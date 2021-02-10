@@ -83,7 +83,8 @@
  * 
  * 1.前半部分（图片[1]）和 后半部分（修改单属性 : 位置X[100] : 时间[60]）
  *   的参数可以随意组合。一共有4*18种组合方式。
- * 2.你可以同时执行多条"修改单属性"的指令，并且重复指令可以叠加执行。
+ * 2.你可以同时执行 多条 "修改单属性"的指令，并且重复指令可以叠加执行。
+ *   设置"时间[0]"与设置"时间[1]"一样，在下一帧才能瞬间切换。
  * 3.所有"相对"参数都可以填正数 +10 ，也可以填负数 -10。
  *   表示根据当前属性，进行适当的增减变化。
  * 4."缩放"默认为 1.0， 表示 100% 缩放程度。
@@ -2461,6 +2462,8 @@ Game_Picture.prototype.update = function() {
 Game_Picture.prototype.drill_PSh_updateCommandExecute = function() {
 	for( var i=0; i < this._Drill_PSh_commandTank.length; i++ ){
 		var command = this._Drill_PSh_commandTank[i];
+		
+		if( command["time"] <= 0 ){ command["time"] = 1; }
 		
 		// > 预加载资源
 		if( command["type"] == "preload" ){

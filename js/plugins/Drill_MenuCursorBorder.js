@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        主菜单 - 多样式菜单选项边框
+ * @plugindesc [v1.1]        主菜单 - 多样式菜单选项边框
  * @author Drill_up
  * 
  * @Drill_LE_param "选项边框样式-%d"
@@ -88,6 +88,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 添加了选项边框设置偏移位置功能。
  * 
  *
  *
@@ -228,7 +230,21 @@
  * @desc 只用于方便区分查看的标签，不作用在插件中。
  * @default --新的选项边框样式--
  * 
+ * @param ---常规---
+ * @desc 
+ * 
+ * @param 偏移-框 X
+ * @parent ---常规---
+ * @desc 以自动适应的位置为基准，x轴方向平移，正右负左，单位像素。
+ * @default 0
+ * 
+ * @param 偏移-框 Y
+ * @parent ---常规---
+ * @desc 以自动适应的位置为基准，y轴方向平移，正下负上，单位像素。
+ * @default 0
+ * 
  * @param 未激活时透明度
+ * @parent ---常规---
  * @type number
  * @min 0
  * @min 255
@@ -398,6 +414,7 @@
 //			
 //		★存在的问题：
 //			暂无
+//		
 
 //=============================================================================
 // ** 变量获取
@@ -413,6 +430,8 @@
 	//==============================
 	DrillUp.drill_MCB_initStyle = function( dataFrom ) {
 		var data = {};
+		data['shifting_x'] = Number( dataFrom["偏移-框 X"] || 0);
+		data['shifting_y'] = Number( dataFrom["偏移-框 Y"] || 0);
 		data['opacity'] = Number( dataFrom["未激活时透明度"] || 125);
 		
 		// > 边框
@@ -881,9 +900,11 @@ Drill_MCB_Sprite.prototype.drill_MCB_updateOpacity = function() {
 //==============================
 Drill_MCB_Sprite.prototype.drill_MCB_refreshPosition = function() {
 	if( this._drill_parent._drill_MCB_needRefresh == false ){ return; }
+	var data = this._drill_curStyle;	
 	var rect = this.drill_MCB_getRect();
-	this.x = rect.x + rect.width*0.5  + this._drill_parent.standardPadding();		//默认中心（注意要包含画布的内边距位置）
-	this.y = rect.y + rect.height*0.5 + this._drill_parent.standardPadding();
+	
+	this.x = rect.x + rect.width*0.5  + this._drill_parent.standardPadding() + data['shifting_x'];	//默认中心（注意要包含画布的内边距位置）
+	this.y = rect.y + rect.height*0.5 + this._drill_parent.standardPadding() + data['shifting_y'];
 }
 //==============================
 // * 帧刷新 - 边框

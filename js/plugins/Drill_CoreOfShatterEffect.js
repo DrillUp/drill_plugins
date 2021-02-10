@@ -1135,6 +1135,7 @@ Sprite.prototype.drill_COSE_clearShatter = function(){
 //==============================
 Sprite.prototype.drill_COSE_updateMove = function(){
 	var data = this._drill_COSE_data;
+	if( this._drill_COSE_sprites == undefined ){ return; }
 	
 	// > 时间播放
 	if( data['shatter_converted'] == true ){

@@ -1,5 +1,0 @@
-19:45 2019/6/12
-
-	该文件夹为旧mog插件 MOG_BossHP.js 敌人boss生命框 的资源，可以用，但不再作为示例使用。
-
-	示例中使用 Drill_GaugeForBoss.js 高级BOSS生命固定框 代替。

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        行走图 - 方块粉碎效果
+ * @plugindesc [v1.3]        行走图 - 方块粉碎效果
  * @author Drill_up
  * 
  * 
@@ -47,6 +47,7 @@
  * 插件指令：>方块粉碎效果 : 事件[10] : 方块粉碎[1]
  * 插件指令：>方块粉碎效果 : 事件变量[10] : 方块粉碎[1]
  * 插件指令：>方块粉碎效果 : 批量事件[10,11,12] : 方块粉碎[1]
+ * 插件指令：>方块粉碎效果 : 批量事件变量[21,22,23] : 方块粉碎[1]
  * 
  * 插件指令：>方块粉碎效果 : 本事件 : 方块粉碎[1]
  * 插件指令：>方块粉碎效果 : 本事件 : 方块反转粉碎[1]
@@ -55,6 +56,15 @@
  * 1.前面部分（本事件）和后面设置（方块粉碎[1]）可以随意组合。
  *   一共有4*3种组合方式。
  * 2."方块粉碎[1]"对应 方块粉碎核心 插件中配置的粉碎id。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定
+ * 你可以通过插件指令快速复原全图的碎片：
+ * （注意，冒号左右有一个空格）
+ * 
+ * 插件指令：>方块粉碎效果 : 全图事件 : 立刻复原
+ * 
+ * 1.插件指令能对碎掉的事件有效，未碎的事件不起效果。
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定
@@ -101,6 +111,8 @@
  * 优化了内部结构，修改了注释内容。
  * [v1.2]
  * 修改了与核心的部分兼容设置。
+ * [v1.3]
+ * 添加了 全图事件 的粉碎复原指令。
  * 
  * 
  * @param 默认事件碎片消失方式
@@ -199,7 +211,16 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( unit == "本事件" ){
 				e_ids = [ this._eventId ];
 			}
-			if( unit.indexOf("批量事件[") != -1 ){
+			if( e_ids == null && unit.indexOf("批量事件变量[") != -1 ){
+				unit = unit.replace("批量事件变量[","");
+				unit = unit.replace("]","");
+				e_ids = [];
+				var temp_arr = unit.split(/[,，]/);
+				for( var k=0; k < temp_arr.length; k++ ){
+					e_ids.push( $gameVariables.value(Number(temp_arr[k])) );
+				}
+			}
+			if( e_ids == null && unit.indexOf("批量事件[") != -1 ){
 				unit = unit.replace("批量事件[","");
 				unit = unit.replace("]","");
 				e_ids = [];
@@ -208,15 +229,23 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					e_ids.push( Number(temp_arr[k]) );
 				}
 			}
-			if( unit.indexOf("事件变量[") != -1 ){
+			if( e_ids == null && unit.indexOf("事件变量[") != -1 ){
 				unit = unit.replace("事件变量[","");
 				unit = unit.replace("]","");
 				e_ids = [ $gameVariables.value(Number(unit)) ];
 			}
-			if( unit.indexOf("事件[") != -1 ){
+			if( e_ids == null && unit.indexOf("事件[") != -1 ){
 				unit = unit.replace("事件[","");
 				unit = unit.replace("]","");
 				e_ids = [ Number(unit) ];
+			}
+			if( e_ids == null && unit == "全图事件" ){
+				var all_e = $gameMap._events;
+				e_ids = [];
+				for( var i=0; i < all_e.length; i++ ){
+					if( !all_e[i] ){ continue; }
+					e_ids.push( all_e[i]._eventId );
+				}
 			}
 			
 			if( e_ids && temp1.indexOf("方块粉碎[") != -1 ){

@@ -3,51 +3,8 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        战斗 - 活动战斗镜头
+ * @plugindesc [v1.3]        战斗 - 活动战斗镜头
  * @author Drill_up
- *
- * @param 镜头架宽度
- * @type number
- * @min 50
- * @desc 镜头可以活动的宽度。战斗背景大小 >= 镜头架宽度 >= 窗口宽度 。
- * @default 1000
- *
- * @param 镜头架高度
- * @type number
- * @min 50
- * @desc 镜头可以活动的高度。战斗背景大小 >= 镜头架高度 >= 窗口高度 。
- * @default 740
- *
- * @param 镜头移动模式
- * @type select
- * @option 弹性移动
- * @value 弹性移动
- * @option 匀速移动
- * @value 匀速移动
- * @desc 镜头移动到新目标的模式。
- * @default 弹性移动
- *
- * @param 镜头移动速度
- * @parent 镜头移动模式
- * @type number
- * @min 1
- * @desc 匀速移动模式：简单平移，单位 像素/帧。
- * 弹性模式：速度为比例除数，值越小，速度越快。
- * @default 10 
- *
- * @param 镜头聚焦延迟
- * @type number
- * @min 0
- * @desc 镜头移动延迟的时间。20表示20帧后开始移动镜头。（1秒60帧）
- * @default 20  
- *
- * @param 偏移-镜头 X
- * @desc 默认镜头聚焦目标的中心，在中心的基础上x轴方向偏移，单位像素。（可为负数）
- * @default 0
- *
- * @param 偏移-镜头 Y
- * @desc 默认镜头聚焦目标的中心，在中心的基础上y轴方向偏移，单位像素。（可为负数）
- * @default 0
  *
  * @help  
  * =============================================================================
@@ -56,49 +13,53 @@
  * 如果你有兴趣，也可以来看看更多我写的drill插件哦ヽ(*。>Д<)o゜
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
- * 镜头会根据对象进行平移，当指针选中敌人时，镜头会进行动态移动。
+ * 镜头会根据选择的对象进行镜头动态移动。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----插件扩展
+ * 该插件可以单独使用。
  *
  * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：战斗界面。
- *   作用于战斗整体画面，但不包括ui。
- * 2.兼容yep修改窗口大小。
- * 3.在车轮战插件中，新的波数的第一回合，会出现暂时镜头锁死情况。
- *   下一回合就会恢复。
- * 4.镜头翻转/缩放的原理与 活动地图镜头 原理一样。
- *   你可以去看看活动地图镜头的注意事项。这里不赘述。
- * 5.注意，镜头翻转，只对图像有效，鼠标点击区域没有变化。
- *   比如，敌人的鼠标靠近状态查看区域，翻转后，还是原来的位置。
- *
- * -----------------------------------------------------------------------------
- * ----素材规则
- * 你只要满足： 
- *     战斗背景高度 >= 镜头架高度 >= 窗口高度
- *     战斗背景宽度 >= 镜头架宽度 >= 窗口宽度
- * 就可以随意控制战斗背景了。
+ *   作用于战斗整体图层。
+ * 插件兼容：
+ *   (1.兼容yep修改窗口大小。
+ *   (2.在车轮战插件中，新的波数的第一回合，会出现暂时镜头锁死情况。
+ *      下一回合就会恢复。
+ * 镜头缩放/旋转：
+ *   (1.镜头翻转/缩放的原理与 活动地图镜头 原理一样。
+ *      你可以去看看活动地图镜头的注意事项。这里不赘述。
+ *   (2.注意，镜头翻转，只对图像有效，鼠标点击区域没有变化。
+ *      比如，敌人的鼠标靠近状态查看区域，翻转后，还是原来的位置。
+ * 素材规则：
+ *   (1.你只要满足： 
+ *      战斗背景高度 >= 镜头架高度 >= 窗口高度
+ *      战斗背景宽度 >= 镜头架宽度 >= 窗口宽度
+ *      就可以随意控制战斗背景了。
+ *   (2.示例中的配置为：
+ *      战斗背景高度(1000) >= 镜头架高度(1000) >= 窗口高度(816)
+ *      战斗背景高度(740) >= 镜头架高度(740) >= 窗口高度(624)
+ *      这样，示例中有高度0-184范围，宽度0-176范围的可活动空间。
+ *   (3.镜头架，相当于窗口的可活动区域。
+ *      如果 镜头架宽度 小于 窗口宽度，则镜头无法左右移动。
+ *      如果 镜头架高度 小于 窗口高度，则镜头无法上下移动。
+ *   (4.你可以通过yep设置窗口为1280*720，设置镜头架为1366*768。
+ *      那么你需要配置1366*768的战斗背景素材。（素材小了会看到黑边）
+ *      相比原来的mog，这里的镜头不对战斗背景做任何多余操作。
+ * 黑边问题：
+ *   (1.关于素材看到黑边的几个问题可能原因：
+ *   (2.素材小了。
+ *      配置高度宽度大于你设置的窗口即可。
+ *   (3.战斗背景位移比没有置0。
+ *      如果你的战斗背景跟着你的镜头移动，那么很可能是因为你没有将
+ *      位移比置0，由于背景往不同的方向移动，很可能会看到边界。
+ *   (4.使用了其他相关镜头控制插件。
+ *      首先确认一点，除了这个插件的插件指令可以缩放战斗画面。
+ *      示例中【没有任何其他插件】会缩放战斗背景。
+ *      如果你发现了战斗背景明显变大了，或者敌人大小和战斗背景大小
+ *      明显不符，那么极有可能是其它插件进行了介入。造成了问题。
  * 
- * 1.示例中的配置为：
- *     战斗背景高度(1000) >= 镜头架高度(1000) >= 窗口高度(816)
- *     战斗背景高度(740) >= 镜头架高度(740) >= 窗口高度(624)
- *     这样，示例中有高度0-184范围，宽度0-176范围的可活动空间。
- * 2.镜头架，相当于窗口的可活动区域。
- *   如果 镜头架宽度 小于 窗口宽度，则镜头无法左右移动。
- *   如果 镜头架高度 小于 窗口高度，则镜头无法上下移动。
- * 3.你可以通过yep设置窗口为1280*720，设置镜头架为1366*768。
- *   那么你只需要配置1366*768的战斗背景素材就可以了。（素材小了会看到黑边）
- *   相比原来的mog，这里的镜头不对战斗背景做任何多余操作。
- * 4.关于素材看到黑边的几个问题可能原因：
- *    1）素材小了。
- *       配置高度宽度大于你设置的窗口即可。
- *    2）战斗背景位移比没有置0。
- *       如果你的战斗背景跟着你的镜头移动，那么很可能是因为你没有将
- *       位移比置0，由于背景往不同的方向移动，很可能会看到边界。
- *    3）使用了其他相关镜头控制插件。
- *       首先确认一点，除了这个插件的插件指令可以缩放战斗画面。
- *       示例中【没有任何其他插件】会缩放战斗背景。
- *       如果你发现了战斗背景明显变大了，或者敌人大小和战斗背景大小
- *       明显不符，那么极有可能是其它插件进行了介入。造成了问题。
- *
  * -----------------------------------------------------------------------------
  * ----可选设定
  * 你可以手动改变镜头架的大小等参数。
@@ -108,7 +69,7 @@
  *
  * 插件指令（改高度）：>战斗镜头架高度 1000
  * 插件指令（改宽度）：>战斗镜头架宽度 740
- * 插件指令（改速度）：>战斗镜头速度 10
+ * 插件指令（改时间）：>战斗镜头切换时间 10
  *
  * -----------------------------------------------------------------------------
  * ----可选设定 - 镜头缩放/旋转
@@ -159,12 +120,57 @@
  * 添加了镜头翻转、镜头缩放功能。
  * [v1.2]
  * 修复了在sideview情况下，默认战斗背景出现黑边的问题。
+ * [v1.3]
+ * 修复了镜头移动时，战斗UI跟随延迟的bug。
+ * 
+ * 
+ * @param 镜头架宽度
+ * @type number
+ * @min 50
+ * @desc 镜头可以活动的宽度。战斗背景大小 >= 镜头架宽度 >= 窗口宽度 。
+ * @default 1000
+ *
+ * @param 镜头架高度
+ * @type number
+ * @min 50
+ * @desc 镜头可以活动的高度。战斗背景大小 >= 镜头架高度 >= 窗口高度 。
+ * @default 740
+ *
+ * @param 镜头移动模式
+ * @type select
+ * @option 弹性移动
+ * @value 弹性移动
+ * @option 匀速移动
+ * @value 匀速移动
+ * @desc 镜头移动到新目标的模式。
+ * @default 弹性移动
+ *
+ * @param 镜头切换时间
+ * @parent 镜头移动模式
+ * @type number
+ * @min 1
+ * @desc 镜头切换移动目标时，移动的时间，单位帧。（1秒60帧）
+ * @default 15
+ *
+ * @param 镜头聚焦延迟
+ * @type number
+ * @min 0
+ * @desc 镜头移动延迟的时间。20表示20帧后开始移动镜头。（1秒60帧）
+ * @default 20  
+ *
+ * @param 偏移-镜头 X
+ * @desc 默认镜头聚焦目标的中心，在中心的基础上x轴方向偏移，单位像素。（可为负数）
+ * @default 0
+ *
+ * @param 偏移-镜头 Y
+ * @desc 默认镜头聚焦目标的中心，在中心的基础上y轴方向偏移，单位像素。（可为负数）
+ * @default 0
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 //		插件简称		BCa（Battle_Camera）
 //		临时全局变量	DrillUp.g_BCa_xxx
-//		临时局部变量	$gameTemp._drill_cam_xxx	（许多插件关联，不在改动）
+//		临时局部变量	$gameTemp._drill_cam_xxx	（许多插件关联，不再改动）
 //		存储数据变量	$gameSystem._drill_cam_xxx
 //		全局存储变量	无
 //		覆盖重写方法	无
@@ -181,15 +187,14 @@
 //				->镜头缩放/旋转
 //				->翻转的镜头
 //				x->镜头放大特写
+//	
+//		★必要注意事项：
+//			1.该插件与弹道核心没有交互，为了独立开来，使用了弹道核心部分代码片段。
 //		
 //		★其它说明细节：
 //			1.该插件原本原理只是对 _battleField 进行简单平移。
 //			  （mog由于直接改变了大小，越弄越复杂，这里重建，简化方式。）
-//			  	中心点：	._drill_center_X
-//			  	镜头目标点：._drill_target_X
-//			  	当前点：	._battleField.x
-//			2.战斗镜头的平移控制的是_battleField，缩放、旋转控制的是Spriteset_Battle。
-//			3.【战斗的实际镜头，是._battleField.x控制的】，Spriteset_Battle的xy完全属于例外变量。
+//			2.战斗镜头的平移控制的是 _battleField 图层，缩放、旋转控制的是Spriteset_Battle。
 //
 //		★存在的问题：
 //			1.插件没有完全脱离mog的影子，内部有已经套牢并且无法改名的变量名。（外部插件都与此插件关联引用）
@@ -201,15 +206,17 @@
 　　var Imported = Imported || {};
 　　Imported.Drill_BattleCamera = true;
 　　var DrillUp = DrillUp || {}; 
-
     DrillUp.parameters = PluginManager.parameters('Drill_BattleCamera');
+
+	/*-----------------杂项------------------*/
 	DrillUp.g_BCa_x = Number(DrillUp.parameters['平移-镜头 X'] || 0);
 	DrillUp.g_BCa_y = Number(DrillUp.parameters['平移-镜头 Y'] || 0);
 	DrillUp.g_BCa_limit_width = Number(DrillUp.parameters['镜头架宽度'] || 1500);
 	DrillUp.g_BCa_limit_height = Number(DrillUp.parameters['镜头架高度'] || 900);
-    DrillUp.g_BCa_type = String(DrillUp.parameters['镜头移动模式'] || '弹性移动');
-    DrillUp.g_BCa_speed = Number(DrillUp.parameters['镜头移动速度'] || 10);
+    DrillUp.g_BCa_moveType = String(DrillUp.parameters['镜头移动模式'] || '弹性移动');
+    DrillUp.g_BCa_switchTime = Number(DrillUp.parameters['镜头切换时间'] || 15);
 	DrillUp.g_BCa_ftime = Number(DrillUp.parameters['镜头聚焦延迟'] || 20);
+	
 	
 //=============================================================================
 // ** 插件指令
@@ -217,14 +224,15 @@
 var _drill_BCa_pluginCommand = Game_Interpreter.prototype.pluginCommand
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_BCa_pluginCommand.call(this,command, args)
-	if (command === ">镜头速度" || command === ">战斗镜头速度" )  {
+	
+	if (command === ">镜头切换时间" || command === ">战斗镜头切换时间" )  {
 		if(args.length == 1){
-			$gameSystem._drill_cam_speed = Number(args[0])
+			$gameSystem._drill_cam_switchTime = Number(args[0]);
 		};
 	};
 	if (command === ">镜头架高度" || command === ">战斗镜头架高度")  {
 		if(args.length == 1){
-			$gameSystem._drill_cam_limit_height = Number(args[0])
+			$gameSystem._drill_cam_limit_height = Number(args[0]);
 		};
 	};
 	if (command === ">镜头架宽度" || command === ">战斗镜头架宽度")  {
@@ -236,7 +244,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	if (command === ">关闭镜头" || command === ">关闭战斗镜头")  { $gameSystem._drill_cam_enable = false};
 	
 	
-	if (command === '>战斗镜头') { // >战斗镜头 : 水平翻转 : 60 : 匀速
+	if (command === ">战斗镜头") { // >战斗镜头 : 水平翻转 : 60 : 匀速
 		if(args.length == 6){
 			var type = String(args[1]);
 			var temp1 = Number(args[3]);
@@ -287,11 +295,12 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 var _drill_BCa_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
 	_drill_BCa_sys_initialize.call(this);
-    this._drill_cam_enable = true ;
-    this._drill_cam_speed = DrillUp.g_BCa_speed;
-    this._drill_cam_ftime = DrillUp.g_BCa_ftime;
-    this._drill_cam_limit_width = DrillUp.g_BCa_limit_width;
-    this._drill_cam_limit_height = DrillUp.g_BCa_limit_height;
+	
+    this._drill_cam_enable = true ;								//镜头激活
+    this._drill_cam_switchTime = DrillUp.g_BCa_switchTime;		//镜头切换时间
+    this._drill_cam_ftime = DrillUp.g_BCa_ftime;				//镜头聚焦延迟
+    this._drill_cam_limit_width = DrillUp.g_BCa_limit_width;	//镜头架宽度
+    this._drill_cam_limit_height = DrillUp.g_BCa_limit_height;	//镜头架高度
 	
 	this._drill_BCa_X = {}			// 缩放x
 	this._drill_BCa_X.cur = 0;      //	cur = -0.1，则缩放为0.9
@@ -536,10 +545,10 @@ Spriteset_Battle.prototype.drill_BCa_flip = function() {
 }
 
 //=============================================================================
-// ** 镜头移动目标
+// ** 镜头移动目标标记
 //=============================================================================
 //==============================
-// * 镜头移动目标 - 选中全部敌人时（Scene_Battle）
+// * 标记 - 选中全部敌人时（Scene_Battle）
 //==============================
 var _drill_BCa_onSelectAction = Scene_Battle.prototype.onSelectAction;
 Scene_Battle.prototype.onSelectAction = function() {
@@ -549,7 +558,7 @@ Scene_Battle.prototype.onSelectAction = function() {
 };
 
 //==============================
-// * 镜头移动目标 - 角色窗口被隐藏时（Window BattleActor）
+// * 标记 - 角色窗口被隐藏时（Window BattleActor）
 //==============================
 var _drill_BCa_win_actor_hide = Window_BattleActor.prototype.hide;
 Window_BattleActor.prototype.hide = function() {
@@ -558,7 +567,7 @@ Window_BattleActor.prototype.hide = function() {
 	$gameTemp._drill_cam_select_single = null;
 };
 //==============================
-// * 镜头移动目标 - 选中一个敌人时（Window BattleActor）
+// * 标记 - 选中一个敌人时（Window BattleActor）
 //==============================
 var _drill_BCa_win_actor_select = Window_BattleActor.prototype.select;
 Window_BattleActor.prototype.select = function(index) {
@@ -568,7 +577,7 @@ Window_BattleActor.prototype.select = function(index) {
 };
 
 //==============================
-// * 镜头移动目标 - 敌人窗口被隐藏时（Window BattleEnemy）
+// * 标记 - 敌人窗口被隐藏时（Window BattleEnemy）
 //==============================
 var _drill_BCa_win_enemy_hide = Window_BattleEnemy.prototype.hide; 
 Window_BattleEnemy.prototype.hide = function() {
@@ -577,7 +586,7 @@ Window_BattleEnemy.prototype.hide = function() {
 	$gameTemp._drill_cam_select_single = null;
 };
 //==============================
-// * 镜头移动目标 - 选中一个角色时（[SV] Window BattleEnemy）
+// * 标记 - 选中一个角色时（[SV] Window BattleEnemy）
 //==============================
 var _drill_BCa_win_enemy_select = Window_BattleEnemy.prototype.select;
 Window_BattleEnemy.prototype.select = function(index) {
@@ -587,7 +596,7 @@ Window_BattleEnemy.prototype.select = function(index) {
 };
 
 //==============================
-// * 镜头移动目标 - 清除目标
+// * 标记 - 清除目标
 //==============================
 BattleManager.drill_BCa_targetClear = function() {
 	$gameTemp._drill_cam_being_attack = [null,[0,0],0];
@@ -597,7 +606,7 @@ BattleManager.drill_BCa_targetClear = function() {
 };
 
 //==============================
-// * 镜头 - 结束回合
+// * 标记 - 结束回合
 //==============================
 var _drill_BCa_endTurn = BattleManager.endTurn;
 BattleManager.endTurn = function() {
@@ -607,7 +616,7 @@ BattleManager.endTurn = function() {
 };
 
 //==============================
-// * 镜头 - 开始释放技能
+// * 标记 - 开始释放技能
 //==============================
 var _drill_BCa_startAction = BattleManager.startAction;
 BattleManager.startAction = function() {
@@ -619,7 +628,7 @@ BattleManager.startAction = function() {
 };
 
 //==============================
-// * 镜头 - 战斗胜利
+// * 标记 - 战斗胜利
 //==============================
 var _drill_BCa_processVictory = BattleManager.processVictory;
 BattleManager.processVictory = function() {
@@ -627,7 +636,7 @@ BattleManager.processVictory = function() {
 	_drill_BCa_processVictory.call(this);	 
 };
 //==============================
-// * 镜头 - 战斗逃跑
+// * 标记 - 战斗逃跑
 //==============================
 var _drill_BCa_processAbort = BattleManager.processAbort;
 BattleManager.processAbort = function() {
@@ -635,7 +644,7 @@ BattleManager.processAbort = function() {
 	_drill_BCa_processAbort.call(this);	 
 };
 //==============================
-// * 镜头 - 战斗失败
+// * 标记 - 战斗失败
 //==============================
 var _drill_BCa_processDefeat = BattleManager.processDefeat;
 BattleManager.processDefeat = function() {
@@ -644,21 +653,16 @@ BattleManager.processDefeat = function() {
 };
 
 //=============================================================================
-// ** Spriteset Battler
+// ** 镜头位置
 //=============================================================================
-
 //==============================
-// * 战斗场景帧刷新
+// * 位置 - 刷新镜头位置
 //==============================
 var _drill_BCa_b_updatePosition = Sprite_Battler.prototype.updatePosition;
 Sprite_Battler.prototype.updatePosition = function() {
 	_drill_BCa_b_updatePosition.call(this);
     this.drill_BCa_updateCamPos();
 };
-
-//==============================
-// * 刷新镜头位置
-//==============================
 Sprite_Battler.prototype.drill_BCa_updateCamPos = function() {
 	$gameTemp._drill_cam_cur_actor[0] = BattleManager.actor();
 	if ($gameTemp._drill_cam_select_single && $gameTemp._drill_cam_select_single[0] === this._battler) {this.drill_BCa_focusTarget()};
@@ -666,9 +670,8 @@ Sprite_Battler.prototype.drill_BCa_updateCamPos = function() {
 	if ($gameTemp._drill_cam_being_attack && $gameTemp._drill_cam_being_attack[0] === this._battler) {this.drill_BCa_focusBeingAttack()};
 	if ($gameTemp._drill_cam_cur_actor && $gameTemp._drill_cam_cur_actor[0] === this._battler) {this.drill_BCa_focusActor()};
 };
-
 //==============================
-// * 镜头位置 - 高度修正
+// * 位置 - 高度修正
 //==============================
 Sprite_Battler.prototype.drill_BCa_heightFix = function() {
 	if (this._mainSprite) {
@@ -678,7 +681,7 @@ Sprite_Battler.prototype.drill_BCa_heightFix = function() {
 	};
 };
 //==============================
-// * 镜头位置 - 当前角色
+// * 位置 - 当前角色
 //==============================
 Sprite_Battler.prototype.drill_BCa_focusActor = function() {
 	  $gameTemp._drill_cam_cur_actor[1][0] = this.x;
@@ -686,7 +689,7 @@ Sprite_Battler.prototype.drill_BCa_focusActor = function() {
 };
 
 //==============================
-// * 镜头位置 - 选择目标
+// * 位置 - 选择目标
 //==============================
 Sprite_Battler.prototype.drill_BCa_focusTarget = function() {
 	   $gameTemp._drill_cam_select_single[1][0] = this.x;
@@ -694,7 +697,7 @@ Sprite_Battler.prototype.drill_BCa_focusTarget = function() {
 };
 
 //==============================
-// * 镜头位置 - 选择目标
+// * 位置 - 选择目标
 //==============================
 Sprite_Battler.prototype.drill_BCa_focusTarget_turn = function() {
 	   $gameTemp._drill_cam_select_single_turn[1][0] = this.x;
@@ -702,56 +705,286 @@ Sprite_Battler.prototype.drill_BCa_focusTarget_turn = function() {
 };
 	
 //==============================
-// * 镜头位置 - 受伤单位
+// * 位置 - 受伤单位
 //==============================
 Sprite_Battler.prototype.drill_BCa_focusBeingAttack = function() {
 	   $gameTemp._drill_cam_being_attack[1][0] = this.x;
        $gameTemp._drill_cam_being_attack[1][1] = this.drill_BCa_heightFix();
 };	
 
-//=============================================================================
-// ** Spriteset Battle
-//=============================================================================
-
 //==============================
-// * 镜头内容初始化
-//==============================
-var _drill_BCa_spriteset_initialize = Spriteset_Battle.prototype.initialize;
-Spriteset_Battle.prototype.initialize = function() {
-	this.drill_BCa_setup();
-	_drill_BCa_spriteset_initialize.call(this);	
-};
-
-Spriteset_Battle.prototype.drill_BCa_setup = function() {
-    $gameTemp.drill_BCa_clearCamera(); 
-	this._drill_center_X = Graphics.boxWidth / 2;	//设置中心
-	this._drill_center_Y = Graphics.boxHeight / 2;	
-	this._drill_target_XF = DrillUp.g_BCa_x;		//设置偏移
-	this._drill_target_YF = DrillUp.g_BCa_y; 
-	this.drill_BCa_setToCenter();
-};
-
-	
-//==============================
-// * 默认的两个背景控制
+// * 位置 - 图层默认两个背景控制
 //==============================
 var _drill_BCa_createBattleback = Spriteset_Battle.prototype.createBattleback
 Spriteset_Battle.prototype.createBattleback = function() {
 	_drill_BCa_createBattleback.call(this);
-	if ($gameSystem._drill_cam_enable) {
+	if( $gameSystem._drill_cam_enable ){
 		this._back1Sprite.anchor.x = 0.5;
 		this._back1Sprite.anchor.y = 0.5;
-		this._back1Sprite.x = this._drill_center_X;
-		this._back1Sprite.y = this._drill_center_Y;
+		this._back1Sprite.x = this._drill_BCa_centerX;
+		this._back1Sprite.y = this._drill_BCa_centerY;
 		this._back2Sprite.anchor.x = 0.5;
 		this._back2Sprite.anchor.y = 0.5;
-		this._back2Sprite.x = this._drill_center_X;
-		this._back2Sprite.y = this._drill_center_Y;
+		this._back2Sprite.x = this._drill_BCa_centerX;
+		this._back2Sprite.y = this._drill_BCa_centerY;
 	};
 };
+
+//=============================================================================
+// ** 镜头移动
+//=============================================================================
 //==============================
+// * 镜头 - 初始化
+//==============================
+var _drill_BCa_spriteset_initialize = Spriteset_Battle.prototype.initialize;
+Spriteset_Battle.prototype.initialize = function() {
+	this.drill_BCa_init();
+	_drill_BCa_spriteset_initialize.call(this);	
+};
+Spriteset_Battle.prototype.drill_BCa_init = function() {
+    
+	// > 清理目标
+	$gameTemp.drill_BCa_clearCamera(); 
+	
+	// > 私有变量初始化
+	this._drill_BCa_curTime = 0;
+	this._drill_BCa_centerX = Graphics.boxWidth / 2;		//中心点
+	this._drill_BCa_centerY = Graphics.boxHeight / 2;		//
+	this._drill_BCa_lastTargetX = 0;						//上一个目标点
+	this._drill_BCa_lastTargetY = 0;						//
+	this._drill_BCa_ballisticsX = [];						//弹道X（与弹道核心无关）
+	this._drill_BCa_ballisticsY = [];						//弹道Y
+	
+	// > 默认移动到中心
+	this.drill_BCa_setMoveTo( this._drill_BCa_centerX, this._drill_BCa_centerY );
+};
+//==============================
+// * 镜头 - 设置移动到（接口）
+//==============================
+Spriteset_Battle.prototype.drill_BCa_setMoveTo = function( x, y ){
+    if(!this._battleField ){ return; }
+    if( $gameSystem._drill_cam_enable != true ){ return; }
+    if( this._drill_BCa_lastTargetX == x && this._drill_BCa_lastTargetY == y ){ return; }
+	this._drill_BCa_lastTargetX = x;
+	this._drill_BCa_lastTargetY = y;
+	
+	// > 目标位置
+	var tar_x = this._drill_BCa_centerX - x;
+	var tar_y = this._drill_BCa_centerY - y;
+	var lim_x = Math.max($gameSystem._drill_cam_limit_width /2 - Graphics.boxWidth / 2,0);
+	var lim_y = Math.max($gameSystem._drill_cam_limit_height /2 - Graphics.boxHeight / 2,0);
+	tar_x += DrillUp.g_BCa_x;	//（目标偏移量）
+	tar_y += DrillUp.g_BCa_y;
+	if( tar_x > lim_x ){ tar_x = lim_x; }		//（镜头架限制）
+	if( tar_x < -lim_x ){ tar_x = -lim_x; }
+	if( tar_y > lim_y ){ tar_y = lim_y; }
+	if( tar_y < -lim_y ){ tar_y = -lim_y; }
+	
+	// > 弹道推演（ 不用 弹道核心）
+	//var b_data = {};
+	//b_data['movementMode'] = "两点式";
+	//b_data['movementTime'] = $gameSystem._drill_cam_switchTime;
+	//b_data['movementDelay']= 0;
+	//b_data['twoPointType'] = DrillUp.g_BCa_moveType;
+	//b_data['twoPointDifferenceX'] = tar_x - this._battleField.x;
+	//b_data['twoPointDifferenceY'] = tar_y - this._battleField.y;
+	//
+	//$gameTemp.drill_COBa_setBallisticsMove( b_data );							//初始化
+	//$gameTemp.drill_COBa_preBallisticsMove( this, 0 , this._battleField.x, this._battleField.y );		//推演赋值
+	//
+	//this._drill_BCa_ballisticsX = this['_drill_COBa_x'];
+	//this._drill_BCa_ballisticsY = this['_drill_COBa_y'];
+	
+	// > 弹道推演
+	this.drill_BCa_ballisticsMove( tar_x-this._battleField.x, tar_y-this._battleField.y );
+	
+	this._drill_BCa_curTime = 0;
+};
+//==============================
+// * 镜头 - 弹道推演
+//==============================
+Spriteset_Battle.prototype.drill_BCa_ballisticsMove = function( diffX, diffY ){
+	
+	this._drill_BCa_ballisticsX = [];
+	this._drill_BCa_ballisticsY = [];
+	var orgX = this._battleField.x;
+	var orgY = this._battleField.y;
+	
+	for(var time = 0; time <= $gameSystem._drill_cam_switchTime; time++){
+		
+		// > 速度
+		var xx = 0;
+		var yy = 0;
+		
+		if( DrillUp.g_BCa_moveType == "匀速移动"){	
+			xx = time * diffX/$gameSystem._drill_cam_switchTime;
+			yy = time * diffY/$gameSystem._drill_cam_switchTime;
+		}
+		
+		if( DrillUp.g_BCa_moveType == "弹性移动"){
+			var dx = diffX;	//r = 1/2*a*t^2
+			var dy = diffY;
+			var t = $gameSystem._drill_cam_switchTime;
+			var ax = 2 * dx / t / t;
+			var ay = 2 * dy / t / t;	
+			var c_time = t - time;
+			xx = 0.5 * ax * t * t - 0.5 * ax * c_time * c_time ;
+			yy = 0.5 * ay * t * t - 0.5 * ay * c_time * c_time ;
+		}
+		
+		xx = orgX + xx;
+		yy = orgY + yy;
+		this._drill_BCa_ballisticsX.push(xx);
+		this._drill_BCa_ballisticsY.push(yy);
+	}
+	
+};
+
+//==============================
+// * 镜头 - 帧刷新
+//==============================
+var _drill_BCa_s_update = Spriteset_Battle.prototype.update;
+Spriteset_Battle.prototype.update = function() {
+	_drill_BCa_s_update.call(this); 
+    if( $gameSystem._drill_cam_enable != true ){ return; }
+
+	this.drill_BCa_updateCameraTarget();	//刷新目标
+	this.drill_BCa_updateCameraMove();		//移动镜头
+};
+//==============================
+// * 帧刷新 - 刷新目标
+//==============================
+Spriteset_Battle.prototype.drill_BCa_updateCameraTarget = function() {
+	
+	// > 移动到中心
+	if( this.drill_BCa_isNeedToCenter() ){
+		this.drill_BCa_setMoveTo( this._drill_BCa_centerX, this._drill_BCa_centerY );
+		return ;
+	};
+	
+	// > 受伤时镜头震动 - 时间变化
+	if( $gameTemp._drill_cam_being_attack[2] > 0 ){
+		$gameTemp._drill_cam_being_attack[2] -= 1
+	};
+	
+	// > 选择一个敌人/角色
+	if ($gameTemp._drill_cam_select_single && $gameTemp._drill_cam_select_single[0]) {
+		if (!$gameSystem.isSideView() && $gameTemp._drill_cam_select_single[0].isActor()) {
+			var xx = this._drill_BCa_centerX;
+			var yy = this._drill_BCa_centerY;		
+			this.drill_BCa_setMoveTo( xx,yy );
+	    } else { 
+			var xx = $gameTemp._drill_cam_select_single[1][0];
+			var yy = $gameTemp._drill_cam_select_single[1][1];
+			this.drill_BCa_setMoveTo( xx,yy );
+	    }
+		
+	// > 受伤时镜头震动
+    } else if (this.drill_BCa_isBeingAttack()) {
+		if (!$gameSystem.isSideView() && $gameTemp._drill_cam_being_attack[0].isActor()) {
+			var xx = this._drill_BCa_centerX;
+			var yy = this._drill_BCa_centerY;		
+			this.drill_BCa_setMoveTo( xx,yy );
+		} else {
+			var xx = $gameTemp._drill_cam_being_attack[1][0];
+			var yy = $gameTemp._drill_cam_being_attack[1][1];
+			this.drill_BCa_setMoveTo( xx,yy );
+		}
+
+	// > 敌人回合
+	} else if (this.drill_BCa_isTarget()) {
+		var xx = $gameTemp._drill_cam_select_single_turn[1][0];
+		var yy = $gameTemp._drill_cam_select_single_turn[1][1];
+		this.drill_BCa_setMoveTo( xx,yy );
+		
+	// > 角色回合
+	} else if (this.drill_BCa_isActor()) {
+		var xx = $gameTemp._drill_cam_cur_actor[1][0];
+		var yy = $gameTemp._drill_cam_cur_actor[1][1];	
+		this.drill_BCa_setMoveTo( xx,yy );
+
+	// > 其他情况回到中心
+	} else {
+		this.drill_BCa_setMoveTo( this._drill_BCa_centerX, this._drill_BCa_centerY );
+	}
+};
+//==============================
+// * 帧刷新 - 移动镜头
+//==============================
+Spriteset_Battle.prototype.drill_BCa_updateCameraMove = function() {
+	this._drill_BCa_curTime += 1;
+	
+	// > 当前位置
+	var index = this._drill_BCa_curTime;
+	if( index >= this._drill_BCa_ballisticsX.length ){
+		index = this._drill_BCa_ballisticsX.length-1;
+	}
+	
+	// > 设置图层位置
+	if( index > 0 ){
+		this._battleField.x = Math.floor( this._drill_BCa_ballisticsX[ index-1 ] );
+		this._battleField.y = Math.floor( this._drill_BCa_ballisticsY[ index-1 ] );
+	}
+	
+	// > 记录偏移量
+	if( index == 0 || index >= this._drill_BCa_ballisticsX.length ){
+		$gameTemp._drill_cam_result_move_X = 0;
+		$gameTemp._drill_cam_result_move_Y = 0;
+	}else{
+		$gameTemp._drill_cam_result_move_X = this._drill_BCa_ballisticsX[ index ] - this._drill_BCa_ballisticsX[ index-1 ];
+		$gameTemp._drill_cam_result_move_Y = this._drill_BCa_ballisticsY[ index ] - this._drill_BCa_ballisticsY[ index-1 ];
+	}
+	
+	// > 记录位置
+	$gameTemp._drill_cam_pos[0] = Math.floor( this._drill_BCa_ballisticsX[ index ] );
+	$gameTemp._drill_cam_pos[1] = Math.floor( this._drill_BCa_ballisticsY[ index ] );
+	
+};
+
+//==============================
+// * 判断 - 移动到 - 中心
+//==============================
+Spriteset_Battle.prototype.drill_BCa_isNeedToCenter = function() {
+	if ($gameTemp._drill_cam_select_all) {return true};
+	if ($gameTemp._drill_cam_select_all_turn) {return true};
+	if ($gameTemp._drill_battleEnd) {return true};
+	return false
+};
+//==============================
+// * 判断 - 移动到 - 受伤害目标
+//==============================
+Spriteset_Battle.prototype.drill_BCa_isBeingAttack = function() {
+	if (!$gameTemp._drill_cam_being_attack) {return false};
+	if (!$gameTemp._drill_cam_being_attack[0]) {return false};
+	if ($gameTemp._drill_cam_being_attack[2] === 0) {return false};
+	if (Imported.MOG_ATB) {
+	    if (this._phase != 'start') {return false};
+	};
+	return true;
+};
+//==============================
+// * 判断 - 移动到 - 敌人回合
+//==============================
+Spriteset_Battle.prototype.drill_BCa_isTarget = function() {
+	if (!$gameTemp._drill_cam_select_single_turn) {return false};
+	if (!$gameTemp._drill_cam_select_single_turn[0]) {return false};
+	if (!$gameSystem.isSideView() && $gameTemp._drill_cam_select_single_turn[0].isActor()) {return false};
+	return true;
+};
+//==============================
+// * 判断 - 移动到 - 角色回合
+//==============================
+Spriteset_Battle.prototype.drill_BCa_isActor = function() {
+    if (!$gameSystem.isSideView()) {return false};
+	if (!$gameTemp._drill_cam_cur_actor) {return false};
+	if (!$gameTemp._drill_cam_cur_actor[0]) {return false};
+	return true;
+};
+
+
+//=============================================================================
 // * 兼容yep核心
-//==============================
+//=============================================================================
 if( Imported.YEP_CoreEngine ){
 	var _drill_BCa_scaleSprite = Sprite_Battleback.prototype.scaleSprite;
 	Sprite_Battleback.prototype.scaleSprite = function() {
@@ -763,172 +996,12 @@ if( Imported.YEP_CoreEngine ){
 	};
 }
 
-//==============================
-// * 镜头 - 帧刷新
-//==============================
-var _drill_BCa_update = Spriteset_Battle.prototype.update;
-Spriteset_Battle.prototype.update = function() {
-	_drill_BCa_update.call(this); 
-    if ( $gameSystem._drill_cam_enable ) {
-		this.drill_BCa_updateCameraPos();
-		this.drill_BCa_updateCameraMove();
-	};
-};
-
-//==============================
-// * 镜头 - 刷新目标
-//==============================
-Spriteset_Battle.prototype.drill_BCa_updateCameraPos = function() {
-	if (this.drill_BCa_isNeedToCenter()) {	//中心移动判断
-		this.drill_BCa_setToCenter();
-		return ;
-	};
-	if ($gameTemp._drill_cam_being_attack[2] > 0) {	//镜头移动延迟
-		$gameTemp._drill_cam_being_attack[2] -= 1
-	};
-	if ($gameTemp._drill_cam_select_single && $gameTemp._drill_cam_select_single[0]) {
-		if (!$gameSystem.isSideView() && $gameTemp._drill_cam_select_single[0].isActor()) {
-		  this._drill_target_X = this._drill_center_X;
-     	  this._drill_target_Y = this._drill_center_Y;		
-	    } else { 
-		  this._drill_target_X = $gameTemp._drill_cam_select_single[1][0];
-     	  this._drill_target_Y = $gameTemp._drill_cam_select_single[1][1];
-	    };
-    } else if (this.drill_BCa_isBeingAttack()) {
-		  if (!$gameSystem.isSideView() && $gameTemp._drill_cam_being_attack[0].isActor()) {
-			this.drill_BCa_setToCenter();
-		  } else {
-		    this._drill_target_X = $gameTemp._drill_cam_being_attack[1][0];
-     	    this._drill_target_Y = $gameTemp._drill_cam_being_attack[1][1];
-		  };
-		  //if (TouchInput.isCancelled()) {alert("TEST")}
-
-	} else if (this.drill_BCa_isTarget()) {
-		  this._drill_target_X = $gameTemp._drill_cam_select_single_turn[1][0];
-     	  this._drill_target_Y = $gameTemp._drill_cam_select_single_turn[1][1];
-	} else if (this.drill_BCa_isActor()) {
-		  this._drill_target_X = $gameTemp._drill_cam_cur_actor[1][0];
-     	  this._drill_target_Y = $gameTemp._drill_cam_cur_actor[1][1];		 
-	} else {
-		this.drill_BCa_setToCenter();
-	};
-};
-
-
-//==============================
-// * 镜头 - 设置移动到中心
-//==============================
-Spriteset_Battle.prototype.drill_BCa_setToCenter = function() {
-	this._drill_target_X = this._drill_center_X;
-	this._drill_target_Y = this._drill_center_Y;
-};
-
-//==============================
-// * 镜头 - 判断移动到中心
-//==============================
-Spriteset_Battle.prototype.drill_BCa_isNeedToCenter = function() {
-	if ($gameTemp._drill_cam_select_all) {return true};
-	if ($gameTemp._drill_cam_select_all_turn) {return true};
-	if ($gameTemp._drill_battleEnd) {return true};
-	return false
-};
-
-//==============================
-// * 镜头 - 判断受伤害目标
-//==============================
-Spriteset_Battle.prototype.drill_BCa_isBeingAttack = function() {
-	if (!$gameTemp._drill_cam_being_attack) {return false};
-	if (!$gameTemp._drill_cam_being_attack[0]) {return false};
-	if ($gameTemp._drill_cam_being_attack[2] === 0) {return false};
-	if (Imported.MOG_ATB) {
-	    if (this._phase != 'start') {return false};
-	};
-	return true;
-};
-
-//==============================
-// * 镜头 - 判断选择目标
-//==============================
-Spriteset_Battle.prototype.drill_BCa_isTarget = function() {
-	if (!$gameTemp._drill_cam_select_single_turn) {return false};
-	if (!$gameTemp._drill_cam_select_single_turn[0]) {return false};
-	if (!$gameSystem.isSideView() && $gameTemp._drill_cam_select_single_turn[0].isActor()) {return false};
-	return true;
-};
-
-//==============================
-// * 镜头 - 判断角色
-//==============================
-Spriteset_Battle.prototype.drill_BCa_isActor = function() {
-    if (!$gameSystem.isSideView()) {return false};
-	if (!$gameTemp._drill_cam_cur_actor) {return false};
-	if (!$gameTemp._drill_cam_cur_actor[0]) {return false};
-	return true;
-};
-
-//==============================
-// * 镜头 - 移动镜头
-//==============================
-Spriteset_Battle.prototype.drill_BCa_updateCameraMove = function() {
-	var tar_x = this._drill_center_X - this._drill_target_X + this._drill_target_XF;
-	var tar_y = this._drill_center_Y - this._drill_target_Y + this._drill_target_YF;
-	var lim_x = Math.max($gameSystem._drill_cam_limit_width /2 - Graphics.boxWidth / 2,0);
-	var lim_y = Math.max($gameSystem._drill_cam_limit_height /2 - Graphics.boxHeight / 2,0);
-	var cur_x = this._battleField.x;
-	var cur_y = this._battleField.y;
-	var speed_x = $gameSystem._drill_cam_speed;
-	var speed_y = $gameSystem._drill_cam_speed;
-	
-	if( tar_x > lim_x ){ tar_x = lim_x; }		//镜头架限制
-	if( tar_x < -lim_x ){ tar_x = -lim_x; }
-	if( tar_y > lim_y ){ tar_y = lim_y; }
-	if( tar_y < -lim_y ){ tar_y = -lim_y; }
-	
-	if( cur_x < tar_x ){
-		if( DrillUp.g_BCa_type == '弹性移动' ){ speed_x = Math.max( (tar_x - cur_x)/speed_x , 1 ); }
-		cur_x += speed_x;
-		if( cur_x > tar_x ){
-			cur_x = tar_x;
-		}
-	}
-	if( cur_x > tar_x ){
-		if( DrillUp.g_BCa_type == '弹性移动' ){ speed_x = Math.max( (cur_x - tar_x)/speed_x , 1 ); }
-		cur_x -= speed_x;
-		if( cur_x < tar_x ){
-			cur_x = tar_x;
-		}
-	}
-	if( cur_y < tar_y ){
-		if( DrillUp.g_BCa_type == '弹性移动' ){ speed_y = Math.max( (tar_y - cur_y)/speed_y , 1 ); }
-		cur_y += speed_y;
-		if( cur_y > tar_y ){
-			cur_y = tar_y;
-		}
-	}
-	if( cur_y > tar_y ){
-		if( DrillUp.g_BCa_type == '弹性移动' ){ speed_y = Math.max( (cur_y - tar_y)/speed_y , 1 ); }
-		cur_y -= speed_y;
-		if( cur_y < tar_y ){
-			cur_y = tar_y;
-		}
-	}
-	$gameTemp._drill_cam_result_move_X = cur_x - this._battleField.x;
-	$gameTemp._drill_cam_result_move_Y = cur_y - this._battleField.y;
-	this._battleField.x = cur_x ;
-	this._battleField.y = cur_y ;
-	//this._battleField.x = cur_x * 1.2;
-	//this._battleField.y = cur_y * 1.2;
-	//this._battleField.scale.x = 1.20 ;
-	//this._battleField.scale.y = 1.20 ;
-	
-	$gameTemp._drill_cam_pos = [this._battleField.x,this._battleField.y];
-    //if (Imported.MOG_BattlebackEX) {this.update_bbex_cam()};
-};
-
 //=============================================================================
-// ** 其它mog插件兼容
+// ** 其它MOG插件兼容
 //=============================================================================
-
+//==============================
+// * MOG - 帧刷新
+//==============================
 var _drill_mog_ballon_update = Spriteset_Battle.prototype.update;
 Spriteset_Battle.prototype.update = function() {
 	_drill_mog_ballon_update.call(this);
@@ -945,9 +1018,10 @@ Spriteset_Battle.prototype.update = function() {
 		this._hpField.y = this._battleField.y
 	};
 };
-
-
-if (Imported.MOG_ChainCommands) {
+//==============================
+// * MOG - 按键连锁攻击
+//==============================
+if( Imported.MOG_ChainCommands ){
 	var _drill_mog_updateFocus = Spriteset_Battle.prototype.updateFocus;
 	Spriteset_Battle.prototype.updateFocus = function() {
 		if ($gameTemp._bchainTemp) {$gameTemp._drill_cam_being_attack[2] = 0};//技能 - 按键连锁攻击（下一段招不等待）

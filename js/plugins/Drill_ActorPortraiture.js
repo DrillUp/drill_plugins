@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        战斗UI - 角色肖像
+ * @plugindesc [v1.4]        战斗UI - 角色肖像
  * @author Drill_up
  * 
  * @Drill_LE_param "角色肖像-%d"
@@ -29,14 +29,19 @@
  * ----设定注意事项
  * 1.插件的作用域：战斗界面。
  *   角色肖像放置在 战斗上层 。
- * 2.角色肖像的图片层级与所有处于战斗上层的相关插件的层级共享。
- *   （比如上层且图片层级大于100的战斗背景,会挡住角色肖像,反之在后面）
- * 3.注意，这里配置的坐标和平移与一般设定是相反的。
- *   一般设定X轴正数向右负数向左，这里是正数向左负数向右。
- * 4.你可以只配一种条件一张图片。也可以配置多种条件多张图片实现gif动作。
- *   你并不需要设置HP为0的肖像，因为角色死亡后是无法选择的。
- * 5.写在前面的条件优先处理，如果当前条件不符合后，才进入后面的条件判定。
- *   你可以设置满状态、满血、负伤、虚弱等的肖像，只要你有充足的美术资源。
+ * 细节：
+ *   (1.角色肖像的图片层级与所有处于战斗上层的相关插件的层级共享。
+ *     （比如上层且图片层级大于100的战斗背景,会挡住角色肖像,反之在后面）
+ *   (2.注意，该插件配置的坐标和平移与一般设定是相反的。
+ *      一般设定X轴正数向右负数向左，这里是正数向左负数向右。
+ *   (3.写在前面的条件优先处理，如果当前条件不符合后，才进入后面的条件判定。
+ *      你可以设置满状态、满血、负伤、虚弱等的肖像，只要你有充足的美术资源。
+ * 角色变动：
+ *   (1.注意，战斗时如果执行了指令：角色入队、角色出队，那么插件指令的修改
+ *      会被重置。
+ * 设计：
+ *   (1.你可以只配一种条件一张图片。也可以配置多种条件多张图片实现gif动作。
+ *      你并不需要设置HP为0的肖像，因为角色死亡后是无法选择的。
  * 
  * -----------------------------------------------------------------------------
  * ----关联文件
@@ -72,6 +77,29 @@
  *   "角色"表示角色id为5的角色，这个角色强制处于条件id为4的条件。
  *   如果处于的条件内容为空，那么插件指令没有任何效果。
  * 2.战斗结束后肖像自动解除强制条件。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----插件性能
+ * 测试仪器：   4G 内存，Intel Core i5-2520M CPU 2.5GHz 处理器
+ *              Intel(R) HD Graphics 3000 集显 的垃圾笔记本
+ *              (笔记本的3dmark综合分：571，鲁大师综合分：48456)
+ * 总时段：     20000.00ms左右
+ * 对照表：     0.00ms  - 40.00ms （几乎无消耗）
+ *              40.00ms - 80.00ms （低消耗）
+ *              80.00ms - 120.00ms（中消耗）
+ *              120.00ms以上      （高消耗）
+ * 工作类型：   持续执行
+ * 时间复杂度： o(n^3)*o(贴图处理) 每帧
+ * 测试方法：   进入战斗界面，进行相关的性能测试。
+ * 测试结果：   1个角色的消耗为：【21.33ms】
+ *              4个角色的消耗为：【37.60ms】
+ *              8个角色的消耗为：【57.92ms】
+ * 
+ * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
+ *   测试结果并不是精确值，范围在给定值的10ms范围内波动。
+ *   更多了解插件性能，可以去看看"关于插件性能.docx"。
+ * 2.注意，角色数量 能够使得角色立绘计算量倍增。
+ *   因为每个角色都配有许多图片资源。
  *
  * -----------------------------------------------------------------------------
  * ----更新日志
@@ -83,6 +111,8 @@
  * 添加了最大值编辑的支持。
  * [v1.3]
  * 添加了长期保持角色在战斗界面的功能。
+ * [v1.4]
+ * 修复了战斗时，角色入队出队变化时出错的bug。
  * 
  *
  * @param ----常规----
@@ -792,6 +822,13 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
+//		工作类型		持续执行
+//		时间复杂度		o(n^3)*o(贴图处理) 每帧
+//		性能测试因素	战斗界面
+//		性能测试消耗	21.33ms
+//		最坏情况		无
+//		备注			无
+//
 //插件记录：
 //		★大体框架与功能如下：
 //			角色肖像：
@@ -812,7 +849,10 @@
 //		★必要注意事项：
 //			1.插件的图片层级与多个插件共享。【必须自写 层级排序 函数】
 //			2.注意，由于Drill_AP_Sprite的分布为双sprite+双重数组结构，-前视/背景 -第N个条件 -第N帧GIF，一些地方需要注意划分。
-//
+//			3.【该插件数据和贴图未分离】。
+//			   如果容器被重刷，插件指令做出的改变，比如变身贴图，就会被还原。
+//			  （这个问题在此插件中不解决，）
+//	
 //		★其它说明细节：
 //			1.该插件比较核心的部分，是识别当前的角色部分，需要确保是在输入窗口情况再进行图片切换。
 //			  其他部分就是常用的图片图层切换。
@@ -995,87 +1035,87 @@ Spriteset_Battle.prototype.drill_AP_sortByZIndex = function() {
 };
 
 //=============================================================================
-// ** 战斗绘制层 控制
+// ** 战斗层 绘制
 //=============================================================================
 //==============================
-// * 初始化
+// * 战斗层 - 初始化
+//==============================
+var _drill_AP_s_initialize = Spriteset_Battle.prototype.initialize;
+Spriteset_Battle.prototype.initialize = function() {
+	_drill_AP_s_initialize.call(this);
+	
+	this._drill_AP_spriteTank = [];			//角色贴图容器
+	this._drill_AP_needRefresh = true;		//角色贴图容器刷新标记
+}
+//==============================
+// * 战斗层 - 创建
 //==============================
 var _drill_AP_s_createLowerLayer = Spriteset_Battle.prototype.createLowerLayer;
 Spriteset_Battle.prototype.createLowerLayer = function() {
 	_drill_AP_s_createLowerLayer.call(this);
-	this.drill_AP_createLayer();	
-	this.drill_AP_createSprite();	
+	this.drill_AP_createLayer();			//角色层
 }
 //==============================
-// * 战斗角色初始化
+// * 创建 - 角色层
 //==============================
 Spriteset_Battle.prototype.drill_AP_createLayer = function() {
+	
+	// > 角色层
 	this._drill_AP_actorLayer = new Sprite();
 	this._drill_AP_actorLayer.zIndex = DrillUp.g_AP_layer;
-	this._drill_AP_spriteTank = [];
-	this._drill_AP_dataTank = [];
-	
 	this._drill_battleUpArea.addChild(this._drill_AP_actorLayer);
-	this.drill_AP_sortByZIndex();		//排序
+	
+	// > 层级排序
+	this.drill_AP_sortByZIndex();
+	
+	// > 重刷容器
+	this._drill_AP_needRefresh = true;
 }
 //==============================
-// * 战斗角色初始化
-//==============================
-Spriteset_Battle.prototype.drill_AP_createSprite = function() {
-	
-	//（确认一下 车轮战插件 中的create会不会重复执行）
-	for(var i=0; i < $gameParty.members().length; i++){
-		var actor = $gameParty.members()[i];
-		var actor_id = actor.actorId();
-		
-		actor._drill_AP_force = -1;	//强制条件重置
-		
-		var temp_data = JSON.parse(JSON.stringify( DrillUp.g_AP_list[actor_id-1] ));
-		if( temp_data.actor_id ){
-			var temp_sprite = new Drill_AP_Sprite( temp_data );
-			
-			this._drill_AP_actorLayer.addChild(temp_sprite);
-			this._drill_AP_spriteTank.push( temp_sprite );
-			this._drill_AP_dataTank.push( temp_data );
-		}
-	}
-	
-}
-
-//==============================
-// * 战斗 - 帧刷新
+// * 战斗界面 - 帧刷新
 //==============================
 var _drill_AP_s_update = Scene_Battle.prototype.update;
 Scene_Battle.prototype.update = function() {
 	_drill_AP_s_update.call(this);
-	this.drill_AP_updateActor();
+	
+	this._spriteset.drill_AP_updateTankCheck();			//容器-检查刷新条件
+	this._spriteset.drill_AP_refreshTankIfNeed();		//容器-帧刷新
+	
+	this.drill_AP_updateActorActive();		//判断当前选中角色
 };
 //==============================
 // * 帧刷新 - 判断当前选中角色
 //==============================
-Scene_Battle.prototype.drill_AP_updateActor = function() {
-	if( !this._spriteset._drill_AP_spriteTank ){ return }
-	if( !this._spriteset._drill_AP_dataTank ){ return }
+Scene_Battle.prototype.drill_AP_updateActorActive = function() {
+	if( !this._spriteset._drill_AP_spriteTank ){ return; }
 	if( !BattleManager.actor() ){ return false; }
 	
 	if( DrillUp.g_AP_noDeactive == false ){	//（强制永久保持）
-		if ( this.drill_AP_isActorVisible() == false ) {		//未激活时，隐藏所有肖像
+	
+		// > 未激活时，隐藏所有肖像
+		if ( this.drill_AP_isActorVisible() == false ){		
 			for(var i=0; i < this._spriteset._drill_AP_spriteTank.length; i++){
-				this._spriteset._drill_AP_spriteTank[i].deactive();
+				var temp_sprite = this._spriteset._drill_AP_spriteTank[i];
+				if( temp_sprite == null ){ continue; }
+				temp_sprite.deactive();
 			}
 			return;
 		}
 	}
 	
-	var cur_Actor = BattleManager.actor();			//激活当前选中的肖像
-	for(var i=0; i < $gameParty.members().length; i++){
+	// > 激活当前选中的肖像
+	var cur_Actor = BattleManager.actor();		
+	for(var i=0; i < this._spriteset._drill_AP_spriteTank.length; i++){
+		var temp_sprite = this._spriteset._drill_AP_spriteTank[i];
+		if( temp_sprite == null ){ continue; }
 		var actor = $gameParty.members()[i];
 		var actor_id = actor.actorId();
+		
 		if( cur_Actor.actorId() == actor.actorId() ){
-			this._spriteset._drill_AP_spriteTank[i].active();
-			this._spriteset._drill_AP_spriteTank[i].force(cur_Actor._drill_AP_force);
+			temp_sprite.active();
+			temp_sprite.force(cur_Actor._drill_AP_force);
 		}else{
-			this._spriteset._drill_AP_spriteTank[i].deactive();
+			temp_sprite.deactive();
 		}
 	}
 };
@@ -1090,18 +1130,75 @@ Scene_Battle.prototype.drill_AP_isActorVisible = function() {
 	return true;
 }
 
+//=============================================================================
+// ** 角色贴图容器
+//
+//			说明：	该容器是在Spriteset_Battle自身上的，销毁时不需要考虑残留问题。
+//=============================================================================
+//==============================
+// * 容器 - 检查刷新条件
+//==============================
+Spriteset_Battle.prototype.drill_AP_updateTankCheck = function() {
+	if( !this._drill_AP_spriteTank ){ return; }
+	if( this._drill_AP_spriteTank.length == 0 ){ return; }
+	if( $gameParty.members().length == 0 ){ return; }
+	
+	if( $gameParty.members().length != this._drill_AP_spriteTank.length ){ 
+		this._drill_AP_needRefresh = true;
+	}
+}
+//==============================
+// * 容器 - 帧刷新
+//==============================
+Spriteset_Battle.prototype.drill_AP_refreshTankIfNeed = function(){
+	if( this._drill_AP_needRefresh != true ){ return; }
+	this._drill_AP_needRefresh = false;
+	
+	// > 清空容器
+	this.drill_AP_clearTank();
+	
+	// > 建立角色贴图
+	var members = $gameParty.members();
+	for(var i=0; i < members.length; i++){
+		var actor = members[i];
+		var actor_id = actor.actorId();
+		
+		actor._drill_AP_force = -1;		//（强制条件重置）
+		
+		// > 根据数据建立sprite
+		var temp_sprite = null;
+		var temp_data = JSON.parse(JSON.stringify( DrillUp.g_AP_list[actor_id-1] ));
+		if( temp_data.actor_id ){
+			temp_sprite = new Drill_AP_Sprite( temp_data );
+			this._drill_AP_actorLayer.addChild(temp_sprite);
+		}
+		this._drill_AP_spriteTank[i] = temp_sprite;
+	}
+};
+//==============================
+// * 容器 - 清空
+//==============================
+Spriteset_Battle.prototype.drill_AP_clearTank = function(){
+	for( var i = this._drill_AP_spriteTank.length-1; i >=0; i-- ){
+		var temp_sprite = this._drill_AP_spriteTank[i];
+		if( temp_sprite == null ){ continue; }
+		this._drill_AP_actorLayer.removeChild(temp_sprite);
+	}
+	this._drill_AP_spriteTank = [];
+};
+
+
 
 
 //=============================================================================
 // ** Drill_AP_Sprite 单角色肖像
 //
-//		初始化参数：data.actor_id			//角色id
+//			参数：	data.actor_id			//角色id
 //					data.condition_list		//条件/GIF贴图列表（见全局变量获取的结构）
-//		使用方法：	1.准备好数据，new即可。
+//			说明：	1.准备好数据，new即可。
 //					2.实时调用函数.active()和.deactive()改变图像显示/隐藏。
 //					3.调用函数.force(1)和.clearForce()锁定解锁条件。
-//					4.条件变化和gif的控制都由内部处理。
-//	
+//					4.条件变化和gif播放控制都由内部处理。
 //=============================================================================
 //==============================
 // * 角色肖像 - 定义
@@ -1243,7 +1340,7 @@ Drill_AP_Sprite.prototype.drill_AP_updateOrg = function() {
 	this._drill_p_sprite.skew.x = 0;
 	this._drill_p_sprite.skew.y = 0;
 	
-	this._drill_b_sprite.x = Graphics.boxWidth - DrillUp.g_AP_b_x - DrillUp.g_AP_b_silde_x;
+	this._drill_b_sprite.x = Graphics.boxWidth - DrillUp.g_AP_b_x - DrillUp.g_AP_b_silde_x + 10; //（+10震动时防止过界）
 	this._drill_b_sprite.y = Graphics.boxHeight - DrillUp.g_AP_b_y - DrillUp.g_AP_b_silde_y;
 	this._drill_b_sprite.rotation = 0;
 	this._drill_b_sprite.scale.x = 1;

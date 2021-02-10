@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        图片 - 方块粉碎效果
+ * @plugindesc [v1.3]        图片 - 方块粉碎效果
  * @author Drill_up
  * 
  *
@@ -98,6 +98,8 @@
  * 修改了与核心的部分兼容设置。
  * [v1.2]
  * 添加了插件指令图片检查。
+ * [v1.3]
+ * 修复了图片刚创建时，就执行粉碎出错的bug。
  * 
  * 
  * @param 默认图片碎片消失方式
@@ -298,6 +300,8 @@ Sprite_Picture.prototype.update = function() {
 	_drill_PSE_pic_update.call(this);
 	
 	if( !this.picture() ){ return; }
+	if( !this.bitmap ){ return; }
+	if( !this.bitmap.isReady() ){ return; }		//（需要等图片加载完毕后才能进行粉碎）
 	this._drill_PSE = this.picture()._drill_PSE;
 	
 	// > 粉碎指令

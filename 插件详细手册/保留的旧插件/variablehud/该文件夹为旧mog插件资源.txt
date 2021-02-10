@@ -1,5 +1,0 @@
-7:47 2019/6/30
-
-	该文件夹为旧mog插件MOG_VariableHud.js 变量固定框 的资源，可以用，但不再作为示例使用。
-	
-	示例中使用 Drill_GaugeForVariable.js 高级变量固定框 插件代替。

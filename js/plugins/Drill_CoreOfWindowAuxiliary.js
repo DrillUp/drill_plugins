@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        系统 - 窗口辅助核心
+ * @plugindesc [v1.5]        系统 - 窗口辅助核心
  * @author Drill_up
  * 
  * @help  
@@ -100,6 +100,8 @@
  * 优化了内部结构。
  * [v1.4]
  * 修复了对话框中 使用姓名框+改变对话框宽度 时，卡死的bug。
+ * [v1.5]
+ * 修复了窗口移动只延迟一次的bug。
  *
  */
  
@@ -279,6 +281,8 @@ Window_Base.prototype.drill_COWA_getTextExWidth = function( text ){
 	//var ww = textState.x ;		//（只有画出来了才有值）
 	
 	$gameTemp._drill_COWA_bitmap_isCalculating = false;
+	this.resetFontSettings();		//（字体恢复，计算时会造成变色、字体大小变化）
+	this.resetTextColor();
 	return ww;
 }
 //==============================
@@ -566,7 +570,6 @@ Window_Base.prototype.drill_COWA_changeParamData = function( data ){
 	if( data['height'] == undefined ){ data['height'] = this.height };					//高度
 	if( data['fontsize'] == undefined ){ data['fontsize'] = this.standardFontSize(); };	//字体大小
 	
-	data['slideCur'] = 0;																//移动 - 当前时间
 	if( data['slideDelay'] == undefined ){ data['slideDelay'] = 0 };					//移动 - 延迟
 	if( data['slideTime'] == undefined ){ data['slideTime'] = 0 };						//移动 - 时长
 	if( data['slideMoveType'] == undefined ){ data['slideMoveType'] = "匀速移动" };		//移动 - 移动类型（匀速移动/弹性移动/不移动）
@@ -585,8 +588,13 @@ Window_Base.prototype.drill_COWA_changeParamData = function( data ){
 	data['callBackNeeded'] = true;														//特殊 - 回调开关
 	if( data['callBack'] == undefined ){ data['callBack'] = function(){} };				//特殊 - 回调函数
 	
-	// > 参数初始化
+	
+	// > 私有参数初始化
 	this._drill_COWA_CPD_data = data;
+	this._drill_COWA_CPD_slideCur = 0;							//移动 - 当前时间
+	this._drill_COWA_CPD_slideDelayTime = data['slideDelay'];	//移动 - 延迟时间
+	
+	// > 初始化函数
 	this.drill_COWA_CPD_initMove();			//初始化 - 移动属性 
 	this.drill_COWA_CPD_initFrame();		//初始化 - 窗口高宽 
 	this.drill_COWA_CPD_initLayout();		//初始化 - 贴图布局 
@@ -617,7 +625,9 @@ Window_Base.prototype.drill_COWA_CPD_resetMove = function(){
 	var data = this._drill_COWA_CPD_data;
 	if( data['slideMoveType'] == "不移动" ){ return; }
 	
-	data['slideCur'] = 0;
+	this._drill_COWA_CPD_slideCur = 0;	
+	this._drill_COWA_CPD_slideDelayTime = data['slideDelay'];
+	
 	this.contentsOpacity = 0;
 	this._drill_COWA_frameOpacity = 0;
 	this._drill_COWA_layoutOpacity = 0;
@@ -666,10 +676,10 @@ Window_Base.prototype.drill_COWA_CPD_updateMove = function(){
 	var data = this._drill_COWA_CPD_data;
 	
 	// > 时间控制
-	data['slideDelay'] -= 1;
-	if( data['slideDelay'] >= 0 ){ this.drill_COWA_CPD_resetMove(); return; }
-	data['slideCur'] += 1;
-	if( data['slideCur'] > data['slideTime'] ){	
+	this._drill_COWA_CPD_slideDelayTime -= 1;
+	if( this._drill_COWA_CPD_slideDelayTime >= 0 ){ return; }
+	this._drill_COWA_CPD_slideCur += 1;
+	if( this._drill_COWA_CPD_slideCur > data['slideTime'] ){	
 		if( data['callBackNeeded'] == true ){
 			data['callBackNeeded'] = false;
 			data['callBack'].call(this);		//（回调函数）
@@ -692,17 +702,17 @@ Window_Base.prototype.drill_COWA_CPD_updateMove = function(){
 		dy = data['slideAbsoluteY'] - data['y'];
 	}
 	if( data['slideMoveType'] == "匀速移动" ){
-		xx += dx - dx / data['slideTime'] * data['slideCur'];
-		yy += dy - dy / data['slideTime'] * data['slideCur'];
+		xx += dx - dx / data['slideTime'] * this._drill_COWA_CPD_slideCur;
+		yy += dy - dy / data['slideTime'] * this._drill_COWA_CPD_slideCur;
 	}
 	if( data['slideMoveType'] == "弹性移动" ){		//r = 1/2*a*t^2
 		var ax = 2 * dx / data['slideTime'] / data['slideTime'];
 		var ay = 2 * dy / data['slideTime'] / data['slideTime'];
-		var c_time = data['slideTime'] - data['slideCur'];
+		var c_time = data['slideTime'] - this._drill_COWA_CPD_slideCur;
 		xx += 0.5 * ax * c_time * c_time ;
 		yy += 0.5 * ay * c_time * c_time ;
 	}
-	if( data['slideCur'] == data['slideTime'] ){	//最后一刻锁定坐标位置
+	if( this._drill_COWA_CPD_slideCur == data['slideTime'] ){	//最后一刻锁定坐标位置
 		xx = data['x'];
 		yy = data['y'];
 	}
@@ -712,17 +722,17 @@ Window_Base.prototype.drill_COWA_CPD_updateMove = function(){
 	
 	// > 透明度
 	if( data['layoutType'] == "默认皮肤" ){ 
-		this.contentsOpacity = 255 / data['slideTime'] * data['slideCur'];
-		this._drill_COWA_frameOpacity = 255 / data['slideTime'] * data['slideCur'];
+		this.contentsOpacity = 255 / data['slideTime'] * this._drill_COWA_CPD_slideCur;
+		this._drill_COWA_frameOpacity = 255 / data['slideTime'] * this._drill_COWA_CPD_slideCur;
 		this._drill_COWA_layoutOpacity = 0;
 	}
 	if( data['layoutType'] == "单张背景贴图" ){ 
-		this.contentsOpacity = 255 / data['slideTime'] * data['slideCur'];
+		this.contentsOpacity = 255 / data['slideTime'] * this._drill_COWA_CPD_slideCur;
 		this._drill_COWA_frameOpacity = 0;
-		this._drill_COWA_layoutOpacity = 255 / data['slideTime'] * data['slideCur'];
+		this._drill_COWA_layoutOpacity = 255 / data['slideTime'] * this._drill_COWA_CPD_slideCur;
 	}
 	if( data['layoutType'] == "隐藏布局" ){ 
-		this.contentsOpacity = 255 / data['slideTime'] * data['slideCur'];
+		this.contentsOpacity = 255 / data['slideTime'] * this._drill_COWA_CPD_slideCur;
 		this._drill_COWA_frameOpacity = 0;
 		this._drill_COWA_layoutOpacity = 0;
 	}
@@ -828,7 +838,6 @@ Sprite.prototype.drill_COWA_setButtonMove = function( data ){
 	if( data['y'] == undefined ){ data['y'] = this.y };									//平移y
 	//if( data['opacity'] == undefined ){ data['opacity'] = 255 };						//透明度
 	
-	data['slideCur'] = 0;																//移动 - 当前时间
 	if( data['slideDelay'] == undefined ){ data['slideDelay'] = 0 };					//移动 - 延迟
 	if( data['slideTime'] == undefined ){ data['slideTime'] = 0 };						//移动 - 时长
 	if( data['slideMoveType'] == undefined ){ data['slideMoveType'] = "匀速移动" };		//移动 - 移动类型（匀速移动/弹性移动/不移动）
@@ -841,7 +850,13 @@ Sprite.prototype.drill_COWA_setButtonMove = function( data ){
 	data['callBackNeeded'] = true;														//特殊 - 回调开关
 	if( data['callBack'] == undefined ){ data['callBack'] = function(){} };				//特殊 - 回调函数
 	
+	
+	// > 私有参数初始化
 	this._drill_COWA_SBM_data = data;
+	this._drill_COWA_SBM_slideCur = 0;							//移动 - 当前时间
+	this._drill_COWA_SBM_slideDelayTime = data['slideDelay'];	//移动 - 延迟时间
+	
+	// > 初始化函数
 	this.drill_COWA_SBM_initMove();		//初始化 - 移动属性 
 }
 //==============================
@@ -853,7 +868,9 @@ Sprite.prototype.drill_COWA_SBM_resetMove = function(){
 	var data = this._drill_COWA_SBM_data;
 	if( data['slideMoveType'] == "不移动" ){ return; }
 	
-	data['slideCur'] = 0;
+	this._drill_COWA_SBM_slideCur = 0;
+	this._drill_COWA_SBM_slideDelayTime = data['slideDelay'];
+	
 	this.drill_COWA_SBM_initMove();
 	//（按钮不控制透明度）
 }
@@ -903,10 +920,10 @@ Sprite.prototype.drill_COWA_SBM_updateMove = function(){
 	var data = this._drill_COWA_SBM_data;
 	
 	// > 时间控制
-	data['slideDelay'] -= 1;
-	if( data['slideDelay'] >= 0 ){ return; }
-	data['slideCur'] += 1;
-	if( data['slideCur'] > data['slideTime'] ){
+	this._drill_COWA_SBM_slideDelayTime -= 1;
+	if( this._drill_COWA_SBM_slideDelayTime >= 0 ){ return; }
+	this._drill_COWA_SBM_slideCur += 1;
+	if( this._drill_COWA_SBM_slideCur > data['slideTime'] ){
 		if( data['callBackNeeded'] == true ){
 			data['callBackNeeded'] = false;
 			data['callBack'].call(this);		//（回调函数）
@@ -929,17 +946,17 @@ Sprite.prototype.drill_COWA_SBM_updateMove = function(){
 		dy = data['slideAbsoluteY'] - data['y'];
 	}
 	if( data['slideMoveType'] == "匀速移动" ){
-		xx += dx - dx / data['slideTime'] * data['slideCur'];
-		yy += dy - dy / data['slideTime'] * data['slideCur'];
+		xx += dx - dx / data['slideTime'] * this._drill_COWA_SBM_slideCur;
+		yy += dy - dy / data['slideTime'] * this._drill_COWA_SBM_slideCur;
 	}
 	if( data['slideMoveType'] == "弹性移动" ){		//r = 1/2*a*t^2
 		var ax = 2 * dx / data['slideTime'] / data['slideTime'];
 		var ay = 2 * dy / data['slideTime'] / data['slideTime'];
-		var c_time = data['slideTime'] - data['slideCur'];
+		var c_time = data['slideTime'] - this._drill_COWA_SBM_slideCur;
 		xx += 0.5 * ax * c_time * c_time ;
 		yy += 0.5 * ay * c_time * c_time ;
 	}
-	if( data['slideCur'] == data['slideTime'] ){	//最后一刻锁定坐标位置
+	if( this._drill_COWA_SBM_slideCur == data['slideTime'] ){	//最后一刻锁定坐标位置
 		xx = data['x'];
 		yy = data['y'];
 	}

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        面板 - 全自定义主菜单面板
+ * @plugindesc [v1.4]        面板 - 全自定义主菜单面板
  * @author Drill_up
  * 
  * @Drill_LE_param "角色固定框样式-%d"
@@ -129,6 +129,34 @@
  * 1.由于面板打开后，游戏是暂停的，所以你只能在地图界面中执行指令。
  * 2.角色框设置中"改变前视图[2,3,4]"数字对应 备用角色前视图列表 的编号，
  *   可以输入多张图片，这些图片将作为gif序列改变替换到指定角色的前视图设置。
+ *
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 获取时间
+ * 你可以使用下面的插件指令：
+ * （冒号两边都有一个空格）
+ * 
+ * 插件指令：>主菜单面板 : 累积游戏时长(秒) : 给予值 : 变量[21]
+ * 插件指令：>主菜单面板 : 累积游戏时长(分) : 给予值 : 变量[21]
+ * 插件指令：>主菜单面板 : 累积游戏时长(时) : 给予值 : 变量[21]
+ * 插件指令：>主菜单面板 : 累积游戏时长(总秒数) : 给予值 : 变量[21]
+ * 
+ * 插件指令：>主菜单面板 : 真实时间(秒) : 给予值 : 变量[21]
+ * 插件指令：>主菜单面板 : 真实时间(分) : 给予值 : 变量[21]
+ * 插件指令：>主菜单面板 : 真实时间(时) : 给予值 : 变量[21]
+ * 插件指令：>主菜单面板 : 真实时间(日) : 给予值 : 变量[21]
+ * 插件指令：>主菜单面板 : 真实时间(月) : 给予值 : 变量[21]
+ * 插件指令：>主菜单面板 : 真实时间(年) : 给予值 : 变量[21]
+ * 
+ * 插件指令：>主菜单面板 : 游戏世界时间(秒) : 给予值 : 变量[21]
+ * 插件指令：>主菜单面板 : 游戏世界时间(分) : 给予值 : 变量[21]
+ * 插件指令：>主菜单面板 : 游戏世界时间(时) : 给予值 : 变量[21]
+ * 插件指令：>主菜单面板 : 游戏世界时间(日) : 给予值 : 变量[21]
+ * 插件指令：>主菜单面板 : 游戏世界时间(月) : 给予值 : 变量[21]
+ * 插件指令：>主菜单面板 : 游戏世界时间(年) : 给予值 : 变量[21]
+ * 
+ * 1."累积游戏时长_时"的值可以超过24小时（比如值为200），
+ *   因为累积时长不统计天数。
+ * 2."游戏世界时间"需要相关的插件支持才能得到值，否则返回-1。
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -162,6 +190,8 @@
  * 添加了外部干扰插件的检测。
  * [v1.3]
  * 添加了drill指针的控制。
+ * [v1.4]
+ * 添加了插件指令获取时间给变量的功能。
  * 
  * 
  * @param ----杂项----
@@ -2415,7 +2445,7 @@
 //						->空角色前视图
 //				->队形面板
 //				->插件指令
-//					->获取真实时间		x
+//					->获取真实时间
 //					->修改按钮样式
 //					->修改按钮组位置
 //					->修改角色固定框样式
@@ -3170,6 +3200,85 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				}
 				if( temp1 == "还原默认前视图配置" ){
 					$gameSystem._drill_SMa_actorBindTank[ a_id ]['pic_src_commandSet'] = $gameSystem._drill_SMa_actorBindTank[ a_id ]['pic_src'];
+				}
+			}
+		}
+		/*-----------------获取时间------------------*/
+		if( args.length == 6 ){
+			var type = String(args[1]);
+			var temp1 = String(args[3]);
+			var temp2 = String(args[5]);
+			if( temp1 == "给予值" ){
+				temp2 = temp2.replace("变量[","");
+				temp2 = temp2.replace("]","");
+				if( type == "累积游戏时长(秒)" || type == "累积游戏时长（秒）" ){
+					var sec = $gameSystem.playtime() % 60;
+					$gameVariables.setValue( Number(temp2), sec );
+				}
+				if( type == "累积游戏时长(分)" || type == "累积游戏时长（分）" ){
+					var min = Math.floor($gameSystem.playtime() / 60) % 60;
+					$gameVariables.setValue( Number(temp2), min );
+				}
+				if( type == "累积游戏时长(时)" || type == "累积游戏时长（时）" ){
+					var hour = Math.floor($gameSystem.playtime() / 60 / 60);
+					$gameVariables.setValue( Number(temp2), hour );
+				}
+				if( type == "累积游戏时长(总秒数)" || type == "累积游戏时长（总秒数）" ){
+					$gameVariables.setValue( Number(temp2), $gameSystem.playtime() );
+				}
+				if( type == "真实时间(秒)" || type == "真实时间（秒）" ){
+					var sec = new Date().getSeconds();
+					$gameVariables.setValue( Number(temp2), sec );
+				}
+				if( type == "真实时间(分)" || type == "真实时间（分）" ){
+					var min = new Date().getMinutes();
+					$gameVariables.setValue( Number(temp2), min );
+				}
+				if( type == "真实时间(时)" || type == "真实时间（时）" ){
+					var hour = new Date().getHours();
+					$gameVariables.setValue( Number(temp2), hour );
+				}
+				if( type == "真实时间(日)" || type == "真实时间（日）" ){
+					var d = new Date().getDate();
+					$gameVariables.setValue( Number(temp2), d );
+				}
+				if( type == "真实时间(月)" || type == "真实时间（月）" ){
+					var month = new Date().getMonth() + 1;
+					$gameVariables.setValue( Number(temp2), month );
+				}
+				if( type == "真实时间(年)" || type == "真实时间（年）" ){
+					var year = new Date().getFullYear();
+					$gameVariables.setValue( Number(temp2), year );
+				}
+				if( type == "游戏世界时间(秒)" || type == "游戏世界时间（秒）" ){
+					if( Imported.MOG_TimeSystem != true ){ $gameVariables.setValue( Number(temp2), -1 ); return; }
+					var sec = $gameSystem.second();
+					$gameVariables.setValue( Number(temp2), sec );
+				}
+				if( type == "游戏世界时间(分)" || type == "游戏世界时间（分）" ){
+					if( Imported.MOG_TimeSystem != true ){ $gameVariables.setValue( Number(temp2), -1 ); return; }
+					var min = $gameSystem.minute();
+					$gameVariables.setValue( Number(temp2), min );
+				}
+				if( type == "游戏世界时间(时)" || type == "游戏世界时间（时）" ){
+					if( Imported.MOG_TimeSystem != true ){ $gameVariables.setValue( Number(temp2), -1 ); return; }
+					var hour = $gameSystem.hour();
+					$gameVariables.setValue( Number(temp2), hour );
+				}
+				if( type == "游戏世界时间(日)" || type == "游戏世界时间（日）" ){
+					if( Imported.MOG_TimeSystem != true ){ $gameVariables.setValue( Number(temp2), -1 ); return; }
+					var d = $gameSystem.day();
+					$gameVariables.setValue( Number(temp2), d );
+				}
+				if( type == "游戏世界时间(月)" || type == "游戏世界时间（月）" ){
+					if( Imported.MOG_TimeSystem != true ){ $gameVariables.setValue( Number(temp2), -1 ); return; }
+					var month = $gameSystem.month();
+					$gameVariables.setValue( Number(temp2), month );
+				}
+				if( type == "游戏世界时间(年)" || type == "游戏世界时间（年）" ){
+					if( Imported.MOG_TimeSystem != true ){ $gameVariables.setValue( Number(temp2), -1 ); return; }
+					var year = $gameSystem.year();
+					$gameVariables.setValue( Number(temp2), year );
 				}
 			}
 		}

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        主菜单 - 多样式菜单滚动条
+ * @plugindesc [v1.1]        主菜单 - 多样式菜单滚动条
  * @author Drill_up
  * 
  * @Drill_LE_param "滚动条样式-%d"
@@ -91,6 +91,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 添加了滚动条设置偏移位置功能。
  * 
  *
  * 
@@ -231,7 +233,11 @@
  * @desc 只用于方便区分查看的标签，不作用在插件中。
  * @default --新的滚动条样式--
  * 
+ * @param ---常规---
+ * @desc 
+ * 
  * @param 边沿靠向
+ * @parent ---常规---
  * @type select
  * @option 左侧
  * @value 左侧
@@ -240,7 +246,18 @@
  * @desc 滚动条靠向的边沿。
  * @default 右侧
  * 
+ * @param 偏移-滚动条 X
+ * @parent ---常规---
+ * @desc 以自动适应的位置为基准，x轴方向平移，正右负左，单位像素。
+ * @default 0
+ * 
+ * @param 偏移-滚动条 Y
+ * @parent ---常规---
+ * @desc 以自动适应的位置为基准，y轴方向平移，正下负上，单位像素。
+ * @default 0
+ * 
  * @param 未激活时透明度
+ * @parent ---常规---
  * @type number
  * @min 0
  * @min 255
@@ -412,6 +429,8 @@
 	DrillUp.drill_MSB_initStyle = function( dataFrom ) {
 		var data = {};
 		data['scroll_pos'] = String( dataFrom["边沿靠向"] || "右侧");
+		data['shifting_x'] = Number( dataFrom["偏移-滚动条 X"] || 0);
+		data['shifting_y'] = Number( dataFrom["偏移-滚动条 Y"] || 0);
 		data['opacity'] = Number( dataFrom["未激活时透明度"] || 125);
 		
 		// > 外框
@@ -1019,11 +1038,11 @@ Drill_MSB_Sprite.prototype.drill_MSB_refreshPosition = function() {
 	
 	// > 位置
 	if( data['scroll_pos'] == "左侧" ){
-		this.x = ppp*0.5 ;
-		this.y = phh*0.5 ;
+		this.x = ppp*0.5 + data['shifting_x'];
+		this.y = phh*0.5 + data['shifting_y'];
 	}else{
-		this.x = pww - ppp*0.5;
-		this.y = phh*0.5 ;
+		this.x = pww - ppp*0.5 + data['shifting_x'];
+		this.y = phh*0.5 + data['shifting_y'];
 	}
 }
 //==============================
