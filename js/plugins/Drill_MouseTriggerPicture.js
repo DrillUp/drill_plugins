@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        鼠标 - 鼠标触发图片
+ * @plugindesc [v1.1]        鼠标 - 鼠标触发图片
  * @author Drill_up
  * 
  * @help  
@@ -117,7 +117,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
- * 
+ * [v1.1]
+ * 修复了重复加入事件绑定会叠加的bug。
  *
  *
  */
@@ -573,8 +574,14 @@ Game_Picture.prototype.erase = function() {
 // * 图片 - 加入新的触发
 //==============================
 Game_Picture.prototype.drill_MTP_addTrigger = function( typeName, commonId ){
-	this._drill_MTP.triggerType.push( typeName );
-	this._drill_MTP.triggerCommonId.push( commonId );
+	// > 检查重复
+	var index = this._drill_MTP.triggerType.indexOf(typeName);
+	if( index == -1 ){
+		this._drill_MTP.triggerType.push( typeName );
+		this._drill_MTP.triggerCommonId.push( commonId );
+	}else{
+		this._drill_MTP.triggerCommonId[ index ] = commonId;
+	}
 }
 //==============================
 // * 图片 - 去除新的触发

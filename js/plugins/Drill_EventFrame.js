@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        行走图 - 多帧行走图
+ * @plugindesc [v1.5]        行走图 - 多帧行走图
  * @author Drill_up
  * 
  *
@@ -210,6 +210,8 @@
  * 大幅度完善了插件指令，以及文档、概念的说明。
  * [v1.4]
  * 修复了玩家初始帧设置无效的bug。
+ * [v1.5]
+ * 修复了玩家 修改动画帧 无效的bug。
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -644,7 +646,7 @@ Game_CharacterBase.prototype.animationWait = function() {
 	if( this._drill_EF.inter != ""  ){
 		
 		// > 帧间隔公式
-		if( this._drill_EF.cur_inter != this._drill_EF.inter &&
+		if( this._drill_EF.cur_inter != this._drill_EF.inter ||
 			this._drill_EF.cur_realSpeed != this.realMoveSpeed() ){	//优化：速度如果变化，才求解一次公式，而不是每次都求解公式
 			this._drill_EF.cur_inter = this._drill_EF.inter;
 			this._drill_EF.cur_realSpeed = this.realMoveSpeed();

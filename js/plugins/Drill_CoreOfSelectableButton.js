@@ -1229,7 +1229,8 @@
 //		★必要注意事项：
 //			1. Window_Selectable是一个父类，单独不可使用。
 //				其子类一定会覆写.maxCols和.maxItems函数。
-//
+//			2. 如果你的子窗口【覆写了refresh函数】，那么要记得添加刷新标记。
+//	
 //		★其它说明细节：
 //			1.
 //
@@ -2559,6 +2560,8 @@ if( typeof(_drill_mouse_getCurPos) == "undefined" ){	//防止重复定义
 //=============================================================================
 //==============================
 // * 窗口refresh - 标记
+//
+//				说明：	如果你的子窗口覆写了refresh函数，那么要记得添加刷新标记。
 //==============================
 var _drill_COSB_windowSelectableRefresh = Window_Selectable.prototype.refresh;
 Window_Selectable.prototype.refresh = function(){

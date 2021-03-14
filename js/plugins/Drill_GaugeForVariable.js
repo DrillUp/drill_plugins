@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.8]        UI - 高级变量固定框
+ * @plugindesc [v1.9]        UI - 高级变量固定框
  * @author Drill_up
  * 
  * @Drill_LE_param "固定框样式-%d"
@@ -22,6 +22,7 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 能在地图界面或战斗界面显示多个不同的变量参数框。
+ * 注意，该框功能是实现 变量值 可视化而存在的，一切都是基于变量值而显示的。
  * 【支持插件关联资源的打包、加密】
  * 
  * -----------------------------------------------------------------------------
@@ -45,6 +46,8 @@
  *   (2.战斗界面中，变量框放在战斗层级的 上层 。
  *      地图界面中，变量框放在地图层级的 图片层 。
  *      你需要考虑规划 变量框 与 其他贴图 的先后顺序与位置。
+ *   (3.注意，该框功能是实现 变量值 可视化而存在的，
+ *      一切都是基于变量值而显示的。
  * 样式槽：
  *   (1.你可以在一个固定框样式里面，添加多个样式槽。
  *      每个槽都可以配置 1个参数条、1个参数数字、1个名称。
@@ -93,6 +96,8 @@
  * 
  * 插件指令：>高级变量框 : 框设置[1] : 隐藏
  * 插件指令：>高级变量框 : 框设置[1] : 显示
+ * 插件指令：>高级变量框 : 框设置[1] : 修改位置[100,100]
+ * 插件指令：>高级变量框 : 框设置[1] : 修改位置(变量)[21,22]
  * 
  * 1.插件指令的 前半部分（框设置）和后半部分（隐藏）的参数可以随意组合。
  *   一共有3*2种组合方式。
@@ -127,6 +132,8 @@
  *   "变量修改段上限[21]"可以使得段上限的值设置为 变量21 的值。
  *   "添加段上限[+100]"表示在其基础上添加值，如果为[-100]，则表示减去。
  *   "变量添加段上限[21]"表示在其基础上添加变量的值（变量可以为负数值）。
+ * 4.额定值是 参数数字 的属性，修改额定值后，显示的数字会改变。
+ *   段上限是 参数条 的属性，修改段上限后，参数条的百分比例会改变。
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -171,6 +178,8 @@
  * 翻新了整体结构，使其基于更宽泛的参数条、参数数字核心。
  * [v1.8]
  * 添加了部分插件指令。
+ * [v1.9]
+ * 添加了修改坐标的插件指令。
  * 
  * 
  * 
@@ -1118,7 +1127,8 @@
 	
 	
 	//==============================
-	// * 变量获取 - 变量固定框样式（必须写在前面）
+	// * 变量获取 - 变量固定框样式
+	//				（~struct~GFVStyle）
 	//==============================
 	DrillUp.drill_GFV_initStyle = function( dataFrom ) {
 		var data = {};
@@ -1166,7 +1176,8 @@
 	}
 	
 	//==============================
-	// * 变量获取 - 变量设置（必须写在前面）
+	// * 变量获取 - 变量设置
+	//				（~struct~GFVBind）
 	//==============================
 	DrillUp.drill_GFV_initBind = function( dataFrom ) {
 		var data = {};
@@ -1301,6 +1312,38 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					$gameSystem._drill_GFV_bindTank[ id ]['visible'] = false;
 				}
 				$gameTemp._drill_GFV_needReflash = true;
+			}
+			if( temp2.indexOf("修改位置(变量)[") != -1 ){
+				temp2 = temp2.replace("修改位置(变量)[","");
+				temp2 = temp2.replace("]","");
+				var temp_arr = temp2.split(/[,，]/);
+				if( temp_arr.length >= 2 ){
+					e_pos = [ $gameVariables.value(Number(temp_arr[0])),
+							  $gameVariables.value(Number(temp_arr[1])) ];
+				
+					for(var j = 0; j< bind_ids.length; j++ ){
+						var id = bind_ids[j];
+						$gameSystem._drill_GFV_bindTank[ id ]['frame_x'] = e_pos[0];
+						$gameSystem._drill_GFV_bindTank[ id ]['frame_y'] = e_pos[1];
+					}
+					$gameTemp._drill_GFV_needReflash = true;
+				}
+			}
+			else if( temp2.indexOf("修改位置[") != -1 ){
+				temp2 = temp2.replace("修改位置[","");
+				temp2 = temp2.replace("]","");
+				var temp_arr = temp2.split(/[,，]/);
+				if( temp_arr.length >= 2 ){
+					e_pos = [ Number(temp_arr[0]),
+							  Number(temp_arr[1]) ];
+				
+					for(var j = 0; j< bind_ids.length; j++ ){
+						var id = bind_ids[j];
+						$gameSystem._drill_GFV_bindTank[ id ]['frame_x'] = e_pos[0];
+						$gameSystem._drill_GFV_bindTank[ id ]['frame_y'] = e_pos[1];
+					}
+					$gameTemp._drill_GFV_needReflash = true;
+				}
 			}
 		}
 		if(args.length == 6){		//>高级变量框 : 框设置[1] : 槽[1] : 显示名称

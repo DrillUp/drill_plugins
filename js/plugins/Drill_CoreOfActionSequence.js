@@ -3,11 +3,11 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        系统 - GIF动画序列核心
+ * @plugindesc [v1.1]        系统 - GIF动画序列核心
  * @author Drill_up
  * 
- * @Drill_LE_param "动作序列-%d"
- * @Drill_LE_parentKey "---动作序列%d至%d---"
+ * @Drill_LE_param "动画序列-%d"
+ * @Drill_LE_parentKey "---动画序列%d至%d---"
  * @Drill_LE_var "DrillUp.g_COAS_list_length"
  * 
  * @Drill_LE_param "状态元-%d"
@@ -56,13 +56,13 @@
  * 要查看所有关联资源文件的插件，可以去看看"插件清单.xlsx"。
  * 如果没有，需要自己建立。这里需要在角色组中手动配置：
  * 
- * 动作序列1 状态元1 资源-状态元
- * 动作序列1 状态元2 资源-状态元
- * 动作序列1 状态元3 资源-状态元
- * 动作序列1 动作元1 资源-动作元
- * 动作序列1 动作元2 资源-动作元
- * 动作序列1 动作元3 资源-动作元
- * 动作序列2 …
+ * 动画序列1 状态元1 资源-状态元
+ * 动画序列1 状态元2 资源-状态元
+ * 动画序列1 状态元3 资源-状态元
+ * 动画序列1 动作元1 资源-动作元
+ * 动画序列1 动作元2 资源-动作元
+ * 动画序列1 动作元3 资源-动作元
+ * 动画序列2 …
  * ……
  *
  * 你可以配置每个动作元、状态元的设置，并且还可以是组成GIF的多张图像。
@@ -92,253 +92,256 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 添加了 色调值、模糊边缘、帧间隔明细表 设置，
+ * 并实现了小工具交互功能。
  * 
  * 
  *
- * @param ---动作序列 1至20---
+ * @param ---动画序列 1至20---
  * @default
  *
- * @param 动作序列-1
- * @parent ---动作序列 1至20---
+ * @param 动画序列-1
+ * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-2
- * @parent ---动作序列 1至20---
+ * @param 动画序列-2
+ * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-3
- * @parent ---动作序列 1至20---
+ * @param 动画序列-3
+ * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-4
- * @parent ---动作序列 1至20---
+ * @param 动画序列-4
+ * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-5
- * @parent ---动作序列 1至20---
+ * @param 动画序列-5
+ * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-6
- * @parent ---动作序列 1至20---
+ * @param 动画序列-6
+ * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-7
- * @parent ---动作序列 1至20---
+ * @param 动画序列-7
+ * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-8
- * @parent ---动作序列 1至20---
+ * @param 动画序列-8
+ * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-9
- * @parent ---动作序列 1至20---
+ * @param 动画序列-9
+ * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-10
- * @parent ---动作序列 1至20---
+ * @param 动画序列-10
+ * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-11
- * @parent ---动作序列 1至20---
+ * @param 动画序列-11
+ * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-12
- * @parent ---动作序列 1至20---
+ * @param 动画序列-12
+ * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-13
- * @parent ---动作序列 1至20---
+ * @param 动画序列-13
+ * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-14
- * @parent ---动作序列 1至20---
+ * @param 动画序列-14
+ * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-15
- * @parent ---动作序列 1至20---
+ * @param 动画序列-15
+ * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-16
- * @parent ---动作序列 1至20---
+ * @param 动画序列-16
+ * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-17
- * @parent ---动作序列 1至20---
+ * @param 动画序列-17
+ * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-18
- * @parent ---动作序列 1至20---
+ * @param 动画序列-18
+ * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-19
- * @parent ---动作序列 1至20---
+ * @param 动画序列-19
+ * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-20
- * @parent ---动作序列 1至20---
+ * @param 动画序列-20
+ * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param ---动作序列21至40---
+ * @param ---动画序列21至40---
  * @default
  *
- * @param 动作序列-21
- * @parent ---动作序列21至40---
+ * @param 动画序列-21
+ * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-22
- * @parent ---动作序列21至40---
+ * @param 动画序列-22
+ * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-23
- * @parent ---动作序列21至40---
+ * @param 动画序列-23
+ * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-24
- * @parent ---动作序列21至40---
+ * @param 动画序列-24
+ * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-25
- * @parent ---动作序列21至40---
+ * @param 动画序列-25
+ * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-26
- * @parent ---动作序列21至40---
+ * @param 动画序列-26
+ * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-27
- * @parent ---动作序列21至40---
+ * @param 动画序列-27
+ * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-28
- * @parent ---动作序列21至40---
+ * @param 动画序列-28
+ * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-29
- * @parent ---动作序列21至40---
+ * @param 动画序列-29
+ * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-30
- * @parent ---动作序列21至40---
+ * @param 动画序列-30
+ * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-31
- * @parent ---动作序列21至40---
+ * @param 动画序列-31
+ * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-32
- * @parent ---动作序列21至40---
+ * @param 动画序列-32
+ * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-33
- * @parent ---动作序列21至40---
+ * @param 动画序列-33
+ * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-34
- * @parent ---动作序列21至40---
+ * @param 动画序列-34
+ * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-35
- * @parent ---动作序列21至40---
+ * @param 动画序列-35
+ * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-36
- * @parent ---动作序列21至40---
+ * @param 动画序列-36
+ * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-37
- * @parent ---动作序列21至40---
+ * @param 动画序列-37
+ * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-38
- * @parent ---动作序列21至40---
+ * @param 动画序列-38
+ * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-39
- * @parent ---动作序列21至40---
+ * @param 动画序列-39
+ * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  *
- * @param 动作序列-40
- * @parent ---动作序列21至40---
+ * @param 动画序列-40
+ * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
- * @desc GIF动作序列的详细配置信息。
+ * @desc GIF动画序列的详细配置信息。
  * @default 
  * 
  * 
@@ -488,26 +491,6 @@
  * @desc 状态元的标识性名称，注意不要与其他名称重复。
  * @default 小爱丽丝静止1
  * 
- * @param 资源-状态元
- * @desc 该状态元下的资源图片。可以是单张图片，也可以是多张组成的gif。
- * @default 
- * @require 1
- * @dir img/Special__actionSeq/
- * @type file[]
- *
- * @param 帧间隔
- * @type number
- * @min 1
- * @desc gif每帧播放间隔时间，单位帧。（1秒60帧）
- * @default 4
- *
- * @param 是否倒放
- * @type boolean
- * @on 倒放
- * @off 不倒放
- * @desc true - 倒放，false - 不倒放
- * @default false
- * 
  * @param 状态元权重
  * @type number
  * @min 1
@@ -519,6 +502,55 @@
  * @min 0
  * @desc 状态元优先级是针对动作元设置的，优先级高的状态元，不会被优先级低的动作元中断。
  * @default 0
+ * 
+ * @param ---GIF---
+ * @default
+ * 
+ * @param 资源-状态元
+ * @parent ---GIF---
+ * @desc 该状态元下的资源图片。可以是单张图片，也可以是多张组成的gif。
+ * @default []
+ * @require 1
+ * @dir img/Special__actionSeq/
+ * @type file[]
+ *
+ * @param 帧间隔
+ * @parent ---GIF---
+ * @type number
+ * @min 1
+ * @desc 默认gif每帧播放间隔时间，单位帧。（1秒60帧）
+ * @default 4
+ * 
+ * @param 帧间隔-明细表
+ * @parent ---GIF---
+ * @type number[]
+ * @min 1
+ * @desc GIF中，每帧的详细间隔，间隔与配置的资源一一对应。不对应的则用默认的帧间隔。
+ * @default []
+ *
+ * @param 是否倒放
+ * @parent ---GIF---
+ * @type boolean
+ * @on 倒放
+ * @off 不倒放
+ * @desc true - 倒放，false - 不倒放
+ * @default false
+ *
+ * @param 图像-色调值
+ * @parent ---GIF---
+ * @type number
+ * @min 0
+ * @min 360
+ * @desc GIF图像的色调值。
+ * @default 0
+ *
+ * @param 图像-模糊边缘
+ * @parent ---GIF---
+ * @type boolean
+ * @on 模糊
+ * @off 关闭
+ * @desc 可以模糊GIF图像的边缘，防止出现像素锯齿。
+ * @default false
  *
  */
 /*~struct~DrillCOASAct:
@@ -532,25 +564,54 @@
  * @min 0
  * @desc 优先级高的动作，可以中断 状态元 和正在播放的低优先级动作元，优先级相同或低的，则不影响。
  * @default 20
+ * 
+ * @param ---GIF---
+ * @default
  *
  * @param 资源-动作元
+ * @parent ---GIF---
  * @desc 该动作元下的资源图片。可以是单张图片，也可以是多张组成的gif。
- * @default 
+ * @default []
  * @require 1
  * @dir img/Special__actionSeq/
  * @type file[]
  *
  * @param 帧间隔
+ * @parent ---GIF---
  * @type number
  * @min 1
- * @desc gif每帧播放间隔时间，单位帧。（1秒60帧）
+ * @desc 默认gif每帧播放间隔时间，单位帧。（1秒60帧）
  * @default 4
+ * 
+ * @param 帧间隔-明细表
+ * @parent ---GIF---
+ * @type number[]
+ * @min 1
+ * @desc GIF中，每帧的详细间隔，间隔与配置的资源一一对应。不对应的则用默认的帧间隔。
+ * @default []
  *
  * @param 是否倒放
+ * @parent ---GIF---
  * @type boolean
  * @on 倒放
  * @off 不倒放
  * @desc true - 倒放，false - 不倒放
+ * @default false
+ *
+ * @param 图像-色调值
+ * @parent ---GIF---
+ * @type number
+ * @min 0
+ * @min 360
+ * @desc GIF图像的色调值。
+ * @default 0
+ *
+ * @param 图像-模糊边缘
+ * @parent ---GIF---
+ * @type boolean
+ * @on 模糊
+ * @off 关闭
+ * @desc 可以模糊GIF图像的边缘，防止出现像素锯齿。
  * @default false
  *
  */
@@ -625,9 +686,29 @@
 		}else{
 			data['gif_src'] = [];
 		}
+		if( dataFrom["帧间隔-明细表"] != "" &&
+			dataFrom["帧间隔-明细表"] != undefined ){
+			data['gif_intervalTank'] = JSON.parse( dataFrom["帧间隔-明细表"] );
+		}else{
+			data['gif_intervalTank'] = [];
+		}
 		data['gif_src_file'] = "img/Special__actionSeq/";
 		data['gif_interval'] = Number( dataFrom["帧间隔"] || 4);
 		data['gif_back_run'] = String( dataFrom["是否倒放"] || "false") == "true";
+		data['gif_tint'] = Number( dataFrom["图像-色调值"] || 0);
+		data['gif_smooth'] = String( dataFrom["图像-模糊边缘"] || "false") == "true";
+		
+		// > 帧间隔计算
+		data['gif_intervalRealTank'] = [];
+		data['gif_intervalRealTank_total'] = 0;
+		for( var i=0; i < data['gif_src'].length; i++ ){
+			var interval = data['gif_interval'];
+			if( i < data['gif_intervalTank'].length ){
+				interval = Number(data['gif_intervalTank'][i]);
+			}
+			data['gif_intervalRealTank'][i] = Number(interval);
+			data['gif_intervalRealTank_total'] += Number(interval);
+		}
 		return data;
 	}
 	//==============================
@@ -644,13 +725,33 @@
 		}else{
 			data['gif_src'] = [];
 		}
+		if( dataFrom["帧间隔-明细表"] != "" &&
+			dataFrom["帧间隔-明细表"] != undefined ){
+			data['gif_intervalTank'] = JSON.parse( dataFrom["帧间隔-明细表"] );
+		}else{
+			data['gif_intervalTank'] = [];
+		}
 		data['gif_src_file'] = "img/Special__actionSeq/";
 		data['gif_interval'] = Number( dataFrom["帧间隔"] || 4);
 		data['gif_back_run'] = String( dataFrom["是否倒放"] || "false") == "true";
+		data['gif_tint'] = Number( dataFrom["图像-色调值"] || 0);
+		data['gif_smooth'] = String( dataFrom["图像-模糊边缘"] || "false") == "true";
+		
+		// > 帧间隔计算
+		data['gif_intervalRealTank'] = [];
+		data['gif_intervalRealTank_total'] = 0;
+		for( var i=0; i < data['gif_src'].length; i++ ){
+			var interval = data['gif_interval'];
+			if( i < data['gif_intervalTank'].length ){
+				interval = Number(data['gif_intervalTank'][i]);
+			}
+			data['gif_intervalRealTank'][i] = Number(interval);
+			data['gif_intervalRealTank_total'] += Number(interval);
+		}
 		return data;
 	}
 	//==============================
-	// * 变量获取 - 动作序列
+	// * 变量获取 - 动画序列
 	//				（~struct~DrillCOASSequence）
 	//==============================
 	DrillUp.g_COAS_stateList_length = 10;
@@ -696,9 +797,9 @@
 	DrillUp.g_COAS_list_length = 40;
 	DrillUp.g_COAS_list = [];
 	for (var i = 0; i < DrillUp.g_COAS_list_length; i++) {
-		if( DrillUp.parameters["动作序列-" + String(i+1) ] != undefined &&
-			DrillUp.parameters["动作序列-" + String(i+1) ] != "" ){
-			var sequence = JSON.parse(DrillUp.parameters["动作序列-" + String(i+1) ]);
+		if( DrillUp.parameters["动画序列-" + String(i+1) ] != undefined &&
+			DrillUp.parameters["动画序列-" + String(i+1) ] != "" ){
+			var sequence = JSON.parse(DrillUp.parameters["动画序列-" + String(i+1) ]);
 			DrillUp.g_COAS_list[i] = DrillUp.drill_COAS_initSequence( sequence );
 		}else{
 			DrillUp.g_COAS_list[i] = DrillUp.drill_COAS_initSequence( {} );
@@ -716,6 +817,8 @@
 //					> 能被存到存档中
 //			说明：	> 该类的update函数需要手动调用。
 //					> 你可以随时new新的Drill_COAS_Data，但是要注意销毁装饰器对象。
+//	
+//			特殊：	【该类在c++工具中存在 复刻类 ，修改后注意同步复刻 】
 //=============================================================================
 //==============================
 // * 数据 - 定义
@@ -754,6 +857,8 @@ Drill_COAS_Data.prototype.drill_initData = function() {
 	this._drill_arrayCheck = true;									//检查数组元素
 	this._drill_bitmapName = "";									//当前的bitmap对象名
 	this._drill_bitmapPath = "";									//当前的bitmap路径
+	this._drill_bitmapTint = 0;										//当前的bitmap色调
+	this._drill_bitmapSmooth = false;								//当前的bitmap模糊
 	this._drill_state_curCom = "";									//状态元 - 当前状态
 	this._drill_state_curTime = 0;									//状态元 - 当前时间
 	this._drill_state_curSeq = data['state_default_randomSeq'];		//状态元 - 当前序列
@@ -796,20 +901,41 @@ Drill_COAS_Data.prototype.drill_COAS_updateState = function() {
 	
 	// > gif播放
 	if( data_state['gif_src'].length != 0 ){
-		var inter = this._drill_time;
-		inter = inter / data_state['gif_interval'];
-		inter = inter % data_state['gif_src'].length;
-		if( data_state['gif_back_run'] ){
-			inter = data_state['gif_src'].length - 1 - inter;
+		
+		var index = 0;
+		var inter_time = this._drill_state_curTime;
+		if( data_state['gif_back_run'] == false){
+
+			// > 正向播放
+			for (var i = 0; i < data_state['gif_intervalRealTank'].length; i++){
+				var i_time = data_state['gif_intervalRealTank'][i];
+				if( inter_time < i_time ){
+					index = i;
+					break;
+				}
+				inter_time -= i_time;
+			}
+		}else{
+
+			// > 倒放
+			for (var i = data_state['gif_intervalRealTank'].length-1; i >=0 ; i--){
+				var i_time = data_state['gif_intervalRealTank'][i];
+				if( inter_time < i_time ){
+					index = i;
+					break;
+				}
+				inter_time -= i_time;
+			}
 		}
-		inter = Math.floor(inter);
-		this._drill_bitmapName = data_state['gif_src'][inter];
+		this._drill_bitmapName = data_state['gif_src'][index];
 		this._drill_bitmapPath = data_state['gif_src_file'];
+		this._drill_bitmapTint = data_state['gif_tint'];
+		this._drill_bitmapSmooth = data_state['gif_smooth'];
 	}
 	
 	// > 时间+1
 	this._drill_state_curTime += 1;
-	if( this._drill_state_curTime >= data_state['gif_src'].length * data_state['gif_interval'] ){
+	if( this._drill_state_curTime >= data_state['gif_intervalRealTank_total'] ){
 		this._drill_state_curCom = "";
 		this._drill_state_curTime = 0;
 	}
@@ -841,20 +967,42 @@ Drill_COAS_Data.prototype.drill_COAS_updateAct = function() {
 	
 	// > gif播放（一次只能播放一种行为）
 	if( data_act['gif_src'].length != 0 ){
-		var inter = this._drill_time;
-		inter = inter / data_act['gif_interval'];
-		inter = inter % data_act['gif_src'].length;
-		if( data_act['gif_back_run'] ){
-			inter = data_act['gif_src'].length - 1 - inter;
+		
+		var index = 0;
+		var inter_time = this._drill_act_curTime;
+		if( data_act['gif_back_run'] == false){
+
+			// > 正向播放
+			for (var i = 0; i < data_act['gif_intervalRealTank'].length; i++){
+				var i_time = data_act['gif_intervalRealTank'][i];
+				if( inter_time < i_time ){
+					index = i;
+					break;
+				}
+				inter_time -= i_time;
+			}
+		}else{
+
+			// > 倒放
+			for (var i = data_act['gif_intervalRealTank'].length-1; i >=0 ; i--){
+				var i_time = data_act['gif_intervalRealTank'][i];
+				if( inter_time < i_time ){
+					index = i;
+					break;
+				}
+				inter_time -= i_time;
+			}
 		}
-		inter = Math.floor(inter);
-		this._drill_bitmapName = data_act['gif_src'][inter];
+		
+		this._drill_bitmapName = data_act['gif_src'][index];
 		this._drill_bitmapPath = data_act['gif_src_file'];
+		this._drill_bitmapTint = data_act['gif_tint'];
+		this._drill_bitmapSmooth = data_act['gif_smooth'];
 	}
 	
 	// > 时间+1
 	this._drill_act_curTime += 1;
-	if( this._drill_act_curTime > data_act['gif_src'].length * data_act['gif_interval'] ){
+	if( this._drill_act_curTime > data_act['gif_intervalRealTank_total'] ){
 		this._drill_act_curCom = "";
 		this._drill_act_curTime = 0;
 	}
@@ -996,7 +1144,11 @@ Drill_COAS_SpriteDecorator.prototype.initialize = function( parent, COAS_data ){
 Drill_COAS_SpriteDecorator.prototype.update = function() {
 	if( this._drill_controller == null ){ return; }
 	
-	var temp_bitmap = ImageManager.loadBitmap( this._drill_controller._drill_bitmapPath, this._drill_controller._drill_bitmapName, 0, true);
+	var temp_bitmap = ImageManager.loadBitmap( 
+							this._drill_controller._drill_bitmapPath, 
+							this._drill_controller._drill_bitmapName, 
+							this._drill_controller._drill_bitmapTint, 
+							this._drill_controller._drill_bitmapSmooth );
 	this.drill_COAS_setParentBitmap( temp_bitmap );
 };
 //==============================

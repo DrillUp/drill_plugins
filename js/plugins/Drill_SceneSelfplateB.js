@@ -3,13 +3,13 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.2]        面板 - 全自定义信息面板B
+ * @plugindesc [v2.3]        面板 - 全自定义信息面板B
  * @author Drill_up
  * 
  * @Drill_LE_param "内容-%d"
  * @Drill_LE_parentKey "---内容组%d至%d---"
  * @Drill_LE_var "DrillUp.g_SSpB_context_list_length"
- *
+ * 
  *
  * @help
  * =============================================================================
@@ -37,7 +37,6 @@
  * 结构：
  *   (1.插件包含：1个选项窗口 + 1个文本描述窗口 + 1个描述图
  *      选项窗口中，每个选项都会改变 描述图和描述窗口 的内容。
- *      与面板A结构一模一样。
  *   (2.窗口的布局规划没有限制，你可以去看看"窗口与布局.docx"。
  *      如果你想尝试开始上手设计，可以看看"关于全自定义信息面板.docx"。
  * 全局存储：
@@ -171,6 +170,8 @@
  * 添加了 长文本选项 功能的支持。以及 菜单指针/边框 的控制关闭功能。
  * [v2.2]
  * 添加了drill指针的控制。
+ * [v2.3]
+ * 优化了全局存储的结构，减小了存储的数据容量。
  * 
  *
  * @param ----杂项----
@@ -1206,7 +1207,7 @@
 //		临时全局变量	DrillUp.g_SSpB_xxx
 //		临时局部变量	this._drill_xxx
 //		存储数据变量	$gameSystem._drill_SSpB_context_list
-//		全局存储变量	DrillUp.global_SSpB_enable
+//		全局存储变量	DrillUp.global_SSpB_enableTank
 //		覆盖重写方法	无
 //
 //		工作类型		持续执行
@@ -1408,15 +1409,15 @@
 	
 	/*-----------------内容------------------*/
 	DrillUp.g_SSpB_context_list_length = 80;
-	DrillUp.g_SSpB_context_list = {};
-	for (var i = 1; i <= DrillUp.g_SSpB_context_list_length ; i++ ) {
+	DrillUp.g_SSpB_context_list = [];
+	for( var i = 1; i <= DrillUp.g_SSpB_context_list_length ; i++ ){
 		if( DrillUp.parameters['内容-' + String(i) ] != "" ){
 			var data = JSON.parse(DrillUp.parameters['内容-' + String(i)] );
 			DrillUp.g_SSpB_context_list[i] = DrillUp.drill_SSpB_initContext( data );
+			DrillUp.g_SSpB_context_list[i]['index'] = i;
 		}else{
-			DrillUp.g_SSpB_context_list[i] = "";
+			DrillUp.g_SSpB_context_list[i] = null;
 		}
-		DrillUp.g_SSpB_context_list[i]['index'] = i;
 	};
 	
 	/*-----------------锁定内容------------------*/
@@ -1429,6 +1430,10 @@
 	DrillUp.g_SSpB_locked_type = String(DrillUp.parameters['内容锁定方式'] || "锁定描述图和描述内容");
 	DrillUp.g_SSpB_locked_pic = String(DrillUp.parameters['资源-锁定的描述图'] || "");
 	
+	/*-----------------全局存储对象------------------*/
+	DrillUp.global_SSpB_enableTank = null;
+	DrillUp.global_SSpB_lockTank = null;
+	
 //=============================================================================
 // * >>>>基于插件检测>>>>
 //=============================================================================
@@ -1436,28 +1441,39 @@ if( Imported.Drill_CoreOfWindowAuxiliary ){
 	
 	
 //=============================================================================
-// ** 全局
+// ** 全局存储
 //=============================================================================
 //==============================
 // * 全局 - 读取
 //==============================
 	var _drill_global = DataManager.loadGlobalInfo();
-	//alert(JSON.stringify(_drill_global));
-	if( !DrillUp.global_SSpB_enable ){	//游戏没关情况
+	
+	// > 显示情况
+	if( DrillUp.global_SSpB_enableTank == null ){	//（游戏没关时，不会为null)
 		if( _drill_global && _drill_global[0] && _drill_global[0]["_global_Drill_SSpB_enable"] ){		//游戏关闭后，重开读取global中的配置
-			DrillUp.global_SSpB_enable = _drill_global[0]["_global_Drill_SSpB_enable"];
+			DrillUp.global_SSpB_enableTank = _drill_global[0]["_global_Drill_SSpB_enable"];
 		}else{
-			DrillUp.global_SSpB_enable = [];
+			DrillUp.global_SSpB_enableTank = [];		//（若没有全局存储的值，则初始化）
+			for( var i = 1; i <= DrillUp.g_SSpB_context_list_length ; i++ ){
+				var temp_c = DrillUp.g_SSpB_context_list[i];
+				if( temp_c == null ){ continue; }
+				DrillUp.global_SSpB_enableTank[i] = temp_c['enabled'];
+			}
 		}
 	}
-	if( !DrillUp.global_SSpB_lock ){	
+	// > 锁定情况
+	if( DrillUp.global_SSpB_lockTank == null ){	
 		if( _drill_global && _drill_global[0] && _drill_global[0]["_global_Drill_SSpB_lock"] ){
-			DrillUp.global_SSpB_lock = _drill_global[0]["_global_Drill_SSpB_lock"];
+			DrillUp.global_SSpB_lockTank = _drill_global[0]["_global_Drill_SSpB_lock"];
 		}else{
-			DrillUp.global_SSpB_lock = [];
+			DrillUp.global_SSpB_lockTank = [];			//（若没有全局存储的值，则初始化）
+			for( var i = 1; i <= DrillUp.g_SSpB_context_list_length ; i++ ){
+				var temp_c = DrillUp.g_SSpB_context_list[i];
+				if( temp_c == null ){ continue; }
+				DrillUp.global_SSpB_lockTank[i] = temp_c['locked'];
+			}
 		}
 	}
-	//注意，不要马上将全局的值赋值到system函数中，需要在 "正常存储赋值" 中再做存储区分判断
 	
 //==============================
 // * 全局 - 存储
@@ -1465,14 +1481,8 @@ if( Imported.Drill_CoreOfWindowAuxiliary ){
 var _drill_SSpB_saveGlobal = DataManager.saveGlobalInfo;
 DataManager.saveGlobalInfo = function(info) {	//第0个存档为全局存档
 	if(!info[0]){info[0] = []};
-	DrillUp.global_SSpB_enable = [null];	//i从0开始
-	DrillUp.global_SSpB_lock = [null];
-	for (var i = 1; i <= DrillUp.g_SSpB_context_list_length ; i++ ) {
-		DrillUp.global_SSpB_enable.push(DrillUp.g_SSpB_context_list[i]['enabled']);
-		DrillUp.global_SSpB_lock.push(DrillUp.g_SSpB_context_list[i]['locked']);
-	}
-	info[0]["_global_Drill_SSpB_enable"] = DrillUp.global_SSpB_enable;
-	info[0]["_global_Drill_SSpB_lock"] = DrillUp.global_SSpB_lock;
+	info[0]["_global_Drill_SSpB_enable"] = DrillUp.global_SSpB_enableTank;
+	info[0]["_global_Drill_SSpB_lock"] = DrillUp.global_SSpB_lockTank;
 	_drill_SSpB_saveGlobal.call(this,info);
 };
 DataManager.forceSaveGlobalInfo = function() {
@@ -1480,6 +1490,65 @@ DataManager.forceSaveGlobalInfo = function() {
 	globalInfo[0] = this.makeSavefileInfo();
 	this.saveGlobalInfo(globalInfo);
 };
+
+//=============================================================================
+// ** 正常存储
+//=============================================================================
+//==============================
+// * 正常 - 初始化
+//==============================
+var _drill_SSpB_sys_initialize = Game_System.prototype.initialize;
+Game_System.prototype.initialize = function() {	
+	_drill_SSpB_sys_initialize.call(this);
+	this._drill_SSpB_context_list = null;		//旧存档数据
+	this._drill_SSpB_enableTank = null;				//显示情况
+	this._drill_SSpB_lockTank = null;				//锁定情况
+};
+//==============================
+// * 正常 - 读取 正常存储 的值
+//==============================
+Game_System.prototype.drill_SSpB_initDataIfNeed = function() {
+	if( this._drill_SSpB_enableTank != null ){ return; }
+	
+	// > 一般初始化
+	if( this._drill_SSpB_context_list == null ){
+		
+		this._drill_SSpB_enableTank = [];
+		for( var i = 1; i <= DrillUp.g_SSpB_context_list_length ; i++ ){
+			var temp_c = DrillUp.g_SSpB_context_list[i];
+			if( temp_c == null ){ continue; }
+			this._drill_SSpB_enableTank[i] = temp_c['enabled'];
+		}
+		this._drill_SSpB_lockTank = [];
+		for( var i = 1; i <= DrillUp.g_SSpB_context_list_length ; i++ ){
+			var temp_c = DrillUp.g_SSpB_context_list[i];
+			if( temp_c == null ){ continue; }
+			this._drill_SSpB_lockTank[i] = temp_c['locked'];
+		}
+		
+	// > 从旧存档中初始化
+	}else{
+		
+		this._drill_SSpB_enableTank = [];
+		for( var i = 1; i <= DrillUp.g_SSpB_context_list_length ; i++ ){
+			var temp_c = this._drill_SSpB_context_list[i];
+			if( temp_c == null ){ continue; }
+			if( temp_c == "" ){ continue; }
+			this._drill_SSpB_enableTank[i] = temp_c['enabled'];
+		}
+		this._drill_SSpB_lockTank = [];
+		for( var i = 1; i <= DrillUp.g_SSpB_context_list_length ; i++ ){
+			var temp_c = this._drill_SSpB_context_list[i];
+			if( temp_c == null ){ continue; }
+			if( temp_c == "" ){ continue; }
+			this._drill_SSpB_lockTank[i] = temp_c['locked'];
+		}
+		
+		this._drill_SSpB_context_list = null;		//（强制清除旧插件的冗余存档数据）
+	}
+};
+
+
 
 //=============================================================================
 // ** 资源文件夹
@@ -1495,7 +1564,8 @@ var _drill_SSpB_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_SSpB_pluginCommand.call(this, command, args);
 	
-	if (command === ">信息面板B") {
+	if( command === ">信息面板B" ){
+		$gameSystem.drill_SSpB_initDataIfNeed();	//（初始化）
 		if(args.length == 2){
 			var type = String(args[1]);
 			if( type == "打开面板" ){			//打开菜单
@@ -1503,65 +1573,58 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			}
 			if( type == "显示全部" ){
 				for( var i = 1; i <= DrillUp.g_SSpB_context_list_length; i++){
-					DrillUp.g_SSpB_context_list[i]['enabled'] = true;	//全局存储
-					$gameSystem.drill_SSpB_initDataIfNeed();
-					$gameSystem._drill_SSpB_context_list[i]['enabled'] = true;	//正常存储
+					DrillUp.global_SSpB_enableTank[i] = true;			//全局存储
+					$gameSystem._drill_SSpB_enableTank[i] = true;		//正常存储
 				}
 				DataManager.forceSaveGlobalInfo();
 			}
 			if( type == "隐藏全部" ){
 				for( var i = 1; i <= DrillUp.g_SSpB_context_list_length; i++){
-					DrillUp.g_SSpB_context_list[i]['enabled'] = false;	//全局存储
-					$gameSystem.drill_SSpB_initDataIfNeed();
-					$gameSystem._drill_SSpB_context_list[i]['enabled'] = false;	//正常存储
+					DrillUp.global_SSpB_enableTank[i] = false;			//全局存储
+					$gameSystem._drill_SSpB_enableTank[i] = false;		//正常存储
 				}
 				DataManager.forceSaveGlobalInfo();
 			}
 			if( type == "锁定全部" ){
 				for( var i = 1; i <= DrillUp.g_SSpB_context_list_length; i++){
-					DrillUp.g_SSpB_context_list[i]['locked'] = true;	//全局存储
-					$gameSystem.drill_SSpB_initDataIfNeed();
-					$gameSystem._drill_SSpB_context_list[i]['locked'] = true;	//正常存储
+					DrillUp.global_SSpB_lockTank[i] = true;				//全局存储
+					$gameSystem._drill_SSpB_lockTank[i] = true;			//正常存储
 				}
 				DataManager.forceSaveGlobalInfo();
 			}
 			if( type == "解锁全部" ){
 				for( var i = 1; i <= DrillUp.g_SSpB_context_list_length; i++){
-					DrillUp.g_SSpB_context_list[i]['locked'] = false;	//全局存储
-					$gameSystem.drill_SSpB_initDataIfNeed();
-					$gameSystem._drill_SSpB_context_list[i]['locked'] = false;	//正常存储
+					DrillUp.global_SSpB_lockTank[i] = false;			//全局存储
+					$gameSystem._drill_SSpB_lockTank[i] = false;		//正常存储
 				}
 				DataManager.forceSaveGlobalInfo();
 			}
 		}
 	}
-	if (command === ">信息面板B") {
+	if( command === ">信息面板B" ){
+		$gameSystem.drill_SSpB_initDataIfNeed();	//（初始化）
 		if(args.length == 4){
 			var type = String(args[1]);
 			var temp1 = Number(args[3]);
 			if( type == "显示选项" ){
-				DrillUp.g_SSpB_context_list[temp1]['enabled'] = true;	//全局存储
+				DrillUp.global_SSpB_enableTank[temp1] = true;			//全局存储
+				$gameSystem._drill_SSpB_enableTank[temp1] = true;		//正常存储
 				DataManager.forceSaveGlobalInfo();
-				$gameSystem.drill_SSpB_initDataIfNeed();
-				$gameSystem._drill_SSpB_context_list[temp1]['enabled'] = true;	//正常存储
 			}
 			if( type == "隐藏选项" ){
-				DrillUp.g_SSpB_context_list[temp1]['enabled'] = false;	//全局存储
+				DrillUp.global_SSpB_enableTank[temp1] = false;			//全局存储
+				$gameSystem._drill_SSpB_enableTank[temp1] = false;		//正常存储
 				DataManager.forceSaveGlobalInfo();
-				$gameSystem.drill_SSpB_initDataIfNeed();
-				$gameSystem._drill_SSpB_context_list[temp1]['enabled'] = false;	//正常存储
 			}
 			if( type == "锁定选项" ){
-				DrillUp.g_SSpB_context_list[temp1]['locked'] = true;	//全局存储
+				DrillUp.global_SSpB_lockTank[temp1] = true;				//全局存储
+				$gameSystem._drill_SSpB_lockTank[temp1] = true;			//正常存储
 				DataManager.forceSaveGlobalInfo();
-				$gameSystem.drill_SSpB_initDataIfNeed();
-				$gameSystem._drill_SSpB_context_list[temp1]['locked'] = true;	//正常存储
 			}
 			if( type == "解锁选项" ){
-				DrillUp.g_SSpB_context_list[temp1]['locked'] = false;	//全局存储
+				DrillUp.global_SSpB_lockTank[temp1] = false;			//全局存储
+				$gameSystem._drill_SSpB_lockTank[temp1] = false;		//正常存储
 				DataManager.forceSaveGlobalInfo();
-				$gameSystem.drill_SSpB_initDataIfNeed();
-				$gameSystem._drill_SSpB_context_list[temp1]['locked'] = false;	//正常存储
 			}
 			if( type == "选中页" ){
 				var temp = temp1 -1;
@@ -1616,11 +1679,58 @@ Window_TitleCommand.prototype.makeCommandList = function() {
 //=============================================================================
 // * 临时数据
 //=============================================================================
+//==============================
+// * 临时 - 初始化
+//==============================
 var _drill_SSpB_temp_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {	
 	_drill_SSpB_temp_initialize.call(this);
 	this._drill_SSpB_visibleList = [];			//可见的列表
 };
+//==============================
+// * 临时 - 判断 锁定情况
+//==============================
+Game_Temp.prototype.drill_SSpB_isLocked = function( context_realIndex ){
+	
+	// > 全局存储控制
+	if( DrillUp.g_SSpB_title_data_global == true ){
+		if( DrillUp.global_SSpB_lockTank[ context_realIndex ] == true ){
+			return true;
+		}else{
+			return false;
+		}
+		
+	// > 正常存储控制
+	}else{
+		if( $gameSystem._drill_SSpB_lockTank[ context_realIndex ] == true ){
+			return true;
+		}else{
+			return false;
+		}
+	}
+}
+//==============================
+// * 临时 - 判断 显示情况
+//==============================
+Game_Temp.prototype.drill_SSpB_isEnabled = function( context_realIndex ){
+	
+	// > 全局存储控制
+	if( DrillUp.g_SSpB_title_data_global == true ){
+		if( DrillUp.global_SSpB_enableTank[ context_realIndex ] == true ){
+			return true;
+		}else{
+			return false;
+		}
+		
+	// > 正常存储控制
+	}else{
+		if( $gameSystem._drill_SSpB_enableTank[ context_realIndex ] == true ){
+			return true;
+		}else{
+			return false;
+		}
+	}
+}
 
 
 //=============================================================================
@@ -1640,23 +1750,7 @@ Scene_Drill_SSpB.prototype.constructor = Scene_Drill_SSpB;
 Scene_Drill_SSpB.prototype.initialize = function() {
     Scene_MenuBase.prototype.initialize.call(this);
 	this._cur_index = -1;
-	//alert($gameSystem._drill_SSpB_context_list); //检查存档是否有记录
 	$gameSystem.drill_SSpB_initDataIfNeed();
-};
-//==============================
-// * 信息面板B - 读取 正常存储/全局存储 的值
-//==============================
-Game_System.prototype.drill_SSpB_initDataIfNeed = function() {
-	if( $gameSystem._drill_SSpB_context_list != undefined ){ return; }
-	
-	this._drill_SSpB_context_list = JSON.parse(JSON.stringify( DrillUp.g_SSpB_context_list ));	//深拷贝数据（杜绝引用造成的修改）
-	
-	if( DrillUp.g_SSpB_title_data_global ){
-		for(var i=1 ; i< DrillUp.global_SSpB_enable.length ; i++){	//全局变量赋值（存储的数量多一个，i0）
-			DrillUp.g_SSpB_context_list[i]['enabled'] = DrillUp.global_SSpB_enable[i] ;	//显示处理
-			DrillUp.g_SSpB_context_list[i]['locked'] = DrillUp.global_SSpB_lock[i] ;	//锁定处理
-		}
-	}
 };
 //==============================
 // * 信息面板B - 创建
@@ -1665,10 +1759,10 @@ Scene_Drill_SSpB.prototype.create = function() {
     Scene_MenuBase.prototype.create.call(this);
 	this._drill_field = new Sprite();
 	this.addChild(this._drill_field);	//布局（先画，其图层都被放在后面）
-	this.createLayout();
-	this.createDescPic();
-	this.createSelect();
-	this.createDesc();
+	this.drill_createLayout();
+	this.drill_createDescPic();
+	this.drill_createSelect();
+	this.drill_createDesc();
 };
 //==============================
 // * 信息面板B - 帧刷新
@@ -1678,21 +1772,21 @@ Scene_Drill_SSpB.prototype.update = function() {
 	
 	this._window_select.drill_COWA_CPD_update();
 	this._window_desc.drill_COWA_CPD_update();
-	this.updateDescPic();
-	this.updateIndex();
+	this.drill_updateDescPic();
+	this.drill_updateIndex();
 }
 
 //==============================
 // * 创建 - 整体布局
 //==============================
-Scene_Drill_SSpB.prototype.createLayout = function() {
+Scene_Drill_SSpB.prototype.drill_createLayout = function() {
 	this._drill_layout = new Sprite(ImageManager.load_MenuSelfDef(DrillUp.g_SSpB_layout));
 	this._drill_field.addChild(this._drill_layout);	
 };
 //==============================
 // * 创建 - 选项窗口
 //==============================
-Scene_Drill_SSpB.prototype.createSelect = function() {
+Scene_Drill_SSpB.prototype.drill_createSelect = function() {
 	var data = {
 		"x": DrillUp.g_SSpB_selWin_x,
 		"y": DrillUp.g_SSpB_selWin_y,
@@ -1726,7 +1820,7 @@ Scene_Drill_SSpB.prototype.createSelect = function() {
 //==============================
 // * 创建 - 描述窗口
 //==============================
-Scene_Drill_SSpB.prototype.createDesc = function() {
+Scene_Drill_SSpB.prototype.drill_createDesc = function() {
 	var data = {
 		"x": DrillUp.g_SSpB_descWin_x,
 		"y": DrillUp.g_SSpB_descWin_y,
@@ -1757,7 +1851,7 @@ Scene_Drill_SSpB.prototype.createDesc = function() {
 //==============================
 // * 创建 - 描述图片
 //==============================
-Scene_Drill_SSpB.prototype.createDescPic = function() {
+Scene_Drill_SSpB.prototype.drill_createDescPic = function() {
 	var data = {
 		"x": DrillUp.g_SSpB_descPic_x,
 		"y": DrillUp.g_SSpB_descPic_y,
@@ -1781,7 +1875,7 @@ Scene_Drill_SSpB.prototype.createDescPic = function() {
 //==============================
 // * 信息面板B - 重设窗口起点（切换选项时）
 //==============================
-Scene_Drill_SSpB.prototype.resetPosition = function() {
+Scene_Drill_SSpB.prototype.drill_resetPosition = function() {
 	
 	// > 刷新描述窗口
 	if( DrillUp.g_SSpB_descWin_replay ){
@@ -1798,27 +1892,35 @@ Scene_Drill_SSpB.prototype.resetPosition = function() {
 //==============================
 Scene_Drill_SSpB.prototype.drill_refreshDescPic = function( cur_index ) {
 	var temp_list = $gameTemp._drill_SSpB_visibleList;		//可见项列表
-	var temp_data = temp_list[ cur_index ];					//当前选项
-	var src_tank = this._window_desc_pic._drill_bitmaps;	//资源bitmap容器
 	
 	// > 资源预加载
+	var src_tank = this._window_desc_pic._drill_bitmaps;	//资源bitmap容器
 	if( src_tank.length == 0 ){
 		src_tank[0] = ImageManager.load_MenuSelfDef(DrillUp.g_SSpB_locked_pic);
 		for( var i=0; i < temp_list.length; i++ ){
-			var context_index = temp_list[i]['index'];
-			src_tank[ i+1 ] = ImageManager.load_MenuSelfDef(DrillUp.g_SSpB_context_list[context_index]["pic"]);	
+			var temp_c = temp_list[i];
+			if( temp_c == null ){ continue; }
+			if( temp_c == "" ){ continue; }
+			
+			var context_realIndex = temp_c['index'];
+			src_tank[ i+1 ] = ImageManager.load_MenuSelfDef(DrillUp.g_SSpB_context_list[ context_realIndex ]["pic"]);	
 		}
 		this._window_desc_pic._drill_bitmaps = src_tank;
 	}
 	
 	// > 切换描述图
-	if( temp_data['locked'] && 
-		(DrillUp.g_SSpB_locked_type == "锁定描述图和描述内容" || 
-		 DrillUp.g_SSpB_locked_type == "只锁定描述图" ) ){
+	var temp_c = temp_list[ cur_index ];					//当前选项
+	var context_realIndex = temp_c['index'];
+	
+	if( $gameTemp.drill_SSpB_isLocked( context_realIndex ) == true && 
+	   (DrillUp.g_SSpB_locked_type == "锁定描述图和描述内容" || 
+		DrillUp.g_SSpB_locked_type == "只锁定描述图" ) ){
+			
 		this._window_desc_pic.bitmap = src_tank[ 0 ];			//锁定描述图
 	}else{
 		this._window_desc_pic.bitmap = src_tank[ cur_index+1 ];	//当前描述图
 	}
+	
 	if( DrillUp.g_SSpB_descPic_showInstant == false ){
 		this._window_desc_pic.opacity = 0;
 	}
@@ -1826,7 +1928,7 @@ Scene_Drill_SSpB.prototype.drill_refreshDescPic = function( cur_index ) {
 //==============================
 // * 帧刷新 - 描述图片
 //==============================
-Scene_Drill_SSpB.prototype.updateDescPic = function() {
+Scene_Drill_SSpB.prototype.drill_updateDescPic = function() {
 	if( DrillUp.g_SSpB_descPic_showInstant == false ){
 		this._window_desc_pic.opacity += 255/DrillUp.g_SSpB_descPic_slideAnim['slideTime'];
 	}
@@ -1834,7 +1936,7 @@ Scene_Drill_SSpB.prototype.updateDescPic = function() {
 //==============================
 // * 帧刷新 - 窗口选项刷新
 //==============================
-Scene_Drill_SSpB.prototype.updateIndex = function() {
+Scene_Drill_SSpB.prototype.drill_updateIndex = function() {
 	if( $gameSystem._drill_SSpB_context_index != undefined || $gameSystem._drill_SSpB_context_index != null ){
 		this._window_select.select( $gameSystem._drill_SSpB_context_index );
 		$gameSystem._drill_SSpB_context_index = null;		//设置选中页
@@ -1846,7 +1948,7 @@ Scene_Drill_SSpB.prototype.updateIndex = function() {
 	
 	if( this._cur_index != this._window_select._index ){
 		this._cur_index = this._window_select._index;
-		this.resetPosition();
+		this.drill_resetPosition();
 		this._window_desc.drill_refreshDesc(this._cur_index);
 		this.drill_refreshDescPic(this._cur_index);
 	}
@@ -1876,6 +1978,7 @@ Drill_SSpB_SelectWindow.prototype.initialize = function(x, y, width, height) {
 	this.activate();
 	this.drill_initSelect();
 };
+
 //==============================
 // * 选项窗口 - 窗口数据
 //==============================
@@ -1903,32 +2006,33 @@ Drill_SSpB_SelectWindow.prototype.update = function() {
 Drill_SSpB_SelectWindow.prototype.refresh = function() {
 	$gameTemp._drill_SSpB_visibleList = [];
 	for(var i=1; i<= DrillUp.g_SSpB_context_list_length ;i++){
+		var temp_c = DrillUp.g_SSpB_context_list[i];
+		if( temp_c == null ){ continue; }
 		
-		if( DrillUp.g_SSpB_title_data_global ){
-			var temp = DrillUp.g_SSpB_context_list[i];	//全局存储
-		}else{
-			var temp = $gameSystem._drill_SSpB_context_list[i];	//正常存储
-		}
-		
-		if( temp != "" && temp['enabled'] == true ){
-			$gameTemp._drill_SSpB_visibleList.push( temp );
+		if( $gameTemp.drill_SSpB_isEnabled( i ) == true ){
+			$gameTemp._drill_SSpB_visibleList.push( temp_c );
 		}
 	}
 	
 	// > 待绘制的字符串
 	this._list = [];
 	for( var j=0; j< $gameTemp._drill_SSpB_visibleList.length ;j++ ){
-		if( $gameTemp._drill_SSpB_visibleList[j]['locked'] == true ){
+		var temp_c = $gameTemp._drill_SSpB_visibleList[j];
+		var context_realIndex = temp_c['index'];
+		
+		// > 选项锁定
+		if( $gameTemp.drill_SSpB_isLocked( context_realIndex ) == true ){
 			this._list.push( DrillUp.g_SSpB_locked_name );
 			continue;
 		}
 		
+		// > 长文本选项
 		if( DrillUp.g_SSpB_selWin_nameExEnabled == true ){
-			this._list.push( $gameTemp._drill_SSpB_visibleList[j]['nameEx'] );
+			this._list.push( temp_c['nameEx'] );
 			continue;
 		}
 		
-		this._list.push( $gameTemp._drill_SSpB_visibleList[j]['name'] );
+		this._list.push( temp_c['name'] );
 	}
 	
 	
@@ -2075,23 +2179,26 @@ Drill_SSpB_DescWindow.prototype.update = function() {
 //==============================
 Drill_SSpB_DescWindow.prototype.drill_refreshDesc = function( cur_index ) {
 	var temp_list = $gameTemp._drill_SSpB_visibleList;		//可见项列表
-	var temp_data = temp_list[ cur_index ];					//当前选项
+	var temp_c = temp_list[ cur_index ];					//当前选项
 	
 	// > 切换描述内容
 	var context_list = "";
-	if( temp_data['locked'] && 
-		(DrillUp.g_SSpB_locked_type == "锁定描述图和描述内容" || 
-		 DrillUp.g_SSpB_locked_type == "只锁定描述内容" ) ){
+	var context_realIndex = temp_c['index'];
+	
+	if( $gameTemp.drill_SSpB_isLocked( context_realIndex ) == true && 
+	   (DrillUp.g_SSpB_locked_type == "锁定描述图和描述内容" || 
+		DrillUp.g_SSpB_locked_type == "只锁定描述内容" ) ){
+			
 		context_list = DrillUp.g_SSpB_locked_context;		//锁定内容
 	}else{
-		context_list = temp_data['context'];				//当前内容
+		context_list = temp_c['context'];				//当前内容
 	}
 	
 	// > 绘制内容
 	var op = {
-		"align":temp_data['contextAlign'],
-		"autoLineheight":temp_data['contextAutoLineheight'],
-		"lineheight":temp_data['contextLineheight'],
+		"align":temp_c['contextAlign'],
+		"autoLineheight":temp_c['contextAutoLineheight'],
+		"lineheight":temp_c['contextLineheight'],
 	}
 	this.drill_COWA_drawTextListEx(context_list,op);
 }
