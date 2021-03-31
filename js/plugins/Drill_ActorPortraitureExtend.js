@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        战斗UI - 高级角色肖像
+ * @plugindesc [v1.1]        战斗UI - 高级角色肖像
  * @author Drill_up
  * 
  * @Drill_LE_param "角色肖像-%d"
@@ -41,8 +41,8 @@
  *     （比如上层且图片层级大于100的战斗背景,会挡住角色肖像,反之在后面）
  *   (2.注意，该插件配置的坐标和平移与一般设定是相反的。
  *      一般设定X轴正数向右负数向左，这里是正数向左负数向右。
- *   (3.每个肖像都对应两个动作序列，动作序列在核心中进行配置。
- *      一个前视图GIF动作序列，一个背景图GIF动作序列。
+ *   (3.每个肖像都对应两个动画序列，动画序列在核心中进行配置。
+ *      一个前视图GIF动画序列，一个背景图GIF动画序列。
  * 触发时机：
  *   (1.触发时机与事件页的功能相似，
  *      如果触发同时满足多个触发时机，则序号大的触发时机优先。
@@ -71,12 +71,14 @@
  *   测试结果并不是精确值，范围在给定值的10ms范围内波动。
  *   更多了解插件性能，可以去看看"关于插件性能.docx"。
  * 2.注意，角色数量 能够使得角色立绘计算量倍增。
- *   因为每个角色都配有动作序列，需要刷新动作与状态。
+ *   因为每个角色都配有动画序列，需要刷新动作与状态。
  * 
  * -----------------------------------------------------------------------------
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 修复了 动画序列设为0 时，出错的bug。
  * 
  *
  * @param ----常规----
@@ -158,121 +160,121 @@
  * @param 角色肖像-1
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-2
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-3
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-4
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-5
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-6
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-7
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-8
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-9
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-10
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-11
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-12
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-13
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-14
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-15
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-16
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-17
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-18
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-19
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-20
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  *
@@ -282,121 +284,121 @@
  * @param 角色肖像-21
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-22
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-23
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-24
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-25
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-26
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-27
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-28
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-29
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-30
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-31
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-32
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-33
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-34
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-35
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-36
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-37
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-38
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-39
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-40
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param ----角色肖像41至60----
@@ -405,121 +407,121 @@
  * @param 角色肖像-41
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-42
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-43
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-44
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-45
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-46
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-47
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-48
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-49
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-50
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-51
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-52
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-53
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-54
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-55
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-56
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-57
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-58
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-59
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  *
  * @param 角色肖像-60
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动作序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看"关于GIF动画序列核心.docx"。
  * @default 
  * 
  * 
@@ -530,17 +532,17 @@
  * @desc 只用于方便区分查看的标签，不作用在插件中。
  * @default --新的肖像--
  *
- * @param --动作序列--
+ * @param --动画序列--
  * @desc 
  *
  * @param 前视图GIF动作序列
- * @parent --动作序列--
+ * @parent --动画序列--
  * @type number
  * @desc 前视图gif每帧播放间隔时间，单位帧。（1秒60帧）
  * @default 0
  *
  * @param 背景图GIF动作序列
- * @parent --动作序列--
+ * @parent --动画序列--
  * @type number
  * @desc 前视图gif每帧播放间隔时间，单位帧。（1秒60帧）
  * @default 0
@@ -622,49 +624,49 @@
  * @param 触发时机-1
  * @parent --触发时机--
  * @type struct<ActorPortraitureCondition>
- * @desc 在指定条件下，对角色肖像的动作序列进行操作。注意，这些条件必须全部同时满足才会操作。
+ * @desc 在指定条件下，对角色肖像的动画序列进行操作。注意，这些条件必须全部同时满足才会操作。
  * @default {}
  *
  * @param 触发时机-2
  * @parent --触发时机--
  * @type struct<ActorPortraitureCondition>
- * @desc 在指定条件下，对角色肖像的动作序列进行操作。注意，这些条件必须全部同时满足才会操作。
+ * @desc 在指定条件下，对角色肖像的动画序列进行操作。注意，这些条件必须全部同时满足才会操作。
  * @default {}
  *
  * @param 触发时机-3
  * @parent --触发时机--
  * @type struct<ActorPortraitureCondition>
- * @desc 在指定条件下，对角色肖像的动作序列进行操作。注意，这些条件必须全部同时满足才会操作。
+ * @desc 在指定条件下，对角色肖像的动画序列进行操作。注意，这些条件必须全部同时满足才会操作。
  * @default 
  *
  * @param 触发时机-4
  * @parent --触发时机--
  * @type struct<ActorPortraitureCondition>
- * @desc 在指定条件下，对角色肖像的动作序列进行操作。注意，这些条件必须全部同时满足才会操作。
+ * @desc 在指定条件下，对角色肖像的动画序列进行操作。注意，这些条件必须全部同时满足才会操作。
  * @default 
  *
  * @param 触发时机-5
  * @parent --触发时机--
  * @type struct<ActorPortraitureCondition>
- * @desc 在指定条件下，对角色肖像的动作序列进行操作。注意，这些条件必须全部同时满足才会操作。
+ * @desc 在指定条件下，对角色肖像的动画序列进行操作。注意，这些条件必须全部同时满足才会操作。
  * @default 
  *
  * @param 触发时机-6
  * @parent --触发时机--
  * @type struct<ActorPortraitureCondition>
- * @desc 在指定条件下，对角色肖像的动作序列进行操作。注意，这些条件必须全部同时满足才会操作。
+ * @desc 在指定条件下，对角色肖像的动画序列进行操作。注意，这些条件必须全部同时满足才会操作。
  * @default 
  * 
  * @param 触发时机-7
  * @parent --触发时机--
  * @type struct<ActorPortraitureCondition>
- * @desc 在指定条件下，对角色肖像的动作序列进行操作。注意，这些条件必须全部同时满足才会操作。
+ * @desc 在指定条件下，对角色肖像的动画序列进行操作。注意，这些条件必须全部同时满足才会操作。
  * @default 
  *
  * @param 触发时机-8
  * @parent --触发时机--
  * @type struct<ActorPortraitureCondition>
- * @desc 在指定条件下，对角色肖像的动作序列进行操作。注意，这些条件必须全部同时满足才会操作。
+ * @desc 在指定条件下，对角色肖像的动画序列进行操作。注意，这些条件必须全部同时满足才会操作。
  * @default 
  *
  */
@@ -868,7 +870,7 @@
  * @param 前视图-切换的状态元集合
  * @parent 前视图-是否切换状态元集合
  * @type text[]
- * @desc 角色肖像的动作序列切换的状态元集合，比如['小爱丽丝静止1']，如果动作序列没有对应的状态名，则没有效果。
+ * @desc 角色肖像的动画序列切换的状态元集合，比如['小爱丽丝静止1']，如果动画序列没有对应的状态名，则没有效果。
  * @default [""]
  * 
  * @param 前视图-是否播放一次动作
@@ -881,7 +883,7 @@
  * 
  * @param 前视图-播放的动作名
  * @parent 前视图-是否播放一次动作
- * @desc 角色肖像的动作序列播放的动作元，如果动作序列没有对应动作名，则没有效果。
+ * @desc 角色肖像的动画序列播放的动作元，如果动画序列没有对应动作名，则没有效果。
  * @default 默认动作
  * 
  * 
@@ -899,7 +901,7 @@
  * @param 背景图-切换的状态元集合
  * @parent 背景图-是否切换状态元集合
  * @type text[]
- * @desc 背景的动作序列进入的状态元集合，比如['小爱丽丝静止1']，如果动作序列没有对应的状态名，则没有效果。
+ * @desc 背景的动画序列进入的状态元集合，比如['小爱丽丝静止1']，如果动画序列没有对应的状态名，则没有效果。
  * @default [""]
  * 
  * @param 背景图-是否播放一次动作
@@ -912,7 +914,7 @@
  *
  * @param 背景图-播放的动作名
  * @parent 背景图-是否播放一次动作
- * @desc 背景的动作序列播放的动作元，如果动作序列没有对应动作名，则没有效果。
+ * @desc 背景的动画序列播放的动作元，如果动画序列没有对应动作名，则没有效果。
  * @default 默认动作
  * 
  *
@@ -1014,7 +1016,7 @@
 	//==============================
 	DrillUp.drill_APEx_initPortraiture = function( dataFrom ) {
 		var data = {};
-		// > 动作序列
+		// > 动画序列
 		data['p_actionSeq'] = Number( dataFrom["前视图GIF动作序列"] || 0);
 		data['b_actionSeq'] = Number( dataFrom["背景图GIF动作序列"] || 0);
 		// > 呼吸效果
@@ -1345,7 +1347,11 @@ Drill_APEx_Sprite.prototype.drill_APEx_initSprite = function() {
 	this._drill_p_sprite._breath = Math.random() * 10;
 	this._drill_p_sprite._breath_dir = Math.floor(Math.random() * 2);
 	this._drill_p_sprite._f_time = 0;
-	this._drill_p_data = new Drill_COAS_Data( DrillUp.g_COAS_list[ data['p_actionSeq']-1 ] );
+	if( data['p_actionSeq'] <= 0 ){  
+		this._drill_p_data = new Drill_COAS_Data( {} );
+	}else{
+		this._drill_p_data = new Drill_COAS_Data( DrillUp.g_COAS_list[ data['p_actionSeq']-1 ] );
+	}
 	this._drill_p_decorator = new Drill_COAS_SpriteDecorator( this._drill_p_sprite, this._drill_p_data );
 	
 	// > 背景图
@@ -1356,7 +1362,11 @@ Drill_APEx_Sprite.prototype.drill_APEx_initSprite = function() {
 	this._drill_b_sprite.y = Graphics.boxHeight - DrillUp.g_APEx_b_y - DrillUp.g_APEx_b_silde_y;
 	this._drill_b_sprite.opacity = 0;
 	this._drill_b_sprite._move = 0;
-	this._drill_b_data = new Drill_COAS_Data( DrillUp.g_COAS_list[ data['b_actionSeq']-1 ] );
+	if( data['b_actionSeq'] <= 0 ){  
+		this._drill_b_data = new Drill_COAS_Data( {} );
+	}else{
+		this._drill_b_data = new Drill_COAS_Data( DrillUp.g_COAS_list[ data['b_actionSeq']-1 ] );
+	}
 	this._drill_b_decorator = new Drill_COAS_SpriteDecorator( this._drill_b_sprite, this._drill_b_data );
 	
 	this.addChild(this._drill_b_sprite);	//背景图在后面
@@ -1381,7 +1391,7 @@ Drill_APEx_Sprite.prototype.update = function() {
 	this.drill_APEx_updateOrg();			//固定帧初始值
 	this.drill_APEx_updateCondition();		//条件刷新
 	this.drill_APEx_updatePosition();		//位置与显示
-	this.drill_APEx_updateGIF();			//动作序列刷新
+	this.drill_APEx_updateGIF();			//动画序列刷新
 	this.drill_APEx_updateEffects();		//效果刷新
 }
 //==============================
@@ -1589,7 +1599,7 @@ Drill_APEx_Sprite.prototype.drill_APEx_updatePosition = function() {
 }
 
 //==============================
-// * 帧刷新 - 动作序列刷新
+// * 帧刷新 - 动画序列刷新
 //==============================
 Drill_APEx_Sprite.prototype.drill_APEx_updateGIF = function() {
 	
@@ -1644,7 +1654,7 @@ Drill_APEx_Sprite.prototype.drill_APEx_updateEffects = function() {
 }
 
 //==============================
-// * 动作序列 - 前视图 - 还原默认状态元集合
+// * 动画序列 - 前视图 - 还原默认状态元集合
 //
 //			说明：	直接调用核心提供的接口即可，
 //					注意，不要为了简化，让插件指令直接去操作COAS核心函数。
@@ -1653,56 +1663,56 @@ Drill_APEx_Sprite.prototype.drill_APEx_p_setSequenceDefault = function(){
 	this._drill_p_data.drill_COAS_setSequence( this._drill_p_data._drill_data['state_default_randomSeq'] );
 }
 //==============================
-// * 动作序列 - 前视图 - 设置状态元集合
+// * 动画序列 - 前视图 - 设置状态元集合
 //==============================
 Drill_APEx_Sprite.prototype.drill_APEx_p_setSequence = function( seq ){
 	this._drill_p_data.drill_COAS_setSequence( seq );
 }
 //==============================
-// * 动作序列 - 前视图 - 设置状态元集合，立刻改变
+// * 动画序列 - 前视图 - 设置状态元集合，立刻改变
 //==============================
 Drill_APEx_Sprite.prototype.drill_APEx_p_setSequenceImmediate = function( seq ){
 	this._drill_p_data.drill_COAS_setSequenceImmediate( seq );
 }
 //==============================
-// * 动作序列 - 前视图 - 添加动作
+// * 动画序列 - 前视图 - 添加动作
 //==============================
 Drill_APEx_Sprite.prototype.drill_APEx_p_setAct = function( act_name ){
 	this._drill_p_data.drill_COAS_setAct( act_name );
 }
 //==============================
-// * 动作序列 - 前视图 - 立刻终止动作
+// * 动画序列 - 前视图 - 立刻终止动作
 //==============================
 Drill_APEx_Sprite.prototype.drill_APEx_p_stopAct = function(){
 	this._drill_p_data.drill_COAS_stopAct();
 }
 
 //==============================
-// * 动作序列 - 背景图 - 还原默认状态元集合
+// * 动画序列 - 背景图 - 还原默认状态元集合
 //==============================
 Drill_APEx_Sprite.prototype.drill_APEx_b_setSequenceDefault = function(){
 	this._drill_b_data.drill_COAS_setSequence( this._drill_b_data._drill_data['state_default_randomSeq'] );
 }
 //==============================
-// * 动作序列 - 背景图 - 设置状态元集合
+// * 动画序列 - 背景图 - 设置状态元集合
 //==============================
 Drill_APEx_Sprite.prototype.drill_APEx_b_setSequence = function( seq ){
 	this._drill_b_data.drill_COAS_setSequence( seq );
 }
 //==============================
-// * 动作序列 - 背景图 - 设置状态元集合，立刻改变
+// * 动画序列 - 背景图 - 设置状态元集合，立刻改变
 //==============================
 Drill_APEx_Sprite.prototype.drill_APEx_b_setSequenceImmediate = function( seq ){
 	this._drill_b_data.drill_COAS_setSequenceImmediate( seq );
 }
 //==============================
-// * 动作序列 - 背景图 - 添加动作
+// * 动画序列 - 背景图 - 添加动作
 //==============================
 Drill_APEx_Sprite.prototype.drill_APEx_b_setAct = function( act_name ){
 	this._drill_b_data.drill_COAS_setAct( act_name );
 }
 //==============================
-// * 动作序列 - 背景图 - 立刻终止动作
+// * 动画序列 - 背景图 - 立刻终止动作
 //==============================
 Drill_APEx_Sprite.prototype.drill_APEx_b_stopAct = function(){
 	this._drill_b_data.drill_COAS_stopAct();

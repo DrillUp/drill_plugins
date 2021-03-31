@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        面板 - 全自定义信息面板L
+ * @plugindesc [v1.3]        面板 - 全自定义信息面板L
  * @author Drill_up
  * 
  * @Drill_LE_param "内容-%d"
@@ -56,6 +56,9 @@
  * 公共事件触发：
  *   (1.由于需要支持公共事件的触发，所以放弃了全局存储的功能。
  *      选择一个按钮之后，将会返回到地图界面，并执行对应的公共事件。
+ *   (2.公共事件优先以"执行的公共事件"为准。
+ *      当"执行的公共事件"为0时，则按"执行对应变量的公共事件"执行。
+ *      如果两个都为0，则不执行任何公共事件。
  * 内容：
  *   (1.每篇内容可以单独控制行间距，居中对齐等功能。
  *   (2.选项窗口和描述窗口支持所有文本的特殊字符：
@@ -153,6 +156,8 @@
  * [v1.2]
  * 优化了全局存储的结构，减小了存储的数据容量。
  * 修复了设置 按钮贴图序列 时无效的bug。
+ * [v1.3]
+ * 添加了 变量对应调用公共事件 的功能。
  * 
  *
  * @param ----杂项----
@@ -927,6 +932,12 @@
  * @type common_event
  * @desc 按钮按下后执行的公共事件。执行公共事件会必然离开菜单界面，因为菜单界面中游戏是暂停状态。
  * @default 0
+ * 
+ * @param 执行对应变量的公共事件
+ * @parent 是否执行公共事件
+ * @type common_event
+ * @desc 按钮按下后执行的该变量对应到的那个公共事件id。执行公共事件会必然离开菜单界面，因为菜单界面中游戏是暂停状态。
+ * @default 0
  *
  * @param 公共事件执行方式
  * @parent 是否执行公共事件
@@ -1425,6 +1436,7 @@
 		data['script'] = String(dataFrom['执行的脚本'] || "");
 		data['commonEventEnable'] = String(dataFrom['是否执行公共事件'] || "false") == "true";
 		data['commonEventId'] = Number(dataFrom['执行的公共事件'] || 0);
+		data['commonEventVarId'] = Number(dataFrom['执行对应变量的公共事件'] || 0);
 		data['pipeType'] = String(dataFrom['公共事件执行方式'] || "串行");
 		
 		return data;
@@ -1843,11 +1855,17 @@ Scene_Drill_SSpL.prototype.drill_processOk = function() {
 			if(SceneManager._stack.length > 0){ SceneManager.pop(); }	
 			if(SceneManager._stack.length > 0){ SceneManager.pop(); }	
 			//$gameTemp.reserveCommonEvent( temp_context['commonEventId'] );
+			
+			var common_id = temp_context['commonEventId'];
+			if( common_id == 0 ){ 
+				common_id = $gameVariables.value( temp_context['commonEventVarId'] );
+			}
+			
 			SoundManager.playOk();
 			var e_data = {
 				'type':"公共事件",
 				'pipeType': temp_context['pipeType'],
-				'commonEventId': temp_context['commonEventId'],
+				'commonEventId': common_id,
 			};
 			$gameMap.drill_LCT_addPipeEvent( e_data );
 		}else{

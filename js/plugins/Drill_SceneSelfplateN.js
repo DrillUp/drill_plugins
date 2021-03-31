@@ -1394,7 +1394,7 @@
 	DrillUp.drill_SSpN_initCommandWindow = function( dataFrom ) {
 		var data = {};
 		data['x'] = Number( dataFrom["选项窗口 X"] || 0);
-		data['y'] = Number( dataFrom["选项窗口 Y"] || 0);
+		data['y'] = Number( dataFrom["选项窗口 Y"] || 10000);	//（空值时移出窗口）
 		data['width'] = Number( dataFrom["选项窗口宽度"] || 100);
 		data['height'] = Number( dataFrom["选项窗口高度"] || 100);
 		data['col'] = Number( dataFrom["选项窗口列数"] || 1);
@@ -1439,7 +1439,7 @@
 	DrillUp.drill_SSpN_initCommandButton = function( dataFrom ) {
 		var data = {};
 		data['x'] = Number( dataFrom["平移-按钮组 X"] || 0);
-		data['y'] = Number( dataFrom["平移-按钮组 Y"] || 0);
+		data['y'] = Number( dataFrom["平移-按钮组 Y"] || 10000);	//（空值时移出窗口）
 		data['style_id'] = Number( dataFrom["按钮组样式"] || 0);
 		data['btn_constructor'] = "Window_Selectable";
 		data['btn_src_file'] = "img/Menu__self/";
@@ -1461,7 +1461,7 @@
 	DrillUp.drill_SSpN_initDescWindow = function( dataFrom ) {
 		var data = {};
 		data['x'] = Number( dataFrom["描述窗口 X"] || 100);
-		data['y'] = Number( dataFrom["描述窗口 Y"] || 100);
+		data['y'] = Number( dataFrom["描述窗口 Y"] || 10000);	//（空值时移出窗口）
 		data['width'] = Number( dataFrom["描述窗口宽度"] || 100);
 		data['height'] = Number( dataFrom["描述窗口高度"] || 100);
 		data['fontsize'] = Number( dataFrom["描述窗口字体大小"] || 22);

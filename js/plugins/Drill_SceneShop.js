@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.8]        面板 - 全自定义商店界面
+ * @plugindesc [v1.9]        面板 - 全自定义商店界面
  * @author Drill_up
  * 
  * @Drill_LE_param "服务员-%d"
@@ -197,6 +197,8 @@
  * 添加了"额外价格"的设置，加强了服务员的功能。
  * [v1.8]
  * 添加了drill指针的控制。
+ * [v1.9]
+ * 修复了玩家鼠标猛点按钮区域，可以反复购买/出售的bug。
  * 
  *
  * @param ----杂项----
@@ -2016,6 +2018,51 @@ Scene_Shop.prototype.drill_SSh_isOnSprite = function(sprite) {
 
 
 //=============================================================================
+// ** bug修复 - 未激活物品数量窗口时，不允许再次购买/出售
+//=============================================================================
+//==============================
+// * bug修复 - 限制场景执行事件
+//==============================
+var _drill_SSh_onNumberOk = Scene_Shop.prototype.onNumberOk;
+Scene_Shop.prototype.onNumberOk = function() {
+	if( this._numberWindow._drill_SSh_enabled != true ){ 
+		this.endNumberInput();
+		this._goldWindow.refresh();
+		this._statusWindow.refresh();
+		return;
+	}
+	_drill_SSh_onNumberOk.call(this);
+}
+//==============================
+// * bug修复 - 限制物品数量窗口事件
+//==============================
+var _drill_SSh_n_onButtonUp = Window_ShopNumber.prototype.onButtonUp;
+Window_ShopNumber.prototype.onButtonUp = function() {
+	if( this._drill_SSh_enabled != true ){ return; }
+	_drill_SSh_n_onButtonUp.call(this);
+};
+var _drill_SSh_n_onButtonUp2 = Window_ShopNumber.prototype.onButtonUp2;
+Window_ShopNumber.prototype.onButtonUp2 = function() {
+	if( this._drill_SSh_enabled != true ){ return; }
+	_drill_SSh_n_onButtonUp2.call(this);
+};
+var _drill_SSh_n_onButtonDown = Window_ShopNumber.prototype.onButtonDown;
+Window_ShopNumber.prototype.onButtonDown = function() {
+	if( this._drill_SSh_enabled != true ){ return; }
+	_drill_SSh_n_onButtonDown.call(this);
+};
+var _drill_SSh_n_onButtonDown2 = Window_ShopNumber.prototype.onButtonDown2;
+Window_ShopNumber.prototype.onButtonDown2 = function() {
+	if( this._drill_SSh_enabled != true ){ return; }
+	_drill_SSh_n_onButtonDown2.call(this);
+};
+var _drill_SSh_n_onButtonOk = Window_ShopNumber.prototype.onButtonOk;
+Window_ShopNumber.prototype.onButtonOk = function() {
+	if( this._drill_SSh_enabled != true ){ return; }
+	_drill_SSh_n_onButtonOk.call(this);
+};
+
+//=============================================================================
 // ** 选项按钮组
 //=============================================================================
 //==============================
@@ -2641,7 +2688,7 @@ Scene_Shop.prototype.createNumberWindow = function() {
     this._numberWindow = new Window_ShopNumber(0, 0, 0);
     this._numberWindow.lineHeight = function(){ return DrillUp.g_SSh_number_fontsize + 4;}		//强制修正间距
 	this._numberWindow.drill_COWA_changeParamData( data );			//辅助核心 - 控制窗口基本属性
-    this._numberWindow.hide = function(){ return null;}
+    this._numberWindow.hide = function(){ this._drill_SSh_enabled = false; return null;}
 	
     this._numberWindow.setHandler('ok',     this.onNumberOk.bind(this));
     this._numberWindow.setHandler('cancel', this.onNumberCancel.bind(this));
@@ -2658,6 +2705,7 @@ Scene_Shop.prototype.drill_SSh_updateNumberWindow = function() {
 	// 只激活时显示
 	if( this._numberWindow.active ){
 		this._numberWindow.open();	
+		this._numberWindow._drill_SSh_enabled = true;
 	}else{
 		this._numberWindow.close();
 		if( this._numberWindow.openness <= 0 ){

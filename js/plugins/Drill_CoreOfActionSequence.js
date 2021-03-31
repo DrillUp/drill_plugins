@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        系统 - GIF动画序列核心
+ * @plugindesc [v1.2]        系统 - GIF动画序列核心
  * @author Drill_up
  * 
  * @Drill_LE_param "动画序列-%d"
@@ -17,8 +17,8 @@
  * @Drill_LE_param "动作元-%d"
  * @Drill_LE_parentKey ""
  * @Drill_LE_var "DrillUp.g_COAS_actList_length"
- *
- *
+ * 
+ * 
  * @help
  * =============================================================================
  * +++ Drill_CoreOfActionSequence +++
@@ -35,6 +35,7 @@
  * 作用于：
  *   - Drill_ActorPortraitureExtend   战斗UI - 高级角色肖像
  *   - Drill_PictureActionSequence    图片 - GIF动画序列
+ *   - Drill_EventActionSequence      行走图 - GIF动画序列
  *
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -68,6 +69,18 @@
  * 你可以配置每个动作元、状态元的设置，并且还可以是组成GIF的多张图像。
  * 
  * -----------------------------------------------------------------------------
+ * ----可选设定
+ * 动画核心提供了测试动作元、状态元的方法：
+ * 
+ * 插件指令：>动画序列核心DEBUG : 动画序列[1] : 显示默认状态元集合
+ * 插件指令：>动画序列核心DEBUG : 动画序列[1] : 显示全部状态元名称
+ * 插件指令：>动画序列核心DEBUG : 动画序列[1] : 显示符合注解的状态元名[@向上移动]
+ * 插件指令：>动画序列核心DEBUG : 动画序列[1] : 显示全部动作元名称
+ * 
+ * 1.注意，这里是动画核心，单独使用没有效果。插件指令只是辅助调试用。
+ *   你需要去 子插件 看具体功能。
+ * 
+ * -----------------------------------------------------------------------------
  * ----插件性能
  * 测试仪器：   4G 内存，Intel Core i5-2520M CPU 2.5GHz 处理器
  *              Intel(R) HD Graphics 3000 集显 的垃圾笔记本
@@ -95,6 +108,8 @@
  * [v1.1]
  * 添加了 色调值、模糊边缘、帧间隔明细表 设置，
  * 并实现了小工具交互功能。
+ * [v1.2]
+ * 添加了部分适配接口。
  * 
  * 
  *
@@ -552,6 +567,11 @@
  * @desc 可以模糊GIF图像的边缘，防止出现像素锯齿。
  * @default false
  *
+ * @param 备注
+ * @type note
+ * @desc 备注的文本，在动画序列中并不起实际作用。
+ * @default ""
+ *
  */
 /*~struct~DrillCOASAct:
  * 
@@ -613,6 +633,11 @@
  * @off 关闭
  * @desc 可以模糊GIF图像的边缘，防止出现像素锯齿。
  * @default false
+ *
+ * @param 备注
+ * @type note
+ * @desc 备注的文本，在动画序列中并不起实际作用。
+ * @default ""
  *
  */
 
@@ -697,6 +722,12 @@
 		data['gif_back_run'] = String( dataFrom["是否倒放"] || "false") == "true";
 		data['gif_tint'] = Number( dataFrom["图像-色调值"] || 0);
 		data['gif_smooth'] = String( dataFrom["图像-模糊边缘"] || "false") == "true";
+		var temp = String( dataFrom["备注"] || "" );
+		if( temp[0] == "\"" ){
+			temp = temp.substring(1,temp.length-1);
+			temp = temp.replace(/\\\\/g,"\\");
+		}
+		data['note'] = temp;
 		
 		// > 帧间隔计算
 		data['gif_intervalRealTank'] = [];
@@ -736,6 +767,12 @@
 		data['gif_back_run'] = String( dataFrom["是否倒放"] || "false") == "true";
 		data['gif_tint'] = Number( dataFrom["图像-色调值"] || 0);
 		data['gif_smooth'] = String( dataFrom["图像-模糊边缘"] || "false") == "true";
+		var temp = String( dataFrom["备注"] || "" );
+		if( temp[0] == "\"" ){
+			temp = temp.substring(1,temp.length-1);
+			temp = temp.replace(/\\\\/g,"\\");
+		}
+		data['note'] = temp;
 		
 		// > 帧间隔计算
 		data['gif_intervalRealTank'] = [];
@@ -807,6 +844,48 @@
 	}
 	
 	
+//=============================================================================
+// ** 插件指令
+//=============================================================================
+var _Drill_COAS_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+Game_Interpreter.prototype.pluginCommand = function(command, args) {
+	_Drill_COAS_pluginCommand.call(this, command, args);
+	
+	if( command === ">动画序列核心DEBUG" ){
+		if( args.length == 4 ){
+			var temp1 = String(args[1]);
+			var temp2 = String(args[3]);
+			
+			if( temp1.indexOf("动画序列[") != -1 ){
+				temp1 = temp1.replace("动画序列[","");
+				temp1 = temp1.replace("]","");
+				temp1 = Number(temp1);
+				
+				var COAS_data = new Drill_COAS_Data( DrillUp.g_COAS_list[ temp1-1 ] );
+				if( temp2 == "显示默认状态元集合" ){
+					var seq = COAS_data.drill_COAS_getDefaultStateGroup();
+					alert( JSON.stringify(seq) );
+				}
+				if( temp2 == "显示全部状态元名称" ){
+					var seq = COAS_data.drill_COAS_getAllStateName();
+					alert( JSON.stringify(seq) );
+				}
+				if( temp2 == "显示全部动作元名称" ){
+					var seq = COAS_data.drill_COAS_getAllActName();
+					alert( JSON.stringify(seq) );
+				}
+				if( temp2.indexOf("显示符合注解的状态元名[") != -1 ){
+					temp2 = temp2.replace("显示符合注解的状态元名[","");
+					temp2 = temp2.replace("]","");
+					COAS_data.drill_COAS_setSequenceByAnnotation( temp2 );
+					var seq = COAS_data.drill_COAS_getCurrentStateSeqName();
+					alert( JSON.stringify(seq) );
+				}
+			}
+		}
+	}
+}
+
 
 //=============================================================================
 // ** 动画序列数据【Drill_COAS_Data】
@@ -830,6 +909,7 @@ function Drill_COAS_Data() {
 // * 数据 - 初始化
 //==============================
 Drill_COAS_Data.prototype.initialize = function( data ){
+	if( data == undefined ){ data = {}; }
 	this._drill_data = JSON.parse(JSON.stringify( data ));	//深拷贝数据
 	this.drill_initData();									//初始化数据
 };
@@ -848,6 +928,7 @@ Drill_COAS_Data.prototype.drill_initData = function() {
 	var data = this._drill_data;	
 	
 	// > 默认值
+	if( data['waitForPreload'] == undefined ){ data['waitForPreload'] = false };					//预加载等待
 	if( data['state_default_randomSeq'] == undefined ){ data['state_default_randomSeq'] = [] };		//默认状态元集合
 	if( data['state_tank'] == undefined ){ data['state_tank'] = [] };								//状态元 容器
 	if( data['act_tank'] == undefined ){ data['act_tank'] = [] };									//动作元 容器
@@ -862,6 +943,7 @@ Drill_COAS_Data.prototype.drill_initData = function() {
 	this._drill_state_curCom = "";									//状态元 - 当前状态
 	this._drill_state_curTime = 0;									//状态元 - 当前时间
 	this._drill_state_curSeq = data['state_default_randomSeq'];		//状态元 - 当前序列
+	this._drill_state_lastAnnotation = "";							//状态元 - 上一个注解名
 	this._drill_act_curCom = "";									//动作元 - 当前动作
 	this._drill_act_curTime = 0;									//动作元 - 当前时间
 }
@@ -1024,7 +1106,7 @@ Drill_COAS_Data.prototype.drill_COAS_checkArray = function( arr ){
 	}	
 }
 //==============================
-// * 数据 - 状态元 - 设置序列（接口）
+// * 数据 - 状态元 - 设置状态元序列（接口）
 //
 //				说明：	序列中存放 状态名称 的数组，状态元会跳过不识别的对象。
 //==============================
@@ -1033,13 +1115,140 @@ Drill_COAS_Data.prototype.drill_COAS_setSequence = function( seq ){
 	this._drill_state_curSeq = seq;
 }
 //==============================
-// * 数据 - 状态元 - 设置序列，立刻改变（接口）
+// * 数据 - 状态元 - 设置状态元序列-立刻改变（接口）
 //==============================
 Drill_COAS_Data.prototype.drill_COAS_setSequenceImmediate = function( seq ){
-	this.drill_COAS_checkArray( seq );
-	this._drill_state_curSeq = seq;
+	this.drill_COAS_setSequence();
 	this._drill_state_curCom = "";
 	this._drill_state_curTime = 0;
+}
+//==============================
+// * 数据 - 状态元 - 设置状态元序列[注解模式]（接口）
+//
+//			说明：	状态元名称中含有特定注解的，会被捕获。如果都没捕获到，返回失败（false）。
+//==============================
+Drill_COAS_Data.prototype.drill_COAS_setSequenceByAnnotation = function( annotation ){
+	if( this._drill_state_lastAnnotation == annotation ){ return true; }	//（重复注解时跳过）
+	this._drill_state_lastAnnotation = annotation;
+	
+	// > 获取注解列表
+	var annotation_list = [];
+	var temp_list = annotation.split("@");
+	for( var i=0; i < temp_list.length; i++ ){
+		var temp = temp_list[i];
+		if( temp == "" ){ continue; }
+		annotation_list.push( "@"+temp );
+	}
+	
+	// > 找到符合注解数量最多的状态元名
+	var name_list = this.drill_COAS_getAllStateName();
+	var max_fit_count = 0;			//（最大符合数量）
+	var tag_seq = [];				//（最大符合的索引列表）
+	for( var i=0; i < name_list.length; i++ ){
+		var name = name_list[i];
+		
+		// > 获取@符号数量
+		var char_count = 0;
+		for(var j=0; j < name.length; j++){
+			if( name[j] == "@" ){
+				char_count += 1;
+			}	
+		}
+		if( char_count == 0 ){ continue; }
+		
+		// > 记录注解符合数量
+		var fit_count = 0;
+		for(var j=0; j < annotation_list.length; j++){
+			var annotation = annotation_list[j];
+			if( name.contains(annotation) == true ){
+				fit_count += 1;
+			}
+		}
+		
+		// > 含有不匹配的@符号时，跳过
+		if( char_count > fit_count ){
+			continue;
+		}
+		
+		// > 符合数量更大时，清空序列，重新添加
+		if( fit_count > max_fit_count ){ 
+			tag_seq = [];
+			max_fit_count = fit_count;
+			
+			var tag = {};
+			tag['index'] = i;
+			tag['count'] = fit_count;
+			tag['name'] = name;
+			tag_seq.push( tag );
+		
+		// > 符合数量相等，累计
+		}else if( fit_count == max_fit_count ){
+			var tag = {};
+			tag['index'] = i;
+			tag['count'] = fit_count;
+			tag['name'] = name;
+			tag_seq.push( tag );
+			
+		// > 符合数量少了，跳过
+		}else{
+			continue; 
+		}
+	}
+	if( tag_seq.length == 0 ){ return false; }
+	
+	// > 根据最大值的下标取出符合的名称
+	var seq = [];
+	for( var i=0; i < tag_seq.length; i++ ){
+		seq.push( tag_seq[i]['name'] );
+	}
+	
+	this._drill_state_curSeq = seq;
+	return true;
+}
+//==============================
+// * 数据 - 状态元 - 设置状态元序列[注解模式]-立刻改变（接口）
+//==============================
+Drill_COAS_Data.prototype.drill_COAS_setSequenceImmediateByAnnotation = function( annotation ){
+	if( this._drill_state_lastAnnotation == annotation ){ return true; }	//（重复注解时跳过）
+	
+	var success = this.drill_COAS_setSequenceByAnnotation(annotation);
+	if( success ){
+		this._drill_state_curCom = "";
+		this._drill_state_curTime = 0;
+	}
+	return success;
+}
+//==============================
+// * 数据 - 状态元 - 获取默认状态元集合（接口）
+//==============================
+Drill_COAS_Data.prototype.drill_COAS_getDefaultStateGroup = function(){
+	return this._drill_data['state_default_randomSeq'];
+}
+//==============================
+// * 数据 - 状态元 - 获取当前状态元名称（接口）
+//==============================
+Drill_COAS_Data.prototype.drill_COAS_getCurrentStateName = function(){
+	return this._drill_state_curCom;
+}
+//==============================
+// * 数据 - 状态元 - 获取当前状态元集合名称（接口）
+//==============================
+Drill_COAS_Data.prototype.drill_COAS_getCurrentStateSeqName = function(){
+	return this._drill_state_curSeq;
+}
+//==============================
+// * 数据 - 状态元 - 获取全部状态元名称（接口）
+//==============================
+Drill_COAS_Data.prototype.drill_COAS_getAllStateName = function(){
+	var data = this._drill_data;
+	var result_list = [];	
+	for( var i=0; i < data['state_tank'].length; i++ ){
+		var data_state = data['state_tank'][i];
+		if( data_state && data_state['name'] != "" ){
+			result_list.push( data_state['name'] );
+		}
+	}
+	return result_list;
 }
 //==============================
 // * 数据 - 状态元 - 获取数据 根据名称
@@ -1097,6 +1306,26 @@ Drill_COAS_Data.prototype.drill_COAS_stopAct = function(){
 	this._drill_act_curTime = 0;
 }
 //==============================
+// * 数据 - 状态元 - 获取当前动作元名称（接口）
+//==============================
+Drill_COAS_Data.prototype.drill_COAS_getCurrentActName = function(){
+	return this._drill_act_curCom;
+}
+//==============================
+// * 数据 - 动作元 - 获取全部动作元名称（接口）
+//==============================
+Drill_COAS_Data.prototype.drill_COAS_getAllActName = function(){
+	var data = this._drill_data;
+	var result_list = [];	
+	for( var i=0; i < data['act_tank'].length; i++ ){
+		var data_state = data['act_tank'][i];
+		if( data_state && data_state['name'] != "" ){
+			result_list.push( data_state['name'] );
+		}
+	}
+	return result_list;
+}
+//==============================
 // * 数据 - 动作元 - 获取数据 根据名称
 //==============================
 Drill_COAS_Data.prototype.drill_COAS_getDataAct = function( act_name ){
@@ -1144,6 +1373,13 @@ Drill_COAS_SpriteDecorator.prototype.initialize = function( parent, COAS_data ){
 Drill_COAS_SpriteDecorator.prototype.update = function() {
 	if( this._drill_controller == null ){ return; }
 	
+	// > 预加载等待
+	if( this._drill_controller['waitForPreload'] == true &&
+		this.drill_COAS_isAllBitmapReady() == false ){ 
+		return; 
+	}
+	
+	// > 执行资源切换
 	var temp_bitmap = ImageManager.loadBitmap( 
 							this._drill_controller._drill_bitmapPath, 
 							this._drill_controller._drill_bitmapName, 
@@ -1210,6 +1446,7 @@ Drill_COAS_SpriteDecorator.prototype.drill_initSprite = function() {
 		};
 	};
 	
+	// > 测试图片
 	//if( data['state_tank'].length > 0 &&
 	//	data['state_tank'][0]['gif_src_bitmap'].length > 0 ){
 	//	this.drill_COAS_setParentBitmap( data['state_tank'][0]['gif_src_bitmap'][0] );
@@ -1233,7 +1470,25 @@ Drill_COAS_SpriteDecorator.prototype.drill_COAS_setParentBitmap = function( bitm
 		temp_parent.bitmap = bitmap;
 	}
 }
-
-
-
+//==============================
+// * 对象 - 判断图片加载情况
+//==============================
+Drill_COAS_SpriteDecorator.prototype.drill_COAS_isAllBitmapReady = function(){
+	if( this._drill_controller == null ){ return false; }
+	var data = this._drill_controller._drill_data;	
+	
+	// > 预加载bitmap
+	for(var i = 0; i < this._drill_COAS_stateBitmap.length ; i++){
+		if( this._drill_COAS_stateBitmap[i].isReady() == false ){
+			return false;
+		}
+	};
+	for(var i = 0; i < this._drill_COAS_actBitmap.length ; i++){
+		if( this._drill_COAS_actBitmap[i].isReady() == false ){
+			return false;
+		}
+	};
+	
+	return true;
+}
 

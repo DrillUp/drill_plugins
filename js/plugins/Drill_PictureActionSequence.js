@@ -33,11 +33,11 @@
  *      图片在执行"设置动画序列"后才会全加载，你可以提前把图片
  *      设为透明放上并设置动画序列。
  * 设计：
- *   (1.动作序列可以是一个简单的GIF，在动作序列中配置后，
+ *   (1.动画序列可以是一个简单的GIF，在动画序列中配置后，
  *      可以通过该插件实现图片GIF效果。
  *   (2.有时候动画序列在图片建立后，不能立即设置动画序列，不然会使得
  *      动画序列找不到对象进行初始化。这时应该等1帧再设置。
- *   (3.具体去看看"关于GIF动画序列核心.docx" 的 配置GIF动作序列。
+ *   (3.具体去看看"关于GIF动画序列核心.docx" 的 配置GIF动画序列。
  * 
  * -----------------------------------------------------------------------------
  * ----激活条件 - 动画序列
@@ -80,17 +80,17 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
  * 时间复杂度： o(n^2)*o(贴图处理) 每帧
- * 测试方法：   在对话管理层设置3张图片，加载45帧动作序列。
+ * 测试方法：   在对话管理层设置3张图片，加载45帧动画序列。
  * 测试结果：   200个事件的地图中，平均消耗为：【17.76ms】
  *              100个事件的地图中，平均消耗为：【13.94ms】
  *               50个事件的地图中，平均消耗为：【12.60ms】
  * 测试结果2：  战斗界面中，平均消耗为：【21.21ms】
- * 测试结果3：  动作序列载入时，3秒内消耗：【131.05ms】
+ * 测试结果3：  动画序列载入时，3秒内消耗：【131.05ms】
  * 
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
  *   测试结果并不是精确值，范围在给定值的10ms范围内波动。
  *   更多了解插件性能，可以去看看"关于插件性能.docx"。
- * 2.由于图片加载需要很多时间，加载45帧的动作序列时，出现了明显
+ * 2.由于图片加载需要很多时间，加载45帧的动画序列时，出现了明显
  *   的卡顿，但是后期恢复了。
  * 
  * -----------------------------------------------------------------------------
@@ -112,14 +112,14 @@
 //		工作类型		持续执行
 //		时间复杂度		o(n^2)*o(贴图处理) 每帧
 //		性能测试因素	对话管理层
-//		性能测试消耗	12.60ms（update） 131.05ms（载入动作序列时）
-//		最坏情况		大量图片，大量动作序列。
-//		备注			加载一个45帧的动作序列时，垃圾电脑出现了明显的卡顿，但是后期恢复了。
+//		性能测试消耗	12.60ms（update） 131.05ms（载入动画序列时）
+//		最坏情况		大量图片，大量动画序列。
+//		备注			加载一个45帧的动画序列时，垃圾电脑出现了明显的卡顿，但是后期恢复了。
 //
 //插件记录：
 //		★大体框架与功能如下：
 //			图片动画序列：
-//				->动作序列
+//				->动画序列
 //					->数据绑定
 //					->对象绑定
 //				->动作元
@@ -363,7 +363,7 @@ Game_Picture.prototype.erase = function() {
 }
 
 //==============================
-// * 图片 - 设置动作序列
+// * 图片 - 设置动画序列
 //==============================
 Game_Picture.prototype.drill_PASe_setActionSequence = function( as_id ){
 	this._Drill_PASe_enabled = true;
@@ -371,7 +371,7 @@ Game_Picture.prototype.drill_PASe_setActionSequence = function( as_id ){
 	this._Drill_PASe_commandInit = true;
 }
 //==============================
-// * 图片 - 去除动作序列
+// * 图片 - 去除动画序列
 //==============================
 Game_Picture.prototype.drill_PASe_removeActionSequence = function(){
 	this._Drill_PASe_enabled = false;
@@ -379,7 +379,7 @@ Game_Picture.prototype.drill_PASe_removeActionSequence = function(){
 	this._Drill_PASe_commandDestroy = true;
 }
 //==============================
-// * 动作序列 - 还原默认状态元集合
+// * 动画序列 - 还原默认状态元集合
 //
 //			说明：	直接调用核心提供的接口即可，
 //					注意，不要为了简化，让插件指令直接去操作COAS核心函数。
@@ -388,25 +388,25 @@ Game_Picture.prototype.drill_PASe_setSequenceDefault = function(){
 	this._Drill_PASe_data.drill_COAS_setSequence( this._Drill_PASe_data._drill_data['state_default_randomSeq'] );
 }
 //==============================
-// * 动作序列 - 设置状态元集合
+// * 动画序列 - 设置状态元集合
 //==============================
 Game_Picture.prototype.drill_PASe_setSequence = function( seq ){
 	this._Drill_PASe_data.drill_COAS_setSequence( seq );
 }
 //==============================
-// * 动作序列 - 设置状态元集合，立刻改变
+// * 动画序列 - 设置状态元集合，立刻改变
 //==============================
 Game_Picture.prototype.drill_PASe_setSequenceImmediate = function( seq ){
 	this._Drill_PASe_data.drill_COAS_setSequenceImmediate( seq );
 }
 //==============================
-// * 动作序列 - 添加动作
+// * 动画序列 - 添加动作
 //==============================
 Game_Picture.prototype.drill_PASe_setAct = function( act_name ){
 	this._Drill_PASe_data.drill_COAS_setAct( act_name );
 }
 //==============================
-// * 动作序列 - 立刻终止动作
+// * 动画序列 - 立刻终止动作
 //==============================
 Game_Picture.prototype.drill_PASe_stopAct = function(){
 	this._Drill_PASe_data.drill_COAS_stopAct();

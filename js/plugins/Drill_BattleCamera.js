@@ -328,14 +328,15 @@ Game_Temp.prototype.initialize = function() {
     this.drill_BCa_clearCamera();
 };
 Game_Temp.prototype.drill_BCa_clearCamera = function() {
+	this._drill_BCa_cur_actor = [null,[0,0]];			//当前选中角色（sv）
+	this._drill_BCa_being_attack = [null,[0,0],0];		//受伤害单位
+	this._drill_BCa_select_single = [null,[0,0]];		//选中一个单位
+	this._drill_BCa_select_single_turn = [null,[0,0]];	//
+	this._drill_BCa_select_all = false;					//选中所有单位
+	this._drill_BCa_select_all_turn = false;			//
+	this._drill_BCa_battleEnd = false;					//战斗结束标记
+	
 	this._drill_cam_pos = [0,0];						//镜头所在位置
-	this._drill_cam_cur_actor = [null,[0,0]];			//当前选中角色（sv）
-	this._drill_cam_being_attack = [null,[0,0],0];		//受伤害单位
-	this._drill_cam_select_single = [null,[0,0]];		//选中一个单位
-	this._drill_cam_select_single_turn = [null,[0,0]];	//
-	this._drill_cam_select_all = false;					//选中所有单位
-	this._drill_cam_select_all_turn = false;			//
-	this._drill_battleEnd = false;						//战斗结束
 	this._drill_cam_result_move_X = 0;					//镜头实际位移量X
 	this._drill_cam_result_move_Y = 0;					//镜头实际位移量Y
 };
@@ -553,7 +554,7 @@ Spriteset_Battle.prototype.drill_BCa_flip = function() {
 var _drill_BCa_onSelectAction = Scene_Battle.prototype.onSelectAction;
 Scene_Battle.prototype.onSelectAction = function() {
 	var action = BattleManager.inputtingAction();
-	$gameTemp._drill_cam_select_all = action.isForAll();
+	$gameTemp._drill_BCa_select_all = action.isForAll();
 	_drill_BCa_onSelectAction.call(this);    
 };
 
@@ -563,8 +564,8 @@ Scene_Battle.prototype.onSelectAction = function() {
 var _drill_BCa_win_actor_hide = Window_BattleActor.prototype.hide;
 Window_BattleActor.prototype.hide = function() {
     _drill_BCa_win_actor_hide.call(this);
-    $gameTemp._drill_cam_select_all = false;
-	$gameTemp._drill_cam_select_single = null;
+    $gameTemp._drill_BCa_select_all = false;
+	$gameTemp._drill_BCa_select_single = null;
 };
 //==============================
 // * 标记 - 选中一个敌人时（Window BattleActor）
@@ -572,8 +573,8 @@ Window_BattleActor.prototype.hide = function() {
 var _drill_BCa_win_actor_select = Window_BattleActor.prototype.select;
 Window_BattleActor.prototype.select = function(index) {
     _drill_BCa_win_actor_select.call(this,index);
-	$gameTemp._drill_cam_select_single = [null,[0,0]];
-	if (this.actor()) {$gameTemp._drill_cam_select_single[0] = this.actor();};
+	$gameTemp._drill_BCa_select_single = [null,[0,0]];
+	if (this.actor()) {$gameTemp._drill_BCa_select_single[0] = this.actor();};
 };
 
 //==============================
@@ -582,8 +583,8 @@ Window_BattleActor.prototype.select = function(index) {
 var _drill_BCa_win_enemy_hide = Window_BattleEnemy.prototype.hide; 
 Window_BattleEnemy.prototype.hide = function() {
 	_drill_BCa_win_enemy_hide.call(this);
-	$gameTemp._drill_cam_select_all = false;
-	$gameTemp._drill_cam_select_single = null;
+	$gameTemp._drill_BCa_select_all = false;
+	$gameTemp._drill_BCa_select_single = null;
 };
 //==============================
 // * 标记 - 选中一个角色时（[SV] Window BattleEnemy）
@@ -591,17 +592,17 @@ Window_BattleEnemy.prototype.hide = function() {
 var _drill_BCa_win_enemy_select = Window_BattleEnemy.prototype.select;
 Window_BattleEnemy.prototype.select = function(index) {
     _drill_BCa_win_enemy_select.call(this,index)
-	$gameTemp._drill_cam_select_single = [null,[0,0]];
-	if (this.enemy()) {$gameTemp._drill_cam_select_single[0] = this.enemy();};
+	$gameTemp._drill_BCa_select_single = [null,[0,0]];
+	if (this.enemy()) {$gameTemp._drill_BCa_select_single[0] = this.enemy();};
 };
 
 //==============================
 // * 标记 - 清除目标
 //==============================
 BattleManager.drill_BCa_targetClear = function() {
-	$gameTemp._drill_cam_being_attack = [null,[0,0],0];
-	$gameTemp._drill_cam_select_single_turn = [null,[0,0]];
-	$gameTemp._drill_cam_select_all_turn = false;
+	$gameTemp._drill_BCa_being_attack = [null,[0,0],0];
+	$gameTemp._drill_BCa_select_single_turn = [null,[0,0]];
+	$gameTemp._drill_BCa_select_all_turn = false;
 	$gameTemp._drill_cam_pos = [0,0];
 };
 
@@ -611,7 +612,7 @@ BattleManager.drill_BCa_targetClear = function() {
 var _drill_BCa_endTurn = BattleManager.endTurn;
 BattleManager.endTurn = function() {
 	_drill_BCa_endTurn.call(this);
-	$gameTemp._drill_cam_being_attack = [null,[0,0],0];
+	$gameTemp._drill_BCa_being_attack = [null,[0,0],0];
     this.drill_BCa_targetClear();
 };
 
@@ -622,9 +623,9 @@ var _drill_BCa_startAction = BattleManager.startAction;
 BattleManager.startAction = function() {
 	_drill_BCa_startAction.call(this);
     this.drill_BCa_targetClear();
-	$gameTemp._drill_cam_being_attack = [this._subject,[0,0],$gameSystem._drill_cam_ftime];	//确定/聚焦 被攻击对象
-	$gameTemp._drill_cam_select_single_turn[0] = this._targets[0];
-	if (this._targets.length > 1) {$gameTemp._drill_cam_select_all_turn = true};
+	$gameTemp._drill_BCa_being_attack = [this._subject,[0,0],$gameSystem._drill_cam_ftime];	//确定/聚焦 被攻击对象
+	$gameTemp._drill_BCa_select_single_turn[0] = this._targets[0];
+	if( this._targets.length > 1 ){ $gameTemp._drill_BCa_select_all_turn = true; }
 };
 
 //==============================
@@ -632,7 +633,7 @@ BattleManager.startAction = function() {
 //==============================
 var _drill_BCa_processVictory = BattleManager.processVictory;
 BattleManager.processVictory = function() {
-	 $gameTemp._drill_battleEnd = true;
+	$gameTemp._drill_BCa_battleEnd = true;
 	_drill_BCa_processVictory.call(this);	 
 };
 //==============================
@@ -640,7 +641,7 @@ BattleManager.processVictory = function() {
 //==============================
 var _drill_BCa_processAbort = BattleManager.processAbort;
 BattleManager.processAbort = function() {
-	$gameTemp._drill_battleEnd = true;
+	$gameTemp._drill_BCa_battleEnd = true;
 	_drill_BCa_processAbort.call(this);	 
 };
 //==============================
@@ -648,7 +649,7 @@ BattleManager.processAbort = function() {
 //==============================
 var _drill_BCa_processDefeat = BattleManager.processDefeat;
 BattleManager.processDefeat = function() {
-	$gameTemp._drill_battleEnd = true;
+	$gameTemp._drill_BCa_battleEnd = true;
 	_drill_BCa_processDefeat.call(this);	 
 };
 
@@ -664,11 +665,11 @@ Sprite_Battler.prototype.updatePosition = function() {
     this.drill_BCa_updateCamPos();
 };
 Sprite_Battler.prototype.drill_BCa_updateCamPos = function() {
-	$gameTemp._drill_cam_cur_actor[0] = BattleManager.actor();
-	if ($gameTemp._drill_cam_select_single && $gameTemp._drill_cam_select_single[0] === this._battler) {this.drill_BCa_focusTarget()};
-	if ($gameTemp._drill_cam_select_single_turn && $gameTemp._drill_cam_select_single_turn[0] === this._battler) {this.drill_BCa_focusTarget_turn()};
-	if ($gameTemp._drill_cam_being_attack && $gameTemp._drill_cam_being_attack[0] === this._battler) {this.drill_BCa_focusBeingAttack()};
-	if ($gameTemp._drill_cam_cur_actor && $gameTemp._drill_cam_cur_actor[0] === this._battler) {this.drill_BCa_focusActor()};
+	$gameTemp._drill_BCa_cur_actor[0] = BattleManager.actor();
+	if ($gameTemp._drill_BCa_select_single && $gameTemp._drill_BCa_select_single[0] === this._battler) {this.drill_BCa_focusTarget()};
+	if ($gameTemp._drill_BCa_select_single_turn && $gameTemp._drill_BCa_select_single_turn[0] === this._battler) {this.drill_BCa_focusTarget_turn()};
+	if ($gameTemp._drill_BCa_being_attack && $gameTemp._drill_BCa_being_attack[0] === this._battler) {this.drill_BCa_focusBeingAttack()};
+	if ($gameTemp._drill_BCa_cur_actor && $gameTemp._drill_BCa_cur_actor[0] === this._battler) {this.drill_BCa_focusActor()};
 };
 //==============================
 // * 位置 - 高度修正
@@ -684,32 +685,32 @@ Sprite_Battler.prototype.drill_BCa_heightFix = function() {
 // * 位置 - 当前角色
 //==============================
 Sprite_Battler.prototype.drill_BCa_focusActor = function() {
-	  $gameTemp._drill_cam_cur_actor[1][0] = this.x;
-      $gameTemp._drill_cam_cur_actor[1][1] = this.drill_BCa_heightFix();
+	  $gameTemp._drill_BCa_cur_actor[1][0] = this.x;
+      $gameTemp._drill_BCa_cur_actor[1][1] = this.drill_BCa_heightFix();
 };
 
 //==============================
 // * 位置 - 选择目标
 //==============================
 Sprite_Battler.prototype.drill_BCa_focusTarget = function() {
-	   $gameTemp._drill_cam_select_single[1][0] = this.x;
-       $gameTemp._drill_cam_select_single[1][1] = this.drill_BCa_heightFix();
+	   $gameTemp._drill_BCa_select_single[1][0] = this.x;
+       $gameTemp._drill_BCa_select_single[1][1] = this.drill_BCa_heightFix();
 };
 
 //==============================
 // * 位置 - 选择目标
 //==============================
 Sprite_Battler.prototype.drill_BCa_focusTarget_turn = function() {
-	   $gameTemp._drill_cam_select_single_turn[1][0] = this.x;
-       $gameTemp._drill_cam_select_single_turn[1][1] = this.drill_BCa_heightFix();
+	   $gameTemp._drill_BCa_select_single_turn[1][0] = this.x;
+       $gameTemp._drill_BCa_select_single_turn[1][1] = this.drill_BCa_heightFix();
 };
 	
 //==============================
 // * 位置 - 受伤单位
 //==============================
 Sprite_Battler.prototype.drill_BCa_focusBeingAttack = function() {
-	   $gameTemp._drill_cam_being_attack[1][0] = this.x;
-       $gameTemp._drill_cam_being_attack[1][1] = this.drill_BCa_heightFix();
+	   $gameTemp._drill_BCa_being_attack[1][0] = this.x;
+       $gameTemp._drill_BCa_being_attack[1][1] = this.drill_BCa_heightFix();
 };	
 
 //==============================
@@ -863,44 +864,44 @@ Spriteset_Battle.prototype.drill_BCa_updateCameraTarget = function() {
 	};
 	
 	// > 受伤时镜头震动 - 时间变化
-	if( $gameTemp._drill_cam_being_attack[2] > 0 ){
-		$gameTemp._drill_cam_being_attack[2] -= 1
+	if( $gameTemp._drill_BCa_being_attack[2] > 0 ){
+		$gameTemp._drill_BCa_being_attack[2] -= 1
 	};
 	
 	// > 选择一个敌人/角色
-	if ($gameTemp._drill_cam_select_single && $gameTemp._drill_cam_select_single[0]) {
-		if (!$gameSystem.isSideView() && $gameTemp._drill_cam_select_single[0].isActor()) {
+	if ($gameTemp._drill_BCa_select_single && $gameTemp._drill_BCa_select_single[0]) {
+		if (!$gameSystem.isSideView() && $gameTemp._drill_BCa_select_single[0].isActor()) {
 			var xx = this._drill_BCa_centerX;
 			var yy = this._drill_BCa_centerY;		
 			this.drill_BCa_setMoveTo( xx,yy );
 	    } else { 
-			var xx = $gameTemp._drill_cam_select_single[1][0];
-			var yy = $gameTemp._drill_cam_select_single[1][1];
+			var xx = $gameTemp._drill_BCa_select_single[1][0];
+			var yy = $gameTemp._drill_BCa_select_single[1][1];
 			this.drill_BCa_setMoveTo( xx,yy );
 	    }
 		
 	// > 受伤时镜头震动
     } else if (this.drill_BCa_isBeingAttack()) {
-		if (!$gameSystem.isSideView() && $gameTemp._drill_cam_being_attack[0].isActor()) {
+		if (!$gameSystem.isSideView() && $gameTemp._drill_BCa_being_attack[0].isActor()) {
 			var xx = this._drill_BCa_centerX;
 			var yy = this._drill_BCa_centerY;		
 			this.drill_BCa_setMoveTo( xx,yy );
 		} else {
-			var xx = $gameTemp._drill_cam_being_attack[1][0];
-			var yy = $gameTemp._drill_cam_being_attack[1][1];
+			var xx = $gameTemp._drill_BCa_being_attack[1][0];
+			var yy = $gameTemp._drill_BCa_being_attack[1][1];
 			this.drill_BCa_setMoveTo( xx,yy );
 		}
 
 	// > 敌人回合
 	} else if (this.drill_BCa_isTarget()) {
-		var xx = $gameTemp._drill_cam_select_single_turn[1][0];
-		var yy = $gameTemp._drill_cam_select_single_turn[1][1];
+		var xx = $gameTemp._drill_BCa_select_single_turn[1][0];
+		var yy = $gameTemp._drill_BCa_select_single_turn[1][1];
 		this.drill_BCa_setMoveTo( xx,yy );
 		
 	// > 角色回合
 	} else if (this.drill_BCa_isActor()) {
-		var xx = $gameTemp._drill_cam_cur_actor[1][0];
-		var yy = $gameTemp._drill_cam_cur_actor[1][1];	
+		var xx = $gameTemp._drill_BCa_cur_actor[1][0];
+		var yy = $gameTemp._drill_BCa_cur_actor[1][1];	
 		this.drill_BCa_setMoveTo( xx,yy );
 
 	// > 其他情况回到中心
@@ -945,18 +946,18 @@ Spriteset_Battle.prototype.drill_BCa_updateCameraMove = function() {
 // * 判断 - 移动到 - 中心
 //==============================
 Spriteset_Battle.prototype.drill_BCa_isNeedToCenter = function() {
-	if ($gameTemp._drill_cam_select_all) {return true};
-	if ($gameTemp._drill_cam_select_all_turn) {return true};
-	if ($gameTemp._drill_battleEnd) {return true};
+	if( $gameTemp._drill_BCa_select_all ){ return true; }
+	if( $gameTemp._drill_BCa_select_all_turn ){ return true; }
+	if( $gameTemp._drill_BCa_battleEnd ){ return true; }
 	return false
 };
 //==============================
 // * 判断 - 移动到 - 受伤害目标
 //==============================
 Spriteset_Battle.prototype.drill_BCa_isBeingAttack = function() {
-	if (!$gameTemp._drill_cam_being_attack) {return false};
-	if (!$gameTemp._drill_cam_being_attack[0]) {return false};
-	if ($gameTemp._drill_cam_being_attack[2] === 0) {return false};
+	if (!$gameTemp._drill_BCa_being_attack) {return false};
+	if (!$gameTemp._drill_BCa_being_attack[0]) {return false};
+	if ($gameTemp._drill_BCa_being_attack[2] === 0) {return false};
 	if (Imported.MOG_ATB) {
 	    if (this._phase != 'start') {return false};
 	};
@@ -966,9 +967,9 @@ Spriteset_Battle.prototype.drill_BCa_isBeingAttack = function() {
 // * 判断 - 移动到 - 敌人回合
 //==============================
 Spriteset_Battle.prototype.drill_BCa_isTarget = function() {
-	if (!$gameTemp._drill_cam_select_single_turn) {return false};
-	if (!$gameTemp._drill_cam_select_single_turn[0]) {return false};
-	if (!$gameSystem.isSideView() && $gameTemp._drill_cam_select_single_turn[0].isActor()) {return false};
+	if (!$gameTemp._drill_BCa_select_single_turn) {return false};
+	if (!$gameTemp._drill_BCa_select_single_turn[0]) {return false};
+	if (!$gameSystem.isSideView() && $gameTemp._drill_BCa_select_single_turn[0].isActor()) {return false};
 	return true;
 };
 //==============================
@@ -976,8 +977,8 @@ Spriteset_Battle.prototype.drill_BCa_isTarget = function() {
 //==============================
 Spriteset_Battle.prototype.drill_BCa_isActor = function() {
     if (!$gameSystem.isSideView()) {return false};
-	if (!$gameTemp._drill_cam_cur_actor) {return false};
-	if (!$gameTemp._drill_cam_cur_actor[0]) {return false};
+	if (!$gameTemp._drill_BCa_cur_actor) {return false};
+	if (!$gameTemp._drill_BCa_cur_actor[0]) {return false};
 	return true;
 };
 
@@ -1024,7 +1025,7 @@ Spriteset_Battle.prototype.update = function() {
 if( Imported.MOG_ChainCommands ){
 	var _drill_mog_updateFocus = Spriteset_Battle.prototype.updateFocus;
 	Spriteset_Battle.prototype.updateFocus = function() {
-		if ($gameTemp._bchainTemp) {$gameTemp._drill_cam_being_attack[2] = 0};//技能 - 按键连锁攻击（下一段招不等待）
+		if ($gameTemp._bchainTemp) {$gameTemp._drill_BCa_being_attack[2] = 0};//技能 - 按键连锁攻击（下一段招不等待）
 		_drill_mog_updateFocus.call(this);
 	};
 };

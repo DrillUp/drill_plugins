@@ -802,14 +802,14 @@ var _Drill_EFOE_s_update = Sprite_Character.prototype.update;
 Sprite_Character.prototype.update = function() {
 	_Drill_EFOE_s_update.call(this);
 	if ( this._character && this._Drill_EFOE ) {
-		this.update_EFOE_effect();			//执行变换
-		this.update_EFOE_bitmap();			//获取图片宽高
+		this.drill_EFOE_updateEffect();			//执行变换
+		this.drill_EFOE_updateBitmap();			//获取图片宽高
 	}
 };
 //==============================
 // * 帧刷新 - 执行变换
 //==============================
-Sprite_Character.prototype.update_EFOE_effect = function() {
+Sprite_Character.prototype.drill_EFOE_updateEffect = function() {
 	if( !this._character.drill_EFOE_isPlaying() ){ return; }
 	
 	this.x += this._Drill_EFOE.x ;					// x
@@ -825,7 +825,7 @@ Sprite_Character.prototype.update_EFOE_effect = function() {
 //==============================
 // * 帧刷新 - 获取图片宽高
 //==============================
-Sprite_Character.prototype.update_EFOE_bitmap = function() {
+Sprite_Character.prototype.drill_EFOE_updateBitmap = function() {
 	if( this.bitmap && this.bitmap.isReady() ){
 		this._Drill_EFOE.real_width = this.patternWidth();
 		this._Drill_EFOE.real_height = this.patternHeight();

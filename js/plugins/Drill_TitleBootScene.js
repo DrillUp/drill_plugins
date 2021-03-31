@@ -561,26 +561,36 @@ if( typeof(Liquidize) != "undefined" && typeof(Liquidize.MadeWithMV) != "undefin
 //==============================
 var _drill_TBS_boot_start = Scene_Boot.prototype.start;
 Scene_Boot.prototype.start = function() {
+	
+	// > 全屏模式
 	if ( DrillUp.g_TBS_screen_mode === "全屏模式" ) {
 		Graphics._requestFullScreen();
 		
+	// > 窗口模式
 	}else if( DrillUp.g_TBS_screen_mode === "窗口模式" ){
 		
-		if( DrillUp.g_TBS_screen_maximize && Utils.isNwjs() ){
-			var gui = require('nw.gui'); 
-			var win = gui.Window.get(); 
-			win.maximize(); 
-		}else if( DrillUp.g_TBS_screen ){	//yep核心控制
-			if( Imported.YEP_CoreEngine ){
-				var w = DrillUp.g_TBS_screen_width - Yanfly.Param.ScreenWidth ;
-				var h = DrillUp.g_TBS_screen_height - Yanfly.Param.ScreenHeight ;
-				window.resizeBy( w , h );
-				window.moveBy( -1*w/2 , -1*h/2 );
-			}else{
-				var w = DrillUp.g_TBS_screen_width - SceneManager._screenWidth ;
-				var h = DrillUp.g_TBS_screen_height - SceneManager._screenHeight ;
-				window.resizeBy( w , h );
-				window.moveBy( -1*w/2 , -1*h/2 );
+		// > 窗口最大化
+		if( DrillUp.g_TBS_screen_maximize ){
+			if( Utils.isNwjs() ){
+				var gui = require('nw.gui'); 
+				var win = gui.Window.get(); 
+				win.maximize();
+			}
+
+		}else{
+			// > 设置指定大小
+			if( DrillUp.g_TBS_screen ){
+				if( Imported.YEP_CoreEngine ){		//yep核心控制
+					var w = DrillUp.g_TBS_screen_width - Yanfly.Param.ScreenWidth ;
+					var h = DrillUp.g_TBS_screen_height - Yanfly.Param.ScreenHeight ;
+					window.resizeBy( w , h );
+					window.moveBy( -1*w/2 , -1*h/2 );
+				}else{
+					var w = DrillUp.g_TBS_screen_width - SceneManager._screenWidth ;
+					var h = DrillUp.g_TBS_screen_height - SceneManager._screenHeight ;
+					window.resizeBy( w , h );
+					window.moveBy( -1*w/2 , -1*h/2 );
+				}	
 			}
 		}
 	}

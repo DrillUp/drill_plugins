@@ -287,7 +287,8 @@ Game_System.prototype.initialize = function() {
 //==============================
 var _drill_COI_onRightButtonDown = TouchInput._onRightButtonDown;
 TouchInput._onRightButtonDown = function(event) {
-	if( $gameSystem._drill_COI_menu_mouse == true && SceneManager._scene.constructor.name === "Scene_Map" ){
+	if( ($gameSystem && $gameSystem._drill_COI_menu_mouse == true) && 
+		SceneManager._scene.constructor.name === "Scene_Map" ){
 		
 	}else{
 		_drill_COI_onRightButtonDown.call(this,event);
@@ -298,7 +299,8 @@ TouchInput._onRightButtonDown = function(event) {
 //==============================
 var _drill_COI_onTouchStart = TouchInput._onTouchStart;
 TouchInput._onTouchStart = function(event) {
-	if( $gameSystem._drill_COI_menu_touchPad == true && SceneManager._scene.constructor.name === "Scene_Map" ){
+	if( ($gameSystem && $gameSystem._drill_COI_menu_touchPad == true) && 
+		SceneManager._scene.constructor.name === "Scene_Map" ){
 		if (event.touches.length >= 2) {
 			this._drill_COI_forbid_menu = true;
 		}
