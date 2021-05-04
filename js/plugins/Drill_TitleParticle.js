@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        标题 - 多层标题粒子
+ * @plugindesc [v1.5]        标题 - 多层标题粒子
  * @author Drill_up
  * 
  * @Drill_LE_param "粒子-%d"
@@ -100,6 +100,9 @@
  * [v1.4]
  * 优化了内部结构，修改了插件指令格式。
  * 添加了粒子遮罩功能。
+ * [v1.5]
+ * 优化了内部结构。
+ * 旋转速度单位改为 角度/帧。
  *
  *
  *
@@ -665,9 +668,8 @@
  * @default 0
  *
  * @param 粒子旋转速度
- * @desc 正数逆时针，负数顺时针，单位 弧度/帧。(1秒60帧)
- * 6.28表示一圈，设置0.01表示大概10秒转一圈，设置0则不旋转。
- * @default 0.01
+ * @desc 正数逆时针，负数顺时针，单位 角度/帧。(1秒60帧，360.0为一周)
+ * @default 1.5
  *
  * @param 菜单层级
  * @type select
@@ -732,28 +734,43 @@
 　　var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_TitleParticle');
 	
+	//==============================
+	// * 变量获取 - 粒子
+	//				（~struct~TitleParticle）
+	//==============================
+	DrillUp.drill_TPa_particleInit = function( dataFrom ) {
+		var data = {};
+		data['visible'] = String( dataFrom["初始是否显示"] || "true") == "true";
+		data['src_img'] = String( dataFrom["资源-粒子"] || "");
+		data['src_img_mask'] = String( dataFrom["资源-粒子遮罩"] || "");
+		data['x'] = Number( dataFrom["平移-粒子 X"] || 0);
+		data['y'] = Number( dataFrom["平移-粒子 Y"] || 0);
+		data['opacity'] = Number( dataFrom["透明度"] || 255);
+		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
+		data['menu_index'] = Number( dataFrom["菜单层级"] || 0);
+		data['zIndex'] = Number( dataFrom["图片层级"] || 0);
+		
+		data['count'] = Number( dataFrom["粒子数量"] || 0);
+		data['x_speed'] = Number( dataFrom["粒子X速度"] || 0.0);
+		data['y_speed'] = Number( dataFrom["粒子Y速度"] || 0.0);
+		data['rotation'] = Number( dataFrom["粒子旋转速度"] || 0.0);
+		return data;
+	}
 	
+	/*-----------------粒子------------------*/
 	DrillUp.g_TPa_list_length = 80;
 	DrillUp.g_TPa_list = [];
 	for (var i = 0; i < DrillUp.g_TPa_list_length; i++) {
 		if( DrillUp.parameters["粒子-" + String(i+1) ] != undefined &&
 			DrillUp.parameters["粒子-" + String(i+1) ] != "" ){
-			DrillUp.g_TPa_list[i] = JSON.parse(DrillUp.parameters["粒子-" + String(i+1) ]);
-			DrillUp.g_TPa_list[i]['visible'] = String(DrillUp.g_TPa_list[i]["初始是否显示"] || "true") == "true";
-			DrillUp.g_TPa_list[i]['src_img'] = String(DrillUp.g_TPa_list[i]["资源-粒子"] || "");
-			DrillUp.g_TPa_list[i]['src_img_mask'] = String(DrillUp.g_TPa_list[i]["资源-粒子遮罩"] || "");
-			DrillUp.g_TPa_list[i]['x'] = Number(DrillUp.g_TPa_list[i]["平移-粒子 X"] || 0);
-			DrillUp.g_TPa_list[i]['y'] = Number(DrillUp.g_TPa_list[i]["平移-粒子 Y"] || 0);
-			DrillUp.g_TPa_list[i]['opacity'] = Number(DrillUp.g_TPa_list[i]["透明度"] || 255);
-			DrillUp.g_TPa_list[i]['blendMode'] = Number(DrillUp.g_TPa_list[i]["混合模式"] || 0);
-			DrillUp.g_TPa_list[i]['count'] = Number(DrillUp.g_TPa_list[i]["粒子数量"] || 0);
-			DrillUp.g_TPa_list[i]['x_speed'] = Number(DrillUp.g_TPa_list[i]["粒子X速度"] || 0);
-			DrillUp.g_TPa_list[i]['y_speed'] = Number(DrillUp.g_TPa_list[i]["粒子Y速度"] || 0);
-			DrillUp.g_TPa_list[i]['rotation'] = Number(DrillUp.g_TPa_list[i]["粒子旋转速度"] || 0);
-			DrillUp.g_TPa_list[i]['menu_index'] = Number(DrillUp.g_TPa_list[i]["菜单层级"] || 0);
-			DrillUp.g_TPa_list[i]['zIndex'] = Number(DrillUp.g_TPa_list[i]["图片层级"] || 0);
+			var temp = JSON.parse(DrillUp.parameters["粒子-" + String(i+1) ]);
+			DrillUp.g_TPa_list[i] = DrillUp.drill_TPa_particleInit( temp );
+			DrillUp.g_TPa_list[i]['id'] = Number(i)+1;
+			DrillUp.g_TPa_list[i]['inited'] = true;
 		}else{
-			DrillUp.g_TPa_list[i] = null;
+			DrillUp.g_TPa_list[i] = DrillUp.drill_TPa_particleInit( {} );
+			DrillUp.g_TPa_list[i]['id'] = Number(i)+1;
+			DrillUp.g_TPa_list[i]['inited'] = false;
 		}
 	}
 	
@@ -772,11 +789,10 @@
 			DrillUp.global_TPa_visible = [];
 			for (var i = 0; i < DrillUp.g_TPa_list.length; i++) {
 				var temp_data = DrillUp.g_TPa_list[i];
-				if( temp_data ){
-					DrillUp.global_TPa_visible.push( temp_data['visible'] );
-				}else{
-					DrillUp.global_TPa_visible.push( false );
-				}
+				if( temp_data == undefined ){ continue; }
+				if( temp_data['inited'] != true ){ continue; }
+					
+				DrillUp.global_TPa_visible[i] = temp_data['visible'];
 			}
 		}
 	}
@@ -854,8 +870,8 @@ var _drill_TPa_createBackground = Scene_Title.prototype.createBackground;
 Scene_Title.prototype.createBackground = function() {
 	// > 粒子初始化
 	SceneManager._drill_TPa_created = false;	
-   	this._drill_TPa_sprites = [];
-   	this._drill_TPa_sprites_data = [];
+   	this._drill_TPa_spriteTank = [];
+   	this._drill_TPa_dataTank = [];
 	
 	_drill_TPa_createBackground.call(this);		//与背景一同创建
 	
@@ -903,9 +919,9 @@ Scene_Title.prototype.update = function() {
 Scene_Title.prototype.drill_TPa_create = function() {	
 	SceneManager._drill_TPa_created = true;
 	
-	if(!this._drill_TPa_sprites){
-		this._drill_TPa_sprites = [];		//防止某些覆写的菜单报错
-		this._drill_TPa_sprites_data = [];
+	if(!this._drill_TPa_spriteTank){
+		this._drill_TPa_spriteTank = [];		//防止某些覆写的菜单报错
+		this._drill_TPa_dataTank = [];
 	}
 	if( !this._backgroundSprite ){		//菜单后面层
 		this._backgroundSprite = new Sprite();
@@ -917,34 +933,36 @@ Scene_Title.prototype.drill_TPa_create = function() {
 	
 	// > 配置的粒子
 	for (var i = 0; i < DrillUp.g_TPa_list.length; i++) {
-		if( DrillUp.g_TPa_list[i] == undefined ){ continue; }
+		var temp_data = DrillUp.g_TPa_list[i];
+		if( temp_data == undefined ){ continue; }
+		if( temp_data['inited'] != true ){ continue; }
+		
 		// > 粒子贴图
 		var temp_layer = new Sprite();
-		var temp_layer_data = DrillUp.g_TPa_list[i];
 		
 		// > 粒子集合
-		for( var j = 0; j < temp_layer_data['count'] ; j++ ){	
-			var temp_sprite_data = JSON.parse(JSON.stringify( temp_layer_data ));	//深拷贝数据（杜绝引用造成的修改）
+		for( var j = 0; j < temp_data['count'] ; j++ ){	
+			var temp_sprite_data = JSON.parse(JSON.stringify( temp_data ));	//深拷贝数据（杜绝引用造成的修改）
 			var temp_sprite = new Sprite(ImageManager.loadTitle1(temp_sprite_data['src_img']));
 			temp_sprite.anchor.x = 0.5;
 			temp_sprite.anchor.y = 0.5;
 			temp_sprite.blendMode = temp_sprite_data['blendMode'];
-			temp_sprite.visible = DrillUp.global_TPa_visible[i];
+			temp_sprite.visible = DrillUp.global_TPa_visible[i] || false;
 			temp_layer.zIndex = temp_sprite_data['zIndex'];
-			this._drill_TPa_sprites.push(temp_sprite);
-			this._drill_TPa_sprites_data.push(temp_sprite_data);
+			this._drill_TPa_spriteTank.push(temp_sprite);
+			this._drill_TPa_dataTank.push(temp_sprite_data);
 			
 			temp_layer.addChild(temp_sprite);
-			this.drill_TPa_resetParticles(this._drill_TPa_sprites_data.length-1);
+			this.drill_TPa_resetParticles(this._drill_TPa_dataTank.length-1);
 		}
 		
 		// > 粒子遮罩
-		if( temp_layer_data['src_img_mask'] != "" ){
-			var temp_mask = new Sprite(ImageManager.loadTitle1(temp_layer_data['src_img_mask']));
+		if( temp_data['src_img_mask'] != "" ){
+			var temp_mask = new Sprite(ImageManager.loadTitle1(temp_data['src_img_mask']));
 			temp_layer.addChild(temp_mask);
 			temp_layer.mask = temp_mask;
 		}
-		if( temp_layer_data['menu_index'] == 0 ){
+		if( temp_data['menu_index'] == 0 ){
 			this._backgroundSprite.addChild(temp_layer);
 		}else{
 			this._foregroundSprite.addChild(temp_layer);
@@ -958,14 +976,22 @@ Scene_Title.prototype.drill_TPa_create = function() {
 // * 粒子 - 帧刷新
 //==============================
 Scene_Title.prototype.drill_TPa_update = function() {
-	for (var i = 0; i < this._drill_TPa_sprites.length; i++) {
-		this._drill_TPa_sprites[i].x += this._drill_TPa_sprites_data[i]['x_speed_random'];
-		this._drill_TPa_sprites[i].y += this._drill_TPa_sprites_data[i]['y_speed_random'];
-		this._drill_TPa_sprites[i].rotation += this._drill_TPa_sprites_data[i]['rotation_random'];
-		this._drill_TPa_sprites[i].opacity += 3 * this._drill_TPa_sprites_data[i]['opacity_dir'];
-		if(this._drill_TPa_sprites[i].opacity >= 255){
-			this._drill_TPa_sprites_data[i]['opacity_dir'] = -1 * Math.random() ;
+	for (var i = 0; i < this._drill_TPa_spriteTank.length; i++) {
+		
+		// > 位置
+		this._drill_TPa_spriteTank[i].x += this._drill_TPa_dataTank[i]['x_speed_random'];
+		this._drill_TPa_spriteTank[i].y += this._drill_TPa_dataTank[i]['y_speed_random'];
+		
+		// > 透明度
+		this._drill_TPa_spriteTank[i].opacity += 3 * this._drill_TPa_dataTank[i]['opacity_dir'];
+		if(this._drill_TPa_spriteTank[i].opacity >= 255){
+			this._drill_TPa_dataTank[i]['opacity_dir'] = -1 * Math.random() ;
 		}
+		
+		// > 自旋转
+		this._drill_TPa_spriteTank[i].rotation += this._drill_TPa_dataTank[i]['rotation_random'] /180*Math.PI;
+		
+		// > 过界刷新
     	if( this.drill_TPa_needResetParticles(i) ){
 			this.drill_TPa_resetParticles(i);
 		};
@@ -976,8 +1002,8 @@ Scene_Title.prototype.drill_TPa_update = function() {
 // * 粒子 - 重设条件
 //==============================	
 Scene_Title.prototype.drill_TPa_needResetParticles = function(i) {
-	var spr = this._drill_TPa_sprites[i];
-	var data = this._drill_TPa_sprites_data[i];
+	var spr = this._drill_TPa_spriteTank[i];
+	var data = this._drill_TPa_dataTank[i];
 	
 	if (spr.x < -1 * Math.abs(data['start_x_fix']) - spr.width * 3) {return true};		//过边界
 	if (spr.x > Math.abs(data['start_x_fix']) + Graphics.boxWidth + spr.width * 3) {return true};
@@ -993,8 +1019,8 @@ Scene_Title.prototype.drill_TPa_needResetParticles = function(i) {
 // * 粒子 - 重设
 //==============================	
 Scene_Title.prototype.drill_TPa_resetParticles = function(i) {
-	var spr = this._drill_TPa_sprites[i];
-	var data = this._drill_TPa_sprites_data[i];
+	var spr = this._drill_TPa_spriteTank[i];
+	var data = this._drill_TPa_dataTank[i];
 	
 	data['x_speed_random'] = ((Math.random() * 2) + 0.4) * data['x_speed'] + Math.random()-0.5;		//偏随机x方向
 	data['y_speed_random'] = ((Math.random() * 2) + 0.4) * data['y_speed'] + Math.random()-0.5;		//偏随机y方向
@@ -1013,8 +1039,8 @@ Scene_Title.prototype.drill_TPa_resetParticles = function(i) {
 	var pz = ((Math.random() * 0.5) * 1);
 	spr.scale = new PIXI.Point(0.5 + Number(pz), 0.5 + Number(pz));
 	
-	//this._drill_TPa_sprites[i] = spr;			//data得到的是变量地址，不需要重新赋值
-	//this._drill_TPa_sprites_data[i] = data;
+	//this._drill_TPa_spriteTank[i] = spr;			//data得到的是变量地址，不需要重新赋值
+	//this._drill_TPa_dataTank[i] = data;
 	
 };
 

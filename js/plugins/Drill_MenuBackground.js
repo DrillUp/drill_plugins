@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        主菜单 - 多层菜单背景
+ * @plugindesc [v1.5]        主菜单 - 多层菜单背景
  * @author Drill_up
  * 
  * @Drill_LE_param "背景-%d"
@@ -110,6 +110,8 @@
  * [v1.4]
  * 优化了内部结构，修改了插件指令格式。
  * 添加了背景遮罩功能。
+ * [v1.5]
+ * 优化了内部结构。
  *
  *
  * @param 底图设置
@@ -828,8 +830,8 @@
 //		★其它说明细节：
 //			1.插件结构并不复杂，但是坑多，需要理清楚下面变量的关系：
 //				DrillUp.g_MBa_list		获取的值（80个）
-//				this._drill_MBa_sprites_data	符合的值（小于80个，不要将数组二者混合使用）
-//				this._drill_MBa_sprites		符合的图片（小于80个）
+//				this._drill_MBa_dataTank	符合的值（小于80个，不要将数组二者混合使用）
+//				this._drill_MBa_spriteTank		符合的图片（小于80个）
 //				temp_sprite			临时图片
 //				temp_sprite_data	临时的值
 //
@@ -845,45 +847,77 @@
 　　var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_MenuBackground');
 	
-	DrillUp.g_MBa_backgrounds_bottom_visible = String(DrillUp.parameters['底图设置'] || "true") === "true";	
-	DrillUp.g_MBa_default = {};
-	if( DrillUp.parameters["默认背景"] != undefined && 
-		DrillUp.parameters["默认背景"] != "" ){
-		DrillUp.g_MBa_default = JSON.parse(DrillUp.parameters["默认背景"]);
-		DrillUp.g_MBa_default['visible'] = String(DrillUp.g_MBa_default["初始是否显示"] || "true") == "true";
-		DrillUp.g_MBa_default['src_img'] = String(DrillUp.g_MBa_default["资源-背景"] || "");
-		DrillUp.g_MBa_default['src_img_mask'] = String(DrillUp.g_MBa_default["资源-背景遮罩"] || "");
-		DrillUp.g_MBa_default['x'] = Number(DrillUp.g_MBa_default["平移-背景 X"] || 0);
-		DrillUp.g_MBa_default['y'] = Number(DrillUp.g_MBa_default["平移-背景 Y"] || 0);
-		DrillUp.g_MBa_default['opacity'] = Number(DrillUp.g_MBa_default["透明度"] || 255);
-		DrillUp.g_MBa_default['blendMode'] = Number(DrillUp.g_MBa_default["混合模式"] || 0);
-		DrillUp.g_MBa_default['x_speed'] = Number(DrillUp.g_MBa_default["背景X速度"] || 0);
-		DrillUp.g_MBa_default['y_speed'] = Number(DrillUp.g_MBa_default["背景Y速度"] || 0);
-		DrillUp.g_MBa_default['zIndex'] = Number(DrillUp.g_MBa_default["图片层级"] || 0);
+	//==============================
+	// * 变量获取 - 默认背景
+	//				（~struct~MenuBackgroundDefault）
+	//==============================
+	DrillUp.drill_MBa_backgroundDefaultInit = function( dataFrom ) {
+		var data = {};
+		data['visible'] = String( dataFrom["初始是否显示"] || "true") == "true";
+		data['src_img'] = String( dataFrom["资源-背景"] || "");
+		data['src_img_mask'] = String( dataFrom["资源-背景遮罩"] || "");
+		data['x'] = Number( dataFrom["平移-背景 X"] || 0);
+		data['y'] = Number( dataFrom["平移-背景 Y"] || 0);
+		data['opacity'] = Number( dataFrom["透明度"] || 255);
+		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
+		data['x_speed'] = Number( dataFrom["背景X速度"] || 0);
+		data['y_speed'] = Number( dataFrom["背景Y速度"] || 0);
+		//data['menu_index'] = Number( dataFrom["菜单层级"] || 0);
+		data['zIndex'] = Number( dataFrom["图片层级"] || 0);
+		return data;
+	}
+	//==============================
+	// * 变量获取 - 背景
+	//				（~struct~MenuBackground）
+	//==============================
+	DrillUp.drill_MBa_backgroundInit = function( dataFrom ) {
+		var data = {};
+		data['menu'] = String( dataFrom["所属菜单"] || "");
+		data['menu_key'] = String( dataFrom["自定义关键字"] || "");
+		data['visible'] = String( dataFrom["初始是否显示"] || "true") == "true";
+		data['src_img'] = String( dataFrom["资源-背景"] || "");
+		data['src_img_mask'] = String( dataFrom["资源-背景遮罩"] || "");
+		data['x'] = Number( dataFrom["平移-背景 X"] || 0);
+		data['y'] = Number( dataFrom["平移-背景 Y"] || 0);
+		data['opacity'] = Number( dataFrom["透明度"] || 255);
+		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
+		data['x_speed'] = Number( dataFrom["背景X速度"] || 0);
+		data['y_speed'] = Number( dataFrom["背景Y速度"] || 0);
+		data['menu_index'] = Number( dataFrom["菜单层级"] || 0);
+		data['zIndex'] = Number( dataFrom["图片层级"] || 0);
+		return data;
 	}
 	
+	
+	/*-----------------杂项------------------*/
+	DrillUp.g_MBa_backgrounds_bottom_visible = String(DrillUp.parameters['底图设置'] || "true") === "true";	
+	if( DrillUp.parameters["默认背景"] != undefined && 
+		DrillUp.parameters["默认背景"] != "" ){
+		var temp = JSON.parse(DrillUp.parameters["默认背景"]);
+		DrillUp.g_MBa_default = DrillUp.drill_MBa_backgroundDefaultInit( temp );
+		DrillUp.g_MBa_default['id'] = 0;
+		DrillUp.g_MBa_default['inited'] = true;
+	}else{   
+		DrillUp.g_MBa_default = DrillUp.drill_MBa_backgroundDefaultInit( {} );
+		DrillUp.g_MBa_default['id'] = 0;
+		DrillUp.g_MBa_default['inited'] = false;
+	}
+	
+	/*-----------------背景------------------*/
 	DrillUp.g_MBa_list_length = 80;
 	DrillUp.g_MBa_list = [];
 	DrillUp.g_MBa_list[0] = DrillUp.g_MBa_default;
 	for (var i = 1; i <= DrillUp.g_MBa_list_length; i++) {
 		if( DrillUp.parameters["背景-" + String(i) ] != undefined &&
 			DrillUp.parameters["背景-" + String(i) ] != "" ){
-			DrillUp.g_MBa_list[i] = JSON.parse(DrillUp.parameters["背景-" + String(i) ]);
-			DrillUp.g_MBa_list[i]['visible'] = String(DrillUp.g_MBa_list[i]["初始是否显示"] || "true") == "true";
-			DrillUp.g_MBa_list[i]['menu'] = String(DrillUp.g_MBa_list[i]["所属菜单"] || "");
-			DrillUp.g_MBa_list[i]['menu_key'] = String(DrillUp.g_MBa_list[i]["自定义关键字"] || "");
-			DrillUp.g_MBa_list[i]['src_img'] = String(DrillUp.g_MBa_list[i]["资源-背景"] || "");
-			DrillUp.g_MBa_list[i]['src_img_mask'] = String(DrillUp.g_MBa_list[i]["资源-背景遮罩"] || "");
-			DrillUp.g_MBa_list[i]['x'] = Number(DrillUp.g_MBa_list[i]["平移-背景 X"] || 0);
-			DrillUp.g_MBa_list[i]['y'] = Number(DrillUp.g_MBa_list[i]["平移-背景 Y"] || 0);
-			DrillUp.g_MBa_list[i]['opacity'] = Number(DrillUp.g_MBa_list[i]["透明度"] || 255);
-			DrillUp.g_MBa_list[i]['blendMode'] = Number(DrillUp.g_MBa_list[i]["混合模式"] || 0);
-			DrillUp.g_MBa_list[i]['x_speed'] = Number(DrillUp.g_MBa_list[i]["背景X速度"] || 0);
-			DrillUp.g_MBa_list[i]['y_speed'] = Number(DrillUp.g_MBa_list[i]["背景Y速度"] || 0);
-			DrillUp.g_MBa_list[i]['menu_index'] = Number(DrillUp.g_MBa_list[i]["菜单层级"] || 0);
-			DrillUp.g_MBa_list[i]['zIndex'] = Number(DrillUp.g_MBa_list[i]["图片层级"] || 0);
+			var temp = JSON.parse(DrillUp.parameters["背景-" + String(i) ]);
+			DrillUp.g_MBa_list[i] = DrillUp.drill_MBa_backgroundInit( temp );
+			DrillUp.g_MBa_list[i]['id'] = Number(i);
+			DrillUp.g_MBa_list[i]['inited'] = true;
 		}else{
-			DrillUp.g_MBa_list[i] = null;
+			DrillUp.g_MBa_list[i] = DrillUp.drill_MBa_backgroundInit( {} );
+			DrillUp.g_MBa_list[i]['id'] = Number(i);
+			DrillUp.g_MBa_list[i]['inited'] = false;
 		}
 	}
 	
@@ -951,9 +985,10 @@ Game_System.prototype.initialize = function() {
 	this._drill_MBa_visible = [];					//显示控制
 	for(var i = 0; i< DrillUp.g_MBa_list.length ;i++){
 		var temp_data = DrillUp.g_MBa_list[i];
-		if( temp_data ){
-			this._drill_MBa_visible[i] = temp_data['visible'];
-		}
+		if( temp_data == undefined ){ continue; }
+		if( temp_data['inited'] != true ){ continue; }
+		
+		this._drill_MBa_visible[i] = temp_data['visible'];
 	}
 };
 
@@ -967,8 +1002,8 @@ var _drill_MBa_createBackground = Scene_MenuBase.prototype.createBackground;
 Scene_MenuBase.prototype.createBackground = function() {
 	// > 背景初始化
 	SceneManager._drill_MBa_created = false;	
-   	this._drill_MBa_sprites = [];
-   	this._drill_MBa_sprites_data = [];	//注意，该数组与DrillUp.g_MBa_list数组的下标不同步，要使用data
+   	this._drill_MBa_spriteTank = [];
+   	this._drill_MBa_dataTank = [];	//注意，该数组与DrillUp.g_MBa_list数组的下标不同步，要使用data
 	
 	_drill_MBa_createBackground.call(this);
 	
@@ -1018,9 +1053,9 @@ Scene_MenuBase.prototype.update = function() {
 Scene_MenuBase.prototype.drill_MBa_create = function() {	
 	SceneManager._drill_MBa_created = true;
 	
-	if(!this._drill_MBa_sprites){
-		this._drill_MBa_sprites = [];	//防止某些覆写的菜单报错
-		this._drill_MBa_sprites_data = [];
+	if(!this._drill_MBa_spriteTank){
+		this._drill_MBa_spriteTank = [];	//防止某些覆写的菜单报错
+		this._drill_MBa_dataTank = [];
 	}
 	if( !this._backgroundSprite ){		//菜单后面层
 		this._backgroundSprite = new Sprite();
@@ -1032,18 +1067,23 @@ Scene_MenuBase.prototype.drill_MBa_create = function() {
 	
 	// > 配置的背景
 	for (var i = 1; i < DrillUp.g_MBa_list.length; i++) {
-		if( this.drill_MBa_checkKeyword(i) ){
+		var temp_data = DrillUp.g_MBa_list[i];
+		if( temp_data == undefined ){ continue; }
+		if( temp_data['inited'] != true ){ continue; }
+		
+		if( this.drill_MBa_checkKeyword( temp_data ) ){
+			
 			// > 背景贴图
-			var temp_sprite_data = JSON.parse(JSON.stringify( DrillUp.g_MBa_list[i] ));	//深拷贝数据（杜绝引用造成的修改）
+			var temp_sprite_data = JSON.parse(JSON.stringify( temp_data ));		//深拷贝数据（杜绝引用造成的修改）
 			var temp_sprite = new TilingSprite(ImageManager.load_MenuLayer(temp_sprite_data['src_img']));	//TilingSprite平铺图层
 			temp_sprite.move(0, 0, Graphics.width, Graphics.height);
 			temp_sprite.origin.x = temp_sprite_data['x'];
 			temp_sprite.origin.y = temp_sprite_data['y'];
 			temp_sprite.opacity = temp_sprite_data['opacity'];
 			temp_sprite.blendMode = temp_sprite_data['blendMode'];
-			temp_sprite.visible = $gameSystem._drill_MBa_visible[i];
-			this._drill_MBa_sprites.push(temp_sprite);
-			this._drill_MBa_sprites_data.push(temp_sprite_data);
+			temp_sprite.visible = $gameSystem._drill_MBa_visible[i] || false;
+			this._drill_MBa_spriteTank.push(temp_sprite);
+			this._drill_MBa_dataTank.push(temp_sprite_data);
 			
 			// > 背景父级
 			var temp_layer = new Sprite();
@@ -1066,46 +1106,46 @@ Scene_MenuBase.prototype.drill_MBa_create = function() {
 	}
 	
 	// > 默认背景
-	if(this._drill_MBa_sprites.length == 0 ){
+	if(this._drill_MBa_spriteTank.length == 0 ){
 		var i = $gameSystem._drill_MBa_default;
-		if( DrillUp.g_MBa_list[i] != undefined ){
-			// > 背景贴图
-			var temp_sprite_data = JSON.parse(JSON.stringify( DrillUp.g_MBa_list[i] ));	//深拷贝数据（杜绝引用造成的修改）
-			var temp_sprite = new TilingSprite(ImageManager.load_MenuLayer(temp_sprite_data['src_img']));	//TilingSprite平铺图层
-			temp_sprite.move(0, 0, Graphics.width, Graphics.height);
-			temp_sprite.origin.x = temp_sprite_data['x'];
-			temp_sprite.origin.y = temp_sprite_data['y'];
-			temp_sprite.opacity = temp_sprite_data['opacity'];
-			temp_sprite.blendMode = temp_sprite_data['blendMode'];
-			temp_sprite.visible = $gameSystem._drill_MBa_visible[i];
-			this._drill_MBa_sprites.push(temp_sprite);
-			this._drill_MBa_sprites_data.push(temp_sprite_data);
-			
-			// > 背景父级
-			var temp_layer = new Sprite();
-			temp_layer.addChild(temp_sprite);
-			temp_layer.zIndex = temp_sprite_data['zIndex'];
-			
-			// > 背景遮罩
-			if( temp_sprite_data['src_img_mask'] != "" ){
-				var temp_mask = new Sprite(ImageManager.load_MenuLayer(temp_sprite_data['src_img_mask']));
-				temp_layer.addChild(temp_mask);
-				temp_layer.mask = temp_mask;
-			}
-			
-			this._backgroundSprite.addChild(temp_layer);
+		var temp_data = DrillUp.g_MBa_list[i];
+		if( temp_data == undefined ){ return; }
+		if( temp_data['inited'] != true ){ return; }
+		
+		// > 背景贴图
+		var temp_sprite_data = JSON.parse(JSON.stringify( temp_data ));			//深拷贝数据（杜绝引用造成的修改）
+		var temp_sprite = new TilingSprite(ImageManager.load_MenuLayer(temp_sprite_data['src_img']));	//TilingSprite平铺图层
+		temp_sprite.move(0, 0, Graphics.width, Graphics.height);
+		temp_sprite.origin.x = temp_sprite_data['x'];
+		temp_sprite.origin.y = temp_sprite_data['y'];
+		temp_sprite.opacity = temp_sprite_data['opacity'];
+		temp_sprite.blendMode = temp_sprite_data['blendMode'];
+		temp_sprite.visible = $gameSystem._drill_MBa_visible[i] || false;
+		this._drill_MBa_spriteTank.push(temp_sprite);
+		this._drill_MBa_dataTank.push(temp_sprite_data);
+		
+		// > 背景父级
+		var temp_layer = new Sprite();
+		temp_layer.addChild(temp_sprite);
+		temp_layer.zIndex = temp_sprite_data['zIndex'];
+		
+		// > 背景遮罩
+		if( temp_sprite_data['src_img_mask'] != "" ){
+			var temp_mask = new Sprite(ImageManager.load_MenuLayer(temp_sprite_data['src_img_mask']));
+			temp_layer.addChild(temp_mask);
+			temp_layer.mask = temp_mask;
 		}
+		
+		this._backgroundSprite.addChild(temp_layer);
+		
 	}
 	this.drill_MBa_sortByZIndex();
 };
 //==============================
 // * 背景 - 检查位置
 //==============================
-Scene_MenuBase.prototype.drill_MBa_checkKeyword = function(i) {
-	var temp_sprite_data = DrillUp.g_MBa_list[i] ; 	//注意，执行该方法，是在DrillUp.g_MBa_list中遍历
-	if( temp_sprite_data == undefined ) {
-		return false;
-	}
+Scene_MenuBase.prototype.drill_MBa_checkKeyword = function( temp_sprite_data ){
+	
 	/*---------------标准----------------*/
 	if( SceneManager._scene.constructor.name === "Scene_Menu" && temp_sprite_data['menu'] == "主菜单" ){
 		return true;
@@ -1152,9 +1192,9 @@ Scene_MenuBase.prototype.drill_MBa_checkKeyword = function(i) {
 // * 背景 - 帧刷新
 //==============================
 Scene_MenuBase.prototype.drill_MBa_update = function() {
-	for (var i = 0; i < this._drill_MBa_sprites.length; i++) {
-		this._drill_MBa_sprites[i].origin.x += this._drill_MBa_sprites_data[i]['x_speed'];
-		this._drill_MBa_sprites[i].origin.y += this._drill_MBa_sprites_data[i]['y_speed'];
+	for (var i = 0; i < this._drill_MBa_spriteTank.length; i++) {
+		this._drill_MBa_spriteTank[i].origin.x += this._drill_MBa_dataTank[i]['x_speed'];
+		this._drill_MBa_spriteTank[i].origin.y += this._drill_MBa_dataTank[i]['y_speed'];
 	};
 };
 

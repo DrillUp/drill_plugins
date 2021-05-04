@@ -1118,7 +1118,7 @@ Drill_COAS_Data.prototype.drill_COAS_setSequence = function( seq ){
 // * 数据 - 状态元 - 设置状态元序列-立刻改变（接口）
 //==============================
 Drill_COAS_Data.prototype.drill_COAS_setSequenceImmediate = function( seq ){
-	this.drill_COAS_setSequence();
+	this.drill_COAS_setSequence( seq );
 	this._drill_state_curCom = "";
 	this._drill_state_curTime = 0;
 }
@@ -1411,9 +1411,23 @@ Drill_COAS_SpriteDecorator.prototype.drill_COAS_addParent = function( parent ){
 // * 对象 - 去除父类（接口）
 //==============================
 Drill_COAS_SpriteDecorator.prototype.drill_COAS_removeParent = function( parent ){
-	for( var i=0; i < this._drill_parents.length; i++ ){
+	for( var i=this._drill_parents.length-1; i >= 0; i-- ){
 		if( this._drill_parents[i] == parent ){
 			this._drill_parents.splice(i,1);
+			this._drill_COAS_parentBitmapTank.splice(i,1);
+			break;
+		}
+	}
+};
+//==============================
+// * 对象 - 外部设置的 父类bitmap资源 变化（接口）
+//
+//			说明：	部分插件可能会对父类单图的bitmap做修改，子插件需要确保关闭动画序列后，单图能还原。
+//==============================
+Drill_COAS_SpriteDecorator.prototype.drill_COAS_parentBitmapChanged = function( parent, bitmap ){
+	for( var i=0; i < this._drill_parents.length; i++ ){
+		if( this._drill_parents[i] == parent ){
+			this._drill_COAS_parentBitmapTank[i] = bitmap;
 			break;
 		}
 	}

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        物体 - 事件的声音
+ * @plugindesc [v1.3]        物体 - 事件的声音
  * @author Drill_up
  * 
  * 
@@ -20,8 +20,11 @@
  * -----------------------------------------------------------------------------
  * ----插件扩展
  * 插件可以配合目标插件一起使用，也可以单独使用。
+ * 基于：
+ *   - Drill_RmmvCoreFix    系统 - rmmv核心修复 ★★v1.1及以上版本★★
+ *     rmmv内部有声音数组bug，必须让目标插件修好bug后，才能用此插件。
  * 可作用于：
- *   - Drill_LayerCamera  地图 - 活动地图镜头 ★★v1.6及以上版本★★
+ *   - Drill_LayerCamera    地图 - 活动地图镜头 ★★v1.6及以上版本★★
  *     目标插件控制镜头放大缩小时，你能够听到的声音范围也会变化。
  * 
  * -----------------------------------------------------------------------------
@@ -34,8 +37,14 @@
  *   (2.声音衰减从起始距离开始计算，假设衰减起始距离为6，衰减距离为12，
  *      镜头中心宽度为6的菱形区域内的事件，播放的声音为标准上限音量。
  *      若事件与镜头距离大于6，则越远音量越小，距离为18以上的声音是最小音量。
+ *   (3.如果衰减距离值很小，那么你会瞬间听到逐步变大的音量。
+ *      所以距离要与你的地图大小适配，不要太小。
  * 声音中断：
  *   (1.你可以设置事件在释放魔法被打断时，声音突然消失的情况。
+ * rmmv内核bug：
+ *   (1.rmmv内部提供了错误的声音数组，如果同时在远处播放两个以上的声音，会造成
+ *      只有一个声音成功衰减，其他声音是原音量。
+ *   (2.此bug在 rmmv核心修复 插件中修复。
  * 
  * -----------------------------------------------------------------------------
  * ----激活条件 - 声音距离化：
@@ -110,6 +119,9 @@
  * 优化了部分结构。 
  * [v1.2]
  * 修正了事件距离与镜头的中心位置。
+ * [v1.3]
+ * 修复了 两个事件 同时在远处播放声音时，只有一个声音衰减的bug。
+ * 此bug来源于rmmv内核的声音数组bug。
  *
  * 
  *
@@ -149,8 +161,8 @@
  * @parent ---声音距离化---
  * @type number
  * @min 0
- * @desc 当声音开始衰减时，声音由强变弱的图块宽度距离。比如起始为6，衰减距离为12，则距离18位置的音量是最小音量。
- * @default 12
+ * @desc 当声音开始衰减时，声音由强变弱的图块宽度距离。比如起始为6，衰减距离为18，则距离24位置的音量是最小音量。
+ * @default 18
  *
  * @param ---声音中断---
  * @default 
@@ -208,6 +220,7 @@
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_EventSound');
 	
+	/*-----------------声音距离化------------------*/
 	DrillUp.g_ESo_enableDefault = String(DrillUp.parameters['地图默认是否开启距离化'] || "true") === "true";	
 	DrillUp.g_ESo_volumeTop = Number(DrillUp.parameters['音量上限'] || 100) * 0.01;
 	DrillUp.g_ESo_volumeBottom = Number(DrillUp.parameters['音量下限'] || 8) * 0.01;
@@ -215,6 +228,11 @@
 	DrillUp.g_ESo_width = Number(DrillUp.parameters['衰减距离'] || 12);
 	DrillUp.g_ESo_fadeTime = Number(DrillUp.parameters['事件声音淡出时间'] || 45);
 	
+	
+//=============================================================================
+// * >>>>基于插件检测>>>>
+//=============================================================================
+if( Imported.Drill_RmmvCoreFix ){
 	
 //=============================================================================
 // * 插件指令
@@ -418,7 +436,7 @@ Game_Character.prototype.processMoveCommand = function(command) {
 }
 
 //==============================
-// * 绑定 - 动画存储事件id
+// * 绑定 - 动画 - 存储事件id
 //==============================
 var _drill_ESo_startAnimation = Sprite_Base.prototype.startAnimation;
 Sprite_Base.prototype.startAnimation = function(animation, mirror, delay) {
@@ -431,9 +449,8 @@ Sprite_Base.prototype.startAnimation = function(animation, mirror, delay) {
 		}
 	}
 }
-
 //==============================
-// * 绑定 - 播放SE（动画序列）
+// * 绑定 - 动画 - 播放SE（动画序列）
 //==============================
 var _drill_ESo_processTimingData = Sprite_Animation.prototype.processTimingData;
 Sprite_Animation.prototype.processTimingData = function(timing) {
@@ -447,20 +464,23 @@ Sprite_Animation.prototype.processTimingData = function(timing) {
 
 //==============================
 // * 绑定 - se声音存储事件id
+//	
+//			说明：	this._seBuffers 数组有bug，每次过滤后都只剩下一个声音。
+//					该bug需要在系统插件中修复。
 //==============================
-var _drill_ESo_playSe = AudioManager.playSe;
-AudioManager.playSe = function(se) {
-	_drill_ESo_playSe.call(this,se);
-	if( $gameTemp._drill_ESo_event > 0 || $gameTemp._drill_ESo_event == -2 ){
-		if ( se.name ) {
-			var buffer = this._seBuffers[ this._seBuffers.length-1 ];
-			buffer._drill_ESo_event = $gameTemp._drill_ESo_event;		//绑定的事件
-			buffer._drill_ESo_isOff = $gameTemp._drill_ESo_isOff;		//距离化关闭状态
-			buffer._drill_ESo_org_volume = buffer.volume;				//原音量
+var _drill_ESo_createBuffer = AudioManager.createBuffer;
+AudioManager.createBuffer = function(folder, name){
+	var buffer = _drill_ESo_createBuffer.call(this, folder, name);
+	if( folder == 'se' && $gameTemp ){
+		if( $gameTemp._drill_ESo_event > 0 || $gameTemp._drill_ESo_event == -2 ){
+			buffer._drill_ESo_b_event = $gameTemp._drill_ESo_event;			//绑定的事件
+			buffer._drill_ESo_b_isOff = $gameTemp._drill_ESo_isOff;			//距离化关闭状态
+			buffer._drill_ESo_b_volume = buffer.volume;						//原音量
 			$gameTemp._drill_ESo_event = 0;
 		}
 	}
-};
+	return buffer;
+}
 
 //==============================
 // * 绑定 - 获取事件声音（所有）
@@ -470,7 +490,7 @@ AudioManager.drill_ESo_getAllEventSounds = function() {
 	var buffers = this._seBuffers;
 	for( var i=0; i < buffers.length; i++ ){
 		var buffer = buffers[i];
-		if( buffer._drill_ESo_event && buffer._drill_ESo_event > 0 ){
+		if( buffer._drill_ESo_b_event && buffer._drill_ESo_b_event > 0 ){
 			result.push( buffer );
 		}
 	}
@@ -485,7 +505,7 @@ AudioManager.drill_ESo_getEventSoundsById = function( event_id ) {
 	var buffers = this._seBuffers;
 	for( var i=0; i < buffers.length; i++ ){
 		var buffer = buffers[i];
-		if( buffer._drill_ESo_event == event_id ){
+		if( buffer._drill_ESo_b_event == event_id ){
 			result.push( buffer );
 		}
 	}
@@ -500,7 +520,7 @@ AudioManager.drill_ESo_getPlayerSounds = function() {
 	var buffers = this._seBuffers;
 	for( var i=0; i < buffers.length; i++ ){
 		var buffer = buffers[i];
-		if( buffer._drill_ESo_event == -2 ){
+		if( buffer._drill_ESo_b_event == -2 ){
 			result.push( buffer );
 		}
 	}
@@ -550,10 +570,8 @@ AudioManager.drill_ESo_playCharacterSe = function(se,character) {
 var _drill_ESo_map_update = Game_Map.prototype.update;
 Game_Map.prototype.update = function(sceneActive) {
 	_drill_ESo_map_update.call(this,sceneActive);
-	
-	this.drill_ESo_updateDistanceDecay();
-	this.drill_ESo_updateSoundInterrupt();
-	
+	this.drill_ESo_updateDistanceDecay();		//帧刷新 - 距离衰减
+	this.drill_ESo_updateSoundInterrupt();		//帧刷新 - 声音中断
 }
 //==============================
 // * 帧刷新 - 距离衰减
@@ -564,9 +582,11 @@ Game_Map.prototype.drill_ESo_updateDistanceDecay = function() {
 	var buffers = AudioManager.drill_ESo_getAllEventSounds();	//遍历正在播放的声音，根据距离改变音量
 	for( var i=0; i < buffers.length; i++ ){	
 		var buffer = buffers[i];
-		if( buffer._drill_ESo_isOff == true ){ continue; }
-		var e = $gameMap.event(buffer._drill_ESo_event);
-		if( e && e._drill_ESo_isEventOff != true ){
+		if( buffer._drill_ESo_b_isOff != false ){ continue; }
+		
+		// > 事件捕获
+		var e = $gameMap.event(buffer._drill_ESo_b_event);
+		if( e ){
 			var x1 = e._realX + 0.5;						//事件位置（中心位置）
 			var y1 = e._realY + 0.5;
 			var x2 = this._displayX + this.screenTileX()/2;	//镜头中心点
@@ -574,6 +594,7 @@ Game_Map.prototype.drill_ESo_updateDistanceDecay = function() {
 			var d = Math.abs( $gameMap.distance(x1, y1, x2, y2) );
 			var per = 1.00;
 			
+			// > 计算距离
 			var _start = $gameSystem._drill_ESo_start;
 			var _width = $gameSystem._drill_ESo_width;
 			if( Imported.Drill_LayerCamera && $gameSystem.drill_LCa_curScaleX ){
@@ -581,11 +602,12 @@ Game_Map.prototype.drill_ESo_updateDistanceDecay = function() {
 				_width = _width * 2 / ( $gameSystem.drill_LCa_curScaleX() + $gameSystem.drill_LCa_curScaleY() );
 			}
 			
+			// > 计算衰减值
 			if( d > _start ){
 				per = 1.00 - (d - _start) / _width; 
 			}
 			per = Math.min(Math.max( per, $gameSystem._drill_ESo_volumeBottom),$gameSystem._drill_ESo_volumeTop);
-			buffer.volume = buffer._drill_ESo_org_volume * per;
+			buffer.volume = buffer._drill_ESo_b_volume * per;
 		}
 	}
 }
@@ -629,9 +651,9 @@ Game_Map.prototype.drill_ESo_updateSoundInterrupt = function() {
 	// > 淡出过程
 	for( var j=$gameTemp._drill_ESo_needFadeSounds.length-1; j >= 0; j-- ){	
 		var buffer = $gameTemp._drill_ESo_needFadeSounds[j];
-		if( !buffer._drill_ESo_time ){ buffer._drill_ESo_time = 0; }
-		buffer._drill_ESo_time += 1;
-		buffer.volume = 1 - buffer._drill_ESo_org_volume * (buffer._drill_ESo_time / $gameSystem._drill_ESo_fadeTime);
+		if( !buffer._drill_ESo_b_time ){ buffer._drill_ESo_b_time = 0; }
+		buffer._drill_ESo_b_time += 1;
+		buffer.volume = 1 - buffer._drill_ESo_b_volume * (buffer._drill_ESo_b_time / $gameSystem._drill_ESo_fadeTime);
 		if( buffer.volume <= 0 ){
 			buffer.stop();
 			$gameTemp._drill_ESo_needFadeSounds.splice(j,1);
@@ -640,5 +662,16 @@ Game_Map.prototype.drill_ESo_updateSoundInterrupt = function() {
 	
 }
 
+
+//=============================================================================
+// * <<<<基于插件检测<<<<
+//=============================================================================
+}else{
+		Imported.Drill_EventSound = false;
+		alert(
+			"【Drill_EventSound.js 物体 - 事件的声音】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
+			"\n- Drill_RmmvCoreFix 系统 - rmmv核心修复"
+		);
+}
 
 

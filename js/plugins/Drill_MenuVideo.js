@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        主菜单 - 多层菜单视频
+ * @plugindesc [v1.5]        主菜单 - 多层菜单视频
  * @author Drill_up
  * 
  * @Drill_LE_param "视频-%d"
@@ -100,6 +100,10 @@
  * 重新修改了视频的结构。
  * [v1.4]
  * 将视频变成可以配置多层。
+ * [v1.5]
+ * 优化了内部结构。更新了pixi5的兼容情况。
+ * 修复了在播放视频时，突然暂停播放的问题。
+ * 
  * 
  *
  * @param ---视频组---
@@ -469,40 +473,56 @@
 　　var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_MenuVideo');
 
+	//==============================
+	// * 变量获取 - 视频
+	//				（~struct~MenuVideo）
+	//==============================
+	DrillUp.drill_MVi_videoInit = function( dataFrom ) {
+		var data = {};
+		data['menu'] = String( dataFrom["所属菜单"] || "");
+		data['menu_key'] = String( dataFrom["自定义关键字"] || "");
+		data['visible'] = String( dataFrom["初始是否显示"] || "true") == "true";
+		data['src'] = String( dataFrom["资源-视频动画"] || "");
+		//data['src_mask'] = String( dataFrom["资源-视频遮罩"] || "");
+		data['playSound'] = String( dataFrom["是否播放声音"] || "false") == "true"; 
+		data['volume'] = Number( dataFrom["音量比"] || 1.00);
+		data['loopEnable'] = String( dataFrom["是否循环播放"] || "false") == "true";
+		data['loopStart'] = Number( dataFrom["起始时间"] || 0);
+		data['loopEnd'] = Number( dataFrom["结束时间"] || 0);
+		data['loopEndLock'] = String( dataFrom["是否指定结束时间"] || "false") == "true";
+		data['playbackRate'] = Number( dataFrom["视频播放速度"] || 1.0);
+		
+		data['widthUseOrg'] = String( dataFrom["是否使用原视频宽度"] || "false") == "true";
+		data['heightUseOrg'] = String( dataFrom["是否使用原视频高度"] || "false") == "true";
+		data['width'] = Number( dataFrom["指定视频宽度"] || 0);
+		data['height'] = Number( dataFrom["指定视频高度"] || 0);
+		data['x'] = Number( dataFrom["平移-视频 X"] || 0);
+		data['y'] = Number( dataFrom["平移-视频 Y"] || 0);
+		data['opacity'] = Number( dataFrom["透明度"] || 255);
+		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
+		data['menu_index'] = String( dataFrom["菜单层级"] || "菜单后面层");
+		data['zIndex'] = Number( dataFrom["图片层级"] || 0);
+		data['tint'] = String( dataFrom["视频色调"] || "#ffffff");
+		return data;
+	}
+	
+	/*-----------------杂项------------------*/
 	DrillUp.g_MVi_DEBUG = String(DrillUp.parameters['是否开启Debug模式'] || "true") === "true";
 	
+	/*-----------------视频------------------*/
 	DrillUp.g_MVi_list_length = 20;
 	DrillUp.g_MVi_list = [];
 	for (var i = 0; i < DrillUp.g_MVi_list_length; i++) {
 		if( DrillUp.parameters["视频-" + String(i+1) ] != undefined &&
 			DrillUp.parameters["视频-" + String(i+1) ] != "" ){
-			DrillUp.g_MVi_list[i] = JSON.parse(DrillUp.parameters["视频-" + String(i+1) ]);
-			DrillUp.g_MVi_list[i]['visible'] = String(DrillUp.g_MVi_list[i]["初始是否显示"] || "true") == "true";
-			DrillUp.g_MVi_list[i]['menu'] = String(DrillUp.g_MVi_list[i]["所属菜单"] || "");
-			DrillUp.g_MVi_list[i]['menu_key'] = String(DrillUp.g_MVi_list[i]["自定义关键字"] || "");
-			DrillUp.g_MVi_list[i]['src'] = String(DrillUp.g_MVi_list[i]["资源-视频动画"] || "");
-			//DrillUp.g_MVi_list[i]['src_mask'] = String(DrillUp.g_MVi_list[i]["资源-视频遮罩"] || "");
-			DrillUp.g_MVi_list[i]['playSound'] = String(DrillUp.g_MVi_list[i]["是否播放声音"] || "false") == "true";
-			DrillUp.g_MVi_list[i]['volume'] = Number(DrillUp.g_MVi_list[i]["音量比"] || 1.00);
-			DrillUp.g_MVi_list[i]['loopEnable'] = String(DrillUp.g_MVi_list[i]["是否循环播放"] || "false") == "true";
-			DrillUp.g_MVi_list[i]['loopStart'] = Number(DrillUp.g_MVi_list[i]["起始时间"] || 0);
-			DrillUp.g_MVi_list[i]['loopEnd'] = Number(DrillUp.g_MVi_list[i]["结束时间"] || 0);
-			DrillUp.g_MVi_list[i]['loopEndLock'] = String(DrillUp.g_MVi_list[i]["是否指定结束时间"] || "false") == "true";
-			DrillUp.g_MVi_list[i]['playbackRate'] = Number(DrillUp.g_MVi_list[i]["视频播放速度"] || 1.0);
-			
-			DrillUp.g_MVi_list[i]['widthUseOrg'] = String(DrillUp.g_MVi_list[i]["是否使用原视频宽度"] || "false") == "true";
-			DrillUp.g_MVi_list[i]['heightUseOrg'] = String(DrillUp.g_MVi_list[i]["是否使用原视频高度"] || "false") == "true";
-			DrillUp.g_MVi_list[i]['width'] = Number(DrillUp.g_MVi_list[i]["指定视频宽度"] || 0);
-			DrillUp.g_MVi_list[i]['height'] = Number(DrillUp.g_MVi_list[i]["指定视频高度"] || 0);
-			DrillUp.g_MVi_list[i]['x'] = Number(DrillUp.g_MVi_list[i]["平移-视频 X"] || 0);
-			DrillUp.g_MVi_list[i]['y'] = Number(DrillUp.g_MVi_list[i]["平移-视频 Y"] || 0);
-			DrillUp.g_MVi_list[i]['opacity'] = Number(DrillUp.g_MVi_list[i]["透明度"] || 255);
-			DrillUp.g_MVi_list[i]['blendMode'] = Number(DrillUp.g_MVi_list[i]["混合模式"] || 0);
-			DrillUp.g_MVi_list[i]['menu_index'] = String(DrillUp.g_MVi_list[i]["菜单层级"] || "菜单后面层");
-			DrillUp.g_MVi_list[i]['zIndex'] = Number(DrillUp.g_MVi_list[i]["图片层级"] || 0);
-			DrillUp.g_MVi_list[i]['tint'] = String(DrillUp.g_MVi_list[i]["视频色调"] || "#ffffff");
+			var temp = JSON.parse(DrillUp.parameters["视频-" + String(i+1) ]);
+			DrillUp.g_MVi_list[i] = DrillUp.drill_MVi_videoInit( temp );
+			DrillUp.g_MVi_list[i]['id'] = Number(i)+1;
+			DrillUp.g_MVi_list[i]['inited'] = true;
 		}else{
-			DrillUp.g_MVi_list[i] = null;
+			DrillUp.g_MVi_list[i] = DrillUp.drill_MVi_videoInit( {} );
+			DrillUp.g_MVi_list[i]['id'] = Number(i)+1;
+			DrillUp.g_MVi_list[i]['inited'] = false;
 		}
 	}
 	
@@ -543,11 +563,12 @@ var _drill_MVi_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
 	_drill_MVi_sys_initialize.call(this);
 	this._drill_MVi_sprites_visible = [];
-	for(var i = 0; i< DrillUp.g_MVi_list.length ;i++){
+	for(var i = 0; i < DrillUp.g_MVi_list.length ;i++){
 		var temp_data = DrillUp.g_MVi_list[i];
-		if( temp_data ){
-			this._drill_MVi_sprites_visible[i] = temp_data['visible'];
-		}
+		if( temp_data == undefined ){ continue; }
+		if( temp_data['inited'] != true ){ continue; }
+		
+		this._drill_MVi_sprites_visible[i] = temp_data['visible'];
 	}
 };
 //==============================
@@ -639,11 +660,14 @@ Scene_MenuBase.prototype.drill_MVi_create = function() {
 	
 	// > 创建贴图
 	for (var i = 0; i < DrillUp.g_MVi_list.length; i++) {
+		var temp_data = DrillUp.g_MVi_list[i];
+		if( temp_data == undefined ){ continue; }
+		if( temp_data['inited'] != true ){ continue; }
 		if( $gameSystem._drill_MVi_sprites_visible[i] != true ){ continue; }
-		if( this.drill_MVi_checkKeyword(i) ){
+		
+		if( this.drill_MVi_checkKeyword( temp_data ) ){
 		
 			// > 视频贴图
-			var temp_data = DrillUp.g_MVi_list[i];
 			var temp_suffix = Game_Interpreter.prototype.videoFileExt();	//组合路径
 			var temp_path = 'movies/'+ temp_data['src'] + temp_suffix;
 			if( DrillUp.g_MVi_DEBUG ){ console.log('菜单视频-读取材质:', temp_path); }
@@ -691,11 +715,8 @@ Scene_MenuBase.prototype.drill_MVi_create = function() {
 //==============================
 // * 视频 - 检查位置
 //==============================
-Scene_MenuBase.prototype.drill_MVi_checkKeyword = function(i) {
-	var temp_sprite_data = DrillUp.g_MVi_list[i] ; 	//注意，执行该方法，是在DrillUp.g_MVi_list中遍历
-	if( temp_sprite_data == undefined ) {
-		return false;	
-	}
+Scene_MenuBase.prototype.drill_MVi_checkKeyword = function( temp_sprite_data ){
+	
 	/*---------------标准----------------*/
 	if( SceneManager._scene.constructor.name === "Scene_Menu" && temp_sprite_data['menu'] == "主菜单" ){
 		return true;
@@ -808,16 +829,22 @@ Drill_MVi_VideoSprite.prototype.initialize = function( data ) {
 	//alert(JSON.stringify(data));
 	
 	this._drill_data = data;										//数据
-	this._drill_texture = PIXI.Texture.fromVideo( data['path'] );	//pixi视频贴图
+	var nstr = PIXI.VERSION.split(/\./);
+	if( Number(nstr[0] >= 5) ){
+		this._drill_texture = PIXI.Texture.from( data['path'] );				//pixi5视频贴图
+		this._drill_src = this._drill_texture.baseTexture.resource.source;		//视频资源信息
+	}else{
+		this._drill_texture = PIXI.Texture.fromVideo( data['path'] );			//pixi4视频贴图
+		this._drill_src = this._drill_texture.baseTexture.source;				//视频资源信息
+	};
 	this._drill_texture_loaded = false;								//视频读取状态
-	this._drill_src = this._drill_texture.baseTexture.source;		//视频资源信息
-	this._drill_video = new PIXI.Sprite();					//视频贴图（rmmv修改了贴图width）
-	this._drill_video.texture = this._drill_texture;		//
-	this._drill_video.anchor.x = 0.5;						//
-	this._drill_video.anchor.y = 0.5;						//
-	this._drill_video.tint = parseInt(data['tint']);		//
-	this._drill_loopStart = 0;								//开始位置
-	this._drill_loopEnd = 0;								//结束位置
+	this._drill_video = new PIXI.Sprite();							//视频贴图（rmmv修改了贴图width）
+	this._drill_video.texture = this._drill_texture;				//
+	this._drill_video.anchor.x = 0.5;								//
+	this._drill_video.anchor.y = 0.5;								//
+	this._drill_video.tint = parseInt(data['tint']);				//
+	this._drill_loopStart = 0;										//开始位置
+	this._drill_loopEnd = 0;										//结束位置
 	this.addChild(this._drill_video);
 	
 	this.drill_MVi_spriteInit();
@@ -862,6 +889,8 @@ Drill_MVi_VideoSprite.prototype.drill_MVi_spriteInit = function() {
 Drill_MVi_VideoSprite.prototype.drill_MVi_videoInit = function() {
 	var data = this._drill_data;
 	
+	this._drill_src['preload'] = 'auto';
+	this._drill_src['autoload'] = true;
 	this._drill_src['volume'] = data['volume'] * WebAudio._masterVolume;
 	this._drill_src['muted'] = data['muted'];
 	this._drill_src['loop'] = data['loopEnable'];

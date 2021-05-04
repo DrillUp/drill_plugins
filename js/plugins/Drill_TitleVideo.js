@@ -444,38 +444,54 @@
 　　var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_TitleVideo');
 
+	//==============================
+	// * 变量获取 - 视频
+	//				（~struct~TitleVideo）
+	//==============================
+	DrillUp.drill_TVi_videoInit = function( dataFrom ) {
+		var data = {};
+		data['visible'] = String( dataFrom["初始是否显示"] || "true") == "true";
+		data['src'] = String( dataFrom["资源-视频动画"] || "");
+		//data['src_mask'] = String( dataFrom["资源-视频遮罩"] || "");
+		data['playSound'] = String( dataFrom["是否播放声音"] || "false") == "true"; 
+		data['volume'] = Number( dataFrom["音量比"] || 1.00);
+		data['loopEnable'] = String( dataFrom["是否循环播放"] || "false") == "true";
+		data['loopStart'] = Number( dataFrom["起始时间"] || 0);
+		data['loopEnd'] = Number( dataFrom["结束时间"] || 0);
+		data['loopEndLock'] = String( dataFrom["是否指定结束时间"] || "false") == "true";
+		data['playbackRate'] = Number( dataFrom["视频播放速度"] || 1.0);
+		
+		data['widthUseOrg'] = String( dataFrom["是否使用原视频宽度"] || "false") == "true";
+		data['heightUseOrg'] = String( dataFrom["是否使用原视频高度"] || "false") == "true";
+		data['width'] = Number( dataFrom["指定视频宽度"] || 0);
+		data['height'] = Number( dataFrom["指定视频高度"] || 0);
+		data['x'] = Number( dataFrom["平移-视频 X"] || 0);
+		data['y'] = Number( dataFrom["平移-视频 Y"] || 0);
+		data['opacity'] = Number( dataFrom["透明度"] || 255);
+		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
+		data['menu_index'] = String( dataFrom["菜单层级"] || "菜单后面层");
+		data['zIndex'] = Number( dataFrom["图片层级"] || 0);
+		data['tint'] = String( dataFrom["视频色调"] || "#ffffff");
+		return data;
+	}
+	
+	/*-----------------杂项------------------*/
 	DrillUp.g_TVi_DEBUG = String(DrillUp.parameters['是否开启Debug模式'] || "true") === "true";
 	
+	/*-----------------视频------------------*/
 	DrillUp.g_TVi_list_length = 20;
 	DrillUp.g_TVi_list = [];
 	for (var i = 0; i < DrillUp.g_TVi_list_length; i++) {
 		if( DrillUp.parameters["视频-" + String(i+1) ] != undefined &&
 			DrillUp.parameters["视频-" + String(i+1) ] != "" ){
-			DrillUp.g_TVi_list[i] = JSON.parse(DrillUp.parameters["视频-" + String(i+1) ]);
-			DrillUp.g_TVi_list[i]['visible'] = String(DrillUp.g_TVi_list[i]["初始是否显示"] || "true") == "true";
-			DrillUp.g_TVi_list[i]['src'] = String(DrillUp.g_TVi_list[i]["资源-视频动画"] || "");
-			//DrillUp.g_TVi_list[i]['src_mask'] = String(DrillUp.g_TVi_list[i]["资源-视频遮罩"] || "");
-			DrillUp.g_TVi_list[i]['playSound'] = String(DrillUp.g_TVi_list[i]["是否播放声音"] || "false") == "true";
-			DrillUp.g_TVi_list[i]['volume'] = Number(DrillUp.g_TVi_list[i]["音量比"] || 1.00);
-			DrillUp.g_TVi_list[i]['loopEnable'] = String(DrillUp.g_TVi_list[i]["是否循环播放"] || "false") == "true";
-			DrillUp.g_TVi_list[i]['loopStart'] = Number(DrillUp.g_TVi_list[i]["起始时间"] || 0);
-			DrillUp.g_TVi_list[i]['loopEnd'] = Number(DrillUp.g_TVi_list[i]["结束时间"] || 0);
-			DrillUp.g_TVi_list[i]['loopEndLock'] = String(DrillUp.g_TVi_list[i]["是否指定结束时间"] || "false") == "true";
-			DrillUp.g_TVi_list[i]['playbackRate'] = Number(DrillUp.g_TVi_list[i]["视频播放速度"] || 1.0);
-			
-			DrillUp.g_TVi_list[i]['widthUseOrg'] = String(DrillUp.g_TVi_list[i]["是否使用原视频宽度"] || "false") == "true";
-			DrillUp.g_TVi_list[i]['heightUseOrg'] = String(DrillUp.g_TVi_list[i]["是否使用原视频高度"] || "false") == "true";
-			DrillUp.g_TVi_list[i]['width'] = Number(DrillUp.g_TVi_list[i]["指定视频宽度"] || 0);
-			DrillUp.g_TVi_list[i]['height'] = Number(DrillUp.g_TVi_list[i]["指定视频高度"] || 0);
-			DrillUp.g_TVi_list[i]['x'] = Number(DrillUp.g_TVi_list[i]["平移-视频 X"] || 0);
-			DrillUp.g_TVi_list[i]['y'] = Number(DrillUp.g_TVi_list[i]["平移-视频 Y"] || 0);
-			DrillUp.g_TVi_list[i]['opacity'] = Number(DrillUp.g_TVi_list[i]["透明度"] || 255);
-			DrillUp.g_TVi_list[i]['blendMode'] = Number(DrillUp.g_TVi_list[i]["混合模式"] || 0);
-			DrillUp.g_TVi_list[i]['menu_index'] = String(DrillUp.g_TVi_list[i]["菜单层级"] || "菜单后面层");
-			DrillUp.g_TVi_list[i]['zIndex'] = Number(DrillUp.g_TVi_list[i]["图片层级"] || 0);
-			DrillUp.g_TVi_list[i]['tint'] = String(DrillUp.g_TVi_list[i]["视频色调"] || "#ffffff");
+			var temp = JSON.parse(DrillUp.parameters["视频-" + String(i+1) ]);
+			DrillUp.g_TVi_list[i] = DrillUp.drill_TVi_videoInit( temp );
+			DrillUp.g_TVi_list[i]['id'] = Number(i)+1;
+			DrillUp.g_TVi_list[i]['inited'] = true;
 		}else{
-			DrillUp.g_TVi_list[i] = null;
+			DrillUp.g_TVi_list[i] = DrillUp.drill_TVi_videoInit( {} );
+			DrillUp.g_TVi_list[i]['id'] = Number(i)+1;
+			DrillUp.g_TVi_list[i]['inited'] = false;
 		}
 	}
 
@@ -491,13 +507,12 @@
 			DrillUp.global_TVi_visible = _drill_global[0]["_global_TVi_visible"];
 		}else{
 			DrillUp.global_TVi_visible = [];
-			for (var i = 0; i < DrillUp.g_TVi_list.length; i++) {
+			for(var i = 0; i < DrillUp.g_TVi_list.length; i++) {
 				var temp_data = DrillUp.g_TVi_list[i];
-				if( temp_data ){
-					DrillUp.global_TVi_visible.push( temp_data['visible'] );
-				}else{
-					DrillUp.global_TVi_visible.push( false );
-				}
+				if( temp_data == undefined ){ continue; }
+				if( temp_data['inited'] != true ){ continue; }
+				
+				DrillUp.global_TVi_visible[i] = temp_data['visible'];
 			}
 		}
 	}
@@ -658,11 +673,12 @@ Scene_Title.prototype.drill_TVi_create = function() {
 	
 	// > 创建贴图
 	for (var i = 0; i < DrillUp.g_TVi_list.length; i++) {
-		if( DrillUp.g_TVi_list[i] == undefined ){ continue; }
+		var temp_data = DrillUp.g_TVi_list[i];
+		if( temp_data == undefined ){ continue; }
+		if( temp_data['inited'] != true ){ continue; }
 		if( DrillUp.global_TVi_visible[i] != true ){ continue; }
 		
 		// > 视频贴图
-		var temp_data = DrillUp.g_TVi_list[i];
 		var temp_suffix = Game_Interpreter.prototype.videoFileExt();	//组合路径
 		var temp_path = 'movies/'+ temp_data['src'] + temp_suffix;
 		if( DrillUp.g_TVi_DEBUG ){ console.log('标题视频-读取材质:', temp_path); }

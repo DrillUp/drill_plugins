@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        图片 - 快捷操作
+ * @plugindesc [v1.2]        图片 - 快捷操作
  * @author Drill_up
  * 
  * @Drill_LE_param "预加载资源-%d"
@@ -63,6 +63,7 @@
  * 插件指令：>图片快捷操作 : 批量图片变量[21,22] : 修改单属性 : 透明度[255] : 时间[60]
  * 
  * 插件指令：>图片快捷操作 : 图片[1] : 修改单属性 : 预加载资源[1]
+ * 插件指令：>图片快捷操作 : 图片[1] : 修改单属性 : 预加载资源变量[21]
  * 插件指令：>图片快捷操作 : 图片[1] : 修改单属性 : 混合模式[0]
  * 插件指令：>图片快捷操作 : 图片[1] : 修改单属性 : 位置X[100] : 时间[60]
  * 插件指令：>图片快捷操作 : 图片[1] : 修改单属性 : 位置Y[100] : 时间[60]
@@ -82,7 +83,7 @@
  * 插件指令：>图片快捷操作 : 图片[1] : 修改单属性 : 相对斜切Y[+0.5] : 时间[60]
  * 
  * 1.前半部分（图片[1]）和 后半部分（修改单属性 : 位置X[100] : 时间[60]）
- *   的参数可以随意组合。一共有4*18种组合方式。
+ *   的参数可以随意组合。一共有4*19种组合方式。
  * 2.你可以同时执行 多条 "修改单属性"的指令，并且重复指令可以叠加执行。
  *   设置"时间[0]"与设置"时间[1]"一样，在下一帧才能瞬间切换。
  * 3.所有"相对"参数都可以填正数 +10 ，也可以填负数 -10。
@@ -121,7 +122,9 @@
  * 插件指令：>图片快捷操作 : 批量图片变量[21,22] : 切换图片层级 : 图片层
  * 
  * 插件指令：>图片快捷操作 : 图片[1] : 弹性移动到 : 位置[100,100] : 时间[60]
+ * 插件指令：>图片快捷操作 : 图片[1] : 弹性移动到 : 位置变量[25,26] : 时间[60]
  * 插件指令：>图片快捷操作 : 图片[1] : 弹性移动到 : 相对位置[-10,-10] : 时间[60]
+ * 插件指令：>图片快捷操作 : 图片[1] : 弹性移动到 : 相对位置变量[25,26] : 时间[60]
  * 插件指令：>图片快捷操作 : 图片[1] : 切换图片层级 : 图片层
  * 插件指令：>图片快捷操作 : 图片[1] : 切换图片层级 : 最顶层
  * 插件指令：>图片快捷操作 : 图片[1] : 显示中心锚点
@@ -130,7 +133,7 @@
  * 插件指令：>图片快捷操作 : 图片[1] : 修改中心锚点 : 锚点[0.5,1.0] : 保持位置
  * 
  * 1.前半部分（图片[1]）和 后半部分（切换图片层级 : 图片层）的参数
- *   可以随意组合。一共有4*8种组合方式。
+ *   可以随意组合。一共有4*10种组合方式。
  * 2.图片可以切换两个层级：图片层 和 最顶层。
  *   最顶层能够挡住 对话框和UI ，地图界面、战斗界面都有效。
  * 3.修改中心锚点时，如果图片还未加载出来，直接执行修改指令即可，
@@ -167,6 +170,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 添加了插件指令图片检查。
+ * [v1.2]
+ * 添加了插件指令变量设置。
  * 
  * 
  * 
@@ -1861,8 +1866,10 @@
 	var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_PictureShortcut');
 	
+	/*-----------------杂项------------------*/
 	DrillUp.g_PSh_top_zIndex = Number(DrillUp.parameters['最顶层时图片层级'] || 10);
 	
+	/*-----------------预加载资源------------------*/
 	DrillUp.g_PSh_pics_length = 200;
 	DrillUp.g_PSh_pics = [];
 	for (var i = 0; i < DrillUp.g_PSh_pics_length; i++) {
@@ -2038,7 +2045,24 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( type == "弹性移动到" ){
 				temp2 = temp2.replace("时间[","");
 				temp2 = temp2.replace("]","");
-				if( temp1.indexOf("相对位置[") != -1  ){
+				if( temp1.indexOf("相对位置变量[") != -1  ){
+					temp1 = temp1.replace("相对位置变量[","");
+					temp1 = temp1.replace("]","");
+					var temp_arr = temp1.split(/[,，]/);
+					if( pics != null && temp_arr.length > 1 ){
+						for( var k=0; k < pics.length; k++ ){
+							var data = {
+								"type":"relativeElasticMove",
+								"valueX":$gameVariables.value( Number(temp_arr[0]) ),
+								"valueY":$gameVariables.value( Number(temp_arr[1]) ),
+								"time":Number(temp2),
+								"cur_time":0,
+							}
+							pics[k]._Drill_PSh_commandTank.push(data);
+						}
+					}
+				}
+				else if( temp1.indexOf("相对位置[") != -1  ){
 					temp1 = temp1.replace("相对位置[","");
 					temp1 = temp1.replace("]","");
 					var temp_arr = temp1.split(/[,，]/);
@@ -2048,6 +2072,23 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 								"type":"relativeElasticMove",
 								"valueX":Number(temp_arr[0]),
 								"valueY":Number(temp_arr[1]),
+								"time":Number(temp2),
+								"cur_time":0,
+							}
+							pics[k]._Drill_PSh_commandTank.push(data);
+						}
+					}
+				}
+				else if( temp1.indexOf("位置变量[") != -1  ){
+					temp1 = temp1.replace("位置变量[","");
+					temp1 = temp1.replace("]","");
+					var temp_arr = temp1.split(/[,，]/);
+					if( pics != null && temp_arr.length > 1 ){
+						for( var k=0; k < pics.length; k++ ){
+							var data = {
+								"type":"elasticMove",
+								"valueX":$gameVariables.value( Number(temp_arr[0]) ) - pics[k]._x,
+								"valueY":$gameVariables.value( Number(temp_arr[1]) ) - pics[k]._y,
 								"time":Number(temp2),
 								"cur_time":0,
 							}
@@ -2103,6 +2144,21 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 							var data = {
 								"type":"preload",
 								"value":Number(temp1) - 1,
+								"time":1,
+								"cur_time":0,
+							}
+							pics[k]._Drill_PSh_commandTank.push(data);
+						}
+					}
+				}
+				if( temp1.indexOf("预加载资源变量[") != -1  ){
+					temp1 = temp1.replace("预加载资源变量[","");
+					temp1 = temp1.replace("]","");
+					if( pics != null ){
+						for( var k=0; k < pics.length; k++ ){
+							var data = {
+								"type":"preload",
+								"value":$gameVariables.value(Number(temp1)) - 1,
 								"time":1,
 								"cur_time":0,
 							}

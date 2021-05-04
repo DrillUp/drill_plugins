@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        标题 - 多层标题魔法圈
+ * @plugindesc [v1.5]        标题 - 多层标题魔法圈
  * @author Drill_up
  * 
  * @Drill_LE_param "魔法圈-%d"
@@ -104,6 +104,9 @@
  * [v1.4]
  * 优化了内部结构，修改了插件指令格式。
  * 添加了魔法圈遮罩功能。
+ * [v1.5]
+ * 优化了内部结构。
+ * 旋转速度单位改为 角度/帧。
  *
  *
  * @param ---魔法圈组 1至20---
@@ -654,9 +657,8 @@
  * @default 0
  *
  * @param 旋转速度
- * @desc 正数逆时针，负数顺时针，单位 弧度/帧。(1秒60帧)
- * 6.28表示一圈，设置0.01表示大概10秒转一圈，设置0则不旋转。
- * @default 0.01
+ * @desc 正数逆时针，负数顺时针，单位 角度/帧。(1秒60帧，360.0为一周)
+ * @default 1.5
  *
  * @param 菜单层级
  * @type select
@@ -743,28 +745,44 @@
 　　var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_TitleCircle');
 	
+	//==============================
+	// * 变量获取 - 魔法圈
+	//				（~struct~TitleCircle）
+	//==============================
+	DrillUp.drill_TCi_circleInit = function( dataFrom ) {
+		var data = {};
+		data['visible'] = String( dataFrom["初始是否显示"] || "true") == "true";
+		data['src_img'] = String( dataFrom["资源-魔法圈"] || "");
+		data['src_img_mask'] = String( dataFrom["资源-魔法圈遮罩"] || "");
+		data['x'] = Number( dataFrom["平移-魔法圈 X"] || 0);
+		data['y'] = Number( dataFrom["平移-魔法圈 Y"] || 0);
+		data['opacity'] = Number( dataFrom["透明度"] || 255);
+		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
+		data['rotate'] = Number( dataFrom["旋转速度"] || 0.0);
+		data['menu_index'] = Number( dataFrom["菜单层级"] || 0);
+		data['zIndex'] = Number( dataFrom["图片层级"] || 0);
+		
+		data['scale_x'] = Number( dataFrom["缩放 X"] || 1.0);
+		data['scale_y'] = Number( dataFrom["缩放 Y"] || 1.0);
+		data['skew_x'] = Number( dataFrom["斜切 X"] || 0);
+		data['skew_y'] = Number( dataFrom["斜切 Y"] || 0);
+		return data;
+	}
+	
+	/*-----------------魔法圈------------------*/
 	DrillUp.g_TCi_list_length = 80;
 	DrillUp.g_TCi_list = [];
 	for (var i = 0; i < DrillUp.g_TCi_list_length; i++) {
 		if( DrillUp.parameters["魔法圈-" + String(i+1) ] != undefined &&
 			DrillUp.parameters["魔法圈-" + String(i+1) ] != "" ){
-			DrillUp.g_TCi_list[i] = JSON.parse(DrillUp.parameters["魔法圈-" + String(i+1) ]);
-			DrillUp.g_TCi_list[i]['visible'] = String(DrillUp.g_TCi_list[i]["初始是否显示"] || "true") == "true";
-			DrillUp.g_TCi_list[i]['src_img'] = String(DrillUp.g_TCi_list[i]["资源-魔法圈"] || "");
-			DrillUp.g_TCi_list[i]['src_img_mask'] = String(DrillUp.g_TCi_list[i]["资源-魔法圈遮罩"] || "");
-			DrillUp.g_TCi_list[i]['x'] = Number(DrillUp.g_TCi_list[i]["平移-魔法圈 X"] || 0);
-			DrillUp.g_TCi_list[i]['y'] = Number(DrillUp.g_TCi_list[i]["平移-魔法圈 Y"] || 0);
-			DrillUp.g_TCi_list[i]['opacity'] = Number(DrillUp.g_TCi_list[i]["透明度"] || 255);
-			DrillUp.g_TCi_list[i]['blendMode'] = Number(DrillUp.g_TCi_list[i]["混合模式"] || 0);
-			DrillUp.g_TCi_list[i]['rotate'] = Number(DrillUp.g_TCi_list[i]["旋转速度"] || 0);
-			DrillUp.g_TCi_list[i]['menu_index'] = Number(DrillUp.g_TCi_list[i]["菜单层级"] || 0);
-			DrillUp.g_TCi_list[i]['zIndex'] = Number(DrillUp.g_TCi_list[i]["图片层级"] || 0);
-			DrillUp.g_TCi_list[i]['scale_x'] = Number(DrillUp.g_TCi_list[i]["缩放 X"] || 1.0);
-			DrillUp.g_TCi_list[i]['scale_y'] = Number(DrillUp.g_TCi_list[i]["缩放 Y"] || 1.0);
-			DrillUp.g_TCi_list[i]['skew_x'] = Number(DrillUp.g_TCi_list[i]["斜切 X"] || 0);
-			DrillUp.g_TCi_list[i]['skew_y'] = Number(DrillUp.g_TCi_list[i]["斜切 Y"] || 0);
+			var temp = JSON.parse(DrillUp.parameters["魔法圈-" + String(i+1) ]);
+			DrillUp.g_TCi_list[i] = DrillUp.drill_TCi_circleInit( temp );
+			DrillUp.g_TCi_list[i]['id'] = Number(i)+1;
+			DrillUp.g_TCi_list[i]['inited'] = true;
 		}else{
-			DrillUp.g_TCi_list[i] = null;
+			DrillUp.g_TCi_list[i] = DrillUp.drill_TCi_circleInit( {} );
+			DrillUp.g_TCi_list[i]['id'] = Number(i)+1;
+			DrillUp.g_TCi_list[i]['inited'] = false;
 		}
 	}
 	
@@ -783,11 +801,10 @@
 			DrillUp.global_TCi_visible = [];
 			for (var i = 0; i < DrillUp.g_TCi_list.length; i++) {
 				var temp_data = DrillUp.g_TCi_list[i];
-				if( temp_data ){
-					DrillUp.global_TCi_visible.push( temp_data['visible'] );
-				}else{
-					DrillUp.global_TCi_visible.push( false );
-				}
+				if( temp_data == undefined ){ continue; }
+				if( temp_data['inited'] != true ){ continue; }
+				
+				DrillUp.global_TCi_visible[i] = temp_data['visible'];
 			}
 		}
 	}
@@ -812,25 +829,25 @@ DataManager.forceSaveGlobalInfo = function() {		//强制存储（任何改变的
 var _drill_TCi_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_TCi_pluginCommand.call(this, command, args);
-	if (command === '>标题魔法圈') {
+	if( command === ">标题魔法圈" ){
 		if(args.length == 4){
 			var temp1 = String(args[1]);
 			temp1 = temp1.replace("魔法圈[","");
 			temp1 = temp1.replace("]","");
 			temp1 = Number(temp1) - 1;
 			var type = String(args[3]);
-			if (type === '显示') {
+			if (type === "显示") {
 				DrillUp.global_TCi_visible[temp1] = true;
 				DataManager.forceSaveGlobalInfo();
 			}
-			if (type === '隐藏') {
+			if (type === "隐藏") {
 				DrillUp.global_TCi_visible[temp1] = false;
 				DataManager.forceSaveGlobalInfo();
 			}
 		}
 		if(args.length == 2){
 			var type = String(args[1]);
-			if( type === '隐藏全部' ){
+			if( type === "隐藏全部" ){
 				for(var i=0; i<DrillUp.global_TCi_visible.length; i++){
 					DrillUp.global_TCi_visible[i] = false;
 				}
@@ -860,9 +877,9 @@ var _drill_TCi_createBackground = Scene_Title.prototype.createBackground;
 Scene_Title.prototype.createBackground = function() {
 	// > 魔法圈初始化
 	SceneManager._drill_TCi_created = false;	
-   	this._drill_TCi_sprites = [];
-   	this._drill_TCi_sprites_bitmap = [];
-   	this._drill_TCi_sprites_data = [];
+   	this._drill_TCi_spriteTank = [];
+   	this._drill_TCi_spriteChildTank = [];
+   	this._drill_TCi_dataTank = [];
 	
 	_drill_TCi_createBackground.call(this);
 	
@@ -911,10 +928,10 @@ Scene_Title.prototype.update = function() {
 Scene_Title.prototype.drill_TCi_create = function() {	
 	SceneManager._drill_TCi_created = true;
 	
-	if(!this._drill_TCi_sprites){
-		this._drill_TCi_sprites = [];		//防止某些覆写的菜单报错
-		this._drill_TCi_sprites_bitmap = [];
-		this._drill_TCi_sprites_data = [];
+	if(!this._drill_TCi_spriteTank){
+		this._drill_TCi_spriteTank = [];		//防止某些覆写的菜单报错
+		this._drill_TCi_spriteChildTank = [];
+		this._drill_TCi_dataTank = [];
 	}
 	if( !this._backgroundSprite ){		//菜单后面层
 		this._backgroundSprite = new Sprite();
@@ -926,14 +943,17 @@ Scene_Title.prototype.drill_TCi_create = function() {
 	
 	// > 配置的魔法圈
 	for (var i = 0; i < DrillUp.g_TCi_list.length; i++) {
-		if( DrillUp.g_TCi_list[i] == undefined ){ continue; }
+		var temp_data = DrillUp.g_TCi_list[i];
+		if( temp_data == undefined ){ continue; }
+		if( temp_data['inited'] != true ){ continue; }
+				
 		// > 魔法圈贴图
-		var temp_sprite_data = JSON.parse(JSON.stringify( DrillUp.g_TCi_list[i] ));	//深拷贝数据（杜绝引用造成的修改）
+		var temp_sprite_data = JSON.parse(JSON.stringify( temp_data ));		//深拷贝数据（杜绝引用造成的修改）
 		
 		var temp_sprite_bitmap = new Sprite(ImageManager.loadTitle1(temp_sprite_data['src_img']));
 		temp_sprite_bitmap.anchor.x = 0.5;
 		temp_sprite_bitmap.anchor.y = 0.5;
-		this._drill_TCi_sprites_bitmap.push(temp_sprite_bitmap);
+		this._drill_TCi_spriteChildTank.push(temp_sprite_bitmap);
 		
 		var temp_sprite = new Sprite();
 		temp_sprite.anchor.x = 0.5;
@@ -946,11 +966,11 @@ Scene_Title.prototype.drill_TCi_create = function() {
 		temp_sprite.scale.y = temp_sprite_data['scale_y'];
 		temp_sprite.skew.x = temp_sprite_data['skew_x'];
 		temp_sprite.skew.y = temp_sprite_data['skew_y'];
-		temp_sprite.visible = DrillUp.global_TCi_visible[i];
+		temp_sprite.visible = DrillUp.global_TCi_visible[i] || false;
 		temp_sprite.addChild(temp_sprite_bitmap);
 		
-		this._drill_TCi_sprites.push(temp_sprite);
-		this._drill_TCi_sprites_data.push(temp_sprite_data);
+		this._drill_TCi_spriteTank.push(temp_sprite);
+		this._drill_TCi_dataTank.push(temp_sprite_data);
 		
 		// > 魔法圈父级
 		var temp_layer = new Sprite();
@@ -976,8 +996,8 @@ Scene_Title.prototype.drill_TCi_create = function() {
 // * 魔法圈 - 帧刷新
 //==============================
 Scene_Title.prototype.drill_TCi_update = function() {
-	for (var i = 0; i < this._drill_TCi_sprites_bitmap.length; i++) {
-		this._drill_TCi_sprites_bitmap[i].rotation += this._drill_TCi_sprites_data[i]['rotate'];
+	for (var i = 0; i < this._drill_TCi_spriteChildTank.length; i++) {
+		this._drill_TCi_spriteChildTank[i].rotation += this._drill_TCi_dataTank[i]['rotate'] /180*Math.PI;
 	};
 };
 

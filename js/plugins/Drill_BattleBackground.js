@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        战斗 - 多层战斗背景
+ * @plugindesc [v1.5]        战斗 - 多层战斗背景
  * @author Drill_up
  * 
  * @Drill_LE_param "背景-%d"
@@ -19,17 +19,27 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 你可以在战斗中放置一个或者多个战斗背景。
- * 要了解更详细的组合方法，去看看"多层组合背景,粒子,魔法圈,gif,视频.docx"。
  * 【支持插件关联资源的打包、加密】
  *
  * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：战斗界面。
  *   该插件不影响rmmv设置的两个背景图片，rmmv配置的背景将放在最底层。
- * 2.背景的图片层级将与GIF、魔法圈等相互控制。
- * 3.背景可以小于窗口大小，它们将经过循环平铺处理。
- * 4.如果要让背景看起来”很远”，那么应该设置位移比接近1.00的图层，
- *   越接近1.00越远。
+ * 2.该插件可以装饰战斗的各种层级。要了解更详细的组合方法，
+ *   去看看"多层组合背景,粒子,魔法圈,gif,视频.docx"。
+ * 战斗层级：
+ *   (1.你可以将背景放置在战斗的五种层级中，分别为：
+ *      下层、上层、图片层、最顶层
+ *   (2.战斗层级之间的关系为：
+ *      rmmv底图 < rmmv背景 < 下层 < rmmv敌人/角色 < 上层
+ *      < rmmv图片 < 图片层 < rmmv对话框 < 最顶层
+ *   (3.最顶层可以把地图界面最高层的对话框、窗口也给挡住。
+ *   (4.处于同一 战斗层级 时，将根据 图片层级 再先后排序。
+ * 位移比：
+ *   (1.根据物理相对运动知识，近大远小，近快远慢的原则。要让GIF看起
+ *      来真的"远"，那需要设置位移比接近1.00，越接近1.00越远。
+ *   (2.去看看最新版本的 文档图解 介绍，
+ *      这里是看起来简单但是实际做起来非常复杂的坑。
  *
  * -----------------------------------------------------------------------------
  * ----关联文件
@@ -46,21 +56,11 @@
  * 所有素材都放在Battle__layer下，不分多余文件夹。
  *
  * -----------------------------------------------------------------------------
- * ----战斗层级
- * 你可以把战斗放在下面层级之间，对应关系为：
- *   rmmv底图 < rmmv背景 < 下层 < rmmv敌人/角色 < 上层
- *   < rmmv图片 < 图片层 < rmmv对话框 < 最顶层
- * 
- * 1.rmmv的层级是被固定的，你可以在 下层、上层、图片层、最顶层 添加背景。
- * 2.最顶层的背景，可以把战斗界面最高层的对话框、窗口也给挡住。
- * 3.处于同一战斗层级的背景、魔法圈等，根据 图片层级 先后排序。
- *
- * -----------------------------------------------------------------------------
  * ----激活条件
  * 你可以通过插件指令控制战斗背景的显示情况：
  * （7个基本参数，冒号两边有一个空格。）
  * 
- * 插件指令：>清空战斗背景
+ * 插件指令：>清空全部战斗装饰部件
  * 插件指令：>创建战斗背景 : A : B : C : D : E : F : G
  *
  * 参数A：背景编号
@@ -78,42 +78,75 @@
  * 参数G：位移比
  *        与镜头插件相关，背景与镜头移动位移的比例。
  *        设置1.00，背景和镜头的位移一致。设置0.00则背景不随镜头移动。
- *
- * 示例：
- * 插件指令：>清空战斗背景
- * 插件指令：>创建战斗背景 : 1 : 数字阵列 : 1 : 上层 : -1.0 : 1.0 : 0.60
- * 插件指令：>创建战斗背景 : 2 : F碎片 : 12 : 下层 : 0.93 : 0 : 0.00
- * （进入战斗前，最好先清空一下战斗背景，避免干扰）
- * （清空默认会包括清空背景、魔法圈、gif、视频，只要有一个清空指令就可以了。）
- *
+ * 参数示例：
+ *        >清空全部战斗装饰部件
+ *        >创建战斗背景 : 1 : 数字阵列 : 1 : 上层 : -1.0 : 1.0 : 0.60
+ *        >创建战斗背景 : 2 : F碎片 : 12 : 下层 : 0.93 : 0 : 0.00
+ * 
+ * 1.注意，创建指令必须在 战斗前 执行。
+ *   战斗时创建的，会被留到下一场战斗中显现。
+ * 2.创建前，最好先清空一下，避免干扰。
+ *   清空会包括清空背景、魔法圈、gif、视频等全部装饰部件。
+ * 3.战斗背景会自动平铺，
+ *   如果你要建立一个非循环平铺的背景，可以用不旋转的魔法圈代替。
+ * 4.考虑到该指令只用于创建，并且文本简单，
+ *   所以此插件指令的格式 不变 ，且后期也不会翻新。
+ *   你如果对背景有其它参数设置，可以先写 创建 指令，然后写 变化 指令实现。
+ * 
  * -----------------------------------------------------------------------------
- * ----高级设置
+ * ----可选设定
  * 随着战斗的深入，战斗背景也可能会根据特殊情况变化：
  * 
- * 插件指令：>战斗背景 : A : 变坐标 : H : I : K1 : K2 
- * 插件指令：>战斗背景 : A : 变速度 : H : I : L1 : L2
- * 插件指令：>战斗背景 : A : 变透明 : H : I : M
- * 插件指令：>战斗背景 : A : 变混合模式 : H : N
- * （背景无法变缩放）
- * （背景无法变斜切）
- * （如果不是循环平移的背景，可以用不旋转的魔法圈代替。）
- *
- * 参数H：开始时间
- *        插件指令生效后，开始变化的延迟时间。单位帧。（1秒60帧）
- *        在战斗前设置90，表示进入战斗后，1.5秒时开始变化。
- *        在战斗时设置30，表示插件指令调用后0.5秒时开始变化。
- * 参数I：变化持续时间
- *        当前的属性，变化到设置的目标属性值的时间。
- * 参数K：xy坐标
- *        在指定时间内，移动到给定的x坐标和y坐标。
- *        （一般将没有速度的背景匀速移动到指定的位置）
- * 参数L：xy速度
- *        在指定时间内，变化到给定的x速度和y速度。
- * 参数M：透明度
- *        在指定时间内，变化到给定的透明度。
- * 参数N：混合模式
- *        混合模式为瞬间切换，0-普通,1-叠加。
- *        其他更详细相关介绍，去看看"pixi的渲染混合模式"。
+ * 插件指令：>战斗背景 : 背景[11] : 变混合模式 : 延迟[150] : 混合模式[2]
+ * 插件指令：>战斗背景 : 背景变量[11] : 变混合模式 : 延迟[150] : 混合模式[2]
+ * 
+ * 插件指令：>战斗背景 : 背景[11] : 变混合模式 : 延迟[150] : 混合模式[2]
+ * 插件指令：>战斗背景 : 背景[11] : 变坐标 : 延迟[150] : 变化时间[60] : 位置[100,100]
+ * 插件指令：>战斗背景 : 背景[11] : 变坐标 : 延迟[150] : 变化时间[60] : 位置变量[25,26]
+ * 插件指令：>战斗背景 : 背景[11] : 变透明 : 延迟[150] : 变化时间[60] : 透明度[255]
+ * 插件指令：>战斗背景 : 背景[11] : 变透明 : 延迟[150] : 变化时间[60] : 透明度变量[21]
+ * 插件指令：>战斗背景 : 背景[11] : 变速度 : 延迟[150] : 变化时间[60] : 速度[1.0,-1.0]
+ * 插件指令：>战斗背景 : 背景[11] : 变速度 : 延迟[150] : 变化时间[60] : 速度变量[25,26]
+ * 
+ * 1.前半部分（背景变量[21]）和 后半部分（变混合模式 : 延迟[150] : 混合模式[2]）
+ *   的参数可以随意组合。一共有2*7种组合方式。
+ * 2."延迟[150]"表示插件指令生效后，开始变化的延迟时间。单位帧。（1秒60帧）
+ *    在战斗前设置90，表示 进入战斗 后，90帧(1.5秒)时开始变化。
+ *    在战斗中设置30，表示 插件指令调用 后30帧(0.5秒)开始变化。
+ * 3."变坐标"的变化效果可以与速度叠加。
+ * 4."混合模式"为瞬间切换，可以去看看"pixi的渲染混合模式"。
+ * 5.插件指令的变化是永久性的。
+ *   如果你想瞬间切换，设置变化时间为0即可。
+ * 6.背景无法变缩放，无法变斜切。
+ * 
+ * 
+ * 以下是旧版本的指令，也可以用：
+ * 插件指令(旧)：>清空战斗背景
+ * 插件指令(旧)：>战斗背景 : 11 : 变坐标 : 150 : 60 : 100 : 100
+ * 插件指令(旧)：>战斗背景 : 11 : 变速度 : 150 : 60 : 1.0 : -1.0
+ * 插件指令(旧)：>战斗背景 : 11 : 变透明 : 150 : 60 : 255
+ * 插件指令(旧)：>战斗背景 : 11 : 变混合模式 : 150 : 2
+ * 
+ * -----------------------------------------------------------------------------
+ * ----插件性能
+ * 测试仪器：   4G 内存，Intel Core i5-2520M CPU 2.5GHz 处理器
+ *              Intel(R) HD Graphics 3000 集显 的垃圾笔记本
+ *              (笔记本的3dmark综合分：571，鲁大师综合分：48456)
+ * 总时段：     20000.00ms左右
+ * 对照表：     0.00ms  - 40.00ms （几乎无消耗）
+ *              40.00ms - 80.00ms （低消耗）
+ *              80.00ms - 120.00ms（中消耗）
+ *              120.00ms以上      （高消耗）
+ * 工作类型：   持续执行
+ * 时间复杂度： o(n^2)*o(贴图处理) 每帧
+ * 测试方法：   开启8个战斗背景，并进行测试。
+ * 测试结果：   战斗界面中，平均消耗为：【31.73ms】
+ * 
+ * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
+ *   测试结果并不是精确值，范围在给定值的10ms范围内波动。
+ *   更多了解插件性能，可以去看看"关于插件性能.docx"。
+ * 2.战斗背景本质上是简单贴图，其变换变形都是自带的功能，不会额
+ *   外增加计算量。消耗程度适中。
  *
  * -----------------------------------------------------------------------------
  * ----更新日志
@@ -125,6 +158,10 @@
  * 修改了插件关联的资源文件夹。
  * [v1.3]
  * 添加了最大值编辑的支持。
+ * [v1.4]
+ * 整理了插件指令格式。
+ * [v1.5]
+ * 优化了内部结构。
  * 
  *
  * @param ---背景组 1至20---
@@ -1768,16 +1805,24 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
+//		工作类型		持续执行
+//		时间复杂度		o(n^2)*o(贴图处理) 每帧
+//		性能测试因素	战斗界面
+//		性能测试消耗	13.96ms（drill_BBa_updateBase）17.77ms（drill_BBa_updateChange）
+//		最坏情况		无
+//		备注			无
+//
 //插件记录：
 //		★大体框架与功能如下：
 //			多层地图背景：
-//				->显示隐藏
-//				->地图层级、图片层级
-//				->简单持续平移
-//				->镜头位移比
-//				->可修改的属性（时间）
-//				->坐标、速度、透明、混合模式
-//				x->色调、缩放、斜切
+//				->基本属性
+//					->战斗层级、图片层级
+//					->简单持续平移
+//					->镜头位移比
+//				->可修改的属性
+//					->时间延迟
+//					->坐标、速度、透明、混合模式
+//					x->色调、缩放、斜切
 //
 //			战斗界面全层级关系：
 //				Spriteset： LowerLayer：	底图 < rmmv背景 < 下层 < rmmv敌人 < rmmv角色 < 上层
@@ -1791,14 +1836,15 @@
 //			3.直接Scene_Battle的update在战斗开始时【不执行】，目前不明原因。
 //			
 //		★其它说明细节：
-//			1.原理非常简单，在Spriteset_Battle上面建立 菜单前面层和菜单后面层。
-//			  然后通过插件指令添加TilingSprite菜单层就可以了。
+//			1.原理非常简单，在Spriteset_Battle上面建立 战斗图层。
+//			  然后通过插件指令添加 TilingSprite层 就可以了。
 //			  变化效果，通过建立计时器，实时对 变化(json串)进行扫描，变化 结束生命周期后自动销毁。
 //			2.该插件不操作rmmv设置的两个背景图片。
 //			3.TilingSprite没有sprite那么灵活，只能循环平移，嵌套、旋转、缩放 都不能做。
 //
 //		★存在的问题：
-//			1.由于全部根据时间控制来锁定变化，修改/复用代码会比较麻烦。
+//			1.由于全部根据时间控制来锁定变化，修改/复用代码会比较麻烦。（2021-4-28 然而我还是翻新了）
+//			
 
 //=============================================================================
 // ** 变量获取
@@ -1815,6 +1861,7 @@
 ImageManager.load_BattleLayer = function(filename) {
     return this.loadBitmap('img/Battle__layer/', filename, 0, true);
 };
+
 //=============================================================================
 // * 插件指令
 //=============================================================================
@@ -1822,40 +1869,112 @@ var _drill_BBa_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_BBa_pluginCommand.call(this, command, args);
 	
-	if (command === '>创建战斗背景') { // >创建战斗背景 : 1 : B数字阵列 : 1 : 上层 : -1.0 : 1.0 : 0.60
+	/*-----------------创建指令（固定）------------------*/
+	if( command === ">创建战斗背景" ){			// >创建战斗背景 : 1 : B数字阵列 : 1 : 上层 : -1.0 : 1.0 : 0.60
 		if(args.length == 14){
 			var index = Number(args[1]);
-			$gameSystem._drill_BBa_data[index] = {};								//背景id
-			$gameSystem._drill_BBa_data[index]['src_img'] = String(args[3]);		//背景资源名
-			$gameSystem._drill_BBa_data[index]['zIndex'] = Number(args[5]);		//背景图片层级
-			$gameSystem._drill_BBa_data[index]['area_index'] = String(args[7]);	//背景战斗层级
-			$gameSystem._drill_BBa_data[index]['x_speed'] = Number(args[9]);		//背景 X速度
-			$gameSystem._drill_BBa_data[index]['y_speed'] = Number(args[11]);	//背景 Y速度
-			$gameSystem._drill_BBa_data[index]['rate'] = Number(args[13]);		//背景位移比
+			$gameSystem._drill_BBa_seq[index] = {};								//背景id
+			$gameSystem._drill_BBa_seq[index]['src_img'] = String(args[3]);		//背景资源名
+			$gameSystem._drill_BBa_seq[index]['zIndex'] = Number(args[5]);		//背景图片层级
+			$gameSystem._drill_BBa_seq[index]['area_index'] = String(args[7]);	//背景战斗层级
+			$gameSystem._drill_BBa_seq[index]['x_speed'] = Number(args[9]);		//背景 X速度
+			$gameSystem._drill_BBa_seq[index]['y_speed'] = Number(args[11]);	//背景 Y速度
+			$gameSystem._drill_BBa_seq[index]['rate'] = Number(args[13]);		//背景位移比
 		}
 	}
-	if (command === '>清空战斗背景') {
-		$gameSystem._drill_BBa_data = [];
+	if( command === ">清空全部战斗装饰部件" || command === ">清空战斗背景" ){
+		$gameSystem._drill_BBa_seq = [];
 		$gameSystem._drill_BBa_changing = [];
-		$gameSystem._drill_BCi_data = [];
-		$gameSystem._drill_BCi_changing = [];
-		$gameSystem._drill_BGi_data = [];
-		$gameSystem._drill_BGi_changing = [];
-		DrillUp.g_BVi_cur_filepath = "";
 	}
-	if (command === '>战斗背景') { // >战斗背景 : A : 变色调 : H : I : J1 : J2 : J3 : J4
+	
+	/*-----------------变化指令------------------*/
+	if( command === ">战斗背景" ){ 		// >战斗背景 : 背景[1] : 变混合模式 : 延迟[150] : 混合模式[2]
+		if(args.length >= 2){
+			var id = -1;
+			var temp1 = String(args[1]);
+			if( temp1.indexOf("背景[") != -1 ){
+				temp1 = temp1.replace("背景[","");
+				temp1 = temp1.replace("]","");
+				id = Number(temp1);
+			}
+			if( temp1.indexOf("背景变量[") != -1 ){
+				temp1 = temp1.replace("背景变量[","");
+				temp1 = temp1.replace("]","");
+				id = $gameVariables.value(Number(temp1));
+			}
+			
+			if( id != -1 && args.length >= 6 ){
+				var type = String(args[3]);
+				var temp2 = String(args[5]);
+				temp2 = temp2.replace("延迟[","");
+				temp2 = temp2.replace("]","");
+				
+				var changing = {};
+				changing['destroy'] = false;
+				changing['id'] = id;
+				changing['type'] = type;
+				changing['start'] = Number(temp2);
+				if( SceneManager._scene.constructor.name === "Scene_Battle" ){		//（战斗中的开始时间）
+					changing['start'] = Number(args[5]) + ($gameSystem._drill_BBa_timer || 0);
+				}
+				
+				if(args.length == 8){
+					var temp3 = String(args[7]);
+					if( type == "变混合模式" ){
+						var num_list = this.drill_BBa_getArgNumList(temp3);
+						changing['data1'] = num_list[0];
+						$gameSystem._drill_BBa_changing.push(changing);
+						return;
+					}
+				}
+				if(args.length == 10){
+					var temp3 = String(args[7]);
+					var temp4 = String(args[9]);
+					temp3 = temp3.replace("变化时间[","");
+					temp3 = temp3.replace("]","");
+					changing['data1'] = Number(temp3);
+					
+					if( type == "变坐标" ){
+						var num_list = this.drill_BBa_getArgNumList(temp4);
+						changing['data2'] = num_list[0];
+						changing['data3'] = num_list[1];
+						$gameSystem._drill_BBa_changing.push(changing);
+						return;
+					}
+					if( type == "变透明" ){
+						var num_list = this.drill_BBa_getArgNumList(temp4);
+						changing['data2'] = num_list[0];
+						$gameSystem._drill_BBa_changing.push(changing);
+						return;
+					}
+					if( type == "变速度" ){
+						var num_list = this.drill_BBa_getArgNumList(temp4);
+						changing['data2'] = num_list[0];
+						changing['data3'] = num_list[1];
+						$gameSystem._drill_BBa_changing.push(changing);
+						return;
+					}
+				}
+			}
+		}
+	}
+	
+	/*-----------------旧指令------------------*/
+	if( command === ">战斗背景" ){				// >战斗背景 : A : 变色调 : H : I : J1 : J2 : J3 : J4
 		if(args.length >= 8){
+			var temp1 = String(args[1]);
+			var type = String(args[3]);
+			if( /^\d+$/.test(temp1) == false ){ return; }	//（判断数字）
 			var changing = {};
 			changing['destroy'] = false;
-			changing['id'] = Number(args[1]);
-			changing['type'] = String(args[3]);
+			changing['id'] = temp1;
+			changing['type'] = type;
 			changing['start'] = Number(args[5]);
-			changing['sustain'] = Number(args[7]);
-			if( args[9] != undefined ){ changing['data1'] = Number(args[9]); }
-			if( args[11] != undefined ){ changing['data2'] = Number(args[11]); }
-			if( args[13] != undefined ){ changing['data3'] = Number(args[13]); }
-			if( args[15] != undefined ){ changing['data4'] = Number(args[15]); }	
-			if( SceneManager._scene.constructor.name === "Scene_Battle" ){		//区别战斗外，战斗中的开始时间
+			changing['data1'] = Number(args[7]);
+			if( args[9] != undefined ){ changing['data2'] = Number(args[9]); }
+			if( args[11] != undefined ){ changing['data3'] = Number(args[11]); }
+			
+			if( SceneManager._scene.constructor.name === "Scene_Battle" ){		//（战斗中的开始时间）
 				changing['start'] = Number(args[5]) + ($gameSystem._drill_BBa_timer || 0);
 			}
 			$gameSystem._drill_BBa_changing.push(changing);
@@ -1863,14 +1982,42 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 };
 //==============================
-// * 插件设置存储准备
+// * 插件指令 - 获取方括号中的数字（返回数字数组）
 //==============================
+Game_Interpreter.prototype.drill_BBa_getArgNumList = function( arg_str ){
+	var arr = arg_str.match( /([^\[]+)\[([^\]]+)\]/ );
+	if( arr.length >= 3 ){
+	// > 有方括号
+		var data_name = arr[1];
+		var data_list = arr[2].split(",");
+		var result_list = [];
+		
+		if( data_name.contains("变量") ){
+			for(var i=0; i < data_list.length; i++){ result_list.push( $gameVariables.value(Number(data_list[i])) ); }
+			return result_list;
+		}else{
+			for(var i=0; i < data_list.length; i++){ result_list.push( Number(data_list[i]) ); }
+			return result_list;
+		}
+	}else{
+	// > 没有方括号
+		var data_list = arg_str.split(",");
+		var result_list = [];
+		for(var i=0; i < data_list.length; i++){ result_list.push( Number(data_list[i]) ); }
+		return result_list;
+	}
+};
+
+//=============================================================================
+// ** 存储数据初始化
+//=============================================================================
 var _drill_BBa_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
 	_drill_BBa_sys_initialize.call(this);
-    this._drill_BBa_data = [];
-    this._drill_BBa_changing = [];
-    this._drill_BBa_timer = 0;
+	
+    this._drill_BBa_timer = 0;      	//战斗计时器
+    this._drill_BBa_seq = [];			//容器 - 创建的数据
+    this._drill_BBa_changing = [];  	//容器 - 变化数据
 };
 
 //=============================================================================
@@ -1930,158 +2077,239 @@ Scene_Battle.prototype.drill_BBa_sortByZIndex = function() {
 	this._drill_SenceTopArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
 };
 
+
 //=============================================================================
-// ** 背景
+// ** 战斗界面
 //=============================================================================
 //==============================
-// * 创建背景
+// * 战斗界面 - 创建
 //==============================
 var _drill_BBa_createDisplayObjects = Scene_Battle.prototype.createDisplayObjects;
 Scene_Battle.prototype.createDisplayObjects = function() {
     _drill_BBa_createDisplayObjects.call(this);
-	this.drill_BBa_create();
-}
-Scene_Battle.prototype.drill_BBa_create = function() {
-	this._drill_BBa_sprite = [];		//数据初始化
-	this._drill_BBa_sprite_data = [];
-	$gameSystem._drill_BBa_timer = 0;
+	this.drill_BBa_initDataTank();			//贴图数据初始化
+	this.drill_BBa_createSprite();			//创建贴图
+};
+//==============================
+// * 战斗界面 - 贴图数据初始化
+//==============================
+Scene_Battle.prototype.drill_BBa_initDataTank = function(){
+	this._drill_BBa_s_dataTank = [];		//容器初始化
 	
-	for (var i = 0; i < $gameSystem._drill_BBa_data.length; i++) {
-		if( $gameSystem._drill_BBa_data[i] != null ){
-			var temp_sprite_data = JSON.parse(JSON.stringify( $gameSystem._drill_BBa_data[i] ));	//深拷贝数据（杜绝引用造成的修改）
-			var temp_sprite = new TilingSprite(ImageManager.load_BattleLayer(temp_sprite_data['src_img']));	//TilingSprite平铺图层
-			if( Imported.Drill_BattleCamera ){
-				temp_sprite.move(
-					(Graphics.width - $gameSystem._drill_cam_limit_width)/2, 
-					(Graphics.height - $gameSystem._drill_cam_limit_height)/2, 
-					$gameSystem._drill_cam_limit_width, 
-					$gameSystem._drill_cam_limit_height
-				);
-			}else{
-				temp_sprite.move(0, 0, Graphics.width, Graphics.height);
-			}
-			temp_sprite.origin.x = temp_sprite_data['x'] || 0;
-			temp_sprite.origin.y = temp_sprite_data['y'] || 0;
-			temp_sprite.opacity = temp_sprite_data['opacity'] || 255;
-			temp_sprite.blendMode = temp_sprite_data['blendMode'] || 0;	//混合模式暂时不加
-			temp_sprite.zIndex = temp_sprite_data['zIndex'];
-			
-			this._drill_BBa_sprite.push(temp_sprite);
-			this._drill_BBa_sprite_data.push(temp_sprite_data);
-			if( temp_sprite_data['area_index'] == '下层' ){
-				this._spriteset._drill_battleDownArea.addChild(temp_sprite);
-			}
-			if( temp_sprite_data['area_index'] == '上层' ){
-				this._spriteset._drill_battleUpArea.addChild(temp_sprite);
-			}
-			if( temp_sprite_data['area_index'] == '图片层' ){
-				this._spriteset._drill_battlePicArea.addChild(temp_sprite);
-			}
-			if( temp_sprite_data['area_index'] == '最顶层' ){
-				this._drill_SenceTopArea.addChild(temp_sprite);
-			}
-		}else{
-			this._drill_BBa_sprite.push(null);
-			this._drill_BBa_sprite_data.push(null);
+	for( var i = 0; i < $gameSystem._drill_BBa_seq.length; i++ ){
+		var temp_data = $gameSystem._drill_BBa_seq[i];
+		if( temp_data == undefined ){ continue; }
+		if( this.drill_BBa_getSpriteDataById( i ) != undefined ){ continue; }	//（去重）
+		var temp_s_data = JSON.parse(JSON.stringify( temp_data ));				//深拷贝数据（杜绝引用造成的修改）
+		
+		// > 默认值
+		temp_s_data['id'] = i;																	//背景id
+		if( temp_s_data['src_img'] == undefined ){ temp_s_data['src_img'] = "" };				//背景资源名
+		if( temp_s_data['zIndex'] == undefined ){ temp_s_data['zIndex'] = 1 };	         		//背景图片层级
+		if( temp_s_data['area_index'] == undefined ){ temp_s_data['area_index'] = "下层" };		//背景战斗层级
+		if( temp_s_data['x_speed'] == undefined ){ temp_s_data['x_speed'] = 0.0 };	     		//背景 X速度
+		if( temp_s_data['y_speed'] == undefined ){ temp_s_data['y_speed'] = 0.0 };	     		//背景 Y速度
+		if( temp_s_data['rate'] == undefined ){ temp_s_data['rate'] = 0.0 };	             	//背景位移比
+		
+		// > 私有变量初始化
+		temp_s_data['x'] = 0;					//基本属性
+		temp_s_data['y'] = 0;					//
+		temp_s_data['opacity'] = 255;			//
+		temp_s_data['blendMode'] = 0;			//
+		
+		temp_s_data['cur_speedX'] = 0;			//当前x位置（速度累加的结果）
+		temp_s_data['cur_speedY'] = 0;			//
+		temp_s_data['cur_cameraX'] = 0;			//当前x镜头偏移位置
+		temp_s_data['cur_cameraY'] = 0;			//
+		
+		this._drill_BBa_s_dataTank.push( temp_s_data );
+	}
+};
+//==============================
+// * 战斗界面 - 创建贴图
+//==============================
+Scene_Battle.prototype.drill_BBa_createSprite = function() {
+	$gameSystem._drill_BBa_timer = 0;		//计时初始化
+	this._drill_BBa_spriteTank = [];		//贴图容器初始化
+	
+	for( var i = 0; i < this._drill_BBa_s_dataTank.length; i++ ){
+		var temp_s_data = this._drill_BBa_s_dataTank[i];
+		
+		var temp_sprite = new TilingSprite();		//TilingSprite平铺图层
+		temp_sprite.bitmap = ImageManager.load_BattleLayer( temp_s_data['src_img'] );
+		temp_sprite.move(0, 0, Graphics.width, Graphics.height);
+		if( Imported.Drill_BattleCamera ){
+			temp_sprite.move(
+				(Graphics.width - $gameSystem._drill_cam_limit_width)/2, 
+				(Graphics.height - $gameSystem._drill_cam_limit_height)/2, 
+				$gameSystem._drill_cam_limit_width, 
+				$gameSystem._drill_cam_limit_height
+			);
+		}
+		temp_sprite.origin.x = temp_s_data['x'];
+		temp_sprite.origin.y = temp_s_data['y'];
+		temp_sprite.opacity = temp_s_data['opacity'];
+		temp_sprite.blendMode = temp_s_data['blendMode'];
+		temp_sprite.zIndex = temp_s_data['zIndex'];
+		
+		// > 战斗层级
+		this._drill_BBa_spriteTank.push(temp_sprite);
+		if( temp_s_data['area_index'] == '下层' ){
+			this._spriteset._drill_battleDownArea.addChild(temp_sprite);
+		}
+		if( temp_s_data['area_index'] == '上层' ){
+			this._spriteset._drill_battleUpArea.addChild(temp_sprite);
+		}
+		if( temp_s_data['area_index'] == '图片层' ){
+			this._spriteset._drill_battlePicArea.addChild(temp_sprite);
+		}
+		if( temp_s_data['area_index'] == '最顶层' ){
+			this._drill_SenceTopArea.addChild(temp_sprite);
 		}
 	}
-	//alert( JSON.stringify( $gameSystem._drill_BBa_changing) );
 	this.drill_BBa_sortByZIndex();
+};
+//==============================
+// * 战斗界面 - 获取贴图数据(根据id)
+//==============================
+Scene_Battle.prototype.drill_BBa_getSpriteDataById = function( id ){
+	for(var i=0; i < this._drill_BBa_s_dataTank.length; i++ ){
+		var temp_data = this._drill_BBa_s_dataTank[i];
+		if( temp_data['id'] == id ){
+			return temp_data;
+		}
+	}
+	return null;
 };
 
 //==============================
-// * 刷新背景
+// * 帧刷新
 //==============================
 var _drill_BBa_update = Spriteset_Battle.prototype.update;
 Spriteset_Battle.prototype.update = function() {
 	_drill_BBa_update.call(this);
 	
 	if( this.parent != undefined && this.parent.constructor.name == "Scene_Battle" ){	
-		this.parent.drill_BBa_update();
+		this.parent.drill_BBa_updateBase();			//基本属性
+		this.parent.drill_BBa_updateChange();		//变化属性
 	}
 };
-Scene_Battle.prototype.drill_BBa_update = function() {
+//==============================
+// * 帧刷新 - 基本属性
+//==============================
+Scene_Battle.prototype.drill_BBa_updateBase = function() {
+	
+	// > 计时+1
 	$gameSystem._drill_BBa_timer += 1;
-	for (var i = 0; i < this._drill_BBa_sprite.length; i++) {
-		if( this._drill_BBa_sprite[i] != null ){
-			var temp_sprite_data = this._drill_BBa_sprite_data[i];
-			var temp_sprite = this._drill_BBa_sprite[i];
-			var b_timer = $gameSystem._drill_BBa_timer;
-			//alert(JSON.stringify(temp_sprite_data));
-			
-			temp_sprite.origin.x += temp_sprite_data['x_speed'];
-			temp_sprite.origin.y += temp_sprite_data['y_speed'];
-			if( Imported.Drill_BattleCamera ){
-				temp_sprite.origin.x += $gameTemp._drill_cam_result_move_X * temp_sprite_data['rate'];
-				temp_sprite.origin.y += $gameTemp._drill_cam_result_move_Y * temp_sprite_data['rate'];
+	
+	// > 基本属性
+	for( var i = 0; i < this._drill_BBa_spriteTank.length; i++ ){
+		var temp_sprite = this._drill_BBa_spriteTank[i];
+		var temp_s_data = this._drill_BBa_s_dataTank[i];
+		var b_time = $gameSystem._drill_BBa_timer;
+		
+		// > 数据变化
+		temp_s_data['cur_speedX'] += temp_s_data['x_speed'];
+		temp_s_data['cur_speedY'] += temp_s_data['y_speed'];
+		if( Imported.Drill_BattleCamera ){					//（位移比）
+			if( temp_s_data['area_index'] == '下层' ||		//（由于 上层和下层 位于_battleField中，所以计算方式与其他不一样）
+				temp_s_data['area_index'] == '上层' ){
+				temp_s_data['cur_cameraX'] = $gameTemp._drill_cam_pos[0] * temp_s_data['rate'];
+				temp_s_data['cur_cameraY'] = $gameTemp._drill_cam_pos[1] * temp_s_data['rate'];
+			}else{
+				temp_s_data['cur_cameraX'] = $gameTemp._drill_cam_pos[0] * (-1 + temp_s_data['rate'] );
+				temp_s_data['cur_cameraY'] = $gameTemp._drill_cam_pos[1] * (-1 + temp_s_data['rate'] );
 			}
-			
-			//变化-每帧开始
-			for (var j = 0; j < $gameSystem._drill_BBa_changing.length; j++) {
-				var t = $gameSystem._drill_BBa_changing[j];
-				if( t['id'] == i ){
-					
-					if( t['type'] == '变坐标' ){
-						if( b_timer > t['start'] && !t['cur_x'] ){		//1.变化 初始化
-							t['cur_x'] = temp_sprite.origin.x;
-							t['cur_y'] = temp_sprite.origin.y;
-							t['c_x'] = ( t['data1'] - t['cur_x'])/ t['sustain'] ;
-							t['c_y'] = ( t['data2'] - t['cur_y'])/ t['sustain'] ;
-						}
-						if( b_timer > t['start'] + t['sustain'] ){	//3.结束变化
-							temp_sprite.origin.x = t['data1'];
-							temp_sprite.origin.y = t['data2'];
-							t['destroy'] = true;
-						}else if( b_timer > t['start'] ){	//2.变化中
-							var time = b_timer - t['start'];
-							temp_sprite.origin.x = t['cur_x'] + t['c_x'] *time;
-							temp_sprite.origin.y = t['cur_y'] + t['c_y'] *time;
-						}
+		}
+		
+		// > 位置
+		var xx = temp_s_data['x'];
+		var yy = temp_s_data['y'];
+		xx += temp_s_data['cur_speedX'];
+		yy += temp_s_data['cur_speedY'];
+		xx += temp_s_data['cur_cameraX'];
+		yy += temp_s_data['cur_cameraY'];
+		temp_sprite.origin.x = Math.floor(xx);
+		temp_sprite.origin.y = Math.floor(yy);
+	}
+}
+//==============================
+// * 帧刷新 - 变化属性
+//==============================
+Scene_Battle.prototype.drill_BBa_updateChange = function() {
+	for( var i = 0; i < this._drill_BBa_spriteTank.length; i++ ){
+		var temp_sprite = this._drill_BBa_spriteTank[i];
+		var temp_s_data = this._drill_BBa_s_dataTank[i];
+		var b_time = $gameSystem._drill_BBa_timer;
+		var change_tank = $gameSystem._drill_BBa_changing;
+		
+		for (var j = 0; j < change_tank.length; j++) {
+			var t = change_tank[j];
+			if( t['id'] == temp_s_data['id'] ){
+				
+				if( t.type == "变坐标" ){
+					if( b_time > t['start'] && !t['cur_x'] ){	//1.变化 初始化
+						t['cur_x'] = temp_s_data['x'];
+						t['cur_y'] = temp_s_data['y'];
+						t['c_x'] = ( t['data2'] - t['cur_x'])/ t['data1'] ;
+						t['c_y'] = ( t['data3'] - t['cur_y'])/ t['data1'] ;
 					}
-					if( t['type'] == '变速度' ){
-						if( b_timer > t['start'] && !t['cur_speed_x'] ){		//1.变化 初始化
-							t['cur_speed_x'] = temp_sprite_data['x_speed'];
-							t['cur_speed_y'] = temp_sprite_data['y_speed'];
-							t['c_speed_x'] = ( t['data1'] - t['cur_speed_x'])/ t['sustain'] ;
-							t['c_speed_y'] = ( t['data2'] - t['cur_speed_y'])/ t['sustain'] ;
-						}
-						if( b_timer > t['start'] + t['sustain'] ){	//3.结束变化
-							temp_sprite_data['x_speed'] = t['data1'];
-							temp_sprite_data['y_speed'] = t['data2'];
-							t['destroy'] = true;
-						}else if( b_timer > t['start'] ){	//2.变化中
-							var time = b_timer - t['start'];
-							temp_sprite_data['x_speed'] = t['cur_speed_x'] + t['c_speed_x'] *time;
-							temp_sprite_data['y_speed'] = t['cur_speed_y'] + t['c_speed_y'] *time;
-						}
+					if( b_time > t['start'] + t['data1'] ){	//3.结束变化
+						temp_s_data['x'] = t['data2'];
+						temp_s_data['y'] = t['data3'];
+						t.destroy = true;
+					}else if( b_time > t['start'] ){	//2.变化中
+						var time = b_time - t['start'];
+						temp_s_data['x'] = t['cur_x'] + t['c_x'] *time;
+						temp_s_data['y'] = t['cur_y'] + t['c_y'] *time;
 					}
-					if( t['type'] == '变透明' ){
-						if( b_timer > t['start'] && !t['cur_opacity'] ){		//1.变化 初始化
-							t['cur_opacity'] = temp_sprite.opacity;
-							t['c_opacity'] = ( t['data1'] - t['cur_opacity'])/ t['sustain'] ;
-						}
-						if( b_timer > t['start'] + t['sustain'] ){	//3.结束变化
-							temp_sprite.opacity = t['data1'];
-							t['destroy'] = true;
-						}else if( b_timer > t['start'] ){	//2.变化中
-							var time = b_timer - t['start'];
-							temp_sprite.opacity = Math.floor(t['cur_opacity'] + t['c_opacity'] *time);
-						}
+				}
+				
+				if( t.type == "变速度" ){
+					if( b_time > t['start'] && !t['cur_speed_x'] ){		//1.变化 初始化
+						t['cur_speed_x'] = temp_s_data['x_speed'];
+						t['cur_speed_y'] = temp_s_data['y_speed'];
+						t['c_speed_x'] = ( t['data2'] - t['cur_speed_x'])/ t['data1'] ;
+						t['c_speed_y'] = ( t['data3'] - t['cur_speed_y'])/ t['data1'] ;
 					}
-					if( t['type'] == '变混合模式' ){
-						if( b_timer > t['start'] ){		//直接变化
-							temp_sprite.blendMode = t['sustain'];
-							t['destroy'] = true;
-						}
+					if( b_time > t['start'] + t['data1'] ){	//3.结束变化
+						temp_s_data['x_speed'] = t['data2'];
+						temp_s_data['y_speed'] = t['data3'];
+						t.destroy = true;
+					}else if( b_time > t['start'] ){	//2.变化中
+						var time = b_time - t['start'];
+						temp_s_data['x_speed'] = t['cur_speed_x'] + t['c_speed_x'] *time;
+						temp_s_data['y_speed'] = t['cur_speed_y'] + t['c_speed_y'] *time;
+					}
+				}
+				
+				if( t.type == "变透明" ){
+					if( b_time > t['start'] && !t['cur_opacity'] ){		//1.变化 初始化
+						t['cur_opacity'] = temp_sprite.opacity;
+						t['c_opacity'] = ( t['data2'] - t['cur_opacity'])/ t['data1'] ;
+					}
+					if( b_time > t['start'] + t['data1'] ){	//3.结束变化
+						temp_sprite.opacity = t['data2'];
+						t.destroy = true;
+					}else if( b_time > t['start'] ){	//2.变化中
+						var time = b_time - t['start'];
+						temp_sprite.opacity = Math.floor(t['cur_opacity'] + t['c_opacity'] *time);
+					}
+				}
+				
+				if( t.type == "变混合模式" ){
+					if( b_time > t['start'] ){		//直接变化
+						temp_sprite.blendMode = t['data1'];
+						t.destroy = true;
 					}
 				}
 			}
-			//4.变化-变化结束生命周期
-			for(var k = $gameSystem._drill_BBa_changing.length -1 ; k >= 0 ; k--){
-				var temp_changing = $gameSystem._drill_BBa_changing[k];
-				if( temp_changing['destroy'] ){
-					$gameSystem._drill_BBa_changing.splice(k, 1);
-				}
+		}
+		
+		// > 清除变化集
+		for(var k = change_tank.length-1 ; k >= 0; k--){
+			if( change_tank[k].destroy == true ){
+				change_tank.splice(k, 1);
 			}
 		}
 	};

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        物体 - 事件一体化
+ * @plugindesc [v1.3]        物体 - 事件一体化
  * @author Drill_up
  * 
  * 
@@ -66,6 +66,9 @@
  *      谁慢，全部按照正在走的那个事件/玩家的速度来走。
  * 朝向一体化：
  *   (1.含有相同朝向标签的事件，统一朝向。
+ *   (2.注意要关闭事件"固定朝向"的设置。
+ *   (3.添加标签后，事件会立即统一朝向，不会存在相同朝向标签的事件会出现
+ *      朝向不同的情况。
  * 触发一体化：
  *   (1.独立开关开启时，统一开启/关闭所有同标签事件的开关。
  *   (2.通过鼠标触发插件，能对相同标签的全部事件整体进行触发。
@@ -150,6 +153,9 @@
  * 修复了玩家一体化的bug，并且添加了玩家初始标签设置。
  * [v1.2]
  * 修复了一体化斜向移动时的bug。
+ * [v1.3]
+ * 修复了一体化朝向初始状态时，事件方向不一致的bug。
+ * 
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -205,9 +211,9 @@
 //				如果使用增加/去除 这种增量性质的容器，会造成 $gamePlayer与事件放在同一个容器时，【二者难以区分直接紊乱】。
 //				所以每次变化还不如直接重刷容器。
 //			3.考虑到标签的问题，这里强制每个事件只能设置一个标签，原先的多标签被弃用：
-//					//this._drill_EU.trigger = {};
-//					//this._drill_EU.trigger.enabled = false;
-//					//this._drill_EU.trigger.tags = {};
+//					//this._drill_EU['trigger'] = {};
+//					//this._drill_EU['trigger'].enabled = false;
+//					//this._drill_EU['trigger'].tags = {};
 //				原因是：当标签绑定在玩家身上时，发现两个标签使得玩家一次移动变成了两次。（如果继续深入下去，程序会极其复杂）
 //				
 //		★存在的问题：
@@ -270,39 +276,40 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
 			if( e && type == "设置移动标签" ){
-				e._drill_EU.move = temp1;
+				e._drill_EU['move'] = temp1;
 				e._drill_ETh_char[ "_drill_EU_"+temp1 ] = true;		//穿透标签
 				$gameTemp._drill_EU_needRefresh = true;
 			}
 			if( e && type == "设置朝向标签" ){
-				e._drill_EU.rotate = temp1;
+				e._drill_EU['rotate'] = temp1;
+				e._drill_EU['rotateNeedInit'] = true;
 				$gameTemp._drill_EU_needRefresh = true;
 			}
 			if( e && type == "设置触发标签" ){
-				e._drill_EU.trigger = temp1;
+				e._drill_EU['trigger'] = temp1;
 				$gameTemp._drill_EU_needRefresh = true;
 			}
 		}
 		if(args.length == 4){
 			var type = String(args[3]);
 			if( e && type == "去除移动标签" ){
-				e._drill_ETh_char[ "_drill_EU_" + e._drill_EU.move ] = false;	//穿透标签
-				e._drill_EU.move = "" ;
+				e._drill_ETh_char[ "_drill_EU_" + e._drill_EU['move'] ] = false;	//穿透标签
+				e._drill_EU['move'] = "" ;
 				$gameTemp._drill_EU_needRefresh = true;
 			}
 			if( e && type == "去除朝向标签" ){
-				e._drill_EU.rotate = "" ;
+				e._drill_EU['rotate'] = "" ;
 				$gameTemp._drill_EU_needRefresh = true;
 			}
 			if( e && type == "去除触发标签" ){
-				e._drill_EU.trigger = "" ;
+				e._drill_EU['trigger'] = "" ;
 				$gameTemp._drill_EU_needRefresh = true;
 			}
 			if( e && type == "开启速度统一" ){
-				e._drill_EU.speed = true ;
+				e._drill_EU['speed'] = true ;
 			}
 			if( e && type == "关闭速度统一" ){
-				e._drill_EU.speed = false ;
+				e._drill_EU['speed'] = false ;
 			}
 		}
 		if(args.length == 8){
@@ -316,12 +323,13 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			
 			if( unit == "领队" || unit == "玩家" ){
 				if( type == "设置移动标签" ){
-					$gamePlayer._drill_EU.move = temp1;
+					$gamePlayer._drill_EU['move'] = temp1;
 					$gamePlayer._drill_ETh_char[ "_drill_EU_"+temp1 ] = true;		//穿透标签
 					$gameTemp._drill_EU_needRefresh = true;
 				}
 				if( type == "设置朝向标签" ){
-					$gamePlayer._drill_EU.rotate = temp1;
+					$gamePlayer._drill_EU['rotate'] = temp1;
+					$gamePlayer._drill_EU['rotateNeedInit'] = true;
 					$gameTemp._drill_EU_needRefresh = true;
 				}
 			}
@@ -332,19 +340,19 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			
 			if( unit == "领队" || unit == "玩家" ){
 				if( type == "去除移动标签" ){
-					$gamePlayer._drill_ETh_char[ "_drill_EU_" + $gamePlayer._drill_EU.move ] = false;	//穿透标签
-					$gamePlayer._drill_EU.move = "" ;
+					$gamePlayer._drill_ETh_char[ "_drill_EU_" + $gamePlayer._drill_EU['move'] ] = false;	//穿透标签
+					$gamePlayer._drill_EU['move'] = "" ;
 					$gameTemp._drill_EU_needRefresh = true;
 				}
 				if( type == "去除朝向标签" ){
-					$gamePlayer._drill_EU.rotate = "" ;
+					$gamePlayer._drill_EU['rotate'] = "" ;
 					$gameTemp._drill_EU_needRefresh = true;
 				}
 				if( type == "开启速度统一" ){
-					$gamePlayer._drill_EU.speed = true ;
+					$gamePlayer._drill_EU['speed'] = true ;
 				}
 				if( type == "关闭速度统一" ){
-					$gamePlayer._drill_EU.speed = false ;
+					$gamePlayer._drill_EU['speed'] = false ;
 				}
 			}
 		}
@@ -375,11 +383,12 @@ Game_Map.prototype.drill_EU_isEventExist = function( e_id ){
 var _drill_EU_p_initMembers = Game_Player.prototype.initMembers;
 Game_Player.prototype.initMembers = function() {
 	_drill_EU_p_initMembers.call(this);
-	this._drill_EU.move = DrillUp.g_EU_move;
-	this._drill_EU.rotate = DrillUp.g_EU_rotate;
-	this._drill_EU.speed = DrillUp.g_EU_speed;
+	this._drill_EU['move'] = DrillUp.g_EU_move;				//移动标签
+	this._drill_EU['rotate'] = DrillUp.g_EU_rotate;			//朝向标签
+	this._drill_EU['speed'] = DrillUp.g_EU_speed;			//触发标签
+	this._drill_EU['rotateNeedInit'] = false;				//朝向初始化标记
 	if( this.drill_EU_hasMoveTag() ){
-		this._drill_ETh_char[ "_drill_EU_"+this._drill_EU.move ] = true;		//穿透标签
+		this._drill_ETh_char[ "_drill_EU_"+this._drill_EU['move'] ] = true;		//穿透标签
 	}
 }
 
@@ -393,10 +402,11 @@ var _drill_EU_initMembers = Game_CharacterBase.prototype.initMembers;
 Game_CharacterBase.prototype.initMembers = function() {
 	_drill_EU_initMembers.call(this);
 	this._drill_EU = {};
-	this._drill_EU.move = "";
-	this._drill_EU.rotate = "";
-	this._drill_EU.trigger = "";
-	this._drill_EU.speed = false;
+	this._drill_EU['move'] = "";				//移动标签
+	this._drill_EU['rotate'] = "";				//朝向标签
+	this._drill_EU['trigger'] = "";				//触发标签
+	this._drill_EU['speed'] = false;			//速度统一标记
+	this._drill_EU['rotateNeedInit'] = false;	//朝向初始化标记
 	this._drill_EU_orgSpeed = null;
 	this._drill_EU_unifyingMovingTarget = null;
 }
@@ -404,13 +414,13 @@ Game_CharacterBase.prototype.initMembers = function() {
 // * 物体 - 含有标签
 //==============================
 Game_CharacterBase.prototype.drill_EU_hasMoveTag = function() {
-	return this._drill_EU.move !== "";
+	return this._drill_EU['move'] !== "";
 }
 Game_CharacterBase.prototype.drill_EU_hasRotateTag = function() {
-	return this._drill_EU.rotate !== "";
+	return this._drill_EU['rotate'] !== "";
 }
 Game_CharacterBase.prototype.drill_EU_hasTriggerTag = function() {
-	return this._drill_EU.trigger !== "";
+	return this._drill_EU['trigger'] !== "";
 }
 //=============================================================================
 // ** 容器
@@ -483,23 +493,35 @@ Game_Map.prototype.drill_EU_refreshTags = function() {
 	$gameTemp._drill_EU_map_trigger = {};
 	for (var i = 0; i < events.length; i++) {  
 		var temp_event = events[i];
+		
+		// > 移动标签 - 统计
 		if( temp_event.drill_EU_hasMoveTag() ){
-			if( !$gameTemp._drill_EU_map_move[ temp_event._drill_EU.move ] ){
-				$gameTemp._drill_EU_map_move[ temp_event._drill_EU.move ] = [];
+			if( !$gameTemp._drill_EU_map_move[ temp_event._drill_EU['move'] ] ){
+				$gameTemp._drill_EU_map_move[ temp_event._drill_EU['move'] ] = [];
 			}
-			$gameTemp._drill_EU_map_move[ temp_event._drill_EU.move ].push(temp_event);
+			$gameTemp._drill_EU_map_move[ temp_event._drill_EU['move'] ].push(temp_event);
 		}
+		
+		// > 朝向标签 - 统计
 		if( temp_event.drill_EU_hasRotateTag() ){
-			if( !$gameTemp._drill_EU_map_rotate[ temp_event._drill_EU.rotate ] ){
-				$gameTemp._drill_EU_map_rotate[ temp_event._drill_EU.rotate ] = [];
+			if( !$gameTemp._drill_EU_map_rotate[ temp_event._drill_EU['rotate'] ] ){
+				$gameTemp._drill_EU_map_rotate[ temp_event._drill_EU['rotate'] ] = [];
 			}
-			$gameTemp._drill_EU_map_rotate[ temp_event._drill_EU.rotate ].push(temp_event);
+			$gameTemp._drill_EU_map_rotate[ temp_event._drill_EU['rotate'] ].push(temp_event);
+		
+			// > 朝向初始化
+			if( temp_event._drill_EU['rotateNeedInit'] == true ){
+				temp_event._drill_EU['rotateNeedInit'] = false;
+				temp_event.setDirection( temp_event.direction() );
+			}
 		}
+		
+		// > 触发标签 - 统计
 		if( temp_event.drill_EU_hasTriggerTag() ){
-			if( !$gameTemp._drill_EU_map_trigger[ temp_event._drill_EU.trigger ] ){
-				$gameTemp._drill_EU_map_trigger[ temp_event._drill_EU.trigger ] = [];
+			if( !$gameTemp._drill_EU_map_trigger[ temp_event._drill_EU['trigger'] ] ){
+				$gameTemp._drill_EU_map_trigger[ temp_event._drill_EU['trigger'] ] = [];
 			}
-			$gameTemp._drill_EU_map_trigger[ temp_event._drill_EU.trigger ].push(temp_event);
+			$gameTemp._drill_EU_map_trigger[ temp_event._drill_EU['trigger'] ].push(temp_event);
 		}
 	}
 }
@@ -524,23 +546,24 @@ Game_Event.prototype.drill_EU_setupTags = function() {
 					var type = String(args[1]); 
 					var temp1 = String(args[3]); 
 					if( type == "移动标签" ){
-						this._drill_EU.move = temp1;
+						this._drill_EU['move'] = temp1;
 						this._drill_ETh_char[ "_drill_EU_"+temp1 ] = true;		//穿透标签
 						$gameTemp._drill_EU_needRefresh = true;
 					}
 					if( type == "朝向标签" ){
-						this._drill_EU.rotate = temp1;
+						this._drill_EU['rotate'] = temp1;
+						this._drill_EU['rotateNeedInit'] = true;			
 						$gameTemp._drill_EU_needRefresh = true;
 					}
 					if( type == "触发标签" ){
-						this._drill_EU.trigger = temp1;
+						this._drill_EU['trigger'] = temp1;
 						$gameTemp._drill_EU_needRefresh = true;
 					}
 				}
 				if(args.length == 2){
 					var type = String(args[1]); 
 					if( type == "开启速度统一" ){
-						this._drill_EU.speed = true;
+						this._drill_EU['speed'] = true;
 					}
 				}
 			};
@@ -581,7 +604,7 @@ Game_CharacterBase.prototype.updateMove = function() {
 		}
 		if( this._drill_EU_unifyingMovingTarget != null ){		//速度改变
 			var u_c = this._drill_EU_unifyingMovingTarget;
-			if( u_c._drill_EU.speed && u_c != this ){
+			if( u_c._drill_EU['speed'] && u_c != this ){
 				this._moveSpeed = u_c._moveSpeed;
 				if( Imported.Drill_MoveSpeed ){
 					this._drill_MS_ASpeed = u_c.drill_MS_getRealASpeed();
@@ -612,7 +635,7 @@ Game_CharacterBase.prototype.updateStop = function() {
 var _drill_EU_moveStraight = Game_CharacterBase.prototype.moveStraight;
 Game_CharacterBase.prototype.moveStraight = function(d) {
 	if( this.drill_EU_hasMoveTag() ){
-		$gameMap.drill_EU_moveStraightByMoveTag( d, this._drill_EU.move , this );		//移动时，所有相同标签的事件同时移动
+		$gameMap.drill_EU_moveStraightByMoveTag( d, this._drill_EU['move'] , this );		//移动时，所有相同标签的事件同时移动
 		this.setDirection(d);
 	}else{
 		_drill_EU_moveStraight.call(this,d);
@@ -690,7 +713,7 @@ Game_Map.prototype.drill_EU_moveStraightByMoveTag = function( d, e_tag , unifyin
 var _drill_EU_moveDiagonally = Game_CharacterBase.prototype.moveDiagonally;
 Game_CharacterBase.prototype.moveDiagonally = function(horz, vert) {
 	if( this.drill_EU_hasMoveTag() ){
-		$gameMap.drill_EU_moveDiagonallyByMoveTag(horz,vert,this._drill_EU.move);		//移动时，所有相同标签的事件同时移动
+		$gameMap.drill_EU_moveDiagonallyByMoveTag(horz,vert,this._drill_EU['move']);		//移动时，所有相同标签的事件同时移动
 		if (this._direction === this.reverseDir(horz)) {
 			this.setDirection(horz);
 		}
@@ -763,7 +786,7 @@ Game_Map.prototype.drill_EU_moveDiagonallyByMoveTag = function( horz, vert, e_ta
 var _drill_EU_setDirection = Game_CharacterBase.prototype.setDirection;
 Game_CharacterBase.prototype.setDirection = function(d) {
 	if( this.drill_EU_hasRotateTag() ){
-		$gameMap.drill_EU_setDirectionByRotateTag( d, this._drill_EU.rotate );
+		$gameMap.drill_EU_setDirectionByRotateTag( d, this._drill_EU['rotate'] );
 	}else{
 		_drill_EU_setDirection.call(this,d);
 	}
@@ -795,7 +818,7 @@ Game_SelfSwitches.prototype.setValue = function(key, value) {
 	if($gameMap._mapId === key[0]){
 		var e = $gameMap.event(key[1]);
 		if( e && e.drill_EU_hasTriggerTag() ){
-			var ev_list = $gameTemp.drill_EU_getEventsByTriggerTag( e._drill_EU.trigger );		//触发时，所有相同标签的事件同时触发
+			var ev_list = $gameTemp.drill_EU_getEventsByTriggerTag( e._drill_EU['trigger'] );		//触发时，所有相同标签的事件同时触发
 			for(var i=0; i < ev_list.length; i++){
 				var e_key = [ key[0], ev_list[i]._eventId, key[2] ];
 				if (value) { 

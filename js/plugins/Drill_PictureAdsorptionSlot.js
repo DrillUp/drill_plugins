@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        图片 - 图片吸附槽
+ * @plugindesc [v1.1]        图片 - 图片吸附槽
  * @author Drill_up
  * 
  * @help  
@@ -99,6 +99,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 修复了 该插件 造成图片插件设置斜切无效的bug。
  * 
  * 
  *
@@ -964,21 +966,6 @@ Sprite_Picture.prototype.initialize = function(pictureId) {
     _drill_PAS_sp_initialize.call(this,pictureId);
 	// ...暂无
 }
-//==============================
-// * 图片贴图 - 固定帧初始值
-//==============================
-var _Drill_PAS_sp_update = Sprite_Picture.prototype.update;
-Sprite_Picture.prototype.update = function() {
-	_Drill_PAS_sp_update.call(this);	
-    //this.updateBitmap();								// 贴图资源
-	//this.updateOrigin();								// 圆心x、圆心y
-	//this.updatePosition();							// x、y
-	//this.updateScale();								// 缩放x、缩放y
-	//this.updateTone();								// 色调
-	//this.updateOther();								// 透明度、混合模式、旋转
-	if( this.skew.x != 0 ){ this.skew.x = 0; }			// 斜切x
-	if( this.skew.y != 0 ){ this.skew.y = 0; }			// 斜切y
-};
 //==============================
 // * 图片贴图 - 帧刷新
 //==============================

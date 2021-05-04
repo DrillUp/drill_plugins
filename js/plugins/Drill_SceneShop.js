@@ -1251,22 +1251,39 @@
 //		★大体框架与功能如下：
 //			全自定义商店界面：
 //				->商店界面（覆写函数）
+//					->整体布局
+//					->窗口排序
 //				->窗口
-//					->选项按钮组（购买、出售、离开）
+//					->选项按钮组
+//						> 购买
+//						> 出售
+//						> 离开
 //					->帮助窗口
 //					->金钱窗口
-//						->修改交换物/货币
+//						->新写窗口
+//						> 金钱数
+//						> 金钱单位（修改交换物/货币）
 //					->购买窗口
-//					->持有数窗口
-//					->物品数量窗口
+//						> 执行购买
+//						> 购买价格
+//						> 选择数量
 //					->出售窗口
+//						> 执行出售
+//						> 出售价格
+//						> 选择数量
+//					->物品数量窗口
+//						> 键盘按键情况
+//						> 鼠标选择情况
+//					->持有数窗口
 //					->出售类型窗口
+//						->新写窗口
 //				->服务员
 //					->切换服务员
-//					->欢迎光临
-//					->购买一个物品
-//					->出售一个物品
-//					->余额不足
+//					->动作
+//						> 欢迎光临
+//						> 购买一个物品
+//						> 出售一个物品
+//						> 余额不足
 //				->特殊
 //					->倍率/额外价格
 //					->交换商店
@@ -1279,23 +1296,25 @@
 //			暂无
 //
 //		★其它说明细节：
-//			1. 2018/12/15，rmmv本体的代码太烂，每个变量布局都被相互制约。
+//			1.[2018/12/15]，rmmv本体的代码太烂，每个变量布局都被相互制约。
 //			  各窗口初始化全被写死了，如果覆盖某些泛用窗口又会影响其他的菜单。
 //			  所以这里采取的全是在初始化之后，修改窗口的各个参数。
 //			  有些参数由于内部关系，必须在初始化前就设置好，所以窗口的格式都有一些不同的小变动。（本来想完全统一写法的，现在没办法控制了）
 //			（目前知道的最好的方法是继承 window_selectable 并新写9个窗口，展开全部方法，然而现在已经都写出来，晚了）
 //			（另外，调整坐标和画素材的我被这个弄炸了……）
-//			2. 2020/3/14，修改了部分结构，可以确定里面的结构有许多部件可以分离到核心中进行统一管理。
+//			2.[2020/3/14]，修改了部分结构，可以确定里面的结构有许多部件可以分离到核心中进行统一管理。
 //			  但是考虑到该插件功能已经完好，并且不干扰其他插件的条件下，暂时不给这个插件添加太多无关的核心。
 //			3. 整理了大部分的窗口。这里有三个待完成的部分：
-//				选项按钮组的移动（暂时不动）
-//				数量窗口的排布（强制了行间距，才不会出现绘制切割错位的问题，这里比较麻烦）
-//				金钱窗口结构（这里虽然用的是自己写的Drill_SSh_GoldWindow，但是金币单位识别仍然存在问题。）
+//				> 选项按钮组的移动（暂时不动）
+//				> 数量窗口的排布（强制了行间距，才不会出现绘制切割错位的问题，这里比较麻烦）
+//				> 金钱窗口结构（这里虽然用的是自己写的Drill_SSh_GoldWindow，但是金币单位识别仍然存在问题。）
+//			4.[2021/4/13]，最近将商店整体代码剖析了一遍。
+//			  结构烂的确是情有可原的，因为商店本身的业务逻辑就是不小的工作量，使用简易window快速搭建的确是一个最好的方法。
 //
 //		★存在的问题：
 //			1.商店界面有必要重构分析，因为商店继续下分可以分为各种不同的窗口面板。
-//			  包括越买越贵的物品，宝物商店等。
-//
+//			  包括越买越贵的物品，宝物商店等。	（该问题不再解决，后期使用其他插件进行功能替代）
+//	
 
 //=============================================================================
 // ** 变量获取
@@ -1834,12 +1853,12 @@ Scene_Shop.prototype.create = function() {
 	
     this.createHelpWindow();			//帮助窗口
     this.createGoldWindow();			//金钱窗口
-    this.createCommandWindow();			//选项按钮组窗口
+    this.createCommandWindow();			//商店选项按钮窗口
     this.createDummyWindow();			//空白窗口
     this.createNumberWindow();			//物品数量窗口
     this.createStatusWindow();			//持有数窗口
     this.createBuyWindow();				//购买窗口
-    this.createCategoryWindow();		//出售类型窗口
+    this.createCategoryWindow();		//出售类型窗口（物品类型窗口）
     this.createSellWindow();			//出售窗口
 	
 	this._commandWindow.zIndex = 1;		//窗口显示先后顺序重配
@@ -1933,23 +1952,24 @@ var _drill_SSh_update = Scene_Shop.prototype.update;
 Scene_Shop.prototype.update = function() { 
 	_drill_SSh_update.call(this);
 	
-	this.drill_SSh_updateHelpWindow();				//帮助窗口
-	this._goldWindow.drill_COWA_CPD_update();		//金钱窗口（长期显示）
-    this.drill_SSh_updateButtons();					//选项按钮组
-													//空白窗口
-	this.drill_SSh_updateNumberWindow();			//物品数量窗口
-	this._statusWindow.drill_COWA_CPD_update();		//持有数窗口（长期显示）
-	this.drill_SSh_updateBuyWindow();				//购买窗口
-	this.drill_SSh_updateCategoryWindow();			//出售类型窗口
-	this.drill_SSh_updateSellWindow();				//出售窗口
+	this.drill_SSh_updateHelpWindow();				//帧刷新 - 帮助窗口
+	this._goldWindow.drill_COWA_CPD_update();		//帧刷新 - 金钱窗口（长期显示）
+    this.drill_SSh_updateButtons();					//帧刷新 - 选项按钮组
+													//帧刷新 - 空白窗口
+	this.drill_SSh_updateNumberWindow();			//帧刷新 - 物品数量窗口
+	this._statusWindow.drill_COWA_CPD_update();		//帧刷新 - 持有数窗口（长期显示）
+	this.drill_SSh_updateBuyWindow();				//帧刷新 - 购买窗口
+	this.drill_SSh_updateCategoryWindow();			//帧刷新 - 出售类型窗口
+	this.drill_SSh_updateSellWindow();				//帧刷新 - 出售窗口
 	
-	
-	this.drill_checkKeyTouch();			//键盘按键监听
-    if (TouchInput.isTriggered()) {		//鼠标点击图片监听
+	// > 输入监听
+	this.drill_checkKeyTouch();			//（键盘按键监听）
+    if (TouchInput.isTriggered()) {		//（鼠标点击图片监听）
 		this.drill_checkImgTouch();
 	};
 	
-	if( this._buyWindow._drill_SSh_goldNotEnough == true ){	//金钱不足识别
+	// > 服务员监听（识别金钱不足情况）
+	if( this._buyWindow._drill_SSh_goldNotEnough == true ){	
 		this._buyWindow._drill_SSh_goldNotEnough = false;
 		if( $gameSystem._drill_SSh_exchange_mode == true ){
 			this._drill_SSh_waitress.drill_COWS_playAct("act-itemNotEnough");
@@ -1959,7 +1979,7 @@ Scene_Shop.prototype.update = function() {
 	}
 }
 //==============================
-// * 商店 - 键盘按键监听
+// * 帧刷新 - 键盘按键监听
 //==============================
 Scene_Shop.prototype.drill_checkKeyTouch = function() {
 	
@@ -1970,14 +1990,14 @@ Scene_Shop.prototype.drill_checkKeyTouch = function() {
 	}
 }
 //==============================
-// * 商店 - 鼠标点击图片监听
+// * 帧刷新 - 鼠标点击图片监听
 //==============================
 Scene_Shop.prototype.drill_checkImgTouch = function() {
 	
 	//图片 - 选项按钮组
 	if( this._commandWindow.active ){
-		 for (var i = 0; i < this._drill_SSh_buttons.length; i++) {
-			if (this.drill_SSh_isOnSprite(this._drill_SSh_buttons[i])) {
+		for( var i = 0; i < this._drill_SSh_buttons.length; i++ ){
+			if( this.drill_SSh_isOnSprite(this._drill_SSh_buttons[i]) ){
 				if(this._commandWindow._index != i){	//点击未激活按钮
 					SoundManager.playCursor();
 					this._commandWindow._index = i;
@@ -1995,11 +2015,11 @@ Scene_Shop.prototype.drill_checkImgTouch = function() {
 					}
 				}
 			};
-		 };
+		};
 	}
 }
 //==============================
-// * 商店 - 鼠标点击图片范围判断
+// * 帧刷新 - 鼠标点击图片监听 - 范围判断
 //==============================
 Scene_Shop.prototype.drill_SSh_isOnSprite = function(sprite) {
 	 if(sprite == null){ return false };
@@ -2018,52 +2038,10 @@ Scene_Shop.prototype.drill_SSh_isOnSprite = function(sprite) {
 
 
 //=============================================================================
-// ** bug修复 - 未激活物品数量窗口时，不允许再次购买/出售
-//=============================================================================
-//==============================
-// * bug修复 - 限制场景执行事件
-//==============================
-var _drill_SSh_onNumberOk = Scene_Shop.prototype.onNumberOk;
-Scene_Shop.prototype.onNumberOk = function() {
-	if( this._numberWindow._drill_SSh_enabled != true ){ 
-		this.endNumberInput();
-		this._goldWindow.refresh();
-		this._statusWindow.refresh();
-		return;
-	}
-	_drill_SSh_onNumberOk.call(this);
-}
-//==============================
-// * bug修复 - 限制物品数量窗口事件
-//==============================
-var _drill_SSh_n_onButtonUp = Window_ShopNumber.prototype.onButtonUp;
-Window_ShopNumber.prototype.onButtonUp = function() {
-	if( this._drill_SSh_enabled != true ){ return; }
-	_drill_SSh_n_onButtonUp.call(this);
-};
-var _drill_SSh_n_onButtonUp2 = Window_ShopNumber.prototype.onButtonUp2;
-Window_ShopNumber.prototype.onButtonUp2 = function() {
-	if( this._drill_SSh_enabled != true ){ return; }
-	_drill_SSh_n_onButtonUp2.call(this);
-};
-var _drill_SSh_n_onButtonDown = Window_ShopNumber.prototype.onButtonDown;
-Window_ShopNumber.prototype.onButtonDown = function() {
-	if( this._drill_SSh_enabled != true ){ return; }
-	_drill_SSh_n_onButtonDown.call(this);
-};
-var _drill_SSh_n_onButtonDown2 = Window_ShopNumber.prototype.onButtonDown2;
-Window_ShopNumber.prototype.onButtonDown2 = function() {
-	if( this._drill_SSh_enabled != true ){ return; }
-	_drill_SSh_n_onButtonDown2.call(this);
-};
-var _drill_SSh_n_onButtonOk = Window_ShopNumber.prototype.onButtonOk;
-Window_ShopNumber.prototype.onButtonOk = function() {
-	if( this._drill_SSh_enabled != true ){ return; }
-	_drill_SSh_n_onButtonOk.call(this);
-};
-
-//=============================================================================
 // ** 选项按钮组
+//
+//			说明：	> 原为 商店选项按钮窗口【Window_ShopCommand】。
+//					> 只是隐藏了窗口，并未覆写功能。
 //=============================================================================
 //==============================
 // * 选项按钮 - 选项窗口控制（覆写，直接隐藏）
@@ -2076,7 +2054,6 @@ Scene_Shop.prototype.createCommandWindow = function() {
     this._commandWindow.setHandler('cancel', this.popScene.bind(this));
     this.addWindow(this._commandWindow);
 };
-
 //==============================
 // * 选项按钮 - 初始化
 //==============================
@@ -2131,7 +2108,6 @@ Scene_Shop.prototype.drill_SSh_createButtons = function() {
 	};
 	if( this._purchaseOnly ){ this._drill_SSh_buttons[1].visible = false }
 };
-
 //==============================
 // * 选项按钮 - 右切换选项（覆写）
 //==============================
@@ -2165,9 +2141,12 @@ Scene_Shop.prototype.drill_SSh_updateButtons = function() {
 		var temp_btn_data = this._drill_SSh_buttons_data[i];
 		//alert(JSON.stringify(temp_btn_data));
 		
-		if( this._commandWindow.active ){	//选择按钮时
-			if (this._commandWindow._index === i )  {	//当前选中的按钮
-				//缩放效果
+		// > 选择按钮时
+		if( this._commandWindow.active ){
+			
+			// > 选择按钮时 - 当前选中的按钮
+			if( this._commandWindow._index === i ){
+				// > 缩放效果
 				if(DrillUp.g_SSh_btn_a_zoom){
 					if (temp_btn_data['Ani'] === 0) {
 						this.drill_SSh_scale_move_to(temp_btn,1.30, 0.01);
@@ -2181,7 +2160,7 @@ Scene_Shop.prototype.drill_SSh_updateButtons = function() {
 						};				 
 					};
 				}
-				//闪烁效果
+				// > 闪烁效果
 				if(DrillUp.g_SSh_btn_a_flash){
 					if (temp_btn_data['Ani'] === 0) {
 						this.drill_SSh_opacity_move_to(temp_btn,255, 10);
@@ -2239,14 +2218,16 @@ Scene_Shop.prototype.drill_SSh_updateButtons = function() {
 					this.drill_SSh_button_move_to(temp_btn,target_x,target_y,7);
 				}
 				
-			} else {	//当前未选中的按钮（半隐藏）
+			// > 选择按钮时 - 当前未选中的按钮（半隐藏）
+			}else{
 				temp_btn_data['Ani'] = 0
 				this.drill_SSh_scale_move_to(temp_btn,1.00, 0.01);
 				this.drill_SSh_opacity_move_to(temp_btn,DrillUp.g_SSh_btn_unselect_opacity,4); 
 				this.drill_SSh_button_move_to(temp_btn,temp_btn_data['org_x'],temp_btn_data['org_y'],7);
 			};
 			
-		}else{	//按钮激活时
+		// > 激活按钮时（移动效果）
+		}else{
 			if( DrillUp.g_SSh_btn_active_usable ){
 				if (this._commandWindow._index === i )  {	//激活的按钮
 					temp_btn_data['Ani'] = 0; 
@@ -2390,6 +2371,7 @@ Scene_Shop.prototype.createGoldWindow = function() {
 	this._goldWindow.refresh();	
 	this.addWindow(this._goldWindow);
 };
+
 //==============================
 // * 金钱窗口 - 定义
 //==============================
@@ -2398,7 +2380,6 @@ function Drill_SSh_GoldWindow() {
 }
 Drill_SSh_GoldWindow.prototype = Object.create(Window_Base.prototype);
 Drill_SSh_GoldWindow.prototype.constructor = Drill_SSh_GoldWindow;
-
 //==============================
 // * 金钱窗口 - 初始化
 //==============================
@@ -2742,6 +2723,52 @@ Window_ShopNumber.prototype.drawCurrencyValue = function(value, unit, x, y, widt
 	}else{
 		_drill_SSh_n_drawCurrencyValue.call(this,value, unit, x, y, width);
 	}
+};
+//=============================================================================
+// * 物品数量窗口 - bug修复
+//
+//				说明：	未激活物品数量窗口时，不允许再次购买/出售。
+//=============================================================================
+//==============================
+// * 物品数量窗口 - bug修复 - 限制场景执行事件
+//==============================
+var _drill_SSh_onNumberOk = Scene_Shop.prototype.onNumberOk;
+Scene_Shop.prototype.onNumberOk = function() {
+	if( this._numberWindow._drill_SSh_enabled != true ){ 
+		this.endNumberInput();
+		this._goldWindow.refresh();
+		this._statusWindow.refresh();
+		return;
+	}
+	_drill_SSh_onNumberOk.call(this);
+}
+//==============================
+// * 物品数量窗口 - bug修复 - 限制物品数量窗口事件
+//==============================
+var _drill_SSh_n_onButtonUp = Window_ShopNumber.prototype.onButtonUp;
+Window_ShopNumber.prototype.onButtonUp = function() {
+	if( this._drill_SSh_enabled != true ){ return; }
+	_drill_SSh_n_onButtonUp.call(this);
+};
+var _drill_SSh_n_onButtonUp2 = Window_ShopNumber.prototype.onButtonUp2;
+Window_ShopNumber.prototype.onButtonUp2 = function() {
+	if( this._drill_SSh_enabled != true ){ return; }
+	_drill_SSh_n_onButtonUp2.call(this);
+};
+var _drill_SSh_n_onButtonDown = Window_ShopNumber.prototype.onButtonDown;
+Window_ShopNumber.prototype.onButtonDown = function() {
+	if( this._drill_SSh_enabled != true ){ return; }
+	_drill_SSh_n_onButtonDown.call(this);
+};
+var _drill_SSh_n_onButtonDown2 = Window_ShopNumber.prototype.onButtonDown2;
+Window_ShopNumber.prototype.onButtonDown2 = function() {
+	if( this._drill_SSh_enabled != true ){ return; }
+	_drill_SSh_n_onButtonDown2.call(this);
+};
+var _drill_SSh_n_onButtonOk = Window_ShopNumber.prototype.onButtonOk;
+Window_ShopNumber.prototype.onButtonOk = function() {
+	if( this._drill_SSh_enabled != true ){ return; }
+	_drill_SSh_n_onButtonOk.call(this);
 };
 
 

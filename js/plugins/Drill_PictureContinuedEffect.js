@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        图片 - 持续动作效果
+ * @plugindesc [v1.2]        图片 - 持续动作效果
  * @author Drill_up
  * 
  * 
@@ -66,6 +66,7 @@
  * 插件指令：>持续动作 : 图片[1] : 左右震动 : 持续时间[60] : 周期[6] : 震动幅度[10]
  * 插件指令：>持续动作 : 图片[1] : 左右摇晃 : 持续时间[40] : 周期[20] : 摇晃幅度[15]
  * 插件指令：>持续动作 : 图片[1] : 呼吸效果 : 持续时间[180] : 周期[45] : 呼吸幅度[6]
+ * 插件指令：>持续动作 : 图片[1] : 原地小跳 : 持续时间[180] : 周期[90] : 跳跃高度[20]
  * 插件指令：>持续动作 : 图片[1] : 空中飘浮 : 持续时间[150] : 缓冲时间[60] : 飘浮高度[100] : 周期[30] : 幅度[8]
  * 插件指令：>持续动作 : 图片[1] : 旋转状态 : 持续时间[150] : 缓冲时间[60] : 旋转角度[90]
  * 插件指令：>持续动作 : 图片[1] : 缩放状态 : 持续时间[150] : 缓冲时间[60] : 缩放比例[1.5]
@@ -130,6 +131,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 添加了插件指令图片检查。
+ * [v1.2]
+ * 修复了 该插件 造成图片插件设置斜切无效的bug。
  * 
  * 
  */
@@ -421,6 +424,22 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					}
 				}
 			}	
+			/*-----------------原地小跳------------------*/
+			if( type == "原地小跳" ){
+				temp1 = temp1.replace("持续时间[","");
+				temp1 = temp1.replace("]","");
+				temp1 = temp1.replace("无限","518400000");
+				temp2 = temp2.replace("周期[","");
+				temp2 = temp2.replace("]","");
+				temp3 = temp3.replace("跳跃高度[","");
+				temp3 = temp3.replace("]","");
+				if( pics != null ){
+					for( var k=0; k < pics.length; k++ ){
+						pics[k].drill_PCE_stopEffect();
+						pics[k].drill_PCE_playSustainingJumping( Number(temp1),Number(temp2),Number(temp3) );
+					}
+				}
+			}	
 			/*-----------------旋转状态------------------*/
 			if( type == "旋转状态" ){
 				temp1 = temp1.replace("持续时间[","");
@@ -564,14 +583,16 @@ Sprite_Picture.prototype.initialize = function(pictureId) {
 var _Drill_PCE_sp_update = Sprite_Picture.prototype.update;
 Sprite_Picture.prototype.update = function() {
 	_Drill_PCE_sp_update.call(this);	
-    //this.updateBitmap();								// 贴图资源
-	//this.updateOrigin();								// 圆心x、圆心y
-	//this.updatePosition();							// x、y
-	//this.updateScale();								// 缩放x、缩放y
-	//this.updateTone();								// 色调
-	//this.updateOther();								// 透明度、混合模式、旋转
-	if( this.skew.x != 0 ){ this.skew.x = 0; }			// 斜切x
-	if( this.skew.y != 0 ){ this.skew.y = 0; }			// 斜切y
+	if( this.picture() && this.picture().drill_PCE_isPlaying() ){
+		//this.updateBitmap();								// 贴图资源
+		//this.updateOrigin();								// 圆心x、圆心y
+		//this.updatePosition();							// x、y
+		//this.updateScale();								// 缩放x、缩放y
+		//this.updateTone();								// 色调
+		//this.updateOther();								// 透明度、混合模式、旋转
+		if( this.skew.x != 0 ){ this.skew.x = 0; }			// 斜切x
+		if( this.skew.y != 0 ){ this.skew.y = 0; }			// 斜切y
+	}
 };
 
 //==============================
@@ -644,6 +665,20 @@ Game_Temp.prototype.drill_PCE_getFixPointInAnchor = function(
 	return { "x":xx, "y":yy };
 }
 
+//=============================================================================
+// * 数学 - 抛物线三点式
+//			
+//			说明：已知三点，返回抛物线公式的abc。
+//=============================================================================
+Game_Temp.prototype.drill_PCE_getParabolicThree = function( x1,y1,x2,y2,x3,y3 ){
+	
+	var b = ((x2*x2 - x3*x3)*(y1 - y2) - (x1*x1 - x2*x2)*(y2 - y3)) / ((x2*x2 - x3*x3)*(x1 - x2) - (x1*x1 - x2*x2)*(x2 - x3));
+	var a = (y1 - y2 - b*(x1 - x2)) / (x1*x1 - x2*x2);
+	var c = y1 - a*x1*x1 - b*x1;
+	
+	return { "a":a, "b":b, "c":c };
+}
+
 
 //=============================================================================
 // ** 图片
@@ -699,6 +734,7 @@ Game_Picture.prototype.update = function() {
 	this.drill_PCE_updateSustainingShakeLR();
 	this.drill_PCE_updateSustainingShakeRotate();
 	this.drill_PCE_updateSustainingBreathing();
+	this.drill_PCE_updateSustainingJumping();
 	this.drill_PCE_updateSustainingFloating();
 	this.drill_PCE_updateSustainingRotateState();
 	this.drill_PCE_updateSustainingResizeState();
@@ -762,9 +798,9 @@ Game_Picture.prototype.drill_PCE_stopEffect = function() {
 //==============================
 Game_Picture.prototype.drill_PCE_playSustainingFlash = function(time,period) {
 	var ef = this._Drill_PCE;
-	ef.playing_type = "sustainingFlash";
+	ef.playing_type = "标准闪烁";
 	ef.f_time = 0;
-	ef.f_dest = time;
+	ef.f_dTime = time;
 	ef.f_period = period;
 	ef.fA_time = 0;
 	ef.fA_dest = period/2;
@@ -776,7 +812,7 @@ Game_Picture.prototype.drill_PCE_playSustainingFlash = function(time,period) {
 //==============================
 Game_Picture.prototype.drill_PCE_updateSustainingFlash = function() {
 	var ef = this._Drill_PCE;
-	if( ef.playing_type != "sustainingFlash" ){ return; }
+	if( ef.playing_type != "标准闪烁" ){ return; }
 	
 	if( ef.fA_time < ef.fA_dest ){
 		ef.fA_time ++;
@@ -792,7 +828,7 @@ Game_Picture.prototype.drill_PCE_updateSustainingFlash = function() {
 		ef.fA_time = 0;
 		ef.fB_time = 0;
 	}
-	if( ef.f_time >= ef.f_dest ){
+	if( ef.f_time >= ef.f_dTime ){
 		this.drill_PCE_stopEffect();	//结束动作
 	}
 }
@@ -803,9 +839,9 @@ Game_Picture.prototype.drill_PCE_updateSustainingFlash = function() {
 //==============================
 Game_Picture.prototype.drill_PCE_playSustainingFlashCos = function(time,period) {
 	var ef = this._Drill_PCE;
-	ef.playing_type = "sustainingFlashCos";
+	ef.playing_type = "渐变闪烁";
 	ef.f_time = 0;
-	ef.f_dest = time;
+	ef.f_dTime = time;
 	ef.f_period = period;
 }
 //==============================
@@ -813,13 +849,13 @@ Game_Picture.prototype.drill_PCE_playSustainingFlashCos = function(time,period) 
 //==============================
 Game_Picture.prototype.drill_PCE_updateSustainingFlashCos = function() {
 	var ef = this._Drill_PCE;
-	if( ef.playing_type != "sustainingFlashCos" ){ return; }
+	if( ef.playing_type != "渐变闪烁" ){ return; }
 	
 	ef.f_time ++;
 	ef.opacity = 127 + 126*Math.cos( ( 360* ef.f_time/ef.f_period )/180*Math.PI );
 	this.drill_PCE_setOpacity(ef.opacity);
 	
-	if( ef.f_time >= ef.f_dest ){
+	if( ef.f_time >= ef.f_dTime ){
 		this.drill_PCE_stopEffect();	//结束动作
 	}
 }
@@ -830,9 +866,9 @@ Game_Picture.prototype.drill_PCE_updateSustainingFlashCos = function() {
 //==============================
 Game_Picture.prototype.drill_PCE_playSustainingRotate = function(time,period,prop) {
 	var ef = this._Drill_PCE;
-	ef.playing_type = "sustainingRotate";
+	ef.playing_type = "顺时针/逆时针旋转";
 	ef.f_time = 0;
-	ef.f_dest = time;
+	ef.f_dTime = time;
 	ef.f_period = period;
 	ef.f_speed = 360/period /180*Math.PI * prop;
 }
@@ -841,7 +877,7 @@ Game_Picture.prototype.drill_PCE_playSustainingRotate = function(time,period,pro
 //==============================
 Game_Picture.prototype.drill_PCE_updateSustainingRotate = function() {
 	var ef = this._Drill_PCE;
-	if( ef.playing_type != "sustainingRotate" ){ return; }
+	if( ef.playing_type != "顺时针/逆时针旋转" ){ return; }
 	
 	ef.f_time ++;
 	ef.rotation += ef.f_speed;
@@ -851,7 +887,7 @@ Game_Picture.prototype.drill_PCE_updateSustainingRotate = function() {
 	ef.x = fix_point.x;	
 	ef.y = fix_point.y;	
 	
-	if( ef.f_time >= ef.f_dest ){
+	if( ef.f_time >= ef.f_dTime ){
 		this.drill_PCE_stopEffect();	//结束动作
 	}
 }
@@ -862,9 +898,9 @@ Game_Picture.prototype.drill_PCE_updateSustainingRotate = function() {
 //==============================
 Game_Picture.prototype.drill_PCE_playSustainingRotateVer = function(time,period) {
 	var ef = this._Drill_PCE;
-	ef.playing_type = "sustainingRotateVer";
+	ef.playing_type = "垂直卡片旋转";
 	ef.f_time = 0;
-	ef.f_dest = time;
+	ef.f_dTime = time;
 	ef.f_period = period;
 	ef.f_speed = 360/period /180*Math.PI;
 }
@@ -873,12 +909,12 @@ Game_Picture.prototype.drill_PCE_playSustainingRotateVer = function(time,period)
 //==============================
 Game_Picture.prototype.drill_PCE_updateSustainingRotateVer = function() {
 	var ef = this._Drill_PCE;
-	if( ef.playing_type != "sustainingRotateVer" ){ return; }
+	if( ef.playing_type != "垂直卡片旋转" ){ return; }
 		
 	ef.f_time ++;
 	ef.scale_x = -0.5 - 0.5 *Math.cos( ef.f_time*ef.f_speed + Math.PI );
 	
-	if( ef.f_time >= ef.f_dest ){
+	if( ef.f_time >= ef.f_dTime ){
 		this.drill_PCE_stopEffect();	//结束动作
 	}
 }
@@ -889,9 +925,9 @@ Game_Picture.prototype.drill_PCE_updateSustainingRotateVer = function() {
 //==============================
 Game_Picture.prototype.drill_PCE_playSustainingRotateHor = function(time,period) {
 	var ef = this._Drill_PCE;
-	ef.playing_type = "sustainingRotateHor";
+	ef.playing_type = "水平卡片旋转";
 	ef.f_time = 0;
-	ef.f_dest = time;
+	ef.f_dTime = time;
 	ef.f_period = period;
 	ef.f_speed = 360/period /180*Math.PI;
 }
@@ -900,14 +936,14 @@ Game_Picture.prototype.drill_PCE_playSustainingRotateHor = function(time,period)
 //==============================
 Game_Picture.prototype.drill_PCE_updateSustainingRotateHor = function() {
 	var ef = this._Drill_PCE;
-	if( ef.playing_type != "sustainingRotateHor" ){ return; }
+	if( ef.playing_type != "水平卡片旋转" ){ return; }
 	
 	ef.f_time ++;
 	ef.scale_y = -0.5 - 0.5*Math.cos( ef.f_time*ef.f_speed + Math.PI );
 	
 	ef.y = 0.5 * this._Drill_PCE.real_height * ef.scale_y;
 	
-	if( ef.f_time >= ef.f_dest ){
+	if( ef.f_time >= ef.f_dTime ){
 		this.drill_PCE_stopEffect();	//结束动作
 	}
 }
@@ -918,9 +954,9 @@ Game_Picture.prototype.drill_PCE_updateSustainingRotateHor = function() {
 //==============================
 Game_Picture.prototype.drill_PCE_playSustainingShakeUD = function( time,period,scope ) {
 	var ef = this._Drill_PCE;
-	ef.playing_type = "sustainingShakeUD";
+	ef.playing_type = "上下震动";
 	ef.f_time = 0;
-	ef.f_dest = time;
+	ef.f_dTime = time;
 	ef.f_period = period;
 	ef.f_scope = scope;
 	ef.f_speed = 360/period /180*Math.PI;
@@ -930,12 +966,12 @@ Game_Picture.prototype.drill_PCE_playSustainingShakeUD = function( time,period,s
 //==============================
 Game_Picture.prototype.drill_PCE_updateSustainingShakeUD = function() {
 	var ef = this._Drill_PCE;
-	if( ef.playing_type != "sustainingShakeUD" ){ return; }
+	if( ef.playing_type != "上下震动" ){ return; }
 	
 	ef.f_time ++;
 	ef.y = ef.f_scope * Math.sin( ef.f_time*ef.f_speed );
 	
-	if( ef.f_time >= ef.f_dest ){
+	if( ef.f_time >= ef.f_dTime ){
 		this.drill_PCE_stopEffect();	//结束动作
 	}
 }
@@ -946,9 +982,9 @@ Game_Picture.prototype.drill_PCE_updateSustainingShakeUD = function() {
 //==============================
 Game_Picture.prototype.drill_PCE_playSustainingShakeLR = function( time,period,scope ) {
 	var ef = this._Drill_PCE;
-	ef.playing_type = "sustainingShakeLR";
+	ef.playing_type = "左右震动";
 	ef.f_time = 0;
-	ef.f_dest = time;
+	ef.f_dTime = time;
 	ef.f_period = period;
 	ef.f_scope = scope;
 	ef.f_speed = 360/period /180*Math.PI;
@@ -958,12 +994,12 @@ Game_Picture.prototype.drill_PCE_playSustainingShakeLR = function( time,period,s
 //==============================
 Game_Picture.prototype.drill_PCE_updateSustainingShakeLR = function() {
 	var ef = this._Drill_PCE;
-	if( ef.playing_type != "sustainingShakeLR" ){ return; }
+	if( ef.playing_type != "左右震动" ){ return; }
 	
 	ef.f_time ++;
 	ef.x = ef.f_scope * Math.sin( ef.f_time*ef.f_speed );
 	
-	if( ef.f_time >= ef.f_dest ){
+	if( ef.f_time >= ef.f_dTime ){
 		this.drill_PCE_stopEffect();	//结束动作
 	}
 }
@@ -974,9 +1010,9 @@ Game_Picture.prototype.drill_PCE_updateSustainingShakeLR = function() {
 //==============================
 Game_Picture.prototype.drill_PCE_playSustainingShakeRotate = function( time,period,scope ) {
 	var ef = this._Drill_PCE;
-	ef.playing_type = "sustainingShakeRotate";
+	ef.playing_type = "左右摇晃";
 	ef.f_time = 0;
-	ef.f_dest = time;
+	ef.f_dTime = time;
 	ef.f_period = period;
 	ef.f_scope = scope /180*Math.PI;
 	ef.f_speed = 360/period /180*Math.PI;
@@ -986,7 +1022,7 @@ Game_Picture.prototype.drill_PCE_playSustainingShakeRotate = function( time,peri
 //==============================
 Game_Picture.prototype.drill_PCE_updateSustainingShakeRotate = function() {
 	var ef = this._Drill_PCE;
-	if( ef.playing_type != "sustainingShakeRotate" ){ return; }
+	if( ef.playing_type != "左右摇晃" ){ return; }
 	
 	ef.f_time ++;
 	ef.rotation = ef.f_scope * Math.sin( ef.f_time*ef.f_speed );
@@ -996,7 +1032,7 @@ Game_Picture.prototype.drill_PCE_updateSustainingShakeRotate = function() {
 	ef.x = fix_point.x;	
 	ef.y = fix_point.y;	
 	
-	if( ef.f_time >= ef.f_dest ){
+	if( ef.f_time >= ef.f_dTime ){
 		this.drill_PCE_stopEffect();	//结束动作
 	}
 }
@@ -1006,9 +1042,9 @@ Game_Picture.prototype.drill_PCE_updateSustainingShakeRotate = function() {
 //==============================
 Game_Picture.prototype.drill_PCE_playSustainingBreathing = function( time,period,scope ) {
 	var ef = this._Drill_PCE;
-	ef.playing_type = "sustainingBreathing";
+	ef.playing_type = "呼吸效果";
 	ef.f_time = 0;
-	ef.f_dest = time;
+	ef.f_dTime = time;
 	ef.f_period = period;
 	ef.f_scope = scope ;
 	ef.f_speed = 360/period /180*Math.PI;
@@ -1018,7 +1054,7 @@ Game_Picture.prototype.drill_PCE_playSustainingBreathing = function( time,period
 //==============================
 Game_Picture.prototype.drill_PCE_updateSustainingBreathing = function() {
 	var ef = this._Drill_PCE;
-	if( ef.playing_type != "sustainingBreathing" ){ return; }
+	if( ef.playing_type != "呼吸效果" ){ return; }
 	
 	ef.f_time ++;
 	ef.scale_y = (ef.f_scope / ef.real_height) * Math.sin( ef.f_time*ef.f_speed );
@@ -1028,7 +1064,82 @@ Game_Picture.prototype.drill_PCE_updateSustainingBreathing = function() {
 	ef.x = fix_point.x;	
 	ef.y = fix_point.y;	
 	
-	if( ef.f_time >= ef.f_dest ){
+	if( ef.f_time >= ef.f_dTime ){
+		this.drill_PCE_stopEffect();	//结束动作
+	}
+}
+
+
+//==============================
+// * 初始化 - 持续 原地小跳
+//==============================
+Game_Picture.prototype.drill_PCE_playSustainingJumping = function( time,period,jump_height ) {
+	var ef = this._Drill_PCE;
+	ef.playing_type = "原地小跳";
+	ef.f_time = 0;
+	ef.f_dTime = time;
+	ef.f_period = period;
+	
+	ef.fA_time = 0;
+	ef.fA_dTime = period*0.25;
+	ef.fA_abc = $gameTemp.drill_PCE_getParabolicThree( 0,0, ef.fA_dTime*0.5,-0.1, ef.fA_dTime,0 );
+	
+	ef.fB_time = 0;
+	ef.fB_dTime = period*0.6;
+	ef.fB_abc = $gameTemp.drill_PCE_getParabolicThree( 0,0, ef.fB_dTime*0.5,jump_height, ef.fB_dTime,0 );
+	
+	ef.fC_time = 0;
+	ef.fC_dTime = period*0.15;
+	ef.fC_abc = $gameTemp.drill_PCE_getParabolicThree( 0,0, ef.fC_dTime*0.5,-0.1, ef.fC_dTime,0 );
+	
+}
+//==============================
+// * 帧刷新 - 持续 原地小跳
+//==============================
+Game_Picture.prototype.drill_PCE_updateSustainingJumping = function() {
+	var ef = this._Drill_PCE;
+	if( ef.playing_type != "原地小跳" ){ return; }
+	
+	ef.f_time ++;
+	if( ef.fA_time <= ef.fA_dTime ){
+		ef.fA_time ++;
+	
+		var t = ef.fA_time;
+		ef.scale_x = -1*( ef.fA_abc['a']*t*t + ef.fA_abc['b']*t + ef.fA_abc['c'] );
+		ef.scale_y = -ef.scale_x;
+		
+		// > 锚点(0.5,1.0)锁定
+		var fix_point = $gameTemp.drill_PCE_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, 0.5,1.0, ef.real_width,ef.real_height, ef.rotation, ef.scale_x, ef.scale_y );
+		ef.x = fix_point.x;	
+		ef.y = fix_point.y;	
+	
+	}else if( ef.fB_time <= ef.fB_dTime ){
+		ef.fB_time ++;
+		
+		var t = ef.fB_time;
+		ef.y = -1*( ef.fB_abc['a']*t*t + ef.fB_abc['b']*t + ef.fB_abc['c'] );
+		
+		
+	}else if( ef.fC_time <= ef.fC_dTime ){
+		ef.fC_time ++;
+		var t = ef.fC_time;
+		ef.scale_x = -1*( ef.fC_abc['a']*t*t + ef.fC_abc['b']*t + ef.fC_abc['c'] );
+		ef.scale_y = -ef.scale_x;
+		
+		// > 锚点(0.5,1.0)锁定
+		var fix_point = $gameTemp.drill_PCE_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, 0.5,1.0, ef.real_width,ef.real_height, ef.rotation, ef.scale_x, ef.scale_y );
+		ef.x = fix_point.x;	
+		ef.y = fix_point.y;	
+	}
+	
+	// > 周期结束，重新跳
+	if( ef.fC_time > ef.fC_dTime ){	
+		ef.fA_time = 0;
+		ef.fB_time = 0;
+		ef.fC_time = 0;
+	}
+	
+	if( ef.f_time >= ef.f_dTime ){
 		this.drill_PCE_stopEffect();	//结束动作
 	}
 }
@@ -1039,7 +1150,7 @@ Game_Picture.prototype.drill_PCE_updateSustainingBreathing = function() {
 //==============================
 Game_Picture.prototype.drill_PCE_playSustainingFloating = function( time,b_time,height,period,scope ) {
 	var ef = this._Drill_PCE;
-	ef.playing_type = "sustainingFloating";
+	ef.playing_type = "空中飘浮";
 	ef.f_isEnd = false;
 	ef.f_height = height;
 	ef.fA_time = 0;
@@ -1057,7 +1168,7 @@ Game_Picture.prototype.drill_PCE_playSustainingFloating = function( time,b_time,
 //==============================
 Game_Picture.prototype.drill_PCE_endSustainingFloating = function() {
 	var ef = this._Drill_PCE;
-	if( ef.playing_type != "sustainingFloating" ){ return; }
+	if( ef.playing_type != "空中飘浮" ){ return; }
 	
 	ef.f_isEnd = true;
 	ef.fC_time = ef.fC_dest - ef.fA_time;
@@ -1067,7 +1178,7 @@ Game_Picture.prototype.drill_PCE_endSustainingFloating = function() {
 //==============================
 Game_Picture.prototype.drill_PCE_updateSustainingFloating = function() {
 	var ef = this._Drill_PCE;
-	if( ef.playing_type != "sustainingFloating" ){ return; }
+	if( ef.playing_type != "空中飘浮" ){ return; }
 	
 	if( ef.fA_time < ef.fA_dest && ef.f_isEnd == false ){		//升起
 		ef.fA_time ++;
@@ -1095,7 +1206,7 @@ Game_Picture.prototype.drill_PCE_updateSustainingFloating = function() {
 //==============================
 Game_Picture.prototype.drill_PCE_playSustainingRotateState = function( time,b_time,scope ) {
 	var ef = this._Drill_PCE;
-	ef.playing_type = "sustainingRotateState";
+	ef.playing_type = "旋转状态";
 	ef.f_isEnd = false;
 	ef.f_scope = scope /180*Math.PI;
 	ef.fA_time = 0;
@@ -1110,7 +1221,7 @@ Game_Picture.prototype.drill_PCE_playSustainingRotateState = function( time,b_ti
 //==============================
 Game_Picture.prototype.drill_PCE_endSustainingRotateState = function() {
 	var ef = this._Drill_PCE;
-	if( ef.playing_type != "sustainingRotateState" ){ return; }
+	if( ef.playing_type != "旋转状态" ){ return; }
 	
 	ef.f_isEnd = true;
 	ef.fC_time = ef.fC_dest - ef.fA_time;
@@ -1120,7 +1231,7 @@ Game_Picture.prototype.drill_PCE_endSustainingRotateState = function() {
 //==============================
 Game_Picture.prototype.drill_PCE_updateSustainingRotateState = function() {
 	var ef = this._Drill_PCE;
-	if( ef.playing_type != "sustainingRotateState" ){ return; }
+	if( ef.playing_type != "旋转状态" ){ return; }
 	
 	if( ef.fA_time < ef.fA_dest && ef.f_isEnd == false ){			//开始旋转
 		ef.fA_time ++;
@@ -1145,7 +1256,7 @@ Game_Picture.prototype.drill_PCE_updateSustainingRotateState = function() {
 //==============================
 Game_Picture.prototype.drill_PCE_playSustainingResizeState = function( time,b_time,scope ) {
 	var ef = this._Drill_PCE;
-	ef.playing_type = "sustainingResizeState";
+	ef.playing_type = "缩放状态";
 	ef.f_isEnd = false;
 	ef.f_scope = scope - 1.0;
 	ef.fA_time = 0;
@@ -1160,7 +1271,7 @@ Game_Picture.prototype.drill_PCE_playSustainingResizeState = function( time,b_ti
 //==============================
 Game_Picture.prototype.drill_PCE_endSustainingResizeState = function() {
 	var ef = this._Drill_PCE;
-	if( ef.playing_type != "sustainingResizeState" ){ return; }
+	if( ef.playing_type != "缩放状态" ){ return; }
 	
 	ef.f_isEnd = true;
 	ef.fC_time = ef.fC_dest - ef.fA_time;
@@ -1170,7 +1281,7 @@ Game_Picture.prototype.drill_PCE_endSustainingResizeState = function() {
 //==============================
 Game_Picture.prototype.drill_PCE_updateSustainingResizeState = function() {
 	var ef = this._Drill_PCE;
-	if( ef.playing_type != "sustainingResizeState" ){ return; }
+	if( ef.playing_type != "缩放状态" ){ return; }
 	
 	if( ef.fA_time < ef.fA_dest && ef.f_isEnd == false ){			//开始缩放
 		ef.fA_time ++;

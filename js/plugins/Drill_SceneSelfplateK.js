@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        面板 - 全自定义信息面板K
+ * @plugindesc [v1.4]        面板 - 全自定义信息面板K
  * @author Drill_up
  * 
  * @Drill_LE_param "内容-%d"
@@ -158,6 +158,8 @@
  * 修复了设置 按钮贴图序列 时无效的bug。
  * [v1.3]
  * 添加了 变量对应调用公共事件 的功能。
+ * [v1.4]
+ * 修复了按钮组模式时，点击按钮无效的bug。
  * 
  *
  * @param ----杂项----
@@ -1827,6 +1829,7 @@ Scene_Drill_SSpK.prototype.drill_createCommandButton = function() {
 	data_style['btn_src_file'] = data_org['btn_src_file'];
 	data_style['btn_src'] = data_org['btn_src'];
 	data_style['btn_srcKeyword'] = data_org['btn_srcKeyword'];
+	data_style['active_enableMouseOk'] = true;	//（鼠标ok点击 开启，强制）
 	//alert(JSON.stringify(data_style));
 	
 	// > 建立按钮组层

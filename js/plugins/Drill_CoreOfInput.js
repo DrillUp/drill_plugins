@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        系统 - 输入设备核心
+ * @plugindesc [v1.4]        系统 - 输入设备核心
  * @author Drill_up、汗先生
  * 
  * @param 键盘双击判定时长
@@ -75,6 +75,17 @@
  * @desc 开启联动绑定后，触屏释放能触发 drill插件中 鼠标右键释放功能。
  * @default true
  *
+ * @param ----地图----
+ * @default 
+ *
+ * @param 是否禁用鼠标左键地图移动
+ * @parent ----地图----
+ * @type boolean
+ * @on 禁用
+ * @off 不操作
+ * @desc true - 禁用，false - 不操作。地图界面中，鼠标左键移动的rmmv功能会被禁用。
+ * @default false
+ *
  * @param ----菜单----
  * @default 
  *
@@ -129,12 +140,17 @@
  * ----可选设定
  * 你可以通过插件指令控制部分配置。
  * 
+ * 插件指令：>输入设备核心 : 地图鼠标左键移动 : 开启
+ * 插件指令：>输入设备核心 : 地图鼠标左键移动 : 关闭
  * 插件指令：>输入设备核心 : 鼠标右键菜单 : 开启
  * 插件指令：>输入设备核心 : 鼠标右键菜单 : 关闭
  * 插件指令：>输入设备核心 : 触屏双指菜单 : 开启
  * 插件指令：>输入设备核心 : 触屏双指菜单 : 关闭
  * 
  * 1.插件指令配置执行后，永久有效，且能够被存储到存档中。
+ *   关闭 与 禁用 的意思是一样的。
+ * 2.注意，关闭后，一定要设计清楚什么时候恢复开启状态，
+ *   如果没有恢复，会造成玩家在游戏中不能操作，属于恶性bug。
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -169,6 +185,8 @@
  * 优化了内部接口的结构。
  * [v1.3]
  * 给右键菜单功能添加了插件指令开关。
+ * [v1.4]
+ * 添加了控制 鼠标左键目的地移动 的功能。
  *
  */
  
@@ -232,6 +250,7 @@
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_CoreOfInput');
 	
+	
 	DrillUp.g_COI_mouse_judgeTime = Number(DrillUp.parameters['键盘双击判定时长'] || 12); 
 	DrillUp.g_COI_pads_judgeTime = Number(DrillUp.parameters['手柄双击判定时长'] || 12); 
 	DrillUp.g_COI_keys_judgeTime = Number(DrillUp.parameters['鼠标双击判定时长'] || 12); 
@@ -243,6 +262,7 @@
 	DrillUp.g_COI_touchPad_m_up = String(DrillUp.parameters['触屏释放>>鼠标中键释放'] || "true") === "true";
 	DrillUp.g_COI_touchPad_r_up = String(DrillUp.parameters['触屏释放>>鼠标右键释放'] || "true") === "true";
 	
+	DrillUp.g_COI_map_leftMouse = String(DrillUp.parameters['是否禁用鼠标左键地图移动'] || "false") === "true";
 	DrillUp.g_COI_menu_mouse = String(DrillUp.parameters['是否禁用鼠标右键菜单'] || "true") === "true";
 	DrillUp.g_COI_menu_touchPad = String(DrillUp.parameters['是否禁用触屏双指菜单'] || "true") === "true";
 
@@ -256,13 +276,17 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	if( command === ">输入设备核心" ){
 		var type = String(args[1]);
 		var temp2 = String(args[3]);
+		if( type == "地图鼠标左键移动" ){
+			if( temp2 == "开启" || temp2 == "启用" ){ $gameSystem._drill_COI_map_leftMouse = false;  }
+			if( temp2 == "关闭" || temp2 == "禁用" ){ $gameSystem._drill_COI_map_leftMouse = true; }
+		}
 		if( type == "鼠标右键菜单" ){
-			if( temp2 == "开启" ){ $gameSystem._drill_COI_menu_mouse = true;  }
-			if( temp2 == "关闭" ){ $gameSystem._drill_COI_menu_mouse = false; }
+			if( temp2 == "开启" || temp2 == "启用" ){ $gameSystem._drill_COI_menu_mouse = false;  }
+			if( temp2 == "关闭" || temp2 == "禁用" ){ $gameSystem._drill_COI_menu_mouse = true; }
 		}
 		if( type == "触屏双指菜单" ){
-			if( temp2 == "开启" ){ $gameSystem._drill_COI_menu_touchPad = true;  }
-			if( temp2 == "关闭" ){ $gameSystem._drill_COI_menu_touchPad = false; }
+			if( temp2 == "开启" || temp2 == "启用" ){ $gameSystem._drill_COI_menu_touchPad = false;  }
+			if( temp2 == "关闭" || temp2 == "禁用" ){ $gameSystem._drill_COI_menu_touchPad = true; }
 		}
 	}
 }
@@ -274,14 +298,23 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 var _drill_COI_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
 	_drill_COI_initialize.call(this);
-	this._drill_COI_menu_mouse = DrillUp.g_COI_menu_mouse;			//鼠标右键菜单
-	this._drill_COI_menu_touchPad = DrillUp.g_COI_menu_touchPad;	//触屏双指菜单
+	this._drill_COI_map_leftMouse = DrillUp.g_COI_map_leftMouse;	//禁用 鼠标右键菜单
+	this._drill_COI_menu_mouse = DrillUp.g_COI_menu_mouse;			//禁用 鼠标右键菜单
+	this._drill_COI_menu_touchPad = DrillUp.g_COI_menu_touchPad;	//禁用 触屏双指菜单
 }
 
 
 //=============================================================================
 // ** 禁用设置
 //=============================================================================
+//==============================
+// * 禁用地图鼠标左键移动
+//==============================
+var _drill_COI_processMapTouch = Scene_Map.prototype.processMapTouch;
+Scene_Map.prototype.processMapTouch = function() {	
+	if( $gameSystem && $gameSystem._drill_COI_map_leftMouse == true ){ return; }
+	_drill_COI_processMapTouch.call(this);
+};
 //==============================
 // ** 禁用右键菜单（地图）
 //==============================

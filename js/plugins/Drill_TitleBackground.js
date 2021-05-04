@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        标题 - 多层标题背景
+ * @plugindesc [v1.5]        标题 - 多层标题背景
  * @author Drill_up
  * 
  * @Drill_LE_param "背景-%d"
@@ -101,6 +101,8 @@
  * [v1.4]
  * 优化了内部结构，修改了插件指令格式。
  * 添加了背景遮罩功能。
+ * [v1.5]
+ * 优化了内部结构。
  *
  *
  * @param ---背景组 1至20---
@@ -722,25 +724,40 @@
 　　var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_TitleBackground');
 	
+	//==============================
+	// * 变量获取 - 背景
+	//				（~struct~TitleBackground）
+	//==============================
+	DrillUp.drill_TBa_backgroundInit = function( dataFrom ) {
+		var data = {};
+		data['visible'] = String( dataFrom["初始是否显示"] || "true") == "true";
+		data['src_img'] = String( dataFrom["资源-背景"] || "");
+		data['src_img_mask'] = String( dataFrom["资源-背景遮罩"] || "");
+		data['x'] = Number( dataFrom["平移-GIF X"] || 0);
+		data['y'] = Number( dataFrom["平移-GIF Y"] || 0);
+		data['opacity'] = Number( dataFrom["透明度"] || 255);
+		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
+		data['x_speed'] = Number( dataFrom["背景X速度"] || 0.0);
+		data['y_speed'] = Number( dataFrom["背景Y速度"] || 0.0);
+		data['menu_index'] = Number( dataFrom["菜单层级"] || 0);
+		data['zIndex'] = Number( dataFrom["图片层级"] || 0);
+		return data;
+	}
+	
+	/*-----------------背景------------------*/
 	DrillUp.g_TBa_list_length = 80;
 	DrillUp.g_TBa_list = [];
 	for (var i = 0; i < DrillUp.g_TBa_list_length; i++) {
 		if( DrillUp.parameters["背景-" + String(i+1) ] != undefined &&
 			DrillUp.parameters["背景-" + String(i+1) ] != "" ){
-			DrillUp.g_TBa_list[i] = JSON.parse(DrillUp.parameters["背景-" + String(i+1) ]);
-			DrillUp.g_TBa_list[i]['visible'] = String(DrillUp.g_TBa_list[i]["初始是否显示"] || "true") == "true";
-			DrillUp.g_TBa_list[i]['src_img'] = String(DrillUp.g_TBa_list[i]["资源-背景"] || "");
-			DrillUp.g_TBa_list[i]['src_img_mask'] = String(DrillUp.g_TBa_list[i]["资源-背景遮罩"] || "");
-			DrillUp.g_TBa_list[i]['x'] = Number(DrillUp.g_TBa_list[i]["平移-背景 X"] || 0);
-			DrillUp.g_TBa_list[i]['y'] = Number(DrillUp.g_TBa_list[i]["平移-背景 Y"] || 0);
-			DrillUp.g_TBa_list[i]['opacity'] = Number(DrillUp.g_TBa_list[i]["透明度"] || 255);
-			DrillUp.g_TBa_list[i]['blendMode'] = Number(DrillUp.g_TBa_list[i]["混合模式"] || 0);
-			DrillUp.g_TBa_list[i]['x_speed'] = Number(DrillUp.g_TBa_list[i]["背景X速度"] || 0);
-			DrillUp.g_TBa_list[i]['y_speed'] = Number(DrillUp.g_TBa_list[i]["背景Y速度"] || 0);
-			DrillUp.g_TBa_list[i]['menu_index'] = Number(DrillUp.g_TBa_list[i]["菜单层级"] || 0);
-			DrillUp.g_TBa_list[i]['zIndex'] = Number(DrillUp.g_TBa_list[i]["图片层级"] || 0);
+			var temp = JSON.parse(DrillUp.parameters["背景-" + String(i+1) ]);
+			DrillUp.g_TBa_list[i] = DrillUp.drill_TBa_backgroundInit( temp );
+			DrillUp.g_TBa_list[i]['id'] = Number(i)+1;
+			DrillUp.g_TBa_list[i]['inited'] = true;
 		}else{
-			DrillUp.g_TBa_list[i] = null;
+			DrillUp.g_TBa_list[i] = DrillUp.drill_TBa_backgroundInit( {} );
+			DrillUp.g_TBa_list[i]['id'] = Number(i)+1;
+			DrillUp.g_TBa_list[i]['inited'] = false;
 		}
 	}
 	
@@ -759,11 +776,10 @@
 			DrillUp.global_TBa_visible = [];
 			for (var i = 0; i < DrillUp.g_TBa_list.length; i++) {
 				var temp_data = DrillUp.g_TBa_list[i];
-				if( temp_data ){
-					DrillUp.global_TBa_visible.push( temp_data['visible'] );
-				}else{
-					DrillUp.global_TBa_visible.push( false );
-				}
+				if( temp_data == undefined ){ continue; }
+				if( temp_data['inited'] != true ){ continue; }
+				
+				DrillUp.global_TBa_visible[i] = temp_data['visible'];
 			}
 		}
 	}
@@ -843,8 +859,8 @@ var _drill_TBa_createBackground = Scene_Title.prototype.createBackground;
 Scene_Title.prototype.createBackground = function() {
 	// > 背景初始化
 	SceneManager._drill_TBa_created = false;	
-   	this._drill_TBa_sprites = [];
-   	this._drill_TBa_sprites_data = [];	//注意，该数组与DrillUp.g_TBa_list数组的下标不同步，要使用data
+   	this._drill_TBa_spriteTank = [];
+   	this._drill_TBa_dataTank = [];		//注意，该数组与DrillUp.g_TBa_list数组的下标不同步，要使用data
 	
 	_drill_TBa_createBackground.call(this);
 	
@@ -892,9 +908,9 @@ Scene_Title.prototype.update = function() {
 Scene_Title.prototype.drill_TBa_create = function() {	
 	SceneManager._drill_TBa_created = true;
 	
-	if(!this._drill_TBa_sprites){
-		this._drill_TBa_sprites = [];	//防止某些覆写的菜单报错
-		this._drill_TBa_sprites_data = [];
+	if(!this._drill_TBa_spriteTank){
+		this._drill_TBa_spriteTank = [];	//防止某些覆写的菜单报错
+		this._drill_TBa_dataTank = [];
 	}
 	if( !this._backgroundSprite ){		//菜单后面层
 		this._backgroundSprite = new Sprite();
@@ -906,18 +922,21 @@ Scene_Title.prototype.drill_TBa_create = function() {
 	
 	// > 配置的背景
 	for (var i = 0; i < DrillUp.g_TBa_list.length; i++) {
-		if( DrillUp.g_TBa_list[i] == undefined ){ continue; }
+		var temp_data = DrillUp.g_TBa_list[i];
+		if( temp_data == undefined ){ continue; }
+		if( temp_data['inited'] != true ){ continue; }
+		
 		// > 背景贴图
-		var temp_sprite_data = JSON.parse(JSON.stringify( DrillUp.g_TBa_list[i] ));	//深拷贝数据（杜绝引用造成的修改）
+		var temp_sprite_data = JSON.parse(JSON.stringify( temp_data ));		//深拷贝数据（杜绝引用造成的修改）
 		var temp_sprite = new TilingSprite(ImageManager.loadTitle1(temp_sprite_data['src_img']));	//TilingSprite平铺图层
 		temp_sprite.move(0, 0, Graphics.width, Graphics.height);
 		temp_sprite.origin.x = temp_sprite_data['x'];
 		temp_sprite.origin.y = temp_sprite_data['y'];
 		temp_sprite.opacity = temp_sprite_data['opacity'];
 		temp_sprite.blendMode = temp_sprite_data['blendMode'];
-		temp_sprite.visible = DrillUp.global_TBa_visible[i];
-		this._drill_TBa_sprites.push(temp_sprite);
-		this._drill_TBa_sprites_data.push(temp_sprite_data);
+		temp_sprite.visible = DrillUp.global_TBa_visible[i] || false;
+		this._drill_TBa_spriteTank.push(temp_sprite);
+		this._drill_TBa_dataTank.push(temp_sprite_data);
 		
 		// > 背景父级
 		var temp_layer = new Sprite();
@@ -943,9 +962,9 @@ Scene_Title.prototype.drill_TBa_create = function() {
 // * 背景 - 帧刷新
 //==============================
 Scene_Title.prototype.drill_TBa_update = function() {
-	for (var i = 0; i < this._drill_TBa_sprites.length; i++) {
-		this._drill_TBa_sprites[i].origin.x += this._drill_TBa_sprites_data[i]['x_speed'];
-		this._drill_TBa_sprites[i].origin.y += this._drill_TBa_sprites_data[i]['y_speed'];
+	for (var i = 0; i < this._drill_TBa_spriteTank.length; i++) {
+		this._drill_TBa_spriteTank[i].origin.x += this._drill_TBa_dataTank[i]['x_speed'];
+		this._drill_TBa_spriteTank[i].origin.y += this._drill_TBa_dataTank[i]['y_speed'];
 	};
 };
 

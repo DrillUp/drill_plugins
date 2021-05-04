@@ -228,14 +228,17 @@ Game_Map.prototype.setupStartingMapEvent = function() {
 		if( event._erased == true ){ return false }
 		return true;
 	});
-	// > 管道事件
-	var events = this.drill_LCT_pipeEvents();
-	for(var i = 0; i < events.length; i++ ){
-		var event = events[i];
-		if( event.isStarting() ){
-			event.clearStartingFlag();
-			this._interpreter.setup( event.list(), available_events[available_events.length -1]._eventId );	//随机依附一个eventid（id为0玩家可以乱跑，不明原因）
-			return true;
+	if( available_events.length > 0 ){
+		
+		// > 管道事件
+		var events = this.drill_LCT_pipeEvents();
+		for(var i = 0; i < events.length; i++ ){
+			var event = events[i];
+			if( event.isStarting() ){
+				event.clearStartingFlag();
+				this._interpreter.setup( event.list(), available_events[available_events.length -1]._eventId );	//随机依附一个eventid（id为0玩家可以乱跑，不明原因）
+				return true;
+			}
 		}
 	}
 	return _drill_LCT_setupStartingMapEvent.call(this);

@@ -1,9 +1,9 @@
 //=============================================================================
-// Drill_MenuGIF.js
+// Drill_MenuGif.js
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        主菜单 - 多层菜单GIF
+ * @plugindesc [v1.5]        主菜单 - 多层菜单GIF
  * @author Drill_up
  * 
  * @Drill_LE_param "GIF-%d"
@@ -12,7 +12,7 @@
  *
  * @help
  * =============================================================================
- * +++ Drill_MenuGIF +++
+ * +++ Drill_MenuGif +++
  * 作者：Drill_up
  * 如果你有兴趣，也可以来看看更多我写的drill插件哦ヽ(*。>Д<)o゜
  * https://rpg.blue/thread-409713-1-1.html
@@ -35,6 +35,7 @@
  * 效果：
  *   (1.菜单GIF可以设置 漂浮效果和呼吸效果。
  *      并且GIF可以像魔法圈一样自旋转。
+ *   (2.注意，如果设置了呼吸效果，那么3d效果的缩放大小的配置会失效。
  * 设计：
  *   (1.这里的GIF，必须拆散成多张png图片，然后配置在资源中。
  *   (2.你可以在同一个菜单里面加入非常多的GIF。
@@ -61,11 +62,11 @@
  * 
  * 插件指令：>菜单GIF : GIF[2] : 显示
  * 插件指令：>菜单GIF : GIF[2] : 隐藏
- *
+ * 
  * 1.数字表示GIF对应配置的编号。
  * 2.GIF没有默认，都是一个个贴在指定菜单中的。
  * 
- *
+ * 
  * -----------------------------------------------------------------------------
  * ----插件性能
  * 测试仪器：   4G 内存，Intel Core i5-2520M CPU 2.5GHz 处理器
@@ -99,6 +100,9 @@
  * [v1.4]
  * 优化了内部结构，修改了插件指令格式。
  * 添加了GIF遮罩功能。
+ * [v1.5]
+ * 优化了内部结构。
+ * 添加了GIF的3d效果设置。旋转速度单位改为 角度/帧。
  *
  *
  * @param ---GIF组 1至20---
@@ -698,8 +702,7 @@
  * @default 0
  *
  * @param 旋转速度
- * @desc 正数逆时针，负数顺时针，单位 弧度/帧。(1秒60帧)
- * 6.28表示一圈，设置0.01表示大概10秒转一圈，设置0则不旋转。
+ * @desc 正数逆时针，负数顺时针，单位 角度/帧。(1秒60帧，360.0为一周)
  * @default 0.0
  *
  * @param 菜单层级
@@ -717,6 +720,29 @@
  * @desc 背景在同一个菜单，并且在菜单层级下，先后排序的位置，0表示最后面。
  * @default 4
  * 
+ * 
+ * @param --3d效果--
+ * @desc 
+ * 
+ * @param 缩放 X
+ * @parent --3d效果--
+ * @desc GIF的缩放X值，默认比例1.0。缩放将会使得GIF看起来旋转具有一定透视。
+ * @default 1.0
+ * 
+ * @param 缩放 Y
+ * @parent --3d效果--
+ * @desc GIF的缩放Y值，默认比例1.0。缩放将会使得GIF看起来旋转具有一定透视。
+ * @default 1.0
+ * 
+ * @param 斜切 X
+ * @parent --3d效果--
+ * @desc GIF的斜切X值，默认比例0.0。斜切将会使得GIF看起来旋转具有一定角度。
+ * @default 0.0
+ * 
+ * @param 斜切 Y
+ * @parent --3d效果--
+ * @desc GIF的斜切Y值，默认比例0.0。斜切将会使得GIF看起来旋转具有一定角度。
+ * @default 0.0
  * 
  * @param --呼吸效果--
  * @desc 
@@ -810,6 +836,7 @@
 //			菜单GIF：
 //				->菜单层级
 //				->显示/隐藏
+//				->3d效果
 //				->呼吸效果/漂浮效果
 //				->GIF遮罩
 //
@@ -819,12 +846,12 @@
 //		★其它说明细节：
 //			1.插件结构并不复杂，但是坑多，需要理清楚下面变量的关系：
 //				DrillUp.g_MGi_list			获取的值（80个）
-//				this._drill_MGi_sprites_data	符合的值（小于80个，不要将数组二者混合使用）
-//				this._drill_MGi_sprites		符合的图片（小于80个）
+//				this._drill_MGi_dataTank	符合的值（小于80个，不要将数组二者混合使用）
+//				this._drill_MGi_spriteTank		符合的图片（小于80个）
 //				temp_sprite			临时图片
 //				temp_sprite_data	临时的值
 //
-//				_drill_MGi_sprites_bitmap	用于存储GIF图片信息，因为图片经过了 旋转 和 斜切 两层图片处理。
+//				_drill_MGi_spriteTank_bitmap	用于存储GIF图片信息，因为图片经过了 旋转 和 斜切 两层图片处理。
 //
 //		★存在的问题：
 //			暂无
@@ -834,44 +861,68 @@
 // ** 变量获取
 //=============================================================================
 　　var Imported = Imported || {};
-　　Imported.Drill_MenuGIF = true;
+　　Imported.Drill_MenuGif = true;
 　　var DrillUp = DrillUp || {}; 
-	DrillUp.parameters = PluginManager.parameters('Drill_MenuGIF');
+	DrillUp.parameters = PluginManager.parameters('Drill_MenuGif');
 	
+	//==============================
+	// * 变量获取 - GIF
+	//				（~struct~MenuGIF）
+	//==============================
+	DrillUp.drill_MGi_gifInit = function( dataFrom ) {
+		var data = {};
+		data['visible'] = String( dataFrom["初始是否显示"] || "false") == "true";
+		data['menu'] = String( dataFrom["所属菜单"] || "");
+		data['menu_key'] = String( dataFrom["自定义关键字"] || "");
+		if( dataFrom["资源-GIF"] != "" &&
+			dataFrom["资源-GIF"] != undefined ){
+			data['src_img'] = JSON.parse( dataFrom["资源-GIF"] );
+		}else{
+			data['src_img'] = [];
+		}
+		data['src_bitmaps'] = [];
+		data['src_img_mask'] = String( dataFrom["资源-GIF遮罩"] || "");
+		data['interval'] = Number( dataFrom["帧间隔"] || 4);
+		data['back_run'] = String( dataFrom["是否倒放"] || "false") == "true";
+		data['x'] = Number( dataFrom["平移-GIF X"] || 0);
+		data['y'] = Number( dataFrom["平移-GIF Y"] || 0);
+		data['opacity'] = Number( dataFrom["透明度"] || 255);
+		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
+		data['rotate'] = Number( dataFrom["旋转速度"] || 0.0);
+		data['menu_index'] = Number( dataFrom["菜单层级"] || 0);
+		data['zIndex'] = Number( dataFrom["图片层级"] || 0);
+		
+		data['scale_x'] = Number( dataFrom["缩放 X"] || 1.0);
+		data['scale_y'] = Number( dataFrom["缩放 Y"] || 1.0);
+		data['skew_x'] = Number( dataFrom["斜切 X"] || 0);
+		data['skew_y'] = Number( dataFrom["斜切 Y"] || 0);
+		
+		data['breath'] = String( dataFrom["是否使用呼吸效果"] || "false") == "true";
+		data['breath_period'] = Number( dataFrom["呼吸周期"] || 70);
+		data['breath_spread'] = Number( dataFrom["呼吸幅度"] || 8);
+		data['breath_type'] = String( dataFrom["呼吸类型"] || '上下缩放');
+			
+		data['float'] = String( dataFrom["是否使用漂浮效果"] || "false") == "true";
+		data['float_speed'] = Number( dataFrom["漂浮速度"] || 70);
+		data['float_spread'] = Number( dataFrom["漂浮幅度"] || 8);
+		data['float_type'] = String( dataFrom["漂浮类型"] || '上下漂浮');
+		return data;
+	}
+	
+	/*-----------------GIF------------------*/
 	DrillUp.g_MGi_list_length = 80;
 	DrillUp.g_MGi_list = [];
 	for (var i = 0; i < DrillUp.g_MGi_list_length; i++) {
 		if( DrillUp.parameters["GIF-" + String(i+1) ] != undefined &&
 			DrillUp.parameters["GIF-" + String(i+1) ] != "" ){
-			DrillUp.g_MGi_list[i] = JSON.parse(DrillUp.parameters["GIF-" + String(i+1) ]);
-			DrillUp.g_MGi_list[i]['visible'] = String(DrillUp.g_MGi_list[i]["初始是否显示"] || "true") == "true";
-			DrillUp.g_MGi_list[i]['menu'] = String(DrillUp.g_MGi_list[i]["所属菜单"] || "");
-			DrillUp.g_MGi_list[i]['menu_key'] = String(DrillUp.g_MGi_list[i]["自定义关键字"] || "");
-			DrillUp.g_MGi_list[i]['x'] = Number(DrillUp.g_MGi_list[i]["平移-GIF X"] || 0);
-			DrillUp.g_MGi_list[i]['y'] = Number(DrillUp.g_MGi_list[i]["平移-GIF Y"] || 0);
-			DrillUp.g_MGi_list[i]['opacity'] = Number(DrillUp.g_MGi_list[i]["透明度"] || 255);
-			DrillUp.g_MGi_list[i]['blendMode'] = Number(DrillUp.g_MGi_list[i]["混合模式"] || 0);
-			DrillUp.g_MGi_list[i]['rotate'] = Number(DrillUp.g_MGi_list[i]["旋转速度"] || 0);
-			DrillUp.g_MGi_list[i]['menu_index'] = Number(DrillUp.g_MGi_list[i]["菜单层级"] || 0);
-			DrillUp.g_MGi_list[i]['zIndex'] = Number(DrillUp.g_MGi_list[i]["图片层级"] || 0);
-			DrillUp.g_MGi_list[i]['src_img'] = JSON.parse(DrillUp.g_MGi_list[i]["资源-GIF"] || []);
-			DrillUp.g_MGi_list[i]['src_img_mask'] = String(DrillUp.g_MGi_list[i]["资源-GIF遮罩"] || "");
-			DrillUp.g_MGi_list[i]['interval'] = Number(DrillUp.g_MGi_list[i]["帧间隔"] || 4);
-			DrillUp.g_MGi_list[i]['back_run'] = String(DrillUp.g_MGi_list[i]["是否倒放"] || "false") == "true";
-			DrillUp.g_MGi_list[i]['src_bitmaps'] = [];
-			
-			DrillUp.g_MGi_list[i]['breath'] = String(DrillUp.g_MGi_list[i]["是否使用呼吸效果"] || "false") == "true";
-			DrillUp.g_MGi_list[i]['breath_period'] = Number(DrillUp.g_MGi_list[i]["呼吸周期"] || 70);
-			DrillUp.g_MGi_list[i]['breath_spread'] = Number(DrillUp.g_MGi_list[i]["呼吸幅度"] || 8);
-			DrillUp.g_MGi_list[i]['breath_type'] = String(DrillUp.g_MGi_list[i]["呼吸类型"] || '上下缩放');
-			
-			DrillUp.g_MGi_list[i]['float'] = String(DrillUp.g_MGi_list[i]["是否使用漂浮效果"] || "false") == "true";
-			DrillUp.g_MGi_list[i]['float_speed'] = Number(DrillUp.g_MGi_list[i]["漂浮速度"] || 70);
-			DrillUp.g_MGi_list[i]['float_spread'] = Number(DrillUp.g_MGi_list[i]["漂浮幅度"] || 8);
-			DrillUp.g_MGi_list[i]['float_type'] = String(DrillUp.g_MGi_list[i]["漂浮类型"] || '上下漂浮');
-			
+			var temp = JSON.parse(DrillUp.parameters['GIF-' + String(i+1) ]);
+			DrillUp.g_MGi_list[i] = DrillUp.drill_MGi_gifInit( temp );
+			DrillUp.g_MGi_list[i]['id'] = Number(i)+1;
+			DrillUp.g_MGi_list[i]['inited'] = true;
 		}else{
-			DrillUp.g_MGi_list[i] = null;
+			DrillUp.g_MGi_list[i] = DrillUp.drill_MGi_gifInit( {} );
+			DrillUp.g_MGi_list[i]['id'] = Number(i)+1;
+			DrillUp.g_MGi_list[i]['inited'] = false;
 		}
 	}
 	//alert(JSON.stringify(DrillUp.g_MGi_list[0]));
@@ -899,17 +950,17 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			temp1 = Number(temp1) - 1;
 			var type = String(args[3]);
 			if (type === '显示') {
-				$gameSystem._drill_MGi_sprites_visible[temp1] = true;
+				$gameSystem._drill_MGi_spriteTank_visible[temp1] = true;
 			}
 			if (type === '隐藏') {
-				$gameSystem._drill_MGi_sprites_visible[temp1] = false;
+				$gameSystem._drill_MGi_spriteTank_visible[temp1] = false;
 			}
 			/*	（呼吸改变中心锚点）
 			if (type === '开启呼吸') {
-				$gameSystem._drill_MGi_sprites_breath[temp1] = true;
+				$gameSystem._drill_MGi_spriteTank_breath[temp1] = true;
 			}
 			if (type === '关闭呼吸') {
-				$gameSystem._drill_MGi_sprites_breath[temp1] = false;
+				$gameSystem._drill_MGi_spriteTank_breath[temp1] = false;
 			}*/
 		}
 	}
@@ -921,14 +972,15 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 var _drill_MGi_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {	
 	_drill_MGi_sys_initialize.call(this);
-	this._drill_MGi_sprites_visible = [];
-	this._drill_MGi_sprites_breath = [];
+	this._drill_MGi_spriteTank_visible = [];
+	this._drill_MGi_spriteTank_breath = [];
 	for(var i = 0; i< DrillUp.g_MGi_list.length ;i++){
 		var temp_data = DrillUp.g_MGi_list[i];
-		if( temp_data ){
-			this._drill_MGi_sprites_visible[i] = temp_data['visible'];
-			this._drill_MGi_sprites_breath[i] = temp_data['breath'];
-		}
+		if( temp_data == undefined ){ continue; }
+		if( temp_data['inited'] != true ){ continue; }
+		
+		this._drill_MGi_spriteTank_visible[i] = temp_data['visible'];
+		this._drill_MGi_spriteTank_breath[i] = temp_data['breath'];
 	}
 };
 
@@ -942,8 +994,8 @@ var _drill_MGi_createBackground = Scene_MenuBase.prototype.createBackground;
 Scene_MenuBase.prototype.createBackground = function() {
 	// > GIF初始化
 	SceneManager._drill_MGi_created = false;	
-   	this._drill_MGi_sprites = [];
-   	this._drill_MGi_sprites_data = [];
+   	this._drill_MGi_spriteTank = [];
+   	this._drill_MGi_dataTank = [];
 	
 	_drill_MGi_createBackground.call(this);		//与背景一同创建
 };
@@ -985,9 +1037,9 @@ Scene_MenuBase.prototype.update = function() {
 //==============================
 Scene_MenuBase.prototype.drill_MGi_create = function() {	
 	SceneManager._drill_MGi_created = true;
-	if(!this._drill_MGi_sprites){
-		this._drill_MGi_sprites = [];		//防止某些覆写的菜单报错
-		this._drill_MGi_sprites_data = [];
+	if(!this._drill_MGi_spriteTank){
+		this._drill_MGi_spriteTank = [];		//防止某些覆写的菜单报错
+		this._drill_MGi_dataTank = [];
 	}
 	if( !this._backgroundSprite ){		//菜单后面层
 		this._backgroundSprite = new Sprite();
@@ -999,9 +1051,14 @@ Scene_MenuBase.prototype.drill_MGi_create = function() {
 	
 	// > 配置的GIF
 	for (var i = 0; i < DrillUp.g_MGi_list.length; i++) {
-		if( this.drill_MGi_checkKeyword(i) ){
+		var temp_data = DrillUp.g_MGi_list[i];
+		if( temp_data == undefined ){ continue; }
+		if( temp_data['inited'] != true ){ continue; }
+		
+		if( this.drill_MGi_checkKeyword( temp_data ) ){
+			
 			// > GIF贴图
-			var temp_sprite_data = JSON.parse(JSON.stringify( DrillUp.g_MGi_list[i] ));	//深拷贝数据（杜绝引用造成的修改）
+			var temp_sprite_data = JSON.parse(JSON.stringify( temp_data ));	//深拷贝数据（杜绝引用造成的修改）
 			for(var j = 0; j < temp_sprite_data['src_img'].length ; j++){
 				temp_sprite_data['src_bitmaps'].push(ImageManager.load_MenuLayerGIF(temp_sprite_data['src_img'][j]));
 			}
@@ -1016,13 +1073,17 @@ Scene_MenuBase.prototype.drill_MGi_create = function() {
 			temp_sprite._org_y = temp_sprite.y;
 			temp_sprite.opacity = temp_sprite_data['opacity'];
 			temp_sprite.blendMode = temp_sprite_data['blendMode'];
-			temp_sprite.visible = $gameSystem._drill_MGi_sprites_visible[i];
+			temp_sprite.scale.x = temp_sprite_data['scale_x'];
+			temp_sprite.scale.y = temp_sprite_data['scale_y'];
+			temp_sprite.skew.x = temp_sprite_data['skew_x'];
+			temp_sprite.skew.y = temp_sprite_data['skew_y'];
+			temp_sprite.visible = $gameSystem._drill_MGi_spriteTank_visible[i] || false;
 			
 			temp_sprite._breath = Math.random() * temp_sprite_data['breath_period'];
 			temp_sprite._breath_dir = Math.floor(Math.random() * 2);
 			temp_sprite._f_time = 0;
-			this._drill_MGi_sprites.push(temp_sprite);
-			this._drill_MGi_sprites_data.push(temp_sprite_data);
+			this._drill_MGi_spriteTank.push(temp_sprite);
+			this._drill_MGi_dataTank.push(temp_sprite_data);
 			
 			// > GIF父级
 			var temp_layer = new Sprite();
@@ -1048,11 +1109,8 @@ Scene_MenuBase.prototype.drill_MGi_create = function() {
 //==============================
 // * GIF - 检查位置
 //==============================
-Scene_MenuBase.prototype.drill_MGi_checkKeyword = function(i) {
-	var temp_sprite_data = DrillUp.g_MGi_list[i] ; 	//注意，执行该方法，是在DrillUp.g_MGi_list中遍历
-	if( temp_sprite_data == undefined ) {
-		return false;	
-	}
+Scene_MenuBase.prototype.drill_MGi_checkKeyword = function( temp_sprite_data ){
+	
 	/*---------------标准----------------*/
 	if( SceneManager._scene.constructor.name === "Scene_Menu" && temp_sprite_data['menu'] == "主菜单" ){
 		return true;
@@ -1101,23 +1159,25 @@ Scene_MenuBase.prototype.drill_MGi_checkKeyword = function(i) {
 // * GIF - 帧刷新
 //==============================
 Scene_MenuBase.prototype.drill_MGi_update = function() {
-	for (var i = 0; i < this._drill_MGi_sprites.length; i++) {
-		var t_gif = this._drill_MGi_sprites[i];
-		var t_gif_data = this._drill_MGi_sprites_data[i];
+	for (var i = 0; i < this._drill_MGi_spriteTank.length; i++) {
+		var t_gif = this._drill_MGi_spriteTank[i];
+		var t_gif_data = this._drill_MGi_dataTank[i];
 		
-		//播放gif
+		// > 播放gif
 		t_gif._time += 1;
-		var inter = this._drill_MGi_sprites[i]._time ;
+		var inter = this._drill_MGi_spriteTank[i]._time ;
 		inter = inter / t_gif_data['interval'];
 		inter = inter % t_gif_data['src_bitmaps'].length;
-		if(t_gif_data['back_run']){
+		if( t_gif_data['back_run'] ){
 			inter = t_gif_data['src_bitmaps'].length - 1 - inter;
 		}
 		inter = Math.floor(inter);
 		t_gif.bitmap = t_gif_data['src_bitmaps'][inter];
-		t_gif.rotation += t_gif_data['rotate'];
 		
-		//呼吸效果
+		// > 旋转
+		t_gif.rotation += t_gif_data['rotate'] /180*Math.PI;
+		
+		// > 呼吸效果
 		if( t_gif_data['breath'] ){
 			if( t_gif._breath_dir == 0 ){
 				t_gif._breath += 2.1;
@@ -1139,7 +1199,7 @@ Scene_MenuBase.prototype.drill_MGi_update = function() {
 				t_gif.scale.x = 1.00 + (t_gif._breath/t_gif_data['breath_period'] * t_gif_data['breath_spread']/100 );
 			}
 		}
-		//漂浮效果
+		// > 漂浮效果
 		if( t_gif_data['float'] ){
 			t_gif._f_time += t_gif_data['float_speed'];
 			if(t_gif._f_time > 360){ t_gif._f_time -= 360; }

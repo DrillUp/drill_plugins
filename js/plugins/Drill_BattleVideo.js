@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.6]        战斗 - 多层战斗视频
+ * @plugindesc [v1.7]        战斗 - 多层战斗视频
  * @author Drill_up
  * 
  * @Drill_LE_param "视频-%d"
@@ -56,11 +56,11 @@
  * 你可以通过插件指令控制战斗视频的显示情况：
  * （注意，冒号两边有一个空格。）
  * 
- * 插件指令：>清空战斗视频
+ * 插件指令：>清空全部战斗装饰部件
  * 插件指令：>创建战斗视频 : 1
  * 插件指令：>创建战斗视频 : 2
  *
- * 1.进入战斗前，最好先清空一下战斗背景，避免干扰。
+ * 1.进入战斗前，最好先清空一下，避免干扰。
  * 2.视频需要一个一个添加上去。
  *
  * -----------------------------------------------------------------------------
@@ -100,6 +100,8 @@
  * 修复了在播放视频时，突然暂停播放的问题。
  * [v1.6]
  * 更新了pixi5的兼容情况。
+ * [v1.7]
+ * 更新了插件指令。
  * 
  *
  * @param ---视频组---
@@ -430,37 +432,53 @@
 　　var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_BattleVideo');
 
+	//==============================
+	// * 变量获取 - 视频
+	//				（~struct~TitleVideo）
+	//==============================
+	DrillUp.drill_BVi_videoInit = function( dataFrom ) {
+		var data = {};
+		data['src'] = String( dataFrom["资源-视频动画"] || "");
+		//data['src_mask'] = String( dataFrom["资源-视频遮罩"] || "");
+		data['playSound'] = String( dataFrom["是否播放声音"] || "false") == "true"; 
+		data['volume'] = Number( dataFrom["音量比"] || 1.00);
+		data['loopEnable'] = String( dataFrom["是否循环播放"] || "false") == "true";
+		data['loopStart'] = Number( dataFrom["起始时间"] || 0);
+		data['loopEnd'] = Number( dataFrom["结束时间"] || 0);
+		data['loopEndLock'] = String( dataFrom["是否指定结束时间"] || "false") == "true";
+		data['playbackRate'] = Number( dataFrom["视频播放速度"] || 1.0);
+		
+		data['widthUseOrg'] = String( dataFrom["是否使用原视频宽度"] || "false") == "true";
+		data['heightUseOrg'] = String( dataFrom["是否使用原视频高度"] || "false") == "true";
+		data['width'] = Number( dataFrom["指定视频宽度"] || 0);
+		data['height'] = Number( dataFrom["指定视频高度"] || 0);
+		data['x'] = Number( dataFrom["平移-视频 X"] || 0);
+		data['y'] = Number( dataFrom["平移-视频 Y"] || 0);
+		data['opacity'] = Number( dataFrom["透明度"] || 255);
+		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
+		data['area_index'] = String( dataFrom["战斗层级"] || "下层");
+		data['zIndex'] = Number( dataFrom["图片层级"] || 0);
+		data['tint'] = String( dataFrom["视频色调"] || "#ffffff");
+		return data;
+	}
+	
+	/*-----------------杂项------------------*/
 	DrillUp.g_BVi_DEBUG = String(DrillUp.parameters['是否开启Debug模式'] || "true") === "true";
 	
+	/*-----------------视频------------------*/
 	DrillUp.g_BVi_list_length = 20;
 	DrillUp.g_BVi_list = [];
 	for (var i = 0; i < DrillUp.g_BVi_list_length; i++) {
 		if( DrillUp.parameters["视频-" + String(i+1) ] != undefined &&
 			DrillUp.parameters["视频-" + String(i+1) ] != "" ){
-			DrillUp.g_BVi_list[i] = JSON.parse(DrillUp.parameters["视频-" + String(i+1) ]);
-			DrillUp.g_BVi_list[i]['src'] = String(DrillUp.g_BVi_list[i]["资源-视频动画"] || "");
-			//DrillUp.g_BVi_list[i]['src_mask'] = String(DrillUp.g_BVi_list[i]["资源-视频遮罩"] || "");
-			DrillUp.g_BVi_list[i]['playSound'] = String(DrillUp.g_BVi_list[i]["是否播放声音"] || "false") == "true";
-			DrillUp.g_BVi_list[i]['volume'] = Number(DrillUp.g_BVi_list[i]["音量比"] || 1.00);
-			DrillUp.g_BVi_list[i]['loopEnable'] = String(DrillUp.g_BVi_list[i]["是否循环播放"] || "false") == "true";
-			DrillUp.g_BVi_list[i]['loopStart'] = Number(DrillUp.g_BVi_list[i]["起始时间"] || 0);
-			DrillUp.g_BVi_list[i]['loopEnd'] = Number(DrillUp.g_BVi_list[i]["结束时间"] || 0);
-			DrillUp.g_BVi_list[i]['loopEndLock'] = String(DrillUp.g_BVi_list[i]["是否指定结束时间"] || "false") == "true";
-			DrillUp.g_BVi_list[i]['playbackRate'] = Number(DrillUp.g_BVi_list[i]["视频播放速度"] || 1.0);
-			
-			DrillUp.g_BVi_list[i]['widthUseOrg'] = String(DrillUp.g_BVi_list[i]["是否使用原视频宽度"] || "false") == "true";
-			DrillUp.g_BVi_list[i]['heightUseOrg'] = String(DrillUp.g_BVi_list[i]["是否使用原视频高度"] || "false") == "true";
-			DrillUp.g_BVi_list[i]['width'] = Number(DrillUp.g_BVi_list[i]["指定视频宽度"] || 0);
-			DrillUp.g_BVi_list[i]['height'] = Number(DrillUp.g_BVi_list[i]["指定视频高度"] || 0);
-			DrillUp.g_BVi_list[i]['x'] = Number(DrillUp.g_BVi_list[i]["平移-视频 X"] || 0);
-			DrillUp.g_BVi_list[i]['y'] = Number(DrillUp.g_BVi_list[i]["平移-视频 Y"] || 0);
-			DrillUp.g_BVi_list[i]['opacity'] = Number(DrillUp.g_BVi_list[i]["透明度"] || 255);
-			DrillUp.g_BVi_list[i]['blendMode'] = Number(DrillUp.g_BVi_list[i]["混合模式"] || 0);
-			DrillUp.g_BVi_list[i]['area_index'] = String(DrillUp.g_BVi_list[i]["战斗层级"] || "下层");
-			DrillUp.g_BVi_list[i]['zIndex'] = Number(DrillUp.g_BVi_list[i]["图片层级"] || 0);
-			DrillUp.g_BVi_list[i]['tint'] = String(DrillUp.g_BVi_list[i]["视频色调"] || "#ffffff");
+			var temp = JSON.parse(DrillUp.parameters["视频-" + String(i+1) ]);
+			DrillUp.g_BVi_list[i] = DrillUp.drill_BVi_videoInit( temp );
+			DrillUp.g_BVi_list[i]['id'] = Number(i)+1;
+			DrillUp.g_BVi_list[i]['inited'] = true;
 		}else{
-			DrillUp.g_BVi_list[i] = null;
+			DrillUp.g_BVi_list[i] = DrillUp.drill_BVi_videoInit( {} );
+			DrillUp.g_BVi_list[i]['id'] = Number(i)+1;
+			DrillUp.g_BVi_list[i]['inited'] = false;
 		}
 	}
 
@@ -471,19 +489,15 @@
 var _drill_BVi_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_BVi_pluginCommand.call(this, command, args);
-	if (command === '>创建战斗视频') {
+	
+	/*-----------------创建指令（固定）------------------*/
+	if( command === ">创建战斗视频" ){
 		if(args.length == 2){
 			var temp = Number(args[1]) - 1;
 			$gameSystem._drill_BVi_id_list.push( temp );
 		}
 	}
-	if (command === '>清空战斗视频') {
-		$gameSystem._drill_BBa_data = [];
-		$gameSystem._drill_BBa_changing = [];
-		$gameSystem._drill_BVi_data = [];
-		$gameSystem._drill_BVi_changing = [];
-		$gameSystem._drill_BGi_data = [];
-		$gameSystem._drill_BGi_changing = [];
+	if( command === ">清空全部战斗装饰部件" || command === ">清空战斗视频" ){
 		$gameSystem._drill_BVi_id_list = [];
 	}
 };
@@ -583,7 +597,8 @@ Scene_Battle.prototype.drill_BVi_create = function() {
 	// > 创建贴图
 	for( var i = 0; i < $gameSystem._drill_BVi_id_list.length; i++) {
 		var temp_data = DrillUp.g_BVi_list[ $gameSystem._drill_BVi_id_list[i] ];
-		if(!temp_data ){ continue; }
+		if( temp_data == undefined ){ continue; }
+		if( temp_data['inited'] != true ){ continue; }
 		
 		var temp_suffix = Game_Interpreter.prototype.videoFileExt();	//组合路径
 		var temp_path = 'movies/'+ temp_data['src'] + temp_suffix;

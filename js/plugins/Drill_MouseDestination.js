@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        鼠标 - 目的地指向标
+ * @plugindesc [v1.2]        鼠标 - 目的地指向标
  * @author Drill_up
  * 
  * @Drill_LE_param "指向标-%d"
@@ -33,6 +33,9 @@
  *   (1.指向标的资源可以是单张图片，也可以是GIF图像。
  *      你可以根据你设计的指向标，配置相关效果。
  *   (2.如果你不想显示目的地指向标，设置参数初始隐藏即可。
+ * 其它：
+ *   (1.如果你想完全关闭 鼠标左键移动到目的地 这个功能，
+ *      可以去看看 系统-输入设备核心 插件的插件指令控制功能。
  * 
  * -----------------------------------------------------------------------------
  * ----关联文件
@@ -61,7 +64,7 @@
  * 插件指令：>目的地指向标 : 切换样式 : 1
  * 
  * 1.数字表示对应配置的指向标编号。
- *   0表示rmmv默认的指向标。
+ *   0表示rmmv默认的指向标(闪烁白矩形)。
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -91,6 +94,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 修复了插件配置细节。
+ * [v1.2]
+ * 修改了插件的 旋转单位 为角度。
  * 
  * 
  *
@@ -104,7 +109,7 @@
  * @param 当前指向标
  * @type number
  * @min 0
- * @desc 当前对应的指向标，0表示rmmv默认的指向标。
+ * @desc 当前对应的指向标，0表示rmmv默认的指向标(闪烁白矩形)。
  * @default 0
  * 
  * @param ----指向标----
@@ -264,7 +269,7 @@
  *
  * @param 旋转速度
  * @parent ---效果---
- * @desc 正数逆时针，负数顺时针，单位 弧度/帧。(1秒60帧) 6.28表示一圈，设置0.01表示大概10秒转一圈，设置0则不旋转。
+ * @desc 正数逆时针，负数顺时针，单位 角度/帧。(1秒60帧，360.0为一周) 
  * @default 0 
  *
  * @param 是否使用缩放效果
@@ -361,35 +366,54 @@
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_MouseDestination');
 	
+	
+	//==============================
+	// * 变量获取 - 鼠标指向标
+	//				（~struct~DrillMDeSprite）
+	//==============================
+	DrillUp.drill_MDe_initDestData = function( dataFrom ) {
+		var data = {};
+		if( dataFrom["资源-指向标GIF"] != undefined &&
+			dataFrom["资源-指向标GIF"] != "" ){
+			data['src_img'] = JSON.parse( dataFrom["资源-指向标GIF"] || [] );
+		}else{
+			data['src_img'] = [];
+		}
+		data['src_img_shadow'] = String( dataFrom["资源-指向标阴影"] || "");
+		data['interval'] = Number( dataFrom["帧间隔"] || 4 );
+		data['back_run'] = String( dataFrom["是否倒放"] || "false") === "true";
+		data['x'] = Number( dataFrom["偏移-指向标 X"] || 0 );
+		data['y'] = Number( dataFrom["偏移-指向标 Y"] || 0 );
+		data['opacity'] = Number( dataFrom["透明度"] || 255 );
+		data['blendMode'] = Number( dataFrom["混合模式"] || 0 );
+		data['src_bitmaps'] = [];
+		
+		data['movement_enable'] = String( dataFrom["是否使用平滑运动"] || "true") === "true";
+		data['fade_enable'] = String( dataFrom["是否使用淡出效果"] || "true") === "true";
+		data['rotate'] = Number( dataFrom["旋转速度"] || 0 );
+		data['zoom_enable'] = String( dataFrom["是否使用缩放效果"] || "false") === "true";
+		data['zoom_range'] = Number( dataFrom["缩放幅度"] || 0.08 );
+		data['zoom_speed'] = Number( dataFrom["缩放速度"] || 5.5 );
+		data['flash_enable'] = String( dataFrom["是否使用闪烁效果"] || "false") === "true";
+		data['flash_speed'] = Number( dataFrom["闪烁速度"] || 7.0 );
+		data['float_enable'] = String( dataFrom["是否使用漂浮效果"] || "true") === "true";
+		data['float_range'] = Number( dataFrom["漂浮幅度"] || 6 );
+		data['float_speed'] = Number( dataFrom["漂浮速度"] || 12.5 );
+		
+		return data;
+	}
+	
+	/*-----------------杂项------------------*/
 	DrillUp.g_MDe_visible = String(DrillUp.parameters['是否初始显示'] || 'true') === 'true';
 	DrillUp.g_MDe_curStyle = Number(DrillUp.parameters['当前指向标'] || 0);
 	
+	/*-----------------鼠标指向标------------------*/
 	DrillUp.g_MDe_list_length = 10;
 	DrillUp.g_MDe_list = [];
 	for (var i = 0; i < DrillUp.g_MDe_list_length; i++) {
 		if( DrillUp.parameters['指向标-' + String(i+1) ] != "" ){
-			DrillUp.g_MDe_list[i] = JSON.parse(DrillUp.parameters['指向标-' + String(i+1) ]);
-			DrillUp.g_MDe_list[i]['src_img'] = JSON.parse(DrillUp.g_MDe_list[i]["资源-指向标GIF"] || []);
-			DrillUp.g_MDe_list[i]['src_img_shadow'] = String(DrillUp.g_MDe_list[i]["资源-指向标阴影"] || "");
-			DrillUp.g_MDe_list[i]['interval'] = Number(DrillUp.g_MDe_list[i]["帧间隔"] || 4);
-			DrillUp.g_MDe_list[i]['back_run'] = String(DrillUp.g_MDe_list[i]["是否倒放"] || "false") === "true";
-			DrillUp.g_MDe_list[i]['x'] = Number(DrillUp.g_MDe_list[i]["偏移-指向标 X"] || 0);
-			DrillUp.g_MDe_list[i]['y'] = Number(DrillUp.g_MDe_list[i]["偏移-指向标 Y"] || 0);
-			DrillUp.g_MDe_list[i]['opacity'] = Number(DrillUp.g_MDe_list[i]["透明度"] || 255);
-			DrillUp.g_MDe_list[i]['blendMode'] = Number(DrillUp.g_MDe_list[i]["混合模式"] || 0);
-			DrillUp.g_MDe_list[i]['src_bitmaps'] = [];
-			
-			DrillUp.g_MDe_list[i]['movement_enable'] = String(DrillUp.g_MDe_list[i]["是否使用平滑运动"] || "true") === "true";
-			DrillUp.g_MDe_list[i]['fade_enable'] = String(DrillUp.g_MDe_list[i]["是否使用淡出效果"] || "true") === "true";
-			DrillUp.g_MDe_list[i]['rotate'] = Number(DrillUp.g_MDe_list[i]["旋转速度"] || 0);
-			DrillUp.g_MDe_list[i]['zoom_enable'] = String(DrillUp.g_MDe_list[i]["是否使用缩放效果"] || "false") === "true";
-			DrillUp.g_MDe_list[i]['zoom_range'] = Number(DrillUp.g_MDe_list[i]["缩放幅度"] || 0.08);
-			DrillUp.g_MDe_list[i]['zoom_speed'] = Number(DrillUp.g_MDe_list[i]["缩放速度"] || 5.5);
-			DrillUp.g_MDe_list[i]['flash_enable'] = String(DrillUp.g_MDe_list[i]["是否使用闪烁效果"] || "false") === "true";
-			DrillUp.g_MDe_list[i]['flash_speed'] = Number(DrillUp.g_MDe_list[i]["闪烁速度"] || 7.0);
-			DrillUp.g_MDe_list[i]['float_enable'] = String(DrillUp.g_MDe_list[i]["是否使用漂浮效果"] || "true") === "true";
-			DrillUp.g_MDe_list[i]['float_range'] = Number(DrillUp.g_MDe_list[i]["漂浮幅度"] || 6);
-			DrillUp.g_MDe_list[i]['float_speed'] = Number(DrillUp.g_MDe_list[i]["漂浮速度"] || 12.5);
+			var temp = JSON.parse(DrillUp.parameters['指向标-' + String(i+1) ]);
+			DrillUp.g_MDe_list[i] = DrillUp.drill_MDe_initDestData( temp );
 		}else{
 			DrillUp.g_MDe_list[i] = null;
 		}
@@ -508,17 +532,22 @@ Drill_MDe_DestSprite.prototype.constructor = Drill_MDe_DestSprite;
 //==============================
 Drill_MDe_DestSprite.prototype.initialize = function() {
 	Sprite_Base.prototype.initialize.call(this);
-	this.anchor.x = 0.5;
-	this.anchor.y = 0.5;
-	this._drill_time = 0;							//持续时间
-	this._drill_data = null;						//样式数据
-	this._drill_curStyle = -1;						//当前样式
-	this._drill_destX = 0;							//缓存坐标x
-	this._drill_destY = 0;							//缓存坐标y
-	this._drill_curX = 0;							//平滑运动 - 当前坐标x
-	this._drill_curY = 0;							//平滑运动 - 当前坐标y
-	this._drill_MDe_sprite = null;					//指针贴图
-	this._drill_MDe_shadow = null;					//指针阴影
+	
+	// > 私有属性初始化
+	this.anchor.x = 0.5;				//中心锚点
+	this.anchor.y = 0.5;				//
+	this._drill_time = 0;				//持续时间
+	this._drill_data = null;			//样式数据
+	this._drill_curStyle = -1;			//当前样式
+	
+	this._drill_destX = 0;				//移动 - 缓存坐标x
+	this._drill_destY = 0;				//移动 - 缓存坐标y
+	this._drill_curX = 0;				//移动 - 平滑运动 - 当前坐标x
+	this._drill_curY = 0;				//移动 - 平滑运动 - 当前坐标y
+	
+	// > 子贴图
+	this._drill_MDe_sprite = null;		//指针贴图
+	this._drill_MDe_shadow = null;		//指针阴影
 };
 //==============================
 // * 贴图 - 帧刷新
@@ -646,7 +675,6 @@ Drill_MDe_DestSprite.prototype.drill_MDe_updateGif = function() {
 	var t_gif_data = this._drill_data;
 	
 	// > 播放gif
-	t_gif._time += 1;
 	var inter = this._drill_time ;
 	inter = inter / t_gif_data['interval'];
 	inter = inter % t_gif_data['src_bitmaps'].length;
@@ -655,7 +683,9 @@ Drill_MDe_DestSprite.prototype.drill_MDe_updateGif = function() {
 	}
 	inter = Math.floor(inter);
 	t_gif.bitmap = t_gif_data['src_bitmaps'][inter];
-	t_gif.rotation += t_gif_data['rotate'];
+	
+	// > 自旋转
+	t_gif.rotation += t_gif_data['rotate'] /180*Math.PI;
 	
 }
 //==============================

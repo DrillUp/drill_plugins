@@ -199,7 +199,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				if( pos == "指定位置" ){
 					if( $gameMap.drill_EDu_isEventExist( temp1 ) == false ){ return; }
 					// > 生成事件
-					$gameMap.drill_EDu_createEvent( $gameMap._mapId, temp1, temp2, temp3 );
+					var e = $gameMap.drill_EDu_createEvent( $gameMap._mapId, temp1, temp2, temp3 );
 					// > 设置透明度
 					if( $gameSystem._drill_EDu_is_opacity ){ e._opacity = 0; }
 				}
@@ -227,9 +227,9 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				if( pos == "指定位置" ){
 					if( $gameTemp.drill_EDu_hasMapId( temp1 ) == false ){ return; }
 					// > 生成事件
-					$gameMap.drill_EDu_createEvent( temp1, temp2, temp3, temp4 );
+					var e = $gameMap.drill_EDu_createEvent( temp1, temp2, temp3, temp4 );
 					// > 设置透明度
-					if( $gameSystem._drill_EDu_is_opacity ){ e._opacity = 0; }
+					if( e && $gameSystem._drill_EDu_is_opacity ){ e._opacity = 0; }
 				}
 				if( pos == "事件位置" ){
 					if( $gameTemp.drill_EDu_hasMapId( temp1 ) == false ){ return; }
@@ -237,9 +237,9 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					var xx = $gameMap.event(temp3)._x;
 					var yy = $gameMap.event(temp3)._y;
 					// > 生成事件
-					$gameMap.drill_EDu_createEvent( temp1, temp2, xx, yy );
+					var e = $gameMap.drill_EDu_createEvent( temp1, temp2, xx, yy );
 					// > 设置透明度
-					if( $gameSystem._drill_EDu_is_opacity ){ e._opacity = 0; }
+					if( e && $gameSystem._drill_EDu_is_opacity ){ e._opacity = 0; }
 					
 				}
 			}

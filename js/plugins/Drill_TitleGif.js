@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        标题 - 多层标题GIF
+ * @plugindesc [v1.5]        标题 - 多层标题GIF
  * @author Drill_up
  * 
  * @Drill_LE_param "GIF-%d"
@@ -51,9 +51,9 @@
  * 要查看所有关联资源文件的插件，可以去看看"插件清单.xlsx"。
  * 如果没有，需要自己建立。需要配置资源文件：
  * 
- * GIF1 资源-GIF
- * GIF2 资源-GIF
- * GIF3 资源-GIF
+ * GIF-1 资源-GIF
+ * GIF-2 资源-GIF
+ * GIF-3 资源-GIF
  * ……
  *
  * 所有素材都放在titles1文件夹下。
@@ -84,8 +84,8 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
  * 时间复杂度： o(n)*o(贴图处理) 每帧
- * 测试方法：   打开主菜单界面，进行性能测试。
- * 测试结果：   主菜单中，gif的消耗为：【8.50ms】
+ * 测试方法：   打开标题界面，进行性能测试。
+ * 测试结果：   标题中，gif的消耗为：【8.50ms】
  *
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
  *   测试结果并不是精确值，范围在给定值的10ms范围内波动。
@@ -105,6 +105,9 @@
  * [v1.4]
  * 优化了内部结构，修改了插件指令格式。
  * 添加了GIF遮罩功能。
+ * [v1.5]
+ * 优化了内部结构。
+ * 添加了GIF的3d效果设置。旋转速度单位改为 角度/帧。
  *
  *
  * @param ---GIF组 1至20---
@@ -666,10 +669,9 @@
  * @value 3
  * @desc pixi的渲染混合模式。0-普通,1-叠加。其他更详细相关介绍，去看看"pixi的渲染混合模式"。
  * @default 0
- *
+ * 
  * @param 旋转速度
- * @desc 正数逆时针，负数顺时针，单位 弧度/帧。(1秒60帧)
- * 6.28表示一圈，设置0.01表示大概10秒转一圈，设置0则不旋转。
+ * @desc 正数逆时针，负数顺时针，单位 角度/帧。(1秒60帧，360.0为一周)
  * @default 0.0
  *
  * @param 菜单层级
@@ -687,6 +689,29 @@
  * @desc 背景在同一个菜单，并且在菜单层级下，先后排序的位置，0表示最后面。
  * @default 4
  * 
+ * 
+ * @param --3d效果--
+ * @desc 
+ * 
+ * @param 缩放 X
+ * @parent --3d效果--
+ * @desc GIF的缩放X值，默认比例1.0。缩放将会使得GIF看起来旋转具有一定透视。
+ * @default 1.0
+ * 
+ * @param 缩放 Y
+ * @parent --3d效果--
+ * @desc GIF的缩放Y值，默认比例1.0。缩放将会使得GIF看起来旋转具有一定透视。
+ * @default 1.0
+ * 
+ * @param 斜切 X
+ * @parent --3d效果--
+ * @desc GIF的斜切X值，默认比例0.0。斜切将会使得GIF看起来旋转具有一定角度。
+ * @default 0.0
+ * 
+ * @param 斜切 Y
+ * @parent --3d效果--
+ * @desc GIF的斜切Y值，默认比例0.0。斜切将会使得GIF看起来旋转具有一定角度。
+ * @default 0.0
  * 
  * @param --呼吸效果--
  * @desc 
@@ -805,41 +830,64 @@
 　　var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_TitleGIF');
 	
+	//==============================
+	// * 变量获取 - GIF
+	//				（~struct~TitleGIF）
+	//==============================
+	DrillUp.drill_TGi_gifInit = function( dataFrom ) {
+		var data = {};
+		data['visible'] = String( dataFrom["初始是否显示"] || "false") == "true";
+		if( dataFrom["资源-GIF"] != "" &&
+			dataFrom["资源-GIF"] != undefined ){
+			data['src_img'] = JSON.parse( dataFrom["资源-GIF"] );
+		}else{
+			data['src_img'] = [];
+		}
+		data['src_bitmaps'] = [];
+		data['src_img_mask'] = String( dataFrom["资源-GIF遮罩"] || "");
+		data['interval'] = Number( dataFrom["帧间隔"] || 4);
+		data['back_run'] = String( dataFrom["是否倒放"] || "false") == "true";
+		data['x'] = Number( dataFrom["平移-GIF X"] || 0);
+		data['y'] = Number( dataFrom["平移-GIF Y"] || 0);
+		data['opacity'] = Number( dataFrom["透明度"] || 255);
+		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
+		data['rotate'] = Number( dataFrom["旋转速度"] || 0.0);
+		data['menu_index'] = Number( dataFrom["菜单层级"] || 0);
+		data['zIndex'] = Number( dataFrom["图片层级"] || 0);
+		
+		data['scale_x'] = Number( dataFrom["缩放 X"] || 1.0);
+		data['scale_y'] = Number( dataFrom["缩放 Y"] || 1.0);
+		data['skew_x'] = Number( dataFrom["斜切 X"] || 0);
+		data['skew_y'] = Number( dataFrom["斜切 Y"] || 0);
+		
+		data['breath'] = String( dataFrom["是否使用呼吸效果"] || "false") == "true";
+		data['breath_period'] = Number( dataFrom["呼吸周期"] || 70);
+		data['breath_spread'] = Number( dataFrom["呼吸幅度"] || 8);
+		data['breath_type'] = String( dataFrom["呼吸类型"] || '上下缩放');
+			
+		data['float'] = String( dataFrom["是否使用漂浮效果"] || "false") == "true";
+		data['float_speed'] = Number( dataFrom["漂浮速度"] || 70);
+		data['float_spread'] = Number( dataFrom["漂浮幅度"] || 8);
+		data['float_type'] = String( dataFrom["漂浮类型"] || '上下漂浮');
+		return data;
+	}
+	
+	/*-----------------GIF------------------*/
 	DrillUp.g_TGi_list_length = 80;
 	DrillUp.g_TGi_list = [];
 	for (var i = 0; i < DrillUp.g_TGi_list_length; i++) {
 		if( DrillUp.parameters["GIF-" + String(i+1) ] != undefined &&
 			DrillUp.parameters["GIF-" + String(i+1) ] != "" ){
-			DrillUp.g_TGi_list[i] = JSON.parse(DrillUp.parameters["GIF-" + String(i+1) ]);
-			DrillUp.g_TGi_list[i]['visible'] = String(DrillUp.g_TGi_list[i]["初始是否显示"] || "true") == "true";
-			DrillUp.g_TGi_list[i]['x'] = Number(DrillUp.g_TGi_list[i]["平移-GIF X"] || 0);
-			DrillUp.g_TGi_list[i]['y'] = Number(DrillUp.g_TGi_list[i]["平移-GIF Y"] || 0);
-			DrillUp.g_TGi_list[i]['opacity'] = Number(DrillUp.g_TGi_list[i]["透明度"] || 255);
-			DrillUp.g_TGi_list[i]['blendMode'] = Number(DrillUp.g_TGi_list[i]["混合模式"] || 0);
-			DrillUp.g_TGi_list[i]['rotate'] = Number(DrillUp.g_TGi_list[i]["旋转速度"] || 0);
-			DrillUp.g_TGi_list[i]['menu_index'] = Number(DrillUp.g_TGi_list[i]["菜单层级"] || 0);
-			DrillUp.g_TGi_list[i]['zIndex'] = Number(DrillUp.g_TGi_list[i]["图片层级"] || 0);
-			DrillUp.g_TGi_list[i]['src_img'] = JSON.parse(DrillUp.g_TGi_list[i]["资源-GIF"] || []);
-			DrillUp.g_TGi_list[i]['src_img_mask'] = String(DrillUp.g_TGi_list[i]["资源-GIF遮罩"] || "");
-			DrillUp.g_TGi_list[i]['interval'] = Number(DrillUp.g_TGi_list[i]["帧间隔"] || 4);
-			DrillUp.g_TGi_list[i]['back_run'] = String(DrillUp.g_TGi_list[i]["是否倒放"] || "false") == "true";
-			DrillUp.g_TGi_list[i]['src_bitmaps'] = [];
-			
-			DrillUp.g_TGi_list[i]['breath'] = String(DrillUp.g_TGi_list[i]["是否使用呼吸效果"] || "false") == "true";
-			DrillUp.g_TGi_list[i]['breath_period'] = Number(DrillUp.g_TGi_list[i]["呼吸周期"] || 70);
-			DrillUp.g_TGi_list[i]['breath_spread'] = Number(DrillUp.g_TGi_list[i]["呼吸幅度"] || 8);
-			DrillUp.g_TGi_list[i]['breath_type'] = String(DrillUp.g_TGi_list[i]["呼吸类型"] || '上下缩放');
-			
-			DrillUp.g_TGi_list[i]['float'] = String(DrillUp.g_TGi_list[i]["是否使用漂浮效果"] || "false") == "true";
-			DrillUp.g_TGi_list[i]['float_speed'] = Number(DrillUp.g_TGi_list[i]["漂浮速度"] || 70);
-			DrillUp.g_TGi_list[i]['float_spread'] = Number(DrillUp.g_TGi_list[i]["漂浮幅度"] || 8);
-			DrillUp.g_TGi_list[i]['float_type'] = String(DrillUp.g_TGi_list[i]["漂浮类型"] || '上下漂浮');
-			
+			var temp = JSON.parse(DrillUp.parameters["GIF-" + String(i+1) ]);
+			DrillUp.g_TGi_list[i] = DrillUp.drill_TGi_gifInit( temp );
+			DrillUp.g_TGi_list[i]['id'] = Number(i)+1;
+			DrillUp.g_TGi_list[i]['inited'] = true;
 		}else{
-			DrillUp.g_TGi_list[i] = null;
+			DrillUp.g_TGi_list[i] = DrillUp.drill_TGi_gifInit( {} );
+			DrillUp.g_TGi_list[i]['id'] = Number(i)+1;
+			DrillUp.g_TGi_list[i]['inited'] = false;
 		}
 	}
-	//alert(JSON.stringify(DrillUp.g_TGi_list[0]));
 	
 	
 //=============================================================================
@@ -856,11 +904,10 @@
 			DrillUp.global_TGi_visible = [];
 			for (var i = 0; i < DrillUp.g_TGi_list.length; i++) {
 				var temp_data = DrillUp.g_TGi_list[i];
-				if( temp_data ){
-					DrillUp.global_TGi_visible.push( temp_data['visible'] );
-				}else{
-					DrillUp.global_TGi_visible.push( false );
-				}
+				if( temp_data == undefined ){ continue; }
+				if( temp_data['inited'] != true ){ continue; }
+
+				DrillUp.global_TGi_visible[i] = temp_data['visible'];
 			}
 		}
 	}
@@ -885,7 +932,7 @@ DataManager.forceSaveGlobalInfo = function() {		//强制存储（任何改变的
 var _drill_TGi_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_TGi_pluginCommand.call(this, command, args);
-	if (command === '>标题GIF' || command === '>标题gif') {
+	if( command === ">标题GIF" || command === ">标题gif" ){
 		if(args.length == 4){
 			var temp1 = String(args[1]);
 			temp1 = temp1.replace("GIF[","");
@@ -893,20 +940,20 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			temp1 = temp1.replace("]","");
 			temp1 = Number(temp1) - 1;
 			var type = String(args[3]);
-			if (type === '显示') {
+			if (type === "显示") {
 				DrillUp.global_TGi_visible[temp1] = true;
 				DataManager.forceSaveGlobalInfo();
 			}
-			if (type === '隐藏') {
+			if (type === "隐藏") {
 				DrillUp.global_TGi_visible[temp1] = false;
 				DataManager.forceSaveGlobalInfo();
 			}
 			/*	（呼吸改变中心锚点）
 			if (type === '开启呼吸') {
-				DrillUp._drill_TGi_sprites_breath[temp1] = true;
+				DrillUp._drill_TGi_spriteTank_breath[temp1] = true;
 			}
 			if (type === '关闭呼吸') {
-				DrillUp._drill_TGi_sprites_breath[temp1] = false;
+				DrillUp._drill_TGi_spriteTank_breath[temp1] = false;
 			}*/
 		}
 		if(args.length == 2){
@@ -940,8 +987,8 @@ var _drill_TGi_createBackground = Scene_Title.prototype.createBackground;
 Scene_Title.prototype.createBackground = function() {
 	// > GIF初始化
 	SceneManager._drill_TGi_created = false;	
-   	this._drill_TGi_sprites = [];
-   	this._drill_TGi_sprites_data = [];
+   	this._drill_TGi_spriteTank = [];
+   	this._drill_TGi_dataTank = [];
 	
 	_drill_TGi_createBackground.call(this);		//与背景一同创建
 	
@@ -988,9 +1035,10 @@ Scene_Title.prototype.update = function() {
 //==============================
 Scene_Title.prototype.drill_TGi_create = function() {	
 	SceneManager._drill_TGi_created = true;
-	if(!this._drill_TGi_sprites){
-		this._drill_TGi_sprites = [];		//防止某些覆写的菜单报错
-		this._drill_TGi_sprites_data = [];
+	
+	if(!this._drill_TGi_spriteTank){
+		this._drill_TGi_spriteTank = [];		//防止某些覆写的菜单报错
+		this._drill_TGi_dataTank = [];
 	}
 	if( !this._backgroundSprite ){		//菜单后面层
 		this._backgroundSprite = new Sprite();
@@ -1002,9 +1050,12 @@ Scene_Title.prototype.drill_TGi_create = function() {
 	
 	// > 配置的GIF
 	for (var i = 0; i < DrillUp.g_TGi_list.length; i++) {
-		if( DrillUp.g_TGi_list[i] == undefined ){ continue; }
+		var temp_data = DrillUp.g_TGi_list[i];
+		if( temp_data == undefined ){ continue; }
+		if( temp_data['inited'] != true ){ continue; }
+		
 		// > GIF贴图
-		var temp_sprite_data = JSON.parse(JSON.stringify( DrillUp.g_TGi_list[i] ));	//深拷贝数据（杜绝引用造成的修改）
+		var temp_sprite_data = JSON.parse(JSON.stringify( temp_data ));	//深拷贝数据（杜绝引用造成的修改）
 		for(var j = 0; j < temp_sprite_data['src_img'].length ; j++){
 			temp_sprite_data['src_bitmaps'].push(ImageManager.loadTitle1(temp_sprite_data['src_img'][j]));
 		}
@@ -1019,13 +1070,17 @@ Scene_Title.prototype.drill_TGi_create = function() {
 		temp_sprite._org_y = temp_sprite.y;
 		temp_sprite.opacity = temp_sprite_data['opacity'];
 		temp_sprite.blendMode = temp_sprite_data['blendMode'];
-		temp_sprite.visible = DrillUp.global_TGi_visible[i];
+		temp_sprite.scale.x = temp_sprite_data['scale_x'];
+		temp_sprite.scale.y = temp_sprite_data['scale_y'];
+		temp_sprite.skew.x = temp_sprite_data['skew_x'];
+		temp_sprite.skew.y = temp_sprite_data['skew_y'];
+		temp_sprite.visible = DrillUp.global_TGi_visible[i] || false;
 		
 		temp_sprite._breath = Math.random() * temp_sprite_data['breath_period'];
 		temp_sprite._breath_dir = Math.floor(Math.random() * 2);
 		temp_sprite._f_time = 0;
-		this._drill_TGi_sprites.push(temp_sprite);
-		this._drill_TGi_sprites_data.push(temp_sprite_data);
+		this._drill_TGi_spriteTank.push(temp_sprite);
+		this._drill_TGi_dataTank.push(temp_sprite_data);
 		
 		// > GIF父级
 		var temp_layer = new Sprite();
@@ -1052,23 +1107,25 @@ Scene_Title.prototype.drill_TGi_create = function() {
 // * GIF - 帧刷新
 //==============================
 Scene_Title.prototype.drill_TGi_update = function() {
-	for (var i = 0; i < this._drill_TGi_sprites.length; i++) {
-		var t_gif = this._drill_TGi_sprites[i];
-		var t_gif_data = this._drill_TGi_sprites_data[i];
+	for (var i = 0; i < this._drill_TGi_spriteTank.length; i++) {
+		var t_gif = this._drill_TGi_spriteTank[i];
+		var t_gif_data = this._drill_TGi_dataTank[i];
 		
-		//播放gif
+		// > 播放gif
 		t_gif._time += 1;
-		var inter = this._drill_TGi_sprites[i]._time ;
+		var inter = this._drill_TGi_spriteTank[i]._time ;
 		inter = inter / t_gif_data['interval'];
 		inter = inter % t_gif_data['src_bitmaps'].length;
-		if(t_gif_data['back_run']){
+		if( t_gif_data['back_run'] ){
 			inter = t_gif_data['src_bitmaps'].length - 1 - inter;
 		}
 		inter = Math.floor(inter);
 		t_gif.bitmap = t_gif_data['src_bitmaps'][inter];
-		t_gif.rotation += t_gif_data['rotate'];
 		
-		//呼吸效果
+		// > 旋转
+		t_gif.rotation += t_gif_data['rotate'] /180*Math.PI;
+		
+		// > 呼吸效果
 		if( t_gif_data['breath'] ){
 			if( t_gif._breath_dir == 0 ){
 				t_gif._breath += 2.1;
@@ -1090,7 +1147,7 @@ Scene_Title.prototype.drill_TGi_update = function() {
 				t_gif.scale.x = 1.00 + (t_gif._breath/t_gif_data['breath_period'] * t_gif_data['breath_spread']/100 );
 			}
 		}
-		//漂浮效果
+		// > 漂浮效果
 		if( t_gif_data['float'] ){
 			t_gif._f_time += t_gif_data['float_speed'];
 			if(t_gif._f_time > 360){ t_gif._f_time -= 360; }

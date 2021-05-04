@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        战斗 - 活动战斗镜头
+ * @plugindesc [v1.4]        战斗 - 活动战斗镜头
  * @author Drill_up
  *
  * @help  
@@ -111,6 +111,27 @@
  * 1.数字表示翻转的时间，单位帧。
  * 2.注意，翻转只能处于一种状态。比如顺时针翻转后。其它翻转指令完全失效。
  *   只有恢复翻转后，才能进行其它翻转操作。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----插件性能
+ * 测试仪器：   4G 内存，Intel Core i5-2520M CPU 2.5GHz 处理器
+ *              Intel(R) HD Graphics 3000 集显 的垃圾笔记本
+ *              (笔记本的3dmark综合分：571，鲁大师综合分：48456)
+ * 总时段：     20000.00ms左右
+ * 对照表：     0.00ms  - 40.00ms （几乎无消耗）
+ *              40.00ms - 80.00ms （低消耗）
+ *              80.00ms - 120.00ms（中消耗）
+ *              120.00ms以上      （高消耗）
+ * 工作类型：   持续执行
+ * 时间复杂度： o(n^3) 每帧
+ * 测试方法：   在战斗界面中，测试战斗镜头的消耗。
+ * 测试结果：   战斗界面中，平均消耗为：【12.69ms】
+ * 
+ * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
+ *   测试结果并不是精确值，范围在给定值的10ms范围内波动。
+ *   更多了解插件性能，可以去看看"关于插件性能.docx"。
+ * 2.战斗镜头大多都是数学位置转换计算，不操作贴图处理。不过相对
+ *   而已消耗比一般单纯位置计算插件要多一点。
  *
  * -----------------------------------------------------------------------------
  * ----更新日志
@@ -122,6 +143,8 @@
  * 修复了在sideview情况下，默认战斗背景出现黑边的问题。
  * [v1.3]
  * 修复了镜头移动时，战斗UI跟随延迟的bug。
+ * [v1.4]
+ * 修复了镜头移动时，配置了位移比的 背景/魔法圈/GIF 会出现不稳定瞬移的bug。
  * 
  * 
  * @param 镜头架宽度
@@ -150,13 +173,13 @@
  * @type number
  * @min 1
  * @desc 镜头切换移动目标时，移动的时间，单位帧。（1秒60帧）
- * @default 15
+ * @default 18
  *
  * @param 镜头聚焦延迟
  * @type number
  * @min 0
  * @desc 镜头移动延迟的时间。20表示20帧后开始移动镜头。（1秒60帧）
- * @default 20  
+ * @default 10  
  *
  * @param 偏移-镜头 X
  * @desc 默认镜头聚焦目标的中心，在中心的基础上x轴方向偏移，单位像素。（可为负数）
@@ -175,18 +198,29 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
+//		工作类型		持续执行
+//		时间复杂度		o(n^3) 每帧
+//		性能测试因素	战斗界面
+//		性能测试消耗	12.69ms（drill_BCa_lockAnchor）
+//		最坏情况		无
+//		备注			无
+//
 //插件记录：
 //		★大体框架与功能如下：
 //			战斗镜头：
-//				->聚焦敌人
-//				->匀速移动
-//				->弹性移动
-//				->镜头架
-//				->镜头位置
-//
-//				->镜头缩放/旋转
-//				->翻转的镜头
-//				x->镜头放大特写
+//				->镜头移动目标
+//					->标记
+//					->聚焦敌人
+//					->镜头位置
+//				->镜头移动方式
+//					->镜头架
+//					->匀速移动
+//					->弹性移动
+//				->镜头属性
+//					->镜头缩放/旋转
+//					->翻转的镜头
+//					x->镜头放大特写
+//				->其它插件兼容
 //	
 //		★必要注意事项：
 //			1.该插件与弹道核心没有交互，为了独立开来，使用了弹道核心部分代码片段。
@@ -194,7 +228,8 @@
 //		★其它说明细节：
 //			1.该插件原本原理只是对 _battleField 进行简单平移。
 //			  （mog由于直接改变了大小，越弄越复杂，这里重建，简化方式。）
-//			2.战斗镜头的平移控制的是 _battleField 图层，缩放、旋转控制的是Spriteset_Battle。
+//			2.战斗镜头的平移控制的是 _battleField 图层，
+//			  缩放、旋转控制的是Spriteset_Battle。
 //
 //		★存在的问题：
 //			1.插件没有完全脱离mog的影子，内部有已经套牢并且无法改名的变量名。（外部插件都与此插件关联引用）
@@ -244,7 +279,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	if (command === ">关闭镜头" || command === ">关闭战斗镜头")  { $gameSystem._drill_cam_enable = false};
 	
 	
-	if (command === ">战斗镜头") { // >战斗镜头 : 水平翻转 : 60 : 匀速
+	if( command === ">战斗镜头" ){ 		// >战斗镜头 : 水平翻转 : 60 : 匀速
 		if(args.length == 6){
 			var type = String(args[1]);
 			var temp1 = Number(args[3]);
@@ -302,19 +337,18 @@ Game_System.prototype.initialize = function() {
     this._drill_cam_limit_width = DrillUp.g_BCa_limit_width;	//镜头架宽度
     this._drill_cam_limit_height = DrillUp.g_BCa_limit_height;	//镜头架高度
 	
-	this._drill_BCa_X = {}			// 缩放x
-	this._drill_BCa_X.cur = 0;      //	cur = -0.1，则缩放为0.9
-	this._drill_BCa_X.move = 0;     //
-	this._drill_BCa_X.time = 0;     //
-	this._drill_BCa_Y = {}          // 缩放y
-	this._drill_BCa_Y.cur = 0;      //
-	this._drill_BCa_Y.move = 0;     //
-	this._drill_BCa_Y.time = 0;     //
-	this._drill_BCa_R = {}          // 旋转
-	this._drill_BCa_R.cur = 0;      //
-	this._drill_BCa_R.move = 0;     //
-	this._drill_BCa_R.time = 0;     //
-	
+	this._drill_BCa_X = {}				// 缩放x
+	this._drill_BCa_X.cur = 0;      	//     cur = -0.1，则缩放为0.9
+	this._drill_BCa_X.move = 0;     	//
+	this._drill_BCa_X.time = 0;     	//
+	this._drill_BCa_Y = {}          	// 缩放y
+	this._drill_BCa_Y.cur = 0;      	//
+	this._drill_BCa_Y.move = 0;     	//
+	this._drill_BCa_Y.time = 0;     	//
+	this._drill_BCa_R = {}          	// 旋转
+	this._drill_BCa_R.cur = 0;      	//
+	this._drill_BCa_R.move = 0;    		//
+	this._drill_BCa_R.time = 0;    		//
     this._drill_BCa_flip = {};			//翻转控制
     this._drill_BCa_flip.lock = false;	//
 };
@@ -336,9 +370,10 @@ Game_Temp.prototype.drill_BCa_clearCamera = function() {
 	this._drill_BCa_select_all_turn = false;			//
 	this._drill_BCa_battleEnd = false;					//战斗结束标记
 	
-	this._drill_cam_pos = [0,0];						//镜头所在位置
-	this._drill_cam_result_move_X = 0;					//镜头实际位移量X
-	this._drill_cam_result_move_Y = 0;					//镜头实际位移量Y
+	this._drill_cam_pos = [0,0];						//镜头所在位置（常用接口）
+	
+	this._drill_cam_result_move_X = 0;					//镜头实际位移量X（存在问题，已弃用）
+	this._drill_cam_result_move_Y = 0;					//镜头实际位移量Y（存在问题，已弃用）
 };
 
 
@@ -545,6 +580,7 @@ Spriteset_Battle.prototype.drill_BCa_flip = function() {
 	}
 }
 
+
 //=============================================================================
 // ** 镜头移动目标标记
 //=============================================================================
@@ -557,7 +593,6 @@ Scene_Battle.prototype.onSelectAction = function() {
 	$gameTemp._drill_BCa_select_all = action.isForAll();
 	_drill_BCa_onSelectAction.call(this);    
 };
-
 //==============================
 // * 标记 - 角色窗口被隐藏时（Window BattleActor）
 //==============================
@@ -652,6 +687,7 @@ BattleManager.processDefeat = function() {
 	$gameTemp._drill_BCa_battleEnd = true;
 	_drill_BCa_processDefeat.call(this);	 
 };
+
 
 //=============================================================================
 // ** 镜头位置
@@ -781,56 +817,46 @@ Spriteset_Battle.prototype.drill_BCa_setMoveTo = function( x, y ){
 	if( tar_y > lim_y ){ tar_y = lim_y; }
 	if( tar_y < -lim_y ){ tar_y = -lim_y; }
 	
-	// > 弹道推演（ 不用 弹道核心）
-	//var b_data = {};
-	//b_data['movementMode'] = "两点式";
-	//b_data['movementTime'] = $gameSystem._drill_cam_switchTime;
-	//b_data['movementDelay']= 0;
-	//b_data['twoPointType'] = DrillUp.g_BCa_moveType;
-	//b_data['twoPointDifferenceX'] = tar_x - this._battleField.x;
-	//b_data['twoPointDifferenceY'] = tar_y - this._battleField.y;
-	//
-	//$gameTemp.drill_COBa_setBallisticsMove( b_data );							//初始化
-	//$gameTemp.drill_COBa_preBallisticsMove( this, 0 , this._battleField.x, this._battleField.y );		//推演赋值
-	//
-	//this._drill_BCa_ballisticsX = this['_drill_COBa_x'];
-	//this._drill_BCa_ballisticsY = this['_drill_COBa_y'];
-	
-	// > 弹道推演
-	this.drill_BCa_ballisticsMove( tar_x-this._battleField.x, tar_y-this._battleField.y );
+	// > 弹道推演（ 不使用 弹道核心）
+	this.drill_BCa_ballisticsMove( this._battleField.x, this._battleField.y, tar_x, tar_y, $gameSystem._drill_cam_switchTime );
 	
 	this._drill_BCa_curTime = 0;
 };
 //==============================
 // * 镜头 - 弹道推演
 //==============================
-Spriteset_Battle.prototype.drill_BCa_ballisticsMove = function( diffX, diffY ){
-	
+Spriteset_Battle.prototype.drill_BCa_ballisticsMove = function( orgX, orgY, tarX, tarY, movementTime ){
 	this._drill_BCa_ballisticsX = [];
 	this._drill_BCa_ballisticsY = [];
-	var orgX = this._battleField.x;
-	var orgY = this._battleField.y;
+	var diffX = tarX - orgX;
+	var diffY = tarY - orgY;
 	
-	for(var time = 0; time <= $gameSystem._drill_cam_switchTime; time++){
+	//（两点式）
+	for(var time = 0; time <= movementTime; time++){
 		
 		// > 速度
 		var xx = 0;
 		var yy = 0;
 		
 		if( DrillUp.g_BCa_moveType == "匀速移动"){	
-			xx = time * diffX/$gameSystem._drill_cam_switchTime;
-			yy = time * diffY/$gameSystem._drill_cam_switchTime;
+			var dx = diffX;
+			var dy = diffY;
+			var dt = movementTime;
+				
+			xx = time * dx / dt;
+			yy = time * dy / dt;
 		}
 		
 		if( DrillUp.g_BCa_moveType == "弹性移动"){
-			var dx = diffX;	//r = 1/2*a*t^2
+			var dx = diffX;
 			var dy = diffY;
-			var t = $gameSystem._drill_cam_switchTime;
-			var ax = 2 * dx / t / t;
-			var ay = 2 * dy / t / t;	
-			var c_time = t - time;
-			xx = 0.5 * ax * t * t - 0.5 * ax * c_time * c_time ;
-			yy = 0.5 * ay * t * t - 0.5 * ay * c_time * c_time ;
+			var dt = movementTime;
+			
+			var ax = 2 * dx / dt / dt;		//r = 1/2*a*t^2
+			var ay = 2 * dy / dt / dt;		//（匀减速移动到目标点）
+			var c_time = dt - time;
+			xx = 0.5 * ax * dt * dt - 0.5 * ax * c_time * c_time ;
+			yy = 0.5 * ay * dt * dt - 0.5 * ay * c_time * c_time ;
 		}
 		
 		xx = orgX + xx;
@@ -838,7 +864,6 @@ Spriteset_Battle.prototype.drill_BCa_ballisticsMove = function( diffX, diffY ){
 		this._drill_BCa_ballisticsX.push(xx);
 		this._drill_BCa_ballisticsY.push(yy);
 	}
-	
 };
 
 //==============================
@@ -927,18 +952,9 @@ Spriteset_Battle.prototype.drill_BCa_updateCameraMove = function() {
 		this._battleField.y = Math.floor( this._drill_BCa_ballisticsY[ index-1 ] );
 	}
 	
-	// > 记录偏移量
-	if( index == 0 || index >= this._drill_BCa_ballisticsX.length ){
-		$gameTemp._drill_cam_result_move_X = 0;
-		$gameTemp._drill_cam_result_move_Y = 0;
-	}else{
-		$gameTemp._drill_cam_result_move_X = this._drill_BCa_ballisticsX[ index ] - this._drill_BCa_ballisticsX[ index-1 ];
-		$gameTemp._drill_cam_result_move_Y = this._drill_BCa_ballisticsY[ index ] - this._drill_BCa_ballisticsY[ index-1 ];
-	}
-	
 	// > 记录位置
-	$gameTemp._drill_cam_pos[0] = Math.floor( this._drill_BCa_ballisticsX[ index ] );
-	$gameTemp._drill_cam_pos[1] = Math.floor( this._drill_BCa_ballisticsY[ index ] );
+	$gameTemp._drill_cam_pos[0] = Math.floor( this._battleField.x );
+	$gameTemp._drill_cam_pos[1] = Math.floor( this._battleField.y );
 	
 };
 
@@ -1006,15 +1022,15 @@ if( Imported.YEP_CoreEngine ){
 var _drill_mog_ballon_update = Spriteset_Battle.prototype.update;
 Spriteset_Battle.prototype.update = function() {
 	_drill_mog_ballon_update.call(this);
-	if (Imported.MOG_BalloonActionName && this._balloonField) {	// 技能 - 招式名气泡框
+	if( Imported.MOG_BalloonActionName && this._balloonField ){	// 技能 - 招式名气泡框
 		this._balloonField.x = this._battleField.x
 		this._balloonField.y = this._battleField.y
 	};
-	if (Imported.MOG_ChainCommands && this._bchain) {		// 技能 - 按键连锁攻击
+	if( Imported.MOG_ChainCommands && this._bchain ){		// 技能 - 按键连锁攻击
 	   this._bchain.x = this._battleField.x;
 	   this._bchain.y = this._battleField.y;
 	};
-	if (Imported.MOG_HPGauge && this._hpField) {		// 敌人 - 生命浮动框
+	if( Imported.MOG_HPGauge && this._hpField ){		// 敌人 - 生命浮动框
 		this._hpField.x = this._battleField.x
 		this._hpField.y = this._battleField.y
 	};
@@ -1025,7 +1041,7 @@ Spriteset_Battle.prototype.update = function() {
 if( Imported.MOG_ChainCommands ){
 	var _drill_mog_updateFocus = Spriteset_Battle.prototype.updateFocus;
 	Spriteset_Battle.prototype.updateFocus = function() {
-		if ($gameTemp._bchainTemp) {$gameTemp._drill_BCa_being_attack[2] = 0};//技能 - 按键连锁攻击（下一段招不等待）
+		if( $gameTemp._bchainTemp ){ $gameTemp._drill_BCa_being_attack[2] = 0 };//技能 - 按键连锁攻击（下一段招不等待）
 		_drill_mog_updateFocus.call(this);
 	};
 };

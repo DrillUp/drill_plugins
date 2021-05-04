@@ -36,6 +36,9 @@
  *      战斗界面中，固定为串行执行。
  *   (2.注意，对话框事件指令 是特殊的指令体，只要执行对话框，就会强
  *      制串行，阻塞其他所有事件的线程。
+ *   (3."上一次触发的" = "当前触发的" 你在公共事件中执行获取，就是当前的。
+ *   (4.如果你的公共事件是并行执行，且有等待指令，那么一定要在等待指令之
+ *      前获取"上一次触发"的数据，不然数据可能会被其他事件冲掉。
  * 设计：
  *   (1.你可以通过该插件，制作简单的图片点击按钮、拖拽图片等功能。
  * 
@@ -89,8 +92,9 @@
  * 插件指令：>图片鼠标事件 : 获取触发记录 : 上一次触发的图片ID : 变量[21]
  * 插件指令：>图片鼠标事件 : 获取触发记录 : 上一次触发的公共事件ID : 变量[22]
  * 
- * 1.触发记录是在执行公共事件之前，记录的相关数据。
- *   你可以在执行公共事件时，获取到上述的数据。
+ * 1."上一次触发的" = "当前触发的" 你在公共事件中执行获取，就是当前的。
+ * 2.如果你的公共事件是并行执行，且有等待指令，那么一定要在等待指令之前获取
+ *   "上一次触发"的数据，不然数据可能会被其他事件冲掉。
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -197,7 +201,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				if( $gameScreen.drill_MTP_isPictureExist( pic_id ) == false ){ return; }
 				pic = $gameScreen.picture( pic_id );
 			}
-			if( pic_id.indexOf("图片[") != -1 ){
+			else if( pic_id.indexOf("图片[") != -1 ){
 				pic_id = pic_id.replace("图片[","");
 				pic_id = pic_id.replace("]","");
 				pic_id = Number(pic_id);
@@ -312,7 +316,6 @@ Game_System.prototype.initialize = function() {
 var _drill_MTP_temp_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {	
 	_drill_MTP_temp_initialize.call(this);
-	this._drill_MTP_sprites = [];				//图片贴图
 	this._drill_MTP_needRefresh = true;			//刷新统计
 };
 //==============================
@@ -321,7 +324,6 @@ Game_Temp.prototype.initialize = function() {
 var _drill_MTP_gmap_setup = Game_Map.prototype.setup;
 Game_Map.prototype.setup = function(mapId) {
 	_drill_MTP_gmap_setup.call(this,mapId);
-	//$gameTemp._drill_MTP_sprites = [];		//（切换地图不会刷 贴图数据）
 	//$gameTemp._drill_MTP_needRefresh = true;
 }
 //==============================
@@ -330,7 +332,6 @@ Game_Map.prototype.setup = function(mapId) {
 var _drill_MTP_sbase_createPictures = Spriteset_Base.prototype.createPictures;
 Spriteset_Base.prototype.createPictures = function() {
 	_drill_MTP_sbase_createPictures.call(this);
-	$gameTemp._drill_MTP_sprites = [];
 	$gameTemp._drill_MTP_needRefresh = true;
 }
 //==============================
@@ -348,14 +349,15 @@ Spriteset_Base.prototype.drill_MTP_refreshSpriteScan = function() {
 	if( !$gameTemp._drill_MTP_needRefresh ){ return }
 	$gameTemp._drill_MTP_needRefresh = false;
 	
+	$gameTemp._drill_MTP_sprites = [];
 	for( var i=0; i < this._pictureContainer.children.length; i++ ){
 		var temp_sprite = this._pictureContainer.children[i];
 		if( temp_sprite == undefined ){ continue; }
 		if( temp_sprite instanceof Sprite_Picture == false ){ continue; }
 		if( temp_sprite.picture() == undefined ){ continue; }
 		
-		if( temp_sprite.picture()._drill_MTP.triggerType.length > 0 ){
-			temp_sprite.picture()._drill_MTP.isMouseInRange == false;	//防止按住图片切菜单的情况
+		if( temp_sprite.picture()._drill_MTP['triggerType'].length > 0 ){
+			temp_sprite.picture()._drill_MTP['isMouseInRange'] == false;	//防止按住图片切菜单的情况
 			$gameTemp._drill_MTP_sprites.push( temp_sprite );
 		}
 	}
@@ -420,8 +422,8 @@ Scene_Map.prototype.drill_MTP_updatePictureHover = function() {
 		var temp_pic = temp_sprite.picture();
 		
 		if( this.drill_MTP_isOnRange( temp_sprite ) ){
-			if( temp_pic._drill_MTP.isMouseInRange == false ){
-				temp_pic._drill_MTP.isMouseInRange = true;
+			if( temp_pic._drill_MTP['isMouseInRange'] == false ){
+				temp_pic._drill_MTP['isMouseInRange'] = true;
 				
 				// > 进入范围时
 				var commonId = temp_pic.drill_MTP_getCommonIdByTriggerType( "鼠标进入图片时" );
@@ -432,8 +434,8 @@ Scene_Map.prototype.drill_MTP_updatePictureHover = function() {
 			}
 			
 		}else{
-			if( temp_pic._drill_MTP.isMouseInRange == true ){
-				temp_pic._drill_MTP.isMouseInRange = false;
+			if( temp_pic._drill_MTP['isMouseInRange'] == true ){
+				temp_pic._drill_MTP['isMouseInRange'] = false;
 				
 				// > 离开范围时
 				var commonId = temp_pic.drill_MTP_getCommonIdByTriggerType( "鼠标离开图片时" );
@@ -553,12 +555,17 @@ Scene_Battle.prototype.drill_MTP_isOnRange = function( sprite ){
 var _drill_MTP_pic_initialize = Game_Picture.prototype.initialize;
 Game_Picture.prototype.initialize = function() {
 	_drill_MTP_pic_initialize.call(this);
-	this._drill_MTP = {};
-	this._drill_MTP.triggerType = [];			//触发的鼠标类型
-	this._drill_MTP.triggerCommonId = [];		//触发的公共事件
-	this._drill_MTP.isMouseInRange = false;		//鼠标进入图片范围
-	
+	this.drill_MTP_init();						//参数初始化
 	$gameTemp._drill_MTP_needRefresh = true;	//图片创建后，强制刷新（战斗界面中创建的图片）
+}
+//==============================
+// * 图片 - 参数初始化
+//==============================
+Game_Picture.prototype.drill_MTP_init = function(){
+	this._drill_MTP = {};
+	this._drill_MTP['triggerType'] = [];			//触发的鼠标类型
+	this._drill_MTP['triggerCommonId'] = [];		//触发的公共事件
+	this._drill_MTP['isMouseInRange'] = false;		//鼠标进入图片范围
 }
 //==============================
 // * 图片 - 图片移除时
@@ -566,34 +573,46 @@ Game_Picture.prototype.initialize = function() {
 var _drill_MTP_pic_erase = Game_Picture.prototype.erase;
 Game_Picture.prototype.erase = function() {
 	_drill_MTP_pic_erase.call(this);
-	this._drill_MTP.triggerType = [];
-	this._drill_MTP.triggerCommonId = [];
-	this._drill_MTP.isMouseInRange = false;
-	
+	this.drill_MTP_init();						//参数清空
 	$gameTemp._drill_MTP_needRefresh = true;	//图片消除后，强制刷新
 }
+//==============================
+// * 图片操作 - 消除图片（command235）
+//==============================
+var _drill_MTP_pic_erasePicture = Game_Screen.prototype.erasePicture;
+Game_Screen.prototype.erasePicture = function( pictureId ){
+    var pic_id = this.realPictureId(pictureId);
+    var pic = this._pictures[pic_id];
+	if( pic != undefined ){
+		pic.drill_MTP_init();					//参数清空
+	}
+	
+	_drill_MTP_pic_erasePicture.call( this, pictureId );
+	
+	$gameTemp._drill_MTP_needRefresh = true;	//图片消除后，强制刷新
+};
 //==============================
 // * 图片 - 加入新的触发
 //==============================
 Game_Picture.prototype.drill_MTP_addTrigger = function( typeName, commonId ){
 	// > 检查重复
-	var index = this._drill_MTP.triggerType.indexOf(typeName);
+	var index = this._drill_MTP['triggerType'].indexOf(typeName);
 	if( index == -1 ){
-		this._drill_MTP.triggerType.push( typeName );
-		this._drill_MTP.triggerCommonId.push( commonId );
+		this._drill_MTP['triggerType'].push( typeName );
+		this._drill_MTP['triggerCommonId'].push( commonId );
 	}else{
-		this._drill_MTP.triggerCommonId[ index ] = commonId;
+		this._drill_MTP['triggerCommonId'][ index ] = commonId;
 	}
 }
 //==============================
 // * 图片 - 去除新的触发
 //==============================
 Game_Picture.prototype.drill_MTP_removeTrigger = function( typeName ){
-	for(var i = this._drill_MTP.triggerType.length-1; i >= 0; i-- ){
-		var temp_name = this._drill_MTP.triggerType[i];
+	for(var i = this._drill_MTP['triggerType'].length-1; i >= 0; i-- ){
+		var temp_name = this._drill_MTP['triggerType'][i];
 		if( temp_name == typeName ){
-			this._drill_MTP.triggerType.splice(i,1);
-			this._drill_MTP.triggerCommonId.splice(i,1);
+			this._drill_MTP['triggerType'].splice(i,1);
+			this._drill_MTP['triggerCommonId'].splice(i,1);
 		}
 	}
 }
@@ -601,10 +620,10 @@ Game_Picture.prototype.drill_MTP_removeTrigger = function( typeName ){
 // * 图片 - 获取触发类型的公共事件id
 //==============================
 Game_Picture.prototype.drill_MTP_getCommonIdByTriggerType = function( typeName ){
-	for(var i = this._drill_MTP.triggerType.length-1; i >= 0; i-- ){
-		var temp_name = this._drill_MTP.triggerType[i];
+	for(var i = this._drill_MTP['triggerType'].length-1; i >= 0; i-- ){
+		var temp_name = this._drill_MTP['triggerType'][i];
 		if( temp_name == typeName ){
-			return this._drill_MTP.triggerCommonId[i];
+			return this._drill_MTP['triggerCommonId'][i];
 		}
 	}
 	return -1;

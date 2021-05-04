@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        地图 - 多层地图魔法圈
+ * @plugindesc [v1.4]        地图 - 多层地图魔法圈
  * @author Drill_up
  * 
  * @Drill_LE_param "魔法圈层-%d"
@@ -42,9 +42,12 @@
  *   (4.处于同一 地图层级 时，将根据 图片层级 再先后排序。
  * 位移比：
  *   (1.根据物理相对运动知识，近大远小，近快远慢的原则。要让魔法圈看
- *      起来真的”远”，那需要设置位移比接近1.00，越接近1.00越远。
+ *      起来真的"远"，那需要设置位移比接近1.00，越接近1.00越远。
  *   (2.需要注意的是，rmmv远景和镜头位移比固定是0.00，所以rmmv的远景
  *      每次调整都感觉不像远景，你需要换掉适合的含位移比的图层。
+ *   (3.注意，位移比是根据 镜头 移动而移动，不是根据玩家移动而移动。
+ *   (4.去看看最新版本的 文档图解 介绍，
+ *      这里是看起来简单但是实际做起来非常复杂的坑。
  * 细节：
  *   (1.插件指令操作的变化结果，是永久性的。
  *   (2.操作隐藏的魔法圈 或者 操作其他地图的魔法圈，插件指令都会有效。
@@ -72,27 +75,41 @@
  * -----------------------------------------------------------------------------
  * ----可选设定
  * 你可以通过插件指令手动修改地图魔法圈的各个属性：
- *
- * 插件指令：>地图魔法圈 : 11 : 显示
- * 插件指令：>地图魔法圈 : 11 : 隐藏
- *
- * 插件指令：>地图魔法圈 : 11 : 变坐标 : 60 : 100 : 100
- * 插件指令：>地图魔法圈 : 11 : 变透明 : 60 : 255
- * 插件指令：>地图魔法圈 : 11 : 变转速 : 60 : 0.314
- * 插件指令：>地图魔法圈 : 11 : 变缩放 : 60 : 1.2 : 1.2
- * 插件指令：>地图魔法圈 : 11 : 变斜切 : 60 : 1.0 : 1.0
- * 插件指令：>地图魔法圈 : 11 : 变混合模式 : 2
  * 
- * 1.最前面的数字表示 配置的魔法圈 编号。
- * 2.变坐标后面表示 时长，x位置，y位置 。坐标变化效果与速度叠加。
- * 3.变透明后面表示 时长，透明度 。
- * 4.变转速后面表示 时长，旋转速度 。
- * 5.变缩放后面表示 时长，x大小，y大小 。
- * 6.变斜切后面表示 时长，x斜率，y斜率 。
- * 7.混合模式为瞬间切换，去看看"pixi的渲染混合模式"。
- * 8.插件指令的变化是永久性的。
+ * 插件指令：>地图魔法圈 : 魔法圈[11] : 显示
+ * 插件指令：>地图魔法圈 : 魔法圈变量[21] : 显示
+ * 
+ * 插件指令：>地图魔法圈 : 魔法圈[11] : 显示
+ * 插件指令：>地图魔法圈 : 魔法圈[11] : 隐藏
+ * 插件指令：>地图魔法圈 : 魔法圈[11] : 变混合模式 : 混合模式[2]
+ * 插件指令：>地图魔法圈 : 魔法圈[11] : 变坐标 : 变化时间[60] : 位置[100,100]
+ * 插件指令：>地图魔法圈 : 魔法圈[11] : 变坐标 : 变化时间[60] : 位置变量[25,26]
+ * 插件指令：>地图魔法圈 : 魔法圈[11] : 变透明 : 变化时间[60] : 透明度[255]
+ * 插件指令：>地图魔法圈 : 魔法圈[11] : 变透明 : 变化时间[60] : 透明度变量[21]
+ * 插件指令：>地图魔法圈 : 魔法圈[11] : 变转速 : 变化时间[60] : 转速[10.0]
+ * 插件指令：>地图魔法圈 : 魔法圈[11] : 变转速 : 变化时间[60] : 转速变量[21]
+ * 插件指令：>地图魔法圈 : 魔法圈[11] : 变缩放 : 变化时间[60] : 缩放[1.2,1.2]
+ * 插件指令：>地图魔法圈 : 魔法圈[11] : 变斜切 : 变化时间[60] : 斜切[0.5,0.5]
+ * 
+ * 1.前半部分（魔法圈变量[21]）和 后半部分（显示）
+ *   的参数可以随意组合。一共有2*11种组合方式。
+ * 2."变坐标"的变化效果可以与速度叠加。
+ * 3."变转速"中，转速的单位为 角度/帧 。
+ *   变量的值可以为负数，你可以通过这种方式修改旋转方向。
+ * 4."混合模式"为瞬间切换，可以去看看"pixi的渲染混合模式"。
+ * 5.插件指令的变化是永久性的。
  *   如果你想瞬间切换，设置时长为0即可。
- * 9.操作隐藏的魔法圈 或者 操作其他地图的魔法圈，插件指令仍然有效。
+ * 6.操作隐藏的魔法圈 或者 操作其他地图的魔法圈，插件指令仍然有效。
+ * 
+ * 以下是旧版本的指令，也可以用：
+ * 插件指令(旧)：>地图魔法圈 : 11 : 显示
+ * 插件指令(旧)：>地图魔法圈 : 11 : 隐藏
+ * 插件指令(旧)：>地图魔法圈 : 11 : 变坐标 : 60 : 100 : 100
+ * 插件指令(旧)：>地图魔法圈 : 11 : 变透明 : 60 : 255
+ * 插件指令(旧)：>地图魔法圈 : 11 : 变转速 : 60 : 0.314
+ * 插件指令(旧)：>地图魔法圈 : 11 : 变缩放 : 60 : 1.2 : 1.2
+ * 插件指令(旧)：>地图魔法圈 : 11 : 变斜切 : 60 : 1.0 : 1.0
+ * 插件指令(旧)：>地图魔法圈 : 11 : 变混合模式 : 2
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -127,9 +144,12 @@
  * 修改了插件内部结构。
  * [v1.3]
  * 修复了背景处于中层时，会和事件、图块相互闪烁的bug。
- *
- *
- *
+ * [v1.4]
+ * 修复了非循环地图中，移动镜头时位移比没有效果的bug。
+ * 修改了插件指令结构，旋转速度改为 角度/帧 。
+ * 
+ * 
+ * 
  * @param ---魔法圈层组 1至20---
  * @default
  *
@@ -1367,7 +1387,15 @@
  * @desc 只用于方便区分查看的标签，不作用在插件中。
  * @default ==新的地图魔法圈==
  *
+ * @param 是否作用到所有地图
+ * @type boolean
+ * @on 作用到所有
+ * @off 作用于指定地图
+ * @desc 你可以设置作用到所有地图。注意，设置后直接对所有地图有效，使用前一定要想好想清楚了。
+ * @default false
+ * 
  * @param 所属地图
+ * @parent 是否作用到所有地图
  * @type number
  * @min 1
  * @desc 该魔法圈将放在指定对应的地图id中。
@@ -1416,10 +1444,9 @@
  * @default 0
  *
  * @param 旋转速度
- * @desc 正数逆时针，负数顺时针，单位 弧度/帧。(1秒60帧)
- * 6.28表示一圈，设置0.01表示大概10秒转一圈，设置0则不旋转。
- * @default 0.01
- *
+ * @desc 正数逆时针，负数顺时针，单位 角度/帧。(1秒60帧，360.0为一周)
+ * @default 2.50
+ * 
  * @param 位移比X
  * @desc 与玩家地图的镜头位置有关，设置1.00，魔法圈和镜头的位移一致。设置0.00则魔法圈不随镜头移动，紧贴地图。负数则反向移动。
  * @default 0.00
@@ -1524,13 +1551,10 @@
 //			4.【这里的镜头位移比是相减，而背景的是相加】。
 //
 //		★其它说明细节：
-//			1.不要通过覆写创建函数来穿插远景和前景，直接在插入点抱方法的大腿。
-//			2.循环时，_displayY会舍去取余，你需要控制图片的位置偏移的取余量不变。
-//			3.默认所有窗口都在 _windowLayer 中，通过addWindow添加。
-//			  而最顶层就在 _windowLayer 的后面，作为另外一个父类层。
+//			1.循环时，_displayY会舍去取余，你需要控制图片的位置偏移的取余量不变。
 //				
 //		★存在的问题：
-//			1.位移图块偏移 X为小数，但是不明原因必须用【parseInt】才能解析小数。
+//			1.位移图块偏移 X为小数，但是不明原因必须用【parseFloat】才能解析小数。
 //			  使用Number会变成NAN。
 //
 
@@ -1542,36 +1566,50 @@
 　　Imported.Drill_LayerCircle = true;
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_LayerCircle');
+	
+	//==============================
+	// * 变量获取 - 魔法圈
+	//				（~struct~LCiMapCircle）
+	//==============================
+	DrillUp.drill_LCi_circleInit = function( dataFrom ) {
+		var data = {};
+		data['mapToAll'] = String( dataFrom["是否作用到所有地图"] || "false") == "true";
+		data['map'] = Number( dataFrom["所属地图"] || 0);
+		data['visible'] = String( dataFrom["初始是否显示"] || "true") == "true";
+		data['src_img'] = String( dataFrom["资源-魔法圈"] || "");
+		data['x'] = Number( dataFrom["平移-魔法圈 X"] || 0);
+		data['y'] = Number( dataFrom["平移-魔法圈 Y"] || 0);
+		data['opacity'] = Number( dataFrom["透明度"] || 255);
+		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
+		data['layer_index'] = String( dataFrom["地图层级"] || "下层");
+		data['zIndex'] = Number( dataFrom["图片层级"] || 0);
+		
+		data['XPer'] = Number( dataFrom["位移比X"] || 0);
+		data['YPer'] = Number( dataFrom["位移比Y"] || 0);
+		data['tile_x'] = parseFloat( dataFrom["位移图块偏移 X"] || 0);
+		data['tile_y'] = parseFloat( dataFrom["位移图块偏移 Y"] || 0);
+		
+		data['rotate'] = Number( dataFrom["旋转速度"] || 0.0);
+		data['scale_x'] = Number( dataFrom["缩放 X"] || 1.0);
+		data['scale_y'] = Number( dataFrom["缩放 Y"] || 1.0);
+		data['skew_x'] = Number( dataFrom["斜切 X"] || 0);
+		data['skew_y'] = Number( dataFrom["斜切 Y"] || 0);
+		return data;
+	}
 
+	/*-----------------魔法圈------------------*/
 	DrillUp.g_LCi_layers_length = 200;
 	DrillUp.g_LCi_layers = [];
 	for (var i = 0; i < DrillUp.g_LCi_layers_length; i++) {
 		if( DrillUp.parameters['魔法圈层-' + String(i+1) ] != "" ){
-			DrillUp.g_LCi_layers[i] = JSON.parse(DrillUp.parameters['魔法圈层-' + String(i+1) ]);
+			var temp = JSON.parse(DrillUp.parameters['魔法圈层-' + String(i+1) ]);
+			DrillUp.g_LCi_layers[i] = DrillUp.drill_LCi_circleInit( temp );
 			DrillUp.g_LCi_layers[i]['id'] = Number(i)+1;
-			DrillUp.g_LCi_layers[i]['map'] = Number(DrillUp.g_LCi_layers[i]["所属地图"]);
-			DrillUp.g_LCi_layers[i]['visible'] = String(DrillUp.g_LCi_layers[i]["初始是否显示"] || "true") == "true";
-			DrillUp.g_LCi_layers[i]['src_img'] = String(DrillUp.g_LCi_layers[i]["资源-魔法圈"]);
-			DrillUp.g_LCi_layers[i]['x'] = Number(DrillUp.g_LCi_layers[i]["平移-魔法圈 X"]);
-			DrillUp.g_LCi_layers[i]['y'] = Number(DrillUp.g_LCi_layers[i]["平移-魔法圈 Y"]);
-			DrillUp.g_LCi_layers[i]['opacity'] = Number(DrillUp.g_LCi_layers[i]["透明度"]);
-			DrillUp.g_LCi_layers[i]['blendMode'] = Number(DrillUp.g_LCi_layers[i]["混合模式"]);
-			DrillUp.g_LCi_layers[i]['layer_index'] = String(DrillUp.g_LCi_layers[i]["地图层级"]);
-			DrillUp.g_LCi_layers[i]['zIndex'] = Number(DrillUp.g_LCi_layers[i]["图片层级"]);
-			
-			DrillUp.g_LCi_layers[i]['XPer'] = Number(DrillUp.g_LCi_layers[i]["位移比X"]);
-			DrillUp.g_LCi_layers[i]['YPer'] = Number(DrillUp.g_LCi_layers[i]["位移比Y"]);
-			DrillUp.g_LCi_layers[i]['tile_x'] = parseInt(DrillUp.g_LCi_layers[i]["位移图块偏移 X"] || 0);
-			DrillUp.g_LCi_layers[i]['tile_y'] = parseInt(DrillUp.g_LCi_layers[i]["位移图块偏移 Y"] || 0);
-			
-			DrillUp.g_LCi_layers[i]['rotate'] = Number(DrillUp.g_LCi_layers[i]["旋转速度"] || 0.01 );
-			DrillUp.g_LCi_layers[i]['scale_x'] = Number(DrillUp.g_LCi_layers[i]["缩放 X"] || 1.0);
-			DrillUp.g_LCi_layers[i]['scale_y'] = Number(DrillUp.g_LCi_layers[i]["缩放 Y"] || 1.0);
-			DrillUp.g_LCi_layers[i]['skew_x'] = Number(DrillUp.g_LCi_layers[i]["斜切 X"] || 0);
-			DrillUp.g_LCi_layers[i]['skew_y'] = Number(DrillUp.g_LCi_layers[i]["斜切 Y"] || 0);
-			
+			DrillUp.g_LCi_layers[i]['inited'] = true;
 		}else{
-			DrillUp.g_LCi_layers[i] = [];
+			DrillUp.g_LCi_layers[i] = DrillUp.drill_LCi_circleInit( {} );
+			DrillUp.g_LCi_layers[i]['id'] = Number(i)+1;
+			DrillUp.g_LCi_layers[i]['inited'] = false;
 		}
 	}
 
@@ -1590,13 +1628,114 @@ var _drill_LCi_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_LCi_pluginCommand.call(this, command, args);
 	
-	if (command === '>地图魔法圈') { // >地图魔法圈 : 1 : 显示
+	if( command === ">地图魔法圈" ){ // >地图魔法圈 : 魔法圈[1] : 显示
+		if(args.length >= 2){
+			var id = -1;
+			var temp1 = String(args[1]);
+			if( temp1.indexOf("魔法圈[") != -1 ){
+				temp1 = temp1.replace("魔法圈[","");
+				temp1 = temp1.replace("]","");
+				id = Number(temp1);
+			}
+			if( temp1.indexOf("魔法圈变量[") != -1 ){
+				temp1 = temp1.replace("魔法圈变量[","");
+				temp1 = temp1.replace("]","");
+				id = $gameVariables.value(Number(temp1));
+			}
+			
+			if( id != -1 ){
+				var changing = {};
+				changing['id'] = id;
+				changing['time'] = 0;
+				changing['destroy'] = false;
+				
+				if(args.length == 4){
+					var type = String(args[3]);
+					if( type == "显示" || type == "隐藏" ){
+						changing['type'] = type;
+						$gameSystem._drill_LCi_dataTank_changing.push(changing);
+						return;
+					}
+				}
+				if(args.length == 6){
+					var type = String(args[3]);
+					var temp2 = String(args[5]);
+					if( type == "变混合模式" ){
+						var num_list = this.drill_LCi_getArgNumList(temp2);
+						changing['type'] = type;
+						changing['data1'] = num_list[0];
+						$gameSystem._drill_LCi_dataTank_changing.push(changing);
+						return;
+					}
+				}
+				if(args.length == 8){
+					var type = String(args[3]);
+					var temp2 = String(args[5]);
+					var temp3 = String(args[7]);
+					if( type == "变坐标" ){
+						var num_list2 = this.drill_LCi_getArgNumList(temp2);
+						var num_list3 = this.drill_LCi_getArgNumList(temp3);
+						changing['type'] = type;
+						changing['data1'] = num_list2[0];
+						changing['data2'] = num_list3[0];
+						changing['data3'] = num_list3[1];
+						$gameSystem._drill_LCi_dataTank_changing.push(changing);
+						return;
+					}
+					if( type == "变透明" ){
+						var num_list2 = this.drill_LCi_getArgNumList(temp2);
+						var num_list3 = this.drill_LCi_getArgNumList(temp3);
+						changing['type'] = type;
+						changing['data1'] = num_list2[0];
+						changing['data2'] = num_list3[0];
+						$gameSystem._drill_LCi_dataTank_changing.push(changing);
+						return;
+					}
+					if( type == "变转速" ){
+						var num_list2 = this.drill_LCi_getArgNumList(temp2);
+						var num_list3 = this.drill_LCi_getArgNumList(temp3);
+						changing['type'] = type;
+						changing['data1'] = num_list2[0];
+						changing['data2'] = num_list3[0];
+						$gameSystem._drill_LCi_dataTank_changing.push(changing);
+						return;
+					}
+					if( type == "变缩放" ){
+						var num_list2 = this.drill_LCi_getArgNumList(temp2);
+						var num_list3 = this.drill_LCi_getArgNumList(temp3);
+						changing['type'] = type;
+						changing['data1'] = num_list2[0];
+						changing['data2'] = num_list3[0];
+						changing['data3'] = num_list3[1];
+						$gameSystem._drill_LCi_dataTank_changing.push(changing);
+						return;
+					}
+					if( type == "变斜切" ){
+						var num_list2 = this.drill_LCi_getArgNumList(temp2);
+						var num_list3 = this.drill_LCi_getArgNumList(temp3);
+						changing['type'] = type;
+						changing['data1'] = num_list2[0];
+						changing['data2'] = num_list3[0];
+						changing['data3'] = num_list3[1];
+						$gameSystem._drill_LCi_dataTank_changing.push(changing);
+						return;
+					}
+				}
+			}
+		}
+	}
+	
+	/*-----------------旧指令------------------*/
+	if( command === ">地图魔法圈" ){ // >地图魔法圈 : 1 : 显示
 		if(args.length >= 4){
+			var temp1 = String(args[1]);
+			var type = String(args[3]);
+			if( /^\d+$/.test(temp1) == false ){ return; }	//（判断数字）
 			var changing = {};
 			changing['destroy'] = false;
 			changing['time'] = 0;
-			changing['id'] = Number(args[1]) ;
-			changing['type'] = String(args[3]);
+			changing['id'] = temp1;
+			changing['type'] = type;
 			if( args[5] != undefined ){ changing['data1'] = Number(args[5]); }
 			if( args[7] != undefined ){ changing['data2'] = Number(args[7]); }
 			if( args[9] != undefined ){ changing['data3'] = Number(args[9]); }
@@ -1606,6 +1745,34 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		}
 	}
 };
+//==============================
+// * 插件指令 - 获取方括号中的数字（返回数字数组）
+//==============================
+Game_Interpreter.prototype.drill_LCi_getArgNumList = function( arg_str ){
+	var arr = arg_str.match( /([^\[]+)\[([^\]]+)\]/ );
+	if( arr.length >= 3 ){
+	// > 有方括号
+		var data_name = arr[1];
+		var data_list = arr[2].split(",");
+		var result_list = [];
+		
+		if( data_name.contains("变量") ){
+			for(var i=0; i < data_list.length; i++){ result_list.push( $gameVariables.value(Number(data_list[i])) ); }
+			return result_list;
+		}else{
+			for(var i=0; i < data_list.length; i++){ result_list.push( Number(data_list[i]) ); }
+			return result_list;
+		}
+	}else{
+	// > 没有方括号
+		var data_list = arg_str.split(",");
+		var result_list = [];
+		for(var i=0; i < data_list.length; i++){ result_list.push( Number(data_list[i]) ); }
+		return result_list;
+	}
+};
+
+
 //=============================================================================
 // ** 存储变量初始化
 //=============================================================================
@@ -1614,45 +1781,19 @@ Game_System.prototype.initialize = function() {
     _drill_LCi_sys_initialize.call(this);
 	
 	this._drill_LCi_dataTank_changing = [];	//插件指令变化容器
-
-	this._drill_LCi_dataTank = [];			//魔法圈数据总容器
 	this._drill_LCi_dataTank_map = [];		//当前地图的魔法圈容器
+	this._drill_LCi_dataTank = [];			//魔法圈数据总容器
+	
 	for(var i = 0; i< DrillUp.g_LCi_layers.length ;i++){
-		var temp_data = DrillUp.g_LCi_layers[i];
-			
-		var data = {};
-		data.id = temp_data['id'];						//id
-		data.map = temp_data['map'];					//所属地图
-		data.visible = temp_data['visible'];			//显示
-		data.src_img = temp_data['src_img'];			//资源背景
-		data.x = temp_data['x'];						//x
-		data.y = temp_data['y'];						//y
-		data.opacity = temp_data['opacity'];			//透明度
-		data.blendMode = temp_data['blendMode'];		//混合模式
-		data.layer_index = temp_data['layer_index'];	//地图层级
-		data.zIndex = temp_data['zIndex'];				//图片层级
+		var data = JSON.parse(JSON.stringify( DrillUp.g_LCi_layers[i] ));	//深拷贝数据
 		
-		data.XPer = temp_data['XPer'];					//位移比x
-		data.YPer = temp_data['YPer'];					//位移比y
-		data.tile_x = temp_data['tile_x'];				//位移图块偏移 X
-		data.tile_y = temp_data['tile_y'];				//位移图块偏移 Y
-		
-		data.rotate = temp_data['rotate'];				//旋转速度
-		data.scale_x = temp_data['scale_x'];			//缩放x
-		data.scale_y = temp_data['scale_y'];			//缩放y
-		data.skew_x = temp_data['skew_x'];				//斜切x
-		data.skew_y = temp_data['skew_y'];				//斜切y
-		
-		data.cameraX = 0;		//实际镜头的x精确坐标
-		data.cameraY = 0;		//
-		data.loopX = 0;			//循环地图中，走动循环的次数
-		data.loopY = 0;			//
-		data.loopFixX = 0;		//循环地图中，把displayX取余的部分加回
-		data.loopFixY = 0;		//
-		
-		data.wave_time = 0;		//（暂未使用）
-		data.curX = 0;			//当前x位置（速度累加的结果）（暂未使用）
-		data.curY = 0;			//
+		// > 私有变量初始化
+		data['cameraX'] = 0;		//实际镜头的x精确坐标
+		data['cameraY'] = 0;		//
+		data['loopX'] = 0;			//循环地图中，走动循环的次数
+		data['loopY'] = 0;			//
+		data['loopFixX'] = 0;		//循环地图中，把displayX取余的部分加回
+		data['loopFixY'] = 0;		//
 		
 		this._drill_LCi_dataTank.push(data);
 	}
@@ -1667,118 +1808,96 @@ Game_System.prototype.initialize = function() {
 var _drill_LCi_setup = Game_Map.prototype.setup;
 Game_Map.prototype.setup = function(mapId) {
 	_drill_LCi_setup.call(this,mapId);
-	
 	this.drill_LCi_initMapdata();
 }
 Game_Map.prototype.drill_LCi_initMapdata = function() {
 	$gameSystem._drill_LCi_dataTank_map = [];		//刷新当前地图的魔法圈
 	for(var i = 0; i< $gameSystem._drill_LCi_dataTank.length ;i++){
 		var data = $gameSystem._drill_LCi_dataTank[i];
-		if( data.map == this._mapId ){
+		if( data['inited'] != true ){ continue; }
+		if( data['mapToAll'] == true || data['map'] == this._mapId ){
 			$gameSystem._drill_LCi_dataTank_map.push(data);
 		}
 	}
 }
 //==============================
-// * 地图 - 进地图初始镜头位置（图块）
+// * 地图 - 帧刷新 镜头位置
 //==============================
-var _drill_LCi_Map_setDisplayPos = Game_Map.prototype.setDisplayPos;
-Game_Map.prototype.setDisplayPos = function(x, y) {
-    _drill_LCi_Map_setDisplayPos.call(this, x, y);
+var _drill_LCi_Map_updateScroll = Game_Map.prototype.updateScroll;
+Game_Map.prototype.updateScroll = function(){
+    _drill_LCi_Map_updateScroll.call(this);
 	
 	for(var i = 0; i< $gameSystem._drill_LCi_dataTank_map.length ;i++){
 		var data = $gameSystem._drill_LCi_dataTank_map[i];
-		//data.cameraX = this._displayX * this.tileWidth();
-		//data.cameraY = this._displayY * this.tileHeight();
-		data.cameraX = (this._displayX + data.loopFixX - data.tile_x) * this.tileWidth() ;
-		data.cameraY = (this._displayY + data.loopFixY - data.tile_y) * this.tileHeight() ;
+		data['cameraX'] = (this._displayX + data['loopFixX'] - data['tile_x']) * this.tileWidth();
+		data['cameraY'] = (this._displayY + data['loopFixY'] - data['tile_y']) * this.tileHeight();
 	}
 };
-
 //==============================
-// * 镜头移动 - 下
+// * 镜头滚动 - 向下滚动
 //==============================
 var _drill_LCi_Map_scrollDown = Game_Map.prototype.scrollDown;
 Game_Map.prototype.scrollDown = function(distance) {
     if (this.isLoopVertical() && this._displayY + distance >= $dataMap.height) {
 		for(var i =0; i<$gameSystem._drill_LCi_dataTank_map.length; i++){
 			var data = $gameSystem._drill_LCi_dataTank_map[i];
-			if( data.map == this._mapId ){
-				data.loopY += 1;
-				data.loopFixY = data.loopY * $dataMap.height;
+			if( data['map'] == this._mapId ){
+				data['loopY'] += 1;		//（记录地图移动时循环次数、偏移量）
+				data['loopFixY'] = data.loopY * $dataMap.height;
 			}
 		}
 	}
     _drill_LCi_Map_scrollDown.call(this, distance);
-	
-	for(var i =0; i<$gameSystem._drill_LCi_dataTank_map.length; i++){
-		var data = $gameSystem._drill_LCi_dataTank_map[i];
-		data.cameraY = (this._displayY + data.loopFixY - data.tile_y) * this.tileHeight();
-	}
 };
 //==============================
-// * 镜头移动 - 上
+// * 镜头滚动 - 向上滚动
 //==============================
 var _drill_LCi_Map_scrollUp = Game_Map.prototype.scrollUp;
 Game_Map.prototype.scrollUp = function(distance) {
     if (this.isLoopVertical() && this._displayY - distance <= 0 ) {
 		for(var i =0; i<$gameSystem._drill_LCi_dataTank_map.length; i++){
 			var data = $gameSystem._drill_LCi_dataTank_map[i];
-			if( data.map == this._mapId ){
-				data.loopY -= 1;
-				data.loopFixY = data.loopY * $dataMap.height;
+			if( data['map'] == this._mapId ){
+				data['loopY'] -= 1;		//（记录地图移动时循环次数、偏移量）
+				data['loopFixY'] = data.loopY * $dataMap.height;
 			}
 		}
 	}
     _drill_LCi_Map_scrollUp.call(this, distance);
-	
-	for(var i =0; i<$gameSystem._drill_LCi_dataTank_map.length; i++){
-		var data = $gameSystem._drill_LCi_dataTank_map[i];
-		data.cameraY = (this._displayY + data.loopFixY - data.tile_y) * this.tileHeight();
-	}
 };
 //==============================
-// * 镜头移动 - 左
+// * 镜头滚动 - 向左滚动
 //==============================
 var _drill_LCi_Map_scrollLeft = Game_Map.prototype.scrollLeft;
 Game_Map.prototype.scrollLeft = function(distance) {
     if (this.isLoopHorizontal() && this._displayX - distance <= 0) {
 		for(var i =0; i<$gameSystem._drill_LCi_dataTank_map.length; i++){
 			var data = $gameSystem._drill_LCi_dataTank_map[i];
-			if( data.map == this._mapId ){
-				data.loopX -= 1;
-				data.loopFixX = data.loopX * $dataMap.width;
+			if( data['map'] == this._mapId ){
+				data['loopX'] -= 1;		//（记录地图移动时循环次数、偏移量）
+				data['loopFixX'] = data.loopX * $dataMap.width;
 			}
 		}
 	}
     _drill_LCi_Map_scrollLeft.call(this, distance);
-	
-	for(var i =0; i<$gameSystem._drill_LCi_dataTank_map.length; i++){
-		var data = $gameSystem._drill_LCi_dataTank_map[i];
-		data.cameraX = (this._displayX + data.loopFixX - data.tile_x) * this.tileWidth();
-	}
 };
 //==============================
-// * 镜头移动 - 右
+// * 镜头滚动 - 向右滚动
 //==============================
 var _drill_LCi_Map_scrollRight = Game_Map.prototype.scrollRight;
 Game_Map.prototype.scrollRight = function(distance) {
     if (this.isLoopHorizontal() && this._displayX + distance >= $dataMap.width) {
 		for(var i =0; i<$gameSystem._drill_LCi_dataTank_map.length; i++){
 			var data = $gameSystem._drill_LCi_dataTank_map[i];
-			if( data.map == this._mapId ){
-				data.loopX += 1;
-				data.loopFixX = data.loopX * $dataMap.width;
+			if( data['map'] == this._mapId ){
+				data['loopX'] += 1;		//（记录地图移动时循环次数、偏移量）
+				data['loopFixX'] = data.loopX * $dataMap.width;
 			}
 		}
 	}
     _drill_LCi_Map_scrollRight.call(this, distance);
-	
-	for(var i =0; i<$gameSystem._drill_LCi_dataTank_map.length; i++){
-		var data = $gameSystem._drill_LCi_dataTank_map[i];
-		data.cameraX = (this._displayX + data.loopFixX - data.tile_x) * this.tileWidth();
-	}
 };
+
 
 //=============================================================================
 // ** 地图层级
@@ -1851,10 +1970,10 @@ Scene_Map.prototype.drill_LCi_sortByZIndex = function() {
 };
 
 //=============================================================================
-// ** 地图绘制层 控制
+// ** 地图界面
 //=============================================================================
 //==============================
-// * 创建
+// * 地图界面 - 创建
 //==============================
 var _drill_LCi_Scene_createAllWindows = Scene_Map.prototype.createAllWindows;
 Scene_Map.prototype.createAllWindows = function() {
@@ -1868,25 +1987,29 @@ Scene_Map.prototype.drill_LCi_create = function() {
 	var data_tank = $gameSystem._drill_LCi_dataTank_map;
 	for(var i=0; i< data_tank.length; i++){
 		var temp_data = data_tank[i];
-		var temp_sprite_bitmap = new Sprite( ImageManager.load_MapLayer( temp_data.src_img ) );
+		
+		// > 子贴图
+		var temp_sprite_bitmap = new Sprite( ImageManager.load_MapLayer( temp_data['src_img'] ) );
 		temp_sprite_bitmap.anchor.x = 0.5;
 		temp_sprite_bitmap.anchor.y = 0.5;
 		this._drill_LCi_spriteTank_bitmap.push(temp_sprite_bitmap);
 		
+		// > 贴图属性
 		var temp_sprite = new Sprite();
-		temp_sprite.x = temp_data.x ;
-		temp_sprite.y = temp_data.y ;
-		temp_sprite.opacity = temp_data.opacity ;
-		temp_sprite.blendMode = temp_data.blendMode ;
-		temp_sprite.rotate = temp_data.rotate;
-		temp_sprite.zIndex = temp_data.zIndex ;
-		temp_sprite.layer_index = temp_data.layer_index ;
-		temp_sprite.scale.x = temp_data.scale_x;
-		temp_sprite.scale.y = temp_data.scale_y;
-		temp_sprite.skew.x = temp_data.skew_x;
-		temp_sprite.skew.y = temp_data.skew_y;
+		temp_sprite.x = temp_data['x'];
+		temp_sprite.y = temp_data['y'];
+		temp_sprite.opacity = temp_data['opacity'];
+		temp_sprite.blendMode = temp_data['blendMode'];
+		temp_sprite.rotate = temp_data['rotate'];
+		temp_sprite.zIndex = temp_data['zIndex'];
+		temp_sprite.layer_index = temp_data['layer_index'];
+		temp_sprite.scale.x = temp_data['scale_x'];
+		temp_sprite.scale.y = temp_data['scale_y'];
+		temp_sprite.skew.x = temp_data['skew_x'];
+		temp_sprite.skew.y = temp_data['skew_y'];
 		temp_sprite.addChild(temp_sprite_bitmap);
 		
+		// > 地图层级
 		this._drill_LCi_spriteTank.push(temp_sprite);
 		if( temp_sprite['layer_index'] == '下层' ){
 			this._spriteset._drill_mapDownArea.addChild(temp_sprite);
@@ -1913,10 +2036,9 @@ Scene_Map.prototype.drill_LCi_create = function() {
 var _drill_LCi_scene_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {	
 	_drill_LCi_scene_update.call(this);
-	if( this.isActive() ){
-		this.drill_LCi_updateBase();		//基本属性
-		this.drill_LCi_updateChange();		//变化属性
-	}
+	if( this.isActive() != true ){ return; }
+	this.drill_LCi_updateBase();		//基本属性
+	this.drill_LCi_updateChange();		//变化属性
 };
 //==============================
 // * 帧刷新 - 基本属性
@@ -1930,18 +2052,24 @@ Scene_Map.prototype.drill_LCi_updateBase = function() {
 		var temp_sprite = sprite_tank[i];
 		var temp_sprite_bitmap = sprite_tank_bitmap[i];
 		var temp_data = data_tank[i];
-		if ( temp_sprite_bitmap.bitmap.isReady() ) {
-			temp_sprite.visible = temp_data.visible;
-			temp_sprite.opacity = temp_data.opacity;
-			temp_sprite.blendMode = temp_data.blendMode;
+		if( temp_sprite_bitmap.bitmap.isReady() ){
 			
-			temp_sprite_bitmap.rotation += temp_data.rotate;
-			temp_sprite.x = temp_data.x - temp_data.cameraX * (1 - temp_data.XPer) + temp_data.curX;
-			temp_sprite.y = temp_data.y - temp_data.cameraY * (1 - temp_data.YPer) + temp_data.curY;
-			//初始位移 - 镜头位移 * 位移比 + 魔法圈位移
+			// > 属性实时变化
+			temp_sprite.visible = temp_data['visible'];
+			temp_sprite.opacity = temp_data['opacity'];
+			temp_sprite.blendMode = temp_data['blendMode'];
 			
-			temp_data.wave_time += 1;//波形移动
-			//temp_data.curX += Math.sin(temp_data.wave_time / 30);
+			// > 自旋转
+			temp_sprite_bitmap.rotation += ( temp_data['rotate'] /180 * Math.PI );
+			
+			// > 位移
+			var xx = temp_data['x'];
+			var yy = temp_data['y'];
+			xx += temp_data['cameraX'] * (1 - temp_data['XPer']);
+			yy += temp_data['cameraY'] * (1 - temp_data['YPer']);
+			temp_sprite.x = xx;
+			temp_sprite.y = yy;
+			//（初始位移 + 镜头位移 * 位移比 ）
 		}
 	}
 };
@@ -1964,54 +2092,61 @@ Scene_Map.prototype.drill_LCi_updateChange = function() {
 		var temp_sprite_bitmap = sprite_tank_bitmap[i];
 		for(var j=0; j< change_tank.length; j++){
 			var temp_change = change_tank[j];
-			if( temp_data.id == temp_change.id && temp_change.destroy == false ){
+			if( temp_data['id'] == temp_change.id && temp_change.destroy == false ){
 				temp_change.time += 1;
+				
 				if( temp_change.type == "显示" ){
-					temp_data.visible = true;
+					temp_data['visible'] = true;
 					temp_change.destroy = true;
 				}
+				
 				if( temp_change.type == "隐藏" ){
-					temp_data.visible = false;
+					temp_data['visible'] = false;
 					temp_change.destroy = true;
 				}
+				
 				if( temp_change.type == "变混合模式" ){
-					temp_data.blendMode = temp_change.data1;
+					temp_data['blendMode'] = temp_change.data1;
 					temp_change.destroy = true;
 				}
+				
 				if( temp_change.type == "变坐标" ){
 					if( temp_change.time == 1 ){
 						temp_change._dest = Math.max( temp_change.data1,1 );
-						temp_change._x = temp_change.data2 - temp_data.x;
-						temp_change._y = temp_change.data3 - temp_data.y;
+						temp_change._x = temp_change.data2 - temp_data['x'];
+						temp_change._y = temp_change.data3 - temp_data['y'];
 					}
 					if( temp_change.time <= temp_change._dest ){
-						temp_data.x += temp_change._x / temp_change._dest;
-						temp_data.y += temp_change._y / temp_change._dest;
+						temp_data['x'] += temp_change._x / temp_change._dest;
+						temp_data['y'] += temp_change._y / temp_change._dest;
 					}
 					if( temp_change.time >= temp_change._dest ){
 						temp_change.destroy = true;
 					}
 				}
+				
 				if( temp_change.type == "变透明" ){
 					if( temp_change.time == 1 ){
 						temp_change._dest = Math.max( temp_change.data1,1 );
-						temp_change._opacity = temp_change.data2 - temp_data.opacity;
+						temp_change._opacity = temp_change.data2 - temp_data['opacity'];
 					}
-					temp_data.opacity += temp_change._opacity / temp_change._dest;
+					temp_data['opacity'] += temp_change._opacity / temp_change._dest;
 					if( temp_change.time >= temp_change._dest ){
 						temp_change.destroy = true;
 					}
 				}
+				
 				if( temp_change.type == "变转速" ){
 					if( temp_change.time == 1 ){
 						temp_change._dest = Math.max( temp_change.data1,1 );
-						temp_change._rotate = temp_change.data2 - temp_data.rotate;
+						temp_change._rotate = temp_change.data2 - temp_data['rotate'];
 					}
-					temp_data.rotate += temp_change._rotate / temp_change._dest;
+					temp_data['rotate'] += temp_change._rotate / temp_change._dest;
 					if( temp_change.time >= temp_change._dest ){
 						temp_change.destroy = true;
 					}
 				}
+				
 				/*
 				if( temp_change.type == "变色调" ){
 					if( temp_change.time == 1 ){
@@ -2037,6 +2172,7 @@ Scene_Map.prototype.drill_LCi_updateChange = function() {
 						temp_change.destroy = true;
 					}
 				}*/
+				
 				if( temp_change.type == "变缩放" ){
 					if( temp_change.time == 1 ){
 						temp_change._dest = Math.max( temp_change.data1,1 );
@@ -2049,6 +2185,7 @@ Scene_Map.prototype.drill_LCi_updateChange = function() {
 						temp_change.destroy = true;
 					}
 				}
+				
 				if( temp_change.type == "变斜切" ){
 					if( temp_change.time == 1 ){
 						temp_change._dest = Math.max( temp_change.data1,1 );
@@ -2065,8 +2202,8 @@ Scene_Map.prototype.drill_LCi_updateChange = function() {
 		}
 	}
 	
-	//清除变化集
-	for(var j=change_tank.length-1; j>0; j--){
+	// > 清除变化集
+	for(var j = change_tank.length-1; j >= 0; j--){
 		if( change_tank[j].destroy == true ){
 			change_tank.splice(j, 1);
 		}

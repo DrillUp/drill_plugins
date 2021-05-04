@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        地图UI - 漂浮参数数字
+ * @plugindesc [v1.2]        地图UI - 漂浮参数数字
  * @author Drill_up
  * 
  * @Drill_LE_param "漂浮数字样式-%d"
@@ -23,13 +23,21 @@
  * ----插件扩展
  * 插件必须基于核心。
  * 基于：
- *   - Drill_CoreOfBallistics       系统 - 弹道核心
+ *   - Drill_CoreOfBallistics       系统 - 弹道核心★★v1.6及以上★★
  *   - Drill_CoreOfGaugeNumber      系统 - 参数数字核心
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：地图界面。
  *   作用于地图的各个层级。
+ * 弹道：
+ *   (1.漂浮数字的弹道支持情况如下：
+ *        极坐标模式    √
+ *        直角坐标模式  √
+ *        轨道锚点模式  √
+ *        两点式        x  (不适合)
+ *   (2.单个漂浮数字的轨迹完全可以通过弹道设置进行设计。
+ *      具体配置方式可以看看"关于弹道.docx"。
  * 细节：
  *   (1.漂浮数字是一个基于 参数数字核心 样式的贴图，具体数字配置方式
  *      可以去看看参数数字核心。
@@ -92,7 +100,9 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 添加了漂浮数字的变量值支持。
- * 
+ * [v1.2]
+ * 修复了弹道的多行 自定义公式 中无法执行且出错的bug。
+ * 添加了锚点轨道模式。
  *
  *
  *
@@ -104,19 +114,19 @@
  * @parent ----漂浮数字样式集合----
  * @type struct<DrillGFNStyle>
  * @desc 漂浮数字的详细配置信息。
- * @default {"标签":"==一般漂浮数字==","---层级---":"","地图层级":"图片层","图片层级":"12","---参数数字---":"","参数数字样式":"1","偏移-参数数字 X":"0","偏移-参数数字 Y":"0","---弹道轨迹---":"","贴图弹道":"{\"标签\":\"==匀速上升==\",\"移动模式\":\"直角坐标模式\",\"---极坐标模式---\":\"\",\"速度类型\":\"只初速度\",\"初速度\":\"1.0\",\"速度随机波动量\":\"2.0\",\"加速度\":\"0.0\",\"最大速度\":\"99.0\",\"最小速度\":\"0.0\",\"路程计算公式\":\"\\\"return 0.0\\\"\",\"方向类型\":\"四周扩散(线性)\",\"固定方向\":\"90.0\",\"扇形朝向\":\"45.0\",\"扇形角度\":\"90.0\",\"方向公式\":\"\\\"return 0.0\\\"\",\"---直角坐标模式---\":\"\",\"X轴速度类型\":\"只初速度\",\"X轴初速度\":\"0.0\",\"X轴速度随机波动量\":\"0.0\",\"X轴加速度\":\"0.0\",\"X轴最大速度\":\"99.0\",\"X轴最小速度\":\"0.0\",\"X轴路程计算公式\":\"\\\"return 0.0\\\"\",\"Y轴速度类型\":\"只初速度\",\"Y轴初速度\":\"-1.5\",\"Y轴速度随机波动量\":\"0.0\",\"Y轴加速度\":\"0.0\",\"Y轴最大速度\":\"99.0\",\"Y轴最小速度\":\"0.0\",\"Y轴路程计算公式\":\"\\\"return 0.0\\\"\"}","消失方式":"线性消失"}
+ * @default {"标签":"==一般漂浮数字==","---层级---":"","地图层级":"图片层","图片层级":"12","---参数数字---":"","参数数字样式":"1","偏移-参数数字 X":"0","偏移-参数数字 Y":"0","---弹道轨迹---":"","贴图弹道":"{\"标签\":\"==匀速上升==\",\"移动模式\":\"直角坐标模式\",\"---极坐标模式---\":\"\",\"速度类型\":\"只初速度\",\"初速度\":\"1.0\",\"速度随机波动量\":\"2.0\",\"加速度\":\"0.0\",\"最大速度\":\"99.0\",\"最小速度\":\"0.0\",\"路程计算公式\":\"\\\"return 0.0\\\"\",\"方向类型\":\"四周扩散(线性)\",\"固定方向\":\"90.0\",\"扇形朝向\":\"45.0\",\"扇形角度\":\"90.0\",\"方向计算公式\":\"\\\"return 0.0\\\"\",\"---直角坐标模式---\":\"\",\"X轴速度类型\":\"只初速度\",\"X轴初速度\":\"0.0\",\"X轴速度随机波动量\":\"0.0\",\"X轴加速度\":\"0.0\",\"X轴最大速度\":\"99.0\",\"X轴最小速度\":\"0.0\",\"X轴路程计算公式\":\"\\\"return 0.0\\\"\",\"Y轴速度类型\":\"只初速度\",\"Y轴初速度\":\"-1.5\",\"Y轴速度随机波动量\":\"0.0\",\"Y轴加速度\":\"0.0\",\"Y轴最大速度\":\"99.0\",\"Y轴最小速度\":\"0.0\",\"Y轴路程计算公式\":\"\\\"return 0.0\\\"\"}","消失方式":"线性消失"}
  * 
  * @param 漂浮数字样式-2
  * @parent ----漂浮数字样式集合----
  * @type struct<DrillGFNStyle>
  * @desc 漂浮数字的详细配置信息。
- * @default {"标签":"==随机方向的漂浮数字==","---层级---":"","地图层级":"图片层","图片层级":"12","---参数数字---":"","参数数字样式":"1","偏移-参数数字 X":"0","偏移-参数数字 Y":"0","---弹道轨迹---":"","贴图弹道":"{\"标签\":\"==匀速随机朝向==\",\"移动模式\":\"极坐标模式\",\"---极坐标模式---\":\"\",\"速度类型\":\"只初速度\",\"初速度\":\"1.5\",\"速度随机波动量\":\"1.0\",\"加速度\":\"0.0\",\"最大速度\":\"99.0\",\"最小速度\":\"0.0\",\"路程计算公式\":\"\\\"return 0.0\\\"\",\"方向类型\":\"四周扩散(随机)\",\"固定方向\":\"90.0\",\"扇形朝向\":\"45.0\",\"扇形角度\":\"90.0\",\"方向公式\":\"\\\"return 0.0\\\"\",\"---直角坐标模式---\":\"\",\"X轴速度类型\":\"只初速度\",\"X轴初速度\":\"1.0\",\"X轴速度随机波动量\":\"2.0\",\"X轴加速度\":\"0.0\",\"X轴最大速度\":\"99.0\",\"X轴最小速度\":\"0.0\",\"X轴路程计算公式\":\"\\\"return 0.0\\\"\",\"Y轴速度类型\":\"只初速度\",\"Y轴初速度\":\"1.0\",\"Y轴速度随机波动量\":\"2.0\",\"Y轴加速度\":\"0.0\",\"Y轴最大速度\":\"99.0\",\"Y轴最小速度\":\"0.0\",\"Y轴路程计算公式\":\"\\\"return 0.0\\\"\"}","消失方式":"线性消失"}
+ * @default {"标签":"==随机方向的漂浮数字==","---层级---":"","地图层级":"图片层","图片层级":"12","---参数数字---":"","参数数字样式":"1","偏移-参数数字 X":"0","偏移-参数数字 Y":"0","---弹道轨迹---":"","贴图弹道":"{\"标签\":\"==匀速随机朝向==\",\"移动模式\":\"极坐标模式\",\"---极坐标模式---\":\"\",\"速度类型\":\"只初速度\",\"初速度\":\"1.5\",\"速度随机波动量\":\"1.0\",\"加速度\":\"0.0\",\"最大速度\":\"99.0\",\"最小速度\":\"0.0\",\"路程计算公式\":\"\\\"return 0.0\\\"\",\"方向类型\":\"四周扩散(随机)\",\"固定方向\":\"90.0\",\"扇形朝向\":\"45.0\",\"扇形角度\":\"90.0\",\"方向计算公式\":\"\\\"return 0.0\\\"\",\"---直角坐标模式---\":\"\",\"X轴速度类型\":\"只初速度\",\"X轴初速度\":\"1.0\",\"X轴速度随机波动量\":\"2.0\",\"X轴加速度\":\"0.0\",\"X轴最大速度\":\"99.0\",\"X轴最小速度\":\"0.0\",\"X轴路程计算公式\":\"\\\"return 0.0\\\"\",\"Y轴速度类型\":\"只初速度\",\"Y轴初速度\":\"1.0\",\"Y轴速度随机波动量\":\"2.0\",\"Y轴加速度\":\"0.0\",\"Y轴最大速度\":\"99.0\",\"Y轴最小速度\":\"0.0\",\"Y轴路程计算公式\":\"\\\"return 0.0\\\"\"}","消失方式":"线性消失"}
  * 
  * @param 漂浮数字样式-3
  * @parent ----漂浮数字样式集合----
  * @type struct<DrillGFNStyle>
  * @desc 漂浮数字的详细配置信息。
- * @default 
+ * @default {"标签":"==抛物线下落数字==","---层级---":"","地图层级":"图片层","图片层级":"12","---参数数字---":"","参数数字样式":"1","偏移-参数数字 X":"0","偏移-参数数字 Y":"0","---弹道轨迹---":"","贴图弹道":"{\"标签\":\"==抛物线弹道==\",\"移动模式\":\"直角坐标模式\",\"---极坐标模式---\":\"\",\"速度类型\":\"只初速度\",\"初速度\":\"1.0\",\"速度随机波动量\":\"2.0\",\"加速度\":\"0.0\",\"最大速度\":\"99.0\",\"最小速度\":\"0.0\",\"路程计算公式\":\"\\\"return 0.0\\\"\",\"方向类型\":\"四周扩散(线性)\",\"固定方向\":\"90.0\",\"扇形朝向\":\"45.0\",\"扇形角度\":\"90.0\",\"方向计算公式\":\"\\\"return 0.0\\\"\",\"---直角坐标模式---\":\"\",\"X轴速度类型\":\"初速度+波动量\",\"X轴初速度\":\"0.0\",\"X轴速度随机波动量\":\"3.0\",\"X轴加速度\":\"0.0\",\"X轴最大速度\":\"99.0\",\"X轴最小速度\":\"0.0\",\"X轴路程计算公式\":\"\\\"return 0.0\\\"\",\"Y轴速度类型\":\"初速度+波动量+加速度+最大最小\",\"Y轴初速度\":\"-12.0\",\"Y轴速度随机波动量\":\"2.0\",\"Y轴加速度\":\"0.4\",\"Y轴最大速度\":\"99.0\",\"Y轴最小速度\":\"-20.0\",\"Y轴路程计算公式\":\"\\\"return 0.0\\\"\"}","消失方式":"线性消失"}
  * 
  * @param 漂浮数字样式-4
  * @parent ----漂浮数字样式集合----
@@ -306,6 +316,8 @@
  * @value 直角坐标模式
  * @option 极坐标模式
  * @value 极坐标模式
+ * @option 轨道锚点模式
+ * @value 轨道锚点模式
  * @desc 描述漂浮数字运动的模式。
  * @default 极坐标模式
  * 
@@ -357,7 +369,7 @@
  * @param 路程计算公式
  * @parent 速度类型
  * @type note
- * @desc 漂浮数字的路程计算公式，可使用参数"id","time","v0","vRan", "a","vMax","vMin"。具体可以看看文档介绍。
+ * @desc 漂浮数字的路程计算公式。可使用 变量和常量 来设计公式，具体看看文档"关于弹道.docx"介绍。
  * @default "return 0.0"
  * 
  * @param 方向类型
@@ -375,8 +387,8 @@
  * @value 扇形范围方向(线性)
  * @option 扇形范围方向(随机)
  * @value 扇形范围方向(随机)
- * @option 方向公式
- * @value 方向公式
+ * @option 方向计算公式
+ * @value 方向计算公式
  * @desc 描述漂浮数字速度的模式。
  * @default 四周扩散(线性)
  * 
@@ -395,14 +407,19 @@
  * @desc 类型为扇形范围方向时，扇形弧的角度数。
  * @default 90.0
  * 
- * @param 方向公式
+ * @param 方向计算公式
  * @parent 方向类型
  * @type note
- * @desc 漂浮数字的方向公式，"id"表示漂浮数字id，"time"表示时间参数，例如"5+0.5*time"。具体可以看看文档介绍。
+ * @desc 漂浮数字的方向计算公式。可使用 变量和常量 来设计公式，具体看看文档"关于弹道.docx"介绍。
  * @default "return 0.0"
  * 
  * @param ---直角坐标模式---
  * @desc 
+ * 
+ * @param 直角坐标整体旋转
+ * @parent ---直角坐标模式---
+ * @desc 将下面设计好的xy公式，进行整体旋转，单位角度。
+ * @default 0.0
  *
  * @param X轴速度类型
  * @parent ---直角坐标模式---
@@ -448,7 +465,7 @@
  * @param X轴路程计算公式
  * @parent X轴速度类型
  * @type note
- * @desc 漂浮数字的路程计算公式，可使用参数"id","time","v0","vRan", "a","vMax","vMin"。具体可以看看文档介绍。
+ * @desc 漂浮数字的路程计算公式。可使用 变量和常量 来设计公式，具体看看文档"关于弹道.docx"介绍。
  * @default "return 0.0"
  *
  * @param Y轴速度类型
@@ -495,7 +512,68 @@
  * @param Y轴路程计算公式
  * @parent Y轴速度类型
  * @type note
- * @desc 漂浮数字的路程计算公式，可使用参数"id","time","v0","vRan", "a","vMax","vMin"。具体可以看看文档介绍。
+ * @desc 漂浮数字的路程计算公式。可使用 变量和常量 来设计公式，具体看看文档"关于弹道.docx"介绍。
+ * @default "return 0.0"
+ * 
+ * 
+ * @param ---轨道锚点模式---
+ * @desc 
+ * 
+ * @param 轨道锚点整体旋转
+ * @parent ---轨道锚点模式---
+ * @desc 将下面设计好的锚点，进行整体旋转，单位角度。
+ * @default 0.0
+ * 
+ * @param 锚点列表
+ * @parent ---轨道锚点模式---
+ * @desc 锚点列表。
+ * @default (0,0),(100,0)
+ *
+ * @param 轨道速度类型
+ * @parent ---轨道锚点模式---
+ * @type select
+ * @option 只初速度
+ * @value 只初速度
+ * @option 初速度+波动量
+ * @value 初速度+波动量
+ * @option 初速度+波动量+加速度
+ * @value 初速度+波动量+加速度
+ * @option 初速度+波动量+加速度+最大最小
+ * @value 初速度+波动量+加速度+最大最小
+ * @option 路程计算公式
+ * @value 路程计算公式
+ * @desc 描述子弹速度的模式。
+ * @default 只初速度
+ * 
+ * @param 轨道初速度
+ * @parent 轨道速度类型
+ * @desc 子弹的基本速度，单位 像素/帧。
+ * @default 1.0
+ * 
+ * @param 轨道速度随机波动量
+ * @parent 轨道速度类型
+ * @desc 子弹速度上下随机浮动的量，单位 像素/帧。
+ * @default 2.0
+ * 
+ * @param 轨道加速度
+ * @parent 轨道速度类型
+ * @desc 子弹的加速度，单位 像素/帧。
+ * @default 0.0
+ * 
+ * @param 轨道最大速度
+ * @parent 轨道速度类型
+ * @desc 子弹的最大速度，单位 像素/帧。
+ * @default 99.0
+ * 
+ * @param 轨道最小速度
+ * @parent 轨道速度类型
+ * @desc 子弹的最小速度，单位 像素/帧。
+ * @default 0.0
+ * 
+ * @param 轨道路程计算公式
+ * @parent 轨道速度类型
+ * @type note
+ * @desc 子弹的路程计算公式。可使用 变量和常量 来设计公式，具体看看文档"关于弹道.docx"介绍。
  * @default "return 0.0"
  * 
  * 
@@ -559,7 +637,7 @@
 		data['movementTime'] = 20;
 		data['movementDelay'] = 0;
 		data['movementMode'] = String( dataFrom["移动模式"] || "极坐标模式" );
-		// > 极坐标（polar）
+		//   极坐标（polar）
 		data['polarSpeedType'] = String( dataFrom["速度类型"] || "只初速度" );
 		data['polarSpeedBase'] = Number( dataFrom["初速度"] || 0.0);
 		data['polarSpeedRandom'] = Number( dataFrom["速度随机波动量"] || 0.0);
@@ -568,13 +646,20 @@
 		data['polarSpeedMin'] = Number( dataFrom["最小速度"] || 0);
 		var temp_str = String( dataFrom["路程计算公式"] || "\"return 0\"" );
 		temp_str = temp_str.substring(1,temp_str.length-1);
-		data['polarDistanceFormula'] = temp_str.replace(/\\\\/g,"\\");
+		temp_str = temp_str.replace(/\\n/g,"\n");
+		temp_str = temp_str.replace(/\\\\/g,"\\");
+		data['polarDistanceFormula'] = temp_str;
 		data['polarDirType'] = String( dataFrom["方向类型"] || "只初速度" );
 		data['polarDirFixed'] = Number( dataFrom["固定方向"] || 0);
 		data['polarDirSectorFace'] = Number( dataFrom["扇形朝向"] || 0);
 		data['polarDirSectorDegree'] = Number( dataFrom["扇形角度"] || 0);
-		data['polarDirFormula'] = String( dataFrom["方向公式"] || "return 0" );
-		// > 直角坐标（cartesian）
+		temp_str = String( dataFrom["方向计算公式"] || "\"return 0\"" );
+		temp_str = temp_str.substring(1,temp_str.length-1);
+		temp_str = temp_str.replace(/\\n/g,"\n");
+		temp_str = temp_str.replace(/\\\\/g,"\\");
+		data['polarDirFormula'] = temp_str;
+		//   直角坐标（cartesian）
+		data['cartRotation'] = Number( dataFrom["直角坐标整体旋转"] || 0.0);
 		data['cartXSpeedType'] = String( dataFrom["X轴速度类型"] || "只初速度" );
 		data['cartXSpeedBase'] = Number( dataFrom["X轴初速度"] || 0.0);
 		data['cartXSpeedRandom'] = Number( dataFrom["X轴速度随机波动量"] || 0.0);
@@ -583,7 +668,9 @@
 		data['cartXSpeedMin'] = Number( dataFrom["X轴最小速度"] || 0);
 		temp_str = String( dataFrom["X轴路程计算公式"] || "return 0" );
 		temp_str = temp_str.substring(1,temp_str.length-1);
-		data['cartXDistanceFormula'] = temp_str.replace(/\\\\/g,"\\");
+		temp_str = temp_str.replace(/\\n/g,"\n");
+		temp_str = temp_str.replace(/\\\\/g,"\\");
+		data['cartXDistanceFormula'] = temp_str;
 		data['cartYSpeedType'] = String( dataFrom["Y轴速度类型"] || "只初速度" );
 		data['cartYSpeedBase'] = Number( dataFrom["Y轴初速度"] || 0.0);
 		data['cartYSpeedRandom'] = Number( dataFrom["Y轴速度随机波动量"] || 0.0);
@@ -592,8 +679,24 @@
 		data['cartYSpeedMin'] = Number( dataFrom["Y轴最小速度"] || 0);
 		temp_str = String( dataFrom["Y轴路程计算公式"] || "return 0" );
 		temp_str = temp_str.substring(1,temp_str.length-1);
-		data['cartYDistanceFormula'] = temp_str.replace(/\\\\/g,"\\");
-		// > 两点式（twoPoint）（关闭）
+		temp_str = temp_str.replace(/\\n/g,"\n");
+		temp_str = temp_str.replace(/\\\\/g,"\\");
+		data['cartYDistanceFormula'] = temp_str;
+		//   轨道锚点（track）
+		data['trackRotation'] = Number( dataFrom["轨道锚点整体旋转"] || 0.0);
+		var temp_str = String( dataFrom["锚点列表"] || "" );
+		data['trackPointTank'] = DrillUp.drill_COBa_convertStringToPointList( temp_str );
+		data['trackSpeedType'] = String( dataFrom["轨道速度类型"] || "只初速度" );
+		data['trackSpeedBase'] = Number( dataFrom["轨道初速度"] || 0.0);
+		data['trackSpeedRandom'] = Number( dataFrom["轨道速度随机波动量"] || 0.0);
+		data['trackSpeedInc'] = Number( dataFrom["轨道加速度"] || 0);
+		data['trackSpeedMax'] = Number( dataFrom["轨道最大速度"] || 0);
+		data['trackSpeedMin'] = Number( dataFrom["轨道最小速度"] || 0);
+		var temp_str = String( dataFrom["轨道路程计算公式"] || "\"return 0\"" );
+		temp_str = temp_str.substring(1,temp_str.length-1);
+		temp_str = temp_str.replace(/\\n/g,"\n");
+		temp_str = temp_str.replace(/\\\\/g,"\\");
+		//   两点式（twoPoint）（关闭）
 		return data;
 	}
 	//==============================
@@ -682,7 +785,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				pos_str = pos_str.replace("事件变量[","");
 				pos_str = pos_str.replace("]","");
 				var e_id = $gameVariables.value(Number(pos_str));
-				if( $gameMap.drill_LIl_isEventExist( e_id ) == false ){ return; }
+				if( $gameMap.drill_GFN_isEventExist( e_id ) == false ){ return; }
 				var e = $gameMap.event( e_id );
 				e_pos = [ e._realX, e._realY ];
 			}
@@ -690,7 +793,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				pos_str = pos_str.replace("事件[","");
 				pos_str = pos_str.replace("]","");
 				var e_id = Number(pos_str);
-				if( $gameMap.drill_LIl_isEventExist( e_id ) == false ){ return; }
+				if( $gameMap.drill_GFN_isEventExist( e_id ) == false ){ return; }
 				var e = $gameMap.event( e_id );
 				e_pos = [ e._realX, e._realY ];
 			}

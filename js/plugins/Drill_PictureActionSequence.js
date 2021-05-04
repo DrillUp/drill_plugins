@@ -206,16 +206,16 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				pics = [ p ];
 			}
 		}
-		// > 透明度检查
-		if( pics != null ){
-			var temp_tank = [];
-			for( var k=0; k < pics.length; k++ ){
-				if( pics[k].opacity() != 0 ){
-					temp_tank.push( pics[k] );
-				}
-			}
-			pics = temp_tank;
-		}
+		// > 透明度检查（不要检查）
+		//if( pics != null ){
+		//	var temp_tank = [];
+		//	for( var k=0; k < pics.length; k++ ){
+		//		if( pics[k].opacity() != 0 ){
+		//			temp_tank.push( pics[k] );
+		//		}
+		//	}
+		//	pics = temp_tank;
+		//}
 
 		
 		/*-----------------关闭动画序列------------------*/
@@ -465,6 +465,16 @@ Sprite_Picture.prototype.update = function() {
 		if( this._drill_PASe_decorator != null ){		//（销毁旧对象）
 			this._drill_PASe_decorator.drill_COAS_destroy(); 
 		}
+	}
+};
+//==============================
+// * 图片贴图 - 获取bitmap资源对象
+//==============================
+var _Drill_PASe_sp_loadBitmap = Sprite_Picture.prototype.loadBitmap;
+Sprite_Picture.prototype.loadBitmap = function() {
+    _Drill_PASe_sp_loadBitmap.call( this );
+    if( this._drill_PASe_decorator != null ){		//（资源变化时，要同步到装饰器中，确保能正常还原资源图片）
+		this._drill_PASe_decorator.drill_COAS_parentBitmapChanged( this, this.bitmap ); 
 	}
 };
 

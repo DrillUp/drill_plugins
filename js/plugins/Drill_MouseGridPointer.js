@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        鼠标 - 网格指向标
+ * @plugindesc [v1.1]        鼠标 - 网格指向标
  * @author Drill_up
  * 
  * @Drill_LE_param "指向标-%d"
@@ -88,6 +88,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 修改了插件的 旋转单位 为角度。
  * 
  * 
  *
@@ -244,7 +246,7 @@
  *
  * @param 旋转速度
  * @parent ---效果---
- * @desc 正数逆时针，负数顺时针，单位 弧度/帧。(1秒60帧) 6.28表示一圈，设置0.01表示大概10秒转一圈，设置0则不旋转。
+ * @desc 正数逆时针，负数顺时针，单位 角度/帧。(1秒60帧，360.0为一周) 
  * @default 0 
  *
  * @param 是否使用缩放效果
@@ -325,30 +327,49 @@
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_MouseGridPointer');
 	
+	
+	//==============================
+	// * 变量获取 - 网格指向标
+	//				（~struct~DrillMGPSprite）
+	//==============================
+	DrillUp.drill_MGP_initGridData = function( dataFrom ) {
+		var data = {};
+		if( dataFrom["资源-指向标GIF"] != undefined &&
+			dataFrom["资源-指向标GIF"] != "" ){
+			data['src_img'] = JSON.parse( dataFrom["资源-指向标GIF"] || [] );
+		}else{
+			data['src_img'] = [];
+		}
+		data['interval'] = Number( dataFrom["帧间隔"] || 4 );
+		data['back_run'] = String( dataFrom["是否倒放"] || "false") === "true";
+		data['x'] = Number( dataFrom["偏移-指向标 X"] || 0 );
+		data['y'] = Number( dataFrom["偏移-指向标 Y"] || 0 );
+		data['opacity'] = Number( dataFrom["透明度"] || 255 );
+		data['blendMode'] = Number( dataFrom["混合模式"] || 0 );
+		data['src_bitmaps'] = [];
+		
+		data['rotate'] = Number( dataFrom["旋转速度"] || 0 );
+		data['zoom_enable'] = String( dataFrom["是否使用缩放效果"] || "false") === "true";
+		data['zoom_range'] = Number( dataFrom["缩放幅度"] || 0.08 );
+		data['zoom_speed'] = Number( dataFrom["缩放速度"] || 5.5 );
+		data['flash_enable'] = String( dataFrom["是否使用闪烁效果"] || "false") === "true";
+		data['flash_speed'] = Number( dataFrom["闪烁速度"] || 7.0 );
+		
+		return data;
+	}
+	
+	/*-----------------杂项------------------*/
 	DrillUp.g_MGP_visible = String(DrillUp.parameters['是否初始显示'] || 'true') === 'true';
 	DrillUp.g_MGP_checkPassage = String(DrillUp.parameters['不可通行时是否隐藏'] || 'true') === 'true';
 	DrillUp.g_MGP_curStyle = Number(DrillUp.parameters['当前指向标'] || 0);
 	
+	/*-----------------网格指向标------------------*/
 	DrillUp.g_MGP_list_length = 10;
 	DrillUp.g_MGP_list = [];
-	for (var i = 0; i < DrillUp.g_MGP_list_length; i++) {
+	for( var i = 0; i < DrillUp.g_MGP_list_length; i++ ){
 		if( DrillUp.parameters['指向标-' + String(i+1) ] != "" ){
-			DrillUp.g_MGP_list[i] = JSON.parse(DrillUp.parameters['指向标-' + String(i+1) ]);
-			DrillUp.g_MGP_list[i]['src_img'] = JSON.parse(DrillUp.g_MGP_list[i]["资源-指向标GIF"] || []);
-			DrillUp.g_MGP_list[i]['interval'] = Number(DrillUp.g_MGP_list[i]["帧间隔"] || 4);
-			DrillUp.g_MGP_list[i]['back_run'] = String(DrillUp.g_MGP_list[i]["是否倒放"] || "false") === "true";
-			DrillUp.g_MGP_list[i]['x'] = Number(DrillUp.g_MGP_list[i]["偏移-指向标 X"] || 0);
-			DrillUp.g_MGP_list[i]['y'] = Number(DrillUp.g_MGP_list[i]["偏移-指向标 Y"] || 0);
-			DrillUp.g_MGP_list[i]['opacity'] = Number(DrillUp.g_MGP_list[i]["透明度"] || 255);
-			DrillUp.g_MGP_list[i]['blendMode'] = Number(DrillUp.g_MGP_list[i]["混合模式"] || 0);
-			DrillUp.g_MGP_list[i]['src_bitmaps'] = [];
-			
-			DrillUp.g_MGP_list[i]['rotate'] = Number(DrillUp.g_MGP_list[i]["旋转速度"] || 0);
-			DrillUp.g_MGP_list[i]['zoom_enable'] = String(DrillUp.g_MGP_list[i]["是否使用缩放效果"] || "false") === "true";
-			DrillUp.g_MGP_list[i]['zoom_range'] = Number(DrillUp.g_MGP_list[i]["缩放幅度"] || 0.08);
-			DrillUp.g_MGP_list[i]['zoom_speed'] = Number(DrillUp.g_MGP_list[i]["缩放速度"] || 5.5);
-			DrillUp.g_MGP_list[i]['flash_enable'] = String(DrillUp.g_MGP_list[i]["是否使用闪烁效果"] || "false") === "true";
-			DrillUp.g_MGP_list[i]['flash_speed'] = Number(DrillUp.g_MGP_list[i]["闪烁速度"] || 7.0);
+			var temp = JSON.parse(DrillUp.parameters['指向标-' + String(i+1) ]);
+			DrillUp.g_MGP_list[i] = DrillUp.drill_MGP_initGridData( temp );
 		}else{
 			DrillUp.g_MGP_list[i] = null;
 		}
@@ -438,11 +459,13 @@ Drill_MGP_GridSprite.prototype.constructor = Drill_MGP_GridSprite;
 //==============================
 Drill_MGP_GridSprite.prototype.initialize = function() {
 	Sprite_Base.prototype.initialize.call(this);
-	this.anchor.x = 0.5;
-	this.anchor.y = 0.5;
-	this._drill_time = 0;							//持续时间
-	this._drill_data = null;						//样式数据
-	this._drill_curStyle = -1;						//当前样式
+	
+	// > 私有属性初始化
+	this.anchor.x = 0.5;				//中心锚点
+	this.anchor.y = 0.5;				//
+	this._drill_time = 0;				//持续时间
+	this._drill_data = null;			//样式数据
+	this._drill_curStyle = -1;			//当前样式
 };
 //==============================
 // * 贴图 - 帧刷新
@@ -505,7 +528,6 @@ Drill_MGP_GridSprite.prototype.drill_MGP_refreshAll = function() {
 		temp_sprite_data['src_bitmaps'].push(ImageManager.load_MapUiMouse(temp_sprite_data['src_img'][j]));
 	}
 	temp_sprite.bitmap = temp_sprite_data['src_bitmaps'][0];
-	temp_sprite._time = 0;
 	temp_sprite.anchor.x = 0.5;
 	temp_sprite.anchor.y = 0.5;
 	temp_sprite.x = temp_sprite_data['x'];
@@ -528,8 +550,7 @@ Drill_MGP_GridSprite.prototype.drill_MGP_updateGif = function() {
 	var t_gif = this._drill_MGP_sprite;
 	var t_gif_data = this._drill_data;
 	
-	//播放gif
-	t_gif._time += 1;
+	// > 播放gif
 	var inter = this._drill_time ;
 	inter = inter / t_gif_data['interval'];
 	inter = inter % t_gif_data['src_bitmaps'].length;
@@ -538,7 +559,9 @@ Drill_MGP_GridSprite.prototype.drill_MGP_updateGif = function() {
 	}
 	inter = Math.floor(inter);
 	t_gif.bitmap = t_gif_data['src_bitmaps'][inter];
-	t_gif.rotation += t_gif_data['rotate'];
+	
+	// > 自旋转
+	t_gif.rotation += t_gif_data['rotate'] /180*Math.PI;
 	
 }
 //==============================

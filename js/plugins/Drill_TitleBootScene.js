@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        标题 - 启动界面
+ * @plugindesc [v1.4]        标题 - 启动界面
  * @author Drill_up
  * 
  * @Drill_LE_param "阶段-%d"
@@ -98,6 +98,8 @@
  * 修复了连续播放视频时，视频丢失的bug。
  * [v1.3]
  * 添加了图片预加载的功能，并且修复显示时间为0时，图片一闪的bug。
+ * [v1.4]
+ * 修复了插件播放视频后，造成插件指令中播放视频静音的bug。
  *
  * 
  * @param ---游戏窗口---
@@ -502,6 +504,44 @@
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_TitleBootScene');
 	
+	//==============================
+	// * 变量获取 - 阶段
+	//				（~struct~TitlePart）
+	//==============================
+	DrillUp.drill_TBS_partInit = function( dataFrom ) {
+		var data = {};
+		data['delay'] = Number( dataFrom["当前阶段至少播放时长"] || 0);
+		data['mode'] = String( dataFrom["显示模式"] || "单图模式" );
+		
+		// > 单图模式
+		data['img_src'] = String( dataFrom["资源-单图"] || "" );
+		data['img_show'] = Number( dataFrom["单图显现时长"] || 60 );
+		data['img_sustain'] = Number( dataFrom["单图持续时长"] || 90 );
+		data['img_hide'] = Number( dataFrom["单图消失时长"] || 30 );
+		data['img_skip'] = Number( dataFrom["单图立即跳过时长"] || 12 );
+		
+		// > GIF模式
+		if( dataFrom["资源-GIF"] != "" &&
+			dataFrom["资源-GIF"] != undefined ){
+			data['gif_src'] = JSON.parse( dataFrom["资源-GIF"] );
+		}else{
+			data['gif_src'] = [];
+		}
+		data['gif_interval'] = Number( dataFrom["帧间隔"] || 4);
+		data['gif_back_run'] = String( dataFrom["是否倒放"] || "false") == "true";
+		data['gif_replay'] = String( dataFrom["GIF到末尾是否重播"] || "false") == "true";
+		data['gif_show'] = Number( dataFrom["GIF显现时长"] || 60);
+		data['gif_sustain'] = Number( dataFrom["GIF持续时长"] || 90);
+		data['gif_hide'] = Number( dataFrom["GIF消失时长"] || 30);
+		data['gif_skip'] = Number( dataFrom["GIF立即跳过时长"] || 12);
+		
+		// > 视频模式
+		data['video_src'] = String( dataFrom["资源-视频"] || "");
+		data['bgm_set'] = String( dataFrom["当前阶段BGM设置"] || "不操作");
+		data['bgm_src'] = String( dataFrom["资源-BGM"] || "");
+		return data;
+	}
+	
 	/*-----------------游戏窗口------------------*/
 	DrillUp.g_TBS_screen_mode = String(DrillUp.parameters["游戏窗口模式"] || "窗口模式");
 	DrillUp.g_TBS_screen_maximize = String(DrillUp.parameters["窗口是否最大化"] || "true") == "true";
@@ -514,32 +554,14 @@
 	DrillUp.g_TBS_list_length = 20;
 	DrillUp.g_TBS_list = [];
 	for (var i = 0; i < DrillUp.g_TBS_list_length; i++) {
-		if( DrillUp.parameters["阶段-" + String(i+1) ] != "" ){
-			DrillUp.g_TBS_list[i] = JSON.parse(DrillUp.parameters["阶段-" + String(i+1) ]);
-			DrillUp.g_TBS_list[i]['mode'] = String(DrillUp.g_TBS_list[i]["显示模式"] || "单图模式");
-			DrillUp.g_TBS_list[i]['img_src'] = String(DrillUp.g_TBS_list[i]["资源-单图"] || "");
-			DrillUp.g_TBS_list[i]['img_show'] = Number(DrillUp.g_TBS_list[i]["单图显现时长"] || 60);
-			DrillUp.g_TBS_list[i]['img_sustain'] = Number(DrillUp.g_TBS_list[i]["单图持续时长"] || 90);
-			DrillUp.g_TBS_list[i]['img_hide'] = Number(DrillUp.g_TBS_list[i]["单图消失时长"] || 30);
-			DrillUp.g_TBS_list[i]['img_skip'] = Number(DrillUp.g_TBS_list[i]["单图立即跳过时长"] || 12);
-			DrillUp.g_TBS_list[i]['gif_src'] = JSON.parse(DrillUp.g_TBS_list[i]["资源-GIF"]);
-			DrillUp.g_TBS_list[i]['gif_interval'] = Number(DrillUp.g_TBS_list[i]["帧间隔"]);
-			DrillUp.g_TBS_list[i]['gif_back_run'] = String(DrillUp.g_TBS_list[i]["是否倒放"] || "false") == "true";
-			DrillUp.g_TBS_list[i]['gif_replay'] = String(DrillUp.g_TBS_list[i]["GIF到末尾是否重播"] || "false") == "true";
-			DrillUp.g_TBS_list[i]['gif_show'] = Number(DrillUp.g_TBS_list[i]["GIF显现时长"] || 60);
-			DrillUp.g_TBS_list[i]['gif_sustain'] = Number(DrillUp.g_TBS_list[i]["GIF持续时长"] || 90);
-			DrillUp.g_TBS_list[i]['gif_hide'] = Number(DrillUp.g_TBS_list[i]["GIF消失时长"] || 30);
-			DrillUp.g_TBS_list[i]['gif_skip'] = Number(DrillUp.g_TBS_list[i]["GIF立即跳过时长"] || 12);
-			DrillUp.g_TBS_list[i]['video_src'] = String(DrillUp.g_TBS_list[i]["资源-视频"] || "");
-			
-			DrillUp.g_TBS_list[i]['delay'] = Number(DrillUp.g_TBS_list[i]["当前阶段至少播放时长"] || 0);
-			DrillUp.g_TBS_list[i]['bgm_set'] = String(DrillUp.g_TBS_list[i]["当前阶段BGM设置"] || "不操作");
-			DrillUp.g_TBS_list[i]['bgm_src'] = String(DrillUp.g_TBS_list[i]["资源-BGM"] || "");
+		if( DrillUp.parameters['阶段-' + String(i+1) ] != "" ){
+			var temp = JSON.parse(DrillUp.parameters['阶段-' + String(i+1) ]);
+			DrillUp.g_TBS_list[i] = DrillUp.drill_TBS_partInit( temp );
 		}else{
-			DrillUp.g_TBS_list[i] = [];
+			DrillUp.g_TBS_list[i] = null;
 		}
 	}
-	DrillUp.g_TBS_list[ DrillUp.g_TBS_list_length ] = [];	//跳出界面的收尾设置
+	DrillUp.g_TBS_list[ DrillUp.g_TBS_list_length ] = null;		//跳出界面的收尾设置
 	
 	
 //=============================================================================
@@ -550,6 +572,16 @@ if( typeof(Liquidize) != "undefined" && typeof(Liquidize.MadeWithMV) != "undefin
 		"【Drill_TitleBootScene.js 标题-启动界面】\n" +
 		"检测到 MadeWithMv.js 插件，请将该插件关闭。\n该插件的功能就是在启动界面显示rmmv图片，但是由于插件修改了内部结构，使得启动界面插件无法运行。"
 	);
+}
+
+
+//=============================================================================
+// ** bug修复（乱按键一定会重播视频的bug）
+//=============================================================================	
+var _drill_TBS_Graphics_initialize = Graphics.initialize;
+Graphics.initialize = function( width, height, type ){
+	_drill_TBS_Graphics_initialize.call( this, width, height, type );
+    this._videoUnlocked = true;
 }
 
 
@@ -693,7 +725,12 @@ Scene_Drill_TBS.prototype.drill_preloadBitmap = function() {
 	this._drill_bitmapTank = [];
 	for( var i=0; i < temp_list.length; i++ ){
 		var temp_data = temp_list[i];
-		if( temp_data['mode'] ){
+		if( temp_data == undefined ){
+			
+			// > 空数据情况
+			this._drill_bitmapTank[i] = {};
+			
+		}else{
 			// > bitmap加载
 			var obj = {};
 			if( temp_data['mode'] == "单图模式" ){
@@ -709,9 +746,6 @@ Scene_Drill_TBS.prototype.drill_preloadBitmap = function() {
 				// （无bitmap）
 			}
 			this._drill_bitmapTank[i] = obj;
-		}else{
-			// > 空数据情况
-			this._drill_bitmapTank[i] = {};
 		}
 	}
 }
@@ -755,7 +789,7 @@ Scene_Drill_TBS.prototype.drill_updateLevel = function() {
 	// > 跳出界面
 	if( this._drill_level >= this._drill_dataList.length -1 ){
 		if( Graphics.isVideoPlaying() == true ){
-			Graphics.playVideo("");			//防止进入标题后，点击造成视频重播的情况
+			Graphics._video.pause();		//暂停播放
 		}
 		SceneManager.goto(Scene_Title);
 		return ;
@@ -775,13 +809,14 @@ Scene_Drill_TBS.prototype.drill_updateLevel = function() {
 //==============================
 Scene_Drill_TBS.prototype.drill_isLevelFinished = function() {
 	var temp_data = this._drill_dataList[this._drill_level];
-	if( temp_data['mode'] && temp_data['mode'] == "单图模式" ){
+	if( temp_data == undefined ){ return true; }
+	if( temp_data['mode'] == "单图模式" ){
 		return this._drill_TBS_picEnd;
 	}
-	if( temp_data['mode'] && temp_data['mode'] == "GIF模式" ){
+	if( temp_data['mode'] == "GIF模式" ){
 		return this._drill_TBS_gifEnd;
 	}
-	if( temp_data['mode'] && temp_data['mode'] == "视频模式" ){
+	if( temp_data['mode'] == "视频模式" ){
 		return this._drill_TBS_videoEnd;
 	}
 	return true;
@@ -791,7 +826,7 @@ Scene_Drill_TBS.prototype.drill_isLevelFinished = function() {
 //==============================
 Scene_Drill_TBS.prototype.drill_createPic = function() {
 	var temp_data = this._drill_dataList[this._drill_level];
-	if( !temp_data ){ return }
+	if( temp_data == undefined ){ return }
 	if( temp_data['mode'] !== "单图模式" ){ return }
 	
 	var temp_sprite = this._drill_pic_sprite;
@@ -809,7 +844,7 @@ Scene_Drill_TBS.prototype.drill_createPic = function() {
 //==============================
 Scene_Drill_TBS.prototype.drill_updatePic = function() {
 	var temp_data = this._drill_dataList[this._drill_level];
-	if( !temp_data ){ return }
+	if( temp_data == undefined ){ return }
 	if( temp_data['mode'] !== "单图模式" ){ return }
 	
 	// > 按键跳过
@@ -847,7 +882,7 @@ Scene_Drill_TBS.prototype.drill_updatePic = function() {
 //==============================
 Scene_Drill_TBS.prototype.drill_createGIF = function() {
 	var temp_data = this._drill_dataList[this._drill_level];
-	if( !temp_data ){ return }
+	if( temp_data == undefined ){ return }
 	if( temp_data['mode'] !== "GIF模式" ){ return }
 	
 	var temp_sprite_data = JSON.parse(JSON.stringify( temp_data ));	
@@ -867,7 +902,7 @@ Scene_Drill_TBS.prototype.drill_createGIF = function() {
 //==============================
 Scene_Drill_TBS.prototype.drill_updateGIF = function() {
 	var temp_data = this._drill_dataList[this._drill_level];
-	if( !temp_data ){ return }
+	if( temp_data == undefined ){ return }
 	if( temp_data['mode'] !== "GIF模式" ){ return }
 	
 	// > 按键跳过
@@ -922,40 +957,40 @@ Scene_Drill_TBS.prototype.drill_updateGIF = function() {
 //==============================
 Scene_Drill_TBS.prototype.drill_createVideo = function() {
 	var temp_data = this._drill_dataList[this._drill_level];
-	if( !temp_data ){ return }
+	if( temp_data == undefined ){ return }
 	if( temp_data['mode'] !== "视频模式" ){ return }
 	
 	var ext = this.videoFileExt();
 	Graphics.playVideo('movies/' + temp_data.video_src + ext);
-	Graphics._updateVisibility(true);
 }
 //==============================
 // * 帧刷新 - 播放视频
 //==============================
 Scene_Drill_TBS.prototype.drill_updateVideo = function() {
 	var temp_data = this._drill_dataList[this._drill_level];
-	if( !temp_data ){ return }
+	if( temp_data == undefined ){ return }
 	if( temp_data['mode'] !== "视频模式" ){ return }
 	
 	// > 按键跳过
 	if( this._drill_level_time >= temp_data.delay ){
 		if( Input.isTriggered("ok") || TouchInput.isTriggered() ){
-			Graphics._video['muted'] = true;
 			Graphics._video.pause();
+			Graphics._onVideoEnd();
 			//Graphics._video.remove();		//remove会使得视频资源丢失却保留声音
-			Graphics._updateVisibility(false);
+			
 			this._drill_TBS_videoEnd = true;
 		}
 	}
 	
 	// > 播放结束
 	if( Graphics.isVideoPlaying() ){
-		Graphics._video['muted'] = false;		//静音控制
+		
+		
 	}else{
-		Graphics._video['muted'] = true;
 		Graphics._video.pause();
+		Graphics._onVideoEnd();
 		//Graphics._video.remove();
-		Graphics._updateVisibility(false);
+		
 		this._drill_TBS_videoEnd = true;
 	}
 }
@@ -975,15 +1010,15 @@ Scene_Drill_TBS.prototype.videoFileExt = function() {
 //==============================
 Scene_Drill_TBS.prototype.drill_createMusic = function() {
 	var temp_data = this._drill_dataList[this._drill_level];
-	if( !temp_data ){ return }
-	if( temp_data.bgm_set === "不操作" ){ return }
-	if( temp_data.bgm_set === "暂停之前的BGM" ){ 
+	if( temp_data == undefined ){ return }
+	if( temp_data['bgm_set'] === "不操作" ){ return }
+	if( temp_data['bgm_set'] === "暂停之前的BGM" ){ 
 		AudioManager.stopBgm();
 		return;
 	}
-	if( temp_data.bgm_set === "播放新的BGM" ){
+	if( temp_data['bgm_set'] === "播放新的BGM" ){
 		var bgm = {};
-		bgm.name = temp_data.bgm_src;
+		bgm.name = temp_data['bgm_src'];
 		bgm.pitch = 100;
 		bgm.volume = 100;
 		AudioManager.playBgm(bgm);
