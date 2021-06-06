@@ -3,34 +3,8 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        互动 - 跳跃能力
+ * @plugindesc [v1.5]        互动 - 跳跃能力
  * @author Drill_up
- * 
- * @param 初始是否开启跳跃能力
- * @type boolean
- * @on 开启
- * @off 关闭
- * @desc true - 开启，false - 关闭。
- * @default true
- * 
- * @param 跳跃音效
- * @desc 跳跃时，播放的音效。
- * @require 1
- * @dir audio/se/
- * @type file
- * @default Jump1
- *
- * @param 跳跃距离
- * @type number
- * @min 0
- * @desc 跳跃到目的地的距离长度，单位图块。0表示只能原地跳跃。
- * @default 2
- *
- * @param 跳跃延迟
- * @type number
- * @min 0
- * @desc 跳跃后，下次跳跃需要等待的时间，单位帧。（1秒60帧）
- * @default 60
  * 
  * 
  * @help  
@@ -147,6 +121,56 @@
  * [v1.4]
  * 修改了插件指令，添加了插件性能测试说明。
  * 分离了插件的功能，使得事件也可以进行普通跳跃。
+ * [v1.5]
+ * 优化了跳跃的一些设定细节。
+ * 
+ * 
+ * 
+ * @param ---常规---
+ * @default 
+ * 
+ * @param 初始是否开启跳跃能力
+ * @parent ---常规---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭。
+ * @default true
+ * 
+ * @param 跳跃音效
+ * @parent ---常规---
+ * @desc 跳跃时，播放的音效。
+ * @require 1
+ * @dir audio/se/
+ * @type file
+ * @default Jump1
+ *
+ * @param 跳跃距离
+ * @parent ---常规---
+ * @type number
+ * @min 0
+ * @desc 跳跃到目的地的距离长度，单位图块。0表示只能原地跳跃。
+ * @default 2
+ *
+ * @param 跳跃延迟
+ * @parent ---常规---
+ * @type number
+ * @min 0
+ * @desc 跳跃后，下次跳跃需要等待的时间，单位帧。（1秒60帧）
+ * @default 60
+ * 
+ * @param ---扩展设定---
+ * @default 
+ * 
+ * @param 奔跑时跳跃距离+1
+ * @parent ---扩展设定---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭。
+ * @default true
+ * 
+ * 
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -167,6 +191,9 @@
 //插件记录：
 //		★大体框架与功能如下：
 //			跳跃能力：
+//				->适应性
+//					->移动到目的地后跳跃，暂时禁用目的地，防止跳跃后回撤
+//					->奔跑时跳跃距离+1
 //				->跳跃距离判定
 //				->跳跃触发事件
 //
@@ -195,11 +222,13 @@
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_Jump');
 
+	/*-----------------杂项------------------*/
 	DrillUp.g_jump_enable = String(DrillUp.parameters['初始是否开启跳跃能力'] || "true") === "true";
 	DrillUp.g_jump_mouse = false;
 	DrillUp.g_jump_delay = Number(DrillUp.parameters['跳跃延迟'] || 60);
 	DrillUp.g_jump_distance = Number(DrillUp.parameters['跳跃距离'] || 2);
 	DrillUp.g_jump_se = String(DrillUp.parameters['跳跃音效']);
+	DrillUp.g_jump_dashDistance = String(DrillUp.parameters['奔跑时跳跃距离+1'] || "true") === "true";
 	
 	
 //=============================================================================
@@ -261,17 +290,26 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 var _drill_jump_temp_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {
     _drill_jump_temp_initialize.call(this);
-	this._drill_jump_dest_push = true;
-	this._drill_jump_dest_count = 0;
-	this._drill_jump_dest_timer = 0;
+	this._drill_jump_dest_push = true;				//目的地取消标记-锁
+	this._drill_jump_dest_count = 0;				//目的地取消次数
+	this._drill_jump_dest_timer = 0;				//长按间隔
+	this._drill_jump_mouse_forbiddenTimer = 0;		//目的地禁用时间
 };
 //==============================
 // * 鼠标点击 - 点击位置
 //==============================
 var _drill_jump_setDestination = Game_Temp.prototype.setDestination;
-Game_Temp.prototype.setDestination = function(x, y) {
+Game_Temp.prototype.setDestination = function( x, y ){
+	
+	// > 禁用目的地情况
+	if( this._drill_jump_mouse_forbiddenTimer > 0 ){	
+		return;
+	}
+	
 	_drill_jump_setDestination.call(this,x,y);
-	if(this._drill_jump_dest_push){				//移动到位置-锁 （被取消移动，或者没有移动，只会被捕获一次）
+	
+	// > 目的地取消标记-锁（被取消移动，或者没有移动，只会被捕获一次）
+	if( this._drill_jump_dest_push ){	
 		this._drill_jump_dest_push = false;
 	}
 };
@@ -283,7 +321,8 @@ Game_Temp.prototype.clearDestination = function() {
 	_drill_jump_clearDestination.call(this);
 	if(!this._drill_jump_dest_push){
 		this._drill_jump_dest_push = true;
-		this._drill_jump_dest_count += 1;
+		
+		this._drill_jump_dest_count += 1;			//目的地取消次数+1
 		this._drill_jump_dest_timer = 0;
 		if( this._drill_jump_dest_count >= 2 ){		//长按鼠标计数器
 			this._drill_jump_dest_count = 0;
@@ -313,7 +352,7 @@ Game_System.prototype.initialize = function() {
 var _drill_jump_p_initialize = Game_Player.prototype.initialize;
 Game_Player.prototype.initialize = function() {
 	_drill_jump_p_initialize.call(this);
-	this._drill_jump_delay_time = 0;
+	this._drill_jump_delay_time = 0;				//跳跃延迟时间
 };
 //==============================
 // * 玩家 - 帧刷新
@@ -321,13 +360,20 @@ Game_Player.prototype.initialize = function() {
 var _drill_jump_player_update = Game_Player.prototype.update;
 Game_Player.prototype.update = function(sceneActive) {
 	_drill_jump_player_update.call(this,sceneActive);
+	
+	// > 跳跃延迟时间
 	this._drill_jump_delay_time += 1;
+	
+	// > 目的地长按间隔
 	$gameTemp._drill_jump_dest_timer += 1;
-	if( $gameTemp._drill_jump_dest_timer >= 18 ){	//时间衰退计时器（间隔过长的两次鼠标点击，不会跳）
+	if( $gameTemp._drill_jump_dest_timer >= 18 ){	//（间隔过长的两次鼠标点击，不会跳）
 		$gameTemp._drill_jump_dest_timer = 0;
 		$gameTemp._drill_jump_dest_count = 0;
 		DrillUp.g_jump_mouse = false;
 	}
+	
+	// > 目的地禁用时间
+	$gameTemp._drill_jump_mouse_forbiddenTimer -= 1;
 }
 //==============================
 // * 玩家 - 按键控制
@@ -386,6 +432,18 @@ Game_Player.prototype.drill_doJump = function() {
 	// > 数据赋值
 	this._drill_EJu_jump['distance'] = $gameSystem._drill_jump_distance;
 	this._drill_EJu_jump['sound'] = $gameSystem._drill_jump_se;
+	
+	// > 移动到目的地后跳跃，暂时禁用目的地，防止跳跃后回撤
+	if( this._x == $gameTemp.destinationX() &&
+		this._y == $gameTemp.destinationY() ){
+		$gameTemp.clearDestination();
+		$gameTemp._drill_jump_mouse_forbiddenTimer = 60;
+	}
+	
+	// > 奔跑时跳跃距离+1
+	if( DrillUp.g_jump_dashDistance && this.isDashing() ){
+		this._drill_EJu_jump['distance'] += 1;
+	}
 	
 	// > 执行普通跳跃
 	this.drill_EJu_commonJump();

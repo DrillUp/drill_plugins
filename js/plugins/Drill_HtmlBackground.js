@@ -596,7 +596,7 @@ Graphics._updateAllElements = function() {
 	this.drill_HB_updateRenderer();
 }
 //==============================
-// * 刷新 - canvas
+// * 刷新 - canvas画布
 //==============================
 Graphics.drill_HB_updateCanvas = function() {
 	this._drill_HB_canvas.style.width = DrillUp.drill_HB_width();
@@ -604,10 +604,10 @@ Graphics.drill_HB_updateCanvas = function() {
 	//this._drill_HB_canvas.style.zIndex = 0;
 };
 //==============================
-// * 刷新 - render
+// * 刷新 - render渲染器
 //==============================
 Graphics.drill_HB_updateRenderer = function() {
-    if (this._drill_HB_renderer) {
+    if( this._drill_HB_renderer ){
         this._drill_HB_renderer.resize( DrillUp.drill_HB_width(), DrillUp.drill_HB_height());
     }
 };
@@ -616,7 +616,7 @@ Graphics.drill_HB_updateRenderer = function() {
 // * 渲染
 //==============================
 Graphics.drill_HB_render = function(stage) {
-	if (stage) {
+	if( stage ){
 		this._drill_HB_renderer.render(stage);
 		if (this._drill_HB_renderer.gl && this._drill_HB_renderer.gl.flush) {
 			this._drill_HB_renderer.gl.flush();
@@ -646,17 +646,18 @@ SceneManager.renderScene = function() {
 
 
 //=============================================================================
-// ** 黑边场景-定义
+// ** 黑边场景【Scene_Drill_HB】
 //=============================================================================
+//==============================
+// * 黑边场景 - 定义
+//==============================
 function Scene_Drill_HB() {
     this.initialize.apply(this, arguments);
 }
-
 Scene_Drill_HB.prototype = Object.create(Scene_Base.prototype);
 Scene_Drill_HB.prototype.constructor = Scene_Drill_HB;
-
 //==============================
-// * 场景-初始化
+// * 黑边场景 - 初始化
 //==============================
 Scene_Drill_HB.prototype.initialize = function() {
     Scene_Base.prototype.initialize.call(this);
@@ -674,7 +675,7 @@ Scene_Drill_HB.prototype.initialize = function() {
 };
 
 //==============================
-// * 场景-创建
+// * 黑边场景 - 创建
 //==============================
 Scene_Drill_HB.prototype.create = function() {
     Scene_Base.prototype.create.call(this);
@@ -683,10 +684,9 @@ Scene_Drill_HB.prototype.create = function() {
 	
 	this.drill_createBackground();
 	this.drill_createWeltImg();
-	
 };
 //==============================
-// * 创建-背景
+// * 黑边场景 - 背景
 //==============================
 Scene_Drill_HB.prototype.drill_createBackground = function() {
 	this._drill_downArea = new Sprite();
@@ -730,7 +730,7 @@ Scene_Drill_HB.prototype.drill_sortByZIndex = function() {
 	this._drill_downArea.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
 };
 //==============================
-// * 创建-贴边图像
+// * 创建 - 贴边图像
 //==============================
 Scene_Drill_HB.prototype.drill_createWeltImg = function() {
 	this._drill_upArea = new Sprite();
@@ -775,7 +775,7 @@ Scene_Drill_HB.prototype.drill_createWeltImg = function() {
 }
 
 //==============================
-// * 场景-帧刷新
+// * 黑边场景 - 帧刷新
 //==============================
 Scene_Drill_HB.prototype.update = function() { 
 	Scene_Base.prototype.update.call(this);	
@@ -783,7 +783,7 @@ Scene_Drill_HB.prototype.update = function() {
 	this.drill_updateWeltImg();
 }
 //==============================
-// * 帧刷新-背景
+// * 帧刷新 - 背景
 //==============================
 Scene_Drill_HB.prototype.drill_updateBackground = function() {
 	
@@ -833,7 +833,7 @@ Scene_Drill_HB.prototype.drill_updateBackground = function() {
 	}
 }
 //==============================
-// * 帧刷新-贴边图像
+// * 帧刷新 - 贴边图像
 //==============================
 Scene_Drill_HB.prototype.drill_updateWeltImg = function() {
 	

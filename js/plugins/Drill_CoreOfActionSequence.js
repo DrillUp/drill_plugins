@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        系统 - GIF动画序列核心
+ * @plugindesc [v1.3]        系统 - GIF动画序列核心
  * @author Drill_up
  * 
  * @Drill_LE_param "动画序列-%d"
@@ -110,6 +110,8 @@
  * 并实现了小工具交互功能。
  * [v1.2]
  * 添加了部分适配接口。
+ * [v1.3]
+ * 修复了 动作元和状态元 优先级相同时，动作元不能播放的bug。
  * 
  * 
  *
@@ -928,7 +930,7 @@ Drill_COAS_Data.prototype.drill_initData = function() {
 	var data = this._drill_data;	
 	
 	// > 默认值
-	if( data['waitForPreload'] == undefined ){ data['waitForPreload'] = false };					//预加载等待
+	if( data['waitForPreload'] == undefined ){ data['waitForPreload'] = false };					//预加载等待（子插件用参数）
 	if( data['state_default_randomSeq'] == undefined ){ data['state_default_randomSeq'] = [] };		//默认状态元集合
 	if( data['state_tank'] == undefined ){ data['state_tank'] = [] };								//状态元 容器
 	if( data['act_tank'] == undefined ){ data['act_tank'] = [] };									//动作元 容器
@@ -940,7 +942,7 @@ Drill_COAS_Data.prototype.drill_initData = function() {
 	this._drill_bitmapPath = "";									//当前的bitmap路径
 	this._drill_bitmapTint = 0;										//当前的bitmap色调
 	this._drill_bitmapSmooth = false;								//当前的bitmap模糊
-	this._drill_state_curCom = "";									//状态元 - 当前状态
+	this._drill_state_curCom = "";									//状态元 - 当前状态（注意，要确保只有 状态元集合为空/资源为空 的情况下，才能为空字符串，其他情况不要随意产生空字符串）
 	this._drill_state_curTime = 0;									//状态元 - 当前时间
 	this._drill_state_curSeq = data['state_default_randomSeq'];		//状态元 - 当前序列
 	this._drill_state_lastAnnotation = "";							//状态元 - 上一个注解名
@@ -956,11 +958,7 @@ Drill_COAS_Data.prototype.drill_COAS_updateState = function() {
 	
 	// > 随机抽取
 	if( this._drill_state_curCom == "" ){
-		if( this._drill_state_curSeq.length == 1 ){
-			this._drill_state_curCom = this._drill_state_curSeq[0];
-		}
-		var index = Math.floor( this._drill_state_curSeq.length * Math.random() );
-		this._drill_state_curCom = this._drill_state_curSeq[ index ];
+		this.drill_COAS_rollCurrentState();
 	}
 	
 	var data = this._drill_data;	
@@ -1018,11 +1016,26 @@ Drill_COAS_Data.prototype.drill_COAS_updateState = function() {
 	// > 时间+1
 	this._drill_state_curTime += 1;
 	if( this._drill_state_curTime >= data_state['gif_intervalRealTank_total'] ){
-		this._drill_state_curCom = "";
+		this.drill_COAS_rollCurrentState();
 		this._drill_state_curTime = 0;
 	}
 	
 }	
+//==============================
+// * 操作 - 抽取新的状态元
+//==============================
+Drill_COAS_Data.prototype.drill_COAS_rollCurrentState = function() {
+	if( this._drill_state_curSeq.length == 0 ){ return; }		//状态元集合 为空时，不操作
+	
+	// > 只有一个就不变
+	if( this._drill_state_curSeq.length == 1 ){
+		this._drill_state_curCom = this._drill_state_curSeq[0];
+	}
+	
+	// > 随机抽取
+	var index = Math.floor( this._drill_state_curSeq.length * Math.random() );
+	this._drill_state_curCom = this._drill_state_curSeq[ index ];
+}
 //==============================
 // * 帧刷新 - 刷新动作元
 //==============================
@@ -1119,7 +1132,7 @@ Drill_COAS_Data.prototype.drill_COAS_setSequence = function( seq ){
 //==============================
 Drill_COAS_Data.prototype.drill_COAS_setSequenceImmediate = function( seq ){
 	this.drill_COAS_setSequence( seq );
-	this._drill_state_curCom = "";
+	this.drill_COAS_rollCurrentState();
 	this._drill_state_curTime = 0;
 }
 //==============================
@@ -1213,7 +1226,7 @@ Drill_COAS_Data.prototype.drill_COAS_setSequenceImmediateByAnnotation = function
 	
 	var success = this.drill_COAS_setSequenceByAnnotation(annotation);
 	if( success ){
-		this._drill_state_curCom = "";
+		this.drill_COAS_rollCurrentState();
 		this._drill_state_curTime = 0;
 	}
 	return success;
@@ -1281,7 +1294,7 @@ Drill_COAS_Data.prototype.drill_COAS_setAct = function( act_name ){
 		var data_act = this.drill_COAS_getDataAct( act_name );
 		var cur_state = this.drill_COAS_getDataState( this._drill_state_curCom );
 		
-		if( cur_state['priority'] >= data_act['priority'] ){	//（只能覆盖小的优先级，不包括同级）
+		if( cur_state['priority'] > data_act['priority'] ){	//（同级的动作元可以覆盖状态元）
 			return;
 		}
 	}
@@ -1318,9 +1331,9 @@ Drill_COAS_Data.prototype.drill_COAS_getAllActName = function(){
 	var data = this._drill_data;
 	var result_list = [];	
 	for( var i=0; i < data['act_tank'].length; i++ ){
-		var data_state = data['act_tank'][i];
-		if( data_state && data_state['name'] != "" ){
-			result_list.push( data_state['name'] );
+		var data_act = data['act_tank'][i];
+		if( data_act && data_act['name'] != "" ){
+			result_list.push( data_act['name'] );
 		}
 	}
 	return result_list;

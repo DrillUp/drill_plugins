@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        物体 - 重力开关
+ * @plugindesc [v1.4]        物体 - 重力开关
  * @author Drill_up
  *
  * 
@@ -20,6 +20,12 @@
  * ----设定注意事项
  * 1.插件的作用域：地图界面。
  *   只作用于事件。
+ * 细节：
+ *   (1.重力开关在事件完全踩在它身上之前，就会立即做出反应。
+ *      队伍跟随的成员不会对重力开关有任何影响，只有领队与事件可以。
+ *   (2.插件本身不会提供按下、弹起的缓冲过程，此功能需要你自己写事件页
+ *      来控制。你可以参考示例中的开关，直接复制粘贴也可以。
+ *      在示例中 物体管理层 右上角区域。
  * 传感器：
  *   (1.重力开关被划分为传感器类。
  *      传感器即遇到某些情况就会自动触发的事件。
@@ -27,11 +33,6 @@
  *   (2.重力开关的注释设置全都跨事件页。
  *      但是考虑到玩家可能会离开地图，所以最好每个事件页都写注释设置。
  *      详细介绍去看看"开关大家族.docx"。
- * 细节：
- *   (1.重力开关在事件完全踩在它身上之前，就会立即做出反应。
- *   (2.插件本身不会提供按下、弹起的缓冲过程，此功能需要你自己写事件页
- *      来控制。你可以参考示例中的开关，直接复制粘贴也可以。
- *   (3.队伍跟随的成员不会对重力开关有任何影响，只有领队与npc可以。
  * 脉冲开关：
  *   (1.脉冲开关即踩第一次，按下，离开后踩第二次，弹出，如此往复。
  *   (2.重力开关二次迭代可以制作成脉冲开关，原理可见docx文档。
@@ -43,7 +44,10 @@
  *      只要锁和钥匙的关键字相互对应上，压着才能够触发重力开关。
  * 设计：
  *   (1.多用于箱子之类的解谜游戏。
- *
+ *   (2.注意，如果你设计了arpg事件战斗的游戏，事件死亡后，需要关闭
+ *      重力作用，不然该事件将会持续按压重力开关，使得其无法弹起或
+ *      再次触发。
+ * 
  * -----------------------------------------------------------------------------
  * ----激活条件
  * 你需要设置指定开关为重力开关，使用下面的注释：
@@ -71,7 +75,28 @@
  * 1.重力钥匙和重力锁的关键字可以完全自定义。
  * 2.同一个事件可以带上多个钥匙，或者多把锁。
  *   只要锁和钥匙的关键字相互对应上，压着才能够触发重力开关。
- *
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 插件指令控制
+ * 你可以使用插件指令，直接设置事件的重力属性：
+ * 
+ * 插件指令：>重力开关 : 玩家 : 开启重力作用
+ * 插件指令：>重力开关 : 本事件 : 开启重力作用
+ * 插件指令：>重力开关 : 事件[10] : 开启重力作用
+ * 插件指令：>重力开关 : 事件变量[21] : 开启重力作用
+ * 插件指令：>重力开关 : 批量事件[10,11] : 开启重力作用
+ * 插件指令：>重力开关 : 批量事件变量[21,22] : 开启重力作用
+ * 
+ * 插件指令：>重力开关 : 玩家 : 开启重力作用
+ * 插件指令：>重力开关 : 玩家 : 关闭重力作用
+ * 插件指令：>重力开关 : 玩家 : 添加重力钥匙 : 钥匙_B
+ * 插件指令：>重力开关 : 玩家 : 去掉重力钥匙 : 钥匙_B
+ * 插件指令：>重力开关 : 玩家 : 去掉全部重力钥匙
+ * 
+ * 1.前半部分（玩家）和 后半部分（开启重力作用）
+ *   的参数可以随意组合。一共有6*5种组合方式。
+ * 2.重力作用被关闭后，将不对重力开关产生任何触发。
+ * 
  * -----------------------------------------------------------------------------
  * ----插件性能
  * 测试仪器：   4G 内存，Intel Core i5-2520M CPU 2.5GHz 处理器
@@ -105,6 +130,9 @@
  * [v1.3]
  * 修复了切换事件页 + 离开地图 + 再回来，开关失效的bug。
  * 修改了注释说明。
+ * [v1.4]
+ * 添加了插件指令控制。
+ * 
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -163,21 +191,134 @@
 
 
 //=============================================================================
-// ** 事件
+// * 插件指令
+//=============================================================================
+var _drill_EPS_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+Game_Interpreter.prototype.pluginCommand = function(command, args) {
+	_drill_EPS_pluginCommand.call(this, command, args);
+	if( command === ">重力开关" ){
+		
+		/*-----------------对象组获取------------------*/
+		var c_chars = null;			// 事件对象组
+		if( args.length >= 2 ){
+			var unit = String(args[1]);
+			if( c_chars == null && unit == "玩家" ){
+				c_chars = [ $gamePlayer ];
+			}
+			if( c_chars == null && unit == "本事件" ){
+				var e = $gameMap.event( this._eventId );
+				c_chars = [ e ];
+			}
+			if( c_chars == null && unit.indexOf("批量事件[") != -1 ){
+				unit = unit.replace("批量事件[","");
+				unit = unit.replace("]","");
+				c_chars = [];
+				var temp_arr = unit.split(/[,，]/);
+				for( var k=0; k < temp_arr.length; k++ ){
+					var e_id = Number(temp_arr[k]);
+					if( $gameMap.drill_EPS_isEventExist( e_id ) == false ){ continue; }
+					var e = $gameMap.event( e_id );
+					c_chars.push( e );
+				}
+			}
+			if( c_chars == null && unit.indexOf("批量事件变量[") != -1 ){
+				unit = unit.replace("批量事件变量[","");
+				unit = unit.replace("]","");
+				c_chars = [];
+				var temp_arr = unit.split(/[,，]/);
+				for( var k=0; k < temp_arr.length; k++ ){
+					var e_id = $gameVariables.value(Number(temp_arr[k]));
+					if( $gameMap.drill_EPS_isEventExist( e_id ) == false ){ continue; }
+					var e = $gameMap.event( e_id );
+					c_chars.push( e );
+				}
+			}
+			if( c_chars == null && unit.indexOf("事件变量[") != -1 ){
+				unit = unit.replace("事件变量[","");
+				unit = unit.replace("]","");
+				var e_id = $gameVariables.value(Number(unit));
+				if( $gameMap.drill_EPS_isEventExist( e_id ) == false ){ return; }
+				var e = $gameMap.event( e_id );
+				c_chars = [ e ];
+			}
+			if( c_chars == null && unit.indexOf("事件[") != -1 ){
+				unit = unit.replace("事件[","");
+				unit = unit.replace("]","");
+				var e_id = Number(unit);
+				if( $gameMap.drill_EPS_isEventExist( e_id ) == false ){ return; }
+				var e = $gameMap.event( e_id );
+				c_chars = [ e ];
+			}
+		}
+		if( c_chars == null ){ return }; 		
+		
+		/*-----------------设置属性------------------*/	
+		if( args.length == 4 ){
+			var type = String(args[3]);
+			if( type == "开启重力作用" ){
+				for( var k=0; k < c_chars.length; k++ ){
+					c_chars[k]._drill_EPS_data['_can_press'] = true;
+				}
+			}
+			if( type == "关闭重力作用" ){
+				for( var k=0; k < c_chars.length; k++ ){
+					c_chars[k]._drill_EPS_data['_can_press'] = false;
+				}
+			}
+			if( type == "去掉全部重力钥匙" ){
+				for( var k=0; k < c_chars.length; k++ ){
+					c_chars[k]._drill_EPS_data['_s_key'] = {};
+				}
+			}
+		}
+		if( args.length == 6 ){
+			var type = String(args[3]);
+			var temp1 = String(args[5]);
+			if( type == "添加重力钥匙" ){
+				for( var k=0; k < c_chars.length; k++ ){
+					c_chars[k]._drill_EPS_data['_s_key'][ temp1 ] = true;
+				}
+			}
+			if( type == "去掉重力钥匙" ){
+				for( var k=0; k < c_chars.length; k++ ){
+					c_chars[k]._drill_EPS_data['_s_key'][ temp1 ] = null;
+				}
+			}
+		}
+		
+	}
+};
+//==============================
+// ** 插件指令 - 事件检查
+//==============================
+Game_Map.prototype.drill_EPS_isEventExist = function( e_id ){
+	if( e_id == 0 ){ return false; }
+	
+	var e = this.event( e_id );
+	if( e == undefined ){
+		alert( "【Drill_EventPressureSwitch.js 物体 - 重力开关】\n" +
+				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
+		return false;
+	}
+	return true;
+};
+
+		
+//=============================================================================
+// ** 物体
 //=============================================================================
 //==============================
-// * 初始化
+// * 物体 - 初始化
 //==============================
 var _drill_EPS_initialize = Game_Character.prototype.initialize;
 Game_Character.prototype.initialize = function() {
 	_drill_EPS_initialize.call(this);
-	this._drill_EPS = {};
-	this._drill_EPS._s_key = {};
-	this._drill_EPS._s_lock = {};
+	this._drill_EPS_data = {};
+	this._drill_EPS_data['_s_key'] = {};
+	this._drill_EPS_data['_s_lock'] = {};
 }
-
 //==============================
-// * 注释初始化
+// * 物体 - 注释初始化
 //==============================
 var _drill_EPS_initMembers = Game_Event.prototype.initMembers;
 Game_Event.prototype.initMembers = function() {
@@ -203,7 +344,7 @@ Game_Event.prototype.drill_EPS_setupPressSwitch = function() {
 	}
 }
 //==============================
-// * 读取注释
+// * 物体 - 读取注释
 //==============================
 Game_Event.prototype.drill_EPS_readPage = function( page_list ) {		
 	page_list.forEach( function(l) {
@@ -216,18 +357,18 @@ Game_Event.prototype.drill_EPS_readPage = function( page_list ) {
 					var temp2 = String(args[3]);
 					if( temp1 == "作用于独立开关" ){
 						$gameTemp._drill_EPS_needRefresh = true;
-						this._drill_EPS._c_switch = temp2;
+						this._drill_EPS_data['_c_switch'] = temp2;
 					}
 					if( temp1 == "重力钥匙" ){
 						$gameTemp._drill_EPS_needRefresh = true;
-						this._drill_EPS._s_key[temp2] = true;
+						this._drill_EPS_data['_s_key'][temp2] = true;
 					}
 				}
 				if(args.length == 2){	//=>重力开关 : 关闭重力作用
 					var temp1 = String(args[1]);
 					if( temp1 == "关闭重力作用" ){
 						$gameTemp._drill_EPS_needRefresh = true;
-						this._drill_EPS._no_press = true;
+						this._drill_EPS_data['_can_press'] = false;
 					}
 				}
 				if(args.length == 8){	//=>重力开关 : 重力锁 : 钥匙_A : 作用于独立开关 : A
@@ -237,7 +378,7 @@ Game_Event.prototype.drill_EPS_readPage = function( page_list ) {
 					var temp4 = String(args[7]);
 					if( temp1 == "重力锁" && temp3 == "作用于独立开关" ){
 						$gameTemp._drill_EPS_needRefresh = true;
-						this._drill_EPS._s_lock[temp2] = temp4;
+						this._drill_EPS_data['_s_lock'][temp2] = temp4;
 					}
 				}
 			};
@@ -245,27 +386,29 @@ Game_Event.prototype.drill_EPS_readPage = function( page_list ) {
 	}, this);
 };
 //==============================
-// * 事件 - 判断锁
+// * 物体 - 判断锁
 //==============================
 Game_Character.prototype.drill_EPS_hasLocks = function() {	
-	if( !this._drill_EPS._s_lock ){ return false; }
-	var locks = this._drill_EPS._s_lock;
+	if( !this._drill_EPS_data['_s_lock'] ){ return false; }
+	var locks = this._drill_EPS_data['_s_lock'];
 	for(var key in locks ){
 		if( locks[key] !== undefined ){ return true; }
 	}
 	return false;
 }
 //==============================
-// * 事件 - 判断钥匙
+// * 物体 - 判断钥匙
 //==============================
 Game_Character.prototype.drill_EPS_hasKeys = function() {
-	if( !this._drill_EPS._s_key ){ return false; }
-	var keys = this._drill_EPS._s_key;
+	if( !this._drill_EPS_data['_s_key'] ){ return false; }
+	var keys = this._drill_EPS_data['_s_key'];
 	for(var key in keys ){
 		if( keys[key] === true ){ return true; }
 	}
 	return false;
 }
+
+
 //=============================================================================
 // ** 事件容器
 //=============================================================================
@@ -275,9 +418,9 @@ Game_Character.prototype.drill_EPS_hasKeys = function() {
 var _drill_EPS_temp_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {	
 	_drill_EPS_temp_initialize.call(this);
-	this._drill_EPS_c_switchs = [];
-	this._drill_EPS_s_locks = [];
-	this._drill_EPS_s_keys = [];
+	this._drill_EPS_c_switchs = [];			//普通重力开关容器
+	this._drill_EPS_s_locks = [];			//重力锁容器
+	this._drill_EPS_s_keys = [];			//重力钥匙容器
 	this._drill_EPS_needRefresh = true;
 };
 //==============================
@@ -285,9 +428,9 @@ Game_Temp.prototype.initialize = function() {
 //==============================
 var _drill_EPS_gmap_setup = Game_Map.prototype.setup;
 Game_Map.prototype.setup = function(mapId) {
-	$gameTemp._drill_EPS_c_switchs = [];
-	$gameTemp._drill_EPS_s_locks = [];
-	$gameTemp._drill_EPS_s_keys = [];
+	$gameTemp._drill_EPS_c_switchs = [];		//普通重力开关容器
+	$gameTemp._drill_EPS_s_locks = [];      	//重力锁容器
+	$gameTemp._drill_EPS_s_keys = [];       	//重力钥匙容器
 	$gameTemp._drill_EPS_needRefresh = true;
 	_drill_EPS_gmap_setup.call(this,mapId);
 }
@@ -296,9 +439,9 @@ Game_Map.prototype.setup = function(mapId) {
 //==============================
 var _drill_EPS_smap_createCharacters = Spriteset_Map.prototype.createCharacters;
 Spriteset_Map.prototype.createCharacters = function() {
-	$gameTemp._drill_EPS_c_switchs = [];
-	$gameTemp._drill_EPS_s_locks = [];
-	$gameTemp._drill_EPS_s_keys = [];
+	$gameTemp._drill_EPS_c_switchs = [];		//普通重力开关容器
+	$gameTemp._drill_EPS_s_locks = [];      	//重力锁容器
+	$gameTemp._drill_EPS_s_keys = [];       	//重力钥匙容器
 	$gameTemp._drill_EPS_needRefresh = true;
 	_drill_EPS_smap_createCharacters.call(this);
 }
@@ -322,13 +465,14 @@ Game_Map.prototype.drill_EPS_refreshSwitchChecks = function() {
 	if( !$gameTemp._drill_EPS_needRefresh ){ return }
 	$gameTemp._drill_EPS_needRefresh = false;
 	
+	$gameTemp._drill_EPS_c_switchs = [];		//普通重力开关容器
+	$gameTemp._drill_EPS_s_locks = [];      	//重力锁容器
+	$gameTemp._drill_EPS_s_keys = [];       	//重力钥匙容器
+	
 	var events = this.events();
-	$gameTemp._drill_EPS_c_switchs = [];
-	$gameTemp._drill_EPS_s_locks = [];
-	$gameTemp._drill_EPS_s_keys = [];
 	for (var i = 0; i < events.length; i++) {  
 		var temp_event = events[i];
-		if( temp_event._drill_EPS._c_switch != undefined){
+		if( temp_event._drill_EPS_data['_c_switch'] != undefined){
 			$gameTemp._drill_EPS_c_switchs.push(temp_event);
 		}
 		if( temp_event.drill_EPS_hasLocks() ){
@@ -352,14 +496,14 @@ Game_Map.prototype.drill_EPS_updateCommonSwitch = function() {
 	for (var i = 0; i < $gameTemp._drill_EPS_c_switchs.length; i++) {  
 		var temp_event = $gameTemp._drill_EPS_c_switchs[i];
 		
-		// >事件触发
+		// > 事件触发
 		var isTriggered = false;
 		var chars = this.events();
 		chars.push($gamePlayer);
 		for (var j = 0; j < chars.length; j++) {
 			var check_char = chars[j];
 			if( temp_event === check_char ){ continue; }	//排除 自己
-			if( check_char._drill_EPS._no_press === true ){ continue; }		//排除 无重力事件 
+			if( check_char._drill_EPS_data['_can_press'] == false ){ continue; }		//排除 无重力事件 
 			
 			if ( temp_event.pos(check_char.x,check_char.y) ){
 				isTriggered = true;
@@ -367,15 +511,15 @@ Game_Map.prototype.drill_EPS_updateCommonSwitch = function() {
 			}
 		}
 		
-		// >切换开关
+		// > 切换开关
 		if(isTriggered){
-			var s_key = [this._mapId, temp_event._eventId, temp_event._drill_EPS._c_switch ];
+			var s_key = [this._mapId, temp_event._eventId, temp_event._drill_EPS_data['_c_switch'] ];
 			if( $gameSelfSwitches.value(s_key) !== true){
 				$gameSelfSwitches.drill_setValueWithOutChange(s_key,true);
 				$gameSelfSwitches.onChange();
 			}
 		}else{
-			var s_key = [this._mapId, temp_event._eventId, temp_event._drill_EPS._c_switch ];
+			var s_key = [this._mapId, temp_event._eventId, temp_event._drill_EPS_data['_c_switch'] ];
 			if( $gameSelfSwitches.value(s_key) !== false){
 				$gameSelfSwitches.drill_setValueWithOutChange(s_key,false);
 				$gameSelfSwitches.onChange();
@@ -396,20 +540,20 @@ Game_Map.prototype.drill_EPS_updateSpecialSwitch = function() {
 	for (var i = 0; i < $gameTemp._drill_EPS_s_locks.length; i++) {  
 		var temp_event = $gameTemp._drill_EPS_s_locks[i];
 		
-		// >事件+玩家触发
+		// > 事件+玩家触发
 		var isTriggered = false;
 		var trigger_switch = "";
-		for (var j = 0; j < $gameTemp._drill_EPS_s_keys.length; j++) {
+		for( var j = 0; j < $gameTemp._drill_EPS_s_keys.length; j++ ){
 			var check_char = $gameTemp._drill_EPS_s_keys[j];
 			if( temp_event === check_char ){ continue; }				//排除 自己
-			if( check_char._drill_EPS._no_press === true ){ continue; } //排除 无重力事件 
+			if( check_char._drill_EPS_data['_can_press'] == false ){ continue; } //排除 无重力事件 
 			
 			if ( temp_event.pos(check_char.x,check_char.y) ){
 				
 				//标签对应
-				var locks = temp_event._drill_EPS._s_lock;
+				var locks = temp_event._drill_EPS_data['_s_lock'];
 				for( var l in locks ){
-					if( check_char._drill_EPS._s_key[ l ] === true ){
+					if( check_char._drill_EPS_data['_s_key'][ l ] === true ){
 						isTriggered = true;
 						trigger_switch = locks[ l ];
 						
@@ -418,15 +562,15 @@ Game_Map.prototype.drill_EPS_updateSpecialSwitch = function() {
 				}
 			}
 		}
-		// >切换开关
-		if(isTriggered){
+		// > 切换开关
+		if( isTriggered ){
 			var s_key = [this._mapId, temp_event._eventId, trigger_switch ];
 			if( $gameSelfSwitches.value(s_key) !== true){
 				$gameSelfSwitches.drill_setValueWithOutChange(s_key,true);
 				$gameSelfSwitches.onChange();
 			}
 		}else{
-			var locks = temp_event._drill_EPS._s_lock;	//未触发，则全部锁标签弹出
+			var locks = temp_event._drill_EPS_data['_s_lock'];	//未触发，则全部锁标签弹出
 			for( var l in locks ){
 				var s_key = [this._mapId, temp_event._eventId, locks[l] ];
 				if( $gameSelfSwitches.value(s_key) !== false){
@@ -442,9 +586,9 @@ Game_Map.prototype.drill_EPS_updateSpecialSwitch = function() {
 // * 优化 - 独立开关赋值时不刷新地图
 //==============================
 Game_SelfSwitches.prototype.drill_setValueWithOutChange = function(key, value) {
-    if (value) {
+    if( value ){
         this._data[key] = true;
-    } else {
+    }else{
         delete this._data[key];
     }
 };

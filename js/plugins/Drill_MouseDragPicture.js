@@ -201,14 +201,14 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var type = String(args[3]);
 			
 			var pic = null;
-			if( pic_id.indexOf("图片变量[") != -1 ){
+			if( pic == null && pic_id.indexOf("图片变量[") != -1 ){
 				pic_id = pic_id.replace("图片变量[","");
 				pic_id = pic_id.replace("]","");
 				pic_id = $gameVariables.value( Number(pic_id) );
 				if( $gameScreen.drill_MDP_isPictureExist( pic_id ) == false ){ return; }
 				pic = $gameScreen.picture( pic_id );
 			}
-			if( pic_id.indexOf("图片[") != -1 ){
+			if( pic == null && pic_id.indexOf("图片[") != -1 ){
 				pic_id = pic_id.replace("图片[","");
 				pic_id = pic_id.replace("]","");
 				pic_id = Number(pic_id);

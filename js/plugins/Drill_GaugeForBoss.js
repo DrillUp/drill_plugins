@@ -57,14 +57,40 @@
  *   (3.BOSS设置将使得 样式和敌人 绑定在一起。
  *      注意，敌群设置时，重复敌人可以出现多个。而如果指定BOSS的敌人
  *      重复出现了两个，则会出现两个重叠在一起的BOSS框。
+ *   (4.战斗中有四个名词： 角色、敌人、我方、敌方。
+ *      角色/敌人，是指数据库里配置的数据信息。
+ *      我方/敌方，是指战斗时，双方所站立的位置。
+ *      比如，角色[1] 表示角色ID为1的数据。
+ *      比如，敌方[1] 表示战斗时，第1个位置的敌人。
+ *      另外，这里的 BOSS设置[1] 表示插件中配置的绑定数据。
  * 参数条：
- *   (1.你需要先配置参数条样式，才能将样式id对应到 生命、魔法、怒气。
- *      参数条样式配置在 参数条核心 中配置。
- *   (2.如果你有不同想法，魔法条、怒气条可以设置多段、游标、凹槽条。
+ *   (1.参数值：　固定绑定BOSS属性。
+ *      遮罩：　　可自定义。
+ *      旋转：　　可自定义。
+ *      段上限：　固定绑定BOSS属性，可多段。
+ *      流动效果：可自定义。
+ *      凹槽条：　可自定义。
+ *      弹出条：　可自定义。
+ *      粒子：　　可自定义。
+ *      游标：　　可自定义。
+ *      加满动画：可自定义。
+ *   (2.参数条样式配置在 参数条核心 中配置。
+ *      部分特定的属性需要在该插件中扩展修改。
+ *      你需要先配置参数条样式，才能将样式id对应到 生命、魔法、怒气。
+ *   (3.如果你有不同想法，魔法条、怒气条可以设置多段、游标、凹槽条。
  * 参数数字：
- *   (1.你需要先配置参数数字样式，才能将样式id对应到 生命、魔法、怒气。
- *      参数数字样式配置在 参数数字核心 中配置。
- *   (2."x19"或"+100/100"等数字组合写法，都在核心中配置样式，该插件只
+ *   (1.参数值：　固定绑定敌人属性。
+ *      旋转：　　可自定义。
+ *      滚动效果：可自定义。
+ *      符号：　　可自定义。
+ *      前缀后缀：可自定义。
+ *      对齐方式：可自定义。
+ *      额定值：　固定绑定敌人属性。
+ *      额定符号：可自定义。
+ *   (2.参数数字样式配置在 参数数字核心 中配置。
+ *      部分特定的属性需要在该插件中扩展修改。
+ *      你需要先配置参数数字样式，才能将样式id对应到 生命、魔法、怒气。
+ *   (3."x19"或"+100/100"等数字组合写法，都在核心中配置样式，该插件只
  *      关联样式id。
  * 插件指令：
  *   (1.你必须先完成固定框样式配置，并且绑定到敌人之后，再来考虑插件指
@@ -1573,7 +1599,7 @@
     DrillUp.g_GFB_hideInDead = String(DrillUp.parameters["BOSS死亡后是否隐藏框"] || "false") === "true";	//未开放
 	if( DrillUp.parameters["资源-备用BOSS头像"] != undefined && 
 		DrillUp.parameters["资源-备用BOSS头像"] != "" ){
-		DrillUp.g_GFB_backupFaceList = JSON.parse( DrillUp.parameters["资源-备用BOSS头像"] || {} );
+		DrillUp.g_GFB_backupFaceList = JSON.parse( DrillUp.parameters["资源-备用BOSS头像"] || [] );
 	}else{
 		DrillUp.g_GFB_backupFaceList = [];
 	}
@@ -1587,7 +1613,7 @@
 			DrillUp.g_GFB_styleList[i] = DrillUp.drill_GFB_initStyle( DrillUp.g_GFB_styleList[i] );
 			//alert(JSON.stringify(DrillUp.g_GFB_styleList[i]));
 		}else{
-			DrillUp.g_GFB_styleList[i] = [];
+			DrillUp.g_GFB_styleList[i] = DrillUp.drill_GFB_initStyle( {} );
 		}
 	}
 	
@@ -1599,7 +1625,7 @@
 			DrillUp.g_GFB_bind[i] = JSON.parse(DrillUp.parameters["BOSS设置-" + String(i+1) ]);
 			DrillUp.g_GFB_bind[i] = DrillUp.drill_GFB_initBind( DrillUp.g_GFB_bind[i] );
 		}else{
-			DrillUp.g_GFB_bind[i] = [];
+			DrillUp.g_GFB_bind[i] = DrillUp.drill_GFB_initBind( {} );
 		}
 	}
 	
@@ -2719,7 +2745,10 @@ Drill_GFB_StyleSprite.prototype.drill_updateCommandParam = function() {
 	if( data_b['head_bitmap_id'] == 0 ){
 		this._drill_head_sprite.bitmap = ImageManager.load_SpecialBoss( data_b['head_src'] );
 	}else{
-		this._drill_head_sprite.bitmap = ImageManager.load_SpecialBoss( DrillUp.g_GFB_backupFaceList[ data_b['head_bitmap_id']-1 ] );
+		var face_src = DrillUp.g_GFB_backupFaceList[ data_b['head_bitmap_id']-1 ];
+		if( face_src ){
+			this._drill_head_sprite.bitmap = ImageManager.load_SpecialBoss( face_src );
+		}
 	}
 	
 }

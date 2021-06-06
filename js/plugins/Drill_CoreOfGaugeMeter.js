@@ -634,8 +634,6 @@
  *
  * @param 扣除速度
  * @parent ---凹槽条---
- * @type number
- * @min 1
  * @desc 凹槽条缩短的速度，单位像素/帧。
  * @default 15.0
  *

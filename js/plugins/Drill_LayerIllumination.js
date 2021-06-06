@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        地图 - 自定义照明效果
+ * @plugindesc [v1.5]        地图 - 自定义照明效果
  * @author Drill_up,紫悠
  * 
  * @Drill_LE_param "光源-%d"
@@ -104,13 +104,15 @@
  * 
  * 插件指令：>自定义照明 : 黑暗层 : 执行开启
  * 插件指令：>自定义照明 : 黑暗层 : 执行关闭
- * 插件指令：>自定义照明 : 黑暗层 : 修改黑暗层过渡时间 : 60
  * 插件指令：>自定义照明 : 黑暗层 : 修改黑暗层透明度 : 155
+ * 插件指令：>自定义照明 : 黑暗层 : 修改黑暗层过渡时间 : 60
  * 插件指令：>自定义照明 : 黑暗层 : 修改黑暗层颜色 : #00ff00
  * 
- * 1."黑暗层过渡时间"单位为帧，1秒60帧。
- *   "黑暗层透明度[0]"的值变为0时，照明效果将会被关闭。
- * 2.黑暗层与纯色滤镜的功能相似。颜色控制相应的过滤。
+ * 1."黑暗层透明度[0]"的值变为0时，照明效果将会自动关闭。
+ *   只要透明度的值大于0，就表示启用了黑暗层，就会持续消耗并工作。
+ *   注意，这里的黑暗层设置，不作用于 锁定 的地图。
+ * 2."黑暗层过渡时间"单位为帧，1秒60帧。
+ * 3.黑暗层与纯色滤镜的功能相似。颜色控制相应的过滤。
  *   不要用纯白色，因为什么光线都过滤不了。
  * 
  * -----------------------------------------------------------------------------
@@ -213,6 +215,8 @@
  * 注意，旧版本的指令不再有效。
  * [v1.4]
  * 修复了部分特殊情况下，黑暗层不显示的bug。
+ * [v1.5]
+ * 修复了插件指令透明度的过渡过程。
  * 
  * 
  * 
@@ -1706,7 +1710,7 @@
 	/*-----------------黑暗层------------------*/
 	DrillUp.g_LIl_enable = String(DrillUp.parameters["初始是否开启黑暗层"] || "false") == "true" ;
 	DrillUp.g_LIl_sustainTime = Number(DrillUp.parameters["黑暗层过渡时间"] || 60) ;
-	DrillUp.g_LIl_targetOpacity = Number(DrillUp.parameters["黑暗层透明度"] || 255) ;
+	DrillUp.g_LIl_opacity = Number(DrillUp.parameters["黑暗层透明度"] || 255) ;
 	DrillUp.g_LIl_layerColor = String(DrillUp.parameters["黑暗层颜色"] || "#000000") ;
 	DrillUp.g_LIl_layer = String(DrillUp.parameters["黑暗层层级"] || "上层") ;
 	
@@ -1762,10 +1766,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var temp1 = String(args[3]);
 			if( type == "黑暗层" ){
 				if( temp1 == "执行开启" ){
-					$gameSystem._drill_LIl['enable'] = true;
+					$gameSystem.drill_LIl_setNewTargetOpacity( DrillUp.g_LIl_opacity );
 				}
 				if( temp1 == "执行关闭" ){
-					$gameSystem._drill_LIl['enable'] = false;
+					$gameSystem.drill_LIl_setNewTargetOpacity( 0 );
 				}
 			}
 		}
@@ -1775,10 +1779,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var temp2 = String(args[5]);
 			if( type == "黑暗层" ){
 				if( temp1 == "修改黑暗层过渡时间" ){
-					$gameSystem._drill_LIl['sustainTime'] = Math.max( 1, Number(temp2) );
+					$gameSystem._drill_LIl['tar_time'] = Math.max( 1, Number(temp2) );
 				}
 				if( temp1 == "修改黑暗层透明度" ){
-					$gameSystem._drill_LIl['targetOpacity'] = Math.min( 255, Math.max( 0, Number(temp2) ));
+					$gameSystem.drill_LIl_setNewTargetOpacity( Number(temp2) );
 				}
 				if( temp1 == "修改黑暗层颜色" ){
 					$gameSystem._drill_LIl['layerColor'] = temp2;
@@ -1787,8 +1791,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		}
 		
 		// > 如果黑暗层未开，则插件指令无效
-		if( $gameMap._drill_LIl_lock['enableLocked'] == true && $gameMap._drill_LIl_lock['enable'] == false ){ return; }
-		if( $gameMap._drill_LIl_lock['enableLocked'] == false && $gameSystem._drill_LIl['enable'] == false ){ return; }
+		if( $gameTemp.drill_LIl_isDarkMaskEnabled() == false ){ return; }
 		
 		/*-----------------物体照明------------------*/
 		if(args.length == 6){
@@ -1966,17 +1969,42 @@ Game_Map.prototype.drill_LIl_isEventExist = function( e_id ){
 //=============================================================================
 // ** 存储变量初始化
 //=============================================================================
+//==============================
+// * 存储变量 - 初始化
+//==============================
 var _drill_LIl_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
     _drill_LIl_sys_initialize.call(this);
-	
+	this.drill_LIl_init();
+}
+Game_System.prototype.drill_LIl_init = function() {
 	this._drill_LIl = {};
-	this._drill_LIl['enable'] = DrillUp.g_LIl_enable;					//黑暗层 - 开关
-	this._drill_LIl['sustainTime'] = DrillUp.g_LIl_sustainTime;			//黑暗层 - 过渡时间
-	this._drill_LIl['targetOpacity'] = DrillUp.g_LIl_targetOpacity;		//黑暗层 - 透明度
+	this._drill_LIl['cur_time'] = 0;									//黑暗层 - 当前时间
+	this._drill_LIl['tar_time'] = DrillUp.g_LIl_sustainTime;			//黑暗层 - 过渡时间
+	this._drill_LIl['cur_opacity'] = 0;									//黑暗层 - 当前透明度（实时变化）
+	this._drill_LIl['last_opacity'] = 0;								//黑暗层 - 变化前透明度
+	this._drill_LIl['next_opacity'] = 0;								//黑暗层 - 下一个透明度
 	this._drill_LIl['layerColor'] = DrillUp.g_LIl_layerColor;			//黑暗层 - 颜色
-	this._drill_LIl['curTime'] = 0;										//黑暗层过渡
+	
+	if( DrillUp.g_LIl_enable == true ){		//（初始开启，则设为指定透明度）
+		this._drill_LIl['last_opacity'] = DrillUp.g_LIl_opacity;	
+		this._drill_LIl['next_opacity'] = DrillUp.g_LIl_opacity;
+	}
 };
+//==============================
+// * 存储变量 - 设置透明度
+//==============================
+Game_System.prototype.drill_LIl_setNewTargetOpacity = function( opacity ){
+	var l_data = this._drill_LIl;
+	l_data['last_opacity'] = l_data['last_opacity'] + (l_data['next_opacity'] - l_data['last_opacity']) * l_data['cur_time'] / l_data['tar_time'];
+	l_data['cur_time'] = 0;		//（从透明度A迈向透明度B）
+	l_data['next_opacity'] = Math.min( 255, Math.max( 0, Number(opacity) ));
+	
+	//alert(l_data['cur_time']);
+	//alert(l_data['tar_time']);
+	//alert(l_data['last_opacity']);
+	//alert(l_data['next_opacity']);
+}
 
 //=============================================================================
 // ** 地图备注
@@ -1993,7 +2021,7 @@ Game_Map.prototype.drill_LIl_setupIllumination = function() {
 	this._drill_LIl_lock['enableLocked'] = false;
 	this._drill_LIl_lock['enable'] = false;									//黑暗层锁定 - 开关
 	this._drill_LIl_lock['sustainTime'] = DrillUp.g_LIl_sustainTime;		//黑暗层锁定 - 过渡时间
-	this._drill_LIl_lock['targetOpacity'] = DrillUp.g_LIl_targetOpacity;	//黑暗层锁定 - 透明度
+	this._drill_LIl_lock['targetOpacity'] = DrillUp.g_LIl_opacity;			//黑暗层锁定 - 透明度
 	this._drill_LIl_lock['layerColor'] = DrillUp.g_LIl_layerColor;			//黑暗层锁定 - 颜色
 	
 	$dataMap.note.split(/[\r\n]+/).forEach(function(note) {
@@ -2044,7 +2072,7 @@ Game_Map.prototype.drill_LIl_setupIllumination = function() {
 // ** 事件
 //=============================================================================
 //==============================
-// * 初始化
+// * 事件 - 初始化
 //==============================
 var _drill_LIl_initialize = Game_CharacterBase.prototype.initialize;
 Game_CharacterBase.prototype.initialize = function() {
@@ -2056,7 +2084,7 @@ Game_CharacterBase.prototype.initialize = function() {
 	this._drill_LIl._light_oType = "";				//光源变化因素
 }
 //==============================
-// * 帧刷新
+// * 事件 - 帧刷新
 //==============================
 var _drill_LIl_c_update = Game_CharacterBase.prototype.update;
 Game_CharacterBase.prototype.update = function() {
@@ -2064,7 +2092,7 @@ Game_CharacterBase.prototype.update = function() {
 	this._drill_LIl._light_time += 1;
 }
 //==============================
-// * 注释初始化
+// * 事件 - 注释初始化
 //==============================
 var _drill_LIl_setupPage = Game_Event.prototype.setupPage;
 Game_Event.prototype.setupPage = function() {
@@ -2153,8 +2181,7 @@ Game_Map.prototype.update = function(sceneActive) {
 // ** 帧刷新 - 刷新统计
 //=============================================================================
 Scene_Map.prototype.drill_LIl_updateLightCheck = function() {
-	if( $gameMap._drill_LIl_lock['enableLocked'] == true && $gameMap._drill_LIl_lock['enable'] == false ){ return; }
-	if( $gameMap._drill_LIl_lock['enableLocked'] == false && $gameSystem._drill_LIl['enable'] == false ){ return; }
+	if( $gameTemp.drill_LIl_isDarkMaskEnabled() == false ){ return; }
 	if( $gameTemp._drill_LIl_needRefresh != true ){ return }
 	$gameTemp._drill_LIl_needRefresh = false;
 	
@@ -2292,30 +2319,32 @@ Scene_Map.prototype.update = function() {
 // * 帧刷新 - 黑暗层
 //==============================
 Scene_Map.prototype.drill_LIl_updateDarkLayer = function() {
-	if( $gameMap._drill_LIl_lock['enableLocked'] == true ){ 		//地图锁定时，黑暗层无法变化
+	
+	// > 地图锁定时，黑暗层无法变化
+	if( $gameMap._drill_LIl_lock['enableLocked'] == true ){ 		
 		this._drill_LIl_darkSprite.opacity = $gameMap._drill_LIl_lock['targetOpacity'];
 		return;
 	}
 	
-	// > 透明度控制
-	if( $gameSystem._drill_LIl['enable'] == true ){
-		$gameSystem._drill_LIl['curTime'] += 1;
-	}else{
-		$gameSystem._drill_LIl['curTime'] -= 1;
-	}
-	if( $gameSystem._drill_LIl['curTime'] < 0 ){
-		$gameSystem._drill_LIl['curTime'] = 0;
-	}
-	if( $gameSystem._drill_LIl['curTime'] > $gameSystem._drill_LIl['sustainTime'] ){
-		$gameSystem._drill_LIl['curTime'] = $gameSystem._drill_LIl['sustainTime'];
+	// > 旧版本兼容刷新
+	if( $gameSystem._drill_LIl['cur_time'] == undefined ){ $gameSystem.drill_LIl_init(); }
+	var l_data = $gameSystem._drill_LIl;
+	
+	// > 透明度控制	
+	l_data['cur_time'] += 1;
+	if( l_data['cur_time'] >= l_data['tar_time'] ){
+		l_data['cur_time'] = l_data['tar_time'];
+		
+		// > 完成变换时
+		l_data['last_opacity'] = l_data['next_opacity'];
+		l_data['cur_opacity'] = l_data['next_opacity'];
+		this._drill_LIl_darkSprite.opacity = l_data['cur_opacity'];
+		return;
 	}
 	
-	var oo = $gameSystem._drill_LIl['targetOpacity'] * $gameSystem._drill_LIl['curTime'] / $gameSystem._drill_LIl['sustainTime'];
-	if( isNaN(oo) ){
-		oo = $gameSystem._drill_LIl['targetOpacity'];
-	}
-	this._drill_LIl_darkSprite.opacity = oo;
-	
+	// > 变换过程
+	l_data['cur_opacity'] = l_data['last_opacity'] + (l_data['next_opacity'] - l_data['last_opacity']) * l_data['cur_time'] / l_data['tar_time'];
+	this._drill_LIl_darkSprite.opacity = l_data['cur_opacity'];
 };
 
 
@@ -2323,7 +2352,7 @@ Scene_Map.prototype.drill_LIl_updateDarkLayer = function() {
 // ** 黑暗层遮罩 全局画布
 //=============================================================================
 //==============================
-// * 初始化
+// * 画布 - 初始化
 //==============================
 var _drill_LIl_graphicsInit = Graphics.initialize;
 Graphics.initialize = function(width, height, type) {
@@ -2361,9 +2390,8 @@ Graphics.initialize = function(width, height, type) {
 	DrillUp.g_LIl_renderer = temp_renderer;
 	this.drill_LIl_updateCanvas();
 }
-
 //==============================
-// * 刷新（非帧）
+// * 画布 - 刷新（非帧）
 //==============================
 var _drill_LIl_updateAllElements = Graphics._updateAllElements;
 Graphics._updateAllElements = function() {
@@ -2372,7 +2400,7 @@ Graphics._updateAllElements = function() {
 	this.drill_LIl_updateRenderer();
 }
 //==============================
-// * 刷新 - canvas
+// * 画布 - 刷新 - canvas
 //==============================
 Graphics.drill_LIl_updateCanvas = function() {
 	DrillUp.g_LIl_canvas.width = this._width;
@@ -2381,13 +2409,14 @@ Graphics.drill_LIl_updateCanvas = function() {
 	//this._centerElement(DrillUp.g_LIl_canvas);
 };
 //==============================
-// * 刷新 - render
+// * 画布 - 刷新 - render
 //==============================
 Graphics.drill_LIl_updateRenderer = function() {
     if( DrillUp.g_LIl_renderer ){
         DrillUp.g_LIl_renderer.resize( this._width, this._height);
     }
 };
+
 
 //=============================================================================
 // ** 黑暗层遮罩
@@ -2400,7 +2429,6 @@ function Drill_LIl_MaskSprite() {
 }
 Drill_LIl_MaskSprite.prototype = Object.create(Sprite_Base.prototype);
 Drill_LIl_MaskSprite.prototype.constructor = Drill_LIl_MaskSprite;
-
 //==============================
 // * 黑暗层遮罩 - 初始化
 //==============================
@@ -2431,8 +2459,7 @@ Drill_LIl_MaskSprite.prototype.update = function() {
 	
 	// > 关闭时，不工作
 	var temp_visible = true;
-	if( $gameMap._drill_LIl_lock['enableLocked'] == true && $gameMap._drill_LIl_lock['enable'] == false ){ temp_visible = false; }
-	if( $gameMap._drill_LIl_lock['enableLocked'] == false && $gameSystem._drill_LIl['enable'] == false ){ temp_visible = false; }
+	temp_visible = $gameTemp.drill_LIl_isDarkMaskEnabled();
 	if( SceneManager._scene.constructor.name != "Scene_Map" ){ temp_visible = false; }
 	
 	// > 可见
@@ -2503,16 +2530,29 @@ Drill_LIl_MaskSprite.prototype.drill_createStage = function(width, height) {
 	}
 }
 //==============================
-// * 黑暗层遮罩 - 帧刷新
+// * 黑暗层遮罩 - 添加到父类
 //==============================
 Drill_LIl_MaskSprite.prototype.drill_LIl_addMaskChild = function( temp_sprite ) {
 	this._drill_main_layer.addChild( temp_sprite );
 }
 //==============================
-// * 黑暗层遮罩 - 帧刷新
+// * 黑暗层遮罩 - 从父类中移除
 //==============================
 Drill_LIl_MaskSprite.prototype.drill_LIl_removeMaskChild = function( temp_sprite ) {
 	this._drill_main_layer.removeChild( temp_sprite );
+}
+//==============================
+// * 黑暗层遮罩 - 判断是否开启
+//==============================
+Game_Temp.prototype.drill_LIl_isDarkMaskEnabled = function(){
+	
+	// > 临时锁定 为关闭状态，则表示长期未开
+	if( $gameMap._drill_LIl_lock['enableLocked'] == true && $gameMap._drill_LIl_lock['enable'] == false ){ return false; }
+	
+	// > 未锁定，且透明度为0，也表示长期未开
+	if( $gameMap._drill_LIl_lock['enableLocked'] == false && $gameSystem._drill_LIl['cur_opacity'] == 0 ){ return false; }
+	
+	return true;
 }
 
 

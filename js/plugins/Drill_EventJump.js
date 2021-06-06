@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        物体 - 事件跳跃
+ * @plugindesc [v1.1]        物体 - 事件跳跃
  * @author Drill_up
  * 
  * 
@@ -175,8 +175,16 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 添加了区域修正判定。
  * 
  * 
+ * @param 是否修正区域判定
+ * @type boolean
+ * @on 修正
+ * @off 不修正
+ * @desc 修正后，物体未完全离开图块时，算作从未离开的图块中起跳。
+ * @default true
  * 
  * @param 资源-跳跃音效
  * @desc 事件进行普通跳跃时播放音效。
@@ -309,7 +317,10 @@
     DrillUp.parameters = PluginManager.parameters('Drill_EventJump');
 	
 	
-	if( DrillUp.parameters["资源-跳跃音效"] != undefined ){
+	/*-----------------杂项------------------*/
+	DrillUp.g_EJu_fix = String(DrillUp.parameters["是否修正区域判定"] || "true") === "true";
+	if( DrillUp.parameters["资源-跳跃音效"] != undefined &&
+		DrillUp.parameters["资源-跳跃音效"] != "" ){
 		DrillUp.g_EJu_se = JSON.parse(DrillUp.parameters["资源-跳跃音效"]);
 	}else{
 		DrillUp.g_EJu_se = [""];
@@ -318,38 +329,38 @@
 	DrillUp.g_EJu_distance = Number(DrillUp.parameters["默认跳跃距离"] || 2);
 	DrillUp.g_EJu_delay = Number(DrillUp.parameters["默认跳跃延迟"] || 0);
 	
-	DrillUp.g_EJu_cliff_1 = [];
-	DrillUp.g_EJu_cliff_2 = [];
-	DrillUp.g_EJu_cliff_3 = [];
-	DrillUp.g_EJu_cliff_4 = [];
-	DrillUp.g_EJu_cliff_5 = [];
-	DrillUp.g_EJu_forbidden_area = [];
-	if( DrillUp.parameters["悬崖高度1"] != undefined ){
+	if( DrillUp.parameters["悬崖高度1"] != undefined &&
+		DrillUp.parameters["悬崖高度1"] != "" ){
 		DrillUp.g_EJu_cliff_1 = JSON.parse(DrillUp.parameters["悬崖高度1"]);
 	}else{
 		DrillUp.g_EJu_cliff_1 = [] ;
 	}
-	if( DrillUp.parameters["悬崖高度2"] != undefined ){
+	if( DrillUp.parameters["悬崖高度2"] != undefined &&
+		DrillUp.parameters["悬崖高度2"] != "" ){
 		DrillUp.g_EJu_cliff_2 = JSON.parse(DrillUp.parameters["悬崖高度2"]);
 	}else{
 		DrillUp.g_EJu_cliff_2 = [] ;
 	}
-	if( DrillUp.parameters["悬崖高度3"] != undefined ){
+	if( DrillUp.parameters["悬崖高度3"] != undefined &&
+		DrillUp.parameters["悬崖高度3"] != "" ){
 		DrillUp.g_EJu_cliff_3 = JSON.parse(DrillUp.parameters["悬崖高度3"]);
 	}else{
 		DrillUp.g_EJu_cliff_3 = [] ;
 	}
-	if( DrillUp.parameters["悬崖高度4"] != undefined ){
+	if( DrillUp.parameters["悬崖高度4"] != undefined &&
+		DrillUp.parameters["悬崖高度4"] != "" ){
 		DrillUp.g_EJu_cliff_4 = JSON.parse(DrillUp.parameters["悬崖高度4"]);
 	}else{
 		DrillUp.g_EJu_cliff_4 = [] ;
 	}
-	if( DrillUp.parameters["悬崖高度5"] != undefined ){
+	if( DrillUp.parameters["悬崖高度5"] != undefined &&
+		DrillUp.parameters["悬崖高度5"] != "" ){
 		DrillUp.g_EJu_cliff_5 = JSON.parse(DrillUp.parameters["悬崖高度5"]);
 	}else{
 		DrillUp.g_EJu_cliff_5 = [] ;
 	}
-	if( DrillUp.parameters["禁止跳跃区"] != undefined  && DrillUp.parameters["禁止跳跃区"] != "" ){
+	if( DrillUp.parameters["禁止跳跃区"] != undefined && 
+		DrillUp.parameters["禁止跳跃区"] != "" ){
 		DrillUp.g_EJu_forbidden_area = JSON.parse(DrillUp.parameters["禁止跳跃区"]);
 	}else{
 		DrillUp.g_EJu_forbidden_area = [] ;
@@ -1022,24 +1033,32 @@ Game_CharacterBase.prototype.initMembers = function() {
 //			    返回：无 
 //==============================
 Game_CharacterBase.prototype.drill_EJu_jumpWithCheck = function( distance,direction ) {
-	// >禁止跳跃区
+	// > 禁止跳跃区
 	if( this.drill_EJu_isInJumpForbiddenArea() ){ return; }
 	
-	// >跳跃延时
+	// > 跳跃延时
 	var data = this._drill_EJu_jump;
 	if( data['cur_delay'] > 0 ){ return; }
 	data['cur_delay'] = data['delay'];
 	
-	// >播放跳跃声音
+	// > 播放跳跃声音
 	SoundManager.drill_EJu_playSE(data['sound'],this);
 	
-	// >起点位置记录
+	// > 起点位置记录
 	data['lastCliff'] = this.drill_EJu_getCliffHeight(this._x, this._y);
 	data['lastX'] = this._x;
 	data['lastY'] = this._y;
 	this.drill_EJu_jumpTouch(this._x,this._y);			//接触原地
 	
-	// >判定推进
+	// > 当未完全进入起点时，距离-1（区域修正）
+	if( DrillUp.g_EJu_fix && distance > 0 ){
+		if( Math.abs( this._realX - this._x ) > 0.4 ||
+			Math.abs( this._realY - this._y ) > 0.4 ){
+			distance -= 1;
+		}
+	}
+	
+	// > 判定推进
 	var tar_x = this._x;
 	var tar_y = this._y;
 	var next_x = 0;		

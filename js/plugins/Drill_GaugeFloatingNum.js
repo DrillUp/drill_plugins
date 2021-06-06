@@ -30,6 +30,13 @@
  * ----设定注意事项
  * 1.插件的作用域：地图界面。
  *   作用于地图的各个层级。
+ * 细节：
+ *   (1.漂浮数字是一个基于 参数数字核心 样式的贴图，具体数字配置方式
+ *      可以去看看参数数字核心。
+ *   (2.你可以将漂浮数字放置在地图层级的 下层、中层、上层、图片层、
+ *      最顶层 中。
+ *   (3.漂浮文字只是临时性的贴图，不建议设计为长期滞留的贴图，
+ *      刷菜单、刷地图都可以刷掉漂浮文字。
  * 弹道：
  *   (1.漂浮数字的弹道支持情况如下：
  *        极坐标模式    √
@@ -38,13 +45,17 @@
  *        两点式        x  (不适合)
  *   (2.单个漂浮数字的轨迹完全可以通过弹道设置进行设计。
  *      具体配置方式可以看看"关于弹道.docx"。
- * 细节：
- *   (1.漂浮数字是一个基于 参数数字核心 样式的贴图，具体数字配置方式
- *      可以去看看参数数字核心。
- *   (2.你可以将漂浮数字放置在地图层级的 下层、中层、上层、图片层、
- *      最顶层 中。
- *   (3.漂浮文字只是临时性的贴图，不建议设计为长期滞留的贴图，
- *      刷菜单、刷地图都可以刷掉漂浮文字。
+ * 参数数字：
+ *   (1.参数值：　取决于插件指令的值。
+ *      旋转：　　可自定义。
+ *      滚动效果：固定为瞬间变化。
+ *      符号：　　可自定义。
+ *      前缀后缀：可自定义。
+ *      对齐方式：可自定义。
+ *      额定值：　关闭。
+ *      额定符号：关闭。
+ *   (2.参数数字样式配置在 参数数字核心 中配置。
+ *      部分特定的属性需要在该插件中扩展修改。
  * 设计：
  *   (1.你可以控制显示一些简单的数字，用来表示 +1 -1 这些漂浮数据。
  *      由于插件的局限性，暂时不能显示复杂的伤害、加成等数据。
@@ -1112,8 +1123,11 @@ Drill_GFN_NumberSprite.prototype.drill_initSprite = function() {
 	this._drill_symbol_data = {};
 	if( this._drill_data['symbol_id'] ){
 		var symbol_id = this._drill_data['symbol_id'];
-		this._drill_symbol_data = DrillUp.g_COGN_list[ symbol_id -1 ];
+		this._drill_symbol_data = JSON.parse(JSON.stringify( DrillUp.g_COGN_list[ symbol_id -1 ] ));
 	}
+	this._drill_symbol_data['rolling_mode'] = "瞬间变化";			//固定为瞬间变化
+	this._drill_symbol_data['specified_enable'] = false;			//关闭额定值
+	this._drill_symbol_data['specified_visible'] = false;			//关闭额定值显示
 	
 	// > 弹道初始化（移动）
 	data['ballistics']['movementTime'] = data['sustain_time'];		//（插件指令强制赋值）
@@ -1154,12 +1168,12 @@ Drill_GFN_NumberSprite.prototype.drill_initSprite = function() {
 	this.visible = data['visible'];
 	this.zIndex = data['zIndex'];		//图片层级
 	
-	this.drill_createMeter();			//创建参数数字
+	this.drill_createNumber();			//创建参数数字
 };
 //==============================
 // * 创建 - 参数数字
 //==============================
-Drill_GFN_NumberSprite.prototype.drill_createMeter = function() {
+Drill_GFN_NumberSprite.prototype.drill_createNumber = function() {
 	var data = this._drill_data;
 	
 	// > 参数数字 贴图初始化

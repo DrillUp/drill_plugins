@@ -818,17 +818,6 @@
  * @max 255
  * @desc 填入区域id，这些设置会作为条件放入筛选器进行筛选。
  * @default []
- * 
- * @param 区域-中心点
- * @type select
- * @option 一定包含
- * @value 一定包含
- * @option 一定不含
- * @value 一定不含
- * @option 任意
- * @value 任意
- * @desc 区域的中心点，不管是否符合后面条件，一定包含/不含。
- * @default 任意
  *
  */
  
@@ -876,61 +865,97 @@
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_CoreOfFixedArea');
 
-	DrillUp.g_COFA_area_list_length = 60;
-	DrillUp.g_COFA_area_list = [];
 	
-	for (var i = 0; i < DrillUp.g_COFA_area_list_length; i++) {
-		if( DrillUp.parameters['自定义区域-' + String(i+1) ] != "" ){
-			DrillUp.g_COFA_area_list[i] = JSON.parse(DrillUp.parameters['自定义区域-' + String(i+1) ]);
-			DrillUp.g_COFA_area_list[i]['consistent'] = String(DrillUp.g_COFA_area_list[i]["是否与事件朝向一致"] || "true") == "true";
-			var points = String( DrillUp.g_COFA_area_list[i]['点列表'] );
-			points = points.replace(/[ ]/g,"");
-			points = points.replace(/[\(（]/g,"");
-			points = points.replace(/[\)）]/g,"");
-			points = points.split(/[,，]/g);
-			if(points.length == 0 || points.length %2 == 1 ){
-				continue;
-			}
-			DrillUp.g_COFA_area_list[i]['points'] = [];
-			for ( var j = 0; j < points.length ; j+=2 ) {
+	//==============================
+	// * 变量获取 - 自定义区域
+	//				（~struct~AreaDefine）
+	//==============================
+	DrillUp.drill_COFA_initAreaDefine = function( dataFrom ){
+		var data = {};
+		data['consistent'] = String( dataFrom["是否与事件朝向一致"] || "true") == "true";
+		
+		data['points'] = [];
+		var points = String( dataFrom["点列表"] || "" );
+		points = points.replace(/[ ]/g,"");
+		points = points.replace(/[\(（]/g,"");
+		points = points.replace(/[\)）]/g,"");
+		points = points.split(/[,，]/g);
+		if( points.length > 0 && points.length %2 == 0 ){
+			for( var j = 0; j < points.length; j+=2 ){
 				var x = Number( points[j] );
 				var y = Number( points[j+1] );
-				DrillUp.g_COFA_area_list[i]['points'].push({ 'x':x,'y':y });
+				data['points'].push({ 'x':x,'y':y });
 			}
-			//alert(JSON.stringify(DrillUp.g_COFA_area_list[i]));
+		}
+		return data;
+	}
+	//==============================
+	// * 变量获取 - 筛选器
+	//				（~struct~AreaCondition）
+	//==============================
+	DrillUp.drill_COFA_initAreaCondition = function( dataFrom ){
+		var data = {};
+		data['center'] = String( dataFrom["区域-中心点"] || "任意");
+		data['block'] = String( dataFrom["区域-通行"] || "任意");
+		data['event'] = String( dataFrom["区域-事件"] || "任意");
+		data['tlie'] = String( dataFrom["区域-地形标志"] || "任意");
+		data['rRegion'] = String( dataFrom["区域-R图块标志"] || "任意");
+		if( dataFrom["地形标志列表"] != undefined &&
+			dataFrom["地形标志列表"] != "" ){
+			data['tlie_list'] = JSON.parse( dataFrom["地形标志列表"] );
 		}else{
-			DrillUp.g_COFA_area_list[i] = [];
+			data['tlie_list'] = [];
+		}
+		if( dataFrom["R图块标志列表"] != undefined &&
+			dataFrom["R图块标志列表"] != "" ){
+			data['rRegion_list'] = JSON.parse( dataFrom["R图块标志列表"] );
+		}else{
+			data['rRegion_list'] = [];
+		}
+		if( dataFrom["事件标签列表"] != undefined &&
+			dataFrom["事件标签列表"] != "" ){
+			data['eventTag_list'] = JSON.parse( dataFrom["事件标签列表"] );
+		}else{
+			data['eventTag_list'] = [];
+		}
+		return data;
+	}
+	
+	/*-----------------自定义区域------------------*/
+	DrillUp.g_COFA_area_list_length = 60;
+	DrillUp.g_COFA_area_list = [];
+	for( var i = 0; i < DrillUp.g_COFA_area_list_length; i++ ){
+		if( DrillUp.parameters['自定义区域-' + String(i+1) ] != undefined &&
+			DrillUp.parameters['自定义区域-' + String(i+1) ] != "" ){
+			var temp = JSON.parse(DrillUp.parameters['自定义区域-' + String(i+1) ]);
+			DrillUp.g_COFA_area_list[i] = DrillUp.drill_COFA_initAreaDefine( temp );
+		}else{
+			DrillUp.g_COFA_area_list[i] = DrillUp.drill_COFA_initAreaDefine( {} );
 		}
 	}
 	
+	/*-----------------筛选器------------------*/
 	DrillUp.g_COFA_condition_list_length = 40;
 	DrillUp.g_COFA_condition_list = [];
-	
-	for (var i = 0; i < DrillUp.g_COFA_condition_list_length; i++) {
-		if( DrillUp.parameters['筛选器-' + String(i+1) ] != "" ){
-			DrillUp.g_COFA_condition_list[i] = JSON.parse(DrillUp.parameters['筛选器-' + String(i+1) ]);
-			DrillUp.g_COFA_condition_list[i]['center'] = String(DrillUp.g_COFA_condition_list[i]["区域-中心点"] || "任意");
-			DrillUp.g_COFA_condition_list[i]['block'] = String(DrillUp.g_COFA_condition_list[i]["图块-通行"] || "任意");
-			DrillUp.g_COFA_condition_list[i]['event'] = String(DrillUp.g_COFA_condition_list[i]["图块-事件"] || "任意");
-			DrillUp.g_COFA_condition_list[i]['tlie'] = String(DrillUp.g_COFA_condition_list[i]["图块-地形标志"] || "任意");
-			DrillUp.g_COFA_condition_list[i]['tlie_list'] = JSON.parse(DrillUp.g_COFA_condition_list[i]['地形标志列表']);
-			DrillUp.g_COFA_condition_list[i]['rRegion'] = String(DrillUp.g_COFA_condition_list[i]["图块-R图块标志"] || "任意");
-			DrillUp.g_COFA_condition_list[i]['rRegion_list'] = JSON.parse(DrillUp.g_COFA_condition_list[i]['R图块标志列表']);
-			if( DrillUp.g_COFA_condition_list[i]['事件标签列表'] ){
-				DrillUp.g_COFA_condition_list[i]['eventTag_list'] = JSON.parse(DrillUp.g_COFA_condition_list[i]['事件标签列表']);
-			}else{
-				DrillUp.g_COFA_condition_list[i]['eventTag_list']
-			}
+	for( var i = 0; i < DrillUp.g_COFA_condition_list_length; i++ ){
+		if( DrillUp.parameters['筛选器-' + String(i+1) ] != undefined &&
+			DrillUp.parameters['筛选器-' + String(i+1) ] != "" ){
+			var temp = JSON.parse(DrillUp.parameters['筛选器-' + String(i+1) ]);
+			DrillUp.g_COFA_condition_list[i] = DrillUp.drill_COFA_initAreaCondition( temp );
+		}else{
+			DrillUp.g_COFA_condition_list[i] = DrillUp.drill_COFA_initAreaCondition( {} );
 		}
 	}
+	
 	
 //=============================================================================
 // * 点集合
 //=============================================================================
 //==============================
 // * 点集合 - 固定形状
-//			  参数：绝对中心点xy，区域类型，区域范围
-//			  返回：绝对坐标列表 { x:12 , y:23 } 
+//	
+//			参数：	绝对中心点xy，区域类型，区域范围
+//			返回：	绝对坐标列表 { x:12 , y:23 } 
 //==============================
 Game_Map.prototype.drill_COFA_getShapePoints = function(c_x, c_y, type, range ) {
 	var c_area = [];
@@ -976,8 +1001,9 @@ Game_Map.prototype.drill_COFA_getShapePoints = function(c_x, c_y, type, range ) 
 
 //==============================
 // * 点集合 - 自定义形状
-//			  参数：绝对中心点xy，朝向(2/4/6/8)，相对中心区域列表[{x:1,y:1}……]
-//			  返回：绝对坐标列表 { x:12 , y:23 } 
+//				
+//			参数：	绝对中心点xy，朝向(2/4/6/8)，相对中心区域列表[{x:1,y:1}……]
+//			返回：	绝对坐标列表 { x:12 , y:23 } 
 //==============================
 Game_Map.prototype.drill_COFA_getCustomPoints = function(c_x, c_y, direction, def_area ) {
 	var c_area = [];	//根据方向变化后的区域
@@ -1005,8 +1031,9 @@ Game_Map.prototype.drill_COFA_getCustomPoints = function(c_x, c_y, direction, de
 }
 //==============================
 // * 点集合 - 自定义形状（id）
-//			  参数：事件id，自定义区域id
-//			  返回：绝对坐标列表 { x:12 , y:23 } 
+//			
+//			参数：	事件id，自定义区域id
+//			返回：	绝对坐标列表 { x:12 , y:23 } 
 //==============================
 Game_Map.prototype.drill_COFA_getCustomPointsById = function( event_id, def_area_id ) {
 	var e = this.event( Number(event_id) );
@@ -1020,8 +1047,9 @@ Game_Map.prototype.drill_COFA_getCustomPointsById = function( event_id, def_area
 }
 //==============================
 // * 点集合 - 自定义形状（玩家位置）
-//			  参数：自定义区域id
-//			  返回：绝对坐标列表 { x:12 , y:23 } 
+//				
+//			参数：	自定义区域id
+//			返回：	绝对坐标列表 { x:12 , y:23 } 
 //==============================
 Game_Map.prototype.drill_COFA_getCustomPointsByPlayer = function( def_area_id ) {
 	var def_area = DrillUp.g_COFA_area_list[ Number(def_area_id) ];
@@ -1033,8 +1061,9 @@ Game_Map.prototype.drill_COFA_getCustomPointsByPlayer = function( def_area_id ) 
 }
 //==============================
 // * 点集合 - 自定义形状（只有位置无方向）
-//			  参数：x，y，自定义区域id
-//			  返回：绝对坐标列表 { x:12 , y:23 } 
+//			
+//			参数：	x，y，自定义区域id
+//			返回：	绝对坐标列表 { x:12 , y:23 } 
 //==============================
 Game_Map.prototype.drill_COFA_getCustomPointsByOnlyPosition = function( x1,y1, def_area_id ) {
 	var def_area = DrillUp.g_COFA_area_list[ Number(def_area_id) ];
@@ -1043,13 +1072,15 @@ Game_Map.prototype.drill_COFA_getCustomPointsByOnlyPosition = function( x1,y1, d
 	return this.drill_COFA_getCustomPoints( x1, y1, 2, def_area['points'] );
 }
 
+
 //=============================================================================
 // * 条件筛选
 //=============================================================================
 //==============================
 // * 条件 - 综合筛选（固定形状）
-//			参数：绝对中心点xy，区域类型，区域范围，条件obj
-//			返回：绝对坐标列表 { x:12 , y:23 } 
+//				
+//			参数：	绝对中心点xy，区域类型，区域范围，条件obj
+//			返回：	绝对坐标列表 { x:12 , y:23 } 
 //==============================
 Game_Map.prototype.drill_COFA_getShapePointsWithCondition = function( c_x, c_y, type, range, condition ) {
 	var area = this.drill_COFA_getShapePoints( c_x, c_y, type, range );		//获取点集合
@@ -1058,8 +1089,9 @@ Game_Map.prototype.drill_COFA_getShapePointsWithCondition = function( c_x, c_y, 
 
 //==============================
 // * 条件 - 综合筛选（自定义形状）
-//			参数：事件id，自定义区域id，条件obj
-//			返回：绝对坐标列表 { x:12 , y:23 } 
+//			
+//			参数：	事件id，自定义区域id，条件obj
+//			返回：	绝对坐标列表 { x:12 , y:23 } 
 //==============================
 Game_Map.prototype.drill_COFA_getCustomPointsByIdWithCondition = function( event_id, def_area_id, condition ) {
 	var area = this.drill_COFA_getCustomPointsById( event_id, def_area_id );	//获取点集合
@@ -1067,8 +1099,9 @@ Game_Map.prototype.drill_COFA_getCustomPointsByIdWithCondition = function( event
 }
 //==============================
 // * 条件 - 综合筛选（自定义形状，只有位置无方向）
-//			参数：事件id，自定义区域id，条件obj
-//			返回：绝对坐标列表 { x:12 , y:23 } 
+//			
+//			参数：	事件id，自定义区域id，条件obj
+//			返回：	绝对坐标列表 { x:12 , y:23 } 
 //==============================
 Game_Map.prototype.drill_COFA_getCustomPointsByOnlyPositionWithCondition = function( c_x,c_y, def_area_id, condition ) {
 	var area = this.drill_COFA_getCustomPointsByOnlyPosition( c_x,c_y, def_area_id );	//获取点集合

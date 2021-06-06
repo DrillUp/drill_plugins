@@ -385,9 +385,9 @@
 　　var Imported = Imported || {};
 　　Imported.Drill_X_SenceEquipParam = true;
 　　var DrillUp = DrillUp || {}; 
-
     DrillUp.parameters = PluginManager.parameters('Drill_X_SenceEquipParam');
 	
+	/*-----------------杂项------------------*/
     DrillUp.g_XSEP_param_float_acc = Number(DrillUp.parameters['显示数值小数点位数'] || 1);
     DrillUp.g_XSEP_param_max_row = Number(DrillUp.parameters['最大行数'] || 10);
 	DrillUp.g_XSEP_params = [];
@@ -445,7 +445,6 @@
 //=============================================================================
 // ** 角色窗口
 //=============================================================================
-
 if(Imported.MOG_SceneEquip){
 
 	//==============================
@@ -495,7 +494,8 @@ if(Imported.MOG_SceneEquip){
 			this.drawNewParam(x + l + w + a*2, y, paramId);
 		}
 		}
-	};*/
+	};
+*/
 	
 	//==============================
 	// * 绘制能力名

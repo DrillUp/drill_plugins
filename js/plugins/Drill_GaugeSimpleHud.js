@@ -8,7 +8,7 @@
  * 
  * @Drill_LE_param "生命框-%d"
  * @Drill_LE_parentKey ""
- * @Drill_LE_var "DrillUp.g_GSH_button_length"
+ * @Drill_LE_var "DrillUp.g_GSH_data_length"
  * 
  * @help  
  * =============================================================================
@@ -31,11 +31,25 @@
  * 1.插件的作用域：地图界面。
  *   作用于地图的各个层级。
  * 生命框：
- *   (1.生命框是一个基于 参数条核心 样式的贴图，具体数字配置方式
+ *   (1.地图简单生命框 = 2个参数条 + 2个外框。
+ *   (2.生命框是一个基于 参数条核心 样式的贴图，具体数字配置方式
  *      可以去看看参数条核心。
- *   (2.你可以将生命框放置在地图层级的 下层、中层、上层、图片层、
+ *   (3.你可以将生命框放置在地图层级的 下层、中层、上层、图片层、
  *      最顶层 中。
- *   (3.每个生命框只能绑定到一个物体上。
+ *   (4.每个生命框只能绑定到一个物体上。
+ * 参数条：
+ *   (1.参数值：　可绑定领队角色属性、变量。
+ *      遮罩：　　可自定义。
+ *      旋转：　　可自定义。
+ *      段上限：　可绑定领队角色属性、变量、固定值，可多段。
+ *      流动效果：可自定义。
+ *      凹槽条：　可自定义。
+ *      弹出条：　可自定义。
+ *      粒子：　　可自定义。
+ *      游标：　　可自定义。
+ *      加满动画：关闭。
+ *   (2.参数条样式配置在 参数条核心 中配置。
+ *      部分特定的属性需要在该插件中扩展修改。
  * 设计：
  *   (1.生命框包含两个参数条，分别为 生命条 和 魔法条 。
  *      这两个参数条不仅仅能表现 生命值、魔法值，还可以绑定变量。
@@ -121,121 +135,121 @@
  * @param 生命框-1
  * @parent ----生命框集合----
  * @type struct<DrillGSHStyle>
- * @desc 漂浮数字的详细配置信息。
+ * @desc 生命框的详细配置信息。
  * @default 
  * 
  * @param 生命框-2
  * @parent ----生命框集合----
  * @type struct<DrillGSHStyle>
- * @desc 漂浮数字的详细配置信息。
+ * @desc 生命框的详细配置信息。
  * @default 
  * 
  * @param 生命框-3
  * @parent ----生命框集合----
  * @type struct<DrillGSHStyle>
- * @desc 漂浮数字的详细配置信息。
+ * @desc 生命框的详细配置信息。
  * @default 
  * 
  * @param 生命框-4
  * @parent ----生命框集合----
  * @type struct<DrillGSHStyle>
- * @desc 漂浮数字的详细配置信息。
+ * @desc 生命框的详细配置信息。
  * @default 
  * 
  * @param 生命框-5
  * @parent ----生命框集合----
  * @type struct<DrillGSHStyle>
- * @desc 漂浮数字的详细配置信息。
+ * @desc 生命框的详细配置信息。
  * @default 
  * 
  * @param 生命框-6
  * @parent ----生命框集合----
  * @type struct<DrillGSHStyle>
- * @desc 漂浮数字的详细配置信息。
+ * @desc 生命框的详细配置信息。
  * @default 
  * 
  * @param 生命框-7
  * @parent ----生命框集合----
  * @type struct<DrillGSHStyle>
- * @desc 漂浮数字的详细配置信息。
+ * @desc 生命框的详细配置信息。
  * @default 
  * 
  * @param 生命框-8
  * @parent ----生命框集合----
  * @type struct<DrillGSHStyle>
- * @desc 漂浮数字的详细配置信息。
+ * @desc 生命框的详细配置信息。
  * @default 
  * 
  * @param 生命框-9
  * @parent ----生命框集合----
  * @type struct<DrillGSHStyle>
- * @desc 漂浮数字的详细配置信息。
+ * @desc 生命框的详细配置信息。
  * @default 
  * 
  * @param 生命框-10
  * @parent ----生命框集合----
  * @type struct<DrillGSHStyle>
- * @desc 漂浮数字的详细配置信息。
+ * @desc 生命框的详细配置信息。
  * @default 
  * 
  * @param 生命框-11
  * @parent ----生命框集合----
  * @type struct<DrillGSHStyle>
- * @desc 漂浮数字的详细配置信息。
+ * @desc 生命框的详细配置信息。
  * @default 
  * 
  * @param 生命框-12
  * @parent ----生命框集合----
  * @type struct<DrillGSHStyle>
- * @desc 漂浮数字的详细配置信息。
+ * @desc 生命框的详细配置信息。
  * @default 
  * 
  * @param 生命框-13
  * @parent ----生命框集合----
  * @type struct<DrillGSHStyle>
- * @desc 漂浮数字的详细配置信息。
+ * @desc 生命框的详细配置信息。
  * @default 
  * 
  * @param 生命框-14
  * @parent ----生命框集合----
  * @type struct<DrillGSHStyle>
- * @desc 漂浮数字的详细配置信息。
+ * @desc 生命框的详细配置信息。
  * @default 
  * 
  * @param 生命框-15
  * @parent ----生命框集合----
  * @type struct<DrillGSHStyle>
- * @desc 漂浮数字的详细配置信息。
+ * @desc 生命框的详细配置信息。
  * @default 
  * 
  * @param 生命框-16
  * @parent ----生命框集合----
  * @type struct<DrillGSHStyle>
- * @desc 漂浮数字的详细配置信息。
+ * @desc 生命框的详细配置信息。
  * @default 
  * 
  * @param 生命框-17
  * @parent ----生命框集合----
  * @type struct<DrillGSHStyle>
- * @desc 漂浮数字的详细配置信息。
+ * @desc 生命框的详细配置信息。
  * @default 
  * 
  * @param 生命框-18
  * @parent ----生命框集合----
  * @type struct<DrillGSHStyle>
- * @desc 漂浮数字的详细配置信息。
+ * @desc 生命框的详细配置信息。
  * @default 
  * 
  * @param 生命框-19
  * @parent ----生命框集合----
  * @type struct<DrillGSHStyle>
- * @desc 漂浮数字的详细配置信息。
+ * @desc 生命框的详细配置信息。
  * @default 
  * 
  * @param 生命框-20
  * @parent ----生命框集合----
  * @type struct<DrillGSHStyle>
- * @desc 漂浮数字的详细配置信息。
+ * @desc 生命框的详细配置信息。
  * @default 
  * 
  * 
@@ -244,7 +258,7 @@
  * 
  * @param 标签
  * @desc 只用于方便区分查看的标签，不作用在插件中。
- * @default ==新的漂浮数字==
+ * @default ==新的生命框==
  *
  * @param ---参数值---
  * @desc 
@@ -372,7 +386,7 @@
  * @value 图片层
  * @option 最顶层
  * @value 最顶层
- * @desc 漂浮数字所在的地图层级。
+ * @desc 生命框所在的地图层级。
  * @default 图片层
  *
  * @param 图片层级
@@ -503,11 +517,10 @@
 //
 //		★必要注意事项：
 //			1.插件的图片层级与多个插件共享。【必须自写 层级排序 函数】
-//			2.【镜头兼容】该插件的漂浮数字如果放在 下层、中层、上层、图片层 ，需要对其进行相关的镜头缩放控制。
+//			2.【镜头兼容】该插件的生命框如果放在 下层、中层、上层、图片层 ，需要对其进行相关的镜头缩放控制。
 //
 //		★其它说明细节：
-//			1.漂浮文字与 缓冲数字物体 不一样，不需要长期存储显示，所以也长用于短期的数字显示。
-//			2.移动镜头时，漂浮数字会被移走，因为漂浮数字只在最开始时锁定地图位置，并不绑定于地图。
+//			1.移动镜头时，生命框会被移走，因为生命框只在最开始时锁定地图位置，并不绑定于地图。
 //
 //		★存在的问题：
 //			暂无
@@ -570,19 +583,19 @@
 	
 	
 	/*-----------------生命框集合------------------*/
-	DrillUp.g_GSH_button_length = 20;
-	DrillUp.g_GSH_button = [];
-	for (var i = 0; i < DrillUp.g_GSH_button_length; i++) {
+	DrillUp.g_GSH_data_length = 20;
+	DrillUp.g_GSH_data = [];
+	for (var i = 0; i < DrillUp.g_GSH_data_length; i++) {
 		if( DrillUp.parameters["生命框-" + String(i+1) ] != undefined &&
 			DrillUp.parameters["生命框-" + String(i+1) ] != "" ){
-			DrillUp.g_GSH_button[i] = JSON.parse(DrillUp.parameters["生命框-" + String(i+1) ]);
-			DrillUp.g_GSH_button[i] = DrillUp.drill_GSH_initParam( DrillUp.g_GSH_button[i] );
-			DrillUp.g_GSH_button[i]['id'] = i+1;
-			DrillUp.g_GSH_button[i]['inited'] = true;
+			DrillUp.g_GSH_data[i] = JSON.parse(DrillUp.parameters["生命框-" + String(i+1) ]);
+			DrillUp.g_GSH_data[i] = DrillUp.drill_GSH_initParam( DrillUp.g_GSH_data[i] );
+			DrillUp.g_GSH_data[i]['id'] = i+1;
+			DrillUp.g_GSH_data[i]['inited'] = true;
 		}else{
-			DrillUp.g_GSH_button[i] = DrillUp.drill_GSH_initParam( {} );
-			DrillUp.g_GSH_button[i]['id'] = i+1;
-			DrillUp.g_GSH_button[i]['inited'] = false;
+			DrillUp.g_GSH_data[i] = DrillUp.drill_GSH_initParam( {} );
+			DrillUp.g_GSH_data[i]['id'] = i+1;
+			DrillUp.g_GSH_data[i]['inited'] = false;
 		}
 	}
 
@@ -730,8 +743,8 @@ Game_System.prototype.initialize = function() {
 	_drill_GSH_sys_initialize.call(this);
 	
 	this._drill_GSH_dataTank = [];			//生命框数据容器
-	for(var i = 0; i< DrillUp.g_GSH_button.length ;i++){
-		var temp_data = DrillUp.g_GSH_button[i];
+	for(var i = 0; i< DrillUp.g_GSH_data.length ;i++){
+		var temp_data = DrillUp.g_GSH_data[i];
 		this._drill_GSH_dataTank[i] = JSON.parse(JSON.stringify( temp_data ));	//深拷贝数据
 	}
 }
@@ -940,7 +953,7 @@ Drill_GSH_LifeSprite.prototype.drill_createMeter = function() {
 		data['hp_meter_id'] > 0 ){
 	
 		var hp_meter_id = data['hp_meter_id'];
-		this._drill_hp_meterData = DrillUp.g_COGM_list[ hp_meter_id -1 ];
+		this._drill_hp_meterData = JSON.parse(JSON.stringify( DrillUp.g_COGM_list[ hp_meter_id -1 ] ));
 		this._drill_hp_meterData['level_max'] = data['hpLevel_max'];				//段上限
 		this._drill_hp_meterData['x'] = data['hp_meter_x'];							//x
 		this._drill_hp_meterData['y'] = data['hp_meter_y'];							//y
@@ -958,7 +971,7 @@ Drill_GSH_LifeSprite.prototype.drill_createMeter = function() {
 		data['mp_meter_id'] > 0 ){
 			
 		var mp_meter_id = this._drill_data['mp_meter_id'];
-		this._drill_mp_meterData = DrillUp.g_COGM_list[ mp_meter_id -1 ];
+		this._drill_mp_meterData = JSON.parse(JSON.stringify( DrillUp.g_COGM_list[ mp_meter_id -1 ] ));
 		this._drill_mp_meterData['level_max'] = data['mpLevel_max'];				//段上限
 		this._drill_mp_meterData['x'] = data['mp_meter_x'];							//x
 		this._drill_mp_meterData['y'] = data['mp_meter_y'];							//y

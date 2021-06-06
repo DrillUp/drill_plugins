@@ -603,11 +603,12 @@ Scene_Boot.prototype.start = function() {
 		
 		// > 窗口最大化
 		if( DrillUp.g_TBS_screen_maximize ){
-			if( Utils.isNwjs() ){
+			if( Utils.isNwjs() ){		//（nwjs情况）
 				var gui = require('nw.gui'); 
 				var win = gui.Window.get(); 
 				win.maximize();
 			}
+			// ...
 
 		}else{
 			// > 设置指定大小
@@ -626,11 +627,13 @@ Scene_Boot.prototype.start = function() {
 			}
 		}
 	}
+	
+	// > 启动界面标记
 	DataManager._drill_TBS_in_boot = true;
 	_drill_TBS_boot_start.call(this);
 };
 //==============================
-// * 场景转换限制
+// * 拦截场景转换（跳转到Scene_Drill_TBS启动界面）
 //==============================
 var _drill_TBS_boot_goto = SceneManager.goto;
 SceneManager.goto = function(sceneClass) {

@@ -140,14 +140,14 @@
  * 修改了内部结构，以及注释说明。
  * 修复了接近触发时出现反复触发独立开关的bug。
  * 
- *
+ * 
  * @param 是否修正区域判定
  * @type boolean
  * @on 修正
  * @off 不修正
  * @desc 修正后，没有完全离开触发区域的事件也会被捕获到，并触发。
  * @default true
- *
+ * 
  * @param 玩家触发-1
  * @parent ---玩家触发---
  * @type struct<ATriArea>

@@ -362,10 +362,10 @@ Game_Event.prototype.drill_COMR_readPage = function( page_list ) {
 					var temp1 = String(args[1]);
 					var temp2 = String(args[3]);
 					if( temp1 == "路线记忆" ){
-						if( temp1 == "关闭" ){
+						if( temp2 == "关闭" ){
 							this._drill_COMR['remain_enable'] = false;
 						}
-						if( temp1 == "开启" ){
+						if( temp2 == "开启" ){
 							this._drill_COMR['remain_enable'] = true;
 						}
 					}

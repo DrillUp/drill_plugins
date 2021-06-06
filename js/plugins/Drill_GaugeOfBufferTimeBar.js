@@ -37,6 +37,19 @@
  *   (2.时间条创建后，是一个单独的个体，通过id区分。
  *      你可以创建多个时间条并绑定到同一事件上。
  *   (3.参数条对应的参数为时间，单位帧。
+ * 参数条：
+ *   (1.参数值：　取决于插件指令，表示剩余时间值。
+ *      遮罩：　　可自定义。
+ *      旋转：　　可自定义。
+ *      段上限：　取决于插件指令，可多段。
+ *      流动效果：可自定义。
+ *      凹槽条：　可自定义。
+ *      弹出条：　可自定义。
+ *      粒子：　　可自定义。
+ *      游标：　　可自定义。
+ *      加满动画：关闭。
+ *   (2.参数条样式配置在 参数条核心 中配置。
+ *      部分特定的属性需要在该插件中扩展修改。
  * 时间条物体：
  *   (1.时间条物体表示一个放置在地图界面中的独立物体，具有自己的贴图和
  *      时间计时器。
@@ -564,28 +577,41 @@
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_GaugeOfBufferTimeBar');
 	
+	
+	//==============================
+	// * 变量获取 - 时间条样式
+	//				（~struct~BufferTimeBar）
+	//==============================
+	DrillUp.drill_GOBTB_initParam = function( dataFrom ) {
+		var data = {};
+		data['x'] = Number( dataFrom["平移-整体 X"] || 0 );
+		data['y'] = Number( dataFrom["平移-整体 Y"] || 0 );
+		data['opacityTime'] = Number( dataFrom["渐变时长"] || 20 );
+		data['flowingType'] = String( dataFrom["时间条流动方式"] || "逐渐加满" );
+		data['zIndex'] = Number( dataFrom["图片层级"] || 0 );
+		data['meter_id'] = Number( dataFrom["参数条样式"] || 0 );
+		data['meter_x'] = Number( dataFrom["偏移-参数条 X"] || 0 );
+		data['meter_y'] = Number( dataFrom["偏移-参数条 Y"] || 0 );
+		data['frameLower_img'] = String( dataFrom["资源-外框背景"] || "" );
+		data['frameLower_x'] = Number( dataFrom["偏移-外框背景 X"] || 0 );
+		data['frameLower_y'] = Number( dataFrom["偏移-外框背景 Y"] || 0 );
+		data['frameLower_rotation'] = Number( dataFrom["外框背景旋转角度"] || 0 );
+		data['frameUpper_img'] = String( dataFrom["资源-外框前景"] || "" );
+		data['frameUpper_x'] = Number( dataFrom["偏移-外框前景 X"] || 0 );
+		data['frameUpper_y'] = Number( dataFrom["偏移-外框前景 Y"] || 0 );
+		data['frameUpper_rotation'] = Number( dataFrom["外框前景旋转角度"] || 0 );
+		return data;
+	}
+	
+	
+	/*-----------------时间条样式------------------*/
 	DrillUp.g_GOBTB_data_list_length = 40;
 	DrillUp.g_GOBTB_data_list = [];
 	for (var i = 0; i < DrillUp.g_GOBTB_data_list_length; i++) {
 		if( DrillUp.parameters["时间条样式-" + String(i+1) ] != undefined &&
 			DrillUp.parameters["时间条样式-" + String(i+1) ] != "" ){
-			DrillUp.g_GOBTB_data_list[i] = JSON.parse(DrillUp.parameters["时间条样式-" + String(i+1) ]);
-			DrillUp.g_GOBTB_data_list[i]['x'] = Number(DrillUp.g_GOBTB_data_list[i]["平移-整体 X"] || 0);
-			DrillUp.g_GOBTB_data_list[i]['y'] = Number(DrillUp.g_GOBTB_data_list[i]["平移-整体 Y"] || 0);
-			DrillUp.g_GOBTB_data_list[i]['opacityTime'] = Number(DrillUp.g_GOBTB_data_list[i]["渐变时长"] || 20);
-			DrillUp.g_GOBTB_data_list[i]['flowingType'] = String(DrillUp.g_GOBTB_data_list[i]["时间条流动方式"] || "逐渐加满");
-			DrillUp.g_GOBTB_data_list[i]['zIndex'] = Number(DrillUp.g_GOBTB_data_list[i]["图片层级"] || 0);
-			DrillUp.g_GOBTB_data_list[i]['meter_id'] = Number(DrillUp.g_GOBTB_data_list[i]["参数条样式"] || 0);
-			DrillUp.g_GOBTB_data_list[i]['meter_x'] = Number(DrillUp.g_GOBTB_data_list[i]["偏移-参数条 X"] || 0);
-			DrillUp.g_GOBTB_data_list[i]['meter_y'] = Number(DrillUp.g_GOBTB_data_list[i]["偏移-参数条 Y"] || 0);
-			DrillUp.g_GOBTB_data_list[i]['frameLower_img'] = String(DrillUp.g_GOBTB_data_list[i]["资源-外框背景"] || "");
-			DrillUp.g_GOBTB_data_list[i]['frameLower_x'] = Number(DrillUp.g_GOBTB_data_list[i]["偏移-外框背景 X"] || 0);
-			DrillUp.g_GOBTB_data_list[i]['frameLower_y'] = Number(DrillUp.g_GOBTB_data_list[i]["偏移-外框背景 Y"] || 0);
-			DrillUp.g_GOBTB_data_list[i]['frameLower_rotation'] = Number(DrillUp.g_GOBTB_data_list[i]["外框背景旋转角度"] || 0);
-			DrillUp.g_GOBTB_data_list[i]['frameUpper_img'] = String(DrillUp.g_GOBTB_data_list[i]["资源-外框前景"] || "");
-			DrillUp.g_GOBTB_data_list[i]['frameUpper_x'] = Number(DrillUp.g_GOBTB_data_list[i]["偏移-外框前景 X"] || 0);
-			DrillUp.g_GOBTB_data_list[i]['frameUpper_y'] = Number(DrillUp.g_GOBTB_data_list[i]["偏移-外框前景 Y"] || 0);
-			DrillUp.g_GOBTB_data_list[i]['frameUpper_rotation'] = Number(DrillUp.g_GOBTB_data_list[i]["外框前景旋转角度"] || 0);
+			var temp = JSON.parse(DrillUp.parameters["时间条样式-" + String(i+1) ]);
+			DrillUp.g_GOBTB_data_list[i] = DrillUp.drill_GOBTB_initParam( temp );
 		}else{
 			DrillUp.g_GOBTB_data_list[i] = {};
 		}
@@ -1092,7 +1118,7 @@ Drill_GOBTB_TimeBarSprite.prototype.drill_createMeter = function() {
 	var data = this._timeBar._drill_data;
 	
 	// > 参数条 数据初始化
-	var temp_data = DrillUp.g_COGM_list[ this._meterId ];
+	var temp_data = JSON.parse(JSON.stringify( DrillUp.g_COGM_list[ this._meterId ] ));
 	temp_data['level_max'] = data['level_max'];			//段上限
 	temp_data['x'] = data['meter_x'];					//x
 	temp_data['y'] = data['meter_y'];					//y

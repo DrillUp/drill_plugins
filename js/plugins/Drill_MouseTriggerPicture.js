@@ -658,6 +658,13 @@ Scene_Battle.prototype.drill_MTP_executeCommonEvent = function( commonId ) {
 	$gameSystem._drill_MTP_lastCommonId = commonId;
 	
 	//...
+	var e_data = {
+		'type':"公共事件",
+		'pipeType': "串行",
+		'commonEventId': commonId,
+	};
+	
+	$gameTemp.reserveCommonEvent( commonId );
 	
 }
 

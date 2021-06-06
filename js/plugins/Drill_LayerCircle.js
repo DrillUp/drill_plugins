@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        地图 - 多层地图魔法圈
+ * @plugindesc [v1.5]        地图 - 多层地图魔法圈
  * @author Drill_up
  * 
  * @Drill_LE_param "魔法圈层-%d"
@@ -147,6 +147,8 @@
  * [v1.4]
  * 修复了非循环地图中，移动镜头时位移比没有效果的bug。
  * 修改了插件指令结构，旋转速度改为 角度/帧 。
+ * [v1.5]
+ * 修复了玩家移动时，出现1像素的轻微漂移的问题。
  * 
  * 
  * 
@@ -1821,16 +1823,18 @@ Game_Map.prototype.drill_LCi_initMapdata = function() {
 	}
 }
 //==============================
-// * 地图 - 帧刷新 镜头位置
+// * 玩家 - 帧刷新 镜头位置
+//
+//			说明：	注意，玩家update与地图update有时间差，且晚1帧，所以只能继承玩家的update。
 //==============================
-var _drill_LCi_Map_updateScroll = Game_Map.prototype.updateScroll;
-Game_Map.prototype.updateScroll = function(){
-    _drill_LCi_Map_updateScroll.call(this);
+var _drill_LCi_player_update = Game_Player.prototype.update;
+Game_Player.prototype.update = function( sceneActive ){
+    _drill_LCi_player_update.call( this, sceneActive );
 	
 	for(var i = 0; i< $gameSystem._drill_LCi_dataTank_map.length ;i++){
 		var data = $gameSystem._drill_LCi_dataTank_map[i];
-		data['cameraX'] = (this._displayX + data['loopFixX'] - data['tile_x']) * this.tileWidth();
-		data['cameraY'] = (this._displayY + data['loopFixY'] - data['tile_y']) * this.tileHeight();
+		data['cameraX'] = ($gameMap._displayX + data['loopFixX'] - data['tile_x']) * $gameMap.tileWidth();
+		data['cameraY'] = ($gameMap._displayY + data['loopFixY'] - data['tile_y']) * $gameMap.tileHeight();
 	}
 };
 //==============================

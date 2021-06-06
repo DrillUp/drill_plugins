@@ -406,7 +406,7 @@ Game_Interpreter.prototype.drill_EIG_command = function(command, args) {
 				
 				/*-----------------起始位置（位置[10,10]）------------------*/
 				if( pos != undefined ){
-					if( pos == "玩家" && pos == "玩家位置" ){
+					if( pos == "玩家" || pos == "玩家位置" ){
 						var x1 = $gamePlayer._realX;
 						var y1 = $gamePlayer._realY;
 					}

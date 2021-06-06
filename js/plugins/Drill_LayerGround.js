@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.7]        地图 - 多层地图背景
+ * @plugindesc [v1.8]        地图 - 多层地图背景
  * @author Drill_up
  * 
  * @Drill_LE_param "背景层-%d"
@@ -150,6 +150,8 @@
  * [v1.7]
  * 修复了非循环地图中，移动镜头时位移比没有效果的bug。
  * 修改了插件指令结构。
+ * [v1.8]
+ * 修复了玩家移动时，出现1像素的轻微漂移的问题。
  *
  *
  * @param ---背景层组 1至20---
@@ -1785,16 +1787,21 @@ Game_Map.prototype.drill_LG_initMapdata = function() {
 	}
 }
 //==============================
-// * 地图 - 帧刷新 镜头位置
+// * 玩家 - 帧刷新 镜头位置
+//
+//			说明：	注意，玩家update与地图update有时间差，且晚1帧，所以只能继承玩家的update。
 //==============================
-var _drill_LG_Map_updateScroll = Game_Map.prototype.updateScroll;
-Game_Map.prototype.updateScroll = function(){
-    _drill_LG_Map_updateScroll.call(this);
+var _drill_LG_player_update = Game_Player.prototype.update;
+Game_Player.prototype.update = function( sceneActive ){
+    _drill_LG_player_update.call( this, sceneActive );
+	
+	// （移动时，像素会提前偏移1像素，可以确定不是 this._displayX 的问题，因为 x - floor(x) 的差值小于0.0001）
+	// 该问题已解决，刷新的时机早了，要等玩家updateScroll之后才刷。
 	
 	for(var i = 0; i< $gameSystem._drill_LG_dataTank_map.length ;i++){
 		var data = $gameSystem._drill_LG_dataTank_map[i];
-		data['cameraX'] = (this._displayX + data['loopFixX'] - data['tile_x']) * this.tileWidth();
-		data['cameraY'] = (this._displayY + data['loopFixY'] - data['tile_y']) * this.tileHeight();
+		data['cameraX'] = ($gameMap.displayX() + data['loopFixX'] - data['tile_x']) * $gameMap.tileWidth();
+		data['cameraY'] = ($gameMap.displayY() + data['loopFixY'] - data['tile_y']) * $gameMap.tileHeight();
 	}
 };
 //==============================
@@ -2013,8 +2020,8 @@ Scene_Map.prototype.drill_LG_updateBase = function() {
 			// > 位移
 			temp_data['cur_speedX'] += temp_data['speedX'];
 			temp_data['cur_speedY'] += temp_data['speedY'];
-			temp_sprite.origin.x = temp_data['x'] + temp_data['cameraX'] * (1 - temp_data['XPer']) + temp_data['cur_speedX'];
-			temp_sprite.origin.y = temp_data['y'] + temp_data['cameraY'] * (1 - temp_data['YPer']) + temp_data['cur_speedY'];
+			temp_sprite.origin.x = temp_data['x'] + temp_data['cameraX'] * (1.0 - temp_data['XPer']) + temp_data['cur_speedX'];
+			temp_sprite.origin.y = temp_data['y'] + temp_data['cameraY'] * (1.0 - temp_data['YPer']) + temp_data['cur_speedY'];
 			//（初始位移 + 镜头位移 * 位移比 + 背景位移）
 			
 			// > 波形移动
