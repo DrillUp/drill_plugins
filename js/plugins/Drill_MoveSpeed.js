@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        物体 - 移动速度
+ * @plugindesc [v1.5]        物体 - 移动速度
  * @author Drill_up
  *
  * @help
@@ -42,6 +42,10 @@
  *      只有设置速度0才可以使得速度为0。0速度是完全不能移动的。
  *   (3.根据群友测试，速度上限为48，
  *      这是因为图块判定的限制，最快只能每帧跑1个图块。
+ * 注意事项：
+ *   (1.禁止移动时，所有移动相关的 移动路线指令 是被阻塞的。
+ *      如果要修改某些移动路线相关属性，需要使用 插件指令。
+ *   (2.另外，移动路线的 脚本 也是被阻塞的，只有解除禁用后才会执行。
  * 
  * -----------------------------------------------------------------------------
  * ----激活条件 - 移动路线
@@ -115,6 +119,8 @@
  * 添加了与事件一体化的相关支持。
  * [v1.4]
  * 优化了插件指令结构，以及添加了禁止奔跑功能。
+ * [v1.5]
+ * 优化了 禁止移动 时，使得部分移动路线可以使用。
  * 
  * 
  *
@@ -151,6 +157,7 @@
 //					->默认速度
 //					->精确速度
 //					->禁止移动
+//						->只禁用部分移动路线
 //					->禁止奔跑
 //
 //		★必要注意事项：
@@ -164,7 +171,7 @@
 //			1.该插件需要参照注释大全来看，单独看非常绕。
 //
 //		★存在的问题：
-//			1.即使关闭此插件，玩家和跟随队员仍然会轻微颤抖。
+//			1.即使关闭此插件，玩家和跟随队员仍然会轻微颤抖。 2021/6
 //			  这种不平滑的感觉个人而言非常难受。以后专研透了，需要好好修复一下。
 //
 
@@ -589,23 +596,6 @@ Game_Follower.prototype.chaseCharacter = function( character ){
 }
 
 //==============================
-// * 禁止移动 - 事件禁止
-//==============================
-var _drill_MS_e_updateRoutineMove = Game_Character.prototype.updateRoutineMove;
-Game_Character.prototype.updateRoutineMove = function() {
-	if( this.drill_MS_isMoveForbidden() == true ){ return; }
-	_drill_MS_e_updateRoutineMove.call(this);
-}
-//==============================
-// * 禁止移动 - 玩家禁止
-//==============================
-var _drill_MS_p_canMove = Game_Player.prototype.canMove;
-Game_Player.prototype.canMove = function() {
-	if( this.drill_MS_isMoveForbidden() == true ){ return false; }
-	return _drill_MS_p_canMove.call(this);
-}
-
-//==============================
 // * 禁止奔跑 - 事件禁止
 //==============================
 var _drill_MS_e_isDashing = Game_Event.prototype.isDashing;
@@ -624,4 +614,95 @@ Game_Player.prototype.updateDashing = function(){
     }
 	_drill_MS_p_updateDashinge.call( this );
 }
+
+
+//=============================================================================
+// ** 移动路线阻塞（禁止移动）
+//=============================================================================
+//==============================
+// * 禁止移动 - 玩家禁止
+//==============================
+var _drill_MS_p_canMove = Game_Player.prototype.canMove;
+Game_Player.prototype.canMove = function() {
+	if( this.drill_MS_isMoveForbidden() == true ){ return false; }
+	return _drill_MS_p_canMove.call(this);
+}
+//==============================
+// * 移动路线 - 初始化
+//==============================
+var _drill_MS_mr_initialize = Game_Character.prototype.initialize;
+Game_Character.prototype.initialize = function() {
+	_drill_MS_mr_initialize.call(this);
+	this['_drill_MS_moveRouteBlock'] = false;		//移动路线阻塞 标记
+};
+//==============================
+// * 移动路线 - 路线帧刷新
+//==============================
+var _drill_MS_mr_updateRoutineMove = Game_Character.prototype.updateRoutineMove;
+Game_Character.prototype.updateRoutineMove = function(){
+	
+	// > 禁止移动被解除时，取消阻塞
+	if( this.drill_MS_isMoveForbidden() == false ){	
+		this['_drill_MS_moveRouteBlock'] = false;
+    }
+	
+	// > 阻塞
+	if( this['_drill_MS_moveRouteBlock'] == true ){ return; }
+	
+	_drill_MS_mr_updateRoutineMove.call(this);
+};
+//==============================
+// * 移动路线 - 执行单条移动路线
+//==============================
+var _drill_MS_mr_processMoveCommand = Game_Character.prototype.processMoveCommand;
+Game_Character.prototype.processMoveCommand = function( command ){
+	
+	// > 阻塞标记识别
+	if( this.drill_MS_isMoveForbidden() == true ){
+		var gc = Game_Character;
+		switch( command.code ){
+			case gc.ROUTE_MOVE_DOWN:			//向下移动
+			case gc.ROUTE_MOVE_LEFT:			//向左移动
+			case gc.ROUTE_MOVE_RIGHT:			//向右移动
+			case gc.ROUTE_MOVE_UP:				//向上移动
+			case gc.ROUTE_MOVE_LOWER_L:			//向左下移动
+			case gc.ROUTE_MOVE_LOWER_R:			//向右下移动
+			case gc.ROUTE_MOVE_UPPER_L:			//向左上移动
+			case gc.ROUTE_MOVE_UPPER_R:			//向右上移动
+			case gc.ROUTE_MOVE_RANDOM:			//随机移动
+			case gc.ROUTE_MOVE_TOWARD:			//接近玩家
+			case gc.ROUTE_MOVE_AWAY:			//远离玩家
+			case gc.ROUTE_MOVE_FORWARD:			//前进一步
+			case gc.ROUTE_MOVE_BACKWARD:		//后退一步
+			case gc.ROUTE_TURN_DOWN:			//朝向下方
+			case gc.ROUTE_TURN_LEFT:			//朝向左方
+			case gc.ROUTE_TURN_RIGHT:			//朝向右方
+			case gc.ROUTE_TURN_UP:				//朝向上方
+			case gc.ROUTE_TURN_90D_R:			//右转90°
+			case gc.ROUTE_TURN_90D_L:			//左转90°
+			case gc.ROUTE_TURN_180D:			//后转180°
+			case gc.ROUTE_TURN_90D_R_L:			//向左或向右转90°
+			case gc.ROUTE_TURN_RANDOM:			//随机转向
+			case gc.ROUTE_TURN_TOWARD:			//朝向玩家
+			case gc.ROUTE_TURN_AWAY:			//背向玩家
+			case gc.ROUTE_SCRIPT:				//脚本...
+				this['_drill_MS_moveRouteBlock'] = true;
+				break;
+		}
+	}
+	
+	// > 阻塞
+	if( this['_drill_MS_moveRouteBlock'] == true ){ return; }
+	
+	_drill_MS_mr_processMoveCommand.call( this, command );
+};
+//==============================
+// * 移动路线 - 移动路线索引+1
+//==============================
+var _drill_MS_mr_advanceMoveRouteIndex = Game_Character.prototype.advanceMoveRouteIndex;
+Game_Character.prototype.advanceMoveRouteIndex = function(){
+	if( this['_drill_MS_moveRouteBlock'] == true ){ return; }	//（阻塞）
+	_drill_MS_mr_advanceMoveRouteIndex.call( this );
+};
+
 

@@ -3,17 +3,9 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.9]        UI - 物品+技能文本颜色
+ * @plugindesc [v2.0]        UI - 物品+技能文本颜色
  * @author Drill_up
- *
  * 
- * @param MOG-技能浮动框是否变色
- * @type boolean
- * @on 变色
- * @off 不变色
- * @desc true - 变色，false - 不变色，技能浮动框插件中的文本也变色。
- * @default true
- *
  * @help  
  * =============================================================================
  * +++ Drill_ItemTextColor +++
@@ -37,12 +29,20 @@
  * ----设定注意事项
  * 1.插件的作用域：战斗界面、菜单界面、地图界面。
  *   作用于物品、技能的名称。
- * 2.该插件与 UI-物品+技能文本的滤镜效果 相互独立，但是为了使得效果
- *   可以叠加，最好放其后面。
- * 3.注意名词：物品/武器/护甲/技能
- *   护甲=防具，物品=道具，这两个名词是同一个意思，指令写防具、道具都有效。
- *   另外，没有下列名词：装备/装甲/装束 。
- *
+ * 细节：
+ *   (1.该插件与 UI-物品+技能文本的滤镜效果 相互独立，但是为了使得效果
+ *      可以叠加，最好放其后面。
+ *   (2.注意名词：物品/武器/护甲/技能
+ *      护甲=防具，物品=道具，这两个名词是同一个意思，指令写防具、道具都有效。
+ *      另外，没有下列名词：装备/装甲/装束 。
+ * 存档问题：
+ *   (1.注意，进入游戏后，颜色数据会被保存到存档中，如果你修改了物品的颜色，
+ *      再次载入旧存档，将读取到 存档前 的旧颜色。
+ *   (2.插件经过优化，遇到 纯黑旧颜色 时，自动会刷新颜色。
+ * 设计：
+ *   (1.注意，发布游戏版本前一定要确认 物品和装备 的颜色不再修改，
+ *      玩家存档后，在不同版本的颜色设置中不同步，会累积成更加复杂的问题。
+ * 
  * -----------------------------------------------------------------------------
  * ----激活条件：
  * 在要修改颜色的 物品/武器/护甲/技能 下，添加注释即可：
@@ -52,69 +52,56 @@
  *
  * <高级颜色:1>
  *
- * 颜色后面的数字1对应你配置中的第1个颜色。你也可以直接贴颜色代码。
+ * 1.颜色后面的数字1对应你配置中的第1个颜色。你也可以直接贴颜色代码。
+ * 2.此颜色配置，在每次新开档时，会刷新，但是在旧存档中，不一定会刷新。
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 颜色：
+ * 如果你要改变颜色设置，可以使用下面插件指令：
+ * （冒号两边都有一个空格）
+ * 
+ * 插件指令：>文本颜色 : 物品[5] : 物品普通 : 普通颜色[2]
+ * 插件指令：>文本颜色 : 武器[5] : 武器普通 : 普通颜色[2]
+ * 插件指令：>文本颜色 : 护甲[5] : 护甲普通 : 普通颜色[2]
+ * 插件指令：>文本颜色 : 技能[5] : 技能普通 : 普通颜色[2]
+ * 
+ * 插件指令：>文本颜色 : 物品[5] : 物品高级 : 高级颜色[4]
+ * 插件指令：>文本颜色 : 武器[5] : 武器高级 : 高级颜色[4]
+ * 插件指令：>文本颜色 : 护甲[5] : 护甲高级 : 高级颜色[4]
+ * 插件指令：>文本颜色 : 技能[5] : 技能高级 : 高级颜色[4]
+ * 
+ * 1.颜色修改后永久有效。
+ * 2.旧插件指令没有"物品[ ]"方框文本，只有单一的数字，
+ *   也可以兼容使用。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 颜色变量：
  * 如果你要临时改变颜色，那么可以使用下面插件指令：
  * （冒号两边都有一个空格）
  * 
- * 插件指令（物品）：>文本颜色 : B : 物品普通 : A1
- * 插件指令（武器）：>文本颜色 : C : 武器普通 : A1
- * 插件指令（护甲）：>文本颜色 : D : 护甲普通 : A1
- * 插件指令（技能）：>文本颜色 : E : 技能普通 : A1
- *
- * 插件指令（物品）：>文本颜色 : B : 物品高级 : A2
- * 插件指令（武器）：>文本颜色 : C : 武器高级 : A2
- * 插件指令（护甲）：>文本颜色 : D : 护甲高级 : A2
- * 插件指令（技能）：>文本颜色 : E : 技能高级 : A2
+ * 插件指令：>文本颜色 : 物品[5] : 物品普通 : 普通颜色[2]
+ * 插件指令：>文本颜色 : 物品[5] : 物品普通 : 普通颜色变量[21]
+ * 插件指令：>文本颜色 : 物品变量[21] : 物品普通 : 普通颜色[2]
+ * 插件指令：>文本颜色 : 物品变量[21] : 物品普通 : 普通颜色变量[22]
  * 
- * 参数A1：颜色编号
- *         也可以直接是颜色代码#ffffff
- * 参数A2：高级颜色编号
- *         对应配置的高级渐变色的编号。
- * 参数B： 物品id号
- * 参数C： 武器id号
- * 参数D： 护甲id号
- * 参数E： 技能id号
- *
- * 修改后永久有效。
+ * 插件指令：>文本颜色 : 物品[5] : 物品高级 : 高级颜色[4]
+ * 插件指令：>文本颜色 : 物品[5] : 物品高级 : 高级颜色变量[21]
+ * 插件指令：>文本颜色 : 物品变量[21] : 物品高级 : 高级颜色[4]
+ * 插件指令：>文本颜色 : 物品变量[21] : 物品高级 : 高级颜色变量[22]
  * 
- * 示例：
- * >文本颜色 : 3 : 物品普通 : 1
- * >文本颜色 : 3 : 物品普通 : #FF4444
- * （修改 3号物品 为 颜色1红色，两个效果是一样的）
- * >文本颜色 : 3 : 物品普通 : #FFFFFF
- * （3号物品变回白色）
- * >文本颜色 : 5 : 物品高级 : 1
- * （修改 5号物品 为 高级颜色1白红渐变）
+ * 1.这里单独为"物品"类型的插件指令情况。
+ *   加上后面的"武器"、"护甲"、"技能"，一共有8*4种组合写法。
  *
- * -----------------------------------------------------------------------------
- * ----可选设定 - 颜色变量：
- * 如果你要使得与相关的变量进行绑定，使用插件指令：
- * （冒号两边都有一个空格）
- *
- * 插件指令（物品变量）：>变量文本颜色 : G : 物品普通 : F1
- * 插件指令（武器变量）：>变量文本颜色 : H : 武器普通 : F1
- * 插件指令（护甲变量）：>变量文本颜色 : I : 护甲普通 : F1
- * 插件指令（技能变量）：>变量文本颜色 : J : 技能普通 : F1
- *
- * 插件指令（物品变量）：>变量文本颜色 : G : 物品高级 : F2
- * 插件指令（武器变量）：>变量文本颜色 : H : 武器高级 : F2
- * 插件指令（护甲变量）：>变量文本颜色 : I : 护甲高级 : F2
- * 插件指令（技能变量）：>变量文本颜色 : J : 技能高级 : F2
- * 
- * 参数F1：颜色变量编号
- * 参数F2：高级颜色变量编号
- * 参数B： 物品变量id号
- * 参数C： 武器变量id号
- * 参数D： 护甲变量id号
- * 参数E： 技能变量id号
- *
- * 示例：
- * >变量文本颜色 : 4 : 敌人普通 : 5
- * （修改编号为 变量4值 对应的物品id，为 变量5值 对应的颜色编号）
- * 
+ * 以下是旧版本的指令，也可以用：
+ * 插件指令(旧)：>变量文本颜色 : 21 : 物品普通 : 22
+ * 插件指令(旧)：>变量文本颜色 : 21 : 武器普通 : 22
+ * 插件指令(旧)：>变量文本颜色 : 21 : 护甲普通 : 22
+ * 插件指令(旧)：>变量文本颜色 : 21 : 技能普通 : 22
+ * 插件指令(旧)：>变量文本颜色 : 21 : 物品高级 : 22
+ * 插件指令(旧)：>变量文本颜色 : 21 : 武器高级 : 22
+ * 插件指令(旧)：>变量文本颜色 : 21 : 护甲高级 : 22
+ * 插件指令(旧)：>变量文本颜色 : 21 : 技能高级 : 22
+ * （修改编号为 变量21值 对应的物品id，为 变量22值 对应的颜色编号）
  *
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -161,6 +148,16 @@
  * 分离了颜色核心。添加了插件性能说明。
  * [v1.9]
  * 修正了部分名词概念的定义。
+ * [v2.0]
+ * 改进了 新加的物品 在旧存档中显示为黑色的问题。
+ * 
+ * 
+ * @param MOG-技能浮动框是否变色
+ * @type boolean
+ * @on 变色
+ * @off 不变色
+ * @desc true - 变色，false - 不变色，技能浮动框插件中的文本也变色。
+ * @default true
  *
  */
  
@@ -219,7 +216,9 @@
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_ItemTextColor');
 	
-    DrillUp.g_ITC_mog_action = String(DrillUp.parameters['MOG-技能浮动框是否变色'] || "true") === "true";
+	
+	/*-----------------杂项------------------*/
+    DrillUp.g_ITC_mog_action = String(DrillUp.parameters["MOG-技能浮动框是否变色"] || "true") === "true";
 
 	
 //=============================================================================
@@ -234,80 +233,122 @@ if( Imported.Drill_CoreOfColor ){
 var _drill_ITC_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_ITC_pluginCommand.call(this, command, args);
-	if (command === '>文本颜色') {	// >文本颜色 : B : 物品普通 : A1
+	if( command === ">文本颜色" ){	// >文本颜色 : B : 物品普通 : A1
 		if(args.length == 6){
-			var temp1 = Number(args[1]);
-			var temp2 = String(args[5]);
 			var type = String(args[3]);
-			if( type == '物品普通' || type == '道具普通' ){
+			
+			/*-----------------对象组获取------------------*/
+			var temp1 = String(args[1]);
+			var temp2 = String(args[5]);
+			if( temp1.indexOf("变量[") != -1 ){
+				temp1 = temp1.replace("物品变量[","");
+				temp1 = temp1.replace("道具变量[","");
+				temp1 = temp1.replace("武器变量[","");
+				temp1 = temp1.replace("护甲变量[","");
+				temp1 = temp1.replace("防具变量[","");
+				temp1 = temp1.replace("技能变量[","");
+				temp1 = temp1.replace("]","");
+				temp1 = $gameVariables.value( Number(temp1) );
+			}else{
+				temp1 = temp1.replace("物品[","");
+				temp1 = temp1.replace("道具[","");
+				temp1 = temp1.replace("武器[","");
+				temp1 = temp1.replace("护甲[","");
+				temp1 = temp1.replace("防具[","");
+				temp1 = temp1.replace("技能[","");
+				temp1 = temp1.replace("]","");
+				temp1 = Number(temp1);
+			}
+			if( temp2.indexOf("变量[") != -1 ){
+				temp2 = temp2.replace("普通颜色变量[","");
+				temp2 = temp2.replace("高级颜色变量[","");
+				temp2 = temp2.replace("颜色变量[","");
+				temp2 = temp2.replace("]","");
+				temp2 = $gameVariables.value( Number(temp2) );
+				temp2 = String(temp2);
+			}else{
+				temp2 = temp2.replace("普通颜色[","");
+				temp2 = temp2.replace("高级颜色[","");
+				temp2 = temp2.replace("颜色[","");
+				temp2 = temp2.replace("]","");
+				temp2 = String(temp2);
+			}
+			
+			/*-----------------转换------------------*/
+			if( type == "物品普通" || type == "道具普通" ){
 				if( temp2.slice(0,1) === "#" ){
 					$gameSystem._drill_ITC_items[temp1] = temp2;
 				}else{
 					$gameSystem._drill_ITC_items[temp1] = String(DrillUp.drill_COC_getColor( Number(temp2)-1 ));
 				}
 			}
-			if( type == '物品高级' || type == '道具高级' ){
+			if( type == "物品高级" || type == "道具高级" ){
 				$gameSystem._drill_ITC_items[temp1] = String(DrillUp.drill_COC_getSeniorColor( Number(temp2) -1 ));
 			}
-			if( type == '武器普通' ){
+			
+			if( type == "武器普通" ){
 				if( temp2.slice(0,1) === "#" ){
 					$gameSystem._drill_ITC_weapons[temp1] = temp2;
 				}else{
 					$gameSystem._drill_ITC_weapons[temp1] = String(DrillUp.drill_COC_getColor( Number(temp2) -1 ));
 				}
 			}
-			if( type == '武器高级' ){
+			if( type == "武器高级" ){
 				$gameSystem._drill_ITC_weapons[temp1] = String(DrillUp.drill_COC_getSeniorColor( Number(temp2) -1 ));
 			}
-			if( type == '护甲普通' || type == '防具普通' ){
+			
+			if( type == "护甲普通" || type == "防具普通" ){
 				if( temp2.slice(0,1) === "#" ){
 					$gameSystem._drill_ITC_armors[temp1] = temp2;
 				}else{
 					$gameSystem._drill_ITC_armors[temp1] = String(DrillUp.drill_COC_getColor( Number(temp2) -1 ));
 				}
 			}
-			if( type == '护甲高级' || type == '防具高级' ){
+			if( type == "护甲高级" || type == "防具高级" ){
 				$gameSystem._drill_ITC_armors[temp1] = String(DrillUp.drill_COC_getSeniorColor( Number(temp2) -1 ));
 			}
-			if( type == '技能普通' ){
+			
+			if( type == "技能普通" ){
 				if( temp2.slice(0,1) === "#" ){
 					$gameSystem._drill_ITC_skills[temp1] = temp2;
 				}else{
 					$gameSystem._drill_ITC_skills[temp1] = String(DrillUp.drill_COC_getColor( Number(temp2) -1 ));
 				}
 			}
-			if( type == '技能高级' ){
+			if( type == "技能高级" ){
 				$gameSystem._drill_ITC_skills[temp1] = String(DrillUp.drill_COC_getSeniorColor( Number(temp2) -1 ));
 			}
 		}
 	}
-	if (command === '>变量文本颜色') {
+	
+	/*-----------------旧插件指令------------------*/
+	if( command === ">变量文本颜色" ){
 		if(args.length == 6){
 			var temp1 = $gameVariables.value( Number(args[1]) ) ;
 			var temp2 = $gameVariables.value( Number(args[5]) ) ;
 			var type = String(args[3]);
-			if( type == '物品普通' || type == '道具普通' ){
+			if( type == "物品普通" || type == "道具普通" ){
 				$gameSystem._drill_ITC_items[temp1] = String(DrillUp.drill_COC_getColor( Number(temp2) -1 ));
 			}
-			if( type == '物品高级' || type == '道具高级' ){
+			if( type == "物品高级" || type == "道具高级" ){
 				$gameSystem._drill_ITC_items[temp1] = String(DrillUp.drill_COC_getSeniorColor( Number(temp2) -1 ));
 			}
-			if( type == '武器普通' ){
+			if( type == "武器普通" ){
 				$gameSystem._drill_ITC_weapons[temp1] = String(DrillUp.drill_COC_getColor( Number(temp2) -1 ));
 			}
-			if( type == '武器高级' ){
+			if( type == "武器高级" ){
 				$gameSystem._drill_ITC_weapons[temp1] = String(DrillUp.drill_COC_getSeniorColor( Number(temp2) -1 ));
 			}
-			if( type == '护甲普通' || type == '防具普通' ){
+			if( type == "护甲普通" || type == "防具普通" ){
 				$gameSystem._drill_ITC_armors[temp1] = String(DrillUp.drill_COC_getColor( Number(temp2) -1 ));
 			}
-			if( type == '护甲高级' || type == '防具高级' ){
+			if( type == "护甲高级" || type == "防具高级" ){
 				$gameSystem._drill_ITC_armors[temp1] = String(DrillUp.drill_COC_getSeniorColor( Number(temp2) -1 ));
 			}
-			if( type == '技能普通' ){
+			if( type == "技能普通" ){
 				$gameSystem._drill_ITC_skills[temp1] = String(DrillUp.drill_COC_getColor( Number(temp2) -1 ));
 			}
-			if( type == '技能高级' ){
+			if( type == "技能高级" ){
 				$gameSystem._drill_ITC_skills[temp1] = String(DrillUp.drill_COC_getSeniorColor( Number(temp2) -1 ));
 			}
 		}
@@ -315,89 +356,146 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	
 };
 //=============================================================================
-// ** 读取注释初始化
+// ** 存储变量初始化
 //=============================================================================
+//=============================
+// * 存储变量 - 初始化
+//=============================
 var _drill_ITC_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
 	_drill_ITC_initialize.call(this);
+	
+	// > 颜色数据容器初始化
 	this._drill_ITC_items = [];
 	this._drill_ITC_weapons = [];
 	this._drill_ITC_armors = [];
 	this._drill_ITC_skills = [];
-	for( var i = 0; i < $dataItems.length; i++ ){	//物品
-		if( $dataItems[i] == null ){this._drill_ITC_items[i] = "";continue;}
-		var note = String($dataItems[i].note);
-		var re_color = /<颜色:([^<>]*?)>/; 				//正则获取（返回数组，第二个为匹配内容）
-		var color = (note.match(re_color)) || [];
-		var re_colorG = /<高级颜色:([^<>]*?)>/; 	
-		var colorG = (note.match(re_colorG)) || [];
-		if(color != "" && color != [] ){
-			if( color[1].slice(0,1) === "#" ){
-				this._drill_ITC_items[i] = color;
+	
+	// > 读取注释
+	this.drill_ITC_readCommon();
+}
+//==============================
+// * 存档文件 - 载入存档 - 数据赋值
+//==============================
+var _drill_ITC_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_ITC_extractSaveContents.call( this, contents );
+	$gameSystem.drill_ITC_readCommon();		//（载入旧存档时，读取注释，防止物品的黑颜色）
+}
+//=============================
+// * 存储变量 - 读取注释
+//=============================
+Game_System.prototype.drill_ITC_readCommon = function() {
+	for( var i = 0; i < $dataItems.length; i++ ){		//物品
+		
+		// > 空物品时，跳过
+		if( $dataItems[i] == null ){ this._drill_ITC_items[i] = ""; continue; }
+		
+		// > 无数据时，才赋值
+		if( this._drill_ITC_items[i] == null || 
+			this._drill_ITC_items[i] == "" ){
+		
+			// > 开始读取
+			var note = String($dataItems[i].note);
+			var re_color = /<颜色:([^<>]*?)>/; 				//正则获取（返回数组，第二个为匹配内容）
+			var color = (note.match(re_color)) || [];
+			var re_colorG = /<高级颜色:([^<>]*?)>/; 	
+			var colorG = (note.match(re_colorG)) || [];
+			if( color != "" && color != [] ){				//（普通颜色编号）
+				if( color[1].slice(0,1) === "#" ){
+					this._drill_ITC_items[i] = color;
+				}else{
+					this._drill_ITC_items[i] = String(DrillUp.drill_COC_getColor( Number(color[1]) -1 )) ;
+				}
+			}else if( colorG != "" && colorG != [] ){		//（高级颜色编号）
+				this._drill_ITC_items[i] = DrillUp.drill_COC_getSeniorColor( Number(colorG[1]) -1 );
 			}else{
-				this._drill_ITC_items[i] = String(DrillUp.drill_COC_getColor( Number(color[1]) -1 )) ;
+				this._drill_ITC_items[i] = "";
 			}
-		}else if( colorG != "" && colorG != [] ){	//高级颜色编号
-			this._drill_ITC_items[i] = DrillUp.drill_COC_getSeniorColor( Number(colorG[1]) -1 );
-		}else{
-			this._drill_ITC_items[i] = "";
 		}
 	}
-	for( var i = 0; i < $dataWeapons.length; i++ ){	//武器
+	for( var i = 0; i < $dataWeapons.length; i++ ){		//武器
+		
+		// > 空物品时，跳过
 		if( $dataWeapons[i] == null ){this._drill_ITC_weapons[i] = "";continue;}
-		var note = String($dataWeapons[i].note);
-		var re_color = /<颜色:([^<>]*?)>/; 		
-		var color = (note.match(re_color)) || [];
-		var re_colorG = /<高级颜色:([^<>]*?)>/; 	
-		var colorG = (note.match(re_colorG)) || [];
-		if(color != "" && color != [] ){
-			if( color[1].slice(0,1) === "#" ){
-				this._drill_ITC_weapons[i] = color;
+		
+		// > 无数据时，才赋值
+		if( this._drill_ITC_weapons[i] == null ||
+			this._drill_ITC_weapons[i] == "" ){
+		
+			// > 开始读取
+			var note = String($dataWeapons[i].note);
+			var re_color = /<颜色:([^<>]*?)>/; 		
+			var color = (note.match(re_color)) || [];
+			var re_colorG = /<高级颜色:([^<>]*?)>/; 	
+			var colorG = (note.match(re_colorG)) || [];
+			if( color != "" && color != [] ){				//（普通颜色编号）
+				if( color[1].slice(0,1) === "#" ){
+					this._drill_ITC_weapons[i] = color;
+				}else{
+					this._drill_ITC_weapons[i] = String(DrillUp.drill_COC_getColor( Number(color[1]) -1 )) ;
+				}
+			}else if( colorG != "" && colorG != [] ){		//（高级颜色编号）
+				this._drill_ITC_weapons[i] = DrillUp.drill_COC_getSeniorColor( Number(colorG[1]) -1 );
 			}else{
-				this._drill_ITC_weapons[i] = String(DrillUp.drill_COC_getColor( Number(color[1]) -1 )) ;
+				this._drill_ITC_weapons[i] = "";
 			}
-		}else if( colorG != "" && colorG != [] ){	//高级颜色编号
-			this._drill_ITC_weapons[i] = DrillUp.drill_COC_getSeniorColor( Number(colorG[1]) -1 );
-		}else{
-			this._drill_ITC_weapons[i] = "";
 		}
 	}
-	for( var i = 0; i < $dataArmors.length; i++ ){	//护甲
+	for( var i = 0; i < $dataArmors.length; i++ ){		//护甲
+		
+		// > 空物品时，跳过
 		if( $dataArmors[i] == null ){this._drill_ITC_armors[i] = "";continue;}
-		var note = String($dataArmors[i].note);
-		var re_color = /<颜色:([^<>]*?)>/; 		
-		var color = (note.match(re_color)) || [];
-		var re_colorG = /<高级颜色:([^<>]*?)>/; 	
-		var colorG = (note.match(re_colorG)) || [];
-		if(color != "" && color != [] ){
-			if( color[1].slice(0,1) === "#" ){
-				this._drill_ITC_armors[i] = color;
+		
+		// > 无数据时，才赋值
+		if( this._drill_ITC_armors[i] == null ||
+			this._drill_ITC_armors[i] == "" ){
+		
+			// > 开始读取
+			var note = String($dataArmors[i].note);
+			var re_color = /<颜色:([^<>]*?)>/; 		
+			var color = (note.match(re_color)) || [];
+			var re_colorG = /<高级颜色:([^<>]*?)>/; 	
+			var colorG = (note.match(re_colorG)) || [];
+			if( color != "" && color != [] ){				//（普通颜色编号）
+				if( color[1].slice(0,1) === "#" ){
+					this._drill_ITC_armors[i] = color;
+				}else{
+					this._drill_ITC_armors[i] = String(DrillUp.drill_COC_getColor( Number(color[1]) -1 )) ;
+				}
+			}else if( colorG != "" && colorG != [] ){		//（高级颜色编号）
+				this._drill_ITC_armors[i] = DrillUp.drill_COC_getSeniorColor( Number(colorG[1]) -1 );
 			}else{
-				this._drill_ITC_armors[i] = String(DrillUp.drill_COC_getColor( Number(color[1]) -1 )) ;
+				this._drill_ITC_armors[i] = "";
 			}
-		}else if( colorG != "" && colorG != [] ){	//高级颜色编号
-			this._drill_ITC_armors[i] = DrillUp.drill_COC_getSeniorColor( Number(colorG[1]) -1 );
-		}else{
-			this._drill_ITC_armors[i] = "";
 		}
 	}
-	for( var i = 0; i < $dataSkills.length; i++ ){	//技能
+	for( var i = 0; i < $dataSkills.length; i++ ){		//技能
+		
+		// > 空物品时，跳过
 		if( $dataSkills[i] == null ){this._drill_ITC_skills[i] = "";continue;}
-		var note = String($dataSkills[i].note);
-		var re_color = /<颜色:([^<>]*?)>/; 		
-		var color = (note.match(re_color)) || [];
-		var re_colorG = /<高级颜色:([^<>]*?)>/; 	
-		var colorG = (note.match(re_colorG)) || [];
-		if(color != "" && color != [] ){
-			if( color[1].slice(0,1) === "#" ){
-				this._drill_ITC_skills[i] = color;
+		
+		// > 无数据时，才赋值
+		if( this._drill_ITC_skills[i] == null ||
+			this._drill_ITC_skills[i] == "" ){ 
+		
+			// > 开始读取
+			var note = String($dataSkills[i].note);
+			var re_color = /<颜色:([^<>]*?)>/; 		
+			var color = (note.match(re_color)) || [];
+			var re_colorG = /<高级颜色:([^<>]*?)>/; 	
+			var colorG = (note.match(re_colorG)) || [];
+			if( color != "" && color != [] ){				//（普通颜色编号）
+				if( color[1].slice(0,1) === "#" ){
+					this._drill_ITC_skills[i] = color;
+				}else{
+					this._drill_ITC_skills[i] = String(DrillUp.drill_COC_getColor( Number(color[1]) -1 )) ;
+				}
+			}else if( colorG != "" && colorG != [] ){		//（高级颜色编号）
+				this._drill_ITC_skills[i] = DrillUp.drill_COC_getSeniorColor( Number(colorG[1]) -1 );
 			}else{
-				this._drill_ITC_skills[i] = String(DrillUp.drill_COC_getColor( Number(color[1]) -1 )) ;
+				this._drill_ITC_skills[i] = "";
 			}
-		}else if( colorG != "" && colorG != [] ){	//高级颜色编号
-			this._drill_ITC_skills[i] = DrillUp.drill_COC_getSeniorColor( Number(colorG[1]) -1 );
-		}else{
-			this._drill_ITC_skills[i] = "";
 		}
 	}
 };
@@ -406,23 +504,24 @@ Game_System.prototype.initialize = function() {
 // ** 窗口物品文本
 //=============================================================================
 //=============================
-// * 添加标识
+// * 物品文本 - 添加标识
 //=============================
 var _drill_ITC_drawItemName = Window_Base.prototype.drawItemName;
 Window_Base.prototype.drawItemName = function(item, x, y, width) {
+	this._drill_ITC_isDrawingItemName = true;		//绘制标记 - 开
+	this._drill_ITC_curItem = item;					//当前的物品对象
 	
-	this._drill_ITC_isDrawingItemName = true;
-	this._drill_ITC_curItem = item;
 	_drill_ITC_drawItemName.call(this, item, x, y, width);
-	this._drill_ITC_isDrawingItemName = false;
 	
+	this._drill_ITC_isDrawingItemName = false;		//绘制标记 - 关
 }
 //=============================
-// * 根据标识修改颜色
+// * 物品文本 - 根据标识修改颜色
 //=============================
 var _drill_ITC_drawText = Window_Base.prototype.drawText;
 Window_Base.prototype.drawText = function(text, x, y, maxWidth, align) {
 
+	// > 绘制
 	if( this._drill_ITC_isDrawingItemName == true ){
 		var item = this._drill_ITC_curItem;
 		if( DataManager.isItem(item) ){
@@ -448,8 +547,10 @@ Window_Base.prototype.drawText = function(text, x, y, maxWidth, align) {
 			if( color != "" ){this.changeTextColor(color);}
 		}
 	}
+	
 	_drill_ITC_drawText.call(this, text, x, y, maxWidth, align);
 	
+	// > 绘制后颜色恢复
 	if( this._drill_ITC_isDrawingItemName == true ){
 		this.resetTextColor();
 	}

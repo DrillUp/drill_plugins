@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        对话框 - 方块粉碎效果
+ * @plugindesc [v1.3]        对话框 - 方块粉碎效果
  * @author Drill_up
  * 
  *
@@ -63,11 +63,13 @@
  * 
  * 1.在对话框播放文字时，插件指令是不能执行的。
  *   所以，你必须在文字播放前，预备执行插件指令。
- * 2.粉碎的插件指令最好 紧贴 对话指令。如果不紧贴，
+ * 2.插件指令的 前半部分(对话框内容)和后半部分(延迟[60] : 方块粉碎[15])
+ *   的参数可以随意组合。一共有3*3种组合方式。
+ * 3.粉碎的插件指令最好 紧贴 对话指令。如果不紧贴，
  *   "延迟[0]"的效果会提早生效。要注意延迟时间长一点。
- * 3."延迟[60]"表示对话开始后，粉碎延迟的时间。单位帧，1秒60帧。
+ * 4."延迟[60]"表示对话开始后，粉碎延迟的时间。单位帧，1秒60帧。
  *   "方块粉碎[1]"对应 方块粉碎核心 插件中配置的粉碎id。
- * 4.粉碎背景可以有两个过程，先反转拼合在一起，然后破碎。
+ * 5.粉碎背景可以有两个过程，先反转拼合在一起，然后破碎。
  *   以此可以制作中间的过渡效果。
  * 
  * -----------------------------------------------------------------------------
@@ -118,6 +120,9 @@
  * 修改了部分插件注释内容。
  * [v1.2]
  * 修改了与核心的部分兼容设置。
+ * [v1.3]
+ * 修复了战斗界面对话框不能粉碎的bug。
+ * 
  * 
  * 
  * @param 默认图片碎片消失方式
@@ -130,7 +135,6 @@
  * @value 等一半时间后线性消失
  * @desc 碎片消失的方式。
  * @default 线性消失
- * 
  * 
  * 
  */
@@ -188,7 +192,10 @@
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_DialogShatterEffect');
 	
+	
+	/*-----------------杂项------------------*/
 	DrillUp.g_DSE_opacityType = String(DrillUp.parameters['默认图片碎片消失方式'] || "线性消失");	
+	
 	
 	
 //=============================================================================
@@ -319,7 +326,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 var _drill_DSE_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
     _drill_DSE_sys_initialize.call(this);
-	this._drill_DSE_opacityType = DrillUp.g_DSE_opacityType;
+	
+	this._drill_DSE_opacityType = DrillUp.g_DSE_opacityType;	//透明类型
+	
+	// > 对话框
 	this._drill_DSE = {};
 	this._drill_DSE.tc = {};
 	this._drill_DSE.tc['shatter_command'] = false;			//碎片指令
@@ -327,12 +337,14 @@ Game_System.prototype.initialize = function() {
 	this._drill_DSE.tc['shatter_id'] = -1;					//当前碎片样式id
 	this._drill_DSE.tc['shatter_converted'] = false;		//反向弹道
 	this._drill_DSE.tc['redraw_command'] = false;			//重画指令
+	// > 选择框
 	this._drill_DSE.cc = {};
 	this._drill_DSE.cc['shatter_command'] = false;		
 	this._drill_DSE.cc['shatter_delay'] = 0;	
 	this._drill_DSE.cc['shatter_id'] = -1;				
 	this._drill_DSE.cc['shatter_converted'] = false;	
 	this._drill_DSE.cc['redraw_command'] = false;		
+	// > 姓名框
 	this._drill_DSE.nc = {};
 	this._drill_DSE.nc['shatter_command'] = false;		
 	this._drill_DSE.nc['shatter_delay'] = 0;	
@@ -351,9 +363,7 @@ var _drill_DSE_map_initialize = Scene_Map.prototype.initialize;
 Scene_Map.prototype.initialize = function() {
 	_drill_DSE_map_initialize.call(this);
 	this.drill_DSE_initBitmapFrame();			//贴图框架
-	$gameTemp.drill_DSE_tc_time = 0;			//对话框内容 延迟指令时间
-	$gameTemp.drill_DSE_cc_time = 0;			//选择框内容 延迟指令时间
-	$gameTemp.drill_DSE_nc_time = 0;			//姓名框内容 延迟指令时间
+	this.drill_DSE_initTimeDelay();				//延迟指令时间
 }
 //==============================
 // * 地图 - 帧刷新
@@ -369,9 +379,7 @@ Scene_Map.prototype.update = function() {
 	
 	// > 粉碎指令
 	if(this.isActive()){
-		$gameTemp.drill_DSE_tc_time += 1;
-		$gameTemp.drill_DSE_cc_time += 1;
-		$gameTemp.drill_DSE_nc_time += 1;
+		this.drill_DSE_updateTimeDelay();
 		this.drill_DSE_updateMessageContentsSprite();
 		this.drill_DSE_updateMessageChoiceSprite();
 		this.drill_DSE_updateMessageNameSprite();
@@ -390,159 +398,24 @@ Window.prototype._updateContents = function() {
 };
 
 //==============================
-// * 帧刷新 - 对话框
+// ** 延迟指令 - 初始化
 //==============================
-Scene_Map.prototype.drill_DSE_updateMessageContentsSprite = function() {
-	if( this._messageWindow && this._messageWindow._windowContentsSprite ){
-		var datafrom = $gameSystem._drill_DSE.tc;
-		var window_sprite = this._messageWindow._windowContentsSprite;
-		var data;
-		
-		// > 粉碎指令
-		if( datafrom['shatter_command'] == true && $gameTemp.drill_DSE_tc_time > datafrom['shatter_delay'] ) {
-			datafrom['shatter_command'] = false;
-			var data = {
-				"frameX":this._drill_DSE_tc_frame_x,
-				"frameY":this._drill_DSE_tc_frame_y,
-				"frameW":this._drill_DSE_tc_frame_w,
-				"frameH":this._drill_DSE_tc_frame_h,
-				"shatter_id":datafrom['shatter_id'],							//粉碎样式
-				"shatter_converted":datafrom['shatter_converted'],				//反向弹道
-				"shatter_opacityType":$gameSystem._drill_DSE_opacityType,		//透明度变化方式
-			};
-			window_sprite.drill_COSE_setShatter( data,window_sprite.bitmap );	//方块粉碎核心 - 初始化
-			window_sprite._drill_DSE_activated = true;
-		}
-		
-		// > 复原指令
-		if( datafrom['redraw_command'] == true ) {
-			datafrom['redraw_command'] = false;
-			window_sprite.drill_COSE_restoreShatter();				//方块粉碎核心 - 复原
-			window_sprite._drill_DSE_activated = true;
-		}
-		
-		// > 粉碎时图像隐藏
-		if( window_sprite._drill_DSE_activated == true ){
-			if( window_sprite.drill_COSE_isShattering() ){
-				window_sprite.setFrame(0,0,0,0);
-			}
-		}
-		
-	}
+Scene_Map.prototype.drill_DSE_initTimeDelay = function() {
+	$gameTemp.drill_DSE_tc_time = 0;			//对话框内容 延迟指令时间
+	$gameTemp.drill_DSE_cc_time = 0;			//选择框内容 延迟指令时间
+	$gameTemp.drill_DSE_nc_time = 0;			//姓名框内容 延迟指令时间
 }
 //==============================
-// * 对话框 - 下一个指令时机
+// * 延迟指令 - 帧刷新
 //==============================
-var _drill_DSE_w_startMessage = Window_Message.prototype.startMessage;
-Window_Message.prototype.startMessage = function() {
-    _drill_DSE_w_startMessage.call(this);
-	$gameTemp.drill_DSE_tc_time = 0;
-	$gameTemp.drill_DSE_cc_time = 0;
-};
-//==============================
-// * 帧刷新 - 选择框
-//==============================
-Scene_Map.prototype.drill_DSE_updateMessageChoiceSprite = function() {
-	if( this._messageWindow && this._messageWindow._choiceWindow && this._messageWindow._choiceWindow._windowContentsSprite ){
-		var datafrom = $gameSystem._drill_DSE.cc;
-		var window_sprite = this._messageWindow._choiceWindow._windowContentsSprite;
-		var data;
-		
-		// > 粉碎指令
-		if( datafrom['shatter_command'] == true && $gameTemp.drill_DSE_cc_time > datafrom['shatter_delay'] ) {
-			datafrom['shatter_command'] = false;
-			var data = {
-				"frameX":this._drill_DSE_cc_frame_x,
-				"frameY":this._drill_DSE_cc_frame_y,
-				"frameW":this._drill_DSE_cc_frame_w,
-				"frameH":this._drill_DSE_cc_frame_h,
-				"shatter_id":datafrom['shatter_id'],							//粉碎样式
-				"shatter_converted":datafrom['shatter_converted'],				//反向弹道
-				"shatter_opacityType":$gameSystem._drill_DSE_opacityType,		//透明度变化方式
-			};
-			window_sprite.drill_COSE_setShatter( data,window_sprite.bitmap );	//方块粉碎核心 - 初始化
-			window_sprite._drill_DSE_activated = true;
-		}
-		
-		// > 复原指令
-		if( datafrom['redraw_command'] == true ) {
-			datafrom['redraw_command'] = false;
-			window_sprite.drill_COSE_restoreShatter();				//方块粉碎核心 - 复原
-			window_sprite._drill_DSE_activated = true;
-		}
-		
-		// > 粉碎时图像隐藏
-		if( window_sprite._drill_DSE_activated == true ){
-			if( window_sprite.drill_COSE_isShattering() ){
-				window_sprite.setFrame(0,0,0,0);
-			}
-		}
-		
-	}
+Scene_Map.prototype.drill_DSE_updateTimeDelay = function() {
+	$gameTemp.drill_DSE_tc_time += 1;
+	$gameTemp.drill_DSE_cc_time += 1;
+	$gameTemp.drill_DSE_nc_time += 1;
 }
-//==============================
-// * 选择框 - 下一个指令时机
-//==============================
-var _drill_DSE_w_choiceStart = Window_ChoiceList.prototype.selectDefault;
-Window_ChoiceList.prototype.selectDefault = function() {
-    _drill_DSE_w_choiceStart.call(this);
-	$gameTemp.drill_DSE_cc_time = 0;
-};
-//==============================
-// * 帧刷新 - 姓名框
-//==============================
-Scene_Map.prototype.drill_DSE_updateMessageNameSprite = function() {
-	if( this._messageWindow && this._messageWindow._nameWindow && this._messageWindow._nameWindow._windowContentsSprite ){
-		var datafrom = $gameSystem._drill_DSE.nc;
-		var window_sprite = this._messageWindow._nameWindow._windowContentsSprite;
-		var data;
-		
-		// > 粉碎指令
-		if( datafrom['shatter_command'] == true && $gameTemp.drill_DSE_nc_time > datafrom['shatter_delay'] ) {
-			datafrom['shatter_command'] = false;
-			var data = {
-				"frameX":this._drill_DSE_nc_frame_x,
-				"frameY":this._drill_DSE_nc_frame_y,
-				"frameW":this._drill_DSE_nc_frame_w,
-				"frameH":this._drill_DSE_nc_frame_h,
-				"shatter_id":datafrom['shatter_id'],							//粉碎样式
-				"shatter_converted":datafrom['shatter_converted'],				//反向弹道
-				"shatter_opacityType":$gameSystem._drill_DSE_opacityType,		//透明度变化方式
-			};
-			window_sprite.drill_COSE_setShatter( data,window_sprite.bitmap );	//方块粉碎核心 - 初始化
-			window_sprite._drill_DSE_activated = true;
-		}
-		
-		// > 复原指令
-		if( datafrom['redraw_command'] == true ) {
-			datafrom['redraw_command'] = false;
-			window_sprite.drill_COSE_restoreShatter();				//方块粉碎核心 - 复原
-			window_sprite._drill_DSE_activated = true;
-		}
-		
-		// > 粉碎时图像隐藏
-		if( window_sprite._drill_DSE_activated == true ){
-			if( window_sprite.drill_COSE_isShattering() ){
-				window_sprite.setFrame(0,0,0,0);
-			}
-		}
-		
-	}
-}
-//==============================
-// * 姓名框 - 下一个指令时机
-//==============================
-var _drill_DSE_w_nameRefresh = Window_NameBox.prototype.refresh;
-Window_NameBox.prototype.refresh = function(text, position) {
-	$gameTemp.drill_DSE_nc_time = 0;
-    return _drill_DSE_w_nameRefresh.call(this,text, position);
-};
 
-//=============================================================================
-// ** 贴图框架
-//=============================================================================
 //==============================
-// * 贴图框架 - 初始化
+// ** 贴图框架 - 初始化
 //==============================
 Scene_Map.prototype.drill_DSE_initBitmapFrame = function() {
 	this._drill_DSE_tc_frame_x = -1;			//框架 - x
@@ -559,7 +432,7 @@ Scene_Map.prototype.drill_DSE_initBitmapFrame = function() {
 	this._drill_DSE_nc_frame_h = 0;			
 }
 //==============================
-// * 贴图框架 - bitmap识别（必须放前面）
+// * 贴图框架 - 帧刷新bitmap识别（必须放前面）
 //==============================
 Scene_Map.prototype.drill_DSE_updateBitmapFrame = function() {
 	
@@ -622,6 +495,204 @@ Scene_Map.prototype.drill_DSE_updateBitmapFrame = function() {
 		}
 	}
 }
+
+//==============================
+// ** 对话框 - 帧刷新
+//==============================
+Scene_Map.prototype.drill_DSE_updateMessageContentsSprite = function() {
+	if( this._messageWindow == undefined ){ return; }
+	if( this._messageWindow._windowContentsSprite == undefined ){ return; }
+	
+	var datafrom = $gameSystem._drill_DSE.tc;
+	var window_sprite = this._messageWindow._windowContentsSprite;
+	var data;
+	
+	// > 粉碎指令
+	if( datafrom['shatter_command'] == true && $gameTemp.drill_DSE_tc_time > datafrom['shatter_delay'] ) {
+		datafrom['shatter_command'] = false;
+		var data = {
+			"frameX":this._drill_DSE_tc_frame_x,
+			"frameY":this._drill_DSE_tc_frame_y,
+			"frameW":this._drill_DSE_tc_frame_w,
+			"frameH":this._drill_DSE_tc_frame_h,
+			"shatter_id":datafrom['shatter_id'],							//粉碎样式
+			"shatter_converted":datafrom['shatter_converted'],				//反向弹道
+			"shatter_opacityType":$gameSystem._drill_DSE_opacityType,		//透明度变化方式
+		};
+		window_sprite.drill_COSE_setShatter( data,window_sprite.bitmap );	//方块粉碎核心 - 初始化
+		window_sprite._drill_DSE_activated = true;
+	}
+	
+	// > 复原指令
+	if( datafrom['redraw_command'] == true ) {
+		datafrom['redraw_command'] = false;
+		window_sprite.drill_COSE_restoreShatter();				//方块粉碎核心 - 复原
+		window_sprite._drill_DSE_activated = true;
+	}
+	
+	// > 粉碎时图像隐藏
+	if( window_sprite._drill_DSE_activated == true ){
+		if( window_sprite.drill_COSE_isShattering() ){
+			window_sprite.setFrame(0,0,0,0);
+		}
+	}
+}
+//==============================
+// * 对话框 - 下一个指令时机
+//==============================
+var _drill_DSE_w_startMessage = Window_Message.prototype.startMessage;
+Window_Message.prototype.startMessage = function() {
+    _drill_DSE_w_startMessage.call(this);
+	$gameTemp.drill_DSE_tc_time = 0;
+	$gameTemp.drill_DSE_cc_time = 0;
+};
+
+//==============================
+// ** 选择框 - 帧刷新
+//==============================
+Scene_Map.prototype.drill_DSE_updateMessageChoiceSprite = function() {
+	if( this._messageWindow == undefined ){ return; }
+	if( this._messageWindow._choiceWindow == undefined ){ return; }
+	if( this._messageWindow._choiceWindow._windowContentsSprite == undefined ){ return; }
+	
+	var datafrom = $gameSystem._drill_DSE.cc;
+	var window_sprite = this._messageWindow._choiceWindow._windowContentsSprite;
+	var data;
+	
+	// > 粉碎指令
+	if( datafrom['shatter_command'] == true && $gameTemp.drill_DSE_cc_time > datafrom['shatter_delay'] ){
+		datafrom['shatter_command'] = false;
+		var data = {
+			"frameX":this._drill_DSE_cc_frame_x,
+			"frameY":this._drill_DSE_cc_frame_y,
+			"frameW":this._drill_DSE_cc_frame_w,
+			"frameH":this._drill_DSE_cc_frame_h,
+			"shatter_id":datafrom['shatter_id'],							//粉碎样式
+			"shatter_converted":datafrom['shatter_converted'],				//反向弹道
+			"shatter_opacityType":$gameSystem._drill_DSE_opacityType,		//透明度变化方式
+		};
+		window_sprite.drill_COSE_setShatter( data,window_sprite.bitmap );	//方块粉碎核心 - 初始化
+		window_sprite._drill_DSE_activated = true;
+	}
+	
+	// > 复原指令
+	if( datafrom['redraw_command'] == true ){
+		datafrom['redraw_command'] = false;
+		window_sprite.drill_COSE_restoreShatter();				//方块粉碎核心 - 复原
+		window_sprite._drill_DSE_activated = true;
+	}
+	
+	// > 粉碎时图像隐藏
+	if( window_sprite._drill_DSE_activated == true ){
+		if( window_sprite.drill_COSE_isShattering() ){
+			window_sprite.setFrame(0,0,0,0);
+		}
+	}
+}
+//==============================
+// * 选择框 - 下一个指令时机
+//==============================
+var _drill_DSE_w_choiceStart = Window_ChoiceList.prototype.selectDefault;
+Window_ChoiceList.prototype.selectDefault = function() {
+    _drill_DSE_w_choiceStart.call(this);
+	$gameTemp.drill_DSE_cc_time = 0;
+};
+
+//==============================
+// ** 姓名框 - 帧刷新
+//==============================
+Scene_Map.prototype.drill_DSE_updateMessageNameSprite = function() {
+	if( this._messageWindow == undefined ){ return; }
+	if( this._messageWindow._nameWindow == undefined ){ return; }
+	if( this._messageWindow._nameWindow._windowContentsSprite == undefined ){ return; }
+	
+	var datafrom = $gameSystem._drill_DSE.nc;
+	var window_sprite = this._messageWindow._nameWindow._windowContentsSprite;
+	var data;
+	
+	// > 粉碎指令
+	if( datafrom['shatter_command'] == true && $gameTemp.drill_DSE_nc_time > datafrom['shatter_delay'] ) {
+		datafrom['shatter_command'] = false;
+		var data = {
+			"frameX":this._drill_DSE_nc_frame_x,
+			"frameY":this._drill_DSE_nc_frame_y,
+			"frameW":this._drill_DSE_nc_frame_w,
+			"frameH":this._drill_DSE_nc_frame_h,
+			"shatter_id":datafrom['shatter_id'],							//粉碎样式
+			"shatter_converted":datafrom['shatter_converted'],				//反向弹道
+			"shatter_opacityType":$gameSystem._drill_DSE_opacityType,		//透明度变化方式
+		};
+		window_sprite.drill_COSE_setShatter( data,window_sprite.bitmap );	//方块粉碎核心 - 初始化
+		window_sprite._drill_DSE_activated = true;
+	}
+	
+	// > 复原指令
+	if( datafrom['redraw_command'] == true ) {
+		datafrom['redraw_command'] = false;
+		window_sprite.drill_COSE_restoreShatter();				//方块粉碎核心 - 复原
+		window_sprite._drill_DSE_activated = true;
+	}
+	
+	// > 粉碎时图像隐藏
+	if( window_sprite._drill_DSE_activated == true ){
+		if( window_sprite.drill_COSE_isShattering() ){
+			window_sprite.setFrame(0,0,0,0);
+		}
+	}
+}
+//==============================
+// * 姓名框 - 下一个指令时机
+//==============================
+var _drill_DSE_w_nameRefresh = Window_NameBox.prototype.refresh;
+Window_NameBox.prototype.refresh = function(text, position) {
+	$gameTemp.drill_DSE_nc_time = 0;
+    return _drill_DSE_w_nameRefresh.call(this,text, position);
+};
+
+
+
+//=============================================================================
+// ** 战斗界面复刻
+//=============================================================================
+//==============================
+// * 战斗 - 初始化
+//==============================
+var _drill_DSE_battle_initialize = Scene_Battle.prototype.initialize;
+Scene_Battle.prototype.initialize = function() {
+	_drill_DSE_battle_initialize.call(this);
+	this.drill_DSE_initBitmapFrame();			//贴图框架
+	this.drill_DSE_initTimeDelay();				//延迟指令时间
+}
+Scene_Battle.prototype.drill_DSE_initBitmapFrame = Scene_Map.prototype.drill_DSE_initBitmapFrame;
+Scene_Battle.prototype.drill_DSE_initTimeDelay = Scene_Map.prototype.drill_DSE_initTimeDelay;
+//==============================
+// * 战斗 - 帧刷新
+//==============================
+var _drill_DSE_battle_update = Scene_Battle.prototype.update;
+Scene_Battle.prototype.update = function() {
+	
+	// > bitmap识别（必须放前面）
+	this.drill_DSE_updateBitmapFrame();
+	
+	// > 帧刷新
+	_drill_DSE_battle_update.call(this);
+	
+	// > 粉碎指令
+	if(this.isActive()){
+		this.drill_DSE_updateTimeDelay();
+		this.drill_DSE_updateMessageContentsSprite();
+		this.drill_DSE_updateMessageChoiceSprite();
+		this.drill_DSE_updateMessageNameSprite();
+	}
+}
+Scene_Battle.prototype.drill_DSE_updateBitmapFrame = Scene_Map.prototype.drill_DSE_updateBitmapFrame;
+Scene_Battle.prototype.drill_DSE_updateTimeDelay = Scene_Map.prototype.drill_DSE_updateTimeDelay;
+Scene_Battle.prototype.drill_DSE_updateMessageContentsSprite = Scene_Map.prototype.drill_DSE_updateMessageContentsSprite;
+Scene_Battle.prototype.drill_DSE_updateMessageChoiceSprite = Scene_Map.prototype.drill_DSE_updateMessageChoiceSprite;
+Scene_Battle.prototype.drill_DSE_updateMessageNameSprite = Scene_Map.prototype.drill_DSE_updateMessageNameSprite;
+
+
+
 
 //=============================================================================
 // * <<<<基于插件检测<<<<

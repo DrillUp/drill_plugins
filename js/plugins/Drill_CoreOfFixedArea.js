@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        物体触发 - 固定区域核心
+ * @plugindesc [v1.4]        物体触发 - 固定区域核心
  * @author Drill_up
  * 
  * @Drill_LE_param "自定义区域-%d"
@@ -90,6 +90,8 @@
  * 修复了事件被消除后，随机点仍然识别事件的bug。
  * [v1.3]
  * 添加了最大值编辑的支持。
+ * [v1.4]
+ * 修复了中心点报错的bug。
  * 
  * 
  *
@@ -896,10 +898,10 @@
 	DrillUp.drill_COFA_initAreaCondition = function( dataFrom ){
 		var data = {};
 		data['center'] = String( dataFrom["区域-中心点"] || "任意");
-		data['block'] = String( dataFrom["区域-通行"] || "任意");
-		data['event'] = String( dataFrom["区域-事件"] || "任意");
-		data['tlie'] = String( dataFrom["区域-地形标志"] || "任意");
-		data['rRegion'] = String( dataFrom["区域-R图块标志"] || "任意");
+		data['block'] = String( dataFrom["图块-通行"] || "任意");
+		data['event'] = String( dataFrom["图块-事件"] || "任意");
+		data['tlie'] = String( dataFrom["图块-地形标志"] || "任意");
+		data['rRegion'] = String( dataFrom["图块-R图块标志"] || "任意");
 		if( dataFrom["地形标志列表"] != undefined &&
 			dataFrom["地形标志列表"] != "" ){
 			data['tlie_list'] = JSON.parse( dataFrom["地形标志列表"] );
@@ -1083,8 +1085,16 @@ Game_Map.prototype.drill_COFA_getCustomPointsByOnlyPosition = function( x1,y1, d
 //			返回：	绝对坐标列表 { x:12 , y:23 } 
 //==============================
 Game_Map.prototype.drill_COFA_getShapePointsWithCondition = function( c_x, c_y, type, range, condition ) {
-	var area = this.drill_COFA_getShapePoints( c_x, c_y, type, range );		//获取点集合
-	return this.drill_COFA_selectPoints( area,condition );					//条件筛选
+	
+	// > 获取点集合
+	var area = this.drill_COFA_getShapePoints( c_x, c_y, type, range );	
+	
+	// > 中心点
+	condition['center_x'] = c_x;
+	condition['center_y'] = c_y;
+	
+	// > 条件筛选
+	return this.drill_COFA_selectPoints( area,condition );					
 }
 
 //==============================
@@ -1094,8 +1104,19 @@ Game_Map.prototype.drill_COFA_getShapePointsWithCondition = function( c_x, c_y, 
 //			返回：	绝对坐标列表 { x:12 , y:23 } 
 //==============================
 Game_Map.prototype.drill_COFA_getCustomPointsByIdWithCondition = function( event_id, def_area_id, condition ) {
-	var area = this.drill_COFA_getCustomPointsById( event_id, def_area_id );	//获取点集合
-	return this.drill_COFA_selectPoints( area,condition );						//条件筛选
+	
+	// > 获取点集合
+	var area = this.drill_COFA_getCustomPointsById( event_id, def_area_id );
+	
+	// > 中心点
+	var e = this.event(event_id);
+	if( e != undefined ){
+		condition['center_x'] = e._x;
+		condition['center_y'] = e._y;
+	}
+	
+	// > 条件筛选
+	return this.drill_COFA_selectPoints( area,condition );	
 }
 //==============================
 // * 条件 - 综合筛选（自定义形状，只有位置无方向）
@@ -1104,13 +1125,25 @@ Game_Map.prototype.drill_COFA_getCustomPointsByIdWithCondition = function( event
 //			返回：	绝对坐标列表 { x:12 , y:23 } 
 //==============================
 Game_Map.prototype.drill_COFA_getCustomPointsByOnlyPositionWithCondition = function( c_x,c_y, def_area_id, condition ) {
-	var area = this.drill_COFA_getCustomPointsByOnlyPosition( c_x,c_y, def_area_id );	//获取点集合
-	return this.drill_COFA_selectPoints( area,condition );						//条件筛选
+	
+	// > 获取点集合
+	var area = this.drill_COFA_getCustomPointsByOnlyPosition( c_x,c_y, def_area_id );
+	
+	// > 中心点
+	condition['center_x'] = c_x;
+	condition['center_y'] = c_y;
+	
+	// > 条件筛选
+	return this.drill_COFA_selectPoints( area,condition );			
 }
 //==============================
 // * 条件 - 综合筛选
 //==============================
 Game_Map.prototype.drill_COFA_selectPoints = function( c_area, condition ) {
+	
+	// > 固定标准条件
+	c_area = this.drill_COFA_selectPoints_standard( c_area );
+	
 	if( condition['block'] == "必须可通行" ){
 		c_area = this.drill_COFA_selectPoints_block( c_area,false );
 	}
@@ -1147,19 +1180,29 @@ Game_Map.prototype.drill_COFA_selectPoints = function( c_area, condition ) {
 	if( condition['rRegion'] == "必须不含下列R图块值" ){
 		c_area = this.drill_COFA_selectPoints_rRegion( c_area,false, condition['rRegion_list'] );
 	}
-	if( condition['center'] == "一定包含" ){
-		var e = this.event(event_id);
-		if( e == undefined ){ return [] }
-		c_area = this.drill_COFA_addPointNoRepeat( c_area, e._x, e._y );
+	if( condition['center'] == "一定包含" && condition['center_x'] != undefined ){
+		c_area = this.drill_COFA_addPointNoRepeat( c_area, condition['center_x'], condition['center_y'] );
 	}
-	if( condition['center'] == "一定不含" ){
-		var e = this.event(event_id);
-		if( e == undefined ){ return [] }
-		c_area = this.drill_COFA_removePoint( c_area, e._x, e._y );
+	if( condition['center'] == "一定不含" && condition['center_x'] != undefined ){
+		c_area = this.drill_COFA_removePoint( c_area, condition['center_x'], condition['center_y'] );
 	}
 	return c_area;
 }
 
+//==============================
+// * 条件 - 固定标准条件
+//==============================
+Game_Map.prototype.drill_COFA_selectPoints_standard = function( c_area ) {
+	var result_area = [];
+	for (var i = 0; i < c_area.length ; i++) {
+		var x = c_area[i].x;
+		var y = c_area[i].y;
+		if( this.isValid(x, y) ){		//地图不能越界
+			result_area.push( c_area[i] );
+		}
+	}
+	return result_area;
+}
 //==============================
 // * 条件 - 筛选堵路的点（isBlock：true堵路，false不堵路）
 //==============================

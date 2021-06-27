@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        互动 - 物体滑行
+ * @plugindesc [v1.1]        互动 - 物体滑行
  * @author Drill_up
  * 
  * 
@@ -15,21 +15,25 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 能使得地图中指定的区域或者图块表面完全光滑，走在上面会一直滑行，
- * 更多详细的介绍，去看看"关于物体滑行.docx"。
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：地图界面、战斗界面、菜单界面。
  *   作用于游戏存档。
+ * 2.更多详细的介绍，去看看"关于物体滑行.docx"。
  * 细节：
  *   (1.滑行过程不能改变方向。
- *   (2.如果滑行时需要强制转向，需要使用插件指令。移动路线指令不适合。
- *     （rmmv事件的转向会让角色暂停滑行，如果玩家一直按住方向键，会无视强制转向。）
- *   (3.斜向滑行时，可以设置是否穿透对角两边的阻碍。
- *   (4.飞行的物体（在人物上方）不会滑行。
+ *   (2.斜向滑行时，可以设置是否穿透对角两边的阻碍。
+ *   (3.飞行的物体（在人物上方）不会滑行。
  * 组合：
  *   (1.玩家可以举着花盆滑行。
  *   (2.玩家可以在滑行时跳跃。
+ *   (3.玩家可以在滑行时改变移动速度。
+ * 注意事项：
+ *   (1.滑行时，大部分移动路线指令是被阻塞的，包含 移动和转向 指令。
+ *      如果滑行时需要强制转向，需要使用 插件指令或转向毯。
+ *     （rmmv事件的转向会让角色暂停滑行，如果玩家一直按住方向键，会无视强制转向。）
+ *   (2.注意，移动路线的 脚本 也是被阻塞的，只有滑行结束后才会执行。
  * 转向毯：
  *   (1.由于事件指令无法实现手动控制 事件与事件 的触发关系，
  *      所以插件专门提供了 物体滑行转向毯 的功能，
@@ -72,7 +76,7 @@
  *
  * -----------------------------------------------------------------------------
  * ----可选设定 - 转向毯
- * 你可以设置只有含有重力钥匙的事件才能触发重力锁的开关。
+ * 你可以设置转向毯事件，任何滑行中接触了转向毯的事件/玩家，都会被转向。
  * 
  * 事件注释：=>物体滑行转向毯 : 转向上方
  * 事件注释：=>物体滑行转向毯 : 转向下方
@@ -85,6 +89,17 @@
  * 
  * 1.添加注释后，指定事件将具有转向毯功能，滑行过程中接触到转向毯的 事件或
  *   玩家 将会被强制转向。
+ * 2.转向毯会扭转所有 非自己 的事件、玩家。
+ *   另外，转向毯事件本身也是可以滑行的，前提是自己主动移动。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 滑行数据
+ * 你可以通过插件指令获取到 滑行过程 相关的数据。
+ * 
+ * 插件指令：>物体滑行 : 事件[21] : 获取上一次滑行位置 : 变量[25,26]
+ * 插件指令：>物体滑行 : 事件[21] : 脚下是否为光滑地面 : 开关[21]
+ * 
+ * 1.插件指令与前面的指令同样可以组合，有4*2种组合方式。
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -115,6 +130,10 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 修复了光滑图块中靠边的转向地毯，在玩家持续按方向键时不能转向的bug。
+ * 优化了计算结构。
+ * 
  * 
  * 
  * @param 是否修正区域判定
@@ -130,11 +149,19 @@
  * @desc 滑行时角色的行走动作。根据当前角色的行走图的位置开始，0-左，1-中，2-右，>2会选择往右的其它行走图。
  * @default 2
  * 
+ * @param 是否锁定滑行速度
+ * @type boolean
+ * @on 锁定
+ * @off 不锁定
+ * @desc 锁定后，所有物体以固定的速度滑行。
+ * @default false
+ * 
  * @param 滑行速度
+ * @parent 是否锁定滑行速度
  * @type number
- * @min 0
- * @desc 滑行时会改变到指定速度，填入1-6，4为标准速度，0表示速度不变。
- * @default 0
+ * @min 1
+ * @desc 滑行时会改变到指定速度，填入1-6，4为标准速度。
+ * @default 4
  * 
  * @param 光滑地面区域列表
  * @type number[]
@@ -176,19 +203,25 @@
 //					->玩家滑行
 //					->事件滑行
 //					->无法转向
+//					->只禁用部分移动路线
 //					->滑行前位置记录
 //				->物体滑行转向毯
 //					->转向毯属性
 //					->转向毯容器
 //				->设计
 //					->跳跃滑行情况
+//				->性能优化
+//					->没有冰面区域，不工作
 //				x->滑行掉入深渊后回到滑行前位置
 //		
 //		★必要注意事项：
 //			暂无
 //
 //		★其它说明细节：
-//			暂无
+//			1.这里我没有注意到 滑行过程 中执行移动路线的可能性。
+//			  由于移动过程中，移动路线时阻塞的，而一直滑行不经过移动路线的话，是一直阻塞的。
+//			  这里我强制写了个执行移动路线的功能。
+//			  不知道会不会对后期有什么特殊影响。（在滑行时，isMoving的时候，可以执行部分指令）
 //
 //		★存在的问题：
 //			暂无
@@ -206,7 +239,8 @@
 	/*-----------------杂项------------------*/
 	DrillUp.g_LST_fix = String(DrillUp.parameters["是否修正区域判定"] || "true") === "true";
 	DrillUp.g_LST_act = Number(DrillUp.parameters["滑行动作帧"] || 2);
-	DrillUp.g_LST_speed = Number(DrillUp.parameters["滑行速度"] || 0);
+	DrillUp.g_LST_speedLock = String(DrillUp.parameters["是否锁定滑行速度"] || "false") === "true";
+	DrillUp.g_LST_speed = Number(DrillUp.parameters["滑行速度"] || 4);
 	DrillUp.g_LST_diagonallyThrough = String(DrillUp.parameters["斜向滑行是否穿透两边阻碍"] || "true") == "true";
 	if( DrillUp.parameters["光滑地面区域列表"] != undefined &&
 		DrillUp.parameters["光滑地面区域列表"] != "" ){
@@ -313,6 +347,24 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			}
 		}
 		
+		/*-----------------滑行数据------------------*/
+		if( args.length == 6 ){
+			var type = String(args[3]);
+			var temp1 = String(args[5]);
+			if( type === "获取上一次滑行位置" ){
+				temp1 = temp1.replace("变量[","");
+				temp1 = temp1.replace("]","");
+				var temp_arr = temp1.split(/[，,]/);
+				$gameVariables.setValue( Number(temp_arr[0]), chars[0]._drill_LST_lastX );
+				$gameVariables.setValue( Number(temp_arr[1]), chars[0]._drill_LST_lastY );
+			}
+			if( type === "脚下是否为光滑地面" ){
+				temp1 = temp1.replace("开关[","");
+				temp1 = temp1.replace("]","");
+				$gameSwitches.setValue( Number(temp1), chars[0].drill_LST_isOnSlipperyFloor() );
+			}
+		}
+		
 	}
 };
 //==============================
@@ -409,6 +461,33 @@ Game_Map.prototype.drill_LST_isAnyPassable = function( x, y ){
 
 
 //=============================================================================
+// ** 性能优化（没有冰面区域，不工作）
+//=============================================================================
+//==============================
+// * 性能优化 - 冰面区域标记
+//==============================
+var _drill_LST_setup = Game_Map.prototype.setup;
+Game_Map.prototype.setup = function( mapId ){
+	_drill_LST_setup.call( this, mapId );
+	
+	this._drill_LST_hasAnyStairTile = this.drill_LST_checkAnyStairTile();
+}
+//==============================
+// * 性能优化 - 冰面阶梯区域
+//==============================
+Game_Map.prototype.drill_LST_checkAnyStairTile = function(){
+	for( var x=0; x < this.width(); x++ ){
+		for( var y=0; y < this.height(); y++ ){
+			if( this.drill_LST_isSlippery( x, y ) ){
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+
+//=============================================================================
 // ** 物体滑行属性
 //=============================================================================
 //==============================
@@ -432,6 +511,11 @@ Game_CharacterBase.prototype.drill_LST_setSlide = function( b ){ this['_drill_LS
 // * 物体 - 判断在光滑地面上
 //==============================
 Game_CharacterBase.prototype.drill_LST_isOnSlipperyFloor = function(){
+	
+	// > 性能优化
+	if( $gameMap._drill_LST_hasAnyStairTile == false ){ return false; }
+	
+	// > 判断
 	if( DrillUp.g_LST_fix  ){	// （区域判定修正）
 		return $gameMap.drill_LST_isSlippery( Math.floor(this._realX + 0.5), Math.floor(this._realY + 0.5) );
 	}else{
@@ -453,7 +537,7 @@ Game_CharacterBase.prototype.pattern = function() {
 //==============================
 var _drill_LST_realMoveSpeed = Game_CharacterBase.prototype.realMoveSpeed;
 Game_CharacterBase.prototype.realMoveSpeed = function() {
-	if( this.drill_LST_isOnSlipperyFloor() && DrillUp.g_LST_speed > 0 ){
+	if( this.drill_LST_isOnSlipperyFloor() && DrillUp.g_LST_speedLock ){
 		return DrillUp.g_LST_speed;
 	}
 	return _drill_LST_realMoveSpeed.call(this);
@@ -515,27 +599,26 @@ Game_CharacterBase.prototype.canPassDiagonally = function( x, y, horz, vert ){
 	}
 };
 //==============================
-// * 物体 - 移动路线阻塞
-//==============================
-var _drill_LST_c_updateRoutineMove = Game_Character.prototype.updateRoutineMove;
-Game_Character.prototype.updateRoutineMove = function(){
-	if( this.drill_LST_isSliding() ){	
-		return;
-    }
-	_drill_LST_c_updateRoutineMove.call(this);
-};
-//==============================
 // * 物体 - 滑行帧刷新
 //
 //			说明：	该刷新由子类选择调用，并不直接嵌套到update帧刷新中。
 //==============================
 Game_CharacterBase.prototype.drill_LST_updateSlippery = function() {
 	
-	// > 可滑行条件
-    if( this['_drill_LST_enable'] == true &&			//滑行可用情况
-		this.drill_LST_isOnSlipperyFloor() == true &&	//在光滑地面上
-		this._priorityType <= 1							//飞行物体的不会滑
-		){
+	// > 滑行不可用
+	if( this['_drill_LST_enable'] != true ){
+		this.drill_LST_setSlide( false );
+		return;
+	}
+	
+	// > 飞行物体的不会滑
+	if( this._priorityType == 2 ){
+		this.drill_LST_setSlide( false );
+		return;
+	}
+	
+	// > 光滑地面处理
+    if( this.drill_LST_isOnSlipperyFloor() ){
 		
 		// > 移动过程中，不操作
 		if( this.isMoving() ){
@@ -543,6 +626,19 @@ Game_CharacterBase.prototype.drill_LST_updateSlippery = function() {
 			
 		// > 停止移动时
 		}else{
+			
+			// > 若移动成功，则继续滑行
+			if( this.isMovementSucceeded() ){
+				if( this.drill_LST_isSliding() == false ){	//（开始滑行时，记录位置）
+					this['_drill_LST_lastX'] = this._x;	
+					this['_drill_LST_lastY'] = this._y;	
+				}
+				this.drill_LST_setSlide( true );
+				
+			// > 若移动失败（撞墙），则停止滑行
+			}else{
+				this.drill_LST_setSlide( false );
+			}
 			
 			// > 保持滑行移动
 			if( this.drill_LST_isSliding() ){
@@ -562,24 +658,10 @@ Game_CharacterBase.prototype.drill_LST_updateSlippery = function() {
 					this.moveDiagonally(6, 8);
 				}
 			}
-			
-			// > 若移动成功，则继续滑行
-			if( this.isMovementSucceeded() ){
-				if( this.drill_LST_isSliding() == false ){	//（开始滑行时，记录位置）
-					this['_drill_LST_lastX'] = this._x;	
-					this['_drill_LST_lastY'] = this._y;	
-				}
-				this.drill_LST_setSlide( true );
-				
-			// > 若移动失败（撞墙），则停止滑行
-			}else{
-				this.drill_LST_setSlide( false );
-			}
 		}
-    }
-	
+		
 	// > 不在光滑地面时，停止滑行
-	if( this.drill_LST_isOnSlipperyFloor() == false ){
+    }else{
 		this.drill_LST_setSlide( false );
 	}
 };
@@ -607,8 +689,8 @@ Game_Player.prototype.update = function( sceneActive ){
 //==============================
 Game_Player.prototype.drill_LST_updatePlayerSlippery = function() {
 	
-	// > 事件运行时，不滑
-    if( $gameMap.isEventRunning() ){ return; }
+	// > 事件运行时，不滑（靠边的转向地毯会失效）
+	//if( $gameMap.isEventRunning() ){ return; }
 	
 	// > 关闭鼠标目的地
     if( this.drill_LST_isOnSlipperyFloor() && this.isMoving() == false ){
@@ -627,6 +709,102 @@ Game_Player.prototype.moveByInput = function() {
 		return;
     }
 	_drill_LST_p_moveByInput.call(this);
+};
+
+
+//=============================================================================
+// ** 移动路线阻塞
+//=============================================================================
+//==============================
+// * 移动路线 - 初始化
+//==============================
+var _drill_LST_mr_initialize = Game_Character.prototype.initialize;
+Game_Character.prototype.initialize = function() {
+	_drill_LST_mr_initialize.call(this);
+	this['_drill_LST_moveRouteBlock'] = false;		//移动路线阻塞 标记
+};
+//==============================
+// * 移动路线 - 帧刷新
+//==============================
+var _drill_LST_mr_update = Game_CharacterBase.prototype.update;
+Game_CharacterBase.prototype.update = function(){
+	_drill_LST_mr_update.call(this);
+	
+	// > 滑行时，可执行部分移动路线指令（若不开这个，滑行过程一直不会停，只有离开光滑地面才能结束）
+    if( this.drill_LST_isSliding() ){ 
+		if( this._moveRouteForcing ){
+			this.updateRoutineMove();
+		}
+	}
+}
+//==============================
+// * 移动路线 - 路线帧刷新
+//==============================
+var _drill_LST_mr_updateRoutineMove = Game_Character.prototype.updateRoutineMove;
+Game_Character.prototype.updateRoutineMove = function(){
+	
+	// > 离开光滑地面，取消阻塞
+	if( this.drill_LST_isSliding() == false ){	
+		this['_drill_LST_moveRouteBlock'] = false;
+    }
+	
+	// > 阻塞
+	if( this['_drill_LST_moveRouteBlock'] == true ){ return; }
+	
+	_drill_LST_mr_updateRoutineMove.call(this);
+};
+//==============================
+// * 移动路线 - 执行单条移动路线
+//==============================
+var _drill_LST_mr_processMoveCommand = Game_Character.prototype.processMoveCommand;
+Game_Character.prototype.processMoveCommand = function( command ){
+	
+	// > 阻塞标记识别
+	if( this.drill_LST_isSliding() == true ){
+		var gc = Game_Character;
+		switch( command.code ){
+			case gc.ROUTE_MOVE_DOWN:			//向下移动
+			case gc.ROUTE_MOVE_LEFT:			//向左移动
+			case gc.ROUTE_MOVE_RIGHT:			//向右移动
+			case gc.ROUTE_MOVE_UP:				//向上移动
+			case gc.ROUTE_MOVE_LOWER_L:			//向左下移动
+			case gc.ROUTE_MOVE_LOWER_R:			//向右下移动
+			case gc.ROUTE_MOVE_UPPER_L:			//向左上移动
+			case gc.ROUTE_MOVE_UPPER_R:			//向右上移动
+			case gc.ROUTE_MOVE_RANDOM:			//随机移动
+			case gc.ROUTE_MOVE_TOWARD:			//接近玩家
+			case gc.ROUTE_MOVE_AWAY:			//远离玩家
+			case gc.ROUTE_MOVE_FORWARD:			//前进一步
+			case gc.ROUTE_MOVE_BACKWARD:		//后退一步
+			case gc.ROUTE_TURN_DOWN:			//朝向下方
+			case gc.ROUTE_TURN_LEFT:			//朝向左方
+			case gc.ROUTE_TURN_RIGHT:			//朝向右方
+			case gc.ROUTE_TURN_UP:				//朝向上方
+			case gc.ROUTE_TURN_90D_R:			//右转90°
+			case gc.ROUTE_TURN_90D_L:			//左转90°
+			case gc.ROUTE_TURN_180D:			//后转180°
+			case gc.ROUTE_TURN_90D_R_L:			//向左或向右转90°
+			case gc.ROUTE_TURN_RANDOM:			//随机转向
+			case gc.ROUTE_TURN_TOWARD:			//朝向玩家
+			case gc.ROUTE_TURN_AWAY:			//背向玩家
+			case gc.ROUTE_SCRIPT:				//脚本...
+				this['_drill_LST_moveRouteBlock'] = true;
+				break;
+		}
+	}
+	
+	// > 阻塞
+	if( this['_drill_LST_moveRouteBlock'] == true ){ return; }
+	
+	_drill_LST_mr_processMoveCommand.call( this, command );
+};
+//==============================
+// * 移动路线 - 移动路线索引+1
+//==============================
+var _drill_LST_mr_advanceMoveRouteIndex = Game_Character.prototype.advanceMoveRouteIndex;
+Game_Character.prototype.advanceMoveRouteIndex = function(){
+	if( this['_drill_LST_moveRouteBlock'] == true ){ return; }	//（阻塞）
+	_drill_LST_mr_advanceMoveRouteIndex.call( this );
 };
 
 
@@ -771,11 +949,14 @@ Game_Map.prototype.drill_LST_refreshBlanketChecks = function() {
 //==============================
 Game_CharacterBase.prototype.drill_LST_updateBlanket = function() {
 	
-	// > 可滑行条件
-    if( this['_drill_LST_enable'] == true &&			//滑行可用情况
-		this.drill_LST_isOnSlipperyFloor() == true &&	//在光滑地面上
-		this._priorityType <= 1							//飞行物体的不会滑
-		){
+	// > 滑行不可用
+	if( this['_drill_LST_enable'] != true ){ return; }
+	
+	// > 飞行物体的不会滑
+	if( this._priorityType == 2 ){ return; }
+	
+	// > 光滑地面处理
+    if( this.drill_LST_isOnSlipperyFloor() ){
 		
 		// > 与转向毯重合时，强制转向
 		for( var i = 0; i < $gameTemp._drill_LST_blanketTank.length; i++ ){

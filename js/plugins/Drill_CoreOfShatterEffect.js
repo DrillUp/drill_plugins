@@ -1173,6 +1173,9 @@ Sprite.prototype.drill_COSE_updateMove = function(){
 	// > 根据轨迹进行播放
 	for( var i=0; i < this._drill_COSE_sprites.length; i++){
 		var temp_sprite = this._drill_COSE_sprites[i];
+		if( temp_sprite == undefined ){ continue; }
+		if( temp_sprite['_drill_COBa_x'] == undefined ){ continue; }
+		
 		var time = this._drill_COSE_curTime;
 		if( time < 0 ){ time = 0; }
 		if( time > temp_sprite['_drill_COBa_x'].length-1 ){
