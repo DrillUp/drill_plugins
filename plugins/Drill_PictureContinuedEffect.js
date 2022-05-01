@@ -68,6 +68,7 @@
  * 插件指令：>持续动作 : 图片[1] : 锚点摇晃 : 持续时间[40] : 周期[20] : 摇晃幅度[15]
  * 插件指令：>持续动作 : 图片[1] : 呼吸效果 : 持续时间[180] : 周期[45] : 呼吸幅度[6]
  * 插件指令：>持续动作 : 图片[1] : 原地小跳 : 持续时间[180] : 周期[90] : 跳跃高度[20]
+ * 插件指令：>持续动作 : 图片[1] : 反复缩放 : 持续时间[180] : 周期[60] : 最小缩放[1.00] : 最大缩放[1.25]
  * 插件指令：>持续动作 : 图片[1] : 空中飘浮 : 持续时间[150] : 缓冲时间[60] : 飘浮高度[100] : 周期[30] : 幅度[8]
  * 插件指令：>持续动作 : 图片[1] : 旋转状态 : 持续时间[150] : 缓冲时间[60] : 旋转角度[90]
  * 插件指令：>持续动作 : 图片[1] : 缩放状态 : 持续时间[150] : 缓冲时间[60] : 缩放比例[1.5]
@@ -82,7 +83,7 @@
  * 插件指令：>持续动作 : 图片[1] : 锚点摇晃(渐变) : 持续时间[40] : 周期[8] : 摇晃幅度[25] : 开始时间[90] : 结束时间[60]
  * 
  * 1.前半部分（图片）和 后半部分（标准闪烁 : 持续时间[60] : 周期[30]）
- *   的参数可以随意组合。一共有4*25种组合方式。
+ *   的参数可以随意组合。一共有4*26种组合方式。
  * 2.参数中"时间"、"周期"的单位是帧。1秒60帧。
  *   参数中"幅度"、"高度"的单位是像素。
  * 3."标准闪烁 : 持续时间[60] : 周期[30]"表示：
@@ -587,6 +588,24 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var temp2 = String(args[7]);
 			var temp3 = String(args[9]);
 			var temp4 = String(args[11]);
+			/*-----------------反复缩放 - 开始------------------*/
+			if( type == "反复缩放" ){
+				temp1 = temp1.replace("持续时间[","");
+				temp1 = temp1.replace("]","");
+				temp1 = temp1.replace("无限","518400000");
+				temp2 = temp2.replace("周期[","");
+				temp2 = temp2.replace("]","");
+				temp3 = temp3.replace("最小缩放[","");
+				temp3 = temp3.replace("]","");
+				temp4 = temp4.replace("最大缩放[","");
+				temp4 = temp4.replace("]","");
+				if( pics != null ){
+					for( var k=0; k < pics.length; k++ ){
+						pics[k].drill_PCE_stopEffect();
+						pics[k].drill_PCE_playSustainingZooming( Number(temp1),Number(temp2),Number(temp3),Number(temp4) );
+					}
+				}
+			}	
 			/*-----------------顺时针旋转(渐变) - 开始------------------*/
 			if( type == "顺时针旋转(渐变)" ){
 				temp1 = temp1.replace("持续时间[","");
@@ -1123,6 +1142,7 @@ Game_Picture.prototype.update = function() {
 	this.drill_PCE_updateSustainingAnchorRotate();				//帧刷新 - 锚点摇晃
 	this.drill_PCE_updateSustainingBreathing();					//帧刷新 - 呼吸效果
 	this.drill_PCE_updateSustainingJumping();					//帧刷新 - 原地小跳
+	this.drill_PCE_updateSustainingZooming();					//帧刷新 - 反复缩放
 	this.drill_PCE_updateSustainingFloating();					//帧刷新 - 空中飘浮
 	this.drill_PCE_updateSustainingRotateState();				//帧刷新 - 旋转状态
 	this.drill_PCE_updateSustainingResizeState();				//帧刷新 - 缩放状态
@@ -1573,6 +1593,41 @@ Game_Picture.prototype.drill_PCE_updateSustainingJumping = function() {
 		ef.fB_time = 0;
 		ef.fC_time = 0;
 	}
+	
+	// > 终止持续效果
+	if( ef.f_time >= ef.f_dTime ){
+		this.drill_PCE_stopEffect();
+	}
+}
+
+//==============================
+// * 初始化 - 持续 反复缩放
+//==============================
+Game_Picture.prototype.drill_PCE_playSustainingZooming = function( time,period,min_size,max_size ) {
+	var ef = this._Drill_PCE;
+	ef.playing_type = "反复缩放";
+	ef.f_time = 0;
+	ef.f_dTime = time;
+	ef.f_period = period;
+	ef.f_min = min_size -1;
+	ef.f_max = max_size -1;
+	ef.f_speed = 360/period /180*Math.PI;
+}
+//==============================
+// * 帧刷新 - 持续 反复缩放
+//==============================
+Game_Picture.prototype.drill_PCE_updateSustainingZooming = function() {
+	var ef = this._Drill_PCE;
+	if( ef.playing_type != "反复缩放" ){ return; }
+	
+	ef.f_time ++;
+	ef.scale_x = ef.f_min + (ef.f_max - ef.f_min)/2 + (ef.f_max - ef.f_min)/2 * Math.sin( ef.f_time*ef.f_speed );
+	ef.scale_y = ef.scale_x;
+	
+	// > 锚点(0.5,0.5)锁定
+	var fix_point = $gameTemp.drill_PCE_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, 0.5,0.5, ef.real_width,ef.real_height, ef.rotation, ef.scale_x, ef.scale_y );
+	ef.x = fix_point.x;	
+	ef.y = fix_point.y;	
 	
 	// > 终止持续效果
 	if( ef.f_time >= ef.f_dTime ){

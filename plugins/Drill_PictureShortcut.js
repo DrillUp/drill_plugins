@@ -2523,42 +2523,42 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp2 = temp2.replace("]","");
 				if( temp1 == "位置X" ){
 					if( pics != null ){
-						$gameSwitches.setValue( Number(temp2), pics[0]._x );
+						$gameVariables.setValue( Number(temp2), pics[0]._x );
 					}
 				}
 				if( temp1 == "位置Y" ){
 					if( pics != null ){
-						$gameSwitches.setValue( Number(temp2), pics[0]._y );
+						$gameVariables.setValue( Number(temp2), pics[0]._y );
 					}
 				}
 				if( temp1 == "透明度" ){
 					if( pics != null ){
-						$gameSwitches.setValue( Number(temp2), pics[0]._opacity );
+						$gameVariables.setValue( Number(temp2), pics[0]._opacity );
 					}
 				}
 				if( temp1 == "旋转" ){
 					if( pics != null ){
-						$gameSwitches.setValue( Number(temp2), pics[0]._angle );
+						$gameVariables.setValue( Number(temp2), pics[0]._angle );
 					}
 				}
 				if( temp1 == "缩放X" ){
 					if( pics != null ){
-						$gameSwitches.setValue( Number(temp2), pics[0]._scaleX );
+						$gameVariables.setValue( Number(temp2), pics[0]._scaleX );
 					}
 				}
 				if( temp1 == "缩放Y" ){
 					if( pics != null ){
-						$gameSwitches.setValue( Number(temp2), pics[0]._scaleY );
+						$gameVariables.setValue( Number(temp2), pics[0]._scaleY );
 					}
 				}
 				if( temp1 == "斜切X" ){
 					if( pics != null ){
-						$gameSwitches.setValue( Number(temp2), pics[0]._skewX );
+						$gameVariables.setValue( Number(temp2), pics[0]._skewX );
 					}
 				}
 				if( temp1 == "斜切Y" ){
 					if( pics != null ){
-						$gameSwitches.setValue( Number(temp2), pics[0]._skewY );
+						$gameVariables.setValue( Number(temp2), pics[0]._skewY );
 					}
 				}
 			}
@@ -2960,9 +2960,7 @@ Game_Picture.prototype.move = function(origin, x, y, scaleX, scaleY, opacity, bl
 //==============================
 // * 图片贴图 - 锚点显示
 //==============================
-var _Drill_PSh_sp_initialize2 = Sprite_Picture.prototype.initialize;
-Sprite_Picture.prototype.initialize = function(pictureId) {
-	_Drill_PSh_sp_initialize2.call(this,pictureId);
+Sprite_Picture.prototype.drill_PSh_createAnchorSprite = function(){
 	
 	// > 锚点图形初始化
 	var temp_sprite = new Sprite();
@@ -2993,8 +2991,13 @@ Sprite_Picture.prototype.updateOrigin = function() {
 		picture._drill_height = this.bitmap.height;
 	}
 	
+	// > 锚点图形创建监听
+	if( picture._drill_showAnchor == true && 
+		this._drill_PSh_anchorSprite == undefined ){
+		this.drill_PSh_createAnchorSprite();
+	}
 	// > 锚点图形显示
-	if( this._drill_PSh_anchorSprite ){
+	if( this._drill_PSh_anchorSprite != undefined ){
 		this._drill_PSh_anchorSprite.visible = picture._drill_showAnchor;
 	}
 	

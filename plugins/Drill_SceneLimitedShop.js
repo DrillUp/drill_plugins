@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        面板 - 限量商店
+ * @plugindesc [v1.3]        面板 - 限量商店
  * @author Drill_up
  * 
  * @Drill_LE_param "限量商店-%d"
@@ -84,6 +84,14 @@
  *   (3.服务员实际上只是一张变化的gif贴图，可以不是人物立绘。
  *   (4.该插件配置有 限量商店 和 服务员 配置。
  *      找不到服务员的时候，记得 往下翻 参数列表，因为服务员配置在下面。
+ * 存储数据：
+ *   (1.插件中很多属性修改后永久有效，这些数据存入了存档中，
+ *      如果读取旧存档，会出现旧存档中部分数据不一致的问题。
+ *   (2.插件支持 空数据同步更新 的优化，
+ *      详细去看看"0.基本定义 > 数据更新与旧存档.docx"
+ *   (3.效果为：新加了一个限量商店时，这个商店可以在旧存档中开放。
+ *      并且具备相应的商品数量。
+ *      但注意，编辑修改的商店商品数量，是不能同步到旧存档中的。
  * 设计：
  *   (1.该商店需要使用插件指令">限量商店"才能进入指定的限量商店。
  *      并且，窗口配置后的样式是固定的。
@@ -179,6 +187,8 @@
  * [v1.2]
  * 修复了所有商品卖完后，再次购买出错的bug。添加了 库存全部卖完 动作。
  * 修复了服务员无法正常播放动作的bug。
+ * [v1.3]
+ * 添加了 空数据同步更新 的优化。
  * 
  *
  * @param ----杂项----
@@ -1712,13 +1722,15 @@
 	/*-----------------商店数据参数------------------*/
 	DrillUp.g_SLS_shop_list_length = 30;
 	DrillUp.g_SLS_shop_list = [];
-	for (var i = 0; i < DrillUp.g_SLS_shop_list_length ; i++ ) {
+	for( var i = 0; i < DrillUp.g_SLS_shop_list_length ; i++ ){
 		if( DrillUp.parameters['限量商店-' + String(i+1) ] != "" &&
 			DrillUp.parameters['限量商店-' + String(i+1) ] != undefined ){
 			var shop_params = JSON.parse(DrillUp.parameters['限量商店-' + String(i+1)] );
 			DrillUp.g_SLS_shop_list[i] = DrillUp.drill_SLS_initShopData( shop_params );
+			DrillUp.g_SLS_shop_list[i]['inited'] = true;
 		}else{
 			DrillUp.g_SLS_shop_list[i] = DrillUp.drill_SLS_initShopData( {} );
+			DrillUp.g_SLS_shop_list[i]['inited'] = false;
 		}
 	};
 	
@@ -1823,8 +1835,10 @@
 			DrillUp.parameters['服务员-' + String(i+1) ] != undefined ){
 			var waitress_params = JSON.parse(DrillUp.parameters['服务员-' + String(i+1)] );
 			DrillUp.g_SLS_waitress_list[i] = DrillUp.drill_SLS_convertWaitress( waitress_params );
+			DrillUp.g_SLS_waitress_list[i]['inited'] = true;
 		}else{
 			DrillUp.g_SLS_waitress_list[i] = DrillUp.drill_SLS_convertWaitress( {} );
+			DrillUp.g_SLS_waitress_list[i]['inited'] = false;
 		}
 	};
 	
@@ -1968,8 +1982,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( type == "切换服务员" ){
 				temp1 = temp1.replace("限量商店[","");
 				temp1 = temp1.replace("]","");
-				temp1 = Number(temp1) - 1;
-				$gameSystem._drill_SLS_shopList[ temp1 ]['waitress_id'] = Number(temp2);
+				temp1 = Math.max( Number(temp1) - 1, 0 );
+				$gameSystem._drill_SLS_shopList[ temp1 ]['waitress_id'] = Math.max( Number(temp2), 1 );
 			}
 		}
 		if(args.length == 4){
@@ -1978,7 +1992,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( type == "隐藏服务员" ){
 				temp1 = temp1.replace("限量商店[","");
 				temp1 = temp1.replace("]","");
-				temp1 = Number(temp1) - 1;
+				temp1 = Math.max( Number(temp1) - 1, 0 );
 				$gameSystem._drill_SLS_shopList[ temp1 ]['waitress_id'] = 0;
 			}
 		}
@@ -1998,6 +2012,45 @@ Game_System.prototype.initialize = function() {
 	this._drill_SLS_shopIndex = 0;														//商店索引
 	this._drill_SLS_shopList = JSON.parse(JSON.stringify( DrillUp.g_SLS_shop_list ));	//商店数据
 };
+//==============================
+// * 管理器 - 读取数据
+//==============================
+var _drill_SLS_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_SLS_extractSaveContents.call( this, contents );
+	$gameSystem.drill_SLS_checkData();
+}
+//==============================
+// * 管理器 - 检查数据
+//==============================
+Game_System.prototype.drill_SLS_checkData = function() {
+	
+	// > 库都未定义，则直接赋值
+	if( this._drill_SLS_shopList == undefined ){
+		this._drill_SLS_shopList = JSON.parse(JSON.stringify( DrillUp.g_SLS_shop_list ));
+		this._drill_SLS_shopIndex = 0;
+		return;
+	}
+	
+	// > 绑定数据容器
+	for(var i = 0; i < DrillUp.g_SLS_shop_list.length; i++ ){
+		var temp_data = JSON.parse(JSON.stringify( DrillUp.g_SLS_shop_list[i] ));
+		
+		// > 已配置（'inited'为 false 表示空数据）
+		if( temp_data['inited'] == true ){
+			
+			// > 未存储的，重新初始化
+			if( this._drill_SLS_shopList[i] == undefined ||
+				this._drill_SLS_shopList[i]['inited'] == false ){
+				this._drill_SLS_shopList[i] = temp_data;
+			
+			// > 已存储的，跳过
+			}else{
+				//（不操作）
+			}
+		}
+	}
+}
 //==============================
 // * 存储数据 - 获取商店数据
 //==============================
@@ -2319,6 +2372,8 @@ Scene_Drill_SLS.prototype.createWaitress = function() {
 	var waitress = {};
 	if( shop['waitress_id'] > 0 ){
 		waitress = DrillUp.g_SLS_waitress_list[ shop['waitress_id'] -1 ];
+	}else{
+		waitress = DrillUp.drill_SLS_convertWaitress( {} );
 	}
 	var data = {
 		"x": waitress['x'],
@@ -2712,15 +2767,17 @@ Drill_SLS_GoodsWindow.prototype.drill_SLS_price = function(index) {
 	if( item_shop['inc_lock'] == true ){
 		result = item_shop['inc_locknum'];
 	}
-	if( item_shop['inc_type'] == "按背包数量涨价" ){
-		// > 只按背包数量涨价
-		for( var i=0; i < $gameParty.numItems(item_data); i++ ){
-			result = result * item_shop['inc_power'] + item_shop['inc_add'];
-		}
-	}else{
-		// > 永久涨价
-		for( var i=0; i < item_shop['limit_cur']; i++ ){
-			result = result * item_shop['inc_power'] + item_shop['inc_add'];
+	if( item_shop['inc_enable'] == true ){
+		if( item_shop['inc_type'] == "按背包数量涨价" ){
+			// > 只按背包数量涨价
+			for( var i=0; i < $gameParty.numItems(item_data); i++ ){
+				result = result * item_shop['inc_power'] + item_shop['inc_add'];
+			}
+		}else{
+			// > 永久涨价
+			for( var i=0; i < item_shop['limit_cur']; i++ ){
+				result = result * item_shop['inc_power'] + item_shop['inc_add'];
+			}
 		}
 	}
 	

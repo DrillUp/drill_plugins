@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        物体 - 移动路线指令集
+ * @plugindesc [v1.1]        物体 - 移动路线指令集
  * @author Drill_up
  * 
  * 
@@ -216,6 +216,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 优化了 移动路线指令转义 的功能。
  * 
  * 
  *
@@ -297,9 +299,7 @@ if( Imported.Drill_CoreOfMoveRoute ){
 
 
 //=============================================================================
-// * 指令 - 执行移动路线指令（继承）
-//
-//			说明：	这里执行具体的 移动路线指令 。
+// * 指令执行阶段 - 执行指令（继承接口）
 //=============================================================================
 var _drill_RCG_routeCommand = Game_Character.prototype.drill_COMR_routeCommand;
 Game_Character.prototype.drill_COMR_routeCommand = function(command, args){
@@ -683,13 +683,11 @@ Game_Character.prototype.drill_COMR_routeCommand = function(command, args){
 
 
 //=============================================================================
-// * 脚本转义 - 多层转义指令（继承）
-//
-//			说明：	这里仅提供 指令转义/指令翻倍 功能，不直接执行指令本身。
+// * 脚本转义阶段 - 执行转义（继承接口）
 //=============================================================================
 var _drill_RCG_routeTransform = Game_Character.prototype.drill_COMR_routeTransform;
-Game_Character.prototype.drill_COMR_routeTransform = function(command, args, route_list){
-	_drill_RCG_routeTransform.call( this, command, args, route_list );
+Game_Character.prototype.drill_COMR_routeTransform = function( command, args ){
+	_drill_RCG_routeTransform.call( this, command, args );
 	if( command == ">指令集" ){
 		
 		/*-----------------步数叠加------------------*/
@@ -700,64 +698,98 @@ Game_Character.prototype.drill_COMR_routeTransform = function(command, args, rou
 				step = step.replace("]","");
 				step = Number(step);
 				args.pop();
+				var route_list = [];
 				for( var i=0; i < step; i++ ){
 					var _script = command + ":" + args.join(":");
 					route_list.push( {code:45,parameters:[_script]} );	//（去掉步数参数，将剩余指令复制n次）
 				}
+				this.drill_COMR_routeSubmit_Transform( route_list );
+				
 			}else if( step.indexOf("步数变量[") != -1 ){
 				step = step.replace("步数变量[","");
 				step = step.replace("]","");
 				step = $gameVariables.value( Number(step) );
 				args.pop();
+				var route_list = [];
 				for( var i=0; i < step; i++ ){
 					var _script = command + ":" + args.join(":");
 					route_list.push( {code:45,parameters:[_script]} );
 				}
+				this.drill_COMR_routeSubmit_Transform( route_list );
 			}
 		}
 	}
 	
 	/*-----------------部分旧指令------------------*/
 	if( command.match( /^>下移(\d+)步/ ) ){
+		var route_list = [];
 		for( var i=0; i < Number(RegExp.$1); i++){
 			route_list.push({code:1});
 		}
+		this.drill_COMR_routeSubmit_Transform( route_list );
+		
 	}else if( command.match( /^>左移(\d+)步/ ) ){
+		var route_list = [];
 		for( var i=0; i < Number(RegExp.$1); i++){
 			route_list.push({code:2});
 		}
+		this.drill_COMR_routeSubmit_Transform( route_list );
+		
 	}else if( command.match( /^>右移(\d+)步/ ) ){
+		var route_list = [];
 		for( var i=0; i < Number(RegExp.$1); i++){
 			route_list.push({code:3});
 		}
+		this.drill_COMR_routeSubmit_Transform( route_list );
+		
 	}else if( command.match( /^>上移(\d+)步/ ) ){
+		var route_list = [];
 		for( var i=0; i < Number(RegExp.$1); i++){
 			route_list.push({code:4});
 		}
+		this.drill_COMR_routeSubmit_Transform( route_list );
+		
 	}else if( command.match( /^>左下移(\d+)步/ ) ){
+		var route_list = [];
 		for( var i=0; i < Number(RegExp.$1); i++){
 			route_list.push({code:5});
 		}
+		this.drill_COMR_routeSubmit_Transform( route_list );
+		
 	}else if( command.match( /^>右下移(\d+)步/ ) ){
+		var route_list = [];
 		for( var i=0; i < Number(RegExp.$1); i++){
 			route_list.push({code:6});
 		}
+		this.drill_COMR_routeSubmit_Transform( route_list );
+		
 	}else if( command.match( /^>右上移(\d+)步/ ) ){
+		var route_list = [];
 		for( var i=0; i < Number(RegExp.$1); i++){
 			route_list.push({code:7});
 		}
+		this.drill_COMR_routeSubmit_Transform( route_list );
+		
 	}else if( command.match( /^>左上移(\d+)步/ ) ){
+		var route_list = [];
 		for( var i=0; i < Number(RegExp.$1); i++){
 			route_list.push({code:8});
 		}
+		this.drill_COMR_routeSubmit_Transform( route_list );
+		
 	}else if( command.match( /^>前进(\d+)步/ ) ){
+		var route_list = [];
 		for( var i=0; i < Number(RegExp.$1); i++){
 			route_list.push({code:12});
 		}
+		this.drill_COMR_routeSubmit_Transform( route_list );
+		
 	}else if( command.match( /^>后退(\d+)步/ ) ){
+		var route_list = [];
 		for( var i=0; i < Number(RegExp.$1); i++){
 			route_list.push({code:13});
 		}
+		this.drill_COMR_routeSubmit_Transform( route_list );
 	}
 }
 
@@ -1069,7 +1101,7 @@ if( typeof(_drill_touchPad_getCurPos) == "undefined" ){	//防止重复定义
 }else{
 		Imported.Drill_RouteCommandGroup = false;
 		alert(
-			"【Drill_RouteCommandGroup.js 物体 - 移动速度】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfMoveRoute 物体-移动路线指令集"
+			"【Drill_RouteCommandGroup.js 物体 - 移动路线指令集】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
+			"\n- Drill_CoreOfMoveRoute 物体-移动路线核心"
 		);
 }

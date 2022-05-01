@@ -804,6 +804,9 @@ Game_Map.prototype.drill_EAT_updateEventsOrderIndex = function() {
 		// > 离玩家越远越后
 		var distance = $gameMap.distance( temp_event._x, temp_event._y, $gamePlayer._x, $gamePlayer._y ); 
 		temp_event._drill_EAT_orderIndex = distance;
+		
+		// > 被清除的事件排最后
+		if( temp_event._erased ){ temp_event._drill_EAT_orderIndex = 99999; }
 	}
 	
 };
@@ -940,8 +943,7 @@ Game_Map.prototype.drill_EAT_getEventsInMaxRange = function() {
 	var result = [];
 	for(var i=0; i < this._drill_EAT_xy_events.length ; i++){
 		var temp_event = this._drill_EAT_xy_events[i];
-		if( temp_event == undefined ){ break; }
-		if( temp_event._drill_EAT_orderIndex == 99999 ){ break; }
+		if( temp_event == undefined ){ continue; }
 		if( temp_event._drill_EAT_orderIndex > DrillUp.g_EAT_area_max_x_range+1 ){ break; }
 		if( temp_event._drill_EAT_orderIndex > DrillUp.g_EAT_area_max_y_range+1 ){ break; }
 		result.push( temp_event );

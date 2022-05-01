@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        控件 - 商店节假日的折扣[扩展]
+ * @plugindesc [v1.1]        控件 - 商店节假日的折扣[扩展]
  * @author Drill_up
  * 
  * @Drill_LE_param "折扣-%d"
@@ -108,6 +108,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 修复了使用 自定义单图背景 模式时，切换折扣样式造成错误叠加的bug。
  * 
  * 
  * 
@@ -132,12 +134,12 @@
  *
  * @param 偏移-折扣信息框 X
  * @parent ---折扣信息框---
- * @desc 以鼠标/触屏的点位置为基准，x轴方向平移，单位像素。（可为负数）
+ * @desc 以鼠标/触屏的点位置为基准，x轴方向平移，单位像素。正数向右，负数向左。
  * @default 0
  *
  * @param 偏移-折扣信息框 Y
  * @parent ---折扣信息框---
- * @desc 以鼠标/触屏的点位置为基准，y轴方向平移，单位像素。（可为负数）
+ * @desc 以鼠标/触屏的点位置为基准，y轴方向平移，单位像素。正数向下，负数向上。
  * @default 0
  *
  * @param 信息框布局
@@ -180,12 +182,12 @@
  *
  * @param 平移-自定义背景图片 X
  * @parent 信息框布局
- * @desc 修正图片的偏移用。以窗口的点为基准，x轴方向平移，单位像素。（可为负数）
+ * @desc 修正图片的偏移用。以窗口的点为基准，x轴方向平移，单位像素。正数向右，负数向左。
  * @default 0
  *
  * @param 平移-自定义背景图片 Y
  * @parent 信息框布局
- * @desc 修正图片的偏移用。以窗口的点为基准，y轴方向平移，单位像素。（可为负数）
+ * @desc 修正图片的偏移用。以窗口的点为基准，y轴方向平移，单位像素。正数向下，负数向上。
  * @default 0
  *
  * @param 是否锁定窗口位置
@@ -1358,6 +1360,7 @@ Drill_XSSD_Window.prototype.drill_createBackground = function() {
 		
 		// > 透明度
 		this.opacity = data['window_opacity'];
+		this._drill_background.bitmap = null;
 		this._drill_background.opacity = data['window_opacity'];
 		this._windowBackSprite.opacity = data['window_opacity'];
 		this._windowFrameSprite.opacity = data['window_opacity'];
@@ -1369,6 +1372,7 @@ Drill_XSSD_Window.prototype.drill_createBackground = function() {
 		this.windowskin = data['window_sys_bitmap'];
 		
 		// > 透明度
+		this._drill_background.bitmap = null;
 		this._drill_background.opacity = data['window_opacity'];
 		this._windowBackSprite.opacity = data['window_opacity'];
 		this._windowFrameSprite.opacity = data['window_opacity'];
@@ -1393,6 +1397,7 @@ Drill_XSSD_Window.prototype.drill_createBackground = function() {
 		//（需延迟设置，见后面）
 		
 		// > 透明度
+		this._drill_background.bitmap = null;
 		this._drill_background.opacity = data['window_opacity'];
 		this._windowBackSprite.opacity = 0;
 		this._windowFrameSprite.opacity = 0;
@@ -1526,10 +1531,9 @@ Drill_XSSD_Window.prototype.drill_refreshMessage = function( context_list ){
 	
 	// > 窗口高宽 - 计算
 	var options = {};
-	options['convertEnabled'] = false;
 	options['autoLineheight'] = true;
 	options['lineheight'] = data['window_lineheight'];
-	this.drill_COWA_DTLE_calculateHeightAndWidth( context_list, options );		//（窗口辅助核心）
+	this.drill_COWA_calculateHeightAndWidth( context_list, options );		//（窗口辅助核心）
 	// > 窗口高宽 - 赋值
 	var ww = 0;
 	var hh = 0;

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        地图 - 多层地图平铺GIF
+ * @plugindesc [v1.4]        地图 - 多层地图平铺GIF
  * @author Drill_up
  * 
  * @Drill_LE_param "平铺GIF-%d"
@@ -161,6 +161,8 @@
  * 添加了 参数存储 功能开关，以及动态遮罩功能。
  * [v1.3]
  * 添加了平铺GIF的浮动效果设置。
+ * [v1.4]
+ * 梳理优化了位移比的结构。
  * 
  * 
  * 
@@ -1505,7 +1507,7 @@
  *
  * @param 平移-平铺GIF Y
  * @parent ---贴图---
- * @desc x轴方向平移，单位像素。0为贴在最上面。这里用来表示进入地图时图片的初始位置。
+ * @desc y轴方向平移，单位像素。0为贴在最上面。这里用来表示进入地图时图片的初始位置。
  * @default 0
  *
  * @param 平铺GIF-X速度
@@ -1905,11 +1907,11 @@ Game_System.prototype.drill_LTG_initData = function() {
 		// > 私有变量初始化
 		data['cur_speedX'] = 0;			//当前x位置（速度累加的结果）
 		data['cur_speedY'] = 0;			//
-		data['cameraX'] = 0;			//实际镜头的x精确坐标
+		data['cameraX'] = 0;			//含循环累积的镜头位置（像素单位）
 		data['cameraY'] = 0;			//
 		data['loopX'] = 0;				//循环地图中，走动循环的次数
 		data['loopY'] = 0;				//
-		data['loopFixX'] = 0;			//循环地图中，把displayX取余的部分加回
+		data['loopFixX'] = 0;			//循环地图中，把displayX取余的部分加回（图块单位）
 		data['loopFixY'] = 0;			//
 		data['gif_p_playing'] = false;			//gif - 播放一次
 		data['gif_p_playType'] = "forwardRun";	//gif - 播放是否反向
@@ -1965,8 +1967,8 @@ Game_Player.prototype.update = function( sceneActive ){
 	
 	for(var i = 0; i< $gameSystem._drill_LTG_dataTank_map.length ;i++){
 		var data = $gameSystem._drill_LTG_dataTank_map[i];
-		data['cameraX'] = ($gameMap._displayX + data['loopFixX'] - data['tile_x']) * $gameMap.tileWidth();
-		data['cameraY'] = ($gameMap._displayY + data['loopFixY'] - data['tile_y']) * $gameMap.tileHeight();
+		data['cameraX'] = ($gameMap.displayX() + data['loopFixX']) * $gameMap.tileWidth();
+		data['cameraY'] = ($gameMap.displayY() + data['loopFixY']) * $gameMap.tileHeight();
 	}
 };
 //==============================
@@ -2035,11 +2037,53 @@ Game_Map.prototype.scrollRight = function(distance) {
 };
 
 
+//#############################################################################
+// ** 标准函数（地图层级）
+//#############################################################################
+//##############################
+// * 地图层级 - 添加贴图到层级【标准函数】
+//				
+//			参数：	> sprite 贴图        （添加的贴图对象）
+//					> layer_index 字符串 （添加到的层级名，下层/中层/上层/图片层/最顶层）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图添加到目标层级中。
+//##############################
+Scene_Map.prototype.drill_LTG_layerAddSprite = function (sprite, layer_index) {
+    this.drill_LTG_layerAddSprite_Private(sprite, layer_index);
+}
+//##############################
+// * 地图层级 - 移动贴图【标准函数】
+//				
+//			参数：	> x 数字           （x位置，地图参照为基准）
+//					> y 数字           （y位置，地图参照为基准）
+//					> reference 字符串 （参考系，镜头参照/地图参照）
+//					> option 动态参数对象 （计算时的必要数据）
+//			返回：	> pos 动态参数对象
+//                  > pos['x']
+//                  > pos['y']
+//          
+//			说明：	> 强行规范的接口，必须按照接口的结构来，把要考虑的问题全考虑清楚了再去实现。
+//##############################
+Scene_Map.prototype.drill_LTG_layerMoveingReference = function (x, y, reference, option) {
+    return this.drill_LTG_layerMoveingReference_Private(x, y, reference, option);
+}
+//##############################
+// * 地图层级 - 图片层级排序【标准函数】
+//				
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 执行该函数后，地图层级的子贴图，按照zIndex属性来进行先后排序。值越大，越靠前。
+//##############################
+Scene_Map.prototype.drill_LTG_sortByZIndex = function () {
+    this.drill_LTG_sortByZIndex_Private();
+}
 //=============================================================================
-// ** 地图层级
+// ** 地图层级（接口实现）
 //=============================================================================
 //==============================
-// ** 下层
+// * 地图层级 - 下层
 //==============================
 var _drill_LTG_layer_createParallax = Spriteset_Map.prototype.createParallax;
 Spriteset_Map.prototype.createParallax = function() {
@@ -2050,7 +2094,7 @@ Spriteset_Map.prototype.createParallax = function() {
 	}
 }
 //==============================
-// ** 中层
+// * 地图层级 - 中层
 //==============================
 var _drill_LTG_layer_createTilemap = Spriteset_Map.prototype.createTilemap;
 Spriteset_Map.prototype.createTilemap = function() {
@@ -2062,7 +2106,7 @@ Spriteset_Map.prototype.createTilemap = function() {
 	}
 }
 //==============================
-// ** 上层
+// * 地图层级 - 上层
 //==============================
 var _drill_LTG_layer_createDestination = Spriteset_Map.prototype.createDestination;
 Spriteset_Map.prototype.createDestination = function() {
@@ -2073,7 +2117,7 @@ Spriteset_Map.prototype.createDestination = function() {
 	}
 }
 //==============================
-// ** 图片层
+// * 地图层级 - 图片层
 //==============================
 var _drill_LTG_layer_createPictures = Spriteset_Map.prototype.createPictures;
 Spriteset_Map.prototype.createPictures = function() {
@@ -2084,7 +2128,7 @@ Spriteset_Map.prototype.createPictures = function() {
 	}
 }
 //==============================
-// ** 最顶层
+// * 地图层级 - 最顶层
 //==============================
 var _drill_LTG_layer_createAllWindows = Scene_Map.prototype.createAllWindows;
 Scene_Map.prototype.createAllWindows = function() {
@@ -2095,15 +2139,69 @@ Scene_Map.prototype.createAllWindows = function() {
 	}
 }
 //==============================
-// ** 层级排序
+// * 地图层级 - 图片层级排序（私有）
 //==============================
-Scene_Map.prototype.drill_LTG_sortByZIndex = function() {
+Scene_Map.prototype.drill_LTG_sortByZIndex_Private = function() {
 	this._spriteset._drill_mapDownArea.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
 	this._spriteset._drill_mapCenterArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
 	this._spriteset._drill_mapUpArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
 	this._spriteset._drill_mapPicArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
 	this._drill_SenceTopArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
 };
+//==============================
+// * 地图层级 - 添加贴图到层级（私有）
+//==============================
+Scene_Map.prototype.drill_LTG_layerAddSprite_Private = function (sprite, layer_index) {
+    if (layer_index == "下层") {
+        this._spriteset._drill_mapDownArea.addChild(sprite);
+    }
+    if (layer_index == "中层") {
+        this._spriteset._drill_mapCenterArea.addChild(sprite);
+    }
+    if (layer_index == "上层") {
+        this._spriteset._drill_mapUpArea.addChild(sprite);
+    }
+    if (layer_index == "图片层") {
+        this._spriteset._drill_mapPicArea.addChild(sprite);
+    }
+    if (layer_index == "最顶层") {
+        this._drill_SenceTopArea.addChild(sprite);
+    }
+}
+//==============================
+// * 地图层级 - 移动贴图（私有）
+//			
+//			说明：	当前的xx，yy的参照系是 地图参照 。
+//==============================
+Scene_Map.prototype.drill_LTG_layerMoveingReference_Private = function( xx, yy, reference, option ){
+	
+	// > 位移比
+	//		（这里是位移比配置是反的，可能是因为 TilingSprite 的缘故。）
+	var x_per = 1.0 - option['XPer'];
+	var y_per = 1.0 - option['YPer'];
+	
+	xx -= option['tile_x'] * $gameMap.tileWidth() * x_per;
+	yy -= option['tile_y'] * $gameMap.tileHeight() * y_per;
+	//		（*0 表示紧贴地图；*1表示减回去了，紧贴镜头。）
+	
+	xx += option['cameraX'] * x_per;
+	yy += option['cameraY'] * y_per;
+	//		（*0 表示不跟镜头移动，紧贴地图；*1表示紧贴镜头。）
+	
+	
+	// > 参照系修正
+	if( reference == "地图参照" ){
+		//（不操作）
+		return {'x':xx, 'y':yy };
+	}
+	if( reference == "镜头参照" ){
+		xx -= this._spriteset._baseSprite.x;	//（由于 Spriteset_Map 的 _baseSprite 坐标始终是(0,0)，所以两个参照没有区别。）
+		yy -= this._spriteset._baseSprite.y;
+		return {'x':xx, 'y':yy };
+	}
+	return {'x':xx, 'y':yy };
+}
+
 
 //=============================================================================
 // ** 地图界面
@@ -2151,21 +2249,7 @@ Scene_Map.prototype.drill_LTG_create = function() {
 		
 		// > 地图层级
 		this._drill_LTG_spriteTank.push(temp_sprite);
-		if( temp_sprite['layer_index'] == '下层' ){
-			this._spriteset._drill_mapDownArea.addChild(temp_sprite);
-		}
-		if( temp_sprite['layer_index'] == '中层' ){
-			this._spriteset._drill_mapCenterArea.addChild(temp_sprite);
-		}
-		if( temp_sprite['layer_index'] == '上层' ){
-			this._spriteset._drill_mapUpArea.addChild(temp_sprite);
-		}
-		if( temp_sprite['layer_index'] == '图片层' ){
-			this._spriteset._drill_mapPicArea.addChild(temp_sprite);
-		}
-		if( temp_sprite['layer_index'] == '最顶层' ){
-			this._drill_SenceTopArea.addChild(temp_sprite);
-		}
+		this.drill_LTG_layerAddSprite( temp_sprite, temp_sprite['layer_index'] );
 	}
 	this.drill_LTG_sortByZIndex();		//排序
 }
@@ -2252,23 +2336,39 @@ Scene_Map.prototype.drill_LTG_updateBase = function() {
 				}
 			}
 			
-			// > 平移
+		    // > 时间+1
 			temp_sprite['_time'] += 1;
 			var time = temp_sprite['_time'];
+
+		    // > 位移（地图参照）
 			var xx = 0;
 			var yy = 0;
 			xx += temp_data['x'];
 			yy += temp_data['y'];
+			xx += temp_data['tile_x'] * $gameMap.tileWidth();
+			yy += temp_data['tile_y'] * $gameMap.tileHeight();
+			//（不含镜头的偏移）
 			
 			// > 背景速度
 			temp_data['cur_speedX'] += temp_data['speedX'];
 			temp_data['cur_speedY'] += temp_data['speedY'];
 			xx += temp_data['cur_speedX'];
 			yy += temp_data['cur_speedY'];
-			
-			// > 位移比
-			xx += temp_data['cameraX'] * (1.0 - temp_data['XPer']);		//（镜头位移 * 位移比）
-			yy += temp_data['cameraY'] * (1.0 - temp_data['YPer']);
+
+		    // > 位移偏转
+			if (temp_data['layer_index'] == "下层" ||
+                temp_data['layer_index'] == "中层" ||
+                temp_data['layer_index'] == "上层") {
+			    var pos = this.drill_LTG_layerMoveingReference(xx, yy, "地图参照", temp_data);
+			    xx = pos['x'];
+			    yy = pos['y'];
+			}
+			if (temp_data['layer_index'] == "图片层" ||
+                temp_data['layer_index'] == "最顶层") {
+			    var pos = this.drill_LTG_layerMoveingReference(xx, yy, "镜头参照", temp_data);
+			    xx = pos['x'];
+			    yy = pos['y'];
+			}
 			
 			// > 浮动效果
 			if( temp_data['float_enabled'] == true ){

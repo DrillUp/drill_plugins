@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        对话框 - 大图片字符
+ * @plugindesc [v1.2]        对话框 - 大图片字符
  * @author Drill_up
  * 
  * @Drill_LE_param "字符图-%d"
@@ -19,14 +19,13 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 使得你可以将图片当成一个字符，绘制在窗口中。
- * ★★必须基于 相关核心 插件★★
+ * ★★必须基于 窗口字符核心 插件★★
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
  * 该插件 不能 单独使用，必须基于核心。
  * 基于：
- *   - YEP_MessageCore               对话框-消息核心★★v1.1及以上★★
- *   - Drill_CoreOfWindowAuxiliary   系统-窗口辅助核心★★v1.3及以上★★
+ *   - Drill_CoreOfWindowCharacter   对话框 - 窗口字符核心
  *     需要该核心才能将图片绘制在窗口的文本域中。
  * 
  * -----------------------------------------------------------------------------
@@ -61,13 +60,18 @@
  *      显示/切换图片的效果。
  * 
  * -----------------------------------------------------------------------------
- * ----激活方式
+ * ----激活条件
+ * 你需要使用下面的窗口字符来绘制大图片：
  * 
- * 效果字符
- *   \dimg[1]        该字符会把编号为1的图片绘制到当前光标下。
- *   \dimg[10,-10,1] 该字符会把编号为1的图片绘制到光标偏移 x 10 像素
- *                    y -10 像素的位置。
- *   (dimg全称为：Drill_Image，即图片字符)
+ * 窗口字符：\dimg[1]
+ * 窗口字符：\dimg[1:位置[10,-10]]
+ * 
+ * 1."\dimg[1]"字符会把编号为1的图片绘制到当前光标下。 
+ *   （dimg全称为：Drill_Image，即图片字符）
+ * 2."\dimg[1:位置[10,-10]]"字符会把编号为1的图片绘制到当前光标
+ *   偏移到 x 10像素 y -10像素 的位置。
+ * 3.后绘制的图片，能够遮挡先绘制的文字或图片。但不包括 字符块 。
+ *   详细可以去看看对话管理层 阅后即焚 的效果。
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -479,8 +483,7 @@
 //=============================================================================
 // * >>>>基于插件检测>>>>
 //=============================================================================
-if( Imported.YEP_MessageCore &&
-	Imported.Drill_CoreOfWindowAuxiliary ){
+if( Imported.Drill_CoreOfWindowCharacter ){
 	
 	
 //=============================================================================
@@ -513,39 +516,34 @@ Window_Base.prototype.loadWindowskin = function(){
 //==============================
 // ** 文本转义 - 获取效果字符中的数组
 //==============================
-Window_Base.prototype.drill_DTBI_obtainEscapeArray = function(textState) {
-	var arr_str = /^\[[^\]]+\]/.exec(textState.text.slice(textState.index));
-	if( arr_str ){
-		arr_str = arr_str[0];
-        textState.index += arr_str.length;
-		var arr = arr_str.slice(1,arr_str.length-1).split(",");
-		return arr;
-	} else {
-		return [];
+var _drill_DTBI_processNewEffectChar_Combined = Window_Base.prototype.drill_COWC_processNewEffectChar_Combined;
+Window_Base.prototype.drill_COWC_processNewEffectChar_Combined = function( matched_index, matched_str, command, args ){
+	_drill_DTBI_processNewEffectChar_Combined.call( this, matched_index, matched_str, command, args );
+	if( command == "dimg" ){
+		
+		if( args.length == 1 ){
+			this.drill_DTBI_drawImg( Number(args[0]), 
+				this._drill_COWC_effect_curData['x'], 
+				this._drill_COWC_effect_curData['y'] );
+			this.drill_COWC_charSubmit_Effect(0,0);
+		}
+		if( args.length == 2 ){
+			var temp1 = String(args[0]);
+			var temp2 = String(args[1]);
+			temp2 = temp2.replace("位置[","");
+			temp2 = temp2.replace("]","");
+			var pos = temp2.split(/[,，]/);
+			if( pos.length >= 2 ){
+				this.drill_DTBI_drawImg( Number(temp1), 
+					this._drill_COWC_effect_curData['x'] + Number(pos[0]), 
+					this._drill_COWC_effect_curData['y'] + Number(pos[1]) );
+			}
+			this.drill_COWC_charSubmit_Effect(0,0);
+		}
+		
 	}
 };
 
-//==============================
-// ** 文本转义 - 字符参数输入
-//==============================
-var _drill_DTBI_processEscapeCharacter = Window_Base.prototype.processEscapeCharacter;
-Window_Base.prototype.processEscapeCharacter = function( code, textState ){
-	switch ( code ){
-		case 'DIMG':
-			var arr = this.drill_DTBI_obtainEscapeArray(textState);	
-			if( arr.length == 1 ){
-				this.drill_DTBI_drawImg( Number(arr[0]), textState.x, textState.y );
-			}
-			if( arr.length == 3 ){
-				this.drill_DTBI_drawImg( Number(arr[2]), textState.x + Number(arr[0]), textState.y + Number(arr[1]) );
-			}
-			
-			break;
-		default:
-			_drill_DTBI_processEscapeCharacter.call(this, code, textState);
-			break;
-	}
-};
 
 //==============================
 // * 绘制 - 绘制大图片
@@ -569,8 +567,7 @@ Window_Base.prototype.drill_DTBI_drawImg = function( imgIndex, x, y ){
 		Imported.Drill_DialogTextBigImage = false;
 		alert(
 			"【Drill_DialogTextBigImage.js 对话框-大图片字符】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfWindowAuxiliary 系统-窗口辅助核心"+
-			"\n- YEP_MessageCore 对话框-消息核心"
+			"\n- Drill_CoreOfWindowCharacter 系统-窗口字符核心"
 		);
 }
 

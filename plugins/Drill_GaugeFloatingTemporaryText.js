@@ -470,12 +470,12 @@
  *
  * @param 平移-自定义背景图片 X
  * @parent 布局模式
- * @desc 修正图片的偏移用。以窗口的点为基准，x轴方向平移，单位像素。（可为负数）
+ * @desc 修正图片的偏移用。以窗口的点为基准，x轴方向平移，单位像素。正数向右，负数向左。
  * @default 0
  *
  * @param 平移-自定义背景图片 Y
  * @parent 布局模式
- * @desc 修正图片的偏移用。以窗口的点为基准，y轴方向平移，单位像素。（可为负数）
+ * @desc 修正图片的偏移用。以窗口的点为基准，y轴方向平移，单位像素。正数向下，负数向上。
  * @default 0
  *
  * @param 窗口中心锚点
@@ -1064,10 +1064,15 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( unit == "临时对象" && type == "修改内容文本" ){
 				
 				if( temp1.indexOf("字符串[") != -1 ){
-					temp1 = temp1.replace("字符串[","");
-					temp1 = temp1.replace("]","");
-					temp1 = $gameStrings.value( Number(temp1) );
-					$gameTemp.drill_GFTT_setBufferContext( temp1 );
+					if( Imported.Drill_CoreOfString ){
+						temp1 = temp1.replace("字符串[","");
+						temp1 = temp1.replace("]","");
+						temp1 = $gameStrings.value( Number(temp1) );
+						$gameTemp.drill_GFTT_setBufferContext( temp1 );
+					}else{
+						alert( "【Drill_GaugeFloatingTemporaryText.js 地图UI - 临时漂浮文字】\n" +
+								"缺少 字符串核心 插件，插件指令执行失败。");
+					}
 					
 				}else{	
 					
@@ -1570,6 +1575,7 @@ Drill_GFTT_Window.prototype.drill_createBackground = function() {
 		
 		// > 透明度
 		this.opacity = s_data['window_opacity'];
+		this._drill_background.bitmap = null;
 		this._drill_background.opacity = s_data['window_opacity'];
 		this._windowBackSprite.opacity = s_data['window_opacity'];
 		this._windowFrameSprite.opacity = s_data['window_opacity'];
@@ -1581,6 +1587,7 @@ Drill_GFTT_Window.prototype.drill_createBackground = function() {
 		this.windowskin = this._drill_window_sys_bitmap;
 		
 		// > 透明度
+		this._drill_background.bitmap = null;
 		this._drill_background.opacity = s_data['window_opacity'];
 		this._windowBackSprite.opacity = s_data['window_opacity'];
 		this._windowFrameSprite.opacity = s_data['window_opacity'];
@@ -1605,6 +1612,7 @@ Drill_GFTT_Window.prototype.drill_createBackground = function() {
 		//（需延迟设置，见后面）
 		
 		// > 透明度
+		this._drill_background.bitmap = null;
 		this._drill_background.opacity = s_data['window_opacity'];
 		this._windowBackSprite.opacity = 0;
 		this._windowFrameSprite.opacity = 0;
@@ -1684,10 +1692,9 @@ Drill_GFTT_Window.prototype.drill_refreshMessage = function( context_list ){
 	
 	// > 窗口高宽 - 计算
 	var options = {};
-	options['convertEnabled'] = false;
 	options['autoLineheight'] = s_data['window_autoLineheight'];
 	options['lineheight'] = s_data['window_lineheight'];
-	this.drill_COWA_DTLE_calculateHeightAndWidth( context_list, options );		//（窗口辅助核心）
+	this.drill_COWA_calculateHeightAndWidth( context_list, options );		//（窗口辅助核心）
 	// > 窗口高宽 - 赋值
 	var ww = 0;
 	var hh = 0;

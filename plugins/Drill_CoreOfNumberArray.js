@@ -2234,7 +2234,12 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 							result += " ";
 						}
 					}
-					$gameStrings.setValue( temp1, result );
+					if( Imported.Drill_CoreOfString ){
+						$gameStrings.setValue( temp1, result );
+					}else{
+						alert( "【Drill_CoreOfNumberArray.js 系统 - 变量数组核心】\n" +
+								"缺少 字符串核心 插件，插件指令执行失败。");
+					}
 				}
 				
 				if( type == "转为字符串(逗号连接)" && temp1.indexOf("字符串[") != -1 ){	
@@ -2249,7 +2254,12 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 							result += ",";
 						}
 					}
-					$gameStrings.setValue( temp1, result );
+					if( Imported.Drill_CoreOfString ){
+						$gameStrings.setValue( temp1, result );
+					}else{
+						alert( "【Drill_CoreOfNumberArray.js 系统 - 变量数组核心】\n" +
+								"缺少 字符串核心 插件，插件指令执行失败。");
+					}
 				}
 			}
 		}

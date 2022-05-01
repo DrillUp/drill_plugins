@@ -159,12 +159,12 @@
  *
  * @param 偏移-窗口 X
  * @parent ---窗口---
- * @desc 以鼠标/触屏的点位置为基准，x轴方向平移，单位像素。（可为负数）
+ * @desc 以鼠标/触屏的点位置为基准，x轴方向平移，单位像素。正数向右，负数向左。
  * @default 0
  *
  * @param 偏移-窗口 Y
  * @parent ---窗口---
- * @desc 以鼠标/触屏的点位置为基准，y轴方向平移，单位像素。（可为负数）
+ * @desc 以鼠标/触屏的点位置为基准，y轴方向平移，单位像素。正数向下，负数向上。
  * @default 0
  * 
  * @param 无状态时是否显示窗口
@@ -221,12 +221,12 @@
  *
  * @param 平移-自定义背景图片 X
  * @parent 布局模式
- * @desc 修正图片的偏移用。以窗口的点为基准，x轴方向平移，单位像素。（可为负数）
+ * @desc 修正图片的偏移用。以窗口的点为基准，x轴方向平移，单位像素。正数向右，负数向左。
  * @default 0
  *
  * @param 平移-自定义背景图片 Y
  * @parent 布局模式
- * @desc 修正图片的偏移用。以窗口的点为基准，y轴方向平移，单位像素。（可为负数）
+ * @desc 修正图片的偏移用。以窗口的点为基准，y轴方向平移，单位像素。正数向下，负数向上。
  * @default 0
  *
  * @param 窗口中心锚点
@@ -1602,6 +1602,7 @@ Drill_MPFS_Window.prototype.drill_createBackground = function() {
 		
 		// > 透明度
 		this.opacity = data['window_opacity'];
+		this._drill_background.bitmap = null;
 		this._drill_background.opacity = data['window_opacity'];
 		this._windowBackSprite.opacity = data['window_opacity'];
 		this._windowFrameSprite.opacity = data['window_opacity'];
@@ -1613,6 +1614,7 @@ Drill_MPFS_Window.prototype.drill_createBackground = function() {
 		this.windowskin = data['window_sys_bitmap'];
 		
 		// > 透明度
+		this._drill_background.bitmap = null;
 		this._drill_background.opacity = data['window_opacity'];
 		this._windowBackSprite.opacity = data['window_opacity'];
 		this._windowFrameSprite.opacity = data['window_opacity'];
@@ -1637,6 +1639,7 @@ Drill_MPFS_Window.prototype.drill_createBackground = function() {
 		//（需延迟设置，见后面）
 		
 		// > 透明度
+		this._drill_background.bitmap = null;
 		this._drill_background.opacity = data['window_opacity'];
 		this._windowBackSprite.opacity = 0;
 		this._windowFrameSprite.opacity = 0;
@@ -1648,11 +1651,11 @@ Drill_MPFS_Window.prototype.drill_createBackground = function() {
 // * 创建 - 文本层
 //==============================
 Drill_MPFS_Window.prototype.drill_createText = function() {
-	this.createContents();
     this.contents.clear();
+	this.createContents();
 	
-	// 绘制内容
-	this.drawTextEx( this._drill_text_default, 0, 0 );
+	// > 绘制内容
+	this.drill_COWA_drawTextEx( this._drill_text_default, {"x":0,"y":0} );
 }
 //==============================
 // ** 底层层级排序
@@ -1825,58 +1828,12 @@ Drill_MPFS_Window.prototype.drill_refreshMessage = function( state_ids, buff_ids
 		}
 	}
 	
-	// 2.长度判定（必须在绘制前）
-	//var tar_width = 0;
-	//for (var i=0; i< contexts.length; i++) {
-	//	var ic = 0;		//icon字符大小
-	//	var temp = contexts[i];	
-	//	var temp_s = temp.concat();
-	//	temp_s = temp_s.replace(/\\C\[\d+\]/gi,'');
-	//	temp_s = temp_s.replace(/\\I\[\d+\]/gi,function(){
-	//		ic+=1;
-	//		return '';
-	//	}.bind(this));
-	//	var temp_w = this.textWidth(temp_s) + ic * (this.standardFontSize() + 8);
-	//	if( temp_w > tar_width ){
-	//		tar_width = temp_w;
-	//	}
-	//}
-	//this._drill_width = tar_width;
-	//this._drill_height = contexts.length * ( this.standardFontSize() + DrillUp.g_MPFS_lineheight);
-	//this._drill_width += this.standardPadding() * 2;
-	//this._drill_height += this.standardPadding() * 2;
-	//this._drill_width += DrillUp.g_MPFS_ex_width;
-	//this._drill_height += DrillUp.g_MPFS_ex_height;
-	////if( has_no_states ){	
-	////	this._drill_width = 0;
-	////	this._drill_height = 0;
-	////}
-	//this.width = this._drill_width;
-	//this.height = this._drill_height;
-	//
-	//// 3.绘制内容
-	//this.createContents();
-    //this.contents.clear();
-	//for (var i=0; i< contexts.length; i++) {
-	//	var x = 0;
-	//	var y = 0 + i*( this.standardFontSize() + DrillUp.g_MPFS_lineheight);
-	//	
-	//	var temp = contexts[i];	
-	//	this.drawTextEx(temp,x,y);
-	//}
-	////if(contexts.length >= 1){
-	////	alert(contexts);
-	////	alert(this._drill_width);
-	////	alert(this._drill_height);
-	////}
-	
 	
 	// > 窗口高宽 - 计算
 	var options = {};
-	options['convertEnabled'] = false;
 	options['autoLineheight'] = true;
 	options['lineheight'] = data['window_lineheight'];
-	this.drill_COWA_DTLE_calculateHeightAndWidth( context_list, options );		//（窗口辅助核心）
+	this.drill_COWA_calculateHeightAndWidth( context_list, options );		//（窗口辅助核心）
 	// > 窗口高宽 - 赋值
 	var ww = 0;
 	var hh = 0;

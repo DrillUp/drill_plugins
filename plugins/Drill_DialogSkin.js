@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        对话框 - 对话框皮肤
+ * @plugindesc [v1.2]        对话框 - 对话框皮肤
  * @author Drill_up
  * 
  * @Drill_LE_param "皮肤样式-%d"
@@ -19,6 +19,17 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 使得你可以装饰对话框。
+ * ★★必须放在 姓名框窗口 插件后面★★
+ *
+ * -----------------------------------------------------------------------------
+ * ----插件扩展
+ * 该插件可以单独使用。
+ * 可作用于：
+ *   - Drill_DialogNameBox           对话框 - 姓名框窗口
+ *     该插件能够支持 姓名框窗口 的皮肤设计。
+ *   - Drill_DialogSkinBackground    对话框 - 对话框背景
+ *   - Drill_DialogSkinDecoration    对话框 - 对话框装饰图
+ *     背景和装饰图可以在对话框皮肤插件的基础上，添加更多装饰功能。
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -113,6 +124,9 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 修复了 边角的缩进距 设置无效的bug。
+ * [v1.2]
+ * 修复了使用 自定义单图背景 模式时，切换对话框样式造成错误叠加的bug。
+ * 优化了 姓名框窗口 的兼容性。
  * 
  *
  *
@@ -324,12 +338,12 @@
  *
  * @param 平移-自定义背景图片 X
  * @parent 布局模式
- * @desc 修正图片的偏移用。以窗口的点为基准，x轴方向平移，单位像素。（可为负数）
+ * @desc 修正图片的偏移用。以窗口的点为基准，x轴方向平移，单位像素。正数向右，负数向左。
  * @default 0
  *
  * @param 平移-自定义背景图片 Y
  * @parent 布局模式
- * @desc 修正图片的偏移用。以窗口的点为基准，y轴方向平移，单位像素。（可为负数）
+ * @desc 修正图片的偏移用。以窗口的点为基准，y轴方向平移，单位像素。正数向下，负数向上。
  * @default 0
  *
  * @param 是否锁定窗口色调
@@ -699,8 +713,8 @@ ImageManager.load_MenuUiMessage = function(filename) {
 var _drill_DSk_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_DSk_pluginCommand.call(this, command, args);
-	
 	if( command === ">对话框皮肤" ){
+		
 		if(args.length == 6){
 			var temp1 = String(args[1]);
 			var type = String(args[3]);
@@ -720,19 +734,19 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				if( temp1 == "只对话框" ){
 					$gameSystem._drill_DSk_messageStyleId = temp2;
 				}
-				if( temp1 == "只金钱窗口" ){
+				if( temp1 == "只金钱窗口" || temp1 == "只金钱框" ){
 					$gameSystem._drill_DSk_goldStyleId = temp2;
 				}
-				if( temp1 == "只选择项窗口" ){
+				if( temp1 == "只选择项窗口" || temp1 == "只选择项" ){
 					$gameSystem._drill_DSk_choiceStyleId = temp2;
 				}
-				if( temp1 == "只数字输入窗口" ){
+				if( temp1 == "只数字输入窗口" || temp1 == "只数字输入框" ){
 					$gameSystem._drill_DSk_numberStyleId = temp2;
 				}
-				if( temp1 == "只选择物品窗口" ){
+				if( temp1 == "只选择物品窗口" || temp1 == "只选择物品框" ){
 					$gameSystem._drill_DSk_itemStyleId = temp2;
 				}
-				if( temp1 == "只姓名框窗口" ){
+				if( temp1 == "只姓名框窗口" || temp1 == "只姓名框" ){
 					$gameSystem._drill_DSk_nameStyleId = temp2;
 				}
 			}
@@ -775,7 +789,7 @@ Game_System.prototype.drill_DSk_getStyleId = function( tag ){
 	if( tag == "Window_EventItem" ){
 		return  this._drill_DSk_itemStyleId -1;
 	}
-	if( tag == "Window_NameBox" ){
+	if( tag == "Window_NameBox" || tag == "Drill_DNB_NameBoxWindow" ){
 		return  this._drill_DSk_nameStyleId -1;
 	}
 	return -1;
@@ -920,6 +934,7 @@ Window_Message.prototype.drill_DSk_refreshBackground = function(){
 		
 		// > 透明度
 		this.opacity = data['window_opacity'];
+		this._drill_DSk_background.bitmap = null;
 		this._drill_DSk_background.opacity = data['window_opacity'];
 		this._windowBackSprite.opacity = data['window_opacity'];
 		this._windowFrameSprite.opacity = data['window_opacity'];
@@ -930,6 +945,7 @@ Window_Message.prototype.drill_DSk_refreshBackground = function(){
 		this.windowskin = ImageManager.load_MenuUiMessage( data['window_sys_src'] );
 		
 		// > 透明度
+		this._drill_DSk_background.bitmap = null;
 		this._drill_DSk_background.opacity = data['window_opacity'];
 		this._windowBackSprite.opacity = data['window_opacity'];
 		this._windowFrameSprite.opacity = data['window_opacity'];
@@ -1083,9 +1099,45 @@ Window_EventItem.prototype.start = function() {
 	this.drill_DSk_refreshBorder();			//刷新边框
 }
 
+//=============================================================================
+// * 兼容 - Drill姓名框
+//=============================================================================
+if( Imported.Drill_DialogNameBox ){	
+	//==============================
+	// * Drill姓名框 - 通用函数
+	//==============================
+	Drill_DNB_NameBoxWindow.prototype.drill_DSk_createBackground = Window_Message.prototype.drill_DSk_createBackground;
+	Drill_DNB_NameBoxWindow.prototype.drill_DSk_createBorder = Window_Message.prototype.drill_DSk_createBorder;
+	Drill_DNB_NameBoxWindow.prototype.drill_DSk_sortBottomByZIndex = Window_Message.prototype.drill_DSk_sortBottomByZIndex;
+	Drill_DNB_NameBoxWindow.prototype.drill_DSk_refreshBackground = Window_Message.prototype.drill_DSk_refreshBackground;
+	Drill_DNB_NameBoxWindow.prototype.drill_DSk_refreshBorder = Window_Message.prototype.drill_DSk_refreshBorder;
+	//==============================
+	// * Drill姓名框 - 初始化
+	//==============================
+	var _drill_DSk_DNB_initialize = Drill_DNB_NameBoxWindow.prototype.initialize;
+	Drill_DNB_NameBoxWindow.prototype.initialize = function( parentWindow ){
+		_drill_DSk_DNB_initialize.call( this,parentWindow );
+		this._drill_DSk_tag = "Drill_DNB_NameBoxWindow";
+		this.drill_DSk_createBackground();		//创建背景
+		this.drill_DSk_createBorder();			//创建边框层
+		this.drill_DSk_sortBottomByZIndex();	//底层层级排序
+	}
+	//==============================
+	// * Drill姓名框 - 刷新
+	//==============================
+	var _drill_DSk_DNB_setData = Drill_DNB_NameBoxWindow.prototype.drill_setData;
+	Drill_DNB_NameBoxWindow.prototype.drill_setData = function( text, position_type ){
+		this.drill_DSk_refreshBackground();		//刷新背景
+		this.drill_DSk_refreshBorder();			//刷新边框
+		return _drill_DSk_DNB_setData.call( this, text, position_type );
+	}
+}
+//=============================================================================
+// * 兼容 - Yep姓名框
+//=============================================================================
 if( Imported.YEP_MessageCore ){	
 	//==============================
-	// * Yep名称窗口 - 通用函数
+	// * Yep姓名框 - 通用函数
 	//==============================
 	Window_NameBox.prototype.drill_DSk_createBackground = Window_Message.prototype.drill_DSk_createBackground;
 	Window_NameBox.prototype.drill_DSk_createBorder = Window_Message.prototype.drill_DSk_createBorder;
@@ -1093,7 +1145,7 @@ if( Imported.YEP_MessageCore ){
 	Window_NameBox.prototype.drill_DSk_refreshBackground = Window_Message.prototype.drill_DSk_refreshBackground;
 	Window_NameBox.prototype.drill_DSk_refreshBorder = Window_Message.prototype.drill_DSk_refreshBorder;
 	//==============================
-	// * Yep名称窗口 - 初始化
+	// * Yep姓名框 - 初始化
 	//==============================
 	var _drill_DSk_yep_NameBox_initialize = Window_NameBox.prototype.initialize;
 	Window_NameBox.prototype.initialize = function( parentWindow ){
@@ -1104,7 +1156,7 @@ if( Imported.YEP_MessageCore ){
 		this.drill_DSk_sortBottomByZIndex();	//底层层级排序
 	}
 	//==============================
-	// * Yep名称窗口 - 刷新
+	// * Yep姓名框 - 刷新
 	//==============================
 	var _drill_DSk_yep_NameBox_refresh = Window_NameBox.prototype.refresh;
 	Window_NameBox.prototype.refresh = function( text, position ){
@@ -1113,7 +1165,6 @@ if( Imported.YEP_MessageCore ){
 		return _drill_DSk_yep_NameBox_refresh.call( this,text,position );
 	}
 }
-
 //=============================================================================
 // * 兼容 - Yep修正窗口对象
 //=============================================================================
@@ -1131,22 +1182,30 @@ if( Imported.YEP_MessageCore ){
 
 
 //=============================================================================
-// ** 对话框边框贴图【Drill_DSk_BorderSprite】
+// ** 对话框边贴图【Drill_DSk_BorderSprite】
 //
+//			主功能：	包含边框和边角两个结构。
+//			
+// 			代码：	> 范围 - 该类额外显示边框和边角装饰。
+//					> 结构 - [ ●合并/分离/ 混乱 ] 数据与贴图合并。通过记录父类的_drill_DSk_tag，来访问$gameSystem进行自变化。
+//					> 数量 - [单个/ ●多个 ] 每个子窗口都有一个对应。
+//					> 创建 - [ ●一次性 /自延迟/外部延迟] 
+//					> 销毁 - [ ●不考虑 /自销毁/外部销毁] 
+//					> 样式 - [不可修改/ ●自变化 /外部变化] 样式根据 _drill_curStyleId 自变化 _drill_curStyle 数据。
 //=============================================================================
 //==============================
-// * 边框贴图 - 定义
+// * 边贴图 - 定义
 //==============================
 function Drill_DSk_BorderSprite() {
 	this.initialize.apply(this, arguments);
 }
-Drill_DSk_BorderSprite.prototype = Object.create(Sprite_Base.prototype);
+Drill_DSk_BorderSprite.prototype = Object.create(Sprite.prototype);
 Drill_DSk_BorderSprite.prototype.constructor = Drill_DSk_BorderSprite;
 //==============================
-// * 边框贴图 - 初始化
+// * 边贴图 - 初始化
 //==============================
 Drill_DSk_BorderSprite.prototype.initialize = function( p ){
-	Sprite_Base.prototype.initialize.call(this);
+	Sprite.prototype.initialize.call(this);
 	this._drill_parent = p;
 	this._drill_curStyleId = $gameSystem.drill_DSk_getStyleId( this._drill_parent._drill_DSk_tag );
 	this._drill_curStyle = JSON.parse(JSON.stringify( $gameSystem.drill_DSk_getStyle( this._drill_parent._drill_DSk_tag ) ));	//深拷贝数据
@@ -1154,15 +1213,15 @@ Drill_DSk_BorderSprite.prototype.initialize = function( p ){
 	this.drill_initSprite();			//初始化对象
 };
 //==============================
-// * 边框贴图 - 帧刷新
+// * 边贴图 - 帧刷新
 //==============================
 Drill_DSk_BorderSprite.prototype.update = function() {
-	Sprite_Base.prototype.update.call(this);
+	Sprite.prototype.update.call(this);
 	
 	this.drill_updateSprite();				//帧刷新对象
 };
 //==============================
-// * 边框贴图 - 修改样式（接口）
+// * 边贴图 - 修改样式（接口）
 //==============================
 Drill_DSk_BorderSprite.prototype.drill_DSk_refreshStyle = function(){
 	var styleId = $gameSystem.drill_DSk_getStyleId( this._drill_parent._drill_DSk_tag );

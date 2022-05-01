@@ -24,7 +24,7 @@
  * ----插件扩展
  * 插件需要基于核心，可以与其它插件组合。
  * 基于：
- *   - Drill_DialogSkin       对话框 - 对话框皮肤
+ *   - Drill_DialogSkin            对话框 - 对话框皮肤
  *     必须基于对话框皮肤插件，才能添加装饰图。
  * 
  * -----------------------------------------------------------------------------
@@ -421,8 +421,8 @@ ImageManager.load_MenuUiMessage = function(filename) {
 var _drill_DSD_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_DSD_pluginCommand.call(this, command, args);
-	
 	if( command === ">对话框装饰图" ){
+		
 		if(args.length == 4){
 			var temp1 = String(args[1]);
 			var type = String(args[3]);
@@ -474,6 +474,8 @@ Window_Message.prototype.initialize = function() {
 };
 //==============================
 // * 对话框 - 设置背景（非帧刷新，窗口/暗淡/透明）
+//
+//			说明：	窗口类型切换时，刷新装饰图的出现情况。
 //==============================
 var _drill_DSD_setBackgroundType = Window_Message.prototype.setBackgroundType;
 Window_Message.prototype.setBackgroundType = function( type ){
@@ -485,7 +487,7 @@ Window_Message.prototype.setBackgroundType = function( type ){
 }
 
 //==============================
-// * 通用函数 - 创建装饰图
+// * 通用函数 - 创建装饰图层
 //==============================
 Window_Message.prototype.drill_DSD_createSprite = function() {
 	
@@ -500,6 +502,8 @@ Window_Message.prototype.drill_DSD_createSprite = function() {
 };
 //==============================
 // * 通用函数 - 刷新装饰图
+//
+//			说明：	每个窗口中都建立一个装饰图层，然后根据样式检查，删除全部装饰图，再重建并添加到图层。
 //==============================
 Window_Message.prototype.drill_DSD_refreshSprite = function(){
 	
@@ -628,7 +632,13 @@ Window_EventItem.prototype.start = function() {
 
 //=============================================================================
 // ** 对话框装饰图【Drill_DSD_DecorationSprite】
-//
+//			
+// 			代码：	> 范围 - 该类额外显示单图的装饰。
+//					> 结构 - [ ●合并/分离/ 混乱 ] 数据与贴图合并。只有visible被控制。
+//					> 数量 - [单个/ ●多个 ] 
+//					> 创建 - [ ●一次性 /自延迟/外部延迟] 
+//					> 销毁 - [ ●不考虑 /自销毁/外部销毁] 
+//					> 样式 - [ ●不可修改 /自变化/外部变化] 
 //=============================================================================
 //==============================
 // * 装饰图 - 定义
@@ -636,14 +646,13 @@ Window_EventItem.prototype.start = function() {
 function Drill_DSD_DecorationSprite() {
 	this.initialize.apply(this, arguments);
 }
-Drill_DSD_DecorationSprite.prototype = Object.create(Sprite_Base.prototype);
+Drill_DSD_DecorationSprite.prototype = Object.create(Sprite.prototype);
 Drill_DSD_DecorationSprite.prototype.constructor = Drill_DSD_DecorationSprite;
 //==============================
 // * 装饰图 - 初始化
 //==============================
 Drill_DSD_DecorationSprite.prototype.initialize = function( data, parent ){
-	Sprite_Base.prototype.initialize.call(this);
-	
+	Sprite.prototype.initialize.call(this);
 	this._drill_data = data;
 	this._drill_parent = parent;
 	
@@ -663,11 +672,11 @@ Drill_DSD_DecorationSprite.prototype.initialize = function( data, parent ){
 // * 装饰图 - 帧刷新
 //==============================
 Drill_DSD_DecorationSprite.prototype.update = function() {
-	Sprite_Base.prototype.update.call(this);
+	Sprite.prototype.update.call(this);
 	
-	this.drill_DSD_updateVisible();
-	this.drill_DSD_updatePosition();
-	this.drill_DSD_updateGIF();
+	this.drill_DSD_updateVisible();			//帧刷新 - 可见情况
+	this.drill_DSD_updatePosition();		//帧刷新 - 位置
+	this.drill_DSD_updateGIF();				//帧刷新 - 播放GIF
 }
 //==============================
 // * 帧刷新 - 可见情况

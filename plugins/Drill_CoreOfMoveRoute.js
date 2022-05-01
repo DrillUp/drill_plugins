@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.7]        物体 - 移动路线核心
+ * @plugindesc [v1.8]        物体 - 移动路线核心
  * @author Drill_up
  * 
  * 
@@ -103,6 +103,8 @@
  * 添加了 上一条指令再执行变量n值的次数 移动路线指令。
  * [v1.7]
  * 分离了核心插件中的 指令集 功能，将移动路线核心的基础功能重新整理规划。
+ * [v1.8]
+ * 优化了内部接口结构。
  * 
  * 
  * @param 是否开启路线记忆
@@ -137,21 +139,23 @@
 //插件记录：
 //		★大体框架与功能如下：
 //			移动路线核心：
+//				->脚本转义
+//					->执行转义【标准接口】
+//					->提交转义【标准函数】
+//					->上一条指令再执行n次
 //				->指令拦截
-//					->执行移动路线指令（继承接口）
+//					->执行指令【标准接口】
 //					->阻止错误的脚本
+//				->嵌套跳转
+//					->进入下一个移动指令【标准函数】
 //				->路线记忆
 //					->记忆指令
 //					->事件页刷新时复原
 //					->清除记忆
-//				->嵌套跳转
-//					->进入下一个移动指令（接口）
-//				->脚本转义
-//					->多层转义指令（继承接口）
-//					->上一条指令再执行n次
 //
 //		★必要注意事项：
-//			1.initMembers函数中，this.event()未加载完全，还没有值。
+//			1.移动路线指令的执行流程如下：
+//				脚本转义阶段 -> 执行转义【标准接口】 -> 指令执行阶段 -> 执行指令【标准接口】
 //			2.嵌套跳转 - 进入下一个移动指令 是一个比较难缠的函数。
 //			  留意原理以及说明，这一块对性能影响巨大。
 //		
@@ -159,10 +163,12 @@
 //			1.字符串性能比较（执行150万次）：
 //				"=="：8    ".substr(0,1) == "：48    ".match":116
 //			  所以尽可能减少match函数的使用。
+//			2.initMembers函数中，this.event()未加载完全，还没有值。
 //
 //		★核心接口说明：
-//			1.该插件整合了移动路线的结构，提供了解析功能。
-//
+//			1.核心中含有 标准接口/标准函数 ，这是其它子插件的底座，无论核心内容怎么变，标准接口一定不能动。
+//			2.路线记忆 是一个附属的小功能，不具备标准接口。
+//			
 //		★存在的问题：
 //			暂无
 //		
@@ -175,58 +181,81 @@
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_CoreOfMoveRoute');
 	
+	
 	/*-----------------杂项------------------*/
     DrillUp.g_COMR_remainRoute = String(DrillUp.parameters["是否开启路线记忆"] || "true") === "true";
-	
 
-//=============================================================================
-// ** 指令拦截（核心功能扩展）
-//=============================================================================
-//==============================
-// * 指令 - 临时全局变量
-//==============================
-DrillUp.g_COMR_errorMsgTank = [];				//脚本拦截容器
-//==============================
-// * 指令 - 阻止
-//==============================
-var _drill_COMR_processMoveCommand = Game_Character.prototype.processMoveCommand;
-Game_Character.prototype.processMoveCommand = function(command) {
-    var params = command.parameters;
-	if( command.code == Game_Character.ROUTE_SCRIPT ){
-		var temp_script = String(params[0]);
-		
-		// > 阻止 ">xxx"
-		if( temp_script.substr(0,1) == ">" ){
-			var args = temp_script.split(/[ :：]+/);
-			var command = args.shift();
-			
-			// > 执行移动路线指令
-			this.drill_COMR_routeCommand(command, args);
-			
-			return; 
-		}
-		
-		// > 阻止 "没有括号的函数"
-		if( temp_script.indexOf("=") == -1 && ( temp_script.indexOf("(") == -1 || temp_script.indexOf(")") == -1 ) ){
-			var message = "【物体-移动路线核心】不能识别脚本：\""+ temp_script +"\"";
-			if( DrillUp.g_COMR_errorMsgTank.indexOf(message) == -1 ){
-				DrillUp.g_COMR_errorMsgTank.push(message);
-				console.log("%c"+message, "color:#f67; font-size:14px;");
-			}
-			return; 
-		}
-	}
-	_drill_COMR_processMoveCommand.call( this,command );
-}
-//==============================
-// * 指令 - 执行移动路线指令（继承接口）
+	
+//#############################################################################
+// ** 标准接口（脚本转义阶段）
 //
-//			说明：	> 这里根据指令执行具体移动路线功能。
-//					> 继承后，要返回0，返回1表示跳到下一条指令，返回-1表示 指令不识别 的提示。
-//==============================
-Game_Character.prototype.drill_COMR_routeCommand = function(command, args){
+//			说明：	即对子插件开放的固定函数，无论插件如何变化，标准函数都不变。
+//#############################################################################
+//##############################
+// * 脚本转义阶段 - 执行转义【标准接口】
+//					
+//			参数：	> command 字符串   （当前的指令）
+//					> args 字符串列表  （当前的参数列表）
+//					> this._drill_COMR_tran_curData 动态参数对象（后续更新在该对象提供更多数据）
+//					> this._drill_COMR_tran_curData['lastRoute'] 移动路线（上一条的移动路线指令）
+//					> this._drill_COMR_tran_curData['curRouteList'] 移动路线列表（此移动路线之前所有的移动路线列表）
+//			返回：	> 无
+//					
+//			说明：	> 此函数，能够识别指定的 移动路线指令，并转义成其他移动路线指令。
+//					> 如果成功转义，需要调用函数： this.drill_COMR_routeSubmit_Transform( [] );
+//					  若未调用此函数，则会进入后面阶段执行指令阶段。
+//			示例：	> 具体应用，可见当前插件的函数： _drill_COMR_routeTransform_copy
+//##############################
+Game_Character.prototype.drill_COMR_routeTransform = function( command, args ){
+	
 	//（待子类继承写内容）
+	
 }
+//##############################
+// * 脚本转义阶段 - 提交转义【标准函数】
+//
+//			参数：	> submit_route_list 移动路线列表（当前的移动路线，可以转义成多个其他移动路线指令）
+//			返回：	> 无
+//					
+//			说明：	> 此函数只在 转义字符阶段 有效。
+//##############################
+Game_Character.prototype.drill_COMR_routeSubmit_Transform = function( submit_route_list ){
+	this._drill_COMR_tran_success = true;
+	this._drill_COMR_tran_routes = submit_route_list;
+}
+
+//#############################################################################
+// ** 标准接口（指令执行阶段）
+//#############################################################################
+//##############################
+// * 指令执行阶段 - 执行指令【标准接口】
+//				
+//			参数：	> command 字符串   （当前的指令）
+//					> args 字符串列表  （当前的参数列表）
+//					> this._drill_COMR_cmd_curData 动态参数对象（后续更新在该对象提供更多数据）
+//			返回：	> 无
+//					
+//			说明：	> 与插件指令类似，执行移动路线指令。
+//			示例：	> 具体应用，可见插件： 移动路线指令集
+//##############################
+Game_Character.prototype.drill_COMR_routeCommand = function( command, args ){
+	
+	//（待子类继承写内容）
+	
+}
+//##############################
+// * 指令执行阶段 - 进入下一个移动指令【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 无
+//
+//			说明：	> 该函数调用后，可以立即跳转并执行下一条移动路线指令。
+//					> 多用于 遇障碍结束 的条件移动。
+//##############################
+Game_Character.prototype.drill_COMR_skipToNext = function(){
+	this.drill_COMR_skipToNext_Private();
+}
+
 
 
 //=============================================================================
@@ -252,6 +281,212 @@ Game_Character.prototype.initialize = function() {
 
 
 //=============================================================================
+// ** 指令拦截（核心功能扩展）
+//=============================================================================
+//==============================
+// * 指令执行阶段 - 临时全局变量
+//==============================
+DrillUp.g_COMR_errorMsgTank = [];				//脚本拦截容器
+//==============================
+// * 指令执行阶段 - 添加拦截的指令
+//==============================
+DrillUp.drill_COMR_addScript = function( temp_script ){
+	var message = "【物体-移动路线核心】不能识别脚本：\""+ temp_script +"\"";
+	if( DrillUp.g_COMR_errorMsgTank.indexOf(message) == -1 ){
+		DrillUp.g_COMR_errorMsgTank.push(message);
+		console.log("%c"+message, "color:#f67; font-size:14px;");
+	}
+};
+//==============================
+// * 指令执行阶段 - 阻止
+//==============================
+var _drill_COMR_processMoveCommand = Game_Character.prototype.processMoveCommand;
+Game_Character.prototype.processMoveCommand = function( command ){
+    var params = command.parameters;
+	if( command.code == Game_Character.ROUTE_SCRIPT ){
+		var temp_script = String(params[0]);
+		
+		// > 阻止 ">xxx"
+		if( temp_script.substr(0,1) == ">" ){
+			var args = temp_script.split(/[ :：]+/);
+			var command = args.shift();
+				
+			// > 可用参数 初始化
+			this._drill_COMR_cmd_curData = {};
+			
+			
+			// > 执行 子函数
+			this.drill_COMR_routeCommand( command, args );
+			
+			
+			return; 
+		}
+		
+		// > 阻止 "没有括号的函数"
+		if( temp_script.indexOf("=") == -1 && ( temp_script.indexOf("(") == -1 || temp_script.indexOf(")") == -1 ) ){
+			DrillUp.drill_COMR_addScript( temp_script );
+			return; 
+		}
+	}
+	_drill_COMR_processMoveCommand.call( this,command );
+}
+
+
+//=============================================================================
+// ** 脚本转义阶段（核心功能扩展）
+//=============================================================================
+//==============================
+// * 脚本转义 - 自主移动 - 设置
+//==============================
+var _drill_COMR_setMoveRoute = Game_Character.prototype.setMoveRoute;
+Game_Character.prototype.setMoveRoute = function( moveRoute ){
+	moveRoute.list = this.drill_COMR_scriptTransform(moveRoute.list);
+	_drill_COMR_setMoveRoute.call(this, moveRoute);
+};
+//==============================
+// * 脚本转义 - 强制路线 - 执行路线
+//==============================
+var _drill_COMR_forceMoveRoute = Game_Character.prototype.forceMoveRoute;
+Game_Character.prototype.forceMoveRoute = function( moveRoute ){
+	moveRoute.list = this.drill_COMR_scriptTransform(moveRoute.list);
+	_drill_COMR_forceMoveRoute.call(this, moveRoute);
+};
+//==============================
+// * 脚本转义 - 修改路线内容
+//
+//			说明：	> 这里将原路线指令遍历一遍，并且将部分 特殊指令 替换成新的 指令集。
+//					> 替换后和替换前的 指令集数量 可以不一样。
+//==============================
+Game_Character.prototype.drill_COMR_scriptTransform = function( org_route_list ){
+	this._drill_COMR_lastRoute = null;
+	
+	// > 脚本转义
+	var new_route_list = [];
+	for( var k=0; k < org_route_list.length; k++ ){
+		var temp_route = org_route_list[k];
+		if( temp_route.code === Game_Character.ROUTE_SCRIPT ){
+			var temp_script = temp_route.parameters[0];
+			
+			// > 移动路线指令
+			if( temp_script.substr(0,1) == ">" ){
+				var args = temp_script.split(/[:：]+/);
+				var command = args.shift();
+				var temp_count = org_route_list.length;
+				
+				// > 提交数据 初始化
+				this._drill_COMR_tran_success = false;
+				this._drill_COMR_tran_routes = null;
+				
+				// > 可用参数 初始化
+				this._drill_COMR_tran_curData = {};
+				this._drill_COMR_tran_curData['lastRoute'] = this._drill_COMR_lastRoute;
+				this._drill_COMR_tran_curData['curRouteList'] = new_route_list;
+				
+				
+				// > 执行 子函数
+				this.drill_COMR_routeTransform( command, args );
+				
+				
+				// > 提交转义时，添加内容
+				if( this._drill_COMR_tran_success == true ){
+					for( var j = 0; j < this._drill_COMR_tran_routes.length; j++ ){
+						var route = this._drill_COMR_tran_routes[j];
+						new_route_list.push(route);
+						this._drill_COMR_lastRoute = route;
+					}
+					
+				// > 未提交，直接添加
+				}else{
+					new_route_list.push(temp_route);
+					this._drill_COMR_lastRoute = temp_route;
+				}
+				
+			// > 普通脚本指令
+			}else{
+				new_route_list.push(temp_route);
+				this._drill_COMR_lastRoute = temp_route;
+			}
+			
+		// > 普通指令
+		}else{
+			new_route_list.push(temp_route);
+			this._drill_COMR_lastRoute = temp_route;
+		}
+	}
+	return new_route_list;
+}
+//==============================
+// * 脚本转义 - 上一条指令执行n次
+//==============================
+var _drill_COMR_routeTransform_copy = Game_Character.prototype.drill_COMR_routeTransform;
+Game_Character.prototype.drill_COMR_routeTransform = function( command, args ){
+	_drill_COMR_routeTransform_copy.call( this, command, args );
+	
+	if( command == ">核心" ){
+		if( args.length == 2 ){
+			var type = args[0];
+			var temp1 = args[1];
+			if( type == "上一条指令再执行" ){
+				var last_route = this._drill_COMR_tran_curData['lastRoute'];
+				if( last_route == null ){ return; }
+				
+				if( temp1.indexOf("次数[") != -1 ){
+					temp1 = temp1.replace("次数[","");
+					temp1 = temp1.replace("]","");
+					temp1 = Number(temp1);
+					var route_list = [];
+					for( var i=0; i < temp1; i++ ){
+						route_list.push(last_route);
+					}
+					this.drill_COMR_routeSubmit_Transform( route_list );
+					return;
+					
+				}else if( temp1.indexOf("次数变量[") != -1 ){
+					temp1 = temp1.replace("次数变量[","");
+					temp1 = temp1.replace("]","");
+					temp1 = $gameVariables.value( Number(temp1) );
+					var route_list = [];
+					for( var i=0; i < temp1; i++ ){
+						route_list.push(last_route);
+					}
+					this.drill_COMR_routeSubmit_Transform( route_list );
+					return;
+				}
+			}
+		}
+	}
+	
+	if( command.substr(0,9) == ">上一条指令再执行" ){
+		
+		// > 旧指令 - 再执行n次
+		if( command.match( /^>上一条指令再执行(\d+)次/ ) ){
+			var last_route = this._drill_COMR_tran_curData['lastRoute'];
+			if( last_route == null ){ return; }
+			var route_list = [];
+			for( var i=0; i < Number(RegExp.$1); i++ ){
+				route_list.push(last_route);
+			}
+			this.drill_COMR_routeSubmit_Transform( route_list );
+			return;
+		}
+		
+		// > 旧指令 - 再执行变量n次
+		if( command.match( /^>上一条指令再执行变量(\d+)值的次数/ ) ){
+			var last_route = this._drill_COMR_tran_curData['lastRoute'];
+			if( last_route == null ){ return; }
+			var v_value = $gameVariables.value( Number(RegExp.$1) );
+			var route_list = [];
+			for( var i=0; i < v_value; i++ ){
+				route_list.push(last_route);
+			}
+			this.drill_COMR_routeSubmit_Transform( route_list );
+			return;
+		}
+	}
+}
+
+
+//=============================================================================
 // ** 嵌套跳转
 //=============================================================================
 //==============================
@@ -263,7 +498,7 @@ Game_Character.prototype.updateRoutineMove = function() {
 	_drill_COMR_updateRoutineMove.call( this );
 }
 //==============================
-// * 嵌套跳转 - 进入下一个移动指令（接口）
+// * 嵌套跳转 - 进入下一个移动指令
 //
 //			原理：	> rmmv每帧只执行一条移动路线指令。
 //					> (遇障碍结束)功能，要求如果遇到了障碍，这一帧不能浪费，而是直接跳转到下一条指令。
@@ -274,10 +509,8 @@ Game_Character.prototype.updateRoutineMove = function() {
 //					  - 重复的指令，直接跳过。
 //					  - 每帧添加锁，该函数每帧最多被调用一次。
 //					  - 用for循环，防止嵌套递归
-//
-//			用法：	该函数需要外部调用，调用后，可以立即跳转并执行下一条移动路线指令。
 //==============================
-Game_Character.prototype.drill_COMR_skipToNext = function() {
+Game_Character.prototype.drill_COMR_skipToNext_Private = function() {
 	var data = this._drill_COMR_skipData;
 	
 	// > 嵌套递归标记
@@ -388,7 +621,6 @@ Game_Event.prototype.drill_COMR_readPage = function( page_list ) {
 	}, this);
 };
 
-
 //=============================================================================
 // ** 路线记忆
 //=============================================================================
@@ -452,143 +684,4 @@ Game_Event.prototype.drill_COMR_refreshChange = function() {
 		this._moveRouteIndex = new_mIndex;
 	}
 }
-
-
-//=============================================================================
-// ** 脚本转义（核心功能扩展）
-//=============================================================================
-//==============================
-// * 脚本转义 - 自主移动 - 设置
-//==============================
-var _drill_COMR_setMoveRoute = Game_Character.prototype.setMoveRoute;
-Game_Character.prototype.setMoveRoute = function( moveRoute ){
-	moveRoute.list = this.drill_COMR_scriptTransform(moveRoute.list);
-	_drill_COMR_setMoveRoute.call(this, moveRoute);
-};
-//==============================
-// * 脚本转义 - 强制路线 - 执行路线
-//==============================
-var _drill_COMR_forceMoveRoute = Game_Character.prototype.forceMoveRoute;
-Game_Character.prototype.forceMoveRoute = function( moveRoute ){
-	moveRoute.list = this.drill_COMR_scriptTransform(moveRoute.list);
-	_drill_COMR_forceMoveRoute.call(this, moveRoute);
-};
-//==============================
-// * 脚本转义 - 修改路线内容
-//
-//			说明：	> 这里将原路线指令遍历一遍，并且将部分 特殊指令 替换成新的 指令集。
-//					> 替换后和替换前的 指令集数量 可以不一样。
-//==============================
-Game_Character.prototype.drill_COMR_scriptTransform = function( org_route_list ){
-	this._drill_COMR_lastRoute = null;
-	
-	// > 脚本转义
-	var route_list = [];
-	for( var k=0; k < org_route_list.length; k++ ){
-		var temp_route = org_route_list[k];
-		if( temp_route.code === Game_Character.ROUTE_SCRIPT ){
-			var temp_script = temp_route.parameters[0];
-			
-			// > 移动路线指令
-			if( temp_script.substr(0,1) == ">" ){
-				var args = temp_script.split(/[:：]+/);
-				var command = args.shift();
-				var temp_count = org_route_list.length;
-				
-				// > 脚本转义 - 上一条指令执行n次
-				this.drill_COMR_routeTransformCopy(command, args, route_list);
-				
-				// > 脚本转义 - 多层转义
-				this.drill_COMR_routeTransform(command, args, route_list);
-				
-				// > 非脚本转义时，直接添加
-				if( temp_count == org_route_list.length ){
-					route_list.push(temp_route);
-					this._drill_COMR_lastRoute = temp_route;
-				}
-				
-			// > 普通脚本指令
-			}else{
-				route_list.push(temp_route);
-				this._drill_COMR_lastRoute = temp_route;
-			}
-			
-		// > 普通指令
-		}else{
-			route_list.push(temp_route);
-			this._drill_COMR_lastRoute = temp_route;
-		}
-	}
-	return route_list;
-}
-//==============================
-// * 脚本转义 - 上一条指令执行n次
-//==============================
-Game_Character.prototype.drill_COMR_routeTransformCopy = function(command, args, route_list){
-	var last_route = this._drill_COMR_lastRoute;
-	
-	if( command == ">核心" ){
-		if( args.length == 2 ){
-			var type = args[0];
-			var temp1 = args[1];
-			if( type == "上一条指令再执行" ){
-				if( last_route == null ){ return; }
-				
-				if( temp1.indexOf("次数[") != -1 ){
-					temp1 = temp1.replace("次数[","");
-					temp1 = temp1.replace("]","");
-					temp1 = Number(temp1);
-					for( var i=0; i < temp1; i++ ){
-						route_list.push(last_route);
-					}
-					this._drill_COMR_lastRoute = null;	//（清空上一条指令）
-					
-					return;
-				}else if( temp1.indexOf("次数变量[") != -1 ){
-					temp1 = temp1.replace("次数变量[","");
-					temp1 = temp1.replace("]","");
-					temp1 = $gameVariables.value( Number(temp1) );
-					for( var i=0; i < temp1; i++ ){
-						route_list.push(last_route);
-					}
-					this._drill_COMR_lastRoute = null;	//（清空上一条指令）
-					
-					return;
-				}
-			}
-		}
-	}
-	
-	if( command.substr(0,9) == ">上一条指令再执行" ){
-		// > 旧指令 - 再执行n次
-		if( command.match( /^>上一条指令再执行(\d+)次/ ) ){
-			if( last_route == null ){ return; }
-			for( var i=0; i < Number(RegExp.$1); i++ ){
-				route_list.push(last_route);
-			}
-			this._drill_COMR_lastRoute = null;	//（清空上一条指令）
-			return;
-		}
-		
-		// > 旧指令 - 再执行变量n次
-		if( command.match( /^>上一条指令再执行变量(\d+)值的次数/ ) ){
-			if( last_route == null ){ return; }
-			var v_value = $gameVariables.value( Number(RegExp.$1) );
-			for( var i=0; i < v_value; i++ ){
-				route_list.push(last_route);
-			}
-			this._drill_COMR_lastRoute = null;	//（清空上一条指令）
-			return;
-		}
-	}
-}
-//==============================
-// * 脚本转义 - 多层转义指令（继承接口）
-//
-//			说明：	你可以根据指令，来将指令转义成相应内容，并push到 route_list 中。
-//==============================
-Game_Character.prototype.drill_COMR_routeTransform = function(command, args, route_list){
-	//（待子类继承写内容）
-}
-
 

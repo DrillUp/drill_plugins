@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        对话框 - 滤镜效果
+ * @plugindesc [v1.2]        对话框 - 内容滤镜效果
  * @author Drill_up
  *
  *
@@ -20,11 +20,12 @@
  * ----插件扩展
  * 该插件 不能 单独使用，必须基于核心。另外，该插件可以扩展消息核心功能。
  * 基于：
- *   - Drill_CoreOfFilter 系统-滤镜核心
+ *   - Drill_CoreOfFilter       系统 - 滤镜核心
  *     需要该核心才能启用滤镜效果。
  * 可作用于：
- *   - YEP_MessageCore 对话框-消息核心
- *     使得YEP消息核心中的 姓名框 也能产生滤镜效果。
+ *   - Drill_DialogNameBox      对话框 - 姓名框窗口
+ *   - YEP_MessageCore          对话框 - 消息核心
+ *     使得上述插件中的 姓名框窗口 也能产生滤镜效果。
  *
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -37,6 +38,7 @@
  *   (2.波动纯色滤镜 与 纯色滤镜 是同一个滤镜，只是变化方式不同。
  *      二者设置会相互覆盖。
  *   (3.滤镜效果作用到对话框的内容，并且包括头像。
+ *      但是注意，无法作用到 窗口字符块 上。
  * 
  * -----------------------------------------------------------------------------
  * ----激活条件
@@ -135,6 +137,8 @@
  * [v1.1]
  * 分离了滤镜核心，大幅度优化了底层结构。
  * 添加了填充滤镜功能，降低了模糊滤镜的性能消耗。
+ * [v1.2]
+ * 优化了 姓名框窗口 的支持。
  *
  */
  
@@ -318,12 +322,12 @@ Scene_Map.prototype.drill_DFi_updateMessageContentsSprite = function() {
 		var window_sprite = this._messageWindow._windowContentsSprite;
 		var data;
 		
-		//>初始化
+		// > 初始化
 		if( window_sprite.drill_COF_isInited() == false ){
 			window_sprite.drill_COF_initialize();
 		}
 		
-		//>插件指令配置 - 线性
+		// > 插件指令配置 - 线性
 		data = datafrom.setPureLinear;
 		window_sprite.drill_COF_setPureLinear_ONCE(data[0],data[1],data[2]);
 		data = datafrom.setColorLinear;
@@ -335,7 +339,7 @@ Scene_Map.prototype.drill_DFi_updateMessageContentsSprite = function() {
 		data = datafrom.setNoiseLinear;
 		window_sprite.drill_COF_setNoiseLinear_ONCE(data[0],data[1]);
 		
-		//>插件指令配置 - 波动
+		// > 插件指令配置 - 波动
 		data = datafrom.setPureWave;
 		window_sprite.drill_COF_setPureWave_ONCE(data[0],data[1],data[2]);
 		data = datafrom.setColorWave;
@@ -358,12 +362,12 @@ Scene_Map.prototype.drill_DFi_updateMessageChoiceSprite = function() {
 		var window_sprite = this._messageWindow._choiceWindow._windowContentsSprite;
 		var data;
 		
-		//>初始化
+		// > 初始化
 		if( window_sprite.drill_COF_isInited() == false ){
 			window_sprite.drill_COF_initialize();
 		}
 		
-		//>插件指令配置 - 线性
+		// > 插件指令配置 - 线性
 		data = datafrom.setPureLinear;
 		window_sprite.drill_COF_setPureLinear_ONCE(data[0],data[1],data[2]);
 		data = datafrom.setColorLinear;
@@ -375,7 +379,7 @@ Scene_Map.prototype.drill_DFi_updateMessageChoiceSprite = function() {
 		data = datafrom.setNoiseLinear;
 		window_sprite.drill_COF_setNoiseLinear_ONCE(data[0],data[1]);
 		
-		//>插件指令配置 - 波动
+		// > 插件指令配置 - 波动
 		data = datafrom.setPureWave;
 		window_sprite.drill_COF_setPureWave_ONCE(data[0],data[1],data[2]);
 		data = datafrom.setColorWave;
@@ -389,20 +393,30 @@ Scene_Map.prototype.drill_DFi_updateMessageChoiceSprite = function() {
 	}
 }
 //==============================
-// * 帧刷新 - YEP姓名框
+// * 帧刷新 - 姓名框
 //==============================
 Scene_Map.prototype.drill_DFi_updateMessageNameSprite = function() {
+	var window_sprite = null;
+		
+	// > Yep姓名框
 	if( this._messageWindow && this._messageWindow._nameWindow && this._messageWindow._nameWindow._windowContentsSprite ){
+		window_sprite = this._messageWindow._nameWindow._windowContentsSprite;
+	}
+	// > Drill姓名框
+	if( this._messageWindow && this._messageWindow._drill_DNB_nameWindow && this._messageWindow._drill_DNB_nameWindow._windowContentsSprite ){
+		window_sprite = this._messageWindow._drill_DNB_nameWindow._windowContentsSprite;
+	}
+	
+	if( window_sprite != null ){
 		var datafrom = $gameSystem._drill_DFi.n;
-		var window_sprite = this._messageWindow._nameWindow._windowContentsSprite;
 		var data;
 		
-		//>初始化
+		// > 初始化
 		if( window_sprite.drill_COF_isInited() == false ){
 			window_sprite.drill_COF_initialize();
 		}
 		
-		//>插件指令配置 - 线性
+		// > 插件指令配置 - 线性
 		data = datafrom.setPureLinear;
 		window_sprite.drill_COF_setPureLinear_ONCE(data[0],data[1],data[2]);
 		data = datafrom.setColorLinear;
@@ -414,7 +428,7 @@ Scene_Map.prototype.drill_DFi_updateMessageNameSprite = function() {
 		data = datafrom.setNoiseLinear;
 		window_sprite.drill_COF_setNoiseLinear_ONCE(data[0],data[1]);
 		
-		//>插件指令配置 - 波动
+		// > 插件指令配置 - 波动
 		data = datafrom.setPureWave;
 		window_sprite.drill_COF_setPureWave_ONCE(data[0],data[1],data[2]);
 		data = datafrom.setColorWave;

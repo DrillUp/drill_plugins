@@ -3,12 +3,13 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        战斗UI - 简单生命框
+ * @plugindesc [v1.2]        战斗UI - 简单生命框
  * @author Drill_up
  * 
  * @Drill_LE_param "生命框-%d"
  * @Drill_LE_parentKey ""
  * @Drill_LE_var "DrillUp.g_ESH_data_length"
+ * 
  * 
  * @help  
  * =============================================================================
@@ -161,7 +162,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 修复了生命框在战斗界面中进入菜单界面，然后返回战斗界面后出错的bug。
- *
+ * [v1.2]
+ * 添加了 生命框 固定不随敌人移动 的功能。
  *
  * 
  * 
@@ -320,12 +322,12 @@
  *
  * @param 平移-位置 X
  * @parent ---层级---
- * @desc 以玩家/事件的位置为基准，x轴方向平移，单位像素。（可为负数）
+ * @desc 以玩家/事件的位置为基准，x轴方向平移，单位像素。正数向右，负数向左。
  * @default 0
  * 
  * @param 平移-位置 Y
  * @parent ---层级---
- * @desc 以玩家/事件的位置为基准，y轴方向平移，单位像素。（可为负数）
+ * @desc 以玩家/事件的位置为基准，y轴方向平移，单位像素。正数向下，负数向上。
  * @default 0
  *
  * @param 战斗层级
@@ -350,6 +352,14 @@
  * 
  * @param ---显现效果---
  * @desc 
+ * 
+ * @param 是否固定生命框
+ * @parent ---显现效果---
+ * @type boolean
+ * @on 固定
+ * @off 关闭固定
+ * @desc true - 固定，false - 关闭固定。固定后，敌人移动时，生命框的位置不会变化。
+ * @default false
  * 
  * @param 是否强制长期显示
  * @parent ---显现效果---
@@ -397,12 +407,12 @@
  *
  * @param 生命-平移-参数条 X
  * @parent 生命-是否显示参数条
- * @desc 以样式框的位置为基准，x轴方向平移，单位像素。
+ * @desc 以样式框的位置为基准，x轴方向平移，单位像素。正数向右，负数向左。
  * @default 10
  *
  * @param 生命-平移-参数条 Y
  * @parent 生命-是否显示参数条
- * @desc 以样式框的位置为基准，y轴方向平移，单位像素。
+ * @desc 以样式框的位置为基准，y轴方向平移，单位像素。正数向下，负数向上。
  * @default 10
  * 
  * @param 魔法-是否显示参数条
@@ -422,12 +432,12 @@
  *
  * @param 魔法-平移-参数条 X
  * @parent 魔法-是否显示参数条
- * @desc 以样式框的位置为基准，x轴方向平移，单位像素。
+ * @desc 以样式框的位置为基准，x轴方向平移，单位像素。正数向右，负数向左。
  * @default 10
  *
  * @param 魔法-平移-参数条 Y
  * @parent 魔法-是否显示参数条
- * @desc 以样式框的位置为基准，y轴方向平移，单位像素。
+ * @desc 以样式框的位置为基准，y轴方向平移，单位像素。正数向下，负数向上。
  * @default 10
  * 
  * @param 怒气-是否显示参数条
@@ -447,12 +457,12 @@
  *
  * @param 怒气-平移-参数条 X
  * @parent 怒气-是否显示参数条
- * @desc 以样式框的位置为基准，x轴方向平移，单位像素。
+ * @desc 以样式框的位置为基准，x轴方向平移，单位像素。正数向右，负数向左。
  * @default 10
  *
  * @param 怒气-平移-参数条 Y
  * @parent 怒气-是否显示参数条
- * @desc 以样式框的位置为基准，y轴方向平移，单位像素。
+ * @desc 以样式框的位置为基准，y轴方向平移，单位像素。正数向下，负数向上。
  * @default 10
  *
  * 
@@ -476,12 +486,12 @@
  *
  * @param 生命-平移-参数数字 X
  * @parent 生命-是否显示参数数字
- * @desc 以样式框的位置为基准，x轴方向平移，单位像素。
+ * @desc 以样式框的位置为基准，x轴方向平移，单位像素。正数向右，负数向左。
  * @default 10
  *
  * @param 生命-平移-参数数字 Y
  * @parent 生命-是否显示参数数字
- * @desc 以样式框的位置为基准，y轴方向平移，单位像素。
+ * @desc 以样式框的位置为基准，y轴方向平移，单位像素。正数向下，负数向上。
  * @default 10
  * 
  * @param 魔法-是否显示参数数字
@@ -501,12 +511,12 @@
  *
  * @param 魔法-平移-参数数字 X
  * @parent 魔法-是否显示参数数字
- * @desc 以样式框的位置为基准，x轴方向平移，单位像素。
+ * @desc 以样式框的位置为基准，x轴方向平移，单位像素。正数向右，负数向左。
  * @default 10
  *
  * @param 魔法-平移-参数数字 Y
  * @parent 魔法-是否显示参数数字
- * @desc 以样式框的位置为基准，y轴方向平移，单位像素。
+ * @desc 以样式框的位置为基准，y轴方向平移，单位像素。正数向下，负数向上。
  * @default 10
  * 
  * @param 怒气-是否显示参数数字
@@ -526,12 +536,12 @@
  *
  * @param 怒气-平移-参数数字 X
  * @parent 怒气-是否显示参数数字
- * @desc 以样式框的位置为基准，x轴方向平移，单位像素。
+ * @desc 以样式框的位置为基准，x轴方向平移，单位像素。正数向右，负数向左。
  * @default 10
  *
  * @param 怒气-平移-参数数字 Y
  * @parent 怒气-是否显示参数数字
- * @desc 以样式框的位置为基准，y轴方向平移，单位像素。
+ * @desc 以样式框的位置为基准，y轴方向平移，单位像素。正数向下，负数向上。
  * @default 10
  * 
  * 
@@ -548,12 +558,12 @@
  *
  * @param 平移-固定框背景 X
  * @parent ----外框----
- * @desc 修正校对背景的位置用，x轴方向平移，单位像素。
+ * @desc 修正校对背景的位置用，x轴方向平移，单位像素。正数向右，负数向左。
  * @default 0
  *
  * @param 平移-固定框背景 Y
  * @parent ----外框----
- * @desc 修正校对背景的位置用，y轴方向平移，单位像素。
+ * @desc 修正校对背景的位置用，y轴方向平移，单位像素。正数向下，负数向上。
  * @default 0
  *
  * @param 资源-固定框前景
@@ -566,12 +576,12 @@
  *
  * @param 平移-固定框前景 X
  * @parent ----外框----
- * @desc 修正校对前景的位置用，x轴方向平移，单位像素。
+ * @desc 修正校对前景的位置用，x轴方向平移，单位像素。正数向右，负数向左。
  * @default 0
  *
  * @param 平移-固定框前景 Y
  * @parent ----外框----
- * @desc 修正校对前景的位置用，y轴方向平移，单位像素。
+ * @desc 修正校对前景的位置用，y轴方向平移，单位像素。正数向下，负数向上。
  * @default 0
  * 
  */
@@ -655,6 +665,7 @@
 		data['battle_index'] = String( dataFrom["战斗层级"] || "上层");
 		data['zIndex'] = Number( dataFrom["图片层级"] || 0);
 		// > 显现效果
+		data['lockHomePos_enable'] = String( dataFrom["是否固定生命框"] || "false") === "true";
 		data['slide_alwaysOff'] = String( dataFrom["是否强制长期显示"] || "false") === "true";
 		data['slide_x'] = Number( dataFrom["消失位置 X"] || 0);
 		data['slide_y'] = Number( dataFrom["消失位置 Y"] || 0);
@@ -1012,8 +1023,10 @@ Game_Troop.prototype.drill_ESH_initEnemy = function( enemy ){
 	temp_b_data['enemyIndex'] = enemy.index();		//敌人索引位置（车轮战重组后，索引会错位，只有标定enemyIndex才能避免）
 	
 	// > 贴图实时捕获属性
-	temp_b_data['sprite_x'] = this.x;				//贴图位置 X
-	temp_b_data['sprite_y'] = this.y;				//贴图位置 Y
+	temp_b_data['sprite_x'] = 0;					//贴图位置 X
+	temp_b_data['sprite_y'] = 0;					//贴图位置 Y
+	temp_b_data['sprite_homeX'] = 0;				//原位置 X
+	temp_b_data['sprite_homeY'] = 0;				//原位置 Y
 	
 	// > 显现效果属性
 	temp_b_data['isFocusing'] = false;				//聚焦标记
@@ -1032,9 +1045,11 @@ Sprite_Enemy.prototype.update = function() {
 	if( this._enemy['_drill_ESH_data'] == undefined ){ return; }
 	var ESH_data = this._enemy['_drill_ESH_data'];
 	
-	// > 捕获敌人贴图位置
+	// > 捕获 敌人贴图 位置
 	ESH_data['sprite_x'] = this.x;
 	ESH_data['sprite_y'] = this.y;
+	ESH_data['sprite_homeX'] = this._homeX;
+	ESH_data['sprite_homeY'] = this._homeY;
 	
 	// > 标识变化
 	ESH_data['enemyId'] = this._enemy.enemyId();
@@ -1152,6 +1167,8 @@ Spriteset_Battle.prototype.createActors = function() {
 		// > 贴图实时捕获属性
 		temp_b_data['sprite_x'] = 0;			//贴图位置 X
 		temp_b_data['sprite_y'] = 0;			//贴图位置 Y
+		temp_b_data['sprite_homeX'] = 0;		//原位置 X
+		temp_b_data['sprite_homeY'] = 0;		//原位置 Y
 		
 		// > 显现效果属性
 		temp_b_data['isFocusing'] = false;				//聚焦标记
@@ -1176,9 +1193,11 @@ Sprite_Actor.prototype.update = function() {
 	if( this._actor['_drill_ESH_data'] == undefined ){ return; }
 	var ESH_data = this._actor['_drill_ESH_data'];
 	
-	// > 捕获敌人贴图位置
+	// > 捕获 角色贴图 位置
 	ESH_data['sprite_x'] = this.x;
 	ESH_data['sprite_y'] = this.y;
+	ESH_data['sprite_homeX'] = this._homeX;
+	ESH_data['sprite_homeY'] = this._homeY;
 	
 	// > 标识变化
 	ESH_data['actorId'] = this._actor.actorId();
@@ -1339,8 +1358,13 @@ Scene_Battle.prototype.drill_ESH_clearActorSpriteTank = function(){
 
 //=============================================================================
 // ** 简单生命框【Drill_ESH_LifeSprite】
-// 
-// 			说明：	进入地图界面后，全创建。
+//					
+//	 		代码：	> 范围 - 该类显示单独的敌人生命框。
+//					> 结构 - [合并/分离/ ●混乱 ] 该类使用了样式结构，并且使用了_drill_bind_data指针，用于变化内容。
+//					> 数量 - [单个/ ●多个 ] 
+//					> 创建 - [ ●一次性 /自延迟/外部延迟] 
+//					> 销毁 - [ ●不考虑 /自销毁/外部销毁 ] 
+//					> 样式 - [ ●不可修改 /自变化/外部变化] 创建后样式固定，修改无效。
 //=============================================================================
 //==============================
 // * 简单生命框 - 定义
@@ -1639,6 +1663,12 @@ Drill_ESH_LifeSprite.prototype.drill_updatePosition = function() {
 	
 	var xx = b_data['sprite_x'];
 	var yy = b_data['sprite_y'];
+	
+	// > 固定生命框
+	if( s_data['lockHomePos_enable'] == true ){
+		xx = b_data['sprite_homeX'];
+		yy = b_data['sprite_homeY'];
+	}
 	
 	// > 注释中的偏移
 	xx += b_data['offset_x'];

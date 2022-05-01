@@ -237,7 +237,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var temp1 = String(args[3]);
 			
 			if( type == "修改文本" ){
-				if( temp1.indexOf("字符串[") != -1 ){
+				if( temp1.indexOf("字符串[") != -1 && Imported.Drill_CoreOfString ){
 					temp1 = temp1.replace("字符串[","");
 					temp1 = temp1.replace("]","");
 					temp1 = $gameStrings.value( Number(temp1) );
@@ -257,7 +257,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			}
 			
 			if( type == "追加文本" ){
-				if( temp1.indexOf("字符串[") != -1 ){
+				if( temp1.indexOf("字符串[") != -1 && Imported.Drill_CoreOfString ){
 					temp1 = temp1.replace("字符串[","");
 					temp1 = temp1.replace("]","");
 					temp1 = $gameStrings.value( Number(temp1) );

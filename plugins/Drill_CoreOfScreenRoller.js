@@ -6,6 +6,7 @@
  * @plugindesc [v1.2]        系统 - 滚轴核心
  * @author Drill_up
  * 
+ * 
  * @help  
  * =============================================================================
  * +++ Drill_CoreOfScreenRoller +++
@@ -21,7 +22,7 @@
  * 该插件为基础核心，单独使用没有效果。
  * 需要基于核心才能运行，并作用于子插件：
  * 基于：
- *   - Drill_CoreOfWindowAuxiliary  系统 - 窗口辅助核心
+ *   - Drill_CoreOfWindowAuxiliary  系统 - 窗口辅助核心★★v1.9及以上★★
  * 作用于：
  *   - Drill_SenceCredits           标题 - 制作组
  *   - Drill_SceneSelfplateE        面板 - 全自定义信息面板E
@@ -439,7 +440,6 @@ function Drill_COSR_WindowSprite() {
 };
 Drill_COSR_WindowSprite.prototype = Object.create(Window_Base.prototype);
 Drill_COSR_WindowSprite.prototype.constructor = Drill_COSR_WindowSprite;
-
 //==============================
 // * 文本域 - 初始化
 //==============================
@@ -471,15 +471,10 @@ Drill_COSR_WindowSprite.prototype.update = function() {
 //==============================
 // * 文本域 - 绘制文本
 //==============================
-Drill_COSR_WindowSprite.prototype.drill_createText = function(context_list, options) {
+Drill_COSR_WindowSprite.prototype.drill_createText = function( context_list, options ) {
 	
 	// > 默认值（COWA函数）
-	options = this.drill_COWA_DTLE_checkOptions(options);
-	
-	// > 表达式 - 转义字符（COWA函数）
-	if( options['convertEnabled'] == true ){
-		context_list = this.drill_COWA_convertEscapeCharacterInList( context_list );
-	}
+	options = this.drill_COWA_checkDrawExOptions(options);
 	
 	// > 计算字符高宽（COWA函数）
 	this.drill_COWA_DTLE_calculateHeightAndWidth( context_list, options );
@@ -497,7 +492,7 @@ Drill_COSR_WindowSprite.prototype.drill_createText = function(context_list, opti
     this.contents.clear();
 	
 	// > 开始绘制（COWA函数）
-	this.drill_COWA_DTLE_startDraw( context_list, options );
+	this.drill_COWA_startDrawListEx( context_list, options );
 	
 }
 //==============================

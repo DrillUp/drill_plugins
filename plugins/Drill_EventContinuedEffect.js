@@ -77,6 +77,7 @@
  * 插件指令：>持续动作 : 本事件 : 锚点摇晃 : 持续时间[40] : 周期[20] : 摇晃幅度[15]
  * 插件指令：>持续动作 : 本事件 : 呼吸效果 : 持续时间[180] : 周期[45] : 呼吸幅度[2]
  * 插件指令：>持续动作 : 本事件 : 原地小跳 : 持续时间[180] : 周期[45] : 跳跃高度[20]
+ * 插件指令：>持续动作 : 本事件 : 反复缩放 : 持续时间[180] : 周期[60] : 最小缩放[1.00] : 最大缩放[1.25]
  * 插件指令：>持续动作 : 本事件 : 空中飘浮 : 持续时间[150] : 缓冲时间[60] : 飘浮高度[24] : 周期[30] : 幅度[3]
  * 插件指令：>持续动作 : 本事件 : 旋转状态 : 持续时间[150] : 缓冲时间[60] : 旋转角度[90]
  * 插件指令：>持续动作 : 本事件 : 缩放状态 : 持续时间[150] : 缓冲时间[60] : 缩放比例[1.5]
@@ -91,7 +92,7 @@
  * 插件指令：>持续动作 : 本事件 : 锚点摇晃(渐变) : 持续时间[40] : 周期[8] : 摇晃幅度[25] : 开始时间[90] : 结束时间[60]
  * 
  * 1.前半部分（玩家）和 后半部分（标准闪烁 : 持续时间[60] : 周期[30]）
- *   的参数可以随意组合。一共有10*25种组合方式。
+ *   的参数可以随意组合。一共有10*26种组合方式。
  * 2."玩家"和"玩家领队"是同一个意思。
  *   "玩家队员[1]"表示领队后面第一个跟随的队友。
  * 3.参数中"时间"、"周期"的单位是帧。1秒60帧。
@@ -162,6 +163,7 @@
  * 事件注释：=>持续动作 : 锚点摇晃 : 周期[20] : 摇晃幅度[15]
  * 事件注释：=>持续动作 : 呼吸效果 : 周期[45] : 呼吸幅度[2]
  * 事件注释：=>持续动作 : 原地小跳 : 周期[45] : 跳跃高度[20]
+ * 事件注释：=>持续动作 : 反复缩放 : 周期[60] : 最小缩放[1.00] : 最大缩放[1.25]
  * 事件注释：=>持续动作 : 空中飘浮 : 飘浮高度[24] : 周期[30] : 幅度[3]
  * 事件注释：=>持续动作 : 旋转状态 : 旋转角度[90]
  * 事件注释：=>持续动作 : 缩放状态 : 缩放比例[1.5]
@@ -801,6 +803,30 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var temp2 = String(args[7]);
 			var temp3 = String(args[9]);
 			var temp4 = String(args[11]);
+			/*-----------------反复缩放 - 开始------------------*/
+			if( type == "反复缩放" ){
+				temp1 = temp1.replace("持续时间[","");
+				temp1 = temp1.replace("]","");
+				temp1 = temp1.replace("无限","518400000");
+				temp2 = temp2.replace("周期[","");
+				temp2 = temp2.replace("]","");
+				temp3 = temp3.replace("最小缩放[","");
+				temp3 = temp3.replace("]","");
+				temp4 = temp4.replace("最大缩放[","");
+				temp4 = temp4.replace("]","");
+				if( e_chars != null ){
+					for( var k=0; k < e_chars.length; k++ ){
+						e_chars[k].drill_ECE_stopEffect();
+						e_chars[k].drill_ECE_playSustainingZooming( Number(temp1),Number(temp2),Number(temp3),Number(temp4) );
+					}
+				}
+				if( p_chars != null ){
+					for( var k=0; k < p_chars.length; k++ ){
+						p_chars[k].drill_ECE_stopEffect();
+						p_chars[k].drill_ECE_playSustainingZooming( Number(temp1),Number(temp2),Number(temp3),Number(temp4) );
+					}
+				}
+			}	
 			/*-----------------顺时针旋转(渐变) - 开始------------------*/
 			if( type == "顺时针旋转(渐变)" ){
 				temp1 = temp1.replace("持续时间[","");
@@ -1521,6 +1547,16 @@ Game_Event.prototype.drill_ECE_readPage = function( page_list ){
 					var temp1 = String(args[3]);
 					var temp2 = String(args[5]);
 					var temp3 = String(args[7]);
+					/*-----------------反复缩放 - 开始------------------*/
+					if( type == "反复缩放" ){
+						temp1 = temp1.replace("周期[","");
+						temp1 = temp1.replace("]","");
+						temp2 = temp2.replace("最小缩放[","");
+						temp2 = temp2.replace("]","");
+						temp3 = temp3.replace("最大缩放[","");
+						temp3 = temp3.replace("]","");
+						this.drill_ECE_playSustainingZooming( time, Number(temp1),Number(temp2),Number(temp3) );
+					}	
 					/*-----------------空中飘浮------------------*/
 					if( type == "空中飘浮" ){
 						temp1 = temp1.replace("飘浮高度[","");
@@ -1749,6 +1785,7 @@ Game_CharacterBase.prototype.update = function() {
 	this.drill_ECE_updateSustainingAnchorRotate();          	//帧刷新 - 锚点摇晃
 	this.drill_ECE_updateSustainingBreathing();             	//帧刷新 - 呼吸效果
 	this.drill_ECE_updateSustainingJumping();					//帧刷新 - 原地小跳
+	this.drill_ECE_updateSustainingZooming();					//帧刷新 - 反复缩放
 	this.drill_ECE_updateSustainingFloating();              	//帧刷新 - 空中飘浮
 	this.drill_ECE_updateSustainingRotateState();           	//帧刷新 - 旋转状态
 	this.drill_ECE_updateSustainingResizeState();           	//帧刷新 - 缩放状态
@@ -2194,6 +2231,41 @@ Game_Character.prototype.drill_ECE_updateSustainingJumping = function() {
 		ef.fB_time = 0;
 		ef.fC_time = 0;
 	}
+	
+	// > 终止持续效果
+	if( ef.f_time >= ef.f_dTime ){
+		this.drill_ECE_stopEffect();
+	}
+}
+
+//==============================
+// * 初始化 - 持续 反复缩放
+//==============================
+Game_Character.prototype.drill_ECE_playSustainingZooming = function( time,period,min_size,max_size ) {
+	var ef = this._Drill_ECE;
+	ef.playing_type = "反复缩放";
+	ef.f_time = 0;
+	ef.f_dTime = time;
+	ef.f_period = period;
+	ef.f_min = min_size -1;
+	ef.f_max = max_size -1;
+	ef.f_speed = 360/period /180*Math.PI;
+}
+//==============================
+// * 帧刷新 - 持续 反复缩放
+//==============================
+Game_Character.prototype.drill_ECE_updateSustainingZooming = function() {
+	var ef = this._Drill_ECE;
+	if( ef.playing_type != "反复缩放" ){ return; }
+	
+	ef.f_time ++;
+	ef.scale_x = ef.f_min + (ef.f_max - ef.f_min)/2 + (ef.f_max - ef.f_min)/2 * Math.sin( ef.f_time*ef.f_speed );
+	ef.scale_y = ef.scale_x;
+	
+	// > 锚点(0.5,0.5)锁定
+	var fix_point = $gameTemp.drill_ECE_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, 0.5,0.5, ef.real_width,ef.real_height, ef.rotation, ef.scale_x, ef.scale_y );
+	ef.x = fix_point.x;	
+	ef.y = fix_point.y;	
 	
 	// > 终止持续效果
 	if( ef.f_time >= ef.f_dTime ){

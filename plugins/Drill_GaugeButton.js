@@ -290,12 +290,12 @@
  *
  * @param 平移-按钮 X
  * @parent ---贴图---
- * @desc x轴方向平移，单位像素，0为中心贴在按钮面板的中心。（可为负数）
+ * @desc x轴方向平移，单位像素，0为中心贴在按钮面板的中心。正数向右，负数向左。
  * @default 0
  *
  * @param 平移-按钮 Y
  * @parent ---贴图---
- * @desc y轴方向平移，单位像素，0为中心贴在按钮面板的中心。（可为负数）
+ * @desc y轴方向平移，单位像素，0为中心贴在按钮面板的中心。正数向下，负数向上。
  * @default 0
  *
  * @param 地图层级
@@ -486,7 +486,7 @@
 //		
 //		
 //		★私有类如下：
-//			* Drill_GBu_ButtonSprite		状态按钮
+//			* Drill_GBu_ButtonSprite		固定按钮
 //
 //		★必要注意事项：
 //			1.插件的图片层级与多个插件共享。【必须自写 层级排序 函数】
@@ -932,13 +932,20 @@ Scene_Map.prototype.drill_GBu_updatePlayerInput = function() {
 
 
 //=============================================================================
-// ** 状态按钮
+// ** 固定按钮
 // 
-// 			说明：这里将按钮的各个状态封装在一起。
-//				  初始化设置资源后，调用接口状态切换，能够随时切换到指定的按钮状态。
+// 			说明：	这里将按钮的各个状态封装在一起。
+//					初始化设置资源后，调用接口状态切换，能够随时切换到指定的按钮状态。
+//					
+//			代码：	> 范围 - 该类显示固定的按钮。
+//					> 结构 - [ ●合并 /分离/混乱] 数据与贴图合并。
+//					> 数量 - [单个/ ●多个 ] 
+//					> 创建 - [ ●一次性 /自延迟/外部延迟] 
+//					> 销毁 - [ ●不考虑 /自销毁/外部销毁 ] 
+//					> 样式 - [不可修改/自变化/ ●外部变化 ] 通过外部修改样式设置高亮情况。
 //=============================================================================
 //==============================
-// * 状态按钮 - 定义
+// * 固定按钮 - 定义
 //==============================
 function Drill_GBu_ButtonSprite() {
     this.initialize.apply(this, arguments);
@@ -946,7 +953,7 @@ function Drill_GBu_ButtonSprite() {
 Drill_GBu_ButtonSprite.prototype = Object.create(Sprite_Base.prototype);
 Drill_GBu_ButtonSprite.prototype.constructor = Drill_GBu_ButtonSprite;
 //==============================
-// * 状态按钮 - 初始化
+// * 固定按钮 - 初始化
 //==============================
 Drill_GBu_ButtonSprite.prototype.initialize = function( data ) {
 	Sprite_Base.prototype.initialize.call(this);
@@ -957,7 +964,7 @@ Drill_GBu_ButtonSprite.prototype.initialize = function( data ) {
 	this.drill_initSprite();	//初始化对象
 };
 //==============================
-// * 状态按钮 - 帧刷新
+// * 固定按钮 - 帧刷新
 //==============================
 Drill_GBu_ButtonSprite.prototype.update = function() {
 	Sprite_Base.prototype.update.call(this);

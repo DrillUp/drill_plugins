@@ -2432,14 +2432,14 @@ Drill_SSh_GoldWindow.prototype.value = function() {
 Drill_SSh_GoldWindow.prototype.drill_drawCurrencyValue = function(value, unit, x, y, width) {
 	if( $gameSystem._drill_SSh_exchange_mode ){
 		// > 交换物绘制
-		var unitWidth = Math.min(32, this.textWidth(unit));		//这里获取到的Width效果并不好。
+		var unitWidth = Math.min(32, this.drill_COWA_getTextWidth(unit));
 		this.resetTextColor();
 		this.drawText(value, x, y, width - unitWidth - 6, 'right');
 		this.changeTextColor(this.systemColor());
 		this.drawTextEx(unit, x + width - unitWidth, y );
 	}else{
 		// > 金币绘制
-		var unitWidth = Math.min(80, this.textWidth(unit));
+		var unitWidth = Math.min(80, this.drill_COWA_getTextWidth(unit));
 		this.resetTextColor();
 		this.drawText(value, x, y, width - unitWidth - 6, 'right');
 		this.changeTextColor(this.systemColor());
@@ -2723,8 +2723,8 @@ Window_ShopNumber.prototype.drawTotalPrice = function() {
 //==============================
 var _drill_SSh_n_drawCurrencyValue = Window_ShopNumber.prototype.drawCurrencyValue;
 Window_ShopNumber.prototype.drawCurrencyValue = function(value, unit, x, y, width) {
-    if($gameSystem._drill_SSh_exchange_mode){
-		var unitWidth = Math.min(80, this.textWidth(unit));
+    if( $gameSystem._drill_SSh_exchange_mode ){
+		var unitWidth = Math.min( 80, this.drill_COWA_getTextWidth(unit) );
 		this.resetTextColor();
 		this.drawText(value, x, y, width - unitWidth - 6, 'right');
 		this.changeTextColor(this.systemColor());

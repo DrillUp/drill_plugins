@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.5]        面板 - 全自定义主菜单面板
+ * @plugindesc [v1.6]        面板 - 全自定义主菜单面板
  * @author Drill_up
  * 
  * @Drill_LE_param "角色固定框样式-%d"
@@ -229,6 +229,8 @@
  * 添加了插件指令获取时间给变量的功能。
  * [v1.5]
  * 添加了角色框 职业、昵称 的显示功能。
+ * [v1.6]
+ * 修复了 主菜单插件单独 使用时，会影响物品界面使用物品时选择人物的窗口挤占高度的bug。
  * 
  * 
  * @param ----杂项----
@@ -1341,7 +1343,7 @@
  * 
  * @param 激活后出列绝对坐标 X
  * @parent ---激活的按钮---
- * @desc x轴方向平移，单位像素。0为贴在最左边。单位像素。。
+ * @desc x轴方向平移，单位像素。0为贴在最左边。单位像素。
  * @default 150
  * 
  * @param 激活后出列绝对坐标 Y
@@ -1583,12 +1585,12 @@
  *
  * @param 平移-固定框背景 X
  * @parent ----外框----
- * @desc 修正校对背景的位置用，x轴方向平移，单位像素。
+ * @desc 修正校对背景的位置用，x轴方向平移，单位像素。正数向右，负数向左。
  * @default 0
  *
  * @param 平移-固定框背景 Y
  * @parent ----外框----
- * @desc 修正校对背景的位置用，y轴方向平移，单位像素。
+ * @desc 修正校对背景的位置用，y轴方向平移，单位像素。正数向下，负数向上。
  * @default 0
  *
  * @param 资源-固定框前景
@@ -1601,12 +1603,12 @@
  *
  * @param 平移-固定框前景 X
  * @parent ----外框----
- * @desc 修正校对前景的位置用，x轴方向平移，单位像素。
+ * @desc 修正校对前景的位置用，x轴方向平移，单位像素。正数向右，负数向左。
  * @default 0
  *
  * @param 平移-固定框前景 Y
  * @parent ----外框----
- * @desc 修正校对前景的位置用，y轴方向平移，单位像素。
+ * @desc 修正校对前景的位置用，y轴方向平移，单位像素。正数向下，负数向上。
  * @default 0
  * 
  * @param ----姓名显示----
@@ -1622,12 +1624,12 @@
  *
  * @param 平移-姓名 X
  * @parent ----姓名显示----
- * @desc 以样式框的位置为基准，x轴方向平移，单位像素。
+ * @desc 以样式框的位置为基准，x轴方向平移，单位像素。正数向右，负数向左。
  * @default 94
  *
  * @param 平移-姓名 Y
  * @parent ----姓名显示----
- * @desc 以样式框的位置为基准，y轴方向平移，单位像素。
+ * @desc 以样式框的位置为基准，y轴方向平移，单位像素。正数向下，负数向上。
  * @default 51
  * 
  * @param 姓名字体大小
@@ -1662,12 +1664,12 @@
  *
  * @param 平移-职业 X
  * @parent ----职业显示----
- * @desc 以样式框的位置为基准，x轴方向平移，单位像素。
+ * @desc 以样式框的位置为基准，x轴方向平移，单位像素。正数向右，负数向左。
  * @default 164
  *
  * @param 平移-职业 Y
  * @parent ----职业显示----
- * @desc 以样式框的位置为基准，y轴方向平移，单位像素。
+ * @desc 以样式框的位置为基准，y轴方向平移，单位像素。正数向下，负数向上。
  * @default 51
  * 
  * @param 职业字体大小
@@ -1702,12 +1704,12 @@
  *
  * @param 平移-昵称 X
  * @parent ----昵称显示----
- * @desc 以样式框的位置为基准，x轴方向平移，单位像素。
+ * @desc 以样式框的位置为基准，x轴方向平移，单位像素。正数向右，负数向左。
  * @default 164
  *
  * @param 平移-昵称 Y
  * @parent ----昵称显示----
- * @desc 以样式框的位置为基准，y轴方向平移，单位像素。
+ * @desc 以样式框的位置为基准，y轴方向平移，单位像素。正数向下，负数向上。
  * @default 74
  * 
  * @param 昵称字体大小
@@ -1742,12 +1744,12 @@
  *
  * @param 平移-状态 X
  * @parent ----状态显示----
- * @desc 以样式框的位置为基准，x轴方向平移，单位像素。
+ * @desc 以样式框的位置为基准，x轴方向平移，单位像素。正数向右，负数向左。
  * @default 229
  *
  * @param 平移-状态 Y
  * @parent ----状态显示----
- * @desc 以样式框的位置为基准，y轴方向平移，单位像素。
+ * @desc 以样式框的位置为基准，y轴方向平移，单位像素。正数向下，负数向上。
  * @default 62
  *
  * @param 状态显示模式
@@ -1841,12 +1843,12 @@
  * 
  * @param 平移-角色前视图 X
  * @parent ---角色前视图---
- * @desc 以样式框的位置为基准，x轴方向平移，单位像素。可为负数。
+ * @desc 以样式框的位置为基准，x轴方向平移，单位像素。正数向右，负数向左。
  * @default 10
  *
  * @param 平移-角色前视图 Y
  * @parent ---角色前视图---
- * @desc 以样式框的位置为基准，y轴方向平移，单位像素。可为负数。
+ * @desc 以样式框的位置为基准，y轴方向平移，单位像素。正数向下，负数向上。
  * @default 10
  * 
  * 
@@ -2017,12 +2019,12 @@
  *
  * @param 平移-参数条 X
  * @parent ---主体---
- * @desc 以样式框的位置为基准，x轴方向平移，单位像素。
+ * @desc 以样式框的位置为基准，x轴方向平移，单位像素。正数向右，负数向左。
  * @default 10
  *
  * @param 平移-参数条 Y
  * @parent ---主体---
- * @desc 以样式框的位置为基准，y轴方向平移，单位像素。
+ * @desc 以样式框的位置为基准，y轴方向平移，单位像素。正数向下，负数向上。
  * @default 10
  *
  * @param 整体旋转角度
@@ -2264,12 +2266,12 @@
  *
  * @param 平移-参数数字 X
  * @parent ---主体---
- * @desc 以样式框的位置为基准，x轴方向平移，单位像素。
+ * @desc 以样式框的位置为基准，x轴方向平移，单位像素。正数向右，负数向左。
  * @default 10
  *
  * @param 平移-参数数字 Y
  * @parent ---主体---
- * @desc 以样式框的位置为基准，y轴方向平移，单位像素。
+ * @desc 以样式框的位置为基准，y轴方向平移，单位像素。正数向下，负数向上。
  * @default 10
  *
  * @param 整体旋转角度
@@ -2497,8 +2499,7 @@
 //		全局存储变量	无
 //		覆盖重写方法	Scene_Menu.prototype.commandFormation
 //						Scene_Menu.prototype.commandPersonal（半覆写）
-//						Window_MenuStatus.prototype.processCursorMove（半覆写）
-//						Window_MenuCommand.prototype.processCursorMove（半覆写）
+//						Window_MenuStatus.prototype.refresh（半覆写）
 //
 //		工作类型		持续执行
 //		时间复杂度		o(n^3)*o(场景元素) 每帧
@@ -3575,7 +3576,8 @@ var _drill_SMa_createStatusWindow = Scene_Menu.prototype.createStatusWindow;
 Scene_Menu.prototype.createStatusWindow = function() {
 	_drill_SMa_createStatusWindow.call( this );
 	
-	this._statusWindow._list = [];	//强制加上_list给 按钮组核心识别
+	this._statusWindow._drill_SMa_isInMainMenu = true;	//（标记 主菜单场景）
+	this._statusWindow._list = [];						//（强制加上_list给 按钮组核心识别）
 	this._statusWindow.refresh();
 }
 //==============================
@@ -3935,13 +3937,15 @@ var _drill_SMa_statusWindowRefresh = Window_MenuStatus.prototype.refresh;
 Window_MenuStatus.prototype.refresh = function() {
 
 	// > 列表刷新
-	this._list = [];						//名称列表（VisibleRows并不影响list数量）
-	this._drill_COSB_indexList = [];		//交叉列表
-	var actors = $gameParty.members();
-	for( var i=0; i < actors.length; i++ ){
-		var actor = actors[i];
-		this._list.push( actor.name() );
-		this._drill_COSB_indexList.push( actor.actorId() -1 );
+	if( this._drill_SMa_isInMainMenu == true ){
+		this._list = [];						//名称列表（VisibleRows并不影响list数量）
+		this._drill_COSB_indexList = [];		//交叉列表
+		var actors = $gameParty.members();
+		for( var i=0; i < actors.length; i++ ){
+			var actor = actors[i];
+			this._list.push( actor.name() );
+			this._drill_COSB_indexList.push( actor.actorId() -1 );
+		}
 	}
 	
 	// > 默认刷新
@@ -3950,13 +3954,24 @@ Window_MenuStatus.prototype.refresh = function() {
 //==============================
 // * 原装状态窗口 - 状态窗口显示按钮数量
 //==============================
+var _drill_SMa_status_numVisibleRows = Window_MenuStatus.prototype.numVisibleRows;
 Window_MenuStatus.prototype.numVisibleRows = function() {
-    return DrillUp.g_SMa_actorAvatar_visibleNum;
+	if( this._drill_SMa_isInMainMenu == true ){
+		return DrillUp.g_SMa_actorAvatar_visibleNum;
+	}
+    return _drill_SMa_status_numVisibleRows.call(this);
 };
 
 
 //=============================================================================
-// ** 角色固定框
+// ** 角色固定框【Drill_SMa_ActorSprite】
+//			
+//	 		代码：	> 范围 - 该类显示单独的角色框。
+//					> 结构 - [合并/分离/ ●混乱 ] 该类使用了样式结构，并且使用_org_visible、_org_x、_org_y参数，用于变化内容。
+//					> 数量 - [单个/ ●多个 ] 
+//					> 创建 - [ ●一次性 /自延迟/外部延迟] 
+//					> 销毁 - [ ●不考虑 /自销毁/外部销毁 ] 
+//					> 样式 - [ ●不可修改 /自变化/外部变化] 创建后样式固定，不可修改。
 //=============================================================================
 //==============================
 // * 角色固定框 - 定义
@@ -3964,13 +3979,13 @@ Window_MenuStatus.prototype.numVisibleRows = function() {
 function Drill_SMa_ActorSprite() {
     this.initialize.apply(this, arguments);
 }
-Drill_SMa_ActorSprite.prototype = Object.create(Sprite_Base.prototype);
+Drill_SMa_ActorSprite.prototype = Object.create(Sprite.prototype);
 Drill_SMa_ActorSprite.prototype.constructor = Drill_SMa_ActorSprite;
 //==============================
 // * 角色固定框 - 初始化
 //==============================
 Drill_SMa_ActorSprite.prototype.initialize = function( actor, memberIndex ) {
-    Sprite_Base.prototype.initialize.call(this);
+    Sprite.prototype.initialize.call(this);
 	this._drill_actor = actor;		//角色可能为空
 	this._drill_memberIndex = memberIndex;
 	if( this._drill_actor ){
@@ -3988,7 +4003,7 @@ Drill_SMa_ActorSprite.prototype.initialize = function( actor, memberIndex ) {
 // * 角色固定框 - 帧刷新
 //==============================
 Drill_SMa_ActorSprite.prototype.update = function() {
-	Sprite_Base.prototype.update.call(this);
+	Sprite.prototype.update.call(this);
 	
 	this.drill_updateSprite();			//帧刷新对象
 };

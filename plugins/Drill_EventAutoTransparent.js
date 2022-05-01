@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        行走图 - 玩家接近自动透明化
+ * @plugindesc [v1.2]        行走图 - 玩家接近自动透明化
  * @author Drill_up
  * 
  * 
@@ -102,6 +102,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 添加了插件指令临时修改功能。
+ * [v1.2]
+ * 修复了接近透明失效的bug。
  * 
  * 
  *
@@ -416,7 +418,7 @@ Scene_Map.prototype.drill_EATran_refreshArray = function() {
 				var temp_sprite = char_sprites[j];
 				if( $gameTemp.drill_EATran_isReflectionSprite( temp_sprite ) ){ continue; }	//（跳过镜像情况）
 				var temp_character = temp_sprite._character;
-				if( temp_character == undefined && 
+				if( temp_character != undefined && 
 					temp_character instanceof Game_Event && 
 					temp_character._eventId == temp_id ){
 					$gameTemp._drill_EATran_sprites[i] = temp_sprite;
@@ -445,7 +447,7 @@ Scene_Map.prototype.drill_EATran_updateTransparent = function() {
 		var temp_id = $gameSystem._drill_EATran_idTank[i];
 		var player_sprite = $gameTemp._drill_EATran_player_sprite;
 		if( this.drill_EATran_isBitmapReady( temp_sprite ) ){					//贴图已加载
-		
+			
 			var e = $gameMap.event( temp_id );
 			var is_coverd = false;
 			if( e._drill_EATran_type == "只要接触就透明" ){

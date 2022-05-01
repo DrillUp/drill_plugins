@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.6]        地图 - 多层地图GIF
+ * @plugindesc [v1.7]        地图 - 多层地图GIF
  * @author Drill_up
  * 
  * @Drill_LE_param "GIF层-%d"
@@ -182,6 +182,8 @@
  * 修复了玩家移动时，出现1像素的轻微漂移的问题。
  * [v1.6]
  * 添加了 参数存储 功能开关，以及动态遮罩功能。
+ * [v1.7]
+ * 重新整理的图片层级的位移问题，修复了贴图在图片层位移比错位的问题。
  * 
  * 
  * 
@@ -1526,7 +1528,7 @@
  *
  * @param 平移-GIF Y
  * @parent ---贴图---
- * @desc x轴方向平移，单位像素。0为贴在最上面。这里用来表示进入地图时图片的初始位置。
+ * @desc y轴方向平移，单位像素。0为贴在最上面。这里用来表示进入地图时图片的初始位置。
  * @default 0
  *
  * @param 旋转速度
@@ -1643,7 +1645,10 @@
 //		★大体框架与功能如下：
 //			多层地图GIF：
 //				->基本属性
-//					->地图层级、图片层级（多插件相互作用）
+//					->地图层级
+//						->添加贴图到层级【标准函数】
+//						->移动贴图【标准函数】
+//						->图片层级排序【标准函数】
 //					->GIF播放
 //					->镜头位移比
 //				->可修改的属性
@@ -1661,7 +1666,7 @@
 //				AllWindows：WindowLayer：	< rmmv对话框 < rmmv滚动文章 < 最顶层【_drill_SenceTopArea】
 //
 //		★必要注意事项：
-//			1.插件的图片层级与多个插件共享。【必须自写 层级排序 函数】
+//			1.插件的地图层级/图片层级与多个插件共享。【必须自写 层级排序 标准函数】
 //			2.使用插件指令变化时，changing将会作为一个变化容器，根据时间对【数据】进行改变。
 //			3.原理基于【定量】赋值，【你直接用_displayX就可以了】,增量赋值方法绕太多远路！
 //			4.【这里的镜头位移比是相减，而背景的是相加】。
@@ -1942,12 +1947,12 @@ Game_System.prototype.drill_LGi_initData = function() {
 		var data = JSON.parse(JSON.stringify( DrillUp.g_LGi_layers[i] ));	//深拷贝数据
 		
 		// > 私有变量初始化
-		data['cameraX'] = 0;		//实际镜头的x精确坐标
-		data['cameraY'] = 0;		//
-		data['loopX'] = 0;			//循环地图中，走动循环的次数
-		data['loopY'] = 0;			//
-		data['loopFixX'] = 0;		//循环地图中，把displayX取余的部分加回
-		data['loopFixY'] = 0;		//
+		data['cameraX'] = 0;			//含循环累积的镜头位置（像素单位）
+		data['cameraY'] = 0;			//
+		data['loopX'] = 0;				//循环地图中，走动循环的次数
+		data['loopY'] = 0;				//
+		data['loopFixX'] = 0;			//循环地图中，把displayX取余的部分加回（图块单位）
+		data['loopFixY'] = 0;			//
 		data['gif_p_playing'] = false;			//gif - 播放一次
 		data['gif_p_playType'] = "forwardRun";	//gif - 播放是否反向
 		data['gif_p_curTime'] = 0;				//gif - 当前时间
@@ -2002,8 +2007,8 @@ Game_Player.prototype.update = function( sceneActive ){
 	
 	for(var i = 0; i< $gameSystem._drill_LGi_dataTank_map.length ;i++){
 		var data = $gameSystem._drill_LGi_dataTank_map[i];
-		data['cameraX'] = ($gameMap._displayX + data['loopFixX'] - data['tile_x']) * $gameMap.tileWidth();
-		data['cameraY'] = ($gameMap._displayY + data['loopFixY'] - data['tile_y']) * $gameMap.tileHeight();
+		data['cameraX'] = ($gameMap.displayX() + data['loopFixX']) * $gameMap.tileWidth();
+		data['cameraY'] = ($gameMap.displayY() + data['loopFixY']) * $gameMap.tileHeight();
 	}
 };
 //==============================
@@ -2072,11 +2077,53 @@ Game_Map.prototype.scrollRight = function(distance) {
 };
 
 
+//#############################################################################
+// ** 标准函数（地图层级）
+//#############################################################################
+//##############################
+// * 地图层级 - 添加贴图到层级【标准函数】
+//				
+//			参数：	> sprite 贴图        （添加的贴图对象）
+//					> layer_index 字符串 （添加到的层级名，下层/中层/上层/图片层/最顶层）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图添加到目标层级中。
+//##############################
+Scene_Map.prototype.drill_LGi_layerAddSprite = function( sprite, layer_index ){
+	this.drill_LGi_layerAddSprite_Private( sprite, layer_index );
+}
+//##############################
+// * 地图层级 - 移动贴图【标准函数】
+//				
+//			参数：	> x 数字           （x位置，地图参照为基准）
+//					> y 数字           （y位置，地图参照为基准）
+//					> reference 字符串 （参考系，镜头参照/地图参照）
+//					> option 动态参数对象 （计算时的必要数据）
+//			返回：	> pos 动态参数对象
+//                  > pos['x']
+//                  > pos['y']
+//          
+//			说明：	> 强行规范的接口，必须按照接口的结构来，把要考虑的问题全考虑清楚了再去实现。
+//##############################
+Scene_Map.prototype.drill_LGi_layerMoveingReference = function( x, y, reference, option ){
+	return this.drill_LGi_layerMoveingReference_Private( x, y, reference, option );
+}
+//##############################
+// * 地图层级 - 图片层级排序【标准函数】
+//				
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 执行该函数后，地图层级的子贴图，按照zIndex属性来进行先后排序。值越大，越靠前。
+//##############################
+Scene_Map.prototype.drill_LGi_sortByZIndex = function () {
+    this.drill_LGi_sortByZIndex_Private();
+}
 //=============================================================================
-// ** 地图层级
+// ** 地图层级（接口实现）
 //=============================================================================
 //==============================
-// ** 下层
+// * 地图层级 - 下层
 //==============================
 var _drill_LGi_layer_createParallax = Spriteset_Map.prototype.createParallax;
 Spriteset_Map.prototype.createParallax = function() {
@@ -2087,7 +2134,7 @@ Spriteset_Map.prototype.createParallax = function() {
 	}
 }
 //==============================
-// ** 中层
+// * 地图层级 - 中层
 //==============================
 var _drill_LGi_layer_createTilemap = Spriteset_Map.prototype.createTilemap;
 Spriteset_Map.prototype.createTilemap = function() {
@@ -2099,7 +2146,7 @@ Spriteset_Map.prototype.createTilemap = function() {
 	}
 }
 //==============================
-// ** 上层
+// * 地图层级 - 上层
 //==============================
 var _drill_LGi_layer_createDestination = Spriteset_Map.prototype.createDestination;
 Spriteset_Map.prototype.createDestination = function() {
@@ -2110,7 +2157,7 @@ Spriteset_Map.prototype.createDestination = function() {
 	}
 }
 //==============================
-// ** 图片层
+// * 地图层级 - 图片层
 //==============================
 var _drill_LGi_layer_createPictures = Spriteset_Map.prototype.createPictures;
 Spriteset_Map.prototype.createPictures = function() {
@@ -2121,7 +2168,7 @@ Spriteset_Map.prototype.createPictures = function() {
 	}
 }
 //==============================
-// ** 最顶层
+// * 地图层级 - 最顶层
 //==============================
 var _drill_LGi_layer_createAllWindows = Scene_Map.prototype.createAllWindows;
 Scene_Map.prototype.createAllWindows = function() {
@@ -2132,15 +2179,68 @@ Scene_Map.prototype.createAllWindows = function() {
 	}
 }
 //==============================
-// ** 层级排序
+// * 地图层级 - 图片层级排序（私有）
 //==============================
-Scene_Map.prototype.drill_LGi_sortByZIndex = function() {
+Scene_Map.prototype.drill_LGi_sortByZIndex_Private = function () {
 	this._spriteset._drill_mapDownArea.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
 	this._spriteset._drill_mapCenterArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
 	this._spriteset._drill_mapUpArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
 	this._spriteset._drill_mapPicArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
 	this._drill_SenceTopArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
 };
+//==============================
+// * 地图层级 - 添加贴图到层级（私有）
+//==============================
+Scene_Map.prototype.drill_LGi_layerAddSprite_Private = function( sprite, layer_index ){
+	if( layer_index == "下层" ){
+		this._spriteset._drill_mapDownArea.addChild( sprite );
+	}
+	if( layer_index == "中层" ){
+		this._spriteset._drill_mapCenterArea.addChild( sprite );
+	}
+	if( layer_index == "上层" ){
+		this._spriteset._drill_mapUpArea.addChild( sprite );
+	}
+	if( layer_index == "图片层" ){
+		this._spriteset._drill_mapPicArea.addChild( sprite );
+	}
+	if( layer_index == "最顶层" ){
+		this._drill_SenceTopArea.addChild( sprite );
+	}
+}
+//==============================
+// * 地图层级 - 移动贴图（私有）
+//			
+//			说明：	当前的xx，yy的参照系是 地图参照 。
+//==============================
+Scene_Map.prototype.drill_LGi_layerMoveingReference_Private = function( xx, yy, reference, option ){
+	
+	// > 位移比
+	var x_per = option['XPer'];
+	var y_per = option['YPer'];
+	
+	xx -= option['tile_x'] * $gameMap.tileWidth() * x_per;
+	yy -= option['tile_y'] * $gameMap.tileHeight() * y_per;
+	//		（*0 表示紧贴地图；*1表示减回去了，紧贴镜头。）
+	
+	xx += option['cameraX'] * x_per;
+	yy += option['cameraY'] * y_per;
+	//		（*0 表示不跟镜头移动，紧贴地图；*1表示紧贴镜头。）
+	
+	
+	// > 参照系修正
+	if( reference == "地图参照" ){
+		//（不操作）
+		return {'x':xx, 'y':yy };
+	}
+	if( reference == "镜头参照" ){
+		xx -= this._spriteset._baseSprite.x;	//（由于 Spriteset_Map 的 _baseSprite 坐标始终是(0,0)，所以两个参照没有区别。）
+		yy -= this._spriteset._baseSprite.y;
+		return {'x':xx, 'y':yy };
+	}
+	return {'x':xx, 'y':yy };
+}
+
 
 //=============================================================================
 // ** 地图界面
@@ -2199,21 +2299,7 @@ Scene_Map.prototype.drill_LGi_create = function() {
 		
 		// > 地图层级
 		this._drill_LGi_spriteTank.push(temp_sprite);
-		if( temp_sprite['layer_index'] == '下层' ){
-			this._spriteset._drill_mapDownArea.addChild(temp_sprite);
-		}
-		if( temp_sprite['layer_index'] == '中层' ){
-			this._spriteset._drill_mapCenterArea.addChild(temp_sprite);
-		}
-		if( temp_sprite['layer_index'] == '上层' ){
-			this._spriteset._drill_mapUpArea.addChild(temp_sprite);
-		}
-		if( temp_sprite['layer_index'] == '图片层' ){
-			this._spriteset._drill_mapPicArea.addChild(temp_sprite);
-		}
-		if( temp_sprite['layer_index'] == '最顶层' ){
-			this._drill_SenceTopArea.addChild(temp_sprite);
-		}
+		this.drill_LGi_layerAddSprite( temp_sprite, temp_sprite['layer_index'] );
 	}
 	this.drill_LGi_sortByZIndex();		//排序
 }
@@ -2305,10 +2391,29 @@ Scene_Map.prototype.drill_LGi_updateBase = function() {
 			// > 自旋转
 			temp_sprite_bitmap.rotation += ( temp_data['rotate'] /180 * Math.PI );
 			
-			// > 位移
-			temp_sprite.x = temp_data['x'] + temp_data['cameraX'] * (1 - temp_data['XPer']);
-			temp_sprite.y = temp_data['y'] + temp_data['cameraY'] * (1 - temp_data['YPer']);
-			//（初始位移 + 镜头位移 * 位移比 ）
+			
+			// > 位移（地图参照）
+			var xx = temp_data['x'];
+			var yy = temp_data['y'];
+			xx -= temp_data['cameraX'];		//（注意，这里不能用adjust，因为如果你一直向前移动，贴图会越来越远）
+			yy -= temp_data['cameraY'];
+			xx += temp_data['tile_x'] * $gameMap.tileWidth();
+			yy += temp_data['tile_y'] * $gameMap.tileHeight();
+			
+			// > 位移偏转
+			if( temp_data['layer_index'] == "下层" ||
+				temp_data['layer_index'] == "中层" ||
+				temp_data['layer_index'] == "上层" ){
+				var pos = this.drill_LGi_layerMoveingReference( xx, yy, "地图参照", temp_data );
+				temp_sprite.x = pos['x'];
+				temp_sprite.y = pos['y'];
+			}
+			if( temp_data['layer_index'] == "图片层" ||
+				temp_data['layer_index'] == "最顶层" ){
+				var pos = this.drill_LGi_layerMoveingReference( xx, yy, "镜头参照", temp_data );
+				temp_sprite.x = pos['x'];
+				temp_sprite.y = pos['y'];
+			}
 		}
 		
 		// > 创建动态遮罩（延迟创建）

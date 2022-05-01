@@ -22,6 +22,10 @@
  * ★★必须放在 对话框-消息核心 插件后面★★
  *
  * -----------------------------------------------------------------------------
+ * ----插件扩展
+ * 该插件可以单独使用。
+ * 
+ * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：地图界面、战斗界面。
  *   作用于最顶层。
@@ -474,6 +478,7 @@
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_DialogSingleSprite');
 	
+	
 	/*-----------------杂项------------------*/
 	DrillUp.g_DSS_layerIndex = Number(DrillUp.parameters["图片层级"] || 50);	
 	DrillUp.g_DSS_fadeTime = Number(DrillUp.parameters["贴图显现时间"] || 20);	
@@ -481,10 +486,9 @@
 	/*-----------------对话图------------------*/
 	DrillUp.g_DSS_pics_length = 40;
 	DrillUp.g_DSS_pics = [];
-	for (var i = 0; i < DrillUp.g_DSS_pics_length; i++) {
+	for( var i = 0; i < DrillUp.g_DSS_pics_length; i++ ){
 		DrillUp.g_DSS_pics[i] = String(DrillUp.parameters["对话图-" + String(i+1) ] || "");
 	}
-	
 	
 	
 //=============================================================================
@@ -535,20 +539,14 @@ Window_Message.prototype.initialize = function() {
 
 //==============================
 // * 对话框 - 帧刷新
+//
+//			说明：	注意，对话框窗口不要 固定帧初始值 。
 //==============================
 var _drill_DSS_update = Window_Message.prototype.update;
 Window_Message.prototype.update = function() {
 	_drill_DSS_update.call(this);
-	this.drill_DSS_updateEffect();			//执行变换
+	this.drill_DSS_updateEffect();			//帧刷新变换
 };
-////==============================
-//// * 帧刷新 - 固定帧初始值
-////==============================
-//Window_Message.prototype.drill_DSS_updatePosition = function() {
-//	if( this.x != this._drill_orgX ){ this.x = this._drill_orgX; }		// x
-//	if( this.y != this._drill_orgY ){ this.y = this._drill_orgY; }		// y
-//	//（窗口不含旋转、缩放等效果）
-//};
 ////==============================
 //// * 捕获 - 窗口x位置（并不是帧刷新）
 ////==============================
@@ -569,12 +567,14 @@ Window_Message.prototype.update = function() {
 //};
 	
 //==============================
-// * 对话框 - 执行变换
+// * 对话框 - 帧刷新变换
 //==============================
 Window_Message.prototype.drill_DSS_updateEffect = function() {
 	
-	// > 隐藏转移
+	// > 时间+1
 	this._drill_DSS['delay'] += 1;
+	
+	// > 播放隐藏
 	if( $gameTemp._drill_DSS_isPlaying ){
 		if( this._drill_DSS['lastState'] == false ){
 			this._drill_DSS['lastState'] = true;		//锁-开始播放时
@@ -585,34 +585,32 @@ Window_Message.prototype.drill_DSS_updateEffect = function() {
 			this.x += 0;
 			this.y += Graphics.boxHeight * 2;
 		}
+		
+	// > 关闭隐藏
 	}else{
 		if( this._drill_DSS['lastState'] == true ){
 			this._drill_DSS['lastState'] = false;		//锁-结束播放时
 			
 			this._drill_DSS['delay'] = 0;
 		}
+		
+		// > 延迟归位（8帧后 执行一次归位，已经归位则不执行）
 		if( this._drill_DSS['lastState'] == false && 
-			this._drill_DSS['delay'] > 8 &&
-			this._drill_DSS['orgX'] != -1 &&
-			this._drill_DSS['orgY'] != -1 ){
-				
-			this.x = this._drill_DSS['orgX'];			//（延迟归位）
-			this.y = this._drill_DSS['orgY'];
-			this._drill_DSS['orgX'] = -1;			//（清理原坐标）
-			this._drill_DSS['orgY'] = -1;			//
+			this._drill_DSS['delay'] > 8 ){
+			this.drill_DSS_homingPosition();
 		}
 	}
-	
-	//// > 变换
-	//if( $gameTemp._drill_DSS_isPlaying || this._drill_DSS['delay'] < 8 ){
-	//	this._drill_DSS['y'] = Graphics.boxHeight * 2;
-	//}else{
-	//	this._drill_DSS['y'] = 0;
-	//}
-	//
-	//// > 变换
-	//this.x += this._drill_DSS['x'] ;					// x
-	//this.y += this._drill_DSS['y'] ;					// y
+}
+//==============================
+// * 对话框 - 执行归位
+//==============================
+Window_Message.prototype.drill_DSS_homingPosition = function() {
+	if( this._drill_DSS['orgX'] == -1 &&
+		this._drill_DSS['orgY'] == -1 ){ return; }
+	this.x = this._drill_DSS['orgX'];
+	this.y = this._drill_DSS['orgY'];
+	this._drill_DSS['orgX'] = -1;			//（清理原坐标）
+	this._drill_DSS['orgY'] = -1;			//
 }
 
 

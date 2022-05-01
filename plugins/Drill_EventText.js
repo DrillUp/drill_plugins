@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.6]        行走图 - 事件漂浮文字
+ * @plugindesc [v1.7]        行走图 - 事件漂浮文字
  * @author Drill_up
  * 
  * 
@@ -19,10 +19,12 @@
  * -----------------------------------------------------------------------------
  * ----插件扩展
  * 插件可以单独使用，还可以被其他插件扩展使用。
- * 被扩展：
- *   - Drill_X_EventTextFilter     行走图-事件漂浮文字的滤镜效果[扩展]
+ * 基于：
+ *   - Drill_CoreOfWindowAuxiliary 系统 - 窗口辅助核心★★v1.9及以上★★
+ * 可被扩展：
+ *   - Drill_X_EventTextFilter     行走图 - 事件漂浮文字的滤镜效果[扩展]
  *     该插件能给事件的漂浮文字添加滤镜效果。
- *   - Drill_X_EventTextBackground 行走图-事件漂浮文字的背景[扩展]
+ *   - Drill_X_EventTextBackground 行走图 - 事件漂浮文字的背景[扩展]
  *     该插件能给事件的漂浮文字添加背景。
  *
  * -----------------------------------------------------------------------------
@@ -33,13 +35,15 @@
  *   (1.你可以通过换事件页，来切换头顶的漂浮文字。
  *      你可以使用变量等特殊字符，但是变量的变动不会主动刷新漂浮文字。
  *   (2.显示出来的文字不能包含 英文空格 ，但是可以包含中文空格。
- *   (3.你可以在文本中加入各种特殊字符：
+ *   (3.你可以在文本中加入各种窗口字符：
  *       \c[n] 变颜色    \i[n] 显示图标    \{ \} 字体变大变小
  *       \V[n] 显示变量  \N[n] 显示角色名  \G 显示货币单位
  *      更多的特殊字符，可以去看看插件：对话框 - 消息核心。
  *      如果你想控制图标大小，去看看：对话框 - 特殊字符大小控制器
  *   (4.字符串中可以使用\V[n]变量，但是注释指令不会刷新变量值，
  *      需要用插件指令执行，才会刷新值。
+ *   (5.你还可以添加更为特殊的窗口字符。
+ *      具体可以去看看 "15.对话框 > 关于窗口字符.docx"。
  * 位置：
  *   (1.漂浮位置固定在事件上方24像素的位置，你可以根据需要，对文字进行
  *      位置偏移调整。
@@ -143,6 +147,8 @@
  * 添加了对齐方式。
  * [v1.6]
  * 修复了复制事件时，五毛特效 效果会多次叠加的bug。
+ * [v1.7]
+ * 优化了内部结构。并兼容 窗口字符块 。
  * 
  * 
  * 
@@ -257,6 +263,12 @@
 	DrillUp.g_ET_frame_visible = String(DrillUp.parameters["默认是否显示外框"] || "false") === "true";	
 	DrillUp.g_ET_align = String(DrillUp.parameters["默认对齐方式"] || "居中");	
 	DrillUp.g_ET_padding = Number(DrillUp.parameters["内边距"] || 4); 
+	
+	
+//=============================================================================
+// * >>>>基于插件检测>>>>
+//=============================================================================
+if( Imported.Drill_CoreOfWindowAuxiliary ){
 	
 	
 //=============================================================================
@@ -684,8 +696,8 @@ Drill_ET_WindowSprite.prototype.standardPadding = function(){ return DrillUp.g_E
 Drill_ET_WindowSprite.prototype.drill_initSprite = function() {
 	
 	// > 私有对象初始化
-	this._drill_width = 0;					//窗口宽度
-	this._drill_height = 0;					//窗口高度
+	this._drill_textWidth = 0;					//窗口宽度
+	this._drill_textHeight = 0;					//窗口高度
 	this._drill_curText = "";				//当前文本
 	this._drill_fix_x = 0;					//对齐方式偏移x
 	this._drill_fix_y = 0;					//对齐方式偏移y
@@ -714,25 +726,20 @@ Drill_ET_WindowSprite.prototype.drill_ET_updateText = function() {
 		data_ET['_forceRefresh'] = false;
 
 		this._drill_curText = String(data_ET['_text']);	
-			
-		// > 确定宽高
-		var x = this.standardPadding();
-		var y = this.standardPadding();
-		var textState = { 'index': 0, 'x': x, 'y': y, 'left': x };
-		textState.text = this.convertEscapeCharacters( String(this._drill_curText) );
-		textState.height = this.calcTextHeight(textState, false);
 		
-		this._drill_height = textState.height + this.standardPadding() * 2;
-		this._drill_width = this.drawTextEx(this._drill_curText,0,0) + this.standardPadding() * 2 ;
+		// > 确定宽高（窗口辅助核心的 标准函数 ）
+		this._drill_textWidth = this.drill_COWA_getTextExWidth( this._drill_curText );
+		this._drill_textHeight = this.drill_COWA_getTextExHeight( this._drill_curText );
 		
-		this.width = this._drill_width + 4;		//稍微多几像素的空间
-		this.height = this._drill_height + 2;
+		this.width = this._drill_textWidth + this.standardPadding() * 2;		// 窗口宽度
+		this.height = this._drill_textHeight + this.standardPadding() * 2;		// 窗口高度
 		
 		// > 重建bitmap
+		this.contents.clear();
 		this.createContents();
 		
-		// > 绘制内容
-		this.drawTextEx(this._drill_curText,0,0);
+		// > 绘制内容（窗口辅助核心的 标准函数 ）
+		this.drill_COWA_drawTextEx( this._drill_curText, {"x":0,"y":0} );
 		
 		// > 对齐方式
 		if( data_ET['_align'] == "左对齐" ){
@@ -783,4 +790,15 @@ Drill_ET_WindowSprite.prototype.drill_ET_updateOpacity = function() {
 	this.contents.opacity = oo;
 }
 
+
+//=============================================================================
+// * <<<<基于插件检测<<<<
+//=============================================================================
+}else{
+		Imported.Drill_EventText = false;
+		alert(
+			"【Drill_EventText.js 行走图 - 事件漂浮文字】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
+			"\n- Drill_CoreOfWindowAuxiliary 系统-窗口辅助核心"
+		);
+}
 

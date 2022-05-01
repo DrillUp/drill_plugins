@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        对话框 - 文本居中
+ * @plugindesc [v1.3]        对话框 - 文本居中
  * @author Drill_up
  * 
  * 
@@ -21,8 +21,7 @@
  * ----插件扩展
  * 该插件 不能 单独使用，必须基于核心。
  * 基于：
- *   - YEP_MessageCore               对话框-消息核心★★[v1.1]及以上★★
- *   - Drill_CoreOfWindowAuxiliary   系统-窗口辅助核心★★v1.3及以上★★
+ *   - Drill_CoreOfWindowCharacter   对话框 - 窗口字符核心
  *     需要该核心才能设置居中与右对齐。
  *
  * -----------------------------------------------------------------------------
@@ -32,28 +31,30 @@
  * 2.了解更多窗口字符，可以去看看 "15.对话框 > 关于窗口字符.docx"。
  * 细节：
  *   (1.如果对话框中有头像，插件会以除去头像外的剩余位置来居中适应。
- *   (2.你可以将右对齐符号插入文本的中间，实现文本断开并贴着两边。
- *   (3.居中字符能与字符"\px[100]"兼容。
- *   (4.字符对所有窗口都有效，你可以在任何支持效果字符的窗口中试试
- *      该字符。对于某些特殊修改了自身的光标结构的窗口，可能无效。
+ *   (2.居中字符能与窗口字符"\px[100]"兼容。
+ *   (3.字符对所有窗口都有效，你可以在任何支持 窗口字符 的窗口中试
+ *      试该字符。对于某些特殊修改了自身的光标结构的窗口，可能无效。
  * 叠加情况：
  *   (1.注意，同一行不能出现两个以上 居中/右对齐 字符。
  *      否则字符光标的偏移会叠加，导致字符越界看不见。
  *   (2.同样的，如果你设置了面板中自带的居中/右对齐功能，使用字符时
- *      光标的偏移也会叠加。
+ *      光标的偏移也会叠加，导致字符越界看不见。
+ * 设计：
+ *   (1.你可以将右对齐符号插入文本的中间，实现右对齐符号两边的文本
+ *      断开并贴着两边显示。
  * 
  * -----------------------------------------------------------------------------
- * ----激活方式
+ * ----激活条件
+ * 你需要使用下面的窗口字符来实现效果：
  * 
- * 效果字符
- *   \dal       当前行中，该字符之后的文字左对齐。
- *   \dac       当前行中，该字符之后的文字居中。
- *   \dar       当前行中，该字符之后的文字右对齐。
+ * 窗口字符：\dal       当前行中，该字符之后的文字左对齐
+ * 窗口字符：\dac       当前行中，该字符之后的文字居中
+ * 窗口字符：\dar       当前行中，该字符之后的文字右对齐
+ * 
+ * 1.注意，同一行不能出现两个以上 居中/右对齐 字符。
  *   (dal全称为：Drill_Align_Left，即左对齐)
  *   (dac全称为：Drill_Align_Center，即居中)
  *   (dar全称为：Drill_Align_Right，即右对齐)
- * 
- * 注意，同一行不能出现两个以上 居中/右对齐 字符。
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -85,6 +86,8 @@
  * 修复了对话框中 使用姓名框+改变对话框宽度 时，卡死的bug。
  * [v1.2]
  * 修复了对话框连续使用 居中窗口字符 时失效的bug。
+ * [v1.3]
+ * 大幅度优化了 窗口字符核心 的底层，简化了居中的插件结构。
  * 
  */
  
@@ -114,6 +117,16 @@
 //				->防套娃死循环
 //
 //		★必要注意事项：
+//			1. 2022/4/16 窗口字符核心 进行了一次大翻新，文本居中根本就没那么复杂。
+//			   先计算每行宽度（居中字符不纳入计算），居中字符再进行宽度变化。
+//			
+//		★其它说明细节：
+//			暂无
+//		
+//		★存在的问题：
+//			暂无
+//		
+//		★旧日志（2022/4以前）：
 //			1.因为 Window_Message 根本就没用到 drawTextEx 函数。
 //			  所以需要额外进行一次捕获。
 //			2.修改 textState.x 时，【千万注意！】
@@ -123,16 +136,12 @@
 //			  即使代码都有注释，且是我熟悉的地方，但是我发现无法深入，因为太复杂了。最后，用update绕开了死循环问题。
 //			  2021-8-24 在newpage时，只执行一次计算，就不会死循环。
 //			  （底层非常清晰，不应该存在问题，猜测是yep插件的问题，不过先这样吧……）
-//			
-//		★其它说明细节：
-//			1.居中要一个非常麻烦的变量：字符宽度，而这个宽度，必须先绘制一次之后，才能得到。
+//			4.居中要一个非常麻烦的变量：字符宽度，而这个宽度，必须先绘制一次之后，才能得到。
 //			  经过多次套娃与反套娃，终于实现了效果。
 //			  不过理解时可能比较绕。具体去窗口辅助核心去看看。
-//			2. \px[100] 字符也是个影响因素，只不过是最外层的影响因素，最后考虑。
-//		
-//		★存在的问题：
-//			1.设置多行时，超过6行，右对齐和居中会产生偏移位置。（套娃bug，已发现并解决）
-//			2.信息面板k中，移动选项光标时，计算的字符长度会变长，原因不明。可以确定不是套娃问题。（行数+1的问题，这里又是比较绕的地方了）
+//			5. \px[100] 字符也是个影响因素，只不过是最外层的影响因素，最后考虑。
+//			6.问题：设置多行时，超过6行，右对齐和居中会产生偏移位置。（套娃bug，已发现并解决）
+//			7.问题：信息面板k中，移动选项光标时，计算的字符长度会变长，原因不明。可以确定不是套娃问题。（行数+1的问题，这里又是比较绕的地方了）
 //
  
 //=============================================================================
@@ -147,225 +156,92 @@
 //=============================================================================
 // * >>>>基于插件检测>>>>
 //=============================================================================
-if( Imported.YEP_MessageCore &&
-	Imported.Drill_CoreOfWindowAuxiliary ){
+if( Imported.Drill_CoreOfWindowCharacter ){
 	
-	
+
 //=============================================================================
-// ** 宽度计算（一般窗口）
+// ** 行宽标记
 //=============================================================================
 //==============================
-// ** 宽度计算 - 初始化
+// * 当前行 - 执行当前行（继承接口）
 //==============================
-var _drill_DTA_initialize = Window_Base.prototype.initialize;
-Window_Base.prototype.initialize = function(x, y, width, height) {
-	_drill_DTA_initialize.call( this, x, y, width, height );	
-	this.drill_DTA_clearList();
+var _drill_DTA_COWC_processNewLine = Window_Base.prototype.drill_COWC_processNewLine;
+Window_Base.prototype.drill_COWC_processNewLine = function( line_index, line_text ){
+	_drill_DTA_COWC_processNewLine.call( this, line_index, line_text );
+	this._drill_DTA_line_width = this.drill_COWC_getCurLineWidth();
 }
 //==============================
-// ** 宽度计算 - 重新统计
+// * 效果字符应用 - 光标偏移X（\PX 效果字符专用）
 //==============================
-Window_Base.prototype.drill_DTA_clearList = function() {
-	this._drill_DTA_cur_line = 0;		//当前行
-	this._drill_DTA_textList = [];		//文本列表
-	this._drill_DTA_widthList = [];		//文本宽度列表
-}
-//==============================
-// ** 宽度计算 - 内容contents重建时，重新统计
-//==============================
-var _drill_DTA_createContents = Window_Base.prototype.createContents;
-Window_Base.prototype.createContents = function() {
-	_drill_DTA_createContents.call( this );
-	if( this instanceof Window_Message == true ){ return; }	//排除对话框情况
-	
-	this.drill_DTA_clearList();	
-}
-//==============================
-// ** 宽度计算 - 多次绘制时，累加统计
-//==============================
-var _drill_DTA_drawTextEx = Window_Base.prototype.drawTextEx;
-Window_Base.prototype.drawTextEx = function( text, x, y ){
-	
-	// > 不准套娃
-	if( $gameTemp._drill_COWA_bitmap_isCalculating == true ){
-		return _drill_DTA_drawTextEx.call( this, text, x, y );
-	}
-				
-	// > 统计宽度（drawTextEx可能会多次绘制，每次绘制前，累加统计）
-    if( text != undefined ){
-		var new_text = String(text);
-		var temp_ww = this.drill_COWA_getTextExWidth( new_text );
-		this._drill_DTA_textList.push( new_text );
-		this._drill_DTA_widthList.push( temp_ww );
-	}
-	
-	return _drill_DTA_drawTextEx.call( this, text, x, y );
+var _drill_DTA_COWC_charOffsetX = Window_Base.prototype.drill_COWC_charOffsetX;
+Window_Base.prototype.drill_COWC_charOffsetX = function( xx ){
+	_drill_DTA_COWC_charOffsetX.call( this, xx );
+	// （此函数用不上，因为计算宽度时，\px[100] 的宽度已经纳入了宽度计算。）
 }
 
 //=============================================================================
-// ** 宽度计算（对话框）
+// ** 效果字符应用
 //=============================================================================
 //==============================
-// ** 宽度计算 - 对话框 绘制前初始化（对话框并不使用drawTextEx绘制）
+// * 效果字符应用 - 字符转换（简单符）
 //==============================
-var _drill_DTA_newPage = Window_Message.prototype.newPage;
-Window_Message.prototype.newPage = function( textState ){
+var _drill_DTA_processNewEffectChar_Simple = Window_Base.prototype.drill_COWC_processNewEffectChar_Simple;
+Window_Base.prototype.drill_COWC_processNewEffectChar_Simple = function( matched_index, command ){
+	_drill_DTA_processNewEffectChar_Simple.call( this, matched_index, command );
 	
-	// > 不准套娃
-	if( $gameTemp._drill_COWA_bitmap_isCalculating == true ){ return; }
+	// > 不准套娃（该字符是算好单行宽度后，而变化的宽度。所以不准套娃计算。）
+	if( this.drill_COWA_isCalculating() ){ 
+		if( command.toUpperCase() == "DAL" ){ this.drill_COWC_charSubmit_Effect(0,0); }
+		if( command.toUpperCase() == "DAC" ){ this.drill_COWC_charSubmit_Effect(0,0); }
+		if( command.toUpperCase() == "DAR" ){ this.drill_COWC_charSubmit_Effect(0,0); }
+		return; 
+	}
 	
-	// > 防死循环
-	if( this._drill_DTA_Block == true ){ return; }
-	this._drill_DTA_Block = true;
 	
-		// > 强制清理
-		this.drill_DTA_clearList();
-		
-		// > 统计宽度（对话框的文本每页是固定的，所以不需要那么麻烦）
-		var new_text = String( textState.text );
-		var temp_textList = new_text.split(/[\n\r]+/g);
-		for( var i=0; i < temp_textList.length; i++ ){
-			var temp_text = temp_textList[i];
-			this._drill_DTA_textList.push( temp_text );
-			//this._drill_DTA_widthList.push( temp_ww );	//（不能放这里，会死锁）
-		}
-		
-		// > 只计算第一行的宽度（修复第一行不能居中的bug，宽度计算不能放循环）
-		if( this._drill_DTA_textList.length > 0 ){
-			var temp_ww = this.drill_COWA_getTextExWidth( this._drill_DTA_textList[0] );
-			this._drill_DTA_widthList.push( temp_ww );
-		}
-	
-	this._drill_DTA_Block = false;
-	
-	// > 执行新页控制
-	_drill_DTA_newPage.call( this,textState );
-}
-//==============================
-// ** 宽度计算 - 对话框 延迟计算宽度
-//==============================
-var _drill_DTA_m_update = Window_Message.prototype.update;
-Window_Message.prototype.update = function() {
-	_drill_DTA_m_update.call( this );
-	
-	if( this._drill_DTA_textList.length > 0 &&
-		this._drill_DTA_widthList.length <= 1 &&
-		this.contents && this.contents.isReady() ){
+	// > 左对齐（\DAL）
+	if( command.toUpperCase() == "DAL" ){
+		//（什么都不做）
+		this.drill_COWC_charSubmit_Effect(0,0);
+	}
+	// > 居中（\DAC）
+	if( command.toUpperCase() == "DAC" ){
+		var ww = this._drill_DTA_line_width;
+		var xx = 0;
+		if( ww > 0 ){
 			
-		for( var i = 1; i < this._drill_DTA_textList.length; i++ ){
-			var temp_text = this._drill_DTA_textList[i];
-			var temp_ww = this.drill_COWA_getTextExWidth( temp_text );	//（计算长度时有可能会影响文本颜色，目前没有解决方法）
-			this._drill_DTA_widthList.push( temp_ww );
-		}
-	}
-}
-
-
-
-//=============================================================================
-// ** 文本转义
-//=============================================================================
-//==============================
-// ** 文本转义 - 换行标记
-//==============================
-var _drill_DTA_processNewLine = Window_Base.prototype.processNewLine;
-Window_Base.prototype.processNewLine = function( textState ){
-	this._drill_DTA_cur_line += 1;
-	_drill_DTA_processNewLine.call( this, textState );
-}
-//==============================
-// ** 文本转义 - 指代字符 转换
-//==============================
-var _drill_DTA_YEP_convertExtraEscapeCharacters = Window_Base.prototype.convertExtraEscapeCharacters;
-Window_Base.prototype.convertExtraEscapeCharacters = function( text ){
-	text = text.replace(/\x1bDAL/gi, '\x1bDLGDRILL[0]');	//0 左对齐
-	text = text.replace(/\x1bDAC/gi, '\x1bDLGDRILL[1]');	//1 居中
-	text = text.replace(/\x1bDAR/gi, '\x1bDLGDRILL[2]');	//2 右对齐
-	return _drill_DTA_YEP_convertExtraEscapeCharacters.call( this, text );
-}
-//==============================
-// ** 文本转义 - 字符参数输入
-//
-//			说明：	字符参数输入时，必须考虑计算时"不准套娃"情况。
-//==============================
-var _drill_DTA_processEscapeCharacter = Window_Base.prototype.processEscapeCharacter;
-Window_Base.prototype.processEscapeCharacter = function( code, textState ){
-	switch ( code ){
-		case 'DLGDRILL':	//（Dialog_Drill）
-			var id = this.obtainEscapeParam(textState);	
+			// > 当前行宽度
+			var c_ww = this.contentsWidth();
 			
-			/*-----------------左对齐------------------*/
-			if( id === 0 ){
-				
-				// > 不准套娃
-				if( $gameTemp._drill_COWA_bitmap_isCalculating == true ){
-					return;
-				}
-				
-				//（什么都不做）
+			// > 对话框的脸图宽度影响
+			if( this instanceof Window_Message == true && $gameMessage.faceName() != "" ){
+				c_ww -= (Window_Base._faceWidth + 20);
 			}
 			
-			/*-----------------居中------------------*/
-			if( id === 1 ){
-				
-				// > 不准套娃
-				if( $gameTemp._drill_COWA_bitmap_isCalculating == true ){
-					return;
-				}
-				
-				// > 修改 textState.x 绘制（注意，改变textState.x会影响宽度计算）
-				if( this._drill_DTA_cur_line < this._drill_DTA_widthList.length ){
-					
-					//（文字宽度）
-					var ww = this._drill_DTA_widthList[ this._drill_DTA_cur_line ];
-					
-					//（当前绘制矩阵宽度）
-					var c_ww = this.contentsWidth();
-					if( this._drill_COWA_drawingOption ){
-						c_ww = this._drill_COWA_drawingOption['width'];
-					}
-					if( this instanceof Window_Message == true ){	//（对话框的脸图宽度影响）
-						c_ww = c_ww - this.newLineX();
-					}
-					
-					//（居中）
-					textState.x += c_ww *0.5 - ww*0.5;
-				}
+			// > 居中
+			xx = c_ww *0.5 - ww*0.5;
+		}
+		this.drill_COWC_charSubmit_Effect(xx,0);
+	}
+	// > 右对齐（\DAR）
+	if( command.toUpperCase() == "DAR" ){
+		var ww = this._drill_DTA_line_width;
+		var xx = 0;
+		if( ww > 0 ){
+			
+			// > 当前行宽度
+			var c_ww = this.contentsWidth();
+			
+			// > 对话框的脸图宽度影响
+			if( this instanceof Window_Message == true && $gameMessage.faceName() != "" ){
+				c_ww -= (Window_Base._faceWidth + 20);
 			}
 			
-			/*-----------------右对齐------------------*/
-			if( id === 2 ){
-				
-				// > 不准套娃
-				if( $gameTemp._drill_COWA_bitmap_isCalculating == true ){
-					return;
-				}
-				
-				// > 修改 textState.x 绘制（注意，改变textState.x会影响宽度计算）
-				if( this._drill_DTA_cur_line < this._drill_DTA_widthList.length ){
-					
-					//（文字宽度）
-					var ww = this._drill_DTA_widthList[ this._drill_DTA_cur_line ];
-					
-					//（当前绘制矩阵宽度）
-					var c_ww = this.contentsWidth();
-					if( this._drill_COWA_drawingOption ){
-						c_ww = this._drill_COWA_drawingOption['width'];
-					}
-					if( this instanceof Window_Message == true ){	//（对话框的脸图宽度影响）
-						c_ww = c_ww - this.newLineX();
-					}
-					
-					//（右对齐）
-					textState.x += c_ww - ww;
-				}
-			}
-			break;
-		default:
-			_drill_DTA_processEscapeCharacter.call(this, code, textState);
-			break;
+			// > 右对齐
+			xx = c_ww - ww;
+		}
+		this.drill_COWC_charSubmit_Effect(xx,0);
 	}
-};
+}
 
 
 //=============================================================================
@@ -375,8 +251,7 @@ Window_Base.prototype.processEscapeCharacter = function( code, textState ){
 		Imported.Drill_DialogTextAlign = false;
 		alert(
 			"【Drill_DialogTextAlign.js 对话框-文本居中】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfWindowAuxiliary 系统-窗口辅助核心"+
-			"\n- YEP_MessageCore 对话框-消息核心"
+			"\n- Drill_CoreOfWindowCharacter 对话框-窗口字符核心"
 		);
 }
 

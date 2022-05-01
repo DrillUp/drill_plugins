@@ -114,18 +114,29 @@
 //=============================================================================
 // ** 服务员
 // **
-// **		类型：Sprite独立子类
-// **		功能：通过输入指令，让贴图呈现不同的形态序列。
-// **		接口：调用方法如下，数据格式见 >默认值 
-// **				// > 初始化
-// **				waitress = new Drill_COWS_WaitressSprite( 【default数据】 );
-// **				waitress.drill_COWS_pushNewAct("【aaa】", 【aaa的数据】);
-// **				waitress.drill_COWS_pushNewAct("【bbb】", 【bbb的数据】);
-// **				waitress.drill_COWS_pushNewAct("【ccc】", 【ccc的数据】);
-// **				// > 播放行为
-// **				waitress.drill_COWS_playAct("【aaa】");
-// **				waitress.drill_COWS_playAct("【bbb】");
-// **		说明：1.初始化后bitmap加载可能会要一些时间，期间不会显示出任何图片。
+// **		作用域：	菜单界面
+// **		主功能：	> 通过输入指令，让贴图呈现不同的形态序列。
+// **		
+// **		说明：	> 初始化后bitmap加载可能会要一些时间，期间不会显示出任何图片。
+// **				> 此核心为 GIF动画序列 的初版雏形，不确定后期是否要推翻。
+// **				  （动画序列直接分离了 数据 和 贴图装饰器，这里仍是合并的结构）
+// **				
+// ** 		代码：	> 范围 - 该类显示单独的角色肖像。
+// **				> 结构 - [ ●合并 /分离/混乱] 贴图与数据合并。
+// **				> 数量 - [ ●单个/多个] 每个场景只有一个
+// **				> 创建 - [ ●一次性 /自延迟/外部延迟] 
+// **				> 销毁 - [ ●不考虑 /自销毁/外部销毁 ] 
+// **				> 样式 - [不可修改/ ●自变化 /外部变化] 根据指令自变化。
+// **
+// **		调用方法：	数据格式见 >默认值 
+// **					// > 初始化
+// **					waitress = new Drill_COWS_WaitressSprite( 【default数据】 );
+// **					waitress.drill_COWS_pushNewAct("【aaa】", 【aaa的数据】);
+// **					waitress.drill_COWS_pushNewAct("【bbb】", 【bbb的数据】);
+// **					waitress.drill_COWS_pushNewAct("【ccc】", 【ccc的数据】);
+// **					// > 播放行为
+// **					waitress.drill_COWS_playAct("【aaa】");
+// **					waitress.drill_COWS_playAct("【bbb】");
 //=============================================================================
 //==============================
 // * 服务员 - 定义
@@ -135,7 +146,6 @@ function Drill_COWS_WaitressSprite() {
 }
 Drill_COWS_WaitressSprite.prototype = Object.create(Sprite_Base.prototype);
 Drill_COWS_WaitressSprite.prototype.constructor = Drill_COWS_WaitressSprite;
-
 //==============================
 // * 服务员 - 初始化
 //==============================

@@ -520,6 +520,13 @@ Window_Message.prototype._updatePauseSign = function() {
 
 //=============================================================================
 // ** 小箭头贴图
+//
+// 			代码：	> 范围 - 该类显示单独的小箭头装饰。
+//					> 结构 - [ ●合并/分离/ 混乱 ] 数据与贴图合并。只visible和curStyle被外部控制。
+//					> 数量 - [ ●单个 /多个] 
+//					> 创建 - [ ●一次性 /自延迟/外部延迟] 
+//					> 销毁 - [ ●不考虑 /自销毁/外部销毁] 
+//					> 样式 - [不可修改/ ●自变化 /外部变化] 样式根据 _drill_curStyle 自变化_drill_data数据。
 //=============================================================================
 //==============================
 // * 贴图 - 定义
@@ -527,13 +534,13 @@ Window_Message.prototype._updatePauseSign = function() {
 function Drill_DAr_ArrowSprite() {
 	this.initialize.apply(this, arguments);
 }
-Drill_DAr_ArrowSprite.prototype = Object.create(Sprite_Base.prototype);
+Drill_DAr_ArrowSprite.prototype = Object.create(Sprite.prototype);
 Drill_DAr_ArrowSprite.prototype.constructor = Drill_DAr_ArrowSprite;
 //==============================
 // * 贴图 - 初始化
 //==============================
 Drill_DAr_ArrowSprite.prototype.initialize = function() {
-	Sprite_Base.prototype.initialize.call(this);
+	Sprite.prototype.initialize.call(this);
 	
 	// > 私有属性初始化
 	this.anchor.x = 0.5;				//中心锚点
@@ -552,7 +559,7 @@ Drill_DAr_ArrowSprite.prototype.initialize = function() {
 // * 贴图 - 帧刷新
 //==============================
 Drill_DAr_ArrowSprite.prototype.update = function() {
-	Sprite_Base.prototype.update.call(this);
+	Sprite.prototype.update.call(this);
 	this._drill_time += 1;
 	
 	if( this._drill_curStyle != $gameSystem._drill_DAr_curStyle ){	//重刷结构

@@ -24,8 +24,8 @@
  * ----插件扩展
  * 插件需要基于核心，可以与其它插件组合。
  * 基于：
- *   - Drill_CoreOfDynamicMask     系统 - 动态遮罩核心
  *   - Drill_DialogSkin            对话框 - 对话框皮肤
+ *   - Drill_CoreOfDynamicMask     系统 - 动态遮罩核心
  *     必须基于对话框皮肤插件，才能添加背景。
  * 
  * -----------------------------------------------------------------------------
@@ -268,7 +268,7 @@
  *
  * @param 平移-背景 Y
  * @parent ---背景层---
- * @desc x轴方向平移，单位像素。0为贴在最上面。这里用来表示进入地图时图片的初始位置。
+ * @desc y轴方向平移，单位像素。0为贴在最上面。这里用来表示进入地图时图片的初始位置。
  * @default 0
  *
  * @param 透明度
@@ -444,8 +444,8 @@ if( Imported.Drill_CoreOfDynamicMask &&
 var _drill_DSB_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_DSB_pluginCommand.call(this, command, args);
-	
 	if( command === ">对话框背景" ){
+		
 		if(args.length == 4){
 			var temp1 = String(args[1]);
 			var type = String(args[3]);
@@ -497,6 +497,8 @@ Window_Message.prototype.initialize = function() {
 };
 //==============================
 // * 对话框 - 设置背景（非帧刷新，窗口/暗淡/透明）
+//
+//			说明：	窗口类型切换时，刷新背景的出现情况。
 //==============================
 var _drill_DSB_setBackgroundType = Window_Message.prototype.setBackgroundType;
 Window_Message.prototype.setBackgroundType = function( type ){
@@ -523,6 +525,8 @@ Window_Message.prototype.drill_DSB_createSprite = function() {
 };
 //==============================
 // * 通用函数 - 刷新背景
+//
+//			说明：	每个窗口中都建立一个装饰图层，然后根据样式检查，删除全部装饰图，再重建并添加到图层。
 //==============================
 Window_Message.prototype.drill_DSB_refreshSprite = function(){
 	
@@ -652,6 +656,13 @@ Window_EventItem.prototype.start = function() {
 // ** 对话框背景【Drill_DSB_DecorationBackground】
 //
 //			说明：	每个背景都配有一个 动态遮罩贴图，可以用不同的鼠标指针资源改变不同的遮罩。
+//			
+// 			代码：	> 范围 - 该类额外显示平铺背景的装饰。
+//					> 结构 - [ ●合并/分离/ 混乱 ] 数据与贴图合并。只有visible被控制。
+//					> 数量 - [单个/ ●多个 ] 
+//					> 创建 - [一次性/ ●自延迟 /外部延迟] 鼠标透视镜需要延迟创建。
+//					> 销毁 - [ ●不考虑 /自销毁/外部销毁] 
+//					> 样式 - [ ●不可修改 /自变化/外部变化] 
 //=============================================================================
 //==============================
 // * 背景 - 定义
@@ -666,7 +677,6 @@ Drill_DSB_DecorationBackground.prototype.constructor = Drill_DSB_DecorationBackg
 //==============================
 Drill_DSB_DecorationBackground.prototype.initialize = function( data, parent ){
 	TilingSprite.prototype.initialize.call(this);
-	
 	this._drill_data = data;
 	this._drill_parent = parent;
 	this._drill_inited = false;

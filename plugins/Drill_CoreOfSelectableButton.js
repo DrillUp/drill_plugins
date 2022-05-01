@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        系统 - 按钮组核心
+ * @plugindesc [v1.5]        系统 - 按钮组核心
  * @author Drill_up
  * 
  * @Drill_LE_param "按钮组样式-%d"
@@ -26,6 +26,7 @@
  * 插件必须基于核心，并可以辅助扩展下列插件。
  * 基于：
  *   - Drill_CoreOfBallistics       系统 - 弹道核心
+ *   - Drill_CoreOfWindowAuxiliary  系统 - 窗口辅助核心★★v1.9及以上★★
  * 可作用于：
  *   - Drill_SceneMain              面板 - 全自定义主菜单面板
  *   - Drill_SceneSelfplateI        面板 - 全自定义信息面板I
@@ -104,6 +105,8 @@
  * 添加了参数检查功能。
  * [v1.4]
  * 添加了 按钮名称 的偏移位置。
+ * [v1.5]
+ * 使得按钮名称能够支持 效果窗口字符。
  * 
  * 
  * 
@@ -797,12 +800,12 @@
  * 
  * @param 平移-名称块 X
  * @parent ---名称块---
- * @desc 以按钮组中心的位置为基准。x轴方向平移，单位像素。
+ * @desc 以按钮组中心的位置为基准。x轴方向平移，单位像素。正数向右，负数向左。
  * @default 0
  * 
  * @param 平移-名称块 Y
  * @parent ---名称块---
- * @desc 以按钮组中心的位置为基准。y轴方向平移，单位像素。
+ * @desc 以按钮组中心的位置为基准。y轴方向平移，单位像素。正数向下，负数向上。
  * @default -100
  *
  * @param 名称块字体大小
@@ -967,12 +970,12 @@
  * 
  * @param 平移-出列相对偏移 X
  * @parent 是否出列
- * @desc 以按钮的位置为基准。x轴方向平移，单位像素。
+ * @desc 以按钮的位置为基准。x轴方向平移，单位像素。正数向右，负数向左。
  * @default 50
  * 
  * @param 平移-出列相对偏移 Y
  * @parent 是否出列
- * @desc 以按钮的位置为基准。y轴方向平移，单位像素。
+ * @desc 以按钮的位置为基准。y轴方向平移，单位像素。正数向下，负数向上。
  * @default 0
  * 
  * 
@@ -1269,7 +1272,8 @@
 //=============================================================================
 // * >>>>基于插件检测>>>>
 //=============================================================================
-if( Imported.Drill_CoreOfBallistics ){
+if( Imported.Drill_CoreOfBallistics &&
+	Imported.Drill_CoreOfWindowAuxiliary ){
 	
 		
 	//==============================
@@ -2209,7 +2213,13 @@ Drill_COSB_LayerSprite.prototype.drill_updateButtonStreamlineMove = function() {
 Drill_COSB_LayerSprite.prototype.drill_updateButtonSelectionCursor = function() {
 	var temp_data = this._drill_data;
 	var temp_window = this._drill_window;
-	if( temp_data['cursor_enable'] == false ){ return; }
+	if( temp_data['cursor_enable'] == false ){ 
+		
+		// > 关闭指针时，指针默认放在窗口正下方看不见的位置
+		temp_window._drill_COSB_selectedBtnX = Graphics.boxWidth * 0.5;
+		temp_window._drill_COSB_selectedBtnY = Graphics.boxHeight * 1.25;
+		return;
+	}
 	
 	var btn_index = temp_window.index() - temp_window.topIndex();
 	if( btn_index == -1 ){ return; }
@@ -2767,7 +2777,6 @@ function Drill_COSB_WindowSprite() {
 };
 Drill_COSB_WindowSprite.prototype = Object.create(Window_Base.prototype);
 Drill_COSB_WindowSprite.prototype.constructor = Drill_COSB_WindowSprite;
-
 //==============================
 // * 文字贴图 - 初始化
 //==============================
@@ -2821,8 +2830,8 @@ Drill_COSB_WindowSprite.prototype.drill_initSprite = function() {
 	var data = this._drill_data;
 	
 	// > 私有对象初始化
-	this._drill_width = 0;
-	this._drill_height = 0;
+	this._drill_textWidth = 0;
+	this._drill_textHeight = 0;
 	this._drill_curText = data['text'];
 	this._drill_needRefresh = true;
 	
@@ -2839,24 +2848,19 @@ Drill_COSB_WindowSprite.prototype.drill_COSB_updateText = function() {
 	if( this._drill_needRefresh == true ){
 		this._drill_needRefresh = false;
 		
-		// > 确定宽高
-		var x = this.standardPadding();
-		var y = this.standardPadding();
-		var textState = { 'index': 0, 'x': x, 'y': y, 'left': x };
-		textState.text = this.convertEscapeCharacters( this._drill_curText );
-		textState.height = this.calcTextHeight(textState, false);
+		// > 确定宽高（窗口辅助核心的 标准函数 ）
+		this._drill_textWidth = this.drill_COWA_getTextExWidth( this._drill_curText );
+		this._drill_textHeight = this.drill_COWA_getTextExHeight( this._drill_curText );
 		
-		this._drill_height = textState.height + this.standardPadding() * 2;
-		this._drill_width = this.drawTextEx(this._drill_curText,0,0) + this.standardPadding() * 2 ;
-		
-		this.width = this._drill_width + 4;		//稍微多几像素的空间
-		this.height = this._drill_height + 2;
+		this.width = this._drill_textWidth + this.standardPadding() * 2;		// 窗口宽度
+		this.height = this._drill_textHeight + this.standardPadding() * 2;		// 窗口高度
 		
 		// > 重建bitmap
+		this.contents.clear();
 		this.createContents();
 		
-		// > 绘制内容
-		this.drawTextEx(this._drill_curText,0,0);
+		// > 绘制内容（窗口辅助核心的 标准函数 ）
+		this.drill_COWA_drawTextEx( this._drill_curText, {"x":0,"y":0} );
 		
 		// > 对齐方式
 		var xx = data['x'];
@@ -2885,7 +2889,8 @@ Drill_COSB_WindowSprite.prototype.drill_COSB_updateText = function() {
 		Imported.Drill_CoreOfSelectableButton = false;
 		alert(
 			"【Drill_CoreOfSelectableButton.js 系统 - 按钮组核心】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfBallistics 系统-弹道核心"
+			"\n- Drill_CoreOfBallistics 系统-弹道核心" + 
+			"\n- Drill_CoreOfWindowAuxiliary 系统-窗口辅助核心"
 		);
 }
 

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        控件 - 物品+技能详细图片[扩展]
+ * @plugindesc [v1.5]        控件 - 物品+技能详细图片[扩展]
  * @author Drill_up
  * 
  * @Drill_LE_param "资源-物品%d"
@@ -37,7 +37,7 @@
  * ----插件扩展
  * 插件只对指定插件扩展，如果没有使用目标插件，则该插件没有任何效果。
  * 作用于：
- *   - Drill_RotateCard 控件-旋转卡牌
+ *   - Drill_RotateCard        控件 - 旋转卡牌★★v1.5及以上★★
  *     可以将目标插件的物品/装备/技能的图标换成高清图片。
  *
  * -----------------------------------------------------------------------------
@@ -75,7 +75,27 @@
  *
  * 如果指定的物品/装备/技能没有图片，则使用默认的图标。
  * （目前配置上限：物品200，武器100，防具300，技能300）
- *
+ * 
+ * -----------------------------------------------------------------------------
+ * ----插件性能
+ * 测试仪器：   4G 内存，Intel Core i5-2520M CPU 2.5GHz 处理器
+ *              Intel(R) HD Graphics 3000 集显 的垃圾笔记本
+ *              (笔记本的3dmark综合分：571，鲁大师综合分：48456)
+ * 总时段：     20000.00ms左右
+ * 对照表：     0.00ms  - 40.00ms （几乎无消耗）
+ *              40.00ms - 80.00ms （低消耗）
+ *              80.00ms - 120.00ms（中消耗）
+ *              120.00ms以上      （高消耗）
+ * 工作类型：   单次执行
+ * 时间复杂度： o(n)
+ * 测试方法：   进入物品界面，并进行测试。
+ * 测试结果：   菜单界面中，平均消耗为：【5ms以下】
+ * 
+ * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
+ *   测试结果并不是精确值，范围在给定值的10ms范围内波动。
+ *   更多性能介绍，去看看 "0.性能测试报告 > 关于插件性能.docx"。
+ * 2.该插件只在窗口切换物品/技能时，才切换图片，几乎没有消耗。
+  
  * -----------------------------------------------------------------------------
  * ----更新日志
  * [v1.0]
@@ -88,6 +108,8 @@
  * 修改了插件关联的资源文件夹。
  * [v1.4]
  * 添加了最大值修改功能，可通过小工具修改最大值。
+ * [v1.5]
+ * 优化了内部结构。
  *
  *
  * @param ----修改开关----
@@ -7478,6 +7500,13 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
+//		工作类型		单次执行
+//		时间复杂度		o(n)
+//		性能测试因素	菜单界面
+//		性能测试消耗	消耗太小没有找到。
+//		最坏情况		暂无
+//		备注			暂无
+//
 //插件记录：
 //		★大体框架与功能如下：
 //			旋转卡牌扩展：
@@ -7487,8 +7516,7 @@
 //			暂无
 //			
 //		★其它说明细节：
-//			1.不是很懂，为什么this._item_img不能直接修改bitmap。
-//			  只能通过visible重新绕一圈加图片了……
+//			1.这里为了不影响 this._drill_itemIconSprite，额外加了个 _drill_itemPicSprite 贴图对象。
 //
 //		★存在的问题：
 //			暂无
@@ -7503,11 +7531,13 @@
     DrillUp.parameters = PluginManager.parameters('Drill_X_ItemImage');
 	
 	
+	/*-----------------杂项------------------*/
     DrillUp.g_XII_card_item = String(DrillUp.parameters['是否修改物品卡牌图像'] || "true") === "true";
     DrillUp.g_XII_card_weapon = String(DrillUp.parameters['是否修改武器卡牌图像'] || "true") === "true";
     DrillUp.g_XII_card_armor = String(DrillUp.parameters['是否修改防具卡牌图像'] || "true") === "true";
     DrillUp.g_XII_card_skill = String(DrillUp.parameters['是否修改技能卡牌图像'] || "true") === "true";
 	
+	/*-----------------资源图片------------------*/
 	DrillUp.g_XII_item_list_length = 200;
 	DrillUp.g_XII_item_list = [];
 	for (var i = 0; i < DrillUp.g_XII_item_list_length ; i++ ) {
@@ -7533,61 +7563,60 @@
 //=============================================================================
 // * >>>>基于插件检测>>>>
 //=============================================================================
-if( Imported.Drill_RotateCard && 
-	ImageManager.load_MenuCard !== undefined ){
+if( Imported.Drill_RotateCard ){
 
 
 //=============================================================================
 // ** 旋转卡牌修改
 //=============================================================================
-var _drill_XII_refreshImage = Sprite_RCard.prototype.refreshImage;
-Sprite_RCard.prototype.refreshImage = function(item) {
-	_drill_XII_refreshImage.call(this,item);
-	
+var _drill_XII_refreshImage = Drill_RCardSprite.prototype.drill_refreshImage;
+Drill_RCardSprite.prototype.drill_refreshImage = function( item ){
+	_drill_XII_refreshImage.call( this, item );
 	//alert(JSON.stringify(item));
-	if( !this._item_pic ){
-		this._item_pic = new Sprite();
-		this._item_pic.anchor.x = 0.5;
-		this._item_pic.anchor.y = 0.5;
-		this._layout.addChild(this._item_pic);
+	
+	if( !this._drill_itemPicSprite ){
+		this._drill_itemPicSprite = new Sprite();
+		this._drill_itemPicSprite.anchor.x = 0.5;
+		this._drill_itemPicSprite.anchor.y = 0.5;
+		this._drill_front.addChild(this._drill_itemPicSprite);
 	}
-	this._item_img.visible = true;
-	this._item_pic.visible = false;
+	this._drill_itemIconSprite.visible = true;
+	this._drill_itemPicSprite.visible = false;
 	
 	// > 物品
-	if( DataManager.isItem(item) ){
+	if( DataManager.isItem(item) && DrillUp.g_XII_card_item == true ){
 		var file_name = DrillUp.g_XII_item_list[ item.id -1 ];
 		if( file_name != "" ){
-			this._item_img.visible = false;
-			this._item_pic.visible = true;
-			this._item_pic.bitmap = ImageManager.load_MenuCard( file_name );
+			this._drill_itemIconSprite.visible = false;
+			this._drill_itemPicSprite.visible = true;
+			this._drill_itemPicSprite.bitmap = ImageManager.loadBitmap('img/Menu__ui_card/', file_name, 0, true);
 		}
 	}
 	// > 武器
-	if( DataManager.isWeapon(item) ){
+	if( DataManager.isWeapon(item) && DrillUp.g_XII_card_weapon == true ){
 		var file_name = DrillUp.g_XII_weapon_list[ item.id -1 ];
 		if( file_name != "" ){
-			this._item_img.visible = false;
-			this._item_pic.visible = true;
-			this._item_pic.bitmap = ImageManager.load_MenuCard( file_name );
+			this._drill_itemIconSprite.visible = false;
+			this._drill_itemPicSprite.visible = true;
+			this._drill_itemPicSprite.bitmap = ImageManager.loadBitmap('img/Menu__ui_card/', file_name, 0, true);
 		}
 	}
 	// > 防具（护甲）
-	if( DataManager.isArmor(item) ){
+	if( DataManager.isArmor(item) && DrillUp.g_XII_card_armor == true ){
 		var file_name = DrillUp.g_XII_armor_list[ item.id -1 ];
 		if( file_name != "" ){
-			this._item_img.visible = false;
-			this._item_pic.visible = true;
-			this._item_pic.bitmap = ImageManager.load_MenuCard( file_name );
+			this._drill_itemIconSprite.visible = false;
+			this._drill_itemPicSprite.visible = true;
+			this._drill_itemPicSprite.bitmap = ImageManager.loadBitmap('img/Menu__ui_card/', file_name, 0, true);
 		}
 	}
 	// > 技能
-	if( DataManager.isSkill(item) ){
+	if( DataManager.isSkill(item) && DrillUp.g_XII_card_skill == true ){
 		var file_name = DrillUp.g_XII_skill_list[ item.id -1 ];
 		if( file_name != "" ){
-			this._item_img.visible = false;
-			this._item_pic.visible = true;
-			this._item_pic.bitmap = ImageManager.load_MenuCard( file_name );
+			this._drill_itemIconSprite.visible = false;
+			this._drill_itemPicSprite.visible = true;
+			this._drill_itemPicSprite.bitmap = ImageManager.loadBitmap('img/Menu__ui_card/', file_name, 0, true);
 		}
 	}
 	
