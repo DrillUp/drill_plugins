@@ -2025,6 +2025,28 @@ Scene_Map.prototype.drill_LCi_layerAddSprite = function( sprite, layer_index ){
 	this.drill_LCi_layerAddSprite_Private( sprite, layer_index );
 }
 //##############################
+// * 地图层级 - 去除贴图【标准函数】
+//				
+//			参数：	> sprite 贴图（添加的贴图对象）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图从地图层级中移除。
+//##############################
+Scene_Map.prototype.drill_LCi_layerRemoveSprite = function( sprite ){
+	//（不操作）
+}
+//##############################
+// * 地图层级 - 图片层级排序【标准函数】
+//				
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 执行该函数后，地图层级的子贴图，按照zIndex属性来进行先后排序。值越大，越靠前。
+//##############################
+Scene_Map.prototype.drill_LCi_sortByZIndex = function () {
+    this.drill_LCi_sortByZIndex_Private();
+}
+//##############################
 // * 地图层级 - 移动贴图【标准函数】
 //				
 //			参数：	> x 数字           （x位置，地图参照为基准）
@@ -2039,17 +2061,6 @@ Scene_Map.prototype.drill_LCi_layerAddSprite = function( sprite, layer_index ){
 //##############################
 Scene_Map.prototype.drill_LCi_layerMoveingReference = function( x, y, reference, option ){
 	return this.drill_LCi_layerMoveingReference_Private( x, y, reference, option );
-}
-//##############################
-// * 地图层级 - 图片层级排序【标准函数】
-//				
-//			参数：	> 无
-//			返回：	> 无
-//          
-//			说明：	> 执行该函数后，地图层级的子贴图，按照zIndex属性来进行先后排序。值越大，越靠前。
-//##############################
-Scene_Map.prototype.drill_LCi_sortByZIndex = function () {
-    this.drill_LCi_sortByZIndex_Private();
 }
 //=============================================================================
 // ** 地图层级（接口实现）

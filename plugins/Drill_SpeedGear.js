@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        系统 - 变速齿轮
+ * @plugindesc [v1.3]        系统 - 变速齿轮
  * @author Drill_up
  * 
  * @help  
@@ -27,11 +27,15 @@
  * ----可选设定
  * 你可以通过插件指令即时变化变速齿轮的内部参数：
  * 
- * 插件指令： >变速齿轮 : 改速度 : 1.00
- * 插件指令： >变速齿轮 : 改变量 : 2
- * 插件指令： >变速齿轮 : 改同步 : 0.25
+ * 插件指令： >变速齿轮 : 修改速度 : 比例[1.00]
+ * 插件指令： >变速齿轮 : 修改绑定的变量 : 变量[2]
+ * 插件指令： >变速齿轮 : 修改声音同步率 : 比例[0.25]
  *
- * 如果你绑定了变量，改速度是不起作用的。
+ * 1.如果你开启了变量绑定，则 修改速度 不起作用，
+ *   直接修改对应绑定的变量值即可修改速度。
+ * 2.注意，绑定后的变量值为 100 时，表示速度比例 1.00 。
+ *   绑定后的变量值为140时，表示速度比例1.40 。
+ *   最低速度比例为0.20，若小于0.20的按0.20算。
  *
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -54,6 +58,8 @@
  * 修改了插件的内部结构。
  * [v1.2]
  * 修复了启动画面播放音乐时，该插件出现的空指针错误。
+ * [v1.3]
+ * 优化了内部注释。
  * 
  *
  * @param 初始齿轮速度
@@ -119,11 +125,14 @@
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_SpeedGear');
 	
+	
+	/*-----------------杂项------------------*/
 	DrillUp.g_SG_speed = Number(DrillUp.parameters['初始齿轮速度'] || 1.00);	
 	DrillUp.g_SG_var_bind = String(DrillUp.parameters['是否绑定齿轮到变量'] || "true") === "true";	
 	DrillUp.g_SG_var = Number(DrillUp.parameters['绑定的变量'] || 0);	
 	DrillUp.g_SG_sound_bind = String(DrillUp.parameters['声音是否变速'] || "true") === "true";	
 	DrillUp.g_SG_sound = Number(DrillUp.parameters['声音变速同步率'] || 0.25);	
+
 
 //=============================================================================
 // ** 插件指令
@@ -131,20 +140,25 @@
 var _drill_SG_pluginCommand = Game_Interpreter.prototype.pluginCommand
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_SG_pluginCommand.call(this,command, args);
-	if (command === ">变速齿轮")  { 
-		if(args.length == 4){
-			var temp1 = Number(args[3]);
+	if( command === ">变速齿轮" ){ 
+		if( args.length == 4 ){
 			var type = String(args[1]);
-			if (type === '改速度' && !DrillUp.g_SG_var_bind) {
-				$gameSystem._drill_SG_speed = Math.max(temp1,0.05);
-				SceneManager._deltaTime = 1/60.0 / $gameSystem._drill_SG_speed;
-				AudioManager.drill_SG_reflash_pitch();
+			var temp1 = String(args[3]);
+			temp1 = temp1.replace("比例[","");
+			temp1 = temp1.replace("变量[","");
+			temp1 = temp1.replace("]","");
+			if( type == "改速度" && type == "修改速度" ){
+				if( DrillUp.g_SG_var_bind == false ){
+					$gameSystem._drill_SG_speed = Math.max( Number(temp1), 0.05 );
+					SceneManager._deltaTime = 1/60.0 / $gameSystem._drill_SG_speed;
+					AudioManager.drill_SG_reflash_pitch();
+				}
 			}
-			if (type === '改变量') {
-				$gameSystem._drill_SG_var = temp1;
+			if( type == "改变量" && type == "修改绑定的变量" ){
+				$gameSystem._drill_SG_var = Number(temp1);
 			}
-			if (type === '改同步') {
-				$gameSystem._drill_SG_sound = temp1;
+			if( type == "改同步" && type == "修改声音同步率" ){
+				$gameSystem._drill_SG_sound = Number(temp1);
 			}
 		}
 	};
@@ -157,31 +171,43 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 var _drill_SG_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
 	_drill_SG_initialize.call(this);
+	
 	this._drill_SG_speed = Math.max(DrillUp.g_SG_speed,0.05);
 	this._drill_SG_var = DrillUp.g_SG_var;
 	this._drill_SG_var_cur_value = 0;
 	this._drill_SG_sound = DrillUp.g_SG_sound;
+	
+	// > 修改速度
     SceneManager._deltaTime = 1/60.0 / this._drill_SG_speed;
 };
 
+//=============================================================================
+// ** 速度变化
+//=============================================================================
 //==============================
-// * 齿轮绑定的变量
+// * 速度 - 绑定变量（地图界面）
 //==============================
 var _drill_SG_Map_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {
 	$gameSystem.drill_SG_variable();
     _drill_SG_Map_update.call(this);
 };
+//==============================
+// * 速度 - 绑定变量（战斗界面）
+//==============================
 var _drill_SG_Battle_update = Scene_Battle.prototype.update
 Scene_Battle.prototype.update = function() {
 	$gameSystem.drill_SG_variable();
     _drill_SG_Battle_update.call(this);
 };
+//==============================
+// * 速度 - 执行变化
+//==============================
 Game_System.prototype.drill_SG_variable = function() {
-	if(DrillUp.g_SG_var_bind){
+	if( DrillUp.g_SG_var_bind == true ){
 		var temp = $gameVariables.value(this._drill_SG_var);
-		if (temp < 20 ){ temp = 20};
-		if(this._drill_SG_var_cur_value != temp ){		//对变量值进行缓冲，不需要任何时候都变化速度和声音
+		if( temp < 20 ){ temp = 20};
+		if( this._drill_SG_var_cur_value != temp ){		//对变量值进行缓冲，不需要任何时候都变化速度和声音
 			this._drill_SG_var_cur_value = temp;
 			this._drill_SG_speed = temp / 100;
 			SceneManager._deltaTime = 1/60.0 / this._drill_SG_speed;
@@ -190,9 +216,22 @@ Game_System.prototype.drill_SG_variable = function() {
 	}
 };
 
+//=============================================================================
+// ** 声音变化
+//=============================================================================
 //==============================
-// * 声音变化
+// * 声音 - 变调捕获（覆写）
 //==============================
+AudioManager.updateBufferParameters = function(buffer, configVolume, audio) {
+    if( buffer && audio && $gameSystem ){
+        buffer.volume = configVolume * (audio.volume || 0) / 10000;
+		
+		// > 对所有新加入的声音进行变调
+		if( !buffer._org_pitch ){  buffer._org_pitch = (audio.pitch || 0) / 100; };
+        buffer.pitch = (audio.pitch || 0) / 100 +(( $gameSystem._drill_SG_speed-1 )*$gameSystem._drill_SG_sound);
+        buffer.pan = (audio.pan || 0) / 100;
+    }
+}
 /*
 var _drill_speedgear_AudioManagerBuffer = AudioManager.updateBufferParameters ;
 AudioManager.updateBufferParameters = function(buffer, configVolume, audio) {
@@ -206,37 +245,37 @@ AudioManager.updateBufferParameters = function(buffer, configVolume, audio) {
         buffer.pitch = buffer._org_pitch +(( $gameSystem._drill_SG_speed-1 )*$gameSystem._drill_SG_sound);
     }
 };*/
-
-AudioManager.updateBufferParameters = function(buffer, configVolume, audio) {
-    if (buffer && audio && $gameSystem) {
-        buffer.volume = configVolume * (audio.volume || 0) / 10000;
-		//对所有新加入的声音进行变调
-		if( !buffer._org_pitch ){  buffer._org_pitch = (audio.pitch || 0) / 100; };
-        buffer.pitch = (audio.pitch || 0) / 100 +(( $gameSystem._drill_SG_speed-1 )*$gameSystem._drill_SG_sound);
-        buffer.pan = (audio.pan || 0) / 100;
-    }
-}
+//==============================
+// * 声音 - 声音变速
+//==============================
 AudioManager.drill_SG_reflash_pitch = function() {
+	if( DrillUp.g_SG_sound_bind != true ){ return; }
 	
-	//刷新变调当前正在播放的声音
-	if( this._bgmBuffer && DrillUp.g_SG_sound_bind){
-		if( !this._bgmBuffer._org_pitch ){ this._bgmBuffer._org_pitch = this._bgmBuffer.pitch };
+	// > 当前bgm变调
+	if( this._bgmBuffer != undefined ){
+		if( this._bgmBuffer._org_pitch != undefined ){
+			this._bgmBuffer._org_pitch = this._bgmBuffer.pitch;
+		};
 		var pos = this._bgmBuffer.seek();	//pitch变化之后，当前播放的声音进度被清空了
 		this._bgmBuffer.pitch = this._bgmBuffer._org_pitch +(( $gameSystem._drill_SG_speed-1 )*$gameSystem._drill_SG_sound);
 		this._bgmBuffer.play(true, pos || 0);
 	}
-	if( this._bgsBuffer && DrillUp.g_SG_sound_bind){
-		if( !this._bgsBuffer._org_pitch ){ this._bgsBuffer._org_pitch = this._bgsBuffer.pitch };
-		var pos = this._bgmBuffer.seek();
+	// > 当前bgs变调
+	if( this._bgsBuffer != undefined ){
+		if( this._bgsBuffer._org_pitch != undefined ){
+			this._bgsBuffer._org_pitch = this._bgsBuffer.pitch; 
+		};
+		var pos = this._bgsBuffer.seek();
 		this._bgsBuffer.pitch = this._bgsBuffer._org_pitch +(( $gameSystem._drill_SG_speed-1 )*$gameSystem._drill_SG_sound);
 		this._bgsBuffer.play(true, pos || 0);
 	}
 	/*
-	this._bgmBuffer      = null;
-	this._bgsBuffer      = null;
-	this._meBuffer       = null;
-	this._seBuffers      = [];
-	this._staticBuffers  = [];*/
+		this._bgmBuffer      = null;
+		this._bgsBuffer      = null;
+		this._meBuffer       = null;
+		this._seBuffers      = [];
+		this._staticBuffers  = [];
+	*/
 };
 
 

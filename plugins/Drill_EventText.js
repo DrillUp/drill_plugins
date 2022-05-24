@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.7]        行走图 - 事件漂浮文字
+ * @plugindesc [v1.8]        行走图 - 事件漂浮文字
  * @author Drill_up
  * 
  * 
@@ -149,6 +149,8 @@
  * 修复了复制事件时，五毛特效 效果会多次叠加的bug。
  * [v1.7]
  * 优化了内部结构。并兼容 窗口字符块 。
+ * [v1.8]
+ * 修复了 切换菜单 时，漂浮文字会延迟加载的问题。
  * 
  * 
  * 
@@ -512,17 +514,21 @@ Game_Event.prototype.drill_ET_refreshText = function() {
 var _drill_ET_temp_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {	
 	_drill_ET_temp_initialize.call(this);
-	this._drill_ET_textEvents = [];			//含漂浮文字的事件
+	this._drill_ET_textEvents = [];			//（含漂浮文字的事件）
 	this._drill_ET_needRefresh = true;
 };
 //==============================
 // * 容器 - 切换地图时
 //==============================
 var _drill_ET_gmap_setup = Game_Map.prototype.setup;
-Game_Map.prototype.setup = function(mapId) {
-	$gameTemp._drill_ET_textEvents = [];	//含漂浮文字的事件
+Game_Map.prototype.setup = function( mapId ){
+	$gameTemp._drill_ET_textEvents = [];	//（含漂浮文字的事件）
 	$gameTemp._drill_ET_needRefresh = true;
-	_drill_ET_gmap_setup.call(this,mapId);
+	
+	// > 原函数
+	_drill_ET_gmap_setup.call( this, mapId );
+	
+	this.drill_ET_refreshEventChecks();		//（强制刷新统计一次，确保刚加载就有）
 }
 //==============================
 // * 容器 - 切换贴图时（菜单界面刷新）
@@ -531,22 +537,22 @@ var _drill_ET_smap_createCharacters = Spriteset_Map.prototype.createCharacters;
 Spriteset_Map.prototype.createCharacters = function() {
 	$gameTemp._drill_ET_textEvents = [];
 	$gameTemp._drill_ET_needRefresh = true;
+	$gameMap.drill_ET_refreshEventChecks();	//（强制刷新统计一次，确保刚加载就有）
 	_drill_ET_smap_createCharacters.call(this);
 }
 //==============================
-// ** 容器 - 帧刷新
+// * 容器 - 帧刷新
 //==============================
 var _drill_ET_map_update = Game_Map.prototype.update;
-Game_Map.prototype.update = function(sceneActive) {
+Game_Map.prototype.update = function( sceneActive ){
 	_drill_ET_map_update.call(this,sceneActive);
-	
 	this.drill_ET_refreshEventChecks();
 };
 //==============================
-// ** 容器 - 帧刷新 - 刷新统计
+// * 容器 - 帧刷新 - 刷新统计
 //==============================
 Game_Map.prototype.drill_ET_refreshEventChecks = function() {
-	if( !$gameTemp._drill_ET_needRefresh ){ return }
+	if( $gameTemp._drill_ET_needRefresh != true ){ return }
 	$gameTemp._drill_ET_needRefresh = false;
 	
 	var events = this.events();
@@ -583,16 +589,20 @@ Spriteset_Map.prototype.drill_ET_sortByZIndex = function() {
 
 
 //=============================================================================
-// ** 地图绘制层 控制（需要用的时候才初始化）
+// ** 漂浮文字容器层 控制
 //=============================================================================
 //==============================
-// * 层级初始化
+// * 容器层 - 初始化
 //==============================
 var _drill_ET_s_createDestination = Spriteset_Map.prototype.createDestination;
 Spriteset_Map.prototype.createDestination = function() {
 	_drill_ET_s_createDestination.call(this);
-	this.drill_ET_create();	
+	this.drill_ET_create();					//层级创建
+	this.drill_ET_updateNewEventText();		//漂浮文字变化（创建后立刻强制变化一次）
 }
+//==============================
+// * 容器层 - 层级创建
+//==============================
 Spriteset_Map.prototype.drill_ET_create = function() {
 	this._drill_ET_textLayer = new Sprite();
 	this._drill_ET_textLayer.zIndex = DrillUp.g_ET_layer;
@@ -600,19 +610,21 @@ Spriteset_Map.prototype.drill_ET_create = function() {
 	this._drill_ET_eventCount = 0;			//事件数量变化监听
 	
 	this._drill_mapUpArea.addChild(this._drill_ET_textLayer);
-	this.drill_ET_sortByZIndex();		//排序
+	this.drill_ET_sortByZIndex();			//排序
 }
-
 //==============================
-// * 帧刷新 - 添加漂浮文字
+// * 容器层 - 帧刷新漂浮文字变化
 //==============================
 var _drill_ET_update = Spriteset_Map.prototype.update;
 Spriteset_Map.prototype.update = function() {
 	_drill_ET_update.call(this);
-	this.drill_ET_updateNewEventText();
+	this.drill_ET_updateNewEventText();		//帧刷新 - 漂浮文字变化
 }
+//==============================
+// * 容器层 - 漂浮文字变化
+//==============================
 Spriteset_Map.prototype.drill_ET_updateNewEventText = function(){
-	var e_tank = $gameTemp._drill_ET_textEvents;
+	var e_tank = $gameTemp._drill_ET_textEvents;	//（这里注意确保 事件容器 已经统计好了）
 	
 	// > 事件数量变化监听
 	if( this._drill_ET_eventCount == e_tank.length ){ return; }		//（事件只增不减，以此来控制贴图数量）

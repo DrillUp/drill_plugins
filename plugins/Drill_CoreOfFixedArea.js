@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.7]        物体触发 - 固定区域核心
+ * @plugindesc [v1.8]        物体触发 - 固定区域核心
  * @author Drill_up
  * 
  * @Drill_LE_param "自定义区域-%d"
@@ -29,6 +29,7 @@
  * 该插件为基础核心，是以下插件的依赖。
  * 可作用于：
  *   - Drill_EventAutoTrigger      物体触发 - 固定区域 & 玩家接近 & 条件触发
+ *   - Drill_EventClosingTrigger   物体触发 - 固定区域 & 事件接近 & 条件触发
  *   - Drill_EventRangeTrigger     物体触发 - 固定区域 & 条件触发
  *   - Drill_EventRangeAnimation   物体触发 - 固定区域 & 播放并行动画
  *   - Drill_EventRandomPoint      物体触发 - 固定区域 & 随机点
@@ -99,6 +100,8 @@
  * 修复了越过循环地图边界的坐标，在捕获时被排除的bug。
  * [v1.7]
  * 优化了事件容器结构。
+ * [v1.8]
+ * 大幅度优化了底层结构，并定义了标准接口。
  * 
  * 
  *
@@ -109,13 +112,13 @@
  * @parent ---自定义固定区域1至20---
  * @type struct<AreaDefine>
  * @desc 设置自定义的固定区域。
- * @default {"标签":"--前三格--","点列表":"(0,0),(-1,-1),(-1,0),(-1,1)","是否与事件朝向一致":"true"}
+ * @default {"标签":"--前方横向3格--","点列表":"(0,0),(-1,-1),(-1,0),(-1,1)","是否与事件朝向一致":"true"}
  *
  * @param 自定义区域-2
  * @parent ---自定义固定区域1至20---
  * @type struct<AreaDefine>
  * @desc 设置自定义的固定区域。
- * @default {"标签":"--扇形--","点列表":"(0,0),(-1,-1),(-1,0),(-1,1),(-2,-2),(-2,-1),(-2,0),(-2,1),(-2,2),(-3,0)","是否与事件朝向一致":"true"}
+ * @default {"标签":"--小扇形--","点列表":"(0,0),(-1,-1),(-1,0),(-1,1),(-2,-2),(-2,-1),(-2,0),(-2,1),(-2,2),(-3,0)","是否与事件朝向一致":"true"}
  * 
  * @param 自定义区域-3
  * @parent ---自定义固定区域1至20---
@@ -158,42 +161,42 @@
  * @type struct<AreaDefine>
  * @desc 设置自定义的固定区域。
  * @default 
- *
+ * 
  * @param 自定义区域-10
  * @parent ---自定义固定区域1至20---
  * @type struct<AreaDefine>
  * @desc 设置自定义的固定区域。
  * @default 
- * 
+ *
  * @param 自定义区域-11
  * @parent ---自定义固定区域1至20---
  * @type struct<AreaDefine>
  * @desc 设置自定义的固定区域。
- * @default 
- *
+ * @default {"标签":"--前方竖向1格--","点列表":"(0,0),(-1,0)","是否与事件朝向一致":"true"}
+ * 
  * @param 自定义区域-12
  * @parent ---自定义固定区域1至20---
  * @type struct<AreaDefine>
  * @desc 设置自定义的固定区域。
- * @default 
- * 
+ * @default {"标签":"--前方竖向2格--","点列表":"(0,0),(-1,0),(-2,0)","是否与事件朝向一致":"true"}
+ *
  * @param 自定义区域-13
  * @parent ---自定义固定区域1至20---
  * @type struct<AreaDefine>
  * @desc 设置自定义的固定区域。
- * @default 
- *
+ * @default {"标签":"--前方竖向3格--","点列表":"(0,0),(-1,0),(-2,0),(-3,0)","是否与事件朝向一致":"true"}
+ * 
  * @param 自定义区域-14
  * @parent ---自定义固定区域1至20---
  * @type struct<AreaDefine>
  * @desc 设置自定义的固定区域。
- * @default 
- * 
+ * @default {"标签":"--前方竖向4格--","点列表":"(0,0),(-1,0),(-2,0),(-3,0),(-4,0)","是否与事件朝向一致":"true"}
+ *
  * @param 自定义区域-15
  * @parent ---自定义固定区域1至20---
  * @type struct<AreaDefine>
  * @desc 设置自定义的固定区域。
- * @default 
+ * @default {"标签":"--前方竖向5格--","点列表":"(0,0),(-1,0),(-2,0),(-3,0),(-4,0),(-5,0)","是否与事件朝向一致":"true"}
  *
  * @param 自定义区域-16
  * @parent ---自定义固定区域1至20---
@@ -726,7 +729,7 @@
  * @default --新的区域--
  *
  * @param 点列表
- * @desc 自定义区域的所有点，为相对坐标，(0,0)表示事件中心。格式为：(0,0),(1,0),(-1,0),(1,1)……
+ * @desc 填入相对坐标，(0,0)表示事件中心，正左(-1,0)是默认事件的前方。格式为：(0,0),(1,0),(-1,0),(1,1)…
  * @default (0,0)
  * 
  * @param 是否与事件朝向一致
@@ -860,18 +863,46 @@
 //插件记录：
 //		★大体框架与功能如下：
 //			区域核心：
-//				->固定区域/自定义区域
-//				->点集合（只操作点）
-//				->条件筛选
-//				->根据独立性封装函数
+//				->固定区域
+//					->接口
+//						->点获取【标准函数】
+//						->点获取(含筛选器)【标准函数】
+//					->点获取（只操作点）
+//				->自定义区域
+//					->接口
+//						->点获取【标准函数】
+//						->点获取(含筛选器)【标准函数】
+//						->根据玩家快速获取【标准函数】
+//						->根据事件快速获取【标准函数】
+//						->无方向坐标集【标准函数】
+//					->点获取（只操作点）
+//				->筛选器
+//					->接口
+//						->执行筛选【标准函数】
+//						->单点条件匹配【标准函数】
+//					->条件筛选
+//				->有效事件容器
+//					->接口
+//						->获取指针【标准函数】
+//						->获取备份容器【标准函数】
+//				->核心漏洞修复
+//				->区域块贴图
 //				
 //		★必要注意事项：
 //			1.isPassable在地图载入时，因为未加载完全，会出现filter错误。（this.tileEvents造成的）
 //			  但是，这是一个诡异的rmmv bug，tileEvents是数组，却不知道哪里被赋值了空字符串。
-//
+//			2.筛选器性能比较（8000000次直接执行）：
+//				直接创建for+push：	147
+//				splice筛选：		345
+//				filter筛选：		272
+//			  所以真要筛选，直接创建最合适。
+//			
 //		★其它说明细节：
 //			1.概念与思路的建设难度远比插件要大。
 //			  为了分离出"筛选器"的概念，我苦思冥想花费了一星期的时间，由于区域纠缠在一起，实在难以分割。
+//			
+//		★核心接口说明：
+//			1.核心中含有 标准接口/标准函数 ，这是其它子插件的底座，无论核心内容怎么变，标准接口一定不能动。
 //				
 //		★存在的问题：
 //			暂无
@@ -950,8 +981,10 @@
 			DrillUp.parameters['自定义区域-' + String(i+1) ] != "" ){
 			var temp = JSON.parse(DrillUp.parameters['自定义区域-' + String(i+1) ]);
 			DrillUp.g_COFA_area_list[i] = DrillUp.drill_COFA_initAreaDefine( temp );
+			DrillUp.g_COFA_area_list[i]['inited'] = true;
 		}else{
 			DrillUp.g_COFA_area_list[i] = DrillUp.drill_COFA_initAreaDefine( {} );
+			DrillUp.g_COFA_area_list[i]['inited'] = false;
 		}
 	}
 	
@@ -963,25 +996,228 @@
 			DrillUp.parameters['筛选器-' + String(i+1) ] != "" ){
 			var temp = JSON.parse(DrillUp.parameters['筛选器-' + String(i+1) ]);
 			DrillUp.g_COFA_condition_list[i] = DrillUp.drill_COFA_initAreaCondition( temp );
+			DrillUp.g_COFA_condition_list[i]['inited'] = true;
 		}else{
 			DrillUp.g_COFA_condition_list[i] = DrillUp.drill_COFA_initAreaCondition( {} );
+			DrillUp.g_COFA_condition_list[i]['inited'] = false;
 		}
 	}
 	
+
+//#############################################################################
+// ** 标准函数（有效事件容器）
+//#############################################################################
+//##############################
+// * 有效事件容器 - 获取指针【标准函数】
+//			
+//			参数：	无
+//			返回：	> 有效容器指针
+//			
+//			说明：	> 返回的是一个指针，使用时必须 只读 。
+//					> 有效事件指 非空、未被清除 的事件。
+//					> 固定区域下，统一用该接口来获取 有效事件 。
+//##############################
+Game_Map.prototype.drill_COFA_getAvailableEventTank = function(){
+	return this.drill_COFA_getAvailableEventTank_Pointer_Private();
+}
+Game_Map.prototype.drill_COFA_getAvailableEventTank_Pointer = function(){
+	return this.drill_COFA_getAvailableEventTank_Pointer_Private();
+}
+//##############################
+// * 有效事件容器 - 获取备份容器【标准函数】
+//			
+//			参数：	无
+//			返回：	> 有效容器指针
+//			
+//			说明：	> 返回一个新数组，可以对数组随意操作。
+//					> 有效事件指 非空、未被清除 的事件。
+//					> 固定区域下，统一用该接口来获取 有效事件 。
+//##############################
+Game_Map.prototype.drill_COFA_getAvailableEventTank_Copyed = function(){
+	return this.drill_COFA_getAvailableEventTank_Copyed_Private();
+}
+
 	
-//=============================================================================
-// * 点集合
-//=============================================================================
-//==============================
-// * 点集合 - 固定形状
-//	
-//			参数：	绝对中心点xy，区域类型，区域范围
-//			返回：	绝对坐标列表 { x:12 , y:23 } 
-//==============================
+//#############################################################################
+// ** 标准函数（固定形状）
+//
+//			说明：	即对子插件开放的固定函数，无论插件如何变化，标准函数都不变。
+//#############################################################################
+//##############################
+// * 固定形状 - 点获取【标准函数】
+//			
+//			参数：	> c_x 数字（绝对中心点X）
+//					> c_y 数字（绝对中心点Y）
+//					> type 字符串（区域类型，填 方形区域/菱形区域/圆形区域/十字区域/横条区域/竖条区域 ）
+//					> range 数字（区域范围）
+//			返回：	> 坐标列表（绝对坐标，格式为：[ {'x':12,'y':23}, … ]）
+//			
+//			说明：	> 不含筛选器。
+//##############################
 Game_Map.prototype.drill_COFA_getShapePoints = function( c_x, c_y, type, range ){
+	return this.drill_COFA_getShapePoints_Private( c_x, c_y, type, range );
+}
+//##############################
+// * 固定形状 - 点获取（含筛选器）【标准函数】
+//			
+//			参数：	> c_x 数字（绝对中心点X）
+//					> c_y 数字（绝对中心点Y）
+//					> type 字符串（区域类型，填 方形区域/菱形区域/圆形区域/十字区域/横条区域/竖条区域 ）
+//					> range 数字（区域范围）
+//					> condition 动态参数对象（筛选条件，可为空）
+//			返回：	> 坐标列表（绝对坐标，格式为：[ {'x':12,'y':23}, … ]）
+//			
+//			说明：	> 组合流程的函数。
+//##############################
+Game_Map.prototype.drill_COFA_getShapePointsWithCondition = function( c_x, c_y, type, range, condition ){
+	return this.drill_COFA_getShapePointsWithCondition_Private( c_x, c_y, type, range, condition );
+}
+
+//#############################################################################
+// ** 标准函数（自定义形状）
+//#############################################################################
+//##############################
+// * 自定义形状 - 点获取【标准函数】
+//			
+//			参数：	> c_x 数字（绝对中心点X）
+//					> c_y 数字（绝对中心点Y）
+//					> direction 数字（朝向，填 2/4/6/8 ）
+//					> def_area 坐标列表（相对坐标）
+//			返回：	> 坐标列表（绝对坐标，格式为：[ {'x':12,'y':23}, … ]）
+//			
+//			说明：	> 不含筛选器。
+//##############################
+Game_Map.prototype.drill_COFA_getCustomPoints = function( c_x, c_y, direction, def_area ){
+	return this.drill_COFA_getCustomPoints_Private( c_x, c_y, direction, def_area );
+}
+//##############################
+// * 自定义形状 - 点获取（含筛选器）【标准函数】
+//			
+//			参数：	> c_x 数字（绝对中心点X）
+//					> c_y 数字（绝对中心点Y）
+//					> direction 数字（朝向，填 2/4/6/8 ）
+//					> def_area 坐标列表（相对坐标）
+//					> condition 动态参数对象（筛选条件，可为空）
+//			返回：	> 坐标列表（绝对坐标，格式为：[ {'x':12,'y':23}, … ]）
+//			
+//			说明：	> 组合流程的函数。
+//##############################
+Game_Map.prototype.drill_COFA_getCustomPointsWithCondition = function( c_x, c_y, direction, def_area, condition ){
+	return this.drill_COFA_getCustomPointsWithCondition_Private( c_x, c_y, direction, def_area, condition );
+}
+
+//#############################################################################
+// ** 标准函数（筛选器）
+//#############################################################################
+//##############################
+// * 筛选器 - 执行筛选【标准函数】
+//			
+//			参数：	> c_area 坐标列表（绝对坐标）
+//					> condition 动态参数对象（筛选条件，不能为空，需要中心点）
+//					> condition['center_x'] 数字（中心点X）
+//					> condition['center_y'] 数字（中心点Y）
+//			返回：	> 坐标列表（绝对坐标，格式为：[ {'x':12,'y':23}, … ]）
+//			
+//			说明：	> 筛选器中必须含有 中心点 作为基准。
+//##############################
+Game_Map.prototype.drill_COFA_selectPoints = function( c_area, condition ){
+	return this.drill_COFA_selectPoints_Private( c_area, condition );
+}
+//##############################
+// * 筛选器 - 单点条件匹配【标准函数】
+//			
+//			参数：	> point 坐标（绝对坐标）
+//					> point['x'] 数字（坐标X）
+//					> point['y'] 数字（坐标Y）
+//					> condition 动态参数对象（筛选条件，可为空，不需要中心点）
+//			返回：	> 布尔（符合情况）
+//			
+//			说明：	> 此函数为 单独一个点 经过筛选器的条件匹配情况。
+//##############################
+Game_Map.prototype.drill_COFA_isPointMatched = function( point, condition ){
+	return this.drill_COFA_isPointMatched_Private( point, condition );
+}
+
+
+//#############################################################################
+// ** 标准函数（组合流程）
+//#############################################################################
+//##############################
+// * 组合流程 - 自定义形状 - 根据玩家快速获取【标准函数】
+//			
+//			参数：	> def_area_id 数字（自定义区域id）
+//			返回：	> 坐标列表（绝对坐标，格式为：[ {'x':12,'y':23}, … ]）
+//			
+//			说明：	> 不含筛选器。
+//##############################
+Game_Map.prototype.drill_COFA_getCustomPointsByPlayer = function( def_area_id ){
+	return this.drill_COFA_getCustomPointsByPlayer_Private( def_area_id );
+}
+//##############################
+// * 组合流程 - 自定义形状 - 根据事件快速获取【标准函数】
+//			
+//			参数：	> event_id 数字（事件id）
+//					> def_area_id 数字（自定义区域id）
+//			返回：	> 坐标列表（绝对坐标，格式为：[ {'x':12,'y':23}, … ]）
+//			
+//			说明：	> 不含筛选器。
+//##############################
+Game_Map.prototype.drill_COFA_getCustomPointsById = function( event_id, def_area_id ){
+	return this.drill_COFA_getCustomPointsById_Private( event_id, def_area_id );
+}
+//##############################
+// * 组合流程 - 自定义形状 - 根据事件快速获取（含筛选器）【标准函数】
+//			
+//			参数：	> event_id 数字（事件id）
+//					> def_area_id 数字（自定义区域id）
+//					> condition 动态参数对象（筛选条件，可为空）
+//			返回：	> 坐标列表（绝对坐标，格式为：[ {'x':12,'y':23}, … ]）
+//			
+//			说明：	> 组合流程的函数。
+//##############################
+Game_Map.prototype.drill_COFA_getCustomPointsByIdWithCondition = function( event_id, def_area_id, condition ){
+	return this.drill_COFA_getCustomPointsByIdWithCondition_Private( event_id, def_area_id, condition );
+}
+//##############################
+// * 组合流程 - 自定义形状 - 无方向坐标集【标准函数】
+//			
+//			参数：	> x1 数字（中心点X）
+//					> y1 数字（中心点Y）
+//					> def_area_id 数字（自定义区域id）
+//			返回：	> 坐标列表（绝对坐标，格式为：[ {'x':12,'y':23}, … ]）
+//			
+//			说明：	> 不含筛选器。
+//##############################
+Game_Map.prototype.drill_COFA_getCustomPointsByOnlyPosition = function( x1, y1, def_area_id ){
+	return this.drill_COFA_getCustomPointsByOnlyPosition_Private( x1, y1, def_area_id );
+}
+//##############################
+// * 组合流程 - 自定义形状 - 无方向坐标集（含筛选器）【标准函数】
+//			
+//			参数：	> x1 数字（中心点X）
+//					> y1 数字（中心点Y）
+//					> def_area_id 数字（自定义区域id）
+//					> condition 动态参数对象（筛选条件，可为空）
+//			返回：	> 坐标列表（绝对坐标，格式为：[ {'x':12,'y':23}, … ]）
+//			
+//			说明：	> 组合流程的函数。
+//##############################
+Game_Map.prototype.drill_COFA_getCustomPointsByOnlyPositionWithCondition = function( x1, y1, def_area_id, condition ){
+	return this.drill_COFA_getCustomPointsByOnlyPositionWithCondition_Private( x1, y1, def_area_id, condition );
+}
+
+
+
+//=============================================================================
+// ** 点获取
+//=============================================================================
+//==============================
+// * 点获取 - 固定形状（私有）
+//==============================
+Game_Map.prototype.drill_COFA_getShapePoints_Private = function( c_x, c_y, type, range ){
 	var c_area = [];
-	for (var i = -range; i <= range; i++) {
-		for (var j = -range; j <= range; j++) {
+	for( var i = -range; i <= range; i++ ){
+		for( var j = -range; j <= range; j++ ){
 			if( type == "方形区域" ){		//deltaX()函数考虑了循环地图的情况（公式：dx <= r，dy <= r）
 				if( Math.abs(i) <= range && Math.abs(j) <= range){	
 					c_area.push({'x': this.roundX(c_x + i), 'y': this.roundY(c_y + j) });
@@ -1019,16 +1255,28 @@ Game_Map.prototype.drill_COFA_getShapePoints = function( c_x, c_y, type, range )
 	}
 	return c_area;
 }
-
 //==============================
-// * 点集合 - 自定义形状
-//				
-//			参数：	绝对中心点xy，朝向(2/4/6/8)，相对中心区域列表[{x:1,y:1}……]
-//			返回：	绝对坐标列表 { x:12 , y:23 } 
+// * 点获取 - 固定形状（含筛选器）（私有）
 //==============================
-Game_Map.prototype.drill_COFA_getCustomPoints = function( c_x, c_y, direction, def_area ){
+Game_Map.prototype.drill_COFA_getShapePointsWithCondition_Private = function( c_x, c_y, type, range, condition ){
+	if( condition == undefined ){ condition = {}; }
+	
+	// > 获取点集合
+	var area = this.drill_COFA_getShapePoints_Private( c_x, c_y, type, range );	
+	
+	// > 中心点
+	condition['center_x'] = c_x;
+	condition['center_y'] = c_y;
+	
+	// > 条件筛选
+	return this.drill_COFA_selectPoints_Private( area,condition );					
+}
+//==============================
+// * 点获取 - 自定义形状（私有）
+//==============================
+Game_Map.prototype.drill_COFA_getCustomPoints_Private = function( c_x, c_y, direction, def_area ){
 	var c_area = [];	//根据方向变化后的区域
-	for (var i = 0; i < def_area.length ; i++) {
+	for( var i = 0; i < def_area.length; i++ ){
 		var temp_point = def_area[i];
 		if( direction == 2 ){
 			var x = this.roundX(c_x - temp_point['y']);	//下
@@ -1051,338 +1299,379 @@ Game_Map.prototype.drill_COFA_getCustomPoints = function( c_x, c_y, direction, d
 	return c_area;
 }
 //==============================
-// * 点集合 - 自定义形状（id）
-//			
-//			参数：	事件id，自定义区域id
-//			返回：	绝对坐标列表 { x:12 , y:23 } 
+// * 点获取 - 自定义形状（含筛选器）（私有）
 //==============================
-Game_Map.prototype.drill_COFA_getCustomPointsById = function( event_id, def_area_id ) {
-	var e = this.event( Number(event_id) );
-	var def_area = DrillUp.g_COFA_area_list[ Number(def_area_id) ];
-	if( e == undefined ){ return [] }
-	if( def_area == undefined ){ return [] }
-	
-	var direction = e._direction;
-	if( def_area['consistent'] !== true ){ direction = 2; }
-	return this.drill_COFA_getCustomPoints( e._x, e._y, direction, def_area['points'] );
-}
-//==============================
-// * 点集合 - 自定义形状（玩家位置）
-//				
-//			参数：	自定义区域id
-//			返回：	绝对坐标列表 { x:12 , y:23 } 
-//==============================
-Game_Map.prototype.drill_COFA_getCustomPointsByPlayer = function( def_area_id ) {
-	var def_area = DrillUp.g_COFA_area_list[ Number(def_area_id) ];
-	if( def_area == undefined ){ return [] }
-	
-	var direction = $gamePlayer._direction;
-	if( def_area['consistent'] !== true ){ direction = 2; }
-	return this.drill_COFA_getCustomPoints( $gamePlayer._x, $gamePlayer._y, direction, def_area['points'] );
-}
-//==============================
-// * 点集合 - 自定义形状（只有位置无方向）
-//			
-//			参数：	x，y，自定义区域id
-//			返回：	绝对坐标列表 { x:12 , y:23 } 
-//==============================
-Game_Map.prototype.drill_COFA_getCustomPointsByOnlyPosition = function( x1,y1, def_area_id ) {
-	var def_area = DrillUp.g_COFA_area_list[ Number(def_area_id) ];
-	if( def_area == undefined ){ return [] }
-	
-	return this.drill_COFA_getCustomPoints( x1, y1, 2, def_area['points'] );
-}
-
-
-//=============================================================================
-// * 条件筛选
-//=============================================================================
-//==============================
-// * 条件 - 综合筛选（固定形状）
-//				
-//			参数：	绝对中心点xy，区域类型，区域范围，条件obj
-//			返回：	绝对坐标列表 { x:12 , y:23 } 
-//==============================
-Game_Map.prototype.drill_COFA_getShapePointsWithCondition = function( c_x, c_y, type, range, condition ) {
+Game_Map.prototype.drill_COFA_getCustomPointsWithCondition_Private = function( c_x, c_y, direction, def_area, condition ){
+	if( condition == undefined ){ condition = {}; }
 	
 	// > 获取点集合
-	var area = this.drill_COFA_getShapePoints( c_x, c_y, type, range );	
+	var area = this.drill_COFA_getCustomPoints_Private( c_x, c_y, direction, def_area );	
 	
 	// > 中心点
 	condition['center_x'] = c_x;
 	condition['center_y'] = c_y;
 	
 	// > 条件筛选
-	return this.drill_COFA_selectPoints( area,condition );					
+	return this.drill_COFA_selectPoints_Private( area,condition );					
 }
 
+
+//=============================================================================
+// ** 筛选器
+//=============================================================================
 //==============================
-// * 条件 - 综合筛选（自定义形状）
-//			
-//			参数：	事件id，自定义区域id，条件obj
-//			返回：	绝对坐标列表 { x:12 , y:23 } 
+// * 筛选器 - 执行筛选（私有）
 //==============================
-Game_Map.prototype.drill_COFA_getCustomPointsByIdWithCondition = function( event_id, def_area_id, condition ) {
+Game_Map.prototype.drill_COFA_selectPoints_Private = function( c_area, condition ){
 	
-	// > 获取点集合
-	var area = this.drill_COFA_getCustomPointsById( event_id, def_area_id );
+	// > 单点条件
+	var temp_area = [];
+	for( var i = 0; i < c_area.length; i++ ){
+		if( this.drill_COFA_isPointMatched_Private(c_area[i],condition) ){
+			temp_area.push( c_area[i] );
+		}
+	}
+	c_area = temp_area;
 	
-	// > 中心点
-	var e = this.event(event_id);
-	if( e != undefined ){
-		condition['center_x'] = e._x;
-		condition['center_y'] = e._y;
-	}
-	
-	// > 条件筛选
-	return this.drill_COFA_selectPoints( area,condition );	
-}
-//==============================
-// * 条件 - 综合筛选（自定义形状，只有位置无方向）
-//			
-//			参数：	事件id，自定义区域id，条件obj
-//			返回：	绝对坐标列表 { x:12 , y:23 } 
-//==============================
-Game_Map.prototype.drill_COFA_getCustomPointsByOnlyPositionWithCondition = function( c_x,c_y, def_area_id, condition ) {
-	
-	// > 获取点集合
-	var area = this.drill_COFA_getCustomPointsByOnlyPosition( c_x,c_y, def_area_id );
-	
-	// > 中心点
-	condition['center_x'] = c_x;
-	condition['center_y'] = c_y;
-	
-	// > 条件筛选
-	return this.drill_COFA_selectPoints( area,condition );			
-}
-//==============================
-// * 条件 - 综合筛选
-//==============================
-Game_Map.prototype.drill_COFA_selectPoints = function( c_area, condition ) {
-	
-	// > 固定标准条件
-	c_area = this.drill_COFA_selectPoints_standard( c_area );
-	
-	if( condition['block'] == "必须可通行" ){
-		c_area = this.drill_COFA_selectPoints_block( c_area,false );
-	}
-	if( condition['block'] == "必须不可通行" ){
-		c_area = this.drill_COFA_selectPoints_block( c_area,true );
-	}
-	if( condition['event'] == "必须含事件" ){
-		c_area = this.drill_COFA_selectPoints_event( c_area,true );
-	}
-	if( condition['event'] == "必须含下列标签的事件" ){
-		c_area = this.drill_COFA_selectPoints_eventWithTag( c_area,true, condition['eventTag_list'] );
-	}
-	if( condition['event'] == "必须含除下列标签以外的事件" ){
-		c_area = this.drill_COFA_selectPoints_eventWithTag( c_area,false, condition['eventTag_list'] );
-	}
-	if( condition['event'] == "必须不含事件" ){
-		c_area = this.drill_COFA_selectPoints_event( c_area,false );
-	}
-	if( condition['event'] == "只排除下列标签的事件" ){
-		c_area = this.drill_COFA_selectPoints_eventWithoutTag( c_area,true, condition['eventTag_list'] );
-	}
-	if( condition['event'] == "只排除除下列标签以外的事件" ){
-		c_area = this.drill_COFA_selectPoints_eventWithoutTag( c_area,false, condition['eventTag_list'] );
-	}
-	if( condition['tlie'] == "必须含下列标志" ){
-		c_area = this.drill_COFA_selectPoints_tlie( c_area,true, condition['tlie_list'] );
-	}
-	if( condition['tlie'] == "必须不含下列标志" ){
-		c_area = this.drill_COFA_selectPoints_tlie( c_area,false, condition['tlie_list'] );
-	}
-	if( condition['rRegion'] == "必须含下列R图块值" ){
-		c_area = this.drill_COFA_selectPoints_rRegion( c_area,true, condition['rRegion_list'] );
-	}
-	if( condition['rRegion'] == "必须不含下列R图块值" ){
-		c_area = this.drill_COFA_selectPoints_rRegion( c_area,false, condition['rRegion_list'] );
-	}
 	if( condition['center'] == "一定包含" && condition['center_x'] != undefined ){
 		c_area = this.drill_COFA_addPointNoRepeat( c_area, condition['center_x'], condition['center_y'] );
+		if( c_area.length == 0 ){ return c_area; }
 	}
 	if( condition['center'] == "一定不含" && condition['center_x'] != undefined ){
 		c_area = this.drill_COFA_removePoint( c_area, condition['center_x'], condition['center_y'] );
+		if( c_area.length == 0 ){ return c_area; }
 	}
 	if( condition['playerPos'] == "一定包含" ){
 		c_area = this.drill_COFA_addPointNoRepeat( c_area, $gamePlayer._x, $gamePlayer._y );
+		if( c_area.length == 0 ){ return c_area; }
 	}
 	if( condition['playerPos'] == "一定不含" ){
 		c_area = this.drill_COFA_removePoint( c_area, $gamePlayer._x, $gamePlayer._y );
+		if( c_area.length == 0 ){ return c_area; }
 	}
+	
 	return c_area;
+}
+//==============================
+// * 筛选器 - 判断单点是否符合条件（私有）
+//==============================
+Game_Map.prototype.drill_COFA_isPointMatched_Private = function( point, condition ){
+	
+	// > 固定标准条件
+	if( this.drill_COFA_isPointMatched_standard(point) == false ){ return false; }
+	
+	if( condition['block'] == "必须可通行" ){
+		if( this.drill_COFA_isPointMatched_block(point,false) == false ){ return false; }
+	}
+	if( condition['block'] == "必须不可通行" ){
+		if( this.drill_COFA_isPointMatched_block(point,true) == false ){ return false; }
+	}
+	if( condition['event'] == "必须含事件" ){
+		if( this.drill_COFA_isPointMatched_event(point,true) == false ){ return false; }
+	}
+	if( condition['event'] == "必须含下列标签的事件" ){
+		if( this.drill_COFA_isPointMatched_eventWithTag(point,true,condition['eventTag_list']) == false ){ return false; }
+	}
+	if( condition['event'] == "必须含除下列标签以外的事件" ){
+		if( this.drill_COFA_isPointMatched_eventWithTag(point,false,condition['eventTag_list']) == false ){ return false; }
+	}
+	if( condition['event'] == "必须不含事件" ){
+		if( this.drill_COFA_isPointMatched_event(point,false) == false ){ return false; }
+	}
+	if( condition['event'] == "只排除下列标签的事件" ){
+		if( this.drill_COFA_isPointMatched_eventWithoutTag(point,true,condition['eventTag_list']) == false ){ return false; }
+	}
+	if( condition['event'] == "只排除除下列标签以外的事件" ){
+		if( this.drill_COFA_isPointMatched_eventWithoutTag(point,false,condition['eventTag_list']) == false ){ return false; }
+	}
+	if( condition['tlie'] == "必须含下列标志" ){
+		if( this.drill_COFA_isPointMatched_tlie(point,true,condition['tlie_list']) == false ){ return false; }
+	}
+	if( condition['tlie'] == "必须不含下列标志" ){
+		if( this.drill_COFA_isPointMatched_tlie(point,false,condition['tlie_list']) == false ){ return false; }
+	}
+	if( condition['rRegion'] == "必须含下列R图块值" ){
+		if( this.drill_COFA_isPointMatched_rRegion(point,true,condition['rRegion_list']) == false ){ return false; }
+	}
+	if( condition['rRegion'] == "必须不含下列R图块值" ){
+		if( this.drill_COFA_isPointMatched_rRegion(point,false,condition['rRegion_list']) == false ){ return false; }
+	}
+	
+	return true;
 }
 
 //==============================
-// * 条件 - 固定标准条件
+// * 条件 - 固定标准条件 - 列表
 //==============================
-Game_Map.prototype.drill_COFA_selectPoints_standard = function( c_area ) {
+Game_Map.prototype.drill_COFA_selectPoints_standard = function( c_area ){
 	var result_area = [];
-	for (var i = 0; i < c_area.length ; i++) {
-		var x = c_area[i].x;			//（area的点在生成时，就包括了循环地图换算）
-		var y = c_area[i].y;
-		if( this.isValid(x, y) ){		//（地图不能越界）
+	for( var i = 0; i < c_area.length; i++ ){	//（area的点在生成时，就包括了循环地图换算）
+		if( this.drill_COFA_isPointMatched_standard(c_area[i]) ){
 			result_area.push( c_area[i] );
 		}
 	}
 	return result_area;
 }
 //==============================
-// * 条件 - 筛选堵路的点（isBlock：true堵路，false不堵路）
+// * 条件 - 固定标准条件 - 单点
+//
+//			参数：	> point 坐标（绝对坐标）
+//			返回：	> 布尔（是否符合条件）
 //==============================
-Game_Map.prototype.drill_COFA_selectPoints_block = function( c_area, isBlock ) {
+Game_Map.prototype.drill_COFA_isPointMatched_standard = function( point ){	
+	if( this.isValid( point.x, point.y ) == false ){		//（地图不能越界）
+		return false;
+	}
+	return true;
+}
+//==============================
+// * 条件 - 筛选堵路的点 - 列表
+//==============================
+Game_Map.prototype.drill_COFA_selectPoints_block = function( c_area, isBlock ){
 	var result_area = [];
-	for (var i = 0; i < c_area.length ; i++) {
-		var x = c_area[i].x;
-		var y = c_area[i].y;
-		if( this.isPassable(x, y, 2)||this.isPassable(x, y, 4)||this.isPassable(x, y, 6)||this.isPassable(x, y, 8) ){
-			//可通行
-			if( isBlock == false ){
-				result_area.push( c_area[i] );
-			}
-		}else{
-			//不可通行
-			if( isBlock == true ){
-				result_area.push( c_area[i] );
-			}
+	for( var i = 0; i < c_area.length; i++ ){
+		if( this.drill_COFA_isPointMatched_block( c_area[i],isBlock ) ){
+			result_area.push( c_area[i] );
 		}
 	}
 	return result_area;
 }
 //==============================
-// * 条件 - 筛选含事件的点（hasEvent：true有事件，false无事件）
+// * 条件 - 筛选堵路的点 - 单点
+//
+//			参数：	> point 坐标（绝对坐标）
+//					> isBlock 布尔（true堵路，false不堵路）
+//			返回：	> 布尔（是否符合条件）
+//==============================
+Game_Map.prototype.drill_COFA_isPointMatched_block = function( point, isBlock ){	
+	if( this.isPassable( point.x, point.y, 2) || 
+		this.isPassable( point.x, point.y, 4) ||
+		this.isPassable( point.x, point.y, 6) ||
+		this.isPassable( point.x, point.y, 8) ){
+		// > 当前 可通行，条件要 不堵路的
+		if( isBlock == false ){
+			return true;
+		// > 当前 可通行，条件要 堵路的，不符条件
+		}else{
+			return false;
+		}
+	}else{
+		// > 当前 不可通行，条件要 堵路的
+		if( isBlock == true ){
+			return true;
+		// > 当前 不可通行，条件要 不堵路的，不符条件
+		}else{
+			return false;
+		}
+	}
+}
+//==============================
+// * 条件 - 筛选含事件的点 - 列表
 //==============================
 Game_Map.prototype.drill_COFA_selectPoints_event = function( c_area, hasEvent, options ) {
 	var result_area = [];
-	for (var i = 0; i < c_area.length ; i++) {
-		var x = c_area[i].x;
-		var y = c_area[i].y;
-		if( this.eventsXy(x, y).filter(function(e) { return e._erased == false; }).length > 0 ){
-			//有事件
-			if( hasEvent == true ){
-				result_area.push( c_area[i] );
-			}
-		}else{
-			//无事件
-			if( hasEvent == false ){
-				result_area.push( c_area[i] );
-			}
-		}
-	}
-	return result_area;
-}
-//==============================
-// * 条件 - 筛选含标签事件的点（hasTag：true含其中标签，false不含任一标签）
-//==============================
-Game_Map.prototype.drill_COFA_selectPoints_eventWithTag = function( c_area, hasTag, tag_list ) {
-	var result_area = [];
-	for (var i = 0; i < c_area.length ; i++) {
-		var x = c_area[i].x;
-		var y = c_area[i].y;
-		var events = this.eventsXy(x, y).filter(function(e) { return e._erased == false; });
-		if( events.length > 0 ){
-			//有事件
-			if( Imported.Drill_CoreOfEventTags ){
-				if( hasTag == true ){
-					if( this.drill_COET_selectEventsByTaglist(events,tag_list).length > 0 ){
-						result_area.push( c_area[i] );
-					}
-				}else{
-					if( this.drill_COET_selectEventsByTaglist(events,tag_list).length == 0 ){
-						result_area.push( c_area[i] );
-					}
-				}
-			}else{
-				result_area.push( c_area[i] );
-			}
-		}else{
-			//无事件
-		}
-	}
-	return result_area;
-}
-//==============================
-// * 条件 - 筛选排除含标签事件的点（hasTag：true含其中标签，false不含任一标签）
-//==============================
-Game_Map.prototype.drill_COFA_selectPoints_eventWithoutTag = function( c_area, hasTag, tag_list ) {
-	var result_area = [];
-	for (var i = 0; i < c_area.length ; i++) {
-		var x = c_area[i].x;
-		var y = c_area[i].y;
-		var events = this.eventsXy(x, y).filter(function(e) { return e._erased == false; });
-		if( events.length > 0 ){
-			//有事件
-			if( Imported.Drill_CoreOfEventTags ){
-				if( hasTag == true ){
-					if( this.drill_COET_selectEventsByTaglist(events,tag_list).length > 0 ){
-						
-					}else{
-						result_area.push( c_area[i] );
-					}
-				}else{
-					if( this.drill_COET_selectEventsByTaglist(events,tag_list).length == 0 ){
-						
-					}else{
-						result_area.push( c_area[i] );
-					}
-				}
-			}else{
-			}
-		}else{
-			//无事件
+	for( var i = 0; i < c_area.length; i++ ){
+		if( this.drill_COFA_isPointMatched_event( c_area[i],hasEvent ) ){
 			result_area.push( c_area[i] );
 		}
 	}
 	return result_area;
 }
 //==============================
-// * 条件 - 筛选含地形标志的点（fit：true符合，false不符合）
+// * 条件 - 筛选含事件的点 - 单点
+//
+//			参数：	> point 坐标（绝对坐标）
+//					> hasEvent 布尔（true有事件，false无事件）
+//			返回：	> 布尔（是否符合条件）
 //==============================
-Game_Map.prototype.drill_COFA_selectPoints_tlie = function( c_area, fit, list ) {
-	var result_area = [];
-	for (var i = 0; i < c_area.length ; i++) {
-		var x = c_area[i].x;
-		var y = c_area[i].y;
-		var t_tag = String($gameMap.terrainTag(x,y));
-		if( list.indexOf(t_tag) != -1 ){
-			if( fit == true ){
-				result_area.push( c_area[i] );
-			}
+Game_Map.prototype.drill_COFA_isPointMatched_event = function( point, hasEvent ){	
+	var event_list = this.eventsXy( point.x, point.y ).filter( function(e){
+		return e != undefined && e._erased != true; 
+	} );
+	
+	if( event_list.length > 0 ){
+		// > 当前 有事件，条件要 有事件
+		if( hasEvent == true ){
+			return true;
+		// > 当前 有事件，条件要 无事件，不符条件
 		}else{
-			if( fit == false ){
-				result_area.push( c_area[i] );
-			}
+			return false;
+		}
+	}else{
+		// > 当前 无事件，条件要 无事件
+		if( hasEvent == false ){
+			return true;
+		// > 当前 无事件，条件要 有事件，不符条件
+		}else{
+			return false;
+		}
+	}
+}
+//==============================
+// * 条件 - 筛选含标签事件的点 - 列表
+//==============================
+Game_Map.prototype.drill_COFA_selectPoints_eventWithTag = function( c_area, hasTag, tag_list ){
+	var result_area = [];
+	for( var i = 0; i < c_area.length; i++ ){
+		if( this.drill_COFA_isPointMatched_eventWithTag( c_area[i],hasTag,tag_list ) ){
+			result_area.push( c_area[i] );
 		}
 	}
 	return result_area;
 }
 //==============================
-// * 条件 - 筛选含R图块的点（fit：true符合，false不符合）
+// * 条件 - 筛选含标签事件的点 - 单点
+//
+//			参数：	> point 坐标（绝对坐标）
+//					> hasTag 布尔（true含其中标签，false不含任一标签）
+//					> tag_list 字符串列表（标签列表）
+//			返回：	> 布尔（是否符合条件）
 //==============================
-Game_Map.prototype.drill_COFA_selectPoints_rRegion = function( c_area, fit, list ) {
-	var result_area = [];
-	for (var i = 0; i < c_area.length ; i++) {
-		var x = c_area[i].x;
-		var y = c_area[i].y;
-		var r_id = String($gameMap.regionId(x,y));
-		if( list.indexOf(r_id) != -1 ){
-			if( fit == true ){
-				result_area.push( c_area[i] );
-			}
+Game_Map.prototype.drill_COFA_isPointMatched_eventWithTag = function( point, hasTag, tag_list ){	
+	var event_list = this.eventsXy( point.x, point.y ).filter( function(e){
+		return e != undefined && e._erased != true; 
+	} );
+	
+	// > 无事件，直接不符条件
+	if( event_list.length == 0 ){ return false; }
+	
+	// > 未导入插件，直接不符条件
+	if( Imported.Drill_CoreOfEventTags != true ){ return false; }
+	
+	if( hasTag == true ){
+		// > 当前 含标签事件，条件要 含标签事件
+		if( this.drill_COET_selectEventsByTaglist(event_list,tag_list).length > 0 ){
+			return true;
+		// > 当前 不含标签事件，条件要 含标签事件，不符条件
 		}else{
-			if( fit == false ){
-				result_area.push( c_area[i] );
-			}
+			return false;
+		}
+	}else{
+		// > 当前 不含标签事件，条件要 不含标签事件
+		if( this.drill_COET_selectEventsByTaglist(event_list,tag_list).length == 0 ){
+			return true;
+		// > 当前 含标签事件，条件要 不含标签事件，不符条件
+		}else{
+			return false;
+		}
+	}
+}
+//==============================
+// * 条件 - 筛选排除含标签事件的点 - 列表
+//==============================
+Game_Map.prototype.drill_COFA_selectPoints_eventWithoutTag = function( c_area, hasTag, tag_list ) {
+	var result_area = [];
+	for( var i = 0; i < c_area.length; i++ ){
+		if( this.drill_COFA_isPointMatched_eventWithoutTag( c_area[i],hasTag,tag_list ) ){
+			result_area.push( c_area[i] );
 		}
 	}
 	return result_area;
+}
+//==============================
+// * 条件 - 筛选排除含标签事件的点 - 单点
+//
+//			参数：	> point 坐标（绝对坐标）
+//					> hasTag 布尔（true含其中标签，false不含任一标签）
+//					> tag_list 字符串列表（标签列表）
+//			返回：	> 布尔（是否符合条件）
+//==============================
+Game_Map.prototype.drill_COFA_isPointMatched_eventWithoutTag = function( point, hasTag, tag_list ){	
+	var event_list = this.eventsXy( point.x, point.y ).filter( function(e){
+		return e != undefined && e._erased != true; 
+	} );
+	
+	// > 无事件，直接不符条件
+	if( event_list.length == 0 ){ return false; }
+	
+	// > 未导入插件，直接不符条件
+	if( Imported.Drill_CoreOfEventTags != true ){ return false; }
+	
+	if( hasTag == true ){	//（与 筛选含标签事件的点 的相反）
+		if( this.drill_COET_selectEventsByTaglist(event_list,tag_list).length > 0 ){
+			return false;
+		}else{
+			return true;
+		}
+	}else{
+		if( this.drill_COET_selectEventsByTaglist(event_list,tag_list).length == 0 ){
+			return false;
+		}else{
+			return true;
+		}
+	}
+}
+//==============================
+// * 条件 - 筛选含地形标志的点 - 列表
+//==============================
+Game_Map.prototype.drill_COFA_selectPoints_tlie = function( c_area, fit, list ){
+	var result_area = [];
+	for( var i = 0; i < c_area.length; i++ ){
+		if( this.drill_COFA_isPointMatched_tlie( c_area[i],fit,list ) ){
+			result_area.push( c_area[i] );
+		}
+	}
+	return result_area;
+}
+//==============================
+// * 条件 - 筛选含地形标志的点 - 单点
+//
+//			参数：	> point 坐标（绝对坐标）
+//					> fit 布尔（true符合，false不符合）
+//					> list 字符串列表（地形标志列表）
+//			返回：	> 布尔（是否符合条件）
+//==============================
+Game_Map.prototype.drill_COFA_isPointMatched_tlie = function( point, fit, list ){	
+	var t_tag = String( $gameMap.terrainTag( point.x, point.y ) );
+	if( list.indexOf(t_tag) != -1 ){
+		if( fit == true ){
+			return true;
+		}
+	}else{
+		if( fit == false ){
+			return true;
+		}
+	}
+	return false;
+}
+//==============================
+// * 条件 - 筛选含R图块的点 - 列表
+//==============================
+Game_Map.prototype.drill_COFA_selectPoints_rRegion = function( c_area, fit, list ) {
+	var result_area = [];
+	for( var i = 0; i < c_area.length; i++ ){
+		if( this.drill_COFA_isPointMatched_rRegion( c_area[i],fit,list ) ){
+			result_area.push( c_area[i] );
+		}
+	}
+	return result_area;
+}
+//==============================
+// * 条件 - 筛选含R图块的点 - 单点
+//
+//			参数：	> point 坐标（绝对坐标）
+//					> fit 布尔（true符合，false不符合）
+//					> list 字符串列表（R图块列表）
+//			返回：	> 布尔（是否符合条件）
+//==============================
+Game_Map.prototype.drill_COFA_isPointMatched_rRegion = function( point, fit, list ){	
+	var r_id = String( $gameMap.regionId( point.x, point.y ) );
+	if( list.indexOf(r_id) != -1 ){
+		if( fit == true ){
+			return true;
+		}
+	}else{
+		if( fit == false ){
+			return true;
+		}
+	}
+	return false;
 }
 //==============================
 // * 条件 - 添加点（不重复添加）
 //==============================
-Game_Map.prototype.drill_COFA_addPointNoRepeat = function( c_area, c_x, c_y ) {
-	for (var i = 0; i < c_area.length ; i++) {
+Game_Map.prototype.drill_COFA_addPointNoRepeat = function( c_area, c_x, c_y ){
+	for( var i = 0; i < c_area.length; i++ ){
 		var x = c_area[i].x;
 		var y = c_area[i].y;
 		if( x == c_x && y == c_y ){	//如果有点则直接返回
@@ -1395,8 +1684,8 @@ Game_Map.prototype.drill_COFA_addPointNoRepeat = function( c_area, c_x, c_y ) {
 //==============================
 // * 条件 - 去除点
 //==============================
-Game_Map.prototype.drill_COFA_removePoint = function( c_area, c_x, c_y ) {
-	for (var i = 0; i < c_area.length ; i++) {
+Game_Map.prototype.drill_COFA_removePoint = function( c_area, c_x, c_y ){
+	for( var i = 0; i < c_area.length; i++ ){
 		var x = c_area[i].x;
 		var y = c_area[i].y;
 		if( x == c_x && y == c_y ){	//如果有点则直接返回
@@ -1407,8 +1696,182 @@ Game_Map.prototype.drill_COFA_removePoint = function( c_area, c_x, c_y ) {
 	return c_area;
 }
 
+
 //=============================================================================
-// * 核心漏洞修复
+// ** 组合流程
+//=============================================================================
+//==============================
+// * 组合流程 - 自定义形状 - 根据玩家快速获取（私有）
+//==============================
+Game_Map.prototype.drill_COFA_getCustomPointsByPlayer_Private = function( def_area_id ){
+	var def_area = DrillUp.g_COFA_area_list[ Number(def_area_id) ];
+	if( def_area == undefined ){ return [] }
+	
+	var direction = $gamePlayer._direction;
+	if( def_area['consistent'] !== true ){ direction = 4; }		//（默认朝左，确保与填写的坐标一致）
+	return this.drill_COFA_getCustomPoints_Private( $gamePlayer._x, $gamePlayer._y, direction, def_area['points'] );
+}
+//==============================
+// * 组合流程 - 自定义形状 - 根据事件快速获取（私有）
+//==============================
+Game_Map.prototype.drill_COFA_getCustomPointsById_Private = function( event_id, def_area_id ){
+	var e = this.event( Number(event_id) );
+	var def_area = DrillUp.g_COFA_area_list[ Number(def_area_id) ];
+	if( e == undefined ){ return [] }
+	if( def_area == undefined ){ return [] }
+	
+	var direction = e._direction;
+	if( def_area['consistent'] !== true ){ direction = 4; }		//（默认朝左，确保与填写的坐标一致）
+	return this.drill_COFA_getCustomPoints_Private( e._x, e._y, direction, def_area['points'] );
+}
+//==============================
+// * 组合流程 - 自定义形状 - 根据事件快速获取（含筛选器）（私有）
+//==============================
+Game_Map.prototype.drill_COFA_getCustomPointsByIdWithCondition_Private = function( event_id, def_area_id, condition ){
+	
+	// > 获取点集合
+	var area = this.drill_COFA_getCustomPointsById_Private( event_id, def_area_id );
+	
+	// > 中心点
+	var e = this.event(event_id);
+	if( e == undefined ){ return [] }
+	condition['center_x'] = e._x;
+	condition['center_y'] = e._y;
+	
+	// > 条件筛选
+	return this.drill_COFA_selectPoints_Private( area,condition );	
+}
+//==============================
+// * 组合流程 - 自定义形状 - 无方向坐标集（私有）
+//==============================
+Game_Map.prototype.drill_COFA_getCustomPointsByOnlyPosition_Private = function( x1, y1, def_area_id ){
+	var def_area = DrillUp.g_COFA_area_list[ Number(def_area_id) ];
+	if( def_area == undefined ){ return [] }
+	
+	return this.drill_COFA_getCustomPoints_Private( x1, y1, 4, def_area['points'] );		//（默认朝左，确保与填写的坐标一致）
+}
+//==============================
+// * 组合流程 - 自定义形状 - 无方向坐标集（含筛选器）（私有）
+//==============================
+Game_Map.prototype.drill_COFA_getCustomPointsByOnlyPositionWithCondition_Private = function( c_x, c_y, def_area_id, condition ){
+	
+	// > 获取点集合
+	var area = this.drill_COFA_getCustomPointsByOnlyPosition_Private( c_x, c_y, def_area_id );
+	
+	// > 中心点
+	condition['center_x'] = c_x;
+	condition['center_y'] = c_y;
+	
+	// > 条件筛选
+	return this.drill_COFA_selectPoints_Private( area,condition );			
+}
+
+
+//=============================================================================
+// ** 核心功能扩展 - 有效事件容器
+//
+//			说明：	有效事件指：非空、未被清除 的事件。
+//					注意，容器的序号不与id对应。
+//=============================================================================
+//==============================
+// * 容器 - 初始化
+//==============================
+var _drill_COFA_initialize = Game_Map.prototype.initialize;
+Game_Map.prototype.initialize = function(){
+	_drill_COFA_initialize.call(this);
+	this._drill_COFA_tank = [];				//有效事件容器
+	this._drill_COFA_countPrivate = 0;		//容器监听数量标记（私有参数）
+}
+//==============================
+// * 容器 - 切换地图时
+//==============================
+var _drill_COFA_setup = Game_Map.prototype.setup;
+Game_Map.prototype.setup = function( mapId ){
+	this._drill_COFA_tank = [];				//有效事件容器
+	this._drill_COFA_countPrivate = 0;		//容器监听数量标记（私有参数）
+	
+	// > 原函数
+	_drill_COFA_setup.call( this, mapId );
+	
+	// > 强制刷新容器
+	this.drill_COFA_updateTank();			//帧刷新 - 容器变化监听
+	this.drill_COFA_updateEvents();			//帧刷新 - 容器内事件检查
+}
+//==============================
+// * 容器 - 帧刷新
+//==============================
+var _drill_COFA_update = Game_Map.prototype.update;
+Game_Map.prototype.update = function( sceneActive ){
+	_drill_COFA_update.call(this,sceneActive);
+	this.drill_COFA_updateTank();			//帧刷新 - 容器变化监听
+	this.drill_COFA_updateEvents();			//帧刷新 - 容器内事件检查
+};
+//==============================
+// * 帧刷新 - 容器变化监听
+//==============================
+Game_Map.prototype.drill_COFA_updateTank = function(){
+	
+	// > 等于时（跳过）
+	if( this._drill_COFA_countPrivate == this._events.length ){ return; }
+	
+	// > 小于时（新的事件加入容器）
+	if( this._drill_COFA_countPrivate < this._events.length ){
+		for( var i = this._drill_COFA_countPrivate; i < this._events.length; i++ ){
+			this._drill_COFA_tank.push( this._events[i] );
+		}
+		this._drill_COFA_countPrivate = this._events.length;
+	}
+	
+	// > 大于时（异常情况，事件容器常规情况只增不减）
+	if( this._drill_COFA_countPrivate > this._events.length ){
+		this._drill_COFA_tank = [];
+		for( var i = 0; i < this._events.length; i++ ){
+			this._drill_COFA_tank.push( this._events[i] );
+		}
+		this._drill_COFA_countPrivate = this._events.length;
+	}
+};
+//==============================
+// * 帧刷新 - 容器内事件检查
+//==============================
+Game_Map.prototype.drill_COFA_updateEvents = function(){
+	for( var i = this._drill_COFA_tank.length-1; i >= 0; i-- ){
+		var ev = this._drill_COFA_tank[i];
+		if( ev == undefined ){		//（空事件排除）
+			this._drill_COFA_tank.splice( i, 1 );
+			continue;
+		}
+		if( ev._erased == true ){	//（清除的事件排除）
+			this._drill_COFA_tank.splice( i, 1 );
+			continue;
+		}
+	}
+};
+//==============================
+// * 容器 - 获取有效事件容器 指针（私有）
+//
+//			说明：	返回的是容器指针，注意确保对容器只读，对事件随意操作。
+//					容器中所有事件非空。
+//==============================
+Game_Map.prototype.drill_COFA_getAvailableEventTank_Pointer_Private = function(){
+	return this._drill_COFA_tank;
+}
+//==============================
+// * 容器 - 获取有效事件容器 备份容器（私有）
+//
+//			说明：	返回的是一个新数组，可以对该数组随意操作。
+//==============================
+Game_Map.prototype.drill_COFA_getAvailableEventTank_Copyed_Private = function(){
+	var result = [];
+	for( var i = 0; i < this._drill_COFA_tank.length; i++ ){
+		result.push( this._drill_COFA_tank[i] );
+	}
+	return result;
+}
+
+
+//=============================================================================
+// ** 核心漏洞修复
 //=============================================================================
 //==============================
 // * 核心漏洞修复 - 图块容错捕获
@@ -1429,72 +1892,128 @@ Game_Map.prototype.tileEventsXy = function(x, y) {
 
 
 //=============================================================================
-// * 核心功能扩展 - 有效事件容器
-//
-//			说明：	有效事件指：非空、未被清除 的事件。
-//					注意，容器的序号不与id对应。
+// ** 区域块可视化 贴图【Drill_COFA_DebugSprite】
+//			
+//			
+//			主功能：	> 定义一个debug区域块可视化贴图。
+//			子功能：	
+//						->不绑定 事件/玩家
+//						->重画图块点
+//						->图块点变化
+//						
+//			说明：	> 注意，此贴图只能显示一个区域。多个区域还需要创建多个贴图。
+//					
+// 			代码：	> 范围 - 该类只根据点变化显示图块贴图。
+//					> 结构 - [ ●合并 /分离/混乱] 
+//					> 数量 - [单个/ ●多个 ] 
+//					> 创建 - [ ●一次性 /自延迟/外部延迟] 
+//					> 销毁 - [不考虑/自销毁/ ●外部销毁 ] 
+//					> 样式 - [不可修改/自变化/ ●外部变化 ] 贴图通过 drill_changePointList 点变化来修改贴图。
 //=============================================================================
 //==============================
-// * 容器 - 初始化
+// * 区域块贴图 - 定义
 //==============================
-var _drill_COFA_initialize = Game_Map.prototype.initialize;
-Game_Map.prototype.initialize = function(){
-	_drill_COFA_initialize.call(this);
-	this._drill_COFA_tank = [];	//有效事件容器
-	this._drill_COFA_count = 0;	//容器监听数量标记
+function Drill_COFA_DebugSprite() {
+	this.initialize.apply(this, arguments);
 }
+Drill_COFA_DebugSprite.prototype = Object.create(Sprite.prototype);
+Drill_COFA_DebugSprite.prototype.constructor = Drill_COFA_DebugSprite;
 //==============================
-// * 容器 - 帧刷新
+// * 区域块贴图 - 初始化
 //==============================
-var _drill_COFA_update = Game_Map.prototype.update;
-Game_Map.prototype.update = function( sceneActive ){
-	_drill_COFA_update.call(this,sceneActive);
-	this.drill_COFA_updateTank();			//帧刷新 - 容器变化监听
-	this.drill_COFA_updateEvents();			//帧刷新 - 容器内事件检查
-};
-//==============================
-// * 帧刷新 - 容器变化监听
-//==============================
-Game_Map.prototype.drill_COFA_updateTank = function(){
-	if( this._drill_COFA_count == this._events.length ){ return; }
+Drill_COFA_DebugSprite.prototype.initialize = function( data ){
+	Sprite.prototype.initialize.call(this);
+	this._drill_data = JSON.parse(JSON.stringify( data ));
+	//（注意，此贴图不绑定 事件/玩家 对象，要控制在外部去控制）
 	
-	// > 小于时（新的事件加入容器）
-	if( this._drill_COFA_count < this._events.length ){
-		for( var i = this._drill_COFA_count; i < this._events.length; i++ ){
-			this._drill_COFA_tank.push( this._events[i] );
+	// > 默认值
+	if( data['color'] == undefined ){ data['color'] = "#00ffff"; }		//绘制颜色
+	if( data['width'] == undefined ){ data['width'] = 1; }				//贴图宽度（图块单位）
+	if( data['height'] == undefined ){ data['height'] = 1; }			//贴图高度（图块单位）
+	if( data['point_list'] == undefined ){ data['point_list'] = []; }	//点列表（棋盘坐标）
+	
+	// > 私有属性初始化
+	this._drill_pointList = JSON.parse(JSON.stringify( data['point_list'] ));
+	this._drill_pointNeedRedraw = true;
+	
+	// > 贴图初始化
+	var tw = $gameMap.tileWidth();
+	var th = $gameMap.tileHeight();
+	this.bitmap = new Bitmap( data['width']*tw, data['height']*th );
+	this.anchor.x = 0.5;
+	this.anchor.y = 0.5;
+	this.opacity = 70;
+};
+//==============================
+// * 区域块贴图 - 帧刷新
+//==============================
+Drill_COFA_DebugSprite.prototype.update = function() {
+	Sprite.prototype.update.call(this);
+											//帧刷新 - 位置（外部控制）
+											//帧刷新 - 区域点设置（外部控制）
+	this.drill_updatePointDraw();			//帧刷新 - 重画图块点
+};
+//==============================
+// * 帧刷新 - 重画图块点
+//==============================
+Drill_COFA_DebugSprite.prototype.drill_updatePointDraw = function() {
+	if( this._drill_data == undefined ){ return; }
+	if( this._drill_pointNeedRedraw == false ){ return; }
+	this._drill_pointNeedRedraw = false;
+	
+	var data = this._drill_data;
+	var tw = $gameMap.tileWidth();
+	var th = $gameMap.tileHeight();
+	
+	// > 清理画布
+	this.bitmap.clear();
+	//this.bitmap.fillRect( 0, 0, this.bitmap.width, this.bitmap.height, "#ffffff" );
+	
+	// > 依次绘制
+	for(var i=0; i <this._drill_pointList.length; i++ ){
+		var point = this._drill_pointList[i];
+		var xx = point.x;
+		var yy = point.y;
+		this.bitmap.fillRect( xx*tw, yy*th, tw, th, "#000000" );	//（外侧边线）
+		this.bitmap.fillRect( xx*tw+2, yy*th+2, tw-4, th-4, data['color'] );
+	}
+};
+//==============================
+// * 区域块贴图 - 图块点变化（接口）
+//			
+//			参数：	> point_list 点列表（棋盘坐标）
+//					
+//			说明：	> 只显示固定的棋盘内的点。【朝向、筛选器 等条件，需要外部计算完后再对此赋值】。
+//					> 可将此接口放入帧刷新反复调用。
+//==============================
+Drill_COFA_DebugSprite.prototype.drill_changePointList = function( point_list ){
+	
+	// > 点列表判断
+	var tank_a = point_list;
+	var tank_b = this._drill_pointList;
+	if( tank_a.length == 0 && tank_b.length == 0 ){ return; }
+	
+	// > 获取重复元素数量
+	var repeat_count = 0;
+	for(var j=0; j < tank_a.length; j++ ){
+		var p_a = tank_a[j];
+		
+		for(var i=0; i < tank_b.length; i++ ){
+			var p_b = tank_b[i];
+			
+			if( p_b.x == p_a.x && p_b.y == p_a.y ){
+				repeat_count += 1;
+				break;
+			}
 		}
-		this._drill_COFA_count = this._events.length;
 	}
 	
-	// > 大于时（异常情况，事件容器常规情况只增不减）
-	if( this._drill_COFA_count > this._events.length ){
-		this._drill_COFA_tank = this._events.slice();
-		this._drill_COFA_count = this._events.length;
-	}
+	// > 若两数组完全匹配，则跳过
+	if( repeat_count == tank_a.length && tank_a.length > 0 ){ return; }
+	if( repeat_count == tank_b.length && tank_b.length > 0 ){ return; }
+	
+	// > 不匹配，则 重画图块点
+	this._drill_pointList = JSON.parse(JSON.stringify( point_list ));
+	this._drill_pointNeedRedraw = true;
 };
-//==============================
-// * 帧刷新 - 容器内事件检查
-//==============================
-Game_Map.prototype.drill_COFA_updateEvents = function(){
-	for( var i = this._drill_COFA_tank.length-1; i >= 0; i-- ){
-		var ev = this._drill_COFA_tank[i];
-		if( ev == undefined ){		//（空事件排除）
-			this._drill_COFA_tank.splice( i, 1 );
-			continue;
-		}
-		if( ev._erased == true ){	//（清除的事件排除）
-			this._drill_COFA_tank.splice( i, 1 );
-			continue;
-		}
-	}
-};
-//==============================
-// * 容器 - 获取有效事件容器（接口）
-//
-//			说明：	返回的是容器指针，注意确保对容器只读，对事件随意操作。
-//					容器中所有事件非空。
-//==============================
-Game_Map.prototype.drill_COFA_getAvailableEventTank = function(){
-	return this._drill_COFA_tank;
-}
 

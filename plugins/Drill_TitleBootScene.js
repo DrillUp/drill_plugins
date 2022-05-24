@@ -3,13 +3,14 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        标题 - 启动界面
+ * @plugindesc [v1.5]        标题 - 启动界面
  * @author Drill_up
  * 
  * @Drill_LE_param "阶段-%d"
  * @Drill_LE_parentKey ""
  * @Drill_LE_var "DrillUp.g_TBS_list_length"
- *
+ * 
+ * 
  * @help  
  * =============================================================================
  * +++ Drill_TitleBootScene +++
@@ -103,6 +104,8 @@
  * 添加了图片预加载的功能，并且修复显示时间为0时，图片一闪的bug。
  * [v1.4]
  * 修复了插件播放视频后，造成插件指令中播放视频静音的bug。
+ * [v1.5]
+ * 修复了GIF模式在第一个阶段时不能播放的bug。
  *
  * 
  * @param ---游戏窗口---
@@ -726,11 +729,10 @@ Scene_Drill_TBS.prototype.update = function() {
 // * 预加载
 //==============================
 Scene_Drill_TBS.prototype.drill_preloadBitmap = function() {
-	var temp_list = this._drill_dataList;
 	
 	this._drill_bitmapTank = [];
-	for( var i=0; i < temp_list.length; i++ ){
-		var temp_data = temp_list[i];
+	for( var i=0; i < this._drill_dataList.length; i++ ){
+		var temp_data = this._drill_dataList[i];
 		if( temp_data == undefined ){
 			
 			// > 空数据情况
@@ -768,7 +770,7 @@ Scene_Drill_TBS.prototype.drill_isAllBitmapReady = function() {
 		// > gif模式的加载
 		if( obj['gif_bitmaps'] != undefined ){
 			for(var j = 0; j < obj['gif_bitmaps'].length ; j++){
-				if( obj['gif_bitmaps'][j].isReady() ){
+				if( obj['gif_bitmaps'][j].isReady() == false ){
 					return false;
 				}
 			}	//（这里的判断比较松散，如果未添加bitmap，则不返回false，默认返回true）
@@ -840,6 +842,7 @@ Scene_Drill_TBS.prototype.drill_createPic = function() {
     temp_sprite.anchor.x = 0.5;
     temp_sprite.anchor.y = 0.5;
 	temp_sprite.opacity = 1;
+	
 	if( temp_data['img_show'] == 0 ){ temp_sprite.opacity = 255; }
 	this._drill_main_sprite.addChild(temp_sprite);
 	this._drill_pic_sprite = temp_sprite;
@@ -897,6 +900,8 @@ Scene_Drill_TBS.prototype.drill_createGIF = function() {
     temp_sprite.anchor.x = 0.5;
     temp_sprite.anchor.y = 0.5;
 	temp_sprite.opacity = 1;
+	temp_sprite['gif_bitmaps'] = this._drill_bitmapTank[ this._drill_level ]['gif_bitmaps'];
+	
 	if( temp_data['img_show'] == 0 ){ temp_sprite.opacity = 255; }
 	this._drill_main_sprite.addChild(temp_sprite);
 	this._drill_gif_sprite = temp_sprite;
@@ -945,17 +950,17 @@ Scene_Drill_TBS.prototype.drill_updateGIF = function() {
 	// > GIF播放
 	var inter = this._drill_level_time ;
 	inter = inter / temp_sprite_data['gif_interval'];
-	if( inter >= temp_sprite_data['gif_bitmaps'].length &&
+	if( inter >= temp_sprite['gif_bitmaps'].length &&
 		temp_sprite_data['gif_replay'] == false ){
-		inter = temp_sprite_data['gif_bitmaps'].length - 1;			//不重播
+		inter = temp_sprite['gif_bitmaps'].length - 1;			//不重播
 	}else{
-		inter = inter % temp_sprite_data['gif_bitmaps'].length;		//重播
+		inter = inter % temp_sprite['gif_bitmaps'].length;		//重播
 	}
-	if(temp_sprite_data['gif_back_run']){
-		inter = temp_sprite_data['gif_bitmaps'].length - 1 - inter;
+	if( temp_sprite_data['gif_back_run'] ){
+		inter = temp_sprite['gif_bitmaps'].length - 1 - inter;
 	}
 	inter = Math.floor(inter);
-	temp_sprite.bitmap = this._drill_bitmapTank[ this._drill_level ]['gif_bitmaps'][inter];
+	temp_sprite.bitmap = temp_sprite['gif_bitmaps'][inter];
 	
 }
 //==============================

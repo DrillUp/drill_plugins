@@ -266,7 +266,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( type == "开启能力" ){
 				$gameSystem._drill_jump_enable = true;
 			}
-			if( type == "关闭能力" ){
+			if( type == "关闭能力" || type == "禁用能力" ){
 				$gameSystem._drill_jump_enable = false;
 			}
 		}

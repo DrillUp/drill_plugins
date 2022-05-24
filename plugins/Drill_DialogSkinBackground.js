@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        对话框 - 对话框背景
+ * @plugindesc [v1.1]        对话框 - 对话框背景
  * @author Drill_up
  * 
  * @Drill_LE_param "背景层-%d"
@@ -90,6 +90,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 修复了对话框宽高变化时，背景没有跟随变化的bug。
  * 
  *
  *
@@ -681,11 +683,10 @@ Drill_DSB_DecorationBackground.prototype.initialize = function( data, parent ){
 	this._drill_parent = parent;
 	this._drill_inited = false;
 	
+	this._drill_parent_width = 0;
+	this._drill_parent_height = 0;
+	
 	// > 贴图属性
-    var m = data['backInner'];
-    var w = parent._width - m * 2;
-    var h = parent._height - m * 2;
-	this.move(m, m, w, h);		//（填满窗口矩形）
 	this.bitmap = ImageManager.loadBitmap( data['src_file'], data['src_img'], 0, true);
 	this.origin.x = data['x'];
 	this.origin.y = data['y'];
@@ -702,6 +703,7 @@ Drill_DSB_DecorationBackground.prototype.update = function() {
 	if( this.bitmap.isReady() == false ){ return; }
 	this.drill_DSB_updateVisible();				//帧刷新 - 可见情况
 	this.drill_DSB_updateSpriteInit();			//帧刷新 - 贴图创建
+	this.drill_DSB_updateSize();				//帧刷新 - 窗口大小变化
 	this.drill_DSB_updateMousePosition();		//帧刷新 - 鼠标遮罩
 }
 //==============================
@@ -722,8 +724,8 @@ Drill_DSB_DecorationBackground.prototype.drill_DSB_updateSpriteInit = function()
 	var data = this._drill_data;	
 	if( data['mask_mode'] == "关闭" ){ return; }
 	
-	// > 动态遮罩贴图
-	this._drill_mask = new Drill_CODM_MaskSprite( this.width, this.height );
+	// > 动态遮罩贴图（直接游戏大小，这样就不需要改变遮罩大小了）
+	this._drill_mask = new Drill_CODM_MaskSprite( Graphics.boxWidth, Graphics.boxHeight );
 	if( data['mask_mode'] == "开启反向遮罩" ){
 		this._drill_mask.drill_CODM_setConvert( true );
 	}
@@ -739,6 +741,24 @@ Drill_DSB_DecorationBackground.prototype.drill_DSB_updateSpriteInit = function()
 	temp_sprite.anchor.y = 0.5;
 	this._drill_mouseSprite = temp_sprite;
 	this._drill_mask.drill_CODM_addMaskChild( temp_sprite );
+}
+//==============================
+// * 帧刷新 - 窗口大小变化
+//==============================
+Drill_DSB_DecorationBackground.prototype.drill_DSB_updateSize = function() {
+	if( this._drill_parent_width == this._drill_parent.width && 
+		this._drill_parent_height == this._drill_parent.height ){ return; }
+	this._drill_parent_width = this._drill_parent.width;
+	this._drill_parent_height = this._drill_parent.height;
+	var data = this._drill_data;
+	
+	// > 背景变化
+    var m = data['backInner'];
+    var w = this._drill_parent_width - m * 2;
+    var h = this._drill_parent_height - m * 2;
+	this.move(m, m, w, h);		//（填满窗口矩形）
+	
+	//（不需要改变遮罩大小）
 }
 //==============================
 // * 帧刷新 - 鼠标遮罩

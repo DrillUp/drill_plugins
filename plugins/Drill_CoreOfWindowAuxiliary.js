@@ -41,7 +41,7 @@
  *      了解更多窗口字符，去看看 "15.对话框 > 关于窗口字符.docx"。
  * 
  * -----------------------------------------------------------------------------
- * ----可选设定 - 帮助窗口换行
+ * ----知识点 - 帮助窗口换行
  * 在各类菜单窗口中如果使用到了帮助窗口，
  * 你可以直接在编辑器中写"\n"字符实现换行。
  * 
@@ -652,7 +652,7 @@ Window_Base.prototype.drill_COWA_drawTextEx_Copyed = function( text, x, y ){
 //==============================
 // * 绘制 - 扩展文本 - 自定义函数
 //
-//			说明：	原函数基础上，加了 递归嵌套锁。
+//			说明：	原函数基础上，加了 递归嵌套锁 和 起始光标Y。
 //==============================
 Window_Base.prototype.drill_COWA_drawTextEx_Custom = function( text, x, y ){
 	if( text == undefined ){ return 0; }
@@ -665,7 +665,8 @@ Window_Base.prototype.drill_COWA_drawTextEx_Custom = function( text, x, y ){
 	textState['index'] = 0;
 	textState['x'] = x;
 	textState['y'] = y;
-	textState['left'] = x;
+	textState['left'] = x;			//（起始光标X）
+	textState['top'] = y;			//（起始光标Y）
 	textState['text'] = this.convertEscapeCharacters(text);
 	textState['height'] = this.calcTextHeight(textState, false);
 	
@@ -796,6 +797,7 @@ Window_Base.prototype.drill_COWA_drawTextList_Private = function( context_list, 
 	if( options['align'] == "居中" ){ options['align'] = "center"; }
 	if( options['align'] == "右对齐" ){ options['align'] = "right"; }
 	for( var i=0; i < context_list.length; i++ ){
+		var context = context_list[i];
 		var yy = options['y'] + i * options['lineheight'];
 		this.contents.drawText( context, options['x'], yy, options['maxWidth'], options['lineheight'], options['align'] );
 	}

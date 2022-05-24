@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.5]        系统 - 按钮组核心
+ * @plugindesc [v1.6]        系统 - 按钮组核心
  * @author Drill_up
  * 
  * @Drill_LE_param "按钮组样式-%d"
@@ -107,6 +107,8 @@
  * 添加了 按钮名称 的偏移位置。
  * [v1.5]
  * 使得按钮名称能够支持 效果窗口字符。
+ * [v1.6]
+ * 使得按钮名称能够支持 多行长文本。
  * 
  * 
  * 
@@ -2767,7 +2769,8 @@ Window_Selectable.prototype.drill_COSB_cursorBack = function( lastIndex ){
 
 
 //=============================================================================
-// ** Drill_COSB_WindowSprite 单行文字贴图
+// ** 单行文字贴图【Drill_COSB_WindowSprite】
+//
 //=============================================================================
 //==============================
 // * 文字贴图 - 定义
@@ -2804,10 +2807,13 @@ Drill_COSB_WindowSprite.prototype.standardPadding = function() {
     return 6;
 };
 //==============================
-// * 文字贴图 - 接口（单次调用）
+// * 文字贴图 - 接口（内部单次调用）
+//
+//			说明：	名称块根据 窗口选项 的文本定死了结构，仅 Drill_COSB_LayerSprite 调用，不对外开放。
 //==============================
 Drill_COSB_WindowSprite.prototype.setText = function( text ) {
-    this._drill_curText = String( text );
+	if( text == undefined ){ return; }
+    this._drill_curTextTank = String( text ).split(/(\\n|\n)/);
 	this._drill_needRefresh = true;
 };
 
@@ -2818,10 +2824,9 @@ Drill_COSB_WindowSprite.prototype.drill_initData = function() {
 	var data = this._drill_data;
 	
 	// > 默认值
-	if( data['text'] == undefined ){ data['text'] = "" };									
+	if( data['text'] == undefined ){ data['text'] = "" };			//（初始的text是空字符串，需要等父类调用接口刷新）
 	if( data['fontsize'] == undefined ){ data['fontsize'] = 28 };					
 	if( data['align'] == undefined ){ data['align'] = "左对齐" };										
-	
 }
 //==============================
 // * 初始化 - 对象
@@ -2832,7 +2837,7 @@ Drill_COSB_WindowSprite.prototype.drill_initSprite = function() {
 	// > 私有对象初始化
 	this._drill_textWidth = 0;
 	this._drill_textHeight = 0;
-	this._drill_curText = data['text'];
+	this._drill_curTextTank = data['text'].split(/(\\n|\n)/);
 	this._drill_needRefresh = true;
 	
 	// > 主体属性
@@ -2843,41 +2848,53 @@ Drill_COSB_WindowSprite.prototype.drill_initSprite = function() {
 // * 帧刷新 - 文本变化
 //==============================
 Drill_COSB_WindowSprite.prototype.drill_COSB_updateText = function() {
+	if( this._drill_needRefresh == false ){ return; }
+	this._drill_needRefresh = false;
 	var data = this._drill_data;
-	
-	if( this._drill_needRefresh == true ){
-		this._drill_needRefresh = false;
 		
-		// > 确定宽高（窗口辅助核心的 标准函数 ）
-		this._drill_textWidth = this.drill_COWA_getTextExWidth( this._drill_curText );
-		this._drill_textHeight = this.drill_COWA_getTextExHeight( this._drill_curText );
-		
-		this.width = this._drill_textWidth + this.standardPadding() * 2;		// 窗口宽度
-		this.height = this._drill_textHeight + this.standardPadding() * 2;		// 窗口高度
-		
-		// > 重建bitmap
-		this.contents.clear();
-		this.createContents();
-		
-		// > 绘制内容（窗口辅助核心的 标准函数 ）
-		this.drill_COWA_drawTextEx( this._drill_curText, {"x":0,"y":0} );
-		
-		// > 对齐方式
-		var xx = data['x'];
-		var yy = data['y'];
-		if( data['align'] == "左对齐" ){
-			xx += 0 ;
-			yy += -0.5 * this.height ;
-		}else if( data['align'] == "居中" ){
-			xx += -0.5 * this.width ;
-			yy += -0.5 * this.height ;
-		}else if( data['align'] == "右对齐" ){
-			xx += -1.0 * this.width ;
-			yy += -0.5 * this.height ;
+	// > 确定宽高（窗口辅助核心的 标准函数 ）
+	this.drill_COWA_calculateHeightAndWidth( this._drill_curTextTank );
+	this._drill_textWidth = 0;
+	this._drill_textHeight = 0;
+	for( var i=0; i < this.drill_COWA_widthList.length; i++ ){	//（取最大宽度）
+		if( this._drill_textWidth < this.drill_COWA_widthList[i] ){
+			this._drill_textWidth = this.drill_COWA_widthList[i];
 		}
-		this.x = xx ;
-		this.y = yy ;
 	}
+	for( var i=0; i < this.drill_COWA_heightList.length; i++ ){	//（高度累加）
+		this._drill_textHeight += this.drill_COWA_heightList[i];
+	}
+	this.width = this._drill_textWidth + this.standardPadding() * 2;		// 窗口宽度
+	this.height = this._drill_textHeight + this.standardPadding() * 2 + 10;	// 窗口高度（高一点，防止文字被切割）
+	
+	// > 重建bitmap
+	this.contents.clear();
+	this.createContents();
+	
+	// > 绘制内容（窗口辅助核心的 标准函数 ）
+	var options = {};
+	options['x'] = 0;
+	options['y'] = 0;
+	options['width'] = this._drill_textWidth;
+	options['autoLineheight'] = true;
+	options['align'] = data['align'];
+	this.drill_COWA_drawTextListEx( this._drill_curTextTank, options );
+	
+	// > 对齐方式
+	var xx = data['x'];
+	var yy = data['y'];
+	if( data['align'] == "左对齐" ){
+		xx += 0 ;
+		yy += -0.5 * this.height ;
+	}else if( data['align'] == "居中" ){
+		xx += -0.5 * this.width ;
+		yy += -0.5 * this.height ;
+	}else if( data['align'] == "右对齐" ){
+		xx += -1.0 * this.width ;
+		yy += -0.5 * this.height ;
+	}
+	this.x = xx ;
+	this.y = yy ;
 }
 
 

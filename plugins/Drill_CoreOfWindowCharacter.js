@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        对话框 - 窗口字符核心
+ * @plugindesc [v1.1]        对话框 - 窗口字符核心
  * @author Drill_up
  * 
  * 
@@ -218,6 +218,10 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 优化字符外框厚度为0时，不绘制外框的功能。
+ * 优化了部分参数配置。
+ * 
  * 
  * 
  * @param ---字符样式---
@@ -234,7 +238,7 @@
  * @parent ---字符样式---
  * @type number
  * @min 0
- * @desc 默认字符外框的厚度。
+ * @desc 默认字符外框的厚度。设为0时，则不绘制字符外框。
  * @default 4
  * 
  * @param ---消息快进---
@@ -504,6 +508,8 @@ Window_Message.prototype.drill_COWC_processNewTransformChar_Combined = function(
 //					> this._drill_COWC_effect_curData 动态参数对象（后续更新在该对象提供更多数据）
 //					> this._drill_COWC_effect_curData['x']（当前绘制的光标x位置，0表示在画布左上角）
 //					> this._drill_COWC_effect_curData['y']（当前绘制的光标y位置，0表示在画布左上角）
+//					> this._drill_COWC_effect_curData['left']（起始光标x位置）
+//					> this._drill_COWC_effect_curData['top']（起始光标y位置）
 //			返回：	> 无
 //
 //			说明：	> 效果字符，可将 "\xxx" 识别，并执行该函数。
@@ -527,6 +533,8 @@ Window_Base.prototype.drill_COWC_processNewEffectChar_Simple = function( matched
 //					> this._drill_COWC_effect_curData 动态参数对象（后续更新在该对象提供更多数据）
 //					> this._drill_COWC_effect_curData['x']（当前绘制的光标x位置，0表示在画布左上角）
 //					> this._drill_COWC_effect_curData['y']（当前绘制的光标y位置，0表示在画布左上角）
+//					> this._drill_COWC_effect_curData['left']（起始光标x位置）
+//					> this._drill_COWC_effect_curData['top']（起始光标y位置）
 //			返回：	> 无
 //
 //			说明：	> 效果字符，可将 "\xxx[xxx]" 识别，并执行该函数。
@@ -984,6 +992,8 @@ Window_Base.prototype.drill_COWC_Effect_Simple = function( code, textState ){
 	this._drill_COWC_effect_curData = {};
 	this._drill_COWC_effect_curData['x'] = textState['x'];				//可用参数 - 当前X
 	this._drill_COWC_effect_curData['y'] = textState['y'];				//可用参数 - 当前Y
+	this._drill_COWC_effect_curData['left'] = textState['left'];		//可用参数 - 起始X
+	this._drill_COWC_effect_curData['top'] = textState['top'] || 0;		//可用参数 - 起始Y
 	this._drill_COWC_effect_curData['index'] = index_start;				//可用参数 - 当前索引（也就是index_start）
 	//this._drill_COWC_effect_curData['rowIndex'] ;						//可用参数 - 当前所处行
 	
@@ -1013,6 +1023,8 @@ Window_Base.prototype.drill_COWC_Effect_Combined = function( code, textState ){
 	this._drill_COWC_effect_curData = {};
 	this._drill_COWC_effect_curData['x'] = textState['x'];				//可用参数 - 当前X
 	this._drill_COWC_effect_curData['y'] = textState['y'];				//可用参数 - 当前Y
+	this._drill_COWC_effect_curData['left'] = textState['left'];		//可用参数 - 起始X
+	this._drill_COWC_effect_curData['top'] = textState['top'] || 0;		//可用参数 - 起始Y
 	this._drill_COWC_effect_curData['index'] = data['index_start'];		//可用参数 - 当前索引（也就是index_start）
 	
 	// > 执行 子函数
@@ -1539,7 +1551,6 @@ Window_Base.prototype.resetFontSettings = function() {
 	this.contents.outlineWidth = $gameSystem._drill_COWC_fontEdgeThickness || 4;				        	//标记 - 外框厚度
 };
 
-
 //=============================================================================
 // ** 效果字符应用
 //=============================================================================
@@ -1662,6 +1673,20 @@ Window_Base.prototype.drill_COWC_charOffsetY = function( yy ){
 	this.drill_COWC_charSubmit_Effect(0,yy);
 }
 //==============================
+// * 效果字符应用 - 光标偏移Y - 高度变化
+//==============================
+var _drill_COWC_COWA_getTextExHeight_Private = Window_Base.prototype.drill_COWA_getTextExHeight_Private;
+Window_Base.prototype.drill_COWA_getTextExHeight_Private = function( text ){
+	var hh = _drill_COWC_COWA_getTextExHeight_Private.call( this, text );
+	var data = text.match( /PY\[(\d+)\]/i );
+	if( data != null ){
+		if( data[1] != "" ){
+			hh += Number( data[1] );	//（由于是强制偏移Y轴，因此和输入的行高累加）
+		}
+	}
+	return hh;
+}
+//==============================
 // * 效果字符应用 - 字符边颜色
 //==============================
 Window_Base.prototype.drill_COWC_outlineColor = function( color_index ){
@@ -1673,6 +1698,34 @@ Window_Base.prototype.drill_COWC_outlineColor = function( color_index ){
         str = "rgba(" + r + "," + g + "," + b + ",0.5)"
     }
     return str;
+}
+//==============================
+// * 效果字符应用 - 字符边厚度 - 初始化
+//==============================
+var _drill_COWC_bitmap_initialize2 = Bitmap.prototype.initialize;
+Bitmap.prototype.initialize = function( width, height ){
+	_drill_COWC_bitmap_initialize2.call( this, width, height );
+	
+	// > 标记 - 外框色
+	//（初始无法修改）
+	
+	// > 标记 - 外框厚度
+	if( $gameSystem != undefined &&
+		$gameSystem._drill_COWC_fontEdgeThickness != undefined ){
+		this.outlineWidth = $gameSystem._drill_COWC_fontEdgeThickness;
+	}
+}
+//==============================
+// * 效果字符应用 - 字符边厚度
+//==============================
+var _drill_COWC__drawTextOutline = Bitmap.prototype._drawTextOutline;
+Bitmap.prototype._drawTextOutline = function( text, tx, ty, maxWidth ){
+	
+	// > 厚度小于等于0时，直接不绘制
+	if( this.outlineWidth <= 0 ){ return; }
+	
+	// > 原函数
+	_drill_COWC__drawTextOutline.call( this, text, tx, ty, maxWidth );
 }
 
 

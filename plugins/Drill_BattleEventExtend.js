@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        战斗 - 战斗事件扩展
+ * @plugindesc [v1.1]        战斗 - 战斗时公共事件
  * @author Drill_up
  * 
  * 
@@ -14,12 +14,13 @@
  * 如果你有兴趣，也可以来看看更多我写的drill插件哦ヽ(*。>Д<)o゜
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
- * 可以使得你可以战斗前执行公共事件。
+ * 你可以设置战斗开始时/战斗结束时执行公共事件。
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：战斗界面。
  *   作用于所有战斗。
+ * 2.详细介绍可以去看看："10.互动 > 关于时机设置公共事件.docx"
  * 细节：
  *   (1.该插件对所有战斗都有效，如果你要对指定的战斗进行配置。
  *      在公共事件中加 分支条件 通过开关区分即可。
@@ -140,7 +141,7 @@
 var _drill_BEE_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_BEE_pluginCommand.call(this, command, args);
-	if( command === ">战斗事件扩展" ){
+	if( command === ">战斗时公共事件" && command === ">战斗事件扩展" ){
 		
 		if(args.length == 6){
 			var type = String(args[1]);

@@ -3,8 +3,9 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        地图 - 多线程
+ * @plugindesc [v1.2]        地图 - 多线程
  * @author Drill_up
+ * 
  * 
  * @help  
  * =============================================================================
@@ -79,6 +80,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 添加了公共事件校验功能。
+ * [v1.2]
+ * 优化了内部结构。
  * 
  */
  
@@ -101,8 +104,16 @@
 //插件记录：
 //		★大体框架与功能如下：
 //			多线程：
-//				->管道物体（直接控制串行/并行）
-//				->地图界面实时创建
+//				->地图容器
+//					->接口
+//						->添加公共事件【标准函数】
+//					->自动清除
+//				->管道物体
+//					->串行
+//					->并行处理
+//		
+//		★私有类如下：
+//			* Drill_LCT_GamePipeEvent		管道物体
 //
 //		★必要注意事项：
 //			1.简单来说，有list有interpreter就可以执行。
@@ -132,6 +143,28 @@
     DrillUp.parameters = PluginManager.parameters('Drill_LayerCommandThread');
 	
 	
+	
+//#############################################################################
+// ** 标准函数（公共事件容器）
+//#############################################################################
+//##############################
+// * 容器 - 添加公共事件【标准函数】
+//			
+//			参数：	> data 动态参数对象
+//					> data['type'] 字符串（填 公共事件 ，目前只有这一个选项）
+//					> data['pipeType'] 字符串（填 并行/串行 ）
+//					> data['commonEventId'] 数字（填 公共事件的id值）
+//					> data['callBack_str'] 字符串（脚本指令，公共事件执行完毕后，回调的字符串脚本）
+//			返回：	无
+//			
+//			说明：	> 按照参数对象执行函数即可，只能在地图界面执行。
+//					> 注意，回调函数必须是字符串，不能为 函数对象，因为需要考虑存储数据问题。
+//##############################
+Game_Map.prototype.drill_LCT_addPipeEvent = function( data ){
+	this.drill_LCT_addPipeEvent_private( data );
+}
+
+
 //=============================================================================
 // * 插件指令
 //=============================================================================
@@ -188,17 +221,11 @@ Game_Map.prototype.setupEvents = function() {
     this._drill_LCT_pipeEventTank = [];
 }
 //==============================
-// * 容器 - 获取
-//==============================
-Game_Map.prototype.drill_LCT_pipeEvents = function() {
-	return this._drill_LCT_pipeEventTank;
-}
-//==============================
-// * 容器 - 添加公共事件（接口）
+// * 容器 - 添加公共事件（私有）
 //
 //			说明：	添加的格式为： { 'type':"公共事件", 'pipeType':"并行", 'commonEventId': Number(temp1)  };
 //==============================
-Game_Map.prototype.drill_LCT_addPipeEvent = function( data ) {
+Game_Map.prototype.drill_LCT_addPipeEvent_private = function( data ){
 	
 	// > 校验
     var commonEvent = $dataCommonEvents[ data['commonEventId'] ];
@@ -218,7 +245,7 @@ Game_Map.prototype.drill_LCT_addPipeEvent = function( data ) {
 	this._drill_LCT_pipeEventTank.push( new Drill_LCT_GamePipeEvent( data ) );
 }
 //==============================
-// * 容器 - 清除
+// * 容器 - 自动清除
 //==============================
 var _drill_LCT_map_update = Game_Map.prototype.update;
 Game_Map.prototype.update = function( sceneActive ) {
@@ -232,16 +259,33 @@ Game_Map.prototype.update = function( sceneActive ) {
 		}
 	}
 }
+//==============================
+// * 容器 - 获取容器
+//==============================
+Game_Map.prototype.drill_LCT_pipeEvents = function() {
+	return this._drill_LCT_pipeEventTank;
+}
+//==============================
+// * 容器 - 刷新（不需要）
+//==============================
+//var _drill_LCT_map_refresh = Game_Map.prototype.refresh;
+//Game_Map.prototype.refresh = function() {
+//    this.drill_LCT_pipeEvents().forEach(function(event) {
+//        event.refresh();
+//    });
+//	_drill_LCT_map_refresh.call(this);
+//};
 
 
 //=============================================================================
-// * 地图界面捕获
+// ** 地图界面捕获
 //=============================================================================
 //==============================
-// * 地图 - 串行 - 事件输入栈
+// * 串行捕获 - 事件输入栈
 //==============================
 var _drill_LCT_setupStartingMapEvent = Game_Map.prototype.setupStartingMapEvent;
 Game_Map.prototype.setupStartingMapEvent = function() {
+	
 	// > 依附事件
 	var available_events = this._events.filter(function(event) {
 		if( event == null ){ return false }
@@ -264,7 +308,7 @@ Game_Map.prototype.setupStartingMapEvent = function() {
 	return _drill_LCT_setupStartingMapEvent.call(this);
 };
 //==============================
-// * 地图 - 串行 - 事件start判断
+// * 串行捕获 - 事件start判断
 //==============================
 var _drill_LCT_isAnyEventStarting = Game_Map.prototype.isAnyEventStarting;
 Game_Map.prototype.isAnyEventStarting = function() {	
@@ -274,7 +318,7 @@ Game_Map.prototype.isAnyEventStarting = function() {
 			});
 };
 //==============================
-// * 地图 - 并行 - 事件帧刷新
+// * 并行捕获 - 事件帧刷新
 //==============================
 var _drill_LCT_updateEvents = Game_Map.prototype.updateEvents;
 Game_Map.prototype.updateEvents = function() {
@@ -283,20 +327,12 @@ Game_Map.prototype.updateEvents = function() {
         event.update();
     });
 };
-//==============================
-// * 地图 - 重刷事件（不需要）
-//==============================
-//var _drill_LCT_map_refresh = Game_Map.prototype.refresh;
-//Game_Map.prototype.refresh = function() {
-//    this.drill_LCT_pipeEvents().forEach(function(event) {
-//        event.refresh();
-//    });
-//	_drill_LCT_map_refresh.call(this);
-//};
 
 
 //=============================================================================
-// ** Drill_LCT_GamePipeEvent 管道物体（串行/并行）
+// ** 管道物体【Drill_LCT_GamePipeEvent】
+//
+//			说明：	用于构建 串行/并行 的小型事件，执行公共事件用。
 //=============================================================================
 //==============================
 // * 管道物体 - 定义
@@ -318,8 +354,8 @@ Drill_LCT_GamePipeEvent.prototype.initialize = function( data ) {
 //==============================
 Drill_LCT_GamePipeEvent.prototype.update = function() {
 	if( this._drill_erased == true ){ return; }
-    this.drill_updateStart();			//串行开关
-    this.drill_updateParallel();		//并行处理
+    this.drill_updateStart();			//帧刷新 - 串行开关
+    this.drill_updateParallel();		//帧刷新 - 并行处理
 }
 
 //==============================
@@ -332,6 +368,7 @@ Drill_LCT_GamePipeEvent.prototype.drill_initData = function() {
 	if( data['type'] == undefined ){ data['type'] = "公共事件" };					//物体类型
 	if( data['pipeType'] == undefined ){ data['pipeType'] = "并行" };				//管道类型（串行/并行））
 	if( data['commonEventId'] == undefined ){ data['commonEventId'] = 0 };			//公共事件id
+	if( data['callBack_str'] == undefined ){ data['callBack_str'] = "" };			//回调函数
 }
 //==============================
 // * 初始化 - 对象
@@ -358,20 +395,39 @@ Drill_LCT_GamePipeEvent.prototype.drill_initObject = function() {
     }
 }
 //==============================
-// * 帧刷新 - 串行开关
+// * 管道物体 - 事件页指令列表
+//
+//			说明：	返回格式： "list":[{"code":117,"indent":0,"parameters":[10]},……]
 //==============================
-Drill_LCT_GamePipeEvent.prototype.drill_updateStart = function() {
-    if( this._drill_trigger != 3 ){ return; }
+Drill_LCT_GamePipeEvent.prototype.list = function() {
 	
-	// > 运行判断
-	if( this._drill_startingSetuped == true && 
-		this._drill_starting == false &&
-		!$gameMap.isEventRunning() ){
-		this._drill_erased = true;		//串行分配结束，清除
+	// > 指令准备
+	var result = [];
+	var data = this._drill_data;
+	
+	// > 指令 - 执行公共事件
+	if( data['type'] == "公共事件" ){
+		var c_id = data['commonEventId'];
+		var command = {"code":117,"indent":0,"parameters":[c_id] };
+		result.push( command );
 	}
+	
+	// > 指令 - 脚本（回调函数，只能存字符串，因为要考虑存储数据问题）
+	if( typeof data['callBack_str'] === 'string' && data['callBack_str'] != "" ){
+		var script_str = data['callBack_str'];
+		var command = {"code":355,"indent":0,"parameters":[ script_str ] };
+		result.push( command );
+	}
+	
+	// > 指令 - 结尾指令
+	var command = {"code":0,"indent":0,"parameters":[]};
+	result.push( command );
+	
+	return result;
 };
+
 //==============================
-// * 帧刷新 - 并行处理
+// * 并行 - 帧刷新并行处理
 //==============================
 Drill_LCT_GamePipeEvent.prototype.drill_updateParallel = function() {
     if( this._drill_trigger != 4 ){ return; }
@@ -395,29 +451,22 @@ Drill_LCT_GamePipeEvent.prototype.drill_updateParallel = function() {
 		}
 	}
 };
+
 //==============================
-// * 管道物体 - 事件页指令列表
+// * 串行 - 帧刷新串行开关
 //==============================
-Drill_LCT_GamePipeEvent.prototype.list = function() {
-	// data中的格式： "list":[{"code":117,"indent":0,"parameters":[10]},……]
-	var result = [];
-	var data = this._drill_data;
+Drill_LCT_GamePipeEvent.prototype.drill_updateStart = function() {
+    if( this._drill_trigger != 3 ){ return; }
 	
-	// > 内嵌公共事件
-	if( data['type'] == "公共事件" ){
-		var c_id = data['commonEventId'];
-		var command = {"code":117,"indent":0,"parameters":[c_id] };
-		result.push( command );
+	// > 运行判断
+	if( this._drill_startingSetuped == true && 
+		this._drill_starting == false &&
+		!$gameMap.isEventRunning() ){
+		this._drill_erased = true;		//串行分配结束，清除
 	}
-	
-	// > 结尾指令
-	var command = {"code":0,"indent":0,"parameters":[]};
-	result.push( command );
-	
-	return result;
 };
 //==============================
-// * 管道物体 - 输入栈的开关
+// * 串行 - 开始事件指令
 //==============================
 Drill_LCT_GamePipeEvent.prototype.start = function() {
 	var list = this.list();
@@ -426,9 +475,15 @@ Drill_LCT_GamePipeEvent.prototype.start = function() {
 		this._drill_startingSetuped = true;
 	}
 };
+//==============================
+// * 串行 - 是否正在阻塞
+//==============================
 Drill_LCT_GamePipeEvent.prototype.isStarting = function() {
     return this._drill_starting;
 };
+//==============================
+// * 串行 - 清理阻塞状态
+//==============================
 Drill_LCT_GamePipeEvent.prototype.clearStartingFlag = function() {
     this._drill_starting = false;
 };

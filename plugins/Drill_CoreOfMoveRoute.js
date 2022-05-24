@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.8]        物体 - 移动路线核心
+ * @plugindesc [v1.9]        物体 - 移动路线核心
  * @author Drill_up
  * 
  * 
@@ -48,7 +48,16 @@
  * 事件注释：=>移动路线核心 : 路线记忆 : 关闭
  * 事件注释：=>移动路线核心 : 路线记忆 : 开启
  * 
+ * 插件指令：>移动路线核心 : 本事件 : 重置路线记忆
+ * 插件指令：>移动路线核心 : 事件[10] : 重置路线记忆
+ * 插件指令：>移动路线核心 : 事件变量[21] : 重置路线记忆
+ * 插件指令：>移动路线核心 : 批量事件[10,11] : 重置路线记忆
+ * 插件指令：>移动路线核心 : 批量事件变量[21,22] : 重置路线记忆
+ * 
  * 1.在指定事件中添加注释即可。
+ * 2.如果你的事件设置了位移，并且切换了事件页，可能会由于路线记忆，
+ *   事件仍然会保持上一次的路线记忆，按照原来的走法移动。
+ *   如果你希望事件位移后，重置路线记忆，调用插件指令即可重置。
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 特殊指令
@@ -105,6 +114,8 @@
  * 分离了核心插件中的 指令集 功能，将移动路线核心的基础功能重新整理规划。
  * [v1.8]
  * 优化了内部接口结构。
+ * [v1.9]
+ * 添加了路线记忆重置的功能。
  * 
  * 
  * @param 是否开启路线记忆
@@ -257,6 +268,90 @@ Game_Character.prototype.drill_COMR_skipToNext = function(){
 }
 
 
+//=============================================================================
+// * 插件指令
+//=============================================================================
+var _drill_COMR_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+Game_Interpreter.prototype.pluginCommand = function(command, args) {
+	_drill_COMR_pluginCommand.call(this, command, args);
+	if( command === ">移动路线核心" ){
+		
+		/*-----------------对象组获取------------------*/
+		var char_list = null;
+		if( args.length >= 2 ){
+			var unit = String(args[1]);
+			if( char_list == null && unit == "本事件" ){
+				var e = $gameMap.event( this._eventId );
+				char_list = [ e ];
+			}
+			if( char_list == null && unit.indexOf("批量事件[") != -1 ){
+				unit = unit.replace("批量事件[","");
+				unit = unit.replace("]","");
+				var temp_arr = unit.split(/[,，]/);
+				char_list = [];
+				for( var k=0; k < temp_arr.length; k++ ){
+					var e_id = Number(temp_arr[k]);
+					if( $gameMap.drill_COMR_isEventExist( e_id ) == false ){ continue; }
+					var e = $gameMap.event( e_id );
+					char_list.push( e );
+				}
+			}
+			if( char_list == null && unit.indexOf("批量事件变量[") != -1 ){
+				unit = unit.replace("批量事件变量[","");
+				unit = unit.replace("]","");
+				var temp_arr = unit.split(/[,，]/);
+				char_list = [];
+				for( var k=0; k < temp_arr.length; k++ ){
+					var e_id = $gameVariables.value(Number(temp_arr[k]));
+					if( $gameMap.drill_COMR_isEventExist( e_id ) == false ){ continue; }
+					var e = $gameMap.event( e_id );
+					char_list.push( e );
+				}
+			}
+			if( char_list == null && unit.indexOf("事件[") != -1 ){
+				unit = unit.replace("事件[","");
+				unit = unit.replace("]","");
+				var e_id = Number(unit);
+				if( $gameMap.drill_COMR_isEventExist( e_id ) == false ){ return; }
+				var e = $gameMap.event( e_id );
+				char_list = [ e ];
+			}
+			if( char_list == null && unit.indexOf("事件变量[") != -1 ){
+				unit = unit.replace("事件变量[","");
+				unit = unit.replace("]","");
+				var e_id = $gameVariables.value(Number(unit));
+				if( $gameMap.drill_COMR_isEventExist( e_id ) == false ){ return; }
+				var e = $gameMap.event( e_id );
+				char_list = [ e ];
+			}
+		}
+			
+		/*-----------------对象组获取------------------*/
+		if( char_list != null && args.length == 4 ){
+			var type = String(args[3]);
+			if( type == "重置路线记忆" ){	
+				for( var i=0; i < char_list.length; i++ ){
+					char_list[i].drill_COMR_clearCheck();	//清理记忆
+					char_list[i]._moveRouteIndex = 0;		//重刷路线索引
+				}
+			}
+		}
+	}
+};
+//==============================
+// ** 插件指令 - 事件检查
+//==============================
+Game_Map.prototype.drill_COMR_isEventExist = function( e_id ){
+	if( e_id == 0 ){ return false; }
+	
+	var e = this.event( e_id );
+	if( e == undefined ){
+		alert( "【Drill_CoreOfMoveRoute.js 物体 - 移动路线核心】\n" +
+				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
+		return false;
+	}
+	return true;
+};
 
 //=============================================================================
 // * 物体参数初始化
@@ -651,6 +746,13 @@ Game_Event.prototype.drill_COMR_initCheck = function() {
 	if( data['inited'] == true ){ return; }
 	data['inited'] = true;
 	
+	this.drill_COMR_clearCheck();
+}
+//==============================
+// * 路线记忆 - 清理全部记忆（接口）
+//==============================
+Game_Event.prototype.drill_COMR_clearCheck = function() {
+	var data = this._drill_COMR_memoryData;
 	data['mrList'] = [];
 	var ev_data = this.event();
 	if( ev_data ){

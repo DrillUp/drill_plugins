@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        对话框 - 文本居中
+ * @plugindesc [v1.4]        对话框 - 文本居中
  * @author Drill_up
  * 
  * 
@@ -88,6 +88,8 @@
  * 修复了对话框连续使用 居中窗口字符 时失效的bug。
  * [v1.3]
  * 大幅度优化了 窗口字符核心 的底层，简化了居中的插件结构。
+ * [v1.4]
+ * 修复了 居中字符 在选项窗口中使用时，会多一点点偏移的bug。
  * 
  */
  
@@ -211,6 +213,7 @@ Window_Base.prototype.drill_COWC_processNewEffectChar_Simple = function( matched
 			
 			// > 当前行宽度
 			var c_ww = this.contentsWidth();
+			c_ww -= this._drill_COWC_effect_curData['left'] || 0;	//（去除起始光标位置的影响）
 			
 			// > 对话框的脸图宽度影响
 			if( this instanceof Window_Message == true && $gameMessage.faceName() != "" ){
@@ -230,6 +233,7 @@ Window_Base.prototype.drill_COWC_processNewEffectChar_Simple = function( matched
 			
 			// > 当前行宽度
 			var c_ww = this.contentsWidth();
+			c_ww -= this._drill_COWC_effect_curData['left'] || 0;	//（去除起始光标位置的影响）
 			
 			// > 对话框的脸图宽度影响
 			if( this instanceof Window_Message == true && $gameMessage.faceName() != "" ){

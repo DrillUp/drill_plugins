@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        对话框 - 姓名框窗口
+ * @plugindesc [v1.1]        对话框 - 姓名框窗口
  * @author Drill_up
  * 
  * 
@@ -79,6 +79,9 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 修复了姓名框能遮挡对话框的bug。
+ * 
  * 
  * 
  * @param ---姓名框窗口---
@@ -202,18 +205,22 @@ var _drill_DNB_msg_createSubWindows = Window_Message.prototype.createSubWindows;
 Window_Message.prototype.createSubWindows = function() {
 	_drill_DNB_msg_createSubWindows.call(this);
 	this._drill_DNB_nameWindow = new Drill_DNB_NameBoxWindow( this );
+    
+	// > 强行用addChild，因为addWindow会出现窗口相互遮挡问题
+	var scene = SceneManager._scene;
+    scene.addChild(this._drill_DNB_nameWindow);
 };
 //==============================
 // * 对话框 - 相关子窗口
 //
 //			说明：	该函数被父场景调用并自动addWindow。
 //==============================
-var _drill_DNB_msg_subWindows = Window_Message.prototype.subWindows;
-Window_Message.prototype.subWindows = function(){
-	var win_list = _drill_DNB_msg_subWindows.call(this);
-	win_list.push( this._drill_DNB_nameWindow );
-	return win_list;
-};
+//var _drill_DNB_msg_subWindows = Window_Message.prototype.subWindows;
+//Window_Message.prototype.subWindows = function(){
+//	var win_list = _drill_DNB_msg_subWindows.call(this);
+//	win_list.push( this._drill_DNB_nameWindow );
+//	return win_list;
+//};
 //==============================
 // * 对话框 - 显示新建页
 //==============================
@@ -335,10 +342,14 @@ Drill_DNB_NameBoxWindow.prototype.constructor = Drill_DNB_NameBoxWindow;
 // * 姓名窗口 - 初始化
 //==============================
 Drill_DNB_NameBoxWindow.prototype.initialize = function( p ){
-    this._drill_parentWindow = p;
 	
+	// > 绑定父窗体
+	this._drill_parentWindow = p;
+	
+	// > 原函数
     Window_Base.prototype.initialize.call(this, 0, 0, 240, this.windowHeight());
 	
+	// > 私有参数初始化
     this._drill_text = "";
     this._drill_showingText = "";
     this._drill_width = 240;
@@ -346,12 +357,15 @@ Drill_DNB_NameBoxWindow.prototype.initialize = function( p ){
 	
 	// > 私有属性初始化
     this._openness = 0;			//初始紧闭
-	//this.backOpacity = 0;		//（隐藏背景）
-    //this.opacity = 0;
 	
+	// > 初始隐藏
     this.deactivate();
     this.hide();
 };
+//==============================
+// * 姓名窗口 - 属性 - 内边距
+//==============================
+Drill_DNB_NameBoxWindow.prototype.standardPadding = function(){ return DrillUp.g_DNB_nameBox_padding; };
 //==============================
 // * 姓名窗口 - 属性 - 窗口宽度（暂不考虑文本伸缩情况，后续还需要伸缩）
 //==============================
@@ -360,15 +374,8 @@ Drill_DNB_NameBoxWindow.prototype.windowWidth = function(){ return this._drill_w
 // * 姓名窗口 - 属性 - 高度（1行高）
 //==============================
 Drill_DNB_NameBoxWindow.prototype.windowHeight = function(){ return this.fittingHeight(1); };
-
-Drill_DNB_NameBoxWindow.prototype.standardPadding = function(){ return DrillUp.g_DNB_nameBox_padding; };
-
 //==============================
-// * 姓名窗口 - 字体
-//==============================
-//Drill_DNB_NameBoxWindow.prototype.standardFontFace = function(){ return "xxxx"; };
-//==============================
-// * 姓名窗口 - 字体大小
+// * 姓名窗口 - 属性 - 字体大小
 //==============================
 Drill_DNB_NameBoxWindow.prototype.standardFontSize = function() { return DrillUp.g_DNB_nameBox_fontSize; };
 

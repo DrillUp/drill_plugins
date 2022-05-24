@@ -3,11 +3,11 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.0]        物体触发 - 固定区域 & 玩家接近 & 条件触发
+ * @plugindesc [v2.1]        物体触发 - 固定区域 & 玩家接近 & 条件触发
  * @author Drill_up
  * 
  * @Drill_LE_param "玩家触发-%d"
- * @Drill_LE_parentKey ""
+ * @Drill_LE_parentKey "---玩家触发组%d至%d---"
  * @Drill_LE_var "DrillUp.g_EAT_area_length"
  * 
  * 
@@ -24,15 +24,15 @@
  * ----插件扩展
  * 该插件必须依赖指定插件才能运行。
  * 基于：
- *   - Drill_CoreOfFixedArea        物体触发 - 固定区域核心★★v1.7及以上★★
+ *   - Drill_CoreOfFixedArea        物体触发 - 固定区域核心★★v1.8及以上★★
  *     该插件需要固定区域才能进行区域触发。
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：地图界面。
  *   只作用于事件。
- * 2.当前触发分为两种：玩家 与 被触发的事件。
- * 3.更多详细内容，去看看 "9.物体触发 > 关于物体触发-固定区域.docx"。
+ * 2.更多相关内容，去看看 "9.物体触发 > 关于玩家接近触发.docx"。
+ *   触发区域相关，去看看 "9.物体触发 > 关于物体触发-固定区域.docx"。
  * 传感器：
  *   (1.接近触发被划分为传感器类。
  *      传感器即遇到某些情况就会自动触发的事件。
@@ -43,9 +43,16 @@
  *   (1.该插件的区域主体是玩家，用于自动触发接近玩家区域的事件。
  *   (2.主动触发是一个区域范围，被触发是一个点，区域内符合条件的点会被触发。
  *      注意，这里玩家是主体，区域会一直跟着玩家，事件是点。
+ * 区域可视化：
+ *   (1.该插件提供了DEBUG区域显示功能，显示的区域能根据朝向和筛选器而变化。
+ *      注意，仅用于测试查看用，并且DEBUG显示非常消耗性能，要记得随时关闭。
  * 细节：
- *   (1.玩家触发比较特殊，触发是连续不间断的。
- *   (2.你可以自定义条件关键字，用于连接玩家与不同的被触发的事件。
+ *   (1.玩家触发 是连续不间断的。
+ *   (2.你可以自定义条件关键字，用于连接玩家与不同的被触发事件。
+ * 多次优化：
+ *   (1.插件的每个版本都在优化性能，从最初的368.27ms消耗（v1.2版本以前），
+ *      到后来的优化排序的189.12ms消耗（v2.0版本以前），再到现在使用棋盘
+ *      算法的再次优化，降低到80.58ms的消耗。
  * 设计：
  *   (1.玩家接近事件后，事件可以自己快速做出反应，比如逃跑/释放技能等。
  *   (2.你可以设计成某种接近后自动触发的开关，可见物体管理层的亮片。
@@ -104,23 +111,27 @@
  * 工作类型：   持续执行
  * 时间复杂度： o(nlogn)+o(n^2) 每帧
  * 测试方法：   去物体管理层、地理管理层、镜像管理层跑一圈测试就可以了。
- * 测试结果：   200个事件的地图中，平均消耗为：【59.74ms】
- *              100个事件的地图中，平均消耗为：【42.80ms】
+ * 测试结果：   200个事件的地图中，平均消耗为：【41.20ms】
+ *              100个事件的地图中，平均消耗为：【32.18ms】
  *               50个事件的地图中，平均消耗为：【28.62ms】
  * 测试方法2：  物体管理层的76个亮片，切换区域设置，边跑边测试。
- * 测试结果2：  200个事件的地图中，平均消耗为：【189.12ms】
+ * 测试结果2：  200个事件的地图中，平均消耗为：【80.58ms】
  * 
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
  *   测试结果并不是精确值，范围在给定值的10ms范围内波动。
  *   更多性能介绍，去看看 "0.性能测试报告 > 关于插件性能.docx"。
- * 2.该插件v1.2以前版本未优化到位，200个事件的消耗为【538.27ms】。
+ * 2.插件v1.2以前版本：
+ *   未优化到位，200个事件的消耗为【538.27ms】。
  *   如果未升级建议立即升级。
  * 3.在较好性能的游戏本中，200个事件的消耗只有27.94ms，流畅性自然比当前垃
  *   圾本要高的多了。高性能电脑固然支持清晰的画面和流畅的体验，但rmmv毕竟
  *   是2d游戏，如果2d游戏比3d游戏还卡，实在说不过去。
- * 4.玩家视野范围内出现大量事件时，消耗还是难以压下去。原先的49个亮片消耗
- *   并不多，60ms左右，而到了76个亮片时，消耗就骤然上升了。
- *   （另外，垃圾电脑的网页版运行只有3帧。）
+ * 4.插件v2.0以前版本：
+ *   玩家视野范围内出现大量事件时，消耗还是难以压下去。
+ *   76个亮片时，消耗高达189.12ms。（另外，垃圾电脑的网页版运行只有3帧。）
+ * 5.现阶段版本：
+ *   插件引入了棋盘算法，大幅度优化了算法筛选机制。
+ *   76个亮片时，消耗平衡在80.58ms左右。（减少了一半的消耗）
  * 
  * -----------------------------------------------------------------------------
  * ----更新日志
@@ -147,7 +158,17 @@
  * 优化了部分计算方法，减少性能消耗。
  * [v2.0]
  * 优化了容器结构，减少性能消耗。
+ * [v2.1]
+ * 使用了棋盘算法再次大幅度优化内部结构，减少了一半的性能消耗。
  * 
+ * 
+ * 
+ * @param DEBUG-触发区域显示
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc 开启后，事件的触发区域将会被显示出来，用于排查触发问题。
+ * @default false
  * 
  * @param 是否修正区域判定
  * @type boolean
@@ -156,242 +177,248 @@
  * @desc 修正后，没有完全离开触发区域的事件也会被捕获到，并触发。
  * @default true
  * 
+ * @param ---玩家触发组 1至20---
+ * @desc 
+ * 
  * @param 玩家触发-1
- * @parent ---玩家触发---
+ * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
  * @desc 自定义玩家自动触发的设置。
  * @default {"标签":"==与玩家距离1==","初始是否开启":"true","触发关键字":"与玩家距离1","区域模式":"形状区域","形状区域":"菱形区域","形状区域范围":"1","自定义区域编号":"1","是否开启筛选器":"false","筛选器编号":"1"}
  *
  * @param 玩家触发-2
- * @parent ---玩家触发---
+ * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
- * @default {"标签":"==与玩家距离1==","初始是否开启":"true","触发关键字":"与玩家距离2","区域模式":"形状区域","形状区域":"菱形区域","形状区域范围":"2","自定义区域编号":"1","是否开启筛选器":"false","筛选器编号":"1"}
+ * @default {"标签":"==与玩家距离2==","初始是否开启":"true","触发关键字":"与玩家距离2","区域模式":"形状区域","形状区域":"菱形区域","形状区域范围":"2","自定义区域编号":"1","是否开启筛选器":"false","筛选器编号":"1"}
  *
  * @param 玩家触发-3
- * @parent ---玩家触发---
+ * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
- * @default {"标签":"==与玩家距离1==","初始是否开启":"true","触发关键字":"与玩家距离3","区域模式":"形状区域","形状区域":"菱形区域","形状区域范围":"3","自定义区域编号":"1","是否开启筛选器":"false","筛选器编号":"1"}
+ * @default {"标签":"==与玩家距离3==","初始是否开启":"true","触发关键字":"与玩家距离3","区域模式":"形状区域","形状区域":"菱形区域","形状区域范围":"3","自定义区域编号":"1","是否开启筛选器":"false","筛选器编号":"1"}
  *
  * @param 玩家触发-4
- * @parent ---玩家触发---
+ * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
- * @default {"标签":"==与玩家距离1==","初始是否开启":"true","触发关键字":"与玩家距离4","区域模式":"形状区域","形状区域":"菱形区域","形状区域范围":"4","自定义区域编号":"1","是否开启筛选器":"false","筛选器编号":"1"}
+ * @default {"标签":"==与玩家距离4==","初始是否开启":"true","触发关键字":"与玩家距离4","区域模式":"形状区域","形状区域":"菱形区域","形状区域范围":"4","自定义区域编号":"1","是否开启筛选器":"false","筛选器编号":"1"}
  *
  * @param 玩家触发-5
- * @parent ---玩家触发---
+ * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
- * @default {"标签":"==与玩家距离1==","初始是否开启":"true","触发关键字":"与玩家距离5","区域模式":"形状区域","形状区域":"菱形区域","形状区域范围":"5","自定义区域编号":"1","是否开启筛选器":"false","筛选器编号":"1"}
+ * @default {"标签":"==与玩家距离5==","初始是否开启":"true","触发关键字":"与玩家距离5","区域模式":"形状区域","形状区域":"菱形区域","形状区域范围":"5","自定义区域编号":"1","是否开启筛选器":"false","筛选器编号":"1"}
  *
  * @param 玩家触发-6
- * @parent ---玩家触发---
+ * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
- * @default {"标签":"==与玩家距离1==","初始是否开启":"true","触发关键字":"与玩家距离6","区域模式":"形状区域","形状区域":"菱形区域","形状区域范围":"6","自定义区域编号":"1","是否开启筛选器":"false","筛选器编号":"1"}
+ * @default {"标签":"==与玩家距离6==","初始是否开启":"true","触发关键字":"与玩家距离6","区域模式":"形状区域","形状区域":"菱形区域","形状区域范围":"6","自定义区域编号":"1","是否开启筛选器":"false","筛选器编号":"1"}
  *
  * @param 玩家触发-7
- * @parent ---玩家触发---
+ * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
- * @default {"标签":"==与玩家距离1==","初始是否开启":"true","触发关键字":"与玩家距离7","区域模式":"形状区域","形状区域":"菱形区域","形状区域范围":"7","自定义区域编号":"1","是否开启筛选器":"false","筛选器编号":"1"}
+ * @default {"标签":"==与玩家距离7==","初始是否开启":"true","触发关键字":"与玩家距离7","区域模式":"形状区域","形状区域":"菱形区域","形状区域范围":"7","自定义区域编号":"1","是否开启筛选器":"false","筛选器编号":"1"}
  *
  * @param 玩家触发-8
- * @parent ---玩家触发---
+ * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
- * @default {"标签":"==与玩家距离1==","初始是否开启":"true","触发关键字":"与玩家距离8","区域模式":"形状区域","形状区域":"菱形区域","形状区域范围":"8","自定义区域编号":"1","是否开启筛选器":"false","筛选器编号":"1"}
+ * @default {"标签":"==与玩家距离8==","初始是否开启":"true","触发关键字":"与玩家距离8","区域模式":"形状区域","形状区域":"菱形区域","形状区域范围":"8","自定义区域编号":"1","是否开启筛选器":"false","筛选器编号":"1"}
  *
  * @param 玩家触发-9
- * @parent ---玩家触发---
+ * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 玩家触发-10
- * @parent ---玩家触发---
+ * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 玩家触发-11
- * @parent ---玩家触发---
+ * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 玩家触发-12
- * @parent ---玩家触发---
+ * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 玩家触发-13
- * @parent ---玩家触发---
+ * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 玩家触发-14
- * @parent ---玩家触发---
+ * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 玩家触发-15
- * @parent ---玩家触发---
+ * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 玩家触发-16
- * @parent ---玩家触发---
+ * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 玩家触发-17
- * @parent ---玩家触发---
+ * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 玩家触发-18
- * @parent ---玩家触发---
+ * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 玩家触发-19
- * @parent ---玩家触发---
+ * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 玩家触发-20
- * @parent ---玩家触发---
+ * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
  * @default 
+ * 
+ * @param ---玩家触发组21至40---
+ * @desc 
  *
  * @param 玩家触发-21
- * @parent ---玩家触发---
+ * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 玩家触发-22
- * @parent ---玩家触发---
+ * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 玩家触发-23
- * @parent ---玩家触发---
+ * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 玩家触发-24
- * @parent ---玩家触发---
+ * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 玩家触发-25
- * @parent ---玩家触发---
+ * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 玩家触发-26
- * @parent ---玩家触发---
+ * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 玩家触发-27
- * @parent ---玩家触发---
+ * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 玩家触发-28
- * @parent ---玩家触发---
+ * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 玩家触发-29
- * @parent ---玩家触发---
+ * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 玩家触发-30
- * @parent ---玩家触发---
+ * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 玩家触发-31
- * @parent ---玩家触发---
+ * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 玩家触发-32
- * @parent ---玩家触发---
+ * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 玩家触发-33
- * @parent ---玩家触发---
+ * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 玩家触发-34
- * @parent ---玩家触发---
+ * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 玩家触发-35
- * @parent ---玩家触发---
+ * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 玩家触发-36
- * @parent ---玩家触发---
+ * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 玩家触发-37
- * @parent ---玩家触发---
+ * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 玩家触发-38
- * @parent ---玩家触发---
+ * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 玩家触发-39
- * @parent ---玩家触发---
+ * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 玩家触发-40
- * @parent ---玩家触发---
+ * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
  * @desc 自定义触发事件的区域范围。
  * @default 
@@ -468,6 +495,18 @@
  * @desc 对应固定区域核心中对应的自定义区域。
  * @default 1
  *
+ * @param DEBUG-是否显示区域
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭，当在DEBUG调试时，该区域将显示出来。
+ * @default false
+ * 
+ * @param DEBUG-区域颜色
+ * @parent DEBUG-是否显示区域
+ * @desc 当开启DEBUG调试时，该区域显示的颜色。
+ * @default #00ff00
+ *
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -481,41 +520,82 @@
 //		工作类型		持续执行
 //		时间复杂度		o(n^3)			每帧	【直接for】
 //						o(nlogn)+o(n^2)	每帧	【排序后】
+//						o(nlogn)+o(n^2)	每帧	【棋盘算法】（直接减少了n的基数）
 //		性能测试因素	200个事件
-//		性能测试消耗	538.27ms	【直接for】
-//						59.74ms		【排序后】
-//						269.32ms	【外加了固定区域+筛选器 76个亮片】
-//		最坏情况		所有事件都在玩家范围内，并且所有事件都有"被触发"标签。
+//		性能测试消耗	> 538.27ms	【直接for】
+//						> 59.74ms	【排序后】
+//						  269.32ms	【排序后，外加 固定区域+筛选器 76个亮片】
+//						> 28.20ms	【棋盘算法】
+//						  80.58ms	【棋盘算法，外加 固定区域+筛选器 76个亮片】
+//		最坏情况		所有事件都在玩家范围内，并且所有事件都有"被触发"条件。
+//		备注			暂无
 //		
-//		2021-11-20优化	稍微优化了一下排序sort的处理方式。
+//		2021-11-20优化	稍微优化了一下排序sort的处理方式。（可能由于函数分散，所以没测准）
 //						在76个亮片中测试后： 87.01ms， 其中66.78ms（drill_EAT_playerTriggerRangeArea）20.24ms（drill_EAT_playerTriggerSelfArea）
 //		2022-2-20优化	这里将非空容器单独分离出来，放到核心中。
 //						能有效减少 复制新事件 造成的接近触发判定问题。
+//		2022-5-4优化	使用了棋盘算法
+//						在76个亮片中测试后： 
+//							棋盘算法（垃圾本）：80.58ms（drill_EAT_updatePlayerTrigger）持续在1帧的位置。
+//							棋盘算法（高配本）：80.70ms（drill_EAT_checkerboardTriggered）持续在15帧的位置。
+//							坐标遍历算法（垃圾本）：145.67ms（drill_EAT_playerTriggerRangeArea）垃圾本持续在0帧和1帧波动，明显棋盘算法没出现0帧的情况。
 //		
 //插件记录：
 //		★大体框架与功能如下：
 //			玩家接近触发：
-//				->进入范围ON，离开自动OFF
-//				->自定义区域触发方式
-//				->优化，尽可能减少计算量
-//				->固定区域核心交互
+//				->指令
+//					->插件指令
+//					->事件注释
+//				->玩家接近棋盘
+//					->创建棋盘
+//						->形状区域
+//						->自定义区域
+//					->最大触发距离
+//						->正方形棋盘（考虑到朝向变化）
+//				->排序
+//					->离玩家最大距离
+//				->玩家触发
+//					->棋盘内
+//						> 棋盘点数据
+//						> 棋盘筛选器
+//						> 玩家触发 - 开关
+//						> 玩家触发 - 关键字
+//					->棋盘外
+//					->子流程
+//						->选择性关闭 自关标记
+//						->关闭所有 自关标记
+//						->触发指定事件的条件
+//					->执行触发
+//				->事件条件数据
+//					> 条件集
+//					> 对应的独立开关
+//					> 自关标记
+//				->事件已触发容器
+//					->记录事件
 //			
 //		★必要注意事项：
-//			1.遍历关系如下：update -> player -> areas -> events -> points
-//			  其中，update不可变，player只有1个，events经过排序优化。
-//			  事件经过了两次指针存储：
-//			2.为了更完美优化事件内容，一般多用【排序+break】，可以有效减少冗余的计算。
-//			  与玩家接近的事件，最多十几个左右，所以每帧在200个事件中选出符合条件的事件最快的方法是排序。
-//			  每次都 组装大数组 ，遍历，即使有条件设置，但是只要不break，仍然非常耗计算。
-//			3.排序数组中的事件包括空值、已被销毁情况，你需要加条件区分。
+//			1.当前使用了棋盘算法。
+//			  你可以在固定区域里面自定义一大堆的区域，这些区域都应该被压缩到一个棋盘里面，
+//			  事件进入玩家的范围，根据棋盘的分布，找到相应的自定义区域，然后按条件依次触发开关。
+//			2.插件有三个对象： 玩家，棋盘范围，目标事件
+//			  触发有只有一种：目标事件进入棋盘范围 -> 目标事件开开关
+//			  玩家是棋盘范围的所有者，但不与棋盘范围交互。
 //				
 //		★其它说明细节：
 //			1.该插件与【Drill_EventRangeTrigger】插件的"被触发"注释有交叉，但并不干扰对方，是独立的。
-//			2.要使用独立开关判定，每次独立开关赋值都会刷新地图。
-//			  离开范围需要off
-//			  这里设置的所有被触发，都是直接跨 事件页 的，指定页被激活后，相关注释即可设定。
-//			3.由于这里是持续触发，不需要存储上一次区域，所以内部结构不需要大幅度修改。
+//			2.由于这里是持续触发，不需要存储上一次区域，所以内部结构不需要大幅度修改。
 //			  这里要注意两个关系，一个是玩家位置的判定修正，另一个是触发敌人的判定修正。
+//		
+//		★旧版本日志：
+//			1.直接for遍历
+//			  关系如下：update -> player -> areas -> events -> points
+//			  其中，update不可变，player只有1个，events经过排序优化。
+//			  事件经过了两次指针存储：
+//			2.排序法：
+//			  为了更完美优化事件内容，一般多用【排序+break】，可以有效减少冗余的计算。
+//			  与玩家接近的事件，最多十几个左右，所以每帧在200个事件中选出符合条件的事件最快的方法是排序。
+//			  每次都 组装大数组 ，遍历，即使有条件设置，但是只要不break，仍然非常耗计算。
+//			  排序数组中的事件包括空值、已被销毁情况，你需要加条件区分。
 //				
 //		★存在的问题：
 //			暂无
@@ -528,42 +608,82 @@
 　　Imported.Drill_EventAutoTrigger = true;
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_EventAutoTrigger');
-
 	
+	
+	//==============================
+	// * 变量获取 - 玩家触发
+	//				（~struct~ATriArea）
+	//==============================
+	DrillUp.drill_EAT_areaInit = function( dataFrom ){
+		var data = {};
+		
+		// > 绑定
+		data['enable'] = String( dataFrom["初始是否开启"] || "true") == "true";
+		data['keyword'] = String( dataFrom["触发关键字"] || "");
+		data['areaMode'] = String( dataFrom["区域模式"] || "形状区域");
+		
+		// > 形状区域
+		data['shapeMode'] = String( dataFrom["形状区域"] || "方形区域");
+		data['shapeRange'] = Number( dataFrom["形状区域范围"] || 1);
+		
+		// > 自定义区域
+		data['self_id'] = Number( dataFrom["自定义区域编号"] || 1);
+		
+		// > 筛选器
+		data['condition_enable'] = String( dataFrom["是否开启筛选器"] || "true") == "true";
+		data['condition_id'] = Number( dataFrom["筛选器编号"] || 1);
+		
+		// > DEBUG
+		data['debug_enabled'] = String( dataFrom["DEBUG-是否显示区域"] || "false") == "true";
+		data['debug_color'] = String( dataFrom["DEBUG-区域颜色"] || "#ffff00");
+		
+		return data;
+	}
+	
+	/*-----------------杂项------------------*/
+	DrillUp.g_EAT_debugEnabled = String(DrillUp.parameters['DEBUG-触发区域显示'] || "false") === "true";
 	DrillUp.g_EAT_fix = String(DrillUp.parameters['是否修正区域判定'] || "true") === "true";//几乎没有不修正的需求，所以直接修正
 	
-	DrillUp.g_EAT_area_max_x_range = 1;	//最大触发区域距离（优化用）
-	DrillUp.g_EAT_area_max_y_range = 1;
+	/*-----------------玩家触发组------------------*/
 	DrillUp.g_EAT_area_length = 40;
 	DrillUp.g_EAT_area = [];
 	for( var i = 0; i < DrillUp.g_EAT_area_length; i++ ){
-		if( DrillUp.parameters["玩家触发-" + String(i+1) ] != "" ){
-			DrillUp.g_EAT_area[i] = JSON.parse(DrillUp.parameters["玩家触发-" + String(i+1) ]);
-			DrillUp.g_EAT_area[i]['enable'] = String(DrillUp.g_EAT_area[i]["初始是否开启"] || "true") == "true";
-			DrillUp.g_EAT_area[i]['keyword'] = String(DrillUp.g_EAT_area[i]["触发关键字"]);
-			DrillUp.g_EAT_area[i]['areaMode'] = String(DrillUp.g_EAT_area[i]["区域模式"]);
-			
-			DrillUp.g_EAT_area[i]['shapeMode'] = String(DrillUp.g_EAT_area[i]["形状区域"]);
-			DrillUp.g_EAT_area[i]['shapeRange'] = Number(DrillUp.g_EAT_area[i]["形状区域范围"] || 1);
-			DrillUp.g_EAT_area_max_x_range = Math.max(DrillUp.g_EAT_area[i]['shapeRange'],DrillUp.g_EAT_area_max_x_range);
-			DrillUp.g_EAT_area_max_y_range = Math.max(DrillUp.g_EAT_area[i]['shapeRange'],DrillUp.g_EAT_area_max_y_range);
-			
-			var self_id = Number(DrillUp.g_EAT_area[i]["自定义区域编号"] || 1)  - 1;
-			if( self_id > 0 ){
-				var area = DrillUp.g_COFA_area_list[ self_id ]['points']
-				for (var j = 0; j < area.length ; j++) {
-					DrillUp.g_EAT_area_max_x_range = Math.max( area[j].x, DrillUp.g_EAT_area_max_x_range);
-					DrillUp.g_EAT_area_max_y_range = Math.max( area[j].y, DrillUp.g_EAT_area_max_y_range);
-				}
-			}
-			DrillUp.g_EAT_area[i]['self_id'] = self_id;
-			DrillUp.g_EAT_area[i]['condition_enable'] = String(DrillUp.g_EAT_area[i]["是否开启筛选器"] || "true") == "true";
-			DrillUp.g_EAT_area[i]['condition_id'] = Number(DrillUp.g_EAT_area[i]["筛选器编号"] || 1);
-			
-			//alert(JSON.stringify(DrillUp.g_EAT_area[i]));
+		if( DrillUp.parameters["玩家触发-" + String(i+1) ] != "" &&
+			DrillUp.parameters["玩家触发-" + String(i+1) ] != undefined ){
+			var data = JSON.parse(DrillUp.parameters["玩家触发-" + String(i+1) ]);
+			DrillUp.g_EAT_area[i] = DrillUp.drill_EAT_areaInit( data );
+			DrillUp.g_EAT_area[i]['id'] = i;
 		}else{
 			DrillUp.g_EAT_area[i] = null;
 		}
+	}
+	
+	/*-----------------检查关键字 重复情况------------------*/
+	DrillUp.g_EAT_area_keyWordList = [];
+	for(var i = 0; i < DrillUp.g_EAT_area.length; i++ ){
+		var area = DrillUp.g_EAT_area[i];
+		if( area == undefined ){ continue; }
+		if( DrillUp.g_EAT_area_keyWordList.contains(area['keyword']) ){
+			alert(
+				"【Drill_EventAutoTrigger.js 物体触发 - 固定区域 & 玩家接近 & 条件触发】\n"+
+				"错误，玩家触发-"+String(i+1)+"的触发关键字，与之前的设置重复，你需要手动修改确保 触发关键字 唯一。"
+			);
+			continue;
+		}
+		DrillUp.g_EAT_area_keyWordList.push( area['keyword'] );
+	}
+	
+	//==============================
+	// * 数据 - 根据触发关键字获取事件触发
+	//==============================
+	DrillUp.drill_EAT_getAreaByKeyword = function( keyword ){
+		for(var i=0; i < this.g_EAT_area.length; i++){
+			var area = this.g_EAT_area[i];
+			if( area['keyword'] == keyword ){
+				return area;
+			}
+		}
+		return null;
 	}
 	
 	
@@ -612,7 +732,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				for( var k=0; k < e_ids.length; k++ ){
 					if( $gameMap.drill_EAT_isEventExist( e_ids[k] ) == false ){ continue; }
 					var e = $gameMap.event( e_ids[k] );
-					e._drill_EAT['tags'] = {};
+					e.drill_EAT_removeAllTag();
 				}
 			}
 		}
@@ -623,7 +743,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				for( var k=0; k < e_ids.length; k++ ){
 					if( $gameMap.drill_EAT_isEventExist( e_ids[k] ) == false ){ continue; }
 					var e = $gameMap.event( e_ids[k] );
-					e._drill_EAT['tags'][temp2] = false;
+					e.drill_EAT_removeTag( temp2 );
 				}
 			}
 		}
@@ -637,8 +757,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					for( var k=0; k < e_ids.length; k++ ){
 						if( $gameMap.drill_EAT_isEventExist( e_ids[k] ) == false ){ continue; }
 						var e = $gameMap.event( e_ids[k] );
-						e._drill_EAT['tags'][temp2] = true;
-						e._drill_EAT['self_switchs'][temp2] = temp4;
+						e.drill_EAT_addTag( temp2, temp4 );
 					}
 				}
 			}
@@ -652,7 +771,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					for( var k=0; k < e_ids.length; k++ ){
 						if( $gameMap.drill_EAT_isEventExist( e_ids[k] ) == false ){ continue; }
 						var e = $gameMap.event( e_ids[k] );
-						e._drill_EAT['autoOff'][temp2] = true;
+						e.drill_EAT_setAutoOff( temp2, true );
 					}
 				}
 			}
@@ -693,22 +812,18 @@ Game_Map.prototype.drill_EAT_isEventExist = function( e_id ){
 
 
 //=============================================================================
-// ** 事件
+// ** 事件注释
 //=============================================================================	
 //==============================
-// ** 初始化
+// * 事件注释 - 标记
 //==============================
-var _drill_EAT_char_initialize = Game_Event.prototype.initialize;
+var _drill_EAT_ev_initialize = Game_Event.prototype.initialize;
 Game_Event.prototype.initialize = function( mapId, eventId ){
-	this._drill_EAT = {};				
-	this._drill_EAT['tags'] = {};				//条件关键字（json串）
-	this._drill_EAT['autoOff'] = {};			//自动off关键字（json串）
-	this._drill_EAT['self_switchs'] = {};		//开启独立开关
-	this._drill_EAT_isFirstBirth = true;		//第一次出生
-	_drill_EAT_char_initialize.call( this,mapId, eventId );
+	this._drill_EAT_isFirstBirth = true;	//第一次出生
+	_drill_EAT_ev_initialize.call( this,mapId, eventId );
 };
 //==============================
-// ** 注释初始化
+// * 事件注释 - 注释初始化
 //==============================
 var _drill_EAT_event_setupPage = Game_Event.prototype.setupPage;
 Game_Event.prototype.setupPage = function() {
@@ -729,24 +844,27 @@ Game_Event.prototype.drill_EAT_setupPage = function() {
 	}
 };
 //==============================
-// * 读取注释
+// * 事件注释 - 读取注释
 //==============================
 Game_Event.prototype.drill_EAT_readPage = function( page_list ) {	
 	page_list.forEach( function(l) {	//这里并不需要与另一个插件同步，因为他们仅仅是相同的注释有相同的效果而已
 		if( l.code === 108 ){
 			var args = l.parameters[0].split(' ');
 			var command = args.shift();
-			if (command == "=>被触发"){	//=>被触发 : 击碎岩石 : 触发独立开关 : A
-				if(args.length >= 4){
-					if(args[1]){ var temp1 = String(args[1]); }
-					if(args[3]){ var temp2 = String(args[3]); }
-					if(args[5]){ var temp3 = String(args[5]); }
-					if( temp2 == "触发独立开关" ){
-						this._drill_EAT['tags'][temp1] = true;
-						this._drill_EAT['self_switchs'][temp1] = temp3;
+			if( command == "=>被触发" ){	//=>被触发 : 击碎岩石 : 触发独立开关 : A
+				if(args.length == 4){
+					var temp1 = String(args[1]);
+					var type = String(args[3]);
+					if( type == "离开范围时自动OFF" ){
+						this.drill_EAT_setAutoOff( temp1, true );
 					}
-					if( temp2 == "离开范围时自动OFF" ){
-						this._drill_EAT['autoOff'][temp1] = true;
+				}
+				if(args.length == 6){
+					var temp1 = String(args[1]);
+					var type = String(args[3]);
+					var temp2 = String(args[5]);
+					if( type == "触发独立开关" ){
+						this.drill_EAT_addTag( temp1, temp2 );
 					}
 				}
 			};
@@ -755,13 +873,13 @@ Game_Event.prototype.drill_EAT_readPage = function( page_list ) {
 }
 
 //=============================================================================
-// * 存储变量初始化
+// * 存储数据初始化
 //=============================================================================
 var _drill_EAT_system_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
     _drill_EAT_system_initialize.call(this);
 	this._drill_EAT_enables = [];					//玩家接近主动触发 开关
-	for(var i=0; i<DrillUp.g_EAT_area.length ;i++ ){
+	for(var i=0; i<DrillUp.g_EAT_area.length; i++ ){
 		var area = DrillUp.g_EAT_area[i];
 		if( area == undefined ){ 
 			this._drill_EAT_enables.push( false );
@@ -771,231 +889,625 @@ Game_System.prototype.initialize = function() {
 	}
 };	
 
+
 //=============================================================================
-// * 地图界面
+// ** 玩家接近 棋盘
+//
+//			说明：	> 棋盘中按照 点列表 依次塞入 玩家触发id和其它条件。
+//					> 注意，棋盘中不含筛选器情况，从棋盘中拿到点后，要手动操作一下筛选器。
 //=============================================================================
 //==============================
-// * 帧刷新
+// * 棋盘 - 初始化
 //==============================
-var _drill_EAT_update = Game_Map.prototype.update;
-Game_Map.prototype.update = function(sceneActive) {
-	_drill_EAT_update.call(this,sceneActive);
+var _drill_EAT_initMembers = Game_Player.prototype.initMembers;
+Game_Player.prototype.initMembers = function(){
+	_drill_EAT_initMembers.call(this);
+	this._drill_EAT_checkerboard = {};
+	this._drill_EAT_checkerboard['matrix'] = null;			//棋盘矩阵
+	this._drill_EAT_checkerboard['matrix_inited'] = false;	//棋盘初始化标记
+	this._drill_EAT_checkerboard['max_x'] = 1;				//最大触发距离X（注意，不是棋盘宽度）
+	this._drill_EAT_checkerboard['max_y'] = 1;				//最大触发距离Y（注意，不是棋盘高度）
+	this._drill_EAT_checkerboard['c_x'] = 0;				//棋盘中心点X
+	this._drill_EAT_checkerboard['c_y'] = 0;				//棋盘中心点Y
+};
+//==============================
+// * 棋盘 - 创建棋盘
+//
+//			说明：	只读数据，然后依次将数据塞入棋盘中。
+//==============================
+Game_Player.prototype.drill_EAT_createCheckerboard = function( EAT_area_list ){
+	if( this._drill_EAT_checkerboard['matrix_inited'] == true ){ return; }
+	this._drill_EAT_checkerboard['matrix_inited'] = true;
+	
+	// > 最大触发距离初始化
+	this.drill_EAT_initMaxRange( EAT_area_list );
+	
+	// > 棋盘中心点
+	var x_range = this._drill_EAT_checkerboard['max_x'];
+	var y_range = this._drill_EAT_checkerboard['max_y'];
+	this._drill_EAT_checkerboard['c_x'] = x_range;
+	this._drill_EAT_checkerboard['c_y'] = y_range;
+	var x_length = x_range*2 +1;
+	var y_length = y_range*2 +1;
+	
+	// > 构建棋盘
+	this._drill_EAT_checkerboard['matrix'] = [];	
+	for(var x=0; x < x_length; x++){
+		this._drill_EAT_checkerboard['matrix'][x] = [];
+		for(var y=0; y < y_length; y++){
+			this._drill_EAT_checkerboard['matrix'][x][y] = [];
+		}
+	}
+		
+	// > 插入区域信息
+	for( var i = 0; i < EAT_area_list.length; i++ ){
+		var area_data = EAT_area_list[i];
+		if( area_data == undefined ){ continue; }
+		
+		if( area_data['areaMode'] == "形状区域" ){
+			
+			// > 棋盘点数据（注意，只放与棋盘相关条件的数据）
+			var area_ptr = {};
+			area_ptr['id'] = area_data['id'];		//玩家触发id
+			area_ptr['direction'] = 0;				//朝向条件（0表示无条件，2/4/6/8表示特定朝向）
+			
+			// > 区域准备
+			var cal_area = $gameMap.drill_COFA_getShapePoints( 
+				this._drill_EAT_checkerboard['c_x'], 
+				this._drill_EAT_checkerboard['c_y'], 
+				area_data['shapeMode'], area_data['shapeRange']
+			);
+			
+			// > 将 棋盘点数据 塞入棋盘
+			for(var x=0; x < x_length; x++){
+				for(var y=0; y < y_length; y++){
+					for(var k=0; k < cal_area.length; k++){
+						var point = cal_area[k];
+						if( point['x'] == x && point['y'] == y ){
+							this._drill_EAT_checkerboard['matrix'][x][y].push( area_ptr );
+						}
+					}
+				}
+			};
+		}
+		if( area_data['areaMode'] == "自定义区域" ){
+			var self_id = area_data['self_id'];
+			if( self_id <= 0 ){ continue; }
+			
+			// > 区域准备（四个方向）
+			var def_area = DrillUp.g_COFA_area_list[ self_id-1 ];
+			var cal_area_2 = $gameMap.drill_COFA_getCustomPoints( this._drill_EAT_checkerboard['c_x'], this._drill_EAT_checkerboard['c_y'], 2, def_area['points'] );
+			var cal_area_4 = $gameMap.drill_COFA_getCustomPoints( this._drill_EAT_checkerboard['c_x'], this._drill_EAT_checkerboard['c_y'], 4, def_area['points'] );
+			var cal_area_6 = $gameMap.drill_COFA_getCustomPoints( this._drill_EAT_checkerboard['c_x'], this._drill_EAT_checkerboard['c_y'], 6, def_area['points'] );
+			var cal_area_8 = $gameMap.drill_COFA_getCustomPoints( this._drill_EAT_checkerboard['c_x'], this._drill_EAT_checkerboard['c_y'], 8, def_area['points'] );
+			
+			// > 将 棋盘点数据 塞入棋盘
+			for(var x=0; x < x_length; x++){
+				for(var y=0; y < y_length; y++){
+					
+					// > 关闭朝向（固定向右）
+					if( def_area['consistent'] == false ){
+						for(var k=0; k < cal_area_6.length; k++){
+							var point = cal_area_6[k];
+							if( point['x'] == x && point['y'] == y ){
+								
+								// > 棋盘点数据（注意，只放与棋盘相关条件的数据）
+								var area_ptr = {};
+								area_ptr['id'] = area_data['id'];	//事件触发id
+								area_ptr['direction'] = 0;			//朝向条件
+								
+								this._drill_EAT_checkerboard['matrix'][x][y].push( area_ptr );
+							}
+						}
+						continue;
+					}
+					
+					// > 与事件朝向一致（四个方向）
+					for(var k=0; k < cal_area_2.length; k++){
+						var point = cal_area_2[k];
+						if( point['x'] == x && point['y'] == y ){
+							
+							// > 棋盘点数据（注意，只放与棋盘相关条件的数据）
+							var area_ptr = {};
+							area_ptr['id'] = area_data['id'];		//事件触发id
+							area_ptr['direction'] = 2;				//朝向条件
+							
+							this._drill_EAT_checkerboard['matrix'][x][y].push( area_ptr );
+						}
+					}
+					for(var k=0; k < cal_area_4.length; k++){
+						var point = cal_area_4[k];
+						if( point['x'] == x && point['y'] == y ){
+							
+							// > 棋盘点数据（注意，只放与棋盘相关条件的数据）
+							var area_ptr = {};
+							area_ptr['id'] = area_data['id'];		//事件触发id
+							area_ptr['direction'] = 4;				//朝向条件
+							
+							this._drill_EAT_checkerboard['matrix'][x][y].push( area_ptr );
+						}
+					}
+					for(var k=0; k < cal_area_6.length; k++){
+						var point = cal_area_6[k];
+						if( point['x'] == x && point['y'] == y ){
+							
+							// > 棋盘点数据（注意，只放与棋盘相关条件的数据）
+							var area_ptr = {};
+							area_ptr['id'] = area_data['id'];		//事件触发id
+							area_ptr['direction'] = 6;				//朝向条件
+							
+							this._drill_EAT_checkerboard['matrix'][x][y].push( area_ptr );
+						}
+					}
+					for(var k=0; k < cal_area_8.length; k++){
+						var point = cal_area_8[k];
+						if( point['x'] == x && point['y'] == y ){
+							
+							// > 棋盘点数据（注意，只放与棋盘相关条件的数据）
+							var area_ptr = {};
+							area_ptr['id'] = area_data['id'];		//事件触发id
+							area_ptr['direction'] = 8;				//朝向条件
+							
+							this._drill_EAT_checkerboard['matrix'][x][y].push( area_ptr );
+						}
+					}
+				}
+			};
+			
+		}
+	}
+	
+	// > 区域块可视化
+	$gameTemp._drill_EAT_DEBUG_spriteNeedRefresh = true;
+}
+//==============================
+// * 棋盘 - 最大触发距离初始化
+//
+//			说明：	此函数针对 棋盘的max_x和max_y参数进行初始化。
+//==============================
+Game_Player.prototype.drill_EAT_initMaxRange = function( EAT_area_list ){
+	this._drill_EAT_checkerboard['max_x'] = 1;		//最大触发距离（优化用）
+	this._drill_EAT_checkerboard['max_y'] = 1;
+	
+	for( var i = 0; i < EAT_area_list.length; i++ ){
+		var area_data = EAT_area_list[i];
+		if( area_data == undefined ){ continue; }
+		
+		if( area_data['areaMode'] == "形状区域" ){
+			this._drill_EAT_checkerboard['max_x'] = Math.max( area_data['shapeRange'], this._drill_EAT_checkerboard['max_x'] );
+			this._drill_EAT_checkerboard['max_y'] = Math.max( area_data['shapeRange'], this._drill_EAT_checkerboard['max_y'] );
+		}
+		if( area_data['areaMode'] == "自定义区域" ){
+			var self_id = area_data['self_id'];
+			if( self_id <= 0 ){ continue; }
+			var area = DrillUp.g_COFA_area_list[ self_id-1 ]['points'];
+			for( var j = 0; j < area.length; j++ ){
+				this._drill_EAT_checkerboard['max_x'] = Math.max( Math.abs(area[j].x), this._drill_EAT_checkerboard['max_x'] );
+				this._drill_EAT_checkerboard['max_y'] = Math.max( Math.abs(area[j].y), this._drill_EAT_checkerboard['max_y'] );
+			}
+		}
+	}
+	
+	// > 考虑到朝向变化问题，这里设为正方形
+	if( this._drill_EAT_checkerboard['max_x'] < this._drill_EAT_checkerboard['max_y'] ){
+		this._drill_EAT_checkerboard['max_x'] = this._drill_EAT_checkerboard['max_y'];
+	}else{
+		this._drill_EAT_checkerboard['max_y'] = this._drill_EAT_checkerboard['max_x'];
+	}
+}
+
+//=============================================================================
+// ** 玩家接近 棋盘变化控制
+//=============================================================================
+//==============================
+// * 棋盘变化 - 创建
+//==============================
+var _drill_EAT_setup = Game_Map.prototype.setup;
+Game_Map.prototype.setup = function( mapId ){
+	_drill_EAT_setup.call( this, mapId );
+	$gamePlayer.drill_EAT_createCheckerboard( DrillUp.g_EAT_area );	//创建棋盘（只创建一次，一次全创建）
+}
+
+
+
+//=============================================================================
+// ** 排序（最大距离）
+//
+//			说明：	> 这里的距离不是指 曼哈顿距离，而是 横向/纵向距离 的最大值。
+//					> 此部分 只提供一个功能：【获取矩形范围内的所有物体】。
+//					> （暂不考虑四叉树算法）
+//=============================================================================
+//==============================
+// * 排序 - 帧刷新
+//==============================
+var _drill_EAT_update_sort = Game_Map.prototype.update;
+Game_Map.prototype.update = function( sceneActive ){
+	_drill_EAT_update_sort.call( this,sceneActive );
 	if( sceneActive && $gamePlayer != undefined ){
-		this.drill_EAT_updateEventsOrderIndex();	//按玩家距离权值初始化
-		this.drill_EAT_updateEventsSort();			//按玩家距离排序
-		this.drill_EAT_updatePlayerTrigger();		//玩家触发
+		this.drill_EAT_updateEventsTank();			//帧刷新 - 容器变化
+		this.drill_EAT_updateEventsOrderIndex();	//帧刷新 - 排序权值
+		this.drill_EAT_updateEventsSort();			//帧刷新 - 执行排序
 	}
 };
 //==============================
-// * 帧刷新 - 按玩家距离排序（优化）
+// * 排序 - 帧刷新容器变化
+//==============================
+Game_Map.prototype.drill_EAT_updateEventsTank = function() {
+	
+	// > 临时排序数组 初始化
+	if( this._drill_EAT_xy_events == undefined ){
+		this._drill_EAT_xy_events = this.drill_COFA_getAvailableEventTank_Copyed();
+	}
+	
+	// > 临时排序数组 同步（事件数组变化了才同步）
+	var aTank_ptr = this.drill_COFA_getAvailableEventTank_Pointer();
+	if( this._drill_EAT_xy_events.length != aTank_ptr.length ){
+		this._drill_EAT_xy_events = this.drill_COFA_getAvailableEventTank_Copyed();
+	}
+};
+//==============================
+// * 排序 - 帧刷新排序权值
 //==============================
 Game_Map.prototype.drill_EAT_updateEventsOrderIndex = function() {
-	
-	// > 同步事件数组（事件数组变化了才同步）
-	var availableEventTank = this.drill_COFA_getAvailableEventTank();
-	if( this._drill_EAT_xy_events == undefined || this._drill_EAT_xy_events.length != availableEventTank.length ){
-		this._drill_EAT_xy_events = availableEventTank.slice();
-	}
 	
 	// > 设置权重
 	for( var i=0; i < this._drill_EAT_xy_events.length; i++ ){
 		var temp_event = this._drill_EAT_xy_events[i];
 		
-		// > 离玩家越远越后
-		var distance = $gameMap.distance( temp_event._x, temp_event._y, $gamePlayer._x, $gamePlayer._y ); 
-		temp_event._drill_EAT_orderIndex = distance;
-		
-		// > 被清除的事件排最后
-		if( temp_event._erased ){ temp_event._drill_EAT_orderIndex = 99999; }
+		// > 离玩家 最大横向距离
+		var dx = Math.abs( this.deltaX(temp_event._x, $gamePlayer._x) );
+		var dy = Math.abs( this.deltaY(temp_event._y, $gamePlayer._y) );
+		temp_event._drill_EAT_orderIndex = Math.max( dx, dy );
 	}
 	
 };
 //==============================
-// * 帧刷新 - 按玩家距离排序（优化）
+// * 排序 - 帧刷新执行排序
 //==============================
 Game_Map.prototype.drill_EAT_updateEventsSort = function() {
+	
 	// > 排序
 	this._drill_EAT_xy_events.sort(function(a, b){
 		return a._drill_EAT_orderIndex - b._drill_EAT_orderIndex ;
 	});
+	
 	//alert(this._drill_EAT_xy_events[0]._eventId);	//注意排序关系，第一个肯定是离玩家最近的事件
 	//alert(this._drill_EAT_xy_events[1]._eventId);
 	//alert(this._drill_EAT_xy_events[2]._eventId);
 	//alert( $gameMap.distance(this._drill_EAT_xy_events[0]._realX,this._drill_EAT_xy_events[0]._realY,$gamePlayer._realX,$gamePlayer._realY ));
 	//alert( $gameMap.distance(this._drill_EAT_xy_events[1]._realX,this._drill_EAT_xy_events[1]._realY,$gamePlayer._realX,$gamePlayer._realY ));
 	//alert( $gameMap.distance(this._drill_EAT_xy_events[2]._realX,this._drill_EAT_xy_events[2]._realY,$gamePlayer._realX,$gamePlayer._realY ));
-}
-
+};
 //==============================
-// * 帧刷新 - 玩家触发
-//==============================
-Game_Map.prototype.drill_EAT_updatePlayerTrigger = function() {
-	
-	for(var i=0; i < DrillUp.g_EAT_area.length; i++ ){
-		var a = DrillUp.g_EAT_area[i];
-		if( a == undefined ){ continue; }
-		
-		// > 触发开关
-		if( $gameSystem._drill_EAT_enables[i] != true ){ continue; }
-			
-		// > 筛选器对象
-		var condition = null;
-		if( a['condition_enable'] == true ){
-			condition = DrillUp.g_COFA_condition_list[ a['condition_id']-1 ]; 
-		}else{
-			condition = {}
-		}
-		
-		// > 自定义区域
-		if( a['areaMode'] == "自定义区域"){
-			this.drill_EAT_playerTriggerSelfArea( a['self_id'], condition, a['keyword'] );
-			
-		// > 形状区域
-		}else{
-			this.drill_EAT_playerTriggerRangeArea( a['shapeMode'],a['shapeRange'], condition, a['keyword'] );
-		}
-	}
-}
-
-//==============================
-// * 玩家触发 - 形状区域（区域类型、区域范围、筛选器对象、条件关键字）
-//==============================
-Game_Map.prototype.drill_EAT_playerTriggerRangeArea = function( type, range, condition, tag ) {
-
-	// > 位置修正
-	var p_x = $gamePlayer._x;
-	var p_y = $gamePlayer._y;
-	if( DrillUp.g_EAT_fix ){
-		p_x = Math.floor($gamePlayer._realX + 0.5);
-		p_y = Math.floor($gamePlayer._realY + 0.5);
-	}
-	
-	// > 获取范围内+已触发的事件
-	var events = this.drill_EAT_getEventsInMaxRange();
-	events = events.concat( this._drill_EAT_triggeredEvents.filter(	//并集
-		function(v) { return events.indexOf(v) === -1}
-	));
-	
-	// > 获取判定区域
-	var cal_area = this.drill_COFA_getShapePointsWithCondition( p_x, p_y, type, range, condition );
-	
-	// > 触发区域
-	this.drill_EAT_triggerArea( events, cal_area, tag);
-}
-//==============================
-// * 玩家触发 - 自定义区域（自定义区域id、筛选器对象、条件关键字）
-//==============================
-Game_Map.prototype.drill_EAT_playerTriggerSelfArea = function( self_id, condition, tag ) {
-	
-	// > 获取范围内+已触发的事件
-	var events = this.drill_EAT_getEventsInMaxRange();
-	events = events.concat( this._drill_EAT_triggeredEvents.filter(	//并集
-		function(v) { return events.indexOf(v) === -1}
-	));
-	
-	// > 获取判定区域
-	var cal_area = this.drill_COFA_getCustomPointsByPlayer( self_id );		//获取点集合（玩家）
-	cal_area = this.drill_COFA_selectPoints( cal_area,condition );			//条件筛选
-	
-	// > 触发区域
-	this.drill_EAT_triggerArea( events, cal_area, tag);
-}
-//==============================
-// * 事件触发 - 触发区域（事件集合，实际区域[{x:21,y:31},{x:22,y:32}]，条件）
-//==============================
-Game_Map.prototype.drill_EAT_triggerArea = function( events, area, tag ) {
-	
-	for (var i = 0; i < events.length; i++) {  
-		var temp_event = events[i];
-		if( temp_event._drill_EAT['tags'][tag] == true ){		//大前提：事件含被触发标签
-			
-			var is_inArea = false;
-			for( var j = 0; j < area.length ; j++ ){
-				var temp_point = area[j];
-				
-				// > 判断
-				if( temp_event.drill_EAT_isInPos( temp_point['x'], temp_point['y'] ) ){	
-					
-					var key = [this._mapId, temp_event._eventId, temp_event._drill_EAT['self_switchs'][tag] ];
-					if( $gameSelfSwitches.value(key) !== true){
-						$gameSelfSwitches.setValue(key,true);
-						this.drill_EAT_triggeredEventsAdd(temp_event);	//记录需要自动off的所有事件
-					}
-					is_inArea = true;
-					break;
-				}
-			}
-			if( is_inArea == false && temp_event._drill_EAT['autoOff'][tag] == true ){	//自动off
-				var key = [this._mapId, temp_event._eventId, temp_event._drill_EAT['self_switchs'][tag] ];
-				if( $gameSelfSwitches.value(key) !== false){
-					$gameSelfSwitches.setValue(key,false);
-					this.drill_EAT_triggeredEventsRemove(temp_event);
-				}
-			}
-		}
-	}
-}
-
-//==============================
-// * 优化 - 获取玩家最大触发范围内的所有事件
+// * 排序 - 获取 矩形范围 内的所有事件
 //==============================
 Game_Map.prototype.drill_EAT_getEventsInMaxRange = function() {
 	var result = [];
-	for(var i=0; i < this._drill_EAT_xy_events.length ; i++){
-		var temp_event = this._drill_EAT_xy_events[i];
-		if( temp_event == undefined ){ continue; }
-		if( temp_event._drill_EAT_orderIndex > DrillUp.g_EAT_area_max_x_range+1 ){ break; }
-		if( temp_event._drill_EAT_orderIndex > DrillUp.g_EAT_area_max_y_range+1 ){ break; }
+	for(var i=0; i < this._drill_EAT_xy_events.length; i++ ){
+		var temp_event = this._drill_EAT_xy_events[i];	//（容器中事件全部非空）
+		if( temp_event._drill_EAT_orderIndex > Math.max( $gamePlayer._drill_EAT_checkerboard['max_x'], $gamePlayer._drill_EAT_checkerboard['max_y']) ){ break; }
 		result.push( temp_event );
 	}
 	return result;
-}
-//==============================
-// * 优化 - 独立开关赋值时不刷新地图
-//==============================
-Game_SelfSwitches.prototype.drill_EAT_setValueWithOutChange = function( key, value ){
-    if( value ){
-        this._data[key] = true;
-    }else{
-        delete this._data[key];
-    }
 };
-//==============================
-// * 事件触发 - 判定位置
-//==============================
-Game_CharacterBase.prototype.drill_EAT_isInPos = function( x,y ){	
 
-	// > 修正情况
-	if( DrillUp.g_EAT_fix ){
-		if( Math.abs( x - this._realX) <= 0.55 && 
-			Math.abs( y - this._realY) <= 0.55 ){	//稍微扩大一点范围，可能会有未捕获到的区域误差
-			return true;
-		}else{
-			return false;
-		}
-		
-	// > 不修正
-	}else{
-		return this.pos( x,y );
+
+//=============================================================================
+// ** 玩家触发
+//=============================================================================
+//==============================
+// * 玩家触发 - 帧刷新
+//==============================
+var _drill_EAT_update_trigger = Game_Map.prototype.update;
+Game_Map.prototype.update = function( sceneActive ){
+	_drill_EAT_update_trigger.call( this,sceneActive );
+	if( sceneActive && $gamePlayer != undefined ){
+		this.drill_EAT_updatePlayerTrigger();		//帧刷新 - 事件触发棋盘
 	}
 };
+//==============================
+// * 帧刷新 - 事件触发棋盘
+//==============================
+Game_Map.prototype.drill_EAT_updatePlayerTrigger = function() {
+	if( $gamePlayer._drill_EAT_checkerboard == undefined ){ return; }
+	if( $gamePlayer._drill_EAT_checkerboard['matrix'] == undefined ){ return; }
+	var c_board = $gamePlayer._drill_EAT_checkerboard;
+	
+	// > 相关事件
+	var events = this.drill_EAT_getEventsInMaxRange();
+	events = events.concat( this._drill_EAT_triggeredEvents.filter(	//并集
+		function(v) { return events.indexOf(v) === -1}
+	));
+	
+	// > 事件确定
+	for(var i=0; i < events.length; i++ ){
+		var tar_event = events[i];
+		
+		// > 位置修正
+		var dx;
+		var dy;
+		if( DrillUp.g_EAT_fix ){
+			dx = Math.floor( this.deltaX(tar_event._realX, $gamePlayer._realX) +0.55 );
+			dy = Math.floor( this.deltaY(tar_event._realY, $gamePlayer._realY) +0.55 );
+		}else{
+			dx = this.deltaX(tar_event._x, $gamePlayer._x);
+			dy = this.deltaY(tar_event._y, $gamePlayer._y);
+		}
+		dx += c_board['c_x'];
+		dy += c_board['c_y'];
+		
+		
+		// > 事件在棋盘内（注意，棋盘真实形状是所有形状的组合，不一定是方形）
+		var matrix = c_board['matrix'];
+		if( dx >= 0 && dx < matrix.length &&
+			dy >= 0 && dy < matrix[0].length ){
+			
+			// > 棋盘内触发
+			var area_ptr_list = matrix[ dx ][ dy ];
+			if( area_ptr_list == undefined ){ continue; }	//（注意这一步，不可能为空）
+			this.drill_EAT_checkerboardTriggered( tar_event, $gamePlayer, area_ptr_list );
+			
+			
+		// > 事件在棋盘外（注意，棋盘真实形状是所有形状的组合，不一定是方形）
+		}else{
+			this.drill_EAT_autoOffAllTag( tar_event );		//（自关标记 的全关）
+		}
+	}
+}
+//==============================
+// * 帧刷新 - 棋盘内触发
+//
+//			参数：	> tar_event 对象（目标事件，即进入范围的事件）
+//					> org_event 对象（主动事件，即范围的所有者）
+//					> area_ptr_list 对象列表（棋盘点数据）
+//==============================
+Game_Map.prototype.drill_EAT_checkerboardTriggered = function( tar_event, org_event, area_ptr_list ){
+	
+	var tar_inTag_list = [];	//（记录 自关标记）
+	for(var k=0; k < area_ptr_list.length; k++ ){
+		var area_ptr = area_ptr_list[k];
+		
+		// > 棋盘点数据 条件（条件必须符合特定的方向）
+		var pass = false;
+		if( area_ptr['direction'] == 0 ){
+			pass = true;
+		}
+		if( area_ptr['direction'] > 0 &&
+			area_ptr['direction'] == org_event._direction ){
+			pass = true;
+		}
+		if( pass == false ){
+			continue;
+		}
+		
+		// > 接近触发数据
+		var area = DrillUp.g_EAT_area[ area_ptr['id'] ];
+		if( area == undefined ){ continue; }		//（注意这一步，不可能为空）
+		
+		// > 大前提：触发条件必须开启
+		if( $gameSystem._drill_EAT_enables[ area_ptr['id'] ] != true ){ continue; }
+		
+		// > 棋盘筛选器
+		var condition = null;
+		if( area['condition_enable'] == true ){
+			condition = DrillUp.g_COFA_condition_list[ area['condition_id']-1 ]; 
+		}else{
+			condition = {}
+		}
+		if( this.drill_COFA_isPointMatched(tar_event,condition) == false ){ continue; }	//（筛选器 - 单点条件匹配）
+		
+		// > 触发 主动事件
+		//（无）
+		// > 触发 目标事件
+		if( tar_event.drill_EAT_hasTag( area['keyword'] ) == true ){
+			this.drill_EAT_triggerTag( tar_event, area['keyword'], true );
+			tar_inTag_list.push( area['keyword'] );
+		}
+		
+		// > 捕获测试（捕获到的目标事件，触发了什么条件）
+		//alert( area['keyword'] );
+	}		
+	
+	// > 选择性关闭 自关标记（主动事件）
+	//（无）
+	// > 选择性关闭 自关标记（目标事件）
+	this.drill_EAT_autoOffAllTagWithoutInTag( tar_event, tar_inTag_list );
+}
+//==============================
+// * 开关触发 - 选择性关闭 自关标记（子流程）
+//
+//			参数：	> e 对象（目标事件）
+//					> inTag_list 字符串数组（排除列表）
+//			说明：	> 只关闭含 自关标记 的条件。
+//					> 关闭除 inTag_list 中以外的自关标记。
+//					> 如果两个条件指向了同一个开关，条件A符合棋盘，条件B不符合棋盘，那么这个开关不要关。
+//					> 所以这里获取 自关标记的开关 和 触发的开关，取差集，然后关闭过滤的独立开关即可。
+//==============================
+Game_Map.prototype.drill_EAT_autoOffAllTagWithoutInTag = function( e, inTag_list ){
+	var offTag_list = e.drill_EAT_getAutoOffTagList();
+	var offSwitch_list = e.drill_EAT_getTagSwitchList(offTag_list);
+	var inSwitch_list = e.drill_EAT_getTagSwitchList(inTag_list);
+	
+	for(var k=0; k < offSwitch_list.length; k++ ){
+		var switch_name = offSwitch_list[k];
+		if( inSwitch_list.contains( switch_name ) ){
+			continue;
+		}
+		this.drill_EAT_triggerSwitch( e, switch_name, false );
+	}
+}
+//==============================
+// * 开关触发 - 关闭所有 自关标记 的独立开关（子流程）
+//
+//			说明：	> 直接全关，不做比较。
+//==============================
+Game_Map.prototype.drill_EAT_autoOffAllTag = function( e ){
+	var offTag_list = e.drill_EAT_getAutoOffTagList();
+	for(var k=0; k < offTag_list.length; k++ ){
+		this.drill_EAT_triggerTag( e, offTag_list[k], false );
+	}
+}
+//==============================
+// * 开关触发 - 触发指定事件的条件（子流程）
+//==============================
+Game_Map.prototype.drill_EAT_triggerTag = function( e, tag, enabled ){
+	
+	// > 不含条件则跳过
+	if( e.drill_EAT_hasTag( tag ) != true ){ return; }
+	
+	var switchName = e.drill_EAT_getTagSwitch( tag );
+	this.drill_EAT_triggerSwitch( e, switchName, enabled );
+}
+//==============================
+// * 开关触发 - 执行触发（基函数）
+//
+//			说明：	> 由于独立开关受 Game_Map 控制，因此该函数不能转移到 事件类 中。
+//					> 开关触发因为受到 事件条件 的限制关系，所以被分成了多个 子流程 函数。
+//==============================
+Game_Map.prototype.drill_EAT_triggerSwitch = function( e, switchName, enabled ){
+	
+	// > 开启独立开关
+	if( enabled == true ){
+		var key = [this._mapId, e._eventId, switchName ];
+		if( $gameSelfSwitches.value(key) !== true){
+			$gameSelfSwitches.setValue(key,true);
+			this.drill_EAT_triggeredEventsAdd( e );		//（记录需要 自关标记 的事件）
+		}
+		
+	// > 关闭独立开关
+	}else{
+		var key = [this._mapId, e._eventId, switchName ];
+		if( $gameSelfSwitches.value(key) !== false){
+			$gameSelfSwitches.setValue(key,false);
+			this.drill_EAT_triggeredEventsRemove( e );	//（开关关闭后，去除 自关标记 标记）
+		}
+	}
+}
 
 
 //=============================================================================
-// * 事件标记容器
+// ** 事件条件数据
+//
+//			说明：	> 事件条件与独立开关 的数据，单独绑定在事件身上。
+//					  这里只是一个访问器的结构。
+//					> 此设置与 事件接近 的结构一致。
 //=============================================================================
 //==============================
-// * 标记容器 - 初始化
+// * 事件条件 - 初始化
 //==============================
-var _drill_EAT_initialize = Game_Map.prototype.initialize;
+var _drill_EAT_ev_initialize2 = Game_Event.prototype.initialize;
+Game_Event.prototype.initialize = function( mapId, eventId ){
+	
+	// > 参数初始化
+	this._drill_EAT = {};				
+	this._drill_EAT['tags'] = {};				//条件 - 条件集
+	this._drill_EAT['tags_switches'] = {};		//条件 - 对应的独立开关
+	this._drill_EAT['tags_autoOff'] = {};		//条件 - 自关标记设置
+	
+	// > 原函数
+	_drill_EAT_ev_initialize2.call( this, mapId, eventId );
+};
+//==============================
+// * 事件条件 - 添加条件
+//==============================
+Game_Event.prototype.drill_EAT_addTag = function( tag_name, switch_name ){
+	if( DrillUp.g_EAT_area_keyWordList.contains(tag_name) == false ){ return; }//（关键字对不上，则不添加）
+	this._drill_EAT['tags'][ tag_name ] = true;
+	this._drill_EAT['tags_switches'][ tag_name ] = switch_name;
+};
+//==============================
+// * 事件条件 - 设置条件自关标记
+//==============================
+Game_Event.prototype.drill_EAT_setAutoOff = function( tag_name, enabled ){
+	if( DrillUp.g_EAT_area_keyWordList.contains(tag_name) == false ){ return; }//（关键字对不上，则不添加）
+	this._drill_EAT['tags_autoOff'][ tag_name ] = enabled;
+};
+//==============================
+// * 事件条件 - 去除条件
+//==============================
+Game_Event.prototype.drill_EAT_removeTag = function( tag_name ){
+	this._drill_EAT['tags'][ tag_name ] = null;
+	this._drill_EAT['tags_switches'][ tag_name ] = null;
+	this._drill_EAT['tags_autoOff'][ tag_name ] = null;
+};
+//==============================
+// * 事件条件 - 去除全部条件
+//==============================
+Game_Event.prototype.drill_EAT_removeAllTag = function(){
+	this._drill_EAT['tags'] = {};
+	this._drill_EAT['tags_switches'] = {};
+	this._drill_EAT['tags_autoOff'] = {};
+};
+//==============================
+// * 获取 - 判断条件
+//==============================
+Game_Event.prototype.drill_EAT_hasTag = function( tag_name ){
+	return this._drill_EAT['tags'][ tag_name ] == true;
+};
+//==============================
+// * 获取 - 获取全部条件
+//==============================
+Game_Event.prototype.drill_EAT_getAllTag = function(){
+	return Object.keys( this._drill_EAT['tags'] );
+};
+//==============================
+// * 获取 - 获取自关标记的条件
+//==============================
+Game_Event.prototype.drill_EAT_getAutoOffTagList = function(){
+	return Object.keys( this._drill_EAT['tags_autoOff'] );
+};
+//==============================
+// * 获取 - 判断条件是否自关标记
+//
+//			说明：	注意，先判断是否存在条件，再获取对应的自关标记情况。
+//==============================
+Game_Event.prototype.drill_EAT_isTagAutoOff = function( tag_name ){
+	return this._drill_EAT['tags_autoOff'][ tag_name ] == true;
+};
+//==============================
+// * 获取 - 条件对应的独立开关
+//
+//			说明：	注意，先判断是否存在条件，再获取对应的独立开关。
+//==============================
+Game_Event.prototype.drill_EAT_getTagSwitch = function( tag_name ){
+	return this._drill_EAT['tags_switches'][ tag_name ];
+};
+//==============================
+// * 获取 - 条件对应的独立开关列表
+//
+//			说明：	> 返回的独立开关不重复。
+//					> 注意，先判断是否存在条件，再获取对应的独立开关。
+//==============================
+Game_Event.prototype.drill_EAT_getTagSwitchList = function( tag_name_list ){
+	var result = [];
+	for(var i=0; i < tag_name_list.length; i++){
+		var switch_name = this._drill_EAT['tags_switches'][ tag_name_list[i] ];
+		if( result.contains(switch_name) ){ continue; }
+		result.push(switch_name);
+	}
+	return result;
+};
+
+
+//=============================================================================
+// ** 事件已触发容器
+//
+//			说明：	> 接近触发后，触发ON的事件都会被捕获在该容器中。OFF时去掉。
+//					  这里只是一个访问器的结构。
+//					> 此设置与 事件接近 的结构一致。
+//=============================================================================
+//==============================
+// * 已触发容器 - 初始化
+//==============================
+var _drill_EAT_initialize2 = Game_Map.prototype.initialize;
 Game_Map.prototype.initialize = function() {
-	_drill_EAT_initialize.call(this);
+	_drill_EAT_initialize2.call(this);
 	this._drill_EAT_triggeredEvents = [];
 }
 //==============================
-// * 标记容器 - 切换地图时清空
+// * 已触发容器 - 切换地图时清空
 //==============================
-var _drill_EAT_setup = Game_Map.prototype.setup;
+var _drill_EAT_setup2 = Game_Map.prototype.setup;
 Game_Map.prototype.setup = function( mapId ){
 	
 	// > 切换地图时，清空所有触发过的独立开关
@@ -1004,23 +1516,23 @@ Game_Map.prototype.setup = function( mapId ){
 	}
 	
 	// > 刷新
-	_drill_EAT_setup.call(this,mapId);
+	_drill_EAT_setup2.call(this,mapId);
 	
 	// > 容器初始化
 	this._drill_EAT_triggeredEvents = [];
 }
 
 //==============================
-// * 标记容器 - 添加已触发的事件
+// * 已触发容器 - 添加 已触发的事件
 //==============================
-Game_Map.prototype.drill_EAT_triggeredEventsAdd = function( temp_event ) {
+Game_Map.prototype.drill_EAT_triggeredEventsAdd = function( temp_event ){
 	this._drill_EAT_triggeredEvents.push(temp_event);
 }
 //==============================
-// * 标记容器 - 去除已触发的事件
+// * 已触发容器 - 去除 已触发的事件
 //==============================
-Game_Map.prototype.drill_EAT_triggeredEventsRemove = function( temp_event ) {
-	for (var k=this._drill_EAT_triggeredEvents.length-1; k>=0; k-- ) {	
+Game_Map.prototype.drill_EAT_triggeredEventsRemove = function( temp_event ){
+	for( var k=this._drill_EAT_triggeredEvents.length-1; k>=0; k-- ){
 		if( this._drill_EAT_triggeredEvents[k] == temp_event){
 			this._drill_EAT_triggeredEvents.splice(k,1);
 			break;
@@ -1028,23 +1540,333 @@ Game_Map.prototype.drill_EAT_triggeredEventsRemove = function( temp_event ) {
 	}
 }
 //==============================
-// * 标记容器 - 去除已触发的事件的所有标签对应的独立开关
+// * 已触发容器 - 去除 已触发的事件 的所有条件对应的独立开关
 //==============================
 Game_Map.prototype.drill_EAT_triggeredEventsClearAllSwitches = function() {
-	for( var i = 0;  i < this._drill_EAT_triggeredEvents.length; i++) {  
+	for( var i = 0;  i < this._drill_EAT_triggeredEvents.length; i++ ){
 		var temp_event = this._drill_EAT_triggeredEvents[i];
-		var temp_tags = Object.keys(temp_event._drill_EAT['tags']);
-		for( var j = 0; j < temp_tags.length; j++ ){  
-			if( temp_event._drill_EAT['tags'][temp_tags[j]] == true ){
-				if( temp_event._drill_EAT['autoOff'][ temp_tags[j] ] == true ){	//自动off
-					var key = [this._mapId, temp_event._eventId, temp_event._drill_EAT['self_switchs'][ temp_tags[j] ] ];
-					if( $gameSelfSwitches.value(key) !== false){
-						$gameSelfSwitches.setValue(key,false);
-					}
+		var temp_tags = temp_event.drill_EAT_getAllTag();
+		for( var j = 0; j < temp_tags.length; j++ ){
+			var tag = temp_tags[j];
+			if( temp_event.drill_EAT_hasTag( tag ) == true ){
+				
+				var sw = temp_event.drill_EAT_getTagSwitch( tag );
+				var key = [this._mapId, temp_event._eventId, sw ];
+				if( $gameSelfSwitches.value(key) !== false){
+					$gameSelfSwitches.setValue(key,false);
 				}
+				//// > 自动off标记
+				//if( temp_event.drill_EAT_isTagAutoOff( tag ) == true ){
+				//}
 			}
 		}
 	}
+}
+
+
+//#############################################################################
+// ** 标准函数（地图层级）
+//#############################################################################
+//##############################
+// * 地图层级 - 添加贴图到层级【标准函数】
+//				
+//			参数：	> sprite 贴图        （添加的贴图对象）
+//					> layer_index 字符串 （添加到的层级名，中层/上层）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图添加到目标层级中。
+//##############################
+Scene_Map.prototype.drill_EAT_layerAddSprite = function( sprite, layer_index ){
+	this.drill_EAT_layerAddSprite_Private( sprite, layer_index );
+}
+//##############################
+// * 地图层级 - 去除贴图【标准函数】
+//				
+//			参数：	> sprite 贴图（添加的贴图对象）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图从地图层级中移除。
+//##############################
+Scene_Map.prototype.drill_EAT_layerRemoveSprite = function( sprite ){
+	this.drill_EAT_layerRemoveSprite_Private( sprite );
+}
+//##############################
+// * 地图层级 - 图片层级排序【标准函数】
+//				
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 执行该函数后，地图层级的子贴图，按照zIndex属性来进行先后排序。值越大，越靠前。
+//##############################
+Scene_Map.prototype.drill_EAT_sortByZIndex = function () {
+    this.drill_EAT_sortByZIndex_Private();
+}
+//##############################
+// * 地图层级 - 移动贴图【标准函数】
+//				
+//			参数：	> x 数字           （x位置，地图参照为基准）
+//					> y 数字           （y位置，地图参照为基准）
+//					> reference 字符串 （参考系，镜头参照/地图参照）
+//					> option 动态参数对象 （计算时的必要数据）
+//			返回：	> pos 动态参数对象
+//                  > pos['x'] （移动后的坐标X）
+//                  > pos['y'] （移动后的坐标Y）
+//          
+//			说明：	> 强行规范的接口，必须按照接口的结构来，把要考虑的问题全考虑清楚了再去实现。
+//##############################
+Scene_Map.prototype.drill_EAT_layerMoveingReference = function( x, y, reference, option ){
+	return this.drill_EAT_layerMoveingReference_Private( x, y, reference, option );
+}
+//=============================================================================
+// ** 地图层级（接口实现）
+//=============================================================================
+//==============================
+// * 地图层级 - 中层
+//==============================
+var _drill_EAT_layer_createTilemap = Spriteset_Map.prototype.createTilemap;
+Spriteset_Map.prototype.createTilemap = function() {
+	_drill_EAT_layer_createTilemap.call(this);		//rmmv图块 < 中层 < rmmv角色
+	if( !this._drill_mapCenterArea ){
+		this._drill_mapCenterArea = new Sprite();
+		this._drill_mapCenterArea.z = 0.60;
+		this._tilemap.addChild(this._drill_mapCenterArea);	
+	}
+}
+//==============================
+// * 地图层级 - 上层
+//==============================
+var _drill_EAT_layer_createDestination = Spriteset_Map.prototype.createDestination;
+Spriteset_Map.prototype.createDestination = function() {
+	_drill_EAT_layer_createDestination.call(this);	//rmmv鼠标目的地 < 上层 < rmmv天气
+	if( !this._drill_mapUpArea ){
+		this._drill_mapUpArea = new Sprite();
+		this._baseSprite.addChild(this._drill_mapUpArea);	
+	}
+}
+//==============================
+// * 地图层级 - 图片层级排序（私有）
+//==============================
+Scene_Map.prototype.drill_EAT_sortByZIndex_Private = function () {
+	this._spriteset._drill_mapCenterArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
+	this._spriteset._drill_mapUpArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
+};
+//==============================
+// * 地图层级 - 添加贴图到层级（私有）
+//==============================
+Scene_Map.prototype.drill_EAT_layerAddSprite_Private = function( sprite, layer_index ){
+	if( layer_index == "中层" ){
+		this._spriteset._drill_mapCenterArea.addChild( sprite );
+	}
+	if( layer_index == "上层" ){
+		this._spriteset._drill_mapUpArea.addChild( sprite );
+	}
+};
+//==============================
+// * 地图层级 - 去除贴图（私有）
+//==============================
+Scene_Map.prototype.drill_EAT_layerRemoveSprite_Private = function( sprite ){
+	this._spriteset._drill_mapCenterArea.removeChild( sprite );
+	this._spriteset._drill_mapUpArea.removeChild( sprite );
+};
+//==============================
+// * 地图层级 - 移动贴图（私有）
+//			
+//			说明：	当前的xx，yy的参照系是 地图参照 。
+//==============================
+Scene_Map.prototype.drill_EAT_layerMoveingReference_Private = function( xx, yy, reference, option ){
+	
+	// > 参照系修正
+	if( reference == "地图参照" ){
+		//（不操作）
+		return {'x':xx, 'y':yy };
+	}
+	if( reference == "镜头参照" ){
+		xx -= this._spriteset._baseSprite.x;	//（由于 Spriteset_Map 的 _baseSprite 坐标始终是(0,0)，所以两个参照没有区别。）
+		yy -= this._spriteset._baseSprite.y;
+		return {'x':xx, 'y':yy };
+	}
+	return {'x':xx, 'y':yy };
+}
+
+//=============================================================================
+// ** DEBUG - 区域块可视化
+//
+//			说明：	> 此项默认关闭，尽可能不消耗更多性能。
+//=============================================================================
+//==============================
+// * 区域块可视化 - 帧刷新
+//==============================
+var _drill_EAT_DEBUG_update = Scene_Map.prototype.update;
+Scene_Map.prototype.update = function() {	
+	_drill_EAT_DEBUG_update.call(this);
+	
+	if( DrillUp.g_EAT_debugEnabled != true ){ return; }
+	
+	this.drill_EAT_DEBUG_updateRebuild();	//帧刷新 - 重建
+	this.drill_EAT_DEBUG_updateSprite();	//帧刷新 - 贴图
+};
+//==============================
+// * 区域块可视化 - 帧刷新重建
+//==============================
+Scene_Map.prototype.drill_EAT_DEBUG_updateRebuild = function() {
+	if( $gameTemp._drill_EAT_DEBUG_spriteNeedRefresh != true ){ return; }
+	$gameTemp._drill_EAT_DEBUG_spriteNeedRefresh = false;
+	
+	// > 初始化
+	if( this._drill_EAT_spriteTank == undefined ){
+		this._drill_EAT_spriteTank = [];
+	}
+	
+	// > 清除旧贴图
+	for(var i=0; i < this._drill_EAT_spriteTank.length; i++ ){
+		var temp_sprite = this._drill_EAT_spriteTank[i];
+		this.drill_EAT_layerRemoveSprite( temp_sprite );
+	}
+	
+	// > 创建贴图
+	this._drill_EAT_spriteTank = [];
+	for(var i=0; i < DrillUp.g_EAT_area.length; i++){
+		var temp_area = DrillUp.g_EAT_area[i];
+		if( temp_area == undefined ){
+			this._drill_EAT_spriteTank.push( null );
+			continue;
+		}
+		if( temp_area['debug_enabled'] == false ){
+			this._drill_EAT_spriteTank.push( null );
+			continue;
+		}
+		
+		// > 贴图属性
+		var data = {};
+		data['color'] = temp_area['debug_color'];
+		data['width'] = $gamePlayer._drill_EAT_checkerboard['matrix'].length;
+		data['height'] = $gamePlayer._drill_EAT_checkerboard['matrix'][0].length;
+		data['point_list'] = [];
+		var temp_sprite = new Drill_COFA_DebugSprite( data );
+		temp_sprite['layer_index'] = "中层";
+		temp_sprite.zIndex = i;
+		
+		// > 地图层级
+		this._drill_EAT_spriteTank.push( temp_sprite );
+		this.drill_EAT_layerAddSprite( temp_sprite, temp_sprite['layer_index'] );
+		
+	}
+	
+	// > 贴图排序
+	this.drill_EAT_sortByZIndex();
+};
+//==============================
+// * 区域块可视化 - 帧刷新贴图
+//==============================
+Scene_Map.prototype.drill_EAT_DEBUG_updateSprite = function() {
+	if( this._drill_EAT_spriteTank == undefined ){ return; }
+	for(var i=0; i < this._drill_EAT_spriteTank.length; i++){
+		var temp_sprite = this._drill_EAT_spriteTank[i];
+		if( temp_sprite == undefined ){ continue; }
+		
+		// > 位移（地图参照）
+		var tw = $gameMap.tileWidth();
+		var th = $gameMap.tileHeight();
+		
+		var xx = 0;
+		var yy = 0;
+		if( DrillUp.g_EAT_fix ){
+			xx = Math.floor( $gamePlayer._realX +0.55 );
+			yy = Math.floor( $gamePlayer._realY +0.55 );
+		}else{
+			xx = $gamePlayer._x;
+			yy = $gamePlayer._y;
+		}
+		xx = Math.round( $gameMap.adjustX( xx ) * tw + tw / 2);
+		yy = Math.round( $gameMap.adjustY( yy ) * th + th / 2);
+		
+		// > 位移偏转
+		if( temp_sprite['layer_index'] == "中层" ||
+			temp_sprite['layer_index'] == "上层" ){
+			var pos = this.drill_EAT_layerMoveingReference( xx, yy, "地图参照", {} );
+			temp_sprite.x = pos['x'];
+			temp_sprite.y = pos['y'];
+		}
+		
+		// > 图块点变化
+		var area_data = DrillUp.g_EAT_area[ i ];
+		if( area_data == undefined ){ continue; }
+		$gamePlayer.drill_EAT_DEBUG_refreshPointList( area_data, temp_sprite );
+		
+	}
+}
+//==============================
+// * 区域块可视化 - 区域绘制
+//==============================
+Game_Player.prototype.drill_EAT_DEBUG_refreshPointList = function( area_data, temp_sprite ){
+	
+	// > 筛选器
+	var condition = null;
+	if( area_data['condition_enable'] == true ){
+		condition = DrillUp.g_COFA_condition_list[ area_data['condition_id']-1 ]; 
+	}else{
+		condition = {}
+	}
+	
+	// > 区域触发
+	if( area_data['areaMode'] == "形状区域" ){
+		var cal_area = $gameMap.drill_COFA_getShapePointsWithCondition( 	//（使用绝对坐标，获取到符合条件的点）
+			this.x, 
+			this.y, 
+			area_data['shapeMode'], area_data['shapeRange'], condition
+		);
+		cal_area = this.drill_EAT_DEBUG_adjustPoints( cal_area );
+		temp_sprite.drill_changePointList( cal_area );
+	}
+	if( area_data['areaMode'] == "自定义区域" ){
+		var self_id = area_data['self_id'];
+		if( self_id <= 0 ){ return; }
+		
+		var def_area = DrillUp.g_COFA_area_list[ self_id-1 ];
+		if( def_area['consistent'] == false ){		//关闭朝向（固定向右）
+			var cal_area = $gameMap.drill_COFA_getCustomPointsWithCondition( 	//（使用绝对坐标，获取到符合条件的点）
+				this.x, 
+				this.y, 
+				6, def_area['points'], condition
+			);
+			cal_area = this.drill_EAT_DEBUG_adjustPoints( cal_area );
+			temp_sprite.drill_changePointList( cal_area );
+		}else{										//与事件朝向一致（四个方向）
+			var cal_area = $gameMap.drill_COFA_getCustomPointsWithCondition( 	//（使用绝对坐标，获取到符合条件的点）
+				this.x, 
+				this.y, 
+				this._direction, def_area['points'], condition
+			);
+			cal_area = this.drill_EAT_DEBUG_adjustPoints( cal_area );
+			temp_sprite.drill_changePointList( cal_area );
+		}
+	}
+}
+//==============================
+// * 区域块可视化 - 点位置修正
+//==============================
+Game_Player.prototype.drill_EAT_DEBUG_adjustPoints = function( point_list ){
+	var result_list = [];
+	for(var i=0; i < point_list.length; i++ ){
+		var xx = point_list[i].x;
+		var yy = point_list[i].y;
+		
+		// > 去掉事件的绝对位置
+		xx -= this.x;
+		yy -= this.y;
+		
+		// > 加上棋盘的偏移位置
+		xx += this._drill_EAT_checkerboard['c_x'];
+		yy += this._drill_EAT_checkerboard['c_y'];
+		
+		// > 循环地图情况
+		xx = $gameMap.roundX( xx );
+		yy = $gameMap.roundY( yy );
+		
+		var p = { 'x':xx, 'y':yy };
+		result_list.push( p );
+	}
+	return result_list;
 }
 
 

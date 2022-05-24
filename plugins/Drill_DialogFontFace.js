@@ -75,7 +75,7 @@
  * 
  * @param 预加载的字体名
  * @type text[]
- * @desc 你在。
+ * @desc 将fonts文件夹中gamefont.css文件里配置的字体名称，添加到这里，即可预加载字体。
  * @default ["GameFont"]
  * 
  */
