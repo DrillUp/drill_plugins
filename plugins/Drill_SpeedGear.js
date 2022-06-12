@@ -147,17 +147,17 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			temp1 = temp1.replace("比例[","");
 			temp1 = temp1.replace("变量[","");
 			temp1 = temp1.replace("]","");
-			if( type == "改速度" && type == "修改速度" ){
+			if( type == "改速度" || type == "修改速度" ){
 				if( DrillUp.g_SG_var_bind == false ){
 					$gameSystem._drill_SG_speed = Math.max( Number(temp1), 0.05 );
 					SceneManager._deltaTime = 1/60.0 / $gameSystem._drill_SG_speed;
 					AudioManager.drill_SG_reflash_pitch();
 				}
 			}
-			if( type == "改变量" && type == "修改绑定的变量" ){
+			if( type == "改变量" || type == "修改绑定的变量" ){
 				$gameSystem._drill_SG_var = Number(temp1);
 			}
-			if( type == "改同步" && type == "修改声音同步率" ){
+			if( type == "改同步" || type == "修改声音同步率" ){
 				$gameSystem._drill_SG_sound = Number(temp1);
 			}
 		}

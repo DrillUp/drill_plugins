@@ -648,6 +648,7 @@
 	DrillUp.drill_ECT_getAreaByKeyword = function( keyword ){
 		for(var i=0; i < this.g_ECT_area.length; i++){
 			var area = this.g_ECT_area[i];
+			if( area == undefined ){ continue; }
 			if( area['keyword'] == keyword ){
 				return area;
 			}
@@ -1284,7 +1285,7 @@ Game_Map.prototype.drill_ECT_getEventsInRange = function( c_x, c_y, max_x_count,
 		}
 	}
 	var x_tank = [];
-	for(var i = i_low+1; i <= i_high-1; i++){	//（两指针的向内一格的边界）
+	for(var i = i_low; i <= i_high; i++){		//（两指针的边界）
 		var ev = this._drill_ECT_x_events[i];
 		if( ev == undefined ){ continue }		//（数组越界的不算）
 		x_tank.push( ev );
@@ -1327,7 +1328,7 @@ Game_Map.prototype.drill_ECT_getEventsInRange = function( c_x, c_y, max_x_count,
 		}
 	}
 	var y_tank = []
-	for(var j = j_low+1; j <= j_high-1; j++){	//（两指针的向内一格的边界）
+	for(var j = j_low; j <= j_high; j++){		//（两指针的边界）
 		var ev = this._drill_ECT_y_events[j];
 		if( ev == undefined ){ continue }		//（数组越界的不算）
 		y_tank.push( ev );
@@ -1829,10 +1830,10 @@ Scene_Map.prototype.drill_ECT_sortByZIndex = function () {
     this.drill_ECT_sortByZIndex_Private();
 }
 //##############################
-// * 地图层级 - 移动贴图【标准函数】
+// * 地图层级 - 参照的位移【标准函数】
 //				
-//			参数：	> x 数字           （x位置，地图参照为基准）
-//					> y 数字           （y位置，地图参照为基准）
+//			参数：	> x 数字           （x位置）
+//					> y 数字           （y位置）
 //					> reference 字符串 （参考系，镜头参照/地图参照）
 //					> option 动态参数对象 （计算时的必要数据）
 //			返回：	> pos 动态参数对象
@@ -1896,18 +1897,15 @@ Scene_Map.prototype.drill_ECT_layerRemoveSprite_Private = function( sprite ){
 	this._spriteset._drill_mapUpArea.removeChild( sprite );
 };
 //==============================
-// * 地图层级 - 移动贴图（私有）
-//			
-//			说明：	当前的xx，yy的参照系是 地图参照 。
+// * 地图层级 - 参照的位移（私有）
 //==============================
 Scene_Map.prototype.drill_ECT_layerMoveingReference_Private = function( xx, yy, reference, option ){
 	
 	// > 参照系修正
-	if( reference == "地图参照" ){
-		//（不操作）
+	if( reference == "地图参照 -> 地图参照" ){
 		return {'x':xx, 'y':yy };
 	}
-	if( reference == "镜头参照" ){
+	if( reference == "地图参照 -> 镜头参照" ){
 		xx -= this._spriteset._baseSprite.x;	//（由于 Spriteset_Map 的 _baseSprite 坐标始终是(0,0)，所以两个参照没有区别。）
 		yy -= this._spriteset._baseSprite.y;
 		return {'x':xx, 'y':yy };
@@ -2031,10 +2029,10 @@ Scene_Map.prototype.drill_ECT_DEBUG_updateSprite = function() {
 		xx = Math.round( $gameMap.adjustX( xx ) * tw + tw / 2);
 		yy = Math.round( $gameMap.adjustY( yy ) * th + th / 2);
 		
-		// > 位移偏转
+		// > 参照的位移
 		if( temp_sprite['layer_index'] == "中层" ||
 			temp_sprite['layer_index'] == "上层" ){
-			var pos = this.drill_ECT_layerMoveingReference( xx, yy, "地图参照", {} );
+			var pos = this.drill_ECT_layerMoveingReference( xx, yy, "地图参照 -> 地图参照", {} );
 			temp_sprite.x = pos['x'];
 			temp_sprite.y = pos['y'];
 		}

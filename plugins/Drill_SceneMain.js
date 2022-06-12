@@ -2768,12 +2768,15 @@ if( Imported.Drill_CoreOfWindowAuxiliary &&
 		var data = {};
 		data['debug_search'] = String( dataFrom["DEBUG-按钮关键字搜索"] || "false") == "true";
 		
+		// > 按钮组 - 主体
+		data['style_id'] = Number( dataFrom["按钮组样式"] || 0);
 		data['x'] = Number( dataFrom["平移-按钮组 X"] || 0);
 		data['y'] = Number( dataFrom["平移-按钮组 Y"] || 0);
-		data['style_id'] = Number( dataFrom["按钮组样式"] || 0);
 		data['btn_constructor'] = "Window_Command";
-		data['btn_src_file'] = "img/Menu__main/";
+		
+		// > 按钮组 - 按钮贴图
 		data['btn_src_default'] = String( dataFrom["默认按钮贴图"] || "");
+		data['btn_src_file'] = "img/Menu__main/";
 		if( dataFrom["按钮贴图序列"] != "" &&
 			dataFrom["按钮贴图序列"] != undefined ){
 			var seq = JSON.parse( dataFrom["按钮贴图序列"] );
@@ -2803,12 +2806,15 @@ if( Imported.Drill_CoreOfWindowAuxiliary &&
 			data['btn_src'] = [];
 			data['btn_srcKeyword'] = [];
 		}
+		
+		// > 按钮组 - 激活
 		data['active_enableMouseOk'] = true;	//（鼠标ok点击 开启）
 		data['active_hide'] = false;			//（激活后是否瞬间隐藏，克隆选中按钮用）
 		data['active_out'] = String( dataFrom["按钮激活后是否出列"] || "false") == "true";
 		data['active_out_time'] = Number( dataFrom["激活后出列变化时长"] || 20);
 		data['active_out_x'] = Number( dataFrom["激活后出列绝对坐标 X"] || 150);
 		data['active_out_y'] = Number( dataFrom["激活后出列绝对坐标 Y"] || 467);
+		
 		return data;
 	}
 	
@@ -2819,12 +2825,16 @@ if( Imported.Drill_CoreOfWindowAuxiliary &&
 	//==============================
 	DrillUp.drill_SMa_initActorAvatarButton = function( dataFrom ) {
 		var data = {};
+		
+		// > 按钮组 - 主体
+		data['style_id'] = Number( dataFrom["按钮组样式"] || 0);
 		data['x'] = Number( dataFrom["平移-按钮组 X"] || 0);
 		data['y'] = Number( dataFrom["平移-按钮组 Y"] || 0);
-		data['style_id'] = Number( dataFrom["按钮组样式"] || 0);
 		data['btn_constructor'] = "Window_Selectable";
-		data['btn_src_file'] = "img/Menu__actorFaces/";
+		
+		// > 按钮组 - 按钮贴图
 		data['btn_src_default'] = String( dataFrom["默认头像按钮贴图"] || "");
+		data['btn_src_file'] = "img/Menu__actorFaces/";
 		if( dataFrom["头像按钮贴图序列"] != "" &&
 			dataFrom["头像按钮贴图序列"] != undefined ){
 			data['btn_src'] = JSON.parse( dataFrom["头像按钮贴图序列"] );
@@ -2832,9 +2842,12 @@ if( Imported.Drill_CoreOfWindowAuxiliary &&
 			data['btn_src'] = [];
 		}
 		data['btn_srcKeyword'] = [];
+		
+		// > 按钮组 - 激活
 		data['active_enableMouseOk'] = true;	//（鼠标ok点击 开启）
 		data['active_hide'] = false;			//（激活后是否瞬间隐藏，克隆选中按钮用）
 		data['active_out'] = false;				//（激活后不出列）
+		
 		return data;
 	}
 	
@@ -2845,6 +2858,7 @@ if( Imported.Drill_CoreOfWindowAuxiliary &&
 	//==============================
 	DrillUp.drill_SMa_initActorBoardMeter = function( dataFrom ) {
 		var data = {};
+		
 		// > 主体
 		//		data['anchor_x']（关闭）
 		//		data['anchor_y']（关闭）
@@ -2855,6 +2869,7 @@ if( Imported.Drill_CoreOfWindowAuxiliary &&
 		data['meter_src'] = String( dataFrom["资源-参数条"] || "" );
 		data['meter_src_file'] = "img/Menu__main/";
 		data['meter_src_mask'] = String( dataFrom["资源-参数条遮罩"] || "" );
+		
 		// > 分段条（段）
 		//		data['level_max']（后面函数赋值）
 		data['level_count'] = 1;
@@ -2866,8 +2881,11 @@ if( Imported.Drill_CoreOfWindowAuxiliary &&
 		data['flow_speed'] = Number( dataFrom["流动速度"] || 1.0 );
 		data['flow_srcMode'] = String( dataFrom["流动段划分模式"] || "三等份划分");
 		data['flow_levelLength'] = Number( dataFrom["段长度"] || 0 );
+		
 		// > 凹槽条（关闭）
+		
 		// > 弹出条（关闭）
+		
 		// > 粒子
 		data['par_enable'] = String( dataFrom["是否启用粒子效果"] || "true") === "true";
 		data['par_src'] = String( dataFrom["资源-粒子"] || "" );
@@ -2877,6 +2895,7 @@ if( Imported.Drill_CoreOfWindowAuxiliary &&
 		data['par_speedY'] = Number( dataFrom["粒子Y速度"] || -1.5);
 		data['par_count'] = Number( dataFrom["粒子数量"] || 20);
 		data['par_life'] = Number( dataFrom["粒子持续时间"] || 20);
+		
 		// > 游标
 		data['vernier_enable'] = String( dataFrom["是否启用游标"] || "false") === "true";
 		if( dataFrom["资源-游标"] != undefined && dataFrom["资源-游标"] != "" ){
@@ -2892,11 +2911,13 @@ if( Imported.Drill_CoreOfWindowAuxiliary &&
 		data['vernier_mode'] = String( dataFrom["游标显示模式"] || "一直显示");
 		data['vernier_reset'] = false;
 		data['vernier_maskCover'] = String( dataFrom["遮罩是否能遮挡游标"] || "false") === "true";
+		
 		// > 加满动画
 		data['filling_enable'] = String( dataFrom["是否启用加满动画"] || "false") === "true";
 		data['filling_mode'] = String( dataFrom["加满方式"] || "匀速加满");
 		data['filling_time'] = Number( dataFrom["加满持续时间"] || 90);
 		data['filling_delay'] = Number( dataFrom["加满延迟"] || 30);
+		
 		return data;
 	}
 	//==============================
@@ -2905,6 +2926,7 @@ if( Imported.Drill_CoreOfWindowAuxiliary &&
 	//==============================
 	DrillUp.drill_SMa_initActorBoardNumber = function( dataFrom ) {
 		var data = {};
+		
 		// > 主体
 		//		data['visible']（后面函数赋值）
 		data['x'] = Number( dataFrom["平移-参数数字 X"] || 0 );
@@ -2914,19 +2936,23 @@ if( Imported.Drill_CoreOfWindowAuxiliary &&
 		data['symbol_src_file'] = "img/Menu__main/";
 		data['symbolEx_src'] = String( dataFrom["资源-扩展符号"] || "" );
 		data['symbolEx_src_file'] = "img/Menu__main/";
+		
 		// > 符号
 		data['symbol_hasNegative'] = String( dataFrom["是否显示负号"] || "true") === "true";
 		data['symbol_prefix'] = String( dataFrom["额外符号前缀"] || "") ;
 		data['symbol_suffix'] = String( dataFrom["额外符号后缀"] || "") ;
+		
 		// > 排列
 		data['section_align'] = String( dataFrom["对齐方式"] || "右对齐") ;
 		data['section_spriteLength'] = Number( dataFrom["最大符号数量"] || 20 );
 		data['section_interval'] = Number( dataFrom["符号间间距"] || 0 );
 		data['section_widthMode'] = String( dataFrom["排列宽度模式"] || "不限制宽度");
 		data['section_widthLimit'] = Number( dataFrom["排列限制宽度"] || 300 );
+		
 		// > 滚动效果
 		data['rolling_mode'] = String( dataFrom["滚动模式"] || "弹性滚动");
 		data['rolling_speed'] = Number( dataFrom["弹性变化速度"] || 10.0 );
+		
 		// > 额定值
 		data['specified_enable'] = String( dataFrom["是否显示额定值"] || "false") === "true";	//显示即启用
 		data['specified_visible'] = String( dataFrom["是否显示额定值"] || "false") === "true";

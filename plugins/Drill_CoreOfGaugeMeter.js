@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        系统 - 参数条核心
+ * @plugindesc [v1.5]        系统 - 参数条核心
  * @author Drill_up
  * 
  * @Drill_LE_param "参数条样式-%d"
@@ -143,6 +143,8 @@
  * 分离并添加了 瞬间伸长、匀速伸长、弹性伸长 设置。
  * [v1.4]
  * 优化了内部结构，减少性能消耗。
+ * [v1.5]
+ * 整理规范了插件的数据结构。
  * 
  * 
  *
@@ -1347,6 +1349,22 @@
 			DrillUp.g_COGM_list[i] = {};
 		}
 	}
+
+	//==============================
+	// * 数据获取 - 参数条样式（接口）
+	//	
+	//			说明：	与直接获取 "DrillUp.g_COGM_list[i]" 一样，只是加了一道过滤提示网。
+	//==============================
+	DrillUp.drill_COGM_getCopyedData = function( index ){
+		var data = DrillUp.g_COGM_list[ index ];
+		if( data['level_count'] == undefined ){
+			alert(	"【Drill_CoreOfGaugeMeter.js 系统 - 参数条核心】\n"+
+					"未找到id为"+(index+1)+"的参数条样式配置。"
+			);
+			return {};
+		}
+		return JSON.parse(JSON.stringify( data ));
+	}
 	
 	
 //=============================================================================
@@ -1356,7 +1374,7 @@ if( Imported.Drill_CoreOfBallistics ){
 	
 
 //=============================================================================
-// ** 参数条
+// ** 参数条【Drill_COGM_MeterSprite】
 // **			
 // **		索引：	COGM（可从子插件搜索到函数、类用法）
 // **		来源：	继承于Sprite
@@ -1379,16 +1397,16 @@ if( Imported.Drill_CoreOfBallistics ){
 // **				> 结构 - [ ●合并 /分离/混乱] 贴图与数据合并，主要靠接口控制 当前值 和 段上限。
 // **				> 数量 - [单个/ ●多个 ] 
 // **				> 创建 - [一次性/ ●自延迟 /外部延迟] 需要等分段条加载完毕后，才进行切割划分。
-// **				> 销毁 - [ ●不考虑 /自销毁/外部销毁] 
+// **				> 销毁 - [不考虑/自销毁/ ●外部销毁 ] 如果外部要换样式，先将贴图销毁，然后重建即可。
 // **				> 样式 - [ ●不可修改 /自变化/外部变化] 
 // **
-// **		调用方法：	数据格式见函数drill_initData。
-// **					// > 参数条 数据初始化
+// **		调用方法：	// > 参数条 数据初始化
+// **					//  （完整数据 默认值 见函数drill_initData）
 // **					var meter_id = 1;
-// **					var temp_data = DrillUp.g_COGM_list[ meter_id ];
-// **					temp_data['level_max'] = data['level_max'];			//段上限
-// **					temp_data['anchor_x'] = 0.5;						//中心锚点x
-// **					temp_data['anchor_y'] = 0.5;						//中心锚点y	
+// **					var temp_data = DrillUp.drill_COGM_getCopyedData( meter_id );	//深拷贝数据
+// **					temp_data['level_max'] = 200;				//段上限
+// **					temp_data['anchor_x'] = 0.5;				//中心锚点x
+// **					temp_data['anchor_y'] = 0.5;				//中心锚点y	
 // **					// > 参数条 贴图初始化
 // **					var temp_sprite = new Drill_COGM_MeterSprite( temp_data );
 // **					this.addChild( temp_sprite );
@@ -1420,33 +1438,80 @@ Drill_COGM_MeterSprite.prototype.update = function() {
 	this.drill_updateDelayingInit();	//延迟初始化
 	this.drill_updateSprite();			//帧刷新对象
 }
-//==============================
-// * 参数条 - 变化因子（接口，实时调用）
-//==============================
-Drill_COGM_MeterSprite.prototype.drill_COGM_reflashValue = function(value) {
-	this._drill_new_value = value;
-}
-//==============================
-// * 参数条 - 显示/隐藏（接口，单次调用）
-//==============================
-Drill_COGM_MeterSprite.prototype.drill_COGM_setVisible = function( visible ) {
+//##############################
+// * 参数条 - 显示/隐藏【标准函数】
+//
+//			参数：	> visible 布尔（是否显示）
+//			返回：	> 无
+//			
+//			说明：	> 可放在帧刷新函数中实时调用。
+//##############################
+Drill_COGM_MeterSprite.prototype.drill_COGM_setVisible = function( visible ){
 	var data = this._drill_data;
 	data['visible'] = visible;
 }
-//==============================
-// * 参数条 - 修改段上限（接口，单次调用）
-//==============================
-Drill_COGM_MeterSprite.prototype.drill_COGM_setLevelMax = function( level_max ) {
+//##############################
+// * 参数条 - 是否就绪【标准函数】
+//
+//			参数：	> 无
+//			返回：	> visible 布尔
+//			
+//			说明：	> 可放在帧刷新函数中实时调用。
+//##############################
+Drill_COGM_MeterSprite.prototype.drill_COGM_isReady = function(){
+	if( this.drill_isLevelsReady() == false ){ return false; }
+	return true;
+}
+//##############################
+// * 参数条 - 销毁【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 无
+//			
+//			说明：	> 如果需要重建时。
+//##############################
+Drill_COGM_MeterSprite.prototype.drill_COGM_destroy = function(){
+	this.drill_COGM_destroy_Private();
+};
+//##############################
+// * 参数条 - 修改变化因子【标准函数】
+//
+//			参数：	> value 数字（变化因子值）
+//			返回：	> 无
+//			
+//			说明：	> 可放在帧刷新函数中实时调用。
+//					> 该插件只提供变换因子的参数条显示效果，且 变化因子 可以超出 段上限，也可以为负数。
+//##############################
+Drill_COGM_MeterSprite.prototype.drill_COGM_reflashValue = function( value ){
+	this._drill_new_value = value;
+}
+//##############################
+// * 参数条 - 修改段上限【标准函数】
+//
+//			参数：	> level_max 数字（段上限）
+//			返回：	> 无
+//			
+//			说明：	> 可放在帧刷新函数中实时调用。
+//##############################
+Drill_COGM_MeterSprite.prototype.drill_COGM_setLevelMax = function( level_max ){
 	var data = this._drill_data;
 	data['level_max'] = level_max;
 }
-//==============================
-// * 初始化 - 数据
-//==============================
+//##############################
+// * 参数条 - 初始化数据【标准默认值】
+//
+//			参数：	> 无
+//			返回：	> 无
+//			
+//			说明：	> data 动态参数对象（来自类初始化）
+//					  该对象包含 类所需的所有默认值。
+//					> 其中 DrillUp.drill_COGM_initStyle 提供了部分数据库设置的样式数据，
+//					  样式数据中注释的部分，仍然需要子插件根据自身情况来进行赋值。
+//##############################
 Drill_COGM_MeterSprite.prototype.drill_initData = function() {
 	var data = this._drill_data;
 	
-	// > 默认值
+	// > 标准默认值
 	data['enable'] = true;	
 	if( data['x'] == undefined ){ data['x'] = 0 };													//主体 - 平移x（非实时赋值）
 	if( data['y'] == undefined ){ data['y'] = 0 };													//主体 - 平移y（非实时赋值）
@@ -1800,11 +1865,72 @@ Drill_COGM_MeterSprite.prototype.drill_delayingInitFilling = function() {
 	this._drill_filling_mask = temp_mask;
 }
 //==============================
+// * 销毁 - 执行销毁
+//==============================
+Drill_COGM_MeterSprite.prototype.drill_COGM_destroy_Private = function() {
+	this.visible = false;
+	
+	// > 断开联系
+	this.drill_COGM_removeChildConnect( this._layer_context );
+	this.drill_COGM_removeChildConnect( this._layer_outer );
+	this.removeChild(this._drill_filling_mask);
+	
+	// > 销毁 - 层级
+	this._drill_attr_needInit = false;
+	this._drill_meter_bitmap = null;
+	this._layer_outer = null;
+	this._layer_context = null;
+	this._layer_contextMask = null;
+	
+	// > 销毁 - 分段条
+	this._drill_sectionUp_sprite = null;
+	this._drill_sectionDown_sprite = null;
+	this._drill_level_needInit = false;
+	this._drill_level_bitmaps.length = 0;
+	
+	// > 销毁 - 凹槽条
+	this._drill_leak_sprite = null;
+	
+	// > 销毁 - 弹出条
+	this._drill_spring_needInit = false;
+	this._drill_spring_tank.length = 0;
+	
+	// > 销毁 - 粒子
+	this._drill_par_needInit = false;
+	this._drill_par_spriteTank.length = 0;
+	this._drill_par_bitmap = null;
+	
+	// > 销毁 - 游标
+	this._drill_vernier_needInit = false;
+	this._drill_vernier_sprite = null;
+	this._drill_vernier_bitmaps.length = 0;
+	
+	// > 销毁 - 加满动画
+	this._drill_filling_needInit = false;
+	this._drill_filling_mask = null;
+}
+//==============================
+// * 销毁 - 递归断开连接
+//==============================
+Drill_COGM_MeterSprite.prototype.drill_COGM_removeChildConnect = function( parent_sprite ){
+	if( parent_sprite == undefined ){ return; }
+	var sprite_list = parent_sprite.children;
+	if( sprite_list == undefined ){ return; }
+	for(var i = 0; i < sprite_list.length; i++ ){
+		var sprite = sprite_list[i];
+		if( sprite == undefined ){ continue; }
+		parent_sprite.removeChild( sprite );
+		this.drill_COGM_removeChildConnect( sprite );
+	}
+};
+
+
+//==============================
 // * 帧刷新对象
 //==============================
 Drill_COGM_MeterSprite.prototype.drill_updateSprite = function() {
 	var data = this._drill_data;
-	if( !this.drill_isLevelsReady() ){ return }
+	if( this.drill_isLevelsReady() == false ){ return }
 	
 	this.drill_updateSpringShowing();				//帧刷新 - 弹出条（在上段下段切换前，要捕获bitmap对象）
 	this.drill_updateLevelValue();					//帧刷新 - 分段条 - 段值
@@ -2332,10 +2458,16 @@ Drill_COGM_MeterSprite.prototype.drill_getCurLevelNum = function() {
 // * 获取 - 分段条是否准备就绪
 //==============================
 Drill_COGM_MeterSprite.prototype.drill_isLevelsReady = function() {
-	if(!this._drill_level_bitmaps ){ return false; }
+	
+	// > 分段资源未加载
+	if( this._drill_meter_bitmap.isReady() == false ){ return false; }
+	
+	// > 分段条未初始化
 	if( this._drill_level_bitmaps.length == 0 ){ return false; }
-	for( var i=0; i<this._drill_level_bitmaps.length; i++ ){
-		if( !this._drill_level_bitmaps[i].isReady() ){ return false; }
+	
+	// > 分段条为加载完
+	for( var i=0; i < this._drill_level_bitmaps.length; i++ ){
+		if( this._drill_level_bitmaps[i].isReady() == false ){ return false; }
 	}
 	return true;
 }

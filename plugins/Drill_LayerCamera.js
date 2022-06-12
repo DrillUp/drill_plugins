@@ -339,20 +339,29 @@
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_LayerCamera');
 
+
+	/*-----------------杂项------------------*/
     DrillUp.g_LCa_type = String(DrillUp.parameters['镜头移动模式'] || '弹性移动');
     DrillUp.g_LCa_speedRatio = Number(DrillUp.parameters['弹性模式移动速度'] || 10);
     DrillUp.g_LCa_speedMax = Number(DrillUp.parameters['弹性模式镜头速度上限'] || 24);
     DrillUp.g_LCa_forceRefresh = String(DrillUp.parameters['缩小镜头时是否加强刷新量'] || "true") == "true";
 
+
 //=============================================================================
-// ** 存储变量初始化
+// ** 存储数据
 //=============================================================================
 //==============================
-// * 初始化
+// ** 存储数据 - 初始化
 //==============================
 var _drill_LCa_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-	_drill_LCa_sys_initialize.call(this);
+    _drill_LCa_sys_initialize.call(this);
+	this.drill_LCa_initData();
+};
+//==============================
+// ** 存储数据 - 初始化数据
+//==============================
+Game_System.prototype.drill_LCa_initData = function() {
     this._drill_LCa_type = DrillUp.g_LCa_type ;					//镜头移动模式
     this._drill_LCa_speedRatio = DrillUp.g_LCa_speedRatio ;		//移动速度
     this._drill_LCa_speedMax = DrillUp.g_LCa_speedMax ;			//速度上限
@@ -377,6 +386,17 @@ Game_System.prototype.initialize = function() {
     this._drill_LCa_lookAt_X = -1;		//看向图块x
     this._drill_LCa_lookAt_Y = -1;		//看向图块y
     this._drill_LCa_lookAt_event = -1;	//看向事件
+};	
+//==============================
+// * 存档文件 - 载入存档 - 数据赋值
+//==============================
+var _drill_LCa_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function(contents){
+	_drill_LCa_extractSaveContents.call( this, contents );
+	
+	if( $gameSystem._drill_LCa_sX == undefined ){	//（空数据时，强制赋值）
+		$gameSystem.drill_LCa_initData();
+	}
 };
 //==============================
 // * 缩放参数

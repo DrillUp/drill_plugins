@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        对话框 - 对话框变形器
+ * @plugindesc [v1.1]        对话框 - 对话框变形器
  * @author Drill_up
  * 
  * @Drill_LE_param "变形样式-%d"
@@ -113,6 +113,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 优化了子窗口的位置设置。
  * 
  * 
  * 
@@ -734,26 +736,13 @@ Window_Message.prototype.drill_DOp_refreshWindowChild = function() {
 	}
 	
 	// > 选项窗口
-	var left_height = Graphics.boxHeight - this.y - this.height;
-	if( left_height > this._choiceWindow.height ){	//（处于对话框下方）
-		this._choiceWindow.y = this.y + this.height;
-	}else{				//（处于对话框上方）
-		this._choiceWindow.y = this.y - this._choiceWindow.height;
-	}
+	this._choiceWindow.updatePlacement();
 	
 	// > 数字输入窗口
-	if( this.y == 0 ){	//（处于对话框下方）
-		this._numberWindow.y = this.height;
-	}else{				//（处于对话框上方）
-		this._numberWindow.y = this.y - this.height;
-	}
+	this._numberWindow.updatePlacement();
 	
 	// > 物品选择窗口
-	if( this.y == 0 ){	//（处于下方）
-		this._itemWindow.y = Graphics.boxHeight - this._itemWindow.height;
-	}else{				//（处于上方）
-		this._itemWindow.y = 0;
-	}
+	this._itemWindow.updatePlacement();
 	
 	// > 姓名窗口
 	//（自适应）
@@ -818,6 +807,47 @@ Window_Message.prototype.standardFontSize = function() {
 	var data = $gameSystem._drill_DOp_curStyle;
     return data['fontSize'];
 };
+//==============================
+// * 子窗口 - 选择项窗口 - 捕获位置刷新
+//==============================
+var _drill_DOp_c_updatePlacement = Window_ChoiceList.prototype.updatePlacement;
+Window_ChoiceList.prototype.updatePlacement = function(){
+	_drill_DOp_c_updatePlacement.call(this);
+	
+	var bottom_height = Graphics.boxHeight - this._messageWindow.y - this._messageWindow.height;
+	if( bottom_height > this.height ){	//（处于对话框下方）
+		this.y = this._messageWindow.y + this._messageWindow.height;
+	}else{				//（处于对话框上方）
+		this.y = this._messageWindow.y - this.height;
+	}
+}
+//==============================
+// * 子窗口 - 数字输入窗口 - 捕获位置刷新
+//==============================
+var _drill_DOp_n_updatePlacement = Window_NumberInput.prototype.updatePlacement;
+Window_NumberInput.prototype.updatePlacement = function(){
+	_drill_DOp_n_updatePlacement.call(this);
+	
+	if( this._messageWindow.y == 0 ){	//（处于对话框下方）
+		this.y = this._messageWindow.height;
+	}else{				//（处于对话框上方）
+		this.y = this._messageWindow.y - this.height;
+	}
+}
+//==============================
+// * 子窗口 - 选择物品窗口 - 捕获位置刷新
+//==============================
+var _drill_DOp_i_updatePlacement = Window_EventItem.prototype.updatePlacement;
+Window_EventItem.prototype.updatePlacement = function(){
+	_drill_DOp_i_updatePlacement.call(this);
+	
+	if( this.y == 0 ){	//（处于下方）
+		this.y = Graphics.boxHeight - this.height;
+	}else{				//（处于上方）
+		this.y = 0;
+	}
+}
+
 
 //=============================================================================
 // ** 兼容

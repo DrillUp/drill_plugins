@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        系统 - 参数数字核心
+ * @plugindesc [v1.2]        系统 - 参数数字核心
  * @author Drill_up
  * 
  * @Drill_LE_param "数字样式-%d"
@@ -108,6 +108,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 优化了内部结构，减少性能消耗。添加了时间格式的支持。
+ * [v1.2]
+ * 整理规范了插件的数据结构。
  * 
  * 
  *
@@ -689,6 +691,10 @@
  * @param 格式结构
  * @parent ---时间格式---
  * @type select
+ * @option 时间(mm:ss)
+ * @value 时间(mm:ss)
+ * @option 时间(mm:ss)+零填充
+ * @value 时间(mm:ss)+零填充
  * @option 时间(hh:mm:ss)
  * @value 时间(hh:mm:ss)
  * @option 时间(hh:mm:ss)+零填充
@@ -708,11 +714,11 @@
  * @option 帧单位
  * @value 帧单位
  * @desc 使用 逐帧计时器 结构，参数数字值为10000时，秒单位表示 1万秒，显示"1:66:40 00"。 帧单位表示 1万帧，显示"1:66 40"。
- * @default 秒单位
+ * @default 帧单位
  * 
  * @param 时间格式符号
  * @parent ---时间格式---
- * @desc 此处填指代字符。用于表示"hh:mm:ss"中的":"符号。
+ * @desc 此处填指代字符，对应到相应的资源切片。用于表示"hh:mm:ss"中":"符号的图像。
  * @default e
  * 
  */
@@ -854,10 +860,26 @@
 			DrillUp.g_COGN_list[i] = {};
 		}
 	}
+
+	//==============================
+	// * 数据获取 - 参数数字样式（接口）
+	//	
+	//			说明：	与直接获取 "DrillUp.g_COGN_list[i]" 一样，只是加了一道过滤提示网。
+	//==============================
+	DrillUp.drill_COGN_getCopyedData = function( index ){
+		var data = DrillUp.g_COGN_list[ index ];
+		if( data['specified_enable'] == undefined ){
+			alert(	"【Drill_CoreOfGaugeNumber.js 系统 - 参数数字核心】\n"+
+					"未找到id为"+(index+1)+"的参数数字样式配置。"
+			);
+			return {};
+		}
+		return JSON.parse(JSON.stringify( data ));
+	}
 	
 
 //=============================================================================
-// ** 参数数字
+// ** 参数数字【Drill_COGN_NumberSprite】
 // **			
 // **		索引：	COGN（可从子插件搜索到函数、类用法）
 // **		来源：	继承于Sprite
@@ -877,14 +899,17 @@
 // **				> 结构 - [ ●合并 /分离/混乱] 贴图与数据合并，主要靠接口控制 当前值 和 额定值。
 // **				> 数量 - [单个/ ●多个 ] 
 // **				> 创建 - [一次性/ ●自延迟 /外部延迟] 需要等 基本符号和扩展符号 加载完毕后，才进行切割划分。
-// **				> 销毁 - [ ●不考虑 /自销毁/外部销毁] 
+// **				> 销毁 - [不考虑/自销毁/ ●外部销毁 ] 
 // **				> 样式 - [ ●不可修改 /自变化/外部变化] 
 // **
-// **		调用方法：	数据格式见函数drill_initData。
-// **					// > 参数数字 数据初始化
-// **					var temp_data = DrillUp.g_COGN_list[ meter_id ];
-// **					temp_data['anchor_x'] = 0.5;						//中心锚点x
-// **					temp_data['anchor_y'] = 0.5;						//中心锚点y	
+// **		调用方法：	// > 参数数字 数据初始化
+// **					//  （完整数据 默认值 见函数drill_initData）
+// **					var number_id = 1;
+// **					var temp_data = DrillUp.drill_COGN_getCopyedData( number_id );	//深拷贝数据
+// **					temp_data['specified_enable'] = true;			//额定值启用
+// **					temp_data['specified_visible'] = true;			//额定值显示
+// **					temp_data['specified_conditionNum'] = 200;		//额定值
+// **					temp_data['section_align'] = "右对齐";			//对齐方式	
 // **					// > 参数数字 贴图初始化
 // **					var temp_sprite = new Drill_COGN_NumberSprite( temp_data );
 // **					this.addChild( temp_sprite );
@@ -916,36 +941,89 @@ Drill_COGN_NumberSprite.prototype.update = function() {
 	this.drill_updateDelayingInit();	//延迟初始化
 	this.drill_updateSprite();			//帧刷新对象
 }
-//==============================
-// * 参数数字 - 变化因子（接口，实时调用）
-//==============================
-Drill_COGN_NumberSprite.prototype.drill_COGN_reflashValue = function(value) {
-	this._drill_new_value = value;
-}
-//==============================
-// * 参数数字 - 显示/隐藏（接口，单次调用）
-//==============================
-Drill_COGN_NumberSprite.prototype.drill_COGN_setVisible = function( visible ) {
+//##############################
+// * 参数数字 - 显示/隐藏【标准函数】
+//
+//			参数：	> visible 布尔（是否显示）
+//			返回：	> 无
+//			
+//			说明：	> 可放在帧刷新函数中实时调用。
+//##############################
+Drill_COGN_NumberSprite.prototype.drill_COGN_setVisible = function( visible ){
 	var data = this._drill_data;
 	data['visible'] = visible;
+};
+//##############################
+// * 参数数字 - 是否就绪【标准函数】
+//
+//			参数：	> 无
+//			返回：	> visible 布尔
+//			
+//			说明：	> 可放在帧刷新函数中实时调用。
+//##############################
+Drill_COGN_NumberSprite.prototype.drill_COGN_isReady = function(){
+	if( this.drill_isSrcReady() == false ){ return false; }
+	if( this.drill_isSymbolReady() == false ){ return false; }
+	return true;
+};
+//##############################
+// * 参数数字 - 销毁【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 无
+//			
+//			说明：	> 如果需要重建时。
+//##############################
+Drill_COGN_NumberSprite.prototype.drill_COGN_destroy = function(){
+	this.drill_COGN_destroy_Private();
+};
+//##############################
+// * 参数数字 - 修改变化因子【标准函数】
+//
+//			参数：	> value 数字（变化因子值）
+//			返回：	> 无
+//			
+//			说明：	> 可放在帧刷新函数中实时调用。
+//					> 该插件只提供变换因子的参数数字显示效果，且 变化因子 可以超出 额定值，也可以为负数。
+//##############################
+Drill_COGN_NumberSprite.prototype.drill_COGN_reflashValue = function( value ){
+	this._drill_new_value = value;
 }
-//==============================
-// * 参数数字 - 修改额定值（接口，单次调用）
-//==============================
-Drill_COGN_NumberSprite.prototype.drill_COGN_setSpecifiedNum = function( num ) {
+//##############################
+// * 参数数字 - 修改额定值【标准函数】
+//
+//			参数：	> num 数字（额定值）
+//			返回：	> 无
+//			
+//			说明：	> 可放在帧刷新函数中实时调用。
+//##############################
+Drill_COGN_NumberSprite.prototype.drill_COGN_setSpecifiedNum = function( num ){
 	var data = this._drill_data;
 	data['specified_conditionNum'] = num;
 }
-//==============================
-// * 参数数字 - 修改额定值显示（接口，单次调用）
-//==============================
-Drill_COGN_NumberSprite.prototype.drill_COGN_setSpecifiedNumVisible = function( visible ) {
+//##############################
+// * 参数数字 - 修改额定值显示【标准函数】
+//
+//			参数：	> visible 布尔（是否显示）
+//			返回：	> 无
+//			
+//			说明：	> 可放在帧刷新函数中实时调用。
+//##############################
+Drill_COGN_NumberSprite.prototype.drill_COGN_setSpecifiedNumVisible = function( visible ){
 	var data = this._drill_data;
 	data['specified_visible'] = visible;
 }
-//==============================
-// * 初始化 - 数据
-//==============================
+//##############################
+// * 参数数字 - 初始化数据【标准默认值】
+//
+//			参数：	> 无
+//			返回：	> 无
+//			
+//			说明：	> data 动态参数对象（来自类初始化）
+//					  该对象包含 类所需的所有默认值。
+//					> 其中 DrillUp.drill_COGN_initStyle 提供了部分数据库设置的样式数据，
+//					  样式数据中注释的部分，仍然需要子插件根据自身情况来进行赋值。
+//##############################
 Drill_COGN_NumberSprite.prototype.drill_initData = function() {
 	var data = this._drill_data;
 	
@@ -1002,7 +1080,6 @@ Drill_COGN_NumberSprite.prototype.drill_initSprite = function() {
 	
 	this._layer_outer = null;					//层级 - 外层
 	this._layer_context = null;					//层级 - 内容层
-	this._layer_contextMask = null;				//层级 - 内容层遮罩
 	
 	this._drill_symbol_needInit = true;			//符号 - 初始化 锁
 	this._drill_symbol_bitmap = null;			//符号 - 基本符号bitmap
@@ -1012,6 +1089,8 @@ Drill_COGN_NumberSprite.prototype.drill_initSprite = function() {
 	this._drill_section_layer = null;			//排列 - 排列层
 	this._drill_symbol_height = 0;				//排列 - 高度
 	this._drill_symbol_width = 0;				//排列 - 宽度
+	this._drill_symbolEx_height = 0;			//排列 - 高度
+	this._drill_symbolEx_width = 0;				//排列 - 宽度
 	this._drill_section_changed = true;			//排列 - 排列刷新
 	this._drill_section_string = "";			//排列 - 转义字符串
 	this._drill_section_spriteTank = [];		//排列 - 贴图容器
@@ -1121,21 +1200,20 @@ Drill_COGN_NumberSprite.prototype.drill_updateDelayingInit = function() {
 	var data = this._drill_data;
 	
 	// > 主体
-	if( this._drill_symbol_bitmap.isReady() && this._drill_attr_needInit ){
+	if( this.drill_isSrcReady() && this._drill_attr_needInit ){
 		this._drill_attr_needInit = false;
 		this._drill_symbol_height = this._drill_symbol_bitmap.height;
 		this._drill_symbol_width = this._drill_symbol_bitmap.width;
+		this._drill_symbolEx_height = this._drill_symbolEx_bitmap.height;
+		this._drill_symbolEx_width = this._drill_symbolEx_bitmap.width;
 	}
 	// > 显示
-	if( this._drill_symbol_bitmap.isReady() && this.visible != data['visible'] ){
+	if( this.drill_isSrcReady() && this.visible != data['visible'] ){
 		this.visible = data['visible'];
 		this.drill_updateOutputString();	//（显示时，才刷新一下输出的 参数数字）
 	}
 	// > 符号
-	if( this._drill_symbol_bitmap.isReady() && 
-		this._drill_symbolEx_bitmap.isReady() && 
-		this._drill_symbol_needInit ){	
-		
+	if( this.drill_isSrcReady() && this._drill_symbol_needInit ){	
 		this._drill_symbol_needInit = false;
 		this.drill_delayingInitSymbol();
 	}
@@ -1157,8 +1235,8 @@ Drill_COGN_NumberSprite.prototype.drill_delayingInitSymbol = function() {
 	this._drill_symbol_bitmapTank = [];	
 	
 	// > 资源切割（基本符号）
-	var w = Math.ceil(this._drill_symbol_width / 14);
-	var h = this._drill_symbol_height;
+	var w = this.drill_width();
+	var h = this.drill_height();
 	for(var i=0; i < 14; i++){
 		var x = w * i;
 		var y = 0;
@@ -1167,6 +1245,8 @@ Drill_COGN_NumberSprite.prototype.drill_delayingInitSymbol = function() {
 		this._drill_symbol_bitmapTank.push(new_bitmap);	
 	}
 	// > 资源切割（扩展符号）
+	var w = this.drill_widthEx();
+	var h = this.drill_heightEx();
 	for(var i=0; i < 14; i++){
 		var x = w * i;
 		var y = 0;
@@ -1201,13 +1281,57 @@ Drill_COGN_NumberSprite.prototype.drill_delayingInitSpecified = function() {
 		this._drill_specified_bitmapTank.push(new_bitmap);	
 	}
 }
+//==============================
+// * 销毁 - 执行销毁
+//==============================
+Drill_COGN_NumberSprite.prototype.drill_COGN_destroy_Private = function() {
+	this.visible = false;
+	
+	// > 断开联系
+	this.drill_COGN_removeChildConnect( this._layer_context );
+	this.drill_COGN_removeChildConnect( this._layer_outer );
+	
+	// > 销毁 - 层级
+	this._layer_outer = null;
+	this._layer_context = null;
+	
+	// > 销毁 - 符号
+	this._drill_attr_needInit = false;
+	this._drill_symbol_needInit = false;
+	this._drill_symbol_bitmap = null;
+	this._drill_symbolEx_bitmap = null;
+	this._drill_symbol_bitmapTank.length = 0;
+	
+	// > 销毁 - 排列层
+	this._drill_section_layer = null;
+	this._drill_section_spriteTank.length = 0;
+	
+	// > 销毁 - 额定符号
+	this._drill_specified_needInit = false;
+	this._drill_specified_bitmap = null;
+	this._drill_specifiedEx_bitmap = null;
+}
+//==============================
+// * 销毁 - 递归断开连接
+//==============================
+Drill_COGN_NumberSprite.prototype.drill_COGN_removeChildConnect = function( parent_sprite ){
+	if( parent_sprite == undefined ){ return; }
+	var sprite_list = parent_sprite.children;
+	if( sprite_list == undefined ){ return; }
+	for(var i = 0; i < sprite_list.length; i++ ){
+		var sprite = sprite_list[i];
+		if( sprite == undefined ){ continue; }
+		parent_sprite.removeChild( sprite );
+		this.drill_COGN_removeChildConnect( sprite );
+	}
+};
 
 //==============================
 // * 帧刷新对象
 //==============================
 Drill_COGN_NumberSprite.prototype.drill_updateSprite = function() {
 	var data = this._drill_data;
-	if( !this.drill_isSymbolReady() ){ return }
+	if( this.drill_isSymbolReady() == false ){ return }
 	
 	this.drill_updateRolling();						//帧刷新 - 滚动效果
 													//	> 帧刷新 - 输出字符串
@@ -1325,6 +1449,22 @@ Drill_COGN_NumberSprite.prototype.drill_convertNumberToString = function( value 
 		var mm = Math.floor(value /3600) %60;
 		var hh = Math.floor(value /216000 );
 		
+		if( data['timeUnit_mode'] == "时间(mm:ss)" ){
+			var mm_2 = Math.floor(value /3600);
+			if( value > 3600 ){
+				result_str = String(mm_2) + ":" + String(ss).padZero(2);
+				result_str = result_str.replace(/:/g, data['timeUnit_timeChar']);
+			}else if( value > 60 ){
+				result_str = String(ss);
+			}else{
+				//（不显示）
+			}
+		}
+		if( data['timeUnit_mode'] == "时间(mm:ss)+零填充" ){
+			var mm_2 = Math.floor(value /3600);
+			result_str = String(mm_2).padZero(2) + ":" + String(ss).padZero(2);
+			result_str = result_str.replace(/:/g, data['timeUnit_timeChar']);
+		}
 		if( data['timeUnit_mode'] == "时间(hh:mm:ss)" ){
 			if( value > 216000 ){
 				result_str = String(hh) + ":" + String(mm).padZero(2) + ":" + String(ss).padZero(2);
@@ -1539,13 +1679,19 @@ Drill_COGN_NumberSprite.prototype.drill_COGN_sortByZIndex = function() {
    this._layer_outer.children.sort(function(a, b){return a.zIndex-b.zIndex});		//外层
 };
 //==============================
+// * 获取 - 资源是否准备就绪
+//==============================
+Drill_COGN_NumberSprite.prototype.drill_isSrcReady = function() {
+	if( this._drill_symbol_bitmap.isReady() == false ){ return false; }
+	if( this._drill_symbolEx_bitmap.isReady() == false ){ return false; }
+	return true;
+}
+//==============================
 // * 获取 - 符号是否准备就绪
 //==============================
 Drill_COGN_NumberSprite.prototype.drill_isSymbolReady = function() {
-	if(!this._drill_symbol_bitmapTank ){ return false; }
-	if( this._drill_symbol_bitmapTank.length == 0 ){ return false; }
-	for( var i=0; i<this._drill_symbol_bitmapTank.length; i++ ){
-		if( !this._drill_symbol_bitmapTank[i].isReady() ){ return false; }
+	for( var i=0; i < this._drill_symbol_bitmapTank.length; i++ ){
+		if( this._drill_symbol_bitmapTank[i].isReady() == false ){ return false; }
 	}
 	return true;
 }
@@ -1556,10 +1702,24 @@ Drill_COGN_NumberSprite.prototype.drill_width = function(){
 	return Math.ceil(this._drill_symbol_width / 14);
 }
 //==============================
+// * 获取 - 扩展符号宽度
+//==============================
+Drill_COGN_NumberSprite.prototype.drill_widthEx = function(){
+	if( this._drill_symbolEx_width == 0 ){ return this.drill_width(); }
+	return Math.ceil(this._drill_symbolEx_width / 14);
+}
+//==============================
 // * 获取 - 符号高度
 //==============================
 Drill_COGN_NumberSprite.prototype.drill_height = function() {
 	return this._drill_symbol_height;
+}
+//==============================
+// * 获取 - 扩展符号高度
+//==============================
+Drill_COGN_NumberSprite.prototype.drill_heightEx = function() {
+	if( this._drill_symbolEx_height == 0 ){ return this.drill_height(); }
+	return this._drill_symbolEx_height;
 }
 
 

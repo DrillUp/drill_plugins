@@ -3,8 +3,12 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        互动 - 遇敌时公共事件
+ * @plugindesc [v1.1]        互动 - 遇敌时公共事件
  * @author Drill_up
+ * 
+ * @Drill_LE_param "遇敌触发-%d"
+ * @Drill_LE_parentKey "---遇敌触发组%d至%d---"
+ * @Drill_LE_var "DrillUp.g_PET_trigger_length"
  * 
  *
  * @help
@@ -39,6 +43,16 @@
  * ----可选设定
  * 你可以通过插件指令手动控制触发的开关：
  * 
+ * 插件指令：>遇敌时公共事件 : 开启触发 : 遇敌触发[1]
+ * 插件指令：>遇敌时公共事件 : 关闭触发 : 遇敌触发[1]
+ * 
+ * 1.注意，如果公共事件正在执行，关闭触发不会阻止当前的公共事件。
+ *   关闭只会影响下一次 进入/离开 的判定。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 获取敌群ID
+ * 你可以通过插件指令获取敌群ID：
+ * 
  * 插件指令：>遇敌时公共事件 : 遇敌的敌群ID : 给予值 : 变量[21]
  * 
  * 1.无论是在遇敌前或遇敌后，都能够获取到当前遇敌的 敌群ID。
@@ -68,6 +82,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 添加了插件指令设置。
  * 
  *
  *
@@ -229,14 +245,14 @@
  * @type boolean
  * @on 作用到所有
  * @off 作用于指定地图
- * @desc 你可以设置作用到所有地图。注意，设置后直接对所有地图有效，使用前一定要想好想清楚了。
+ * @desc true - 作用到所有，false - 作用于指定地图。
  * @default false
  * 
  * @param 所属地图
  * @parent 是否作用到所有地图
  * @type number
  * @min 1
- * @desc 指定地图发生遇敌时，才会触发。
+ * @desc 关闭"作用到所有地图"时，指定的地图发生遇敌时，才会触发。
  * @default 1
  *
  * @param 是否作用到所有区域
@@ -287,7 +303,7 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		PET（Layer_Region_Trigger）
+//		插件简称		PET（Player_Encounter_Timing）
 //		临时全局变量	无
 //		临时局部变量	无
 //		存储数据变量	无
@@ -312,7 +328,7 @@
 //			暂无
 //
 //		★其它说明细节：
-//			1.
+//			暂无
 //			
 //		★存在的问题：
 //			暂无
@@ -379,6 +395,22 @@ var _drill_PET_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_PET_pluginCommand.call(this, command, args);
 	if( command === ">遇敌时公共事件" ){
+		if(args.length == 4){
+			var type = String(args[1]);
+			var temp1 = String(args[3]);
+			if( type == "开启触发" ){	
+				temp1 = temp1.replace("遇敌触发[","");
+				temp1 = temp1.replace("]","");
+				temp1 = Number(temp1) -1;
+				$gameSystem._drill_PET_dataTank[ temp1 ]['enable'] = true;
+			}
+			if( type == "关闭触发" ){	
+				temp1 = temp1.replace("遇敌触发[","");
+				temp1 = temp1.replace("]","");
+				temp1 = Number(temp1) -1;
+				$gameSystem._drill_PET_dataTank[ temp1 ]['enable'] = false;
+			}
+		}
 		if(args.length == 6){
 			var type = String(args[1]);
 			var temp1 = String(args[3]);
@@ -656,7 +688,7 @@ Scene_Map.prototype.drill_PET_updateCommonEventAfter = function() {
 }else{
 		Imported.Drill_PlayerEncounterTiming = false;
 		alert(
-			"【Drill_PlayerEncounterTiming.js 互动 - 出入遇敌触发公共事件】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
+			"【Drill_PlayerEncounterTiming.js 互动 - 遇敌时公共事件】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
 			"\n- Drill_LayerCommandThread 地图-多线程"
 		);
 }

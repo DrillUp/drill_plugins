@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        对话框 - 字符块持续动作效果
+ * @plugindesc [v1.1]        对话框 - 字符块持续动作效果
  * @author Drill_up
  * 
  * @Drill_LE_param "预设-%d"
@@ -145,6 +145,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 修复了使用 修改字体 的效果字符时，跳动字符无变化的bug。
  *
  *
  * @param ---预设组 1至20---
@@ -1067,6 +1069,8 @@ Window_Base.prototype.drill_DCCE_createBlockSprite = function( text ){
 	temp_sprite.bitmap.textColor = this.contents.textColor;
 	temp_sprite.bitmap.paintOpacity = this.contents.paintOpacity;
 	temp_sprite.bitmap.fontSize = this.contents.fontSize;
+	temp_sprite.bitmap.fontFace = this.contents.fontFace;
+	temp_sprite.bitmap['drill_elements_drawText'] = true;		//（高级渐变颜色 偏移标记）
 	temp_sprite.bitmap.drawText( text, 0, 0, text_width, text_height );
 	temp_sprite._drill_width = text_width;
 	temp_sprite._drill_height = text_height;

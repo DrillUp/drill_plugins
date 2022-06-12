@@ -25,7 +25,7 @@
  * 插件必须基于核心。
  * 基于：
  *   - Drill_CoreOfBallistics       系统 - 弹道核心★★v1.7及以上★★
- *   - Drill_CoreOfGaugeNumber      系统 - 参数数字核心
+ *   - Drill_CoreOfGaugeNumber      系统 - 参数数字核心★★v1.2及以上★★
  * 可作用于：
  *   - Drill_X_GaugeForFloorDamage  地图UI - 地形伤害漂浮数字[扩展]
  *     该插件能够使得目标插件在地形伤害/治愈时，弹出相应的数字。
@@ -1052,6 +1052,9 @@ Scene_Map.prototype.drill_GFN_updateNumberSpriteDelete = function() {
 		var temp_sprite = this._drill_GFN_spriteTank[i];
 		if( temp_sprite.drill_isDead() ){
 			
+			// > 执行内部销毁
+			temp_sprite.drill_destroy();
+			
 			// > 从层中去除
 			this._spriteset._drill_mapDownArea.removeChild(temp_sprite);
 			this._spriteset._drill_mapCenterArea.removeChild(temp_sprite);
@@ -1169,7 +1172,7 @@ Drill_GFN_NumberSprite.prototype.drill_initSprite = function() {
 	this._drill_symbol_data = {};
 	if( this._drill_data['symbol_id'] ){
 		var symbol_id = this._drill_data['symbol_id'];
-		this._drill_symbol_data = JSON.parse(JSON.stringify( DrillUp.g_COGN_list[ symbol_id -1 ] ));
+		this._drill_symbol_data = DrillUp.drill_COGN_getCopyedData( symbol_id -1 );
 	}
 	this._drill_symbol_data['rolling_mode'] = "瞬间变化";			//固定为瞬间变化
 	this._drill_symbol_data['specified_enable'] = false;			//关闭额定值
@@ -1232,6 +1235,19 @@ Drill_GFN_NumberSprite.prototype.drill_createNumber = function() {
 	// > 刷新数字数据
 	this._drill_symbolSprite.drill_COGN_reflashValue( data['symbol_data'] );
 };
+//==============================
+// * 销毁 - 执行销毁
+//==============================
+Drill_GFN_NumberSprite.prototype.drill_destroy = function() {
+	
+	// > 参数数字销毁
+	this._drill_symbolSprite.drill_COGN_destroy();
+	
+	// > 层级销毁
+	this.removeChild( this._drill_symbolSprite );
+	this._drill_symbolSprite = null;
+};
+
 //==============================
 // * 帧刷新对象
 //==============================

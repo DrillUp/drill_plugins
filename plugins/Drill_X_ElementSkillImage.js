@@ -20,7 +20,7 @@
  * ----插件扩展
  * 插件只对指定插件扩展，如果没有使用目标插件，则该插件没有任何效果。
  * 作用于：
- *   - Drill_WindowSkillElement 主菜单-技能窗口块元素
+ *   - Drill_WindowSkillElement    主菜单-技能窗口块元素
  *     可以给目标插件中的块元素提供多背景支持，不同的技能设置更多不同背景。
  *
  * -----------------------------------------------------------------------------
@@ -1792,7 +1792,7 @@ if( Imported.Drill_WindowSkillElement && ImageManager.load_MenuSkillElement !== 
 	
 	
 //=============================================================================
-// ** 图片初始化
+// ** 预加载
 //=============================================================================
 var _drill_XESI_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {
@@ -1830,7 +1830,7 @@ Window_SkillList.prototype.drill_WSE_s_drawBackground = function( cur_bitmap, sk
 // ** 绘制图标
 //=============================================================================
 var _drill_XESI_s_drawIcon = Window_SkillList.prototype.drill_WSE_s_drawIcon;
-Window_SkillList.prototype.drill_WSE_s_drawIcon = function(cur_bitmap, skill ) {
+Window_SkillList.prototype.drill_WSE_s_drawIcon = function( cur_bitmap, skill ){
 	if( DrillUp.g_XESI_hide_icon ){
 		
 	}else{
@@ -1838,10 +1838,11 @@ Window_SkillList.prototype.drill_WSE_s_drawIcon = function(cur_bitmap, skill ) {
 	}
 }
 
-//==============================
-// * 往mog强制塞入drill作用方法
-//==============================
-if(Imported.MOG_SceneSkill){
+
+//=============================================================================
+// * mog技能界面 - 塞入drill作用方法
+//=============================================================================
+if( Imported.MOG_SceneSkill ){
 	Window_SkillListM.prototype.drill_WSE_s_drawBackground = Window_SkillList.prototype.drill_WSE_s_drawBackground;
 	Window_SkillListM.prototype.drill_WSE_s_drawIcon = Window_SkillList.prototype.drill_WSE_s_drawIcon;
 }

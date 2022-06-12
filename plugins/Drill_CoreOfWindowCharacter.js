@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        对话框 - 窗口字符核心
+ * @plugindesc [v1.2]        对话框 - 窗口字符核心
  * @author Drill_up
  * 
  * 
@@ -130,6 +130,18 @@
  *   消息输入字符：指控制对话框消息显示、停顿等操作的字符。
  * 
  * -----------------------------------------------------------------------------
+ * ----可选设定 - 字符块
+ * 使用该插件后，你可以使用下列窗口字符：
+ * 
+ * 窗口字符：\dCOWCf[某文字]
+ * 窗口字符：\dCOWC[字符块:文本[某文字]]
+ * 
+ * 1."\dCOWCf[某文字]"表示"某文字" 作为一个字符块显示，
+ *   与"\dCOWC[字符块:文本[某文字]]"的指令意思一样，只是前者是简写。
+ * 2.字符块 常用于在文本变色时、消息输入时，将多个字符作为一个整体显示。
+ *   反转字符、子插件的跳动字符，都基于字符块。
+ * 
+ * -----------------------------------------------------------------------------
  * ----可选设定 - 翻转字符
  * 使用该插件后，你可以使用下列窗口字符：
  * （注意，冒号之间没有空格，并且是英文冒号。）
@@ -221,6 +233,8 @@
  * [v1.1]
  * 优化字符外框厚度为0时，不绘制外框的功能。
  * 优化了部分参数配置。
+ * [v1.2]
+ * 添加了设置单纯的 字符块 的窗口字符。
  * 
  * 
  * 
@@ -1891,6 +1905,8 @@ Window_Base.prototype.drill_COWC_createBlockSprite = function( text ){
 	temp_sprite.bitmap.textColor = this.contents.textColor;
 	temp_sprite.bitmap.paintOpacity = this.contents.paintOpacity;
 	temp_sprite.bitmap.fontSize = this.contents.fontSize;
+	temp_sprite.bitmap.fontFace = this.contents.fontFace;
+	temp_sprite.bitmap['drill_elements_drawText'] = true;		//（高级渐变颜色 偏移标记）
 	temp_sprite.bitmap.drawText( text, 0, 0, text_width, text_height );
 	temp_sprite._drill_width = text_width;
 	temp_sprite._drill_height = text_height;
@@ -1903,6 +1919,19 @@ var _drill_COWC_processNewEffectChar_Combined_4 = Window_Base.prototype.drill_CO
 Window_Base.prototype.drill_COWC_processNewEffectChar_Combined = function( matched_index, matched_str, command, args ){
 	_drill_COWC_processNewEffectChar_Combined_4.call( this, matched_index, matched_str, command, args );
 	
+	if( command == "dCOWCf" ){
+		if( args.length == 1 ){
+			var temp1 = String(args[0]);
+			var text_width = this.drill_COWA_getTextWidth( temp1 );
+			if( this.drill_COWA_isCalculating() == false ){
+				var temp_sprite = this.drill_COWC_createBlockSprite( temp1 );
+				temp_sprite.x = this._drill_COWC_effect_curData['x'];
+				temp_sprite.y = this._drill_COWC_effect_curData['y'];
+				this.drill_COWC_addSprite( temp_sprite );
+			}
+			this.drill_COWC_charSubmit_Effect( text_width, 0 );
+		}
+	}
 	if( command == "dCOWCfv" ){
 		if( args.length == 1 ){
 			var temp1 = String(args[0]);
@@ -1935,6 +1964,18 @@ Window_Base.prototype.drill_COWC_processNewEffectChar_Combined = function( match
 		if( args.length == 2 ){
 			var type = String(args[0]);
 			var temp1 = String(args[1]);
+			if( type == "字符块" ){
+				temp1 = temp1.replace("文本[","");
+				temp1 = temp1.replace("]","");
+				var text_width = this.drill_COWA_getTextWidth( temp1 );
+				if( this.drill_COWA_isCalculating() == false ){
+					var temp_sprite = this.drill_COWC_createBlockSprite( temp1 );
+					temp_sprite.x = this._drill_COWC_effect_curData['x'];
+					temp_sprite.y = this._drill_COWC_effect_curData['y'];
+					this.drill_COWC_addSprite( temp_sprite );
+				}
+				this.drill_COWC_charSubmit_Effect( text_width, 0 );
+			}
 			if( type == "横向翻转" ){
 				temp1 = temp1.replace("文本[","");
 				temp1 = temp1.replace("]","");

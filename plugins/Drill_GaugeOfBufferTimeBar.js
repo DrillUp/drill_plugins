@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        UI - 缓冲时间条
+ * @plugindesc [v1.2]        UI - 缓冲时间条
  * @author Drill_up
  * 
  * @Drill_LE_param "时间条样式-%d"
@@ -97,6 +97,7 @@
  *   你可以创建多个时间条并绑定到同一事件上。
  *   如果"时间条[1]"已经创建，再执行一次创建，则会将原来的去掉，而覆盖新的。
  * 3.如果创建了id相同的时间条物体，那么后一个物体会覆盖掉前一个物体。
+ * 4.持续时间的单位为帧，如果要60秒，则需填"持续时间[3600]"。
  *
  * -----------------------------------------------------------------------------
  * ----可选设定
@@ -119,6 +120,23 @@
  *   大部分的时间条是重叠在一起的，需要额外分配位置。
  * 5."设置/增加时间值"会影响段的情况，比如段上限180，时间+180，那么时间条
  *   会立即增加一段。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 根据事件控制
+ * 你可以能够设置根据某事件来控制时间条：
+ * 
+ * 插件指令：>缓冲时间条 : 本事件 : 所有条 : 暂停计时器
+ * 插件指令：>缓冲时间条 : 本事件 : 所有条 : 恢复计时器
+ * 插件指令：>缓冲时间条 : 本事件 : 所有条 : 结束时间播放
+ * 插件指令：>缓冲时间条 : 本事件 : 所有条 : 设置时间值 : 时间[50]
+ * 插件指令：>缓冲时间条 : 本事件 : 所有条 : 增加时间值 : 时间[+10]
+ * 插件指令：>缓冲时间条 : 本事件 : 所有条 : 修改整体位置平移 : 位置[20,-20]
+ * 
+ * 插件指令：>缓冲时间条 : 本事件 : 所有条 : 暂停计时器
+ * 插件指令：>缓冲时间条 : 事件[10] : 所有条 : 暂停计时器
+ * 插件指令：>缓冲时间条 : 事件变量[21] : 所有条 : 暂停计时器
+ * 
+ * 1.如果这个事件没有绑定任何 时间条，则没有效果。
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -153,6 +171,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 修复了插件指令在没有创建时间条时，执行 恢复计时器 出错的bug。
+ * [v1.2]
+ * 添加了 根据事件 来修改控制参数条的插件指令。
  * 
  * 
  * 
@@ -656,135 +676,233 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp3 = temp3.replace("段上限[","");
 				temp3 = temp3.replace("]","");
 				
-				$gameMap.drill_GOBTB_createTimeBar( Number(bar_id), Number(temp1)-1, Number(temp2), Number(temp3)  );
+				var timeBar = $gameMap.drill_GOBTB_createTimeBar( Number(bar_id), Number(temp1)-1, Number(temp2), Number(temp3)  );
+				
+				// > 默认绑定于本事件
+				timeBar.drill_GOBTB_bindEvent( this._eventId );
+				return;
+			}
+		}
+		
+		/*-----------------对象组获取 - 时间条------------------*/
+		var bar_id = null;
+		if( args.length >= 2 ){
+			var obj_str = String(args[1]);
+			if( obj_str.indexOf("控制时间条[") != -1 ){
+				obj_str = obj_str.replace("控制时间条[","");
+				obj_str = obj_str.replace("]","");
+				bar_id = Number(obj_str);
 			}
 		}
 		
 		/*-----------------控制时间条------------------*/
-		if(args.length == 6){ 	//	>缓冲时间条 : 控制时间条[1] : 绑定于物体 : 本事件
-			var bar_id = String(args[1]);
+		if( bar_id != null && args.length == 6 ){ 	//	>缓冲时间条 : 控制时间条[1] : 绑定于物体 : 本事件
 			var temp1 = String(args[3]);
 			var temp2 = String(args[5]);
-			if( bar_id.indexOf("控制时间条[") != -1 ){
-				bar_id = bar_id.replace("控制时间条[","");
-				bar_id = bar_id.replace("]","");
+			if( temp1 == "绑定于物体" ){
+				var e_id = null;
+				if( temp2 == "玩家" ){
+					e_id = -2;
+				}
+				if( temp2 == "本事件" ){
+					e_id = this._eventId;
+				}
+				if( temp2.indexOf("事件[") != -1 ){
+					temp2 = temp2.replace("事件[","");
+					temp2 = temp2.replace("]","");
+					e_id = Number(temp2);
+				}
+				if( temp2.indexOf("事件变量[") != -1 ){
+					temp2 = temp2.replace("事件变量[","");
+					temp2 = temp2.replace("]","");
+					e_id = $gameVariables.value(Number(temp2));
+				}
 				
-				if( temp1 == "绑定于物体" ){
-					var e_id = null;
-					if( temp2 == "玩家" ){
-						e_id = -2;
+				if( e_id ){
+					if( $gameMap.drill_GOBTB_isEventExist( e_id ) == false ){ return; }
+					var timeBar = $gameMap.drill_GOBTB_getTimeBarById( Number(bar_id) );
+					if( timeBar ){
+						timeBar.drill_GOBTB_bindEvent( e_id );
 					}
-					if( temp2 == "本事件" ){
-						e_id = this._eventId;
-					}
-					if( temp2.indexOf("事件[") != -1 ){
-						temp2 = temp2.replace("事件[","");
-						temp2 = temp2.replace("]","");
-						e_id = Number(temp2);
-					}
-					if( temp2.indexOf("事件变量[") != -1 ){
-						temp2 = temp2.replace("事件变量[","");
-						temp2 = temp2.replace("]","");
-						e_id = $gameVariables.value(Number(temp2));
-					}
-					
-					if( e_id ){
-						if( $gameMap.drill_GOBTB_isEventExist( e_id ) == false ){ return; }
+				}
+				return;
+			}
+			
+			if( temp1 == "绑定于图块" ){
+				if( temp2.indexOf("位置[") != -1 ){
+					temp2 = temp2.replace("位置[","");
+					temp2 = temp2.replace("]","");
+					var temp_arr = temp2.split(/[,，]/);
+					if( temp_arr.length >= 2 ){
 						var timeBar = $gameMap.drill_GOBTB_getTimeBarById( Number(bar_id) );
 						if( timeBar ){
-							timeBar.drill_GOBTB_bindEvent( e_id );
+							timeBar.drill_GOBTB_bindTile( Number(temp_arr[0]),Number(temp_arr[1]) );
 						}
 					}
 				}
-				
-				if( temp1 == "绑定于图块" ){
-					if( temp2.indexOf("位置[") != -1 ){
-						temp2 = temp2.replace("位置[","");
-						temp2 = temp2.replace("]","");
-						var temp_arr = temp2.split(/[,，]/);
-						if( temp_arr.length >= 2 ){
-							var timeBar = $gameMap.drill_GOBTB_getTimeBarById( Number(bar_id) );
-							if( timeBar ){
-								timeBar.drill_GOBTB_bindTile( Number(temp_arr[0]),Number(temp_arr[1]) );
-							}
-						}
-					}
-				}
+				return;
 			}
 		}
 		
 		/*-----------------可选设定 控制------------------*/
-		if(args.length == 4){ 			//	>缓冲时间条 : 控制时间条[1] : 暂停计时器
-			var bar_id = String(args[1]);
+		if( bar_id != null && args.length == 4 ){ 			//	>缓冲时间条 : 控制时间条[1] : 暂停计时器
 			var temp1 = String(args[3]);
-			if( bar_id.indexOf("控制时间条[") != -1 ){
-				bar_id = bar_id.replace("控制时间条[","");
-				bar_id = bar_id.replace("]","");
-				
-				if( temp1 == "暂停计时器" ){
-					var timeBar = $gameMap.drill_GOBTB_getTimeBarById( Number(bar_id) );
-					if( timeBar ){
-						timeBar._drill_timeBlocked = true;
-					}
+			if( temp1 == "暂停计时器" ){
+				var timeBar = $gameMap.drill_GOBTB_getTimeBarById( Number(bar_id) );
+				if( timeBar ){
+					timeBar._drill_timeBlocked = true;
 				}
-				if( temp1 == "恢复计时器" ){
-					var timeBar = $gameMap.drill_GOBTB_getTimeBarById( Number(bar_id) );
-					if( timeBar ){
-						timeBar._drill_timeBlocked = false;
-					}
+				return;
+			}
+			if( temp1 == "恢复计时器" ){
+				var timeBar = $gameMap.drill_GOBTB_getTimeBarById( Number(bar_id) );
+				if( timeBar ){
+					timeBar._drill_timeBlocked = false;
 				}
-				if( temp1 == "结束时间播放" ){
-					var timeBar = $gameMap.drill_GOBTB_getTimeBarById( Number(bar_id) );
-					if( timeBar ){
-						timeBar._drill_timeBlocked = false;
-						timeBar._drill_data['life_time'] = timeBar._drill_cur_time;		//结束时间 立即变成当前时间
-					}
+				return;
+			}
+			if( temp1 == "结束时间播放" ){
+				var timeBar = $gameMap.drill_GOBTB_getTimeBarById( Number(bar_id) );
+				if( timeBar ){
+					timeBar._drill_timeBlocked = false;
+					timeBar._drill_data['life_time'] = timeBar._drill_cur_time;		//结束时间 立即变成当前时间
 				}
+				return;
 			}
 		}
-		if(args.length == 6){ 	
-			var bar_id = String(args[1]);
+		if( bar_id != null && args.length == 6 ){ 	
 			var temp1 = String(args[3]);
 			var temp2 = String(args[5]);
-			if( bar_id.indexOf("控制时间条[") != -1 ){
-				bar_id = bar_id.replace("控制时间条[","");
-				bar_id = bar_id.replace("]","");
-				
-				if( temp1 == "修改整体位置平移" ){
-					if( temp2.indexOf("位置[") != -1 ){
-						temp2 = temp2.replace("位置[","");
-						temp2 = temp2.replace("]","");
-						var temp_arr = temp2.split(/[,，]/);
-						if( temp_arr.length >= 2 ){
-							var timeBar = $gameMap.drill_GOBTB_getTimeBarById( Number(bar_id) );
-							if( timeBar ){
-								timeBar._drill_data['x'] = Number(temp_arr[0]);
-								timeBar._drill_data['y'] = Number(temp_arr[1]);
-							}
-						}
-					}
-				}
-				
-				if( temp1 == "设置时间值" ){
-					if( temp2.indexOf("时间[") != -1 ){
-						temp2 = temp2.replace("时间[","");
-						temp2 = temp2.replace("]","");
+			if( temp1 == "修改整体位置平移" ){
+				if( temp2.indexOf("位置[") != -1 ){
+					temp2 = temp2.replace("位置[","");
+					temp2 = temp2.replace("]","");
+					var temp_arr = temp2.split(/[,，]/);
+					if( temp_arr.length >= 2 ){
 						var timeBar = $gameMap.drill_GOBTB_getTimeBarById( Number(bar_id) );
 						if( timeBar ){
-							timeBar._drill_cur_time = Number(temp2);
+							timeBar._drill_data['x'] = Number(temp_arr[0]);
+							timeBar._drill_data['y'] = Number(temp_arr[1]);
 						}
 					}
 				}
-				if( temp1 == "增加时间值" ){
-					if( temp2.indexOf("时间[") != -1 ){
-						temp2 = temp2.replace("时间[","");
-						temp2 = temp2.replace("]","");
-						var timeBar = $gameMap.drill_GOBTB_getTimeBarById( Number(bar_id) );
-						if( timeBar ){
-							timeBar._drill_cur_time += Number(temp2);
+				return;
+			}
+			
+			if( temp1 == "设置时间值" ){
+				if( temp2.indexOf("时间[") != -1 ){
+					temp2 = temp2.replace("时间[","");
+					temp2 = temp2.replace("]","");
+					var timeBar = $gameMap.drill_GOBTB_getTimeBarById( Number(bar_id) );
+					if( timeBar ){
+						timeBar._drill_cur_time = Number(temp2);
+					}
+				}
+				return;
+			}
+			if( temp1 == "增加时间值" ){
+				if( temp2.indexOf("时间[") != -1 ){
+					temp2 = temp2.replace("时间[","");
+					temp2 = temp2.replace("]","");
+					var timeBar = $gameMap.drill_GOBTB_getTimeBarById( Number(bar_id) );
+					if( timeBar ){
+						timeBar._drill_cur_time += Number(temp2);
+					}
+				}
+				return;
+			}
+		}
+		
+		/*-----------------对象组获取 - 事件------------------*/
+		var e_id = null;
+		if( args.length >= 2 ){
+			var obj_str = String(args[1]);
+			if( obj_str == "本事件" ){
+				e_id = this._eventId;
+				
+			}else if( obj_str.indexOf("事件变量[") != -1 ){
+				obj_str = obj_str.replace("事件变量[","");
+				obj_str = obj_str.replace("]","");
+				e_id = $gameVariables.value(Number(obj_str));
+			
+			}else if( obj_str.indexOf("事件[") != -1 ){
+				obj_str = obj_str.replace("事件[","");
+				obj_str = obj_str.replace("]","");
+				e_id = Number(obj_str);
+			}
+		}
+		
+		/*-----------------事件 控制------------------*/
+		if( e_id != null && args.length == 6 ){ 
+			var temp1 = String(args[3]);
+			var temp2 = String(args[5]);
+			if( temp1 == "所有条" && temp2 == "暂停计时器" ){
+				var timeBar_list = $gameMap.drill_GOBTB_getTimeBarListByEventId( e_id );
+				for( var i=0; i < timeBar_list.length; i++ ){
+					timeBar_list[i]._drill_timeBlocked = true;
+				}
+				return;
+			}
+			if( temp1 == "所有条" && temp2 == "恢复计时器" ){
+				var timeBar_list = $gameMap.drill_GOBTB_getTimeBarListByEventId( e_id );
+				for( var i=0; i < timeBar_list.length; i++ ){
+					timeBar_list[i]._drill_timeBlocked = false;
+				}
+				return;
+			}
+			if( temp1 == "所有条" && temp2 == "结束时间播放" ){
+				var timeBar_list = $gameMap.drill_GOBTB_getTimeBarListByEventId( e_id );
+				for(var i=0; i < timeBar_list.length; i++ ){
+					var timeBar = timeBar_list[i];
+					timeBar._drill_timeBlocked = false;
+					timeBar._drill_data['life_time'] = timeBar._drill_cur_time;		//结束时间 立即变成当前时间
+				}
+				return;
+			}
+		}
+		if( e_id != null && args.length == 8 ){ 	
+			var temp1 = String(args[3]);
+			var temp2 = String(args[5]);
+			var temp3 = String(args[7]);
+			if( temp1 == "所有条" && temp2 == "修改整体位置平移" ){
+				if( temp3.indexOf("位置[") != -1 ){
+					temp3 = temp3.replace("位置[","");
+					temp3 = temp3.replace("]","");
+					var temp_arr = temp3.split(/[,，]/);
+					if( temp_arr.length >= 2 ){
+						var timeBar_list = $gameMap.drill_GOBTB_getTimeBarListByEventId( e_id );
+						for(var i=0; i < timeBar_list.length; i++ ){
+							var timeBar = timeBar_list[i];
+							timeBar._drill_data['x'] = Number(temp_arr[0]);
+							timeBar._drill_data['y'] = Number(temp_arr[1]);
 						}
 					}
 				}
+				return;
+			}
+			if( temp1 == "所有条" && temp2 == "设置时间值" ){
+				if( temp3.indexOf("时间[") != -1 ){
+					temp3 = temp3.replace("时间[","");
+					temp3 = temp3.replace("]","");
+					var timeBar_list = $gameMap.drill_GOBTB_getTimeBarListByEventId( e_id );
+					for(var i=0; i < timeBar_list.length; i++ ){
+						var timeBar = timeBar_list[i];
+						timeBar._drill_cur_time = Number(temp3);
+					}
+				}
+				return;
+			}
+			if( temp1 == "所有条" && temp2 == "增加时间值" ){
+				if( temp3.indexOf("时间[") != -1 ){
+					temp3 = temp3.replace("时间[","");
+					temp3 = temp3.replace("]","");
+					var timeBar_list = $gameMap.drill_GOBTB_getTimeBarListByEventId( e_id );
+					for(var i=0; i < timeBar_list.length; i++ ){
+						var timeBar = timeBar_list[i];
+						timeBar._drill_cur_time += Number(temp3);
+					}
+				}
+				return;
 			}
 		}
 	}
@@ -807,7 +925,8 @@ Game_Map.prototype.drill_GOBTB_isEventExist = function( e_id ){
 
 
 //=============================================================================
-// ** Drill_GOBTB_GameTimeBar 时间条物体
+// ** 时间条物体【Drill_GOBTB_GameTimeBar】
+//
 //=============================================================================
 //==============================
 // * 时间条物体 - 定义
@@ -977,6 +1096,7 @@ Game_Map.prototype.drill_GOBTB_createTimeBar = function( bar_id, barSprite_id, l
 	var obj = new Drill_GOBTB_GameTimeBar( data );
 	this._drill_GOBTB_timeBarTank[ bar_id ] = obj;
 	$gameTemp._drill_GOBTB_needRefresh = true;
+	return obj;
 };
 //==============================
 // * 容器 - 获取物体
@@ -985,12 +1105,27 @@ Game_Map.prototype.drill_GOBTB_getTimeBarById = function( bar_id ){
 	return this._drill_GOBTB_timeBarTank[ bar_id ];
 }
 //==============================
+// * 容器 - 获取物体（根据事件）
+//==============================
+Game_Map.prototype.drill_GOBTB_getTimeBarListByEventId = function( e_id ){
+	var result = [];
+	for( var i=0; i < this._drill_GOBTB_timeBarTank.length; i++ ){
+		var timeBar = this._drill_GOBTB_timeBarTank[i];
+		if( timeBar == undefined ){ continue; }
+		if( timeBar._drill_data['bind_eventId'] == -1 ){ continue; }
+		if( timeBar._drill_data['bind_eventId'] != e_id ){ continue; }
+		result.push( timeBar );
+	}
+	return result;
+}
+//==============================
 // * 容器 - 删除物体
 //==============================
 Game_Map.prototype.drill_GOBTB_deleteTimeBar = function( bar_id ) {
 	this._drill_GOBTB_timeBarTank[ bar_id ] = null;
 	$gameTemp._drill_GOBTB_needRefresh = true;
 };
+
 
 //=============================================================================
 // ** 地图层级
@@ -1074,6 +1209,7 @@ Scene_Map.prototype.drill_GOBTB_updateTimeBarCheck = function() {
 		
 		// > 销毁旧贴图
 		if( temp_sprite != null ){
+			temp_sprite.drill_destroy();	//（执行内部销毁）
 			this._spriteset._drill_mapUpArea.removeChild( temp_sprite );
 		}
 		
@@ -1168,6 +1304,22 @@ Drill_GOBTB_TimeBarSprite.prototype.drill_createFrontLayout = function() {
 	temp_sprite.rotation = data['frameUpper_rotation'] / 180 * Math.PI;
 	this.addChild( temp_sprite );
 	this._drill_frontSprite = temp_sprite;
+}
+//==============================
+// * 销毁 - 执行销毁
+//==============================
+Drill_GOBTB_TimeBarSprite.prototype.drill_destroy = function() {
+	
+	// > 参数条销毁
+	this._drill_meterSprite.drill_COGM_destroy();
+	
+	// > 层级销毁
+	this.removeChild( this._drill_meterSprite );
+	this.removeChild( this._drill_backSprite );
+	this.removeChild( this._drill_frontSprite );
+	this._drill_meterSprite = null;
+	this._drill_backSprite = null;
+	this._drill_frontSprite = null;
 }
 
 //==============================

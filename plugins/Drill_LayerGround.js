@@ -1634,7 +1634,7 @@
 //				->基本属性
 //					->地图层级
 //						->添加贴图到层级【标准函数】
-//						->移动贴图【标准函数】
+//						->参照的位移【标准函数】
 //						->图片层级排序【标准函数】
 //					->简单持续平移
 //					->镜头位移比
@@ -2072,10 +2072,10 @@ Scene_Map.prototype.drill_LG_sortByZIndex = function () {
     this.drill_LG_sortByZIndex_Private();
 }
 //##############################
-// * 地图层级 - 移动贴图【标准函数】
+// * 地图层级 - 参照的位移【标准函数】
 //				
-//			参数：	> x 数字           （x位置，地图参照为基准）
-//					> y 数字           （y位置，地图参照为基准）
+//			参数：	> x 数字           （x位置）
+//					> y 数字           （y位置）
 //					> reference 字符串 （参考系，镜头参照/地图参照）
 //					> option 动态参数对象 （计算时的必要数据）
 //			返回：	> pos 动态参数对象
@@ -2093,9 +2093,9 @@ Scene_Map.prototype.drill_LG_layerMoveingReference = function (x, y, reference, 
 //==============================
 // * 地图层级 - 下层
 //==============================
-var _drill_LG_layer_createParallax = Spriteset_Map.prototype.createParallax;
+var _drill_LG_map_createParallax = Spriteset_Map.prototype.createParallax;
 Spriteset_Map.prototype.createParallax = function() {
-	_drill_LG_layer_createParallax.call(this);		//rmmv远景 < 下层 < rmmv图块
+	_drill_LG_map_createParallax.call(this);		//rmmv远景 < 下层 < rmmv图块
 	if( !this._drill_mapDownArea ){
 		this._drill_mapDownArea = new Sprite();
 		this._baseSprite.addChild(this._drill_mapDownArea);	
@@ -2104,9 +2104,9 @@ Spriteset_Map.prototype.createParallax = function() {
 //==============================
 // * 地图层级 - 中层
 //==============================
-var _drill_LG_layer_createTilemap = Spriteset_Map.prototype.createTilemap;
+var _drill_LG_map_createTilemap = Spriteset_Map.prototype.createTilemap;
 Spriteset_Map.prototype.createTilemap = function() {
-	_drill_LG_layer_createTilemap.call(this);		//rmmv图块 < 中层 < rmmv玩家
+	_drill_LG_map_createTilemap.call(this);		//rmmv图块 < 中层 < rmmv玩家
 	if( !this._drill_mapCenterArea ){
 		this._drill_mapCenterArea = new Sprite();
 		this._drill_mapCenterArea.z = 0.60;
@@ -2116,9 +2116,9 @@ Spriteset_Map.prototype.createTilemap = function() {
 //==============================
 // * 地图层级 - 上层
 //==============================
-var _drill_LG_layer_createDestination = Spriteset_Map.prototype.createDestination;
+var _drill_LG_map_createDestination = Spriteset_Map.prototype.createDestination;
 Spriteset_Map.prototype.createDestination = function() {
-	_drill_LG_layer_createDestination.call(this);	//rmmv鼠标目的地 < 上层 < rmmv天气
+	_drill_LG_map_createDestination.call(this);	//rmmv鼠标目的地 < 上层 < rmmv天气
 	if( !this._drill_mapUpArea ){
 		this._drill_mapUpArea = new Sprite();
 		this._baseSprite.addChild(this._drill_mapUpArea);	
@@ -2127,9 +2127,9 @@ Spriteset_Map.prototype.createDestination = function() {
 //==============================
 // * 地图层级 - 图片层
 //==============================
-var _drill_LG_layer_createPictures = Spriteset_Map.prototype.createPictures;
+var _drill_LG_map_createPictures = Spriteset_Map.prototype.createPictures;
 Spriteset_Map.prototype.createPictures = function() {
-	_drill_LG_layer_createPictures.call(this);		//rmmv图片 < 图片层 < rmmv对话框
+	_drill_LG_map_createPictures.call(this);		//rmmv图片 < 图片层 < rmmv对话框
 	if( !this._drill_mapPicArea ){
 		this._drill_mapPicArea = new Sprite();
 		this.addChild(this._drill_mapPicArea);	
@@ -2138,9 +2138,9 @@ Spriteset_Map.prototype.createPictures = function() {
 //==============================
 // * 地图层级 - 最顶层
 //==============================
-var _drill_LG_layer_createAllWindows = Scene_Map.prototype.createAllWindows;
+var _drill_LG_map_createAllWindows = Scene_Map.prototype.createAllWindows;
 Scene_Map.prototype.createAllWindows = function() {
-	_drill_LG_layer_createAllWindows.call(this);	//rmmv对话框 < 最顶层
+	_drill_LG_map_createAllWindows.call(this);	//rmmv对话框 < 最顶层
 	if( !this._drill_SenceTopArea ){
 		this._drill_SenceTopArea = new Sprite();
 		this.addChild(this._drill_SenceTopArea);	
@@ -2177,9 +2177,7 @@ Scene_Map.prototype.drill_LG_layerAddSprite_Private = function (sprite, layer_in
     }
 }
 //==============================
-// * 地图层级 - 移动贴图（私有）
-//			
-//			说明：	当前的xx，yy的参照系是 地图参照 。
+// * 地图层级 - 参照的位移（私有）
 //==============================
 Scene_Map.prototype.drill_LG_layerMoveingReference_Private = function( xx, yy, reference, option ){
 	
@@ -2198,11 +2196,10 @@ Scene_Map.prototype.drill_LG_layerMoveingReference_Private = function( xx, yy, r
 	
 	
 	// > 参照系修正
-	if( reference == "地图参照" ){
-		//（不操作）
+	if( reference == "地图参照 -> 地图参照" ){
 		return {'x':xx, 'y':yy };
 	}
-	if( reference == "镜头参照" ){
+	if( reference == "地图参照 -> 镜头参照" ){
 		xx -= this._spriteset._baseSprite.x;	//（由于 Spriteset_Map 的 _baseSprite 坐标始终是(0,0)，所以两个参照没有区别。）
 		yy -= this._spriteset._baseSprite.y;
 		return {'x':xx, 'y':yy };
@@ -2324,17 +2321,17 @@ Scene_Map.prototype.drill_LG_updateBase = function() {
 			xx += temp_data['cur_speedX'];
 			yy += temp_data['cur_speedY'];
 
-		    // > 位移偏转
+		    // > 参照的位移
 			if (temp_data['layer_index'] == "下层" ||
                 temp_data['layer_index'] == "中层" ||
                 temp_data['layer_index'] == "上层") {
-			    var pos = this.drill_LG_layerMoveingReference(xx, yy, "地图参照", temp_data);
+			    var pos = this.drill_LG_layerMoveingReference(xx, yy, "地图参照 -> 地图参照", temp_data);
 			    xx = pos['x'];
 			    yy = pos['y'];
 			}
 			if (temp_data['layer_index'] == "图片层" ||
                 temp_data['layer_index'] == "最顶层") {
-			    var pos = this.drill_LG_layerMoveingReference(xx, yy, "镜头参照", temp_data);
+			    var pos = this.drill_LG_layerMoveingReference(xx, yy, "地图参照 -> 镜头参照", temp_data);
 			    xx = pos['x'];
 			    yy = pos['y'];
 			}

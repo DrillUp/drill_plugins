@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.7]        战斗 - 多层战斗视频
+ * @plugindesc [v1.8]        战斗 - 多层战斗视频
  * @author Drill_up
  * 
  * @Drill_LE_param "视频-%d"
@@ -104,6 +104,8 @@
  * 更新了pixi5的兼容情况。
  * [v1.7]
  * 更新了插件指令。
+ * [v1.8]
+ * 优化了战斗层级结构。
  * 
  *
  * @param ---视频组---
@@ -524,16 +526,71 @@ Game_Temp.prototype.initialize = function() {
 	_drill_BVi_initialize.call(this);
 	this._drill_BVi_sprites = [];
 }
-	
+
+
+//#############################################################################
+// ** 标准函数（战斗层级）
+//#############################################################################
+//##############################
+// * 战斗层级 - 添加贴图到层级【标准函数】
+//				
+//			参数：	> sprite 贴图        （添加的贴图对象）
+//					> layer_index 字符串 （添加到的层级名，下层/上层/图片层/最顶层）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图添加到目标层级中。
+//##############################
+Scene_Battle.prototype.drill_BVi_layerAddSprite = function( sprite, layer_index ){
+	this.drill_BVi_layerAddSprite_Private( sprite, layer_index );
+}
+//##############################
+// * 战斗层级 - 去除贴图【标准函数】
+//				
+//			参数：	> sprite 贴图（添加的贴图对象）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图从战斗层级中移除。
+//##############################
+Scene_Battle.prototype.drill_BVi_layerRemoveSprite = function( sprite ){
+	//（不操作）
+}
+//##############################
+// * 战斗层级 - 图片层级排序【标准函数】
+//				
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 执行该函数后，战斗层级的子贴图，按照zIndex属性来进行先后排序。值越大，越靠前。
+//##############################
+Scene_Battle.prototype.drill_BVi_sortByZIndex = function () {
+    this.drill_BVi_sortByZIndex_Private();
+}
+//##############################
+// * 战斗层级 - 参照的位移【标准函数】
+//				
+//			参数：	> x 数字           （x位置）
+//					> y 数字           （y位置）
+//					> reference 字符串 （参考系，镜头参照/战斗参照）
+//					> option 动态参数对象 （计算时的必要数据）
+//			返回：	> pos 动态参数对象
+//                  > pos['x']
+//                  > pos['y']
+//          
+//			说明：	> 强行规范的接口，必须按照接口的结构来，把要考虑的问题全考虑清楚了再去实现。
+//##############################
+Scene_Battle.prototype.drill_BVi_layerMoveingReference = function( x, y, reference, option ){
+	//（不操作）
+	return {'x':0,'y':0};
+}
 //=============================================================================
-// ** 战斗层级
+// ** 战斗层级（接口实现）
 //=============================================================================
 //==============================
-// ** 下层
+// * 战斗层级 - 下层
 //==============================
-var _drill_BVi_layer_createBattleback = Spriteset_Battle.prototype.createBattleback;
+var _drill_BVi_battle_createBattleback = Spriteset_Battle.prototype.createBattleback;
 Spriteset_Battle.prototype.createBattleback = function() {    
-	_drill_BVi_layer_createBattleback.call(this);
+	_drill_BVi_battle_createBattleback.call(this);
 	if( !this._drill_battleDownArea ){
 		this._drill_battleDownArea = new Sprite();
 		this._drill_battleDownArea.z = 0;	//（yep层级适配，YEP_BattleEngineCore）
@@ -541,11 +598,11 @@ Spriteset_Battle.prototype.createBattleback = function() {
 	}
 };
 //==============================
-// ** 上层
+// * 战斗层级 - 上层
 //==============================
-var _drill_BVi_layer_createLowerLayer = Spriteset_Battle.prototype.createLowerLayer;
+var _drill_BVi_battle_createLowerLayer = Spriteset_Battle.prototype.createLowerLayer;
 Spriteset_Battle.prototype.createLowerLayer = function() {
-    _drill_BVi_layer_createLowerLayer.call(this);
+    _drill_BVi_battle_createLowerLayer.call(this);
 	if( !this._drill_battleUpArea ){
 		this._drill_battleUpArea = new Sprite();
 		this._drill_battleUpArea.z = 9999;	//（yep层级适配，YEP_BattleEngineCore）
@@ -553,42 +610,59 @@ Spriteset_Battle.prototype.createLowerLayer = function() {
 	}
 };
 //==============================
-// ** 图片层
+// * 战斗层级 - 图片层
 //==============================
-var _drill_BVi_layer_createPictures = Spriteset_Battle.prototype.createPictures;
+var _drill_BVi_battle_createPictures = Spriteset_Battle.prototype.createPictures;
 Spriteset_Battle.prototype.createPictures = function() {
-	_drill_BVi_layer_createPictures.call(this);		//rmmv图片 < 图片层 < rmmv对话框
+	_drill_BVi_battle_createPictures.call(this);		//rmmv图片 < 图片层 < rmmv对话框
 	if( !this._drill_battlePicArea ){
 		this._drill_battlePicArea = new Sprite();
 		this.addChild(this._drill_battlePicArea);	
 	}
 }
 //==============================
-// ** 最顶层
+// * 战斗层级 - 最顶层
 //==============================
-var _drill_BVi_layer_createAllWindows = Scene_Battle.prototype.createAllWindows;
+var _drill_BVi_battle_createAllWindows = Scene_Battle.prototype.createAllWindows;
 Scene_Battle.prototype.createAllWindows = function() {
-	_drill_BVi_layer_createAllWindows.call(this);	//rmmv对话框 < 最顶层
+	_drill_BVi_battle_createAllWindows.call(this);	//rmmv对话框 < 最顶层
 	if( !this._drill_SenceTopArea ){
 		this._drill_SenceTopArea = new Sprite();
 		this.addChild(this._drill_SenceTopArea);	
 	}
 }
 //==============================
-// ** 层级排序
+// * 战斗层级 - 图片层级排序（私有）
 //==============================
-Scene_Battle.prototype.drill_BVi_sortByZIndex = function() {
+Scene_Battle.prototype.drill_BVi_sortByZIndex_Private = function() {
 	this._spriteset._drill_battleDownArea.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
 	this._spriteset._drill_battleUpArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
 	this._spriteset._drill_battlePicArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
 	this._drill_SenceTopArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
 };
+//==============================
+// * 战斗层级 - 添加贴图到层级（私有）
+//==============================
+Scene_Battle.prototype.drill_BVi_layerAddSprite_Private = function( sprite, layer_index ){
+	if( layer_index == "下层" ){
+		this._spriteset._drill_battleDownArea.addChild( sprite );
+	}
+	if( layer_index == "上层" ){
+		this._spriteset._drill_battleUpArea.addChild( sprite );
+	}
+	if( layer_index == "图片层" ){
+		this._spriteset._drill_battlePicArea.addChild( sprite );
+	}
+	if( layer_index == "最顶层" ){
+		this._drill_SenceTopArea.addChild( sprite );
+	}
+}
 
 //=============================================================================
 // ** 视频
 //=============================================================================
 //==============================
-// ** 创建视频
+// * 创建视频
 //==============================
 var _drill_BVi_createDisplayObjects = Scene_Battle.prototype.createDisplayObjects;
 Scene_Battle.prototype.createDisplayObjects = function() {
@@ -635,18 +709,7 @@ Scene_Battle.prototype.drill_BVi_create = function() {
 		var temp_sprite = new Drill_BVi_VideoSprite( data );
 		$gameTemp._drill_BVi_sprites.push(temp_sprite);
 		
-		if( temp_data['area_index'] == '下层' ){
-			this._spriteset._drill_battleDownArea.addChild(temp_sprite);
-		}
-		if( temp_data['area_index'] == '上层' ){
-			this._spriteset._drill_battleUpArea.addChild(temp_sprite);
-		}
-		if( temp_data['area_index'] == '图片层' ){
-			this._spriteset._drill_battlePicArea.addChild(temp_sprite);
-		}
-		if( temp_data['area_index'] == '最顶层' ){
-			this._drill_SenceTopArea.addChild(temp_sprite);
-		}
+		this.drill_BVi_layerAddSprite( temp_sprite, temp_data['area_index'] );
 	}
 
 	// > 层级排序

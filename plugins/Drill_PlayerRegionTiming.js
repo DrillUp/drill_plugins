@@ -3,8 +3,12 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        互动 - 出入区域公共事件
+ * @plugindesc [v1.1]        互动 - 出入区域公共事件
  * @author Drill_up
+ * 
+ * @Drill_LE_param "区域触发-%d"
+ * @Drill_LE_parentKey "---区域触发组%d至%d---"
+ * @Drill_LE_var "DrillUp.g_PRT_trigger_length"
  * 
  *
  * @help
@@ -69,6 +73,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 添加了地图条件设置。
  * 
  *
  *
@@ -225,6 +231,21 @@
  * @param ---绑定---
  * @default 
  *
+ * @param 是否作用到所有地图
+ * @parent ---绑定---
+ * @type boolean
+ * @on 作用到所有
+ * @off 作用于指定地图
+ * @desc true - 作用到所有，false - 作用于指定地图。
+ * @default false
+ * 
+ * @param 所属地图
+ * @parent 是否作用到所有地图
+ * @type number
+ * @min 1
+ * @desc 关闭"作用到所有地图"时，指定的地图发生区域出入时，才会触发。
+ * @default 1
+ *
  * @param 区域组
  * @parent ---绑定---
  * @type number[]
@@ -265,7 +286,7 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		PRT（Layer_Region_Trigger）
+//		插件简称		PRT（Player_Region_Timing）
 //		临时全局变量	无
 //		临时局部变量	无
 //		存储数据变量	无
@@ -281,14 +302,14 @@
 //
 //插件记录：
 //		★大体框架与功能如下：
-//			动态图块帧：
-//				->改帧间隔
+//			出入区域公共事件：
+//				->脚下区域记录
 //
 //		★必要注意事项：
 //			暂无
 //
 //		★其它说明细节：
-//			1.
+//			暂无
 //			
 //		★存在的问题：
 //			暂无
@@ -314,6 +335,8 @@
 		data['onlyOnce'] = String( dataFrom["是否限制触发最多一次"] || "false") == "true";
 		
 		// > 绑定
+		data['mapToAll'] = String( dataFrom["是否作用到所有地图"] || "true") == "true";
+		data['mapId'] = Number( dataFrom["所属地图"] || 0);
 		if( dataFrom['区域组'] != "" &&
 			dataFrom['区域组'] != undefined ){
 			var temp = JSON.parse( dataFrom['区域组'] );
@@ -459,6 +482,16 @@ Game_Player.prototype.drill_PRT_updateCommonEvent = function() {
 		if( temp_data == undefined ){ continue; }
 		if( temp_data['enable'] == false ){ continue; }
 		
+		// > 条件 - 地图条件
+		var pass = false;
+		if( temp_data['mapToAll'] == true ){
+			pass = true;
+		}
+		if( temp_data['mapToAll'] == false && temp_data['mapId'] == $gameMap._mapId ){
+			pass = true;
+		}
+		if( pass == false ){ continue; }
+		
 		// > 条件 - 限制触发最多一次
 		if( temp_data['onlyOnce'] == true &&
 			temp_data['activeCount'] > 0 ){
@@ -504,7 +537,7 @@ Game_Player.prototype.drill_PRT_updateCommonEvent = function() {
 }else{
 		Imported.Drill_PlayerRegionTiming = false;
 		alert(
-			"【Drill_PlayerRegionTiming.js 互动 - 出入区域公共事件公共事件】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
+			"【Drill_PlayerRegionTiming.js 互动 - 出入区域公共事件】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
 			"\n- Drill_LayerCommandThread 地图-多线程"
 		);
 }

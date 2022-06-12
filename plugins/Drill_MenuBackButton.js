@@ -1107,7 +1107,7 @@ Scene_MenuBase.prototype.update = function() {
 Scene_MenuBase.prototype.drill_MBB_create = function() {	
 	SceneManager._drill_MBB_created = true;
 	
-	if(!this._drill_MBB_sprites){		//防止覆写报错 - 贴图初始化
+	if(!this._drill_MBB_sprites ){		//防止覆写报错 - 贴图初始化
 		this._drill_MBB_sprites = [];
 		this._drill_MBB_sprites_style = [];
 		this._drill_MBB_sprites_layer = [];
@@ -1123,6 +1123,25 @@ Scene_MenuBase.prototype.drill_MBB_create = function() {
 		this._foregroundSprite = new Sprite();
 		this.addChild(this._foregroundSprite);
 	}
+	
+	// > 销毁旧按钮
+	if( this._drill_MBB_sprites_layer.length > 0 ){
+		for( var i = this._drill_MBB_sprites_layer.length-1; i >= 0; i-- ){
+			var temp_layer = this._drill_MBB_sprites_layer[i];
+			var temp_ch_list = temp_layer.children;
+			for( var j = temp_ch_list.length-1; j >= 0; j-- ){
+				var temp_ch = temp_ch_list[j];
+				temp_layer.removeChild( temp_ch );
+			}
+			this._foregroundSprite.removeChild( temp_layer );
+		}
+		this._drill_MBB_sprites = [];
+		this._drill_MBB_sprites_style = [];
+		this._drill_MBB_sprites_layer = [];
+		this._drill_MBB_sprites_highlight = [];
+		this._drill_MBB_sprites_pushdown = [];
+	}
+	
 	
 	// > 配置的按钮
 	for (var i = 1; i < DrillUp.g_MBB_list.length; i++) {
@@ -1142,6 +1161,8 @@ Scene_MenuBase.prototype.drill_MBB_create = function() {
 			var temp_sprite = new Sprite();
 			temp_sprite.bitmap = temp_style['src_bitmaps'][0];
 			temp_sprite._time = 0;
+			temp_sprite.x = 0;
+			temp_sprite.y = Graphics.boxHeight * 2;
 			temp_sprite.anchor.x = 0.5;
 			temp_sprite.anchor.y = 0.5;
 			temp_sprite.blendMode = temp_style['blendMode'];
@@ -1207,6 +1228,8 @@ Scene_MenuBase.prototype.drill_MBB_create = function() {
 			var temp_sprite = new Sprite();
 			temp_sprite.bitmap = temp_style['src_bitmaps'][0];
 			temp_sprite._time = 0;
+			temp_sprite.x = 0;
+			temp_sprite.y = Graphics.boxHeight * 2;
 			temp_sprite.anchor.x = 0.5;
 			temp_sprite.anchor.y = 0.5;
 			temp_sprite.blendMode = temp_style['blendMode'];

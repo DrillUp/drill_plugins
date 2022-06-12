@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        控件 - 技能窗口块元素
+ * @plugindesc [v1.5]        控件 - 技能窗口块元素
  * @author Drill_up
  * 
  *
@@ -21,7 +21,7 @@
  * ----插件扩展
  * 该插件能单独使用，它只针对技能窗口 内部元素 进行美化。
  * 被扩展：
- *   - Drill_X_ElementSkillImage.js 控件-技能块元素的背景图片[扩展]
+ *   - Drill_X_ElementSkillImage    控件 - 技能块元素的背景图片[扩展]
  *     通过该插件可以使得块元素中不同的技能，拥有不同的背景。
  *
  * -----------------------------------------------------------------------------
@@ -75,6 +75,8 @@
  * 修改了插件关联的资源文件夹。
  * [v1.4]
  * 添加了自定义字符串控制技能名的功能。
+ * [v1.5]
+ * 较大幅度优化了插件结构，修复了 只有一个技能时，不能正常显示的bug。
  * 
  * 
  *
@@ -310,8 +312,10 @@
 //		临时局部变量	this._drill_xxx
 //		存储数据变量	无
 //		全局存储变量	无
-//		覆盖重写方法	Window_BattleSkill.prototype.drawAllItems
-//						Window_BattleSkill.prototype.drawItem
+//		覆盖重写方法	Window_SkillList.prototype.drawItem
+//						Window_SkillList.prototype.itemHeight
+//						Window_SkillList.prototype.maxCols
+//						Window_SkillList.prototype.spacing
 //
 //		工作类型		持续执行
 //		时间复杂度		o(贴图处理)*o(n^2)
@@ -344,8 +348,8 @@
 //			  （覆写弄的乱七八糟的……关注drill_xxx方法就好了。）
 //
 //		★存在的问题：
-//			暂无
-//
+//			1.滚动条放入任何一个layer都会出现诡异bug，影响这个插件第7个sprite，不停地闪。（已解决）
+//			 （是因为贴图addChild之后，就没删除，造成的残留）
 //
  
 //=============================================================================
@@ -356,9 +360,10 @@
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_WindowSkillElement');
 
+
 	/*-----------------窗口------------------*/
-	DrillUp.g_WSE_use_in_menu = String(DrillUp.parameters['是否应用于菜单技能窗口'] || "true") === "true";	
-	DrillUp.g_WSE_use_in_battle = String(DrillUp.parameters['是否应用于战斗技能窗口'] || "true") === "true";	
+	DrillUp.g_WSE_menuSceneEnabled = String(DrillUp.parameters['是否应用于菜单技能窗口'] || "true") === "true";	
+	DrillUp.g_WSE_battleSceneEnabled = String(DrillUp.parameters['是否应用于战斗技能窗口'] || "true") === "true";	
 	
 	/*-----------------元素组------------------*/
     DrillUp.g_WSE_selected_pos_x = Number(DrillUp.parameters['选中元素偏移 X'] || 0);
@@ -401,76 +406,204 @@ ImageManager.load_MenuSkillElement = function(filename) {
     return this.loadBitmap('img/Menu__ui_skillElement/', filename, 0, true);
 };		
 
+
 //=============================================================================
-// ** 窗口初始化（追加分配）
+// ** 块元素绑定 - 战斗界面
+//
+//			说明：	注意，Window_BattleSkill 继承于 Window_SkillList。
 //=============================================================================
 //==============================
-// * 初始化 - 函数捕获
+// * 战斗 - 窗口初始化
+//==============================
+var _drill_WSE_battle_initialize = Window_BattleSkill.prototype.initialize;
+Window_BattleSkill.prototype.initialize = function( x, y, width, height ){
+	if( Imported.MOG_BattleHud ){	//mog角色窗口 设置必须实时初始化
+		_drill_WSE_battle_initialize.call(this, x, y, Moghunter.bhud_skill_width, Moghunter.bhud_skill_height);
+	}else{
+		_drill_WSE_battle_initialize.call(this, x, y, width, height);
+	}
+	
+	if( DrillUp.g_WSE_battleSceneEnabled == true ){
+		this.drill_WSE_initSprite();
+	}
+};
+//==============================
+// * 战斗 - 窗口帧刷新
+//==============================
+var _drill_WSE_battle_update = Window_BattleSkill.prototype.update;
+Window_BattleSkill.prototype.update = function() {
+	_drill_WSE_battle_update.call(this);
+	if( DrillUp.g_WSE_battleSceneEnabled == true ){
+		this.drill_WSE_updateSprite();
+	}
+}
+//==============================
+// * 战斗 - 窗口高度
+//==============================
+var _drill_WSE_battle_iitemHeight = Window_BattleSkill.prototype.itemHeight;
+Window_BattleSkill.prototype.itemHeight = function() {
+	if( DrillUp.g_WSE_battleSceneEnabled == true ){
+		return DrillUp.g_WSE_height;
+	}
+	return _drill_WSE_battle_iitemHeight.call(this);
+};
+//==============================
+// * 战斗 - 窗口列数
+//==============================
+var _drill_WSE_battle_imaxCols = Window_BattleSkill.prototype.maxCols;
+Window_BattleSkill.prototype.maxCols = function() {
+	if( DrillUp.g_WSE_battleSceneEnabled == true ){
+		return DrillUp.g_WSE_battle_col;
+	}
+	return _drill_WSE_battle_imaxCols.call(this);
+};
+//==============================
+// * 战斗 - 窗口横向间距
+//==============================
+var _drill_WSE_battle_ispacing = Window_BattleSkill.prototype.spacing;
+Window_BattleSkill.prototype.spacing = function() {
+	if( DrillUp.g_WSE_battleSceneEnabled == true ){
+		return DrillUp.g_WSE_spacing;
+	}
+	return _drill_WSE_battle_ispacing.call(this);
+};
+//==============================
+// * 战斗 - 窗口 绘制全部块
+//==============================
+var _drill_WSE_battle_drawAllItems = Window_BattleSkill.prototype.drawAllItems;
+Window_BattleSkill.prototype.drawAllItems = function(){
+	if( DrillUp.g_WSE_battleSceneEnabled == true ){
+		this.drill_WSE_clearAllBitmap();			//（清理全部画布块）
+	}
+	_drill_WSE_battle_drawAllItems.call(this);
+};
+//==============================
+// * 战斗 - 窗口 绘制单个块
+//==============================
+var _drill_WSE_battle_drawItem = Window_BattleSkill.prototype.drawItem;
+Window_BattleSkill.prototype.drawItem = function( index ){
+	if( DrillUp.g_WSE_battleSceneEnabled == true ){
+		this.drill_WSE_drawItem( index );
+		return;
+	}
+	_drill_WSE_battle_drawItem.call(this);
+};
+
+
+//=============================================================================
+// ** 块元素绑定 - 菜单界面
+//=============================================================================
+//==============================
+// * 菜单 - 窗口初始化
 //==============================
 var _drill_WSE_menu_initialize = Window_SkillList.prototype.initialize;
-var _drill_WSE_battle_initialize = Window_BattleSkill.prototype.initialize;
+Window_SkillList.prototype.initialize = function( x, y, width, height ){
+	_drill_WSE_menu_initialize.call( this, x, y, width, height );
+	if( DrillUp.g_WSE_menuSceneEnabled == true ){
+		this.drill_WSE_initSprite();
+	}
+};
 //==============================
-// * 初始化 - 菜单
+// * 菜单 - 窗口帧刷新
 //==============================
-if( DrillUp.g_WSE_use_in_menu ){
-	//==============================
-	// * 初始化 - rmmv技能窗口
-	//==============================
-	Window_SkillList.prototype.initialize = function(x, y, width, height) {
-		_drill_WSE_menu_initialize.call(this, x, y, width, height);
-		this.drill_WSE_skillSpriteInit();
-	};
-	//==============================
-	// * 初始化 - mog技能窗口
-	//==============================
-	if(Imported.MOG_SceneSkill){
-		var _drill_WSE_MOG_menu_initialize = Window_SkillListM.prototype.initialize;
-		Window_SkillListM.prototype.initialize = function(x, y, width, height) {
-			_drill_WSE_MOG_menu_initialize.call(this, x, y, width, height);
-			this.drill_WSE_skillSpriteInit();
-		};
+var _drill_WSE_menu_update = Window_SkillList.prototype.update;
+Window_SkillList.prototype.update = function() {
+	_drill_WSE_menu_update.call(this);
+	if( DrillUp.g_WSE_menuSceneEnabled == true ){
+		this.drill_WSE_updateSprite();
 	}
 }
 //==============================
-// * 初始化 - 战斗界面
+// * 菜单 - 窗口高度
 //==============================
-if( DrillUp.g_WSE_use_in_battle ){
-	
-	//==============================
-	// * 初始化 - mog战斗技能窗口
-	//==============================
-	if( Imported.MOG_BattleHud ){	//mog角色窗口设置必须实时初始化
-		Window_BattleSkill.prototype.initialize = function(x, y, width, height) {
-			_drill_WSE_battle_initialize.call(this, x, y, Moghunter.bhud_skill_width, Moghunter.bhud_skill_height);
-			this.drill_WSE_skillSpriteInit();
-		};
-		
-	//==============================
-	// * 初始化 - rmmv战斗技能窗口
-	//==============================
-	}else{
-		Window_BattleSkill.prototype.initialize = function(x, y, width, height) {
-			_drill_WSE_battle_initialize.call(this, x, y, width, height);
-			this.drill_WSE_skillSpriteInit();
-		};
+var _drill_WSE_menu_itemHeight = Window_SkillList.prototype.itemHeight;
+Window_SkillList.prototype.itemHeight = function() {
+	if( DrillUp.g_WSE_menuSceneEnabled == true ){
+		return DrillUp.g_WSE_height;
 	}
-}
+	return _drill_WSE_menu_itemHeight.call(this);
+};
 //==============================
-// * 初始化 - 执行初始化
+// * 菜单 - 窗口列数
 //==============================
-Window_SkillList.prototype.drill_WSE_skillSpriteInit = function() {
+var _drill_WSE_menu_maxCols = Window_SkillList.prototype.maxCols;
+Window_SkillList.prototype.maxCols = function() {
+	if( DrillUp.g_WSE_menuSceneEnabled == true ){
+		return DrillUp.g_WSE_menu_col;
+	}
+	return _drill_WSE_menu_maxCols.call(this);
+};
+//==============================
+// * 菜单 - 窗口横向间距
+//==============================
+var _drill_WSE_menu_spacing = Window_SkillList.prototype.spacing;
+Window_SkillList.prototype.spacing = function() {
+	if( DrillUp.g_WSE_menuSceneEnabled == true ){
+		return DrillUp.g_WSE_spacing;
+	}
+	return _drill_WSE_menu_spacing.call(this);
+};
+//==============================
+// * 菜单 - 窗口 绘制全部块
+//==============================
+var _drill_WSE_menu_drawAllItems = Window_SkillList.prototype.drawAllItems;
+Window_SkillList.prototype.drawAllItems = function(){
+	if( DrillUp.g_WSE_menuSceneEnabled == true ){
+		this.drill_WSE_clearAllBitmap();	//（清理全部画布块）
+	}
+	_drill_WSE_menu_drawAllItems.call(this);
+};
+//==============================
+// * 菜单 - 窗口 绘制单个块
+//==============================
+var _drill_WSE_menu_drawItem = Window_SkillList.prototype.drawItem;
+Window_SkillList.prototype.drawItem = function( index ){
+	if( DrillUp.g_WSE_menuSceneEnabled == true ){
+		this.drill_WSE_drawItem( index );
+		return;
+	}
+	_drill_WSE_menu_drawItem.call(this);
+};
+
+
+//=============================================================================
+// ** 块元素
+//=============================================================================
+//==============================
+// * 块元素 - 初始化
+//
+//			说明：	此函数可以多次执行，执行后会销毁原来的贴图。
+//==============================
+Window_SkillList.prototype.drill_WSE_initSprite = function() {
 	
 	// > 私有函数初始化
-	this._drill_WSE_spriteTank = [];
-	this._drill_WSE_bitmapTank = [];
+	this._drill_WSE_lastSkill = null;
 	this._drill_WSE_bitmapBackground = ImageManager.load_MenuSkillElement(DrillUp.g_WSE_src_background);
 	
-	// > 创建选项层
-	if( this._drill_selectable_layer == undefined ){	
-		this._drill_selectable_layer = new Sprite();
-		this.addChild(this._drill_selectable_layer);		//（这里建立sprite层，根据rect的大小固定创建 sprite）
+	// > 销毁贴图
+	if( this._drill_WSE_spriteTank != undefined ){
+		for(var j = this._drill_WSE_spriteTank.length-1; j >= 0; j-- ){	
+			var temp_sprite = this._drill_WSE_spriteTank[j];
+			temp_sprite.bitmap = null;
+			this._drill_WSE_layer.removeChild(temp_sprite);	
+			delete temp_sprite;
+		}
 	}
+	
+	// > 销毁贴图层
+	if( this._drill_WSE_layer != undefined ){
+		this.removeChild( this._drill_WSE_layer );
+		delete this._drill_WSE_layer;
+	}
+	
+	
+	// > 创建贴图层
+	this._drill_WSE_layer = new Sprite();
+	this.addChild(this._drill_WSE_layer);		//（这里建立sprite层，根据rect的大小固定创建 sprite）
+	
 	// > 创建贴图
+	this._drill_WSE_spriteTank = [];
+	this._drill_WSE_bitmapTank = [];
 	for( var j = 0; j < this.maxPageItems(); j++ ){		//（窗口只划分n*m矩阵，多余的部分不画）
 		var rect = this.itemRect( j );
 		var temp_sprite = new Sprite();
@@ -479,7 +612,7 @@ Window_SkillList.prototype.drill_WSE_skillSpriteInit = function() {
 		temp_sprite._org_x = temp_sprite.x;
 		temp_sprite._org_y = temp_sprite.y;
 		temp_sprite.zIndex = 100;		//（菜单选项框的zIndex为 10，滚动条不在该layer中）
-										//（滚动条放入任何一个layer都会出现诡异bug，影响这个插件第7个sprite）
+										//（滚动条放入任何一个layer都会出现诡异bug，影响这个插件第7个sprite，不停地闪）
 		
 		if( DrillUp.g_WSE_is_strict ){
 			var temp_bitmap = new Bitmap( rect.width , rect.height );
@@ -491,222 +624,131 @@ Window_SkillList.prototype.drill_WSE_skillSpriteInit = function() {
 		temp_sprite.bitmap = temp_bitmap;
 		this._drill_WSE_bitmapTank.push(temp_bitmap);
 		this._drill_WSE_spriteTank.push(temp_sprite);
-		this._drill_selectable_layer.addChild(temp_sprite);	
-		
+		this._drill_WSE_layer.addChild(temp_sprite);	
 	}
 	
 	// > 层级排序
-	this._drill_selectable_layer.children.sort(function(a, b){return a.zIndex-b.zIndex});
-		
+	this._drill_WSE_layer.children.sort(function(a, b){return a.zIndex-b.zIndex});
 }
-
-//=============================================================================
-// ** 窗口内容值初始化（覆写分配）
-//=============================================================================
-var _drill_WSE_menu_itemHeight = Window_SkillList.prototype.itemHeight;
-var _drill_WSE_battle_itemHeight = Window_BattleSkill.prototype.itemHeight;
-var _drill_WSE_menu_maxCols = Window_SkillList.prototype.maxCols;
-var _drill_WSE_battle_maxCols = Window_BattleSkill.prototype.maxCols;
-var _drill_WSE_menu_spacing = Window_SkillList.prototype.spacing;
-var _drill_WSE_battle_spacing = Window_BattleSkill.prototype.spacing;
-
-if( DrillUp.g_WSE_use_in_menu ){
-	Window_SkillList.prototype.itemHeight = function() {
-		return DrillUp.g_WSE_height;
-	};
-	Window_SkillList.prototype.maxCols = function() {
-		return DrillUp.g_WSE_menu_col;
-	};
-	Window_SkillList.prototype.spacing = function() {
-		return DrillUp.g_WSE_spacing;
-	};
-	Window_BattleSkill.prototype.itemHeight = function() {
-		return _drill_WSE_battle_itemHeight.call(this);
-	};
-	Window_BattleSkill.prototype.maxCols = function() {
-		return _drill_WSE_battle_maxCols.call(this);
-	};
-	Window_BattleSkill.prototype.spacing = function() {
-		return _drill_WSE_battle_spacing.call(this);
-	};
-	if(Imported.MOG_SceneSkill){
-		Window_SkillListM.prototype.itemHeight = function() {
-			return DrillUp.g_WSE_height;
-		};
-		Window_SkillListM.prototype.maxCols = function() {
-			return DrillUp.g_WSE_menu_col;
-		};
-		Window_SkillListM.prototype.spacing = function() {
-			return DrillUp.g_WSE_spacing;
-		};
-	}
-}
-
-if( DrillUp.g_WSE_use_in_battle ){
-	Window_BattleSkill.prototype.itemHeight = function() {
-		return DrillUp.g_WSE_height;
-	};
-	Window_BattleSkill.prototype.maxCols = function() {
-		return DrillUp.g_WSE_battle_col;
-	};
-	Window_BattleSkill.prototype.spacing = function() {
-		return DrillUp.g_WSE_spacing;
-	};
-}
-
 //==============================
-// * bitmap窗口动作 刷新（覆写分配）
+// * 块元素 - 清理全部画布块
 //==============================
-var _drill_WSE_menu_drawAllItems = Window_SkillList.prototype.drawAllItems;
-var _drill_WSE_battle_drawAllItems = Window_BattleSkill.prototype.drawAllItems;
-
-if( DrillUp.g_WSE_use_in_menu ){
+Window_SkillList.prototype.drill_WSE_clearAllBitmap = function() {
 	
-	Window_SkillList.prototype.drawAllItems = function() {
-		this.drill_WSE_drawAllItems();
-	};
+	// > 清理锁
+	this._drill_WSE_lastSkill = null;
 	
-	if(Imported.MOG_SceneSkill){
-		Window_SkillListM.prototype.drawAllItems = function() {
-			this.drill_WSE_drawAllItems();
-		};
-	}
-}
-
-if( DrillUp.g_WSE_use_in_battle ){
-	Window_BattleSkill.prototype.drawAllItems = function() {
-		this.drill_WSE_drawAllItems();
-	};
-}
-
-//==============================
-// * bitmap窗口动作 刷新
-//==============================
-Window_SkillList.prototype.drill_WSE_drawAllItems = function() {
-	var topIndex = this.topIndex();
-	
-	for (var i = 0; i < this.maxPageItems(); i++) {
-		var index = topIndex + i;
-		var cur_bitmap = this._drill_WSE_bitmapTank[i];
-		if( index < this.maxItems() ){
-			this.drawItem( index,cur_bitmap );
-		}else{
-			cur_bitmap.clear();
-		}
+	// > 清理画布
+	for( var i = 0; i < this._drill_WSE_bitmapTank.length; i++ ){
+		this._drill_WSE_bitmapTank[i].clear();
 	}
 };
-
 //==============================
-// * bitmap绘制（覆写分配）
+// * 块元素 - 绘制单个块
 //==============================
-var _drill_WSE_menu_drawItem = Window_SkillList.prototype.drawItem;
-var _drill_WSE_battle_drawItem = Window_BattleSkill.prototype.drawItem;
-
-if( DrillUp.g_WSE_use_in_menu ){
-	
-	Window_SkillList.prototype.drawItem = function(index,cur_bitmap) {
-		this.drill_WSE_drawItem(index,cur_bitmap);
-	};
-	
-	if(Imported.MOG_SceneSkill){
-		Window_SkillListM.prototype.drawItem = function(index,cur_bitmap) {
-			this.drill_WSE_drawItem(index,cur_bitmap);
-		};
-	}
-}
-
-if( DrillUp.g_WSE_use_in_battle ){
-	Window_BattleSkill.prototype.drawItem = function(index,cur_bitmap) {
-		this.drill_WSE_drawItem(index,cur_bitmap);
-	};
-}
-
-//==============================
-// * bitmap绘制
-//==============================
-Window_SkillList.prototype.drill_WSE_drawItem = function( index,cur_bitmap ){
+Window_SkillList.prototype.drill_WSE_drawItem = function( index ){
     var skill = this._data[index];
-    if( skill ){
-        var rect = this.itemRect(index);
-        rect.width -= this.textPadding();
-		cur_bitmap._disabled = !this.isEnabled(skill);
-		cur_bitmap.paintOpacity = this.isEnabled(skill) ? 255 : this.translucentOpacity();	//	不可用的技能透明度控制
-		cur_bitmap.clear();
-        this.drill_WSE_s_drawBlock( cur_bitmap, skill );
-		cur_bitmap.paintOpacity = 255 ;
-    }
+    if( skill == undefined ){ return; }
+	var topIndex = this.topIndex();
+	var cur_bitmap = this._drill_WSE_bitmapTank[ index - topIndex ];
+    if( cur_bitmap == undefined ){ return; }
+	
+	var rect = this.itemRect(index);
+	rect.width -= this.textPadding();
+	
+	cur_bitmap['_drill_enabled'] = this.isEnabled(skill);
+	cur_bitmap.paintOpacity = this.isEnabled(skill) ? 255 : this.translucentOpacity();	//	不可用的技能透明度控制
+	this.drill_WSE_s_drawBlock( cur_bitmap, skill );
+	cur_bitmap.paintOpacity = 255 ;
 };
+//==============================
+// * 块元素 - 绘制块内部
+//==============================
 Window_SkillList.prototype.drill_WSE_s_drawBlock = function( cur_bitmap, skill ){
+    if( this._drill_WSE_lastSkill == skill ){ return; }
+	this._drill_WSE_lastSkill = skill;
 	
-    if( this._drill_WSE_lastSkill != skill ){
-		this._drill_WSE_lastSkill = skill;
-		cur_bitmap.drill_elements_drawText = null;	//绘制颜色特殊位置修正
-        this.resetTextColor();
-        
-		this.drill_WSE_s_drawBackground(cur_bitmap, skill);		//绘制背景
-		//cur_bitmap.fillRect(0, 0 , cur_bitmap.width, cur_bitmap.height, "#000");
-		
-		this.drill_WSE_s_drawIcon(cur_bitmap, skill);			//绘制图标
-		
-		
-		var name_x = DrillUp.g_WSE_skill_x;		//绘制技能名
-		var name_y = DrillUp.g_WSE_skill_y;
-		var name_width = DrillUp.g_WSE_skill_width; //cur_bitmap.width;
-		var name_align = DrillUp.g_WSE_skill_align;
-		cur_bitmap.fontSize = DrillUp.g_WSE_skill_fontsize;
-		if(Imported.Drill_ItemTextColor){
-			var temp_c = $gameSystem._drill_ITC_skills[ skill.id ];
-			if( temp_c != "" ){ 
-				cur_bitmap.textColor = temp_c ;
-				cur_bitmap.drill_elements_drawText = true;
-			}
+	// > 颜色特殊位置修正
+	cur_bitmap['drill_elements_drawText'] = null;		//（高级渐变颜色 偏移标记）
+	this.resetTextColor();
+	
+	// > 绘制背景
+	this.drill_WSE_s_drawBackground( cur_bitmap, skill );
+	//cur_bitmap.fillRect(0, 0 , cur_bitmap.width, cur_bitmap.height, "#000");
+	
+	// > 绘制图标
+	this.drill_WSE_s_drawIcon( cur_bitmap, skill );
+	
+	
+	// > 绘制技能名
+	var name_x = DrillUp.g_WSE_skill_x;
+	var name_y = DrillUp.g_WSE_skill_y;
+	var name_width = DrillUp.g_WSE_skill_width; //cur_bitmap.width;
+	var name_align = DrillUp.g_WSE_skill_align;
+	cur_bitmap.fontSize = DrillUp.g_WSE_skill_fontsize;
+	
+	// > 绘制技能名 - 文本颜色
+	if( Imported.Drill_ItemTextColor ){
+		var temp_c = $gameSystem._drill_ITC_skills[ skill.id ];
+		if( temp_c != "" ){ 
+			cur_bitmap.textColor = temp_c ;
+			cur_bitmap['drill_elements_drawText'] = true;		//（高级渐变颜色 偏移标记）
 		}
-		var skill_name = String(skill.name)
-		if( Imported.Drill_CoreOfString == true ){
-			// > 指代字符（提前转换）
-			skill_name = skill_name.replace(/[\\]?\\STR\[(\d+)\]/gi, function() {
-				return $gameStrings.convertedValue( parseInt(arguments[1]) );
-			}.bind(this));
-		}
-		cur_bitmap.drawText( skill_name, name_x, name_y, name_width, this.lineHeight(), name_align);
-		cur_bitmap.textColor = "#ffffff" ;
+	}
+	
+	// > 绘制技能名 - 字符串核心
+	var skill_name = String( skill.name )
+	if( Imported.Drill_CoreOfString ){
+		// > 指代字符（提前转换）
+		skill_name = skill_name.replace(/[\\]?\\STR\[(\d+)\]/gi, function() {
+			return $gameStrings.convertedValue( parseInt(arguments[1]) );
+		}.bind(this));
+	}
+	cur_bitmap.drawText( skill_name, name_x, name_y, name_width, this.lineHeight(), name_align);
+	cur_bitmap.textColor = "#ffffff" ;
+	
+	
+	// > 绘制消耗值
+	var cost_x = DrillUp.g_WSE_cost_x;
+	var cost_y = DrillUp.g_WSE_cost_y;
+	var cost_width = DrillUp.g_WSE_cost_width; //cur_bitmap.width;
+	var cost_align = DrillUp.g_WSE_cost_align;
+	cur_bitmap.fontSize = DrillUp.g_WSE_cost_fontsize;
+	if( this._actor.skillTpCost(skill) > 0 ){		
+		cur_bitmap.textColor = this.textColor(DrillUp.g_WSE_cost_tp_color) ;
+		cur_bitmap['drill_elements_drawText'] = true;		//（高级渐变颜色 偏移标记）
+		cur_bitmap.drawText( String(this._actor.skillTpCost(skill)), cost_x, cost_y, cost_width,  this.lineHeight(), cost_align);
 		
-		var cost_x = DrillUp.g_WSE_cost_x;		// 绘制消耗值
-		var cost_y = DrillUp.g_WSE_cost_y;
-		var cost_width = DrillUp.g_WSE_cost_width; //cur_bitmap.width;
-		var cost_align = DrillUp.g_WSE_cost_align;
-		cur_bitmap.fontSize = DrillUp.g_WSE_cost_fontsize;
-		if (this._actor.skillTpCost(skill) > 0) {		
-			cur_bitmap.textColor = this.textColor(DrillUp.g_WSE_cost_tp_color) ;
-			cur_bitmap.drill_elements_drawText = true;
-			cur_bitmap.drawText( String(this._actor.skillTpCost(skill)), cost_x, cost_y, cost_width,  this.lineHeight(), cost_align);
-			
-		} else if (this._actor.skillMpCost(skill) > 0) {
-			cur_bitmap.textColor = this.textColor(DrillUp.g_WSE_cost_mp_color) ;
-			cur_bitmap.drill_elements_drawText = true;
-			cur_bitmap.drawText( String(this._actor.skillMpCost(skill)), cost_x, cost_y, cost_width,  this.lineHeight(), cost_align);
-		
-		} else if ( this._actor.skillTpCost(skill) == 0 || this._actor.skillMpCost(skill) == 0) {
-			cur_bitmap.textColor = this.textColor(DrillUp.g_WSE_cost_no_cost_color) ;
-			cur_bitmap.drill_elements_drawText = true;
-			cur_bitmap.drawText( String(DrillUp.g_WSE_cost_no_cost), cost_x, cost_y, cost_width,  this.lineHeight(), cost_align);
-		}
-		cur_bitmap.textColor = "#ffffff" ;
-    }
+	}else if( this._actor.skillMpCost(skill) > 0 ){
+		cur_bitmap.textColor = this.textColor(DrillUp.g_WSE_cost_mp_color) ;
+		cur_bitmap['drill_elements_drawText'] = true;		//（高级渐变颜色 偏移标记）
+		cur_bitmap.drawText( String(this._actor.skillMpCost(skill)), cost_x, cost_y, cost_width,  this.lineHeight(), cost_align);
+	
+	}else if( this._actor.skillTpCost(skill) == 0 || this._actor.skillMpCost(skill) == 0 ){
+		cur_bitmap.textColor = this.textColor(DrillUp.g_WSE_cost_no_cost_color) ;
+		cur_bitmap['drill_elements_drawText'] = true;		//（高级渐变颜色 偏移标记）
+		cur_bitmap.drawText( String(DrillUp.g_WSE_cost_no_cost), cost_x, cost_y, cost_width,  this.lineHeight(), cost_align);
+	}
+	cur_bitmap.textColor = "#ffffff" ;
 };
-
-Window_SkillList.prototype.drill_WSE_s_drawBackground = function(cur_bitmap, skill ) {
-	
-	//绘制背景（背景后期可能会扩展，这里从单独拿出来）
+//==============================
+// * 块元素 - 绘制块内部 - 背景（可继承接口）
+//
+//			说明：	背景后期可能会扩展，这里从单独拿出来。
+//==============================
+Window_SkillList.prototype.drill_WSE_s_drawBackground = function( cur_bitmap, skill ){
 	var back_x = 0;
 	var back_y = 0;
 	var back_w = this._drill_WSE_bitmapBackground.width;
 	var back_h = this._drill_WSE_bitmapBackground.height;
 	cur_bitmap.blt( this._drill_WSE_bitmapBackground,  back_x, back_y, back_w, back_h,  0,0, back_w, back_h);
 }
-Window_SkillList.prototype.drill_WSE_s_drawIcon = function(cur_bitmap, skill ) {
-	
-	//绘制图标（背景后期可能会扩展，这里从单独拿出来）
+//==============================
+// * 块元素 - 绘制块内部 - 图标（可继承接口）
+//
+//			说明：	背景后期可能会扩展，这里从单独拿出来。
+//==============================
+Window_SkillList.prototype.drill_WSE_s_drawIcon = function( cur_bitmap, skill ){
 	var pbitmap = ImageManager.loadSystem('IconSet');
 	var pw = Window_Base._iconWidth ;
 	var ph = Window_Base._iconHeight ;
@@ -721,63 +763,41 @@ Window_SkillList.prototype.drill_WSE_s_drawIcon = function(cur_bitmap, skill ) {
 }
 
 //==============================
-// * sprite动作（追加分配）
+// * 块元素 - 帧刷新
 //==============================
-var _drill_WSE_menu_update = Window_SkillList.prototype.update;
-var _drill_WSE_battle_update = Window_BattleSkill.prototype.update;
-
-if( DrillUp.g_WSE_use_in_menu ){
-	
-	Window_SkillList.prototype.update = function() {
-		_drill_WSE_menu_update.call(this);
-		this.drill_WSE_skillSpriteUpdate();
-	}
-	
-	if(Imported.MOG_SceneSkill){
-		var _drill_WSE_MOG_menu_update = Window_SkillListM.prototype.update;
-		Window_SkillListM.prototype.update = function(x, y, width, height) {
-			_drill_WSE_MOG_menu_update.call(this, x, y, width, height);
-			this.drill_WSE_skillSpriteUpdate();
-		};
-	}
-}
-
-if( DrillUp.g_WSE_use_in_battle ){
-	Window_BattleSkill.prototype.update = function() {
-		_drill_WSE_battle_update.call(this);
-		this.drill_WSE_skillSpriteUpdate();
-	}
-}
-
-//==============================
-// * sprite动作
-//==============================
-Window_SkillList.prototype.drill_WSE_skillSpriteUpdate = function() {
-	for(var i = 0; i< this._drill_WSE_spriteTank.length; i++){
+Window_SkillList.prototype.drill_WSE_updateSprite = function() {
+	var topIndex = this.topIndex();
+	for(var i = 0; i < this._drill_WSE_spriteTank.length; i++){
 		var temp_sprite = this._drill_WSE_spriteTank[i];
-		if(  this._index == i + this.topIndex() 
-			&& !(temp_sprite.bitmap._disabled) ){
+		
+		// > 被选中的块
+		if( this._index == i + topIndex &&
+			temp_sprite.bitmap['_drill_enabled'] == true ){
+				
 			this.drill_WSE_button_move_to(temp_sprite,
 				temp_sprite._org_x + DrillUp.g_WSE_selected_pos_x,
 				temp_sprite._org_y + DrillUp.g_WSE_selected_pos_y,
 				3);
 			this.drill_WSE_scale_move_to(temp_sprite,DrillUp.g_WSE_selected_size_x,'x',0.01);
 			this.drill_WSE_scale_move_to(temp_sprite,DrillUp.g_WSE_selected_size_y,'y',0.01);
+			
+		// > 未选中的块
 		}else{
 			this.drill_WSE_button_move_to(temp_sprite,temp_sprite._org_x,temp_sprite._org_y,3);
 			this.drill_WSE_scale_move_to(temp_sprite,1.00,'x',0.01);
 			this.drill_WSE_scale_move_to(temp_sprite,1.00,'y',0.01);
 		}
-		if(this.contentsOpacity != null){
-			temp_sprite.opacity = this.contentsOpacity;
-		}
+		
+		//// > 透明度保持一致
+		//if( this.contentsOpacity != null ){
+		//	temp_sprite.opacity = this.contentsOpacity;
+		//}
 	}
 }
-
 //==============================
-// * 按钮变化工具方法
+// * 块元素 - 帧刷新 - 移动到
 //==============================
-Window_SkillList.prototype.drill_WSE_button_move_to = function(sprite,x,y,speed) {
+Window_SkillList.prototype.drill_WSE_button_move_to = function( sprite, x, y, speed ){
 	var dx = sprite.x - x;
 	var dy = sprite.y - y;
 	if( dx < 0 ){ sprite.x += speed; }
@@ -788,8 +808,10 @@ Window_SkillList.prototype.drill_WSE_button_move_to = function(sprite,x,y,speed)
 	if( Math.abs(dx) <= speed ){ sprite.x = x; }
 	if( Math.abs(dy) <= speed ){ sprite.y = y; }
 }
-
-Window_SkillList.prototype.drill_WSE_scale_move_to = function(sprite,s,type,speed) {
+//==============================
+// * 块元素 - 帧刷新 - 缩放到
+//==============================
+Window_SkillList.prototype.drill_WSE_scale_move_to = function( sprite, s, type, speed ){
 	if( type == "x" ){
 		var ds = sprite.scale.x - s;
 		if( ds < 0 ){ sprite.scale.x += speed; }
@@ -802,20 +824,97 @@ Window_SkillList.prototype.drill_WSE_scale_move_to = function(sprite,s,type,spee
 		if( Math.abs(ds) <= speed ){ sprite.scale.y = s; }
 	}
 }
+
+
+//=============================================================================
+// ** 兼容 - mog技能界面
+//=============================================================================
+if( Imported.MOG_SceneSkill ){
 	
-//==============================
-// * 往mog强制塞入drill作用方法
-//==============================
-if(Imported.MOG_SceneSkill){
-	Window_SkillListM.prototype.drill_WSE_skillSpriteInit = Window_SkillList.prototype.drill_WSE_skillSpriteInit;
-	Window_SkillListM.prototype.drill_WSE_drawAllItems = Window_SkillList.prototype.drill_WSE_drawAllItems;
+	//==============================
+	// * mog技能界面 - 塞入drill作用方法
+	//==============================
+	Window_SkillListM.prototype.drill_WSE_initSprite = Window_SkillList.prototype.drill_WSE_initSprite;
+	Window_SkillListM.prototype.drill_WSE_clearAllBitmap = Window_SkillList.prototype.drill_WSE_clearAllBitmap;
 	Window_SkillListM.prototype.drill_WSE_drawItem = Window_SkillList.prototype.drill_WSE_drawItem;
 	Window_SkillListM.prototype.drill_WSE_s_drawBlock = Window_SkillList.prototype.drill_WSE_s_drawBlock;
 	Window_SkillListM.prototype.drill_WSE_s_drawBackground = Window_SkillList.prototype.drill_WSE_s_drawBackground;
 	Window_SkillListM.prototype.drill_WSE_s_drawIcon = Window_SkillList.prototype.drill_WSE_s_drawIcon;
-	Window_SkillListM.prototype.drill_WSE_skillSpriteUpdate = Window_SkillList.prototype.drill_WSE_skillSpriteUpdate;
+	Window_SkillListM.prototype.drill_WSE_updateSprite = Window_SkillList.prototype.drill_WSE_updateSprite;
 	Window_SkillListM.prototype.drill_WSE_button_move_to = Window_SkillList.prototype.drill_WSE_button_move_to;
 	Window_SkillListM.prototype.drill_WSE_scale_move_to = Window_SkillList.prototype.drill_WSE_scale_move_to;
+	
+	//==============================
+	// * mog技能界面 - 窗口初始化
+	//==============================
+	var _drill_WSE_MOG_menu_initialize = Window_SkillListM.prototype.initialize;
+	Window_SkillListM.prototype.initialize = function( x, y, width, height ){
+		_drill_WSE_MOG_menu_initialize.call(this, x, y, width, height);
+		if( DrillUp.g_WSE_menuSceneEnabled == true ){
+			this.drill_WSE_initSprite();
+		}
+	};
+	//==============================
+	// * mog技能界面 - 窗口帧刷新
+	//==============================
+	var _drill_WSE_MOG_menu_update = Window_SkillListM.prototype.update;
+	Window_SkillListM.prototype.update = function() {
+		_drill_WSE_MOG_menu_update.call(this);
+		if( DrillUp.g_WSE_menuSceneEnabled == true ){
+			this.drill_WSE_updateSprite();
+		}
+	}
+	//==============================
+	// * mog技能界面 - 窗口高度
+	//==============================
+	var _drill_WSE_MOG_menu_itemHeight = Window_SkillListM.prototype.itemHeight;
+	Window_SkillListM.prototype.itemHeight = function() {
+		if( DrillUp.g_WSE_menuSceneEnabled == true ){
+			return DrillUp.g_WSE_height;
+		}
+		return _drill_WSE_MOG_menu_itemHeight.call(this);
+	};
+	//==============================
+	// * mog技能界面 - 窗口列数
+	//==============================
+	var _drill_WSE_MOG_menu_maxCols = Window_SkillListM.prototype.maxCols;
+	Window_SkillListM.prototype.maxCols = function() {
+		if( DrillUp.g_WSE_menuSceneEnabled == true ){
+			return DrillUp.g_WSE_menu_col;
+		}
+		return _drill_WSE_MOG_menu_maxCols.call(this);
+	};
+	//==============================
+	// * mog技能界面 - 窗口横向间距
+	//==============================
+	var _drill_WSE_MOG_menu_spacing = Window_SkillListM.prototype.spacing;
+	Window_SkillListM.prototype.spacing = function() {
+		if( DrillUp.g_WSE_menuSceneEnabled == true ){
+			return DrillUp.g_WSE_spacing;
+		}
+		return _drill_WSE_MOG_menu_spacing.call(this);
+	};
+	//==============================
+	// * mog技能界面 - 窗口 绘制全部块
+	//==============================
+	var _drill_WSE_MOG_menu_drawAllItems = Window_SkillListM.prototype.drawAllItems;
+	Window_SkillListM.prototype.drawAllItems = function(){
+		if( DrillUp.g_WSE_menuSceneEnabled == true ){
+			this.drill_WSE_clearAllBitmap();	//（清理全部画布块）
+		}
+		_drill_WSE_MOG_menu_drawAllItems.call(this);
+	};
+	//==============================
+	// * mog技能界面 - 窗口 绘制单个块
+	//==============================
+	var _drill_WSE_MOG_menu_drawItem = Window_SkillListM.prototype.drawItem;
+	Window_SkillListM.prototype.drawItem = function( index ){
+		if( DrillUp.g_WSE_menuSceneEnabled == true ){
+			this.drill_WSE_drawItem( index );
+			return;
+		}
+		_drill_WSE_MOG_menu_drawItem.call(this);
+	};
+	
 }
-
 
