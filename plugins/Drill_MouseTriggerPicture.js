@@ -17,10 +17,11 @@
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 插件必须基于核心，并可以辅助扩展下列插件。
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。并可以辅助扩展下列插件。
  * 基于：
- *   - Drill_CoreOfInput          系统 - 输入设备核心
- *   - Drill_LayerCommandThread   地图 - 多线程
+ *   - Drill_CoreOfInput          系统-输入设备核心
+ *   - Drill_LayerCommandThread   地图-多线程
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -112,6 +113,8 @@
  * 测试结果：   200个事件的地图中，平均消耗为：【10.31ms】
  *              100个事件的地图中，平均消耗为：【9.15ms】
  *               50个事件的地图中，平均消耗为：【6.58ms】
+ * 测试方法2：  在战斗时，进行图片鼠标触发测试。
+ * 测试结果2：  战斗界面中，平均消耗为：【9.41ms】
  * 
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
  *   测试结果并不是精确值，范围在给定值的10ms范围内波动。
@@ -137,21 +140,26 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^2)  每帧
-//		性能测试因素	对话管理层
-//		性能测试消耗	6.58ms（Scene_Map.update）
-//		最坏情况		暂无
-//		备注			能够稳定在10帧左右，去掉图片后，15帧左右。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^2)  每帧
+//		★性能测试因素	对话管理层
+//		★性能测试消耗	6.58ms（Scene_Map.update）
+//		★最坏情况		暂无
+//		★备注			能够稳定在10帧左右，去掉图片后，15帧左右。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			鼠标触发图片：（鼠标+触屏）
 //				->鼠标点击
 //				->触发记录
 //
 //		★必要注意事项：
-//			1.该插件使用了【图片容器】。
+//			1.【该插件使用了图片容器】。
 //
 //		★其它说明细节：
 //			1.图片比较特殊，同时在战斗界面和地图界面都要有效果。
@@ -176,7 +184,6 @@
 //=============================================================================
 if( Imported.Drill_CoreOfInput &&
 	Imported.Drill_LayerCommandThread ){
-	
 	
 	
 //=============================================================================
@@ -316,7 +323,7 @@ Game_System.prototype.initialize = function() {
 var _drill_MTP_temp_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {	
 	_drill_MTP_temp_initialize.call(this);
-	this._drill_MTP_needRefresh = true;			//刷新统计
+	this._drill_MTP_needRestatistics = true;			//刷新统计
 };
 //==============================
 // * 图片容器 - 切换地图时
@@ -324,7 +331,7 @@ Game_Temp.prototype.initialize = function() {
 var _drill_MTP_gmap_setup = Game_Map.prototype.setup;
 Game_Map.prototype.setup = function(mapId) {
 	_drill_MTP_gmap_setup.call(this,mapId);
-	//$gameTemp._drill_MTP_needRefresh = true;
+	//$gameTemp._drill_MTP_needRestatistics = true;
 }
 //==============================
 // * 图片容器 - 切换贴图时（菜单界面刷新）（注意，这里对 地图界面+战斗界面 都有效）
@@ -332,7 +339,7 @@ Game_Map.prototype.setup = function(mapId) {
 var _drill_MTP_sbase_createPictures = Spriteset_Base.prototype.createPictures;
 Spriteset_Base.prototype.createPictures = function() {
 	_drill_MTP_sbase_createPictures.call(this);
-	$gameTemp._drill_MTP_needRefresh = true;
+	$gameTemp._drill_MTP_needRestatistics = true;
 }
 //==============================
 // * 场景层 - 帧刷新
@@ -340,14 +347,14 @@ Spriteset_Base.prototype.createPictures = function() {
 var _drill_MTP_base_update = Spriteset_Base.prototype.update;
 Spriteset_Base.prototype.update = function() {	
 	_drill_MTP_base_update.call(this);
-	this.drill_MTP_refreshSpriteScan();		//刷新统计
+	this.drill_MTP_updateRestatistics();		//帧刷新 - 刷新统计
 };
 //==============================
-// ** 帧刷新 - 刷新统计
+// * 场景层 - 帧刷新 - 刷新统计
 //==============================
-Spriteset_Base.prototype.drill_MTP_refreshSpriteScan = function() {
-	if( !$gameTemp._drill_MTP_needRefresh ){ return }
-	$gameTemp._drill_MTP_needRefresh = false;
+Spriteset_Base.prototype.drill_MTP_updateRestatistics = function() {
+	if( !$gameTemp._drill_MTP_needRestatistics ){ return }
+	$gameTemp._drill_MTP_needRestatistics = false;
 	
 	$gameTemp._drill_MTP_sprites = [];
 	for( var i=0; i < this._pictureContainer.children.length; i++ ){
@@ -555,8 +562,8 @@ Scene_Battle.prototype.drill_MTP_isOnRange = function( sprite ){
 var _drill_MTP_pic_initialize = Game_Picture.prototype.initialize;
 Game_Picture.prototype.initialize = function() {
 	_drill_MTP_pic_initialize.call(this);
-	this.drill_MTP_init();						//参数初始化
-	$gameTemp._drill_MTP_needRefresh = true;	//图片创建后，强制刷新（战斗界面中创建的图片）
+	this.drill_MTP_init();							//参数初始化
+	$gameTemp._drill_MTP_needRestatistics = true;	//图片创建后，强制刷新（战斗界面中创建的图片）
 }
 //==============================
 // * 图片 - 参数初始化
@@ -573,8 +580,8 @@ Game_Picture.prototype.drill_MTP_init = function(){
 var _drill_MTP_pic_erase = Game_Picture.prototype.erase;
 Game_Picture.prototype.erase = function() {
 	_drill_MTP_pic_erase.call(this);
-	this.drill_MTP_init();						//参数清空
-	$gameTemp._drill_MTP_needRefresh = true;	//图片消除后，强制刷新
+	this.drill_MTP_init();							//参数清空
+	$gameTemp._drill_MTP_needRestatistics = true;	//图片消除后，强制刷新
 }
 //==============================
 // * 图片操作 - 消除图片（command235）
@@ -589,7 +596,7 @@ Game_Screen.prototype.erasePicture = function( pictureId ){
 	
 	_drill_MTP_pic_erasePicture.call( this, pictureId );
 	
-	$gameTemp._drill_MTP_needRefresh = true;	//图片消除后，强制刷新
+	$gameTemp._drill_MTP_needRestatistics = true;	//图片消除后，强制刷新
 };
 //==============================
 // * 图片 - 加入新的触发

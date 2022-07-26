@@ -19,17 +19,17 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 可全自定义的商店界面。
- * 【支持插件关联资源的打包、加密】
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 插件不能单独使用，必须基于下列核心插件。
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfWindowAuxiliary    系统 - 窗口辅助核心
- *   - Drill_CoreOfWaitressSprite     主菜单 - 服务员核心
+ *   - Drill_CoreOfWindowAuxiliary    系统-窗口辅助核心
+ *   - Drill_CoreOfWaitressSprite     主菜单-服务员核心
  *     必须基于上述插件才能显示控制窗口移动、服务员动作。
  * 被扩展：
- *   - Drill_ItemCategory             控件-物品类型 ★★v1.4及以上★★
+ *   - Drill_ItemCategory             控件-物品类型★★v1.4及以上★★
  *     通过该插件，可以扩展更多物品类型。
  * 
  * -----------------------------------------------------------------------------
@@ -164,7 +164,7 @@
  * 工作类型：   持续执行
  * 时间复杂度： o(n^2)*o(场景元素) 每帧
  * 测试方法：   直接进入该信息面板进行测试。
- * 测试结果：   该商店面板中，基本元素消耗为：【21.03ms】
+ * 测试结果：   菜单界面中，商店的基本元素消耗为：【21.03ms】
  * 
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
  *   测试结果并不是精确值，范围在给定值的10ms范围内波动。
@@ -1047,7 +1047,7 @@
  * @type boolean
  * @on 启用
  * @off 关闭
- * @desc true - 启用，false - 关闭，你可以开关rmmv默认选项的白色闪烁矩形。需要Drill_MenuCursorBorder插件支持。
+ * @desc true - 启用，false - 关闭，你可以开关默认选项的白色闪烁矩形。需要Drill_MenuCursorBorder插件支持。
  * @default true
  * 
  * @param 是否启用菜单边框
@@ -1244,14 +1244,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	重写方法非常多，未带 drill_ 前缀的都是
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^2)*o(场景元素) 每帧
-//		性能测试因素	在面板中记录
-//		性能测试消耗	7.42ms
-//		最坏情况		无
-//		备注			这个值不是很符合实际，这里应该把辅助核心的消耗加进来。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^2)*o(场景元素) 每帧
+//		★性能测试因素	在面板中记录
+//		★性能测试消耗	7.42ms
+//		★最坏情况		无
+//		★备注			这个值不是很符合实际，这里应该把辅助核心的消耗加进来。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			全自定义商店界面：
 //				->商店界面（覆写函数）
@@ -1300,7 +1305,7 @@
 //			暂无
 //
 //		★其它说明细节：
-//			1.[2018/12/15]，rmmv本体的代码太烂，每个变量布局都被相互制约。
+//			1.[2018/12/15]，默认本体的代码太烂，每个变量布局都被相互制约。
 //			  各窗口初始化全被写死了，如果覆盖某些泛用窗口又会影响其他的菜单。
 //			  所以这里采取的全是在初始化之后，修改窗口的各个参数。
 //			  有些参数由于内部关系，必须在初始化前就设置好，所以窗口的格式都有一些不同的小变动。（本来想完全统一写法的，现在没办法控制了）
@@ -1363,7 +1368,7 @@
 	DrillUp.g_SSh_btn_active_Y = Number(DrillUp.parameters['平移-激活的按钮 Y'] || 130);   
     DrillUp.g_SSh_btn_unselect_opacity = Number(DrillUp.parameters['未选中按钮透明度'] || 160);
 	DrillUp.g_SSh_btn_a_zoom = String(DrillUp.parameters['是否使用缩放效果'] || "true") == "true";	
-	DrillUp.g_SSh_btn_a_flash = String(DrillUp.parameters['是否使用闪烁效果'] || "false") == "true";	
+	DrillUp.g_SSh_btn_a_flicker = String(DrillUp.parameters['是否使用闪烁效果'] || "false") == "true";	
     DrillUp.g_SSh_btn_a_float_var = Number(DrillUp.parameters['浮动偏移量'] || 15);
 	DrillUp.g_SSh_btn_a_float_lr = String(DrillUp.parameters['是否使用左右浮动'] || "false") == "true";	
 	DrillUp.g_SSh_btn_a_float_ud = String(DrillUp.parameters['是否使用上下浮动'] || "false") == "true";	
@@ -1733,7 +1738,7 @@
 //=============================================================================
 if( Imported.Drill_SenceShop ){
 	alert(
-		"【Drill_SceneShop.js 面板-全自定义商店界面】\n注意，检测到重复的商店插件，请及时去掉旧插件。"
+		"【Drill_SceneShop.js 面板 - 全自定义商店界面】\n注意，检测到重复的商店插件，请及时去掉旧插件。"
 	);
 }
 
@@ -2160,7 +2165,7 @@ Scene_Shop.prototype.drill_SSh_updateButtons = function() {
 					};
 				}
 				// > 闪烁效果
-				if( DrillUp.g_SSh_btn_a_flash ){
+				if( DrillUp.g_SSh_btn_a_flicker ){
 					if (temp_btn_data['Ani'] === 0) {
 						this.drill_SSh_opacity_move_to(temp_btn,255, 10);
 						if (temp_btn.opacity >= 255) {
@@ -2493,9 +2498,9 @@ Scene_Shop.prototype.createBuyWindow = function() {
     this._buyWindow = new Window_ShopBuy(0, 0, 0, this._goods);
 	this._buyWindow.drill_COWA_changeParamData( data );			//辅助核心 - 控制窗口基本属性
 	this._buyWindow.maxCols = function(){ return DrillUp.g_SSh_buy_col;}
-	this._buyWindow.hide = function(){ return null;}			//禁止rmmv默认控制隐藏
+	this._buyWindow.hide = function(){ return null;}			//禁止默认控制隐藏
 	
-	// > 兼容Drill_MenuCursor菜单指针插件
+	// > 兼容【Drill_MenuCursor 主菜单 - 多样式菜单指针】
 	if( Imported.Drill_MenuCursor == true && DrillUp.g_SSh_buy_cursor != null ){
 		this._buyWindow.drill_MCu_cursorEnabled = function(){
 			return DrillUp.g_SSh_buy_cursor['MCu_enabled'];
@@ -2508,7 +2513,7 @@ Scene_Shop.prototype.createBuyWindow = function() {
 			}
 		}
 	}
-	// > 兼容Drill_MenuCursorBorder菜单边框插件
+	// > 兼容【Drill_MenuCursorBorder 主菜单 - 多样式菜单选项边框】
 	if( Imported.Drill_MenuCursorBorder == true && DrillUp.g_SSh_buy_cursor != null ){
 		this._buyWindow.drill_MCB_glimmerRectVisible = function() {
 			return DrillUp.g_SSh_buy_cursor['MCB_rectEnabled'];
@@ -2524,7 +2529,7 @@ Scene_Shop.prototype.createBuyWindow = function() {
 			}
 		}
 	}
-	// > 兼容Drill_MenuScrollBar菜单滚动条插件
+	// > 兼容【Drill_MenuScrollBar 主菜单 - 多样式菜单滚动条】
 	if( Imported.Drill_MenuScrollBar == true && DrillUp.g_SSh_buy_cursor != null ){
 		this._buyWindow.drill_MSB_scrollBarEnabled = function() {
 			return DrillUp.g_SSh_buy_cursor['MSB_enabled'];
@@ -2631,7 +2636,7 @@ Scene_Shop.prototype.createStatusWindow = function() {
 	}
     this._statusWindow = new Window_ShopStatus(0, 0, 0, 0);
 	this._statusWindow.drill_COWA_changeParamData( data );			//辅助核心 - 控制窗口基本属性
-	this._statusWindow.hide = function(){ return null;}		//禁止rmmv默认控制隐藏
+	this._statusWindow.hide = function(){ return null;}		//禁止默认控制隐藏
 	
     this._statusWindow.refresh();
     this.addWindow(this._statusWindow);
@@ -2813,9 +2818,9 @@ Scene_Shop.prototype.createSellWindow = function() {
     this._sellWindow = new Window_ShopSell(0, 0, 0, 0);
 	this._sellWindow.drill_COWA_changeParamData( data );			//辅助核心 - 控制窗口基本属性
 	this._sellWindow.maxCols = function(){ return DrillUp.g_SSh_sell_col;}
-	this._sellWindow.hide = function(){ return null;}			//禁止rmmv默认控制隐藏
+	this._sellWindow.hide = function(){ return null;}			//禁止默认控制隐藏
 	
-	// > 兼容Drill_MenuCursor菜单指针插件
+	// > 兼容【Drill_MenuCursor 主菜单 - 多样式菜单指针】
 	if( Imported.Drill_MenuCursor == true && DrillUp.g_SSh_sell_cursor != null ){
 		this._sellWindow.drill_MCu_cursorEnabled = function(){
 			return DrillUp.g_SSh_sell_cursor['MCu_enabled'];
@@ -2828,7 +2833,7 @@ Scene_Shop.prototype.createSellWindow = function() {
 			}
 		}
 	}
-	// > 兼容Drill_MenuCursorBorder菜单边框插件
+	// > 兼容【Drill_MenuCursorBorder 主菜单 - 多样式菜单选项边框】
 	if( Imported.Drill_MenuCursorBorder == true && DrillUp.g_SSh_sell_cursor != null ){
 		this._sellWindow.drill_MCB_glimmerRectVisible = function() {
 			return DrillUp.g_SSh_sell_cursor['MCB_rectEnabled'];
@@ -2844,7 +2849,7 @@ Scene_Shop.prototype.createSellWindow = function() {
 			}
 		}
 	}
-	// > 兼容Drill_MenuScrollBar菜单滚动条插件
+	// > 兼容【Drill_MenuScrollBar 主菜单 - 多样式菜单滚动条】
 	if( Imported.Drill_MenuScrollBar == true && DrillUp.g_SSh_sell_cursor != null ){
 		this._sellWindow.drill_MSB_scrollBarEnabled = function() {
 			return DrillUp.g_SSh_sell_cursor['MSB_enabled'];
@@ -2941,7 +2946,7 @@ Scene_Shop.prototype.createCategoryWindow = function() {
 	this._categoryWindow.drill_COWA_changeParamData( data );			//辅助核心 - 控制窗口基本属性
 	this._categoryWindow.maxCols = function(){ return DrillUp.g_SSh_category_col;}
 	
-	// > 兼容Drill_MenuCursor菜单指针插件
+	// > 兼容【Drill_MenuCursor 主菜单 - 多样式菜单指针】
 	if( Imported.Drill_MenuCursor == true && DrillUp.g_SSh_category_cursor != null ){
 		this._categoryWindow.drill_MCu_cursorEnabled = function(){
 			return DrillUp.g_SSh_category_cursor['MCu_enabled'];
@@ -2954,7 +2959,7 @@ Scene_Shop.prototype.createCategoryWindow = function() {
 			}
 		}
 	}
-	// > 兼容Drill_MenuCursorBorder菜单边框插件
+	// > 兼容【Drill_MenuCursorBorder 主菜单 - 多样式菜单选项边框】
 	if( Imported.Drill_MenuCursorBorder == true && DrillUp.g_SSh_category_cursor != null ){
 		this._categoryWindow.drill_MCB_glimmerRectVisible = function() {
 			return DrillUp.g_SSh_category_cursor['MCB_rectEnabled'];
@@ -3085,7 +3090,7 @@ Drill_SSh_WaitressSprite.prototype.update = function() {
 }else{
 		Imported.Drill_SceneShop = false;
 		alert(
-			"【Drill_SceneShop.js 面板-全自定义商店界面】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
+			"【Drill_SceneShop.js 面板 - 全自定义商店界面】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
 			"\n- Drill_CoreOfWindowAuxiliary 系统-窗口辅助核心" +
 			"\n- Drill_CoreOfWaitressSprite 主菜单-服务员核心"
 		);

@@ -440,14 +440,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n)*o(贴图处理) 每帧
-//		性能测试因素	对话管理层
-//		性能测试消耗	8.79ms
-//		最坏情况		暂无
-//		备注			只有一个贴图控制，不需要担心消耗。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n)*o(贴图处理) 每帧
+//		★性能测试因素	对话管理层
+//		★性能测试消耗	8.79ms
+//		★最坏情况		暂无
+//		★备注			只有一个贴图控制，不需要担心消耗。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			对话图：
 //				->隐藏对话框
@@ -547,24 +552,6 @@ Window_Message.prototype.update = function() {
 	_drill_DSS_update.call(this);
 	this.drill_DSS_updateEffect();			//帧刷新变换
 };
-////==============================
-//// * 捕获 - 窗口x位置（并不是帧刷新）
-////==============================
-//if( Imported.YEP_MessageCore ){
-//	var _drill_DSS_adjustWindowSettings = Window_Message.prototype.adjustWindowSettings;
-//	Window_Message.prototype.adjustWindowSettings = function() {
-//		_drill_DSS_adjustWindowSettings.call(this);
-//		this._drill_orgX = this.x;
-//	};
-//};
-////==============================
-//// * 捕获 - 窗口y位置（并不是帧刷新）
-////==============================
-//var _drill_DSS_updatePlacement = Window_Message.prototype.updatePlacement;
-//Window_Message.prototype.updatePlacement = function() {
-//	_drill_DSS_updatePlacement.call(this);
-//	this._drill_orgY = this.y;
-//};
 	
 //==============================
 // * 对话框 - 帧刷新变换
@@ -663,7 +650,7 @@ Window_Message.prototype.terminateMessage = function() {
 //==============================
 var _drill_DSS_layer_createAllWindows = Scene_Map.prototype.createAllWindows;
 Scene_Map.prototype.createAllWindows = function() {
-	_drill_DSS_layer_createAllWindows.call(this);	//rmmv对话框 < 最顶层
+	_drill_DSS_layer_createAllWindows.call(this);	//对话框集合 < 最顶层
 	if( !this._drill_SenceTopArea ){
 		this._drill_SenceTopArea = new Sprite();
 		this.addChild(this._drill_SenceTopArea);	
@@ -741,7 +728,7 @@ Scene_Map.prototype.drill_DSS_updateSprite = function() {
 //==============================
 var _drill_DSS_battle_createAllWindows = Scene_Battle.prototype.createAllWindows;
 Scene_Battle.prototype.createAllWindows = function() {
-	_drill_DSS_battle_createAllWindows.call(this);	//rmmv对话框 < 最顶层
+	_drill_DSS_battle_createAllWindows.call(this);	//对话框集合 < 最顶层
 	if( !this._drill_SenceTopArea ){
 		this._drill_SenceTopArea = new Sprite();
 		this.addChild(this._drill_SenceTopArea);	

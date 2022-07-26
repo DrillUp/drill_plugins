@@ -19,13 +19,16 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 使得你可以添加粒子，绑定在一个指定的动画上面。播放动画时能出现粒子。
- * 【支持插件关联资源的打包、加密】
+ * 
+ * -----------------------------------------------------------------------------
+ * ----插件扩展
+ * 该插件可以单独使用。
  *
  * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：地图界面，战斗界面。
  *   作用于动画，伴随动画一起出现。
- * 2.更多详细的组合方法，去看看 "17.主菜单 > 多层组合装饰（对象装饰）.docx"。
+ * 2.更多详细的组合方法，去看看 "17.主菜单 > 多层组合装饰（个体装饰）.docx"。
  * 3.更多详细的设置效果，去看看 "12.动画 > 关于魔法效果与并行动画.docx"。
  * 细节：
  *   (1.动画粒子是一个具有持续时间的效果，分为 出现、持续、消失 三阶段。
@@ -1461,7 +1464,7 @@
  * @value 2
  * @option 浅色
  * @value 3
- * @desc pixi的渲染混合模式。0-普通,1-叠加。其他更详细相关介绍，去看看"混合模式.docx"。
+ * @desc pixi的渲染混合模式。0-普通,1-叠加。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
  * @default 0
  *
  * @param 动画层级
@@ -1712,14 +1715,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^3)*o(贴图处理) 每帧
-//		性能测试因素	物体管理层、战斗界面
-//		性能测试消耗	2.51ms、7.57ms（update）13.87ms（drill_updateParticle）
-//		最坏情况		大量动画被同时播放。
-//		备注			无
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^3)*o(贴图处理) 每帧
+//		★性能测试因素	物体管理层、战斗界面
+//		★性能测试消耗	2.51ms、7.57ms（update）13.87ms（drill_updateParticle）
+//		★最坏情况		大量动画被同时播放。
+//		★备注			无
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			动画粒子：
 //				->动画过程
@@ -2748,7 +2756,7 @@ Drill_APa_Sprite.prototype.drill_updateParticle = function() {
 		spr.rotation += data['par_selfRotate'] /180*Math.PI;
 		
 		// > 过界刷新
-    	if( this.drill_APa_needResetParticles(i) ){
+    	if( this.drill_APa_isNeedResetParticles(i) ){
 			this.drill_APa_resetParticles(i);
 		};
 	};
@@ -2757,7 +2765,7 @@ Drill_APa_Sprite.prototype.drill_updateParticle = function() {
 //==============================
 // * 粒子 - 重设条件
 //==============================	
-Drill_APa_Sprite.prototype.drill_APa_needResetParticles = function( i ){
+Drill_APa_Sprite.prototype.drill_APa_isNeedResetParticles = function( i ){
 	var spr = this._drill_APa_particleTankOrg[i];
 	var data = this._drill_APa_particleDataTank[i];
 	

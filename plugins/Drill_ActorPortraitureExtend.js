@@ -23,13 +23,13 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 你可以设置战斗当前角色的肖像,还可以配置不同条件下角色不同样子的肖像。
- * 【支持插件关联资源的打包、加密】
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该插件必须基于核心插件才能运行：
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfActionSequence    系统 - GIF动画序列核心
+ *   - Drill_CoreOfActionSequence    系统-GIF动画序列核心
  *
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -168,121 +168,121 @@
  * @param 角色肖像-1
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-2
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-3
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-4
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-5
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-6
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-7
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-8
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-9
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-10
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-11
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-12
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-13
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-14
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-15
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-16
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-17
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-18
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-19
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-20
  * @parent ----角色肖像1至20----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  *
@@ -292,121 +292,121 @@
  * @param 角色肖像-21
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-22
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-23
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-24
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-25
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-26
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-27
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-28
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-29
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-30
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-31
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-32
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-33
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-34
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-35
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-36
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-37
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-38
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-39
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-40
  * @parent ----角色肖像21至40----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param ----角色肖像41至60----
@@ -415,121 +415,121 @@
  * @param 角色肖像-41
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-42
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-43
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-44
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-45
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-46
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-47
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-48
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-49
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-50
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-51
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-52
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-53
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-54
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-55
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-56
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-57
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-58
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-59
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  *
  * @param 角色肖像-60
  * @parent ----角色肖像41至60----
  * @type struct<ActorPortraiture>
- * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 关于GIF动画序列核心.docx"。
+ * @desc 设置指定的条件下，角色肖像的效果。具体设计可以去看看 "1.系统 > 大家族-GIF动画序列.docx"。
  * @default 
  * 
  * 
@@ -950,14 +950,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^3)*o(贴图处理) 每帧
-//		性能测试因素	战斗界面
-//		性能测试消耗	 25.87ms（drill_APEx_updatePosition） 19.71ms（drill_APEx_updateCondition） 17.25ms（update）
-//		最坏情况		配置了大量角色立绘，以及5-8个角色。
-//		备注			角色数量能够使得角色立绘计算量倍增，注意。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^3)*o(贴图处理) 每帧
+//		★性能测试因素	战斗界面
+//		★性能测试消耗	 25.87ms（drill_APEx_updatePosition） 19.71ms（drill_APEx_updateCondition） 17.25ms（update）
+//		★最坏情况		配置了大量角色立绘，以及5-8个角色。
+//		★备注			角色数量能够使得角色立绘计算量倍增，注意。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			角色肖像：
 //				->条件
@@ -1855,7 +1860,7 @@ Game_BattlerBase.prototype.drill_APEx_isAnyStateAffected = function( state_list 
 }else{
 		Imported.Drill_ActorPortraitureExtend = false;
 		alert(
-			"【Drill_ActorPortraitureExtend.js 战斗UI-高级角色肖像】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
+			"【Drill_ActorPortraitureExtend.js 战斗UI - 高级角色肖像】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
 			"\n- Drill_CoreOfActionSequence  系统-GIF动画序列核心"
 		);
 }

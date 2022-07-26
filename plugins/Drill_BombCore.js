@@ -19,30 +19,30 @@
  *
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该插件 不能 单独使用，必须拥有下列插件作为基础，才能运行：
+ * 该插件 不能 单独使用。
+ * 必须拥有下列插件作为基础，才能运行。
  * 基于：
- *   - Drill_CoreOfMoveRoute      物体 - 移动路线核心★★v1.7以上★★
- *   - Drill_EventDuplicator      物体 - 事件复制器
- *   - Drill_EventThrough         物体 - 事件穿透关系
- *   - Drill_CoreOfFixedArea      物体触发 - 固定区域核心
- *   - Drill_EventLaserTrigger    物体触发 - 可变激光区域&条件触发 ★★v1.2以上★★
- *   - Drill_EventLaserAnimation  物体触发 - 可变激光区域&播放并行动画 ★★v1.2以上★★
- *
- * 被扩展：
- *   - Drill_OperateKeys          互动 - 键盘手柄按键修改器★★v1.1以上★★
+ *   - Drill_EventDuplicator      物体管理-事件复制器
+ *   - Drill_EventThrough         体积-事件穿透关系
+ *   - Drill_CoreOfFixedArea      物体触发-固定区域核心
+ *   - Drill_EventLaserTrigger    物体触发-可变激光区域&条件触发 ★★v1.2以上★★
+ *   - Drill_EventLaserAnimation  物体触发-可变激光区域&播放并行动画 ★★v1.2以上★★
+ *   - Drill_CoreOfMoveRoute      移动路线-移动路线核心★★v1.7以上★★
+ * 可被扩展：
+ *   - Drill_OperateKeys          键盘-键盘手柄按键修改器★★v1.1以上★★
  *     通过该插件你可以设置键盘、手柄按键，放置炸弹。
- *   - Drill_OperateHud           互动 - 鼠标辅助操作面板★★v1.3以上★★
+ *   - Drill_OperateHud           鼠标-鼠标辅助操作面板★★v1.3以上★★
  *     通过该插件你可以设置鼠标、触屏，放置炸弹。
- *   - Drill_LayerIllumination    地图 - 自定义照明效果
+ *   - Drill_LayerIllumination    地图-自定义照明效果
  *     如果有该插件，炸弹能够在黑暗中产生光亮，没有该插件也无妨。
  *
  * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：地图界面。
  *   对事件、玩家有效。
- * 2.更多详细介绍，去看看 "10.互动 > 关于炸弹人游戏.docx"。
+ * 2.更多详细介绍，去看看 "29.炸弹人 > 关于炸弹人游戏.docx"。
  * 3.插件需要将指定 地形标志 或 图块R区域 设为禁止炸弹区，
- *   去看看 "10.互动 > 关于插件与图块R占用说明.xlsx"
+ *   去看看 "26.图块 > 关于插件与图块R占用说明.xlsx"
  * 功能点：
  *   (1.该核心能实现基本的炸弹人游戏功能。
  *      后面会有一些其它方向扩展的插件，都基于该核心。
@@ -61,7 +61,7 @@
  *   (3.你需要 手动添加 ："=>事件穿透关系 : 穿透标签 : 炸弹人-角色"。
  *      确保只有玩家与敌人相互才可以穿透。无关事件、炸弹、其他物体都会堵路。
  *   (4.如果你想做爆炸能穿透，但是玩家无法通过的区域。
- *      根据 物体-事件穿透关系 插件，你可以在指定位置放事件作为透明墙。
+ *      根据 体积-事件穿透关系 插件，你可以在指定位置放事件作为透明墙。
  *     （爆炸波不能穿透地形，只能穿透事件）
  * 炸弹：
  *   (1.核心中的炸弹，都为"标准炸弹"，与"自定义炸弹"区分。
@@ -78,7 +78,7 @@
  *   (8.跳跃过程中可以放置炸弹，并且放的是玩家当前位置的正下方。
  * AI决策：
  *   (1.通过移动路线的设置，决定了事件该如何放置炸弹、躲避炸弹的思维。
- *      "10.互动 > 关于炸弹人游戏.docx"中有AI决策的详细解读。
+ *      "29.炸弹人 > 关于炸弹人游戏.docx"中有AI决策的详细解读。
  *   (2.AI能够识别自定义炸弹，可以去看看插件：炸弹人-自定义炸弹。
  * 
  * -----------------------------------------------------------------------------
@@ -335,14 +335,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^4) + o(n^2)*o(图形处理)
-//		性能测试因素	炸弹人管理层150个事件
-//		性能测试消耗	12.44ms ~ 20.27ms
-//		最坏情况		放很多炸弹，炸弹的动画会极大影响性能。
-//		备注			单纯放置炸弹并没有加大负荷，只是在爆炸时负荷超大。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^4) + o(n^2)*o(图形处理)
+//		★性能测试因素	炸弹人管理层150个事件
+//		★性能测试消耗	12.44ms ~ 20.27ms
+//		★最坏情况		放很多炸弹，炸弹的动画会极大影响性能。
+//		★备注			单纯放置炸弹并没有加大负荷，只是在爆炸时负荷超大。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			指令与数据
 //				->能力 - 炸弹火力
@@ -389,7 +394,7 @@
 //			  面板通过上述四个接口 主动调用 能力插件中的函数。
 //			2.【该插件使用了事件容器】，必须考虑三种情况：初始化、切换地图时、切换贴图时，不然会出现指针错误！
 //				只要是装事件的容器，都需要考虑指针问题，不管是放在$gameMap还是$gameTemp中。
-//				另外，帧刷新判断时，最好每次变化直接【重刷容器】。
+//				另外，帧刷新判断时，最好每次变化直接【刷新统计】。
 //				容器（$gameTemp._xxx）中存放了两种事件集合：炸弹集合、阵营集合
 //			3.关于爆炸区域判定优化算法：
 //				想法1：建立一个与地图等效的大数组列。数值为时间，帧刷新减一，降到0为止。
@@ -518,7 +523,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			
 			if( type == "阵营" ){
 				character._drill_BoC.group['character'] = temp2.split(/[,，]/);
-				$gameTemp._drill_BoC_needRefreshGroup = true;
+				$gameTemp._drill_BoC_needRestatistics_Group = true;
 			}
 		}
 		if(args.length == 8){			//>炸弹人控制台 : 事件[1] : 火力 : 增加 : 1
@@ -713,7 +718,7 @@ Game_Event.prototype.drill_BoC_setupGroup = function() {
 			};
 		};
 	}, this);};
-	$gameTemp._drill_BoC_needRefreshGroup = true;
+	$gameTemp._drill_BoC_needRestatistics_Group = true;
 };
 //==============================
 // * 事件 - 炸弹属性初始化 
@@ -793,7 +798,7 @@ Game_Event.prototype.drill_BoC_setupBomb = function() {
 					var bomb_ai = String(args[1]);
 					if( bomb_ai == "AI识别爆炸区域" || bomb_ai == "AI识别爆炸时长" ){
 						this._drill_BoC.bomb['isBomb'] = true;
-						$gameTemp._drill_BoC_needRefreshBombs = true;		//炸弹集刷新
+						$gameTemp._drill_BoC_needRestatistics_Bombs = true;		//炸弹集刷新
 					}
 				}
 			};
@@ -832,7 +837,7 @@ Game_CharacterBase.prototype.initialize = function() {
 //==============================
 Game_CharacterBase.prototype.drill_BoC_hasBomb = function() {
 	if( !this._drill_BoC.attr['bombTank'] ){ return false }
-	var count = this._drill_BoC.attr['bombTank'].filter( function(value,index,array){ return $gameMap.event(value)._erased == false; } ).length;
+	var count = this._drill_BoC.attr['bombTank'].filter( function(value,index,array){ return $gameMap.event(value) != undefined && $gameMap.event(value)._erased == false; } ).length;
 	return count < this._drill_BoC.attr['bombNum'];
 }
 //==============================
@@ -951,8 +956,8 @@ Game_Temp.prototype.initialize = function() {
 	this._drill_BoC_group_destructible = [];	//阵营(可炸物)容器
 	this._drill_BoC_group_hostile = [];			//阵营(仇恨单位)容器
 												//阵营(忽视单位)不统计
-	this._drill_BoC_needRefreshGroup = true;
-	this._drill_BoC_needRefreshBombs = true;
+	this._drill_BoC_needRestatistics_Group = true;
+	this._drill_BoC_needRestatistics_Bombs = true;
 };
 //==============================
 // * 容器 - 切换地图时
@@ -963,8 +968,8 @@ Game_Map.prototype.setup = function(mapId) {
 	$gameTemp._drill_BoC_group_custom = [];
 	$gameTemp._drill_BoC_group_destructible = [];
 	$gameTemp._drill_BoC_group_hostile = [];
-	$gameTemp._drill_BoC_needRefreshGroup = true;
-	$gameTemp._drill_BoC_needRefreshBombs = true;
+	$gameTemp._drill_BoC_needRestatistics_Group = true;
+	$gameTemp._drill_BoC_needRestatistics_Bombs = true;
 	_drill_BoC_gmap_setup.call(this,mapId);
 }
 //==============================
@@ -976,8 +981,8 @@ Spriteset_Map.prototype.createCharacters = function() {
 	$gameTemp._drill_BoC_group_custom = [];
 	$gameTemp._drill_BoC_group_destructible = [];
 	$gameTemp._drill_BoC_group_hostile = [];
-	$gameTemp._drill_BoC_needRefreshGroup = true;
-	$gameTemp._drill_BoC_needRefreshBombs = true;
+	$gameTemp._drill_BoC_needRestatistics_Group = true;
+	$gameTemp._drill_BoC_needRestatistics_Bombs = true;
 	_drill_BoC_smap_createCharacters.call(this);
 }
 //==============================
@@ -987,15 +992,15 @@ var _drill_BoC_map_update = Game_Map.prototype.update;
 Game_Map.prototype.update = function(sceneActive) {
 	_drill_BoC_map_update.call(this,sceneActive);
 	
-	this.drill_BoC_refreshGroupChecks();
-	this.drill_BoC_refreshBombsChecks();
+	this.drill_BoC_updateRestatistics_Group();
+	this.drill_BoC_updateRestatistics_Bombs();
 };
 //==============================
 // ** 帧刷新 - 刷新统计（阵营）
 //==============================
-Game_Map.prototype.drill_BoC_refreshGroupChecks = function() {
-	if( !$gameTemp._drill_BoC_needRefreshGroup ){ return }
-	$gameTemp._drill_BoC_needRefreshGroup = false;
+Game_Map.prototype.drill_BoC_updateRestatistics_Group = function() {
+	if( !$gameTemp._drill_BoC_needRestatistics_Group ){ return }
+	$gameTemp._drill_BoC_needRestatistics_Group = false;
 	
 	var events = this.events()
 	events.push($gamePlayer);
@@ -1018,7 +1023,7 @@ Game_Map.prototype.drill_BoC_refreshGroupChecks = function() {
 //==============================
 // ** 帧刷新 - 刷新统计（炸弹）
 //==============================
-Game_Map.prototype.drill_BoC_refreshBombsChecks = function() {
+Game_Map.prototype.drill_BoC_updateRestatistics_Bombs = function() {
 	// > 去掉被移除的炸弹
 	for (var i = $gameTemp._drill_BoC_bombs.length-1; i >=0; i--) {
 		if( $gameTemp._drill_BoC_bombs[i]._erased ){
@@ -1027,8 +1032,8 @@ Game_Map.prototype.drill_BoC_refreshBombsChecks = function() {
 	}
 	
 	// > 刷新炸弹（添加时）
-	if( !$gameTemp._drill_BoC_needRefreshBombs ){ return }
-	$gameTemp._drill_BoC_needRefreshBombs = false;
+	if( !$gameTemp._drill_BoC_needRestatistics_Bombs ){ return }
+	$gameTemp._drill_BoC_needRestatistics_Bombs = false;
 	
 	var events = this.events();
 	$gameTemp._drill_BoC_bombs = [];
@@ -1116,7 +1121,7 @@ Game_Map.prototype.drill_BoC_getGroupUnitCount = function( group_tag ) {
 // * 	放置炸弹
 //
 //		功能：		通过调用主函数，快速建立一个炸弹。
-//		可选项：	input_data中的数据可调，见 drill_BoC_createBombData 中的数据初始化。（你也可以传递一些特殊参数，用于继承函数时使用）
+//		可选项：	input_data中的数据可调，见 drill_BoC_createEventDataTemplate 中的数据初始化。（你也可以传递一些特殊参数，用于继承函数时使用）
 //		主函数：	var b_id = $gameMap.drill_BoC_putBomb( input_data );
 //=============================================================================
 //==============================
@@ -1125,7 +1130,7 @@ Game_Map.prototype.drill_BoC_getGroupUnitCount = function( group_tag ) {
 Game_Map.prototype.drill_BoC_putBomb = function( input_data ) {
 	if( $gameSystem._drill_BoC_canPutBomb == false ){ return -1; }
 	
-	var data = $gameMap.drill_BoC_createBombData(input_data);	//获取炸弹事件数据
+	var data = $gameMap.drill_BoC_createEventDataTemplate(input_data);	//获取炸弹事件数据
 	
 	if( this.drill_BoC_isBombCanPut( input_data['x'],input_data['y'] ) ){	//验证炸弹是否能放
 		var e = $gameMap.drill_newEvent_createEvent(data);	//新建炸弹事件
@@ -1138,7 +1143,7 @@ Game_Map.prototype.drill_BoC_putBomb = function( input_data ) {
 		// e._drill_BoC.bomb['triggerType'] = "可变激光区域";
 		// e._drill_BoC.bomb['dirs'] = ['东','南','西','北'];
 		// e._drill_BoC.bomb['options'] = {"through":["炸弹人-角色","炸弹人-透明墙"]};
-		// $gameTemp._drill_BoC_needRefreshBombs = true;		//炸弹集刷新
+		// $gameTemp._drill_BoC_needRestatistics_Bombs = true;		//炸弹集刷新
 		
 		if(data['putSound']){	//放置音效
 			var se = {};
@@ -1177,11 +1182,11 @@ Game_Map.prototype.drill_BoC_isBombCanPut = function( x, y ) {
 	return true;
 }
 //==============================
-// * 炸弹 - 标准炸弹的数据
+// * 炸弹 - 标准炸弹的事件模板数据
 //==============================
-Game_Map.prototype.drill_BoC_createBombData = function( input_data ) {
+Game_Map.prototype.drill_BoC_createEventDataTemplate = function( input_data ){
 	
-	//数据初始化
+	// > 输入数据初始化
 	var _fire = input_data['fire'] || DrillUp.g_BoC_eventFire;
 	var _anim = input_data['anim'] || DrillUp.g_BoC_bombAnim;
 	var _img = input_data['img'] || DrillUp.g_BoC_bombImg;
@@ -1201,8 +1206,8 @@ Game_Map.prototype.drill_BoC_createBombData = function( input_data ) {
 		var _light_time = 1;
 	}
 
-	//新建模板（id在创建事件时才赋值）
-	var event_data = {
+	// > 新建模板数据（id在创建事件时才赋值）
+	var new_event_data = {
 		"name":"定时炸弹",
 		"note":"",
 		"meta":{},	//镜像反射的查找meta的bug修复（其实一直不知道meta的作用）
@@ -1268,7 +1273,8 @@ Game_Map.prototype.drill_BoC_createBombData = function( input_data ) {
 				{"code":225,"indent":0,"parameters":[3,7,20,false]},	//震动屏幕
 				{"code":230,"indent":0,"parameters":[ _interval ]},		//延时间隔
 				{"code":356,"indent":0,"parameters":[">主动触发 : 可变激光区域 : 上一次事件的 : 本事件 : 炸弹人-爆炸"]}, //隔一段时间，再次触发
-				{"code":214,"indent":0,"parameters":[]},				//消除事件
+				//{"code":214,"indent":0,"parameters":[]},				//暂时消除事件
+				{"code":356,"indent":0,"parameters":[">事件管理核心 : 本事件 : 彻底删除"]},
 				{"code":0,"indent":0,"parameters":[]}
 			],
 			"moveFrequency":3,
@@ -1289,7 +1295,7 @@ Game_Map.prototype.drill_BoC_createBombData = function( input_data ) {
 		"putSound":_putSound
 	};
 	
-	return event_data;
+	return new_event_data;
 };
 
 //=============================================================================
@@ -1772,12 +1778,12 @@ Game_CharacterBase.prototype.drill_BoC_isInExplodeAreaTime = function(x, y) {
 		Imported.Drill_BombCore = false;
 		alert(
 			"【Drill_BombCore.js 炸弹人 - 游戏核心】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfMoveRoute 物体-移动路线核心"+
-			"\n- Drill_EventDuplicator 物体-事件复制器"+
-			"\n- Drill_EventThrough 物体-事件穿透关系"+
+			"\n- Drill_EventDuplicator 物体管理-事件复制器"+
+			"\n- Drill_EventThrough 体积-事件穿透关系"+
 			"\n- Drill_CoreOfFixedArea 物体触发-固定区域核心"+
 			"\n- Drill_EventLaserTrigger 物体触发-可变激光区域&条件"+
-			"\n- Drill_EventLaserAnimation 物体触发-可变激光区域&播放并行动画"
+			"\n- Drill_EventLaserAnimation 物体触发-可变激光区域&播放并行动画"+
+			"\n- Drill_CoreOfMoveRoute 移动路线-移动路线核心"
 		);
 }
 

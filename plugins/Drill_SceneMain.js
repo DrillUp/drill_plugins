@@ -23,20 +23,20 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 可完全自己定义的主菜单设置。
- * 【支持插件关联资源的打包、加密】
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 插件必须基于核心，被扩展的部分插件可以不加。
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。被扩展的部分插件可以不加。
  * 基于：
- *   - Drill_CoreOfWindowAuxiliary  系统 - 窗口辅助核心
- *   - Drill_CoreOfGaugeMeter       系统 - 参数条核心
- *   - Drill_CoreOfGaugeNumber      系统 - 参数数字核心
- *   - Drill_CoreOfSelectableButton 系统 - 按钮组核心
+ *   - Drill_CoreOfWindowAuxiliary  系统-窗口辅助核心
+ *   - Drill_CoreOfGaugeMeter       系统-参数条核心
+ *   - Drill_CoreOfGaugeNumber      系统-参数数字核心
+ *   - Drill_CoreOfSelectableButton 系统-按钮组核心
  * 被扩展：
- *   - Drill_WindowMenuButton       控件 - 主菜单选项按钮管理器
+ *   - Drill_WindowMenuButton       控件-主菜单选项按钮管理器
  *     通过该插件，你可以更灵活地添加/修改主菜单的选项/按钮。
- *   - MOG_TimeSystem               地图UI - 时间系统
+ *   - MOG_TimeSystem               地图UI-时间系统
  *     通过该插件，你可以显示游戏世界时间。
  * 
  * -----------------------------------------------------------------------------
@@ -105,7 +105,7 @@
  *   (1.该插件不会影响其他主菜单控制插件，
  *      但是会受到相关主菜单插件的不确定影响，最好关闭那些插件。
  *   (2.目前已知的为：
- *      rmmv默认AltMenu插件会造成主菜单每次只能显示一两个按钮。
+ *      默认AltMenu插件会造成主菜单每次只能显示一两个按钮。
  * 
  * -----------------------------------------------------------------------------
  * ----关联文件
@@ -206,7 +206,7 @@
  * 工作类型：   持续执行
  * 时间复杂度： o(n^3)*o(场景元素) 每帧
  * 测试方法：   直接进入主菜单面板进行测试。
- * 测试结果：   该菜单面板中，基本元素消耗为：【44.39ms】
+ * 测试结果：   在菜单界面中，基本元素消耗为：【44.39ms】
  * 
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
  *   测试结果并不是精确值，范围在给定值的10ms范围内波动。
@@ -1024,7 +1024,7 @@
  * @type boolean
  * @on 启用
  * @off 关闭
- * @desc true - 启用，false - 关闭，你可以开关rmmv默认选项的白色闪烁矩形。需要Drill_MenuCursorBorder插件支持。
+ * @desc true - 启用，false - 关闭，你可以开关默认选项的白色闪烁矩形。需要Drill_MenuCursorBorder插件支持。
  * @default true
  * 
  * @param 是否启用菜单边框
@@ -2246,7 +2246,7 @@
  * @value 变化模式
  * @option 一直显示
  * @value 一直显示
- * @desc 游标的显示模式，详细介绍见文档 "13.UI > 关于参数条.docx"中游标介绍。
+ * @desc 游标的显示模式，详细介绍见文档 "1.系统 > 关于参数条.docx"中游标介绍。
  * @default 一直显示
  *
  * @param 遮罩是否能遮挡游标
@@ -2501,14 +2501,19 @@
 //						Scene_Menu.prototype.commandPersonal（半覆写）
 //						Window_MenuStatus.prototype.refresh（半覆写）
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^3)*o(场景元素) 每帧
-//		性能测试因素	直接进入主菜单面板进行测试。
-//		性能测试消耗	44.39ms  58.25ms
-//		最坏情况		如果有很多角色固定框，且都有x4的参数条和x5的参数数字，可能会有些性能影响。
-//		备注			4个角色固定框的时候，每隔几秒会有一个性能大消耗，然后复原，但是有时候不会出现这种情况，原因不明。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^3)*o(场景元素) 每帧
+//		★性能测试因素	直接进入主菜单面板进行测试。
+//		★性能测试消耗	44.39ms  58.25ms
+//		★最坏情况		如果有很多角色固定框，且都有x4的参数条和x5的参数数字，可能会有些性能影响。
+//		★备注			4个角色固定框的时候，每隔几秒会有一个性能大消耗，然后复原，但是有时候不会出现这种情况，原因不明。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			主菜单面板：
 //				->原装结构
@@ -3507,7 +3512,7 @@ Scene_Menu.prototype.create = function() {
 	this.drill_SMa_createActorAvatarButton();		//角色头像按钮集
 }
 //==============================
-// * 主菜单 - 帧刷新（rmmv中没有此函数，不能覆写，覆写会少背景）
+// * 主菜单 - 帧刷新（rpg_scene中没有此函数，不能覆写，覆写会少背景）
 //==============================
 var _drill_SMa_update = Scene_Menu.prototype.update;
 Scene_Menu.prototype.update = function() {
@@ -3538,7 +3543,7 @@ Scene_Menu.prototype.createCommandWindow = function() {
 			return "left";
 		}
 		
-		// > 兼容Drill_MenuCursor菜单指针插件
+		// > 兼容【Drill_MenuCursor 主菜单 - 多样式菜单指针】
 		if( Imported.Drill_MenuCursor == true && DrillUp.g_SMa_command_window['cursor'] != null ){
 			this._commandWindow.drill_MCu_cursorEnabled = function(){
 				return DrillUp.g_SMa_command_window['cursor']['MCu_enabled'];
@@ -3551,7 +3556,7 @@ Scene_Menu.prototype.createCommandWindow = function() {
 				}
 			}
 		}
-		// > 兼容Drill_MenuCursorBorder菜单边框插件
+		// > 兼容【Drill_MenuCursorBorder 主菜单 - 多样式菜单选项边框】
 		if( Imported.Drill_MenuCursorBorder == true && DrillUp.g_SMa_command_window['cursor'] != null ){
 			this._commandWindow.drill_MCB_glimmerRectVisible = function() {
 				return DrillUp.g_SMa_command_window['cursor']['MCB_rectEnabled'];
@@ -3567,7 +3572,7 @@ Scene_Menu.prototype.createCommandWindow = function() {
 				}
 			}
 		}
-		// > 兼容Drill_MenuScrollBar菜单滚动条插件
+		// > 兼容【Drill_MenuScrollBar 主菜单 - 多样式菜单滚动条】
 		if( Imported.Drill_MenuScrollBar == true && DrillUp.g_SMa_command_window['cursor'] != null ){
 			this._commandWindow.drill_MSB_scrollBarEnabled = function() {
 				return DrillUp.g_SMa_command_window['cursor']['MSB_enabled'];
@@ -4404,7 +4409,7 @@ Drill_SMa_ActorSprite.prototype.drill_createState = function() {
 		}
 		
 	}else{
-		// > 闪烁的状态贴图（直接用rmmv默认）
+		// > 闪烁的状态贴图（直接用默认）
 		this._drill_state_sprite = new Sprite_StateIcon();	
 		this._drill_state_sprite.anchor.x = 0.5;
 		this._drill_state_sprite.anchor.y = 0.5;

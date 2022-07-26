@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        系统 - 全局存储性能优化[扩展]
+ * @plugindesc [v1.1]        管理器 - 全局存储性能优化[扩展]
  * @author Drill_up
  * 
  * @help  
@@ -18,7 +18,8 @@
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 插件只对指定插件扩展，如果没有使用目标插件，则该插件没有任何效果。
+ * 该插件可以单独使用。
+ * 但只对指定插件扩展，如果没有使用目标插件，则该插件没有任何效果。
  * 作用于：
  *   - 所有 全局存储 相关插件
  * 
@@ -31,6 +32,7 @@
  *   慢的系统就会卡顿。
  * 3.该插件能使得存储优化，变为延时存储，将短时间内变量多次变化统一，
  *   减少冗余存储次数。
+ * 4.此插件功能与 全局存储核心 插件的部分功能重复，插件可有可无。
  * 
  * -----------------------------------------------------------------------------
  * ----更新日志
@@ -58,7 +60,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//插件记录：
+//<<<<<<<<性能记录<<<<<<<<
+//
+//		★工作类型		无
+//		★时间复杂度		无
+//		★性能测试因素	无
+//		★性能测试消耗	无
+//		★最坏情况		无
+//		★备注			无
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			全局存储优化：
 //				->游戏任何时段运行
@@ -83,8 +97,9 @@
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_X_GlobalOptimization');
 	
+	
 	DrillUp.g_XGO_saveTimeDelay = Number(DrillUp.parameters['全局存储轮询时间'] || 10);
-	DrillUp.g_XGO_needGlobalSave = false;
+	DrillUp.g_XGO_globalSave = false;
 	DrillUp.g_XGO_time = 0;
 	
 	
@@ -99,7 +114,7 @@ SceneManager.initialize = function() {
 	// ** 全局存储
 	//=============================================================================
 	DataManager.forceSaveGlobalInfo = function() {	//（forceSaveGlobalInfo不是原框架函数）覆盖为打开存储开关	
-		DrillUp.g_XGO_needGlobalSave = true;
+		DrillUp.g_XGO_globalSave = true;
 	};
 	DataManager.forceSaveGlobalInfo_delay = function() {	//（forceSaveGlobalInfo_delay不是原框架函数）	
 		var globalInfo = this.loadGlobalInfo() || [];
@@ -117,9 +132,9 @@ SceneManager.initialize = function() {
 		
 		if( DrillUp.g_XGO_time > DrillUp.g_XGO_saveTimeDelay ){
 			DrillUp.g_XGO_time = 0;
-			if( DrillUp.g_XGO_needGlobalSave ){
+			if( DrillUp.g_XGO_globalSave ){
 				DataManager.forceSaveGlobalInfo_delay();
-				DrillUp.g_XGO_needGlobalSave = false;
+				DrillUp.g_XGO_globalSave = false;
 			}
 		}
 	};

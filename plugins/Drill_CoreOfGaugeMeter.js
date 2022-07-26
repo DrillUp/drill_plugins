@@ -23,20 +23,22 @@
  *
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该插件为基础核心，单用没有任何效果。
+ * 该插件为基础核心，单独使用没有效果。
  * 需要基于核心才能运行，并作用于子插件：
  * 基于：
- *   - Drill_CoreOfBallistics       系统 - 弹道核心★★v1.6及以上★★
+ *   - Drill_CoreOfBallistics       系统-弹道核心★★v1.6及以上★★
  * 作用于：
- *   - Drill_GaugeForBoss           UI - 高级BOSS生命固定框
- *   - Drill_GaugeForVariable       UI - 高级变量固定框
- *   - Drill_GaugeOfBufferTimeBar   UI - 缓冲时间条
+ *   - Drill_GaugeForBoss           UI-高级BOSS生命固定框
+ *   - Drill_GaugeForVariable       UI-高级变量固定框
+ *   - Drill_GaugeOfBufferTimeBar   UI-缓冲时间条
+ *   - Drill_GaugeTimerHud          UI-时间计时器
+ *   ……
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：菜单界面、地图界面、战斗界面。
- *   作用于rmmv贴图。
- * 2.具体可以去看看 "13.UI > 关于参数条.docx"。
+ *   作用于任意贴图。
+ * 2.具体可以去看看 "1.系统 > 关于参数条.docx"。
  *   文档中有相关图解，比纯文字容易理解。
  * 弹道：
  *   (1.弹出条的弹道支持情况如下：
@@ -113,7 +115,7 @@
  *              80.00ms - 120.00ms（中消耗）
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
- * 时间复杂度： o(参数条数)*o(n^4)*o(贴图处理) 每帧
+ * 时间复杂度： o(n^4)*o(参数条数)*o(贴图处理) 每帧
  * 测试方法：   主要基于该核心的子插件来判断。
  * 测试结果：   地图界面，平均消耗为：【52.86ms】
  *              战斗界面，平均消耗为：【43.67ms】
@@ -845,7 +847,7 @@
  * @value 变化模式
  * @option 一直显示
  * @value 一直显示
- * @desc 游标的显示模式，详细介绍见文档 "13.UI > 关于参数条.docx"中游标介绍。
+ * @desc 游标的显示模式，详细介绍见文档 "1.系统 > 关于参数条.docx"中游标介绍。
  * @default 一直显示
  *
  * @param 是否启用多段复位
@@ -1093,17 +1095,30 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(参数条数)*o(n^4)*o(贴图处理) 每帧
-//		性能测试因素	可视化管理层、战斗界面
-//		性能测试消耗	22.52ms （菜单界面 38.83ms）
-//		最坏情况		大量弹出条滥用
-//		备注			可视化管理层平均fps14，同时开6个参数条，帧数无明显下降，大概fps12。
-//						只有缓冲时间条+弹出条时，fps直接降到1。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^4)*o(参数条数)*o(贴图处理) 每帧
+//		★性能测试因素	可视化管理层、战斗界面
+//		★性能测试消耗	22.52ms （菜单界面 38.83ms）
+//		★最坏情况		大量弹出条滥用
+//		★备注			可视化管理层平均fps14，同时开6个参数条，帧数无明显下降，大概fps12。
+//						只有缓冲时间条+弹出条时，fps直接降到1。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			参数条核心：
+//				->贴图
+//					->标准模块
+//						->显示/隐藏【标准函数】
+//						->是否就绪【标准函数】
+//						->销毁【标准函数】
+//						->修改变化因子【标准函数】
+//						->修改段上限【标准函数】
+//						->初始化数据【标准默认值】
 //				->主体
 //					->遮罩
 //					->旋转角度
@@ -1157,7 +1172,7 @@
 //			1.参数条是高度对象化的sprite大类。具体在类说明中有解释。		
 //			2.弹出条局限性：
 //				目前的弹出条，只是根据以存在的bitmap来画，而不是sprite转换后的效果来画。比如粒子效果，是加不进弹出条的。
-//				（bitmap是rmmv自己写的类，经过图片存储等中介转换，最后给texture来渲染。）
+//				（bitmap是引擎自己写的类，经过图片存储等中介转换，最后给texture来渲染。）
 //				（如果我要把sprite转成图片，必须先建立一个stage，然后addchild，再然后render，生成的图片还是有黑底的canvas。）
 //				（主要还是渲染消耗性能问题，render一次会费许多性能）
 //			3.参数条的中心锚点最后还是需要通过数学来锁定，因为有一定旋转角度时，参数条的位置会乱。
@@ -1290,7 +1305,7 @@
 		data['leak_src'] = String( dataFrom["资源-凹槽条"] || "" );
 		data['leak_speed'] = Number( dataFrom["扣除速度"] || 15.0 );
 		data['leak_delay'] = Number( dataFrom["扣除延迟"] || 0 );
-		data['leak_delayReflash'] = String( dataFrom["连续扣除是否刷新延迟"] || "true") === "true";
+		data['leak_delayRefresh'] = String( dataFrom["连续扣除是否刷新延迟"] || "true") === "true";
 		
 		// > 弹出条
 		data['spring_enable'] = String( dataFrom["是否启用弹出效果"] || "true") === "true";
@@ -1384,13 +1399,13 @@ if( Imported.Drill_CoreOfBallistics ){
 // **
 // **		作用域：	地图界面、战斗界面、菜单界面
 // **		主功能：	> 定义一个贴图组合体，根据预设定义，得到一个参数条贴图。
-// **					> 具体功能见 "13.UI > 关于参数条.docx"。
+// **					> 具体功能见 "1.系统 > 关于参数条.docx"。
 // **
 // **		说明：	> sprite贴在任意地方都可以。
 // **			 	> 【temp_data配置参数】都在drill_initData中，其他的都为私有参数。
 // **		 		  你可以先取【DrillUp.g_COGM_list样式数据】再赋值各个额外属性，也可以【直接new】全参数自己建立控制。
 // **		 		  其中，"level_max"段上限 由于其特殊性，是会贯穿于所有子插件的。
-// **				> 需要实时调用函数.drill_reflashValue(value)改变参数条的值。
+// **				> 需要实时调用函数.drill_COGM_reflashValue(value)改变参数条的值。
 // **				> 值减少时，凹槽条、弹出条会产生效果，值增加不会。
 // **
 // **		代码：	> 范围 - 该类只对 具体的数值 提供可视化参数条显示。
@@ -1402,14 +1417,14 @@ if( Imported.Drill_CoreOfBallistics ){
 // **
 // **		调用方法：	// > 参数条 数据初始化
 // **					//  （完整数据 默认值 见函数drill_initData）
-// **					var meter_id = 1;
-// **					var temp_data = DrillUp.drill_COGM_getCopyedData( meter_id );	//深拷贝数据
-// **					temp_data['level_max'] = 200;				//段上限
-// **					temp_data['anchor_x'] = 0.5;				//中心锚点x
-// **					temp_data['anchor_y'] = 0.5;				//中心锚点y	
+// **						var meter_id = 1;
+// **						var temp_data = DrillUp.drill_COGM_getCopyedData( meter_id );	//深拷贝数据
+// **						temp_data['level_max'] = 200;				//段上限
+// **						temp_data['anchor_x'] = 0.5;				//中心锚点x
+// **						temp_data['anchor_y'] = 0.5;				//中心锚点y	
 // **					// > 参数条 贴图初始化
-// **					var temp_sprite = new Drill_COGM_MeterSprite( temp_data );
-// **					this.addChild( temp_sprite );
+// **						var temp_sprite = new Drill_COGM_MeterSprite( temp_data );
+// **						this.addChild( temp_sprite );
 //=============================================================================
 //==============================
 // * 参数条 - 定义
@@ -1543,7 +1558,7 @@ Drill_COGM_MeterSprite.prototype.drill_initData = function() {
 	if( data['leak_src_file'] == undefined ){ data['leak_src_file'] = "img/Special__meter/" };		//凹槽条 - 资源文件夹
 	if( data['leak_speed'] == undefined ){ data['leak_speed'] = 4.0 };								//凹槽条 - 扣除速度
 	if( data['leak_delay'] == undefined ){ data['leak_delay'] = 0.0 };								//凹槽条 - 扣除延迟
-	if( data['leak_delayReflash'] == undefined ){ data['leak_delayReflash'] = true };				//凹槽条 - 连续受伤是否刷新延迟
+	if( data['leak_delayRefresh'] == undefined ){ data['leak_delayRefresh'] = true };				//凹槽条 - 连续受伤是否刷新延迟
 	
 	if( data['spring_enable'] == undefined ){ data['spring_enable'] = false };						//弹出条 - 启用
 	if( data['spring_type'] == undefined ){ data['spring_type'] = "当前参数条" };					//弹出条 - 块模式
@@ -1615,7 +1630,7 @@ Drill_COGM_MeterSprite.prototype.drill_initSprite = function() {
 	this._drill_vernier_needInit = true;				//游标 - 初始化 锁
 	this._drill_vernier_sprite = null;					//游标 - 贴图
 	this._drill_vernier_bitmaps = [];					//游标 - bitmap
-	this._drill_vernier_flash = 1;						//游标 - 闪烁方向
+	this._drill_vernier_flicker = 1;					//游标 - 闪烁方向
 	this._drill_vernier_time = 0;						//游标 - 当前时间
 	this._drill_vernier_cur = 0;						//游标 - 当前动画帧
 			
@@ -2136,7 +2151,7 @@ Drill_COGM_MeterSprite.prototype.drill_updateLeakingValue = function() {
 	}
 	
 	// > 延迟 - 连续受伤刷新延迟
-	if( data['leak_delayReflash'] &&
+	if( data['leak_delayRefresh'] &&
 		this._drill_new_value != this._drill_cur_value ){
 		this._drill_leak_time = data['leak_delay'];
 	}
@@ -2394,12 +2409,12 @@ Drill_COGM_MeterSprite.prototype.drill_updateVernier = function() {
 			}
 		}
 	}else if( data['vernier_mode'] == "闪烁模式" ){
-		temp_sprite.opacity += this._drill_vernier_flash * 5;
+		temp_sprite.opacity += this._drill_vernier_flicker * 5;
 		if(temp_sprite.opacity == 255){
-			this._drill_vernier_flash = -1;
+			this._drill_vernier_flicker = -1;
 		}
 		if(temp_sprite.opacity == 0){
-			this._drill_vernier_flash = 1;
+			this._drill_vernier_flicker = 1;
 		}
 	}else if( data['vernier_mode'] == "受伤模式" ){
 		temp_sprite.opacity -= 5;

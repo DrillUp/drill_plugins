@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.0]        行走图 - 图块同步镜像
+ * @plugindesc [v2.1]        行走图 - 图块同步镜像
  * @author Drill_up
  * 
  * @Drill_LE_param "地图镜面-%d"
@@ -20,6 +20,10 @@
  * =============================================================================
  * 使得你可以让图块反射出与基准线垂直的镜像。
  * ★★尽量放在所有 行走图效果 的插件后面，放后面可以支持更多叠加效果★★ 
+ * 
+ * -----------------------------------------------------------------------------
+ * ----插件扩展
+ * 该插件可以单独使用。
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -225,7 +229,9 @@
  * [v2.0]
  * 修正了镜面里的 同步镜像物体 遮挡关系。
  * 修正了地图备注，以及添加了 毛玻璃效果 。
- *
+ * [v2.1]
+ * 兼容了 事件彻底删除时，也包括删除镜像的功能。
+ * 
  * 
  *
  * @param 所有地图是否默认启用镜像
@@ -794,20 +800,25 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //	
-//		工作类型		持续执行
-//		时间复杂度		o(n)*o(贴图处理) 每帧
-//		性能测试因素	镜像管理层50事件 跑一圈
-//		性能测试消耗			不优化		离开镜头优化
-//						低谷期：30.90ms		18.70ms
+//<<<<<<<<性能记录<<<<<<<<
+//
+//		★工作类型		持续执行
+//		★时间复杂度		o(n)*o(贴图处理) 每帧
+//		★性能测试因素	镜像管理层50事件 跑一圈
+//		★性能测试消耗	低谷期：30.90ms（不优化） 18.70ms（离开镜头优化）
 //						（未出现高峰期）
-//						2021-11-4：	14.70ms（Drill_Sprite_LSR.prototype.drill_LSR_isNearTheScreen函数）
-//									10.05ms（Drill_Sprite_LSR.prototype.update函数）
-//		最坏情况		只要镜像多，就是最坏情况。
-//		备注			图像处理减少的消耗，不是很好测，但是也有值。
+//		★最坏情况		只要镜像多，就是最坏情况。
+//		★备注			贴图处理减少的消耗，不是很好测，但是也有值。
 //						在200事件的地图中，可以直接减少70%的消耗。
 //						因为出了镜头的镜像暂停刷新，缩小了范围，200事件就变成了50个事件的消耗。
+//		
+//		★优化记录
+//			2021-11-4优化
+//				14.70ms（Drill_Sprite_LSR.prototype.drill_LSR_isNearTheScreen函数）
+//				10.05ms（Drill_Sprite_LSR.prototype.update函数）
 //
-//插件记录：
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			图块同步镜像：
 //				->镜面
@@ -1042,15 +1053,6 @@ Game_System.prototype.initialize = function() {
 	_drill_LSR_sys_initialize.call(this);
     this._drill_LSR_tileEdge = DrillUp.g_LSR_edge ;		//同步镜像边
     this._drill_LSR_mode = DrillUp.g_LSR_mode ;			//同步镜像模式
-};
-
-//=============================================================================
-// ** 临时变量初始化
-//=============================================================================
-var _drill_LSR_temp_initialize = Game_Temp.prototype.initialize;
-Game_Temp.prototype.initialize = function() {
-	_drill_LSR_temp_initialize.call(this);
-    this._drill_LSR_needResort = false ;				//排序标记
 };
 
 
@@ -1345,6 +1347,29 @@ Spriteset_Map.prototype.drill_LSR_updateNewEventReflect = function() {
 	}
 }
 //==============================
+// * 镜像 - 删除镜像（接口）
+//==============================
+Spriteset_Map.prototype.drill_LSR_deleteEventReflect = function( e_id ){
+	if( this._drill_LSR_sprites == undefined ){ return; }	//（如果地图禁用镜像，连此数组都不会存在）
+	
+	for(var i = this._drill_LSR_sprites.length-1; i >= 0; i--){
+		var temp_sprite = this._drill_LSR_sprites[i];
+		if( temp_sprite == undefined ){ continue; }
+		if( temp_sprite._character == undefined ){ continue; }
+		if( temp_sprite._character._eventId == e_id ){
+			
+			// > 去除贴图
+			temp_sprite._character = null;
+			this._drill_LSR_layer.removeChild( temp_sprite );
+			
+			// > 断开关联
+			this._drill_LSR_sprites.splice( i, 1 );
+			
+			this._drill_LSR_CharSpriteLen -= 1;
+		}
+	}
+}
+//==============================
 // * 帧刷新 - 子贴图排序
 //==============================
 Spriteset_Map.prototype.drill_LSR_updateChildSort = function() {
@@ -1457,6 +1482,7 @@ Drill_Sprite_LSR.prototype.update = function() {
 	// > 父类帧刷新
 	Sprite_Character.prototype.update.call(this);
 	
+	if( this._character == undefined ){ return; }
 	this.drill_updatePosition();		//帧刷新 - 位置
 	this.drill_updateZIndex();			//帧刷新 - 先后顺序
 	this.drill_updateVisible();			//帧刷新 - 可见情况

@@ -3,13 +3,13 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.5]        系统 - 方块粉碎核心
+ * @plugindesc [v1.6]        系统 - 方块粉碎核心
  * @author Drill_up
  * 
  * @Drill_LE_param "方块粉碎-%d"
  * @Drill_LE_parentKey "---方块粉碎组%d至%d---"
  * @Drill_LE_var "DrillUp.g_COSE_style_list_length"
- *
+ * 
  * 
  * @help  
  * =============================================================================
@@ -18,27 +18,27 @@
  * 如果你有兴趣，也可以来看看更多我写的drill插件哦ヽ(*。>Д<)o゜
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
- * 提供一张图片按网格方块分割成大量碎片，从而播放粉碎散开动画的脚本功能。
+ * 该核心可将贴图按网格方块的形式分割成大量碎片，从而播放粉碎散开动画。
  * ★★尽量放在最靠上的位置★★
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
  * 该插件为基础核心，单独使用没有效果。
- * 插件可以作用于各个粉碎效果子插件，但是要基于核心才能运行：
+ * 插件可以作用于各个粉碎效果子插件，但是要基于核心才能运行。
  * 基于：
- *   - Drill_CoreOfBallistics       系统 - 弹道核心★★v1.7及以上★★
+ *   - Drill_CoreOfBallistics       系统-弹道核心★★v1.9及以上★★
  * 作用于：
- *   - Drill_BattleShatterEffect    战斗 - 方块粉碎效果
- *   - Drill_LayerShatterEffect     地图 - 方块粉碎效果
- *   - Drill_EventShatterEffect     行走图 - 方块粉碎效果
- *   - Drill_PictureShatterEffect   图片 - 方块粉碎效果
- *   - Drill_DialogShatterEffect    对话框 - 方块粉碎效果
+ *   - Drill_BattleShatterEffect    战斗-方块粉碎效果
+ *   - Drill_LayerShatterEffect     地图-方块粉碎效果
+ *   - Drill_EventShatterEffect     行走图-方块粉碎效果
+ *   - Drill_PictureShatterEffect   图片-方块粉碎效果
+ *   - Drill_DialogShatterEffect    对话框-方块粉碎效果
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
- * 1.插件的作用域：地图界面、战斗界面、菜单界面。
+ * 1.插件的作用域：地图界面、战斗界面。
  *   作用于贴图。
- * 2.想要更多了解方块粉碎，去看看 "1.系统 > 方块粉碎大家族.docx"。
+ * 2.想要更多了解方块粉碎，去看看 "1.系统 > 大家族-方块粉碎.docx"。
  * 弹道：
  *   (1.碎片的弹道支持情况如下：
  *        极坐标模式    √
@@ -54,14 +54,6 @@
  *   (2.原理为：将指定的图片根据行数列数切割成n块碎片。
  *      碎片编号为0至n-1，依次赋予弹道。
  *      如果弹道的随机值差异不大，则碎片散开的差异也不会很大。
- * 比例粉碎：
- *   (1.所有碎片，除了波动量设置，基本上速度都几乎一样。
- *      比如线性粉碎配置，你能够清晰地看到一个圆向外扩散的样子。
- *      因为所有碎片的速度都几乎一样。
- *   (2.而比例粉碎，最外面碎片的速度最快，里面的速度较慢。
- *      通过设置 "碎片速度是否分比例" 可以使得碎片里外的速度不一样。
- *   (3.碎片数量少时，比例扩散的直观感受不大。
- *      而碎片很多时，会有较明显的效果。
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -75,8 +67,9 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
  * 时间复杂度： o(n^2)*o(贴图处理) 每帧
- * 测试方法：   无法测出具体值，需要根据基于该核心的子插件来判断。
- * 测试结果：   无
+ * 测试方法：   根据子插件运行，看看在各界面的效果。
+ * 测试结果：   地图界面中，平均消耗为：【63.34ms】
+ *              战斗界面中，平均消耗为：【45.39ms】
  *
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
  *   测试结果并不是精确值，范围在给定值的 20ms 范围内波动。
@@ -476,20 +469,35 @@
  * @param 标签
  * @desc 只用于方便区分查看的标签，不作用在插件中。
  * @default ==新的粉碎设置==
- *
- * @param 切割矩阵行数
- * @type number
- * @min 1
- * @desc 指定贴图切割的行数。碎片数 = 行数 x 列数。
- * @default 6
  * 
- * @param 切割矩阵列数
+ * @param ---碎片弹道---
+ * @desc 
+ *
+ * @param 碎片弹道
+ * @parent ---碎片弹道---
+ * @type struct<DrillCOSEBallistic>
+ * @desc 碎片弹道运动轨迹的详细配置信息。
+ * @default {}
+ * 
+ * @param 碎片持续时长
+ * @parent ---碎片弹道---
  * @type number
- * @min 1
- * @desc 指定贴图切割的行数。碎片数 = 行数 x 列数。
- * @default 6
+ * @min 4
+ * @desc 碎片的持续时长，单位帧。（1秒60帧）
+ * @default 120
+ * 
+ * @param 碎片依次延迟间隔
+ * @parent ---碎片弹道---
+ * @desc 碎片依次延迟粉碎的间隔，单位帧。可为负数，正数表示第一块碎片最先粉碎，负数表示最后一块碎片最先粉碎。
+ * @default 0
+ * 
+ * @param 碎片速度倍率
+ * @parent ---碎片弹道---
+ * @desc 中心的碎片的速度最小，最边缘碎片的速度的最大。
+ * @default 1.00
  *
  * @param 碎片速度是否分比例
+ * @parent ---碎片弹道---
  * @type boolean
  * @on 分比例
  * @off 速度一致
@@ -500,11 +508,47 @@
  * @parent 碎片速度是否分比例
  * @desc 中心的碎片的速度最小，最边缘碎片的速度的最大。
  * @default 0.2
+ * 
+ * @param ---碎片切割---
+ * @desc 
  *
- * @param 碎片弹道
- * @type struct<DrillCOSEBallistic>
- * @desc 碎片弹道运动轨迹的详细配置信息。
- * @default {}
+ * @param 碎片切割方式
+ * @parent ---碎片切割---
+ * @type select
+ * @option 切割矩阵
+ * @value 切割矩阵
+ * @option 固定大小
+ * @value 固定大小
+ * @desc 碎片切割的模式。
+ * @default 切割矩阵
+ * 
+ * @param 切割矩阵行数
+ * @parent 碎片切割方式
+ * @type number
+ * @min 1
+ * @desc 切割模式为 切割矩阵 时，指定贴图切割的行数。碎片数 = 行数 x 列数。
+ * @default 6
+ * 
+ * @param 切割矩阵列数
+ * @parent 碎片切割方式
+ * @type number
+ * @min 1
+ * @desc 切割模式为 切割矩阵 时，指定贴图切割的行数。碎片数 = 行数 x 列数。
+ * @default 6
+ * 
+ * @param 固定大小的碎片宽度
+ * @parent 碎片切割方式
+ * @type number
+ * @min 4
+ * @desc 切割模式为 固定大小 时，指定碎片的宽度，单位像素。
+ * @default 36
+ * 
+ * @param 固定大小的碎片高度
+ * @parent 碎片切割方式
+ * @type number
+ * @min 4
+ * @desc 切割模式为 固定大小 时，指定碎片的高度，单位像素。
+ * @default 36
  * 
  */
 /*~struct~DrillCOSEBallistic:
@@ -512,12 +556,6 @@
  * @param 标签
  * @desc 只用于方便区分查看的标签，不作用在插件中。
  * @default ==新的运动模式==
- *
- * @param 移动时长
- * @type number
- * @min 1
- * @desc 碎片移动的持续时长，过了时间之后，碎片消失或者停止移动，单位帧。
- * @default 120
  *
  * @param 移动模式
  * @type select
@@ -734,42 +772,73 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^2)*o(贴图处理) 每帧
-//		性能测试因素	无
-//		性能测试消耗	1163.34ms（由于覆写了sprite.update函数，结果全算到这个插件上了）
-//		最坏情况		不可估计
-//		备注			可以确定的是，消耗要比滤镜的多一点。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^2)*o(贴图处理) 每帧
+//		★性能测试因素	无
+//		★性能测试消耗	1163.34ms（由于覆写了sprite.update函数，结果全算到这个插件上了）
+//		★最坏情况		不可估计
+//		★备注			可以确定的是，消耗要比滤镜的多一点。
+//		
+//		★优化记录		
+//			2022-7-16优化：
+//				这次主要优化存储数据对象，数据类保存后，每个 方块粉碎控制器 的数据占2k的字节容量。
+//				以Drill_LayerShatterEffect为例，存储数据 与 不存数据的存档，差了 12k 的大小区别。
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
-//			方块粉碎：
-//				->建立粉碎块
-//				->清理粉碎块
-//				->重建
-//				->弹道参数
-//					->弹道（坐标）
-//					->弹道（透明度）固定消失
-//					->反向弹道
-//					->碎片自旋转	x
-//				->一个个掉落粉碎?
+//			方块粉碎核心：
+//				->控制器
+//					->标准模块 模板
+//						->帧刷新【标准函数】
+//						->重设数据【标准函数】
+//						->显示/隐藏【标准函数】
+//						->初始化数据【标准默认值】
+//					->标准模块
+//						->是否正在播放【标准函数】
+//						->播放粉碎过程【标准函数】
+//						->倒放粉碎过程【标准函数】
+//						->立即复原【标准函数】
+//						->暂停粉碎过程【标准函数】
+//						->继续粉碎过程【标准函数】
+//					->弹道参数
+//						->弹道（坐标）
+//						->弹道（透明度）
+//					->帧刷新
+//						->碎片可见
+//						->碎片时间流逝
+//				->贴图
+//					->标准模块 模板
+//						->设置控制器【标准函数】
+//						->是否就绪【标准函数】
+//						->是否需要销毁【标准函数】
+//						->销毁【标准函数】
+//					->标准模块
+//						->父贴图是否显示【标准函数】
+//					->粉碎贴图
+//						->重刷时机
+//						->重建 碎片贴图
+//						->重建 资源对象
+//						->重建 弹道
+//						->优化浮点数过滤
 //
 //		★必要注意事项：
 //			1.这里引用了弹道核心的：坐标、透明度 功能。
-//			  注意，【透明度】这里强制固定了配置内容。经过了一次转换。
+//			  这里的 透明度 是自定义的配置内容。
 //			2.该核心的粉碎效果不会隐藏图片本体，需要在子插件手动隐藏。
 //			
 //		★其它说明细节：
-//			1.该核心的数据都依托在sprite上，
-//			  你需要考虑确保切换菜单时cur_time等数据【不被重置】。
+//			1.碎片滞留、父贴图框架问题、父贴图隐藏问题、控制器数据管理问题等问题，
+//			  此核心一概不管，全部由 子插件 说明、处理。
 //		
 //		★核心接口说明：
-//			1.整个核心提供Sprite的装饰函数集，能将Sprite变成四散的碎片。
-//		
+//			1.整个核心提供 一个粉碎控制器数据对象 和 一个粉碎贴图。
 //		
 //		★存在的问题：
 //			1.参数过多，拆解极其麻烦。概念上，一直在纠结碎片行数列数是否要下发到子插件中设置。
-//			虽然这里完全封装成了一个单一函数接口。
+//			虽然这里完全封装成了一个单一函数接口。（2022/7/20 这里经过了完整重构，结构思路已经很清晰了）
 //
 
 //=============================================================================
@@ -780,17 +849,21 @@
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_CoreOfShatterEffect');
 	
+	
 	//==============================
-	// * 变量获取 - 弹道样式（必须写在前面）
-	//
+	// * 变量获取 - 弹道样式
+	//				（~struct~DrillCOSEBallistic）
+	//				
 	//				说明：函数未定义白色括号中的参数，需要子插件定义。若不定义则为默认值。
 	//==============================
-	DrillUp.drill_COSE_ballisticsInit = function( dataFrom ) {
+	DrillUp.drill_COSE_ballisticsInit = function( dataFrom ){
 		var data = {};
 		// > 移动（movement）
-		//		data['movementNum']【碎片数量】
-		data['movementTime'] = Number( dataFrom["移动时长"] || 0);
-		data['movementDelay'] = 0;
+		//		data['movementNum']     【碎片数量】
+		//		data['movementTime']    【移动时长】
+		//		data['movementDelay']    开始前延迟时间
+		//		data['movementEndDelay'] 到终点后延迟时间
+		data['movementTime'] = Number( dataFrom["移动时长"] || -1 );	//（兼容旧配置）
 		data['movementMode'] = String( dataFrom["移动模式"] || "极坐标模式" );
 		//   极坐标（polar）
 		data['polarSpeedType'] = String( dataFrom["速度类型"] || "只初速度" );
@@ -841,25 +914,52 @@
 		//   两点式（twoPoint）（关闭）
 		return data;
 	}
+	//==============================
+	// * 变量获取 - 方块粉碎
+	//				（~struct~DrillCOSEShatter）
+	//==============================
+	DrillUp.drill_COSE_styleInit = function( dataFrom ){
+		var data = {};
+		
+		// > 碎片弹道
+		if( dataFrom["碎片弹道"] != undefined &&
+			dataFrom["碎片弹道"] != "" ){
+			var temp = JSON.parse( dataFrom["碎片弹道"] || [] );
+			data['ballistics'] = DrillUp.drill_COSE_ballisticsInit( temp );
+		}else{
+			data['ballistics'] = DrillUp.drill_COSE_ballisticsInit( {} );
+		}
+		data['sustain'] = Number( dataFrom["碎片持续时长"] || 120);
+		data['orderDelay'] = Number( dataFrom["碎片依次延迟间隔"] || 0);
+		if( data['ballistics']['movementTime'] > 0 ){ data['sustain'] = data['ballistics']['movementTime']; }
+		data['speedFactor'] = Number( dataFrom["碎片速度倍率"] || 1.0);
+		data['speedPer'] = String( dataFrom["碎片速度是否分比例"] || "false" ) == "true";
+		data['speedPerMin'] = Number( dataFrom["最小速度比例"] || 0.2);
+		
+		// > 碎片切割
+		data['splitMode'] = String( dataFrom["碎片切割方式"] || "切割矩阵" );
+		data['splitRowCount'] = Number( dataFrom["切割矩阵行数"] || 5);
+		data['splitColCount'] = Number( dataFrom["切割矩阵列数"] || 5);
+		data['splitWidth'] = Number( dataFrom["固定大小的碎片宽度"] || 36);
+		data['splitHeight'] = Number( dataFrom["固定大小的碎片高度"] || 36);
+		//data['rotation'] = Number( dataFrom["粒子自旋转速度"] || 0);
+		
+		return data;
+	}
 	
 	/*-----------------方块粉碎（配置）------------------*/
 	DrillUp.g_COSE_style_list_length = 60;
 	DrillUp.g_COSE_style_list = [];
-	for (var i = 0; i < DrillUp.g_COSE_style_list_length ; i++ ) {
-		if( DrillUp.parameters['方块粉碎-' + String(i+1) ] != "" ){
-			DrillUp.g_COSE_style_list[i] = JSON.parse(DrillUp.parameters['方块粉碎-' + String(i+1)] );
-			DrillUp.g_COSE_style_list[i]['splitRowCount'] = Number(DrillUp.g_COSE_style_list[i]['切割矩阵行数'] || 5);
-			DrillUp.g_COSE_style_list[i]['splitColCount'] = Number(DrillUp.g_COSE_style_list[i]['切割矩阵列数'] || 5);
-			DrillUp.g_COSE_style_list[i]['speedPer'] = String(DrillUp.g_COSE_style_list[i]['碎片速度是否分比例'] || "false") == "true";
-			DrillUp.g_COSE_style_list[i]['speedPerMin'] = Number(DrillUp.g_COSE_style_list[i]['最小速度比例'] || 0.2);
-			//DrillUp.g_COSE_style_list[i]['rotation'] = Number(DrillUp.g_COSE_style_list[i]['粒子自旋转速度'] || 0);
-			
-			var temp = JSON.parse(DrillUp.g_COSE_style_list[i]['碎片弹道'] || {} );
-			DrillUp.g_COSE_style_list[i]['ballistics'] = DrillUp.drill_COSE_ballisticsInit( temp );
+	for( var i = 0; i < DrillUp.g_COSE_style_list_length; i++ ){
+		if( DrillUp.parameters['方块粉碎-' + String(i+1) ] != "" &&
+			DrillUp.parameters['方块粉碎-' + String(i+1) ] != undefined ){
+			var data = JSON.parse(DrillUp.parameters['方块粉碎-' + String(i+1)] );
+			DrillUp.g_COSE_style_list[i] = DrillUp.drill_COSE_styleInit( data );
 		}else{
 			DrillUp.g_COSE_style_list[i] = null;
 		}
 	};
+	
 	
 	
 //=============================================================================
@@ -867,113 +967,168 @@
 //=============================================================================
 if( Imported.Drill_CoreOfBallistics ){
 	
-
+	
 //=============================================================================
-// ** 方块粉碎
-// **
-// **		类型：装饰函数集
-// **		功能：通过粉碎设置，能将Sprite变成四散的碎片。
-// **		接口：调用方法如下，数据格式见 >默认值 
-// **				// > 初始化碎片信息
-// **				sprite.drill_COSE_setShatter( data );
-// **				// > 立即复原
-// **				sprite.drill_COSE_restoreShatter();	
-// **		说明：1.【data配置参数】都在drill_COSE_initData中，其他的都为私有参数。
-// **				注意，粉碎效果不会隐藏图片本体，需要手动通过 if( sprite.drill_COSE_isShattering() ){  } 来判断粉碎情况，进而手动隐藏本体。
-// **			  2.只要调用这个函数就可以了，粉碎碎片会自动update。
-// **			  	如果你想强制控制一些参数，可以直接对 sprite._drill_COSE_data['xxx'] 赋值。但不建议。
+// ** 方块粉碎控制器【Drill_COSE_Controller】
+// **			
+// **		索引：	COSE（可从子插件搜索到函数、类用法）
+// **		来源：	独立数据
+// **		实例：	> Drill_EventShatterEffect 插件中 Game_CharacterBase 对象的 ._drill_ESE_controller 成员
+// **		应用：	> Drill_EventShatterEffect 插件中 Game_CharacterBase 对象的 drill_COSE_update 帧刷新。
+// **		
+// **		作用域：	地图界面、战斗界面、菜单界面
+// **		主功能：	> 定义一个专门控制粉碎的数据类。
+// **					
+// **		说明：	> 该类不能单独使用，必须结合 方块粉碎贴图 对象类。
 //=============================================================================
 //==============================
-// * 方块粉碎 - 初始化（接口，单次调用）
-//
-//			说明：对所有贴图有效，使其分割成许多子sprite。
+// * 控制器 - 定义
 //==============================
-Sprite.prototype.drill_COSE_setShatter = function( data,bitmap ){
-	this._drill_COSE_bitmap = bitmap;							//bitmap对象
-	this._drill_COSE_data = JSON.parse(JSON.stringify( data ));	//拷贝数据 【注意，拷贝数据后，非默认值变量会被清】
-	
-	// > 私有变量初始化
-	this._drill_COSE_curTime = 0;								//时间
-	this._drill_COSE_needInit = true;							//延迟初始化开关
+function Drill_COSE_Controller() {
+	this.initialize.apply(this, arguments);
 }
 //==============================
-// * 方块粉碎 - 立即复原（接口，单次调用）
-//
-//			说明：对所有贴图有效，执行后立即复原。
+// * 控制器 - 初始化
 //==============================
-Sprite.prototype.drill_COSE_restoreShatter = function(){
-	var data = this._drill_COSE_data;
-	
-	data['enable'] = false;							//关闭粉碎核心的开关
-	
-	if( this._drill_COSE_layer ){					//隐藏碎片层
-		this._drill_COSE_layer.visible = false;
-	}
+Drill_COSE_Controller.prototype.initialize = function( data ){
+	if( data == undefined ){ data = {}; }
+	this._drill_data = {};
+    this.drill_COSE_resetData( data );
 }
-//==============================
-// * 方块粉碎 - 判断粉碎情况（接口，持续调用）
-//
-//			说明：插件不会隐藏图片本体，你需要判断是否正在执行粉碎来隐藏本体。
-//==============================
-Sprite.prototype.drill_COSE_isShattering = function(){
-	var data = this._drill_COSE_data;
-	return data['enable'] && this._drill_COSE_curTime >= 0;
+//##############################
+// * 控制器 - 帧刷新【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//			
+//			说明：	> 此函数必须在 帧刷新 中手动调用执行。
+//##############################
+Drill_COSE_Controller.prototype.drill_COSE_update = function(){
+	this.drill_updateVisible();			//帧刷新 - 可见
+	this.drill_updateTime();			//帧刷新 - 时间流逝
 }
-//==============================
-// * 方块粉碎 - 延迟初始化
-//==============================
-var _drill_COSE_init_update = Sprite.prototype.update;
-Sprite.prototype.update = function(){
-	_drill_COSE_init_update.call(this);
-	
-	if( this._drill_COSE_needInit != true ){ return; }
-	if(!this._drill_COSE_bitmap ){ return; }
-	if(!this._drill_COSE_bitmap.isReady() ){ return; }
-	this._drill_COSE_needInit = false;
-	
-	this.drill_COSE_initData();				//初始化数据
-	this.drill_COSE_initSprite();			//初始化对象
-	this.drill_COSE_initShatterSprite();	//初始化碎片贴图
-}
-//==============================
-// * 初始化 - 数据
+//##############################
+// * 控制器 - 重设数据【标准函数】
+//			
+//			参数：	> data 动态参数对象
+//			返回：	> 无
+//			
+//			说明：	> 通过此函数，你不需要再重新创建一个数据对象，并且贴图能直接根据此数据来变化。
+//					> 参数对象中的参数【可以缺项】，只要的参数项不一样，就刷新；参数项一样，则不变化。
+//					> 此函数遇到 指定资源名+空名称 的碎片设置时，不变化。
+//##############################
+Drill_COSE_Controller.prototype.drill_COSE_resetData = function( data ){
+	this.drill_COSE_resetData_Private( data );
+};
+//##############################
+// * 控制器 - 显示/隐藏【标准函数】
 //
-//			说明：必须要求bitmap对象载入完毕，才能进行初始化设置。
-//==============================
-Sprite.prototype.drill_COSE_initData = function() {
-	var data = this._drill_COSE_data;
+//			参数：	> visible 布尔（是否显示）
+//			返回：	> 无
+//			
+//			说明：	> 可放在帧刷新函数中实时调用。
+//##############################
+Drill_COSE_Controller.prototype.drill_COSE_setVisible = function( visible ){
+	var data = this._drill_data;
+	data['visible'] = visible;
+};
+//##############################
+// * 控制器 - 是否正在播放【标准函数】
+//
+//			参数：	> 无
+//			返回：	> visible 布尔（是否显示）
+//			
+//			说明：	> 注意，粉碎播放完后，会返回false。
+//					  如果是正向播放，碎片会保持消失状态，父贴图也不会显示。
+//##############################
+Drill_COSE_Controller.prototype.drill_COSE_isPlaying = function(){
+	return this.drill_COSE_isPlaying_Private();
+}
+//##############################
+// * 控制器 - 播放粉碎过程【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 无
+//			
+//			说明：	> 开始播放 粉碎过程。若之前处于暂停状态，则会解除暂停。
+//##############################
+Drill_COSE_Controller.prototype.drill_COSE_runShatter = function(){
+    this.drill_COSE_runShatter_Private();
+}
+//##############################
+// * 控制器 - 倒放粉碎过程【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 无
+//			
+//			说明：	> 开始倒放 粉碎过程。若之前处于暂停状态，则会解除暂停。
+//##############################
+Drill_COSE_Controller.prototype.drill_COSE_backrunShatter = function(){
+    this.drill_COSE_backrunShatter_Private();
+}
+//##############################
+// * 控制器 - 立即复原【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 无
+//			
+//			说明：	> 隐藏碎片贴图，恢复初始状态。
+//##############################
+Drill_COSE_Controller.prototype.drill_COSE_restoreShatter = function(){
+    this.drill_COSE_restoreShatter_Private();
+}
+//##############################
+// * 控制器 - 暂停粉碎过程【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 无
+//##############################
+Drill_COSE_Controller.prototype.drill_COSE_pause = function(){
+    this.drill_COSE_pause_Private();
+}
+//##############################
+// * 控制器 - 继续粉碎过程【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 无
+//##############################
+Drill_COSE_Controller.prototype.drill_COSE_continue = function(){
+    this.drill_COSE_continue_Private();
+}
+//##############################
+// * 控制器 - 初始化数据【标准默认值】
+//
+//			参数：	> 无
+//			返回：	> 无
+//			
+//			说明：	> data 动态参数对象（来自类初始化）
+//					  该对象包含 类所需的所有默认值。
+//##############################
+Drill_COSE_Controller.prototype.drill_initData = function(){
+	var data = this._drill_data;
 	
 	// > 默认值
-	data['enable'] = true;			
-	if( data['frameX'] == undefined ){ data['frameX'] = 0 };									//切割框架x
-	if( data['frameY'] == undefined ){ data['frameY'] = 0 };									//切割框架y
-	if( data['frameW'] == undefined ){ data['frameW'] = this._drill_COSE_bitmap.width };		//切割框架w
-	if( data['frameH'] == undefined ){ data['frameH'] = this._drill_COSE_bitmap.height };		//切割框架h
-
-	if( data['shatter_id'] == undefined ){ data['shatter_id'] = 0 };							//粉碎样式id
-	if( data['shatter_converted'] == undefined ){ data['shatter_converted'] = false };			//反向弹道
-	if( data['shatter_opacityType'] == undefined ){ data['shatter_opacityType'] = "线性消失" };	//透明度类型
-	if( data['shatter_autoHide'] == undefined ){ data['shatter_autoHide'] = true };				//图层自动隐藏
-
+	if( data['visible'] == undefined ){ data['visible'] = true };				//可见情况
+	
+	if( data['frameX'] == undefined ){ data['frameX'] = 0 };					//切割框架X
+	if( data['frameY'] == undefined ){ data['frameY'] = 0 };					//切割框架Y
+	if( data['frameW'] == undefined ){ data['frameW'] = 100 };					//切割框架宽度
+	if( data['frameH'] == undefined ){ data['frameH'] = 100 };					//切割框架高度
+	
+	if( data['src_mode'] == undefined ){ data['src_mode'] = "指定资源名" };		//资源模式（指定资源名/关闭资源控制）
+	if( data['src_img'] == undefined ){ data['src_img'] = "" };					//资源文件
+	if( data['src_file'] == undefined ){ data['src_file'] = "img/system/" };	//资源路径
+	//（"指定资源名"情况下，数据能够保存，如果为"关闭资源控制"，那么数据不存，并且你还需要在贴图创建后，赋值bitmap，见 drill_COSE_setUncontroledBitmap 。）
+	
+	if( data['shatter_id'] == undefined ){ data['shatter_id'] = 0 };							//碎片 - 方块粉碎id
+	if( data['shatter_opacityType'] == undefined ){ data['shatter_opacityType'] = "线性消失" };	//碎片 - 透明度类型
+	if( data['shatter_hasParent'] == undefined ){ data['shatter_hasParent'] = true };			//碎片 - 父贴图标记（如果没有父贴图，那么碎片复原后会保持显示）
 }
 //==============================
-// * 初始化 - 对象
+// * 初始化 - 私有数据初始化
 //==============================
-Sprite.prototype.drill_COSE_initSprite = function() {
-	var data = this._drill_COSE_data;
-	
-	this.drill_COSE_initBallisticsMove( data );			//弹道初始化（坐标）
-	this.drill_COSE_initBallisticsOpacity( data );		//弹道初始化（透明度）
-	
-	// > 配置值
-	this._drill_COSE_curTime = 0;																		//当前时间进度
-	if( data['shatter_converted'] == true ){ this._drill_COSE_curTime = data['movementTime']-1; }		//反向弹道
-	
-}
-//==============================
-// * 对象 - 弹道初始化（坐标）
-//==============================
-Sprite.prototype.drill_COSE_initBallisticsMove = function( data ){
+Drill_COSE_Controller.prototype.drill_initPrivateData = function(){
+	var data = this._drill_data;
 	
 	// > 检查
 	var style_data = DrillUp.g_COSE_style_list[ data['shatter_id'] ];
@@ -982,152 +1137,628 @@ Sprite.prototype.drill_COSE_initBallisticsMove = function( data ){
 			"【Drill_CoreOfShatterEffect.js 系统-方块粉碎核心】\n"+
 			"没有找到编号为"+ (data['shatter_id']+1) +"的方块粉碎配置，请查看插件参数的配置内容。"
 		);
+		return;
 	}
 	
-	var ballistics_data = style_data["ballistics"];
-	data['splitRowCount'] = style_data["splitRowCount"];
-	data['splitColCount'] = style_data["splitColCount"];
-	data['speedPer'] = style_data["speedPer"];
-	data['speedPerMin'] = style_data["speedPerMin"];
-		
-	//   移动（movement）
-	data['movementNum'] = data['splitRowCount'] * data['splitColCount'];		//碎片数量
-	data['movementTime'] = ballistics_data["movementTime"];						//时长
-	data['movementMode'] = ballistics_data["movementMode"];						//移动模式
-	//   极坐标（polar）
-	data['polarSpeedType'] = ballistics_data["polarSpeedType"];					//极坐标 - 速度 - 类型
-	data['polarSpeedBase'] = ballistics_data["polarSpeedBase"];					//极坐标 - 速度 - 初速度
-	data['polarSpeedRandom'] = ballistics_data["polarSpeedRandom"];				//极坐标 - 速度 - 速度随机波动量
-	data['polarSpeedInc'] = ballistics_data["polarSpeedInc"];					//极坐标 - 速度 - 加速度
-	data['polarSpeedMax'] = ballistics_data["polarSpeedMax"];					//极坐标 - 速度 - 最大速度
-	data['polarSpeedMin'] = ballistics_data["polarSpeedMin"];					//极坐标 - 速度 - 最小速度
-	data['polarDistanceFormula'] = ballistics_data["polarDistanceFormula"];		//极坐标 - 速度 - 路程计算公式
-	data['polarDirType'] = ballistics_data["polarDirType"];						//极坐标 - 方向 - 类型
-	data['polarDirFixed'] = ballistics_data["polarDirFixed"];					//极坐标 - 方向 - 固定方向
-	data['polarDirSectorFace'] = ballistics_data["polarDirSectorFace"];			//极坐标 - 方向 - 扇形朝向
-	data['polarDirSectorDegree'] = ballistics_data["polarDirSectorDegree"];		//极坐标 - 方向 - 扇形角度
-	data['polarDirFormula'] = ballistics_data["polarDirFormula"];				//极坐标 - 方向 - 方向计算公式
-	//   直角坐标（cartesian）
-	data['cartRotation'] = ballistics_data["cartRotation"];						//直角坐标 - 直角坐标整体旋转
-	data['cartXSpeedType'] = ballistics_data["cartXSpeedType"];					//直角坐标 - x - 类型
-	data['cartXSpeedBase'] = ballistics_data["cartXSpeedBase"];					//直角坐标 - x - 初速度
-	data['cartXSpeedRandom'] = ballistics_data["cartXSpeedRandom"];				//直角坐标 - x - 速度随机波动量
-	data['cartXSpeedInc'] = ballistics_data["cartXSpeedInc"];					//直角坐标 - x - 加速度
-	data['cartXSpeedMax'] = ballistics_data["cartXSpeedMax"];					//直角坐标 - x - 最大速度
-	data['cartXSpeedMin'] = ballistics_data["cartXSpeedMin"];					//直角坐标 - x - 最小速度
-	data['cartXDistanceFormula'] = ballistics_data["cartXDistanceFormula"];		//直角坐标 - x - 路程计算公式
-	data['cartYSpeedType'] = ballistics_data["cartYSpeedType"];					//直角坐标 - y - 类型
-	data['cartYSpeedBase'] = ballistics_data["cartYSpeedBase"];					//直角坐标 - y - 初速度
-	data['cartYSpeedRandom'] = ballistics_data["cartYSpeedRandom"];				//直角坐标 - y - 速度随机波动量
-	data['cartYSpeedInc'] = ballistics_data["cartYSpeedInc"];					//直角坐标 - y - 加速度
-	data['cartYSpeedMax'] = ballistics_data["cartYSpeedMax"];					//直角坐标 - y - 最大速度
-	data['cartYSpeedMin'] = ballistics_data["cartYSpeedMin"];					//直角坐标 - y - 最小速度
-	data['cartYDistanceFormula'] = ballistics_data["cartYDistanceFormula"];		//直角坐标 - y - 路程计算公式
+	// > 不接受零高宽情况
+	if( data['frameW'] == 0 || data['frameH'] == 0 ){
+		alert(
+			"【Drill_CoreOfShatterEffect.js 系统-方块粉碎核心】\n"+
+			"碎片参数错误，出现了宽度或高度为零的碎片。"
+		);
+		return;
+	}
 	
-	$gameTemp.drill_COBa_setBallisticsMove( data );								//弹道核心 - 坐标初始化
+	
+	// > 初始化 - 私有变量
+	this._drill_pause = false;							//暂停标记
+	this._drill_backrun = false;						//倒放标记
+	this._drill_visible = false;						//可见情况
+	this._drill_curTime = 0;							//当前时间进度
+	this._drill_playingTime = 0;						//动画总时间
+	this._drill_needDestroy = false;					//销毁标记（暂未用到）
+	
+	// > 初始化 - 碎片切割方式 - 固定大小
+	if( style_data['splitMode'] == "固定大小" ){
+		this._drill_spriteWidth = style_data['splitWidth'];
+		this._drill_spriteHeight = style_data['splitHeight'];
+		this._drill_spriteRowCount = Math.ceil( data['frameH'] / style_data['splitHeight'] );
+		this._drill_spriteColCount = Math.ceil( data['frameW'] / style_data['splitWidth'] );
+		this._drill_spriteNum = this._drill_spriteRowCount * this._drill_spriteColCount;
+		
+	// > 初始化 - 碎片切割方式 - 切割矩阵
+	}else{
+		this._drill_spriteNum = style_data['splitRowCount'] * style_data['splitColCount'];
+		this._drill_spriteWidth = Math.ceil( data['frameW'] / style_data['splitColCount'] );
+		this._drill_spriteHeight = Math.ceil( data['frameH'] / style_data['splitRowCount'] );
+		this._drill_spriteRowCount = style_data['splitRowCount'];
+		this._drill_spriteColCount = style_data['splitColCount'];
+	}
+	
+	// > 初始化 - 弹道数据
+	this._drill_COSE_ballistics_move = {};
+	this._drill_COSE_ballistics_opacity = {};
+    this.drill_initBallisticsMove( data, style_data['ballistics'], style_data['sustain'], style_data['orderDelay'] );	//弹道初始化（坐标）
+    this.drill_initBallisticsOpacity( data, style_data['sustain'], style_data['orderDelay'] );							//弹道初始化（透明度）
+	this._drill_playingTime = $gameTemp.drill_COBa_getBallisticsMove_TotalTime();										//碎片持续时长
 }
 //==============================
-// * 对象 - 弹道初始化（透明度）
+// * 初始化 - 弹道初始化（坐标）
 //==============================
-Sprite.prototype.drill_COSE_initBallisticsOpacity = function( data ){
+Drill_COSE_Controller.prototype.drill_initBallisticsMove = function( data, b_data, sustain, orderDelay ){
+	
+	// > 弹道初始化（坐标）
+	var ballistics_move = {}
+	
+	//   移动（movement）
+	ballistics_move['movementNum'] = this._drill_spriteNum;							//碎片数量
+	ballistics_move['movementTime'] = sustain;										//时长
+	ballistics_move['movementDelay'] = 0;											//延迟
+	ballistics_move['movementEndDelay'] = 0;										//延迟
+	ballistics_move['movementOrderDelay'] = orderDelay;								//依次延迟时间
+	ballistics_move['movementMode'] = b_data["movementMode"];						//移动模式
+	//   极坐标（polar）
+	ballistics_move['polarSpeedType'] = b_data["polarSpeedType"];					//极坐标 - 速度 - 类型
+	ballistics_move['polarSpeedBase'] = b_data["polarSpeedBase"];					//极坐标 - 速度 - 初速度
+	ballistics_move['polarSpeedRandom'] = b_data["polarSpeedRandom"];				//极坐标 - 速度 - 速度随机波动量
+	ballistics_move['polarSpeedInc'] = b_data["polarSpeedInc"];						//极坐标 - 速度 - 加速度
+	ballistics_move['polarSpeedMax'] = b_data["polarSpeedMax"];						//极坐标 - 速度 - 最大速度
+	ballistics_move['polarSpeedMin'] = b_data["polarSpeedMin"];						//极坐标 - 速度 - 最小速度
+	ballistics_move['polarDistanceFormula'] = b_data["polarDistanceFormula"];		//极坐标 - 速度 - 路程计算公式
+	ballistics_move['polarDirType'] = b_data["polarDirType"];						//极坐标 - 方向 - 类型
+	ballistics_move['polarDirFixed'] = b_data["polarDirFixed"];						//极坐标 - 方向 - 固定方向
+	ballistics_move['polarDirSectorFace'] = b_data["polarDirSectorFace"];			//极坐标 - 方向 - 扇形朝向
+	ballistics_move['polarDirSectorDegree'] = b_data["polarDirSectorDegree"];		//极坐标 - 方向 - 扇形角度
+	ballistics_move['polarDirFormula'] = b_data["polarDirFormula"];					//极坐标 - 方向 - 方向计算公式
+	//   直角坐标（cartesian）
+	ballistics_move['cartRotation'] = b_data["cartRotation"];						//直角坐标 - 直角坐标整体旋转
+	ballistics_move['cartXSpeedType'] = b_data["cartXSpeedType"];					//直角坐标 - x - 类型
+	ballistics_move['cartXSpeedBase'] = b_data["cartXSpeedBase"];					//直角坐标 - x - 初速度
+	ballistics_move['cartXSpeedRandom'] = b_data["cartXSpeedRandom"];				//直角坐标 - x - 速度随机波动量
+	ballistics_move['cartXSpeedInc'] = b_data["cartXSpeedInc"];						//直角坐标 - x - 加速度
+	ballistics_move['cartXSpeedMax'] = b_data["cartXSpeedMax"];						//直角坐标 - x - 最大速度
+	ballistics_move['cartXSpeedMin'] = b_data["cartXSpeedMin"];						//直角坐标 - x - 最小速度
+	ballistics_move['cartXDistanceFormula'] = b_data["cartXDistanceFormula"];		//直角坐标 - x - 路程计算公式
+	ballistics_move['cartYSpeedType'] = b_data["cartYSpeedType"];					//直角坐标 - y - 类型
+	ballistics_move['cartYSpeedBase'] = b_data["cartYSpeedBase"];					//直角坐标 - y - 初速度
+	ballistics_move['cartYSpeedRandom'] = b_data["cartYSpeedRandom"];				//直角坐标 - y - 速度随机波动量
+	ballistics_move['cartYSpeedInc'] = b_data["cartYSpeedInc"];						//直角坐标 - y - 加速度
+	ballistics_move['cartYSpeedMax'] = b_data["cartYSpeedMax"];						//直角坐标 - y - 最大速度
+	ballistics_move['cartYSpeedMin'] = b_data["cartYSpeedMin"];						//直角坐标 - y - 最小速度
+	ballistics_move['cartYDistanceFormula'] = b_data["cartYDistanceFormula"];		//直角坐标 - y - 路程计算公式
+	
+	// > 生成参数数据
+	this._drill_COSE_ballistics_move = $gameTemp.drill_COBa_setBallisticsMove( ballistics_move );
+}
+//==============================
+// * 初始化 - 弹道初始化（透明度）
+//==============================
+Drill_COSE_Controller.prototype.drill_initBallisticsOpacity = function( data, sustain, orderDelay ){
 	
 	// > 弹道初始化（透明度）
 	var orgOpacity = 255;
 	var ballistics_opacity = {};
 	ballistics_opacity['opacityMode'] = "目标值模式";
 	
-	if( data['shatter_opacityType'] == "瞬间消失" ){				//（透明度这里直接固定配置内容）
-		ballistics_opacity['opacityTime'] = data['movementTime'];					//
-		ballistics_opacity['opacityDelay'] = 0;										//
-		ballistics_opacity['targetType'] = "瞬间变化";								//
-		ballistics_opacity['targetDifference'] = 0 - orgOpacity;					//
+	if( data['shatter_opacityType'] == "不消失" ){	
+		// > 基础参数
+		ballistics_opacity['opacityNum'] = this._drill_spriteNum;
+		ballistics_opacity['opacityTime'] = sustain;
+		ballistics_opacity['opacityDelay'] = 0;
+		ballistics_opacity['opacityEndDelay'] = 0;				
+		ballistics_opacity['opacityOrderDelay'] = orderDelay;	
+		// > 模式参数		
+		ballistics_opacity['targetType'] = "瞬间变化";			
+		ballistics_opacity['targetDifference'] = 0;
 	}
-	if( data['shatter_opacityType'] == "线性消失" ){		
-		ballistics_opacity['opacityTime'] = data['movementTime'];					//
-		ballistics_opacity['opacityDelay'] = 0;										//
-		ballistics_opacity['targetType'] = "匀速变化";								//
-		ballistics_opacity['targetDifference'] = 0 - orgOpacity;					//
+	else if( data['shatter_opacityType'] == "瞬间消失" ){		//（透明度这里直接固定配置内容）
+		// > 基础参数
+		ballistics_opacity['opacityNum'] = this._drill_spriteNum;
+		ballistics_opacity['opacityTime'] = sustain;	
+		ballistics_opacity['opacityDelay'] = 0;						
+		ballistics_opacity['opacityEndDelay'] = 0;					
+		ballistics_opacity['opacityOrderDelay'] = orderDelay;	
+		// > 模式参数
+		ballistics_opacity['targetType'] = "瞬间变化";				
+		ballistics_opacity['targetDifference'] = 0 - orgOpacity;	
 	}
-	if( data['shatter_opacityType'] == "等一半时间后线性消失" ){	
-		ballistics_opacity['opacityTime'] = data['movementTime']/2;					//
-		ballistics_opacity['opacityDelay'] = data['movementTime']/2;				//
-		ballistics_opacity['targetType'] = "匀速变化";								//
-		ballistics_opacity['targetDifference'] = 0 - orgOpacity;					//
+	else if( data['shatter_opacityType'] == "线性消失" ){		
+		// > 基础参数
+		ballistics_opacity['opacityNum'] = this._drill_spriteNum;
+		ballistics_opacity['opacityTime'] = sustain;
+		ballistics_opacity['opacityDelay'] = 0;					
+		ballistics_opacity['opacityEndDelay'] = 0;					
+		ballistics_opacity['opacityOrderDelay'] = orderDelay;	
+		// > 模式参数		
+		ballistics_opacity['targetType'] = "匀速变化";				
+		ballistics_opacity['targetDifference'] = 0 - orgOpacity;	
+	}
+	else if( data['shatter_opacityType'] == "等一半时间后线性消失" ){	
+		// > 基础参数
+		ballistics_opacity['opacityNum'] = this._drill_spriteNum;
+		ballistics_opacity['opacityTime'] = sustain/2;
+		ballistics_opacity['opacityDelay'] = sustain/2;
+		ballistics_opacity['opacityEndDelay'] = 0;					
+		ballistics_opacity['opacityOrderDelay'] = orderDelay;	
+		// > 模式参数		
+		ballistics_opacity['targetType'] = "匀速变化";			
+		ballistics_opacity['targetDifference'] = 0 - orgOpacity;
+	}
+	else{
+		alert(
+			"【Drill_CoreOfShatterEffect.js 系统-方块粉碎核心】\n"+
+			"透明度类型错误，没有类型'" + data['shatter_opacityType'] + "'。"
+		);
 	}
 	
-	$gameTemp.drill_COBa_setBallisticsOpacity( ballistics_opacity );				//弹道核心 - 透明度初始化
+	// > 生成参数数据
+	this._drill_COSE_ballistics_opacity = $gameTemp.drill_COBa_setBallisticsOpacity( ballistics_opacity );
 }
 //==============================
-// * 初始化 - 碎片贴图
+// * 控制器 - 重设数据（私有）
+//
+//			说明：	data对象中的参数【可以缺项】。
 //==============================
-Sprite.prototype.drill_COSE_initShatterSprite = function(){
-	var data = this._drill_COSE_data;
+Drill_COSE_Controller.prototype.drill_COSE_resetData_Private = function( data ){
 	
-	// > 清理
-	this.drill_COSE_clearShatter();
+	// > 不接受空名称的碎片
+	if( data['src_mode'] == "指定资源名" && data['src_img'] == "" ){
+		return;
+	}
 	
-	// > 粉碎层
-	var temp_layer = new Sprite();
-	temp_layer.anchor.x = 0;
-	temp_layer.anchor.y = 0;
-	temp_layer.x = -1 * this.anchor.x * data['frameW'];
-	temp_layer.y = -1 * this.anchor.y * data['frameH'];
+	// > 判断数据重复情况
+	if( this._drill_data != undefined ){
+		var keys = Object.keys( data );
+		var is_same = true;
+		for( var i=0; i < keys.length; i++ ){
+			var key = keys[i];
+			if( this._drill_data[key] != data[key] ){
+				is_same = false;
+			}
+		}
+		if( is_same == true ){ return; }
+	}
+	// > 补充未设置的数据
+	var keys = Object.keys( this._drill_data );
+	for( var i=0; i < keys.length; i++ ){
+		var key = keys[i];
+		if( data[key] == undefined ){
+			data[key] = this._drill_data[key];
+		}
+	}
 	
-	this._drill_COSE_layer = temp_layer;
-	this.addChild( temp_layer );
+	// > 执行重置
+	this._drill_data = JSON.parse(JSON.stringify( data ));	//深拷贝
+	this._drill_controllerSerial = new Date().getTime();	//（生成一个不重复的序列号）
+    this.drill_initData();									//初始化数据
+    this.drill_initPrivateData();							//私有数据初始化
+}
+//==============================
+// * 控制器 - 是否正在播放（私有）
+//==============================
+Drill_COSE_Controller.prototype.drill_COSE_isPlaying_Private = function(){
+	if( this._drill_curTime <= 0 ){ return false; }
+	if( this._drill_curTime >= this._drill_playingTime ){ return false; }
+	return true;
+}
+//==============================
+// * 控制器 - 播放粉碎过程（私有）
+//==============================
+Drill_COSE_Controller.prototype.drill_COSE_runShatter_Private = function(){
+	this._drill_curTime = 0;
+	this._drill_backrun = false;
+	this._drill_pause = false;
+}
+//==============================
+// * 控制器 - 倒放粉碎过程（私有）
+//==============================
+Drill_COSE_Controller.prototype.drill_COSE_backrunShatter_Private = function(){
+	this._drill_curTime = this._drill_playingTime;
+	this._drill_backrun = true;
+	this._drill_pause = false;
+}
+//==============================
+// * 控制器 - 立即复原（私有）
+//
+//			说明：	立即复原表示：父类显示，碎片隐藏，不播放动画的状态。
+//==============================
+Drill_COSE_Controller.prototype.drill_COSE_restoreShatter_Private = function(){
+	this._drill_curTime = 0;
+	this._drill_backrun = false;
+	this._drill_pause = true;
+}
+//==============================
+// * 控制器 - 暂停粉碎过程（私有）
+//==============================
+Drill_COSE_Controller.prototype.drill_COSE_pause_Private = function(){
+	this._drill_pause = true;
+}
+//==============================
+// * 控制器 - 继续粉碎过程（私有）
+//==============================
+Drill_COSE_Controller.prototype.drill_COSE_continue_Private = function(){
+	this._drill_pause = false;
+}
+//==============================
+// * 帧刷新 - 碎片可见
+//==============================
+Drill_COSE_Controller.prototype.drill_updateVisible = function(){
+	var data = this._drill_data;
 	
-	// > 变速矩阵（测试显示）
-	//var ss = "";
-	//var max_per = Math.floor( Math.abs( (Math.max( data['splitColCount'],data['splitRowCount'] )-1) /2 ) );
-	//for( var i=0; i < data['splitColCount']; i++){
-	//	var sss = "";
-	//	for( var j=0; j < data['splitRowCount']; j++){
-	//		var a = Math.abs( i - (data['splitColCount']-1)/2 );
-	//		var b = Math.abs( j - (data['splitRowCount']-1)/2 );
-	//		a = Math.floor( Math.max( a,b ) );
-	//		a = a/max_per;
-	//		
-	//		sss += String(a) + "  ";
-	//		//sss += String(j + i * data['splitRowCount']) + "  ";
-	//	}
-	//	ss += sss + "\n";
-	//}
-	//alert(ss);
+	// > 强制隐藏时
+	if( data['visible'] == false ){
+		this._drill_visible = false;
+		return;
+	}
 	
+	// > 强制不消失时
+	if( data['shatter_opacityType'] == "不消失" ){	
+		this._drill_visible = true;
+		return;
+	}
 	
-	// > 粉碎块
-	var max_per = Math.floor( Math.abs( (Math.max( data['splitColCount'],data['splitRowCount'] )-1) /2 ) );
-	var ww = data['frameW']/data['splitColCount'];
-	var hh = data['frameH']/data['splitRowCount'];
-	this._drill_COSE_sprites = [];
-	for( var i=0; i < data['splitColCount']; i++){
-		for( var j=0; j < data['splitRowCount']; j++){
+	// > 可见情况（有父贴图时，碎片只在动画播放时显示）
+	if( data['shatter_hasParent'] == true ){
+		this._drill_visible = this.drill_COSE_isPlaying_Private();
+		return;
+	}
+	
+	// > 可见情况（无父贴图时，碎片只要没过消失时间，都显示）
+	if( this._drill_curTime < this._drill_playingTime ){
+		this._drill_visible = true;
+	}else{
+		this._drill_visible = false;
+	}
+}
+//==============================
+// * 帧刷新 - 碎片时间流逝
+//==============================
+Drill_COSE_Controller.prototype.drill_updateTime = function(){
+	var data = this._drill_data;
+	
+	// > 暂停情况
+	if( this._drill_pause == true ){ return; }
+	
+	// > 时间播放（倒放）
+	if( this._drill_backrun == true ){
+		this._drill_curTime -= 1;
+		
+	// > 时间播放
+	}else{
+		this._drill_curTime += 1;
+	}
+}
+
+
+//=============================================================================
+// ** 方块粉碎贴图【Drill_COSE_LayerSprite】
+// **			
+// **		索引：	COSE（可从子插件搜索到函数、类用法）
+// **		来源：	继承于Sprite
+// **		实例：	> Drill_EventShatterEffect 插件中 Sprite_Character 对象的 ._drill_ESE_sprite 成员
+// **		应用：	> Drill_EventShatterEffect 插件中 Sprite_Character 对象的 drill_COSE_setController 绑定
+// **		
+// **		作用域：	地图界面、战斗界面、菜单界面
+// **		主功能：	> 定义一个粉碎贴图，能够播放碎片四散的动画。
+// **					> 贴图不影响父贴图，更【不会隐藏】父贴图。
+// **
+// **		说明：	> 子插件需要根据情况，手动控制 父贴图 的显示。
+// **				> 该类不能单独使用，必须结合 方块粉碎控制器 数据类。
+// **
+// **		代码：	> 范围 - 该类只对 粉碎配置 提供简易动画。
+// **				> 结构 - [合并/ ●分离 /混乱] 贴图与数据分离。
+// **				> 数量 - [单个/ ●多个 ] 父贴图与粉碎一对一。
+// **				> 创建 - [ ●一次性 /自延迟/外部延迟] 直接根据数据划分切片来创建碎片。
+// **				> 销毁 - [不考虑/ ●自销毁 /外部销毁 ] 碎片数据加上销毁标记，即可使得贴图自销毁。
+// **				> 样式 - [不可修改/ ●自变化 /外部变化 ] 
+// **
+// **		调用方法：	// > 创建 - 不存储数据 写法
+// **						$gameTemp._drill_XXX_controller = new Drill_COSE_Controller();		//（放$gameTemp中，不存）
+// **						$gameTemp._drill_XXX_sprite = new Drill_COSE_LayerSprite();
+// **						$gameTemp._drill_XXX_sprite.drill_COSE_setController( $gameTemp._drill_XXX_controller );
+// **						this._drill_SenceTopArea.addChild( $gameTemp._drill_XXX_sprite );
+// **					// > 创建 - 存储数据 写法
+// **						$gameSystem._drill_XXX_controller = new Drill_COSE_Controller();	//（放$gameSystem中初始化，存储）
+// **						$gameTemp._drill_XXX_sprite = new Drill_COSE_LayerSprite();
+// **						$gameTemp._drill_XXX_sprite.drill_COSE_setController( $gameSystem._drill_XXX_controller );
+// **						this._drill_SenceTopArea.addChild( $gameTemp._drill_XXX_sprite );
+// **
+// **					// > 帧刷新
+// **						$gameTemp._drill_XXX_controller.drill_COSE_update();				//（不要忘了，数据必须手动帧刷新）
+// **
+// **					// > 修改数据
+// **						var data = {
+// **							"frameX": 0,	
+// **							"frameY": 0,
+// **							"frameW": Graphics.boxWidth,
+// **							"frameH": Graphics.boxHeight,
+// **							"src_mode": "指定资源名",
+// **							"src_img": bitmap_name,
+// **							"src_file": "img/Map__shatterBackground/",
+// **							"shatter_id": Number(temp2)-1,									//粉碎样式
+// **							"shatter_opacityType": $gameSystem._drill_XXX_opacityType,		//透明度变化方式
+// **							"shatter_hasParent": false,										//父贴图标记
+// **						};
+// **						$gameTemp._drill_XXX_controller.drill_COSE_resetData( data );		//方块粉碎核心 - 初始化
+// **						$gameTemp._drill_XXX_controller.drill_COSE_runShatter();			//正常播放
+// **						//（直接对控制器进行操作即可，贴图对象会自变化）
+//=============================================================================
+//==============================
+// * 粉碎贴图 - 定义
+//==============================
+function Drill_COSE_LayerSprite() {
+	this.initialize.apply(this, arguments);
+}
+Drill_COSE_LayerSprite.prototype = Object.create(Sprite.prototype);
+Drill_COSE_LayerSprite.prototype.constructor = Drill_COSE_LayerSprite;
+//==============================
+// * 粉碎贴图 - 初始化
+//==============================
+Drill_COSE_LayerSprite.prototype.initialize = function(){
+	Sprite.prototype.initialize.call(this);
+	this._drill_controller = null;		//控制器对象
+	this._drill_curSerial = -1;			//控制器序列号
+	this._drill_bitmap = null;			//资源对象
+	this._drill_spriteTank = [];		//碎片容器
+	//（初始状态，不创建任何对象）
+}
+//==============================
+// * 粉碎贴图 - 帧刷新
+//==============================
+Drill_COSE_LayerSprite.prototype.update = function(){
+	Sprite.prototype.update.call(this);
+	this.drill_updateAutoDestroy();			//帧刷新 - 自动销毁
+	if( this._drill_controller == undefined ){ return; }
+	this.drill_updateRebuild();				//帧刷新 - 碎片重刷时机
+	this.drill_updateShatterVisible();		//帧刷新 - 碎片可见
+	this.drill_updateShatterMove();			//帧刷新 - 碎片移动
+}
+//##############################
+// * 粉碎贴图 - 设置控制器【标准函数】
+//			
+//			参数：	> controller 控制器对象
+//			返回：	> 无
+//			
+//			说明：	> 由于贴图与数据分离，贴图必须依赖一个数据对象。
+//##############################
+Drill_COSE_LayerSprite.prototype.drill_COSE_setController = function( controller ){
+	this._drill_controller = controller;
+};
+//##############################
+// * 粉碎贴图 - 是否就绪【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> visible 布尔（是否显示）
+//			
+//			说明：	> 这里完全 不考虑 延迟加载问题。
+//##############################
+Drill_COSE_LayerSprite.prototype.drill_COSE_isReady = function(){
+	if( this._drill_controller == undefined ){ return false; }
+    return true;
+};
+//##############################
+// * 粉碎贴图 - 是否需要销毁【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> visible 布尔（是否需要销毁）
+//			
+//			说明：	> 此函数可用于监听 控制器数据 是否被销毁，数据销毁后，贴图可自动销毁。
+//##############################
+Drill_COSE_LayerSprite.prototype.drill_COSE_isNeedDestroy = function(){
+	if( this._drill_controller == undefined ){ return false; }	//（未绑定时，不销毁）
+	if( this._drill_controller._drill_needDestroy == true ){ return true; }
+    return false;
+};
+//##############################
+// * 粉碎贴图 - 销毁【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//			
+//			说明：	> 销毁不是必要的，但最好随时留意给 旧贴图 执行销毁函数。
+//##############################
+Drill_COSE_LayerSprite.prototype.drill_COSE_destroy = function(){
+	this.drill_COSE_destroy_Private();
+};
+//##############################
+// * 粉碎贴图 - 父贴图是否显示【标准函数】
+//
+//			参数：	> 无
+//			返回：	> visible 布尔（是否显示）
+//			
+//			说明：	> 播放时、碎片消失后，都返回false。
+//                  > 复原时、倒放碎片恢复后，才返回true。
+//					> 注意，如果碎片没有父贴图，那么需要在 data['shatter_hasParent'] 中设置false。
+//					> 当然，如果碎片没有父贴图，此函数也用不上。
+//##############################
+Drill_COSE_LayerSprite.prototype.drill_COSE_canParentVisible = function(){
+	return this.drill_COSE_canParentVisible_Private();
+};
+//##############################
+// * 粉碎贴图 - 设置非控制的资源对象【标准函数】
+//
+//			参数：	> bitmap 对象（资源对象）
+//			返回：	> 无
+//			
+//			说明：	> 如果 控制器 中设置了"关闭资源控制"，那么需要此函数赋值bitmap对象。
+//					> 调用后，将强制给贴图赋值资源对象。（此对象无法保存）
+//##############################
+Drill_COSE_LayerSprite.prototype.drill_COSE_setUncontroledBitmap = function( bitmap ){
+	this._drill_bitmap = bitmap;
+	this.drill_rebuildBitmap();
+};
+//==============================
+// * 粉碎贴图 - 销毁（私有）
+//==============================
+Drill_COSE_LayerSprite.prototype.drill_COSE_destroy_Private = function(){
+	
+	// > 清空碎片贴图
+	this.drill_clearShatter();
+	
+	// > 断开连接
+	this._drill_controller = null;
+	this._drill_bitmap = null;
+};
+//==============================
+// * 粉碎贴图 - 父贴图是否显示（私有）
+//==============================
+Drill_COSE_LayerSprite.prototype.drill_COSE_canParentVisible_Private = function(){
+	
+	// > 未准备完全时，父贴图保持显示
+	if( this.drill_COSE_isReady() == false ){ return true; }
+	
+	// > 处于粉碎状态时，父贴图不显示
+	if( this._drill_controller._drill_curTime > 0 ){ return false; }
+	
+	return true;
+};
+
+//==============================
+// * 粉碎贴图 - 清空碎片贴图
+//==============================
+Drill_COSE_LayerSprite.prototype.drill_clearShatter = function(){
+	for( var i=0; i < this._drill_spriteTank.length; i++){
+		var temp_sprite = this._drill_spriteTank[i];
+		this.removeChild(temp_sprite);
+	}
+	this._drill_spriteTank = [];
+};
+//==============================
+// * 粉碎贴图 - 重建 - 碎片贴图
+//==============================
+Drill_COSE_LayerSprite.prototype.drill_rebuildShatter = function(){
+    var c_data = this._drill_controller;
+    var d_data = this._drill_controller._drill_data;
+	
+	// > 序列号标记
+	this._drill_curSerial = this._drill_controller._drill_controllerSerial;
+	
+	// > 清空碎片贴图
+	this.drill_clearShatter();
+	
+	// > 私有属性初始化
+    this.anchor.x = 0;
+    this.anchor.y = 0;
+	if( d_data['shatter_hasParent'] == true ){
+		this.x = -1 * this.parent.anchor.x * d_data['frameW'];
+		this.y = -1 * this.parent.anchor.y * d_data['frameH'];
+	}else{
+		this.x = 0;
+		this.y = 0;
+	}
+	
+	// > 碎片参数
+	var sw = c_data._drill_spriteWidth;
+	var sh = c_data._drill_spriteHeight;
+	var colNum = c_data._drill_spriteColCount;
+	var rowNum = c_data._drill_spriteRowCount;
+	
+	for( var i=0; i < colNum; i++ ){
+		for( var j=0; j < rowNum; j++ ){
 			
-			// > 碎块初始化
+			// > 碎片初始化
 			var temp_sprite = new Sprite();
-			var xx = data['frameX'] + ww * i;
-			var yy = data['frameY'] + hh * j;
-			temp_sprite._orgX = 0 + ww * i;
-			temp_sprite._orgY = 0 + hh * j;
+			temp_sprite._orgX = 0 + sw * i;
+			temp_sprite._orgY = 0 + sh * j;
 			temp_sprite._orgOpacity = 255;
 			temp_sprite.x = temp_sprite._orgX;
 			temp_sprite.y = temp_sprite._orgY;
-			temp_sprite.bitmap = this._drill_COSE_bitmap;
-			temp_sprite.setFrame( xx,yy,ww,hh );
 			
-			// > 弹道核心 - 推演
-			$gameTemp.drill_COBa_preBallisticsMove( temp_sprite, i*data['splitRowCount']+j , temp_sprite._orgX, temp_sprite._orgY );
-			$gameTemp.drill_COBa_preBallisticsOpacity( temp_sprite, i*data['splitRowCount']+j , temp_sprite._orgOpacity );
+			// > 添加碎片
+			this.addChild( temp_sprite );
+			this._drill_spriteTank.push( temp_sprite );
+		}
+	}	
+}
+//==============================
+// * 粉碎贴图 - 重建 - 资源对象
+//==============================
+Drill_COSE_LayerSprite.prototype.drill_rebuildBitmap = function(){
+    var c_data = this._drill_controller;
+    var d_data = this._drill_controller._drill_data;
+	
+	// > 资源对象设置
+	if( d_data['src_mode'] == "指定资源名" ){
+		this._drill_bitmap = ImageManager.loadBitmap( d_data['src_file'], d_data['src_img'], 0, true);
+	}
+	if( d_data['src_mode'] == "关闭资源控制" ){
+		//（不操作）
+	}
+	
+	// > 碎片参数
+	var sw = c_data._drill_spriteWidth;
+	var sh = c_data._drill_spriteHeight;
+	var colNum = c_data._drill_spriteColCount;
+	var rowNum = c_data._drill_spriteRowCount;
+	
+	for( var i=0; i < colNum; i++ ){
+		for( var j=0; j < rowNum; j++ ){
+			var temp_sprite = this._drill_spriteTank[ i*rowNum+j ];
+			if( temp_sprite == undefined ){ continue; }
+			
+			// > 设置资源对象
+			temp_sprite.bitmap = this._drill_bitmap;
+			
+			// > 设置框架范围
+			var xx = sw * i;
+			var yy = sh * j;
+			var ww = sw;
+			var hh = sh;
+			if( xx + sw > d_data['frameW'] ){	//（切割不能越界）
+				ww = d_data['frameW'] - xx;
+			}
+			if( yy + sh > d_data['frameH'] ){
+				hh = d_data['frameH'] - yy;
+			}
+			xx += d_data['frameX'];
+			yy += d_data['frameY'];
+			temp_sprite.drill_COSE_setFrame( xx, yy, ww, hh );
+		}
+	}
+}
+//==============================
+// * 粉碎贴图 - 优化浮点数过滤
+//
+//			说明：	用floor防止 浮点数 比较时，造成frame的反复刷新。
+//==============================
+Sprite.prototype.drill_COSE_setFrame = function( x, y, width, height ){
+	this.setFrame( Math.floor(x), Math.floor(y), Math.floor(width), Math.floor(height) );
+}
+//==============================
+// * 粉碎贴图 - 重建 - 弹道
+//==============================
+Drill_COSE_LayerSprite.prototype.drill_rebuildBallistics = function(){
+    var c_data = this._drill_controller;
+    var d_data = this._drill_controller._drill_data;
+	var style_data = DrillUp.g_COSE_style_list[ d_data['shatter_id'] ];
+	
+	// > 碎片参数
+	var colNum = c_data._drill_spriteColCount;
+	var rowNum = c_data._drill_spriteRowCount;
+	
+	var max_per = Math.floor( Math.abs( (Math.max( colNum,rowNum )-1) /2 ) );
+	$gameTemp._drill_COBa_moveData = c_data._drill_COSE_ballistics_move;	//（存储的弹道数据，赋值后预推演）
+	$gameTemp._drill_COBa_commonData = c_data._drill_COSE_ballistics_opacity;
+	//alert( JSON.stringify(  $gameTemp._drill_COBa_moveData ) );
+	//alert( JSON.stringify(  $gameTemp._drill_COBa_commonData ) );
+	
+	for( var i=0; i < colNum; i++ ){
+		for( var j=0; j < rowNum; j++ ){
+			var temp_sprite = this._drill_spriteTank[ i*rowNum+j ];
+			if( temp_sprite == undefined ){ continue; }
+			
+			// > 弹道核心 - 预推演
+			$gameTemp.drill_COBa_preBallisticsMove( temp_sprite, i*rowNum+j , temp_sprite._orgX, temp_sprite._orgY );
+			$gameTemp.drill_COBa_preBallisticsOpacity( temp_sprite, i*rowNum+j , temp_sprite._orgOpacity );
 			
 			// > 变速矩阵
-			if( data['speedPer'] == true ){
-				var a = Math.abs( i - (data['splitColCount']-1)/2 );
-				var b = Math.abs( j - (data['splitRowCount']-1)/2 );
+			if( style_data['speedPer'] == true ){
+				var a = Math.abs( i - (colNum-1)/2 );
+				var b = Math.abs( j - (rowNum-1)/2 );
 				a = Math.floor( Math.max( a,b ) );
 				a = a/max_per;
 				
-				a = a *( 1-data['speedPerMin'] ) + data['speedPerMin'];
-				
+				a = a *( 1-style_data['speedPerMin'] ) + style_data['speedPerMin'];
 				for( var n = 0; n < temp_sprite["_drill_COBa_x"].length; n++ ){
 					temp_sprite["_drill_COBa_x"][n] = temp_sprite["_drill_COBa_x"][n] * a + temp_sprite._orgX * (1-a);
 				}
@@ -1135,54 +1766,93 @@ Sprite.prototype.drill_COSE_initShatterSprite = function(){
 					temp_sprite["_drill_COBa_y"][n] = temp_sprite["_drill_COBa_y"][n] * a + temp_sprite._orgY * (1-a);
 				}
 			}
-
-			this._drill_COSE_sprites.push( temp_sprite );
-			temp_layer.addChild( temp_sprite );
-		}
-	}	
-}
-//==============================
-// * 方块粉碎 - 清理
-//==============================
-Sprite.prototype.drill_COSE_clearShatter = function(){
-	
-	// > 去除节点
-	if( this._drill_COSE_layer != undefined  ){
-		if( this._drill_COSE_sprites != undefined && 
-			this._drill_COSE_sprites.length > 0 ){
-			for( var i=0; i < this._drill_COSE_sprites.length; i++){
-				var temp_sprite = this._drill_COSE_sprites[i];
-				this._drill_COSE_layer.removeChild(temp_sprite);
+			
+			// > 速度倍率
+			var speedFactor = style_data['speedFactor'] || 1.0;
+			for( var n = 0; n < temp_sprite["_drill_COBa_x"].length; n++ ){
+				temp_sprite["_drill_COBa_x"][n] = temp_sprite["_drill_COBa_x"][n] * speedFactor;
+			}
+			for( var n = 0; n < temp_sprite["_drill_COBa_y"].length; n++ ){
+				temp_sprite["_drill_COBa_y"][n] = temp_sprite["_drill_COBa_y"][n] * speedFactor;
 			}
 		}
-		this.removeChild(this._drill_COSE_layer);
 	}
-	// > 清理指针
-	this._drill_COSE_layer = null;
-	this._drill_COSE_sprites = [];
 	
+	// > 变速矩阵（测试显示）
+	//var ss = "";
+	//var max_per = Math.floor( Math.abs( (Math.max( colNum,rowNum )-1) /2 ) );
+	//for( var i=0; i < colNum; i++){
+	//	var sss = "";
+	//	for( var j=0; j < rowNum; j++){
+	//		var a = Math.abs( i - (colNum-1)/2 );
+	//		var b = Math.abs( j - (rowNum-1)/2 );
+	//		a = Math.floor( Math.max( a,b ) );
+	//		a = a/max_per;
+	//		
+	//		sss += String(a) + "  ";
+	//		//sss += String(j + i * rowNum) + "  ";
+	//	}
+	//	ss += sss + "\n";
+	//}
+	//alert(ss);
+}
+
+
+//==============================
+// * 帧刷新 - 自动销毁
+//==============================
+Drill_COSE_LayerSprite.prototype.drill_updateAutoDestroy = function(){
+	if( this.drill_COSE_isNeedDestroy() != true ){ return };
+	
+	// > 需要销毁，却没销毁时
+	if( this._drill_spriteTank.length > 0 ){
+		
+		// > 自行销毁
+		this.drill_COSE_destroy();
+	}
 }
 //==============================
-// * 方块粉碎 - 移动
+// * 帧刷新 - 碎片重刷时机
 //==============================
-Sprite.prototype.drill_COSE_updateMove = function(){
-	var data = this._drill_COSE_data;
-	if( this._drill_COSE_sprites == undefined ){ return; }
+Drill_COSE_LayerSprite.prototype.drill_updateRebuild = function(){
 	
-	// > 时间播放
-	if( data['shatter_converted'] == true ){
-		this._drill_COSE_curTime -= 1;
+	// > 有控制器时
+	if( this._drill_spriteTank.length == 0 ){
+		this.drill_rebuildShatter();	//（自行创建）
+		this.drill_rebuildBitmap();
+		this.drill_rebuildBallistics();
+		
+	// > 控制器变化时
 	}else{
-		this._drill_COSE_curTime += 1;
+		if( this._drill_curSerial != this._drill_controller._drill_controllerSerial ){
+			this._drill_curSerial = this._drill_controller._drill_controllerSerial;
+			this.drill_rebuildShatter();	//（自行创建）
+			this.drill_rebuildBitmap();
+			this.drill_rebuildBallistics();
+		}
 	}
+}
+//==============================
+// * 帧刷新 - 碎片可见
+//==============================
+Drill_COSE_LayerSprite.prototype.drill_updateShatterVisible = function(){
+	this.visible = this._drill_controller._drill_visible;
+	//this.visible = true;
+}
+//==============================
+// * 帧刷新 - 碎片移动
+//==============================
+Drill_COSE_LayerSprite.prototype.drill_updateShatterMove = function(){
+    var c_data = this._drill_controller;
+    var d_data = this._drill_controller._drill_data;
 	
 	// > 根据轨迹进行播放
-	for( var i=0; i < this._drill_COSE_sprites.length; i++){
-		var temp_sprite = this._drill_COSE_sprites[i];
+	for( var i=0; i < this._drill_spriteTank.length; i++ ){
+		var temp_sprite = this._drill_spriteTank[i];
 		if( temp_sprite == undefined ){ continue; }
 		if( temp_sprite['_drill_COBa_x'] == undefined ){ continue; }
 		
-		var time = this._drill_COSE_curTime;
+		var time = c_data._drill_curTime;
 		if( time < 0 ){ time = 0; }
 		if( time > temp_sprite['_drill_COBa_x'].length-1 ){
 			time = temp_sprite['_drill_COBa_x'].length-1;
@@ -1190,38 +1860,22 @@ Sprite.prototype.drill_COSE_updateMove = function(){
 		temp_sprite.x = temp_sprite['_drill_COBa_x'][time];		//播放弹道轨迹
 		temp_sprite.y = temp_sprite['_drill_COBa_y'][time];
 		temp_sprite.opacity = temp_sprite['_drill_COBa_opacity'][time];
+		//temp_sprite.opacity = 255;
 	}
-	
-	// > 碎片层自动隐藏
-	if( data['shatter_autoHide'] == true ){
-		this._drill_COSE_layer.visible = this.drill_COSE_isShattering();
-	}
-}
-	
-	
-//=============================================================================
-// ** 贴图基类附着
-//=============================================================================
-//==============================
-// * 贴图基类 - 初始化
-//==============================
-var _drill_COSE_initialize = Sprite.prototype.initialize;
-Sprite.prototype.initialize = function(bitmap){
-	_drill_COSE_initialize.call(this, bitmap);
-	this._drill_COSE_data = {};
-	this._drill_COSE_data['enable'] = false;
-}
-//==============================
-// * 贴图基类 - 帧刷新
-//==============================
-var _drill_COSE_update = Sprite.prototype.update;
-Sprite.prototype.update = function(){
-	_drill_COSE_update.call(this);
-	if( this._drill_COSE_data['enable'] == false ){ return; }
-	
-	this.drill_COSE_updateMove();	//帧刷新 - 移动属性 
 }
 
+//=============================================================================
+// ** 核心漏洞修复
+//=============================================================================
+//==============================
+// * 核心漏洞修复 - 屏蔽根据版本重刷地图
+//
+//			说明：	此功能会刷掉旧存档的存储数据，因为版本不一样会强制重进地图。
+//					而这样做只是 刷新旧存档的当前地图而已，没任何好处。
+//==============================
+Scene_Load.prototype.reloadMapIfUpdated = function() {
+	// （禁止重刷）
+};
 
 
 //=============================================================================

@@ -23,14 +23,14 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 只提供限量道具的商店界面。
- * 【支持插件关联资源的打包、加密】
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 插件不能单独使用，必须基于下列核心插件。
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfWindowAuxiliary 系统 - 窗口辅助核心
- *   - Drill_CoreOfWaitressSprite  主菜单 - 服务员核心
+ *   - Drill_CoreOfWindowAuxiliary  系统-窗口辅助核心
+ *   - Drill_CoreOfWaitressSprite   主菜单-服务员核心
  *     必须基于上述插件才能显示控制窗口移动、服务员动作。
  *
  * -----------------------------------------------------------------------------
@@ -88,7 +88,7 @@
  *   (1.插件中很多属性修改后永久有效，这些数据存入了存档中，
  *      如果读取旧存档，会出现旧存档中部分数据不一致的问题。
  *   (2.插件支持 空数据同步更新 的优化，
- *      详细去看看"0.基本定义 > 数据更新与旧存档.docx"
+ *      详细去看看"21.管理器 > 数据更新与旧存档.docx"
  *   (3.效果为：新加了一个限量商店时，这个商店可以在旧存档中开放。
  *      并且具备相应的商品数量。
  *      但注意，编辑修改的商店商品数量，是不能同步到旧存档中的。
@@ -168,7 +168,7 @@
  * 工作类型：   持续执行
  * 时间复杂度： o(n^2)*o(场景元素) 每帧
  * 测试方法：   直接进入该信息面板进行测试。
- * 测试结果：   该菜单面板中，基本元素消耗为：【18.53ms】
+ * 测试结果：   在菜单界面中，基本元素消耗为：【18.53ms】
  * 
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
  *   测试结果并不是精确值，范围在给定值的10ms范围内波动。
@@ -1197,7 +1197,7 @@
  * @type boolean
  * @on 启用
  * @off 关闭
- * @desc true - 启用，false - 关闭，你可以开关rmmv默认选项的白色闪烁矩形。需要Drill_MenuCursorBorder插件支持。
+ * @desc true - 启用，false - 关闭，你可以开关默认选项的白色闪烁矩形。需要Drill_MenuCursorBorder插件支持。
  * @default true
  * 
  * @param 是否启用菜单边框
@@ -1400,14 +1400,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^2)*o(场景元素) 每帧
-//		性能测试因素	在面板中记录
-//		性能测试消耗	4.92ms
-//		最坏情况		无
-//		备注			这个值不是很符合实际，这里应该把辅助核心的消耗加进来。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^2)*o(场景元素) 每帧
+//		★性能测试因素	在面板中记录
+//		★性能测试消耗	4.92ms
+//		★最坏情况		无
+//		★备注			这个值不是很符合实际，这里应该把辅助核心的消耗加进来。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			限量商店：
 //				->窗口
@@ -1444,7 +1449,7 @@
 //			1.4个窗口基本结构直接使用辅助核心进行填入。该插件没有属性控制的多余操作。
 //			  主要都是内容和流程。
 //			2.商品窗口贴指定的商品序列，对照gamesystem数据进行刷新。
-//			  帮助窗口链接了商品窗口，功能都是rmmv自带的。
+//			  帮助窗口链接了商品窗口，功能都是自带的。
 //			  确认窗口固定只有两个按钮，且贴在底部。（注意open和close函数）
 //			  金钱窗口只是单纯的绘制，流程中偶尔执行refresh。
 //			3.服务员与窗口【完全独立】，只是流程中会插入一些动作: drill_COWS_playAct("")
@@ -2802,7 +2807,7 @@ Drill_SLS_GoodsWindow.prototype.drill_SLS_buyOne = function() {
 	this._list[this.index()]['limit_cur'] += 1;	//直接操作$gameSystem存储的指针
 };
 //==============================
-// * 商品窗口 - 兼容 - Drill_MenuCursor菜单指针插件
+// * 商品窗口 - 兼容 - 【Drill_MenuCursor 主菜单 - 多样式菜单指针】
 //==============================
 if( Imported.Drill_MenuCursor == true && DrillUp.g_SLS_goodsWin_cursor != null ){
 	Drill_SLS_GoodsWindow.prototype.drill_MCu_cursorEnabled = function() {
@@ -2817,7 +2822,7 @@ if( Imported.Drill_MenuCursor == true && DrillUp.g_SLS_goodsWin_cursor != null )
 	}
 }
 //==============================
-// * 商品窗口 - 兼容 - Drill_MenuCursorBorder菜单边框插件
+// * 商品窗口 - 兼容 - 【Drill_MenuCursorBorder 主菜单 - 多样式菜单选项边框】
 //==============================
 if( Imported.Drill_MenuCursorBorder == true && DrillUp.g_SLS_goodsWin_cursor != null ){
 	Drill_SLS_GoodsWindow.prototype.drill_MCB_glimmerRectVisible = function() {
@@ -2835,7 +2840,7 @@ if( Imported.Drill_MenuCursorBorder == true && DrillUp.g_SLS_goodsWin_cursor != 
 	}
 }
 //==============================
-// * 商品窗口 - 兼容 - Drill_MenuScrollBar菜单滚动条插件
+// * 商品窗口 - 兼容 - 【Drill_MenuScrollBar 主菜单 - 多样式菜单滚动条】
 //==============================
 if( Imported.Drill_MenuScrollBar == true && DrillUp.g_SLS_goodsWin_cursor != null ){
 	Drill_SLS_GoodsWindow.prototype.drill_MSB_scrollBarEnabled = function() {
@@ -3135,7 +3140,7 @@ Drill_SLS_ConfirmWindow.prototype.drawItem = function(index) {
 	this.drawText(text, rect.x, rect.y , rect.width, 'center');
 };
 //==============================
-// * 确认窗口 - 兼容 - Drill_MenuCursor菜单指针插件
+// * 确认窗口 - 兼容 - 【Drill_MenuCursor 主菜单 - 多样式菜单指针】
 //==============================
 if( Imported.Drill_MenuCursor == true && DrillUp.g_SLS_confirmWin_cursor != null ){
 	Drill_SLS_ConfirmWindow.prototype.drill_MCu_cursorEnabled = function() {
@@ -3150,7 +3155,7 @@ if( Imported.Drill_MenuCursor == true && DrillUp.g_SLS_confirmWin_cursor != null
 	}
 }
 //==============================
-// * 确认窗口 - 兼容 - Drill_MenuCursorBorder菜单边框插件
+// * 确认窗口 - 兼容 - 【Drill_MenuCursorBorder 主菜单 - 多样式菜单选项边框】
 //==============================
 if( Imported.Drill_MenuCursorBorder == true && DrillUp.g_SLS_confirmWin_cursor != null ){
 	Drill_SLS_ConfirmWindow.prototype.drill_MCB_glimmerRectVisible = function() {
@@ -3168,7 +3173,7 @@ if( Imported.Drill_MenuCursorBorder == true && DrillUp.g_SLS_confirmWin_cursor !
 	}
 }
 //==============================
-// * 确认窗口 - 兼容 - Drill_MenuScrollBar菜单滚动条插件
+// * 确认窗口 - 兼容 - 【Drill_MenuScrollBar 主菜单 - 多样式菜单滚动条】
 //==============================
 if( Imported.Drill_MenuScrollBar == true && DrillUp.g_SLS_confirmWin_cursor != null ){
 	Drill_SLS_ConfirmWindow.prototype.drill_MSB_scrollBarEnabled = function() {
@@ -3263,7 +3268,7 @@ Drill_SLS_WaitressSprite.prototype.update = function() {
 }else{
 		Imported.Drill_SceneLimitedShop = false;
 		alert(
-			"【Drill_SceneLimitedShop.js 面板-限量商店】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
+			"【Drill_SceneLimitedShop.js 面板 - 限量商店】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
 			"\n- Drill_CoreOfWindowAuxiliary 系统-窗口辅助核心" +
 			"\n- Drill_CoreOfWaitressSprite 主菜单-服务员核心"
 		);

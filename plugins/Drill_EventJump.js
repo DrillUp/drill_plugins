@@ -18,14 +18,15 @@
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该插件必须基于核心，也可以作用于其他插件。
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。也可以作用于其他插件。
  * 基于：
- *   - Drill_CoreOfMoveRoute      物体 - 移动路线核心★★v1.7以上★★
+ *   - Drill_CoreOfMoveRoute      移动路线-移动路线核心★★v1.7以上★★
  * 可作用于：
- *   - Drill_Jump                 互动 - 跳跃能力
+ *   - Drill_Jump                 互动-跳跃能力
  *     目标插件基于此插件，可以使得控制台控制玩家的跳跃。
  * 可被扩展：
- *   - Drill_LayerWallBlock       物体 - 墙壁阻塞器
+ *   - Drill_LayerWallBlock       图块-墙壁阻塞器
  *     墙壁阻塞器，可以设置 墙面和墙顶图块 无法被翻越，节省R图块配置。
  * 
  * -----------------------------------------------------------------------------
@@ -34,7 +35,7 @@
  *   作用于事件、玩家。
  * 2.更多详细的介绍，去看看 "10.互动 > 关于跳跃能力.docx"。
  * 3.插件需要将指定 地形标志 或 图块R区域 设为悬崖，
- *   去看看 "10.互动 > 关于插件与图块R占用说明.xlsx"
+ *   去看看 "26.图块 > 关于插件与图块R占用说明.xlsx"
  * 普通跳跃：
  *   (1.普通跳跃将考虑事件、悬崖、地形等因素。
  *      普通跳跃时，事件/玩家都不会改变朝向。
@@ -43,7 +44,7 @@
  *   (3.注意，如果事件的跳跃延迟属性大于0，那么执行普通跳跃事件指令时，
  *      将会受到延迟影响，不能立即跳多次。
  * 强制跳跃：
- *   (1.强制跳跃为rmmv默认的跳跃功能，都属于强制跳跃。
+ *   (1.强制跳跃为默认的跳跃功能，都属于强制跳跃。
  *      即无视地形、悬崖、事件等条件，强制跳到目标位置。
  * 地形条件：
  *   (1.你有必要在一些特殊障碍中直接设置最高悬崖高度，比如河流，天花板等。
@@ -59,13 +60,33 @@
  *      通过该方法，可以设计一些需要固定走动/跳跃的事件帮助踩按钮的谜题。
  * 
  * -----------------------------------------------------------------------------
- * ----可选设定 - 普通跳跃
- * 你可以设置事件的基本跳跃属性，以及移动路线：
+ * ----可选设定 - 普通跳跃属性
+ * 你可以设置事件的跳跃属性：
  * （注释冒号两边都有一个空格，移动路线两边没有空格）
  * 
- * 事件注释：=>事件跳跃 : 跳跃距离 : 2
- * 事件注释：=>事件跳跃 : 跳跃声音 : 1
- * 事件注释：=>事件跳跃 : 跳跃延迟 : 30
+ * 事件注释：=>事件跳跃 : 跳跃距离 : 图块距离[2]
+ * 事件注释：=>事件跳跃 : 跳跃声音 : 声音[1]
+ * 事件注释：=>事件跳跃 : 跳跃延迟 : 时间[30]
+ * 
+ * 插件指令：>事件跳跃 : 本事件 : 修改属性-跳跃距离 : 图块距离[2]
+ * 插件指令：>事件跳跃 : 事件[10] : 修改属性-跳跃距离 : 图块距离[2]
+ * 插件指令：>事件跳跃 : 事件变量[21] : 修改属性-跳跃距离 : 图块距离[2]
+ * 插件指令：>事件跳跃 : 批量事件[10,11] : 修改属性-跳跃距离 : 图块距离[2]
+ * 插件指令：>事件跳跃 : 批量事件变量[21,22] : 修改属性-跳跃距离 : 图块距离[2]
+ * 
+ * 插件指令：>事件跳跃 : 本事件 : 修改属性-跳跃距离 : 图块距离[2]
+ * 插件指令：>事件跳跃 : 本事件 : 修改属性-跳跃声音 : 声音[2]
+ * 插件指令：>事件跳跃 : 本事件 : 修改属性-跳跃延迟 : 时间[30]
+ * 
+ * 1."跳跃声音 : 1"表示当前插件配置的第一个跳跃音效。
+ * 2.插件指令前面部分（本事件）和后面设置（修改属性-跳跃距离）可以随意组合。
+ *   一共有5*3种组合方式。
+ * 3.插件指令修改的事件跳跃，只在当前地图中有效，离开地图后会恢复默认。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 执行普通跳跃
+ * 你可以使用下面指令执行普通跳跃：
+ * （冒号两边都有一个空格）
  * 
  * 移动路线指令：>普通跳跃
  * 移动路线指令：>普通跳跃:前:距离[属性值]
@@ -78,13 +99,12 @@
  * 移动路线指令：>普通跳跃:右前方:距离[2]
  * 移动路线指令：>普通跳跃:右后方:距离[2]
  * 
- * 1."跳跃声音 : 1"表示当前插件配置的第一个跳跃音效。
- * 2.单个">普通跳跃"指令，表示向前跳跃。
- * 3."距离[0]"表示原地跳，"距离[属性值]"表示事件自带的跳跃距离值。
+ * 1.单个">普通跳跃"指令，表示向前跳跃。
+ * 2."距离[0]"表示原地跳，"距离[属性值]"表示事件自带的跳跃距离值。
  * 
  * -----------------------------------------------------------------------------
- * ----可选设定 - 普通跳跃（插件指令）
- * 你可以使用下面插件指令操作普通跳跃：
+ * ----可选设定 - 执行普通跳跃（插件指令）
+ * 你可以使用下面插件指令执行普通跳跃：
  * （冒号两边都有一个空格）
  * 
  * 插件指令：>事件跳跃 : 玩家 : 普通跳跃 : 前 : 距离[2]
@@ -169,7 +189,7 @@
  *              80.00ms - 120.00ms（中消耗）
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
- * 时间复杂度： o(n^2)
+ * 时间复杂度： o(n^2) 每帧
  * 测试方法：   在大部分管理层中，设置10个事件使用移动路线普通跳跃。
  * 测试结果：   200个事件的地图中，消耗为：【24.61ms】
  *              100个事件的地图中，消耗为：【14.77ms】
@@ -289,15 +309,20 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		单次执行
-//		时间复杂度		o(n^2)
-//		性能测试因素	物体触发管理层
-//		性能测试消耗	24.61ms
-//		最坏情况		所有事件都到处跳。
-//		备注			只要继承了event的update函数，就有几率出现在61.53ms的行走图刷新的消耗列表中。
-//						判断就很头疼。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^2) 每帧
+//		★性能测试因素	物体触发管理层
+//		★性能测试消耗	24.61ms
+//		★最坏情况		所有事件都到处跳。
+//		★备注			只要继承了event的update函数，就有几率出现在61.53ms的行走图刷新的消耗列表中。
+//						判断就很头疼。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			事件跳跃：
 //				->强制跳跃
@@ -341,6 +366,7 @@
 	DrillUp.g_EJu_distance = Number(DrillUp.parameters["默认跳跃距离"] || 2);
 	DrillUp.g_EJu_delay = Number(DrillUp.parameters["默认跳跃延迟"] || 0);
 	
+	/*-----------------悬崖------------------*/
 	if( DrillUp.parameters["悬崖高度1"] != undefined &&
 		DrillUp.parameters["悬崖高度1"] != "" ){
 		DrillUp.g_EJu_cliff_1 = JSON.parse(DrillUp.parameters["悬崖高度1"]);
@@ -371,6 +397,8 @@
 	}else{
 		DrillUp.g_EJu_cliff_5 = [] ;
 	}
+	
+	/*-----------------禁止跳跃区------------------*/
 	if( DrillUp.parameters["禁止跳跃区"] != undefined && 
 		DrillUp.parameters["禁止跳跃区"] != "" ){
 		DrillUp.g_EJu_forbidden_area = JSON.parse(DrillUp.parameters["禁止跳跃区"]);
@@ -379,14 +407,13 @@
 	}
 	
 	
-	
 //=============================================================================
 // * 插件顺序检测
 //=============================================================================
 if( Imported.Drill_LayerWallBlock ){
 	alert(
 		"【Drill_EventJump.js  物体 - 事件跳跃】\n"+
-		"插件顺序不对，Drill_LayerWallBlock 物体-墙壁阻塞器 插件需要放在该插件后面。"
+		"插件顺序不对，Drill_LayerWallBlock 图块-墙壁阻塞器 插件需要放在该插件后面。"
 	);
 }
 
@@ -404,7 +431,7 @@ if( Imported.Drill_CoreOfMoveRoute ){
 // * 插件指令 - 指令
 //==============================
 var _drill_EJu_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function(command, args){
 	_drill_EJu_pluginCommand.call(this, command, args);
 	this.drill_EJu_forceJumpCommand(command, args);		//强制跳跃
 	this.drill_EJu_commonJumpCommand(command, args);	//普通跳跃
@@ -413,16 +440,13 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 //==============================
 // * 插件指令 - 强制跳跃
 //==============================
-Game_Interpreter.prototype.drill_EJu_forceJumpCommand = function(command, args) {
-	if (command === ">事件跳跃")  {
+Game_Interpreter.prototype.drill_EJu_forceJumpCommand = function( command, args ){
+	if( command === ">事件跳跃" ){
 		
 		/*-----------------事件------------------*/
-		if(args.length == 6){
+		var e_ids = null;
+		if( args.length >= 2 ){
 			var unit = String(args[1]);
-			var temp1 = String(args[3]);
-			var temp2 = String(args[5]);
-			var e_ids = null;
-			
 			if( e_ids == null && unit == "本事件" ){
 				e_ids = [];
 				e_ids.push( this._eventId );
@@ -433,7 +457,7 @@ Game_Interpreter.prototype.drill_EJu_forceJumpCommand = function(command, args) 
 				var temp_arr = unit.split(/[,，]/);
 				e_ids = [];
 				for( var k=0; k < temp_arr.length; k++ ){
-					e_ids.push( Number(temp_arr[j]) );
+					e_ids.push( Number(temp_arr[k]) );
 				}
 			}
 			if( e_ids == null && unit.indexOf("批量事件变量[") != -1 ){
@@ -457,125 +481,125 @@ Game_Interpreter.prototype.drill_EJu_forceJumpCommand = function(command, args) 
 				e_ids = [];
 				e_ids.push( $gameVariables.value(Number(unit)) );
 			}
-			
-			if( e_ids && e_ids.length > 0 ){
-				if( temp1 == "强制跳跃到" ){
-					var pos = temp2;
-					var e_pos = [];
-					if( pos.indexOf("位置变量[") != -1 ){
-						pos = pos.replace("位置变量[","");
-						pos = pos.replace("]","");
-						var temp_arr = pos.split(/[,，]/);
-						if( temp_arr.length >= 2 ){
-							e_pos = [ $gameVariables.value(Number(temp_arr[0])),
-									  $gameVariables.value(Number(temp_arr[1])) ];
-									  
-							for( var k=0; k < e_ids.length; k++ ){
-								var e_id = e_ids[k];
-								if( $gameMap.drill_EJu_isEventExist( e_id ) == false ){ continue; }
-								var e = $gameMap.event( e_id );
-								e.jump( e_pos[0] - e.x, e_pos[1] - e.y );
+		}
+		if( e_ids != null && args.length == 6){
+			var temp1 = String(args[3]);
+			var temp2 = String(args[5]);
+			if( temp1 == "强制跳跃到" ){
+				var pos = temp2;
+				var e_pos = [];
+				if( pos.indexOf("位置变量[") != -1 ){
+					pos = pos.replace("位置变量[","");
+					pos = pos.replace("]","");
+					var temp_arr = pos.split(/[,，]/);
+					if( temp_arr.length >= 2 ){
+						e_pos = [ $gameVariables.value(Number(temp_arr[0])),
+								  $gameVariables.value(Number(temp_arr[1])) ];
+								  
+						for( var k=0; k < e_ids.length; k++ ){
+							var e_id = e_ids[k];
+							if( $gameMap.drill_EJu_isEventExist( e_id ) == false ){ continue; }
+							var e = $gameMap.event( e_id );
+							e.jump( e_pos[0] - e.x, e_pos[1] - e.y );
+						}
+					}
+				}
+				if( pos.indexOf("相对朝向坐标变量[") != -1 ){
+					pos = pos.replace("相对朝向坐标变量[","");
+					pos = pos.replace("]","");
+					var temp_arr = pos.split(/[,，]/);
+					if( temp_arr.length >= 2 ){
+						e_pos = [ $gameVariables.value(Number(temp_arr[0])),
+								  $gameVariables.value(Number(temp_arr[1])) ];
+						
+						for( var k=0; k < e_ids.length; k++ ){
+							var e_id = e_ids[k];
+							if( $gameMap.drill_EJu_isEventExist( e_id ) == false ){ continue; }
+							var e = $gameMap.event( e_id );
+							if( e.direction() === 2 ){		//下
+								e.jump(e.x + e_pos[0], e.y + e_pos[1]);
+							} else if( e.direction() === 4 ){	//左
+								e.jump(e.x - e_pos[1], e.y + e_pos[0]);
+							} else if( e.direction() === 6 ){	//右
+								e.jump(e.x + e_pos[1], e.y - e_pos[0]);
+							} else if( e.direction() === 8 ){	//上
+								e.jump( - e_pos[0], - e_pos[1] );
 							}
 						}
 					}
-					if( pos.indexOf("相对朝向坐标变量[") != -1 ){
-						pos = pos.replace("相对朝向坐标变量[","");
-						pos = pos.replace("]","");
-						var temp_arr = pos.split(/[,，]/);
-						if( temp_arr.length >= 2 ){
-							e_pos = [ $gameVariables.value(Number(temp_arr[0])),
-									  $gameVariables.value(Number(temp_arr[1])) ];
-							
-							for( var k=0; k < e_ids.length; k++ ){
-								var e_id = e_ids[k];
-								if( $gameMap.drill_EJu_isEventExist( e_id ) == false ){ continue; }
-								var e = $gameMap.event( e_id );
-								if (e.direction() === 2) {		//下
-									e.jump(e.x + e_pos[0], e.y + e_pos[1]);
-								} else if (e.direction() === 4) {	//左
-									e.jump(e.x - e_pos[1], e.y + e_pos[0]);
-								} else if (e.direction() === 6) {	//右
-									e.jump(e.x + e_pos[1], e.y - e_pos[0]);
-								} else if (e.direction() === 8) {	//上
-									e.jump( - e_pos[0], - e_pos[1] );
-								}
+				}
+				if( pos.indexOf("相对坐标变量[") != -1 ){
+					pos = pos.replace("相对坐标变量[","");
+					pos = pos.replace("]","");
+					var temp_arr = pos.split(/[,，]/);
+					if( temp_arr.length >= 2 ){
+						e_pos = [ $gameVariables.value(Number(temp_arr[0])),
+								  $gameVariables.value(Number(temp_arr[1])) ];
+						
+						for( var k=0; k < e_ids.length; k++ ){
+							var e_id = e_ids[k];
+							if( $gameMap.drill_EJu_isEventExist( e_id ) == false ){ continue; }
+							var e = $gameMap.event( e_id );
+							e.jump( e_pos[0], e_pos[1] );
+						}
+					}
+				}
+				if( pos.indexOf("位置[") != -1 ){
+					pos = pos.replace("位置[","");
+					pos = pos.replace("]","");
+					var temp_arr = pos.split(/[,，]/);
+					if( temp_arr.length >= 2 ){
+						e_pos = [ Number(temp_arr[0]),Number(temp_arr[1]) ];
+						
+						for( var k=0; k < e_ids.length; k++ ){
+							var e_id = e_ids[k];
+							if( $gameMap.drill_EJu_isEventExist( e_id ) == false ){ continue; }
+							var e = $gameMap.event( e_id );
+							e.jump( e_pos[0] - e.x, e_pos[1] - e.y );
+						}
+					}
+				}
+				if( pos.indexOf("相对朝向坐标[") != -1 ){
+					pos = pos.replace("相对朝向坐标[","");
+					pos = pos.replace("]","");
+					var temp_arr = pos.split(/[,，]/);
+					if( temp_arr.length >= 2 ){
+						e_pos = [ Number(temp_arr[0]),Number(temp_arr[1]) ];
+						
+						for( var k=0; k < e_ids.length; k++ ){
+							var e_id = e_ids[k];
+							if( $gameMap.drill_EJu_isEventExist( e_id ) == false ){ continue; }
+							var e = $gameMap.event( e_id );
+							if( e.direction() === 2 ){		//下
+								e.jump(e.x + e_pos[0], e.y + e_pos[1]);
+							} else if( e.direction() === 4 ){	//左
+								e.jump(e.x - e_pos[1], e.y + e_pos[0]);
+							} else if( e.direction() === 6 ){	//右
+								e.jump(e.x + e_pos[1], e.y - e_pos[0]);
+							} else if( e.direction() === 8 ){	//上
+								e.jump( - e_pos[0], - e_pos[1] );
 							}
 						}
 					}
-					if( pos.indexOf("相对坐标变量[") != -1 ){
-						pos = pos.replace("相对坐标变量[","");
-						pos = pos.replace("]","");
-						var temp_arr = pos.split(/[,，]/);
-						if( temp_arr.length >= 2 ){
-							e_pos = [ $gameVariables.value(Number(temp_arr[0])),
-									  $gameVariables.value(Number(temp_arr[1])) ];
-							
-							for( var k=0; k < e_ids.length; k++ ){
-								var e_id = e_ids[k];
-								if( $gameMap.drill_EJu_isEventExist( e_id ) == false ){ continue; }
-								var e = $gameMap.event( e_id );
-								e.jump( e_pos[0], e_pos[1] );
-							}
-						}
-					}
-					if( pos.indexOf("位置[") != -1 ){
-						pos = pos.replace("位置[","");
-						pos = pos.replace("]","");
-						var temp_arr = pos.split(/[,，]/);
-						if( temp_arr.length >= 2 ){
-							e_pos = [ Number(temp_arr[0]),Number(temp_arr[1]) ];
-							
-							for( var k=0; k < e_ids.length; k++ ){
-								var e_id = e_ids[k];
-								if( $gameMap.drill_EJu_isEventExist( e_id ) == false ){ continue; }
-								var e = $gameMap.event( e_id );
-								e.jump( e_pos[0] - e.x, e_pos[1] - e.y );
-							}
-						}
-					}
-					if( pos.indexOf("相对朝向坐标[") != -1 ){
-						pos = pos.replace("相对朝向坐标[","");
-						pos = pos.replace("]","");
-						var temp_arr = pos.split(/[,，]/);
-						if( temp_arr.length >= 2 ){
-							e_pos = [ Number(temp_arr[0]),Number(temp_arr[1]) ];
-							
-							for( var k=0; k < e_ids.length; k++ ){
-								var e_id = e_ids[k];
-								if( $gameMap.drill_EJu_isEventExist( e_id ) == false ){ continue; }
-								var e = $gameMap.event( e_id );
-								if (e.direction() === 2) {		//下
-									e.jump(e.x + e_pos[0], e.y + e_pos[1]);
-								} else if (e.direction() === 4) {	//左
-									e.jump(e.x - e_pos[1], e.y + e_pos[0]);
-								} else if (e.direction() === 6) {	//右
-									e.jump(e.x + e_pos[1], e.y - e_pos[0]);
-								} else if (e.direction() === 8) {	//上
-									e.jump( - e_pos[0], - e_pos[1] );
-								}
-							}
-						}
-					}
-					if( pos.indexOf("相对坐标[") != -1 ){
-						pos = pos.replace("相对坐标[","");
-						pos = pos.replace("]","");
-						var temp_arr = pos.split(/[,，]/);
-						if( temp_arr.length >= 2 ){
-							e_pos = [ Number(temp_arr[0]),Number(temp_arr[1]) ];
-							
-							for( var k=0; k < e_ids.length; k++ ){
-								var e_id = e_ids[k];
-								if( $gameMap.drill_EJu_isEventExist( e_id ) == false ){ continue; }
-								var e = $gameMap.event( e_id );
-								e.jump( e_pos[0], e_pos[1] );
-							}
+				}
+				if( pos.indexOf("相对坐标[") != -1 ){
+					pos = pos.replace("相对坐标[","");
+					pos = pos.replace("]","");
+					var temp_arr = pos.split(/[,，]/);
+					if( temp_arr.length >= 2 ){
+						e_pos = [ Number(temp_arr[0]),Number(temp_arr[1]) ];
+						
+						for( var k=0; k < e_ids.length; k++ ){
+							var e_id = e_ids[k];
+							if( $gameMap.drill_EJu_isEventExist( e_id ) == false ){ continue; }
+							var e = $gameMap.event( e_id );
+							e.jump( e_pos[0], e_pos[1] );
 						}
 					}
 				}
 			}
 		}
 		
-		/*-----------------玩家------------------*/
 		if(args.length == 6){
 			var unit = String(args[1]);
 			var temp1 = String(args[3]);
@@ -603,13 +627,13 @@ Game_Interpreter.prototype.drill_EJu_forceJumpCommand = function(command, args) 
 							e_pos = [ $gameVariables.value(Number(temp_arr[0])),
 									  $gameVariables.value(Number(temp_arr[1])) ];
 							
-							if ($gamePlayer.direction() === 2) {		//下
+							if( $gamePlayer.direction() === 2 ){		//下
 								$gamePlayer.jump($gamePlayer.x + e_pos[0], $gamePlayer.y + e_pos[1]);
-							} else if ($gamePlayer.direction() === 4) {	//左
+							} else if( $gamePlayer.direction() === 4 ){	//左
 								$gamePlayer.jump($gamePlayer.x - e_pos[1], $gamePlayer.y + e_pos[0]);
-							} else if ($gamePlayer.direction() === 6) {	//右
+							} else if( $gamePlayer.direction() === 6 ){	//右
 								$gamePlayer.jump($gamePlayer.x + e_pos[1], $gamePlayer.y - e_pos[0]);
-							} else if ($gamePlayer.direction() === 8) {	//上
+							} else if( $gamePlayer.direction() === 8 ){	//上
 								$gamePlayer.jump( - e_pos[0], - e_pos[1] );
 							}
 						}
@@ -642,13 +666,13 @@ Game_Interpreter.prototype.drill_EJu_forceJumpCommand = function(command, args) 
 						if( temp_arr.length >= 2 ){
 							e_pos = [ Number(temp_arr[0]),Number(temp_arr[1]) ];
 							
-							if ($gamePlayer.direction() === 2) {		//下
+							if( $gamePlayer.direction() === 2 ){		//下
 								$gamePlayer.jump($gamePlayer.x + e_pos[0], $gamePlayer.y + e_pos[1]);
-							} else if ($gamePlayer.direction() === 4) {	//左
+							} else if( $gamePlayer.direction() === 4 ){	//左
 								$gamePlayer.jump($gamePlayer.x - e_pos[1], $gamePlayer.y + e_pos[0]);
-							} else if ($gamePlayer.direction() === 6) {	//右
+							} else if( $gamePlayer.direction() === 6 ){	//右
 								$gamePlayer.jump($gamePlayer.x + e_pos[1], $gamePlayer.y - e_pos[0]);
-							} else if ($gamePlayer.direction() === 8) {	//上
+							} else if( $gamePlayer.direction() === 8 ){	//上
 								$gamePlayer.jump( - e_pos[0], - e_pos[1] );
 							}
 						}
@@ -671,17 +695,13 @@ Game_Interpreter.prototype.drill_EJu_forceJumpCommand = function(command, args) 
 //==============================
 // * 插件指令 - 普通跳跃
 //==============================
-Game_Interpreter.prototype.drill_EJu_commonJumpCommand = function(command, args) {
-	if (command === ">事件跳跃")  {
+Game_Interpreter.prototype.drill_EJu_commonJumpCommand = function( command, args ){
+	if( command === ">事件跳跃" ){
 		
 		/*-----------------事件------------------*/
-		if(args.length == 8){
+		var e_ids = null;
+		if( args.length >= 2 ){
 			var unit = String(args[1]);
-			var temp1 = String(args[3]);
-			var temp2 = String(args[5]);
-			var temp3 = String(args[7]);
-			var e_ids = null;
-			
 			if( e_ids == null && unit == "本事件" ){
 				e_ids = [];
 				e_ids.push( this._eventId );
@@ -692,7 +712,7 @@ Game_Interpreter.prototype.drill_EJu_commonJumpCommand = function(command, args)
 				var temp_arr = unit.split(/[,，]/);
 				e_ids = [];
 				for( var k=0; k < temp_arr.length; k++ ){
-					e_ids.push( Number(temp_arr[j]) );
+					e_ids.push( Number(temp_arr[k]) );
 				}
 			}
 			if( e_ids == null && unit.indexOf("批量事件变量[") != -1 ){
@@ -716,27 +736,63 @@ Game_Interpreter.prototype.drill_EJu_commonJumpCommand = function(command, args)
 				e_ids = [];
 				e_ids.push( $gameVariables.value(Number(unit)) );
 			}
-			
-			if( e_ids && e_ids.length > 0 ){
-				if( temp1 == "普通跳跃" ){
-					temp3 = temp3.replace("距离[","");
-					temp3 = temp3.replace("]","");
-					for( var k=0; k < e_ids.length; k++ ){
-						var e_id = e_ids[k];
-						if( $gameMap.drill_EJu_isEventExist( e_id ) == false ){ continue; }
-						var e = $gameMap.event( e_id );
-						if( temp3 == "属性值" ){
-							e.drill_EJu_commonJumpCommand( e._drill_EJu_jump['distance'],temp2 );
-						}else{
-							e.drill_EJu_commonJumpCommand( Number(temp3),temp2 );
-						}
+		}
+		if( e_ids != null && e_ids.length > 0 && args.length == 8 ){
+			var temp1 = String(args[3]);
+			var temp2 = String(args[5]);
+			var temp3 = String(args[7]);
+			if( temp1 == "普通跳跃" ){
+				temp3 = temp3.replace("距离[","");
+				temp3 = temp3.replace("]","");
+				for( var k=0; k < e_ids.length; k++ ){
+					var e_id = e_ids[k];
+					if( $gameMap.drill_EJu_isEventExist( e_id ) == false ){ continue; }
+					var e = $gameMap.event( e_id );
+					if( temp3 == "属性值" ){
+						e.drill_EJu_commonJumpCommand( e._drill_EJu_jump['distance'],temp2 );
+					}else{
+						e.drill_EJu_commonJumpCommand( Number(temp3),temp2 );
 					}
+				}
+			}
+		}
+		if( e_ids != null && e_ids.length > 0 && args.length == 6 ){
+			var temp1 = String(args[3]);
+			var temp2 = String(args[5]);
+			if( temp1 == "修改属性-跳跃距离" ){
+				temp2 = temp2.replace("图块距离[","");
+				temp2 = temp2.replace("]","");
+				for( var k=0; k < e_ids.length; k++ ){
+					var e_id = e_ids[k];
+					if( $gameMap.drill_EJu_isEventExist( e_id ) == false ){ continue; }
+					var e = $gameMap.event( e_id );
+					e._drill_EJu_jump['distance'] = Number(temp2);
+				}
+			}
+			if( temp1 == "修改属性-跳跃声音" ){
+				temp2 = temp2.replace("声音[","");
+				temp2 = temp2.replace("]","");
+				for( var k=0; k < e_ids.length; k++ ){
+					var e_id = e_ids[k];
+					if( $gameMap.drill_EJu_isEventExist( e_id ) == false ){ continue; }
+					var e = $gameMap.event( e_id );
+					e._drill_EJu_jump['sound'] = DrillUp.g_EJu_se[ Number(temp2)-1 ];
+				}
+			}
+			if( temp1 == "修改属性-跳跃延迟" ){
+				temp2 = temp2.replace("时间[","");
+				temp2 = temp2.replace("]","");
+				for( var k=0; k < e_ids.length; k++ ){
+					var e_id = e_ids[k];
+					if( $gameMap.drill_EJu_isEventExist( e_id ) == false ){ continue; }
+					var e = $gameMap.event( e_id );
+					e._drill_EJu_jump['delay'] = Number(temp2);
 				}
 			}
 		}
 		
 		/*-----------------玩家------------------*/
-		if(args.length == 8){
+		if( args.length == 8 ){
 			var unit = String(args[1]);
 			var temp1 = String(args[3]);
 			var temp2 = String(args[5]);
@@ -759,8 +815,8 @@ Game_Interpreter.prototype.drill_EJu_commonJumpCommand = function(command, args)
 //==============================
 // * 插件指令 - 地形条件获取
 //==============================
-Game_Interpreter.prototype.drill_EJu_tileCommand = function(command, args) {
-	if (command === ">事件跳跃")  {
+Game_Interpreter.prototype.drill_EJu_tileCommand = function( command, args ){
+	if( command === ">事件跳跃" ){
 		/*-----------------事件------------------*/
 		if(args.length == 6){
 			var unit = String(args[1]);
@@ -852,27 +908,33 @@ Game_Map.prototype.drill_EJu_isEventExist = function( e_id ){
 // * 注释初始化
 //=============================================================================
 var _drill_EJu_event_setupPage = Game_Event.prototype.setupPage;
-Game_Event.prototype.setupPage = function() {
+Game_Event.prototype.setupPage = function( ){
 	_drill_EJu_event_setupPage.call(this);
     this.drill_EJu_setupPage();
 };
-Game_Event.prototype.drill_EJu_setupPage = function() {
-	if (!this._erased && this.page()) {this.list().forEach(function(l) {
-		if (l.code === 108) {
+Game_Event.prototype.drill_EJu_setupPage = function( ){
+	if( !this._erased && this.page() ){this.list().forEach(function(l ){
+		if( l.code === 108 ){
 			var args = l.parameters[0].split(' ');
 			var command = args.shift();
-			if (command == "=>事件跳跃"){	//=>事件跳跃 : 跳跃距离 : 2
+			if( command == "=>事件跳跃"){	//=>事件跳跃 : 跳跃距离 : 2
 				if(args.length == 4){
 					var type = String(args[1]);
-					var temp1 = Number(args[3]);
+					var temp1 = String(args[3]);
 					if( type == "跳跃距离" ){
-						this._drill_EJu_jump['distance'] = temp1;
+						temp1 = temp1.replace("图块距离[","");
+						temp1 = temp1.replace("]","");
+						this._drill_EJu_jump['distance'] = Number(temp1);
 					}
 					if( type == "跳跃声音" ){
-						this._drill_EJu_jump['sound'] = DrillUp.g_EJu_se[ temp1-1 ];
+						temp1 = temp1.replace("声音[","");
+						temp1 = temp1.replace("]","");
+						this._drill_EJu_jump['sound'] = DrillUp.g_EJu_se[ Number(temp1)-1 ];
 					}
 					if( type == "跳跃延迟" ){
-						this._drill_EJu_jump['delay'] = temp1;
+						temp1 = temp1.replace("时间[","");
+						temp1 = temp1.replace("]","");
+						this._drill_EJu_jump['delay'] = Number(temp1);
 					}
 				}
 			};
@@ -917,7 +979,7 @@ Game_Character.prototype.drill_COMR_routeCommand = function(command, args){
 // 
 //				说明：根据角色当前朝向、距离，向前跳。
 //==============================
-Game_CharacterBase.prototype.drill_EJu_commonJump = function() {
+Game_CharacterBase.prototype.drill_EJu_commonJump = function( ){
 	var data = this._drill_EJu_jump;
 	this.drill_EJu_jumpWithCheck( data['distance'],this._direction );	//条件跳跃
 }
@@ -928,7 +990,7 @@ Game_CharacterBase.prototype.drill_EJu_commonJump = function() {
 //			    参数：最大距离，朝向字符串
 //			    返回：无 
 //==============================
-Game_CharacterBase.prototype.drill_EJu_commonJumpCommand = function( distance,direction_str ) {
+Game_CharacterBase.prototype.drill_EJu_commonJumpCommand = function( distance,direction_str  ){
 	var direction = 2;
 	if( this._direction == 2 ){//下
 		if( direction_str == "前" ){ direction = 2; }
@@ -979,7 +1041,7 @@ Game_CharacterBase.prototype.drill_EJu_commonJumpCommand = function( distance,di
 //			    参数：最大距离，朝向(2/4/6/8/62/68/48/42)
 //			    返回：无 
 //==============================
-Game_CharacterBase.prototype.drill_EJu_jumpWithCheckLockDir = function( distance,direction ) {
+Game_CharacterBase.prototype.drill_EJu_jumpWithCheckLockDir = function( distance,direction  ){
 	this._drill_EJu_tempLockDir = true;
 	this.drill_EJu_jumpWithCheck( distance,direction );
 	this._drill_EJu_tempLockDir = false;
@@ -988,7 +1050,7 @@ Game_CharacterBase.prototype.drill_EJu_jumpWithCheckLockDir = function( distance
 // * 锁定朝向 - 过滤设置
 //==============================
 var _drill_EJu_lock_setDirection = Game_CharacterBase.prototype.setDirection;
-Game_CharacterBase.prototype.setDirection = function(d) {
+Game_CharacterBase.prototype.setDirection = function(d ){
 	if( this._drill_EJu_tempLockDir == true ){ return; }
 	_drill_EJu_lock_setDirection.call(this,d);
 }
@@ -1001,7 +1063,7 @@ Game_CharacterBase.prototype.setDirection = function(d) {
 // * 普通跳跃 - 参数初始化
 //==============================
 var _drill_EJu_initMembers = Game_CharacterBase.prototype.initMembers;
-Game_CharacterBase.prototype.initMembers = function() {
+Game_CharacterBase.prototype.initMembers = function( ){
 	_drill_EJu_initMembers.call(this);
 	
 	this._drill_EJu_jump = {};
@@ -1029,7 +1091,7 @@ Game_CharacterBase.prototype.initMembers = function() {
 //			    参数：最大距离，朝向(2/4/6/8/62/68/48/42)
 //			    返回：无 
 //==============================
-Game_CharacterBase.prototype.drill_EJu_jumpWithCheck = function( distance,direction ) {
+Game_CharacterBase.prototype.drill_EJu_jumpWithCheck = function( distance,direction  ){
 	// > 禁止跳跃区
 	if( this.drill_EJu_isInJumpForbiddenArea() ){ return; }
 	
@@ -1060,29 +1122,29 @@ Game_CharacterBase.prototype.drill_EJu_jumpWithCheck = function( distance,direct
 	var tar_y = this._y;
 	var next_x = 0;		
 	var next_y = 0;
-	for (var i = 1; i <= distance; i++) {		//向前一步步推进判断，函数是直接执行到底的
-		if ( direction === 2) {		//下
+	for (var i = 1; i <= distance; i++ ){		//向前一步步推进判断，函数是直接执行到底的
+		if(  direction === 2 ){		//下
 			next_x = this._x;		
 			next_y = this._y + i;
-		} else if ( direction === 4) {	//左
+		} else if(  direction === 4 ){	//左
 			next_x = this._x - i;
 			next_y = this._y;
-		} else if ( direction === 6) {	//右
+		} else if(  direction === 6 ){	//右
 			next_x = this._x + i;
 			next_y = this._y;
-		} else if ( direction === 8) {	//上
+		} else if(  direction === 8 ){	//上
 			next_x = this._x;
 			next_y = this._y - i;
-		} else if ( direction === 62) {	//右下
+		} else if(  direction === 62 ){	//右下
 			next_x = this._x + i;
 			next_y = this._y + i;
-		} else if ( direction === 68) {	//右上
+		} else if(  direction === 68 ){	//右上
 			next_x = this._x + i;
 			next_y = this._y - i;
-		} else if ( direction === 48) {	//左上
+		} else if(  direction === 48 ){	//左上
 			next_x = this._x - i;
 			next_y = this._y - i;
-		} else if ( direction === 42) {	//左下
+		} else if(  direction === 42 ){	//左下
 			next_x = this._x - i;
 			next_y = this._y + i;
 		}	
@@ -1090,7 +1152,7 @@ Game_CharacterBase.prototype.drill_EJu_jumpWithCheck = function( distance,direct
 		// >障碍判定
 		//		比如，A为不可通行区域，B为可通行，B在A的后面，B会覆盖A的tar_值
 		//		这样就可以跳过鸿沟了，但是遇到高墙，就break
-		if (this.drill_EJu_canPassJump(next_x,next_y,data['lastCliff'])) {
+		if( this.drill_EJu_canPassJump(next_x,next_y,data['lastCliff']) ){
 			tar_x = next_x;
 			tar_y = next_y;
 		};
@@ -1115,7 +1177,7 @@ Game_CharacterBase.prototype.drill_EJu_jumpWithCheck = function( distance,direct
 //==============================
 // * 普通跳跃 - 接触过的地面
 //==============================
-Game_CharacterBase.prototype.drill_EJu_jumpTouch = function( x,y ) {
+Game_CharacterBase.prototype.drill_EJu_jumpTouch = function( x,y  ){
 	//该方法需要被继承，用于子插件控制跳跃经过的轨迹
 }
 
@@ -1123,7 +1185,7 @@ Game_CharacterBase.prototype.drill_EJu_jumpTouch = function( x,y ) {
 // * 普通跳跃 - 延迟计数
 //==============================
 var _drill_EJu_c_update = Game_CharacterBase.prototype.update;
-Game_CharacterBase.prototype.update = function() {
+Game_CharacterBase.prototype.update = function( ){
 	_drill_EJu_c_update.call(this);
 	this._drill_EJu_jump['cur_delay'] -= 1;
 }
@@ -1136,7 +1198,9 @@ SoundManager.drill_EJu_playSE = function(fileName,character){
 	se.name = fileName;
 	se.pitch = 100;
 	se.volume = 100;
-	if( Imported.Drill_EventSound && AudioManager.drill_ESo_playCharacterSe ){		//适应声音距离化
+	
+	// > 【声音 - 事件的声音】适应声音距离化
+	if( Imported.Drill_EventSound && AudioManager.drill_ESo_playCharacterSe ){
 		AudioManager.drill_ESo_playCharacterSe(se,character);
 	}else{
 		AudioManager.playSe(se);
@@ -1146,7 +1210,7 @@ SoundManager.drill_EJu_playSE = function(fileName,character){
 //==============================
 // * 普通跳跃 - 判断悬崖高度
 //==============================
-Game_CharacterBase.prototype.drill_EJu_getCliffHeight = function(x, y) {
+Game_CharacterBase.prototype.drill_EJu_getCliffHeight = function(x, y ){
 	var r_id = $gameMap.regionId(x,y);
 	for(var i = 0;i< DrillUp.g_EJu_cliff_1.length ;i++){
 		if( r_id == DrillUp.g_EJu_cliff_1[i] ){
@@ -1183,7 +1247,7 @@ Game_CharacterBase.prototype.drill_EJu_getCliffHeight = function(x, y) {
 //==============================
 // * 普通跳跃 - 判断禁止跳跃区
 //==============================
-Game_CharacterBase.prototype.drill_EJu_isInJumpForbiddenArea = function() {
+Game_CharacterBase.prototype.drill_EJu_isInJumpForbiddenArea = function( ){
 	var r_id = $gameMap.regionId(this._x,this._y);
 	for(var i=0; i< DrillUp.g_EJu_forbidden_area.length ;i++){	//禁止跳跃区域
 		if( r_id == DrillUp.g_EJu_forbidden_area[i] ){
@@ -1196,7 +1260,7 @@ Game_CharacterBase.prototype.drill_EJu_isInJumpForbiddenArea = function() {
 //==============================
 // * 普通跳跃 - 判断跳跃目的地
 //==============================
-Game_CharacterBase.prototype.drill_EJu_canPassJump = function(x, y, cur_cliff) {
+Game_CharacterBase.prototype.drill_EJu_canPassJump = function(x, y, cur_cliff ){
 	
 	// > 判断 - 地图边界
     if( !$gameMap.isValid(x, y) ){ return false; }
@@ -1225,7 +1289,7 @@ Game_CharacterBase.prototype.drill_EJu_canPassJump = function(x, y, cur_cliff) {
 //==============================
 // * 普通跳跃 - 判断图块可通行情况
 //==============================
-Game_Map.prototype.drill_EJu_isAnyPassable = function( x, y ) {
+Game_Map.prototype.drill_EJu_isAnyPassable = function( x, y  ){
 	return this.isPassable(x, y, 2)||this.isPassable(x, y, 4)||this.isPassable(x, y, 6)||this.isPassable(x, y, 8);
 }
 
@@ -1237,7 +1301,7 @@ Game_Map.prototype.drill_EJu_isAnyPassable = function( x, y ) {
 		Imported.Drill_EventJump = false;
 		alert(
 			"【Drill_EventJump.js 物体 - 事件跳跃】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfMoveRoute 物体-移动路线核心"
+			"\n- Drill_CoreOfMoveRoute 移动路线-移动路线核心"
 		);
 }
 

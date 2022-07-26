@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        对话框 - 字符块持续动作效果
+ * @plugindesc [v1.2]        窗口字符 - 字符块持续动作效果
  * @author Drill_up
  * 
  * @Drill_LE_param "预设-%d"
@@ -22,16 +22,17 @@
  *
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该核心 不能 单独使用，必须基于核心。
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfWindowCharacter     对话框 - 窗口字符核心
+ *   - Drill_CoreOfWindowCharacter     窗口字符-窗口字符核心
  *     需要该核心才能建立字符块，并播放动作效果。
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：地图界面、战斗界面、菜单界面。
  *   作用于任何窗口。
- * 2.更多详细内容，去看看 "15.对话框 > 关于窗口字符.docx"。
+ * 2.更多详细内容，去看看 "23.窗口字符 > 关于窗口字符.docx"。
  * 细节：
  *   (1.所有字符块建立后，动作都是并行的，且不可控制。
  *   (2.常用于 对话框 显示特殊字符。一般的窗口也能够支持字符块，
@@ -147,6 +148,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 修复了使用 修改字体 的效果字符时，跳动字符无变化的bug。
+ * [v1.2]
+ * 修改了插件的分类。
  *
  *
  * @param ---预设组 1至20---
@@ -448,14 +451,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n)*o(字符块数量)*o(贴图处理) 每帧
-//		性能测试因素	对话管理层
-//		性能测试消耗	7.56ms，12.60ms（Drill_DCCE_Sprite.prototype.update）17.64ms（drill_DCCE_updateBitmap）
-//		最坏情况		地图中添加了大量头顶文字，而且这些文字还都是跳动的字符块。
-//		备注			对话管理层测试时直接卡到2-3帧，但都不是对话框插件造成的影响，有必要对其他插件进行整体优化了。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n)*o(字符块数量)*o(贴图处理) 每帧
+//		★性能测试因素	对话管理层
+//		★性能测试消耗	7.56ms，12.60ms（Drill_DCCE_Sprite.prototype.update）17.64ms（drill_DCCE_updateBitmap）
+//		★最坏情况		地图中添加了大量头顶文字，而且这些文字还都是跳动的字符块。
+//		★备注			对话管理层测试时直接卡到2-3帧，但都不是对话框插件造成的影响，有必要对其他插件进行整体优化了。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			持续动作效果：
 //				->动作
@@ -524,6 +532,13 @@
         }
     }
 	
+
+//=============================================================================
+// * >>>>基于插件检测>>>>
+//=============================================================================
+if( Imported.Drill_CoreOfWindowCharacter ){
+	
+	
 //=============================================================================
 // ** 窗口字符指令
 //=============================================================================
@@ -556,10 +571,10 @@ Window_Base.prototype.drill_COWC_processNewEffectChar_Combined = function( match
 			var temp_sprite = this.drill_DCCE_createBlockSprite( data_str );
 			
 			if( data['type'] == "标准闪烁" ){
-				temp_sprite.drill_DCCE_playSustainingFlash( sustain_time, data['param2'] );
+				temp_sprite.drill_DCCE_playSustainingFlicker( sustain_time, data['param2'] );
 			}
 			if( data['type'] == "渐变闪烁" ){
-				temp_sprite.drill_DCCE_playSustainingFlashCos( sustain_time, data['param2'] );
+				temp_sprite.drill_DCCE_playSustainingFlickerCos( sustain_time, data['param2'] );
 			}
 			if( data['type'] == "顺时针旋转" ){
 				temp_sprite.drill_DCCE_playSustainingRotate( sustain_time, data['param2'], 1 );
@@ -650,7 +665,7 @@ Window_Base.prototype.drill_COWC_processNewEffectChar_Combined = function( match
 				temp2 = temp2.replace("周期[","");
 				temp2 = temp2.replace("]","");
 				var temp_sprite = this.drill_DCCE_createBlockSprite( data_str );
-				temp_sprite.drill_DCCE_playSustainingFlash( Number(temp1),Number(temp2) );
+				temp_sprite.drill_DCCE_playSustainingFlicker( Number(temp1),Number(temp2) );
 				this.drill_COWC_addSprite( temp_sprite );
 				this.drill_COWC_charSubmit_Effect( temp_sprite._drill_width, 0 );
 			}
@@ -662,7 +677,7 @@ Window_Base.prototype.drill_COWC_processNewEffectChar_Combined = function( match
 				temp2 = temp2.replace("周期[","");
 				temp2 = temp2.replace("]","");
 				var temp_sprite = this.drill_DCCE_createBlockSprite( data_str );
-				temp_sprite.drill_DCCE_playSustainingFlashCos( Number(temp1),Number(temp2) );
+				temp_sprite.drill_DCCE_playSustainingFlickerCos( Number(temp1),Number(temp2) );
 				this.drill_COWC_addSprite( temp_sprite );
 				this.drill_COWC_charSubmit_Effect( temp_sprite._drill_width, 0 );
 			}
@@ -1065,12 +1080,15 @@ Window_Base.prototype.drill_DCCE_createBlockSprite = function( text ){
 	var text_height = this.drill_COWA_getTextHeight( text );
 	var temp_sprite = new Drill_DCCE_Sprite();
 	temp_sprite.visible = false;			//（准备好了再显示）
-	temp_sprite.bitmap = new Bitmap( text_width, text_height );
+	temp_sprite.bitmap = new Bitmap( text_width +2, text_height +2 );
 	temp_sprite.bitmap.textColor = this.contents.textColor;
 	temp_sprite.bitmap.paintOpacity = this.contents.paintOpacity;
 	temp_sprite.bitmap.fontSize = this.contents.fontSize;
-	temp_sprite.bitmap.fontFace = this.contents.fontFace;
 	temp_sprite.bitmap['drill_elements_drawText'] = true;		//（高级渐变颜色 偏移标记）
+	
+	// > 画笔同步
+	this.drill_COWC_drawSynchronization( this.contents, temp_sprite.bitmap );
+	
 	temp_sprite.bitmap.drawText( text, 0, 0, text_width, text_height );
 	temp_sprite._drill_width = text_width;
 	temp_sprite._drill_height = text_height;
@@ -1204,8 +1222,8 @@ Drill_DCCE_Sprite.prototype.update = function() {
 	
 	this.visible = true;
 	
-	this.drill_DCCE_updateSustainingFlash();					//帧刷新 - 标准闪烁
-	this.drill_DCCE_updateSustainingFlashCos();					//帧刷新 - 渐变闪烁
+	this.drill_DCCE_updateSustainingFlicker();					//帧刷新 - 标准闪烁
+	this.drill_DCCE_updateSustainingFlickerCos();					//帧刷新 - 渐变闪烁
 	this.drill_DCCE_updateSustainingRotate();					//帧刷新 - 顺时针/逆时针旋转
 	this.drill_DCCE_updateSustainingRotateVer();				//帧刷新 - 垂直卡片旋转
 	this.drill_DCCE_updateSustainingRotateHor();				//帧刷新 - 水平卡片旋转
@@ -1292,7 +1310,7 @@ Drill_DCCE_Sprite.prototype.drill_DCCE_stopEffect = function() {
 //==============================
 // * 初始化 - 持续 标准闪烁
 //==============================
-Drill_DCCE_Sprite.prototype.drill_DCCE_playSustainingFlash = function(time,period) {
+Drill_DCCE_Sprite.prototype.drill_DCCE_playSustainingFlicker = function(time,period) {
 	var ef = this._Drill_DCCE;
 	ef.playing_type = "标准闪烁";
 	ef.f_time = 0;
@@ -1306,7 +1324,7 @@ Drill_DCCE_Sprite.prototype.drill_DCCE_playSustainingFlash = function(time,perio
 //==============================
 // * 帧刷新 - 持续 标准闪烁
 //==============================
-Drill_DCCE_Sprite.prototype.drill_DCCE_updateSustainingFlash = function() {
+Drill_DCCE_Sprite.prototype.drill_DCCE_updateSustainingFlicker = function() {
 	var ef = this._Drill_DCCE;
 	if( ef.playing_type != "标准闪烁" ){ return; }
 	
@@ -1335,7 +1353,7 @@ Drill_DCCE_Sprite.prototype.drill_DCCE_updateSustainingFlash = function() {
 //==============================
 // * 初始化 - 持续 渐变闪烁
 //==============================
-Drill_DCCE_Sprite.prototype.drill_DCCE_playSustainingFlashCos = function(time,period) {
+Drill_DCCE_Sprite.prototype.drill_DCCE_playSustainingFlickerCos = function(time,period) {
 	var ef = this._Drill_DCCE;
 	ef.playing_type = "渐变闪烁";
 	ef.f_time = 0;
@@ -1345,7 +1363,7 @@ Drill_DCCE_Sprite.prototype.drill_DCCE_playSustainingFlashCos = function(time,pe
 //==============================
 // * 帧刷新 - 持续 渐变闪烁
 //==============================
-Drill_DCCE_Sprite.prototype.drill_DCCE_updateSustainingFlashCos = function() {
+Drill_DCCE_Sprite.prototype.drill_DCCE_updateSustainingFlickerCos = function() {
 	var ef = this._Drill_DCCE;
 	if( ef.playing_type != "渐变闪烁" ){ return; }
 	
@@ -2550,6 +2568,18 @@ Drill_DCCE_Sprite.prototype.drill_DCCE_updateSustainingAnchorRotate_Gradual = fu
 	}else{
 		this.drill_DCCE_stopEffect();
 	}
+}
+
+
+//=============================================================================
+// * <<<<基于插件检测<<<<
+//=============================================================================
+}else{
+		Imported.Drill_DialogCharContinuedEffect = false;
+		alert(
+			"【Drill_DialogCharContinuedEffect.js 窗口字符 - 字符块持续动作效果】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
+			"\n- Drill_CoreOfWindowCharacter 窗口字符-窗口字符核心"
+		);
 }
 
 

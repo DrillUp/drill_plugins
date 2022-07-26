@@ -22,12 +22,13 @@
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 插件必须基于核心。
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfBallistics       系统 - 弹道核心★★v1.7及以上★★
- *   - Drill_CoreOfGaugeNumber      系统 - 参数数字核心★★v1.2及以上★★
+ *   - Drill_CoreOfBallistics       系统-弹道核心★★v1.7及以上★★
+ *   - Drill_CoreOfGaugeNumber      系统-参数数字核心★★v1.2及以上★★
  * 可作用于：
- *   - Drill_X_GaugeForFloorDamage  地图UI - 地形伤害漂浮数字[扩展]
+ *   - Drill_X_GaugeForFloorDamage  图块-地形伤害漂浮数字[扩展]
  *     该插件能够使得目标插件在地形伤害/治愈时，弹出相应的数字。
  * 
  * -----------------------------------------------------------------------------
@@ -620,14 +621,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^2)*o(贴图处理)  每帧
-//		性能测试因素	物体管理层
-//		性能测试消耗	9.07ms
-//		最坏情况		大量插件指令不停地执行漂浮文字创建。
-//		备注			暂无
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^2)*o(贴图处理)  每帧
+//		★性能测试因素	物体管理层
+//		★性能测试消耗	9.07ms
+//		★最坏情况		大量插件指令不停地执行漂浮文字创建。
+//		★备注			暂无
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			漂浮参数数字：
 //				->结构
@@ -914,7 +920,7 @@ Game_Temp.prototype.initialize = function() {
 //==============================
 var _drill_GFN_layer_createParallax = Spriteset_Map.prototype.createParallax;
 Spriteset_Map.prototype.createParallax = function() {
-	_drill_GFN_layer_createParallax.call(this);		//rmmv远景 < 下层 < rmmv图块
+	_drill_GFN_layer_createParallax.call(this);		//地图远景 < 下层 < 图块层
 	if( !this._drill_mapDownArea ){
 		this._drill_mapDownArea = new Sprite();
 		this._baseSprite.addChild(this._drill_mapDownArea);	
@@ -925,7 +931,7 @@ Spriteset_Map.prototype.createParallax = function() {
 //==============================
 var _drill_GFN_layer_createTilemap = Spriteset_Map.prototype.createTilemap;
 Spriteset_Map.prototype.createTilemap = function() {
-	_drill_GFN_layer_createTilemap.call(this);		//rmmv图块 < 中层 < rmmv玩家
+	_drill_GFN_layer_createTilemap.call(this);		//图块层 < 中层 < 事件/玩家层
 	if( !this._drill_mapCenterArea ){
 		this._drill_mapCenterArea = new Sprite();
 		this._drill_mapCenterArea.z = 0.60;
@@ -937,7 +943,7 @@ Spriteset_Map.prototype.createTilemap = function() {
 //==============================
 var _drill_GFN_layer_createDestination = Spriteset_Map.prototype.createDestination;
 Spriteset_Map.prototype.createDestination = function() {
-	_drill_GFN_layer_createDestination.call(this);	//rmmv鼠标目的地 < 上层 < rmmv天气
+	_drill_GFN_layer_createDestination.call(this);	//鼠标目的地 < 上层 < 天气层
 	if( !this._drill_mapUpArea ){
 		this._drill_mapUpArea = new Sprite();
 		this._baseSprite.addChild(this._drill_mapUpArea);	
@@ -948,7 +954,7 @@ Spriteset_Map.prototype.createDestination = function() {
 //==============================
 var _drill_GFN_layer_createPictures = Spriteset_Map.prototype.createPictures;
 Spriteset_Map.prototype.createPictures = function() {
-	_drill_GFN_layer_createPictures.call(this);		//rmmv图片 < 图片层 < rmmv对话框
+	_drill_GFN_layer_createPictures.call(this);		//图片对象层 < 图片层 < 对话框集合
 	if( !this._drill_mapPicArea ){
 		this._drill_mapPicArea = new Sprite();
 		this.addChild(this._drill_mapPicArea);	
@@ -959,7 +965,7 @@ Spriteset_Map.prototype.createPictures = function() {
 //==============================
 var _drill_GFN_layer_createAllWindows = Scene_Map.prototype.createAllWindows;
 Scene_Map.prototype.createAllWindows = function() {
-	_drill_GFN_layer_createAllWindows.call(this);	//rmmv对话框 < 最顶层
+	_drill_GFN_layer_createAllWindows.call(this);	//对话框集合 < 最顶层
 	if( !this._drill_SenceTopArea ){
 		this._drill_SenceTopArea = new Sprite();
 		this.addChild(this._drill_SenceTopArea);	
@@ -1304,7 +1310,7 @@ Drill_GFN_NumberSprite.prototype.drill_updatePosition = function() {
 }else{
 		Imported.Drill_GaugeFloatingNum = false;
 		alert(
-			"【Drill_GaugeFloatingNum.js 地图UI - 漂浮参数数字】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
+			"【Drill_GaugeFloatingNum.js 地图UI - 临时漂浮参数数字】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
 			"\n- Drill_CoreOfBallistics 系统-弹道核心" + 
 			"\n- Drill_CoreOfGaugeNumber 系统-参数数字核心"
 		);

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.5]        行走图 - 显现动作效果
+ * @plugindesc [v1.6]        行走图 - 显现动作效果
  * @author Drill_up
  * 
  * 
@@ -15,6 +15,10 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 使得你可以播放事件显现出来的各种动作。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----插件扩展
+ * 该插件可以单独使用。
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -35,7 +39,7 @@
  * 透明度：
  *   (1.开启"透明度检查"后，如果事件的透明度为255，则动作会被阻止播放。
  *   (2.该插件只影响事件的 透明度 ，并不控制 透明状态 。
- *      若rmmv的透明状态为ON时，事件直接不可见，动作也不可见。
+ *      若透明状态为ON时，事件直接不可见，动作也不可见。
  * 设计：
  *   (1.你可以使得事件执行消失动作之后，再显现动作出现在镜像中。
  *      具体可以去镜像管理层看看"镜像化"的小爱丽丝。
@@ -57,6 +61,8 @@
  * 插件指令：>显现动作 : 批量事件[10,11] : 标准弹跳 : 时间[60] : 高度[168]
  * 插件指令：>显现动作 : 批量事件变量[21,22] : 标准弹跳 : 时间[60] : 高度[168]
  * 
+ * 插件指令：>显现动作 : 本事件 : 直接显现 : 时间[60]
+ * 插件指令：>显现动作 : 本事件 : 移动显现 : 时间[60] : 方向角度[90] : 移动距离[100]
  * 插件指令：>显现动作 : 本事件 : 标准落下 : 时间[60] : 缓冲时间[20] : 高度[168]
  * 插件指令：>显现动作 : 本事件 : 标准弹跳 : 时间[60] : 高度[500]
  * 插件指令：>显现动作 : 本事件 : 横向冒出 : 时间[60] : 横向比例[1.5]
@@ -70,13 +76,14 @@
  * 插件指令：>显现动作 : 本事件 : 立即终止动作
  * 
  * 1.前半部分（玩家）和 后半部分（标准落下 : 时间[60] : 缓冲时间[20] : 高度[168]）
- *   的参数可以随意组合。一共有10*11种组合方式。
+ *   的参数可以随意组合。一共有10*13种组合方式。
  * 2."玩家"和"玩家领队"是同一个意思。
  *   "玩家队员[1]"表示领队后面第一个跟随的队友。
- * 3.部分类型的动作有 时间和缓冲时间 两个设置，该动作分两个阶段。
+ * 3.参数中"时间"、"周期"的单位是帧。1秒60帧。
+ *   参数中"距离"、"高度"的单位是像素。
+ * 4.类型的更详细介绍，去看看 "7.行走图 > 关于动作效果.docx"。
+ * 5.部分类型的动作有 时间和缓冲时间 两个设置，该动作分两个阶段。
  *   比如"标准落下"，分别对应落下的动作时间，和落地后阶段弹簧效果的缓冲时间。
- * 4.如果你不想要任何动作，只想让事件直接静态显现，直接设置 标准弹跳 + 高度0 即可。
- *   但是时间不能为0。
  * 
  * 以下是旧版本的指令，也可以用：
  * 插件指令(旧)：>玩家显现效果 : 领队 : 标准落下 : 60 : 168
@@ -157,6 +164,8 @@
  * 添加了横向冒出和纵向冒出。
  * [v1.5]
  * 添加了插件指令获取状态信息功能。
+ * [v1.6]
+ * 添加了 直接显现、移动显现 功能。
  * 
  * 
  * 
@@ -184,15 +193,20 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n)*o(镜像)*o(贴图处理) 每帧
-//		性能测试因素	地图管理层 125事件
-//		性能测试消耗	39.91ms（Sprite_Character.update）
-//		最坏情况		所有事件都在执行动作。
-//		备注			从原理上看，变化并没有那么复杂，只是图像一直在变。
-//						类似于滤镜，但没有滤镜消耗复杂。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n)*o(镜像)*o(贴图处理) 每帧
+//		★性能测试因素	地图管理层 125事件
+//		★性能测试消耗	39.91ms（Sprite_Character.update）
+//		★最坏情况		所有事件都在执行动作。
+//		★备注			从原理上看，变化并没有那么复杂，只是图像一直在变。
+//						类似于滤镜，但没有滤镜消耗复杂。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			显现动作效果：
 //				->动作
@@ -210,7 +224,7 @@
 //		★必要注意事项：
 //			1.变化原理为：每帧都【固定初始值】，然后适时赋值公式变化值。
 //			  该插件限定透明度 0->255 的变化。
-//			2.由于rmmv函数中没有【Game_Character.prototype.update】，所以继承时要用【Game_CharacterBase.prototype.update】。
+//			2.由于函数中没有【Game_Character.prototype.update】，所以继承时要用【Game_CharacterBase.prototype.update】。
 //			  之前继承了这个没有的函数，造成了举起物体插件出问题。
 //
 //		★其它说明细节：
@@ -399,7 +413,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					$gameSwitches.setValue( temp1, b );
 				}
 			}
-			if( type == "获取正在播放的类型" && Imported.Drill_CoreOfString ){
+			if( type == "获取正在播放的类型" && Imported.Drill_CoreOfString ){	//【系统 - 字符串核心】
 				temp1 = temp1.replace("字符串[","");
 				temp1 = temp1.replace("]","");
 				temp1 = Number(temp1);
@@ -418,6 +432,22 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					$gameStrings.setValue( temp1, str );
 				}
 			}
+			
+			/*-----------------直接显现------------------*/
+			if( type == "直接显现" ){
+				temp1 = temp1.replace("时间[","");
+				temp1 = temp1.replace("]","");
+				if( e_chars != null){
+					for( var k=0; k < e_chars.length; k++ ){
+						e_chars[k].drill_EFIE_playShowingAppear( Number(temp1) );
+					}
+				}
+				if( p_chars != null){
+					for( var k=0; k < p_chars.length; k++ ){
+						p_chars[k].drill_EFIE_playShowingAppear( Number(temp1) );
+					}
+				}
+			}
 		}	
 			
 		if( args.length == 10 ){
@@ -425,6 +455,26 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var temp1 = String(args[5]);
 			var temp2 = String(args[7]);
 			var temp3 = String(args[9]);
+			
+			/*-----------------移动显现------------------*/
+			if( type == "移动显现" ){
+				temp1 = temp1.replace("时间[","");
+				temp1 = temp1.replace("]","");
+				temp2 = temp2.replace("方向角度[","");
+				temp2 = temp2.replace("]","");
+				temp3 = temp3.replace("移动距离[","");
+				temp3 = temp3.replace("]","");
+				if( e_chars != null){
+					for( var k=0; k < e_chars.length; k++ ){
+						e_chars[k].drill_EFIE_playShowingMoveAppear( Number(temp1),Number(temp2),Number(temp3) );
+					}
+				}
+				if( p_chars != null){
+					for( var k=0; k < p_chars.length; k++ ){
+						p_chars[k].drill_EFIE_playShowingMoveAppear( Number(temp1),Number(temp2),Number(temp3) );
+					}
+				}
+			}
 			
 			/*-----------------标准落下------------------*/
 			if( type == "标准落下" ){
@@ -959,7 +1009,11 @@ Game_Character.prototype.drill_EFIE_isPlaying = function() {
 //==============================
 // * 物体 - 设置透明度
 //==============================
-Game_Character.prototype.drill_EFIE_setOpacity = function(opacity) {
+Game_Character.prototype.drill_EFIE_setOpacity = function( opacity ){
+	if( isNaN(opacity) ){
+		alert(	"【Drill_EventFadeInEffect.js 行走图 - 显现动作效果】\n" +
+				"错误，透明度赋值时出现了NaN错误值。");
+	}
 	this.setOpacity( opacity );
 }
 //==============================
@@ -974,6 +1028,8 @@ Game_CharacterBase.prototype.update = function() {
 	if( this._Drill_EFIE.real_width == -1 ){ return; }		//需要等图片加载完成
 	if( this._Drill_EFIE.real_height == -1 ){ return; }
 	
+	this.drill_EFIE_updateShowingAppear();			//帧刷新 - 直接显现
+	this.drill_EFIE_updateShowingMoveAppear();		//帧刷新 - 移动显现
 	this.drill_EFIE_updateShowingFall();			//帧刷新 - 标准落下
 	this.drill_EFIE_updateShowingJump();			//帧刷新 - 标准弹跳
 	this.drill_EFIE_updateShowingHorizonFlat();		//帧刷新 - 放大出现
@@ -1003,6 +1059,61 @@ Game_Character.prototype.drill_EFIE_stopEffect = function() {
 //=============================================================================
 // ** 显现动作
 //=============================================================================
+//==============================
+// * 初始化 - 显现 直接显现
+//==============================
+Game_Character.prototype.drill_EFIE_playShowingAppear = function( time ){
+	var ef = this._Drill_EFIE;
+	ef.playing_type = "直接显现";
+	ef.fA_dtime = time;
+	ef.fA_time = 0;
+}
+//==============================
+// * 帧刷新 - 显现 直接显现
+//==============================
+Game_Character.prototype.drill_EFIE_updateShowingAppear = function() {
+	var ef = this._Drill_EFIE;
+	if( ef.playing_type != "直接显现" ){ return; }
+	
+	if( ef.fA_time < ef.fA_dtime ){
+		ef.fA_time ++;
+		ef.opacity = 255 * ef.fA_time/ef.fA_dtime;
+		this.drill_EFIE_setOpacity(ef.opacity);
+	}else{
+		this.drill_EFIE_stopEffect();	//结束动作
+	}
+}
+
+//==============================
+// * 初始化 - 显现 移动显现
+//==============================
+Game_Character.prototype.drill_EFIE_playShowingMoveAppear = function( time,angle,distance ){
+	var ef = this._Drill_EFIE;
+	ef.playing_type = "移动显现";
+	ef.fA_dtime = time;
+	ef.fA_time = 0;
+	ef.fA_angle = angle;
+	ef.fA_distance = distance;
+}
+//==============================
+// * 帧刷新 - 显现 移动显现
+//==============================
+Game_Character.prototype.drill_EFIE_updateShowingMoveAppear = function() {
+	var ef = this._Drill_EFIE;
+	if( ef.playing_type != "移动显现" ){ return; }
+	
+	if( ef.fA_time < ef.fA_dtime ){
+		ef.fA_time ++;
+		var temp_d = ef.fA_distance * (1 - ef.fA_time/ef.fA_dtime);		//匀速移动
+		ef.x = temp_d * Math.cos( ef.fA_angle *Math.PI/180 );
+		ef.y = temp_d * Math.sin( ef.fA_angle *Math.PI/180 );
+		ef.opacity = 255 * ef.fA_time/ef.fA_dtime;
+		this.drill_EFIE_setOpacity(ef.opacity);
+	}else{
+		this.drill_EFIE_stopEffect();	//结束动作
+	}
+}
+
 //==============================
 // * 初始化 - 显现 标准落下
 //==============================

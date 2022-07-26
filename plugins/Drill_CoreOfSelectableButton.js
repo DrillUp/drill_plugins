@@ -19,11 +19,12 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 能够将含选项的窗口，变成一系列灵活分布的按钮组。
- * 【支持插件关联资源的打包、加密】
+ * ★★尽量放在最靠上的位置★★
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 插件必须基于核心，并可以辅助扩展下列插件。
+ * 该插件 不能 单独使用。
+ * 需要基于其他核心插件，才能运行，并作用于其他子插件。
  * 基于：
  *   - Drill_CoreOfBallistics       系统 - 弹道核心
  *   - Drill_CoreOfWindowAuxiliary  系统 - 窗口辅助核心★★v1.9及以上★★
@@ -82,7 +83,7 @@
  *              80.00ms - 120.00ms（中消耗）
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
- * 时间复杂度： o(n^3)*o(贴图处理)
+ * 时间复杂度： o(n^3)*o(贴图处理) 每帧
  * 测试方法：   标题菜单、主菜单界面性能测试。
  * 测试结果：   菜单界面中，消耗为：【24.54ms】
  *              地图界面中，消耗为：【57.41ms】
@@ -1239,15 +1240,20 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^3)*o(贴图处理)  每帧
-//		性能测试因素	主菜单界面
-//		性能测试消耗	24.54ms（update函数 9.71ms）
-//						57.41ms（对话选项按钮组 drill_COSB_getVisibleRowNum）
-//		最坏情况		出现了100个以上的按钮，不过一般情况下，子插件都会限制最大显示数量。
-//		备注			按钮组消耗一般，类似于gif的消耗。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^3)*o(贴图处理) 每帧
+//		★性能测试因素	主菜单界面
+//		★性能测试消耗	24.54ms（update函数 9.71ms）
+//						57.41ms（对话选项按钮组 drill_COSB_getVisibleRowNum）
+//		★最坏情况		出现了100个以上的按钮，不过一般情况下，子插件都会限制最大显示数量。
+//		★备注			按钮组消耗一般，类似于gif的消耗。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			按钮组核心：
 //				->主体
@@ -1429,9 +1435,9 @@
 		// > 选中的按钮
 		data['selected_opacity_default'] = Number( dataFrom["未选中按钮透明度"] || 160);
 		data['selected_opacity_time'] = Number( dataFrom["选中后透明度变化时长"] || 20);
-		data['selected_flash'] = String( dataFrom["闪烁效果"] || "关闭");
-		data['selected_flashSpeed'] = Number( dataFrom["闪烁速度"] || 6.0);
-		data['selected_flashRange'] = Number( dataFrom["闪烁幅度范围"] || 20);
+		data['selected_flicker'] = String( dataFrom["闪烁效果"] || "关闭");
+		data['selected_flickerSpeed'] = Number( dataFrom["闪烁速度"] || 6.0);
+		data['selected_flickerRange'] = Number( dataFrom["闪烁幅度范围"] || 20);
 		data['selected_swing'] = String( dataFrom["摇晃效果"] || "关闭");
 		data['selected_swingSpeed'] = Number( dataFrom["摇晃速度"] || 4.0);
 		data['selected_swingRange'] = Number( dataFrom["摇晃幅度范围"] || 12);
@@ -1517,7 +1523,7 @@ if( Imported.Drill_CoreOfBallistics &&
 // **
 // **		作用域：	地图界面、战斗界面、菜单界面
 // **		主功能：	> 定义一个贴图组合体，根据预设定义，得到一个参数条贴图。
-// **					> 具体功能见 "13.UI > 关于参数条.docx"。
+// **					> 具体功能见 "1.系统 > 关于参数条.docx"。
 // **
 // **		说明：	> sprite贴在任意地方都可以。
 // **		
@@ -1661,9 +1667,9 @@ Drill_COSB_LayerSprite.prototype.drill_initData = function() {
 	
 	if( data['selected_opacity_default'] == undefined ){ data['selected_opacity_default'] = 160 };	//选中的按钮 - 未选中按钮透明度
 	if( data['selected_opacity_time'] == undefined ){ data['selected_opacity_time'] = 20 };			//选中的按钮 - 选中后透明度变化时长
-	if( data['selected_flash'] == undefined ){ data['selected_flash'] = "关闭" };					//选中的按钮 - 闪烁效果
-	if( data['selected_flashSpeed'] == undefined ){ data['selected_flashSpeed'] = 6.0 };			//选中的按钮 - 闪烁速度
-	if( data['selected_flashRange'] == undefined ){ data['selected_flashRange'] = 20 };				//选中的按钮 - 闪烁幅度范围
+	if( data['selected_flicker'] == undefined ){ data['selected_flicker'] = "关闭" };					//选中的按钮 - 闪烁效果
+	if( data['selected_flickerSpeed'] == undefined ){ data['selected_flickerSpeed'] = 6.0 };			//选中的按钮 - 闪烁速度
+	if( data['selected_flickerRange'] == undefined ){ data['selected_flickerRange'] = 20 };				//选中的按钮 - 闪烁幅度范围
 	if( data['selected_swing'] == undefined ){ data['selected_swing'] = "关闭" };					//选中的按钮 - 摇晃效果
 	if( data['selected_swingSpeed'] == undefined ){ data['selected_swingSpeed'] = 20 };				//选中的按钮 - 摇晃速度
 	if( data['selected_swingRange'] == undefined ){ data['selected_swingRange'] = 20 };				//选中的按钮 - 摇晃幅度范围
@@ -1927,6 +1933,10 @@ Drill_COSB_LayerSprite.prototype.drill_window_getBitmapIndex = function( real_in
 			
 			// > 返回 交错列表中的index
 			var bitmap_index = temp_window._drill_COSB_indexList[ real_index ];
+		
+			// > 没有配置资源列表，用默认的贴图
+			if( temp_data['btn_src'][ bitmap_index ] == undefined ){ return -1; }
+			
 			return bitmap_index;
 		
 		}else{
@@ -2232,9 +2242,9 @@ Drill_COSB_LayerSprite.prototype.drill_createButton = function() {
 		// > 弹道初始化
 		$gameTemp.drill_COBa_setBallisticsMove( data );												//初始化
 		$gameTemp.drill_COBa_preBallisticsMove( temp_sprite, i , temp_sprite.x, temp_sprite.y );	//推演赋值
-		temp_sprite._drill_foldTime = 0;						//播放帧时间置零
-		temp_sprite._drill_slideTime = data['movementTime'];	//总时间
-		temp_sprite._drill_delayTime = data['movementDelay'];	//延迟时间
+		temp_sprite._drill_foldTime = 0;										//播放帧时间置零
+		temp_sprite._drill_slideTime = Math.max( data['movementTime'], 1);		//总时间
+		temp_sprite._drill_delayTime = data['movementDelay'];					//延迟时间
 		
 		// > 选中属性初始化
 		temp_sprite['_select_periodTime'] = 0;		//选中时间（周期类）
@@ -2287,9 +2297,9 @@ Drill_COSB_LayerSprite.prototype.drill_createName = function() {
 	// > 弹道初始化
 	$gameTemp.drill_COBa_setBallisticsMove( data );											//初始化
 	$gameTemp.drill_COBa_preBallisticsMove( temp_layer, 0 , temp_layer.x, temp_layer.y );	//推演赋值
-	temp_layer._drill_foldTime = 0;							//播放帧时间置零
-	temp_layer._drill_slideTime = data['movementTime'];		//总时间
-	temp_layer._drill_delayTime = data['movementDelay'];	//延迟时间
+	temp_layer._drill_foldTime = 0;											//播放帧时间置零
+	temp_layer._drill_slideTime = Math.max( data['movementTime'], 1);		//总时间
+	temp_layer._drill_delayTime = data['movementDelay'];					//延迟时间
 }
 //==============================
 // * 销毁 - 执行销毁
@@ -2573,7 +2583,7 @@ Drill_COSB_LayerSprite.prototype.drill_updateButtonSelectionTransfer = function(
 	selected_sprite['_select_periodTime'] %= 360;
 	
 	// > 选中的按钮 - 透明度时间+1
-	if( temp_data['selected_flash'] != "开启" ){
+	if( temp_data['selected_flicker'] != "开启" ){
 		selected_sprite['_select_opacityTime'] += 1;
 		if( selected_sprite['_select_opacityTime'] > temp_data['selected_opacity_time'] ){
 			selected_sprite['_select_opacityTime'] = temp_data['selected_opacity_time'];
@@ -2622,7 +2632,7 @@ Drill_COSB_LayerSprite.prototype.drill_updateButtonSelectionTransfer = function(
 	}
 	
 	// > 非选中按钮 - 透明度时间回落
-	if( temp_data['selected_flash'] != "开启" ){
+	if( temp_data['selected_flicker'] != "开启" ){
 		for(var i = 0; i < this._drill_button_spriteTank.length; i++ ){
 			var temp_sprite = this._drill_button_spriteTank[i];
 			if( temp_sprite == selected_sprite ){ continue; }
@@ -2651,9 +2661,9 @@ Drill_COSB_LayerSprite.prototype.drill_updateButtonSelectionTransfer = function(
 		var temp_sprite = this._drill_button_spriteTank[i];
 		var cur_time = temp_sprite['_select_periodTime'];
 		// > 闪烁效果
-		if( temp_data['selected_flash'] == "开启" ){
-			var speed = temp_data['selected_flashSpeed'];
-			var range = temp_data['selected_flashRange'];
+		if( temp_data['selected_flicker'] == "开启" ){
+			var speed = temp_data['selected_flickerSpeed'];
+			var range = temp_data['selected_flickerRange'];
 			temp_sprite['_opacity'] += range * Math.sin( cur_time * speed /180*Math.PI );
 			temp_sprite['_opacity'] = temp_sprite['_opacity'].clamp(0,255);
 		
@@ -3173,20 +3183,20 @@ Drill_COSB_WindowSprite.prototype.drill_COSB_updateText = function() {
 	yy -= hh;
 	
 	if( data['anchorType'] == "左上角" ){
-		xx += 0;
-		yy += 0;
+		xx += ww;
+		yy += hh;
 	}
 	if( data['anchorType'] == "右上角" ){
-		xx += ww;
-		yy += 0;
-	}
-	if( data['anchorType'] == "左下角" ){
 		xx += 0;
 		yy += hh;
 	}
-	if( data['anchorType'] == "右下角" ){
+	if( data['anchorType'] == "左下角" ){
 		xx += ww;
-		yy += hh;
+		yy += 0;
+	}
+	if( data['anchorType'] == "右下角" ){
+		xx += 0;
+		yy += 0;
 	}
 	if( data['anchorType'] == "正中心" ){
 		xx += ww * 0.5;
@@ -3194,18 +3204,18 @@ Drill_COSB_WindowSprite.prototype.drill_COSB_updateText = function() {
 	}
 	if( data['anchorType'] == "正上方" ){
 		xx += ww * 0.5;
-		yy += 0;
+		yy += hh;
 	}
 	if( data['anchorType'] == "正下方" ){
 		xx += ww * 0.5;
-		yy += hh;
+		yy += 0;
 	}
 	if( data['anchorType'] == "正左方" ){
-		xx += 0;
+		xx += ww;
 		yy += hh * 0.5;
 	}
 	if( data['anchorType'] == "正右方" ){
-		xx += ww;
+		xx += 0;
 		yy += hh * 0.5;
 	}
 	

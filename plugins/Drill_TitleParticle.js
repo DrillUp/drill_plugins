@@ -19,13 +19,13 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 你可以在标题界面中放置一种或者多种粒子。
- * 【支持插件关联资源的打包、加密】
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 插件不能单独使用，必须基于核心插件。
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfGlobalSave       系统 - 全局存储核心
+ *   - Drill_CoreOfGlobalSave       管理器-全局存储核心
  *     由于在标题界面，插件的数据固定全局存储。
  * 
  * -----------------------------------------------------------------------------
@@ -37,7 +37,7 @@
  * 全局存储：
  *   (1.该插件控制的显示/隐藏数据将存储在全局文件中。
  *      如果游戏中修改了显示/隐藏，则永久有效，不保存也有效。
- *   (2.更多详细介绍，去看看 "1.系统 > 关于全局存储.docx"。
+ *   (2.更多详细介绍，去看看 "21.管理器 > 关于全局存储.docx"。
  *   (3.留意全局存储的机制，开游戏就生效。
  *      如果你遇到了图片设置后不显示/不变化的问题，要注意清除全部存档。
  * 层级:
@@ -84,7 +84,7 @@
  * 工作类型：   持续执行
  * 时间复杂度： o(n^2)*o(贴图处理) 每帧
  * 测试方法：   打开主菜单界面，进行性能测试。
- * 测试结果：   主菜单中，粒子的消耗为：【12.74ms】
+ * 测试结果：   菜单界面中，粒子的消耗为：【12.74ms】
  *
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
  *   测试结果并不是精确值，范围在给定值的10ms范围内波动。
@@ -879,14 +879,19 @@
 //		全局存储变量	DrillUp.global_TPa_visibleTank
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^2)*o(贴图处理)
-//		性能测试因素	主菜单界面
-//		性能测试消耗	6.43ms 11.77ms 12.74ms
-//		最坏情况		无
-//		备注			无
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^2)*o(贴图处理)
+//		★性能测试因素	主菜单界面
+//		★性能测试消耗	6.43ms 11.77ms 12.74ms
+//		★最坏情况		无
+//		★备注			无
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			标题粒子：
 //				->基本属性
@@ -1317,7 +1322,7 @@ Scene_Title.prototype.drill_TPa_update = function() {
 		spr.rotation += data['par_selfRotate'] /180*Math.PI;
 		
 		// > 过界刷新
-    	if( this.drill_TPa_needResetParticles(i) ){
+    	if( this.drill_TPa_isNeedResetParticles(i) ){
 			this.drill_TPa_resetParticles(i);
 		};
 	};
@@ -1347,7 +1352,7 @@ Scene_Title.prototype.drill_TPa_update = function() {
 //==============================
 // * 粒子 - 重设条件
 //==============================	
-Scene_Title.prototype.drill_TPa_needResetParticles = function( i ){
+Scene_Title.prototype.drill_TPa_isNeedResetParticles = function( i ){
 	var spr = this._drill_TPa_spriteTankOrg[i];
 	var data = this._drill_TPa_dataTank[i];
 	var ww = Math.max( spr.width, 100 );
@@ -1583,8 +1588,8 @@ Scene_Title.prototype.drill_TPa_getPointToPointDegree = function( x1,y1,x2,y2 ){
 }else{
 		Imported.Drill_TitleParticle = false;
 		alert(
-			"【Drill_TitleParticle.js 标题-多层标题粒子】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfGlobalSave 系统-全局存储核心"
+			"【Drill_TitleParticle.js 标题 - 多层标题粒子】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
+			"\n- Drill_CoreOfGlobalSave 管理器-全局存储核心"
 		);
 }
 

@@ -19,14 +19,14 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 使得你可以针对时间计时器进行美化，包括相关插件指令操作。
- * 【支持插件关联资源的打包、加密】
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 插件必须基于核心。
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfGaugeMeter       系统 - 参数条核心★★v1.5及以上★★
- *   - Drill_CoreOfGaugeNumber      系统 - 参数数字核心★★v1.2及以上★★
+ *   - Drill_CoreOfGaugeMeter       系统-参数条核心★★v1.5及以上★★
+ *   - Drill_CoreOfGaugeNumber      系统-参数数字核心★★v1.2及以上★★
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -66,7 +66,7 @@
  *      部分特定的属性需要在该插件中扩展修改。
  * 设计：
  *   (1.你可以结合插件"时间计时器到零时公共事件"，
- *      来设计小游戏的倒计时，倒计时结束后，执行失败画面。
+ *      来设计小游戏的倒计时，倒计时结束后，执行失败界面。
  *      如果成功了，那么停止计时。
  *
  * -----------------------------------------------------------------------------
@@ -387,14 +387,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^3)*o(贴图处理)  每帧
-//		性能测试因素	UI管理层
-//		性能测试消耗	34.38ms（drill_GTH_updatePosition）
-//		最坏情况		暂无
-//		备注			UI管理层只有5帧左右，菜单矩形框插件 的消耗也在 35.61ms，性能录制事件可能偏长了25000ms。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^3)*o(贴图处理)  每帧
+//		★性能测试因素	UI管理层
+//		★性能测试消耗	34.38ms（drill_GTH_updatePosition）
+//		★最坏情况		暂无
+//		★备注			UI管理层只有5帧左右，菜单矩形框插件 的消耗也在 35.61ms，性能录制事件可能偏长了25000ms。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			时间计时器：
 //				->结构
@@ -574,7 +579,7 @@ Game_System.prototype.initialize = function() {
 
 
 //#############################################################################
-// ** 标准函数（地图层级）
+// ** 【标准模块】地图层级
 //#############################################################################
 //##############################
 // * 地图层级 - 添加贴图到层级【标准函数】
@@ -634,7 +639,7 @@ Scene_Map.prototype.drill_GTH_layerMoveingReference = function( x, y, reference,
 //==============================
 var _drill_GTH_map_createDestination = Spriteset_Map.prototype.createDestination;
 Spriteset_Map.prototype.createDestination = function() {
-	_drill_GTH_map_createDestination.call(this);	//rmmv鼠标目的地 < 上层 < rmmv天气
+	_drill_GTH_map_createDestination.call(this);	//鼠标目的地 < 上层 < 天气层
 	if( !this._drill_mapUpArea ){
 		this._drill_mapUpArea = new Sprite();
 		this._baseSprite.addChild(this._drill_mapUpArea);	
@@ -645,7 +650,7 @@ Spriteset_Map.prototype.createDestination = function() {
 //==============================
 var _drill_GTH_map_createPictures = Spriteset_Map.prototype.createPictures;
 Spriteset_Map.prototype.createPictures = function() {
-	_drill_GTH_map_createPictures.call(this);		//rmmv图片 < 图片层 < rmmv对话框
+	_drill_GTH_map_createPictures.call(this);		//图片对象层 < 图片层 < 对话框集合
 	if( !this._drill_mapPicArea ){
 		this._drill_mapPicArea = new Sprite();
 		this.addChild(this._drill_mapPicArea);	
@@ -656,7 +661,7 @@ Spriteset_Map.prototype.createPictures = function() {
 //==============================
 var _drill_GTH_map_createAllWindows = Scene_Map.prototype.createAllWindows;
 Scene_Map.prototype.createAllWindows = function() {
-	_drill_GTH_map_createAllWindows.call(this);	//rmmv对话框 < 最顶层
+	_drill_GTH_map_createAllWindows.call(this);	//对话框集合 < 最顶层
 	if( !this._drill_SenceTopArea ){
 		this._drill_SenceTopArea = new Sprite();
 		this.addChild(this._drill_SenceTopArea);	
@@ -783,7 +788,7 @@ Scene_Map.prototype.drill_GTH_updatePosition = function() {
 
 
 //#############################################################################
-// ** 标准函数（战斗层级）
+// ** 【标准模块】战斗层级
 //#############################################################################
 //##############################
 // * 战斗层级 - 添加贴图到层级【标准函数】
@@ -855,7 +860,7 @@ Spriteset_Battle.prototype.createLowerLayer = function() {
 //==============================
 var _drill_GTH_battle_createPictures = Spriteset_Battle.prototype.createPictures;
 Spriteset_Battle.prototype.createPictures = function() {
-	_drill_GTH_battle_createPictures.call(this);		//rmmv图片 < 图片层 < rmmv对话框
+	_drill_GTH_battle_createPictures.call(this);		//图片对象层 < 图片层 < 对话框集合
 	if( !this._drill_battlePicArea ){
 		this._drill_battlePicArea = new Sprite();
 		this.addChild(this._drill_battlePicArea);	
@@ -866,7 +871,7 @@ Spriteset_Battle.prototype.createPictures = function() {
 //==============================
 var _drill_GTH_battle_createAllWindows = Scene_Battle.prototype.createAllWindows;
 Scene_Battle.prototype.createAllWindows = function() {
-	_drill_GTH_battle_createAllWindows.call(this);	//rmmv对话框 < 最顶层
+	_drill_GTH_battle_createAllWindows.call(this);	//对话框集合 < 最顶层
 	if( !this._drill_SenceTopArea ){
 		this._drill_SenceTopArea = new Sprite();
 		this.addChild(this._drill_SenceTopArea);	

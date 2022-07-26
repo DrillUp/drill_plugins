@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        地图UI - 地图按钮集
+ * @plugindesc [v1.1]        鼠标 - 地图按钮集
  * @author Drill_up
  * 
  * @Drill_LE_param "按钮-%d"
@@ -21,16 +21,17 @@
  *
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 插件必须基于核心，并可以辅助扩展下列插件。
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfInput          系统 - 输入设备核心
- *   - Drill_LayerCommandThread   地图 - 多线程
+ *   - Drill_CoreOfInput          系统-输入设备核心
+ *   - Drill_LayerCommandThread   地图-多线程
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：地图界面。
  *   作用于地图。
- * 2.详细内容可以去看看 "11.地图UI > 关于地图按钮集.docx"。
+ * 2.详细内容可以去看看 "14.鼠标 > 关于鼠标地图按钮集.docx"。
  * 地图层级：
  *   (1.你只可以将按钮放置在地图层级的 图片层 或 最顶层 中。
  *   (2.你可以在对话框进行时，按钮可按，但是要注意公共事件必须要等
@@ -47,7 +48,7 @@
  *   (3.如果点击了两个按钮重叠的部分，则高亮的那个按钮起效果。
  * 公共事件：
  *   (1.公共事件的执行通过 地图-多线程 插件来控制。
- *      可选择串行与并行，具体看看 "6.地图 > 关于公共事件与并行.docx"。
+ *      可选择串行与并行，具体看看 "31.公共事件 > 关于公共事件与并行.docx"。
  *   (2.注意，对话框事件指令 是特殊的指令体，只要执行对话框，就会强
  *      制串行，阻塞其他所有事件的线程。
  * 设计：
@@ -458,14 +459,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^2)*o(贴图处理)  每帧
-//		性能测试因素	地图初始点
-//		性能测试消耗	18.28ms
-//		最坏情况		暂无
-//		备注			由于开启了按钮预加载，18.28ms是预加载 drill_GBu_createBitmap 消耗的全部时间。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^2)*o(贴图处理)  每帧
+//		★性能测试因素	地图初始点
+//		★性能测试消耗	18.28ms
+//		★最坏情况		暂无
+//		★备注			由于开启了按钮预加载，18.28ms是预加载 drill_GBu_createBitmap 消耗的全部时间。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			地图按钮集：（鼠标+触屏）
 //				->地图点击拦截
@@ -674,7 +680,7 @@ Scene_Map.prototype.drill_GBu_isOnGaugeButton = function() {
 //==============================
 var _drill_GBu_layer_createPictures = Spriteset_Map.prototype.createPictures;
 Spriteset_Map.prototype.createPictures = function() {
-	_drill_GBu_layer_createPictures.call(this);		//rmmv图片 < 图片层 < rmmv对话框
+	_drill_GBu_layer_createPictures.call(this);		//图片对象层 < 图片层 < 对话框集合
 	if(!this._drill_mapPicArea ){
 		this._drill_mapPicArea = new Sprite();
 		this.addChild(this._drill_mapPicArea);	
@@ -685,7 +691,7 @@ Spriteset_Map.prototype.createPictures = function() {
 //==============================
 var _drill_GBu_layer_createAllWindows = Scene_Map.prototype.createAllWindows;
 Scene_Map.prototype.createAllWindows = function() {
-	_drill_GBu_layer_createAllWindows.call(this);	//rmmv对话框 < 最顶层
+	_drill_GBu_layer_createAllWindows.call(this);	//对话框集合 < 最顶层
 	if( !this._drill_SenceTopArea ){
 		this._drill_SenceTopArea = new Sprite();
 		this.addChild(this._drill_SenceTopArea);	

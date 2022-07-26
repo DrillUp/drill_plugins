@@ -18,12 +18,13 @@
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 插件可以单独使用，也可以配合下面插件使用：
+ * 该插件可以单独使用。
+ * 也可以配合下面插件使用：
  * 作用于：
- *   - Drill_AnimationCircle    动画 - 多层动画魔法圈 ★★v1.5及以上版本★★
- *   - Drill_AnimationParticle  动画 - 多层动画粒子 ★★v1.5及以上版本★★
- *   - Drill_AnimationGif       动画 - 多层动画Gif ★★v1.5及以上版本★★
- *   - Drill_AnimationSurround  动画 - 多层动画环绕球
+ *   - Drill_AnimationCircle    动画-多层动画魔法圈★★v1.5及以上版本★★
+ *   - Drill_AnimationParticle  动画-多层动画粒子★★v1.5及以上版本★★
+ *   - Drill_AnimationGif       动画-多层动画Gif★★v1.5及以上版本★★
+ *   - Drill_AnimationSurround  动画-多层动画环绕球
  *     该插件执行 立即消失 时，可以关闭指定 动画 的全部装饰贴图。
  * 
  * -----------------------------------------------------------------------------
@@ -102,14 +103,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	Sprite_Base.prototype.isAnimationPlaying
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n)
-//		性能测试因素	物体管理层
-//		性能测试消耗	8.80ms
-//		最坏情况		无
-//		备注			无
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n)
+//		★性能测试因素	物体管理层
+//		★性能测试消耗	8.80ms
+//		★最坏情况		无
+//		★备注			无
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			并行动画：
 //				->战斗不阻塞设置
@@ -139,7 +145,7 @@
 //				-> Sprite_Battler.prototype.startAnimation(xxx) 该函数创建动画，并加入_animationSprites，开始播放。
 //			2.该插件写出来的函数非常绕。如果要修改，最好把上面的路线走一遍，再考虑。
 //			3.这里的sv模式下，我没有找到是谁在调用startAnimation。
-//				rmmv可以找到的函数都没有被触发，这就很奇怪。
+//				脚本中可以找到的函数都没有被触发，这就很奇怪。
 //				（不过，我改变了一下策略，默认的动画都是并行，手动设置不并行，这样就不存在卡住的问题了。）
 //
 //		★存在的问题：
@@ -471,7 +477,7 @@ Sprite_Battler.prototype.setupAnimation = function() {
 	}
 	
 	// > 原函数
-	_drill_AIP_setupAnimation.call(this);	//原方法是rmmv猴子写的，为了不冲突，我只能绕非常大一圈路线
+	_drill_AIP_setupAnimation.call(this);	//原方法是 猴子 写的，为了不冲突，我只能绕非常大一圈路线
 											// Sprite_Battler.prototype.startAnimation 这个函数也被写死了，不好继承，所以直接写外面来	
 
 	if( this._drill_AIP_data_enable == true ){	//通过enable来绕开猴子程序

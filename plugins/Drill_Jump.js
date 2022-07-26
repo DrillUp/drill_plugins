@@ -18,12 +18,13 @@
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该插件 不能 单独使用，必须基于 事件跳跃 插件。
+ * 该插件 不能 单独使用。
+ * 必须基于跳跃插件才能运行。
  * 基于：
- *   - Drill_EventJump            物体 - 事件跳跃
+ *   - Drill_EventJump            物体-事件跳跃
  *     需要该插件才能执行普通跳跃。
  * 被扩展：
- *   - Drill_OperateHud           互动 - 鼠标辅助操作面板
+ *   - Drill_OperateHud           鼠标-鼠标辅助操作面板
  *     该插件提供鼠标、触碰辅助控制跳跃的支持。
  *
  * -----------------------------------------------------------------------------
@@ -47,12 +48,12 @@
  *   (1.你可以用跳跃触发事件的功能，制作解谜中必须跳起才能弄破的泡泡。
  * 
  * -----------------------------------------------------------------------------
- * ----控制操作 - 键盘、手柄
+ * ----知识点 - 键盘、手柄
  * 键盘 - "Q"键跳跃
  * 手柄 - "LB"键跳跃
  *
  * -----------------------------------------------------------------------------
- * ----控制操作 - 鼠标、触屏
+ * ----知识点 - 鼠标、触屏
  * 鼠标 - 鼠标双击跳跃，或者长按，在不能移动的地方自动跳跃。
  * 触屏 - 双触碰跳跃，或者长触碰，在不能移动的地方自动跳跃。
  *
@@ -65,8 +66,8 @@
  * 
  * 插件指令：>玩家跳跃 : 开启能力
  * 插件指令：>玩家跳跃 : 关闭能力
- * 插件指令：>玩家跳跃 : 设置距离 : 2
- * 插件指令：>玩家跳跃 : 设置延迟 : 60
+ * 插件指令：>玩家跳跃 : 修改属性-跳跃距离 : 图块距离[2]
+ * 插件指令：>玩家跳跃 : 修改属性-跳跃延迟 : 时间[60]
  *
  * 1.距离和延迟最小为0，0距离只能原地跳，0延迟可以无限跳。
  * 
@@ -81,8 +82,8 @@
  * 如果你需要设置某些必须跳跃才能触发的开关，使用下面事件注释：
  * （注意，冒号左右有两个空格）
  * 
- * 事件注释：=>玩家跳跃 : 跳跃触发开关 : 1
  * 事件注释：=>玩家跳跃 : 跳跃触发独立开关 : A
+ * 事件注释：=>玩家跳跃 : 跳跃触发开关 : 开关[1]
  *
  * 1.注意，必须是玩家跳跃时，掠过的事件，才会被触发。
  * 2."跳跃触发独立开关"为事件的独立开关。
@@ -184,14 +185,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		单次执行
-//		时间复杂度		o(n^2)
-//		性能测试因素	乱跑
-//		性能测试消耗	镜像管理层3.74ms，体积管理层4.97ms
-//		最坏情况		未知
-//		备注			该跳跃插件只有玩家一个人，消耗不大。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		单次执行
+//		★时间复杂度		o(n^2)
+//		★性能测试因素	乱跑
+//		★性能测试消耗	镜像管理层3.74ms，体积管理层4.97ms
+//		★最坏情况		未知
+//		★备注			该跳跃插件只有玩家一个人，消耗不大。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			跳跃能力：
 //				->适应性
@@ -225,6 +231,7 @@
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_Jump');
 
+
 	/*-----------------杂项------------------*/
 	DrillUp.g_jump_enable = String(DrillUp.parameters['初始是否开启跳跃能力'] || "true") === "true";
 	DrillUp.g_jump_mouse = false;
@@ -244,23 +251,11 @@ if( Imported.Drill_EventJump ){
 // ** 插件指令
 //=============================================================================
 var _drill_jump_pluginCommand = Game_Interpreter.prototype.pluginCommand
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function(command, args ){
 	_drill_jump_pluginCommand.call(this,command, args);
-	if (command === ">角色跳跃开启")  { $gameSystem._drill_jump_enable = true;};
-	if (command === ">角色跳跃关闭")  { $gameSystem._drill_jump_enable = false;};
-	if (command === ">角色跳跃") {
-		if(args.length == 4){
-			var temp1 = Number(args[3]);
-			var type = String(args[1]);
-			if( type == "设置距离" ){
-				$gameSystem._drill_jump_distance = Math.max(temp1,0);
-			}
-			if( type == "设置延迟" ){
-				$gameSystem._drill_jump_delay = Math.max(temp1,0);
-			}
-		}
-	}
-	if (command === ">玩家跳跃") {
+	
+	/*-----------------玩家跳跃------------------*/
+	if( command === ">玩家跳跃" ){
 		if(args.length == 2){
 			var type = String(args[1]);
 			if( type == "开启能力" ){
@@ -271,8 +266,28 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			}
 		}
 		if(args.length == 4){
-			var temp1 = Number(args[3]);
+			var temp1 = String(args[3]);
 			var type = String(args[1]);
+			if( type == "设置距离" || type == "修改属性-跳跃距离" ){
+				temp1 = temp1.replace("图块距离[","");
+				temp1 = temp1.replace("]","");
+				$gameSystem._drill_jump_distance = Math.max( Number(temp1),0 );
+			}
+			if( type == "设置延迟" || type == "修改属性-跳跃延迟" ){
+				temp1 = temp1.replace("时间[","");
+				temp1 = temp1.replace("]","");
+				$gameSystem._drill_jump_delay = Math.max( Number(temp1),0 );
+			}
+		}
+	}
+	
+	/*-----------------旧指令------------------*/
+	if( command === ">角色跳跃开启" ){ $gameSystem._drill_jump_enable = true;};
+	if( command === ">角色跳跃关闭" ){ $gameSystem._drill_jump_enable = false;};
+	if( command === ">角色跳跃" ){
+		if(args.length == 4){
+			var type = String(args[1]);
+			var temp1 = String(args[3]);
 			if( type == "设置距离" ){
 				$gameSystem._drill_jump_distance = Math.max(temp1,0);
 			}
@@ -281,7 +296,6 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			}
 		}
 	}
-	return true;
 };
 
 //=============================================================================
@@ -291,7 +305,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 // * 鼠标点击 - 初始化
 //==============================
 var _drill_jump_temp_initialize = Game_Temp.prototype.initialize;
-Game_Temp.prototype.initialize = function() {
+Game_Temp.prototype.initialize = function( ){
     _drill_jump_temp_initialize.call(this);
 	this._drill_jump_dest_push = true;				//目的地取消标记-锁
 	this._drill_jump_dest_count = 0;				//目的地取消次数
@@ -320,7 +334,7 @@ Game_Temp.prototype.setDestination = function( x, y ){
 // * 鼠标点击 - 消除位置
 //==============================
 var _drill_jump_clearDestination = Game_Temp.prototype.clearDestination;
-Game_Temp.prototype.clearDestination = function() {
+Game_Temp.prototype.clearDestination = function( ){
 	_drill_jump_clearDestination.call(this);
 	if(!this._drill_jump_dest_push){
 		this._drill_jump_dest_push = true;
@@ -341,7 +355,7 @@ Game_Temp.prototype.clearDestination = function() {
 // * 存储变量初始化
 //==============================
 var _drill_jump_sys_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function() {
+Game_System.prototype.initialize = function( ){
 	_drill_jump_sys_initialize.call(this);
 	this._drill_jump_enable = DrillUp.g_jump_enable;
 	this._drill_jump_delay = DrillUp.g_jump_delay;
@@ -353,7 +367,7 @@ Game_System.prototype.initialize = function() {
 // *（Game_Player初始化时，$gameSystem已载入存储数据。）
 //==============================
 var _drill_jump_p_initialize = Game_Player.prototype.initialize;
-Game_Player.prototype.initialize = function() {
+Game_Player.prototype.initialize = function( ){
 	_drill_jump_p_initialize.call(this);
 	this._drill_jump_delay_time = 0;				//跳跃延迟时间
 };
@@ -361,7 +375,7 @@ Game_Player.prototype.initialize = function() {
 // * 玩家 - 帧刷新
 //==============================
 var _drill_jump_player_update = Game_Player.prototype.update;
-Game_Player.prototype.update = function(sceneActive) {
+Game_Player.prototype.update = function(sceneActive ){
 	_drill_jump_player_update.call(this,sceneActive);
 	
 	// > 跳跃延迟时间
@@ -382,9 +396,9 @@ Game_Player.prototype.update = function(sceneActive) {
 // * 玩家 - 按键控制
 //==============================
 var _drill_jump_moveByInput = Game_Player.prototype.moveByInput;
-Game_Player.prototype.moveByInput = function() {
+Game_Player.prototype.moveByInput = function( ){
 	
-    if ( this.drill_canJump_Normal()) { 			//基本跳跃条件
+    if(  this.drill_canJump_Normal() ){ 			//基本跳跃条件
 		if( this.drill_isJumpControl() ){			//跳跃按钮按下
 			this._drill_jump_delay_time = 0;		//消耗一次跳跃机会，防止不停触发
 			if( this.drill_canJump_Conditional() ){	//限制跳跃条件
@@ -400,7 +414,7 @@ Game_Player.prototype.moveByInput = function() {
 //==============================
 // * 跳跃 - 键盘按键条件
 //==============================
-Game_Player.prototype.drill_isJumpControl = function() {
+Game_Player.prototype.drill_isJumpControl = function( ){
 	//Q键 + 长按鼠标
 	return Input.isPressed('pageup') || DrillUp.g_jump_mouse;
 }
@@ -409,7 +423,7 @@ Game_Player.prototype.drill_isJumpControl = function() {
 //				
 //			程序执行流程中，必须禁止该能力的条件，一般不播放错误音。
 //==============================
-Game_Player.prototype.drill_canJump_Normal = function() {
+Game_Player.prototype.drill_canJump_Normal = function( ){
 	if( this.isJumping() ){return false};						//跳跃时
 	if( !this.canMove() ){return false};						//无法移动时
 	if( this._drill_jump_delay_time <= $gameSystem._drill_jump_delay){return false};	//跳跃间隔未结束
@@ -420,7 +434,7 @@ Game_Player.prototype.drill_canJump_Normal = function() {
 //				
 //			由能力关闭、封印、数量限制等因素造成的，一般会播放错误提示音。
 //==============================
-Game_Player.prototype.drill_canJump_Conditional = function() {
+Game_Player.prototype.drill_canJump_Conditional = function( ){
 	if( this.isInVehicle() ){return false};						//载具中禁止跳跃
 	if( this.drill_EJu_isInJumpForbiddenArea() ){return false};	//跳跃禁区禁止跳跃
 	if( !$gameSystem._drill_jump_enable ){return false};		//关闭跳跃能力，禁止跳跃
@@ -430,7 +444,7 @@ Game_Player.prototype.drill_canJump_Conditional = function() {
 //==============================
 // * 跳跃 - 执行操作
 //==============================
-Game_Player.prototype.drill_doJump = function() {
+Game_Player.prototype.drill_doJump = function( ){
 	
 	// > 数据赋值
 	this._drill_EJu_jump['distance'] = $gameSystem._drill_jump_distance;
@@ -462,14 +476,14 @@ Game_Player.prototype.drill_doJump = function() {
 // * 跳跃触发 - 注释初始化
 //==============================
 var _drill_jump_event_setupPage = Game_Event.prototype.setupPage;
-Game_Event.prototype.setupPage = function() {
+Game_Event.prototype.setupPage = function( ){
 	_drill_jump_event_setupPage.call(this);
     this.drill_jump_setJumpTrigger();
 };
-Game_Event.prototype.drill_jump_setJumpTrigger = function() {
+Game_Event.prototype.drill_jump_setJumpTrigger = function( ){
 	this._drill_jump_trigger = false;		//是否含触发
-	if (!this._erased && this.page()) {this.list().forEach(function(l) {
-		if (l.code === 108) {
+	if( !this._erased && this.page() ){this.list().forEach(function(l ){
+		if( l.code === 108 ){
 			var args = l.parameters[0].split(' ');
 			var command = args.shift();
 			if( command == "=>角色跳跃" || command == "=>玩家跳跃" ){
@@ -480,6 +494,8 @@ Game_Event.prototype.drill_jump_setJumpTrigger = function() {
 					this._drill_jump_trigger_self_switch = temp1;
 				}
 				if( type == "跳跃触发开关" ){
+					temp1 = temp1.replace("开关[","");
+					temp1 = temp1.replace("]","");
 					this._drill_jump_trigger = true;
 					this._drill_jump_trigger_var_switch = Number(temp1);
 				}
@@ -491,12 +507,12 @@ Game_Event.prototype.drill_jump_setJumpTrigger = function() {
 // * 跳跃触发 - 接触触发
 //==============================
 var _drill_jump_p_jumpTouch = Game_Player.prototype.drill_EJu_jumpTouch;
-Game_Player.prototype.drill_EJu_jumpTouch = function( x, y ) {
+Game_Player.prototype.drill_EJu_jumpTouch = function( x, y  ){
 	_drill_jump_p_jumpTouch.call(this, x, y);		//继承事件跳跃的 接触函数
 	
 	var events = $gameMap.eventsXy(x,y);
 	for(var i=0; i < events.length; i++){
-		if ( events[i]._drill_jump_trigger == true ){
+		if(  events[i]._drill_jump_trigger == true ){
 			if( events[i]._drill_jump_trigger_self_switch != undefined ){
 				var key = [events[i]._mapId, events[i]._eventId, events[i]._drill_jump_trigger_self_switch ];
 				$gameSelfSwitches.setValue(key,true);
@@ -515,7 +531,7 @@ Game_Player.prototype.drill_EJu_jumpTouch = function( x, y ) {
 }else{
 		Imported.Drill_Jump = false;
 		alert(
-			"【Drill_Jump.js 互动-跳跃能力】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
+			"【Drill_Jump.js 互动 - 跳跃能力】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
 			"\n- Drill_EventJump 物体-事件跳跃"
 		);
 }

@@ -24,15 +24,15 @@
  * =============================================================================
  * 能在地图界面或战斗界面显示多个不同的变量参数框。
  * 注意，该框功能是实现 变量值 可视化而存在的，一切都是基于变量值而显示的。
- * 【支持插件关联资源的打包、加密】
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 插件需要基于核心，可以与其它插件组合。
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfBallistics       系统 - 弹道核心
- *   - Drill_CoreOfGaugeMeter       系统 - 参数条核心★★v1.5及以上★★
- *   - Drill_CoreOfGaugeNumber      系统 - 参数数字核心★★v1.2及以上★★
+ *   - Drill_CoreOfBallistics       系统-弹道核心
+ *   - Drill_CoreOfGaugeMeter       系统-参数条核心★★v1.5及以上★★
+ *   - Drill_CoreOfGaugeNumber      系统-参数数字核心★★v1.2及以上★★
  *     必须要有上述核心，才能配置完整的boss框。
  *
  * -----------------------------------------------------------------------------
@@ -90,7 +90,7 @@
  *   (1.插件中很多属性修改后永久有效，这些数据存入了存档中，
  *      如果读取旧存档，会出现旧存档中部分数据不一致的问题。
  *   (2.插件支持 空数据同步更新 的优化，
- *      详细去看看"0.基本定义 > 数据更新与旧存档.docx"
+ *      详细去看看"21.管理器 > 数据更新与旧存档.docx"
  * 设计：
  *   (1.一个固定框样式可以只放 参数数字 ，用于计分板、资源表、参数表等。
  *      也可以只放 参数条，用于剩余时间条、任务进度条、大招槽、能源条等。
@@ -175,7 +175,7 @@
  *              80.00ms - 120.00ms（中消耗）
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
- * 时间复杂度： o(样式槽数)*o(n^3)*o(贴图处理)
+ * 时间复杂度： o(n^3)*o(样式槽数)*o(贴图处理) 每帧
  * 测试方法：   在各个界面中以正常游戏流程进行测试。
  * 测试结果：   地图界面，消耗为：【31.74ms】
  *              战斗界面，消耗为：【30.04ms】
@@ -1113,14 +1113,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(样式槽数)*o(n^3)*o(贴图处理)
-//		性能测试因素	可视化管理层
-//		性能测试消耗	30.04ms
-//		最坏情况		暂无
-//		备注			开了持续变化的参数条与参数数字，仍然能够流畅运行，可以确定消耗不大。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^3)*o(样式槽数)*o(贴图处理) 每帧
+//		★性能测试因素	可视化管理层
+//		★性能测试消耗	30.04ms
+//		★最坏情况		暂无
+//		★备注			开了持续变化的参数条与参数数字，仍然能够流畅运行，可以确定消耗不大。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			固定框样式：
 //				->外框
@@ -1598,7 +1603,7 @@ Game_System.prototype.drill_GFV_checkData = function() {
 
 
 //#############################################################################
-// ** 标准函数（地图层级）
+// ** 【标准模块】地图层级
 //#############################################################################
 //##############################
 // * 地图层级 - 添加贴图到层级【标准函数】
@@ -1658,7 +1663,7 @@ Scene_Map.prototype.drill_GFV_layerMoveingReference = function( x, y, reference,
 //==============================
 var _drill_GFV_map_createDestination = Spriteset_Map.prototype.createDestination;
 Spriteset_Map.prototype.createDestination = function() {
-	_drill_GFV_map_createDestination.call(this);	//rmmv鼠标目的地 < 上层 < rmmv天气
+	_drill_GFV_map_createDestination.call(this);	//鼠标目的地 < 上层 < 天气层
 	if( !this._drill_mapUpArea ){
 		this._drill_mapUpArea = new Sprite();
 		this._baseSprite.addChild(this._drill_mapUpArea);	
@@ -1669,7 +1674,7 @@ Spriteset_Map.prototype.createDestination = function() {
 //==============================
 var _drill_GFV_map_createPictures = Spriteset_Map.prototype.createPictures;
 Spriteset_Map.prototype.createPictures = function() {
-	_drill_GFV_map_createPictures.call(this);		//rmmv图片 < 图片层 < rmmv对话框
+	_drill_GFV_map_createPictures.call(this);		//图片对象层 < 图片层 < 对话框集合
 	if( !this._drill_mapPicArea ){
 		this._drill_mapPicArea = new Sprite();
 		this.addChild(this._drill_mapPicArea);	
@@ -1680,7 +1685,7 @@ Spriteset_Map.prototype.createPictures = function() {
 //==============================
 var _drill_GFV_map_createAllWindows = Scene_Map.prototype.createAllWindows;
 Scene_Map.prototype.createAllWindows = function() {
-	_drill_GFV_map_createAllWindows.call(this);	//rmmv对话框 < 最顶层
+	_drill_GFV_map_createAllWindows.call(this);	//对话框集合 < 最顶层
 	if( !this._drill_SenceTopArea ){
 		this._drill_SenceTopArea = new Sprite();
 		this.addChild(this._drill_SenceTopArea);	
@@ -1861,7 +1866,7 @@ Scene_Map.prototype.drill_GFV_updateGaugePosition = function() {
 
 
 //#############################################################################
-// ** 标准函数（战斗层级）
+// ** 【标准模块】战斗层级
 //#############################################################################
 //##############################
 // * 战斗层级 - 添加贴图到层级【标准函数】
@@ -1945,7 +1950,7 @@ Spriteset_Battle.prototype.createLowerLayer = function() {
 //==============================
 var _drill_GFV_battle_createPictures = Spriteset_Battle.prototype.createPictures;
 Spriteset_Battle.prototype.createPictures = function() {
-	_drill_GFV_battle_createPictures.call(this);		//rmmv图片 < 图片层 < rmmv对话框
+	_drill_GFV_battle_createPictures.call(this);		//图片对象层 < 图片层 < 对话框集合
 	if( !this._drill_battlePicArea ){
 		this._drill_battlePicArea = new Sprite();
 		this.addChild(this._drill_battlePicArea);	
@@ -1956,7 +1961,7 @@ Spriteset_Battle.prototype.createPictures = function() {
 //==============================
 var _drill_GFV_battle_createAllWindows = Scene_Battle.prototype.createAllWindows;
 Scene_Battle.prototype.createAllWindows = function() {
-	_drill_GFV_battle_createAllWindows.call(this);	//rmmv对话框 < 最顶层
+	_drill_GFV_battle_createAllWindows.call(this);	//对话框集合 < 最顶层
 	if( !this._drill_SenceTopArea ){
 		this._drill_SenceTopArea = new Sprite();
 		this.addChild(this._drill_SenceTopArea);	

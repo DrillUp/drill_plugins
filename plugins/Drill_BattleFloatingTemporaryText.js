@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        战斗UI - 临时漂浮文字
+ * @plugindesc [v1.1]        战斗UI - 临时漂浮文字
  * @author Drill_up
  * 
  * @Drill_LE_param "临时漂浮样式-%d"
@@ -13,6 +13,7 @@
  * @Drill_LE_param "临时漂浮弹道-%d"
  * @Drill_LE_parentKey "---弹道组%d至%d---"
  * @Drill_LE_var "DrillUp.g_BFTT_ballistics_length"
+ * 
  * 
  * @help  
  * =============================================================================
@@ -25,12 +26,13 @@
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 插件必须基于核心。
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfBallistics       系统 - 弹道核心★★v1.7及以上★★
- *   - Drill_CoreOfWindowAuxiliary  系统 - 窗口辅助核心
+ *   - Drill_CoreOfBallistics       系统-弹道核心★★v1.7及以上★★
+ *   - Drill_CoreOfWindowAuxiliary  系统-窗口辅助核心
  * 可扩展：
- *   - Drill_CoreOfString           系统 - 字符串核心
+ *   - Drill_CoreOfString           系统-字符串核心
  *     可以在漂浮文字中，绑定并显示自定义的字符串。
  * 
  * -----------------------------------------------------------------------------
@@ -117,6 +119,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 优化了内部结构。
  *
  *
  *
@@ -501,21 +505,21 @@
  * @parent 窗口是否自适应行间距
  * @type number
  * @min 1
- * @desc 如果你取消了自适应行间距，这里将使得每行的文字的行间距都是固定值。（rmmv默认：36）
+ * @desc 如果你取消了自适应行间距，这里将使得每行的文字的行间距都是固定值。（默认：36）
  * @default 24
  *
  * @param 窗口内边距
  * @parent --窗口--
  * @type number
  * @min 0
- * @desc 窗口内容与窗口外框的内边距。（rmmv默认标准：18）
+ * @desc 窗口内容与窗口外框的内边距。（默认标准：18）
  * @default 10
  *
  * @param 窗口字体大小
  * @parent --窗口--
  * @type number
  * @min 1
- * @desc 窗口的字体大小。注意图标无法根据字体大小变化。（rmmv默认标准：28）
+ * @desc 窗口的字体大小。注意图标无法根据字体大小变化。（默认标准：28）
  * @default 22
  *
  * @param 窗口附加宽度
@@ -838,14 +842,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^2)*o(贴图处理)  每帧
-//		性能测试因素	战斗场景
-//		性能测试消耗	5.01ms（未工作时，update）
-//		最坏情况		使用临时漂浮文字添加了大量窗口。
-//		备注			暂无
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^2)*o(贴图处理)  每帧
+//		★性能测试因素	战斗场景
+//		★性能测试消耗	5.01ms（未工作时，update）
+//		★最坏情况		使用临时漂浮文字添加了大量窗口。
+//		★备注			暂无
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			漂浮参数数字：
 //				->结构
@@ -854,6 +863,18 @@
 //					->弹道核心（绑定移动）
 //					->透明度类型设置
 //				->插件指令添加
+//				->单位贴图
+//					->获取 - 敌人容器指针【标准函数】
+//					->获取 - 根据敌方索引【标准函数】
+//					->获取 - 根据敌人ID【标准函数】
+//					->获取 - 角色容器指针【标准函数】
+//					->获取 - 根据我方索引【标准函数】
+//					->获取 - 根据角色ID【标准函数】
+//				->战斗层级
+//					->添加贴图到层级【标准函数】
+//					->去除贴图【标准函数】
+//					->图片层级排序【标准函数】
+//					->参照的位移【标准函数】
 //
 //		★必要注意事项：
 //			1.插件的图片层级与多个插件共享。【必须自写 层级排序 函数】
@@ -1183,25 +1204,94 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 };
 
 
+//#############################################################################
+// ** 【标准模块】单位贴图
+//#############################################################################
+//##############################
+// * 单位贴图 - 获取 - 敌人容器指针【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 贴图数组    （敌人贴图）
+//          
+//			说明：	> 此函数直接返回容器对象。
+//##############################
+Game_Temp.prototype.drill_BFTT_getEnemySpriteTank = function(){
+	return this.drill_BFTT_getEnemySpriteTank_Private();
+}
+//##############################
+// * 单位贴图 - 获取 - 根据敌方索引【标准函数】
+//				
+//			参数：	> index 数字 （敌方第n个位置，从0开始计数）
+//			返回：	> 贴图       （敌人贴图）
+//          
+//			说明：	暂无。
+//##############################
+Game_Temp.prototype.drill_BFTT_getEnemySpriteByIndex = function( index ){
+	return this.drill_BFTT_getEnemySpriteByIndex_Private( index );
+}
+//##############################
+// * 单位贴图 - 获取 - 根据敌人ID【标准函数】
+//				
+//			参数：	> enemy_id 数字（敌人ID）
+//			返回：	> 贴图数组     （敌人贴图数组）
+//          
+//			说明：	> 注意敌人可能有很多个，返回的是数组。
+//##############################
+Game_Temp.prototype.drill_BFTT_getEnemySpriteByEnemyId = function( enemy_id ){
+	return this.drill_BFTT_getEnemySpriteByEnemyId_Private( enemy_id );
+}
+//##############################
+// * 单位贴图 - 获取 - 角色容器指针【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 贴图数组   （角色贴图）
+//          
+//			说明：	> 此函数直接返回容器对象。
+//##############################
+Game_Temp.prototype.drill_BFTT_getActorSpriteTank = function(){
+	return this.drill_BFTT_getActorSpriteTank_Private();
+}
+//##############################
+// * 单位贴图 - 获取 - 根据我方索引【标准函数】
+//				
+//			参数：	> index 数字 （我方第n个位置，从0开始计数）
+//			返回：	> 贴图       （角色贴图）
+//          
+//			说明：	暂无。
+//##############################
+Game_Temp.prototype.drill_BFTT_getActorSpriteByIndex = function( index ){
+	return this.drill_BFTT_getActorSpriteByIndex_Private( index );
+}
+//##############################
+// * 单位贴图 - 获取 - 根据角色ID【标准函数】
+//				
+//			参数：	> actor_id 数字（角色ID）
+//			返回：	> sprite 贴图  （角色贴图）
+//          
+//			说明：	暂无。
+//##############################
+Game_Temp.prototype.drill_BFTT_getActorSpriteByActorId = function( actor_id ){
+	return this.drill_BFTT_getActorSpriteByActorId_Private( actor_id );
+}
 //=============================================================================
-// ** 贴图标记 我方敌方
+// ** 单位贴图（接口实现）
 //=============================================================================
 //==============================
-// * 标记容器 - 初始化
+// * 单位贴图容器 - 获取 - 敌人容器指针（私有）
 //==============================
-var _drill_BFTT_sTank_initialize = Game_Temp.prototype.initialize;
-Game_Temp.prototype.initialize = function() {
-	_drill_BFTT_sTank_initialize.call(this);
-	
-	this._drill_BFTT_EnemiesSpriteTank = [];		//敌人贴图
-	this._drill_BFTT_ActorSpriteTank = [];			//角色贴图
+Game_Temp.prototype.drill_BFTT_getEnemySpriteTank_Private = function(){
+	if( SceneManager._scene == undefined ){ return null; }
+	if( SceneManager._scene._spriteset == undefined ){ return null; }
+	return SceneManager._scene._spriteset._enemySprites;
 };
 //==============================
-// * 标记容器 - 获取敌方索引
+// * 单位贴图容器 - 获取 - 根据敌方索引（私有）
 //==============================
-Game_Temp.prototype.drill_BFTT_getEnemySpriteByIndex = function( index ) {
-	for(var i=0; i < this._drill_BFTT_EnemiesSpriteTank.length; i++){
-		var enemy_sprite = this._drill_BFTT_EnemiesSpriteTank[i];
+Game_Temp.prototype.drill_BFTT_getEnemySpriteByIndex_Private = function( index ){
+	var sprite_list = this.drill_BFTT_getEnemySpriteTank_Private();
+	if( sprite_list == undefined ){ return null; }
+	for(var i=0; i < sprite_list.length; i++){
+		var enemy_sprite = sprite_list[i];
 		if( enemy_sprite._battler == undefined ){ continue; }
 		if( enemy_sprite._battler.isEnemy() &&
 			enemy_sprite._battler.index() == index ){
@@ -1211,11 +1301,38 @@ Game_Temp.prototype.drill_BFTT_getEnemySpriteByIndex = function( index ) {
 	return null;
 };
 //==============================
-// * 标记容器 - 获取我方索引
+// * 单位贴图容器 - 获取 - 根据敌人ID（私有）
 //==============================
-Game_Temp.prototype.drill_BFTT_getActorSpriteByIndex = function( index ) {
-	for(var i=0; i < this._drill_BFTT_ActorSpriteTank.length; i++){
-		var actor_sprite = this._drill_BFTT_ActorSpriteTank[i];
+Game_Temp.prototype.drill_BFTT_getEnemySpriteByEnemyId_Private = function( enemy_id ){
+	var sprite_list = this.drill_BFTT_getEnemySpriteTank_Private();
+	if( sprite_list == undefined ){ return []; }
+	var result_list = [];
+	for(var i=0; i < sprite_list.length; i++){
+		var enemy_sprite = sprite_list[i];
+		if( enemy_sprite._battler == undefined ){ continue; }
+		if( enemy_sprite._battler.isEnemy() &&
+			enemy_sprite._battler.enemyId() == enemy_id ){
+			result_list.push( enemy_sprite );
+		}
+	}
+	return result_list;
+};
+//==============================
+// * 单位贴图容器 - 获取 - 角色容器指针（私有）
+//==============================
+Game_Temp.prototype.drill_BFTT_getActorSpriteTank_Private = function(){
+	if( SceneManager._scene == undefined ){ return null; }
+	if( SceneManager._scene._spriteset == undefined ){ return null; }
+	return SceneManager._scene._spriteset._actorSprites;
+};
+//==============================
+// * 单位贴图容器 - 获取 - 根据我方索引（私有）
+//==============================
+Game_Temp.prototype.drill_BFTT_getActorSpriteByIndex_Private = function( index ){
+	var sprite_list = this.drill_BFTT_getActorSpriteTank_Private();
+	if( sprite_list == undefined ){ return null; }
+	for(var i=0; i < sprite_list.length; i++){
+		var actor_sprite = sprite_list[i];
 		if( actor_sprite._battler == undefined ){ continue; }
 		if( actor_sprite._battler.isActor() &&
 			actor_sprite._battler.index() == index ){
@@ -1225,31 +1342,191 @@ Game_Temp.prototype.drill_BFTT_getActorSpriteByIndex = function( index ) {
 	return null;
 };
 //==============================
-// * 捕获 - 战斗敌人贴图创建
+// * 单位贴图容器 - 获取 - 根据角色ID（私有）
 //==============================
-var _drill_BFTT_sTank_createEnemies = Spriteset_Battle.prototype.createEnemies;
-Spriteset_Battle.prototype.createEnemies = function() {
-	_drill_BFTT_sTank_createEnemies.call(this);
-	$gameTemp._drill_BFTT_EnemiesSpriteTank = this._enemySprites;
-};
-//==============================
-// * 捕获 - 战斗角色贴图创建
-//==============================
-var _drill_BFTT_sTank_createActors = Spriteset_Battle.prototype.createActors;
-Spriteset_Battle.prototype.createActors = function() {
-	_drill_BFTT_sTank_createActors.call(this);
-	$gameTemp._drill_BFTT_ActorSpriteTank = this._enemySprites;
-};
-//==============================
-// * 标记容器 - 清空
-//==============================
-var _drill_BFTT_sTank_terminate = Scene_Battle.prototype.terminate;
-Scene_Battle.prototype.terminate = function() {
-	_drill_BFTT_sTank_terminate.call(this);
-	$gameTemp._drill_BFTT_EnemiesSpriteTank = [];		//敌人贴图
-	$gameTemp._drill_BFTT_ActorSpriteTank = [];			//角色贴图
+Game_Temp.prototype.drill_BFTT_getActorSpriteByActorId_Private = function( actor_id ){
+	var sprite_list = this.drill_BFTT_getActorSpriteTank_Private();
+	if( sprite_list == undefined ){ return null; }
+	for(var i=0; i < sprite_list.length; i++){
+		var actor_sprite = sprite_list[i];
+		if( actor_sprite._battler == undefined ){ continue; }
+		if( actor_sprite._battler.isActor() &&
+			actor_sprite._battler.actorId() == actor_id ){
+			return actor_sprite;
+		}
+	}
+	return null;
 };
 
+
+
+//#############################################################################
+// ** 【标准模块】战斗层级
+//#############################################################################
+//##############################
+// * 战斗层级 - 添加贴图到层级【标准函数】
+//				
+//			参数：	> sprite 贴图        （添加的贴图对象）
+//					> layer_index 字符串 （添加到的层级名，下层/上层/图片层/最顶层）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图添加到目标层级中。
+//##############################
+Scene_Battle.prototype.drill_BFTT_layerAddSprite = function( sprite, layer_index ){
+	this.drill_BFTT_layerAddSprite_Private( sprite, layer_index );
+}
+//##############################
+// * 战斗层级 - 去除贴图【标准函数】
+//				
+//			参数：	> sprite 贴图（添加的贴图对象）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图从战斗层级中移除。
+//##############################
+Scene_Battle.prototype.drill_BFTT_layerRemoveSprite = function( sprite ){
+	this.drill_BFTT_layerRemoveSprite_Private( sprite );
+}
+//##############################
+// * 战斗层级 - 图片层级排序【标准函数】
+//				
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 执行该函数后，战斗层级的子贴图，按照zIndex属性来进行先后排序。值越大，越靠前。
+//##############################
+Scene_Battle.prototype.drill_BFTT_sortByZIndex = function () {
+    this.drill_BFTT_sortByZIndex_Private();
+}
+//##############################
+// * 战斗层级 - 参照的位移【标准函数】（暂未使用）
+//				
+//			参数：	> x 数字           （x位置）
+//					> y 数字           （y位置）
+//					> reference 字符串 （参考系，镜头参照/战斗参照）
+//					> option 动态参数对象 （计算时的必要数据）
+//			返回：	> pos 动态参数对象
+//                  > pos['x']
+//                  > pos['y']
+//          
+//			说明：	> 强行规范的接口，必须按照接口的结构来，把要考虑的问题全考虑清楚了再去实现。
+//##############################
+Scene_Battle.prototype.drill_BFTT_layerMoveingReference = function( x, y, reference, option ){
+	return this.drill_BFTT_layerMoveingReference_Private( x, y, reference, option );
+}
+//=============================================================================
+// ** 战斗层级（接口实现）
+//=============================================================================
+//==============================
+// * 战斗层级 - 下层
+//==============================
+var _drill_BFTT_layer_createBattleback = Spriteset_Battle.prototype.createBattleback;
+Spriteset_Battle.prototype.createBattleback = function() {    
+	_drill_BFTT_layer_createBattleback.call(this);
+	if( !this._drill_battleDownArea ){
+		this._drill_battleDownArea = new Sprite();
+		this._drill_battleDownArea.z = 0;	//（yep层级适配，YEP_BattleEngineCore）
+		this._battleField.addChild(this._drill_battleDownArea);	
+	}
+};
+//==============================
+// * 战斗层级 - 上层
+//==============================
+var _drill_BFTT_layer_createLowerLayer = Spriteset_Battle.prototype.createLowerLayer;
+Spriteset_Battle.prototype.createLowerLayer = function() {
+    _drill_BFTT_layer_createLowerLayer.call(this);
+	if( !this._drill_battleUpArea ){
+		this._drill_battleUpArea = new Sprite();
+		this._drill_battleUpArea.z = 9999;	//（yep层级适配，YEP_BattleEngineCore）
+		this._battleField.addChild(this._drill_battleUpArea);
+	}
+};
+//==============================
+// * 战斗层级 - 图片层
+//==============================
+var _drill_BFTT_layer_createPictures = Spriteset_Battle.prototype.createPictures;
+Spriteset_Battle.prototype.createPictures = function() {
+	_drill_BFTT_layer_createPictures.call(this);		//图片对象层 < 图片层 < 对话框集合
+	if( !this._drill_battlePicArea ){
+		this._drill_battlePicArea = new Sprite();
+		this.addChild(this._drill_battlePicArea);	
+	}
+}
+//==============================
+// * 战斗层级 - 最顶层
+//==============================
+var _drill_BFTT_layer_createAllWindows = Scene_Battle.prototype.createAllWindows;
+Scene_Battle.prototype.createAllWindows = function() {
+	_drill_BFTT_layer_createAllWindows.call(this);	//对话框集合 < 最顶层
+	if( !this._drill_SenceTopArea ){
+		this._drill_SenceTopArea = new Sprite();
+		this.addChild(this._drill_SenceTopArea);	
+	}
+}
+//==============================
+// * 战斗层级 - 图片层级排序（私有）
+//==============================
+Scene_Battle.prototype.drill_BFTT_sortByZIndex_Private = function() {
+	this._spriteset._drill_battleDownArea.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
+	this._spriteset._drill_battleUpArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
+	this._spriteset._drill_battlePicArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
+	this._drill_SenceTopArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
+};
+//==============================
+// * 战斗层级 - 图片层级排序（私有）
+//==============================
+Scene_Battle.prototype.drill_BFTT_layerRemoveSprite_Private = function( sprite ){
+	this._spriteset._drill_battleDownArea.removeChild( sprite );
+	this._spriteset._drill_battleUpArea.removeChild( sprite );
+	this._spriteset._drill_battlePicArea.removeChild( sprite );
+	this._drill_SenceTopArea.removeChild( sprite );
+};
+//==============================
+// * 战斗层级 - 添加贴图到层级（私有）
+//==============================
+Scene_Battle.prototype.drill_BFTT_layerAddSprite_Private = function( sprite, layer_index ){
+	if( layer_index == "下层" ){
+		this._spriteset._drill_battleDownArea.addChild( sprite );
+	}
+	if( layer_index == "上层" ){
+		this._spriteset._drill_battleUpArea.addChild( sprite );
+	}
+	if( layer_index == "图片层" ){
+		this._spriteset._drill_battlePicArea.addChild( sprite );
+	}
+	if( layer_index == "最顶层" ){
+		this._drill_SenceTopArea.addChild( sprite );
+	}
+}
+//==============================
+// * 战斗层级 - 参照的位移（私有）
+//==============================
+Scene_Battle.prototype.drill_BFTT_layerMoveingReference_Private = function( xx, yy, reference, option ){
+	
+	// > 参照系修正
+	if( reference == "战斗参照 -> 战斗参照" ){
+		//（不操作）
+		return {'x':xx, 'y':yy };
+	}
+	if( reference == "战斗参照 -> 镜头参照" ){
+		xx += this._spriteset._baseSprite.x;	//（由于 Spriteset_Battle 的 _baseSprite 坐标始终是(0,0)，所以两个参照没有区别。）
+		yy += this._spriteset._baseSprite.y;
+		xx += this._spriteset._battleField.x;	//（处于 Spriteset_Battle 的 _battleField 情况。）
+		yy += this._spriteset._battleField.y;
+		return {'x':xx, 'y':yy };
+	}
+	if( reference == "镜头参照 -> 镜头参照" ){
+		//（不操作）
+		return {'x':xx, 'y':yy };
+	}
+	if( reference == "镜头参照 -> 战斗参照" ){
+		xx -= this._spriteset._baseSprite.x;	//（由于 Spriteset_Battle 的 _baseSprite 坐标始终是(0,0)，所以两个参照没有区别。）
+		yy -= this._spriteset._baseSprite.y;
+		xx -= this._spriteset._battleField.x;	//（处于 Spriteset_Battle 的 _battleField 情况。）
+		yy -= this._spriteset._battleField.y;
+		return {'x':xx, 'y':yy };
+	}
+	return {'x':xx, 'y':yy };
+}
 
 
 //=============================================================================
@@ -1308,65 +1585,6 @@ Game_Temp.prototype.drill_BFTT_create = function( pos, time ){
 
 
 //=============================================================================
-// ** 战斗层级
-//=============================================================================
-//==============================
-// ** 下层
-//==============================
-var _drill_BFTT_layer_createBattleback = Spriteset_Battle.prototype.createBattleback;
-Spriteset_Battle.prototype.createBattleback = function() {    
-	_drill_BFTT_layer_createBattleback.call(this);
-	if( !this._drill_battleDownArea ){
-		this._drill_battleDownArea = new Sprite();
-		this._drill_battleDownArea.z = 0;	//（yep层级适配，YEP_BattleEngineCore）
-		this._battleField.addChild(this._drill_battleDownArea);	
-	}
-};
-//==============================
-// ** 上层
-//==============================
-var _drill_BFTT_layer_createLowerLayer = Spriteset_Battle.prototype.createLowerLayer;
-Spriteset_Battle.prototype.createLowerLayer = function() {
-    _drill_BFTT_layer_createLowerLayer.call(this);
-	if( !this._drill_battleUpArea ){
-		this._drill_battleUpArea = new Sprite();
-		this._drill_battleUpArea.z = 9999;	//（yep层级适配，YEP_BattleEngineCore）
-		this._battleField.addChild(this._drill_battleUpArea);
-	}
-};
-//==============================
-// ** 图片层
-//==============================
-var _drill_BFTT_layer_createPictures = Spriteset_Battle.prototype.createPictures;
-Spriteset_Battle.prototype.createPictures = function() {
-	_drill_BFTT_layer_createPictures.call(this);		//rmmv图片 < 图片层 < rmmv对话框
-	if( !this._drill_battlePicArea ){
-		this._drill_battlePicArea = new Sprite();
-		this.addChild(this._drill_battlePicArea);	
-	}
-}
-//==============================
-// ** 最顶层
-//==============================
-var _drill_BFTT_layer_createAllWindows = Scene_Battle.prototype.createAllWindows;
-Scene_Battle.prototype.createAllWindows = function() {
-	_drill_BFTT_layer_createAllWindows.call(this);	//rmmv对话框 < 最顶层
-	if( !this._drill_SenceTopArea ){
-		this._drill_SenceTopArea = new Sprite();
-		this.addChild(this._drill_SenceTopArea);	
-	}
-}
-//==============================
-// ** 层级排序
-//==============================
-Scene_Battle.prototype.drill_BFTT_sortByZIndex = function() {
-	this._spriteset._drill_battleDownArea.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
-	this._spriteset._drill_battleUpArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
-	this._spriteset._drill_battlePicArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
-	this._drill_SenceTopArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
-};
-
-//=============================================================================
 // ** 战斗界面
 //=============================================================================
 //==============================
@@ -1384,8 +1602,9 @@ var _drill_BFTT_battle_update = Scene_Battle.prototype.update;
 Scene_Battle.prototype.update = function() {	
 	_drill_BFTT_battle_update.call(this);
 	if( this.isActive() ){
-		this.drill_BFTT_updateWindowAddChild();			//插件指令建立贴图
-		this.drill_BFTT_updateWindowDelete();			//贴图删除
+		this.drill_BFTT_updateWindowAddChild();			//帧刷新 - 插件指令建立贴图
+		this.drill_BFTT_updateWindowDelete();			//帧刷新 - 贴图删除
+		this.drill_BFTT_updateWindowPosition();			//帧刷新 - 位置
 	}
 };
 //==============================
@@ -1404,20 +1623,12 @@ Scene_Battle.prototype.drill_BFTT_updateWindowAddChild = function() {
 		this._drill_BFTT_windowTank.push( temp_window );
 		
 		// > 层级初始化
-		if( s_data['window_battle_layer'] == "下层" ){
-			this._spriteset._drill_battleDownArea.addChild(temp_window);
-		}
-		if( s_data['window_battle_layer'] == "上层" ){
-			this._spriteset._drill_battleUpArea.addChild(temp_window);
-		}
-		if( s_data['window_battle_layer'] == "图片层" ){
-			this._spriteset._drill_battlePicArea.addChild(temp_window);
-		}
-		if( s_data['window_battle_layer'] == "最顶层" ){
-			this._drill_SenceTopArea.addChild(temp_window);
-		}
+		this.drill_BFTT_layerAddSprite( temp_window, s_data['window_battle_layer'] );
+		
+		// > 层级排序
 		this.drill_BFTT_sortByZIndex();
 		
+		// > 出栈
 		$gameTemp._drill_BFTT_commandSeq.splice( i, 1 );
 	}
 }
@@ -1430,14 +1641,69 @@ Scene_Battle.prototype.drill_BFTT_updateWindowDelete = function() {
 		if( temp_window.drill_isDead() ){
 			
 			// > 从层中去除
-			this._spriteset._drill_battleDownArea.removeChild( temp_window );
-			this._spriteset._drill_battleUpArea.removeChild( temp_window );
-			this._spriteset._drill_battlePicArea.removeChild( temp_window );
-			this._drill_SenceTopArea.removeChild( temp_window );
+			this.drill_BFTT_layerRemoveSprite( temp_window );
 			
 			// > 从容器中去除
 			this._drill_BFTT_windowTank.splice( i, 1 );
 		}
+	}
+}
+//==============================
+// * 帧刷新 - 帧刷新位置
+//==============================
+Scene_Battle.prototype.drill_BFTT_updateWindowPosition = function() {
+	for( var i = 0; i < this._drill_BFTT_windowTank.length; i++ ){
+		var temp_window = this._drill_BFTT_windowTank[i];
+		var s_data = temp_window._drill_style_data;
+		var b_data = temp_window._drill_ballistics_data;
+		if( temp_window['_drill_COBa_x'].length == 0 ){ continue; }
+			
+		// > 位移
+		var xx = 0;
+		var yy = 0;
+		xx += s_data['offset_x'];
+		yy += s_data['offset_y'];
+		
+		// > 窗口的锚点
+		xx -= temp_window._drill_width * temp_window._drill_anchor_x;
+		yy -= temp_window._drill_height * temp_window._drill_anchor_y;
+		
+		// > 弹道位移
+		var time = temp_window._drill_time;
+		if( time < 0 ){ time = 0; }
+		if( time > temp_window['_drill_COBa_x'].length-1 ){
+			time = temp_window['_drill_COBa_x'].length-1;
+		}
+		xx += temp_window['_drill_COBa_x'][ time ];		//播放弹道轨迹
+		yy += temp_window['_drill_COBa_y'][ time ];
+		
+		// > 参照的位移
+		if( s_data['window_benchmark'] == "相对于战斗场景" ){
+			if( s_data['window_battle_layer'] == '下层' ||
+				s_data['window_battle_layer'] == '上层' ){
+				var pos = this.drill_BFTT_layerMoveingReference(xx, yy, "战斗参照 -> 战斗参照", {} );
+				xx = pos['x'];
+				yy = pos['y'];
+			}else{
+				var pos = this.drill_BFTT_layerMoveingReference(xx, yy, "战斗参照 -> 镜头参照", {} );
+				xx = pos['x'];
+				yy = pos['y'];
+			}
+		}else{
+			if( s_data['window_battle_layer'] == '下层' ||
+				s_data['window_battle_layer'] == '上层' ){
+				var pos = this.drill_BFTT_layerMoveingReference(xx, yy, "镜头参照 -> 战斗参照", {} );
+				xx = pos['x'];
+				yy = pos['y'];
+			}else{
+				var pos = this.drill_BFTT_layerMoveingReference(xx, yy, "镜头参照 -> 镜头参照", {} );
+				xx = pos['x'];
+				yy = pos['y'];
+			}
+		}
+		
+		temp_window.x = xx;
+		temp_window.y = yy;
 	}
 }
 
@@ -1500,7 +1766,7 @@ Drill_BFTT_Window.prototype.update = function() {
 	Window_Base.prototype.update.call(this);
 	
 	this._drill_time += 1;
-	this.drill_updatePosition();		//帧刷新 - 位置
+	this.drill_updateOpacity();			//帧刷新 - 透明度
 }
 //==============================
 // * 漂浮文字窗口 - 窗口属性
@@ -1530,6 +1796,7 @@ Drill_BFTT_Window.prototype.drill_initData = function() {
 	// > 私有属性初始化
 	this.x = 0;
 	this.y = Graphics.boxHeight*2;
+	this.contentsOpacity = 0;
 	this._drill_time = 0;
 	this._drill_width = 0;
 	this._drill_height = 0;
@@ -1665,65 +1932,18 @@ Drill_BFTT_Window.prototype.drill_sortBottomByZIndex = function() {
 //==============================
 // * 帧刷新 - 位置
 //==============================
-Drill_BFTT_Window.prototype.drill_updatePosition = function() {
+Drill_BFTT_Window.prototype.drill_updateOpacity = function() {
 	var s_data = this._drill_style_data;
 	var b_data = this._drill_ballistics_data;
-	if( this['_drill_COBa_x'].length == 0 ){ return; }
+	if( this['_drill_COBa_opacity'].length == 0 ){ return; }
 		
 	// > 根据轨迹进行播放
 	var time = this._drill_time;
 	if( time < 0 ){ time = 0; }
-	if( time > this['_drill_COBa_x'].length-1 ){
-		time = this['_drill_COBa_x'].length-1;
+	if( time > this['_drill_COBa_opacity'].length-1 ){
+		time = this['_drill_COBa_opacity'].length-1;
 	}
-	var xx = this['_drill_COBa_x'][ time ];		//播放弹道轨迹
-	var yy = this['_drill_COBa_y'][ time ];
 	var oo = this['_drill_COBa_opacity'][ time ];
-	
-		
-	// > 有战斗镜头才会产生偏移
-	if( Imported.Drill_BattleCamera ){
-		var cur_cameraX = 0;
-		var cur_cameraY = 0;
-		
-		// > UI基准偏移（相对于战斗场景）
-		if( s_data['window_benchmark'] == "相对于战斗场景" ){
-			if( s_data['window_battle_layer'] == '下层' ||		//（由于 上层和下层 位于_battleField中，所以计算方式与其他不一样）
-				s_data['window_battle_layer'] == '上层' ){
-				cur_cameraX = $gameTemp._drill_cam_pos[0] * 0;
-				cur_cameraY = $gameTemp._drill_cam_pos[1] * 0;
-			}else{
-				cur_cameraX = $gameTemp._drill_cam_pos[0] * (1 + 0 );
-				cur_cameraY = $gameTemp._drill_cam_pos[1] * (1 + 0 );
-			}
-			
-		// > UI基准偏移（相对于镜头）
-		}else{
-			if( s_data['window_battle_layer'] == '下层' ||
-				s_data['window_battle_layer'] == '上层' ){
-				cur_cameraX = $gameTemp._drill_cam_pos[0] * (-1 + 0 );
-				cur_cameraY = $gameTemp._drill_cam_pos[1] * (-1 + 0 );
-			}else{
-				cur_cameraX = $gameTemp._drill_cam_pos[0] * 0;
-				cur_cameraY = $gameTemp._drill_cam_pos[1] * 0;
-			}
-			
-		}
-		
-		xx += cur_cameraX;
-		yy += cur_cameraY;
-	}
-	
-	// > 额外位置偏移
-	xx += s_data['offset_x'];
-	yy += s_data['offset_y'];
-	
-	// > 窗口的锚点
-	xx -= this._drill_width * this._drill_anchor_x;
-	yy -= this._drill_height * this._drill_anchor_y;
-	
-	this.x = xx;
-	this.y = yy;
 	this.contentsOpacity = oo;
 }
 //==============================
@@ -1780,7 +2000,7 @@ Drill_BFTT_Window.prototype.drill_refreshMessage = function( context_list ){
 }else{
 		Imported.Drill_BattleFloatingTemporaryText = false;
 		alert(
-			"【Drill_BattleFloatingTemporaryText.js 战斗UI - 漂浮参数数字】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
+			"【Drill_BattleFloatingTemporaryText.js 战斗UI - 临时漂浮文字】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
 			"\n- Drill_CoreOfBallistics 系统-弹道核心" + 
 			"\n- Drill_CoreOfWindowAuxiliary 系统-窗口辅助核心"
 		);

@@ -19,17 +19,17 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 你可以用自己画的照明资源图片，然后绑定到玩家、事件身上。
- * 【支持插件关联资源的打包、加密】
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 插件需要基于核心，也可以扩展下列插件：
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。也可以作用于其他插件。
  * 基于：
- *   - Drill_CoreOfDynamicMask     系统 - 动态遮罩核心★★v1.2及以上★★
+ *   - Drill_CoreOfDynamicMask     系统-动态遮罩核心★★v1.2及以上★★
  * 作用于：
- *   - Drill_MouseIllumination     鼠标 - 自定义照明效果★★v1.1及以上★★
+ *   - Drill_MouseIllumination     鼠标-自定义照明效果★★v1.1及以上★★
  *     使得鼠标也能够具备照明效果。
- *   - Drill_BombCore              炸弹人 - 游戏核心
+ *   - Drill_BombCore              炸弹人-游戏核心
  *     使得炸弹人的炸弹能够具备照明效果。
  * 
  * -----------------------------------------------------------------------------
@@ -56,7 +56,7 @@
  * 自画资源：
  *   (1.所有照明的形状、大小都需要你自己画照明素材来提供。
  *      通常为白色和透明为主。
- *   (2.rmmv单个图块的像素是48x48。所需光照素材的大小通常较大，
+ *   (2.单个图块的像素是48x48。所需光照素材的大小通常较大，
  *      你也可以修改光源配置的 缩放比例 来放大光源。
  * 多种颜色：
  *   (1.资源图片的颜色默认都是纯白与透明。
@@ -280,7 +280,7 @@
  *              80.00ms - 120.00ms（中消耗）
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
- * 时间复杂度： o(n^2)*o(贴图处理)*o(遮罩渲染)
+ * 时间复杂度： o(n^2)*o(贴图处理)*o(遮罩渲染) 每帧
  * 测试方法：   在光源管理层进行性能测试。
  * 测试结果：   200个事件的地图中，平均消耗为：【175.44ms】
  *              100个事件的地图中，平均消耗为：【138.23ms】
@@ -291,7 +291,7 @@
  *   测试结果并不是精确值，范围在给定值的 20ms 范围内波动。
  *   更多性能介绍，去看看 "0.性能测试报告 > 关于插件性能.docx"。
  * 2.经过数次优化，光源插件的性能还是比较难压下去，因为主要消耗GPU
- *   的能力，黑暗层和光源是在整个地图画面的基础上，再绘制一层遮罩。
+ *   的能力，黑暗层和光源是在整个地图图层的基础上，再绘制一层遮罩。
  *   客户端打开的游戏没有性能问题，而用浏览器进行游戏会比较吃力。
  * 
  * -----------------------------------------------------------------------------
@@ -1747,14 +1747,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^2)*o(贴图处理)*o(遮罩渲染)
-//		性能测试因素	光源管理层，乱跑
-//		性能测试消耗	138.23ms
-//		最坏情况		无
-//		备注			无
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^2)*o(贴图处理)*o(遮罩渲染) 每帧
+//		★性能测试因素	光源管理层，乱跑
+//		★性能测试消耗	138.23ms
+//		★最坏情况		无
+//		★备注			无
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			自定义照明效果：
 //				->物体照明
@@ -2510,7 +2515,7 @@ Game_System.prototype.drill_LIl_setNewTargetOpacity = function( opacity ){
 // ** 遮罩渲染器【Drill_LIl_Renderer】
 //			
 //			说明：	> 该类为静态类，单独定义一个渲染器结构。
-//					> 该渲染器与 主游戏画面 完全并行渲染场景。
+//					> 该渲染器与 主游戏界面 完全并行渲染场景。
 //					> 此功能可类比 Drill_CODM_Renderer 遮罩渲染器
 //=============================================================================
 //==============================
@@ -2861,7 +2866,7 @@ Game_Map.prototype.drill_LIl_setupIllumination = function() {
 //==============================
 var _drill_LIl_layer_createDestination = Spriteset_Map.prototype.createDestination;
 Spriteset_Map.prototype.createDestination = function() {
-	_drill_LIl_layer_createDestination.call(this);	//rmmv鼠标目的地 < 上层 < rmmv天气
+	_drill_LIl_layer_createDestination.call(this);	//鼠标目的地 < 上层 < 天气层
 	if( !this._drill_mapUpArea ){
 		this._drill_mapUpArea = new Sprite();
 		this._baseSprite.addChild(this._drill_mapUpArea);	
@@ -2872,7 +2877,7 @@ Spriteset_Map.prototype.createDestination = function() {
 //==============================
 var _drill_LIl_layer_createPictures = Spriteset_Map.prototype.createPictures;
 Spriteset_Map.prototype.createPictures = function() {
-	_drill_LIl_layer_createPictures.call(this);		//rmmv图片 < 图片层 < rmmv对话框
+	_drill_LIl_layer_createPictures.call(this);		//图片对象层 < 图片层 < 对话框集合
 	if( !this._drill_mapPicArea ){
 		this._drill_mapPicArea = new Sprite();
 		this.addChild(this._drill_mapPicArea);	
@@ -2883,7 +2888,7 @@ Spriteset_Map.prototype.createPictures = function() {
 //==============================
 var _drill_LIl_layer_createAllWindows = Scene_Map.prototype.createAllWindows;
 Scene_Map.prototype.createAllWindows = function() {
-	_drill_LIl_layer_createAllWindows.call(this);	//rmmv对话框 < 最顶层
+	_drill_LIl_layer_createAllWindows.call(this);	//对话框集合 < 最顶层
 	if( !this._drill_SenceTopArea ){
 		this._drill_SenceTopArea = new Sprite();
 		this.addChild(this._drill_SenceTopArea);	

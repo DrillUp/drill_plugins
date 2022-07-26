@@ -22,12 +22,13 @@
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 插件不能单独使用，必须基于核心插件。
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfWindowAuxiliary   系统 - 窗口辅助核心★★v1.9及以上★★
+ *   - Drill_CoreOfWindowAuxiliary   系统-窗口辅助核心★★v1.9及以上★★
  *     必须基于该插件才能对文本长度自适应。
  * 可被扩展：
- *   - Drill_CoreOfWindowCharacter   对话框 - 窗口字符核心
+ *   - Drill_CoreOfWindowCharacter   窗口字符-窗口字符核心
  *     你可以使用插件指令，使得对话框中的文本自动换行，支持窗口字符的换行。
  * 
  * -----------------------------------------------------------------------------
@@ -376,14 +377,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		单次执行
-//		时间复杂度		o(n^2)
-//		性能测试因素	对话管理层
-//		性能测试消耗	太小，未找到
-//		最坏情况		暂无
-//		备注			暂无
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		单次执行
+//		★时间复杂度		o(n^2)
+//		★性能测试因素	对话管理层
+//		★性能测试消耗	太小，未找到
+//		★最坏情况		暂无
+//		★备注			暂无
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			对话框变形器：
 //				->高宽
@@ -854,7 +860,7 @@ Window_EventItem.prototype.updatePlacement = function(){
 //=============================================================================
 Window_Message.prototype.drill_DOp_beforeRefresh = function() {
 	
-	// > 对话框 - 简易对话图
+	// > 【对话框 - 简易对话图】
 	if( Imported.Drill_DialogSingleSprite ){
 		this.drill_DSS_homingPosition();	//（强制归位）
 	}
@@ -916,6 +922,8 @@ Game_Interpreter.prototype.drill_DOp_isContinueString = function() {
 // * 指令 - 添加文本
 //==============================
 Game_Message.prototype.drill_DOp_addText = function( text ){
+	
+	// > 【窗口字符 - 窗口字符核心】
 	if( Imported.Drill_CoreOfWindowCharacter ){
 		if( $gameSystem._drill_DOp_curStyle == "与最长文本宽度一致" ){
 			//（不允许在变化宽度中自动换行）

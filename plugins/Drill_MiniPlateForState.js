@@ -23,14 +23,15 @@
  *
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该插件 不能 单独使用，基于插件才能运行。该插件也可以对其它插件扩展。
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。该插件也可以对其它插件扩展。
  * 基于：
- *   - Drill_CoreOfInput             系统 - 输入设备核心
- *   - Drill_CoreOfWindowAuxiliary   系统 - 窗口辅助核心
+ *   - Drill_CoreOfInput             系统-输入设备核心
+ *   - Drill_CoreOfWindowAuxiliary   系统-窗口辅助核心
  * 作用于：
- *   - MOG_BattleHud                 战斗UI - 角色窗口 
+ *   - MOG_BattleHud                 战斗UI-角色窗口 
  *     使得角色窗口的状态能显示，状态说明。
- *   - Drill_GaugeForBoss            UI - 高级BOSS生命固定框 ★★v1.7及以上★★
+ *   - Drill_GaugeForBoss            UI-高级BOSS生命固定框★★v1.7及以上★★
  *     使得敌人生命框的状态能显示，状态说明。
  *   - YEP_BuffsStatesCore           YEP状态核心
  *     yep插件使得sv模式下玩家头上能显示状态图标，这里能兼容yep的图标。
@@ -45,7 +46,7 @@
  *   (1.配置的状态与数据库中状态的id一一对应，如果你修改了数据库的状态，
  *      需要记得进入该插件修改状态说明。
  *   (2.状态和buff是两种不同的分类，buff是固定的可叠加的能力值强化弱化。
- *      rmmv默认最高强化弱化2次，如果你修改了最大次数，可以继续添加3级以上说明。
+ *      默认最高强化弱化2次，如果你修改了最大次数，可以继续添加3级以上说明。
  *   (3.sv模式中，角色在战斗中的状态不是图标，而是固定的几个gif状态。
  * 内容：
  *   (1.状态可以有两种说明方式，模糊说明，以及详细说明。
@@ -67,7 +68,7 @@
  * 资源-自定义窗口皮肤
  * 资源-自定义背景图片
  *
- * 系统窗口与rmmv默认的window.png图片一样，可设置为不同的皮肤。
+ * 系统窗口与默认的window.png图片一样，可设置为不同的皮肤。
  * 图片布局不能根据窗口内容自适应，你需要合理控制的设置的说明文字。
  * 
  * -----------------------------------------------------------------------------
@@ -103,7 +104,7 @@
  *              80.00ms - 120.00ms（中消耗）
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
- * 时间复杂度： o(n^2) + o(图像处理) 每帧
+ * 时间复杂度： o(n^2)+o(贴图处理) 每帧
  * 测试方法：   以正常流程进行游戏，记录鼠标靠近区域显示窗口的消耗。
  * 测试结果：   战斗界面，平均消耗为：【41.76ms】
  * 
@@ -267,21 +268,21 @@
  * @parent ---窗口---
  * @type number
  * @min 0
- * @desc 窗口内容之间的行间距。（rmmv默认标准：36）
+ * @desc 窗口内容之间的行间距。（默认标准：36）
  * @default 10
  *
  * @param 窗口内边距
  * @parent ---窗口---
  * @type number
  * @min 0
- * @desc 窗口内容与窗口外框的内边距。（rmmv默认标准：18）
+ * @desc 窗口内容与窗口外框的内边距。（默认标准：18）
  * @default 10
  *
  * @param 窗口字体大小
  * @parent ---窗口---
  * @type number
  * @min 1
- * @desc 窗口的字体大小。注意图标无法根据字体大小变化。（rmmv默认标准：28）
+ * @desc 窗口的字体大小。注意图标无法根据字体大小变化。（默认标准：28）
  * @default 22
  *
  * @param 窗口附加宽度
@@ -941,14 +942,20 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^2) + o(图像处理) 每帧
-//		性能测试因素	鼠标乱晃
-//		性能测试消耗	41.76ms
-//		最坏情况		战斗界面出现大量敌人、角色、boss浮动框。
-//						（该插件目前没有对最坏情况进行实测。）
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^2)+o(贴图处理) 每帧
+//		★性能测试因素	鼠标乱晃
+//		★性能测试消耗	41.76ms
+//		★最坏情况		战斗界面出现大量敌人、角色、boss浮动框。
+//						（该插件目前没有对最坏情况进行实测。）
+//		★备注			无
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			事件说明窗口：
 //				->说明面板
@@ -1435,7 +1442,7 @@ Spriteset_Battle.prototype.createLowerLayer = function() {
 //==============================
 var _drill_MPFS_battle_createPictures = Spriteset_Battle.prototype.createPictures;
 Spriteset_Battle.prototype.createPictures = function() {
-	_drill_MPFS_battle_createPictures.call(this);		//rmmv图片 < 图片层 < rmmv对话框
+	_drill_MPFS_battle_createPictures.call(this);		//图片对象层 < 图片层 < 对话框集合
 	if( !this._drill_battlePicArea ){
 		this._drill_battlePicArea = new Sprite();
 		this.addChild(this._drill_battlePicArea);	
@@ -1446,7 +1453,7 @@ Spriteset_Battle.prototype.createPictures = function() {
 //==============================
 var _drill_MPFS_battle_createAllWindows = Scene_Battle.prototype.createAllWindows;
 Scene_Battle.prototype.createAllWindows = function() {
-	_drill_MPFS_battle_createAllWindows.call(this);	//rmmv对话框 < 最顶层
+	_drill_MPFS_battle_createAllWindows.call(this);	//对话框集合 < 最顶层
 	if( !this._drill_SenceTopArea ){
 		this._drill_SenceTopArea = new Sprite();
 		this.addChild(this._drill_SenceTopArea);	

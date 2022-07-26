@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        行走图 - 事件漂浮文字的背景[扩展]
+ * @plugindesc [v1.3]        行走图 - 事件漂浮文字的背景[扩展]
  * @author Drill_up
  * 
  * @Drill_LE_param "背景样式-%d"
@@ -22,9 +22,10 @@
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 插件只对指定插件扩展，如果没有使用目标插件，则该插件没有任何效果。
+ * 该插件 不能 单独使用。
+ * 必须基于下面插件才能运行。
  * 基于：
- *   - Drill_EventText             行走图-事件漂浮文字
+ *   - Drill_EventText             行走图-事件漂浮文字★★v1.9及以上★★
  *     需要该插件才能绘制背景。
  *
  * -----------------------------------------------------------------------------
@@ -37,7 +38,7 @@
  *   (2.你可以通过换事件页，来切换头顶的漂浮背景。
  *   (3.事件变形、位移时，漂浮背景会一直跟着事件，但仅仅是跟着。
  * 设计：
- *   (1.你可以单独设置事件的漂浮背景，不设置文字。
+ *   (1.你可以单独设置事件的漂浮背景，设置文字为看不见的中文空格。
  *      并且，漂浮背景可以是GIF，可以作为头顶的广告牌用。
  *      （示例在 对话管理层 中被作为五毛特效展示。）
  * 
@@ -111,8 +112,10 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 添加了最大值编辑的支持。
- * [v1.5]
+ * [v1.2]
  * 优化了内部结构。
+ * [v1.3]
+ * 更新了版本兼容结构。
  * 
  * 
  * 
@@ -1403,20 +1406,26 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n)*o(贴图处理)	每帧
-//		性能测试因素	乱跑
-//		性能测试消耗	10.55ms ~ 6.22ms
-//		最坏情况		所有事件都有背景设置。
-//		备注			不确定实际的消耗量，还要看贴图的大小和数量，但是小图肯定不担心。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n)*o(贴图处理)	每帧
+//		★性能测试因素	乱跑
+//		★性能测试消耗	10.55ms ~ 6.22ms
+//		★最坏情况		所有事件都有背景设置。
+//		★备注			不确定实际的消耗量，还要看贴图的大小和数量，但是小图肯定不担心。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			事件漂浮文字背景：
-//				->贴一个gif
-//				->插件指令
+//				->绑定控制器数据
+//				->贴图GIF播放
 //
 //		★私有类如下：
+//			* Drill_ET_Controller【漂浮文字控制器】
 //			* Drill_ET_WindowSprite【漂浮文字贴图】
 //
 //		★必要注意事项：
@@ -1424,7 +1433,7 @@
 //			
 //		★其它说明细节：
 //			1.该插件附着在漂浮文字插件上。
-//			  包含 _XETB_layer层 和 背景自身。
+//			  包含 _drill_XETB_layer层 和 背景自身。
 //			2.背景是根据漂浮文字反向位移，才看起来背景和文字是两个东西。
 //
 //		★存在的问题：
@@ -1439,13 +1448,13 @@
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_X_EventTextBackground');
 	
+	
 	//==============================
 	// * 变量获取 - 背景样式
 	//				（~struct~EventTextGIF）
 	//==============================
 	DrillUp.drill_XETB_initEventTextGIF = function( dataFrom ) {
 		var data = {};
-		data['cur_time'] = 0;
 		
 		if( dataFrom["资源-图片序列"] != "" &&
 			dataFrom["资源-图片序列"] != undefined ){
@@ -1465,13 +1474,6 @@
 		//data['skew_y'] = Number( dataFrom["斜切 Y"] || 0);
 		return data;
 	}
-	
-	/*-----------------杂项------------------*/
-	DrillUp.g_XETB_layer = Number(DrillUp.parameters["图片层级"] || 100); 
-	DrillUp.g_XETB_fontSize = Number(DrillUp.parameters["默认字体大小"] || 18); 
-	DrillUp.g_XETB_padding = Number(DrillUp.parameters["内边距"] || 4); 
-	DrillUp.g_XETB_frame_visible = String(DrillUp.parameters["默认是否显示外框"] || "false") === "true";	
-	DrillUp.g_XETB_algorithm = String(DrillUp.parameters["优化算法"] || "全创建") ;	
 	
 	/*-----------------背景样式------------------*/
 	DrillUp.g_XETB_list_length = 200;
@@ -1510,13 +1512,12 @@ ImageManager.load_MapEventBackground = function(filename) {
 var _drill_XETB_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_XETB_pluginCommand.call(this, command, args);
-	
-	if (command === ">事件漂浮背景") { 	//	>事件漂浮背景 : 本事件 : 设置背景 : 2
-		if(args.length == 6){
+	if( command === ">事件漂浮背景" ){ 	//	>事件漂浮背景 : 本事件 : 设置背景 : 2
+		
+		/*-----------------对象组获取------------------*/
+		var e_id = null;
+		if( args.length >= 2 ){
 			var temp1 = String(args[1]);
-			var type = String(args[3]);
-			var temp3 = Number(args[5]);
-			
 			if( temp1 == "本事件" ){
 				var e_id = this._eventId;
 			}
@@ -1529,65 +1530,47 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp1 = temp1.replace("事件变量[","");
 				temp1 = temp1.replace("]","");
 				var e_id = $gameVariables.value(Number(temp1));
-			}
-			if( e_id && type == "设置背景" ){
-				if( $gameMap.drill_XETB_isEventExist( e_id ) == false ){ return; }
-				$gameMap.event(e_id)._drill_ET._enabled = true;		//强制漂浮文字刷新
-				$gameMap.event(e_id)._drill_XETB._back_index = temp3-1;
-				$gameMap.event(e_id)._drill_ET._forceRefresh = true;
-				$gameTemp._drill_ET_needRefresh = true;
 			}
 		}
-		if(args.length == 4){
-			var temp1 = String(args[1]);
+		
+		/*-----------------指令设置------------------*/
+		if( e_id != null && args.length == 6 ){
 			var type = String(args[3]);
-			
-			if( temp1 == "本事件" ){
-				var e_id = this._eventId;
-			}
-			if( temp1.indexOf("事件[") != -1 ){
-				temp1 = temp1.replace("事件[","");
-				temp1 = temp1.replace("]","");
-				var e_id = Number(temp1);
-			}
-			if( temp1.indexOf("事件变量[") != -1 ){
-				temp1 = temp1.replace("事件变量[","");
-				temp1 = temp1.replace("]","");
-				var e_id = $gameVariables.value(Number(temp1));
-			}
-			if( e_id && type == "去掉背景" ){
+			var temp3 = String(args[5]);
+			if( type == "设置背景" ){
 				if( $gameMap.drill_XETB_isEventExist( e_id ) == false ){ return; }
-				$gameMap.event(e_id)._drill_XETB._back_index = -1;
+				var e = $gameMap.event(e_id);
+				e.drill_ET_createController();
+				e._drill_ET_controller.drill_XETB_setBackgroundId( Number(temp3)-1 );
 			}
 		}
-		if(args.length == 8){
-			var temp1 = String(args[1]);
+		if( args.length == 4 ){
 			var type = String(args[3]);
-			var temp3 = Number(args[5]);
-			var temp4 = Number(args[7]);
-			
-			if( temp1 == "本事件" ){
-				var e_id = this._eventId;
-			}
-			if( temp1.indexOf("事件[") != -1 ){
-				temp1 = temp1.replace("事件[","");
-				temp1 = temp1.replace("]","");
-				var e_id = Number(temp1);
-			}
-			if( temp1.indexOf("事件变量[") != -1 ){
-				temp1 = temp1.replace("事件变量[","");
-				temp1 = temp1.replace("]","");
-				var e_id = $gameVariables.value(Number(temp1));
-			}
-			if( e_id && type == "背景偏移" ){
+			if( type == "去掉背景" ){
 				if( $gameMap.drill_XETB_isEventExist( e_id ) == false ){ return; }
-				$gameMap.event(e_id)._drill_XETB._x = temp3;
-				$gameMap.event(e_id)._drill_XETB._y = temp4;
+				var e = $gameMap.event(e_id);
+				e.drill_ET_createController();
+				e._drill_ET_controller.drill_XETB_setBackgroundId( -1 );
 			}
-			if( e_id && type == "背景偏移(变量)" ){
+		}
+		if( e_id != null && args.length == 8 ){
+			var type = String(args[3]);
+			var temp3 = String(args[5]);
+			var temp4 = String(args[7]);
+			if( type == "背景偏移" ){
 				if( $gameMap.drill_XETB_isEventExist( e_id ) == false ){ return; }
-				$gameMap.event(e_id)._drill_XETB._x = $gameVariables.value(temp3);
-				$gameMap.event(e_id)._drill_XETB._y = $gameVariables.value(temp4);
+				var e = $gameMap.event(e_id);
+				e.drill_ET_createController();
+				e._drill_ET_controller.drill_XETB_setOffset( Number(temp3),Number(temp4) );
+			}
+			if( type == "背景偏移(变量)" ){
+				if( $gameMap.drill_XETB_isEventExist( e_id ) == false ){ return; }
+				var e = $gameMap.event(e_id);
+				e.drill_ET_createController();
+				e._drill_ET_controller.drill_XETB_setOffset( 
+					$gameVariables.value(Number(temp3)),
+					$gameVariables.value(Number(temp4)) 
+				);
 			}
 		}
 	}
@@ -1609,10 +1592,10 @@ Game_Map.prototype.drill_XETB_isEventExist = function( e_id ){
 
 
 //=============================================================================
-// ** 初始化
+// ** 事件注释初始化
 //=============================================================================
 //==============================
-// * 事件初始化
+// * 事件 - 注释初始化
 //==============================
 var _drill_XETB_c_setupPageSettings = Game_Event.prototype.setupPageSettings;
 Game_Event.prototype.setupPageSettings = function() {
@@ -1621,53 +1604,122 @@ Game_Event.prototype.setupPageSettings = function() {
 }
 Game_Event.prototype.drill_XETB_refreshBackground = function() {
 	
-	this._drill_XETB = {};
-	this._drill_XETB._back_index = -1;
-	this._drill_XETB._x = 0;
-	this._drill_XETB._y = 0;
+	// > 默认情况下，归位并置空
+	if( this._drill_ET_controller != null ){
+		this._drill_ET_controller.drill_XETB_setBackgroundId( -1 );
+		this._drill_ET_controller.drill_XETB_setOffset( 0,0 );
+	}
 	
 	var page = this.page();
     if( page ){
-		this.list().forEach(function(l) {
-			if (l.code === 108) {
-				
-				/*-----------------旧注释------------------*/
-				var comment = l.parameters[0].split(/[:：]/);
-				if (comment[0].toLowerCase() === "事件漂浮背景"){
-					if( comment.length == 2 && comment[1].toLowerCase() == "去掉背景" ){
-						this._drill_XETB._back_index = -1;
-					}
-					if( comment.length == 3 && comment[1].toLowerCase() == "设置背景" ){
-						this._drill_ET._enabled = true;		//强制漂浮文字刷新
-						this._drill_XETB._back_index = Number(comment[2])-1;
-						$gameTemp._drill_ET_needRefresh = true;
-					}
-					if( comment.length == 4 && comment[1].toLowerCase() == "背景偏移" ){
-						this._drill_XETB._x = Number(comment[2]);
-						this._drill_XETB._y = Number(comment[3]);
-					}
-				};
+		this.list().forEach(function(l){
+			if( l.code === 108 ){
+				var l_str = l.parameters[0];
 				
 				/*-----------------注释------------------*/
-				var args = l.parameters[0].split(/[ ]+/);	
+				var args = l_str.split(/[ ]+/);	
 				var command = args.shift();
-				if (command == "=>事件漂浮背景" ){
-					if( args.length == 2 && args[1] == "去掉背景" ){
-						this._drill_XETB._back_index = -1;
+				if( command == "=>事件漂浮背景" ){
+					if( args.length == 2 ){
+						var type = String(args[1]);
+						if( type == "去掉背景" ){
+							this.drill_ET_createController();
+							this._drill_ET_controller.drill_XETB_setBackgroundId( -1 );
+						}
 					}
-					if( args.length == 4 && args[1] == "设置背景" ){
-						this._drill_ET._enabled = true;		//强制漂浮文字刷新
-						this._drill_XETB._back_index = Number(args[3])-1;
-						$gameTemp._drill_ET_needRefresh = true;
+					if( args.length == 4 ){
+						var type = String(args[1]);
+						var temp1 = String(args[3]);
+						if( type == "设置背景" ){
+							this.drill_ET_createController();
+							this._drill_ET_controller.drill_XETB_setBackgroundId( Number(temp1)-1 );
+						}
 					}
-					if( args.length == 6 && args[1] == "背景偏移" ){
-						this._drill_XETB._x = Number(args[3]);
-						this._drill_XETB._y = Number(args[5]);
+					if( args.length == 6 ){
+						var type = String(args[1]);
+						var temp1 = String(args[3]);
+						var temp2 = String(args[5]);
+						if( type == "背景偏移" ){
+							this.drill_ET_createController();
+							this._drill_ET_controller.drill_XETB_setOffset( Number(temp1),Number(temp2) );
+						}
 					}
 				};  
+				
+				/*-----------------旧注释------------------*/
+				var comment = l_str.split(/[:：]/);
+				if( comment[0].toLowerCase() === "事件漂浮背景"){
+					if( comment.length == 2 && comment[1].toLowerCase() == "去掉背景" ){
+						this.drill_ET_createController();
+						this._drill_ET_controller.drill_XETB_setBackgroundId( -1 );
+					}
+					if( comment.length == 3 && comment[1].toLowerCase() == "设置背景" ){
+						this.drill_ET_createController();
+						this._drill_ET_controller.drill_XETB_setBackgroundId( Number(comment[2])-1 );
+					}
+					if( comment.length == 4 && comment[1].toLowerCase() == "背景偏移" ){
+						this.drill_ET_createController();
+						this._drill_ET_controller.drill_XETB_setOffset( Number(comment[2]),Number(comment[3]) );
+					}
+				};
 			};
 		}, this);
     }
+}
+
+//=============================================================================
+// ** 漂浮文字控制器（继承）
+//=============================================================================
+//==============================
+// * 控制器 - 初始化（继承）
+//==============================
+var _drill_XETB_ET_c_initData = Drill_ET_Controller.prototype.drill_initData;
+Drill_ET_Controller.prototype.drill_initData = function(){
+	_drill_XETB_ET_c_initData.call(this);
+	var data = this._drill_data;
+	
+	// > 默认值
+	if( data['background_id'] == undefined ){ data['background_id'] = -1 };		//背景ID
+	if( data['background_x'] == undefined ){ data['background_x'] = 0 };		//背景偏移x
+	if( data['background_y'] == undefined ){ data['background_y'] = 0 };		//背景偏移y
+}
+//==============================
+// * 控制器 - 私有初始化（继承）
+//==============================
+var _drill_XETB_ET_c_initPrivateData = Drill_ET_Controller.prototype.drill_initPrivateData;
+Drill_ET_Controller.prototype.drill_initPrivateData = function(){
+	_drill_XETB_ET_c_initPrivateData.call(this);
+	var data = this._drill_data;
+	
+	// > 初始化 - 私有变量
+	this._drill_XETB_curTime = 0;
+}
+//==============================
+// * 控制器 - 设置偏移（接口）
+//==============================
+Drill_ET_Controller.prototype.drill_XETB_setBackgroundId = function( id ){
+	var data = this._drill_data;
+	data['background_id'] = id;
+}
+//==============================
+// * 控制器 - 设置偏移（接口）
+//==============================
+Drill_ET_Controller.prototype.drill_XETB_setOffset = function( x, y ){
+	var data = this._drill_data;
+	data['background_x'] = x;
+	data['background_y'] = y;
+}
+//==============================
+// * 控制器 - 帧刷新（继承）
+//==============================
+var _drill_XETB_ET_c_update = Drill_ET_Controller.prototype.drill_ET_update;
+Drill_ET_Controller.prototype.drill_ET_update = function(){
+	_drill_XETB_ET_c_update.call(this);
+	var data = this._drill_data;
+	if( data['background_id'] == -1 ){ return; }
+	
+	// > 时间+1
+	this._drill_XETB_curTime += 1;
 }
 
 
@@ -1675,111 +1727,126 @@ Game_Event.prototype.drill_XETB_refreshBackground = function() {
 // ** 漂浮文字贴图（继承）
 //=============================================================================
 //==============================
-// * 漂浮文字贴图 - 初始化
+// * 文字贴图 - 初始化（继承）
 //==============================
-var _drill_XETB_ET_initialize = Drill_ET_WindowSprite.prototype.initialize;
-Drill_ET_WindowSprite.prototype.initialize = function(character_sprite) {
-    _drill_XETB_ET_initialize.call(this,character_sprite);
+var _drill_XETB_ET_sp_initialize = Drill_ET_WindowSprite.prototype.initialize;
+Drill_ET_WindowSprite.prototype.initialize = function( obj_event ){
+    _drill_XETB_ET_sp_initialize.call( this,obj_event );
 	
-	this._XETB_cur_background = null;			//当前背景
-	this._XETB_cur_index = -1;					//当前背景编号
-	this._XETB_layer = new Sprite();			//背景层
-	this.addChildAt( this._XETB_layer, 0 );		//
+	// > 背景层
+	this._drill_XETB_layer = new Sprite();
+	this.addChildAt( this._drill_XETB_layer, 0 );
+	
+	// > 背景贴图
+	this._drill_XETB_curBackground = null;		//当前背景
+	this._drill_XETB_curIndex = -1;				//当前背景样式
 };
 //==============================
-// * 漂浮文字贴图 - 创建背景
+// * 文字贴图 - 销毁（继承）
 //==============================
-Drill_ET_WindowSprite.prototype.drill_XETB_create = function() {
-	var index = this['_character']._drill_XETB._back_index;
-	if( this._XETB_cur_background != null ){		//移除当前背景
-		this._XETB_layer.removeChild(this._XETB_cur_background);
-		this._XETB_cur_background = null;
+var _drill_XETB_ET_sp_destroy_Private = Drill_ET_WindowSprite.prototype.drill_ET_destroy_Private;
+Drill_ET_WindowSprite.prototype.drill_ET_destroy_Private = function(){
+    _drill_XETB_ET_sp_destroy_Private.call( this );
+	
+	// > 移除层
+	this.removeChild(this._drill_XETB_layer);
+	
+	// > 断开连接
+	this._drill_XETB_layer = null;
+	this._drill_XETB_curBackground = null;
+}
+
+//==============================
+// * 文字贴图 - 帧刷新
+//==============================
+var _drill_XETB_ET_sp_update = Drill_ET_WindowSprite.prototype.update;
+Drill_ET_WindowSprite.prototype.update = function() {
+	_drill_XETB_ET_sp_update.call(this);
+	if( this._drill_controller == undefined ){ return; }
+	this.drill_XETB_updateRebuild();		//帧刷新 - 重建背景监听
+	if( this._drill_XETB_curBackground == undefined ){ return; }
+	this.drill_XETB_updateGIF();			//帧刷新 - 播放GIF
+	this.drill_XETB_updatePosition();		//帧刷新 - 背景位置
+}
+//==============================
+// * 帧刷新 - 重建背景监听
+//==============================
+Drill_ET_WindowSprite.prototype.drill_XETB_updateRebuild = function() {
+	var d_data = this._drill_controller._drill_data;
+	
+	// > 背景样式不一样时，切换背景
+	if( this._drill_XETB_curIndex != d_data['background_id'] ){
+		this._drill_XETB_curIndex = d_data['background_id'];
+		this.drill_XETB_rebuildBackground();
+	}
+}
+//==============================
+// * 文字贴图 - 重建背景
+//==============================
+Drill_ET_WindowSprite.prototype.drill_XETB_rebuildBackground = function() {
+	var index = this._drill_XETB_curIndex;
+	
+	// > 移除当前背景
+	if( this._drill_XETB_curBackground != null ){
+		this._drill_XETB_layer.removeChild(this._drill_XETB_curBackground);
+		this._drill_XETB_curBackground = null;
 	}
 	if( index == -1 ){ return; }
 	
-	var temp_data = JSON.parse(JSON.stringify( DrillUp.g_XETB_list[index] ));	
-	var temp_sprite = new Sprite();
-	temp_sprite['_drill_data'] = temp_data;			//配置数据
-	temp_sprite['_drill_src_bitmaps'] = [];			//bitmap容器
-	for(var j = 0; j < temp_data['src_img'].length ; j++){
-		temp_sprite['_drill_src_bitmaps'].push(ImageManager.load_MapEventBackground(temp_data['src_img'][j]));
+	// > 资源初始化
+	var s_data = DrillUp.g_XETB_list[ index ];
+	this._drill_XETB_bitmapTank = [];
+	for(var j = 0; j < s_data['src_img'].length; j++){
+		var temp_bitmap = ImageManager.load_MapEventBackground( s_data['src_img'][j] );
+		this._drill_XETB_bitmapTank.push( temp_bitmap );
 	}
-	temp_sprite.bitmap = temp_sprite['_drill_src_bitmaps'][0];
+	
+	// > 创建背景贴图
+	var temp_sprite = new Sprite();
 	temp_sprite.anchor.x = 0.5;
 	temp_sprite.anchor.y = 0.5;
 	temp_sprite.x = 0;
 	temp_sprite.y = 0;
-	temp_sprite.opacity = temp_data['opacity'];
-	temp_sprite.blendMode = temp_data['blendMode'];
+	temp_sprite.bitmap = this._drill_XETB_bitmapTank[0];
+	temp_sprite.opacity = s_data['opacity'];
+	temp_sprite.blendMode = s_data['blendMode'];
 	
-	this._XETB_cur_background = temp_sprite;
-	this._XETB_layer.addChild(temp_sprite);
-		
-}
-
-//==============================
-// * 漂浮文字贴图 - 帧刷新
-//==============================
-var _drill_XETB_ET_update = Drill_ET_WindowSprite.prototype.update;
-Drill_ET_WindowSprite.prototype.update = function() {
-	_drill_XETB_ET_update.call(this);
-	if( this['_character'] ){
-		this.drill_XETB_updateCreate();
-		this.drill_XETB_updateBackground();
-	}
+	this._drill_XETB_curBackground = temp_sprite;
+	this._drill_XETB_layer.addChild(temp_sprite);
 }
 //==============================
-// * 帧刷新 - 文本背景切换
+// * 帧刷新 - 播放GIF
 //==============================
-Drill_ET_WindowSprite.prototype.drill_XETB_updateCreate = function() {
-	if(this['_character']._erased){
-		// > 事件去除后
-		if( this._XETB_layer ){			//移除整个层
-			this.removeChild(this._XETB_layer);
-			this._XETB_layer = null;
-		}
-		
-	}else{
-		// > 事件保持存在时
-		var temp_data = this['_character']._drill_XETB;
-		if( this._XETB_cur_index != temp_data._back_index ){		//改变背景
-			this._XETB_cur_index = temp_data._back_index;
-			this.drill_XETB_create();
-		}
-	}
+Drill_ET_WindowSprite.prototype.drill_XETB_updateGIF = function() {
+	var index = this._drill_XETB_curIndex;
+	if( index == -1 ){ return; }
+	var s_data = DrillUp.g_XETB_list[ index ];
 	
-}
-//==============================
-// * 帧刷新 - 文本背景GIF
-//==============================
-Drill_ET_WindowSprite.prototype.drill_XETB_updateBackground = function() {
-	
-	// > 层位置
-	if( this._XETB_layer == undefined ){ return }
-	var parent_data = this['_character']._drill_ET;
-	var xx = -1 * parent_data._x;
-	var yy = -1 * parent_data._y;
-	xx += this.width/2;
-	yy += this.height/2;
-	this._XETB_layer.x = xx;
-	this._XETB_layer.y = yy;
-	
-	// > 背景
-	var temp_sprite = this._XETB_cur_background;
-	if( temp_sprite == undefined ){ return }
-	temp_sprite['_drill_data']['cur_time'] += 1;
-	var inter = temp_sprite['_drill_data']['cur_time'] ;
-	inter = inter / temp_sprite['_drill_data']['interval'];
-	inter = inter % temp_sprite['_drill_src_bitmaps'].length;
-	if( temp_sprite['_drill_data']['back_run'] ){
-		inter = temp_sprite['_drill_src_bitmaps'].length - 1 - inter;
+	// > 播放GIF
+	var inter = this._drill_controller._drill_XETB_curTime;
+	inter = inter / s_data['interval'];
+	inter = inter % this._drill_XETB_bitmapTank.length;
+	if( s_data['back_run'] == true ){
+		inter = this._drill_XETB_bitmapTank.length - 1 - inter;
 	}
 	inter = Math.floor(inter);
-	temp_sprite.bitmap = temp_sprite['_drill_src_bitmaps'][inter];
+	this._drill_XETB_curBackground.bitmap = this._drill_XETB_bitmapTank[inter];
+}
+//==============================
+// * 帧刷新 - 背景位置
+//==============================
+Drill_ET_WindowSprite.prototype.drill_XETB_updatePosition = function() {
+	var d_data = this._drill_controller._drill_data;
 	
-	var temp_data = this['_character']._drill_XETB;
-	temp_sprite.x = temp_data._x;
-	temp_sprite.y = temp_data._y;
+	// > 位置
+	var xx = 0;
+	var yy = 0;
+	xx += d_data['background_x'];
+	yy += d_data['background_y'];
+	xx += this.width/2;		//（窗口位置居中）
+	yy += this.height/2;
+	this._drill_XETB_curBackground.x = xx;
+	this._drill_XETB_curBackground.y = yy;
 }
 
 

@@ -15,13 +15,13 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 使得地图玩家能够与花盆等物件互动，该能力分3个阶段：举起、运输、投掷。
- * 【支持插件关联资源的打包、加密】
  *
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该插件可以单独使用，也可以通过其他插件添加更多功能。
+ * 该插件可以单独使用。
+ * 也可以通过其他插件添加更多功能。
  * 被扩展：
- *   - Drill_OperateHud 画面 - 鼠标辅助操作面板
+ *   - Drill_OperateHud      鼠标-鼠标辅助操作面板
  *     该插件提供鼠标、触碰辅助控制举起、投掷的支持。
  *
  * -----------------------------------------------------------------------------
@@ -30,7 +30,7 @@
  *   对玩家、被举起的事件 有效。
  * 2.更多详细的介绍，去看看 "10.互动 > 关于举起花盆能力.docx"。
  * 3.插件需要将指定 地形标志 或 图块R区域 设为禁止花盆区，
- *   去看看 "10.互动 > 关于插件与图块R占用说明.xlsx"
+ *   去看看 "26.图块 > 关于插件与图块R占用说明.xlsx"
  * 举起：
  *   (1.玩家/花盆任一个站在花盆禁区，都无法举起花盆。
  *   (2.花盆一次只能捡一个。
@@ -64,12 +64,12 @@
  *      地震),火药石(运输时持续扣HP)，鸡(隔一段时间自己挣脱被举)……
  * 
  * -----------------------------------------------------------------------------
- * ----控制操作 - 键盘、手柄
+ * ----知识点 - 键盘、手柄
  * 键盘 - "确定"键拾取、投掷
  * 手柄 - "确定"键拾取、投掷
  *
  * -----------------------------------------------------------------------------
- * ----控制操作 - 鼠标、触屏
+ * ----知识点 - 鼠标、触屏
  * 鼠标 - 无法控制，点击不能举起，也不能投掷
  * 触屏 - 无法控制，触碰不能举起，也不能投掷
  *
@@ -148,7 +148,7 @@
  *              80.00ms - 120.00ms（中消耗）
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
- * 时间复杂度： o(n^2)
+ * 时间复杂度： o(n^2) 每帧
  * 测试方法：   去管理层放置几个可举起物体，举起物体并监听性能消耗。
  * 测试结果：   200个事件的地图中，消耗为：【89.26ms】
  *              100个事件的地图中，消耗为：【52.31ms】
@@ -234,13 +234,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^2)
-//		性能测试因素	设计箱子关卡
-//		性能测试消耗	52.31ms
-//		最坏情况		地图存在大量可举起的箱子。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^2) 每帧
+//		★性能测试因素	设计箱子关卡
+//		★性能测试消耗	52.31ms
+//		★最坏情况		地图存在大量可举起的箱子。
+//		★备注			无
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			举起花盆能力：
 //				->参数赋值
@@ -385,7 +391,7 @@ var _drill_PT_map_update = Game_Map.prototype.update;
 Game_Map.prototype.update = function(sceneActive){ 
 	_drill_PT_map_update.call(this,sceneActive);
 	
-	//不能实时赋值，rmmv默认赋值会刷新整个地图
+	//不能实时赋值，默认赋值会刷新整个地图
 	$gameSwitches.drill_setValueWithOutChange( DrillUp.g_PT_isLifting_switch, $gamePlayer._drill_PT_is_lifting );
 	$gameVariables.drill_setValueWithOutChange( DrillUp.g_PT_liftingEvent_par, $gameSystem._drill_PT_being_lift_event );
 };
@@ -515,7 +521,9 @@ SoundManager.drill_PT_playSE = function(fileName,character){
 	se.name = fileName;
 	se.pitch = 100;
 	se.volume = 100;
-	if( Imported.Drill_EventSound && AudioManager.drill_ESo_playCharacterSe ){		//适应声音距离化
+	
+	// > 【声音-事件的声音】适应声音距离化
+	if( Imported.Drill_EventSound && AudioManager.drill_ESo_playCharacterSe ){
 		AudioManager.drill_ESo_playCharacterSe(se,character);
 	}else{
 		AudioManager.playSe(se);
@@ -787,7 +795,7 @@ Sprite_Character.prototype.updatePosition = function(){
 var _drill_PT_c_screenY = Game_CharacterBase.prototype.screenY;
 Game_CharacterBase.prototype.screenY = function(){
 	
-	// > 阶梯修正
+	// > 【图块-侧边阶梯区域】修正
 	if( Imported.Drill_LayerStairArea && this._drill_PT_is_being_lift ){
 		this._drill_LSA_height = $gamePlayer._drill_LSA_height * 2;		//（由于阶梯是完全相反的Y轴补正，所以阶梯初始高度x2）
 	}

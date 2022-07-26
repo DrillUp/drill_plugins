@@ -15,13 +15,13 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 查看物品或装备时，会弹出旋转卡牌并展示物品的图片。
- * 【支持插件关联资源的打包、加密】
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 插件可以单独使用，可以在多个界面中显示。
+ * 该插件可以单独使用。
+ * 也可以与其他插件组合使用。
  * 被扩展：
- *   - Drill_X_ItemImage        控件 - 物品+技能详细图片[扩展]
+ *   - Drill_X_ItemImage        控件-物品+技能详细图片[扩展]
  *     通过该插件，卡片中的图标可以换成高清图片。
  *
  * -----------------------------------------------------------------------------
@@ -594,14 +594,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^2)*o(贴图处理) 每帧
-//		性能测试因素	菜单界面
-//		性能测试消耗	消耗太小没有找到。
-//		最坏情况		暂无
-//		备注			暂无
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^2)*o(贴图处理) 每帧
+//		★性能测试因素	菜单界面
+//		★性能测试消耗	消耗太小没有找到。
+//		★最坏情况		暂无
+//		★备注			暂无
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			旋转卡牌：
 //				->卡片旋转
@@ -796,8 +801,9 @@ Window_Selectable.prototype.processHandling = function() {
 		this._drill_RCardSprite._switch_visible = !this._drill_RCardSprite.visible;	//开关
 		if( this._drill_RCardSprite._switch_visible ){
 			this._drill_RCardSprite.show();	//按键显示卡片（刷新）	
+			
+			// >【FTKR_SkillTreeSystem.js技能树插件】
 			if( Imported.FTKR_STS && FTKR && FTKR.STS && this.constructor == Window_SkillTree ){
-				// FTKR_SkillTreeSystem.js技能树插件
 				this.drill_setRotateCard(this.item());
 			}else{
 				this.updateHelp();
@@ -834,6 +840,8 @@ Scene_Base.prototype.drill_RCard_create = function() {
 	if( this._slotWindow ){ this._slotWindow._drill_RCardSprite = this._drill_scene_RCardSprite; }
 	if( this._itemWindow ){ this._itemWindow._drill_RCardSprite = this._drill_scene_RCardSprite; }
 	if( this._skillWindow ){ this._skillWindow._drill_RCardSprite = this._drill_scene_RCardSprite; }
+	
+	// >【FTKR_SkillTreeSystem.js技能树插件】
 	if( Imported.FTKR_STS && FTKR && FTKR.STS && this._stsSkillTreeWindow ){ this._stsSkillTreeWindow._drill_RCardSprite = this._drill_scene_RCardSprite; }
 };
 //=============================
@@ -882,7 +890,7 @@ Scene_Battle.prototype.create = function() {
 	DrillUp.g_RCard_curScene = "Scene_Battle";
 };
 //=============================
-// * 界面 - 技能树界面（FTKR_SkillTreeSystem.js）
+// * 界面 - 技能树界面【FTKR_SkillTreeSystem.js技能树插件】
 //=============================
 if( Imported.FTKR_STS && FTKR && FTKR.STS ){
 	var _drill_RCard_SSTS_createSkillTreeWindow = Scene_STS.prototype.createSkillTreeWindow;

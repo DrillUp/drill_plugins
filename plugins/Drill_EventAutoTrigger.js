@@ -22,9 +22,10 @@
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该插件必须依赖指定插件才能运行。
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfFixedArea        物体触发 - 固定区域核心★★v1.8及以上★★
+ *   - Drill_CoreOfFixedArea        物体触发-固定区域核心★★v1.8及以上★★
  *     该插件需要固定区域才能进行区域触发。
  * 
  * -----------------------------------------------------------------------------
@@ -38,7 +39,7 @@
  *      传感器即遇到某些情况就会自动触发的事件。
  *      当玩家的特定范围覆盖到事件时，独立开关会自动开启。
  *   (2.接近触发的注释设置全都跨事件页。
- *      详细介绍去看看 "8.物体 > 开关大家族.docx"。
+ *      详细介绍去看看 "8.物体 > 大家族-开关.docx"。
  * 区域主体：
  *   (1.该插件的区域主体是玩家，用于自动触发接近玩家区域的事件。
  *   (2.主动触发是一个区域范围，被触发是一个点，区域内符合条件的点会被触发。
@@ -124,7 +125,7 @@
  *   未优化到位，200个事件的消耗为【538.27ms】。
  *   如果未升级建议立即升级。
  * 3.在较好性能的游戏本中，200个事件的消耗只有27.94ms，流畅性自然比当前垃
- *   圾本要高的多了。高性能电脑固然支持清晰的画面和流畅的体验，但rmmv毕竟
+ *   圾本要高的多了。高性能电脑固然支持清晰的界面和流畅的体验，但这里毕竟
  *   是2d游戏，如果2d游戏比3d游戏还卡，实在说不过去。
  * 4.插件v2.0以前版本：
  *   玩家视野范围内出现大量事件时，消耗还是难以压下去。
@@ -517,30 +518,38 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^3)			每帧	【直接for】
+//<<<<<<<<性能记录<<<<<<<<
+//
+//		
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^3)			每帧	【直接for】
 //						o(nlogn)+o(n^2)	每帧	【排序后】
 //						o(nlogn)+o(n^2)	每帧	【棋盘算法】（直接减少了n的基数）
-//		性能测试因素	200个事件
-//		性能测试消耗	> 538.27ms	【直接for】
+//		★性能测试因素	200个事件
+//		★性能测试消耗	> 538.27ms	【直接for】
 //						> 59.74ms	【排序后】
 //						  269.32ms	【排序后，外加 固定区域+筛选器 76个亮片】
 //						> 28.20ms	【棋盘算法】
 //						  80.58ms	【棋盘算法，外加 固定区域+筛选器 76个亮片】
-//		最坏情况		所有事件都在玩家范围内，并且所有事件都有"被触发"条件。
-//		备注			暂无
+//		★最坏情况		所有事件都在玩家范围内，并且所有事件都有"被触发"条件。
+//		★备注			暂无
 //		
-//		2021-11-20优化	稍微优化了一下排序sort的处理方式。（可能由于函数分散，所以没测准）
-//						在76个亮片中测试后： 87.01ms， 其中66.78ms（drill_EAT_playerTriggerRangeArea）20.24ms（drill_EAT_playerTriggerSelfArea）
-//		2022-2-20优化	这里将非空容器单独分离出来，放到核心中。
-//						能有效减少 复制新事件 造成的接近触发判定问题。
-//		2022-5-4优化	使用了棋盘算法
-//						在76个亮片中测试后： 
-//							棋盘算法（垃圾本）：80.58ms（drill_EAT_updatePlayerTrigger）持续在1帧的位置。
-//							棋盘算法（高配本）：80.70ms（drill_EAT_checkerboardTriggered）持续在15帧的位置。
-//							坐标遍历算法（垃圾本）：145.67ms（drill_EAT_playerTriggerRangeArea）垃圾本持续在0帧和1帧波动，明显棋盘算法没出现0帧的情况。
+//		★优化记录
+//			2021-11-20优化
+//				稍微优化了一下排序sort的处理方式。（可能由于函数分散，所以没测准）
+//				在76个亮片中测试后： 87.01ms， 其中66.78ms（drill_EAT_playerTriggerRangeArea）20.24ms（drill_EAT_playerTriggerSelfArea）
+//			2022-2-20优化
+//				这里将非空容器单独分离出来，放到核心中。
+//				能有效减少 复制新事件 造成的接近触发判定问题。
+//			2022-5-4优化
+//				使用了棋盘算法
+//				在76个亮片中测试后： 
+//				棋盘算法（垃圾本）：80.58ms（drill_EAT_updatePlayerTrigger）持续在1帧的位置。
+//				棋盘算法（高配本）：80.70ms（drill_EAT_checkerboardTriggered）持续在15帧的位置。
+//				坐标遍历算法（垃圾本）：145.67ms（drill_EAT_playerTriggerRangeArea）垃圾本持续在0帧和1帧波动，明显棋盘算法没出现0帧的情况。
 //		
-//插件记录：
+//<<<<<<<<插件记录<<<<<<<<
+//		
 //		★大体框架与功能如下：
 //			玩家接近触发：
 //				->指令
@@ -804,7 +813,7 @@ Game_Map.prototype.drill_EAT_isEventExist = function( e_id ){
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_EventAutoTrigger.js 物体触发 - 固定区域&玩家接近&条件触发】\n" +
+		alert( "【Drill_EventAutoTrigger.js 物体触发 - 固定区域 & 玩家接近 & 条件触发】\n" +
 				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
 		return false;
 	}
@@ -1566,7 +1575,7 @@ Game_Map.prototype.drill_EAT_triggeredEventsClearAllSwitches = function() {
 
 
 //#############################################################################
-// ** 标准函数（地图层级）
+// ** 【标准模块】地图层级
 //#############################################################################
 //##############################
 // * 地图层级 - 添加贴图到层级【标准函数】
@@ -1626,7 +1635,7 @@ Scene_Map.prototype.drill_EAT_layerMoveingReference = function( x, y, reference,
 //==============================
 var _drill_EAT_layer_createTilemap = Spriteset_Map.prototype.createTilemap;
 Spriteset_Map.prototype.createTilemap = function() {
-	_drill_EAT_layer_createTilemap.call(this);		//rmmv图块 < 中层 < rmmv角色
+	_drill_EAT_layer_createTilemap.call(this);		//图块层 < 中层 < 事件/玩家层
 	if( !this._drill_mapCenterArea ){
 		this._drill_mapCenterArea = new Sprite();
 		this._drill_mapCenterArea.z = 0.60;
@@ -1638,7 +1647,7 @@ Spriteset_Map.prototype.createTilemap = function() {
 //==============================
 var _drill_EAT_layer_createDestination = Spriteset_Map.prototype.createDestination;
 Spriteset_Map.prototype.createDestination = function() {
-	_drill_EAT_layer_createDestination.call(this);	//rmmv鼠标目的地 < 上层 < rmmv天气
+	_drill_EAT_layer_createDestination.call(this);	//鼠标目的地 < 上层 < 天气层
 	if( !this._drill_mapUpArea ){
 		this._drill_mapUpArea = new Sprite();
 		this._baseSprite.addChild(this._drill_mapUpArea);	
@@ -1876,7 +1885,7 @@ Game_Player.prototype.drill_EAT_DEBUG_adjustPoints = function( point_list ){
 }else{
 		Imported.Drill_EventAutoTrigger = false;
 		alert(
-			"【Drill_EventAutoTrigger.js 物体触发 - 固定区域&玩家接近&条件触发】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
+			"【Drill_EventAutoTrigger.js 物体触发 - 固定区域 & 玩家接近 & 条件触发】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
 			"\n- Drill_CoreOfFixedArea 物体触发-固定区域核心"
 		);
 }

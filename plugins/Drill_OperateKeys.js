@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.6]        互动 - 键盘手柄按键修改器
+ * @plugindesc [v1.7]        键盘 - 键盘手柄按键修改器
  * @author Drill_up
  * 
  * 
@@ -19,7 +19,8 @@
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 插件完全可以单独使用。你可以对下列插件有选择地添加，不必要配置全部。
+ * 该插件可以单独使用。
+ * 你也可以对下列插件有选择地添加，实现特定的功能按键控制。
  * 作用于：
  *   - Drill_Jump               互动-跳跃能力
  *   - Drill_RotateDirection    互动-原地转向能力
@@ -86,6 +87,9 @@
  * 测试结果：   200个事件的地图中，消耗为：【10.92ms】
  *              100个事件的地图中，消耗为：【11.87ms】
  *               50个事件的地图中，消耗为：【11.34ms】
+ * 测试方法2：  在其它界面中进行性能测试。
+ * 测试结果2：  战斗界面中，消耗为：【10.17ms】
+ *              菜单界面中，消耗为：【6.13ms】
  * 
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
  *   测试结果并不是精确值，范围在给定值的10ms范围内波动。
@@ -103,11 +107,13 @@
  * [v1.3]
  * 漏了esc键位设置，已加上。
  * [v1.4]
- * 把rmmv的所有键位都加上，防止其他插件使用特殊按键时没有效果。
+ * 把设定的所有键位都加上，防止其他插件使用特殊按键时没有效果。
  * [v1.5]
  * 添加了插件性能测试说明。
  * [v1.6]
  * 修复了tab物理按键无效的bug，感谢群友"sacredbless"。
+ * [v1.7]
+ * 修改了插件分类。
  * 
  * 
  * 
@@ -655,15 +661,19 @@
 //		覆盖重写方法	Input.gamepadMapper变量
 //						Input.keyMapper变量
 //
-//		工作类型		单次执行
-//		时间复杂度		o(n^2)
-//		性能测试因素	乱跑
-//		性能测试消耗	11.87ms  17.48ms（drill_isGamepadControling函数，Bomb判断占了9.32ms）
-//		最坏情况		无
-//		备注			不好测，低消耗有时候找的到，有时候找不到。
+//<<<<<<<<性能记录<<<<<<<<
 //
+//		★工作类型		单次执行
+//		★时间复杂度		o(n^2)
+//		★性能测试因素	乱跑
+//		★性能测试消耗	11.87ms  17.48ms（drill_isGamepadControling函数，Bomb判断占了9.32ms）
+//		★最坏情况		无
+//		★备注			不好测，低消耗有时候找的到，有时候找不到。
+//		
+//		★优化记录		暂无
 //
-//插件记录：
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			手柄：
 //				->改键
@@ -694,7 +704,7 @@
 //		★原理：
 //			这里的映射关系颇为复杂，首先不能破坏原有的键位顺序（原有的菜单键又可分离可重合）
 //			整合之后，还要考虑功能键情况。（毕竟组合按键能扩展很多东西，没想到这个比鼠标面板还要复杂。）
-//			【rmmv内核通过 isTriggered("jump") 关键字来映射按钮，多个按钮可以触发同一个关键字"jump"，但是反之不能。】
+//			【rpg_core内核通过 isTriggered("jump") 关键字来映射按钮，多个按钮可以触发同一个关键字"jump"，但是反之不能。】
 //			【为了使得同一个按钮可以触发不同情况，在不同功能写 isTriggered("jump")来判断就可以了。】	
 //			如果键位少了，需要重新利用，添加新的字段，比如"jump"字段等。	
 //		
@@ -722,6 +732,7 @@
 //		★存在的问题：
 //			1.直接修改映射会屏蔽掉一些未知按键，比如debug时的ctrl的特权穿透键。
 //			2.如果有新的按键内容加入，必须根据脚本依葫芦画瓢。没有合适的接口，只能硬编码。
+//
  
 //=============================================================================
 // ** 变量获取
@@ -912,7 +923,7 @@ Game_System.prototype.drill_gamePadKeysInit = function() {
 	this._drill_gamepadMapper[ pad['left'] ] = 'left';
 	this._drill_gamepadMapper[ pad['right'] ] = 'right';
 	if(Object.keys(this._drill_gamepadMapper).length < 9){
-		alert('画面 - 键盘手柄按键修改器：\n手柄检测到重复的基本键设置，一些按键可能会无法使用。');
+		alert("【Drill_OperateKeys.js  键盘 - 键盘手柄按键修改器】\n手柄检测到重复的基本键设置，一些按键可能会无法使用。");
 	}
 	
 	/*----------获取扩展键----------*/
@@ -1136,7 +1147,7 @@ Game_System.prototype.drill_keyboardKeysInit = function() {
 	count += board['debug'].length;
 	count += board['control'].length;
 	if(Object.keys(this._drill_keyboardMapper).length < count ){
-		alert('画面 - 键盘手柄按键修改器：\n键盘检测到重复的基本键设置，一些按键可能会无法使用。');
+		alert("【Drill_OperateKeys.js  键盘 - 键盘手柄按键修改器】\n键盘检测到重复的基本键设置，一些按键可能会无法使用。");
 	}
 	
 	/*----------获取扩展键----------*/
@@ -1294,9 +1305,9 @@ Scene_Map.prototype.isMenuCalled = function() {
 };
 
 //==============================
-// * 举起投掷按键条件
+// * 【互动-举起花盆能力】按键条件
 //==============================
-if(Imported.Drill_PickThrow){
+if( Imported.Drill_PickThrow ){
 	//举起默认与确定键绑定，如果举起与确定键分离，则换为手动与举起的花盆互动。
 	var _drill_okeys_pick_triggerButtonAction = Game_Player.prototype.triggerButtonAction;
 	Game_Player.prototype.triggerButtonAction = function() {
@@ -1392,9 +1403,9 @@ if(Imported.Drill_PickThrow){
 }
 
 //==============================
-// * 跳跃按键条件
+// * 【互动-跳跃能力】按键条件
 //==============================
-if(Imported.Drill_Jump){
+if( Imported.Drill_Jump ){
 	Game_Player.prototype.drill_isJumpControl = function() {
 		if(DrillUp.g_jump_mouse || DrillUp.jump_mouse){ return true; }
 		if(Input.drill_isGamepadControling()){	//手柄
@@ -1429,9 +1440,9 @@ if(Imported.Drill_Jump){
 }
 
 //==============================
-// * 原地转向按键条件
+// * 【互动-原地转向能力】按键条件
 //==============================
-if(Imported.Drill_RotateDirection){
+if( Imported.Drill_RotateDirection ){
 	Game_Player.prototype.drill_isRotateControl = function() {
 		if(Input.drill_isGamepadControling()){	//手柄
 			if( $gameSystem._drill_input_pad['rotate_has_fn'] ){
@@ -1466,9 +1477,9 @@ if(Imported.Drill_RotateDirection){
 }
 
 //==============================
-// * 放置炸弹按键条件
+// * 【炸弹人-游戏核心】按键条件
 //==============================
-if(Imported.Drill_BombCore){
+if( Imported.Drill_BombCore ){
 	Game_Player.prototype.drill_isBombControl = function() {
 		if(Input.drill_isGamepadControling()){	//手柄
 			if( $gameSystem._drill_input_pad['bomb_has_fn'] ){

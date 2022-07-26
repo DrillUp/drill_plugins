@@ -15,12 +15,16 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 任何事件踩到开关时，立即按下，离开开关时，立即弹出。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----插件扩展
+ * 该插件可以单独使用。
  *
  * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：地图界面。
  *   只作用于事件。
- * 2.详细介绍可以去看看 "8.物体 > 开关大家族.docx"。
+ * 2.详细介绍可以去看看 "8.物体 > 大家族-开关.docx"。
  * 细节：
  *   (1.重力开关在事件完全踩在它身上之前，就会立即做出反应。
  *      队伍跟随的成员不会对重力开关有任何影响，只有领队与事件可以。
@@ -162,14 +166,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n)
-//		性能测试因素	华容道关卡
-//		性能测试消耗	6.22ms
-//		最坏情况		暂无
-//		备注			消耗太小，一般消耗列表中找不到该插件。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n)
+//		★性能测试因素	华容道关卡
+//		★性能测试消耗	6.22ms
+//		★最坏情况		暂无
+//		★备注			消耗太小，一般消耗列表中找不到该插件。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			重力开关：
 //				->实时检查按下
@@ -183,11 +192,11 @@
 //			1.【这里开关的结构和变量关系比较绕】，
 //				赋值的commonSwitch是单个的重力开关，specialKey和specialLock是键值组。
 //			2.诡异bug：
-//				$gameTemp._drill_EPS_needRefresh 如果切换地图后，没重刷，从物体管理层 到 炸弹人关卡，伦琴就不能动，伦琴事件无法开启独立开关A。
+//				$gameTemp._drill_EPS_needRestatistics 如果切换地图后，没重刷，从物体管理层 到 炸弹人关卡，伦琴就不能动，伦琴事件无法开启独立开关A。
 //				初步判定是指针出现了错误，事件被移除后，而指针却仍然存留。
 //			3.【该插件使用了事件容器】，必须考虑三种情况：初始化、切换地图时、切换贴图时，不然会出现指针错误！
 //				只要是装事件的容器，都需要考虑指针问题，不管是放在$gameMap还是$gameTemp中。
-//				另外，帧刷新判断时，最好每次变化直接【重刷容器】。
+//				另外，帧刷新判断时，最好每次变化直接【刷新统计】。
 //			
 //		★其它说明细节：
 //			1.每次检查坐标情况，来确定开关是否被压住。
@@ -392,12 +401,12 @@ Game_Event.prototype.drill_EPS_readPage = function( page_list ){
 					var temp1 = String(args[1]);
 					var temp2 = String(args[3]);
 					if( temp1 == "作用于独立开关" ){
-						$gameTemp._drill_EPS_needRefresh = true;
 						this._drill_EPS_data['commonSwitch'] = temp2;
+						$gameTemp._drill_EPS_needRestatistics = true;
 					}
 					if( temp1 == "重力钥匙" ){
-						$gameTemp._drill_EPS_needRefresh = true;
 						this._drill_EPS_data['specialKey'][temp2] = true;
+						$gameTemp._drill_EPS_needRestatistics = true;
 					}
 				}
 				if(args.length == 8){	//=>重力开关 : 重力锁 : 钥匙_A : 作用于独立开关 : A
@@ -406,15 +415,15 @@ Game_Event.prototype.drill_EPS_readPage = function( page_list ){
 					var temp3 = String(args[5]);
 					var temp4 = String(args[7]);
 					if( temp1 == "重力锁" && temp3 == "作用于独立开关" ){
-						$gameTemp._drill_EPS_needRefresh = true;
 						this._drill_EPS_data['specialLock'][temp2] = temp4;
+						$gameTemp._drill_EPS_needRestatistics = true;
 					}
 				}
 				if(args.length == 2){	//=>重力开关 : 关闭重力作用
 					var temp1 = String(args[1]);
 					if( temp1 == "关闭重力作用" ){
-						$gameTemp._drill_EPS_needRefresh = true;
 						this._drill_EPS_data['canPress'] = false;
+						$gameTemp._drill_EPS_needRestatistics = true;
 					}
 				}
 			};
@@ -455,7 +464,7 @@ var _drill_EPS_temp_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {	
 	_drill_EPS_temp_initialize.call(this);
 	this.drill_EPS_clearTemp();
-	this._drill_EPS_needRefresh = true;
+	this._drill_EPS_needRestatistics = true;
 };
 Game_Temp.prototype.drill_EPS_clearTemp = function() {	
 	this._drill_EPS_commonSwitchTank = [];		//普通重力开关容器
@@ -468,7 +477,7 @@ Game_Temp.prototype.drill_EPS_clearTemp = function() {
 var _drill_EPS_gmap_setup = Game_Map.prototype.setup;
 Game_Map.prototype.setup = function(mapId) {
 	$gameTemp.drill_EPS_clearTemp();
-	$gameTemp._drill_EPS_needRefresh = true;
+	$gameTemp._drill_EPS_needRestatistics = true;
 	_drill_EPS_gmap_setup.call(this,mapId);
 }
 //==============================
@@ -477,28 +486,26 @@ Game_Map.prototype.setup = function(mapId) {
 var _drill_EPS_smap_createCharacters = Spriteset_Map.prototype.createCharacters;
 Spriteset_Map.prototype.createCharacters = function() {
 	$gameTemp.drill_EPS_clearTemp();
-	$gameTemp._drill_EPS_needRefresh = true;
+	$gameTemp._drill_EPS_needRestatistics = true;
 	_drill_EPS_smap_createCharacters.call(this);
 }
-
 //==============================
-// ** 容器 - 帧刷新
+// * 容器 - 帧刷新
 //==============================
 var _drill_EPS_map_update = Game_Map.prototype.update;
 Game_Map.prototype.update = function(sceneActive) {
 	_drill_EPS_map_update.call(this,sceneActive);
 	
-	this.drill_EPS_refreshSwitchChecks();		//帧刷新 - 刷新统计
+	this.drill_EPS_updateRestatistics();		//帧刷新 - 刷新统计
 	this.drill_EPS_updateCommonSwitch();		//帧刷新 - 普通重力开关触发
 	this.drill_EPS_updateSpecialSwitch();		//帧刷新 - 钥匙重力开关触发
 };
-
 //==============================
-// ** 帧刷新 - 刷新统计
+// * 容器 - 帧刷新 - 刷新统计
 //==============================
-Game_Map.prototype.drill_EPS_refreshSwitchChecks = function() {
-	if( !$gameTemp._drill_EPS_needRefresh ){ return }
-	$gameTemp._drill_EPS_needRefresh = false;
+Game_Map.prototype.drill_EPS_updateRestatistics = function() {
+	if( !$gameTemp._drill_EPS_needRestatistics ){ return }
+	$gameTemp._drill_EPS_needRestatistics = false;
 	
 	$gameTemp._drill_EPS_commonSwitchTank = [];		//普通重力开关容器
 	$gameTemp._drill_EPS_specialLockTank = [];     	//重力锁容器

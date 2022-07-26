@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        图片 - 消失动作效果
+ * @plugindesc [v1.4]        图片 - 消失动作效果
  * @author Drill_up
  * 
  * 
@@ -17,9 +17,13 @@
  * 使得你可以播放图片消失不见的各种动作。
  * 
  * -----------------------------------------------------------------------------
+ * ----插件扩展
+ * 该插件可以单独使用。
+ * 
+ * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：地图界面、战斗界面。
- *   作用于rmmv图片。
+ *   作用于图片对象。
  * 2.建议先了解 "0.基本定义 > 显示与透明度.docx"。
  *   更多详细内容，去看看 "7.行走图 > 关于动作效果.docx"。
  * 细节：
@@ -37,7 +41,7 @@
  *      必须手动执行插件指令来终止。
  * 设计：
  *   (1.该效果可以与 滤镜效果、方块粉碎效果 叠加。
- *      特别注意，图片的中心锚点是可以修改的，rmmv默认有左上(0,0)和中
+ *      特别注意，图片的中心锚点是可以修改的，默认有左上(0,0)和中
  *      心(0.5,0.5)的设置。中心锚点会影响部分动作效果。
  *
  * -----------------------------------------------------------------------------
@@ -49,6 +53,8 @@
  * 插件指令：>消失动作 : 批量图片[10,11] : 标准弹跳 : 时间[60] : 高度[168]
  * 插件指令：>消失动作 : 批量图片变量[21,22] : 标准弹跳 : 时间[60] : 高度[168]
  * 
+ * 插件指令：>消失动作 : 图片[1] : 直接消失 : 时间[60]
+ * 插件指令：>消失动作 : 图片[1] : 移动消失 : 时间[60] : 方向角度[90] : 移动距离[100]
  * 插件指令：>消失动作 : 图片[1] : 标准升起 : 时间[60] : 缓冲时间[20] : 高度[168]
  * 插件指令：>消失动作 : 图片[1] : 标准弹跳 : 时间[60] : 高度[500]
  * 插件指令：>消失动作 : 图片[1] : 向左炸飞 : 时间[60] : 速度[11.5]
@@ -64,10 +70,13 @@
  * 插件指令：>消失动作 : 图片[1] : 立即终止动作
  * 
  * 1.前半部分（玩家）和 后半部分（标准升起 : 时间[60] : 缓冲时间[20] : 高度[168]）
- *   的参数可以随意组合。一共有4*13种组合方式。
+ *   的参数可以随意组合。一共有4*15种组合方式。
  * 2."玩家"和"玩家领队"是同一个意思。
  *   "玩家队员[1]"表示领队后面第一个跟随的队友。
- * 3.部分类型的动作有 时间和缓冲时间 两个设置，该动作分两个阶段。
+ * 3.参数中"时间"、"周期"的单位是帧。1秒60帧。
+ *   参数中"距离"、"高度"的单位是像素。
+ * 4.类型的更详细介绍，去看看 "7.行走图 > 关于动作效果.docx"。
+ * 5.部分类型的动作有 时间和缓冲时间 两个设置，该动作分两个阶段。
  *   比如"标准升起"，分别对应升起的动作时间，和升起前阶段起跳效果的缓冲时间。
  *
  * -----------------------------------------------------------------------------
@@ -130,6 +139,8 @@
  * 修复了 该插件 造成图片插件设置斜切无效的bug。
  * [v1.3]
  * 添加了插件指令获取状态信息功能。
+ * [v1.4]
+ * 添加了 直接消失、移动消失 功能。
  *
  *
  * 
@@ -151,15 +162,20 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n)*o(贴图处理) 每帧
-//		性能测试因素	对话管理层
-//		性能测试消耗	24.94ms 23.34ms（sprite_picture.update）
-//		最坏情况		地图放了大量图片，并且所有图片都在持续变化。
-//		备注			要说图片贴图和事件贴图哪个消耗大，真无法确定。
-//						事件贴图面积小但变化多，而图片面积大但变化不多。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n)*o(贴图处理) 每帧
+//		★性能测试因素	对话管理层
+//		★性能测试消耗	24.94ms 23.34ms（sprite_picture.update）
+//		★最坏情况		地图放了大量图片，并且所有图片都在持续变化。
+//		★备注			要说图片贴图和事件贴图哪个消耗大，真无法确定。
+//						事件贴图面积小但变化多，而图片面积大但变化不多。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			消失动作效果：
 //				->动作
@@ -306,7 +322,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					$gameSwitches.setValue( temp1, b );
 				}
 			}
-			if( type == "获取正在播放的类型" && Imported.Drill_CoreOfString ){
+			if( type == "获取正在播放的类型" && Imported.Drill_CoreOfString ){	//【系统-字符串核心】
 				temp1 = temp1.replace("字符串[","");
 				temp1 = temp1.replace("]","");
 				temp1 = Number(temp1);
@@ -318,6 +334,17 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					$gameStrings.setValue( temp1, str );
 				}
 			}
+			
+			/*-----------------直接消失------------------*/
+			if( type == "直接消失" ){
+				temp1 = temp1.replace("时间[","");
+				temp1 = temp1.replace("]","");
+				if( pics != null){
+					for( var k=0; k < pics.length; k++ ){
+						pics[k].drill_PFOE_playHidingDisappear( Number(temp1) );
+					}
+				}
+			}
 		}	
 			
 		if( args.length == 10 ){
@@ -326,6 +353,20 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var temp2 = String(args[7]);
 			var temp3 = String(args[9]);
 			
+			/*-----------------移动消失------------------*/
+			if( type == "移动消失" ){
+				temp1 = temp1.replace("时间[","");
+				temp1 = temp1.replace("]","");
+				temp2 = temp2.replace("方向角度[","");
+				temp2 = temp2.replace("]","");
+				temp3 = temp3.replace("移动距离[","");
+				temp3 = temp3.replace("]","");
+				if( pics != null){
+					for( var k=0; k < pics.length; k++ ){
+						pics[k].drill_PFOE_playHidingMoveDisappear( Number(temp1),Number(temp2),Number(temp3) );
+					}
+				}
+			}
 			/*-----------------标准升起------------------*/
 			if( type == "标准升起" ){
 				temp1 = temp1.replace("时间[","");
@@ -641,7 +682,7 @@ Game_Picture.prototype.initialize = function() {
 	this._Drill_PFOE.skew_x = 0;			// 斜切x
 	this._Drill_PFOE.skew_y = 0;			// 斜切y
 	
-	this._Drill_PFOE.opacity = 0;			// 透明度（不叠加）
+	this._Drill_PFOE.opacity = 255;			// 透明度（不叠加，【注意，这里是消失效果，默认255】）
 	this._Drill_PFOE.playing_type = "";		// 显示类型
 	this._Drill_PFOE.real_width = -1;		// 贴图宽
 	this._Drill_PFOE.real_height = -1;		// 贴图高
@@ -659,7 +700,11 @@ Game_Picture.prototype.drill_PFOE_isPlaying = function() {
 //==============================
 // * 图片 - 设置透明度
 //==============================
-Game_Picture.prototype.drill_PFOE_setOpacity = function(opacity) {
+Game_Picture.prototype.drill_PFOE_setOpacity = function( opacity ){
+	if( isNaN(opacity) ){
+		alert(	"【Drill_PictureFadeOutEffect.js 图片 - 消失动作效果】\n" +
+				"错误，透明度赋值时出现了NaN错误值。");
+	}
 	this._opacity = opacity;
 }
 //==============================
@@ -704,6 +749,8 @@ Game_Picture.prototype.update = function() {
 	if( this._Drill_PFOE.real_width == -1 ){ return; }		//需要等图片加载完成
 	if( this._Drill_PFOE.real_height == -1 ){ return; }
 	
+	this.drill_PFOE_updateHidingDisappear();		//帧刷新 - 直接消失
+	this.drill_PFOE_updateHidingMoveDisappear();	//帧刷新 - 移动消失
 	this.drill_PFOE_updateHidingSpring();			//帧刷新 - 标准升起
 	this.drill_PFOE_updateHidingJump();				//帧刷新 - 标准弹跳
 	this.drill_PFOE_updateHidingShrink();			//帧刷新 - 缩小消失
@@ -734,6 +781,61 @@ Game_Picture.prototype.drill_PFOE_stopEffect = function() {
 //=============================================================================
 // ** 消失动作
 //=============================================================================
+//==============================
+// * 初始化 - 消失 直接消失
+//==============================
+Game_Picture.prototype.drill_PFOE_playHidingDisappear = function( time ){
+	var ef = this._Drill_PFOE;
+	ef.playing_type = "直接消失";
+	ef.fA_dtime = time;
+	ef.fA_time = 0;
+}
+//==============================
+// * 帧刷新 - 消失 直接消失
+//==============================
+Game_Picture.prototype.drill_PFOE_updateHidingDisappear = function() {
+	var ef = this._Drill_PFOE;
+	if( ef.playing_type != "直接消失" ){ return; }
+	
+	if( ef.fA_time < ef.fA_dtime ){
+		ef.fA_time ++;
+		ef.opacity = 255 *(1 - ef.fA_time/ef.fA_dtime);
+		this.drill_PFOE_setOpacity(ef.opacity);
+	}else{
+		this.drill_PFOE_stopEffect();	//结束动作
+	}
+}
+
+//==============================
+// * 初始化 - 消失 移动消失
+//==============================
+Game_Picture.prototype.drill_PFOE_playHidingMoveDisappear = function( time,angle,distance ){
+	var ef = this._Drill_PFOE;
+	ef.playing_type = "移动消失";
+	ef.fA_dtime = time;
+	ef.fA_time = 0;
+	ef.fA_angle = angle;
+	ef.fA_distance = distance;
+}
+//==============================
+// * 帧刷新 - 消失 移动消失
+//==============================
+Game_Picture.prototype.drill_PFOE_updateHidingMoveDisappear = function() {
+	var ef = this._Drill_PFOE;
+	if( ef.playing_type != "移动消失" ){ return; }
+	
+	if( ef.fA_time < ef.fA_dtime ){
+		ef.fA_time ++;
+		var temp_d = ef.fA_distance * ef.fA_time/ef.fA_dtime;		//匀速移动
+		ef.x = temp_d * Math.cos( ef.fA_angle *Math.PI/180 );
+		ef.y = temp_d * Math.sin( ef.fA_angle *Math.PI/180 );
+		ef.opacity = 255 *(1 - ef.fA_time/ef.fA_dtime);
+		this.drill_PFOE_setOpacity(ef.opacity);
+	}else{
+		this.drill_PFOE_stopEffect();	//结束动作
+	}
+}
+
 //==============================
 // * 初始化 - 消失 标准升起
 //==============================
@@ -875,7 +977,7 @@ Game_Picture.prototype.drill_PFOE_updateHidingShrink = function() {
 
 
 //==============================
-// * 初始化 - 显现 横向挤扁
+// * 初始化 - 消失 横向挤扁
 //==============================
 Game_Picture.prototype.drill_PFOE_playHidingHorizonFlat = function( time, scale_x, opacity_off ) {
 	var ef = this._Drill_PFOE;
@@ -888,7 +990,7 @@ Game_Picture.prototype.drill_PFOE_playHidingHorizonFlat = function( time, scale_
 	ef.f_opacityOff = opacity_off;
 }
 //==============================
-// * 帧刷新 - 显现 横向挤扁
+// * 帧刷新 - 消失 横向挤扁
 //==============================
 Game_Picture.prototype.drill_PFOE_updateHidingHorizonFlat = function() {
 	var ef = this._Drill_PFOE;
@@ -921,7 +1023,7 @@ Game_Picture.prototype.drill_PFOE_updateHidingHorizonFlat = function() {
 
 
 //==============================
-// * 初始化 - 显现 纵向挤扁
+// * 初始化 - 消失 纵向挤扁
 //==============================
 Game_Picture.prototype.drill_PFOE_playHidingVerticalFlat = function( time, scale_y, opacity_off ) {
 	var ef = this._Drill_PFOE;
@@ -934,7 +1036,7 @@ Game_Picture.prototype.drill_PFOE_playHidingVerticalFlat = function( time, scale
 	ef.f_opacityOff = opacity_off;
 }
 //==============================
-// * 帧刷新 - 显现 纵向挤扁
+// * 帧刷新 - 消失 纵向挤扁
 //==============================
 Game_Picture.prototype.drill_PFOE_updateHidingVerticalFlat = function() {
 	var ef = this._Drill_PFOE;
@@ -967,7 +1069,7 @@ Game_Picture.prototype.drill_PFOE_updateHidingVerticalFlat = function() {
 
 
 //==============================
-// * 初始化 - 显现 向左炸飞
+// * 初始化 - 消失 向左炸飞
 //==============================
 Game_Picture.prototype.drill_PFOE_playHidingBlowOutLeft = function( time, speed ) {
 	var ef = this._Drill_PFOE;
@@ -980,7 +1082,7 @@ Game_Picture.prototype.drill_PFOE_playHidingBlowOutLeft = function( time, speed 
 	ef.f_rotate = Math.PI/2 + Math.PI/4;	//135度
 }
 //==============================
-// * 帧刷新 - 显现 向左炸飞
+// * 帧刷新 - 消失 向左炸飞
 //==============================
 Game_Picture.prototype.drill_PFOE_updateHidingBlowOutLeft = function() {
 	var ef = this._Drill_PFOE;
@@ -1002,7 +1104,7 @@ Game_Picture.prototype.drill_PFOE_updateHidingBlowOutLeft = function() {
 
 
 //==============================
-// * 初始化 - 显现 向右炸飞
+// * 初始化 - 消失 向右炸飞
 //==============================
 Game_Picture.prototype.drill_PFOE_playHidingBlowOutRight = function( time, speed ) {
 	var ef = this._Drill_PFOE;
@@ -1015,7 +1117,7 @@ Game_Picture.prototype.drill_PFOE_playHidingBlowOutRight = function( time, speed
 	ef.f_rotate = Math.PI/2 + Math.PI/4;	//135度
 }
 //==============================
-// * 帧刷新 - 显现 向右炸飞
+// * 帧刷新 - 消失 向右炸飞
 //==============================
 Game_Picture.prototype.drill_PFOE_updateHidingBlowOutRight = function() {
 	var ef = this._Drill_PFOE;
@@ -1037,7 +1139,7 @@ Game_Picture.prototype.drill_PFOE_updateHidingBlowOutRight = function() {
 
 
 //==============================
-// * 初始化 - 显现 弹性缩小消失
+// * 初始化 - 消失 弹性缩小消失
 //==============================
 Game_Picture.prototype.drill_PFOE_playHidingShrinkSpring = function( dtime, overflow_scale, anchor_x, anchor_y, opacity_off ){
 	var ef = this._Drill_PFOE;
@@ -1054,7 +1156,7 @@ Game_Picture.prototype.drill_PFOE_playHidingShrinkSpring = function( dtime, over
 	
 }
 //==============================
-// * 帧刷新 - 显现 弹性缩小消失
+// * 帧刷新 - 消失 弹性缩小消失
 //==============================
 Game_Picture.prototype.drill_PFOE_updateHidingShrinkSpring = function() {
 	var ef = this._Drill_PFOE;

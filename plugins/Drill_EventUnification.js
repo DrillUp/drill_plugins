@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        物体 - 事件一体化
+ * @plugindesc [v1.5]        体积 - 事件一体化
  * @author Drill_up
  * 
  * 
@@ -20,14 +20,15 @@
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该插件需要基于功能插件才能运行。并且可以被其他插件扩展。
+ * 该插件 不能 单独使用。
+ * 必须基于插件才能运行。并且可以被其他插件扩展。
  * 基于：
- *   - Drill_EventThrough        物体 - 事件穿透关系
+ *   - Drill_EventThrough        体积-事件穿透关系
  *     通过该插件，才能进行物体整体移动。
  * 可被扩展：
- *   - Drill_MouseTriggerEvent   鼠标 - 鼠标触发事件★★v1.2以上★★
+ *   - Drill_MouseTriggerEvent   鼠标-鼠标触发事件★★v1.2以上★★
  *     通过鼠标触发插件，能对事件整体进行触发。
- *   - Drill_MoveSpeed           物体 - 移动速度★★v1.3以上★★
+ *   - Drill_MoveSpeed           物体-移动速度★★v1.3以上★★
  *     通过移动速度插件，精确的速度也能够统一。
  * 
  * -----------------------------------------------------------------------------
@@ -35,7 +36,7 @@
  * 1.插件的作用域：地图界面。
  *   作用于事件和玩家。
  * 2.事件一体化具有各种特殊的绑定分组方式，
- *   详细介绍可以去看看 "8.物体 > 关于事件一体化.docx"。
+ *   详细介绍可以去看看 "27.体积 > 关于事件一体化.docx"。
  * 细节：
  *   (1.由于结构的特殊性，同类型的一体化标签，只能同时拥有一个。
  *   (2.该插件的注释设置跨事件页。
@@ -150,6 +151,8 @@
  * 修复了一体化朝向初始状态时，事件方向不一致的bug。
  * [v1.4]
  * 修复了 移动一体化 造成跟随队员颤抖的bug。
+ * [v1.5]
+ * 修改了插件分类。
  * 
  * 
  * 
@@ -183,14 +186,19 @@
 //						Game_CharacterBase.prototype.moveDiagonally	（半覆写）
 //						Game_CharacterBase.prototype.setDirection	（半覆写）
 //
-//		工作类型		单次执行
-//		时间复杂度		o(n)
-//		性能测试因素	鼠标管理层多物体移动
-//		性能测试消耗	54.50ms ~ 30.08ms ~ 20.28ms
-//		最坏情况		大量一体化的物体到处移动并触发。
-//		备注			一体化事件的性能消耗，会与好几个插件交织在一起，不过目前没有出现累加后超级大的计算量。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		单次执行
+//		★时间复杂度		o(n)
+//		★性能测试因素	鼠标管理层多物体移动
+//		★性能测试消耗	54.50ms ~ 30.08ms ~ 20.28ms
+//		★最坏情况		大量一体化的物体到处移动并触发。
+//		★备注			一体化事件的性能消耗，会与好几个插件交织在一起，不过目前没有出现累加后超级大的计算量。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			事件一体化：
 //				->移动一体化
@@ -212,7 +220,7 @@
 //			3.【$gameTemp与$gameMap】同步校验，确保载入存档，地图重新进入后，能刷一次事件注释的记录。
 //			4.【该插件使用了事件容器】，必须考虑三种情况：初始化、切换地图时、切换贴图时，不然会出现指针错误！
 //				只要是装事件的容器，都需要考虑指针问题，不管是放在$gameMap还是$gameTemp中。
-//				另外，帧刷新判断时，最好每次变化直接【重刷容器】。
+//				另外，帧刷新判断时，最好每次变化直接【刷新统计】。
 //
 //		★其它说明细节：
 //			1.移动一体化：
@@ -295,16 +303,16 @@ Game_Interpreter.prototype.pluginCommand = function(command, args ){
 			if( e && type == "设置移动标签" ){
 				e._drill_EU['move'] = temp1;
 				e._drill_ETh_char[ "_drill_EU_"+temp1 ] = true;		//穿透标签
-				$gameTemp._drill_EU_needRefresh = true;
+				$gameTemp._drill_EU_needRestatistics = true;
 			}
 			if( e && type == "设置朝向标签" ){
 				e._drill_EU['rotate'] = temp1;
 				e._drill_EU['rotateNeedInit'] = true;
-				$gameTemp._drill_EU_needRefresh = true;
+				$gameTemp._drill_EU_needRestatistics = true;
 			}
 			if( e && type == "设置触发标签" ){
 				e._drill_EU['trigger'] = temp1;
-				$gameTemp._drill_EU_needRefresh = true;
+				$gameTemp._drill_EU_needRestatistics = true;
 			}
 		}
 		if(args.length == 4){
@@ -312,15 +320,15 @@ Game_Interpreter.prototype.pluginCommand = function(command, args ){
 			if( e && type == "去除移动标签" ){
 				e._drill_ETh_char[ "_drill_EU_" + e._drill_EU['move'] ] = false;	//穿透标签
 				e._drill_EU['move'] = "" ;
-				$gameTemp._drill_EU_needRefresh = true;
+				$gameTemp._drill_EU_needRestatistics = true;
 			}
 			if( e && type == "去除朝向标签" ){
 				e._drill_EU['rotate'] = "" ;
-				$gameTemp._drill_EU_needRefresh = true;
+				$gameTemp._drill_EU_needRestatistics = true;
 			}
 			if( e && type == "去除触发标签" ){
 				e._drill_EU['trigger'] = "" ;
-				$gameTemp._drill_EU_needRefresh = true;
+				$gameTemp._drill_EU_needRestatistics = true;
 			}
 			if( e && type == "开启速度统一" ){
 				e._drill_EU['speed'] = true ;
@@ -340,12 +348,12 @@ Game_Interpreter.prototype.pluginCommand = function(command, args ){
 				if( type == "设置移动标签" ){
 					$gamePlayer._drill_EU['move'] = temp1;
 					$gamePlayer._drill_ETh_char[ "_drill_EU_"+temp1 ] = true;		//穿透标签
-					$gameTemp._drill_EU_needRefresh = true;
+					$gameTemp._drill_EU_needRestatistics = true;
 				}
 				if( type == "设置朝向标签" ){
 					$gamePlayer._drill_EU['rotate'] = temp1;
 					$gamePlayer._drill_EU['rotateNeedInit'] = true;
-					$gameTemp._drill_EU_needRefresh = true;
+					$gameTemp._drill_EU_needRestatistics = true;
 				}
 			}
 		}
@@ -357,11 +365,11 @@ Game_Interpreter.prototype.pluginCommand = function(command, args ){
 				if( type == "去除移动标签" ){
 					$gamePlayer._drill_ETh_char[ "_drill_EU_" + $gamePlayer._drill_EU['move'] ] = false;	//穿透标签
 					$gamePlayer._drill_EU['move'] = "" ;
-					$gameTemp._drill_EU_needRefresh = true;
+					$gameTemp._drill_EU_needRestatistics = true;
 				}
 				if( type == "去除朝向标签" ){
 					$gamePlayer._drill_EU['rotate'] = "" ;
-					$gameTemp._drill_EU_needRefresh = true;
+					$gameTemp._drill_EU_needRestatistics = true;
 				}
 				if( type == "开启速度统一" ){
 					$gamePlayer._drill_EU['speed'] = true ;
@@ -381,7 +389,7 @@ Game_Map.prototype.drill_EU_isEventExist = function( e_id ){
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_EventUnification.js 物体 - 事件一体化】\n" +
+		alert( "【Drill_EventUnification.js 体积 - 事件一体化】\n" +
 				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
 		return false;
 	}
@@ -456,7 +464,7 @@ Game_Temp.prototype.initialize = function(){
 	this._drill_EU_map_move = {};
 	this._drill_EU_map_rotate = {};
 	this._drill_EU_map_trigger = {};
-	this._drill_EU_needRefresh = true;
+	this._drill_EU_needRestatistics = true;
 };
 //==============================
 // * 容器 - 切换地图时
@@ -466,7 +474,7 @@ Game_Map.prototype.setup = function(mapId ){
 	$gameTemp._drill_EU_map_move = {};
 	$gameTemp._drill_EU_map_rotate = {};
 	$gameTemp._drill_EU_map_trigger = {};
-	$gameTemp._drill_EU_needRefresh = true;
+	$gameTemp._drill_EU_needRestatistics = true;
 	_drill_EU_gmap_setup.call(this,mapId);
 }
 //==============================
@@ -478,16 +486,19 @@ Spriteset_Map.prototype.createCharacters = function(){
 	_drill_EU_smap_createCharacters.call(this);
 }
 //==============================
-// * 容器 - 刷新统计
+// * 容器 - 帧刷新
 //==============================
 var _drill_EU_map_update = Game_Map.prototype.update;
-Game_Map.prototype.update = function(sceneActive ){
+Game_Map.prototype.update = function(sceneActive){
 	_drill_EU_map_update.call(this,sceneActive);
-	this.drill_EU_refreshTags();
+	this.drill_EU_updateRestatistics();		//帧刷新 - 刷新统计
 };
-Game_Map.prototype.drill_EU_refreshTags = function(){
-	if( !$gameTemp._drill_EU_needRefresh ){ return }
-	$gameTemp._drill_EU_needRefresh = false;
+//==============================
+// * 容器 - 帧刷新 - 刷新统计
+//==============================
+Game_Map.prototype.drill_EU_updateRestatistics = function(){
+	if( !$gameTemp._drill_EU_needRestatistics ){ return }
+	$gameTemp._drill_EU_needRestatistics = false;
 	
 	var events = this.events();
 	events.push( $gamePlayer );
@@ -574,16 +585,16 @@ Game_Event.prototype.drill_EU_setupTags = function(){
 					if( type == "移动标签" ){
 						this._drill_EU['move'] = temp1;
 						this._drill_ETh_char[ "_drill_EU_"+temp1 ] = true;		//穿透标签
-						$gameTemp._drill_EU_needRefresh = true;
+						$gameTemp._drill_EU_needRestatistics = true;
 					}
 					if( type == "朝向标签" ){
 						this._drill_EU['rotate'] = temp1;
 						this._drill_EU['rotateNeedInit'] = true;			
-						$gameTemp._drill_EU_needRefresh = true;
+						$gameTemp._drill_EU_needRestatistics = true;
 					}
 					if( type == "触发标签" ){
 						this._drill_EU['trigger'] = temp1;
-						$gameTemp._drill_EU_needRefresh = true;
+						$gameTemp._drill_EU_needRestatistics = true;
 					}
 				}
 				if(args.length == 2){
@@ -633,7 +644,7 @@ Game_CharacterBase.prototype.updateMove = function(){
 			var u_c = this._drill_EU_unifyingMovingTarget;
 			if( u_c._drill_EU['speed'] && u_c != this ){
 				this._moveSpeed = u_c._moveSpeed;
-				if( Imported.Drill_MoveSpeed ){
+				if( Imported.Drill_MoveSpeed ){		//【物体-移动速度】
 					this._drill_MS_ASpeed = u_c.drill_MS_getRealASpeed();
 				}
 			}
@@ -867,8 +878,8 @@ Game_SelfSwitches.prototype.setValue = function( key, value ){
 }else{
 		Imported.Drill_EventUnification = false;
 		alert(
-			"【Drill_EventUnification.js 物体 - 事件一体化】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_EventThrough 物体-事件穿透关系"
+			"【Drill_EventUnification.js 体积 - 事件一体化】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
+			"\n- Drill_EventThrough 体积-事件穿透关系"
 		);
 }
 

@@ -19,12 +19,13 @@
  *
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该插件 不能 单独使用，必须基于核心。
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfFixedArea        物体触发 - 固定区域核心
+ *   - Drill_CoreOfFixedArea        物体触发-固定区域核心
  *     需要该核心才能进行区域动画播放。
  * 可被扩展：
- *   - Drill_EventRangeTrigger      物体触发 - 固定区域 & 条件触发
+ *   - Drill_EventRangeTrigger      物体触发-固定区域 & 条件触发
  *     如果使用目标插件，插件指令的"上一次触发的"、"读取区域"可以生效。
  *
  * -----------------------------------------------------------------------------
@@ -142,13 +143,13 @@
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
  *   测试结果并不是精确值，范围在给定值的 20ms 范围内波动。
  *   更多性能介绍，去看看 "0.性能测试报告 > 关于插件性能.docx"。
- * 2.播放并行动画的功能比较特殊，因为是基于rmmv的自定义动画，并且批量
+ * 2.播放并行动画的功能比较特殊，因为是基于自定义动画，并且批量
  *   同时播放，消耗量不言而喻。
- * 3.与激光区域不同，斩击动画、激光动画都没出现掉帧情况，但是运行时会
- *   卡一下。
- * 4.如果你觉得性能消耗太大承受不起，可以在释放点只播放一个动画，通过
- *   rmmv中设计拼接，形成固定的技能动画。不过代价也比较大，由于单独动
- *   画极度缺乏灵活性，你只能一个技能一个动画。
+ * 3.与激光区域不同，斩击动画、激光动画都没出现掉帧情况，但是运行时
+ *   会卡一下。
+ * 4.如果你觉得性能消耗太大承受不起，可以在释放点只播放一个动画，通
+ *   过设计拼接，形成固定的技能动画。不过代价也比较大，由于单独动画
+ *   极度缺乏灵活性，你只能一个技能一个动画。
  * 
  * -----------------------------------------------------------------------------
  * ----更新日志
@@ -168,13 +169,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		短时间持续
-//		时间复杂度		o(n^2)*o(动画数量)*o(图片处理) 每帧
-//		性能测试因素	125个事件 菱形区域攻击
-//		性能测试消耗	258.42ms
-//		最坏情况		大量事件释放大量动画技能。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		短时间持续
+//		★时间复杂度		o(n^2)*o(动画数量)*o(图片处理) 每帧
+//		★性能测试因素	125个事件 菱形区域攻击
+//		★性能测试消耗	258.42ms
+//		★最坏情况		大量事件释放大量动画技能。
+//		★备注			暂无
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			固定区域：
 //				->六种形状区域
@@ -340,7 +347,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			anim = anim.replace("动画[","");
 			anim = anim.replace("]","");
 			var a_id = Number(anim);
-			if( type == "固定区域" && type2 == "上一次触发的" && Imported.Drill_EventRangeTrigger){	
+			if( type == "固定区域" && type2 == "上一次触发的" && Imported.Drill_EventRangeTrigger){	//【物体触发 - 固定区域 & 条件触发】
 				var last_area = $gameSystem.drill_ERT_getLastArea() || [];
 				//var point = $gameSystem.drill_ERT_getLastPoint();	//中心点暂时用不上
 				$gameMap.drill_ERA_triggerArea( last_area, a_id );
@@ -374,13 +381,13 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				e_id = Number(unit);
 			}
 			
-			if( type == "固定区域" && type2 == "上一次事件的" && Imported.Drill_EventRangeTrigger){	
+			if( type == "固定区域" && type2 == "上一次事件的" && Imported.Drill_EventRangeTrigger){		//【物体触发 - 固定区域 & 条件触发】
 				if( $gameMap.drill_ERA_isEventExist( e_id ) == false ){ return; }
 				var e = $gameMap.event( e_id );
 				var area = e._ERT_area || [];
 				$gameMap.drill_ERA_triggerArea( area, a_id );
 			}
-			if( type == "固定区域" && type2 == "读取区域" && Imported.Drill_EventRangeTrigger){	
+			if( type == "固定区域" && type2 == "读取区域" && Imported.Drill_EventRangeTrigger){			//【物体触发 - 固定区域 & 条件触发】
 				var area = $gameSystem.drill_ERT_loadArea( Number(unit) ) || [];	//这个unit是区域容器的编号
 				$gameMap.drill_ERA_triggerArea( area, a_id );
 			}

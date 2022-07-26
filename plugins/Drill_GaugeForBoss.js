@@ -23,26 +23,26 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 能在给指定敌人显示多个不同的BOSS生命固定框。
- * 【支持插件关联资源的打包、加密】
  * ★★必须放在 车轮战 插件的后面★★
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 插件需要基于核心，可以与其它插件组合。
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。也可以与其它插件组合。
  * 基于：
- *   - Drill_CoreOfBallistics       系统 - 弹道核心
- *   - Drill_CoreOfGaugeMeter       系统 - 参数条核心★★v1.5及以上★★
- *   - Drill_CoreOfGaugeNumber      系统 - 参数数字核心★★v1.2及以上★★
+ *   - Drill_CoreOfBallistics       系统-弹道核心
+ *   - Drill_CoreOfGaugeMeter       系统-参数条核心★★v1.5及以上★★
+ *   - Drill_CoreOfGaugeNumber      系统-参数数字核心★★v1.2及以上★★
  *     必须要有上述核心，才能配置完整的boss框。
  * 作用于：
- *   - MOG_ConsecutiveBattles       战斗 - 车轮战
- *     可以使得rmmv的敌人出现，以及车轮战出现的boss，出现时显示新的固定框。
+ *   - MOG_ConsecutiveBattles       战斗-车轮战
+ *     可以使得敌人出现，以及车轮战出现的boss，出现时显示新的固定框。
  * 被扩展：
- *   - Drill_EnemyTextColor         UI - 敌人文本颜色
+ *   - Drill_EnemyTextColor         UI-敌人文本颜色
  *     通过该插件，可以使得boss的名字变色。
- *   - Drill_MiniPlateForState      鼠标 - 状态和buff说明窗口
+ *   - Drill_MiniPlateForState      鼠标-状态和buff说明窗口
  *     通过该插件，可以状态能显示详细说明。
- *   - Drill_X_GaugeBossFilter      UI - 高级BOSS框的滤镜效果[扩展]
+ *   - Drill_X_GaugeBossFilter      UI-高级BOSS框的滤镜效果[扩展]
  *     通过该插件，BOSS框、头像可以添加滤镜效果。
  *
  * -----------------------------------------------------------------------------
@@ -113,7 +113,7 @@
  *   (1.插件中很多属性修改后永久有效，这些数据存入了存档中，
  *      如果读取旧存档，会出现旧存档中部分数据不一致的问题。
  *   (2.插件支持 空数据同步更新 的优化，
- *      详细去看看"0.基本定义 > 数据更新与旧存档.docx"
+ *      详细去看看"21.管理器 > 数据更新与旧存档.docx"
  * 设计：
  *   (1.很多时候你并不缺少工具，你缺的是一个生命框设计参考。
  *      比如，玩一款你喜欢的游戏，留意一下游戏中敌人的血条和数值。
@@ -200,7 +200,7 @@
  *              80.00ms - 120.00ms（中消耗）
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
- * 时间复杂度： o(n^3)*o(贴图处理)
+ * 时间复杂度： o(n^3)*o(贴图处理) 每帧
  * 测试方法：   在各个界面中以正常游戏流程进行测试。
  * 测试结果：   战斗界面，消耗为：【22.52ms】
  *
@@ -208,7 +208,7 @@
  *   测试结果并不是精确值，范围在给定值的10ms范围内波动。
  *   更多性能介绍，去看看 "0.性能测试报告 > 关于插件性能.docx"。
  * 2.之前一直以为战斗时偶尔会出现的卡顿是BOSS框引起的，后来才发现
- *   都是rmmv动画自身底层大量使用了滤镜造成的。
+ *   都是动画播放时自身底层大量使用了滤镜造成的。
  *   BOSS框本身的消耗较小。
  * 
  * -----------------------------------------------------------------------------
@@ -1396,14 +1396,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^3)*o(贴图处理)
-//		性能测试因素	战斗界面
-//		性能测试消耗	18.28ms 22.52ms
-//		最坏情况		暂无
-//		备注			之前一直以为战斗时偶尔会出现的卡顿是boss框引起的，后来才发现都是rmmv动画自身底层大量使用了滤镜造成的。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^3)*o(贴图处理) 每帧
+//		★性能测试因素	战斗界面
+//		★性能测试消耗	18.28ms 22.52ms
+//		★最坏情况		暂无
+//		★备注			之前一直以为战斗时偶尔会出现的卡顿是boss框引起的，后来才发现都是 动画 自身底层大量使用了滤镜造成的。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			固定框样式：
 //				->外框
@@ -1966,7 +1971,7 @@ Game_System.prototype.drill_GFB_checkData = function() {
 
 
 //#############################################################################
-// ** 标准函数（战斗层级）
+// ** 【标准模块】战斗层级
 //#############################################################################
 //##############################
 // * 战斗层级 - 添加贴图到层级【标准函数】
@@ -2050,7 +2055,7 @@ Spriteset_Battle.prototype.createLowerLayer = function() {
 //==============================
 var _drill_GFB_battle_createPictures = Spriteset_Battle.prototype.createPictures;
 Spriteset_Battle.prototype.createPictures = function() {
-	_drill_GFB_battle_createPictures.call(this);		//rmmv图片 < 图片层 < rmmv对话框
+	_drill_GFB_battle_createPictures.call(this);		//图片对象层 < 图片层 < 对话框集合
 	if( !this._drill_battlePicArea ){
 		this._drill_battlePicArea = new Sprite();
 		this.addChild(this._drill_battlePicArea);	
@@ -2061,7 +2066,7 @@ Spriteset_Battle.prototype.createPictures = function() {
 //==============================
 var _drill_GFB_battle_createAllWindows = Scene_Battle.prototype.createAllWindows;
 Scene_Battle.prototype.createAllWindows = function() {
-	_drill_GFB_battle_createAllWindows.call(this);	//rmmv对话框 < 最顶层
+	_drill_GFB_battle_createAllWindows.call(this);	//对话框集合 < 最顶层
 	if( !this._drill_SenceTopArea ){
 		this._drill_SenceTopArea = new Sprite();
 		this.addChild(this._drill_SenceTopArea);	
@@ -2653,7 +2658,7 @@ Drill_GFB_StyleSprite.prototype.drill_createState = function() {
 		}
 		
 	}else{
-		// > 闪烁的状态贴图（直接用rmmv默认）
+		// > 闪烁的状态贴图（直接用默认）
 		this._drill_state_sprite = new Sprite_StateIcon();	
 		this._drill_state_sprite.anchor.x = 0.5;
 		this._drill_state_sprite.anchor.y = 0.5;

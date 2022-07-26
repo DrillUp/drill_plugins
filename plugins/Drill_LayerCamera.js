@@ -22,13 +22,13 @@
  * 该插件可以单独使用。
  * 插件由于控制了镜头的缩放大小，对所有UI控件相关插件有影响。
  * 被扩展：
- *   - Drill_CoreOfMoveRoute   物体-移动路线核心
- *   - Drill_EventSound        物体-事件的声音
- *   - Drill_MouseTriggerEvent 鼠标-鼠标触发事件 ★★v1.3及以上版本★★
+ *   - Drill_CoreOfMoveRoute   移动路线-移动路线核心
+ *   - Drill_EventSound        声音-事件的声音
+ *   - Drill_MouseTriggerEvent 鼠标-鼠标触发事件★★v1.3及以上版本★★
  *   - Drill_MouseGridPointer  鼠标-网格指向标
  *   - Drill_MouseIllumination 鼠标-自定义照明效果
- *   - Drill_OperateHud        互动-鼠标辅助操作面板 ★★v1.6及以上版本★★
- *   - Drill_GaugeForVariable  UI - 高级变量固定框 ★★v1.6及以上版本★★
+ *   - Drill_OperateHud        鼠标-鼠标辅助操作面板★★v1.6及以上版本★★
+ *   - Drill_GaugeForVariable  UI-高级变量固定框★★v1.6及以上版本★★
  *     上述插件，都可以在镜头缩放时，做相应的变换支持。
  * 
  * -----------------------------------------------------------------------------
@@ -36,7 +36,7 @@
  * 1.插件的作用域：地图界面。
  * 2.如果想了解镜头更多的内容，去看看 "6.地图 > 关于地图活动镜头.docx"。
  * 镜头移动：
- *   (1.弹性移动 和 平滑移动，会对rmmv中的 移动 > 滚动地图 指令 有影响。
+ *   (1.弹性移动 和 平滑移动，会对 移动 > 滚动地图 的事件指令 有影响。
  *      滚动地图指令结束后会立即弹回玩家中心。
  *      如果要防止弹回中心，你需要修改移动模式为"默认移动"。
  *   (2.平滑移动，穿过循环地图边缘时，可能会出现镜头不稳定的小问题。
@@ -48,7 +48,7 @@
  *   (2.镜头缩放/旋转 最好只作为临时性的过场动画使用。
  *   (3.镜头缩放 和 镜头旋转 不能 同时使用。
  *   (5.旋转、缩放时能够看见未填充的图块边缘，属于正常情况。
- *      这是由于rmmv的内部机制，每块图块根据方形镜头区域一个个拼上去的。
+ *      这是由于游戏内部机制，每块图块根据方形镜头区域一个个拼上去的。
  *      你可以设置"缩小镜头时加强刷新量"，只是会比较消耗计算量。
  *   (6.缩放时，由于事件贴图是分开渲染的，可能在一体化事件之间出现非常微
  *      小的缝隙（只有1个像素的缝隙），为了避免这些问题，你需要使得缩放的
@@ -201,7 +201,7 @@
  *              80.00ms - 120.00ms（中消耗）
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
- * 时间复杂度： o(n^2)
+ * 时间复杂度： o(n^2) 每帧
  * 测试方法：   去物体管理层、地理管理层、镜像管理层跑一圈测试。
  * 测试结果：   200个事件的地图中，消耗为：【18.74ms】
  *              100个事件的地图中，消耗为：【14.84ms】
@@ -280,14 +280,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	Game_Player.prototype.updateScroll
 //
-//		工作类型		单次执行
-//		时间复杂度		o(n^2)
-//		性能测试因素	镜像管理层
-//		性能测试消耗	18.74ms 23.85ms
-//		最坏情况		暂无
-//		备注			消耗虽然很小，但是总能找到。移动镜头、翻转镜头没有明显的消耗。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^2) 每帧
+//		★性能测试因素	镜像管理层
+//		★性能测试消耗	18.74ms 23.85ms
+//		★最坏情况		暂无
+//		★备注			消耗虽然很小，但是总能找到。移动镜头、翻转镜头没有明显的消耗。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			地图镜头：
 //				->镜头移动
@@ -305,11 +310,21 @@
 //					->看向指定的事件
 //				->镜头墙
 //				->视野触发
+//				->镜头属性
+//					->镜头范围【标准函数】
+//					->镜头架范围【标准函数】
+//					->镜头位置【标准函数】
+//					->缩放 - 当前X缩放值【标准函数】
+//					->缩放 - 当前Y缩放值【标准函数】
+//					->缩放 - 镜头的X 转 缩放后的X【标准函数】
+//					->缩放 - 镜头的Y 转 缩放后的Y【标准函数】
+//					->缩放 - 缩放后的X 转 镜头的X【标准函数】
+//					->缩放 - 缩放后的Y 转 镜头的Y【标准函数】
 //
 //		★必要注意事项：
 //			1.【该插件使用了事件容器】，必须考虑三种情况：初始化、切换地图时、切换贴图时，不然会出现指针错误！
 //				只要是装事件的容器，都需要考虑指针问题，不管是放在$gameMap还是$gameTemp中。
-//				另外，帧刷新判断时，最好每次变化直接【重刷容器】。
+//				另外，帧刷新判断时，最好每次变化直接【刷新统计】。
 //			2.【该插件的缩放功能近似于核心】，许多子插件都要进行缩放转换控制，可能会关联许多与地图坐标相关的内容。
 //	
 //		★其它说明细节：
@@ -330,6 +345,7 @@
 //			3.镜头最大的问题，在于圆心的问题。
 //			  只有单独的sprite才能设置圆心，tilemap和循环贴图都没有圆心。
 //			  旋转的时候问题也大，这相当于指数形式让公式越来越复杂（通过数学转换部分解决，但是仍然存在问题）
+//
 
 //=============================================================================
 // ** 变量获取
@@ -345,92 +361,6 @@
     DrillUp.g_LCa_speedRatio = Number(DrillUp.parameters['弹性模式移动速度'] || 10);
     DrillUp.g_LCa_speedMax = Number(DrillUp.parameters['弹性模式镜头速度上限'] || 24);
     DrillUp.g_LCa_forceRefresh = String(DrillUp.parameters['缩小镜头时是否加强刷新量'] || "true") == "true";
-
-
-//=============================================================================
-// ** 存储数据
-//=============================================================================
-//==============================
-// ** 存储数据 - 初始化
-//==============================
-var _drill_LCa_sys_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function() {
-    _drill_LCa_sys_initialize.call(this);
-	this.drill_LCa_initData();
-};
-//==============================
-// ** 存储数据 - 初始化数据
-//==============================
-Game_System.prototype.drill_LCa_initData = function() {
-    this._drill_LCa_type = DrillUp.g_LCa_type ;					//镜头移动模式
-    this._drill_LCa_speedRatio = DrillUp.g_LCa_speedRatio ;		//移动速度
-    this._drill_LCa_speedMax = DrillUp.g_LCa_speedMax ;			//速度上限
-	
-	this._drill_LCa_sX = {}			// 缩放x
-	this._drill_LCa_sX.cur = 0;		//	cur = -0.1，则缩放为0.9
-	this._drill_LCa_sX.move = 0;	//
-	this._drill_LCa_sX.time = 0;	//
-	this._drill_LCa_sY = {}			// 缩放y
-	this._drill_LCa_sY.cur = 0;		//
-	this._drill_LCa_sY.move = 0;	//
-	this._drill_LCa_sY.time = 0;	//
-	this._drill_LCa_R = {}			// 旋转
-	this._drill_LCa_R.cur = 0;		//
-	this._drill_LCa_R.move = 0;		//
-	this._drill_LCa_R.time = 0;		//
-	
-    this._drill_LCa_flip = {};			//翻转控制
-    this._drill_LCa_flip.lock = false;	//
-	
-    this._drill_LCa_locked = false;		//固定看向
-    this._drill_LCa_lookAt_X = -1;		//看向图块x
-    this._drill_LCa_lookAt_Y = -1;		//看向图块y
-    this._drill_LCa_lookAt_event = -1;	//看向事件
-};	
-//==============================
-// * 存档文件 - 载入存档 - 数据赋值
-//==============================
-var _drill_LCa_extractSaveContents = DataManager.extractSaveContents;
-DataManager.extractSaveContents = function(contents){
-	_drill_LCa_extractSaveContents.call( this, contents );
-	
-	if( $gameSystem._drill_LCa_sX == undefined ){	//（空数据时，强制赋值）
-		$gameSystem.drill_LCa_initData();
-	}
-};
-//==============================
-// * 缩放参数
-//==============================
-Game_System.prototype.drill_LCa_curScaleX = function() {		//当前镜头x缩放
-	return 1 + this._drill_LCa_sX.cur;
-}
-Game_System.prototype.drill_LCa_curScaleY = function() {		//当前镜头y缩放
-	return 1 + this._drill_LCa_sY.cur;
-}
-Game_System.prototype.drill_LCa_cameraToMapX = function(x) {	//当前镜头的x -> 缩放后的x
-	var cur_scale = this.drill_LCa_curScaleX();
-	x = x / cur_scale;
-	x -= (Graphics.boxWidth / cur_scale - Graphics.boxWidth)/2;
-	return Math.round(x);
-}
-Game_System.prototype.drill_LCa_cameraToMapY = function(y) {	//当前镜头的y -> 缩放后的y
-	var cur_scale = this.drill_LCa_curScaleY();
-	y = y / cur_scale;
-	y -= (Graphics.boxHeight / cur_scale - Graphics.boxHeight)/2;
-	return Math.round(y);
-}
-Game_System.prototype.drill_LCa_mapToCameraX = function(x) {	//当前缩放的x -> 镜头的x
-	var cur_scale = this.drill_LCa_curScaleX();
-	x += (Graphics.boxWidth / cur_scale - Graphics.boxWidth)/2;
-	x = x * cur_scale;
-	return Math.round(x);
-}
-Game_System.prototype.drill_LCa_mapToCameraY = function(y) {	//当前缩放的y -> 镜头的y
-	var cur_scale = this.drill_LCa_curScaleY();
-	y += (Graphics.boxHeight / cur_scale - Graphics.boxHeight)/2;
-	y = y * cur_scale;
-	return Math.round(y);
-}
 
 
 //=============================================================================
@@ -619,7 +549,7 @@ Game_Event.prototype.setupPageSettings = function() {
 						if(args[3]){ var temp1 = String(args[3]);}
 						if ( type == "设置镜头墙"){
 							this._drill_LCa_wall.push(temp1);
-							$gameTemp._drill_LCa_needRefresh = true;
+							$gameTemp._drill_LCa_needRestatistics = true;
 						}
 					}
 					if( args.length == 6 ){
@@ -628,11 +558,11 @@ Game_Event.prototype.setupPageSettings = function() {
 						if(args[5]){ var temp1 = String(args[5]);}
 						if ( type == "进入视野" && type2 == "触发独立开关"){
 							this._drill_LCa_sightOn = temp1;
-							$gameTemp._drill_LCa_needRefresh = true;
+							$gameTemp._drill_LCa_needRestatistics = true;
 						}
 						if ( type == "离开视野" && type2 == "关闭独立开关"){
 							this._drill_LCa_sightOff = temp1;
-							$gameTemp._drill_LCa_needRefresh = true;
+							$gameTemp._drill_LCa_needRestatistics = true;
 						}
 					}
 				};  
@@ -640,6 +570,229 @@ Game_Event.prototype.setupPageSettings = function() {
 		}, this);
     }
 }
+
+
+//=============================================================================
+// ** 存储数据
+//=============================================================================
+//==============================
+// ** 存储数据 - 初始化
+//==============================
+var _drill_LCa_sys_initialize = Game_System.prototype.initialize;
+Game_System.prototype.initialize = function() {
+    _drill_LCa_sys_initialize.call(this);
+	this.drill_LCa_initData();
+};
+//==============================
+// ** 存储数据 - 初始化数据
+//==============================
+Game_System.prototype.drill_LCa_initData = function() {
+    this._drill_LCa_type = DrillUp.g_LCa_type ;					//镜头移动模式
+    this._drill_LCa_speedRatio = DrillUp.g_LCa_speedRatio ;		//移动速度
+    this._drill_LCa_speedMax = DrillUp.g_LCa_speedMax ;			//速度上限
+	
+	this._drill_LCa_sX = {}			// 缩放x
+	this._drill_LCa_sX.cur = 0;		//	cur = -0.1，则缩放为0.9
+	this._drill_LCa_sX.move = 0;	//
+	this._drill_LCa_sX.time = 0;	//
+	this._drill_LCa_sY = {}			// 缩放y
+	this._drill_LCa_sY.cur = 0;		//
+	this._drill_LCa_sY.move = 0;	//
+	this._drill_LCa_sY.time = 0;	//
+	this._drill_LCa_R = {}			// 旋转
+	this._drill_LCa_R.cur = 0;		//
+	this._drill_LCa_R.move = 0;		//
+	this._drill_LCa_R.time = 0;		//
+	
+    this._drill_LCa_flip = {};			//翻转控制
+    this._drill_LCa_flip.lock = false;	//
+	
+    this._drill_LCa_locked = false;		//固定看向
+    this._drill_LCa_lookAt_X = -1;		//看向图块x
+    this._drill_LCa_lookAt_Y = -1;		//看向图块y
+    this._drill_LCa_lookAt_event = -1;	//看向事件
+};	
+//==============================
+// * 存档文件 - 载入存档 - 数据赋值
+//==============================
+var _drill_LCa_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function(contents){
+	_drill_LCa_extractSaveContents.call( this, contents );
+	
+	if( $gameSystem._drill_LCa_sX == undefined ){	//（空数据时，强制赋值）
+		$gameSystem.drill_LCa_initData();
+	}
+};
+
+
+//#############################################################################
+// ** 【标准模块】镜头属性
+//#############################################################################
+//##############################
+// * 镜头属性 - 镜头范围【标准函数】
+//				
+//			参数：	无
+//			返回：	> 矩形对象
+//          
+//			说明：	> 常规的镜头矩形范围，不含缩放情况。单位像素。
+//##############################
+Game_System.prototype.drill_LCa_getCameraRect = function(){
+	return this.drill_LCa_getCameraRect_Private();
+}
+//##############################
+// * 镜头属性 - 镜头架范围【标准函数】
+//				
+//			参数：	无
+//			返回：	> 矩形对象
+//          
+//			说明：	> 镜头架的矩形范围，单位像素，与地图大小有关。
+//##############################
+Game_System.prototype.drill_LCa_getCameraHolderRect = function(){
+	return this.drill_LCa_getCameraHolderRect_Private();
+}
+//##############################
+// * 镜头属性 - 镜头位置【标准函数】
+//				
+//			参数：	无
+//			返回：	> 点对象
+//          
+//			说明：	暂无。
+//##############################
+Game_System.prototype.drill_LCa_curPos = function(){
+	return this.drill_LCa_curPos_Private();
+}
+//##############################
+// * 镜头属性 - 缩放 - 当前X缩放值【标准函数】
+//				
+//			参数：	无
+//			返回：	> 数字
+//          
+//			说明：	> 1.00表示默认缩放值。
+//##############################
+Game_System.prototype.drill_LCa_curScaleX = function(){
+	return 1 + this._drill_LCa_sX.cur;
+}
+//##############################
+// * 镜头属性 - 缩放 - 当前Y缩放值【标准函数】
+//				
+//			参数：	无
+//			返回：	> 数字
+//          
+//			说明：	> 1.00表示默认缩放值。
+//##############################
+Game_System.prototype.drill_LCa_curScaleY = function(){
+	return 1 + this._drill_LCa_sY.cur;
+}
+//##############################
+// * 镜头属性 - 缩放 - 镜头的X 转 缩放后的X【标准函数】
+//				
+//			参数：	> x 数字（镜头的X值）
+//			返回：	> 数字  （缩放后的X值）
+//##############################
+Game_System.prototype.drill_LCa_cameraToMapX = function( x ){
+	return this.drill_LCa_cameraToMapX_Private( x );
+}
+//##############################
+// * 镜头属性 - 缩放 - 镜头的Y 转 缩放后的Y【标准函数】
+//				
+//			参数：	> y 数字（镜头的Y值）
+//			返回：	> 数字  （缩放后的Y值）
+//##############################
+Game_System.prototype.drill_LCa_cameraToMapY = function( y ){
+	return this.drill_LCa_cameraToMapY_Private( y );
+}
+//##############################
+// * 镜头属性 - 缩放 - 缩放后的X 转 镜头的X【标准函数】
+//				
+//			参数：	> x 数字（缩放后的X值）
+//			返回：	> 数字  （镜头的X值）
+//##############################
+Game_System.prototype.drill_LCa_mapToCameraX = function( x ){
+	return this.drill_LCa_mapToCameraX_Private( x );
+}
+//##############################
+// * 镜头属性 - 缩放 - 缩放后的Y 转 镜头的Y【标准函数】
+//				
+//			参数：	> y 数字（缩放后的Y值）
+//			返回：	> 数字  （镜头的Y值）
+//##############################
+Game_System.prototype.drill_LCa_mapToCameraY = function( y ){
+	return this.drill_LCa_mapToCameraY_Private( y );
+}
+//=============================================================================
+// ** 镜头属性（接口实现）
+//=============================================================================
+//==============================
+// * 镜头属性 - 镜头范围（私有）
+//==============================
+Game_System.prototype.drill_LCa_getCameraRect_Private = function(){
+	return new Rectangle( 0, 0, Graphics.boxWidth, Graphics.boxHeight );
+}
+//==============================
+// * 镜头属性 - 镜头架范围（私有）
+//==============================
+Game_System.prototype.drill_LCa_getCameraHolderRect_Private = function(){
+	return new Rectangle( 0, 0, $gameMap.width()*$gameMap.tileWidth(), $gameMap.height()*$gameMap.tileHeight() );
+}
+//==============================
+// * 镜头属性 - 镜头位置（私有）
+//==============================
+Game_System.prototype.drill_LCa_curPos_Private = function(){
+	return {'x': $gameMap.displayX()*$gameMap.tileWidth(), 'y': $gameMap.displayY()*$gameMap.tileHeight() };
+}
+//==============================
+// * 镜头属性 - 镜头的X -> 缩放后的X（私有）
+//==============================
+Game_System.prototype.drill_LCa_cameraToMapX_Private = function( x ){
+	var cur_scale = this.drill_LCa_curScaleX();
+	x = x / cur_scale;
+	x -= (Graphics.boxWidth / cur_scale - Graphics.boxWidth)/2;
+	return Math.round(x);
+}
+//==============================
+// * 镜头属性 - 镜头的Y -> 缩放后的Y（私有）
+//==============================
+Game_System.prototype.drill_LCa_cameraToMapY_Private = function( y ){
+	var cur_scale = this.drill_LCa_curScaleY();
+	y = y / cur_scale;
+	y -= (Graphics.boxHeight / cur_scale - Graphics.boxHeight)/2;
+	return Math.round(y);
+}
+//==============================
+// * 镜头属性 - 缩放后的X -> 镜头的X（私有）
+//==============================
+Game_System.prototype.drill_LCa_mapToCameraX_Private = function( x ){
+	var cur_scale = this.drill_LCa_curScaleX();
+	x += (Graphics.boxWidth / cur_scale - Graphics.boxWidth)/2;
+	x = x * cur_scale;
+	return Math.round(x);
+}
+//==============================
+// * 镜头属性 - 缩放后的Y -> 镜头的Y（私有）
+//==============================
+Game_System.prototype.drill_LCa_mapToCameraY_Private = function( y ){
+	var cur_scale = this.drill_LCa_curScaleY();
+	y += (Graphics.boxHeight / cur_scale - Graphics.boxHeight)/2;
+	y = y * cur_scale;
+	return Math.round(y);
+}
+//==============================
+// * 镜头属性 - 缩放地图的鼠标X修正（私有）
+//==============================
+var _drill_LCa_g_canvasToMapX = Game_Map.prototype.canvasToMapX;
+Game_Map.prototype.canvasToMapX = function( x ){
+	x = $gameSystem.drill_LCa_cameraToMapX( x );
+	return _drill_LCa_g_canvasToMapX.call(this,x);
+};
+//==============================
+// * 镜头属性 - 缩放地图的鼠标Y修正（私有）
+//==============================
+var _drill_LCa_g_canvasToMapY = Game_Map.prototype.canvasToMapY;
+Game_Map.prototype.canvasToMapY = function( y ){
+	y = $gameSystem.drill_LCa_cameraToMapY( y );
+	return _drill_LCa_g_canvasToMapY.call(this,y);
+};
+
 
 //=============================================================================
 // ** 事件容器
@@ -652,7 +805,7 @@ Game_Temp.prototype.initialize = function() {
 	_drill_LCa_temp_initialize.call(this);
 	this._drill_LCa_wallEvents = [];		//含镜头墙的事件
 	this._drill_LCa_sightEvents = [];		//含视野触发的事件
-	this._drill_LCa_needRefresh = true;
+	this._drill_LCa_needRestatistics = true;
 	
 	this._drill_LCa_pixel_fix_x = 0;		//像素补正值
 	this._drill_LCa_pixel_fix_y = 0;		//
@@ -664,7 +817,7 @@ var _drill_LCa_gmap_setup = Game_Map.prototype.setup;
 Game_Map.prototype.setup = function(mapId) {
 	$gameTemp._drill_LCa_wallEvents = [];		//含镜头墙的事件
 	$gameTemp._drill_LCa_sightEvents = [];		//含视野触发的事件
-	$gameTemp._drill_LCa_needRefresh = true;
+	$gameTemp._drill_LCa_needRestatistics = true;
 	_drill_LCa_gmap_setup.call(this,mapId);
 }
 //==============================
@@ -674,24 +827,23 @@ var _drill_LCa_smap_createCharacters = Spriteset_Map.prototype.createCharacters;
 Spriteset_Map.prototype.createCharacters = function() {
 	$gameTemp._drill_LCa_wallEvents = [];
 	$gameTemp._drill_LCa_sightEvents = [];
-	$gameTemp._drill_LCa_needRefresh = true;
+	$gameTemp._drill_LCa_needRestatistics = true;
 	_drill_LCa_smap_createCharacters.call(this);
 }
 //==============================
 // ** 容器 - 帧刷新
 //==============================
 var _drill_LCa_map_update = Game_Map.prototype.update;
-Game_Map.prototype.update = function(sceneActive) {
-	_drill_LCa_map_update.call(this,sceneActive);
-	
-	this.drill_LCa_refreshSwitchChecks();
+Game_Map.prototype.update = function( sceneActive ){
+	_drill_LCa_map_update.call( this, sceneActive );
+	this.drill_LCa_updateRestatistics();	//帧刷新 - 刷新统计
 };
 //==============================
 // ** 容器 - 帧刷新 - 刷新统计
 //==============================
-Game_Map.prototype.drill_LCa_refreshSwitchChecks = function() {
-	if( !$gameTemp._drill_LCa_needRefresh ){ return }
-	$gameTemp._drill_LCa_needRefresh = false;
+Game_Map.prototype.drill_LCa_updateRestatistics = function() {
+	if( !$gameTemp._drill_LCa_needRestatistics ){ return }
+	$gameTemp._drill_LCa_needRestatistics = false;
 	
 	var events = this.events();
 	$gameTemp._drill_LCa_wallEvents = [];
@@ -717,21 +869,6 @@ Game_Map.prototype.drill_LCa_refreshSwitchChecks = function() {
 //=============================================================================
 // ** 镜头属性
 //=============================================================================
-//==============================
-// * 镜头属性 - 缩放地图的鼠标修正
-//==============================
-var _drill_LCa_g_canvasToMapX = Game_Map.prototype.canvasToMapX;
-Game_Map.prototype.canvasToMapX = function( x ) {
-	x = $gameSystem.drill_LCa_cameraToMapX( x );
-	return _drill_LCa_g_canvasToMapX.call(this,x);
-};
-
-var _drill_LCa_g_canvasToMapY = Game_Map.prototype.canvasToMapY;
-Game_Map.prototype.canvasToMapY = function( y ) {
-	y = $gameSystem.drill_LCa_cameraToMapY( y );
-	return _drill_LCa_g_canvasToMapY.call(this,y);
-};
-
 //==============================
 // * 镜头属性 - 固定帧初始值
 //==============================
@@ -1320,9 +1457,8 @@ Game_Map.prototype.drill_LCa_posIsInCamera = function(realX, realY) {
 // ** 视野 - 帧刷新
 //==============================
 var _drill_LCa_sight_update = Game_Map.prototype.update;
-Game_Map.prototype.update = function(sceneActive) {
+Game_Map.prototype.update = function( sceneActive ){
 	_drill_LCa_sight_update.call(this,sceneActive);
-	
 	this.drill_LCa_updateSightSwitch();
 };
 Game_Map.prototype.drill_LCa_updateSightSwitch = function() {
@@ -1338,13 +1474,13 @@ Game_Map.prototype.drill_LCa_updateSightSwitch = function() {
 		if(isTriggered){
 			var s_key = [this._mapId, temp_event._eventId, temp_event._drill_LCa_sightOn ];
 			if( $gameSelfSwitches.value(s_key) !== true){
-				$gameSelfSwitches.drill_setValueWithOutChange(s_key,true);
+				$gameSelfSwitches.drill_LCa_setValueWithOutChange(s_key,true);
 				$gameSelfSwitches.onChange();
 			}
 		}else{
 			var s_key = [this._mapId, temp_event._eventId, temp_event._drill_LCa_sightOff ];
 			if( $gameSelfSwitches.value(s_key) !== false){
-				$gameSelfSwitches.drill_setValueWithOutChange(s_key,false);
+				$gameSelfSwitches.drill_LCa_setValueWithOutChange(s_key,false);
 				$gameSelfSwitches.onChange();
 			}
 		}
@@ -1353,10 +1489,10 @@ Game_Map.prototype.drill_LCa_updateSightSwitch = function() {
 //==============================
 // * 优化 - 独立开关赋值时不刷新地图
 //==============================
-Game_SelfSwitches.prototype.drill_setValueWithOutChange = function(key, value) {
-    if (value) {
+Game_SelfSwitches.prototype.drill_LCa_setValueWithOutChange = function( key, value ){
+    if( value ){
         this._data[key] = true;
-    } else {
+    }else{
         delete this._data[key];
     }
 };

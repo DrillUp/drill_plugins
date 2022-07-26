@@ -19,16 +19,16 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 可全部自定义的画廊D。
- * 【支持插件关联资源的打包、加密】
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 插件不能单独使用，必须基于核心插件。
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfInput            系统 - 输入设备核心★★v1.5及以上★★
+ *   - Drill_CoreOfInput            系统-输入设备核心★★v1.5及以上★★
  *     必须基于该插件才能控制查看图片细节。
- *   - Drill_CoreOfGlobalSave       系统 - 全局存储核心
- *   - Drill_CoreOfWindowAuxiliary  系统 - 窗口辅助核心★★v1.3及以上★★
+ *   - Drill_CoreOfGlobalSave       管理器-全局存储核心
+ *   - Drill_CoreOfWindowAuxiliary  系统-窗口辅助核心★★v1.3及以上★★
  *     必须基于该插件才能显示描述内容。
  *
  * -----------------------------------------------------------------------------
@@ -51,7 +51,7 @@
  *   (1.该插件控制的选项显示/隐藏可以设置存储在全局文件中。
  *      如果游戏中修改了显示/隐藏，则永久有效，不保存也有效。
  *   (2.注意，如果配置显示/隐藏不起作用，记得删掉存档再看看。
- *   (3.更多详细介绍，去看看 "1.系统 > 关于全局存储.docx"。
+ *   (3.更多详细介绍，去看看 "21.管理器 > 关于全局存储.docx"。
  * 窗口：
  *   (1.如果你只要一个单独的描述窗口：
  *      设置一个选项，然后把选项窗口设置y1000看不见即可。
@@ -66,7 +66,7 @@
  *       \c[n] 变颜色    \i[n] 显示图标    \{\} 字体变大变小
  *       \V[n] 显示变量  \N[n] 显示角色名  \G 显示货币单位
  *      其他特殊字符可见插件 对话框-消息核心 的说明，
- *      或者去看看文档 "15.对话框 > 关于窗口字符.docx"。
+ *      或者去看看文档 "23.窗口字符 > 关于窗口字符.docx"。
  *   (3.内容可以包含表达式，用于特殊的功能显示。
  *      表达式介绍见"系统-窗口辅助核心"插件。
  * 内容锁定：
@@ -143,7 +143,7 @@
  * 工作类型：   持续执行
  * 时间复杂度： o(n^3)*o(场景元素) 每帧
  * 测试方法：   直接进入该画廊进行测试。
- * 测试结果：   该菜单面板中，基本元素消耗为：【22.23ms】
+ * 测试结果：   在菜单界面中，基本元素消耗为：【22.23ms】
  * 
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
  *   测试结果并不是精确值，范围在给定值的10ms范围内波动。
@@ -1397,7 +1397,7 @@
  * @type boolean
  * @on 启用
  * @off 关闭
- * @desc true - 启用，false - 关闭，你可以开关rmmv默认选项的白色闪烁矩形。需要Drill_MenuCursorBorder插件支持。
+ * @desc true - 启用，false - 关闭，你可以开关默认选项的白色闪烁矩形。需要Drill_MenuCursorBorder插件支持。
  * @default true
  * 
  * @param 是否启用菜单边框
@@ -1475,16 +1475,21 @@
 //		全局存储变量	DrillUp.global_SGaD_enableTank
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^3)*o(场景元素) 每帧
-//		性能测试因素	直接进入画廊进行测试。
-//		性能测试消耗	22.23ms（Scene_Drill_SGaD.prototype.update函数）
+//<<<<<<<<性能记录<<<<<<<<
+//
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^3)*o(场景元素) 每帧
+//		★性能测试因素	直接进入画廊进行测试。
+//		★性能测试消耗	22.23ms（Scene_Drill_SGaD.prototype.update函数）
 //						18.17ms（Scene_Drill_SGaD.prototype.drill_updateThumbnail函数）
 //						16.96ms（Scene_Drill_SGaD.prototype.drill_updateArrow函数）
-//		最坏情况		无
-//		备注			无
+//		★最坏情况		无
+//		★备注			无
+//		
+//		★优化记录		暂无
 //
-//插件记录：
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			全自定义画廊：
 //				->部件
@@ -1785,7 +1790,7 @@
 	DrillUp.g_SGaD_arrowDown_X = Number(DrillUp.parameters['平移-下箭头 X'] || 408);
 	DrillUp.g_SGaD_arrowDown_Y = Number(DrillUp.parameters['平移-下箭头 Y'] || 560);
 	DrillUp.g_SGaD_arrow_zoom = String(DrillUp.parameters['是否使用缩放效果'] || "false") === "true";	
-	DrillUp.g_SGaD_arrow_flash = String(DrillUp.parameters['是否使用闪烁效果'] || "false") === "true";	
+	DrillUp.g_SGaD_arrow_flicker = String(DrillUp.parameters['是否使用闪烁效果'] || "false") === "true";	
 	DrillUp.g_SGaD_arrow_float_val = Number(DrillUp.parameters['浮动偏移量'] || 10);
 	DrillUp.g_SGaD_arrow_float_lr = String(DrillUp.parameters['是否使用左右浮动'] || "true") === "true";	
 	DrillUp.g_SGaD_arrow_float_ud = String(DrillUp.parameters['是否使用上下浮动'] || "true") === "true";	
@@ -2938,7 +2943,7 @@ Scene_Drill_SGaD.prototype.drill_updateArrow = function() {
 	this._arrow_right.opacity= 180 ;
 	this._arrow_up.opacity =   180 ;
 	this._arrow_down.opacity = 180 ;
-	if( DrillUp.g_SGaD_arrow_flash ){
+	if( DrillUp.g_SGaD_arrow_flicker ){
 		this._arrow_left.opacity = 56+ this._arrow_linear * 200 ;
 		this._arrow_right.opacity= 56+ this._arrow_linear * 200 ;
 		this._arrow_up.opacity =   56+ this._arrow_linear * 200 ;
@@ -3175,7 +3180,7 @@ if( Imported.MOG_CursorBorder == true ){
 	}
 }
 //==============================
-// * 选项窗口 - 兼容 - Drill_MenuCursor菜单指针插件
+// * 选项窗口 - 兼容 - 【Drill_MenuCursor 主菜单 - 多样式菜单指针】
 //==============================
 if( Imported.Drill_MenuCursor == true ){
 	Drill_SGaD_SelectWindow.prototype.drill_MCu_cursorEnabled = function() {
@@ -3190,7 +3195,7 @@ if( Imported.Drill_MenuCursor == true ){
 	}
 }
 //==============================
-// * 选项窗口 - 兼容 - Drill_MenuCursorBorder菜单边框插件
+// * 选项窗口 - 兼容 - 【Drill_MenuCursorBorder 主菜单 - 多样式菜单选项边框】
 //==============================
 if( Imported.Drill_MenuCursorBorder == true ){
 	Drill_SGaD_SelectWindow.prototype.drill_MCB_glimmerRectVisible = function() {
@@ -3208,7 +3213,7 @@ if( Imported.Drill_MenuCursorBorder == true ){
 	}
 }
 //==============================
-// * 选项窗口 - 兼容 - Drill_MenuScrollBar菜单滚动条插件
+// * 选项窗口 - 兼容 - 【Drill_MenuScrollBar 主菜单 - 多样式菜单滚动条】
 //==============================
 if( Imported.Drill_MenuScrollBar == true ){
 	Drill_SGaD_SelectWindow.prototype.drill_MSB_scrollBarEnabled = function() {
@@ -3391,9 +3396,9 @@ Drill_SGaD_ImgExpandWindow.prototype.scrollUp = function(){}
 }else{
 		Imported.Drill_SceneGalleryD = false;
 		alert(
-			"【Drill_SceneGalleryD.js 面板-全自定义画廊D】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
+			"【Drill_SceneGalleryD.js 面板 - 全自定义画廊D】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
 			"\n- Drill_CoreOfInput  系统-输入设备核心" +
-			"\n- Drill_CoreOfGlobalSave 系统-全局存储核心"+
+			"\n- Drill_CoreOfGlobalSave 管理器-全局存储核心"+
 			"\n- Drill_CoreOfWindowAuxiliary  系统-窗口辅助核心"
 		);
 }

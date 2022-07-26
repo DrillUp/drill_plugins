@@ -6,6 +6,7 @@
  * @plugindesc [v1.4]        物体 - 跳跃速度
  * @author Drill_up，赤瞳大白猫
  * 
+ * 
  * @help  
  * =============================================================================
  * +++ Drill_Jump +++
@@ -17,9 +18,10 @@
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 插件能单独使用，并且可以作用于其他插件。
+ * 该插件可以单独使用。
+ * 并且可以作用于其他插件。
  * 作用于：
- *   - Drill_EventItemGenerator 物体 - 可拾取物生成器
+ *   - Drill_EventItemGenerator   物体管理-可拾取物生成器
  *     如果使用了该插件，目标插件生成的所有道具弹跳的高度速度可以控制。
  *
  * -----------------------------------------------------------------------------
@@ -85,8 +87,6 @@
  * 以下是旧版本的指令，也可以用：
  * 插件指令(旧)：>跳跃设置 : 21 : 高度时间 : 72 : 60
  * 插件指令(旧)：>跳跃设置 : 21 : 高度速度 : 72 : 1.5
- * 插件指令(旧)：>角色跳跃设置 : 高度时间 : 72 : 60
- * 插件指令(旧)：>角色跳跃设置 : 高度速度 : 72 : 1.5
  *
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -141,14 +141,19 @@
 //		覆盖重写方法	Game_CharacterBase.prototype.updateJump（半重写）
 //						Game_CharacterBase.prototype.jump（半重写）
 //
-//		工作类型		单次执行
-//		时间复杂度		o(n)
-//		性能测试因素	物体管理层，到处跳
-//		性能测试消耗	4.01ms
-//		最坏情况		无
-//		备注			无
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		单次执行
+//		★时间复杂度		o(n)
+//		★性能测试因素	物体管理层，到处跳
+//		★性能测试消耗	4.01ms
+//		★最坏情况		无
+//		★备注			无
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			跳跃速度：
 //				->跳跃公式
@@ -156,7 +161,7 @@
 //				->弹跳次数
 //
 //		★必要注意事项：
-//			1.弹跳公式没有使用rmmv的默认公式，这里取得了默认公式的高度，就直接开始自写公式了。
+//			1.弹跳公式没有使用默认公式，这里取得了默认公式的高度，就直接开始自写公式了。
 //			  【公式分为 直线位移公式 和 y轴抛物线公式】
 //			2.弹跳分段中，每段的时间都是【相等的】，弹3次，则时间为总时间的三分之一。
 //			  多层抛物线是根据三角形，逐级递减。
@@ -169,7 +174,6 @@
 //		★存在的问题：
 //			暂无
 //
-//
  
 //=============================================================================
 // ** 变量获取
@@ -179,11 +183,15 @@
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_JumpSpeed');
 	
-	if( DrillUp.parameters['资源-多次弹跳音效'] != undefined ){
+	
+	/*-----------------杂项------------------*/
+	if( DrillUp.parameters['资源-多次弹跳音效'] != "" &&
+		DrillUp.parameters['资源-多次弹跳音效'] != undefined  ){
 		DrillUp.g_JSp_se = JSON.parse(DrillUp.parameters['资源-多次弹跳音效']);
 	}else{
-		DrillUp.g_JSp_se = [""];
+		DrillUp.g_JSp_se = [];
 	}
+
 
 //=============================================================================
 // ** 插件指令
@@ -200,8 +208,9 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 //==============================
 // * 插件指令 - 新指令
 //==============================
-Game_Interpreter.prototype.drill_JSp_command = function(command, args) {
-	if (command === ">跳跃设置")  {
+Game_Interpreter.prototype.drill_JSp_command = function( command, args ){
+	if( command === ">跳跃设置" ){
+		
 		/*-----------------事件------------------*/
 		if(args.length == 6){
 			var unit = String(args[1]);
@@ -254,10 +263,10 @@ Game_Interpreter.prototype.drill_JSp_command = function(command, args) {
 						var e_id = e_ids[j];
 						if( $gameMap.drill_JSp_isEventExist( e_id ) == false ){ continue; }
 						var e = $gameMap.event( e_id );
-						e._drill_JS['enabled'] = true;
-						e._drill_JS['height'] = Number(temp1);
-						e._drill_JS['time'] = Number(temp2);
-						e._drill_JS['speed'] = -1;
+						e._drill_JSp['enabled'] = true;
+						e._drill_JSp['height'] = Number(temp1);
+						e._drill_JSp['time'] = Number(temp2);
+						e._drill_JSp['speed'] = -1;
 					}
 				}
 				if( temp1.indexOf("高度[") != -1 && temp2.indexOf("速度[") != -1 ){
@@ -269,10 +278,10 @@ Game_Interpreter.prototype.drill_JSp_command = function(command, args) {
 						var e_id = e_ids[j];
 						if( $gameMap.drill_JSp_isEventExist( e_id ) == false ){ continue; }
 						var e = $gameMap.event( e_id );
-						e._drill_JS['enabled'] = true;
-						e._drill_JS['height'] = Number(temp1);
-						e._drill_JS['time'] = -1;
-						e._drill_JS['speed'] = Number(temp2);
+						e._drill_JSp['enabled'] = true;
+						e._drill_JSp['height'] = Number(temp1);
+						e._drill_JSp['time'] = -1;
+						e._drill_JSp['speed'] = Number(temp2);
 					}
 				}
 				if( temp1.indexOf("弹跳次数[") != -1 && temp2.indexOf("弹跳声音[") != -1 ){
@@ -284,8 +293,8 @@ Game_Interpreter.prototype.drill_JSp_command = function(command, args) {
 						var e_id = e_ids[j];
 						if( $gameMap.drill_JSp_isEventExist( e_id ) == false ){ continue; }
 						var e = $gameMap.event( e_id );
-						e._drill_JS['level'] = Math.max(1, Number(temp1));
-						e._drill_JS['levelSound'] = Number(temp2);
+						e._drill_JSp['level'] = Math.max(1, Number(temp1));
+						e._drill_JSp['levelSound'] = Number(temp2);
 					}
 				}
 			}
@@ -301,16 +310,16 @@ Game_Interpreter.prototype.drill_JSp_command = function(command, args) {
 					temp1 = temp1.replace("]","");
 					temp2 = temp2.replace("时间[","");
 					temp2 = temp2.replace("]","");
-					$gamePlayer._drill_JS['enabled'] = true;
-					$gamePlayer._drill_JS['height'] = Number(temp1);
-					$gamePlayer._drill_JS['time'] = Number(temp2);
-					$gamePlayer._drill_JS['speed'] = -1;
+					$gamePlayer._drill_JSp['enabled'] = true;
+					$gamePlayer._drill_JSp['height'] = Number(temp1);
+					$gamePlayer._drill_JSp['time'] = Number(temp2);
+					$gamePlayer._drill_JSp['speed'] = -1;
 					for (var i = 0; i < $gamePlayer.followers()._data.length; i++) {
 						var follower = $gamePlayer.followers()._data[i];
-						follower._drill_JS['enabled'] = true;
-						follower._drill_JS['height'] = Number(temp1);
-						follower._drill_JS['time'] = Number(temp2);
-						follower._drill_JS['speed'] = -1;
+						follower._drill_JSp['enabled'] = true;
+						follower._drill_JSp['height'] = Number(temp1);
+						follower._drill_JSp['time'] = Number(temp2);
+						follower._drill_JSp['speed'] = -1;
 					};	
 				}
 				if( temp1.indexOf("高度[") != -1 && temp2.indexOf("速度[") != -1 ){
@@ -318,16 +327,16 @@ Game_Interpreter.prototype.drill_JSp_command = function(command, args) {
 					temp1 = temp1.replace("]","");
 					temp2 = temp2.replace("速度[","");
 					temp2 = temp2.replace("]","");
-					$gamePlayer._drill_JS['enabled'] = true;
-					$gamePlayer._drill_JS['height'] = Number(temp1);
-					$gamePlayer._drill_JS['time'] = -1;
-					$gamePlayer._drill_JS['speed'] = Number(temp2);
+					$gamePlayer._drill_JSp['enabled'] = true;
+					$gamePlayer._drill_JSp['height'] = Number(temp1);
+					$gamePlayer._drill_JSp['time'] = -1;
+					$gamePlayer._drill_JSp['speed'] = Number(temp2);
 					for (var i = 0; i < $gamePlayer.followers()._data.length; i++) {
 						var follower = $gamePlayer.followers()._data[i];
-						follower._drill_JS['enabled'] = true;
-						follower._drill_JS['height'] = Number(temp1);
-						follower._drill_JS['time'] = -1;
-						follower._drill_JS['speed'] = Number(temp2);
+						follower._drill_JSp['enabled'] = true;
+						follower._drill_JSp['height'] = Number(temp1);
+						follower._drill_JSp['time'] = -1;
+						follower._drill_JSp['speed'] = Number(temp2);
 					};	
 				}
 				if( temp1.indexOf("弹跳次数[") != -1 && temp2.indexOf("弹跳声音[") != -1 ){
@@ -335,12 +344,12 @@ Game_Interpreter.prototype.drill_JSp_command = function(command, args) {
 					temp1 = temp1.replace("]","");
 					temp2 = temp2.replace("弹跳声音[","");
 					temp2 = temp2.replace("]","");
-					$gamePlayer._drill_JS['level'] = Math.max(1, Number(temp1));
-					$gamePlayer._drill_JS['levelSound'] = Number(temp2);
+					$gamePlayer._drill_JSp['level'] = Math.max(1, Number(temp1));
+					$gamePlayer._drill_JSp['levelSound'] = Number(temp2);
 					for (var i = 0; i < $gamePlayer.followers()._data.length; i++) {
 						var follower = $gamePlayer.followers()._data[i];
-						follower._drill_JS['level'] = Math.max(1, Number(temp1));
-						follower._drill_JS['levelSound'] = Number(temp2);
+						follower._drill_JSp['level'] = Math.max(1, Number(temp1));
+						follower._drill_JSp['levelSound'] = Number(temp2);
 					};	
 				}
 			}
@@ -370,43 +379,16 @@ Game_Interpreter.prototype.drill_JSp_oldCommand = function( command, args ){
 			}
 		}
 	};
-	if (event_id > 0) {
+	if( event_id > 0 ){
 		$gameMap.events().forEach(function(event) {
 			if (event.eventId() === event_id) {
-				event._drill_JS['enabled'] = true;
-				event._drill_JS['height'] = h;
-				event._drill_JS['time'] = t;
-				event._drill_JS['speed'] = s;
+				event._drill_JSp['enabled'] = true;
+				event._drill_JSp['height'] = h;
+				event._drill_JSp['time'] = t;
+				event._drill_JSp['speed'] = s;
 			};
 		}, this);	
 	};
-	if (command === ">角色跳跃设置")  {
-		if( args.length == 6 ){
-			var type = String(args[1]);
-			if( type == "高度时间" ){
-				var h = Number(args[3]);
-				var t = Number(args[5]);
-				var s = -1;
-			}
-			if( type == "高度速度" ){
-				var h = Number(args[3]);
-				var t = -1;
-				var s = Number(args[5]);
-			}
-			$gamePlayer._drill_JS['enabled'] = true;
-			$gamePlayer._drill_JS['height'] = h;
-			$gamePlayer._drill_JS['time'] = t;
-			$gamePlayer._drill_JS['speed'] = s;
-			for (var i = 0; i < $gamePlayer.followers()._data.length; i++) {
-				var follower = $gamePlayer.followers()._data[i];
-				follower._drill_JS['enabled'] = true;
-				follower._drill_JS['height'] = h;
-				follower._drill_JS['time'] = t;
-				follower._drill_JS['speed'] = s;
-			};	
-		}
-	};
-	
 };
 //==============================
 // ** 插件指令 - 事件检查
@@ -423,6 +405,7 @@ Game_Map.prototype.drill_JSp_isEventExist = function( e_id ){
 	return true;
 };
 
+
 //=============================================================================
 // ** 事件
 //=============================================================================
@@ -432,14 +415,29 @@ Game_Map.prototype.drill_JSp_isEventExist = function( e_id ){
 var _drill_JSp_initMembers = Game_CharacterBase.prototype.initMembers;
 Game_CharacterBase.prototype.initMembers = function() {
 	_drill_JSp_initMembers.call(this);
-	this._drill_JS = {};
-	this._drill_JS['enabled'] = false;			//激活（未激活使用默认跳跃）
-	this._drill_JS['_data_inited'] = false;		//初始化（在起跳setjump时初始化）
-	this._drill_JS['height'] = -1;				//高度
-	this._drill_JS['time'] = -1;				//时间
-	this._drill_JS['speed'] = -1;				//速度
-	this._drill_JS['level'] = 1;				//弹跳次数
-	//this._drill_JS['lockDirection'] = false;	//锁定朝向（这个应该让子方法来做，这里不要作为一个属性）
+	this.drill_JSp_initData();
+};
+Game_CharacterBase.prototype.drill_JSp_initData = function() {
+	
+	// > 常规属性
+	this._drill_JSp = {};
+	this._drill_JSp['enabled'] = false;			//激活（未激活使用默认跳跃）
+	this._drill_JSp['height'] = -1;				//跳跃高度（增量值）
+	this._drill_JSp['time'] = -1;				//跳跃时间
+	this._drill_JSp['speed'] = -1;				//跳跃速度（比例值）
+	this._drill_JSp['level'] = 1;				//弹跳次数
+	this._drill_JSp['levelSound'] = -1;			//弹跳声音
+	
+	// > 公式参数
+	this._drill_JSp['_data_inited'] = false;	//初始化（在起跳setjump时初始化）
+	this._drill_JSp['_count'] = 0;				//起跳时间
+	this._drill_JSp['_orgX'] = 0;				//起跳点x
+	this._drill_JSp['_orgY'] = 0;				//起跳点y
+	this._drill_JSp['_realDistance'] = 0;		//抛物线距离
+	this._drill_JSp['_realHight'] = 0;			//抛物线高度
+	
+	// > 私有属性初始化
+	this._drill_JSp_curJumpHeight = 0;			//当前跳跃高度值
 };
 //==============================
 // * 玩家初始化
@@ -447,9 +445,10 @@ Game_CharacterBase.prototype.initMembers = function() {
 var _drill_JSp_p_initMembers = Game_Player.prototype.initMembers;
 Game_Player.prototype.initMembers = function() {
 	_drill_JSp_p_initMembers.call(this);
-	this._drill_JS['enabled'] = true;		//固定玩家使用的跳跃属性
-	this._drill_JS['height'] = 0;
-	this._drill_JS['speed'] = 1;
+	this._drill_JSp['enabled'] = true;		//固定玩家使用的跳跃属性
+	this._drill_JSp['height'] = 0;
+	this._drill_JSp['time'] = -1;
+	this._drill_JSp['speed'] = 1;
 }
 //==============================
 // * 注释初始化
@@ -460,12 +459,12 @@ Game_Event.prototype.setupPage = function() {
     this.drill_JSp_setJumpSpeed();
 };
 Game_Event.prototype.drill_JSp_setJumpSpeed = function() {
-	if (!this._erased && this.page()) {this.list().forEach(function(l) {
-		if (l.code === 108) {
+	if( !this._erased && this.page() ){ this.list().forEach(function(l) {
+		if( l.code === 108 ){
 			/*-----------------指令------------------*/
 			var args = l.parameters[0].split(' ');
 			var command = args.shift();
-			if (command == "=>跳跃设置"){	//=>跳跃设置 : 高度[+0] : 时间[60]
+			if( command == "=>跳跃设置" ){	//=>跳跃设置 : 高度[+0] : 时间[60]
 				if(args.length == 4){
 					var temp1 = String(args[1]);
 					var temp2 = String(args[3]);
@@ -474,45 +473,45 @@ Game_Event.prototype.drill_JSp_setJumpSpeed = function() {
 						temp1 = temp1.replace("]","");
 						temp2 = temp2.replace("时间[","");
 						temp2 = temp2.replace("]","");
-						this._drill_JS['enabled'] = true;
-						this._drill_JS['height'] = Number(temp1);
-						this._drill_JS['time'] = Number(temp2);
-						this._drill_JS['speed'] = -1;
+						this._drill_JSp['enabled'] = true;
+						this._drill_JSp['height'] = Number(temp1);
+						this._drill_JSp['time'] = Number(temp2);
+						this._drill_JSp['speed'] = -1;
 					}
 					if( temp1.indexOf("高度[") != -1 && temp2.indexOf("速度[") != -1 ){
 						temp1 = temp1.replace("高度[","");
 						temp1 = temp1.replace("]","");
 						temp2 = temp2.replace("速度[","");
 						temp2 = temp2.replace("]","");
-						this._drill_JS['enabled'] = true;
-						this._drill_JS['height'] = Number(temp1);
-						this._drill_JS['time'] = -1;
-						this._drill_JS['speed'] = Number(temp2);
+						this._drill_JSp['enabled'] = true;
+						this._drill_JSp['height'] = Number(temp1);
+						this._drill_JSp['time'] = -1;
+						this._drill_JSp['speed'] = Number(temp2);
 					}
 					if( temp1.indexOf("弹跳次数[") != -1 && temp2.indexOf("弹跳声音[") != -1 ){
 						temp1 = temp1.replace("弹跳次数[","");
 						temp1 = temp1.replace("]","");
 						temp2 = temp2.replace("弹跳声音[","");
 						temp2 = temp2.replace("]","");
-						this._drill_JS['level'] = Math.max(1, Number(temp1));
-						this._drill_JS['levelSound'] = Number(temp2) - 1;
+						this._drill_JSp['level'] = Math.max(1, Number(temp1));
+						this._drill_JSp['levelSound'] = Number(temp2) - 1;
 					}
 				}
 			};
 			/*-----------------旧指令------------------*/
 			var args = l.parameters[0].split(': ');
-			if (args[0].toLowerCase() == "=>跳跃设置 "){
+			if( args[0].toLowerCase() == "=>跳跃设置 " ){
 				if (args[1].toLowerCase() == "高度时间 "){
-					this._drill_JS['enabled'] = true;
-					this._drill_JS['height'] = Number(args[2]);
-					this._drill_JS['time'] = Number(args[3]);
-					this._drill_JS['speed'] = -1;
+					this._drill_JSp['enabled'] = true;
+					this._drill_JSp['height'] = Number(args[2]);
+					this._drill_JSp['time'] = Number(args[3]);
+					this._drill_JSp['speed'] = -1;
 				}
 				if (args[1].toLowerCase() == "高度速度 "){
-					this._drill_JS['enabled'] = true;
-					this._drill_JS['height'] = Number(args[2]);
-					this._drill_JS['time'] = -1;
-					this._drill_JS['speed'] = Number(args[3]);
+					this._drill_JSp['enabled'] = true;
+					this._drill_JSp['height'] = Number(args[2]);
+					this._drill_JSp['time'] = -1;
+					this._drill_JSp['speed'] = Number(args[3]);
 				}
 			};  
 		};
@@ -526,8 +525,8 @@ Game_Event.prototype.drill_JSp_setJumpSpeed = function() {
 // * 跳跃 - 参数初始化
 //==============================
 var _drill_JSp_jump = Game_CharacterBase.prototype.jump;
-Game_CharacterBase.prototype.jump = function(xPlus, yPlus) {
-	if( this._drill_JS['enabled'] == true ){
+Game_CharacterBase.prototype.jump = function( xPlus, yPlus ){
+	if( this._drill_JSp['enabled'] == true ){
 		this.drill_JSp_jumpSet(xPlus, yPlus);
 	}else{
 		_drill_JSp_jump.call(this,xPlus, yPlus);
@@ -535,39 +534,40 @@ Game_CharacterBase.prototype.jump = function(xPlus, yPlus) {
 };
 Game_CharacterBase.prototype.drill_JSp_jumpSet = function(xPlus, yPlus) {
 	
-	// >方向控制
-	if (Math.abs(xPlus) > Math.abs(yPlus)) {
-		if (xPlus !== 0) {
+	// > 方向控制
+	if( Math.abs(xPlus) > Math.abs(yPlus) ){
+		if( xPlus !== 0 ){
 			this.setDirection(xPlus < 0 ? 4 : 6);
 		}
-	} else {
-		if (yPlus !== 0) {
+	}else{
+		if( yPlus !== 0 ){
 			this.setDirection(yPlus < 0 ? 8 : 2);
 		}
 	}
 	
-	// >位置控制（起跳前，事件就已经处于目标位置）
+	// > 位置控制（起跳前，事件就已经处于目标位置）
 	this._x += xPlus;
 	this._y += yPlus;
 	
-	// >常量（这部分参数不加入 公式 ）
+	// > 常量（这部分参数不加入 公式 ）
     var distance = Math.round(Math.sqrt(xPlus * xPlus + yPlus * yPlus));
     this._jumpPeak = 10 + distance - this._moveSpeed;
     this._jumpCount = this._jumpPeak * 2;
 	
-	// >公式参数初始化
-	var data = this._drill_JS;
-	data['_data_inited'] = true;					
+	// > 公式参数 - 初始化
+	var data = this._drill_JSp;
+	data['_data_inited'] = true;													//初始化
 	data['_count'] = 0;																//起跳时间
 	data['_orgX'] = Number(this._realX);											//起跳点x
 	data['_orgY'] = Number(this._realY);											//起跳点y
 	data['_realDistance'] = Math.abs(data['_orgX'] - this._x);						//抛物线距离
 	data['_realHight'] = this.drill_JSp_maxJumpHeight() + Number(data['height']);	//抛物线高度
+	
 	if( data['time'] == -1 ){
 		data['time'] = this._jumpCount / data['speed'];	
 	}
 	
-	// >行走图设为暂停状态
+	// > 行走图设为暂停状态
 	this.resetStopCount();
 	this.straighten();
 }
@@ -576,24 +576,25 @@ Game_CharacterBase.prototype.drill_JSp_jumpSet = function(xPlus, yPlus) {
 //==============================
 var _drill_JSp_updateJump = Game_CharacterBase.prototype.updateJump;
 Game_CharacterBase.prototype.updateJump = function() {
-	if( this._drill_JS['enabled'] == true && this._drill_JS['_data_inited'] == true ){
+	if( this._drill_JSp['enabled'] == true && this._drill_JSp['_data_inited'] == true ){
 		this.drill_JSp_updateJump();
 	}else{
 		_drill_JSp_updateJump.call(this);
 	}
 };
 Game_CharacterBase.prototype.drill_JSp_updateJump = function() {
-	// >时间
-	var data = this._drill_JS;
+	
+	// > 时间
+	var data = this._drill_JSp;
 	data['_count'] += 1;
 	
-	// >跳跃 - 直线位移公式
+	// > 跳跃 - 直线位移公式
 	if( data['level'] == 1 ){
-		// >匀速平移
+		// > 匀速平移
 		this._realX = data['_orgX'] + (this._x - data['_orgX']) * data['_count'] / data['time'];
 		this._realY = data['_orgY'] + (this._y - data['_orgY']) * data['_count'] / data['time'];
 	}else{
-		// >分段速度
+		// > 分段速度
 		var x_vspeed = (this._x - data['_orgX']) / data['time'];
 		var y_vspeed = (this._y - data['_orgY']) / data['time'];
 		var p_time = data['time'] / data['level'];
@@ -619,17 +620,17 @@ Game_CharacterBase.prototype.drill_JSp_updateJump = function() {
 	}
 	
 	
-	// >跳跃 - y抛物线公式（curJumpHeight放在 jumpHeight()函数中被调用）
+	// > 跳跃 - y抛物线公式（curJumpHeight放在 jumpHeight()函数中被调用）
 	if( data['level'] == 1 ){
 		
-		// >单抛物线
+		// > 单抛物线
 		var a = -4*data['_realHight']/data['time']/data['time'];	//a = -4*h/d/d，b = 4*h/d，c = 0
 		var b = 4*data['_realHight']/data['time'];
 		var c = 0;
-		data['curJumpHeight'] = a*data['_count']*data['_count'] + b*data['_count'] + c ;
+		this._drill_JSp_curJumpHeight = a*data['_count']*data['_count'] + b*data['_count'] + c ;
 	}else{
 		
-		// >多抛物线（平分时间）
+		// > 多抛物线（平分时间）
 		var p_time = Math.floor(data['time'] / data['level']);
 		var p_height = data['_realHight'] / 2 * (data['time']-data['_count']) / data['time'];
 		var p_count = data['_count'] % p_time;
@@ -637,20 +638,23 @@ Game_CharacterBase.prototype.drill_JSp_updateJump = function() {
 		var a = -4*p_height/p_time/p_time;	//a = -4*h/d/d，b = 4*h/d，c = 0
 		var b = 4*p_height/p_time;
 		var c = 0;
-		data['curJumpHeight'] = a*p_count*p_count + b*p_count + c ;
+		this._drill_JSp_curJumpHeight = a*p_count*p_count + b*p_count + c ;
 	}
 	
-	// >弹跳声音
+	// > 弹跳声音
 	if( data['_count'] > 0 &&
 		data['_count'] % Math.floor(data['time'] / data['level']) == 0 ){
-		SoundManager.drill_JSp_playSE( DrillUp.g_JSp_se[ data['levelSound'] ] ,this );
+		var se = DrillUp.g_JSp_se[ data['levelSound'] ];
+		if( se != undefined ){
+			SoundManager.drill_JSp_playSE( se, this );
+		}
 	}
 	
-	// >刷新跳跃终点位置
+	// > 刷新跳跃终点位置
 	this.refreshBushDepth();
 	if (data['_count'] >= data['time']) {
 		this._jumpCount = 0;
-		data['curJumpHeight'] = 0;
+		this._drill_JSp_curJumpHeight = 0;
 		this._realX = this._x = $gameMap.roundX(this._x);
 		this._realY = this._y = $gameMap.roundY(this._y);
 	}
@@ -660,32 +664,38 @@ Game_CharacterBase.prototype.drill_JSp_updateJump = function() {
 //==============================
 var _drill_JSp_jumpHeight = Game_CharacterBase.prototype.jumpHeight;
 Game_CharacterBase.prototype.jumpHeight = function() {
-	if( this._drill_JS['enabled'] == true && this._drill_JS['_data_inited'] == true ){
-		return this._drill_JS['curJumpHeight'] ;
+	
+	// > 自动初始化
+	if( this._drill_JSp == undefined ){ this.drill_JSp_initData(); }
+	
+	// > 返回高度值
+	if( this._drill_JSp['enabled'] == true && this._drill_JSp['_data_inited'] == true ){
+		return this._drill_JSp_curJumpHeight;
 	}else{
 		return _drill_JSp_jumpHeight.call(this);
 	}
 };
-
 //==============================
 // * 跳跃 - 获取最高高度
 //==============================
 Game_CharacterBase.prototype.drill_JSp_maxJumpHeight = function() {
 	var count = this._jumpCount /2;
 	var peakHeight = (this._jumpPeak * this._jumpPeak - Math.pow(Math.abs(count - this._jumpPeak), 2)) / 2;
-	peakHeight -= (this._y - this._drill_JS['_orgY'])/2;		//去掉斜向直线公式的干扰
+	peakHeight -= (this._y - this._drill_JSp['_orgY'])/2;		//去掉斜向直线公式的干扰
 	return peakHeight;
 }
 
 //==============================
 // * 播放音效
 //==============================
-SoundManager.drill_JSp_playSE = function(fileName,character){
+SoundManager.drill_JSp_playSE = function( fileName, character ){
 	var se = {};
 	se.name = fileName;
 	se.pitch = 100;
 	se.volume = 60;
-	if( Imported.Drill_EventSound && AudioManager.drill_ESo_playCharacterSe != undefined ){		//适应声音距离化
+	
+	// > 【声音 - 事件的声音】适应声音距离化
+	if( Imported.Drill_EventSound && AudioManager.drill_ESo_playCharacterSe != undefined ){
 		AudioManager.drill_ESo_playCharacterSe(se,character);
 	}else{
 		AudioManager.playSe(se);

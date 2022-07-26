@@ -19,17 +19,17 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 可全部自定义的信息面板K。
- * 【支持插件关联资源的打包、加密】
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 插件不能单独使用，必须基于核心插件。
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfWindowAuxiliary  系统 - 窗口辅助核心★★v1.3及以上★★
+ *   - Drill_CoreOfWindowAuxiliary  系统-窗口辅助核心★★v1.3及以上★★
  *     必须基于该插件才能显示描述内容。（不含全局存储）
- *   - Drill_CoreOfSelectableButton 系统 - 按钮组核心
+ *   - Drill_CoreOfSelectableButton 系统-按钮组核心
  *     必须基于该插件才能使用按钮组。
- *   - Drill_LayerCommandThread     地图 - 多线程
+ *   - Drill_LayerCommandThread     地图-多线程
  *     必须基于该插件才能使用公共事件触发。
  *
  * -----------------------------------------------------------------------------
@@ -65,7 +65,7 @@
  *       \c[n] 变颜色    \i[n] 显示图标    \{\} 字体变大变小
  *       \V[n] 显示变量  \N[n] 显示角色名  \G 显示货币单位
  *      其他特殊字符可见插件 对话框-消息核心 的说明，
- *      或者去看看文档 "15.对话框 > 关于窗口字符.docx"。
+ *      或者去看看文档 "23.窗口字符 > 关于窗口字符.docx"。
  *   (3.内容可以包含表达式，用于特殊的功能显示。
  *      表达式介绍见"系统-窗口辅助核心"插件。
  * 内容锁定：
@@ -138,7 +138,8 @@
  * 工作类型：   持续执行
  * 时间复杂度： o(n^2)*o(场景元素) 每帧
  * 测试方法：   直接进入该信息面板进行测试。
- * 测试结果：   该菜单面板中，基本元素消耗为：【9.41ms】
+ * 测试结果：   在菜单界面中，基本元素消耗为：【9.41ms】
+ *              在地图界面中，执行公共事件消耗为：【5ms以下】
  * 
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
  *   测试结果并不是精确值，范围在给定值的10ms范围内波动。
@@ -1161,7 +1162,7 @@
  * @type boolean
  * @on 启用
  * @off 关闭
- * @desc true - 启用，false - 关闭，你可以开关rmmv默认选项的白色闪烁矩形。需要Drill_MenuCursorBorder插件支持。
+ * @desc true - 启用，false - 关闭，你可以开关默认选项的白色闪烁矩形。需要Drill_MenuCursorBorder插件支持。
  * @default true
  * 
  * @param 是否启用菜单边框
@@ -1276,14 +1277,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^2)*o(场景元素) 每帧
-//		性能测试因素	直接进入信息面板进行测试。
-//		性能测试消耗	7.41ms
-//		最坏情况		无
-//		备注			本来以为反复绘制可能会影响性能，结果直接接近60帧的流畅。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^2)*o(场景元素) 每帧
+//		★性能测试因素	直接进入信息面板进行测试。
+//		★性能测试消耗	7.41ms
+//		★最坏情况		无
+//		★备注			本来以为反复绘制可能会影响性能，结果直接接近60帧的流畅。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			全自定义面板：
 //				->窗口
@@ -2198,7 +2204,7 @@ if( Imported.MOG_CursorBorder == true ){
 	}
 }
 //==============================
-// * 选项窗口 - 兼容 - Drill_MenuCursor菜单指针插件
+// * 选项窗口 - 兼容 - 【Drill_MenuCursor 主菜单 - 多样式菜单指针】
 //==============================
 if( Imported.Drill_MenuCursor == true ){
 	Drill_SSpK_SelectWindow.prototype.drill_MCu_cursorEnabled = function() {
@@ -2213,7 +2219,7 @@ if( Imported.Drill_MenuCursor == true ){
 	}
 }
 //==============================
-// * 选项窗口 - 兼容 - Drill_MenuCursorBorder菜单边框插件
+// * 选项窗口 - 兼容 - 【Drill_MenuCursorBorder 主菜单 - 多样式菜单选项边框】
 //==============================
 if( Imported.Drill_MenuCursorBorder == true ){
 	Drill_SSpK_SelectWindow.prototype.drill_MCB_glimmerRectVisible = function() {
@@ -2231,7 +2237,7 @@ if( Imported.Drill_MenuCursorBorder == true ){
 	}
 }
 //==============================
-// * 选项窗口 - 兼容 - Drill_MenuScrollBar菜单滚动条插件
+// * 选项窗口 - 兼容 - 【Drill_MenuScrollBar 主菜单 - 多样式菜单滚动条】
 //==============================
 if( Imported.Drill_MenuScrollBar == true ){
 	Drill_SSpK_SelectWindow.prototype.drill_MSB_scrollBarEnabled = function() {
@@ -2309,7 +2315,7 @@ Drill_SSpK_DescWindow.prototype.drill_refreshDesc = function( cur_index ) {
 }else{
 		Imported.Drill_SceneSelfplateK = false;
 		alert(
-			"【Drill_SceneSelfplateK.js 面板-全自定义信息面板K】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
+			"【Drill_SceneSelfplateK.js 面板 - 全自定义信息面板K】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
 			"\n- Drill_CoreOfWindowAuxiliary  系统-窗口辅助核心" +
 			"\n- Drill_CoreOfSelectableButton 系统-按钮组核心" +
 			"\n- Drill_LayerCommandThread  地图-多线程"

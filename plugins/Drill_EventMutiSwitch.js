@@ -15,6 +15,10 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 当计数开关的钥匙数量满足一定条件时，会开启相应条件的锁。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----插件扩展
+ * 该插件可以单独使用。
  *
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -26,7 +30,7 @@
  *      当计数开关的钥匙数量满足一定条件时，会开启相应条件的锁。
  *   (2.钥匙的注释设置 不跨事件页。
  *      锁的注释设置 跨事件页。
- *      详细介绍去看看 "8.物体 > 开关大家族.docx"。
+ *      详细介绍去看看 "8.物体 > 大家族-开关.docx"。
  * 细节：
  *   (1.计数开关只记录钥匙的数量，不考虑钥匙的顺序。
  *      计数开关所有钥匙、锁必须在同一张地图中。
@@ -108,18 +112,23 @@
 //		插件简称		EMS（Event_Muti_Switch）
 //		临时全局变量	无
 //		临时局部变量	this._drill_EMS_xxx
-//		存储数据变量	$gameMap.drill_EMS_needReflash （不完全算存储，离开地图就被清除重做）
+//		存储数据变量	$gameMap.drill_EMS_needRefresh （不完全算存储，离开地图就被清除重做）
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n)
-//		性能测试因素	脉冲开关设计关卡
-//		性能测试消耗	8.29ms
-//		最坏情况		暂无
-//		备注			消耗太小，一般消耗列表中找不到该插件。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n)
+//		★性能测试因素	脉冲开关设计关卡
+//		★性能测试消耗	8.29ms
+//		★最坏情况		暂无
+//		★备注			消耗太小，一般消耗列表中找不到该插件。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			计数开关：
 //				->每次刷事件页，更新key
@@ -269,7 +278,7 @@ Game_Event.prototype.drill_EMS_readPage = function( page_list ) {
 		};
 	}, this);
 	
-	$gameMap.drill_EMS_needReflash = true;	//默认都刷新（有注释，少了注释，都有影响）
+	$gameMap.drill_EMS_needRefresh = true;	//默认都刷新（有注释，少了注释，都有影响）
 };
 
 //==============================
@@ -288,16 +297,16 @@ Game_Map.prototype.update = function(sceneActive) {
 	_drill_EMS_map_update.call(this,sceneActive);
 	
 	//在刷新启动时，刷新全部
-	if( this._drill_EMS_hasSwitch == true && this.drill_EMS_needReflash == true ){
-		this.drill_EMS_needReflash = false;
-		this.drill_EMS_reflashMutiSwitch();
+	if( this._drill_EMS_hasSwitch == true && this.drill_EMS_needRefresh == true ){
+		this.drill_EMS_needRefresh = false;
+		this.drill_EMS_refreshMutiSwitch();
 	}
 };
 
 //=============================================================================
 // ** 统计全部条件，并触发开关
 //=============================================================================
-Game_Map.prototype.drill_EMS_reflashMutiSwitch = function() {	//该函数每次改变时只进入一次，而不是不停刷新
+Game_Map.prototype.drill_EMS_refreshMutiSwitch = function() {	//该函数每次改变时只进入一次，而不是不停刷新
 	var events = this.events();
 	
 	// > 钥匙统计
@@ -319,7 +328,7 @@ Game_Map.prototype.drill_EMS_reflashMutiSwitch = function() {	//该函数每次�
 	//alert(JSON.stringify(all_keys));
 	
 	// > 条件开锁
-	for (var i = 0; i < events.length; i++) {  
+	for( var i = 0; i < events.length; i++ ){
 		var temp_event = events[i];
 		var temp_locks = temp_event._drill_EMS.locks;
 		for(var lockname in temp_locks ){

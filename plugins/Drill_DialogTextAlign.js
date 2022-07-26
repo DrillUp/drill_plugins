@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        对话框 - 文本居中
+ * @plugindesc [v1.5]        窗口字符 - 文本居中
  * @author Drill_up
  * 
  * 
@@ -19,16 +19,17 @@
  *
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该插件 不能 单独使用，必须基于核心。
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfWindowCharacter   对话框 - 窗口字符核心
+ *   - Drill_CoreOfWindowCharacter   窗口字符-窗口字符核心
  *     需要该核心才能设置居中与右对齐。
  *
  * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：地图界面、战斗界面、菜单界面。
  *   对所有窗口有效。
- * 2.了解更多窗口字符，可以去看看 "15.对话框 > 关于窗口字符.docx"。
+ * 2.了解更多窗口字符，可以去看看 "23.窗口字符 > 关于窗口字符.docx"。
  * 细节：
  *   (1.如果对话框中有头像，插件会以除去头像外的剩余位置来居中适应。
  *   (2.居中字符能与窗口字符"\px[100]"兼容。
@@ -90,6 +91,8 @@
  * 大幅度优化了 窗口字符核心 的底层，简化了居中的插件结构。
  * [v1.4]
  * 修复了 居中字符 在选项窗口中使用时，会多一点点偏移的bug。
+ * [v1.5]
+ * 修改了插件的分类。
  * 
  */
  
@@ -101,14 +104,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		单次执行
-//		时间复杂度		o(n)
-//		性能测试因素	对话管理层
-//		性能测试消耗	4.94ms（drawTextEx） 2.40ms（没有插件使用时）
-//		最坏情况		暂无
-//		备注			在反复测试刷选项窗口时，帧数会降低到22帧，但是只是添加了渲染render的负担，过一下就好了。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		单次执行
+//		★时间复杂度		o(n)
+//		★性能测试因素	对话管理层
+//		★性能测试消耗	4.94ms（drawTextEx） 2.40ms（没有插件使用时）
+//		★最坏情况		暂无
+//		★备注			在反复测试刷选项窗口时，帧数会降低到22帧，但是只是添加了渲染render的负担，过一下就好了。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			文本居中：
 //				->drawTextEx捕获计算
@@ -216,8 +224,10 @@ Window_Base.prototype.drill_COWC_processNewEffectChar_Simple = function( matched
 			c_ww -= this._drill_COWC_effect_curData['left'] || 0;	//（去除起始光标位置的影响）
 			
 			// > 对话框的脸图宽度影响
-			if( this instanceof Window_Message == true && $gameMessage.faceName() != "" ){
-				c_ww -= (Window_Base._faceWidth + 20);
+			if( this._drill_COWC_messageFaceWidthSubtracted != true ){	//（来自核心的标记）
+				if( this instanceof Window_Message == true && $gameMessage.faceName() != "" ){
+					c_ww -= (Window_Base._faceWidth + 20);
+				}
 			}
 			
 			// > 居中
@@ -236,8 +246,10 @@ Window_Base.prototype.drill_COWC_processNewEffectChar_Simple = function( matched
 			c_ww -= this._drill_COWC_effect_curData['left'] || 0;	//（去除起始光标位置的影响）
 			
 			// > 对话框的脸图宽度影响
-			if( this instanceof Window_Message == true && $gameMessage.faceName() != "" ){
-				c_ww -= (Window_Base._faceWidth + 20);
+			if( this._drill_COWC_messageFaceWidthSubtracted != true ){	//（来自核心的标记）
+				if( this instanceof Window_Message == true && $gameMessage.faceName() != "" ){
+					c_ww -= (Window_Base._faceWidth + 20);
+				}
 			}
 			
 			// > 右对齐
@@ -254,8 +266,8 @@ Window_Base.prototype.drill_COWC_processNewEffectChar_Simple = function( matched
 }else{
 		Imported.Drill_DialogTextAlign = false;
 		alert(
-			"【Drill_DialogTextAlign.js 对话框-文本居中】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfWindowCharacter 对话框-窗口字符核心"
+			"【Drill_DialogTextAlign.js 窗口字符 - 文本居中】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
+			"\n- Drill_CoreOfWindowCharacter 窗口字符-窗口字符核心"
 		);
 }
 

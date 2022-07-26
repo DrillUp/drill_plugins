@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.5]        行走图 - 消失动作效果
+ * @plugindesc [v1.6]        行走图 - 消失动作效果
  * @author Drill_up
  * 
  * 
@@ -15,6 +15,10 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 使得你可以播放事件消失不见的各种动作。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----插件扩展
+ * 该插件可以单独使用。
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -37,7 +41,7 @@
  * 透明度：
  *   (1.开启"透明度检查"后，如果事件的透明度为0，则动作会被阻止播放。
  *   (2.该插件只影响事件的 透明度 ，并不控制 透明状态 。
- *      若rmmv的透明状态为ON时，事件直接不可见，动作也不可见。
+ *      若透明状态为ON时，事件直接不可见，动作也不可见。
  * 设计：
  *   (1.你可以使得事件消失之后，显现出现在镜像中。或者反过来。
  *      具体可以去镜像管理层看看"镜像化"的小爱丽丝。
@@ -59,6 +63,8 @@
  * 插件指令：>消失动作 : 批量事件[10,11] : 标准弹跳 : 时间[60] : 高度[168]
  * 插件指令：>消失动作 : 批量事件变量[21,22] : 标准弹跳 : 时间[60] : 高度[168]
  * 
+ * 插件指令：>消失动作 : 本事件 : 直接消失 : 时间[60]
+ * 插件指令：>消失动作 : 本事件 : 移动消失 : 时间[60] : 方向角度[90] : 移动距离[100]
  * 插件指令：>消失动作 : 本事件 : 标准升起 : 时间[60] : 缓冲时间[20] : 高度[168]
  * 插件指令：>消失动作 : 本事件 : 标准弹跳 : 时间[60] : 高度[500]
  * 插件指令：>消失动作 : 本事件 : 向左炸飞 : 时间[60] : 速度[11.5]
@@ -74,13 +80,14 @@
  * 插件指令：>消失动作 : 本事件 : 立即终止动作
  * 
  * 1.前半部分（玩家）和 后半部分（标准升起 : 时间[60] : 缓冲时间[20] : 高度[168]）
- *   的参数可以随意组合。一共有10*13种组合方式。
+ *   的参数可以随意组合。一共有10*15种组合方式。
  * 2."玩家"和"玩家领队"是同一个意思。
  *   "玩家队员[1]"表示领队后面第一个跟随的队友。
- * 3.部分类型的动作有 时间和缓冲时间 两个设置，该动作分两个阶段。
+ * 3.参数中"时间"、"周期"的单位是帧。1秒60帧。
+ *   参数中"距离"、"高度"的单位是像素。
+ * 4.类型的更详细介绍，去看看 "7.行走图 > 关于动作效果.docx"。
+ * 5.部分类型的动作有 时间和缓冲时间 两个设置，该动作分两个阶段。
  *   比如"标准升起"，分别对应升起的动作时间，和升起前阶段起跳效果的缓冲时间。
- * 4.如果你不想要任何动作，只想让事件直接静态消失，直接设置 标准弹跳 + 高度0 即可。
- *   但是时间不能为0。
  * 
  * 以下是旧版本的指令，也可以用：
  * 插件指令(旧)：>玩家消失效果 : 领队 : 标准升起 : 60 : 168
@@ -161,6 +168,8 @@
  * 添加了横向挤扁和纵向挤扁。
  * [v1.5]
  * 添加了插件指令获取状态信息功能。
+ * [v1.6]
+ * 添加了 直接消失、移动消失 功能。修复了执行指令时，会闪的bug。
  *
  *
  * 
@@ -188,15 +197,20 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n)*o(镜像)*o(贴图处理) 每帧
-//		性能测试因素	地图管理层 125事件
-//		性能测试消耗	39.91ms（Sprite_Character.update）
-//		最坏情况		所有事件都在执行动作。
-//		备注			从原理上看，变化并没有那么复杂，只是图像一直在变。
-//						类似于滤镜，但没有滤镜消耗复杂。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n)*o(镜像)*o(贴图处理) 每帧
+//		★性能测试因素	地图管理层 125事件
+//		★性能测试消耗	39.91ms（Sprite_Character.update）
+//		★最坏情况		所有事件都在执行动作。
+//		★备注			从原理上看，变化并没有那么复杂，只是图像一直在变。
+//						类似于滤镜，但没有滤镜消耗复杂。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			消失动作效果：
 //				->动作
@@ -218,7 +232,7 @@
 //		★必要注意事项：
 //			1.变化原理为：每帧都【固定初始值】，然后适时赋值公式变化值。
 //			  该插件限定透明度 255->0 的变化。
-//			2.由于rmmv函数中没有【Game_Character.prototype.update】，所以继承时要用【Game_CharacterBase.prototype.update】。
+//			2.由于函数中没有【Game_Character.prototype.update】，所以继承时要用【Game_CharacterBase.prototype.update】。
 //			  之前继承了这个没有的函数，造成了举起物体插件出问题。
 //
 //		★其它说明细节：
@@ -407,7 +421,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					$gameSwitches.setValue( temp1, b );
 				}
 			}
-			if( type == "获取正在播放的类型" && Imported.Drill_CoreOfString ){
+			if( type == "获取正在播放的类型" && Imported.Drill_CoreOfString ){	//【系统 - 字符串核心】
 				temp1 = temp1.replace("字符串[","");
 				temp1 = temp1.replace("]","");
 				temp1 = Number(temp1);
@@ -426,6 +440,22 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					$gameStrings.setValue( temp1, str );
 				}
 			}
+			
+			/*-----------------直接消失------------------*/
+			if( type == "直接消失" ){
+				temp1 = temp1.replace("时间[","");
+				temp1 = temp1.replace("]","");
+				if( e_chars != null){
+					for( var k=0; k < e_chars.length; k++ ){
+						e_chars[k].drill_EFOE_playHidingDisappear( Number(temp1) );
+					}
+				}
+				if( p_chars != null){
+					for( var k=0; k < p_chars.length; k++ ){
+						p_chars[k].drill_EFOE_playHidingDisappear( Number(temp1) );
+					}
+				}
+			}
 		}	
 			
 		if( args.length == 10 ){
@@ -433,6 +463,26 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var temp1 = String(args[5]);
 			var temp2 = String(args[7]);
 			var temp3 = String(args[9]);
+			
+			/*-----------------移动消失------------------*/
+			if( type == "移动消失" ){
+				temp1 = temp1.replace("时间[","");
+				temp1 = temp1.replace("]","");
+				temp2 = temp2.replace("方向角度[","");
+				temp2 = temp2.replace("]","");
+				temp3 = temp3.replace("移动距离[","");
+				temp3 = temp3.replace("]","");
+				if( e_chars != null){
+					for( var k=0; k < e_chars.length; k++ ){
+						e_chars[k].drill_EFOE_playHidingMoveDisappear( Number(temp1),Number(temp2),Number(temp3) );
+					}
+				}
+				if( p_chars != null){
+					for( var k=0; k < p_chars.length; k++ ){
+						p_chars[k].drill_EFOE_playHidingMoveDisappear( Number(temp1),Number(temp2),Number(temp3) );
+					}
+				}
+			}
 			
 			/*-----------------标准升起------------------*/
 			if( type == "标准升起" ){
@@ -896,7 +946,7 @@ var _drill_EFOE_setOpacity = Game_Follower.prototype.setOpacity;
 Game_Follower.prototype.setOpacity = function(opacity) {
 	if( $gamePlayer.drill_EFOE_isPlaying() ){ return; }
 	if( this.drill_EFOE_isPlaying() ){ return; }
-	if( this._Drill_EFOE._opacityLock == true ){ return; }	//使得rmmv原函数失效
+	if( this._Drill_EFOE._opacityLock == true ){ return; }	//使得 原函数 失效
 	_drill_EFOE_setOpacity.call( this,opacity );
 };
 //==============================
@@ -954,7 +1004,7 @@ Game_Character.prototype.processMoveCommand = function(command) {
 var _Drill_EFOE_s_setCharacter = Sprite_Character.prototype.setCharacter;
 Sprite_Character.prototype.setCharacter = function(character) {
 	_Drill_EFOE_s_setCharacter.call(this,character);
-	if (character) { this._Drill_EFOE = character._Drill_EFOE; };
+	if( character ){ this._Drill_EFOE = character._Drill_EFOE; };
 };
 
 //==============================
@@ -1026,7 +1076,7 @@ Game_Character.prototype.initialize = function() {
 	this._Drill_EFOE.skew_x = 0;			// 斜切x
 	this._Drill_EFOE.skew_y = 0;			// 斜切y
 	
-	this._Drill_EFOE.opacity = 0;			// 透明度（不叠加）
+	this._Drill_EFOE.opacity = 255;			// 透明度（不叠加，【注意，这里是消失效果，默认255】）
 	this._Drill_EFOE.playing_type = "";		// 显示类型
 	this._Drill_EFOE.real_width = -1;		// 贴图宽
 	this._Drill_EFOE.real_height = -1;		// 贴图高
@@ -1044,7 +1094,11 @@ Game_Character.prototype.drill_EFOE_isPlaying = function() {
 //==============================
 // * 物体 - 设置透明度
 //==============================
-Game_Character.prototype.drill_EFOE_setOpacity = function(opacity) {
+Game_Character.prototype.drill_EFOE_setOpacity = function( opacity ){
+	if( isNaN(opacity) ){
+		alert(	"【Drill_EventFadeOutEffect.js 行走图 - 消失动作效果】\n" +
+				"错误，透明度赋值时出现了NaN错误值。");
+	}
 	this.setOpacity( opacity );
 }
 //==============================
@@ -1059,6 +1113,8 @@ Game_CharacterBase.prototype.update = function() {
 	if( this._Drill_EFOE.real_width == -1 ){ return; }		//需要等图片加载完成
 	if( this._Drill_EFOE.real_height == -1 ){ return; }
 	
+	this.drill_EFOE_updateHidingDisappear();		//帧刷新 - 直接消失
+	this.drill_EFOE_updateHidingMoveDisappear();	//帧刷新 - 移动消失
 	this.drill_EFOE_updateHidingSpring();			//帧刷新 - 标准升起
 	this.drill_EFOE_updateHidingJump();				//帧刷新 - 标准弹跳
 	this.drill_EFOE_updateHidingShrink();			//帧刷新 - 缩小消失
@@ -1089,6 +1145,61 @@ Game_Character.prototype.drill_EFOE_stopEffect = function() {
 //=============================================================================
 // ** 消失动作
 //=============================================================================
+//==============================
+// * 初始化 - 消失 直接消失
+//==============================
+Game_Character.prototype.drill_EFOE_playHidingDisappear = function( time ){
+	var ef = this._Drill_EFOE;
+	ef.playing_type = "直接消失";
+	ef.fA_dtime = time;
+	ef.fA_time = 0;
+}
+//==============================
+// * 帧刷新 - 消失 直接消失
+//==============================
+Game_Character.prototype.drill_EFOE_updateHidingDisappear = function() {
+	var ef = this._Drill_EFOE;
+	if( ef.playing_type != "直接消失" ){ return; }
+	
+	if( ef.fA_time < ef.fA_dtime ){
+		ef.fA_time ++;
+		ef.opacity = 255 *(1 - ef.fA_time/ef.fA_dtime);
+		this.drill_EFOE_setOpacity(ef.opacity);
+	}else{
+		this.drill_EFOE_stopEffect();	//结束动作
+	}
+}
+
+//==============================
+// * 初始化 - 消失 移动消失
+//==============================
+Game_Character.prototype.drill_EFOE_playHidingMoveDisappear = function( time,angle,distance ){
+	var ef = this._Drill_EFOE;
+	ef.playing_type = "移动消失";
+	ef.fA_dtime = time;
+	ef.fA_time = 0;
+	ef.fA_angle = angle;
+	ef.fA_distance = distance;
+}
+//==============================
+// * 帧刷新 - 消失 移动消失
+//==============================
+Game_Character.prototype.drill_EFOE_updateHidingMoveDisappear = function() {
+	var ef = this._Drill_EFOE;
+	if( ef.playing_type != "移动消失" ){ return; }
+	
+	if( ef.fA_time < ef.fA_dtime ){
+		ef.fA_time ++;
+		var temp_d = ef.fA_distance * ef.fA_time/ef.fA_dtime;		//匀速移动
+		ef.x = temp_d * Math.cos( ef.fA_angle *Math.PI/180 );
+		ef.y = temp_d * Math.sin( ef.fA_angle *Math.PI/180 );
+		ef.opacity = 255 *(1 - ef.fA_time/ef.fA_dtime);
+		this.drill_EFOE_setOpacity(ef.opacity);
+	}else{
+		this.drill_EFOE_stopEffect();	//结束动作
+	}
+}
+
 //==============================
 // * 初始化 - 消失 标准升起
 //==============================

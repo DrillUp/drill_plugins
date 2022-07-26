@@ -21,6 +21,10 @@
  * 你可以在战斗中放置一个或者多个战斗视频。
  * 
  * -----------------------------------------------------------------------------
+ * ----插件扩展
+ * 该插件可以单独使用。
+ * 
+ * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：战斗界面。
  *   可以放置在战斗中的四个层级中。
@@ -400,11 +404,17 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n)+o(视频图像处理) 每帧
-//		性能测试因素	战斗界面开启视频
-//		性能测试消耗	265.46ms 从图像函数里面找到的值
-//		最坏情况		开视频就是最坏情况。
+//<<<<<<<<性能记录<<<<<<<<
+//
+//		★工作类型		持续执行
+//		★时间复杂度		o(n)+o(视频图像处理) 每帧
+//		★性能测试因素	战斗界面开启视频
+//		★性能测试消耗	265.46ms 从图像函数里面找到的值
+//		★最坏情况		开视频就是最坏情况。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
 //
 //		★大体框架与功能如下：
 //			视频动画背景：
@@ -426,7 +436,6 @@
 //		★存在的问题：
 //			暂无
 //			  
-//			
 
 //=============================================================================
 // ** 变量获取
@@ -529,7 +538,7 @@ Game_Temp.prototype.initialize = function() {
 
 
 //#############################################################################
-// ** 标准函数（战斗层级）
+// ** 【标准模块】战斗层级
 //#############################################################################
 //##############################
 // * 战斗层级 - 添加贴图到层级【标准函数】
@@ -614,7 +623,7 @@ Spriteset_Battle.prototype.createLowerLayer = function() {
 //==============================
 var _drill_BVi_battle_createPictures = Spriteset_Battle.prototype.createPictures;
 Spriteset_Battle.prototype.createPictures = function() {
-	_drill_BVi_battle_createPictures.call(this);		//rmmv图片 < 图片层 < rmmv对话框
+	_drill_BVi_battle_createPictures.call(this);		//图片对象层 < 图片层 < 对话框集合
 	if( !this._drill_battlePicArea ){
 		this._drill_battlePicArea = new Sprite();
 		this.addChild(this._drill_battlePicArea);	
@@ -625,7 +634,7 @@ Spriteset_Battle.prototype.createPictures = function() {
 //==============================
 var _drill_BVi_battle_createAllWindows = Scene_Battle.prototype.createAllWindows;
 Scene_Battle.prototype.createAllWindows = function() {
-	_drill_BVi_battle_createAllWindows.call(this);	//rmmv对话框 < 最顶层
+	_drill_BVi_battle_createAllWindows.call(this);	//对话框集合 < 最顶层
 	if( !this._drill_SenceTopArea ){
 		this._drill_SenceTopArea = new Sprite();
 		this.addChild(this._drill_SenceTopArea);	
@@ -806,7 +815,7 @@ Drill_BVi_VideoSprite.prototype.initialize = function( data ) {
 		this._drill_src = this._drill_texture.baseTexture.source;				//视频资源信息
 	};
 	this._drill_texture_loaded = false;								//视频读取状态
-	this._drill_video = new PIXI.Sprite();							//视频贴图（rmmv修改了贴图width）
+	this._drill_video = new PIXI.Sprite();							//视频贴图（默认的Sprite 修改了贴图width）
 	this._drill_video.texture = this._drill_texture;				//
 	this._drill_video.anchor.x = 0.5;								//
 	this._drill_video.anchor.y = 0.5;								//

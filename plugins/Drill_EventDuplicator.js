@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.6]        物体 - 事件复制器
+ * @plugindesc [v1.7]        物体管理 - 事件复制器
  * @author Drill_up
  * 
  * 
@@ -19,14 +19,17 @@
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该插件可以单独使用。有部分插件依赖该插件。
+ * 该插件 不能 单独使用。
+ * 需要基于核心，也可以作用于其它插件。
+ * 基于：
+ *   - Drill_CoreOfEventManager     物体管理-事件管理核心
  * 扩展于：
- *   - Drill_EventSelfSwitch        物体 - 独立开关★★v1.7及以上★★
+ *   - Drill_EventSelfSwitch        物体-独立开关★★v1.7及以上★★
  *     复制的事件可以支持自定义E、F、G 等的独立开关。
- *   - Drill_BombCore               炸弹人 - 游戏核心
- *     目标插件基于该插件才能进行对炸弹的基本操作。
- *   - Drill_EventForPlayer         物体 - 玩家的事件
+ *   - Drill_EventForPlayer         物体管理-玩家的事件
  *     目标插件基于该插件才能进行对玩家事件的创建。
+ *   - Drill_BombCore               炸弹人-游戏核心
+ *     目标插件基于该插件才能进行对炸弹的基本操作。
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -126,6 +129,8 @@
  * [v1.6]
  * 添加了 指定位置(变量) 插件指令。
  * 添加了 自定义独立开关 的支持。
+ * [v1.7]
+ * 修改了插件分类。
  * 
  */
  
@@ -137,14 +142,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		单次执行
-//		时间复杂度		o(n)
-//		性能测试因素	放置超级多的炸弹
-//		性能测试消耗	28.05ms
-//		最坏情况		无	
-//		备注			建立事件不消耗，消耗的是事件建立后的各种行为。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		单次执行
+//		★时间复杂度		o(n)
+//		★性能测试因素	放置超级多的炸弹
+//		★性能测试消耗	28.05ms
+//		★最坏情况		无	
+//		★备注			建立事件不消耗，消耗的是事件建立后的各种行为。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			事件复制器：
 //				->流程
@@ -180,15 +190,12 @@
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_EventDuplicator');
 	
-//=============================================================================
-// * 版本检验
-//=============================================================================
-if( !Utils.RPGMAKER_VERSION || Utils.RPGMAKER_VERSION < "1.5.0" ){
 	
-	alert("【Drill_EventDuplicator.js 物体 - 事件复制器】\n检测到你的rmmv工程版本太低，事件复制器无法使用。\n会报ResourceHandler资源指针错误。\n你可以使用\"rmmv软件版本.docx\"中的升级工程的方法来升级你的工程。 ");
-	Imported.Drill_EventDuplicator = false;
+//=============================================================================
+// * >>>>基于插件检测>>>>
+//=============================================================================
+if( Imported.Drill_CoreOfEventManager ){
 	
-}else{
 	
 //=============================================================================
 // * 插件指令
@@ -214,7 +221,9 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				if( pos == "指定位置" ){
 					if( $gameMap.drill_EDu_isEventExist( temp1 ) == false ){ return; }
 					// > 生成事件
-					var e = $gameMap.drill_EDu_createEvent( $gameMap._mapId, temp1, temp2, temp3 );
+					var e = $gameMap.drill_COEM_offspring_createEvent( $gameMap._mapId, temp1, temp2, temp3 );
+					// > 记录id
+					$gameSystem._drill_EDu_last_id = e._eventId;
 					// > 设置透明度
 					if( $gameSystem._drill_EDu_is_opacity ){ e._opacity = 0; }
 				}
@@ -223,7 +232,9 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp2 = $gameVariables.value(temp2);
 					temp3 = $gameVariables.value(temp3);
 					// > 生成事件
-					var e = $gameMap.drill_EDu_createEvent( $gameMap._mapId, temp1, temp2, temp3 );
+					var e = $gameMap.drill_COEM_offspring_createEvent( $gameMap._mapId, temp1, temp2, temp3 );
+					// > 记录id
+					$gameSystem._drill_EDu_last_id = e._eventId;
 					// > 设置透明度
 					if( $gameSystem._drill_EDu_is_opacity ){ e._opacity = 0; }
 				}
@@ -233,7 +244,9 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					var xx = $gameMap.event(temp2)._x;
 					var yy = $gameMap.event(temp2)._y;
 					// > 生成事件
-					$gameMap.drill_EDu_createEvent( $gameMap._mapId, temp1, xx, yy );
+					$gameMap.drill_COEM_offspring_createEvent( $gameMap._mapId, temp1, xx, yy );
+					// > 记录id
+					$gameSystem._drill_EDu_last_id = e._eventId;
 					// > 设置透明度
 					if( $gameSystem._drill_EDu_is_opacity ){ e._opacity = 0; }
 				}
@@ -258,30 +271,36 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp2 = temp2.replace("]","");
 				temp2 = Number(temp2);
 				if( pos == "指定位置" ){
-					if( $gameTemp.drill_EDu_hasMapId( temp1 ) == false ){ return; }
+					if( $gameTemp.drill_COEM_isMapExist( temp1 ) == false ){ return; }
 					// > 生成事件
 					var xx = Number(temp3);
 					var yy = Number(temp4);
-					var e = $gameMap.drill_EDu_createEvent( temp1, temp2, xx, yy );
+					var e = $gameMap.drill_COEM_offspring_createEvent( temp1, temp2, xx, yy );
+					// > 记录id
+					$gameSystem._drill_EDu_last_id = e._eventId;
 					// > 设置透明度
 					if( e && $gameSystem._drill_EDu_is_opacity ){ e._opacity = 0; }
 				}
 				if( pos == "指定位置(变量)" ){
-					if( $gameTemp.drill_EDu_hasMapId( temp1 ) == false ){ return; }
+					if( $gameTemp.drill_COEM_isMapExist( temp1 ) == false ){ return; }
 					// > 生成事件
 					var xx = $gameVariables.value(temp3);
 					var yy = $gameVariables.value(temp4);
-					var e = $gameMap.drill_EDu_createEvent( temp1, temp2, xx, yy );
+					var e = $gameMap.drill_COEM_offspring_createEvent( temp1, temp2, xx, yy );
+					// > 记录id
+					$gameSystem._drill_EDu_last_id = e._eventId;
 					// > 设置透明度
 					if( e && $gameSystem._drill_EDu_is_opacity ){ e._opacity = 0; }
 				}
 				if( pos == "事件位置" ){
-					if( $gameTemp.drill_EDu_hasMapId( temp1 ) == false ){ return; }
+					if( $gameTemp.drill_COEM_isMapExist( temp1 ) == false ){ return; }
 					if( $gameMap.drill_EDu_isEventExist( temp3 ) == false ){ return; }
 					// > 生成事件
 					var xx = $gameMap.event(temp3)._x;
 					var yy = $gameMap.event(temp3)._y;
-					var e = $gameMap.drill_EDu_createEvent( temp1, temp2, xx, yy );
+					var e = $gameMap.drill_COEM_offspring_createEvent( temp1, temp2, xx, yy );
+					// > 记录id
+					$gameSystem._drill_EDu_last_id = e._eventId;
 					// > 设置透明度
 					if( e && $gameSystem._drill_EDu_is_opacity ){ e._opacity = 0; }
 					
@@ -321,7 +340,7 @@ Game_Map.prototype.drill_EDu_isEventExist = function( e_id ){
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_EventDuplicator.js 物体 - 事件复制器】\n" +
+		alert( "【Drill_EventDuplicator.js 物体管理 - 事件复制器】\n" +
 				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
 		return false;
 	}
@@ -359,28 +378,16 @@ Scene_Map.prototype.drill_EDu_loadMapData = function() {
 	
 	// > 加载地图id
 	for( var key in temp_map ){
-		if( $gameTemp.drill_EDu_hasMapId( key ) == false ){
+		if( $gameTemp.drill_COEM_isMapExist( key ) == false ){
 			alert(
-				"【Drill_EventDuplicator.js 物体 - 事件复制器】\n" + 
+				"【Drill_EventDuplicator.js 物体管理 - 事件复制器】\n" + 
 				"插件指令指定要复制地图"+ key +"中的某个事件。\n"+
 				"但是系统并没有找到这个地图文件。\n"+
 				"请检查你的地图文件是否存在，或者修改插件指令。"
 			);
 		}
-		DataManager.drill_loadMapData( key );
+		DataManager.drill_COEM_loadMapData( key );
 	}
-};
-//==============================
-// ** 插件指令 - 检查地图id
-//==============================
-Game_Temp.prototype.drill_EDu_hasMapId = function( map_id ) {	
-	for( var j=0; j < $dataMapInfos.length; j++ ){
-		var temp_info = $dataMapInfos[j];
-		if( temp_info != undefined && temp_info['id'] == map_id ){
-			return true;
-		}
-	}
-	return false;
 };
 
 
@@ -394,208 +401,55 @@ Game_System.prototype.initialize = function() {
 	this._drill_EDu_is_opacity = false;		//透明度（只限于本插件的指令）
 }
 
-
 //=============================================================================
-// ** 	地图读取器
-//		
-//		主功能：	通过调用主函数，返回一个地图json类。
-//					
-//		说明：		注意，由于含异步请求，如果未提前加载，则不能立即返回数据。
-//		调用方法：	DataManager.drill_loadMapData( map_id );					//预加载
-//					var map_data = DataManager.drill_getMapData( map_id );		//调用数据
+// ** 旧插件 函数的兼容
 //=============================================================================
 //==============================
-// * 读取器 - 获取资源
-//==============================
-DataManager.drill_getMapData = function( map_id ){
-	var map_data = window[ "_drill_mapData_"+map_id ];
-	if( map_data == undefined ){
-		DataManager.drill_loadMapData( map_id );
-		return null;
-	}else{
-		return map_data;
-	}
-}
-//==============================
-// * 读取器 - 读取资源
-//==============================
-DataManager.drill_loadMapData = function( map_id ){
-	if( map_id > 0 && window[ "_drill_mapData_"+map_id ] == undefined ){
-		var filename = 'Map%1.json'.format(map_id.padZero(3));
-		var param_name = "_drill_mapData_" + map_id;
-		
-		ResourceHandler.createLoader('data/' + filename, this.loadDataFile.bind(this, param_name, filename));		//（this._mapLoader是一个完全没用的变量）
-		this.loadDataFile(param_name, filename);
-	}
-};
-
-
-//=============================================================================
-// ** 	事件容器
-//		
-//		主功能：	通过调用主函数，快速新建一个事件。
-//		
-//		说明：		调用时注意，是要单独的函数，还是要一个整体的创建流程。
-//		调用方法：	var event = $gameMap.drill_EDu_createEvent( map_id, event_id, tar_x, tar_y );		//整体流程
-//					var event = $gameMap.drill_newEvent_createEvent( data );							//单独函数
-//=============================================================================
-//==============================
-// * 流程 - 创建事件（接口）
-//
-//			参数： 来源地图id，来源事件id，放置位置x，方式位置y
-//			说明： 该流程进行了部分兼容处理，执行成功，返回事件，执行失败，返回null。
+// * 创建事件（主流程）
 //==============================
 Game_Map.prototype.drill_EDu_createEvent = function( map_id, event_id, tar_x, tar_y ){
-	if( this._mapId == map_id ){
-		
-		// > 检查 源事件
-		var src_event = this.event( event_id );
-		if( src_event == undefined ){
-			alert( "【Drill_EventDuplicator.js 物体 - 事件复制器】\n" +
-					"复制事件时错误，当前地图并不存在id为"+event_id+"的事件。");
-			return null;
-		}
-					
-		// > 获取事件数据
-		var e_data = JSON.parse(JSON.stringify( src_event.event() ));
-		e_data['x'] = tar_x;
-		e_data['y'] = tar_y;
-		if( !e_data['meta'] ){ e_data['meta'] = {}; }	//（兼容镜像错误）
-		
-		// > 根据数据生成事件对象
-		var e = this.drill_newEvent_createEvent( e_data );
-		
-		// > 记录上一个id
-		$gameSystem._drill_EDu_last_id = e._eventId;
-		return e;
-		
-	}else{
-		
-		// > 获取map文件
-		var map_data = DataManager.drill_getMapData( map_id );
-		if( map_data ){
-		
-			// > 检查 源事件
-			var src_eventData = map_data.events[event_id];
-			if( src_eventData == undefined ){
-				alert( "【Drill_EventDuplicator.js 物体 - 事件复制器】\n" +
-						"复制事件时错误，地图["+map_id+"]并不存在id为"+event_id+"的事件。");
-				return null;
-			}
-			
-			// > 获取事件数据
-			var e_data = JSON.parse(JSON.stringify( src_eventData ));
-			e_data['x'] = tar_x;
-			e_data['y'] = tar_y;
-			if( !e_data['meta'] ){ e_data['meta'] = {}; }	//（兼容镜像错误）
-			
-			// > 自定义独立开关 兼容
-			if( Imported.Drill_EventSelfSwitch ){
-				$gameTemp.drill_ESS_dataCovert( e_data );
-			}
-			
-			// > 根据数据生成事件对象
-			var e = this.drill_newEvent_createEvent( e_data );
-			
-			// > 记录上一个id
-			$gameSystem._drill_EDu_last_id = e._eventId;
-			return e;
-			
-		}else{
-			
-			return null;
-		}
-	}
-}
-//==============================
-// * 容器 - 地图初始化
-//==============================
-var _drill_newEvent_initialize = Game_Map.prototype.initialize;
-Game_Map.prototype.initialize = function() {
-	_drill_newEvent_initialize.call(this);
-	this._drill_newEvents_dataTank = [];
-}
-//==============================
-// * 容器 - 切换地图
-//==============================
-var _drill_newEvent_setup = Game_Map.prototype.setup;
-Game_Map.prototype.setup = function(mapId) {
-	_drill_newEvent_setup.call(this,mapId);
-	this._drill_newEvents_dataTank = [];
-}
-//==============================
-// * 容器 - 创建事件对象（接口）
-//
-//			参数： 事件json数据
-//			说明： 函数可以单独调用，返回一个事件，但是没有对特殊情况进行处理，需要额外加工。
-//==============================
-Game_Map.prototype.drill_newEvent_createEvent = function( data ) {
-	
-	// > 分配id
-	var new_id = $dataMap.events.length + this._drill_newEvents_dataTank.length;	//注意，$dataMap 和 $gameMap._events 存在数量不一致的情况
-	data['id'] = new_id;
-	this._drill_newEvents_dataTank.push(data);
-	
-	// > 清理独立开关
-	$gameSelfSwitches.drill_newEvent_clearKeys( this._mapId, new_id );
-	
-	// > 建立事件对象
-	var new_event = new Game_Event(this._mapId, new_id);
-	this._events[new_id] = new_event;
-	
-	// > 添加事件贴图
-	SceneManager._scene._spriteset.drill_newEvent_createSprite(new_event);
-	return new_event;
-}
-//==============================
-// * 容器 - 获取数据
-//==============================
-var _drill_newEvent_event = Game_Event.prototype.event;
-Game_Event.prototype.event = function() {
-	
-	// > 新建的事件
-	if( Number(this._eventId) >= $dataMap.events.length ){	//（新事件id >= map.json本体的事件数量）
-		var e_tank = $gameMap._drill_newEvents_dataTank;
-		for(var i = 0; i< e_tank.length; i++){
-			if( e_tank[i]['id'] == this._eventId ){
-				return e_tank[i];
-			}
-		}
-	}
-	// > 原地图设置的事件
-	return _drill_newEvent_event.call(this);
+	return this.drill_COEM_offspring_createEvent( map_id, event_id, tar_x, tar_y );
 };
 //==============================
-// * 容器 - 清除指定事件的全部独立开关（不刷新地图）
+// * 创建事件（根据数据）
 //==============================
-Game_SelfSwitches.prototype.drill_newEvent_clearKeys = function( map_id, e_id ) {
-	
-	// > 获取键
-	var org_keys = Object.keys(this._data);
-	var del_keys = [];
-	for(var i=0; i < org_keys.length; i++){
-		var key = org_keys[i].split(",");
-		if( Number(key[0]) == Number(map_id) && Number(key[1]) == Number(e_id) ){
-			del_keys.push( org_keys[i] );
-		}
-	}
-	//if( del_keys.length > 0 ){ alert(JSON.stringify(del_keys)); }	//检测id初始化前，就有的相关开启的独立开关
-	
-	// > 删除键
-	for(var i=0; i < del_keys.length; i++){
-		delete this._data[ del_keys[i] ];
-	}
+Game_Map.prototype.drill_newEvent_createEvent = function( data ){
+	return this.drill_COEM_offspring_createEventByData_Private( data );
 };
 //==============================
-// ** 容器 - 添加事件贴图
+// * 删除全部独立开关
 //==============================
-Spriteset_Map.prototype.drill_newEvent_createSprite = function( target ){
-	this._characterSprites = this._characterSprites || [];
-	var len = this._characterSprites.length;
-	this._characterSprites[len] = new Sprite_Character(target);
-	this._characterSprites[len].update();
-	this._tilemap.addChild(this._characterSprites[len]);
+Game_SelfSwitches.prototype.drill_newEvent_clearKeys = function( map_id, e_id ){
+	this.drill_COEM_deleteEventKeys_Private( map_id, e_id );
+};
+//==============================
+// * 地图读取器 - 获取资源
+//==============================
+DataManager.drill_getMapData = function( map_id ){
+	return this.drill_COEM_getMapData_Private( map_id );
+};
+//==============================
+// * 地图读取器 - 提前加载资源
+//==============================
+DataManager.drill_loadMapData = function( map_id ){
+	this.drill_COEM_loadMapData_Private( map_id );
+};
+//==============================
+// * 地图读取器 - 地图资源是否存在
+//==============================
+Game_Temp.prototype.drill_EDu_hasMapId = function( map_id ){
+	return this.drill_COEM_isMapExist( map_id );
 };
 
 
+//=============================================================================
+// * <<<<基于插件检测<<<<
+//=============================================================================
+}else{
+		Imported.Drill_EventDuplicator = false;
+		alert(
+			"【Drill_EventDuplicator.js 物体管理 - 事件复制器】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
+			"\n- Drill_CoreOfEventManager 物体管理-事件管理核心"
+		);
 }
+

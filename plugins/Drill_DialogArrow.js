@@ -10,6 +10,7 @@
  * @Drill_LE_parentKey ""
  * @Drill_LE_var "DrillUp.g_DAr_list_length"
  * 
+ * 
  * @help  
  * =============================================================================
  * +++ Drill_DialogArrow +++
@@ -18,7 +19,10 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 使得你可以修改对话框的小箭头位置以及样式。
- * 【支持插件关联资源的打包、加密】
+ * 
+ * -----------------------------------------------------------------------------
+ * ----插件扩展
+ * 该插件可以单独使用。
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -53,7 +57,7 @@
  * 插件指令：>对话框小箭头 : 恢复默认箭头
  * 
  * 1."样式"中表示对应配置的小箭头编号。
- * 2."恢复默认箭头"表示rmmv默认的小箭头。
+ * 2."恢复默认箭头"表示默认的小箭头。
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -66,7 +70,7 @@
  *              80.00ms - 120.00ms（中消耗）
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
- * 时间复杂度： o(n)*o(贴图处理)
+ * 时间复杂度： o(n)*o(贴图处理) 每帧
  * 测试方法：   开启小箭头，去各个管理层测试性能。
  * 测试结果：   200个事件的地图中，平均消耗为：【5ms以下】
  *              100个事件的地图中，平均消耗为：【5ms以下】
@@ -100,7 +104,7 @@
  * @param 当前小箭头
  * @type number
  * @min 0
- * @desc 当前对应的小箭头，0表示rmmv默认的小箭头。
+ * @desc 当前对应的小箭头，0表示默认的小箭头。
  * @default 0
  * 
  * @param ----小箭头----
@@ -312,14 +316,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n)*o(贴图处理)
-//		性能测试因素	菜单管理层
-//		性能测试消耗	2.50ms（drill_DAr_updateGif）,11.42ms（drill_DAr_updateGif战斗界面、卡顿时）
-//		最坏情况		暂无
-//		备注			只有一个，所以消耗不可能上去。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n)*o(贴图处理) 每帧
+//		★性能测试因素	菜单管理层
+//		★性能测试消耗	2.50ms（drill_DAr_updateGif）,11.42ms（drill_DAr_updateGif战斗界面、卡顿时）
+//		★最坏情况		暂无
+//		★备注			只有一个，所以消耗不可能上去。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			对话框小箭头：
 //				->对话框位置设置
@@ -372,8 +381,8 @@
 		data['zoom_enable'] = String( dataFrom["是否使用缩放效果"] || "false") === "true";
 		data['zoom_range'] = Number( dataFrom["缩放幅度"] || 0.08 );
 		data['zoom_speed'] = Number( dataFrom["缩放速度"] || 5.5 );
-		data['flash_enable'] = String( dataFrom["是否使用闪烁效果"] || "false") === "true";
-		data['flash_speed'] = Number( dataFrom["闪烁速度"] || 7.0 );
+		data['flicker_enable'] = String( dataFrom["是否使用闪烁效果"] || "false") === "true";
+		data['flicker_speed'] = Number( dataFrom["闪烁速度"] || 7.0 );
 		data['float_enable'] = String( dataFrom["是否使用漂浮效果"] || "true") === "true";
 		data['float_type'] = String( dataFrom["漂浮方式"] || "上下漂浮");
 		data['float_range'] = Number( dataFrom["漂浮幅度"] || 6 );
@@ -664,9 +673,9 @@ Drill_DAr_ArrowSprite.prototype.drill_DAr_updateEffects = function() {
 	}
 	
 	// > 闪烁效果
-	if( data['flash_enable'] == true ){
-		var flash_speed = data['flash_speed'];
-		this._drill_DAr_sprite.opacity = data['opacity']/2 + data['opacity']/2 * Math.cos( this._drill_time*flash_speed /180*Math.PI );
+	if( data['flicker_enable'] == true ){
+		var flicker_speed = data['flicker_speed'];
+		this._drill_DAr_sprite.opacity = data['opacity']/2 + data['opacity']/2 * Math.cos( this._drill_time*flicker_speed /180*Math.PI );
 	}
 	
 	// > 漂浮效果

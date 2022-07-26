@@ -19,11 +19,12 @@
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 插件可以单独使用，控制消息的显示。
+ * 该插件可以单独使用。
+ * 也可以被下列插件扩展。
  * 被扩展：
- *   - Drill_ActorTextColor 角色文本颜色
+ *   - Drill_ActorTextColor     UI-角色文本颜色
  *     通过该插件，消息提示中的角色名字可以变色。
- *   - Drill_EnemyTextColor 敌人文本颜色
+ *   - Drill_EnemyTextColor     UI-敌人文本颜色
  *     通过该插件，消息提示中的敌人名字可以变色。
  * 
  * -----------------------------------------------------------------------------
@@ -55,7 +56,7 @@
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
  *   测试结果并不是精确值，范围在给定值的10ms范围内波动。
  *   更多性能介绍，去看看 "0.性能测试报告 > 关于插件性能.docx"。
- * 2.该插件覆写了部分rmmv原函数，只在每次战斗行动前执行一次，并不是
+ * 2.该插件覆写了部分原函数，只在每次战斗行动前执行一次，并不是
  *   持续消耗，所以消耗不大。
  *
  * -----------------------------------------------------------------------------
@@ -432,14 +433,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	【全部函数都是覆盖重写，除了 Window_Base.prototype.textColor 】
 //
-//		工作类型		单次执行
-//		时间复杂度		o(n)
-//		性能测试因素	在战斗界面中测试
-//		性能测试消耗	太小，没找到
-//		最坏情况		无
-//		备注			无
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		单次执行
+//		★时间复杂度		o(n)
+//		★性能测试因素	在战斗界面中测试
+//		★性能测试消耗	太小，没找到
+//		★最坏情况		无
+//		★备注			无
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			窗口提示消息：
 //				->消息提示
@@ -983,7 +989,7 @@ Window_BattleLog.prototype.displayBuffs = function( target, buffs, fmt ){
 BattleManager.displayStartMessages = function(){
     if( DrillUp.g_WL_battleStartMessage){
 		
-		if( Imported.Drill_EnemyTextColor ){
+		if( Imported.Drill_EnemyTextColor ){	//【Drill_EnemyTextColor  UI - 敌人文本颜色】
 			$gameTroop.drill_WL_enemyColorNames().forEach(function(name){
 				$gameMessage.add(TextManager.emerge.format(name));
 			});

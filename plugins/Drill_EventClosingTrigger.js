@@ -22,7 +22,8 @@
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该插件必须依赖指定插件才能运行。
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。
  * 基于：
  *   - Drill_CoreOfFixedArea        物体触发 - 固定区域核心★★v1.7及以上★★
  *     该插件需要固定区域才能进行区域触发。
@@ -38,7 +39,7 @@
  *      传感器即遇到某些情况就会自动触发的事件。
  *      当玩家的特定范围覆盖到事件时，独立开关会自动开启。
  *   (2.接近触发的注释设置全都跨事件页。
- *      详细介绍去看看 "8.物体 > 开关大家族.docx"。
+ *      详细介绍去看看 "8.物体 > 大家族-开关.docx"。
  * 区域主体：
  *   (1.该插件的区域主体是玩家，用于自动触发接近玩家区域的事件。
  *   (2.主动触发是一个区域范围，被触发是一个点，区域内符合条件的点会被触发。
@@ -509,17 +510,21 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(nlogn)+o(n^2)	每帧	【棋盘算法】
-//		性能测试因素1	对话管理层，6个有棋盘且挤在附近的事件
-//		性能测试消耗1	24.21ms（drill_ECT_updateEventTrigger）
-//		性能测试因素2	遇敌管理层，12个有棋盘的事件
-//		性能测试消耗2	23.15ms（drill_ECT_updateEventTrigger）30.46ms（drill_ECT_getEventsInRange）
-//		最坏情况		设置了大量事件，并在棋盘范围内触发。
-//		备注			高配本和低配本都能保持正常的低消耗。
+//<<<<<<<<性能记录<<<<<<<<
+//
+//		★工作类型		持续执行
+//		★时间复杂度		o(nlogn)+o(n^2)	每帧	【棋盘算法】
+//		★性能测试因素1	对话管理层，6个有棋盘且挤在附近的事件
+//		★性能测试消耗1	24.21ms（drill_ECT_updateEventTrigger）
+//		★性能测试因素2	遇敌管理层，12个有棋盘的事件
+//		★性能测试消耗2	23.15ms（drill_ECT_updateEventTrigger）30.46ms（drill_ECT_getEventsInRange）
+//		★最坏情况		设置了大量事件，并在棋盘范围内触发。
+//		★备注			高配本和低配本都能保持正常的低消耗。
 //		
+//		★优化记录		暂无
 //		
-//插件记录：
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			事件接近触发：
 //				->指令
@@ -562,6 +567,9 @@
 //			  触发有两种：	目标事件进入棋盘范围 -> 目标事件开开关
 //							目标事件进入棋盘范围 -> 主动事件开开关
 //			  主动事件自身是棋盘范围的所有者，但不与棋盘范围交互。
+//			3.【该插件使用了事件容器】，必须考虑三种情况：初始化、切换地图时、切换贴图时，不然会出现指针错误！
+//				只要是装事件的容器，都需要考虑指针问题，不管是放在$gameMap还是$gameTemp中。
+//				另外，帧刷新判断时，最好每次变化直接【刷新统计】。
 //			
 //		★其它说明细节：
 //			暂无
@@ -1110,7 +1118,7 @@ Game_Event.prototype.update = function(){
 	if( this._drill_ECT_areaNeedRefresh == false ){ return; }
 	this._drill_ECT_areaNeedRefresh = false;
 	this.drill_ECT_createCheckerboard( this._drill_ECT_areaTank );
-	$gameTemp._drill_ECT_bindNeedRefresh = true;
+	$gameTemp._drill_ECT_bindNeedRestatistics = true;
 }
 //==============================
 // * 棋盘变化 - 是否含棋盘
@@ -1129,7 +1137,7 @@ var _drill_ECT_temp_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {	
 	_drill_ECT_temp_initialize.call(this);
 	this.drill_ECT_clearTemp();
-	this._drill_ECT_bindNeedRefresh = true;
+	this._drill_ECT_bindNeedRestatistics = true;
 };
 Game_Temp.prototype.drill_ECT_clearTemp = function() {	
 	this._drill_ECT_bindTank = [];			//棋盘事件容器
@@ -1140,7 +1148,7 @@ Game_Temp.prototype.drill_ECT_clearTemp = function() {
 var _drill_ECT_gmap_setup = Game_Map.prototype.setup;
 Game_Map.prototype.setup = function( mapId ){
 	$gameTemp.drill_ECT_clearTemp();
-	$gameTemp._drill_ECT_bindNeedRefresh = true;
+	$gameTemp._drill_ECT_bindNeedRestatistics = true;
 	_drill_ECT_gmap_setup.call(this,mapId);
 }
 //==============================
@@ -1149,7 +1157,7 @@ Game_Map.prototype.setup = function( mapId ){
 var _drill_ECT_smap_createCharacters = Spriteset_Map.prototype.createCharacters;
 Spriteset_Map.prototype.createCharacters = function() {
 	$gameTemp.drill_ECT_clearTemp();
-	$gameTemp._drill_ECT_bindNeedRefresh = true;
+	$gameTemp._drill_ECT_bindNeedRestatistics = true;
 	_drill_ECT_smap_createCharacters.call(this);
 }
 //==============================
@@ -1158,14 +1166,14 @@ Spriteset_Map.prototype.createCharacters = function() {
 var _drill_ECT_update_bind = Game_Map.prototype.update;
 Game_Map.prototype.update = function(sceneActive) {
 	_drill_ECT_update_bind.call(this,sceneActive);
-	this.drill_ECT_refreshSwitchChecks();		//帧刷新 - 刷新统计
+	this.drill_ECT_updateRestatistics();		//帧刷新 - 刷新统计
 };
 //==============================
 // * 帧刷新 - 刷新统计
 //==============================
-Game_Map.prototype.drill_ECT_refreshSwitchChecks = function() {
-	if( $gameTemp._drill_ECT_bindNeedRefresh == false ){ return }
-	$gameTemp._drill_ECT_bindNeedRefresh = false;
+Game_Map.prototype.drill_ECT_updateRestatistics = function() {
+	if( $gameTemp._drill_ECT_bindNeedRestatistics == false ){ return }
+	$gameTemp._drill_ECT_bindNeedRestatistics = false;
 	
 	// > 统计棋盘事件
 	$gameTemp._drill_ECT_bindTank = [];
@@ -1793,7 +1801,7 @@ Game_Map.prototype.drill_ECT_triggeredEventsClearAllSwitches = function() {
 
 
 //#############################################################################
-// ** 标准函数（地图层级）
+// ** 【标准模块】地图层级
 //#############################################################################
 //##############################
 // * 地图层级 - 添加贴图到层级【标准函数】
@@ -1853,7 +1861,7 @@ Scene_Map.prototype.drill_ECT_layerMoveingReference = function( x, y, reference,
 //==============================
 var _drill_ECT_layer_createTilemap = Spriteset_Map.prototype.createTilemap;
 Spriteset_Map.prototype.createTilemap = function() {
-	_drill_ECT_layer_createTilemap.call(this);		//rmmv图块 < 中层 < rmmv角色
+	_drill_ECT_layer_createTilemap.call(this);		//图块层 < 中层 < 事件/玩家层
 	if( !this._drill_mapCenterArea ){
 		this._drill_mapCenterArea = new Sprite();
 		this._drill_mapCenterArea.z = 0.60;
@@ -1865,7 +1873,7 @@ Spriteset_Map.prototype.createTilemap = function() {
 //==============================
 var _drill_ECT_layer_createDestination = Spriteset_Map.prototype.createDestination;
 Spriteset_Map.prototype.createDestination = function() {
-	_drill_ECT_layer_createDestination.call(this);	//rmmv鼠标目的地 < 上层 < rmmv天气
+	_drill_ECT_layer_createDestination.call(this);	//鼠标目的地 < 上层 < 天气层
 	if( !this._drill_mapUpArea ){
 		this._drill_mapUpArea = new Sprite();
 		this._baseSprite.addChild(this._drill_mapUpArea);	
@@ -2140,7 +2148,7 @@ Game_Event.prototype.drill_ECT_DEBUG_adjustPoints = function( point_list ){
 }else{
 		Imported.Drill_EventClosingTrigger = false;
 		alert(
-			"【Drill_EventClosingTrigger.js 物体触发 - 固定区域&事件接近&条件触发】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
+			"【Drill_EventClosingTrigger.js 物体触发 - 固定区域 & 事件接近 & 条件触发】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
 			"\n- Drill_CoreOfFixedArea 物体触发-固定区域核心"
 		);
 }

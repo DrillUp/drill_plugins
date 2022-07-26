@@ -23,12 +23,13 @@
  *
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该插件 不能 单独使用，基于插件才能运行。该插件也可以对其它插件扩展。
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。该插件也可以对其它插件扩展。
  * 基于：
- *   - Drill_CoreOfInput             系统 - 输入设备核心
- *   - Drill_CoreOfWindowAuxiliary   系统 - 窗口辅助核心
- * 可扩展：
- *   - Drill_CoreOfString            系统 - 字符串核心
+ *   - Drill_CoreOfInput             系统-输入设备核心
+ *   - Drill_CoreOfWindowAuxiliary   系统-窗口辅助核心
+ * 可被扩展：
+ *   - Drill_CoreOfString            系统-字符串核心
  *     可以在说明窗口中，绑定并显示自定义的字符串。
  * 
  * -----------------------------------------------------------------------------
@@ -70,7 +71,7 @@
  * 资源-自定义窗口皮肤
  * 资源-自定义背景图片
  *
- * 系统窗口与rmmv默认的window.png图片一样，可设置为不同的皮肤。
+ * 系统窗口与默认的window.png图片一样，可设置为不同的皮肤。
  * 图片布局不能根据窗口内容自适应，你需要合理控制的设置的说明文字。
  * 
  * -----------------------------------------------------------------------------
@@ -94,7 +95,7 @@
  *              80.00ms - 120.00ms（中消耗）
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
- * 时间复杂度： o(n^2) + o(图像处理) 每帧
+ * 时间复杂度： o(n^2)+o(贴图处理) 每帧
  * 测试方法：   以正常流程进行游戏，记录鼠标靠近区域显示窗口的消耗。
  * 测试结果：   地图界面中，平均消耗为：【11.24ms】
  *              战斗界面中，平均消耗为：【13.17ms】
@@ -229,21 +230,21 @@
  * @parent ---窗口---
  * @type number
  * @min 0
- * @desc 窗口内容之间的行间距。（rmmv默认标准：36）
+ * @desc 窗口内容之间的行间距。（默认标准：36）
  * @default 10
  *
  * @param 窗口内边距
  * @parent ---窗口---
  * @type number
  * @min 0
- * @desc 窗口内容与窗口外框的内边距。（rmmv默认标准：18）
+ * @desc 窗口内容与窗口外框的内边距。（默认标准：18）
  * @default 10
  *
  * @param 窗口字体大小
  * @parent ---窗口---
  * @type number
  * @min 1
- * @desc 窗口的字体大小。注意图标无法根据字体大小变化。（rmmv默认标准：28）
+ * @desc 窗口的字体大小。注意图标无法根据字体大小变化。（默认标准：28）
  * @default 22
  *
  * @param 窗口附加宽度
@@ -811,13 +812,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^2) + o(图像处理) 每帧
-//		性能测试因素	对话管理层
-//		性能测试消耗	11.24ms（drill_updatePosition函数）
-//		最坏情况		暂无
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^2)+o(贴图处理) 每帧
+//		★性能测试因素	对话管理层
+//		★性能测试消耗	11.24ms（drill_updatePosition函数）
+//		★最坏情况		暂无
+//		★备注			无
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			事件说明窗口：
 //				->说明面板
@@ -1121,7 +1128,7 @@ Spriteset_Battle.prototype.createLowerLayer = function() {
 //==============================
 var _drill_MPFP_battle_createPictures = Spriteset_Battle.prototype.createPictures;
 Spriteset_Battle.prototype.createPictures = function() {
-	_drill_MPFP_battle_createPictures.call(this);		//rmmv图片 < 图片层 < rmmv对话框
+	_drill_MPFP_battle_createPictures.call(this);		//图片对象层 < 图片层 < 对话框集合
 	if( !this._drill_battlePicArea ){
 		this._drill_battlePicArea = new Sprite();
 		this.addChild(this._drill_battlePicArea);	
@@ -1132,7 +1139,7 @@ Spriteset_Battle.prototype.createPictures = function() {
 //==============================
 var _drill_MPFP_battle_createAllWindows = Scene_Battle.prototype.createAllWindows;
 Scene_Battle.prototype.createAllWindows = function() {
-	_drill_MPFP_battle_createAllWindows.call(this);	//rmmv对话框 < 最顶层
+	_drill_MPFP_battle_createAllWindows.call(this);	//对话框集合 < 最顶层
 	if( !this._drill_SenceTopArea ){
 		this._drill_SenceTopArea = new Sprite();
 		this.addChild(this._drill_SenceTopArea);	
@@ -1179,7 +1186,7 @@ Scene_Battle.prototype.createAllWindows = function() {
 //==============================
 var _drill_MPFP_layer_createDestination = Spriteset_Map.prototype.createDestination;
 Spriteset_Map.prototype.createDestination = function() {
-	_drill_MPFP_layer_createDestination.call(this);	//rmmv鼠标目的地 < 上层 < rmmv天气
+	_drill_MPFP_layer_createDestination.call(this);	//鼠标目的地 < 上层 < 天气层
 	if( !this._drill_mapUpArea ){
 		this._drill_mapUpArea = new Sprite();
 		this._baseSprite.addChild(this._drill_mapUpArea);	
@@ -1190,7 +1197,7 @@ Spriteset_Map.prototype.createDestination = function() {
 //==============================
 var _drill_MPFP_layer_createPictures = Spriteset_Map.prototype.createPictures;
 Spriteset_Map.prototype.createPictures = function() {
-	_drill_MPFP_layer_createPictures.call(this);		//rmmv图片 < 图片层 < rmmv对话框
+	_drill_MPFP_layer_createPictures.call(this);		//图片对象层 < 图片层 < 对话框集合
 	if( !this._drill_mapPicArea ){
 		this._drill_mapPicArea = new Sprite();
 		this.addChild(this._drill_mapPicArea);	
@@ -1201,7 +1208,7 @@ Spriteset_Map.prototype.createPictures = function() {
 //==============================
 var _drill_MPFP_layer_createAllWindows = Scene_Map.prototype.createAllWindows;
 Scene_Map.prototype.createAllWindows = function() {
-	_drill_MPFP_layer_createAllWindows.call(this);	//rmmv对话框 < 最顶层
+	_drill_MPFP_layer_createAllWindows.call(this);	//对话框集合 < 最顶层
 	if( !this._drill_SenceTopArea ){
 		this._drill_SenceTopArea = new Sprite();
 		this.addChild(this._drill_SenceTopArea);	
@@ -1610,7 +1617,7 @@ Drill_MPFP_Window.prototype.drill_refreshMessage = function( context_id, str_id 
 }else{
 		Imported.Drill_MiniPlateForPicture = false;
 		alert(
-			"【Drill_MiniPlateForPicture.js 鼠标 - 图片内容和buff说明窗口】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
+			"【Drill_MiniPlateForPicture.js 鼠标 - 图片说明窗口】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
 			"\n- Drill_CoreOfInput 系统-输入设备核心"+
 			"\n- Drill_CoreOfWindowAuxiliary 系统-窗口辅助核心"
 		);

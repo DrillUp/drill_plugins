@@ -20,13 +20,13 @@
  * =============================================================================
  * 使得你可以把对话框的选项转换成按钮组的形式。
  * ★★必须放在 对话框变形器 插件的后面★★
- * 【支持插件关联资源的打包、加密】
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 插件必须基于核心。
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfSelectableButton 系统 - 按钮组核心★★v1.6及以上★★
+ *   - Drill_CoreOfSelectableButton   系统-按钮组核心★★v1.6及以上★★
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -83,6 +83,8 @@
  * 测试结果：   200个事件的地图中，平均消耗为：【47.41ms】
  *              100个事件的地图中，平均消耗为：【32.61ms】
  *               50个事件的地图中，平均消耗为：【22.74ms】
+ * 测试方法2：  在战斗界面中，进行按钮测试。
+ * 测试结果2：  战斗界面中，平均消耗为：【26.22ms】
  * 
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
  *   测试结果并不是精确值，范围在给定值的10ms范围内波动。
@@ -262,14 +264,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^3)*o(贴图处理)  每帧
-//		性能测试因素	UI管理层
-//		性能测试消耗	11.74ms（Drill_DCB_BtnLayerSprite.prototype.update）
-//		最坏情况		暂无
-//		备注			主要消耗出现在 按钮组核心 57.41ms，该插件只提供了一个图层进行变换。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^3)*o(贴图处理)  每帧
+//		★性能测试因素	UI管理层
+//		★性能测试消耗	11.74ms（Drill_DCB_BtnLayerSprite.prototype.update）
+//		★最坏情况		暂无
+//		★备注			主要消耗出现在 按钮组核心 57.41ms，该插件只提供了一个图层进行变换。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			对话选项按钮组：
 //				->结构
@@ -278,13 +285,13 @@
 //		★必要注意事项：
 //			1.插件的图片层级与多个插件共享。【必须自写 层级排序 函数】
 //			2.【镜头兼容】该插件的对话选项样式如果放在 下层、中层、上层、图片层 ，需要对其进行相关的镜头缩放控制。
+//			3.为了保持贴图不会修改到数据，这里使用 _drill_DCB_serial 序列号 来进行同步。
 //
 //		★其它说明细节：
 //			1.
 //
 //		★存在的问题：
 //			暂无
-//
 //
  
 //=============================================================================
@@ -405,7 +412,7 @@ Game_System.prototype.initialize = function() {
 
 
 //#############################################################################
-// ** 标准函数（地图层级）
+// ** 【标准模块】地图层级
 //#############################################################################
 //##############################
 // * 地图层级 - 添加贴图到层级【标准函数】
@@ -465,7 +472,7 @@ Scene_Map.prototype.drill_DCB_layerMoveingReference = function( x, y, reference,
 //==============================
 var _drill_DCB_map_createDestination = Spriteset_Map.prototype.createDestination;
 Spriteset_Map.prototype.createDestination = function() {
-	_drill_DCB_map_createDestination.call(this);	//rmmv鼠标目的地 < 上层 < rmmv天气
+	_drill_DCB_map_createDestination.call(this);	//鼠标目的地 < 上层 < 天气层
 	if( !this._drill_mapUpArea ){
 		this._drill_mapUpArea = new Sprite();
 		this._baseSprite.addChild(this._drill_mapUpArea);	
@@ -476,7 +483,7 @@ Spriteset_Map.prototype.createDestination = function() {
 //==============================
 var _drill_DCB_map_createPictures = Spriteset_Map.prototype.createPictures;
 Spriteset_Map.prototype.createPictures = function() {
-	_drill_DCB_map_createPictures.call(this);		//rmmv图片 < 图片层 < rmmv对话框
+	_drill_DCB_map_createPictures.call(this);		//图片对象层 < 图片层 < 对话框集合
 	if( !this._drill_mapPicArea ){
 		this._drill_mapPicArea = new Sprite();
 		this.addChild(this._drill_mapPicArea);	
@@ -487,7 +494,7 @@ Spriteset_Map.prototype.createPictures = function() {
 //==============================
 var _drill_DCB_map_createAllWindows = Scene_Map.prototype.createAllWindows;
 Scene_Map.prototype.createAllWindows = function() {
-	_drill_DCB_map_createAllWindows.call(this);	//rmmv对话框 < 最顶层
+	_drill_DCB_map_createAllWindows.call(this);	//对话框集合 < 最顶层
 	if( !this._drill_SenceTopArea ){
 		this._drill_SenceTopArea = new Sprite();
 		this.addChild(this._drill_SenceTopArea);	
@@ -618,7 +625,7 @@ Scene_Map.prototype.drill_DCB_updatePosition = function() {
 
 
 //#############################################################################
-// ** 标准函数（战斗层级）
+// ** 【标准模块】战斗层级
 //#############################################################################
 //##############################
 // * 战斗层级 - 添加贴图到层级【标准函数】
@@ -690,7 +697,7 @@ Spriteset_Battle.prototype.createLowerLayer = function() {
 //==============================
 var _drill_DCB_battle_createPictures = Spriteset_Battle.prototype.createPictures;
 Spriteset_Battle.prototype.createPictures = function() {
-	_drill_DCB_battle_createPictures.call(this);		//rmmv图片 < 图片层 < rmmv对话框
+	_drill_DCB_battle_createPictures.call(this);		//图片对象层 < 图片层 < 对话框集合
 	if( !this._drill_battlePicArea ){
 		this._drill_battlePicArea = new Sprite();
 		this.addChild(this._drill_battlePicArea);	
@@ -701,7 +708,7 @@ Spriteset_Battle.prototype.createPictures = function() {
 //==============================
 var _drill_DCB_battle_createAllWindows = Scene_Battle.prototype.createAllWindows;
 Scene_Battle.prototype.createAllWindows = function() {
-	_drill_DCB_battle_createAllWindows.call(this);	//rmmv对话框 < 最顶层
+	_drill_DCB_battle_createAllWindows.call(this);	//对话框集合 < 最顶层
 	if( !this._drill_SenceTopArea ){
 		this._drill_SenceTopArea = new Sprite();
 		this.addChild(this._drill_SenceTopArea);	

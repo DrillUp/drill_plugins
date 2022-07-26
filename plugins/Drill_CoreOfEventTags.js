@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        物体触发 - 事件标签核心
+ * @plugindesc [v1.2]        物体管理 - 事件标签核心
  * @author Drill_up
  * 
  * 
@@ -14,21 +14,21 @@
  * 如果你有兴趣，也可以来看看更多我写的drill插件哦ヽ(*。>Д<)o゜
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
- * 该插件为基础核心。可以单独使用。
  * 给指定事件添加各种标签，用于子插件捕获使用。
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
+ * 该插件可以单独使用。
  * 该插件为基础核心，是以下插件的依赖。
  * 可作用于：
- *   - Drill_CoreOfEventTags       物体触发 - 固定区域核心
+ *   - Drill_CoreOfEventTags       物体触发-固定区域核心
  *     插件的筛选器可以支持"必须含指定标签的事件"的捕获。
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：地图界面。
  *   只作用于事件。
- * 2.更多相关内容，去看看 "9.物体触发 > 关于事件标签核心.docx"。
+ * 2.更多相关内容，去看看 "28.物体管理 > 关于事件标签核心.docx"。
  * 标签与筛选器：
  *   (1.标签属于辅助性功能，用于区分不同事件的特殊属性。
  *   (2.标签可以与固定区域核心的筛选器一起使用，
@@ -123,7 +123,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 优化了内部结构。
- * 
+ * [v1.2]
+ * 修改了插件分类。
  * 
  */
  
@@ -135,13 +136,18 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		单次执行
-//		时间复杂度		o(n)
-//		性能测试因素	到处跑
-//		性能测试消耗	消耗列表中找不到
-//		最坏情况		无
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		单次执行
+//		★时间复杂度		o(n)
+//		★性能测试因素	到处跑
+//		★性能测试消耗	消耗列表中找不到
+//		★最坏情况		无
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			事件标签核心：
 //				->设置标签
@@ -152,7 +158,9 @@
 //					->容器法获取 x
 //				
 //		★必要注意事项：
-//			暂无
+//			1.【该插件使用了事件容器】，必须考虑三种情况：初始化、切换地图时、切换贴图时，不然会出现指针错误！
+//				只要是装事件的容器，都需要考虑指针问题，不管是放在$gameMap还是$gameTemp中。
+//				另外，帧刷新判断时，最好每次变化直接【刷新统计】。
 //
 //		★其它说明细节：
 //			1.这里只是提供了一系列"通过标签"快速筛选的功能和方法。
@@ -230,7 +238,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					var e = $gameMap.event( e_id );
 					e.drill_COET_removeAllTag();
 				}
-				$gameTemp._drill_COET_needRefresh = true;
+				$gameTemp._drill_COET_needRestatistics = true;
 			}
 		}
 		if( e_ids && args.length == 6 ){
@@ -243,7 +251,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					var e = $gameMap.event( e_id );
 					e.drill_COET_removeTag(temp2);
 				}
-				$gameTemp._drill_COET_needRefresh = true;
+				$gameTemp._drill_COET_needRestatistics = true;
 			}
 			if( type == "添加标签" ){
 				for( var k=0; k < e_ids.length; k++ ){
@@ -252,7 +260,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					var e = $gameMap.event( e_id );
 					e.drill_COET_addTag(temp2);
 				}
-				$gameTemp._drill_COET_needRefresh = true;
+				$gameTemp._drill_COET_needRestatistics = true;
 			}
 		}
 		
@@ -352,7 +360,7 @@ Game_Map.prototype.drill_COET_isEventExist = function( e_id ){
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_CoreOfEventTags.js 物体 - 事件标签核心】\n" +
+		alert( "【Drill_CoreOfEventTags.js 物体管理 - 事件标签核心】\n" +
 				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
 		return false;
 	}
@@ -546,15 +554,15 @@ var _drill_COET_temp_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {	
 	_drill_COET_temp_initialize.call(this);
 	this._drill_COET_eventTank = {};			//分类容器
-	this._drill_COET_needRefresh = true;
+	this._drill_COET_needRestatistics = true;
 };
 //==============================
 // * 容器 - 切换地图时
 //==============================
 var _drill_COET_gmap_setup = Game_Map.prototype.setup;
-Game_Map.prototype.setup = function(mapId) {
+Game_Map.prototype.setup = function( mapId ){
 	$gameTemp._drill_COET_eventTank = {};
-	$gameTemp._drill_COET_needRefresh = true;
+	$gameTemp._drill_COET_needRestatistics = true;
 	_drill_COET_gmap_setup.call(this,mapId);
 }
 //==============================
@@ -563,24 +571,23 @@ Game_Map.prototype.setup = function(mapId) {
 var _drill_COET_smap_createCharacters = Spriteset_Map.prototype.createCharacters;
 Spriteset_Map.prototype.createCharacters = function() {
 	$gameTemp._drill_COET_eventTank = {};
-	$gameTemp._drill_COET_needRefresh = true;
+	$gameTemp._drill_COET_needRestatistics = true;
 	_drill_COET_smap_createCharacters.call(this);
 }
 //==============================
 // * 容器 - 帧刷新
 //==============================
 var _drill_COET_map_update = Game_Map.prototype.update;
-Game_Map.prototype.update = function(sceneActive) {
-	_drill_COET_map_update.call(this,sceneActive);
-	
-	this.drill_COET_refreshTagChecks();
+Game_Map.prototype.update = function( sceneActive ){
+	_drill_COET_map_update.call( this,sceneActive );
+	this.drill_COET_updateRestatistics();		//帧刷新 - 刷新统计
 };
 //==============================
-// * 帧刷新 - 刷新统计
+// * 容器 - 帧刷新 - 刷新统计
 //==============================
-Game_Map.prototype.drill_COET_refreshTagChecks = function() {
-	if( !$gameTemp._drill_COET_needRefresh ){ return }
-	$gameTemp._drill_COET_needRefresh = false;
+Game_Map.prototype.drill_COET_updateRestatistics = function() {
+	if( !$gameTemp._drill_COET_needRestatistics ){ return }
+	$gameTemp._drill_COET_needRestatistics = false;
 	
 	$gameTemp._drill_COET_eventTank = {};
 	var events = this.events();
@@ -597,4 +604,17 @@ Game_Map.prototype.drill_COET_refreshTagChecks = function() {
 		}
 	}
 }
+
+//=============================================================================
+// ** 核心漏洞修复
+//=============================================================================
+//==============================
+// * 核心漏洞修复 - 屏蔽根据版本重刷地图
+//
+//			说明：	此功能会刷掉旧存档的存储数据，因为版本不一样会强制重进地图。
+//					而这样做只是 刷新旧存档的当前地图而已，没任何好处。
+//==============================
+Scene_Load.prototype.reloadMapIfUpdated = function() {
+	// （禁止重刷）
+};
 

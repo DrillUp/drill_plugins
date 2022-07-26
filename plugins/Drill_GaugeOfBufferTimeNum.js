@@ -22,9 +22,10 @@
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 插件必须基于核心，才能运行。
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfGaugeNumber       系统 - 参数数字核心
+ *   - Drill_CoreOfGaugeNumber       系统-参数数字核心
  *     必须基于该插件，才可以绘制时间数字。
  * 
  * -----------------------------------------------------------------------------
@@ -152,7 +153,7 @@
  *              80.00ms - 120.00ms（中消耗）
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
- * 时间复杂度： o(物体数)*o(n^3)*o(贴图处理)
+ * 时间复杂度： o(n^3)*o(物体数)*o(贴图处理) 每帧
  * 测试方法：   在可视化管理层，同时开7个时间数字物体。
  * 测试结果：   200个事件的地图中，消耗为：【32.82ms】
  *              100个事件的地图中，消耗为：【28.24ms】
@@ -543,14 +544,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(物体数)*o(n^3)*o(贴图处理)
-//		性能测试因素	可视化管理层
-//		性能测试消耗	27.01ms 28.24ms
-//		最坏情况		暂无
-//		备注			同时开很多数字都不会有卡顿影响，并且能够稳定地进行数字变化。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^3)*o(物体数)*o(贴图处理) 每帧
+//		★性能测试因素	可视化管理层
+//		★性能测试消耗	27.01ms 28.24ms
+//		★最坏情况		暂无
+//		★备注			同时开很多数字都不会有卡顿影响，并且能够稳定地进行数字变化。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			缓冲时间数字：
 //				->物体
@@ -573,7 +579,7 @@
 //			1.插件的图片层级与多个插件共享。【必须自写 层级排序 函数】
 //			2.【该插件使用了事件容器】，必须考虑三种情况：初始化、切换地图时、切换贴图时，不然会出现指针错误！
 //				只要是装事件的容器，都需要考虑指针问题，不管是放在$gameMap还是$gameTemp中。
-//				另外，帧刷新判断时，最好每次变化直接【重刷容器】。
+//				另外，帧刷新判断时，最好每次变化直接【刷新统计】。
 //			3.由于容器特殊，根据物体数组单独存放，一个萝卜一个坑，贴图与物体对象一致，也是一个萝卜一个坑。
 //			  物体的数据统一放在data中控制，包括 私有对象数据 。
 //			
@@ -640,7 +646,6 @@
 // * >>>>基于插件检测>>>>
 //=============================================================================
 if( Imported.Drill_CoreOfGaugeNumber ){
-	
 	
 	
 //=============================================================================
@@ -1097,7 +1102,7 @@ Game_Map.prototype.drill_GOBTN_createTimeNum = function( bar_id, barSprite_id, l
 	// > 创建时间数字
 	var obj = new Drill_GOBTN_GameTimeNum( data );
 	this._drill_GOBTN_timeNumTank[ bar_id ] = obj;
-	$gameTemp._drill_GOBTN_needRefresh = true;
+	$gameTemp._drill_GOBTN_needRestatistics = true;
 	return obj;
 };
 //==============================
@@ -1125,7 +1130,7 @@ Game_Map.prototype.drill_GOBTN_getTimeNumListByEventId = function( e_id ){
 //==============================
 Game_Map.prototype.drill_GOBTN_deleteTimeNum = function( bar_id ) {
 	this._drill_GOBTN_timeNumTank[ bar_id ] = null;
-	$gameTemp._drill_GOBTN_needRefresh = true;
+	$gameTemp._drill_GOBTN_needRestatistics = true;
 };
 
 
@@ -1137,7 +1142,7 @@ Game_Map.prototype.drill_GOBTN_deleteTimeNum = function( bar_id ) {
 //==============================
 var _drill_GOBTN_layer_createDestination = Spriteset_Map.prototype.createDestination;
 Spriteset_Map.prototype.createDestination = function() {
-	_drill_GOBTN_layer_createDestination.call(this);	//rmmv鼠标目的地 < 上层 < rmmv天气
+	_drill_GOBTN_layer_createDestination.call(this);	//鼠标目的地 < 上层 < 天气层
 	if( !this._drill_mapUpArea ){
 		this._drill_mapUpArea = new Sprite();
 		this._baseSprite.addChild(this._drill_mapUpArea);	
@@ -1160,7 +1165,7 @@ var _drill_GOBTN_temp_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {	
 	_drill_GOBTN_temp_initialize.call(this);
 	this._drill_GOBTN_spriteTank = [];
-	this._drill_GOBTN_needRefresh = true;
+	this._drill_GOBTN_needRestatistics = true;
 };
 //==============================
 // * 容器 - 切换地图时
@@ -1168,7 +1173,7 @@ Game_Temp.prototype.initialize = function() {
 var _drill_GOBTN_gmap_setup = Game_Map.prototype.setup;
 Game_Map.prototype.setup = function(mapId) {
 	$gameTemp._drill_GOBTN_spriteTank = [];
-	$gameTemp._drill_GOBTN_needRefresh = true;
+	$gameTemp._drill_GOBTN_needRestatistics = true;
 	this.drill_GOBTN_resetTimeNums();
 	_drill_GOBTN_gmap_setup.call(this,mapId);
 }
@@ -1178,7 +1183,7 @@ Game_Map.prototype.setup = function(mapId) {
 var _drill_GOBTN_smap_createCharacters = Spriteset_Map.prototype.createCharacters;
 Spriteset_Map.prototype.createCharacters = function() {
 	$gameTemp._drill_GOBTN_spriteTank = [];
-	$gameTemp._drill_GOBTN_needRefresh = true;
+	$gameTemp._drill_GOBTN_needRestatistics = true;
 	_drill_GOBTN_smap_createCharacters.call(this);
 }
 //==============================
@@ -1188,15 +1193,15 @@ var _drill_GOBTN_scene_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {	
 	_drill_GOBTN_scene_update.call(this);
 	if( this.isActive() ){
-		this.drill_GOBTN_updateTimeNumCheck();		//刷新统计
+		this.drill_GOBTN_updateRestatistics();		//帧刷新 - 刷新统计
 	}
 };
 //==============================
 // ** 容器 - 帧刷新 - 刷新统计
 //==============================
-Scene_Map.prototype.drill_GOBTN_updateTimeNumCheck = function() {
-	if( !$gameTemp._drill_GOBTN_needRefresh ){ return }
-	$gameTemp._drill_GOBTN_needRefresh = false;
+Scene_Map.prototype.drill_GOBTN_updateRestatistics = function() {
+	if( !$gameTemp._drill_GOBTN_needRestatistics ){ return }
+	$gameTemp._drill_GOBTN_needRestatistics = false;
 	
 	// > 创建时间数字贴图
 	for(var i=0; i< $gameMap._drill_GOBTN_timeNumTank.length; i++){

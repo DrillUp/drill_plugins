@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.1]        行走图 - 图块倒影镜像
+ * @plugindesc [v2.2]        行走图 - 图块倒影镜像
  * @author Drill_up
  * 
  * @Drill_LE_param "地图镜面-%d"
@@ -20,6 +20,10 @@
  * =============================================================================
  * 使得你可以让图块反射出上下镜像倒影，并且镜像支持大部分效果。
  * ★★尽量放在所有 行走图效果 的插件后面，放后面可以支持更多叠加效果★★ 
+ * 
+ * -----------------------------------------------------------------------------
+ * ----插件扩展
+ * 该插件可以单独使用。
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -198,6 +202,8 @@
  * 优化了内部结构，添加了偏移补正支持。
  * [v2.1]
  * 修正了地图备注，以及添加了 毛玻璃效果 。
+ * [v2.2]
+ * 兼容了 事件彻底删除时，也包括删除镜像的功能。
  *
  * 
  * 
@@ -755,18 +761,22 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //	
-//		工作类型		持续执行
-//		时间复杂度		o(n)*o(贴图处理) 每帧
-//		性能测试因素	物体管理层200事件 跑一圈
-//		性能测试消耗			不优化		离开镜头优化
-//						高峰期：434.65ms 	169.54ms
-//						低谷期：60.25ms		18.70ms
-//		最坏情况		只要镜像多，就是最坏情况。
-//		备注			图像处理减少的消耗，不是很好测，但是也有值。
+//<<<<<<<<性能记录<<<<<<<<
+//
+//		★工作类型		持续执行
+//		★时间复杂度		o(n)*o(贴图处理) 每帧
+//		★性能测试因素	物体管理层200事件 跑一圈
+//		★性能测试消耗	高峰期：434.65ms（不优化） 	169.54ms（离开镜头优化）
+//						低谷期：60.25ms（不优化）	18.70ms（离开镜头优化）
+//		★最坏情况		只要镜像多，就是最坏情况。
+//		★备注			贴图处理减少的消耗，不是很好测，但是也有值。
 //						在200事件的地图中，可以直接减少70%的消耗。
 //						因为出了镜头的镜像暂停刷新，缩小了范围，200事件就变成了50个事件的消耗。
+//		
+//		★优化记录		暂无
 //
-//插件记录：
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			图块倒影镜像：
 //				->镜面
@@ -792,7 +802,7 @@
 //				//==============================
 //				Game_Temp.prototype.drill_XXX_isReflectionSprite = function( sprite ){
 //					if( Imported.Drill_LayerReverseReflection      && sprite instanceof Drill_Sprite_LRR ){ return true; }
-//					if( Imported.Drill_LayerSynchronizedReflection && sprite instanceof Drill_Sprite_LSR ){ return true; }
+//					if( Imported.Drill_LayerSynchronizedReflection && sprite instanceof Drill_Sprite_LRR ){ return true; }
 //					return false;
 //				}
 //
@@ -1240,6 +1250,29 @@ Spriteset_Map.prototype.drill_LRR_updateNewEventReflect = function() {
 		this._drill_LRR_CharSpriteLen = this._characterSprites.length;
 	}
 }
+//==============================
+// * 镜像 - 删除镜像（接口）
+//==============================
+Spriteset_Map.prototype.drill_LRR_deleteEventReflect = function( e_id ){
+	if( this._drill_LRR_sprites == undefined ){ return; }	//（如果地图禁用镜像，连此数组都不会存在）
+	
+	for(var i = this._drill_LRR_sprites.length-1; i >= 0; i--){
+		var temp_sprite = this._drill_LRR_sprites[i];
+		if( temp_sprite == undefined ){ continue; }
+		if( temp_sprite._character == undefined ){ continue; }
+		if( temp_sprite._character._eventId == e_id ){
+			
+			// > 去除贴图
+			temp_sprite._character = null;
+			this._drill_LRR_layer.removeChild( temp_sprite );
+			
+			// > 断开关联
+			this._drill_LRR_sprites.splice( i, 1 );
+			
+			this._drill_LRR_CharSpriteLen -= 1;
+		}
+	}
+}
 
 //=============================================================================
 // ** 毛玻璃效果
@@ -1333,6 +1366,7 @@ Drill_Sprite_LRR.prototype.update = function() {
 	// > 父类帧刷新
 	Sprite_Character.prototype.update.call(this);
 	
+	if( this._character == undefined ){ return; }
 	this.drill_updatePosition();		//帧刷新 - 位置
 	this.drill_updateSize();			//帧刷新 - 大小
 	this.drill_updateVisible();			//帧刷新 - 可见情况

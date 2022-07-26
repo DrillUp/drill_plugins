@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        互动 - 原地转向能力
+ * @plugindesc [v1.3]        互动 - 原地转向能力
  * @author Drill_up
  * 
  * 
@@ -14,13 +14,14 @@
  * 如果你有兴趣，也可以来看看更多我写的drill插件哦ヽ(*。>Д<)o゜
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
- * 使得地图的角色具有原地转向能力。
+ * 使得地图的玩家具有原地转向能力。
  *
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该插件可以单独使用，也可以通过其他插件添加更多功能。
+ * 该插件可以单独使用。
+ * 也可以通过其他插件添加更多功能。
  * 被扩展：
- *   - Drill_OperateHud           互动 - 鼠标辅助操作面板
+ *   - Drill_OperateHud           鼠标-鼠标辅助操作面板
  *     该插件提供鼠标、触碰辅助控制原地转向的支持。
  *
  * -----------------------------------------------------------------------------
@@ -34,12 +35,12 @@
  *     （虽然基础，但是可以做跳舞毯。）
  * 
  * -----------------------------------------------------------------------------
- * ----控制操作 - 键盘、手柄
+ * ----知识点 - 键盘、手柄
  * 键盘 - "W"键 + 方向键 转向
  * 手柄 - "RB"键 + 方向键 转向
  *
  * -----------------------------------------------------------------------------
- * ----控制操作 - 鼠标、触屏
+ * ----知识点 - 鼠标、触屏
  * 鼠标 - 无法控制
  * 触屏 - 无法控制
  * 
@@ -49,7 +50,7 @@
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定
- * 你可以通过插件指令设置角色原地转向能力。
+ * 你可以通过插件指令设置玩家原地转向能力。
  *
  * 插件指令：>玩家原地转向 : 开启能力
  * 插件指令：>玩家原地转向 : 关闭能力
@@ -84,7 +85,8 @@
  * 修改了插件分类。
  * [v1.2]
  * 添加了插件性能说明。
- *
+ * [v1.3]
+ * 修复了原地转向在光滑地面上能转向的bug。
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -95,14 +97,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		单次执行
-//		时间复杂度		o(n)
-//		性能测试因素	到处测试
-//		性能测试消耗	找不到
-//		最坏情况		无
-//		备注			转向只是换一下bitmap那么简单，消耗几乎没有。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		单次执行
+//		★时间复杂度		o(n)
+//		★性能测试因素	到处测试
+//		★性能测试消耗	找不到
+//		★最坏情况		无
+//		★备注			转向只是换一下bitmap那么简单，消耗几乎没有。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			原地转向能力：
 //				->不走动转向
@@ -124,7 +131,6 @@
 //		★存在的问题：
 //			暂无
 //
-//
  
 //=============================================================================
 // ** 变量获取
@@ -139,11 +145,9 @@
 // ** 插件指令
 //=============================================================================
 var _drill_RD_pluginCommand = Game_Interpreter.prototype.pluginCommand
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function(command, args){
 	_drill_RD_pluginCommand.call(this,command, args);
-	if (command === ">角色原地转向开启")  { $gameSystem._drill_RD_enable = true;};
-	if (command === ">角色原地转向关闭")  { $gameSystem._drill_RD_enable = false;};
-	if (command === ">玩家原地转向") {
+	if( command === ">玩家原地转向" ){
 		if(args.length == 2){
 			var type = String(args[1]);
 			if( type == "开启能力" ){
@@ -154,40 +158,39 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			}
 		}
 	}
-	return true;
 };
 
 //=============================================================================
-// ** Game_Player角色转向设置
+// ** 玩家原地转向
 //=============================================================================
 //==============================
-// * 转向初始化
-// *（Game_Player初始化时，$gameSystem已载入存储数据。）
+// * 玩家 - 转向初始化
 //==============================
 var _drill_RD_initialize = Game_Player.prototype.initialize;
 Game_Player.prototype.initialize = function() {
 	_drill_RD_initialize.call(this);
-	if( $gameSystem._drill_RD_enable === undefined ){ $gameSystem._drill_RD_enable = true;}
+	if( $gameSystem._drill_RD_enable == undefined ){ $gameSystem._drill_RD_enable = true;}
 };
-
 //==============================
-// * 开始转向
+// * 玩家 - 执行移动
 //==============================
 var _drill_RD_moveByInput = Game_Player.prototype.moveByInput;
 Game_Player.prototype.moveByInput = function() {
 	
-    if ( this.drill_canRotate_Normal() ) { 			//基本转向条件
+	// > 转向阻止
+    if( this.drill_canRotate_Normal() ){ 			//基本转向条件
 		if( this.drill_isRotateControl() ){			//转向按钮按下
 			if( this.drill_canRotate_Conditional() ){//限制转向条件
 				this.drill_RD_setDirection();
 				return;
 			}else{
 				SoundManager.playBuzzer();
-			}	
+			}
 		}
 	}
-	_drill_RD_moveByInput.call(this);	
 	
+	// > 原函数
+	_drill_RD_moveByInput.call(this);
 };
 
 //==============================
@@ -227,9 +230,10 @@ Game_Player.prototype.drill_canRotate_Conditional = function() {
 // * 判断光滑图块
 //==============================
 Game_Player.prototype.drill_RD_isInSlipperyArea = function() {
-	if( Imported.YEP_SlipperyTiles ){
-		return this.onSlipperyFloor();
-	}
+	// > 【图块 - 物体滑行】
+	if( Imported.Drill_LayerSlipperyTile ){ return this.drill_LST_isOnSlipperyFloor(); }
+	// > 【Yep图块插件】
+	if( Imported.YEP_SlipperyTiles ){ return this.onSlipperyFloor(); }
 	return false;
 }
 

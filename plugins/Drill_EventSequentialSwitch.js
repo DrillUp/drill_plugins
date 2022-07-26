@@ -15,6 +15,10 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 你可以设置某个锁，必须在按照指定的顺序开启/关闭时，才会被激活。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----插件扩展
+ * 该插件可以单独使用。
  *
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -25,7 +29,7 @@
  *      触发器是连接开关与门的中间体，用于控制门的开启条件。
  *      当序列开关的固定顺序开关满足开启/关闭条件时，才会被激活。
  *   (2.序列开关的注释设置全都跨事件页。
- *      详细介绍去看看 "8.物体 > 开关大家族.docx"。
+ *      详细介绍去看看 "8.物体 > 大家族-开关.docx"。
  * 细节：
  *   (1.序列开关必须指定每一个事件的开关状态作为调节，是有顺序的。
  *   (2.你可以写大量条件注释，这些注释与 分歧条件 指令的原理一样。
@@ -105,17 +109,23 @@
 //		插件简称		ESeS（Event_Sequential_Switch）
 //		临时全局变量	无
 //		临时局部变量	this._drill_ESeS_xxx
-//		存储数据变量	$gameMap.drill_ESeS_needReflash （不完全算存储，离开地图就被清除重做）
+//		存储数据变量	$gameMap.drill_ESeS_needRefresh （不完全算存储，离开地图就被清除重做）
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^2)
-//		性能测试因素	去逻辑图形设计关卡
-//		性能测试消耗	8.61ms
-//		最坏情况		每个事件都有乱七八糟的条件。(其实也不影响性能)
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^2)
+//		★性能测试因素	去逻辑图形设计关卡
+//		★性能测试消耗	8.61ms
+//		★最坏情况		每个事件都有乱七八糟的条件。(其实也不影响性能)
+//		★备注			暂无
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			序列开关：
 //				->每次切换独立开关，更新条件
@@ -173,7 +183,7 @@ Game_Event.prototype.drill_ESeS_setupSwitch = function() {
 			this.drill_ESeS_readPage( pages[n].list );			//强制检查全部注释，防止切换事件页保存读取后失效。
 		}
 	};
-	$gameMap.drill_ESeS_needReflash = true;	//刷新锁（有注释，少了注释，都有影响）
+	$gameMap.drill_ESeS_needRefresh = true;	//刷新锁（有注释，少了注释，都有影响）
 };
 //==============================
 // * 读取注释
@@ -274,7 +284,7 @@ Game_Event.prototype.drill_ESeS_readPage = function( page_list ) {
 var _drill_ESeS_setValue = Game_SelfSwitches.prototype.setValue;
 Game_SelfSwitches.prototype.setValue = function(key, value) {
 	_drill_ESeS_setValue.call(this, key, value);
-	$gameMap.drill_ESeS_needReflash = true;
+	$gameMap.drill_ESeS_needRefresh = true;
 };
 
 
@@ -297,18 +307,18 @@ Game_Map.prototype.update = function(sceneActive) {
 	_drill_ESeS_map_update.call(this,sceneActive);
 	
 	//在刷新启动时，刷新全部
-	if( this._drill_ESeS_hasSwitch == true && this.drill_ESeS_needReflash == true ){
-		this.drill_ESeS_needReflash = false;
-		this.drill_ESeS_reflashSwitch();
+	if( this._drill_ESeS_hasSwitch == true && this.drill_ESeS_needRefresh == true ){
+		this.drill_ESeS_needRefresh = false;
+		this.drill_ESeS_refreshSwitch();
 	}
 };
 
 //==============================
 // ** 统计全部条件，并触发开关
 //==============================
-Game_Map.prototype.drill_ESeS_reflashSwitch = function() {	//该函数每次改变时只进入一次，而不是不停刷新
+Game_Map.prototype.drill_ESeS_refreshSwitch = function() {	//该函数每次改变时只进入一次，而不是不停刷新
 	var events = this.events();
-	var need_reflash = false;	
+	var need_refresh = false;	
 	
 	// > 遍历锁
 	for (var i = 0; i < events.length; i++) {  
@@ -338,13 +348,13 @@ Game_Map.prototype.drill_ESeS_reflashSwitch = function() {	//该函数每次改�
 					var s_key = [this._mapId, temp_event._eventId, lock['switch'] ];
 					if( $gameSelfSwitches.value(s_key) !== true){
 						$gameSelfSwitches.drill_setValueWithOutChange(s_key,true);
-						need_reflash = true;
+						need_refresh = true;
 					}
 				}else if( temp_event._drill_ESeS_lockAutoOff == true ){
 					var s_key = [this._mapId, temp_event._eventId, lock['switch'] ];
 					if( $gameSelfSwitches.value(s_key) !== false){
 						$gameSelfSwitches.drill_setValueWithOutChange(s_key,false);
-						need_reflash = true;
+						need_refresh = true;
 					}
 				}
 			}
@@ -353,13 +363,13 @@ Game_Map.prototype.drill_ESeS_reflashSwitch = function() {	//该函数每次改�
 					var s_key = [this._mapId, temp_event._eventId, lock['switch'] ];
 					if( $gameSelfSwitches.value(s_key) !== true){
 						$gameSelfSwitches.drill_setValueWithOutChange(s_key,true);
-						need_reflash = true;
+						need_refresh = true;
 					}
 				}else if( temp_event._drill_ESeS_lockAutoOff == true ){
 					var s_key = [this._mapId, temp_event._eventId, lock['switch'] ];
 					if( $gameSelfSwitches.value(s_key) !== false){
 						$gameSelfSwitches.drill_setValueWithOutChange(s_key,false);
-						need_reflash = true;
+						need_refresh = true;
 					}
 				}
 			}
@@ -367,7 +377,7 @@ Game_Map.prototype.drill_ESeS_reflashSwitch = function() {	//该函数每次改�
 		
 	}
 	
-	if(need_reflash){
+	if(need_refresh){
 		$gameMap.requestRefresh();	//变化后手动刷新
 	}
 };

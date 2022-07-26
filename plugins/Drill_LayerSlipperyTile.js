@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        互动 - 物体滑行
+ * @plugindesc [v1.3]        图块 - 物体滑行
  * @author Drill_up
  * 
  * 
@@ -17,12 +17,16 @@
  * 能使得地图中指定的区域或者图块表面完全光滑，走在上面会一直滑行，
  * 
  * -----------------------------------------------------------------------------
+ * ----插件扩展
+ * 该插件可以单独使用。
+ * 
+ * -----------------------------------------------------------------------------
  * ----设定注意事项
- * 1.插件的作用域：地图界面、战斗界面、菜单界面。
- *   作用于游戏存档。
- * 2.更多详细的介绍，去看看 "10.互动 > 关于物体滑行.docx"。
+ * 1.插件的作用域：地图界面。
+ *   作用于图块。
+ * 2.更多详细的介绍，去看看 "26.图块 > 关于物体滑行.docx"。
  * 3.插件需要将指定 地形标志 或 图块R区域 设为光滑地面，
- *   去看看 "10.互动 > 关于插件与图块R占用说明.xlsx"
+ *   去看看 "26.图块 > 关于插件与图块R占用说明.xlsx"
  * 细节：
  *   (1.滑行过程不能改变方向。
  *   (2.斜向滑行时，可以设置是否穿透对角两边的阻碍。
@@ -34,7 +38,7 @@
  * 注意事项：
  *   (1.滑行时，大部分移动路线指令是被阻塞的，包含 移动和转向 指令。
  *      如果滑行时需要强制转向，需要使用 插件指令或转向毯。
- *     （rmmv事件的转向会让角色暂停滑行，如果玩家一直按住方向键，会无视强制转向。）
+ *     （事件指令的转向会让角色暂停滑行，如果玩家一直按住方向键，会无视强制转向。）
  *   (2.注意，移动路线的 脚本 也是被阻塞的，只有滑行结束后才会执行。
  * 转向毯：
  *   (1.由于事件指令无法实现手动控制 事件与事件 的触发关系，
@@ -44,7 +48,7 @@
  *   (1.物体滑行功能中最常见的是冰面关卡。
  *      你可以组合 物体滑行+地形伤害 形成撞刺即死的迷宫。
  *   (2.除了光滑的冰面，当然还有本身就是大冰块的事件。
- *      大冰块事件可以用 制动开关 制作，具体去看"10.互动 > 关于物体滑行.docx"。
+ *      大冰块事件可以用 制动开关 制作，具体去看"26.图块 > 关于物体滑行.docx"。
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定
@@ -119,7 +123,7 @@
  *              80.00ms - 120.00ms（中消耗）
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
- * 时间复杂度： o(n^2)*o(移动路线执行数) 每帧
+ * 时间复杂度： o(n^2)*o(移动路线) 每帧
  * 测试方法：   去物体管理层、地图管理层、鼠标管理层转一圈测试就可以了。
  * 测试结果：   200个事件的地图中，消耗为：【86.45ms】
  *              100个事件的地图中，消耗为：【50.08ms】
@@ -140,6 +144,10 @@
  * [v1.1]
  * 修复了光滑图块中靠边的转向地毯，在玩家持续按方向键时不能转向的bug。
  * 优化了计算结构。
+ * [v1.2]
+ * 修改了插件的类型。优化了内部算法细节。
+ * [v1.3]
+ * 修改了插件分类。
  * 
  * 
  * 
@@ -195,14 +203,21 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^2)*o(移动路线执行数) 每帧
-//		性能测试因素	物体管理层
-//		性能测试消耗	50.08ms（drill_LST_isSlippery函数） 37.56ms（drill_LST_isOnSlipperyFloor函数） 150.81ms 120.52ms（200事件中）
-//		最坏情况		暂无
-//		备注			这里很难确定是不是光滑运算的问题，在光滑图块关卡中200事件，帧数保持在 6 帧左右。（Drill_EventContinuedEffect 有 508.46ms）
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^2)*o(移动路线) 每帧
+//		★性能测试因素	物体管理层
+//		★性能测试消耗	50.08ms（drill_LST_isSlippery函数） 37.56ms（drill_LST_isOnSlipperyFloor函数） 150.81ms 120.52ms（200事件中）
+//		★最坏情况		暂无
+//		★备注			这里很难确定是不是光滑运算的问题，在光滑图块关卡中200事件，帧数保持在 6 帧左右。（Drill_EventContinuedEffect 有 508.46ms）
+//		
+//		★优化记录
+//			2022-6-26优化
+//				将 drill_LST_isOnSlipperyFloor 变成单个状态位的函数。防止多次被调用时消耗大量性能。
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			事件滑行：
 //				->光滑地面
@@ -222,7 +237,9 @@
 //				x->滑行掉入深渊后回到滑行前位置
 //		
 //		★必要注意事项：
-//			暂无
+//			1.【该插件使用了事件容器】，必须考虑三种情况：初始化、切换地图时、切换贴图时，不然会出现指针错误！
+//				只要是装事件的容器，都需要考虑指针问题，不管是放在$gameMap还是$gameTemp中。
+//				另外，帧刷新判断时，最好每次变化直接【刷新统计】。
 //
 //		★其它说明细节：
 //			1.这里我没有注意到 滑行过程 中执行移动路线的可能性。
@@ -233,7 +250,6 @@
 //		★存在的问题：
 //			暂无
 //
-//
  
 //=============================================================================
 // ** 变量获取
@@ -242,6 +258,7 @@
 　　Imported.Drill_LayerSlipperyTile = true;
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_LayerSlipperyTile');
+	
 	
 	/*-----------------杂项------------------*/
 	DrillUp.g_LST_fix = String(DrillUp.parameters["是否修正区域判定"] || "true") === "true";
@@ -382,7 +399,7 @@ Game_Map.prototype.drill_LST_isEventExist = function( e_id ){
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_LayerSlipperyTile.js 互动 - 物体滑行】\n" +
+		alert( "【Drill_LayerSlipperyTile.js 图块 - 物体滑行】\n" +
 				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
 		return false;
 	}
@@ -505,6 +522,7 @@ Game_CharacterBase.prototype.initialize = function(){
 	_drill_LST_initialize.call(this);
 	this['_drill_LST_enable'] = true;				//滑行可用情况
 	this['_drill_LST_isSliding'] = false;			//滑行状态判断
+	this['_drill_LST_isOnSlipperyFloor'] = false;	//滑行位置判断
 	this['_drill_LST_slidingDirection'] = 0;		//滑行方向
 	this['_drill_LST_lastX'] = 0;					//滑行前位置X
 	this['_drill_LST_lastY'] = 0;					//滑行前位置Y
@@ -512,12 +530,13 @@ Game_CharacterBase.prototype.initialize = function(){
 //==============================
 // * 物体 - 访问器
 //==============================
-Game_CharacterBase.prototype.drill_LST_isSliding = function(){ return this['_drill_LST_isSliding']; }
+Game_CharacterBase.prototype.drill_LST_isSliding = function(){ return this['_drill_LST_isSliding'] == true; }
+Game_CharacterBase.prototype.drill_LST_isOnSlipperyFloor = function(){ return this['_drill_LST_isOnSlipperyFloor'] == true; }
 Game_CharacterBase.prototype.drill_LST_setSlide = function( b ){ this['_drill_LST_isSliding'] = b; }
 //==============================
-// * 物体 - 判断在光滑地面上
+// * 物体 - 获取光滑地面的判断
 //==============================
-Game_CharacterBase.prototype.drill_LST_isOnSlipperyFloor = function(){
+Game_CharacterBase.prototype.drill_LST_checkSlipperyFloor = function(){
 	
 	// > 性能优化
 	if( $gameMap._drill_LST_hasAnyStairTile == false ){ return false; }
@@ -534,7 +553,7 @@ Game_CharacterBase.prototype.drill_LST_isOnSlipperyFloor = function(){
 //==============================
 var _drill_LST_pattern = Game_CharacterBase.prototype.pattern;
 Game_CharacterBase.prototype.pattern = function() {
-	if( this.drill_LST_isOnSlipperyFloor() && this.hasStepAnime() == false ){
+	if( this.hasStepAnime() == false && this.drill_LST_isOnSlipperyFloor() ){
 		return DrillUp.g_LST_act;
 	}
 	return _drill_LST_pattern.call(this);
@@ -544,7 +563,7 @@ Game_CharacterBase.prototype.pattern = function() {
 //==============================
 var _drill_LST_realMoveSpeed = Game_CharacterBase.prototype.realMoveSpeed;
 Game_CharacterBase.prototype.realMoveSpeed = function() {
-	if( this.drill_LST_isOnSlipperyFloor() && DrillUp.g_LST_speedLock ){
+	if( DrillUp.g_LST_speedLock && this.drill_LST_isOnSlipperyFloor() ){
 		return DrillUp.g_LST_speed;
 	}
 	return _drill_LST_realMoveSpeed.call(this);
@@ -554,16 +573,20 @@ Game_CharacterBase.prototype.realMoveSpeed = function() {
 //==============================
 var _drill_LST_c_isDashing = Game_CharacterBase.prototype.isDashing;
 Game_CharacterBase.prototype.isDashing = function() {
+	var is_dashing = _drill_LST_c_isDashing.call(this);		//（先判断，尽可能不要先执行 drill_LST_isOnSlipperyFloor，费性能）
+	if( is_dashing == false ){ return false; }
 	if( this.drill_LST_isOnSlipperyFloor() ){ return false; }
-	return _drill_LST_c_isDashing.call(this);
+	return is_dashing;
 }
 //==============================
 // * 玩家 - 光滑地面上禁止奔跑
 //==============================
 var _drill_LST_p_isDashing = Game_Player.prototype.isDashing;
 Game_Player.prototype.isDashing = function() {
+	var is_dashing = _drill_LST_p_isDashing.call(this);
+	if( is_dashing == false ){ return false; }
 	if( this.drill_LST_isOnSlipperyFloor() ){ return false; }
-	return _drill_LST_p_isDashing.call(this);
+	return is_dashing;
 }
 //==============================
 // * 物体 - 滑行方向捕获
@@ -743,6 +766,9 @@ Game_CharacterBase.prototype.update = function(){
 			this.updateRoutineMove();
 		}
 	}
+	
+	// > 性能优化 - 用状态位获取 光滑地面的判断
+	this['_drill_LST_isOnSlipperyFloor'] = this.drill_LST_checkSlipperyFloor();
 }
 //==============================
 // * 移动路线 - 路线帧刷新
@@ -902,7 +928,7 @@ var _drill_LST_temp_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {	
 	_drill_LST_temp_initialize.call(this);
 	this._drill_LST_blanketTank = [];
-	this._drill_LST_needRefresh = true;
+	this._drill_LST_needRestatistics = true;
 };
 //==============================
 // * 容器 - 切换地图时
@@ -910,7 +936,7 @@ Game_Temp.prototype.initialize = function() {
 var _drill_LST_gmap_setup = Game_Map.prototype.setup;
 Game_Map.prototype.setup = function(mapId) {
 	$gameTemp._drill_LST_blanketTank = [];
-	$gameTemp._drill_LST_needRefresh = true;
+	$gameTemp._drill_LST_needRestatistics = true;
 	_drill_LST_gmap_setup.call(this,mapId);
 }
 //==============================
@@ -919,7 +945,7 @@ Game_Map.prototype.setup = function(mapId) {
 var _drill_LST_smap_createCharacters = Spriteset_Map.prototype.createCharacters;
 Spriteset_Map.prototype.createCharacters = function() {
 	$gameTemp._drill_LST_blanketTank = [];
-	$gameTemp._drill_LST_needRefresh = true;
+	$gameTemp._drill_LST_needRestatistics = true;
 	_drill_LST_smap_createCharacters.call(this);
 }
 
@@ -929,15 +955,14 @@ Spriteset_Map.prototype.createCharacters = function() {
 var _drill_LST_map_update = Game_Map.prototype.update;
 Game_Map.prototype.update = function(sceneActive) {
 	_drill_LST_map_update.call(this,sceneActive);
-	
-	this.drill_LST_refreshBlanketChecks();
+	this.drill_LST_updateRestatistics();
 };
 //==============================
 // ** 帧刷新 - 刷新统计
 //==============================
-Game_Map.prototype.drill_LST_refreshBlanketChecks = function() {
-	if( !$gameTemp._drill_LST_needRefresh ){ return }
-	$gameTemp._drill_LST_needRefresh = false;
+Game_Map.prototype.drill_LST_updateRestatistics = function() {
+	if( !$gameTemp._drill_LST_needRestatistics ){ return }
+	$gameTemp._drill_LST_needRestatistics = false;
 	
 	$gameTemp._drill_LST_blanketTank = [];
 	var events = this.events();

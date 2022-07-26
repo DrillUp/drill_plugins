@@ -17,6 +17,10 @@
  * 使得你可以播放事件持续执行的各种动作。
  * 
  * -----------------------------------------------------------------------------
+ * ----插件扩展
+ * 该插件可以单独使用。
+ * 
+ * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：地图界面。
  *   作用于 事件、玩家 。
@@ -97,13 +101,14 @@
  *   "玩家队员[1]"表示领队后面第一个跟随的队友。
  * 3.参数中"时间"、"周期"的单位是帧。1秒60帧。
  *   参数中"幅度"、"高度"的单位是像素。
- * 4."标准闪烁 : 持续时间[60] : 周期[30]"表示：
+ * 4.类型的更详细介绍，去看看 "7.行走图 > 关于动作效果.docx"。
+ * 5."标准闪烁 : 持续时间[60] : 周期[30]"表示：
  *    闪烁30帧，15帧透明，15帧不透明，持续60帧。也就是闪两次。
- * 5."旋转"类型中，一个周期旋转一整圈。
+ * 6."旋转"类型中，一个周期旋转一整圈。
  *   持续60帧，周期30帧，则表示图像旋转两圈后结束。
- * 6."空中飘浮"类型中，包含飘起、漂浮中、飘落三种状态。
+ * 7."空中飘浮"类型中，包含飘起、漂浮中、飘落三种状态。
  *   缓冲时间对应飘起飘落的时间，可以应用于某种法术的释放动作。
- * 7."(渐变)"类型的效果，无论周期、结束时间如何，在结束动作后，
+ * 8."(渐变)"类型的效果，无论周期、结束时间如何，在结束动作后，
  *   都能够在原状态下慢慢减速停住。
  * 
  * 以下是旧版本的指令，也可以用：
@@ -250,15 +255,20 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n)*o(镜像)*o(贴图处理) 每帧
-//		性能测试因素	地图管理层 125事件
-//		性能测试消耗	39.91ms（Sprite_Character.update）
-//		最坏情况		所有事件都在执行动作。
-//		备注			从原理上看，变化并没有那么复杂，只是图像一直在变。
-//						类似于滤镜，但没有滤镜消耗复杂。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n)*o(镜像)*o(贴图处理) 每帧
+//		★性能测试因素	地图管理层 125事件
+//		★性能测试消耗	39.91ms（Sprite_Character.update）
+//		★最坏情况		所有事件都在执行动作。
+//		★备注			从原理上看，变化并没有那么复杂，只是图像一直在变。
+//						类似于滤镜，但没有滤镜消耗复杂。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			持续动作效果：
 //				->动作
@@ -280,7 +290,7 @@
 //
 //		★必要注意事项：
 //			1.变化原理为：每帧都【固定初始值】，然后适时赋值公式变化值。
-//			2.由于rmmv函数中没有【Game_Character.prototype.update】，所以继承时要用【Game_CharacterBase.prototype.update】。
+//			2.由于rpg_object函数中没有【Game_Character.prototype.update】，所以继承时要用【Game_CharacterBase.prototype.update】。
 //			  之前继承了这个没有的函数，造成了举起物体插件出问题。
 //
 //		★其它说明细节：
@@ -445,7 +455,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					$gameSwitches.setValue( temp1, b );
 				}
 			}
-			if( type == "获取正在播放的类型" && Imported.Drill_CoreOfString ){
+			if( type == "获取正在播放的类型" && Imported.Drill_CoreOfString ){	//【系统 - 字符串核心】
 				temp1 = temp1.replace("字符串[","");
 				temp1 = temp1.replace("]","");
 				temp1 = Number(temp1);
@@ -480,13 +490,13 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				if( e_chars != null ){
 					for( var k=0; k < e_chars.length; k++ ){
 						e_chars[k].drill_ECE_stopEffect();
-						e_chars[k].drill_ECE_playSustainingFlash( Number(temp1),Number(temp2) );
+						e_chars[k].drill_ECE_playSustainingFlicker( Number(temp1),Number(temp2) );
 					}
 				}
 				if( p_chars != null ){
 					for( var k=0; k < p_chars.length; k++ ){
 						p_chars[k].drill_ECE_stopEffect();
-						p_chars[k].drill_ECE_playSustainingFlash( Number(temp1),Number(temp2) );
+						p_chars[k].drill_ECE_playSustainingFlicker( Number(temp1),Number(temp2) );
 					}
 				}
 			}
@@ -500,13 +510,13 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				if( e_chars != null ){
 					for( var k=0; k < e_chars.length; k++ ){
 						e_chars[k].drill_ECE_stopEffect();
-						e_chars[k].drill_ECE_playSustainingFlashCos( Number(temp1),Number(temp2) );
+						e_chars[k].drill_ECE_playSustainingFlickerCos( Number(temp1),Number(temp2) );
 					}
 				}
 				if( p_chars != null ){
 					for( var k=0; k < p_chars.length; k++ ){
 						p_chars[k].drill_ECE_stopEffect();
-						p_chars[k].drill_ECE_playSustainingFlashCos( Number(temp1),Number(temp2) );
+						p_chars[k].drill_ECE_playSustainingFlickerCos( Number(temp1),Number(temp2) );
 					}
 				}
 			}
@@ -1255,8 +1265,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( time == '无限时间' ){ time = 60*60*60*24*100; }else{ time = Number(time); }
 			if( temp1 == '领队' ){ 
 				if( type == '终止持续效果' ){ $gamePlayer.drill_ECE_stopEffect(); }
-				if( type == '标准闪烁' ){ $gamePlayer.drill_ECE_playSustainingFlash(time,period); }
-				if( type == '渐变闪烁' ){ $gamePlayer.drill_ECE_playSustainingFlashCos(time,period); }
+				if( type == '标准闪烁' ){ $gamePlayer.drill_ECE_playSustainingFlicker(time,period); }
+				if( type == '渐变闪烁' ){ $gamePlayer.drill_ECE_playSustainingFlickerCos(time,period); }
 				if( type == '顺时针旋转' ){ $gamePlayer.drill_ECE_playSustainingRotate(time,period,1); }
 				if( type == '逆时针旋转' ){ $gamePlayer.drill_ECE_playSustainingRotate(time,period,-1); }
 				if( type == '垂直卡片旋转' ){ $gamePlayer.drill_ECE_playSustainingRotateVer(time,period); }
@@ -1264,8 +1274,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			}
 			if( temp1 == '全部队员' ){ 
 				if( type == '终止持续效果' ){ $gamePlayer.drill_ECE_stopEffect(); $gamePlayer.followers().forEach(function(f){ f.drill_ECE_stopEffect(); },this); }
-				if( type == '标准闪烁' ){ $gamePlayer.drill_ECE_playSustainingFlash(time,period); $gamePlayer.followers().forEach(function(f){ f.drill_ECE_playSustainingFlash(time,period); },this); }
-				if( type == '渐变闪烁' ){ $gamePlayer.drill_ECE_playSustainingFlashCos(time,period); $gamePlayer.followers().forEach(function(f){ f.drill_ECE_playSustainingFlashCos(time,period); },this); }
+				if( type == '标准闪烁' ){ $gamePlayer.drill_ECE_playSustainingFlicker(time,period); $gamePlayer.followers().forEach(function(f){ f.drill_ECE_playSustainingFlicker(time,period); },this); }
+				if( type == '渐变闪烁' ){ $gamePlayer.drill_ECE_playSustainingFlickerCos(time,period); $gamePlayer.followers().forEach(function(f){ f.drill_ECE_playSustainingFlickerCos(time,period); },this); }
 				if( type == '顺时针旋转' ){ $gamePlayer.drill_ECE_playSustainingRotate(time,period,1); $gamePlayer.followers().forEach(function(f){ f.drill_ECE_playSustainingRotate(time,period,1); },this); }
 				if( type == '逆时针旋转' ){ $gamePlayer.drill_ECE_playSustainingRotate(time,period,-1); $gamePlayer.followers().forEach(function(f){ f.drill_ECE_playSustainingRotate(time,period,-1); },this); }
 				if( type == '垂直卡片旋转' ){ $gamePlayer.drill_ECE_playSustainingRotateVer(time,period); $gamePlayer.followers().forEach(function(f){ f.drill_ECE_playSustainingRotateVer(time,period); },this); }
@@ -1285,8 +1295,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				if( temp2 < _followers.length ){
 					if( _followers[temp2].opacity() == 0){ return; }
 					if( type == '终止持续效果' ){ _followers[temp2].drill_ECE_stopEffect(); }
-					if( type == '标准闪烁' ){ _followers[temp2].drill_ECE_playSustainingFlash(time,period); }
-					if( type == '渐变闪烁' ){ _followers[temp2].drill_ECE_playSustainingFlashCos(time,period); }
+					if( type == '标准闪烁' ){ _followers[temp2].drill_ECE_playSustainingFlicker(time,period); }
+					if( type == '渐变闪烁' ){ _followers[temp2].drill_ECE_playSustainingFlickerCos(time,period); }
 					if( type == '顺时针旋转' ){ _followers[temp2].drill_ECE_playSustainingRotate(time,period,1); }
 					if( type == '逆时针旋转' ){ _followers[temp2].drill_ECE_playSustainingRotate(time,period,-1); }
 					if( type == '垂直卡片旋转' ){ _followers[temp2].drill_ECE_playSustainingRotateVer(time,period); }
@@ -1298,8 +1308,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				if( temp2 < _followers.length ){
 					if( _followers[temp2].opacity() == 0){ return; }
 					if( type == '终止持续效果' ){ _followers[temp2].drill_ECE_stopEffect(); }
-					if( type == '标准闪烁' ){ _followers[temp2].drill_ECE_playSustainingFlash(time,period); }
-					if( type == '渐变闪烁' ){ _followers[temp2].drill_ECE_playSustainingFlashCos(time,period); }
+					if( type == '标准闪烁' ){ _followers[temp2].drill_ECE_playSustainingFlicker(time,period); }
+					if( type == '渐变闪烁' ){ _followers[temp2].drill_ECE_playSustainingFlickerCos(time,period); }
 					if( type == '顺时针旋转' ){ _followers[temp2].drill_ECE_playSustainingRotate(time,period,1); }
 					if( type == '逆时针旋转' ){ _followers[temp2].drill_ECE_playSustainingRotate(time,period,-1); }
 					if( type == '垂直卡片旋转' ){ _followers[temp2].drill_ECE_playSustainingRotateVer(time,period); }
@@ -1319,8 +1329,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				var e = $gameMap.event( this._eventId );
 				if( e.opacity() == 0){ return; }
 				if( type == '终止持续效果' ){ e.drill_ECE_stopEffect(); }
-				if( type == '标准闪烁'){ e.drill_ECE_playSustainingFlash(time,period); }
-				if( type == '渐变闪烁'){ e.drill_ECE_playSustainingFlashCos(time,period); }
+				if( type == '标准闪烁'){ e.drill_ECE_playSustainingFlicker(time,period); }
+				if( type == '渐变闪烁'){ e.drill_ECE_playSustainingFlickerCos(time,period); }
 				if( type == '顺时针旋转'  ){ e.drill_ECE_playSustainingRotate(time,period,1); }
 				if( type == '逆时针旋转'  ){ e.drill_ECE_playSustainingRotate(time,period,-1); }
 				if( type == '垂直卡片旋转'  ){ e.drill_ECE_playSustainingRotateVer(time,period); }
@@ -1339,8 +1349,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				var e = $gameMap.event( temp2 );
 				if( e.opacity() == 0){ return; }
 				if( type == '终止持续效果' ){ e.drill_ECE_stopEffect(); }
-				if( type == '标准闪烁' ){ e.drill_ECE_playSustainingFlash(time,period); }
-				if( type == '渐变闪烁' ){ e.drill_ECE_playSustainingFlashCos(time,period); }
+				if( type == '标准闪烁' ){ e.drill_ECE_playSustainingFlicker(time,period); }
+				if( type == '渐变闪烁' ){ e.drill_ECE_playSustainingFlickerCos(time,period); }
 				if( type == '顺时针旋转' ){ e.drill_ECE_playSustainingRotate(time,period,1); }
 				if( type == '逆时针旋转' ){ e.drill_ECE_playSustainingRotate(time,period,-1); }
 				if( type == '垂直卡片旋转' ){ e.drill_ECE_playSustainingRotateVer(time,period); }
@@ -1352,8 +1362,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				var e = $gameMap.event( e_id );
 				if( e.opacity() == 0){ return; }
 				if( type == '终止持续效果' ){ e.drill_ECE_stopEffect(); }
-				if( type == '标准闪烁' ){ e.drill_ECE_playSustainingFlash(time,period); }
-				if( type == '渐变闪烁' ){ e.drill_ECE_playSustainingFlashCos(time,period); }
+				if( type == '标准闪烁' ){ e.drill_ECE_playSustainingFlicker(time,period); }
+				if( type == '渐变闪烁' ){ e.drill_ECE_playSustainingFlickerCos(time,period); }
 				if( type == '顺时针旋转' ){ e.drill_ECE_playSustainingRotate(time,period,1); }
 				if( type == '逆时针旋转' ){ e.drill_ECE_playSustainingRotate(time,period,-1); }
 				if( type == '垂直卡片旋转' ){ e.drill_ECE_playSustainingRotateVer(time,period); }
@@ -1436,13 +1446,13 @@ Game_Event.prototype.drill_ECE_readPage = function( page_list ){
 					if( type == "标准闪烁" ){
 						temp1 = temp1.replace("周期[","");
 						temp1 = temp1.replace("]","");
-						this.drill_ECE_playSustainingFlash( time,Number(temp1) );
+						this.drill_ECE_playSustainingFlicker( time,Number(temp1) );
 					}
 					/*-----------------渐变闪烁------------------*/
 					if( type == "渐变闪烁" ){
 						temp1 = temp1.replace("周期[","");
 						temp1 = temp1.replace("]","");
-						this.drill_ECE_playSustainingFlashCos( time,Number(temp1) );
+						this.drill_ECE_playSustainingFlickerCos( time,Number(temp1) );
 					}
 					/*-----------------顺时针旋转------------------*/
 					if( type == "顺时针旋转" ){
@@ -1576,10 +1586,10 @@ Game_Event.prototype.drill_ECE_readPage = function( page_list ){
 				var temp1 = Number(args[3]);
 				var time = 60*60*60*24*100;
 				if( type == "标准闪烁" ){
-					this.drill_ECE_playSustainingFlash(time,temp1);
+					this.drill_ECE_playSustainingFlicker(time,temp1);
 				}
 				if( type == "渐变闪烁" ){
-					this.drill_ECE_playSustainingFlashCos(time,temp1);
+					this.drill_ECE_playSustainingFlickerCos(time,temp1);
 				}
 				if( type == "顺时针旋转" ){
 					this.drill_ECE_playSustainingRotate(time,temp1,1);
@@ -1758,7 +1768,11 @@ Game_Character.prototype.drill_ECE_isPlaying = function() {
 //==============================
 // * 物体 - 设置透明度
 //==============================
-Game_Character.prototype.drill_ECE_setOpacity = function(opacity) {
+Game_Character.prototype.drill_ECE_setOpacity = function( opacity ){
+	if( isNaN(opacity) ){
+		alert(	"【Drill_EventContinuedEffect.js 行走图 - 持续动作效果】\n" +
+				"错误，透明度赋值时出现了NaN错误值。");
+	}
 	this.setOpacity( opacity );
 }
 //==============================
@@ -1773,8 +1787,8 @@ Game_CharacterBase.prototype.update = function() {
 	if( this._Drill_ECE.real_width == -1 ){ return; }		//需要等图片加载完成
 	if( this._Drill_ECE.real_height == -1 ){ return; }
 	
-	this.drill_ECE_updateSustainingFlash();						//帧刷新 - 标准闪烁
-	this.drill_ECE_updateSustainingFlashCos();              	//帧刷新 - 渐变闪烁
+	this.drill_ECE_updateSustainingFlicker();						//帧刷新 - 标准闪烁
+	this.drill_ECE_updateSustainingFlickerCos();              	//帧刷新 - 渐变闪烁
 	this.drill_ECE_updateSustainingRotate();                	//帧刷新 - 顺时针/逆时针旋转
 	this.drill_ECE_updateSustainingRotateVer();             	//帧刷新 - 垂直卡片旋转
 	this.drill_ECE_updateSustainingRotateHor();             	//帧刷新 - 水平卡片旋转
@@ -1822,7 +1836,7 @@ Game_Character.prototype.drill_ECE_stopEffect = function() {
 //==============================
 // * 初始化 - 持续 标准闪烁
 //==============================
-Game_Character.prototype.drill_ECE_playSustainingFlash = function(time,period) {
+Game_Character.prototype.drill_ECE_playSustainingFlicker = function(time,period) {
 	var ef = this._Drill_ECE;
 	ef.playing_type = "标准闪烁";
 	ef.f_time = 0;
@@ -1836,7 +1850,7 @@ Game_Character.prototype.drill_ECE_playSustainingFlash = function(time,period) {
 //==============================
 // * 帧刷新 - 持续 标准闪烁
 //==============================
-Game_Character.prototype.drill_ECE_updateSustainingFlash = function() {
+Game_Character.prototype.drill_ECE_updateSustainingFlicker = function() {
 	var ef = this._Drill_ECE;
 	if( ef.playing_type != "标准闪烁" ){ return; }
 	
@@ -1865,7 +1879,7 @@ Game_Character.prototype.drill_ECE_updateSustainingFlash = function() {
 //==============================
 // * 初始化 - 持续 渐变闪烁
 //==============================
-Game_Character.prototype.drill_ECE_playSustainingFlashCos = function(time,period) {
+Game_Character.prototype.drill_ECE_playSustainingFlickerCos = function(time,period) {
 	var ef = this._Drill_ECE;
 	ef.playing_type = "渐变闪烁";
 	ef.f_time = 0;
@@ -1875,7 +1889,7 @@ Game_Character.prototype.drill_ECE_playSustainingFlashCos = function(time,period
 //==============================
 // * 帧刷新 - 持续 渐变闪烁
 //==============================
-Game_Character.prototype.drill_ECE_updateSustainingFlashCos = function() {
+Game_Character.prototype.drill_ECE_updateSustainingFlickerCos = function() {
 	var ef = this._Drill_ECE;
 	if( ef.playing_type != "渐变闪烁" ){ return; }
 	

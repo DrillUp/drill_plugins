@@ -15,6 +15,10 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 当聚集开关聚集的数量超过一定值时，可以触发独立开关。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----插件扩展
+ * 该插件可以单独使用。
  *
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -25,7 +29,7 @@
  *      传感器即遇到某些情况就会自动触发的事件。
  *      当聚集开关聚集的数量超过一定值时，独立开关会自动开启。
  *   (2.聚集开关的注释设置全都跨事件页。
- *      详细介绍去看看 "8.物体 > 开关大家族.docx"。
+ *      详细介绍去看看 "8.物体 > 大家族-开关.docx"。
  * 细节：
  *   (1.开关必须完全静止2帧之后，才会触发。
  *      并且三个开关同时被触发独立开关，如果你设置的为"自动执行"，
@@ -116,14 +120,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n)
-//		性能测试因素	消除砖块关卡
-//		性能测试消耗	38.98ms
-//		最坏情况		暂无
-//		备注			由于消除砖块和移动核心的持续下移(重力)有关，这里的性能消耗比较不稳定。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n)
+//		★性能测试因素	消除砖块关卡
+//		★性能测试消耗	38.98ms
+//		★最坏情况		暂无
+//		★备注			由于消除砖块和移动核心的持续下移(重力)有关，这里的性能消耗比较不稳定。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			聚集开关：
 //				->必须在停稳之后才可以触发（3帧）
@@ -139,7 +148,7 @@
 //				赋值的_c_switch是单个的聚集开关，_s_key和_s_lock是键值组。
 //			3.【该插件使用了事件容器】，必须考虑三种情况：初始化、切换地图时、切换贴图时，不然会出现指针错误！
 //				只要是装事件的容器，都需要考虑指针问题，不管是放在$gameMap还是$gameTemp中。
-//				另外，帧刷新判断时，最好每次变化直接【重刷容器】。
+//				另外，帧刷新判断时，最好每次变化直接【刷新统计】。
 //			
 //		★其它说明细节：
 //			1.每次检查坐标情况，来确定开关是否被压住。
@@ -248,28 +257,29 @@ Game_Event.prototype.drill_EGS_readPage = function( page_list ) {
 						temp1 = temp1.replace("聚集数量[","");
 						temp1 = temp1.replace("]","");
 						temp1 = Number(temp1);
-						$gameTemp._drill_EGS_needRefresh = true;
+						
 						this._drill_EGS._num = temp1;
 						this._drill_EGS._switch = temp3;
 						if( this._drill_EGS._tag == "" ){
 							this._drill_EGS._tag = "default";
 						}
+						$gameTemp._drill_EGS_needRestatistics = true;
 					}
 				}
 				if(args.length == 2){	//=>聚集开关 : 关闭聚集开关
 					var temp1 = String(args[1]);
 					if( temp1 == "关闭聚集开关" ){
-						$gameTemp._drill_EGS_needRefresh = true;
 						this._drill_EGS._switch = "";
 						this._drill_EGS._tag = "";
+						$gameTemp._drill_EGS_needRestatistics = true;
 					}
 				}
 				if(args.length == 4){	//=>聚集开关 : 聚集标签 : 红方块
 					var temp1 = String(args[1]);
 					var temp2 = String(args[3]);
 					if( temp1 == "聚集标签" ){
-						$gameTemp._drill_EGS_needRefresh = true;
 						this._drill_EGS._tag = temp2;
+						$gameTemp._drill_EGS_needRestatistics = true;
 					}
 				}
 			};
@@ -287,7 +297,7 @@ Game_Temp.prototype.initialize = function() {
 	_drill_EGS_temp_initialize.call(this);
 	this._drill_EGS_tags = [];
 	this._drill_EGS_switchs = {};
-	this._drill_EGS_needRefresh = true;
+	this._drill_EGS_needRestatistics = true;
 };
 //==============================
 // * 容器 - 切换地图时
@@ -296,7 +306,7 @@ var _drill_EGS_gmap_setup = Game_Map.prototype.setup;
 Game_Map.prototype.setup = function(mapId) {
 	$gameTemp._drill_EGS_tags = [];
 	$gameTemp._drill_EGS_switchs = {};
-	$gameTemp._drill_EGS_needRefresh = true;
+	$gameTemp._drill_EGS_needRestatistics = true;
 	_drill_EGS_gmap_setup.call(this,mapId);
 }
 //==============================
@@ -306,7 +316,7 @@ var _drill_EGS_smap_createCharacters = Spriteset_Map.prototype.createCharacters;
 Spriteset_Map.prototype.createCharacters = function() {
 	$gameTemp._drill_EGS_tags = [];
 	$gameTemp._drill_EGS_switchs = {};
-	$gameTemp._drill_EGS_needRefresh = true;
+	$gameTemp._drill_EGS_needRestatistics = true;
 	_drill_EGS_smap_createCharacters.call(this);
 }
 
@@ -314,19 +324,17 @@ Spriteset_Map.prototype.createCharacters = function() {
 // * 容器 - 帧刷新
 //==============================
 var _drill_EGS_map_update = Game_Map.prototype.update;
-Game_Map.prototype.update = function(sceneActive) {
-	_drill_EGS_map_update.call(this,sceneActive);
-	
-	this.drill_EGS_refreshSwitchChecks();
-	this.drill_EGS_updateSwitch();
+Game_Map.prototype.update = function( sceneActive ){
+	_drill_EGS_map_update.call( this, sceneActive );
+	this.drill_EGS_updateRestatistics();	//帧刷新 - 刷新统计
+	this.drill_EGS_updateSwitch();			//帧刷新 - 聚集开关
 };
-
 //==============================
-// * 帧刷新 - 刷新统计
+// * 容器 - 帧刷新 - 刷新统计
 //==============================
-Game_Map.prototype.drill_EGS_refreshSwitchChecks = function() {
-	if( !$gameTemp._drill_EGS_needRefresh ){ return }
-	$gameTemp._drill_EGS_needRefresh = false;
+Game_Map.prototype.drill_EGS_updateRestatistics = function() {
+	if( !$gameTemp._drill_EGS_needRestatistics ){ return }
+	$gameTemp._drill_EGS_needRestatistics = false;
 	
 	var events = this.events();
 	$gameTemp._drill_EGS_tags = [];

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        行走图 - GIF动画序列
+ * @plugindesc [v1.1]        行走图 - GIF动画序列
  * @author Drill_up
  * 
  * 
@@ -18,15 +18,16 @@
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该插件必须基于核心插件才能运行：
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfActionSequence    系统 - GIF动画序列核心★★v1.2及以上★★
+ *   - Drill_CoreOfActionSequence    系统-GIF动画序列核心★★v1.2及以上★★
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：地图界面。
  *   作用于行走图。
- * 2.更多详细内容，去看看 "7.行走图 > 关于行走图GIF动画序列核心.docx"。
+ * 2.更多详细内容，去看看 "7.行走图 > 关于行走图GIF动画序列.docx"。
  * 细节：
  *   (1.事件的 GIF动画序列 可以与消失/显现/持续动作效果叠加。
  *   (2.如果你配置的事件数量特别多，那么必然会造成显示延迟。
@@ -36,7 +37,7 @@
  *   (1.动画序列可以是一个简单的GIF，也可以是一组动作集。
  *      比如，单纯的事件动画播放，或者事件根据 变量 播放不同的动作。
  *      你需要先 动画序列核心 ，然后通过该插件调用指令实现事件GIF切换。
- *      具体可以去看看 "1.系统 > 关于GIF动画序列核心.docx" ，了解通过
+ *      具体可以去看看 "1.系统 > 大家族-GIF动画序列.docx" ，了解通过
  *      小工具配置GIF动画序列的方法。
  * 
  * -----------------------------------------------------------------------------
@@ -105,7 +106,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
- * 
+ * [v1.1]
+ * 修复了行走图播放序列时切换菜单会报错的bug。
  * 
  */
  
@@ -117,14 +119,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^2)*o(贴图处理) 每帧
-//		性能测试因素	对话管理层
-//		性能测试消耗	12.29ms, 18.78ms（drill_EASe_isPlaying 执行）
-//		最坏情况		所有事件都用动画序列。（其实也不坏…）
-//		备注			暂无
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^2)*o(贴图处理) 每帧
+//		★性能测试因素	对话管理层
+//		★性能测试消耗	12.29ms, 18.78ms（drill_EASe_isPlaying 执行）
+//		★最坏情况		所有事件都用动画序列。（其实也不坏…）
+//		★备注			暂无
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			行走图动画序列：
 //				->动画序列
@@ -138,6 +145,7 @@
 //			1.该插件将 核心插件 的接口进行了一一对应。
 //			  只修改贴图的 bitmap，其它都不影响。
 //			2.注意，数据（data）和 贴图装饰器（decorator）是分离的。
+//			3.为了保持贴图不会修改到数据，这里使用 _Drill_EASe_initSerial 序列号 来进行同步。
 //
 //		★其它说明细节：
 //			暂无
@@ -371,11 +379,10 @@ var _Drill_EASe_c_initialize = Game_Character.prototype.initialize;
 Game_Character.prototype.initialize = function() {
 	_Drill_EASe_c_initialize.call(this);	
 	
-	this._Drill_EASe_enabled = false;				//开关
-	this._Drill_EASe_data = null;					//动画序列数据
-	
-	this._Drill_EASe_commandInit = false;			//指令-对象初始化开关
-	this._Drill_EASe_commandDestroy = false;		//指令-对象销毁开关
+	this._Drill_EASe_enabled = false;			//开关
+	this._Drill_EASe_data = null;				//动画序列数据
+	this._Drill_EASe_initSerial = -1;			//创建用序列号
+	this._Drill_EASe_needDestroy = false;		//销毁标记
 }
 //==============================
 // * 事件 - 帧刷新
@@ -395,19 +402,22 @@ Game_CharacterBase.prototype.update = function() {
 var _Drill_EASe_c_erase = Game_Event.prototype.erase;
 Game_Event.prototype.erase = function() {
 	_Drill_EASe_c_erase.call(this);	
-	
-	this._Drill_EASe_commandDestroy = true;		//强制执行销毁指令
+	this._Drill_EASe_needDestroy = true;	//强制执行销毁指令
 }
-
 //==============================
 // * 事件 - 设置动画序列
 //==============================
 Game_Character.prototype.drill_EASe_setActionSequence = function( as_id ){
+	
+	// > 创建数据
 	this._Drill_EASe_enabled = true;
 	var data = JSON.parse(JSON.stringify( DrillUp.g_COAS_list[ as_id ] ));
 	data['waitForPreload'] = true;			//（开启预加载等待）
 	this._Drill_EASe_data = new Drill_COAS_Data( data );
-	this._Drill_EASe_commandInit = true;
+	
+	// > 创建用序列号
+	this._Drill_EASe_initSerial = new Date().getTime();	//（生成一个不重复的序列号）
+	this._Drill_EASe_needDestroy = false;
 }
 //==============================
 // * 事件 - 去除动画序列
@@ -415,7 +425,7 @@ Game_Character.prototype.drill_EASe_setActionSequence = function( as_id ){
 Game_Character.prototype.drill_EASe_removeActionSequence = function(){
 	this._Drill_EASe_enabled = false;
 	this._Drill_EASe_data = null;
-	this._Drill_EASe_commandDestroy = true;
+	this._Drill_EASe_needDestroy = true;
 }
 //==============================
 // * 动画序列 - 还原默认状态元集合
@@ -463,8 +473,8 @@ Game_Character.prototype.drill_EASe_stopAct = function(){
 var _drill_EASe_sp_initialize = Sprite_Character.prototype.initMembers;
 Sprite_Character.prototype.initMembers = function(){
     _drill_EASe_sp_initialize.call( this );
-	
-	this._drill_EASe_decorator = null;	//动画序列对象
+	this._drill_EASe_decorator = null;					//动画序列 对象
+	this._drill_EASe_decoratorCreateSerial = -1;		//动画序列 创建用序列号
 }
 //==============================
 // * 事件贴图 - 帧刷新
@@ -472,50 +482,60 @@ Sprite_Character.prototype.initMembers = function(){
 var _Drill_EASe_sp_update = Sprite_Character.prototype.update;
 Sprite_Character.prototype.update = function() {
 	_Drill_EASe_sp_update.call(this);	
-	
 	if( this._character == undefined ){ return; }
 	
-	// > 指令 - 初始化动画序列对象 
-	if( this._character._Drill_EASe_commandInit == true ){
-		this._character._Drill_EASe_commandInit = false;	
-		
-		if( this._drill_EASe_decorator != null ){		//（销毁旧对象）
-			this._drill_EASe_decorator.drill_COAS_destroy(); 
-		}
-		this._drill_EASe_decorator = new Drill_COAS_SpriteDecorator( this, this._character._Drill_EASe_data );
-	}
-	
-	// > 跨地图，贴图销毁时重建（要在初始化指令后面，防止new执行后立即销毁）
-	if( this._character._Drill_EASe_enabled == true &&
-		this._character._Drill_EASe_data != null &&
-		this._drill_EASe_decorator == null ){
-		
-		this._drill_EASe_decorator = new Drill_COAS_SpriteDecorator( this, this._character._Drill_EASe_data );
-	}
-	
-	// > 动画序列对象 帧刷新
-	if( this._character._Drill_EASe_enabled == true &&
-		this._drill_EASe_decorator != null ){
+	this.drill_EASe_updateCreate();			//帧刷新 - 创建对象
+	this.drill_EASe_updateDestroy();		//帧刷新 - 销毁对象
+	if( this.drill_EASe_isPlaying() ){		//帧刷新 - 动画序列
 		this._drill_EASe_decorator.update();
 	} 
-	
-	// > 指令 - 动画序列对象 销毁
-	if( this._character._Drill_EASe_commandDestroy == true ){
-		this._character._Drill_EASe_commandDestroy = false;	
-		if( this._drill_EASe_decorator != null ){		//（销毁旧对象）
-			this._drill_EASe_decorator.drill_COAS_destroy(); 
-		}
-	}
 };
 //==============================
-// * 事件贴图 - 阻塞 - 原贴图刷新
+// * 帧刷新 - 创建对象 监听
+//==============================
+Sprite_Character.prototype.drill_EASe_updateCreate = function() {
+	
+	// > 销毁开启时，不再创建
+	if( this._character._Drill_EASe_needDestroy == true ){ return; }
+	
+	if( this._drill_EASe_decoratorCreateSerial != this._character._Drill_EASe_initSerial ){
+		this._drill_EASe_decoratorCreateSerial =  this._character._Drill_EASe_initSerial;	
+		
+		// > 销毁旧对象
+		if( this._drill_EASe_decorator != null ){		
+			this._drill_EASe_decorator.drill_COAS_destroy(); 
+			this._drill_EASe_decorator = null;
+		}
+		
+		// > 创建对象
+		this._drill_EASe_decorator = new Drill_COAS_SpriteDecorator( this, this._character._Drill_EASe_data );
+	}
+}
+//==============================
+// * 帧刷新 - 销毁对象 监听
+//==============================
+Sprite_Character.prototype.drill_EASe_updateDestroy = function() {
+	
+	// > 销毁未开，不操作
+	if( this._character._Drill_EASe_needDestroy == false ){ return; }
+	
+	// > 销毁旧对象
+	if( this._drill_EASe_decorator != null ){
+		this._drill_EASe_decorator.drill_COAS_destroy(); 
+		this._drill_EASe_decorator = null;
+	}
+}
+
+//==============================
+// * 阻塞 - 原贴图刷新
 //==============================
 Sprite_Character.prototype.drill_EASe_isPlaying = function() {
+	if( this._drill_EASe_decorator == null ){ return false; }
 	if( this._character == undefined ){ return false; }
 	return this._character._Drill_EASe_enabled;
 }
 //==============================
-// * 事件贴图 - 阻塞 - 原贴图刷新
+// * 阻塞 - 原贴图刷新
 //==============================
 var _drill_EASe_sp_updateBitmap = Sprite_Character.prototype.updateBitmap;
 Sprite_Character.prototype.updateBitmap = function() {
@@ -523,11 +543,14 @@ Sprite_Character.prototype.updateBitmap = function() {
 	_drill_EASe_sp_updateBitmap.call(this);
 }
 //==============================
-// * 事件贴图 - 阻塞 - 原贴图刷新
+// * 阻塞 - 原贴图刷新
 //==============================
 var _drill_EASe_sp_updateFrame = Sprite_Character.prototype.updateFrame;
 Sprite_Character.prototype.updateFrame = function() {
+	
+	// > 播放时，阻塞贴图的 动画帧
 	if( this.drill_EASe_isPlaying() == true ){
+		if( this._drill_EASe_decorator.drill_COAS_isAllBitmapReady() == false ){ return; }
 		var pw = this.patternWidth();
 		var ph = this.patternHeight();
 		var sx = 0;
@@ -535,26 +558,40 @@ Sprite_Character.prototype.updateFrame = function() {
 		this.setFrame(sx, sy, pw, ph);
 		return;
 	}
+	
+	// > 原函数
 	_drill_EASe_sp_updateFrame.call(this);
 }
 //==============================
-// * 事件贴图 - 固定 - 原贴图切割宽
+// * 固定 - 原贴图切割宽
 //==============================
 var _drill_EASe_sp_patternWidth = Sprite_Character.prototype.patternWidth;
 Sprite_Character.prototype.patternWidth = function() {
+	
 	if( this.drill_EASe_isPlaying() == true ){
+		if( this._tileId > 0 ){	//（无bitmap情况）
+			return $gameMap.tileWidth();
+		}
 		return this.bitmap.width;
 	}
+	
+	// > 原函数
 	return _drill_EASe_sp_patternWidth.call(this);
 };
 //==============================
-// * 事件贴图 - 固定 - 原贴图切割高
+// * 固定 - 原贴图切割高
 //==============================
 var _drill_EASe_sp_patternHeight = Sprite_Character.prototype.patternHeight;
 Sprite_Character.prototype.patternHeight = function() {
+	
 	if( this.drill_EASe_isPlaying() == true ){
+		if( this._tileId > 0 ){	//（无bitmap情况）
+			return $gameMap.tileHeight();
+		}
 		return this.bitmap.height;
 	}
+	
+	// > 原函数
 	return _drill_EASe_sp_patternHeight.call(this);
 };
 
@@ -566,7 +603,7 @@ Sprite_Character.prototype.patternHeight = function() {
 }else{
 		Imported.Drill_EventActionSequence = false;
 		alert(
-			"【Drill_EventActionSequence.js 行走图-GIF动画序列】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
+			"【Drill_EventActionSequence.js 行走图 - GIF动画序列】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
 			"\n- Drill_CoreOfActionSequence  系统-GIF动画序列核心"
 		);
 }

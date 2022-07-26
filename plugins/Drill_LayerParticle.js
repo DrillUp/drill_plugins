@@ -19,7 +19,6 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 你可以在地图界面中放置一个或者多个粒子。
- * 【支持插件关联资源的打包、加密】
  * ★★必须放在 mog多层天气效果 插件的后面★★
  * 
  * -----------------------------------------------------------------------------
@@ -27,8 +26,8 @@
  * 该插件可以单独使用。
  * 插件也可以被下列插件扩展，实现特殊功能效果。
  * 可被扩展：
- *   - Drill_LayerDynamicMaskA     地图 - 地图动态遮罩板A
- *   - Drill_LayerDynamicMaskB     地图 - 地图动态遮罩板B
+ *   - Drill_LayerDynamicMaskA     地图-地图动态遮罩板A
+ *   - Drill_LayerDynamicMaskB     地图-地图动态遮罩板B
  *     地图粒子可添加动态遮罩，实现玩家通过 透视镜 看到局部图像的功能。
  * 
  * -----------------------------------------------------------------------------
@@ -38,18 +37,18 @@
  * 2.该插件可以装饰地图的各种层级。要了解更详细的组合方法，
  *   去看看 "17.主菜单 > 多层组合装饰（界面装饰）.docx"。
  * 3.该插件的指令较多且使用频繁，建议使用小工具：插件信息查看器。
- *   在开启rmmv软件时，并行使用读取器复制指令。
+ *   在开启游戏编辑器时，可以并行使用读取器复制指令。
  * 地图绑定：
  *   (1.每个配置绑定到一个指定的地图，可以多个配置绑定到同一个地图。
  *      注意配置中"所属地图"参数，"所属地图"要与你的地图id相对应。
- *   (2.留意rmmv编辑器下方的状态栏，地图id、坐标、缩放比例、事件id
+ *   (2.留意游戏编辑器下方的状态栏，地图id、坐标、缩放比例、事件id
  *      都有信息显示。
  * 地图层级：
  *   (1.你可以将粒子放置在地图的五种层级中，分别为：
  *      下层、中层、上层、图片层、最顶层
  *   (2.地图层级之间的关系为：
- *      rmmv远景 《 下层 《 rmmv图块 《 中层 《 rmmv玩家/事件 《 上层
- *      《 rmmv图片 《 图片层 《 rmmv对话框 《 最顶层
+ *      地图远景 《 下层 《 图块层 《 中层 《 事件/玩家层 《 上层
+ *      《 图片对象层 《 图片层 《 对话框集合 《 最顶层
  *   (3.最顶层的粒子，可以把地图界面最高层的对话框、窗口也给挡住。
  *   (4.处于同一 地图层级 时，将根据 图片层级 再先后排序。
  *   (5.如果你设置了粒子在 中层 ，你会发现粒子可能会切割图块画的
@@ -58,7 +57,7 @@
  * 位移比：
  *   (1.根据物理相对运动知识，近大远小，近快远慢的原则。要让远景看起
  *      来真的像”远景”，那需要设置位移比接近1.00，越接近1.00越远。
- *   (2.需要注意的是，rmmv远景和镜头位移比固定是0.00，所以rmmv的远景
+ *   (2.需要注意的是，地图远景和镜头位移比固定是0.00，所以地图远景
  *      每次调整都感觉不像远景，你需要换掉适合的含位移比的图层。
  *   (3.注意，位移比是根据 镜头 移动而移动，不是根据玩家移动而移动。
  *   (4.去看看最新版本的 文档图解 介绍，
@@ -1687,7 +1686,7 @@
  * @type boolean
  * @on 启用
  * @off 关闭
- * @desc 设置后，粒子会被 地图动态遮罩 遮住，通过特定的 透视镜 才能看到该粒子的部分画面。
+ * @desc 设置后，粒子会被 地图动态遮罩 遮住，通过特定的 透视镜 才能看到该粒子的部分图像。
  * @default false
  *
  * @param 关联的动态遮罩板
@@ -1711,15 +1710,20 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^2)*o(贴图处理) 每帧
-//		性能测试因素	特效管理层（6个背景，5个粒子，动态遮罩板B）
-//		性能测试消耗	15.32ms（drill_LPa_resetParticles）75.77ms（drill_LPa_updateBase）
-//		最坏情况		大量粒子+动态遮罩被使用。
-//		备注			在垃圾笔记本上测试，只有4帧，可能是因为动态遮罩的缘故。
-//						（在高配笔记本上，也会突然从60帧降到30帧）
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^2)*o(贴图处理) 每帧
+//		★性能测试因素	特效管理层（6个背景，5个粒子，动态遮罩板B）
+//		★性能测试消耗	15.32ms（drill_LPa_resetParticles）75.77ms（drill_LPa_updateBase）
+//		★最坏情况		大量粒子+动态遮罩被使用。
+//		★备注			在垃圾笔记本上测试，只有4帧，可能是因为动态遮罩的缘故。
+//						（在高配笔记本上，也会突然从60帧降到30帧）
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			多层地图粒子：
 //				->基本属性
@@ -2107,7 +2111,7 @@ Game_Map.prototype.scrollRight = function(distance) {
 
 
 //#############################################################################
-// ** 标准函数（地图层级）
+// ** 【标准模块】地图层级
 //#############################################################################
 //##############################
 // * 地图层级 - 添加贴图到层级【标准函数】
@@ -2167,7 +2171,7 @@ Scene_Map.prototype.drill_LPa_layerMoveingReference = function (x, y, reference,
 //==============================
 var _drill_LPa_map_createParallax = Spriteset_Map.prototype.createParallax;
 Spriteset_Map.prototype.createParallax = function() {
-	_drill_LPa_map_createParallax.call(this);		//rmmv远景 < 下层 < rmmv图块
+	_drill_LPa_map_createParallax.call(this);		//地图远景 < 下层 < 图块层
 	if( !this._drill_mapDownArea ){
 		this._drill_mapDownArea = new Sprite();
 		this._baseSprite.addChild(this._drill_mapDownArea);	
@@ -2178,7 +2182,7 @@ Spriteset_Map.prototype.createParallax = function() {
 //==============================
 var _drill_LPa_map_createTilemap = Spriteset_Map.prototype.createTilemap;
 Spriteset_Map.prototype.createTilemap = function() {
-	_drill_LPa_map_createTilemap.call(this);		//rmmv图块 < 中层 < rmmv玩家
+	_drill_LPa_map_createTilemap.call(this);		//图块层 < 中层 < 事件/玩家层
 	if( !this._drill_mapCenterArea ){
 		this._drill_mapCenterArea = new Sprite();
 		this._drill_mapCenterArea.z = 0.60;
@@ -2190,7 +2194,7 @@ Spriteset_Map.prototype.createTilemap = function() {
 //==============================
 var _drill_LPa_map_createDestination = Spriteset_Map.prototype.createDestination;
 Spriteset_Map.prototype.createDestination = function() {
-	_drill_LPa_map_createDestination.call(this);	//rmmv鼠标目的地 < 上层 < rmmv天气
+	_drill_LPa_map_createDestination.call(this);	//鼠标目的地 < 上层 < 天气层
 	if( !this._drill_mapUpArea ){
 		this._drill_mapUpArea = new Sprite();
 		this._baseSprite.addChild(this._drill_mapUpArea);	
@@ -2201,7 +2205,7 @@ Spriteset_Map.prototype.createDestination = function() {
 //==============================
 var _drill_LPa_map_createPictures = Spriteset_Map.prototype.createPictures;
 Spriteset_Map.prototype.createPictures = function() {
-	_drill_LPa_map_createPictures.call(this);		//rmmv图片 < 图片层 < rmmv对话框
+	_drill_LPa_map_createPictures.call(this);		//图片对象层 < 图片层 < 对话框集合
 	if( !this._drill_mapPicArea ){
 		this._drill_mapPicArea = new Sprite();
 		this.addChild(this._drill_mapPicArea);	
@@ -2212,7 +2216,7 @@ Spriteset_Map.prototype.createPictures = function() {
 //==============================
 var _drill_LPa_map_createAllWindows = Scene_Map.prototype.createAllWindows;
 Scene_Map.prototype.createAllWindows = function() {
-	_drill_LPa_map_createAllWindows.call(this);	//rmmv对话框 < 最顶层
+	_drill_LPa_map_createAllWindows.call(this);	//对话框集合 < 最顶层
 	if( !this._drill_SenceTopArea ){
 		this._drill_SenceTopArea = new Sprite();
 		this.addChild(this._drill_SenceTopArea);	
@@ -2484,7 +2488,7 @@ Scene_Map.prototype.drill_LPa_updateBase = function() {
 		spr.rotation += data['par_selfRotate'] /180*Math.PI;
 		
 		// > 过界刷新
-    	if( this.drill_LPa_needResetParticles(i) ){
+    	if( this.drill_LPa_isNeedResetParticles(i) ){
 			this.drill_LPa_resetParticles(i);
 		};
 	};
@@ -2611,7 +2615,7 @@ Scene_Map.prototype.drill_LPa_updateChange = function() {
 //==============================
 // * 粒子 - 重设条件
 //==============================	
-Scene_Map.prototype.drill_LPa_needResetParticles = function( i ){
+Scene_Map.prototype.drill_LPa_isNeedResetParticles = function( i ){
 	var spr = this._drill_LPa_particleTankOrg[i];
 	var data = this._drill_LPa_particleDataTank[i];
 	var p_data = $gameSystem._drill_LPa_dataTank_map[ spr['_parentIndex'] ];

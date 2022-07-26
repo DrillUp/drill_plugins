@@ -19,7 +19,10 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 你可以在战斗中放置一个或者多个战斗GIF。
- * 【支持插件关联资源的打包、加密】
+ * 
+ * -----------------------------------------------------------------------------
+ * ----插件扩展
+ * 该插件可以单独使用。
  *
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -31,8 +34,8 @@
  *   (1.你可以将背景放置在战斗的五种层级中，分别为：
  *      下层、上层、图片层、最顶层
  *   (2.战斗层级之间的关系为：
- *      rmmv底图 《 rmmv背景 《 下层 《 rmmv敌人/角色 《 上层
- *      《 rmmv图片 《 图片层 《 rmmv对话框 《 最顶层
+ *      底图 《 战斗背景 《 下层 《 敌人/角色层 《 上层
+ *      《 图片对象层 《 图片层 《 对话框集合 《 最顶层
  *   (3.最顶层可以把地图界面最高层的对话框、窗口也给挡住。
  *   (4.处于同一 战斗层级 时，将根据 图片层级 再先后排序。
  * 位移比：
@@ -849,14 +852,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^2)*o(贴图处理) 每帧
-//		性能测试因素	战斗界面
-//		性能测试消耗	7.62ms（drill_BGi_updateBase）
-//		最坏情况		无
-//		备注			无
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^2)*o(贴图处理) 每帧
+//		★性能测试因素	战斗界面
+//		★性能测试消耗	7.62ms（drill_BGi_updateBase）
+//		★最坏情况		无
+//		★备注			无
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			多层地图GIF：
 //				->基本属性
@@ -1139,7 +1147,7 @@ Game_System.prototype.initialize = function() {
 
 
 //#############################################################################
-// ** 标准函数（战斗层级）
+// ** 【标准模块】战斗层级
 //#############################################################################
 //##############################
 // * 战斗层级 - 添加贴图到层级【标准函数】
@@ -1223,7 +1231,7 @@ Spriteset_Battle.prototype.createLowerLayer = function() {
 //==============================
 var _drill_BGi_battle_createPictures = Spriteset_Battle.prototype.createPictures;
 Spriteset_Battle.prototype.createPictures = function() {
-	_drill_BGi_battle_createPictures.call(this);		//rmmv图片 < 图片层 < rmmv对话框
+	_drill_BGi_battle_createPictures.call(this);		//图片对象层 < 图片层 < 对话框集合
 	if( !this._drill_battlePicArea ){
 		this._drill_battlePicArea = new Sprite();
 		this.addChild(this._drill_battlePicArea);	
@@ -1234,7 +1242,7 @@ Spriteset_Battle.prototype.createPictures = function() {
 //==============================
 var _drill_BGi_battle_createAllWindows = Scene_Battle.prototype.createAllWindows;
 Scene_Battle.prototype.createAllWindows = function() {
-	_drill_BGi_battle_createAllWindows.call(this);	//rmmv对话框 < 最顶层
+	_drill_BGi_battle_createAllWindows.call(this);	//对话框集合 < 最顶层
 	if( !this._drill_SenceTopArea ){
 		this._drill_SenceTopArea = new Sprite();
 		this.addChild(this._drill_SenceTopArea);	

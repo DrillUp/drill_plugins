@@ -19,7 +19,10 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 玩家鼠标点击地图的某一个点时，会飘出一个指向标。
- * 【支持插件关联资源的打包、加密】
+ * 
+ * -----------------------------------------------------------------------------
+ * ----插件扩展
+ * 该插件可以单独使用。
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -65,7 +68,7 @@
  * 插件指令：>目的地指向标 : 切换样式 : 1
  * 
  * 1.数字表示对应配置的指向标编号。
- *   0表示rmmv默认的指向标(闪烁白矩形)。
+ *   0表示默认的指向标(闪烁白矩形)。
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -78,7 +81,7 @@
  *              80.00ms - 120.00ms（中消耗）
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
- * 时间复杂度： o(n)*o(贴图处理)
+ * 时间复杂度： o(n)*o(贴图处理) 每帧
  * 测试方法：   开启网格，去各个管理层测试性能。
  * 测试结果：   200个事件的地图中，平均消耗为：【5ms以下】
  *              100个事件的地图中，平均消耗为：【5ms以下】
@@ -110,7 +113,7 @@
  * @param 当前指向标
  * @type number
  * @min 0
- * @desc 当前对应的指向标，0表示rmmv默认的指向标(闪烁白矩形)。
+ * @desc 当前对应的指向标，0表示默认的指向标(闪烁白矩形)。
  * @default 0
  * 
  * @param ----指向标----
@@ -332,14 +335,20 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n)*o(贴图处理)
-//		性能测试因素	乱跑
-//		性能测试消耗	1.22ms（全图只有这一个sprite）
-//		最坏情况		无
-//		备注			无
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n)*o(贴图处理) 每帧
+//		★性能测试因素	乱跑
+//		★性能测试消耗	1.22ms（全图只有这一个sprite）
+//		★最坏情况		无
+//		★备注			无
+//		
+//		★优化记录		暂无
+//
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			目的地指向标：
 //				->目的地获取
@@ -395,8 +404,8 @@
 		data['zoom_enable'] = String( dataFrom["是否使用缩放效果"] || "false") === "true";
 		data['zoom_range'] = Number( dataFrom["缩放幅度"] || 0.08 );
 		data['zoom_speed'] = Number( dataFrom["缩放速度"] || 5.5 );
-		data['flash_enable'] = String( dataFrom["是否使用闪烁效果"] || "false") === "true";
-		data['flash_speed'] = Number( dataFrom["闪烁速度"] || 7.0 );
+		data['flicker_enable'] = String( dataFrom["是否使用闪烁效果"] || "false") === "true";
+		data['flicker_speed'] = Number( dataFrom["闪烁速度"] || 7.0 );
 		data['float_enable'] = String( dataFrom["是否使用漂浮效果"] || "true") === "true";
 		data['float_range'] = Number( dataFrom["漂浮幅度"] || 6 );
 		data['float_speed'] = Number( dataFrom["漂浮速度"] || 12.5 );
@@ -480,7 +489,7 @@ Spriteset_Map.prototype.drill_MDe_createDestination = function() {
 	if( this._destinationSprite ){this._tilemap.removeChild( this._destinationSprite ); }		//优化（重复创建需要去掉原来的）
 	$gameSystem._drill_MDe_curStyle = $gameSystem._drill_MDe_tarStyle;
 	if( $gameSystem._drill_MDe_curStyle == 0 ){
-		// > rmmv默认样式
+		// > 默认样式
 		this._destinationSprite = new Sprite_Destination();
 		this._destinationSprite.z = 9;
 		this._tilemap.addChild(this._destinationSprite);
@@ -712,9 +721,9 @@ Drill_MDe_DestSprite.prototype.drill_MDe_updateEffects = function() {
 	}
 	
 	// > 闪烁效果
-	if( data['flash_enable'] == true && this._drill_MDe_sprite ){
-		var flash_speed = data['flash_speed'];
-		this._drill_MDe_sprite.opacity = data['opacity']/2 + data['opacity']/2 * Math.cos( this._drill_time*flash_speed /180*Math.PI );
+	if( data['flicker_enable'] == true && this._drill_MDe_sprite ){
+		var flicker_speed = data['flicker_speed'];
+		this._drill_MDe_sprite.opacity = data['opacity']/2 + data['opacity']/2 * Math.cos( this._drill_time*flicker_speed /180*Math.PI );
 	}
 	
 	// > 漂浮效果

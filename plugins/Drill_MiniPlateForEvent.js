@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.5]        鼠标 - 事件说明窗口
+ * @plugindesc [v1.6]        鼠标 - 事件说明窗口
  * @author Drill_up
  *
  *
@@ -18,10 +18,11 @@
  *
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该插件 不能 单独使用，必须拥有下面插件作为基础，才能运行：
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfInput             系统 - 输入设备核心
- *   - Drill_CoreOfWindowAuxiliary   系统 - 窗口辅助核心
+ *   - Drill_CoreOfInput             系统-输入设备核心
+ *   - Drill_CoreOfWindowAuxiliary   系统-窗口辅助核心
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -58,7 +59,7 @@
  * 资源-自定义窗口皮肤
  * 资源-自定义背景图片
  *
- * 系统窗口与rmmv默认的window.png图片一样，可设置为不同的皮肤。
+ * 系统窗口与默认的window.png图片一样，可设置为不同的皮肤。
  * 图片布局不能根据窗口内容自适应，你需要合理控制的设置的说明文字。
  * 
  * -----------------------------------------------------------------------------
@@ -113,7 +114,7 @@
  *              80.00ms - 120.00ms（中消耗）
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
- * 时间复杂度： o(n^2) + o(图像处理) 每帧
+ * 时间复杂度： o(n^2)+o(贴图处理) 每帧
  * 测试方法：   指定地图中放置10个带有说明窗口的事件，测试触发情况。
  * 测试结果：   200个事件的地图中，平均消耗为：【32.18ms】
  *              100个事件的地图中，平均消耗为：【30.09ms】
@@ -138,6 +139,8 @@
  * 修改了内部结构，添加了强制刷新插件指令。
  * [v1.5]
  * 优化了内部整体结构，添加了地图层级的设置。添加了窗口中心锚点的设置。
+ * [v1.6]
+ * 优化了 强制刷新说明 指令的执行方式。
  * 
  * 
  * 
@@ -230,21 +233,21 @@
  * @parent ---窗口---
  * @type number
  * @min 0
- * @desc 窗口内容之间的行间距。（rmmv默认标准：36）
+ * @desc 窗口内容之间的行间距。（默认标准：36）
  * @default 10
  *
  * @param 窗口内边距
  * @parent ---窗口---
  * @type number
  * @min 0
- * @desc 窗口内容与窗口外框的内边距。（rmmv默认标准：18）
+ * @desc 窗口内容与窗口外框的内边距。（默认标准：18）
  * @default 10
  *
  * @param 窗口字体大小
  * @parent ---窗口---
  * @type number
  * @min 1
- * @desc 窗口的字体大小。注意图标无法根据字体大小变化。（rmmv默认标准：28）
+ * @desc 窗口的字体大小。注意图标无法根据字体大小变化。（默认标准：28）
  * @default 22
  *
  * @param 窗口附加宽度
@@ -286,14 +289,20 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^2) + o(图像处理) 每帧
-//		性能测试因素	鼠标乱晃
-//		性能测试消耗	30.09ms  39.97ms（update函数，在镜像Drill_Sprite_LRR中）
-//		最坏情况		当前视角，存在大批说明窗口的事件，并且玩家的鼠标乱晃。
-//						（该插件目前没有对最坏情况进行实测。）
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^2)+o(贴图处理) 每帧
+//		★性能测试因素	鼠标乱晃
+//		★性能测试消耗	30.09ms  39.97ms（update函数，在镜像Drill_Sprite_LRR中）
+//		★最坏情况		当前视角，存在大批说明窗口的事件，并且玩家的鼠标乱晃。
+//						（该插件目前没有对最坏情况进行实测。）
+//		★备注			无
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			事件说明窗口：
 //				->说明面板
@@ -422,7 +431,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					e_id = Number(temp1);
 				}
 				if( $gameMap.drill_MPFE_isEventExist( e_id ) == false ){ return; }
-				$gameMap.event( e_id )._drill_MPFE_eventNeedRefresh = true;
+				$gameMap.event( e_id )._drill_MPFE_eventContextSerial = new Date().getTime();	//（生成一个不重复的序列号）
 			}
 		}
 		if(args.length == 4){
@@ -490,15 +499,20 @@ Game_Temp.prototype.drill_MPFE_isReflectionSprite = function( sprite ){
 //==============================
 // * 事件贴图 - 初始化
 //==============================
+var _drill_MPFE_initMembers = Sprite_Character.prototype.initMembers;
+Sprite_Character.prototype.initMembers = function(){
+	_drill_MPFE_initMembers.call(this);
+	this._drill_MPFE_contextSerial = -1;
+};
 //var _drill_MPFE_setCharacter = Sprite_Character.prototype.setCharacter;
 //Sprite_Character.prototype.setCharacter = function( character ){		//图像改变，范围就改变
 //	_drill_MPFE_setCharacter.call(this,character);
-//    this.drill_MPFE_refreshTrigger();
+//    this.drill_MPFE_refreshContext();
 //};
 //==============================
 // * 事件贴图 - 刷新内容
 //==============================
-Sprite_Character.prototype.drill_MPFE_refreshTrigger = function() {
+Sprite_Character.prototype.drill_MPFE_refreshContext = function() {
 	if(!this._character ){ return; }
 	if( this._character.constructor.name !== "Game_Event" ){ return; }
 	var page = this._character.page();
@@ -557,7 +571,7 @@ Sprite_Character.prototype.update = function() {
 	
 	// > 切换图片时变化
     if( this.isImageChanged() ){
-		this.drill_MPFE_refreshTrigger();
+		this.drill_MPFE_refreshContext();
 	}
 	
 	// > 原函数
@@ -566,9 +580,10 @@ Sprite_Character.prototype.update = function() {
 	// > 强制刷新
 	if(!this._character ){ return; }
 	if( this._character.constructor.name !== "Game_Event" ){ return; }
-	if( this._character._drill_MPFE_eventNeedRefresh == true ){
-		this._character._drill_MPFE_eventNeedRefresh = false;
-		this.drill_MPFE_refreshTrigger();
+	if( this._character._drill_MPFE_eventContextSerial == undefined ){ return; }
+	if( this._drill_MPFE_contextSerial != this._character._drill_MPFE_eventContextSerial ){
+		this._drill_MPFE_contextSerial =  this._character._drill_MPFE_eventContextSerial;
+		this.drill_MPFE_refreshContext();
 	}
 }
 
@@ -644,7 +659,7 @@ Scene_Map.prototype._drill_MPFE_updateMiniPlate = function() {
 
 	// > 从地图贴图找起 >> 找到含event的Sprite_Character >> 刷新事件的注释
 	var char_sprites = this._spriteset._characterSprites;
-	for(var i=0; i< char_sprites.length; i++){
+	for(var i=0; i < char_sprites.length; i++){
 		var temp_sprite = char_sprites[i];
 		if( temp_sprite == undefined ){ continue; }
 		if( $gameTemp.drill_MPFE_isReflectionSprite(temp_sprite) ){ continue; }		//（跳过镜像情况）
@@ -685,7 +700,7 @@ Scene_Map.prototype._drill_MPFE_updateMiniPlate = function() {
 //==============================
 var _drill_MPFE_layer_createDestination = Spriteset_Map.prototype.createDestination;
 Spriteset_Map.prototype.createDestination = function() {
-	_drill_MPFE_layer_createDestination.call(this);	//rmmv鼠标目的地 < 上层 < rmmv天气
+	_drill_MPFE_layer_createDestination.call(this);	//鼠标目的地 < 上层 < 天气层
 	if( !this._drill_mapUpArea ){
 		this._drill_mapUpArea = new Sprite();
 		this._baseSprite.addChild(this._drill_mapUpArea);	
@@ -696,7 +711,7 @@ Spriteset_Map.prototype.createDestination = function() {
 //==============================
 var _drill_MPFE_layer_createPictures = Spriteset_Map.prototype.createPictures;
 Spriteset_Map.prototype.createPictures = function() {
-	_drill_MPFE_layer_createPictures.call(this);		//rmmv图片 < 图片层 < rmmv对话框
+	_drill_MPFE_layer_createPictures.call(this);		//图片对象层 < 图片层 < 对话框集合
 	if( !this._drill_mapPicArea ){
 		this._drill_mapPicArea = new Sprite();
 		this.addChild(this._drill_mapPicArea);	
@@ -707,7 +722,7 @@ Spriteset_Map.prototype.createPictures = function() {
 //==============================
 var _drill_MPFE_layer_createAllWindows = Scene_Map.prototype.createAllWindows;
 Scene_Map.prototype.createAllWindows = function() {
-	_drill_MPFE_layer_createAllWindows.call(this);	//rmmv对话框 < 最顶层
+	_drill_MPFE_layer_createAllWindows.call(this);	//对话框集合 < 最顶层
 	if( !this._drill_SenceTopArea ){
 		this._drill_SenceTopArea = new Sprite();
 		this.addChild(this._drill_SenceTopArea);	
@@ -981,7 +996,7 @@ Drill_MPFE_Window.prototype.drill_updateChecks = function() {
 	for(var i=0; i< this._drill_check_tank.length; i++){
 		var check = this._drill_check_tank[i];
 		
-		if ( this.drill_checkCondition(check) ) { 
+		if( this.drill_checkCondition(check) ){
 			is_visible = true; 
 			check_obj = check; 
 			break; 

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        系统 - 颜色核心
+ * @plugindesc [v1.4]        窗口字符 - 颜色核心
  * @author Drill_up
  * 
  * @Drill_LE_editForbidden
@@ -20,19 +20,19 @@
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该插件为基础核心，可以单独使用。
- * 插件也可以作用于以下子插件。
+ * 该插件可以单独使用。
+ * 该插件为基础核心，可以作用于以下子插件。
  * 可作用于：
- *   - Drill_ActorTextColor        UI - 角色文本颜色
- *   - Drill_EnemyTextColor        UI - 敌人文本颜色
- *   - Drill_ItemTextColor         UI - 物品+技能文本颜色
+ *   - Drill_ActorTextColor        UI-角色文本颜色
+ *   - Drill_EnemyTextColor        UI-敌人文本颜色
+ *   - Drill_ItemTextColor         UI-物品+技能文本颜色
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：战斗界面、菜单界面、地图界面。
  *   作用于任何显示文本的地方。
- * 2.如果想了解高级颜色设置方法，去看看 "13.UI > 关于文本颜色.docx"。
- * 3.如果想了解更多窗口字符，可以去看看 "15.对话框 > 关于窗口字符.docx"。
+ * 2.如果想了解高级颜色设置方法，去看看 "23.窗口字符 > 关于颜色核心.docx"。
+ * 3.如果想了解更多窗口字符，可以去看看 "23.窗口字符 > 关于窗口字符.docx"。
  * 细节：
  *   (1.由于颜色固定只能配置99种，高级颜色固定99种，渐变固定6种，
  *      如果超过了99，会出现数组错位，所以该插件被禁止修改最大值。
@@ -53,7 +53,7 @@
  * 窗口字符：\c[201]
  * 窗口字符：\c[202]
  * 
- * 1.rmmv中有默认32种颜色窗口字符，即 \c[0] - \c[31] 。
+ * 1.游戏中有默认32种颜色窗口字符，即 \c[0] - \c[31] 。
  * 2.颜色和高级颜色固定99种自定义设置。
  *   "\c[101] - \c[199]"对应了 颜色1 至 颜色99。
  *   "\c[201] - \c[299]"对应了 高级颜色1 至 高级颜色99。
@@ -68,6 +68,7 @@
  *  #8B4C39 棕     #797979 灰
  *  #FFFFFF 黑     #000000 白
  *
+ * 颜色代码大写小写字母都可以识别。
  * 如果你想配置更完美的颜色，推荐去这个网址找到你想要的颜色代码：
  * http://tool.oschina.net/commons?type=3
  *
@@ -103,6 +104,8 @@
  * 优化了内部结构以及注释。
  * [v1.3]
  * 修复了高级渐变色的角度bug，支持了0-360的角度设置。
+ * [v1.4]
+ * 修改了插件的分类。
  * 
  *
  * 
@@ -112,595 +115,595 @@
  * @param 颜色-1
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default {"标记":"==赤==","颜色代码":"#FF4444"}
  * 
  * @param 颜色-2
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default {"标记":"==橙==","颜色代码":"#FF784C"}
  * 
  * @param 颜色-3
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default {"标记":"==黄==","颜色代码":"#FFFF40"}
  * 
  * @param 颜色-4
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default {"标记":"==绿==","颜色代码":"#80FF80"}
  * 
  * @param 颜色-5
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default {"标记":"==青==","颜色代码":"#98F5FF"}
  * 
  * @param 颜色-6
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default {"标记":"==蓝==","颜色代码":"#40C0F0"}
  * 
  * @param 颜色-7
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default {"标记":"==紫==","颜色代码":"#8080FF"}
  * 
  * @param 颜色-8
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default {"标记":"==粉==","颜色代码":"#FF69B4"}
  * 
  * @param 颜色-9
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default {"标记":"==棕==","颜色代码":"#8B4C39"}
  * 
  * @param 颜色-10
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default {"标记":"==灰==","颜色代码":"#797979"}
  * 
  * @param 颜色-11
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default {"标记":"==黑==","颜色代码":"#000000"}
  * 
  * @param 颜色-12
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default {"标记":"==白==","颜色代码":"#FFFFFF"}
  * 
  * @param 颜色-13
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-14
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-15
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-16
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-17
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-18
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-19
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-20
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-21
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-22
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-23
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-24
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-25
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-26
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-27
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-28
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-29
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-30
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-31
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-32
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-33
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-34
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-35
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-36
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-37
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-38
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-39
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-40
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-41
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-42
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-43
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-44
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-45
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-46
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-47
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-48
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-49
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-50
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-51
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-52
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-53
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-54
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-55
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-56
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-57
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-58
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-59
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-60
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-61
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-62
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-63
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-64
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-65
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-66
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-67
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-68
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-69
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-70
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-71
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-72
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-73
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-74
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-75
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-76
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-77
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-78
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-79
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-80
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-81
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-82
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-83
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-84
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-85
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-86
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-87
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-88
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-89
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-90
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-91
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-92
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-93
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-94
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-95
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-96
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-97
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-98
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 颜色-99
  * @parent ---普通颜色---
  * @type struct<CommonColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  *
  *
@@ -711,595 +714,595 @@
  * @param 高级颜色-1
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default {"标记":"==白红纵向渐变==","渐变方向":"0","渐变节点-1":"0.20","渐变节点颜色-1":"#FFFFFF","渐变节点-2":"1.00","渐变节点颜色-2":"#FF3333","渐变节点-3":"","渐变节点颜色-3":"","渐变节点-4":"","渐变节点颜色-4":"","渐变节点-5":"","渐变节点颜色-5":"","渐变节点-6":"","渐变节点颜色-6":""}
  * 
  * @param 高级颜色-2
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default {"标记":"==白橙纵向渐变==","渐变方向":"0","渐变节点-1":"0.20","渐变节点颜色-1":"#FFFFFF","渐变节点-2":"1.00","渐变节点颜色-2":"#FF573C","渐变节点-3":"","渐变节点颜色-3":"","渐变节点-4":"","渐变节点颜色-4":"","渐变节点-5":"","渐变节点颜色-5":"","渐变节点-6":"","渐变节点颜色-6":""}
  * 
  * @param 高级颜色-3
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default {"标记":"==白黄纵向渐变==","渐变方向":"0","渐变节点-1":"0.20","渐变节点颜色-1":"#FFFFFF","渐变节点-2":"1.00","渐变节点颜色-2":"#FFFF20","渐变节点-3":"","渐变节点颜色-3":"","渐变节点-4":"","渐变节点颜色-4":"","渐变节点-5":"","渐变节点颜色-5":"","渐变节点-6":"","渐变节点颜色-6":""}
  * 
  * @param 高级颜色-4
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default {"标记":"==白绿纵向渐变==","渐变方向":"0","渐变节点-1":"0.20","渐变节点颜色-1":"#FFFFFF","渐变节点-2":"1.00","渐变节点颜色-2":"#27FF27","渐变节点-3":"","渐变节点颜色-3":"","渐变节点-4":"","渐变节点颜色-4":"","渐变节点-5":"","渐变节点颜色-5":"","渐变节点-6":"","渐变节点颜色-6":""}
  * 
  * @param 高级颜色-5
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default {"标记":"==白青纵向渐变==","渐变方向":"0","渐变节点-1":"0.20","渐变节点颜色-1":"#FFFFFF","渐变节点-2":"1.00","渐变节点颜色-2":"#88EDFF","渐变节点-3":"","渐变节点颜色-3":"","渐变节点-4":"","渐变节点颜色-4":"","渐变节点-5":"","渐变节点颜色-5":"","渐变节点-6":"","渐变节点颜色-6":""}
  * 
  * @param 高级颜色-6
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default {"标记":"==白蓝纵向渐变==","渐变方向":"0","渐变节点-1":"0.20","渐变节点颜色-1":"#FFFFFF","渐变节点-2":"1.00","渐变节点颜色-2":"#21A9F4","渐变节点-3":"","渐变节点颜色-3":"","渐变节点-4":"","渐变节点颜色-4":"","渐变节点-5":"","渐变节点颜色-5":"","渐变节点-6":"","渐变节点颜色-6":""}
  * 
  * @param 高级颜色-7
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default {"标记":"==白紫纵向渐变==","渐变方向":"0","渐变节点-1":"0.20","渐变节点颜色-1":"#FFFFFF","渐变节点-2":"1.00","渐变节点颜色-2":"#8330FF","渐变节点-3":"","渐变节点颜色-3":"","渐变节点-4":"","渐变节点颜色-4":"","渐变节点-5":"","渐变节点颜色-5":"","渐变节点-6":"","渐变节点颜色-6":""}
  * 
  * @param 高级颜色-8
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default {"标记":"==白粉纵向渐变==","渐变方向":"0","渐变节点-1":"0.20","渐变节点颜色-1":"#FFFFFF","渐变节点-2":"1.00","渐变节点颜色-2":"#FF69B4","渐变节点-3":"","渐变节点颜色-3":"","渐变节点-4":"","渐变节点颜色-4":"","渐变节点-5":"","渐变节点颜色-5":"","渐变节点-6":"","渐变节点颜色-6":""}
  * 
  * @param 高级颜色-9
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default {"标记":"==白棕纵向渐变==","渐变方向":"0","渐变节点-1":"0.20","渐变节点颜色-1":"#FFFFFF","渐变节点-2":"1.00","渐变节点颜色-2":"#7B3C29","渐变节点-3":"","渐变节点颜色-3":"","渐变节点-4":"","渐变节点颜色-4":"","渐变节点-5":"","渐变节点颜色-5":"","渐变节点-6":"","渐变节点颜色-6":""}
  * 
  * @param 高级颜色-10
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default {"标记":"==白灰纵向渐变==","渐变方向":"0","渐变节点-1":"0.20","渐变节点颜色-1":"#FFFFFF","渐变节点-2":"1.00","渐变节点颜色-2":"#797979","渐变节点-3":"","渐变节点颜色-3":"","渐变节点-4":"","渐变节点颜色-4":"","渐变节点-5":"","渐变节点颜色-5":"","渐变节点-6":"","渐变节点颜色-6":""}
  * 
  * @param 高级颜色-11
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-12
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default {"标记":"--白红横向渐变--","渐变方向":"90","渐变节点-1":"0.20","渐变节点颜色-1":"#FFFFFF","渐变节点-2":"1.00","渐变节点颜色-2":"#FF2222","渐变节点-3":"","渐变节点颜色-3":"","渐变节点-4":"","渐变节点颜色-4":"","渐变节点-5":"","渐变节点颜色-5":"","渐变节点-6":"","渐变节点颜色-6":""}
  * 
  * @param 高级颜色-13
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default {"标记":"--白绿横向渐变--","渐变方向":"90","渐变节点-1":"0.20","渐变节点颜色-1":"#FFFFFF","渐变节点-2":"1.00","渐变节点颜色-2":"#40FF40","渐变节点-3":"","渐变节点颜色-3":"","渐变节点-4":"","渐变节点颜色-4":"","渐变节点-5":"","渐变节点颜色-5":"","渐变节点-6":"","渐变节点颜色-6":""}
  * 
  * @param 高级颜色-14
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default {"标记":"--白蓝横向渐变--","渐变方向":"90","渐变节点-1":"0.20","渐变节点颜色-1":"#FFFFFF","渐变节点-2":"1.00","渐变节点颜色-2":"#40A0F0","渐变节点-3":"","渐变节点颜色-3":"","渐变节点-4":"","渐变节点颜色-4":"","渐变节点-5":"","渐变节点颜色-5":"","渐变节点-6":"","渐变节点颜色-6":""}
  * 
  * @param 高级颜色-15
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-16
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default {"标记":"==淡红斜向渐变==","渐变方向":"340","渐变节点-1":"0.00","渐变节点颜色-1":"#ff8e8e","渐变节点-2":"0.49","渐变节点颜色-2":"#ff8e8e","渐变节点-3":"0.51","渐变节点颜色-3":"#db4646","渐变节点-4":"1.00","渐变节点颜色-4":"#db4646","渐变节点-5":"","渐变节点颜色-5":"","渐变节点-6":"","渐变节点颜色-6":""}
  * 
  * @param 高级颜色-17
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default {"标记":"==淡橙斜向渐变==","渐变方向":"340","渐变节点-1":"0.00","渐变节点颜色-1":"#FFB079","渐变节点-2":"0.49","渐变节点颜色-2":"#FFB079","渐变节点-3":"0.51","渐变节点颜色-3":"#DF6816","渐变节点-4":"1.00","渐变节点颜色-4":"#DF6816","渐变节点-5":"","渐变节点颜色-5":"","渐变节点-6":"","渐变节点颜色-6":""}
  * 
  * @param 高级颜色-18
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default {"标记":"==淡黄斜向渐变==","渐变方向":"340","渐变节点-1":"0.00","渐变节点颜色-1":"#F9F0C0","渐变节点-2":"0.49","渐变节点颜色-2":"#F9F0C0","渐变节点-3":"0.51","渐变节点颜色-3":"#D9C23D","渐变节点-4":"1.00","渐变节点颜色-4":"#D9C23D","渐变节点-5":"","渐变节点颜色-5":"","渐变节点-6":"","渐变节点颜色-6":""}
  * 
  * @param 高级颜色-19
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default {"标记":"==淡绿斜向渐变==","渐变方向":"340","渐变节点-1":"0.00","渐变节点颜色-1":"#A9F1A8","渐变节点-2":"0.49","渐变节点颜色-2":"#A9F1A8","渐变节点-3":"0.51","渐变节点颜色-3":"#34A558","渐变节点-4":"1.00","渐变节点颜色-4":"#34A558","渐变节点-5":"","渐变节点颜色-5":"","渐变节点-6":"","渐变节点颜色-6":""}
  * 
  * @param 高级颜色-20
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default {"标记":"==淡青斜向渐变==","渐变方向":"340","渐变节点-1":"0.00","渐变节点颜色-1":"#B1D9FA","渐变节点-2":"0.49","渐变节点颜色-2":"#B1D9FA","渐变节点-3":"0.51","渐变节点颜色-3":"#2292C6","渐变节点-4":"1.00","渐变节点颜色-4":"#2292C6","渐变节点-5":"","渐变节点颜色-5":"","渐变节点-6":"","渐变节点颜色-6":""}
  * 
  * @param 高级颜色-21
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default {"标记":"==淡蓝斜向渐变==","渐变方向":"340","渐变节点-1":"0.00","渐变节点颜色-1":"#618FD5","渐变节点-2":"0.49","渐变节点颜色-2":"#618FD5","渐变节点-3":"0.51","渐变节点颜色-3":"#2260BC","渐变节点-4":"1.00","渐变节点颜色-4":"#2260BC","渐变节点-5":"","渐变节点颜色-5":"","渐变节点-6":"","渐变节点颜色-6":""}
  * 
  * @param 高级颜色-22
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default {"标记":"==淡紫斜向渐变==","渐变方向":"340","渐变节点-1":"0.00","渐变节点颜色-1":"#B95DE3","渐变节点-2":"0.49","渐变节点颜色-2":"#B95DE3","渐变节点-3":"0.51","渐变节点颜色-3":"#8B22BC","渐变节点-4":"1.00","渐变节点颜色-4":"#8B22BC","渐变节点-5":"","渐变节点颜色-5":"","渐变节点-6":"","渐变节点颜色-6":""}
  * 
  * @param 高级颜色-23
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default {"标记":"==淡灰斜向渐变==","渐变方向":"340","渐变节点-1":"0.00","渐变节点颜色-1":"#B2B2B2","渐变节点-2":"0.49","渐变节点颜色-2":"#B2B2B2","渐变节点-3":"0.51","渐变节点颜色-3":"#7F7F7F","渐变节点-4":"1.00","渐变节点颜色-4":"#7F7F7F","渐变节点-5":"","渐变节点颜色-5":"","渐变节点-6":"","渐变节点颜色-6":""}
  * 
  * @param 高级颜色-24
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-25
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-26
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-27
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-28
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-29
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-30
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-31
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-32
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-33
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-34
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-35
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-36
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-37
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-38
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-39
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-40
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-41
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-42
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-43
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-44
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-45
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-46
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-47
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-48
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-49
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-50
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-51
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-52
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-53
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-54
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-55
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-56
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-57
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-58
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-59
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-60
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-61
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-62
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-63
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-64
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-65
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-66
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-67
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-68
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-69
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-70
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-71
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-72
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-73
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-74
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-75
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-76
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-77
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-78
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-79
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-80
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-81
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-82
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-83
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-84
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-85
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-86
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-87
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-88
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-89
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-90
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-91
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-92
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-93
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-94
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-95
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-96
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-97
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-98
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
  * @param 高级颜色-99
  * @parent ---高级颜色---
  * @type struct<GradientColor>
- * @desc 自定义你的配置颜色。
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  *
  *
@@ -1386,14 +1389,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		单次执行
-//		时间复杂度		o(n^2)
-//		性能测试因素	菜单界面的物品
-//		性能测试消耗	3.70ms
-//		最坏情况		暂无
-//		备注			能够在性能列表中找到消耗，但是很小。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		单次执行
+//		★时间复杂度		o(n^2)
+//		★性能测试因素	菜单界面的物品
+//		★性能测试消耗	3.70ms
+//		★最坏情况		暂无
+//		★备注			能够在性能列表中找到消耗，但是很小。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			颜色核心：
 //				->普通颜色
@@ -1454,16 +1462,16 @@
 	// * 临时全局 - 获取普通颜色
 	//==============================
 	DrillUp.drill_COC_getColor = function( n ) {
-		if( !DrillUp.g_COC_color_list[n] ){ console.log("【系统-颜色核心】普通颜色接受到一个无效的参数："+n+"。" ); return "#ffffff" }
-		if( !DrillUp.g_COC_color_list[n]['color'] ){ console.log("【系统-颜色核心】你没有在 颜色-"+n+" 中配置颜色，而你在游戏中使用了它。" ); return "#ffffff" }
+		if( !DrillUp.g_COC_color_list[n] ){ console.log("【窗口字符-颜色核心】普通颜色接受到一个无效的参数："+n+"。" ); return "#ffffff" }
+		if( !DrillUp.g_COC_color_list[n]['color'] ){ console.log("【窗口字符-颜色核心】你没有在 颜色-"+n+" 中配置颜色，而你在游戏中使用了它。" ); return "#ffffff" }
 		return DrillUp.g_COC_color_list[n]['color'];
 	}
 	//==============================
 	// * 临时全局 - 获取高级颜色
 	//==============================
 	DrillUp.drill_COC_getSeniorColor = function( n ) {
-		if( !DrillUp.g_COC_seniorColor_list[n] ){ console.log("【系统-颜色核心】高级颜色接受到一个无效的参数："+n+"。" ); return "#ffffff" }
-		if( !DrillUp.g_COC_seniorColor_list[n]['color'] ){ console.log("【系统-颜色核心】你没有在 高级颜色-"+n+" 中配置颜色，而你在游戏中使用了它。" ); return "#ffffff" }
+		if( !DrillUp.g_COC_seniorColor_list[n] ){ console.log("【窗口字符-颜色核心】高级颜色接受到一个无效的参数："+n+"。" ); return "#ffffff" }
+		if( !DrillUp.g_COC_seniorColor_list[n]['color'] ){ console.log("【窗口字符-颜色核心】你没有在 高级颜色-"+n+" 中配置颜色，而你在游戏中使用了它。" ); return "#ffffff" }
 		return DrillUp.g_COC_seniorColor_list[n]['color'];
 	}
 	
@@ -1543,7 +1551,7 @@ Bitmap.prototype._drawTextBody = function( text, tx, ty, maxWidth ){
 			var y_0 = midPoint.y;
 			var x_1 = midPoint.x + width/2;
 			var y_1 = midPoint.y;
-		}else if( radian <= angle_lim ){
+		}else if( radian <= angle_lim || radian > 2*Math.PI - angle_lim ){
 			var x_0 = midPoint.x + height/2 * Math.tan(radian);
 			var y_0 = midPoint.y - height/2;
 			var x_1 = midPoint.x - height/2 * Math.tan(radian);

@@ -22,9 +22,10 @@
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 插件不能单独使用，必须基于 滚轴核心 插件。
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfScreenRoller 系统 - 滚轴核心
+ *   - Drill_CoreOfScreenRoller     系统-滚轴核心
  *     必须基于该插件才能滚轴播放内容。
  *
  * -----------------------------------------------------------------------------
@@ -77,7 +78,7 @@
  * 工作类型：   持续执行
  * 时间复杂度： o(n^2)*o(场景元素) 每帧
  * 测试方法：   直接进入该信息面板进行测试。
- * 测试结果：   该菜单面板中，基本元素消耗为：【10.97ms】
+ * 测试结果：   在菜单界面中，基本元素消耗为：【10.97ms】
  * 
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
  *   测试结果并不是精确值，范围在给定值的10ms范围内波动。
@@ -106,7 +107,7 @@
  * 
  * @param 资源-整体布局
  * @parent ----杂项----
- * @desc 整体布局的图片资源。静态放置在面板最上层，一般为面板的框架画面。
+ * @desc 整体布局的图片资源。静态放置在面板最上层，一般为面板的框架图像。
  * @default 制作组-整体布局
  * @require 1
  * @dir img/titles2/
@@ -567,18 +568,23 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^2)*o(场景元素) 每帧
-//		性能测试因素	直接进入信息面板进行测试。
-//		性能测试消耗	13.65ms  10.97ms
-//		最坏情况		无
-//		备注			无
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^2)*o(场景元素) 每帧
+//		★性能测试因素	直接进入信息面板进行测试。
+//		★性能测试消耗	13.65ms  10.97ms
+//		★最坏情况		无
+//		★备注			无
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			制作组：
 //				->内容遮罩
-//				->滚轴画面
+//				->滚轴窗口
 //				->加速滚轴按键
 //				->退出滚轴按键
 // 
@@ -594,7 +600,6 @@
 //		★存在的问题：
 //			暂无
 //
-//
  
 //=============================================================================
 // ** 变量获取
@@ -604,15 +609,17 @@
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_SceneCredits');
 	
+	
+	/*-----------------杂项------------------*/
     DrillUp.g_SCr_commandName = String(DrillUp.parameters['用语-制作组'] || "制作组");
     DrillUp.g_SCr_layout = String(DrillUp.parameters['资源-整体布局'] || "");
     DrillUp.g_SCr_contextMask = String(DrillUp.parameters['资源-内容遮罩'] || "");
     DrillUp.g_SCr_opacityShow = String(DrillUp.parameters['是否初始阶段渐变显示'] || "true") == "true";
     DrillUp.g_SCr_opacitySpeed = Number(DrillUp.parameters['渐变速度'] || 2);
 
+	/*-----------------阶段------------------*/
 	DrillUp.g_SCr_list_length = 40;
 	DrillUp.g_SCr_list = [];
-	
 	for (var i = 0; i < DrillUp.g_SCr_list_length; i++) {
 		if( DrillUp.parameters['阶段-' + String(i+1) ] != "" &&
 			DrillUp.parameters['阶段-' + String(i+1) ] != undefined ){
@@ -762,7 +769,7 @@ Scene_Drill_SCr.prototype.drill_updateMask = function() {
 	}
 }
 //==============================
-// * 帧刷新 - 退出画面
+// * 帧刷新 - 退出
 //==============================
 Scene_Drill_SCr.prototype.drill_updateQuit = function() {
 	
@@ -790,7 +797,7 @@ Scene_Drill_SCr.prototype.drill_updateQuit = function() {
 }else{
 		Imported.Drill_SceneCredits = false;
 		alert(
-			"【Drill_SceneCredits.js 标题-制作组】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
+			"【Drill_SceneCredits.js 标题 - 制作组】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
 			"\n- Drill_CoreOfScreenRoller 系统-滚轴核心"
 		);
 }

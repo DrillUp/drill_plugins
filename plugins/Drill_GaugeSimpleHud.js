@@ -10,6 +10,7 @@
  * @Drill_LE_parentKey ""
  * @Drill_LE_var "DrillUp.g_GSH_data_length"
  * 
+ * 
  * @help  
  * =============================================================================
  * +++ Drill_GaugeSimpleHud +++
@@ -18,13 +19,13 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 使得你可以在地图界面中快速显示一个或多个生命框。
- * 【支持插件关联资源的打包、加密】
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 插件必须基于核心。
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfGaugeMeter       系统 - 参数条核心
+ *   - Drill_CoreOfGaugeMeter       系统-参数条核心
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -501,14 +502,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^3)*o(贴图处理)  每帧
-//		性能测试因素	UI管理层
-//		性能测试消耗	12.52ms
-//		最坏情况		开了大量生命框，并且开了大量其他参数条相关的框，计算量会非常大。
-//		备注			暂无
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^3)*o(贴图处理)  每帧
+//		★性能测试因素	UI管理层
+//		★性能测试消耗	12.52ms
+//		★最坏情况		开了大量生命框，并且开了大量其他参数条相关的框，计算量会非常大。
+//		★备注			暂无
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			简单生命框：
 //				->结构
@@ -761,7 +767,7 @@ Game_System.prototype.initialize = function() {
 //==============================
 var _drill_GSH_layer_createParallax = Spriteset_Map.prototype.createParallax;
 Spriteset_Map.prototype.createParallax = function() {
-	_drill_GSH_layer_createParallax.call(this);		//rmmv远景 < 下层 < rmmv图块
+	_drill_GSH_layer_createParallax.call(this);		//地图远景 < 下层 < 图块层
 	if( !this._drill_mapDownArea ){
 		this._drill_mapDownArea = new Sprite();
 		this._baseSprite.addChild(this._drill_mapDownArea);	
@@ -772,7 +778,7 @@ Spriteset_Map.prototype.createParallax = function() {
 //==============================
 var _drill_GSH_layer_createTilemap = Spriteset_Map.prototype.createTilemap;
 Spriteset_Map.prototype.createTilemap = function() {
-	_drill_GSH_layer_createTilemap.call(this);		//rmmv图块 < 中层 < rmmv玩家
+	_drill_GSH_layer_createTilemap.call(this);		//图块层 < 中层 < 事件/玩家层
 	if( !this._drill_mapCenterArea ){
 		this._drill_mapCenterArea = new Sprite();
 		this._drill_mapCenterArea.z = 0.60;
@@ -784,7 +790,7 @@ Spriteset_Map.prototype.createTilemap = function() {
 //==============================
 var _drill_GSH_layer_createDestination = Spriteset_Map.prototype.createDestination;
 Spriteset_Map.prototype.createDestination = function() {
-	_drill_GSH_layer_createDestination.call(this);	//rmmv鼠标目的地 < 上层 < rmmv天气
+	_drill_GSH_layer_createDestination.call(this);	//鼠标目的地 < 上层 < 天气层
 	if( !this._drill_mapUpArea ){
 		this._drill_mapUpArea = new Sprite();
 		this._baseSprite.addChild(this._drill_mapUpArea);	
@@ -795,7 +801,7 @@ Spriteset_Map.prototype.createDestination = function() {
 //==============================
 var _drill_GSH_layer_createPictures = Spriteset_Map.prototype.createPictures;
 Spriteset_Map.prototype.createPictures = function() {
-	_drill_GSH_layer_createPictures.call(this);		//rmmv图片 < 图片层 < rmmv对话框
+	_drill_GSH_layer_createPictures.call(this);		//图片对象层 < 图片层 < 对话框集合
 	if( !this._drill_mapPicArea ){
 		this._drill_mapPicArea = new Sprite();
 		this.addChild(this._drill_mapPicArea);	
@@ -806,7 +812,7 @@ Spriteset_Map.prototype.createPictures = function() {
 //==============================
 var _drill_GSH_layer_createAllWindows = Scene_Map.prototype.createAllWindows;
 Scene_Map.prototype.createAllWindows = function() {
-	_drill_GSH_layer_createAllWindows.call(this);	//rmmv对话框 < 最顶层
+	_drill_GSH_layer_createAllWindows.call(this);	//对话框集合 < 最顶层
 	if( !this._drill_SenceTopArea ){
 		this._drill_SenceTopArea = new Sprite();
 		this.addChild(this._drill_SenceTopArea);	

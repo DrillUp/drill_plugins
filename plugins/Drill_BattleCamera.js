@@ -5,7 +5,8 @@
 /*:
  * @plugindesc [v1.5]        战斗 - 活动战斗镜头
  * @author Drill_up
- *
+ * 
+ * 
  * @help  
  * =============================================================================
  * +++ Drill_BattleCamera +++
@@ -55,7 +56,7 @@
  *      如果你的战斗背景跟着你的镜头移动，那么很可能是因为你没有将
  *      位移比置0，由于背景往不同的方向移动，很可能会看到边界。
  *   (4.使用了其他相关镜头控制插件。
- *      首先确认一点，除了这个插件的插件指令可以缩放战斗画面。
+ *      首先确认一点，除了这个插件的插件指令可以缩放战斗图层。
  *      示例中【没有任何其他插件】会缩放战斗背景。
  *      如果你发现了战斗背景明显变大了，或者敌人大小和战斗背景大小
  *      明显不符，那么极有可能是其它插件进行了介入。造成了问题。
@@ -234,16 +235,21 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^3) 每帧
-//		性能测试因素	战斗界面
-//		性能测试消耗	12.69ms（drill_BCa_lockAnchor） 6.26ms（Spriteset_Battle.prototype.update）
-//		最坏情况		无
-//		备注			无
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^3) 每帧
+//		★性能测试因素	战斗界面
+//		★性能测试消耗	12.69ms（drill_BCa_lockAnchor） 6.26ms（Spriteset_Battle.prototype.update）
+//		★最坏情况		无
+//		★备注			无
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
-//			战斗镜头：
+//			战斗活动镜头：
 //				->镜头移动目标
 //					->标记
 //					->聚焦敌人
@@ -257,6 +263,23 @@
 //					->翻转的镜头
 //					x->镜头放大特写
 //				->其它插件兼容
+//				->单位贴图
+//					->获取 - 敌人容器指针【标准函数】
+//					->获取 - 根据敌方索引【标准函数】
+//					->获取 - 根据敌人ID【标准函数】
+//					->获取 - 角色容器指针【标准函数】
+//					->获取 - 根据我方索引【标准函数】
+//					->获取 - 根据角色ID【标准函数】
+//				->镜头属性
+//					->镜头范围【标准函数】
+//					->镜头架范围【标准函数】
+//					->镜头位置【标准函数】
+//					->缩放 - 当前X缩放值【标准函数】
+//					->缩放 - 当前Y缩放值【标准函数】
+//					->缩放 - 镜头的X 转 缩放后的X【标准函数】
+//					->缩放 - 镜头的Y 转 缩放后的Y【标准函数】
+//					->缩放 - 缩放后的X 转 镜头的X【标准函数】
+//					->缩放 - 缩放后的Y 转 镜头的Y【标准函数】
 //	
 //		★必要注意事项：
 //			1.该插件与弹道核心没有交互，为了独立开来，使用了弹道核心部分代码片段。
@@ -278,6 +301,7 @@
 　　Imported.Drill_BattleCamera = true;
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_BattleCamera');
+
 
 	/*-----------------杂项------------------*/
 	DrillUp.g_BCa_x = Number(DrillUp.parameters['平移-镜头 X'] || 0);
@@ -365,7 +389,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp1 = temp1.replace("敌方变量位置[","");
 					temp1 = temp1.replace("]","");
 					temp1 = $gameVariables.value(Number(temp1));
-					var temp_sprite = $gameTemp.drill_BFTT_getEnemySpriteByIndex(temp1-1);
+					var temp_sprite = $gameTemp.drill_BCa_getEnemySpriteByIndex(temp1-1);
 					if( temp_sprite != undefined ){
 						pos = [ temp_sprite.x, 
 								temp_sprite.y ];
@@ -374,7 +398,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp1 = temp1.replace("敌方位置[","");
 					temp1 = temp1.replace("]","");
 					temp1 = Number(temp1);
-					var temp_sprite = $gameTemp.drill_BFTT_getEnemySpriteByIndex(temp1-1);
+					var temp_sprite = $gameTemp.drill_BCa_getEnemySpriteByIndex(temp1-1);
 					if( temp_sprite != undefined ){
 						pos = [ temp_sprite.x, 
 								temp_sprite.y ];
@@ -384,7 +408,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp1 = temp1.replace("我方变量位置[","");
 					temp1 = temp1.replace("]","");
 					temp1 = $gameVariables.value(Number(temp1));
-					var temp_sprite = $gameTemp.drill_BFTT_getActorSpriteByIndex(temp1-1);
+					var temp_sprite = $gameTemp.drill_BCa_getActorSpriteByIndex(temp1-1);
 					if( temp_sprite != undefined ){
 						pos = [ temp_sprite.x, 
 								temp_sprite.y ];
@@ -393,7 +417,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp1 = temp1.replace("我方位置[","");
 					temp1 = temp1.replace("]","");
 					temp1 = Number(temp1);
-					var temp_sprite = $gameTemp.drill_BFTT_getActorSpriteByIndex(temp1-1);
+					var temp_sprite = $gameTemp.drill_BCa_getActorSpriteByIndex(temp1-1);
 					if( temp_sprite != undefined ){
 						pos = [ temp_sprite.x, 
 								temp_sprite.y ];
@@ -479,74 +503,6 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 
 
 //=============================================================================
-// ** 贴图标记 我方敌方
-//=============================================================================
-//==============================
-// * 标记容器 - 初始化
-//==============================
-var _drill_BCa_sTank_initialize = Game_Temp.prototype.initialize;
-Game_Temp.prototype.initialize = function() {
-	_drill_BCa_sTank_initialize.call(this);
-	
-	this._drill_BCa_EnemiesSpriteTank = [];			//敌人贴图
-	this._drill_BCa_ActorSpriteTank = [];			//角色贴图
-};
-//==============================
-// * 标记容器 - 获取敌方索引
-//==============================
-Game_Temp.prototype.drill_BCa_getEnemySpriteByIndex = function( index ) {
-	for(var i=0; i < this._drill_BCa_EnemiesSpriteTank.length; i++){
-		var enemy_sprite = this._drill_BCa_EnemiesSpriteTank[i];
-		if( enemy_sprite._battler == undefined ){ continue; }
-		if( enemy_sprite._battler.isEnemy() &&
-			enemy_sprite._battler.index() == index ){
-			return enemy_sprite;
-		}
-	}
-	return null;
-};
-//==============================
-// * 标记容器 - 获取我方索引
-//==============================
-Game_Temp.prototype.drill_BCa_getActorSpriteByIndex = function( index ) {
-	for(var i=0; i < this._drill_BCa_ActorSpriteTank.length; i++){
-		var actor_sprite = this._drill_BCa_ActorSpriteTank[i];
-		if( actor_sprite._battler == undefined ){ continue; }
-		if( actor_sprite._battler.isActor() &&
-			actor_sprite._battler.index() == index ){
-			return actor_sprite;
-		}
-	}
-	return null;
-};
-//==============================
-// * 捕获 - 战斗敌人贴图创建
-//==============================
-var _drill_BCa_sTank_createEnemies = Spriteset_Battle.prototype.createEnemies;
-Spriteset_Battle.prototype.createEnemies = function() {
-	_drill_BCa_sTank_createEnemies.call(this);
-	$gameTemp._drill_BCa_EnemiesSpriteTank = this._enemySprites;
-};
-//==============================
-// * 捕获 - 战斗角色贴图创建
-//==============================
-var _drill_BCa_sTank_createActors = Spriteset_Battle.prototype.createActors;
-Spriteset_Battle.prototype.createActors = function() {
-	_drill_BCa_sTank_createActors.call(this);
-	$gameTemp._drill_BCa_ActorSpriteTank = this._enemySprites;
-};
-//==============================
-// * 标记容器 - 清空
-//==============================
-var _drill_BCa_sTank_terminate = Scene_Battle.prototype.terminate;
-Scene_Battle.prototype.terminate = function() {
-	_drill_BCa_sTank_terminate.call(this);
-	$gameTemp._drill_BCa_EnemiesSpriteTank = [];		//敌人贴图
-	$gameTemp._drill_BCa_ActorSpriteTank = [];			//角色贴图
-};
-
-
-//=============================================================================
 // ** 存储变量初始化
 //=============================================================================	
 var _drill_BCa_sys_initialize = Game_System.prototype.initialize;
@@ -606,6 +562,283 @@ Game_Temp.prototype.drill_BCa_clearCamera = function() {
 	this._drill_cam_result_move_X = 0;					//镜头实际位移量X（存在问题，已弃用）
 	this._drill_cam_result_move_Y = 0;					//镜头实际位移量Y（存在问题，已弃用）
 };
+
+
+//#############################################################################
+// ** 【标准模块】单位贴图
+//#############################################################################
+//##############################
+// * 单位贴图 - 获取 - 敌人容器指针【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 贴图数组    （敌人贴图）
+//          
+//			说明：	> 此函数直接返回容器对象。
+//##############################
+Game_Temp.prototype.drill_BCa_getEnemySpriteTank = function(){
+	return this.drill_BCa_getEnemySpriteTank_Private();
+}
+//##############################
+// * 单位贴图 - 获取 - 根据敌方索引【标准函数】
+//				
+//			参数：	> index 数字 （敌方第n个位置，从0开始计数）
+//			返回：	> 贴图       （敌人贴图）
+//          
+//			说明：	暂无。
+//##############################
+Game_Temp.prototype.drill_BCa_getEnemySpriteByIndex = function( index ){
+	return this.drill_BCa_getEnemySpriteByIndex_Private( index );
+}
+//##############################
+// * 单位贴图 - 获取 - 根据敌人ID【标准函数】
+//				
+//			参数：	> enemy_id 数字（敌人ID）
+//			返回：	> 贴图数组     （敌人贴图数组）
+//          
+//			说明：	> 注意敌人可能有很多个，返回的是数组。
+//##############################
+Game_Temp.prototype.drill_BCa_getEnemySpriteByEnemyId = function( enemy_id ){
+	return this.drill_BCa_getEnemySpriteByEnemyId_Private( enemy_id );
+}
+//##############################
+// * 单位贴图 - 获取 - 角色容器指针【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 贴图数组   （角色贴图）
+//          
+//			说明：	> 此函数直接返回容器对象。
+//##############################
+Game_Temp.prototype.drill_BCa_getActorSpriteTank = function(){
+	return this.drill_BCa_getActorSpriteTank_Private();
+}
+//##############################
+// * 单位贴图 - 获取 - 根据我方索引【标准函数】
+//				
+//			参数：	> index 数字 （我方第n个位置，从0开始计数）
+//			返回：	> 贴图       （角色贴图）
+//          
+//			说明：	暂无。
+//##############################
+Game_Temp.prototype.drill_BCa_getActorSpriteByIndex = function( index ){
+	return this.drill_BCa_getActorSpriteByIndex_Private( index );
+}
+//##############################
+// * 单位贴图 - 获取 - 根据角色ID【标准函数】
+//				
+//			参数：	> actor_id 数字（角色ID）
+//			返回：	> sprite 贴图  （角色贴图）
+//          
+//			说明：	暂无。
+//##############################
+Game_Temp.prototype.drill_BCa_getActorSpriteByActorId = function( actor_id ){
+	return this.drill_BCa_getActorSpriteByActorId_Private( actor_id );
+}
+//=============================================================================
+// ** 单位贴图（接口实现）
+//=============================================================================
+//==============================
+// * 单位贴图容器 - 获取 - 敌人容器指针（私有）
+//==============================
+Game_Temp.prototype.drill_BCa_getEnemySpriteTank_Private = function(){
+	if( SceneManager._scene == undefined ){ return null; }
+	if( SceneManager._scene._spriteset == undefined ){ return null; }
+	return SceneManager._scene._spriteset._enemySprites;
+};
+//==============================
+// * 单位贴图容器 - 获取 - 根据敌方索引（私有）
+//==============================
+Game_Temp.prototype.drill_BCa_getEnemySpriteByIndex_Private = function( index ){
+	var sprite_list = this.drill_BCa_getEnemySpriteTank_Private();
+	if( sprite_list == undefined ){ return null; }
+	for(var i=0; i < sprite_list.length; i++){
+		var enemy_sprite = sprite_list[i];
+		if( enemy_sprite._battler == undefined ){ continue; }
+		if( enemy_sprite._battler.isEnemy() &&
+			enemy_sprite._battler.index() == index ){
+			return enemy_sprite;
+		}
+	}
+	return null;
+};
+//==============================
+// * 单位贴图容器 - 获取 - 根据敌人ID（私有）
+//==============================
+Game_Temp.prototype.drill_BCa_getEnemySpriteByEnemyId_Private = function( enemy_id ){
+	var sprite_list = this.drill_BCa_getEnemySpriteTank_Private();
+	if( sprite_list == undefined ){ return []; }
+	var result_list = [];
+	for(var i=0; i < sprite_list.length; i++){
+		var enemy_sprite = sprite_list[i];
+		if( enemy_sprite._battler == undefined ){ continue; }
+		if( enemy_sprite._battler.isEnemy() &&
+			enemy_sprite._battler.enemyId() == enemy_id ){
+			result_list.push( enemy_sprite );
+		}
+	}
+	return result_list;
+};
+//==============================
+// * 单位贴图容器 - 获取 - 角色容器指针（私有）
+//==============================
+Game_Temp.prototype.drill_BCa_getActorSpriteTank_Private = function(){
+	if( SceneManager._scene == undefined ){ return null; }
+	if( SceneManager._scene._spriteset == undefined ){ return null; }
+	return SceneManager._scene._spriteset._actorSprites;
+};
+//==============================
+// * 单位贴图容器 - 获取 - 根据我方索引（私有）
+//==============================
+Game_Temp.prototype.drill_BCa_getActorSpriteByIndex_Private = function( index ){
+	var sprite_list = this.drill_BCa_getActorSpriteTank_Private();
+	if( sprite_list == undefined ){ return null; }
+	for(var i=0; i < sprite_list.length; i++){
+		var actor_sprite = sprite_list[i];
+		if( actor_sprite._battler == undefined ){ continue; }
+		if( actor_sprite._battler.isActor() &&
+			actor_sprite._battler.index() == index ){
+			return actor_sprite;
+		}
+	}
+	return null;
+};
+//==============================
+// * 单位贴图容器 - 获取 - 根据角色ID（私有）
+//==============================
+Game_Temp.prototype.drill_BCa_getActorSpriteByActorId_Private = function( actor_id ){
+	var sprite_list = this.drill_BCa_getActorSpriteTank_Private();
+	if( sprite_list == undefined ){ return null; }
+	for(var i=0; i < sprite_list.length; i++){
+		var actor_sprite = sprite_list[i];
+		if( actor_sprite._battler == undefined ){ continue; }
+		if( actor_sprite._battler.isActor() &&
+			actor_sprite._battler.actorId() == actor_id ){
+			return actor_sprite;
+		}
+	}
+	return null;
+};
+
+
+
+//#############################################################################
+// ** 【标准模块】镜头属性
+//#############################################################################
+//##############################
+// * 镜头属性 - 镜头范围【标准函数】
+//				
+//			参数：	无
+//			返回：	> 矩形对象
+//          
+//			说明：	> 常规的镜头矩形范围，不含缩放情况。单位像素。
+//##############################
+Game_System.prototype.drill_BCa_getCameraRect = function(){
+	return this.drill_BCa_getCameraRect_Private();
+}
+//##############################
+// * 镜头属性 - 镜头架范围【标准函数】
+//				
+//			参数：	无
+//			返回：	> 矩形对象
+//          
+//			说明：	> 镜头架的矩形范围，单位像素。注意x，y可以为负数。
+//##############################
+Game_System.prototype.drill_BCa_getCameraHolderRect = function(){
+	return this.drill_BCa_getCameraHolderRect_Private();
+}
+//##############################
+// * 镜头属性 - 镜头位置【标准函数】
+//				
+//			参数：	无
+//			返回：	> 点对象
+//          
+//			说明：	> 注意，点位置可以为负数。
+//##############################
+Game_System.prototype.drill_BCa_curPos = function(){
+	return this.drill_BCa_curPos_Private();
+}
+//##############################
+// * 镜头属性 - 缩放 - 当前X缩放值【标准函数】
+//				
+//			参数：	无
+//			返回：	> 数字
+//          
+//			说明：	> 1.00表示默认缩放值。
+//##############################
+Game_System.prototype.drill_BCa_curScaleX = function(){
+	return 1;
+}
+//##############################
+// * 镜头属性 - 缩放 - 当前Y缩放值【标准函数】
+//				
+//			参数：	无
+//			返回：	> 数字
+//          
+//			说明：	> 1.00表示默认缩放值。
+//##############################
+Game_System.prototype.drill_BCa_curScaleY = function(){
+	return 1;
+}
+//##############################
+// * 镜头属性 - 缩放 - 镜头的X 转 缩放后的X【标准函数】
+//				
+//			参数：	> x 数字（镜头的X值）
+//			返回：	> 数字  （缩放后的X值）
+//##############################
+Game_System.prototype.drill_BCa_cameraToMapX = function( x ){
+	return x;
+}
+//##############################
+// * 镜头属性 - 缩放 - 镜头的Y 转 缩放后的Y【标准函数】
+//				
+//			参数：	> y 数字（镜头的Y值）
+//			返回：	> 数字  （缩放后的Y值）
+//##############################
+Game_System.prototype.drill_BCa_cameraToMapY = function( y ){
+	return y;
+}
+//##############################
+// * 镜头属性 - 缩放 - 缩放后的X 转 镜头的X【标准函数】
+//				
+//			参数：	> x 数字（缩放后的X值）
+//			返回：	> 数字  （镜头的X值）
+//##############################
+Game_System.prototype.drill_BCa_mapToCameraX = function( x ){
+	return x;
+}
+//##############################
+// * 镜头属性 - 缩放 - 缩放后的Y 转 镜头的Y【标准函数】
+//				
+//			参数：	> y 数字（缩放后的Y值）
+//			返回：	> 数字  （镜头的Y值）
+//##############################
+Game_System.prototype.drill_BCa_mapToCameraY = function( y ){
+	return y;
+}
+//=============================================================================
+// ** 镜头属性（接口实现）
+//=============================================================================
+//==============================
+// * 镜头属性 - 镜头范围（私有）
+//==============================
+Game_System.prototype.drill_BCa_getCameraRect_Private = function(){
+	return new Rectangle( 0, 0, Graphics.boxWidth, Graphics.boxHeight );
+}
+//==============================
+// * 镜头属性 - 镜头架范围（私有）
+//==============================
+Game_System.prototype.drill_BCa_getCameraHolderRect_Private = function(){
+	var x = ($gameSystem._drill_cam_limit_width - Graphics.boxWidth) * 0.5;
+	var y = ($gameSystem._drill_cam_limit_height - Graphics.boxHeight) * 0.5;
+	if( x < 0 ){ x = 0; }
+	if( y < 0 ){ y = 0; }
+	return new Rectangle( x, y, $gameSystem._drill_cam_limit_width, $gameSystem._drill_cam_limit_height );
+}
+//==============================
+// * 镜头属性 - 镜头位置（私有）
+//==============================
+Game_System.prototype.drill_BCa_curPos_Private = function(){
+	return {'x': $gameTemp._drill_cam_pos[0], 'y': $gameTemp._drill_cam_pos[1] };
+}
 
 
 //=============================================================================

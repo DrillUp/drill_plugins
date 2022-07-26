@@ -17,10 +17,14 @@
  * 物体停止移动超过限时时间后，立即触发独立开关。
  * 
  * -----------------------------------------------------------------------------
+ * ----插件扩展
+ * 该插件可以单独使用。
+ * 
+ * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：地图界面。
  *   只作用于事件。
- * 2.详细介绍可以去看看 "8.物体 > 开关大家族.docx"。
+ * 2.详细介绍可以去看看 "8.物体 > 大家族-开关.docx"。
  * 细节：
  *   (1.制动 即 "刹车"，是指将运行的汽车立即停下、减速的过程。 
  *      制动开关 即 制动监听器一类的开关。
@@ -139,14 +143,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^2) 每帧
-//		性能测试因素	弹丸反射关卡
-//		性能测试消耗	14.14ms（Game_CharacterBase.prototype.update）2.64ms（drill_EStS_readPage）11.89ms（drill_EStS_updateCommonSwitch）
-//		最坏情况		暂无
-//		备注			弹丸反射关卡中，低配电脑只稳定到5帧左右。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^2) 每帧
+//		★性能测试因素	弹丸反射关卡
+//		★性能测试消耗	14.14ms（Game_CharacterBase.prototype.update）2.64ms（drill_EStS_readPage）11.89ms（drill_EStS_updateCommonSwitch）
+//		★最坏情况		暂无
+//		★备注			弹丸反射关卡中，低配电脑只稳定到5帧左右。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			制动开关：
 //				->停止时计时
@@ -154,7 +163,7 @@
 //		★必要注意事项：
 //			1.【该插件使用了事件容器】，必须考虑三种情况：初始化、切换地图时、切换贴图时，不然会出现指针错误！
 //				只要是装事件的容器，都需要考虑指针问题，不管是放在$gameMap还是$gameTemp中。
-//				另外，帧刷新判断时，最好每次变化直接【重刷容器】。
+//				另外，帧刷新判断时，最好每次变化直接【刷新统计】。
 //			
 //		★其它说明细节：
 //			2022-2-1：
@@ -357,7 +366,7 @@ Game_Event.prototype.drill_EStS_readPage = function( page_list ){
 					if( temp2 == "作用于独立开关" ){
 						temp1 = temp1.replace("最大暂停时间[","");
 						temp1 = temp1.replace("]","");
-						$gameTemp._drill_EStS_needRefresh = true;
+						$gameTemp._drill_EStS_needRestatistics = true;
 						this._drill_EStS_data['switch'] = temp3;
 						this._drill_EStS_data['maxTime'] = Math.max( Number(temp1), 1 );
 					}
@@ -384,7 +393,7 @@ var _drill_EStS_temp_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {	
 	_drill_EStS_temp_initialize.call(this);
 	this._drill_EStS_switchTank = [];			//制动开关容器
-	this._drill_EStS_needRefresh = true;
+	this._drill_EStS_needRestatistics = true;
 };
 //==============================
 // * 容器 - 切换地图时
@@ -392,7 +401,7 @@ Game_Temp.prototype.initialize = function() {
 var _drill_EStS_gmap_setup = Game_Map.prototype.setup;
 Game_Map.prototype.setup = function(mapId) {
 	$gameTemp._drill_EStS_switchTank = [];		//制动开关容器
-	$gameTemp._drill_EStS_needRefresh = true;
+	$gameTemp._drill_EStS_needRestatistics = true;
 	_drill_EStS_gmap_setup.call(this,mapId);
 }
 //==============================
@@ -401,26 +410,24 @@ Game_Map.prototype.setup = function(mapId) {
 var _drill_EStS_smap_createCharacters = Spriteset_Map.prototype.createCharacters;
 Spriteset_Map.prototype.createCharacters = function() {
 	$gameTemp._drill_EStS_switchTank = [];		//制动开关容器
-	$gameTemp._drill_EStS_needRefresh = true;
+	$gameTemp._drill_EStS_needRestatistics = true;
 	_drill_EStS_smap_createCharacters.call(this);
 }
-
 //==============================
-// ** 容器 - 帧刷新
+// * 容器 - 帧刷新
 //==============================
 var _drill_EStS_map_update = Game_Map.prototype.update;
 Game_Map.prototype.update = function(sceneActive) {
 	_drill_EStS_map_update.call(this,sceneActive);
-	
-	this.drill_EStS_refreshSwitchChecks();		//帧刷新 - 刷新统计
+	this.drill_EStS_updateRestatistics();		//帧刷新 - 刷新统计
 	this.drill_EStS_updateCommonSwitch();		//帧刷新 - 制动开关触发
 };
 //==============================
-// ** 帧刷新 - 刷新统计
+// * 容器 - 帧刷新 - 刷新统计
 //==============================
-Game_Map.prototype.drill_EStS_refreshSwitchChecks = function() {
-	if( !$gameTemp._drill_EStS_needRefresh ){ return }
-	$gameTemp._drill_EStS_needRefresh = false;
+Game_Map.prototype.drill_EStS_updateRestatistics = function() {
+	if( !$gameTemp._drill_EStS_needRestatistics ){ return }
+	$gameTemp._drill_EStS_needRestatistics = false;
 	
 	$gameTemp._drill_EStS_switchTank = [];		//制动开关容器
 	
@@ -463,7 +470,7 @@ Game_Map.prototype.drill_EStS_updateCommonSwitch = function() {
 		if( temp_event._drill_EStS_curTime > temp_event._drill_EStS_data['maxTime'] ){
 			isTriggered = true;
 			
-			// > 标记上一次碰撞位置（斜向朝向情况）
+			// > 标记上一次碰撞位置（斜向朝向情况）【物体 - 事件转向】
 			if( Imported.Drill_EventDirection &&
 				temp_event.drill_EDi_isDirectionDiagonal() ){
 				var di = temp_event.drill_EDi_getDiagonalDirection( temp_event.direction() );

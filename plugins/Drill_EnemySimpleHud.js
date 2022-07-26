@@ -19,12 +19,12 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 使得你可以在地图界面中快速显示一个或多个生命框。
- * 【支持插件关联资源的打包、加密】
  * ★★必须放在 车轮战 插件的后面★★
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 插件必须基于核心。
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。
  * 基于：
  *   - Drill_CoreOfGaugeMeter       系统 - 参数条核心
  *   - Drill_CoreOfGaugeNumber      系统 - 参数数字核心
@@ -594,14 +594,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^3)*o(贴图处理)  每帧
-//		性能测试因素	战斗界面
-//		性能测试消耗	27.66ms（drill_updateValue函数）  10.06ms（Sprite_Enemy.prototype.update函数）
-//		最坏情况		开了大量生命框，并且开了大量其他参数条相关的框，计算量会非常大。
-//		备注			消耗比想象中的要小很多。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^3)*o(贴图处理)  每帧
+//		★性能测试因素	战斗界面
+//		★性能测试消耗	27.66ms（drill_updateValue函数）  10.06ms（Sprite_Enemy.prototype.update函数）
+//		★最坏情况		开了大量生命框，并且开了大量其他参数条相关的框，计算量会非常大。
+//		★备注			消耗比想象中的要小很多。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			战斗简单生命框：
 //				->结构
@@ -895,7 +900,7 @@ Spriteset_Battle.prototype.createLowerLayer = function() {
 //==============================
 var _drill_ESH_layer_createPictures = Spriteset_Battle.prototype.createPictures;
 Spriteset_Battle.prototype.createPictures = function() {
-	_drill_ESH_layer_createPictures.call(this);		//rmmv图片 < 图片层 < rmmv对话框
+	_drill_ESH_layer_createPictures.call(this);		//图片对象层 < 图片层 < 对话框集合
 	if( !this._drill_battlePicArea ){
 		this._drill_battlePicArea = new Sprite();
 		this.addChild(this._drill_battlePicArea);	
@@ -906,7 +911,7 @@ Spriteset_Battle.prototype.createPictures = function() {
 //==============================
 var _drill_ESH_layer_createAllWindows = Scene_Battle.prototype.createAllWindows;
 Scene_Battle.prototype.createAllWindows = function() {
-	_drill_ESH_layer_createAllWindows.call(this);	//rmmv对话框 < 最顶层
+	_drill_ESH_layer_createAllWindows.call(this);	//对话框集合 < 最顶层
 	if( !this._drill_SenceTopArea ){
 		this._drill_SenceTopArea = new Sprite();
 		this.addChild(this._drill_SenceTopArea);	

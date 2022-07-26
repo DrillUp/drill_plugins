@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        地图UI - 临时漂浮文字
+ * @plugindesc [v1.2]        地图UI - 临时漂浮文字
  * @author Drill_up
  * 
  * @Drill_LE_param "临时漂浮样式-%d"
@@ -13,6 +13,7 @@
  * @Drill_LE_param "临时漂浮弹道-%d"
  * @Drill_LE_parentKey "---弹道组%d至%d---"
  * @Drill_LE_var "DrillUp.g_GFTT_ballistics_length"
+ * 
  * 
  * @help  
  * =============================================================================
@@ -25,12 +26,13 @@
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 插件必须基于核心。
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfBallistics       系统 - 弹道核心★★v1.7及以上★★
- *   - Drill_CoreOfWindowAuxiliary  系统 - 窗口辅助核心
+ *   - Drill_CoreOfBallistics       系统-弹道核心★★v1.7及以上★★
+ *   - Drill_CoreOfWindowAuxiliary  系统-窗口辅助核心
  * 可扩展：
- *   - Drill_CoreOfString           系统 - 字符串核心
+ *   - Drill_CoreOfString           系统-字符串核心
  *     可以在漂浮文字中，绑定并显示自定义的字符串。
  * 
  * -----------------------------------------------------------------------------
@@ -39,7 +41,7 @@
  *   作用于地图的各个层级。
  * 2.更多详细内容，去看看文档 "13.UI > 关于漂浮文字.docx"。
  * 3.该插件的指令较多且使用频繁，建议使用小工具：插件信息查看器。
- *   在开启rmmv软件时，并行使用读取器复制指令。
+ *   在开启游戏编辑器时，可以并行使用读取器复制指令。
  * 细节：
  *   (1.漂浮文字本质上是一个窗口，可以显示窗口外框。
  *   (2.你可以将漂浮文字放置在地图层级的 下层、中层、上层、图片层、
@@ -120,6 +122,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 添加了插件指令 修改文本 的空格支持。
+ * [v1.2]
+ * 优化了内部结构。
  *
  *
  *
@@ -506,21 +510,21 @@
  * @parent 窗口是否自适应行间距
  * @type number
  * @min 1
- * @desc 如果你取消了自适应行间距，这里将使得每行的文字的行间距都是固定值。（rmmv默认：36）
+ * @desc 如果你取消了自适应行间距，这里将使得每行的文字的行间距都是固定值。（默认：36）
  * @default 24
  *
  * @param 窗口内边距
  * @parent --窗口--
  * @type number
  * @min 0
- * @desc 窗口内容与窗口外框的内边距。（rmmv默认标准：18）
+ * @desc 窗口内容与窗口外框的内边距。（默认标准：18）
  * @default 10
  *
  * @param 窗口字体大小
  * @parent --窗口--
  * @type number
  * @min 1
- * @desc 窗口的字体大小。注意图标无法根据字体大小变化。（rmmv默认标准：28）
+ * @desc 窗口的字体大小。注意图标无法根据字体大小变化。（默认标准：28）
  * @default 22
  *
  * @param 窗口附加宽度
@@ -843,14 +847,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^2)*o(贴图处理)  每帧
-//		性能测试因素	UI管理层测试
-//		性能测试消耗	7.34ms（drill_updatePosition） 10.25ms（update）
-//		最坏情况		使用临时漂浮文字添加了大量窗口。
-//		备注			调用插件指令时，卡，但是实际测的时候，发现并不卡，可以推断是创建时性能消耗导致。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^2)*o(贴图处理)  每帧
+//		★性能测试因素	UI管理层测试
+//		★性能测试消耗	7.34ms（drill_updateOpacity） 10.25ms（update）
+//		★最坏情况		使用临时漂浮文字添加了大量窗口。
+//		★备注			调用插件指令时，卡，但是实际测的时候，发现并不卡，可以推断是创建时性能消耗导致。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			漂浮参数数字：
 //				->结构
@@ -859,6 +868,11 @@
 //					->弹道核心（绑定移动）
 //					->透明度类型设置
 //				->插件指令添加
+//				->地图层级
+//					->添加贴图到层级【标准函数】
+//					->去除贴图【标准函数】
+//					->图片层级排序【标准函数】
+//					->参照的位移【标准函数】
 //
 //		★必要注意事项：
 //			1.插件的图片层级与多个插件共享。【必须自写 层级排序 函数】
@@ -1199,6 +1213,185 @@ Game_Map.prototype.drill_GFTT_isEventExist = function( e_id ){
 };
 
 
+
+//#############################################################################
+// ** 【标准模块】地图层级
+//#############################################################################
+//##############################
+// * 地图层级 - 添加贴图到层级【标准函数】
+//				
+//			参数：	> sprite 贴图        （添加的贴图对象）
+//					> layer_index 字符串 （添加到的层级名，下层/中层/上层/图片层/最顶层）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图添加到目标层级中。
+//##############################
+Scene_Map.prototype.drill_GFTT_layerAddSprite = function( sprite, layer_index ){
+	this.drill_GFTT_layerAddSprite_Private( sprite, layer_index );
+}
+//##############################
+// * 地图层级 - 去除贴图【标准函数】
+//				
+//			参数：	> sprite 贴图（添加的贴图对象）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图从地图层级中移除。
+//##############################
+Scene_Map.prototype.drill_GFTT_layerRemoveSprite = function( sprite ){
+	this.drill_GFTT_layerRemoveSprite_Private( sprite );
+}
+//##############################
+// * 地图层级 - 图片层级排序【标准函数】
+//				
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 执行该函数后，地图层级的子贴图，按照zIndex属性来进行先后排序。值越大，越靠前。
+//##############################
+Scene_Map.prototype.drill_GFTT_sortByZIndex = function () {
+    this.drill_GFTT_sortByZIndex_Private();
+}
+//##############################
+// * 地图层级 - 参照的位移【标准函数】（暂未使用）
+//				
+//			参数：	> x 数字           （x位置，地图参照为基准）
+//					> y 数字           （y位置，地图参照为基准）
+//					> reference 字符串 （参考系，镜头参照/地图参照）
+//					> option 动态参数对象 （计算时的必要数据）
+//			返回：	> pos 动态参数对象
+//                  > pos['x']
+//                  > pos['y']
+//          
+//			说明：	> 强行规范的接口，必须按照接口的结构来，把要考虑的问题全考虑清楚了再去实现。
+//##############################
+Scene_Map.prototype.drill_GFTT_layerMoveingReference = function( x, y, reference, option ){
+	return this.drill_GFTT_layerMoveingReference_Private( x, y, reference, option );
+}
+//=============================================================================
+// ** 地图层级（接口实现）
+//=============================================================================
+//==============================
+// * 地图层级 - 下层
+//==============================
+var _drill_GFTT_map_createParallax = Spriteset_Map.prototype.createParallax;
+Spriteset_Map.prototype.createParallax = function() {
+	_drill_GFTT_map_createParallax.call(this);		//地图远景 < 下层 < 图块层
+	if( !this._drill_mapDownArea ){
+		this._drill_mapDownArea = new Sprite();
+		this._baseSprite.addChild(this._drill_mapDownArea);	
+	}
+}
+//==============================
+// * 地图层级 - 中层
+//==============================
+var _drill_GFTT_map_createTilemap = Spriteset_Map.prototype.createTilemap;
+Spriteset_Map.prototype.createTilemap = function() {
+	_drill_GFTT_map_createTilemap.call(this);		//图块层 < 中层 < 事件/玩家层
+	if( !this._drill_mapCenterArea ){
+		this._drill_mapCenterArea = new Sprite();
+		this._drill_mapCenterArea.z = 0.60;
+		this._tilemap.addChild(this._drill_mapCenterArea);	
+	}
+}
+//==============================
+// * 地图层级 - 上层
+//==============================
+var _drill_GFTT_map_createDestination = Spriteset_Map.prototype.createDestination;
+Spriteset_Map.prototype.createDestination = function() {
+	_drill_GFTT_map_createDestination.call(this);	//鼠标目的地 < 上层 < 天气层
+	if( !this._drill_mapUpArea ){
+		this._drill_mapUpArea = new Sprite();
+		this._baseSprite.addChild(this._drill_mapUpArea);	
+	}
+}
+//==============================
+// * 地图层级 - 图片层
+//==============================
+var _drill_GFTT_map_createPictures = Spriteset_Map.prototype.createPictures;
+Spriteset_Map.prototype.createPictures = function() {
+	_drill_GFTT_map_createPictures.call(this);		//图片对象层 < 图片层 < 对话框集合
+	if( !this._drill_mapPicArea ){
+		this._drill_mapPicArea = new Sprite();
+		this.addChild(this._drill_mapPicArea);	
+	}
+}
+//==============================
+// * 地图层级 - 最顶层
+//==============================
+var _drill_GFTT_map_createAllWindows = Scene_Map.prototype.createAllWindows;
+Scene_Map.prototype.createAllWindows = function() {
+	_drill_GFTT_map_createAllWindows.call(this);	//对话框集合 < 最顶层
+	if( !this._drill_SenceTopArea ){
+		this._drill_SenceTopArea = new Sprite();
+		this.addChild(this._drill_SenceTopArea);	
+	}
+}
+//==============================
+// * 地图层级 - 图片层级排序（私有）
+//==============================
+Scene_Map.prototype.drill_GFTT_sortByZIndex_Private = function(){
+	this._spriteset._drill_mapDownArea.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
+	this._spriteset._drill_mapCenterArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
+	this._spriteset._drill_mapUpArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
+	this._spriteset._drill_mapPicArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
+	this._drill_SenceTopArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
+};
+//==============================
+// * 地图层级 - 去除贴图（私有）
+//==============================
+Scene_Map.prototype.drill_GFTT_layerRemoveSprite_Private = function( sprite ){
+	this._spriteset._drill_mapDownArea.removeChild( sprite );
+	this._spriteset._drill_mapCenterArea.removeChild( sprite );
+	this._spriteset._drill_mapUpArea.removeChild( sprite );
+	this._spriteset._drill_mapPicArea.removeChild( sprite );
+	this._drill_SenceTopArea.removeChild( sprite );
+};
+//==============================
+// * 地图层级 - 添加贴图到层级（私有）
+//==============================
+Scene_Map.prototype.drill_GFTT_layerAddSprite_Private = function( sprite, layer_index ){
+	if( layer_index == "下层" ){
+		this._spriteset._drill_mapDownArea.addChild( sprite );
+	}
+	if( layer_index == "中层" ){
+		this._spriteset._drill_mapCenterArea.addChild( sprite );
+	}
+	if( layer_index == "上层" ){
+		this._spriteset._drill_mapUpArea.addChild( sprite );
+	}
+	if( layer_index == "图片层" ){
+		this._spriteset._drill_mapPicArea.addChild( sprite );
+	}
+	if( layer_index == "最顶层" ){
+		this._drill_SenceTopArea.addChild( sprite );
+	}
+}
+//==============================
+// * 地图层级 - 参照的位移（私有）
+//==============================
+Scene_Map.prototype.drill_GFTT_layerMoveingReference_Private = function( xx, yy, reference, option ){
+	
+	// > 参照系修正
+	if( reference == "地图参照 -> 地图参照" ){
+		return {'x':xx, 'y':yy };
+	}
+	if( reference == "地图参照 -> 镜头参照" ){
+		xx += this._spriteset._baseSprite.x;	//（由于 Spriteset_Map 的 _baseSprite 坐标始终是(0,0)，所以两个参照没有区别。）
+		yy += this._spriteset._baseSprite.y;
+		return {'x':xx, 'y':yy };
+	}
+	if( reference == "镜头参照 -> 镜头参照" ){
+		return {'x':xx, 'y':yy };
+	}
+	if( reference == "镜头参照 -> 地图参照" ){
+		xx -= this._spriteset._baseSprite.x;	//（由于 Spriteset_Map 的 _baseSprite 坐标始终是(0,0)，所以两个参照没有区别。）
+		yy -= this._spriteset._baseSprite.y;
+		return {'x':xx, 'y':yy };
+	}
+	return {'x':xx, 'y':yy };
+}
+
+
 //=============================================================================
 // ** 缓冲数据
 //=============================================================================
@@ -1255,76 +1448,6 @@ Game_Temp.prototype.drill_GFTT_create = function( pos, time ){
 
 
 //=============================================================================
-// ** 地图层级
-//=============================================================================
-//==============================
-// ** 下层
-//==============================
-var _drill_GFTT_layer_createParallax = Spriteset_Map.prototype.createParallax;
-Spriteset_Map.prototype.createParallax = function() {
-	_drill_GFTT_layer_createParallax.call(this);		//rmmv远景 < 下层 < rmmv图块
-	if( !this._drill_mapDownArea ){
-		this._drill_mapDownArea = new Sprite();
-		this._baseSprite.addChild(this._drill_mapDownArea);	
-	}
-}
-//==============================
-// ** 中层
-//==============================
-var _drill_GFTT_layer_createTilemap = Spriteset_Map.prototype.createTilemap;
-Spriteset_Map.prototype.createTilemap = function() {
-	_drill_GFTT_layer_createTilemap.call(this);		//rmmv图块 < 中层 < rmmv玩家
-	if( !this._drill_mapCenterArea ){
-		this._drill_mapCenterArea = new Sprite();
-		this._drill_mapCenterArea.z = 0.60;
-		this._tilemap.addChild(this._drill_mapCenterArea);	
-	}
-}
-//==============================
-// ** 上层
-//==============================
-var _drill_GFTT_layer_createDestination = Spriteset_Map.prototype.createDestination;
-Spriteset_Map.prototype.createDestination = function() {
-	_drill_GFTT_layer_createDestination.call(this);	//rmmv鼠标目的地 < 上层 < rmmv天气
-	if( !this._drill_mapUpArea ){
-		this._drill_mapUpArea = new Sprite();
-		this._baseSprite.addChild(this._drill_mapUpArea);	
-	}
-}
-//==============================
-// ** 图片层
-//==============================
-var _drill_GFTT_layer_createPictures = Spriteset_Map.prototype.createPictures;
-Spriteset_Map.prototype.createPictures = function() {
-	_drill_GFTT_layer_createPictures.call(this);		//rmmv图片 < 图片层 < rmmv对话框
-	if( !this._drill_mapPicArea ){
-		this._drill_mapPicArea = new Sprite();
-		this.addChild(this._drill_mapPicArea);	
-	}
-}
-//==============================
-// ** 最顶层
-//==============================
-var _drill_GFTT_layer_createAllWindows = Scene_Map.prototype.createAllWindows;
-Scene_Map.prototype.createAllWindows = function() {
-	_drill_GFTT_layer_createAllWindows.call(this);	//rmmv对话框 < 最顶层
-	if( !this._drill_SenceTopArea ){
-		this._drill_SenceTopArea = new Sprite();
-		this.addChild(this._drill_SenceTopArea);	
-	}
-}
-//==============================
-// ** 层级排序
-//==============================
-Scene_Map.prototype.drill_GFTT_sortByZIndex = function() {
-	this._spriteset._drill_mapDownArea.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
-	this._spriteset._drill_mapCenterArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
-	this._spriteset._drill_mapUpArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
-	this._spriteset._drill_mapPicArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
-	this._drill_SenceTopArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
-};
-
-//=============================================================================
 // ** 地图界面
 //=============================================================================
 //==============================
@@ -1342,8 +1465,9 @@ var _drill_GFTT_map_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {	
 	_drill_GFTT_map_update.call(this);
 	if( this.isActive() ){
-		this.drill_GFTT_updateWindowAddChild();			//插件指令建立贴图
-		this.drill_GFTT_updateWindowDelete();			//贴图删除
+		this.drill_GFTT_updateWindowAddChild();			//帧刷新 - 插件指令建立贴图
+		this.drill_GFTT_updateWindowDelete();			//帧刷新 - 贴图删除
+		this.drill_GFTT_updateWindowPosition();			//帧刷新 - 位置
 	}
 };
 //==============================
@@ -1362,23 +1486,12 @@ Scene_Map.prototype.drill_GFTT_updateWindowAddChild = function() {
 		this._drill_GFTT_windowTank.push( temp_window );
 		
 		// > 层级初始化
-		if( s_data['window_map_layer'] == "下层" ){
-			this._spriteset._drill_mapDownArea.addChild(temp_window);
-		}
-		if( s_data['window_map_layer'] == "中层" ){
-			this._spriteset._drill_mapCenterArea.addChild(temp_window);
-		}
-		if( s_data['window_map_layer'] == "上层" ){
-			this._spriteset._drill_mapUpArea.addChild(temp_window);
-		}
-		if( s_data['window_map_layer'] == "图片层" ){
-			this._spriteset._drill_mapPicArea.addChild(temp_window);
-		}
-		if( s_data['window_map_layer'] == "最顶层" ){
-			this._drill_SenceTopArea.addChild(temp_window);
-		}
+		this.drill_GFTT_layerAddSprite( temp_window, s_data['window_map_layer'] );
+		
+		// > 层级排序
 		this.drill_GFTT_sortByZIndex();
 		
+		// > 出栈
 		$gameTemp._drill_GFTT_commandSeq.splice( i, 1 );
 	}
 }
@@ -1391,15 +1504,87 @@ Scene_Map.prototype.drill_GFTT_updateWindowDelete = function() {
 		if( temp_window.drill_isDead() ){
 			
 			// > 从层中去除
-			this._spriteset._drill_mapDownArea.removeChild( temp_window );
-			this._spriteset._drill_mapCenterArea.removeChild( temp_window );
-			this._spriteset._drill_mapUpArea.removeChild( temp_window );
-			this._spriteset._drill_mapPicArea.removeChild( temp_window );
-			this._drill_SenceTopArea.removeChild( temp_window );
+			this.drill_GFTT_layerRemoveSprite( temp_window );
 			
 			// > 从容器中去除
 			this._drill_GFTT_windowTank.splice( i, 1 );
 		}
+	}
+}
+//==============================
+// * 帧刷新 - 帧刷新位置
+//==============================
+Scene_Map.prototype.drill_GFTT_updateWindowPosition = function() {
+	for( var i = 0; i < this._drill_GFTT_windowTank.length; i++ ){
+		var temp_window = this._drill_GFTT_windowTank[i];
+		var s_data = temp_window._drill_style_data;
+		var b_data = temp_window._drill_ballistics_data;
+		if( temp_window['_drill_COBa_x'].length == 0 ){ continue; }
+			
+		// > 位移
+		var xx = 0;
+		var yy = 0;
+		xx += s_data['offset_x'];
+		yy += s_data['offset_y'];
+		
+		// > 窗口的锚点
+		xx -= temp_window._drill_width * temp_window._drill_anchor_x;
+		yy -= temp_window._drill_height * temp_window._drill_anchor_y;
+		
+		// > 弹道位移
+		var time = temp_window._drill_time;
+		if( time < 0 ){ time = 0; }
+		if( time > temp_window['_drill_COBa_x'].length-1 ){
+			time = temp_window['_drill_COBa_x'].length-1;
+		}
+		xx += temp_window['_drill_COBa_x'][ time ];		//播放弹道轨迹
+		yy += temp_window['_drill_COBa_y'][ time ];
+		
+		// > 参照的位移
+		if( s_data['window_benchmark'] == "相对于地图" ){
+			
+			// > 相对地图的偏移
+			var pos_x = $gameMap.adjustX(0);
+			var pos_y = $gameMap.adjustY(0);
+			xx += $gameMap.deltaX( pos_x, temp_window._drill_orgPos_x ) * $gameMap.tileWidth();
+			yy += $gameMap.deltaY( pos_y, temp_window._drill_orgPos_y ) * $gameMap.tileHeight();
+			
+			if( s_data['window_map_layer'] == '下层' ||
+				s_data['window_map_layer'] == '中层' ||
+				s_data['window_map_layer'] == '上层' ){
+				var pos = this.drill_GFTT_layerMoveingReference(xx, yy, "地图参照 -> 地图参照", {} );
+				xx = pos['x'];
+				yy = pos['y'];
+			}else{
+				var pos = this.drill_GFTT_layerMoveingReference(xx, yy, "地图参照 -> 镜头参照", {} );
+				xx = pos['x'];
+				yy = pos['y'];
+			}
+		}else{
+			if( s_data['window_map_layer'] == '下层' ||
+				s_data['window_map_layer'] == '中层' ||
+				s_data['window_map_layer'] == '上层' ){
+				var pos = this.drill_GFTT_layerMoveingReference(xx, yy, "镜头参照 -> 地图参照", {} );
+				xx = pos['x'];
+				yy = pos['y'];
+			}else{
+				var pos = this.drill_GFTT_layerMoveingReference(xx, yy, "镜头参照 -> 镜头参照", {} );
+				xx = pos['x'];
+				yy = pos['y'];
+			}
+		}
+	
+		// > 地图镜头修正（处于下层/中层/上层/图片层，需要一起缩放）
+		if( Imported.Drill_LayerCamera && 			
+			s_data['window_map_layer'] != "最顶层" ){
+			xx = $gameSystem.drill_LCa_cameraToMapX( xx );
+			yy = $gameSystem.drill_LCa_cameraToMapY( yy );
+			temp_window.scale.x = 1.00 / $gameSystem.drill_LCa_curScaleX();
+			temp_window.scale.y = 1.00 / $gameSystem.drill_LCa_curScaleY();
+		}
+		
+		temp_window.x = xx;
+		temp_window.y = yy;
 	}
 }
 
@@ -1462,7 +1647,7 @@ Drill_GFTT_Window.prototype.update = function() {
 	Window_Base.prototype.update.call(this);
 	
 	this._drill_time += 1;
-	this.drill_updatePosition();		//帧刷新 - 位置
+	this.drill_updateOpacity();		//帧刷新 - 位置
 }
 //==============================
 // * 漂浮文字窗口 - 窗口属性
@@ -1492,6 +1677,7 @@ Drill_GFTT_Window.prototype.drill_initData = function() {
 	// > 私有属性初始化
 	this.x = 0;
 	this.y = Graphics.boxHeight*2;
+	this.contentsOpacity = 0;
 	this._drill_time = 0;
 	this._drill_width = 0;
 	this._drill_height = 0;
@@ -1631,7 +1817,7 @@ Drill_GFTT_Window.prototype.drill_sortBottomByZIndex = function() {
 //==============================
 // * 帧刷新 - 位置
 //==============================
-Drill_GFTT_Window.prototype.drill_updatePosition = function() {
+Drill_GFTT_Window.prototype.drill_updateOpacity = function() {
 	var s_data = this._drill_style_data;
 	var b_data = this._drill_ballistics_data;
 	if( this['_drill_COBa_x'].length == 0 ){ return; }
@@ -1639,40 +1825,10 @@ Drill_GFTT_Window.prototype.drill_updatePosition = function() {
 	// > 根据轨迹进行播放
 	var time = this._drill_time;
 	if( time < 0 ){ time = 0; }
-	if( time > this['_drill_COBa_x'].length-1 ){
-		time = this['_drill_COBa_x'].length-1;
+	if( time > this['_drill_COBa_opacity'].length-1 ){
+		time = this['_drill_COBa_opacity'].length-1;
 	}
-	var xx = this['_drill_COBa_x'][ time ];		//播放弹道轨迹
-	var yy = this['_drill_COBa_y'][ time ];
 	var oo = this['_drill_COBa_opacity'][ time ];
-	
-	// > UI基准偏移（相对于地图）
-	if( s_data['window_benchmark'] == "相对于地图" ){
-		var pos_x = $gameMap.adjustX(0);
-		var pos_y = $gameMap.adjustY(0);
-		xx += $gameMap.deltaX( pos_x, this._drill_orgPos_x ) * $gameMap.tileWidth();
-		yy += $gameMap.deltaY( pos_y, this._drill_orgPos_y ) * $gameMap.tileHeight();
-	}
-	
-	// > 地图镜头修正（处于下层/中层/上层/图片层，需要一起缩放）
-	if( Imported.Drill_LayerCamera && 			
-		s_data['window_map_layer'] != "最顶层" ){
-		xx = $gameSystem.drill_LCa_cameraToMapX( xx );
-		yy = $gameSystem.drill_LCa_cameraToMapY( yy );
-		this.scale.x = 1.00 / $gameSystem.drill_LCa_curScaleX();
-		this.scale.y = 1.00 / $gameSystem.drill_LCa_curScaleY();
-	}
-	
-	// > 额外位置偏移
-	xx += s_data['offset_x'];
-	yy += s_data['offset_y'];
-	
-	// > 窗口的锚点
-	xx -= this._drill_width * this._drill_anchor_x;
-	yy -= this._drill_height * this._drill_anchor_y;
-	
-	this.x = xx;
-	this.y = yy;
 	this.contentsOpacity = oo;
 }
 //==============================
@@ -1729,7 +1885,7 @@ Drill_GFTT_Window.prototype.drill_refreshMessage = function( context_list ){
 }else{
 		Imported.Drill_GaugeFloatingTemporaryText = false;
 		alert(
-			"【Drill_GaugeFloatingTemporaryText.js 地图UI - 漂浮参数数字】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
+			"【Drill_GaugeFloatingTemporaryText.js 地图UI - 临时漂浮文字】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
 			"\n- Drill_CoreOfBallistics 系统-弹道核心" + 
 			"\n- Drill_CoreOfWindowAuxiliary 系统-窗口辅助核心"
 		);

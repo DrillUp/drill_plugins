@@ -17,9 +17,13 @@
  * 使得你可以播放图片持续执行的各种动作。
  * 
  * -----------------------------------------------------------------------------
+ * ----插件扩展
+ * 该插件可以单独使用。
+ * 
+ * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：地图界面、战斗界面。
- *   作用于rmmv图片。
+ *   作用于图片对象。
  * 2.更多详细内容，去看看 "7.行走图 > 关于动作效果.docx"。
  * 细节：
  *   (1.所有动作都是并行的，你可能需要手动加等待时间。
@@ -86,13 +90,14 @@
  *   的参数可以随意组合。一共有4*26种组合方式。
  * 2.参数中"时间"、"周期"的单位是帧。1秒60帧。
  *   参数中"幅度"、"高度"的单位是像素。
- * 3."标准闪烁 : 持续时间[60] : 周期[30]"表示：
+ * 3.类型的更详细介绍，去看看 "7.行走图 > 关于动作效果.docx"。
+ * 4."标准闪烁 : 持续时间[60] : 周期[30]"表示：
  *    闪烁30帧，15帧透明，15帧不透明，持续60帧。也就是闪两次。
- * 4."旋转"类型中，一个周期旋转一整圈。
+ * 5."旋转"类型中，一个周期旋转一整圈。
  *   持续60帧，周期30帧，则表示图像旋转两圈后结束。
- * 5."空中飘浮"类型中，包含飘起、漂浮中、飘落三种状态。
+ * 6."空中飘浮"类型中，包含飘起、漂浮中、飘落三种状态。
  *   缓冲时间对应飘起飘落的时间，可以应用于某种法术的释放动作。
- * 6."(渐变)"类型的效果，无论周期、结束时间如何，在结束动作后，
+ * 7."(渐变)"类型的效果，无论周期、结束时间如何，在结束动作后，
  *   都能够在原状态下慢慢减速停住。
  * 
  * -----------------------------------------------------------------------------
@@ -187,15 +192,20 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n)*o(贴图处理) 每帧
-//		性能测试因素	对话管理层
-//		性能测试消耗	24.94ms 23.34ms（sprite_picture.update）
-//		最坏情况		地图放了大量图片，并且所有图片都在持续变化。
-//		备注			要说图片贴图和事件贴图哪个消耗大，真无法确定。
-//						事件贴图面积小但变化多，而图片面积大但变化不多。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n)*o(贴图处理) 每帧
+//		★性能测试因素	对话管理层
+//		★性能测试消耗	24.94ms 23.34ms（sprite_picture.update）
+//		★最坏情况		地图放了大量图片，并且所有图片都在持续变化。
+//		★备注			要说图片贴图和事件贴图哪个消耗大，真无法确定。
+//						事件贴图面积小但变化多，而图片面积大但变化不多。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			持续动作效果：
 //				->动作
@@ -327,7 +337,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					$gameSwitches.setValue( temp1, b );
 				}
 			}
-			if( type == "获取正在播放的类型" && Imported.Drill_CoreOfString ){
+			if( type == "获取正在播放的类型" && Imported.Drill_CoreOfString ){	//【系统-字符串核心】
 				temp1 = temp1.replace("字符串[","");
 				temp1 = temp1.replace("]","");
 				temp1 = Number(temp1);
@@ -355,7 +365,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				if( pics != null ){
 					for( var k=0; k < pics.length; k++ ){
 						pics[k].drill_PCE_stopEffect();
-						pics[k].drill_PCE_playSustainingFlash( Number(temp1),Number(temp2) );
+						pics[k].drill_PCE_playSustainingFlicker( Number(temp1),Number(temp2) );
 					}
 				}
 			}
@@ -369,7 +379,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				if( pics != null ){
 					for( var k=0; k < pics.length; k++ ){
 						pics[k].drill_PCE_stopEffect();
-						pics[k].drill_PCE_playSustainingFlashCos( Number(temp1),Number(temp2) );
+						pics[k].drill_PCE_playSustainingFlickerCos( Number(temp1),Number(temp2) );
 					}
 				}
 			}
@@ -1085,7 +1095,11 @@ Game_Picture.prototype.drill_PCE_isPlaying = function() {
 //==============================
 // * 图片 - 设置透明度
 //==============================
-Game_Picture.prototype.drill_PCE_setOpacity = function(opacity) {
+Game_Picture.prototype.drill_PCE_setOpacity = function( opacity ){
+	if( isNaN(opacity) ){
+		alert(	"【Drill_PictureContinuedEffect.js 图片 - 持续动作效果】\n" +
+				"错误，透明度赋值时出现了NaN错误值。");
+	}
 	this._opacity = opacity;
 }
 //==============================
@@ -1130,8 +1144,8 @@ Game_Picture.prototype.update = function() {
 	if( this._Drill_PCE.real_width == -1 ){ return; }		//需要等图片加载完成
 	if( this._Drill_PCE.real_height == -1 ){ return; }
 	
-	this.drill_PCE_updateSustainingFlash();						//帧刷新 - 标准闪烁
-	this.drill_PCE_updateSustainingFlashCos();					//帧刷新 - 渐变闪烁
+	this.drill_PCE_updateSustainingFlicker();						//帧刷新 - 标准闪烁
+	this.drill_PCE_updateSustainingFlickerCos();					//帧刷新 - 渐变闪烁
 	this.drill_PCE_updateSustainingRotate();					//帧刷新 - 顺时针/逆时针旋转
 	this.drill_PCE_updateSustainingRotateVer();					//帧刷新 - 垂直卡片旋转
 	this.drill_PCE_updateSustainingRotateHor();					//帧刷新 - 水平卡片旋转
@@ -1179,7 +1193,7 @@ Game_Picture.prototype.drill_PCE_stopEffect = function() {
 //==============================
 // * 初始化 - 持续 标准闪烁
 //==============================
-Game_Picture.prototype.drill_PCE_playSustainingFlash = function(time,period) {
+Game_Picture.prototype.drill_PCE_playSustainingFlicker = function(time,period) {
 	var ef = this._Drill_PCE;
 	ef.playing_type = "标准闪烁";
 	ef.f_time = 0;
@@ -1193,7 +1207,7 @@ Game_Picture.prototype.drill_PCE_playSustainingFlash = function(time,period) {
 //==============================
 // * 帧刷新 - 持续 标准闪烁
 //==============================
-Game_Picture.prototype.drill_PCE_updateSustainingFlash = function() {
+Game_Picture.prototype.drill_PCE_updateSustainingFlicker = function() {
 	var ef = this._Drill_PCE;
 	if( ef.playing_type != "标准闪烁" ){ return; }
 	
@@ -1222,7 +1236,7 @@ Game_Picture.prototype.drill_PCE_updateSustainingFlash = function() {
 //==============================
 // * 初始化 - 持续 渐变闪烁
 //==============================
-Game_Picture.prototype.drill_PCE_playSustainingFlashCos = function(time,period) {
+Game_Picture.prototype.drill_PCE_playSustainingFlickerCos = function(time,period) {
 	var ef = this._Drill_PCE;
 	ef.playing_type = "渐变闪烁";
 	ef.f_time = 0;
@@ -1232,7 +1246,7 @@ Game_Picture.prototype.drill_PCE_playSustainingFlashCos = function(time,period) 
 //==============================
 // * 帧刷新 - 持续 渐变闪烁
 //==============================
-Game_Picture.prototype.drill_PCE_updateSustainingFlashCos = function() {
+Game_Picture.prototype.drill_PCE_updateSustainingFlickerCos = function() {
 	var ef = this._Drill_PCE;
 	if( ef.playing_type != "渐变闪烁" ){ return; }
 	

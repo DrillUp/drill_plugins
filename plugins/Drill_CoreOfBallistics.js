@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.8]        系统 - 弹道核心
+ * @plugindesc [v1.9]        系统 - 弹道核心
  * @author Drill_up
  * 
  * 
@@ -15,23 +15,22 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 能够描述 单个或一群 粒子/碎片/子弹 运动的轨迹。
- * 该插件为基础核心，单独使用没有效果。
  * ★★尽量放在最靠上的位置★★
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该插件为基础插件，作用于非常多的插件：
+ * 该插件为基础核心，单独使用没有效果。
  * 作用于：
- *   - Drill_CoreOfGaugeMeter        系统 - 参数条核心
- *   - Drill_CoreOfShatterEffect     系统 - 方块粉碎核心
- *   - Drill_CoreOfSelectableButton  系统 - 按钮组核心
- *   - Drill_STG__core               STG核心 - 引擎
+ *   - Drill_CoreOfGaugeMeter        系统-参数条核心
+ *   - Drill_CoreOfShatterEffect     系统-方块粉碎核心
+ *   - Drill_CoreOfSelectableButton  系统-按钮组核心
+ *   - Drill_STG__core               STG核心-引擎
  *   
- *   - Drill_GaugeForBoss            UI - 高级BOSS生命固定框
- *   - Drill_GaugeForVariable        UI - 高级变量固定框
- *   - Drill_GaugeFloatingNum        地图UI - 漂浮参数数字
- *   - Drill_MenuCursor              主菜单 - 多样式菜单指针
- *   - Drill_PictureAdsorptionSlot   图片 - 图片吸附槽
+ *   - Drill_GaugeForBoss            UI-高级BOSS生命固定框
+ *   - Drill_GaugeForVariable        UI-高级变量固定框
+ *   - Drill_GaugeFloatingNum        地图UI-漂浮参数数字
+ *   - Drill_MenuCursor              主菜单-多样式菜单指针
+ *   - Drill_PictureAdsorptionSlot   图片-图片吸附槽
  *   ……
  * 
  * -----------------------------------------------------------------------------
@@ -96,6 +95,8 @@
  * 优化了内部功能。完善了透明度弹道的结构。
  * [v1.8]
  * 优化了添加了缩放的弹道变化功能。
+ * [v1.9]
+ * 优化了底层的结构。
  * 
  */
  
@@ -107,21 +108,26 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		单次执行
-//		时间复杂度		o(n^2)
-//		性能测试因素	无
-//		性能测试消耗	无
-//		最坏情况		不可估计
-//		备注			虽然无法测试该核心的消耗，但是由于核心只进行一次粒子路程的数学
-//						计算，计算完毕后不再工作，可以确定消耗小于5ms。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		单次执行
+//		★时间复杂度		o(n^2)
+//		★性能测试因素	无
+//		★性能测试消耗	无
+//		★最坏情况		不可估计
+//		★备注			虽然无法测试该核心的消耗，但是由于核心只进行一次粒子路程的数学
+//						计算，计算完毕后不再工作，可以确定消耗小于5ms。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			弹道：
 //				->移动弹道【二维数组】：
-//					->接口
-//						->弹道结果数列
-//						->随机因子
+//					->标准模块
+//						->初始化数据【标准默认值】
+//						->预推演【标准函数】
 //					->移动模式
 //						->极坐标：方向 + 速度
 //						->直角坐标：x速度 + y速度
@@ -151,6 +157,9 @@
 //							> 弹性移动
 //							> 抛物线移动
 //				->通用弹道【一维数组】：
+//					->标准模块
+//						->初始化数据【标准默认值】
+//						->预推演【标准函数】
 //					->变化模式
 //						->目标值
 //						->时间公式
@@ -164,11 +173,12 @@
 //
 //		★必要注意事项：
 //			1.插件提供数学计算，setBallistics初始化配置，preBallistics预推演数据。
-//			  注意，初始化和预推演都没有返回值。且预推演函数中的 obj 是一个对象指针。
 //			
 //		★其它说明细节：
-//			1.随机因子是一个非常特殊的结构，作用是使得轨迹既有随机性，又不会在重新赋值时出现轨迹重置现象。
-//			  如果你要锁定随机因子，在data中加上因子的设定即可。【通常情况下随机因子是不需要赋值的。】
+//			1.随机因子是一个特殊的参数，作用是使得轨迹既有随机性，又不会在重新赋值时出现轨迹重置现象。
+//			  如果你要锁定随机因子，在 默认值 中对因子数列进行的赋值即可。【通常情况下随机因子是不需要赋值的。】
+//			2.未设置延迟的情况下，data['movementTime'] 时长 就是数组的长度。
+//			  但如果你设置了延迟，就需要考虑数组长度变化的问题了。
 //		
 //		★核心接口说明：
 //			1.整个核心提供多个可调用的函数接口。	
@@ -187,7 +197,7 @@
 //			  obj用于放配置数据，执行完后，结果集会放到下面两个数组中：
 //			  		obj['_drill_COBa_x']
 //			  		obj['_drill_COBa_y']
-//			  obj可以是个对象，空数组也可以，只要能放结果就可以。（data['movementTime'] 时长 就是数组的长度。）
+//			  obj可以是个对象，空数组也可以，只要能放结果就可以。
 //
 //		★存在的问题：
 //			暂无
@@ -200,6 +210,190 @@
 　　Imported.Drill_CoreOfBallistics = true;
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_CoreOfBallistics');
+
+
+
+//#############################################################################
+// ** 【标准模块】弹道
+//#############################################################################
+//##############################
+// * 移动弹道 - 初始化数据【标准默认值】
+//			
+//			参数：	> data 动态参数对象            （准备的数据）
+//			返回：	> 动态参数对象                 （预推演 用的数据）
+//					> this['_drill_COBa_moveData'] （预推演 用的数据）
+//			
+//			功能：	> 纯数学计算。给传来的data进行初始赋值。
+//                  > 执行后，需要立即执行 预推演 ，确保这两个接口在同一个函数内执行即可。
+//					
+//			说明：	> 动态参数对象 具体见 drill_COBa_setBallisticsMove_Private 。
+//                  > 注意，锚点列表的格式固定为：[ {'x':0,'y':0} ]，你可以用工具类转一下。
+//					> 执行后，会固定【随机因子】，可将 返回数据 存储，进而确保生成相同的弹道。
+//					  返回数据 可以放入此函数再次执行，参数对象内容不会变。
+//##############################
+Game_Temp.prototype.drill_COBa_setBallisticsMove = function( data ){
+	return this.drill_COBa_setBallisticsMove_Private( data );
+}
+//##############################
+// * 移动弹道 - 获取弹道总时间【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 数字 （弹道数组长度）
+//					
+//			说明：	> 此函数必须在 初始化数据 之后调用。得到的值是【弹道数组的长度】，即弹道总时间。
+//					> 注意，'movementTime'不是总时间，还需要考虑延迟时间。
+//					> 此函数能在预推演前，得到数组长度。
+//##############################
+Game_Temp.prototype.drill_COBa_getBallisticsMove_TotalTime = function(){
+	return this.drill_COBa_getBallisticsMove_TotalTime_Private();
+}
+//##############################
+// * 移动弹道 - 预推演【标准函数】
+//			
+//			参数：	> obj_data 对象  （对象容器）
+//					> obj_index 数字 （对象编号）
+//					> orgX 数字      （初始x位置）
+//					> orgY 数字      （初始y位置）
+//			返回：	> 无
+//					> this['_drill_COBa_x'] 数字数组（计算的X结果）
+//					> this['_drill_COBa_y'] 数字数组（计算的Y结果）
+//			
+//			功能：	> 纯数学计算。根据当前的弹道参数设置，开始计算轨迹。
+//					
+//			说明：	> 对象编号 obj_index 必须按照预先给的来，即 0 到 'movementNum'-1 的值。
+//					> 每次推演返回的数组长度都一样。
+//##############################
+Game_Temp.prototype.drill_COBa_preBallisticsMove = function( obj_data, obj_index, orgX, orgY ){
+	this.drill_COBa_preBallisticsMove_Private( obj_data, obj_index, orgX, orgY );
+}
+
+//##############################
+// * 透明度弹道 - 初始化数据【标准默认值】
+//			
+//			参数：	> data 动态参数对象              （准备的数据）
+//			返回：	> 动态参数对象                   （预推演 用的数据）
+//					> this['_drill_COBa_commonData'] （预推演 用的数据）
+//##############################
+Game_Temp.prototype.drill_COBa_setBallisticsOpacity = function( data ){
+	return this.drill_COBa_setBallisticsOpacity_Private( data );
+}
+//##############################
+// * 透明度弹道 - 获取弹道总时间【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 数字 （弹道数组长度）
+//##############################
+Game_Temp.prototype.drill_COBa_getBallisticsOpacity_TotalTime = function(){
+	return this.drill_COBa_preBallisticsCommon_TotalTime_Private();
+}
+//##############################
+// * 透明度弹道 - 预推演【标准函数】
+//			
+//			参数：	> obj_data 对象  （对象容器）
+//					> obj_index 数字 （对象编号）
+//					> orgOpacity 数字（初始透明度）
+//			返回：	> 无
+//					> this['_drill_COBa_opacity'] 数字数组（计算的结果）
+//##############################
+Game_Temp.prototype.drill_COBa_preBallisticsOpacity = function( obj_data, obj_index, orgOpacity ){
+	this.drill_COBa_preBallisticsOpacity_Private( obj_data, obj_index, orgOpacity );
+}
+
+//##############################
+// * 缩放X弹道 - 初始化数据【标准默认值】
+//			
+//			参数：	> data 动态参数对象              （准备的数据）
+//			返回：	> 动态参数对象                   （预推演 用的数据）
+//					> this['_drill_COBa_commonData'] （预推演 用的数据）
+//##############################
+Game_Temp.prototype.drill_COBa_setBallisticsScaleX = function( data ){
+	return this.drill_COBa_setBallisticsScaleX_Private( data );
+}
+//##############################
+// * 缩放X弹道 - 获取弹道总时间【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 数字 （弹道数组长度）
+//##############################
+Game_Temp.prototype.drill_COBa_getBallisticsScaleX_TotalTime = function(){
+	return this.drill_COBa_preBallisticsCommon_TotalTime_Private();
+}
+//##############################
+// * 缩放X弹道 - 预推演【标准函数】
+//			
+//			参数：	> obj_data 对象  （对象容器）
+//					> obj_index 数字 （对象编号）
+//					> orgScaleX 数字（初始缩放X）
+//			返回：	> 无
+//					> this['_drill_COBa_scaleX'] 数字数组（计算的结果）
+//##############################
+Game_Temp.prototype.drill_COBa_preBallisticsScaleX = function( obj_data, obj_index, orgScaleX ){
+	this.drill_COBa_preBallisticsScaleX_Private( obj_data, obj_index, orgScaleX );
+}
+//##############################
+// * 缩放Y弹道 - 初始化数据【标准默认值】
+//			
+//			参数：	> data 动态参数对象              （准备的数据）
+//			返回：	> 动态参数对象                   （预推演 用的数据）
+//					> this['_drill_COBa_commonData'] （预推演 用的数据）
+//##############################
+Game_Temp.prototype.drill_COBa_setBallisticsScaleY = function( data ){
+	return this.drill_COBa_setBallisticsScaleY_Private( data );
+}
+//##############################
+// * 缩放Y弹道 - 获取弹道总时间【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 数字 （弹道数组长度）
+//##############################
+Game_Temp.prototype.drill_COBa_getBallisticsScaleY_TotalTime = function(){
+	return this.drill_COBa_preBallisticsCommon_TotalTime_Private();
+}
+//##############################
+// * 缩放Y弹道 - 预推演【标准函数】
+//			
+//			参数：	> obj_data 对象  （对象容器）
+//					> obj_index 数字 （对象编号）
+//					> orgScaleY 数字（初始缩放Y）
+//			返回：	> 无
+//					> this['_drill_COBa_scaleY'] 数字数组（计算的结果）
+//##############################
+Game_Temp.prototype.drill_COBa_preBallisticsScaleY = function( obj_data, obj_index, orgScaleY ){
+	this.drill_COBa_preBallisticsScaleY_Private( obj_data, obj_index, orgScaleY );
+}
+
+//##############################
+// * 旋转角弹道 - 初始化数据【标准默认值】
+//			
+//			参数：	> data 动态参数对象              （准备的数据）
+//			返回：	> 动态参数对象                   （预推演 用的数据）
+//					> this['_drill_COBa_commonData'] （预推演 用的数据）
+//##############################
+Game_Temp.prototype.drill_COBa_setBallisticsRotate = function( data ){
+	return this.drill_COBa_setBallisticsRotate_Private( data );
+}
+//##############################
+// * 缩放Y弹道 - 获取弹道总时间【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 数字 （弹道数组长度）
+//##############################
+Game_Temp.prototype.drill_COBa_getBallisticsRotate_TotalTime = function(){
+	return this.drill_COBa_preBallisticsCommon_TotalTime_Private();
+}
+//##############################
+// * 旋转角弹道 - 预推演【标准函数】
+//			
+//			参数：	> obj_data 对象  （对象容器）
+//					> obj_index 数字 （对象编号）
+//					> orgRotate 数字（初始旋转角）
+//			返回：	> 无
+//					> this['_drill_COBa_rotate'] 数字数组（计算的结果）
+//##############################
+Game_Temp.prototype.drill_COBa_preBallisticsRotate = function( obj_data, obj_index, orgRotate ){
+	this.drill_COBa_preBallisticsRotate_Private( obj_data, obj_index, orgRotate );
+}
+
 
 
 //=============================================================================
@@ -292,97 +486,146 @@ DrillUp.drill_COBa_checkValue = function( p, result ){
 // ** 移动弹道【二维数组】
 //=============================================================================
 //==============================
-// * 移动弹道 - 初始化（接口，单次调用）
-//
-//			说明：	> 给传来的data进行初始赋值，主要功能为数学计算。
-//					> 执行后，需要立即执行 预推演 ，确保这两个接口在同一个函数内执行即可。
-//					> 注意，锚点列表的格式固定为：[ {'x':0,'y':0} ]，你可以用工具类转一下
-//			参数：	见默认值，执行接口后，data指针中将被赋值数据。
-//			返回：	无
+// * 移动弹道 - 初始化数据 默认值（私有）
 //==============================
-Game_Temp.prototype.drill_COBa_setBallisticsMove = function( data ){
-	this._drill_COBa_moveData = JSON.parse(JSON.stringify( data ));	//深拷贝数据
-	var data = this._drill_COBa_moveData;
+Game_Temp.prototype.drill_COBa_setBallisticsMove_Private = function( data ){
+	var result = {};
 	
 	//   移动基础参数（movement）
-	if( data['movementNum'] == undefined ){ data['movementNum'] = 1 };								//移动 - 子弹数量
-	if( data['movementTime'] == undefined ){ data['movementTime'] = 1 };							//移动 - 时长
-	if( data['movementDelay'] == undefined ){ data['movementDelay'] = 0 };							//移动 - 开始前延迟时间
-	if( data['movementEndDelay'] == undefined ){ data['movementEndDelay'] = 0 };					//移动 - 到终点后延迟时间
-	if( data['movementMode'] == undefined ){ data['movementMode'] = "极坐标模式" };					//移动 - 移动模式（极坐标模式/直角坐标模式/两点式/…）
+	result['movementNum'] = data['movementNum'] || 1;									//移动 - 子弹数量
+	result['movementTime'] = data['movementTime'] || 1;                     			//移动 - 时长
+	result['movementDelay'] = data['movementDelay'] || 0;                   			//移动 - 开始前延迟时间
+	result['movementEndDelay'] = data['movementEndDelay'] || 0;             			//移动 - 到终点后延迟时间
+	result['movementOrderDelay'] = data['movementOrderDelay'] || 0;                   	//移动 - ID依次延迟时间（可为正数负数，将在首尾形成额外梯度的延迟时间）
+	result['movementMode'] = data['movementMode'] || "极坐标模式";          			//移动 - 移动模式（极坐标模式/直角坐标模式/两点式/…）
+	
 	// ■ 极坐标（polar）		
-	if( data['polarSpeedType'] == undefined ){ data['polarSpeedType'] = "只初速度" };				//极坐标 - 速度 - 类型
-	if( data['polarSpeedBase'] == undefined ){ data['polarSpeedBase'] = 0 };						//极坐标 - 速度 - 初速度
-	if( data['polarSpeedRandom'] == undefined ){ data['polarSpeedRandom'] = 0 };					//极坐标 - 速度 - 速度随机波动量
-	if( data['polarSpeedInc'] == undefined ){ data['polarSpeedInc'] = 0 };							//极坐标 - 速度 - 加速度
-	if( data['polarSpeedMax'] == undefined ){ data['polarSpeedMax'] = 0 };							//极坐标 - 速度 - 最大速度
-	if( data['polarSpeedMin'] == undefined ){ data['polarSpeedMin'] = 0 };							//极坐标 - 速度 - 最小速度
-	if( data['polarDistanceFormula'] == undefined ){ data['polarDistanceFormula'] = "return 0" };	//极坐标 - 速度 - 路程计算公式
-	if( data['polarDirType'] == undefined ){ data['polarDirType'] = "固定方向" };					//极坐标 - 方向 - 类型
-	if( data['polarDirFixed'] == undefined ){ data['polarDirFixed'] = 0 };							//极坐标 - 方向 - 固定方向
-	if( data['polarDirSectorFace'] == undefined ){ data['polarDirSectorFace'] = 0 };				//极坐标 - 方向 - 扇形朝向
-	if( data['polarDirSectorDegree'] == undefined ){ data['polarDirSectorDegree'] = 0 };			//极坐标 - 方向 - 扇形角度
-	if( data['polarDirFormula'] == undefined ){ data['polarDirFormula'] = "return 0" };				//极坐标 - 方向 - 方向计算公式
+	if( result['movementMode'] == "极坐标模式" ){	//（这样写是为了减少参数数量，便于存储）
+		result['polarSpeedType'] = data['polarSpeedType'] || "只初速度";				//极坐标 - 速度 - 类型
+		result['polarSpeedBase'] = data['polarSpeedBase'] || 0;                         //极坐标 - 速度 - 初速度
+		result['polarSpeedRandom'] = data['polarSpeedRandom'] || 0;                     //极坐标 - 速度 - 速度随机波动量
+		result['polarSpeedInc'] = data['polarSpeedInc'] || 0;                           //极坐标 - 速度 - 加速度
+		result['polarSpeedMax'] = data['polarSpeedMax'] || 0;                           //极坐标 - 速度 - 最大速度
+		result['polarSpeedMin'] = data['polarSpeedMin'] || 0;                           //极坐标 - 速度 - 最小速度
+		result['polarDistanceFormula'] = data['polarDistanceFormula'] || "return 0";    //极坐标 - 速度 - 路程计算公式
+		result['polarDirType'] = data['polarDirType'] || "固定方向";                    //极坐标 - 方向 - 类型
+		result['polarDirFixed'] = data['polarDirFixed'] || 0;                           //极坐标 - 方向 - 固定方向
+		result['polarDirSectorFace'] = data['polarDirSectorFace'] || 0;                 //极坐标 - 方向 - 扇形朝向
+		result['polarDirSectorDegree'] = data['polarDirSectorDegree'] || 0;             //极坐标 - 方向 - 扇形角度
+		result['polarDirFormula'] = data['polarDirFormula'] || "return 0";              //极坐标 - 方向 - 方向计算公式
+	}
 	// ■ 直角坐标（cartesian）
-	if( data['cartRotation'] == undefined ){ data['cartRotation'] = 0 };							//直角坐标 - 整体坐标轴旋转角度
-	if( data['cartXSpeedType'] == undefined ){ data['cartXSpeedType'] = "只初速度" };				//直角坐标 - x - 类型
-	if( data['cartXSpeedBase'] == undefined ){ data['cartXSpeedBase'] = 0 };						//直角坐标 - x - 初速度
-	if( data['cartXSpeedRandom'] == undefined ){ data['cartXSpeedRandom'] = 0 };					//直角坐标 - x - 速度随机波动量
-	if( data['cartXSpeedInc'] == undefined ){ data['cartXSpeedInc'] = 0 };							//直角坐标 - x - 加速度
-	if( data['cartXSpeedMax'] == undefined ){ data['cartXSpeedMax'] = 0 };							//直角坐标 - x - 最大速度
-	if( data['cartXSpeedMin'] == undefined ){ data['cartXSpeedMin'] = 0 };							//直角坐标 - x - 最小速度
-	if( data['cartXDistanceFormula'] == undefined ){ data['cartXDistanceFormula'] = "return 0" };	//直角坐标 - x - 路程计算公式
-	if( data['cartYSpeedType'] == undefined ){ data['cartYSpeedType'] = "只初速度" };				//直角坐标 - y - 类型
-	if( data['cartYSpeedBase'] == undefined ){ data['cartYSpeedBase'] = 0 };						//直角坐标 - y - 初速度
-	if( data['cartYSpeedRandom'] == undefined ){ data['cartYSpeedRandom'] = 0 };					//直角坐标 - y - 速度随机波动量
-	if( data['cartYSpeedInc'] == undefined ){ data['cartYSpeedInc'] = 0 };							//直角坐标 - y - 加速度
-	if( data['cartYSpeedMax'] == undefined ){ data['cartYSpeedMax'] = 0 };							//直角坐标 - y - 最大速度
-	if( data['cartYSpeedMin'] == undefined ){ data['cartYSpeedMin'] = 0 };							//直角坐标 - y - 最小速度
-	if( data['cartYDistanceFormula'] == undefined ){ data['cartYDistanceFormula'] = "return 0" };	//直角坐标 - y - 路程计算公式
+	if( result['movementMode'] == "直角坐标模式" ){			
+		result['cartRotation'] = data['cartRotation'] || 0;								//直角坐标 - 整体坐标轴旋转角度
+		result['cartXSpeedType'] = data['cartXSpeedType'] || "只初速度";				//直角坐标 - x - 类型	
+		result['cartXSpeedBase'] = data['cartXSpeedBase'] || 0;                         //直角坐标 - x - 初速度
+		result['cartXSpeedRandom'] = data['cartXSpeedRandom'] || 0;                     //直角坐标 - x - 速度随机波动量
+		result['cartXSpeedInc'] = data['cartXSpeedInc'] || 0;                           //直角坐标 - x - 加速度
+		result['cartXSpeedMax'] = data['cartXSpeedMax'] || 0;                           //直角坐标 - x - 最大速度
+		result['cartXSpeedMin'] = data['cartXSpeedMin'] || 0;                           //直角坐标 - x - 最小速度
+		result['cartXDistanceFormula'] = data['cartXDistanceFormula'] || "return 0";    //直角坐标 - x - 路程计算公式
+		result['cartYSpeedType'] = data['cartYSpeedType'] || "只初速度";                //直角坐标 - y - 类型
+		result['cartYSpeedBase'] = data['cartYSpeedBase'] || 0;                         //直角坐标 - y - 初速度
+		result['cartYSpeedRandom'] = data['cartYSpeedRandom'] || 0;                     //直角坐标 - y - 速度随机波动量
+		result['cartYSpeedInc'] = data['cartYSpeedInc'] || 0;                           //直角坐标 - y - 加速度
+		result['cartYSpeedMax'] = data['cartYSpeedMax'] || 0;                           //直角坐标 - y - 最大速度
+		result['cartYSpeedMin'] = data['cartYSpeedMin'] || 0;                           //直角坐标 - y - 最小速度
+		result['cartYDistanceFormula'] = data['cartYDistanceFormula'] || "return 0";    //直角坐标 - y - 路程计算公式
+	}
 	// ■ 轨道锚点（track）		
-	if( data['trackSpeedType'] == undefined ){ data['trackSpeedType'] = "只初速度" };				//轨道锚点 - 速度 - 类型
-	if( data['trackSpeedBase'] == undefined ){ data['trackSpeedBase'] = 0 };						//轨道锚点 - 速度 - 初速度
-	if( data['trackSpeedRandom'] == undefined ){ data['trackSpeedRandom'] = 0 };					//轨道锚点 - 速度 - 速度随机波动量
-	if( data['trackSpeedInc'] == undefined ){ data['trackSpeedInc'] = 0 };							//轨道锚点 - 速度 - 加速度
-	if( data['trackSpeedMax'] == undefined ){ data['trackSpeedMax'] = 0 };							//轨道锚点 - 速度 - 最大速度
-	if( data['trackSpeedMin'] == undefined ){ data['trackSpeedMin'] = 0 };							//轨道锚点 - 速度 - 最小速度
-	if( data['trackDistanceFormula'] == undefined ){ data['trackDistanceFormula'] = "return 0" };	//轨道锚点 - 速度 - 路程计算公式
-	if( data['trackPointTank'] == undefined ){ data['trackPointTank'] = [] };						//轨道锚点 - 轨道 - 锚点列表
-	if( data['trackRotation'] == undefined ){ data['trackRotation'] = 0 };							//轨道锚点 - 轨道 - 整体旋转角度
+	if( result['movementMode'] == "轨道锚点模式" ){			
+		result['trackSpeedType'] = data['trackSpeedType'] || "只初速度";				//轨道锚点 - 速度 - 类型
+		result['trackSpeedBase'] = data['trackSpeedBase'] || 0;                         //轨道锚点 - 速度 - 初速度
+		result['trackSpeedRandom'] = data['trackSpeedRandom'] || 0;                     //轨道锚点 - 速度 - 速度随机波动量
+		result['trackSpeedInc'] = data['trackSpeedInc'] || 0;                           //轨道锚点 - 速度 - 加速度
+		result['trackSpeedMax'] = data['trackSpeedMax'] || 0;                           //轨道锚点 - 速度 - 最大速度
+		result['trackSpeedMin'] = data['trackSpeedMin'] || 0;                           //轨道锚点 - 速度 - 最小速度
+		result['trackDistanceFormula'] = data['trackDistanceFormula'] || "return 0";    //轨道锚点 - 速度 - 路程计算公式
+		result['trackPointTank'] = data['trackPointTank'] || [];                        //轨道锚点 - 轨道 - 锚点列表
+		result['trackRotation'] = data['trackRotation'] || 0;                           //轨道锚点 - 轨道 - 整体旋转角度
+	}
 	// ■ 两点式（twoPoint）
-	if( data['twoPointType'] == undefined ){ data['twoPointType'] = "不移动" };						//两点式 - 类型（不移动/匀速移动/弹性移动/……）
-	if( data['twoPointDifferenceX'] == undefined ){ data['twoPointDifferenceX'] = 0 };				//两点式 - 距离差值x（终点减起点）
-	if( data['twoPointDifferenceY'] == undefined ){ data['twoPointDifferenceY'] = 0 };				//两点式 - 距离差值y（终点减起点）
-	if( data['twoPointParabolaDir'] == undefined ){ data['twoPointParabolaDir'] = 0 };				//两点式 - 抛物线移动 - 初始方向（单位角度）
-	if( data['twoPointParabolaSpeed'] == undefined ){ data['twoPointParabolaSpeed'] = 0 };			//两点式 - 抛物线移动 - 初始速度
+	if( result['movementMode'] == "两点式" ){		
+		result['twoPointType'] = data['twoPointType'] || "不移动";						//两点式 - 类型（不移动/匀速移动/弹性移动/……）
+		result['twoPointDifferenceX'] = data['twoPointDifferenceX'] || 0;				//两点式 - 距离差值x（终点减起点）
+		result['twoPointDifferenceY'] = data['twoPointDifferenceY'] || 0;	            //两点式 - 距离差值y（终点减起点）
+		result['twoPointParabolaDir'] = data['twoPointParabolaDir'] || 0;	            //两点式 - 抛物线移动 - 初始方向（单位角度）
+		result['twoPointParabolaSpeed'] = data['twoPointParabolaSpeed'] || 0;	        //两点式 - 抛物线移动 - 初始速度
+	}
 	
-	//   公式obj
-	eval("data['polarDistanceFunction'] = function( p ){ "+data['polarDistanceFormula']+" }" );
-	eval("data['polarDirFunction'] = function( p ){ "+data['polarDirFormula']+" }" );
-	eval("data['cartXDistanceFunction'] = function( p ){ "+data['cartXDistanceFormula']+" }" );
-	eval("data['cartYDistanceFunction'] = function( p ){ "+data['cartYDistanceFormula']+" }" );
-	eval("data['trackDistanceFunction'] = function( p ){ "+data['trackDistanceFormula']+" }" );
+	
 	//   随机因子（RandomFactor）
-	if( data['polarSpeedRandomFactor'] == undefined ){ data['polarSpeedRandomFactor'] = -1 };		//极坐标 - 速度 - 随机因子（锁定随机值专用,0-1之间）
-	if( data['polarDirRandomFactor'] == undefined ){ data['polarDirRandomFactor'] = -1 };			//极坐标 - 方向 - 随机因子（锁定随机值专用,0-1之间）
-	if( data['cartXSpeedRandomFactor'] == undefined ){ data['cartXSpeedRandomFactor'] = -1 };		//直角坐标 - x - 随机因子（锁定随机值专用,0-1之间）
-	if( data['cartYSpeedRandomFactor'] == undefined ){ data['cartYSpeedRandomFactor'] = -1 };		//直角坐标 - y - 随机因子（锁定随机值专用,0-1之间）
-	if( data['trackSpeedRandomFactor'] == undefined ){ data['trackSpeedRandomFactor'] = -1 };		//轨道锚点 - 速度 - 随机因子（锁定随机值专用,0-1之间）
-	//   终止条件（terminate）
-	if( data['terminateRectEnabled'] == undefined ){ data['terminateRectEnabled'] = false };					//终止条件 - 矩形范围开关
-	if( data['terminateRect'] == undefined ){ data['terminateRect'] = {'x':0,'y':0,'width':0,'height':0}; };	//终止条件 - 矩形范围
+	if( result['movementMode'] == "极坐标模式" ){
+		if( data['polarSpeedRandomFactorList'] != undefined ){
+			result['polarSpeedRandomFactorList'] = JSON.parse(JSON.stringify( data['polarSpeedRandomFactorList'] ));
+			result['polarDirRandomFactorList'] = JSON.parse(JSON.stringify( data['polarDirRandomFactorList'] ));
+		}else{
+			result['polarSpeedRandomFactorList'] = [];									//极坐标 - 速度 - 随机因子（锁定随机值专用,0-1之间）
+			result['polarDirRandomFactorList'] = [];                                    //极坐标 - 方向 - 随机因子（锁定随机值专用,0-1之间）
+			for( var i=0; i < data['movementNum']; i++ ){
+				result['polarSpeedRandomFactorList'].push( Math.random() );
+				result['polarDirRandomFactorList'].push( Math.random() );
+			}
+		}
+	}
+	if( result['movementMode'] == "直角坐标模式" ){		
+		if( data['cartXSpeedRandomFactorList'] != undefined ){
+			result['cartXSpeedRandomFactorList'] = JSON.parse(JSON.stringify( data['cartXSpeedRandomFactorList'] ));
+			result['cartYSpeedRandomFactorList'] = JSON.parse(JSON.stringify( data['cartYSpeedRandomFactorList'] ));
+		}else{
+			result['cartXSpeedRandomFactorList'] = [];									//直角坐标 - x - 随机因子（锁定随机值专用,0-1之间）
+			result['cartYSpeedRandomFactorList'] = [];                                  //直角坐标 - y - 随机因子（锁定随机值专用,0-1之间）
+			for( var i=0; i < data['movementNum']; i++ ){
+				result['cartXSpeedRandomFactorList'].push( Math.random() );
+				result['cartYSpeedRandomFactorList'].push( Math.random() );
+			}
+		}
+	}
+	if( result['movementMode'] == "轨道锚点模式" ){		
+		if( data['trackSpeedRandomFactorList'] != undefined ){
+			result['trackSpeedRandomFactorList'] = JSON.parse(JSON.stringify( data['trackSpeedRandomFactorList'] ));
+		}else{
+			result['trackSpeedRandomFactorList'] = [];									//轨道锚点 - 速度 - 随机因子（锁定随机值专用,0-1之间）
+			for( var i=0; i < data['movementNum']; i++ ){
+				result['trackSpeedRandomFactorList'].push( Math.random() );
+			}
+		}
+	}
+	if( result['movementMode'] == "两点式" ){		
+		//（无随机因子）
+	}
 	
+	
+	//   终止条件（terminate）
+	result['terminateRectEnabled'] = data['terminateRectEnabled'] || false;				//终止条件 - 矩形范围开关
+	if( data['terminateRect'] != undefined ){											//终止条件 - 矩形范围
+		result['terminateRect'] = JSON.parse(JSON.stringify( data['terminateRect'] ));
+	}else{
+		result['terminateRect'] = {'x':0,'y':0,'width':0,'height':0};
+	}
+	
+	
+	this._drill_COBa_moveData = result;
+	this._drill_COBa_moveObj = null;
+	return result;
 }
 //==============================
-// * 移动弹道 - 预推演（接口，单次调用）
-//
-//			说明：	根据当前的弹道参数设置，开始计算轨迹，主要功能为数学计算。
-//			参数：	对象容器，对象编号，初始x位置，初始y位置
-//					执行后，obj_data指针中将被赋值弹道结果。
-//			返回：	无
+// * 移动弹道 - 获取弹道总时间（私有）
 //==============================
-Game_Temp.prototype.drill_COBa_preBallisticsMove = function( obj_data, obj_index, orgX, orgY ){
+Game_Temp.prototype.drill_COBa_getBallisticsMove_TotalTime_Private = function(){
 	var data = this._drill_COBa_moveData;
+	var result = data['movementTime'];
+	result += data['movementDelay'];
+	result += data['movementEndDelay'];
+	result += data['movementOrderDelay'] * (data['movementNum']-1);
+	return result;
+}
+//==============================
+// * 移动弹道 - 预推演（私有）
+//==============================
+Game_Temp.prototype.drill_COBa_preBallisticsMove_Private = function( obj_data, obj_index, orgX, orgY ){
+	var data = this._drill_COBa_moveData;
+	var obj = this._drill_COBa_moveObj;
 	
 	// > 初始化校验
 	if( isNaN( obj_index ) == true && DrillUp._drill_COBa_checkOn == true ){
@@ -409,13 +652,36 @@ Game_Temp.prototype.drill_COBa_preBallisticsMove = function( obj_data, obj_index
 	obj_data['_drill_COBa_x'] = [];
 	obj_data['_drill_COBa_y'] = [];
 	
+	
+	// > 预推演的obj
+	if( this._drill_COBa_moveObj == null ){
+		this._drill_COBa_moveObj = {};
+		obj = this._drill_COBa_moveObj;
+		//   公式obj
+		if( data['movementMode'] == "极坐标模式"){
+			eval("obj['polarDistanceFunction'] = function( p ){ "+data['polarDistanceFormula']+" }" );
+			eval("obj['polarDirFunction'] = function( p ){ "+data['polarDirFormula']+" }" );
+		}
+		if( data['movementMode'] == "直角坐标模式"){
+			eval("obj['cartXDistanceFunction'] = function( p ){ "+data['cartXDistanceFormula']+" }" );
+			eval("obj['cartYDistanceFunction'] = function( p ){ "+data['cartYDistanceFormula']+" }" );
+		}
+		if( data['movementMode'] == "轨道锚点模式"){
+			eval("obj['trackDistanceFunction'] = function( p ){ "+data['trackDistanceFormula']+" }" );
+		}
+		if( data['movementMode'] == "两点式" ){		
+			//（无公式）
+		}
+	}
+	
 	// > 终止条件（矩形范围）
 	var rect_enabled = data['terminateRectEnabled'];
 	var x_min = data['terminateRect']['x'];
 	var x_max = data['terminateRect']['x'] + data['terminateRect']['width'];
 	var y_min = data['terminateRect']['y'];
 	var y_max = data['terminateRect']['y'] + data['terminateRect']['height'];
-		
+	
+	
 	/*-----------------极坐标模式------------------*/
 	if( data['movementMode'] == "极坐标模式"){
 		
@@ -423,11 +689,11 @@ Game_Temp.prototype.drill_COBa_preBallisticsMove = function( obj_data, obj_index
 		obj_data['_drill_COBa_x'].push( orgX );
 		obj_data['_drill_COBa_y'].push( orgY );
 		
-		// > 随机值（只有随机值和时间没有关系）
-		var randomSpeed = Math.random();	//速度随机因子
-		var randomDirValue = Math.random();	//方向随机因子
-		if( data['polarSpeedRandomFactor'] != -1 ){ randomSpeed = data['polarSpeedRandomFactor']; }
-		if( data['polarDirRandomFactor'] != -1 ){ randomDirValue = data['polarDirRandomFactor']; }
+		// > 随机值（来自随机因子）
+		var randomSpeed = data['polarSpeedRandomFactorList'][ obj_index ];	//速度随机因子
+		var randomDirValue = data['polarDirRandomFactorList'][ obj_index ];	//方向随机因子
+		if( randomSpeed == undefined ){ randomSpeed = data['polarSpeedRandomFactorList'][0]; }
+		if( randomDirValue == undefined ){ randomDirValue = data['polarDirRandomFactorList'][0]; }
 		
 		// > 变量定义（写这里是为优化性能，减少反复创建次数）
 		var p = {};				//参数容器
@@ -467,7 +733,7 @@ Game_Temp.prototype.drill_COBa_preBallisticsMove = function( obj_data, obj_index
 				dir = this.drill_COBa_directionFunction_6( p );	
 			}
 			if( data['polarDirType'] == "方向计算公式"){
-				dir = data['polarDirFunction'].call(this, p );	
+				dir = obj['polarDirFunction'].call(this, p );	
 			}
 			DrillUp.drill_COBa_checkValue( p, dir );	//（校验）
 			dir = dir / 180 * Math.PI;
@@ -497,7 +763,7 @@ Game_Temp.prototype.drill_COBa_preBallisticsMove = function( obj_data, obj_index
 				radius = this.drill_COBa_speedFunction_4( p );	
 			}
 			if( data['polarSpeedType'] == "路程计算公式"){
-				radius = data['polarDistanceFunction'].call(this, p );	
+				radius = obj['polarDistanceFunction'].call(this, p );	
 			}
 			DrillUp.drill_COBa_checkValue( p, radius );	//（校验）
 		
@@ -525,11 +791,11 @@ Game_Temp.prototype.drill_COBa_preBallisticsMove = function( obj_data, obj_index
 		obj_data['_drill_COBa_x'].push( orgX );
 		obj_data['_drill_COBa_y'].push( orgY );
 		
-		// > 随机值（只有随机值和时间没有关系）
-		var x_randomSpeed = Math.random();	//速度随机因子
-		var y_randomSpeed = Math.random();	//方向随机因子
-		if( data['cartXSpeedRandomFactor'] != -1 ){ x_randomSpeed = data['cartXSpeedRandomFactor']; }
-		if( data['cartYSpeedRandomFactor'] != -1 ){ y_randomSpeed = data['cartYSpeedRandomFactor']; }
+		// > 随机值（来自随机因子）
+		var x_randomSpeed = data['cartXSpeedRandomFactorList'][ obj_index ];	//X随机因子
+		var y_randomSpeed = data['cartYSpeedRandomFactorList'][ obj_index ];	//Y随机因子
+		if( x_randomSpeed == undefined ){ x_randomSpeed = data['cartXSpeedRandomFactorList'][0]; }
+		if( y_randomSpeed == undefined ){ y_randomSpeed = data['cartYSpeedRandomFactorList'][0]; }
 		
 		// > 变量定义（写这里是为优化性能，减少反复创建次数）
 		var p = {};				//参数容器
@@ -565,7 +831,7 @@ Game_Temp.prototype.drill_COBa_preBallisticsMove = function( obj_data, obj_index
 				xx = this.drill_COBa_speedFunction_4( p );	
 			}
 			if( data['cartXSpeedType'] == "路程计算公式"){
-				xx = data['cartXDistanceFunction'].call(this, p );	
+				xx = obj['cartXDistanceFunction'].call(this, p );	
 			}
 			DrillUp.drill_COBa_checkValue( p, xx );	//（校验）
 			
@@ -593,7 +859,7 @@ Game_Temp.prototype.drill_COBa_preBallisticsMove = function( obj_data, obj_index
 				yy = this.drill_COBa_speedFunction_4( p );	
 			}
 			if( data['cartYSpeedType'] == "路程计算公式"){
-				yy = data['cartYDistanceFunction'].call(this, p );	
+				yy = obj['cartYDistanceFunction'].call(this, p );	
 			}
 			DrillUp.drill_COBa_checkValue( p, yy );	//（校验）
 			
@@ -625,10 +891,9 @@ Game_Temp.prototype.drill_COBa_preBallisticsMove = function( obj_data, obj_index
 		obj_data['_drill_COBa_x'].push( orgX );
 		obj_data['_drill_COBa_y'].push( orgY );
 		
-		// > 随机值（只有随机值和时间没有关系）
-		var randomSpeed = Math.random();	//速度随机因子
-		if( data['trackSpeedRandomFactor'] != -1 ){ randomSpeed = data['trackSpeedRandomFactor']; }
-		
+		// > 随机值（来自随机因子）
+		var randomSpeed = data['trackSpeedRandomFactorList'][ obj_index ];
+		if( randomSpeed == undefined ){ randomSpeed = data['trackSpeedRandomFactorList'][0]; }
 		
 		// > 轨道点初始化
 		if( data['trackPointTank'].length < 2 ){	//（至少要两个点才能计算）
@@ -687,7 +952,7 @@ Game_Temp.prototype.drill_COBa_preBallisticsMove = function( obj_data, obj_index
 				distance = this.drill_COBa_speedFunction_4( p );	
 			}
 			if( data['trackSpeedType'] == "路程计算公式"){
-				distance = data['trackDistanceFunction'].call(this, p );	
+				distance = obj['trackDistanceFunction'].call(this, p );	
 			}
 			DrillUp.drill_COBa_checkValue( p, distance );	//（校验）
 			
@@ -889,6 +1154,36 @@ Game_Temp.prototype.drill_COBa_preBallisticsMove = function( obj_data, obj_index
 		obj_data['_drill_COBa_x'].push( obj_data['_drill_COBa_x'][ obj_data['_drill_COBa_x'].length-1 ] );
 		obj_data['_drill_COBa_y'].push( obj_data['_drill_COBa_y'][ obj_data['_drill_COBa_y'].length-1 ] );
 	}
+	// > 延迟（ID依次延迟时间）
+	if( data['movementOrderDelay'] > 0 ){
+		var start_num = obj_index;
+		var end_num = data['movementNum']-1 - obj_index;
+		var start_delay = start_num * data['movementOrderDelay'];
+		var end_delay = end_num * data['movementOrderDelay'];
+		for(var i = 0; i < start_delay; i++){
+			obj_data['_drill_COBa_x'].unshift( obj_data['_drill_COBa_x'][0] );
+			obj_data['_drill_COBa_y'].unshift( obj_data['_drill_COBa_y'][0] );
+		}
+		for(var i = 0; i < end_delay; i++){
+			obj_data['_drill_COBa_x'].push( obj_data['_drill_COBa_x'][ obj_data['_drill_COBa_x'].length-1 ] );
+			obj_data['_drill_COBa_y'].push( obj_data['_drill_COBa_y'][ obj_data['_drill_COBa_y'].length-1 ] );
+		}
+	}else if( data['movementOrderDelay'] < 0 ){
+		var start_num = data['movementNum']-1 - obj_index;
+		var end_num = obj_index;
+		var start_delay = start_num * Math.abs( data['movementOrderDelay'] );
+		var end_delay = end_num * Math.abs( data['movementOrderDelay'] );
+		for(var i = 0; i < start_delay; i++){
+			obj_data['_drill_COBa_x'].unshift( obj_data['_drill_COBa_x'][0] );
+			obj_data['_drill_COBa_y'].unshift( obj_data['_drill_COBa_y'][0] );
+		}
+		for(var i = 0; i < end_delay; i++){
+			obj_data['_drill_COBa_x'].push( obj_data['_drill_COBa_x'][ obj_data['_drill_COBa_x'].length-1 ] );
+			obj_data['_drill_COBa_y'].push( obj_data['_drill_COBa_y'][ obj_data['_drill_COBa_y'].length-1 ] );
+		}
+	}else{
+		//（不操作）
+	}
 	
 }
 
@@ -917,8 +1212,8 @@ Game_Temp.prototype.drill_COBa_directionFunction_3 = function( p ){
 // * 公式 - 方向计算公式(方向类型) - 四周扩散(抖动)
 //==============================
 Game_Temp.prototype.drill_COBa_directionFunction_4 = function( p ){
-	var result =  p.d0 + 360 * p.ran + 30 * Math.random();		//（ Math.random() 虽然是随机的，但是不可控）
-	return result;												//（ 如果系统要记录随机弹幕的轨迹，那么尽量要避免用 Math.random()，改用随机因子 ）
+	var result =  p.d0 + 360 * p.ran + 30 * Math.sin(p.time);
+	return result;											
 }
 //==============================
 // * 公式 - 方向计算公式(方向类型) - 扇形范围方向(线性)
@@ -994,53 +1289,66 @@ Game_Temp.prototype.drill_COBa_speedFunction_4 = function( p ){
 // ** 通用弹道【一维数组】
 //=============================================================================
 //==============================
-// * 通用弹道 - 初始化（接口，单次调用）
-//
-//			说明：	> 所有一维数组变化的通用接口，参数配置并计算后，能够返回一个数组列表。
-//					> 给传来的data进行初始赋值，主要功能为数学计算。
-//					> 执行后，需要立即执行 预推演 ，确保这两个接口在同一个函数内执行即可。
-//			参数：	见默认值，执行接口后，data指针中将被赋值数据。
-//			返回：	无
+// * 通用弹道 - 初始化（私有）
 //==============================
 Game_Temp.prototype.drill_COBa_setBallisticsCommon = function( data ){
-	this._drill_COBa_commonData = JSON.parse(JSON.stringify( data ));	//深拷贝数据
-	var data = this._drill_COBa_commonData;
+	var result = {};
 	
 	//   通用基础参数（common）
-	if( data['commonNum'] == undefined ){ data['commonNum'] = 1 };							//通用 - 子弹数量
-	if( data['commonTime'] == undefined ){ data['commonTime'] = 1 };						//通用 - 时长
-	if( data['commonDelay'] == undefined ){ data['commonDelay'] = 0 };						//通用 - 开始前延迟时间
-	if( data['commonEndDelay'] == undefined ){ data['commonEndDelay'] = 0 };				//通用 - 到终点后延迟时间
-	if( data['commonMode'] == undefined ){ data['commonMode'] = "目标值模式" };				//通用 - 通用模式（时间公式模式/时间锚点模式/目标值模式）
+	result['commonNum'] = data['commonNum'] || 1;						//通用 - 子弹数量
+	result['commonTime'] = data['commonTime'] || 1;                 	//通用 - 时长
+	result['commonDelay'] = data['commonDelay'] || 0;               	//通用 - 开始前延迟时间
+	result['commonEndDelay'] = data['commonEndDelay'] || 0;         	//通用 - 到终点后延迟时间
+	result['commonOrderDelay'] = data['commonOrderDelay'] || 0;         //通用 - ID依次延迟时间
+	result['commonMode'] = data['commonMode'] || "目标值模式";      	//通用 - 通用模式（时间公式模式/时间锚点模式/目标值模式）
 	
 	// ■ 时间公式（o-t图）
-	if( data['otFormula'] == undefined ){ data['otFormula'] = "return 0" };					//时间公式 - 公式值
+	if( result['commonMode'] == "时间公式模式" ){
+		result['otFormula'] = data['otFormula'] || "return 0";			//时间公式 - 公式值
+	}
 	
 	// ■ 时间锚点（anchor）		
-	if( data['anchorPointTank'] == undefined ){ data['anchorPointTank'] = [] };				//时间锚点 - 锚点列表
+	if( result['commonMode'] == "时间锚点模式" ){
+		result['anchorPointTank'] = data['anchorPointTank'] || [];		//时间锚点 - 锚点列表
+	}
 	
 	// ■ 目标值（target）		
-	if( data['targetType'] == undefined ){ data['targetType'] = "瞬间变化" };				//目标值 - 类型（瞬间变化/匀速变化/增减速变化/弹性变化）
-	if( data['targetDifference'] == undefined ){ data['targetDifference'] = 0 };			//目标值 - 距离差值（终点值减起点值）
+	if( result['commonMode'] == "目标值模式" ){
+		result['targetType'] = data['targetType'] || "瞬间变化";		//目标值 - 类型（瞬间变化/匀速变化/增减速变化/弹性变化）
+		result['targetDifference'] = data['targetDifference'] || 0;     //目标值 - 距离差值（终点值减起点值）
+	}
 	
-		
-	//   公式obj
-	eval("data['otFunction'] = function( p ){ "+data['otFormula']+" }" );
 	//   随机因子（RandomFactor）
-	if( data['randomFactor'] == undefined ){ data['randomFactor'] = -1 };		//通用 - 随机因子（锁定随机值专用,0-1之间）
+	if( data['randomFactorList'] != undefined ){
+		result['randomFactorList'] = JSON.parse(JSON.stringify( data['randomFactorList'] ));
+	}else{
+		result['randomFactorList'] = [];								//通用 - 随机因子（锁定随机值专用,0-1之间）
+		for( var i=0; i < data['movementNum']; i++ ){
+			result['randomFactorList'].push( Math.random() );
+		}
+	}
 	
+	this._drill_COBa_commonData = result;
+	this._drill_COBa_commonObj = null;
+	return result;
 }
 //==============================
-// * 通用弹道 - 预推演（接口，单次调用）
-//
-//			说明：	> 根据当前的弹道参数设置，开始计算轨迹，主要功能为数学计算。
-//					> 执行后，需要立即执行 预推演 ，确保这两个接口在同一个函数内执行即可。
-//			参数：	对象容器，对象编号，初始旋转角
-//				  	执行后，obj_data指针中将被赋值弹道结果。
-//			返回：	无
+// * 通用弹道 - 获取弹道总时间（私有）
+//==============================
+Game_Temp.prototype.drill_COBa_preBallisticsCommon_TotalTime_Private = function(){
+	var data = this._drill_COBa_commonData;
+	var result = data['commonTime'];
+	result += data['commonDelay'];
+	result += data['commonEndDelay'];
+	result += data['commonOrderDelay'] * (data['commonNum']-1);
+	return result;
+}
+//==============================
+// * 通用弹道 - 预推演（私有）
 //==============================
 Game_Temp.prototype.drill_COBa_preBallisticsCommon = function( obj_data, obj_index, orgCommon ){
 	var data = this._drill_COBa_commonData;
+	var obj = this._drill_COBa_commonObj;
 	
 	// > 初始化校验
 	if( isNaN( obj_index ) == true && DrillUp._drill_COBa_checkOn == true ){
@@ -1060,15 +1368,32 @@ Game_Temp.prototype.drill_COBa_preBallisticsCommon = function( obj_data, obj_ind
 	obj_data['_drill_COBa_common'] = [];
 	
 	
+	// > 预推演的obj
+	if( this._drill_COBa_commonObj == null ){
+		this._drill_COBa_commonObj = {};
+		obj = this._drill_COBa_commonObj;
+		//   公式obj
+		if( data['commonMode'] == "时间公式模式"){
+			eval("obj['otFunction'] = function( p ){ "+data['otFormula']+" }" );
+		}
+		if( data['commonMode'] == "时间锚点模式" ){		
+			//（无公式）
+		}
+		if( data['commonMode'] == "目标值模式" ){		
+			//（无公式）
+		}
+	}
+	
+	
 	/*-----------------时间公式模式------------------*/
 	if( data['commonMode'] == "时间公式模式"){
 		
 		// > 起点值
 		obj_data['_drill_COBa_common'].push( orgCommon );
 		
-		// > 随机值（只有随机值和时间没有关系）
-		var randomValue = Math.random();
-		if( data['randomFactor'] != -1 ){ randomValue = data['randomFactor']; }
+		// > 随机值（来自随机因子）
+		var randomValue = data['randomFactorList'][ obj_index ];
+		if( randomValue == undefined ){ randomValue = data['randomFactorList'][0]; }
 		
 		// > 变量定义（写这里是为优化性能，减少反复创建次数）
 		var p = {};				//参数容器
@@ -1081,7 +1406,7 @@ Game_Temp.prototype.drill_COBa_preBallisticsCommon = function( obj_data, obj_ind
 			p.ran   = randomValue;
 			p.num   = data['commonNum'];
 			
-			cc = data['otFunction'].call(this, p );	
+			cc = obj['otFunction'].call(this, p );	
 			DrillUp.drill_COBa_checkValue( p, cc );		//（校验）
 		
 			cc = orgCommon + cc;
@@ -1201,6 +1526,32 @@ Game_Temp.prototype.drill_COBa_preBallisticsCommon = function( obj_data, obj_ind
 	for(var i = 0; i < data['commonEndDelay']; i++){
 		obj_data['_drill_COBa_common'].push( obj_data['_drill_COBa_common'][ obj_data['_drill_COBa_common'].length-1 ] );
 	}
+	// > 延迟（ID依次延迟时间）
+	if( data['commonOrderDelay'] > 0 ){
+		var start_num = obj_index;
+		var end_num = data['commonNum']-1 - obj_index;
+		var start_delay = start_num * data['commonOrderDelay'];
+		var end_delay = end_num * data['commonOrderDelay'];
+		for(var i = 0; i < start_delay; i++){
+			obj_data['_drill_COBa_common'].unshift( obj_data['_drill_COBa_common'][0] );
+		}
+		for(var i = 0; i < end_delay; i++){
+			obj_data['_drill_COBa_common'].push( obj_data['_drill_COBa_common'][ obj_data['_drill_COBa_common'].length-1 ] );
+		}
+	}else if( data['commonOrderDelay'] < 0 ){
+		var start_num = data['commonNum']-1 - obj_index;
+		var end_num = obj_index;
+		var start_delay = start_num * Math.abs( data['commonOrderDelay'] );
+		var end_delay = end_num * Math.abs( data['commonOrderDelay'] );
+		for(var i = 0; i < start_delay; i++){
+			obj_data['_drill_COBa_common'].unshift( obj_data['_drill_COBa_common'][0] );
+		}
+		for(var i = 0; i < end_delay; i++){
+			obj_data['_drill_COBa_common'].push( obj_data['_drill_COBa_common'][ obj_data['_drill_COBa_common'].length-1 ] );
+		}
+	}else{
+		//（不操作）
+	}
 	
 }
 
@@ -1210,138 +1561,166 @@ Game_Temp.prototype.drill_COBa_preBallisticsCommon = function( obj_data, obj_ind
 // ** 透明度弹道【一维数组】
 //=============================================================================
 //==============================
-// * 透明度弹道 - 初始化（接口，单次调用）
-//
-//			说明：	> 给传来的data进行初始赋值，主要功能为数学计算。
-//					> 执行后，需要立即执行 预推演 ，确保这两个接口在同一个函数内执行即可。
-//			参数：	见默认值，执行接口后，data指针中将被赋值数据。
-//			返回：	无
+// * 透明度弹道 - 初始化数据 默认值（私有）
 //==============================
-Game_Temp.prototype.drill_COBa_setBallisticsOpacity = function( data ){
-	this.drill_COBa_setBallisticsCommon( data );		//（按通用弹道规则设置）
-	var data = this._drill_COBa_commonData;
+Game_Temp.prototype.drill_COBa_setBallisticsOpacity_Private = function( data ){
+	// （这里与通用弹道的数据有交叉，但不影响整体使用。正常当做 透明度弹道数据 来存储/处理即可。）
+	var result = {};
 	
 	//   透明度基础参数（opacity）
-	if( data['opacityNum'] == undefined ){ data['opacityNum'] = 1 };						//透明度 - 子弹数量
-	if( data['opacityTime'] == undefined ){ data['opacityTime'] = 1 };						//透明度 - 时长
-	if( data['opacityDelay'] == undefined ){ data['opacityDelay'] = 0 };					//透明度 - 开始前延迟时间
-	if( data['opacityEndDelay'] == undefined ){ data['opacityEndDelay'] = 0 };				//透明度 - 到终点后延迟时间
-	if( data['opacityMode'] == undefined ){ data['opacityMode'] = "目标值模式" };			//透明度 - 透明度模式（时间公式模式/时间锚点模式/目标值模式）
+	result['opacityNum'] = data['opacityNum'] || 1;					//透明度 - 子弹数量
+	result['opacityTime'] = data['opacityTime'] || 1;               //透明度 - 时长
+	result['opacityDelay'] = data['opacityDelay'] || 0;             //透明度 - 开始前延迟时间
+	result['opacityEndDelay'] = data['opacityEndDelay'] || 0;       //透明度 - 到终点后延迟时间
+	result['opacityOrderDelay'] = data['opacityOrderDelay'] || 0;	//透明度 - ID依次延迟时间
+	result['opacityMode'] = data['opacityMode'] || "目标值模式";    //透明度 - 透明度模式（时间公式模式/时间锚点模式/目标值模式）
 	
-	data['commonNum'] = data['opacityNum'];
-	data['commonTime'] = data['opacityTime'];
-	data['commonDelay'] = data['opacityDelay'];
-	data['commonEndDelay'] = data['opacityEndDelay'];
-	data['commonMode'] = data['opacityMode'];
+	
+	// ■ 时间公式（o-t图）
+	if( result['opacityMode'] == "时间公式模式" ){
+		result['otFormula'] = data['otFormula'] || "return 0";			//时间公式 - 公式值
+	}
+	
+	// ■ 时间锚点（anchor）		
+	if( result['opacityMode'] == "时间锚点模式" ){
+		result['anchorPointTank'] = data['anchorPointTank'] || [];		//时间锚点 - 锚点列表
+	}
+	
+	// ■ 目标值（target）		
+	if( result['opacityMode'] == "目标值模式" ){
+		result['targetType'] = data['targetType'] || "瞬间变化";		//目标值 - 类型（瞬间变化/匀速变化/增减速变化/弹性变化）
+		result['targetDifference'] = data['targetDifference'] || 0;     //目标值 - 距离差值（终点值减起点值）
+	}
+	
+	
+	// > 按通用弹道规则设置（私有）
+	result['commonNum'] = result['opacityNum'];
+	result['commonTime'] = result['opacityTime'];
+	result['commonDelay'] = result['opacityDelay'];
+	result['commonEndDelay'] = result['opacityEndDelay'];
+	result['commonOrderDelay'] = result['opacityOrderDelay'];
+	result['commonMode'] = result['opacityMode'];
+	return this.drill_COBa_setBallisticsCommon( result );	
 }
 //==============================
-// * 透明度弹道 - 预推演（接口，单次调用）
-//
-//			说明：	> 根据当前的弹道参数设置，开始计算轨迹，主要功能为数学计算。
-//					> 执行后，需要立即执行 预推演 ，确保这两个接口在同一个函数内执行即可。
-//			参数：	对象容器，对象编号，初始旋转角
-//				  	执行后，obj_data指针中将被赋值弹道结果。
-//			返回：	无
+// * 透明度弹道 - 预推演（私有）
 //==============================
-Game_Temp.prototype.drill_COBa_preBallisticsOpacity = function( obj_data, obj_index, orgOpacity ){
+Game_Temp.prototype.drill_COBa_preBallisticsOpacity_Private = function( obj_data, obj_index, orgOpacity ){
 	this.drill_COBa_preBallisticsCommon( obj_data, obj_index, orgOpacity );		//（按通用弹道规则推演）
 	
 	// > 指针结果交换
 	obj_data['_drill_COBa_opacity'] = obj_data['_drill_COBa_common'];
 	obj_data['_drill_COBa_common'] = null;
-	
 }
 
 
 
 //=============================================================================
-// ** 缩放弹道【一维数组】x2
+// ** 缩放弹道x2【一维数组】
 //=============================================================================
 //==============================
-// * 缩放X弹道 - 初始化（接口，单次调用）
-//
-//			说明：	> 缩放X 和 缩放Y 是两个分开 推演 的一维数组。
-//					> 给传来的data进行初始赋值，主要功能为数学计算。
-//					> 执行后，需要立即执行 预推演 ，确保这两个接口在同一个函数内执行即可。
-//			参数：	见默认值，执行接口后，data指针中将被赋值数据。
-//			返回：	无
+// * 缩放X弹道 - 初始化数据 默认值（私有）
 //==============================
-Game_Temp.prototype.drill_COBa_setBallisticsScaleX = function( data ){
-	this.drill_COBa_setBallisticsCommon( data );		//（按通用弹道规则设置）
-	var data = this._drill_COBa_commonData;
+Game_Temp.prototype.drill_COBa_setBallisticsScaleX_Private = function( data ){
+	// （这里与通用弹道的数据有交叉，但不影响整体使用。正常当做 透明度弹道数据 来存储/处理即可。）
+	var result = {};
 	
-	//   缩放基础参数（scaleX）
-	if( data['scaleXNum'] == undefined ){ data['scaleXNum'] = 1 };						//缩放 - 子弹数量
-	if( data['scaleXTime'] == undefined ){ data['scaleXTime'] = 1 };					//缩放 - 时长
-	if( data['scaleXDelay'] == undefined ){ data['scaleXDelay'] = 0 };					//缩放 - 开始前延迟时间
-	if( data['scaleXEndDelay'] == undefined ){ data['scaleXEndDelay'] = 0 };			//缩放 - 到终点后延迟时间
-	if( data['scaleXMode'] == undefined ){ data['scaleXMode'] = "目标值模式" };			//缩放 - 缩放模式（时间公式模式/时间锚点模式/目标值模式）
+	//   缩放X基础参数（scaleX）
+	result['scaleXNum'] = data['scaleXNum'] || 1;					//缩放X - 子弹数量
+	result['scaleXTime'] = data['scaleXTime'] || 1;                 //缩放X - 时长
+	result['scaleXDelay'] = data['scaleXDelay'] || 0;               //缩放X - 开始前延迟时间
+	result['scaleXEndDelay'] = data['scaleXEndDelay'] || 0;         //缩放X - 到终点后延迟时间
+	result['scaleXOrderDelay'] = data['scaleXOrderDelay'] || 0;		//缩放X - ID依次延迟时间
+	result['scaleXMode'] = data['scaleXMode'] || "目标值模式";      //缩放X - 透明度模式（时间公式模式/时间锚点模式/目标值模式）
 	
-	data['commonNum'] = data['scaleXNum'];
-	data['commonTime'] = data['scaleXTime'];
-	data['commonDelay'] = data['scaleXDelay'];
-	data['commonEndDelay'] = data['scaleXEndDelay'];
-	data['commonMode'] = data['scaleXMode'];
+	
+	// ■ 时间公式（o-t图）
+	if( result['scaleXMode'] == "时间公式模式" ){
+		result['otFormula'] = data['otFormula'] || "return 0";			//时间公式 - 公式值
+	}
+	
+	// ■ 时间锚点（anchor）		
+	if( result['scaleXMode'] == "时间锚点模式" ){
+		result['anchorPointTank'] = data['anchorPointTank'] || [];		//时间锚点 - 锚点列表
+	}
+	
+	// ■ 目标值（target）		
+	if( result['scaleXMode'] == "目标值模式" ){
+		result['targetType'] = data['targetType'] || "瞬间变化";		//目标值 - 类型（瞬间变化/匀速变化/增减速变化/弹性变化）
+		result['targetDifference'] = data['targetDifference'] || 0;     //目标值 - 距离差值（终点值减起点值）
+	}
+	
+	
+	// > 按通用弹道规则设置（私有）
+	result['commonNum'] = result['scaleXNum'];
+	result['commonTime'] = result['scaleXTime'];
+	result['commonDelay'] = result['scaleXDelay'];
+	result['commonEndDelay'] = result['scaleXEndDelay'];
+	result['commonOrderDelay'] = result['scaleXOrderDelay'];
+	result['commonMode'] = result['scaleXMode'];
+	return this.drill_COBa_setBallisticsCommon( result );	
 }
 //==============================
-// * 缩放X弹道 - 预推演（接口，单次调用）
-//
-//			说明：	> 根据当前的弹道参数设置，开始计算轨迹，主要功能为数学计算。
-//					> 执行后，需要立即执行 预推演 ，确保这两个接口在同一个函数内执行即可。
-//			参数：	对象容器，对象编号，初始旋转角
-//				  	执行后，obj_data指针中将被赋值弹道结果。
-//			返回：	无
+// * 缩放X弹道 - 预推演（私有）
 //==============================
-Game_Temp.prototype.drill_COBa_preBallisticsScaleX = function( obj_data, obj_index, orgScaleX ){
+Game_Temp.prototype.drill_COBa_preBallisticsScaleX_Private = function( obj_data, obj_index, orgScaleX ){
 	this.drill_COBa_preBallisticsCommon( obj_data, obj_index, orgScaleX );		//（按通用弹道规则推演）
 	
 	// > 指针结果交换
 	obj_data['_drill_COBa_scaleX'] = obj_data['_drill_COBa_common'];
 	obj_data['_drill_COBa_common'] = null;
-	
 }
 //==============================
-// * 缩放Y弹道 - 初始化（接口，单次调用）
-//
-//			说明：	> 缩放X 和 缩放Y 是两个分开 推演 的一维数组。
-//					> 给传来的data进行初始赋值，主要功能为数学计算。
-//					> 执行后，需要立即执行 预推演 ，确保这两个接口在同一个函数内执行即可。
-//			参数：	见默认值，执行接口后，data指针中将被赋值数据。
-//			返回：	无
+// * 缩放Y弹道 - 初始化数据 默认值（私有）
 //==============================
-Game_Temp.prototype.drill_COBa_setBallisticsScaleY = function( data ){
-	this.drill_COBa_setBallisticsCommon( data );		//（按通用弹道规则设置）
-	var data = this._drill_COBa_commonData;
+Game_Temp.prototype.drill_COBa_setBallisticsScaleY_Private = function( data ){
+	// （这里与通用弹道的数据有交叉，但不影响整体使用。正常当做 透明度弹道数据 来存储/处理即可。）
+	var result = {};
 	
-	//   缩放基础参数（scaleY）
-	if( data['scaleYNum'] == undefined ){ data['scaleYNum'] = 1 };						//缩放 - 子弹数量
-	if( data['scaleYTime'] == undefined ){ data['scaleYTime'] = 1 };					//缩放 - 时长
-	if( data['scaleYDelay'] == undefined ){ data['scaleYDelay'] = 0 };					//缩放 - 开始前延迟时间
-	if( data['scaleYEndDelay'] == undefined ){ data['scaleYEndDelay'] = 0 };			//缩放 - 到终点后延迟时间
-	if( data['scaleYMode'] == undefined ){ data['scaleYMode'] = "目标值模式" };			//缩放 - 缩放模式（时间公式模式/时间锚点模式/目标值模式）
+	//   缩放Y基础参数（scaleY）
+	result['scaleYNum'] = data['scaleYNum'] || 1;					//缩放Y - 子弹数量
+	result['scaleYTime'] = data['scaleYTime'] || 1;                 //缩放Y - 时长
+	result['scaleYDelay'] = data['scaleYDelay'] || 0;               //缩放Y - 开始前延迟时间
+	result['scaleYEndDelay'] = data['scaleYEndDelay'] || 0;         //缩放Y - 到终点后延迟时间
+	result['scaleYOrderDelay'] = data['scaleYOrderDelay'] || 0;		//缩放Y - ID依次延迟时间
+	result['scaleYMode'] = data['scaleYMode'] || "目标值模式";      //缩放Y - 透明度模式（时间公式模式/时间锚点模式/目标值模式）
 	
-	data['commonNum'] = data['scaleYNum'];
-	data['commonTime'] = data['scaleYTime'];
-	data['commonDelay'] = data['scaleYDelay'];
-	data['commonEndDelay'] = data['scaleYEndDelay'];
-	data['commonMode'] = data['scaleYMode'];
+	
+	// ■ 时间公式（o-t图）
+	if( result['scaleYMode'] == "时间公式模式" ){
+		result['otFormula'] = data['otFormula'] || "return 0";			//时间公式 - 公式值
+	}
+	
+	// ■ 时间锚点（anchor）		
+	if( result['scaleYMode'] == "时间锚点模式" ){
+		result['anchorPointTank'] = data['anchorPointTank'] || [];		//时间锚点 - 锚点列表
+	}
+	
+	// ■ 目标值（target）		
+	if( result['scaleYMode'] == "目标值模式" ){
+		result['targetType'] = data['targetType'] || "瞬间变化";		//目标值 - 类型（瞬间变化/匀速变化/增减速变化/弹性变化）
+		result['targetDifference'] = data['targetDifference'] || 0;     //目标值 - 距离差值（终点值减起点值）
+	}
+	
+	
+	// > 按通用弹道规则设置（私有）
+	result['commonNum'] = result['scaleYNum'];
+	result['commonTime'] = result['scaleYTime'];
+	result['commonDelay'] = result['scaleYDelay'];
+	result['commonEndDelay'] = result['scaleYEndDelay'];
+	result['commonOrderDelay'] = result['scaleYOrderDelay'];
+	result['commonMode'] = result['scaleYMode'];
+	return this.drill_COBa_setBallisticsCommon( result );	
 }
 //==============================
-// * 缩放Y弹道 - 预推演（接口，单次调用）
-//
-//			说明：	> 根据当前的弹道参数设置，开始计算轨迹，主要功能为数学计算。
-//					> 执行后，需要立即执行 预推演 ，确保这两个接口在同一个函数内执行即可。
-//			参数：	对象容器，对象编号，初始旋转角
-//				  	执行后，obj_data指针中将被赋值弹道结果。
-//			返回：	无
+// * 缩放Y弹道 - 预推演（私有）
 //==============================
-Game_Temp.prototype.drill_COBa_preBallisticsScaleY = function( obj_data, obj_index, orgScaleY ){
+Game_Temp.prototype.drill_COBa_preBallisticsScaleY_Private = function( obj_data, obj_index, orgScaleY ){
 	this.drill_COBa_preBallisticsCommon( obj_data, obj_index, orgScaleY );		//（按通用弹道规则推演）
 	
 	// > 指针结果交换
 	obj_data['_drill_COBa_scaleY'] = obj_data['_drill_COBa_common'];
 	obj_data['_drill_COBa_common'] = null;
-	
 }
 
 
@@ -1350,48 +1729,55 @@ Game_Temp.prototype.drill_COBa_preBallisticsScaleY = function( obj_data, obj_ind
 // ** 旋转角弹道【一维数组】
 //=============================================================================
 //==============================
-// * 旋转角弹道 - 初始化（接口，单次调用）
-//
-//			说明：	> 给传来的data进行初始赋值，主要功能为数学计算。
-//					> 执行后，需要立即执行 预推演 ，确保这两个接口在同一个函数内执行即可。
-//			参数：	见默认值，执行接口后，data指针中将被赋值数据。
-//			返回：	无
+// * 旋转角弹道 - 初始化数据 默认值（私有）
 //==============================
-Game_Temp.prototype.drill_COBa_setBallisticsRotate = function( data ){
-	this.drill_COBa_setBallisticsCommon( data );		//（按通用弹道规则设置）
-	var data = this._drill_COBa_commonData;
+Game_Temp.prototype.drill_COBa_setBallisticsRotate_Private = function( data ){
+	// （这里与通用弹道的数据有交叉，但不影响整体使用。正常当做 透明度弹道数据 来存储/处理即可。）
+	var result = {};
 	
 	//   旋转角基础参数（rotate）
-	if( data['rotateNum'] == undefined ){ data['rotateNum'] = 1 };						//透明度 - 子弹数量
-	if( data['rotateTime'] == undefined ){ data['rotateTime'] = 1 };						//透明度 - 时长
-	if( data['rotateDelay'] == undefined ){ data['rotateDelay'] = 0 };					//透明度 - 开始前延迟时间
-	if( data['rotateEndDelay'] == undefined ){ data['rotateEndDelay'] = 0 };				//透明度 - 到终点后延迟时间
-	if( data['rotateMode'] == undefined ){ data['rotateMode'] = "目标值模式" };			//透明度 - 透明度模式（时间公式模式/时间锚点模式/目标值模式）
+	result['rotateNum'] = data['rotateNum'] || 1;					//旋转角 - 子弹数量
+	result['rotateTime'] = data['rotateTime'] || 1;                 //旋转角 - 时长
+	result['rotateDelay'] = data['rotateDelay'] || 0;               //旋转角 - 开始前延迟时间
+	result['rotateEndDelay'] = data['rotateEndDelay'] || 0;         //旋转角 - 到终点后延迟时间
+	result['rotateOrderDelay'] = data['rotateOrderDelay'] || 0;		//旋转角 - ID依次延迟时间
+	result['rotateMode'] = data['rotateMode'] || "目标值模式";      //旋转角 - 透明度模式（时间公式模式/时间锚点模式/目标值模式）
 	
-	data['commonNum'] = data['rotateNum'];
-	data['commonTime'] = data['rotateTime'];
-	data['commonDelay'] = data['rotateDelay'];
-	data['commonEndDelay'] = data['rotateEndDelay'];
-	data['commonMode'] = data['rotateMode'];
+	
+	// ■ 时间公式（o-t图）
+	if( result['rotateMode'] == "时间公式模式" ){
+		result['otFormula'] = data['otFormula'] || "return 0";			//时间公式 - 公式值
+	}
+	
+	// ■ 时间锚点（anchor）		
+	if( result['rotateMode'] == "时间锚点模式" ){
+		result['anchorPointTank'] = data['anchorPointTank'] || [];		//时间锚点 - 锚点列表
+	}
+	
+	// ■ 目标值（target）		
+	if( result['rotateMode'] == "目标值模式" ){
+		result['targetType'] = data['targetType'] || "瞬间变化";		//目标值 - 类型（瞬间变化/匀速变化/增减速变化/弹性变化）
+		result['targetDifference'] = data['targetDifference'] || 0;     //目标值 - 距离差值（终点值减起点值）
+	}
+	
+	
+	// > 按通用弹道规则设置（私有）
+	result['commonNum'] = result['rotateNum'];
+	result['commonTime'] = result['rotateTime'];
+	result['commonDelay'] = result['rotateDelay'];
+	result['commonEndDelay'] = result['rotateEndDelay'];
+	result['commonOrderDelay'] = result['rotateOrderDelay'];
+	result['commonMode'] = result['rotateMode'];
+	return this.drill_COBa_setBallisticsCommon( result );	
 }
 //==============================
-// * 旋转角弹道 - 预推演（接口，单次调用）
-//
-//			说明：	> 根据当前的弹道参数设置，开始计算轨迹，主要功能为数学计算。
-//					> 执行后，需要立即执行 预推演 ，确保这两个接口在同一个函数内执行即可。
-//			参数：	对象容器，对象编号，初始旋转角
-//				  	执行后，obj_data指针中将被赋值弹道结果。
-//			返回：	无
+// * 旋转角弹道 - 预推演（私有）
 //==============================
-Game_Temp.prototype.drill_COBa_preBallisticsRotate = function( obj_data, obj_index, orgRotate ){
+Game_Temp.prototype.drill_COBa_preBallisticsRotate_Private = function( obj_data, obj_index, orgRotate ){
 	this.drill_COBa_preBallisticsCommon( obj_data, obj_index, orgRotate );		//（按通用弹道规则推演）
 	
 	// > 指针结果交换
 	obj_data['_drill_COBa_rotate'] = obj_data['_drill_COBa_common'];
 	obj_data['_drill_COBa_common'] = null;
-	
 }
-
-
-
 

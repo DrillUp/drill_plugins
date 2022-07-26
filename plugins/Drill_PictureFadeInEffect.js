@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        图片 - 显现动作效果
+ * @plugindesc [v1.4]        图片 - 显现动作效果
  * @author Drill_up
  * 
  * 
@@ -17,9 +17,13 @@
  * 使得你可以播放图片显现出来的各种动作。
  * 
  * -----------------------------------------------------------------------------
+ * ----插件扩展
+ * 该插件可以单独使用。
+ * 
+ * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：地图界面、战斗界面。
- *   作用于rmmv图片。
+ *   作用于图片对象。
  * 2.建议先了解 "0.基本定义 > 显示与透明度.docx"。
  *   更多详细内容，去看看 "7.行走图 > 关于动作效果.docx"。
  * 细节：
@@ -37,7 +41,7 @@
  *      必须手动执行插件指令来终止。
  * 设计：
  *   (1.该效果可以与 滤镜效果、方块粉碎效果 叠加。
- *      特别注意，图片的中心锚点是可以修改的，rmmv默认有左上(0,0)和中
+ *      特别注意，图片的中心锚点是可以修改的，默认有左上(0,0)和中
  *      心(0.5,0.5)的设置。中心锚点会影响部分动作效果。
  *
  * -----------------------------------------------------------------------------
@@ -49,6 +53,8 @@
  * 插件指令：>显现动作 : 批量图片[4,5] : 标准弹跳 : 时间[60] : 高度[168]
  * 插件指令：>显现动作 : 批量图片变量[21,22] : 标准弹跳 : 时间[60] : 高度[168]
  * 
+ * 插件指令：>显现动作 : 图片[1] : 直接显现 : 时间[60]
+ * 插件指令：>显现动作 : 图片[1] : 移动显现 : 时间[60] : 方向角度[90] : 移动距离[100]
  * 插件指令：>显现动作 : 图片[1] : 标准落下 : 时间[60] : 缓冲时间[20] : 高度[168]
  * 插件指令：>显现动作 : 图片[1] : 标准弹跳 : 时间[60] : 高度[500]
  * 插件指令：>显现动作 : 图片[1] : 横向冒出 : 时间[60] : 横向比例[1.5]
@@ -62,10 +68,13 @@
  * 插件指令：>显现动作 : 图片[1] : 立即终止动作
  * 
  * 1.前半部分（玩家）和 后半部分（标准落下 : 时间[60] : 缓冲时间[20] : 高度[168]）
- *   的参数可以随意组合。一共有4*11种组合方式。
+ *   的参数可以随意组合。一共有4*13种组合方式。
  * 2."玩家"和"玩家领队"是同一个意思。
  *   "玩家队员[1]"表示领队后面第一个跟随的队友。
- * 3.部分类型的动作有 时间和缓冲时间 两个设置，该动作分两个阶段。
+ * 3.参数中"时间"、"周期"的单位是帧。1秒60帧。
+ *   参数中"距离"、"高度"的单位是像素。
+ * 4.类型的更详细介绍，去看看 "7.行走图 > 关于动作效果.docx"。
+ * 5.部分类型的动作有 时间和缓冲时间 两个设置，该动作分两个阶段。
  *   比如"标准落下"，分别对应落下的动作时间，和落地后阶段弹簧效果的缓冲时间。
  * 
  * -----------------------------------------------------------------------------
@@ -128,6 +137,8 @@
  * 修复了 该插件 造成图片插件设置斜切无效的bug。
  * [v1.3]
  * 添加了插件指令获取状态信息功能。
+ * [v1.4]
+ * 添加了 直接显现、移动显现 功能。
  * 
  * 
  * 
@@ -148,15 +159,20 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n)*o(贴图处理) 每帧
-//		性能测试因素	对话管理层
-//		性能测试消耗	24.94ms 23.34ms（sprite_picture.update）
-//		最坏情况		地图放了大量图片，并且所有图片都在持续变化。
-//		备注			要说图片贴图和事件贴图哪个消耗大，真无法确定。
-//						事件贴图面积小但变化多，而图片面积大但变化不多。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n)*o(贴图处理) 每帧
+//		★性能测试因素	对话管理层
+//		★性能测试消耗	24.94ms 23.34ms（sprite_picture.update）
+//		★最坏情况		地图放了大量图片，并且所有图片都在持续变化。
+//		★备注			要说图片贴图和事件贴图哪个消耗大，真无法确定。
+//						事件贴图面积小但变化多，而图片面积大但变化不多。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			显现动作效果：
 //				->动作
@@ -302,7 +318,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					$gameSwitches.setValue( temp1, b );
 				}
 			}
-			if( type == "获取正在播放的类型" && Imported.Drill_CoreOfString ){
+			if( type == "获取正在播放的类型" && Imported.Drill_CoreOfString ){	//【系统-字符串核心】
 				temp1 = temp1.replace("字符串[","");
 				temp1 = temp1.replace("]","");
 				temp1 = Number(temp1);
@@ -314,6 +330,21 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					$gameStrings.setValue( temp1, str );
 				}
 			}
+			
+			/*-----------------直接显现------------------*/
+			if( type == "直接显现" ){
+				temp1 = temp1.replace("时间[","");
+				temp1 = temp1.replace("]","");
+				temp2 = temp2.replace("缓冲时间[","");
+				temp2 = temp2.replace("]","");
+				temp3 = temp3.replace("高度[","");
+				temp3 = temp3.replace("]","");
+				if( pics != null){
+					for( var k=0; k < pics.length; k++ ){
+						pics[k].drill_PFIE_playShowingAppear( Number(temp1) );
+					}
+				}
+			}
 		}	
 			
 		if( args.length == 10 ){
@@ -322,6 +353,20 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var temp2 = String(args[7]);
 			var temp3 = String(args[9]);
 			
+			/*-----------------移动显现------------------*/
+			if( type == "移动显现" ){
+				temp1 = temp1.replace("时间[","");
+				temp1 = temp1.replace("]","");
+				temp2 = temp2.replace("方向角度[","");
+				temp2 = temp2.replace("]","");
+				temp3 = temp3.replace("移动距离[","");
+				temp3 = temp3.replace("]","");
+				if( pics != null){
+					for( var k=0; k < pics.length; k++ ){
+						pics[k].drill_PFIE_playShowingMoveAppear( Number(temp1),Number(temp2),Number(temp3) );
+					}
+				}
+			}
 			/*-----------------标准落下------------------*/
 			if( type == "标准落下" ){
 				temp1 = temp1.replace("时间[","");
@@ -632,7 +677,11 @@ Game_Picture.prototype.drill_PFIE_isPlaying = function() {
 //==============================
 // * 图片 - 设置透明度
 //==============================
-Game_Picture.prototype.drill_PFIE_setOpacity = function(opacity) {
+Game_Picture.prototype.drill_PFIE_setOpacity = function( opacity ){
+	if( isNaN(opacity) ){
+		alert(	"【Drill_PictureFadeInEffect.js 图片 - 显现动作效果】\n" +
+				"错误，透明度赋值时出现了NaN错误值。");
+	}
 	this._opacity = opacity;
 }
 //==============================
@@ -677,6 +726,8 @@ Game_Picture.prototype.update = function() {
 	if( this._Drill_PFIE.real_width == -1 ){ return; }		//需要等图片加载完成
 	if( this._Drill_PFIE.real_height == -1 ){ return; }
 	
+	this.drill_PFIE_updateShowingAppear();			//帧刷新 - 直接显现
+	this.drill_PFIE_updateShowingMoveAppear();		//帧刷新 - 移动显现
 	this.drill_PFIE_updateShowingFall();			//帧刷新 - 标准落下
 	this.drill_PFIE_updateShowingJump();			//帧刷新 - 标准弹跳
 	this.drill_PFIE_updateShowingHorizonFlat();		//帧刷新 - 放大出现
@@ -705,6 +756,61 @@ Game_Picture.prototype.drill_PFIE_stopEffect = function() {
 //=============================================================================
 // ** 显现动作
 //=============================================================================
+//==============================
+// * 初始化 - 显现 直接显现
+//==============================
+Game_Picture.prototype.drill_PFIE_playShowingAppear = function( time ){
+	var ef = this._Drill_PFIE;
+	ef.playing_type = "直接显现";
+	ef.fA_dtime = time;
+	ef.fA_time = 0;
+}
+//==============================
+// * 帧刷新 - 显现 直接显现
+//==============================
+Game_Picture.prototype.drill_PFIE_updateShowingAppear = function() {
+	var ef = this._Drill_PFIE;
+	if( ef.playing_type != "直接显现" ){ return; }
+	
+	if( ef.fA_time < ef.fA_dtime ){
+		ef.fA_time ++;
+		ef.opacity = 255 * ef.fA_time/ef.fA_dtime;
+		this.drill_PFIE_setOpacity(ef.opacity);
+	}else{
+		this.drill_PFIE_stopEffect();	//结束动作
+	}
+}
+
+//==============================
+// * 初始化 - 显现 移动显现
+//==============================
+Game_Picture.prototype.drill_PFIE_playShowingMoveAppear = function( time,angle,distance ){
+	var ef = this._Drill_PFIE;
+	ef.playing_type = "移动显现";
+	ef.fA_dtime = time;
+	ef.fA_time = 0;
+	ef.fA_angle = angle;
+	ef.fA_distance = distance;
+}
+//==============================
+// * 帧刷新 - 显现 移动显现
+//==============================
+Game_Picture.prototype.drill_PFIE_updateShowingMoveAppear = function() {
+	var ef = this._Drill_PFIE;
+	if( ef.playing_type != "移动显现" ){ return; }
+	
+	if( ef.fA_time < ef.fA_dtime ){
+		ef.fA_time ++;
+		var temp_d = ef.fA_distance * (1 - ef.fA_time/ef.fA_dtime);		//匀速移动
+		ef.x = temp_d * Math.cos( ef.fA_angle *Math.PI/180 );
+		ef.y = temp_d * Math.sin( ef.fA_angle *Math.PI/180 );
+		ef.opacity = 255 * ef.fA_time/ef.fA_dtime;
+		this.drill_PFIE_setOpacity(ef.opacity);
+	}else{
+		this.drill_PFIE_stopEffect();	//结束动作
+	}
+}
+
 //==============================
 // * 初始化 - 显现 标准落下
 //==============================

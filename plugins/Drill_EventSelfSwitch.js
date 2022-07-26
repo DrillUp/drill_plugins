@@ -18,9 +18,9 @@
  *
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该插件可以单独使用。有部分功能可被扩展。
+ * 该插件可以单独使用。
  * 可被扩展：
- *   - Drill_EventDuplicator        物体 - 事件复制器
+ *   - Drill_EventDuplicator        物体管理-事件复制器
  *     复制的事件可以支持自定义E、F、G 等的独立开关。
  * 
  * -----------------------------------------------------------------------------
@@ -29,7 +29,7 @@
  *   只作用于事件。
  * 2.详细介绍可以去看看 "8.物体 > 独立开关与事件页.docx"。
  * 3.该插件的指令较多且使用频繁，建议使用小工具：插件信息查看器。
- *   在开启rmmv软件时，并行使用读取器复制指令。
+ *   在开启游戏编辑器时，可以并行使用读取器复制指令。
  * 出现条件：
  *   (1.事件页的条件可以受到注释<<出现条件>>的影响。
  *      看条件时，你需要留意事件页是否有这个注释。
@@ -163,13 +163,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		单次执行
-//		时间复杂度		o(n)
-//		性能测试因素	任意地图
-//		性能测试消耗	5ms以下
-//		最坏情况		暂无
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		单次执行
+//		★时间复杂度		o(n)
+//		★性能测试因素	任意地图
+//		★性能测试消耗	5ms以下
+//		★最坏情况		暂无
+//		★备注			暂无
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			独立开关：
 //				->多个独立开关
@@ -365,24 +371,24 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					$gameSelfSwitches.setValue(key,false);
 				}
 			}else{
-				var need_reflash = false;
+				var need_refresh = false;
 				var ids = temp1.split(/[,，]/);
 				for(var i = 0; i<ids.length; i++){
 					if( temp3 == "开启" ){
 						var s_key = [this._mapId, Number(ids[i]), temp2 ];
 						if( $gameSelfSwitches.value(s_key) !== true){
 							$gameSelfSwitches.drill_setValueWithOutChange(s_key,true);
-							need_reflash = true;
+							need_refresh = true;
 						}
 					}else{
 						var s_key = [this._mapId, Number(ids[i]), temp2 ];
 						if( $gameSelfSwitches.value(s_key) !== false){
 							$gameSelfSwitches.drill_setValueWithOutChange(s_key,false);
-							need_reflash = true;
+							need_refresh = true;
 						}
 					}
 				}
-				if(need_reflash){
+				if(need_refresh){
 					$gameMap.requestRefresh();	//变化后手动刷新
 				}
 			}

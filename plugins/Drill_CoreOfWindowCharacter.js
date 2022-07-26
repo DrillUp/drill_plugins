@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        对话框 - 窗口字符核心
+ * @plugindesc [v1.3]        窗口字符 - 窗口字符核心
  * @author Drill_up
  * 
  * 
@@ -19,18 +19,25 @@
  *
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该核心 不能 单独使用，必须基于核心。
+ * 该插件 不能 单独使用。
+ * 需要基于其他核心插件，才能运行，并作用于其他子插件。
  * 基于：
- *   - Drill_CoreOfWindowAuxiliary   系统-窗口辅助核心★★v1.9及以上★★
+ *   - Drill_CoreOfWindowAuxiliary      系统-窗口辅助核心★★v1.9及以上★★
  *     需要该核心才能获取到具体字符的宽度。
+ * 可作用于：
+ *   - Drill_DialogTextAlign            窗口字符-文本居中
+ *   - Drill_DialogCharContinuedEffect  窗口字符-字符块持续动作效果
+ *   - Drill_DialogCharOuterGlow        窗口字符-外发光效果
+ *   - Drill_DialogCharOuterGlow        窗口字符-描边效果
+ *   ……
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：地图界面、战斗界面、菜单界面。
  *   对所有窗口有效。
- * 2.了解更多窗口字符，可以去看看 "15.对话框 > 关于窗口字符.docx"。
+ * 2.了解更多窗口字符，可以去看看 "23.窗口字符 > 关于窗口字符.docx"。
  * 3.该插件的指令较多且使用频繁，建议使用小工具：插件信息查看器。
- *   在开启rmmv软件时，并行使用读取器复制指令。
+ *   在开启游戏编辑器时，可以并行使用读取器复制指令。
  * 窗口字符：
  *   (1.窗口字符指绘制在窗口中的字符。窗口字符分为下面三种：
  *      指代字符：指在窗口中显示时，会被替换成特定字符串的字符。
@@ -73,7 +80,7 @@
  * 窗口字符：\G           替换为货币单位（ 数据库>系统 中设置单位）
  * 窗口字符：\\           替换为'\'反斜杠字符本身。
  * 
- * 窗口字符：\c[n]        之后文字使用第n个颜色（rmmv默认颜色0-31，可扩展高级颜色）
+ * 窗口字符：\c[n]        之后文字使用第n个颜色（默认颜色0-31，可扩展高级颜色）
  * 窗口字符：\i[n]        绘制第n个图标
  * 窗口字符：\{           将字体放大一级
  * 窗口字符：\}           将字体缩小一级
@@ -115,10 +122,8 @@
  * 窗口字符：\fb          之后的文字字体加粗。（如果要还原，就加 \fr ）
  * 窗口字符：\fi          之后的文字字体倾斜。（如果要还原，就加 \fr ）
  * 窗口字符：\fs[n]       指定之后的文字字体大小为n。
- * 窗口字符：\oc[n]       之后的文字边线为第n个颜色。(rmmv默认颜色0-31,不支持高级颜色)
- * 窗口字符：\ow[n]       之后的文字边线厚度为n像素。(标准为1像素)
- * 窗口字符：\px[n]       设置当前字符偏移的x值，单位像素。
- * 窗口字符：\py[n]       设置当前字符偏移的y值，单位像素。
+ * 窗口字符：\px[n]       设置当前字符光标偏移的x值，单位像素。
+ * 窗口字符：\py[n]       设置当前字符光标偏移的y值，单位像素。
  * 窗口字符：\af[n]       该字符把对话框脸图 换成第n个角色脸图。    (只对话框有效)
  * 窗口字符：\pf[n]       该字符把对话框脸图 换成第n个队伍成员脸图。(只对话框有效)
  * 
@@ -235,25 +240,10 @@
  * 优化了部分参数配置。
  * [v1.2]
  * 添加了设置单纯的 字符块 的窗口字符。
+ * [v1.3]
+ * 修改了插件的分类。分离了描边的窗口字符功能。
  * 
  * 
- * 
- * @param ---字符样式---
- * @desc 
- * 
- * @param 默认字符外框颜色
- * @parent ---字符样式---
- * @type number
- * @min 1
- * @desc 默认字符外框的颜色。
- * @default 15
- * 
- * @param 默认字符外框厚度
- * @parent ---字符样式---
- * @type number
- * @min 0
- * @desc 默认字符外框的厚度。设为0时，则不绘制字符外框。
- * @default 4
  * 
  * @param ---消息快进---
  * @desc 
@@ -275,7 +265,7 @@
  * @value pageup
  * @option 基本键-下一页
  * @value pagedown
- * @desc 按住快进键，可以快速跳过对话框中的非常多的文字信息。（键位修改可以去看看插件 互动-键盘手柄按键修改器）
+ * @desc 按住快进键，可以快速跳过对话框中的非常多的文字信息。（键位修改可以去看看插件 键盘-键盘手柄按键修改器）
  * @default pagedown
  * 
  */
@@ -288,23 +278,28 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		单次执行
-//		时间复杂度		o(n)
-//		性能测试因素	对话管理层
-//		性能测试消耗	4.94ms（drawTextEx） 2.40ms（没有插件使用时）
-//		最坏情况		暂无
-//		备注			在反复测试刷选项窗口时，帧数会降低到22帧，但是只是添加了渲染render的负担，过一下就好了。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		单次执行
+//		★时间复杂度		o(n)
+//		★性能测试因素	对话管理层
+//		★性能测试消耗	4.94ms（drawTextEx） 2.40ms（没有插件使用时）
+//		★最坏情况		暂无
+//		★备注			在反复测试刷选项窗口时，帧数会降低到22帧，但是只是添加了渲染render的负担，过一下就好了。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			窗口字符核心：
 //				->表达式阶段
-//					->接口
+//					->标准模块
 //						->表达式转义【标准接口】
 //						->提交转义【标准函数】
 //					->表达式应用
 //				->转义字符阶段
-//					->接口
+//					->标准模块
 //						->简单符【标准接口】
 //						->组合符【标准接口】
 //						->提交转义【标准函数】
@@ -319,7 +314,7 @@
 //						> 图标+物品/武器/护甲/技能名
 //						> 图标+状态名
 //				->效果字符阶段
-//					->接口
+//					->标准模块
 //						->简单符【标准接口】
 //						->组合符【标准接口】
 //						->当前行【标准接口】
@@ -332,14 +327,15 @@
 //						> 脸图切换
 //						> 重置字体
 //				->窗口的画布
-//					->接口
+//					->标准模块
+//						->画笔同步【标准接口】
 //						->添加字符块【标准函数】
 //						->清除字符块【标准函数】
 //						->获取字符块【标准函数】
 //					->画布标记
 //					->创建字符块贴图
 //				->自动换行
-//					->接口
+//					->标准模块
 //						->执行换行【标准函数】
 //					->计算标记
 //					->记录索引和宽度
@@ -376,8 +372,6 @@
 	
 	
 	/*-----------------杂项------------------*/
-	DrillUp.g_COWC_fontEdgeColor = String(DrillUp.parameters["默认字符外框颜色"] || 15); 
-	DrillUp.g_COWC_fontEdgeThickness = Number(DrillUp.parameters["默认字符外框厚度"] || 4); 
 	DrillUp.g_COWC_fastForwardEnabled = String(DrillUp.parameters["初始是否启用快进键"] || "true") == "true"; 
 	DrillUp.g_COWC_fastForwardKey = String(DrillUp.parameters["快进键"] || "pagedown"); 
 	
@@ -397,7 +391,7 @@ SceneManager.initialize = function() {
 	
 	if( Imported.YEP_MessageCore ){
 		alert(
-			"【Drill_CoreOfWindowCharacter.js 对话框 - 窗口字符核心】\n"+
+			"【Drill_CoreOfWindowCharacter.js 窗口字符 - 窗口字符核心】\n"+
 			"检测到你开启了 YEP_MessageCore插件。\n"+
 			"请及时关闭该插件，该插件与 窗口字符核心 兼容性冲突。"
 		);
@@ -644,6 +638,21 @@ Window_Message.prototype.drill_COWC_processNewLine = function( line_index, line_
 // ** 标准接口（字符块）
 //#############################################################################
 //##############################
+// * 字符块 - 画笔同步【标准接口】
+//					
+//			参数：	> bitmap_from 贴图（画笔来源）
+//					> bitmap_to   贴图（画笔同步到的对象）
+//			返回：	> 无
+//					
+//			说明：	> 如果你定义了某些的效果字符，在画布中绘制有某些属性，需要在字符块中也同步，则需继承此函数。
+//					  可以参考 描边、外发光 插件。
+//##############################
+Window_Base.prototype.drill_COWC_drawSynchronization = function( bitmap_from, bitmap_to ){
+	
+	//（待子类继承写内容）
+	
+}
+//##############################
 // * 字符块 - 添加字符块【标准函数】
 //			
 //			参数：	> tar_sprite 贴图
@@ -741,9 +750,6 @@ Window_Base.prototype.drill_COWC_setWordWrap = function( text, max_width ){
 var _drill_COWC_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
 	_drill_COWC_sys_initialize.call(this);
-	
-	this._drill_COWC_fontEdgeColor = DrillUp.g_COWC_fontEdgeColor;				//窗口字符 - 字符外框颜色
-	this._drill_COWC_fontEdgeThickness = DrillUp.g_COWC_fontEdgeThickness;		//窗口字符 - 字符外框厚度
 
 	this._drill_COWC_fastForwardEnabled = DrillUp.g_COWC_fastForwardEnabled;	//消息快进 - 功能开关
 	this._drill_COWC_fastForwardKey = DrillUp.g_COWC_fastForwardKey;			//消息快进 - 快进键
@@ -1559,10 +1565,8 @@ Window_Base.prototype.resetFontSettings = function() {
     //this.contents.fontSize = this.standardFontSize();			//原函数 - 字体大小
     //this.resetTextColor();									//原函数 - 字体颜色
 	
-	this.contents._drill_COWC_fontBold = false;													        	//标记 - 加粗
-	this.contents.fontItalic = false;														        		//标记 - 斜体
-	this.contents.outlineColor = this.drill_COWC_outlineColor($gameSystem._drill_COWC_fontEdgeColor || 15); //标记 - 外框色
-	this.contents.outlineWidth = $gameSystem._drill_COWC_fontEdgeThickness || 4;				        	//标记 - 外框厚度
+	this.contents._drill_COWC_fontBold = false;					//标记 - 加粗
+	this.contents.fontItalic = false;							//标记 - 斜体
 };
 
 //=============================================================================
@@ -1602,20 +1606,6 @@ Window_Base.prototype.drill_COWC_processNewEffectChar_Combined = function( match
 	if( command.toUpperCase() == "FS" ){
 		if( args.length == 1 ){
 			this.contents.fontSize = Number(args[0]);
-			this.drill_COWC_charSubmit_Effect(0,0);
-		}
-	}
-	// > 外框色（\OC）
-	if( command.toUpperCase() == "OC" ){
-		if( args.length == 1 ){
-		    this.contents.outlineColor = this.drill_COWC_outlineColor(args[0]);
-			this.drill_COWC_charSubmit_Effect(0,0);
-		}
-	}
-	// > 外框厚度（\OW）
-	if( command.toUpperCase() == "OW" ){
-		if( args.length == 1 ){
-			this.contents.outlineWidth = Number(args[0]);
 			this.drill_COWC_charSubmit_Effect(0,0);
 		}
 	}
@@ -1699,47 +1689,6 @@ Window_Base.prototype.drill_COWA_getTextExHeight_Private = function( text ){
 		}
 	}
 	return hh;
-}
-//==============================
-// * 效果字符应用 - 字符边颜色
-//==============================
-Window_Base.prototype.drill_COWC_outlineColor = function( color_index ){
-    var str = this.textColor(color_index);
-    if (str.length == 7) {
-        var r = parseInt(str.substring(1, 3), 16);
-        var g = parseInt(str.substring(3, 5), 16);
-        var b = parseInt(str.substring(5, 7), 16);
-        str = "rgba(" + r + "," + g + "," + b + ",0.5)"
-    }
-    return str;
-}
-//==============================
-// * 效果字符应用 - 字符边厚度 - 初始化
-//==============================
-var _drill_COWC_bitmap_initialize2 = Bitmap.prototype.initialize;
-Bitmap.prototype.initialize = function( width, height ){
-	_drill_COWC_bitmap_initialize2.call( this, width, height );
-	
-	// > 标记 - 外框色
-	//（初始无法修改）
-	
-	// > 标记 - 外框厚度
-	if( $gameSystem != undefined &&
-		$gameSystem._drill_COWC_fontEdgeThickness != undefined ){
-		this.outlineWidth = $gameSystem._drill_COWC_fontEdgeThickness;
-	}
-}
-//==============================
-// * 效果字符应用 - 字符边厚度
-//==============================
-var _drill_COWC__drawTextOutline = Bitmap.prototype._drawTextOutline;
-Bitmap.prototype._drawTextOutline = function( text, tx, ty, maxWidth ){
-	
-	// > 厚度小于等于0时，直接不绘制
-	if( this.outlineWidth <= 0 ){ return; }
-	
-	// > 原函数
-	_drill_COWC__drawTextOutline.call( this, text, tx, ty, maxWidth );
 }
 
 
@@ -1901,12 +1850,15 @@ Window_Base.prototype.drill_COWC_createBlockSprite = function( text ){
 	var text_width = this.drill_COWA_getTextWidth( text );		//（直接通过 核心接口 获取 纯文本宽度）
 	var text_height = this.drill_COWA_getTextHeight( text );	//（直接通过 核心接口 获取 纯文本高度）
 	var temp_sprite = new Sprite();
-	temp_sprite.bitmap = new Bitmap( text_width, text_height );
+	temp_sprite.bitmap = new Bitmap( text_width +2, text_height +2 );
 	temp_sprite.bitmap.textColor = this.contents.textColor;
 	temp_sprite.bitmap.paintOpacity = this.contents.paintOpacity;
 	temp_sprite.bitmap.fontSize = this.contents.fontSize;
-	temp_sprite.bitmap.fontFace = this.contents.fontFace;
 	temp_sprite.bitmap['drill_elements_drawText'] = true;		//（高级渐变颜色 偏移标记）
+	
+	// > 画笔同步
+	this.drill_COWC_drawSynchronization( this.contents, temp_sprite.bitmap );
+	
 	temp_sprite.bitmap.drawText( text, 0, 0, text_width, text_height );
 	temp_sprite._drill_width = text_width;
 	temp_sprite._drill_height = text_height;
@@ -2063,6 +2015,7 @@ Window_Base.prototype.convertEscapeCharacters = function( text ){
 		if( this instanceof Window_Message ){	//（注意脸图会挤压宽度）
 			if( $gameMessage.faceName() != "" ){
 				max_width -= (Window_Base._faceWidth + 20);
+				this._drill_COWC_messageFaceWidthSubtracted = true;		//（脸图宽度减去标记）
 			}
 		}
 		
@@ -2231,7 +2184,7 @@ Window_Message.prototype.processEscapeCharacter = function( code, textState ){
 }else{
 		Imported.Drill_CoreOfWindowCharacter = false;
 		alert(
-			"【Drill_CoreOfWindowCharacter.js 对话框-窗口字符核心】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
+			"【Drill_CoreOfWindowCharacter.js 窗口字符-窗口字符核心】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
 			"\n- Drill_CoreOfWindowAuxiliary 系统-窗口辅助核心"
 		);
 }

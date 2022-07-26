@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        对话框 - 字体管理器
+ * @plugindesc [v1.1]        窗口字符 - 字体管理器
  * @author Drill_up
  * 
  * 
@@ -18,16 +18,17 @@
  *
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该核心 不能 单独使用，必须基于核心。
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfWindowCharacter   对话框-窗口字符核心
+ *   - Drill_CoreOfWindowCharacter   窗口字符-窗口字符核心★★v1.3及以上★★
  *     需要该核心才能使用窗口字符修改字体。
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：地图界面、战斗界面、菜单界面。
  *   作用于窗口的文本。
- * 2.更多详细内容，去看看 "15.对话框 > 关于字体管理器.docx"。
+ * 2.更多详细内容，去看看 "23.窗口字符 > 关于字体管理器.docx"。
  * 细节：
  *   (1.你需要去看文档，来配置fonts文件夹下面的字体。
  *      才能保证字体能正常加载到游戏中并使用。
@@ -67,6 +68,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 修改了插件的分类。优化了内部结构。
  * 
  * 
  * @param 默认字体类型
@@ -88,13 +91,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	Window_Base.prototype.standardFontFace
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n)
-//		性能测试因素	对话管理层
-//		性能测试消耗	太小，未找到
-//		最坏情况		暂无
+//<<<<<<<<性能记录<<<<<<<<
+//
+//		★工作类型		持续执行
+//		★时间复杂度		o(n)
+//		★性能测试因素	对话管理层
+//		★性能测试消耗	太小，未找到
+//		★最坏情况		暂无
+//		★备注			暂无
 //		
-//插件记录：
+//		★优化记录		暂无
+//		
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			字体管理：
 //				->覆写默认类型
@@ -144,7 +153,7 @@ SceneManager.initialize = function() {
 	
 	if( Imported.YEP_MessageCore ){
 		alert(
-			"【Drill_DialogFontFace.js 对话框 - 字体管理器】\n"+
+			"【Drill_DialogFontFace.js 窗口字符 - 字体管理器】\n"+
 			"检测到你开启了 YEP_MessageCore插件。\n"+
 			"请及时关闭该插件，该插件与 字体管理器 兼容性冲突。"
 		);
@@ -173,7 +182,7 @@ Window_Base.prototype.standardFontFace = function(){
 	return DrillUp.g_DFF_fontFace;
 };
 //==============================
-// * 效果字符应用 - 字符转换（组合符）
+// * 字体 - 效果字符转换 - 组合符（继承）
 //==============================
 var _drill_DFF_processNewEffectChar_Combined = Window_Base.prototype.drill_COWC_processNewEffectChar_Combined;
 Window_Base.prototype.drill_COWC_processNewEffectChar_Combined = function( matched_index, matched_str, command, args ){
@@ -187,6 +196,14 @@ Window_Base.prototype.drill_COWC_processNewEffectChar_Combined = function( match
 		}
 	}
 }
+//==============================
+// * 字体 - 画笔同步（继承）
+//==============================
+var _drill_COWC_DFF_drawSynchronization = Window_Base.prototype.drill_COWC_drawSynchronization;
+Window_Base.prototype.drill_COWC_drawSynchronization = function( bitmap_from, bitmap_to ){
+	_drill_COWC_DFF_drawSynchronization.call( this, bitmap_from, bitmap_to );
+	bitmap_to.fontFace = bitmap_from.fontFace;
+}
 
 
 //=============================================================================
@@ -195,8 +212,8 @@ Window_Base.prototype.drill_COWC_processNewEffectChar_Combined = function( match
 }else{
 		Imported.Drill_DialogFontFace = false;
 		alert(
-			"【Drill_DialogFontFace.js 对话框-字体管理器】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfWindowCharacter 对话框-窗口字符核心"
+			"【Drill_DialogFontFace.js 窗口字符-字体管理器】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
+			"\n- Drill_CoreOfWindowCharacter 窗口字符-窗口字符核心"
 		);
 }
 

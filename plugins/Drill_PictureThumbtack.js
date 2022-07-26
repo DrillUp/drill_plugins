@@ -18,9 +18,13 @@
  * ★★需要放在 图片类插件 尽可能靠后的位置★★
  * 
  * -----------------------------------------------------------------------------
+ * ----插件扩展
+ * 该插件可以单独使用。
+ * 
+ * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：地图界面、战斗界面。
- *   作用于rmmv图片。
+ *   作用于图片对象。
  * 细节：
  *   (1.图钉原理：只锁定图片xy坐标，不考虑缩放、旋转情况。
  *      每张图片只有一个图钉，并且只对指定的有效。
@@ -108,14 +112,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^2) 每帧
-//		性能测试因素	对话管理层
-//		性能测试消耗	9.72ms
-//		最坏情况		暂无
-//		备注			暂无
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^2) 每帧
+//		★性能测试因素	对话管理层
+//		★性能测试消耗	9.72ms
+//		★最坏情况		暂无
+//		★备注			暂无
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			图片图钉：
 //				->事件图钉
@@ -474,11 +483,14 @@ Game_Picture.prototype.drill_PTh_updatePicPos = function() {
 	var yy = pic.y();
 	xx += data['shiftX'];	//（偏移的位置）
 	yy += data['shiftY'];
-	if( Imported.Drill_MouseDragPicture == true ){	//（拖拽 偏移）
+	
+	// > 【鼠标 - 可拖拽的图片】偏移
+	if( Imported.Drill_MouseDragPicture == true ){
 		xx += pic.drill_MDP_getDraggingXOffset();
 		yy += pic.drill_MDP_getDraggingYOffset();
 	}
-	if( Imported.Drill_PictureAdsorptionSlot == true ){	//（吸附槽 偏移）
+	// > 【图片 - 图片吸附槽】偏移
+	if( Imported.Drill_PictureAdsorptionSlot == true ){
 		xx += pic.drill_PAS_getAdsorbXOffset();
 		yy += pic.drill_PAS_getAdsorbYOffset();
 	}
@@ -552,7 +564,9 @@ Game_Picture.prototype.drill_PTh_updateEnemyPos = function() {
 	var yy = enemy.screenY();
 	xx += data['shiftX'];	//（偏移的位置）
 	yy += data['shiftY'];
-	if( Imported.Drill_BattleCamera == true ){	//（战斗镜头 偏移）
+	
+	// > 【战斗 - 活动战斗镜头】偏移
+	if( Imported.Drill_BattleCamera == true ){
 		xx += $gameTemp._drill_cam_pos[0];
 		yy += $gameTemp._drill_cam_pos[1];
 	}
@@ -582,7 +596,9 @@ Game_Picture.prototype.drill_PTh_updateActorPos = function() {
 	var yy = actor_sprite._homeY + actor_sprite._offsetY;
 	xx += data['shiftX'];	//（偏移的位置）
 	yy += data['shiftY'];
-	if( Imported.Drill_BattleCamera == true ){	//（战斗镜头 偏移）
+	
+	// > 【战斗 - 活动战斗镜头】偏移
+	if( Imported.Drill_BattleCamera == true ){
 		xx += $gameTemp._drill_cam_pos[0];
 		yy += $gameTemp._drill_cam_pos[1];
 	}

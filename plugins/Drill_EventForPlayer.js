@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        物体 - 玩家的事件
+ * @plugindesc [v1.2]        物体管理 - 玩家的事件
  * @author Drill_up
  * 
  * 
@@ -14,14 +14,15 @@
  * 如果你有兴趣，也可以来看看更多我写的drill插件哦ヽ(*。>Д<)o゜
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
- * 使得某个事件时刻与玩家位置重合，并且能够跨地图，只对玩家进行相关
- * 触发响应动作。
+ * 创建一个事件并时刻与玩家位置重合。
+ * 并且该能够跨地图，只对玩家进行相关触发响应动作。
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该插件必须依赖指定插件才能运行。
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_EventDuplicator        物体-事件复制器★★v1.5及以上版本★★
+ *   - Drill_EventDuplicator        物体管理-事件复制器★★v1.5及以上版本★★
  *     跨地图时，需要该插件才能复制事件。
  * 
  * -----------------------------------------------------------------------------
@@ -95,6 +96,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 添加了事件贴图与玩家贴图同步的功能。
+ * [v1.2]
+ * 修改了插件分类。
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -105,14 +108,19 @@
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^2) 每帧
-//		性能测试因素	物体管理层、其他管理层穿梭
-//		性能测试消耗	3.70ms
-//		最坏情况		如果绑定了20个以上的事件，不仅给插件加大消耗，而且还给地图带来更多负担。
-//		备注			暂无
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^2) 每帧
+//		★性能测试因素	物体管理层、其他管理层穿梭
+//		★性能测试消耗	3.70ms
+//		★最坏情况		如果绑定了20个以上的事件，不仅给插件加大消耗，而且还给地图带来更多负担。
+//		★备注			暂无
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			玩家的事件：
 //				->绑定
@@ -231,7 +239,7 @@ Game_Map.prototype.drill_EFP_isEventExist = function( e_id ){
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_EventForPlayer.js 物体 - 玩家的事件】\n" +
+		alert( "【Drill_EventForPlayer.js 物体管理 - 玩家的事件】\n" +
 				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
 		return false;
 	}
@@ -347,7 +355,7 @@ Game_Map.prototype.drill_EFP_setupMap = function( mapId ){
 	for( var key in temp_map ){
 		if( $gameTemp.drill_EDu_hasMapId( key ) == false ){
 			alert(
-				"【Drill_EventForPlayer.js 物体 - 玩家的事件】\n" + 
+				"【Drill_EventForPlayer.js 物体管理 - 玩家的事件】\n" + 
 				"插件指令指定要复制地图"+ key +"中的某个事件。\n"+
 				"但是系统并没有找到这个地图文件。\n"+
 				"请检查你的地图文件是否存在，或者修改插件指令。"
@@ -476,7 +484,7 @@ Game_Map.prototype.drill_EFP_getTarMapEventDataByName = function( mapId, eventNa
 				}
 			}
 			alert(
-				"【Drill_EventForPlayer.js 物体 - 玩家的事件】\n" + 
+				"【Drill_EventForPlayer.js 物体管理 - 玩家的事件】\n" + 
 				"插件指令指定的地图"+ mapId +"中，\n"+
 				"并没有名称为 "+ eventName +" 的事件。"
 			);
@@ -587,8 +595,8 @@ Sprite_Character.prototype.drill_EFP_updateSpriteData = function() {
 }else{
 		Imported.Drill_EventForPlayer = false;
 		alert(
-			"【Drill_EventForPlayer.js 物体 - 玩家的事件】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_EventDuplicator 物体 - 事件复制器"
+			"【Drill_EventForPlayer.js 物体管理 - 玩家的事件】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
+			"\n- Drill_EventDuplicator 物体管理-事件复制器"
 		);
 }
 

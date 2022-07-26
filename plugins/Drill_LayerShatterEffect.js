@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        地图 - 方块粉碎效果
+ * @plugindesc [v1.2]        地图 - 方块粉碎效果
  * @author Drill_up
  * 
  * @Drill_LE_param "粉碎背景-%d"
@@ -18,19 +18,20 @@
  * 如果你有兴趣，也可以来看看更多我写的drill插件哦ヽ(*。>Д<)o゜
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
- * 使得行走图能播放方块状的粉碎效果。
+ * 使得地图界面能播放方块状的粉碎效果。
  *
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该插件不能单独运行，必须要基于核心才能运行：
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfShatterEffect    系统-方块粉碎核心★★v1.3及以上版本★★
+ *   - Drill_CoreOfShatterEffect    系统-方块粉碎核心★★v1.6及以上★★
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：地图界面。
- *   只作用于事件行走图。
- * 2.想要更多了解方块粉碎，可以去看看 "1.系统 > 方块粉碎大家族.docx"。
+ *   只作用于地图界面整体。
+ * 2.想要更多了解方块粉碎，可以去看看 "1.系统 > 大家族-方块粉碎.docx"。
  * 细节:
  *   (1.粉碎背景与截图 固定放置在地图层的 最顶层 。
  * 设计:
@@ -47,10 +48,14 @@
  * 插件指令：>方块粉碎效果 : 地图 : 界面截图 : 方块粉碎[1]
  * 插件指令：>方块粉碎效果 : 地图 : 界面截图 : 方块反转粉碎[1]
  * 插件指令：>方块粉碎效果 : 地图 : 界面截图 : 立刻复原
+ * 插件指令：>方块粉碎效果 : 地图 : 界面截图 : 暂停播放
+ * 插件指令：>方块粉碎效果 : 地图 : 界面截图 : 继续播放
  * 
  * 插件指令：>方块粉碎效果 : 地图 : 粉碎背景[1] : 方块粉碎[1]
  * 插件指令：>方块粉碎效果 : 地图 : 粉碎背景[1] : 方块反转粉碎[1]
  * 插件指令：>方块粉碎效果 : 地图 : 粉碎背景[1] : 立刻复原
+ * 插件指令：>方块粉碎效果 : 地图 : 粉碎背景[1] : 暂停播放
+ * 插件指令：>方块粉碎效果 : 地图 : 粉碎背景[1] : 继续播放
  * 
  * 1."方块粉碎[1]"对应 方块粉碎核心 插件中配置的粉碎id。
  * 2.粉碎背景可以有两个过程，先反转拼合在一起，然后破碎。
@@ -99,6 +104,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 修改了与核心的部分兼容设置。
+ * [v1.2]
+ * 较大改动了结构，支持了 暂停播放和继续播放 功能。
  * 
  * 
  * @param 默认地图碎片消失方式
@@ -442,21 +449,26 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		LSE（Event_Shatter_Effect）
+//		插件简称		LSE（Layer_Shatter_Effect）
 //		临时全局变量	无
 //		临时局部变量	this._drill_LSE_xxx
-//		存储数据变量	$gameMap.drill_LSE_needReflash （不完全算存储，离开地图就被清除重做）
+//		存储数据变量	无
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
-//		工作类型		持续执行
-//		时间复杂度		o(n^2)*o(贴图处理)
-//		性能测试因素	在地图管理层中执行粉碎
-//		性能测试消耗	113.47ms
-//		最坏情况		粉碎分割的数量特别多。
-//		备注			由于只有一个贴图，粉碎性能是不需要非常担心的，不过还是有影响。
+//<<<<<<<<性能记录<<<<<<<<
 //
-//插件记录：
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^2)*o(贴图处理)
+//		★性能测试因素	在地图管理层中执行粉碎
+//		★性能测试消耗	113.47ms
+//		★最坏情况		粉碎分割的数量特别多。
+//		★备注			由于只有一个贴图，粉碎性能是不需要非常担心的，不过还是有影响。
+//		
+//		★优化记录		暂无
+//
+//<<<<<<<<插件记录<<<<<<<<
+//
 //		★大体框架与功能如下：
 //			地图方块粉碎：
 //				->粉碎配置
@@ -468,6 +480,7 @@
 //
 //		★必要注意事项：
 //			1.整个插件只有一个sprite，并且放置在最顶层。
+//			  核心中提供了 存储碎片 的功能，但是此插件不存任何数据。
 //			
 //		★其它说明细节：
 //			暂无
@@ -484,13 +497,17 @@
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_LayerShatterEffect');
 	
+	
+	/*-----------------杂项------------------*/
 	DrillUp.g_LSE_opacityType = String(DrillUp.parameters['默认地图碎片消失方式'] || "线性消失");	
 	
+	/*-----------------粉碎背景------------------*/
 	DrillUp.g_LSE_list_length = 40;
 	DrillUp.g_LSE_list = [];
-	for (var i = 0; i < DrillUp.g_LSE_list_length; i++) {
-		DrillUp.g_LSE_list[i] = String(DrillUp.parameters["粉碎背景-" + String(i+1) ] || "");
+	for( var i = 0; i < DrillUp.g_LSE_list_length; i++ ){
+		DrillUp.g_LSE_list[i] = String(DrillUp.parameters['粉碎背景-' + String(i+1) ] || "");
 	}
+	
 	
 //=============================================================================
 // * >>>>基于插件检测>>>>
@@ -504,40 +521,79 @@ if( Imported.Drill_CoreOfShatterEffect ){
 var _Drill_LSE_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_Drill_LSE_pluginCommand.call(this, command, args);
-	if (command === ">方块粉碎效果") { // >方块粉碎效果 : 地图 : 界面截图 : 方块粉碎[1]
+	if( command === ">方块粉碎效果" ){ // >方块粉碎效果 : 地图 : 界面截图 : 方块粉碎[1]
+		
 		if(args.length == 6){
 			var type = String(args[1]);
 			var temp1 = String(args[3]);
 			var temp2 = String(args[5]);
-					
+			
 			if( type == "地图" ){
+				if( $gameTemp._drill_LSE_controlled_sprite == undefined ){ return; }
+				if( temp2 == "立刻复原" ){
+					$gameTemp._drill_LSE_controller.drill_COSE_restoreShatter();
+					return;
+				}
+				if( temp2 == "暂停播放" ){
+					$gameTemp._drill_LSE_controller.drill_COSE_pause();
+					return;
+				}
+				if( temp2 == "继续播放" ){
+					$gameTemp._drill_LSE_controller.drill_COSE_continue();
+					return;
+				}
+				
+				
+				// > 参数准备
+				var temp_data = {
+					"frameX": 0,	
+					"frameY": 0,
+					"frameW": Graphics.boxWidth,
+					"frameH": Graphics.boxHeight,
+					"shatter_id": 0,
+					"shatter_opacityType": $gameSystem._drill_LSE_opacityType,	//透明度变化方式
+					"shatter_hasParent": false,									//父贴图标记
+				};
 				if( temp1 == "界面截图" ){
-					$gameSystem._drill_LSE['shatter_img_src'] = -1;
+					temp_data["src_mode"] = "关闭资源控制";
+					temp_data["src_img"] = "";
+					temp_data["src_file"] = "img/Map__shatterBackground/";
 				}
 				if( temp1.indexOf("粉碎背景[") != -1 ){
 					temp1 = temp1.replace("粉碎背景[","");
 					temp1 = temp1.replace("]","");
-					$gameSystem._drill_LSE['shatter_img_src'] = Number(temp1)-1;
+					var img_src = DrillUp.g_LSE_list[ Number(temp1)-1 ];
+					temp_data["src_mode"] = "指定资源名";
+					temp_data["src_img"] = img_src;
+					temp_data["src_file"] = "img/Map__shatterBackground/";
 				}
-					
+				
+				// > 贴图设置
 				if( temp2.indexOf("方块粉碎[") != -1 ){
 					temp2 = temp2.replace("方块粉碎[","");
 					temp2 = temp2.replace("]","");
+					temp_data["shatter_id"] = Number(temp2)-1;
 					
-					$gameSystem._drill_LSE['shatter_command'] = true;
-					$gameSystem._drill_LSE['shatter_id'] = Number(temp2)-1;
-					$gameSystem._drill_LSE['shatter_converted'] = false;
+					$gameTemp._drill_LSE_controller.drill_COSE_resetData( temp_data );		//方块粉碎核心 - 初始化
+					$gameTemp._drill_LSE_controller.drill_COSE_runShatter();				//正常播放
+					
+					// > 截图资源对象情况（只能直接控制贴图，不能从数据层面上去改）
+					if( temp_data["src_mode"] == "关闭资源控制" ){
+						$gameTemp._drill_LSE_controlled_sprite.drill_COSE_setUncontroledBitmap( SceneManager.snap() );
+					}
 				}
 				if( temp2.indexOf("方块反转粉碎[") != -1 ){
 					temp2 = temp2.replace("方块反转粉碎[","");
 					temp2 = temp2.replace("]","");
+					temp_data["shatter_id"] = Number(temp2)-1;
 					
-					$gameSystem._drill_LSE['shatter_command'] = true;
-					$gameSystem._drill_LSE['shatter_id'] = Number(temp2)-1;
-					$gameSystem._drill_LSE['shatter_converted'] = true;
-				}
-				if( temp2 == "立刻复原" ){
-					$gameSystem._drill_LSE['redraw_command'] = true;
+					$gameTemp._drill_LSE_controller.drill_COSE_resetData( temp_data );		//方块粉碎核心 - 初始化
+					$gameTemp._drill_LSE_controller.drill_COSE_backrunShatter();			//倒放
+					
+					// > 截图资源对象情况（只能直接控制贴图，不能从数据层面上去改）
+					if( temp_data["src_mode"] == "关闭资源控制" ){
+						$gameTemp._drill_LSE_controlled_sprite.drill_COSE_setUncontroledBitmap( SceneManager.snap() );
+					}
 				}
 			}
 		}
@@ -547,21 +603,16 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var temp2 = String(args[5]);
 			if( type == "地图碎片" && temp1 == "消失方式" ){
 				if( temp2 == "设回默认" ){
-					$gameSystem._drill_LSE['opacityType'] = DrillUp.g_LSE_opacityType;
+					$gameSystem._drill_LSE_opacityType = DrillUp.g_LSE_opacityType;
 				}else{
-					$gameSystem._drill_LSE['opacityType'] = temp1;
+					$gameSystem._drill_LSE_opacityType = temp1;
 				}
 			}
 		}
 	}
 };
 
-//=============================================================================
-// ** 资源文件夹
-//=============================================================================
-ImageManager.load_MapShatterBackground = function(filename) {
-    return this.loadBitmap('img/Map__shatterBackground/', filename, 0, true);
-};
+
 
 //=============================================================================
 // * 存储数据初始化
@@ -569,102 +620,73 @@ ImageManager.load_MapShatterBackground = function(filename) {
 var _drill_LSE_system_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
     _drill_LSE_system_initialize.call(this);
-	this._drill_LSE = {};
-	this._drill_LSE['redraw_command'] = false;				//重画指令
-	this._drill_LSE['shatter_command'] = false;				//碎片指令
-	this._drill_LSE['shatter_id'] = -1;						//当前碎片样式id
-	this._drill_LSE['shatter_converted'] = false;			//反向弹道
-	this._drill_LSE['shatter_img_src'] = -1;				//粉碎背景
-	this._drill_LSE['opacityType'] = DrillUp.g_LSE_opacityType;
+	this._drill_LSE_opacityType = DrillUp.g_LSE_opacityType;
 }
+
 
 //=============================================================================
 // ** 地图层级
 //=============================================================================
 //==============================
-// ** 最顶层
+// * 地图层级 - 最顶层
 //==============================
 var _drill_LSE_layer_createAllWindows = Scene_Map.prototype.createAllWindows;
 Scene_Map.prototype.createAllWindows = function() {
-	_drill_LSE_layer_createAllWindows.call(this);	//rmmv对话框 < 最顶层
+	_drill_LSE_layer_createAllWindows.call(this);	//对话框集合 < 最顶层
 	if( !this._drill_SenceTopArea ){
 		this._drill_SenceTopArea = new Sprite();
 		this.addChild(this._drill_SenceTopArea);	
 	}
 }
 //==============================
-// ** 层级排序
+// * 地图层级 - 层级排序
 //==============================
 Scene_Map.prototype.drill_LSE_sortByZIndex = function() {
 	this._drill_SenceTopArea.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
 };
 
+
 //=============================================================================
-// ** 地图界面
+// ** 粉碎贴图
 //=============================================================================
 //==============================
-// * 帧刷新
+// * 粉碎贴图 - 初始化
 //==============================
-var _drill_LSE_scene_update = Scene_Map.prototype.update;
-Scene_Map.prototype.update = function() {	
-	_drill_LSE_scene_update.call(this);
-	
-	if( this.isActive() ){
-		this.drill_LSE_updateCommand();
-	}
+var _drill_LSE_sTank_initialize = Game_Temp.prototype.initialize;
+Game_Temp.prototype.initialize = function() {
+	_drill_LSE_sTank_initialize.call(this);
+	this._drill_LSE_controller = null;				//粉碎控制器
+	this._drill_LSE_controlled_sprite = null;		//粉碎贴图容器
 };
 //==============================
-// * 指令控制
+// * 粉碎贴图 - 创建
 //==============================
-Scene_Map.prototype.drill_LSE_updateCommand = function() {
-	
-	// > 粉碎指令
-	if( $gameSystem._drill_LSE['shatter_command'] == true ){
-		$gameSystem._drill_LSE['shatter_command'] = false;
-		
-		if( this._Drill_LSE_sprite != null ){
-			this._drill_SenceTopArea.removeChild( this._Drill_LSE_sprite );
-		}
-		
-		if( $gameSystem._drill_LSE['shatter_img_src'] == -1 ){
-			this._Drill_LSE_sprite_bitmap = SceneManager.snap();
-		}else{
-			var img_src = DrillUp.g_LSE_list[ $gameSystem._drill_LSE['shatter_img_src'] ];
-			this._Drill_LSE_sprite_bitmap = ImageManager.load_MapShatterBackground(img_src);
-		}
-		
-		this._Drill_LSE_sprite = new Sprite();
-		this._drill_SenceTopArea.addChild( this._Drill_LSE_sprite );
-		
-		this._drill_LSE_waiting = true;
-	}
-	if( this._Drill_LSE_sprite &&
-		this._Drill_LSE_sprite_bitmap &&
-		this._Drill_LSE_sprite_bitmap.isReady() &&
-		this._drill_LSE_waiting == true ){
-		this._drill_LSE_waiting = false;
-		var data = {
-			"frameX":0,	
-			"frameY":0,
-			"frameW":Graphics.boxWidth,
-			"frameH":Graphics.boxHeight,
-			"shatter_id":$gameSystem._drill_LSE['shatter_id'],							//粉碎样式
-			"shatter_converted":$gameSystem._drill_LSE['shatter_converted'],			//反向弹道
-			"shatter_opacityType":$gameSystem._drill_LSE['opacityType'],				//透明度变化方式
-			"shatter_autoHide":false,													//自动隐藏
-		};
-		this._Drill_LSE_sprite.drill_COSE_setShatter( data,this._Drill_LSE_sprite_bitmap );		//方块粉碎核心 - 初始化
-	}
-	
-	
-	// > 重画指令
-	if( $gameSystem._drill_LSE['redraw_command'] == true ){
-		$gameSystem._drill_LSE['redraw_command'] = false;
-		
-		this._Drill_LSE_sprite.drill_COSE_restoreShatter();				//方块粉碎核心 - 复原
-	}
-	
-}
+var _drill_LSE_sTank_createAllWindows = Scene_Map.prototype.createAllWindows;
+Scene_Map.prototype.createAllWindows = function() {
+	_drill_LSE_sTank_createAllWindows.call(this);
+	$gameTemp._drill_LSE_controller = new Drill_COSE_Controller();	//（此数据对象不存）
+	$gameTemp._drill_LSE_controlled_sprite = new Drill_COSE_LayerSprite();
+	$gameTemp._drill_LSE_controlled_sprite.drill_COSE_setController( $gameTemp._drill_LSE_controller );
+	this._drill_SenceTopArea.addChild( $gameTemp._drill_LSE_controlled_sprite );
+};
+//==============================
+// * 粉碎贴图 - 帧刷新
+//==============================
+var _drill_LSE_sTank_update = Scene_Map.prototype.update;
+Scene_Map.prototype.update = function() {
+	_drill_LSE_sTank_update.call(this);
+	$gameTemp._drill_LSE_controller.drill_COSE_update();			//（不要忘了，数据必须手动帧刷新）
+};
+//==============================
+// * 粉碎贴图 - 销毁
+//==============================
+var _drill_LSE_sTank_terminate = Scene_Map.prototype.terminate;
+Scene_Map.prototype.terminate = function() {
+	_drill_LSE_sTank_terminate.call(this);
+	$gameTemp._drill_LSE_controlled_sprite.drill_COSE_destroy();
+	$gameTemp._drill_LSE_controlled_sprite = null;
+	$gameTemp._drill_LSE_controller = null;
+};
 
 
 //=============================================================================
@@ -673,7 +695,7 @@ Scene_Map.prototype.drill_LSE_updateCommand = function() {
 }else{
 		Imported.Drill_LayerShatterEffect = false;
 		alert(
-			"【Drill_LayerShatterEffect.js 行走图-方块粉碎效果】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
+			"【Drill_LayerShatterEffect.js 地图 - 方块粉碎效果】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
 			"\n- Drill_CoreOfShatterEffect 系统-方块粉碎核心"
 		);
 }
