@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        窗口字符 - 窗口字符核心
+ * @plugindesc [v1.4]        窗口字符 - 窗口字符核心
  * @author Drill_up
  * 
  * 
@@ -242,6 +242,8 @@
  * 添加了设置单纯的 字符块 的窗口字符。
  * [v1.3]
  * 修改了插件的分类。分离了描边的窗口字符功能。
+ * [v1.4]
+ * 优化了对话文字速度的关系。
  * 
  * 
  * 
@@ -276,7 +278,7 @@
 //		临时局部变量	this._drill_COWC_xxx
 //		存储数据变量	无
 //		全局存储变量	无
-//		覆盖重写方法	无
+//		覆盖重写方法	Window_Message.prototype.updateMessage
 //
 //<<<<<<<<性能记录<<<<<<<<
 //
@@ -2176,6 +2178,58 @@ Window_Message.prototype.processEscapeCharacter = function( code, textState ){
 	_drill_COWC_msg_processEscapeCharacter.call( this, code, textState );
 }
 
+//=============================================================================
+// ** 核心漏洞修复
+//=============================================================================
+//==============================
+// * 核心漏洞修复 - 等待消息显示（覆写）
+//
+//			说明：	拆分此函数，转为更适合扩展的结构。
+//==============================
+Window_Message.prototype.updateMessage = function(){
+    if( this._textState ){
+        while( !this.isEndOfText(this._textState) ){
+			
+			// > 执行新建页
+            if( this.needsNewPage(this._textState) ){
+                this.newPage(this._textState);
+            }
+			
+			// > 按确定键 瞬间显示当前页
+            this.updateShowFast();
+			
+			// > 绘制下一个字符
+            this.processCharacter(this._textState);
+			
+			// > 跳出字符绘制情况
+            if( this.drill_COWC_canBreakProcess() == true ){ break; }
+        }
+		
+		// > 绘制完 全部字符 时
+        if( this.isEndOfText(this._textState) ){
+            this.onEndOfText();
+        }
+        return true;
+    }else{
+        return false;
+    }
+}
+//==============================
+// * 核心漏洞修复 - 跳出字符绘制情况（false继续绘制，true跳出绘制）
+//==============================
+Window_Message.prototype.drill_COWC_canBreakProcess = function(){
+	
+	// > 瞬间显示时，跳出
+	if( this._showFast == false && this._lineShowFast == false ){ return true; }
+	
+	// > 等待输入时，跳出
+	if( this.pause == true ){ return true; }
+	
+	// > 等待字符时，跳出
+	if( this._waitCount > 0 ){ return true; }
+	
+	return false;
+};
 
 
 //=============================================================================

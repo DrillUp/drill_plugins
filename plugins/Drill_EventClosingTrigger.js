@@ -1439,7 +1439,9 @@ Game_Map.prototype.drill_ECT_updateEventTrigger = function( org_event ){
 			
 		// > 事件在棋盘外（注意，棋盘真实形状是所有形状的组合，不一定是方形）
 		}else{
-			this.drill_ECT_autoOffAllTag( tar_event );		//（自关标记 的全关）
+			// > 只关 org_event 对应的 自关标记
+			this.drill_ECT_autoOffAllTagWithInTag( tar_event, org_event.drill_ECT_getAutoOffTagList() );
+			//this.drill_ECT_autoOffAllTag( tar_event );
 		}
 		
 	}
@@ -1530,8 +1532,28 @@ Game_Map.prototype.drill_ECT_checkerboardTriggered = function( tar_event, org_ev
 //==============================
 // * 开关触发 - 选择性关闭 自关标记（子流程）
 //
-//			参数：	> e 对象（目标事件）
-//					> inTag_list 字符串数组（排除列表）
+//			参数：	> e 对象                （目标事件）
+//					> inTag_list 字符串数组 （包含列表）
+//			说明：	> 只关闭含 自关标记 的条件。
+//					> 关闭 inTag_list 的自关标记。
+//==============================
+Game_Map.prototype.drill_ECT_autoOffAllTagWithInTag = function( e, inTag_list ){
+	var offTag_list = e.drill_ECT_getAutoOffTagList();
+	var offSwitch_list = e.drill_ECT_getTagSwitchList(offTag_list);
+	var inSwitch_list = e.drill_ECT_getTagSwitchList(inTag_list);
+	
+	for(var k=0; k < offSwitch_list.length; k++ ){
+		var switch_name = offSwitch_list[k];
+		if( inSwitch_list.contains( switch_name ) ){
+			this.drill_ECT_triggerSwitch( e, switch_name, false );
+		}
+	}
+}
+//==============================
+// * 开关触发 - 选择性关闭 自关标记（子流程）
+//
+//			参数：	> e 对象                （目标事件）
+//					> inTag_list 字符串数组 （排除列表）
 //			说明：	> 只关闭含 自关标记 的条件。
 //					> 关闭除 inTag_list 中以外的自关标记。
 //					> 如果两个条件指向了同一个开关，条件A符合棋盘，条件B不符合棋盘，那么这个开关不要关。
@@ -1838,11 +1860,11 @@ Scene_Map.prototype.drill_ECT_sortByZIndex = function () {
     this.drill_ECT_sortByZIndex_Private();
 }
 //##############################
-// * 地图层级 - 参照的位移【标准函数】
+// * 地图层级 - 层级与镜头的位移【标准函数】
 //				
-//			参数：	> x 数字           （x位置）
-//					> y 数字           （y位置）
-//					> reference 字符串 （参考系，镜头参照/地图参照）
+//			参数：	> x 数字              （x位置）
+//					> y 数字              （y位置）
+//					> layer 字符串        （层级，下层/中层/上层/图片层/最顶层）
 //					> option 动态参数对象 （计算时的必要数据）
 //			返回：	> pos 动态参数对象
 //                  > pos['x'] （移动后的坐标X）
@@ -1850,8 +1872,8 @@ Scene_Map.prototype.drill_ECT_sortByZIndex = function () {
 //          
 //			说明：	> 强行规范的接口，必须按照接口的结构来，把要考虑的问题全考虑清楚了再去实现。
 //##############################
-Scene_Map.prototype.drill_ECT_layerMoveingReference = function( x, y, reference, option ){
-	return this.drill_ECT_layerMoveingReference_Private( x, y, reference, option );
+Scene_Map.prototype.drill_ECT_layerCameraMoving = function( x, y, layer, option ){
+	return this.drill_ECT_layerCameraMoving_Private( x, y, layer, option );
 }
 //=============================================================================
 // ** 地图层级（接口实现）
@@ -1905,17 +1927,18 @@ Scene_Map.prototype.drill_ECT_layerRemoveSprite_Private = function( sprite ){
 	this._spriteset._drill_mapUpArea.removeChild( sprite );
 };
 //==============================
-// * 地图层级 - 参照的位移（私有）
+// * 地图层级 - 层级与镜头的位移（私有）
 //==============================
-Scene_Map.prototype.drill_ECT_layerMoveingReference_Private = function( xx, yy, reference, option ){
+Scene_Map.prototype.drill_ECT_layerCameraMoving_Private = function( xx, yy, layer, option ){
 	
-	// > 参照系修正
-	if( reference == "地图参照 -> 地图参照" ){
+	// > 地图参照 -> 地图参照
+	if( layer == "下层" || layer == "中层" || layer == "上层" ){
 		return {'x':xx, 'y':yy };
 	}
-	if( reference == "地图参照 -> 镜头参照" ){
-		xx -= this._spriteset._baseSprite.x;	//（由于 Spriteset_Map 的 _baseSprite 坐标始终是(0,0)，所以两个参照没有区别。）
-		yy -= this._spriteset._baseSprite.y;
+	
+	// > 地图参照 -> 镜头参照
+	if( layer == "图片层" || layer == "最顶层" ){
+		//（不需要变换）
 		return {'x':xx, 'y':yy };
 	}
 	return {'x':xx, 'y':yy };
@@ -2037,13 +2060,12 @@ Scene_Map.prototype.drill_ECT_DEBUG_updateSprite = function() {
 		xx = Math.round( $gameMap.adjustX( xx ) * tw + tw / 2);
 		yy = Math.round( $gameMap.adjustY( yy ) * th + th / 2);
 		
-		// > 参照的位移
-		if( temp_sprite['layer_index'] == "中层" ||
-			temp_sprite['layer_index'] == "上层" ){
-			var pos = this.drill_ECT_layerMoveingReference( xx, yy, "地图参照 -> 地图参照", {} );
-			temp_sprite.x = pos['x'];
-			temp_sprite.y = pos['y'];
-		}
+		
+		// > 层级与镜头的位移
+		var pos = this.drill_ECT_layerCameraMoving( xx, yy, temp_sprite['layer_index'], {} );
+		temp_sprite.x = pos['x'];
+		temp_sprite.y = pos['y'];
+		
 		
 		// > 图块点变化
 		var area_data = temp_event._drill_ECT_areaTank[ 0 ];

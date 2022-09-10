@@ -3,12 +3,13 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        鼠标 - 地图按钮集
+ * @plugindesc [v1.2]        鼠标 - 地图按钮集
  * @author Drill_up
  * 
  * @Drill_LE_param "按钮-%d"
  * @Drill_LE_parentKey ""
  * @Drill_LE_var "DrillUp.g_GBu_button_length"
+ * 
  * 
  * @help  
  * =============================================================================
@@ -116,6 +117,7 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 优化了内部结构，修复了镜头缩放时按钮被缩小的bug。
+ * [v1.2]
  * 
  *
  *
@@ -322,7 +324,7 @@
  * @param 资源-激活图片
  * @parent ---激活状态---
  * @desc 按钮的图片资源。
- * @default ["按钮集-激活图片"]
+ * @default ["(需配置)按钮集-激活图片"]
  * @require 1
  * @dir img/Map__ui_gaugeButton/
  * @type file[]
@@ -359,7 +361,7 @@
  * @param 资源-高亮图片
  * @parent 高亮效果
  * @desc 返回按钮高亮的图片资源。
- * @default 按钮集-高亮图片
+ * @default (需配置)按钮集-高亮图片
  * @require 1
  * @dir img/Map__ui_gaugeButton/
  * @type file
@@ -395,7 +397,7 @@
  * @param 资源-按下图片
  * @parent 按下效果
  * @desc 返回按钮按下的图片资源。
- * @default 按钮集-按下图片
+ * @default (需配置)按钮集-按下图片
  * @require 1
  * @dir img/Map__ui_gaugeButton/
  * @type file
@@ -406,7 +408,7 @@
  * @param 资源-封印图片
  * @parent ---封印状态---
  * @desc 按钮封印时的图片资源。
- * @default 按钮集-封印图片
+ * @default (需配置)按钮集-封印图片
  * @require 1
  * @dir img/Map__ui_gaugeButton/
  * @type file
@@ -428,7 +430,7 @@
  * @param 资源-封印时高亮图片
  * @parent 封印时高亮效果
  * @desc 返回按钮高亮的图片资源。
- * @default 按钮集-封印时高亮图片
+ * @default (需配置)按钮集-封印时高亮图片
  * @require 1
  * @dir img/Map__ui_gaugeButton/
  * @type file
@@ -590,7 +592,7 @@ ImageManager.load_MapGaugeButton = function(filename) {
 var _drill_GBu_pluginCommand = Game_Interpreter.prototype.pluginCommand
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_GBu_pluginCommand.call(this, command, args);
-	if(command === ">地图按钮集"){
+	if( command === ">地图按钮集" ){
 		
 		/*-----------------按钮控制------------------*/
 		if( args.length == 4 ){				//>地图按钮集 : 按钮[1] : 显示
@@ -672,11 +674,48 @@ Scene_Map.prototype.drill_GBu_isOnGaugeButton = function() {
 }
 
 
+//#############################################################################
+// ** 【标准模块】地图层级
+//#############################################################################
+//##############################
+// * 地图层级 - 添加贴图到层级【标准函数】
+//				
+//			参数：	> sprite 贴图        （添加的贴图对象）
+//					> layer_index 字符串 （添加到的层级名，下层/中层/上层/图片层/最顶层）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图添加到目标层级中。
+//##############################
+Scene_Map.prototype.drill_GBu_layerAddSprite = function( sprite, layer_index ){
+	this.drill_GBu_layerAddSprite_Private( sprite, layer_index );
+}
+//##############################
+// * 地图层级 - 去除贴图【标准函数】
+//				
+//			参数：	> sprite 贴图（添加的贴图对象）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图从地图层级中移除。
+//##############################
+Scene_Map.prototype.drill_GBu_layerRemoveSprite = function( sprite ){
+	//（无）
+}
+//##############################
+// * 地图层级 - 图片层级排序【标准函数】
+//				
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 执行该函数后，地图层级的子贴图，按照zIndex属性来进行先后排序。值越大，越靠前。
+//##############################
+Scene_Map.prototype.drill_GBu_sortByZIndex = function(){
+    this.drill_GBu_sortByZIndex_Private();
+}
 //=============================================================================
-// ** 地图层级
+// ** 地图层级（接口实现）
 //=============================================================================
 //==============================
-// ** 图片层
+// * 地图层级 - 图片层
 //==============================
 var _drill_GBu_layer_createPictures = Spriteset_Map.prototype.createPictures;
 Spriteset_Map.prototype.createPictures = function() {
@@ -687,7 +726,7 @@ Spriteset_Map.prototype.createPictures = function() {
 	}
 }
 //==============================
-// ** 最顶层
+// * 地图层级 - 最顶层
 //==============================
 var _drill_GBu_layer_createAllWindows = Scene_Map.prototype.createAllWindows;
 Scene_Map.prototype.createAllWindows = function() {
@@ -698,12 +737,23 @@ Scene_Map.prototype.createAllWindows = function() {
 	}
 }
 //==============================
-// ** 层级排序
+// * 地图层级 - 图片层级排序（私有）
 //==============================
-Scene_Map.prototype.drill_GBu_sortByZIndex = function() {
+Scene_Map.prototype.drill_GBu_sortByZIndex_Private = function() {
 	this._spriteset._drill_mapPicArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
 	this._drill_SenceTopArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
 };
+//==============================
+// * 地图层级 - 添加贴图到层级（私有）
+//==============================
+Scene_Map.prototype.drill_GBu_layerAddSprite_Private = function( sprite, layer_index ){
+	if( layer_index == "图片层" ){
+		this._spriteset._drill_mapPicArea.addChild( sprite );
+	}
+	if( layer_index == "最顶层" ){
+		this._drill_SenceTopArea.addChild( sprite );
+	}
+}
 
 
 
@@ -756,14 +806,12 @@ Scene_Map.prototype.drill_GBu_createButton = function() {
 		var temp_sprite = new Drill_GBu_ButtonSprite( data );
 		
 		// > 贴图层级
-		if( data['layer_index'] == "图片层" ){
-			this._spriteset._drill_mapPicArea.addChild(temp_sprite);
-		}
-		if( data['layer_index'] == "最顶层" ){
-			this._drill_SenceTopArea.addChild(temp_sprite);
-		}
+		this.drill_GBu_layerAddSprite( temp_sprite, data['layer_index'] );
 		this._drill_GBu_spriteTank[i] = temp_sprite;
 	}
+	
+	// > 层级排序
+	this.drill_GBu_sortByZIndex();
 };
 //==============================
 // * 帧刷新 - 按钮属性刷新
@@ -1215,13 +1263,21 @@ Drill_GBu_ButtonSprite.prototype.drill_updatePosition = function() {
 	
 	var xx = data['x'];
 	var yy = data['y'];
-	if( Imported.Drill_LayerCamera && 	//地图镜头修正（处于下层/中层/上层/图片层，需要一起缩放）
-		data['layer_index'] != "最顶层" ){
-		xx = $gameSystem.drill_LCa_cameraToMapX( xx );
-		yy = $gameSystem.drill_LCa_cameraToMapY( yy );
-		this.scale.x = 1.00 / $gameSystem.drill_LCa_curScaleX();
-		this.scale.y = 1.00 / $gameSystem.drill_LCa_curScaleY();
+	
+	// > 镜头缩放与位移【地图 - 活动地图镜头】
+	//		（由于按钮 只在 图片层和最顶层，下面的函数执行不到。）
+	if( Imported.Drill_LayerCamera ){
+		var layer = data['layer_index'];
+		if( layer == "下层" || layer == "中层" || layer == "上层" ){
+			this.scale.x = 1.00 / $gameSystem.drill_LCa_curScaleX();
+			this.scale.y = 1.00 / $gameSystem.drill_LCa_curScaleY();
+			//（暂不考虑缩放位移偏转）
+		}
+		if( layer == "图片层" || layer == "最顶层" ){
+			//（不需偏移）
+		}
 	}
+	
 	this.x = Math.floor(xx);
 	this.y = Math.floor(yy);
 }

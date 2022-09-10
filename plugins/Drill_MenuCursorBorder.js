@@ -261,7 +261,7 @@
  * @param 资源-边框
  * @parent ---边框---
  * @desc png图片资源组，可以是单张图片，也可以是多张构成的GIF。
- * @default ["菜单选项边框-默认"]
+ * @default ["(需配置)菜单选项边框"]
  * @require 1
  * @dir img/Menu__ui/
  * @type file[]
@@ -320,7 +320,7 @@
  * @param 资源-边角
  * @parent ---边角---
  * @desc png图片资源组，可以是单张图片，也可以是多张构成的GIF。
- * @default ["菜单选项边角-默认"]
+ * @default ["(需配置)菜单选项边角"]
  * @require 1
  * @dir img/Menu__ui/
  * @type file[]

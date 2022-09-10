@@ -829,7 +829,7 @@ Game_Character.prototype.drill_RCG_moveDiagonally_skip = function( horz, vert ){
 // * 遇障碍结束 - 前进一步
 //==============================
 Game_Character.prototype.drill_RCG_moveForward_skip = function(){
-    this.drill_RCG_moveStraight(this.direction());
+    this.drill_RCG_moveStraight_skip(this.direction());
 };
 //==============================
 // * 遇障碍结束 - 后退一步
@@ -839,7 +839,7 @@ Game_Character.prototype.drill_RCG_moveForward_skip = function(){
 Game_Character.prototype.drill_RCG_moveBackward_skip = function(){
     var lastDirectionFix = this.isDirectionFixed();
     this.setDirectionFix(true);
-    this.drill_RCG_moveStraight(this.reverseDir(this.direction()));
+    this.drill_RCG_moveStraight_skip(this.reverseDir(this.direction()));
     this.setDirectionFix(lastDirectionFix);
 };
 //==============================
@@ -848,7 +848,7 @@ Game_Character.prototype.drill_RCG_moveBackward_skip = function(){
 Game_Character.prototype.drill_RCG_moveRandom_skip = function(){
     var d = 2 + Math.randomInt(4) * 2;
     if( this.canPass(this.x, this.y, d) ){
-        this.drill_RCG_moveStraight(d);
+        this.drill_RCG_moveStraight_skip(d);
     }
 };
 
@@ -1059,13 +1059,17 @@ Game_Character.prototype.drill_RCG_mouseKeepDistance = function( distance ){
 // ** 鼠标 - 获取点
 //=============================================================================
 Game_Character.prototype.drill_RCG_getMousePoint = function( ){
+	
 	// > 鼠标坐标
 	var mouse_x = _drill_mouse_x;
 	var mouse_y = _drill_mouse_y;
-	if( Imported.Drill_LayerCamera ){		//镜头缩放
+	
+	// > 镜头缩放【地图 - 活动地图镜头】
+	if( Imported.Drill_LayerCamera ){	//（事件处于 下层、中层、上层 之间）
 		mouse_x = $gameSystem.drill_LCa_cameraToMapX( _drill_mouse_x );	
 		mouse_y = $gameSystem.drill_LCa_cameraToMapY( _drill_mouse_y );	
 	}
+	
 	// > 坐标转换
 	var m = {}
 	m.x = Math.floor( $gameMap._displayX + mouse_x / $gameMap.tileWidth() );

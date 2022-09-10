@@ -575,11 +575,11 @@ Scene_Battle.prototype.drill_BVi_sortByZIndex = function () {
     this.drill_BVi_sortByZIndex_Private();
 }
 //##############################
-// * 战斗层级 - 参照的位移【标准函数】
+// * 战斗层级 - 层级与镜头的位移【标准函数】
 //				
-//			参数：	> x 数字           （x位置）
-//					> y 数字           （y位置）
-//					> reference 字符串 （参考系，镜头参照/战斗参照）
+//			参数：	> x 数字              （x位置，当前为 战斗参照）
+//					> y 数字              （y位置，当前为 战斗参照）
+//					> layer 字符串        （层级，下层/上层/图片层/最顶层）
 //					> option 动态参数对象 （计算时的必要数据）
 //			返回：	> pos 动态参数对象
 //                  > pos['x']
@@ -587,9 +587,9 @@ Scene_Battle.prototype.drill_BVi_sortByZIndex = function () {
 //          
 //			说明：	> 强行规范的接口，必须按照接口的结构来，把要考虑的问题全考虑清楚了再去实现。
 //##############################
-Scene_Battle.prototype.drill_BVi_layerMoveingReference = function( x, y, reference, option ){
+Scene_Battle.prototype.drill_BVi_layerCameraMoving = function( x, y, layer, option ){
 	//（不操作）
-	return {'x':0,'y':0};
+	return {'x':x,'y':y};
 }
 //=============================================================================
 // ** 战斗层级（接口实现）

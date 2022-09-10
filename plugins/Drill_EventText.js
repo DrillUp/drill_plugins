@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.9]        行走图 - 事件漂浮文字
+ * @plugindesc [v2.0]        行走图 - 事件漂浮文字
  * @author Drill_up
  * 
  * 
@@ -42,8 +42,7 @@
  *   (3.你可以在文本中加入各种窗口字符：
  *       \c[n] 变颜色    \i[n] 显示图标    \{ \} 字体变大变小
  *       \V[n] 显示变量  \N[n] 显示角色名  \G 显示货币单位
- *      更多的特殊字符，可以去看看插件：对话框 - 消息核心。
- *      如果你想控制图标大小，去看看：窗口字符 - 字符大小控制器
+ *      更多的特殊字符，可以去看看插件：窗口字符-窗口字符核心。
  *   (4.字符串中可以使用\V[n]变量，但是注释指令不会刷新变量值，
  *      需要用插件指令执行，才会刷新值。
  *   (5.你还可以添加更为特殊的窗口字符。
@@ -103,6 +102,7 @@
  * 插件指令：>事件漂浮文字 : 事件变量[10] : 修改文本 : 这是一串修改的文字
  * 
  * 插件指令：>事件漂浮文字 : 本事件 : 修改文本 : 这是一串修改的文字
+ * 插件指令：>事件漂浮文字 : 本事件 : 清空文本
  * 插件指令：>事件漂浮文字 : 本事件 : 设置偏移 : 5 : -5
  * 插件指令：>事件漂浮文字 : 本事件 : 设置偏移(变量) : 5 : -5
  * 插件指令：>事件漂浮文字 : 本事件 : 外框 : 显示
@@ -195,6 +195,8 @@
  * 修复了 切换菜单 时，漂浮文字会延迟加载的问题。
  * [v1.9]
  * 大幅度修改了内部结构，添加了轮播文本的功能。
+ * [v2.0]
+ * 修复了外框一直显示的bug，以及轮播无效的bug。
  * 
  * 
  * 
@@ -382,6 +384,18 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			}
 		}
 		
+		/*-----------------清空文本------------------*/
+		if( e_id != null && args.length == 4 ){
+			var type = String(args[3]);
+			if( type == "清空文本" ){
+				if( $gameMap.drill_ET_isEventExist( e_id ) == false ){ return; }
+				var e = $gameMap.event(e_id);
+				e.drill_ET_createController();
+				e._drill_ET_controller.drill_ET_setText( "" );		//（清空文本同时关闭轮播）
+				e._drill_ET_controller.drill_ET_setLoopEnabled( false );
+			}
+		}
+				
 		/*-----------------修改文本------------------*/
 		if( e_id != null && args.length == 6 ){ 	//	>事件漂浮文字 : 本事件 : 修改文本 : 这是一串字符
 			var type = String(args[3]);
@@ -460,13 +474,13 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				}
 				if( temp3 == "开始单次播放" ){
 					e.drill_ET_createController();
-					e._drill_ET_controller.drill_ET_setLoopEnabled( true );
 					e._drill_ET_controller.drill_ET_setLoopMode( "单次" );
+					e._drill_ET_controller.drill_ET_setLoopEnabled( true );
 				}
 				if( temp3 == "开始循环播放" ){
 					e.drill_ET_createController();
-					e._drill_ET_controller.drill_ET_setLoopEnabled( true );
 					e._drill_ET_controller.drill_ET_setLoopMode( "循环" );
+					e._drill_ET_controller.drill_ET_setLoopEnabled( true );
 				}
 				if( temp3 == "暂停播放" ){
 					e.drill_ET_createController();
@@ -519,6 +533,7 @@ Game_Event.prototype.drill_ET_refreshText = function() {
 	if( this._drill_ET_controller != null ){
 		this._drill_ET_controller.drill_ET_setText( "" );
 		this._drill_ET_controller.drill_ET_setOffset( 0,0 );
+		this._drill_ET_controller.drill_ET_setLoopEnabled( false );
 	}
 	
 	var page = this.page();
@@ -600,8 +615,8 @@ Game_Event.prototype.drill_ET_refreshText = function() {
 						temp_context.push(row.replace("=:",""));
 					}else{
 						this.drill_ET_createController();
-						this._drill_ET_controller.drill_ET_setLoopEnabled( true );
 						this._drill_ET_controller.drill_ET_setLoopText( temp_context );
+						this._drill_ET_controller.drill_ET_setLoopEnabled( true );
 						temp_start = false;
 					}
 				}
@@ -637,6 +652,14 @@ Game_Event.prototype.drill_ET_refreshText = function() {
 				
 			};
 		};
+				
+		// > 多行注释捕获（轮播下列文本，如果没有捕获到时）
+		if( temp_start == true ){
+			this.drill_ET_createController();
+			this._drill_ET_controller.drill_ET_setLoopText( temp_context );
+			this._drill_ET_controller.drill_ET_setLoopEnabled( true );
+			temp_start = false;
+		}
     }
 }
 
@@ -1164,8 +1187,8 @@ Drill_ET_Controller.prototype.drill_updatePosition = function(){
 	
 	// > 透明度
 	var oo = Number( ev.opacity() );
-	this._drill_textOpacity = oo;			//文本透明度
-	if( data['frameVisible'] == true ){		//框架透明度
+	this._drill_textOpacity = oo;										//文本透明度
+	if( data['frameVisible'] == true && this._drill_curText != "" ){	//框架透明度（空文本时不显示外框）
 		this._drill_frameOpacity = oo;
 	}else{
 		this._drill_frameOpacity = 0;
@@ -1378,7 +1401,7 @@ Drill_ET_WindowSprite.prototype.drill_ET_updateAttr = function() {
 	
 	// > 透明度
 	this.opacity = this._drill_controller._drill_frameOpacity;
-	this.contents.opacity = this._drill_controller._drill_textOpacity;
+	this.contentsOpacity = this._drill_controller._drill_textOpacity;
 	
 	// > 可见
 	this.visible = this._drill_controller._drill_visible;

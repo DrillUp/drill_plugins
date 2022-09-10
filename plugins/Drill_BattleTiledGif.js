@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        战斗 - 多层战斗平铺GIF
+ * @plugindesc [v1.2]        战斗 - 多层战斗平铺GIF
  * @author Drill_up
  * 
  * @Drill_LE_param "平铺GIF-%d"
@@ -147,6 +147,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 优化了战斗层级结构。
+ * [v1.2]
+ * 优化了与战斗活动镜头的变换关系。
  * 
  *
  *
@@ -774,7 +776,7 @@
  *
  * @param 资源-平铺GIF
  * @desc png图片资源组，多张构成gif。
- * @default ["战斗平铺GIF-默认"]
+ * @default ["(需配置)战斗平铺GIF"]
  * @require 1
  * @dir img/Battle__layer_gif/
  * @type file[]
@@ -1075,11 +1077,11 @@ Scene_Battle.prototype.drill_BTG_sortByZIndex = function () {
     this.drill_BTG_sortByZIndex_Private();
 }
 //##############################
-// * 战斗层级 - 参照的位移【标准函数】
+// * 战斗层级 - 层级与镜头的位移【标准函数】
 //				
-//			参数：	> x 数字           （x位置）
-//					> y 数字           （y位置）
-//					> reference 字符串 （参考系，镜头参照/战斗参照）
+//			参数：	> x 数字              （x位置，当前为 战斗参照）
+//					> y 数字              （y位置，当前为 战斗参照）
+//					> layer 字符串        （层级，下层/上层/图片层/最顶层）
 //					> option 动态参数对象 （计算时的必要数据）
 //			返回：	> pos 动态参数对象
 //                  > pos['x']
@@ -1087,8 +1089,8 @@ Scene_Battle.prototype.drill_BTG_sortByZIndex = function () {
 //          
 //			说明：	> 强行规范的接口，必须按照接口的结构来，把要考虑的问题全考虑清楚了再去实现。
 //##############################
-Scene_Battle.prototype.drill_BTG_layerMoveingReference = function( x, y, reference, option ){
-	return this.drill_BTG_layerMoveingReference_Private( x, y, reference, option );
+Scene_Battle.prototype.drill_BTG_layerCameraMoving = function( x, y, layer, option ){
+	return this.drill_BTG_layerCameraMoving_Private( x, y, layer, option );
 }
 //=============================================================================
 // ** 战斗层级（接口实现）
@@ -1166,30 +1168,41 @@ Scene_Battle.prototype.drill_BTG_layerAddSprite_Private = function( sprite, laye
 	}
 }
 //==============================
-// * 战斗层级 - 参照的位移（私有）
+// * 战斗层级 - 层级与镜头的位移（私有）
 //==============================
-Scene_Battle.prototype.drill_BTG_layerMoveingReference_Private = function( xx, yy, reference, option ){
-	
+Scene_Battle.prototype.drill_BTG_layerCameraMoving_Private = function( xx, yy, layer, option ){
+		
 	// > 位移比
 	var x_per = option['rate'];
 	var y_per = option['rate'];
-	
 	if( Imported.Drill_BattleCamera ){
-		xx += $gameTemp._drill_cam_pos[0] * x_per;
-		yy += $gameTemp._drill_cam_pos[1] * y_per;
+		var camera_pos = $gameSystem._drill_BCa_controller.drill_BCa_getCameraPos_Children();
+		xx += camera_pos.x * x_per;
+		yy += camera_pos.y * y_per;
 	}
 	//		（*0 表示不跟镜头移动，紧贴地图；*1表示紧贴镜头。）
 	
-	// > 参照系修正
-	if( reference == "战斗参照 -> 战斗参照" ){
+	
+	// > 战斗参照 -> 战斗参照
+	if( layer == "下层" || layer == "上层" ){
 		//（不操作）
 		return {'x':xx, 'y':yy };
 	}
-	if( reference == "战斗参照 -> 镜头参照" ){
+	
+	// > 战斗参照 -> 镜头参照
+	if( layer == "图片层" || layer == "最顶层" ){
 		xx -= this._spriteset._baseSprite.x;	//（由于 Spriteset_Battle 的 _baseSprite 坐标始终是(0,0)，所以两个参照没有区别。）
 		yy -= this._spriteset._baseSprite.y;
-		xx -= this._spriteset._battleField.x;	//（处于 Spriteset_Battle 的 _battleField 情况。）
-		yy -= this._spriteset._battleField.y;
+		
+		// > 战斗镜头位移（在图层内）
+		if( Imported.Drill_BattleCamera ){
+			var camera_pos = $gameSystem._drill_BCa_controller.drill_BCa_getCameraPos_Children();
+			xx -= camera_pos.x;
+			yy -= camera_pos.y;
+		}else{
+			xx -= this._spriteset._battleField.x;	//（处于 Spriteset_Battle 的 _battleField 情况。）
+			yy -= this._spriteset._battleField.y;
+		}
 		return {'x':xx, 'y':yy };
 	}
 	return {'x':xx, 'y':yy };
@@ -1372,17 +1385,15 @@ Scene_Battle.prototype.drill_BTG_updateBase = function() {
 		xx += temp_s_data['cur_speedX'];
 		yy += temp_s_data['cur_speedY'];
 		
-		// > 参照的位移
-		if( temp_s_data['area_index'] == '下层' ||		//（上层和下层 位于_battleField中）
-			temp_s_data['area_index'] == '上层' ){
-			var pos = this.drill_BTG_layerMoveingReference(xx, yy, "战斗参照 -> 战斗参照", temp_s_data);
-			xx = pos['x'];
-			yy = pos['y'];
-		}else{
-			var pos = this.drill_BTG_layerMoveingReference(xx, yy, "战斗参照 -> 镜头参照", temp_s_data);
-			xx = pos['x'];
-			yy = pos['y'];
-		}
+		
+		// > 层级与镜头的位移（镜头参照）
+		var option = {
+			"rate": temp_s_data['rate'],
+		};
+		var pos = this.drill_BTG_layerCameraMoving(xx, yy, temp_s_data['area_index'], option );
+		xx = pos['x'];
+		yy = pos['y'];
+		
 		
 		// > 位置
 		temp_sprite.origin.x = Math.floor(xx);

@@ -1036,7 +1036,7 @@ Drill_COSE_Controller.prototype.drill_COSE_setVisible = function( visible ){
 // * 控制器 - 是否正在播放【标准函数】
 //
 //			参数：	> 无
-//			返回：	> visible 布尔（是否显示）
+//			返回：	> 布尔（是否显示）
 //			
 //			说明：	> 注意，粉碎播放完后，会返回false。
 //					  如果是正向播放，碎片会保持消失状态，父贴图也不会显示。
@@ -1528,7 +1528,7 @@ Drill_COSE_LayerSprite.prototype.drill_COSE_setController = function( controller
 // * 粉碎贴图 - 是否就绪【标准函数】
 //			
 //			参数：	> 无
-//			返回：	> visible 布尔（是否显示）
+//			返回：	> 布尔（是否显示）
 //			
 //			说明：	> 这里完全 不考虑 延迟加载问题。
 //##############################
@@ -1540,7 +1540,7 @@ Drill_COSE_LayerSprite.prototype.drill_COSE_isReady = function(){
 // * 粉碎贴图 - 是否需要销毁【标准函数】
 //			
 //			参数：	> 无
-//			返回：	> visible 布尔（是否需要销毁）
+//			返回：	> 布尔（是否需要销毁）
 //			
 //			说明：	> 此函数可用于监听 控制器数据 是否被销毁，数据销毁后，贴图可自动销毁。
 //##############################
@@ -1564,7 +1564,7 @@ Drill_COSE_LayerSprite.prototype.drill_COSE_destroy = function(){
 // * 粉碎贴图 - 父贴图是否显示【标准函数】
 //
 //			参数：	> 无
-//			返回：	> visible 布尔（是否显示）
+//			返回：	> 布尔（是否显示）
 //			
 //			说明：	> 播放时、碎片消失后，都返回false。
 //                  > 复原时、倒放碎片恢复后，才返回true。

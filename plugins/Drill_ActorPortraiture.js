@@ -701,7 +701,7 @@
  * @param 资源-前视图
  * @parent ===前视图===
  * @desc 前视图的图片资源，多张可以构成gif。
- * @default ["角色肖像-前视图"]
+ * @default ["(需配置)角色肖像-前视图"]
  * @require 1
  * @dir img/Battle__portraiture/
  * @type file[]
@@ -727,7 +727,7 @@
  * @param 资源-背景图
  * @parent ===背景图===
  * @desc 背景图的图片资源，多张可以构成gif。
- * @default ["角色肖像-背景图"]
+ * @default ["(需配置)角色肖像-背景图"]
  * @require 1
  * @dir img/Battle__portraiture/
  * @type file[]
@@ -1026,11 +1026,64 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 };
 
+
+//#############################################################################
+// ** 【标准模块】战斗层级
+//#############################################################################
+//##############################
+// * 战斗层级 - 添加贴图到层级【标准函数】
+//				
+//			参数：	> sprite 贴图        （添加的贴图对象）
+//					> layer_index 字符串 （添加到的层级名，下层/上层/图片层/最顶层）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图添加到目标层级中。
+//					> 注意，当前类为 Spriteset_Battle 。
+//##############################
+Spriteset_Battle.prototype.drill_AP_layerAddSprite = function( sprite, layer_index ){
+	this.drill_AP_layerAddSprite_Private( sprite, layer_index );
+}
+//##############################
+// * 战斗层级 - 去除贴图【标准函数】
+//				
+//			参数：	> sprite 贴图（添加的贴图对象）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图从战斗层级中移除。
+//					> 注意，当前类为 Spriteset_Battle 。
+//##############################
+Spriteset_Battle.prototype.drill_AP_layerRemoveSprite = function( sprite ){
+	//（不操作）
+}
+//##############################
+// * 战斗层级 - 图片层级排序【标准函数】
+//				
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 执行该函数后，战斗层级的子贴图，按照zIndex属性来进行先后排序。值越大，越靠前。
+//					> 注意，当前类为 Spriteset_Battle 。
+//##############################
+Spriteset_Battle.prototype.drill_AP_sortByZIndex = function () {
+    this.drill_AP_sortByZIndex_Private();
+}
 //=============================================================================
-// ** 战斗层级
+// ** 战斗层级（接口实现）
 //=============================================================================
 //==============================
-// ** 上层
+// * 战斗层级 - 下层
+//==============================
+var _drill_AP_layer_createBattleback = Spriteset_Battle.prototype.createBattleback;
+Spriteset_Battle.prototype.createBattleback = function() {    
+	_drill_AP_layer_createBattleback.call(this);
+	if( !this._drill_battleDownArea ){
+		this._drill_battleDownArea = new Sprite();
+		this._drill_battleDownArea.z = 0;	//（yep层级适配，YEP_BattleEngineCore）
+		this._battleField.addChild(this._drill_battleDownArea);	
+	}
+};
+//==============================
+// * 战斗层级 - 上层
 //==============================
 var _drill_AP_layer_createLowerLayer = Spriteset_Battle.prototype.createLowerLayer;
 Spriteset_Battle.prototype.createLowerLayer = function() {
@@ -1042,11 +1095,24 @@ Spriteset_Battle.prototype.createLowerLayer = function() {
 	}
 };
 //==============================
-// ** 层级排序
+// * 战斗层级 - 图片层级排序（私有）
 //==============================
-Spriteset_Battle.prototype.drill_AP_sortByZIndex = function() {
+Spriteset_Battle.prototype.drill_AP_sortByZIndex_Private = function() {
+	this._drill_battleDownArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
 	this._drill_battleUpArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
 };
+//==============================
+// * 战斗层级 - 添加贴图到层级（私有）
+//==============================
+Spriteset_Battle.prototype.drill_AP_layerAddSprite_Private = function( sprite, layer_index ){
+	if( layer_index == "下层" ){
+		this._drill_battleDownArea.addChild( sprite );
+	}
+	if( layer_index == "上层" ){
+		this._drill_battleUpArea.addChild( sprite );
+	}
+}
+
 
 //=============================================================================
 // ** 战斗层 绘制
@@ -1077,7 +1143,7 @@ Spriteset_Battle.prototype.drill_AP_createLayer = function() {
 	// > 角色层
 	this._drill_AP_actorLayer = new Sprite();
 	this._drill_AP_actorLayer.zIndex = DrillUp.g_AP_layer;
-	this._drill_battleUpArea.addChild(this._drill_AP_actorLayer);
+	this.drill_AP_layerAddSprite( this._drill_AP_actorLayer, "上层" );
 	
 	// > 层级排序
 	this.drill_AP_sortByZIndex();
@@ -1426,11 +1492,13 @@ Drill_AP_Sprite.prototype.drill_AP_updateSprite = function() {
 	}
 	if(this._drill_cur_condition < 0){ return }
 	
-	if( Imported.Drill_BattleCamera ){	//修正镜头
-		this._drill_p_sprite.x -= $gameTemp._drill_cam_pos[0];
-		this._drill_p_sprite.y -= $gameTemp._drill_cam_pos[1];
-		this._drill_b_sprite.x -= $gameTemp._drill_cam_pos[0];
-		this._drill_b_sprite.y -= $gameTemp._drill_cam_pos[1];
+	// > 修正镜头
+	if( Imported.Drill_BattleCamera ){		//（固定处于上层，在图层内）
+		var camera_pos = $gameSystem._drill_BCa_controller.drill_BCa_getCameraPos_Children();
+		this._drill_p_sprite.x -= camera_pos.x;
+		this._drill_p_sprite.y -= camera_pos.y;
+		this._drill_b_sprite.x -= camera_pos.x;
+		this._drill_b_sprite.y -= camera_pos.y;
 	}
 	
 	if(this._drill_isActived){	// >前视图显示

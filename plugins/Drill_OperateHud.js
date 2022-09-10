@@ -1006,10 +1006,13 @@ Scene_Map.prototype.update = function() {
 	if( p_sprite != null ){
 		var _x = p_sprite.x + DrillUp.g_OH_x;
 		var _y = p_sprite.y - 24 + DrillUp.g_OH_y;
-		if( Imported.Drill_LayerCamera ){
+		
+		// > 镜头缩放【地图 - 活动地图镜头】
+		if( Imported.Drill_LayerCamera ){	//（事件处于 下层、中层、上层 之间）
 			_x = $gameSystem.drill_LCa_mapToCameraX( _x );
 			_y = $gameSystem.drill_LCa_mapToCameraY( _y );
 		}
+		
 		this._drill_OH.x = _x;
 		this._drill_OH.y = _y;
 	}
@@ -1105,10 +1108,13 @@ Sprite_Character.prototype.drill_OH_isOnCharacterSprite = function() {
 	
 	var _x = _drill_mouse_x;
 	var _y = _drill_mouse_y;
-	if( Imported.Drill_LayerCamera ){
+	
+	// > 镜头缩放【地图 - 活动地图镜头】
+	if( Imported.Drill_LayerCamera ){	//（事件贴图处于 下层、中层、上层 之间）
 		_x = $gameSystem.drill_LCa_cameraToMapX( _drill_mouse_x );
 		_y = $gameSystem.drill_LCa_cameraToMapY( _drill_mouse_y );
 	}
+	
 	if ( _x < this.x - pw) {return false};
 	if ( _x > this.x + pw) {return false};
 	if ( _y < this.y - ph - 24) {return false};	//这个24是角色行走图偏移的修正值

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        战斗UI - 简单生命框
+ * @plugindesc [v1.3]        战斗UI - 简单生命框
  * @author Drill_up
  * 
  * @Drill_LE_param "生命框-%d"
@@ -164,6 +164,8 @@
  * 修复了生命框在战斗界面中进入菜单界面，然后返回战斗界面后出错的bug。
  * [v1.2]
  * 添加了 生命框 固定不随敌人移动 的功能。
+ * [v1.3]
+ * 优化了与战斗活动镜头的变换关系。
  *
  * 
  * 
@@ -551,7 +553,7 @@
  * @param 资源-固定框背景
  * @parent ----外框----
  * @desc 固定框背景的图片资源。
- * @default 战斗生命框背景-默认
+ * @default (需配置)战斗生命框背景
  * @require 1
  * @dir img/Battle__ui/
  * @type file
@@ -569,7 +571,7 @@
  * @param 资源-固定框前景
  * @parent ----外框----
  * @desc 固定框前景的图片资源，可以遮住生命条、魔法条、怒气条。
- * @default 战斗生命框前景-默认
+ * @default (需配置)战斗生命框前景
  * @require 1
  * @dir img/Battle__ui/
  * @type file
@@ -868,11 +870,65 @@ Game_Temp.prototype.initialize = function() {
 }
 
 
+
+//#############################################################################
+// ** 【标准模块】战斗层级
+//#############################################################################
+//##############################
+// * 战斗层级 - 添加贴图到层级【标准函数】
+//				
+//			参数：	> sprite 贴图        （添加的贴图对象）
+//					> layer_index 字符串 （添加到的层级名，下层/上层/图片层/最顶层）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图添加到目标层级中。
+//##############################
+Scene_Battle.prototype.drill_ESH_layerAddSprite = function( sprite, layer_index ){
+	this.drill_ESH_layerAddSprite_Private( sprite, layer_index );
+}
+//##############################
+// * 战斗层级 - 去除贴图【标准函数】
+//				
+//			参数：	> sprite 贴图（添加的贴图对象）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图从战斗层级中移除。
+//##############################
+Scene_Battle.prototype.drill_ESH_layerRemoveSprite = function( sprite ){
+	this.drill_ESH_layerRemoveSprite_Private( sprite );
+}
+//##############################
+// * 战斗层级 - 图片层级排序【标准函数】
+//				
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 执行该函数后，战斗层级的子贴图，按照zIndex属性来进行先后排序。值越大，越靠前。
+//##############################
+Scene_Battle.prototype.drill_ESH_sortByZIndex = function () {
+    this.drill_ESH_sortByZIndex_Private();
+}
+//##############################
+// * 战斗层级 - 层级与镜头的位移【标准函数】
+//				
+//			参数：	> x 数字              （x位置，当前为 战斗参照）
+//					> y 数字              （y位置，当前为 战斗参照）
+//					> layer 字符串        （层级，下层/上层/图片层/最顶层）
+//					> option 动态参数对象 （计算时的必要数据）
+//			返回：	> pos 动态参数对象
+//                  > pos['x']
+//                  > pos['y']
+//          
+//			说明：	> 强行规范的接口，必须按照接口的结构来，把要考虑的问题全考虑清楚了再去实现。
+//##############################
+Scene_Battle.prototype.drill_ESH_layerCameraMoving = function( x, y, layer, option ){
+	return this.drill_ESH_layerCameraMoving_Private( x, y, layer, option );
+}
 //=============================================================================
-// ** 战斗层级
+// ** 战斗层级（接口实现）
 //=============================================================================
 //==============================
-// ** 下层
+// * 战斗层级 - 下层
 //==============================
 var _drill_ESH_layer_createBattleback = Spriteset_Battle.prototype.createBattleback;
 Spriteset_Battle.prototype.createBattleback = function() {    
@@ -884,7 +940,7 @@ Spriteset_Battle.prototype.createBattleback = function() {
 	}
 };
 //==============================
-// ** 上层
+// * 战斗层级 - 上层
 //==============================
 var _drill_ESH_layer_createLowerLayer = Spriteset_Battle.prototype.createLowerLayer;
 Spriteset_Battle.prototype.createLowerLayer = function() {
@@ -896,7 +952,7 @@ Spriteset_Battle.prototype.createLowerLayer = function() {
 	}
 };
 //==============================
-// ** 图片层
+// * 战斗层级 - 图片层
 //==============================
 var _drill_ESH_layer_createPictures = Spriteset_Battle.prototype.createPictures;
 Spriteset_Battle.prototype.createPictures = function() {
@@ -907,7 +963,7 @@ Spriteset_Battle.prototype.createPictures = function() {
 	}
 }
 //==============================
-// ** 最顶层
+// * 战斗层级 - 最顶层
 //==============================
 var _drill_ESH_layer_createAllWindows = Scene_Battle.prototype.createAllWindows;
 Scene_Battle.prototype.createAllWindows = function() {
@@ -918,14 +974,77 @@ Scene_Battle.prototype.createAllWindows = function() {
 	}
 }
 //==============================
-// ** 层级排序
+// * 战斗层级 - 图片层级排序（私有）
 //==============================
-Scene_Battle.prototype.drill_ESH_sortByZIndex = function() {
+Scene_Battle.prototype.drill_ESH_sortByZIndex_Private = function() {
 	this._spriteset._drill_battleDownArea.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
 	this._spriteset._drill_battleUpArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
 	this._spriteset._drill_battlePicArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
 	this._drill_SenceTopArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
 };
+//==============================
+// * 战斗层级 - 添加贴图到层级（私有）
+//==============================
+Scene_Battle.prototype.drill_ESH_layerAddSprite_Private = function( sprite, layer_index ){
+	if( layer_index == "下层" ){
+		this._spriteset._drill_battleDownArea.addChild( sprite );
+	}
+	if( layer_index == "上层" ){
+		this._spriteset._drill_battleUpArea.addChild( sprite );
+	}
+	if( layer_index == "图片层" ){
+		this._spriteset._drill_battlePicArea.addChild( sprite );
+	}
+	if( layer_index == "最顶层" ){
+		this._drill_SenceTopArea.addChild( sprite );
+	}
+}
+//==============================
+// * 战斗层级 - 去除贴图（私有）
+//==============================
+Scene_Battle.prototype.drill_ESH_layerRemoveSprite_Private = function( sprite ){
+	this._spriteset._drill_battleDownArea.removeChild( sprite );
+	this._spriteset._drill_battleUpArea.removeChild( sprite );
+	this._spriteset._drill_battlePicArea.removeChild( sprite );
+	this._drill_SenceTopArea.removeChild( sprite );
+}
+//==============================
+// * 战斗层级 - 层级与镜头的位移（私有）
+//==============================
+Scene_Battle.prototype.drill_ESH_layerCameraMoving_Private = function( xx, yy, layer, option ){
+	
+	// > 战斗参照 -> 战斗参照
+	if( layer == "下层" || layer == "上层" ){
+		//（不操作）
+		return {'x':xx, 'y':yy };
+	}
+	
+	// > 战斗参照 -> 镜头参照
+	if( layer == "图片层" || layer == "最顶层" ){
+		xx -= this._spriteset._baseSprite.x;	//（由于 Spriteset_Battle 的 _baseSprite 坐标始终是(0,0)，所以两个参照没有区别。）
+		yy -= this._spriteset._baseSprite.y;
+		
+		// > 战斗镜头位移
+		if( Imported.Drill_BattleCamera ){
+			//（此处有点小瑕疵，反复调整 调不对，暂时搁置 2022/8/18）
+			
+			// > 镜头变换位置（去掉 在图层内的位移）
+			var camera_pos = $gameSystem._drill_BCa_controller.drill_BCa_getCameraPos_Children();
+			xx += camera_pos.x;
+			yy += camera_pos.y;
+			
+			// > 镜头变换位置（恢复在图层外变换）
+			var camera_pos = $gameSystem._drill_BCa_controller.drill_BCa_getCameraPos_OuterSprite( xx, yy );
+			xx = camera_pos.x;
+			yy = camera_pos.y;
+		}else{
+			xx -= this._spriteset._battleField.x;	//（处于 Spriteset_Battle 的 _battleField 情况。）
+			yy -= this._spriteset._battleField.y;
+		}
+		return {'x':xx, 'y':yy };
+	}
+	return {'x':xx, 'y':yy };
+}
 
 //=============================================================================
 // ** 备注解析
@@ -1241,8 +1360,10 @@ Game_Actor.prototype.drill_ESH_isFocusing = function() {
 var _drill_ESH_update = Scene_Battle.prototype.update;
 Scene_Battle.prototype.update = function() {
 	_drill_ESH_update.call(this);
-	this.drill_ESH_updateCreateEnemySprite();		//创建敌人生命框
-	this.drill_ESH_updateCreateActorSprite();		//创建角色生命框
+	this.drill_ESH_updateCreateEnemySprite();		//帧刷新 - 创建敌人生命框
+	this.drill_ESH_updateCreateActorSprite();		//帧刷新 - 创建角色生命框
+	this.drill_ESH_updateEnemySprite();				//帧刷新 - 敌人生命框
+	this.drill_ESH_updateActorSprite();				//帧刷新 - 角色生命框
 }
 //==============================
 // * 战斗界面 - 析构函数
@@ -1254,7 +1375,7 @@ Scene_Battle.prototype.terminate = function() {
 	this.drill_ESH_clearActorSpriteTank();			//清空全部角色生命框
 }
 //==============================
-// * 操作 - 创建敌人生命框
+// * 帧刷新 - 创建敌人生命框
 //==============================
 Scene_Battle.prototype.drill_ESH_updateCreateEnemySprite = function() {
 	if( $gameTemp._drill_ESH_needRecreateEnemy != true ){ return; }
@@ -1271,14 +1392,14 @@ Scene_Battle.prototype.drill_ESH_updateCreateEnemySprite = function() {
 		
 		var temp_sprite = new Drill_ESH_LifeSprite( temp_data );		//（传入数据指针）
 		
-		this.drill_ESH_addChildSprite( temp_sprite );
+		this.drill_ESH_layerAddSprite( temp_sprite, temp_sprite._drill_style_data['battle_index'] );
 		$gameTemp._drill_ESH_enemySpriteTank.push( temp_sprite );	//（注意，最顶层也加在了spriteSet的tank中）
 	}
 	
 	this.drill_ESH_sortByZIndex();
 }
 //==============================
-// * 操作 - 创建角色生命框
+// * 帧刷新 - 创建角色生命框
 //==============================
 Scene_Battle.prototype.drill_ESH_updateCreateActorSprite = function() {
 	if( $gameTemp._drill_ESH_needRecreateActor != true ){ return; }
@@ -1295,47 +1416,11 @@ Scene_Battle.prototype.drill_ESH_updateCreateActorSprite = function() {
 		
 		var temp_sprite = new Drill_ESH_LifeSprite( temp_data );		//（传入数据指针）
 		
-		this.drill_ESH_addChildSprite( temp_sprite );
+		this.drill_ESH_layerAddSprite( temp_sprite, temp_sprite._drill_style_data['battle_index'] );
 		$gameTemp._drill_ESH_actorSpriteTank.push( temp_sprite );
 	}
 	
 	this.drill_ESH_sortByZIndex();
-}
-//==============================
-// * 操作 - 添加贴图对象
-//==============================
-Scene_Battle.prototype.drill_ESH_addChildSprite = function( temp_sprite ){
-	var s_data = temp_sprite._drill_style_data;
-	if( s_data['battle_index'] == "下层" ){
-		this._spriteset._drill_battleDownArea.addChild(temp_sprite);
-	}
-	if( s_data['battle_index'] == "上层" ){
-		this._spriteset._drill_battleUpArea.addChild(temp_sprite);
-	}
-	if( s_data['battle_index'] == "图片层" ){
-		this._spriteset._drill_battlePicArea.addChild(temp_sprite);
-	}
-	if( s_data['battle_index'] == "最顶层" ){
-		this._drill_SenceTopArea.addChild(temp_sprite);
-	}
-}
-//==============================
-// * 操作 - 去除贴图对象
-//==============================
-Scene_Battle.prototype.drill_ESH_removeChildSprite = function( temp_sprite ){
-	var s_data = temp_sprite._drill_style_data;
-	if( s_data['battle_index'] == "下层" ){
-		this._spriteset._drill_battleDownArea.removeChild(temp_sprite);
-	}
-	if( s_data['battle_index'] == "上层" ){
-		this._spriteset._drill_battleUpArea.removeChild(temp_sprite);
-	}
-	if( s_data['battle_index'] == "图片层" ){
-		this._spriteset._drill_battlePicArea.removeChild(temp_sprite);
-	}
-	if( s_data['battle_index'] == "最顶层" ){
-		this._drill_SenceTopArea.removeChild(temp_sprite);
-	}
 }
 //==============================
 // * 操作 - 清空全部敌人生命框
@@ -1343,7 +1428,7 @@ Scene_Battle.prototype.drill_ESH_removeChildSprite = function( temp_sprite ){
 Scene_Battle.prototype.drill_ESH_clearEnemySpriteTank = function(){
 	var s_tank = $gameTemp._drill_ESH_enemySpriteTank;
 	for(var i = s_tank.length-1; i >= 0; i-- ){
-		this.drill_ESH_removeChildSprite( s_tank[i] );
+		this.drill_ESH_layerRemoveSprite( s_tank[i] );
 		s_tank.splice(i,1);
 	}
 	$gameTemp._drill_ESH_enemySpriteTank = [];
@@ -1354,10 +1439,102 @@ Scene_Battle.prototype.drill_ESH_clearEnemySpriteTank = function(){
 Scene_Battle.prototype.drill_ESH_clearActorSpriteTank = function(){
 	var s_tank = $gameTemp._drill_ESH_actorSpriteTank;
 	for(var i = s_tank.length-1; i >= 0; i-- ){
-		this.drill_ESH_removeChildSprite( s_tank[i] );
+		this.drill_ESH_layerRemoveSprite( s_tank[i] );
 		s_tank.splice(i,1);
 	}
 	$gameTemp._drill_ESH_actorSpriteTank = [];
+}
+//==============================
+// * 帧刷新 - 敌人生命框
+//==============================
+Scene_Battle.prototype.drill_ESH_updateEnemySprite = function() {
+	for(var i = 0; i < $gameTemp._drill_ESH_enemySpriteTank.length; i++ ){
+		var temp_sprite = $gameTemp._drill_ESH_enemySpriteTank[i];
+		this.drill_ESH_updatePosition( temp_sprite );
+	}
+}
+//==============================
+// * 帧刷新 - 角色生命框
+//==============================
+Scene_Battle.prototype.drill_ESH_updateActorSprite = function() {
+	for(var i = 0; i < $gameTemp._drill_ESH_actorSpriteTank.length; i++ ){
+		var temp_sprite = $gameTemp._drill_ESH_actorSpriteTank[i];
+		this.drill_ESH_updatePosition( temp_sprite );
+	}
+}
+//==============================
+// * 帧刷新 - 镜头与位置
+//==============================
+Scene_Battle.prototype.drill_ESH_updatePosition = function( sprite ){
+	var s_data = sprite._drill_style_data;
+	var b_data = sprite._drill_bind_data;
+	if( sprite.drill_ESH_isBindingEnemy() == false &&
+		sprite.drill_ESH_isBindingActor() == false ){
+		return;
+	}
+	
+	var xx = b_data['sprite_x'];
+	var yy = b_data['sprite_y'];
+	
+	// > 固定生命框
+	if( s_data['lockHomePos_enable'] == true ){
+		xx = b_data['sprite_homeX'];
+		yy = b_data['sprite_homeY'];
+	}
+	
+	// > 注释中的偏移
+	xx += b_data['offset_x'];
+	yy += b_data['offset_y'];
+	
+	// > 根据背景资源居中
+	if( sprite._drill_background_sprite.bitmap != null ){
+		xx -= sprite._drill_background_sprite.bitmap.width *0.5;
+		yy -= sprite._drill_background_sprite.bitmap.height *0.5;		
+		
+	}else if( sprite._drill_foreground_sprite.bitmap != null ){
+		xx -= sprite._drill_foreground_sprite.bitmap.width *0.5;
+		yy -= sprite._drill_foreground_sprite.bitmap.height *0.5;		
+	}
+	
+	// > 显现效果
+	var cur_slide_x = 0;
+	var cur_slide_y = 0;
+	if( s_data['slide_alwaysOff'] == true ){
+		
+		cur_slide_x = 0;
+		cur_slide_y = 0;
+		sprite.opacity = 255;
+		
+	}else{
+		
+		if( b_data['isFocusing'] == true ){	//（聚焦时显现）
+			sprite._drill_cur_slideTime += 1;
+			if( sprite._drill_cur_slideTime > s_data['slide_time'] ){
+				sprite._drill_cur_slideTime = s_data['slide_time'];
+			}
+		}else{
+			sprite._drill_cur_slideTime -= 1;
+			if( sprite._drill_cur_slideTime < 0 ){
+				sprite._drill_cur_slideTime = 0;
+			}
+		}
+		cur_slide_x = s_data['slide_x'] - s_data['slide_x'] * sprite._drill_cur_slideTime / s_data['slide_time'] ;
+		cur_slide_y = s_data['slide_y'] - s_data['slide_y'] * sprite._drill_cur_slideTime / s_data['slide_time'] ;
+		sprite.opacity = 255 * sprite._drill_cur_slideTime / s_data['slide_time'] ;
+		
+	}
+	xx += cur_slide_x;
+	yy += cur_slide_y;
+	
+	
+	// > 层级与镜头的位移
+	var pos = this.drill_ESH_layerCameraMoving( xx, yy, s_data['battle_index'], {} );
+	xx = pos['x'];
+	yy = pos['y'];
+	
+	
+	sprite.x = Math.floor(xx);
+	sprite.y = Math.floor(yy);
 }
 
 
@@ -1610,7 +1787,6 @@ Drill_ESH_LifeSprite.prototype.drill_updateSprite = function() {
 	
 	this._drill_cur_time += 1;
 	this.drill_updateVisible();			//显示控制
-	this.drill_updatePosition();		//镜头与位置
 	this.drill_updateValue();			//刷新值
 }
 //==============================
@@ -1654,81 +1830,6 @@ Drill_ESH_LifeSprite.prototype.drill_updateVisible = function() {
 	
 	this.visible = true;
 	
-}
-//==============================
-// * 帧刷新 - 镜头与位置
-//==============================
-Drill_ESH_LifeSprite.prototype.drill_updatePosition = function() {
-	var s_data = this._drill_style_data;
-	var b_data = this._drill_bind_data;
-	if( this.drill_ESH_isBindingEnemy() == false &&
-		this.drill_ESH_isBindingActor() == false ){
-		return;
-	}
-	
-	var xx = b_data['sprite_x'];
-	var yy = b_data['sprite_y'];
-	
-	// > 固定生命框
-	if( s_data['lockHomePos_enable'] == true ){
-		xx = b_data['sprite_homeX'];
-		yy = b_data['sprite_homeY'];
-	}
-	
-	// > 注释中的偏移
-	xx += b_data['offset_x'];
-	yy += b_data['offset_y'];
-	
-	// > 根据背景资源居中
-	if( this._drill_background_sprite.bitmap != null ){
-		xx -= this._drill_background_sprite.bitmap.width *0.5;
-		yy -= this._drill_background_sprite.bitmap.height *0.5;		
-		
-	}else if( this._drill_foreground_sprite.bitmap != null ){
-		xx -= this._drill_foreground_sprite.bitmap.width *0.5;
-		yy -= this._drill_foreground_sprite.bitmap.height *0.5;		
-	}
-	
-	// > 战斗镜头修正
-	if( Imported.Drill_BattleCamera &&
-	    ( s_data['battle_index'] == "图片层" || s_data['battle_index'] == "最顶层" )
-		){
-		xx += $gameTemp._drill_cam_pos[0];
-		yy += $gameTemp._drill_cam_pos[1];
-	}
-	
-	// > 显现效果
-	var cur_slide_x = 0;
-	var cur_slide_y = 0;
-	if( s_data['slide_alwaysOff'] == true ){
-		
-		cur_slide_x = 0;
-		cur_slide_y = 0;
-		this.opacity = 255;
-		
-	}else{
-		
-		if( b_data['isFocusing'] == true ){	//（聚焦时显现）
-			this._drill_cur_slideTime += 1;
-			if( this._drill_cur_slideTime > s_data['slide_time'] ){
-				this._drill_cur_slideTime = s_data['slide_time'];
-			}
-		}else{
-			this._drill_cur_slideTime -= 1;
-			if( this._drill_cur_slideTime < 0 ){
-				this._drill_cur_slideTime = 0;
-			}
-		}
-		cur_slide_x = s_data['slide_x'] - s_data['slide_x'] * this._drill_cur_slideTime / s_data['slide_time'] ;
-		cur_slide_y = s_data['slide_y'] - s_data['slide_y'] * this._drill_cur_slideTime / s_data['slide_time'] ;
-		this.opacity = 255 * this._drill_cur_slideTime / s_data['slide_time'] ;
-		
-	}
-	xx += cur_slide_x;
-	yy += cur_slide_y;
-	
-	this.x = Math.floor(xx);
-	this.y = Math.floor(yy);
 }
 //==============================
 // * 帧刷新 - 刷新值

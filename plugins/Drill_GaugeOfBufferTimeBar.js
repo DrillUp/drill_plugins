@@ -489,7 +489,7 @@
  * @param 资源-外框背景
  * @parent ---外框---
  * @desc 时间条的外框图片资源。外框背景处于参数条下方。
- * @default 时间条外框-默认背景
+ * @default (需配置)时间条外框-默认背景
  * @require 1
  * @dir img/Special__bufferTimeBar/
  * @type file
@@ -514,7 +514,7 @@
  * @param 资源-外框前景
  * @parent ---外框---
  * @desc 时间条的外框图片资源。外框前景处于参数条上方。
- * @default 时间条外框-默认前景
+ * @default (需配置)时间条外框-默认前景
  * @require 1
  * @dir img/Special__bufferTimeBar/
  * @type file

@@ -260,7 +260,7 @@
  * @param 资源-菜单指针
  * @parent ---常规---
  * @desc png图片资源组，可以是单张图片，也可以是多张构成的GIF。
- * @default ["菜单指针-默认"]
+ * @default ["(需配置)菜单指针"]
  * @require 1
  * @dir img/Menu__ui/
  * @type file[]

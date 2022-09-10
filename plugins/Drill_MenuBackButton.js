@@ -775,7 +775,7 @@
  * @param 资源-返回按钮
  * @parent ---贴图---
  * @desc 返回按钮的png图片资源组，多张构成gif。
- * @default ["返回按钮-默认"]
+ * @default ["(需配置)菜单返回按钮"]
  * @require 1
  * @dir img/Menu__layer_backBtn/
  * @type file[]
@@ -843,7 +843,7 @@
  * @parent ---效果---
  * @parent 高亮效果
  * @desc 返回按钮高亮的图片资源。
- * @default 返回按钮-高亮图片
+ * @default (需配置)菜单返回按钮-高亮图片
  * @require 1
  * @dir img/Menu__layer_backBtn/
  * @type file
@@ -864,7 +864,7 @@
  * @parent ---效果---
  * @parent 按下效果
  * @desc 返回按钮按下的图片资源。
- * @default 返回按钮-按下图片
+ * @default (需配置)菜单返回按钮-按下图片
  * @require 1
  * @dir img/Menu__layer_backBtn/
  * @type file

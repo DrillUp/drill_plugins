@@ -631,6 +631,8 @@ Game_Map.prototype.drill_ESo_updateDistanceDecay = function() {
 			// > 计算距离
 			var _start = $gameSystem._drill_ESo_start;
 			var _width = $gameSystem._drill_ESo_width;
+			
+			// > 镜头缩放与位移【地图 - 活动地图镜头】
 			if( Imported.Drill_LayerCamera && $gameSystem.drill_LCa_curScaleX ){
 				_start = _start * 2 / ( $gameSystem.drill_LCa_curScaleX() + $gameSystem.drill_LCa_curScaleY() );
 				_width = _width * 2 / ( $gameSystem.drill_LCa_curScaleX() + $gameSystem.drill_LCa_curScaleY() );

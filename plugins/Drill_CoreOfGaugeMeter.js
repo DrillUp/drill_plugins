@@ -539,7 +539,7 @@
  * @param 资源-参数条
  * @parent ---主体---
  * @desc 参数条的图片资源，注意要与你后面配置的段数吻合。
- * @default 参数条-默认
+ * @default (需配置)参数条
  * @require 1
  * @dir img/Special__meter/
  * @type file
@@ -668,7 +668,7 @@
  * @param 资源-凹槽条
  * @parent ---凹槽条---
  * @desc 凹槽条的图片资源。注意，如果开启了流动效果，凹槽条的长度需要适配 段长度。
- * @default 凹槽条-默认
+ * @default (需配置)凹槽条
  * @require 1
  * @dir img/Special__meter/
  * @type file
@@ -743,7 +743,7 @@
  * @param 资源-粒子
  * @parent ---粒子效果---
  * @desc 生命条中的粒子效果的粒子图片资源。
- * @default 参数条-默认粒子
+ * @default (需配置)参数条粒子
  * @require 1
  * @dir img/Special__meter/
  * @type file
@@ -802,7 +802,7 @@
  * @param 资源-游标
  * @parent ---游标---
  * @desc 参数条中游标的图片资源。可以为单张，也可以为多张形成gif。
- * @default ["参数条-默认游标"]
+ * @default ["(需配置)参数条游标"]
  * @require 1
  * @dir img/Special__meter/
  * @type file[]
@@ -1746,15 +1746,17 @@ Drill_COGM_MeterSprite.prototype.drill_updateDelayingInit = function() {
 	// > 主体
 	if( this.drill_isLevelsReady() && this._drill_attr_needInit ){
 		this._drill_attr_needInit = false;
+		var ww = this.drill_levelWidth();
+		var hh = this.drill_levelHeight();
 		var point = $gameTemp.drill_COGM_getFixPointInAnchor(
 						0.0, 0.0,
 						data['anchor_x'], data['anchor_y'],
-						this.drill_levelWidth(), this.drill_levelHeight(),
+						ww, hh,
 						this._drill_radian,
 						1.0 , 1.0 
 					);
-		this.x = data['x'] + point.x;
-		this.y = data['y'] + point.y;	
+		this.x = data['x'] + point.x - ww*data['anchor_x'];
+		this.y = data['y'] + point.y - hh*data['anchor_y'];
 	}
 	// > 显示
 	if( this.drill_isLevelsReady() && this.visible != data['visible'] ){
@@ -2542,8 +2544,18 @@ Drill_COGM_MeterSprite.prototype.drill_levelWidthInLeft = function(){
 //=============================================================================
 // * 数学 - 锁定锚点
 //			
-//			说明：修正 旋转+缩放 的xy坐标，使其看起来像是在绕着 新的锚点 变换。
-//				  注意，该锁定含有正负号修正。
+//			参数：	> org_anchor_x 数字    （原贴图锚点X）
+//					> org_anchor_y 数字    （原贴图锚点Y）
+//					> target_anchor_x 数字 （新的锚点X）
+//					> target_anchor_y 数字 （新的锚点Y）
+//					> width 数字           （贴图宽度）
+//					> height 数字          （贴图高度）
+//					> rotation 数字        （旋转度数，弧度）
+//					> scale_x,scale_y 数字 （缩放比例XY，默认1.00）
+//			返回：	> { x:0, y:0 }         （偏移的坐标）
+//			
+//			说明：	修正 旋转+缩放 的坐标，使其看起来像是在绕着 新的锚点 变换。
+//					旋转值和缩放值可为负数。
 //=============================================================================
 Game_Temp.prototype.drill_COGM_getFixPointInAnchor = function( 
 					org_anchor_x,org_anchor_y,			//原贴图中心锚点 
@@ -2558,15 +2570,25 @@ Game_Temp.prototype.drill_COGM_getFixPointInAnchor = function(
 	if( ww == 0 && hh == 0){ return { "x":0, "y":0 }; }
 	if( ww == 0 ){ ww = 0.0001; }
 	
-	var r = Math.sqrt( Math.pow(ww,2) + Math.pow(hh,2) );
-	var p_degree = Math.atan(hh/ww);	
+	// > 先缩放
+	var sww = ww*scale_x;
+	var shh = hh*scale_y;
+	
+	// > 后旋转
+	var r = Math.sqrt( Math.pow(sww,2) + Math.pow(shh,2) );
+	var p_degree = Math.atan(shh/sww);	
 	p_degree = Math.PI - p_degree;
+	if( sww < 0 ){
+		p_degree = Math.PI + p_degree;
+	}
 	
-	xx = r*Math.cos( rotation - p_degree);		//圆公式 (x-a)²+(y-b)²=r²
-	yy = r*Math.sin( rotation - p_degree);		//圆极坐标 x=ρcosθ,y=ρsinθ
+	// > 变换的偏移量
+	xx += r*Math.cos( rotation - p_degree);		//圆公式 (x-a)²+(y-b)²=r²
+	yy += r*Math.sin( rotation - p_degree);		//圆极坐标 x=ρcosθ,y=ρsinθ
 	
-	xx += ww * (1 - scale_x);
-	yy += hh * (1 - scale_y);
+	// > 锚点偏移量
+	xx += ww;
+	yy += hh;
 	
 	return { "x":xx, "y":yy };
 }

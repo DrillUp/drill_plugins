@@ -747,6 +747,7 @@ Scene_Map.prototype.createAllWindows = function() {
 		this._drill_MPFE_window = new Drill_MPFE_Window();
 		
 		this._drill_MPFE_window.zIndex = DrillUp.g_MPFE_zIndex;
+		this._drill_MPFE_window._drill_curScene = "Scene_Map";
 		if( DrillUp.g_MPFE_layer == '上层' ){
 			this._spriteset._drill_mapUpArea.addChild( this._drill_MPFE_window );
 		}
@@ -938,7 +939,6 @@ Drill_MPFE_Window.prototype.drill_sortBottomByZIndex = function() {
 // * 帧刷新 - 位置
 //==============================
 Drill_MPFE_Window.prototype.drill_updatePosition = function() {
-	var data = this._drill_data;
 	
 	// > 锁定位置
 	if( DrillUp.g_MPFE_lock_enable == true ){
@@ -950,6 +950,19 @@ Drill_MPFE_Window.prototype.drill_updatePosition = function() {
 	// > 跟随鼠标位置
 	var cal_x = _drill_mouse_x;
 	var cal_y = _drill_mouse_y;
+	if( this._drill_curScene == "Scene_Map" ){
+		if( Imported.Drill_LayerCamera ){		// 【地图 - 活动地图镜头】落点位置	
+			var layer = DrillUp.g_MPFE_layer;	//  （注意，这里只改变窗口的位置 ）
+			if( layer == "下层" || layer == "中层" || layer == "上层" ){
+				var convert_pos = $gameSystem._drill_LCa_controller.drill_LCa_getPos_OuterToChildren( cal_x, cal_y );
+				cal_x = convert_pos.x;
+				cal_y = convert_pos.y;
+			}
+			if( layer == "图片层" || layer == "最顶层" ){
+				//（不操作）
+			}
+		}
+	}
 	cal_x -= this._drill_width * this._drill_anchor_x;
 	cal_y -= this._drill_height * this._drill_anchor_y;
 	if( cal_x < 0 ){	//（横向贴边控制）
@@ -1049,6 +1062,14 @@ Drill_MPFE_Window.prototype.drill_checkCondition = function( check ){
 	if( check['mouseType'] == "触屏按下[持续]" ){
 		var _x = TouchInput.x;
 		var _y = TouchInput.y;
+	}
+	if( this._drill_curScene == "Scene_Map" ){
+		if( Imported.Drill_LayerCamera ){		// 【地图 - 活动地图镜头】落点位置	
+												//  （注意，这里是 鼠标落点 与 矩形范围的图层 偏移关系 ）
+			var convert_pos = $gameSystem._drill_LCa_controller.drill_LCa_getPos_OuterToChildren( _x, _y );
+			_x = convert_pos.x;
+			_y = convert_pos.y;					//（这是事件的层级，事件处于 下层、中层、上层）
+		}
 	}
 	if( _x > check['x'] + check['w'] ){ return false;}
 	if( _x < check['x'] + 0 ){ return false;}

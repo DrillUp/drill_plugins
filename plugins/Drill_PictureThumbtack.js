@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        图片 - 图片图钉
+ * @plugindesc [v1.2]        图片 - 图片图钉
  * @author Drill_up
  * 
  * 
@@ -100,7 +100,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 添加了 玩家和战斗角色 的绑定。
- * 
+ * [v1.2]
+ * 优化了与战斗活动镜头的变换关系。
  * 
  */
  
@@ -158,7 +159,6 @@
 var _Drill_PTh_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_Drill_PTh_pluginCommand.call(this, command, args);
-	
 	if( command === ">图片图钉" ){ 
 	
 		/*-----------------对象组获取------------------*/
@@ -426,6 +426,206 @@ Game_System.prototype.initialize = function() {
 }
 
 
+//#############################################################################
+// ** 【标准模块】单位贴图
+//#############################################################################
+//##############################
+// * 单位贴图 - 获取 - 敌人容器指针【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 贴图数组    （敌人贴图）
+//          
+//			说明：	> 此函数直接返回容器对象。
+//##############################
+Game_Temp.prototype.drill_PTh_getEnemySpriteTank = function(){
+	return this.drill_PTh_getEnemySpriteTank_Private();
+}
+//##############################
+// * 单位贴图 - 获取 - 根据敌方索引【标准函数】
+//				
+//			参数：	> index 数字 （敌方第n个位置，从0开始计数）
+//			返回：	> 贴图       （敌人贴图）
+//          
+//			说明：	暂无。
+//##############################
+Game_Temp.prototype.drill_PTh_getEnemySpriteByIndex = function( index ){
+	return this.drill_PTh_getEnemySpriteByIndex_Private( index );
+}
+//##############################
+// * 单位贴图 - 获取 - 根据敌人ID【标准函数】
+//				
+//			参数：	> enemy_id 数字（敌人ID）
+//			返回：	> 贴图数组     （敌人贴图数组）
+//          
+//			说明：	> 注意敌人可能有很多个，返回的是数组。
+//##############################
+Game_Temp.prototype.drill_PTh_getEnemySpriteByEnemyId = function( enemy_id ){
+	return this.drill_PTh_getEnemySpriteByEnemyId_Private( enemy_id );
+}
+//##############################
+// * 单位贴图 - 获取 - 角色容器指针【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 贴图数组   （角色贴图）
+//          
+//			说明：	> 此函数直接返回容器对象。
+//##############################
+Game_Temp.prototype.drill_PTh_getActorSpriteTank = function(){
+	return this.drill_PTh_getActorSpriteTank_Private();
+}
+//##############################
+// * 单位贴图 - 获取 - 根据我方索引【标准函数】
+//				
+//			参数：	> index 数字 （我方第n个位置，从0开始计数）
+//			返回：	> 贴图       （角色贴图）
+//          
+//			说明：	暂无。
+//##############################
+Game_Temp.prototype.drill_PTh_getActorSpriteByIndex = function( index ){
+	return this.drill_PTh_getActorSpriteByIndex_Private( index );
+}
+//##############################
+// * 单位贴图 - 获取 - 根据角色ID【标准函数】
+//				
+//			参数：	> actor_id 数字（角色ID）
+//			返回：	> sprite 贴图  （角色贴图）
+//          
+//			说明：	暂无。
+//##############################
+Game_Temp.prototype.drill_PTh_getActorSpriteByActorId = function( actor_id ){
+	return this.drill_PTh_getActorSpriteByActorId_Private( actor_id );
+}
+//=============================================================================
+// ** 单位贴图（接口实现）
+//=============================================================================
+//==============================
+// * 单位贴图容器 - 获取 - 敌人容器指针（私有）
+//==============================
+Game_Temp.prototype.drill_PTh_getEnemySpriteTank_Private = function(){
+	if( SceneManager._scene == undefined ){ return null; }
+	if( SceneManager._scene._spriteset == undefined ){ return null; }
+	return SceneManager._scene._spriteset._enemySprites;
+};
+//==============================
+// * 单位贴图容器 - 获取 - 根据敌方索引（私有）
+//==============================
+Game_Temp.prototype.drill_PTh_getEnemySpriteByIndex_Private = function( index ){
+	var sprite_list = this.drill_PTh_getEnemySpriteTank_Private();
+	if( sprite_list == undefined ){ return null; }
+	for(var i=0; i < sprite_list.length; i++){
+		var enemy_sprite = sprite_list[i];
+		if( enemy_sprite._battler == undefined ){ continue; }
+		if( enemy_sprite._battler.isEnemy() &&
+			enemy_sprite._battler.index() == index ){
+			return enemy_sprite;
+		}
+	}
+	return null;
+};
+//==============================
+// * 单位贴图容器 - 获取 - 根据敌人ID（私有）
+//==============================
+Game_Temp.prototype.drill_PTh_getEnemySpriteByEnemyId_Private = function( enemy_id ){
+	var sprite_list = this.drill_PTh_getEnemySpriteTank_Private();
+	if( sprite_list == undefined ){ return []; }
+	var result_list = [];
+	for(var i=0; i < sprite_list.length; i++){
+		var enemy_sprite = sprite_list[i];
+		if( enemy_sprite._battler == undefined ){ continue; }
+		if( enemy_sprite._battler.isEnemy() &&
+			enemy_sprite._battler.enemyId() == enemy_id ){
+			result_list.push( enemy_sprite );
+		}
+	}
+	return result_list;
+};
+//==============================
+// * 单位贴图容器 - 获取 - 角色容器指针（私有）
+//==============================
+Game_Temp.prototype.drill_PTh_getActorSpriteTank_Private = function(){
+	if( SceneManager._scene == undefined ){ return null; }
+	if( SceneManager._scene._spriteset == undefined ){ return null; }
+	return SceneManager._scene._spriteset._actorSprites;
+};
+//==============================
+// * 单位贴图容器 - 获取 - 根据我方索引（私有）
+//==============================
+Game_Temp.prototype.drill_PTh_getActorSpriteByIndex_Private = function( index ){
+	var sprite_list = this.drill_PTh_getActorSpriteTank_Private();
+	if( sprite_list == undefined ){ return null; }
+	for(var i=0; i < sprite_list.length; i++){
+		var actor_sprite = sprite_list[i];
+		if( actor_sprite._battler == undefined ){ continue; }
+		if( actor_sprite._battler.isActor() &&
+			actor_sprite._battler.index() == index ){
+			return actor_sprite;
+		}
+	}
+	return null;
+};
+//==============================
+// * 单位贴图容器 - 获取 - 根据角色ID（私有）
+//==============================
+Game_Temp.prototype.drill_PTh_getActorSpriteByActorId_Private = function( actor_id ){
+	var sprite_list = this.drill_PTh_getActorSpriteTank_Private();
+	if( sprite_list == undefined ){ return null; }
+	for(var i=0; i < sprite_list.length; i++){
+		var actor_sprite = sprite_list[i];
+		if( actor_sprite._battler == undefined ){ continue; }
+		if( actor_sprite._battler.isActor() &&
+			actor_sprite._battler.actorId() == actor_id ){
+			return actor_sprite;
+		}
+	}
+	return null;
+};
+
+
+//#############################################################################
+// ** 【标准模块】战斗层级
+//#############################################################################
+//##############################
+// * 战斗层级 - 层级与镜头的位移【标准函数】
+//				
+//			参数：	> x 数字              （x位置）
+//					> y 数字              （y位置）
+//					> layer 字符串        （层级，下层/上层/图片层/最顶层）
+//					> option 动态参数对象 （计算时的必要数据）
+//			返回：	> pos 动态参数对象
+//                  > pos['x']
+//                  > pos['y']
+//          
+//			说明：	> 强行规范的接口，必须按照接口的结构来，把要考虑的问题全考虑清楚了再去实现。
+//##############################
+Game_Picture.prototype.drill_PTh_layerCameraMoving = function( x, y, layer, option ){
+	return this.drill_PTh_layerCameraMoving_Private( x, y, layer, option );
+}
+//==============================
+// * 战斗层级 - 层级与镜头的位移（私有）
+//==============================
+Game_Picture.prototype.drill_PTh_layerCameraMoving_Private = function( xx, yy, layer, option ){
+	
+	// > 【战斗 - 活动战斗镜头】
+	//	 （长期在图片层，不需要考虑在下层、上层情况）
+	if( Imported.Drill_BattleCamera ){
+		
+		// > 镜头基点位置 
+		var camera_pos = $gameSystem._drill_BCa_controller.drill_BCa_getCameraPos_Children();
+		xx += camera_pos.x;
+		yy += camera_pos.y;
+		
+		// > 镜头变换位置
+		var camera_pos = $gameSystem._drill_BCa_controller.drill_BCa_getCameraPos_OuterSprite( xx, yy );
+		xx = camera_pos.x;
+		yy = camera_pos.y;
+		
+		return {'x':xx, 'y':yy };
+	}
+	return {'x':xx, 'y':yy };
+}
+
+
+
 //=============================================================================
 // ** 图片
 //=============================================================================
@@ -552,24 +752,19 @@ Game_Picture.prototype.drill_PTh_updateEnemyPos = function() {
 	
 	// > 获取战斗敌群信息
 	var index = data['enemy_Index']-1;
-	var member = $gameTroop.members();
-	if( member.length == 0 ){ return; }
-	if( index < 0 ){ index = 0; }
-	if( index > member.length-1 ){ index = member.length-1; }
-	
-	// > 设置位置
-	var enemy = member[ index ];
-	if( enemy == undefined ){ return; }
-	var xx = enemy.screenX();
-	var yy = enemy.screenY();
+	var enemy_sprite = $gameTemp.drill_PTh_getEnemySpriteByIndex( index );
+	if( enemy_sprite == undefined ){ return; }
+	//var xx = enemy_sprite._homeX + enemy_sprite._offsetX;
+	//var yy = enemy_sprite._homeY + enemy_sprite._offsetY;
+	var xx = enemy_sprite.x;
+	var yy = enemy_sprite.y;
 	xx += data['shiftX'];	//（偏移的位置）
 	yy += data['shiftY'];
 	
-	// > 【战斗 - 活动战斗镜头】偏移
-	if( Imported.Drill_BattleCamera == true ){
-		xx += $gameTemp._drill_cam_pos[0];
-		yy += $gameTemp._drill_cam_pos[1];
-	}
+	// > 层级与镜头的位移
+	var camera_pos = this.drill_PTh_layerCameraMoving( xx, yy, "图片层", {} );
+	xx = camera_pos.x;
+	yy = camera_pos.y;
 	
 	this._x = xx;
 	this._y = yy;
@@ -580,59 +775,24 @@ Game_Picture.prototype.drill_PTh_updateEnemyPos = function() {
 Game_Picture.prototype.drill_PTh_updateActorPos = function() {
 	var data = this._Drill_PTh_data;
 	if( data['type'] != "战斗角色" ){ return; }
-	if( $gameTemp._drill_PTh_actorSpriteTank.length == 0 ){ return; }
 	
-	// > 获取战斗角色信息
+	// > 战斗角色贴图
 	var index = data['actor_Index']-1;
-	var sprite_tank = $gameTemp._drill_PTh_actorSpriteTank;
-	if( sprite_tank.length == 0 ){ return; }
-	if( index < 0 ){ index = 0; }
-	if( index > sprite_tank.length-1 ){ index = sprite_tank.length-1; }
-	
-	// > 设置位置
-	var actor_sprite = sprite_tank[ index ];
+	var actor_sprite = $gameTemp.drill_PTh_getActorSpriteByIndex( index );
 	if( actor_sprite == undefined ){ return; }
-	var xx = actor_sprite._homeX + actor_sprite._offsetX;
-	var yy = actor_sprite._homeY + actor_sprite._offsetY;
+	//var xx = actor_sprite._homeX + actor_sprite._offsetX;
+	//var yy = actor_sprite._homeY + actor_sprite._offsetY;
+	var xx = actor_sprite.x;
+	var yy = actor_sprite.y;
 	xx += data['shiftX'];	//（偏移的位置）
 	yy += data['shiftY'];
 	
-	// > 【战斗 - 活动战斗镜头】偏移
-	if( Imported.Drill_BattleCamera == true ){
-		xx += $gameTemp._drill_cam_pos[0];
-		yy += $gameTemp._drill_cam_pos[1];
-	}
+	// > 层级与镜头的位移
+	var camera_pos = this.drill_PTh_layerCameraMoving( xx, yy, "图片层", {} );
+	xx = camera_pos.x;
+	yy = camera_pos.y;
 	
 	this._x = xx;
 	this._y = yy;
 }
-
-//=============================================================================
-// ** 战斗角色容器
-//=============================================================================
-//==============================
-// * 容器 - 初始化
-//==============================
-var _drill_PTh_temp_initialize = Game_Temp.prototype.initialize;
-Game_Temp.prototype.initialize = function() {	
-	_drill_PTh_temp_initialize.call(this);
-	this._drill_PTh_actorSpriteTank = [];
-};
-//==============================
-// * 容器 - 捕获
-//==============================
-var _Drill_PTh_createActors = Spriteset_Battle.prototype.createActors;
-Spriteset_Battle.prototype.createActors = function() {
-	_Drill_PTh_createActors.call(this);
-	$gameTemp._drill_PTh_actorSpriteTank = this._actorSprites;
-};
-//==============================
-// * 容器 - 释放
-//==============================
-var _Drill_PTh_endBattle = BattleManager.endBattle;
-BattleManager.endBattle = function( result ){
-	_Drill_PTh_endBattle.call( this,result );
-	$gameTemp._drill_PTh_actorSpriteTank = [];
-};
-
 

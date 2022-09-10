@@ -643,7 +643,7 @@
  * @param 资源-魔法圈
  * @parent ---贴图---
  * @desc 魔法圈的图片资源。
- * @default 魔法圈-默认
+ * @default (需配置)标题魔法圈
  * @require 1
  * @dir img/titles1/
  * @type file

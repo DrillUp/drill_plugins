@@ -192,7 +192,7 @@ if( Imported.Drill_CoreOfInput &&
 var _drill_MTP_pluginCommand = Game_Interpreter.prototype.pluginCommand
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_MTP_pluginCommand.call(this, command, args);
-	if(command === ">图片鼠标事件"){
+	if( command === ">图片鼠标事件" ){
 		
 		if( args.length == 6 ){				//>图片鼠标事件 : 图片[1] : 鼠标进入图片时 : 执行公共事件[1]
 			var pic_id = String(args[1]);
@@ -504,14 +504,14 @@ Scene_Map.prototype.drill_MTP_isOnRange = function( sprite ){
 	var cy = sprite.y ;
 	var _x = _drill_mouse_x;
 	var _y = _drill_mouse_y;
-	if( Imported.Drill_LayerCamera ){		//（镜头兼容）
-		_x = $gameSystem.drill_LCa_cameraToMapX( _drill_mouse_x );
-		_y = $gameSystem.drill_LCa_cameraToMapY( _drill_mouse_y );
-	}
-	if ( _x <  cx + 0  - cw*sprite.anchor.x ){ return false };
-	if ( _x >= cx + cw - cw*sprite.anchor.x ){ return false };
-	if ( _y <  cy + 0  - ch*sprite.anchor.y ){ return false };
-	if ( _y >= cy + ch - ch*sprite.anchor.y ){ return false };
+	
+	// > 镜头缩放【地图 - 活动地图镜头】
+	//		（图片处于 图片层、最顶层 之间，不需要考虑缩放）
+	
+	if( _x <  cx + 0  - cw*sprite.anchor.x ){ return false };
+	if( _x >= cx + cw - cw*sprite.anchor.x ){ return false };
+	if( _y <  cy + 0  - ch*sprite.anchor.y ){ return false };
+	if( _y >= cy + ch - ch*sprite.anchor.y ){ return false };
 	return true;	
 }
 
@@ -545,10 +545,14 @@ Scene_Battle.prototype.drill_MTP_isOnRange = function( sprite ){
 	var cy = sprite.y ;
 	var _x = _drill_mouse_x;
 	var _y = _drill_mouse_y;
-	if ( _x <  cx + 0  - cw*sprite.anchor.x ){ return false };
-	if ( _x >= cx + cw - cw*sprite.anchor.x ){ return false };
-	if ( _y <  cy + 0  - ch*sprite.anchor.y ){ return false };
-	if ( _y >= cy + ch - ch*sprite.anchor.y ){ return false };
+	
+	// > 镜头缩放【战斗 - 活动战斗镜头】
+	//		（图片处于 图片层、最顶层 之间，不需要考虑缩放）
+	
+	if( _x <  cx + 0  - cw*sprite.anchor.x ){ return false };
+	if( _x >= cx + cw - cw*sprite.anchor.x ){ return false };
+	if( _y <  cy + 0  - ch*sprite.anchor.y ){ return false };
+	if( _y >= cy + ch - ch*sprite.anchor.y ){ return false };
 	return true;	
 }
 

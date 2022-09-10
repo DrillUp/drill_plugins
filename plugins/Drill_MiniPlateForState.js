@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.0]        鼠标 - 状态和buff说明窗口
+ * @plugindesc [v2.1]        鼠标 - 状态和buff说明窗口
  * @author Drill_up
  * 
  * @Drill_LE_param "状态-%d"
@@ -137,6 +137,9 @@
  * 添加了战斗层级的设置。
  * [v2.0]
  * 优化了内部整体结构。添加了窗口中心锚点的设置。
+ * [v2.1]
+ * 优化了与战斗活动镜头的变换关系。
+ * 
  * 
  * 
  * @param ---窗口---
@@ -1119,8 +1122,6 @@
 			DrillUp.g_MPFS_list[i] = DrillUp.drill_MPFS_initState( {} );
 		}
 	};
-	DrillUp.g_MPFS_plugin_cur_check = 0;	//（容错检查）
-	DrillUp.g_MPFS_plugin_check = 60;
 	
 
 
@@ -1137,7 +1138,7 @@ if( Imported.Drill_CoreOfInput &&
 var _drill_MPFS_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_MPFS_pluginCommand.call(this, command, args);
-	if (command === ">状态说明窗口") { // >状态说明窗口 : A : 使用模糊说明
+	if( command === ">状态说明窗口" ){	// >状态说明窗口 : A : 使用模糊说明
 		if(args.length == 4){
 			var temp1 = Number(args[1]) -1;
 			var type = String(args[3]);
@@ -1200,6 +1201,11 @@ Game_System.prototype.initialize = function() {
 // ** 状态图标绑定
 //=============================================================================
 //==============================
+// * 工具 - 容错检查
+//==============================
+DrillUp.g_MPFS_plugin_cur_check = 0;
+DrillUp.g_MPFS_plugin_check = 60;
+//==============================
 // * 工具 - 父类溯源
 //
 //			说明：	输入对象、父类定义，返回父类对象。没有则返回空。
@@ -1239,7 +1245,8 @@ if( Imported.MOG_BattleHud ){
 			};
 			var check = {
 				's': this._battler._states,
-				'b': this._battler._buffs
+				'b': this._battler._buffs,
+				'layer': "图片层"
 			}
 			if(Moghunter.bhud_statesAlign == 1){	//mog状态右对齐
 				check['x'] = this._state_icon.x - Window_Base._iconWidth * (icon_n -1);
@@ -1292,14 +1299,14 @@ Sprite_Enemy.prototype.updateStateSprite = function() {
 		'w': Sprite_StateIcon._iconWidth,
 		'h': Sprite_StateIcon._iconHeight,
 		's': this._stateIconSprite._battler._states,
-		'b': this._battler._buffs
+		'b': this._battler._buffs,
+		'layer': "上层"
 	}
 	check['x'] = this.x - this._stateIconSprite.anchor.x * Sprite_StateIcon._iconWidth;
 	check['y'] = this.y - this._stateIconSprite.anchor.y * Sprite_StateIcon._iconHeight + this._stateIconSprite.y;
-	if( Imported.Drill_BattleCamera ){	//镜头修正
-		check['x'] += $gameTemp._drill_cam_pos[0];
-		check['y'] += $gameTemp._drill_cam_pos[1];
-	}
+	//if( Imported.Drill_BattleCamera ){
+	//	（此处不需镜头修正，使用 鼠标落点位置 来捕获范围）
+	//}
 	//if( check.s.length >= 1){
 	//	alert(JSON.stringify(check));
 	//}
@@ -1325,28 +1332,28 @@ Sprite_Actor.prototype.update = function() {
 			'w': Sprite_StateIcon._iconWidth,
 			'h': Sprite_StateIcon._iconHeight,
 			's': this._stateIconSprite._battler._states,
-			'b': this._battler._buffs
+			'b': this._battler._buffs,
+			'layer': "上层"
 		}
 		check['x'] = this.x - this._stateIconSprite.anchor.x * Sprite_StateIcon._iconWidth;
 		check['y'] = this.y - this._stateIconSprite.anchor.y * Sprite_StateIcon._iconHeight + this._stateIconSprite.y;
-		if( Imported.Drill_BattleCamera ){	//镜头修正
-			check['x'] += $gameTemp._drill_cam_pos[0];
-			check['y'] += $gameTemp._drill_cam_pos[1];
-		}
+		//if( Imported.Drill_BattleCamera ){
+		//	（此处不需镜头修正，使用 鼠标落点位置 来捕获范围）
+		//}
 		_drill_plate.pushChecks(check);
 	}else{
 		var check = {
 			'w': 48,		//来自Sprite_StateOverlay，固定48像素
 			'h': 48,
 			's': this._battler._states,
-			'b': this._battler._buffs
+			'b': this._battler._buffs,
+			'layer': "上层"
 		}
 		check['x'] = this.x - this._stateSprite.anchor.x * 48;
 		check['y'] = this.y - this._stateSprite.anchor.y * 48 - 24;
-		if( Imported.Drill_BattleCamera ){	//镜头修正
-			check['x'] += $gameTemp._drill_cam_pos[0];
-			check['y'] += $gameTemp._drill_cam_pos[1];
-		}
+		//if( Imported.Drill_BattleCamera ){
+		//	（此处不需镜头修正，使用 鼠标落点位置 来捕获范围）
+		//}
 		_drill_plate.pushChecks(check);
 	}
 };
@@ -1375,7 +1382,8 @@ if( Imported.Drill_GaugeForBoss ){
 			var ih = Window_Base._iconHeight;
 			var check = {
 				's': this._drill_enemy._states,
-				'b': this._drill_enemy._buffs
+				'b': this._drill_enemy._buffs,
+				'layer': this._drill_data_bind['layerIndex_battle']		//（boss框的层级）
 			}
 			if( data_s['state_mode'] == "直线并排" ){
 			
@@ -1408,10 +1416,9 @@ if( Imported.Drill_GaugeForBoss ){
 			}
 			check['x'] -= iw/2;
 			check['y'] -= ih/2;
-			if( Imported.Drill_BattleCamera ){	//镜头修正
-				check['x'] += $gameTemp._drill_cam_pos[0];
-				check['y'] += $gameTemp._drill_cam_pos[1];
-			}
+			//if( Imported.Drill_BattleCamera ){
+			//	（此处不需镜头修正，使用 鼠标落点位置 来捕获范围）
+			//}
 			//if( check.s.length >= 1){
 			//	alert(JSON.stringify(check));
 			//}
@@ -1422,11 +1429,64 @@ if( Imported.Drill_GaugeForBoss ){
 
 
 
+//#############################################################################
+// ** 【标准模块】战斗层级
+//#############################################################################
+//##############################
+// * 战斗层级 - 添加贴图到层级【标准函数】
+//				
+//			参数：	> sprite 贴图        （添加的贴图对象）
+//					> layer_index 字符串 （添加到的层级名，下层/上层/图片层/最顶层）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图添加到目标层级中。
+//##############################
+Scene_Battle.prototype.drill_MPFS_layerAddSprite = function( sprite, layer_index ){
+	this.drill_MPFS_layerAddSprite_Private( sprite, layer_index );
+}
+//##############################
+// * 战斗层级 - 去除贴图【标准函数】
+//				
+//			参数：	> sprite 贴图（添加的贴图对象）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图从战斗层级中移除。
+//##############################
+Scene_Battle.prototype.drill_MPFS_layerRemoveSprite = function( sprite ){
+	//（不操作）
+}
+//##############################
+// * 战斗层级 - 图片层级排序【标准函数】
+//				
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 执行该函数后，战斗层级的子贴图，按照zIndex属性来进行先后排序。值越大，越靠前。
+//##############################
+Scene_Battle.prototype.drill_MPFS_sortByZIndex = function () {
+    this.drill_MPFS_sortByZIndex_Private();
+}
+//##############################
+// * 战斗层级 - 层级与镜头的位移【标准函数】
+//				
+//			参数：	> x 数字              （x位置）
+//					> y 数字              （y位置）
+//					> layer 字符串        （层级，下层/上层/图片层/最顶层）
+//					> option 动态参数对象 （计算时的必要数据）
+//			返回：	> pos 动态参数对象
+//                  > pos['x']
+//                  > pos['y']
+//          
+//			说明：	> 强行规范的接口，必须按照接口的结构来，把要考虑的问题全考虑清楚了再去实现。
+//##############################
+Scene_Battle.prototype.drill_MPFS_layerCameraMoving = function( x, y, layer, option ){
+	//（当前为窗口，被点击对象，不适用位移）
+}
 //=============================================================================
-// ** 战斗层级
+// ** 战斗层级（接口实现）
 //=============================================================================
 //==============================
-// ** 上层
+// * 战斗层级 - 上层
 //==============================
 var _drill_MPFS_battle_createLowerLayer = Spriteset_Battle.prototype.createLowerLayer;
 Spriteset_Battle.prototype.createLowerLayer = function() {
@@ -1438,7 +1498,7 @@ Spriteset_Battle.prototype.createLowerLayer = function() {
 	}
 };
 //==============================
-// ** 图片层
+// * 战斗层级 - 图片层
 //==============================
 var _drill_MPFS_battle_createPictures = Spriteset_Battle.prototype.createPictures;
 Spriteset_Battle.prototype.createPictures = function() {
@@ -1447,9 +1507,9 @@ Spriteset_Battle.prototype.createPictures = function() {
 		this._drill_battlePicArea = new Sprite();
 		this.addChild(this._drill_battlePicArea);	
 	}
-}
+};
 //==============================
-// ** 最顶层
+// * 战斗层级 - 最顶层
 //==============================
 var _drill_MPFS_battle_createAllWindows = Scene_Battle.prototype.createAllWindows;
 Scene_Battle.prototype.createAllWindows = function() {
@@ -1458,17 +1518,34 @@ Scene_Battle.prototype.createAllWindows = function() {
 		this._drill_SenceTopArea = new Sprite();
 		this.addChild(this._drill_SenceTopArea);	
 	}
-}
+};
 //==============================
-// ** 层级排序
+// * 战斗层级 - 图片层级排序（私有）
 //==============================
-Scene_Battle.prototype.drill_MPFS_sortByZIndex = function() {
+Scene_Battle.prototype.drill_MPFS_sortByZIndex_Private = function() {
 	this._spriteset._drill_battleUpArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
 	this._spriteset._drill_battlePicArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
 	this._drill_SenceTopArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
 };
 //==============================
-// * 战斗层级 - 创建面板
+// * 战斗层级 - 添加贴图到层级（私有）
+//==============================
+Scene_Battle.prototype.drill_MPFS_layerAddSprite_Private = function( sprite, layer_index ){
+	if( layer_index == "上层" ){
+		this._spriteset._drill_battleUpArea.addChild( sprite );
+	}
+	if( layer_index == "图片层" ){
+		this._spriteset._drill_battlePicArea.addChild( sprite );
+	}
+	if( layer_index == "最顶层" ){
+		this._drill_SenceTopArea.addChild( sprite );
+	}
+};
+//=============================================================================
+// ** 战斗界面
+//=============================================================================
+//==============================
+// * 战斗 - 创建面板
 //==============================
 var _drill_MPFS_battleScene_createAllWindows = Scene_Battle.prototype.createAllWindows;
 Scene_Battle.prototype.createAllWindows = function() {
@@ -1476,17 +1553,13 @@ Scene_Battle.prototype.createAllWindows = function() {
 	
 	if(!this._drill_MPFS_window ){		//（只建立一个窗口）
 		this._drill_MPFS_window = new Drill_MPFS_Window();
-		
 		this._drill_MPFS_window.zIndex = DrillUp.g_MPFS_zIndex;
-		if( DrillUp.g_MPFS_layer == '上层' ){
-			this._spriteset._drill_battleUpArea.addChild( this._drill_MPFS_window );
-		}
-		if( DrillUp.g_MPFS_layer == '图片层' ){
-			this._spriteset._drill_battlePicArea.addChild( this._drill_MPFS_window );
-		}
-		if( DrillUp.g_MPFS_layer == '最顶层' ){
-			this._drill_SenceTopArea.addChild( this._drill_MPFS_window );
-		}
+		this._drill_MPFS_window._drill_curScene = "Scene_Battle";
+		
+		// > 添加贴图到层级
+		this.drill_MPFS_layerAddSprite( this._drill_MPFS_window, DrillUp.g_MPFS_layer );
+		
+		// > 图片层级排序
 		this.drill_MPFS_sortByZIndex();
 	}
 };
@@ -1685,8 +1758,23 @@ Drill_MPFS_Window.prototype.drill_updatePosition = function() {
 	}
 	
 	// > 跟随鼠标位置
-	var cal_x = _drill_mouse_x + DrillUp.g_MPFS_x;
-	var cal_y = _drill_mouse_y + DrillUp.g_MPFS_y;
+	var cal_x = _drill_mouse_x;
+	var cal_y = _drill_mouse_y;
+	if( this._drill_curScene == "Scene_Battle" ){
+		if( Imported.Drill_BattleCamera ){		// 【战斗 - 活动战斗镜头】落点位置	
+			var layer = DrillUp.g_MPFS_layer;	//  （注意，这里只改变窗口的位置 ）
+			if( layer == "下层" || layer == "上层" ){
+				var convert_pos = $gameSystem._drill_BCa_controller.drill_BCa_getPos_OuterToChildren( cal_x, cal_y );
+				cal_x = convert_pos.x;
+				cal_y = convert_pos.y;	
+			}
+			if( layer == "图片层" || layer == "最顶层" ){
+				//（不操作）
+			}
+		}
+	}
+	cal_x += DrillUp.g_MPFS_x;
+	cal_y += DrillUp.g_MPFS_y;
 	cal_x -= this._drill_width * this._drill_anchor_x;
 	cal_y -= this._drill_height * this._drill_anchor_y;
 	if( cal_x < 0 ){	//（横向贴边控制）
@@ -1774,6 +1862,19 @@ Drill_MPFS_Window.prototype.drill_checkCondition = function( check ){
 	if( check['mouseType'] == "触屏按下[持续]" ){
 		var _x = TouchInput.x;
 		var _y = TouchInput.y;
+	}
+	if( this._drill_curScene == "Scene_Battle" ){
+		if( Imported.Drill_BattleCamera ){	// 【战斗 - 活动战斗镜头】落点位置
+			var layer = check['layer'];		//  （注意，这里是 鼠标落点 与 矩形范围的图层 偏移关系 ）
+			if( layer == "下层" || layer == "上层" ){
+				var convert_pos = $gameSystem._drill_BCa_controller.drill_BCa_getPos_OuterToChildren( _x, _y );
+				_x = convert_pos.x;
+				_y = convert_pos.y;	
+			}
+			if( layer == "图片层" || layer == "最顶层" ){
+				//（不操作）
+			}
+		}
 	}
 	if( _x > check['x'] + check['w'] ){ return false;}
 	if( _x < check['x'] + 0 ){ return false;}

@@ -26,7 +26,7 @@
  * 可作用于：
  *   - Drill_EventUnification  体积-事件一体化★★v1.1以上★★
  *     使得一体化的事件，能够整体触发悬停等功能。
- *   - Drill_LayerCamera       地图-活动地图镜头★★v1.6以上★★
+ *   - Drill_LayerCamera       地图-活动地图镜头★★v1.9以上★★
  *     目标插件控制镜头放大缩小时，鼠标也能正常触发事件。
  * 
  * -----------------------------------------------------------------------------
@@ -247,6 +247,7 @@
     DrillUp.parameters = PluginManager.parameters('Drill_MouseTriggerEvent');
 	
 	
+	/*-----------------杂项------------------*/
     DrillUp.g_MTE_remainTrigger = String(DrillUp.parameters['对话框弹出时是否仍然可触发'] || "true") === "true";
 
 
@@ -260,10 +261,10 @@ if( Imported.Drill_CoreOfInput ){
 // ** 插件指令
 //=============================================================================
 var _drill_MTE_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function(command, args){ 
 	_drill_MTE_pluginCommand.call(this, command, args);
-	
-	if (command === ">鼠标触发")  {
+	if( command === ">鼠标触发" ){
+		
 		if( args.length == 10 ){
 			var temp1 = String(args[1]);
 			var temp2 = String(args[3]);
@@ -286,9 +287,9 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var temp1 = String(args[1]);
 			var temp2 = String(args[3]);
 			var type = String(args[5]);
-			if(temp1 == "去除"){
+			if( temp1 == "去除" ){
 				var obj = {};
-				if(temp2 == "本事件"){
+				if( temp2 == "本事件" ){
 					obj._event_id = this._eventId;
 				}else{
 					obj._event_id = Number(temp2);
@@ -306,16 +307,16 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 // * 贴图初始化
 //==============================
 var _drill_MTE_initMembers = Game_Event.prototype.initMembers;
-Game_Event.prototype.initMembers = function() {
+Game_Event.prototype.initMembers = function(){ 
 	_drill_MTE_initMembers.call(this);
 	this._drill_MTE_isFirstBirth = true;
 };
 var _drill_MTE_setCharacter = Sprite_Character.prototype.setCharacter;
-Sprite_Character.prototype.setCharacter = function(character) {		//图像改变，范围就改变
+Sprite_Character.prototype.setCharacter = function(character){ 		//图像改变，范围就改变
 	_drill_MTE_setCharacter.call(this,character);
     this.drill_MTE_setupTrigger();
 };
-Sprite_Character.prototype.drill_MTE_setupTrigger = function() {
+Sprite_Character.prototype.drill_MTE_setupTrigger = function(){ 
 	if( this._character && this._character instanceof Game_Event ){
 		var ch = this._character;
 		
@@ -335,14 +336,14 @@ Sprite_Character.prototype.drill_MTE_setupTrigger = function() {
 //==============================
 // * 读取注释
 //==============================
-Game_Event.prototype.drill_MTE_readPage = function( page_list ) {	
-	page_list.forEach( function(l) {
-		if (l.code === 108) {
+Game_Event.prototype.drill_MTE_readPage = function( page_list ){
+	page_list.forEach( function(l){
+		if( l.code === 108 ){
 			var args = l.parameters[0].split(' ');
 			var command = args.shift();
-			if (command == "=>鼠标触发"){	//=>鼠标触发 : 悬停 : 触发独立开关 : A
-				if(args.length >= 6){
-					if(args[1]){ var type = String(args[1]); }
+			if( command == "=>鼠标触发" ){	//=>鼠标触发 : 悬停 : 触发独立开关 : A
+				if( args.length >= 6 ){
+					if(args[1]){ var type  = String(args[1]); }
 					if(args[3]){ var temp1 = String(args[3]); }
 					if(args[5]){ var temp2 = String(args[5]); }
 					if( temp1 == "触发独立开关" ){
@@ -384,7 +385,7 @@ Game_Temp.prototype.drill_MTE_isReflectionSprite = function( sprite ){
 // * 容器 - 初始化
 //==============================
 var _drill_MTE_temp_initialize = Game_Temp.prototype.initialize;
-Game_Temp.prototype.initialize = function() {	
+Game_Temp.prototype.initialize = function(){ 	
 	_drill_MTE_temp_initialize.call(this);
 	this._drill_MTE_sprites = [];				//缓冲池 - 鼠标贴图
 	this._drill_MTE_EU_cacheSprites = {};		//缓冲池 - 一体化贴图集合
@@ -394,7 +395,7 @@ Game_Temp.prototype.initialize = function() {
 // * 容器 - 切换地图时
 //==============================
 var _drill_MTE_gmap_setup = Game_Map.prototype.setup;
-Game_Map.prototype.setup = function(mapId) {
+Game_Map.prototype.setup = function( mapId ){
 	$gameSystem._drill_MTE_data = [];				//缓冲池 - 鼠标数据
 	$gameTemp._drill_MTE_sprites = [];				//缓冲池 - 鼠标贴图
 	$gameTemp._drill_MTE_EU_cacheSprites = {};		//缓冲池 - 一体化贴图集合
@@ -406,7 +407,7 @@ Game_Map.prototype.setup = function(mapId) {
 // * 容器 - 切换贴图时（菜单界面刷新）
 //==============================
 var _drill_MTE_smap_createCharacters = Spriteset_Map.prototype.createCharacters;
-Spriteset_Map.prototype.createCharacters = function() {
+Spriteset_Map.prototype.createCharacters = function(){ 
 	for( var i = 0; i < $gameSystem._drill_MTE_data.length; i++ ){
 		$gameTemp._drill_MTE_sprites[i] = null;
 	}
@@ -418,14 +419,14 @@ Spriteset_Map.prototype.createCharacters = function() {
 // * 存储容器 - 初始化
 //==============================
 var _drill_MTE_sys_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function() {	
+Game_System.prototype.initialize = function(){ 	
 	_drill_MTE_sys_initialize.call(this);
 	this._drill_MTE_data = [];						//缓冲池 - 鼠标数据
 }
 //==============================
 // * 存储容器 - 添加
 //==============================
-Game_System.prototype.drill_MTE_pushData = function(data) {	
+Game_System.prototype.drill_MTE_pushData = function(data){ 	
 	for(var i=0; i< this._drill_MTE_data.length; i++){	//重复的不插入
 		var temp_data = this._drill_MTE_data[i];
 		if( temp_data._event_id == data._event_id &&
@@ -440,7 +441,7 @@ Game_System.prototype.drill_MTE_pushData = function(data) {
 //==============================
 // * 存储容器 - 去除
 //==============================
-Game_System.prototype.drill_MTE_removeData = function(data) {	
+Game_System.prototype.drill_MTE_removeData = function(data){ 	
 
 	for(var i=this._drill_MTE_data.length-1; i>=0; i--){
 		var temp_data = this._drill_MTE_data[i];
@@ -463,7 +464,7 @@ Game_System.prototype.drill_MTE_removeData = function(data) {
 // * 帧刷新
 //==============================
 var _drill_MTE_smap_update = Scene_Map.prototype.update;
-Scene_Map.prototype.update = function() {	
+Scene_Map.prototype.update = function(){ 	
 	_drill_MTE_smap_update.call(this);
 	if( this.isActive() ){
 		this.drill_MTE_refreshArray();
@@ -474,7 +475,7 @@ Scene_Map.prototype.update = function() {
 //==============================
 // * 帧刷新 - 容器触发集合
 //==============================
-Scene_Map.prototype.drill_MTE_refreshArray = function() {
+Scene_Map.prototype.drill_MTE_refreshArray = function(){ 
 	//	$gameSystem._drill_MTE_data：动态变化的触发条件
 	//	this._spriteset._characterSprites：只增不减的数组（这个数组其实一开始就不应该在每帧里面遍历）
 	
@@ -500,7 +501,7 @@ Scene_Map.prototype.drill_MTE_refreshArray = function() {
 //==============================
 // * 帧刷新 - 鼠标触发
 //==============================
-Scene_Map.prototype.drill_MTE_updateTrigger = function() {	
+Scene_Map.prototype.drill_MTE_updateTrigger = function(){ 	
 	if( DrillUp.g_MTE_remainTrigger == false && ($gameMessage.isBusy() || this.isBusy()) ){
 		return;
 	}
@@ -510,7 +511,7 @@ Scene_Map.prototype.drill_MTE_updateTrigger = function() {
 		var temp_data = $gameSystem._drill_MTE_data[i];
 		if( this.drill_MTE_isBitmapReady(temp_sprite) ){
 			
-			// >鼠标ON触发
+			// > 鼠标ON触发
 			if( this.drill_MTE_isOnMouse( temp_data._type, temp_sprite ) ){
 				var key = [ $gameMap._mapId, temp_data._event_id, temp_data._switch ];
 				if( $gameSelfSwitches.value(key) !== true){
@@ -519,7 +520,7 @@ Scene_Map.prototype.drill_MTE_updateTrigger = function() {
 				}
 			}
 			
-			// >鼠标OFF触发
+			// > 鼠标OFF触发
 			if( this.drill_MTE_isOnOFFMouse( temp_data._type, temp_sprite ) ){
 				var key = [ $gameMap._mapId, temp_data._event_id, temp_data._switch ];
 				if( $gameSelfSwitches.value(key) !== false){
@@ -535,33 +536,33 @@ Scene_Map.prototype.drill_MTE_updateTrigger = function() {
 //==============================
 // * 判定 - 鼠标ON触发
 //==============================
-Scene_Map.prototype.drill_MTE_isOnMouse = function( type, sprite ) {
-	if ( type == "左键按下[持续]" ){
-		if ( TouchInput.drill_isLeftPressed() && this.drill_MTE_isOnMouseHover(sprite) ) {return true};
+Scene_Map.prototype.drill_MTE_isOnMouse = function( type, sprite ){ 
+	if( type == "左键按下[持续]" ){
+		if( TouchInput.drill_isLeftPressed() && this.drill_MTE_isOnMouseHover(sprite) ){ return true};
 	}else if( type == "左键按下[一帧]" ){
-		if ( TouchInput.drill_isLeftTriggerd() && this.drill_MTE_isOnMouseHover(sprite) ) {return true};
+		if( TouchInput.drill_isLeftTriggerd() && this.drill_MTE_isOnMouseHover(sprite) ){ return true};
 	}else if( type == "左键释放[一帧]" ){
-		if ( TouchInput.drill_isLeftReleased() && this.drill_MTE_isOnMouseHover(sprite) ) {return true};
+		if( TouchInput.drill_isLeftReleased() && this.drill_MTE_isOnMouseHover(sprite) ){ return true};
 	}else if( type == "左键双击[一帧]" ){
-		if ( TouchInput.drill_isLeftDoubled() && this.drill_MTE_isOnMouseHover(sprite) ) {return true};
+		if( TouchInput.drill_isLeftDoubled() && this.drill_MTE_isOnMouseHover(sprite) ){ return true};
 		
 	}else if( type == "右键按下[持续]" ){
-		if ( TouchInput.drill_isRightPressed() && this.drill_MTE_isOnMouseHover(sprite) ) {return true};
+		if( TouchInput.drill_isRightPressed() && this.drill_MTE_isOnMouseHover(sprite) ){ return true};
 	}else if( type == "右键按下[一帧]" ){
-		if ( TouchInput.drill_isRightTriggerd() && this.drill_MTE_isOnMouseHover(sprite) ) {return true};
+		if( TouchInput.drill_isRightTriggerd() && this.drill_MTE_isOnMouseHover(sprite) ){ return true};
 	}else if( type == "右键释放[一帧]" ){
-		if ( TouchInput.drill_isRightReleased() && this.drill_MTE_isOnMouseHover(sprite) ) {return true};
+		if( TouchInput.drill_isRightReleased() && this.drill_MTE_isOnMouseHover(sprite) ){ return true};
 	}else if( type == "右键双击[一帧]" ){
-		if ( TouchInput.drill_isRightDoubled() && this.drill_MTE_isOnMouseHover(sprite) ) {return true};
+		if( TouchInput.drill_isRightDoubled() && this.drill_MTE_isOnMouseHover(sprite) ){ return true};
 		
 	}else if( type == "滚轮按下[持续]" ){
-		if ( TouchInput.drill_isMiddlePressed() && this.drill_MTE_isOnMouseHover(sprite) ) {return true};
+		if( TouchInput.drill_isMiddlePressed() && this.drill_MTE_isOnMouseHover(sprite) ){ return true};
 	}else if( type == "滚轮按下[一帧]" ){
-		if ( TouchInput.drill_isMiddleTriggerd() && this.drill_MTE_isOnMouseHover(sprite) ) {return true};
+		if( TouchInput.drill_isMiddleTriggerd() && this.drill_MTE_isOnMouseHover(sprite) ){ return true};
 	}else if( type == "滚轮释放[一帧]" ){
-		if ( TouchInput.drill_isMiddleReleased() && this.drill_MTE_isOnMouseHover(sprite) ) {return true};
+		if( TouchInput.drill_isMiddleReleased() && this.drill_MTE_isOnMouseHover(sprite) ){ return true};
 	}else if( type == "滚轮双击[一帧]" ){
-		if ( TouchInput.drill_isMiddleDoubled() && this.drill_MTE_isOnMouseHover(sprite) ) {return true};
+		if( TouchInput.drill_isMiddleDoubled() && this.drill_MTE_isOnMouseHover(sprite) ){ return true};
 		
 	}else if( type == "滚轮上滚" ){
 		if( TouchInput.drill_isWheelUp() && this.drill_MTE_isOnMouseHover(sprite) ){return true;}
@@ -577,24 +578,24 @@ Scene_Map.prototype.drill_MTE_isOnMouse = function( type, sprite ) {
 //==============================
 // * 判定 - 鼠标OFF触发
 //==============================
-Scene_Map.prototype.drill_MTE_isOnOFFMouse = function( type, sprite ) {
+Scene_Map.prototype.drill_MTE_isOnOFFMouse = function( type, sprite ){ 
 	if( type == "任何位置左键释放[一帧]" ){
-		if ( TouchInput.drill_isLeftReleased() ) {return true};
+		if( TouchInput.drill_isLeftReleased() ){ return true; }
 	}else if( type == "任何位置右键释放[一帧]" ){
-		if ( TouchInput.drill_isRightReleased() ) {return true};
+		if( TouchInput.drill_isRightReleased() ){ return true; }
 	}else if( type == "任何位置滚轮释放[一帧]" ){
-		if ( TouchInput.drill_isMiddleReleased() ) {return true};
+		if( TouchInput.drill_isMiddleReleased() ){ return true; }
 	}else if( type == "悬停且离开时OFF" ){
-		if( !this.drill_MTE_isOnMouseHover(sprite) ){return true;}
+		if( !this.drill_MTE_isOnMouseHover(sprite) ){return true; }
 	}else if( type == "不在悬停区域时" ){
-		if( !this.drill_MTE_isOnMouseHover(sprite) ){return true;}
+		if( !this.drill_MTE_isOnMouseHover(sprite) ){return true; }
 	}
 	return false;	
 }
 //==============================
 // * 判定 - 鼠标触发所处范围
 //==============================
-Scene_Map.prototype.drill_MTE_isOnMouseHover = function( sprite ) {
+Scene_Map.prototype.drill_MTE_isOnMouseHover = function( sprite ){ 
 	if( this.drill_MTE_isUnificationSprite(sprite) ){
 		//一体化事件
 		var sprite_list = this.drill_MTE_getUnificationSprites( sprite );
@@ -607,17 +608,17 @@ Scene_Map.prototype.drill_MTE_isOnMouseHover = function( sprite ) {
 //==============================
 // * 优化 - 独立开关赋值时不刷新地图
 //==============================
-Game_SelfSwitches.prototype.drill_setValueWithOutChange = function(key, value) {
-    if (value) {
+Game_SelfSwitches.prototype.drill_setValueWithOutChange = function( key, value ){ 
+    if( value ){ 
         this._data[key] = true;
-    } else {
+    }else{
         delete this._data[key];
     }
 };
 //==============================
 // * 一体化 - 判断是否为一体化事件
 //==============================
-Scene_Map.prototype.drill_MTE_isUnificationSprite = function( sprite ) {
+Scene_Map.prototype.drill_MTE_isUnificationSprite = function( sprite ){ 
 	if( !Imported.Drill_EventUnification ){ return false;}
 	if( !sprite._character ){ return false;}
 	if( !sprite._character.drill_EU_hasTriggerTag() ){ return false;}
@@ -627,7 +628,7 @@ Scene_Map.prototype.drill_MTE_isUnificationSprite = function( sprite ) {
 //==============================
 // * 一体化 - 根据单个贴图获取到关联的贴图(乱序)
 //==============================
-Scene_Map.prototype.drill_MTE_getUnificationSprites = function( sprite ) {
+Scene_Map.prototype.drill_MTE_getUnificationSprites = function( sprite ){ 
 	var tag = sprite._character._drill_EU.trigger;
 	var sprite_list = [];
 	var sprites = this.drill_MTE_getSpritesByTag(tag);	//触发时，所有相同标签的事件同时触发
@@ -637,7 +638,7 @@ Scene_Map.prototype.drill_MTE_getUnificationSprites = function( sprite ) {
 //==============================
 // * 一体化 - 根据标签获取到对应贴图(乱序)
 //==============================
-Scene_Map.prototype.drill_MTE_getSpritesByTag = function( t_key ) {
+Scene_Map.prototype.drill_MTE_getSpritesByTag = function( t_key ){ 
 	var ev_list = $gameTemp.drill_EU_getEventsByTriggerTag( t_key );
 	if(	$gameTemp._drill_MTE_EU_cacheSprites[t_key] &&
 		$gameTemp._drill_MTE_EU_cacheListener[t_key] === ev_list.length ){
@@ -661,38 +662,40 @@ Scene_Map.prototype.drill_MTE_getSpritesByTag = function( t_key ) {
 //==============================
 // * 贴图判定 - 是否准备完毕
 //==============================
-Scene_Map.prototype.drill_MTE_isBitmapReady = function( sprite ) {
-	 if (!sprite ){ return false };
-	 if (!sprite.bitmap ){ return false };
-	 if (!sprite.bitmap.isReady() ){ return false };
-	 if (sprite.visible === false) {return false};
-	 if (sprite.opacity === 0) {return false};
-	 return true;	
+Scene_Map.prototype.drill_MTE_isBitmapReady = function( sprite ){ 
+	if( !sprite ){ return false };
+	if( !sprite.bitmap ){ return false };
+	if( !sprite.bitmap.isReady() ){ return false };
+	if( sprite.visible === false ){ return false};
+	if( sprite.opacity === 0 ){ return false};
+	return true;	
 }
 //==============================
 // * 贴图判定 - 是否处在范围
 //==============================
-Scene_Map.prototype.drill_MTE_isOnRange = function( sprite ) {
-	var cw = sprite.patternWidth() ;
-	var ch = sprite.patternHeight() ;
-	var cx = sprite.x ;
-	var cy = sprite.y ;
+Scene_Map.prototype.drill_MTE_isOnRange = function( sprite ){ 
+	var cw = sprite.patternWidth();
+	var ch = sprite.patternHeight();
+	var cx = sprite.x;
+	var cy = sprite.y;
 	var _x = _drill_mouse_x;
 	var _y = _drill_mouse_y;
-	if( Imported.Drill_LayerCamera ){
-		_x = $gameSystem.drill_LCa_cameraToMapX( _drill_mouse_x );
-		_y = $gameSystem.drill_LCa_cameraToMapY( _drill_mouse_y );
+	if( Imported.Drill_LayerCamera ){		// 【地图 - 活动地图镜头】获取鼠标落点位置
+											//	（这是事件的层级，事件处于 下层、中层、上层）
+		var mouse_pos = $gameSystem._drill_LCa_controller.drill_LCa_getMousePos_OnChildren();
+		_x = mouse_pos.x;
+		_y = mouse_pos.y;
 	}
-	if ( _x <  cx + 0 - cw*sprite.anchor.x ) {return false};
-	if ( _x >= cx + cw - cw*sprite.anchor.x ) {return false};
-	if ( _y <  cy + 0 - ch*sprite.anchor.y ) {return false};
-	if ( _y >= cy + ch - ch*sprite.anchor.y ) {return false};
+	if( _x <  cx + 0  - cw*sprite.anchor.x ){ return false };
+	if( _x >= cx + cw - cw*sprite.anchor.x ){ return false };
+	if( _y <  cy + 0  - ch*sprite.anchor.y ){ return false };
+	if( _y >= cy + ch - ch*sprite.anchor.y ){ return false };
 	return true;	
 };
 //==============================
 // * 贴图判定 - 是否处在范围集合中
 //==============================
-Scene_Map.prototype.drill_MTE_isOnRangeList = function( sprite_list ) {
+Scene_Map.prototype.drill_MTE_isOnRangeList = function( sprite_list ){ 
 	for(var i=0; i < sprite_list.length; i++){
 		if( this.drill_MTE_isOnRange( sprite_list[i] ) ){ return true; }
 	}

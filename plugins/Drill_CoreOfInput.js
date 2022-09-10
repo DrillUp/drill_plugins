@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.5]        系统 - 输入设备核心
+ * @plugindesc [v1.6]        系统 - 输入设备核心
  * @author Drill_up、汗先生
  * 
  * 
@@ -35,30 +35,41 @@
  * 1.插件的作用域：菜单界面、地图界面、战斗界面。
  *   主要改进游戏的输入设备控制，但仅限drill插件，不干扰其他插件。
  * 2.你需要了解基本的按键定义，去看看 "1.系统 > 关于输入设备核心.docx"。
- * 鼠标与触屏:
- *   (1.鼠标有三个键位，左键、中键、右键。而触屏比较特殊，只有一个键位，开
- *      启触屏联动可能会影响多种鼠标键位操作，需要仔细考虑。
- *      按下和释放的联动最好同时为true或false，不然逻辑会乱。
- *   (2.注意，触屏联动不是针对所有rmmv的触屏功能，而是仅限【drill插件】有效。
- *      只有禁用鼠标右键菜单和双指菜单，会影响到rmmv地图界面进入菜单的功能。
  * 键盘与手柄:
  *   (1.物理按键：指真实世界键盘上/手柄上存在的按键，比如z,x,c,v键等。
  *      逻辑按键：指游戏中用于划分特定功能的按键，比如确定键,取消键,跳跃键等。
+ * 鼠标与触屏:
+ *   (1.鼠标有三个键位，左键、中键、右键。鼠标中键与鼠标滚轮是一样的。
+ *      触屏比较特殊，只有一个键位，需要开启触屏联动来控制多种鼠标键位操作。
+ *      按下和释放的联动最好同时为true或false，不然逻辑会乱。
+ *   (2.注意，触屏联动不是针对所有插件的触屏功能，而是仅限【drill插件】有效。
+ *      只有禁用鼠标右键菜单和双指菜单，会影响到默认地图界面进入菜单的功能。
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定
  * 你可以通过插件指令控制部分配置。
  * 
- * 插件指令：>输入设备核心 : 地图鼠标左键移动 : 开启
- * 插件指令：>输入设备核心 : 地图鼠标左键移动 : 关闭
- * 插件指令：>输入设备核心 : 鼠标右键菜单 : 开启
- * 插件指令：>输入设备核心 : 鼠标右键菜单 : 关闭
- * 插件指令：>输入设备核心 : 触屏双指菜单 : 开启
- * 插件指令：>输入设备核心 : 触屏双指菜单 : 关闭
+ * 插件指令：>输入设备核心 : 战斗界面-键盘 : 开启
+ * 插件指令：>输入设备核心 : 战斗界面-手柄 : 开启
+ * 插件指令：>输入设备核心 : 战斗界面-鼠标 : 开启
+ * 插件指令：>输入设备核心 : 战斗界面-触屏 : 开启
  * 
- * 1.插件指令配置执行后，永久有效，且能够被存储到存档中。
- *   关闭 与 禁用 的意思是一样的。
- * 2.注意，关闭后，一定要设计清楚什么时候恢复开启状态，
+ * 插件指令：>输入设备核心 : 地图界面-键盘 : 开启
+ * 插件指令：>输入设备核心 : 地图界面-手柄 : 开启
+ * 插件指令：>输入设备核心 : 地图界面-鼠标 : 开启
+ * 插件指令：>输入设备核心 : 地图界面-触屏 : 开启
+ * 插件指令：>输入设备核心 : 地图界面-鼠标左键移动 : 开启
+ * 插件指令：>输入设备核心 : 地图界面-鼠标右键菜单 : 开启
+ * 插件指令：>输入设备核心 : 地图界面-触屏双指菜单 : 开启
+ * 
+ * 插件指令：>输入设备核心 : 菜单界面-键盘 : 开启
+ * 插件指令：>输入设备核心 : 菜单界面-手柄 : 开启
+ * 插件指令：>输入设备核心 : 菜单界面-鼠标 : 开启
+ * 插件指令：>输入设备核心 : 菜单界面-触屏 : 开启
+ * 
+ * 1.上述插件指令可以设置·"开启"或"关闭"。
+ * 2.插件指令配置执行后，永久有效，且能够被存储到存档中。
+ * 3.注意，部分功能关闭后，要注意考虑什么时候恢复开启状态，
  *   如果没有恢复，会造成玩家在游戏中不能操作，属于恶性bug。
  * 
  * -----------------------------------------------------------------------------
@@ -98,32 +109,166 @@
  * 添加了控制 鼠标左键目的地移动 的功能。
  * [v1.5]
  * 修复了持续按键时，按键暂停的细节bug。
+ * [v1.6]
+ * 添加了开启/关闭键盘、手柄、鼠标、触屏的功能。
  * 
  * 
+ *
+ * @param ---默认开关---
+ * @default 
+ *
+ * @param 开关-战斗界面-键盘
+ * @parent ---默认开关---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭。
+ * @default true
+ *
+ * @param 开关-战斗界面-手柄
+ * @parent ---默认开关---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭。
+ * @default true
+ *
+ * @param 开关-战斗界面-鼠标
+ * @parent ---默认开关---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭。
+ * @default true
+ *
+ * @param 开关-战斗界面-触屏
+ * @parent ---默认开关---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭。
+ * @default true
+ * 
+ *
+ * @param 开关-地图界面-键盘
+ * @parent ---默认开关---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭。
+ * @default true
+ *
+ * @param 开关-地图界面-手柄
+ * @parent ---默认开关---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭。
+ * @default true
+ *
+ * @param 开关-地图界面-鼠标
+ * @parent ---默认开关---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭。
+ * @default true
+ *
+ * @param 开关-地图界面-触屏
+ * @parent ---默认开关---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭。
+ * @default true
+ *
+ * @param 开关-地图界面-鼠标左键移动
+ * @parent ---默认开关---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭。若设置关闭，则地图界面中鼠标左键移动的功能会被禁用。
+ * @default true
+ *
+ * @param 开关-地图界面-鼠标右键菜单
+ * @parent ---默认开关---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭。若设置关闭，则地图界面中鼠标右键直接进入菜单的功能会被禁用。
+ * @default false
+ *
+ * @param 开关-地图界面-触屏双指菜单
+ * @parent ---默认开关---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭。若设置关闭，则地图界面中触屏按下两个手指后进入菜单的功能会被禁用。
+ * @default false
+ * 
+ *
+ * @param 开关-菜单界面-键盘
+ * @parent ---默认开关---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭。
+ * @default true
+ *
+ * @param 开关-菜单界面-手柄
+ * @parent ---默认开关---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭。
+ * @default true
+ *
+ * @param 开关-菜单界面-鼠标
+ * @parent ---默认开关---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭。
+ * @default true
+ *
+ * @param 开关-菜单界面-触屏
+ * @parent ---默认开关---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭。
+ * @default true
+ * 
+ *
+ * @param ---双击判定---
+ * @default 
  * 
  * @param 键盘双击判定时长
+ * @parent ---双击判定---
  * @type number
  * @min 4
  * @desc drill插件中，按下第一次键盘按键后，在设置的帧数内再按一次，被判定为双击。(1秒60帧)
  * @default 12
  * 
  * @param 手柄双击判定时长
+ * @parent ---双击判定---
  * @type number
  * @min 4
  * @desc drill插件中，按下第一次手柄按键后，在设置的帧数内再按一次，被判定为双击。(1秒60帧)
  * @default 12
  * 
  * @param 鼠标双击判定时长
+ * @parent ---双击判定---
  * @type number
  * @min 4
  * @desc drill插件中，按下第一次鼠标按键后，在设置的帧数内再按一次，被判定为双击。(1秒60帧)
  * @default 12
  *
- * @param ----触屏联动----
+ * @param ---触屏联动---
  * @default 
  * 
  * @param 触屏按下>>鼠标左键按下
- * @parent ----触屏联动----
+ * @parent ---触屏联动---
  * @type boolean
  * @on 开启
  * @off 关闭
@@ -131,7 +276,7 @@
  * @default false
  * 
  * @param 触屏按下>>鼠标中键按下
- * @parent ----触屏联动----
+ * @parent ---触屏联动---
  * @type boolean
  * @on 开启
  * @off 关闭
@@ -139,7 +284,7 @@
  * @default true
  * 
  * @param 触屏按下>>鼠标右键按下
- * @parent ----触屏联动----
+ * @parent ---触屏联动---
  * @type boolean
  * @on 开启
  * @off 关闭
@@ -147,7 +292,7 @@
  * @default true
  * 
  * @param 触屏释放>>鼠标左键释放
- * @parent ----触屏联动----
+ * @parent ---触屏联动---
  * @type boolean
  * @on 开启
  * @off 关闭
@@ -155,7 +300,7 @@
  * @default false
  * 
  * @param 触屏释放>>鼠标中键释放
- * @parent ----触屏联动----
+ * @parent ---触屏联动---
  * @type boolean
  * @on 开启
  * @off 关闭
@@ -163,41 +308,11 @@
  * @default true
  * 
  * @param 触屏释放>>鼠标右键释放
- * @parent ----触屏联动----
+ * @parent ---触屏联动---
  * @type boolean
  * @on 开启
  * @off 关闭
  * @desc 开启联动绑定后，触屏释放能触发 drill插件中 鼠标右键释放功能。
- * @default true
- *
- * @param ----地图----
- * @default 
- *
- * @param 是否禁用鼠标左键地图移动
- * @parent ----地图----
- * @type boolean
- * @on 禁用
- * @off 不操作
- * @desc true - 禁用，false - 不操作。地图界面中，鼠标左键移动的rmmv功能会被禁用。
- * @default false
- *
- * @param ----菜单----
- * @default 
- *
- * @param 是否禁用鼠标右键菜单
- * @parent ----菜单----
- * @type boolean
- * @on 禁用
- * @off 不操作
- * @desc true - 禁用，false - 不操作。地图界面中，鼠标右键直接进入菜单的rmmv功能会被禁用。
- * @default true
- *
- * @param 是否禁用触屏双指菜单
- * @parent ----菜单----
- * @type boolean
- * @on 禁用
- * @off 不操作
- * @desc true - 禁用，false - 不操作。地图界面中，触屏按下两个手指后进入菜单的rmmv功能会被禁用。
  * @default true
  *
  */
@@ -228,16 +343,27 @@
 //
 //		★大体框架与功能如下：
 //			输入设备核心：
-//				->鼠标按键
-//					->鼠标失去窗口焦点优化
-//				->手柄按键
-//				->键盘按键
-//				->触屏辅助联动
-//				->优化，手柄按键自动打盹
-//				->优化，键盘按键自动打盹
-//				->禁用设置
-//					->右键菜单
-//					->触屏双指菜单
+//				->默认开关
+//					->各界面开关
+//						->键盘
+//						->手柄
+//						->鼠标
+//						->触屏
+//					->特定设置
+//						->鼠标左键移动
+//						->鼠标右键菜单
+//						->触屏双指菜单
+//				->鼠标
+//					>左键
+//					>中键/滚轮
+//					>右键
+//					->鼠标失去窗口焦点
+//				->触屏
+//					->触屏联动
+//				->手柄
+//					->优化，手柄按键自动打盹
+//				->键盘
+//					->优化，键盘按键自动打盹
 //
 //		★必要注意事项：
 //			1.键盘/手柄按键自动打盹：键位触发后，如果超过一定时间，就认定为打盹。
@@ -269,6 +395,22 @@
 	
 	
 	/*-----------------杂项------------------*/
+	DrillUp.g_COI_battle_keyboard = String(DrillUp.parameters['开关-战斗界面-键盘'] || "true") === "true";
+	DrillUp.g_COI_battle_pad = String(DrillUp.parameters['开关-战斗界面-手柄'] || "true") === "true";
+	DrillUp.g_COI_battle_mouse = String(DrillUp.parameters['开关-战斗界面-鼠标'] || "true") === "true";
+	DrillUp.g_COI_battle_touchPad = String(DrillUp.parameters['开关-战斗界面-触屏'] || "true") === "true";
+	DrillUp.g_COI_map_keyboard = String(DrillUp.parameters['开关-地图界面-键盘'] || "true") === "true";
+	DrillUp.g_COI_map_pad = String(DrillUp.parameters['开关-地图界面-手柄'] || "true") === "true";
+	DrillUp.g_COI_map_mouse = String(DrillUp.parameters['开关-地图界面-鼠标'] || "true") === "true";
+	DrillUp.g_COI_map_touchPad = String(DrillUp.parameters['开关-地图界面-触屏'] || "true") === "true";
+	DrillUp.g_COI_map_mouseLeftMove = String(DrillUp.parameters['开关-地图界面-鼠标左键移动'] || "true") === "true";
+	DrillUp.g_COI_map_mouseRightMenu = String(DrillUp.parameters['开关-地图界面-鼠标右键菜单'] || "false") === "true";
+	DrillUp.g_COI_map_touchPadMenu = String(DrillUp.parameters['开关-地图界面-触屏双指菜单'] || "false") === "true";
+	DrillUp.g_COI_menu_keyboard = String(DrillUp.parameters['开关-菜单界面-键盘'] || "true") === "true";
+	DrillUp.g_COI_menu_pad = String(DrillUp.parameters['开关-菜单界面-手柄'] || "true") === "true";
+	DrillUp.g_COI_menu_mouse = String(DrillUp.parameters['开关-菜单界面-鼠标'] || "true") === "true";
+	DrillUp.g_COI_menu_touchPad = String(DrillUp.parameters['开关-菜单界面-触屏'] || "true") === "true";
+	
 	DrillUp.g_COI_mouse_judgeTime = Number(DrillUp.parameters['键盘双击判定时长'] || 12); 
 	DrillUp.g_COI_pads_judgeTime = Number(DrillUp.parameters['手柄双击判定时长'] || 12); 
 	DrillUp.g_COI_keys_judgeTime = Number(DrillUp.parameters['鼠标双击判定时长'] || 12); 
@@ -280,9 +422,6 @@
 	DrillUp.g_COI_touchPad_m_up = String(DrillUp.parameters['触屏释放>>鼠标中键释放'] || "true") === "true";
 	DrillUp.g_COI_touchPad_r_up = String(DrillUp.parameters['触屏释放>>鼠标右键释放'] || "true") === "true";
 	
-	DrillUp.g_COI_map_leftMouse = String(DrillUp.parameters['是否禁用鼠标左键地图移动'] || "false") === "true";
-	DrillUp.g_COI_menu_mouse = String(DrillUp.parameters['是否禁用鼠标右键菜单'] || "true") === "true";
-	DrillUp.g_COI_menu_touchPad = String(DrillUp.parameters['是否禁用触屏双指菜单'] || "true") === "true";
 
 
 //=============================================================================
@@ -294,93 +433,489 @@ Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	if( command === ">输入设备核心" ){
 		var type = String(args[1]);
 		var temp2 = String(args[3]);
-		if( type == "地图鼠标左键移动" ){
-			if( temp2 == "开启" || temp2 == "启用" ){ $gameSystem._drill_COI_map_leftMouse = false;  }
-			if( temp2 == "关闭" || temp2 == "禁用" ){ $gameSystem._drill_COI_map_leftMouse = true; }
-		}
-		if( type == "鼠标右键菜单" ){
-			if( temp2 == "开启" || temp2 == "启用" ){ $gameSystem._drill_COI_menu_mouse = false;  }
-			if( temp2 == "关闭" || temp2 == "禁用" ){ $gameSystem._drill_COI_menu_mouse = true; }
-		}
-		if( type == "触屏双指菜单" ){
-			if( temp2 == "开启" || temp2 == "启用" ){ $gameSystem._drill_COI_menu_touchPad = false;  }
-			if( temp2 == "关闭" || temp2 == "禁用" ){ $gameSystem._drill_COI_menu_touchPad = true; }
-		}
-	}
-}
-
-
-//=============================================================================
-// ** 存储数据变量初始化
-//=============================================================================
-var _drill_COI_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function(){
-	_drill_COI_initialize.call(this);
-	this._drill_COI_map_leftMouse = DrillUp.g_COI_map_leftMouse;	//禁用 鼠标右键菜单
-	this._drill_COI_menu_mouse = DrillUp.g_COI_menu_mouse;			//禁用 鼠标右键菜单
-	this._drill_COI_menu_touchPad = DrillUp.g_COI_menu_touchPad;	//禁用 触屏双指菜单
-}
-
-
-//=============================================================================
-// ** 禁用设置
-//=============================================================================
-//==============================
-// * 禁用 - 地图鼠标左键移动
-//==============================
-var _drill_COI_processMapTouch = Scene_Map.prototype.processMapTouch;
-Scene_Map.prototype.processMapTouch = function(){	
-	if( $gameSystem && $gameSystem._drill_COI_map_leftMouse == true ){ return; }
-	_drill_COI_processMapTouch.call(this);
-};
-//==============================
-// * 禁用 - 右键菜单（地图）
-//==============================
-var _drill_COI_onRightButtonDown = TouchInput._onRightButtonDown;
-TouchInput._onRightButtonDown = function( event ){
-	if( ($gameSystem && $gameSystem._drill_COI_menu_mouse == true) && 
-		SceneManager._scene.constructor.name === "Scene_Map" ){
 		
-	}else{
-		_drill_COI_onRightButtonDown.call(this,event);
+		if( type == "战斗界面-键盘" ){
+			if( temp2 == "开启" || temp2 == "启用" ){ $gameSystem.drill_COI_Battle_setKeyboard( true ); }
+			if( temp2 == "关闭" || temp2 == "禁用" ){ $gameSystem.drill_COI_Battle_setKeyboard( false );  }
+		}
+		if( type == "战斗界面-手柄" ){
+			if( temp2 == "开启" || temp2 == "启用" ){ $gameSystem.drill_COI_Battle_setPad( true ); }
+			if( temp2 == "关闭" || temp2 == "禁用" ){ $gameSystem.drill_COI_Battle_setPad( false ); }
+		}
+		if( type == "战斗界面-鼠标" ){
+			if( temp2 == "开启" || temp2 == "启用" ){ $gameSystem.drill_COI_Battle_setMouse( true ); }
+			if( temp2 == "关闭" || temp2 == "禁用" ){ $gameSystem.drill_COI_Battle_setMouse( false ); }
+		}
+		if( type == "战斗界面-触屏" ){
+			if( temp2 == "开启" || temp2 == "启用" ){ $gameSystem.drill_COI_Battle_setTouchPad( true ); }
+			if( temp2 == "关闭" || temp2 == "禁用" ){ $gameSystem.drill_COI_Battle_setTouchPad( false ); }
+		}
+		
+		if( type == "地图界面-键盘" ){
+			if( temp2 == "开启" || temp2 == "启用" ){ $gameSystem.drill_COI_Map_setKeyboard( true ); }
+			if( temp2 == "关闭" || temp2 == "禁用" ){ $gameSystem.drill_COI_Map_setKeyboard( false ); }
+		}
+		if( type == "地图界面-手柄" ){
+			if( temp2 == "开启" || temp2 == "启用" ){ $gameSystem.drill_COI_Map_setPad( true ); }
+			if( temp2 == "关闭" || temp2 == "禁用" ){ $gameSystem.drill_COI_Map_setPad( false ); }
+		}
+		if( type == "地图界面-鼠标" ){
+			if( temp2 == "开启" || temp2 == "启用" ){ $gameSystem.drill_COI_Map_setMouse( true ); }
+			if( temp2 == "关闭" || temp2 == "禁用" ){ $gameSystem.drill_COI_Map_setMouse( false ); }
+		}
+		if( type == "地图界面-触屏" ){
+			if( temp2 == "开启" || temp2 == "启用" ){ $gameSystem.drill_COI_Map_setTouchPad( true ); }
+			if( temp2 == "关闭" || temp2 == "禁用" ){ $gameSystem.drill_COI_Map_setTouchPad( false ); }
+		}
+		if( type == "地图界面-鼠标左键移动" || type == "地图鼠标左键移动" ){
+			if( temp2 == "开启" || temp2 == "启用" ){ $gameSystem.drill_COI_Map_setMouseLeftMove( true ); }
+			if( temp2 == "关闭" || temp2 == "禁用" ){ $gameSystem.drill_COI_Map_setMouseLeftMove( false ); }
+		}
+		if( type == "地图界面-鼠标右键菜单" || type == "鼠标右键菜单" ){
+			if( temp2 == "开启" || temp2 == "启用" ){ $gameSystem.drill_COI_Map_setMouseRightMenu( true ); }
+			if( temp2 == "关闭" || temp2 == "禁用" ){ $gameSystem.drill_COI_Map_setMouseRightMenu( false ); }
+		}
+		if( type == "地图界面-触屏双指菜单" || type == "触屏双指菜单" ){
+			if( temp2 == "开启" || temp2 == "启用" ){ $gameSystem.drill_COI_Map_setTouchPadMenu( true ); }
+			if( temp2 == "关闭" || temp2 == "禁用" ){ $gameSystem.drill_COI_Map_setTouchPadMenu( false ); }
+		}
+		
+		if( type == "菜单界面-键盘" ){
+			if( temp2 == "开启" || temp2 == "启用" ){ $gameSystem.drill_COI_Menu_setKeyboard( true ); }
+			if( temp2 == "关闭" || temp2 == "禁用" ){ $gameSystem.drill_COI_Menu_setKeyboard( false ); }
+		}
+		if( type == "菜单界面-手柄" ){
+			if( temp2 == "开启" || temp2 == "启用" ){ $gameSystem.drill_COI_Menu_setPad( true ); }
+			if( temp2 == "关闭" || temp2 == "禁用" ){ $gameSystem.drill_COI_Menu_setPad( false ); }
+		}
+		if( type == "菜单界面-鼠标" ){
+			if( temp2 == "开启" || temp2 == "启用" ){ $gameSystem.drill_COI_Menu_setMouse( true ); }
+			if( temp2 == "关闭" || temp2 == "禁用" ){ $gameSystem.drill_COI_Menu_setMouse( false ); }
+		}
+		if( type == "菜单界面-触屏" ){
+			if( temp2 == "开启" || temp2 == "启用" ){ $gameSystem.drill_COI_Menu_setTouchPad( true ); }
+			if( temp2 == "关闭" || temp2 == "禁用" ){ $gameSystem.drill_COI_Menu_setTouchPad( false ); }
+		}
 	}
+}
+
+
+
+
+//#############################################################################
+// ** 【标准模块】默认开关
+//#############################################################################
+//##############################
+// * 默认开关 - 战斗界面 - 键盘【标准函数】
+//				
+//			参数：	> enable 布尔
+//			返回：	> 无
+//##############################
+Game_System.prototype.drill_COI_Battle_setKeyboard = function( enable ){
+	this._drill_COI_battle_keyboard = enable;
+};
+//##############################
+// * 默认开关 - 战斗界面 - 手柄【标准函数】
+//				
+//			参数：	> enable 布尔
+//			返回：	> 无
+//##############################
+Game_System.prototype.drill_COI_Battle_setPad = function( enable ){
+	this._drill_COI_battle_pad = enable;
+};
+//##############################
+// * 默认开关 - 战斗界面 - 鼠标【标准函数】
+//				
+//			参数：	> enable 布尔
+//			返回：	> 无
+//##############################
+Game_System.prototype.drill_COI_Battle_setMouse = function( enable ){
+	this._drill_COI_battle_mouse = enable;
+};
+//##############################
+// * 默认开关 - 战斗界面 - 触屏【标准函数】
+//				
+//			参数：	> enable 布尔
+//			返回：	> 无
+//##############################
+Game_System.prototype.drill_COI_Battle_setTouchPad = function( enable ){
+	this._drill_COI_battle_touchPad = enable;
+};
+
+//##############################
+// * 默认开关 - 地图界面 - 键盘【标准函数】
+//				
+//			参数：	> enable 布尔
+//			返回：	> 无
+//##############################
+Game_System.prototype.drill_COI_Map_setKeyboard = function( enable ){
+	this._drill_COI_map_keyboard = enable;
+};
+//##############################
+// * 默认开关 - 地图界面 - 手柄【标准函数】
+//				
+//			参数：	> enable 布尔
+//			返回：	> 无
+//##############################
+Game_System.prototype.drill_COI_Map_setPad = function( enable ){
+	this._drill_COI_map_pad = enable;
+};
+//##############################
+// * 默认开关 - 地图界面 - 鼠标【标准函数】
+//				
+//			参数：	> enable 布尔
+//			返回：	> 无
+//##############################
+Game_System.prototype.drill_COI_Map_setMouse = function( enable ){
+	this._drill_COI_map_mouse = enable;
+};
+//##############################
+// * 默认开关 - 地图界面 - 触屏【标准函数】
+//				
+//			参数：	> enable 布尔
+//			返回：	> 无
+//##############################
+Game_System.prototype.drill_COI_Map_setTouchPad = function( enable ){
+	this._drill_COI_map_touchPad = enable;
+};
+//##############################
+// * 默认开关 - 地图界面 - 鼠标左键移动【标准函数】
+//				
+//			参数：	> enable 布尔
+//			返回：	> 无
+//##############################
+Game_System.prototype.drill_COI_Map_setMouseLeftMove = function( enable ){
+	this._drill_COI_map_mouseLeftMove = enable;
+};
+//##############################
+// * 默认开关 - 地图界面 - 鼠标右键菜单【标准函数】
+//				
+//			参数：	> enable 布尔
+//			返回：	> 无
+//##############################
+Game_System.prototype.drill_COI_Map_setMouseRightMenu = function( enable ){
+	this._drill_COI_map_mouseRightMenu = enable;
+};
+//##############################
+// * 默认开关 - 地图界面 - 触屏双指菜单【标准函数】
+//				
+//			参数：	> enable 布尔
+//			返回：	> 无
+//##############################
+Game_System.prototype.drill_COI_Map_setTouchPadMenu = function( enable ){
+	this._drill_COI_map_touchPadMenu = enable;
+};
+
+//##############################
+// * 默认开关 - 菜单界面 - 键盘【标准函数】
+//				
+//			参数：	> enable 布尔
+//			返回：	> 无
+//##############################
+Game_System.prototype.drill_COI_Menu_setKeyboard = function( enable ){
+	this._drill_COI_menu_keyboard = enable;
+};
+//##############################
+// * 默认开关 - 菜单界面 - 手柄【标准函数】
+//				
+//			参数：	> enable 布尔
+//			返回：	> 无
+//##############################
+Game_System.prototype.drill_COI_Menu_setPad = function( enable ){
+	this._drill_COI_menu_pad = enable;
+};
+//##############################
+// * 默认开关 - 菜单界面 - 鼠标【标准函数】
+//				
+//			参数：	> enable 布尔
+//			返回：	> 无
+//##############################
+Game_System.prototype.drill_COI_Menu_setMouse = function( enable ){
+	this._drill_COI_menu_mouse = enable;
+};
+//##############################
+// * 默认开关 - 菜单界面 - 触屏【标准函数】
+//				
+//			参数：	> enable 布尔
+//			返回：	> 无
+//##############################
+Game_System.prototype.drill_COI_Menu_setTouchPad = function( enable ){
+	this._drill_COI_menu_touchPad = enable;
+};
+//=============================================================================
+// ** 默认开关（接口实现）
+//=============================================================================
+//==============================
+// * 默认开关 - 存储数据初始化
+//==============================
+var _drill_COI_Switch_initialize = Game_System.prototype.initialize;
+Game_System.prototype.initialize = function(){
+	_drill_COI_Switch_initialize.call(this);
+	
+	this._drill_COI_battle_keyboard = DrillUp.g_COI_battle_keyboard;			//战斗界面-键盘
+	this._drill_COI_battle_pad = DrillUp.g_COI_battle_pad;						//战斗界面-手柄
+	this._drill_COI_battle_mouse = DrillUp.g_COI_battle_mouse;					//战斗界面-鼠标
+	this._drill_COI_battle_touchPad = DrillUp.g_COI_battle_touchPad;			//战斗界面-触屏
+	
+	this._drill_COI_map_keyboard = DrillUp.g_COI_map_keyboard;					//地图界面-键盘
+	this._drill_COI_map_pad = DrillUp.g_COI_map_pad;							//地图界面-手柄
+	this._drill_COI_map_mouse = DrillUp.g_COI_map_mouse;						//地图界面-鼠标
+	this._drill_COI_map_touchPad = DrillUp.g_COI_map_touchPad;					//地图界面-触屏
+	this._drill_COI_map_mouseLeftMove = DrillUp.g_COI_map_mouseLeftMove;		//地图界面-鼠标左键移动
+	this._drill_COI_map_mouseRightMenu = DrillUp.g_COI_map_mouseRightMenu;		//地图界面-鼠标右键菜单
+	this._drill_COI_map_touchPadMenu = DrillUp.g_COI_map_touchPadMenu;			//地图界面-触屏双指菜单
+	
+	this._drill_COI_menu_keyboard = DrillUp.g_COI_menu_keyboard;				//菜单界面-键盘
+	this._drill_COI_menu_pad = DrillUp.g_COI_menu_pad;							//菜单界面-手柄
+	this._drill_COI_menu_mouse = DrillUp.g_COI_menu_mouse;						//菜单界面-鼠标
+	this._drill_COI_menu_touchPad = DrillUp.g_COI_menu_touchPad;				//菜单界面-触屏
+}
+//==============================
+// * 触发绑定 - 非菜单界面标记
+//==============================
+DrillUp.g_COI_isNotSceneMenu = [];
+DrillUp.g_COI_isNotSceneMenu.push("Scene_Map");
+DrillUp.g_COI_isNotSceneMenu.push("Scene_Battle");
+//==============================
+// * 触发绑定 - 鼠标可用情况
+//==============================
+TouchInput.drill_COI_isMouseEnabled = function(){
+	if( SceneManager._scene == undefined ){ return true; }
+	var scene_name = SceneManager._scene.constructor.name;
+	if( scene_name === "Scene_Map" ){
+		if( $gameSystem && $gameSystem._drill_COI_map_mouse == false ){
+			return false;
+		}
+	}
+	if( scene_name === "Scene_Battle" ){
+		if( $gameSystem && $gameSystem._drill_COI_battle_mouse == false ){
+			return false;
+		}
+	}
+	if( DrillUp.g_COI_isNotSceneMenu.contains(scene_name) == false ){//（如果不在 非菜单界面 列表中，则说明是菜单界面）
+		if( $gameSystem && $gameSystem._drill_COI_menu_mouse == false ){
+			return false;
+		}
+	}
+	return true;
+}
+//==============================
+// * 触发绑定 - 触屏可用情况
+//==============================
+TouchInput.drill_COI_isTouchPadEnabled = function(){
+	if( SceneManager._scene == undefined ){ return true; }
+	var scene_name = SceneManager._scene.constructor.name;
+	if( scene_name === "Scene_Map" ){
+		if( $gameSystem && $gameSystem._drill_COI_map_touchPad == false ){
+			return false;
+		}
+	}
+	if( scene_name === "Scene_Battle" ){
+		if( $gameSystem && $gameSystem._drill_COI_battle_touchPad == false ){
+			return false;
+		}
+	}
+	if( DrillUp.g_COI_isNotSceneMenu.contains(scene_name) == false ){//（如果不在 非菜单界面 列表中，则说明是菜单界面）
+		if( $gameSystem && $gameSystem._drill_COI_menu_touchPad== false ){
+			return false;
+		}
+	}
+	return true;
+}
+//==============================
+// * 触发绑定 - 鼠标按下（dom 'mousedown'）
+//==============================
+var _drill_COI_Switch__onMouseDown = TouchInput._onMouseDown;
+TouchInput._onMouseDown = function( event ){
+	if( this.drill_COI_isMouseEnabled() == false ){ return; }
+	_drill_COI_Switch__onMouseDown.call( this, event );
+}
+//==============================
+// * 触发绑定 - 鼠标移动（dom 'mousemove'）
+//==============================
+var _drill_COI_Switch__onMouseMove = TouchInput._onMouseMove;
+TouchInput._onMouseMove = function( event ){
+	if( this.drill_COI_isMouseEnabled() == false ){ return; }
+	_drill_COI_Switch__onMouseMove.call( this, event );
+}
+//==============================
+// * 触发绑定 - 鼠标释放（dom 'mouseup'）
+//==============================
+var _drill_COI_Switch__onMouseUp = TouchInput._onMouseUp;
+TouchInput._onMouseUp = function( event ){
+	if( this.drill_COI_isMouseEnabled() == false ){ return; }
+	_drill_COI_Switch__onMouseUp.call( this, event );
+}
+//==============================
+// * 触发绑定 - 鼠标滚轮（dom 'wheel'）
+//==============================
+var _drill_COI_Switch__onWheel = TouchInput._onWheel;
+TouchInput._onWheel = function( event ){
+	if( this.drill_COI_isMouseEnabled() == false ){ return; }
+	_drill_COI_Switch__onWheel.call( this, event );
+}
+//==============================
+// * 触发绑定 - 触屏开始（dom 'touchstart'）
+//==============================
+var _drill_COI_Switch__onTouchStart = TouchInput._onTouchStart;
+TouchInput._onTouchStart = function( event ){
+	if( this.drill_COI_isTouchPadEnabled() == false ){ return; }
+	_drill_COI_Switch__onTouchStart.call( this, event );
+}
+//==============================
+// * 触发绑定 - 触屏移动（dom 'touchmove'）
+//==============================
+var _drill_COI_Switch__onTouchMove = TouchInput._onTouchMove;
+TouchInput._onTouchMove = function( event ){
+	if( this.drill_COI_isTouchPadEnabled() == false ){ return; }
+	_drill_COI_Switch__onTouchMove.call( this, event );
+}
+//==============================
+// * 触发绑定 - 触屏结束（dom 'touchend'）
+//==============================
+var _drill_COI_Switch__onTouchEnd = TouchInput._onTouchEnd;
+TouchInput._onTouchEnd = function( event ){
+	if( this.drill_COI_isTouchPadEnabled() == false ){ return; }
+	_drill_COI_Switch__onTouchEnd.call( this, event );
+}
+//==============================
+// * 触发绑定 - 触屏取消（dom 'touchcancel'）
+//==============================
+var _drill_COI_Switch__onTouchCancel = TouchInput._onTouchCancel;
+TouchInput._onTouchCancel = function( event ){
+	if( this.drill_COI_isTouchPadEnabled() == false ){ return; }
+	_drill_COI_Switch__onTouchCancel.call( this, event );
+}
+//==============================
+// * 触发绑定 - 触屏点击（dom 'pointerdown'）
+//==============================
+var _drill_COI_Switch__onPointerDown = TouchInput._onPointerDown;
+TouchInput._onPointerDown = function( event ){
+	if( this.drill_COI_isTouchPadEnabled() == false ){ return; }
+	_drill_COI_Switch__onPointerDown.call( this, event );
+}
+//==============================
+// * 地图界面 - 鼠标左键移动
+//==============================
+var _drill_COI_Switch_processMapTouch = Scene_Map.prototype.processMapTouch;
+Scene_Map.prototype.processMapTouch = function(){	
+	
+	// > 若关闭则不执行
+	if( $gameSystem && $gameSystem._drill_COI_map_mouseLeftMove == false ){ return; }
+	
+	// > 原函数
+	_drill_COI_Switch_processMapTouch.call(this);
 };
 //==============================
-// * 禁用 - 触屏双指菜单（地图）
+// * 地图界面 - 鼠标右键菜单
 //==============================
-var _drill_COI_onTouchStart = TouchInput._onTouchStart;
+var _drill_COI_Switch_onRightButtonDown = TouchInput._onRightButtonDown;
+TouchInput._onRightButtonDown = function( event ){
+	
+	// > 若关闭则不执行
+	if( ($gameSystem && $gameSystem._drill_COI_map_mouseRightMenu == false) && 
+		SceneManager._scene.constructor.name === "Scene_Map" ){
+		return;
+	}
+	
+	// > 原函数
+	_drill_COI_Switch_onRightButtonDown.call(this,event);
+};
+//==============================
+// * 地图界面 - 触屏双指菜单 - 标记
+//==============================
+var _drill_COI_Switch__onTouchStart = TouchInput._onTouchStart;
 TouchInput._onTouchStart = function( event ){
-	if( ($gameSystem && $gameSystem._drill_COI_menu_touchPad == true) && 
+	if( ($gameSystem && $gameSystem._drill_COI_map_touchPadMenu == false) && 
 		SceneManager._scene.constructor.name === "Scene_Map" ){
 		if( event.touches.length >= 2 ){
 			this._drill_COI_forbid_menu = true;
 		}
 	}
-	_drill_COI_onTouchStart.call(this,event);
+	_drill_COI_Switch__onTouchStart.call(this,event);
 };
 //==============================
-// * 禁用 - 触屏双指菜单 延迟锁
+// * 地图界面 - 触屏双指菜单 - 延迟锁
 //==============================
-var _drill_COI_onCancel = TouchInput._onCancel;
+var _drill_COI_Switch__onCancel = TouchInput._onCancel;
 TouchInput._onCancel = function( x, y ){
 	if( this._drill_COI_forbid_menu === true ){
 		this._drill_COI_forbid_menu = false;
 		return ;
 	}
-	_drill_COI_onCancel.call(this,x, y);
+	_drill_COI_Switch__onCancel.call(this,x, y);
 };
 
-//=============================================================================
-// ** 鼠标失去窗口焦点优化（添加焦点函数）
-//=============================================================================
-var _drill_COI__setupEventHandlers = TouchInput._setupEventHandlers;
-TouchInput._setupEventHandlers = function(){
-	_drill_COI__setupEventHandlers.call(this);
-    window.addEventListener("blur", this._onLostFocus.bind(this));
-};
-TouchInput._onLostFocus = function(){
-    this.clear();
-};
+//==============================
+// * 触发绑定 - 键盘可用情况
+//==============================
+Input.drill_COI_isKeyboardEnabled = function(){
+	if( SceneManager._scene == undefined ){ return true; }
+	var scene_name = SceneManager._scene.constructor.name;
+	if( scene_name === "Scene_Map" ){
+		if( $gameSystem && $gameSystem._drill_COI_map_keyboard == false ){
+			return false;
+		}
+	}
+	if( scene_name === "Scene_Battle" ){
+		if( $gameSystem && $gameSystem._drill_COI_battle_keyboard == false ){
+			return false;
+		}
+	}
+	if( DrillUp.g_COI_isNotSceneMenu.contains(scene_name) == false ){//（如果不在 非菜单界面 列表中，则说明是菜单界面）
+		if( $gameSystem && $gameSystem._drill_COI_menu_keyboard == false ){
+			return false;
+		}
+	}
+	return true;
+}
+//==============================
+// * 触发绑定 - 手柄可用情况
+//==============================
+Input.drill_COI_isPadEnabled = function(){
+	if( SceneManager._scene == undefined ){ return true; }
+	var scene_name = SceneManager._scene.constructor.name;
+	if( scene_name === "Scene_Map" ){
+		if( $gameSystem && $gameSystem._drill_COI_map_pad == false ){
+			return false;
+		}
+	}
+	if( scene_name === "Scene_Battle" ){
+		if( $gameSystem && $gameSystem._drill_COI_battle_pad == false ){
+			return false;
+		}
+	}
+	if( DrillUp.g_COI_isNotSceneMenu.contains(scene_name) == false ){//（如果不在 非菜单界面 列表中，则说明是菜单界面）
+		if( $gameSystem && $gameSystem._drill_COI_menu_pad== false ){
+			return false;
+		}
+	}
+	return true;
+}
+//==============================
+// * 触发绑定 - 键盘按下（dom 'keydown'）
+//==============================
+var _drill_COI_Switch__onKeyDown = Input._onKeyDown;
+Input._onKeyDown = function( event ){
+	if( this.drill_COI_isKeyboardEnabled() == false ){ return; }
+	_drill_COI_Switch__onKeyDown.call( this, event );
+}
+//==============================
+// * 触发绑定 - 键盘释放（dom 'keyup'）
+//==============================
+var _drill_COI_Switch__onKeyUp = Input._onKeyUp;
+Input._onKeyUp = function( event ){
+	if( this.drill_COI_isKeyboardEnabled() == false ){ return; }
+	_drill_COI_Switch__onKeyUp.call( this, event );
+}
+//==============================
+// * 触发绑定 - 手柄控制
+//==============================
+var _drill_COI_Switch__updateGamepadState = Input._updateGamepadState;
+Input._updateGamepadState = function( gamepad ){
+	if( this.drill_COI_isPadEnabled() == false ){ return; }
+	_drill_COI_Switch__updateGamepadState.call( this, gamepad );
+}
 
 
 
@@ -389,27 +924,145 @@ TouchInput._onLostFocus = function(){
 //		
 //			类型：	装饰函数集
 //			功能：	获取鼠标指针、鼠标按键数据。
-//			接口：	var xx = _drill_mouse_x;						// 鼠标指针位置（全局变量，直接使用即可）
-//					var yy = _drill_mouse_y;
-//					if( TouchInput.drill_isWheelUp() ){ }			// 滚轮向上[一帧]
-//					if( TouchInput.drill_isWheelDown() ){ }			// 滚轮向下[一帧]
-//					if( TouchInput.drill_isLeftPressed() ){ }		// 左键按下[持续]
-//					if( TouchInput.drill_isLeftTriggered() ){ }		// 左键按下[一帧]
-//					if( TouchInput.drill_isLeftReleased() ){ }		// 左键释放[一帧]
-//					if( TouchInput.drill_isLeftDoubled() ){ }		// 左键双击[一帧]
-//					if( TouchInput.drill_isMiddlePressed() ){ }		// 中键按下[持续]
-//					if( TouchInput.drill_isMiddleTriggered() ){ }	// 中键按下[一帧]
-//					if( TouchInput.drill_isMiddleReleased() ){ }	// 中键释放[一帧]
-//					if( TouchInput.drill_isMiddleDoubled() ){ }		// 中键双击[一帧]
-//					if( TouchInput.drill_isRightPressed() ){ }		// 右键按下[持续]
-//					if( TouchInput.drill_isRightTriggered() ){ }	// 右键按下[一帧]
-//					if( TouchInput.drill_isRightReleased() ){ }		// 右键释放[一帧]
-//					if( TouchInput.drill_isRightDoubled() ){ }		// 右键双击[一帧]
+//			
+//			用法：	var mouse_pos = TouchInput.drill_COI_getMousePos();					// 鼠标指针位置
+//					var mouse_pos = TouchInput.drill_COI_getMousePos_WithOutside();		// 鼠标指针位置（包含出界情况）
+//					if( TouchInput.drill_isLeftPressed() ){ }							// 左键按下[持续]
+//					if( TouchInput.drill_isLeftTriggered() ){ }							// 左键按下[一帧]
+//					if( TouchInput.drill_isLeftReleased() ){ }							// 左键释放[一帧]
+//					if( TouchInput.drill_isLeftDoubled() ){ }							// 左键双击[一帧]
+//					if( TouchInput.drill_isWheelUp() ){ }								// 滚轮上滚[一帧]
+//					if( TouchInput.drill_isWheelDown() ){ }								// 滚轮下滚[一帧]
+//					if( TouchInput.drill_isMiddlePressed() ){ }							// 滚轮按下[持续]
+//					if( TouchInput.drill_isMiddleTriggered() ){ }						// 滚轮按下[一帧]
+//					if( TouchInput.drill_isMiddleReleased() ){ }						// 滚轮释放[一帧]
+//					if( TouchInput.drill_isMiddleDoubled() ){ }							// 滚轮双击[一帧]
+//					if( TouchInput.drill_isRightPressed() ){ }							// 右键按下[持续]
+//					if( TouchInput.drill_isRightTriggered() ){ }						// 右键按下[一帧]
+//					if( TouchInput.drill_isRightReleased() ){ }							// 右键释放[一帧]
+//					if( TouchInput.drill_isRightDoubled() ){ }							// 右键双击[一帧]
 //
 //			说明：	> 上述的判定可以放在update帧刷新中进行持续判定。
 //=============================================================================
+//##############################
+// * 鼠标 - 指针位置【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 坐标对象（x,y）
+//
+//			说明：	坐标值为 镜头参照 。
+//##############################
+TouchInput.drill_COI_getMousePos = function(){
+	return {'x': _drill_mouse_x, 'y': _drill_mouse_y };
+}
+//##############################
+// * 鼠标 - 指针位置（包含出界情况）【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 坐标对象（x,y）
+//
+//			说明：	坐标值为 镜头参照 。
+//##############################
+TouchInput.drill_COI_getMousePos_WithOutside = function(){
+	return {'x': this._drill_COI_mouse_x_outside, 'y': this._drill_COI_mouse_y_outside };
+}
+
+//##############################
+// * 鼠标 - 左键 - 左键按下[持续]
+//
+//			说明：	下面的函数全都包括 触屏联动 的情况。
+//##############################
+TouchInput.drill_isLeftPressed = function(){
+	return this._drill_LeftPressed;
+}
+//##############################
+// * 鼠标 - 左键 - 左键按下[一帧]
+//##############################
+TouchInput.drill_isLeftTriggerd = function(){
+	return (this._drill_LeftPressed && this._drill_LeftPressedTime == 1);
+}
+TouchInput.drill_isLeftTriggered = TouchInput.drill_isLeftTriggerd;			//（错误拼写兼容）
+//##############################
+// * 鼠标 - 左键 - 左键释放[一帧]
+//##############################
+TouchInput.drill_isLeftReleased = function(){
+	return (!this._drill_LeftPressed && this._drill_LeftReleasedTime == 1);
+}
+//##############################
+// * 鼠标 - 左键 - 左键双击[一帧]
+//##############################
+TouchInput.drill_isLeftDoubled = function(){
+	return this._drill_LeftDoubledTime == 1 ;
+}
+
+//##############################
+// * 鼠标 - 滚轮 - 滚轮上滚[一帧]
+//##############################
+TouchInput.drill_isWheelUp = function(){
+	var threshold = 20;
+	return TouchInput.wheelY <= -threshold;
+}
+//##############################
+// * 鼠标 - 滚轮 - 滚轮下滚[一帧]
+//##############################
+TouchInput.drill_isWheelDown = function(){
+	var threshold = 20;
+	return TouchInput.wheelY >= threshold;
+}
+//##############################
+// * 鼠标 - 滚轮 - 滚轮按下[持续]
+//##############################
+TouchInput.drill_isMiddlePressed = function(){
+	return this._drill_MiddlePressed;
+}
+//##############################
+// * 鼠标 - 滚轮 - 滚轮按下[一帧]
+//##############################
+TouchInput.drill_isMiddleTriggerd = function(){
+	return (this._drill_MiddlePressed && this._drill_MiddlePressedTime == 1);
+}
+TouchInput.drill_isMiddleTriggered = TouchInput.drill_isMiddleTriggerd;		//（错误拼写兼容）
+//##############################
+// * 鼠标 - 滚轮 - 滚轮释放[一帧]
+//##############################
+TouchInput.drill_isMiddleReleased = function(){
+	return (!this._drill_MiddlePressed && this._drill_MiddleReleasedTime == 1);
+}
+//##############################
+// * 鼠标 - 滚轮 - 滚轮双击[一帧]
+//##############################
+TouchInput.drill_isMiddleDoubled = function(){
+	return this._drill_MiddleDoubledTime == 1 ;
+}
+
+//##############################
+// * 鼠标 - 右键 - 右键按下[持续]
+//##############################
+TouchInput.drill_isRightPressed = function(){
+	return this._drill_RightPressed;
+}
+//##############################
+// * 鼠标 - 右键 - 右键按下[一帧]
+//##############################
+TouchInput.drill_isRightTriggerd = function(){
+	return (this._drill_RightPressed && this._drill_RightPressedTime == 1);
+}
+TouchInput.drill_isRightTriggered = TouchInput.drill_isRightTriggerd;		//（错误拼写兼容）
+//##############################
+// * 鼠标 - 右键 - 右键释放[一帧]
+//##############################
+TouchInput.drill_isRightReleased = function(){
+	return (!this._drill_RightPressed && this._drill_RightReleasedTime == 1);
+}
+//##############################
+// * 鼠标 - 右键 - 右键双击[一帧]
+//##############################
+TouchInput.drill_isRightDoubled = function(){
+	return this._drill_RightDoubledTime == 1 ;
+}
+
 //==============================
-// ** 鼠标 - 指针位置
+// * 指针位置 - 通用函数
 //==============================
 if( typeof(_drill_mouse_getCurPos) == "undefined" ){	//防止重复定义（该函数在许多插件都用到了）
 
@@ -423,28 +1076,51 @@ if( typeof(_drill_mouse_getCurPos) == "undefined" ){	//防止重复定义（该�
         _drill_mouse_y = Graphics.pageToCanvasY(event.pageY);
 	};
 }
-
 //==============================
-// ** 鼠标 - 滚轮监听
+// * 指针位置 - 数据初始化
 //==============================
-var _drill_mouseWheel_onWheel = TouchInput._onWheel;
-TouchInput._onWheel = function( event ){
-	//if( event.deltaY != 0 ){					//暂时用rmmv原函数
-	//	this._drill_COI_wheel_delta = event.deltaY;
-	//}
-	_drill_mouseWheel_onWheel.call(this,event);
+var _drill_COI_Mouse_clear = TouchInput.clear;
+TouchInput.clear = function(){
+	_drill_COI_Mouse_clear.call(this);
+	this._drill_COI_mouse_x_outside = 0;
+	this._drill_COI_mouse_y_outside = 0;
+}
+//==============================
+// * 指针位置 - 获取指针位置
+//==============================
+var _drill_COI_Mouse__onMouseMove = TouchInput._onMouseMove;
+TouchInput._onMouseMove = function( event ){
+	_drill_COI_Mouse__onMouseMove.call(this,event);
+	
+	this._drill_COI_mouse_x_outside = Graphics.pageToCanvasX(event.pageX);
+	this._drill_COI_mouse_y_outside = Graphics.pageToCanvasY(event.pageY);
+}
+//==============================
+// * 指针位置 - 出界情况绑定
+//==============================
+var _drill_COI_Mouse__setupEventHandlers = TouchInput._setupEventHandlers;
+TouchInput._setupEventHandlers = function(){
+	_drill_COI_Mouse__setupEventHandlers.call(this);
+    document.addEventListener("mouseleave", this.drill_COI_onMouseLeave.bind(this));
 };
 //==============================
-// ** 鼠标 - 滚轮监听（可用函数集）
+// * 指针位置 - 出界情况
 //==============================
-TouchInput.drill_isWheelUp = function(){		//滚轮向上[一帧]
-	var threshold = 20;
-	return TouchInput.wheelY <= -threshold;
+TouchInput.drill_COI_onMouseLeave = function( event ){
+	this._drill_COI_mouse_x_outside = Graphics.pageToCanvasX(event.pageX);
+	this._drill_COI_mouse_y_outside = Graphics.pageToCanvasY(event.pageY);
 }
-TouchInput.drill_isWheelDown = function(){		//滚轮向下[一帧]
-	var threshold = 20;
-	return TouchInput.wheelY >= threshold;
-}
+
+//==============================
+// * 滚轮 - 滚轮监听
+//==============================
+var _drill_COI_Mouse_onWheel = TouchInput._onWheel;
+TouchInput._onWheel = function( event ){
+	//if( event.deltaY != 0 ){					//暂时用原函数
+	//	this._drill_COI_wheel_delta = event.deltaY;
+	//}
+	_drill_COI_Mouse_onWheel.call(this,event);
+};
 
 //==============================
 // * 触发绑定 - 鼠标按下
@@ -455,7 +1131,7 @@ var _drill_mouseInput_pressed = TouchInput._onMouseDown;
 TouchInput._onMouseDown = function( event ){	
 	if( event.button === 0 ){			//左键
 		this.drill_onLeftDown(event);
-	}else if( event.button === 1 ){		//中键
+	}else if( event.button === 1 ){		//中键/滚轮
 		this.drill_onMiddleDown(event);
 	}else if( event.button === 2 ){		//右键
 		this.drill_onRightDown(event);
@@ -477,7 +1153,7 @@ TouchInput.drill_onLeftDown = function( event ){		//鼠标左键按下事件
 	}
 }
 //==============================
-// * 触发绑定 - 鼠标按下 - 中键
+// * 触发绑定 - 鼠标按下 - 中键/滚轮
 //==============================
 TouchInput.drill_onMiddleDown = function( event ){	//鼠标滚轮按下事件
 	var x = Graphics.pageToCanvasX(event.pageX);
@@ -504,9 +1180,8 @@ TouchInput.drill_onRightDown = function( event ){	//鼠标右键按下事件
 		this._drill_RightPressedTime = 0;
 	}
 }
-
 //==============================
-// ** 触发绑定 - 鼠标释放
+// * 触发绑定 - 鼠标释放
 //
 //			说明：原函数绑定了（dom 'mouseup'）
 //==============================
@@ -514,7 +1189,7 @@ var _drill_mouseInput_released = TouchInput._onMouseUp;
 TouchInput._onMouseUp = function( event ){
 	if( event.button === 0 ){			//左键
 		this.drill_onLeftUp(event);
-	}else if( event.button === 1 ){		//中键
+	}else if( event.button === 1 ){		//中键/滚轮
 		this.drill_onMiddleUp(event);
 	}else if( event.button === 2 ){		//右键
 		this.drill_onRightUp(event);
@@ -529,7 +1204,7 @@ TouchInput.drill_onLeftUp = function( event ){
 	this._drill_LeftReleasedTime = 0;
 }
 //==============================
-// * 触发绑定 - 鼠标释放 - 中键
+// * 触发绑定 - 鼠标释放 - 中键/滚轮
 //==============================
 TouchInput.drill_onMiddleUp = function( event ){
 	this._drill_MiddlePressed = false;
@@ -545,7 +1220,7 @@ TouchInput.drill_onRightUp = function( event ){
 
 
 //==============================
-// ** 鼠标 - 帧刷新
+// * 鼠标 - 帧刷新
 //==============================
 var _drill_mouseInput_update = TouchInput.update;
 TouchInput.update = function(){
@@ -565,7 +1240,7 @@ TouchInput.update = function(){
 		this._drill_LeftDoubledTime = -1;
 	}
 	
-	// > 中键双击处理
+	// > 中键/滚轮 双击处理
 	if( this.drill_isMiddlePressed() ){
 		if( this._drill_MiddlePressedTime != -1){ this._drill_MiddlePressedTime++; }
 	}else{
@@ -594,48 +1269,23 @@ TouchInput.update = function(){
 	}
 }
 
+//=============================================================================
+// ** 核心漏洞修复
+//=============================================================================
 //==============================
-// ** 鼠标 - 按键（可用函数集）
+// * 核心漏洞修复 - 鼠标失去窗口焦点时
 //==============================
-TouchInput.drill_isLeftPressed = function(){		//左键按下[持续]
-	return this._drill_LeftPressed;
-}
-TouchInput.drill_isLeftTriggerd = function(){		//左键按下[一帧]
-	return (this._drill_LeftPressed && this._drill_LeftPressedTime == 1);
-}
-TouchInput.drill_isLeftReleased = function(){		//左键释放[一帧]
-	return (!this._drill_LeftPressed && this._drill_LeftReleasedTime == 1);
-}
-TouchInput.drill_isLeftDoubled = function(){		//左键双击[一帧]
-	return this._drill_LeftDoubledTime == 1 ;
-}
-TouchInput.drill_isMiddlePressed = function(){		//滚轮按下[持续]
-	return this._drill_MiddlePressed;
-}
-TouchInput.drill_isMiddleTriggerd = function(){		//滚轮按下[一帧]
-	return (this._drill_MiddlePressed && this._drill_MiddlePressedTime == 1);
-}
-TouchInput.drill_isMiddleReleased = function(){		//滚轮释放[一帧]
-	return (!this._drill_MiddlePressed && this._drill_MiddleReleasedTime == 1);
-}
-TouchInput.drill_isMiddleDoubled = function(){		//滚轮双击[一帧]
-	return this._drill_MiddleDoubledTime == 1 ;
-}
-TouchInput.drill_isRightPressed = function(){		//右键按下[持续]
-	return this._drill_RightPressed;
-}
-TouchInput.drill_isRightTriggerd = function(){		//右键按下[一帧]
-	return (this._drill_RightPressed && this._drill_RightPressedTime == 1);
-}
-TouchInput.drill_isRightReleased = function(){		//右键释放[一帧]
-	return (!this._drill_RightPressed && this._drill_RightReleasedTime == 1);
-}
-TouchInput.drill_isRightDoubled = function(){		//右键双击[一帧]
-	return this._drill_RightDoubledTime == 1 ;
-}
-TouchInput.drill_isLeftTriggered = TouchInput.drill_isLeftTriggerd;		//（拼写错误修复）
-TouchInput.drill_isMiddleTriggered = TouchInput.drill_isMiddleTriggerd
-TouchInput.drill_isRightTriggered = TouchInput.drill_isRightTriggerd
+var _drill_COI_Mouse__setupEventHandlers2 = TouchInput._setupEventHandlers;
+TouchInput._setupEventHandlers = function(){
+	_drill_COI_Mouse__setupEventHandlers2.call(this);
+    window.addEventListener("blur", this.drill_COI_onLostFocus.bind(this));
+};
+//==============================
+// * 核心漏洞修复 - 鼠标失去窗口焦点时 - 清理参数
+//==============================
+TouchInput.drill_COI_onLostFocus = function(){
+    this.clear();
+};
 
 
 
@@ -644,16 +1294,17 @@ TouchInput.drill_isRightTriggered = TouchInput.drill_isRightTriggerd
 //		
 //			类型：	装饰函数集
 //			功能：	获取触屏指针、触屏按键数据。
+//			
 //			接口：	var xx = _drill_mouse_x;						// 触屏指针位置（全局变量，直接使用即可）
 //					var yy = _drill_mouse_y;
 //					if( TouchInput.drill_isLeftPressed() ){ }		// 左键按下[持续] （触屏联动）
 //					if( TouchInput.drill_isLeftTriggered() ){ }		// 左键按下[一帧] （触屏联动）
 //					if( TouchInput.drill_isLeftReleased() ){ }		// 左键释放[一帧] （触屏联动）
 //					if( TouchInput.drill_isLeftDoubled() ){ }		// 左键双击[一帧] （触屏联动）
-//					if( TouchInput.drill_isMiddlePressed() ){ }		// 中键按下[持续] （触屏联动）
-//					if( TouchInput.drill_isMiddleTriggered() ){ }	// 中键按下[一帧] （触屏联动）
-//					if( TouchInput.drill_isMiddleReleased() ){ }	// 中键释放[一帧] （触屏联动）
-//					if( TouchInput.drill_isMiddleDoubled() ){ }		// 中键双击[一帧] （触屏联动）
+//					if( TouchInput.drill_isMiddlePressed() ){ }		// 滚轮按下[持续] （触屏联动）
+//					if( TouchInput.drill_isMiddleTriggered() ){ }	// 滚轮按下[一帧] （触屏联动）
+//					if( TouchInput.drill_isMiddleReleased() ){ }	// 滚轮释放[一帧] （触屏联动）
+//					if( TouchInput.drill_isMiddleDoubled() ){ }		// 滚轮双击[一帧] （触屏联动）
 //					if( TouchInput.drill_isRightPressed() ){ }		// 右键按下[持续] （触屏联动）
 //					if( TouchInput.drill_isRightTriggered() ){ }	// 右键按下[一帧] （触屏联动）
 //					if( TouchInput.drill_isRightReleased() ){ }		// 右键释放[一帧] （触屏联动）
@@ -664,7 +1315,7 @@ TouchInput.drill_isRightTriggered = TouchInput.drill_isRightTriggerd
 //					  通过触屏联动，可以使得触屏能够触发和鼠标按键一样的功能。但是仅限使用了上述条件的插件。
 //=============================================================================
 //==============================
-// ** 触屏 - 位置
+// * 触屏 - 位置
 //==============================
 if( typeof(_drill_touchPad_getCurPos) == "undefined" ){	//防止重复定义
 	
@@ -680,7 +1331,7 @@ if( typeof(_drill_touchPad_getCurPos) == "undefined" ){	//防止重复定义
 	};
 }
 //==============================
-// ** 触屏 - 按下（与鼠标联动）
+// * 触屏 - 按下（与鼠标联动）
 //==============================
 var _drill_touchPad_pressed = TouchInput._onTouchStart;
 TouchInput._onTouchStart = function( event ){
@@ -716,7 +1367,7 @@ TouchInput._onTouchStart = function( event ){
 	}
 };
 //==============================
-// ** 触屏 - 释放（与鼠标联动）
+// * 触屏 - 释放（与鼠标联动）
 //==============================
 var _drill_touchPad_released = TouchInput._onTouchEnd;
 TouchInput._onTouchEnd = function( event ){
@@ -741,6 +1392,7 @@ TouchInput._onTouchEnd = function( event ){
 //		
 //			类型：	装饰函数集
 //			功能：	获取键盘按键数据。
+//			
 //			接口：	if( Input.drill_isKeyPressed("a") ){ }			// A键按下[持续]
 //					if( Input.drill_isKeyTriggered("a") ){ }		// A键按下[一帧]
 //					if( Input.drill_isKeyReleased("a") ){ }			// A键释放[一帧]
@@ -901,6 +1553,7 @@ Input.drill_isAnyKeyTriggered = Input.drill_isAnyKeyTriggerd;
 //		
 //			类型：	装饰函数集
 //			功能：	获取手柄按键数据。
+//			
 //			接口：	if( Input.drill_isPadPressed("LB") ){ }			// LB键按下[持续]
 //					if( Input.drill_isPadTriggered("LB") ){ }		// LB键按下[一帧]
 //					if( Input.drill_isPadReleased("LB") ){ }		// LB键释放[一帧]
@@ -1008,7 +1661,7 @@ Input.drill_COI_updatePadsAction = function(){
 	}
 }
 //==============================
-// ** 键盘 - 键位判断（可用函数集）
+// ** 手柄 - 键位判断（可用函数集）
 //==============================
 Input.drill_isPadPressed = function( pad ){				//手柄按下[持续]
 	return DrillUp.g_COI_pads_pressed[pad] == true;		//	（持续按时，不要打盹）

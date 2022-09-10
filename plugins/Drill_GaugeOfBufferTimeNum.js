@@ -487,7 +487,7 @@
  * @param 资源-外框背景
  * @parent ---外框---
  * @desc 时间数字的外框图片资源。外框背景处于参数数字下方。
- * @default 时间数字外框-默认背景
+ * @default (需配置)时间数字外框-默认背景
  * @require 1
  * @dir img/Special__bufferTimeNum/
  * @type file
@@ -512,7 +512,7 @@
  * @param 资源-外框前景
  * @parent ---外框---
  * @desc 时间数字的外框图片资源。外框前景处于参数数字上方。
- * @default 时间数字外框-默认前景
+ * @default (需配置)时间数字外框-默认前景
  * @require 1
  * @dir img/Special__bufferTimeNum/
  * @type file

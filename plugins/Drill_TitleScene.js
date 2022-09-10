@@ -475,7 +475,7 @@
  * @param 资源-贴图
  * @parent ---单张背景贴图---
  * @desc 窗口的背景贴图的资源。
- * @default 背景贴图
+ * @default (需配置)标题界面背景贴图
  * @require 1
  * @dir img/titles1/
  * @type file
@@ -647,7 +647,7 @@
  * @param 默认按钮贴图列表
  * @parent ---多种主题按钮---
  * @desc 默认按钮贴图的图片资源。
- * @default ["按钮-默认贴图"]
+ * @default ["(需配置)标题界面按钮"]
  * @require 1
  * @dir img/titles1/
  * @type file[]
@@ -682,7 +682,7 @@
  * 
  * @param 按钮贴图
  * @desc 自定义按钮的图片资源。
- * @default 按钮贴图xxx
+ * @default (需配置)标题界面按钮
  * @require 1
  * @dir img/titles1/
  * @type file

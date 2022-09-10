@@ -446,15 +446,34 @@ Game_Character.prototype.processMoveCommand = function( command ){
 
 
 //=============================================================================
+// ** 核心漏洞修复
+//=============================================================================
+//==============================
+// * 核心漏洞修复 - 移动路线初始优化
+//
+//			说明：	在执行setMoveRoute时，初始化原移动路线。（此操作防止_originalMoveRoute为空 报错。）
+//==============================
+var _drill_COMR_setMoveRoute = Game_Character.prototype.setMoveRoute;
+Game_Character.prototype.setMoveRoute = function( moveRoute ){
+	if( !this._moveRouteForcing ){
+		_drill_COMR_setMoveRoute.call( this, moveRoute );
+	}else{
+		this._originalMoveRoute = moveRoute;
+		this._originalMoveRouteIndex = 0;
+	}
+};
+
+
+//=============================================================================
 // ** 脚本转义阶段（核心功能扩展）
 //=============================================================================
 //==============================
 // * 脚本转义 - 自主移动 - 设置
 //==============================
-var _drill_COMR_setMoveRoute = Game_Character.prototype.setMoveRoute;
+var _drill_COMR_setMoveRoute2 = Game_Character.prototype.setMoveRoute;
 Game_Character.prototype.setMoveRoute = function( moveRoute ){
 	moveRoute.list = this.drill_COMR_scriptTransform(moveRoute.list);
-	_drill_COMR_setMoveRoute.call(this, moveRoute);
+	_drill_COMR_setMoveRoute2.call(this, moveRoute);
 };
 //==============================
 // * 脚本转义 - 强制路线 - 执行路线

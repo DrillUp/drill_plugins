@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        图片 - 快捷操作
+ * @plugindesc [v1.5]        图片 - 快捷操作
  * @author Drill_up
  * 
  * @Drill_LE_param "预加载资源-%d"
@@ -190,6 +190,8 @@
  * 修复了弹性移动时差一点点偏移的bug，添加了 增减速移动到 的功能。
  * [v1.4]
  * 优化了部分内容的兼容性。
+ * [v1.5]
+ * 优化了数学缩短锚点的计算公式。
  * 
  * 
  * 
@@ -2053,10 +2055,12 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 										pics[k]._scaleX*0.01 , pics[k]._scaleY*0.01 
 									);
 						pics[k]._origin = 100;
+						pics[k]._x += point.x;
+						pics[k]._y += point.y;
+						pics[k]._x += pics[k]._drill_width  *(tarX - pics[k]._anchorX);	//（锚点的偏移）
+						pics[k]._y += pics[k]._drill_height *(tarY - pics[k]._anchorY);
 						pics[k]._anchorX = tarX;
 						pics[k]._anchorY = tarY;
-						pics[k]._x -= point.x;
-						pics[k]._y -= point.y;
 					}
 				}
 			}
@@ -3023,8 +3027,18 @@ Sprite_Picture.prototype.updateOrigin = function() {
 //=============================================================================
 // * 数学 - 锁定锚点
 //			
-//			说明：修正 旋转+缩放 的xy坐标，使其看起来像是在绕着 新的锚点 变换。
-//				  注意，该锁定含有正负号修正。
+//			参数：	> org_anchor_x 数字    （原贴图锚点X）
+//					> org_anchor_y 数字    （原贴图锚点Y）
+//					> target_anchor_x 数字 （新的锚点X）
+//					> target_anchor_y 数字 （新的锚点Y）
+//					> width 数字           （贴图宽度）
+//					> height 数字          （贴图高度）
+//					> rotation 数字        （旋转度数，弧度）
+//					> scale_x,scale_y 数字 （缩放比例XY，默认1.00）
+//			返回：	> { x:0, y:0 }         （偏移的坐标）
+//			
+//			说明：	修正 旋转+缩放 的坐标，使其看起来像是在绕着 新的锚点 变换。
+//					旋转值和缩放值可为负数。
 //=============================================================================
 Game_Temp.prototype.drill_PSh_getFixPointInAnchor = function( 
 					org_anchor_x,org_anchor_y,			//原贴图中心锚点 
@@ -3039,19 +3053,25 @@ Game_Temp.prototype.drill_PSh_getFixPointInAnchor = function(
 	if( ww == 0 && hh == 0){ return { "x":0, "y":0 }; }
 	if( ww == 0 ){ ww = 0.0001; }
 	
-	var r = Math.sqrt( Math.pow(ww,2) + Math.pow(hh,2) );
-	var p_degree = Math.atan(hh/ww);	
+	// > 先缩放
+	var sww = ww*scale_x;
+	var shh = hh*scale_y;
+	
+	// > 后旋转
+	var r = Math.sqrt( Math.pow(sww,2) + Math.pow(shh,2) );
+	var p_degree = Math.atan(shh/sww);	
 	p_degree = Math.PI - p_degree;
+	if( sww < 0 ){
+		p_degree = Math.PI + p_degree;
+	}
 	
-	xx = r*Math.cos( rotation - p_degree);		//圆公式 (x-a)²+(y-b)²=r²
-	yy = r*Math.sin( rotation - p_degree);		//圆极坐标 x=ρcosθ,y=ρsinθ
-	if( target_anchor_x < org_anchor_x && xx < 0 ){ xx = -1*xx; }	//公式正负号修正（大坑）
-	if( target_anchor_y < org_anchor_y && yy < 0 ){ yy = -1*yy; }
-	if( target_anchor_x > org_anchor_x && xx > 0 ){ xx = -1*xx; }
-	if( target_anchor_y > org_anchor_y && yy > 0 ){ yy = -1*yy; }
+	// > 变换的偏移量
+	xx += r*Math.cos( rotation - p_degree);		//圆公式 (x-a)²+(y-b)²=r²
+	yy += r*Math.sin( rotation - p_degree);		//圆极坐标 x=ρcosθ,y=ρsinθ
 	
-	xx += ww * (1 - scale_x);
-	yy += hh * (1 - scale_y);
+	// > 锚点偏移量
+	xx += ww;
+	yy += hh;
 	
 	return { "x":xx, "y":yy };
 }

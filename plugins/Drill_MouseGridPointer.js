@@ -191,7 +191,7 @@
  * @param 资源-指向标GIF
  * @parent ---贴图---
  * @desc 指向标的图片资源，可以是单张图片，也可以是多张组合的gif。
- * @default []
+ * @default ["(需配置)网格指向标"]
  * @require 1
  * @dir img/Map__ui_mouse/
  * @type file[]
@@ -506,9 +506,11 @@ Drill_MGP_GridSprite.prototype.drill_MGP_updatePosition = function() {
 	// > 鼠标坐标
 	var mouse_x = _drill_mouse_x;
 	var mouse_y = _drill_mouse_y;
-	if( Imported.Drill_LayerCamera ){											//镜头缩放
-		mouse_x = $gameSystem.drill_LCa_cameraToMapX( _drill_mouse_x );			//		镜头缩放只作用于当前的镜头有效，也就是鼠标位置，其它都没有变化
-		mouse_y = $gameSystem.drill_LCa_cameraToMapY( _drill_mouse_y );			//		【不需要】多考虑图块缩放后变小的问题
+	
+	// > 镜头缩放【地图 - 活动地图镜头】
+	if( Imported.Drill_LayerCamera ){										//（网格指向标贴图 处于中层、上层 之间）
+		mouse_x = $gameSystem.drill_LCa_cameraToMapX( _drill_mouse_x );		//【不需要】多考虑图块缩放后变小的问题
+		mouse_y = $gameSystem.drill_LCa_cameraToMapY( _drill_mouse_y );
 	}
 	
 	// > 网格坐标
@@ -586,7 +588,9 @@ Drill_MGP_GridSprite.prototype.drill_MGP_updateCheck = function() {
 	// > 鼠标坐标
 	var mouse_x = _drill_mouse_x;
 	var mouse_y = _drill_mouse_y;
-	if( Imported.Drill_LayerCamera ){					//镜头缩放
+	
+	// > 镜头缩放【地图 - 活动地图镜头】
+	if( Imported.Drill_LayerCamera ){	//（网格指向标贴图 处于中层、上层 之间）
 		mouse_x = $gameSystem.drill_LCa_cameraToMapX( _drill_mouse_x );	
 		mouse_y = $gameSystem.drill_LCa_cameraToMapY( _drill_mouse_y );	
 	}

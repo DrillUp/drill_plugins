@@ -562,7 +562,7 @@ Game_Temp.prototype.drill_COBa_setBallisticsMove_Private = function( data ){
 		}else{
 			result['polarSpeedRandomFactorList'] = [];									//极坐标 - 速度 - 随机因子（锁定随机值专用,0-1之间）
 			result['polarDirRandomFactorList'] = [];                                    //极坐标 - 方向 - 随机因子（锁定随机值专用,0-1之间）
-			for( var i=0; i < data['movementNum']; i++ ){
+			for( var i=0; i < result['movementNum']; i++ ){
 				result['polarSpeedRandomFactorList'].push( Math.random() );
 				result['polarDirRandomFactorList'].push( Math.random() );
 			}
@@ -575,7 +575,7 @@ Game_Temp.prototype.drill_COBa_setBallisticsMove_Private = function( data ){
 		}else{
 			result['cartXSpeedRandomFactorList'] = [];									//直角坐标 - x - 随机因子（锁定随机值专用,0-1之间）
 			result['cartYSpeedRandomFactorList'] = [];                                  //直角坐标 - y - 随机因子（锁定随机值专用,0-1之间）
-			for( var i=0; i < data['movementNum']; i++ ){
+			for( var i=0; i < result['movementNum']; i++ ){
 				result['cartXSpeedRandomFactorList'].push( Math.random() );
 				result['cartYSpeedRandomFactorList'].push( Math.random() );
 			}
@@ -586,7 +586,7 @@ Game_Temp.prototype.drill_COBa_setBallisticsMove_Private = function( data ){
 			result['trackSpeedRandomFactorList'] = JSON.parse(JSON.stringify( data['trackSpeedRandomFactorList'] ));
 		}else{
 			result['trackSpeedRandomFactorList'] = [];									//轨道锚点 - 速度 - 随机因子（锁定随机值专用,0-1之间）
-			for( var i=0; i < data['movementNum']; i++ ){
+			for( var i=0; i < result['movementNum']; i++ ){
 				result['trackSpeedRandomFactorList'].push( Math.random() );
 			}
 		}

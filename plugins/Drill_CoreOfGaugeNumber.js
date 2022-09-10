@@ -503,7 +503,7 @@
  * @param 资源-基本符号
  * @parent ---主体---
  * @desc 基本符号的图片资源。注意，资源会被分成14等分，分别表示数字和加减乘除（0123456789+-x/）。
- * @default 基本符号-默认
+ * @default (需配置)基本符号
  * @require 1
  * @dir img/Special__number/
  * @type file
@@ -511,7 +511,7 @@
  * @param 资源-扩展符号
  * @parent ---主体---
  * @desc 扩展符号的图片资源，注意，资源会被分成14等分。通过字母表示扩展符号（abcdefghijklmn）。
- * @default 扩展符号-默认
+ * @default (需配置)扩展符号
  * @require 1
  * @dir img/Special__number/
  * @type file
@@ -664,7 +664,7 @@
  * @param 资源-额定基本符号
  * @parent ---额定值---
  * @desc 满足额定条件时基本符号的图片资源。注意，资源会被分成14等分，分别表示数字和加减乘除（0123456789+-x/）。
- * @default 额定基本符号-默认
+ * @default (需配置)额定基本符号
  * @require 1
  * @dir img/Special__number/
  * @type file
@@ -672,7 +672,7 @@
  * @param 资源-额定扩展符号
  * @parent ---额定值---
  * @desc 满足额定条件时扩展符号的图片资源，注意，资源会被分成14等分。通过字母表示扩展符号（abcdefghijklmn）。
- * @default 额定扩展符号-默认
+ * @default (需配置)额定扩展符号
  * @require 1
  * @dir img/Special__number/
  * @type file

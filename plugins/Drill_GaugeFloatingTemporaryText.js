@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        地图UI - 临时漂浮文字
+ * @plugindesc [v1.3]        地图UI - 临时漂浮文字
  * @author Drill_up
  * 
  * @Drill_LE_param "临时漂浮样式-%d"
@@ -124,6 +124,8 @@
  * 添加了插件指令 修改文本 的空格支持。
  * [v1.2]
  * 优化了内部结构。
+ * [v1.3]
+ * 优化了与地图活动镜头的变换关系。
  *
  *
  *
@@ -467,7 +469,7 @@
  * @param 资源-自定义背景图片
  * @parent 布局模式
  * @desc 背景图片布局的资源。
- * @default 
+ * @default (需配置)临时漂浮文字-自定义背景图片
  * @require 1
  * @dir img/system/
  * @type file
@@ -872,7 +874,7 @@
 //					->添加贴图到层级【标准函数】
 //					->去除贴图【标准函数】
 //					->图片层级排序【标准函数】
-//					->参照的位移【标准函数】
+//					->层级与镜头的位移【标准函数】
 //
 //		★必要注意事项：
 //			1.插件的图片层级与多个插件共享。【必须自写 层级排序 函数】
@@ -1252,11 +1254,11 @@ Scene_Map.prototype.drill_GFTT_sortByZIndex = function () {
     this.drill_GFTT_sortByZIndex_Private();
 }
 //##############################
-// * 地图层级 - 参照的位移【标准函数】（暂未使用）
+// * 地图层级 - 层级与镜头的位移【标准函数】
 //				
-//			参数：	> x 数字           （x位置，地图参照为基准）
-//					> y 数字           （y位置，地图参照为基准）
-//					> reference 字符串 （参考系，镜头参照/地图参照）
+//			参数：	> x 数字              （x位置）
+//					> y 数字              （y位置）
+//					> layer 字符串        （层级，下层/中层/上层/图片层/最顶层）
 //					> option 动态参数对象 （计算时的必要数据）
 //			返回：	> pos 动态参数对象
 //                  > pos['x']
@@ -1264,8 +1266,8 @@ Scene_Map.prototype.drill_GFTT_sortByZIndex = function () {
 //          
 //			说明：	> 强行规范的接口，必须按照接口的结构来，把要考虑的问题全考虑清楚了再去实现。
 //##############################
-Scene_Map.prototype.drill_GFTT_layerMoveingReference = function( x, y, reference, option ){
-	return this.drill_GFTT_layerMoveingReference_Private( x, y, reference, option );
+Scene_Map.prototype.drill_GFTT_layerCameraMoving = function( x, y, layer, option ){
+	return this.drill_GFTT_layerCameraMoving_Private( x, y, layer, option );
 }
 //=============================================================================
 // ** 地图层级（接口实现）
@@ -1367,26 +1369,45 @@ Scene_Map.prototype.drill_GFTT_layerAddSprite_Private = function( sprite, layer_
 	}
 }
 //==============================
-// * 地图层级 - 参照的位移（私有）
+// * 地图层级 - 层级与镜头的位移（私有）
 //==============================
-Scene_Map.prototype.drill_GFTT_layerMoveingReference_Private = function( xx, yy, reference, option ){
+Scene_Map.prototype.drill_GFTT_layerCameraMoving_Private = function( xx, yy, layer, option ){
 	
-	// > 参照系修正
-	if( reference == "地图参照 -> 地图参照" ){
-		return {'x':xx, 'y':yy };
-	}
-	if( reference == "地图参照 -> 镜头参照" ){
-		xx += this._spriteset._baseSprite.x;	//（由于 Spriteset_Map 的 _baseSprite 坐标始终是(0,0)，所以两个参照没有区别。）
-		yy += this._spriteset._baseSprite.y;
-		return {'x':xx, 'y':yy };
-	}
-	if( reference == "镜头参照 -> 镜头参照" ){
-		return {'x':xx, 'y':yy };
-	}
-	if( reference == "镜头参照 -> 地图参照" ){
-		xx -= this._spriteset._baseSprite.x;	//（由于 Spriteset_Map 的 _baseSprite 坐标始终是(0,0)，所以两个参照没有区别。）
-		yy -= this._spriteset._baseSprite.y;
-		return {'x':xx, 'y':yy };
+	// > 层级与镜头的位移
+	if( option['window_benchmark'] == "相对于地图" ){
+		
+		// > 相对地图的偏移
+		var pos_x = $gameMap.adjustX(0);
+		var pos_y = $gameMap.adjustY(0);
+		xx += $gameMap.deltaX( pos_x, option['orgPos_x'] ) * $gameMap.tileWidth();
+		yy += $gameMap.deltaY( pos_y, option['orgPos_y'] ) * $gameMap.tileHeight();
+		
+		
+		// > 地图参照 -> 地图参照
+		if( layer == "下层" || layer == "中层" || layer == "上层" ){
+			//（不操作）
+			return {'x':xx, 'y':yy };
+		}
+		
+		// > 地图参照 -> 镜头参照
+		if( layer == "图片层" || layer == "最顶层" ){
+			//（不需要变换）
+			return {'x':xx, 'y':yy };
+		}
+	
+	}else{
+		
+		// > 镜头参照 -> 地图参照
+		if( layer == "下层" || layer == "中层" || layer == "上层" ){
+			//（不需要变换）
+			return {'x':xx, 'y':yy };
+		}
+		
+		// > 镜头参照 -> 镜头参照
+		if( layer == "图片层" || layer == "最顶层" ){
+			//（不操作）
+			return {'x':xx, 'y':yy };
+		}
 	}
 	return {'x':xx, 'y':yy };
 }
@@ -1540,47 +1561,32 @@ Scene_Map.prototype.drill_GFTT_updateWindowPosition = function() {
 		xx += temp_window['_drill_COBa_x'][ time ];		//播放弹道轨迹
 		yy += temp_window['_drill_COBa_y'][ time ];
 		
-		// > 参照的位移
-		if( s_data['window_benchmark'] == "相对于地图" ){
-			
-			// > 相对地图的偏移
-			var pos_x = $gameMap.adjustX(0);
-			var pos_y = $gameMap.adjustY(0);
-			xx += $gameMap.deltaX( pos_x, temp_window._drill_orgPos_x ) * $gameMap.tileWidth();
-			yy += $gameMap.deltaY( pos_y, temp_window._drill_orgPos_y ) * $gameMap.tileHeight();
-			
-			if( s_data['window_map_layer'] == '下层' ||
-				s_data['window_map_layer'] == '中层' ||
-				s_data['window_map_layer'] == '上层' ){
-				var pos = this.drill_GFTT_layerMoveingReference(xx, yy, "地图参照 -> 地图参照", {} );
-				xx = pos['x'];
-				yy = pos['y'];
-			}else{
-				var pos = this.drill_GFTT_layerMoveingReference(xx, yy, "地图参照 -> 镜头参照", {} );
-				xx = pos['x'];
-				yy = pos['y'];
-			}
-		}else{
-			if( s_data['window_map_layer'] == '下层' ||
-				s_data['window_map_layer'] == '中层' ||
-				s_data['window_map_layer'] == '上层' ){
-				var pos = this.drill_GFTT_layerMoveingReference(xx, yy, "镜头参照 -> 地图参照", {} );
-				xx = pos['x'];
-				yy = pos['y'];
-			}else{
-				var pos = this.drill_GFTT_layerMoveingReference(xx, yy, "镜头参照 -> 镜头参照", {} );
-				xx = pos['x'];
-				yy = pos['y'];
-			}
-		}
+		
+		// > 层级与镜头的位移
+		var option = {
+			"window_benchmark": s_data['window_benchmark'],
+			"orgPos_x": temp_window._drill_orgPos_x,
+			"orgPos_y": temp_window._drill_orgPos_y,
+		};
+		var pos = this.drill_GFTT_layerCameraMoving(xx, yy, s_data['window_map_layer'], option );
+		xx = pos['x'];
+		yy = pos['y'];
+		
 	
-		// > 地图镜头修正（处于下层/中层/上层/图片层，需要一起缩放）
-		if( Imported.Drill_LayerCamera && 			
-			s_data['window_map_layer'] != "最顶层" ){
-			xx = $gameSystem.drill_LCa_cameraToMapX( xx );
-			yy = $gameSystem.drill_LCa_cameraToMapY( yy );
-			temp_window.scale.x = 1.00 / $gameSystem.drill_LCa_curScaleX();
-			temp_window.scale.y = 1.00 / $gameSystem.drill_LCa_curScaleY();
+		// > 镜头缩放与位移【地图 - 活动地图镜头】
+		if( Imported.Drill_LayerCamera ){
+			var layer = s_data['window_map_layer'];
+			if( layer == "下层" || layer == "中层" || layer == "上层" ){
+				temp_window.scale.x = 1.00 / $gameSystem.drill_LCa_curScaleX();
+				temp_window.scale.y = 1.00 / $gameSystem.drill_LCa_curScaleY();
+				//（暂不考虑缩放位移偏转）
+			}
+			if( layer == "图片层" || layer == "最顶层" ){
+				if( s_data['window_benchmark'] == "相对于地图" ){
+					xx = $gameSystem.drill_LCa_mapToCameraX( xx );
+					yy = $gameSystem.drill_LCa_mapToCameraY( yy );
+				}
+			}
 		}
 		
 		temp_window.x = xx;
@@ -1609,7 +1615,6 @@ Scene_Map.prototype.drill_GFTT_updateWindowPosition = function() {
 //								> 黑底背景
 //						->位置
 //							->地图UI基准
-//							->地图镜头修正
 //							->窗口的锚点
 //						->持续时间
 //							->移动弹道持续时间（延迟+移动时长+结束延迟）

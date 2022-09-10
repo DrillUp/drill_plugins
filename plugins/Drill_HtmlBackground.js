@@ -185,7 +185,7 @@
  * @param 资源-左侧图像
  * @parent ---贴边图像---
  * @desc 黑边背景的左侧图像。
- * @default 黑边背景-左侧图像
+ * @default (需配置)黑边背景-左侧图像
  * @require 1
  * @dir img/Special__layer/
  * @type file
@@ -193,7 +193,7 @@
  * @param 资源-右侧图像
  * @parent ---贴边图像---
  * @desc 黑边背景的右侧图像。
- * @default 黑边背景-右侧图像
+ * @default (需配置)黑边背景-右侧图像
  * @require 1
  * @dir img/Special__layer/
  * @type file
@@ -201,7 +201,7 @@
  * @param 资源-上侧图像
  * @parent ---贴边图像---
  * @desc 黑边背景的上侧图像。
- * @default 黑边背景-上侧图像
+ * @default (需配置)黑边背景-上侧图像
  * @require 1
  * @dir img/Special__layer/
  * @type file
@@ -209,7 +209,7 @@
  * @param 资源-下侧图像
  * @parent ---贴边图像---
  * @desc 黑边背景的下侧图像。
- * @default 黑边背景-下侧图像
+ * @default (需配置)黑边背景-下侧图像
  * @require 1
  * @dir img/Special__layer/
  * @type file
@@ -300,7 +300,7 @@
  *
  * @param 资源-背景
  * @desc 背景的图片资源。
- * @default 黑边背景-平铺背景
+ * @default (需配置)黑边背景-平铺背景
  * @require 1
  * @dir img/Special__layer/
  * @type file

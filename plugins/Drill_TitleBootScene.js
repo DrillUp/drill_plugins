@@ -313,7 +313,7 @@
  * @param 资源-单图
  * @parent ---单图模式---
  * @desc 单张图片的资源设置。
- * @default 启动界面-单图
+ * @default (需配置)启动界面-单图
  * @require 1
  * @dir img/titles2/
  * @type file
@@ -352,7 +352,7 @@
  * @param 资源-GIF
  * @parent ---GIF模式---
  * @desc png图片资源组，多张构成gif。
- * @default ["启动界面-默认GIF"]
+ * @default ["(需配置)启动界面-默认GIF"]
  * @require 1
  * @dir img/titles2/
  * @type file[]

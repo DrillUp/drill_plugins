@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        战斗UI - 永久漂浮文字
+ * @plugindesc [v1.2]        战斗UI - 永久漂浮文字
  * @author Drill_up
  * 
  * @Drill_LE_param "永久漂浮样式-%d"
@@ -138,6 +138,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 优化了内部结构。
+ * [v1.2]
+ * 优化了与战斗活动镜头的变换关系。
  *
  *
  *
@@ -480,7 +482,7 @@
 //					->添加贴图到层级【标准函数】
 //					->去除贴图【标准函数】
 //					->图片层级排序【标准函数】
-//					->参照的位移【标准函数】
+//					->层级与镜头的位移【标准函数】
 //
 //		★必要注意事项：
 //			1.插件的图片层级与多个插件共享。【必须自写 层级排序 函数】
@@ -805,11 +807,11 @@ Scene_Battle.prototype.drill_BFPT_sortByZIndex = function () {
     this.drill_BFPT_sortByZIndex_Private();
 }
 //##############################
-// * 战斗层级 - 参照的位移【标准函数】（暂未使用）
+// * 战斗层级 - 层级与镜头的位移【标准函数】
 //				
-//			参数：	> x 数字           （x位置）
-//					> y 数字           （y位置）
-//					> reference 字符串 （参考系，镜头参照/战斗参照）
+//			参数：	> x 数字              （x位置）
+//					> y 数字              （y位置）
+//					> layer 字符串        （层级，下层/上层/图片层/最顶层）
 //					> option 动态参数对象 （计算时的必要数据）
 //			返回：	> pos 动态参数对象
 //                  > pos['x']
@@ -817,8 +819,8 @@ Scene_Battle.prototype.drill_BFPT_sortByZIndex = function () {
 //          
 //			说明：	> 强行规范的接口，必须按照接口的结构来，把要考虑的问题全考虑清楚了再去实现。
 //##############################
-Scene_Battle.prototype.drill_BFPT_layerMoveingReference = function( x, y, reference, option ){
-	return this.drill_BFPT_layerMoveingReference_Private( x, y, reference, option );
+Scene_Battle.prototype.drill_BFPT_layerCameraMoving = function( x, y, layer, option ){
+	return this.drill_BFPT_layerCameraMoving_Private( x, y, layer, option );
 }
 //=============================================================================
 // ** 战斗层级（接口实现）
@@ -879,7 +881,7 @@ Scene_Battle.prototype.drill_BFPT_sortByZIndex_Private = function() {
 	this._drill_SenceTopArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
 };
 //==============================
-// * 战斗层级 - 图片层级排序（私有）
+// * 战斗层级 - 去除贴图（私有）
 //==============================
 Scene_Battle.prototype.drill_BFPT_layerRemoveSprite_Private = function( sprite ){
 	this._spriteset._drill_battleDownArea.removeChild( sprite );
@@ -905,32 +907,59 @@ Scene_Battle.prototype.drill_BFPT_layerAddSprite_Private = function( sprite, lay
 	}
 }
 //==============================
-// * 战斗层级 - 参照的位移（私有）
+// * 战斗层级 - 层级与镜头的位移（私有）
 //==============================
-Scene_Battle.prototype.drill_BFPT_layerMoveingReference_Private = function( xx, yy, reference, option ){
-	
-	// > 参照系修正
-	if( reference == "战斗参照 -> 战斗参照" ){
-		//（不操作）
-		return {'x':xx, 'y':yy };
-	}
-	if( reference == "战斗参照 -> 镜头参照" ){
-		xx += this._spriteset._baseSprite.x;	//（由于 Spriteset_Battle 的 _baseSprite 坐标始终是(0,0)，所以两个参照没有区别。）
-		yy += this._spriteset._baseSprite.y;
-		xx += this._spriteset._battleField.x;	//（处于 Spriteset_Battle 的 _battleField 情况。）
-		yy += this._spriteset._battleField.y;
-		return {'x':xx, 'y':yy };
-	}
-	if( reference == "镜头参照 -> 镜头参照" ){
-		//（不操作）
-		return {'x':xx, 'y':yy };
-	}
-	if( reference == "镜头参照 -> 战斗参照" ){
-		xx -= this._spriteset._baseSprite.x;	//（由于 Spriteset_Battle 的 _baseSprite 坐标始终是(0,0)，所以两个参照没有区别。）
-		yy -= this._spriteset._baseSprite.y;
-		xx -= this._spriteset._battleField.x;	//（处于 Spriteset_Battle 的 _battleField 情况。）
-		yy -= this._spriteset._battleField.y;
-		return {'x':xx, 'y':yy };
+Scene_Battle.prototype.drill_BFPT_layerCameraMoving_Private = function( xx, yy, layer, option ){
+		
+	if( option['window_benchmark'] == "相对于战斗场景" ){
+		
+		// > 战斗参照 -> 战斗参照
+		if( layer == "下层" || layer == "上层" ){
+			//（不操作）
+			return {'x':xx, 'y':yy };
+		}
+		
+		// > 战斗参照 -> 镜头参照
+		if( layer == "图片层" || layer == "最顶层" ){
+			xx += this._spriteset._baseSprite.x;
+			yy += this._spriteset._baseSprite.y;
+			
+			// > 战斗镜头位移（在图层内）
+			if( Imported.Drill_BattleCamera ){
+				var offset_pos = $gameSystem._drill_BCa_controller.drill_BCa_getCameraPosOffset();
+				xx += offset_pos.x;
+				yy += offset_pos.y;
+			}else{
+				xx += this._spriteset._battleField.x;
+				yy += this._spriteset._battleField.y;
+			}
+			return {'x':xx, 'y':yy };
+		}
+		
+	}else{
+		
+		// > 镜头参照 -> 镜头参照
+		if( layer == "下层" || layer == "上层" ){
+			xx -= this._spriteset._baseSprite.x;
+			yy -= this._spriteset._baseSprite.y;
+			
+			// > 战斗镜头位移（在图层内）
+			if( Imported.Drill_BattleCamera ){
+				var camera_pos = $gameSystem._drill_BCa_controller.drill_BCa_getCameraPos_Children();
+				xx -= camera_pos.x;
+				yy -= camera_pos.y;
+			}else{
+				xx -= this._spriteset._battleField.x;
+				yy -= this._spriteset._battleField.y;
+			}
+			return {'x':xx, 'y':yy };
+		}
+		
+		// > 镜头参照 -> 战斗参照
+		if( layer == "图片层" || layer == "最顶层" ){
+			//（不操作）
+			return {'x':xx, 'y':yy };
+		}
 	}
 	return {'x':xx, 'y':yy };
 }
@@ -1133,31 +1162,16 @@ Scene_Battle.prototype.drill_BFPT_updateDataMoving = function() {
 		}
 		xx += data['_drill_COBa_x'][ data['m_cur_time'] ];		//播放弹道轨迹
 		yy += data['_drill_COBa_y'][ data['m_cur_time'] ];
-		
-		// > 参照的位移
-		if( data['window_benchmark'] == "相对于战斗场景" ){
-			if( data['window_battle_layer'] == '下层' ||
-				data['window_battle_layer'] == '上层' ){
-				var pos = this.drill_BFPT_layerMoveingReference(xx, yy, "战斗参照 -> 战斗参照", {} );
-				xx = pos['x'];
-				yy = pos['y'];
-			}else{
-				var pos = this.drill_BFPT_layerMoveingReference(xx, yy, "战斗参照 -> 镜头参照", {} );
-				xx = pos['x'];
-				yy = pos['y'];
-			}
-		}else{
-			if( data['window_battle_layer'] == '下层' ||
-				data['window_battle_layer'] == '上层' ){
-				var pos = this.drill_BFPT_layerMoveingReference(xx, yy, "镜头参照 -> 战斗参照", {} );
-				xx = pos['x'];
-				yy = pos['y'];
-			}else{
-				var pos = this.drill_BFPT_layerMoveingReference(xx, yy, "镜头参照 -> 镜头参照", {} );
-				xx = pos['x'];
-				yy = pos['y'];
-			}
-		}
+	
+	
+		// > 层级与镜头的位移（参照设置与 window_benchmark 有关）
+		var option = {
+			"window_benchmark": data['window_benchmark'],
+		};
+		var pos = this.drill_BFPT_layerCameraMoving(xx, yy, data['window_battle_layer'], option );
+		xx = pos['x'];
+		yy = pos['y'];
+	
 		
 		data['x'] = xx;
 		data['y'] = yy;

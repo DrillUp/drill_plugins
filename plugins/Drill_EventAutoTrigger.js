@@ -1612,11 +1612,11 @@ Scene_Map.prototype.drill_EAT_sortByZIndex = function () {
     this.drill_EAT_sortByZIndex_Private();
 }
 //##############################
-// * 地图层级 - 参照的位移【标准函数】
+// * 地图层级 - 层级与镜头的位移【标准函数】
 //				
-//			参数：	> x 数字           （x位置）
-//					> y 数字           （y位置）
-//					> reference 字符串 （参考系，镜头参照/地图参照）
+//			参数：	> x 数字              （x位置）
+//					> y 数字              （y位置）
+//					> layer 字符串        （层级，下层/中层/上层/图片层/最顶层）
 //					> option 动态参数对象 （计算时的必要数据）
 //			返回：	> pos 动态参数对象
 //                  > pos['x'] （移动后的坐标X）
@@ -1624,8 +1624,8 @@ Scene_Map.prototype.drill_EAT_sortByZIndex = function () {
 //          
 //			说明：	> 强行规范的接口，必须按照接口的结构来，把要考虑的问题全考虑清楚了再去实现。
 //##############################
-Scene_Map.prototype.drill_EAT_layerMoveingReference = function( x, y, reference, option ){
-	return this.drill_EAT_layerMoveingReference_Private( x, y, reference, option );
+Scene_Map.prototype.drill_EAT_layerCameraMoving = function( x, y, layer, option ){
+	return this.drill_EAT_layerCameraMoving_Private( x, y, layer, option );
 }
 //=============================================================================
 // ** 地图层级（接口实现）
@@ -1679,19 +1679,20 @@ Scene_Map.prototype.drill_EAT_layerRemoveSprite_Private = function( sprite ){
 	this._spriteset._drill_mapUpArea.removeChild( sprite );
 };
 //==============================
-// * 地图层级 - 参照的位移（私有）
+// * 地图层级 - 层级与镜头的位移（私有）
 //			
 //			说明：	当前的xx，yy的参照系是 地图参照 。
 //==============================
-Scene_Map.prototype.drill_EAT_layerMoveingReference_Private = function( xx, yy, reference, option ){
+Scene_Map.prototype.drill_EAT_layerCameraMoving_Private = function( xx, yy, layer, option ){
 	
-	// > 参照系修正
-	if( reference == "地图参照 -> 地图参照" ){
+	// > 地图参照 -> 地图参照
+	if( layer == "下层" || layer == "中层" || layer == "上层" ){
 		return {'x':xx, 'y':yy };
 	}
-	if( reference == "地图参照 -> 镜头参照" ){
-		xx -= this._spriteset._baseSprite.x;	//（由于 Spriteset_Map 的 _baseSprite 坐标始终是(0,0)，所以两个参照没有区别。）
-		yy -= this._spriteset._baseSprite.y;
+	
+	// > 地图参照 -> 镜头参照
+	if( layer == "图片层" || layer == "最顶层" ){
+		//（不需要变换）
 		return {'x':xx, 'y':yy };
 	}
 	return {'x':xx, 'y':yy };
@@ -1789,13 +1790,12 @@ Scene_Map.prototype.drill_EAT_DEBUG_updateSprite = function() {
 		xx = Math.round( $gameMap.adjustX( xx ) * tw + tw / 2);
 		yy = Math.round( $gameMap.adjustY( yy ) * th + th / 2);
 		
-		// > 参照的位移
-		if( temp_sprite['layer_index'] == "中层" ||
-			temp_sprite['layer_index'] == "上层" ){
-			var pos = this.drill_EAT_layerMoveingReference( xx, yy, "地图参照 -> 地图参照", {} );
-			temp_sprite.x = pos['x'];
-			temp_sprite.y = pos['y'];
-		}
+		
+		// > 层级与镜头的位移
+		var pos = this.drill_EAT_layerCameraMoving( xx, yy, temp_sprite['layer_index'], {} );
+		temp_sprite.x = pos['x'];
+		temp_sprite.y = pos['y'];
+		
 		
 		// > 图块点变化
 		var area_data = DrillUp.g_EAT_area[ i ];

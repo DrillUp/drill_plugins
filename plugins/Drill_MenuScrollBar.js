@@ -278,7 +278,7 @@
  * @param 资源-外框
  * @parent ---外框---
  * @desc png图片资源组，可以是单张图片，也可以是多张构成的GIF。
- * @default ["滚动条外框-默认"]
+ * @default ["(需配置)菜单滚动条外框"]
  * @require 1
  * @dir img/Menu__ui/
  * @type file[]
@@ -323,7 +323,7 @@
  * @param 资源-内条
  * @parent ---内条---
  * @desc png图片资源组，可以是单张图片，也可以是多张构成的GIF。
- * @default ["滚动条内条-默认"]
+ * @default ["(需配置)菜单滚动条内条"]
  * @require 1
  * @dir img/Menu__ui/
  * @type file[]

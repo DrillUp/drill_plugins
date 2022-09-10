@@ -1421,7 +1421,7 @@
  * @param 绑定的动画
  * @parent ---绑定---
  * @type animation
- * @desc 指定动画的id，粒子样式将会与动画相互绑定。
+ * @desc 指定动画的id，粒子将会与动画相互绑定。
  * @default 0
  * 
  * @param ---贴图---
@@ -1438,7 +1438,7 @@
  * @param 资源-粒子
  * @parent ---贴图---
  * @desc 粒子的图片资源。
- * @default 动画粒子-默认
+ * @default (需配置)动画粒子
  * @require 1
  * @dir img/Special__anim/
  * @type file
@@ -1476,7 +1476,7 @@
  * @value 在动画后面
  * @option 在动画前面
  * @value 在动画前面
- * @desc 粒子样式所属的动画层级。父贴图后面是指：战斗时，敌人/玩家贴图的后面，地图中，事件贴图的后面。
+ * @desc 粒子所属的动画层级。父贴图后面是指：战斗时，敌人/玩家贴图的后面，地图中，事件贴图的后面。
  * @default 在动画后面
  *
  * @param 图片层级
@@ -1493,14 +1493,14 @@
  * @parent ---动画过程---
  * @type number
  * @min 0
- * @desc 粒子样式将延迟一段时间显现，单位帧。
+ * @desc 粒子将延迟一段时间显现，单位帧。
  * @default 0
  *
  * @param 出现时长
  * @parent ---动画过程---
  * @type number
  * @min 0
- * @desc 粒子样式显现的时间，单位帧。
+ * @desc 粒子显现的时间，单位帧。
  * @default 60
  *
  * @param 出现模式
@@ -1516,21 +1516,21 @@
  * @value 缩小显现
  * @option 普通淡入显现
  * @value 普通淡入显现
- * @desc 粒子样式显现的模式方法。
+ * @desc 粒子显现的模式方法。
  * @default 横向显现
  *
  * @param 持续时长
  * @parent ---动画过程---
  * @type number
  * @min 0
- * @desc 粒子样式持续的时间，单位帧。
+ * @desc 粒子持续的时间，单位帧。
  * @default 220
  *
  * @param 消失时长
  * @parent ---动画过程---
  * @type number
  * @min 0
- * @desc 粒子样式显现的延迟时间。
+ * @desc 粒子消失的时间。
  * @default 30
  *
  * @param 消失模式
@@ -1546,7 +1546,7 @@
  * @value 缩小消失
  * @option 普通淡出消失
  * @value 普通淡出消失
- * @desc 粒子样式消失的模式方法。
+ * @desc 粒子消失的模式方法。
  * @default 普通淡出消失
  * 
  * 
@@ -1681,7 +1681,7 @@
  * @param 资源-第二层粒子
  * @parent ---双层效果---
  * @desc 第二层粒子的图片资源。
- * @default 粒子-默认粒子
+ * @default (需配置)第二层粒子
  * @require 1
  * @dir img/Special__anim/
  * @type file
@@ -2930,13 +2930,18 @@ Drill_APa_Sprite.prototype.drill_APa_resetParticles = function( i ){
 };
 //==============================
 // * 数学 - 计算点A朝向点B的角度
-//
+//			
+//			参数：	> x1,y1 数字（点A）
+//					> x2,y2 数字（点B）
+//			返回：	> 数字      （角度，0 至 360 之间）
+//			
 //			说明：	0度朝右，90度朝下，180度朝左，270度朝上。
-//					返回的值永远保持在 0 至 360 之间。
 //==============================
 Drill_APa_Sprite.prototype.drill_APa_getPointToPointDegree = function( x1,y1,x2,y2 ){
 	var degree = 0;
-	if( x2 == x1 ){		// arctan不能为0情况
+	
+	// > arctan不能为0情况
+	if( x2 == x1 ){
 		if( y2 > y1 ){
 			degree = 90;
 		}else{
@@ -2948,8 +2953,10 @@ Drill_APa_Sprite.prototype.drill_APa_getPointToPointDegree = function( x1,y1,x2,
 		}else{
 			degree = 180;
 		}
-	}else{	// arctan正常计算
-		degree = Math.atan( (y2 - y1)/(x2 - x1) );		//朝向自机的角度
+	
+	// > arctan正常计算
+	}else{
+		degree = Math.atan( (y2 - y1)/(x2 - x1) );
 		degree = degree / Math.PI * 180;
 		if( x2 < x1 ){
 			degree += 180;
@@ -3003,9 +3010,10 @@ Drill_APa_Sprite.prototype.drill_updatePosition = function() {
 			// > 角色位置修正
 			if( _sprite instanceof Sprite_Actor ){
 				// > 第一人称位置修正（战斗镜头）
-				if( Imported.Drill_BattleCamera && !$gameSystem.isSideView() ){
-					xx -= $gameTemp._drill_cam_pos[0];
-					yy -= $gameTemp._drill_cam_pos[1];
+				if( Imported.Drill_BattleCamera && !$gameSystem.isSideView() ){		//（在图层内）
+					var camera_pos = $gameSystem._drill_BCa_controller.drill_BCa_getCameraPos_Children();
+					xx -= camera_pos.x;
+					yy -= camera_pos.y;
 				}
 			}
 			// > 物体位置修正

@@ -192,7 +192,7 @@
  * @param 资源-指向标GIF
  * @parent ---贴图---
  * @desc 指向标的图片资源，可以是单张图片，也可以是多张组合的gif。
- * @default []
+ * @default ["(需配置)目的地指向标"]
  * @require 1
  * @dir img/Map__ui_mouse/
  * @type file[]
@@ -200,7 +200,7 @@
  * @param 资源-指向标阴影
  * @parent ---贴图---
  * @desc 鼠标指向标阴影的图片资源。漂浮效果时使用。
- * @default 目的地指向标-阴影
+ * @default (需配置)目的地指向标-阴影
  * @require 1
  * @dir img/Map__ui_mouse/
  * @type file
@@ -442,8 +442,8 @@ ImageManager.load_MapUiMouse = function(filename) {
 var _drill_MDe_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_MDe_pluginCommand.call(this, command, args);
-	
-	if (command === ">目的地指向标")  {
+	if( command === ">目的地指向标" ){
+		
 		if( args.length == 2 ){
 			var type = String(args[1]);
 			if( type == "显示" ){

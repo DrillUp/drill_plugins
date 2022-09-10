@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.1]        地图 - 多层地图背景
+ * @plugindesc [v2.2]        地图 - 多层地图背景
  * @author Drill_up
  * 
  * @Drill_LE_param "背景层-%d"
@@ -177,6 +177,8 @@
  * 添加了背景的浮动效果设置。
  * [v2.1]
  * 梳理优化了位移比的结构。
+ * [v2.2]
+ * 优化了与地图活动镜头的兼容结构。
  * 
  * 
  * 
@@ -1457,7 +1459,7 @@
  * @param 资源-背景
  * @parent ---贴图---
  * @desc 背景的图片资源。
- * @default 背景-默认地图背景
+ * @default (需配置)地图背景
  * @require 1
  * @dir img/Map__layer/
  * @type file
@@ -1638,7 +1640,7 @@
 //				->基本属性
 //					->地图层级
 //						->添加贴图到层级【标准函数】
-//						->参照的位移【标准函数】
+//						->层级与镜头的位移【标准函数】
 //						->图片层级排序【标准函数】
 //					->简单持续平移
 //					->镜头位移比
@@ -1907,14 +1909,16 @@ Game_System.prototype.drill_LG_initData = function() {
 		var data = JSON.parse(JSON.stringify( DrillUp.g_LG_layers[i] ));	//深拷贝数据
 		
 		// > 私有变量初始化
-		data['cur_speedX'] = 0;			//当前x位置（速度累加的结果）
-		data['cur_speedY'] = 0;			//
-		data['cameraX'] = 0;			//含循环累积的镜头位置（像素单位）
-		data['cameraY'] = 0;			//
-		data['loopX'] = 0;				//循环地图中，走动循环的次数
-		data['loopY'] = 0;				//
-		data['loopFixX'] = 0;			//循环地图中，把displayX取余的部分加回（图块单位）
-		data['loopFixY'] = 0;			//
+		data['cur_speedX'] = 0;				//当前x位置（速度累加的结果）
+		data['cur_speedY'] = 0;				//
+		data['cameraXAcc'] = 0;				//镜头基点（循环积累值）（像素单位）
+		data['cameraYAcc'] = 0;				//
+		data['cameraExtraX'] = 0;			//镜头缩放的额外偏移
+		data['cameraExtraY'] = 0;			//
+		//data['loopX'] = 0;				//循环地图中，走动循环的次数
+		//data['loopY'] = 0;				//
+		//data['loopFixX'] = 0;				//循环地图中，把displayX取余的部分加回（图块单位）
+		//data['loopFixY'] = 0;				//
 		
 		this._drill_LG_dataTank.push(data);
 	}
@@ -1954,6 +1958,7 @@ Game_Map.prototype.drill_LG_initMapdata = function() {
 		}
 	}
 }
+DrillUp.g_LG_alert = true;
 //==============================
 // * 玩家 - 帧刷新 镜头位置
 //
@@ -1968,10 +1973,27 @@ Game_Player.prototype.update = function( sceneActive ){
 	
 	for(var i = 0; i< $gameSystem._drill_LG_dataTank_map.length ;i++){
 		var data = $gameSystem._drill_LG_dataTank_map[i];
-		data['cameraX'] = ($gameMap.displayX() + data['loopFixX']) * $gameMap.tileWidth();
-		data['cameraY'] = ($gameMap.displayY() + data['loopFixY']) * $gameMap.tileHeight();
+		
+		// > 镜头基点（循环积累值）
+		if( Imported.Drill_LayerCamera ){
+			if( $gameSystem._drill_LCa_controller == undefined && DrillUp.g_LG_alert == true ){ 
+				alert("【Drill_LayerGround.js 地图 - 多层地图背景】\n活动地图镜头插件版本过低，你需要更新 镜头插件 至少v1.9及以上版本。");
+				DrillUp.g_LG_alert = false;
+				return; 
+			}
+			data['cameraXAcc'] = $gameSystem._drill_LCa_controller._drill_cameraX_offsetAcc * $gameMap.tileWidth();
+			data['cameraYAcc'] = $gameSystem._drill_LCa_controller._drill_cameraY_offsetAcc * $gameMap.tileHeight();
+			
+		// > 镜头基点
+		}else{
+			data['cameraXAcc'] = $gameMap.displayX() * $gameMap.tileWidth();
+			data['cameraYAcc'] = $gameMap.displayY() * $gameMap.tileHeight();
+		}
+		//data['cameraXAcc'] = ($gameMap.displayX() + data['loopFixX']) * $gameMap.tileWidth();
+		//data['cameraYAcc'] = ($gameMap.displayY() + data['loopFixY']) * $gameMap.tileHeight();
 	}
 };
+/*	（旧代码）
 //==============================
 // * 镜头滚动 - 向下滚动
 //==============================
@@ -2036,7 +2058,7 @@ Game_Map.prototype.scrollRight = function(distance) {
 	}
     _drill_LG_Map_scrollRight.call(this, distance);
 };
-
+*/
 
 //#############################################################################
 // ** 【标准模块】地图层级
@@ -2076,11 +2098,11 @@ Scene_Map.prototype.drill_LG_sortByZIndex = function () {
     this.drill_LG_sortByZIndex_Private();
 }
 //##############################
-// * 地图层级 - 参照的位移【标准函数】
+// * 地图层级 - 层级与镜头的位移【标准函数】
 //				
-//			参数：	> x 数字           （x位置）
-//					> y 数字           （y位置）
-//					> reference 字符串 （参考系，镜头参照/地图参照）
+//			参数：	> x 数字              （x位置）
+//					> y 数字              （y位置）
+//					> layer 字符串        （层级，下层/中层/上层/图片层/最顶层）
 //					> option 动态参数对象 （计算时的必要数据）
 //			返回：	> pos 动态参数对象
 //                  > pos['x']
@@ -2088,8 +2110,8 @@ Scene_Map.prototype.drill_LG_sortByZIndex = function () {
 //          
 //			说明：	> 强行规范的接口，必须按照接口的结构来，把要考虑的问题全考虑清楚了再去实现。
 //##############################
-Scene_Map.prototype.drill_LG_layerMoveingReference = function (x, y, reference, option) {
-    return this.drill_LG_layerMoveingReference_Private(x, y, reference, option);
+Scene_Map.prototype.drill_LG_layerCameraMoving = function( x, y, layer, option ){
+    return this.drill_LG_layerCameraMoving_Private( x, y, layer, option );
 }
 //=============================================================================
 // ** 地图层级（接口实现）
@@ -2163,27 +2185,27 @@ Scene_Map.prototype.drill_LG_sortByZIndex_Private = function() {
 //==============================
 // * 地图层级 - 添加贴图到层级（私有）
 //==============================
-Scene_Map.prototype.drill_LG_layerAddSprite_Private = function (sprite, layer_index) {
-    if (layer_index == "下层") {
-        this._spriteset._drill_mapDownArea.addChild(sprite);
-    }
-    if (layer_index == "中层") {
-        this._spriteset._drill_mapCenterArea.addChild(sprite);
-    }
-    if (layer_index == "上层") {
-        this._spriteset._drill_mapUpArea.addChild(sprite);
-    }
-    if (layer_index == "图片层") {
-        this._spriteset._drill_mapPicArea.addChild(sprite);
-    }
-    if (layer_index == "最顶层") {
-        this._drill_SenceTopArea.addChild(sprite);
-    }
+Scene_Map.prototype.drill_LG_layerAddSprite_Private = function( sprite, layer_index ){
+	if( layer_index == "下层" ){
+		this._spriteset._drill_mapDownArea.addChild( sprite );
+	}
+	if( layer_index == "中层" ){
+		this._spriteset._drill_mapCenterArea.addChild( sprite );
+	}
+	if( layer_index == "上层" ){
+		this._spriteset._drill_mapUpArea.addChild( sprite );
+	}
+	if( layer_index == "图片层" ){
+		this._spriteset._drill_mapPicArea.addChild( sprite );
+	}
+	if( layer_index == "最顶层" ){
+		this._drill_SenceTopArea.addChild( sprite );
+	}
 }
 //==============================
-// * 地图层级 - 参照的位移（私有）
+// * 地图层级 - 层级与镜头的位移（私有）
 //==============================
-Scene_Map.prototype.drill_LG_layerMoveingReference_Private = function( xx, yy, reference, option ){
+Scene_Map.prototype.drill_LG_layerCameraMoving_Private = function( xx, yy, layer, option ){
 	
 	// > 位移比
 	//		（这里是位移比配置是反的，可能是因为 TilingSprite 的缘故。）
@@ -2194,16 +2216,22 @@ Scene_Map.prototype.drill_LG_layerMoveingReference_Private = function( xx, yy, r
 	yy -= option['tile_y'] * $gameMap.tileHeight() * y_per;
 	//		（*0 表示紧贴地图；*1表示减回去了，紧贴镜头。）
 	
-	xx += option['cameraX'] * x_per;
-	yy += option['cameraY'] * y_per;
+	xx += option['cameraXAcc'] * x_per;
+	yy += option['cameraYAcc'] * y_per;
 	//		（*0 表示不跟镜头移动，紧贴地图；*1表示紧贴镜头。）
 	
 	
-	// > 参照系修正
-	if( reference == "地图参照 -> 地图参照" ){
+	// > 镜头缩放的额外偏移
+	xx += option['cameraExtraX'];
+	yy += option['cameraExtraY'];
+	
+	
+	// > 地图参照 -> 地图参照
+	if( layer == "下层" || layer == "中层" || layer == "上层" ){
 		return {'x':xx, 'y':yy };
 	}
-	if( reference == "地图参照 -> 镜头参照" ){
+	// > 地图参照 -> 镜头参照
+	if( layer == "图片层" || layer == "最顶层" ){
 		xx -= this._spriteset._baseSprite.x;	//（由于 Spriteset_Map 的 _baseSprite 坐标始终是(0,0)，所以两个参照没有区别。）
 		yy -= this._spriteset._baseSprite.y;
 		return {'x':xx, 'y':yy };
@@ -2284,6 +2312,7 @@ Scene_Map.prototype.update = function() {
 	_drill_LG_scene_update.call(this);
 	
 	this.drill_LG_updateBase();				//基本属性（在游戏使用事件指令"结束游戏"后，让玩家移动，会造成图层错位问题。）
+	this.drill_LG_updateResize();			//缩放属性
 	
 	if( this.isActive() == true ){
 		this.drill_LG_updateChange();		//变化属性（该变化必须等 isActive 激活后执行，不然在变化时，会闪……目前原因不明，但也没必要深究了）
@@ -2324,21 +2353,13 @@ Scene_Map.prototype.drill_LG_updateBase = function() {
 			temp_data['cur_speedY'] += temp_data['speedY'];
 			xx += temp_data['cur_speedX'];
 			yy += temp_data['cur_speedY'];
-
-		    // > 参照的位移
-			if (temp_data['layer_index'] == "下层" ||
-                temp_data['layer_index'] == "中层" ||
-                temp_data['layer_index'] == "上层") {
-			    var pos = this.drill_LG_layerMoveingReference(xx, yy, "地图参照 -> 地图参照", temp_data);
-			    xx = pos['x'];
-			    yy = pos['y'];
-			}
-			if (temp_data['layer_index'] == "图片层" ||
-                temp_data['layer_index'] == "最顶层") {
-			    var pos = this.drill_LG_layerMoveingReference(xx, yy, "地图参照 -> 镜头参照", temp_data);
-			    xx = pos['x'];
-			    yy = pos['y'];
-			}
+			
+			
+			// > 层级与镜头的位移（地图参照）
+			var pos = this.drill_LG_layerCameraMoving( xx, yy, temp_data['layer_index'], temp_data );
+			xx = pos['x'];
+			yy = pos['y'];
+			
 			
 			// > 浮动效果
 			if( temp_data['float_enabled'] == true ){
@@ -2446,6 +2467,52 @@ Scene_Map.prototype.drill_LG_updateChange = function() {
 	for(var j = change_tank.length-1; j >= 0; j--){
 		if( change_tank[j].destroy == true ){
 			change_tank.splice(j, 1);
+		}
+	}
+}
+//=============================================================================
+// * 镜头兼容（兼容缩放、旋转的外包裹矩形）
+//=============================================================================
+Scene_Map.prototype.drill_LG_updateResize = function(){
+	
+	// > 【地图 - 活动地图镜头】
+	if( Imported.Drill_LayerCamera != true ){ return; }
+	
+	// > 值相同时，不刷新
+	var layer_sprite = this._spriteset._baseSprite;
+	if( this._drill_LG_LCa_rotation == layer_sprite.rotation &&
+		this._drill_LG_LCa_scale_x == layer_sprite.scale.x &&
+		this._drill_LG_LCa_scale_y == layer_sprite.scale.y ){
+		return;
+	}
+	this._drill_LG_LCa_rotation = layer_sprite.rotation;
+	this._drill_LG_LCa_scale_x = layer_sprite.scale.x;
+	this._drill_LG_LCa_scale_y = layer_sprite.scale.y;
+	
+	// > 外包裹矩形
+	var rect = $gameTemp.drill_LCa_getTileTransformRect( 
+					0,0,Graphics.boxWidth,Graphics.boxHeight,
+					layer_sprite.rotation,
+					layer_sprite.scale.x,
+					layer_sprite.scale.y
+				);
+	var ww = rect.width;
+	var hh = rect.height;
+	if( ww > 6000 ){ ww = 6000; }	//（定义矩形的上限值）
+	if( hh > 6000 ){ hh = 6000; }
+	var ox = (Graphics.boxWidth - ww)*0.5;
+	var oy = (Graphics.boxHeight - hh)*0.5;
+	
+	// > 背景伸缩
+	for(var i=0; i < this._drill_LG_spriteTank.length; i++){
+		var temp_sprite = this._drill_LG_spriteTank[i];
+		var temp_data = $gameSystem._drill_LG_dataTank_map[i];
+		if( temp_data['layer_index'] == "下层" ||
+			temp_data['layer_index'] == "中层" || 
+			temp_data['layer_index'] == "上层" ){
+			temp_sprite.move( ox, oy, ww, hh );
+			temp_data['cameraExtraX'] = ox;
+			temp_data['cameraExtraY'] = oy;
 		}
 	}
 }

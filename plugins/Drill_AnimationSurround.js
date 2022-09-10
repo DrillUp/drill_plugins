@@ -1421,7 +1421,7 @@
  * @param 资源-环绕球
  * @parent --贴图--
  * @desc 环绕球的图片资源，可以是单张图片，也可以是多张图片构成的GIF。
- * @default ["动画环绕球-默认"]
+ * @default ["(需配置)动画环绕球"]
  * @require 1
  * @dir img/Special__anim/
  * @type file[]
@@ -1514,14 +1514,14 @@
  * @parent --动画过程--
  * @type number
  * @min 0
- * @desc 魔法圈样式将延迟一段时间显现，单位帧。
+ * @desc 环绕球将延迟一段时间显现，单位帧。
  * @default 0
  *
  * @param 出现时长
  * @parent --动画过程--
  * @type number
  * @min 0
- * @desc 魔法圈样式显现的时间，单位帧。
+ * @desc 环绕球显现的时间，单位帧。
  * @default 60
  *
  * @param 出现模式
@@ -1539,7 +1539,7 @@
  * @value 普通淡入显现
  * @option 自定义
  * @value 自定义
- * @desc 魔法圈样式显现的模式方法。
+ * @desc 环绕球显现的模式方法。
  * @default 横向显现
  *
  * @param 出现-自定义缩放 X
@@ -1564,7 +1564,7 @@
  * @parent --动画过程--
  * @type number
  * @min 0
- * @desc 魔法圈样式持续的时间，单位帧。
+ * @desc 环绕球持续的时间，单位帧。
  * @default 220
  *
  * @param 持续模式
@@ -1599,7 +1599,7 @@
  * @parent --动画过程--
  * @type number
  * @min 0
- * @desc 魔法圈样式显现的延迟时间。
+ * @desc 环绕球消失的时间。
  * @default 30
  *
  * @param 消失模式
@@ -1617,7 +1617,7 @@
  * @value 普通淡出消失
  * @option 自定义
  * @value 自定义
- * @desc 魔法圈样式消失的模式方法。
+ * @desc 环绕球消失的模式方法。
  * @default 普通淡出消失
  *
  * @param 消失-自定义缩放 X
@@ -2757,9 +2757,10 @@ Drill_ASu_Sprite.prototype.drill_updatePosition = function() {
 		// > 角色位置修正
 		if( this._drill_bindingSprite instanceof Sprite_Actor ){
 			// > 第一人称位置修正（战斗镜头）
-			if( Imported.Drill_BattleCamera && !$gameSystem.isSideView() ){
-				xx -= $gameTemp._drill_cam_pos[0];
-				yy -= $gameTemp._drill_cam_pos[1];
+			if( Imported.Drill_BattleCamera && !$gameSystem.isSideView() ){		//（在图层内）
+				var camera_pos = $gameSystem._drill_BCa_controller.drill_BCa_getCameraPos_Children();
+				xx -= camera_pos.x;
+				yy -= camera_pos.y;
 			}
 		}
 		

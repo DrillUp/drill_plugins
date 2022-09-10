@@ -661,7 +661,7 @@
  * @param 资源-GIF
  * @parent ---贴图---
  * @desc png图片资源组，多张构成gif。
- * @default ["GIF-默认"]
+ * @default ["(需配置)菜单GIF"]
  * @require 1
  * @dir img/Menu__layer_gif/
  * @type file[]

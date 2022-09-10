@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        对话框 - 对话选项按钮组
+ * @plugindesc [v1.1]        对话框 - 对话选项按钮组
  * @author Drill_up
  * 
  * @Drill_LE_param "对话选项样式-%d"
@@ -96,6 +96,9 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 优化了与战斗活动镜头的变换关系。
+ * 优化了与地图活动镜头的变换关系。
  * 
  *
  * 
@@ -449,11 +452,11 @@ Scene_Map.prototype.drill_DCB_sortByZIndex = function () {
     this.drill_DCB_sortByZIndex_Private();
 }
 //##############################
-// * 地图层级 - 参照的位移【标准函数】
+// * 地图层级 - 层级与镜头的位移【标准函数】
 //				
-//			参数：	> x 数字           （x位置，地图参照为基准）
-//					> y 数字           （y位置，地图参照为基准）
-//					> reference 字符串 （参考系，镜头参照/地图参照）
+//			参数：	> x 数字              （x位置，当前为 镜头参照）
+//					> y 数字              （y位置，当前为 镜头参照）
+//					> layer 字符串        （层级，下层/上层/图片层/最顶层）
 //					> option 动态参数对象 （计算时的必要数据）
 //			返回：	> pos 动态参数对象
 //                  > pos['x']
@@ -461,8 +464,8 @@ Scene_Map.prototype.drill_DCB_sortByZIndex = function () {
 //          
 //			说明：	> 强行规范的接口，必须按照接口的结构来，把要考虑的问题全考虑清楚了再去实现。
 //##############################
-Scene_Map.prototype.drill_DCB_layerMoveingReference = function( x, y, reference, option ){
-	return this.drill_DCB_layerMoveingReference_Private( x, y, reference, option );
+Scene_Map.prototype.drill_DCB_layerCameraMoving = function( x, y, layer, option ){
+	return this.drill_DCB_layerCameraMoving_Private( x, y, layer, option );
 }
 //=============================================================================
 // ** 地图层级（接口实现）
@@ -523,18 +526,19 @@ Scene_Map.prototype.drill_DCB_layerAddSprite_Private = function( sprite, layer_i
 	}
 }
 //==============================
-// * 地图层级 - 参照的位移（私有）
+// * 地图层级 - 层级与镜头的位移（私有）
 //==============================
-Scene_Map.prototype.drill_DCB_layerMoveingReference_Private = function( xx, yy, reference, option ){
-	
-	// > 参照系修正
-	//  （由于镜头位置_displayX是独立出来的，每个事件、对象都需各自叠加镜头位置，因此此参照系 有无 的效果都是一样的）
-	if( reference == "镜头参照 -> 镜头参照" ){
+Scene_Map.prototype.drill_DCB_layerCameraMoving_Private = function( xx, yy, layer, option ){
+		
+	// > 镜头参照 -> 地图参照
+	if( layer == "下层" || layer == "中层" || layer == "上层" ){
+		//（不需要变换）
 		return {'x':xx, 'y':yy };
 	}
-	if( reference == "镜头参照 -> 地图参照" ){
-		xx += this._spriteset._baseSprite.x;	//（由于 Spriteset_Map 的 _baseSprite 坐标始终是(0,0)，所以两个参照没有区别。）
-		yy += this._spriteset._baseSprite.y;
+	
+	// > 镜头参照 -> 镜头参照
+	//  （由于镜头位置_displayX是独立出来的，每个事件、对象都需各自叠加镜头位置，因此此参照系 有无 的效果都是一样的）
+	if( layer == "图片层" || layer == "最顶层" ){
 		return {'x':xx, 'y':yy };
 	}
 	return {'x':xx, 'y':yy };
@@ -597,27 +601,25 @@ Scene_Map.prototype.drill_DCB_updatePosition = function() {
 	var xx = 0;
 	var yy = 0;
 	
-	// > 镜头缩放与位移
-	if( Imported.Drill_LayerCamera &&  	//（处于下层/中层/上层/图片层，需要一起缩放）
-		temp_data['map_layerIndex'] != "最顶层" ){
-		xx = $gameSystem.drill_LCa_cameraToMapX( xx );
-		yy = $gameSystem.drill_LCa_cameraToMapY( yy );
-		temp_sprite.scale.x = 1.00 / $gameSystem.drill_LCa_curScaleX();
-		temp_sprite.scale.y = 1.00 / $gameSystem.drill_LCa_curScaleY();
+	// > 镜头缩放与位移【地图 - 活动地图镜头】
+	if( Imported.Drill_LayerCamera ){
+		var layer = temp_data['map_layerIndex'];
+		if( layer == "下层" || layer == "中层" || layer == "上层" ){
+			temp_sprite.scale.x = 1.00 / $gameSystem.drill_LCa_curScaleX();
+			temp_sprite.scale.y = 1.00 / $gameSystem.drill_LCa_curScaleY();
+			//（暂不考虑缩放位移偏转）
+		}
+		if( layer == "图片层" || layer == "最顶层" ){
+			//（不需偏移）
+		}
 	}
 	
-	// > 参照的位移
-	if( temp_data['map_layerIndex'] == "下层" ||
-		temp_data['map_layerIndex'] == "中层" ||
-		temp_data['map_layerIndex'] == "上层" ){
-		var pos = this.drill_DCB_layerMoveingReference(xx, yy, "镜头参照 -> 地图参照", {});
-		xx = pos['x'];
-		yy = pos['y'];
-	}else{
-		var pos = this.drill_DCB_layerMoveingReference(xx, yy, "镜头参照 -> 镜头参照", {});
-		xx = pos['x'];
-		yy = pos['y'];
-	}
+	
+	// > 层级与镜头的位移（镜头参照）
+	var pos = this.drill_DCB_layerCameraMoving(xx, yy, temp_data['map_layerIndex'], {});
+	xx = pos['x'];
+	yy = pos['y'];
+	
 	
 	temp_sprite.x = xx;
 	temp_sprite.y = yy;
@@ -662,11 +664,11 @@ Scene_Battle.prototype.drill_DCB_sortByZIndex = function () {
     this.drill_DCB_sortByZIndex_Private();
 }
 //##############################
-// * 战斗层级 - 参照的位移【标准函数】
+// * 战斗层级 - 层级与镜头的位移【标准函数】
 //				
-//			参数：	> x 数字           （x位置，战斗参照为基准）
-//					> y 数字           （y位置，战斗参照为基准）
-//					> reference 字符串 （参考系，镜头参照/战斗参照）
+//			参数：	> x 数字              （x位置，当前为 镜头参照）
+//					> y 数字              （y位置，当前为 镜头参照）
+//					> layer 字符串        （层级，下层/上层/图片层/最顶层）
 //					> option 动态参数对象 （计算时的必要数据）
 //			返回：	> pos 动态参数对象
 //                  > pos['x']
@@ -674,8 +676,8 @@ Scene_Battle.prototype.drill_DCB_sortByZIndex = function () {
 //          
 //			说明：	> 强行规范的接口，必须按照接口的结构来，把要考虑的问题全考虑清楚了再去实现。
 //##############################
-Scene_Battle.prototype.drill_DCB_layerMoveingReference = function( x, y, reference, option ){
-	return this.drill_DCB_layerMoveingReference_Private( x, y, reference, option );
+Scene_Battle.prototype.drill_DCB_layerCameraMoving = function( x, y, layer, option ){
+	return this.drill_DCB_layerCameraMoving_Private( x, y, layer, option );
 }
 //=============================================================================
 // ** 战斗层级（接口实现）
@@ -737,19 +739,30 @@ Scene_Battle.prototype.drill_DCB_layerAddSprite_Private = function( sprite, laye
 	}
 }
 //==============================
-// * 战斗层级 - 参照的位移（私有）
+// * 战斗层级 - 层级与镜头的位移（私有）
 //==============================
-Scene_Battle.prototype.drill_DCB_layerMoveingReference_Private = function( xx, yy, reference, option ){
+Scene_Battle.prototype.drill_DCB_layerCameraMoving_Private = function( xx, yy, layer, option ){
 	
-	// > 参照系修正
-	if( reference == "镜头参照 -> 镜头参照" ){
+	// > 镜头参照 -> 战斗参照
+	if( layer == "下层" || layer == "上层" ){
+		xx -= this._spriteset._baseSprite.x;
+		yy -= this._spriteset._baseSprite.y;
+		
+		// > 战斗镜头位移（在图层内）
+		if( Imported.Drill_BattleCamera ){
+			var camera_pos = $gameSystem._drill_BCa_controller.drill_BCa_getCameraPos_Children();
+			xx -= camera_pos.x;
+			yy -= camera_pos.y;
+		}else{
+			xx -= this._spriteset._battleField.x;
+			yy -= this._spriteset._battleField.y;
+		}
 		return {'x':xx, 'y':yy };
 	}
-	if( reference == "镜头参照 -> 战斗参照" ){
-		xx -= this._spriteset._baseSprite.x;	//（由于 Spriteset_Battle 的 _baseSprite 坐标始终是(0,0)，所以两个参照没有区别。）
-		yy -= this._spriteset._baseSprite.y;
-		xx -= this._spriteset._battleField.x;	//（处于 Spriteset_Battle 的 _battleField 情况。）
-		yy -= this._spriteset._battleField.y;
+	
+	// > 镜头参照 -> 镜头参照
+	if( layer == "图片层" || layer == "最顶层" ){
+		//（不操作）
 		return {'x':xx, 'y':yy };
 	}
 	return {'x':xx, 'y':yy };
@@ -812,17 +825,12 @@ Scene_Battle.prototype.drill_DCB_updatePosition = function() {
 	var xx = 0;
 	var yy = 0;
 	
-	// > 参照的位移
-	if( temp_data['battle_layerIndex'] == "下层" ||		//（上层和下层 位于_battleField中）
-		temp_data['battle_layerIndex'] == "上层" ){
-		var pos = this.drill_DCB_layerMoveingReference(xx, yy, "镜头参照 -> 战斗参照", {});
-		xx = pos['x'];
-		yy = pos['y'];
-	}else{
-		var pos = this.drill_DCB_layerMoveingReference(xx, yy, "镜头参照 -> 镜头参照", {});
-		xx = pos['x'];
-		yy = pos['y'];
-	}
+	
+	// > 层级与镜头的位移（镜头参照）
+	var pos = this.drill_DCB_layerCameraMoving(xx, yy, temp_data['battle_layerIndex'], {});
+	xx = pos['x'];
+	yy = pos['y'];
+	
 	
 	temp_sprite.x = xx;
 	temp_sprite.y = yy;

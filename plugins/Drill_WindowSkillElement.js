@@ -187,7 +187,7 @@
  * @param 资源-元素背景
  * @parent ---背景块---
  * @desc 元素背景的图片资源。
- * @default 技能窗口-技能卡槽背景
+ * @default (需配置)技能窗口-技能卡槽背景
  * @require 1
  * @dir img/Menu__ui_skillElement/
  * @type file

@@ -323,7 +323,7 @@
  * @param 资源-自定义窗口皮肤
  * @parent 布局模式
  * @desc 配置该资源，可以使得该窗口有与默认不同的系统窗口。
- * @default 对话框皮肤-默认
+ * @default (需配置)对话框皮肤-窗口皮肤
  * @require 1
  * @dir img/Menu__ui_message/
  * @type file
@@ -331,7 +331,7 @@
  * @param 资源-自定义背景图片
  * @parent 布局模式
  * @desc 背景图片布局的资源。
- * @default 对话框皮肤-背景图片
+ * @default (需配置)对话框皮肤-背景图片
  * @require 1
  * @dir img/Menu__ui_message/
  * @type file

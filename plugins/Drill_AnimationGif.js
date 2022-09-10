@@ -1436,7 +1436,7 @@
  * @param 资源-GIF
  * @parent --贴图--
  * @desc GIF的图片资源组，多张构成gif。
- * @default ["动画GIF-默认"]
+ * @default ["(需配置)动画GIF"]
  * @require 1
  * @dir img/Special__anim_gif/
  * @type file[]
@@ -1511,14 +1511,14 @@
  * @parent --动画过程--
  * @type number
  * @min 0
- * @desc 魔法圈样式将延迟一段时间显现，单位帧。
+ * @desc GIF将延迟一段时间显现，单位帧。
  * @default 0
  *
  * @param 出现时长
  * @parent --动画过程--
  * @type number
  * @min 0
- * @desc 魔法圈样式显现的时间，单位帧。
+ * @desc GIF显现的时间，单位帧。
  * @default 60
  *
  * @param 出现模式
@@ -1536,7 +1536,7 @@
  * @value 普通淡入显现
  * @option 自定义
  * @value 自定义
- * @desc 魔法圈样式显现的模式方法。
+ * @desc GIF显现的模式方法。
  * @default 横向显现
  *
  * @param 出现-自定义缩放 X
@@ -1561,7 +1561,7 @@
  * @parent --动画过程--
  * @type number
  * @min 0
- * @desc 魔法圈样式持续的时间，单位帧。
+ * @desc GIF持续的时间，单位帧。
  * @default 220
  *
  * @param 持续模式
@@ -1596,7 +1596,7 @@
  * @parent --动画过程--
  * @type number
  * @min 0
- * @desc 魔法圈样式显现的延迟时间。
+ * @desc GIF消失的时间。
  * @default 30
  *
  * @param 消失模式
@@ -1614,7 +1614,7 @@
  * @value 普通淡出消失
  * @option 自定义
  * @value 自定义
- * @desc 魔法圈样式消失的模式方法。
+ * @desc GIF消失的模式方法。
  * @default 普通淡出消失
  *
  * @param 消失-自定义缩放 X
@@ -2693,9 +2693,10 @@ Drill_AGi_Sprite.prototype.drill_updatePosition = function() {
 			// > 角色位置修正
 			if( _sprite instanceof Sprite_Actor ){
 				// > 第一人称位置修正（战斗镜头）
-				if( Imported.Drill_BattleCamera && !$gameSystem.isSideView() ){
-					this.x -= $gameTemp._drill_cam_pos[0];
-					this.y -= $gameTemp._drill_cam_pos[1];
+				if( Imported.Drill_BattleCamera && !$gameSystem.isSideView() ){		//（在图层内）
+					var camera_pos = $gameSystem._drill_BCa_controller.drill_BCa_getCameraPos_Children();
+					this.x -= camera_pos.x;
+					this.y -= camera_pos.y;
 				}
 			}
 			// > 物体位置修正

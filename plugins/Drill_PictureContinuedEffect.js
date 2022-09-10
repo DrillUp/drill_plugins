@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        图片 - 持续动作效果
+ * @plugindesc [v1.5]        图片 - 持续动作效果
  * @author Drill_up
  * 
  * 
@@ -181,6 +181,8 @@
  * [v1.4]
  * 添加了 钟摆摇晃、锚点摇晃、钟摆摇晃(渐变)、锚点摇晃(渐变) 四个类型。
  * 添加了插件指令获取状态信息功能。
+ * [v1.5]
+ * 优化了数学缩短锚点的计算公式。
  * 
  */
  
@@ -936,7 +938,18 @@ Game_Screen.prototype.drill_PCE_isPictureExist = function( pic_id ){
 //=============================================================================
 // * 数学 - 锁定锚点
 //			
-//			说明：修正 旋转+缩放 的xy坐标，使其看起来像是在绕着 新的锚点 变换。
+//			参数：	> org_anchor_x 数字    （原贴图锚点X）
+//					> org_anchor_y 数字    （原贴图锚点Y）
+//					> target_anchor_x 数字 （新的锚点X）
+//					> target_anchor_y 数字 （新的锚点Y）
+//					> width 数字           （贴图宽度）
+//					> height 数字          （贴图高度）
+//					> rotation 数字        （旋转度数，弧度）
+//					> scale_x,scale_y 数字 （缩放比例XY，默认1.00）
+//			返回：	> { x:0, y:0 }         （偏移的坐标）
+//			
+//			说明：	修正 旋转+缩放 的坐标，使其看起来像是在绕着 新的锚点 变换。
+//					旋转值和缩放值可为负数。
 //=============================================================================
 Game_Temp.prototype.drill_PCE_getFixPointInAnchor = function( 
 					org_anchor_x,org_anchor_y,			//原贴图中心锚点 
@@ -951,21 +964,37 @@ Game_Temp.prototype.drill_PCE_getFixPointInAnchor = function(
 	if( ww == 0 && hh == 0){ return { "x":0, "y":0 }; }
 	if( ww == 0 ){ ww = 0.0001; }
 	
-	var r = Math.sqrt( Math.pow(ww,2) + Math.pow(hh,2) );
-	var p_degree = Math.atan(hh/ww);	
-	p_degree = Math.PI - p_degree;
+	// > 先缩放
+	var sww = ww*scale_x;
+	var shh = hh*scale_y;
 	
-	xx = r*Math.cos( rotation - p_degree);		//圆公式 (x-a)²+(y-b)²=r²
-	yy = r*Math.sin( rotation - p_degree);		//圆极坐标 x=ρcosθ,y=ρsinθ
-	xx += ww * (1 - scale_x);
-	yy += hh * (1 - scale_y);
+	// > 后旋转
+	var r = Math.sqrt( Math.pow(sww,2) + Math.pow(shh,2) );
+	var p_degree = Math.atan(shh/sww);	
+	p_degree = Math.PI - p_degree;
+	if( sww < 0 ){
+		p_degree = Math.PI + p_degree;
+	}
+	
+	// > 变换的偏移量
+	xx += r*Math.cos( rotation - p_degree);		//圆公式 (x-a)²+(y-b)²=r²
+	yy += r*Math.sin( rotation - p_degree);		//圆极坐标 x=ρcosθ,y=ρsinθ
+	
+	// > 锚点偏移量
+	xx += ww;
+	yy += hh;
 	
 	return { "x":xx, "y":yy };
 }
 //=============================================================================
 // * 数学 - 抛物线三点式
 //			
-//			说明：已知三点，返回抛物线公式的abc。
+//			参数：	> x1,y1 数字（点A）
+//					> x2,y2 数字（点B）
+//					> x3,y3 数字（点C）
+//			返回：	> { a:0, b:0, c:0 } （抛物线公式的abc）
+//			
+//			说明：	已知三点，返回抛物线公式 y = a*x^2 + b*x + c 的abc值。
 //=============================================================================
 Game_Temp.prototype.drill_PCE_getParabolicThree = function( x1,y1,x2,y2,x3,y3 ){
 	
@@ -1283,7 +1312,7 @@ Game_Picture.prototype.drill_PCE_updateSustainingRotate = function() {
 	ef.rotation += ef.f_speed;
 	
 	// > 锚点(0.5,0.5)锁定
-	var fix_point = $gameTemp.drill_PCE_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, 0.5,0.5, ef.real_width,ef.real_height, ef.rotation, ef.scale_x, ef.scale_y );
+	var fix_point = $gameTemp.drill_PCE_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, 0.5,0.5, ef.real_width,ef.real_height, ef.rotation, ef.scale_x+1, ef.scale_y+1 );
 	ef.x = fix_point.x;	
 	ef.y = fix_point.y;	
 	
@@ -1433,7 +1462,7 @@ Game_Picture.prototype.drill_PCE_updateSustainingShakeRotate = function() {
 	ef.rotation = ef.f_scope * Math.sin( ef.f_time*ef.f_speed );
 	
 	// > 锚点(0.5,1.0)锁定
-	var fix_point = $gameTemp.drill_PCE_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, 0.5,1.0, ef.real_width,ef.real_height, ef.rotation, ef.scale_x, ef.scale_y );
+	var fix_point = $gameTemp.drill_PCE_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, 0.5,1.0, ef.real_width,ef.real_height, ef.rotation, ef.scale_x+1, ef.scale_y+1 );
 	ef.x = fix_point.x;	
 	ef.y = fix_point.y;	
 	
@@ -1465,7 +1494,7 @@ Game_Picture.prototype.drill_PCE_updateSustainingPendulumRotate = function() {
 	ef.rotation = ef.f_scope * Math.sin( ef.f_time*ef.f_speed );
 	
 	// > 锚点(0.5,0.0)锁定
-	var fix_point = $gameTemp.drill_PCE_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, 0.5,0.0, ef.real_width,ef.real_height, ef.rotation, ef.scale_x, ef.scale_y );
+	var fix_point = $gameTemp.drill_PCE_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, 0.5,0.0, ef.real_width,ef.real_height, ef.rotation, ef.scale_x+1, ef.scale_y+1 );
 	ef.x = fix_point.x;	
 	ef.y = fix_point.y;	
 	
@@ -1525,7 +1554,7 @@ Game_Picture.prototype.drill_PCE_updateSustainingBreathing = function() {
 	ef.scale_y = (ef.f_scope / ef.real_height) * Math.sin( ef.f_time*ef.f_speed );
 	
 	// > 锚点(0.5,1.0)锁定
-	var fix_point = $gameTemp.drill_PCE_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, 0.5,1.0, ef.real_width,ef.real_height, ef.rotation, ef.scale_x, ef.scale_y );
+	var fix_point = $gameTemp.drill_PCE_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, 0.5,1.0, ef.real_width,ef.real_height, ef.rotation, ef.scale_x+1, ef.scale_y+1 );
 	ef.x = fix_point.x;	
 	ef.y = fix_point.y;	
 	
@@ -1577,7 +1606,7 @@ Game_Picture.prototype.drill_PCE_updateSustainingJumping = function() {
 		ef.scale_y = -ef.scale_x;
 		
 		// > 锚点(0.5,1.0)锁定
-		var fix_point = $gameTemp.drill_PCE_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, 0.5,1.0, ef.real_width,ef.real_height, ef.rotation, ef.scale_x, ef.scale_y );
+		var fix_point = $gameTemp.drill_PCE_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, 0.5,1.0, ef.real_width,ef.real_height, ef.rotation, ef.scale_x+1, ef.scale_y+1 );
 		ef.x = fix_point.x;	
 		ef.y = fix_point.y;	
 	
@@ -1596,7 +1625,7 @@ Game_Picture.prototype.drill_PCE_updateSustainingJumping = function() {
 		ef.scale_y = -ef.scale_x;
 		
 		// > 锚点(0.5,1.0)锁定
-		var fix_point = $gameTemp.drill_PCE_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, 0.5,1.0, ef.real_width,ef.real_height, ef.rotation, ef.scale_x, ef.scale_y );
+		var fix_point = $gameTemp.drill_PCE_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, 0.5,1.0, ef.real_width,ef.real_height, ef.rotation, ef.scale_x+1, ef.scale_y+1 );
 		ef.x = fix_point.x;	
 		ef.y = fix_point.y;	
 	}
@@ -1639,7 +1668,7 @@ Game_Picture.prototype.drill_PCE_updateSustainingZooming = function() {
 	ef.scale_y = ef.scale_x;
 	
 	// > 锚点(0.5,0.5)锁定
-	var fix_point = $gameTemp.drill_PCE_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, 0.5,0.5, ef.real_width,ef.real_height, ef.rotation, ef.scale_x, ef.scale_y );
+	var fix_point = $gameTemp.drill_PCE_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, 0.5,0.5, ef.real_width,ef.real_height, ef.rotation, ef.scale_x+1, ef.scale_y+1 );
 	ef.x = fix_point.x;	
 	ef.y = fix_point.y;	
 	
@@ -1870,7 +1899,7 @@ Game_Picture.prototype.drill_PCE_updateSustainingRotate_Gradual = function() {
 	ef.rotation = ef.f_pos * ef.f_prop;		//（区分顺时针逆时针）
 	
 	// > 锚点(0.5,0.5)锁定
-	var fix_point = $gameTemp.drill_PCE_getFixPointInAnchor( ef.anchor_x, ef.anchor_y, 0.5,0.5, ef.real_width,ef.real_height, ef.rotation, ef.scale_x, ef.scale_y );
+	var fix_point = $gameTemp.drill_PCE_getFixPointInAnchor( ef.anchor_x, ef.anchor_y, 0.5,0.5, ef.real_width,ef.real_height, ef.rotation, ef.scale_x+1, ef.scale_y+1 );
 	ef.x = fix_point.x;	
 	ef.y = fix_point.y;	
 		
@@ -2264,7 +2293,7 @@ Game_Picture.prototype.drill_PCE_updateSustainingShakeRotate_Gradual = function(
 	ef.rotation = ef.f_scope * Math.sin( ef.f_pos );
 	
 	// > 锚点(0.5,1.0)锁定
-	var fix_point = $gameTemp.drill_PCE_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, 0.5,1.0, ef.real_width,ef.real_height, ef.rotation, ef.scale_x, ef.scale_y );
+	var fix_point = $gameTemp.drill_PCE_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, 0.5,1.0, ef.real_width,ef.real_height, ef.rotation, ef.scale_x+1, ef.scale_y+1 );
 	ef.x = fix_point.x;	
 	ef.y = fix_point.y;	
 	
@@ -2345,7 +2374,7 @@ Game_Picture.prototype.drill_PCE_updateSustainingPendulumRotate_Gradual = functi
 	ef.rotation = ef.f_scope * Math.sin( ef.f_pos );
 	
 	// > 锚点(0.5,0.0)锁定
-	var fix_point = $gameTemp.drill_PCE_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, 0.5,0.0, ef.real_width,ef.real_height, ef.rotation, ef.scale_x, ef.scale_y );
+	var fix_point = $gameTemp.drill_PCE_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, 0.5,0.0, ef.real_width,ef.real_height, ef.rotation, ef.scale_x+1, ef.scale_y+1 );
 	ef.x = fix_point.x;	
 	ef.y = fix_point.y;	
 	

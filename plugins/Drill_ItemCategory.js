@@ -212,7 +212,7 @@
  * @param 资源-类型按钮
  * @parent ---mog物品界面---
  * @desc 新类型按钮的图片资源，对应MOG_SceneItem 全自定义物品界面 中的按钮。
- * @default 道具界面-道具选项
+ * @default (需配置)道具界面-道具选项
  * @require 1
  * @dir img/Menu__item/
  * @type file

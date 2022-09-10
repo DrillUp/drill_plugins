@@ -643,7 +643,7 @@
  * @param 资源-背景
  * @parent ---贴图---
  * @desc 背景的图片资源。
- * @default 背景-默认背景
+ * @default (需配置)标题背景
  * @require 1
  * @dir img/titles1/
  * @type file

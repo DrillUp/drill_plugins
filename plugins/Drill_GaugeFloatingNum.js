@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        地图UI - 临时漂浮参数数字
+ * @plugindesc [v1.5]        地图UI - 临时漂浮参数数字
  * @author Drill_up
  * 
  * @Drill_LE_param "漂浮数字样式-%d"
@@ -127,6 +127,8 @@
  * 修复了插件指令细节。
  * [v1.4]
  * 添加了部分指令解析的检查。
+ * [v1.5]
+ * 优化了与地图活动镜头的变换关系。
  *
  *
  * 
@@ -912,11 +914,48 @@ Game_Temp.prototype.initialize = function() {
 }
 
 
+//#############################################################################
+// ** 【标准模块】地图层级
+//#############################################################################
+//##############################
+// * 地图层级 - 添加贴图到层级【标准函数】
+//				
+//			参数：	> sprite 贴图        （添加的贴图对象）
+//					> layer_index 字符串 （添加到的层级名，下层/中层/上层/图片层/最顶层）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图添加到目标层级中。
+//##############################
+Scene_Map.prototype.drill_GFN_layerAddSprite = function( sprite, layer_index ){
+	this.drill_GFN_layerAddSprite_Private( sprite, layer_index );
+}
+//##############################
+// * 地图层级 - 去除贴图【标准函数】
+//				
+//			参数：	> sprite 贴图（添加的贴图对象）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图从地图层级中移除。
+//##############################
+Scene_Map.prototype.drill_GFN_layerRemoveSprite = function( sprite ){
+	this.drill_GFN_layerRemoveSprite_Private( sprite );
+}
+//##############################
+// * 地图层级 - 图片层级排序【标准函数】
+//				
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 执行该函数后，地图层级的子贴图，按照zIndex属性来进行先后排序。值越大，越靠前。
+//##############################
+Scene_Map.prototype.drill_GFN_sortByZIndex = function(){
+    this.drill_GFN_sortByZIndex_Private();
+}
 //=============================================================================
-// ** 地图层级
+// ** 地图层级（接口实现）
 //=============================================================================
 //==============================
-// ** 下层
+// * 地图层级 - 下层
 //==============================
 var _drill_GFN_layer_createParallax = Spriteset_Map.prototype.createParallax;
 Spriteset_Map.prototype.createParallax = function() {
@@ -927,7 +966,7 @@ Spriteset_Map.prototype.createParallax = function() {
 	}
 }
 //==============================
-// ** 中层
+// * 地图层级 - 中层
 //==============================
 var _drill_GFN_layer_createTilemap = Spriteset_Map.prototype.createTilemap;
 Spriteset_Map.prototype.createTilemap = function() {
@@ -939,7 +978,7 @@ Spriteset_Map.prototype.createTilemap = function() {
 	}
 }
 //==============================
-// ** 上层
+// * 地图层级 - 上层
 //==============================
 var _drill_GFN_layer_createDestination = Spriteset_Map.prototype.createDestination;
 Spriteset_Map.prototype.createDestination = function() {
@@ -950,7 +989,7 @@ Spriteset_Map.prototype.createDestination = function() {
 	}
 }
 //==============================
-// ** 图片层
+// * 地图层级 - 图片层
 //==============================
 var _drill_GFN_layer_createPictures = Spriteset_Map.prototype.createPictures;
 Spriteset_Map.prototype.createPictures = function() {
@@ -961,7 +1000,7 @@ Spriteset_Map.prototype.createPictures = function() {
 	}
 }
 //==============================
-// ** 最顶层
+// * 地图层级 - 最顶层
 //==============================
 var _drill_GFN_layer_createAllWindows = Scene_Map.prototype.createAllWindows;
 Scene_Map.prototype.createAllWindows = function() {
@@ -972,14 +1011,44 @@ Scene_Map.prototype.createAllWindows = function() {
 	}
 }
 //==============================
-// ** 层级排序
+// * 地图层级 - 图片层级排序（私有）
 //==============================
-Scene_Map.prototype.drill_GFN_sortByZIndex = function() {
+Scene_Map.prototype.drill_GFN_sortByZIndex_Private = function() {
 	this._spriteset._drill_mapDownArea.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
 	this._spriteset._drill_mapCenterArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
 	this._spriteset._drill_mapUpArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
 	this._spriteset._drill_mapPicArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
 	this._drill_SenceTopArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
+};
+//==============================
+// * 地图层级 - 添加贴图到层级（私有）
+//==============================
+Scene_Map.prototype.drill_GFN_layerAddSprite_Private = function( sprite, layer_index ){
+	if( layer_index == "下层" ){
+		this._spriteset._drill_mapDownArea.addChild( sprite );
+	}
+	if( layer_index == "中层" ){
+		this._spriteset._drill_mapCenterArea.addChild( sprite );
+	}
+	if( layer_index == "上层" ){
+		this._spriteset._drill_mapUpArea.addChild( sprite );
+	}
+	if( layer_index == "图片层" ){
+		this._spriteset._drill_mapPicArea.addChild( sprite );
+	}
+	if( layer_index == "最顶层" ){
+		this._drill_SenceTopArea.addChild( sprite );
+	}
+}
+//==============================
+// * 地图层级 - 删除贴图（私有）
+//==============================
+Scene_Map.prototype.drill_GFN_layerRemoveSprite_Private = function( sprite ) {
+	this._spriteset._drill_mapDownArea.removeChild( sprite );
+	this._spriteset._drill_mapCenterArea.removeChild( sprite );
+	this._spriteset._drill_mapUpArea.removeChild( sprite );
+	this._spriteset._drill_mapPicArea.removeChild( sprite );
+	this._drill_SenceTopArea.removeChild( sprite );
 };
 
 //=============================================================================
@@ -1030,25 +1099,16 @@ Scene_Map.prototype.drill_GFN_updateCommandCreate = function() {
 		}
 		
 		var temp_sprite = new Drill_GFN_NumberSprite( data );
+		
+		// > 贴图层级
 		this._drill_GFN_spriteTank.push( temp_sprite );
-		if( temp_sprite._drill_data['layer_index'] == "下层" ){
-			this._spriteset._drill_mapDownArea.addChild(temp_sprite);
-		}
-		if( temp_sprite._drill_data['layer_index'] == "中层" ){
-			this._spriteset._drill_mapCenterArea.addChild(temp_sprite);
-		}
-		if( temp_sprite._drill_data['layer_index'] == "上层" ){
-			this._spriteset._drill_mapUpArea.addChild(temp_sprite);
-		}
-		if( temp_sprite._drill_data['layer_index'] == "图片层" ){
-			this._spriteset._drill_mapPicArea.addChild(temp_sprite);
-		}
-		if( temp_sprite._drill_data['layer_index'] == "最顶层" ){
-			this._drill_SenceTopArea.addChild(temp_sprite);
-		}
+		this.drill_GFN_layerAddSprite( temp_sprite, temp_sprite._drill_data['layer_index'] );
 		
 		$gameTemp._drill_GFN_commandSeq.splice( i, 1 );
 	}
+	
+	// > 层级排序
+	this.drill_GFN_sortByZIndex();
 }
 //==============================
 // * 帧刷新 - 贴图删除
@@ -1062,11 +1122,7 @@ Scene_Map.prototype.drill_GFN_updateNumberSpriteDelete = function() {
 			temp_sprite.drill_destroy();
 			
 			// > 从层中去除
-			this._spriteset._drill_mapDownArea.removeChild(temp_sprite);
-			this._spriteset._drill_mapCenterArea.removeChild(temp_sprite);
-			this._spriteset._drill_mapUpArea.removeChild(temp_sprite);
-			this._spriteset._drill_mapPicArea.removeChild(temp_sprite);
-			this._drill_SenceTopArea.removeChild(temp_sprite);
+			this.drill_GFN_layerRemoveSprite( temp_sprite );
 			
 			// > 从容器中去除
 			this._drill_GFN_spriteTank.splice( i, 1 );
@@ -1287,13 +1343,18 @@ Drill_GFN_NumberSprite.prototype.drill_updatePosition = function() {
 		yy += $gameMap.deltaY( pos_y, this._drill_orgPos_y ) * $gameMap.tileHeight();
 	}
 	
-	// > 地图镜头修正（处于下层/中层/上层/图片层，需要一起缩放）
-	if( Imported.Drill_LayerCamera && 			
-		data['layer_index'] != "最顶层" ){
-		xx = $gameSystem.drill_LCa_cameraToMapX( xx );
-		yy = $gameSystem.drill_LCa_cameraToMapY( yy );
-		this.scale.x = 1.00 / $gameSystem.drill_LCa_curScaleX();
-		this.scale.y = 1.00 / $gameSystem.drill_LCa_curScaleY();
+	// > 镜头缩放与位移【地图 - 活动地图镜头】
+	if( Imported.Drill_LayerCamera ){
+		var layer = data['layer_index'];
+		if( layer == "下层" || layer == "中层" || layer == "上层" ){
+			this.scale.x = 1.00 / $gameSystem.drill_LCa_curScaleX();
+			this.scale.y = 1.00 / $gameSystem.drill_LCa_curScaleY();
+			//（暂不考虑缩放位移偏转）
+		}
+		if( layer == "图片层" || layer == "最顶层" ){
+			xx = $gameSystem.drill_LCa_mapToCameraX( xx );
+			yy = $gameSystem.drill_LCa_mapToCameraY( yy );
+		}
 	}
 	
 	this.x = Math.floor(xx);

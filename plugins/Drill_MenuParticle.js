@@ -674,7 +674,7 @@
  * @param 资源-粒子
  * @parent ---贴图---
  * @desc 粒子的图片资源。
- * @default 粒子-默认粒子
+ * @default (需配置)菜单粒子
  * @require 1
  * @dir img/Menu__layer/
  * @type file
@@ -885,7 +885,7 @@
  * @param 资源-第二层粒子
  * @parent ---双层效果---
  * @desc 第二层粒子的图片资源。
- * @default 粒子-默认粒子
+ * @default (需配置)菜单第二层粒子
  * @require 1
  * @dir img/Menu__layer/
  * @type file
@@ -925,7 +925,7 @@
  * @param 资源-粒子
  * @parent ---贴图---
  * @desc 粒子的图片资源。
- * @default 粒子-默认粒子
+ * @default (需配置)菜单粒子
  * @require 1
  * @dir img/Menu__layer/
  * @type file
@@ -1126,7 +1126,7 @@
  * @param 资源-第二层粒子
  * @parent ---双层效果---
  * @desc 第二层粒子的图片资源。
- * @default 粒子-默认粒子
+ * @default (需配置)菜单第二层粒子
  * @require 1
  * @dir img/Menu__layer/
  * @type file
@@ -1968,13 +1968,18 @@ Scene_MenuBase.prototype.drill_MPa_resetParticles = function(i) {
 };
 //==============================
 // * 数学 - 计算点A朝向点B的角度
-//
+//			
+//			参数：	> x1,y1 数字（点A）
+//					> x2,y2 数字（点B）
+//			返回：	> 数字      （角度，0 至 360 之间）
+//			
 //			说明：	0度朝右，90度朝下，180度朝左，270度朝上。
-//					返回的值永远保持在 0 至 360 之间。
 //==============================
 Scene_Title.prototype.drill_MPa_getPointToPointDegree = function( x1,y1,x2,y2 ){
 	var degree = 0;
-	if( x2 == x1 ){		// arctan不能为0情况
+	
+	// > arctan不能为0情况
+	if( x2 == x1 ){
 		if( y2 > y1 ){
 			degree = 90;
 		}else{
@@ -1986,8 +1991,10 @@ Scene_Title.prototype.drill_MPa_getPointToPointDegree = function( x1,y1,x2,y2 ){
 		}else{
 			degree = 180;
 		}
-	}else{	// arctan正常计算
-		degree = Math.atan( (y2 - y1)/(x2 - x1) );		//朝向自机的角度
+	
+	// > arctan正常计算
+	}else{
+		degree = Math.atan( (y2 - y1)/(x2 - x1) );
 		degree = degree / Math.PI * 180;
 		if( x2 < x1 ){
 			degree += 180;
