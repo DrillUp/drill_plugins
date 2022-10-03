@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.0]        行走图 - 事件漂浮文字
+ * @plugindesc [v2.1]        行走图 - 事件漂浮文字
  * @author Drill_up
  * 
  * 
@@ -86,7 +86,8 @@
  * 事件注释(旧)：事件漂浮文字:对齐方式:居中
  * 事件注释(旧)：事件漂浮文字:对齐方式:右对齐
  *
- * 1."显示出来的文字"中，不能有英文空格。但是可以有中文空格"ㅤ"。
+ * 1.考虑到此插件用途太广泛，"显示出来的文字"中，
+ *   注释已经支持英文空格，并支持换行符"\n"。
  *   你也可以用 字符串核心 的\str[21]代替，在字符串中加空格。
  * 2.冒号后面的数字表示颜色，可以填默认的0-31。
  *   也可以填高级颜色编号\c[201]，但需要 颜色核心 插件的支持。
@@ -103,6 +104,7 @@
  * 
  * 插件指令：>事件漂浮文字 : 本事件 : 修改文本 : 这是一串修改的文字
  * 插件指令：>事件漂浮文字 : 本事件 : 清空文本
+ * 插件指令：>事件漂浮文字 : 本事件 : 强制刷新文本
  * 插件指令：>事件漂浮文字 : 本事件 : 设置偏移 : 5 : -5
  * 插件指令：>事件漂浮文字 : 本事件 : 设置偏移(变量) : 5 : -5
  * 插件指令：>事件漂浮文字 : 本事件 : 外框 : 显示
@@ -197,6 +199,8 @@
  * 大幅度修改了内部结构，添加了轮播文本的功能。
  * [v2.0]
  * 修复了外框一直显示的bug，以及轮播无效的bug。
+ * [v2.1]
+ * 使得插件支持多行换行，以及事件注释中的英文空格。
  * 
  * 
  * 
@@ -394,6 +398,12 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				e._drill_ET_controller.drill_ET_setText( "" );		//（清空文本同时关闭轮播）
 				e._drill_ET_controller.drill_ET_setLoopEnabled( false );
 			}
+			if( type == "强制刷新文本" ){
+				if( $gameMap.drill_ET_isEventExist( e_id ) == false ){ return; }
+				var e = $gameMap.event(e_id);
+				e.drill_ET_createController();
+				e._drill_ET_controller.drill_ET_forceRefresh();
+			}
 		}
 				
 		/*-----------------修改文本------------------*/
@@ -554,12 +564,8 @@ Game_Event.prototype.drill_ET_refreshText = function() {
 				var command = args.shift();
 				if( command == "=>事件漂浮文字" ){
 					
-					if( args.length == 2 ){
-						var temp1 = String(args[1]);
-						this.drill_ET_createController();
-						this._drill_ET_controller.drill_ET_setText( temp1 );
-					}
-					if( args.length == 4 ){
+					/*-----------------标准格式的注释------------------*/
+					if( args.length == 4 && ( String(args[2]) == ":" || String(args[2]) == "：" ) ){
 						var temp1 = String(args[1]);
 						var temp2 = String(args[3]);
 						if( temp1 == "外框" ){
@@ -571,11 +577,13 @@ Game_Event.prototype.drill_ET_refreshText = function() {
 								this.drill_ET_createController();
 								this._drill_ET_controller.drill_ET_setFrameVisible( false );
 							}
+							continue;
 						}else if( temp1 == "对齐方式" ){
 							if( temp2 == "左对齐" || temp2 == "居中" || temp2 == "右对齐" ){
 								this.drill_ET_createController();
 								this._drill_ET_controller.drill_ET_setAlign( temp2 );
 							}
+							continue;
 						}else if( temp1 == "轮播文本" ){
 							if( temp2 == "轮播下列文本" ){
 								temp_start = true;
@@ -593,18 +601,46 @@ Game_Event.prototype.drill_ET_refreshText = function() {
 								this.drill_ET_createController();
 								this._drill_ET_controller.drill_ET_setLoopMode( temp2 );
 							}
-						}else{
-							this.drill_ET_createController();
-							this._drill_ET_controller.drill_ET_setText( "\\c["+temp2+"]" +temp1 );
+							continue;
 						}
 					}
-					if( args.length == 6 ){
+					if( args.length == 6 && ( String(args[4]) == ":" || String(args[4]) == "：" ) ){
 						var temp1 = String(args[1]);
 						var temp2 = String(args[3]);
 						var temp3 = String(args[5]);
 						if( temp1 == "偏移" ){
 							this.drill_ET_createController();
 							this._drill_ET_controller.drill_ET_setOffset( Number(temp2),Number(temp3) );
+							continue;
+						}
+					}
+					
+					/*-----------------允许空格的字符串注释------------------*/
+					if( args.length >= 2 ){
+						var last_arg_1 = String(args[ args.length-1 ]);
+						var last_arg_2 = String(args[ args.length-2 ]);
+						
+						// > 文本色情况
+						if( args.length >= 4 && ( last_arg_2 == ":" || last_arg_2 == "：" ) ){
+							var str_list = [];
+							for( var i=1; i < args.length-2; i++ ){
+								str_list.push( String(args[i]) );
+							}
+							var str = str_list.join(" ");
+							str = str.replace("\\n","\n");
+							this.drill_ET_createController();
+							this._drill_ET_controller.drill_ET_setText( "\\c["+last_arg_1+"]" + str );
+						
+						// > 普通文本情况
+						}else{
+							var str_list = [];
+							for( var i=1; i < args.length; i++ ){
+								str_list.push( String(args[i]) );
+							}
+							var str = str_list.join(" ");
+							str = str.replace("\\n","\n");
+							this.drill_ET_createController();
+							this._drill_ET_controller.drill_ET_setText( str );
 						}
 					}
 				};  
@@ -918,8 +954,11 @@ function Drill_ET_Controller() {
 // * 控制器 - 初始化
 //==============================
 Drill_ET_Controller.prototype.initialize = function( data ){
-	if( data == undefined ){ data = {}; }
 	this._drill_data = {};
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+    this.drill_initData();													//初始化数据
+    this.drill_initPrivateData();											//私有数据初始化
+	if( data == undefined ){ data = {}; }
     this.drill_ET_resetData( data );
 }
 //##############################
@@ -1361,19 +1400,36 @@ Drill_ET_WindowSprite.prototype.drill_ET_updateText = function() {
 		this.contents.clear();
 		return ;
 	}
-		
-	// > 确定宽高（窗口辅助核心的 标准函数 ）
-	this._drill_textWidth = this.drill_COWA_getTextExWidth( cur_text );
-	this._drill_textHeight = this.drill_COWA_getTextExHeight( cur_text );
-	this.width = this._drill_textWidth + this.standardPadding() * 2;		// 窗口宽度
-	this.height = this._drill_textHeight + this.standardPadding() * 2;		// 窗口高度
+	
+	// > 文本转义
+	var context_list;
+	if( Imported.Drill_CoreOfString ){		//【系统 - 字符串核心】
+		context_list = DataManager.drill_COSt_replaceChar( cur_text ).split("\n");
+	}else{
+		context_list = cur_text.split("\n");
+	}
+	
+	// > 窗口高宽 - 计算
+	var options = {};
+	this.drill_COWA_calculateHeightAndWidth( context_list, options );		//（窗口辅助核心）
+	// > 窗口高宽 - 赋值
+	var ww = 0;
+	var hh = 0;
+	for( var i=0; i < this.drill_COWA_widthList.length; i++ ){ if( ww < this.drill_COWA_widthList[i] ){ ww = this.drill_COWA_widthList[i]; } }
+	for( var i=0; i < this.drill_COWA_heightList.length; i++ ){ hh += this.drill_COWA_heightList[i]; }
+	ww += this.standardPadding() * 2;
+	hh += this.standardPadding() * 2;
+	this._drill_textWidth = ww;
+	this._drill_textHeight = hh;
+	this.width = this._drill_textWidth;			// 窗口宽度
+	this.height = this._drill_textHeight;		// 窗口高度
 	
 	// > 重建bitmap
 	this.contents.clear();
 	this.createContents();
 	
 	// > 绘制内容（窗口辅助核心的 标准函数 ）
-	this.drill_COWA_drawTextEx( cur_text, {"x":0,"y":0} );
+	this.drill_COWA_drawTextListEx( context_list, options );
 }
 //==============================
 // * 帧刷新 - 属性变化

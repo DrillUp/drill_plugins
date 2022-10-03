@@ -860,8 +860,8 @@
 var _Drill_COAS_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_Drill_COAS_pluginCommand.call(this, command, args);
-	
 	if( command === ">动画序列核心DEBUG" ){
+		
 		if( args.length == 4 ){
 			var temp1 = String(args[1]);
 			var temp2 = String(args[3]);
@@ -899,15 +899,20 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 
 //=============================================================================
 // ** 动画序列数据【Drill_COAS_Data】
-// 
-//			来源：	独立数据
-//			应用：	高级战斗肖像
-//   		功能：	> 独立的数据操作器
-//					> 能被存到存档中
-//			说明：	> 该类的update函数需要手动调用。
-//					> 你可以随时new新的Drill_COAS_Data，但是要注意销毁装饰器对象。
-//	
-//			特殊：	【该类在c++工具中存在 复刻类 ，修改后注意同步复刻 】
+// **
+// **		索引：	COAS（可从子插件搜索到函数、类用法）
+// **		来源：	独立数据
+// **		实例：	> 
+// **		应用：	> 见高级战斗肖像插件  函数
+// **		
+// **		作用域：	地图界面、战斗界面、菜单界面
+// ** 		主功能：	> 独立的数据操作器
+// **					> 能被存到存档中
+// ** 		子功能：	> 
+// **		
+// **		说明：	> 该类的update函数需要手动调用。
+// **				> 你可以随时new新的Drill_COAS_Data，但是要注意销毁装饰器对象。
+// **				> 【该类在c++工具中存在 复刻类 ，修改后注意同步复刻 】
 //=============================================================================
 //==============================
 // * 数据 - 定义
@@ -922,26 +927,45 @@ Drill_COAS_Data.prototype.initialize = function( data ){
 	if( data == undefined ){ data = {}; }
 	this._drill_data = JSON.parse(JSON.stringify( data ));	//深拷贝数据
 	this.drill_initData();									//初始化数据
+	this.drill_initPrivateData();							//初始化私有数据
 };
-//==============================
-// * 数据 - 帧刷新（需要父类手动执行）
-//==============================
-Drill_COAS_Data.prototype.update = function() {
+//##############################
+// * 数据 - 帧刷新【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//			
+//			说明：	> 此函数必须在 帧刷新 中手动调用执行。
+//##############################
+Drill_COAS_Data.prototype.update = function() { this.drill_COAS_update(); };
+Drill_COAS_Data.prototype.drill_COAS_update = function(){
 	this._drill_time += 1;				//时间+1
-	this.drill_COAS_updateState();		//刷新状态元
-	this.drill_COAS_updateAct();		//刷新动作元
+	this.drill_COAS_updateState();		//帧刷新 - 状态元
+	this.drill_COAS_updateAct();		//帧刷新 - 动作元
 };
-//==============================
-// * 创建 - 初始化
-//==============================
+//##############################
+// * 数据 - 初始化数据【标准默认值】
+//
+//			参数：	> 无
+//			返回：	> 无
+//			
+//			说明：	> data 动态参数对象（来自类初始化）
+//					  该对象包含 类所需的所有默认值。
+//##############################
 Drill_COAS_Data.prototype.drill_initData = function() {
-	var data = this._drill_data;	
+	var data = this._drill_data;
 	
 	// > 默认值
 	if( data['waitForPreload'] == undefined ){ data['waitForPreload'] = false };					//预加载等待（子插件用参数）
 	if( data['state_default_randomSeq'] == undefined ){ data['state_default_randomSeq'] = [] };		//默认状态元集合
 	if( data['state_tank'] == undefined ){ data['state_tank'] = [] };								//状态元 容器
 	if( data['act_tank'] == undefined ){ data['act_tank'] = [] };									//动作元 容器
+}
+//==============================
+// * 数据 - 初始化私有数据
+//==============================
+Drill_COAS_Data.prototype.drill_initPrivateData = function() {
+	var data = this._drill_data;
 	
 	// > 私有变量初始化
 	this._drill_time = 0;											//持续时间
@@ -1533,6 +1557,7 @@ Drill_COAS_SpriteDecorator.prototype.drill_COAS_isAllBitmapReady = function(){
 	return true;
 }
 
+
 //=============================================================================
 // ** 核心漏洞修复
 //=============================================================================
@@ -1545,4 +1570,5 @@ Drill_COAS_SpriteDecorator.prototype.drill_COAS_isAllBitmapReady = function(){
 Scene_Load.prototype.reloadMapIfUpdated = function() {
 	// （禁止重刷）
 };
+
 

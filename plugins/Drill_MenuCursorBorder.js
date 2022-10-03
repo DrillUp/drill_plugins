@@ -523,15 +523,34 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 
 
 //=============================================================================
-// * 存储数据初始化
+// ** 存储数据
 //=============================================================================
-var _drill_MCB_system_initialize = Game_System.prototype.initialize;
+//==============================
+// * 存储数据 - 初始化
+//==============================
+var _drill_MCB_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-    _drill_MCB_system_initialize.call(this);
+    _drill_MCB_sys_initialize.call(this);
+	this.drill_MCB_initSysData();
+};
+//==============================
+// * 存储数据 - 初始化数据
+//==============================
+Game_System.prototype.drill_MCB_initSysData = function() {
 	this._drill_MCB_visible = true;
 	this._drill_MCB_style = DrillUp.g_MCB_defaultStyle;
 	this._drill_MCB_glimmerRect_visible = true;
-}
+};	
+//==============================
+// * 存档文件 - 载入存档 - 数据赋值
+//==============================
+var _drill_MCB_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function(contents){
+	_drill_MCB_sys_extractSaveContents.call( this, contents );
+	if( $gameSystem._drill_MCB_style == undefined ){
+		$gameSystem.drill_MCB_initSysData();
+	}
+};
 
 
 //=============================================================================
@@ -644,7 +663,7 @@ Drill_MCB_Sprite.prototype.initialize = function( parent ){
 //==============================
 Drill_MCB_Sprite.prototype.update = function() {
 	Sprite_Base.prototype.update.call(this);
-	
+	if( this._drill_parent == undefined ){ return; }
 	this.drill_updateSprite();			//帧刷新对象
 };
 //==============================

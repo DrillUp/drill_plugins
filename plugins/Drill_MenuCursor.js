@@ -593,16 +593,35 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 }
 	
 //=============================================================================
-// ** 存储数据初始化
+// ** 存储数据
 //=============================================================================
+//==============================
+// * 存储数据 - 初始化
+//==============================
 var _drill_MCu_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {	
 	_drill_MCu_sys_initialize.call(this);
+	this.drill_MCu_initSysData();
+};
+//==============================
+// * 存储数据 - 初始化数据
+//==============================
+Game_System.prototype.drill_MCu_initSysData = function() {
 	this._drill_MCu_visible = true;
 	this._drill_MCu_style = DrillUp.g_MCu_defaultStyle;
 	DrillUp.g_MCu_init_x = Graphics.boxWidth*0.5;		//（最初点）
 	DrillUp.g_MCu_init_y = Graphics.boxHeight*0.5;		//
-}
+};	
+//==============================
+// * 存档文件 - 载入存档 - 数据赋值
+//==============================
+var _drill_MCu_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function(contents){
+	_drill_MCu_sys_extractSaveContents.call( this, contents );
+	if( $gameSystem._drill_MCu_style == undefined ){
+		$gameSystem.drill_MCu_initSysData();
+	}
+};
 
 //=============================================================================
 // ** 强制鼠标滚轮切换选项（默认的鼠标滚动，真就是翻页，而不是切换选项）

@@ -936,11 +936,10 @@ Game_Event.prototype.drill_EF_setupRandom = function() {
 						
 						// > 随机种子
 						var seed = this._mapId * this._eventId * (this._pageIndex+1) + this._eventId * this._eventId - this._pageIndex +31;
-						seed = ( seed * 9301 + 49297 ) % 233280;
-						seed = seed / 233280.0;
+						var random_num = this.drill_EF_getRandomInSeed( seed );
 						
 						// > 朝向设置
-						page.image.pattern = Math.floor(seed*3);
+						page.image.pattern = Math.floor(random_num*3);
 					}
 				}
 			}
@@ -970,15 +969,27 @@ Game_Event.prototype.drill_EF_setupRandom = function() {
 						
 						// > 随机种子（与 地图id、事件id、事件页id 相关）
 						var seed = this._mapId * this._eventId * (this._pageIndex+1) + this._eventId * this._eventId - this._pageIndex +31;
-						seed = ( seed * 9301 + 49297 ) % 233280;
-						seed = seed / 233280.0;
+						var random_num = this.drill_EF_getRandomInSeed( seed );
 						
 						// > 朝向设置
-						var ran = Math.floor(seed * temp1.length);
+						var ran = Math.floor(random_num * temp1.length);
 						page.image.pattern = Number( temp1[ran] );
 					}
 				}
 			}
 		};
 	}
+};
+//==============================
+// * 数学 - 生成随机数（随机种子）
+//			
+//			参数：	> seed 数字	（正整数）
+//			返回：	> 数字 		（0~1随机数）
+//			
+//			说明：	> 如果随机种子为 1至100，那么你将得到线性均匀分布的随机值。不是乱序随机。
+//==============================
+Game_Event.prototype.drill_EF_getRandomInSeed = function( seed ){
+	var new_ran = ( seed * 9301 + 49297 ) % 233280;
+	new_ran = new_ran / 233280.0;
+	return new_ran;
 };

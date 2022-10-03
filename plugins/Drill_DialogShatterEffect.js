@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.5]        对话框 - 方块粉碎效果
+ * @plugindesc [v1.6]        对话框 - 方块粉碎效果
  * @author Drill_up
  * 
  *
@@ -134,6 +134,8 @@
  * 优化了对 姓名框窗口 的兼容性。
  * [v1.5]
  * 大幅度优化了结构，支持了 暂停播放和继续播放 功能。
+ * [v1.6]
+ * 修复了保存后，对话框不可见的bug。
  * 
  * 
  * 
@@ -479,14 +481,34 @@ Game_System.prototype.initialize = function() {
 	this._drill_DSE_delayCommandTank = [];						//延迟插件指令容器
 	
 	// > 对话框
-	this._drill_DSE_mc = new Drill_COSE_Controller();
+	var data = {};
+	data['src_mode'] = "关闭资源控制";
+	this._drill_DSE_mc = new Drill_COSE_Controller( data );
 	
 	// > 选择框
-	this._drill_DSE_cc = new Drill_COSE_Controller();
+	this._drill_DSE_cc = new Drill_COSE_Controller( data );
 	
 	// > 姓名框
-	this._drill_DSE_nc = new Drill_COSE_Controller();
+	this._drill_DSE_nc = new Drill_COSE_Controller( data );
 }
+//==============================
+// * 存档文件 - 载入存档 - 数据赋值
+//==============================
+var _drill_DSE_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function(contents){
+	_drill_DSE_extractSaveContents.call( this, contents );
+	
+	// > 对话框
+	var data = {};
+	data['src_mode'] = "关闭资源控制";
+	$gameSystem._drill_DSE_mc = new Drill_COSE_Controller( data );
+	
+	// > 选择框
+	$gameSystem._drill_DSE_cc = new Drill_COSE_Controller( data );
+	
+	// > 姓名框
+	$gameSystem._drill_DSE_nc = new Drill_COSE_Controller( data );
+};
 
 
 //=============================================================================
@@ -693,6 +715,7 @@ Window.prototype._updateContents = function() {
 			for(var i = 0; i < char_sprite_list.length; i++){
 				char_sprite_list[i].visible = false;
 			}
+			
 		}
 	}else{
 		

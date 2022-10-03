@@ -92,6 +92,8 @@
  * 修复了弹道的多行 自定义公式 中无法执行且出错的bug。
  * [v1.5]
  * 优化了内部结构。
+ * [v1.6]
+ * 修复了空碎片数据的bug。
  * 
  * 
  * @param ---方块粉碎组 1至20---
@@ -877,7 +879,7 @@
 		temp_str = temp_str.replace(/\\n/g,"\n");
 		temp_str = temp_str.replace(/\\\\/g,"\\");
 		data['polarDistanceFormula'] = temp_str;
-		data['polarDirType'] = String( dataFrom["方向类型"] || "只初速度" );
+		data['polarDirType'] = String( dataFrom["方向类型"] || "固定方向" );
 		data['polarDirFixed'] = Number( dataFrom["固定方向"] || 0);
 		data['polarDirSectorFace'] = Number( dataFrom["扇形朝向"] || 0);
 		data['polarDirSectorDegree'] = Number( dataFrom["扇形角度"] || 0);
@@ -942,7 +944,7 @@
 		data['splitColCount'] = Number( dataFrom["切割矩阵列数"] || 5);
 		data['splitWidth'] = Number( dataFrom["固定大小的碎片宽度"] || 36);
 		data['splitHeight'] = Number( dataFrom["固定大小的碎片高度"] || 36);
-		//data['rotation'] = Number( dataFrom["粒子自旋转速度"] || 0);
+		//data['rotation'] = Number( dataFrom["碎片自旋转速度"] || 0);
 		
 		return data;
 	}
@@ -978,8 +980,26 @@ if( Imported.Drill_CoreOfBallistics ){
 // **		
 // **		作用域：	地图界面、战斗界面、菜单界面
 // **		主功能：	> 定义一个专门控制粉碎的数据类。
+// **		子功能：	->帧刷新
+// **						->重设数据
+// **						->显示/隐藏
+// **						->暂停/继续
+// **					->粉碎过程
+// **						->播放/倒放
+// **						->立即复原
+// **					->资源模式
+// **						> 指定资源名
+// **						> 关闭资源控制
+// **						->切割框架
+// **					->碎片
+// **						->碎片时间流逝
+// **						->透明度类型
+// **						->弹道初始化（坐标）
+// **						->弹道初始化（透明度）
 // **					
 // **		说明：	> 该类不能单独使用，必须结合 方块粉碎贴图 对象类。
+// **				> 创建后固定为暂停状态，需要手动执行碎片播放。
+// **				> 注意，此控制器，使用了 随机因子 （保存后再读取能复原碎片样子），但是没用 随机迭代次数。
 //=============================================================================
 //==============================
 // * 控制器 - 定义
@@ -991,8 +1011,11 @@ function Drill_COSE_Controller() {
 // * 控制器 - 初始化
 //==============================
 Drill_COSE_Controller.prototype.initialize = function( data ){
-	if( data == undefined ){ data = {}; }
 	this._drill_data = {};
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+    this.drill_initData();													//初始化数据
+    this.drill_initPrivateData();											//私有数据初始化
+	if( data == undefined ){ data = {}; }
     this.drill_COSE_resetData( data );
 }
 //##############################
@@ -1151,7 +1174,7 @@ Drill_COSE_Controller.prototype.drill_initPrivateData = function(){
 	
 	
 	// > 初始化 - 私有变量
-	this._drill_pause = false;							//暂停标记
+	this._drill_pause = true;							//暂停标记（注意，创建后固定为暂停状态，需要手动执行碎片播放）
 	this._drill_backrun = false;						//倒放标记
 	this._drill_visible = false;						//可见情况
 	this._drill_curTime = 0;							//当前时间进度
@@ -1175,7 +1198,11 @@ Drill_COSE_Controller.prototype.drill_initPrivateData = function(){
 		this._drill_spriteColCount = style_data['splitColCount'];
 	}
 	
-	// > 初始化 - 弹道数据
+	
+	// > 碎片群弹道 - 随机因子（所有随机数 都基于该随机因子）
+	this._drill_randomFactor = Math.random();
+	
+	// > 碎片群弹道 - 弹道数据
 	this._drill_COSE_ballistics_move = {};
 	this._drill_COSE_ballistics_opacity = {};
     this.drill_initBallisticsMove( data, style_data['ballistics'], style_data['sustain'], style_data['orderDelay'] );	//弹道初始化（坐标）
@@ -1183,106 +1210,121 @@ Drill_COSE_Controller.prototype.drill_initPrivateData = function(){
 	this._drill_playingTime = $gameTemp.drill_COBa_getBallisticsMove_TotalTime();										//碎片持续时长
 }
 //==============================
-// * 初始化 - 弹道初始化（坐标）
+// * 碎片群弹道 - 弹道初始化（坐标）
+//
+//			说明：	> 只存 弹道配置，不存 实际弹道。包括随机因子，但不含随机迭代次数。
+//					> 实际弹道只在贴图中进行推演并使用。
 //==============================
 Drill_COSE_Controller.prototype.drill_initBallisticsMove = function( data, b_data, sustain, orderDelay ){
 	
 	// > 弹道初始化（坐标）
-	var ballistics_move = {}
+	var temp_b_move = {}
 	
 	//   移动（movement）
-	ballistics_move['movementNum'] = this._drill_spriteNum;							//碎片数量
-	ballistics_move['movementTime'] = sustain;										//时长
-	ballistics_move['movementDelay'] = 0;											//延迟
-	ballistics_move['movementEndDelay'] = 0;										//延迟
-	ballistics_move['movementOrderDelay'] = orderDelay;								//依次延迟时间
-	ballistics_move['movementMode'] = b_data["movementMode"];						//移动模式
+	temp_b_move['movementNum'] = this._drill_spriteNum;							//碎片数量
+	temp_b_move['movementTime'] = sustain;										//时长
+	temp_b_move['movementDelay'] = 0;											//延迟
+	temp_b_move['movementEndDelay'] = 0;										//延迟
+	temp_b_move['movementOrderDelay'] = orderDelay;								//依次延迟时间
+	temp_b_move['movementMode'] = b_data["movementMode"];						//移动模式
 	//   极坐标（polar）
-	ballistics_move['polarSpeedType'] = b_data["polarSpeedType"];					//极坐标 - 速度 - 类型
-	ballistics_move['polarSpeedBase'] = b_data["polarSpeedBase"];					//极坐标 - 速度 - 初速度
-	ballistics_move['polarSpeedRandom'] = b_data["polarSpeedRandom"];				//极坐标 - 速度 - 速度随机波动量
-	ballistics_move['polarSpeedInc'] = b_data["polarSpeedInc"];						//极坐标 - 速度 - 加速度
-	ballistics_move['polarSpeedMax'] = b_data["polarSpeedMax"];						//极坐标 - 速度 - 最大速度
-	ballistics_move['polarSpeedMin'] = b_data["polarSpeedMin"];						//极坐标 - 速度 - 最小速度
-	ballistics_move['polarDistanceFormula'] = b_data["polarDistanceFormula"];		//极坐标 - 速度 - 路程计算公式
-	ballistics_move['polarDirType'] = b_data["polarDirType"];						//极坐标 - 方向 - 类型
-	ballistics_move['polarDirFixed'] = b_data["polarDirFixed"];						//极坐标 - 方向 - 固定方向
-	ballistics_move['polarDirSectorFace'] = b_data["polarDirSectorFace"];			//极坐标 - 方向 - 扇形朝向
-	ballistics_move['polarDirSectorDegree'] = b_data["polarDirSectorDegree"];		//极坐标 - 方向 - 扇形角度
-	ballistics_move['polarDirFormula'] = b_data["polarDirFormula"];					//极坐标 - 方向 - 方向计算公式
+	temp_b_move['polarSpeedType'] = b_data["polarSpeedType"];					//极坐标 - 速度 - 类型
+	temp_b_move['polarSpeedBase'] = b_data["polarSpeedBase"];					//极坐标 - 速度 - 初速度
+	temp_b_move['polarSpeedRandom'] = b_data["polarSpeedRandom"];				//极坐标 - 速度 - 速度随机波动量
+	temp_b_move['polarSpeedInc'] = b_data["polarSpeedInc"];						//极坐标 - 速度 - 加速度
+	temp_b_move['polarSpeedMax'] = b_data["polarSpeedMax"];						//极坐标 - 速度 - 最大速度
+	temp_b_move['polarSpeedMin'] = b_data["polarSpeedMin"];						//极坐标 - 速度 - 最小速度
+	temp_b_move['polarDistanceFormula'] = b_data["polarDistanceFormula"];		//极坐标 - 速度 - 路程计算公式
+	temp_b_move['polarDirType'] = b_data["polarDirType"];						//极坐标 - 方向 - 类型
+	temp_b_move['polarDirFixed'] = b_data["polarDirFixed"];						//极坐标 - 方向 - 固定方向
+	temp_b_move['polarDirSectorFace'] = b_data["polarDirSectorFace"];			//极坐标 - 方向 - 扇形朝向
+	temp_b_move['polarDirSectorDegree'] = b_data["polarDirSectorDegree"];		//极坐标 - 方向 - 扇形角度
+	temp_b_move['polarDirFormula'] = b_data["polarDirFormula"];					//极坐标 - 方向 - 方向计算公式
 	//   直角坐标（cartesian）
-	ballistics_move['cartRotation'] = b_data["cartRotation"];						//直角坐标 - 直角坐标整体旋转
-	ballistics_move['cartXSpeedType'] = b_data["cartXSpeedType"];					//直角坐标 - x - 类型
-	ballistics_move['cartXSpeedBase'] = b_data["cartXSpeedBase"];					//直角坐标 - x - 初速度
-	ballistics_move['cartXSpeedRandom'] = b_data["cartXSpeedRandom"];				//直角坐标 - x - 速度随机波动量
-	ballistics_move['cartXSpeedInc'] = b_data["cartXSpeedInc"];						//直角坐标 - x - 加速度
-	ballistics_move['cartXSpeedMax'] = b_data["cartXSpeedMax"];						//直角坐标 - x - 最大速度
-	ballistics_move['cartXSpeedMin'] = b_data["cartXSpeedMin"];						//直角坐标 - x - 最小速度
-	ballistics_move['cartXDistanceFormula'] = b_data["cartXDistanceFormula"];		//直角坐标 - x - 路程计算公式
-	ballistics_move['cartYSpeedType'] = b_data["cartYSpeedType"];					//直角坐标 - y - 类型
-	ballistics_move['cartYSpeedBase'] = b_data["cartYSpeedBase"];					//直角坐标 - y - 初速度
-	ballistics_move['cartYSpeedRandom'] = b_data["cartYSpeedRandom"];				//直角坐标 - y - 速度随机波动量
-	ballistics_move['cartYSpeedInc'] = b_data["cartYSpeedInc"];						//直角坐标 - y - 加速度
-	ballistics_move['cartYSpeedMax'] = b_data["cartYSpeedMax"];						//直角坐标 - y - 最大速度
-	ballistics_move['cartYSpeedMin'] = b_data["cartYSpeedMin"];						//直角坐标 - y - 最小速度
-	ballistics_move['cartYDistanceFormula'] = b_data["cartYDistanceFormula"];		//直角坐标 - y - 路程计算公式
+	temp_b_move['cartRotation'] = b_data["cartRotation"];						//直角坐标 - 直角坐标整体旋转
+	temp_b_move['cartXSpeedType'] = b_data["cartXSpeedType"];					//直角坐标 - x - 类型
+	temp_b_move['cartXSpeedBase'] = b_data["cartXSpeedBase"];					//直角坐标 - x - 初速度
+	temp_b_move['cartXSpeedRandom'] = b_data["cartXSpeedRandom"];				//直角坐标 - x - 速度随机波动量
+	temp_b_move['cartXSpeedInc'] = b_data["cartXSpeedInc"];						//直角坐标 - x - 加速度
+	temp_b_move['cartXSpeedMax'] = b_data["cartXSpeedMax"];						//直角坐标 - x - 最大速度
+	temp_b_move['cartXSpeedMin'] = b_data["cartXSpeedMin"];						//直角坐标 - x - 最小速度
+	temp_b_move['cartXDistanceFormula'] = b_data["cartXDistanceFormula"];		//直角坐标 - x - 路程计算公式
+	temp_b_move['cartYSpeedType'] = b_data["cartYSpeedType"];					//直角坐标 - y - 类型
+	temp_b_move['cartYSpeedBase'] = b_data["cartYSpeedBase"];					//直角坐标 - y - 初速度
+	temp_b_move['cartYSpeedRandom'] = b_data["cartYSpeedRandom"];				//直角坐标 - y - 速度随机波动量
+	temp_b_move['cartYSpeedInc'] = b_data["cartYSpeedInc"];						//直角坐标 - y - 加速度
+	temp_b_move['cartYSpeedMax'] = b_data["cartYSpeedMax"];						//直角坐标 - y - 最大速度
+	temp_b_move['cartYSpeedMin'] = b_data["cartYSpeedMin"];						//直角坐标 - y - 最小速度
+	temp_b_move['cartYDistanceFormula'] = b_data["cartYDistanceFormula"];		//直角坐标 - y - 路程计算公式
+	
+	// > 随机因子（RandomFactor）
+	//		（每个碎片对应一个随机因子，掌握一条弹道。）
+	temp_b_move['polarSpeedRandomFactor'] = this._drill_randomFactor;		//极坐标 - 速度 - 随机因子
+	temp_b_move['polarDirRandomFactor'] = this._drill_randomFactor;			//极坐标 - 方向 - 随机因子
+	temp_b_move['cartXSpeedRandomFactor'] = this._drill_randomFactor;		//直角坐标 - x - 随机因子
+	temp_b_move['cartYSpeedRandomFactor'] = this._drill_randomFactor;		//直角坐标 - y - 随机因子
+	// > 随机迭代次数（RandomIteration）
+	//		（无）
 	
 	// > 生成参数数据
-	this._drill_COSE_ballistics_move = $gameTemp.drill_COBa_setBallisticsMove( ballistics_move );
+	this._drill_COSE_ballistics_move = $gameTemp.drill_COBa_setBallisticsMove( temp_b_move );
 }
 //==============================
-// * 初始化 - 弹道初始化（透明度）
+// * 碎片群弹道 - 弹道初始化（透明度）
+//
+//			说明：	> 只存 弹道配置，不存 实际弹道。包括随机因子，但不含随机迭代次数。
+//					> 实际弹道只在贴图中进行推演并使用。
 //==============================
 Drill_COSE_Controller.prototype.drill_initBallisticsOpacity = function( data, sustain, orderDelay ){
 	
 	// > 弹道初始化（透明度）
 	var orgOpacity = 255;
-	var ballistics_opacity = {};
-	ballistics_opacity['opacityMode'] = "目标值模式";
+	var temp_b_opacity = {};
+	temp_b_opacity['opacityMode'] = "目标值模式";
 	
 	if( data['shatter_opacityType'] == "不消失" ){	
 		// > 基础参数
-		ballistics_opacity['opacityNum'] = this._drill_spriteNum;
-		ballistics_opacity['opacityTime'] = sustain;
-		ballistics_opacity['opacityDelay'] = 0;
-		ballistics_opacity['opacityEndDelay'] = 0;				
-		ballistics_opacity['opacityOrderDelay'] = orderDelay;	
+		temp_b_opacity['opacityNum'] = this._drill_spriteNum;
+		temp_b_opacity['opacityTime'] = sustain;
+		temp_b_opacity['opacityDelay'] = 0;
+		temp_b_opacity['opacityEndDelay'] = 0;				
+		temp_b_opacity['opacityOrderDelay'] = orderDelay;	
 		// > 模式参数		
-		ballistics_opacity['targetType'] = "瞬间变化";			
-		ballistics_opacity['targetDifference'] = 0;
+		temp_b_opacity['targetType'] = "瞬间变化";			
+		temp_b_opacity['targetDifference'] = 0;
 	}
 	else if( data['shatter_opacityType'] == "瞬间消失" ){		//（透明度这里直接固定配置内容）
 		// > 基础参数
-		ballistics_opacity['opacityNum'] = this._drill_spriteNum;
-		ballistics_opacity['opacityTime'] = sustain;	
-		ballistics_opacity['opacityDelay'] = 0;						
-		ballistics_opacity['opacityEndDelay'] = 0;					
-		ballistics_opacity['opacityOrderDelay'] = orderDelay;	
+		temp_b_opacity['opacityNum'] = this._drill_spriteNum;
+		temp_b_opacity['opacityTime'] = sustain;	
+		temp_b_opacity['opacityDelay'] = 0;						
+		temp_b_opacity['opacityEndDelay'] = 0;					
+		temp_b_opacity['opacityOrderDelay'] = orderDelay;	
 		// > 模式参数
-		ballistics_opacity['targetType'] = "瞬间变化";				
-		ballistics_opacity['targetDifference'] = 0 - orgOpacity;	
+		temp_b_opacity['targetType'] = "瞬间变化";				
+		temp_b_opacity['targetDifference'] = 0 - orgOpacity;	
 	}
 	else if( data['shatter_opacityType'] == "线性消失" ){		
 		// > 基础参数
-		ballistics_opacity['opacityNum'] = this._drill_spriteNum;
-		ballistics_opacity['opacityTime'] = sustain;
-		ballistics_opacity['opacityDelay'] = 0;					
-		ballistics_opacity['opacityEndDelay'] = 0;					
-		ballistics_opacity['opacityOrderDelay'] = orderDelay;	
+		temp_b_opacity['opacityNum'] = this._drill_spriteNum;
+		temp_b_opacity['opacityTime'] = sustain;
+		temp_b_opacity['opacityDelay'] = 0;					
+		temp_b_opacity['opacityEndDelay'] = 0;					
+		temp_b_opacity['opacityOrderDelay'] = orderDelay;	
 		// > 模式参数		
-		ballistics_opacity['targetType'] = "匀速变化";				
-		ballistics_opacity['targetDifference'] = 0 - orgOpacity;	
+		temp_b_opacity['targetType'] = "匀速变化";				
+		temp_b_opacity['targetDifference'] = 0 - orgOpacity;	
 	}
 	else if( data['shatter_opacityType'] == "等一半时间后线性消失" ){	
 		// > 基础参数
-		ballistics_opacity['opacityNum'] = this._drill_spriteNum;
-		ballistics_opacity['opacityTime'] = sustain/2;
-		ballistics_opacity['opacityDelay'] = sustain/2;
-		ballistics_opacity['opacityEndDelay'] = 0;					
-		ballistics_opacity['opacityOrderDelay'] = orderDelay;	
+		temp_b_opacity['opacityNum'] = this._drill_spriteNum;
+		temp_b_opacity['opacityTime'] = sustain/2;
+		temp_b_opacity['opacityDelay'] = sustain/2;
+		temp_b_opacity['opacityEndDelay'] = 0;					
+		temp_b_opacity['opacityOrderDelay'] = orderDelay;	
 		// > 模式参数		
-		ballistics_opacity['targetType'] = "匀速变化";			
-		ballistics_opacity['targetDifference'] = 0 - orgOpacity;
+		temp_b_opacity['targetType'] = "匀速变化";			
+		temp_b_opacity['targetDifference'] = 0 - orgOpacity;
 	}
 	else{
 		alert(
@@ -1291,8 +1333,14 @@ Drill_COSE_Controller.prototype.drill_initBallisticsOpacity = function( data, su
 		);
 	}
 	
+	//   随机因子（RandomFactor）
+	//		（每个碎片对应一个随机因子，掌握一条弹道。）
+	temp_b_opacity['randomFactor'] = this._drill_randomFactor;
+	//   随机迭代次数（RandomIteration）
+	//		（无）
+	
 	// > 生成参数数据
-	this._drill_COSE_ballistics_opacity = $gameTemp.drill_COBa_setBallisticsOpacity( ballistics_opacity );
+	this._drill_COSE_ballistics_opacity = $gameTemp.drill_COBa_setBallisticsOpacity( temp_b_opacity );
 }
 //==============================
 // * 控制器 - 重设数据（私有）
@@ -1328,10 +1376,10 @@ Drill_COSE_Controller.prototype.drill_COSE_resetData_Private = function( data ){
 	}
 	
 	// > 执行重置
-	this._drill_data = JSON.parse(JSON.stringify( data ));	//深拷贝
-	this._drill_controllerSerial = new Date().getTime();	//（生成一个不重复的序列号）
-    this.drill_initData();									//初始化数据
-    this.drill_initPrivateData();							//私有数据初始化
+	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+    this.drill_initData();													//初始化数据
+    this.drill_initPrivateData();											//私有数据初始化
 }
 //==============================
 // * 控制器 - 是否正在播放（私有）
@@ -1725,7 +1773,7 @@ Sprite.prototype.drill_COSE_setFrame = function( x, y, width, height ){
 	this.setFrame( Math.floor(x), Math.floor(y), Math.floor(width), Math.floor(height) );
 }
 //==============================
-// * 粉碎贴图 - 重建 - 弹道
+// * 碎片群弹道 - 重新推演弹道
 //==============================
 Drill_COSE_LayerSprite.prototype.drill_rebuildBallistics = function(){
     var c_data = this._drill_controller;
@@ -1747,8 +1795,10 @@ Drill_COSE_LayerSprite.prototype.drill_rebuildBallistics = function(){
 			var temp_sprite = this._drill_spriteTank[ i*rowNum+j ];
 			if( temp_sprite == undefined ){ continue; }
 			
-			// > 弹道核心 - 预推演
+			// > 碎片群弹道 - 预推演（坐标）
 			$gameTemp.drill_COBa_preBallisticsMove( temp_sprite, i*rowNum+j , temp_sprite._orgX, temp_sprite._orgY );
+			
+			// > 碎片群弹道 - 预推演（透明度）
 			$gameTemp.drill_COBa_preBallisticsOpacity( temp_sprite, i*rowNum+j , temp_sprite._orgOpacity );
 			
 			// > 变速矩阵
@@ -1857,8 +1907,12 @@ Drill_COSE_LayerSprite.prototype.drill_updateShatterMove = function(){
 		if( time > temp_sprite['_drill_COBa_x'].length-1 ){
 			time = temp_sprite['_drill_COBa_x'].length-1;
 		}
-		temp_sprite.x = temp_sprite['_drill_COBa_x'][time];		//播放弹道轨迹
+		
+		// > 位置（碎片群弹道）
+		temp_sprite.x = temp_sprite['_drill_COBa_x'][time];	
 		temp_sprite.y = temp_sprite['_drill_COBa_y'][time];
+		
+		// > 透明度（碎片群弹道）
 		temp_sprite.opacity = temp_sprite['_drill_COBa_opacity'][time];
 		//temp_sprite.opacity = 255;
 	}

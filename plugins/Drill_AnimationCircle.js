@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.7]        动画 - 多层动画魔法圈
+ * @plugindesc [v1.9]        动画 - 多层动画魔法圈
  * @author Drill_up
  * 
  * @Drill_LE_param "魔法圈样式-%d"
@@ -78,6 +78,8 @@
  * 插件指令：>动画魔法圈 : 播放中的样式[2] : 立即隐藏
  * 插件指令：>动画魔法圈 : 播放中的样式[2] : 立即出现
  * 插件指令：>动画魔法圈 : 播放中的样式[2] : 立即消失
+ * 插件指令：>动画魔法圈 : 播放中的样式[2] : 暂停
+ * 插件指令：>动画魔法圈 : 播放中的样式[2] : 继续
  *
  * 1."立即显示/隐藏"可以使得正在播放的样式瞬间显示/隐藏。
  *   "立即出现"可以使得播放的动画立刻跳过 出现状态。
@@ -102,9 +104,11 @@
  * 插件指令：>动画魔法圈 : 播放中的样式[2] : 本事件 : 立即隐藏
  * 插件指令：>动画魔法圈 : 播放中的样式[2] : 本事件 : 立即出现
  * 插件指令：>动画魔法圈 : 播放中的样式[2] : 本事件 : 立即消失
+ * 插件指令：>动画魔法圈 : 播放中的样式[2] : 本事件 : 暂停
+ * 插件指令：>动画魔法圈 : 播放中的样式[2] : 本事件 : 继续
  * 
  * 1.前半部分（所有样式）中间部分（本事件）和 后半部分（立即出现）
- *   的参数可以随意组合。一共有2*6*4种组合方式。
+ *   的参数可以随意组合。一共有2*6*6种组合方式。
  * 2.通过插件指令可以直接控制到地图界面中一个具体事件的一个具体魔法圈。
  * 
  * -----------------------------------------------------------------------------
@@ -129,9 +133,11 @@
  * 插件指令：>动画魔法圈 : 播放中的样式[2] : 敌方[2] : 立即隐藏
  * 插件指令：>动画魔法圈 : 播放中的样式[2] : 敌方[2] : 立即出现
  * 插件指令：>动画魔法圈 : 播放中的样式[2] : 敌方[2] : 立即消失
+ * 插件指令：>动画魔法圈 : 播放中的样式[2] : 敌方[2] : 暂停
+ * 插件指令：>动画魔法圈 : 播放中的样式[2] : 敌方[2] : 继续
  * 
  * 1.前半部分（所有样式）中间部分（敌方[2]）和 后半部分（立即出现）
- *   的参数可以随意组合。一共有2*10*4种组合方式。
+ *   的参数可以随意组合。一共有2*10*6种组合方式。
  * 2.通过插件指令可以直接控制到战斗界面中一个具体单位的一个具体魔法圈。
  * 3."敌方[1]"表示从左往右第1个敌人，
  *   "敌人[5]"表示所有 敌人id 为5的敌方单位。
@@ -180,6 +186,10 @@
  * 修复了动画位置为画面时，父贴图后面层仍然跟随施法者移动的bug。
  * [v1.7]
  * 修复了动画删除时出错的bug。
+ * [v1.8]
+ * 大幅度优化了插件结构。
+ * [v1.9]
+ * 优化了装饰贴图自动销毁与动画销毁关系，减少了内存累积问题。
  * 
  * 
  * @param ---魔法圈样式组 1至20---
@@ -1418,28 +1428,28 @@
  * @desc 只用于方便区分查看的标签，不作用在插件中。
  * @default ==新的动画魔法圈样式==
  * 
- * @param --绑定--
+ * @param ---绑定---
  * @desc 
  *
  * @param 绑定的动画
- * @parent --绑定--
+ * @parent ---绑定---
  * @type animation
  * @desc 指定动画的id，魔法圈将会与动画相互绑定。
  * @default 0
  *
  * @param 初始是否显示
- * @parent --绑定--
+ * @parent ---绑定---
  * @type boolean
  * @on 显示
  * @off 不显示
  * @desc true - 显示，false - 不显示
  * @default true
  * 
- * @param --贴图--
+ * @param ---贴图---
  * @desc 
  *
  * @param 资源-魔法圈
- * @parent --贴图--
+ * @parent ---贴图---
  * @desc 魔法圈的图片资源。
  * @default (需配置)动画魔法圈
  * @require 1
@@ -1447,17 +1457,17 @@
  * @type file
  *
  * @param 平移-魔法圈 X
- * @parent --贴图--
+ * @parent ---贴图---
  * @desc x轴方向平移，单位像素。正数向右，负数向左。
  * @default 0
  *
  * @param 平移-魔法圈 Y
- * @parent --贴图--
+ * @parent ---贴图---
  * @desc y轴方向平移，单位像素。正数向下，负数向上。
  * @default 0
  *
  * @param 混合模式
- * @parent --贴图--
+ * @parent ---贴图---
  * @type select
  * @option 普通
  * @value 0
@@ -1471,12 +1481,12 @@
  * @default 0
  *
  * @param 旋转速度
- * @parent --贴图--
+ * @parent ---贴图---
  * @desc 正数逆时针，负数顺时针，单位 角度/帧。(1秒60帧)
- * @default 10.0
+ * @default 4.0
  *
  * @param 动画层级
- * @parent --贴图--
+ * @parent ---贴图---
  * @type select
  * @option 在父贴图后面
  * @value 在父贴图后面
@@ -1488,31 +1498,31 @@
  * @default 在动画后面
  *
  * @param 图片层级
- * @parent --贴图--
+ * @parent ---贴图---
  * @type number
  * @min 0
- * @desc 魔法圈在同一个动画，并且在同一动画层级下，先后排序的位置，0表示最后面。
+ * @desc 魔法圈在同一个动画，并且在同一动画层级时，先后排序的位置，0表示最后面。
  * @default 0
  * 
- * @param --动画过程--
+ * @param ---动画过程---
  * @desc 
  *
  * @param 出现延迟
- * @parent --动画过程--
+ * @parent ---动画过程---
  * @type number
  * @min 0
  * @desc 魔法圈将延迟一段时间显现，单位帧。
  * @default 0
  *
  * @param 出现时长
- * @parent --动画过程--
+ * @parent ---动画过程---
  * @type number
  * @min 0
  * @desc 魔法圈显现的时间，单位帧。
  * @default 60
  *
  * @param 出现模式
- * @parent --动画过程--
+ * @parent ---动画过程---
  * @type select
  * @option 横向显现
  * @value 横向显现
@@ -1548,14 +1558,14 @@
  * @default 0
  *
  * @param 持续时长
- * @parent --动画过程--
+ * @parent ---动画过程---
  * @type number
  * @min 0
  * @desc 魔法圈持续的时间，单位帧。
  * @default 220
  *
  * @param 持续模式
- * @parent --动画过程--
+ * @parent ---动画过程---
  * @type select
  * @option 常规值
  * @value 常规值
@@ -1583,14 +1593,14 @@
  * @default 255
  *
  * @param 消失时长
- * @parent --动画过程--
+ * @parent ---动画过程---
  * @type number
  * @min 0
  * @desc 魔法圈的消失时间。
  * @default 30
  *
  * @param 消失模式
- * @parent --动画过程--
+ * @parent ---动画过程---
  * @type select
  * @option 横向消失
  * @value 横向消失
@@ -1626,29 +1636,64 @@
  * @default 0
  * 
  * 
- * @param --3d效果--
+ * @param ---3d效果---
  * @desc 
  * 
  * @param 整体缩放 X
- * @parent --3d效果--
+ * @parent ---3d效果---
  * @desc 魔法圈的缩放X值，默认比例1.0。缩放将会使得魔法圈看起来旋转具有一定的3d效果。
  * @default 1.0
  * 
  * @param 整体缩放 Y
- * @parent --3d效果--
+ * @parent ---3d效果---
  * @desc 魔法圈的缩放Y值，默认比例1.0。缩放将会使得魔法圈看起来旋转具有一定的3d效果。
  * @default 1.0
  * 
  * @param 整体斜切 X
- * @parent --3d效果--
+ * @parent ---3d效果---
  * @desc 魔法圈的斜切X值，默认比例0.0。斜切将会使得魔法圈看起来旋转具有一定角度。
  * @default 0.0
  * 
  * @param 整体斜切 Y
- * @parent --3d效果--
+ * @parent ---3d效果---
  * @desc 魔法圈的斜切Y值，默认比例0.0。斜切将会使得魔法圈看起来旋转具有一定角度。
  * @default 0.0
  * 
+ * @param 整体再旋转角度
+ * @parent ---3d效果---
+ * @desc 在上述效果的基础上，魔法圈再旋转的角度。
+ * @default 0.0
+ * 
+ * 
+ * @param ---半图层效果---
+ * @default 
+ *
+ * @param 是否开启半图层效果
+ * @parent ---半图层效果---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭。
+ * @default false
+ *
+ * @param 半图层动画层级
+ * @parent ---半图层效果---
+ * @type select
+ * @option 在父贴图后面
+ * @value 在父贴图后面
+ * @option 在动画后面
+ * @value 在动画后面
+ * @option 在动画前面
+ * @value 在动画前面
+ * @desc 半图层所属的动画层级。父贴图后面是指：战斗时，敌人/玩家贴图的后面，地图中，事件贴图的后面。
+ * @default 在父贴图后面
+ *
+ * @param 半图层图片层级
+ * @parent ---半图层效果---
+ * @type number
+ * @min 0
+ * @desc 半图层与其他贴图先后排序的位置，0表示最后面。
+ * @default 3
  *
  */
  
@@ -1675,19 +1720,42 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★大体框架与功能如下：
-//			动画魔法圈样式：
-//				->动画过程
-//					> 延迟
-//					> 出现
-//					> 持续
-//					> 消失
-//				->父贴图后面层
+//			动画魔法圈：
+//				->动画魔法圈 容器
+//					->获取贴图（接口）
+//					->获取贴图 - 根据敌人对象（接口）
+//					->获取贴图 - 根据角色对象（接口）
+//					->获取贴图 - 根据物体对象（接口）
+//					->获取全部控制器（接口）
+//					->获取全部贴图（接口）
+//					->获取全部贴图 - 根据敌人对象（接口）
+//					->获取全部贴图 - 根据角色对象（接口）
+//					->获取全部贴图 - 根据物体对象（接口）
+//					->获取列表中指定动画的贴图
+//					->设置贴图立即显示/隐藏（接口）
+//					->设置贴图立即出现（接口）
+//					->设置贴图立即消失（接口）
 //				->插件指令
 //					->立即出现
 //					->立即消失
+//				->个体层级
+//					->添加贴图到层级【标准函数】
+//					->去除贴图【标准函数】
+//					->图片层级排序（界面装饰）【标准函数】
+//					->图片层级排序（个体装饰）【标准函数】
+//				->动画创建
+//					->创建数据/创建贴图
+//					->外键标记
+//				->外部控制
+//					->控制器刷新
+//					->自动销毁
+//
+//				->动画魔法圈控制器【Drill_ACi_Controller】
+//				->动画魔法圈贴图【Drill_ACi_Sprite】
 //		
 //		★私有类如下：
-//			* Drill_ACi_Sprite	【动画魔法圈贴图】
+//			* Drill_ACi_Controller	【动画魔法圈控制器】
+//			* Drill_ACi_Sprite		【动画魔法圈贴图】
 //
 //		★必要注意事项：
 //			1.插件的图片层级与多个插件共享。【必须自写 层级排序 函数】
@@ -1705,6 +1773,7 @@
 //			3.留意下面的变量：
 //				_drill_duration_decreased		减一锁（多次相互覆盖）
 //				_drill_duration					延迟时间（多次相互覆盖）
+//			4.留意关键字：【暂未使用】。
 //
 //		★其它说明细节：
 //			1.该插件的原理模式与菜单魔法圈样式有较大不同，虽然配置原理相似。
@@ -1721,8 +1790,7 @@
 //			  为了使得动画在角色身后，找父类找到最顶层的 Spriteset_Battle，然后找到指定的子类层，添加。
 //			  并且要绑定随时变化的敌人/玩家位置。
 //			  ._drill_animPBackArea 父贴图后面层
-//			  ._drill_ACi_tempArea 父贴图后面层（临时）
-//			  ._drill_bindingSprite 确定跟随位移
+//			  ._drill_individualSprite 确定跟随位移
 //			5.与 MOG_BattleHud 和 Drill_BattleCamera 有关联，用于定位第一人称下的动画位置。
 //
 //		★存在的问题：
@@ -1744,17 +1812,25 @@
 	//==============================
 	DrillUp.drill_ACi_styleInit = function( dataFrom ){
 		var data = {};
+		
+		// > 绑定
 		data['anim'] = Number( dataFrom["绑定的动画"] || 0);
 		data['visible'] = String( dataFrom["初始是否显示"] || "true") == "true";
+		data['pause'] = false;
 		
+		// > 资源
 		data['src_img'] = String( dataFrom["资源-魔法圈"] || "");
+		data['src_img_file'] = "img/Special__anim/";
+		
+		// > 贴图
 		data['x'] = Number( dataFrom["平移-魔法圈 X"] || 0);
 		data['y'] = Number( dataFrom["平移-魔法圈 Y"] || 0);
 		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
-		data['rotate'] = Number( dataFrom["旋转速度"] || 0) /180*Math.PI;
 		data['anim_index'] = String( dataFrom["动画层级"] || "在动画后面");
 		data['zIndex'] = Number( dataFrom["图片层级"] || 0);
+		data['rotate'] = Number( dataFrom["旋转速度"] || 0);
 		
+		// > 动画过程
 		data['delay'] = Number( dataFrom["出现延迟"] || 0);
 		data['birth'] = Number( dataFrom["出现时长"] || 20);
 		data['birthMode'] = String( dataFrom["出现模式"] || "横向显现");
@@ -1772,10 +1848,18 @@
 		data['deathScaleY'] = Number( dataFrom["消失-自定义缩放 Y"] || 1.0);
 		data['deathOpacity'] = Number( dataFrom["消失-自定义透明度"] || 0);
 		
+		// > 3d效果
 		data['scale_x'] = Number( dataFrom["整体缩放 X"] || 1.0);
 		data['scale_y'] = Number( dataFrom["整体缩放 Y"] || 1.0);
 		data['skew_x'] = Number( dataFrom["整体斜切 X"] || 0.0);
 		data['skew_y'] = Number( dataFrom["整体斜切 Y"] || 0.0);
+		data['parentRotate'] = Number( dataFrom["整体再旋转角度"] || 0.0);
+		
+		// > 半图层效果
+		data['half_enable'] = String( dataFrom["是否开启半图层效果"] || "false") == "true";
+		data['half_animIndex'] = String( dataFrom["半图层动画层级"] || "在父贴图后面");
+		data['half_zIndex'] = Number( dataFrom["半图层图片层级"] || 3);
+		
 		return data;
 	}
 	
@@ -1797,13 +1881,7 @@
 	}
 	
 	
-//=============================================================================
-// ** 资源文件夹
-//=============================================================================
-ImageManager.load_SpecialAnim = function(filename) {
-    return this.loadBitmap('img/Special__anim/', filename, 0, true);
-};
-
+	
 //=============================================================================
 // * 插件指令
 //=============================================================================
@@ -2015,6 +2093,12 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( type === "立即消失" ){
 				$gameTemp.drill_ACi_setAnimDeath( sprite_list );
 			}
+			if( type === "暂停" ){
+				$gameTemp.drill_ACi_setAnimPause( sprite_list, true );
+			}
+			if( type === "继续" ){
+				$gameTemp.drill_ACi_setAnimPause( sprite_list, false );
+			}
 		}
 		
 		/*-----------------执行变化 - 样式+角色条件------------------*/
@@ -2063,6 +2147,12 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			}
 			if( type === "立即消失" ){
 				$gameTemp.drill_ACi_setAnimDeath( sprite_list );
+			}
+			if( type === "暂停" ){
+				$gameTemp.drill_ACi_setAnimPause( sprite_list, true );
+			}
+			if( type === "继续" ){
+				$gameTemp.drill_ACi_setAnimPause( sprite_list, false );
 			}
 		}
 	}
@@ -2123,9 +2213,9 @@ var _drill_ACi_temp_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {
     _drill_ACi_temp_initialize.call(this);
 	
-	this._drill_ACi_spriteTank = [];			//当前播放中的样式
-	this._drill_ACi_lastAdded = [];				//上一次添加的 魔法圈贴图
-	this._drill_ACi_lastAdded_PBack = [];		//上一次添加在父贴图后面的 魔法圈贴图
+	this._drill_ACi_spriteTank = [];			//当前播放中的贴图
+	this._drill_ACi_controllerTank = [];		//当前播放中的控制器
+	this._drill_ACi_lastAdded = [];				//上一次添加的 贴图
 }
 //==============================
 // * 容器 - 获取贴图（接口）
@@ -2135,7 +2225,9 @@ Game_Temp.prototype.drill_ACi_getSpriteList = function( style_id ){
 	for(var i = 0; i < this._drill_ACi_spriteTank.length; i++){
 		var temp_sprite = this._drill_ACi_spriteTank[i];
 		if( temp_sprite == undefined ){ continue; }
-		if( temp_sprite._drill_data['id'] == style_id ){
+		var temp_controller = temp_sprite._drill_controller;
+		if( temp_controller == undefined ){ continue; }
+		if( temp_controller._drill_data['id'] == style_id ){
 			result.push( temp_sprite );
 		}
 	}
@@ -2149,7 +2241,9 @@ Game_Temp.prototype.drill_ACi_getSpriteList_Enemy = function( style_id, enemy_ob
 	for(var i = 0; i < this._drill_ACi_spriteTank.length; i++){
 		var temp_sprite = this._drill_ACi_spriteTank[i];
 		if( temp_sprite == undefined ){ continue; }
-		if( temp_sprite._drill_data['id'] == style_id &&
+		var temp_controller = temp_sprite._drill_controller;
+		if( temp_controller == undefined ){ continue; }
+		if( temp_controller._drill_data['id'] == style_id &&
 			temp_sprite._drill_parent_enemyObj == enemy_obj ){
 			result.push( temp_sprite );
 		}
@@ -2164,7 +2258,9 @@ Game_Temp.prototype.drill_ACi_getSpriteList_Actor = function( style_id, actor_ob
 	for(var i = 0; i < this._drill_ACi_spriteTank.length; i++){
 		var temp_sprite = this._drill_ACi_spriteTank[i];
 		if( temp_sprite == undefined ){ continue; }
-		if( temp_sprite._drill_data['id'] == style_id &&
+		var temp_controller = temp_sprite._drill_controller;
+		if( temp_controller == undefined ){ continue; }
+		if( temp_controller._drill_data['id'] == style_id &&
 			temp_sprite._drill_parent_actorObj == actor_obj ){
 			result.push( temp_sprite );
 		}
@@ -2179,12 +2275,20 @@ Game_Temp.prototype.drill_ACi_getSpriteList_Character = function( style_id, char
 	for(var i = 0; i < this._drill_ACi_spriteTank.length; i++){
 		var temp_sprite = this._drill_ACi_spriteTank[i];
 		if( temp_sprite == undefined ){ continue; }
-		if( temp_sprite._drill_data['id'] == style_id &&
+		var temp_controller = temp_sprite._drill_controller;
+		if( temp_controller == undefined ){ continue; }
+		if( temp_controller._drill_data['id'] == style_id &&
 			temp_sprite._drill_parent_characterObj == character_obj ){
 			result.push( temp_sprite );
 		}
 	}
 	return result;
+}
+//==============================
+// * 容器 - 获取全部控制器（接口）
+//==============================
+Game_Temp.prototype.drill_ACi_getAllControllerList = function(){
+	return this._drill_ACi_controllerTank;
 }
 //==============================
 // * 容器 - 获取全部贴图（接口）
@@ -2241,19 +2345,37 @@ Game_Temp.prototype.drill_ACi_selectSpriteByAnimId = function( sprite_list, anim
 	var result = [];
 	for(var i = 0; i < sprite_list.length ;i++){
 		var temp_sprite = sprite_list[i];
-		if( temp_sprite._drill_data['anim'] == anim_id ){
+		if( temp_sprite == undefined ){ continue; }
+		var temp_controller = temp_sprite._drill_controller;
+		if( temp_controller == undefined ){ continue; }
+		if( temp_controller._drill_data['anim'] == anim_id ){
 			result.push( temp_sprite );
 		}
 	}
 	return result;
 }
 //==============================
-// * 容器操作 - 设置贴图立即显示/隐藏（接口）
+// * 容器操作 - 设置贴图 立即显示/隐藏（接口）
 //==============================
 Game_Temp.prototype.drill_ACi_setAnimVisible = function( sprite_list, v ){
 	for(var i = 0; i < sprite_list.length ;i++){
 		var temp_sprite = sprite_list[i];
-		temp_sprite.visible = v;
+		if( temp_sprite == undefined ){ continue; }
+		var temp_controller = temp_sprite._drill_controller;
+		if( temp_controller == undefined ){ continue; }
+		temp_controller.drill_ACi_setVisible( v );
+	}
+}
+//==============================
+// * 容器操作 - 设置贴图 暂停/继续（接口）
+//==============================
+Game_Temp.prototype.drill_ACi_setAnimPause = function( sprite_list, b ){
+	for(var i = 0; i < sprite_list.length ;i++){
+		var temp_sprite = sprite_list[i];
+		if( temp_sprite == undefined ){ continue; }
+		var temp_controller = temp_sprite._drill_controller;
+		if( temp_controller == undefined ){ continue; }
+		temp_controller.drill_ACi_setPause( b );
 	}
 }
 //==============================
@@ -2262,9 +2384,13 @@ Game_Temp.prototype.drill_ACi_setAnimVisible = function( sprite_list, v ){
 Game_Temp.prototype.drill_ACi_setAnimBirth = function( sprite_list ){
 	for(var i = 0; i < sprite_list.length ;i++){
 		var temp_sprite = sprite_list[i];
-		if( temp_sprite.drill_getState() == "延迟" ||
-			temp_sprite.drill_getState() == "出现" ){
-			temp_sprite.drill_setState("持续");
+		if( temp_sprite == undefined ){ continue; }
+		var temp_controller = temp_sprite._drill_controller;
+		if( temp_controller == undefined ){ continue; }
+		if( temp_controller.drill_ACi_getState() == "延迟" ||
+			temp_controller.drill_ACi_getState() == "出现" ){
+			temp_controller.drill_ACi_setState("持续");
+			temp_controller.drill_ACi_setPause( false );
 		}
 	}
 }
@@ -2274,34 +2400,185 @@ Game_Temp.prototype.drill_ACi_setAnimBirth = function( sprite_list ){
 Game_Temp.prototype.drill_ACi_setAnimDeath = function( sprite_list ){
 	for(var i = 0; i < sprite_list.length ;i++){
 		var temp_sprite = sprite_list[i];
-		if( temp_sprite.drill_getState() != "消失" ){
-			temp_sprite.drill_setState("消失");
+		if( temp_sprite == undefined ){ continue; }
+		var temp_controller = temp_sprite._drill_controller;
+		if( temp_controller == undefined ){ continue; }
+		if( temp_controller.drill_ACi_getState() != "消失" ){
+			temp_controller.drill_ACi_setState("消失");
+			temp_controller.drill_ACi_setPause( false );
 		}
 	}
 }
+
+
+
+//#############################################################################
+// ** 【标准模块】个体层级
+//#############################################################################
+//##############################
+// * 个体层级 - 添加贴图到层级【标准函数】
+//				
+//			参数：	> sprite 贴图           （添加的贴图对象）
+//					> layer_index 字符串    （添加到的层级名，动画前面层/动画后面层/父贴图后面层）
+//					> individual_sprite 贴图（被装饰的个体贴图对象）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图添加到目标层级中。
+//##############################
+Game_Temp.prototype.drill_ACi_layerAddSprite = function( sprite, layer_index, individual_sprite ){
+    this.drill_ACi_layerAddSprite_Private( sprite, layer_index, individual_sprite );
+}
+//##############################
+// * 个体层级 - 去除贴图【标准函数】
+//				
+//			参数：	> sprite 贴图（添加的贴图对象）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图从父层级中移除。
+//##############################
+Game_Temp.prototype.drill_ACi_layerRemoveSprite = function( sprite ){
+	this.drill_ACi_layerRemoveSprite_Private( sprite );
+}
+//##############################
+// * 个体层级 - 图片层级排序（界面装饰）【标准函数】
+//				
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 执行该函数后，子贴图按照zIndex属性来进行先后排序。值越大，越靠前。
+//					> 注意，由于个体装饰的差异性，此函数分为 界面装饰 和 个体装饰。
+//##############################
+Game_Temp.prototype.drill_ACi_sortByZIndex_Scene = function(){
+	var cur_scene = SceneManager._scene;
+	if( cur_scene instanceof Scene_Map ){
+		cur_scene._spriteset._drill_animPBackArea.children.sort(function(a, b){return a.zIndex-b.zIndex});	//父贴图后面层
+	}
+	if( cur_scene instanceof Scene_Battle ){
+		cur_scene._spriteset._drill_animPBackArea.children.sort(function(a, b){return a.zIndex-b.zIndex});	//父贴图后面层
+	}
+}
+//##############################
+// * 个体层级 - 图片层级排序（个体装饰）【标准函数】
+//				
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 执行该函数后，子贴图按照zIndex属性来进行先后排序。值越大，越靠前。
+//					> 注意，由于个体装饰的差异性，此函数分为 界面装饰 和 个体装饰。
+//##############################
+Sprite_Animation.prototype.drill_ACi_sortByZIndex_Individual = function(){
+	this._drill_animDownArea.children.sort(function(a, b){return a.zIndex-b.zIndex});					//动画后面层
+	this._drill_animUpArea.children.sort(function(a, b){return a.zIndex-b.zIndex});						//动画前面层
+}
+//=============================================================================
+// ** 个体层级（接口实现）
+//=============================================================================
 //==============================
-// * 容器 - 自动销毁
+// * 个体层级 - 动画前面层/动画后面层
 //==============================
-var _drill_ACi_timer_update = Game_Timer.prototype.update;
-Game_Timer.prototype.update = function( sceneActive ){
-    _drill_ACi_timer_update.call( this, sceneActive );
-	for(var i = $gameTemp._drill_ACi_spriteTank.length-1; i >= 0; i--){
-		var temp_sprite = $gameTemp._drill_ACi_spriteTank[i];
-		if( temp_sprite == null ){
-			$gameTemp._drill_ACi_spriteTank.splice(i,1);
-		}else if( temp_sprite.drill_isDead() ){
-			if( temp_sprite.parent != null ){
-				temp_sprite.parent.removeChild( temp_sprite );
-			}
-			$gameTemp._drill_ACi_spriteTank.splice(i,1);
-			delete temp_sprite;
+var _drill_ACi_layer_setup = Sprite_Animation.prototype.setup;
+Sprite_Animation.prototype.setup = function(target, animation, mirror, delay) {
+	
+	// > 层级 - 动画后面层
+	if( !this._drill_animDownArea ){
+		this._drill_animDownArea = new Sprite();
+		this.addChild(this._drill_animDownArea);
+	}
+	
+	// > 原函数
+    _drill_ACi_layer_setup.call(this,target, animation, mirror, delay);
+	
+	// > 层级 - 动画前面层
+	if( !this._drill_animUpArea ){
+		this._drill_animUpArea = new Sprite();
+		this.addChild(this._drill_animUpArea);
+	}
+};
+//==============================
+// * 个体层级 - 父贴图后面层 - 战斗界面
+//==============================
+var _drill_ACi_layer_createEnemies = Spriteset_Battle.prototype.createEnemies;
+Spriteset_Battle.prototype.createEnemies = function() {
+    
+	if( !this._drill_animPBackArea ){			//父贴图后面层
+		this._drill_animPBackArea = new Sprite();
+		this._drill_animPBackArea.z = 0;		//（yep层级适配，YEP_BattleEngineCore）
+		this._battleField.addChild(this._drill_animPBackArea);
+	}
+	
+	_drill_ACi_layer_createEnemies.call(this);	
+};
+//==============================
+// * 个体层级 - 父贴图后面层 - 地图界面
+//==============================
+var _drill_ACi_layer_createCharacters = Spriteset_Map.prototype.createCharacters;
+Spriteset_Map.prototype.createCharacters = function() {
+	
+	if( !this._drill_animPBackArea ){			//父贴图后面层
+		this._drill_animPBackArea = new Sprite();
+		this._drill_animPBackArea.z = 0.75;		//（在中层上面，事件后面）
+		this._tilemap.addChild(this._drill_animPBackArea);
+	}
+	
+	_drill_ACi_layer_createCharacters.call(this);
+};
+//==============================
+// * 个体层级 - 添加贴图到层级（私有）
+//==============================
+Game_Temp.prototype.drill_ACi_layerAddSprite_Private = function( sprite, layer_index, individual_sprite ){
+	if( layer_index == "父贴图后面层" || layer_index == "在父贴图后面" ){
+		if( $gameTemp._drill_spritesetCreated != true ){ return; }
+		var cur_scene = SceneManager._scene;
+		if( cur_scene instanceof Scene_Map ){
+			sprite._drill_isAtAnimPBackArea = true;		//（标记 - 在父贴图后面）
+			cur_scene._spriteset._drill_animPBackArea.addChild( sprite );
 		}
+		if( cur_scene instanceof Scene_Battle ){
+			sprite._drill_isAtAnimPBackArea = true;		//（标记 - 在父贴图后面）
+			cur_scene._spriteset._drill_animPBackArea.addChild( sprite );
+		}
+	}
+	if( layer_index == "动画前面层" || layer_index == "在动画前面" ){
+		individual_sprite._drill_animUpArea.addChild( sprite );
+	}
+	if( layer_index == "动画后面层" || layer_index == "在动画后面" ){
+		individual_sprite._drill_animDownArea.addChild( sprite );
+	}
+};
+//==============================
+// * 个体层级 - 层级 锁
+//==============================
+var _drill_ACi_layerMap_createDisplayObjects = Scene_Map.prototype.createDisplayObjects;
+Scene_Map.prototype.createDisplayObjects = function() {
+	$gameTemp._drill_spritesetCreated = false;
+	_drill_ACi_layerMap_createDisplayObjects.call(this);
+	$gameTemp._drill_spritesetCreated = true;
+};
+var _drill_ACi_layerBattle_createDisplayObjects = Scene_Battle.prototype.createDisplayObjects;
+Scene_Battle.prototype.createDisplayObjects = function() {
+	$gameTemp._drill_spritesetCreated = false;
+	_drill_ACi_layerBattle_createDisplayObjects.call(this);
+	$gameTemp._drill_spritesetCreated = true;
+};
+//==============================
+// * 个体层级 - 去除贴图（私有）
+//==============================
+Game_Temp.prototype.drill_ACi_layerRemoveSprite_Private = function( sprite ){
+	if( sprite == undefined ){ return; }
+	
+	// > 清空指针
+	sprite.drill_ACi_destroy();
+	
+	// > 断开父类
+	if( sprite.parent != undefined ){
+		sprite.parent.removeChild( sprite );
 	}
 };
 
 
+
 //=============================================================================
-// ** 动画设置
+// ** 动画创建
 //=============================================================================
 //==============================
 // * 工具 - 父类溯源
@@ -2321,7 +2598,7 @@ DrillUp.drill_ACi_getAncestor = function( sprite, ancestor_class ){
 	return null;
 }
 //==============================
-// * 动画 - 初始化
+// * 动画创建 - 初始化
 //==============================
 var _drill_ACi_initMembers = Sprite_Animation.prototype.initMembers;
 Sprite_Animation.prototype.initMembers = function() {
@@ -2329,95 +2606,83 @@ Sprite_Animation.prototype.initMembers = function() {
 	this._drill_duration = 0;			//最大持续时间
 }
 //==============================
-// * 动画 - 判断是否含装饰
-//==============================
-Sprite_Animation.prototype.drill_ACi_hasStyleBinding = function( anim_id ){
-	for( var i = 0; i < DrillUp.g_ACi_style.length; i++ ){
-		var anim_data = DrillUp.g_ACi_style[i];
-		if( anim_data['anim'] == anim_id ){
-			return true;
-		}
-	}
-	return false;
-}
-//==============================
-// * 动画 - 设置
+// * 动画创建 - 创建数据/创建贴图
 //==============================
 var _drill_ACi_setup = Sprite_Animation.prototype.setup;
 Sprite_Animation.prototype.setup = function(target, animation, mirror, delay) {
 	
-	var has_binding = this.drill_ACi_hasStyleBinding( animation.id );
-	if( has_binding ){
-		
-		// > 层级 - 父贴图后面层（预置，后续在父类中重置取出）
-		if( !this._drill_ACi_tempArea ){	
-			this._drill_ACi_tempArea = new Sprite();
-			this.addChild(this._drill_ACi_tempArea);
-		}
-		// > 层级 - 动画后面层
-		if( !this._drill_animDownArea ){
-			this._drill_animDownArea = new Sprite();
-			this.addChild(this._drill_animDownArea);
-		}
-	}
-	
 	// > 原函数
     _drill_ACi_setup.call(this,target, animation, mirror, delay);
 	
-	if( has_binding ){
-		
-		// > 层级 - 动画前面层
-		if( !this._drill_animUpArea ){
-			this._drill_animUpArea = new Sprite();
-			this.addChild(this._drill_animUpArea);
-		}
-		
-		// > 添加动画贴图
-		$gameTemp._drill_ACi_lastAdded = [];
-		$gameTemp._drill_ACi_lastAdded_PBack = [];
-		for( var i = 0; i < DrillUp.g_ACi_style.length; i++ ){
-			var anim_data = DrillUp.g_ACi_style[i];
-			if( this._animation.id == anim_data['anim'] ){
+	
+	// > 添加动画贴图
+	$gameTemp._drill_ACi_lastAdded = [];
+	for( var i = 0; i < DrillUp.g_ACi_style.length; i++ ){
+		var anim_data = DrillUp.g_ACi_style[i];
+		if( this._animation.id == anim_data['anim'] ){
+			
+			// > 创建数据
+			var temp_controller = new Drill_ACi_Controller( anim_data );
+			$gameTemp._drill_ACi_controllerTank.push( temp_controller );
+			
+			// > 创建贴图
+			var temp_sprite = new Drill_ACi_Sprite();
+			temp_sprite.drill_ACi_setController( temp_controller );
+			temp_sprite.drill_ACi_setAnimationSprite( this );		//（绑定动画贴图，转半圈还要回来）
+																	//（个体贴图后期绑定）
+			temp_sprite.drill_ACi_initSprite();
+			$gameTemp._drill_ACi_spriteTank.push( temp_sprite );
+			$gameTemp._drill_ACi_lastAdded.push( temp_sprite );		//（个体贴图绑定 的 临时容器）
+			
+			// > 添加贴图到层级
+			$gameTemp.drill_ACi_layerAddSprite( temp_sprite, anim_data['anim_index'], this );
+			
+			
+			// > 半图层效果（另一半贴图）
+			if( anim_data['half_enable'] == true ){
 				
-				var temp_sprite = new Drill_ACi_Sprite( this._animation, anim_data );
+				// > 再创建贴图
+				var temp_sprite = new Drill_ACi_Sprite();
+				temp_sprite.drill_ACi_setController( temp_controller );
+				temp_sprite.drill_ACi_setAnimationSprite( this );		//（绑定动画贴图，转半圈还要回来）
+																		//（个体贴图后期绑定）
+				temp_sprite.drill_ACi_initSprite();
+				temp_sprite.drill_ACi_setSpriteHalf( true );			//（另一半标记）
 				$gameTemp._drill_ACi_spriteTank.push( temp_sprite );
-				$gameTemp._drill_ACi_lastAdded.push( temp_sprite );
-				
-				if( anim_data['anim_index'] == "在动画前面" ){
-					this._drill_animUpArea.addChild( temp_sprite );
-				}else if( anim_data['anim_index'] == "在动画后面" ){
-					this._drill_animDownArea.addChild( temp_sprite );
-				}else if( anim_data['anim_index'] == "在父贴图后面" ){
-					this._drill_ACi_tempArea.addChild( temp_sprite );
-					$gameTemp._drill_ACi_lastAdded_PBack.push( temp_sprite );
-				}
-				this._drill_duration =  Math.max(this._drill_duration, Math.max( temp_sprite._drill_time_all + 1 , this._duration));
+				$gameTemp._drill_ACi_lastAdded.push( temp_sprite );		//（个体贴图绑定 的 临时容器）
+			
+				// > 添加贴图到层级
+				$gameTemp.drill_ACi_layerAddSprite( temp_sprite, anim_data['half_animIndex'], this );
 			}
+			
+			// > 层级排序
+			$gameTemp.drill_ACi_sortByZIndex_Scene();
+			this.drill_ACi_sortByZIndex_Individual();
+			
+			// > 动画时长
+			this._drill_duration =  Math.max(this._drill_duration, Math.max( 
+				anim_data['delay'] + anim_data['birth'] + anim_data['sustain'] + anim_data['death'] + 1 , this._duration));
 		}
-		this.drill_ACi_sortByZIndex();
-		//alert(JSON.stringify(this._animation));
 	}
 	
-	// 连接-> （动画 - 绑定对象）
+	
+	// 连接-> （动画创建 - 外键标记）
 };
 //==============================
-// * 动画 - 绑定对象
+// * 动画创建 - 外键标记
 //==============================
 var _drill_ACi_startAnimation = Sprite_Base.prototype.startAnimation;
 Sprite_Base.prototype.startAnimation = function(animation, mirror, delay) {
     _drill_ACi_startAnimation.call(this,animation, mirror, delay);
 	
-	// <-承接 （动画 - 设置）
+	// <-承接 （动画创建 - 创建数据/创建贴图）
 	//	（前面的函数执行完后，会进入到该函数继续）
 	
-	this.drill_ACi_foreignKeyBinding();		//外键标记
-	this.drill_ACi_charBackPuting();		//父贴图后面层 的 层级转移
-	
+	this.drill_ACi_foreignKeyBinding();			//外键标记
 	$gameTemp._drill_ACi_lastAdded = [];		//清空上一次添加的标记
-	$gameTemp._drill_ACi_lastAdded_PBack = [];	//
 }
 //==============================
-// * 动画 - 外键标记
+// * 动画创建 - 外键标记
 //==============================
 Sprite_Base.prototype.drill_ACi_foreignKeyBinding = function(){
 	if( $gameTemp._drill_ACi_lastAdded.length == 0 ){ return; }
@@ -2426,7 +2691,7 @@ Sprite_Base.prototype.drill_ACi_foreignKeyBinding = function(){
 	if( this instanceof Sprite_Enemy ){
 		for(var i=0; i < $gameTemp._drill_ACi_lastAdded.length; i++ ){
 			var sprite = $gameTemp._drill_ACi_lastAdded[i];
-			sprite._drill_bindingSprite = this;
+			sprite.drill_ACi_setIndividualSprite( this );
 			sprite._drill_parent_enemyObj = this._enemy;
 		}
 	}
@@ -2435,104 +2700,81 @@ Sprite_Base.prototype.drill_ACi_foreignKeyBinding = function(){
 	if( this instanceof Sprite_Actor ){
 		for(var i=0; i < $gameTemp._drill_ACi_lastAdded.length; i++ ){
 			var sprite = $gameTemp._drill_ACi_lastAdded[i];
-			sprite._drill_bindingSprite = this;
+			sprite.drill_ACi_setIndividualSprite( this );
 			sprite._drill_parent_actorObj = this._actor;
 		}
 	}
 	
 	// > 物体贴图（地图界面）
-	if( this instanceof Sprite_Character && $gameTemp.drill_ACi_isReflectionSprite(this) == false ){
+	if( this instanceof Sprite_Character ){
+		if( $gameTemp.drill_ACi_isReflectionSprite(this) == true ){ return; }	//（排除镜像情况）
 		for(var i=0; i < $gameTemp._drill_ACi_lastAdded.length; i++ ){
 			var sprite = $gameTemp._drill_ACi_lastAdded[i];
-			sprite._drill_bindingSprite = this;
+			sprite.drill_ACi_setIndividualSprite( this );
 			sprite._drill_parent_characterObj = this._character;
 		}
 	}
 }
+
+//=============================================================================
+// ** 外部控制
+//=============================================================================
 //==============================
-// * 父贴图后面层 - 层级转移
+// * 外部控制 - 帧刷新 - 地图界面
 //==============================
-Sprite_Base.prototype.drill_ACi_charBackPuting = function(){
-	if( $gameTemp._drill_ACi_lastAdded_PBack.length == 0 ){ return; }
-	var PBack_list = $gameTemp._drill_ACi_lastAdded_PBack;
+var _drill_ACi_smap_update = Scene_Map.prototype.update;
+Scene_Map.prototype.update = function() {
+	_drill_ACi_smap_update.call(this);
+	this.drill_ACi_updateInScene();
+}
+Scene_Map.prototype.drill_ACi_updateInScene = function() {
 	
-	// > 敌人贴图（战斗界面）
-	if( this instanceof Sprite_Enemy ){
-		this.drill_ACi_addToPBackArea( PBack_list, Scene_Battle );
+	
+	// > 控制器刷新（需要放后面，与层级变化错开1帧）
+	for(var i = 0; i < $gameTemp._drill_ACi_controllerTank.length; i++){
+		var temp_controller = $gameTemp._drill_ACi_controllerTank[i];
+		temp_controller.drill_ACi_update();
+	};
+	
+	
+	// > 自动销毁 - 控制器
+	for(var i = $gameTemp._drill_ACi_controllerTank.length-1; i >= 0; i--){
+		var temp_controller = $gameTemp._drill_ACi_controllerTank[i];
+		if( temp_controller == undefined ||
+			temp_controller.drill_ACi_isDead() ){
+			$gameTemp._drill_ACi_controllerTank.splice(i,1);
+		}
 	}
 	
-	// > 角色贴图（战斗界面）
-	if( this instanceof Sprite_Actor ){
+	// > 自动销毁 - 贴图
+	for(var i = $gameTemp._drill_ACi_spriteTank.length-1; i >= 0; i--){
+		var temp_sprite = $gameTemp._drill_ACi_spriteTank[i];
 		
-		// > SV模式
-		if( $gameSystem.isSideView() ){
-			this.drill_ACi_addToPBackArea( PBack_list, Scene_Battle );
+		// > 自动销毁 - 贴图本身为空
+		if( temp_sprite == undefined ){
+			$gameTemp._drill_ACi_spriteTank.splice(i,1);
+			continue;
 		}
 		
-		// > 第一人称+使用了mog角色窗口
-		if( !$gameSystem.isSideView() && Imported.MOG_BattleHud ){
-			this.drill_ACi_addToPBackArea( PBack_list, Scene_Battle );
+		// > 自动销毁 - 控制器生命周期结束
+		var temp_controller = temp_sprite._drill_controller;
+		if( temp_controller == undefined ||
+			temp_controller.drill_ACi_isDead() ){
+			$gameTemp.drill_ACi_layerRemoveSprite( temp_sprite );	//（销毁贴图）
+			$gameTemp._drill_ACi_spriteTank.splice(i,1);
+			delete temp_sprite;
 		}
 	}
-	
-	// > 物体贴图（地图界面）
-	if( this instanceof Sprite_Character && $gameTemp.drill_ACi_isReflectionSprite(this) == false ){
-		this.drill_ACi_addToPBackArea( PBack_list, Scene_Map );
-	}
 };
 //==============================
-// * 父贴图后面层 - 添加到层
+// * 外部控制 - 帧刷新 - 战斗界面
 //==============================
-Sprite_Base.prototype.drill_ACi_addToPBackArea = function( sprite_list, scene_class ){
-	var scene = DrillUp.drill_ACi_getAncestor( this, scene_class );
-	if( scene == null ){ return; }
-		
-	for(var i = sprite_list.length-1; i >= 0; i--){					//（转移操作会改变children数组的长度）
-		var sprite = sprite_list[i];
-		sprite._drill_is_charBack = true;							//（标记 - 在父贴图后面）
-		scene._spriteset._drill_animPBackArea.addChild( sprite );	//（重复addChild会被移走）
-	}
-	
-	// > 层级排序（父贴图后面层）
-	scene._spriteset._drill_animPBackArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
-};
-//==============================
-// * 父贴图后面层 - 战斗界面 层定义
-//==============================
-var _drill_ACi_createEnemies = Spriteset_Battle.prototype.createEnemies;
-Spriteset_Battle.prototype.createEnemies = function() {
-    
-	if( !this._drill_animPBackArea ){		//父贴图后面层
-		this._drill_animPBackArea = new Sprite();
-		this._drill_animPBackArea.z = 0;	//（yep层级适配，YEP_BattleEngineCore）
-		this._battleField.addChild(this._drill_animPBackArea);
-	}
-	
-	_drill_ACi_createEnemies.call(this);	
-};
-//==============================
-// * 父贴图后面层 - 地图界面 层定义
-//==============================
-var _drill_ACi_createCharacters = Spriteset_Map.prototype.createCharacters;
-Spriteset_Map.prototype.createCharacters = function() {
-	
-	if( !this._drill_animPBackArea ){		//父贴图后面层
-		this._drill_animPBackArea = new Sprite();
-		this._drill_animPBackArea.z = 0.75;		//（在中层上面，事件后面）
-		this._tilemap.addChild(this._drill_animPBackArea);
-	}
-	
-	_drill_ACi_createCharacters.call(this);
-};
-//==============================
-// * 动画 - 层级排序（不含 父贴图后面层）
-//==============================
-Sprite_Animation.prototype.drill_ACi_sortByZIndex = function() {
-   this._drill_animDownArea.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
-   this._drill_animUpArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
-};
-
-
+var _drill_ACi_sbattle_update = Scene_Battle.prototype.update;
+Scene_Battle.prototype.update = function() {
+	_drill_ACi_sbattle_update.call(this);
+	this.drill_ACi_updateInScene();
+}
+Scene_Battle.prototype.drill_ACi_updateInScene = Scene_Map.prototype.drill_ACi_updateInScene;
 //==============================
 // * 动画 - 播放中
 //==============================
@@ -2563,7 +2805,7 @@ Sprite_Animation.prototype.remove = function() {
 	if( this._target != undefined ){
 		_drill_ACi_remove.call(this);
 	}else{
-		if (this.parent) {
+		if( this.parent ){
 			this.parent.removeChild(this);
 		}
 	}
@@ -2571,17 +2813,533 @@ Sprite_Animation.prototype.remove = function() {
 
 
 //=============================================================================
-// ** 动画魔法圈贴图【Drill_ACi_Sprite】
-//
-// 			代码：	> 范围 - 该类显示单独的动画装饰。
-//					> 结构 - [ ●合并 /分离/混乱] 贴图与数据合并。
-//					> 数量 - [单个/ ●多个] 
-//					> 创建 - [ ●一次性 /自延迟/外部延迟] 
-//					> 销毁 - [不考虑/自销毁/ ●外部销毁 ] 由于动画存放在temp的容器中，销毁仍然需要外部来控制。
-//					> 样式 - [ ●不可修改 /自变化/外部变化] 
+// ** 动画魔法圈控制器【Drill_ACi_Controller】
+// **		
+// **		作用域：	地图界面、战斗界面
+// **		主功能：	> 定义一个专门控制动画魔法圈的数据类。
+// **		子功能：	->帧刷新
+// **						->显示/隐藏
+// **						->暂停/继续
+// **						> 平移
+// **						> 旋转
+// **						> 缩放
+// **					->重设数据
+// **						->序列号（暂未使用）
+// **					->阶段
+// **						->延迟/出现/持续/消失/销毁
+// **					->半图层效果
+// **						->原贴图 + 遮罩
+// **						->另一半贴图 + 遮罩
+// **		
+// **		说明：	> 该类可存储在 $gameSystem 中。
+// **				  但暂时没必要，因为动画贴图无法再次创建。
 //=============================================================================
 //==============================
-// * 动画魔法圈贴图 - 定义
+// * 控制器 - 定义
+//==============================
+function Drill_ACi_Controller(){
+    this.initialize.apply(this, arguments);
+};
+//==============================
+// * 控制器 - 校验标记
+//==============================
+DrillUp.g_ACi_checkNaN = true;
+//==============================
+// * 控制器 - 初始化
+//==============================
+Drill_ACi_Controller.prototype.initialize = function( data ){
+	this._drill_data = {};
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+    this.drill_initData();													//初始化数据
+    this.drill_initPrivateData();											//私有数据初始化
+	if( data == undefined ){ data = {}; }
+    this.drill_ACi_resetData( data );
+}
+//##############################
+// * 控制器 - 帧刷新【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//			
+//			说明：	> 此函数必须在 帧刷新 中手动调用执行。
+//##############################
+Drill_ACi_Controller.prototype.drill_ACi_update = function(){
+	if( this._drill_data['pause'] == true ){ return; }
+	this._drill_curTime += 1;			//帧刷新 - 时间流逝
+	this.drill_ACi_updatePosition();	//帧刷新 - 位置
+	this.drill_ACi_updateState();		//帧刷新 - 阶段
+	this.drill_ACi_updateCheckNaN();	//帧刷新 - 校验值
+}
+//##############################
+// * 控制器 - 重设数据【标准函数】
+//			
+//			参数：	> data 动态参数对象
+//			返回：	> 无
+//			
+//			说明：	> 通过此函数，你不需要再重新创建一个数据对象，并且贴图能直接根据此数据来变化。
+//					> 参数对象中的参数【可以缺项】，只要的参数项不一样，就刷新；参数项一样，则不变化。
+//##############################
+Drill_ACi_Controller.prototype.drill_ACi_resetData = function( data ){
+	this.drill_ACi_resetData_Private( data );
+};
+//##############################
+// * 控制器 - 显示/隐藏【标准函数】（暂未使用，采用 $gameSystem._drill_ACi_visible 控制）
+//
+//			参数：	> visible 布尔（是否显示）
+//			返回：	> 无
+//			
+//			说明：	> 可放在帧刷新函数中实时调用。
+//##############################
+Drill_ACi_Controller.prototype.drill_ACi_setVisible = function( visible ){
+	var data = this._drill_data;
+	data['visible'] = visible;
+};
+//##############################
+// * 控制器 - 暂停/继续【标准函数】
+//
+//			参数：	> enable 布尔
+//			返回：	> 无
+//			
+//			说明：	> 可放在帧刷新函数中实时调用。
+//##############################
+Drill_ACi_Controller.prototype.drill_ACi_setPause = function( pause ){
+	var data = this._drill_data;
+	data['pause'] = pause;
+};
+
+//##############################
+// * 阶段 - 获取当前阶段【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 布尔
+//##############################
+Drill_ACi_Controller.prototype.drill_ACi_getState = function(){
+	return this._drill_curState;
+};
+//##############################
+// * 阶段 - 设置当前阶段【标准函数】
+//
+//			参数：	> state 字符串
+//			返回：	> 无
+//##############################
+Drill_ACi_Controller.prototype.drill_ACi_setState = function( state ){
+	this.drill_ACi_setState_Private( state );
+};
+//##############################
+// * 阶段 - 判断销毁【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 布尔
+//##############################
+Drill_ACi_Controller.prototype.drill_ACi_isDead = function(){
+	return this._drill_curState == "销毁";
+};
+
+//##############################
+// * 控制器 - 初始化数据【标准默认值】
+//
+//			参数：	> 无
+//			返回：	> 无
+//			
+//			说明：	> data 动态参数对象（来自类初始化）
+//					  该对象包含 类所需的所有默认值。
+//##############################
+Drill_ACi_Controller.prototype.drill_initData = function(){
+	var data = this._drill_data;
+	
+	// > 绑定
+	if( data['visible'] == undefined ){ data['visible'] = true };				//显示情况
+	if( data['pause'] == undefined ){ data['pause'] = false };					//暂停情况
+	if( data['anim'] == undefined ){ data['anim'] = 0 };						//绑定的动画id
+	
+	// > 资源
+	if( data['src_img'] == undefined ){ data['src_img'] = "" };								//资源 - 魔法圈
+	if( data['src_img_file'] == undefined ){ data['src_img_file'] = "img/Special__anim/" };	//资源 - 文件夹
+	
+	// > 贴图
+	if( data['x'] == undefined ){ data['x'] = 0 };								//贴图 - 平移X
+	if( data['y'] == undefined ){ data['y'] = 0 };								//贴图 - 平移Y
+	if( data['blendMode'] == undefined ){ data['blendMode'] = 0 };				//贴图 - 混合模式
+	if( data['anim_index'] == undefined ){ data['anim_index'] = "在动画后面" };	//贴图 - 动画层级
+	if( data['zIndex'] == undefined ){ data['zIndex'] = 0 };					//贴图 - 图片层级
+	if( data['rotate'] == undefined ){ data['rotate'] = 0 };					//贴图 - 自旋转速度（单位角度）
+	
+	// > 动画过程
+	if( data['delay'] == undefined ){ data['delay'] = 0 };						//阶段 - 出现延迟
+	if( data['birth'] == undefined ){ data['birth'] = 20 };						//阶段 - 出现时长
+	if( data['birthMode'] == undefined ){ data['birthMode'] = "横向显现" };		//阶段 - 出现模式
+	if( data['birthScaleX'] == undefined ){ data['birthScaleX'] = 1.0 };		//阶段 - 出现-自定义缩放X
+	if( data['birthScaleY'] == undefined ){ data['birthScaleY'] = 1.0 };		//阶段 - 出现-自定义缩放Y
+	if( data['birthOpacity'] == undefined ){ data['birthOpacity'] = 0 };		//阶段 - 出现-自定义透明度
+	if( data['sustain'] == undefined ){ data['sustain'] = 120 };				//阶段 - 持续时长
+	if( data['sustainMode'] == undefined ){ data['sustainMode'] = "常规值" };	//阶段 - 持续模式
+	if( data['sustainScaleX'] == undefined ){ data['sustainScaleX'] = 1.0 };	//阶段 - 持续-自定义缩放X
+	if( data['sustainScaleY'] == undefined ){ data['sustainScaleY'] = 1.0 };	//阶段 - 持续-自定义缩放Y
+	if( data['sustainOpacity'] == undefined ){ data['sustainOpacity'] = 0 };	//阶段 - 持续-自定义透明度
+	if( data['death'] == undefined ){ data['death'] = 20 };						//阶段 - 消失时长
+	if( data['deathMode'] == undefined ){ data['deathMode'] = "普通淡出消失" };	//阶段 - 消失模式
+	if( data['deathScaleX'] == undefined ){ data['deathScaleX'] = 1.0 };		//阶段 - 消失-自定义缩放X
+	if( data['deathScaleY'] == undefined ){ data['deathScaleY'] = 1.0 };		//阶段 - 消失-自定义缩放Y
+	if( data['deathOpacity'] == undefined ){ data['deathOpacity'] = 0 };		//阶段 - 消失-自定义透明度
+	
+	// > 3d效果
+	if( data['scale_x'] == undefined ){ data['scale_x'] = 1.0 };				//3d效果 - 整体缩放X
+	if( data['scale_y'] == undefined ){ data['scale_y'] = 1.0 };				//3d效果 - 整体缩放Y
+	if( data['skew_x'] == undefined ){ data['skew_x'] = 0 };					//3d效果 - 整体斜切X
+	if( data['skew_y'] == undefined ){ data['skew_y'] = 0 };					//3d效果 - 整体斜切Y
+	if( data['parentRotate'] == undefined ){ data['parentRotate'] = 0 };		//3d效果 - 整体再旋转角度
+	
+	// > 半图层效果
+	if( data['half_enable'] == undefined ){ data['half_enable'] = false };					//半图层效果 - 是否开启半图层效果
+	if( data['half_animIndex'] == undefined ){ data['half_animIndex'] = "在父贴图后面" };	//半图层效果 - 半图层动画层级
+	if( data['half_zIndex'] == undefined ){ data['half_zIndex'] = 3 };						//半图层效果 - 半图层图片层级
+}
+//==============================
+// * 初始化 - 私有数据初始化
+//==============================
+Drill_ACi_Controller.prototype.drill_initPrivateData = function(){
+	var data = this._drill_data;
+	
+	// > 阶段
+	this._drill_curTime = 0;			//阶段 - 当前时间
+	this._drill_curState = "延迟";		//阶段 - 当前阶段（延迟、出现、持续、消失、销毁）
+	this._drill_needDestroy = false;	//阶段 - 销毁
+	
+	// > 阶段初始化
+	this.drill_initBirthState();
+	this.drill_initSustainState();
+	this.drill_initDeathState();
+	
+	
+	// > 控制器 - 贴图属性
+	this._drill_x = 0;
+	this._drill_y = 0;
+	this._drill_scaleX = 1;
+	this._drill_scaleY = 1;
+	this._drill_opacity = 255;
+	this._drill_rotation = data['parentRotate'];	//（整体再旋转角度）
+	
+	// > 控制器 - 层级属性
+	this._drill_layer_scaleX = data['scale_x'];
+	this._drill_layer_scaleY = data['scale_y'];
+	this._drill_layer_skewX = data['skew_x'];
+	this._drill_layer_skewY = data['skew_y'];
+	
+	// > 控制器 - 魔法圈属性
+	this._drill_childCircle_rotation = 0;
+}
+//==============================
+// * 控制器 - 重设数据（私有）
+//
+//			说明：	data对象中的参数【可以缺项】。
+//==============================
+Drill_ACi_Controller.prototype.drill_ACi_resetData_Private = function( data ){
+	
+	// > 判断数据重复情况
+	if( this._drill_data != undefined ){
+		var keys = Object.keys( data );
+		var is_same = true;
+		for( var i=0; i < keys.length; i++ ){
+			var key = keys[i];
+			if( this._drill_data[key] != data[key] ){
+				is_same = false;
+			}
+		}
+		if( is_same == true ){ return; }
+	}
+	// > 补充未设置的数据
+	var keys = Object.keys( this._drill_data );
+	for( var i=0; i < keys.length; i++ ){
+		var key = keys[i];
+		if( data[key] == undefined ){
+			data[key] = this._drill_data[key];
+		}
+	}
+	
+	// > 执行重置
+	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+    this.drill_initData();													//初始化数据
+    this.drill_initPrivateData();											//私有数据初始化
+}
+
+//==============================
+// * 位置 - 帧刷新
+//==============================
+Drill_ACi_Controller.prototype.drill_ACi_updatePosition = function(){
+	var data = this._drill_data;
+	
+	// > 位置平移
+	var xx = 0;
+	var yy = 0;
+	xx += data['x'];
+	yy += data['y'];
+	
+	this._drill_x = xx;
+	this._drill_y = yy;
+	
+	// > 自旋转
+	this._drill_childCircle_rotation += data['rotate'];
+}
+	
+//==============================
+// * 阶段 - 设置当前阶段
+//
+//			说明：	注意，由于 透明度和缩放 变化并不是固定公式，而是增量值。
+//					因此 阶段切换 时不会出现贴图突然变化情况，但代价是变化情况不可控。
+//==============================
+Drill_ACi_Controller.prototype.drill_ACi_setState_Private = function( state ){
+	var data = this._drill_data;
+	if( state == "延迟" ){
+		this._drill_curTime = 0;
+		this._drill_curState = state;
+	}
+	if( state == "出现" ){
+		this._drill_curTime = data['delay'];
+		this._drill_curState = state;
+	}
+	if( state == "持续" ){
+		this._drill_opacity = 255;
+		this._drill_curTime = data['delay'] + data['birth'];
+		this._drill_curState = state;
+	}
+	if( state == "消失" ){
+		this._drill_curTime = data['delay'] + data['birth'] + data['sustain'];
+		this._drill_curState = state;
+	}
+	if( state == "销毁" ){
+		this._drill_curTime = data['delay'] + data['birth'] + data['sustain'] + data['death'];
+		this._drill_curState = state;
+		this._drill_needDestroy = true;
+	}
+}
+//==============================
+// * 阶段 - 帧刷新
+//==============================
+Drill_ACi_Controller.prototype.drill_ACi_updateState = function(){
+	var data = this._drill_data;
+	
+	// > 阶段赋值
+	if( this._drill_curTime < data['delay'] ){
+		this._drill_curState = "延迟";
+	}else if( this._drill_curTime < data['delay'] + data['birth'] ){
+		this._drill_curState = "出现";
+	}else if( this._drill_curTime < data['delay'] + data['birth'] + data['sustain'] ){
+		this._drill_curState = "持续";
+	}else if( this._drill_curTime < data['delay'] + data['birth'] + data['sustain'] + data['death'] ){
+		this._drill_curState = "消失";
+	}else{
+		this._drill_curState = "销毁";
+		this._drill_needDestroy = true;
+	}
+	
+	// > 缩放与旋转
+	var opacity = 255;
+	var scale_x = 1;
+	var scale_y = 1;
+	if( this._drill_curState == "延迟" ){
+		opacity = this._drill_birth_opacity;
+		scale_x = this._drill_birth_scaleX;
+		scale_y = this._drill_birth_scaleY;
+	}
+	if( this._drill_curState == "出现" ){
+		var cur_time = this._drill_curTime - data['delay'];
+		
+		// > 透明度
+		var d0 = this._drill_birth_opacity;
+		var diff = this._drill_sustain_opacity - this._drill_birth_opacity;
+		opacity = d0 + diff * cur_time / data['birth'];
+		
+		// > 缩放X
+		var d0 = this._drill_birth_scaleX;
+		var diff = this._drill_sustain_scaleX - this._drill_birth_scaleX;
+		scale_x = d0 + diff * cur_time / data['birth'];
+		
+		// > 缩放Y
+		var d0 = this._drill_birth_scaleY;
+		var diff = this._drill_sustain_scaleY - this._drill_birth_scaleY;
+		scale_y = d0 + diff * cur_time / data['birth'];
+	}
+	if( this._drill_curState == "持续" ){
+		opacity = this._drill_sustain_opacity;
+		scale_x = this._drill_sustain_scaleX;
+		scale_y = this._drill_sustain_scaleY;
+	}
+	if( this._drill_curState == "消失" ){
+		var cur_time = this._drill_curTime - data['delay'] - data['birth'] - data['sustain'];
+		
+		// > 透明度
+		var d0 = this._drill_sustain_opacity;
+		var diff = this._drill_death_opacity - this._drill_sustain_opacity;
+		opacity = d0 + diff * cur_time / data['death'];
+		
+		// > 缩放X
+		var d0 = this._drill_sustain_scaleX;
+		var diff = this._drill_death_scaleX - this._drill_sustain_scaleX;
+		scale_x = d0 + diff * cur_time / data['death'];
+		
+		// > 缩放Y
+		var d0 = this._drill_sustain_scaleY;
+		var diff = this._drill_death_scaleY - this._drill_sustain_scaleY;
+		scale_y = d0 + diff * cur_time / data['death'];
+	}
+	if( this._drill_curState == "销毁" ){
+		opacity = 0;
+		scale_x = 1;
+		scale_y = 1;
+	}
+	this._drill_opacity = opacity;
+	this._drill_scaleX  = scale_x;
+	this._drill_scaleY  = scale_y;
+}
+//==============================
+// * 阶段 - 初始化 出现状态
+//==============================
+Drill_ACi_Controller.prototype.drill_initBirthState = function() {
+	var data = this._drill_data;
+	
+	this._drill_birth_scaleX = 1;	//（常规值）
+	this._drill_birth_scaleY = 1;
+	this._drill_birth_opacity = 0;
+	if( data['birthMode'] == "横向显现"){
+		this._drill_birth_scaleY = 0;
+		this._drill_birth_opacity = 0;
+	}else if( data['birthMode'] == "纵向显现"){
+		this._drill_birth_scaleX = 0;
+		this._drill_birth_opacity = 0;
+	}else if( data['birthMode'] == "放大显现"){
+		this._drill_birth_scaleX = 0;
+		this._drill_birth_scaleY = 0;
+		this._drill_birth_opacity = 0;
+	}else if( data['birthMode'] == "缩小显现"){
+		this._drill_birth_scaleX = 2;
+		this._drill_birth_scaleY = 2;
+		this._drill_birth_opacity = 0;
+	}else if( data['birthMode'] == "普通淡入显现"){
+		this._drill_birth_opacity = 0;
+	}else if( data['birthMode'] == "自定义"){
+		this._drill_birth_scaleX = data['birthScaleX'];
+		this._drill_birth_scaleY = data['birthScaleY'];
+		this._drill_birth_opacity = data['birthOpacity'];
+	}
+}
+//==============================
+// * 阶段 - 初始化 持续状态
+//==============================
+Drill_ACi_Controller.prototype.drill_initSustainState = function() {
+	var data = this._drill_data;
+	
+	this._drill_sustain_scaleX = 1;	//（常规值）
+	this._drill_sustain_scaleY = 1;
+	this._drill_sustain_opacity = 255;
+	if( data['sustainMode'] == "自定义" ){
+		this._drill_sustain_scaleX = data['sustainScaleX'];
+		this._drill_sustain_scaleY = data['sustainScaleY'];
+		this._drill_sustain_opacity = data['sustainOpacity'];
+	}
+}
+//==============================
+// * 阶段 - 初始化 消失状态
+//==============================
+Drill_ACi_Controller.prototype.drill_initDeathState = function() {
+	var data = this._drill_data;
+	
+	this._drill_death_scaleX = 1;	//（常规值）
+	this._drill_death_scaleY = 1;
+	this._drill_death_opacity = 255;
+	if( data['deathMode'] == "横向消失"){
+		this._drill_death_scaleY = 0;
+		this._drill_death_opacity = 0;
+	}else if( data['deathMode'] == "纵向消失"){
+		this._drill_death_scaleX = 0;
+		this._drill_death_opacity = 0;
+	}else if( data['deathMode'] == "放大消失"){
+		this._drill_death_scaleX = 2;
+		this._drill_death_scaleY = 2;
+		this._drill_death_opacity = 0;
+	}else if( data['deathMode'] == "缩小消失"){
+		this._drill_death_scaleX = 0;
+		this._drill_death_scaleY = 0;
+		this._drill_death_opacity = 0;
+	}else if( data['deathMode'] == "普通淡出消失"){
+		this._drill_death_opacity = 0;
+	}else if( data['deathMode'] == "自定义"){
+		this._drill_death_scaleX = data['deathScaleX'];
+		this._drill_death_scaleY = data['deathScaleY'];
+		this._drill_death_opacity = data['deathOpacity'];
+	}
+}
+
+//==============================
+// * 帧刷新 - 校验值
+//==============================
+Drill_ACi_Controller.prototype.drill_ACi_updateCheckNaN = function(){
+	
+	// > 校验值
+	if( DrillUp.g_ACi_checkNaN == true ){
+		if( isNaN( this._drill_x ) ){
+			DrillUp.g_ACi_checkNaN = false;
+			alert(
+				"【Drill_AnimationCircle.js 动画 - 多层动画魔法圈】\n"+
+				"检测到控制器参数_drill_x出现了NaN值，请及时检查你的函数。"
+			);
+		}
+		if( isNaN( this._drill_y ) ){
+			DrillUp.g_ACi_checkNaN = false;
+			alert(
+				"【Drill_AnimationCircle.js 动画 - 多层动画魔法圈】\n"+
+				"检测到控制器参数_drill_y出现了NaN值，请及时检查你的函数。"
+			);
+		}
+		if( isNaN( this._drill_opacity ) ){
+			DrillUp.g_ACi_checkNaN = false;
+			alert(
+				"【Drill_AnimationCircle.js 动画 - 多层动画魔法圈】\n"+
+				"检测到控制器参数_drill_opacity出现了NaN值，请及时检查你的函数。"
+			);
+		}
+		if( isNaN( this._drill_scaleX ) ){
+			DrillUp.g_ACi_checkNaN = false;
+			alert(
+				"【Drill_AnimationCircle.js 动画 - 多层动画魔法圈】\n"+
+				"检测到控制器参数_drill_scaleX出现了NaN值，请及时检查你的函数。"
+			);
+		}
+		if( isNaN( this._drill_scaleY ) ){
+			DrillUp.g_ACi_checkNaN = false;
+			alert(
+				"【Drill_AnimationCircle.js 动画 - 多层动画魔法圈】\n"+
+				"检测到控制器参数_drill_scaleY出现了NaN值，请及时检查你的函数。"
+			);
+		}
+	}
+}
+
+
+//=============================================================================
+// ** 动画魔法圈贴图【Drill_ACi_Sprite】
+// **
+// **		作用域：	地图界面、战斗界面
+// **		主功能：	> 定义一个魔法圈贴图。
+// **		子功能：	->对象绑定
+// **						->设置控制器
+// **						->设置动画贴图
+// **						->设置个体贴图
+// **					->贴图初始化（手动）
+// **					->销毁（手动）
+// **					->层级位置修正
+// **
+// **		说明：	> 你必须在创建贴图后，手动初始化。（还需要先设置 控制器和个体贴图 ）
+// **
+// **		代码：	> 范围 - 该类显示单独的动画装饰。
+// **				> 结构 - [合并/ ●分离 /混乱] 贴图与数据合并。
+// **				> 数量 - [单个/ ●多个] 
+// **				> 创建 - [ ●一次性 /自延迟/外部延迟] 
+// **				> 销毁 - [不考虑/自销毁/ ●外部销毁 ] 由于动画存放在temp的容器中，销毁仍然需要外部来控制。
+// **				> 样式 - [ ●不可修改 /自变化/外部变化] 
+//=============================================================================
+//==============================
+// * 魔法圈贴图 - 定义
 //==============================
 function Drill_ACi_Sprite() {
     this.initialize.apply(this, arguments);
@@ -2589,291 +3347,288 @@ function Drill_ACi_Sprite() {
 Drill_ACi_Sprite.prototype = Object.create(Sprite.prototype);
 Drill_ACi_Sprite.prototype.constructor = Drill_ACi_Sprite;
 //==============================
-// * 动画魔法圈贴图 - 初始化
+// * 魔法圈贴图 - 初始化
 //==============================
-Drill_ACi_Sprite.prototype.initialize = function( animation, settings ){
+Drill_ACi_Sprite.prototype.initialize = function(){
 	Sprite.prototype.initialize.call(this);
-	this._animation = animation;									//动画父对象
-	this._drill_data = JSON.parse(JSON.stringify( settings ));		//设置数据
+	this._drill_controller = null;				//控制器对象
+	this._drill_individualSprite = null;		//个体贴图
+	this._drill_animationSprite = null;			//动画贴图
+	this._animation = null;						//动画对象（不存储的数据）
+};
+//==============================
+// * 魔法圈贴图 - 帧刷新
+//==============================
+Drill_ACi_Sprite.prototype.update = function() {
+	Sprite.prototype.update.call(this);
+	if( this.drill_ACi_isReady() == false ){ return; }
+	this.drill_updateLayer();					//帧刷新 - 层级
+	this.drill_updateChild();					//帧刷新 - 魔法圈
+}
+//##############################
+// * 魔法圈贴图 - 设置控制器【标准函数】
+//			
+//			参数：	> controller 控制器对象
+//			返回：	> 无
+//			
+//			说明：	> 由于贴图与数据分离，贴图必须依赖一个数据对象。
+//##############################
+Drill_ACi_Sprite.prototype.drill_ACi_setController = function( controller ){
+	this._drill_controller = controller;
+};
+//##############################
+// * 魔法圈贴图 - 设置动画贴图【标准函数】
+//			
+//			参数：	> animation_sprite 动画贴图
+//			返回：	> 无
+//##############################
+Drill_ACi_Sprite.prototype.drill_ACi_setAnimationSprite = function( animation_sprite ){
+	this._drill_animationSprite = animation_sprite;
+	this._animation = animation_sprite._animation;
+};
+//##############################
+// * 魔法圈贴图 - 设置个体贴图【标准函数】
+//			
+//			参数：	> individual_sprite 贴图对象
+//			返回：	> 无
+//			
+//			说明：	> 由于贴图随时会变换图层，贴图必须标记个体贴图。
+//##############################
+Drill_ACi_Sprite.prototype.drill_ACi_setIndividualSprite = function( individual_sprite ){
+	this._drill_individualSprite = individual_sprite;
+};
+//##############################
+// * 魔法圈贴图 - 贴图初始化【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//			
+//			说明：	> 需要设置 控制器和个体贴图 之后，才能进行初始化。
+//##############################
+Drill_ACi_Sprite.prototype.drill_ACi_initSprite = function(){
+	this.drill_ACi_initSprite_Private();
+};
+//##############################
+// * 魔法圈贴图 - 是否就绪【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 布尔（是否显示）
+//			
+//			说明：	> 这里完全 不考虑 延迟加载问题。
+//##############################
+Drill_ACi_Sprite.prototype.drill_ACi_isReady = function(){
+	if( this._drill_controller == undefined ){ return false; }
+	if( this._drill_individualSprite == undefined ){ return false; }
+    return true;
+};
+//##############################
+// * 魔法圈贴图 - 是否需要销毁【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 布尔（是否需要销毁）
+//			
+//			说明：	> 此函数可用于监听 控制器数据 是否被销毁，数据销毁后，贴图可自动销毁。
+//##############################
+Drill_ACi_Sprite.prototype.drill_ACi_isNeedDestroy = function(){
+	if( this._drill_controller == undefined ){ return false; }	//（未绑定时，不销毁）
+	if( this._drill_controller._drill_needDestroy == true ){ return true; }
+    return false;
+};
+//##############################
+// * 魔法圈贴图 - 销毁【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//			
+//			说明：	> 销毁不是必要的，但最好随时留意给 旧贴图 执行销毁函数。
+//##############################
+Drill_ACi_Sprite.prototype.drill_ACi_destroy = function(){
+	this.drill_ACi_destroy_Private();
+};
+//##############################
+// * 魔法圈贴图 - 半图层效果 设置【标准函数】
+//
+//			参数：	> isOtherHalf 布尔
+//			返回：	> 无
+//
+//			说明：	> 此设置开启后，表示当前贴图为 另一半贴图。
+//					> 半图层设置 需要建立两个此贴图，一个为 原贴图，一个为 另一半贴图。
+//##############################
+Drill_ACi_Sprite.prototype.drill_ACi_setSpriteHalf = function( isOtherHalf ){
+	var data = this._drill_controller._drill_data;
+	this._drill_ACi_isOtherHalf = isOtherHalf;
+	this._drill_ACi_curLayer = data['half_animIndex'];
+	this.zIndex = data['half_zIndex'];
+};
+//==============================
+// * 魔法圈贴图 - 贴图初始化（私有）
+//==============================
+Drill_ACi_Sprite.prototype.drill_ACi_initSprite_Private = function(){
+
+	// > 私有数据初始化
+	var data = this._drill_controller._drill_data;
+	this._drill_ACi_isOtherHalf = false;				//半图层 - 半图层标记
+	this._drill_ACi_curLayer = data['anim_index'];		//半图层 - 当前所在层级
 	
-	// > 阶段数据
-	this._drill_cur_time = 0;									//阶段 - 当前时间
-	this._drill_cur_state = "延迟";								//阶段 - 当前阶段（延迟、出现、持续、消失）
-	this._drill_time_delay = this._drill_data['delay'];			//阶段 - 出现延迟
-	this._drill_time_birth = this._drill_data['birth'];			//阶段 - 出现时长
-	this._drill_time_sustain = this._drill_data['sustain'];		//阶段 - 持续时长
-	this._drill_time_death = this._drill_data['death'];			//阶段 - 消失时长
-	this._drill_time_all = this._drill_time_delay + this._drill_time_birth + this._drill_time_sustain + this._drill_time_death;
 	
-	// > 私有属性初始化
-	this.x = this._drill_data['x'];
-	this.y = this._drill_data['y'];
-	this.blendMode = this._drill_data['blendMode'];
-	this.zIndex = this._drill_data['zIndex'];
-	this.opacity = 0;
+	// > 属性初始化
 	this.anchor.x = 0.5;
 	this.anchor.y = 0.5;
-	this.visible = $gameSystem._drill_ACi_visible[this._drill_data['id']-1];
+	this.blendMode = data['blendMode'];
+	this.zIndex = data['zIndex'];
+	this.visible = false;
+	
 	
 	// > 外键数据
-	this._drill_is_charBack = false;			//是否 在父贴图后面
-	this._drill_bindingSprite = null;			//父贴图对象（需跨层级跟随sprite的xy位置）
 	this._drill_parent_enemyObj = null;			//绑定的 战斗界面中的 敌人
 	this._drill_parent_actorObj = null;			//绑定的 战斗界面中的 角色
 	this._drill_parent_characterObj = null;		//绑定的 地图界面中的 物体
 	
-	this.drill_createCircle();				//创建 - 魔法圈	
-};
-//==============================
-// * 创建 - 魔法圈
-//==============================
-Drill_ACi_Sprite.prototype.drill_createCircle = function() {
 	
-	// > 魔法圈贴图
-	var temp_sprite_bitmap = new Sprite(ImageManager.load_SpecialAnim(this._drill_data['src_img']));
-	temp_sprite_bitmap.anchor.x = 0.5;
-	temp_sprite_bitmap.anchor.y = 0.5;
-	
-	// > 魔法圈层
-	var temp_sprite = new Sprite();		//魔法圈样式两层容器
+	// > 魔法圈 贴图
+	var temp_sprite = new Sprite(); 
 	temp_sprite.anchor.x = 0.5;
 	temp_sprite.anchor.y = 0.5;
-	temp_sprite.scale.x = this._drill_data['scale_x'];
-	temp_sprite.scale.y = this._drill_data['scale_y'];
-	temp_sprite.skew.x = this._drill_data['skew_x'];
-	temp_sprite.skew.y = this._drill_data['skew_y'];
+	temp_sprite.bitmap = ImageManager.loadBitmap( data['src_img_file'], data['src_img'], 0, true );
+	this._drill_childCircleSprite = temp_sprite;
 	
-	this._drill_circle = temp_sprite;
-	this._drill_circle_bitmap = temp_sprite_bitmap;
-	temp_sprite.addChild(temp_sprite_bitmap);
-	this.addChild(temp_sprite);
+	// > 魔法圈 层
+	var temp_layer = new Sprite();		//魔法圈样式两层容器
+	temp_layer.anchor.x = 0.5;
+	temp_layer.anchor.y = 0.5;
+	this._drill_layerSprite = temp_layer;
+	
+	this._drill_layerSprite.addChild( this._drill_childCircleSprite );
+	this.addChild( this._drill_layerSprite );
 }
 //==============================
-// * 动画魔法圈贴图 - 帧刷新
+// * 魔法圈贴图 - 销毁（私有）
 //==============================
-Drill_ACi_Sprite.prototype.update = function() {
-	Sprite.prototype.update.call(this);
+Drill_ACi_Sprite.prototype.drill_ACi_destroy_Private = function(){
 	
-	this.drill_updatePosition();	//帧刷新 - 位置
-	this.drill_updateStep();		//帧刷新 - 阶段
-	this.drill_updateBirthing();	//帧刷新 - 出现阶段
-	this.drill_updateDying();		//帧刷新 - 消失阶段
-}
-//==============================
-// * 帧刷新 - 位置
-//==============================
-Drill_ACi_Sprite.prototype.drill_updatePosition = function() {
+	// > 贴图销毁
+	this._drill_layerSprite.removeChild( this._drill_childCircleSprite );
+	this.removeChild( this._drill_layerSprite );
+	this._drill_childCircleSprite = null;
+	this._drill_layerSprite = null;
 	
-	// > 父贴图后面层
-	if( this._drill_is_charBack == true ){
+	// > 指针清空
+	this._drill_controller = null;				//控制器对象
+	this._drill_individualSprite = null;		//个体贴图
+	this._drill_animationSprite = null;			//动画贴图
+	this._animation = null;						//动画对象
+	
+	this._drill_parent_enemyObj = null;
+	this._drill_parent_actorObj = null;
+	this._drill_parent_characterObj = null;
+};
+//==============================
+// * 帧刷新 - 层级
+//==============================
+Drill_ACi_Sprite.prototype.drill_updateLayer = function() {
+	var data = this._drill_controller._drill_data;
+	var xx = this._drill_controller._drill_x;
+	var yy = this._drill_controller._drill_y;
+	
+	
+	// > 层级位置修正
+	var cur_layer = this._drill_ACi_curLayer;		//（注意 半图层效果 的不同层级情况）
+	
+	if( cur_layer == "动画前面层" || cur_layer == "在动画前面" ){
+		//（无操作）
+	}
+	
+	if( cur_layer == "动画后面层" || cur_layer == "在动画后面" ){
+		//（无操作）
+	}
+	
+	if( cur_layer == "父贴图后面层" || cur_layer == "在父贴图后面" ){
 		
 		// > 类型为 画面 情况时
 		if( this._animation.position == 3 ){
-			this.x = this._drill_data['x'] + Graphics.boxWidth *0.5;
-			this.y = this._drill_data['y'] + Graphics.boxHeight*0.5;
+			xx += Graphics.boxWidth *0.5;
+			yy += Graphics.boxHeight*0.5;
 		
 		// > 一般类型的情况
 		}else{
-			var _sprite = this._drill_bindingSprite;
-			this.x = this._drill_data['x'] + _sprite.x;
-			this.y = this._drill_data['y'] + _sprite.y;
+			xx += this._drill_animationSprite.x;
+			yy += this._drill_animationSprite.y;
 				
 			// > 敌人位置修正
-			if( _sprite instanceof Sprite_Enemy ){
-				this.y -= _sprite.width/2;
+			if( this._drill_individualSprite instanceof Sprite_Enemy ){
+				//（不修正）
+				//yy += this._drill_individualSprite.height*0.1;
 			}
 			// > 角色位置修正
-			if( _sprite instanceof Sprite_Actor ){
+			if( this._drill_individualSprite instanceof Sprite_Actor ){
 				// > 第一人称位置修正（战斗镜头）
 				if( Imported.Drill_BattleCamera && !$gameSystem.isSideView() ){		//（在图层内）
 					var camera_pos = $gameSystem._drill_BCa_controller.drill_BCa_getCameraPos_Children();
-					this.x -= camera_pos.x;
-					this.y -= camera_pos.y;
+					xx -= camera_pos.x;
+					yy -= camera_pos.y;
 				}
 			}
 			// > 物体位置修正
-			if( _sprite instanceof Sprite_Character ){
-				this.y -= 24;
+			if( this._drill_individualSprite instanceof Sprite_Character ){
+				//（不修正）
+				//yy -= 24;
 			}
 		}
 	}
 	
-	// > 自旋转
-	this._drill_circle_bitmap.rotation += this._drill_data['rotate'];
-}
-//==============================
-// * 帧刷新 - 阶段
-//==============================
-Drill_ACi_Sprite.prototype.drill_updateStep = function() {
 	
-	// > 阶段初始化
-	if( this._drill_cur_time == 0){
-		this.drill_initBirthState();
-		this.drill_initDeathState();
-	}
+	// > 贴图 - 贴图属性
+	this.x = Math.round( xx );
+	this.y = Math.round( yy );
+	this.scale.x = this._drill_controller._drill_scaleX;
+	this.scale.y = this._drill_controller._drill_scaleY;
+	this.opacity = this._drill_controller._drill_opacity;
+	this.rotation = this._drill_controller._drill_rotation *Math.PI/180;	//（整体再旋转角度)
+	//this.visible = data['visible'];
+	this.visible = $gameSystem._drill_ACi_visible[data['id']-1];
 	
-	// > 阶段变化
-	this._drill_cur_time += 1;
-	if( this._drill_cur_time < this._drill_time_delay ){
-		this._drill_cur_state = "延迟";
-	}else if( this._drill_cur_time < this._drill_time_delay + this._drill_time_birth ){
-		this._drill_cur_state = "出现";
-	}else if( this._drill_cur_time < this._drill_time_delay + this._drill_time_birth + this._drill_time_sustain ){
-		this._drill_cur_state = "持续";
-	}else{
-		this._drill_cur_state = "消失";
-	}
-}
-//==============================
-// * 阶段 - 初始化 出现状态
-//==============================
-Drill_ACi_Sprite.prototype.drill_initBirthState = function() {
-	this.start_scale_x = 1;
-	this.start_scale_y = 1;
-	this.start_opacity = 0;
-	if(this._drill_data['birthMode'] == "横向显现"){
-		this.start_scale_y = 0;
-		this.start_opacity = 0;
-	}else if(this._drill_data['birthMode'] == "纵向显现"){
-		this.start_scale_x = 0;
-		this.start_opacity = 0;
-	}else if(this._drill_data['birthMode'] == "放大显现"){
-		this.start_scale_x = 0;
-		this.start_scale_y = 0;
-		this.start_opacity = 0;
-	}else if(this._drill_data['birthMode'] == "缩小显现"){
-		this.start_scale_x = 2;
-		this.start_scale_y = 2;
-		this.start_opacity = 0;
-	}else if(this._drill_data['birthMode'] == "普通淡入显现"){
-		this.start_opacity = 0;
-	}else if(this._drill_data['birthMode'] == "自定义"){
-		this.start_scale_x = this._drill_data['birthScaleX'];
-		this.start_scale_y = this._drill_data['birthScaleY'];
-		this.start_opacity = this._drill_data['birthOpacity'];
-	}
-	this.scale.x = this.start_scale_x;
-	this.scale.y = this.start_scale_y;
-	this.opacity = this.start_opacity;
+	// > 贴图 - 层级属性
+	this._drill_layerSprite.scale.x  = this._drill_controller._drill_layer_scaleX;
+	this._drill_layerSprite.scale.y  = this._drill_controller._drill_layer_scaleY;
+	this._drill_layerSprite.skew.x   = this._drill_controller._drill_layer_skewX;
+	this._drill_layerSprite.skew.y   = this._drill_controller._drill_layer_skewY;
 	
-	this.sustain_scale_x = 1;
-	this.sustain_scale_y = 1;
-	this.sustain_opacity = 255;
-	if(this._drill_data['sustainMode'] == "自定义"){
-		this.sustain_scale_x = this._drill_data['sustainScaleX'];
-		this.sustain_scale_y = this._drill_data['sustainScaleY'];
-		this.sustain_opacity = this._drill_data['sustainOpacity'];
-	}
-}
-//==============================
-// * 阶段 - 初始化 消失状态
-//==============================
-Drill_ACi_Sprite.prototype.drill_initDeathState = function() {
-	this.end_scale_x = 1;
-	this.end_scale_y = 1;
-	this.end_opacity = 255;
-	if(this._drill_data['deathMode'] == "横向消失"){
-		this.end_scale_y = 0;
-		this.end_opacity = 0;
-	}else if(this._drill_data['deathMode'] == "纵向消失"){
-		this.end_scale_x = 0;
-		this.end_opacity = 0;
-	}else if(this._drill_data['deathMode'] == "放大消失"){
-		this.end_scale_x = 2;
-		this.end_scale_y = 2;
-		this.end_opacity = 0;
-	}else if(this._drill_data['deathMode'] == "缩小消失"){
-		this.end_scale_x = 0;
-		this.end_scale_y = 0;
-		this.end_opacity = 0;
-	}else if(this._drill_data['deathMode'] == "普通淡出消失"){
-		this.end_opacity = 0;
-	}else if(this._drill_data['deathMode'] == "自定义"){
-		this.end_scale_x = this._drill_data['deathScaleX'];
-		this.end_scale_y = this._drill_data['deathScaleY'];
-		this.end_opacity = this._drill_data['deathOpacity'];
-	}
-}
-//==============================
-// * 阶段 - 判断销毁
-//==============================
-Drill_ACi_Sprite.prototype.drill_isDead = function(){
-	return this._drill_cur_time > this._drill_time_all;
-}
-//==============================
-// * 阶段 - 获取当前阶段
-//==============================
-Drill_ACi_Sprite.prototype.drill_getState = function(){
-	return this._drill_cur_state;
-}
-//==============================
-// * 阶段 - 设置当前阶段
-//
-//			说明：	注意，由于 透明度和缩放 变化并不是固定公式，而是增量值。
-//					因此 阶段切换 时不会出现贴图突然变化情况，但代价是变化情况不可控。
-//==============================
-Drill_ACi_Sprite.prototype.drill_setState = function( state ){
-	if( state == "延迟" ){
-		this._drill_cur_time = 0;
-		this._drill_cur_state = state;
-	}
-	if( state == "出现" ){
-		this._drill_cur_time = this._drill_time_delay;
-		this._drill_cur_state = state;
-	}
-	if( state == "持续" ){
-		this.opacity = 255;
-		this._drill_cur_time = this._drill_time_delay + this._drill_time_birth;
-		this._drill_cur_state = state;
-	}
-	if( state == "消失" ){
-		this._drill_cur_time = this._drill_time_delay + this._drill_time_birth + this._drill_time_sustain;
-		this._drill_cur_state = state;
-	}
-}
-//==============================
-// * 帧刷新 - 出现阶段
-//==============================
-Drill_ACi_Sprite.prototype.drill_updateBirthing = function() {
-	if( this._drill_cur_state != "出现" ){ return; }
 	
-	// > 透明度
-	this.opacity += ( this.sustain_opacity - this.start_opacity )/this._drill_time_birth;
-	
-	// > 缩放
-	this.drill_scaleX_move_to(this, this.sustain_scale_x, Math.abs(this.start_scale_x -this.sustain_scale_x)/this._drill_time_birth);
-	this.drill_scaleY_move_to(this, this.sustain_scale_y, Math.abs(this.start_scale_y -this.sustain_scale_y)/this._drill_time_birth);
-}
-//==============================
-// * 帧刷新 - 消失阶段
-//==============================
-Drill_ACi_Sprite.prototype.drill_updateDying = function() {
-	if( this._drill_cur_state != "消失" ){ return; }
-	
-	// > 透明度
-	this.opacity -= ( this.sustain_opacity - this.end_opacity )/this._drill_time_death;
-	
-	// > 缩放
-	this.drill_scaleX_move_to(this, this.end_scale_x, Math.abs(this.sustain_scale_x-this.end_scale_x)/this._drill_time_death);
-	this.drill_scaleY_move_to(this, this.end_scale_y, Math.abs(this.sustain_scale_y-this.end_scale_y)/this._drill_time_death);
-}
-
-//==============================
-// * 动画魔法圈贴图 - 缩放控制
-//==============================
-Drill_ACi_Sprite.prototype.drill_scaleX_move_to = function(sprite,s,speed) {
-	var ds = sprite.scale.x - s;
-	if( ds < 0 ){ sprite.scale.x += speed; }
-	if( ds > 0 ){ sprite.scale.x -= speed; }
+	// > 半图层效果（遮罩设置）
+	if( data['half_enable'] == true ){
+		var bitmap = this._drill_childCircleSprite.bitmap;
+		if( bitmap.isReady() != true ){ return; }
 		
-	if( Math.abs(ds) <= speed ){ sprite.scale.x = s; }
+		// > 创建遮罩
+		if( this._drill_ACi_maskSprite == undefined ){
+			var temp_sprite = new Sprite();
+			temp_sprite.bitmap = new Bitmap( bitmap.width, Math.ceil(bitmap.height*0.5) );
+			temp_sprite.bitmap.fillAll("#ffffff");
+			
+			// > 半图层 - 原贴图 的遮罩
+			temp_sprite.anchor.x = 0.5;
+			temp_sprite.anchor.y = 0;
+			
+			// > 半图层 - 另一半贴图 的遮罩
+			if( this._drill_ACi_isOtherHalf == true ){
+				temp_sprite.anchor.x = 0.5;
+				temp_sprite.anchor.y = 1;
+			}
+			
+			this._drill_layerSprite.addChild( temp_sprite );
+			this._drill_layerSprite.mask = temp_sprite;
+			this._drill_ACi_maskSprite = temp_sprite;
+		}
+	}
 }
-Drill_ACi_Sprite.prototype.drill_scaleY_move_to = function(sprite,s,speed) {
-	var ds = sprite.scale.y - s;
-	if( ds < 0 ){ sprite.scale.y += speed; }
-	if( ds > 0 ){ sprite.scale.y -= speed; }
-		
-	if( Math.abs(ds) <= speed ){ sprite.scale.y = s; }
+//==============================
+// * 帧刷新 - 魔法圈
+//==============================
+Drill_ACi_Sprite.prototype.drill_updateChild = function() {
+	var data = this._drill_controller._drill_data;
+	
+	// > 贴图 - 魔法圈属性
+	this._drill_childCircleSprite.rotation = this._drill_controller._drill_childCircle_rotation *Math.PI/180;
 }
 
 //=============================================================================
@@ -2917,8 +3672,8 @@ Drill_ACi_Sprite.prototype.drill_scaleY_move_to = function(sprite,s,speed) {
 	//	for(var i in DrillUp.g_ACi_style_playing_tank){
 	//		var temp = DrillUp.g_ACi_style_playing_tank[i];
 	//		if( (temp._drill_data['anim'] == tar_id || tar_id == -1 ) && 
-	//			temp._drill_bindingSprite != undefined  && 
-	//			temp._drill_bindingSprite._battler == battler  && 
+	//			temp._drill_individualSprite != undefined  && 
+	//			temp._drill_individualSprite._battler == battler  && 
 	//			temp._drill_cur_time < temp._drill_time_all - temp._drill_time_death ){
 	//			temp._drill_cur_time = temp._drill_time_all - temp._drill_time_death;
 	//		}
@@ -2928,8 +3683,8 @@ Drill_ACi_Sprite.prototype.drill_scaleY_move_to = function(sprite,s,speed) {
 	//DrillUp.drill_aCircles_setBattlerSprite = function( battlerSprite ) {
 	//	for(var i in DrillUp.g_ACi_style_playing_tank){
 	//		var temp = DrillUp.g_ACi_style_playing_tank[i];
-	//		if( temp._drill_bindingSprite == undefined ){
-	//			temp._drill_bindingSprite = battlerSprite;
+	//		if( temp._drill_individualSprite == undefined ){
+	//			temp._drill_individualSprite = battlerSprite;
 	//		}
 	//	}
 	//}

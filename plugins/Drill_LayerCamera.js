@@ -1493,8 +1493,11 @@ Drill_LCa_Controller.prototype.isLoopVertical = function(){ return $gameMap.isLo
 // * 控制器 - 初始化
 //==============================
 Drill_LCa_Controller.prototype.initialize = function( data ){
-	if( data == undefined ){ data = {}; }
 	this._drill_data = {};
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+    this.drill_initData();													//初始化数据
+    this.drill_initPrivateData();											//私有数据初始化
+	if( data == undefined ){ data = {}; }
     this.drill_LCa_resetData( data );
 }
 //##############################
@@ -2011,10 +2014,10 @@ Drill_LCa_Controller.prototype.drill_LCa_resetData_Private = function( data ){
 	}
 	
 	// > 执行重置
-	this._drill_data = JSON.parse(JSON.stringify( data ));	//深拷贝
-	this._drill_controllerSerial = new Date().getTime();	//（生成一个不重复的序列号）
-    this.drill_initData();									//初始化数据
-    this.drill_initPrivateData();							//私有数据初始化
+	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+    this.drill_initData();													//初始化数据
+    this.drill_initPrivateData();											//私有数据初始化
 }
 //==============================
 // * 控制器 - 立即复原（私有）

@@ -299,7 +299,8 @@
 　　Imported.Drill_PickThrow = true;
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_PickThrow');
-
+	
+	
 	/*-----------------杂项------------------*/
 	DrillUp.g_PT_liftingHeight = Number(DrillUp.parameters['默认运输时花盆高度'] || 22);
 	DrillUp.g_PT_pickSE = String(DrillUp.parameters['举起音效'] || "");
@@ -796,13 +797,23 @@ var _drill_PT_c_screenY = Game_CharacterBase.prototype.screenY;
 Game_CharacterBase.prototype.screenY = function(){
 	
 	// > 【图块-侧边阶梯区域】修正
-	if( Imported.Drill_LayerStairArea && this._drill_PT_is_being_lift ){
-		this._drill_LSA_height = $gamePlayer._drill_LSA_height * 2;		//（由于阶梯是完全相反的Y轴补正，所以阶梯初始高度x2）
+	if( Imported.Drill_LayerStairArea ){
+		if( this._drill_PT_is_being_lift == true ){
+			this._drill_LSA_height = $gamePlayer._drill_LSA_height * 2;		//（由于阶梯是完全相反的Y轴补正，所以阶梯初始高度x2）
+		}
 	}
 	
-	// > 获取值
+	// > 原函数
 	var yy = _drill_PT_c_screenY.call( this );
-	if( this._drill_PT_is_being_lift ){
+	
+	// > 只有事件才能被举起
+	if( this instanceof Game_Event != true ){
+		return yy;
+	}
+	
+	// > 高度补正
+	if( this._drill_PT_is_being_lift == true || 
+		this._drill_PT_throw_wait > 0 ){
 		
 		// > 玩家Y轴产生的补正高度
 		yy -= $gamePlayer.drill_PT_fixY();	//（插件补正）
