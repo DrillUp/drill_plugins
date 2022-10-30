@@ -489,6 +489,8 @@ DrillUp.drill_COBa_getRandomInIteration = function( org_ran, iteration ){
 	temp_ran = temp_ran / prime;
 	var new_ran = (temp_ran + org_ran * iteration * prime) %1;
 	return new_ran;
+	//var new_ran = (25214903917 * (org_ran + iteration)) & ((1 << 48) - 1);
+	//return new_ran %1;
 };
 //==============================
 // * 数学 - 质数表（1000以内）
@@ -569,7 +571,7 @@ Game_Temp.prototype.drill_COBa_setBallisticsMove_Private = function( data ){
 		result['polarDirFormula'] = data['polarDirFormula'] || "return 0";              //极坐标 - 方向 - 方向计算公式
 	}
 	//   ■ 直角坐标（cartesian）
-	if( result['movementMode'] == "直角坐标模式" ){			
+	else if( result['movementMode'] == "直角坐标模式" ){			
 		result['cartRotation'] = data['cartRotation'] || 0;								//直角坐标 - 整体坐标轴旋转角度
 		result['cartXSpeedType'] = data['cartXSpeedType'] || "只初速度";				//直角坐标 - x - 类型	
 		result['cartXSpeedBase'] = data['cartXSpeedBase'] || 0;                         //直角坐标 - x - 初速度
@@ -587,7 +589,7 @@ Game_Temp.prototype.drill_COBa_setBallisticsMove_Private = function( data ){
 		result['cartYDistanceFormula'] = data['cartYDistanceFormula'] || "return 0";    //直角坐标 - y - 路程计算公式
 	}
 	//   ■ 轨道锚点（track）		
-	if( result['movementMode'] == "轨道锚点模式" ){			
+	else if( result['movementMode'] == "轨道锚点模式" ){			
 		result['trackSpeedType'] = data['trackSpeedType'] || "只初速度";				//轨道锚点 - 速度 - 类型
 		result['trackSpeedBase'] = data['trackSpeedBase'] || 0;                         //轨道锚点 - 速度 - 初速度
 		result['trackSpeedRandom'] = data['trackSpeedRandom'] || 0;                     //轨道锚点 - 速度 - 速度随机波动量
@@ -599,7 +601,7 @@ Game_Temp.prototype.drill_COBa_setBallisticsMove_Private = function( data ){
 		result['trackRotation'] = data['trackRotation'] || 0;                           //轨道锚点 - 轨道 - 整体旋转角度
 	}
 	//   ■ 两点式（twoPoint）
-	if( result['movementMode'] == "两点式" ){		
+	else if( result['movementMode'] == "两点式" ){		
 		result['twoPointType'] = data['twoPointType'] || "不移动";						//两点式 - 类型（不移动/匀速移动/弹性移动/……）
 		result['twoPointDifferenceX'] = data['twoPointDifferenceX'] || 0;				//两点式 - 距离差值x（终点减起点）
 		result['twoPointDifferenceY'] = data['twoPointDifferenceY'] || 0;	            //两点式 - 距离差值y（终点减起点）
@@ -609,18 +611,19 @@ Game_Temp.prototype.drill_COBa_setBallisticsMove_Private = function( data ){
 	
 	
 	// > 随机因子（RandomFactor）
+	//		（注意，独立参数项之间，随机因子不可共用！会造成强关联的错误关系。）
 	if( result['movementMode'] == "极坐标模式" ){
 		result['polarSpeedRandomFactor'] = data['polarSpeedRandomFactor'] || Math.random();
 		result['polarDirRandomFactor'] = data['polarDirRandomFactor'] || Math.random();
 	}
-	if( result['movementMode'] == "直角坐标模式" ){
+	else if( result['movementMode'] == "直角坐标模式" ){
 		result['cartXSpeedRandomFactor'] = data['cartXSpeedRandomFactor'] || Math.random();
 		result['cartYSpeedRandomFactor'] = data['cartYSpeedRandomFactor'] || Math.random();
 	}
-	if( result['movementMode'] == "轨道锚点模式" ){
+	else if( result['movementMode'] == "轨道锚点模式" ){
 		result['trackSpeedRandomFactor'] = data['trackSpeedRandomFactor'] || Math.random();
 	}
-	if( result['movementMode'] == "两点式" ){
+	else if( result['movementMode'] == "两点式" ){
 		//（无随机因子）
 	}
 	
@@ -639,7 +642,7 @@ Game_Temp.prototype.drill_COBa_setBallisticsMove_Private = function( data ){
 			}
 		}
 	}
-	if( result['movementMode'] == "直角坐标模式" ){		
+	else if( result['movementMode'] == "直角坐标模式" ){		
 		if( data['cartXSpeedRandomIterationList'] != undefined ){
 			result['cartXSpeedRandomIterationList'] = data['cartXSpeedRandomIterationList'];//（这里直接用指针，迭代次数变化，推演跟着变）
 			result['cartYSpeedRandomIterationList'] = data['cartYSpeedRandomIterationList'];
@@ -652,7 +655,7 @@ Game_Temp.prototype.drill_COBa_setBallisticsMove_Private = function( data ){
 			}
 		}
 	}
-	if( result['movementMode'] == "轨道锚点模式" ){		
+	else if( result['movementMode'] == "轨道锚点模式" ){		
 		if( data['trackSpeedRandomIterationList'] != undefined ){
 			result['trackSpeedRandomIterationList'] = data['trackSpeedRandomIterationList'];//（这里直接用指针，迭代次数变化，推演跟着变）
 		}else{
@@ -662,7 +665,7 @@ Game_Temp.prototype.drill_COBa_setBallisticsMove_Private = function( data ){
 			}
 		}
 	}
-	if( result['movementMode'] == "两点式" ){		
+	else if( result['movementMode'] == "两点式" ){		
 		//（无随机迭代次数）
 	}
 	
@@ -733,14 +736,14 @@ Game_Temp.prototype.drill_COBa_preBallisticsMove_Private = function( obj_data, o
 			eval("obj['polarDistanceFunction'] = function( p ){ "+data['polarDistanceFormula']+" }" );
 			eval("obj['polarDirFunction'] = function( p ){ "+data['polarDirFormula']+" }" );
 		}
-		if( data['movementMode'] == "直角坐标模式"){
+		else if( data['movementMode'] == "直角坐标模式"){
 			eval("obj['cartXDistanceFunction'] = function( p ){ "+data['cartXDistanceFormula']+" }" );
 			eval("obj['cartYDistanceFunction'] = function( p ){ "+data['cartYDistanceFormula']+" }" );
 		}
-		if( data['movementMode'] == "轨道锚点模式"){
+		else if( data['movementMode'] == "轨道锚点模式"){
 			eval("obj['trackDistanceFunction'] = function( p ){ "+data['trackDistanceFormula']+" }" );
 		}
-		if( data['movementMode'] == "两点式" ){		
+		else if( data['movementMode'] == "两点式" ){		
 			//（无公式）
 		}
 	}
@@ -761,16 +764,16 @@ Game_Temp.prototype.drill_COBa_preBallisticsMove_Private = function( obj_data, o
 		obj_data['_drill_COBa_y'].push( orgY );
 		
 		// > 随机值（方向随机因子）
-		var randomDirValue = DrillUp.drill_COBa_getRandomInIteration( data['polarDirRandomFactor'], obj_index );
+		var randomDirValue = DrillUp.drill_COBa_getRandomInIteration( data['polarDirRandomFactor'], obj_index +12345 );
 		var randomDirValue_i = data['polarDirRandomIterationList'][ obj_index ];
 		if( randomDirValue_i == undefined ){ randomDirValue_i = data['polarDirRandomIterationList'][0]; }
-		randomDirValue = DrillUp.drill_COBa_getRandomInIteration( randomDirValue, data['movementNum']*randomDirValue_i +obj_index );
+		randomDirValue = DrillUp.drill_COBa_getRandomInIteration( randomDirValue, data['movementNum']*randomDirValue_i +obj_index +12345 );
 		
 		// > 随机值（速度随机因子）
-		var randomSpeed = DrillUp.drill_COBa_getRandomInIteration( data['polarSpeedRandomFactor'], obj_index );
+		var randomSpeed = DrillUp.drill_COBa_getRandomInIteration( data['polarSpeedRandomFactor'], obj_index +23456 );
 		var randomSpeed_i = data['polarSpeedRandomIterationList'][ obj_index ];
 		if( randomSpeed_i == undefined ){ randomSpeed_i = data['polarSpeedRandomIterationList'][0]; }
-		randomSpeed = DrillUp.drill_COBa_getRandomInIteration( randomSpeed, data['movementNum']*randomSpeed_i +obj_index );
+		randomSpeed = DrillUp.drill_COBa_getRandomInIteration( randomSpeed, data['movementNum']*randomSpeed_i +obj_index +23456 );
 		
 		// > 变量定义（写这里是为优化性能，减少反复创建次数）
 		var p = {};				//参数容器
@@ -794,22 +797,22 @@ Game_Temp.prototype.drill_COBa_preBallisticsMove_Private = function( obj_data, o
 			if( data['polarDirType'] == "固定方向"){
 				dir = this.drill_COBa_directionFunction_1( p );	
 			}
-			if( data['polarDirType'] == "四周扩散(线性)"){
+			else if( data['polarDirType'] == "四周扩散(线性)"){
 				dir = this.drill_COBa_directionFunction_2( p );	
 			}
-			if( data['polarDirType'] == "四周扩散(随机)"){
+			else if( data['polarDirType'] == "四周扩散(随机)"){
 				dir = this.drill_COBa_directionFunction_3( p );	
 			}
-			if( data['polarDirType'] == "四周扩散(抖动)"){
+			else if( data['polarDirType'] == "四周扩散(抖动)"){
 				dir = this.drill_COBa_directionFunction_4( p );	
 			}
-			if( data['polarDirType'] == "扇形范围方向(线性)"){
+			else if( data['polarDirType'] == "扇形范围方向(线性)"){
 				dir = this.drill_COBa_directionFunction_5( p );	
 			}
-			if( data['polarDirType'] == "扇形范围方向(随机)"){		//扇形的线性和随机的配置角度是反的，目前不明原因
+			else if( data['polarDirType'] == "扇形范围方向(随机)"){		//扇形的线性和随机的配置角度是反的，目前不明原因
 				dir = this.drill_COBa_directionFunction_6( p );	
 			}
-			if( data['polarDirType'] == "方向计算公式"){
+			else if( data['polarDirType'] == "方向计算公式"){
 				dir = obj['polarDirFunction'].call(this, p );	
 			}
 			DrillUp.drill_COBa_checkValue( p, dir );	//（校验）
@@ -830,16 +833,16 @@ Game_Temp.prototype.drill_COBa_preBallisticsMove_Private = function( obj_data, o
 			if( data['polarSpeedType'] == "只初速度"){
 				radius = this.drill_COBa_speedFunction_1( p );	
 			}
-			if( data['polarSpeedType'] == "初速度+波动量"){
+			else if( data['polarSpeedType'] == "初速度+波动量"){
 				radius = this.drill_COBa_speedFunction_2( p );	
 			}
-			if( data['polarSpeedType'] == "初速度+波动量+加速度"){
+			else if( data['polarSpeedType'] == "初速度+波动量+加速度"){
 				radius = this.drill_COBa_speedFunction_3( p );	
 			}
-			if( data['polarSpeedType'] == "初速度+波动量+加速度+最大最小"){
+			else if( data['polarSpeedType'] == "初速度+波动量+加速度+最大最小"){
 				radius = this.drill_COBa_speedFunction_4( p );	
 			}
-			if( data['polarSpeedType'] == "路程计算公式"){
+			else if( data['polarSpeedType'] == "路程计算公式"){
 				radius = obj['polarDistanceFunction'].call(this, p );	
 			}
 			DrillUp.drill_COBa_checkValue( p, radius );	//（校验）
@@ -862,23 +865,23 @@ Game_Temp.prototype.drill_COBa_preBallisticsMove_Private = function( obj_data, o
 	}
 	
 	/*-----------------直角坐标模式------------------*/
-	if( data['movementMode'] == "直角坐标模式"){
+	else if( data['movementMode'] == "直角坐标模式"){
 		
 		// > 起点值
 		obj_data['_drill_COBa_x'].push( orgX );
 		obj_data['_drill_COBa_y'].push( orgY );
 		
 		// > 随机值（X随机因子）
-		var x_randomSpeed = DrillUp.drill_COBa_getRandomInIteration( data['cartXSpeedRandomFactor'], obj_index );
+		var x_randomSpeed = DrillUp.drill_COBa_getRandomInIteration( data['cartXSpeedRandomFactor'], obj_index +34567 );
 		var x_randomSpeed_i = data['cartXSpeedRandomIterationList'][ obj_index ];
 		if( x_randomSpeed_i == undefined ){ x_randomSpeed_i = data['cartXSpeedRandomIterationList'][0]; }
-		x_randomSpeed = DrillUp.drill_COBa_getRandomInIteration( x_randomSpeed, data['movementNum']*x_randomSpeed_i +obj_index );
+		x_randomSpeed = DrillUp.drill_COBa_getRandomInIteration( x_randomSpeed, data['movementNum']*x_randomSpeed_i +obj_index +34567 );
 		
 		// > 随机值（Y随机因子）
-		var y_randomSpeed = DrillUp.drill_COBa_getRandomInIteration( data['cartYSpeedRandomFactor'], obj_index );
+		var y_randomSpeed = DrillUp.drill_COBa_getRandomInIteration( data['cartYSpeedRandomFactor'], obj_index +45678 );
 		var y_randomSpeed_i = data['cartYSpeedRandomIterationList'][ obj_index ];
 		if( y_randomSpeed_i == undefined ){ y_randomSpeed_i = data['cartYSpeedRandomIterationList'][0]; }
-		y_randomSpeed = DrillUp.drill_COBa_getRandomInIteration( y_randomSpeed, data['movementNum']*y_randomSpeed_i +obj_index );
+		y_randomSpeed = DrillUp.drill_COBa_getRandomInIteration( y_randomSpeed, data['movementNum']*y_randomSpeed_i +obj_index +45678 );
 		
 		// > 变量定义（写这里是为优化性能，减少反复创建次数）
 		var p = {};				//参数容器
@@ -904,16 +907,16 @@ Game_Temp.prototype.drill_COBa_preBallisticsMove_Private = function( obj_data, o
 			if( data['cartXSpeedType'] == "只初速度"){
 				xx = this.drill_COBa_speedFunction_1( p );	
 			}
-			if( data['cartXSpeedType'] == "初速度+波动量"){
+			else if( data['cartXSpeedType'] == "初速度+波动量"){
 				xx = this.drill_COBa_speedFunction_2( p );	
 			}
-			if( data['cartXSpeedType'] == "初速度+波动量+加速度"){
+			else if( data['cartXSpeedType'] == "初速度+波动量+加速度"){
 				xx = this.drill_COBa_speedFunction_3( p );	
 			}
-			if( data['cartXSpeedType'] == "初速度+波动量+加速度+最大最小"){
+			else if( data['cartXSpeedType'] == "初速度+波动量+加速度+最大最小"){
 				xx = this.drill_COBa_speedFunction_4( p );	
 			}
-			if( data['cartXSpeedType'] == "路程计算公式"){
+			else if( data['cartXSpeedType'] == "路程计算公式"){
 				xx = obj['cartXDistanceFunction'].call(this, p );	
 			}
 			DrillUp.drill_COBa_checkValue( p, xx );	//（校验）
@@ -932,16 +935,16 @@ Game_Temp.prototype.drill_COBa_preBallisticsMove_Private = function( obj_data, o
 			if( data['cartYSpeedType'] == "只初速度"){
 				yy = this.drill_COBa_speedFunction_1( p );	
 			}
-			if( data['cartYSpeedType'] == "初速度+波动量"){
+			else if( data['cartYSpeedType'] == "初速度+波动量"){
 				yy = this.drill_COBa_speedFunction_2( p );	
 			}
-			if( data['cartYSpeedType'] == "初速度+波动量+加速度"){
+			else if( data['cartYSpeedType'] == "初速度+波动量+加速度"){
 				yy = this.drill_COBa_speedFunction_3( p );	
 			}
-			if( data['cartYSpeedType'] == "初速度+波动量+加速度+最大最小"){
+			else if( data['cartYSpeedType'] == "初速度+波动量+加速度+最大最小"){
 				yy = this.drill_COBa_speedFunction_4( p );	
 			}
-			if( data['cartYSpeedType'] == "路程计算公式"){
+			else if( data['cartYSpeedType'] == "路程计算公式"){
 				yy = obj['cartYDistanceFunction'].call(this, p );	
 			}
 			DrillUp.drill_COBa_checkValue( p, yy );	//（校验）
@@ -968,17 +971,17 @@ Game_Temp.prototype.drill_COBa_preBallisticsMove_Private = function( obj_data, o
 	
 	
 	/*-----------------轨道锚点模式------------------*/
-	if( data['movementMode'] == "轨道锚点模式"){
+	else if( data['movementMode'] == "轨道锚点模式"){
 		
 		// > 起点值
 		obj_data['_drill_COBa_x'].push( orgX );
 		obj_data['_drill_COBa_y'].push( orgY );
 		
 		// > 随机值（通用随机因子）
-		var randomSpeed = DrillUp.drill_COBa_getRandomInIteration( data['trackSpeedRandomFactor'], obj_index );
+		var randomSpeed = DrillUp.drill_COBa_getRandomInIteration( data['trackSpeedRandomFactor'], obj_index +56789 );
 		var randomSpeed_i = data['trackSpeedRandomIterationList'][ obj_index ];
 		if( randomSpeed_i == undefined ){ randomSpeed_i = data['trackSpeedRandomIterationList'][0]; }
-		randomSpeed = DrillUp.drill_COBa_getRandomInIteration( randomSpeed, data['movementNum']*randomSpeed_i +obj_index );
+		randomSpeed = DrillUp.drill_COBa_getRandomInIteration( randomSpeed, data['movementNum']*randomSpeed_i +obj_index +56789 );
 		
 		// > 轨道点初始化
 		if( data['trackPointTank'].length < 2 ){	//（至少要两个点才能计算）
@@ -1027,16 +1030,16 @@ Game_Temp.prototype.drill_COBa_preBallisticsMove_Private = function( obj_data, o
 			if( data['trackSpeedType'] == "只初速度"){
 				distance = this.drill_COBa_speedFunction_1( p );	
 			}
-			if( data['trackSpeedType'] == "初速度+波动量"){
+			else if( data['trackSpeedType'] == "初速度+波动量"){
 				distance = this.drill_COBa_speedFunction_2( p );	
 			}
-			if( data['trackSpeedType'] == "初速度+波动量+加速度"){
+			else if( data['trackSpeedType'] == "初速度+波动量+加速度"){
 				distance = this.drill_COBa_speedFunction_3( p );	
 			}
-			if( data['trackSpeedType'] == "初速度+波动量+加速度+最大最小"){
+			else if( data['trackSpeedType'] == "初速度+波动量+加速度+最大最小"){
 				distance = this.drill_COBa_speedFunction_4( p );	
 			}
-			if( data['trackSpeedType'] == "路程计算公式"){
+			else if( data['trackSpeedType'] == "路程计算公式"){
 				distance = obj['trackDistanceFunction'].call(this, p );	
 			}
 			DrillUp.drill_COBa_checkValue( p, distance );	//（校验）
@@ -1108,7 +1111,7 @@ Game_Temp.prototype.drill_COBa_preBallisticsMove_Private = function( obj_data, o
 		（这里的公式默认递增，你可以反转，变为递减。）
 		（不固定开始点也不固定结束点，由于子插件进行了取反，两头只要固定一处，就会出现各种各样的问题，所以不加了）
 	*/
-	if( data['movementMode'] == "两点式"){		
+	else if( data['movementMode'] == "两点式"){		
 	
 		// > 变量定义（写这里是为优化性能，减少反复创建次数）
 		var xx;					//相对坐标X
@@ -1127,12 +1130,12 @@ Game_Temp.prototype.drill_COBa_preBallisticsMove_Private = function( obj_data, o
 				yy = 0;
 			}
 			
-			if( data['twoPointType'] == "瞬间移动"){
+			else if( data['twoPointType'] == "瞬间移动"){
 				xx = data['twoPointDifferenceX'];	//（一直待在终点）
 				yy = data['twoPointDifferenceY'];
 			}
 			
-			if( data['twoPointType'] == "匀速移动"){	
+			else if( data['twoPointType'] == "匀速移动"){	
 				dx = data['twoPointDifferenceX'];
 				dy = data['twoPointDifferenceY'];
 				dt = data['movementTime'];
@@ -1141,7 +1144,7 @@ Game_Temp.prototype.drill_COBa_preBallisticsMove_Private = function( obj_data, o
 				yy = time * dy / dt;
 			}
 			
-			if( data['twoPointType'] == "增减速移动"){	
+			else if( data['twoPointType'] == "增减速移动"){	
 				dx = data['twoPointDifferenceX'];
 				dy = data['twoPointDifferenceY'];
 				dt = data['movementTime'];
@@ -1165,7 +1168,7 @@ Game_Temp.prototype.drill_COBa_preBallisticsMove_Private = function( obj_data, o
 				}
 			}
 			
-			if( data['twoPointType'] == "弹性移动"){
+			else if( data['twoPointType'] == "弹性移动"){
 				dx = data['twoPointDifferenceX'];
 				dy = data['twoPointDifferenceY'];
 				dt = data['movementTime'];
@@ -1177,7 +1180,7 @@ Game_Temp.prototype.drill_COBa_preBallisticsMove_Private = function( obj_data, o
 				yy = 0.5 * ay * dt * dt - 0.5 * ay * c_time * c_time ;
 			}
 			
-			if( data['twoPointType'] == "抛物线移动"){
+			else if( data['twoPointType'] == "抛物线移动"){
 				dx = data['twoPointDifferenceX'];
 				dy = data['twoPointDifferenceY'];
 				dt = data['movementTime'];
@@ -1393,12 +1396,12 @@ Game_Temp.prototype.drill_COBa_setBallisticsCommon = function( data ){
 	}
 	
 	//   ■ 时间锚点（anchor）		
-	if( result['commonMode'] == "时间锚点模式" ){
+	else if( result['commonMode'] == "时间锚点模式" ){
 		result['anchorPointTank'] = data['anchorPointTank'] || [];		//时间锚点 - 锚点列表
 	}
 	
 	//   ■ 目标值（target）		
-	if( result['commonMode'] == "目标值模式" ){
+	else if( result['commonMode'] == "目标值模式" ){
 		result['targetType'] = data['targetType'] || "瞬间变化";		//目标值 - 类型（瞬间变化/匀速变化/增减速变化/弹性变化）
 		result['targetDifference'] = data['targetDifference'] || 0;     //目标值 - 距离差值（终点值减起点值）
 	}
@@ -1509,7 +1512,7 @@ Game_Temp.prototype.drill_COBa_preBallisticsCommon = function( obj_data, obj_ind
 	
 	
 	/*-----------------时间锚点模式------------------*/
-	if( data['commonMode'] == "时间锚点模式"){
+	else if( data['commonMode'] == "时间锚点模式"){
 		
 		// > 起点值
 		obj_data['_drill_COBa_common'].push( orgCommon );
@@ -1561,7 +1564,7 @@ Game_Temp.prototype.drill_COBa_preBallisticsCommon = function( obj_data, obj_ind
 
 
 	/*-----------------目标值模式------------------*/
-	if( data['commonMode'] == "目标值模式"){
+	else if( data['commonMode'] == "目标值模式"){
 	
 		// > 变量定义（写这里是为优化性能，减少反复创建次数）
 		var cc;					//相对值
@@ -1576,14 +1579,14 @@ Game_Temp.prototype.drill_COBa_preBallisticsCommon = function( obj_data, obj_ind
 				cc = data['targetDifference'];
 			}
 			
-			if( data['targetType'] == "匀速变化"){
+			else if( data['targetType'] == "匀速变化"){
 				dC = data['targetDifference'];
 				dt = data['commonTime'];
 				
 				cc = time * dC / dt;
 			}
 			
-			if( data['targetType'] == "增减速变化"){	
+			else if( data['targetType'] == "增减速变化"){	
 				dC = data['targetDifference'];
 				dt = data['commonTime'];
 				
@@ -1597,7 +1600,7 @@ Game_Temp.prototype.drill_COBa_preBallisticsCommon = function( obj_data, obj_ind
 				}
 			}
 			
-			if( data['targetType'] == "弹性变化"){
+			else if( data['targetType'] == "弹性变化"){
 				dC = data['targetDifference'];
 				dt = data['commonTime'];
 				

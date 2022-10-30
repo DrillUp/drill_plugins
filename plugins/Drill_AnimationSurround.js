@@ -2907,7 +2907,7 @@ Drill_ASu_Controller.prototype.drill_ASu_setPause = function( pause ){
 };
 
 //##############################
-// * 阶段 - 获取当前阶段【标准函数】
+// * 阶段 - 获取当前阶段【开放函数】
 //
 //			参数：	> 无
 //			返回：	> 布尔
@@ -2916,7 +2916,7 @@ Drill_ASu_Controller.prototype.drill_ASu_getState = function(){
 	return this._drill_curState;
 };
 //##############################
-// * 阶段 - 设置当前阶段【标准函数】
+// * 阶段 - 设置当前阶段【开放函数】
 //
 //			参数：	> state 字符串
 //			返回：	> 无
@@ -2925,7 +2925,7 @@ Drill_ASu_Controller.prototype.drill_ASu_setState = function( state ){
 	this.drill_ASu_setState_Private( state );
 };
 //##############################
-// * 阶段 - 判断销毁【标准函数】
+// * 阶段 - 判断阶段销毁【开放函数】
 //
 //			参数：	> 无
 //			返回：	> 布尔
@@ -3444,13 +3444,14 @@ Drill_ASu_Sprite.prototype.initialize = function(){
 // * 环绕球贴图 - 帧刷新
 //==============================
 Drill_ASu_Sprite.prototype.update = function() {
-	Sprite.prototype.update.call(this);
 	if( this.drill_ASu_isReady() == false ){ return; }
+	if( this.drill_ASu_isOptimizationPassed() == false ){ return; }
+	Sprite.prototype.update.call(this);
 	this.drill_updateLayer();					//帧刷新 - 层级
 	this.drill_updateBall();					//帧刷新 - 环绕球
 }
 //##############################
-// * 环绕球贴图 - 设置控制器【标准函数】
+// * 环绕球贴图 - 设置控制器【开放函数】
 //			
 //			参数：	> controller 控制器对象
 //			返回：	> 无
@@ -3461,7 +3462,7 @@ Drill_ASu_Sprite.prototype.drill_ASu_setController = function( controller ){
 	this._drill_controller = controller;
 };
 //##############################
-// * 环绕球贴图 - 设置动画贴图【标准函数】
+// * 环绕球贴图 - 设置动画贴图【开放函数】
 //			
 //			参数：	> animation_sprite 动画贴图
 //			返回：	> 无
@@ -3471,7 +3472,7 @@ Drill_ASu_Sprite.prototype.drill_ASu_setAnimationSprite = function( animation_sp
 	this._animation = animation_sprite._animation;
 };
 //##############################
-// * 环绕球贴图 - 设置个体贴图【标准函数】
+// * 环绕球贴图 - 设置个体贴图【开放函数】
 //			
 //			参数：	> individual_sprite 贴图对象
 //			返回：	> 无
@@ -3482,7 +3483,7 @@ Drill_ASu_Sprite.prototype.drill_ASu_setIndividualSprite = function( individual_
 	this._drill_individualSprite = individual_sprite;
 };
 //##############################
-// * 环绕球贴图 - 贴图初始化【标准函数】
+// * 环绕球贴图 - 贴图初始化【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -3503,6 +3504,17 @@ Drill_ASu_Sprite.prototype.drill_ASu_initSprite = function(){
 Drill_ASu_Sprite.prototype.drill_ASu_isReady = function(){
 	if( this._drill_controller == undefined ){ return false; }
 	if( this._drill_individualSprite == undefined ){ return false; }
+    return true;
+};
+//##############################
+// * 环绕球贴图 - 优化策略【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 布尔（是否通过）
+//			
+//			说明：	> 通过时，正常帧刷新；未通过时，不执行帧刷新。
+//##############################
+Drill_ASu_Sprite.prototype.drill_ASu_isOptimizationPassed = function(){
     return true;
 };
 //##############################

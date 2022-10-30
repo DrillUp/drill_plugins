@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.1]        鼠标 - 状态和buff说明窗口
+ * @plugindesc [v2.2]        鼠标 - 状态和buff说明窗口
  * @author Drill_up
  * 
  * @Drill_LE_param "状态-%d"
@@ -88,6 +88,11 @@
  * 你可以修改设置说明窗口的部分属性：
  * （注意，冒号左右有一个空格）
  * 
+ * 插件指令：>状态说明窗口 : 修改鼠标激活方式 : 鼠标接近
+ * 插件指令：>状态说明窗口 : 修改鼠标激活方式 : 鼠标左键按下[持续]
+ * 插件指令：>状态说明窗口 : 修改鼠标激活方式 : 鼠标滚轮按下[持续]
+ * 插件指令：>状态说明窗口 : 修改鼠标激活方式 : 鼠标右键按下[持续]
+ * 插件指令：>状态说明窗口 : 修改鼠标激活方式 : 触屏按下[持续]
  * 插件指令：>状态说明窗口 : 修改附加宽高 : 宽度[100]
  * 插件指令：>状态说明窗口 : 修改附加宽高 : 高度[100]
  * 
@@ -106,11 +111,13 @@
  * 工作类型：   持续执行
  * 时间复杂度： o(n^2)+o(贴图处理) 每帧
  * 测试方法：   以正常流程进行游戏，记录鼠标靠近区域显示窗口的消耗。
- * 测试结果：   战斗界面，平均消耗为：【41.76ms】
+ * 测试结果：   战斗界面，平均消耗为：【24.96ms】
  * 
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
  *   测试结果并不是精确值，范围在给定值的10ms范围内波动。
  *   更多性能介绍，去看看 "0.性能测试报告 > 关于插件性能.docx"。
+ * 2.该插件在战斗界面中只有一个窗口和4个状态节点在工作，因此整体
+ *   消耗不大。
  *
  * -----------------------------------------------------------------------------
  * ----更新日志
@@ -139,6 +146,8 @@
  * 优化了内部整体结构。添加了窗口中心锚点的设置。
  * [v2.1]
  * 优化了与战斗活动镜头的变换关系。
+ * [v2.2]
+ * 优化了部分结构，减少了性能消耗。
  * 
  * 
  * 
@@ -158,7 +167,7 @@
  * @value 鼠标右键按下[持续]
  * @option 触屏按下[持续]
  * @value 触屏按下[持续]
- * @desc 鼠标接近指定的状态图标时，面板会被激活。你也可以设置按键持续按下才显示。
+ * @desc 鼠标接近指定的状态图标时，说明窗口会被激活。你也可以设置按键持续按下才显示。
  * @default 鼠标接近
  *
  * @param 偏移-窗口 X
@@ -233,6 +242,29 @@
  * @desc 修正图片的偏移用。以窗口的点为基准，y轴方向平移，单位像素。正数向下，负数向上。
  * @default 0
  *
+ * @param 是否锁定窗口色调
+ * @parent ---窗口---
+ * @type boolean
+ * @on 锁定
+ * @off 默认色调
+ * @desc true - 锁定，false - 默认色调，你可以单独锁定该窗口的色调。
+ * @default false
+ *
+ * @param 窗口色调-红
+ * @parent 是否锁定窗口色调
+ * @desc 范围为：-255 至 255，与默认游戏中窗口色调配置的值一样。
+ * @default 0
+ *
+ * @param 窗口色调-绿
+ * @parent 是否锁定窗口色调
+ * @desc 范围为：-255 至 255，与默认游戏中窗口色调配置的值一样。
+ * @default 0
+ *
+ * @param 窗口色调-蓝
+ * @parent 是否锁定窗口色调
+ * @desc 范围为：-255 至 255，与默认游戏中窗口色调配置的值一样。
+ * @default 0
+ *
  * @param 窗口中心锚点
  * @parent ---窗口---
  * @type select
@@ -254,17 +286,17 @@
  * @type boolean
  * @on 锁定
  * @off 关闭
- * @desc true - 锁定，false - 关闭，将面板锁定在一个固定的地方，而不是跟随鼠标位置走。
+ * @desc true - 锁定，false - 关闭，将说明窗口锁定在一个固定的地方，而不是跟随鼠标位置走。
  * @default false
  *
  * @param 平移-锁定位置 X
  * @parent 是否锁定窗口位置
- * @desc 将面板锁定在一个固定的地方，而不是跟随鼠标位置走。x轴方向平移，单位像素，0为贴在最左边。
+ * @desc 将说明窗口锁定在一个固定的地方，而不是跟随鼠标位置走。x轴方向平移，单位像素，0为贴在最左边。
  * @default 0
  *
  * @param 平移-锁定位置 Y
  * @parent 是否锁定窗口位置
- * @desc 将面板锁定在一个固定的地方，而不是跟随鼠标位置走。y轴方向平移，单位像素，0为贴在最上面。
+ * @desc 将说明窗口锁定在一个固定的地方，而不是跟随鼠标位置走。y轴方向平移，单位像素，0为贴在最上面。
  * @default 0
  *
  * @param 窗口行间距
@@ -314,7 +346,7 @@
  * @parent ---窗口---
  * @type number
  * @min 0
- * @desc 窗口在同一个地图层，先后排序的位置，0表示最后面。
+ * @desc 窗口在同一个层级时，先后排序的位置，0表示最后面。
  * @default 90
  *
  *
@@ -950,34 +982,47 @@
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^2)+o(贴图处理) 每帧
 //		★性能测试因素	鼠标乱晃
-//		★性能测试消耗	41.76ms
+//		★性能测试消耗	优化前：41.76ms
+//						优化后：12.9ms（update）63.8ms（drill_refreshMessage，这是因为用鼠标反复切换造成重新绘制产生的消耗）
 //		★最坏情况		战斗界面出现大量敌人、角色、boss浮动框。
 //						（该插件目前没有对最坏情况进行实测。）
 //		★备注			无
 //		
-//		★优化记录		暂无
+//		★优化记录
+//			2022-10-21优化：
+//				优化后的情况（Bean对象方法）：12.9ms，因为判断而造成的消耗显著减少了。
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★大体框架与功能如下：
 //			事件说明窗口：
-//				->说明面板
-//					->类定义
+//				->全局配置
+//					->鼠标激活方式
+//					->附加高宽
+//				->实体类容器
+//				->实体类
+//					->绑定 - mog角色窗口
+//					->绑定 - 敌人图像
+//					->绑定 - 角色图像
+//					->绑定 - drill高级boss框
+//				->说明窗口
+//					->位置
+//						->跟随鼠标位置
 //					->内容
-//						> 内容根据id列表自动组合
-//						> 详细说明
-//						> 模糊说明
-//						> 强化buff
-//						> 弱化buff
-//						> 没有内容时
-//					->判定项
-//						> 鼠标移走则重刷
-//				->鼠标事件
-//		
+//						->遍历实体类容器
+//						->状态的详细说明
+//						->状态的模糊说明
+//						->buff的说明
+//					->窗口皮肤
+//				
+//				
+//		★私有类如下：
+//			* Drill_MPFS_Bean		【事件说明窗口实体类】
+//			* Drill_MPFS_Window		【事件说明窗口】
 //		
 //		★必要注意事项：
-//			1.鼠标悬浮窗口目前已经固定了一套框架，你可以找到其他的 MiniPlateXXX 插件，看看私有类的定义。
-//			  通过 drill_pushChecks 判定项 帧刷新，来控制面板显示的内容。
+//			1.Bean实体类在 事件贴图 中被动赋值。
+//			  Window事件说明窗口在帧刷新时，主动遍历实体类列表，确认激活范围及显示内容。
 //
 //		★其它说明细节：
 //			1.	2019/6/13
@@ -985,15 +1030,19 @@
 //			  	写的时候行云流水，回头一看发现已经写了700多行……
 //				窗口与布局 + 内容转义 + 字体大小 + 图标与颜色 + 鼠标位置获取 + battlehud父层级获取
 //				详细窗口绑定在战斗界面的最顶层：_drill_SenceTopArea，并且只有这一个窗口。
-//			2.窗口显示隐藏部分比较绕。
-//			  只要出现状态图标，它们就都可以鼠标靠近显示。
-//			  为此这里我建立了一个接口pushChecks，输入x,y,w,h,s,b等参数，s为状态id的列表。
-//			  通过这个接口，来实时刷新鼠标位置监听、窗口信息。
-//			3.	2021/7/13
-//				框架稍微统一整理了一下，确定了 MiniPlateXXX 插件的结构。
+//				窗口显示隐藏部分比较绕。
+//				只要出现状态图标，它们就都可以鼠标靠近显示。
+//				为此这里我建立了一个接口pushChecks，输入x,y,w,h,s,b等参数，s为状态id的列表。
+//				通过这个接口，来实时刷新鼠标位置监听、窗口信息。
+//			2.	2022/10/27
+//				经过了多个插件修改，最后将原来的check框架彻底换成了bean实体类的结构。
+//				从性能上也就减少了最多一半的消耗。
+//				经过了多次修改，最后功能都被划分成一个一个块，或许这样逻辑能更清晰一些。
+//				（其实我已经不能界定这样的逻辑是否更清晰，毕竟原来的check结构，逻辑已经很清晰了）
 //
 //		★存在的问题：
 //			暂无
+//
  
 //=============================================================================
 // ** 变量获取
@@ -1003,18 +1052,14 @@
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_MiniPlateForState');
 	
+	
 	/*----------------窗口---------------*/
 	DrillUp.g_MPFS_mouse_type = String(DrillUp.parameters["激活方式"] || "鼠标接近");
 	DrillUp.g_MPFS_x = Number(DrillUp.parameters["偏移-窗口 X"] || 0 );
 	DrillUp.g_MPFS_y = Number(DrillUp.parameters["偏移-窗口 Y"] || 0 );
 	DrillUp.g_MPFS_default_enable = String(DrillUp.parameters["无状态时是否显示窗口"] || "true") === "true";	
 	DrillUp.g_MPFS_default_text = String(DrillUp.parameters["无状态时的说明"]);
-	DrillUp.g_MPFS_layout_type = String(DrillUp.parameters["布局模式"] || "黑底背景");
-	DrillUp.g_MPFS_layout_opacity = Number(DrillUp.parameters["布局透明度"] || 255);
-	DrillUp.g_MPFS_layout_sys_src = String(DrillUp.parameters["资源-自定义窗口皮肤"] || "");
-	DrillUp.g_MPFS_layout_pic_src = String(DrillUp.parameters["资源-自定义背景图片"] || "");
-	DrillUp.g_MPFS_layout_pic_x = Number(DrillUp.parameters["平移-自定义背景图片 X"] || 0 );
-	DrillUp.g_MPFS_layout_pic_y = Number(DrillUp.parameters["平移-自定义背景图片 Y"] || 0 );
+	
 	DrillUp.g_MPFS_anchor = String(DrillUp.parameters["窗口中心锚点"] || "左上角" );
 	DrillUp.g_MPFS_lock_enable = String(DrillUp.parameters["是否锁定窗口位置"] || "false") === "true";
 	DrillUp.g_MPFS_lock_x = Number(DrillUp.parameters["平移-锁定位置 X"] || 0);
@@ -1026,6 +1071,19 @@
 	DrillUp.g_MPFS_ex_height = Number(DrillUp.parameters["窗口附加高度"] || 0);
 	DrillUp.g_MPFS_layer = String(DrillUp.parameters["战斗层级"] || "图片层");
 	DrillUp.g_MPFS_zIndex = Number(DrillUp.parameters["图片层级"] || 0);
+	
+	/*----------------窗口皮肤---------------*/
+	DrillUp.g_MPFS_layout_type = String(DrillUp.parameters["布局模式"] || "黑底背景");
+	DrillUp.g_MPFS_layout_opacity = Number(DrillUp.parameters["布局透明度"] || 255);
+	DrillUp.g_MPFS_layout_sys_src = String(DrillUp.parameters["资源-自定义窗口皮肤"] || "");
+	DrillUp.g_MPFS_layout_pic_src = String(DrillUp.parameters["资源-自定义背景图片"] || "");
+	DrillUp.g_MPFS_layout_pic_x = Number(DrillUp.parameters["平移-自定义背景图片 X"] || 0 );
+	DrillUp.g_MPFS_layout_pic_y = Number(DrillUp.parameters["平移-自定义背景图片 Y"] || 0 );
+	DrillUp.g_MPFS_tone_lock = String(DrillUp.parameters["是否锁定窗口色调"] || "false") === "true";
+	DrillUp.g_MPFS_tone_r = Number(DrillUp.parameters["窗口色调-红"] || 0 );
+	DrillUp.g_MPFS_tone_g = Number(DrillUp.parameters["窗口色调-绿"] || 0 );
+	DrillUp.g_MPFS_tone_b = Number(DrillUp.parameters["窗口色调-蓝"] || 0 );
+	
 	
 	/*----------------buff---------------*/
 	DrillUp.g_MPFS_buff = [];
@@ -1139,6 +1197,7 @@ var _drill_MPFS_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_MPFS_pluginCommand.call(this, command, args);
 	if( command === ">状态说明窗口" ){	// >状态说明窗口 : A : 使用模糊说明
+		
 		if(args.length == 4){
 			var temp1 = Number(args[1]) -1;
 			var type = String(args[3]);
@@ -1169,6 +1228,9 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				}
 				
 			}
+			if( type == "修改鼠标激活方式" ){ 
+				$gameSystem._drill_MPFS_mouseType = temp1;
+			}
 		}
 	}
 };
@@ -1192,37 +1254,15 @@ Game_System.prototype.initialize = function() {
 		this._drill_MPFS_x_context[i] = DrillUp.g_MPFS_list[i]['x_context'];
 	}
 	
-	this._drill_MPFS_ex_width = DrillUp.g_MPFS_ex_width;		//（附加高宽）
-	this._drill_MPFS_ex_height = DrillUp.g_MPFS_ex_height; 
+	this._drill_MPFS_mouseType = DrillUp.g_MPFS_mouse_type;		//（鼠标激活方式）
+	this._drill_MPFS_ex_width = DrillUp.g_MPFS_ex_width;		//（窗口附加宽度）
+	this._drill_MPFS_ex_height = DrillUp.g_MPFS_ex_height; 		//（窗口附加高度）
 };	
 
 
 //=============================================================================
 // ** 状态图标绑定
 //=============================================================================
-//==============================
-// * 工具 - 容错检查
-//==============================
-DrillUp.g_MPFS_plugin_cur_check = 0;
-DrillUp.g_MPFS_plugin_check = 60;
-//==============================
-// * 工具 - 父类溯源
-//
-//			说明：	输入对象、父类定义，返回父类对象。没有则返回空。
-//==============================
-DrillUp.drill_MPFS_getAncestor = function( sprite, ancestor_class ){
-	for( var i=0; i < 8; i++){
-		if( sprite.parent == undefined ){
-			break;
-		}
-		var sprite = sprite.parent;
-		if( sprite instanceof ancestor_class ){
-			return sprite;
-		}
-	}
-	return null;
-}
-
 //==============================
 // * 绑定 - mog角色窗口
 //==============================
@@ -1232,55 +1272,55 @@ if( Imported.MOG_BattleHud ){
 		_drill_MPFS_BHud_update.call(this);
 		if( this._state_icon == undefined ){ return; }
 		
-		// > 上一层级 ._hudField >> Scene_Battle
-		var p = DrillUp.drill_MPFS_getAncestor( this, Scene_Battle );
-		if( p != null ){
-			
-			var _drill_plate = p._drill_MPFS_window;
-			var icon_n = 1;
-			if (this._stateType === 0) {
-				icon_n = 1;
-			} else { 
-				icon_n = Math.max(this._battler._states.length,1);
-			};
-			var check = {
-				's': this._battler._states,
-				'b': this._battler._buffs,
-				'layer': "图片层"
-			}
-			if(Moghunter.bhud_statesAlign == 1){	//mog状态右对齐
-				check['x'] = this._state_icon.x - Window_Base._iconWidth * (icon_n -1);
-				check['y'] = this._state_icon.y;
-				check['w'] = Window_Base._iconWidth * icon_n;
-				check['h'] = Window_Base._iconHeight;
-			}else if(Moghunter.bhud_statesAlign == 2){	//mog状态下对齐
-				check['x'] = this._state_icon.x;
-				check['y'] = this._state_icon.y;
-				check['w'] = Window_Base._iconWidth;
-				check['h'] = Window_Base._iconHeight * icon_n;
-			}else if(Moghunter.bhud_statesAlign == 3){	//mog状态上对齐
-				check['x'] = this._state_icon.x;
-				check['y'] = this._state_icon.y - Window_Base._iconWidth * (icon_n -1);
-				check['w'] = Window_Base._iconWidth;
-				check['h'] = Window_Base._iconHeight * icon_n;
-			}else{	//mog状态左对齐
-				check['x'] = this._state_icon.x;
-				check['y'] = this._state_icon.y;
-				check['w'] = Window_Base._iconWidth * icon_n;
-				check['h'] = Window_Base._iconHeight;
-			}
-			//if( check.s.length >= 1){
-			//	alert(JSON.stringify(check));
-			//}
-			_drill_plate.pushChecks(check);
-		}else{
-			//插件检查
-			DrillUp.g_MPFS_plugin_cur_check += 1;
-			if( DrillUp.g_MPFS_plugin_cur_check > DrillUp.g_MPFS_plugin_check ){
-				DrillUp.g_MPFS_plugin_check = 30000000000;
-				alert("战斗 - 状态说明窗口[扩展]：\n没有找到角色窗口的层级位置，确保你的mog战斗UI-角色窗口为(v4.0)以上。");
-			}
+		
+		// > 实体类创建
+		if( this._drill_MPFS_bean == undefined ){
+			this._drill_MPFS_bean = new Drill_MPFS_Bean();
+			$gameTemp._drill_MPFS_beanTank.push( this._drill_MPFS_bean );
 		}
+		
+		
+		// > 图标数量
+		var icon_n = 1;
+		if( this._stateType === 0 ){
+			icon_n = 1;
+		}else{
+			icon_n = Math.max(this._battler._states.length,1);
+		};
+		
+		// > 范围捕获
+		var xx = 0;
+		var yy = 0;
+		var ww = 0;
+		var hh = 0;
+		if(Moghunter.bhud_statesAlign == 1){		//mog状态右对齐
+			xx = this._state_icon.x - Window_Base._iconWidth * (icon_n -1);
+			yy = this._state_icon.y;
+			ww = Window_Base._iconWidth * icon_n;
+			hh = Window_Base._iconHeight;
+		}else if(Moghunter.bhud_statesAlign == 2){	//mog状态下对齐
+			xx = this._state_icon.x;
+			yy = this._state_icon.y;
+			ww = Window_Base._iconWidth;
+			hh = Window_Base._iconHeight * icon_n;
+		}else if(Moghunter.bhud_statesAlign == 3){	//mog状态上对齐
+			xx = this._state_icon.x;
+			yy = this._state_icon.y - Window_Base._iconWidth * (icon_n -1);
+			ww = Window_Base._iconWidth;
+			hh = Window_Base._iconHeight * icon_n;
+		}else{										//mog状态左对齐
+			xx = this._state_icon.x;
+			yy = this._state_icon.y;
+			ww = Window_Base._iconWidth * icon_n;
+			hh = Window_Base._iconHeight;
+		}
+		
+		// > 实体类设置
+		var bean = this._drill_MPFS_bean;
+		bean.drill_MPFS_setPosition( xx, yy );
+		bean.drill_MPFS_resetFrame( 0, 0, ww, hh );
+		bean.drill_MPFS_setStateAndBuff( this._battler._states, this._battler._buffs );
+		bean.drill_MPFS_setLayer( "图片层" );
 	}
 }
 //==============================
@@ -1290,28 +1330,31 @@ var _drill_MPFS_Enemy_updateStateSprite = Sprite_Enemy.prototype.updateStateSpri
 Sprite_Enemy.prototype.updateStateSprite = function() {
 	_drill_MPFS_Enemy_updateStateSprite.call(this);
 	
-	// > 上一层级 ._battleField >> ._baseSprite >> Spriteset_Battle >> Scene_Battle
-	var p = DrillUp.drill_MPFS_getAncestor( this, Scene_Battle );
-	if( p == null ){ return; }
-			
-	var _drill_plate = p._drill_MPFS_window;
-	var check = {
-		'w': Sprite_StateIcon._iconWidth,
-		'h': Sprite_StateIcon._iconHeight,
-		's': this._stateIconSprite._battler._states,
-		'b': this._battler._buffs,
-		'layer': "上层"
-	}
-	check['x'] = this.x - this._stateIconSprite.anchor.x * Sprite_StateIcon._iconWidth;
-	check['y'] = this.y - this._stateIconSprite.anchor.y * Sprite_StateIcon._iconHeight + this._stateIconSprite.y;
-	//if( Imported.Drill_BattleCamera ){
-	//	（此处不需镜头修正，使用 鼠标落点位置 来捕获范围）
-	//}
-	//if( check.s.length >= 1){
-	//	alert(JSON.stringify(check));
-	//}
 	
-	_drill_plate.pushChecks(check);
+	// > 实体类创建
+	if( this._drill_MPFS_bean == undefined ){
+		this._drill_MPFS_bean = new Drill_MPFS_Bean();
+		$gameTemp._drill_MPFS_beanTank.push( this._drill_MPFS_bean );
+	}
+	
+	
+	// > 范围捕获
+	//		（此处不需镜头修正，使用 鼠标落点位置 来捕获范围）
+	var xx = 0;
+	var yy = 0;
+	var ww = 0;
+	var hh = 0;
+	xx = this.x - this._stateIconSprite.anchor.x * Sprite_StateIcon._iconWidth;
+	yy = this.y - this._stateIconSprite.anchor.y * Sprite_StateIcon._iconHeight + this._stateIconSprite.y;
+	ww = Sprite_StateIcon._iconWidth;
+	hh = Sprite_StateIcon._iconHeight;
+	
+	// > 实体类设置
+	var bean = this._drill_MPFS_bean;
+	bean.drill_MPFS_setPosition( xx, yy );
+	bean.drill_MPFS_resetFrame( 0, 0, ww, hh );
+	bean.drill_MPFS_setStateAndBuff( this._stateIconSprite._battler._states, this._battler._buffs );
+	bean.drill_MPFS_setLayer( "上层" );
 };
 //==============================
 // * 绑定 - 角色图像
@@ -1319,42 +1362,44 @@ Sprite_Enemy.prototype.updateStateSprite = function() {
 var _drill_MPFS_Actor_update = Sprite_Actor.prototype.update;
 Sprite_Actor.prototype.update = function() {
 	_drill_MPFS_Actor_update.call(this);
-	
     if( this._actor == undefined ){ return; }
 	
-	var p = DrillUp.drill_MPFS_getAncestor( this, Scene_Battle );
-	if( p == null ){ return; }
 	
-	var _drill_plate = p._drill_MPFS_window;
+	// > 实体类创建
+	if( this._drill_MPFS_bean == undefined ){
+		this._drill_MPFS_bean = new Drill_MPFS_Bean();
+		$gameTemp._drill_MPFS_beanTank.push( this._drill_MPFS_bean );
+	}
 	
-	if( this._stateIconSprite ){	//如果有Sprite_StateIcon（yep弄的）则按照那个来
-		var check = {
-			'w': Sprite_StateIcon._iconWidth,
-			'h': Sprite_StateIcon._iconHeight,
-			's': this._stateIconSprite._battler._states,
-			'b': this._battler._buffs,
-			'layer': "上层"
-		}
-		check['x'] = this.x - this._stateIconSprite.anchor.x * Sprite_StateIcon._iconWidth;
-		check['y'] = this.y - this._stateIconSprite.anchor.y * Sprite_StateIcon._iconHeight + this._stateIconSprite.y;
-		//if( Imported.Drill_BattleCamera ){
-		//	（此处不需镜头修正，使用 鼠标落点位置 来捕获范围）
-		//}
-		_drill_plate.pushChecks(check);
+	
+	// > 范围捕获
+	//		（此处不需镜头修正，使用 鼠标落点位置 来捕获范围）
+	var xx = 0;
+	var yy = 0;
+	var ww = 0;
+	var hh = 0;
+	if( this._stateIconSprite ){	//如果有 Sprite_StateIcon（yep的）则按照那个来
+		xx = this.x - this._stateIconSprite.anchor.x * Sprite_StateIcon._iconWidth;
+		yy = this.y - this._stateIconSprite.anchor.y * Sprite_StateIcon._iconHeight + this._stateIconSprite.y;
+		ww = Sprite_StateIcon._iconWidth;
+		hh = Sprite_StateIcon._iconHeight;
 	}else{
-		var check = {
-			'w': 48,		//来自Sprite_StateOverlay，固定48像素
-			'h': 48,
-			's': this._battler._states,
-			'b': this._battler._buffs,
-			'layer': "上层"
-		}
-		check['x'] = this.x - this._stateSprite.anchor.x * 48;
-		check['y'] = this.y - this._stateSprite.anchor.y * 48 - 24;
-		//if( Imported.Drill_BattleCamera ){
-		//	（此处不需镜头修正，使用 鼠标落点位置 来捕获范围）
-		//}
-		_drill_plate.pushChecks(check);
+		xx = this.x - this._stateSprite.anchor.x * 48;
+		yy = this.y - this._stateSprite.anchor.y * 48 - 24;
+		ww = 48;		//（来自Sprite_StateOverlay，固定48像素）
+		hh = 48;
+	}
+	
+	// > 实体类设置
+	var bean = this._drill_MPFS_bean;
+	bean.drill_MPFS_setPosition( xx, yy );
+	bean.drill_MPFS_resetFrame( 0, 0, ww, hh );
+	if( this._stateIconSprite ){
+		bean.drill_MPFS_setStateAndBuff( this._stateIconSprite._battler._states, this._battler._buffs );
+		bean.drill_MPFS_setLayer( "上层" );
+	}else{
+		bean.drill_MPFS_setStateAndBuff( this._battler._states, this._battler._buffs );
+		bean.drill_MPFS_setLayer( "上层" );
 	}
 };
 //==============================
@@ -1366,66 +1411,198 @@ if( Imported.Drill_GaugeForBoss ){
 		_drill_MPFS_GFB_update.call(this);
 		var data_b = this._drill_data_bind;
 		var data_s = this._drill_data_style;
+		if( data_s['state_enable'] != true ){ return; }
 		
-		// > 上一层级 ._drill_battleUpArea >> ._battleField >> ._baseSprite  >> Spriteset_Battle >> Scene_Battle
-		var p = DrillUp.drill_MPFS_getAncestor( this, Scene_Battle );
-		if( p == null ){ return; }
-		
-		if( data_s['state_enable'] == true ){
-			var _drill_plate = p._drill_MPFS_window;
-		
-			var icons = this._drill_enemy.allIcons();
-			var icon_n = Math.max(icons.length,1);
-			var space = data_s['state_spacing'];
-			var align = data_s['state_align'];
-			var iw = Window_Base._iconWidth;
-			var ih = Window_Base._iconHeight;
-			var check = {
-				's': this._drill_enemy._states,
-				'b': this._drill_enemy._buffs,
-				'layer': this._drill_data_bind['layerIndex_battle']		//（boss框的层级）
-			}
-			if( data_s['state_mode'] == "直线并排" ){
-			
-				if( align == "右对齐" ){
-					check['x'] = this.x + this._drill_state_sprite.x - iw * (icon_n -1);
-					check['y'] = this.y + this._drill_state_sprite.y;
-					check['w'] = iw * icon_n;
-					check['h'] = ih;
-				}else if( align == "上对齐" ){
-					check['x'] = this.x + this._drill_state_sprite.x;
-					check['y'] = this.y + this._drill_state_sprite.y - iw * (icon_n -1);
-					check['w'] = iw;
-					check['h'] = ih * icon_n;
-				}else if( align == "下对齐" ){
-					check['x'] = this.x + this._drill_state_sprite.x;
-					check['y'] = this.y + this._drill_state_sprite.y;
-					check['w'] = iw;
-					check['h'] = ih * icon_n;
-				}else{
-					check['x'] = this.x + this._drill_state_sprite.x;
-					check['y'] = this.y + this._drill_state_sprite.y;
-					check['w'] = iw * icon_n;
-					check['h'] = ih;
-				}
-			}else{
-				check['x'] = this.x + this._drill_state_sprite.x;
-				check['y'] = this.y + this._drill_state_sprite.y;
-				check['w'] = iw;
-				check['h'] = ih;
-			}
-			check['x'] -= iw/2;
-			check['y'] -= ih/2;
-			//if( Imported.Drill_BattleCamera ){
-			//	（此处不需镜头修正，使用 鼠标落点位置 来捕获范围）
-			//}
-			//if( check.s.length >= 1){
-			//	alert(JSON.stringify(check));
-			//}
-			_drill_plate.pushChecks(check);
+	
+		// > 实体类创建
+		if( this._drill_MPFS_bean == undefined ){
+			this._drill_MPFS_bean = new Drill_MPFS_Bean();
+			$gameTemp._drill_MPFS_beanTank.push( this._drill_MPFS_bean );
 		}
+		
+		
+		// > 范围捕获
+		var xx = 0;
+		var yy = 0;
+		var ww = 0;
+		var hh = 0;
+		var icons = this._drill_enemy.allIcons();
+		var icon_n = Math.max(icons.length,1);
+		var space = data_s['state_spacing'];
+		var align = data_s['state_align'];
+		var iw = Window_Base._iconWidth;
+		var ih = Window_Base._iconHeight;
+		if( data_s['state_mode'] == "直线并排" ){
+		
+			if( align == "右对齐" ){
+				xx = this.x + this._drill_state_sprite.x - iw * (icon_n -1);
+				yy = this.y + this._drill_state_sprite.y;
+				ww = iw * icon_n;
+				hh = ih;
+			}else if( align == "上对齐" ){
+				xx = this.x + this._drill_state_sprite.x;
+				yy = this.y + this._drill_state_sprite.y - iw * (icon_n -1);
+				ww = iw;
+				hh = ih * icon_n;
+			}else if( align == "下对齐" ){
+				xx = this.x + this._drill_state_sprite.x;
+				yy = this.y + this._drill_state_sprite.y;
+				ww = iw;
+				hh = ih * icon_n;
+			}else{
+				xx = this.x + this._drill_state_sprite.x;
+				yy = this.y + this._drill_state_sprite.y;
+				ww = iw * icon_n;
+				hh = ih;
+			}
+		}else{
+			xx = this.x + this._drill_state_sprite.x;
+			yy = this.y + this._drill_state_sprite.y;
+			ww = iw;
+			hh = ih;
+		}
+		xx -= iw/2;
+		yy -= ih/2;
+		
+		// > 实体类设置
+		var bean = this._drill_MPFS_bean;
+		bean.drill_MPFS_setPosition( xx, yy );
+		bean.drill_MPFS_resetFrame( 0, 0, ww, hh );
+		bean.drill_MPFS_setStateAndBuff( this._drill_enemy._states, this._drill_enemy._buffs );
+		bean.drill_MPFS_setLayer( data_b['layerIndex_battle'] );	//（boss框的层级）
 	}
 }
+
+
+//=============================================================================
+// ** 实体类容器
+//=============================================================================
+//==============================
+// * 容器 - 初始化
+//==============================
+var _drill_MPFS_temp_initialize = Game_Temp.prototype.initialize;
+Game_Temp.prototype.initialize = function() {	
+	_drill_MPFS_temp_initialize.call(this);
+	this._drill_MPFS_beanTank = [];				//实体类容器
+};
+//==============================
+// * 容器 - 切换贴图时（战斗界面刷新）
+//==============================
+var _drill_MPFS_battle_createCharacters = Spriteset_Battle.prototype.createCharacters;
+Spriteset_Battle.prototype.createCharacters = function() {
+	$gameTemp._drill_MPFS_beanTank = [];		//实体类容器
+	_drill_MPFS_battle_createCharacters.call(this);
+};
+//==============================
+// * 容器 - 界面销毁时
+//==============================
+var _drill_MPFS_battle_terminate = Scene_Battle.prototype.terminate;
+Scene_Battle.prototype.terminate = function() {
+	_drill_MPFS_battle_terminate.call(this);
+	$gameTemp._drill_MPFS_beanTank = [];		//实体类容器
+};
+
+
+//=============================================================================
+// ** 状态说明窗口 实体类【Drill_MPFS_Bean】
+// **		
+// **		作用域：	地图界面
+// **		主功能：	> 定义一个专门的实体类数据类。
+// **		子功能：	->无帧刷新
+// **					->重设数据
+// **						->序列号
+// **		
+// **		说明：	> 该类可与 Game_CharacterBase 一并存储在 $gameMap 中。
+// **				> 该类没有帧刷新，只能被动赋值。（Sprite_Character 外部控制）
+//=============================================================================
+//==============================
+// * 实体类 - 定义
+//==============================
+function Drill_MPFS_Bean(){
+    this.initialize.apply(this, arguments);
+};
+//==============================
+// * 实体类 - 初始化
+//==============================
+Drill_MPFS_Bean.prototype.initialize = function(){
+	this._drill_beanSerial = new Date().getTime() + Math.random();		//（生成一个不重复的序列号）
+    this.drill_initPrivateData();										//私有数据初始化
+};
+//##############################
+// * 实体类 - 设置可见【开放函数】
+//			
+//			参数：	> visible 布尔
+//			返回：	> 无
+//##############################
+Drill_MPFS_Bean.prototype.drill_MPFS_setVisible = function( visible ){
+	this._drill_visible = visible;
+};
+//##############################
+// * 实体类 - 设置位置【开放函数】
+//			
+//			参数：	> x 数字
+//					> y 数字
+//			返回：	> 无
+//			
+//			说明：	> 实体类只记录一个坐标和一个框架范围。需要考虑锚点的影响。
+//##############################
+Drill_MPFS_Bean.prototype.drill_MPFS_setPosition = function( x, y ){
+	this._drill_x = x;
+	this._drill_y = y;
+};
+//##############################
+// * 实体类 - 设置框架数据【开放函数】
+//			
+//			参数：	> frameX,frameY,frameW,frameH 矩形对象
+//			返回：	> 无
+//			
+//			说明：	> 被动赋值，见 贴图框架 的功能。
+//##############################
+Drill_MPFS_Bean.prototype.drill_MPFS_resetFrame = function( frameX, frameY, frameW, frameH ){
+	this._drill_frameX = frameX;
+	this._drill_frameY = frameY;
+	this._drill_frameW = frameW;
+	this._drill_frameH = frameH;
+};
+//##############################
+// * 实体类 - 设置状态和buff【开放函数】
+//			
+//			参数：	> state_list 字符串列表
+//					> buff_list 字符串列表
+//			返回：	> 无
+//##############################
+Drill_MPFS_Bean.prototype.drill_MPFS_setStateAndBuff = function( state_list, buff_list ){
+	this._drill_state_list = state_list;
+	this._drill_buff_list = buff_list;
+};
+//##############################
+// * 实体类 - 设置所在层级【开放函数】
+//			
+//			参数：	> layer 字符串
+//			返回：	> 无
+//##############################
+Drill_MPFS_Bean.prototype.drill_MPFS_setLayer = function( layer ){
+	this._drill_layer = layer;
+};
+//==============================
+// * 初始化 - 私有数据初始化
+//==============================
+Drill_MPFS_Bean.prototype.drill_initPrivateData = function(){
+	
+	this._drill_visible = true;				//实体类 - 可见
+	
+	this._drill_x = 0;						//实体类 - 位置X
+	this._drill_y = 0;						//实体类 - 位置Y
+	
+	this._drill_frameX = 0;					//实体类 - 框架X
+	this._drill_frameY = 0;					//实体类 - 框架Y
+	this._drill_frameW = 0;					//实体类 - 框架宽度
+	this._drill_frameH = 0;					//实体类 - 框架高度
+	
+	this._drill_state_list = [];			//实体类 - 状态列表
+	this._drill_buff_list = [];				//实体类 - buff列表
+	this._drill_layer = "图片层";			//实体类 - 所在层级
+};
 
 
 
@@ -1436,7 +1613,7 @@ if( Imported.Drill_GaugeForBoss ){
 // * 战斗层级 - 添加贴图到层级【标准函数】
 //				
 //			参数：	> sprite 贴图        （添加的贴图对象）
-//					> layer_index 字符串 （添加到的层级名，下层/上层/图片层/最顶层）
+//					> layer_index 字符串 （添加到的层级名，上层/图片层/最顶层）
 //			返回：	> 无
 //          
 //			说明：	> 强行规范的接口，将指定贴图添加到目标层级中。
@@ -1545,13 +1722,13 @@ Scene_Battle.prototype.drill_MPFS_layerAddSprite_Private = function( sprite, lay
 // ** 战斗界面
 //=============================================================================
 //==============================
-// * 战斗 - 创建面板
+// * 战斗界面 - 创建说明窗口
 //==============================
 var _drill_MPFS_battleScene_createAllWindows = Scene_Battle.prototype.createAllWindows;
 Scene_Battle.prototype.createAllWindows = function() {
 	_drill_MPFS_battleScene_createAllWindows.call(this);
 	
-	if(!this._drill_MPFS_window ){		//（只建立一个窗口）
+	if( this._drill_MPFS_window == undefined ){		//（只建立一个窗口）
 		this._drill_MPFS_window = new Drill_MPFS_Window();
 		this._drill_MPFS_window.zIndex = DrillUp.g_MPFS_zIndex;
 		this._drill_MPFS_window._drill_curScene = "Scene_Battle";
@@ -1566,7 +1743,7 @@ Scene_Battle.prototype.createAllWindows = function() {
 
 	
 //=============================================================================
-// ** 说明面板【Drill_MPFS_Window】
+// ** 状态和buff说明窗口【Drill_MPFS_Window】
 //			
 //			索引：	无
 //			来源：	继承于Window_Base
@@ -1574,28 +1751,28 @@ Scene_Battle.prototype.createAllWindows = function() {
 //			应用：	暂无 
 //			
 //			作用域：	战斗界面
-//			主功能：	定义一个面板，能随时改变内容和高宽，用于描述状态信息。
-//			子功能：
-//						->贴图内容
-//							->文本层
-//							->背景
-//								> 默认窗口皮肤
-//								> 自定义窗口皮肤
-//								> 自定义背景图片
-//								> 黑底背景
-//						->位置
-//							> 锁定位置
-//							> 跟随鼠标位置
-//						->显现时机
-//							->激活
-//							->显示条件
+//			主功能：	定义一个窗口，能随时改变内容和高宽，用于描述状态信息。
+//			子功能：	->位置
+//							->跟随鼠标位置
+//							->中心锚点
+//							->边缘修正
+//						->内容
+//							->遍历实体类容器
 //							->刷新内容
+//								->状态的详细说明
+//								->状态的模糊说明
+//								->buff的说明
+//						->窗口皮肤
+//							> 默认窗口皮肤
+//							> 自定义窗口皮肤
+//							> 自定义背景图片
+//							> 黑底背景
 //				
 //			说明：	> 整个场景只有一个该窗口。
-//					> 其它相似的可变窗口插件： Drill_MiniPlateForEvent、Drill_X_SceneShopDiscount。
+//					> 其它相似的可变窗口插件，可以搜关键词："initSkin"。
 //=============================================================================
 //==============================
-// * 说明面板 - 定义
+// * 说明窗口 - 定义
 //==============================
 function Drill_MPFS_Window() {
     this.initialize.apply(this, arguments);
@@ -1603,26 +1780,27 @@ function Drill_MPFS_Window() {
 Drill_MPFS_Window.prototype = Object.create(Window_Base.prototype);
 Drill_MPFS_Window.prototype.constructor = Drill_MPFS_Window;
 //==============================
-// * 说明面板 - 初始化
+// * 说明窗口 - 初始化
 //==============================
 Drill_MPFS_Window.prototype.initialize = function() {
     Window_Base.prototype.initialize.call(this, 0, 0, 0, 0);
 	this._drill_data = {};
 	
-	this.drill_initData();				//初始化数据
-	this.drill_initSprite();			//初始化对象
+	this.drill_initPrivateData();		//初始化数据
+	this.drill_initSkin();				//初始化窗口皮肤
 };
 //==============================
-// * 说明面板 - 帧刷新
+// * 说明窗口 - 帧刷新
 //==============================
 Drill_MPFS_Window.prototype.update = function() {
 	Window_Base.prototype.update.call(this);
 	
-	this.drill_updateChecks();			//帧刷新 - 判断激活
+	this.drill_updateContext();			//帧刷新 - 内容
 	this.drill_updatePosition();		//帧刷新 - 刷新位置
+	this.drill_updateSkin();			//帧刷新 - 窗口皮肤
 }
 //==============================
-// * 说明面板 - 私有覆写函数
+// * 说明窗口 - 私有覆写函数
 //==============================
 Drill_MPFS_Window.prototype.lineHeight = function(){ return DrillUp.g_MPFS_lineheight; };		//窗口行间距
 Drill_MPFS_Window.prototype.standardPadding = function(){ return DrillUp.g_MPFS_padding; };		//窗口内边距
@@ -1630,118 +1808,31 @@ Drill_MPFS_Window.prototype.standardFontSize = function(){ return DrillUp.g_MPFS
 //==============================
 // * 初始化 - 数据
 //==============================
-Drill_MPFS_Window.prototype.drill_initData = function() {
-	var data = this._drill_data;
-	
-	// > 皮肤设置
-	data['window_type'] = DrillUp.g_MPFS_layout_type;
-	data['window_opacity'] = DrillUp.g_MPFS_layout_opacity;
-	data['window_sys_bitmap'] = ImageManager.loadSystem( DrillUp.g_MPFS_layout_sys_src );
-	data['window_pic_bitmap'] = ImageManager.loadSystem( DrillUp.g_MPFS_layout_pic_src );
-	data['window_pic_x'] = DrillUp.g_MPFS_layout_pic_x;
-	data['window_pic_y'] = DrillUp.g_MPFS_layout_pic_y;
+Drill_MPFS_Window.prototype.drill_initPrivateData = function() {
 	
 	// > 私有变量初始化
 	this._drill_width = 0;
 	this._drill_height = 0;
-	this._drill_visible = false;
+	this._drill_lastStateList = [];
+	this._drill_lastStateMList = [];
+	this._drill_lastBuffList = [];
 	
-	this._drill_check_tank = [];
-	this._drill_text_default = DrillUp.g_MPFS_default_text;
-	this._drill_text_default = this._drill_text_default.substring(1,this._drill_text_default.length-1);
-	
+	// > 中心锚点
 	this._drill_anchor_x = 0;			//中心锚点x
 	this._drill_anchor_y = 0;			//中心锚点y
 	if( DrillUp.g_MPFS_anchor == "右上角" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 0.0; }
 	if( DrillUp.g_MPFS_anchor == "正中心" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 0.5; }
 	if( DrillUp.g_MPFS_anchor == "左下角" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 1.0; }
 	if( DrillUp.g_MPFS_anchor == "右下角" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 1.0; }
-};
-//==============================
-// * 初始化 - 对象
-//==============================
-Drill_MPFS_Window.prototype.drill_initSprite = function() {
-	this.drill_createBackground();		//创建背景
-	this.drill_createText();			//创建文本层
-	this.drill_sortBottomByZIndex();	//底层层级排序
-};
-//==============================
-// * 创建 - 背景
-//==============================
-Drill_MPFS_Window.prototype.drill_createBackground = function() {
-	var data = this._drill_data;
-	this._drill_background = new Sprite();
 	
-	// > 图层顺序处理
-	this._drill_background.zIndex = 1;
-	this._windowBackSprite.zIndex = 2;
-	this._windowFrameSprite.zIndex = 3;
-	
-	// > 信息框布局
-	if( data['window_type'] == "默认窗口皮肤" || data['window_type'] == "默认窗口布局" ){
-		
-		// > 透明度
-		this.opacity = data['window_opacity'];
-		this._drill_background.bitmap = null;
-		this._drill_background.opacity = data['window_opacity'];
-		this._windowBackSprite.opacity = data['window_opacity'];
-		this._windowFrameSprite.opacity = data['window_opacity'];
-		
-		
-	}else if( data['window_type'] == "自定义窗口皮肤" || data['window_type'] == "系统窗口布局" ){
-		
-		// > 皮肤设置
-		this.windowskin = data['window_sys_bitmap'];
-		
-		// > 透明度
-		this._drill_background.bitmap = null;
-		this._drill_background.opacity = data['window_opacity'];
-		this._windowBackSprite.opacity = data['window_opacity'];
-		this._windowFrameSprite.opacity = data['window_opacity'];
-		
-		
-	}else if( data['window_type'] == "自定义背景图片" || data['window_type'] == "图片窗口布局" ){
-		
-		// > bimap建立
-		this._drill_background.bitmap = data['window_pic_bitmap'];
-		this._drill_background.x = data['window_pic_x'];
-		this._drill_background.y = data['window_pic_y'];
-		
-		// > 透明度
-		this._drill_background.opacity = data['window_opacity'];
-		this._windowBackSprite.opacity = 0;
-		this._windowFrameSprite.opacity = 0;
-		
-		
-	}else if( data['window_type'] == "黑底背景" || data['window_type'] == "黑底布局" ){
-		
-		// > bimap建立
-		//（需延迟设置，见后面）
-		
-		// > 透明度
-		this._drill_background.bitmap = null;
-		this._drill_background.opacity = data['window_opacity'];
-		this._windowBackSprite.opacity = 0;
-		this._windowFrameSprite.opacity = 0;
-	}
-	
-	this._windowSpriteContainer.addChild(this._drill_background);	//（ _windowSpriteContainer 为窗口的最底层贴图）
-}
-//==============================
-// * 创建 - 文本层
-//==============================
-Drill_MPFS_Window.prototype.drill_createText = function() {
-    this.contents.clear();
+	// > 窗口内容刷新
 	this.createContents();
+    this.contents.clear();
 	
-	// > 绘制内容
+	// > 绘制初始内容
+	this._drill_text_default = DrillUp.g_MPFS_default_text;
+	this._drill_text_default = this._drill_text_default.substring(1,this._drill_text_default.length-1);
 	this.drill_COWA_drawTextEx( this._drill_text_default, {"x":0,"y":0} );
-}
-//==============================
-// ** 底层层级排序
-//==============================
-Drill_MPFS_Window.prototype.drill_sortBottomByZIndex = function() {
-   this._windowSpriteContainer.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
 };
 
 
@@ -1749,123 +1840,106 @@ Drill_MPFS_Window.prototype.drill_sortBottomByZIndex = function() {
 // * 帧刷新 - 刷新位置
 //==============================
 Drill_MPFS_Window.prototype.drill_updatePosition = function() {
+	var xx = 0;
+	var yy = 0;
+	xx += DrillUp.g_MPFS_x;
+	yy += DrillUp.g_MPFS_y;
 	
 	// > 锁定位置
 	if( DrillUp.g_MPFS_lock_enable == true ){				
-		this.x = DrillUp.g_MPFS_lock_x;
-		this.y = DrillUp.g_MPFS_lock_y;
-		return;
-	}
-	
-	// > 跟随鼠标位置
-	var cal_x = _drill_mouse_x;
-	var cal_y = _drill_mouse_y;
-	if( this._drill_curScene == "Scene_Battle" ){
-		if( Imported.Drill_BattleCamera ){		// 【战斗 - 活动战斗镜头】落点位置	
-			var layer = DrillUp.g_MPFS_layer;	//  （注意，这里只改变窗口的位置 ）
-			if( layer == "下层" || layer == "上层" ){
-				var convert_pos = $gameSystem._drill_BCa_controller.drill_BCa_getPos_OuterToChildren( cal_x, cal_y );
-				cal_x = convert_pos.x;
-				cal_y = convert_pos.y;	
-			}
-			if( layer == "图片层" || layer == "最顶层" ){
-				//（不操作）
-			}
-		}
-	}
-	cal_x += DrillUp.g_MPFS_x;
-	cal_y += DrillUp.g_MPFS_y;
-	cal_x -= this._drill_width * this._drill_anchor_x;
-	cal_y -= this._drill_height * this._drill_anchor_y;
-	if( cal_x < 0 ){	//（横向贴边控制）
-		cal_x = 0;
-	}
-	if( cal_x + this._drill_width > Graphics.boxWidth ){
-		cal_x = Graphics.boxWidth - this._drill_width;
-	}
-	if( cal_y < 0 ){	//（纵向贴边控制）
-		cal_y = 0;
-	}
-	if( cal_y + this._drill_height > Graphics.boxHeight ){
-		cal_y = Graphics.boxHeight - this._drill_height;
-	}
-	this.x = cal_x;
-	this.y = cal_y;
-}
-//==============================
-// * 接口 - 添加状态图标 判断项
-//
-//			参数：	c['x']: 触发范围坐标X
-//					c['y']: 触发范围坐标Y
-//					c['w']: 触发范围宽
-//					c['h']: 触发范围高
-//					c['s']: 状态的id列表
-//					c['b']: buff的id列表
-//==============================
-Drill_MPFS_Window.prototype.pushChecks = function( c ){
-	if( this._drill_check_tank.length < 1000){	//防止卡顿造成的过度积压
-		this._drill_check_tank.push(c);
-	}
-}
-//==============================
-// * 帧刷新 - 判断激活
-//==============================
-Drill_MPFS_Window.prototype.drill_updateChecks = function() {
-	if( !this._drill_check_tank ){ this.visible = false; return; }
-	
-	// > 捕获 判断项
-	var is_visible = false;
-	var state_ids = [];
-	var buff_ids = [];
-	for(var i=0; i< this._drill_check_tank.length; i++){
-		var check = this._drill_check_tank[i];
-		check['mouseType'] = DrillUp.g_MPFS_mouse_type;
+		xx += DrillUp.g_MPFS_lock_x;
+		yy += DrillUp.g_MPFS_lock_y;
 		
-		if ( this.drill_checkCondition(check) ) { 
-			is_visible = true; 
-			state_ids = check['s']; 
-			buff_ids = check['b']; 
-			break; 
-		}
-	}
-	this._drill_check_tank = [];
-	
-	// > 根据 判断项 显示/隐藏
-	if( this._drill_visible == true ){
-		if( is_visible == true ){
-			// > 显示中，不操作
-		}else{
-			// > 显示中断时
-			this._drill_visible = false;
-			this._drill_width = 0;
-			this._drill_height = 0;
-		}
+		
+	// > 跟随鼠标位置
 	}else{
-		if( is_visible == true ){
-			// > 激活显示时
-			this.drill_refreshMessage( state_ids, buff_ids );
-			this._drill_visible = true;
-		}else{
-			// > 隐藏中，不操作
+		xx += _drill_mouse_x;
+		yy += _drill_mouse_y;
+	
+		// > 【战斗 - 活动战斗镜头】落点位置
+		//  	（注意，这里只改变窗口的位置 ）
+		if( Imported.Drill_BattleCamera ){
+			if( this._drill_curScene == "Scene_Battle" ){
+				var layer = DrillUp.g_MPFS_layer;
+				if( layer == "下层" || layer == "上层" ){
+					var convert_pos = $gameSystem._drill_BCa_controller.drill_BCa_getPos_OuterToChildren( xx, yy );
+					xx = convert_pos.x;
+					yy = convert_pos.y;	
+				}
+				if( layer == "图片层" || layer == "最顶层" ){
+					//（不操作）
+				}
+			}
 		}
 	}
 	
-	//（宽高不要在update中轻易修改）
-	this.visible = this._drill_visible;
+	
+	// > 中心锚点
+	xx -= this._drill_width * this._drill_anchor_x;
+	yy -= this._drill_height * this._drill_anchor_y;
+	
+	
+	// > 边缘修正 - 横向贴边
+	if( xx < 0 ){ xx = 0; }
+	if( xx > Graphics.boxWidth - this._drill_width ){
+		xx = Graphics.boxWidth - this._drill_width;
+	}
+	// > 边缘修正 - 纵向贴边
+	if( yy < 0 ){ yy = 0; }
+	if( yy > Graphics.boxHeight - this._drill_height ){
+		yy = Graphics.boxHeight - this._drill_height;
+	}
+	
+	this.x = xx;
+	this.y = yy;
+}
+
+
+//==============================
+// * 内容 - 帧刷新
+//==============================
+Drill_MPFS_Window.prototype.drill_updateContext = function() {
+	
+	// > 实体类容器遍历
+	for( var i=0; i < $gameTemp._drill_MPFS_beanTank.length; i++ ){
+		var bean = $gameTemp._drill_MPFS_beanTank[i];
+		
+		// > 触发范围
+		if( this.drill_isInFrame(bean) ){
+			
+			// > 切换实体类时，刷新内容
+			this.drill_updateStateAndBuffMessage( bean._drill_state_list, bean._drill_buff_list );
+			
+			// > 鼠标激活方式 决定最终显示情况
+			if( this.drill_isMouseControl(bean) ){
+				this.visible = true;
+			}else{
+				this.visible = false;
+			}
+			return;
+		}
+	}
+	
+	this.visible = false;
 }
 //==============================
-// * 激活 - 显示条件
+// * 内容 - 触发范围
 //==============================
-Drill_MPFS_Window.prototype.drill_checkCondition = function( check ){
+Drill_MPFS_Window.prototype.drill_isInFrame = function( bean ){
+	if( bean['_drill_visible'] == false ){ return false; }
+	
 	var _x = _drill_mouse_x;
 	var _y = _drill_mouse_y;
-	if( check['mouseType'] == "触屏按下[持续]" ){
-		var _x = TouchInput.x;
-		var _y = TouchInput.y;
+	if( $gameSystem._drill_MPFS_mouseType == "触屏按下[持续]" ){
+		_x = TouchInput.x;
+		_y = TouchInput.y;
 	}
-	if( this._drill_curScene == "Scene_Battle" ){
-		if( Imported.Drill_BattleCamera ){	// 【战斗 - 活动战斗镜头】落点位置
-			var layer = check['layer'];		//  （注意，这里是 鼠标落点 与 矩形范围的图层 偏移关系 ）
+	
+	// 【战斗 - 活动战斗镜头】落点位置
+	//  （注意，这里是 鼠标落点 与 矩形范围的图层 偏移关系 ）
+	if( Imported.Drill_BattleCamera ){
+		if( this._drill_curScene == "Scene_Battle" ){
+			var layer = bean['_drill_layer'];
 			if( layer == "下层" || layer == "上层" ){
 				var convert_pos = $gameSystem._drill_BCa_controller.drill_BCa_getPos_OuterToChildren( _x, _y );
 				_x = convert_pos.x;
@@ -1876,33 +1950,47 @@ Drill_MPFS_Window.prototype.drill_checkCondition = function( check ){
 			}
 		}
 	}
-	if( _x > check['x'] + check['w'] ){ return false;}
-	if( _x < check['x'] + 0 ){ return false;}
-	if( _y > check['y'] + check['h'] ){ return false;}
-	if( _y < check['y'] + 0 ){ return false;}
-	if( check['mouseType'] == "鼠标左键按下[持续]" ){
+	
+	if( _x > bean['_drill_x'] + bean['_drill_frameW'] ){ return false; }
+	if( _x < bean['_drill_x'] + 0 ){ return false; }
+	if( _y > bean['_drill_y'] + bean['_drill_frameH'] ){ return false; }
+	if( _y < bean['_drill_y'] + 0 ){ return false; }
+	return true;
+}
+//==============================
+// * 内容 - 鼠标激活方式
+//==============================
+Drill_MPFS_Window.prototype.drill_isMouseControl = function( bean ){
+	if( $gameSystem._drill_MPFS_mouseType == "鼠标左键按下[持续]" ){
 		if( TouchInput.drill_isLeftPressed() ){ return true; }else{ return false; }
-	}else if( check['mouseType'] == "鼠标滚轮按下[持续]" ){
+	}else if( $gameSystem._drill_MPFS_mouseType == "鼠标滚轮按下[持续]" ){
 		if( TouchInput.drill_isMiddlePressed() ){ return true; }else{ return false; }
-	}else if( check['mouseType'] == "鼠标右键按下[持续]" ){
+	}else if( $gameSystem._drill_MPFS_mouseType == "鼠标右键按下[持续]" ){
 		if( TouchInput.drill_isRightPressed() ){ return true; }else{ return false; }
-	}else if( check['mouseType'] == "触屏按下[持续]" ){
+	}else if( $gameSystem._drill_MPFS_mouseType == "触屏按下[持续]" ){
 		if( TouchInput.isPressed() ){ return true; }else{ return false; }
 	}
 	return true;
 }
-
 //==============================
-// * 激活 - 刷新内容
+// * 内容 - 根据状态与buff情况刷新内容
 //==============================
-Drill_MPFS_Window.prototype.drill_refreshMessage = function( state_ids, buff_ids ){
-	var data = this._drill_data;
-	if(!state_ids && !buff_ids ){ return }
+Drill_MPFS_Window.prototype.drill_updateStateAndBuffMessage = function( state_ids, buff_ids ){
 	
-	// > 内容获取
+	// > 变化判定
+	if( this.drill_isStateAndBuffChanged( state_ids, buff_ids ) == false ){ return; }
+	this._drill_lastStateList = state_ids;
+	this._drill_lastBuffList = buff_ids;
+	this._drill_lastStateMList = [];
+	for(var i=0; i < state_ids.length; i++ ){
+		var index = state_ids[i]-1;
+		var enabled = $gameSystem._drill_MPFS_enables[index];
+		this._drill_lastStateMList[i] = enabled;
+	}
+	
+	// > 状态的说明
 	var context_list = [];
-	for( var i=0; i< state_ids.length; i++ ){	//状态
-		
+	for(var i=0; i < state_ids.length; i++ ){
 		var index = state_ids[i]-1;
 		var enabled = $gameSystem._drill_MPFS_enables[index];
 		if( enabled ){
@@ -1917,30 +2005,65 @@ Drill_MPFS_Window.prototype.drill_refreshMessage = function( state_ids, buff_ids
 			}
 		}
 	}
-	for (var i=0; i< buff_ids.length; i++) {	//buff
+	// > buff的说明
+	for( var i=0; i< buff_ids.length; i++ ){
 		var level = buff_ids[i];
-		
 		if( level > 0 ){		//强化buff
 			context_list.push( DrillUp.g_MPFS_buff[i][ level-1 ] );
 		}
 		if( level < 0 ){		//弱化buff
 			context_list.push( DrillUp.g_MPFS_debuff[i][ Math.abs(level)-1 ] );
 		}
-		
 	}
-	var has_no_states = false;
-	if( context_list.length == 0){		//没有内容时
-		has_no_states = true;
+	
+	// > 没有说明时
+	if( context_list.length == 0 ){
 		if( DrillUp.g_MPFS_default_enable == true ){
 			context_list.push( this._drill_text_default );
 		}
 	}
 	
+	// > 刷新内容
+	this.drill_refreshMessage( context_list );
+}
+//==============================
+// * 内容 - 判断状态与buff变化
+//==============================
+Drill_MPFS_Window.prototype.drill_isStateAndBuffChanged = function( state_ids, buff_ids ){
+	if( this._drill_lastStateList.length != state_ids.length ){ return true; }
+	if( this._drill_lastBuffList.length != buff_ids.length ){ return true; }
+	
+	// > 状态判定
+	for( var i=0; i < state_ids.length; i++ ){
+		if( this._drill_lastStateList[i] != state_ids[i] ){
+			return true;
+		}
+		var index = state_ids[i]-1;
+		var enabled = $gameSystem._drill_MPFS_enables[index];
+		if( this._drill_lastStateMList[i] != enabled ){
+			return true;
+		}
+	}
+	
+	// > buff判定
+	for( var i=0; i < buff_ids.length; i++ ){
+		if( this._drill_lastBuffList[i] != buff_ids[i] ){
+			return true;
+		}
+	}
+	
+	return false;
+}
+//==============================
+// * 内容 - 刷新内容
+//==============================
+Drill_MPFS_Window.prototype.drill_refreshMessage = function( context_list ){
+	if( context_list.length == 0 ){ return; }
+	
 	
 	// > 窗口高宽 - 计算
 	var options = {};
 	options['autoLineheight'] = true;
-	options['lineheight'] = data['window_lineheight'];
 	this.drill_COWA_calculateHeightAndWidth( context_list, options );		//（窗口辅助核心）
 	// > 窗口高宽 - 赋值
 	var ww = 0;
@@ -1959,14 +2082,190 @@ Drill_MPFS_Window.prototype.drill_refreshMessage = function( state_ids, buff_ids
 	
 	// > 绘制内容
 	this.drill_COWA_drawTextListEx( context_list, options );
+}
+
+
+//==============================
+// * 窗口皮肤 - 初始化
+//
+//			说明：	此函数只在初始化时执行一次，不要执行多了。
+//==============================
+Drill_MPFS_Window.prototype.drill_initSkin = function() {
+	
+	// > 皮肤资源
+	this._drill_skin_defaultSkin = this.windowskin;
+	
+	// > 布局模式
+	var data = {};
+	data['window_type'] = DrillUp.g_MPFS_layout_type;
+	data['window_opacity'] = DrillUp.g_MPFS_layout_opacity;
+	data['window_sys_src'] =  DrillUp.g_MPFS_layout_sys_src;
+	data['window_pic_src'] =  DrillUp.g_MPFS_layout_pic_src;
+	data['window_pic_x'] = DrillUp.g_MPFS_layout_pic_x;
+	data['window_pic_y'] = DrillUp.g_MPFS_layout_pic_y;
+	data['window_tone_lock'] = DrillUp.g_MPFS_tone_lock;
+	data['window_tone_r'] = DrillUp.g_MPFS_tone_r;
+	data['window_tone_g'] = DrillUp.g_MPFS_tone_g;
+	data['window_tone_b'] = DrillUp.g_MPFS_tone_b;
+	this.drill_resetSkinData( data );
+}
+//==============================
+// * 窗口皮肤 - 重设数据
+//
+//			说明：	data对象中的参数【可以缺项】。
+//==============================
+Drill_MPFS_Window.prototype.drill_resetSkinData = function( data ){
+	
+	// > 默认值
+	if( data['window_type'] == undefined ){ data['window_type'] = "默认窗口皮肤" };		//布局模式（默认窗口皮肤/自定义窗口皮肤/自定义背景图片/黑底背景）
+	if( data['window_opacity'] == undefined ){ data['window_opacity'] = 255 };			//布局透明度
+	if( data['window_sys_src'] == undefined ){ data['window_sys_src'] = "" };			//资源-自定义窗口皮肤
+	if( data['window_pic_src'] == undefined ){ data['window_pic_src'] = "" };			//资源-自定义背景图片
+	if( data['window_pic_x'] == undefined ){ data['window_pic_x'] = 0 };				//背景图片X
+	if( data['window_pic_y'] == undefined ){ data['window_pic_y'] = 0 };				//背景图片Y
+	
+	if( data['window_tone_lock'] == undefined ){ data['window_tone_lock'] = false };	//是否锁定窗口色调
+	if( data['window_tone_r'] == undefined ){ data['window_tone_r'] = 0 };				//窗口色调-红
+	if( data['window_tone_g'] == undefined ){ data['window_tone_g'] = 0 };				//窗口色调-绿
+	if( data['window_tone_b'] == undefined ){ data['window_tone_b'] = 0 };				//窗口色调-蓝
 	
 	
-	if( data['window_type'] == "黑底背景" ){
-		this._drill_background_BlackBitmap = new Bitmap(this._drill_width, this._drill_height);
-		this._drill_background_BlackBitmap.fillRect(0, 0 , this._drill_width, this._drill_height, "#000000");	//（背景黑框）
-		this._drill_background.bitmap = this._drill_background_BlackBitmap;
+	// > 窗口皮肤 - 私有变量初始化
+	this._drill_skin_type = data['window_type'];
+	this._drill_skin_opacity = data['window_opacity'];
+	
+	this._drill_skinBackground_width = 0;
+	this._drill_skinBackground_height = 0;
+	if( data['window_type'] == "自定义背景图片" && data['window_pic_src'] != "" ){
+		this._drill_skin_pic_bitmap = ImageManager.loadSystem( data['window_pic_src'] );
+		this._drill_skin_pic_x = data['window_pic_x'];
+		this._drill_skin_pic_y = data['window_pic_y'];
+	}else{
+		this._drill_skin_pic_bitmap = ImageManager.loadEmptyBitmap();
 	}
 	
+	if( data['window_type'] == "自定义窗口皮肤" && data['window_sys_src'] != "" ){
+		this._drill_skin_sys_bitmap = ImageManager.loadSystem( data['window_sys_src'] );
+	}else{
+		this._drill_skin_sys_bitmap = this._drill_skin_defaultSkin;
+	}
+	
+	this._drill_skin_tone_lock = data['window_tone_lock'];
+	this._drill_skin_tone_r = data['window_tone_r'];
+	this._drill_skin_tone_g = data['window_tone_g'];
+	this._drill_skin_tone_b = data['window_tone_b'];
+	
+	
+	// > 窗口皮肤 - 贴图初始化
+	if( this._drill_skinBackground == undefined ){
+		this._drill_skinBackground = new Sprite();
+		this._windowSpriteContainer.addChild(this._drill_skinBackground);	//（ _windowSpriteContainer 为窗口的最底层贴图）
+	}
+	
+	
+	// > 窗口皮肤 - 布局模式
+	if( this._drill_skin_type == "默认窗口皮肤" || this._drill_skin_type == "默认窗口布局" ){
+		
+		// （皮肤资源）
+		this.windowskin = this._drill_skin_defaultSkin;
+		
+		// （透明度）
+		this.opacity = this._drill_skin_opacity;
+		this._windowBackSprite.opacity = this._drill_skin_opacity;
+		this._windowFrameSprite.opacity = this._drill_skin_opacity;
+		this._drill_skinBackground.opacity = 0;
+		
+		// （背景图片布局）
+		this._drill_skinBackground.bitmap = null;
+		
+		
+	}else if( this._drill_skin_type == "自定义窗口皮肤" || this._drill_skin_type == "系统窗口布局" ){
+		
+		// （皮肤资源）
+		this.windowskin = this._drill_skin_sys_bitmap;
+		
+		// （透明度）
+		this.opacity = this._drill_skin_opacity;
+		this._windowBackSprite.opacity = this._drill_skin_opacity;
+		this._windowFrameSprite.opacity = this._drill_skin_opacity;
+		this._drill_skinBackground.opacity = 0;
+		
+		// （背景图片布局）
+		this._drill_skinBackground.bitmap = null;
+		
+		
+	}else if( this._drill_skin_type == "自定义背景图片" || this._drill_skin_type == "图片窗口布局" ){
+		
+		// （皮肤资源）
+		this.windowskin = this._drill_skin_defaultSkin;
+		
+		// （透明度）
+		this.opacity = 255;
+		this._windowBackSprite.opacity = 0;
+		this._windowFrameSprite.opacity = 0;
+		this._drill_skinBackground.opacity = this._drill_skin_opacity;
+		
+		// （背景图片布局）
+		this._drill_skinBackground.bitmap = this._drill_skin_pic_bitmap;
+		this._drill_skinBackground.x = this._drill_skin_pic_x;
+		this._drill_skinBackground.y = this._drill_skin_pic_y;
+		
+		
+	}else if( this._drill_skin_type == "黑底背景" || this._drill_skin_type == "黑底布局" ){
+		
+		// （皮肤资源）
+		this.windowskin = this._drill_skin_defaultSkin;
+		
+		// （透明度）
+		this.opacity = 255;
+		this._windowBackSprite.opacity = 0;
+		this._windowFrameSprite.opacity = 0;
+		this._drill_skinBackground.opacity = this._drill_skin_opacity;
+		
+		// （背景图片布局）
+		this._drill_skinBackground.bitmap = null;	//（帧刷新中会自动建立黑色画布）
+	}
+	
+	
+	// > 窗口皮肤 - 层级排序
+	this._drill_skinBackground.zIndex = 1;
+	this._windowBackSprite.zIndex = 2;
+	this._windowFrameSprite.zIndex = 3;
+	this._windowSpriteContainer.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
+}
+//==============================
+// * 窗口皮肤 - 帧刷新
+//==============================
+Drill_MPFS_Window.prototype.drill_updateSkin = function() {
+	
+	if( this._drill_skin_type == "黑底背景" || this._drill_skin_type == "黑底布局" ){
+		
+		// > 高宽改变锁
+		if( this._drill_skinBackground_width  == this._drill_width &&
+			this._drill_skinBackground_height == this._drill_height ){
+			return;
+		}
+		this._drill_skinBackground_width = this._drill_width;
+		this._drill_skinBackground_height = this._drill_height;
+		
+		// > 改变时新建黑色画布
+		this._drill_skinBackground_BlackBitmap = new Bitmap(this._drill_width, this._drill_height);
+		this._drill_skinBackground_BlackBitmap.fillRect(0, 0 , this._drill_width, this._drill_height, "#000000");
+		this._drill_skinBackground.bitmap = this._drill_skinBackground_BlackBitmap;
+	}
+}
+//==============================
+// * 窗口皮肤 - 帧刷新色调
+//
+//			说明：	setTone可以反复调用赋值，有变化监听的锁。
+//==============================
+var _drill_MPFS_updateTone = Drill_MPFS_Window.prototype.updateTone;
+Drill_MPFS_Window.prototype.updateTone = function() {
+	if( this._drill_skin_tone_lock == true ){
+		this.setTone( this._drill_skin_tone_r, this._drill_skin_tone_g, this._drill_skin_tone_b );
+		return;
+	}
+	_drill_MPFS_updateTone.call( this );
 }
 	
 	

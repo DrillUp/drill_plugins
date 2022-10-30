@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        物体 - 位置与位移
+ * @plugindesc [v1.5]        物体 - 位置与位移
  * @author Drill_up
  * 
  * 
@@ -27,10 +27,10 @@
  * 2.该插件的大部分功能都可以用纯事件指令做，插件指令只是相对更方便一些。
  * 3.该插件的指令较多且使用频繁，建议使用小工具：插件信息查看器。
  *   在开启游戏编辑器时，可以并行使用读取器复制指令。
- * 归位：
+ * 立即归位：
  *   (1.对于复制产生的事件，立即归位的位置为它产生的位置。
  *   (2.如果添加了随机出生点指令，则以出生点的位置为准。
- * 移动：
+ * 移动到：
  *   (1.这里所有的移动，都是瞬间移动到指定位置。
  *      并且无视任何条件，直接指定坐标放置。
  *   (2.事件与事件可以交换位置，事件指令本身就有。
@@ -39,17 +39,17 @@
  *   (1.循环地图中，计算的距离为循环两点的最短距离。
  *   (2.距离的结果为浮点数四舍五入值，
  *      比如事件行走在两个图块间，得出的距离为5.67个图块，则按6个图块算。
- * 获取事件id：
+ * 获取事件ID：
  *   (1.你可以通过插件指令，获取到一个点的事件id。
  *      如果事件重叠在一起，只能获取到第一个，如果没有事件，则赋值-1。
  *      另外，玩家不属于事件，不过会被赋值-2。
  *   (2.如果你想获取自定义区域内的事件，需要设置"只事件的筛选器"并使用
  *      获取随机坐标指令，不过只能获取到一个，局限性比较大。
  * 设计：
- *   (1.你可以使用 归位 指令，将所有事件立即归位。常用于重置关卡。
+ *   (1.你可以使用 立即归位 指令，将所有事件立即归位。常用于重置关卡。
  * 
  * -----------------------------------------------------------------------------
- * ----激活条件 - 归位：
+ * ----激活条件 - 立即归位：
  * 实现快速位移，可以使用下面插件指令：
  * （冒号两边都有一个空格）
  * 
@@ -64,7 +64,7 @@
  * 插件指令：>位置与位移 : 事件[10] : 立即归位包括朝向
  * 
  * 1.前面部分（本事件）和后面设置（立即归位）可以随意组合。
- *   一共有5*2种组合方式。
+ *   一共有6*2种组合方式。
  * 2."立即归位"表示地图载入时，事件回到最初位置。
  *   对于复制产生的事件，立即归位的位置为它产生的位置。
  * 
@@ -75,7 +75,7 @@
  * 插件指令(旧)：>位置与位移 : 指定事件(变量) : 22,23,24 : 立即归位
  * 
  * -----------------------------------------------------------------------------
- * ----激活条件 - 移动：
+ * ----激活条件 - 移动到：
  * 实现快速位移，可以使用下面插件指令：
  * （冒号两边都有一个空格）
  * 
@@ -130,6 +130,7 @@
  * 
  * 插件指令：>位置与位移 : 变量[21] : 获取指定位置的事件ID : 位置[10,10]
  * 插件指令：>位置与位移 : 变量[21] : 获取指定位置的事件ID : 位置变量[25,26]
+ * 插件指令：>位置与位移 : 变量[25,26] : 获取玩家的位置值
  * 插件指令：>位置与位移 : 变量[25,26] : 获取指定事件的位置值 : 本事件
  * 插件指令：>位置与位移 : 变量[25,26] : 获取指定事件的位置值 : 事件[10]
  * 插件指令：>位置与位移 : 变量[25,26] : 获取指定事件的位置值 : 事件变量[21]
@@ -173,6 +174,8 @@
  * 完善了部分插件指令的参数。
  * [v1.4]
  * 添加了全图事件的功能。
+ * [v1.5]
+ * 添加了玩家位置获取。
  * 
  */
  
@@ -236,9 +239,10 @@
 var _drill_EPo_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_EPo_pluginCommand.call(this, command, args);
-	if (command === ">位置与位移") {
+	if( command === ">位置与位移" ){
+		
 		/*-----------------立即归位------------------*/
-		if(args.length == 4){				//>位置与位移 : 本事件 : 立即归位
+		if( args.length == 4 ){				//>位置与位移 : 本事件 : 立即归位
 			var unit = String(args[1]);
 			var type = String(args[3]);
 			var e_ids = null;
@@ -304,10 +308,9 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					e.setDirection(e.page().image.direction);
 				}
 			}
-			
 		}
 		/*-----------------立即归位（旧指令）------------------*/
-		if(args.length == 6){				//（旧指令）>位置与位移 : 指定事件 : 10,21,32 : 立即归位
+		if( args.length == 6 ){				//（旧指令）>位置与位移 : 指定事件 : 10,21,32 : 立即归位
 			var temp1 = String(args[1]);
 			var temp2 = String(args[3]);
 			var type = String(args[5]);
@@ -362,8 +365,9 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				}
 			}
 		}
-		/*-----------------移动到相对位置------------------*/
-		if(args.length == 6){				//>位置与位移 : 玩家 : 移动到 : 位置[3,3]
+		
+		/*-----------------移动到------------------*/
+		if( args.length == 6 ){				//>位置与位移 : 玩家 : 移动到 : 位置[3,3]
 			var unit = String(args[1]);
 			var type = String(args[3]);
 			var pos = String(args[5]);
@@ -566,9 +570,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				}
 			}
 		}
-		
-		/*-----------------移动到相对位置（旧指令）------------------*/
-		if(args.length == 8){				//（旧指令）>位置与位移 : 本事件 : 移动到相对位置 : 3 : 3
+		/*-----------------移动到（旧指令）------------------*/
+		if( args.length == 8 ){				//（旧指令）>位置与位移 : 本事件 : 移动到相对位置 : 3 : 3
 			var temp1 = String(args[1]);
 			var type = String(args[3]);
 			var temp2 = parseInt(args[5]);
@@ -615,8 +618,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				}
 			}
 		}
-		/*-----------------移动到相对位置（旧指令）------------------*/
-		if(args.length == 10){				//（旧指令）>位置与位移 : 指定事件 : 10,21,32 : 移动到相对位置 : 3 : 3
+		if( args.length == 10 ){
 			var temp1 = String(args[1]);
 			var temp2 = String(args[3]);
 			var type = String(args[5]);
@@ -705,7 +707,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		}
 		
 		/*-----------------计算距离------------------*/
-		if(args.length == 8){				//>位置与位移 : 21 : 计算距离 : 事件[10] : 玩家
+		if( args.length == 8 ){				//>位置与位移 : 21 : 计算距离 : 事件[10] : 玩家
 			var temp1 = String(args[1]);
 			var type = String(args[3]);
 			var temp2 = String(args[5]);
@@ -714,6 +716,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp1 = temp1.replace("变量[","");
 				temp1 = temp1.replace("]","");
 				temp1 = Number(temp1);
+				
+				// > 计算距离 - A对象
 				if( temp2 == "玩家" ){
 					var x1 = $gamePlayer._realX;
 					var y1 = $gamePlayer._realY;
@@ -757,7 +761,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 						y1 = $gameVariables.value(Number(pos[1]));
 					}
 				}
-				//---
+				
+				// > 计算距离 - B对象
 				if( temp3 == "玩家" ){
 					var x2 = $gamePlayer._realX;
 					var y2 = $gamePlayer._realY;
@@ -801,14 +806,17 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 						y2 = $gameVariables.value(Number(pos[1]));
 					}
 				}
+				
+				// > 计算距离 - AB对象计算
 				if( x1 != undefined && x2 != undefined &&
 				    y1 != undefined && y2 != undefined ){
 					$gameVariables.setValue( Number(temp1) , Math.round( $gameMap.distance(x1, y1, x2, y2) ) );
 				}
 			}
 		}
-		/*-----------------获取事件id------------------*/
-		if(args.length == 6){				//>位置与位移 : 变量[21] : 获取指定位置的事件ID : 位置变量[25,26]
+		
+		/*-----------------获取值------------------*/
+		if( args.length == 6 ){				//>位置与位移 : 变量[21] : 获取指定位置的事件ID : 位置变量[25,26]
 			var temp1 = String(args[1]);
 			var type = String(args[3]);
 			var temp2 = String(args[5]);
@@ -881,10 +889,23 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				}
 			}
 		}
+		if( args.length == 4 ){
+			var temp1 = String(args[1]);
+			var type = String(args[3]);
+			if( type == "获取玩家的位置值" ){
+				temp1 = temp1.replace("变量[","");
+				temp1 = temp1.replace("]","");
+				var pos = temp1.split(/[,，]/);
+				if( pos.length < 2 ){ return; }
+				$gameVariables.setValue( Number(pos[0]), $gamePlayer.x );
+				$gameVariables.setValue( Number(pos[1]), $gamePlayer.y );
+			}
+		}
+		
 	}
 };
 //==============================
-// ** 插件指令 - 事件检查
+// * 插件指令 - 事件检查
 //==============================
 Game_Map.prototype.drill_EPo_isEventExist = function( e_id ){
 	if( e_id == 0 ){ return false; }
@@ -901,12 +922,12 @@ Game_Map.prototype.drill_EPo_isEventExist = function( e_id ){
 //=============================================================================
 // ** 玩家瞬移
 //=============================================================================
-Game_Player.prototype.drill_EPo_locate = function(x, y) {
-    Game_Character.prototype.locate.call(this, x, y);
-    if (this.isInVehicle()) {
-        this.vehicle().refresh();
-    }
-    this._followers.synchronize(x, y, this.direction());
+Game_Player.prototype.drill_EPo_locate = function( x, y ){
+	Game_Character.prototype.locate.call( this, x, y );
+	if( this.isInVehicle() ){
+		this.vehicle().refresh();
+	}
+	this._followers.synchronize(x, y, this.direction());
 };
 
 

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.7]        物体管理 - 事件复制器
+ * @plugindesc [v1.8]        物体管理 - 事件复制器
  * @author Drill_up
  * 
  * 
@@ -55,9 +55,12 @@
  * 插件指令：>事件复制器 : 复制本图事件 : 源事件[1] : 事件位置 : 4
  * 插件指令：>事件复制器 : 复制本图事件 : 源事件[1] : 指定位置 : 4 : 4
  * 插件指令：>事件复制器 : 复制本图事件 : 源事件[1] : 指定位置(变量) : 25 : 26
+ * 插件指令：>事件复制器 : 复制本图事件 : 源事件变量[21] : 事件位置 : 4
+ * 插件指令：>事件复制器 : 复制本图事件 : 源事件变量[21] : 指定位置 : 4 : 4
+ * 插件指令：>事件复制器 : 复制本图事件 : 源事件变量[21] : 指定位置(变量) : 25 : 26
  *
- * 1.第一条参数为：被复制的事件id，复制到位置的事件id
- * 2.第二条参数为：被复制的事件id，复制到位置x，复制到位置y
+ * 1.第一条参数为：被复制的事件id，复制到位置的事件id。
+ * 2.第二条参数为：被复制的事件id，复制到位置x，复制到位置y。
  * 
  * -----------------------------------------------------------------------------
  * ----激活条件 - 复制其他图事件
@@ -66,10 +69,15 @@
  * 插件指令：>事件复制器 : 复制其他图事件 : 地图[1] : 源事件[3] : 事件位置 : 4
  * 插件指令：>事件复制器 : 复制其他图事件 : 地图[1] : 源事件[3] : 指定位置 : 4 : 4
  * 插件指令：>事件复制器 : 复制其他图事件 : 地图[1] : 源事件[3] : 指定位置(变量) : 25 : 26
+ * 插件指令：>事件复制器 : 复制其他图事件 : 地图[1] : 源事件变量[21] : 事件位置 : 4
+ * 插件指令：>事件复制器 : 复制其他图事件 : 地图[1] : 源事件变量[21] : 指定位置 : 4 : 4
+ * 插件指令：>事件复制器 : 复制其他图事件 : 地图[1] : 源事件变量[21] : 指定位置(变量) : 25 : 26
  * 
- * 1.第一条参数为：地图id，被复制的事件id，复制到位置的事件id
- * 2.第二条参数为：地图id，被复制的事件id，复制到位置x，复制到位置y
- *
+ * 1.第一条参数为：地图id，被复制的事件id，复制到位置的事件id。
+ * 2.第二条参数为：地图id，被复制的事件id，复制到位置x，复制到位置y。
+ * 3."地图[1]"的数值不能设置为变量，因为插件指令需要对此地图id对应的资源进行预加载。
+ *   建议你将需要复制的事件，都放置到统一的地图中，再进行复制。（比如示例的模板管理层）
+ * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 初始透明
  * 你也可以设置初始的事件的透明情况。
@@ -131,6 +139,8 @@
  * 添加了 自定义独立开关 的支持。
  * [v1.7]
  * 修改了插件分类。
+ * [v1.8]
+ * 添加了 "源事件变量" 的设置。
  * 
  */
  
@@ -214,37 +224,48 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if(args[9]){ var temp3 = Number(args[9]) };
 			
 			if( type == "复制本图事件" ){
-				temp1 = temp1.replace("源事件[","");
-				temp1 = temp1.replace("原事件[","");
-				temp1 = temp1.replace("]","");
-				temp1 = Number(temp1);
+				var e_id = 0;
+				if( temp1.indexOf("源事件[") != -1 ||
+					temp1.indexOf("原事件[") != -1 ){
+					temp1 = temp1.replace("源事件[","");
+					temp1 = temp1.replace("原事件[","");
+					temp1 = temp1.replace("]","");
+					e_id = Number(temp1);
+				}
+				if( temp1.indexOf("源事件变量[") != -1 ||
+					temp1.indexOf("原事件变量[") != -1 ){
+					temp1 = temp1.replace("源事件变量[","");
+					temp1 = temp1.replace("原事件变量[","");
+					temp1 = temp1.replace("]","");
+					e_id = $gameVariables.value( Number(temp1) );
+				}
 				if( pos == "指定位置" ){
-					if( $gameMap.drill_EDu_isEventExist( temp1 ) == false ){ return; }
+					if( $gameMap.drill_EDu_isEventExist( e_id ) == false ){ return; }
 					// > 生成事件
-					var e = $gameMap.drill_COEM_offspring_createEvent( $gameMap._mapId, temp1, temp2, temp3 );
+					var e = $gameMap.drill_COEM_offspring_createEvent( $gameMap._mapId, e_id, temp2, temp3 );
 					// > 记录id
 					$gameSystem._drill_EDu_last_id = e._eventId;
 					// > 设置透明度
 					if( $gameSystem._drill_EDu_is_opacity ){ e._opacity = 0; }
 				}
 				if( pos == "指定位置(变量)" ){
-					if( $gameMap.drill_EDu_isEventExist( temp1 ) == false ){ return; }
+					if( $gameMap.drill_EDu_isEventExist( e_id ) == false ){ return; }
 					temp2 = $gameVariables.value(temp2);
 					temp3 = $gameVariables.value(temp3);
 					// > 生成事件
-					var e = $gameMap.drill_COEM_offspring_createEvent( $gameMap._mapId, temp1, temp2, temp3 );
+					var e = $gameMap.drill_COEM_offspring_createEvent( $gameMap._mapId, e_id, temp2, temp3 );
 					// > 记录id
 					$gameSystem._drill_EDu_last_id = e._eventId;
 					// > 设置透明度
 					if( $gameSystem._drill_EDu_is_opacity ){ e._opacity = 0; }
 				}
 				if( pos == "事件位置" ){
-					if( $gameMap.drill_EDu_isEventExist( temp1 ) == false ){ return; }
+					if( $gameMap.drill_EDu_isEventExist( e_id ) == false ){ return; }
 					if( $gameMap.drill_EDu_isEventExist( temp2 ) == false ){ return; }
 					var xx = $gameMap.event(temp2)._x;
 					var yy = $gameMap.event(temp2)._y;
 					// > 生成事件
-					$gameMap.drill_COEM_offspring_createEvent( $gameMap._mapId, temp1, xx, yy );
+					$gameMap.drill_COEM_offspring_createEvent( $gameMap._mapId, e_id, xx, yy );
 					// > 记录id
 					$gameSystem._drill_EDu_last_id = e._eventId;
 					// > 设置透明度
@@ -266,16 +287,27 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp1 = temp1.replace("地图[","");
 				temp1 = temp1.replace("]","");
 				temp1 = Number(temp1);
-				temp2 = temp2.replace("源事件[","");
-				temp2 = temp2.replace("原事件[","");
-				temp2 = temp2.replace("]","");
-				temp2 = Number(temp2);
+				var e_id = 0;
+				if( temp2.indexOf("源事件[") != -1 ||
+					temp2.indexOf("原事件[") != -1 ){
+					temp2 = temp2.replace("源事件[","");
+					temp2 = temp2.replace("原事件[","");
+					temp2 = temp2.replace("]","");
+					e_id = Number(temp2);
+				}
+				if( temp2.indexOf("源事件变量[") != -1 ||
+					temp2.indexOf("原事件变量[") != -1 ){
+					temp2 = temp2.replace("源事件变量[","");
+					temp2 = temp2.replace("原事件变量[","");
+					temp2 = temp2.replace("]","");
+					e_id = $gameVariables.value( Number(temp2) );
+				}
 				if( pos == "指定位置" ){
 					if( $gameTemp.drill_COEM_isMapExist( temp1 ) == false ){ return; }
 					// > 生成事件
 					var xx = Number(temp3);
 					var yy = Number(temp4);
-					var e = $gameMap.drill_COEM_offspring_createEvent( temp1, temp2, xx, yy );
+					var e = $gameMap.drill_COEM_offspring_createEvent( temp1, e_id, xx, yy );
 					// > 记录id
 					$gameSystem._drill_EDu_last_id = e._eventId;
 					// > 设置透明度
@@ -286,7 +318,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					// > 生成事件
 					var xx = $gameVariables.value(temp3);
 					var yy = $gameVariables.value(temp4);
-					var e = $gameMap.drill_COEM_offspring_createEvent( temp1, temp2, xx, yy );
+					var e = $gameMap.drill_COEM_offspring_createEvent( temp1, e_id, xx, yy );
 					// > 记录id
 					$gameSystem._drill_EDu_last_id = e._eventId;
 					// > 设置透明度
@@ -298,7 +330,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					// > 生成事件
 					var xx = $gameMap.event(temp3)._x;
 					var yy = $gameMap.event(temp3)._y;
-					var e = $gameMap.drill_COEM_offspring_createEvent( temp1, temp2, xx, yy );
+					var e = $gameMap.drill_COEM_offspring_createEvent( temp1, e_id, xx, yy );
 					// > 记录id
 					$gameSystem._drill_EDu_last_id = e._eventId;
 					// > 设置透明度

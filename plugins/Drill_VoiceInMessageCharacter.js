@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        声音 - 对话文字响声
+ * @plugindesc [v1.1]        声音 - 对话文字响声
  * @author Drill_up
  * 
  * @Drill_LE_param "声音-%d"
@@ -31,17 +31,18 @@
  * ----设定注意事项
  * 1.插件的作用域：战斗界面、地图界面。
  *   作用于对话框。
+ * 2.了解更多响声相关，可以去看看 "23.窗口字符 > 关于对话文字速度.docx"。
  * 细节：
  *   (1.窗口字符设置的优先级比 插件指令设置 高。
  *      如果窗口字符设置了声音，优先使用窗口字符的。
- *   (2.最好配合 对话文字速度 插件，一起使用。
- *      详细可以去看看 "23.窗口字符 > 关于对话文字速度.docx"。
  * 设计：
  *   (1.由于默认情况下游戏对话的播放速度为每帧一个字，速度
  *      特别快，对话响声会比较刺耳。
  *      你需要配合 对话文字速度 插件，降低播放速度，让响声
  *      慢一点，效果会温和许多。
- *
+ *   (2.如果字数太多，声音仍然太密集，你可以设置字数跳跃，
+ *      比如设置每2个字才播放一次声音，这样能有效减少播放频率。
+ * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 插件指令修改
  * 你可以通过插件指令修改当前的声音：
@@ -49,6 +50,7 @@
  * 插件指令：>对话文字响声 : 设置声音 : 声音[1]
  * 插件指令：>对话文字响声 : 设置声音 : 默认声音
  * 插件指令：>对话文字响声 : 关闭声音
+ * 插件指令：>对话文字响声 : 设置字数跳跃 : 字数[2]
  * 
  * 1."声音[1]"表示对应ID为1的声音配置，修改后将使用该文字响声。
  * 
@@ -88,9 +90,17 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 添加了字数跳跃设置。
  * 
  * 
  * 
+ * 
+ * @param 字数跳跃
+ * @type number
+ * @min 1
+ * @desc 默认为1，1表示每1个字播放一次声音，2表示每2个字播放一次声音。
+ * @default 1
  * 
  * @param 默认对话播放声音
  * @type number
@@ -278,8 +288,8 @@
 //
 //		★大体框架与功能如下：
 //			对话文字响声：
+//				->字数跳跃
 //				->声音配置
-//				->脸图绑定？
 //			
 //		★必要注意事项：
 //			暂无
@@ -315,6 +325,7 @@
 	}
 	
 	/*-----------------杂项------------------*/
+	DrillUp.g_VIMC_charSkip = Number(DrillUp.parameters["字数跳跃"] || 1);
 	DrillUp.g_VIMC_default = Number(DrillUp.parameters["默认对话播放声音"] || 0);
 	
 	/*-----------------声音------------------*/
@@ -367,6 +378,11 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					$gameSystem._drill_VIMC_curSound = Number(temp1);
 				}
 			}
+			if( type == "设置字数跳跃" ){
+				temp1 = temp1.replace("字数[","");
+				temp1 = temp1.replace("]","");
+				$gameSystem._drill_VIMC_charSkip = Math.max( 1,Number(temp1) );
+			}
 		}
 	}
 };
@@ -381,8 +397,11 @@ var _drill_VIMC_system_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
     _drill_VIMC_system_initialize.call(this);
 	
-	this._drill_VIMC_curSound = DrillUp.g_VIMC_default;
-	this._drill_VIMC_curMessageSound = -1;
+	this._drill_VIMC_curSound = DrillUp.g_VIMC_default;			//当前声音（默认的）
+	this._drill_VIMC_curMessageSound = -1;						//当前声音（窗口字符的，优先级更高）
+	
+	this._drill_VIMC_playCount = 0;								//声音播放次数
+	this._drill_VIMC_charSkip = DrillUp.g_VIMC_charSkip;		//字数跳跃
 }
 
 //=============================================================================
@@ -418,6 +437,7 @@ Window_Message.prototype.newPage = function( textState ){
 	$gameSystem._drill_VIMC_curMessageSound = -1;
 };
 
+
 //=============================================================================
 // ** 文字响声
 //=============================================================================
@@ -440,7 +460,7 @@ Window_Message.prototype.processNormalCharacter = function( textState ){
 		}
 		if( cur_sound < 0 ){ return; }
 		
-		// > 播放声音
+		// > 声音资源
 		var se_data = DrillUp.g_VIMC_sound[ cur_sound ];
 		if( se_data == undefined ){ return; }
 		
@@ -448,6 +468,15 @@ Window_Message.prototype.processNormalCharacter = function( textState ){
 		// > 每帧最多播放一次
 		if( $gameTemp._drill_VIMC_canPlay != true ){ return; }
 		$gameTemp._drill_VIMC_canPlay = false;
+		
+		
+		// > 声音播放计数
+		$gameSystem._drill_VIMC_playCount += 1;
+		
+		// > 字数跳跃
+		if( $gameSystem._drill_VIMC_playCount % $gameSystem._drill_VIMC_charSkip != 0 ){
+			return;
+		}
 		
 		// > 播放声音
 		var se = {};

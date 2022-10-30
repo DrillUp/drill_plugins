@@ -380,8 +380,8 @@ Game_System.prototype.initialize = function() {
 //          
 //			说明：	> 此函数直接返回容器对象。
 //##############################
-Game_Temp.prototype.drill_ESE_getCharacterSpriteTank = function( event_id ){
-	return this.drill_ESE_getCharacterSpriteTank_Private( event_id );
+Game_Temp.prototype.drill_ESE_getCharacterSpriteTank = function(){
+	return this.drill_ESE_getCharacterSpriteTank_Private();
 }
 //##############################
 // * 事件贴图 - 获取 - 根据事件ID【标准函数】
@@ -401,7 +401,7 @@ Game_Temp.prototype.drill_ESE_getCharacterSpriteByEventId = function( event_id )
 //==============================
 // * 事件贴图容器 - 获取 - 根据事件ID（私有）
 //==============================
-Game_Temp.prototype.drill_ESE_getCharacterSpriteTank_Private = function( event_id ){
+Game_Temp.prototype.drill_ESE_getCharacterSpriteTank_Private = function(){
 	if( SceneManager._scene == undefined ){ return null; }
 	if( SceneManager._scene._spriteset == undefined ){ return null; }
 	return SceneManager._scene._spriteset._characterSprites;

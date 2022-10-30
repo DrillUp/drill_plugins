@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.5]        系统 - 参数条核心
+ * @plugindesc [v1.6]        系统 - 参数条核心
  * @author Drill_up
  * 
  * @Drill_LE_param "参数条样式-%d"
@@ -147,6 +147,8 @@
  * 优化了内部结构，减少性能消耗。
  * [v1.5]
  * 整理规范了插件的数据结构。
+ * [v1.6]
+ * 优化了内部结构，减少性能消耗。
  * 
  * 
  *
@@ -1105,7 +1107,9 @@
 //		★备注			可视化管理层平均fps14，同时开6个参数条，帧数无明显下降，大概fps12。
 //						只有缓冲时间条+弹出条时，fps直接降到1。
 //		
-//		★优化记录		暂无
+//		★优化记录
+//			2022-10-30优化：
+//				这里把 参数条 的代码全部重新整理，划分结构，去掉了分割图片功能。
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
@@ -1119,39 +1123,19 @@
 //						->修改变化因子【标准函数】
 //						->修改段上限【标准函数】
 //						->初始化数据【标准默认值】
-//				->主体
-//					->遮罩
-//					->旋转角度
-//					->锚点锁定
-//				->层级
-//					->外层
-//					->内容层
-//				->分段条
+//				->主要概念
 //					->段（level）
-//					->段上限
+//					->段上限（level_max）
+//					->上段/下段（section）
 //					->多段结构
-//						->上段/下段（section）
-//						->段循环
-//					->缩短效果
-//						> 瞬间缩短
-//						> 弹性缩短
-//						> 匀速缩短
+//					->段循环
+//					->伸长方式/缩短方式
+//						> 瞬间
+//						> 弹性
+//						> 匀速
 //					->流动效果
 //						->头段/尾段
 //						->段长度
-//				->凹槽条
-//					->扣除速度
-//					->段阻塞
-//				->弹出条
-//					->块模式
-//					->弹道轨迹
-//				->粒子
-//					->边沿粒子出现
-//				->游标
-//					->多段复位
-//					->遮罩遮挡
-//					->显示模式
-//				->加满动画
 //		
 //		
 //		★配置参数结构体如下：
@@ -1180,7 +1164,6 @@
 //		★核心接口说明：
 //			1.整个核心只提供了一个封装好的【Sprite独立子类】。
 //			  具体见类的说明。
-//
 //		
 //		★存在的问题：
 //			1.同时开7个缓冲时间条，并且弹出条开启。210个弹出条同时运动时，地图界面会卡爆。
@@ -1387,19 +1370,109 @@
 //=============================================================================
 if( Imported.Drill_CoreOfBallistics ){
 	
+	
+//=============================================================================
+// ** 资源标记容器
+//
+//			说明：	用过的bitmap，全部标记不删除，防止刷菜单时重建导致浪费资源。
+//=============================================================================
+//==============================
+// * 容器 - 初始化
+//==============================
+var _drill_COGM_temp_initialize = Game_Temp.prototype.initialize;
+Game_Temp.prototype.initialize = function() {
+    _drill_COGM_temp_initialize.call(this);
+	this._drill_COGM_bitmapTank = [];			//参数数字用过的贴图
+}
+//==============================
+// * 容器 - 添加贴图标记
+//==============================
+Game_Temp.prototype.drill_COGM_addBitmap = function( bitmap ){
+	if( this._drill_COGM_bitmapTank.contains( bitmap ) ){ return; }
+	this._drill_COGM_bitmapTank.push( bitmap );
+}
+
 
 //=============================================================================
 // ** 参数条【Drill_COGM_MeterSprite】
-// **			
+// **		
 // **		索引：	COGM（可从子插件搜索到函数、类用法）
 // **		来源：	继承于Sprite
 // **		实例：	> 可见 Drill_GaugeOfBufferTimeBar插件 的 _drill_meterSprite 成员
 // **		应用：	> 可见 Drill_GaugeOfBufferTimeBar插件 的 drill_createMeter 函数
 // **				（应用中除了参数条贴图，还包括背景层和前景层，组合形成 缓冲时间条）
-// **
+// **		
 // **		作用域：	地图界面、战斗界面、菜单界面
 // **		主功能：	> 定义一个贴图组合体，根据预设定义，得到一个参数条贴图。
 // **					> 具体功能见 "1.系统 > 关于参数条.docx"。
+// **		子功能：	->贴图
+// **						->显示/隐藏
+// **						->是否就绪
+// **						->优化策略
+// **						->销毁
+// **						->帧刷新
+// **						->初始化数据
+// **						->初始化对象
+// **						->延迟初始化
+// **					->接口
+// **						->修改变化因子
+// **						->修改段上限
+// **					->A主体
+// **						->层级
+// **							->外层
+// **							->内容层
+// **								->内容层遮罩
+// **								->上段
+// **								->凹槽条
+// **								->下段
+// **						->旋转角度
+// **						->锚点锁定
+// **						->资源宽度
+// **						->资源高度
+// **					->B分段条
+// **						->资源bitmap
+// **						->概念
+// **							->段（level）
+// **							->段上限（level_max）
+// **							->上段/下段（section）
+// **						->框架起点
+// **						->框架终点
+// **						->分段条宽度（开放接口）
+// **						->分段条高度（开放接口）
+// **					->C追逐值
+// **						->伸长方式
+// **						->缩短方式
+// **						->帧刷新 当前值
+// **						->帧刷新 当前层级
+// **						->帧刷新 框架值
+// **						->帧刷新 框架层级
+// **							->段循环
+// **						->是否被阻塞（开放接口）
+// **						->上段的宽度（开放接口）
+// **					->D流动效果
+// **						->概念
+// **							->头段/尾段
+// **							->段长度
+// **						->帧刷新 - 流动值
+// **						->帧刷新 - 框架值
+// **					->E凹槽条
+// **						->滞留标记
+// **						->延迟扣除
+// **							->扣除速度
+// **						->■凹槽条阻塞
+// **						->帧刷新 数值
+// **						->帧刷新 框架
+// **					->F弹出条
+// **						->块框架
+// **						->弹道轨迹
+// **					->G粒子
+// **						->边沿出现
+// **					->H游标
+// **						->多段复位
+// **						->所在层级（遮罩遮挡）
+// **						->显示模式
+// **					->I加满动画
+// **						->播放结束后销毁
 // **
 // **		说明：	> sprite贴在任意地方都可以。
 // **			 	> 【temp_data配置参数】都在drill_initData中，其他的都为私有参数。
@@ -1440,18 +1513,91 @@ Drill_COGM_MeterSprite.prototype.constructor = Drill_COGM_MeterSprite;
 Drill_COGM_MeterSprite.prototype.initialize = function( data ) {
 	Sprite.prototype.initialize.call(this);
 	this._drill_data = JSON.parse(JSON.stringify( data ));	//深拷贝数据
-	
-	this.drill_initData();				//初始化数据
-	this.drill_initSprite();			//初始化对象
+	this.drill_initData();									//初始化数据
+	this.drill_initSprite();								//初始化对象
 }
 //==============================
 // * 参数条 - 帧刷新
 //==============================
 Drill_COGM_MeterSprite.prototype.update = function() {
+	if( this.drill_COGM_isReady() == false ){ return; }
+	if( this.drill_COGM_isOptimizationPassed() == false ){ return; }
 	Sprite.prototype.update.call(this);
+	this.drill_updateDelayingInit();				//帧刷新 - 延迟初始化
 	
-	this.drill_updateDelayingInit();	//延迟初始化
-	this.drill_updateSprite();			//帧刷新对象
+	this.drill_updateSpringShowing();				//帧刷新 - F弹出条（在上段下段切换前，要捕获bitmap对象）
+	
+	this.drill_updateLevel_FrameStart();			//帧刷新 - B分段条 - 框架起点
+	this.drill_updateChase_Value();					//帧刷新 - C追逐值 - 当前值
+	this.drill_updateChase_Level(); 				//帧刷新 - C追逐值 - 当前层级
+	this.drill_updateChase_FrameValue();			//帧刷新 - C追逐值 - 框架值
+	this.drill_updateChase_FrameLevel(); 			//帧刷新 - C追逐值 - 框架层级
+	this.drill_updateFlow_Value(); 					//帧刷新 - D流动效果 - 流动值
+	this.drill_updateFlow_Frame(); 					//帧刷新 - D流动效果 - 框架值
+	this.drill_updateLevel_FrameEnd();				//帧刷新 - B分段条 - 框架终点
+	
+	this.drill_updateLeaking_Value();				//帧刷新 - E凹槽条 - 数值
+	this.drill_updateLeaking_Frame(); 				//帧刷新 - E凹槽条 - 框架
+	this.drill_updateLeaking_Block(); 				//帧刷新 - E凹槽条 - 阻塞
+	
+	this.drill_updateParticle(); 					//帧刷新 - G粒子
+	this.drill_updateVernier(); 					//帧刷新 - H游标
+	this.drill_updateFilling(); 					//帧刷新 - I加满动画
+	
+	this._drill_cur_value = this._drill_new_value;	//帧刷新 - 变化因子
+}
+//==============================
+// * 参数条 - 帧刷新 - 延迟初始化
+//==============================
+Drill_COGM_MeterSprite.prototype.drill_updateDelayingInit = function() {
+	var data = this._drill_data;
+	
+	// > I加满动画
+	if( this._drill_filling_needInit == true ){	
+		this._drill_filling_needInit = false;
+		this.drill_delayingInitFilling();
+	}
+	
+	// > A主体
+	if( this._drill_attr_needInit == true ){
+		this._drill_attr_needInit = false;
+		this.drill_delayingInitAttr();
+	}
+	
+	// > B分段条（无）
+	
+	// > C追逐值（无）
+	
+	// > D流动效果（无）
+	
+	// > E凹槽条（无）
+	
+	// > F弹出条
+	if( this._drill_spring_needInit == true ){	
+		this._drill_spring_needInit = false;
+		this.drill_delayingInitSpring();
+	}
+	
+	// > G粒子
+	if( this._drill_par_bitmap != undefined && 
+		this._drill_par_bitmap.isReady() && 
+		this._drill_par_needInit == true ){	
+		this._drill_par_needInit = false;
+		this.drill_delayingInitParticle();
+	}
+	
+	// > H游标
+	if( this._drill_vernier_bitmaps.length != 0 && 
+		this._drill_vernier_bitmaps[0].isReady() && 
+		this._drill_vernier_needInit == true ){	
+		this._drill_vernier_needInit = false;
+		this.drill_delayingInitVernier();
+	}
+	
+	// > 显示
+	if( this.visible != data['visible'] ){
+		this.visible = data['visible'];
+	}
 }
 //##############################
 // * 参数条 - 显示/隐藏【标准函数】
@@ -1474,9 +1620,20 @@ Drill_COGM_MeterSprite.prototype.drill_COGM_setVisible = function( visible ){
 //			说明：	> 可放在帧刷新函数中实时调用。
 //##############################
 Drill_COGM_MeterSprite.prototype.drill_COGM_isReady = function(){
-	if( this.drill_isLevelsReady() == false ){ return false; }
+	if( this.drill_isSrcReady() == false ){ return false; }
 	return true;
 }
+//##############################
+// * 参数条 - 优化策略【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 布尔（是否通过）
+//			
+//			说明：	> 通过时，正常帧刷新；未通过时，不执行帧刷新。
+//##############################
+Drill_COGM_MeterSprite.prototype.drill_COGM_isOptimizationPassed = function(){
+    return true;	//（暂无策略）
+};
 //##############################
 // * 参数条 - 销毁【标准函数】
 //
@@ -1528,139 +1685,188 @@ Drill_COGM_MeterSprite.prototype.drill_initData = function() {
 	
 	// > 标准默认值
 	data['enable'] = true;	
-	if( data['x'] == undefined ){ data['x'] = 0 };													//主体 - 平移x（非实时赋值）
-	if( data['y'] == undefined ){ data['y'] = 0 };													//主体 - 平移y（非实时赋值）
-	if( data['anchor_x'] == undefined ){ data['anchor_x'] = 0 };									//主体 - 中心锚点x（非实时赋值）
-	if( data['anchor_y'] == undefined ){ data['anchor_y'] = 0 };									//主体 - 中心锚点y（非实时赋值）
-	if( data['rotation'] == undefined ){ data['rotation'] = 0 };									//主体 - 旋转（非实时赋值）
-	if( data['visible'] == undefined ){ data['visible'] = true };									//主体 - 可见
-	if( data['meter_src'] == undefined ){ data['meter_src'] = "" };									//主体 - 资源
-	if( data['meter_src_file'] == undefined ){ data['meter_src_file'] = "img/Special__meter/" };	//主体 - 资源文件夹
-	if( data['meter_src_mask'] == undefined ){ data['meter_src_mask'] = "" };						//主体 - 遮罩
+	if( data['x'] == undefined ){ data['x'] = 0 };													//A主体 - 平移x（非实时赋值）
+	if( data['y'] == undefined ){ data['y'] = 0 };													//A主体 - 平移y（非实时赋值）
+	if( data['anchor_x'] == undefined ){ data['anchor_x'] = 0 };									//A主体 - 中心锚点x（非实时赋值）
+	if( data['anchor_y'] == undefined ){ data['anchor_y'] = 0 };									//A主体 - 中心锚点y（非实时赋值）
+	if( data['rotation'] == undefined ){ data['rotation'] = 0 };									//A主体 - 旋转（非实时赋值）
+	if( data['visible'] == undefined ){ data['visible'] = true };									//A主体 - 可见
 	
-	if( data['level_max'] == undefined ){ data['level_max'] = 100 };								//分段条 - 单段最大值（段上限）
-	if( data['level_count'] == undefined ){ data['level_count'] = 1 };								//分段条 - 段数量
-	if( data['level_isLoop'] == undefined ){ data['level_isLoop'] = false };						//分段条 - 段是否循环
-	if( data['shorten_mode'] == undefined ){ data['shorten_mode'] = "匀速缩短" };					//分段条 - 缩短方式
-	if( data['shorten_ratio'] == undefined ){ data['shorten_ratio'] = 15.0 };						//分段条 - 弹性缩短比
-	if( data['shorten_speed'] == undefined ){ data['shorten_speed'] = 2.5 };						//分段条 - 匀速缩短速度
-	if( data['lengthen_mode'] == undefined ){ data['lengthen_mode'] = "瞬间伸长" };					//分段条 - 伸长方式
-	if( data['lengthen_ratio'] == undefined ){ data['lengthen_ratio'] = 15.0 };						//分段条 - 弹性伸长比
-	if( data['lengthen_speed'] == undefined ){ data['lengthen_speed'] = 10.5 };						//分段条 - 匀速伸长速度
-	if( data['flow_enable'] == undefined ){ data['flow_enable'] = true };							//分段条 - 是否流动
-	if( data['flow_dir'] == undefined ){ data['flow_dir'] = "从右往左" };							//分段条 - 流动方向
-	if( data['flow_speed'] == undefined ){ data['flow_speed'] = 0.5 };								//分段条 - 流动速度
-	if( data['flow_srcMode'] == undefined ){ data['flow_srcMode'] = "三等份划分" };					//分段条 - 流动段划分模式
-	if( data['flow_levelLength'] == undefined ){ data['flow_levelLength'] = 0 };					//分段条 - 段长度
+	if( data['meter_src'] == undefined ){ data['meter_src'] = "" };									//B分段条 - 资源
+	if( data['meter_src_file'] == undefined ){ data['meter_src_file'] = "img/Special__meter/" };	//B分段条 - 资源文件夹
+	if( data['meter_src_mask'] == undefined ){ data['meter_src_mask'] = "" };						//B分段条 - 遮罩
+	if( data['level_max'] == undefined ){ data['level_max'] = 100 };								//B分段条 - 单段最大值（段上限）
+	if( data['level_count'] == undefined ){ data['level_count'] = 1 };								//B分段条 - 段数量
+	if( data['level_isLoop'] == undefined ){ data['level_isLoop'] = false };						//B分段条 - 段是否循环
 	
-	if( data['leak_enable'] == undefined ){ data['leak_enable'] = false };							//凹槽条 - 启用
-	if( data['leak_src'] == undefined ){ data['leak_src'] = "" };									//凹槽条 - 资源
-	if( data['leak_src_file'] == undefined ){ data['leak_src_file'] = "img/Special__meter/" };		//凹槽条 - 资源文件夹
-	if( data['leak_speed'] == undefined ){ data['leak_speed'] = 4.0 };								//凹槽条 - 扣除速度
-	if( data['leak_delay'] == undefined ){ data['leak_delay'] = 0.0 };								//凹槽条 - 扣除延迟
-	if( data['leak_delayRefresh'] == undefined ){ data['leak_delayRefresh'] = true };				//凹槽条 - 连续受伤是否刷新延迟
+	if( data['shorten_mode'] == undefined ){ data['shorten_mode'] = "匀速缩短" };					//C追逐值 - 缩短方式
+	if( data['shorten_ratio'] == undefined ){ data['shorten_ratio'] = 15.0 };						//C追逐值 - 缩短方式 - 弹性缩短比
+	if( data['shorten_speed'] == undefined ){ data['shorten_speed'] = 2.5 };						//C追逐值 - 缩短方式 - 匀速缩短速度
+	if( data['lengthen_mode'] == undefined ){ data['lengthen_mode'] = "瞬间伸长" };					//C追逐值 - 伸长方式
+	if( data['lengthen_ratio'] == undefined ){ data['lengthen_ratio'] = 15.0 };						//C追逐值 - 伸长方式 - 弹性伸长比
+	if( data['lengthen_speed'] == undefined ){ data['lengthen_speed'] = 10.5 };						//C追逐值 - 伸长方式 - 匀速伸长速度
 	
-	if( data['spring_enable'] == undefined ){ data['spring_enable'] = false };						//弹出条 - 启用
-	if( data['spring_type'] == undefined ){ data['spring_type'] = "当前参数条" };					//弹出条 - 块模式
-	if( data['spring_ballistics'] == undefined ){ data['spring_ballistics'] = {} };					//弹出条 - 弹道
-	if( data['spring_maxNum'] == undefined ){ data['spring_maxNum'] = 30 };							//弹出条 - 最大数量
+	if( data['flow_enable'] == undefined ){ data['flow_enable'] = true };							//D流动效果 - 是否流动
+	if( data['flow_dir'] == undefined ){ data['flow_dir'] = "从右往左" };							//D流动效果 - 流动方向
+	if( data['flow_speed'] == undefined ){ data['flow_speed'] = 0.5 };								//D流动效果 - 流动速度
+	if( data['flow_srcMode'] == undefined ){ data['flow_srcMode'] = "三等份划分" };					//D流动效果 - 流动段划分模式
+	if( data['flow_levelLength'] == undefined ){ data['flow_levelLength'] = 0 };					//D流动效果 - 段长度
 	
-	if( data['par_enable'] == undefined ){ data['par_enable'] = false };							//粒子 - 启用
-	if( data['par_src'] == undefined ){ data['par_src'] = "" };										//粒子 - 资源
-	if( data['par_src_file'] == undefined ){ data['par_src_file'] = "img/Special__meter/" };		//粒子 - 资源文件夹
-	if( data['par_mode'] == undefined ){ data['par_mode'] = "底部出现" };							//粒子 - 出现模式	
-	if( data['par_speedX'] == undefined ){ data['par_speedX'] = 0 };								//粒子 - X速度
-	if( data['par_speedY'] == undefined ){ data['par_speedY'] = -1.5 };								//粒子 - Y速度
-	if( data['par_count'] == undefined ){ data['par_count'] = 20 };									//粒子 - 数量
-	if( data['par_life'] == undefined ){ data['par_life'] = 20 };									//粒子 - 持续时间
+	if( data['leak_enable'] == undefined ){ data['leak_enable'] = false };							//E凹槽条 - 启用
+	if( data['leak_src'] == undefined ){ data['leak_src'] = "" };									//E凹槽条 - 资源
+	if( data['leak_src_file'] == undefined ){ data['leak_src_file'] = "img/Special__meter/" };		//E凹槽条 - 资源文件夹
+	if( data['leak_speed'] == undefined ){ data['leak_speed'] = 4.0 };								//E凹槽条 - 扣除速度
+	if( data['leak_delay'] == undefined ){ data['leak_delay'] = 0.0 };								//E凹槽条 - 扣除延迟
+	if( data['leak_delayRefresh'] == undefined ){ data['leak_delayRefresh'] = true };				//E凹槽条 - 连续受伤是否刷新延迟
 	
-	if( data['vernier_enable'] == undefined ){ data['vernier_enable'] = false };					//游标 - 启用
-	if( data['vernier_src'] == undefined ){ data['vernier_src'] = [] };								//游标 - 资源
-	if( data['vernier_src_file'] == undefined ){ data['vernier_src_file'] = "img/Special__meter/" };//游标 - 资源文件夹
-	if( data['vernier_gif_interval'] == undefined ){ data['vernier_gif_interval'] = 4 };			//游标 - 动画帧间隔
-	if( data['vernier_gif_backrun'] == undefined ){ data['vernier_gif_backrun'] = false };			//游标 - 是否倒放
-	if( data['vernier_x'] == undefined ){ data['vernier_x'] = 0 };									//游标 - x
-	if( data['vernier_y'] == undefined ){ data['vernier_y'] = 0 };									//游标 - y
-	if( data['vernier_mode'] == undefined ){ data['vernier_mode'] = "一直显示" };					//游标 - 显示模式
-	if( data['vernier_reset'] == undefined ){ data['vernier_reset'] = false };						//游标 - 多层重置
-	if( data['vernier_maskCover'] == undefined ){ data['vernier_maskCover'] = false };				//游标 - 遮罩遮挡
+	if( data['spring_enable'] == undefined ){ data['spring_enable'] = false };						//F弹出条 - 启用
+	if( data['spring_type'] == undefined ){ data['spring_type'] = "当前参数条" };					//F弹出条 - 块模式
+	if( data['spring_ballistics'] == undefined ){ data['spring_ballistics'] = {} };					//F弹出条 - 弹道
+	if( data['spring_maxNum'] == undefined ){ data['spring_maxNum'] = 30 };							//F弹出条 - 最大数量
 	
-	if( data['filling_enable'] == undefined ){ data['filling_enable'] = false };					//加满动画 - 启用
-	if( data['filling_mode'] == undefined ){ data['filling_mode'] = "匀速加满" };					//加满动画 - 加满方式
-	if( data['filling_time'] == undefined ){ data['filling_time'] = 60 };							//加满动画 - 持续时间
-	if( data['filling_delay'] == undefined ){ data['filling_delay'] = 10 };							//加满动画 - 动画延迟
+	if( data['par_enable'] == undefined ){ data['par_enable'] = false };							//G粒子 - 启用
+	if( data['par_src'] == undefined ){ data['par_src'] = "" };										//G粒子 - 资源
+	if( data['par_src_file'] == undefined ){ data['par_src_file'] = "img/Special__meter/" };		//G粒子 - 资源文件夹
+	if( data['par_mode'] == undefined ){ data['par_mode'] = "底部出现" };							//G粒子 - 出现模式	
+	if( data['par_speedX'] == undefined ){ data['par_speedX'] = 0 };								//G粒子 - X速度
+	if( data['par_speedY'] == undefined ){ data['par_speedY'] = -1.5 };								//G粒子 - Y速度
+	if( data['par_count'] == undefined ){ data['par_count'] = 20 };									//G粒子 - 数量
+	if( data['par_life'] == undefined ){ data['par_life'] = 20 };									//G粒子 - 持续时间
+	
+	if( data['vernier_enable'] == undefined ){ data['vernier_enable'] = false };					//H游标 - 启用
+	if( data['vernier_src'] == undefined ){ data['vernier_src'] = [] };								//H游标 - 资源
+	if( data['vernier_src_file'] == undefined ){ data['vernier_src_file'] = "img/Special__meter/" };//H游标 - 资源文件夹
+	if( data['vernier_gif_interval'] == undefined ){ data['vernier_gif_interval'] = 4 };			//H游标 - 动画帧间隔
+	if( data['vernier_gif_backrun'] == undefined ){ data['vernier_gif_backrun'] = false };			//H游标 - 是否倒放
+	if( data['vernier_x'] == undefined ){ data['vernier_x'] = 0 };									//H游标 - x
+	if( data['vernier_y'] == undefined ){ data['vernier_y'] = 0 };									//H游标 - y
+	if( data['vernier_mode'] == undefined ){ data['vernier_mode'] = "一直显示" };					//H游标 - 显示模式
+	if( data['vernier_reset'] == undefined ){ data['vernier_reset'] = false };						//H游标 - 多层重置
+	if( data['vernier_maskCover'] == undefined ){ data['vernier_maskCover'] = false };				//H游标 - 遮罩遮挡
+	
+	if( data['filling_enable'] == undefined ){ data['filling_enable'] = false };					//I加满动画 - 启用
+	if( data['filling_mode'] == undefined ){ data['filling_mode'] = "匀速加满" };					//I加满动画 - 加满方式
+	if( data['filling_time'] == undefined ){ data['filling_time'] = 60 };							//I加满动画 - 持续时间
+	if( data['filling_delay'] == undefined ){ data['filling_delay'] = 10 };							//I加满动画 - 动画延迟
 };
 //==============================
-// * 初始化 - 对象
+// * 参数条 - 初始化对象
 //==============================
 Drill_COGM_MeterSprite.prototype.drill_initSprite = function() {
-	var data = this._drill_data;
+	this._drill_new_value = 0;				//变化因子 - 新变化参数【使用时只读】
+	this._drill_cur_value = 0;				//变化因子 - 当前参数【使用时只读】
 	
-	// > 私有对象初始化
-	this._drill_new_value = 0;							//变化因子 - 新变化参数【使用时只读】
-	this._drill_cur_value = 0;							//变化因子 - 当前参数【使用时只读】
+	this.drill_initAttr();					//初始化对象 - A主体
+	this.drill_initSection();				//初始化对象 - B分段条
+	this.drill_initChase();					//初始化对象 - C追逐值
+	this.drill_initFlow();					//初始化对象 - D流动效果
+	this.drill_initLeak();					//初始化对象 - E凹槽条
+	this.drill_initSpring();				//初始化对象 - F弹出条
+	this.drill_initParticle();				//初始化对象 - G粒子
+	this.drill_initVernier();				//初始化对象 - H游标
+	this.drill_initFilling();				//初始化对象 - I加满动画
+}
+//==============================
+// * 参数条 - 销毁（私有）
+//==============================
+Drill_COGM_MeterSprite.prototype.drill_COGM_destroy_Private = function() {
+	this.visible = false;
 	
-	this._drill_meter_bitmap = null;					//主体 - bitmap
-	this._drill_radian = data['rotation']/180*Math.PI;	//主体 - 整体旋转弧度
-	this._layer_outer = null;							//层级 - 外层
-	this._layer_context = null;							//层级 - 内容层
-	this._layer_contextMask = null;						//层级 - 内容层遮罩
+	// > 销毁 - A主体
+	this.drill_COGM_removeChildConnect( this._layer_context );	//断开联系
+	this.drill_COGM_removeChildConnect( this._layer_outer );
+	this._layer_outer = null;
+	this._layer_context = null;
+	this._layer_contextMask = null;
+	this._drill_attr_needInit = false;
 	
-	this._drill_sectionUp_sprite = null;				//分段条 - 贴图_上
-	this._drill_sectionDown_sprite = null;				//分段条 - 贴图_下
-	this._drill_level_needInit = true;					//分段条 - 初始化 锁
-	this._drill_level_bitmaps = [];						//分段条 - bitmap
-	this._drill_level_isBlocked = false;				//分段条 - 层级变换阻塞（每次层级降1时自动阻塞）
-	this._drill_level_cur_value = 0;					//分段条 - 层级条缓冲值
-	this._drill_cur_level = -1;							//分段条 - 当前所处的层级
+	// > 销毁 - B分段条
+	this._drill_section_bitmap = null;
+	this._drill_sectionUp_sprite = null;
+	this._drill_sectionDown_sprite = null;
 	
-	this._drill_leak_sprite = null;						//凹槽条 - 贴图
-	this._drill_leak_cur_value = 0;						//凹槽条 - 缓冲值
-	this._drill_leak_time = 0;							//凹槽条 - 延时时间
-			
-	this._drill_spring_needInit = true;					//弹出条 - 初始化 锁
-	this._drill_spring_tank = [];						//弹出条 - 贴图容器
-	this._drill_spring_cur_tankIndex = 0;				//弹出条 - 索引下标
-	this._drill_spring_cur_value = 0;					//弹出条 - 缓冲值
-			
-	this._drill_par_needInit = true;					//粒子 - 初始化 锁
-	this._drill_par_spriteTank = [];					//粒子 - 贴图容器
-	this._drill_par_bitmap = null;						//粒子 - bitmap
-			
-	this._drill_vernier_needInit = true;				//游标 - 初始化 锁
-	this._drill_vernier_sprite = null;					//游标 - 贴图
-	this._drill_vernier_bitmaps = [];					//游标 - bitmap
-	this._drill_vernier_flicker = 1;					//游标 - 闪烁方向
-	this._drill_vernier_time = 0;						//游标 - 当前时间
-	this._drill_vernier_cur = 0;						//游标 - 当前动画帧
-			
-	this._drill_filling_needInit = true;				//加满动画 - 初始化 锁
-	this._drill_filling_mask = null;					//加满动画 - 贴图
+	// > 销毁 - C追逐值（无）
 	
+	// > 销毁 - D流动效果（无）
+	
+	// > 销毁 - E凹槽条
+	this._drill_leak_sprite = null;
+	
+	// > 销毁 - F弹出条
+	this._drill_spring_needInit = false;
+	this._drill_spring_tank.length = 0;
+	
+	// > 销毁 - G粒子
+	this._drill_par_needInit = false;
+	this._drill_par_spriteTank.length = 0;
+	this._drill_par_bitmap = null;
+	
+	// > 销毁 - H游标
+	this._drill_vernier_needInit = false;
+	this._drill_vernier_sprite = null;
+	this._drill_vernier_bitmaps.length = 0;
+	
+	// > 销毁 - I加满动画
+	this.removeChild(this._drill_filling_mask);
+	this._drill_filling_needInit = false;
+	this._drill_filling_mask = null;
+}
+//==============================
+// * 参数条 - 销毁 - 递归断开连接（私有）
+//==============================
+Drill_COGM_MeterSprite.prototype.drill_COGM_removeChildConnect = function( parent_sprite ){
+	if( parent_sprite == undefined ){ return; }
+	var sprite_list = parent_sprite.children;
+	if( sprite_list == undefined ){ return; }
+	for(var i = 0; i < sprite_list.length; i++ ){
+		var sprite = sprite_list[i];
+		if( sprite == undefined ){ continue; }
+		parent_sprite.removeChild( sprite );
+		this.drill_COGM_removeChildConnect( sprite );
+	}
+};
+//==============================
+// * 参数条 - 资源宽度
+//==============================
+Drill_COGM_MeterSprite.prototype.drill_srcWidth = function(){
+	if( !this._drill_section_bitmap.isReady() ){ return 0; } 
+	return this._drill_section_bitmap.width;
+};
+//==============================
+// * 参数条 - 资源高度
+//==============================
+Drill_COGM_MeterSprite.prototype.drill_srcHeight = function(){
+	if( !this._drill_section_bitmap.isReady() ){ return 0; } 
+	return this._drill_section_bitmap.height;
+};
+//==============================
+// * 参数条 - 资源是否准备就绪
+//==============================
+Drill_COGM_MeterSprite.prototype.drill_isSrcReady = function() {
+	if( this._drill_section_bitmap.isReady() == false ){ return false; }
+	return true;
+}
+
+
+//==============================
+// * A主体 - 初始化对象
+//==============================
+Drill_COGM_MeterSprite.prototype.drill_initAttr = function() {
+	this._drill_radian = 0;								//A主体 - 整体旋转弧度
+	this._layer_outer = null;							//A主体 - 外层
+	this._layer_context = null;							//A主体 - 内容层
+	this._layer_contextMask = null;						//A主体 - 内容层遮罩
+	this._drill_attr_needInit = true;
 	
 	// > 主体属性
-	this._drill_attr_needInit = true;
-	this.x = data['x'] + 0;	
-	this.y = data['y'] + 0;	
+	var data = this._drill_data;
+	this._drill_radian = data['rotation']/180*Math.PI;
+	this.x = 0;	
+	this.y = 0;	
 	this.anchor.x = data['anchor_x'];	
 	this.anchor.y = data['anchor_y'];	
 	this.rotation = this._drill_radian;	
 	this.visible = false;
-	
-	// > 创建函数
-	this.drill_createLayer();				//创建 - 层级
-	this.drill_createSection();				//创建 - 分段条
-	this.drill_createLeak();				//创建 - 凹槽条
-											//创建 - 弹出条（无）
-	this.drill_createParticle();			//创建 - 粒子
-	this.drill_createVernier();				//创建 - 游标
-											//创建 - 加满动画（无）
-}
-
-//==============================
-// * 创建 - 层级
-//==============================
-Drill_COGM_MeterSprite.prototype.drill_createLayer = function() {
 	
 	// > 层级初始化
 	this._layer_contextMask = new Sprite();			//内容层遮罩
@@ -1670,141 +1876,594 @@ Drill_COGM_MeterSprite.prototype.drill_createLayer = function() {
 	this.addChild(this._layer_outer);				//
 	
 	// > 内容层遮罩初始化
-	var data = this._drill_data;
 	if( data['meter_src_mask'] != "" ){
-		this._layer_contextMask.bitmap = ImageManager.loadBitmap( data['meter_src_file'], data['meter_src_mask'], 0, true);
+		var bitmap = ImageManager.loadBitmap( data['meter_src_file'], data['meter_src_mask'], 0, true);
+		this._layer_contextMask.bitmap = bitmap;
+		$gameTemp.drill_COGM_addBitmap( bitmap );
+		
 		this._layer_context.addChild(this._layer_contextMask);
 		this._layer_context.mask = this._layer_contextMask;
 	}
-}
+};
 //==============================
-// * 创建 - 分段条
+// * A主体 - 延迟初始化
 //==============================
-Drill_COGM_MeterSprite.prototype.drill_createSection = function() {
+Drill_COGM_MeterSprite.prototype.drill_delayingInitAttr = function() {
 	
-	// > 主体bitmap
+	// > 设置初始位置
 	var data = this._drill_data;
-	this._drill_meter_bitmap = ImageManager.loadBitmap( data['meter_src_file'], data['meter_src'], 0, true);
+	var ww = this.drill_levelWidth();
+	var hh = this.drill_levelHeight();
+	var point = $gameTemp.drill_COGM_getFixPointInAnchor(
+					0.0, 0.0,
+					data['anchor_x'], data['anchor_y'],
+					ww, hh,
+					this._drill_radian,
+					1.0 , 1.0 
+				);
+	this.x = data['x'] + point.x - ww*data['anchor_x'];
+	this.y = data['y'] + point.y - hh*data['anchor_y'];
+};
+//==============================
+// * A主体 - 层级排序
+//==============================
+Drill_COGM_MeterSprite.prototype.drill_COGM_sortByZIndex = function() {
+   this._layer_context.children.sort(function(a, b){return a.zIndex-b.zIndex});		//内容层
+   this._layer_outer.children.sort(function(a, b){return a.zIndex-b.zIndex});		//外层
+};
+
+
+//==============================
+// * B分段条 - 初始化对象
+//
+//			说明：	> 该部分只提供 上段、下段 的创建，基本的数据函数，框架帧刷新。
+//					> 高级操作由其他模块执行。
+//==============================
+Drill_COGM_MeterSprite.prototype.drill_initSection = function() {
+	this._drill_section_bitmap = null;					//B分段条 - 资源bitmap
+	this._drill_sectionUp_sprite = null;				//B分段条 - 上段
+	this._drill_sectionDown_sprite = null;				//B分段条 - 下段
+	this._drill_sectionUpFrame_x = 0;					//B分段条 - 上段框架x
+	this._drill_sectionUpFrame_y = 0;					//B分段条 - 上段框架y
+	this._drill_sectionUpFrame_w = 0;					//B分段条 - 上段框架w
+	this._drill_sectionUpFrame_h = 0;					//B分段条 - 上段框架h
+	this._drill_sectionDownFrame_x = 0;					//B分段条 - 下段框架x
+	this._drill_sectionDownFrame_y = 0;					//B分段条 - 下段框架y
+	this._drill_sectionDownFrame_w = 0;					//B分段条 - 下段框架w
+	this._drill_sectionDownFrame_h = 0;					//B分段条 - 下段框架h
+	this._drill_level_width = 0;						//B分段条 - 分段条宽度
+	this._drill_level_height = 0;						//B分段条 - 分段条高度
 	
-	// > 分段条初始化
-	this._drill_sectionUp_sprite = new Sprite();			//分段条_上
-	this._drill_sectionDown_sprite = new Sprite();			//分段条_下
+	// > 资源bitmap
+	var data = this._drill_data;
+	this._drill_section_bitmap = ImageManager.loadBitmap( data['meter_src_file'], data['meter_src'], 0, true);
+	$gameTemp.drill_COGM_addBitmap( this._drill_section_bitmap );
+	
+	// > 分段条初始化 - 上段
+	this._drill_sectionUp_sprite = new Sprite();
+	this._drill_sectionUp_sprite.bitmap = this._drill_section_bitmap;
 	this._drill_sectionUp_sprite.zIndex = 30;
-	this._drill_sectionDown_sprite.zIndex = 10;
 	this._layer_context.addChild(this._drill_sectionUp_sprite);
+	
+	// > 分段条初始化 - 下段
+	this._drill_sectionDown_sprite = new Sprite();
+	this._drill_sectionDown_sprite.bitmap = this._drill_section_bitmap;
+	this._drill_sectionDown_sprite.zIndex = 10;
 	this._layer_context.addChild(this._drill_sectionDown_sprite);
 	
-	// > 流动位置
-	this._drill_sectionUp_sprite_move = 0;					//上条初始位置
-	this._drill_sectionDown_sprite_move = 0;				//下条初始位置
-}
+	// > 层级排序
+	this.drill_COGM_sortByZIndex();
+};
 //==============================
-// * 创建 - 凹槽条
+// * B分段条 - 帧刷新 框架起点
 //==============================
-Drill_COGM_MeterSprite.prototype.drill_createLeak = function() {
-	this._drill_leak_sprite = new Sprite();
-	this._layer_context.addChild(this._drill_leak_sprite);	//必须创建一个贴图，不能独立
+Drill_COGM_MeterSprite.prototype.drill_updateLevel_FrameStart = function() {
+	this._drill_sectionUpFrame_x = 0;
+	this._drill_sectionUpFrame_y = 0;
+	this._drill_sectionUpFrame_w = 0;
+	this._drill_sectionUpFrame_h = 0;
+	this._drill_sectionDownFrame_x = 0;
+	this._drill_sectionDownFrame_y = 0;
+	this._drill_sectionDownFrame_w = 0;
+	this._drill_sectionDownFrame_h = 0;
+};
+//==============================
+// * B分段条 - 帧刷新 框架终点
+//==============================
+Drill_COGM_MeterSprite.prototype.drill_updateLevel_FrameEnd = function() {
 	
-	var data = this._drill_data;
-	if( data['leak_enable'] == true ){
-		this._drill_leak_sprite.bitmap = ImageManager.loadBitmap( data['leak_src_file'], data['leak_src'], 0, true);
-		this._drill_leak_sprite.drill_COGM_setFrame(0,0,0,0);
-	}
-}
-//==============================
-// * 创建 - 粒子
-//==============================
-Drill_COGM_MeterSprite.prototype.drill_createParticle = function() {
-	var data = this._drill_data;
-	if( data['par_enable'] == false ){ return; }
+	// > 上段
+	this._drill_sectionUp_sprite.drill_COGM_setFrame(
+		this._drill_sectionUpFrame_x,
+		this._drill_sectionUpFrame_y,
+		this._drill_sectionUpFrame_w,
+		this._drill_sectionUpFrame_h
+	);
 	
-	this._drill_par_bitmap = ImageManager.loadBitmap( data['par_src_file'], data['par_src'], 0, true);
-}
+	// > 下段
+	this._drill_sectionDown_sprite.drill_COGM_setFrame(
+		this._drill_sectionDownFrame_x,
+		this._drill_sectionDownFrame_y,
+		this._drill_sectionDownFrame_w,
+		this._drill_sectionDownFrame_h
+	);
+};
 //==============================
-// * 创建 - 游标
+// * B分段条 - 数据 - 分段条宽度（开放接口）
 //==============================
-Drill_COGM_MeterSprite.prototype.drill_createVernier = function() {
+Drill_COGM_MeterSprite.prototype.drill_levelWidth = function(){
+	if( this._drill_level_width == 0 ){
+		this.drill_initLevelWidthAndHeight();	//（高宽初始化）
+	}
+	return this._drill_level_width;
+};
+//==============================
+// * B分段条 - 数据 - 分段条高度（开放接口）
+//==============================
+Drill_COGM_MeterSprite.prototype.drill_levelHeight = function(){
+	if( this._drill_level_height == 0 ){
+		this.drill_initLevelWidthAndHeight();	//（高宽初始化）
+	}
+	return this._drill_level_height;
+};
+//==============================
+// * B分段条 - 数据 - 高宽初始化（私有）
+//==============================
+Drill_COGM_MeterSprite.prototype.drill_initLevelWidthAndHeight = function(){
 	var data = this._drill_data;
-	if( data['vernier_enable'] == false ){ return; }
+	var ww = this._drill_section_bitmap.width;
+	var hh = this._drill_section_bitmap.height;
 	
-	this._drill_vernier_bitmaps = [];
-	for(var j=0; j < data['vernier_src'].length; j++){
-		this._drill_vernier_bitmaps[j] = ImageManager.loadBitmap( data['vernier_src_file'], data['vernier_src'][j], 0, true);
-	}
-}
-//==============================
-// * 延迟初始化
-//==============================
-Drill_COGM_MeterSprite.prototype.drill_updateDelayingInit = function() {
-	var data = this._drill_data;
-	
-	// > 加满动画
-	if( this.drill_isLevelsReady() && this._drill_filling_needInit ){	
-		this._drill_filling_needInit = false;
-		this.drill_delayingInitFilling();
-	}
-	// > 主体
-	if( this.drill_isLevelsReady() && this._drill_attr_needInit ){
-		this._drill_attr_needInit = false;
-		var ww = this.drill_levelWidth();
-		var hh = this.drill_levelHeight();
-		var point = $gameTemp.drill_COGM_getFixPointInAnchor(
-						0.0, 0.0,
-						data['anchor_x'], data['anchor_y'],
-						ww, hh,
-						this._drill_radian,
-						1.0 , 1.0 
-					);
-		this.x = data['x'] + point.x - ww*data['anchor_x'];
-		this.y = data['y'] + point.y - hh*data['anchor_y'];
-	}
-	// > 显示
-	if( this.drill_isLevelsReady() && this.visible != data['visible'] ){
-		this.visible = data['visible'];
-	}
-	// > 分段条
-	if( this._drill_meter_bitmap.isReady() && this._drill_level_needInit ){	
-		this._drill_level_needInit = false;
-		this.drill_delayingInitLevel();
-	}
-	// > 弹出条
-	if( this.drill_isLevelsReady() && this._drill_spring_needInit ){	
-		this._drill_spring_needInit = false;
-		this.drill_delayingInitSpring();
-	}
-	// > 粒子
-	if( this._drill_par_bitmap && this._drill_par_bitmap.isReady() && this._drill_par_needInit ){	
-		this._drill_par_needInit = false;
-		this.drill_delayingInitParticle();
-	}
-	// > 游标
-	if( this._drill_vernier_bitmaps.length != 0 && this._drill_vernier_bitmaps[0].isReady() && this._drill_vernier_needInit ){	
-		this._drill_vernier_needInit = false;
-		this.drill_delayingInitVernier();
-	}
-}
-//==============================
-// * 延迟初始化 - 分段条
-//==============================
-Drill_COGM_MeterSprite.prototype.drill_delayingInitLevel = function() {
-	var data = this._drill_data;
-	this._drill_level_bitmaps = [];	
-	for(var i=0; i < data['level_count']; i++){
-
-		// > 资源切割（分段条）
-		var cut_height = this.drill_meterHeight() / data['level_count'];
-		var new_bitmap = new Bitmap( this.drill_meterWidth(), cut_height );
-		var x = 0;
-		var y = cut_height * i;
-		var w = this.drill_meterWidth();	//总宽
-		var h = cut_height;
-		new_bitmap.blt( this._drill_meter_bitmap,  x, y, w, h,  0, 0, w, h);
-		this._drill_level_bitmaps.push(new_bitmap);
+	// > D流动效果
+	if( data['flow_enable'] == true ){
 		
+		// > 三等份划分
+		ww = Math.ceil( ww/3 );
+		
+		// > 指定段长度划分
+		if( data['flow_srcMode'] == "指定段长度划分" && data['flow_levelLength'] != 0 ){
+			ww = data['flow_levelLength'];
+		}
+	}
+	
+	// > 段数
+	hh = Math.ceil( hh / data['level_count'] );
+	
+	this._drill_level_width = ww;
+	this._drill_level_height = hh;
+};
+
+
+//==============================
+// * C追逐值 - 初始化对象
+//==============================
+Drill_COGM_MeterSprite.prototype.drill_initChase = function() {
+	this._drill_chase_curValue = 0;					//C追逐值 - 当前值
+	this._drill_chase_curLevel = -1;				//C追逐值 - 当前层级
+}
+//==============================
+// * C追逐值 - 帧刷新 当前值
+//
+//			说明：	当前函数只给 this._drill_chase_curValue 赋值。
+//==============================
+Drill_COGM_MeterSprite.prototype.drill_updateChase_Value = function() {
+	var data = this._drill_data;
+	
+	// > 当前值 阻塞
+	//		（被阻塞时，值不变，等待释放）
+	if( this.drill_isChaseBlock() == true ){ return; }
+	
+	
+	// > C追逐值
+	var cur_value = this._drill_chase_curValue;
+	var new_value = this._drill_new_value;
+	var diff_value = Math.abs( cur_value - new_value );
+	var vv = this._drill_chase_curValue;
+	
+	// > C追逐值 - 伸长方式
+	if( cur_value < new_value ){
+		
+		// > 伸长方式 - 瞬间
+		if( data['lengthen_mode'] == "瞬间伸长" || data['lengthen_speed'] == 0 || data['lengthen_ratio'] == 0 ){
+			vv = new_value;
+		
+		// > 伸长方式 - 弹性
+		}else if( data['lengthen_mode'] == "弹性伸长" ){
+			var speed = Math.max( diff_value/data['lengthen_ratio'], 1 );
+			vv += speed;
+			if( vv > new_value ){
+				vv = new_value;
+			}
+			
+		// > 伸长方式 - 匀速
+		}else if( data['lengthen_mode'] == "匀速伸长" ){
+			var ww = this.drill_srcWidth();
+			var speed = data['level_max'] / ww * data['lengthen_speed'];
+			if( diff_value > data['level_max'] ){
+				speed = speed * diff_value/data['level_max'];		//（如果差值远远大于匀速缩短，则加大缩短倍率）
+			}
+			vv += speed;
+			if( vv > new_value ){
+				vv = new_value;
+			}
+		}
+		
+	// > C追逐值 - 缩短方式
+	}else if( cur_value > new_value ){
+		
+		// > 缩短方式 - 瞬间
+		if( data['shorten_mode'] == "瞬间缩短" || data['shorten_speed'] == 0 || data['shorten_ratio'] == 0 ){
+			vv = new_value;
+			
+		// > 缩短方式 - 弹性
+		}else if( data['shorten_mode'] == "弹性缩短" ){
+			var speed = Math.max( diff_value/data['shorten_ratio'], 1 );
+			vv -= speed;
+			if( vv < new_value ){
+				vv = new_value;
+			}
+			
+		// > 缩短方式 - 匀速
+		}else if( data['shorten_mode'] == "匀速缩短" ){
+			var ww = this.drill_srcWidth();
+			var speed = data['level_max'] / ww * data['shorten_speed'];
+			if( diff_value > data['level_max'] ){
+				speed = speed * diff_value/data['level_max'];		//（如果差值远远大于匀速缩短，则加大缩短倍率）
+			}
+			vv -= speed;
+			if( vv < new_value ){
+				vv = new_value;
+			}
+		}
+	}
+	this._drill_chase_curValue = vv;
+}
+//==============================
+// * C追逐值 - 帧刷新 当前层级
+//
+//			说明：	> 当前函数给 this._drill_chase_curLevel 赋值。
+//					> 你可以在 减少时 添加其他功能的阻塞设置。
+//==============================
+Drill_COGM_MeterSprite.prototype.drill_updateChase_Level = function() {
+	var data = this._drill_data;
+	
+	// > 当前层级 阻塞
+	//		（被阻塞时，值不变，等待释放）
+	if( this.drill_isChaseBlock() == true ){ return; }
+	
+	
+	// > 真实值结果
+	var a1 = Math.floor(this._drill_chase_curValue / data['level_max']);
+	var a2 = Math.floor(this._drill_chase_curValue % data['level_max']);
+	if( this._drill_chase_curLevel == a1 ){ return; }
+	
+	
+	// > 当前层级 - 减少时
+	if( this._drill_chase_curLevel > a1 ){
+		this._drill_chase_curLevel -= 1;
+		
+		// > ■凹槽条阻塞
+		//		（每次小于层级时，E凹槽条 都阻塞一次）
+		if( data['leak_enable'] == true ){
+			this._drill_leak_isBlocked = true;
+		}
+	}
+	
+	
+	// > 当前层级 - 增加时
+	if( this._drill_chase_curLevel < a1 ){
+		this._drill_chase_curLevel += 1;
 	}
 }
 //==============================
-// * 延迟初始化 - 弹出条
+// * C追逐值 - 帧刷新 框架值
+//
+//			说明：	此函数只操作 分段条 框架。
+//==============================
+Drill_COGM_MeterSprite.prototype.drill_updateChase_FrameValue = function() {
+	var data = this._drill_data;
+	
+	// > B分段条
+	var a1 = Math.floor(this._drill_chase_curValue / data['level_max']);
+	var a2 = Math.floor(this._drill_chase_curValue % data['level_max']);
+	var ww = this.drill_levelWidth() *a2/data['level_max'];
+	if( a2 == data['level_max'] -1 ){
+		ww += 1;	//（799这种差一点点的参数值，补满条）
+	}
+	
+	// > B分段条 - 宽度
+	this._drill_sectionUpFrame_w = ww;
+	this._drill_sectionDownFrame_w = this.drill_levelWidth();
+}
+//==============================
+// * C追逐值 - 帧刷新 框架层级
+//
+//			说明：	此函数只操作 分段条 框架。
+//==============================
+Drill_COGM_MeterSprite.prototype.drill_updateChase_FrameLevel = function() {
+	var data = this._drill_data;
+	var cur_count = this._drill_chase_curLevel;
+	
+	// > B分段条
+	var hh = this.drill_levelHeight();
+	var u_yy = cur_count *hh;
+	var u_hh = hh;
+	var d_yy = (cur_count-1) *hh;
+	var d_hh = hh;
+	
+	// > B分段条 - 最后一层时
+	if( cur_count == 0 ){
+		u_yy = 0 *hh;
+		u_hh = hh;
+		d_yy = 0;
+		d_hh = 0;
+	}
+	
+	// > B分段条 - 超过最大层时
+	if( cur_count >= data['level_count'] ){
+		
+		// > 段循环 - 循环色
+		if( data['level_isLoop'] == true ){
+			var cc = cur_count % data['level_count'];
+			if( cc == 0 ){
+				u_yy = 0 *hh;
+				u_hh = hh;
+				d_yy = (data['level_count'] - 1) *hh;
+				d_hh = hh;
+			}else{
+				u_yy = cc *hh;
+				u_hh = hh;
+				d_yy = (cc-1) *hh;
+				d_hh = hh;
+			}
+			
+		// > 段循环 - 不循环色
+		}else{
+			u_yy = (data['level_count'] - 1) *hh;
+			u_hh = hh;
+			d_yy = (data['level_count'] - 1) *hh;
+			d_hh = hh;
+		}
+	}
+	
+	// > B分段条 - Y位置与高度
+	this._drill_sectionUpFrame_y = u_yy;
+	this._drill_sectionUpFrame_h = u_hh;
+	this._drill_sectionDownFrame_y = d_yy;
+	this._drill_sectionDownFrame_h = d_hh;
+}
+//==============================
+// * C追逐值 - 是否被阻塞（开放接口）
+//==============================
+Drill_COGM_MeterSprite.prototype.drill_isChaseBlock = function(){
+	if( this._drill_leak_isBlocked == true ){ return true; }
+	return false;
+}
+//==============================
+// * C追逐值 - 上段的宽度（开放接口）
+//==============================
+Drill_COGM_MeterSprite.prototype.drill_chaseUpWidth = function(){
+	var data = this._drill_data;
+	var a1 = Math.floor(this._drill_chase_curValue / data['level_max']);
+	var a2 = Math.floor(this._drill_chase_curValue % data['level_max']);
+	
+	// > 大于一层时
+	if( a1 > 0 ){
+		return this.drill_levelWidth();
+		
+	// > 只剩最后一层时
+	}else{
+		return this.drill_levelWidth() *a2/data['level_max'];
+	}
+};
+
+
+//==============================
+// * D流动效果 - 初始化对象
+//==============================
+Drill_COGM_MeterSprite.prototype.drill_initFlow = function() {
+	this._drill_flow_upMove = 0;				//D流动效果 - 上段框架x偏移值
+	this._drill_flow_downMove = 0;				//D流动效果 - 下段框架x偏移值
+}
+//==============================
+// * D流动效果 - 帧刷新 - 流动值
+//==============================
+Drill_COGM_MeterSprite.prototype.drill_updateFlow_Value = function() {
+	var data = this._drill_data;
+	
+	// > 不流动
+	//	（不操作）
+	
+	// > 流动（增量累加速度）
+	var s_ww = Math.floor(this.drill_srcWidth());
+	var ww = Math.floor(this.drill_levelWidth());
+	if( data['flow_enable'] == true ){
+		var f_speed = Math.abs( data['flow_speed'] );
+		if( data['flow_dir'] == "从左往右" ){ f_speed = -1 * f_speed; }
+		if( f_speed > 0){
+			this._drill_flow_upMove += f_speed;
+			if( this._drill_flow_upMove >= s_ww-ww ){
+				this._drill_flow_upMove = 0 ;
+			}
+		}else if( f_speed < 0){
+			this._drill_flow_upMove += f_speed;
+			if( this._drill_flow_upMove <= 0 ){
+				this._drill_flow_upMove = s_ww-ww ;
+			}
+		}
+		if( f_speed > 0){
+			this._drill_flow_downMove += f_speed;
+			if( this._drill_flow_downMove >= s_ww-ww ){
+				this._drill_flow_downMove = 0 ;
+			}
+		}else if( f_speed < 0){
+			this._drill_flow_downMove += f_speed;
+			if( this._drill_flow_downMove <= 0 ){
+				this._drill_flow_downMove = s_ww-ww ;
+			}
+		}
+	}
+}
+//==============================
+// * D流动效果 - 帧刷新 - 框架值
+//==============================
+Drill_COGM_MeterSprite.prototype.drill_updateFlow_Frame = function() {
+	
+	// > B分段条 - X位置
+	this._drill_sectionUpFrame_x += this._drill_flow_upMove;
+	this._drill_sectionDownFrame_x += this._drill_flow_downMove;
+}
+
+
+//==============================
+// * E凹槽条 - 初始化对象
+//
+//			说明：	凹槽条由于需要长期滞留，因此必要时需要 阻塞 C追逐值 。
+//==============================
+Drill_COGM_MeterSprite.prototype.drill_initLeak = function() {
+	this._drill_leak_sprite = null;				//E凹槽条 - 贴图
+	this._drill_leak_curValue = 0;				//E凹槽条 - 当前值
+	this._drill_leak_isRecording = false;		//E凹槽条 - 记录标记
+	this._drill_leak_delay = 0;					//E凹槽条 - 延时时间
+	this._drill_leak_isBlocked = false;			//E凹槽条 - ■凹槽条阻塞（每次层级降1时自动阻塞）
+	
+	// > 资源bitmap
+	var data = this._drill_data;
+	if( data['leak_enable'] != true ){ return };
+	var bitmap = ImageManager.loadBitmap( data['leak_src_file'], data['leak_src'], 0, true);
+	$gameTemp.drill_COGM_addBitmap( bitmap );
+	
+	// > 创建贴图
+	this._drill_leak_sprite = new Sprite();
+	this._drill_leak_sprite.bitmap = bitmap;
+	this._drill_leak_sprite.zIndex = 20;
+	this._drill_leak_sprite.drill_COGM_setFrame(0,0,0,0);
+	this._layer_context.addChild(this._drill_leak_sprite);
+	
+	// > 层级排序
+	this.drill_COGM_sortByZIndex();
+}
+//==============================
+// * E凹槽条 - 帧刷新 数值
+//==============================
+Drill_COGM_MeterSprite.prototype.drill_updateLeaking_Value = function() {
+	var data = this._drill_data;
+	if( data['leak_enable'] != true ){ return };
+	
+	// > 滞留标记
+	//		（小于追逐值时，直接设为追逐值）
+	if( this._drill_leak_curValue <= this._drill_chase_curValue ){
+		this._drill_leak_curValue = this._drill_chase_curValue;
+		this._drill_leak_isRecording = false;
+	}
+	
+	// > 滞留标记
+	//		（大于追逐值时，开始滞留）
+	if( this._drill_leak_isRecording == false ){
+		if( this._drill_leak_curValue > this._drill_chase_curValue ){
+			this._drill_leak_isRecording = true;
+			this._drill_leak_delay = data['leak_delay'];
+		}
+	}
+	if( this._drill_leak_isRecording == false ){ return; }
+	
+	
+	// > 延迟 - 连续受伤时，刷新延迟
+	if( data['leak_delayRefresh'] == true && this._drill_new_value != this._drill_cur_value ){
+		this._drill_leak_delay = data['leak_delay'];
+	}
+	
+	// > 延迟 - ■凹槽条阻塞
+	//		（阻塞时，凹槽条不再等待，立即缩短）
+	if( this._drill_leak_isBlocked == true ){
+		this._drill_leak_delay = 0;
+	}
+	
+	// > 延迟 - 开始扣除
+	this._drill_leak_delay -= 1;
+	if( this._drill_leak_delay <= 0 ){
+		
+		// > 扣除速度
+		if( this._drill_leak_curValue > this._drill_chase_curValue ){
+			this._drill_leak_curValue -= ( data['level_max'] *data['leak_speed']/this.drill_levelWidth() );
+			if( this._drill_leak_curValue < this._drill_chase_curValue ){
+				this._drill_leak_curValue = this._drill_chase_curValue;
+			}
+		}
+	}
+}
+//==============================
+// * E凹槽条 - 帧刷新 框架
+//==============================
+Drill_COGM_MeterSprite.prototype.drill_updateLeaking_Frame = function() {
+	var data = this._drill_data;
+	if( data['leak_enable'] != true ){ return };
+	
+	// > 凹槽条长度
+	var l_a1 = Math.floor(this._drill_leak_curValue / data['level_max']);
+	var l_a2 = Math.floor(this._drill_leak_curValue % data['level_max']);
+	var ww = this.drill_levelWidth() * l_a2 / data['level_max'];
+	this._drill_leak_sprite.drill_COGM_setFrame( 0, 0, ww, this.drill_levelHeight() );
+}
+//==============================
+// * E凹槽条 - 帧刷新 阻塞
+//
+//			说明：	层级下降一层时，等待凹槽条流逝完毕的状态，该状态显示的分段条会卡在最大值位置。
+//==============================
+Drill_COGM_MeterSprite.prototype.drill_updateLeaking_Block = function() {
+	var data = this._drill_data;
+	if( data['leak_enable'] != true ){ return; };
+	
+	// > ■凹槽条阻塞
+	//		（凹槽条 流逝完毕后 才结束阻塞）
+	if( this._drill_leak_curValue <= this._drill_chase_curValue ){
+		this._drill_leak_isBlocked = false;
+		this._drill_leak_isRecording = false;
+	}
+	
+	// > ■凹槽条阻塞
+	//		（阻塞时，层级顺序变化）
+	var a1 = Math.floor(this._drill_chase_curValue / data['level_max']);
+	var l_a1 = Math.floor(this._drill_leak_curValue / data['level_max']);
+	if( this._drill_leak_isBlocked == true ){
+		if( a1 < l_a1 ){
+			if( this._drill_leak_sprite.zIndex != 40 ){
+				this._drill_leak_sprite.zIndex = 40;
+				this.drill_COGM_sortByZIndex();
+			}
+		}else{
+			if( this._drill_leak_sprite.zIndex != 20 ){
+				this._drill_leak_sprite.zIndex = 20;
+				this.drill_COGM_sortByZIndex();
+			}
+		}
+		
+		// > ■凹槽条阻塞
+		//		（阻塞时，条为满状态）
+		this._drill_sectionUpFrame_w = this.drill_levelWidth();
+		this._drill_sectionDownFrame_w = this.drill_levelWidth();
+	}
+	
+	// > 未阻塞时，保持夹在 上段/下段 的中间
+	if( this._drill_leak_isBlocked == false && 
+		this._drill_leak_sprite.zIndex != 20 ){
+		this._drill_leak_sprite.zIndex = 20;
+		this.drill_COGM_sortByZIndex();
+	}
+}
+
+
+//==============================
+// * F弹出条 - 初始化对象
+//==============================
+Drill_COGM_MeterSprite.prototype.drill_initSpring = function() {
+	this._drill_spring_needInit = true;					//F弹出条 - 初始化 锁
+	this._drill_spring_tank = [];						//F弹出条 - 贴图容器
+	this._drill_spring_cur_tankIndex = 0;				//F弹出条 - 索引下标
+	this._drill_spring_curValue = 0;					//F弹出条 - 缓冲值
+}
+//==============================
+// * F弹出条 - 延迟初始化
 //==============================
 Drill_COGM_MeterSprite.prototype.drill_delayingInitSpring = function() {
 	var data = this._drill_data;
@@ -1813,19 +2472,113 @@ Drill_COGM_MeterSprite.prototype.drill_delayingInitSpring = function() {
 	for(var j=0; j < data['spring_maxNum']; j++){
 		
 		// > 弹出条初始化（与分段条宽度高度一样）
-		var cut_height = this.drill_meterHeight() / data['level_count'];
-		var temp_sprite = new Drill_COGM_SpringSprite( this.drill_meterWidth(), cut_height );
+		var cut_height = this.drill_srcHeight() / data['level_count'];
+		var temp_sprite = new Drill_COGM_SpringSprite( this.drill_srcWidth(), cut_height );
 		this._drill_spring_tank[j] = temp_sprite;
 		this._layer_outer.addChild(temp_sprite);
 	}
 }
 //==============================
-// * 延迟初始化 - 粒子
+// * F弹出条 - 帧刷新
+//==============================
+Drill_COGM_MeterSprite.prototype.drill_updateSpringShowing = function() {
+	var data = this._drill_data;
+	if( data['spring_enable'] == false ){ return; }
+	
+	// > 参数增加
+	if( this._drill_spring_curValue < this._drill_new_value ){
+		// ... 暂不操作
+	}
+	
+	// > 参数减少
+	if( this._drill_spring_curValue > this._drill_new_value ){
+		
+		var w1 = Math.floor(this._drill_spring_curValue % data['level_max']);		//原切点（参数值）
+		var w2 = Math.floor(this._drill_new_value % data['level_max']);				//新切点（参数值）
+		w1 = this.drill_levelWidth() / data['level_max'] * w1;						//原切点（长度值）
+		w2 = this.drill_levelWidth() / data['level_max'] * w2;						//新切点（长度值）
+		
+		// > 当前段减少
+		if( w1 > w2 ){
+			var spring_bitmap = this._drill_section_bitmap;
+			var spring_data = {};		//重新组装必要参数
+			spring_data['pos_x'] = w2;
+			spring_data['pos_y'] = 0;
+			spring_data['xx'] = this._drill_sectionUpFrame_x;
+			spring_data['yy'] = this._drill_sectionUpFrame_y;
+			spring_data['ww'] = w1-w2;	//弹出条宽度
+			spring_data['hh'] = this.drill_levelHeight();
+			spring_data['type'] = data['spring_type'];
+			spring_data['ballistics'] = data['spring_ballistics'];
+			var spring_sprite = this._drill_spring_tank[ this._drill_spring_cur_tankIndex ];
+			spring_sprite.drill_resetData( spring_data, spring_bitmap );
+			
+			this._drill_spring_cur_tankIndex += 1;
+			this._drill_spring_cur_tankIndex %= data['spring_maxNum'];
+			
+		// > 段直接减少到下一段
+		} else if( w2 > w1 ){
+			var spring_bitmap = this._drill_section_bitmap;
+			var spring_data = {};		//头部的碎片
+			spring_data['pos_x'] = 0;
+			spring_data['pos_y'] = 0;
+			spring_data['xx'] = this._drill_sectionUpFrame_x;
+			spring_data['yy'] = this._drill_sectionUpFrame_y;
+			spring_data['ww'] = w1;
+			spring_data['hh'] = this.drill_levelHeight();
+			spring_data['type'] = data['spring_type'];
+			spring_data['ballistics'] = data['spring_ballistics'];
+			var spring_sprite = this._drill_spring_tank[ this._drill_spring_cur_tankIndex ];
+			spring_sprite.drill_resetData( spring_data, spring_bitmap );
+			this._drill_spring_cur_tankIndex += 1;
+			this._drill_spring_cur_tankIndex %= data['spring_maxNum'];
+			
+			var spring_bitmap = this._drill_section_bitmap;
+			var spring_data = {};		//尾部的碎片
+			spring_data['pos_x'] = w2;
+			spring_data['pos_y'] = 0;
+			spring_data['xx'] = this._drill_sectionDownFrame_x;
+			spring_data['yy'] = this._drill_sectionDownFrame_y;
+			spring_data['ww'] = this.drill_levelWidth() - w2;
+			spring_data['hh'] = this.drill_levelHeight();
+			spring_data['type'] = data['spring_type'];
+			spring_data['ballistics'] = data['spring_ballistics'];
+			var spring_sprite = this._drill_spring_tank[ this._drill_spring_cur_tankIndex ];
+			spring_sprite.drill_resetData( spring_data, spring_bitmap );
+			this._drill_spring_cur_tankIndex += 1;
+			this._drill_spring_cur_tankIndex %= data['spring_maxNum'];
+		}
+	}
+	
+	// > 控制参数
+	if( this._drill_spring_curValue != this._drill_new_value ){
+		this._drill_spring_curValue = this._drill_new_value;
+	}
+}
+
+
+//==============================
+// * G粒子 - 初始化对象
+//==============================
+Drill_COGM_MeterSprite.prototype.drill_initParticle = function() {
+	this._drill_par_needInit = true;					//G粒子 - 初始化 锁
+	this._drill_par_spriteTank = [];					//G粒子 - 贴图容器
+	this._drill_par_bitmap = null;						//G粒子 - bitmap
+	
+	// > 资源bitmap
+	var data = this._drill_data;
+	if( data['par_enable'] == false ){ return; }
+	this._drill_par_bitmap = ImageManager.loadBitmap( data['par_src_file'], data['par_src'], 0, true);
+	$gameTemp.drill_COGM_addBitmap( this._drill_par_bitmap );
+}
+//==============================
+// * G粒子 - 延迟初始化
 //==============================
 Drill_COGM_MeterSprite.prototype.drill_delayingInitParticle = function() {
 	var data = this._drill_data;
 	if( data['par_enable'] == false ){ return; }
 	
+	// > 创建粒子
 	for( var j = 0; j < data['par_count'] ; j++ ){
 		var temp_sprite = new Sprite( this._drill_par_bitmap );
 		temp_sprite.anchor.x = 0.5;
@@ -1840,461 +2593,13 @@ Drill_COGM_MeterSprite.prototype.drill_delayingInitParticle = function() {
 	}
 }
 //==============================
-// * 延迟初始化 - 游标
-//==============================
-Drill_COGM_MeterSprite.prototype.drill_delayingInitVernier = function() {
-	var data = this._drill_data;
-	if( data['vernier_enable'] == false ){ return; }
-	
-	var temp_sprite = new Sprite( this._drill_vernier_bitmaps[0] );
-	temp_sprite.anchor.x = 0.5;
-	temp_sprite.anchor.y = 0.5;
-	temp_sprite.opacity = 0;
-	
-	this._drill_vernier_sprite = temp_sprite;
-	if( data['vernier_maskCover'] == true ){
-		temp_sprite.zIndex = 50;
-		this._layer_context.addChild( temp_sprite );	//（处于内容层，会被遮挡）
-	}else{
-		temp_sprite.zIndex = 10;
-		this._layer_outer.addChild( temp_sprite );		//（游标位于弹出层）
-	}
-}
-//==============================
-// * 延迟初始化 - 加满动画
-//==============================
-Drill_COGM_MeterSprite.prototype.drill_delayingInitFilling = function() {
-	var data = this._drill_data;
-	if( data['filling_enable'] == false ){ return; }
-	
-	var filling_data = {};
-	filling_data['x'] = 0;
-	filling_data['y'] = 0;
-	filling_data['w'] = this.drill_levelWidth();
-	filling_data['h'] = this.drill_levelHeight();
-	filling_data['mode'] = data['filling_mode'];
-	filling_data['time'] = data['filling_time'];
-	filling_data['delay'] = data['filling_delay'];
-	
-	var temp_mask = new Drill_COGM_MeterSpriteMask( filling_data );
-	this.mask = temp_mask;
-	this.addChild(temp_mask);
-	this._drill_filling_mask = temp_mask;
-}
-//==============================
-// * 销毁 - 执行销毁
-//==============================
-Drill_COGM_MeterSprite.prototype.drill_COGM_destroy_Private = function() {
-	this.visible = false;
-	
-	// > 断开联系
-	this.drill_COGM_removeChildConnect( this._layer_context );
-	this.drill_COGM_removeChildConnect( this._layer_outer );
-	this.removeChild(this._drill_filling_mask);
-	
-	// > 销毁 - 层级
-	this._drill_attr_needInit = false;
-	this._drill_meter_bitmap = null;
-	this._layer_outer = null;
-	this._layer_context = null;
-	this._layer_contextMask = null;
-	
-	// > 销毁 - 分段条
-	this._drill_sectionUp_sprite = null;
-	this._drill_sectionDown_sprite = null;
-	this._drill_level_needInit = false;
-	this._drill_level_bitmaps.length = 0;
-	
-	// > 销毁 - 凹槽条
-	this._drill_leak_sprite = null;
-	
-	// > 销毁 - 弹出条
-	this._drill_spring_needInit = false;
-	this._drill_spring_tank.length = 0;
-	
-	// > 销毁 - 粒子
-	this._drill_par_needInit = false;
-	this._drill_par_spriteTank.length = 0;
-	this._drill_par_bitmap = null;
-	
-	// > 销毁 - 游标
-	this._drill_vernier_needInit = false;
-	this._drill_vernier_sprite = null;
-	this._drill_vernier_bitmaps.length = 0;
-	
-	// > 销毁 - 加满动画
-	this._drill_filling_needInit = false;
-	this._drill_filling_mask = null;
-}
-//==============================
-// * 销毁 - 递归断开连接
-//==============================
-Drill_COGM_MeterSprite.prototype.drill_COGM_removeChildConnect = function( parent_sprite ){
-	if( parent_sprite == undefined ){ return; }
-	var sprite_list = parent_sprite.children;
-	if( sprite_list == undefined ){ return; }
-	for(var i = 0; i < sprite_list.length; i++ ){
-		var sprite = sprite_list[i];
-		if( sprite == undefined ){ continue; }
-		parent_sprite.removeChild( sprite );
-		this.drill_COGM_removeChildConnect( sprite );
-	}
-};
-
-
-//==============================
-// * 帧刷新对象
-//==============================
-Drill_COGM_MeterSprite.prototype.drill_updateSprite = function() {
-	var data = this._drill_data;
-	if( this.drill_isLevelsReady() == false ){ return }
-	
-	this.drill_updateSpringShowing();				//帧刷新 - 弹出条（在上段下段切换前，要捕获bitmap对象）
-	this.drill_updateLevelValue();					//帧刷新 - 分段条 - 段值
-	this.drill_updateSection(); 					//帧刷新 - 分段条 - 层级变换
-	this.drill_updateSectionLength(); 				//帧刷新 - 分段条 - 长度+流动
-	
-	this.drill_updateLeakingValue();				//帧刷新 - 凹槽条数值
-	this.drill_updateLeakingMeter(); 				//帧刷新 - 凹槽条绘制
-	this.drill_updateLeakingBlock(); 				//帧刷新 - 段阻塞
-	
-	this.drill_updateParticle(); 					//帧刷新 - 粒子
-	this.drill_updateVernier(); 					//帧刷新 - 游标
-	this.drill_updateFilling(); 					//帧刷新 - 加满动画
-	
-	this._drill_cur_value = this._drill_new_value;	//（变化因子）
-}
-//==============================
-// * 帧刷新 - 分段条 - 段值（可以最直接地瞬间缩短，也可以缓冲计算）
-//==============================
-Drill_COGM_MeterSprite.prototype.drill_updateLevelValue = function() {
-	var data = this._drill_data;
-	if( this._drill_level_isBlocked == true ){ return; }	//阻塞时，分段条不变
-		
-	// > 伸长效果
-	if( this._drill_level_cur_value < this._drill_new_value ){
-		
-		// > 伸长效果 - 瞬间
-		if( data['lengthen_mode'] == "瞬间伸长" || data['lengthen_speed'] == 0 || data['lengthen_ratio'] == 0 ){
-			this._drill_level_cur_value = this._drill_new_value;
-		
-		// > 伸长效果 - 弹性
-		}else if( data['lengthen_mode'] == "弹性伸长" ){
-			var diff = Math.max( ( this._drill_new_value - this._drill_level_cur_value)/data['lengthen_ratio'] , 1 );
-			this._drill_level_cur_value += diff;
-			if( this._drill_level_cur_value > this._drill_new_value ){
-				this._drill_level_cur_value = this._drill_new_value;
-			}
-			
-		// > 伸长效果 - 匀速
-		}else if( data['lengthen_mode'] == "匀速伸长" ){
-			var ww = this.drill_meterWidth();
-			if( ww != 0 ){
-				
-				var diff = this._drill_new_value - this._drill_level_cur_value;	//（diff是正数）
-				var speed = data['level_max'] / ww * data['lengthen_speed'];
-				if( diff > data['level_max'] ){
-					speed = speed * diff/data['level_max'];		//（如果差值远远大于匀速缩短，则加大缩短倍率）
-				}
-				this._drill_level_cur_value += speed;
-				if( this._drill_level_cur_value > this._drill_new_value ){
-					this._drill_level_cur_value = this._drill_new_value;
-				}
-			}
-		}
-		
-	// > 缩短效果
-	}else if( this._drill_level_cur_value > this._drill_new_value ){
-		
-		// > 缩短效果 - 瞬间
-		if( data['shorten_mode'] == "瞬间缩短" || data['shorten_speed'] == 0 || data['shorten_ratio'] == 0 ){
-			this._drill_level_cur_value = this._drill_new_value;
-			
-		// > 缩短效果 - 弹性
-		}else if( data['shorten_mode'] == "弹性缩短" ){
-			var diff = Math.max( ( this._drill_level_cur_value - this._drill_new_value)/data['shorten_ratio'] , 1 );
-			this._drill_level_cur_value -= diff;
-			if( this._drill_level_cur_value < this._drill_new_value ){
-				this._drill_level_cur_value = this._drill_new_value;
-			}
-			
-		// > 缩短效果 - 匀速
-		}else if( data['shorten_mode'] == "匀速缩短" ){
-			var ww = this.drill_meterWidth();
-			if( ww != 0 ){
-				
-				var diff = this._drill_level_cur_value - this._drill_new_value;	//（diff是正数）
-				var speed = data['level_max'] / ww * data['shorten_speed'];
-				if( diff > data['level_max'] ){
-					speed = speed * diff/data['level_max'];		//（如果差值远远大于匀速缩短，则加大缩短倍率）
-				}
-				this._drill_level_cur_value -= speed;
-				if( this._drill_level_cur_value < this._drill_new_value ){
-					this._drill_level_cur_value = this._drill_new_value;
-				}
-			}
-		}
-	}
-	
-	// #阻塞 - 小于指定层级最大值时，阻塞
-	var cur_max = this._drill_cur_level * data['level_max'] -1;
-	if( this._drill_level_cur_value < cur_max ){
-		this._drill_level_cur_value = cur_max;
-		//alert(cur_max);
-	}
-}
-//==============================
-// * 帧刷新 - 分段条 - 层级变换
-//==============================
-Drill_COGM_MeterSprite.prototype.drill_updateSection = function() {
-	var data = this._drill_data;
-	
-	var a1 = Math.floor(this._drill_level_cur_value / data['level_max']);
-	var a2 = Math.floor(this._drill_level_cur_value % data['level_max']);
-	
-	if( this._drill_cur_level != a1 ){
-	
-		// #层级阻塞
-		// （小于层级时，必然阻塞。后面根据条件解除。）
-		if(this._drill_cur_level > a1){ this._drill_cur_level -= 1;this._drill_level_isBlocked = true;}
-		if(this._drill_cur_level < a1){ this._drill_cur_level = a1;this._drill_level_isBlocked = false;}
-		
-	
-		// #层级变换
-		if(a1 == 0 ){
-			//只剩最后一层时
-			this._drill_sectionUp_sprite.bitmap = this._drill_level_bitmaps[0];	
-			this._drill_sectionDown_sprite.bitmap = null;
-		}else if( a1 >= data['level_count'] ){
-			//参数值超过最大层时
-			if( data['level_isLoop'] ){
-				//循环色
-				var a3 = a1 % data['level_count'];
-				if( a3 == 0  ){
-					this._drill_sectionUp_sprite.bitmap = this._drill_level_bitmaps[0];
-					this._drill_sectionDown_sprite.bitmap = this._drill_level_bitmaps[data['level_count'] - 1];
-				}else{
-					this._drill_sectionUp_sprite.bitmap = this._drill_level_bitmaps[a3];
-					this._drill_sectionDown_sprite.bitmap = this._drill_level_bitmaps[a3-1];
-				}
-			}else{
-				//不循环色
-				this._drill_sectionUp_sprite.bitmap = this._drill_level_bitmaps[data['level_count'] - 1];
-				this._drill_sectionDown_sprite.bitmap = this._drill_level_bitmaps[data['level_count'] - 1];
-			}
-		}else{
-			//	正常层
-			this._drill_sectionUp_sprite.bitmap = this._drill_level_bitmaps[a1];
-			this._drill_sectionDown_sprite.bitmap = this._drill_level_bitmaps[a1-1];
-		}
-		
-	}
-}
-//==============================
-// * 帧刷新 - 分段条 - 长度+流动
-//==============================
-Drill_COGM_MeterSprite.prototype.drill_updateSectionLength = function() {
-	var data = this._drill_data;
-	var a1 = Math.floor(this._drill_level_cur_value / data['level_max']);
-	var a2 = Math.floor(this._drill_level_cur_value % data['level_max']);
-	
-	// > 长度计算
-	var ww = this.drill_levelWidth() / data['level_max'] * a2;
-	if( a2 == data['level_max'] -1 ){ ww += 1 }	//799这种差一点点的参数值，补满条
-			
-	// > 流动效果
-	var mw = Math.floor(this.drill_meterWidth());
-	var w = Math.floor(this.drill_levelWidth());
-	if( data['flow_enable'] ){
-		var f_speed = Math.abs( data['flow_speed'] );
-		if( data['flow_dir'] == "从左往右" ){ f_speed = -1 * f_speed; }
-		if( f_speed > 0){
-			this._drill_sectionUp_sprite_move += f_speed;
-			if( this._drill_sectionUp_sprite_move >= mw-w ){
-				this._drill_sectionUp_sprite_move = 0 ;
-			}
-		}else if( f_speed < 0){
-			this._drill_sectionUp_sprite_move += f_speed;
-			if( this._drill_sectionUp_sprite_move <= 0 ){
-				this._drill_sectionUp_sprite_move = mw-w ;
-			}
-		}
-		if( f_speed > 0){
-			this._drill_sectionDown_sprite_move += f_speed;
-			if( this._drill_sectionDown_sprite_move >= mw-w ){
-				this._drill_sectionDown_sprite_move = 0 ;
-			}
-		}else if( f_speed < 0){
-			this._drill_sectionDown_sprite_move += f_speed;
-			if( this._drill_sectionDown_sprite_move <= 0 ){
-				this._drill_sectionDown_sprite_move = mw-w ;
-			}
-		}
-	}
-	
-	// > 上条/下条长度
-	if(this._drill_sectionUp_sprite.bitmap != null){	//（流动和长度都只能通过setFrame一个函数控制，不能分开）
-		this._drill_sectionUp_sprite.drill_COGM_setFrame( this._drill_sectionUp_sprite_move, 0, ww, this.drill_levelHeight() );
-	}
-	if(this._drill_sectionDown_sprite.bitmap != null){
-		this._drill_sectionDown_sprite.drill_COGM_setFrame( this._drill_sectionDown_sprite_move, 0, w, this.drill_levelHeight() );
-	}
-}
-//==============================
-// * 帧刷新 - 凹槽条数值
-//==============================
-Drill_COGM_MeterSprite.prototype.drill_updateLeakingValue = function() {
-	var data = this._drill_data;
-	
-	// > 凹槽条持平
-	if( this._drill_leak_cur_value <= this._drill_level_cur_value ){
-		this._drill_leak_cur_value = this._drill_level_cur_value;
-		this._drill_leak_time = data['leak_delay'];
-	}
-	
-	// > 延迟 - 连续受伤刷新延迟
-	if( data['leak_delayRefresh'] &&
-		this._drill_new_value != this._drill_cur_value ){
-		this._drill_leak_time = data['leak_delay'];
-	}
-	
-	// > 延迟 - 达到时间后开始缩短
-	this._drill_leak_time -= 1;
-	if( this._drill_leak_time <= 0 ){
-		if( this._drill_leak_cur_value > this._drill_level_cur_value ){
-			this._drill_leak_cur_value -= ( data['leak_speed'] * data['level_max'] / this.drill_levelWidth() );
-		}
-	}
-	
-	// > 阻塞 - 凹槽条动作
-	// （整段扣完，但是凹槽仍在，这时候需要等凹槽结束缩短后进行下一轮伤害）
-	var a1 = Math.floor(this._drill_leak_cur_value / data['level_max']);
-	var a2 = Math.floor(this._drill_leak_cur_value % data['level_max']);
-	
-	if( this._drill_level_isBlocked == true ){		//阻塞时，解除等待延迟
-		this._drill_leak_time = 0;
-	}
-	if( a2 == 0 && this._drill_leak_cur_value > 0 && 
-		this._drill_leak_cur_value > this._drill_level_cur_value ){ 	//如果当前层耗尽，强制减一，确保下一层的凹槽是满的
-		this._drill_leak_cur_value -= 1; 
-	}
-}
-//==============================
-// * 帧刷新 - 凹槽条绘制
-//==============================
-Drill_COGM_MeterSprite.prototype.drill_updateLeakingMeter = function() {
-	var data = this._drill_data;
-	
-	// > 凹槽条长度
-	var a1 = Math.floor(this._drill_leak_cur_value / data['level_max']);
-	var a2 = Math.floor(this._drill_leak_cur_value % data['level_max']);
-	var ww = this.drill_levelWidth() / data['level_max'] * a2;
-	
-	if( this._drill_leak_sprite.bitmap != null ){
-		this._drill_leak_sprite.drill_COGM_setFrame( 0, 0, ww, this.drill_levelHeight() );
-	}
-}
-//==============================
-// * 帧刷新 - 段阻塞
-//			（阻塞状态：指层级下降一层时，等待凹槽条流逝完毕的状态，该状态显示的分段条会卡在下层的最大值位置）
-//==============================
-Drill_COGM_MeterSprite.prototype.drill_updateLeakingBlock = function() {
-	var data = this._drill_data;
-	
-	// #凹槽条 - 流逝完毕后结束阻塞
-	if( data['leak_enable'] == false || this._drill_leak_cur_value <= this._drill_level_cur_value ){
-		this._drill_level_isBlocked = false;
-	}
-	
-	// #排序 - 阻塞时的凹槽条位置变化
-	if( this._drill_level_isBlocked == true && this._drill_leak_sprite.zIndex != 40 ){
-		this._drill_leak_sprite.zIndex = 40;
-		this.drill_COGM_sortByZIndex();
-	}
-	if( this._drill_level_isBlocked == false && this._drill_leak_sprite.zIndex != 20 ){
-		this._drill_leak_sprite.zIndex = 20;
-		this.drill_COGM_sortByZIndex();
-	}
-}
-//==============================
-// ** 帧刷新 - 弹出条显示
-//==============================
-Drill_COGM_MeterSprite.prototype.drill_updateSpringShowing = function() {
-	var data = this._drill_data;
-	if( data['spring_enable'] == false ){ return; }
-	
-	// > 参数增加
-	if( this._drill_spring_cur_value < this._drill_new_value ){
-		// ... 暂不操作
-	}
-	
-	// > 参数减少
-	if( this._drill_spring_cur_value > this._drill_new_value ){
-		
-		var w1 = Math.floor(this._drill_spring_cur_value % data['level_max']);		//原切点（参数值）
-		var w2 = Math.floor(this._drill_new_value % data['level_max']);				//新切点（参数值）
-		w1 = this.drill_levelWidth() / data['level_max'] * w1;				//原切点（长度值）
-		w2 = this.drill_levelWidth() / data['level_max'] * w2;				//新切点（长度值）
-		
-		// > 当前段减少
-		if( w1 > w2 ){
-			var spring_bitmap = this._drill_sectionUp_sprite.bitmap;
-			var spring_data = {};		//重新组装必要参数
-			spring_data['x'] = w2;
-			spring_data['y'] = 0;
-			spring_data['w'] = w1-w2;	//弹出条宽度
-			spring_data['h'] = this.drill_levelHeight();
-			spring_data['type'] = data['spring_type'];
-			spring_data['ballistics'] = data['spring_ballistics'];
-			var spring_sprite = this._drill_spring_tank[ this._drill_spring_cur_tankIndex ];
-			spring_sprite.drill_resetData( spring_data, spring_bitmap );
-			
-			this._drill_spring_cur_tankIndex += 1;
-			this._drill_spring_cur_tankIndex %= data['spring_maxNum'];
-			
-		// > 段直接减少到下一段
-		} else if( w2 > w1 ){
-			var spring_bitmap = this._drill_sectionUp_sprite.bitmap;
-			var spring_data = {};		//头部的碎片
-			spring_data['x'] = 0;
-			spring_data['y'] = 0;
-			spring_data['w'] = w1;
-			spring_data['h'] = this.drill_levelHeight();
-			spring_data['type'] = data['spring_type'];
-			spring_data['ballistics'] = data['spring_ballistics'];
-			var spring_sprite = this._drill_spring_tank[ this._drill_spring_cur_tankIndex ];
-			spring_sprite.drill_resetData( spring_data, spring_bitmap );
-			this._drill_spring_cur_tankIndex += 1;
-			this._drill_spring_cur_tankIndex %= data['spring_maxNum'];
-			
-			var spring_bitmap = this._drill_sectionDown_sprite.bitmap;
-			var spring_data = {};		//尾部的碎片
-			spring_data['x'] = w2;
-			spring_data['y'] = 0;
-			spring_data['w'] = this.drill_levelWidth() - w2;
-			spring_data['h'] = this.drill_levelHeight();
-			spring_data['type'] = data['spring_type'];
-			spring_data['ballistics'] = data['spring_ballistics'];
-			var spring_sprite = this._drill_spring_tank[ this._drill_spring_cur_tankIndex ];
-			spring_sprite.drill_resetData( spring_data, spring_bitmap );
-			this._drill_spring_cur_tankIndex += 1;
-			this._drill_spring_cur_tankIndex %= data['spring_maxNum'];
-		}
-	}
-	
-	// > 控制参数
-	if( this._drill_spring_cur_value != this._drill_new_value ){
-		this._drill_spring_cur_value = this._drill_new_value;
-	}
-}
-//==============================
-// ** 帧刷新 - 粒子效果
+// * G粒子 - 帧刷新
 //==============================
 Drill_COGM_MeterSprite.prototype.drill_updateParticle = function() {
 	var data = this._drill_data;
 	if( data['par_enable'] == false ){ return; }
-	if( !this._drill_par_bitmap ){ return; }
-	if( !this._drill_par_bitmap.isReady() ){ return; }
+	if( this._drill_par_bitmap == undefined ){ return; }
+	if( this._drill_par_bitmap.isReady() == false ){ return; }
 	
 	var pw = this._drill_par_bitmap.width;
 	var ph = this._drill_par_bitmap.height;
@@ -2303,7 +2608,7 @@ Drill_COGM_MeterSprite.prototype.drill_updateParticle = function() {
 		var par = this._drill_par_spriteTank[i];
 		
 		if( par.x < 0 - pw ||		 //超出边界判定
-			par.x > this.drill_levelWidthInLeft() + pw ||
+			par.x > this.drill_chaseUpWidth() + pw ||
 			par.y < 0 - ph ||
 			par.y > this.drill_levelHeight() + ph ){
 			par.cur_life -= par.cur_life/3;
@@ -2327,28 +2632,73 @@ Drill_COGM_MeterSprite.prototype.drill_updateParticle = function() {
 		if( par.cur_life <= 0 ){	//重新出现粒子
 			par.cur_life = data['par_life'] + Math.random()*0.4*data['par_life'];
 			if( data['par_mode'] == "底部出现" ){
-				par.x = this.drill_levelWidthInLeft() * Math.random();
+				par.x = this.drill_chaseUpWidth() * Math.random();
 				par.y = this.drill_levelHeight() + ph/2;
 			}else if( data['par_mode'] == "顶部出现" ){
-				par.x = this.drill_levelWidthInLeft() * Math.random();
+				par.x = this.drill_chaseUpWidth() * Math.random();
 				par.y = 0 - ph/2;
 			}else if( data['par_mode'] == "左侧出现" ){
 				par.opacity = 0;
 				par.x = 0 - pw/2 * Math.random();
 				par.y = this.drill_levelHeight() * Math.random();
 			}else if( data['par_mode'] == "右侧出现" ){
-				par.x = this.drill_levelWidthInLeft() + pw/2;
+				par.x = this.drill_chaseUpWidth() + pw/2;
 				par.y = this.drill_levelHeight() * Math.random();
 			}else{
 				par.opacity = 0;		//随机出现
-				par.x = this.drill_levelWidthInLeft() * Math.random();
+				par.x = this.drill_chaseUpWidth() * Math.random();
 				par.y = this.drill_levelHeight() * Math.random();
 			}
 		}
 	}
 }
+
 //==============================
-// ** 帧刷新 - 游标
+// * H游标 - 初始化对象
+//==============================
+Drill_COGM_MeterSprite.prototype.drill_initVernier = function() {
+	this._drill_vernier_needInit = true;				//H游标 - 初始化 锁
+	this._drill_vernier_sprite = null;					//H游标 - 贴图
+	this._drill_vernier_bitmaps = [];					//H游标 - bitmap
+	this._drill_vernier_flicker = 1;					//H游标 - 闪烁方向
+	this._drill_vernier_time = 0;						//H游标 - 当前时间
+	this._drill_vernier_cur = 0;						//H游标 - 当前动画帧
+	
+	// > 资源bitmap
+	var data = this._drill_data;
+	if( data['vernier_enable'] == false ){ return; }
+	this._drill_vernier_bitmaps = [];
+	for(var j=0; j < data['vernier_src'].length; j++){
+		var bitmap = ImageManager.loadBitmap( data['vernier_src_file'], data['vernier_src'][j], 0, true);
+		this._drill_vernier_bitmaps[j] = bitmap;
+		$gameTemp.drill_COGM_addBitmap( bitmap );
+	}
+}
+//==============================
+// * H游标 - 延迟初始化
+//==============================
+Drill_COGM_MeterSprite.prototype.drill_delayingInitVernier = function() {
+	var data = this._drill_data;
+	if( data['vernier_enable'] == false ){ return; }
+	
+	// > 游标贴图
+	var temp_sprite = new Sprite( this._drill_vernier_bitmaps[0] );
+	temp_sprite.anchor.x = 0.5;
+	temp_sprite.anchor.y = 0.5;
+	temp_sprite.opacity = 0;
+	this._drill_vernier_sprite = temp_sprite;
+	
+	// > 所在层级
+	if( data['vernier_maskCover'] == true ){
+		temp_sprite.zIndex = 50;
+		this._layer_context.addChild( temp_sprite );	//（处于内容层，会被遮挡）
+	}else{
+		temp_sprite.zIndex = 10;
+		this._layer_outer.addChild( temp_sprite );		//（游标位于弹出层）
+	}
+}
+//==============================
+// * H游标 - 帧刷新
 //==============================
 Drill_COGM_MeterSprite.prototype.drill_updateVernier = function() {
 	var data = this._drill_data;
@@ -2358,13 +2708,13 @@ Drill_COGM_MeterSprite.prototype.drill_updateVernier = function() {
 	// > 游标位置
 	var temp_sprite = this._drill_vernier_sprite;
 	var float_pos;
-	var float_cur = this._drill_level_cur_value;
+	var float_cur = this._drill_chase_curValue;
 	var float_max = data['level_max'];
 	if( data['vernier_reset'] ){		//多段复位
 		var a2 = Math.floor( float_cur % float_max);
 		float_pos = this.drill_levelWidth() * a2 / float_max;
 	}else{
-		float_pos = this.drill_levelWidthInLeft(); 
+		float_pos = this.drill_chaseUpWidth(); 
 	}
 	temp_sprite.x = float_pos; 
 	temp_sprite.y = this.drill_levelHeight()/2;
@@ -2439,106 +2789,53 @@ Drill_COGM_MeterSprite.prototype.drill_updateVernier = function() {
 	}else{
 		temp_sprite.opacity = 255;
 	}
-	
+}
+
+
+//==============================
+// * I加满动画 - 初始化对象
+//==============================
+Drill_COGM_MeterSprite.prototype.drill_initFilling = function() {
+	this._drill_filling_needInit = true;				//I加满动画 - 初始化 锁
+	this._drill_filling_mask = null;					//I加满动画 - 贴图
 }
 //==============================
-// ** 帧刷新 - 加满动画
+// * I加满动画 - 延迟初始化
+//==============================
+Drill_COGM_MeterSprite.prototype.drill_delayingInitFilling = function() {
+	var data = this._drill_data;
+	if( data['filling_enable'] == false ){ return; }
+	
+	var filling_data = {};
+	filling_data['x'] = 0;
+	filling_data['y'] = 0;
+	filling_data['w'] = this.drill_levelWidth();
+	filling_data['h'] = this.drill_levelHeight();
+	filling_data['mode'] = data['filling_mode'];
+	filling_data['time'] = data['filling_time'];
+	filling_data['delay'] = data['filling_delay'];
+	
+	var temp_mask = new Drill_COGM_MeterSpriteMask( filling_data );
+	this.mask = temp_mask;
+	this.addChild(temp_mask);
+	this._drill_filling_mask = temp_mask;
+}
+//==============================
+// * I加满动画 - 帧刷新
 //==============================
 Drill_COGM_MeterSprite.prototype.drill_updateFilling = function() {
 	var data = this._drill_data;
 	if( data['filling_enable'] == false ){ return; }
 	if( this._drill_filling_mask == null ){ return; }
 	
+	// > 时间流逝
+	this._drill_filling_mask._drill_cur_time += 1;
+	
 	// > 播放结束后销毁（防止遮罩挡住弹出条）
-	if( this._drill_filling_mask.drill_isEnding() ){
+	if( this._drill_filling_mask.drill_isPlaying() == false ){
 		this.mask = null;
 		this.removeChild( this._drill_filling_mask );
 		this._drill_filling_mask = null;
-	}
-}
-
-//==============================
-// ** 层级排序
-//==============================
-Drill_COGM_MeterSprite.prototype.drill_COGM_sortByZIndex = function() {
-   this._layer_context.children.sort(function(a, b){return a.zIndex-b.zIndex});		//内容层
-   this._layer_outer.children.sort(function(a, b){return a.zIndex-b.zIndex});		//外层
-};
-//==============================
-// * 获取 - 层级数量
-//==============================
-Drill_COGM_MeterSprite.prototype.drill_getCurLevelNum = function() {
-	var data = this._drill_data;
-	return Math.floor( this._drill_level_cur_value / data['level_max'] );
-}
-//==============================
-// * 获取 - 分段条是否准备就绪
-//==============================
-Drill_COGM_MeterSprite.prototype.drill_isLevelsReady = function() {
-	
-	// > 分段资源未加载
-	if( this._drill_meter_bitmap.isReady() == false ){ return false; }
-	
-	// > 分段条未初始化
-	if( this._drill_level_bitmaps.length == 0 ){ return false; }
-	
-	// > 分段条为加载完
-	for( var i=0; i < this._drill_level_bitmaps.length; i++ ){
-		if( this._drill_level_bitmaps[i].isReady() == false ){ return false; }
-	}
-	return true;
-}
-//==============================
-// * 获取 - 参数条总宽
-//==============================
-Drill_COGM_MeterSprite.prototype.drill_meterWidth = function(){
-	if( !this._drill_meter_bitmap.isReady() ){ return 0; } 
-	return this._drill_meter_bitmap.width;
-}
-//==============================
-// * 获取 - 参数条总高
-//==============================
-Drill_COGM_MeterSprite.prototype.drill_meterHeight = function(){
-	if( !this._drill_meter_bitmap.isReady() ){ return 0; } 
-	return this._drill_meter_bitmap.height;
-}
-//==============================
-// * 获取 - 分段条宽度
-//==============================
-Drill_COGM_MeterSprite.prototype.drill_levelWidth = function(){
-	if( this._drill_level_bitmaps.length == 0 ){ return 0; } 
-	var data = this._drill_data;
-	if( data['flow_enable'] == true ){
-		if( data['flow_srcMode'] == "指定段长度划分" && data['flow_levelLength'] != 0 ){
-			return data['flow_levelLength'];
-		}else{			//三等份划分
-			return this._drill_level_bitmaps[0].width /3;
-		}
-	}else{
-		return this._drill_level_bitmaps[0].width;
-	}
-}
-//==============================
-// * 获取 - 分段条高度
-//==============================
-Drill_COGM_MeterSprite.prototype.drill_levelHeight = function() {
-	if( this._drill_level_bitmaps.length == 0 ){ return 0; }
-	return this._drill_level_bitmaps[0].height;
-}
-//==============================
-// * 获取 - 分段条宽度（根据剩余的值的宽度比例来确定）
-//==============================
-Drill_COGM_MeterSprite.prototype.drill_levelWidthInLeft = function(){
-	if( this._drill_level_bitmaps.length == 0 ){ return 0; } 
-	if( this._drill_level_bitmaps[0].isReady() == false ){ return 0; }
-	
-	var data = this._drill_data;
-	var a1 = Math.floor(this._drill_level_cur_value / data['level_max']);
-	var a2 = Math.floor(this._drill_level_cur_value % data['level_max']);
-	if( a1 == 0 ){	//只剩最后一层时
-		return this.drill_levelWidth() / data['level_max'] * a2;
-	}else{
-		return this.drill_levelWidth();
 	}
 }
 //=============================================================================
@@ -2602,13 +2899,15 @@ Sprite.prototype.drill_COGM_setFrame = function( x, y, width, height ){
 }
 
 
+
+
 //=============================================================================
-// ** 弹出条（私有类）
+// ** 弹出条【Drill_COGM_SpringSprite】
 // ** 
-// **		接口：见drill_resetData函数中的默认值。
-// **		说明：1.参数条专用。
-// ** 			  2.先初始化，再重刷。初始化时一定要赋值高宽，确定最基本的图片属性。
-// ** 			  3.使用的与 上段 相同的bitmap，然后进行setFrame。
+// **		接口：	见drill_resetData函数中的默认值。
+// **		说明：	1.参数条专用。
+// ** 				2.先初始化，再重刷。初始化时一定要赋值高宽，确定最基本的图片属性。
+// ** 				3.使用的与 上段 相同的bitmap，然后进行setFrame。
 //=============================================================================
 //==============================
 // * 弹出条 - 定义
@@ -2621,7 +2920,7 @@ Drill_COGM_SpringSprite.prototype.constructor = Drill_COGM_SpringSprite;
 //==============================
 // * 弹出条 - 初始化
 //==============================
-Drill_COGM_SpringSprite.prototype.initialize = function( width, height ) {
+Drill_COGM_SpringSprite.prototype.initialize = function( width, height ){
 	Sprite.prototype.initialize.call(this);
 	
 	this._drill_cur_type = "";			//当前模式
@@ -2649,7 +2948,7 @@ Drill_COGM_SpringSprite.prototype.update = function() {
 //==============================
 // * 弹出条 - 重刷全部数据
 //==============================
-Drill_COGM_SpringSprite.prototype.drill_resetData = function( data, parent_bitmap_obj ) {
+Drill_COGM_SpringSprite.prototype.drill_resetData = function( data, parent_bitmap_obj ){
 	
 	// > 校验
 	var life_time = data['ballistics']['movementTime'];
@@ -2662,22 +2961,24 @@ Drill_COGM_SpringSprite.prototype.drill_resetData = function( data, parent_bitma
 	var data = this._drill_data;
 	
 	// > 默认值
-	if( data['x'] == undefined ){ data['x'] = 0 };							//x
-	if( data['y'] == undefined ){ data['y'] = 0 };							//y
-	if( data['w'] == undefined ){ data['w'] = 1 };							//宽度
-	if( data['h'] == undefined ){ data['h'] = 1 };							//高度
+	if( data['pos_x'] == undefined ){ data['pos_x'] = 0 };					//位置x
+	if( data['pos_y'] == undefined ){ data['pos_y'] = 0 };					//位置y
+	if( data['xx'] == undefined ){ data['xx'] = 0 };						//框架x
+	if( data['yy'] == undefined ){ data['yy'] = 0 };						//框架y
+	if( data['ww'] == undefined ){ data['ww'] = 1 };						//框架w
+	if( data['hh'] == undefined ){ data['hh'] = 1 };						//框架h
 	if( data['type'] == undefined ){ data['type'] = "当前参数条" };			//类型
 	if( data['ballistics'] == undefined ){ data['ballistics'] = {} };		//弹道
-	data['w'] = Math.max( 1, Math.ceil(data['w']) );						//宽度可能<1情况
-	data['h'] = Math.max( 1, Math.ceil(data['h']) );						//高度可能<1情况
+	data['ww'] = Math.max( 1, Math.ceil(data['ww']) );						//宽度可能<1情况
+	data['hh'] = Math.max( 1, Math.ceil(data['hh']) );						//高度可能<1情况
 	
 	// > 私有对象初始化
 	this._drill_life = life_time;							//持续时间
 	this._drill_time = 0;									//计时器
 	
 	// > 弹道核心 - 初始化 + 推演
-	$gameTemp.drill_COBa_setBallisticsMove( data['ballistics'] );			
-	$gameTemp.drill_COBa_preBallisticsMove( this, 0, data['x'], data['y'] );
+	$gameTemp.drill_COBa_setBallisticsMove( data['ballistics'] );
+	$gameTemp.drill_COBa_preBallisticsMove( this, 0, data['pos_x'], data['pos_y'] );
 	
 	// > 设置bitmap
 	var temp_bitmap = null;
@@ -2690,11 +2991,10 @@ Drill_COGM_SpringSprite.prototype.drill_resetData = function( data, parent_bitma
 	}
 	
 	// > 锁定长方形
-	this.drill_COGM_setFrame( data['x'], data['y'], data['w'], data['h'] );
+	this.drill_COGM_setFrame( data['pos_x']+data['xx'], data['yy'], data['ww'], data['hh'] );
 }
-
 //==============================
-// ** 弹出条 - 帧刷新
+// * 弹出条 - 帧刷新
 //==============================
 Drill_COGM_SpringSprite.prototype.drill_updateSprite = function() {
 	this._drill_time += 1;
@@ -2726,12 +3026,12 @@ Drill_COGM_SpringSprite.prototype.drill_updateSprite = function() {
 
 
 //=============================================================================
-// ** 加满动画遮罩（私有类）
+// ** 加满动画遮罩【Drill_COGM_MeterSpriteMask】
 // **
-// **		接口：见maskInit函数。
-// **		说明：1.参数条专用。
-// **			  2.初始化后即用，不需要其他函数。要有高度宽度数据。
-// **			  3.黑色部分和透明部分都表示遮挡。最初的状态是全遮挡的。该遮罩可以挡住弹出条。
+// **		接口：	见maskInit函数。
+// **		说明：	1.参数条专用。
+// **				2.初始化后即用，不需要其他函数。要有高度宽度数据。
+// **				3.黑色部分和透明部分都表示遮挡。最初的状态是全遮挡的。该遮罩可以挡住弹出条。
 //=============================================================================
 //==============================
 // * 加满遮罩 - 定义
@@ -2747,20 +3047,18 @@ Drill_COGM_MeterSpriteMask.prototype.constructor = Drill_COGM_MeterSpriteMask;
 Drill_COGM_MeterSpriteMask.prototype.initialize = function( data ) {
 	Sprite.prototype.initialize.call(this);
 	this._drill_data = JSON.parse(JSON.stringify( data ));	//深拷贝数据
-	
-	this.drill_initData();				//初始化数据
-	this.drill_initSprite();			//初始化对象
+	this.drill_initData();									//初始化数据
+	this.drill_initSprite();								//初始化对象
 }
 //==============================
 // * 加满遮罩 - 帧刷新
 //==============================
 Drill_COGM_MeterSpriteMask.prototype.update = function() {
 	Sprite.prototype.update.call(this);
-	
 	this.drill_updateSprite();			//帧刷新对象
 }
 //==============================
-// * 初始化 - 数据
+// * 加满遮罩 - 初始化数据
 //==============================
 Drill_COGM_MeterSpriteMask.prototype.drill_initData = function(){
 	var data = this._drill_data;
@@ -2775,7 +3073,7 @@ Drill_COGM_MeterSpriteMask.prototype.drill_initData = function(){
 	if( data['delay'] == undefined ){ data['delay'] = 10 };				//加满延迟
 };
 //==============================
-// * 初始化 - 对象
+// * 加满遮罩 - 初始化对象
 //==============================
 Drill_COGM_MeterSpriteMask.prototype.drill_initSprite = function(){
 	var data = this._drill_data;
@@ -2784,51 +3082,42 @@ Drill_COGM_MeterSpriteMask.prototype.drill_initSprite = function(){
 	this._drill_cur_time = 0;								//当前时间
 	this._drill_bitmap_white = new Bitmap( data['w'], data['h'] );
 	this._drill_bitmap_white.fillAll("#ffffff");
+	this.bitmap = this._drill_bitmap_white;
 	
 	// > 主体属性
 	this.x = data['x'];
 	this.y = data['y'];
 	this.drill_COGM_setFrame( 0, 0, 0, data['h'] );
-	this.bitmap = this._drill_bitmap_white;
 }
-
 //==============================
-// * 帧刷新对象
+// * 加满遮罩 - 帧刷新对象
 //==============================
 Drill_COGM_MeterSpriteMask.prototype.drill_updateSprite = function() {
 	var data = this._drill_data;
-	
-	this._drill_cur_time += 1;
 	
 	// > 加满动画
 	var p_time = this._drill_cur_time - data['delay'];
 	p_time = Math.max( 0, p_time );
 	if( data['mode'] == "匀速加满" ){
-		var width = Math.ceil( data['w'] * p_time / data['time'] );
-		this.drill_COGM_setFrame( 0, 0, width, data['h'] );
+		var ww = Math.ceil( data['w'] * p_time / data['time'] );
+		var hh = data['h'];
+		this.drill_COGM_setFrame( 0, 0, ww, hh );
 	}
 	if( data['mode'] == "弹性加满" ){
 		var a = 2 * data['w'] / data['time'] / data['time'];
 		var c_time = data['time'] - p_time;
-		var width = 0.5 * a * c_time * c_time ;		//抛物线减速
-		width = Math.ceil( data['w'] - width );
-		this.drill_COGM_setFrame( 0, 0, width, data['h'] );
+		var ww = 0.5 * a * c_time * c_time ;		//抛物线减速
+		var hh = data['h'];
+		ww = Math.ceil( data['w'] - ww );
+		this.drill_COGM_setFrame( 0, 0, ww, hh );
 	}
-	
 }
 //==============================
-// * 获取 - 播放情况
+// * 加满遮罩 - 播放情况
 //==============================
 Drill_COGM_MeterSpriteMask.prototype.drill_isPlaying = function() {
 	var data = this._drill_data;
 	return this._drill_cur_time <= data['delay'] + data['time'];
-}
-//==============================
-// * 获取 - 结束情况
-//==============================
-Drill_COGM_MeterSpriteMask.prototype.drill_isEnding = function() {
-	var data = this._drill_data;
-	return this._drill_cur_time > data['delay'] + data['time'];
 }
 
 

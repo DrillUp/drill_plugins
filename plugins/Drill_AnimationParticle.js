@@ -1654,7 +1654,7 @@
  * @parent ---粒子效果---
  * @type number
  * @min 0
- * @desc 以动画中心为圆心，指定半径的圆形区域内会出现粒子，半径单位像素。
+ * @desc 以动画中心为圆心，指定半径的圆形区域内会出现粒子，半径单位像素。设置0表示粒子全部集中于圆心。
  * @default 40
  *
  * @param 粒子方向模式
@@ -3004,7 +3004,7 @@ Drill_APa_Controller.prototype.drill_APa_setPause = function( pause ){
 };
 
 //##############################
-// * 阶段 - 获取当前阶段【标准函数】
+// * 阶段 - 获取当前阶段【开放函数】
 //
 //			参数：	> 无
 //			返回：	> 布尔
@@ -3013,7 +3013,7 @@ Drill_APa_Controller.prototype.drill_APa_getState = function(){
 	return this._drill_curState;
 };
 //##############################
-// * 阶段 - 设置当前阶段【标准函数】
+// * 阶段 - 设置当前阶段【开放函数】
 //
 //			参数：	> state 字符串
 //			返回：	> 无
@@ -3022,7 +3022,7 @@ Drill_APa_Controller.prototype.drill_APa_setState = function( state ){
 	this.drill_APa_setState_Private( state );
 };
 //##############################
-// * 阶段 - 判断销毁【标准函数】
+// * 阶段 - 判断阶段销毁【开放函数】
 //
 //			参数：	> 无
 //			返回：	> 布尔
@@ -3131,10 +3131,14 @@ Drill_APa_Controller.prototype.drill_initPrivateData = function(){
 	this._drill_opacity = 255;
 	
 	
-	// > 粒子群弹道 - 随机因子（所有随机数 都基于该随机因子）
-	this._drill_randomFactor = Math.random();
+	// > 粒子群弹道 - 随机因子
+	this._drill_randomFactor_speed = Math.random();
+	this._drill_randomFactor_dir = Math.random();
+	this._drill_randomFactor_opacity = Math.random();
 	if( data['seed_enable'] == true ){
-		this._drill_randomFactor = data['seed_value'] %1;
+		this._drill_randomFactor_speed = data['seed_value'] %1;
+		this._drill_randomFactor_dir = data['seed_value'] *41 %1;
+		this._drill_randomFactor_opacity = data['seed_value'] *71 %1;
 	}
 	
 	// > 粒子群弹道 - 粒子属性
@@ -3155,7 +3159,7 @@ Drill_APa_Controller.prototype.drill_initPrivateData = function(){
 		if( data['par_selfRotate'] == 0 ){ this._drill_parList_rotation[i] = 0; }
 		this._drill_parList_scaleX[i] = 1.0;
 		this._drill_parList_scaleY[i] = 1.0;
-		this._drill_parList_curTime[i] = Math.floor( data['par_life']*this.drill_APa_curRandom(i) );	//（随机初始时间）
+		this._drill_parList_curTime[i] = Math.floor( data['par_life'] *i /data['par_count'] );	//（线性的初始时间，保持粒子均匀）
 		this._drill_parList_randomIteration[i] = 0;
 		this.drill_APa_resetParticles( i );		//（重设）
 	}
@@ -3200,8 +3204,9 @@ Drill_APa_Controller.prototype.drill_initBallisticsMove = function( data, b_data
 	
 	// > 随机因子（RandomFactor）
 	//		（每个粒子对应一个随机因子，掌握一条弹道。）
-	temp_b_move['polarSpeedRandomFactor'] = this._drill_randomFactor;	//极坐标 - 速度 - 随机因子
-	temp_b_move['polarDirRandomFactor'] = this._drill_randomFactor;		//极坐标 - 方向 - 随机因子
+	//		（注意，独立参数项之间，随机因子不可共用。会造成强关联的错误关系。）
+	temp_b_move['polarSpeedRandomFactor'] = this._drill_randomFactor_speed;		//极坐标 - 速度 - 随机因子
+	temp_b_move['polarDirRandomFactor'] = this._drill_randomFactor_dir;			//极坐标 - 方向 - 随机因子
 	// > 随机迭代次数（RandomIteration）
 	//		（每个粒子对应一个随机迭代次数，变换弹道用。）
 	temp_b_move['polarSpeedRandomIterationList'] = this._drill_parList_randomIteration;
@@ -3282,7 +3287,8 @@ Drill_APa_Controller.prototype.drill_initBallisticsOpacity = function( data, sus
 	
 	// > 随机因子（RandomFactor）
 	//		（每个粒子对应一个随机因子，掌握一条弹道。）
-	temp_b_opacity['randomFactor'] = this._drill_randomFactor;
+	//		（注意，独立参数项之间，随机因子不可共用。会造成强关联的错误关系。）
+	temp_b_opacity['randomFactor'] = this._drill_randomFactor_opacity;
 	// > 随机迭代次数（RandomIteration）
 	//		（每个粒子对应一个随机迭代次数，变换弹道用。）
 	temp_b_opacity['randomIterationList'] = this._drill_parList_randomIteration;
@@ -3401,48 +3407,7 @@ Drill_APa_Controller.prototype.drill_APa_resetParticles = function( i ){
 // * 粒子数据 - 当前的随机数
 //==============================
 Drill_APa_Controller.prototype.drill_APa_curRandom = function( iteration ){
-	return this.drill_APa_getRandomInIteration( this._drill_randomFactor, iteration );
-};
-//==============================
-// * 数学 - 计算点A朝向点B的角度
-//			
-//			参数：	> x1,y1 数字（点A）
-//					> x2,y2 数字（点B）
-//			返回：	> 数字      （角度，0 至 360 之间）
-//			
-//			说明：	0度朝右，90度朝下，180度朝左，270度朝上。
-//==============================
-Drill_APa_Controller.prototype.drill_APa_getPointToPointDegree = function( x1,y1,x2,y2 ){
-	var degree = 0;
-	
-	// > arctan不能为0情况
-	if( x2 == x1 ){
-		if( y2 > y1 ){
-			degree = 90;
-		}else{
-			degree = 270;
-		}
-	}else if( y2 == y1 ){
-		if( x2 > x1 ){
-			degree = 0;
-		}else{
-			degree = 180;
-		}
-	
-	// > arctan正常计算
-	}else{
-		degree = Math.atan( (y2 - y1)/(x2 - x1) );
-		degree = degree / Math.PI * 180;
-		if( x2 < x1 ){
-			degree += 180;
-		}
-	}
-	
-	// > 修正值
-	degree = degree % 360;
-	if( degree < 0 ){ degree += 360; }
-	
-	return degree;
+	return this.drill_APa_getRandomInIteration( this._drill_randomFactor_opacity, iteration );
 };
 //==============================
 // * 数学 - 生成随机数（随机种子）
@@ -3779,13 +3744,14 @@ Drill_APa_Sprite.prototype.initialize = function(){
 // * 粒子贴图 - 帧刷新
 //==============================
 Drill_APa_Sprite.prototype.update = function() {
-	Sprite.prototype.update.call(this);
 	if( this.drill_APa_isReady() == false ){ return; }
+	if( this.drill_APa_isOptimizationPassed() == false ){ return; }
+	Sprite.prototype.update.call(this);
 	this.drill_updateLayer();					//帧刷新 - 层级
 	this.drill_updateChild();					//帧刷新 - 粒子
 }
 //##############################
-// * 粒子贴图 - 设置控制器【标准函数】
+// * 粒子贴图 - 设置控制器【开放函数】
 //			
 //			参数：	> controller 控制器对象
 //			返回：	> 无
@@ -3796,7 +3762,7 @@ Drill_APa_Sprite.prototype.drill_APa_setController = function( controller ){
 	this._drill_controller = controller;
 };
 //##############################
-// * 粒子贴图 - 设置动画贴图【标准函数】
+// * 粒子贴图 - 设置动画贴图【开放函数】
 //			
 //			参数：	> animation_sprite 动画贴图
 //			返回：	> 无
@@ -3806,7 +3772,7 @@ Drill_APa_Sprite.prototype.drill_APa_setAnimationSprite = function( animation_sp
 	this._animation = animation_sprite._animation;
 };
 //##############################
-// * 粒子贴图 - 设置个体贴图【标准函数】
+// * 粒子贴图 - 设置个体贴图【开放函数】
 //			
 //			参数：	> individual_sprite 贴图对象
 //			返回：	> 无
@@ -3815,7 +3781,7 @@ Drill_APa_Sprite.prototype.drill_APa_setIndividualSprite = function( individual_
 	this._drill_individualSprite = individual_sprite;
 };
 //##############################
-// * 粒子贴图 - 贴图初始化【标准函数】
+// * 粒子贴图 - 贴图初始化【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -3836,6 +3802,17 @@ Drill_APa_Sprite.prototype.drill_APa_initSprite = function(){
 Drill_APa_Sprite.prototype.drill_APa_isReady = function(){
 	if( this._drill_controller == undefined ){ return false; }
 	if( this._drill_individualSprite == undefined ){ return false; }
+    return true;
+};
+//##############################
+// * 粒子贴图 - 优化策略【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 布尔（是否通过）
+//			
+//			说明：	> 通过时，正常帧刷新；未通过时，不执行帧刷新。
+//##############################
+Drill_APa_Sprite.prototype.drill_APa_isOptimizationPassed = function(){
     return true;
 };
 //##############################

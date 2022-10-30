@@ -2462,6 +2462,7 @@ Drill_GFV_StyleSprite.prototype.drill_updateMeter = function() {
 		var slot_s = data_s['slot_list'][i];
 		var slot_b = data_b['slot_list'][i];
 		if( slot_b == undefined ){ continue; }
+		if( slot_b['visible'] == false ){ continue; }
 		
 		// > 参数条值刷新
 		var param_value = 0;
@@ -2488,6 +2489,7 @@ Drill_GFV_StyleSprite.prototype.drill_updateNumber = function() {
 		var slot_s = data_s['slot_list'][i];
 		var slot_b = data_b['slot_list'][i];
 		if( slot_b == undefined ){ continue; }
+		if( slot_b['visible'] == false ){ continue; }
 		
 		// > 参数数字值刷新
 		var param_value = 0;

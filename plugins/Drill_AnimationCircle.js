@@ -2908,7 +2908,7 @@ Drill_ACi_Controller.prototype.drill_ACi_setPause = function( pause ){
 };
 
 //##############################
-// * 阶段 - 获取当前阶段【标准函数】
+// * 阶段 - 获取当前阶段【开放函数】
 //
 //			参数：	> 无
 //			返回：	> 布尔
@@ -2917,7 +2917,7 @@ Drill_ACi_Controller.prototype.drill_ACi_getState = function(){
 	return this._drill_curState;
 };
 //##############################
-// * 阶段 - 设置当前阶段【标准函数】
+// * 阶段 - 设置当前阶段【开放函数】
 //
 //			参数：	> state 字符串
 //			返回：	> 无
@@ -2926,7 +2926,7 @@ Drill_ACi_Controller.prototype.drill_ACi_setState = function( state ){
 	this.drill_ACi_setState_Private( state );
 };
 //##############################
-// * 阶段 - 判断销毁【标准函数】
+// * 阶段 - 判断阶段销毁【开放函数】
 //
 //			参数：	> 无
 //			返回：	> 布尔
@@ -3360,13 +3360,14 @@ Drill_ACi_Sprite.prototype.initialize = function(){
 // * 魔法圈贴图 - 帧刷新
 //==============================
 Drill_ACi_Sprite.prototype.update = function() {
-	Sprite.prototype.update.call(this);
 	if( this.drill_ACi_isReady() == false ){ return; }
+	if( this.drill_ACi_isOptimizationPassed() == false ){ return; }
+	Sprite.prototype.update.call(this);
 	this.drill_updateLayer();					//帧刷新 - 层级
 	this.drill_updateChild();					//帧刷新 - 魔法圈
 }
 //##############################
-// * 魔法圈贴图 - 设置控制器【标准函数】
+// * 魔法圈贴图 - 设置控制器【开放函数】
 //			
 //			参数：	> controller 控制器对象
 //			返回：	> 无
@@ -3377,7 +3378,7 @@ Drill_ACi_Sprite.prototype.drill_ACi_setController = function( controller ){
 	this._drill_controller = controller;
 };
 //##############################
-// * 魔法圈贴图 - 设置动画贴图【标准函数】
+// * 魔法圈贴图 - 设置动画贴图【开放函数】
 //			
 //			参数：	> animation_sprite 动画贴图
 //			返回：	> 无
@@ -3387,7 +3388,7 @@ Drill_ACi_Sprite.prototype.drill_ACi_setAnimationSprite = function( animation_sp
 	this._animation = animation_sprite._animation;
 };
 //##############################
-// * 魔法圈贴图 - 设置个体贴图【标准函数】
+// * 魔法圈贴图 - 设置个体贴图【开放函数】
 //			
 //			参数：	> individual_sprite 贴图对象
 //			返回：	> 无
@@ -3398,7 +3399,7 @@ Drill_ACi_Sprite.prototype.drill_ACi_setIndividualSprite = function( individual_
 	this._drill_individualSprite = individual_sprite;
 };
 //##############################
-// * 魔法圈贴图 - 贴图初始化【标准函数】
+// * 魔法圈贴图 - 贴图初始化【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -3419,6 +3420,17 @@ Drill_ACi_Sprite.prototype.drill_ACi_initSprite = function(){
 Drill_ACi_Sprite.prototype.drill_ACi_isReady = function(){
 	if( this._drill_controller == undefined ){ return false; }
 	if( this._drill_individualSprite == undefined ){ return false; }
+    return true;
+};
+//##############################
+// * 魔法圈贴图 - 优化策略【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 布尔（是否通过）
+//			
+//			说明：	> 通过时，正常帧刷新；未通过时，不执行帧刷新。
+//##############################
+Drill_ACi_Sprite.prototype.drill_ACi_isOptimizationPassed = function(){
     return true;
 };
 //##############################
@@ -3446,7 +3458,7 @@ Drill_ACi_Sprite.prototype.drill_ACi_destroy = function(){
 	this.drill_ACi_destroy_Private();
 };
 //##############################
-// * 魔法圈贴图 - 半图层效果 设置【标准函数】
+// * 魔法圈贴图 - 半图层效果 设置【开放函数】
 //
 //			参数：	> isOtherHalf 布尔
 //			返回：	> 无

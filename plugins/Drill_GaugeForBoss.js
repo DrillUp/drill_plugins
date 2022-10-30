@@ -742,14 +742,14 @@
  * @type number
  * @min 1
  * @desc 动画将在时间内加满参数条，单位帧。（1秒60帧）
- * @default 90
+ * @default 150
  *
  * @param 生命-加满延迟
  * @parent 生命-是否启用加满动画
  * @type number
  * @min 0
  * @desc 浮动框出现后，播放加满动画的延迟时间，单位帧。（1秒60帧）
- * @default 30
+ * @default 90
  * 
  * @param 魔法-是否显示参数条
  * @parent ----参数条----
@@ -799,14 +799,14 @@
  * @type number
  * @min 1
  * @desc 动画将在时间内加满参数条，单位帧。（1秒60帧）
- * @default 90
+ * @default 150
  *
  * @param 魔法-加满延迟
  * @parent 魔法-是否启用加满动画
  * @type number
  * @min 0
  * @desc 浮动框出现后，播放加满动画的延迟时间，单位帧。（1秒60帧）
- * @default 30
+ * @default 90
  * 
  * @param 怒气-是否显示参数条
  * @parent ----参数条----
@@ -856,14 +856,14 @@
  * @type number
  * @min 1
  * @desc 动画将在时间内加满参数条，单位帧。（1秒60帧）
- * @default 90
+ * @default 150
  * 
  * @param 怒气-加满延迟
  * @parent 怒气-是否启用加满动画
  * @type number
  * @min 0
  * @desc 浮动框出现后，播放加满动画的延迟时间，单位帧。（1秒60帧）
- * @default 30
+ * @default 90
  * 
  * 
  * @param ----参数数字----

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        行走图 - 多层行走图粒子
+ * @plugindesc [v1.1]        行走图 - 多层行走图粒子
  * @author Drill_up
  * 
  * @Drill_LE_param "粒子样式-%d"
@@ -96,9 +96,9 @@
  * 工作类型：   持续执行
  * 时间复杂度： o(n^3)*o(粒子数量)*o(贴图处理) 每帧
  * 测试方法：   在个体装饰管理层，绑定10个粒子，并性能测试。
- * 测试结果：   200个事件的地图中，平均消耗为：【92.60ms】
- *              100个事件的地图中，平均消耗为：【83.68ms】
- *               50个事件的地图中，平均消耗为：【78.31ms】
+ * 测试结果：   200个事件的地图中，平均消耗为：【81.31ms】
+ *              100个事件的地图中，平均消耗为：【72.18ms】
+ *               50个事件的地图中，平均消耗为：【65.40ms】
  *
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
  *   测试结果并不是精确值，范围在给定值的10ms范围内波动。
@@ -110,6 +110,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 修复了双层粒子无效的bug。优化了插件的性能。
  *
  *
  *
@@ -1436,7 +1438,7 @@
  * @parent ---粒子效果---
  * @type number
  * @min 0
- * @desc 以贴图中心为圆心，指定半径的圆形区域内会出现粒子，半径单位像素。
+ * @desc 以贴图中心为圆心，指定半径的圆形区域内会出现粒子，半径单位像素。设置0表示粒子全部集中于圆心。
  * @default 15
  *
  * @param 粒子方向模式
@@ -1605,7 +1607,11 @@
 //		★最坏情况		事件附带了大量粒子装饰贴图。
 //		★备注			即使粒子小，也架不住粒子多而产生的额外消耗。
 //		
-//		★优化记录		暂无
+//		★优化记录		
+//			2022-10-4优化失败：
+//				本来尝试预设15个迭代的随机弹道，然后所有粒子在这15个弹道里轮播。但是这样反而性能消耗增加了，变120.6ms了。
+//			2022-10-5优化：
+//				添加了接口 优化策略【标准函数】，镜头范围外，直接全部关闭刷新，贴图也关闭帧刷新。
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
@@ -1628,6 +1634,8 @@
 //					->创建贴图
 //						->控制器与序列号判定
 //					->贴图自动销毁
+//				->优化策略
+//					->判断贴图是否在镜头范围内
 //
 //				->行走图粒子控制器【Drill_EFPa_Controller】
 //				->行走图粒子贴图【Drill_EFPa_Sprite】
@@ -2288,6 +2296,7 @@ Sprite_Character.prototype.update = function(){
 		if( this.drill_EFPa_hasSpriteBinding( controller._drill_controllerSerial ) == true ){ continue; }
 		
 		// > 创建贴图
+		var data = controller._drill_data;
 		var temp_sprite = new Drill_EFPa_Sprite();
 		temp_sprite._drill_curSerial = controller._drill_controllerSerial;	//（标记序列号）
 		temp_sprite.drill_EFPa_setController( controller );
@@ -2297,9 +2306,19 @@ Sprite_Character.prototype.update = function(){
 		$gameTemp._drill_EFPa_spriteTank.push( temp_sprite );
 		
 		// > 添加贴图到层级
-		var data = controller._drill_data;
 		$gameTemp.drill_EFPa_layerAddSprite( temp_sprite, data['anim_index'], this );
 		
+		
+		// > 双层效果
+		if( data['second_enable'] == true ){
+			
+			// > 双层效果 - 创建贴图
+			var temp_secSprite = new Drill_EFPa_SecSprite( temp_sprite );
+			$gameTemp._drill_EFPa_spriteTank.push( temp_secSprite );
+			
+			// > 双层效果 - 添加贴图到层级
+			$gameTemp.drill_EFPa_layerAddSprite( temp_secSprite, data['second_animIndex'], this );
+		}
 	}
 	
 	// > 层级排序
@@ -2536,10 +2555,14 @@ Drill_EFPa_Controller.prototype.drill_initPrivateData = function(){
 	this._drill_rotation = data['parentRotate'];	//（整体再旋转角度）
 	
 	
-	// > 粒子群弹道 - 随机因子（所有随机数 都基于该随机因子）
-	this._drill_randomFactor = Math.random();
+	// > 粒子群弹道 - 随机因子
+	this._drill_randomFactor_speed = Math.random();
+	this._drill_randomFactor_dir = Math.random();
+	this._drill_randomFactor_opacity = Math.random();
 	if( data['seed_enable'] == true ){
-		this._drill_randomFactor = data['seed_value'] %1;
+		this._drill_randomFactor_speed = data['seed_value'] %1;
+		this._drill_randomFactor_dir = data['seed_value'] *41 %1;
+		this._drill_randomFactor_opacity = data['seed_value'] *71 %1;
 	}
 	
 	// > 粒子群弹道 - 粒子属性
@@ -2560,7 +2583,7 @@ Drill_EFPa_Controller.prototype.drill_initPrivateData = function(){
 		if( data['par_selfRotate'] == 0 ){ this._drill_parList_rotation[i] = 0; }
 		this._drill_parList_scaleX[i] = 1.0;
 		this._drill_parList_scaleY[i] = 1.0;
-		this._drill_parList_curTime[i] = Math.floor( data['par_life']*this.drill_EFPa_curRandom(i) );	//（随机初始时间）
+		this._drill_parList_curTime[i] = Math.floor( data['par_life'] *i /data['par_count'] );	//（线性的初始时间，保持粒子均匀）
 		this._drill_parList_randomIteration[i] = 0;
 		this.drill_EFPa_resetParticles( i );		//（重设）
 	}
@@ -2605,8 +2628,9 @@ Drill_EFPa_Controller.prototype.drill_initBallisticsMove = function( data, b_dat
 	
 	// > 随机因子（RandomFactor）
 	//		（每个粒子对应一个随机因子，掌握一条弹道。）
-	temp_b_move['polarSpeedRandomFactor'] = this._drill_randomFactor;	//极坐标 - 速度 - 随机因子
-	temp_b_move['polarDirRandomFactor'] = this._drill_randomFactor;		//极坐标 - 方向 - 随机因子
+	//		（注意，独立参数项之间，随机因子不可共用。会造成强关联的错误关系。）
+	temp_b_move['polarSpeedRandomFactor'] = this._drill_randomFactor_speed;	//极坐标 - 速度 - 随机因子
+	temp_b_move['polarDirRandomFactor'] = this._drill_randomFactor_dir;		//极坐标 - 方向 - 随机因子
 	// > 随机迭代次数（RandomIteration）
 	//		（每个粒子对应一个随机迭代次数，变换弹道用。）
 	temp_b_move['polarSpeedRandomIterationList'] = this._drill_parList_randomIteration;
@@ -2687,7 +2711,8 @@ Drill_EFPa_Controller.prototype.drill_initBallisticsOpacity = function( data, su
 	
 	// > 随机因子（RandomFactor）
 	//		（每个粒子对应一个随机因子，掌握一条弹道。）
-	temp_b_opacity['randomFactor'] = this._drill_randomFactor;
+	//		（注意，独立参数项之间，随机因子不可共用。会造成强关联的错误关系。）
+	temp_b_opacity['randomFactor'] = this._drill_randomFactor_opacity;
 	// > 随机迭代次数（RandomIteration）
 	//		（每个粒子对应一个随机迭代次数，变换弹道用。）
 	temp_b_opacity['randomIterationList'] = this._drill_parList_randomIteration;
@@ -2806,48 +2831,7 @@ Drill_EFPa_Controller.prototype.drill_EFPa_resetParticles = function( i ){
 // * 粒子数据 - 当前的随机数
 //==============================
 Drill_EFPa_Controller.prototype.drill_EFPa_curRandom = function( iteration ){
-	return this.drill_EFPa_getRandomInIteration( this._drill_randomFactor, iteration );
-};
-//==============================
-// * 数学 - 计算点A朝向点B的角度
-//			
-//			参数：	> x1,y1 数字（点A）
-//					> x2,y2 数字（点B）
-//			返回：	> 数字      （角度，0 至 360 之间）
-//			
-//			说明：	0度朝右，90度朝下，180度朝左，270度朝上。
-//==============================
-Drill_EFPa_Controller.prototype.drill_EFPa_getPointToPointDegree = function( x1,y1,x2,y2 ){
-	var degree = 0;
-	
-	// > arctan不能为0情况
-	if( x2 == x1 ){
-		if( y2 > y1 ){
-			degree = 90;
-		}else{
-			degree = 270;
-		}
-	}else if( y2 == y1 ){
-		if( x2 > x1 ){
-			degree = 0;
-		}else{
-			degree = 180;
-		}
-	
-	// > arctan正常计算
-	}else{
-		degree = Math.atan( (y2 - y1)/(x2 - x1) );
-		degree = degree / Math.PI * 180;
-		if( x2 < x1 ){
-			degree += 180;
-		}
-	}
-	
-	// > 修正值
-	degree = degree % 360;
-	if( degree < 0 ){ degree += 360; }
-	
-	return degree;
+	return this.drill_EFPa_getRandomInIteration( this._drill_randomFactor_opacity, iteration );
 };
 //==============================
 // * 数学 - 生成随机数（随机种子）
@@ -2996,13 +2980,14 @@ Drill_EFPa_Sprite.prototype.initialize = function(){
 // * 粒子贴图 - 帧刷新
 //==============================
 Drill_EFPa_Sprite.prototype.update = function() {
-	Sprite.prototype.update.call(this);
 	if( this.drill_EFPa_isReady() == false ){ return; }
+	if( this.drill_EFPa_isOptimizationPassed() == false ){ return; }
+	Sprite.prototype.update.call(this);
 	this.drill_updateLayer();					//帧刷新 - 层级
 	this.drill_updateChild();					//帧刷新 - 粒子
 }
 //##############################
-// * 粒子贴图 - 设置控制器【标准函数】
+// * 粒子贴图 - 设置控制器【开放函数】
 //			
 //			参数：	> controller 控制器对象
 //			返回：	> 无
@@ -3013,7 +2998,7 @@ Drill_EFPa_Sprite.prototype.drill_EFPa_setController = function( controller ){
 	this._drill_controller = controller;
 };
 //##############################
-// * 粒子贴图 - 设置个体贴图【标准函数】
+// * 粒子贴图 - 设置个体贴图【开放函数】
 //			
 //			参数：	> individual_sprite 贴图对象
 //			返回：	> 无
@@ -3023,7 +3008,7 @@ Drill_EFPa_Sprite.prototype.drill_EFPa_setIndividualSprite = function( individua
 	this._character = this._drill_individualSprite._character;
 };
 //##############################
-// * 粒子贴图 - 贴图初始化【标准函数】
+// * 粒子贴图 - 贴图初始化【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -3045,6 +3030,17 @@ Drill_EFPa_Sprite.prototype.drill_EFPa_isReady = function(){
 	if( this._drill_controller == undefined ){ return false; }
 	if( this._drill_individualSprite == undefined ){ return false; }
     return true;
+};
+//##############################
+// * 粒子贴图 - 优化策略【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 布尔（是否通过）
+//			
+//			说明：	> 通过时，正常帧刷新；未通过时，不执行帧刷新。
+//##############################
+Drill_EFPa_Sprite.prototype.drill_EFPa_isOptimizationPassed = function(){
+    return this.drill_EFPa_isOptimizationPassed_Private();
 };
 //##############################
 // * 粒子贴图 - 是否需要销毁【标准函数】
@@ -3148,6 +3144,26 @@ Drill_EFPa_Sprite.prototype.drill_updateLayer = function() {
 		yy += this._character.screenY();
 		//xx += this._drill_individualSprite.x;	//（不能用父类的位置，会有1帧延迟问题）
 		//yy += this._drill_individualSprite.y;
+		
+		// > 其他插件位置修正
+		if( Imported.Drill_EventContinuedEffect ){ //【行走图 - 持续动作效果】
+			if( this._character._Drill_ECE != undefined ){
+				xx += this._character._Drill_ECE.x;
+				yy += this._character._Drill_ECE.y;
+			}
+		}
+		if( Imported.Drill_EventFadeInEffect ){ //【行走图 - 显现动作效果】
+			if( this._character._Drill_EFIE != undefined ){
+				xx += this._character._Drill_EFIE.x;
+				yy += this._character._Drill_EFIE.y;
+			}
+		}
+		if( Imported.Drill_EventFadeOutEffect ){ //【行走图 - 持续动作效果】
+			if( this._character._Drill_EFOE != undefined ){
+				xx += this._character._Drill_EFOE.x;
+				yy += this._character._Drill_EFOE.y;
+			}
+		}
 	}
 	
 	
@@ -3233,6 +3249,33 @@ Drill_EFPa_Sprite.prototype.drill_updateChild = function() {
 		par_sprite.scale.y = scale_y;
 	};
 }
+//==============================
+// * 优化策略 - 判断通过（私有）
+//==============================
+Drill_EFPa_Sprite.prototype.drill_EFPa_isOptimizationPassed_Private = function(){
+	
+	// > 镜头范围外时，不工作
+	if( this.drill_EFPa_posIsInCamera( this._character._realX, this._character._realY ) == false ){
+		this.visible = false;
+		return false;
+	}
+	return true;
+}
+//==============================
+// * 优化策略 - 判断贴图是否在镜头范围内
+//==============================
+Drill_EFPa_Sprite.prototype.drill_EFPa_posIsInCamera = function( realX, realY ){
+	var oww = Graphics.boxWidth  / $gameMap.tileWidth();
+	var ohh = Graphics.boxHeight / $gameMap.tileHeight();
+	var sww = oww;
+	var shh = ohh;
+	if( Imported.Drill_LayerCamera ){
+		sww = sww / $gameSystem._drill_LCa_controller._drill_scaleX;
+		shh = shh / $gameSystem._drill_LCa_controller._drill_scaleY;
+	}
+	return  Math.abs($gameMap.adjustX(realX + 0.5 - oww*0.5)) <= sww*0.5 + 5.5 &&	//（镜头范围+5个图块边框区域） 
+			Math.abs($gameMap.adjustY(realY + 0.5 - ohh*0.5)) <= shh*0.5 + 5.5 ;
+}
 
 
 
@@ -3264,8 +3307,27 @@ Drill_EFPa_SecSprite.prototype.initialize = function( parentSprite ){
 	this.opacity = 0;
 	this.visible = false;
 	
-	this.drill_createParticle();		//创建 - 粒子	
+	this.drill_createParticle();				//创建 - 粒子	
 }
+//==============================
+// * 第二层粒子 - 帧刷新
+//==============================
+Drill_EFPa_SecSprite.prototype.update = function() {
+	if( this.drill_EFPa_isOptimizationPassed() == false ){ return; }
+	Sprite.prototype.update.call(this);
+	this.drill_updateChild();					//帧刷新 - 粒子
+}
+//##############################
+// * 粒子贴图 - 优化策略【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 布尔（是否通过）
+//			
+//			说明：	> 通过时，正常帧刷新；未通过时，不执行帧刷新。
+//##############################
+Drill_EFPa_SecSprite.prototype.drill_EFPa_isOptimizationPassed = function(){
+    return this.drill_EFPa_isOptimizationPassed_Private();
+};
 //==============================
 // * 第二层粒子 - 创建粒子
 //==============================
@@ -3284,14 +3346,6 @@ Drill_EFPa_SecSprite.prototype.drill_createParticle = function() {
 		this._drill_EFPa_particleTankSec.push(temp_sprite);
 		this.addChild(temp_sprite);
 	}
-}
-//==============================
-// * 第二层粒子 - 帧刷新
-//==============================
-Drill_EFPa_SecSprite.prototype.update = function() {
-	Sprite.prototype.update.call(this);
-	
-	this.drill_updateChild();	//帧刷新 - 粒子
 }
 //==============================
 // * 第二层粒子 - 帧刷新粒子
@@ -3343,6 +3397,34 @@ Drill_EFPa_SecSprite.prototype.drill_updateChild = function(){
 		par_sprite.scale.x = scale_x;
 		par_sprite.scale.y = scale_y;
 	};
+}
+//==============================
+// * 优化策略 - 判断通过（私有）
+//==============================
+Drill_EFPa_SecSprite.prototype.drill_EFPa_isOptimizationPassed_Private = function(){
+	
+	// > 镜头范围外时，不工作
+	var ch = this._drill_parentSprite._character;
+	if( this.drill_EFPa_posIsInCamera( ch._realX, ch._realY ) == false ){
+		this.visible = false;
+		return false;
+	}
+	return true;
+}
+//==============================
+// * 优化策略 - 判断贴图是否在镜头范围内
+//==============================
+Drill_EFPa_SecSprite.prototype.drill_EFPa_posIsInCamera = function( realX, realY ){
+	var oww = Graphics.boxWidth  / $gameMap.tileWidth();
+	var ohh = Graphics.boxHeight / $gameMap.tileHeight();
+	var sww = oww;
+	var shh = ohh;
+	if( Imported.Drill_LayerCamera ){
+		sww = sww / $gameSystem._drill_LCa_controller._drill_scaleX;
+		shh = shh / $gameSystem._drill_LCa_controller._drill_scaleY;
+	}
+	return  Math.abs($gameMap.adjustX(realX + 0.5 - oww*0.5)) <= sww*0.5 + 5.5 &&	//（镜头范围+5个图块边框区域） 
+			Math.abs($gameMap.adjustY(realY + 0.5 - ohh*0.5)) <= shh*0.5 + 5.5 ;
 }
 
 

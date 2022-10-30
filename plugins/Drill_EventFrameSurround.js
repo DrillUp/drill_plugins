@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        行走图 - 多层行走图环绕球
+ * @plugindesc [v1.1]        行走图 - 多层行走图环绕球
  * @author Drill_up
  * 
  * @Drill_LE_param "环绕球样式-%d"
@@ -107,6 +107,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 优化了插件的性能。
  *
  *
  *
@@ -1529,7 +1531,9 @@
 //		★最坏情况		事件附带了大量装饰贴图。
 //		★备注			无
 //		
-//		★优化记录		暂无
+//		★优化记录		
+//			2022-10-5优化：
+//				添加了接口 优化策略【标准函数】，镜头范围外，直接全部关闭刷新，贴图也关闭帧刷新。
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
@@ -1553,6 +1557,8 @@
 //						->控制器与序列号判定
 //					->层级变化
 //					->贴图自动销毁
+//				->优化策略
+//					->判断贴图是否在镜头范围内
 //
 //				->行走图环绕球控制器【Drill_EFSu_Controller】
 //				->行走图环绕球贴图【Drill_EFSu_Sprite】
@@ -2707,13 +2713,14 @@ Drill_EFSu_Sprite.prototype.initialize = function(){
 // * 环绕球贴图 - 帧刷新
 //==============================
 Drill_EFSu_Sprite.prototype.update = function() {
-	Sprite.prototype.update.call(this);
 	if( this.drill_EFSu_isReady() == false ){ return; }
+	if( this.drill_EFSu_isOptimizationPassed() == false ){ return; }
+	Sprite.prototype.update.call(this);
 	this.drill_updateLayer();					//帧刷新 - 层级
 	this.drill_updateBall();					//帧刷新 - 环绕球
 }
 //##############################
-// * 环绕球贴图 - 设置控制器【标准函数】
+// * 环绕球贴图 - 设置控制器【开放函数】
 //			
 //			参数：	> controller 控制器对象
 //			返回：	> 无
@@ -2724,7 +2731,7 @@ Drill_EFSu_Sprite.prototype.drill_EFSu_setController = function( controller ){
 	this._drill_controller = controller;
 };
 //##############################
-// * 环绕球贴图 - 设置个体贴图【标准函数】
+// * 环绕球贴图 - 设置个体贴图【开放函数】
 //			
 //			参数：	> individual_sprite 贴图对象
 //			返回：	> 无
@@ -2736,7 +2743,7 @@ Drill_EFSu_Sprite.prototype.drill_EFSu_setIndividualSprite = function( individua
 	this._character = this._drill_individualSprite._character;
 };
 //##############################
-// * 环绕球贴图 - 贴图初始化【标准函数】
+// * 环绕球贴图 - 贴图初始化【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -2758,6 +2765,17 @@ Drill_EFSu_Sprite.prototype.drill_EFSu_isReady = function(){
 	if( this._drill_controller == undefined ){ return false; }
 	if( this._drill_individualSprite == undefined ){ return false; }
     return true;
+};
+//##############################
+// * 环绕球贴图 - 优化策略【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 布尔（是否通过）
+//			
+//			说明：	> 通过时，正常帧刷新；未通过时，不执行帧刷新。
+//##############################
+Drill_EFSu_Sprite.prototype.drill_EFSu_isOptimizationPassed = function(){
+    return this.drill_EFSu_isOptimizationPassed_Private();
 };
 //##############################
 // * 环绕球贴图 - 是否需要销毁【标准函数】
@@ -2873,6 +2891,26 @@ Drill_EFSu_Sprite.prototype.drill_updateLayer = function() {
 		yy += this._character.screenY();
 		//xx += this._drill_individualSprite.x;	//（不能用父类的位置，会有1帧延迟问题）
 		//yy += this._drill_individualSprite.y;
+		
+		// > 其他插件位置修正
+		if( Imported.Drill_EventContinuedEffect ){ //【行走图 - 持续动作效果】
+			if( this._character._Drill_ECE != undefined ){
+				xx += this._character._Drill_ECE.x;
+				yy += this._character._Drill_ECE.y;
+			}
+		}
+		if( Imported.Drill_EventFadeInEffect ){ //【行走图 - 显现动作效果】
+			if( this._character._Drill_EFIE != undefined ){
+				xx += this._character._Drill_EFIE.x;
+				yy += this._character._Drill_EFIE.y;
+			}
+		}
+		if( Imported.Drill_EventFadeOutEffect ){ //【行走图 - 持续动作效果】
+			if( this._character._Drill_EFOE != undefined ){
+				xx += this._character._Drill_EFOE.x;
+				yy += this._character._Drill_EFOE.y;
+			}
+		}
 	}
 	
 	
@@ -2918,5 +2956,32 @@ Drill_EFSu_Sprite.prototype.drill_updateBall = function() {
 		this._drill_ballShadowSprite.scale.x = this._drill_ballSprite.scale.x;
 		this._drill_ballShadowSprite.scale.y = this._drill_ballSprite.scale.y;
 	}
+}
+//==============================
+// * 优化策略 - 判断通过（私有）
+//==============================
+Drill_EFSu_Sprite.prototype.drill_EFSu_isOptimizationPassed_Private = function(){
+	
+	// > 镜头范围外时，不工作
+	if( this.drill_EFSu_posIsInCamera( this._character._realX, this._character._realY ) == false ){
+		this.visible = false;
+		return false;
+	}
+	return true;
+}
+//==============================
+// * 优化策略 - 判断贴图是否在镜头范围内
+//==============================
+Drill_EFSu_Sprite.prototype.drill_EFSu_posIsInCamera = function( realX, realY ){
+	var oww = Graphics.boxWidth  / $gameMap.tileWidth();
+	var ohh = Graphics.boxHeight / $gameMap.tileHeight();
+	var sww = oww;
+	var shh = ohh;
+	if( Imported.Drill_LayerCamera ){
+		sww = sww / $gameSystem._drill_LCa_controller._drill_scaleX;
+		shh = shh / $gameSystem._drill_LCa_controller._drill_scaleY;
+	}
+	return  Math.abs($gameMap.adjustX(realX + 0.5 - oww*0.5)) <= sww*0.5 + 5.5 &&	//（镜头范围+5个图块边框区域） 
+			Math.abs($gameMap.adjustY(realY + 0.5 - ohh*0.5)) <= shh*0.5 + 5.5 ;
 }
 

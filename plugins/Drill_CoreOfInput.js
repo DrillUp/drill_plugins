@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.6]        系统 - 输入设备核心
+ * @plugindesc [v1.7]        系统 - 输入设备核心
  * @author Drill_up、汗先生
  * 
  * 
@@ -56,6 +56,7 @@
  * 
  * 插件指令：>输入设备核心 : 地图界面-键盘 : 开启
  * 插件指令：>输入设备核心 : 地图界面-手柄 : 开启
+ * 插件指令：>输入设备核心 : 地图界面-键盘或手柄方向键移动 : 开启
  * 插件指令：>输入设备核心 : 地图界面-鼠标 : 开启
  * 插件指令：>输入设备核心 : 地图界面-触屏 : 开启
  * 插件指令：>输入设备核心 : 地图界面-鼠标左键移动 : 开启
@@ -69,6 +70,8 @@
  * 
  * 1.上述插件指令可以设置·"开启"或"关闭"。
  * 2.插件指令配置执行后，永久有效，且能够被存储到存档中。
+ *   移动、菜单为游戏默认的控制设置，你可以手动关闭它，
+ *   使用游戏其它的控制方式代替。
  * 3.注意，部分功能关闭后，要注意考虑什么时候恢复开启状态，
  *   如果没有恢复，会造成玩家在游戏中不能操作，属于恶性bug。
  * 
@@ -111,6 +114,8 @@
  * 修复了持续按键时，按键暂停的细节bug。
  * [v1.6]
  * 添加了开启/关闭键盘、手柄、鼠标、触屏的功能。
+ * [v1.7]
+ * 修复了触屏点击出错的bug。添加了 键盘或手柄方向键移动 开关功能。
  * 
  * 
  *
@@ -164,6 +169,14 @@
  * @on 开启
  * @off 关闭
  * @desc true - 开启，false - 关闭。
+ * @default true
+ *
+ * @param 开关-地图界面-键盘或手柄方向键移动
+ * @parent ---默认开关---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭。若设置关闭，则地图界面中键盘或手柄方向键移动的功能会被禁用。
  * @default true
  *
  * @param 开关-地图界面-鼠标
@@ -394,27 +407,32 @@
     DrillUp.parameters = PluginManager.parameters('Drill_CoreOfInput');
 	
 	
-	/*-----------------杂项------------------*/
+	/*-----------------默认开关------------------*/
 	DrillUp.g_COI_battle_keyboard = String(DrillUp.parameters['开关-战斗界面-键盘'] || "true") === "true";
 	DrillUp.g_COI_battle_pad = String(DrillUp.parameters['开关-战斗界面-手柄'] || "true") === "true";
 	DrillUp.g_COI_battle_mouse = String(DrillUp.parameters['开关-战斗界面-鼠标'] || "true") === "true";
 	DrillUp.g_COI_battle_touchPad = String(DrillUp.parameters['开关-战斗界面-触屏'] || "true") === "true";
+	
 	DrillUp.g_COI_map_keyboard = String(DrillUp.parameters['开关-地图界面-键盘'] || "true") === "true";
 	DrillUp.g_COI_map_pad = String(DrillUp.parameters['开关-地图界面-手柄'] || "true") === "true";
+	DrillUp.g_COI_map_KPMove = String(DrillUp.parameters['开关-地图界面-键盘或手柄方向键移动'] || "true") === "true";
 	DrillUp.g_COI_map_mouse = String(DrillUp.parameters['开关-地图界面-鼠标'] || "true") === "true";
 	DrillUp.g_COI_map_touchPad = String(DrillUp.parameters['开关-地图界面-触屏'] || "true") === "true";
 	DrillUp.g_COI_map_mouseLeftMove = String(DrillUp.parameters['开关-地图界面-鼠标左键移动'] || "true") === "true";
 	DrillUp.g_COI_map_mouseRightMenu = String(DrillUp.parameters['开关-地图界面-鼠标右键菜单'] || "false") === "true";
 	DrillUp.g_COI_map_touchPadMenu = String(DrillUp.parameters['开关-地图界面-触屏双指菜单'] || "false") === "true";
+	
 	DrillUp.g_COI_menu_keyboard = String(DrillUp.parameters['开关-菜单界面-键盘'] || "true") === "true";
 	DrillUp.g_COI_menu_pad = String(DrillUp.parameters['开关-菜单界面-手柄'] || "true") === "true";
 	DrillUp.g_COI_menu_mouse = String(DrillUp.parameters['开关-菜单界面-鼠标'] || "true") === "true";
 	DrillUp.g_COI_menu_touchPad = String(DrillUp.parameters['开关-菜单界面-触屏'] || "true") === "true";
 	
+	/*-----------------双击判定------------------*/
 	DrillUp.g_COI_mouse_judgeTime = Number(DrillUp.parameters['键盘双击判定时长'] || 12); 
 	DrillUp.g_COI_pads_judgeTime = Number(DrillUp.parameters['手柄双击判定时长'] || 12); 
 	DrillUp.g_COI_keys_judgeTime = Number(DrillUp.parameters['鼠标双击判定时长'] || 12); 
 
+	/*-----------------触屏联动------------------*/
 	DrillUp.g_COI_touchPad_l_down = String(DrillUp.parameters['触屏按下>>鼠标左键按下'] || "false") === "true";
 	DrillUp.g_COI_touchPad_m_down = String(DrillUp.parameters['触屏按下>>鼠标中键按下'] || "true") === "true";
 	DrillUp.g_COI_touchPad_r_down = String(DrillUp.parameters['触屏按下>>鼠标右键按下'] || "true") === "true";
@@ -458,6 +476,10 @@ Game_Interpreter.prototype.pluginCommand = function( command, args ){
 		if( type == "地图界面-手柄" ){
 			if( temp2 == "开启" || temp2 == "启用" ){ $gameSystem.drill_COI_Map_setPad( true ); }
 			if( temp2 == "关闭" || temp2 == "禁用" ){ $gameSystem.drill_COI_Map_setPad( false ); }
+		}
+		if( type == "地图界面-键盘或手柄方向键移动" ){
+			if( temp2 == "开启" || temp2 == "启用" ){ $gameSystem.drill_COI_Map_setKPMove( true ); }
+			if( temp2 == "关闭" || temp2 == "禁用" ){ $gameSystem.drill_COI_Map_setKPMove( false ); }
 		}
 		if( type == "地图界面-鼠标" ){
 			if( temp2 == "开启" || temp2 == "启用" ){ $gameSystem.drill_COI_Map_setMouse( true ); }
@@ -561,6 +583,15 @@ Game_System.prototype.drill_COI_Map_setPad = function( enable ){
 	this._drill_COI_map_pad = enable;
 };
 //##############################
+// * 默认开关 - 地图界面 - 鼠标左键移动【标准函数】
+//				
+//			参数：	> enable 布尔
+//			返回：	> 无
+//##############################
+Game_System.prototype.drill_COI_Map_setKPMove = function( enable ){
+	this._drill_COI_map_KPMove = enable;
+};
+//##############################
 // * 默认开关 - 地图界面 - 鼠标【标准函数】
 //				
 //			参数：	> enable 布尔
@@ -648,9 +679,9 @@ Game_System.prototype.drill_COI_Menu_setTouchPad = function( enable ){
 //==============================
 // * 默认开关 - 存储数据初始化
 //==============================
-var _drill_COI_Switch_initialize = Game_System.prototype.initialize;
+var _drill_COI_DefaultSwitch_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function(){
-	_drill_COI_Switch_initialize.call(this);
+	_drill_COI_DefaultSwitch_initialize.call(this);
 	
 	this._drill_COI_battle_keyboard = DrillUp.g_COI_battle_keyboard;			//战斗界面-键盘
 	this._drill_COI_battle_pad = DrillUp.g_COI_battle_pad;						//战斗界面-手柄
@@ -659,6 +690,7 @@ Game_System.prototype.initialize = function(){
 	
 	this._drill_COI_map_keyboard = DrillUp.g_COI_map_keyboard;					//地图界面-键盘
 	this._drill_COI_map_pad = DrillUp.g_COI_map_pad;							//地图界面-手柄
+	this._drill_COI_map_KPMove = DrillUp.g_COI_map_KPMove;						//地图界面-键盘或手柄方向键移动
 	this._drill_COI_map_mouse = DrillUp.g_COI_map_mouse;						//地图界面-鼠标
 	this._drill_COI_map_touchPad = DrillUp.g_COI_map_touchPad;					//地图界面-触屏
 	this._drill_COI_map_mouseLeftMove = DrillUp.g_COI_map_mouseLeftMove;		//地图界面-鼠标左键移动
@@ -671,13 +703,14 @@ Game_System.prototype.initialize = function(){
 	this._drill_COI_menu_touchPad = DrillUp.g_COI_menu_touchPad;				//菜单界面-触屏
 }
 //==============================
-// * 触发绑定 - 非菜单界面标记
+// * 默认开关 - 非菜单界面标记
 //==============================
 DrillUp.g_COI_isNotSceneMenu = [];
 DrillUp.g_COI_isNotSceneMenu.push("Scene_Map");
 DrillUp.g_COI_isNotSceneMenu.push("Scene_Battle");
+
 //==============================
-// * 触发绑定 - 鼠标可用情况
+// * 默认开关 - 鼠标与触屏 - 鼠标可用情况
 //==============================
 TouchInput.drill_COI_isMouseEnabled = function(){
 	if( SceneManager._scene == undefined ){ return true; }
@@ -700,7 +733,7 @@ TouchInput.drill_COI_isMouseEnabled = function(){
 	return true;
 }
 //==============================
-// * 触发绑定 - 触屏可用情况
+// * 默认开关 - 鼠标与触屏 - 触屏可用情况
 //==============================
 TouchInput.drill_COI_isTouchPadEnabled = function(){
 	if( SceneManager._scene == undefined ){ return true; }
@@ -723,93 +756,93 @@ TouchInput.drill_COI_isTouchPadEnabled = function(){
 	return true;
 }
 //==============================
-// * 触发绑定 - 鼠标按下（dom 'mousedown'）
+// * 默认开关 - 鼠标与触屏 - 鼠标按下（dom 'mousedown'）
 //==============================
-var _drill_COI_Switch__onMouseDown = TouchInput._onMouseDown;
+var _drill_COI_DefaultSwitchBind__onMouseDown = TouchInput._onMouseDown;
 TouchInput._onMouseDown = function( event ){
 	if( this.drill_COI_isMouseEnabled() == false ){ return; }
-	_drill_COI_Switch__onMouseDown.call( this, event );
+	_drill_COI_DefaultSwitchBind__onMouseDown.call( this, event );
 }
 //==============================
-// * 触发绑定 - 鼠标移动（dom 'mousemove'）
+// * 默认开关 - 鼠标与触屏 - 鼠标移动（dom 'mousemove'）
 //==============================
-var _drill_COI_Switch__onMouseMove = TouchInput._onMouseMove;
+var _drill_COI_DefaultSwitchBind__onMouseMove = TouchInput._onMouseMove;
 TouchInput._onMouseMove = function( event ){
 	if( this.drill_COI_isMouseEnabled() == false ){ return; }
-	_drill_COI_Switch__onMouseMove.call( this, event );
+	_drill_COI_DefaultSwitchBind__onMouseMove.call( this, event );
 }
 //==============================
-// * 触发绑定 - 鼠标释放（dom 'mouseup'）
+// * 默认开关 - 鼠标与触屏 - 鼠标释放（dom 'mouseup'）
 //==============================
-var _drill_COI_Switch__onMouseUp = TouchInput._onMouseUp;
+var _drill_COI_DefaultSwitchBind__onMouseUp = TouchInput._onMouseUp;
 TouchInput._onMouseUp = function( event ){
 	if( this.drill_COI_isMouseEnabled() == false ){ return; }
-	_drill_COI_Switch__onMouseUp.call( this, event );
+	_drill_COI_DefaultSwitchBind__onMouseUp.call( this, event );
 }
 //==============================
-// * 触发绑定 - 鼠标滚轮（dom 'wheel'）
+// * 默认开关 - 鼠标与触屏 - 鼠标滚轮（dom 'wheel'）
 //==============================
-var _drill_COI_Switch__onWheel = TouchInput._onWheel;
+var _drill_COI_DefaultSwitchBind__onWheel = TouchInput._onWheel;
 TouchInput._onWheel = function( event ){
 	if( this.drill_COI_isMouseEnabled() == false ){ return; }
-	_drill_COI_Switch__onWheel.call( this, event );
+	_drill_COI_DefaultSwitchBind__onWheel.call( this, event );
 }
 //==============================
-// * 触发绑定 - 触屏开始（dom 'touchstart'）
+// * 默认开关 - 鼠标与触屏 - 触屏开始（dom 'touchstart'）
 //==============================
-var _drill_COI_Switch__onTouchStart = TouchInput._onTouchStart;
+var _drill_COI_DefaultSwitchBind__onTouchStart = TouchInput._onTouchStart;
 TouchInput._onTouchStart = function( event ){
 	if( this.drill_COI_isTouchPadEnabled() == false ){ return; }
-	_drill_COI_Switch__onTouchStart.call( this, event );
+	_drill_COI_DefaultSwitchBind__onTouchStart.call( this, event );
 }
 //==============================
-// * 触发绑定 - 触屏移动（dom 'touchmove'）
+// * 默认开关 - 鼠标与触屏 - 触屏移动（dom 'touchmove'）
 //==============================
-var _drill_COI_Switch__onTouchMove = TouchInput._onTouchMove;
+var _drill_COI_DefaultSwitchBind__onTouchMove = TouchInput._onTouchMove;
 TouchInput._onTouchMove = function( event ){
 	if( this.drill_COI_isTouchPadEnabled() == false ){ return; }
-	_drill_COI_Switch__onTouchMove.call( this, event );
+	_drill_COI_DefaultSwitchBind__onTouchMove.call( this, event );
 }
 //==============================
-// * 触发绑定 - 触屏结束（dom 'touchend'）
+// * 默认开关 - 鼠标与触屏 - 触屏结束（dom 'touchend'）
 //==============================
-var _drill_COI_Switch__onTouchEnd = TouchInput._onTouchEnd;
+var _drill_COI_DefaultSwitchBind__onTouchEnd = TouchInput._onTouchEnd;
 TouchInput._onTouchEnd = function( event ){
 	if( this.drill_COI_isTouchPadEnabled() == false ){ return; }
-	_drill_COI_Switch__onTouchEnd.call( this, event );
+	_drill_COI_DefaultSwitchBind__onTouchEnd.call( this, event );
 }
 //==============================
-// * 触发绑定 - 触屏取消（dom 'touchcancel'）
+// * 默认开关 - 鼠标与触屏 - 触屏取消（dom 'touchcancel'）
 //==============================
-var _drill_COI_Switch__onTouchCancel = TouchInput._onTouchCancel;
+var _drill_COI_DefaultSwitchBind__onTouchCancel = TouchInput._onTouchCancel;
 TouchInput._onTouchCancel = function( event ){
 	if( this.drill_COI_isTouchPadEnabled() == false ){ return; }
-	_drill_COI_Switch__onTouchCancel.call( this, event );
+	_drill_COI_DefaultSwitchBind__onTouchCancel.call( this, event );
 }
 //==============================
-// * 触发绑定 - 触屏点击（dom 'pointerdown'）
+// * 默认开关 - 鼠标与触屏 - 触屏点击（dom 'pointerdown'）
 //==============================
-var _drill_COI_Switch__onPointerDown = TouchInput._onPointerDown;
+var _drill_COI_DefaultSwitchBind__onPointerDown = TouchInput._onPointerDown;
 TouchInput._onPointerDown = function( event ){
 	if( this.drill_COI_isTouchPadEnabled() == false ){ return; }
-	_drill_COI_Switch__onPointerDown.call( this, event );
+	_drill_COI_DefaultSwitchBind__onPointerDown.call( this, event );
 }
 //==============================
-// * 地图界面 - 鼠标左键移动
+// * 默认开关 - 鼠标与触屏 - 鼠标左键移动
 //==============================
-var _drill_COI_Switch_processMapTouch = Scene_Map.prototype.processMapTouch;
+var _drill_COI_DefaultSwitch_processMapTouch = Scene_Map.prototype.processMapTouch;
 Scene_Map.prototype.processMapTouch = function(){	
 	
 	// > 若关闭则不执行
 	if( $gameSystem && $gameSystem._drill_COI_map_mouseLeftMove == false ){ return; }
 	
 	// > 原函数
-	_drill_COI_Switch_processMapTouch.call(this);
+	_drill_COI_DefaultSwitch_processMapTouch.call(this);
 };
 //==============================
-// * 地图界面 - 鼠标右键菜单
+// * 默认开关 - 鼠标与触屏 - 鼠标右键菜单
 //==============================
-var _drill_COI_Switch_onRightButtonDown = TouchInput._onRightButtonDown;
+var _drill_COI_DefaultSwitch_onRightButtonDown = TouchInput._onRightButtonDown;
 TouchInput._onRightButtonDown = function( event ){
 	
 	// > 若关闭则不执行
@@ -819,12 +852,12 @@ TouchInput._onRightButtonDown = function( event ){
 	}
 	
 	// > 原函数
-	_drill_COI_Switch_onRightButtonDown.call(this,event);
+	_drill_COI_DefaultSwitch_onRightButtonDown.call(this,event);
 };
 //==============================
-// * 地图界面 - 触屏双指菜单 - 标记
+// * 默认开关 - 鼠标与触屏 - 触屏双指菜单（标记）
 //==============================
-var _drill_COI_Switch__onTouchStart = TouchInput._onTouchStart;
+var _drill_COI_DefaultSwitch__onTouchStart = TouchInput._onTouchStart;
 TouchInput._onTouchStart = function( event ){
 	if( ($gameSystem && $gameSystem._drill_COI_map_touchPadMenu == false) && 
 		SceneManager._scene.constructor.name === "Scene_Map" ){
@@ -832,22 +865,22 @@ TouchInput._onTouchStart = function( event ){
 			this._drill_COI_forbid_menu = true;
 		}
 	}
-	_drill_COI_Switch__onTouchStart.call(this,event);
+	_drill_COI_DefaultSwitch__onTouchStart.call(this,event);
 };
 //==============================
-// * 地图界面 - 触屏双指菜单 - 延迟锁
+// * 默认开关 - 鼠标与触屏 - 触屏双指菜单（延迟锁）
 //==============================
-var _drill_COI_Switch__onCancel = TouchInput._onCancel;
+var _drill_COI_DefaultSwitch__onCancel = TouchInput._onCancel;
 TouchInput._onCancel = function( x, y ){
 	if( this._drill_COI_forbid_menu === true ){
 		this._drill_COI_forbid_menu = false;
 		return ;
 	}
-	_drill_COI_Switch__onCancel.call(this,x, y);
+	_drill_COI_DefaultSwitch__onCancel.call(this,x, y);
 };
 
 //==============================
-// * 触发绑定 - 键盘可用情况
+// * 默认开关 - 键盘与手柄 - 键盘可用情况
 //==============================
 Input.drill_COI_isKeyboardEnabled = function(){
 	if( SceneManager._scene == undefined ){ return true; }
@@ -870,7 +903,7 @@ Input.drill_COI_isKeyboardEnabled = function(){
 	return true;
 }
 //==============================
-// * 触发绑定 - 手柄可用情况
+// * 默认开关 - 键盘与手柄 - 手柄可用情况
 //==============================
 Input.drill_COI_isPadEnabled = function(){
 	if( SceneManager._scene == undefined ){ return true; }
@@ -893,28 +926,41 @@ Input.drill_COI_isPadEnabled = function(){
 	return true;
 }
 //==============================
-// * 触发绑定 - 键盘按下（dom 'keydown'）
+// * 默认开关 - 键盘与手柄 - 键盘按下（dom 'keydown'）
 //==============================
-var _drill_COI_Switch__onKeyDown = Input._onKeyDown;
+var _drill_COI_DefaultSwitchBind__onKeyDown = Input._onKeyDown;
 Input._onKeyDown = function( event ){
 	if( this.drill_COI_isKeyboardEnabled() == false ){ return; }
-	_drill_COI_Switch__onKeyDown.call( this, event );
+	_drill_COI_DefaultSwitchBind__onKeyDown.call( this, event );
 }
 //==============================
-// * 触发绑定 - 键盘释放（dom 'keyup'）
+// * 默认开关 - 键盘与手柄 - 键盘释放（dom 'keyup'）
 //==============================
-var _drill_COI_Switch__onKeyUp = Input._onKeyUp;
+var _drill_COI_DefaultSwitchBind__onKeyUp = Input._onKeyUp;
 Input._onKeyUp = function( event ){
 	if( this.drill_COI_isKeyboardEnabled() == false ){ return; }
-	_drill_COI_Switch__onKeyUp.call( this, event );
+	_drill_COI_DefaultSwitchBind__onKeyUp.call( this, event );
 }
 //==============================
-// * 触发绑定 - 手柄控制
+// * 默认开关 - 键盘与手柄 - 手柄控制
 //==============================
-var _drill_COI_Switch__updateGamepadState = Input._updateGamepadState;
+var _drill_COI_DefaultSwitch__updateGamepadState = Input._updateGamepadState;
 Input._updateGamepadState = function( gamepad ){
 	if( this.drill_COI_isPadEnabled() == false ){ return; }
-	_drill_COI_Switch__updateGamepadState.call( this, gamepad );
+	_drill_COI_DefaultSwitch__updateGamepadState.call( this, gamepad );
+}
+//==============================
+// * 默认开关 - 键盘与手柄 - 键盘或手柄方向键移动
+//==============================
+var _drill_COI_DefaultSwitch_getInputDirection = Game_Player.prototype.getInputDirection;
+Game_Player.prototype.getInputDirection = function(){
+	var scene_name = SceneManager._scene.constructor.name;
+	if( scene_name === "Scene_Map" ){
+		if( $gameSystem && $gameSystem._drill_COI_map_KPMove == false ){
+			return 0;
+		}
+	}
+	return _drill_COI_DefaultSwitch_getInputDirection.call(this);
 }
 
 

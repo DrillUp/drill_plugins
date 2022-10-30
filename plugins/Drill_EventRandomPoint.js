@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        物体触发 - 固定区域 & 随机点
+ * @plugindesc [v1.2]        物体触发 - 固定区域 & 随机点
  * @author Drill_up
  * 
  * 
@@ -45,7 +45,7 @@
  *      点范围，再进行随机，这样能有效防止物品误飞到不可通行区域。
  *
  * -----------------------------------------------------------------------------
- * ----激活条件 - 随机出生点：
+ * ----激活条件 - 随机出生点
  * 你可以指定某个事件，载入地图时，出现在原位置范围内的随机区域：
  * 
  * 事件注释：=>随机出生点 : 菱形区域 : 1
@@ -56,15 +56,22 @@
  * 事件注释：=>随机出生点 : 竖条区域 : 1
  * 事件注释：=>随机出生点 : 自定义区域 : 1
  * 
- * 事件注释：=>随机出生点 : 固定随机种子
- * 
  * 1.数字表示区域的范围，0表示只有出生点自己。
  *   再比如，"方形区域 : 1"表示事件的位置以及周围8个图块的区域。
- * 2.默认情况下，如果玩家离开重进地图，那么出生点会再次随机。
+ * 2.注意，此注释必须写在事件页第一页才能生效。
+ *
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 固定随机种子
+ * 你可以指定某个事件，载入地图时，出现在原位置范围内的随机区域：
+ * 
+ * 事件注释：=>随机出生点 : 固定随机种子
+ * 
+ * 1.默认情况下，如果玩家离开重进地图，那么出生点会再次随机。
  *   "固定随机种子"可以使得玩家重进地图时，帧数不再随机变化，而是固定的随机值。
+ * 2.注意，此注释必须写在事件页第一页才能生效。
  * 
  * -----------------------------------------------------------------------------
- * ----高级设定 - 出生点筛选器
+ * ----可选设定 - 出生点筛选器
  * 上述的区域，有可能需要再经过一次额外的筛选，来满足复杂地形的条件：
  * 
  * 插件指令：=>随机出生点 : 使用筛选器 : 1
@@ -115,7 +122,7 @@
  * 2.区域后面的数字，对应 区域核心配置 的自定义区域编号。
  *
  * -----------------------------------------------------------------------------
- * ----高级设定 - 筛选器
+ * ----可选设定 - 筛选器
  * 上述的区域，有可能需要再经过一次额外的筛选，来满足复杂地形的条件：
  * 
  * 插件指令：>获取随机坐标 : 固定区域 : 开启筛选器 : 1
@@ -153,6 +160,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 添加了 固定随机种子 功能。
+ * [v1.2]
+ * 修复了切换事件页后，固定随机种子 不固定的bug。
  * 
  */
  
@@ -215,7 +224,7 @@ if( Imported.Drill_CoreOfFixedArea ){
 // * 事件初始化
 //==============================
 var _drill_ERP_event_initialize = Game_Event.prototype.initialize;
-Game_Event.prototype.initialize = function(mapId, eventId) {
+Game_Event.prototype.initialize = function( mapId, eventId ){
 	this._drill_ERP_isInInit = true;
 	_drill_ERP_event_initialize.call(this, mapId, eventId);
 };
@@ -228,12 +237,12 @@ Game_Event.prototype.setupPage = function() {
 	this.drill_ERP_setupPage();
 };
 Game_Event.prototype.drill_ERP_setupPage = function() {
-	if( this._drill_ERP_isInInit !== true ){ return } 	//（进入地图后只执行一次）
+	if( this._drill_ERP_isInInit != true ){ return; } 	//（进入地图后只执行一次）
 	this._drill_ERP_isInInit = false;
-	var cur_condition = {};		//筛选器
+	var cur_condition = {};				//筛选器
 	
-	if( !this._erased && this.page() ){
-		var li = this.list();
+	if( this.event().pages[0] ){		//（强制读取第一页）
+		var li = this.event().pages[0].list;
 		var seed_lock = false;
 		for(var k=0; k < li.length; k++){
 			var l = li[k];
@@ -289,8 +298,8 @@ Game_Event.prototype.drill_ERP_setupPage = function() {
 							ran = Math.floor( Math.random()*c_area.length );
 						}else{
 							
-							// > 随机种子（与 地图id、事件id、事件页id 相关）
-							var seed = this._mapId * this._eventId * (this._pageIndex+1) + this._eventId * this._eventId - this._pageIndex +101;
+							// > 随机种子（与 地图id、事件id 相关，与事件页无关）
+							var seed = this._mapId * this._eventId + this._eventId * this._eventId +101;
 							var random_num = this.drill_ERP_getRandomInSeed( seed );
 							
 							// > 位置设置
@@ -328,6 +337,7 @@ var _drill_ERP_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_ERP_pluginCommand.call(this, command, args);
 	if( command === ">获取随机坐标" ){
+		
 		/*-----------------形状区域------------------*/
 		if(args.length == 8){
 			var unit = String(args[1]);

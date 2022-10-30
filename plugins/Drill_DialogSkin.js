@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        对话框 - 对话框皮肤
+ * @plugindesc [v1.3]        对话框 - 对话框皮肤
  * @author Drill_up
  * 
  * @Drill_LE_param "皮肤样式-%d"
@@ -127,6 +127,8 @@
  * [v1.2]
  * 修复了使用 自定义单图背景 模式时，切换对话框样式造成错误叠加的bug。
  * 优化了 姓名框窗口 的兼容性。
+ * [v1.3]
+ * 优化了对话框皮肤的结构。
  * 
  *
  *
@@ -581,13 +583,13 @@
 //						> 对话框数字输入窗口
 //						> 对话框选择物品窗口
 //						> 对话框姓名框窗口
-//					->布局模式
+//					->窗口皮肤初始化
 //						> 默认窗口皮肤
 //						> 自定义窗口皮肤
 //						> 自定义背景图片
-//					->底层特殊
-//						->窗口色调
+//						> 黑底背景
 //						->窗口平铺背景向内缩进距
+//					->边框皮肤初始化
 //				->边框与边角
 //					->边框
 //						->向内缩进距
@@ -833,7 +835,15 @@ Game_Temp.prototype.initialize = function(){
 
 
 //=============================================================================
-// * 对话框
+// ** 对话框
+// **		
+// **		子功能：	->窗口皮肤初始化
+// **						> 默认窗口皮肤
+// **						> 自定义窗口皮肤
+// **						> 自定义背景图片
+// **						> 黑底背景
+// **						->窗口平铺背景向内缩进距
+// **					->边框皮肤初始化
 //=============================================================================
 //==============================
 // * 对话框 - 初始化
@@ -843,9 +853,8 @@ Window_Message.prototype.initialize = function() {
 	_drill_DSk_initialize.call( this );
 
 	this._drill_DSk_tag = "Window_Message";
-	this.drill_DSk_createBackground();		//创建背景
-	this.drill_DSk_createBorder();			//创建边框层
-	this.drill_DSk_sortBottomByZIndex();	//底层层级排序
+	this.drill_DSk_initSkin();			//窗口皮肤初始化
+	this.drill_DSk_initBorder();		//边框皮肤初始化
 };
 //==============================
 // * 对话框 - 设置背景（非帧刷新，窗口/暗淡/透明）
@@ -855,9 +864,18 @@ Window_Message.prototype.setBackgroundType = function( type ){
 	_drill_DSk_setBackgroundType.call( this,type );
 	
     if( type === 0 ){	// 窗口 类型
-		this.drill_DSk_refreshBackground();
-		this.drill_DSk_refreshBorder();
+		var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
+		this.drill_DSk_resetSkinData( data );	//刷新窗口皮肤
+		this.drill_DSk_resetBorder();			//刷新边框皮肤
 	}
+}
+//==============================
+// * 对话框 - 帧刷新
+//==============================
+var _drill_DSk_mes_update = Window_Message.prototype.update;
+Window_Message.prototype.update = function(){
+	_drill_DSk_mes_update.call(this);
+	this.drill_DSk_updateSkin();				//帧刷新 - 窗口皮肤
 }
 //==============================
 // * 对话框底层 - 窗口平铺背景向内缩进距
@@ -877,40 +895,11 @@ Window.prototype._refreshBack = function(){
 		this._margin = this._drill_DSk_marginTemp;
 	}
 }
-//==============================
-// * 对话框底层 - 窗口色调
-//
-//			说明：	setTone可以反复调用赋值，有变化监听的锁。
-//==============================
-var _drill_DSk_updateTone = Window_Base.prototype.updateTone;
-Window_Base.prototype.updateTone = function() {
-	if( this._drill_DSk_tag != undefined ){
-		var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
-		if( data['window_tone_lock'] == true ){
-			this.setTone( data['window_tone_r'], data['window_tone_g'], data['window_tone_b']);
-			return ;
-		}
-	}
-	_drill_DSk_updateTone.call( this );
-}
 
 //==============================
-// * 通用函数 - 创建背景
+// * 边框皮肤 - 初始化
 //==============================
-Window_Message.prototype.drill_DSk_createBackground = function() {
-	this._drill_DSk_background = new Sprite();
-	
-	// > 图层顺序处理
-	this._drill_DSk_background.zIndex = 1;
-	this._windowBackSprite.zIndex = 2;
-	this._windowFrameSprite.zIndex = 3;
-	
-	this._windowSpriteContainer.addChild(this._drill_DSk_background);	//（ _windowSpriteContainer 为窗口的最底层贴图）
-}
-//==============================
-// * 通用函数 - 创建边框层
-//==============================
-Window_Message.prototype.drill_DSk_createBorder = function() {
+Window_Base.prototype.drill_DSk_initBorder = function() {
 
 	// > 边框层
 	this._drill_DSk_border_needRefresh = false;
@@ -919,60 +908,9 @@ Window_Message.prototype.drill_DSk_createBorder = function() {
 	//（注意， _windowSpriteContainer 是一个 PIXI.Container，不能addChild，巨坑 ）
 }
 //==============================
-// * 通用函数 - 底层层级排序
+// * 边框皮肤 - 刷新边框皮肤
 //==============================
-Window_Message.prototype.drill_DSk_sortBottomByZIndex = function() {
-	this._windowSpriteContainer.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
-};
-//==============================
-// * 通用函数 - 刷新背景
-//==============================
-Window_Message.prototype.drill_DSk_refreshBackground = function(){
-	var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
-	if( this._drill_DSk_background == undefined ){ return; }
-	
-	// > 信息框布局
-	if( data['window_type'] == "默认窗口皮肤" ){
-		
-		// > 皮肤设置
-		this.windowskin = ImageManager.loadSystem( "Window" );
-		
-		// > 透明度
-		this.opacity = data['window_opacity'];
-		this._drill_DSk_background.bitmap = null;
-		this._drill_DSk_background.opacity = data['window_opacity'];
-		this._windowBackSprite.opacity = data['window_opacity'];
-		this._windowFrameSprite.opacity = data['window_opacity'];
-		
-	}else if( data['window_type'] == "自定义窗口皮肤" ){
-		
-		// > 皮肤设置
-		this.windowskin = ImageManager.load_MenuUiMessage( data['window_sys_src'] );
-		
-		// > 透明度
-		this._drill_DSk_background.bitmap = null;
-		this._drill_DSk_background.opacity = data['window_opacity'];
-		this._windowBackSprite.opacity = data['window_opacity'];
-		this._windowFrameSprite.opacity = data['window_opacity'];
-		
-		
-	}else if( data['window_type'] == "自定义背景图片" ){
-		
-		// > bimap建立
-		this._drill_DSk_background.bitmap = ImageManager.load_MenuUiMessage( data['window_pic_src'] );
-		this._drill_DSk_background.x = data['window_pic_x'];
-		this._drill_DSk_background.y = data['window_pic_y'];
-		
-		// > 透明度
-		this._drill_DSk_background.opacity = data['window_opacity'];
-		this._windowBackSprite.opacity = 0;
-		this._windowFrameSprite.opacity = 0;
-	}
-}
-//==============================
-// * 通用函数 - 刷新边框
-//==============================
-Window_Message.prototype.drill_DSk_refreshBorder = function(){
+Window_Base.prototype.drill_DSk_resetBorder = function(){
 	
 	// > 刷新标记
 	this._drill_DSk_border_needRefresh = true;
@@ -980,6 +918,181 @@ Window_Message.prototype.drill_DSk_refreshBorder = function(){
 	// > 边框样式
 	this._drill_DSk_border.drill_DSk_refreshStyle();
 }
+
+//==============================
+// * 窗口皮肤 - 初始化
+//
+//			说明：	此函数只在初始化时执行一次，不要执行多了。
+//==============================
+Window_Base.prototype.drill_DSk_initSkin = function() {
+	
+	// > 皮肤资源
+	this._drill_skin_defaultSkin = this.windowskin;
+	
+	// > 重设数据
+	if( this._drill_DSk_tag == undefined ){ return; }
+	var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
+	this.drill_DSk_resetSkinData( data );
+}
+//==============================
+// * 窗口皮肤 - 重设数据
+//
+//			说明：	data对象中的参数【可以缺项】。
+//==============================
+Window_Base.prototype.drill_DSk_resetSkinData = function( data ){
+	
+	// > 默认值
+	if( data['window_type'] == undefined ){ data['window_type'] = "默认窗口皮肤" };		//布局模式（默认窗口皮肤/自定义窗口皮肤/自定义背景图片/黑底背景）
+	if( data['window_opacity'] == undefined ){ data['window_opacity'] = 255 };			//布局透明度
+	if( data['window_sys_src'] == undefined ){ data['window_sys_src'] = "" };			//资源-自定义窗口皮肤
+	if( data['window_pic_src'] == undefined ){ data['window_pic_src'] = "" };			//资源-自定义背景图片
+	if( data['window_pic_x'] == undefined ){ data['window_pic_x'] = 0 };				//背景图片X
+	if( data['window_pic_y'] == undefined ){ data['window_pic_y'] = 0 };				//背景图片Y
+	
+	if( data['window_tone_lock'] == undefined ){ data['window_tone_lock'] = false };	//是否锁定窗口色调
+	if( data['window_tone_r'] == undefined ){ data['window_tone_r'] = 0 };				//窗口色调-红
+	if( data['window_tone_g'] == undefined ){ data['window_tone_g'] = 0 };				//窗口色调-绿
+	if( data['window_tone_b'] == undefined ){ data['window_tone_b'] = 0 };				//窗口色调-蓝
+	
+	
+	// > 窗口皮肤 - 私有变量初始化
+	this._drill_skin_type = data['window_type'];
+	this._drill_skin_opacity = data['window_opacity'];
+	
+	this._drill_skinBackground_width = 0;
+	this._drill_skinBackground_height = 0;
+	if( data['window_type'] == "自定义背景图片" && data['window_pic_src'] != "" ){
+		this._drill_skin_pic_bitmap = ImageManager.loadBitmap( "img/Menu__ui_message/", data['window_pic_src'], 0, true);
+		this._drill_skin_pic_x = data['window_pic_x'];
+		this._drill_skin_pic_y = data['window_pic_y'];
+	}else{
+		this._drill_skin_pic_bitmap = ImageManager.loadEmptyBitmap();
+	}
+	
+	if( data['window_type'] == "自定义窗口皮肤" && data['window_sys_src'] != "" ){
+		this._drill_skin_sys_bitmap = ImageManager.loadBitmap( "img/Menu__ui_message/", data['window_sys_src'], 0, true);
+	}else{
+		this._drill_skin_sys_bitmap = this._drill_skin_defaultSkin;
+	}
+	
+	this._drill_skin_tone_lock = data['window_tone_lock'];
+	this._drill_skin_tone_r = data['window_tone_r'];
+	this._drill_skin_tone_g = data['window_tone_g'];
+	this._drill_skin_tone_b = data['window_tone_b'];
+	
+	
+	// > 窗口皮肤 - 贴图初始化
+	if( this._drill_skinBackground == undefined ){
+		this._drill_skinBackground = new Sprite();
+		this._windowSpriteContainer.addChild(this._drill_skinBackground);	//（ _windowSpriteContainer 为窗口的最底层贴图）
+	}
+	
+	
+	// > 窗口皮肤 - 布局模式
+	if( this._drill_skin_type == "默认窗口皮肤" || this._drill_skin_type == "默认窗口布局" ){
+		
+		// （皮肤资源）
+		this.windowskin = this._drill_skin_defaultSkin;
+		
+		// （透明度）
+		this.opacity = this._drill_skin_opacity;
+		this._windowBackSprite.opacity = this._drill_skin_opacity;
+		this._windowFrameSprite.opacity = this._drill_skin_opacity;
+		this._drill_skinBackground.opacity = 0;
+		
+		// （背景图片布局）
+		this._drill_skinBackground.bitmap = null;
+		
+		
+	}else if( this._drill_skin_type == "自定义窗口皮肤" || this._drill_skin_type == "系统窗口布局" ){
+		
+		// （皮肤资源）
+		this.windowskin = this._drill_skin_sys_bitmap;
+		
+		// （透明度）
+		this.opacity = this._drill_skin_opacity;
+		this._windowBackSprite.opacity = this._drill_skin_opacity;
+		this._windowFrameSprite.opacity = this._drill_skin_opacity;
+		this._drill_skinBackground.opacity = 0;
+		
+		// （背景图片布局）
+		this._drill_skinBackground.bitmap = null;
+		
+		
+	}else if( this._drill_skin_type == "自定义背景图片" || this._drill_skin_type == "图片窗口布局" ){
+		
+		// （皮肤资源）
+		this.windowskin = this._drill_skin_defaultSkin;
+		
+		// （透明度）
+		this.opacity = 255;
+		this._windowBackSprite.opacity = 0;
+		this._windowFrameSprite.opacity = 0;
+		this._drill_skinBackground.opacity = this._drill_skin_opacity;
+		
+		// （背景图片布局）
+		this._drill_skinBackground.bitmap = this._drill_skin_pic_bitmap;
+		this._drill_skinBackground.x = this._drill_skin_pic_x;
+		this._drill_skinBackground.y = this._drill_skin_pic_y;
+		
+		
+	}else if( this._drill_skin_type == "黑底背景" || this._drill_skin_type == "黑底布局" ){
+		
+		// （皮肤资源）
+		this.windowskin = this._drill_skin_defaultSkin;
+		
+		// （透明度）
+		this.opacity = 255;
+		this._windowBackSprite.opacity = 0;
+		this._windowFrameSprite.opacity = 0;
+		this._drill_skinBackground.opacity = this._drill_skin_opacity;
+		
+		// （背景图片布局）
+		this._drill_skinBackground.bitmap = null;	//（帧刷新中会自动建立黑色画布）
+	}
+	
+	
+	// > 窗口皮肤 - 层级排序
+	this._drill_skinBackground.zIndex = 1;
+	this._windowBackSprite.zIndex = 2;
+	this._windowFrameSprite.zIndex = 3;
+	this._windowSpriteContainer.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
+}
+//==============================
+// * 窗口皮肤 - 帧刷新
+//==============================
+Window_Base.prototype.drill_DSk_updateSkin = function() {
+	
+	if( this._drill_skin_type == "黑底背景" || this._drill_skin_type == "黑底布局" ){
+		
+		// > 高宽改变锁
+		if( this._drill_skinBackground_width  == this._drill_width &&
+			this._drill_skinBackground_height == this._drill_height ){
+			return;
+		}
+		this._drill_skinBackground_width = this._drill_width;
+		this._drill_skinBackground_height = this._drill_height;
+		
+		// > 改变时新建黑色画布
+		this._drill_skinBackground_BlackBitmap = new Bitmap(this._drill_width, this._drill_height);
+		this._drill_skinBackground_BlackBitmap.fillRect(0, 0 , this._drill_width, this._drill_height, "#000000");
+		this._drill_skinBackground.bitmap = this._drill_skinBackground_BlackBitmap;
+	}
+}
+//==============================
+// * 窗口皮肤 - 帧刷新色调
+//
+//			说明：	setTone可以反复调用赋值，有变化监听的锁。
+//==============================
+var _drill_DSk_updateTone = Window_Base.prototype.updateTone;
+Window_Base.prototype.updateTone = function() {
+	if( this._drill_skin_tone_lock == true ){
+		this.setTone( this._drill_skin_tone_r, this._drill_skin_tone_g, this._drill_skin_tone_b );
+		return;
+	}
+	_drill_DSk_updateTone.call( this );
+}
+
 
 
 //=============================================================================
@@ -993,16 +1106,12 @@ Window_Message.prototype.createSubWindows = function(){
 	_drill_DSk_createSubWindows.call( this );
 	
 	// > 通用函数
-	this._goldWindow.drill_DSk_createBackground = this.drill_DSk_createBackground;		
-	this._goldWindow.drill_DSk_createBorder = this.drill_DSk_createBorder;				
-	this._goldWindow.drill_DSk_sortBottomByZIndex = this.drill_DSk_sortBottomByZIndex;	
-	this._goldWindow.drill_DSk_refreshBackground = this.drill_DSk_refreshBackground;	
-	this._goldWindow.drill_DSk_refreshBorder = this.drill_DSk_refreshBorder;	
+	this._goldWindow.drill_DSk_initBorder = this.drill_DSk_initBorder;
+	this._goldWindow.drill_DSk_resetBorder = this.drill_DSk_resetBorder;	
 	
 	this._goldWindow._drill_DSk_tag = "Window_Gold";
-	this._goldWindow.drill_DSk_createBackground();		//创建背景
-	this._goldWindow.drill_DSk_createBorder();			//创建边框层
-	this._goldWindow.drill_DSk_sortBottomByZIndex();	//底层层级排序
+	this._goldWindow.drill_DSk_initSkin();				//窗口皮肤初始化
+	this._goldWindow.drill_DSk_initBorder();			//边框皮肤初始化
 }
 //==============================
 // * 金钱窗口 - 刷新
@@ -1012,19 +1121,20 @@ Window_Gold.prototype.open = function() {
 	_drill_DSk_Gold_open.call(this);
 	
 	if( this._drill_DSk_tag != undefined ){
-		this.drill_DSk_refreshBackground();		//刷新背景
-		this.drill_DSk_refreshBorder();			//刷新边框
+		var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
+		this.drill_DSk_resetSkinData( data );	//刷新窗口皮肤
+		this.drill_DSk_resetBorder();			//刷新边框皮肤
 	}
 }
+//==============================
+// * 金钱窗口 - 帧刷新
+//==============================
+var _drill_DSk_Gold_update = Window_Gold.prototype.update;
+Window_Gold.prototype.update = function(){
+	_drill_DSk_Gold_update.call(this);
+	this.drill_DSk_updateSkin();				//帧刷新 - 窗口皮肤
+}
 
-//==============================
-// * 选择项窗口 - 通用函数
-//==============================
-Window_ChoiceList.prototype.drill_DSk_createBackground = Window_Message.prototype.drill_DSk_createBackground;
-Window_ChoiceList.prototype.drill_DSk_createBorder = Window_Message.prototype.drill_DSk_createBorder;
-Window_ChoiceList.prototype.drill_DSk_sortBottomByZIndex = Window_Message.prototype.drill_DSk_sortBottomByZIndex;
-Window_ChoiceList.prototype.drill_DSk_refreshBackground = Window_Message.prototype.drill_DSk_refreshBackground;
-Window_ChoiceList.prototype.drill_DSk_refreshBorder = Window_Message.prototype.drill_DSk_refreshBorder;
 //==============================
 // * 选择项窗口 - 初始化
 //==============================
@@ -1032,9 +1142,8 @@ var _drill_DSk_ChoiceList_initialize = Window_ChoiceList.prototype.initialize;
 Window_ChoiceList.prototype.initialize = function( messageWindow ){
 	_drill_DSk_ChoiceList_initialize.call( this,messageWindow );
 	this._drill_DSk_tag = "Window_ChoiceList";
-	this.drill_DSk_createBackground();		//创建背景
-	this.drill_DSk_createBorder();			//创建边框层
-	this.drill_DSk_sortBottomByZIndex();	//底层层级排序
+	this.drill_DSk_initSkin();				//窗口皮肤初始化
+	this.drill_DSk_initBorder();			//边框皮肤初始化
 }
 //==============================
 // * 选择项窗口 - 刷新
@@ -1042,18 +1151,19 @@ Window_ChoiceList.prototype.initialize = function( messageWindow ){
 var _drill_DSk_ChoiceList_start = Window_ChoiceList.prototype.start;
 Window_ChoiceList.prototype.start = function() {
 	_drill_DSk_ChoiceList_start.call(this);
-	this.drill_DSk_refreshBackground();		//刷新背景
-	this.drill_DSk_refreshBorder();			//刷新边框
+	var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
+	this.drill_DSk_resetSkinData( data );	//刷新窗口皮肤
+	this.drill_DSk_resetBorder();			//刷新边框皮肤
+}
+//==============================
+// * 选择项窗口 - 帧刷新
+//==============================
+var _drill_DSk_ChoiceList_update = Window_ChoiceList.prototype.update;
+Window_ChoiceList.prototype.update = function(){
+	_drill_DSk_ChoiceList_update.call(this);
+	this.drill_DSk_updateSkin();			//帧刷新 - 窗口皮肤
 }
 
-//==============================
-// * 数字输入窗口 - 通用函数
-//==============================
-Window_NumberInput.prototype.drill_DSk_createBackground = Window_Message.prototype.drill_DSk_createBackground;
-Window_NumberInput.prototype.drill_DSk_createBorder = Window_Message.prototype.drill_DSk_createBorder;
-Window_NumberInput.prototype.drill_DSk_sortBottomByZIndex = Window_Message.prototype.drill_DSk_sortBottomByZIndex;
-Window_NumberInput.prototype.drill_DSk_refreshBackground = Window_Message.prototype.drill_DSk_refreshBackground;
-Window_NumberInput.prototype.drill_DSk_refreshBorder = Window_Message.prototype.drill_DSk_refreshBorder;
 //==============================
 // * 数字输入窗口 - 初始化
 //==============================
@@ -1061,9 +1171,8 @@ var _drill_DSk_NumberInput_initialize = Window_NumberInput.prototype.initialize;
 Window_NumberInput.prototype.initialize = function( messageWindow ){
 	_drill_DSk_NumberInput_initialize.call( this,messageWindow );
 	this._drill_DSk_tag = "Window_NumberInput";
-	this.drill_DSk_createBackground();		//创建背景
-	this.drill_DSk_createBorder();			//创建边框层
-	this.drill_DSk_sortBottomByZIndex();	//底层层级排序
+	this.drill_DSk_initSkin();				//窗口皮肤初始化
+	this.drill_DSk_initBorder();			//边框皮肤初始化
 }
 //==============================
 // * 数字输入窗口 - 刷新
@@ -1071,18 +1180,19 @@ Window_NumberInput.prototype.initialize = function( messageWindow ){
 var _drill_DSk_NumberInput_start = Window_NumberInput.prototype.start;
 Window_NumberInput.prototype.start = function() {
 	_drill_DSk_NumberInput_start.call(this);
-	this.drill_DSk_refreshBackground();		//刷新背景
-	this.drill_DSk_refreshBorder();			//刷新边框
+	var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
+	this.drill_DSk_resetSkinData( data );	//刷新窗口皮肤
+	this.drill_DSk_resetBorder();			//刷新边框皮肤
+}
+//==============================
+// * 数字输入窗口 - 帧刷新
+//==============================
+var _drill_DSk_NumberInput_update = Window_NumberInput.prototype.update;
+Window_NumberInput.prototype.update = function(){
+	_drill_DSk_NumberInput_update.call(this);
+	this.drill_DSk_updateSkin();			//帧刷新 - 窗口皮肤
 }
 
-//==============================
-// * 选择物品窗口 - 通用函数
-//==============================
-Window_EventItem.prototype.drill_DSk_createBackground = Window_Message.prototype.drill_DSk_createBackground;
-Window_EventItem.prototype.drill_DSk_createBorder = Window_Message.prototype.drill_DSk_createBorder;
-Window_EventItem.prototype.drill_DSk_sortBottomByZIndex = Window_Message.prototype.drill_DSk_sortBottomByZIndex;
-Window_EventItem.prototype.drill_DSk_refreshBackground = Window_Message.prototype.drill_DSk_refreshBackground;
-Window_EventItem.prototype.drill_DSk_refreshBorder = Window_Message.prototype.drill_DSk_refreshBorder;
 //==============================
 // * 选择物品窗口 - 初始化
 //==============================
@@ -1090,9 +1200,8 @@ var _drill_DSk_EventItem_initialize = Window_EventItem.prototype.initialize;
 Window_EventItem.prototype.initialize = function( messageWindow ){
 	_drill_DSk_EventItem_initialize.call( this,messageWindow );
 	this._drill_DSk_tag = "Window_EventItem";
-	this.drill_DSk_createBackground();		//创建背景
-	this.drill_DSk_createBorder();			//创建边框层
-	this.drill_DSk_sortBottomByZIndex();	//底层层级排序
+	this.drill_DSk_initSkin();				//窗口皮肤初始化
+	this.drill_DSk_initBorder();			//边框皮肤初始化
 }
 //==============================
 // * 选择物品窗口 - 刷新
@@ -1100,8 +1209,17 @@ Window_EventItem.prototype.initialize = function( messageWindow ){
 var _drill_DSk_EventItem_start = Window_EventItem.prototype.start;
 Window_EventItem.prototype.start = function() {
 	_drill_DSk_EventItem_start.call(this);
-	this.drill_DSk_refreshBackground();		//刷新背景
-	this.drill_DSk_refreshBorder();			//刷新边框
+	var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
+	this.drill_DSk_resetSkinData( data );	//刷新窗口皮肤
+	this.drill_DSk_resetBorder();			//刷新边框皮肤
+}
+//==============================
+// * 选择物品窗口 - 帧刷新
+//==============================
+var _drill_DSk_EventItem_update = Window_EventItem.prototype.update;
+Window_EventItem.prototype.update = function(){
+	_drill_DSk_EventItem_update.call(this);
+	this.drill_DSk_updateSkin();			//帧刷新 - 窗口皮肤
 }
 
 //=============================================================================
@@ -1109,32 +1227,32 @@ Window_EventItem.prototype.start = function() {
 //=============================================================================
 if( Imported.Drill_DialogNameBox ){	
 	//==============================
-	// * Drill姓名框 - 通用函数
-	//==============================
-	Drill_DNB_NameBoxWindow.prototype.drill_DSk_createBackground = Window_Message.prototype.drill_DSk_createBackground;
-	Drill_DNB_NameBoxWindow.prototype.drill_DSk_createBorder = Window_Message.prototype.drill_DSk_createBorder;
-	Drill_DNB_NameBoxWindow.prototype.drill_DSk_sortBottomByZIndex = Window_Message.prototype.drill_DSk_sortBottomByZIndex;
-	Drill_DNB_NameBoxWindow.prototype.drill_DSk_refreshBackground = Window_Message.prototype.drill_DSk_refreshBackground;
-	Drill_DNB_NameBoxWindow.prototype.drill_DSk_refreshBorder = Window_Message.prototype.drill_DSk_refreshBorder;
-	//==============================
 	// * Drill姓名框 - 初始化
 	//==============================
 	var _drill_DSk_DNB_initialize = Drill_DNB_NameBoxWindow.prototype.initialize;
 	Drill_DNB_NameBoxWindow.prototype.initialize = function( parentWindow ){
 		_drill_DSk_DNB_initialize.call( this,parentWindow );
 		this._drill_DSk_tag = "Drill_DNB_NameBoxWindow";
-		this.drill_DSk_createBackground();		//创建背景
-		this.drill_DSk_createBorder();			//创建边框层
-		this.drill_DSk_sortBottomByZIndex();	//底层层级排序
+		this.drill_DSk_initSkin();				//窗口皮肤初始化
+		this.drill_DSk_initBorder();			//边框皮肤初始化
 	}
 	//==============================
 	// * Drill姓名框 - 刷新
 	//==============================
 	var _drill_DSk_DNB_setData = Drill_DNB_NameBoxWindow.prototype.drill_setData;
 	Drill_DNB_NameBoxWindow.prototype.drill_setData = function( text, position_type ){
-		this.drill_DSk_refreshBackground();		//刷新背景
-		this.drill_DSk_refreshBorder();			//刷新边框
+		var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
+		this.drill_DSk_resetSkinData( data );	//刷新窗口皮肤
+		this.drill_DSk_resetBorder();			//刷新边框皮肤
 		return _drill_DSk_DNB_setData.call( this, text, position_type );
+	}
+	//==============================
+	// * Drill姓名框 - 帧刷新
+	//==============================
+	var _drill_DSk_DNB_update = Drill_DNB_NameBoxWindow.prototype.update;
+	Drill_DNB_NameBoxWindow.prototype.update = function(){
+		_drill_DSk_DNB_update.call(this);
+		this.drill_DSk_updateSkin();			//帧刷新 - 窗口皮肤
 	}
 }
 //=============================================================================
@@ -1142,32 +1260,32 @@ if( Imported.Drill_DialogNameBox ){
 //=============================================================================
 if( Imported.YEP_MessageCore ){	
 	//==============================
-	// * Yep姓名框 - 通用函数
-	//==============================
-	Window_NameBox.prototype.drill_DSk_createBackground = Window_Message.prototype.drill_DSk_createBackground;
-	Window_NameBox.prototype.drill_DSk_createBorder = Window_Message.prototype.drill_DSk_createBorder;
-	Window_NameBox.prototype.drill_DSk_sortBottomByZIndex = Window_Message.prototype.drill_DSk_sortBottomByZIndex;
-	Window_NameBox.prototype.drill_DSk_refreshBackground = Window_Message.prototype.drill_DSk_refreshBackground;
-	Window_NameBox.prototype.drill_DSk_refreshBorder = Window_Message.prototype.drill_DSk_refreshBorder;
-	//==============================
 	// * Yep姓名框 - 初始化
 	//==============================
 	var _drill_DSk_yep_NameBox_initialize = Window_NameBox.prototype.initialize;
 	Window_NameBox.prototype.initialize = function( parentWindow ){
 		_drill_DSk_yep_NameBox_initialize.call( this,parentWindow );
 		this._drill_DSk_tag = "Window_NameBox";
-		this.drill_DSk_createBackground();		//创建背景
-		this.drill_DSk_createBorder();			//创建边框层
-		this.drill_DSk_sortBottomByZIndex();	//底层层级排序
+		this.drill_DSk_initSkin();				//窗口皮肤初始化
+		this.drill_DSk_initBorder();			//边框皮肤初始化
 	}
 	//==============================
 	// * Yep姓名框 - 刷新
 	//==============================
 	var _drill_DSk_yep_NameBox_refresh = Window_NameBox.prototype.refresh;
 	Window_NameBox.prototype.refresh = function( text, position ){
-		this.drill_DSk_refreshBackground();		//刷新背景
-		this.drill_DSk_refreshBorder();			//刷新边框
+		var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
+		this.drill_DSk_resetSkinData( data );	//刷新窗口皮肤
+		this.drill_DSk_resetBorder();			//刷新边框皮肤
 		return _drill_DSk_yep_NameBox_refresh.call( this,text,position );
+	}
+	//==============================
+	// * Yep姓名框 - 帧刷新
+	//==============================
+	var _drill_DSk_yep_NameBox_update = Window_NameBox.prototype.update;
+	Window_NameBox.prototype.update = function(){
+		_drill_DSk_yep_NameBox_update.call(this);
+		this.drill_DSk_updateSkin();			//帧刷新 - 窗口皮肤
 	}
 }
 //=============================================================================

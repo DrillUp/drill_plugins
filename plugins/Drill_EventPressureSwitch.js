@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.5]        物体 - 重力开关
+ * @plugindesc [v1.6]        物体 - 重力开关
  * @author Drill_up
  *
  * 
@@ -155,6 +155,8 @@
  * 添加了插件指令控制。
  * [v1.5]
  * 添加了 获取上一个触发重力的事件ID 的功能，修复了 事件消除 后，重力仍然存在的bug。
+ * [v1.6]
+ * 优化了底层，提升了性能，减轻了脉冲开关关卡地图的卡顿问题。
  * 
  */
  
@@ -175,7 +177,10 @@
 //		★最坏情况		暂无
 //		★备注			消耗太小，一般消耗列表中找不到该插件。
 //		
-//		★优化记录		暂无
+//		★优化记录
+//			2022-10-6优化：
+//				每次帧刷新都 翻新一次坐标容器，减少每个锁遍历 全图事件 的次数。
+//				脉冲开关关卡极端情况 4305.9ms，优化后降低到 271.8ms。
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
@@ -470,6 +475,7 @@ Game_Temp.prototype.drill_EPS_clearTemp = function() {
 	this._drill_EPS_commonSwitchTank = [];		//普通重力开关容器
 	this._drill_EPS_specialLockTank = [];		//重力锁容器
 	this._drill_EPS_specialKeyTank = [];		//重力钥匙容器
+	this._drill_EPS_positionTank = {};			//坐标容器
 }
 //==============================
 // * 容器 - 切换地图时
@@ -493,12 +499,9 @@ Spriteset_Map.prototype.createCharacters = function() {
 // * 容器 - 帧刷新
 //==============================
 var _drill_EPS_map_update = Game_Map.prototype.update;
-Game_Map.prototype.update = function(sceneActive) {
-	_drill_EPS_map_update.call(this,sceneActive);
-	
+Game_Map.prototype.update = function( sceneActive ){
+	_drill_EPS_map_update.call( this, sceneActive );
 	this.drill_EPS_updateRestatistics();		//帧刷新 - 刷新统计
-	this.drill_EPS_updateCommonSwitch();		//帧刷新 - 普通重力开关触发
-	this.drill_EPS_updateSpecialSwitch();		//帧刷新 - 钥匙重力开关触发
 };
 //==============================
 // * 容器 - 帧刷新 - 刷新统计
@@ -512,7 +515,7 @@ Game_Map.prototype.drill_EPS_updateRestatistics = function() {
 	$gameTemp._drill_EPS_specialKeyTank = [];      	//重力钥匙容器
 	
 	var events = this.events();
-	for (var i = 0; i < events.length; i++) {  
+	for( var i = 0; i < events.length; i++ ){
 		var temp_event = events[i];
 		if( temp_event._drill_EPS_data['commonSwitch'] != undefined){
 			$gameTemp._drill_EPS_commonSwitchTank.push(temp_event);
@@ -528,37 +531,107 @@ Game_Map.prototype.drill_EPS_updateRestatistics = function() {
 		$gameTemp._drill_EPS_specialKeyTank.push($gamePlayer);
 	}
 }
+
+
+//=============================================================================
+// ** 重力开关
+//=============================================================================
 //==============================
-// ** 判断 - 重力开关是否触发
+// * 重力开关 - 帧刷新
 //==============================
-Game_Map.prototype.drill_EPS_triggerCheck = function( ev_lock, ev_key ){
-	if( ev_lock === ev_key ){ return false; }							//排除 自己
-	if( ev_lock._erased ){ return false; }								//排除 删除的事件
-	if( ev_key._erased ){ return false; }								//排除 删除的事件
-	if( ev_key._drill_EPS_data['canPress'] == false ){ return false; }	//排除 无重力事件 
+var _drill_EPS_map_update2 = Game_Map.prototype.update;
+Game_Map.prototype.update = function( sceneActive ){
+	_drill_EPS_map_update2.call( this, sceneActive );
+	if( this.drill_EPS_isOptimizationPassed() == false ){ return; }
+	this.drill_EPS_updatePositionTank();		//帧刷新 - 坐标容器
+	this.drill_EPS_updateCommonSwitch();		//帧刷新 - 普通重力开关触发
+	this.drill_EPS_updateSpecialSwitch();		//帧刷新 - 钥匙重力开关触发
+}
+//==============================
+// * 帧刷新 - 优化策略
+//==============================
+Game_Map.prototype.drill_EPS_isOptimizationPassed = function() {
 	
-	// > 位置判定
-	if( ev_lock.pos( ev_key.x,ev_key.y ) == false ){
+	// > 地图中所有容器都为空时，不工作
+	if( $gameTemp._drill_EPS_commonSwitchTank.length == 0 &&
+		$gameTemp._drill_EPS_specialLockTank.length == 0 &&
+		$gameTemp._drill_EPS_specialKeyTank.length == 0 ){
 		return false;
 	}
 	return true;
-};
-//=============================================================================
-// ** 帧刷新 - 普通重力开关触发
-//=============================================================================
-Game_Map.prototype.drill_EPS_updateCommonSwitch = function() {
-	if( $gameTemp._drill_EPS_commonSwitchTank == undefined ){ return }
-	if( $gameTemp._drill_EPS_commonSwitchTank.length === 0 ){ return }
+}
+//==============================
+// * 帧刷新 - 坐标容器
+//==============================
+Game_Map.prototype.drill_EPS_updatePositionTank = function() {
+	$gameTemp._drill_EPS_positionTank = {};
 	
-	for (var i = 0; i < $gameTemp._drill_EPS_commonSwitchTank.length; i++) {  
+	// > 如果有 事件管理核心，用核心的函数，节约性能
+	if( Imported.Drill_CoreOfEventManager ){
+		
+		// > 事件容器指针（注意指针不要加东西，只读）
+		var character_list = this.drill_COEM_getAvailableEventTank_Pointer();
+		for( var i = 0; i < character_list.length; i++ ){
+			var character = character_list[i];
+			var slot_id = this.drill_EPS_getSlotId( character );
+		
+			if( $gameTemp._drill_EPS_positionTank[slot_id] == undefined ){
+				$gameTemp._drill_EPS_positionTank[slot_id] = [];
+			}
+			$gameTemp._drill_EPS_positionTank[slot_id].push( character );
+		}
+		
+		// > 玩家后加入
+		var slot_id = this.drill_EPS_getSlotId( $gamePlayer );
+		if( $gameTemp._drill_EPS_positionTank[slot_id] == undefined ){
+			$gameTemp._drill_EPS_positionTank[slot_id] = [];
+		}
+		$gameTemp._drill_EPS_positionTank[slot_id].push( $gamePlayer );
+		
+		
+	// > 没加核心那只能手动筛选了
+	}else{
+		var character_list = this.events();
+		character_list.unshift($gamePlayer);
+		for( var i = 0; i < character_list.length; i++ ){
+			var character = character_list[i];
+			var slot_id = this.drill_EPS_getSlotId( character );
+			
+			// > 排除 空事件
+			if( character == undefined ){ continue; }
+			// > 排除 删除的事件
+			if( character._erased == true ){ continue; }
+			
+			if( $gameTemp._drill_EPS_positionTank[slot_id] == undefined ){
+				$gameTemp._drill_EPS_positionTank[slot_id] = [];
+			}
+			$gameTemp._drill_EPS_positionTank[slot_id].push( character );
+		}
+	}
+}
+//==============================
+// * 帧刷新 - 坐标容器
+//==============================
+Game_Map.prototype.drill_EPS_getSlotId = function( character ){
+	return Math.floor( character.x ) * 100000 + Math.floor( character.y );
+}
+//==============================
+// * 帧刷新 - 普通重力开关
+//==============================
+Game_Map.prototype.drill_EPS_updateCommonSwitch = function() {
+	if( $gameTemp._drill_EPS_commonSwitchTank.length == 0 ){ return; }
+	
+	for( var i = 0; i < $gameTemp._drill_EPS_commonSwitchTank.length; i++ ){
 		var temp_lock = $gameTemp._drill_EPS_commonSwitchTank[i];
+		var slot_id = this.drill_EPS_getSlotId( temp_lock );
+		
+		var ch_list = $gameTemp._drill_EPS_positionTank[slot_id];
+		if( ch_list == undefined ){ continue; }
 		
 		// > 事件触发
 		var isTriggered = false;
-		var chars = this.events();
-		chars.unshift($gamePlayer);
-		for( var j = 0; j < chars.length; j++ ){
-			var temp_key = chars[j];
+		for( var j = 0; j < ch_list.length; j++ ){
+			var temp_key = ch_list[j];
 			if( this.drill_EPS_triggerCheck( temp_lock, temp_key ) ){
 				
 				// > 上一个触发的事件 标记
@@ -596,19 +669,25 @@ Game_Map.prototype.drill_EPS_updateCommonSwitch = function() {
 // ** 帧刷新 - 钥匙重力开关触发
 //=============================================================================
 Game_Map.prototype.drill_EPS_updateSpecialSwitch = function() {
-	if( $gameTemp._drill_EPS_specialLockTank == undefined ){ return }
-	if( $gameTemp._drill_EPS_specialKeyTank == undefined ){ return }
-	if( $gameTemp._drill_EPS_specialLockTank.length === 0 ){ return }
-	if( $gameTemp._drill_EPS_specialKeyTank.length === 0 ){ return }
+	if( $gameTemp._drill_EPS_specialLockTank.length == 0 ){ return; }
+	if( $gameTemp._drill_EPS_specialKeyTank.length == 0 ){ return; }
 	
 	for (var i = 0; i < $gameTemp._drill_EPS_specialLockTank.length; i++) {  
 		var temp_lock = $gameTemp._drill_EPS_specialLockTank[i];
+		var slot_id = this.drill_EPS_getSlotId( temp_lock );
+		
+		var ch_list = $gameTemp._drill_EPS_positionTank[slot_id];
+		if( ch_list == undefined ){ continue; }
 		
 		// > 事件+玩家触发
 		var isTriggered = false;
 		var trigger_switch = "";
-		for( var j = 0; j < $gameTemp._drill_EPS_specialKeyTank.length; j++ ){
-			var temp_key = $gameTemp._drill_EPS_specialKeyTank[j];
+		for( var j = 0; j < ch_list.length; j++ ){
+			var temp_key = ch_list[j];
+			
+			// > 非重力钥匙，跳过
+			if( $gameTemp._drill_EPS_specialKeyTank.contains( temp_key ) == false ){ continue; }
+			
 			if( this.drill_EPS_triggerCheck( temp_lock, temp_key ) ){
 				
 				// > 标签对应
@@ -651,6 +730,19 @@ Game_Map.prototype.drill_EPS_updateSpecialSwitch = function() {
 		}
 	}
 }
+//==============================
+// ** 判断 - 重力开关是否触发
+//==============================
+Game_Map.prototype.drill_EPS_triggerCheck = function( ev_lock, ev_key ){
+	if( ev_key == ev_lock ){ return false; }							//排除 自己
+	if( ev_key._drill_EPS_data['canPress'] == false ){ return false; }	//排除 无重力事件 
+	
+	// > 位置判定
+	if( ev_lock.pos( ev_key.x,ev_key.y ) == false ){
+		return false;
+	}
+	return true;
+};
 
 //==============================
 // * 优化 - 独立开关赋值时不刷新地图

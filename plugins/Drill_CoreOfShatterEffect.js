@@ -787,6 +787,9 @@
 //			2022-7-16优化：
 //				这次主要优化存储数据对象，数据类保存后，每个 方块粉碎控制器 的数据占2k的字节容量。
 //				以Drill_LayerShatterEffect为例，存储数据 与 不存数据的存档，差了 12k 的大小区别。
+//			2022-10-5优化：
+//				drill_updateShatterMove 在没任何贴图的情况下默认工作。已加上标记。
+//				不可见的时候，碎片移动也完全不需要执行。
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
@@ -1199,8 +1202,12 @@ Drill_COSE_Controller.prototype.drill_initPrivateData = function(){
 	}
 	
 	
-	// > 碎片群弹道 - 随机因子（所有随机数 都基于该随机因子）
-	this._drill_randomFactor = Math.random();
+	// > 碎片群弹道 - 随机因子
+	this._drill_randomFactor_speed = Math.random();
+	this._drill_randomFactor_dir = Math.random();
+	this._drill_randomFactor_xSpeed = Math.random();
+	this._drill_randomFactor_ySpeed = Math.random();
+	this._drill_randomFactor_opacity = Math.random();
 	
 	// > 碎片群弹道 - 弹道数据
 	this._drill_COSE_ballistics_move = {};
@@ -1259,10 +1266,11 @@ Drill_COSE_Controller.prototype.drill_initBallisticsMove = function( data, b_dat
 	
 	// > 随机因子（RandomFactor）
 	//		（每个碎片对应一个随机因子，掌握一条弹道。）
-	temp_b_move['polarSpeedRandomFactor'] = this._drill_randomFactor;		//极坐标 - 速度 - 随机因子
-	temp_b_move['polarDirRandomFactor'] = this._drill_randomFactor;			//极坐标 - 方向 - 随机因子
-	temp_b_move['cartXSpeedRandomFactor'] = this._drill_randomFactor;		//直角坐标 - x - 随机因子
-	temp_b_move['cartYSpeedRandomFactor'] = this._drill_randomFactor;		//直角坐标 - y - 随机因子
+	//		（注意，独立参数项之间，随机因子不可共用。会造成强关联的错误关系。）
+	temp_b_move['polarSpeedRandomFactor'] = this._drill_randomFactor_speed;		//极坐标 - 速度 - 随机因子
+	temp_b_move['polarDirRandomFactor'] = this._drill_randomFactor_dir;			//极坐标 - 方向 - 随机因子
+	temp_b_move['cartXSpeedRandomFactor'] = this._drill_randomFactor_xSpeed;	//直角坐标 - x - 随机因子
+	temp_b_move['cartYSpeedRandomFactor'] = this._drill_randomFactor_ySpeed;	//直角坐标 - y - 随机因子
 	// > 随机迭代次数（RandomIteration）
 	//		（无）
 	
@@ -1335,7 +1343,8 @@ Drill_COSE_Controller.prototype.drill_initBallisticsOpacity = function( data, su
 	
 	//   随机因子（RandomFactor）
 	//		（每个碎片对应一个随机因子，掌握一条弹道。）
-	temp_b_opacity['randomFactor'] = this._drill_randomFactor;
+	//		（注意，独立参数项之间，随机因子不可共用。会造成强关联的错误关系。）
+	temp_b_opacity['randomFactor'] = this._drill_randomFactor_opacity;
 	//   随机迭代次数（RandomIteration）
 	//		（无）
 	
@@ -1556,7 +1565,7 @@ Drill_COSE_LayerSprite.prototype.initialize = function(){
 Drill_COSE_LayerSprite.prototype.update = function(){
 	Sprite.prototype.update.call(this);
 	this.drill_updateAutoDestroy();			//帧刷新 - 自动销毁
-	if( this._drill_controller == undefined ){ return; }
+	if( this.drill_COSE_isReady() == false ){ return; }
 	this.drill_updateRebuild();				//帧刷新 - 碎片重刷时机
 	this.drill_updateShatterVisible();		//帧刷新 - 碎片可见
 	this.drill_updateShatterMove();			//帧刷新 - 碎片移动
@@ -1893,6 +1902,10 @@ Drill_COSE_LayerSprite.prototype.drill_updateShatterVisible = function(){
 // * 帧刷新 - 碎片移动
 //==============================
 Drill_COSE_LayerSprite.prototype.drill_updateShatterMove = function(){
+	
+	// > 如果不可见，移动也不需要 帧刷新
+	if( this.visible == false ){ return; }
+	
     var c_data = this._drill_controller;
     var d_data = this._drill_controller._drill_data;
 	

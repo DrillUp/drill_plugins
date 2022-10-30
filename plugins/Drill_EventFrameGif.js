@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        行走图 - 多层行走图GIF
+ * @plugindesc [v1.1]        行走图 - 多层行走图GIF
  * @author Drill_up
  * 
  * @Drill_LE_param "GIF样式-%d"
@@ -106,6 +106,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 优化了插件的性能。
  *
  *
  *
@@ -1368,7 +1370,7 @@
  * @parent ---贴图---
  * @type number
  * @min 1
- * @desc 环绕球每帧播放间隔时间，单位帧。（1秒60帧）
+ * @desc GIF每帧播放间隔时间，单位帧。（1秒60帧）
  * @default 4
  *
  * @param 是否倒放
@@ -1515,7 +1517,9 @@
 //		★最坏情况		事件附带了大量装饰贴图。
 //		★备注			无
 //		
-//		★优化记录		暂无
+//		★优化记录		
+//			2022-10-5优化：
+//				添加了接口 优化策略【标准函数】，镜头范围外，直接全部关闭刷新，贴图也关闭帧刷新。
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
@@ -1538,6 +1542,8 @@
 //					->创建贴图
 //						->控制器与序列号判定
 //					->贴图自动销毁
+//				->优化策略
+//					->判断贴图是否在镜头范围内
 //
 //				->行走图GIF控制器【Drill_EFGi_Controller】
 //				->行走图GIF贴图【Drill_EFGi_Sprite】
@@ -2521,11 +2527,13 @@ Drill_EFGi_Controller.prototype.drill_EFGi_updateGIF = function(){
 	this._drill_GIF_index = Math.floor(inter);
 	
 	// > 每次播放结束后变化
-	var inter = Math.floor(this._drill_GIF_time / data['interval'] / data['src_img_gif'].length);
-	if( this._drill_randomPos_lastInter != inter ){
-		this._drill_randomPos_lastInter = inter;
-		this._drill_randomPos_x = Math.floor( data['randomPos_width'] *( Math.random()-0.5 ));
-		this._drill_randomPos_y = Math.floor( data['randomPos_height']*( Math.random()-0.5 ));
+	if( data['randomPos_enable'] == true ){
+		var inter = Math.floor(this._drill_GIF_time / data['interval'] / data['src_img_gif'].length);
+		if( this._drill_randomPos_lastInter != inter ){
+			this._drill_randomPos_lastInter = inter;
+			this._drill_randomPos_x = Math.floor( data['randomPos_width'] *( Math.random()-0.5 ));
+			this._drill_randomPos_y = Math.floor( data['randomPos_height']*( Math.random()-0.5 ));
+		}
 	}
 }
 
@@ -2619,13 +2627,14 @@ Drill_EFGi_Sprite.prototype.initialize = function(){
 // * GIF贴图 - 帧刷新
 //==============================
 Drill_EFGi_Sprite.prototype.update = function() {
-	Sprite.prototype.update.call(this);
 	if( this.drill_EFGi_isReady() == false ){ return; }
+	if( this.drill_EFGi_isOptimizationPassed() == false ){ return; }
+	Sprite.prototype.update.call(this);
 	this.drill_updateLayer();					//帧刷新 - 层级
 	this.drill_updateChild();					//帧刷新 - GIF
 }
 //##############################
-// * GIF贴图 - 设置控制器【标准函数】
+// * GIF贴图 - 设置控制器【开放函数】
 //			
 //			参数：	> controller 控制器对象
 //			返回：	> 无
@@ -2636,7 +2645,7 @@ Drill_EFGi_Sprite.prototype.drill_EFGi_setController = function( controller ){
 	this._drill_controller = controller;
 };
 //##############################
-// * GIF贴图 - 设置个体贴图【标准函数】
+// * GIF贴图 - 设置个体贴图【开放函数】
 //			
 //			参数：	> individual_sprite 贴图对象
 //			返回：	> 无
@@ -2648,7 +2657,7 @@ Drill_EFGi_Sprite.prototype.drill_EFGi_setIndividualSprite = function( individua
 	this._character = this._drill_individualSprite._character;
 };
 //##############################
-// * GIF贴图 - 贴图初始化【标准函数】
+// * GIF贴图 - 贴图初始化【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -2670,6 +2679,17 @@ Drill_EFGi_Sprite.prototype.drill_EFGi_isReady = function(){
 	if( this._drill_controller == undefined ){ return false; }
 	if( this._drill_individualSprite == undefined ){ return false; }
     return true;
+};
+//##############################
+// * GIF贴图 - 优化策略【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 布尔（是否通过）
+//			
+//			说明：	> 通过时，正常帧刷新；未通过时，不执行帧刷新。
+//##############################
+Drill_EFGi_Sprite.prototype.drill_EFGi_isOptimizationPassed = function(){
+    return this.drill_EFGi_isOptimizationPassed_Private();
 };
 //##############################
 // * GIF贴图 - 是否需要销毁【标准函数】
@@ -2772,6 +2792,26 @@ Drill_EFGi_Sprite.prototype.drill_updateLayer = function() {
 		yy += this._character.screenY();
 		//xx += this._drill_individualSprite.x;	//（不能用父类的位置，会有1帧延迟问题）
 		//yy += this._drill_individualSprite.y;
+		
+		// > 其他插件位置修正
+		if( Imported.Drill_EventContinuedEffect ){ //【行走图 - 持续动作效果】
+			if( this._character._Drill_ECE != undefined ){
+				xx += this._character._Drill_ECE.x;
+				yy += this._character._Drill_ECE.y;
+			}
+		}
+		if( Imported.Drill_EventFadeInEffect ){ //【行走图 - 显现动作效果】
+			if( this._character._Drill_EFIE != undefined ){
+				xx += this._character._Drill_EFIE.x;
+				yy += this._character._Drill_EFIE.y;
+			}
+		}
+		if( Imported.Drill_EventFadeOutEffect ){ //【行走图 - 持续动作效果】
+			if( this._character._Drill_EFOE != undefined ){
+				xx += this._character._Drill_EFOE.x;
+				yy += this._character._Drill_EFOE.y;
+			}
+		}
 	}
 	
 	
@@ -2801,5 +2841,32 @@ Drill_EFGi_Sprite.prototype.drill_updateChild = function() {
 	this._drill_childGIFSprite.bitmap = this._drill_bitmapTank[ this._drill_controller._drill_GIF_index ];
 	this._drill_childGIFSprite.rotation = this._drill_controller._drill_childCircle_rotation *Math.PI/180;
 	
+}
+//==============================
+// * 优化策略 - 判断通过（私有）
+//==============================
+Drill_EFGi_Sprite.prototype.drill_EFGi_isOptimizationPassed_Private = function(){
+	
+	// > 镜头范围外时，不工作
+	if( this.drill_EFGi_posIsInCamera( this._character._realX, this._character._realY ) == false ){
+		this.visible = false;
+		return false;
+	}
+	return true;
+}
+//==============================
+// * 优化策略 - 判断贴图是否在镜头范围内
+//==============================
+Drill_EFGi_Sprite.prototype.drill_EFGi_posIsInCamera = function( realX, realY ){
+	var oww = Graphics.boxWidth  / $gameMap.tileWidth();
+	var ohh = Graphics.boxHeight / $gameMap.tileHeight();
+	var sww = oww;
+	var shh = ohh;
+	if( Imported.Drill_LayerCamera ){
+		sww = sww / $gameSystem._drill_LCa_controller._drill_scaleX;
+		shh = shh / $gameSystem._drill_LCa_controller._drill_scaleY;
+	}
+	return  Math.abs($gameMap.adjustX(realX + 0.5 - oww*0.5)) <= sww*0.5 + 5.5 &&	//（镜头范围+5个图块边框区域） 
+			Math.abs($gameMap.adjustY(realY + 0.5 - ohh*0.5)) <= shh*0.5 + 5.5 ;
 }
 

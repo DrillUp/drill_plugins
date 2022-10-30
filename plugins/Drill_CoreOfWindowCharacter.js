@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        窗口字符 - 窗口字符核心
+ * @plugindesc [v1.5]        窗口字符 - 窗口字符核心
  * @author Drill_up
  * 
  * 
@@ -244,6 +244,8 @@
  * 修改了插件的分类。分离了描边的窗口字符功能。
  * [v1.4]
  * 优化了对话文字速度的关系。
+ * [v1.5]
+ * 优化了字符块的结构。
  * 
  * 
  * 
@@ -1724,6 +1726,16 @@ Window_Base.prototype.createContents = function(){
 	this.contents._drill_COWC_window = this;		//标记指针
 }
 //==============================
+// * 窗口的画布 - 关闭时画布标记
+//==============================
+var _drill_COWC_close = Window_Base.prototype.close;
+Window_Base.prototype.close = function(){
+    if( !this.isClosed() ){
+		this.drill_COWC_clearAllSprite();			//清除所有字符块
+    }
+	_drill_COWC_close.call( this );
+}
+//==============================
 // * 窗口的画布 - 画布清理
 //==============================
 var _drill_COWC_bitmap_clearRect = Bitmap.prototype.clearRect;
@@ -1742,6 +1754,11 @@ Bitmap.prototype.clearRect = function( x, y, width, height ){
 Window_Base.prototype.drill_COWC_addSprite_Private = function( tar_sprite ){
 	if( this._drill_COWC_spriteTank == undefined ){ return; }
 	if( this.drill_COWA_isCalculating() == true ){ return; }	//（计算宽度时，禁止添加字符块）
+	
+	// > 销毁标记
+	if( tar_sprite._drill_COWC_destroyed == true ){ return; }
+	tar_sprite._drill_COWC_destroyed = false;
+	
 	this._drill_COWC_spriteTank.push(tar_sprite);
 	this._windowContentsSprite.addChild(tar_sprite);
 };
@@ -1758,9 +1775,12 @@ Window_Base.prototype.drill_COWC_removeSprite_Private = function( tar_sprite ){
 	for(var i=this._drill_COWC_spriteTank.length-1; i >= 0; i--){
 		var temp_sprite = this._drill_COWC_spriteTank[i];
 		if( temp_sprite == tar_sprite ){
+			
+			// > 销毁标记
+			tar_sprite._drill_COWC_destroyed = true;
+			
 			this._windowContentsSprite.removeChild(temp_sprite);
 			this._drill_COWC_spriteTank.splice(i,1);
-			delete temp_sprite;
 			break;
 		}
 	}
@@ -1774,9 +1794,12 @@ Window_Base.prototype.drill_COWC_clearAllSprite_Private = function() {
 	
 	for(var i=this._drill_COWC_spriteTank.length-1; i >= 0; i--){
 		var temp_sprite = this._drill_COWC_spriteTank[i];
+		
+		// > 销毁标记
+		temp_sprite._drill_COWC_destroyed = true;
+			
 		this._windowContentsSprite.removeChild(temp_sprite);
 		this._drill_COWC_spriteTank.splice(i,1);
-		delete temp_sprite;
 	}
 };
 //=============================
@@ -1795,9 +1818,12 @@ Window_Base.prototype.drill_COWC_clearSpriteInRect_Private = function( rect ){
 		// > 删除列表中 对应的贴图
 		for( var j=0; j < rectSprite_list.length; j++ ){
 			if( temp_sprite == rectSprite_list[j] ){
+				
+				// > 销毁标记
+				temp_sprite._drill_COWC_destroyed = true;
+				
 				this._windowContentsSprite.removeChild(temp_sprite);
 				this._drill_COWC_spriteTank.splice(i,1);
-				delete temp_sprite;
 				break;
 			}
 		}

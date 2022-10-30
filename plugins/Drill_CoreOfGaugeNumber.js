@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        系统 - 参数数字核心
+ * @plugindesc [v1.3]        系统 - 参数数字核心
  * @author Drill_up
  * 
  * @Drill_LE_param "数字样式-%d"
@@ -111,6 +111,8 @@
  * 优化了内部结构，减少性能消耗。添加了时间格式的支持。
  * [v1.2]
  * 整理规范了插件的数据结构。
+ * [v1.3]
+ * 优化了内部结构，减少性能消耗。
  * 
  * 
  *
@@ -741,7 +743,13 @@
 //		★最坏情况		暂无
 //		★备注			参数数字消耗比我预想要小的多，与gif的消耗居然差不多。
 //		
-//		★优化记录		暂无
+//		★优化记录
+//			2022-10-4 优化：
+//				旧版本使用的是bitmap切片，切成了14份。后来换成了setFrame，消耗降低了20ms（不停地刷菜单情况的优化）
+//				加了个锁，添加了资源标记容器。消耗降低15ms左右。当前为65ms左右消耗。
+//			2022-10-30 优化：
+//				这里把 参数条 的代码全部重新整理，划分结构，
+//				反复重建，消耗在 98.1ms 左右；15位战斗界面，消耗在118ms左右。
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
@@ -816,35 +824,31 @@
 	DrillUp.drill_COGN_initStyle = function( dataFrom ) {
 		var data = {};
 		
-		// > 主体
+		// > A主体
 		//		data['x']【平移x（非实时赋值）】
 		//		data['y']【平移y（非实时赋值）】
 		//		data['visible']【可见】
-		//		data['symbol_src_file']【资源文件夹】
-		//		data['symbolEx_src_file']【资源文件夹】
 		data['rotation'] = Number( dataFrom["整体旋转角度"] || 0 );
+		
+		// > D符号
 		data['symbol_src'] = String( dataFrom["资源-基本符号"] || "" );
 		data['symbolEx_src'] = String( dataFrom["资源-扩展符号"] || "" );
-		
-		// > 符号
 		data['symbol_hasNegative'] = String( dataFrom["是否显示负号"] || "true") === "true";
-		data['symbol_prefix'] = String( dataFrom["额外符号前缀"] || "") ;
-		data['symbol_suffix'] = String( dataFrom["额外符号后缀"] || "") ;
+		data['symbol_prefix'] = String( dataFrom["额外符号前缀"] || "");
+		data['symbol_suffix'] = String( dataFrom["额外符号后缀"] || "");
 		
-		// > 排列
+		// > E排列
 		data['section_align'] = String( dataFrom["对齐方式"] || "右对齐") ;
 		data['section_spriteLength'] = Number( dataFrom["最大符号数量"] || 20 );
 		data['section_interval'] = Number( dataFrom["符号间间距"] || 0 );
 		data['section_widthMode'] = String( dataFrom["排列宽度模式"] || "不限制宽度");
 		data['section_widthLimit'] = Number( dataFrom["排列限制宽度"] || 300 );
 		
-		// > 滚动效果
+		// > B追逐值
 		data['rolling_mode'] = String( dataFrom["滚动模式"] || "弹性滚动");
 		data['rolling_speed'] = Number( dataFrom["弹性变化速度"] || 10.0 );
 		
-		// > 额定值
-		//		data['specified_symbol_src_file']【资源文件夹】
-		//		data['specified_symbolEx_src_file']【资源文件夹】
+		// > F额定值
 		data['specified_enable'] = String( dataFrom["是否启用额定值"] || "false") === "true";
 		data['specified_visible'] = String( dataFrom["是否显示额定值"] || "false") === "true";
 		data['specified_conditionNum'] = Number( dataFrom["默认额定值"] || 100 );
@@ -854,7 +858,7 @@
 		data['specified_symbol_src'] = String( dataFrom["资源-额定基本符号"] || "" );
 		data['specified_symbolEx_src'] = String( dataFrom["资源-额定扩展符号"] || "" );
 		
-		// > 时间单位
+		// > C输出字符串 - 时间单位
 		data['timeUnit_enable'] = String( dataFrom["是否启用时间格式"] || "false") === "true";
 		data['timeUnit_mode'] = String( dataFrom["格式结构"] || "时间(hh:mm:ss)");
 		data['timeUnit_unitType'] = String( dataFrom["基础值单位"] || "秒单位");
@@ -892,6 +896,28 @@
 		return JSON.parse(JSON.stringify( data ));
 	}
 	
+	
+//=============================================================================
+// ** 资源标记容器
+//
+//			说明：	用过的bitmap，全部标记不删除，防止刷菜单时重建导致浪费资源。
+//=============================================================================
+//==============================
+// * 容器 - 初始化
+//==============================
+var _drill_COGN_temp_initialize = Game_Temp.prototype.initialize;
+Game_Temp.prototype.initialize = function() {
+    _drill_COGN_temp_initialize.call(this);
+	this._drill_COGN_bitmapTank = [];			//参数数字用过的贴图
+}
+//==============================
+// * 容器 - 添加贴图标记
+//==============================
+Game_Temp.prototype.drill_COGN_addBitmap = function( bitmap ){
+	if( this._drill_COGN_bitmapTank.contains( bitmap ) ){ return; }
+	this._drill_COGN_bitmapTank.push( bitmap );
+}
+
 
 //=============================================================================
 // ** 参数数字【Drill_COGN_NumberSprite】
@@ -905,10 +931,50 @@
 // **		作用域：	地图界面、战斗界面、菜单界面
 // **		主功能：	> 定义一个贴图组合体，根据预设定义，得到一个参数数字贴图。
 // **					> 具体功能见 "1.系统 > 关于参数数字.docx"。
+// **		子功能：	->贴图
+// **						->显示/隐藏
+// **						->是否就绪
+// **						->优化策略
+// **						->销毁
+// **						->帧刷新
+// **						->初始化数据
+// **						->初始化对象
+// **						->延迟初始化
+// **					->接口
+// **						->修改变化因子
+// **						->修改额定值
+// **						->修改额定值显示
+// **					->A主体
+// **						->内容层
+// **							->排列层
+// **						->外层
+// **						->符号宽度
+// **						->符号高度
+// **					->B追逐值
+// **						->滚动效果
+// **							->瞬间变化
+// **							->弹性滚动
+// **					->C输出字符串
+// **						->设置字符串
+// **						->设置前缀后缀
+// **						->数字值 转 字符串
+// **							->时间单位
+// **					->D符号
+// **						->设置符号
+// **						->字符转贴图
+// **					->E排列
+// **						->帧刷新排列
+// **					->F额定值
+// **						->设置字符串（继承）
+// **						->设置前缀后缀（继承）
+// **						->设置符号（继承）
 // **				
 // **		说明：	> sprite贴在任意地方都可以。
 // **			  	> 你可以先取【DrillUp.g_COGN_list样式数据】再赋值各个额外属性，也可以【直接new】全参数自己建立控制。
 // **			  	> 需要实时调用函数.drill_COGN_reflashValue(value)改变参数数字的值。
+// **				> 刷新锁关系：
+// **					B追逐值 > C输出字符串 > D符号 > E排列
+// **				  考虑到性能优化，执行了前面的，再根据自身条件往后执行。
 // **
 // **		代码：	> 范围 - 该类只对 具体的数值 提供可视化参数数字显示。
 // **				> 结构 - [ ●合并 /分离/混乱] 贴图与数据合并，主要靠接口控制 当前值 和 额定值。
@@ -943,18 +1009,54 @@ Drill_COGN_NumberSprite.prototype.constructor = Drill_COGN_NumberSprite;
 Drill_COGN_NumberSprite.prototype.initialize = function( data ) {
 	Sprite.prototype.initialize.call(this);
 	this._drill_data = JSON.parse(JSON.stringify( data ));	//深拷贝数据
-	
-	this.drill_initData();				//初始化数据
-	this.drill_initSprite();			//初始化对象
+	this.drill_initData();									//初始化数据
+	this.drill_initSprite();								//初始化对象
 }
 //==============================
 // * 参数数字 - 帧刷新
 //==============================
 Drill_COGN_NumberSprite.prototype.update = function() {
+	if( this.drill_COGN_isReady() == false ){ return; }
+	if( this.drill_COGN_isOptimizationPassed() == false ){ return; }
 	Sprite.prototype.update.call(this);
+	this.drill_updateDelayingInit();				//帧刷新 - 延迟初始化
 	
-	this.drill_updateDelayingInit();	//延迟初始化
-	this.drill_updateSprite();			//帧刷新对象
+													//帧刷新 - A主体（无）
+	this.drill_updateChase();						//帧刷新 - B追逐值
+	this.drill_updateOutputString();				//帧刷新 - C输出字符串
+													//帧刷新 - F额定值（粘附在 C输出字符串 中）
+	this.drill_updateSymbol();						//帧刷新 - D符号
+	this.drill_updateSection(); 					//帧刷新 - E排列
+	
+	this._drill_cur_value = this._drill_new_value;	//帧刷新 - 变化因子
+}
+//==============================
+// * 参数数字 - 帧刷新 - 延迟初始化
+//==============================
+Drill_COGN_NumberSprite.prototype.drill_updateDelayingInit = function() {
+	var data = this._drill_data;
+	
+	// > A主体
+	if( this._drill_attr_needInit == true ){
+		this._drill_attr_needInit = false;
+		this._drill_width = Math.ceil( this._drill_symbol_bitmap.width /14 );
+		this._drill_height = this._drill_symbol_bitmap.height;
+	}
+	
+	// > B追逐值（无）
+	
+	// > C输出字符串
+	if( this.visible != data['visible'] ){
+		this.visible = data['visible'];
+		this._drill_outputString_needUpdate = true;
+		this.drill_updateOutputString();		//（显示时，强制刷新一下 输出字符串 ）
+	}
+	
+	// > D符号（无）
+	
+	// > E排列（无）
+	
+	// > F额定值（无）
 }
 //##############################
 // * 参数数字 - 显示/隐藏【标准函数】
@@ -978,8 +1080,18 @@ Drill_COGN_NumberSprite.prototype.drill_COGN_setVisible = function( visible ){
 //##############################
 Drill_COGN_NumberSprite.prototype.drill_COGN_isReady = function(){
 	if( this.drill_isSrcReady() == false ){ return false; }
-	if( this.drill_isSymbolReady() == false ){ return false; }
 	return true;
+};
+//##############################
+// * 参数数字 - 优化策略【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 布尔（是否通过）
+//			
+//			说明：	> 通过时，正常帧刷新；未通过时，不执行帧刷新。
+//##############################
+Drill_COGN_NumberSprite.prototype.drill_COGN_isOptimizationPassed = function(){
+    return true;	//（暂无策略）
 };
 //##############################
 // * 参数数字 - 销毁【标准函数】
@@ -1042,292 +1154,96 @@ Drill_COGN_NumberSprite.prototype.drill_COGN_setSpecifiedNumVisible = function( 
 Drill_COGN_NumberSprite.prototype.drill_initData = function() {
 	var data = this._drill_data;
 	
-	// > 默认值
+	// > A主体
 	data['enable'] = true;	
-	if( data['x'] == undefined ){ data['x'] = 0 };														//主体 - 平移x（非实时赋值）
-	if( data['y'] == undefined ){ data['y'] = 0 };														//主体 - 平移y（非实时赋值）
-	if( data['rotation'] == undefined ){ data['rotation'] = 0 };										//主体 - 旋转（非实时赋值）
-	if( data['visible'] == undefined ){ data['visible'] = true };										//主体 - 可见
-	if( data['symbol_src'] == undefined ){ data['symbol_src'] = "" };									//主体 - 资源
-	if( data['symbol_src_file'] == undefined ){ data['symbol_src_file'] = "img/Special__number/" };		//主体 - 资源文件夹
-	if( data['symbolEx_src'] == undefined ){ data['symbolEx_src'] = "" };								//主体 - 资源
-	if( data['symbolEx_src_file'] == undefined ){ data['symbolEx_src_file'] = "img/Special__number/" };	//主体 - 资源文件夹
+	if( data['x'] == undefined ){ data['x'] = 0 };														//A主体 - 平移x（非实时赋值）
+	if( data['y'] == undefined ){ data['y'] = 0 };														//A主体 - 平移y（非实时赋值）
+	if( data['rotation'] == undefined ){ data['rotation'] = 0 };										//A主体 - 旋转（非实时赋值）
+	if( data['visible'] == undefined ){ data['visible'] = true };										//A主体 - 可见
 	
-	if( data['symbol_hasNegative'] == undefined ){ data['symbol_hasNegative'] = true };					//符号 - 是否显示负号
-	if( data['symbol_prefix'] == undefined ){ data['symbol_prefix'] = "" };								//符号 - 额外符号前缀
-	if( data['symbol_suffix'] == undefined ){ data['symbol_suffix'] = "" };								//符号 - 额外符号后缀
+	// > B追逐值
+	if( data['rolling_mode'] == undefined ){ data['rolling_mode'] = "弹性滚动" };						//B追逐值 - 滚动效果 - 滚动模式
+	if( data['rolling_speed'] == undefined ){ data['rolling_speed'] = 10.0 };							//B追逐值 - 滚动效果 - 弹性变化速度
 	
-	if( data['section_align'] == undefined ){ data['section_align'] = "右对齐" };						//排列 - 对齐方式
-	if( data['section_spriteLength'] == undefined ){ data['section_spriteLength'] = 20 };				//排列 - 最大符号数量
-	if( data['section_interval'] == undefined ){ data['section_interval'] = 0 };						//排列 - 符号间间距
-	if( data['section_widthMode'] == undefined ){ data['section_widthMode'] = "不限制宽度" };			//排列 - 排列宽度模式
-	if( data['section_widthLimit'] == undefined ){ data['section_widthLimit'] = 300 };					//排列 - 排列限制宽度
+	// > C输出字符串
+	if( data['timeUnit_enable'] == undefined ){ data['timeUnit_enable'] = false };						//C输出字符串 - 时间单位 - 是否启用
+	if( data['timeUnit_mode'] == undefined ){ data['timeUnit_mode'] = "时间(hh:mm:ss)" };				//C输出字符串 - 时间单位 - 格式结构
+	if( data['timeUnit_unitType'] == undefined ){ data['timeUnit_unitType'] = "秒单位" };				//C输出字符串 - 时间单位 - 基础值单位
+	if( data['timeUnit_timeChar'] == undefined ){ data['timeUnit_timeChar'] = "e" };					//C输出字符串 - 时间单位 - 时间格式符号
 	
-	if( data['rolling_mode'] == undefined ){ data['rolling_mode'] = "弹性滚动" };						//滚动 - 滚动模式
-	if( data['rolling_speed'] == undefined ){ data['rolling_speed'] = 10.0 };							//滚动 - 弹性变化速度
+	// > D符号
+	if( data['symbol_src'] == undefined ){ data['symbol_src'] = "" };									//D符号 - 资源 基本符号
+	if( data['symbol_src_file'] == undefined ){ data['symbol_src_file'] = "img/Special__number/" };		//D符号 - 资源文件夹
+	if( data['symbolEx_src'] == undefined ){ data['symbolEx_src'] = "" };								//D符号 - 资源 扩展符号
+	if( data['symbolEx_src_file'] == undefined ){ data['symbolEx_src_file'] = "img/Special__number/" };	//D符号 - 资源文件夹
+	if( data['symbol_hasNegative'] == undefined ){ data['symbol_hasNegative'] = true };					//D符号 - 是否显示负号
+	if( data['symbol_prefix'] == undefined ){ data['symbol_prefix'] = "" };								//D符号 - 额外符号前缀
+	if( data['symbol_suffix'] == undefined ){ data['symbol_suffix'] = "" };								//D符号 - 额外符号后缀
 	
-	if( data['specified_enable'] == undefined ){ data['specified_enable'] = false };											//额定值 - 是否启用
-	if( data['specified_visible'] == undefined ){ data['specified_visible'] = false };											//额定值 - 是否显示
-	if( data['specified_conditionType'] == undefined ){ data['specified_conditionType'] = "大于等于额定值时" };					//额定值 - 额定条件
-	if( data['specified_conditionNum'] == undefined ){ data['specified_conditionNum'] = 0 };									//额定值 - 额定数值
-	if( data['specified_remainChange'] == undefined ){ data['specified_remainChange'] = false };								//额定值 - 达到条件后是否限制值
-	if( data['specified_changeType'] == undefined ){ data['specified_changeType'] = "不变化" };									//额定值 - 达到条件时符号
-	if( data['specified_symbol_src'] == undefined ){ data['specified_symbol_src'] = "" };										//额定值 - 额定基本符号资源
-	if( data['specified_symbol_src_file'] == undefined ){ data['specified_symbol_src_file'] = "img/Special__number/" };			//额定值 - 资源文件夹
-	if( data['specified_symbolEx_src'] == undefined ){ data['specified_symbolEx_src'] = "" };									//额定值 - 额定扩展符号资源
-	if( data['specified_symbolEx_src_file'] == undefined ){ data['specified_symbolEx_src_file'] = "img/Special__number/" };		//额定值 - 资源文件夹
-
-	if( data['timeUnit_enable'] == undefined ){ data['timeUnit_enable'] = false };						//时间单位 - 是否启用
-	if( data['timeUnit_mode'] == undefined ){ data['timeUnit_mode'] = "时间(hh:mm:ss)" };				//时间单位 - 格式结构
-	if( data['timeUnit_unitType'] == undefined ){ data['timeUnit_unitType'] = "秒单位" };				//时间单位 - 基础值单位
-	if( data['timeUnit_timeChar'] == undefined ){ data['timeUnit_timeChar'] = "e" };					//时间单位 - 时间格式符号
+	// > E排列
+	if( data['section_align'] == undefined ){ data['section_align'] = "右对齐" };						//E排列 - 对齐方式
+	if( data['section_spriteLength'] == undefined ){ data['section_spriteLength'] = 20 };				//E排列 - 最大符号数量
+	if( data['section_interval'] == undefined ){ data['section_interval'] = 0 };						//E排列 - 符号间间距
+	if( data['section_widthMode'] == undefined ){ data['section_widthMode'] = "不限制宽度" };			//E排列 - 排列宽度模式
+	if( data['section_widthLimit'] == undefined ){ data['section_widthLimit'] = 300 };					//E排列 - 排列限制宽度
+	
+	// > F额定值
+	if( data['specified_enable'] == undefined ){ data['specified_enable'] = false };											//F额定值 - 是否启用
+	if( data['specified_visible'] == undefined ){ data['specified_visible'] = false };											//F额定值 - 是否显示
+	if( data['specified_conditionType'] == undefined ){ data['specified_conditionType'] = "大于等于额定值时" };					//F额定值 - 额定条件
+	if( data['specified_conditionNum'] == undefined ){ data['specified_conditionNum'] = 0 };									//F额定值 - 额定数值
+	if( data['specified_remainChange'] == undefined ){ data['specified_remainChange'] = false };								//F额定值 - 达到条件后是否限制值
+	if( data['specified_changeType'] == undefined ){ data['specified_changeType'] = "不变化" };									//F额定值 - 达到条件时符号
+	if( data['specified_symbol_src'] == undefined ){ data['specified_symbol_src'] = "" };										//F额定值 - 额定基本符号资源
+	if( data['specified_symbol_src_file'] == undefined ){ data['specified_symbol_src_file'] = "img/Special__number/" };			//F额定值 - 资源文件夹
+	if( data['specified_symbolEx_src'] == undefined ){ data['specified_symbolEx_src'] = "" };									//F额定值 - 额定扩展符号资源
+	if( data['specified_symbolEx_src_file'] == undefined ){ data['specified_symbolEx_src_file'] = "img/Special__number/" };		//F额定值 - 资源文件夹
 
 };
 //==============================
-// * 初始化 - 对象
+// * 参数数字 - 初始化对象
 //==============================
 Drill_COGN_NumberSprite.prototype.drill_initSprite = function() {
-	var data = this._drill_data;
+	this._drill_new_value = 0;				//变化因子 - 新变化参数【使用时只读】
+	this._drill_cur_value = 0;				//变化因子 - 当前参数【使用时只读】
 	
-	// > 私有对象初始化
-	this._drill_new_value = 0;					//变化因子 - 新变化参数【使用时只读】
-	this._drill_cur_value = 0;					//变化因子 - 当前参数【使用时只读】
-	
-	this._layer_outer = null;					//层级 - 外层
-	this._layer_context = null;					//层级 - 内容层
-	
-	this._drill_symbol_needInit = true;			//符号 - 初始化 锁
-	this._drill_symbol_bitmap = null;			//符号 - 基本符号bitmap
-	this._drill_symbolEx_bitmap = null;			//符号 - 扩展符号bitmap
-	this._drill_symbol_bitmapTank = [];			//符号 - bitmap容器
-
-	this._drill_section_layer = null;			//排列 - 排列层
-	this._drill_symbol_height = 0;				//排列 - 高度
-	this._drill_symbol_width = 0;				//排列 - 宽度
-	this._drill_symbolEx_height = 0;			//排列 - 高度
-	this._drill_symbolEx_width = 0;				//排列 - 宽度
-	this._drill_section_changed = true;			//排列 - 排列刷新
-	this._drill_section_string = "";			//排列 - 转义字符串
-	this._drill_section_spriteTank = [];		//排列 - 贴图容器
-	
-	this._drill_rolling_cur_value = 0;			//滚动 - 当前数值
-	
-	this._drill_specified_needInit = true;		//额定值 - 初始化 锁
-	this._drill_specified_bitmap = null;		//额定值 - 额定基本符号bitmap
-	this._drill_specifiedEx_bitmap = null;		//额定值 - 额定扩展符号bitmap
-	this._drill_specified_bitmapTank = [];		//额定值 - 额定bitmap容器
-	this._drill_specified_isFit = false;		//额定值 - 是否满足额定条件
-	this._drill_specified_checkString = "";		//额定值 - 资源指向字符（贴图用）
-	
-	// > 主体属性
-	this._drill_attr_needInit = true;
-	this.x = data['x'] ;	
-	this.y = data['y'] ;	
-	this.anchor.x = 0.5;	
-	this.anchor.y = 0.5;	
-	this.rotation = data['rotation'] /180 * Math.PI;	
-	this.visible = false;
-	
-	// > 创建函数
-	this.drill_createLayer();				//创建 - 层级
-	this.drill_createSymbol();				//创建 - 符号
-	this.drill_createSection();				//创建 - 排列
-	this.drill_createSpecified();			//创建 - 额定值
-}
-
-//==============================
-// * 创建 - 层级
-//==============================
-Drill_COGN_NumberSprite.prototype.drill_createLayer = function() {
-	
-	// > 层级初始化
-	this._layer_context = new Sprite();				//内容层（暂不考虑遮罩）
-	this.addChild(this._layer_context);				//
-	this._layer_outer = new Sprite();				//外层
-	this.addChild(this._layer_outer);				//
-	
+	this.drill_initAttr();					//初始化对象 - A主体
+	this.drill_initChase();					//初始化对象 - B追逐值
+	this.drill_initOutputString();			//初始化对象 - C输出字符串
+	this.drill_initSymbol();				//初始化对象 - D符号
+	this.drill_initSection();				//初始化对象 - E排列
+	this.drill_initSpecified();				//初始化对象 - F额定值
 }
 //==============================
-// * 创建 - 符号
-//==============================
-Drill_COGN_NumberSprite.prototype.drill_createSymbol = function() {
-	var data = this._drill_data;
-	
-	// > 符号bitmap
-	if( data['symbol_src'] == "" ){
-		this._drill_symbol_bitmap = new Bitmap(0,0);
-	}else{
-		this._drill_symbol_bitmap = ImageManager.loadBitmap( data['symbol_src_file'], data['symbol_src'], 0, true);
-	}
-	if( data['symbolEx_src'] == "" ){
-		this._drill_symbolEx_bitmap = new Bitmap(0,0);
-	}else{
-		this._drill_symbolEx_bitmap = ImageManager.loadBitmap( data['symbolEx_src_file'], data['symbolEx_src'], 0, true);
-	}
-}
-//==============================
-// * 创建 - 排列
-//==============================
-Drill_COGN_NumberSprite.prototype.drill_createSection = function() {
-	var data = this._drill_data;
-	
-	// > 排列层
-	this._drill_section_layer = new Sprite();
-	this._drill_section_layer.zIndex = 10;
-	this._layer_context.addChild(this._drill_section_layer);
-	
-	// > 创建贴图
-	this._drill_section_spriteTank = [];	
-	for(var i=0; i < data['section_spriteLength']; i++){
-		var temp_sprite = new Sprite();
-		temp_sprite.x = 0;
-		temp_sprite.y = 0;
-		temp_sprite.anchor.x = 0.5;
-		temp_sprite.anchor.y = 0.5;
-		this._drill_section_layer.addChild( temp_sprite );
-		this._drill_section_spriteTank.push(temp_sprite);	
-	}
-}
-//==============================
-// * 创建 - 额定值
-//==============================
-Drill_COGN_NumberSprite.prototype.drill_createSpecified = function() {
-	var data = this._drill_data;
-	if( data['specified_enable'] == false ){ return; }
-	
-	// > 额定符号bitmap
-	if( data['symbol_src'] == "" ){
-		this._drill_specified_bitmap = new Bitmap(0,0);
-	}else{
-		this._drill_specified_bitmap = ImageManager.loadBitmap( data['specified_symbol_src_file'], data['specified_symbol_src'], 0, true);
-	}
-	if( data['symbolEx_src'] == "" ){
-		this._drill_specifiedEx_bitmap = new Bitmap(0,0);
-	}else{
-		this._drill_specifiedEx_bitmap = ImageManager.loadBitmap( data['specified_symbolEx_src_file'], data['specified_symbolEx_src'], 0, true);
-	}
-	
-}
-//==============================
-// * 延迟初始化
-//==============================
-Drill_COGN_NumberSprite.prototype.drill_updateDelayingInit = function() {
-	var data = this._drill_data;
-	
-	// > 主体
-	if( this.drill_isSrcReady() && this._drill_attr_needInit ){
-		this._drill_attr_needInit = false;
-		this._drill_symbol_height = this._drill_symbol_bitmap.height;
-		this._drill_symbol_width = this._drill_symbol_bitmap.width;
-		this._drill_symbolEx_height = this._drill_symbolEx_bitmap.height;
-		this._drill_symbolEx_width = this._drill_symbolEx_bitmap.width;
-	}
-	// > 显示
-	if( this.drill_isSrcReady() && this.visible != data['visible'] ){
-		this.visible = data['visible'];
-		this.drill_updateOutputString();	//（显示时，才刷新一下输出的 参数数字）
-	}
-	// > 符号
-	if( this.drill_isSrcReady() && this._drill_symbol_needInit ){	
-		this._drill_symbol_needInit = false;
-		this.drill_delayingInitSymbol();
-	}
-	// > 额定值
-	if( data['specified_enable'] &&
-		this._drill_specified_bitmap.isReady() && 
-		this._drill_specifiedEx_bitmap.isReady() && 
-		this._drill_specified_needInit ){	
-		
-		this._drill_specified_needInit = false;
-		this.drill_delayingInitSpecified();
-	}
-}
-//==============================
-// * 延迟初始化 - 符号
-//==============================
-Drill_COGN_NumberSprite.prototype.drill_delayingInitSymbol = function() {
-	var data = this._drill_data;
-	this._drill_symbol_bitmapTank = [];	
-	
-	// > 资源切割（基本符号）
-	var w = this.drill_width();
-	var h = this.drill_height();
-	for(var i=0; i < 14; i++){
-		var x = w * i;
-		var y = 0;
-		var new_bitmap = new Bitmap( w, h );
-		new_bitmap.blt( this._drill_symbol_bitmap,  x, y, w, h,  0, 0, w, h);
-		this._drill_symbol_bitmapTank.push(new_bitmap);	
-	}
-	// > 资源切割（扩展符号）
-	var w = this.drill_widthEx();
-	var h = this.drill_heightEx();
-	for(var i=0; i < 14; i++){
-		var x = w * i;
-		var y = 0;
-		var new_bitmap = new Bitmap( w, h );
-		new_bitmap.blt( this._drill_symbolEx_bitmap,  x, y, w, h,  0, 0, w, h);
-		this._drill_symbol_bitmapTank.push(new_bitmap);	
-	}
-}
-//==============================
-// * 延迟初始化 - 额定值
-//==============================
-Drill_COGN_NumberSprite.prototype.drill_delayingInitSpecified = function() {
-	var data = this._drill_data;
-	this._drill_specified_bitmapTank = [];	
-	
-	// > 资源切割（额定基本符号）
-	var w = Math.ceil(this._drill_specified_bitmap.width / 14);
-	var h = this._drill_specified_bitmap.height;
-	for(var i=0; i < 14; i++){
-		var x = w * i;
-		var y = 0;
-		var new_bitmap = new Bitmap( w, h );
-		new_bitmap.blt( this._drill_specified_bitmap,  x, y, w, h,  0, 0, w, h);
-		this._drill_specified_bitmapTank.push(new_bitmap);	
-	}
-	// > 资源切割（额定扩展符号）
-	for(var i=0; i < 14; i++){
-		var x = w * i;
-		var y = 0;
-		var new_bitmap = new Bitmap( w, h );
-		new_bitmap.blt( this._drill_specifiedEx_bitmap,  x, y, w, h,  0, 0, w, h);
-		this._drill_specified_bitmapTank.push(new_bitmap);	
-	}
-}
-//==============================
-// * 销毁 - 执行销毁
+// * 参数数字 - 销毁（私有）
 //==============================
 Drill_COGN_NumberSprite.prototype.drill_COGN_destroy_Private = function() {
 	this.visible = false;
 	
-	// > 断开联系
-	this.drill_COGN_removeChildConnect( this._layer_context );
+	// > 销毁 - A主体
+	this.drill_COGN_removeChildConnect( this._layer_context );	//（断开联系）
 	this.drill_COGN_removeChildConnect( this._layer_outer );
-	
-	// > 销毁 - 层级
 	this._layer_outer = null;
 	this._layer_context = null;
 	
-	// > 销毁 - 符号
-	this._drill_attr_needInit = false;
-	this._drill_symbol_needInit = false;
+	// > 销毁 - B追逐值（无）
+	
+	// > 销毁 - C输出字符串（无）
+	
+	// > 销毁 - D符号
 	this._drill_symbol_bitmap = null;
 	this._drill_symbolEx_bitmap = null;
-	this._drill_symbol_bitmapTank.length = 0;
 	
-	// > 销毁 - 排列层
+	// > 销毁 - E排列
 	this._drill_section_layer = null;
 	this._drill_section_spriteTank.length = 0;
 	
-	// > 销毁 - 额定符号
-	this._drill_specified_needInit = false;
+	// > 销毁 - F额定值
 	this._drill_specified_bitmap = null;
 	this._drill_specifiedEx_bitmap = null;
 }
 //==============================
-// * 销毁 - 递归断开连接
+// * 参数数字 - 销毁 - 递归断开连接（私有）
 //==============================
 Drill_COGN_NumberSprite.prototype.drill_COGN_removeChildConnect = function( parent_sprite ){
 	if( parent_sprite == undefined ){ return; }
@@ -1340,119 +1256,162 @@ Drill_COGN_NumberSprite.prototype.drill_COGN_removeChildConnect = function( pare
 		this.drill_COGN_removeChildConnect( sprite );
 	}
 };
-
 //==============================
-// * 帧刷新对象
+// * 参数数字 - 符号宽度
 //==============================
-Drill_COGN_NumberSprite.prototype.drill_updateSprite = function() {
-	var data = this._drill_data;
-	if( this.drill_isSymbolReady() == false ){ return }
-	
-	this.drill_updateRolling();						//帧刷新 - 滚动效果
-													//	> 帧刷新 - 输出字符串
-													//		> 帧刷新 - 额定值
-	this.drill_updateSpecifiedConvert(); 			//帧刷新 - 资源指向字符转义
-	this.drill_updateSection(); 					//帧刷新 - 排列
-	
-	this._drill_cur_value = this._drill_new_value;	//（变化因子）
+Drill_COGN_NumberSprite.prototype.drill_width = function(){
+	return this._drill_width;
 }
 //==============================
-// * 帧刷新 - 滚动效果
+// * 参数数字 - 符号高度
 //==============================
-Drill_COGN_NumberSprite.prototype.drill_updateRolling = function() {
+Drill_COGN_NumberSprite.prototype.drill_height = function() {
+	return this._drill_height;
+}
+//==============================
+// * 参数数字 - 资源是否准备就绪
+//==============================
+Drill_COGN_NumberSprite.prototype.drill_isSrcReady = function() {
+	if( this._drill_symbol_bitmap.isReady() == false ){ return false; }
+	if( this._drill_symbolEx_bitmap.isReady() == false ){ return false; }
+	return true;
+}
+
+
+//==============================
+// * A主体 - 初始化对象
+//==============================
+Drill_COGN_NumberSprite.prototype.drill_initAttr = function() {
+	this._drill_attr_needInit = true;				//A主体 - 延迟初始化锁
+	this._drill_width = 0;							//A主体 - 宽度
+	this._drill_height = 0;							//A主体 - 高度
+	this._layer_context = null;						//A主体 - 内容层
+	this._layer_outer = null;						//A主体 - 外层
+	
+	// > 属性
 	var data = this._drill_data;
-	if( this._drill_rolling_cur_value == this._drill_new_value ){ return; }
-		
-	// > 滚动效果 - 瞬间变化
+	this.x = data['x'] ;	
+	this.y = data['y'] ;	
+	this.anchor.x = 0.5;	
+	this.anchor.y = 0.5;	
+	this.rotation = data['rotation'] /180 * Math.PI;	
+	this.visible = false;
+	
+	// > 层级初始化
+	this._layer_context = new Sprite();				//内容层（暂不考虑遮罩）
+	this.addChild(this._layer_context);				//
+	this._layer_outer = new Sprite();				//外层
+	this.addChild(this._layer_outer);				//
+}
+
+
+//==============================
+// * B追逐值 - 初始化对象
+//==============================
+Drill_COGN_NumberSprite.prototype.drill_initChase = function() {
+	this._drill_chase_curValue = -1;				//B追逐值 - 当前数值
+}
+//==============================
+// * B追逐值 - 帧刷新
+//==============================
+Drill_COGN_NumberSprite.prototype.drill_updateChase = function() {
+	var data = this._drill_data;
+	if( this._drill_chase_curValue == this._drill_new_value ){ return; }
+	
+	// > B追逐值 - 滚动效果 - 瞬间变化
 	if( data['rolling_mode'] == "瞬间变化" || data['rolling_time'] == 1 ){
-		this._drill_rolling_cur_value = this._drill_new_value;
+		this._drill_chase_curValue = this._drill_new_value;
 	}
 	
-	// > 滚动效果 - 弹性滚动
+	// > B追逐值 - 滚动效果 - 弹性滚动
 	if( data['rolling_mode'] == "弹性滚动" ){
-		var move = (this._drill_new_value - this._drill_rolling_cur_value) / data['rolling_speed'];
+		var move = (this._drill_new_value - this._drill_chase_curValue) / data['rolling_speed'];
 		if( move > 0 && move < 1 ){ 
-			this._drill_rolling_cur_value = this._drill_new_value; 
+			this._drill_chase_curValue = this._drill_new_value; 
 		}else if( move < 0 && move > -1 ){
-			this._drill_rolling_cur_value = this._drill_new_value; 
+			this._drill_chase_curValue = this._drill_new_value; 
 		}else {
 			move = Math.floor( move );
-			this._drill_rolling_cur_value += move;
+			this._drill_chase_curValue += move;
 		}
 	}
 	
-	// > 优化 - 数字变化时才刷新 参数数字 的字符串
-	this.drill_updateOutputString(); 				//帧刷新 - 输出字符串（含额定值控制）
+	// > 刷新锁 - C输出字符串
+	//		（数字滚动刷新时，输出字符串才变化）
+	this._drill_outputString_needUpdate = true;
 }
 
+
 //==============================
-// * 输出字符串 - 帧刷新
+// * C输出字符串 - 初始化对象
+//==============================
+Drill_COGN_NumberSprite.prototype.drill_initOutputString = function() {
+	this._drill_outputString = "";					//C输出字符串 - 本体
+	this._drill_outputString_needUpdate = false;	//C输出字符串 - 刷新锁
+}
+//==============================
+// * C输出字符串 - 帧刷新
 //==============================
 Drill_COGN_NumberSprite.prototype.drill_updateOutputString = function() {
-	var data = this._drill_data;
 	
-	// > 参数值字符串
-	var num_str = this.drill_convertNumberToString(this._drill_rolling_cur_value);
-	this._drill_section_string = num_str;
-	this._drill_specified_checkString = this.drill_getFillString( "1", num_str.length );	//资源指向字符（贴图用）
+	// > 刷新锁 - C输出字符串
+	if( this._drill_outputString_needUpdate == false ){ return; }
+	this._drill_outputString_needUpdate = false;
 	
 	
-	// > 额定值帧刷新
-	this.drill_updateSpecified();
+	// > C输出字符串 - 设置字符串
+	this.drill_outputString_setString();
+	
+	// > C输出字符串 - 设置前缀后缀
+	this.drill_outputString_setPrefixAndSuffix();
 	
 	
-	// > 前缀后缀
-	this._drill_section_string = data['symbol_prefix'] + this._drill_section_string;
-	this._drill_section_string = this._drill_section_string + data['symbol_suffix'];
-	this._drill_specified_checkString = this.drill_getFillString( "2",String(data['symbol_prefix']).length ) + this._drill_specified_checkString;	//资源指向字符（贴图用）
-	this._drill_specified_checkString = this._drill_specified_checkString + this.drill_getFillString( "3",String(data['symbol_suffix']).length );
+	// > 刷新锁 - D符号
+	//		（输出字符串变化，符号直接变化）
+	this._drill_symbol_needUpdate = true;
 	
-	this._drill_section_changed = true;
-}
-//==============================
-// * 输出字符串 - 额定值帧刷新
-//==============================
-Drill_COGN_NumberSprite.prototype.drill_updateSpecified = function() {
-	var data = this._drill_data;
-	if( data['specified_enable'] == false ){ return; }
-	
-	// > 额定判断
-	var is_fit = false;
-	if( data['specified_conditionType'] == "小于额定值时" ){
-		is_fit = this._drill_new_value < data['specified_conditionNum'];
-	}else if( data['specified_conditionType'] == "大于额定值时" ){
-		is_fit = this._drill_new_value > data['specified_conditionNum'];
-	}else if( data['specified_conditionType'] == "等于额定值时" ){
-		is_fit = this._drill_new_value == data['specified_conditionNum'];
-	}else if( data['specified_conditionType'] == "小于等于额定值时" ){
-		is_fit = this._drill_new_value <= data['specified_conditionNum'];
-	}else if( data['specified_conditionType'] == "大于等于额定值时" ){
-		is_fit = this._drill_new_value >= data['specified_conditionNum'];
-	}
-	this._drill_specified_isFit = is_fit;
-	
-	// > 保持额定值
-	if( is_fit && data['specified_remainChange'] == true ){
-		var num_str = this.drill_convertNumberToString( data['specified_conditionNum'] );
-		this._drill_section_string = num_str;
-		this._drill_specified_checkString = this.drill_getFillString( "1", num_str.length );		//资源指向字符（贴图用）
-	}
-	// > 显示额定值 (120/100)
-	if( data['specified_visible'] == true ){
-		var num_str = this.drill_convertNumberToString( data['specified_conditionNum'] );
-		this._drill_section_string += "/" + num_str;
-		this._drill_specified_checkString += this.drill_getFillString( "4", num_str.length +1 );	//资源指向字符（贴图用）
+	// > 刷新锁 - E排列
+	//		（输出字符串的长度变化，排列才变化）
+	if( this._drill_section_lastStrLen != this._drill_outputString.length ){
+		this._drill_section_lastStrLen = this._drill_outputString.length;
+		this._drill_section_needUpdate = true;
 	}
 }
 //==============================
-// * 输出字符串 - 根据 数字值 获取到 字符串
+// * C输出字符串 - 设置字符串
+//			
+//			说明：	此函数被后面的 额定值功能 继承。
+//==============================
+Drill_COGN_NumberSprite.prototype.drill_outputString_setString = function() {
+	this._drill_outputString = this.drill_convertNumberToString( this._drill_chase_curValue );
+}
+//==============================
+// * C输出字符串 - 设置前缀后缀
+//			
+//			说明：	此函数被后面的 额定值功能 继承。
+//==============================
+Drill_COGN_NumberSprite.prototype.drill_outputString_setPrefixAndSuffix = function() {
+	var data = this._drill_data;
+	this._drill_outputString = data['symbol_prefix'] + this._drill_outputString;
+	this._drill_outputString = this._drill_outputString + data['symbol_suffix'];
+}
+//==============================
+// * C输出字符串 - 数字值 转 字符串
+//			
+//			说明：	此函数生成的字符串只能在 [0-9][a-n][+-x/ ] 的范围内（对应 字符转贴图 功能）。
 //==============================
 Drill_COGN_NumberSprite.prototype.drill_convertNumberToString = function( value ){
 	var data = this._drill_data;
 	var result_str = "";
 	if( isNaN( value ) ){ return ""; }
 	
-	// > 时间单位情况
+	// > 默认数字 情况
+	result_str = String( value );
+	if( data['symbol_hasNegative'] == false ){		//没有负号时，去掉负号
+		result_str = String( Math.abs( value ) );
+	}
+	
+	// > 时间单位 情况
 	//		（不要考虑日期情况，Date() 的日期包含大小月、闰年问题、1970年问题）
 	if( data['timeUnit_enable'] == true ){
 		if( data['timeUnit_unitType'] == "秒单位" ){
@@ -1514,53 +1473,41 @@ Drill_COGN_NumberSprite.prototype.drill_convertNumberToString = function( value 
 			result_str = hh.padZero(2) + ":" + String(mm).padZero(2) + ":" + String(ss).padZero(2) + " " + String(ff).padZero(2);
 			result_str = result_str.replace(/:/g, data['timeUnit_timeChar']);
 		}
-		
-	// > 默认数字情况
-	}else{
-		result_str = String( value );
-		if( data['symbol_hasNegative'] == false ){		//没有负号时，去掉负号
-			result_str = String( Math.abs( value ) );
-		}
 	}
 	
 	return result_str;
 }
 
+
 //==============================
-// * 帧刷新 - 资源指向字符转义
+// * D符号 - 初始化对象
 //==============================
-Drill_COGN_NumberSprite.prototype.drill_updateSpecifiedConvert = function() {
+Drill_COGN_NumberSprite.prototype.drill_initSymbol = function() {
+	this._drill_symbol_bitmap = null;				//D符号 - 基本符号bitmap
+	this._drill_symbolEx_bitmap = null;				//D符号 - 扩展符号bitmap
+	this._drill_symbol_needUpdate = true;			//D符号 - 刷新锁
+	
+	// > 符号bitmap
 	var data = this._drill_data;
-	if( this._drill_specified_isFit == false ){ return; }
+	this._drill_symbol_bitmap = ImageManager.loadBitmap( data['symbol_src_file'], data['symbol_src'], 0, true);
+	this._drill_symbolEx_bitmap = ImageManager.loadBitmap( data['symbolEx_src_file'], data['symbolEx_src'], 0, true);
 	
-	//	每创建一个字符串时，都会在 this._drill_specified_checkString 中追加 资源指向字符，字符含义如下：
-	// 		1 参数值
-	// 		2 前缀
-	// 		3 后缀
-	// 		4 额定值
-	
-	if( data['specified_changeType'] == "所有符号变为额定符号" ){
-		this._drill_specified_checkString = this.drill_getFillString( "s",this._drill_specified_checkString.length );
-	}
-	if( data['specified_changeType'] == "有效符号变为额定符号" ){
-		this._drill_specified_checkString = this._drill_specified_checkString.replace( /[1]/g, "s" );
-		this._drill_specified_checkString = this._drill_specified_checkString.replace( /[4]/g, "s" );
-	}
-	if( data['specified_changeType'] == "只参数符号变为额定符号" ){
-		this._drill_specified_checkString = this._drill_specified_checkString.replace( /[1]/g, "s" );
-	}
-	
+	// > 标记资源（切换菜单时不会重复创建）
+	$gameTemp.drill_COGN_addBitmap( this._drill_symbol_bitmap );
+	$gameTemp.drill_COGN_addBitmap( this._drill_symbolEx_bitmap );
 }
 //==============================
-// * 帧刷新 - 排列
+// * D符号 - 帧刷新
 //==============================
-Drill_COGN_NumberSprite.prototype.drill_updateSection = function() {
-	var data = this._drill_data;
-	if( this._drill_section_changed == false ){ return; }
-	this._drill_section_changed = false;
+Drill_COGN_NumberSprite.prototype.drill_updateSymbol = function() {
 	
-	// > 转义字符串（必须在符号阶段时，把所有字符串都编辑好）
-	var str_len = this._drill_section_string.length;
+	// > 刷新锁 - D符号
+	if( this._drill_symbol_needUpdate == false ){ return; }
+	this._drill_symbol_needUpdate = false;
+	
+	// > 符号变化
+	var data = this._drill_data;
+	var str_len = this._drill_outputString.length;
 	if( str_len > data['section_spriteLength'] ){
 		str_len = data['section_spriteLength'];
 	}
@@ -1570,82 +1517,167 @@ Drill_COGN_NumberSprite.prototype.drill_updateSection = function() {
 			temp_sprite.bitmap = null;
 			continue;
 		}
+		this.drill_symbol_setDigitSprite( temp_sprite, i );		//（N个字符串 转 N位符号）
+	}
+}
+//==============================
+// * D符号 - 设置符号
+//			
+//			说明：	此函数被后面的 额定值功能 继承。
+//==============================
+Drill_COGN_NumberSprite.prototype.drill_symbol_setDigitSprite = function( tar_sprite, digit_index ){
+	var tar_char = this._drill_outputString.charAt( digit_index );
+	this.drill_setNumberBitmap( tar_sprite, tar_char, this._drill_symbol_bitmap, this._drill_symbolEx_bitmap );
+}
+//==============================
+// * D符号 - 字符转贴图
+//		
+//			参数：	> tar_sprite 贴图   （目标贴图）
+//					> cur_char 字符     （目标字符）
+//					> bitmap 贴图资源   （基本符号资源）
+//					> bitmapEx 贴图资源 （扩展符号资源）
+//			
+//			说明：	> 该函数根据目标字符，对 目标贴图 进行 资源+框架 设置。
+//					> 此功能可以作为一个单独的工具函数。
+//==============================
+Drill_COGN_NumberSprite.prototype.drill_setNumberBitmap = function( tar_sprite, tar_char, bitmap, bitmapEx ){
+	
+	// > 符号索引
+	var temp_index = -1;
+	var temp_char = tar_char.toLowerCase();
+	if( temp_char == "0" ){
+		temp_index = 0;
+	}else if( temp_char == "1" ){
+		temp_index = 1;
+	}else if( temp_char == "2" ){
+		temp_index = 2;
+	}else if( temp_char == "3" ){
+		temp_index = 3;
+	}else if( temp_char == "4" ){
+		temp_index = 4;
+	}else if( temp_char == "5" ){
+		temp_index = 5;
+	}else if( temp_char == "6" ){
+		temp_index = 6;
+	}else if( temp_char == "7" ){
+		temp_index = 7;
+	}else if( temp_char == "8" ){
+		temp_index = 8;
+	}else if( temp_char == "9" ){
+		temp_index = 9;
+	}else if( temp_char == "+" ){
+		temp_index = 10;
+	}else if( temp_char == "-" ){
+		temp_index = 11;
+	}else if( temp_char == "x" || temp_char == "*" ){
+		temp_index = 12;
+	}else if( temp_char == "/" ){
+		temp_index = 13;
 		
-		// > 符号索引
-		var temp_index = 0;
-		var temp_char = this._drill_section_string.charAt(i).toLowerCase();
-		if( temp_char == "0" ){
-			temp_index = 0;
-		}else if( temp_char == "1" ){
-			temp_index = 1;
-		}else if( temp_char == "2" ){
-			temp_index = 2;
-		}else if( temp_char == "3" ){
-			temp_index = 3;
-		}else if( temp_char == "4" ){
-			temp_index = 4;
-		}else if( temp_char == "5" ){
-			temp_index = 5;
-		}else if( temp_char == "6" ){
-			temp_index = 6;
-		}else if( temp_char == "7" ){
-			temp_index = 7;
-		}else if( temp_char == "8" ){
-			temp_index = 8;
-		}else if( temp_char == "9" ){
-			temp_index = 9;
-		}else if( temp_char == "+" ){
-			temp_index = 10;
-		}else if( temp_char == "-" ){
-			temp_index = 11;
-		}else if( temp_char == "x" || temp_char == "*" ){
-			temp_index = 12;
-		}else if( temp_char == "/" ){
-			temp_index = 13;
-			
-		}else if( temp_char == "a" ){
-			temp_index = 14;
-		}else if( temp_char == "b" ){
-			temp_index = 15;
-		}else if( temp_char == "c" ){
-			temp_index = 16;
-		}else if( temp_char == "d" ){
-			temp_index = 17;
-		}else if( temp_char == "e" ){
-			temp_index = 18;
-		}else if( temp_char == "f" ){
-			temp_index = 19;
-		}else if( temp_char == "g" ){
-			temp_index = 20;
-		}else if( temp_char == "h" ){
-			temp_index = 21;
-		}else if( temp_char == "i" ){
-			temp_index = 22;
-		}else if( temp_char == "j" ){
-			temp_index = 23;
-		}else if( temp_char == "k" ){
-			temp_index = 24;
-		}else if( temp_char == "l" ){
-			temp_index = 25;
-		}else if( temp_char == "m" ){
-			temp_index = 26;
-		}else if( temp_char == "n" ){
-			temp_index = 27;
-		}else if( temp_char == " " ){	//（空格，空字符）
-			temp_index = 9999;
-		}
-		
-		// > 符号bitmap对象
-		var temp_char = this._drill_specified_checkString.charAt(i).toLowerCase();
-		if( temp_char == "s" ){
-			temp_sprite.bitmap = this._drill_specified_bitmapTank[temp_index];	//额定bitmap容器
-		}else{
-			temp_sprite.bitmap = this._drill_symbol_bitmapTank[temp_index];		//bitmap容器
-		}
+	}else if( temp_char == "a" ){
+		temp_index = 14;
+	}else if( temp_char == "b" ){
+		temp_index = 15;
+	}else if( temp_char == "c" ){
+		temp_index = 16;
+	}else if( temp_char == "d" ){
+		temp_index = 17;
+	}else if( temp_char == "e" ){
+		temp_index = 18;
+	}else if( temp_char == "f" ){
+		temp_index = 19;
+	}else if( temp_char == "g" ){
+		temp_index = 20;
+	}else if( temp_char == "h" ){
+		temp_index = 21;
+	}else if( temp_char == "i" ){
+		temp_index = 22;
+	}else if( temp_char == "j" ){
+		temp_index = 23;
+	}else if( temp_char == "k" ){
+		temp_index = 24;
+	}else if( temp_char == "l" ){
+		temp_index = 25;
+	}else if( temp_char == "m" ){
+		temp_index = 26;
+	}else if( temp_char == "n" ){
+		temp_index = 27;
+	}else if( temp_char == " " ){	//（空格，空字符）
+		temp_index = -1;
 	}
 	
+	// > 设置资源
+	if( temp_index < 14 ){
+		tar_sprite.bitmap = bitmap;		//基本符号
+	}else{
+		tar_sprite.bitmap = bitmapEx;	//扩展符号
+	}
 	
-	// > 排列
+	// > 设置贴图框架
+	this.drill_setNumberFrame( tar_sprite, temp_index );
+}
+//==============================
+// * D符号 - 字符转贴图 - 设置贴图框架
+//
+//			说明：	框架固定分成14等分。
+//==============================
+Drill_COGN_NumberSprite.prototype.drill_setNumberFrame = function( tar_sprite, index ){
+	var bitmap = tar_sprite.bitmap;
+	var ww = Math.ceil( bitmap.width/14 );
+	var hh = bitmap.height;
+	var i = index % 14;
+	if( i < 0 ){ ww = 0; hh = 0; }
+	tar_sprite.drill_COGN_setFrame( ww*i, 0, ww, hh );
+}
+//==============================
+// * D符号 - 字符转贴图 - 浮点数过滤
+//
+//			说明：	用floor防止 浮点数 比较时，造成frame的反复刷新。
+//==============================
+Sprite.prototype.drill_COGN_setFrame = function( x, y, width, height ){
+	this.setFrame( Math.floor(x), Math.floor(y), Math.floor(width), Math.floor(height) );
+}
+
+
+//==============================
+// * E排列 - 初始化对象
+//==============================
+Drill_COGN_NumberSprite.prototype.drill_initSection = function() {
+	this._drill_section_layer = null;				//E排列 - 排列层
+	this._drill_section_spriteTank = [];			//E排列 - 贴图容器
+	this._drill_section_needUpdate = true;			//E排列 - 刷新锁
+	this._drill_section_lastStrLen = 0;				//E排列 - 字符串长度锁
+	
+	// > 排列层
+	var data = this._drill_data;
+	this._drill_section_layer = new Sprite();
+	this._drill_section_layer.zIndex = 10;
+	this._layer_context.addChild(this._drill_section_layer);
+	
+	// > 创建贴图
+	this._drill_section_spriteTank = [];	
+	for(var i=0; i < data['section_spriteLength']; i++){
+		var temp_sprite = new Sprite();
+		temp_sprite.x = 0;
+		temp_sprite.y = 0;
+		temp_sprite.anchor.x = 0.5;
+		temp_sprite.anchor.y = 0.5;
+		this._drill_section_layer.addChild( temp_sprite );
+		this._drill_section_spriteTank.push(temp_sprite);	
+	}
+}
+//==============================
+// * E排列 - 帧刷新
+//==============================
+Drill_COGN_NumberSprite.prototype.drill_updateSection = function() {
+	
+	// > 刷新锁 - E排列
+	if( this._drill_section_needUpdate == false ){ return; }
+	this._drill_section_needUpdate = false;
+	
+	// > 顺序排列
+	var data = this._drill_data;
+	var str_len = this._drill_outputString.length;
 	var section_width = this.drill_width() + data['section_interval'];		//单字符长度
 	var section_widthTotal = str_len * section_width;						//总长度
 	if( section_widthTotal > data['section_widthLimit'] && data['section_widthMode'] == "挤压限制" ){
@@ -1672,69 +1704,142 @@ Drill_COGN_NumberSprite.prototype.drill_updateSection = function() {
 			this.scale.x = 1.0;
 		}
 	}
-	
 }
 
 
 //==============================
-// ** 获取 - 重复填充的字符串
+// * F额定值 - 初始化对象
+//
+//			说明：	额定值是在前面 C输出字符串、D符号、E排列 的基础上，进一步扩展的功能。
+//					因此额定值的功能全被单独分离到这里。
 //==============================
-Drill_COGN_NumberSprite.prototype.drill_getFillString = function( str, len ) {
+Drill_COGN_NumberSprite.prototype.drill_initSpecified = function() {
+	this._drill_specified_bitmap = null;			//F额定值 - 额定基本符号bitmap
+	this._drill_specifiedEx_bitmap = null;			//F额定值 - 额定扩展符号bitmap
+	this._drill_specified_checkString = "";			//F额定值 - 资源指向字符（贴图用）
+	
+	// > 额定符号bitmap
+	var data = this._drill_data;
+	if( data['specified_enable'] == false ){ return; }
+	if( data['symbol_src'] == "" ){
+		this._drill_specified_bitmap = ImageManager.loadEmptyBitmap();
+	}else{
+		this._drill_specified_bitmap = ImageManager.loadBitmap( data['specified_symbol_src_file'], data['specified_symbol_src'], 0, true);
+	}
+	if( data['symbolEx_src'] == "" ){
+		this._drill_specifiedEx_bitmap = ImageManager.loadEmptyBitmap();
+	}else{
+		this._drill_specifiedEx_bitmap = ImageManager.loadBitmap( data['specified_symbolEx_src_file'], data['specified_symbolEx_src'], 0, true);
+	}
+	
+	// > 标记资源（切换菜单时不会重复创建）
+	$gameTemp.drill_COGN_addBitmap( this._drill_specified_bitmap );
+	$gameTemp.drill_COGN_addBitmap( this._drill_specifiedEx_bitmap );
+}
+//==============================
+// * F额定值 - 设置字符串（继承）
+//==============================
+var _drill_COGN_specified_setString = Drill_COGN_NumberSprite.prototype.drill_outputString_setString;
+Drill_COGN_NumberSprite.prototype.drill_outputString_setString = function() {
+	_drill_COGN_specified_setString.call(this);
+	
+	// > 额定符号 资源标记
+	this._drill_specified_checkString = this.drill_specified_getFillString( "1", this._drill_outputString.length );
+	
+	// > 帧刷新输出字符串
+	this.drill_updateSpecified();
+}
+//==============================
+// * F额定值 - 设置前缀后缀（继承）
+//==============================
+var _drill_COGN_specified_setPrefixAndSuffix = Drill_COGN_NumberSprite.prototype.drill_outputString_setPrefixAndSuffix
+Drill_COGN_NumberSprite.prototype.drill_outputString_setPrefixAndSuffix = function() {
+	_drill_COGN_specified_setPrefixAndSuffix.call(this);
+	
+	// > 额定符号 资源标记（前缀后缀）
+	this._drill_specified_checkString = this.drill_specified_getFillString( "2",String(data['symbol_prefix']).length ) + this._drill_specified_checkString;	//资源指向字符（贴图用）
+	this._drill_specified_checkString = this._drill_specified_checkString + this.drill_specified_getFillString( "3",String(data['symbol_suffix']).length );
+}
+//==============================
+// * F额定值 - 设置符号（继承）
+//==============================
+var _drill_COGN_specified_setDigitSprite = Drill_COGN_NumberSprite.prototype.drill_symbol_setDigitSprite;
+Drill_COGN_NumberSprite.prototype.drill_symbol_setDigitSprite = function( tar_sprite, digit_index ){
+	
+	// > 额定符号 设置
+	//		（每位符号转贴图时，根据额定符号情况，决定是否用 额定符号资源 ）
+	var temp_char2 = this._drill_specified_checkString.charAt( digit_index );
+	if( temp_char2 == "s" ){
+		var tar_char = this._drill_outputString.charAt( digit_index );
+		this.drill_setNumberBitmap( tar_sprite, tar_char, this._drill_specified_bitmap, this._drill_specifiedEx_bitmap );
+		
+	// > 默认符号
+	}else{
+		_drill_COGN_specified_setDigitSprite.call( this, tar_sprite, digit_index );
+	}
+}
+//==============================
+// * F额定值 - 帧刷新
+//==============================
+Drill_COGN_NumberSprite.prototype.drill_updateSpecified = function() {
+	var data = this._drill_data;
+	if( data['specified_enable'] == false ){ return; }
+	
+	// > 额定判断
+	var is_fit = false;
+	if( data['specified_conditionType'] == "小于额定值时" ){
+		is_fit = this._drill_new_value < data['specified_conditionNum'];
+	}else if( data['specified_conditionType'] == "大于额定值时" ){
+		is_fit = this._drill_new_value > data['specified_conditionNum'];
+	}else if( data['specified_conditionType'] == "等于额定值时" ){
+		is_fit = this._drill_new_value == data['specified_conditionNum'];
+	}else if( data['specified_conditionType'] == "小于等于额定值时" ){
+		is_fit = this._drill_new_value <= data['specified_conditionNum'];
+	}else if( data['specified_conditionType'] == "大于等于额定值时" ){
+		is_fit = this._drill_new_value >= data['specified_conditionNum'];
+	}
+	
+	// > 保持额定值
+	if( is_fit && data['specified_remainChange'] == true ){
+		var num_str = this.drill_convertNumberToString( data['specified_conditionNum'] );
+		this._drill_outputString = num_str;
+		this._drill_specified_checkString = this.drill_specified_getFillString( "1", num_str.length );		//资源指向字符（贴图用）
+	}
+	// > 显示额定值 (120/100)
+	if( data['specified_visible'] == true ){
+		var num_str = this.drill_convertNumberToString( data['specified_conditionNum'] );
+		this._drill_outputString += "/" + num_str;
+		this._drill_specified_checkString += this.drill_specified_getFillString( "4", num_str.length +1 );	//资源指向字符（贴图用）
+	}
+	
+	// > 变为额定符号
+	if( is_fit ){
+		//	每创建一个字符串时，都会在 this._drill_specified_checkString 中追加 资源指向字符，字符含义如下：
+		// 		1 参数值
+		// 		2 前缀
+		// 		3 后缀
+		// 		4 额定值
+		
+		if( data['specified_changeType'] == "所有符号变为额定符号" ){
+			this._drill_specified_checkString = this.drill_specified_getFillString( "s",this._drill_specified_checkString.length );
+		}
+		if( data['specified_changeType'] == "有效符号变为额定符号" ){
+			this._drill_specified_checkString = this._drill_specified_checkString.replace( /[1]/g, "s" );
+			this._drill_specified_checkString = this._drill_specified_checkString.replace( /[4]/g, "s" );
+		}
+		if( data['specified_changeType'] == "只参数符号变为额定符号" ){
+			this._drill_specified_checkString = this._drill_specified_checkString.replace( /[1]/g, "s" );
+		}
+	}
+};
+//==============================
+// * F额定值 - 填充重复字符
+//==============================
+Drill_COGN_NumberSprite.prototype.drill_specified_getFillString = function( str, len ){
 	var temp_str = "";
 	for( var i=0; i < len; i++ ){
 		temp_str += str;
 	}
 	return temp_str;
 };
-//==============================
-// ** 层级排序
-//==============================
-Drill_COGN_NumberSprite.prototype.drill_COGN_sortByZIndex = function() {
-   this._layer_context.children.sort(function(a, b){return a.zIndex-b.zIndex});		//内容层
-   this._layer_outer.children.sort(function(a, b){return a.zIndex-b.zIndex});		//外层
-};
-//==============================
-// * 获取 - 资源是否准备就绪
-//==============================
-Drill_COGN_NumberSprite.prototype.drill_isSrcReady = function() {
-	if( this._drill_symbol_bitmap.isReady() == false ){ return false; }
-	if( this._drill_symbolEx_bitmap.isReady() == false ){ return false; }
-	return true;
-}
-//==============================
-// * 获取 - 符号是否准备就绪
-//==============================
-Drill_COGN_NumberSprite.prototype.drill_isSymbolReady = function() {
-	for( var i=0; i < this._drill_symbol_bitmapTank.length; i++ ){
-		if( this._drill_symbol_bitmapTank[i].isReady() == false ){ return false; }
-	}
-	return true;
-}
-//==============================
-// * 获取 - 符号宽度
-//==============================
-Drill_COGN_NumberSprite.prototype.drill_width = function(){
-	return Math.ceil(this._drill_symbol_width / 14);
-}
-//==============================
-// * 获取 - 扩展符号宽度
-//==============================
-Drill_COGN_NumberSprite.prototype.drill_widthEx = function(){
-	if( this._drill_symbolEx_width == 0 ){ return this.drill_width(); }
-	return Math.ceil(this._drill_symbolEx_width / 14);
-}
-//==============================
-// * 获取 - 符号高度
-//==============================
-Drill_COGN_NumberSprite.prototype.drill_height = function() {
-	return this._drill_symbol_height;
-}
-//==============================
-// * 获取 - 扩展符号高度
-//==============================
-Drill_COGN_NumberSprite.prototype.drill_heightEx = function() {
-	if( this._drill_symbolEx_height == 0 ){ return this.drill_height(); }
-	return this._drill_symbolEx_height;
-}
-
 

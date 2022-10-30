@@ -632,7 +632,9 @@
 //		★最坏情况		大量插件指令不停地执行漂浮文字创建。
 //		★备注			暂无
 //		
-//		★优化记录		暂无
+//		★优化记录
+//			2022-10-6优化：
+//				层级排序 被暴露在帧刷新中，浪费了40ms的计算资源。已优化。
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
@@ -796,7 +798,7 @@ if( Imported.Drill_CoreOfBallistics &&
 var _drill_GFN_pluginCommand = Game_Interpreter.prototype.pluginCommand
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_GFN_pluginCommand.call(this, command, args);
-	if(command === ">地图漂浮数字"){
+	if( command === ">地图漂浮数字" ){
 		
 		/*-----------------地图漂浮数字------------------*/
 		if( args.length == 8 ){				//>地图漂浮数字 : 玩家 : 样式[1] : +10 : 持续时间[20]
@@ -1075,6 +1077,11 @@ Scene_Map.prototype.update = function() {
 // * 帧刷新 - 插件指令建立贴图
 //==============================
 Scene_Map.prototype.drill_GFN_updateCommandCreate = function() {
+	
+	// > 没有指令时，不要进入此函数
+	//		（层级排序不要暴露在帧刷新中，会浪费计算资源）
+	if( $gameTemp._drill_GFN_commandSeq.length == 0 ){ return; }
+	
 	for( var i = $gameTemp._drill_GFN_commandSeq.length-1; i >= 0; i-- ){
 		var data = $gameTemp._drill_GFN_commandSeq[i];
 		

@@ -285,18 +285,18 @@
 //						->显示/隐藏【标准函数】
 //						->初始化数据【标准默认值】
 //					->参数设置
-//						->修改文本【标准函数】
-//						->强制刷新文本【标准函数】
-//						->设置偏移【标准函数】
-//						->设置对齐方式【标准函数】
-//						->设置外框显示【标准函数】
-//						->设置轮播文本【标准函数】
-//						->设置轮播间隔【标准函数】
+//						->修改文本【开放函数】
+//						->强制刷新文本【开放函数】
+//						->设置偏移【开放函数】
+//						->设置对齐方式【开放函数】
+//						->设置外框显示【开放函数】
+//						->设置轮播文本【开放函数】
+//						->设置轮播间隔【开放函数】
 //					->轮播文本
 //					->插件指令控制
 //				->漂浮文字贴图
 //					->标准模块 模板
-//						->设置控制器【标准函数】
+//						->设置控制器【开放函数】
 //						->是否就绪【标准函数】
 //						->是否需要销毁【标准函数】
 //						->销毁【标准函数】
@@ -999,7 +999,7 @@ Drill_ET_Controller.prototype.drill_ET_setVisible = function( visible ){
 	data['visible'] = visible;
 };
 //##############################
-// * 控制器 - 修改文本【标准函数】
+// * 控制器 - 修改文本【开放函数】
 //
 //			参数：	> text 字符串（可以为空字符串）
 //			返回：	> 无
@@ -1009,7 +1009,7 @@ Drill_ET_Controller.prototype.drill_ET_setText = function( text ){
 	this.drill_ET_forceRefresh();
 };
 //##############################
-// * 控制器 - 强制刷新文本【标准函数】
+// * 控制器 - 强制刷新文本【开放函数】
 //
 //			参数：	> 无
 //			返回：	> 无
@@ -1018,7 +1018,7 @@ Drill_ET_Controller.prototype.drill_ET_forceRefresh = function(){
 	this._drill_refreshSerial = new Date().getTime();	//刷新用序列号
 };
 //##############################
-// * 控制器 - 设置偏移【标准函数】
+// * 控制器 - 设置偏移【开放函数】
 //
 //			参数：	> x 数字
 //					> y 数字
@@ -1030,7 +1030,7 @@ Drill_ET_Controller.prototype.drill_ET_setOffset = function( x, y ){
 	data['y'] = y;
 };
 //##############################
-// * 控制器 - 设置对齐方式【标准函数】
+// * 控制器 - 设置对齐方式【开放函数】
 //
 //			参数：	> align 字符串（左对齐/居中/右对齐）
 //			返回：	> 无
@@ -1040,7 +1040,7 @@ Drill_ET_Controller.prototype.drill_ET_setAlign = function( align ){
 	data['align'] = align;
 };
 //##############################
-// * 控制器 - 设置外框显示【标准函数】
+// * 控制器 - 设置外框显示【开放函数】
 //
 //			参数：	> visible 布尔
 //			返回：	> 无
@@ -1050,7 +1050,7 @@ Drill_ET_Controller.prototype.drill_ET_setFrameVisible = function( visible ){
 	data['frameVisible'] = visible;
 };
 //##############################
-// * 控制器 - 轮播文本开关【标准函数】
+// * 控制器 - 轮播文本开关【开放函数】
 //
 //			参数：	> enabled 布尔
 //			返回：	> 无
@@ -1060,7 +1060,7 @@ Drill_ET_Controller.prototype.drill_ET_setLoopEnabled = function( enabled ){
 	data['loop_enabled'] = enabled;
 }
 //##############################
-// * 控制器 - 设置轮播文本【标准函数】
+// * 控制器 - 设置轮播文本【开放函数】
 //
 //			参数：	> text_list 字符串列表
 //			返回：	> 无
@@ -1075,7 +1075,7 @@ Drill_ET_Controller.prototype.drill_ET_setLoopText = function( text_list ){
 	this._drill_curLoopPos = 0;
 };
 //##############################
-// * 控制器 - 设置轮播间隔【标准函数】
+// * 控制器 - 设置轮播间隔【开放函数】
 //
 //			参数：	> loop_interval 数字
 //			返回：	> 无
@@ -1085,7 +1085,7 @@ Drill_ET_Controller.prototype.drill_ET_setLoopInterval = function( loop_interval
 	data['loop_interval'] = loop_interval;
 };
 //##############################
-// * 控制器 - 设置轮播模式【标准函数】
+// * 控制器 - 设置轮播模式【开放函数】
 //
 //			参数：	> loop_mode 字符串（循环/单次）
 //			返回：	> 无
@@ -1307,7 +1307,7 @@ Drill_ET_WindowSprite.prototype.update = function() {
 	this.drill_ET_updateAttr();				//帧刷新 - 属性变化
 }
 //##############################
-// * 文字贴图 - 设置控制器【标准函数】
+// * 文字贴图 - 设置控制器【开放函数】
 //			
 //			参数：	> controller 控制器对象
 //			返回：	> 无

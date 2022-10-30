@@ -1355,7 +1355,7 @@ ImageManager.load_MenuLayer = function(filename) {
 var _drill_MPa_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_MPa_pluginCommand.call(this, command, args);
-	if (command === ">菜单粒子") {
+	if( command === ">菜单粒子" ){
 		if(args.length == 4){
 			var temp1 = String(args[1]);
 			var type = String(args[3]);
@@ -1409,6 +1409,81 @@ Game_System.prototype.initialize = function() {
 	}
 };
 
+
+//#############################################################################
+// ** 【标准模块】菜单层级
+//#############################################################################
+//##############################
+// * 菜单层级 - 添加贴图到层级【标准函数】
+//				
+//			参数：	> sprite 贴图        （添加的贴图对象）
+//					> layer_index 字符串 （添加到的层级名，菜单后面层/菜单前面层）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图添加到目标层级中。
+//##############################
+Scene_MenuBase.prototype.drill_MPa_layerAddSprite = function( sprite, layer_index ){
+    this.drill_MPa_layerAddSprite_Private(sprite, layer_index);
+}
+//##############################
+// * 菜单层级 - 去除贴图【标准函数】
+//				
+//			参数：	> sprite 贴图（添加的贴图对象）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图从地图层级中移除。
+//##############################
+Scene_MenuBase.prototype.drill_MPa_layerRemoveSprite = function( sprite ){
+	//（不操作）
+}
+//##############################
+// * 菜单层级 - 图片层级排序【标准函数】
+//				
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 执行该函数后，地图层级的子贴图，按照zIndex属性来进行先后排序。值越大，越靠前。
+//##############################
+Scene_MenuBase.prototype.drill_MPa_sortByZIndex = function () {
+    this.drill_MPa_sortByZIndex_Private();
+}
+//=============================================================================
+// ** 菜单层级（接口实现）
+//=============================================================================
+//==============================
+// * 菜单层级 - 最顶层
+//==============================
+var _drill_MPa_menuLayer_update = Scene_MenuBase.prototype.update;
+Scene_MenuBase.prototype.update = function() {
+	_drill_MPa_menuLayer_update.call(this);
+	
+	if(!this._backgroundSprite ){		//菜单后面层（防止覆写报错）
+		this._backgroundSprite = new Sprite();
+	}
+	if(!this._foregroundSprite ){		//菜单前面层
+		this._foregroundSprite = new Sprite();
+		this.addChild(this._foregroundSprite);	
+	}
+}
+//==============================
+// * 菜单层级 - 图片层级排序（私有）
+//==============================
+Scene_MenuBase.prototype.drill_MPa_sortByZIndex_Private = function() {
+   this._backgroundSprite.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
+   this._foregroundSprite.children.sort(function(a, b){return a.zIndex-b.zIndex});
+};
+//==============================
+// * 菜单层级 - 添加贴图到层级（私有）
+//==============================
+Scene_MenuBase.prototype.drill_MPa_layerAddSprite_Private = function( sprite, layer_index ){
+	if( layer_index == "菜单后面层" || layer_index === 0 ){
+		this._backgroundSprite.addChild( sprite );
+	}
+	if( layer_index == "菜单前面层" || layer_index === 1 ){
+		this._foregroundSprite.addChild( sprite );
+	}
+};
+
 //=============================================================================
 // ** 菜单界面
 //=============================================================================
@@ -1425,7 +1500,7 @@ Scene_MenuBase.prototype.createBackground = function() {
    	this._drill_MPa_dataTank = [];
 	
 	// > 菜单后面层
-	_drill_MPa_createBackground.call(this);		//（菜单基类在这里创建 ._backgroundSprite ）
+	_drill_MPa_createBackground.call(this);
 };
 //==============================
 // ** 菜单 - 退出界面
@@ -1434,13 +1509,6 @@ var _drill_MPa_terminate = Scene_MenuBase.prototype.terminate;
 Scene_MenuBase.prototype.terminate = function() {
 	_drill_MPa_terminate.call(this);			//（下次进入界面需重新创建）
 	SceneManager._drill_MPa_created = false;
-};
-//==============================
-// ** 菜单 - 层级排序
-//==============================
-Scene_MenuBase.prototype.drill_MPa_sortByZIndex = function() {
-   this._backgroundSprite.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
-   this._foregroundSprite.children.sort(function(a, b){return a.zIndex-b.zIndex});
 };
 //==============================
 // * 菜单 - 帧刷新
@@ -1473,15 +1541,6 @@ Scene_MenuBase.prototype.drill_MPa_create = function() {
 		this._drill_MPa_spriteTankOrg = [];
 		this._drill_MPa_spriteTankSec = [];
 		this._drill_MPa_dataTank = [];
-	}
-	if(!this._backgroundSprite ){		//防止覆写报错 - 菜单后面层
-		this._backgroundSprite = new Sprite();
-	}
-	
-	// > 菜单前面层
-	if(!this._foregroundSprite ){
-		this._foregroundSprite = new Sprite();
-		this.addChild(this._foregroundSprite);
 	}
 	
 	// > 配置的粒子
@@ -1518,11 +1577,7 @@ Scene_MenuBase.prototype.drill_MPa_create = function() {
 			}
 			
 			// > 粒子层 - 菜单层级
-			if( temp_data['menu_index'] == 0 ){
-				this._backgroundSprite.addChild(temp_layer);
-			}else{
-				this._foregroundSprite.addChild(temp_layer);
-			}
+			this.drill_MPa_layerAddSprite( temp_layer, temp_data['menu_index'] );
 			
 			// > 粒子层 - 粒子遮罩
 			if( temp_data['src_img_mask'] != "" ){
@@ -1559,11 +1614,7 @@ Scene_MenuBase.prototype.drill_MPa_create = function() {
 				}
 			
 				// > 第二层 - 菜单层级
-				if( temp_data['second_menuIndex'] == 0 ){
-					this._backgroundSprite.addChild(temp_layerSec);
-				}else{
-					this._foregroundSprite.addChild(temp_layerSec);
-				}
+				this.drill_MPa_layerAddSprite( temp_layer, temp_data['second_menuIndex'] );
 				
 				// > 第二层 - 粒子遮罩
 				if( temp_data['src_img_mask'] != "" ){
@@ -1608,7 +1659,7 @@ Scene_MenuBase.prototype.drill_MPa_create = function() {
 		}
 		
 		// > 粒子层 - 菜单层级
-		this._backgroundSprite.addChild(temp_layer);
+		this.drill_MPa_layerAddSprite( temp_layer, "菜单后面层" );
 		
 		// > 粒子层 - 粒子遮罩
 		if( temp_data['src_img_mask'] != "" ){
@@ -1645,11 +1696,7 @@ Scene_MenuBase.prototype.drill_MPa_create = function() {
 			}
 		
 			// > 第二层 - 菜单层级
-			if( temp_data['second_menuIndex'] == 0 ){
-				this._backgroundSprite.addChild(temp_layerSec);
-			}else{
-				this._foregroundSprite.addChild(temp_layerSec);
-			}
+			this.drill_MPa_layerAddSprite( temp_layer, temp_data['second_menuIndex'] );
 			
 			// > 第二层 - 粒子遮罩
 			if( temp_data['src_img_mask'] != "" ){

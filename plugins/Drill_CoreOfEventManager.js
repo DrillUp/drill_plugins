@@ -835,6 +835,10 @@ Game_SelfSwitches.prototype.drill_COEM_deleteEventKeys_Private = function( map_i
 //					注意，容器的序号不与id对应。
 //=============================================================================
 //==============================
+// * 容器 - 校验值
+//==============================
+DrillUp.g_COEM_checkATank = true;
+//==============================
 // * 容器 - 初始化
 //==============================
 var _drill_COEM_aTank_initialize = Game_Map.prototype.initialize;
@@ -866,6 +870,7 @@ Game_Map.prototype.update = function( sceneActive ){
 	_drill_COEM_aTank_update.call(this,sceneActive);
 	this.drill_COEM_updateTank();			//帧刷新 - 容器变化监听
 	this.drill_COEM_updateEvents();			//帧刷新 - 容器内事件检查
+	this.drill_COEM_updateCheck();			//帧刷新 - 校验值
 };
 //==============================
 // * 帧刷新 - 容器变化监听
@@ -905,6 +910,22 @@ Game_Map.prototype.drill_COEM_updateEvents = function(){
 		if( ev._erased == true ){	//（清除的事件排除）
 			this._drill_COEM_availableTank.splice( i, 1 );
 			continue;
+		}
+	}
+};
+//==============================
+// * 帧刷新 - 校验值
+//==============================
+Game_Map.prototype.drill_COEM_updateCheck = function(){
+	
+	// > 校验值
+	if( DrillUp.g_COEM_checkATank == true ){
+		if( this._drill_COEM_availableTank.length > this._drill_COEM_countPrivate ){
+			DrillUp.g_COEM_checkATank = false;
+			alert(
+				"【Drill_CoreOfEventManager.js 物体管理 - 事件管理核心】\n"+
+				"有效事件容器 的事件数量异常，请及时检查你的指针调用。"
+			);
 		}
 	}
 };

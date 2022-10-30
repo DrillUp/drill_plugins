@@ -545,7 +545,7 @@
 var _drill_MVi_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_MVi_pluginCommand.call(this, command, args);
-	if (command === ">菜单视频") {
+	if( command === ">菜单视频" ){
 		if(args.length == 4){
 			var temp1 = String(args[1]);
 			var type = String(args[3]);
@@ -591,7 +591,82 @@ Game_Temp.prototype.initialize = function() {
 	_drill_MVi_initialize.call(this);
 	this._drill_MVi_sprites = [];
 }
+
+
+//#############################################################################
+// ** 【标准模块】菜单层级
+//#############################################################################
+//##############################
+// * 菜单层级 - 添加贴图到层级【标准函数】
+//				
+//			参数：	> sprite 贴图        （添加的贴图对象）
+//					> layer_index 字符串 （添加到的层级名，菜单后面层/菜单前面层）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图添加到目标层级中。
+//##############################
+Scene_MenuBase.prototype.drill_MVi_layerAddSprite = function( sprite, layer_index ){
+    this.drill_MVi_layerAddSprite_Private(sprite, layer_index);
+}
+//##############################
+// * 菜单层级 - 去除贴图【标准函数】
+//				
+//			参数：	> sprite 贴图（添加的贴图对象）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图从地图层级中移除。
+//##############################
+Scene_MenuBase.prototype.drill_MVi_layerRemoveSprite = function( sprite ){
+	//（不操作）
+}
+//##############################
+// * 菜单层级 - 图片层级排序【标准函数】
+//				
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 执行该函数后，地图层级的子贴图，按照zIndex属性来进行先后排序。值越大，越靠前。
+//##############################
+Scene_MenuBase.prototype.drill_MVi_sortByZIndex = function () {
+    this.drill_MVi_sortByZIndex_Private();
+}
+//=============================================================================
+// ** 菜单层级（接口实现）
+//=============================================================================
+//==============================
+// * 菜单层级 - 最顶层
+//==============================
+var _drill_MVi_menuLayer_update = Scene_MenuBase.prototype.update;
+Scene_MenuBase.prototype.update = function() {
+	_drill_MVi_menuLayer_update.call(this);
 	
+	if(!this._backgroundSprite ){		//菜单后面层（防止覆写报错）
+		this._backgroundSprite = new Sprite();
+	}
+	if(!this._foregroundSprite ){		//菜单前面层
+		this._foregroundSprite = new Sprite();
+		this.addChild(this._foregroundSprite);	
+	}
+}
+//==============================
+// * 菜单层级 - 图片层级排序（私有）
+//==============================
+Scene_MenuBase.prototype.drill_MVi_sortByZIndex_Private = function() {
+   this._backgroundSprite.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
+   this._foregroundSprite.children.sort(function(a, b){return a.zIndex-b.zIndex});
+};
+//==============================
+// * 菜单层级 - 添加贴图到层级（私有）
+//==============================
+Scene_MenuBase.prototype.drill_MVi_layerAddSprite_Private = function( sprite, layer_index ){
+	if( layer_index == "菜单后面层" || layer_index === 0 ){
+		this._backgroundSprite.addChild( sprite );
+	}
+	if( layer_index == "菜单前面层" || layer_index === 1 ){
+		this._foregroundSprite.addChild( sprite );
+	}
+};
+
 //=============================================================================
 // ** 菜单
 //=============================================================================
@@ -600,13 +675,13 @@ Game_Temp.prototype.initialize = function() {
 //==============================
 var _drill_MVi_createBackground = Scene_MenuBase.prototype.createBackground;
 Scene_MenuBase.prototype.createBackground = function() {
+	
 	// > 背景初始化
 	SceneManager._drill_MVi_created = false;	
    	this._drill_MVi_sprites = [];
    	this._drill_MVi_sprites_data = [];	//注意，该数组与DrillUp.g_MVi_list数组的下标不同步，要使用data
 	
 	_drill_MVi_createBackground.call(this);
-	
 };
 //==============================
 // ** 菜单 - 退出界面
@@ -620,13 +695,6 @@ Scene_MenuBase.prototype.terminate = function() {
 		sprite.drill_MVi_destroy();
 	}
 	$gameTemp._drill_MVi_sprites = [];
-};
-//==============================
-// ** 菜单 - 层级排序
-//==============================
-Scene_MenuBase.prototype.drill_MVi_sortByZIndex = function() {
-   this._backgroundSprite.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
-   this._foregroundSprite.children.sort(function(a, b){return a.zIndex-b.zIndex});
 };
 //==============================
 // * 菜单 - 帧刷新
@@ -661,13 +729,6 @@ Scene_MenuBase.prototype.drill_MVi_create = function() {
 		this._drill_MVi_sprites = [];	//防止某些覆写的菜单报错
 		this._drill_MVi_sprites_data = [];
 		$gameTemp._drill_MVi_sprites = [];
-	}
-	if( !this._backgroundSprite ){		//菜单后面层
-		this._backgroundSprite = new Sprite();
-	}
-	if( !this._foregroundSprite ){		//菜单前面层
-		this._foregroundSprite = new Sprite();
-		this.addChild(this._foregroundSprite);
 	}
 	
 	// > 创建贴图
@@ -713,11 +774,7 @@ Scene_MenuBase.prototype.drill_MVi_create = function() {
 			this._drill_MVi_sprites_data.push(data);
 			$gameTemp._drill_MVi_sprites.push(temp_sprite);
 			
-			if( temp_data['menu_index'] == "菜单前面层" ){
-				this._foregroundSprite.addChild(temp_sprite);
-			}else{
-				this._backgroundSprite.addChild(temp_sprite);
-			}
+			this.drill_MVi_layerAddSprite( temp_layer, temp_data['menu_index'] );
 		}
 	}
 
