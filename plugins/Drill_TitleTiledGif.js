@@ -852,11 +852,9 @@
 			DrillUp.parameters["平铺GIF-" + String(i+1) ] != "" ){
 			var temp = JSON.parse(DrillUp.parameters['平铺GIF-' + String(i+1) ]);
 			DrillUp.g_TTG_list[i] = DrillUp.drill_TTG_tiledGifInit( temp );
-			DrillUp.g_TTG_list[i]['id'] = Number(i)+1;
 			DrillUp.g_TTG_list[i]['inited'] = true;
 		}else{
 			DrillUp.g_TTG_list[i] = DrillUp.drill_TTG_tiledGifInit( {} );
-			DrillUp.g_TTG_list[i]['id'] = Number(i)+1;
 			DrillUp.g_TTG_list[i]['inited'] = false;
 		}
 	}
@@ -923,6 +921,7 @@ var _drill_TTG_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_TTG_pluginCommand.call(this, command, args);
 	if( command === ">标题平铺GIF" ){
+		
 		if(args.length == 4){
 			var temp1 = String(args[1]);
 			temp1 = temp1.replace("平铺GIF[","");
@@ -948,15 +947,6 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			}
 		}
 	}
-};
-
-//=============================================================================
-// ** 存储数据初始化
-//=============================================================================
-var _drill_TTG_sys_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function() {	
-	_drill_TTG_sys_initialize.call(this);
-	// 无
 };
 
 

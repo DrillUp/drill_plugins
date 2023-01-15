@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.8]        地图 - 自定义照明效果
+ * @plugindesc [v1.9]        地图 - 自定义照明效果
  * @author Drill_up,紫悠
  * 
  * @Drill_LE_param "光源-%d"
@@ -316,6 +316,8 @@
  * 区分了物体照明和高级照明，并强化了 高级照明 的各项功能和插件指令。
  * [v1.8]
  * 修复了1像素抖动的问题。
+ * [v1.9]
+ * 优化了旧存档的识别与兼容。
  * 
  * 
  * 
@@ -2455,21 +2457,72 @@ Game_Screen.prototype.drill_LIl_isPictureExist = function( pic_id ){
 };
 
 
-//=============================================================================
-// ** 存储数据（黑暗层）
-//=============================================================================
-//==============================
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_LIl_saveEnabled = true;
+//##############################
 // * 存储数据 - 初始化
-//==============================
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_LIl_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
     _drill_LIl_sys_initialize.call(this);
-	this.drill_LIl_darkInit();		//黑暗层初始化
-}
+	this.drill_LIl_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_LIl_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_LIl_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_LIl_saveEnabled == true ){	
+		$gameSystem.drill_LIl_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_LIl_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_LIl_initSysData = function() {
+	this.drill_LIl_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_LIl_checkSysData = function() {
+	this.drill_LIl_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
 //==============================
-// * 存储数据 - 黑暗层初始化
+// * 存储数据 - 初始化数据（私有）
 //==============================
-Game_System.prototype.drill_LIl_darkInit = function() {
+Game_System.prototype.drill_LIl_initSysData_Private = function() {
 	
 	// > 黑暗层数据
 	this._drill_LIl = {};
@@ -2487,13 +2540,16 @@ Game_System.prototype.drill_LIl_darkInit = function() {
 	}
 };
 //==============================
-// * 存储数据 - 黑暗层初始化
+// * 存储数据 - 载入存档时检查数据（私有）
 //==============================
-Game_System.prototype.drill_LIl_darkCheck = function() {
+Game_System.prototype.drill_LIl_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
 	if( this._drill_LIl == undefined ){
-		this.drill_LIl_darkInit();
+		this.drill_LIl_initSysData();
 	}
-}
+	
+};
 //==============================
 // * 存储数据 - 设置黑暗层透明度
 //==============================
@@ -2917,7 +2973,7 @@ Scene_Map.prototype.createAllWindows = function() {
 // * 地图界面 - 创建黑暗层
 //==============================
 Scene_Map.prototype.drill_LIl_createDarkLayer = function() {
-	$gameSystem.drill_LIl_darkCheck();	//（参数检查）
+	$gameSystem.drill_LIl_checkSysData_Private();	//（参数检查）
 	
 	// > 黑暗层
 	var temp_sprite = new Drill_LIl_MaskSprite(Graphics.boxWidth, Graphics.boxHeight);
@@ -3049,15 +3105,17 @@ Game_Event.prototype.drill_LIl_setup = function() {
 //==============================
 // ** 存储数据 - 初始化
 //==============================
-var _drill_LIl_sys_initialize2 = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function() {
-    _drill_LIl_sys_initialize2.call(this);
+var _drill_LIl_initSysData2 = Game_System.prototype.drill_LIl_initSysData;
+Game_System.prototype.drill_LIl_initSysData = function() {
+    _drill_LIl_initSysData2.call(this);
 	this._drill_LIl_container = new Drill_CODM_PerspectiveMarkerContainer();	//（创建容器）
 };
 //==============================
 // ** 存储数据 - 存档检查
 //==============================
-Game_System.prototype.drill_LIl_perspectiveCheck = function() {
+var _drill_LIl_checkSysData2 = Game_System.prototype.drill_LIl_checkSysData;
+Game_System.prototype.drill_LIl_checkSysData = function() {
+    _drill_LIl_checkSysData2.call(this);
 	if( this._drill_LIl_container == undefined ){
 		this._drill_LIl_container = new Drill_CODM_PerspectiveMarkerContainer();	//（创建容器）
 	}
@@ -3198,7 +3256,7 @@ Game_System.prototype.drill_LIl_rotateTo = function( marker_id, o_data ){
 //==============================
 var _drill_LIl_map_setupEvents = Game_Map.prototype.setupEvents;
 Game_Map.prototype.setupEvents = function(){
-	$gameSystem.drill_LIl_perspectiveCheck();
+	$gameSystem.drill_LIl_checkSysData();
 	$gameSystem._drill_LIl_container.drill_CODM_clearSimple();	//（清理物体照明）
 	this._drill_LIl_commandLock = {};							//（指令过度重复检测锁）
 	_drill_LIl_map_setupEvents.call( this );
@@ -3212,7 +3270,7 @@ var _drill_LIl_scene_updateMain2 = Scene_Map.prototype.updateMain;
 Scene_Map.prototype.updateMain = function(){
 	_drill_LIl_scene_updateMain2.call( this );
 	if( this.isActive() ){
-		$gameSystem.drill_LIl_perspectiveCheck();
+		$gameSystem.drill_LIl_checkSysData();
 		$gameSystem._drill_LIl_container.update();		//（容器帧刷新）
 	}
 	if( Graphics.frameCount % 180 == 0 ){

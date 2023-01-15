@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.5]        图片 - 消失动作效果
+ * @plugindesc [v1.6]        图片 - 消失动作效果
  * @author Drill_up
  * 
  * 
@@ -143,9 +143,10 @@
  * 添加了 直接消失、移动消失 功能。
  * [v1.5]
  * 优化了数学缩短锚点的计算公式。
+ * [v1.6]
+ * 优化了旧存档的识别与兼容。
  *
  *
- * 
  * 
  * @param 图片默认透明度检查
  * @type boolean
@@ -615,14 +616,87 @@ Game_Temp.prototype.drill_PFOE_getParabolicThree = function( x1,y1,x2,y2,x3,y3 )
 }
 
 
-//=============================================================================
-// ** 存储变量初始化
-//=============================================================================
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_PFOE_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_PFOE_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
     _drill_PFOE_sys_initialize.call(this);
+	this.drill_PFOE_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_PFOE_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_PFOE_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_PFOE_saveEnabled == true ){	
+		$gameSystem.drill_PFOE_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_PFOE_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_PFOE_initSysData = function() {
+	this.drill_PFOE_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_PFOE_checkSysData = function() {
+	this.drill_PFOE_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_PFOE_initSysData_Private = function() {
+	
 	this._drill_PFOE_opacityCheck_pic = DrillUp.g_PFOE_pic_opacityCheck;
-}
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_PFOE_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_PFOE_opacityCheck_pic == undefined ){
+		this.drill_PFOE_initSysData();
+	}
+	
+};
+
 
 //=============================================================================
 // ** 图片贴图

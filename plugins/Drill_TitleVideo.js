@@ -510,11 +510,9 @@
 			DrillUp.parameters["视频-" + String(i+1) ] != "" ){
 			var temp = JSON.parse(DrillUp.parameters["视频-" + String(i+1) ]);
 			DrillUp.g_TVi_list[i] = DrillUp.drill_TVi_videoInit( temp );
-			DrillUp.g_TVi_list[i]['id'] = Number(i)+1;
 			DrillUp.g_TVi_list[i]['inited'] = true;
 		}else{
 			DrillUp.g_TVi_list[i] = DrillUp.drill_TVi_videoInit( {} );
-			DrillUp.g_TVi_list[i]['id'] = Number(i)+1;
 			DrillUp.g_TVi_list[i]['inited'] = false;
 		}
 	}
@@ -612,25 +610,15 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 
 
 //=============================================================================
-// ** 变量初始化
+// ** 临时变量初始化
 //=============================================================================
-//==============================
-// * 存储变量初始化
-//==============================
-var _drill_TVi_sys_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function() {
-	_drill_TVi_sys_initialize.call(this);
-    //无
-};
-//==============================
-// * 临时全局变量初始化
-//==============================
-var _drill_TVi_initialize = Game_Temp.prototype.initialize;
+var _drill_TVi_temp_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {
-	_drill_TVi_initialize.call(this);
+	_drill_TVi_temp_initialize.call(this);
 	this._drill_TVi_sprites = [];
-}
-	
+};
+
+
 //=============================================================================
 // ** 菜单
 //=============================================================================

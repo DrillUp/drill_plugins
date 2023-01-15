@@ -826,7 +826,7 @@ Window_SkillList.prototype.drill_WSE_s_drawBlock = function( cur_bitmap, skill )
 	
 	// > 绘制技能名 - 文本颜色
 	if( Imported.Drill_ItemTextColor ){
-		var temp_c = $gameSystem._drill_ITC_skills[ skill.id ];
+		var temp_c = $gameSystem._drill_ITC_skills[ Number(skill.id) ];
 		if( temp_c != "" ){ 
 			cur_bitmap.textColor = temp_c ;
 			cur_bitmap['drill_elements_drawText'] = true;		//（高级渐变颜色 偏移标记）

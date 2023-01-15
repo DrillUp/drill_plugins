@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.8]        鼠标 - 鼠标辅助操作面板
+ * @plugindesc [v1.9]        鼠标 - 鼠标辅助操作面板
  * @author Drill_up
  * 
  * @Drill_LE_param "自定义按钮-%d"
@@ -158,6 +158,8 @@
  * 修改了内部结构，添加了按钮封印功能，以及自定义按钮功能。
  * [v1.8]
  * 添加了公共事件的并行与串行的功能。
+ * [v1.9]
+ * 优化了旧存档的识别与兼容。
  *
  *
  *
@@ -939,12 +941,73 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	};
 };
 
-//=============================================================================
-// ** 存储数据变量初始化
-//=============================================================================
-var _drill_OH_initialize = Game_System.prototype.initialize;
+
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_OH_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_OH_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-	_drill_OH_initialize.call(this);
+    _drill_OH_sys_initialize.call(this);
+	this.drill_OH_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_OH_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_OH_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_OH_saveEnabled == true ){	
+		$gameSystem.drill_OH_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_OH_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_OH_initSysData = function() {
+	this.drill_OH_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_OH_checkSysData = function() {
+	this.drill_OH_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_OH_initSysData_Private = function() {
 	
 	this._drill_OH_menu_status = DrillUp.g_OH_menu_status;				//菜单
 	this._drill_OH_jump_status = DrillUp.g_OH_jump_status;				//跳跃
@@ -958,13 +1021,39 @@ Game_System.prototype.initialize = function() {
 	this._drill_OH_self_status = [];									//自定义
 	for( var i=0; i < DrillUp.g_OH_self_list.length; i++ ){
 		var data = DrillUp.g_OH_self_list[i];
-		if( data == null ){
-			this._drill_OH_self_status[i] = null;
-		}else{
-			this._drill_OH_self_status[i] = data['status'];
+		if( data == undefined ){ continue; }
+		this._drill_OH_self_status[i] = data['status'];
+	}
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_OH_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_OH_self_status == undefined ){
+		this.drill_OH_initSysData();
+	}
+	
+	// > 容器的 空数据 检查
+	for(var i = 0; i < DrillUp.g_OH_self_list.length; i++ ){
+		var temp_data = DrillUp.g_OH_self_list[i];
+		
+		// > 已配置（undefined表示未配置的空数据）
+		if( temp_data != undefined ){
+			
+			// > 未存储的，重新初始化
+			if( this._drill_OH_self_status[i] == undefined ){
+				this._drill_OH_self_status[i] = temp_data['status'];
+			
+			// > 已存储的，跳过
+			}else{
+				//（不操作）
+			}
 		}
 	}
-}
+};
+
 
 //=============================================================================
 // ** 地图
@@ -1661,7 +1750,8 @@ Drill_Operate_Hud.prototype.drill_updateStatus = function(){
 	for( var i=0; i < this._drill_OH_selfList.length; i++ ){
 		var sprite = this._drill_OH_selfList[i];
 		var status = $gameSystem._drill_OH_self_status[i];
-		if( status == null || sprite == null ){ continue; }
+		if( status == null ){ continue; }
+		if( sprite == null ){ continue; }
 		
 		if( status == "禁用" ){
 			sprite.visible = false;		
@@ -1863,6 +1953,7 @@ Drill_Operate_Hud.prototype.drill_triggerPlayerInput = function() {
 		var sprite = this._drill_OH_selfList[i];
 		var data = DrillUp.g_OH_self_list[i];
 		var status = $gameSystem._drill_OH_self_status[i];
+		if( status == null ){ continue; }
 		if( sprite == null ){ continue; }
 		
 		if( this._drill_OH_hoveringOne == sprite ){

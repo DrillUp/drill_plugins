@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.2]        地图 - 多层地图背景
+ * @plugindesc [v2.3]        地图 - 多层地图背景
  * @author Drill_up
  * 
  * @Drill_LE_param "背景层-%d"
@@ -179,6 +179,8 @@
  * 梳理优化了位移比的结构。
  * [v2.2]
  * 优化了与地图活动镜头的兼容结构。
+ * [v2.3]
+ * 优化了旧存档的识别与兼容。
  * 
  * 
  * 
@@ -1725,6 +1727,18 @@
 		data['dynamicMask_enabled'] = String( dataFrom["是否启用地图动态遮罩"] || "false") == "true";
 		data['dynamicMask_bind'] = String( dataFrom["关联的动态遮罩板"] || "动态遮罩板A");
 		
+		// > 私有变量初始化
+		data['cur_speedX'] = 0;				//当前x位置（速度累加的结果）
+		data['cur_speedY'] = 0;				//
+		data['cameraXAcc'] = 0;				//镜头基点（循环积累值）（像素单位）
+		data['cameraYAcc'] = 0;				//
+		data['cameraExtraX'] = 0;			//镜头缩放的额外偏移
+		data['cameraExtraY'] = 0;			//
+		//data['loopX'] = 0;				//循环地图中，走动循环的次数
+		//data['loopY'] = 0;				//
+		//data['loopFixX'] = 0;				//循环地图中，把displayX取余的部分加回（图块单位）
+		//data['loopFixY'] = 0;				//
+		
 		return data;
 	}
 	
@@ -1738,12 +1752,8 @@
 		if( DrillUp.parameters['背景层-' + String(i+1) ] != "" ){
 			var temp = JSON.parse(DrillUp.parameters['背景层-' + String(i+1) ]);
 			DrillUp.g_LG_layers[i] = DrillUp.drill_LG_backgroundInit( temp );
-			DrillUp.g_LG_layers[i]['id'] = Number(i)+1;
-			DrillUp.g_LG_layers[i]['inited'] = true;
 		}else{
-			DrillUp.g_LG_layers[i] = DrillUp.drill_LG_backgroundInit( {} );
-			DrillUp.g_LG_layers[i]['id'] = Number(i)+1;
-			DrillUp.g_LG_layers[i]['inited'] = false;
+			DrillUp.g_LG_layers[i] = null;		//（强制设为空值，节约存储资源）
 		}
 	}
 
@@ -1761,8 +1771,8 @@ ImageManager.load_MapLayer = function(filename) {
 var _drill_LG_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_LG_pluginCommand.call(this, command, args);
-	
 	if( command === ">地图背景" ){ // >地图背景 : 背景[1] : 显示
+		
 		if(args.length >= 2){
 			var id = -1;
 			var temp1 = String(args[1]);
@@ -1886,53 +1896,116 @@ Game_Interpreter.prototype.drill_LG_getArgNumList = function( arg_str ){
 };
 
 
-//=============================================================================
-// ** 存储数据
-//=============================================================================
-//==============================
-// ** 存储数据 - 初始化
-//==============================
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+//DrillUp.g_LG_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_LG_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
     _drill_LG_sys_initialize.call(this);
-	this.drill_LG_initData();
+	this.drill_LG_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_LG_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_LG_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_LG_saveEnabled == true ){	
+		$gameSystem.drill_LG_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_LG_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_LG_initSysData = function() {
+	this.drill_LG_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_LG_checkSysData = function() {
+	this.drill_LG_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_LG_initSysData_Private = function() {
+	
+	this._drill_LG_dataTank_changing = [];		//插件指令变化容器
+	this._drill_LG_dataTank_curData = [];		//当前地图容器（与 g_LG_layers/_drill_LG_layerTank 依次对应，容器允许出现null值）
+	for(var i = 0; i < DrillUp.g_LG_layers.length; i++){
+		var temp_data = DrillUp.g_LG_layers[i];
+		if( temp_data == undefined ){ continue; }
+		if( temp_data['mapToAll'] == true ){		//全地图数据直接存储（每次地图刷新时，不刷新 全地图数据）
+			var data = JSON.parse(JSON.stringify( temp_data ));
+			this._drill_LG_dataTank_curData[i] = data;
+		}
+	}
+	
+	// > 刷新当前地图
+	if( $gameMap ){
+		$gameMap.drill_LG_initMapdata();
+	}
 };
 //==============================
-// ** 存储数据 - 初始化数据
+// * 存储数据 - 载入存档时检查数据（私有）
 //==============================
-Game_System.prototype.drill_LG_initData = function() {
-	this._drill_LG_dataTank_changing = [];	//插件指令变化容器
-	this._drill_LG_dataTank_map = [];		//当前地图的背景容器
-	this._drill_LG_dataTank = [];			//背景数据总容器
+Game_System.prototype.drill_LG_checkSysData_Private = function() {
 	
-	for(var i = 0; i< DrillUp.g_LG_layers.length ;i++){
-		var data = JSON.parse(JSON.stringify( DrillUp.g_LG_layers[i] ));	//深拷贝数据
-		
-		// > 私有变量初始化
-		data['cur_speedX'] = 0;				//当前x位置（速度累加的结果）
-		data['cur_speedY'] = 0;				//
-		data['cameraXAcc'] = 0;				//镜头基点（循环积累值）（像素单位）
-		data['cameraYAcc'] = 0;				//
-		data['cameraExtraX'] = 0;			//镜头缩放的额外偏移
-		data['cameraExtraY'] = 0;			//
-		//data['loopX'] = 0;				//循环地图中，走动循环的次数
-		//data['loopY'] = 0;				//
-		//data['loopFixX'] = 0;				//循环地图中，把displayX取余的部分加回（图块单位）
-		//data['loopFixY'] = 0;				//
-		
-		this._drill_LG_dataTank.push(data);
+	// > 旧存档数据自动补充
+	if( this._drill_LG_dataTank_curData == undefined ){
+		this.drill_LG_initSysData();
 	}
-};	
-//==============================
-// * 存档文件 - 载入存档 - 数据赋值
-//==============================
-var _drill_LG_extractSaveContents = DataManager.extractSaveContents;
-DataManager.extractSaveContents = function(contents){
-	_drill_LG_extractSaveContents.call( this, contents );
 	
-	if( DrillUp.g_LG_saveEnabled == false ){	//（未开参数存储，则直接覆盖初始化数据）
-		$gameSystem.drill_LG_initData();
-		$gameMap.drill_LG_initMapdata();
+	// > 容器的 空数据 检查
+	for(var i = 0; i < DrillUp.g_LG_layers.length; i++ ){
+		var temp_data = DrillUp.g_LG_layers[i];
+		
+		// > 已配置（检查 全地图数据 的配置情况）
+		if( temp_data != undefined &&
+			temp_data['mapToAll'] == true ){
+			
+			// > 未存储的，重新初始化
+			if( this._drill_LG_dataTank_curData[i] == undefined ){
+				this._drill_LG_dataTank_curData[i] = JSON.parse(JSON.stringify( temp_data ));
+			
+			// > 已存储的，跳过
+			}else{
+				//（不操作）
+			}
+		}
 	}
 };
 
@@ -1949,12 +2022,27 @@ Game_Map.prototype.setup = function( mapId ){
 	this.drill_LG_initMapdata();
 }
 Game_Map.prototype.drill_LG_initMapdata = function() {
-	$gameSystem._drill_LG_dataTank_map = [];		//刷新当前地图的背景
-	for(var i = 0; i< $gameSystem._drill_LG_dataTank.length ;i++){
-		var data = $gameSystem._drill_LG_dataTank[i];
-		if( data['inited'] != true ){ continue; }
-		if( data['mapToAll'] == true || data['map'] == this._mapId ){
-			$gameSystem._drill_LG_dataTank_map.push(data);
+	
+	// > 刷新当前地图容器
+	for(var i = 0; i< DrillUp.g_LG_layers.length ;i++){
+		var temp_data = DrillUp.g_LG_layers[i];
+		if( temp_data == undefined ){
+			$gameSystem._drill_LG_dataTank_curData[i] = null;
+			continue;
+		}
+		
+		// > 全地图数据时
+		if( temp_data['mapToAll'] == true ){
+			//（不刷新数据）
+			
+		// > 单地图数据时
+		}else if( temp_data['map'] == this._mapId ){
+			var data = JSON.parse(JSON.stringify( temp_data ));
+			$gameSystem._drill_LG_dataTank_curData[i] = data;	//（重刷数据）
+			
+		// > 其它情况时
+		}else{
+			$gameSystem._drill_LG_dataTank_curData[i] = null;	//（某地图不含此贴图配置，则直接置空）
 		}
 	}
 }
@@ -1971,8 +2059,9 @@ Game_Player.prototype.update = function( sceneActive ){
 	// （移动时，像素会提前偏移1像素，可以确定不是 this._displayX 的问题，因为 x - floor(x) 的差值小于0.0001）
 	// 该问题已解决，刷新的时机早了，要等玩家updateScroll之后才刷。
 	
-	for(var i = 0; i< $gameSystem._drill_LG_dataTank_map.length ;i++){
-		var data = $gameSystem._drill_LG_dataTank_map[i];
+	for(var i = 0; i< $gameSystem._drill_LG_dataTank_curData.length ;i++){
+		var data = $gameSystem._drill_LG_dataTank_curData[i];
+		if( data == undefined ){ continue; }
 		
 		// > 镜头基点（循环积累值）
 		if( Imported.Drill_LayerCamera ){
@@ -2000,8 +2089,8 @@ Game_Player.prototype.update = function( sceneActive ){
 var _drill_LG_Map_scrollDown = Game_Map.prototype.scrollDown;
 Game_Map.prototype.scrollDown = function(distance) {
     if (this.isLoopVertical() && this._displayY + distance >= $dataMap.height) {
-		for(var i =0; i<$gameSystem._drill_LG_dataTank_map.length; i++){
-			var data = $gameSystem._drill_LG_dataTank_map[i];
+		for(var i =0; i<$gameSystem._drill_LG_dataTank_curData.length; i++){
+			var data = $gameSystem._drill_LG_dataTank_curData[i];
 			if( data['map'] == this._mapId ){
 				data['loopY'] += 1;		//（记录地图移动时循环次数、偏移量）
 				data['loopFixY'] = data.loopY * $dataMap.height;
@@ -2016,8 +2105,8 @@ Game_Map.prototype.scrollDown = function(distance) {
 var _drill_LG_Map_scrollUp = Game_Map.prototype.scrollUp;
 Game_Map.prototype.scrollUp = function(distance) {
     if (this.isLoopVertical() && this._displayY - distance <= 0 ) {
-		for(var i =0; i<$gameSystem._drill_LG_dataTank_map.length; i++){
-			var data = $gameSystem._drill_LG_dataTank_map[i];
+		for(var i =0; i<$gameSystem._drill_LG_dataTank_curData.length; i++){
+			var data = $gameSystem._drill_LG_dataTank_curData[i];
 			if( data['map'] == this._mapId ){
 				data['loopY'] -= 1;		//（记录地图移动时循环次数、偏移量）
 				data['loopFixY'] = data.loopY * $dataMap.height;
@@ -2032,8 +2121,8 @@ Game_Map.prototype.scrollUp = function(distance) {
 var _drill_LG_Map_scrollLeft = Game_Map.prototype.scrollLeft;
 Game_Map.prototype.scrollLeft = function(distance) {
     if (this.isLoopHorizontal() && this._displayX - distance <= 0) {
-		for(var i =0; i<$gameSystem._drill_LG_dataTank_map.length; i++){
-			var data = $gameSystem._drill_LG_dataTank_map[i];
+		for(var i =0; i<$gameSystem._drill_LG_dataTank_curData.length; i++){
+			var data = $gameSystem._drill_LG_dataTank_curData[i];
 			if( data['map'] == this._mapId ){
 				data['loopX'] -= 1;		//（记录地图移动时循环次数、偏移量）
 				data['loopFixX'] = data.loopX * $dataMap.width;
@@ -2048,8 +2137,8 @@ Game_Map.prototype.scrollLeft = function(distance) {
 var _drill_LG_Map_scrollRight = Game_Map.prototype.scrollRight;
 Game_Map.prototype.scrollRight = function(distance) {
     if (this.isLoopHorizontal() && this._displayX + distance >= $dataMap.width) {
-		for(var i =0; i<$gameSystem._drill_LG_dataTank_map.length; i++){
-			var data = $gameSystem._drill_LG_dataTank_map[i];
+		for(var i =0; i<$gameSystem._drill_LG_dataTank_curData.length; i++){
+			var data = $gameSystem._drill_LG_dataTank_curData[i];
 			if( data['map'] == this._mapId ){
 				data['loopX'] += 1;		//（记录地图移动时循环次数、偏移量）
 				data['loopFixX'] = data.loopX * $dataMap.width;
@@ -2252,11 +2341,12 @@ Scene_Map.prototype.createAllWindows = function() {
 	this.drill_LG_create();	
 };
 Scene_Map.prototype.drill_LG_create = function() {
-	this._drill_LG_spriteTank = [];
+	this._drill_LG_spriteTank = [];		//（允许出现null值）
 	
-	var data_tank = $gameSystem._drill_LG_dataTank_map;
+	var data_tank = $gameSystem._drill_LG_dataTank_curData;
 	for(var i=0; i< data_tank.length; i++){
 		var temp_data = data_tank[i];
+		if( temp_data == undefined ){ continue; }
 		
 		// > 贴图属性
 		var temp_sprite = new TilingSprite();
@@ -2281,7 +2371,7 @@ Scene_Map.prototype.drill_LG_create = function() {
 		}
 		
 		// > 地图层级
-		this._drill_LG_spriteTank.push( temp_sprite );
+		this._drill_LG_spriteTank[i] = temp_sprite;
 		this.drill_LG_layerAddSprite( temp_sprite, temp_sprite['layer_index'] );
 	}
 	this.drill_LG_sortByZIndex();		//排序
@@ -2322,12 +2412,14 @@ Scene_Map.prototype.update = function() {
 // * 帧刷新 - 基本属性
 //==============================
 Scene_Map.prototype.drill_LG_updateBase = function() {
-	var sprite_tank = this._drill_LG_spriteTank ;
-	var data_tank = $gameSystem._drill_LG_dataTank_map;
+	var sprite_tank = this._drill_LG_spriteTank;
+	var data_tank = $gameSystem._drill_LG_dataTank_curData;
 	
 	for(var i=0; i< sprite_tank.length; i++){
 		var temp_sprite = sprite_tank[i];
 		var temp_data = data_tank[i];
+		if( temp_data == undefined ){ continue; }
+		if( temp_sprite == undefined ){ continue; }
 		if( temp_sprite.bitmap.isReady() ){
 			
 			// > 属性实时变化
@@ -2396,68 +2488,67 @@ Scene_Map.prototype.drill_LG_updateBase = function() {
 // * 帧刷新 - 变化属性
 //==============================
 Scene_Map.prototype.drill_LG_updateChange = function() {
-	var data_tank = $gameSystem._drill_LG_dataTank_map;
-	var change_tank = $gameSystem._drill_LG_dataTank_changing;
+	var change_tank = $gameSystem._drill_LG_dataTank_changing;	//（只变数据，不变sprite）
+	var data_tank = $gameSystem._drill_LG_dataTank_curData;
 	
-	for(var i=0; i< data_tank.length; i++){		//（只变数据，不变sprite）
-		var temp_data = data_tank[i];
-		for(var j=0; j< change_tank.length; j++){
-			var temp_change = change_tank[j];
-			if( temp_data.id == temp_change.id && temp_change.destroy == false ){
-				temp_change.time += 1;
-				
-				if( temp_change.type == "显示" ){
-					temp_data['visible'] = true;
+	for(var j=0; j< change_tank.length; j++){
+		var temp_change = change_tank[j];
+		var temp_data = data_tank[ temp_change.id -1 ];
+		if( temp_data == undefined ){ continue; }
+		if( temp_change.destroy == false ){
+			temp_change.time += 1;
+			
+			if( temp_change.type == "显示" ){
+				temp_data['visible'] = true;
+				temp_change.destroy = true;
+			}
+			
+			if( temp_change.type == "隐藏" ){
+				temp_data['visible'] = false;
+				temp_change.destroy = true;
+			}
+			
+			if( temp_change.type == "变混合模式" ){
+				temp_data['blendMode'] = temp_change.data1;
+				temp_change.destroy = true;
+			}
+			
+			if( temp_change.type == "变坐标" ){
+				if( temp_change.time == 1 ){
+					temp_change._dest = Math.max( temp_change.data1,1 );
+					temp_change._x = temp_change.data2 - temp_data['x'];
+					temp_change._y = temp_change.data3 - temp_data['y'];
+				}
+				if( temp_change.time <= temp_change._dest ){
+					temp_data['x'] += temp_change._x / temp_change._dest;
+					temp_data['y'] += temp_change._y / temp_change._dest;
+				}
+				if( temp_change.time >= temp_change._dest ){
 					temp_change.destroy = true;
 				}
-				
-				if( temp_change.type == "隐藏" ){
-					temp_data['visible'] = false;
+			}
+			
+			if( temp_change.type == "变透明" ){
+				if( temp_change.time == 1 ){
+					temp_change._dest = Math.max( temp_change.data1,1 );
+					temp_change._opacity = temp_change.data2 - temp_data['opacity'];
+				}
+				temp_data['opacity'] += temp_change._opacity / temp_change._dest;
+				if( temp_change.time >= temp_change._dest ){
 					temp_change.destroy = true;
 				}
-				
-				if( temp_change.type == "变混合模式" ){
-					temp_data['blendMode'] = temp_change.data1;
+			}
+			
+			if( temp_change.type == "变速度" ){
+				if( temp_change.time == 1 ){
+					temp_change._dest = Math.max( temp_change.data1,1 );
+					temp_change._speedX = temp_change.data2 - temp_data['speedX'];
+					temp_change._speedY = temp_change.data3 - temp_data['speedY'];
+				}
+				temp_data['speedX'] += temp_change._speedX / temp_change._dest;
+				temp_data['speedY'] += temp_change._speedY / temp_change._dest;
+				if( temp_change.time >= temp_change._dest ){
 					temp_change.destroy = true;
-				}
-				
-				if( temp_change.type == "变坐标" ){
-					if( temp_change.time == 1 ){
-						temp_change._dest = Math.max( temp_change.data1,1 );
-						temp_change._x = temp_change.data2 - temp_data['x'];
-						temp_change._y = temp_change.data3 - temp_data['y'];
-					}
-					if( temp_change.time <= temp_change._dest ){
-						temp_data['x'] += temp_change._x / temp_change._dest;
-						temp_data['y'] += temp_change._y / temp_change._dest;
-					}
-					if( temp_change.time >= temp_change._dest ){
-						temp_change.destroy = true;
-					}
-				}
-				
-				if( temp_change.type == "变透明" ){
-					if( temp_change.time == 1 ){
-						temp_change._dest = Math.max( temp_change.data1,1 );
-						temp_change._opacity = temp_change.data2 - temp_data['opacity'];
-					}
-					temp_data['opacity'] += temp_change._opacity / temp_change._dest;
-					if( temp_change.time >= temp_change._dest ){
-						temp_change.destroy = true;
-					}
-				}
-				
-				if( temp_change.type == "变速度" ){
-					if( temp_change.time == 1 ){
-						temp_change._dest = Math.max( temp_change.data1,1 );
-						temp_change._speedX = temp_change.data2 - temp_data['speedX'];
-						temp_change._speedY = temp_change.data3 - temp_data['speedY'];
-					}
-					temp_data['speedX'] += temp_change._speedX / temp_change._dest;
-					temp_data['speedY'] += temp_change._speedY / temp_change._dest;
-					if( temp_change.time >= temp_change._dest ){
-						temp_change.destroy = true;
-					}
 				}
 			}
 		}
@@ -2506,7 +2597,9 @@ Scene_Map.prototype.drill_LG_updateResize = function(){
 	// > 背景伸缩
 	for(var i=0; i < this._drill_LG_spriteTank.length; i++){
 		var temp_sprite = this._drill_LG_spriteTank[i];
-		var temp_data = $gameSystem._drill_LG_dataTank_map[i];
+		var temp_data = $gameSystem._drill_LG_dataTank_curData[i];
+		if( temp_data == undefined ){ continue; }
+		if( temp_sprite == undefined ){ continue; }
 		if( temp_data['layer_index'] == "下层" ||
 			temp_data['layer_index'] == "中层" || 
 			temp_data['layer_index'] == "上层" ){

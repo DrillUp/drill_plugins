@@ -989,7 +989,8 @@ StorageManager.drill_TSc_saveData = function(){
 var _drill_TSc_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_TSc_pluginCommand.call(this, command, args);
-	if( command === ">标题界面" || command === ">标题窗口") {
+	if( command === ">标题界面" || command === ">标题窗口" ){
+		
 		if( args.length == 4 ){
 			var type = String(args[1]);
 			var temp1 = String(args[3]);
@@ -1040,15 +1041,6 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		}
 	}
 	
-};
-
-//=============================================================================
-// * 存储数据初始化
-//=============================================================================
-var _drill_TSc_sys_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function() {	
-	_drill_TSc_sys_initialize.call(this);
-	// 无
 };
 
 

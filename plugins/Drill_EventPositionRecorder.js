@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        物体 - 位置存储器
+ * @plugindesc [v1.2]        物体 - 位置存储器
  * @author Drill_up
  *
  * 
@@ -123,6 +123,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 优化了该插件对旧存档的兼容性。
+ * [v1.2]
+ * 优化了旧存档的识别与兼容。
  * 
  */
  
@@ -377,19 +379,90 @@ Game_Map.prototype.drill_EPR_isEventExist = function( e_id ){
 };
 
 
-//=============================================================================
-// ** 存储数据初始化
-//=============================================================================
-//==============================
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_EPR_saveEnabled = true;
+//##############################
 // * 存储数据 - 初始化
-//==============================
-var _drill_EPR_System_initialize = Game_System.prototype.initialize;
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_EPR_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-	_drill_EPR_System_initialize.call(this);
+    _drill_EPR_sys_initialize.call(this);
+	this.drill_EPR_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_EPR_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_EPR_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_EPR_saveEnabled == true ){	
+		$gameSystem.drill_EPR_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_EPR_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_EPR_initSysData = function() {
+	this.drill_EPR_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_EPR_checkSysData = function() {
+	this.drill_EPR_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_EPR_initSysData_Private = function() {
 	
 	this._drill_EPR_paramTank = {};				//位置存储容器
 	this._drill_EPR_mapPosTank = [];			//位置记忆容器（二维列表）
-}
+	//（初始为空容器，不需要初始化）
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_EPR_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_EPR_mapPosTank == undefined ){
+		this.drill_EPR_initSysData();
+	}
+	
+	// > 容器的 空数据 检查
+	//	（容器一直就是空数据，注释激活时才赋值）
+};
 //==============================
 // * 存储数据 - 保存位置
 //==============================

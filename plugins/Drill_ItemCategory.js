@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.5]        控件 - 物品类型
+ * @plugindesc [v1.6]        控件 - 物品类型
  * @author Drill_up
  * 
  * @Drill_LE_param "物品类型-%d"
@@ -118,6 +118,8 @@
  * 修复了插件与商店插件的一些bug。
  * [v1.5]
  * 添加了物品类型插件指令控制。
+ * [v1.6]
+ * 优化了旧存档的识别与兼容。
  * 
  * 
  * 
@@ -280,15 +282,15 @@
 	/*-----------------类型序列------------------*/
 	if( DrillUp.parameters["物品界面物品类型"] != "" &&
 		DrillUp.parameters["物品界面物品类型"] != undefined ){
-		DrillUp.g_ICa_type_SenceItem = JSON.parse(DrillUp.parameters["物品界面物品类型"]);
+		DrillUp.g_ICa_SenceItemType = JSON.parse(DrillUp.parameters["物品界面物品类型"]);
 	}else{
-		DrillUp.g_ICa_type_SenceItem = ["物品","武器","护甲","重要物品"];
+		DrillUp.g_ICa_SenceItemType = ["物品","武器","护甲","重要物品"];
 	}
 	if( DrillUp.parameters["商店出售物品类型"] != "" &&
 		DrillUp.parameters["商店出售物品类型"] != undefined ){
-		DrillUp.g_ICa_type_SenceShop = JSON.parse(DrillUp.parameters["商店出售物品类型"]);
+		DrillUp.g_ICa_SenceShopType = JSON.parse(DrillUp.parameters["商店出售物品类型"]);
 	}else{
-		DrillUp.g_ICa_type_SenceShop = ["物品","武器","护甲","重要物品"];
+		DrillUp.g_ICa_SenceShopType = ["物品","武器","护甲","重要物品"];
 	}
 	
 	/*-----------------物品类型配置------------------*/
@@ -302,7 +304,7 @@
 			DrillUp.g_ICa_type[i]['x'] = Number(DrillUp.g_ICa_type[i]["平移-类型按钮 X"] || 0 );
 			DrillUp.g_ICa_type[i]['y'] = Number(DrillUp.g_ICa_type[i]["平移-类型按钮 Y"] || 0 );
 		}else{
-			DrillUp.g_ICa_type[i] = [];
+			DrillUp.g_ICa_type[i] = null;
 		}
 	}
 
@@ -340,33 +342,103 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 };
 
-//=============================================================================
-// ** 存储数据初始化
-//=============================================================================
-//==============================
-// * 初始化
-//==============================
+
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_ICa_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_ICa_sys_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function() {	
-	_drill_ICa_sys_initialize.call(this);
-	this._drill_ICa_type_SenceItem = DrillUp.g_ICa_type_SenceItem;	//物品类型容器
-	this._drill_ICa_type_SenceShop = DrillUp.g_ICa_type_SenceShop;	//商店类型容器
+Game_System.prototype.initialize = function() {
+    _drill_ICa_sys_initialize.call(this);
+	this.drill_ICa_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_ICa_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_ICa_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_ICa_saveEnabled == true ){	
+		$gameSystem.drill_ICa_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_ICa_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_ICa_initSysData = function() {
+	this.drill_ICa_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_ICa_checkSysData = function() {
+	this.drill_ICa_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_ICa_initSysData_Private = function() {
+	
+	this._drill_ICa_SenceItemType = DrillUp.g_ICa_SenceItemType;	//物品类型容器
+	this._drill_ICa_SenceShopType = DrillUp.g_ICa_SenceShopType;	//商店类型容器
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_ICa_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_ICa_SenceItemType == undefined ){
+		this.drill_ICa_initSysData();
+	}
+	
 };
 //==============================
 // * 物品类型容器 - 添加类型
 //==============================
 Game_System.prototype.drill_ICa_addTypeInItem = function( type_name ) {	
-	if( this._drill_ICa_type_SenceItem.contains( type_name ) ){ return; }
-	this._drill_ICa_type_SenceItem.push( type_name );
+	if( this._drill_ICa_SenceItemType.contains( type_name ) ){ return; }
+	this._drill_ICa_SenceItemType.push( type_name );
 }
 //==============================
 // * 物品类型容器 - 去除类型
 //==============================
 Game_System.prototype.drill_ICa_removeTypeInItem = function( type_name ) {	
-	for( var i = this._drill_ICa_type_SenceItem.length-1; i >=0; i-- ){
-		var temp_type = this._drill_ICa_type_SenceItem[i];
+	for( var i = this._drill_ICa_SenceItemType.length-1; i >=0; i-- ){
+		var temp_type = this._drill_ICa_SenceItemType[i];
 		if( temp_type == type_name ){
-			this._drill_ICa_type_SenceItem.splice( i, 1 );
+			this._drill_ICa_SenceItemType.splice( i, 1 );
 		}
 	}
 }
@@ -374,17 +446,17 @@ Game_System.prototype.drill_ICa_removeTypeInItem = function( type_name ) {
 // * 商店类型容器 - 添加类型
 //==============================
 Game_System.prototype.drill_ICa_addTypeInShop = function( type_name ) {	
-	if( this._drill_ICa_type_SenceShop.contains( type_name ) ){ return; }
-	this._drill_ICa_type_SenceShop.push( type_name );
+	if( this._drill_ICa_SenceShopType.contains( type_name ) ){ return; }
+	this._drill_ICa_SenceShopType.push( type_name );
 }
 //==============================
 // * 商店类型容器 - 去除类型
 //==============================
 Game_System.prototype.drill_ICa_removeTypeInShop = function( type_name ) {	
-	for( var i = this._drill_ICa_type_SenceShop.length-1; i >=0; i-- ){
-		var temp_type = this._drill_ICa_type_SenceShop[i];
+	for( var i = this._drill_ICa_SenceShopType.length-1; i >=0; i-- ){
+		var temp_type = this._drill_ICa_SenceShopType[i];
 		if( temp_type == type_name ){
-			this._drill_ICa_type_SenceShop.splice( i, 1 );
+			this._drill_ICa_SenceShopType.splice( i, 1 );
 		}
 	}
 }
@@ -398,8 +470,8 @@ Game_System.prototype.drill_ICa_removeTypeInShop = function( type_name ) {
 // * 类型 - 窗口列数
 //==============================
 Window_ItemCategory.prototype.maxCols = function() {
-	if(SceneManager._scene.constructor.name === "Scene_Item"){ return $gameSystem._drill_ICa_type_SenceItem.length;}	//物品界面的类型数量
-	if(SceneManager._scene.constructor.name === "Scene_Shop"){ return $gameSystem._drill_ICa_type_SenceShop.length;}	//商店界面的类型数量
+	if(SceneManager._scene.constructor.name === "Scene_Item"){ return $gameSystem._drill_ICa_SenceItemType.length;}	//物品界面的类型数量
+	if(SceneManager._scene.constructor.name === "Scene_Shop"){ return $gameSystem._drill_ICa_SenceShopType.length;}	//商店界面的类型数量
 	return 4;
 };
 //==============================
@@ -408,8 +480,8 @@ Window_ItemCategory.prototype.maxCols = function() {
 Window_ItemCategory.prototype.makeCommandList = function() {
 	for (var i = 0; i < this.maxCols(); i++) {
 		var symbol = "";
-		if( SceneManager._scene.constructor.name === "Scene_Item" ){ symbol = $gameSystem._drill_ICa_type_SenceItem[i];}	//物品界面的类型
-		if( SceneManager._scene.constructor.name === "Scene_Shop" ){ symbol = $gameSystem._drill_ICa_type_SenceShop[i];}	//商店界面的类型
+		if( SceneManager._scene.constructor.name === "Scene_Item" ){ symbol = $gameSystem._drill_ICa_SenceItemType[i];}	//物品界面的类型
+		if( SceneManager._scene.constructor.name === "Scene_Shop" ){ symbol = $gameSystem._drill_ICa_SenceShopType[i];}	//商店界面的类型
 		if( symbol === "item" || symbol === "物品" || symbol === "道具" ){
 			this.addCommand(TextManager.item, 'item');
 		} else if (symbol === "weapon" || symbol === "武器") {
@@ -443,7 +515,7 @@ Window_ItemList.prototype.includes = function(item) {
 var _drill_ICa_ScItem_create = Scene_Item.prototype.create;
 Scene_Item.prototype.create = function() {
 	_drill_ICa_ScItem_create.call(this);
-	if( $gameSystem._drill_ICa_type_SenceItem.length === 1 ){
+	if( $gameSystem._drill_ICa_SenceItemType.length === 1 ){
 		this._categoryWindow.deactivate();		//去掉类型选择窗口
 		this._categoryWindow.hide();
 		var ww = this._itemWindow.width;
@@ -462,8 +534,8 @@ if( Imported.MOG_SceneItem ){
 	Scene_Item.prototype.createButtons = function() {
 		this._buttons = [];
 		this._buttonsAni = [];
-		for (var i = 0; i < $gameSystem._drill_ICa_type_SenceItem.length; i++) {
-			var symbol = $gameSystem._drill_ICa_type_SenceItem[i];
+		for (var i = 0; i < $gameSystem._drill_ICa_SenceItemType.length; i++) {
+			var symbol = $gameSystem._drill_ICa_SenceItemType[i];
 			if (symbol === "item" || symbol === "物品" || symbol === "道具") {
 				this._buttons[i] = new Sprite(this._comImg[0]);
 				this._buttons[i].x = Moghunter.scItem_Com1_X;
@@ -483,13 +555,14 @@ if( Imported.MOG_SceneItem ){
 			} else {
 				this._buttons[i] = new Sprite();
 				for(var j = 0; j < DrillUp.g_ICa_type.length; j++){
-					if( DrillUp.g_ICa_type[j].length == 0 ){
+					var temp_data = DrillUp.g_ICa_type[j];
+					if( temp_data == undefined ){
 						continue;
 					}
-					if( symbol === DrillUp.g_ICa_type[j]['name'] ){
-						this._buttons[i].bitmap = ImageManager.loadMenusitem(DrillUp.g_ICa_type[j]['src_img']);
-						this._buttons[i].x = DrillUp.g_ICa_type[j]['x'];
-						this._buttons[i].y = DrillUp.g_ICa_type[j]['y'];
+					if( symbol === temp_data['name'] ){
+						this._buttons[i].bitmap = ImageManager.loadMenusitem( temp_data['src_img'] );
+						this._buttons[i].x = temp_data['x'];
+						this._buttons[i].y = temp_data['y'];
 					}
 				}
 			}
@@ -506,8 +579,8 @@ if( Imported.MOG_SceneItem ){
 	//==============================
 	Scene_Item.prototype.addCatIndex = function(value) {
 		this._categoryWindow._index += value;
-		if (this._categoryWindow._index > $gameSystem._drill_ICa_type_SenceItem.length-1) {this._categoryWindow._index = 0};
-		if (this._categoryWindow._index < 0) {this._categoryWindow._index = $gameSystem._drill_ICa_type_SenceItem.length-1 };
+		if (this._categoryWindow._index > $gameSystem._drill_ICa_SenceItemType.length-1) {this._categoryWindow._index = 0};
+		if (this._categoryWindow._index < 0) {this._categoryWindow._index = $gameSystem._drill_ICa_SenceItemType.length-1 };
 		if (this._wani[2] != null) {this._categoryWindow._index = this._wani[2]}
 		this._categoryWindow.update();
 		this._itemWindow.select(0);
@@ -535,7 +608,7 @@ if( Imported.MOG_SceneItem ){
 var _drill_ICa_ScShop_create = Scene_Shop.prototype.create;
 Scene_Shop.prototype.create = function() {
 	_drill_ICa_ScShop_create.call(this);
-	if( $gameSystem._drill_ICa_type_SenceItem.length === 1 ){
+	if( $gameSystem._drill_ICa_SenceItemType.length === 1 ){
 		var ww = this._sellWindow.width;
 		var wh = this._sellWindow.height + this._categoryWindow.height;
 		this._sellWindow.move(this._sellWindow.x, this._categoryWindow.y, ww, wh);
@@ -548,7 +621,7 @@ Scene_Shop.prototype.create = function() {
 var _drill_ICa_ScShop_commandSell = Scene_Shop.prototype.commandSell;
 Scene_Shop.prototype.commandSell = function() {
 	_drill_ICa_ScShop_commandSell.call(this);
-	if( $gameSystem._drill_ICa_type_SenceItem.length === 1 ){
+	if( $gameSystem._drill_ICa_SenceItemType.length === 1 ){
 		this._sellWindow.activate();
 		this._statusWindow.hide();
 		this._sellWindow.select(0);
@@ -561,7 +634,7 @@ Scene_Shop.prototype.commandSell = function() {
 var _drill_ICa_ScShop_onSellCancel = Scene_Shop.prototype.onSellCancel;
 Scene_Shop.prototype.onSellCancel = function() {
 	_drill_ICa_ScShop_onSellCancel.call(this);
-	if( $gameSystem._drill_ICa_type_SenceItem.length === 1 ){
+	if( $gameSystem._drill_ICa_SenceItemType.length === 1 ){
 		this.onCategoryCancel();
 	}
 };
@@ -571,8 +644,8 @@ if( Imported.Drill_SceneShop || Imported.Drill_SenceShop ){
 	//==============================
 	if( typeof(Window_ShopItemCategory) != "undefined" ){
 		Window_ShopItemCategory.prototype.makeCommandList = function() {
-			for (var i = 0; i < $gameSystem._drill_ICa_type_SenceShop.length ; i++) {
-				var symbol = $gameSystem._drill_ICa_type_SenceShop[i];
+			for (var i = 0; i < $gameSystem._drill_ICa_SenceShopType.length ; i++) {
+				var symbol = $gameSystem._drill_ICa_SenceShopType[i];
 				if (symbol === "item" || symbol === "物品" || symbol === "道具") {
 					this.addCommand(TextManager.item, 'item');
 				} else if (symbol === "weapon" || symbol === "武器") {
@@ -592,8 +665,8 @@ if( Imported.Drill_SceneShop || Imported.Drill_SenceShop ){
 	//==============================
 	if( typeof(Drill_SSh_SellCategoryWindow) != "undefined" ){
 		Drill_SSh_SellCategoryWindow.prototype.makeCommandList = function() {
-			for (var i = 0; i < $gameSystem._drill_ICa_type_SenceShop.length ; i++) {
-				var symbol = $gameSystem._drill_ICa_type_SenceShop[i];
+			for (var i = 0; i < $gameSystem._drill_ICa_SenceShopType.length ; i++) {
+				var symbol = $gameSystem._drill_ICa_SenceShopType[i];
 				if (symbol === "item" || symbol === "物品" || symbol === "道具") {
 					this.addCommand(TextManager.item, 'item');
 				} else if (symbol === "weapon" || symbol === "武器") {

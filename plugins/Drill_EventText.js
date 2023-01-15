@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.1]        行走图 - 事件漂浮文字
+ * @plugindesc [v2.2]        行走图 - 事件漂浮文字
  * @author Drill_up
  * 
  * 
@@ -201,6 +201,8 @@
  * 修复了外框一直显示的bug，以及轮播无效的bug。
  * [v2.1]
  * 使得插件支持多行换行，以及事件注释中的英文空格。
+ * [v2.2]
+ * 添加了优化策略，减少性能消耗。
  * 
  * 
  * 
@@ -1300,6 +1302,7 @@ Drill_ET_WindowSprite.prototype.initialize = function( obj_event ){
 // * 文字贴图 - 帧刷新
 //==============================
 Drill_ET_WindowSprite.prototype.update = function() {
+	if( this.drill_ET_isOptimizationPassed() == false ){ return; }
 	Window_Base.prototype.update.call(this);
 	this.drill_ET_updateBind();				//帧刷新 - 自动绑定
 	if( this._drill_controller == undefined ){ return; }
@@ -1328,6 +1331,17 @@ Drill_ET_WindowSprite.prototype.drill_ET_setController = function( controller ){
 Drill_ET_WindowSprite.prototype.drill_ET_isReady = function(){
 	if( this._drill_controller == undefined ){ return false; }
     return true;
+};
+//##############################
+// * 文字贴图 - 优化策略【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 布尔（是否通过）
+//			
+//			说明：	> 通过时，正常帧刷新；未通过时，不执行帧刷新。
+//##############################
+Drill_ET_WindowSprite.prototype.drill_ET_isOptimizationPassed = function(){
+    return this.drill_ET_isOptimizationPassed_Private();
 };
 //##############################
 // * 文字贴图 - 是否需要销毁【标准函数】
@@ -1461,6 +1475,44 @@ Drill_ET_WindowSprite.prototype.drill_ET_updateAttr = function() {
 	
 	// > 可见
 	this.visible = this._drill_controller._drill_visible;
+}
+//==============================
+// * 优化策略 - 判断通过（私有）
+//==============================
+Drill_ET_WindowSprite.prototype.drill_ET_isOptimizationPassed_Private = function(){
+	
+	// > 镜头范围外时，不工作
+	if( this._character == undefined ){
+		this.visible = false;
+		return false;
+	}
+	
+	// > 镜头范围外时，不工作
+	if( this.drill_ET_posIsInCamera( this._character._realX, this._character._realY ) == false ){
+		this.visible = false;
+		return false;
+	}
+	return true;
+}
+DrillUp.g_LCa_alert = true;
+//==============================
+// * 优化策略 - 判断贴图是否在镜头范围内
+//==============================
+Drill_ET_WindowSprite.prototype.drill_ET_posIsInCamera = function( realX, realY ){
+	var oww = Graphics.boxWidth  / $gameMap.tileWidth();
+	var ohh = Graphics.boxHeight / $gameMap.tileHeight();
+	var sww = oww;
+	var shh = ohh;
+	if( Imported.Drill_LayerCamera ){
+		if( $gameSystem._drill_LCa_controller == undefined && DrillUp.g_LCa_alert == true ){ 
+			alert("【Drill_EventText.js 行走图 - 事件漂浮文字】\n活动地图镜头插件版本过低，你需要更新 镜头插件 至少v1.9及以上版本。");
+			DrillUp.g_LCa_alert = false;
+		}
+		sww = sww / $gameSystem._drill_LCa_controller._drill_scaleX;
+		shh = shh / $gameSystem._drill_LCa_controller._drill_scaleY;
+	}
+	return  Math.abs($gameMap.adjustX(realX + 0.5) - oww*0.5) <= sww*0.5 + 5.5 &&	//（镜头范围+5个图块边框区域） 
+			Math.abs($gameMap.adjustY(realY + 0.5) - ohh*0.5) <= shh*0.5 + 5.5 ;
 }
 
 

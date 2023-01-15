@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.5]        主菜单 - 多层菜单GIF
+ * @plugindesc [v1.6]        主菜单 - 多层菜单GIF
  * @author Drill_up
  * 
  * @Drill_LE_param "GIF-%d"
@@ -106,6 +106,8 @@
  * [v1.5]
  * 优化了内部结构。
  * 添加了GIF的3d效果设置。旋转速度单位改为 角度/帧。
+ * [v1.6]
+ * 优化了旧存档的识别与兼容。
  *
  *
  * @param ---GIF组 1至20---
@@ -954,14 +956,10 @@
 			var temp = JSON.parse(DrillUp.parameters['GIF-' + String(i+1) ]);
 			DrillUp.g_MGi_list[i] = DrillUp.drill_MGi_gifInit( temp );
 			DrillUp.g_MGi_list[i]['id'] = Number(i)+1;
-			DrillUp.g_MGi_list[i]['inited'] = true;
 		}else{
-			DrillUp.g_MGi_list[i] = DrillUp.drill_MGi_gifInit( {} );
-			DrillUp.g_MGi_list[i]['id'] = Number(i)+1;
-			DrillUp.g_MGi_list[i]['inited'] = false;
+			DrillUp.g_MGi_list[i] = null;		//（强制设为空值，节约存储资源）
 		}
 	}
-	//alert(JSON.stringify(DrillUp.g_MGi_list[0]));
 	
 	
 //=============================================================================
@@ -977,7 +975,7 @@ ImageManager.load_MenuLayerGIF = function(filename) {
 var _drill_MGi_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_MGi_pluginCommand.call(this, command, args);
-	if (command === '>菜单GIF' || command === '>菜单gif') {
+	if( command === ">菜单GIF" || command === ">菜单gif" ){
 		if(args.length == 4){
 			var temp1 = String(args[1]);
 			temp1 = temp1.replace("GIF[","");
@@ -985,10 +983,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			temp1 = temp1.replace("]","");
 			temp1 = Number(temp1) - 1;
 			var type = String(args[3]);
-			if (type === '显示') {
+			if( type === "显示" ){
 				$gameSystem._drill_MGi_spriteTank_visible[temp1] = true;
 			}
-			if (type === '隐藏') {
+			if( type === "隐藏" ){
 				$gameSystem._drill_MGi_spriteTank_visible[temp1] = false;
 			}
 			/*	（呼吸改变中心锚点）
@@ -1002,21 +1000,109 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 };
 
-//=============================================================================
-// ** 存储数据初始化
-//=============================================================================
+
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_MGi_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_MGi_sys_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function() {	
-	_drill_MGi_sys_initialize.call(this);
+Game_System.prototype.initialize = function() {
+    _drill_MGi_sys_initialize.call(this);
+	this.drill_MGi_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_MGi_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_MGi_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_MGi_saveEnabled == true ){	
+		$gameSystem.drill_MGi_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_MGi_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_MGi_initSysData = function() {
+	this.drill_MGi_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_MGi_checkSysData = function() {
+	this.drill_MGi_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_MGi_initSysData_Private = function() {
+	
 	this._drill_MGi_spriteTank_visible = [];
-	this._drill_MGi_spriteTank_breath = [];
+	//this._drill_MGi_spriteTank_breath = [];
 	for(var i = 0; i< DrillUp.g_MGi_list.length ;i++){
 		var temp_data = DrillUp.g_MGi_list[i];
 		if( temp_data == undefined ){ continue; }
-		if( temp_data['inited'] != true ){ continue; }
-		
 		this._drill_MGi_spriteTank_visible[i] = temp_data['visible'];
-		this._drill_MGi_spriteTank_breath[i] = temp_data['breath'];
+		//this._drill_MGi_spriteTank_breath[i] = temp_data['breath'];
+	}
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_MGi_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_MGi_spriteTank_visible == undefined ){
+		this.drill_MGi_initSysData();
+	}
+	
+	// > 容器的 空数据 检查
+	for(var i = 0; i < DrillUp.g_MGi_list.length; i++ ){
+		var temp_data = DrillUp.g_MGi_list[i];
+		
+		// > 已配置（undefined表示未配置的空数据）
+		if( temp_data != undefined ){
+			
+			// > 未存储的，重新初始化
+			if( this._drill_MGi_spriteTank_visible[i] == undefined ){
+				this._drill_MGi_spriteTank_visible[i] = temp_data['visible'];
+			
+			// > 已存储的，跳过
+			}else{
+				//（不操作）
+			}
+		}
 	}
 };
 
@@ -1156,7 +1242,6 @@ Scene_MenuBase.prototype.drill_MGi_create = function() {
 	for (var i = 0; i < DrillUp.g_MGi_list.length; i++) {
 		var temp_data = DrillUp.g_MGi_list[i];
 		if( temp_data == undefined ){ continue; }
-		if( temp_data['inited'] != true ){ continue; }
 		
 		if( this.drill_MGi_checkKeyword( temp_data ) ){
 			

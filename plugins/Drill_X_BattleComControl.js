@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        战斗UI - 技能类型控制[扩展]
+ * @plugindesc [v1.5]        战斗UI - 技能类型控制[扩展]
  * @author Drill_up
  * 
  * @Drill_LE_param "封印类型-%d"
@@ -124,6 +124,8 @@
  * 添加了最大值编辑的支持。
  * [v1.4]
  * 修正了插件指令格式。
+ * [v1.5]
+ * 优化了旧存档的识别与兼容。
  * 
  * 
  * 
@@ -448,13 +450,75 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		}
 	}
 };
-	
-//=============================================================================
-// ** 读取注释初始化
-//=============================================================================
-var _drill_XBCC_initialize = Game_System.prototype.initialize;
+
+
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_XBCC_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_XBCC_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-	_drill_XBCC_initialize.call(this);
+    _drill_XBCC_sys_initialize.call(this);
+	this.drill_XBCC_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_XBCC_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_XBCC_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_XBCC_saveEnabled == true ){	
+		$gameSystem.drill_XBCC_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_XBCC_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_XBCC_initSysData = function() {
+	this.drill_XBCC_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_XBCC_checkSysData = function() {
+	this.drill_XBCC_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_XBCC_initSysData_Private = function() {
+	
 	this._drill_XBCC_availables = [];				//禁用类型（ 3*n 矩阵）
 	this._drill_XBCC_enables = [];					//封印类型（ (m+3)*n 矩阵）
 	
@@ -481,6 +545,20 @@ Game_System.prototype.initialize = function() {
 		if( color.length != 0 ){ this._drill_XBCC_enables[i][2] = true; }
 	}
 };
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_XBCC_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_XBCC_availables == undefined ){
+		this.drill_XBCC_initSysData();
+	}
+	
+	// ...（数组长度变化空值时操作）
+	//		（此处为稀疏矩阵，存储结构需要改成 json 坐标标记的形式{} ，但这是以后的事情了）
+};
+
 
 //=============================================================================
 // ** 命令

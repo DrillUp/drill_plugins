@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.2]        UI - 高级变量固定框
+ * @plugindesc [v2.3]        UI - 高级变量固定框
  * @author Drill_up
  * 
  * @Drill_LE_param "固定框样式-%d"
@@ -216,6 +216,8 @@
  * [v2.2]
  * 优化了与战斗活动镜头的变换关系。
  * 优化了与地图活动镜头的变换关系。
+ * [v2.3]
+ * 优化了旧存档的识别与兼容。
  * 
  * 
  * 
@@ -1319,10 +1321,8 @@
 		if( DrillUp.parameters["变量框设置-" + String(i+1) ] != "" ){
 			var data = JSON.parse(DrillUp.parameters["变量框设置-" + String(i+1) ]);
 			DrillUp.g_GFV_bind[i] = DrillUp.drill_GFV_initBind( data );
-			DrillUp.g_GFV_bind[i]['inited'] = true;
 		}else{
-			DrillUp.g_GFV_bind[i] = {};
-			DrillUp.g_GFV_bind[i]['inited'] = false;
+			DrillUp.g_GFV_bind[i] = null;		//（强制设为空值，节约存储资源）
 		}
 	}
 	
@@ -1354,7 +1354,9 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		if( args.length >= 2 ){
 			var temp1 = String(args[1]);
 			if( temp1 == "全部框设置" ){
-				for(var j = 0; j< $gameSystem._drill_GFV_bindTank.length; j++ ){
+				for(var j = 0; j < $gameSystem._drill_GFV_bindTank.length; j++ ){
+					var dataBind = $gameSystem._drill_GFV_bindTank[j];
+					if( dataBind == undefined ){ continue; }
 					bind_ids.push( j );
 				}
 			}else{
@@ -1372,14 +1374,18 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( temp2 == "显示" ){
 				for(var j = 0; j< bind_ids.length; j++ ){
 					var id = bind_ids[j];
-					$gameSystem._drill_GFV_bindTank[ id ]['visible'] = true;
+					var dataBind = $gameSystem._drill_GFV_bindTank[ id ];
+					if( dataBind == undefined ){ continue; }
+					dataBind['visible'] = true;
 				}
 				$gameTemp._drill_GFV_needRefresh = true;
 			}
 			if( temp2 == "隐藏" ){
 				for(var j = 0; j< bind_ids.length; j++ ){
 					var id = bind_ids[j];
-					$gameSystem._drill_GFV_bindTank[ id ]['visible'] = false;
+					var dataBind = $gameSystem._drill_GFV_bindTank[ id ];
+					if( dataBind == undefined ){ continue; }
+					dataBind['visible'] = false;
 				}
 				$gameTemp._drill_GFV_needRefresh = true;
 			}
@@ -1393,8 +1399,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				
 					for(var j = 0; j< bind_ids.length; j++ ){
 						var id = bind_ids[j];
-						$gameSystem._drill_GFV_bindTank[ id ]['frame_x'] = e_pos[0];
-						$gameSystem._drill_GFV_bindTank[ id ]['frame_y'] = e_pos[1];
+						var dataBind = $gameSystem._drill_GFV_bindTank[ id ];
+						if( dataBind == undefined ){ continue; }
+						dataBind['frame_x'] = e_pos[0];
+						dataBind['frame_y'] = e_pos[1];
 					}
 					$gameTemp._drill_GFV_needRefresh = true;
 				}
@@ -1409,8 +1417,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				
 					for(var j = 0; j< bind_ids.length; j++ ){
 						var id = bind_ids[j];
-						$gameSystem._drill_GFV_bindTank[ id ]['frame_x'] = e_pos[0];
-						$gameSystem._drill_GFV_bindTank[ id ]['frame_y'] = e_pos[1];
+						var dataBind = $gameSystem._drill_GFV_bindTank[ id ];
+						if( dataBind == undefined ){ continue; }
+						dataBind['frame_x'] = e_pos[0];
+						dataBind['frame_y'] = e_pos[1];
 					}
 					$gameTemp._drill_GFV_needRefresh = true;
 				}
@@ -1420,8 +1430,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp2 = temp2.replace("]","");
 				for(var j = 0; j < bind_ids.length; j++ ){
 					var id = bind_ids[j];
-					$gameSystem._drill_GFV_bindTank[ id ]['layerIndex_map'] = temp2;
-					$gameSystem._drill_GFV_bindTank[ id ]['layerIndex_battle'] = temp2;
+					var dataBind = $gameSystem._drill_GFV_bindTank[ id ];
+					if( dataBind == undefined ){ continue; }
+					dataBind['layerIndex_map'] = temp2;
+					dataBind['layerIndex_battle'] = temp2;
 				}
 				$gameTemp._drill_GFV_needRefresh = true;
 			}
@@ -1435,29 +1447,37 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( temp3 == "显示名称" ){
 				for(var j = 0; j< bind_ids.length; j++ ){
 					var id = bind_ids[j];
-					$gameSystem._drill_GFV_bindTank[ id ]['slot_list'][ Number(temp2)-1 ]['name_visible'] = true;
-					$gameSystem._drill_GFV_bindTank[ id ]['commandParamChanged'] = true;
+					var dataBind = $gameSystem._drill_GFV_bindTank[ id ];
+					if( dataBind == undefined ){ continue; }
+					dataBind['slot_list'][ Number(temp2)-1 ]['name_visible'] = true;
+					dataBind['commandParamChanged'] = true;
 				}
 			}
 			if( temp3 == "隐藏名称" ){
 				for(var j = 0; j< bind_ids.length; j++ ){
 					var id = bind_ids[j];
-					$gameSystem._drill_GFV_bindTank[ id ]['slot_list'][ Number(temp2)-1 ]['name_visible'] = false;
-					$gameSystem._drill_GFV_bindTank[ id ]['commandParamChanged'] = true;
+					var dataBind = $gameSystem._drill_GFV_bindTank[ id ];
+					if( dataBind == undefined ){ continue; }
+					dataBind['slot_list'][ Number(temp2)-1 ]['name_visible'] = false;
+					dataBind['commandParamChanged'] = true;
 				}
 			}
 			if( temp3 == "显示参数数字" ){
 				for(var j = 0; j< bind_ids.length; j++ ){
 					var id = bind_ids[j];
-					$gameSystem._drill_GFV_bindTank[ id ]['slot_list'][ Number(temp2)-1 ]['symbol_visible'] = true;
-					$gameSystem._drill_GFV_bindTank[ id ]['commandParamChanged'] = true;
+					var dataBind = $gameSystem._drill_GFV_bindTank[ id ];
+					if( dataBind == undefined ){ continue; }
+					dataBind['slot_list'][ Number(temp2)-1 ]['symbol_visible'] = true;
+					dataBind['commandParamChanged'] = true;
 				}
 			}
 			if( temp3 == "隐藏参数数字" ){
 				for(var j = 0; j< bind_ids.length; j++ ){
 					var id = bind_ids[j];
-					$gameSystem._drill_GFV_bindTank[ id ]['slot_list'][ Number(temp2)-1 ]['symbol_visible'] = false;
-					$gameSystem._drill_GFV_bindTank[ id ]['commandParamChanged'] = true;
+					var dataBind = $gameSystem._drill_GFV_bindTank[ id ];
+					if( dataBind == undefined ){ continue; }
+					dataBind['slot_list'][ Number(temp2)-1 ]['symbol_visible'] = false;
+					dataBind['commandParamChanged'] = true;
 				}
 			}
 			if( temp3.indexOf("修改名称[") != -1 ){
@@ -1465,8 +1485,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp3 = temp3.replace("]","");
 				for(var j = 0; j< bind_ids.length; j++ ){
 					var id = bind_ids[j];
-					$gameSystem._drill_GFV_bindTank[ id ]['slot_list'][ Number(temp2)-1 ]['name'] = String(temp3);
-					$gameSystem._drill_GFV_bindTank[ id ]['commandParamChanged'] = true;
+					var dataBind = $gameSystem._drill_GFV_bindTank[ id ];
+					if( dataBind == undefined ){ continue; }
+					dataBind['slot_list'][ Number(temp2)-1 ]['name'] = String(temp3);
+					dataBind['commandParamChanged'] = true;
 				}
 			}
 			if( temp3.indexOf("变量修改段上限[") != -1 ){
@@ -1474,16 +1496,20 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp3 = temp3.replace("]","");
 				for(var j = 0; j< bind_ids.length; j++ ){
 					var id = bind_ids[j];
-					$gameSystem._drill_GFV_bindTank[ id ]['slot_list'][ Number(temp2)-1 ]['level_max'] = $gameVariables.value( Number(temp3) );
-					$gameSystem._drill_GFV_bindTank[ id ]['commandParamChanged'] = true;
+					var dataBind = $gameSystem._drill_GFV_bindTank[ id ];
+					if( dataBind == undefined ){ continue; }
+					dataBind['slot_list'][ Number(temp2)-1 ]['level_max'] = $gameVariables.value( Number(temp3) );
+					dataBind['commandParamChanged'] = true;
 				}
 			}else if( temp3.indexOf("修改段上限[") != -1 ){
 				temp3 = temp3.replace("修改段上限[","");
 				temp3 = temp3.replace("]","");
 				for(var j = 0; j< bind_ids.length; j++ ){
 					var id = bind_ids[j];
-					$gameSystem._drill_GFV_bindTank[ id ]['slot_list'][ Number(temp2)-1 ]['level_max'] = Number(temp3);
-					$gameSystem._drill_GFV_bindTank[ id ]['commandParamChanged'] = true;
+					var dataBind = $gameSystem._drill_GFV_bindTank[ id ];
+					if( dataBind == undefined ){ continue; }
+					dataBind['slot_list'][ Number(temp2)-1 ]['level_max'] = Number(temp3);
+					dataBind['commandParamChanged'] = true;
 				}
 			}
 			if( temp3.indexOf("变量修改额定值[") != -1 ){
@@ -1491,16 +1517,20 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp3 = temp3.replace("]","");
 				for(var j = 0; j< bind_ids.length; j++ ){
 					var id = bind_ids[j];
-					$gameSystem._drill_GFV_bindTank[ id ]['slot_list'][ Number(temp2)-1 ]['number_specified'] = $gameVariables.value( Number(temp3) );
-					$gameSystem._drill_GFV_bindTank[ id ]['commandParamChanged'] = true;
+					var dataBind = $gameSystem._drill_GFV_bindTank[ id ];
+					if( dataBind == undefined ){ continue; }
+					dataBind['slot_list'][ Number(temp2)-1 ]['number_specified'] = $gameVariables.value( Number(temp3) );
+					dataBind['commandParamChanged'] = true;
 				}
 			}else if( temp3.indexOf("修改额定值[") != -1 ){
 				temp3 = temp3.replace("修改额定值[","");
 				temp3 = temp3.replace("]","");
 				for(var j = 0; j< bind_ids.length; j++ ){
 					var id = bind_ids[j];
-					$gameSystem._drill_GFV_bindTank[ id ]['slot_list'][ Number(temp2)-1 ]['number_specified'] = Number(temp3);
-					$gameSystem._drill_GFV_bindTank[ id ]['commandParamChanged'] = true;
+					var dataBind = $gameSystem._drill_GFV_bindTank[ id ];
+					if( dataBind == undefined ){ continue; }
+					dataBind['slot_list'][ Number(temp2)-1 ]['number_specified'] = Number(temp3);
+					dataBind['commandParamChanged'] = true;
 				}
 			}
 			if( temp3.indexOf("变量添加段上限[") != -1 ){
@@ -1508,16 +1538,20 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp3 = temp3.replace("]","");
 				for(var j = 0; j< bind_ids.length; j++ ){
 					var id = bind_ids[j];
-					$gameSystem._drill_GFV_bindTank[ id ]['slot_list'][ Number(temp2)-1 ]['level_max'] += $gameVariables.value( Number(temp3) );
-					$gameSystem._drill_GFV_bindTank[ id ]['commandParamChanged'] = true;
+					var dataBind = $gameSystem._drill_GFV_bindTank[ id ];
+					if( dataBind == undefined ){ continue; }
+					dataBind['slot_list'][ Number(temp2)-1 ]['level_max'] += $gameVariables.value( Number(temp3) );
+					dataBind['commandParamChanged'] = true;
 				}
 			}else if( temp3.indexOf("添加段上限[") != -1 ){
 				temp3 = temp3.replace("添加段上限[","");
 				temp3 = temp3.replace("]","");
 				for(var j = 0; j< bind_ids.length; j++ ){
 					var id = bind_ids[j];
-					$gameSystem._drill_GFV_bindTank[ id ]['slot_list'][ Number(temp2)-1 ]['level_max'] += Number(temp3);
-					$gameSystem._drill_GFV_bindTank[ id ]['commandParamChanged'] = true;
+					var dataBind = $gameSystem._drill_GFV_bindTank[ id ];
+					if( dataBind == undefined ){ continue; }
+					dataBind['slot_list'][ Number(temp2)-1 ]['level_max'] += Number(temp3);
+					dataBind['commandParamChanged'] = true;
 				}
 			}
 			if( temp3.indexOf("变量添加额定值[") != -1 ){
@@ -1525,16 +1559,20 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp3 = temp3.replace("]","");
 				for(var j = 0; j< bind_ids.length; j++ ){
 					var id = bind_ids[j];
-					$gameSystem._drill_GFV_bindTank[ id ]['slot_list'][ Number(temp2)-1 ]['number_specified'] += $gameVariables.value( Number(temp3) );
-					$gameSystem._drill_GFV_bindTank[ id ]['commandParamChanged'] = true;
+					var dataBind = $gameSystem._drill_GFV_bindTank[ id ];
+					if( dataBind == undefined ){ continue; }
+					dataBind['slot_list'][ Number(temp2)-1 ]['number_specified'] += $gameVariables.value( Number(temp3) );
+					dataBind['commandParamChanged'] = true;
 				}
 			}else if( temp3.indexOf("添加额定值[") != -1 ){
 				temp3 = temp3.replace("添加额定值[","");
 				temp3 = temp3.replace("]","");
 				for(var j = 0; j< bind_ids.length; j++ ){
 					var id = bind_ids[j];
-					$gameSystem._drill_GFV_bindTank[ id ]['slot_list'][ Number(temp2)-1 ]['number_specified'] += Number(temp3);
-					$gameSystem._drill_GFV_bindTank[ id ]['commandParamChanged'] = true;
+					var dataBind = $gameSystem._drill_GFV_bindTank[ id ];
+					if( dataBind == undefined ){ continue; }
+					dataBind['slot_list'][ Number(temp2)-1 ]['number_specified'] += Number(temp3);
+					dataBind['commandParamChanged'] = true;
 				}
 			}
 		}
@@ -1553,46 +1591,101 @@ Game_Temp.prototype.initialize = function() {
 	this._drill_GFV_needRefresh = true;			// 容器刷新
 	this._drill_GFV_spriteTank = [];			// 战斗/地图 贴图容器（记得随时清空）
 }
-//=============================================================================
-// * 存储数据
-//=============================================================================
-//==============================
+
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_GFV_saveEnabled = true;
+//##############################
 // * 存储数据 - 初始化
-//==============================
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_GFV_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-	_drill_GFV_sys_initialize.call(this);
+    _drill_GFV_sys_initialize.call(this);
+	this.drill_GFV_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_GFV_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_GFV_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_GFV_saveEnabled == true ){	
+		$gameSystem.drill_GFV_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_GFV_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_GFV_initSysData = function() {
+	this.drill_GFV_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_GFV_checkSysData = function() {
+	this.drill_GFV_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_GFV_initSysData_Private = function() {
 	
 	this._drill_GFV_bindTank = [];				// 绑定数据容器
 	for(var i = 0; i < DrillUp.g_GFV_bind.length; i++ ){
-		var temp_bind = JSON.parse(JSON.stringify( DrillUp.g_GFV_bind[i] ));
-		this._drill_GFV_bindTank.push( temp_bind );
-	}
-}
-//==============================
-// * 管理器 - 读取数据
-//==============================
-var _drill_GFV_extractSaveContents = DataManager.extractSaveContents;
-DataManager.extractSaveContents = function( contents ){
-	_drill_GFV_extractSaveContents.call( this, contents );
-	$gameSystem.drill_GFV_checkData();
-}
-//==============================
-// * 管理器 - 检查数据
-//==============================
-Game_System.prototype.drill_GFV_checkData = function() {
-	
-	// > 绑定数据容器
-	for(var i = 0; i < DrillUp.g_GFV_bind.length; i++ ){
 		var temp_data = JSON.parse(JSON.stringify( DrillUp.g_GFV_bind[i] ));
+		if( temp_data == undefined ){ continue; }
+		this._drill_GFV_bindTank.push( temp_data );
+	}
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_GFV_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_GFV_seq == undefined ){
+		this.drill_GFV_initSysData();
+	}
+	
+	// > 容器的 空数据 检查
+	for(var i = 0; i < DrillUp.g_GFV_bind.length; i++ ){
+		var temp_data = DrillUp.g_GFV_bind[i];
 		
-		// > 已配置（'inited'为 false 表示空数据）
-		if( temp_data['inited'] == true ){
+		// > 已配置（undefined表示未配置的空数据）
+		if( temp_data != undefined ){
 			
 			// > 未存储的，重新初始化
-			if( this._drill_GFV_bindTank[i] == undefined ||
-				this._drill_GFV_bindTank[i]['inited'] == false ){
-				this._drill_GFV_bindTank[i] = temp_data;
+			if( this._drill_GFV_bindTank[i] == undefined ){
+				this._drill_GFV_bindTank[i] = JSON.parse(JSON.stringify( temp_data ));
 			
 			// > 已存储的，跳过
 			}else{
@@ -1600,7 +1693,7 @@ Game_System.prototype.drill_GFV_checkData = function() {
 			}
 		}
 	}
-}
+};
 
 
 
@@ -1782,6 +1875,7 @@ Scene_Map.prototype.drill_GFV_updateRefreshGauge = function() {
 	for(var i=0; i < $gameSystem._drill_GFV_bindTank.length; i++){
 		var temp_bind = $gameSystem._drill_GFV_bindTank[i];
 		var temp_sprite = $gameTemp._drill_GFV_spriteTank[i];		//一个贴图对应一个绑定
+		if( temp_bind == null ){ continue; }
 		if( temp_sprite == null ){ continue; }
 		
 		if( temp_bind['visible'] == false &&  temp_sprite._drill_foldTime <= 0 ){	//关闭显示+完全消失 时清除
@@ -1795,6 +1889,7 @@ Scene_Map.prototype.drill_GFV_updateRefreshGauge = function() {
 	for(var i = 0; i< $gameSystem._drill_GFV_bindTank.length; i++ ){
 		var temp_bind = $gameSystem._drill_GFV_bindTank[i];
 		var temp_sprite = $gameTemp._drill_GFV_spriteTank[i];		//一个贴图对应一个绑定
+		if( temp_bind == null ){ continue; }
 		if( temp_sprite != null ){ continue; }
 		
 		// > 创建
@@ -1811,6 +1906,7 @@ Scene_Map.prototype.drill_GFV_updateRefreshGauge = function() {
 	for(var i = 0; i< $gameSystem._drill_GFV_bindTank.length; i++ ){
 		var temp_bind = $gameSystem._drill_GFV_bindTank[i];
 		var temp_sprite = $gameTemp._drill_GFV_spriteTank[i];
+		if( temp_bind == null ){ continue; }
 		if( temp_sprite == null ){ continue; }
 		this.drill_GFV_layerAddSprite( temp_sprite, temp_bind['layerIndex_map'] );
 	}
@@ -2078,6 +2174,7 @@ Scene_Battle.prototype.drill_GFV_updateRefreshGauge = function() {
 	for(var i=0; i < $gameSystem._drill_GFV_bindTank.length; i++){
 		var temp_bind = $gameSystem._drill_GFV_bindTank[i];
 		var temp_sprite = $gameTemp._drill_GFV_spriteTank[i];		//一个贴图对应一个绑定
+		if( temp_bind == null ){ continue; }
 		if( temp_sprite == null ){ continue; }
 		
 		if( temp_bind['visible'] == false && temp_sprite._drill_foldTime <= 0 ){	//关闭显示+完全消失 时清除
@@ -2091,6 +2188,7 @@ Scene_Battle.prototype.drill_GFV_updateRefreshGauge = function() {
 	for(var i = 0; i< $gameSystem._drill_GFV_bindTank.length; i++ ){
 		var temp_bind = $gameSystem._drill_GFV_bindTank[i];
 		var temp_sprite = $gameTemp._drill_GFV_spriteTank[i];		//一个贴图对应一个绑定
+		if( temp_bind == null ){ continue; }
 		if( temp_sprite != null ){ continue; }
 		
 		// > 创建
@@ -2107,6 +2205,7 @@ Scene_Battle.prototype.drill_GFV_updateRefreshGauge = function() {
 	for(var i = 0; i< $gameSystem._drill_GFV_bindTank.length; i++ ){
 		var temp_bind = $gameSystem._drill_GFV_bindTank[i];
 		var temp_sprite = $gameTemp._drill_GFV_spriteTank[i];
+		if( temp_bind == null ){ continue; }
 		if( temp_sprite == null ){ continue; }
 		this.drill_GFV_layerAddSprite( temp_sprite, temp_bind['layerIndex_battle'] );
 	}

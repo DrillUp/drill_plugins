@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.9]        动画 - 多层动画粒子
+ * @plugindesc [v2.0]        动画 - 多层动画粒子
  * @author Drill_up
  * 
  * @Drill_LE_param "粒子样式-%d"
@@ -187,6 +187,9 @@
  * 修复了动画删除时出错的bug。
  * [v1.9]
  * 大幅度优化了插件结构，优化了装饰贴图自动销毁与动画销毁关系。
+ * [v2.0]
+ * 优化了旧存档的识别与兼容。
+ *
  *
  *
  * @param ---粒子样式组 1至20---
@@ -1896,6 +1899,30 @@
 //
 
 //=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_APa_tipCurName = "Drill_AnimationParticle.js 动画-多层动画粒子";
+	DrillUp.g_APa_tipBasePluginList = ["Drill_CoreOfBallistics.js 系统-弹道核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_APa_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_APa_tipBasePluginList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_APa_tipCurName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_APa_tipBasePluginList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_APa_tipBasePluginList[i];
+		}
+		return message;
+	};
+
+//=============================================================================
 // ** 变量获取
 //=============================================================================
 　　var Imported = Imported || {};
@@ -2292,15 +2319,72 @@ Game_Map.prototype.drill_APa_isEventExist = function( e_id ){
 };
 
 
-//=============================================================================
-// ** 存储变量初始化
-//=============================================================================
-//==============================
-// * 存储变量 - 初始化
-//==============================
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_APa_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_APa_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
     _drill_APa_sys_initialize.call(this);
+	this.drill_APa_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_APa_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_APa_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_APa_saveEnabled == true ){	
+		$gameSystem.drill_APa_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_APa_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_APa_initSysData = function() {
+	this.drill_APa_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_APa_checkSysData = function() {
+	this.drill_APa_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_APa_initSysData_Private = function() {
 	
 	this._drill_APa_visible = [];
 	for(var i = 0; i < DrillUp.g_APa_style.length ;i++){
@@ -2308,7 +2392,36 @@ Game_System.prototype.initialize = function() {
 		if( data['inited'] == false ){ continue; }
 		this._drill_APa_visible[i] = data['visible'];
 	}
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_APa_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_APa_visible == undefined ){
+		this.drill_APa_initSysData();
+	}
+	
+	// > 容器的 空数据 检查
+	for(var i = 0; i < DrillUp.g_APa_style.length; i++ ){
+		var temp_data = JSON.parse(JSON.stringify( DrillUp.g_APa_style[i] ));
+		
+		// > 已配置（'inited'为 false 表示空数据）
+		if( temp_data['inited'] == true ){
+			
+			// > 未存储的，重新初始化
+			if( this._drill_APa_visible[i] == undefined ){
+				this._drill_APa_visible[i] = temp_data['visible'];
+			
+			// > 已存储的，跳过
+			}else{
+				//（不操作）
+			}
+		}
+	}
 };	
+
 
 //=============================================================================
 // * 优化
@@ -4163,8 +4276,6 @@ Drill_APa_SecSprite.prototype.drill_updateChild = function(){
 //=============================================================================
 }else{
 		Imported.Drill_AnimationParticle = false;
-		alert(
-			"【Drill_AnimationParticle.js 动画-多层动画粒子】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfBallistics 系统-弹道核心"
-		);
+		var tip = DrillUp.drill_APa_getPluginTip_NoBasePlugin();
+		alert( tip );
 }

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.0]        UI - 敌人文本颜色
+ * @plugindesc [v2.1]        UI - 敌人文本颜色
  * @author Drill_up
  * 
  * 
@@ -123,6 +123,8 @@
  * [v2.0]
  * 修正了插件指令。
  * 改进了 新加的敌人 在旧存档中显示为黑色的问题。
+ * [v2.1]
+ * 优化了旧存档的识别与兼容。
  *
  *
  * @param MOG-敌人指针是否变色
@@ -251,16 +253,13 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				/*-----------------转换------------------*/
 				if( type == "敌人普通" ){
 					if( temp2.slice(0,1) === "#" ){
-						$gameSystem._drill_ETC_enemy[temp1] = temp2;
-						$gameSystem._drill_ETC_enemyCount[temp1] = -1;
+						$gameSystem._drill_ETC_colorCode[Number(temp1)] = temp2;
 					}else{
-						$gameSystem._drill_ETC_enemy[temp1] = String(DrillUp.drill_COC_getColor( Number(temp2) -1 )) ;
-						$gameSystem._drill_ETC_enemyCount[temp1] = Number(temp2) ;
+						$gameSystem._drill_ETC_colorCode[Number(temp1)] = String(DrillUp.drill_COC_getColor( Number(temp2) -1 ));
 					}
 				}
 				if( type == "敌人高级" ){
-					$gameSystem._drill_ETC_enemy[temp1] = String(DrillUp.drill_COC_getSeniorColor( Number(temp2) -1 )) ;
-					$gameSystem._drill_ETC_enemyCount[temp1] = Number(temp2) + 100 ;
+					$gameSystem._drill_ETC_colorCode[Number(temp1)] = String(DrillUp.drill_COC_getSeniorColor( Number(temp2) -1 ));
 				}
 			}
 		}
@@ -273,87 +272,197 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var temp2 = $gameVariables.value( Number(args[5]) ) ;
 			var type = String(args[3]);
 			if( type == "敌人普通" ){
-				$gameSystem._drill_ETC_enemy[temp1] = String(DrillUp.drill_COC_getColor( temp2-1 )) ;
-				$gameSystem._drill_ETC_enemyCount[temp1] = Number(temp2) -1;
+				$gameSystem._drill_ETC_colorCode[Number(temp1)] = String(DrillUp.drill_COC_getColor( temp2-1 )) ;
 			}
 			if( type == "敌人高级" ){
-				$gameSystem._drill_ETC_enemy[temp1] = String(DrillUp.drill_COC_getSeniorColor( temp2-1 )) ;
-				$gameSystem._drill_ETC_enemyCount[temp1] = Number(temp2) + 100 ;
+				$gameSystem._drill_ETC_colorCode[Number(temp1)] = String(DrillUp.drill_COC_getSeniorColor( temp2-1 )) ;
 			}
 		}
 	}
 };
 
-//=============================================================================
-// ** 存储变量
-//=============================================================================
-//==============================
-// * 存储变量 - 初始化
-//==============================
-var _drill_ETC_initialize = Game_System.prototype.initialize;
+
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_ETC_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_ETC_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-	_drill_ETC_initialize.call(this);
-	this._drill_ETC_enemy = [];				//敌人颜色代码
-	this._drill_ETC_enemyCount = [];		//敌人颜色序号
-	
-	// > 读取注释
-	this.drill_ETC_readCommon();
-}
-//==============================
-// * 存储变量 - 载入存档 - 数据赋值
-//==============================
-var _drill_ETC_extractSaveContents = DataManager.extractSaveContents;
+    _drill_ETC_sys_initialize.call(this);
+	this.drill_ETC_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_ETC_sys_extractSaveContents = DataManager.extractSaveContents;
 DataManager.extractSaveContents = function( contents ){
-	_drill_ETC_extractSaveContents.call( this, contents );
-	$gameSystem.drill_ETC_readCommon();		//（载入旧存档时，再次读取注释检查）
-}
-//=============================
-// * 存储变量 - 读取注释
-//=============================
-Game_System.prototype.drill_ETC_readCommon = function() {
-	for( var i = 0; i < $dataEnemies.length; i++ ){
+	_drill_ETC_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_ETC_saveEnabled == true ){	
+		$gameSystem.drill_ETC_checkSysData();
 		
-		// > 空敌人数据时，跳过
-		if( $dataEnemies[i] == null ){
-			this._drill_ETC_enemy[i] = "";
-			this._drill_ETC_enemyCount[i] = -1;
-			continue;
-		}
-		
-		// > 无数据时，才赋值
-		if( this._drill_ETC_enemy[i] == null || 
-			this._drill_ETC_enemy[i] == "" ){
-				
-			// > 开始读取
-			var note = String($dataEnemies[i].note);
-			var re_color = /<颜色:([^<>]*?)>/; 				//正则获取（返回数组，第二个为匹配内容）
-			var color = (note.match(re_color)) || [];
-			var re_colorG = /<高级颜色:([^<>]*?)>/; 	
-			var colorG = (note.match(re_colorG)) || [];
-			if( color != "" && color != [] ){
-				if( color[1].slice(0,1) === "#" ){
-					this._drill_ETC_enemy[i] = color[1];
-					this._drill_ETC_enemyCount[i] = -1;
-				}else{
-					this._drill_ETC_enemy[i] = String(DrillUp.drill_COC_getColor( Number(color[1]) -1 )) ;
-					this._drill_ETC_enemyCount[i] = Number(color[1]) ;	//(101开始)
-				}
-			}else if( colorG != "" && colorG != [] ){	//高级颜色编号
-				this._drill_ETC_enemy[i] = DrillUp.drill_COC_getSeniorColor( Number(colorG[1]) -1 );
-				this._drill_ETC_enemyCount[i] = Number(colorG[1]) + 100 ; //(201开始)
-			}else{
-				this._drill_ETC_enemy[i] = "";
-				this._drill_ETC_enemyCount[i] = -1;
-			}
-		}
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_ETC_initSysData();
 	}
 };
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_ETC_initSysData = function() {
+	this.drill_ETC_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_ETC_checkSysData = function() {
+	this.drill_ETC_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_ETC_initSysData_Private = function() {
+	this._drill_ETC_colorCode = [];
+	//（初始为空容器，不需要初始化）
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_ETC_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_ETC_colorCode == undefined ){
+		this.drill_ETC_initSysData();
+	}
+	
+	// > 容器的 空数据 检查
+	//	（容器一直就是空数据，插件指令改色时才用到）
+};
+//==============================
+// * 存储数据 - 数据获取（兼容旧插件）
+//==============================
+Object.defineProperty(Game_System.prototype, '_drill_ETC_enemyCount', {
+    get: function(){
+		alert(
+			"【Drill_EnemyTextColor.js UI-敌人文本颜色】\n有插件在调用已经抛弃的变量，注意同步更新一下下面的插件："+
+			"\n- Drill_CoreOfColor 窗口字符-颜色核心"+
+			"\n- Drill_ActorTextColor UI-角色文本颜色"+
+			"\n- Drill_WindowLog 战斗UI-窗口提示消息"
+		);
+        return 0;
+    },
+    configurable: true
+});
+
+
+
+//=============================================================================
+// ** 临时数据
+//=============================================================================
+//==============================
+// * 临时数据 - 初始化
+//==============================
+var _drill_ETC_temp_initialize = Game_Temp.prototype.initialize;
+Game_Temp.prototype.initialize = function() {
+    _drill_ETC_temp_initialize.call(this);
+	
+	this._drill_ETC_enemyData = [];
+	for( var i = 0; i < $dataEnemies.length; i++ ){
+		if( $dataEnemies[i] == null ){ continue; }
+		
+		// > 开始读取
+		var note = String($dataEnemies[i].note);
+		var re_color = /<颜色:([^<>]*?)>/; 				//正则获取（返回数组，第二个为匹配内容）
+		var color = (note.match(re_color)) || [];
+		var re_colorG = /<高级颜色:([^<>]*?)>/; 	
+		var colorG = (note.match(re_colorG)) || [];
+		
+		// > 普通颜色
+		if( color != "" && color != [] ){
+			
+			// > 普通颜色 - 颜色代码
+			if( color[1].slice(0,1) === "#" ){
+				var data = {};
+				data['color_code'] = color[1];
+				data['color_id'] = -1;
+				this._drill_ETC_enemyData[i] = data;
+				
+			// > 普通颜色 - 颜色编号
+			}else{
+				var data = {};
+				data['color_code'] = String(DrillUp.drill_COC_getColor( Number(color[1]) -1 )) ;
+				data['color_id'] = Number(color[1]) ; //(101开始)
+				this._drill_ETC_enemyData[i] = data;
+			}
+			
+		// > 高级颜色
+		}else if( colorG != "" && colorG != [] ){
+			var data = {};
+			data['color_code'] = DrillUp.drill_COC_getSeniorColor( Number(colorG[1]) -1 );
+			data['color_id'] = Number(colorG[1]) + 100 ; //(201开始)
+			this._drill_ETC_enemyData[i] = data;
+		
+		}else{
+			//（不操作）
+		}
+	}
+	//alert(JSON.stringify(this._drill_ETC_enemyData));
+}
+//==============================
+// * 临时数据 - 获取 颜色代码
+//==============================
+Game_Temp.prototype.drill_ETC_getColorCode = function( enemy_id ){
+	
+	// > 若存储变量有值，就用存储变量的
+	if( $gameSystem._drill_ETC_colorCode[enemy_id] != undefined &&
+		$gameSystem._drill_ETC_colorCode[enemy_id] != "" ){
+		return $gameSystem._drill_ETC_colorCode[enemy_id];
+	}
+	var data = this._drill_ETC_enemyData[enemy_id];
+	if( data == undefined ){ return ""; }
+	return data['color_code'];
+}
+//==============================
+// * 临时数据 - 获取 颜色ID
+//==============================
+Game_Temp.prototype.drill_ETC_getColorId = function( enemy_id ){
+	var data = this._drill_ETC_enemyData[enemy_id];
+	if( data == undefined ){ return 0; }
+	return data['color_id'];
+}
+
 
 //=============================================================================
 // ** 敌人选择窗口绘制（覆写） 
 //=============================================================================
-Window_BattleEnemy.prototype.drawItem = function(index) {
-	var color = $gameSystem._drill_ETC_enemy[index];
+Window_BattleEnemy.prototype.drawItem = function( index ){
+	var color = $gameTemp.drill_ETC_getColorCode( index );
 	if( color != "" ){
 		this.changeTextColor(color);
 	}
@@ -379,8 +488,8 @@ BattleCursor.prototype.refresh_arrow_name = function(battler,sprite) {
 		//}
 		//battler._enemyId
 		if( battler._enemyId ){
-			var color = $gameSystem._drill_ETC_enemy[battler._enemyId];
-			if(color != ""){
+			var color = $gameTemp.drill_ETC_getColorCode( battler._enemyId );
+			if( color != "" ){
 				sprite.bitmap.textColor = color;
 			}
 		}
@@ -399,8 +508,8 @@ if( Imported.MOG_BossHP ){
 		
 		if( DrillUp.g_ETC_mogBoss){
 			if( this._battler ){
-				var color = $gameSystem._drill_ETC_enemy[this._battler._enemyId];
-				if(color != ""){
+				var color = $gameTemp.drill_ETC_getColorCode( this._battler._enemyId );
+				if( color != "" ){
 					this._name.bitmap.textColor = color;
 				}
 			}
@@ -419,7 +528,7 @@ if( Imported.Drill_GaugeForBoss ){
 	Drill_GFB_StyleSprite.prototype.drill_drawName = function() {
 		
 		if( DrillUp.g_ETC_mogBoss){
-			var color = $gameSystem._drill_ETC_enemy[this._drill_enemy._enemyId];
+			var color = $gameTemp.drill_ETC_getColorCode( this._drill_enemy._enemyId );
 			if( color != "" ){
 				this._drill_name_sprite.bitmap.textColor = color;
 			}

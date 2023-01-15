@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.5]        物体触发 - 固定区域 & 条件触发
+ * @plugindesc [v1.6]        物体触发 - 固定区域 & 条件触发
  * @author Drill_up
  *
  * 
@@ -198,6 +198,8 @@
  * 修改了内部结构，并添加了触发修正。
  * [v1.5]
  * 分离了固定区域核心，并添加了筛选器功能。
+ * [v1.6]
+ * 优化了旧存档的识别与兼容。
  * 
  *
  * @param 是否修正区域判定
@@ -431,14 +433,14 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var type2 = String(args[3]);
 			var s_id = Number(args[5]);
 			if( type == "固定区域" && type2 == "开启筛选器"){
-				$gameSystem._drill_ERT_cur_condition = DrillUp.g_COFA_condition_list[ s_id-1 ];
+				$gameSystem._drill_ERT_curCondition = DrillUp.g_COFA_condition_list[ s_id-1 ];
 			}
 		}
 		if(args.length == 4){
 			var type = String(args[1]);
 			var type2 = String(args[3]);
 			if( type == "固定区域" && type2 == "关闭筛选器"){
-				$gameSystem._drill_ERT_cur_condition = {};
+				$gameSystem._drill_ERT_curCondition = {};
 			}
 		}
 	
@@ -578,7 +580,7 @@ Game_Event.prototype.drill_ERT_setupPage = function() {
 //==============================
 Game_Map.prototype.drill_ERT_triggerTypeArea = function( _x, _y, type, range, tag ,e ) {
 	if( _x == -1 || _y == -1 ){ return }
-	var cal_area = this.drill_COFA_getShapePointsWithCondition( _x, _y, type, range, $gameSystem._drill_ERT_cur_condition );
+	var cal_area = this.drill_COFA_getShapePointsWithCondition( _x, _y, type, range, $gameSystem._drill_ERT_curCondition );
 	if( e ){
 		e._ERT_area = cal_area;
 	}
@@ -591,7 +593,7 @@ Game_Map.prototype.drill_ERT_triggerTypeArea = function( _x, _y, type, range, ta
 //==============================
 Game_Map.prototype.drill_ERT_triggerSelfArea = function( e_id, self_id, tag ) {
 	var e = this.event( e_id );
-	var cal_area = this.drill_COFA_getCustomPointsByIdWithCondition( e_id, self_id, $gameSystem._drill_ERT_cur_condition );
+	var cal_area = this.drill_COFA_getCustomPointsByIdWithCondition( e_id, self_id, $gameSystem._drill_ERT_curCondition );
 	
 	e._ERT_area = cal_area;
 	$gameSystem.drill_ERT_setLastPoint({'x':e._x,'y':e._y});
@@ -652,44 +654,115 @@ Game_CharacterBase.prototype.drill_ERT_isInPosEntirely = function(x,y) {
 };
 
 
-
-//=============================================================================
-// * 触发区域缓存容器
-//=============================================================================
-var _drill_ERT_System_initialize = Game_System.prototype.initialize;
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_ERT_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_ERT_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-	_drill_ERT_System_initialize.call(this);
-	this._drill_ERT_cur_condition = {};		//当前筛选器
+    _drill_ERT_sys_initialize.call(this);
+	this.drill_ERT_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_ERT_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_ERT_sys_extractSaveContents.call( this, contents );
 	
-	this._drill_ERT_last_point = {'x':0,'y':0};	//触发中心点
-	this._drill_ERT_last_area = [];				//触发中心区域
-	this._drill_ERT_last_areas = [];			//存储的区域
-	//this._drill_ERT_last_condition = {};		//筛选器（不打算存筛选器）
-	//this._drill_ERT_last_conditions = {};		//存储的筛选器
-}
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_ERT_saveEnabled == true ){	
+		$gameSystem.drill_ERT_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_ERT_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_ERT_initSysData = function() {
+	this.drill_ERT_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_ERT_checkSysData = function() {
+	this.drill_ERT_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_ERT_initSysData_Private = function() {
+	
+	this._drill_ERT_curCondition = {};			//当前筛选器
+	
+	this._drill_ERT_lastPoint = {'x':0,'y':0};	//触发中心点
+	this._drill_ERT_lastArea = [];				//触发中心区域
+	this._drill_ERT_lastAreas = [];				//存储的区域
+	//this._drill_ERT_lastCondition = {};		//筛选器（不打算存筛选器）
+	//this._drill_ERT_lastConditions = {};		//存储的筛选器
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_ERT_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_ERT_curCondition == undefined ){
+		this.drill_ERT_initSysData();
+	}
+	
+};
 // * 设置 - 上一个触发的中心区域 [{'x':21,'y':31,'block':true}……]
 Game_System.prototype.drill_ERT_setLastArea = function(area) {
-	this._drill_ERT_last_area = area;
+	this._drill_ERT_lastArea = area;
 }
 // * 设置 - 上一个触发的中心点 {'x':1,'y':1}
 Game_System.prototype.drill_ERT_setLastPoint = function(p) {
-	this._drill_ERT_last_point = p;
+	this._drill_ERT_lastPoint = p;
 }
 // * 获取 - 上一个触发的中心区域
 Game_System.prototype.drill_ERT_getLastArea = function() {
-	return this._drill_ERT_last_area;
+	return this._drill_ERT_lastArea;
 }
 // * 获取 - 上一个触发的中心点
 Game_System.prototype.drill_ERT_getLastPoint = function() {
-	return this._drill_ERT_last_point;
+	return this._drill_ERT_lastPoint;
 }
 // * 设置 - 存储区域
 Game_System.prototype.drill_ERT_saveArea = function( area_id, area ) {
-	this._drill_ERT_last_areas[area_id] = area;
+	this._drill_ERT_lastAreas[area_id] = area;
 }
 // * 设置 - 读取区域
 Game_System.prototype.drill_ERT_loadArea = function( area_id) {
-	return this._drill_ERT_last_areas[area_id];
+	return this._drill_ERT_lastAreas[area_id];
 }
 
 

@@ -937,11 +937,9 @@
 			DrillUp.parameters["GIF-" + String(i+1) ] != "" ){
 			var temp = JSON.parse(DrillUp.parameters["GIF-" + String(i+1) ]);
 			DrillUp.g_TGi_list[i] = DrillUp.drill_TGi_gifInit( temp );
-			DrillUp.g_TGi_list[i]['id'] = Number(i)+1;
 			DrillUp.g_TGi_list[i]['inited'] = true;
 		}else{
 			DrillUp.g_TGi_list[i] = DrillUp.drill_TGi_gifInit( {} );
-			DrillUp.g_TGi_list[i]['id'] = Number(i)+1;
 			DrillUp.g_TGi_list[i]['inited'] = false;
 		}
 	}
@@ -1041,15 +1039,6 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			}
 		}
 	}
-};
-
-//=============================================================================
-// ** 存储数据初始化
-//=============================================================================
-var _drill_TGi_sys_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function() {	
-	_drill_TGi_sys_initialize.call(this);
-	// 无
 };
 
 

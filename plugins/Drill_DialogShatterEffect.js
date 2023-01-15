@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.6]        对话框 - 方块粉碎效果
+ * @plugindesc [v1.7]        对话框 - 方块粉碎效果
  * @author Drill_up
  * 
  *
@@ -136,6 +136,8 @@
  * 大幅度优化了结构，支持了 暂停播放和继续播放 功能。
  * [v1.6]
  * 修复了保存后，对话框不可见的bug。
+ * [v1.7]
+ * 优化了旧存档的识别与兼容。
  * 
  * 
  * 
@@ -469,13 +471,72 @@ Game_System.prototype.drill_DSE_delayPluginCommand = function( commandData ){
 	}
 };
 
-
-//=============================================================================
-// * 存储数据初始化
-//=============================================================================
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_DSE_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_DSE_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
     _drill_DSE_sys_initialize.call(this);
+	this.drill_DSE_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_DSE_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_DSE_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_DSE_saveEnabled == true ){	
+		$gameSystem.drill_DSE_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_DSE_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_DSE_initSysData = function() {
+	this.drill_DSE_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_DSE_checkSysData = function() {
+	this.drill_DSE_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_DSE_initSysData_Private = function() {
 	
 	this._drill_DSE_opacityType = DrillUp.g_DSE_opacityType;	//透明类型
 	this._drill_DSE_delayCommandTank = [];						//延迟插件指令容器
@@ -490,24 +551,19 @@ Game_System.prototype.initialize = function() {
 	
 	// > 姓名框
 	this._drill_DSE_nc = new Drill_COSE_Controller( data );
-}
+};
 //==============================
-// * 存档文件 - 载入存档 - 数据赋值
+// * 存储数据 - 载入存档时检查数据（私有）
 //==============================
-var _drill_DSE_extractSaveContents = DataManager.extractSaveContents;
-DataManager.extractSaveContents = function(contents){
-	_drill_DSE_extractSaveContents.call( this, contents );
+Game_System.prototype.drill_DSE_checkSysData_Private = function() {
 	
-	// > 对话框
-	var data = {};
-	data['src_mode'] = "关闭资源控制";
-	$gameSystem._drill_DSE_mc = new Drill_COSE_Controller( data );
+	// > 旧存档数据自动补充
+	if( this._drill_DSE_mc == undefined ||
+		this._drill_DSE_cc == undefined ||
+		this._drill_DSE_nc == undefined ){
+		this.drill_DSE_initSysData();
+	}
 	
-	// > 选择框
-	$gameSystem._drill_DSE_cc = new Drill_COSE_Controller( data );
-	
-	// > 姓名框
-	$gameSystem._drill_DSE_nc = new Drill_COSE_Controller( data );
 };
 
 

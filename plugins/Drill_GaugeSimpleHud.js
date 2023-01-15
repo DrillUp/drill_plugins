@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        地图UI - 简单生命框
+ * @plugindesc [v1.3]        地图UI - 简单生命框
  * @author Drill_up
  * 
  * @Drill_LE_param "生命框-%d"
@@ -131,6 +131,8 @@
  * 修复了当生命框处于下层/中层/上层时，镜头缩放时跟着被缩放的bug。
  * [v1.2]
  * 优化了与地图活动镜头的变换关系。
+ * [v1.3]
+ * 优化了旧存档的识别与兼容。
  * 
  *
  *
@@ -599,14 +601,10 @@
 	for (var i = 0; i < DrillUp.g_GSH_data_length; i++) {
 		if( DrillUp.parameters["生命框-" + String(i+1) ] != undefined &&
 			DrillUp.parameters["生命框-" + String(i+1) ] != "" ){
-			DrillUp.g_GSH_data[i] = JSON.parse(DrillUp.parameters["生命框-" + String(i+1) ]);
-			DrillUp.g_GSH_data[i] = DrillUp.drill_GSH_initParam( DrillUp.g_GSH_data[i] );
-			DrillUp.g_GSH_data[i]['id'] = i+1;
-			DrillUp.g_GSH_data[i]['inited'] = true;
+			var data = JSON.parse(DrillUp.parameters["生命框-" + String(i+1) ]);
+			DrillUp.g_GSH_data[i] = DrillUp.drill_GSH_initParam( data );
 		}else{
-			DrillUp.g_GSH_data[i] = DrillUp.drill_GSH_initParam( {} );
-			DrillUp.g_GSH_data[i]['id'] = i+1;
-			DrillUp.g_GSH_data[i]['inited'] = false;
+			DrillUp.g_GSH_data[i] = null;		//（强制设为空值，节约存储资源）
 		}
 	}
 
@@ -636,8 +634,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		if( args.length == 2 ){		
 			if( type == "去除全部生命框绑定" ){	
 				for( var i=0; i < $gameSystem._drill_GSH_dataTank.length; i++ ){
-					$gameSystem._drill_GSH_dataTank[ i ]['bind_char'] = 0;
-					$gameSystem._drill_GSH_dataTank[ i ]['bind_map'] = 0;
+					var data = $gameSystem._drill_GSH_dataTank[ i ];
+					if( data == undefined ){ continue; }
+					data['bind_char'] = 0;
+					data['bind_map'] = 0;
 				}
 			}
 		}
@@ -648,8 +648,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			temp1 = temp1.replace("]","");
 			temp1 = Number(temp1) - 1;
 			if( type == "去除绑定" ){	
-				$gameSystem._drill_GSH_dataTank[ temp1 ]['bind_char'] = 0;
-				$gameSystem._drill_GSH_dataTank[ temp1 ]['bind_map'] = 0;
+				var data = $gameSystem._drill_GSH_dataTank[ temp1 ];
+				if( data == undefined ){ return; }
+				data['bind_char'] = 0;
+				data['bind_map'] = 0;
 			}
 		}
 		
@@ -661,6 +663,14 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			temp1 = temp1.replace("生命框[","");
 			temp1 = temp1.replace("]","");
 			temp1 = Number(temp1) - 1;
+			var data = $gameSystem._drill_GSH_dataTank[ temp1 ];
+			if( data == undefined ){
+				alert(
+					"【Drill_GaugeSimpleHud.js  地图UI - 简单生命框】\n"+
+					"错误，未找到生命框["+id+"]的配置数据。"
+				);
+				return;
+			}
 			
 			if( type == "绑定到" ){		//>地图简单生命框 : 生命框[1] : 绑定到 : 玩家
 				if( temp2.indexOf("事件变量[") != -1 ){
@@ -668,64 +678,64 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp2 = temp2.replace("]","");
 					var e_id = $gameVariables.value(Number(temp2));
 					if( $gameMap.drill_GSH_isEventExist( e_id ) == false ){ return; }
-					$gameSystem._drill_GSH_dataTank[ temp1 ]['bind_char'] = e_id;
-					$gameSystem._drill_GSH_dataTank[ temp1 ]['bind_map'] = this._mapId;
+					data['bind_char'] = e_id;
+					data['bind_map'] = this._mapId;
 				}
 				if( temp2.indexOf("事件[") != -1 ){
 					temp2 = temp2.replace("事件[","");
 					temp2 = temp2.replace("]","");
 					var e_id = Number(temp2);
 					if( $gameMap.drill_GSH_isEventExist( e_id ) == false ){ return; }
-					$gameSystem._drill_GSH_dataTank[ temp1 ]['bind_char'] = e_id;
-					$gameSystem._drill_GSH_dataTank[ temp1 ]['bind_map'] = this._mapId;
+					data['bind_char'] = e_id;
+					data['bind_map'] = this._mapId;
 				}
 				if( temp2 == "本事件" ){
-					$gameSystem._drill_GSH_dataTank[ temp1 ]['bind_char'] = this._eventId;
-					$gameSystem._drill_GSH_dataTank[ temp1 ]['bind_map'] = this._mapId;
+					data['bind_char'] = this._eventId;
+					data['bind_map'] = this._mapId;
 				}
 				if( temp2 == "玩家" ){
-					$gameSystem._drill_GSH_dataTank[ temp1 ]['bind_char'] = -2;
-					$gameSystem._drill_GSH_dataTank[ temp1 ]['bind_map'] = 0;
+					data['bind_char'] = -2;
+					data['bind_map'] = 0;
 				}
 			}
 			
 			if( type == "修改平移" ){	
 				var temp_arr = temp2.split(/[,，]/);
 				if( temp_arr.length >= 2 ){
-					$gameSystem._drill_GSH_dataTank[ temp1 ]['x'] = Number(temp_arr[0]);
-					$gameSystem._drill_GSH_dataTank[ temp1 ]['y'] = Number(temp_arr[1]);
+					data['x'] = Number(temp_arr[0]);
+					data['y'] = Number(temp_arr[1]);
 				}
 			}
 			if( type == "修改生命值-绑定类型" ){	
-				$gameSystem._drill_GSH_dataTank[ temp1 ]['hpValue_type'] = temp2;
+				data['hpValue_type'] = temp2;
 			}
 			if( type == "修改生命值-变量" ){	
-				$gameSystem._drill_GSH_dataTank[ temp1 ]['hpValue_variable'] = Number(temp2);
+				data['hpValue_variable'] = Number(temp2);
 			}
 			if( type == "修改魔法值-绑定类型" ){	
-				$gameSystem._drill_GSH_dataTank[ temp1 ]['mpValue_type'] = temp2;
+				data['mpValue_type'] = temp2;
 			}
 			if( type == "修改魔法值-变量" ){	
-				$gameSystem._drill_GSH_dataTank[ temp1 ]['mpValue_variable'] = Number(temp2);
+				data['mpValue_variable'] = Number(temp2);
 			}
 			
 			if( type == "修改生命段上限-绑定类型" ){	
-				$gameSystem._drill_GSH_dataTank[ temp1 ]['hpLevel_type'] = temp2;
+				data['hpLevel_type'] = temp2;
 			}
 			if( type == "修改生命段上限-固定值" ){	
-				$gameSystem._drill_GSH_dataTank[ temp1 ]['hpLevel_max'] = Number(temp2);
+				data['hpLevel_max'] = Number(temp2);
 			}
 			if( type == "修改生命段上限-变量" ){	
-				$gameSystem._drill_GSH_dataTank[ temp1 ]['hpLevel_variable'] = Number(temp2);
+				data['hpLevel_variable'] = Number(temp2);
 			}
 			if( type == "修改魔法段上限-绑定类型" ){	
-				$gameSystem._drill_GSH_dataTank[ temp1 ]['mpLevel_type'] = temp2;
+				data['mpLevel_type'] = temp2;
 			}
 			if( type == "修改魔法段上限-固定值" ){	
-				$gameSystem._drill_GSH_dataTank[ temp1 ]['mpLevel_max'] = Number(temp2);
+				data['mpLevel_max'] = Number(temp2);
 			}
 			if( type == "修改魔法段上限-变量" ){	
-				$gameSystem._drill_GSH_dataTank[ temp1 ]['mpLevel_variable'] = Number(temp2);
+				data['mpLevel_variable'] = Number(temp2);
 			}
 		}
 	};
@@ -746,19 +756,108 @@ Game_Map.prototype.drill_GSH_isEventExist = function( e_id ){
 };
 
 
-//=============================================================================
-// ** 存储数据初始化
-//=============================================================================
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_GSH_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_GSH_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-	_drill_GSH_sys_initialize.call(this);
+    _drill_GSH_sys_initialize.call(this);
+	this.drill_GSH_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_GSH_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_GSH_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_GSH_saveEnabled == true ){	
+		$gameSystem.drill_GSH_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_GSH_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_GSH_initSysData = function() {
+	this.drill_GSH_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_GSH_checkSysData = function() {
+	this.drill_GSH_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_GSH_initSysData_Private = function() {
 	
 	this._drill_GSH_dataTank = [];			//生命框数据容器
-	for(var i = 0; i< DrillUp.g_GSH_data.length ;i++){
+	for(var i = 0; i < DrillUp.g_GSH_data.length ;i++){
 		var temp_data = DrillUp.g_GSH_data[i];
+		if( temp_data == undefined ){ continue; }
 		this._drill_GSH_dataTank[i] = JSON.parse(JSON.stringify( temp_data ));	//深拷贝数据
 	}
-}
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_GSH_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_GSH_dataTank == undefined ){
+		this.drill_GSH_initSysData();
+	}
+	
+	// > 容器的 空数据 检查
+	for(var i = 0; i < DrillUp.g_GSH_data.length; i++ ){
+		var temp_data = DrillUp.g_GSH_data[i];
+		
+		// > 已配置（undefined表示未配置的空数据）
+		if( temp_data != undefined ){
+			
+			// > 未存储的，重新初始化
+			if( this._drill_GSH_dataTank[i] == undefined ){
+				this._drill_GSH_dataTank[i] = JSON.parse(JSON.stringify( temp_data ));
+			
+			// > 已存储的，跳过
+			}else{
+				//（不操作）
+			}
+		}
+	}
+};
 
 
 //#############################################################################
@@ -914,7 +1013,7 @@ Scene_Map.prototype.drill_GSH_create = function() {
 	
 	for( var i = 0; i < $gameSystem._drill_GSH_dataTank.length; i++ ){
 		var temp_data = $gameSystem._drill_GSH_dataTank[i];
-		if( temp_data['inited'] == false ){ continue; }
+		if( temp_data == undefined ){ continue; }
 		
 		var temp_sprite = new Drill_GSH_LifeSprite( temp_data );
 		this._drill_GSH_spriteTank.push( temp_sprite );

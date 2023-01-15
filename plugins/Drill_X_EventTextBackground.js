@@ -1484,11 +1484,9 @@
 			DrillUp.parameters["背景样式-" + String(i+1) ] != "" ){
 			var temp = JSON.parse(DrillUp.parameters["背景样式-" + String(i+1) ]);
 			DrillUp.g_XETB_list[i] = DrillUp.drill_XETB_initEventTextGIF( temp );
-			DrillUp.g_XETB_list[i]['id'] = Number(i)+1;
 			DrillUp.g_XETB_list[i]['inited'] = true;
 		}else{
 			DrillUp.g_XETB_list[i] = DrillUp.drill_XETB_initEventTextGIF( {} );
-			DrillUp.g_XETB_list[i]['id'] = Number(i)+1;
 			DrillUp.g_XETB_list[i]['inited'] = false;
 		}
 	}

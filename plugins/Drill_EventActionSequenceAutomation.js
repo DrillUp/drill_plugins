@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        行走图 - GIF动画序列自动化
+ * @plugindesc [v1.2]        行走图 - GIF动画序列全自动播放
  * @author Drill_up
  * 
  * 
@@ -21,37 +21,41 @@
  * 该插件 不能 单独使用。
  * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_EventActionSequence    行走图-GIF动画序列
+ *   - Drill_EventActionSequence       行走图-GIF动画序列★★v1.2及以上★★
+ * 可作用于：
+ *   - Drill_EventActionSequenceBind   行走图-GIF动画序列全绑定
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：地图界面。
  *   作用于行走图。
  * 2.更多详细内容，去看看 "7.行走图 > 关于行走图GIF动画序列.docx"。
- * 自动化：
+ * 全自动播放：
  *   (1.如果你配置了行走图动画序列，那么事件将会根据情况，自动对符合
- *      注解条件的状态元进行切换。
- *   (2.注解包含 静止、移动、跳跃、奔跑 四项。具体去看看文档。
+ *      标签条件的 状态节点/状态元 进行切换。
+ *   (2.标签中包含 静止、移动、跳跃、奔跑 等，具体去看看文档中
+*       全自动播放 的章节。
  * 设计：
  *   (1.你可以将一个行走图拆分成 行走图动画序列，再配置给事件或玩家。
+ *      跑通后再进行更复杂的 状态节点 连接，实现更复杂的动画效果。
  *
  * -----------------------------------------------------------------------------
- * ----可选设定 - 自动化
+ * ----可选设定 - 全自动播放
  * 你需要通过下面插件指令来操作动画序列：
  * 
- * 插件指令：>行走图动画序列 : 玩家 : 自动化 : 关闭
- * 插件指令：>行走图动画序列 : 玩家领队 : 自动化 : 关闭
- * 插件指令：>行走图动画序列 : 玩家全员 : 自动化 : 关闭
- * 插件指令：>行走图动画序列 : 玩家队员[1] : 自动化 : 关闭
- * 插件指令：>行走图动画序列 : 玩家队员变量[21] : 自动化 : 关闭
- * 插件指令：>行走图动画序列 : 本事件 : 自动化 : 关闭
- * 插件指令：>行走图动画序列 : 事件[1] : 自动化 : 关闭
- * 插件指令：>行走图动画序列 : 事件变量[1] : 自动化 : 关闭
- * 插件指令：>行走图动画序列 : 批量事件[10,11] : 自动化 : 关闭
- * 插件指令：>行走图动画序列 : 批量事件变量[21,22] : 自动化 : 关闭
+ * 插件指令：>行走图动画序列 : 玩家 : 全自动播放 : 关闭
+ * 插件指令：>行走图动画序列 : 玩家领队 : 全自动播放 : 关闭
+ * 插件指令：>行走图动画序列 : 玩家全员 : 全自动播放 : 关闭
+ * 插件指令：>行走图动画序列 : 玩家队员[1] : 全自动播放 : 关闭
+ * 插件指令：>行走图动画序列 : 玩家队员变量[21] : 全自动播放 : 关闭
+ * 插件指令：>行走图动画序列 : 本事件 : 全自动播放 : 关闭
+ * 插件指令：>行走图动画序列 : 事件[1] : 全自动播放 : 关闭
+ * 插件指令：>行走图动画序列 : 事件变量[1] : 全自动播放 : 关闭
+ * 插件指令：>行走图动画序列 : 批量事件[10,11] : 全自动播放 : 关闭
+ * 插件指令：>行走图动画序列 : 批量事件变量[21,22] : 全自动播放 : 关闭
  * 
- * 插件指令：>行走图动画序列 : 事件[1] : 自动化 : 关闭
- * 插件指令：>行走图动画序列 : 事件[1] : 自动化 : 开启
+ * 插件指令：>行走图动画序列 : 事件[1] : 全自动播放 : 关闭
+ * 插件指令：>行走图动画序列 : 事件[1] : 全自动播放 : 开启
  * 
  * 1.如果你配置了行走图动画序列，那么事件将会根据情况，自动对
  *   符合注解条件的状态元进行切换。
@@ -84,7 +88,10 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
- * 
+ * [v1.1]
+ * 较大幅度更新了 动画序列底层，该插件重新兼容。
+ * [v1.2]
+ * 重新归纳了播放 状态节点 的结构。
  * 
  */
  
@@ -110,12 +117,26 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★大体框架与功能如下：
-//			行走图动画序列自动化：
-//				->事件
-//					->注解调用
+//			GIF动画序列全自动播放：
+//				->物体
+//					->检查 - 未开启功能
+//					->检查 - 控制器为空
+//					->检查 - 镜头范围外
+//					->注解
+//						->@行走图-静止
+//						->@行走图-移动
+//						->@行走图-奔跑
+//						->@行走图-跳跃
+//						->@行走图-滑行
+//						->@行走图-被举起
+//						->@行走图-举花盆
+//					->变化锁
+//				->动画序列 继承
+//				->固定帧
 //
 //		★必要注意事项：
-//			1.该插件相当于一个自驱动器，随时控制变化状态元命令。
+//			1.该插件需要随时控制 播放 状态节点。
+//			2.@行走图-移动 要注意移动速度变化对帧速度的影响。
 //
 //		★其它说明细节：
 //			暂无
@@ -145,7 +166,6 @@ if( Imported.Drill_EventActionSequence ){
 var _Drill_EASA_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_Drill_EASA_pluginCommand.call(this, command, args);
-	
 	if( command === ">行走图动画序列" ){ 
 	
 		/*-----------------对象组获取------------------*/
@@ -226,17 +246,19 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		if( p_chars == null ){ p_chars = []; }
 		
 		
-		/*-----------------自动化------------------*/
+		/*-----------------全自动播放------------------*/
 		if( args.length == 6 ){
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
-			if( type == "自动化" ){
+			if( type == "全自动播放" || type == "自动化" ){
 				if( temp1 == "开启" ){
 					for( var k=0; k < e_chars.length; k++ ){
 						e_chars[k]._Drill_EASA_enabled = true;
+						e_chars[k]._Drill_EASA_lastAnnotation = "";
 					}
 					for( var k=0; k < p_chars.length; k++ ){
 						p_chars[k]._Drill_EASA_enabled = true;
+						p_chars[k]._Drill_EASA_lastAnnotation = "";
 					}
 				}
 				if( temp1 == "关闭" ){
@@ -260,7 +282,7 @@ Game_Map.prototype.drill_EASA_isEventExist = function( e_id ){
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_EventActionSequenceAutomation.js 事件 - GIF动画序列自动化】\n" +
+		alert( "【Drill_EventActionSequenceAutomation.js 事件 - GIF动画序列全自动播放】\n" +
 				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
 		return false;
 	}
@@ -269,112 +291,149 @@ Game_Map.prototype.drill_EASA_isEventExist = function( e_id ){
 
 
 //=============================================================================
-// ** 存储变量初始化
-//=============================================================================
-var _drill_EASA_sys_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function() {
-    _drill_EASA_sys_initialize.call(this);
-	
-	//（暂无）
-}
-
-
-//=============================================================================
-// ** 事件
+// ** 物体
 //=============================================================================
 //==============================
-// * 事件 - 初始化
+// * 物体 - 初始化
 //==============================
 var _Drill_EASA_c_initialize = Game_Character.prototype.initialize;
 Game_Character.prototype.initialize = function() {
-	_Drill_EASA_c_initialize.call(this);	
-	
+	_Drill_EASA_c_initialize.call(this);
 	this._Drill_EASA_enabled = false;		//自动化开关（默认关闭）
+	this._Drill_EASA_lastAnnotation = "";	//上一个标签
+	this._Drill_EASA_lastChangeDelay = 0;	//上一个标签 变化锁
 }
 //==============================
-// * 动画序列 - 还原默认状态元集合（继承）
-//==============================
-var _drill_EASA_EASe_setSequenceDefault = Game_Character.prototype.drill_EASe_setSequenceDefault;
-Game_Character.prototype.drill_EASe_setSequenceDefault = function(){
-	this._Drill_EASA_enabled = false;		//（执行状态元变化时，立即关闭自动化）
-	_drill_EASA_EASe_setSequenceDefault.call(this);
-}
-//==============================
-// * 动画序列 - 设置状态元集合（继承）
-//==============================
-var _drill_EASA_EASe_setSequence = Game_Character.prototype.drill_EASe_setSequence;
-Game_Character.prototype.drill_EASe_setSequence = function( seq ){
-	this._Drill_EASA_enabled = false;
-	_drill_EASA_EASe_setSequence.call( this,seq );
-}
-//==============================
-// * 动画序列 - 设置状态元集合，立刻改变（继承）
-//==============================
-var _drill_EASA_EASe_setSequenceImmediate = Game_Character.prototype.drill_EASe_setSequenceImmediate;
-Game_Character.prototype.drill_EASe_setSequenceImmediate = function( seq ){
-	this._Drill_EASA_enabled = false;
-	_drill_EASA_EASe_setSequenceImmediate.call( this,seq );
-}
-//==============================
-// * 动画序列 - 设置状态元集合（根据注解）
-//
-//			说明：	状态元名称中含有特定注解的，会被捕获。
-//==============================
-Game_Character.prototype.drill_EASA_setSequenceByAnnotation = function( annotation ){
-	this._Drill_EASe_data.drill_COAS_setSequenceImmediateByAnnotation( annotation );		//立刻改变
-}
-
-
-//=============================================================================
-// ** 注解调用 状态元命令
-//=============================================================================
-//==============================
-// * 注解调用 - 静止动作
+// * 物体 - 帧刷新
 //==============================
 var _drill_EASA_ch_update = Game_CharacterBase.prototype.update;
 Game_CharacterBase.prototype.update = function(){
 	_drill_EASA_ch_update.call(this);
+	
+	// > 检查 - 未开启功能，跳过
 	if( this._Drill_EASA_enabled != true ){ return; }
 	
-	// > 第一层注解
-	var command = "";
-	if( this._direction == 2 ){ command = command + "@向下"; }
-	if( this._direction == 4 ){ command = command + "@向左"; }
-	if( this._direction == 6 ){ command = command + "@向右"; }
-	if( this._direction == 8 ){ command = command + "@向上"; }
+	// > 检查 - 控制器为空，跳过
+	if( this._Drill_EASe_controller == undefined ){
+		this._Drill_EASA_lastAnnotation = "";
+		return;
+	}
 	
-	// > 第二层注解
+	// > 检查 - 镜头范围外，跳过
+	if( this.drill_EASA_posIsInCamera( this._realX, this._realY ) == false ){
+		this._Drill_EASA_lastAnnotation = "";
+		return;
+	}
+	
+	
+	// > 注解 - 初始化
+	var cur_annotation = "";
+	
+	
+	// > 注解 - 第一层
 	if( this.slipperyPose != undefined && this.slipperyPose() == true && 
-		(this instanceof Game_Player || this instanceof Game_Follower ) ){	//（YEP_SlipperyTiles插件）
-		command = command + "@滑行";
+		(this instanceof Game_Player || this instanceof Game_Follower ) ){	//（YEP_SlipperyTiles 物体滑行）
+		cur_annotation = "@行走图-滑行";
 		
-	}else if( this._drill_PT_is_being_lift == true ){		//（Drill_PickThrow插件）
-		command = command + "@被举起";
-	
-	}else if( this.isStopping() ){
-		command = command + "@静止";
+	}else if( this.drill_LST_isOnSlipperyFloor != undefined && 
+			  this.drill_LST_isOnSlipperyFloor() == true ){	//（Drill_LayerSlipperyTile 物体滑行）
+		cur_annotation = "@行走图-滑行";
+		
+	}else if( this._drill_PT_is_being_lift == true ){		//（Drill_PickThrow 举起花盆）
+		cur_annotation = "@行走图-被举起";
 	
 	}else if( this.isMoving() ){
 		if( this.isDashing() ){
-			command = command + "@奔跑";
+			cur_annotation = "@行走图-奔跑";
 		}else{
-			command = command + "@移动";
+			cur_annotation = "@行走图-移动";
 		}
-		//"@滑行"
 	
 	}else if( this.isJumping() ){
-		command = command + "@跳跃";
+		cur_annotation = "@行走图-跳跃";
+	
+	}else if( this.isStopping() ){
+		cur_annotation = "@行走图-静止";
 	}
 	
-	// > 第三层注解
+	
+	// > 注解 - 第二层
 	if( this._drill_PT_is_lifting == true ){
-		command = command + "@举花盆";
+		cur_annotation = "@行走图-举花盆";
 	}
 	
 	
-	this.drill_EASA_setSequenceByAnnotation( command );
+	// > 变化锁
+	if( this._Drill_EASA_lastAnnotation == cur_annotation ){
+		this._Drill_EASA_lastChangeDelay = 3;		//（注解变化后，需要至少持续3帧）
+		return;
+	}
+	this._Drill_EASA_lastChangeDelay -= 1;
+	if( this._Drill_EASA_lastChangeDelay > 0 ){ return; }
+	this._Drill_EASA_lastAnnotation = cur_annotation;
+	
+	
+	// > 播放状态元/状态节点 根据标签
+	this.drill_EASA_setAnnotation( cur_annotation );
+}
+//==============================
+// * 优化策略 - 判断贴图是否在镜头范围内
+//==============================
+Game_CharacterBase.prototype.drill_EASA_posIsInCamera = function( realX, realY ){
+	var oww = Graphics.boxWidth  / $gameMap.tileWidth();
+	var ohh = Graphics.boxHeight / $gameMap.tileHeight();
+	var sww = oww;
+	var shh = ohh;
+	if( Imported.Drill_LayerCamera ){
+		sww = sww / $gameSystem._drill_LCa_controller._drill_scaleX;
+		shh = shh / $gameSystem._drill_LCa_controller._drill_scaleY;
+	}
+	return  Math.abs($gameMap.adjustX(realX + 0.5) - oww*0.5) <= sww*0.5 + 5.5 &&	//（镜头范围+5个图块边框区域） 
+			Math.abs($gameMap.adjustY(realY + 0.5) - ohh*0.5) <= shh*0.5 + 5.5 ;
 }
 
+
+//=============================================================================
+// ** 动画序列
+//=============================================================================
+//==============================
+// * 动画序列 - 播放默认的状态元集合（继承）
+//==============================
+var _drill_EASA_EASe_setStateNodeDefault = Game_Character.prototype.drill_EASe_setStateNodeDefault;
+Game_Character.prototype.drill_EASe_setStateNodeDefault = function(){
+	this._Drill_EASA_enabled = false;		//（执行状态元变化时，立即关闭自动化）
+	_drill_EASA_EASe_setStateNodeDefault.call(this);
+}
+//==============================
+// * 动画序列 - 播放状态节点（继承）
+//==============================
+var _drill_EASA_EASe_setStateNode = Game_Character.prototype.drill_EASe_setStateNode;
+Game_Character.prototype.drill_EASe_setStateNode = function( node_name ){
+	this._Drill_EASA_enabled = false;
+	_drill_EASA_EASe_setStateNode.call( this, node_name );
+}
+//==============================
+// * 动画序列 - 播放简易状态节点（继承）
+//==============================
+var _drill_EASA_EASe_setSimpleStateNode = Game_Character.prototype.drill_EASe_setSimpleStateNode;
+Game_Character.prototype.drill_EASe_setSimpleStateNode = function( state_nameList ){
+	this._Drill_EASA_enabled = false;
+	_drill_EASA_EASe_setSimpleStateNode.call( this, state_nameList );
+}
+//==============================
+// * 动画序列 - 播放状态元/状态节点 根据标签（继承）
+//
+//			说明：	状态元/状态节点名称中含有特定注解的，会被捕获。
+//==============================
+Game_Character.prototype.drill_EASA_setAnnotation = function( annotation ){
+	this._Drill_EASe_controller.drill_COAS_setAnnotation( annotation );
+}
+
+
+//=============================================================================
+// ** 固定帧
+//=============================================================================
+//...
 
 
 //=============================================================================

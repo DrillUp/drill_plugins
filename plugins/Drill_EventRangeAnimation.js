@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        物体触发 - 固定区域 & 播放并行动画
+ * @plugindesc [v1.3]        物体触发 - 固定区域 & 播放并行动画
  * @author Drill_up
  * 
  * 
@@ -159,6 +159,9 @@
  * 修改了内部结构，并添加了上一次区域的使用。
  * [v1.2]
  * 分离了固定区域核心，并添加了筛选器功能。添加了插件性能测试说明。
+ * [v1.3]
+ * 优化了旧存档的识别与兼容。
+ * 
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -328,14 +331,14 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var type2 = String(args[3]);
 			var s_id = Number(args[5]);
 			if( type == "固定区域" && type2 == "开启筛选器"){
-				$gameSystem._drill_ERA_cur_condition = DrillUp.g_COFA_condition_list[ s_id-1 ];
+				$gameSystem._drill_ERA_curCondition = DrillUp.g_COFA_condition_list[ s_id-1 ];
 			}
 		}
 		if(args.length == 4){
 			var type = String(args[1]);
 			var type2 = String(args[3]);
 			if( type == "固定区域" && type2 == "关闭筛选器"){
-				$gameSystem._drill_ERA_cur_condition = {};
+				$gameSystem._drill_ERA_curCondition = {};
 			}
 		}
 		
@@ -410,14 +413,88 @@ Game_Map.prototype.drill_ERA_isEventExist = function( e_id ){
 	return true;
 };
 
-//=============================================================================
-// ** 存储数据初始化
-//=============================================================================
-var _drill_ERA_system_initialize = Game_System.prototype.initialize;
+
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_ERA_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_ERA_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-    _drill_ERA_system_initialize.call(this);
-	this._drill_ERA_cur_condition = {};		//当前筛选器
+    _drill_ERA_sys_initialize.call(this);
+	this.drill_ERA_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_ERA_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_ERA_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_ERA_saveEnabled == true ){	
+		$gameSystem.drill_ERA_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_ERA_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_ERA_initSysData = function() {
+	this.drill_ERA_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_ERA_checkSysData = function() {
+	this.drill_ERA_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_ERA_initSysData_Private = function() {
+	
+	this._drill_ERA_curCondition = {};		//当前筛选器
 };	
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_ERA_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_ERA_curCondition == undefined ){
+		this.drill_ERA_initSysData();
+	}
+	
+};
+
 
 //=============================================================================
 // * 范围动画
@@ -427,14 +504,14 @@ Game_System.prototype.initialize = function() {
 //==============================
 Game_Map.prototype.drill_ERA_triggerTypeArea = function( _x, _y, type, range, a_id ) {
 	if( _x == -1 || _y == -1 ){ return }
-	var cal_area = this.drill_COFA_getShapePointsWithCondition( _x, _y, type, range, $gameSystem._drill_ERA_cur_condition );	//获取固定形状区域
+	var cal_area = this.drill_COFA_getShapePointsWithCondition( _x, _y, type, range, $gameSystem._drill_ERA_curCondition );	//获取固定形状区域
 	this.drill_ERA_triggerArea( cal_area, a_id );
 }
 //==============================
 // * 范围动画 - 自定义区域（事件id，中心区域，条件）
 //==============================
 Game_Map.prototype.drill_ERA_triggerSelfArea = function( e_id, self_id, a_id ) {
-	var cal_area = this.drill_COFA_getCustomPointsByIdWithCondition( e_id, self_id, $gameSystem._drill_ERA_cur_condition );	//获取自定义区域
+	var cal_area = this.drill_COFA_getCustomPointsByIdWithCondition( e_id, self_id, $gameSystem._drill_ERA_curCondition );	//获取自定义区域
 	this.drill_ERA_triggerArea( cal_area, a_id );
 }
 //==============================

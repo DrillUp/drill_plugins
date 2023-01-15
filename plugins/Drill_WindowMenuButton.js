@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        控件 - 主菜单选项按钮管理器
+ * @plugindesc [v1.4]        控件 - 主菜单选项按钮管理器
  * @author Drill_up
  * 
  * @Drill_LE_param "菜单按钮-%d"
@@ -118,6 +118,8 @@
  * 修改了插件注释说明。
  * [v1.3]
  * 修改优化了插件内部结构。
+ * [v1.4]
+ * 优化了旧存档的识别与兼容。
  * 
  *
  * @param DEBUG-显示状态列表
@@ -513,22 +515,32 @@
     DrillUp.g_WMB_btn_save_zIndex = Number(DrillUp.parameters['保存按钮优先级'] || 2) ;
     DrillUp.g_WMB_btn_gameEnd_zIndex = Number(DrillUp.parameters['游戏结束按钮优先级'] || 1) ;
 	
+	//==============================
+	// * 变量获取 - 菜单按钮
+	//				（~struct~MenuBtn）
+	//==============================
+	DrillUp.drill_WMB_initMenuBtn = function( dataFrom ){
+		var data = {};
+		data['visible'] = String( dataFrom["是否初始显示"] || "true") == "true";
+		data['btn_name'] = String( dataFrom["按钮名称"] || "");
+		data['btn_key'] = String( dataFrom["按钮关键字"] || "");
+		data['zIndex'] = Number( dataFrom["按钮优先级"] || 0);
+		//data['command'] = JSON.parse( dataFrom["执行的插件指令"] || []);
+		data['script'] = String( dataFrom["执行的脚本"] || "");
+		data['commonEventEnable'] = String( dataFrom["是否执行公共事件"] || "false") == "true";
+		data['commonEventId'] = Number( dataFrom["执行的公共事件"] || 0);
+		data['pipeType'] = String( dataFrom["公共事件执行方式"] || "串行");
+		return data;
+	}
+	
 	/*-----------------菜单按钮------------------*/
 	DrillUp.g_WMB_btns_length = 20;
 	DrillUp.g_WMB_btns = [];
 	for (var i = 0; i < DrillUp.g_WMB_btns_length ; i++ ) {
 		if( DrillUp.parameters["菜单按钮-" + String(i+1) ] != undefined &&
 			DrillUp.parameters["菜单按钮-" + String(i+1) ] != "" ){
-			DrillUp.g_WMB_btns[i] = JSON.parse(DrillUp.parameters["菜单按钮-" + String(i+1)] );
-			DrillUp.g_WMB_btns[i]['visible'] = String(DrillUp.g_WMB_btns[i]["是否初始显示"] || "true") == "true";
-			DrillUp.g_WMB_btns[i]['btn_name'] = String(DrillUp.g_WMB_btns[i]["按钮名称"] || "");
-			DrillUp.g_WMB_btns[i]['btn_key'] = String(DrillUp.g_WMB_btns[i]["按钮关键字"] || "");
-			DrillUp.g_WMB_btns[i]['zIndex'] = Number(DrillUp.g_WMB_btns[i]["按钮优先级"] || 40);
-			//DrillUp.g_WMB_btns[i]['command'] = JSON.parse(DrillUp.g_WMB_btns[i]["执行的插件指令"] || []);
-			DrillUp.g_WMB_btns[i]['script'] = String(DrillUp.g_WMB_btns[i]["执行的脚本"] || "");
-			DrillUp.g_WMB_btns[i]['commonEventEnable'] = String(DrillUp.g_WMB_btns[i]["是否执行公共事件"] || "false") == "true";
-			DrillUp.g_WMB_btns[i]['commonEventId'] = Number(DrillUp.g_WMB_btns[i]["执行的公共事件"] || 0);
-			DrillUp.g_WMB_btns[i]['pipeType'] = String(DrillUp.g_WMB_btns[i]["公共事件执行方式"] || "串行");
+			var data = JSON.parse(DrillUp.parameters["菜单按钮-" + String(i+1)] );
+			DrillUp.g_WMB_btns[i] = DrillUp.drill_WMB_initMenuBtn( data );
 		}else{
 			DrillUp.g_WMB_btns[i] = null;
 		}
@@ -542,7 +554,8 @@
 var _drill_WMB_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_WMB_pluginCommand.call(this, command, args);
-	if (command === ">主菜单按钮") {
+	if( command === ">主菜单按钮" ){
+		
 		if(args.length == 4){
 			var temp1 = String(args[1]);
 			var type = String(args[3]);
@@ -553,8 +566,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				$gameSystem.drill_WMB_mapSetAttr(temp1,"visible",false);
 			}
 		}
-	}
-	if (command === ">主菜单按钮") {
+		
 		if(args.length == 6){
 			var temp1 = String(args[1]);
 			var temp2 = String(args[5]);
@@ -566,15 +578,74 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 };
 
-//=============================================================================
-// ** 指令容器
-//=============================================================================
-//==============================
-// * 指令容器 - 初始化
-//==============================
-var _drill_WMB_initialize = Game_System.prototype.initialize;
+
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_WMB_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_WMB_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-	_drill_WMB_initialize.call(this);
+    _drill_WMB_sys_initialize.call(this);
+	this.drill_WMB_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_WMB_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_WMB_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_WMB_saveEnabled == true ){	
+		$gameSystem.drill_WMB_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_WMB_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_WMB_initSysData = function() {
+	this.drill_WMB_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_WMB_checkSysData = function() {
+	this.drill_WMB_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_WMB_initSysData_Private = function() {
+	
 	// > 默认按钮
 	this._drill_WMB_maps = [];
 	this._drill_WMB_maps.push({"key":"item" ,"zIndex":DrillUp.g_WMB_btn_item_zIndex,"visible":DrillUp.g_WMB_btn_item_visible });
@@ -585,6 +656,7 @@ Game_System.prototype.initialize = function() {
 	this._drill_WMB_maps.push({"key":"options","zIndex":DrillUp.g_WMB_btn_options_zIndex,"visible":DrillUp.g_WMB_btn_options_visible });
 	this._drill_WMB_maps.push({"key":"save" ,"zIndex":DrillUp.g_WMB_btn_save_zIndex,"visible":DrillUp.g_WMB_btn_save_visible });
 	this._drill_WMB_maps.push({"key":"gameEnd" ,"zIndex":DrillUp.g_WMB_btn_gameEnd_zIndex,"visible":DrillUp.g_WMB_btn_gameEnd_visible });
+	
 	// > 自定义按钮
 	for(var i = 0;i< DrillUp.g_WMB_btns.length; i++){
 		var temp_btn = DrillUp.g_WMB_btns[i]
@@ -597,6 +669,19 @@ Game_System.prototype.initialize = function() {
 		this._drill_WMB_maps.push( data );
 	}
 	//alert(JSON.stringify(this._drill_WMB_maps));
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_WMB_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_WMB_maps == undefined ){
+		this.drill_WMB_initSysData();
+	}
+	
+	// > 容器的 空数据 检查
+	//	（此容器为增量容器，不能根据索引进行空检查）
 };
 //==============================
 // * 指令容器 - map插入属性
@@ -618,6 +703,7 @@ Game_System.prototype.drill_WMB_mapSetAttr = function( key,attr_name,attr_val ) 
 	// > 修改属性
 	map[attr_name] = attr_val;
 };
+
 
 //=============================================================================
 // ** 主菜单选项窗口

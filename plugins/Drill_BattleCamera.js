@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.7]        战斗 - 活动战斗镜头
+ * @plugindesc [v1.8]        战斗 - 活动战斗镜头
  * @author Drill_up
  * 
  * 
@@ -215,6 +215,8 @@
  * 优化了 旋转、缩放 的结构。
  * [v1.7]
  * 大幅度改进了插件的镜头控制结构。
+ * [v1.8]
+ * 优化了旧存档的识别与兼容。
  * 
  * 
  * 
@@ -763,21 +765,72 @@ Game_Interpreter.prototype.pluginCommand = function(command, args ){
 };
 
 
-//=============================================================================
-// ** 存储变量
-//=============================================================================	
-//==============================
-// ** 存储数据 - 初始化
-//==============================
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_BCa_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_BCa_sys_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function(){
-	_drill_BCa_sys_initialize.call(this);
-	this.drill_BCa_initData();
+Game_System.prototype.initialize = function() {
+    _drill_BCa_sys_initialize.call(this);
+	this.drill_BCa_initSysData();
 };
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_BCa_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_BCa_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_BCa_saveEnabled == true ){	
+		$gameSystem.drill_BCa_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_BCa_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_BCa_initSysData = function() {
+	this.drill_BCa_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_BCa_checkSysData = function() {
+	this.drill_BCa_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
 //==============================
-// ** 存储数据 - 初始化数据
+// * 存储数据 - 初始化数据（私有）
 //==============================
-Game_System.prototype.drill_BCa_initData = function() {
+Game_System.prototype.drill_BCa_initSysData_Private = function() {
 	
 	// > 控制器
 	var data = {
@@ -811,16 +864,19 @@ Game_System.prototype.drill_BCa_initData = function() {
     this._drill_cam_limit_height = this._drill_BCa_controller._drill_data['holderHeight'];
 };
 //==============================
-// * 存档文件 - 载入存档 - 数据赋值
+// * 存储数据 - 载入存档时检查数据（私有）
 //==============================
-var _drill_BCa_extractSaveContents = DataManager.extractSaveContents;
-DataManager.extractSaveContents = function(contents){
-	_drill_BCa_extractSaveContents.call( this, contents );
+Game_System.prototype.drill_BCa_checkSysData_Private = function() {
 	
-	if( $gameSystem._drill_BCa_controller == undefined ){	//（空数据时，强制赋值）
-		$gameSystem.drill_BCa_initData();
+	// > 旧存档数据自动补充
+	if( this._drill_BCa_controller == undefined ){
+		this.drill_BCa_initData();
 	}
+	
+	// > 容器的 空数据 检查
+	//	（不含容器）
 };
+
 
 //=============================================================================
 // ** 临时变量初始化

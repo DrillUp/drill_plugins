@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.0]        面板 - 全自定义商店界面
+ * @plugindesc [v2.1]        面板 - 全自定义商店界面
  * @author Drill_up
  * 
  * @Drill_LE_param "服务员-%d"
@@ -201,6 +201,8 @@
  * [v2.0]
  * 修复了 金钱窗口的字体大小 无法修改的bug。
  * 修复了服务员无法正常播放动作的bug。
+ * [v2.1]
+ * 优化了旧存档的识别与兼容。
  * 
  *
  * @param ----杂项----
@@ -1821,12 +1823,73 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 };
 
 
-//=============================================================================
-// * 存储数据初始化
-//=============================================================================
-var _drill_SSh_system_initialize = Game_System.prototype.initialize;
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_SSh_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_SSh_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-    _drill_SSh_system_initialize.call(this);
+    _drill_SSh_sys_initialize.call(this);
+	this.drill_SSh_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_SSh_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_SSh_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_SSh_saveEnabled == true ){	
+		$gameSystem.drill_SSh_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_SSh_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_SSh_initSysData = function() {
+	this.drill_SSh_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_SSh_checkSysData = function() {
+	this.drill_SSh_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_SSh_initSysData_Private = function() {
+	
 	this._drill_SSh_buy_rate = DrillUp.g_SSh_buyingPer;		//购买倍率
 	this._drill_SSh_buy_exPrize = 0;						//购买额外价格
 	this._drill_SSh_sell_rate = DrillUp.g_SSh_sellingPer;	//出售倍率
@@ -1835,7 +1898,18 @@ Game_System.prototype.initialize = function() {
 	this._drill_SSh_exchange_item = 0;						//交换物品
 	this._drill_SSh_exchange_unit = "";						//交换单位
 	this._drill_SSh_waitress_id = 1;						//服务员
-};	
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_SSh_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_SSh_buy_rate == undefined ){
+		this.drill_SSh_initSysData();
+	}
+	
+};
 
 
 //=============================================================================

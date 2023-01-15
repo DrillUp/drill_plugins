@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        声音 - 对话文字响声
+ * @plugindesc [v1.2]        声音 - 对话文字响声
  * @author Drill_up
  * 
  * @Drill_LE_param "声音-%d"
@@ -92,6 +92,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 添加了字数跳跃设置。
+ * [v1.2]
+ * 优化了旧存档的识别与兼容。
  * 
  * 
  * 
@@ -335,12 +337,8 @@
 		if( DrillUp.parameters['声音-' + String(i+1) ] != "" ){
 			var temp = JSON.parse(DrillUp.parameters['声音-' + String(i+1) ]);
 			DrillUp.g_VIMC_sound[i] = DrillUp.drill_VIMC_initSound( temp );
-			DrillUp.g_VIMC_sound[i]['id'] = Number(i)+1;
-			DrillUp.g_VIMC_sound[i]['inited'] = true;
 		}else{
-			DrillUp.g_VIMC_sound[i] = DrillUp.drill_VIMC_initSound( {} );
-			DrillUp.g_VIMC_sound[i]['id'] = Number(i)+1;
-			DrillUp.g_VIMC_sound[i]['inited'] = false;
+			DrillUp.g_VIMC_sound[i] = null;
 		}
 	}
 	
@@ -387,22 +385,92 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 };
 
-//=============================================================================
-// * 存储数据
-//=============================================================================
-//==============================
+
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_VIMC_saveEnabled = true;
+//##############################
 // * 存储数据 - 初始化
-//==============================
-var _drill_VIMC_system_initialize = Game_System.prototype.initialize;
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_VIMC_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-    _drill_VIMC_system_initialize.call(this);
+    _drill_VIMC_sys_initialize.call(this);
+	this.drill_VIMC_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_VIMC_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_VIMC_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_VIMC_saveEnabled == true ){	
+		$gameSystem.drill_VIMC_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_VIMC_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_VIMC_initSysData = function() {
+	this.drill_VIMC_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_VIMC_checkSysData = function() {
+	this.drill_VIMC_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_VIMC_initSysData_Private = function() {
 	
 	this._drill_VIMC_curSound = DrillUp.g_VIMC_default;			//当前声音（默认的）
 	this._drill_VIMC_curMessageSound = -1;						//当前声音（窗口字符的，优先级更高）
 	
 	this._drill_VIMC_playCount = 0;								//声音播放次数
 	this._drill_VIMC_charSkip = DrillUp.g_VIMC_charSkip;		//字数跳跃
-}
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_VIMC_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_VIMC_curSound == undefined ){
+		this.drill_VIMC_initSysData();
+	}
+	
+};
+
 
 //=============================================================================
 // * 窗口字符

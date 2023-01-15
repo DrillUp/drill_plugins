@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        战斗UI - 简单生命框
+ * @plugindesc [v1.4]        战斗UI - 简单生命框
  * @author Drill_up
  * 
  * @Drill_LE_param "生命框-%d"
@@ -166,6 +166,8 @@
  * 添加了 生命框 固定不随敌人移动 的功能。
  * [v1.3]
  * 优化了与战斗活动镜头的变换关系。
+ * [v1.4]
+ * 优化了旧存档的识别与兼容。
  *
  * 
  * 
@@ -726,11 +728,9 @@
 			DrillUp.parameters["生命框-" + String(i+1) ] != "" ){
 			DrillUp.g_ESH_data[i] = JSON.parse(DrillUp.parameters["生命框-" + String(i+1) ]);
 			DrillUp.g_ESH_data[i] = DrillUp.drill_ESH_initParam( DrillUp.g_ESH_data[i] );
-			DrillUp.g_ESH_data[i]['id'] = i+1;
 			DrillUp.g_ESH_data[i]['inited'] = true;
 		}else{
 			DrillUp.g_ESH_data[i] = DrillUp.drill_ESH_initParam( {} );
-			DrillUp.g_ESH_data[i]['id'] = i+1;
 			DrillUp.g_ESH_data[i]['inited'] = false;
 		}
 	}
@@ -845,17 +845,87 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 };
 
 
-//=============================================================================
-// ** 存储数据初始化
-//=============================================================================
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_ESH_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_ESH_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-	_drill_ESH_sys_initialize.call(this);
+    _drill_ESH_sys_initialize.call(this);
+	this.drill_ESH_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_ESH_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_ESH_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_ESH_saveEnabled == true ){	
+		$gameSystem.drill_ESH_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_ESH_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_ESH_initSysData = function() {
+	this.drill_ESH_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_ESH_checkSysData = function() {
+	this.drill_ESH_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_ESH_initSysData_Private = function() {
 	
 	this._drill_ESH_defaultIndex = DrillUp.g_ESH_defaultIndex - 1;		//默认生命框
-	//this._drill_ESH_actorStyleSeq = [];								//我方生命框样式初始化预设（临时）
-	//this._drill_ESH_enemyStyleSeq = [];								//敌方生命框样式初始化预设（临时）
-}
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_ESH_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_ESH_defaultIndex == undefined ){
+		this.drill_ESH_initSysData();
+	}
+	
+};
+
 //=============================================================================
 // ** 临时数据初始化
 //=============================================================================
@@ -867,7 +937,7 @@ Game_Temp.prototype.initialize = function() {
 	this._drill_ESH_enemySpriteTank = [];			//敌方生命框容器
 	this._drill_ESH_needRecreateEnemy = false;		//重建标记
 	this._drill_ESH_needRecreateActor = false;		//重建标记
-}
+};
 
 
 

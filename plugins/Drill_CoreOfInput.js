@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.7]        系统 - 输入设备核心
+ * @plugindesc [v1.8]        系统 - 输入设备核心
  * @author Drill_up、汗先生
  * 
  * 
@@ -116,6 +116,8 @@
  * 添加了开启/关闭键盘、手柄、鼠标、触屏的功能。
  * [v1.7]
  * 修复了触屏点击出错的bug。添加了 键盘或手柄方向键移动 开关功能。
+ * [v1.8]
+ * 优化了旧存档的识别与兼容。
  * 
  * 
  *
@@ -522,13 +524,111 @@ Game_Interpreter.prototype.pluginCommand = function( command, args ){
 }
 
 
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_COI_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_COI_sys_initialize = Game_System.prototype.initialize;
+Game_System.prototype.initialize = function() {
+    _drill_COI_sys_initialize.call(this);
+	this.drill_COI_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_COI_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_COI_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_COI_saveEnabled == true ){	
+		$gameSystem.drill_COI_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_COI_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_COI_initSysData = function() {
+	this.drill_COI_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_COI_checkSysData = function() {
+	this.drill_COI_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_COI_initSysData_Private = function() {
+	
+	// > 默认开关
+	this._drill_COI_battle_keyboard = DrillUp.g_COI_battle_keyboard;			//战斗界面-键盘
+	this._drill_COI_battle_pad = DrillUp.g_COI_battle_pad;						//战斗界面-手柄
+	this._drill_COI_battle_mouse = DrillUp.g_COI_battle_mouse;					//战斗界面-鼠标
+	this._drill_COI_battle_touchPad = DrillUp.g_COI_battle_touchPad;			//战斗界面-触屏
+	
+	this._drill_COI_map_keyboard = DrillUp.g_COI_map_keyboard;					//地图界面-键盘
+	this._drill_COI_map_pad = DrillUp.g_COI_map_pad;							//地图界面-手柄
+	this._drill_COI_map_KPMove = DrillUp.g_COI_map_KPMove;						//地图界面-键盘或手柄方向键移动
+	this._drill_COI_map_mouse = DrillUp.g_COI_map_mouse;						//地图界面-鼠标
+	this._drill_COI_map_touchPad = DrillUp.g_COI_map_touchPad;					//地图界面-触屏
+	this._drill_COI_map_mouseLeftMove = DrillUp.g_COI_map_mouseLeftMove;		//地图界面-鼠标左键移动
+	this._drill_COI_map_mouseRightMenu = DrillUp.g_COI_map_mouseRightMenu;		//地图界面-鼠标右键菜单
+	this._drill_COI_map_touchPadMenu = DrillUp.g_COI_map_touchPadMenu;			//地图界面-触屏双指菜单
+	
+	this._drill_COI_menu_keyboard = DrillUp.g_COI_menu_keyboard;				//菜单界面-键盘
+	this._drill_COI_menu_pad = DrillUp.g_COI_menu_pad;							//菜单界面-手柄
+	this._drill_COI_menu_mouse = DrillUp.g_COI_menu_mouse;						//菜单界面-鼠标
+	this._drill_COI_menu_touchPad = DrillUp.g_COI_menu_touchPad;				//菜单界面-触屏
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_COI_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_COI_map_mouseLeftMove == undefined ){
+		this.drill_COI_initSysData();
+	}
+	
+};
 
 
 //#############################################################################
 // ** 【标准模块】默认开关
 //#############################################################################
 //##############################
-// * 默认开关 - 战斗界面 - 键盘【标准函数】
+// * 默认开关 - 战斗界面 - 键盘启用/禁用【标准函数】
 //				
 //			参数：	> enable 布尔
 //			返回：	> 无
@@ -537,7 +637,7 @@ Game_System.prototype.drill_COI_Battle_setKeyboard = function( enable ){
 	this._drill_COI_battle_keyboard = enable;
 };
 //##############################
-// * 默认开关 - 战斗界面 - 手柄【标准函数】
+// * 默认开关 - 战斗界面 - 手柄启用/禁用【标准函数】
 //				
 //			参数：	> enable 布尔
 //			返回：	> 无
@@ -546,7 +646,7 @@ Game_System.prototype.drill_COI_Battle_setPad = function( enable ){
 	this._drill_COI_battle_pad = enable;
 };
 //##############################
-// * 默认开关 - 战斗界面 - 鼠标【标准函数】
+// * 默认开关 - 战斗界面 - 鼠标启用/禁用【标准函数】
 //				
 //			参数：	> enable 布尔
 //			返回：	> 无
@@ -555,7 +655,7 @@ Game_System.prototype.drill_COI_Battle_setMouse = function( enable ){
 	this._drill_COI_battle_mouse = enable;
 };
 //##############################
-// * 默认开关 - 战斗界面 - 触屏【标准函数】
+// * 默认开关 - 战斗界面 - 触屏启用/禁用【标准函数】
 //				
 //			参数：	> enable 布尔
 //			返回：	> 无
@@ -565,7 +665,7 @@ Game_System.prototype.drill_COI_Battle_setTouchPad = function( enable ){
 };
 
 //##############################
-// * 默认开关 - 地图界面 - 键盘【标准函数】
+// * 默认开关 - 地图界面 - 键盘启用/禁用【标准函数】
 //				
 //			参数：	> enable 布尔
 //			返回：	> 无
@@ -574,7 +674,7 @@ Game_System.prototype.drill_COI_Map_setKeyboard = function( enable ){
 	this._drill_COI_map_keyboard = enable;
 };
 //##############################
-// * 默认开关 - 地图界面 - 手柄【标准函数】
+// * 默认开关 - 地图界面 - 手柄启用/禁用【标准函数】
 //				
 //			参数：	> enable 布尔
 //			返回：	> 无
@@ -583,7 +683,7 @@ Game_System.prototype.drill_COI_Map_setPad = function( enable ){
 	this._drill_COI_map_pad = enable;
 };
 //##############################
-// * 默认开关 - 地图界面 - 鼠标左键移动【标准函数】
+// * 默认开关 - 地图界面 - 键盘/手柄控制移动【标准函数】
 //				
 //			参数：	> enable 布尔
 //			返回：	> 无
@@ -592,7 +692,7 @@ Game_System.prototype.drill_COI_Map_setKPMove = function( enable ){
 	this._drill_COI_map_KPMove = enable;
 };
 //##############################
-// * 默认开关 - 地图界面 - 鼠标【标准函数】
+// * 默认开关 - 地图界面 - 鼠标启用/禁用【标准函数】
 //				
 //			参数：	> enable 布尔
 //			返回：	> 无
@@ -601,7 +701,7 @@ Game_System.prototype.drill_COI_Map_setMouse = function( enable ){
 	this._drill_COI_map_mouse = enable;
 };
 //##############################
-// * 默认开关 - 地图界面 - 触屏【标准函数】
+// * 默认开关 - 地图界面 - 触屏启用/禁用【标准函数】
 //				
 //			参数：	> enable 布尔
 //			返回：	> 无
@@ -638,7 +738,7 @@ Game_System.prototype.drill_COI_Map_setTouchPadMenu = function( enable ){
 };
 
 //##############################
-// * 默认开关 - 菜单界面 - 键盘【标准函数】
+// * 默认开关 - 菜单界面 - 键盘启用/禁用【标准函数】
 //				
 //			参数：	> enable 布尔
 //			返回：	> 无
@@ -647,7 +747,7 @@ Game_System.prototype.drill_COI_Menu_setKeyboard = function( enable ){
 	this._drill_COI_menu_keyboard = enable;
 };
 //##############################
-// * 默认开关 - 菜单界面 - 手柄【标准函数】
+// * 默认开关 - 菜单界面 - 手柄启用/禁用【标准函数】
 //				
 //			参数：	> enable 布尔
 //			返回：	> 无
@@ -656,7 +756,7 @@ Game_System.prototype.drill_COI_Menu_setPad = function( enable ){
 	this._drill_COI_menu_pad = enable;
 };
 //##############################
-// * 默认开关 - 菜单界面 - 鼠标【标准函数】
+// * 默认开关 - 菜单界面 - 鼠标启用/禁用【标准函数】
 //				
 //			参数：	> enable 布尔
 //			返回：	> 无
@@ -665,7 +765,7 @@ Game_System.prototype.drill_COI_Menu_setMouse = function( enable ){
 	this._drill_COI_menu_mouse = enable;
 };
 //##############################
-// * 默认开关 - 菜单界面 - 触屏【标准函数】
+// * 默认开关 - 菜单界面 - 触屏启用/禁用【标准函数】
 //				
 //			参数：	> enable 布尔
 //			返回：	> 无
@@ -676,32 +776,6 @@ Game_System.prototype.drill_COI_Menu_setTouchPad = function( enable ){
 //=============================================================================
 // ** 默认开关（接口实现）
 //=============================================================================
-//==============================
-// * 默认开关 - 存储数据初始化
-//==============================
-var _drill_COI_DefaultSwitch_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function(){
-	_drill_COI_DefaultSwitch_initialize.call(this);
-	
-	this._drill_COI_battle_keyboard = DrillUp.g_COI_battle_keyboard;			//战斗界面-键盘
-	this._drill_COI_battle_pad = DrillUp.g_COI_battle_pad;						//战斗界面-手柄
-	this._drill_COI_battle_mouse = DrillUp.g_COI_battle_mouse;					//战斗界面-鼠标
-	this._drill_COI_battle_touchPad = DrillUp.g_COI_battle_touchPad;			//战斗界面-触屏
-	
-	this._drill_COI_map_keyboard = DrillUp.g_COI_map_keyboard;					//地图界面-键盘
-	this._drill_COI_map_pad = DrillUp.g_COI_map_pad;							//地图界面-手柄
-	this._drill_COI_map_KPMove = DrillUp.g_COI_map_KPMove;						//地图界面-键盘或手柄方向键移动
-	this._drill_COI_map_mouse = DrillUp.g_COI_map_mouse;						//地图界面-鼠标
-	this._drill_COI_map_touchPad = DrillUp.g_COI_map_touchPad;					//地图界面-触屏
-	this._drill_COI_map_mouseLeftMove = DrillUp.g_COI_map_mouseLeftMove;		//地图界面-鼠标左键移动
-	this._drill_COI_map_mouseRightMenu = DrillUp.g_COI_map_mouseRightMenu;		//地图界面-鼠标右键菜单
-	this._drill_COI_map_touchPadMenu = DrillUp.g_COI_map_touchPadMenu;			//地图界面-触屏双指菜单
-	
-	this._drill_COI_menu_keyboard = DrillUp.g_COI_menu_keyboard;				//菜单界面-键盘
-	this._drill_COI_menu_pad = DrillUp.g_COI_menu_pad;							//菜单界面-手柄
-	this._drill_COI_menu_mouse = DrillUp.g_COI_menu_mouse;						//菜单界面-鼠标
-	this._drill_COI_menu_touchPad = DrillUp.g_COI_menu_touchPad;				//菜单界面-触屏
-}
 //==============================
 // * 默认开关 - 非菜单界面标记
 //==============================

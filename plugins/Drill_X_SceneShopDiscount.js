@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        控件 - 商店节假日的折扣[扩展]
+ * @plugindesc [v1.2]        控件 - 商店节假日的折扣[扩展]
  * @author Drill_up
  * 
  * @Drill_LE_param "折扣-%d"
@@ -110,6 +110,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 修复了使用 自定义单图背景 模式时，切换折扣样式造成错误叠加的bug。
+ * [v1.2]
+ * 优化了旧存档的识别与兼容。
  * 
  * 
  * 
@@ -776,12 +778,8 @@
 			DrillUp.parameters["折扣-" + String(i+1) ] != "" ){
 			var temp = JSON.parse(DrillUp.parameters["折扣-" + String(i+1) ]);
 			DrillUp.g_XSSD_list[i] = DrillUp.drill_XSSD_initShopDiscount( temp );
-			DrillUp.g_XSSD_list[i]['id'] = Number(i)+1;
-			DrillUp.g_XSSD_list[i]['inited'] = true;
 		}else{
-			DrillUp.g_XSSD_list[i] = DrillUp.drill_XSSD_initShopDiscount( {} );
-			DrillUp.g_XSSD_list[i]['id'] = Number(i)+1;
-			DrillUp.g_XSSD_list[i]['inited'] = false;
+			DrillUp.g_XSSD_list[i] = null;		//（强制设为空值，节约存储资源）
 		}
 	}
 	
@@ -829,6 +827,7 @@ var _drill_XSSD_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_XSSD_pluginCommand.call(this, command, args);
 	if( command === ">商店节假日的折扣" ){
+		
 		if(args.length == 6){
 			var temp1 = String(args[1]);
 			var type = String(args[3]);
@@ -840,23 +839,33 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp1 = Number(temp1) -1;
 				
 				if( type == "应用到全自定义商店界面" && temp2 == "开启" ){
-					$gameSystem._drill_XSSD_list[ temp1 ]['shopEnabled'] = true;
+					var data = $gameSystem._drill_XSSD_list[ temp1 ];
+					if( data == undefined ){ return; }
+					data['shopEnabled'] = true;
 				}
 				if( type == "应用到全自定义商店界面" && temp2 == "关闭" ){
-					$gameSystem._drill_XSSD_list[ temp1 ]['shopEnabled'] = false;
+					var data = $gameSystem._drill_XSSD_list[ temp1 ];
+					if( data == undefined ){ return; }
+					data['shopEnabled'] = false;
 				}
 				if( type == "应用到限量商店界面" && temp2 == "开启" ){
-					$gameSystem._drill_XSSD_list[ temp1 ]['limitShopEnabled'] = true;
+					var data = $gameSystem._drill_XSSD_list[ temp1 ];
+					if( data == undefined ){ return; }
+					data['limitShopEnabled'] = true;
 				}
 				if( type == "应用到限量商店界面" && temp2 == "关闭" ){
-					$gameSystem._drill_XSSD_list[ temp1 ]['limitShopEnabled'] = false;
+					var data = $gameSystem._drill_XSSD_list[ temp1 ];
+					if( data == undefined ){ return; }
+					data['limitShopEnabled'] = false;
 				}
 				if( type == "修改指定限量商店可用" && temp2.indexOf("限量商店[") != -1 ){
 					temp2 = temp2.replace("限量商店[","");
 					temp2 = temp2.replace("]","");
 					temp2 = temp2.split(",");	//（直接按字符串输入）
-					$gameSystem._drill_XSSD_list[ temp1 ]['limitShopAllDiscount'] = false;
-					$gameSystem._drill_XSSD_list[ temp1 ]['limitShopIdList'] = temp2;
+					var data = $gameSystem._drill_XSSD_list[ temp1 ];
+					if( data == undefined ){ return; }
+					data['limitShopAllDiscount'] = false;
+					data['limitShopIdList'] = temp2;
 				}
 				
 			}
@@ -866,19 +875,109 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 };
 
 
-//=============================================================================
-// * 存储数据
-//=============================================================================
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_XSSD_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_XSSD_sys_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function() {	
-	_drill_XSSD_sys_initialize.call(this);
+Game_System.prototype.initialize = function() {
+    _drill_XSSD_sys_initialize.call(this);
+	this.drill_XSSD_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_XSSD_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_XSSD_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_XSSD_saveEnabled == true ){	
+		$gameSystem.drill_XSSD_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_XSSD_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_XSSD_initSysData = function() {
+	this.drill_XSSD_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_XSSD_checkSysData = function() {
+	this.drill_XSSD_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_XSSD_initSysData_Private = function() {
 	
 	this._drill_XSSD_list = [];
 	for( var i=0; i < DrillUp.g_XSSD_list.length; i++ ){
-		var temp_data = DrillUp.g_XSSD_list[i];		//（直接存储全部数据）
+		var temp_data = DrillUp.g_XSSD_list[i];	
+		if( temp_data == undefined ){ continue; }	//（空数据不存）
 		this._drill_XSSD_list[i] = JSON.parse(JSON.stringify( temp_data ));
 	}
 };
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_XSSD_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_XSSD_list == undefined ){
+		this.drill_XSSD_initSysData();
+	}
+	
+	// > 容器的 空数据 检查
+	for(var i = 0; i < DrillUp.g_XSSD_list.length; i++ ){
+		var temp_data = DrillUp.g_XSSD_list[i];
+		
+		// > 已配置（undefined表示未配置的空数据）
+		if( temp_data != undefined ){
+			
+			// > 未存储的，重新初始化
+			if( this._drill_XSSD_list[i] == undefined ){
+				this._drill_XSSD_list[i] = JSON.parse(JSON.stringify( temp_data ));
+			
+			// > 已存储的，跳过
+			}else{
+				//（不操作）
+			}
+		}
+	}
+};
+
 
 //=============================================================================
 // * 临时数据
@@ -910,7 +1009,6 @@ Scene_MenuBase.prototype.initialize = function() {
 	for( var i = 0; i < $gameSystem._drill_XSSD_list.length; i++ ){
 		var temp_data = $gameSystem._drill_XSSD_list[i];
 		if( temp_data == undefined ){ continue; }
-		if( temp_data['inited'] != true ){ continue; }
 		if( this.drill_XSSD_isEnableDiscount( temp_data ) != true ){ continue; }
 		
 		$gameTemp._drill_XSSD_dataTank[i] = JSON.parse(JSON.stringify( temp_data ));	//深拷贝数据（杜绝引用造成的修改）

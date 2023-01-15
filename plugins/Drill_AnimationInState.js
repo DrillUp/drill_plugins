@@ -178,6 +178,30 @@
 //
 
 //=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_AISt_tipCurName = "Drill_AnimationInState.js 动画-并行动画绑定于状态";
+	DrillUp.g_AISt_tipBasePluginList = ["Drill_AnimationInParallel.js 动画-并行战斗动画"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_AISt_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_AISt_tipBasePluginList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_AISt_tipCurName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_AISt_tipBasePluginList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_AISt_tipBasePluginList[i];
+		}
+		return message;
+	};
+	
+//=============================================================================
 // ** 变量获取
 //=============================================================================
 　　var Imported = Imported || {};
@@ -444,9 +468,7 @@ Game_Action.prototype.apply = function(target) {
 //=============================================================================
 }else{
 		Imported.Drill_AnimationInState = false;
-		alert(
-			"【Drill_AnimationInState.js  动画 - 并行动画绑定于状态】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_AnimationInParallel  动画-并行战斗动画"
-		);
+		var tip = DrillUp.drill_AISt_getPluginTip_NoBasePlugin();
+		alert( tip );
 }
 

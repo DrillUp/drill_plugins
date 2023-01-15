@@ -1006,16 +1006,6 @@ Game_Temp.prototype.drill_PCE_getParabolicThree = function( x1,y1,x2,y2,x3,y3 ){
 }
 
 
-//=============================================================================
-// ** 存储变量初始化
-//=============================================================================
-var _drill_PCE_sys_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function() {
-    _drill_PCE_sys_initialize.call(this);
-	
-	//没有存储的内容
-}
-
 
 //=============================================================================
 // ** 图片贴图

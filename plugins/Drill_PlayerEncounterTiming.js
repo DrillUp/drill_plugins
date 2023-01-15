@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        公共事件 - 遇敌时
+ * @plugindesc [v1.3]        公共事件 - 遇敌时
  * @author Drill_up
  * 
  * @Drill_LE_param "遇敌触发-%d"
@@ -87,6 +87,8 @@
  * 添加了插件指令设置。
  * [v1.2]
  * 修改了插件分类。
+ * [v1.3]
+ * 优化了旧存档的识别与兼容。
  * 
  *
  *
@@ -434,15 +436,72 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 };
 
 
-//=============================================================================
-// * 存储数据
-//=============================================================================
-//==============================
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_PET_saveEnabled = true;
+//##############################
 // * 存储数据 - 初始化
-//==============================
-var _drill_PET_system_initialize = Game_System.prototype.initialize;
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_PET_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-    _drill_PET_system_initialize.call(this);
+    _drill_PET_sys_initialize.call(this);
+	this.drill_PET_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_PET_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_PET_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_PET_saveEnabled == true ){	
+		$gameSystem.drill_PET_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_PET_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_PET_initSysData = function() {
+	this.drill_PET_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_PET_checkSysData = function() {
+	this.drill_PET_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_PET_initSysData_Private = function() {
 	
 	this._drill_PET_dataTank = [];
 	for(var i=0; i < DrillUp.g_PET_trigger.length; i++){
@@ -451,25 +510,22 @@ Game_System.prototype.initialize = function() {
 		this._drill_PET_dataTank[i] = JSON.parse(JSON.stringify( temp_data ));
 		this._drill_PET_dataTank[i]['activeCount'] = 0;
 	}
-}
+};
 //==============================
-// * 管理器 - 读取数据
+// * 存储数据 - 载入存档时检查数据（私有）
 //==============================
-var _drill_PET_extractSaveContents = DataManager.extractSaveContents;
-DataManager.extractSaveContents = function( contents ){
-	_drill_PET_extractSaveContents.call( this, contents );
-	$gameSystem.drill_PET_checkData();
-}
-//==============================
-// * 管理器 - 检查数据
-//==============================
-Game_System.prototype.drill_PET_checkData = function() {
+Game_System.prototype.drill_PET_checkSysData_Private = function() {
 	
-	// > 绑定数据容器
+	// > 旧存档数据自动补充
+	if( this._drill_PET_dataTank == undefined ){
+		this.drill_PET_initSysData();
+	}
+	
+	// > 容器的 空数据 检查
 	for(var i = 0; i < DrillUp.g_PET_trigger.length; i++ ){
 		var temp_data = DrillUp.g_PET_trigger[i];
 		
-		// > 已配置
+		// > 已配置（undefined表示未配置的空数据）
 		if( temp_data != undefined ){
 			
 			// > 未存储的，重新初始化

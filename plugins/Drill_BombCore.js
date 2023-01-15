@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.6]        炸弹人 - 游戏核心
+ * @plugindesc [v1.7]        炸弹人 - 游戏核心
  * @author Drill_up
  * 
  * @help  
@@ -208,6 +208,8 @@
  * 添加了与鼠标操作面板的交互内容。
  * [v1.6]
  * 修复了lv1激活出错的bug，改进了移动路线结构。
+ * [v1.7]
+ * 优化了旧存档的识别与兼容。
  * 
  * 
  * @param ----能力----
@@ -425,6 +427,7 @@
 //			1.小爱丽丝寻找目标时，靠近敌人时不识别堵路情况。
 //			  这样会出现两个对手在隔一个堵路时而相互观望的情况。（已解决）
 //			2.切换了地图后，炸弹放置就爆炸问题（事件复制器的坑，复制前需要清除独立开关。）
+//
 
 //=============================================================================
 // ** 变量获取
@@ -474,7 +477,8 @@ var _drill_BoC_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_BoC_pluginCommand.call(this, command, args);
 	if( command === ">炸弹人控制台" ){
-		if(args.length == 10){
+		
+		if( args.length == 10 ){
 			var type = String(args[1]);
 			var temp1 = Number(args[3]);
 			var temp2 = Number(args[5]);
@@ -493,7 +497,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				$gameMap.drill_BoC_putBomb(input_data);
 			}
 		}
-		if(args.length == 6){			//>炸弹人控制台 : 玩家 : 阵营 : 仇恨单位
+		if( args.length == 6 ){			//>炸弹人控制台 : 玩家 : 阵营 : 仇恨单位
 			var temp1 = String(args[1]);
 			var type = String(args[3]);
 			var temp2 = String(args[5]);
@@ -526,7 +530,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				$gameTemp._drill_BoC_needRestatistics_Group = true;
 			}
 		}
-		if(args.length == 8){			//>炸弹人控制台 : 事件[1] : 火力 : 增加 : 1
+		if( args.length == 8 ){			//>炸弹人控制台 : 事件[1] : 火力 : 增加 : 1
 			var temp1 = String(args[1]);
 			var type = String(args[3]);
 			var temp2 = String(args[5]);
@@ -621,7 +625,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				}
 			}
 		}
-		if(args.length == 2){
+		if( args.length == 2 ){
 			var type = String(args[1]);
 			if( type == "关闭放置炸弹" ){
 				$gameSystem._drill_BoC_canPutBomb = false;
@@ -648,15 +652,85 @@ Game_Map.prototype.drill_BoC_isEventExist = function( e_id ){
 };
 
 
-
-//=============================================================================
-// ** 存储变量初始化
-//=============================================================================
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_BoC_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_BoC_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
     _drill_BoC_sys_initialize.call(this);
+	this.drill_BoC_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_BoC_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_BoC_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_BoC_saveEnabled == true ){	
+		$gameSystem.drill_BoC_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_BoC_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_BoC_initSysData = function() {
+	this.drill_BoC_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_BoC_checkSysData = function() {
+	this.drill_BoC_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_BoC_initSysData_Private = function() {
 	this._drill_BoC_canPutBomb = true;
-}
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_BoC_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_BoC_canPutBomb == undefined ){
+		this.drill_BoC_initSysData();
+	}
+	
+};
 
 
 //=============================================================================

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.1]        行走图 - 图块同步镜像
+ * @plugindesc [v2.3]        行走图 - 图块同步镜像
  * @author Drill_up
  * 
  * @Drill_LE_param "地图镜面-%d"
@@ -20,10 +20,13 @@
  * =============================================================================
  * 使得你可以让图块反射出与基准线垂直的镜像。
  * ★★尽量放在所有 行走图效果 的插件后面，放后面可以支持更多叠加效果★★ 
- * 
+ *
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该插件可以单独使用。
+ * 该插件 不能 单独使用。
+ * 需要基于核心插件，才能运行。
+ * 基于：
+ *   - Drill_CoreOfEventFrame        行走图-行走图优化核心
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -231,6 +234,10 @@
  * 修正了地图备注，以及添加了 毛玻璃效果 。
  * [v2.1]
  * 兼容了 事件彻底删除时，也包括删除镜像的功能。
+ * [v2.2]
+ * 调整了与行走图优化核心的兼容结构，减少性能消耗。
+ * [v2.3]
+ * 优化了旧存档的识别与兼容。
  * 
  * 
  *
@@ -904,6 +911,12 @@
 	
 	
 //=============================================================================
+// * >>>>基于插件检测>>>>
+//=============================================================================
+if( Imported.Drill_CoreOfEventFrame ){
+	
+	
+//=============================================================================
 // ** 资源文件夹
 //=============================================================================
 ImageManager.load_MapReflection = function(filename) {
@@ -1045,14 +1058,86 @@ Game_Map.prototype.drill_LSR_isEventExist = function( e_id ){
 };
 
 
-//=============================================================================
-// ** 存储变量初始化
-//=============================================================================
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_LSR_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_LSR_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-	_drill_LSR_sys_initialize.call(this);
+    _drill_LSR_sys_initialize.call(this);
+	this.drill_LSR_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_LSR_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_LSR_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_LSR_saveEnabled == true ){	
+		$gameSystem.drill_LSR_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_LSR_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_LSR_initSysData = function() {
+	this.drill_LSR_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_LSR_checkSysData = function() {
+	this.drill_LSR_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_LSR_initSysData_Private = function() {
+	
     this._drill_LSR_tileEdge = DrillUp.g_LSR_edge ;		//同步镜像边
     this._drill_LSR_mode = DrillUp.g_LSR_mode ;			//同步镜像模式
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_LSR_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_LSR_tileEdge == undefined ){
+		this.drill_LSR_initSysData();
+	}
+	
 };
 
 
@@ -1245,19 +1330,6 @@ Game_CharacterBase.prototype.drill_reverseOffsetY = function(){
 	return yy;
 }
 
-//==============================
-// * 事件贴图 - 固定帧初始值
-//==============================
-var _Drill_LSR_s_updatePosition = Sprite_Character.prototype.updatePosition;
-Sprite_Character.prototype.updatePosition = function() {
-	_Drill_LSR_s_updatePosition.call(this);
-	if( this.scale.x != 1 ){ this.scale.x = 1; }
-	if( this.scale.y != 1 ){ this.scale.y = 1; }
-	//if( this.rotation != 0 ){ this.rotation = 0; }
-	//if( this.skew.x != 0 ){ this.skew.x = 0; }
-	//if( this.skew.y != 0 ){ this.skew.y = 0; }
-	//从这里开始，参数都被固定值（不需要考虑多次update的叠加影响）
-};
 
 //=============================================================================
 // ** 地图图层
@@ -1454,27 +1526,15 @@ Drill_Sprite_LSR.prototype.initialize = function(character) {
 	this._drill_zIndex = 0;				//镜像之间的先后顺序
 };
 //==============================
-// * 优化 - 镜头之外的事件，不刷新镜像
-//==============================
-Drill_Sprite_LSR.prototype.drill_LSR_isNearTheScreen = function() {
-	if( !this._character ){ return false; }	//无事件的贴图直接跳过
-	
-    var gw = Graphics.width + 48*4;		//加宽识别范围
-    var gh = Graphics.height + 48*4;
-    var tw = $gameMap.tileWidth();
-    var th = $gameMap.tileHeight();
-    var px = this._character.scrolledX() * tw + tw / 2 - gw / 2;
-    var py = this._character.scrolledY() * th + th / 2 - gh / 2;
-    return px >= -gw && px <= gw && py >= -gh && py <= gh;
-}
-//==============================
 // * 镜像贴图 - 帧刷新
 //==============================
 Drill_Sprite_LSR.prototype.update = function() {
 	
-	// > 性能优化
-	if( DrillUp.g_LSR_auto_close == true && 
-		this.drill_LSR_isNearTheScreen() == false ){	//不在镜头范围内，直接关闭update（能直接节省210ms左右性能）
+	// > 【行走图 - 行走图优化核心】优化策略 - 必要执行函数
+	this.drill_COEF_updateImportant();
+	
+	// > 【行走图 - 行走图优化核心】优化策略 - 阻塞判定
+	if( this.drill_COEF_isOptimizationPassed() == false ){ 
 		this.visible = false;
 		return;
 	}
@@ -1699,6 +1759,18 @@ Drill_Sprite_LSR_Mask.prototype.update = function() {
 		
 		this.bitmap = n_bitmap;
 	}
+}
+
+
+//=============================================================================
+// * <<<<基于插件检测<<<<
+//=============================================================================
+}else{
+		Imported.Drill_LayerSynchronizedReflection = false;
+		alert(
+			"【Drill_LayerSynchronizedReflection.js 行走图-图块同步镜像】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
+			"\n- Drill_CoreOfEventFrame 行走图-行走图优化核心"
+		);
 }
 
 

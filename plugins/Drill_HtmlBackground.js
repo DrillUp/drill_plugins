@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.5]        游戏窗体 - 黑边背景
+ * @plugindesc [v1.6]        游戏窗体 - 黑边背景
  * @author Drill_up
  * 
  * @Drill_LE_param "黑边背景-%d"
@@ -130,6 +130,8 @@
  * 优化了内部渲染器结构。
  * [v1.5]
  * 修改了插件分类。
+ * [v1.6]
+ * 修复了旧存档加载此插件时报错的bug。
  * 
  *
  *
@@ -157,6 +159,14 @@
  * @off 不隐藏
  * @desc 如果你的黑边背景边框的厚度为0，浏览器非常有可能会自动显示滚动条，因为背景挤占了html的空间。
  * @default false
+ * 
+ * @param 是否开启参数存储
+ * @parent ---常规---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc 如果你希望 插件指令对黑边背景的变化 能够被存入存档中，开启此开关即可。
+ * @default true
  *
  * @param ---贴边图像---
  * @desc 
@@ -394,10 +404,29 @@
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_HtmlBackground');
 	
+	//==============================
+	// * 变量获取 - 黑边背景
+	//				（~struct~BlackBackground）
+	//==============================
+	DrillUp.drill_HB_initBlackBackground = function( dataFrom ){
+		var data = {};
+		data['visible'] = String( dataFrom["初始是否显示"] || "false") == "true";
+		data['src_img'] = String( dataFrom["资源-背景"] || "");
+		data['x'] = Number( dataFrom["平移-背景 X"] || 0);
+		data['y'] = Number( dataFrom["平移-背景 Y"] || 0);
+		data['opacity'] = Number( dataFrom["透明度"] || 255);
+		//data['blendMode'] = Number( dataFrom["混合模式"] || 0);
+		data['x_speed'] = Number( dataFrom["背景X速度"] || 0);
+		data['y_speed'] = Number( dataFrom["背景Y速度"] || 0);
+		data['zIndex'] = Number( dataFrom["图片层级"] || 4);
+		return data;
+	}
+	
 	/*----------------常规---------------*/
 	DrillUp.g_HB_background_time = Number(DrillUp.parameters["背景显现时长"] || 120);
 	DrillUp.g_HB_padding = Number(DrillUp.parameters["背景外框厚度"] || 4);
 	DrillUp.g_HB_scrollDisable = String(DrillUp.parameters["是否隐藏网页滚动条"] || "false" ) == "true";
+	DrillUp.g_HB_saveEnabled = String(DrillUp.parameters["是否开启参数存储"] || "false") == "true" ;
 	
 	/*----------------贴边图像---------------*/
 	DrillUp.g_HB_weltImg_width = Number(DrillUp.parameters["显现条件-宽度"] || 100);
@@ -414,18 +443,12 @@
 	DrillUp.g_HB_background_list = [];
 	for (var i = 0; i < DrillUp.g_HB_background_list_length; i++) {
 		if( DrillUp.parameters['黑边背景-' + String(i+1) ] != "" ){
-			DrillUp.g_HB_background_list[i] = JSON.parse(DrillUp.parameters['黑边背景-' + String(i+1) ]);
-			DrillUp.g_HB_background_list[i]['visible'] = String(DrillUp.g_HB_background_list[i]["初始是否显示"] || "false") == "true";
-			DrillUp.g_HB_background_list[i]['src_img'] = String(DrillUp.g_HB_background_list[i]["资源-背景"] || "");
-			DrillUp.g_HB_background_list[i]['x'] = Number(DrillUp.g_HB_background_list[i]["平移-背景 X"] || 0);
-			DrillUp.g_HB_background_list[i]['y'] = Number(DrillUp.g_HB_background_list[i]["平移-背景 Y"] || 0);
-			DrillUp.g_HB_background_list[i]['opacity'] = Number(DrillUp.g_HB_background_list[i]["透明度"] || 255);
-			//DrillUp.g_HB_background_list[i]['blendMode'] = Number(DrillUp.g_HB_background_list[i]["混合模式"] || 0);
-			DrillUp.g_HB_background_list[i]['x_speed'] = Number(DrillUp.g_HB_background_list[i]["背景X速度"] || 0);
-			DrillUp.g_HB_background_list[i]['y_speed'] = Number(DrillUp.g_HB_background_list[i]["背景Y速度"] || 0);
-			DrillUp.g_HB_background_list[i]['zIndex'] = Number(DrillUp.g_HB_background_list[i]["图片层级"] || 4);
+			var data = JSON.parse(DrillUp.parameters['黑边背景-' + String(i+1) ]);
+			DrillUp.g_HB_background_list[i] = DrillUp.drill_HB_initBlackBackground( data );
+			DrillUp.g_HB_background_list[i]['inited'] = true;
 		}else{
-			DrillUp.g_HB_background_list[i] = [];
+			DrillUp.g_HB_background_list[i] = DrillUp.drill_HB_initBlackBackground( {} );
+			DrillUp.g_HB_background_list[i]['inited'] = false;
 		}
 	}
 	
@@ -440,70 +463,71 @@ ImageManager.load_SpecialLayer = function(filename) {
 // * 插件指令
 //=============================================================================
 var _drill_HB_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
-	_drill_HB_pluginCommand.call(this, command, args);
-	if (command === '>黑边背景') {		//>黑边背景 : 背景 : 3 : 显示
-		if(args.length == 6){
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
+	_drill_HB_pluginCommand.call( this, command, args );
+	if( command === ">黑边背景" ){		//>黑边背景 : 背景 : 3 : 显示
+	
+		if( args.length == 6 ){
 			var target = String(args[1]);
 			var temp1 = String(args[3]);
 			var type = String(args[5]);
-			if( target == '背景' ){
-				if (type == '显示') {
+			if( target == "背景" ){
+				if( type == "显示" ){
 					$gameSystem._drill_HB_dataTank[ Number(temp1)-1 ].visible = true;
 				}
-				if (type == '隐藏') {
+				if( type == "隐藏" ){
 					$gameSystem._drill_HB_dataTank[ Number(temp1)-1 ].visible = false;
 				}
 			}
-			if( target == '贴边图像' ){
-				if (temp1 == '替换左侧图像') {
+			if( target == "贴边图像" ){
+				if( temp1 == "替换左侧图像" ){
 					$gameSystem._drill_HB_weltImg_left = DrillUp.g_HB_weltImg_backImg[ Number(type)-1 ];
 				}
-				if (temp1 == '替换右侧图像') {
+				if( temp1 == "替换右侧图像" ){
 					$gameSystem._drill_HB_weltImg_right = DrillUp.g_HB_weltImg_backImg[ Number(type)-1 ];
 				}
-				if (temp1 == '替换上侧图像') {
+				if( temp1 == "替换上侧图像" ){
 					$gameSystem._drill_HB_weltImg_up = DrillUp.g_HB_weltImg_backImg[ Number(type)-1 ];
 				}
-				if (temp1 == '替换下侧图像') {
+				if( temp1 == "替换下侧图像" ){
 					$gameSystem._drill_HB_weltImg_down = DrillUp.g_HB_weltImg_backImg[ Number(type)-1 ];
 				}
 			}
 		}
-		if(args.length == 8){
+		if( args.length == 8 ){
 			var target = String(args[1]);
 			var temp1 = Number(args[3]) - 1;
 			var type = String(args[5]);
 			var temp2 = Number(args[7]);
-			if( target == '背景' ){
-				if (type == '变坐标X') {
+			if( target == "背景" ){
+				if( type == "变坐标X" ){
 					$gameSystem._drill_HB_dataTank[temp1].tar_x = temp2;
 				}
-				if (type == '变坐标Y') {
+				if( type == "变坐标Y" ){
 					$gameSystem._drill_HB_dataTank[temp1].tar_y = temp2;
 				}
-				if (type == '变速度X') {
+				if( type == "变速度X" ){
 					$gameSystem._drill_HB_dataTank[temp1].tar_x_speed = temp2;
 				}
-				if (type == '变速度Y') {
+				if( type == "变速度Y" ){
 					$gameSystem._drill_HB_dataTank[temp1].tar_y_speed = temp2;
 				}
 			}
 		}
-		if(args.length == 4){
+		if( args.length == 4 ){
 			var target = String(args[1]);
 			var temp1 = String(args[3]);
-			if( target == '贴边图像' ){
-				if (temp1 == '还原左侧图像') {
+			if( target == "贴边图像" ){
+				if( temp1 == "还原左侧图像" ){
 					$gameSystem._drill_HB_weltImg_left = DrillUp.g_HB_weltImg_left;
 				}
-				if (temp1 == '还原右侧图像') {
+				if( temp1 == "还原右侧图像" ){
 					$gameSystem._drill_HB_weltImg_right = DrillUp.g_HB_weltImg_right;
 				}
-				if (temp1 == '还原上侧图像') {
+				if( temp1 == "还原上侧图像" ){
 					$gameSystem._drill_HB_weltImg_up = DrillUp.g_HB_weltImg_up;
 				}
-				if (temp1 == '还原下侧图像') {
+				if( temp1 == "还原下侧图像" ){
 					$gameSystem._drill_HB_weltImg_down = DrillUp.g_HB_weltImg_down;
 				}
 			}
@@ -511,13 +535,73 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 };
 
-//=============================================================================
-// ** 存储数据初始化
-//=============================================================================
+
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+//DrillUp.g_HB_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_HB_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
     _drill_HB_sys_initialize.call(this);
-
+	this.drill_HB_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_HB_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_HB_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_HB_saveEnabled == true ){	
+		$gameSystem.drill_HB_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_HB_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_HB_initSysData = function() {
+	this.drill_HB_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_HB_checkSysData = function() {
+	this.drill_HB_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_HB_initSysData_Private = function() {
 	this._drill_HB_dataTank = [];
 	for(var i=0; i < DrillUp.g_HB_background_list.length ;i++){
 		var temp = DrillUp.g_HB_background_list[i];
@@ -532,16 +616,55 @@ Game_System.prototype.initialize = function() {
 		temp_data.tar_y = 0;		
 		temp_data.tar_x_speed = 0;	
 		temp_data.tar_y_speed = 0;
-		
-		this._drill_HB_dataTank.push(temp_data);
+		this._drill_HB_dataTank[i] = temp_data;
 	}
 	
 	this._drill_HB_weltImg_left = DrillUp.g_HB_weltImg_left;
 	this._drill_HB_weltImg_right = DrillUp.g_HB_weltImg_right;
 	this._drill_HB_weltImg_up = DrillUp.g_HB_weltImg_up;
 	this._drill_HB_weltImg_down = DrillUp.g_HB_weltImg_down;
-}
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_HB_checkSysData_Private = function() {
 	
+	// > 旧存档数据自动补充
+	if( this._drill_HB_dataTank == undefined ){
+		this.drill_HB_initSysData();
+	}
+	
+	// > 容器的 空数据 检查
+	for(var i = 0; i < DrillUp.g_HB_background_list.length; i++ ){
+		var temp_data = JSON.parse(JSON.stringify( DrillUp.g_HB_background_list[i] ));
+		
+		// > 已配置（'inited'为 false 表示空数据）
+		if( temp_data['inited'] == true ){
+			
+			// > 未存储的，重新初始化
+			if( this._drill_HB_dataTank[i] == undefined ){
+					
+				var new_data = {};
+				new_data.visible = temp_data['visible'];	//显示/隐藏
+				new_data.x = 0;								//改坐标
+				new_data.y = 0;								//改坐标
+				new_data.x_speed = 0;						//改速度
+				new_data.y_speed = 0;						//改速度
+				new_data.tar_x = 0;		
+				new_data.tar_y = 0;		
+				new_data.tar_x_speed = 0;	
+				new_data.tar_y_speed = 0;
+				this._drill_HB_dataTank[i] = new_data;
+			
+			// > 已存储的，跳过
+			}else{
+				//（不操作）
+			}
+		}
+	}
+};
+
+
 //=============================================================================
 // ** 渲染器【Drill_HB_Renderer】
 //			

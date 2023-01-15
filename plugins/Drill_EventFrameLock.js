@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        行走图 - 锁定帧
+ * @plugindesc [v1.4]        行走图 - 锁定帧
  * @author Drill_up
  * 
  * 
@@ -15,10 +15,14 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 使得你可以完全锁定事件行走图的初始帧。
+ * ★★需要放在插件 多帧行走图 的后面★★
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该插件可以单独使用。
+ * 该插件 不能 单独使用。
+ * 需要基于核心插件，才能运行。
+ * 基于：
+ *   - Drill_CoreOfEventFrame        行走图-行走图优化核心
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -135,17 +139,19 @@
  *              40.00ms - 80.00ms （低消耗）
  *              80.00ms - 120.00ms（中消耗）
  *              120.00ms以上      （高消耗）
- * 工作类型：   单次执行
- * 时间复杂度： o(1)
+ * 工作类型：   持续执行
+ * 时间复杂度： o(n^2) 每帧
  * 测试方法：   去物体管理层、地理管理层、华容道设计跑一圈测试就可以了。
- * 测试结果：   200个事件的地图中，平均消耗为：【5ms以下】
- *              100个事件的地图中，平均消耗为：【5ms以下】
- *               50个事件的地图中，平均消耗为：【5ms以下】
+ * 测试结果：   200个事件的地图中，平均消耗为：【34.90ms】
+ *              100个事件的地图中，平均消耗为：【17.16ms】
+ *               50个事件的地图中，平均消耗为：【9.63ms】
  *
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
  *   测试结果并不是精确值，范围在给定值的10ms范围内波动。
  *   更多性能介绍，去看看 "0.性能测试报告 > 关于插件性能.docx"。
- * 2.由于该插件为单次执行，性能几乎可以忽略。
+ * 2.如果没有使用优化核心，此插件的性能消耗与事件直接成正比，
+ *   因为一个事件对应一个行走图，是几乎一比一的消耗。
+ *   分别为：200事件81.70ms，100事件38.41ms，50事件16.19ms。
  *
  * -----------------------------------------------------------------------------
  * ----更新日志
@@ -157,23 +163,26 @@
  * 完善了插件指令，以及文档、概念的说明。
  * [v1.3]
  * 优化了插件指令细节。
+ * [v1.4]
+ * 优化了内部结构，减少性能消耗。
  * 
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 //		插件简称		EFL（Event_Frame_Lock）
 //		临时全局变量	无
-//		临时局部变量	this['_drill_EFL_lock']
+//		临时局部变量	this._drill_EFL_lockEnabled
 //		存储数据变量	无
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
 //
-//		★工作类型		单次执行
-//		★时间复杂度		o(1)
+//		★工作类型		持续执行
+//		★时间复杂度		o(n^2) 每帧
 //		★性能测试因素	华容道设计
-//		★性能测试消耗	小到性能测试工具都找不到值。
+//		★性能测试消耗	优化核心加入前：81.7ms（drill_EFL_updateFrame）
+//						优化核心加入后：34.9ms（drill_EFL_updateFrame）
 //		★最坏情况		无
 //		★备注			暂无
 //		
@@ -208,6 +217,12 @@
 	
 	
 //=============================================================================
+// * >>>>基于插件检测>>>>
+//=============================================================================
+if( Imported.Drill_CoreOfEventFrame ){
+	
+	
+//=============================================================================
 // * 事件注释初始化
 //=============================================================================
 var _drill_EFL_c_setupPageSettings = Game_Event.prototype.setupPageSettings;
@@ -223,34 +238,34 @@ Game_Event.prototype.setupPageSettings = function() {
 	// > 注释设置
 	var page = this.page();
     if( page ){
-		this.list().forEach(function(l) {	//将页面注释转成插件指令格式
-			if (l.code === 108) {
+		this.list().forEach( function(l){	//将页面注释转成插件指令格式
+			if( l.code === 108 ){
 				var args = l.parameters[0].split(' ');
 				var command = args.shift();
 				if( command == "=>行走图锁定帧" ){
 					if( args.length == 2 ){
 						var type = String(args[1]);
-						if ( type == "锁定"){
-							this['_drill_EFL_lock'] = true;
+						if( type == "锁定" ){
+							this._drill_EFL_lockEnabled = true;
 						}
-						if ( type == "解锁"){
-							this['_drill_EFL_lock'] = false;
+						if( type == "解锁" ){
+							this._drill_EFL_lockEnabled = false;
 						}
 					}
 					if( args.length == 6 ){
 						var type = String(args[1]);
 						var temp1 = String(args[3]);
 						var temp2 = String(args[5]);
-						if ( type == "锁定帧动画"){
-							var seq = [];
+						if( type == "锁定帧动画" ){
+							var temp_seq = [];
 							if( temp1 == "从左往右" || temp1 == "从左往右" ){
-								seq = [1,2,3,4,5,6,7,8,9,10,11,12];
+								temp_seq = [1,2,3,4,5,6,7,8,9,10,11,12];
 							}else if( temp1 == "从右往左" || temp1 == "从右往左"){
-								seq = [12,11,10,9,8,7,6,5,4,3,2,1];
+								temp_seq = [12,11,10,9,8,7,6,5,4,3,2,1];
 							}else{
 								temp1 = temp1.replace("帧序列[","");
 								temp1 = temp1.replace("]","");
-								seq = temp1.split(/[,，]/);
+								temp_seq = temp1.split(/[,，]/);
 							}
 							temp2 = temp2.replace("帧间隔[","");
 							temp2 = temp2.replace("]","");
@@ -258,7 +273,7 @@ Game_Event.prototype.setupPageSettings = function() {
 							this._drill_EFL_anim['enabled'] = true;
 							this._drill_EFL_anim['paused'] = false;
 							this._drill_EFL_anim['inter'] = Number(temp2);
-							this._drill_EFL_anim['seq'] = seq;
+							this._drill_EFL_anim['seq'] = temp_seq;
 							this._drill_EFL_anim['cur_patternX'] = 0;
 							this._drill_EFL_anim['cur_patternY'] = 0;
 						}
@@ -333,7 +348,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			}
 		}
 			
-		/*-----------------锁定解锁------------------*/
+		/*-----------------锁定/解锁------------------*/
 		if( e_ids != null && args.length == 4 ){
 			var type = String(args[3]);
 			if( type == "锁定" ){
@@ -341,7 +356,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					var e_id = e_ids[j];
 					if( $gameMap.drill_EFL_isEventExist( e_id ) == false ){ continue; }
 					var e = $gameMap.event( e_id );
-					e['_drill_EFL_lock'] = true;
+					e._drill_EFL_lockEnabled = true;
 				}
 			}
 			if( type == "解锁" ){
@@ -349,7 +364,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					var e_id = e_ids[j];
 					if( $gameMap.drill_EFL_isEventExist( e_id ) == false ){ continue; }
 					var e = $gameMap.event( e_id );
-					e['_drill_EFL_lock'] = false;
+					e._drill_EFL_lockEnabled = false;
 				}
 			}
 		}
@@ -384,15 +399,15 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					var e_id = e_ids[j];
 					if( $gameMap.drill_EFL_isEventExist( e_id ) == false ){ continue; }
 					var e = $gameMap.event( e_id );
-					var seq_ = [];
+					var temp_seq = [];
 					if( temp2 == "从左往右" ){
-						seq_ = [1,2,3,4,5,6,7,8,9,10,11,12];
+						temp_seq = [1,2,3,4,5,6,7,8,9,10,11,12];
 					}else if( temp2 == "从右往左"){
-						seq_ = [12,11,10,9,8,7,6,5,4,3,2,1];
+						temp_seq = [12,11,10,9,8,7,6,5,4,3,2,1];
 					}else{
 						temp2 = temp2.replace("帧序列[","");
 						temp2 = temp2.replace("]","");
-						seq_ = temp2.split(/[,，]/);
+						temp_seq = temp2.split(/[,，]/);
 					}
 					temp3 = temp3.replace("帧间隔[","");
 					temp3 = temp3.replace("]","");
@@ -400,7 +415,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					e._drill_EFL_anim['enabled'] = true;
 					e._drill_EFL_anim['paused'] = false;
 					e._drill_EFL_anim['inter'] = Number(temp3);
-					e._drill_EFL_anim['seq'] = seq_;
+					e._drill_EFL_anim['seq'] = temp_seq;
 					e._drill_EFL_anim['cur_patternX'] = 0;
 					e._drill_EFL_anim['cur_patternY'] = 0;
 				}
@@ -424,102 +439,110 @@ Game_Map.prototype.drill_EFL_isEventExist = function( e_id ){
 	return true;
 };
 
+
 //=============================================================================
 // * 物体贴图帧锁定
 //=============================================================================
 //==============================
 // * 物体贴图 - 单帧
 //==============================
-var _drill_EFL_c_characterPatternX = Sprite_Character.prototype.characterPatternX;
-Sprite_Character.prototype.characterPatternX = function() {
-	var ch = this._character;
+var _drill_EFL_COEF_updateValue_PatternX = Sprite_Character.prototype.drill_COEF_updateValue_PatternX;
+Sprite_Character.prototype.drill_COEF_updateValue_PatternX = function() {
+	_drill_EFL_COEF_updateValue_PatternX.call(this);
+	if( this._character == undefined ){ return; }
 	
 	// > 锁定初始帧
-	if( ch['_drill_EFL_lock'] === true ){
-		return ch._originalPattern;
+	if( this._character._drill_EFL_lockEnabled == true ){
+		this._drill_COEF_PatternX = this._character._originalPattern;
+		return;
 	}
 	
 	// > 锁定帧动画
-	if( ch._drill_EFL_anim && ch._drill_EFL_anim['enabled'] === true ){
-		return ch._drill_EFL_anim['cur_patternX'];
+	var a_data = this._character._drill_EFL_anim;
+	if( a_data == undefined ){ return; }
+	if( a_data['enabled'] == true ){
+		this._drill_COEF_PatternX = a_data['cur_patternX'];
 	}
-	
-    return _drill_EFL_c_characterPatternX.call(this);
 };
 //==============================
 // * 物体贴图 - 朝向
 //==============================
-var _drill_EFL_c_characterPatternY = Sprite_Character.prototype.characterPatternY;
-Sprite_Character.prototype.characterPatternY = function() {
-	var ch = this._character;
+var _drill_EFL_COEF_updateValue_PatternY = Sprite_Character.prototype.drill_COEF_updateValue_PatternY;
+Sprite_Character.prototype.drill_COEF_updateValue_PatternY = function() {
+    _drill_EFL_COEF_updateValue_PatternY.call(this);
+	if( this._character == undefined ){ return; }
 	
 	// > 锁定初始帧
-	if( ch['_drill_EFL_lock'] === true ){
-		return (ch._originalDirection - 2) / 2;
+	if( this._character._drill_EFL_lockEnabled == true ){
+		this._drill_COEF_PatternY = (this._character._originalDirection - 2) / 2;
+		return;
 	}
 	
 	// > 锁定帧动画
-	if( ch._drill_EFL_anim && ch._drill_EFL_anim['enabled'] === true ){
-		return ch._drill_EFL_anim['cur_patternY'];
+	var a_data = this._character._drill_EFL_anim;
+	if( a_data == undefined ){ return; }
+	if( a_data['enabled'] == true ){
+		this._drill_COEF_PatternY = a_data['cur_patternY'];
 	}
-	
-    return _drill_EFL_c_characterPatternY.call(this);
 };
+
 
 //=============================================================================
 // * 动画帧锁定
 //=============================================================================
 //==============================
-// * 初始化
+// * 动画帧锁定 - 初始化
 //==============================
 var _drill_EFL_c_initialize = Sprite_Character.prototype.initialize;
-Sprite_Character.prototype.initialize = function(character) {
+Sprite_Character.prototype.initialize = function( character ){
 	_drill_EFL_c_initialize.call(this,character);
-	this._drill_EFL_time = 0;				//计时器
-	this._drill_EFL_isEnabled = false;		//锁定帧动画 的锁
+	this._drill_EFL_animEnabled = false;		//锁定帧动画 开关
+	this._drill_EFL_animTime = 0;				//锁定帧动画 计时器
 };
 //==============================
-// * 帧刷新
+// * 动画帧锁定 - 帧刷新
 //==============================
 var _drill_EFL_c_update = Sprite_Character.prototype.update;
 Sprite_Character.prototype.update = function() {
-
+	
+	// > 帧刷新当前帧
 	this.drill_EFL_updateFrame();
-
+	
+	// > 原函数
 	_drill_EFL_c_update.call(this);
 };
 //==============================
-// * 帧刷新 - 动画帧
+// * 动画帧锁定 - 帧刷新当前帧
 //==============================
 Sprite_Character.prototype.drill_EFL_updateFrame = function() {
+	if( this._character == undefined ){ return; }
 	
 	// > 开关获取
-	var ch = this._character;
-	if( ch != undefined && 
-		ch._drill_EFL_anim != undefined && 
-		ch._drill_EFL_anim['enabled'] === true){
+	var a_data = this._character._drill_EFL_anim;
+	if( a_data == undefined ){ return; }
+	if( a_data['enabled'] == true ){
 		
 		// > 开启时第一帧
-		if( this._drill_EFL_isEnabled == false ){
-			this._drill_EFL_isEnabled = true;
+		if( this._drill_EFL_animEnabled == false ){
+			this._drill_EFL_animEnabled = true;
 			
-			this._drill_EFL_time = 0;	//（时间置零）
+			this._drill_EFL_animTime = 0;	//（时间置零）
 		}
 	}else{
 		
 		// > 关闭时第一帧
-		if( this._drill_EFL_isEnabled == true ){
-			this._drill_EFL_isEnabled = false;
+		if( this._drill_EFL_animEnabled == true ){
+			this._drill_EFL_animEnabled = false;
 			// （暂无）
 		}
 	}
 	
 	// > 播放动画帧
-	if( this._drill_EFL_isEnabled == true ){
+	if( this._drill_EFL_animEnabled == true ){
 		
 		// > 帧时间
-		if( ch._drill_EFL_anim['paused'] != true ){
-			this._drill_EFL_time += 1;
+		if( a_data['paused'] != true ){
+			this._drill_EFL_animTime += 1;
 		
 		// > 帧时间暂停
 		}else{
@@ -527,12 +550,23 @@ Sprite_Character.prototype.drill_EFL_updateFrame = function() {
 		}
 		
 		// > 播放
-		var anim = ch._drill_EFL_anim;
-		var index = Math.floor(this._drill_EFL_time / anim['inter']) % anim['seq'].length;
-		var pattern = Number( anim['seq'][index] ) - 1;
+		var index = Math.floor(this._drill_EFL_animTime / a_data['inter']) % a_data['seq'].length;
+		var pattern = Number( a_data['seq'][index] ) - 1;
 		
-		anim['cur_patternX'] = Math.floor((pattern % 12) % 3);		//单帧
-		anim['cur_patternY'] = Math.floor((pattern % 12) / 3);		//朝向
+		a_data['cur_patternX'] = Math.floor((pattern % 12) % 3);		//单帧
+		a_data['cur_patternY'] = Math.floor((pattern % 12) / 3);		//朝向
 	}
+}
+
+
+//=============================================================================
+// * <<<<基于插件检测<<<<
+//=============================================================================
+}else{
+		Imported.Drill_EventFrameLock = false;
+		alert(
+			"【Drill_EventFrameLock.js 行走图-锁定帧】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
+			"\n- Drill_CoreOfEventFrame 行走图-行走图优化核心"
+		);
 }
 

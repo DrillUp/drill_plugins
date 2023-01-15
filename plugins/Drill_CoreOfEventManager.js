@@ -135,7 +135,7 @@
 //		★必要注意事项：
 //			1.事件的独立开关是独立于事件的，需要额外刷新。
 //			2.如果你需要引用该插件来创建一个外部地图的事件，
-//			  那么必须先预加载地图文本数据，再创建事件。（可参考 Drill_EventForPlayer ）
+//			  那么必须先加载地图文本数据，再创建事件。（可参考 Drill_EventForPlayer ）
 //			
 //		★其它说明细节：
 //			1.先有事件数据，再通过事件数据new事件。
@@ -501,9 +501,9 @@ Game_Map.prototype.drill_COEM_isEventExist = function( e_id ){
 //==============================
 // * 原代容器 - 场景初始化
 //==============================
-var _drill_COEM_p_initialize = Game_Temp.prototype.initialize;
+var _drill_COEM_temp_p_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {
-	_drill_COEM_p_initialize.call(this);
+	_drill_COEM_temp_p_initialize.call(this);
 	this._drill_COEM_primaryEventTank = [];				//原代事件容器
 	this._drill_COEM_primarySpriteTank = [];			//原代事件贴图容器
 };
@@ -558,9 +558,9 @@ Game_Map.prototype.drill_COEM_primary_deleteEvent_Private = function( e_id ){
 //==============================
 // * 子代容器 - 场景初始化
 //==============================
-var _drill_COEM_o_initialize = Game_Temp.prototype.initialize;
+var _drill_COEM_temp_o_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {
-	_drill_COEM_o_initialize.call(this);
+	_drill_COEM_temp_o_initialize.call(this);
 	this._drill_COEM_offspringEventTank = [];				//子代事件容器
 	this._drill_COEM_offspringSpringTank = [];				//子代事件贴图容器
 	this._drill_COEM_offspringLastCreatedEvent = null;		//上一个子代事件

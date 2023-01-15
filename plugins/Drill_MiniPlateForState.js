@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.2]        鼠标 - 状态和buff说明窗口
+ * @plugindesc [v2.3]        鼠标 - 状态和buff说明窗口
  * @author Drill_up
  * 
  * @Drill_LE_param "状态-%d"
@@ -148,6 +148,8 @@
  * 优化了与战斗活动镜头的变换关系。
  * [v2.2]
  * 优化了部分结构，减少了性能消耗。
+ * [v2.3]
+ * 优化了旧存档的识别与兼容。
  * 
  * 
  * 
@@ -1033,7 +1035,7 @@
 //				窗口显示隐藏部分比较绕。
 //				只要出现状态图标，它们就都可以鼠标靠近显示。
 //				为此这里我建立了一个接口pushChecks，输入x,y,w,h,s,b等参数，s为状态id的列表。
-//				通过这个接口，来实时刷新鼠标位置监听、窗口信息。
+//				通过这个接口，来实时刷新鼠标位置监听、窗口信息。(pushChecks已被弃用)
 //			2.	2022/10/27
 //				经过了多个插件修改，最后将原来的check框架彻底换成了bean实体类的结构。
 //				从性能上也就减少了最多一半的消耗。
@@ -1177,7 +1179,7 @@
 			var temp = JSON.parse( DrillUp.parameters["状态-" + String(i+1)] );
 			DrillUp.g_MPFS_list[i] = DrillUp.drill_MPFS_initState( temp );
 		}else{
-			DrillUp.g_MPFS_list[i] = DrillUp.drill_MPFS_initState( {} );
+			DrillUp.g_MPFS_list[i] = null;
 		}
 	};
 	
@@ -1234,30 +1236,136 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		}
 	}
 };
-//=============================================================================
-// ** 存储变量初始化
-//=============================================================================
+
+
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_MPFS_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_MPFS_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
     _drill_MPFS_sys_initialize.call(this);
+	this.drill_MPFS_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_MPFS_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_MPFS_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_MPFS_saveEnabled == true ){	
+		$gameSystem.drill_MPFS_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_MPFS_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_MPFS_initSysData = function() {
+	this.drill_MPFS_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_MPFS_checkSysData = function() {
+	this.drill_MPFS_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_MPFS_initSysData_Private = function() {
 	
 	this._drill_MPFS_enables = [];			//（详细说明开关）
-	for(var i = 0; i< DrillUp.g_MPFS_list.length ;i++){
-		this._drill_MPFS_enables[i] = DrillUp.g_MPFS_list[i]['enabled'];
-	}
 	this._drill_MPFS_m_context = [];		//（模糊说明文本）
-	for(var i = 0; i< DrillUp.g_MPFS_list.length ;i++){
-		this._drill_MPFS_m_context[i] = DrillUp.g_MPFS_list[i]['m_context'];
-	}
 	this._drill_MPFS_x_context = [];		//（详细说明文本）
-	for(var i = 0; i< DrillUp.g_MPFS_list.length ;i++){
-		this._drill_MPFS_x_context[i] = DrillUp.g_MPFS_list[i]['x_context'];
+	for(var i = 0; i < DrillUp.g_MPFS_list.length; i++){
+		var temp_data = DrillUp.g_MPFS_list[i];
+		if( temp_data == undefined ){ continue; }
+		this._drill_MPFS_enables[i] = temp_data['enabled'];
+		this._drill_MPFS_m_context[i] = temp_data['m_context'];
+		this._drill_MPFS_x_context[i] = temp_data['x_context'];
 	}
 	
 	this._drill_MPFS_mouseType = DrillUp.g_MPFS_mouse_type;		//（鼠标激活方式）
 	this._drill_MPFS_ex_width = DrillUp.g_MPFS_ex_width;		//（窗口附加宽度）
 	this._drill_MPFS_ex_height = DrillUp.g_MPFS_ex_height; 		//（窗口附加高度）
-};	
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_MPFS_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_MPFS_enables == undefined ){
+		this.drill_MPFS_initSysData();
+	}
+	
+	// > 容器的 空数据 检查
+	for(var i = 0; i < DrillUp.g_MPFS_list.length; i++ ){
+		var temp_data = DrillUp.g_MPFS_list[i];
+		
+		// > 已配置（undefined表示未配置的空数据）
+		if( temp_data != undefined ){
+			
+			// > 未存储的，重新初始化
+			if( this._drill_MPFS_enables[i] == undefined ){
+				this._drill_MPFS_enables[i] = temp_data['enabled'];
+			
+			// > 已存储的，跳过
+			}else{
+				//（不操作）
+			}
+			
+			// > 未存储的，重新初始化
+			if( this._drill_MPFS_m_context[i] == undefined ){
+				this._drill_MPFS_m_context[i] = temp_data['m_context'];
+			
+			// > 已存储的，跳过
+			}else{
+				//（不操作）
+			}
+			
+			// > 未存储的，重新初始化
+			if( this._drill_MPFS_x_context[i] == undefined ){
+				this._drill_MPFS_x_context[i] = temp_data['x_context'];
+			
+			// > 已存储的，跳过
+			}else{
+				//（不操作）
+			}
+		}
+	}
+};
 
 
 //=============================================================================

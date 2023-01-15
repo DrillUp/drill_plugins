@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.5]        窗口字符 - 窗口字符核心
+ * @plugindesc [v1.6]        窗口字符 - 窗口字符核心
  * @author Drill_up
  * 
  * 
@@ -246,6 +246,8 @@
  * 优化了对话文字速度的关系。
  * [v1.5]
  * 优化了字符块的结构。
+ * [v1.6]
+ * 优化了旧存档的识别与兼容。
  * 
  * 
  * 
@@ -745,19 +747,88 @@ Window_Base.prototype.drill_COWC_setWordWrap = function( text, max_width ){
 
 
 
-//=============================================================================
-// ** 存储数据初始化
-//=============================================================================
-//==============================
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_COWC_saveEnabled = true;
+//##############################
 // * 存储数据 - 初始化
-//==============================
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_COWC_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-	_drill_COWC_sys_initialize.call(this);
+    _drill_COWC_sys_initialize.call(this);
+	this.drill_COWC_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_COWC_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_COWC_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_COWC_saveEnabled == true ){	
+		$gameSystem.drill_COWC_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_COWC_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_COWC_initSysData = function() {
+	this.drill_COWC_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_COWC_checkSysData = function() {
+	this.drill_COWC_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_COWC_initSysData_Private = function() {
 
 	this._drill_COWC_fastForwardEnabled = DrillUp.g_COWC_fastForwardEnabled;	//消息快进 - 功能开关
 	this._drill_COWC_fastForwardKey = DrillUp.g_COWC_fastForwardKey;			//消息快进 - 快进键
-}
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_COWC_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_COWC_fastForwardKey == undefined ){
+		this.drill_COWC_initSysData();
+	}
+
+};
+
     
 //=============================================================================
 // * 插件指令

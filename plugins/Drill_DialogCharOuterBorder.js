@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        窗口字符 - 描边效果
+ * @plugindesc [v1.1]        窗口字符 - 描边效果
  * @author Drill_up
  * 
  * @Drill_LE_param "颜色-%d"
@@ -80,6 +80,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 优化了旧存档的识别与兼容。
  * 
  *
  * 
@@ -339,17 +341,89 @@
 //=============================================================================
 if( Imported.Drill_CoreOfWindowCharacter ){
 	
-	
-//=============================================================================
-// * 存储数据初始化
-//=============================================================================
+
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_DCOB_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_DCOB_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-	_drill_DCOB_sys_initialize.call(this);
+    _drill_DCOB_sys_initialize.call(this);
+	this.drill_DCOB_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_DCOB_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_DCOB_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_DCOB_saveEnabled == true ){	
+		$gameSystem.drill_DCOB_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_DCOB_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_DCOB_initSysData = function() {
+	this.drill_DCOB_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_DCOB_checkSysData = function() {
+	this.drill_DCOB_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_DCOB_initSysData_Private = function() {
 	
 	this._drill_DCOB_fontEdgeColorIndex = DrillUp.g_DCOB_fontEdgeColorIndex;	//窗口字符 - 字符外框颜色
 	this._drill_DCOB_fontEdgeThickness = DrillUp.g_DCOB_fontEdgeThickness;		//窗口字符 - 字符外框厚度
-}
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_DCOB_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_DCOB_fontEdgeColorIndex == undefined ){
+		this.drill_DCOB_initSysData();
+	}
+	
+};
+
 
 //=============================================================================
 // * 描边颜色

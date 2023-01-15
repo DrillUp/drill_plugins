@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        管理器 - 变速齿轮
+ * @plugindesc [v1.5]        管理器 - 变速齿轮
  * @author Drill_up
  * 
  * 
@@ -68,6 +68,8 @@
  * 优化了内部注释。
  * [v1.4]
  * 修改了插件分类。
+ * [v1.5]
+ * 优化了旧存档的识别与兼容。
  * 
  *
  * @param 初始齿轮速度
@@ -161,6 +163,7 @@ var _drill_SG_pluginCommand = Game_Interpreter.prototype.pluginCommand
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_SG_pluginCommand.call(this,command, args);
 	if( command === ">变速齿轮" ){ 
+	
 		if( args.length == 4 ){
 			var type = String(args[1]);
 			var temp1 = String(args[3]);
@@ -182,15 +185,75 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			}
 		}
 	};
-	return true;
 };
 
-//=============================================================================
-// ** 变量初始化
-//=============================================================================
-var _drill_SG_initialize = Game_System.prototype.initialize;
+
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_SG_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_SG_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-	_drill_SG_initialize.call(this);
+    _drill_SG_sys_initialize.call(this);
+	this.drill_SG_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_SG_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_SG_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_SG_saveEnabled == true ){	
+		$gameSystem.drill_SG_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_SG_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_SG_initSysData = function() {
+	this.drill_SG_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_SG_checkSysData = function() {
+	this.drill_SG_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_SG_initSysData_Private = function() {
 	
 	this._drill_SG_speed = Math.max(DrillUp.g_SG_speed,0.05);
 	this._drill_SG_var = DrillUp.g_SG_var;
@@ -200,6 +263,18 @@ Game_System.prototype.initialize = function() {
 	// > 修改速度
     SceneManager._deltaTime = 1/60.0 / this._drill_SG_speed;
 };
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_SG_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_SG_speed == undefined ){
+		this.drill_SG_initSysData();
+	}
+	
+};
+
 
 //=============================================================================
 // ** 速度变化

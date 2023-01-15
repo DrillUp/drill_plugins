@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        物体触发 - 可变激光区域 & 条件触发
+ * @plugindesc [v1.3]        物体触发 - 可变激光区域 & 条件触发
  * @author Drill_up
  *
  * 
@@ -220,6 +220,8 @@
  * [v1.2]
  * 修改了概念结构说明，并规范了插件指令设置。
  * 添加了起始点/终止点的位置获取。添加了插件性能测试说明。
+ * [v1.3]
+ * 优化了旧存档的识别与兼容。
  * 
  *
  * @param 斜向激光是否穿透两边阻碍
@@ -296,7 +298,8 @@
 var _drill_ELT_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_ELT_pluginCommand.call(this, command, args);
-	if (command === ">主动触发") {
+	if( command === ">主动触发" ){
+		
 		/*-----------------可变激光区域------------------*/
 		if(args.length == 10){
 			var unit = String(args[1]);
@@ -545,16 +548,117 @@ Game_Event.prototype.drill_ELT_setupPage = function() {
 	}, this);};
 };	
 
-//=============================================================================
-// ** 存储数据初始化
-//=============================================================================
-var _drill_ELT_system_initialize = Game_System.prototype.initialize;
+
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_ELT_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_ELT_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-    _drill_ELT_system_initialize.call(this);
+    _drill_ELT_sys_initialize.call(this);
+	this.drill_ELT_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_ELT_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_ELT_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_ELT_saveEnabled == true ){	
+		$gameSystem.drill_ELT_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_ELT_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_ELT_initSysData = function() {
+	this.drill_ELT_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_ELT_checkSysData = function() {
+	this.drill_ELT_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_ELT_initSysData_Private = function() {
+	
 	this._drill_ELT_eventThrough = [];						//穿透设置
 	this._drill_ELA_tempStartPoint = {"x":-1,"y":-1};		//暂存起始点
 	this._drill_ELA_tempEndPoint = {"x":-1,"y":-1};			//暂存终止点
+	
+	this._drill_ELT_last_areas = [];			//存储的区域
+	this._drill_ELT_last_area = [];				//触发区域
+	this._drill_ELT_last_point = {'x':0,'y':0};	//触发中心点
 };
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_ELT_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_ELT_eventThrough == undefined ){
+		this.drill_ELT_initSysData();
+	}
+	
+};
+// * 设置 - 上一个触发区域 [{'x':21,'y':31,'block':true}……]
+Game_System.prototype.drill_ELT_setLastArea = function(area) {
+	this._drill_ELT_last_area = area;
+}
+// * 设置 - 上一个触发中心点 {'x':1,'y':1}
+Game_System.prototype.drill_ELT_setLastPoint = function(p) {
+	this._drill_ELT_last_point = p;
+}
+// * 获取 - 上一个触发区域
+Game_System.prototype.drill_ELT_getLastArea = function() {
+	return this._drill_ELT_last_area;
+}
+// * 获取 - 上一个触发中心点
+Game_System.prototype.drill_ELT_getLastPoint = function() {
+	return this._drill_ELT_last_point;
+}
+// * 设置 - 存储区域
+Game_System.prototype.drill_ELT_saveArea = function( area_id, area ) {
+	this._drill_ELT_last_areas[area_id] = area;
+}
+// * 设置 - 读取区域
+Game_System.prototype.drill_ELT_loadArea = function( area_id) {
+	return this._drill_ELT_last_areas[area_id];
+}
 
 
 //=============================================================================
@@ -837,42 +941,6 @@ if( typeof(Game_Map.prototype.drill_getLaserArea) == "undefined" ){	//防止重�
 	Game_Map.prototype.drill_ELT_isAnyPassable = function( x, y ) {
 		return this.isPassable(x, y, 2)||this.isPassable(x, y, 4)||this.isPassable(x, y, 6)||this.isPassable(x, y, 8);
 	}
-}
-
-
-//=============================================================================
-// * 触发区域缓存容器
-//=============================================================================
-var _drill_ELT_System_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function() {
-	_drill_ELT_System_initialize.call(this);
-	this._drill_ELT_last_areas = [];			//存储的区域
-	this._drill_ELT_last_area = [];				//触发区域
-	this._drill_ELT_last_point = {'x':0,'y':0};	//触发中心点
-}
-// * 设置 - 上一个触发区域 [{'x':21,'y':31,'block':true}……]
-Game_System.prototype.drill_ELT_setLastArea = function(area) {
-	this._drill_ELT_last_area = area;
-}
-// * 设置 - 上一个触发中心点 {'x':1,'y':1}
-Game_System.prototype.drill_ELT_setLastPoint = function(p) {
-	this._drill_ELT_last_point = p;
-}
-// * 获取 - 上一个触发区域
-Game_System.prototype.drill_ELT_getLastArea = function() {
-	return this._drill_ELT_last_area;
-}
-// * 获取 - 上一个触发中心点
-Game_System.prototype.drill_ELT_getLastPoint = function() {
-	return this._drill_ELT_last_point;
-}
-// * 设置 - 存储区域
-Game_System.prototype.drill_ELT_saveArea = function( area_id, area ) {
-	this._drill_ELT_last_areas[area_id] = area;
-}
-// * 设置 - 读取区域
-Game_System.prototype.drill_ELT_loadArea = function( area_id) {
-	return this._drill_ELT_last_areas[area_id];
 }
 	
 

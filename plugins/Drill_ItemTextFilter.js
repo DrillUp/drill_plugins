@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        UI - 物品+技能文本的滤镜效果
+ * @plugindesc [v1.1]        UI - 物品+技能文本的滤镜效果
  * @author Drill_up
  *
  * @help  
@@ -90,15 +90,16 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
- *
+ * [v1.1]
+ * 修复了该插件浪费存储空间的bug。
  *
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 //		插件简称：		ITFi (Item_Text_Filter)
 //		临时全局变量	DrillUp.g_ITFi_xxx
-//		临时局部变量	无
-//		存储数据变量	$gameSystem._drill_ITFi_xxx
+//		临时局部变量	$gameTemp._drill_ITFi_xxx
+//		存储数据变量	无
 //		全局存储变量	无
 //		覆盖重写方法	BattleResult.prototype.addIcon（mog）
 //						TreasureIcons.prototype.refreshName（mog）
@@ -127,7 +128,7 @@
 //				->滤镜 - 插件指令修改物品滤镜	x
 //		
 //		★必要注意事项：
-//			1.这里的滤镜配置存储在$gameSystem里面，与 物品/武器/护甲/技能 一一对应。
+//			1.这里的滤镜配置存储在$gameTemp里面，与 物品/武器/护甲/技能 一一对应。
 //			  （与其他滤镜不太一样，其它滤镜附着在对象中。）
 //			  物品类型是固定的四种，直接与DataManager的数据文件对齐，与Game_Item没有任何关系。
 //			2.滤镜使用本体可能由于支持的内容太多，看起来较复杂。
@@ -173,22 +174,24 @@ if( Imported.Drill_CoreOfFilter ){
 //=============================================================================
 // 暂无
 
+
 //=============================================================================
-// ** 物品 - 滤镜设置
+// ** 临时数据
 //=============================================================================
 //==============================
-// ** 存储变量初始化
+// * 临时数据 - 初始化
 //==============================
-var _drill_ITFi_sys_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function() {
-	_drill_ITFi_sys_initialize.call(this);
-	// >容器初始化
+var _drill_ITFi_temp_initialize = Game_Temp.prototype.initialize;
+Game_Temp.prototype.initialize = function() {
+    _drill_ITFi_temp_initialize.call(this);
+	
+	// > 容器初始化
 	this._drill_ITFi_items = [];
 	this._drill_ITFi_weapons = [];
 	this._drill_ITFi_armors = [];
 	this._drill_ITFi_skills = [];
 	
-	// >对象初始化
+	// > 对象初始化
 	for( var i = 0; i < $dataItems.length; i++ ){	//物品
 		f_data = {};
 		f_data.openFilter = false;
@@ -275,7 +278,7 @@ Game_System.prototype.initialize = function() {
 //==============================
 // * 注释转滤镜内容
 //==============================
-Game_System.prototype.drill_ITFi_convertFilterData = function(note,f_data) {
+Game_Temp.prototype.drill_ITFi_convertFilterData = function(note,f_data) {
 	var note_list = note.split('\n');
 	for(var i=0; i< note_list.length; i++){
 		var re_filter = /<(滤镜):([^<>]*?)>/; 				//正则获取（返回数组，第二个为匹配内容）
@@ -331,31 +334,33 @@ Game_System.prototype.drill_ITFi_convertFilterData = function(note,f_data) {
 		}
 	}
 	return f_data;
-}
+};
 //==============================
 // ** 获取对象
 //==============================
-Game_System.prototype.drill_ITFi_getSkillFData = function(item_id) {
+Game_Temp.prototype.drill_ITFi_getSkillFData = function(item_id) {
 	return this._drill_ITFi_skills[item_id];
 }
-Game_System.prototype.drill_ITFi_getItemFData = function(item_id) {
+Game_Temp.prototype.drill_ITFi_getItemFData = function(item_id) {
 	if( $dataItems[item_id].baseItemId ){		 	//Yep物品核心兼容
 		return this._drill_ITFi_items[ $dataItems[item_id].baseItemId ];
 	}
 	return this._drill_ITFi_items[item_id];
 }
-Game_System.prototype.drill_ITFi_getWeaponFData = function(item_id) {
+Game_Temp.prototype.drill_ITFi_getWeaponFData = function(item_id) {
 	if( $dataWeapons[item_id].baseItemId ){		 	//Yep物品核心兼容
 		return this._drill_ITFi_weapons[ $dataWeapons[item_id].baseItemId ];
 	}
 	return this._drill_ITFi_weapons[item_id];
 }
-Game_System.prototype.drill_ITFi_getArmorFData = function(item_id) {
+Game_Temp.prototype.drill_ITFi_getArmorFData = function(item_id) {
 	if( $dataArmors[item_id].baseItemId ){		 	//Yep物品核心兼容
 		return this._drill_ITFi_armors[ $dataArmors[item_id].baseItemId ];
 	}
 	return this._drill_ITFi_armors[item_id];
 }
+
+
 
 //=============================================================================
 // ** 滤镜清除（矩形区域）
@@ -524,10 +529,10 @@ Window_Base.prototype.drill_ITFi_updateItemTextFilter = function() {
 		if ( !item_type ) { continue; }
 		
 		var data;
-		if ( item_type == "技能" ){ var f_data = $gameSystem.drill_ITFi_getSkillFData(item__id); }
-		if ( item_type == "物品" ){ var f_data = $gameSystem.drill_ITFi_getItemFData(item__id); }
-		if ( item_type == "武器" ){ var f_data = $gameSystem.drill_ITFi_getWeaponFData(item__id); }
-		if ( item_type == "护甲" ){ var f_data = $gameSystem.drill_ITFi_getArmorFData(item__id); }
+		if ( item_type == "技能" ){ var f_data = $gameTemp.drill_ITFi_getSkillFData(item__id); }
+		if ( item_type == "物品" ){ var f_data = $gameTemp.drill_ITFi_getItemFData(item__id); }
+		if ( item_type == "武器" ){ var f_data = $gameTemp.drill_ITFi_getWeaponFData(item__id); }
+		if ( item_type == "护甲" ){ var f_data = $gameTemp.drill_ITFi_getArmorFData(item__id); }
 		
 		//>滤镜初始化
 		if( text_sprite.drill_COF_isInited() == false ){
@@ -585,15 +590,15 @@ if(Imported.MOG_ActionName ){
 		f_data.setFillWave = ["",0,0];
 		f_data.setBlurWave = [0,0];
 		f_data.setNoiseWave = [0,0];
-		if (DataManager.isSkill(item)){  f_data = $gameSystem.drill_ITFi_getSkillFData(item.id); };
+		if (DataManager.isSkill(item)){  f_data = $gameTemp.drill_ITFi_getSkillFData(item.id); };
 		if (DataManager.isItem(item)){  
-			f_data = $gameSystem.drill_ITFi_getItemFData(item.id); 
+			f_data = $gameTemp.drill_ITFi_getItemFData(item.id); 
 			if( $dataItems[item.id].baseItemId ){	//Yep物品核心兼容
-				f_data = $gameSystem.drill_ITFi_getItemFData($dataItems[item.id].baseItemId); 
+				f_data = $gameTemp.drill_ITFi_getItemFData($dataItems[item.id].baseItemId); 
 			}
 		}	
-		if (DataManager.isWeapon(item)){  f_data = $gameSystem.drill_ITFi_getWeaponFData(item.id); }
-		if (DataManager.isArmor(item)){  f_data = $gameSystem.drill_ITFi_getArmorFData(item.id); }
+		if (DataManager.isWeapon(item)){  f_data = $gameTemp.drill_ITFi_getWeaponFData(item.id); }
+		if (DataManager.isArmor(item)){  f_data = $gameTemp.drill_ITFi_getArmorFData(item.id); }
 		
 		//>滤镜初始化
 		if( text_sprite.drill_COF_isInited() == false ){
@@ -670,10 +675,10 @@ if(Imported.MOG_BattleResult ){
 			if ( !item_type ) { continue; }
 			
 			var data;
-			if ( item_type == "技能" ){ var f_data = $gameSystem.drill_ITFi_getSkillFData(item__id); }
-			if ( item_type == "物品" ){ var f_data = $gameSystem.drill_ITFi_getItemFData(item__id); }
-			if ( item_type == "武器" ){ var f_data = $gameSystem.drill_ITFi_getWeaponFData(item__id); }
-			if ( item_type == "护甲" ){ var f_data = $gameSystem.drill_ITFi_getArmorFData(item__id); }
+			if ( item_type == "技能" ){ var f_data = $gameTemp.drill_ITFi_getSkillFData(item__id); }
+			if ( item_type == "物品" ){ var f_data = $gameTemp.drill_ITFi_getItemFData(item__id); }
+			if ( item_type == "武器" ){ var f_data = $gameTemp.drill_ITFi_getWeaponFData(item__id); }
+			if ( item_type == "护甲" ){ var f_data = $gameTemp.drill_ITFi_getArmorFData(item__id); }
 			
 			//>滤镜初始化
 			if( text_sprite.drill_COF_isInited() == false ){
@@ -721,15 +726,15 @@ if( Imported.MOG_TreasurePopup ){
 		var text_sprite = this._name;
 		var item = this._item;
 		if (!item){ return; }
-		if (DataManager.isSkill(item)){ var f_data = $gameSystem.drill_ITFi_getSkillFData(item.id); };
+		if (DataManager.isSkill(item)){ var f_data = $gameTemp.drill_ITFi_getSkillFData(item.id); };
 		if (DataManager.isItem(item)){
-			var f_data = $gameSystem.drill_ITFi_getItemFData(item.id); 
+			var f_data = $gameTemp.drill_ITFi_getItemFData(item.id); 
 			if( $dataItems[item.id].baseItemId ){	//Yep物品核心兼容
-				f_data = $gameSystem.drill_ITFi_getItemFData($dataItems[item.id].baseItemId); 
+				f_data = $gameTemp.drill_ITFi_getItemFData($dataItems[item.id].baseItemId); 
 			}
 		}
-		if (DataManager.isWeapon(item)){ var f_data = $gameSystem.drill_ITFi_getWeaponFData(item.id); }
-		if (DataManager.isArmor(item)){ var f_data = $gameSystem.drill_ITFi_getArmorFData(item.id); }
+		if (DataManager.isWeapon(item)){ var f_data = $gameTemp.drill_ITFi_getWeaponFData(item.id); }
+		if (DataManager.isArmor(item)){ var f_data = $gameTemp.drill_ITFi_getArmorFData(item.id); }
 		if (!f_data){ return; }
 		
 		//>滤镜初始化
@@ -787,15 +792,15 @@ if( Imported.MOG_TreasureHud  ){
 		f_data.setFillWave = ["",0,0];
 		f_data.setBlurWave = [0,0];
 		f_data.setNoiseWave = [0,0];
-		if (DataManager.isSkill(item)){  f_data = $gameSystem.drill_ITFi_getSkillFData(item.id); };
+		if (DataManager.isSkill(item)){  f_data = $gameTemp.drill_ITFi_getSkillFData(item.id); };
 		if (DataManager.isItem(item)){
-			f_data = $gameSystem.drill_ITFi_getItemFData(item.id);
+			f_data = $gameTemp.drill_ITFi_getItemFData(item.id);
 			if( $dataItems[item.id].baseItemId ){	//Yep物品核心兼容
-				f_data = $gameSystem.drill_ITFi_getItemFData($dataItems[item.id].baseItemId); 
+				f_data = $gameTemp.drill_ITFi_getItemFData($dataItems[item.id].baseItemId); 
 			}
 		}
-		if (DataManager.isWeapon(item)){  f_data = $gameSystem.drill_ITFi_getWeaponFData(item.id); }
-		if (DataManager.isArmor(item)){  f_data = $gameSystem.drill_ITFi_getArmorFData(item.id); }
+		if (DataManager.isWeapon(item)){  f_data = $gameTemp.drill_ITFi_getWeaponFData(item.id); }
+		if (DataManager.isArmor(item)){  f_data = $gameTemp.drill_ITFi_getArmorFData(item.id); }
 		
 		//>滤镜初始化
 		if( text_sprite.drill_COF_isInited() == false ){

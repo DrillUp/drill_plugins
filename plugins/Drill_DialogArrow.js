@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        对话框 - 对话框小箭头
+ * @plugindesc [v1.2]        对话框 - 对话框小箭头
  * @author Drill_up
  * 
  * @Drill_LE_param "小箭头-%d"
@@ -90,7 +90,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 修改了插件指令细节。
- * 
+ * [v1.2]
+ * 优化了旧存档的识别与兼容。
  * 
  * 
  *
@@ -367,6 +368,7 @@
 		}else{
 			data['src_img'] = [];
 		}
+		data['src_img_file'] = "img/Menu__ui_message/";
 		data['interval'] = Number( dataFrom["帧间隔"] || 4 );
 		data['back_run'] = String( dataFrom["是否倒放"] || "false") === "true";
 		data['x_formula'] = String( dataFrom["平移-小箭头 X公式"] || "" );
@@ -409,12 +411,6 @@
 	}
 	
 	
-//=============================================================================
-// ** 资源文件夹
-//=============================================================================
-ImageManager.load_MenuUiMessage = function(filename) {
-    return this.loadBitmap('img/Menu__ui_message/', filename, 0, true);
-};
 
 //=============================================================================
 // * 插件指令
@@ -448,15 +444,88 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	};
 };
 
-//=============================================================================
-// * 存储数据初始化
-//=============================================================================
-var _drill_DAr_system_initialize = Game_System.prototype.initialize;
+
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_DAr_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_DAr_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-    _drill_DAr_system_initialize.call(this);
+    _drill_DAr_sys_initialize.call(this);
+	this.drill_DAr_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_DAr_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_DAr_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_DAr_saveEnabled == true ){	
+		$gameSystem.drill_DAr_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_DAr_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_DAr_initSysData = function() {
+	this.drill_DAr_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_DAr_checkSysData = function() {
+	this.drill_DAr_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_DAr_initSysData_Private = function() {
 	this._drill_DAr_visible = DrillUp.g_DAr_visible;			//显示状态
 	this._drill_DAr_curStyle = DrillUp.g_DAr_curStyle;			//当前样式
 };	
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_DAr_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_DAr_curStyle == undefined ){
+		this.drill_DAr_initSysData();
+	}
+	
+};
+
 
 //=============================================================================
 // ** 对话框
@@ -607,7 +676,7 @@ Drill_DAr_ArrowSprite.prototype.drill_DAr_refreshAll = function() {
 	var temp_sprite = new Sprite();
 	var temp_sprite_data = this._drill_data;
 	for(var j = 0; j < temp_sprite_data['src_img'].length ; j++){
-		temp_sprite_data['src_bitmaps'].push( ImageManager.load_MenuUiMessage(temp_sprite_data['src_img'][j]) );
+		temp_sprite_data['src_bitmaps'].push( ImageManager.loadBitmap( temp_sprite_data['src_img_file'], temp_sprite_data['src_img'][j], 0, true ) );
 	}
 	temp_sprite.bitmap = temp_sprite_data['src_bitmaps'][0];
 	temp_sprite.anchor.x = 0.5;

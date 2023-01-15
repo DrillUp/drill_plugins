@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.8]        物体管理 - 事件复制器
+ * @plugindesc [v1.9]        物体管理 - 事件复制器
  * @author Drill_up
  * 
  * 
@@ -141,6 +141,8 @@
  * 修改了插件分类。
  * [v1.8]
  * 添加了 "源事件变量" 的设置。
+ * [v1.9]
+ * 优化了旧存档的识别与兼容。
  * 
  */
  
@@ -423,15 +425,88 @@ Scene_Map.prototype.drill_EDu_loadMapData = function() {
 };
 
 
-//=============================================================================
-// ** 存储变量初始化
-//=============================================================================
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_EDu_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_EDu_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
     _drill_EDu_sys_initialize.call(this);
+	this.drill_EDu_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_EDu_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_EDu_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_EDu_saveEnabled == true ){	
+		$gameSystem.drill_EDu_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_EDu_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_EDu_initSysData = function() {
+	this.drill_EDu_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_EDu_checkSysData = function() {
+	this.drill_EDu_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_EDu_initSysData_Private = function() {
+	
 	this._drill_EDu_last_id = 0;			//上一个生成的事件id
 	this._drill_EDu_is_opacity = false;		//透明度（只限于本插件的指令）
-}
+
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_EDu_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_EDu_last_id == undefined ){
+		this.drill_EDu_initSysData();
+	}
+	
+};
 
 //=============================================================================
 // ** 旧插件 函数的兼容

@@ -529,12 +529,8 @@
 			DrillUp.parameters["视频-" + String(i+1) ] != "" ){
 			var temp = JSON.parse(DrillUp.parameters["视频-" + String(i+1) ]);
 			DrillUp.g_MVi_list[i] = DrillUp.drill_MVi_videoInit( temp );
-			DrillUp.g_MVi_list[i]['id'] = Number(i)+1;
-			DrillUp.g_MVi_list[i]['inited'] = true;
 		}else{
-			DrillUp.g_MVi_list[i] = DrillUp.drill_MVi_videoInit( {} );
-			DrillUp.g_MVi_list[i]['id'] = Number(i)+1;
-			DrillUp.g_MVi_list[i]['inited'] = false;
+			DrillUp.g_MVi_list[i] = null;		//（强制设为空值，节约存储资源）
 		}
 	}
 	
@@ -565,30 +561,116 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 };
 
 
-//=============================================================================
-// ** 变量初始化
-//=============================================================================
-//==============================
-// * 存储变量初始化
-//==============================
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_MVi_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_MVi_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-	_drill_MVi_sys_initialize.call(this);
+    _drill_MVi_sys_initialize.call(this);
+	this.drill_MVi_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_MVi_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_MVi_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_MVi_saveEnabled == true ){	
+		$gameSystem.drill_MVi_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_MVi_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_MVi_initSysData = function() {
+	this.drill_MVi_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_MVi_checkSysData = function() {
+	this.drill_MVi_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_MVi_initSysData_Private = function() {
+	
 	this._drill_MVi_sprites_visible = [];
 	for(var i = 0; i < DrillUp.g_MVi_list.length ;i++){
 		var temp_data = DrillUp.g_MVi_list[i];
 		if( temp_data == undefined ){ continue; }
-		if( temp_data['inited'] != true ){ continue; }
-		
 		this._drill_MVi_sprites_visible[i] = temp_data['visible'];
 	}
 };
 //==============================
-// * 临时全局变量初始化
+// * 存储数据 - 载入存档时检查数据（私有）
 //==============================
-var _drill_MVi_initialize = Game_Temp.prototype.initialize;
+Game_System.prototype.drill_MVi_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_MVi_sprites_visible == undefined ){
+		this.drill_MVi_initSysData();
+	}
+	
+	// > 容器的 空数据 检查
+	for(var i = 0; i < DrillUp.g_MVi_list.length; i++ ){
+		var temp_data = DrillUp.g_MVi_list[i];
+		
+		// > 已配置（undefined表示未配置的空数据）
+		if( temp_data != undefined ){
+			
+			// > 未存储的，重新初始化
+			if( this._drill_MVi_sprites_visible[i] == undefined ){
+				this._drill_MVi_sprites_visible[i] = temp_data['visible'];
+			
+			// > 已存储的，跳过
+			}else{
+				//（不操作）
+			}
+		}
+	}
+};
+
+
+//=============================================================================
+// * 临时变量初始化
+//=============================================================================
+var _drill_MVi_temp_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {
-	_drill_MVi_initialize.call(this);
+	_drill_MVi_temp_initialize.call(this);
 	this._drill_MVi_sprites = [];
 }
 
@@ -735,7 +817,6 @@ Scene_MenuBase.prototype.drill_MVi_create = function() {
 	for (var i = 0; i < DrillUp.g_MVi_list.length; i++) {
 		var temp_data = DrillUp.g_MVi_list[i];
 		if( temp_data == undefined ){ continue; }
-		if( temp_data['inited'] != true ){ continue; }
 		if( $gameSystem._drill_MVi_sprites_visible[i] != true ){ continue; }
 		
 		if( this.drill_MVi_checkKeyword( temp_data ) ){

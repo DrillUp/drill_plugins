@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        地图 - 地图动态遮罩板A
+ * @plugindesc [v1.4]        地图 - 地图动态遮罩板A
  * @author Drill_up
  * 
  * @Drill_LE_param "透视镜样式-%d"
@@ -249,6 +249,10 @@
  * 大幅度修改了样式结构，分离了简单透视镜和高级透视镜的功能。
  * [v1.2]
  * 添加了 高级透视镜变量 的功能。
+ * [v1.3]
+ * 修复了预加载有时候失效的bug。
+ * [v1.4]
+ * 优化了旧存档的识别与兼容。
  * 
  * 
  * 
@@ -1691,7 +1695,8 @@
 //			简单透视镜和高级透视镜功能一模一样，只是插件指令不同。
 //				
 //		★存在的问题：
-//			暂无
+//			1.如果在故事管理层进去之后立即返回，进入的地图时会闪一下遮罩。
+//			  可能是插件指令控制同一个透视镜的问题，并且可以确定不是 遮罩 没及时创建的问题。
 //
 
 
@@ -2279,13 +2284,15 @@ var _drill_LDMA_temp_preload = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {
 	_drill_LDMA_temp_preload.call(this);
 	
-    this._drill_LDMA_preloadTank = [];			//bitmap容器
+	this._drill_LDMA_cacheId = Utils.generateRuntimeId();	//资源缓存id
+    this._drill_LDMA_preloadTank = [];						//bitmap容器
 	for( var i = 0; i < DrillUp.g_LDMA_childData.length; i++ ){
 		var temp_data = DrillUp.g_LDMA_childData[i];
 		if( temp_data == undefined ){ continue; }
 		
 		for( var j = 0; j < temp_data['gif_src'].length; j++ ){
-			this._drill_LDMA_preloadTank.push( ImageManager.loadBitmap( temp_data['gif_src_file'], temp_data['gif_src'][j], 0, true ) );
+			var temp_bitmap = ImageManager.reserveBitmap( temp_data['gif_src_file'], temp_data['gif_src'][j], 0, true, this._drill_LDMA_cacheId );
+			this._drill_LDMA_preloadTank.push( temp_bitmap );
 		}
 	}
 }
@@ -2327,17 +2334,88 @@ Game_Event.prototype.drill_LDMA_setup = function() {
 	}, this);};
 };
 
-//=============================================================================
-// ** 存储数据
-//=============================================================================
-//==============================
-// ** 存储数据 - 初始化
-//==============================
+
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_LDMA_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_LDMA_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
     _drill_LDMA_sys_initialize.call(this);
+	this.drill_LDMA_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_LDMA_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_LDMA_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_LDMA_saveEnabled == true ){	
+		$gameSystem.drill_LDMA_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_LDMA_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_LDMA_initSysData = function() {
+	this.drill_LDMA_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_LDMA_checkSysData = function() {
+	this.drill_LDMA_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_LDMA_initSysData_Private = function() {
+	
 	this._drill_LDMA_container = new Drill_CODM_PerspectiveMarkerContainer();	//（创建容器）
 };
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_LDMA_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_LDMA_container == undefined ){
+		this.drill_LDMA_initSysData();
+	}
+	
+};
+
 //==============================
 // * 位置 - 移动设置
 //==============================
@@ -2731,6 +2809,29 @@ var _drill_LDMA_Scene_initialize = Scene_Map.prototype.initialize;
 Scene_Map.prototype.initialize = function() {
 	_drill_LDMA_Scene_initialize.call(this);
 	this.drill_LDMA_createMaskLayer();		//（容器必须在所有 场景装饰插件 之前创建）
+};
+//==============================
+// * 地图界面 - 帧刷新
+//==============================
+var _drill_LDMA_scene_create = Scene_Map.prototype.create;
+Scene_Map.prototype.create = function() {	
+	_drill_LDMA_scene_create.call(this);
+	
+	// > 若遮罩已开启，重建界面时，立即刷新一次统计
+	if( this.drill_LDMA_isMaskOpened() == false ){
+		
+		// > 刷新统计
+		this.drill_LDMA_updateCheck();
+		
+		// > 容器帧刷新
+		this._drill_LDMA_maskStage.update();
+		
+		// > 透视镜 排序（延迟）
+		if( $gameTemp._drill_LDMA_needSort == true ){
+			$gameTemp._drill_LDMA_needSort = false;
+			this._drill_LDMA_maskStage.drill_CODM_sortByZIndex();
+		}
+	}
 };
 //==============================
 // * 地图界面 - 帧刷新

@@ -3,12 +3,12 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        图块 - 地形伤害与地形治愈
+ * @plugindesc [v1.2]        图块 - 地形伤害与地形治愈
  * @author Drill_up
  * 
  * @Drill_LE_param "自定义地形伤害-%d"
  * @Drill_LE_parentKey "---自定义地形伤害集---"
- * @Drill_LE_var "DrillUp.g_LDF_length"
+ * @Drill_LE_var "DrillUp.g_LDF_data_length"
  * 
  * 
  * @help  
@@ -103,6 +103,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 修改了插件分类。
+ * [v1.2]
+ * 优化了旧存档的识别与兼容。
  * 
  * 
  * 
@@ -281,17 +283,15 @@
     DrillUp.g_LDF_defaultFormula = String(DrillUp.parameters["默认地形伤害公式"] || "10");
 	
 	/*----------------自定义地形伤害-----------------*/
-	DrillUp.g_LDF_length = 10;
-	DrillUp.g_LDF = [];
-	for (var i = 0; i < DrillUp.g_LDF_length; i++) {
+	DrillUp.g_LDF_data_length = 10;
+	DrillUp.g_LDF_data = [];
+	for (var i = 0; i < DrillUp.g_LDF_data_length; i++) {
 		if( DrillUp.parameters["自定义地形伤害-" + String(i+1) ] != undefined &&
 			DrillUp.parameters["自定义地形伤害-" + String(i+1) ] != "" ){
 			var data = JSON.parse(DrillUp.parameters["自定义地形伤害-" + String(i+1) ]);
-			DrillUp.g_LDF[i] = DrillUp.drill_LDF_initParam( data );
-			DrillUp.g_LDF[i]['inited'] = true;
+			DrillUp.g_LDF_data[i] = DrillUp.drill_LDF_initParam( data );
 		}else{
-			DrillUp.g_LDF[i] = DrillUp.drill_LDF_initParam( {} );
-			DrillUp.g_LDF[i]['inited'] = false;
+			DrillUp.g_LDF_data[i] = null;		//（强制设为空值，节约存储资源）
 		}
 	}
 	
@@ -302,7 +302,7 @@
 var _drill_LDF_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_LDF_pluginCommand.call(this, command, args);
-	if(command === ">地形伤害与地形治愈"){
+	if( command === ">地形伤害与地形治愈" ){
 		
 		/*-----------------默认------------------*/
 		if(args.length == 4){
@@ -330,10 +330,16 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp1 = temp1.replace("]","");
 				temp1 = Number(temp1) -1;
 				if( temp2 == "开启" ){
-					$gameSystem._drill_LDF_custom[ temp1 ]['enabled'] = true;
+					var data = $gameSystem._drill_LDF_custom[ temp1 ];
+					if( data != undefined ){
+						data['enabled'] = true;
+					}
 				}
 				if( temp2 == "关闭" ){
-					$gameSystem._drill_LDF_custom[ temp1 ]['enabled'] = false;
+					var data = $gameSystem._drill_LDF_custom[ temp1 ];
+					if( data != undefined ){
+						data['enabled'] = false;
+					}
 				}
 			}
 		}
@@ -341,40 +347,108 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 };
 
 
-//=============================================================================
-// ** 存储变量初始化
-//=============================================================================
-//==============================
-// ** 存储数据 - 初始化
-//==============================
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_LDF_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_LDF_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
     _drill_LDF_sys_initialize.call(this);
-	this.drill_LDF_initData();
+	this.drill_LDF_initSysData();
 };
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_LDF_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_LDF_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_LDF_saveEnabled == true ){	
+		$gameSystem.drill_LDF_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_LDF_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_LDF_initSysData = function() {
+	this.drill_LDF_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_LDF_checkSysData = function() {
+	this.drill_LDF_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
 //==============================
-// ** 存储数据 - 初始化数据
+// * 存储数据 - 初始化数据（私有）
 //==============================
-Game_System.prototype.drill_LDF_initData = function() {
+Game_System.prototype.drill_LDF_initSysData_Private = function() {
+	
 	this._drill_LDF_defaultDeadly = DrillUp.g_LDF_defaultDeadly;		//默认地形伤害是否致死
 	this._drill_LDF_defaultFormula = DrillUp.g_LDF_defaultFormula;		//默认地形伤害公式
 	this._drill_LDF_custom = [];
-	for(var i=0; i < DrillUp.g_LDF.length; i++ ){
-		var data = JSON.parse(JSON.stringify( DrillUp.g_LDF[i] ));	//深拷贝数据
-		this._drill_LDF_custom.push(data);
+	for(var i=0; i < DrillUp.g_LDF_data.length; i++ ){
+		var temp_data = DrillUp.g_LDF_data[i];
+		if( temp_data == undefined ){ continue; }
+		this._drill_LDF_custom[i] = JSON.parse(JSON.stringify( temp_data ));
 	}
-}
+};
 //==============================
-// * 存档文件 - 载入存档 - 数据赋值
+// * 存储数据 - 载入存档时检查数据（私有）
 //==============================
-var _drill_LDF_extractSaveContents = DataManager.extractSaveContents;
-DataManager.extractSaveContents = function(contents){
-	var lastVersion = $gameSystem.versionId();
+Game_System.prototype.drill_LDF_checkSysData_Private = function() {
 	
-	_drill_LDF_extractSaveContents.call( this, contents );
+	// > 旧存档数据自动补充
+	if( this._drill_LDF_seq == undefined ){
+		this.drill_LDF_initSysData();
+	}
 	
-	if( lastVersion != $gameSystem.versionId() ){	//（版本发生变化后，重刷数据）
-		$gameSystem.drill_LDF_initData();
+	// > 容器的 空数据 检查
+	for( var i = 0; i < DrillUp.g_LDF_data.length; i++ ){
+		var temp_data = DrillUp.g_LDF_data[i];
+		
+		// > 已配置（undefined表示未配置的空数据）
+		if( temp_data != undefined ){
+			
+			// > 未存储的，重新初始化
+			if( this._drill_LDF_custom[i] == undefined ){
+				this._drill_LDF_custom[i] = JSON.parse(JSON.stringify( temp_data ));
+			
+			// > 已存储的，跳过
+			}else{
+				//（不操作）
+			}
+		}
 	}
 };
 
@@ -527,8 +601,10 @@ Game_Actor.prototype.drill_LDF_executeFloorDamage = function(){
 //==============================
 Game_Actor.prototype.drill_LDF_basicFloorDamage_custom = function(){
 	var type = $gamePlayer._drill_LDF_lastCustomType;
-	var a = this;
-	var result = eval( $gameSystem._drill_LDF_custom[ type ]['formula'] );
+	var a = this;	
+	var data = $gameSystem._drill_LDF_custom[ type ];
+	if( data == undefined ){ return 0; }
+	var result = eval( data['formula'] );
 	if( isNaN(result) ){ return 0; }
 	return result;
 };
@@ -537,7 +613,9 @@ Game_Actor.prototype.drill_LDF_basicFloorDamage_custom = function(){
 //==============================
 Game_Actor.prototype.drill_LDF_maxFloorDamage_custom = function(){
 	var type = $gamePlayer._drill_LDF_lastCustomType;
-    return $gameSystem._drill_LDF_custom[ type ]['deadly'] ? this.hp : Math.max(this.hp - 1, 0);
+	var data = $gameSystem._drill_LDF_custom[ type ];
+	if( data == undefined ){ return 0; }
+    return data['deadly'] ? this.hp : Math.max(this.hp - 1, 0);
 };
 //==============================
 // * 自定义地形 - 条件检查
@@ -547,7 +625,7 @@ Game_Player.prototype.drill_LDF_isOnDamageFloor = function(){
 	var r_id = $gameMap.regionId( this.x, this.y );
 	for(var i=0; i < $gameSystem._drill_LDF_custom.length; i++ ){
 		var custom = $gameSystem._drill_LDF_custom[i];
-		if( custom['inited'] == false ){ continue; }
+		if( custom == undefined ){ continue; }
 		if( custom['enabled'] == false ){ continue; }
 		if( custom['regionId'] == r_id ){
 			this._drill_LDF_lastCustomType = i;		//（记录脚下的自定义类型）

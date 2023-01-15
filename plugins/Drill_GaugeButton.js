@@ -118,6 +118,7 @@
  * [v1.1]
  * 优化了内部结构，修复了镜头缩放时按钮被缩小的bug。
  * [v1.2]
+ * 优化了旧存档的识别与兼容。
  * 
  *
  *
@@ -468,7 +469,7 @@
 //		★性能测试因素	地图初始点
 //		★性能测试消耗	18.28ms
 //		★最坏情况		暂无
-//		★备注			由于开启了按钮预加载，18.28ms是预加载 drill_GBu_createBitmap 消耗的全部时间。
+//		★备注			暂无
 //		
 //		★优化记录		暂无
 //
@@ -564,10 +565,10 @@
 	for (var i = 0; i < DrillUp.g_GBu_button_length; i++) {
 		if( DrillUp.parameters["按钮-" + String(i+1) ] != undefined &&
 			DrillUp.parameters["按钮-" + String(i+1) ] != "" ){
-			DrillUp.g_GBu_button[i] = JSON.parse(DrillUp.parameters["按钮-" + String(i+1) ]);
-			DrillUp.g_GBu_button[i] = DrillUp.drill_GBu_initParam( DrillUp.g_GBu_button[i] );
+			var data = JSON.parse(DrillUp.parameters["按钮-" + String(i+1) ]);
+			DrillUp.g_GBu_button[i] = DrillUp.drill_GBu_initParam( data );
 		}else{
-			DrillUp.g_GBu_button[i] = null;
+			DrillUp.g_GBu_button[i] = null;		//（强制设为空值，节约存储资源）
 		}
 	}
 
@@ -631,24 +632,110 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	};
 };
 
-//=============================================================================
-// ** 存储数据变量初始化
-//=============================================================================
-var _drill_GBu_initialize = Game_System.prototype.initialize;
+
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_GBu_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_GBu_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-	_drill_GBu_initialize.call(this);
+    _drill_GBu_sys_initialize.call(this);
+	this.drill_GBu_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_GBu_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_GBu_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_GBu_saveEnabled == true ){	
+		$gameSystem.drill_GBu_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_GBu_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_GBu_initSysData = function() {
+	this.drill_GBu_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_GBu_checkSysData = function() {
+	this.drill_GBu_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_GBu_initSysData_Private = function() {
 	
 	this._drill_GBu_dataTank = [];							//按钮数据容器
 	for( var i=0; i < DrillUp.g_GBu_button.length; i++ ){
 		var temp_data = DrillUp.g_GBu_button[i];
-		if( temp_data == null ){
-			this._drill_GBu_dataTank[i] = null;
-			continue;
-		}
-		var data = JSON.parse(JSON.stringify( temp_data ));	//深拷贝数据
-		this._drill_GBu_dataTank[i] = data;
+		if( temp_data == undefined ){ continue; }
+		this._drill_GBu_dataTank[i] = JSON.parse(JSON.stringify( temp_data ));	//深拷贝数据
 	}
-}
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_GBu_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_GBu_dataTank == undefined ){
+		this.drill_GBu_initSysData();
+	}
+	
+	// > 容器的 空数据 检查
+	for(var i = 0; i < DrillUp.g_GBu_button.length; i++ ){
+		var temp_data = DrillUp.g_GBu_button[i];
+		
+		// > 已配置（undefined表示未配置的空数据）
+		if( temp_data != undefined ){
+			
+			// > 未存储的，重新初始化
+			if( this._drill_GBu_dataTank[i] == undefined ){
+				this._drill_GBu_dataTank[i] = JSON.parse(JSON.stringify( temp_data ));
+			
+			// > 已存储的，跳过
+			}else{
+				//（不操作）
+			}
+		}
+	}
+};
+
 
 //=============================================================================
 // ** 地图点击拦截

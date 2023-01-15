@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        物体触发 - 固定区域 & 随机点
+ * @plugindesc [v1.3]        物体触发 - 固定区域 & 随机点
  * @author Drill_up
  * 
  * 
@@ -162,6 +162,8 @@
  * 添加了 固定随机种子 功能。
  * [v1.2]
  * 修复了切换事件页后，固定随机种子 不固定的bug。
+ * [v1.3]
+ * 优化了旧存档的识别与兼容。
  * 
  */
  
@@ -484,13 +486,86 @@ Game_Map.prototype.drill_ERP_isEventExist = function( e_id ){
 	return true;
 };
 
-//=============================================================================
-// * 缓存容器
-//=============================================================================
-var _drill_ERP_System_initialize = Game_System.prototype.initialize;
+
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_ERP_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_ERP_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-	_drill_ERP_System_initialize.call(this);
+    _drill_ERP_sys_initialize.call(this);
+	this.drill_ERP_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_ERP_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_ERP_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_ERP_saveEnabled == true ){	
+		$gameSystem.drill_ERP_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_ERP_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_ERP_initSysData = function() {
+	this.drill_ERP_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_ERP_checkSysData = function() {
+	this.drill_ERP_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_ERP_initSysData_Private = function() {
+	
 	this._drill_ERP_cur_condition = {};		//当前筛选器
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_ERP_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_ERP_cur_condition == undefined ){
+		this.drill_ERP_initSysData();
+	}
+	
 };
 
 

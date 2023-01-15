@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.7]        行走图 - 显现动作效果
+ * @plugindesc [v1.9]        行走图 - 显现动作效果
  * @author Drill_up
  * 
  * 
@@ -15,10 +15,13 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 使得你可以播放事件显现出来的各种动作。
- * 
+ *
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该插件可以单独使用。
+ * 该插件 不能 单独使用。
+ * 需要基于核心插件，才能运行。
+ * 基于：
+ *   - Drill_CoreOfEventFrame        行走图-行走图优化核心
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -168,6 +171,10 @@
  * 添加了 直接显现、移动显现 功能。
  * [v1.7]
  * 优化了数学缩短锚点的计算公式。
+ * [v1.8]
+ * 优化了内部结构，减少性能消耗。
+ * [v1.9]
+ * 优化了旧存档的识别与兼容。
  * 
  * 
  * 
@@ -254,6 +261,12 @@
 	/*-----------------杂项------------------*/
 	DrillUp.g_EFIE_p_opacityCheck = String(DrillUp.parameters['玩家默认透明度检查'] || "false") === "true";
 	DrillUp.g_EFIE_e_opacityCheck = String(DrillUp.parameters['事件默认透明度检查'] || "false") === "true";
+	
+	
+//=============================================================================
+// * >>>>基于插件检测>>>>
+//=============================================================================
+if( Imported.Drill_CoreOfEventFrame ){
 	
 	
 //=============================================================================
@@ -914,15 +927,88 @@ Game_Temp.prototype.drill_EFIE_getParabolicThree = function( x1,y1,x2,y2,x3,y3 )
 }
 
 
-//=============================================================================
-// ** 存储变量初始化
-//=============================================================================
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_EFIE_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_EFIE_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
     _drill_EFIE_sys_initialize.call(this);
+	this.drill_EFIE_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_EFIE_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_EFIE_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_EFIE_saveEnabled == true ){	
+		$gameSystem.drill_EFIE_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_EFIE_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_EFIE_initSysData = function() {
+	this.drill_EFIE_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_EFIE_checkSysData = function() {
+	this.drill_EFIE_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_EFIE_initSysData_Private = function() {
+	
 	this._drill_EFIE_opacityCheck_player = DrillUp.g_EFIE_p_opacityCheck;
 	this._drill_EFIE_opacityCheck_event = DrillUp.g_EFIE_e_opacityCheck;
-}
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_EFIE_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_EFIE_opacityCheck_player == undefined ){
+		this.drill_EFIE_initSysData();
+	}
+	
+};
+
 
 //=============================================================================
 // ** 跟随者
@@ -937,6 +1023,7 @@ Game_Follower.prototype.setOpacity = function(opacity) {
 	_drill_EFIE_setOpacity.call(this,opacity);
 };
 
+
 //=============================================================================
 // ** 事件贴图
 //
@@ -949,19 +1036,6 @@ var _Drill_EFIE_s_setCharacter = Sprite_Character.prototype.setCharacter;
 Sprite_Character.prototype.setCharacter = function(character) {
 	_Drill_EFIE_s_setCharacter.call(this,character);
 	if (character) { this._Drill_EFIE = character._Drill_EFIE; };
-};
-
-//==============================
-// * 事件贴图 - 固定帧初始值
-//==============================
-var _Drill_EFIE_s_updatePosition = Sprite_Character.prototype.updatePosition;
-Sprite_Character.prototype.updatePosition = function() {
-	_Drill_EFIE_s_updatePosition.call(this);			// x、y、z
-	if( this.rotation != 0 ){ this.rotation = 0; }		// 旋转
-	if( this.scale.x != 1 ){ this.scale.x = 1; }		// 缩放x
-	if( this.scale.y != 1 ){ this.scale.y = 1; }		// 缩放y
-	if( this.skew.x != 0 ){ this.skew.x = 0; }			// 斜切x
-	if( this.skew.y != 0 ){ this.skew.y = 0; }			// 斜切y
 };
 
 //==============================
@@ -1463,6 +1537,18 @@ Game_Character.prototype.drill_EFIE_updateShowingEnlargeSpring = function() {
 	}else{
 		this.drill_EFIE_stopEffect();	//结束动作
 	}
+}
+
+
+//=============================================================================
+// * <<<<基于插件检测<<<<
+//=============================================================================
+}else{
+		Imported.Drill_EventFadeInEffect = false;
+		alert(
+			"【Drill_EventFadeInEffect.js 行走图-显现动作效果】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
+			"\n- Drill_CoreOfEventFrame 行走图-行走图优化核心"
+		);
 }
 
 

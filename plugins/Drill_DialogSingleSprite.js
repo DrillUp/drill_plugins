@@ -507,11 +507,11 @@ ImageManager.load_SpecialDialogPic = function(filename) {
 // ** 插件指令
 //=============================================================================
 var _Drill_DSS_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
-	_Drill_DSS_pluginCommand.call(this, command, args);
-	
-	if( command === ">简易对话图" ){ // >简易对话图 : 执行 : 图[1]
-		if(args.length == 4){
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
+	_Drill_DSS_pluginCommand.call( this, command, args );
+	if( command === ">简易对话图" ){
+		
+		if( args.length == 4 ){
 			var type = String(args[1]);
 			var temp1 = String(args[3]);
 			if( type == "执行" ){
@@ -672,7 +672,7 @@ Scene_Map.prototype.createAllWindows = function() {
 };
 Scene_Map.prototype.drill_DSS_create = function() {
 	
-	// > bitmap预加载
+	// > bitmap全加载
 	this._drill_DSS_src_bitmaps = [];
 	for( var i=0; i < DrillUp.g_DSS_pics.length; i++ ){
 		var bitmap = ImageManager.load_SpecialDialogPic( DrillUp.g_DSS_pics[i] );

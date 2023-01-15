@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        技能 - 技能记录器
+ * @plugindesc [v1.2]        技能 - 技能记录器
  * @author Drill_up
  * 
  * 
@@ -134,6 +134,8 @@
  * [v1.1]
  * 修复了"敌方 : 上一个施法者ID"获取不到的bug。
  * 修改了注释说明，防止理解混淆。
+ * [v1.2]
+ * 优化了旧存档的识别与兼容。
  * 
  * 
  * 
@@ -337,30 +339,30 @@
     DrillUp.parameters = PluginManager.parameters('Drill_SkillRecorder');
 	
 	
-    DrillUp.g_SkR_varLast_i = Number(DrillUp.parameters['上一个使用的物品ID'] || 0);
-    DrillUp.g_SkR_varLast_i_from_aid = Number(DrillUp.parameters['上一个使用者ID'] || 0);
-    DrillUp.g_SkR_varLast_i_from_aindex = Number(DrillUp.parameters['上一个使用者队伍序号'] || 0);
-    DrillUp.g_SkR_varLast_i_tar_aid = Number(DrillUp.parameters['上一个作用目标角色ID'] || 0);
-    DrillUp.g_SkR_varLast_i_tar_aindex = Number(DrillUp.parameters['上一个作用目标我方队伍序号'] || 0);
-    DrillUp.g_SkR_varLast_i_tar_eid = Number(DrillUp.parameters['上一个作用目标敌人ID'] || 0);
-    DrillUp.g_SkR_varLast_i_tar_eindex = Number(DrillUp.parameters['上一个作用目标敌方队伍序号'] || 0);
+    DrillUp.g_SkR_varLast_i = Number(DrillUp.parameters["上一个使用的物品ID"] || 0);
+    DrillUp.g_SkR_varLast_i_from_aid = Number(DrillUp.parameters["上一个使用者ID"] || 0);
+    DrillUp.g_SkR_varLast_i_from_aindex = Number(DrillUp.parameters["上一个使用者队伍序号"] || 0);
+    DrillUp.g_SkR_varLast_i_tar_aid = Number(DrillUp.parameters["上一个作用目标角色ID"] || 0);
+    DrillUp.g_SkR_varLast_i_tar_aindex = Number(DrillUp.parameters["上一个作用目标我方队伍序号"] || 0);
+    DrillUp.g_SkR_varLast_i_tar_eid = Number(DrillUp.parameters["上一个作用目标敌人ID"] || 0);
+    DrillUp.g_SkR_varLast_i_tar_eindex = Number(DrillUp.parameters["上一个作用目标敌方队伍序号"] || 0);
 	
 	DrillUp.g_SkR_varLast_clear = String(DrillUp.parameters["每次新战斗时是否清零敌方次数"] || "true") == "true";
-    DrillUp.g_SkR_varLast_sa = Number(DrillUp.parameters['敌方上一个施法的技能ID'] || 0);
-    DrillUp.g_SkR_varLast_sa_from_id = Number(DrillUp.parameters['敌方上一个施法者ID'] || 0);
-    DrillUp.g_SkR_varLast_sa_from_index = Number(DrillUp.parameters['敌方上一个施法者队伍序号'] || 0);
-    DrillUp.g_SkR_varLast_sa_tar_aid = Number(DrillUp.parameters['敌方上一个目标角色ID'] || 0);
-    DrillUp.g_SkR_varLast_sa_tar_aindex = Number(DrillUp.parameters['敌方上一个目标我方队伍序号'] || 0);
-    DrillUp.g_SkR_varLast_sa_tar_eid = Number(DrillUp.parameters['敌方上一个目标敌人ID'] || 0);
-    DrillUp.g_SkR_varLast_sa_tar_eindex = Number(DrillUp.parameters['敌方上一个目标敌方队伍序号'] || 0);
+    DrillUp.g_SkR_varLast_sa = Number(DrillUp.parameters["敌方上一个施法的技能ID"] || 0);
+    DrillUp.g_SkR_varLast_sa_from_id = Number(DrillUp.parameters["敌方上一个施法者ID"] || 0);
+    DrillUp.g_SkR_varLast_sa_from_index = Number(DrillUp.parameters["敌方上一个施法者队伍序号"] || 0);
+    DrillUp.g_SkR_varLast_sa_tar_aid = Number(DrillUp.parameters["敌方上一个目标角色ID"] || 0);
+    DrillUp.g_SkR_varLast_sa_tar_aindex = Number(DrillUp.parameters["敌方上一个目标我方队伍序号"] || 0);
+    DrillUp.g_SkR_varLast_sa_tar_eid = Number(DrillUp.parameters["敌方上一个目标敌人ID"] || 0);
+    DrillUp.g_SkR_varLast_sa_tar_eindex = Number(DrillUp.parameters["敌方上一个目标敌方队伍序号"] || 0);
 	
-    DrillUp.g_SkR_varLast_se = Number(DrillUp.parameters['我方上一个施法的技能ID'] || 0);
-    DrillUp.g_SkR_varLast_se_from_id = Number(DrillUp.parameters['我方上一个施法者ID'] || 0);
-    DrillUp.g_SkR_varLast_se_from_index = Number(DrillUp.parameters['我方上一个施法者队伍序号'] || 0);
-    DrillUp.g_SkR_varLast_se_tar_aid = Number(DrillUp.parameters['我方上一个目标角色ID'] || 0);
-    DrillUp.g_SkR_varLast_se_tar_aindex = Number(DrillUp.parameters['我方上一个目标我方队伍序号'] || 0);
-    DrillUp.g_SkR_varLast_se_tar_eid = Number(DrillUp.parameters['我方上一个目标敌人ID'] || 0);
-    DrillUp.g_SkR_varLast_se_tar_eindex = Number(DrillUp.parameters['我方上一个目标敌方队伍序号'] || 0);
+    DrillUp.g_SkR_varLast_se = Number(DrillUp.parameters["我方上一个施法的技能ID"] || 0);
+    DrillUp.g_SkR_varLast_se_from_id = Number(DrillUp.parameters["我方上一个施法者ID"] || 0);
+    DrillUp.g_SkR_varLast_se_from_index = Number(DrillUp.parameters["我方上一个施法者队伍序号"] || 0);
+    DrillUp.g_SkR_varLast_se_tar_aid = Number(DrillUp.parameters["我方上一个目标角色ID"] || 0);
+    DrillUp.g_SkR_varLast_se_tar_aindex = Number(DrillUp.parameters["我方上一个目标我方队伍序号"] || 0);
+    DrillUp.g_SkR_varLast_se_tar_eid = Number(DrillUp.parameters["我方上一个目标敌人ID"] || 0);
+    DrillUp.g_SkR_varLast_se_tar_eindex = Number(DrillUp.parameters["我方上一个目标敌方队伍序号"] || 0);
 
 
 //=============================================================================
@@ -369,14 +371,15 @@
 var _drill_SkR_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_SkR_pluginCommand.call(this, command, args);
-	
-	if (command === ">物品记录器")  {
+	if( command === ">物品记录器" ){
+		
 		if( args.length == 6 ){
 			var type = String(args[1]);
 			var temp1 = Number(args[3]);
 			var temp2 = Number(args[5]);
 			if( type == "获取物品使用次数" ){
 				$gameVariables.setValue( temp1 , $gameSystem.drill_SkR_getItemUsedCount(temp2) );
+				return;
 			}
 		}
 		if( args.length == 4 ){
@@ -384,28 +387,34 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var temp1 = Number(args[3]);
 			if( type == "上一个使用的物品ID" ){
 				$gameVariables.setValue( temp1 , $gameSystem._drill_SkR_i );
+				return;
 			}
 			if( type == "上一个使用者ID" ){
 				$gameVariables.setValue( temp1 , $gameSystem._drill_SkR_i_from_aid );
+				return;
 			}
 			if( type == "上一个使用者队伍序号" ){
 				$gameVariables.setValue( temp1 , $gameSystem._drill_SkR_i_from_aindex );
+				return;
 			}
 			if( type == "上一个作用目标角色ID" ){
 				$gameVariables.setValue( temp1 , $gameSystem._drill_SkR_i_tar_aid );
+				return;
 			}
 			if( type == "上一个作用目标我方队伍序号" ){
 				$gameVariables.setValue( temp1 , $gameSystem._drill_SkR_i_tar_aindex );
+				return;
 			}
 			if( type == "上一个作用目标敌人ID" ){
 				$gameVariables.setValue( temp1 , $gameSystem._drill_SkR_i_tar_eid );
+				return;
 			}
 			if( type == "上一个作用目标敌方队伍序号" ){
 				$gameVariables.setValue( temp1 , $gameSystem._drill_SkR_i_tar_eindex );
+				return;
 			}
 		}
-	};
-	if (command === ">技能记录器")  {
+		
 		if( args.length == 8 ){
 			var group = String(args[1]);
 			var type = String(args[3]);
@@ -414,11 +423,13 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( group == "我方" ){
 				if( type == "获取技能使用次数" ){
 					$gameVariables.setValue( temp1 , $gameSystem.drill_SkR_getActorSkillUsedCount(temp2) );
+					return;
 				}
 			}
 			if( group == "敌方" ){
 				if( type == "获取技能使用次数" ){
 					$gameVariables.setValue( temp1 , $gameSystem.drill_SkR_getEnemySkillUsedCount(temp2) );
+					return;
 				}
 			}
 		}
@@ -429,64 +440,139 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( group == "我方" ){
 				if( type == "上一个施法的技能ID" ){
 					$gameVariables.setValue( temp1 , $gameSystem._drill_SkR_sa );
+					return;
 				}
 				if( type == "上一个施法者ID" ){
 					$gameVariables.setValue( temp1 , $gameSystem._drill_SkR_sa_from_id );
+					return;
 				}
 				if( type == "上一个施法者队伍序号" ){
 					$gameVariables.setValue( temp1 , $gameSystem._drill_SkR_sa_from_index );
+					return;
 				}
 				if( type == "上一个目标角色ID" ){
 					$gameVariables.setValue( temp1 , $gameSystem._drill_SkR_sa_tar_aid );
+					return;
 				}
 				if( type == "上一个目标我方队伍序号" ){
 					$gameVariables.setValue( temp1 , $gameSystem._drill_SkR_sa_tar_aindex );
+					return;
 				}
 				if( type == "上一个目标敌人ID" ){
 					$gameVariables.setValue( temp1 , $gameSystem._drill_SkR_sa_tar_eid );
+					return;
 				}
 				if( type == "上一个目标敌方队伍序号" ){
 					$gameVariables.setValue( temp1 , $gameSystem._drill_SkR_sa_tar_eindex );
+					return;
 				}
 			}
 			if( group == "敌方" ){
 				if( type == "上一个施法的技能ID" ){
 					$gameVariables.setValue( temp1 , $gameSystem._drill_SkR_se );
+					return;
 				}
 				if( type == "上一个施法者ID" ){
 					$gameVariables.setValue( temp1 , $gameSystem._drill_SkR_se_from_id );
+					return;
 				}
 				if( type == "上一个施法者队伍序号" ){
 					$gameVariables.setValue( temp1 , $gameSystem._drill_SkR_se_from_index );
+					return;
 				}
 				if( type == "上一个目标角色ID" ){
 					$gameVariables.setValue( temp1 , $gameSystem._drill_SkR_se_tar_aid );
+					return;
 				}
 				if( type == "上一个目标我方队伍序号" ){
 					$gameVariables.setValue( temp1 , $gameSystem._drill_SkR_se_tar_aindex );
+					return;
 				}
 				if( type == "上一个目标敌人ID" ){
 					$gameVariables.setValue( temp1 , $gameSystem._drill_SkR_se_tar_eid );
+					return;
 				}
 				if( type == "上一个目标敌方队伍序号" ){
 					$gameVariables.setValue( temp1 , $gameSystem._drill_SkR_se_tar_eindex );
+					return;
 				}
 			}
 		}
 	}
 };
-//=============================================================================
-// ** 存储初始化
-//=============================================================================
-//==============================
-// * 初始化
-//==============================
-var _drill_SkR_system_initialize = Game_System.prototype.initialize;
+
+
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_SkR_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_SkR_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-    _drill_SkR_system_initialize.call(this);
+    _drill_SkR_sys_initialize.call(this);
+	this.drill_SkR_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_SkR_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_SkR_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_SkR_saveEnabled == true ){	
+		$gameSystem.drill_SkR_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_SkR_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_SkR_initSysData = function() {
+	this.drill_SkR_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_SkR_checkSysData = function() {
+	this.drill_SkR_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_SkR_initSysData_Private = function() {
+	
 	this._drill_SkR_i_usedCount = [];		//物品次数
 	this._drill_SkR_sa_usedCount = [];		//我方技能次数
 	this._drill_SkR_se_usedCount = [];		//敌方技能次数
+	//（初始为空容器，不需要初始化）
 	
 	this._drill_SkR_i = 0;					//上一个物品
 	this._drill_SkR_i_from_aid = 0;			//上一个使用者ID
@@ -511,7 +597,20 @@ Game_System.prototype.initialize = function() {
 	this._drill_SkR_se_tar_aindex = 0;		//敌方 上一个目标我方队伍序号
 	this._drill_SkR_se_tar_eid = 0;			//敌方 上一个目标敌人ID
 	this._drill_SkR_se_tar_eindex = 0;		//敌方 上一个目标敌方队伍序号
-};	
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_SkR_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_SkR_i_usedCount == undefined ){
+		this.drill_SkR_initSysData();
+	}
+	
+	// > 容器的 空数据 检查
+	//	（容器在物品/技能使用时才赋值，且从0开始计数，不需要空判断）
+};
 //==============================
 // * 物品 - 数量修改
 //==============================

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        面板 - 全自定义画廊A
+ * @plugindesc [v1.2]        面板 - 全自定义画廊A
  * @author Drill_up
  * 
  * @Drill_LE_param "内容-%d"
@@ -160,8 +160,11 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 大幅度修改了全局存储的文件存储结构。
+ * [v1.2]
+ * 优化了旧存档的识别与兼容。
  * 
- *
+ * 
+ * 
  * @param ----杂项----
  * @default 
  *
@@ -1459,7 +1462,7 @@
 //					->打开面板（单图查看模式）
 //					->选中页
 //				->特殊
-//					->原图全部预加载
+//					->原图全部全加载
 //			
 //		★私有类如下：
 //			* Scene_Drill_SGaA				画廊A
@@ -1758,8 +1761,9 @@
 	/*-----------------内容------------------*/
 	DrillUp.g_SGaA_context_list_length = 80;
 	DrillUp.g_SGaA_context_list = [];
-	for( var i = 1; i <= DrillUp.g_SGaA_context_list_length ; i++ ){
-		if( DrillUp.parameters["内容-" + String(i) ] != "" ){
+	for( var i = 1; i <= DrillUp.g_SGaA_context_list_length; i++ ){
+		if( DrillUp.parameters["内容-" + String(i) ] != "" &&
+			DrillUp.parameters["内容-" + String(i) ] != undefined ){
 			var data = JSON.parse(DrillUp.parameters["内容-" + String(i)] );
 			DrillUp.g_SGaA_context_list[i] = DrillUp.drill_SGaA_initContext( data );
 			DrillUp.g_SGaA_context_list[i]['index'] = i;
@@ -1860,57 +1864,116 @@ StorageManager.drill_SGaA_saveData = function(){
 };
 
 
-
-//=============================================================================
-// ** 正常存储
-//=============================================================================
-//==============================
-// * 正常 - 初始化
-//==============================
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_SGaA_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_SGaA_sys_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function() {	
-	_drill_SGaA_sys_initialize.call(this);
+Game_System.prototype.initialize = function() {
+    _drill_SGaA_sys_initialize.call(this);
+	this.drill_SGaA_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_SGaA_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_SGaA_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_SGaA_saveEnabled == true ){	
+		$gameSystem.drill_SGaA_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_SGaA_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_SGaA_initSysData = function() {
+	this.drill_SGaA_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_SGaA_checkSysData = function() {
+	this.drill_SGaA_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_SGaA_initSysData_Private = function() {
+	
 	this._drill_SGaA_enableTank = [];				//显示情况
 	this._drill_SGaA_lockTank = [];					//锁定情况
+	for(var i = 0; i < DrillUp.g_SGaA_context_list.length; i++){
+		var temp_data = DrillUp.g_SGaA_context_list[i];
+		if( temp_data == undefined ){ continue; }
+		this._drill_SGaA_enableTank[i] = temp_data['enabled'];
+		this._drill_SGaA_lockTank[i] = temp_data['locked'];
+	}
 };
 //==============================
-// * 正常 - 检查数据
+// * 存储数据 - 载入存档时检查数据（私有）
 //==============================
-Game_System.prototype.drill_SGaA_sysCheckData = function() {
-	if( this._drill_SGaA_enableTank == null ){ this._drill_SGaA_enableTank = []; }
-	if( this._drill_SGaA_lockTank == null   ){ this._drill_SGaA_lockTank = []; }
+Game_System.prototype.drill_SGaA_checkSysData_Private = function() {
 	
-	for( var i = 1; i <= DrillUp.g_SGaA_context_list_length ; i++ ){
-		var temp_c = DrillUp.g_SGaA_context_list[i];
-		
-		// > 指定数据为空时
-		if( this._drill_SGaA_enableTank[i] == null ){
-			if( temp_c == null ){		//（无内容配置，跳过）
-				this._drill_SGaA_enableTank[i] = null;
-			}else{						//（有内容配置，初始化默认）
-				this._drill_SGaA_enableTank[i] = temp_c['enabled'];
-			}
-			
-		// > 不为空则跳过检查
-		}else{
-			//（不操作）
-		}
+	// > 旧存档数据自动补充
+	if( this._drill_SGaA_enableTank == undefined ){
+		this.drill_SGaA_initSysData();
 	}
-	for( var i = 1; i <= DrillUp.g_SGaA_context_list_length ; i++ ){
-		var temp_c = DrillUp.g_SGaA_context_list[i];
-		if( temp_c == null ){ continue; }
+	
+	// > 容器的 空数据 检查
+	for( var i = 0; i < DrillUp.g_SGaA_context_list.length; i++ ){
+		var temp_data = DrillUp.g_SGaA_context_list[i];
 		
-		// > 指定数据为空时
-		if( this._drill_SGaA_lockTank[i] == null ){
-			if( temp_c == null ){		//（无内容配置，跳过）
-				this._drill_SGaA_lockTank[i] = null;
-			}else{						//（有内容配置，初始化默认）
-				this._drill_SGaA_lockTank[i] = temp_c['locked'];
+		// > 已配置（undefined表示未配置的空数据）
+		if( temp_data != undefined ){
+			
+			// > 未存储的，重新初始化
+			if( this._drill_SGaA_enableTank[i] == undefined ){
+				this._drill_SGaA_enableTank[i] = temp_data['enabled'];
+			
+			// > 已存储的，跳过
+			}else{
+				//（不操作）
 			}
 			
-		// > 不为空则跳过检查
-		}else{
-			//（不操作）
+			// > 未存储的，重新初始化
+			if( this._drill_SGaA_lockTank[i] == undefined ){
+				this._drill_SGaA_lockTank[i] = temp_data['locked'];
+			
+			// > 已存储的，跳过
+			}else{
+				//（不操作）
+			}
 		}
 	}
 };
@@ -1930,9 +1993,8 @@ ImageManager.load_MenuGallery = function(filename) {
 var _drill_SGaA_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_SGaA_pluginCommand.call(this, command, args);
-	
 	if( command === ">画廊A" ){
-		$gameSystem.drill_SGaA_sysCheckData();	//（初始化）
+		
 		if(args.length == 2){
 			var type = String(args[1]);
 			if( type == "打开面板" ){			//打开菜单
@@ -1967,9 +2029,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				StorageManager.drill_SGaA_saveData();
 			}
 		}
-	}
-	if( command === ">画廊A" ){
-		$gameSystem.drill_SGaA_sysCheckData();	//（初始化）
+		
 		if(args.length == 4){
 			var type = String(args[1]);
 			var temp1 = String(args[3]);
@@ -2155,7 +2215,6 @@ Scene_Drill_SGaA.prototype.constructor = Scene_Drill_SGaA;
 Scene_Drill_SGaA.prototype.initialize = function() {
     Scene_MenuBase.prototype.initialize.call(this);
 	this._cur_index = -1;
-	$gameSystem.drill_SGaA_sysCheckData();
 };
 //==============================
 // * 画廊A - 创建
@@ -2167,7 +2226,7 @@ Scene_Drill_SGaA.prototype.create = function() {
 	this._drill_field = new Sprite();
 	this.addChild(this._drill_field);
 
-	this.drill_preloadSrc();				//创建 - 资源预加载
+	this.drill_loadAllSrc();				//创建 - 资源全加载
 	this.drill_createLayout();				//创建 - 整体布局
 	this.drill_createSelect();				//创建 - 选项窗口
 	this.drill_createCommandButton();		//创建 - 选项按钮组
@@ -2216,9 +2275,9 @@ Scene_Drill_SGaA.prototype.terminate = function() {
 }
 
 //==============================
-// * 创建 - 资源预加载
+// * 创建 - 资源全加载
 //==============================
-Scene_Drill_SGaA.prototype.drill_preloadSrc = function() {
+Scene_Drill_SGaA.prototype.drill_loadAllSrc = function() {
 	this._drill_needDelayRefreshSelectWindow = true;
 	this._drill_SGaA_bitmaps = [];
 	for(var i=0; i < DrillUp.g_SGaA_context_list.length; i++){
@@ -2228,7 +2287,7 @@ Scene_Drill_SGaA.prototype.drill_preloadSrc = function() {
 	}
 };
 //==============================
-// * 判断 - 资源预加载
+// * 判断 - 资源全加载
 //==============================
 Scene_Drill_SGaA.prototype.drill_isAllBitmapLoaded = function() {
 	for(var i=0; i < this._drill_SGaA_bitmaps.length; i++){
@@ -2451,7 +2510,7 @@ Scene_Drill_SGaA.prototype.drill_resetPosition = function() {
 Scene_Drill_SGaA.prototype.drill_refreshThumbnail = function( cur_index ) {
 	var data_list = $gameTemp._drill_SGaA_visibleDataList;		//可见项列表
 	
-	// > 资源预加载
+	// > 资源全加载
 	var src_tank = this._sprite_thumbnail._drill_bitmaps;	//资源bitmap容器
 	if( src_tank.length == 0 ){
 		src_tank[0] = ImageManager.load_MenuGallery(DrillUp.g_SGaA_locked_pic);
@@ -2917,7 +2976,7 @@ Drill_SGaA_SelectWindow.prototype.drawItem = function( index ){
 		if( $gameTemp.drill_SGaA_isLocked( realIndex ) == true ){
 			bitmap = ImageManager.load_MenuGallery( DrillUp.g_SGaA_locked_pic );
 		}else{
-			bitmap = ImageManager.load_MenuGallery( temp_data['pic'] );	//（注意预加载问题）
+			bitmap = ImageManager.load_MenuGallery( temp_data['pic'] );	//（注意全加载问题）
 		}
 		
 		if( bitmap != null && bitmap.isReady() == true ){

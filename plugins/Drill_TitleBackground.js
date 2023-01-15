@@ -848,11 +848,9 @@
 			DrillUp.parameters["背景-" + String(i+1) ] != "" ){
 			var temp = JSON.parse(DrillUp.parameters["背景-" + String(i+1) ]);
 			DrillUp.g_TBa_list[i] = DrillUp.drill_TBa_backgroundInit( temp );
-			DrillUp.g_TBa_list[i]['id'] = Number(i)+1;
 			DrillUp.g_TBa_list[i]['inited'] = true;
 		}else{
 			DrillUp.g_TBa_list[i] = DrillUp.drill_TBa_backgroundInit( {} );
-			DrillUp.g_TBa_list[i]['id'] = Number(i)+1;
 			DrillUp.g_TBa_list[i]['inited'] = false;
 		}
 	}
@@ -919,7 +917,8 @@ StorageManager.drill_TBa_saveData = function(){
 var _drill_TBa_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_TBa_pluginCommand.call(this, command, args);
-	if (command === ">标题背景") {
+	if( command === ">标题背景" ){
+		
 		if(args.length == 4){
 			var temp1 = String(args[1]);
 			var type = String(args[3]);
@@ -951,16 +950,6 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			}
 		}
 	}
-};
-
-
-//=============================================================================
-// ** 存储数据初始化
-//=============================================================================
-var _drill_TBa_sys_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function() {	
-	_drill_TBa_sys_initialize.call(this);
-	// 无
 };
 
 

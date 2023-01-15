@@ -175,28 +175,29 @@
 var _drill_EGS_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_EGS_pluginCommand.call(this, command, args);
-	
-	if (command === '>聚集开关') { // >聚集开关 : 变量[21] : 获取上一次触发聚集的数量
-		if(args.length == 4){
+	if( command === ">聚集开关" ){	// >聚集开关 : 变量[21] : 获取上一次触发聚集的数量
+		
+		if( args.length == 4 ){
 			var temp1 = String(args[1]);
 			var type = String(args[3]);
 			if( type == "获取上一次触发聚集的数量"){
 				temp1 = temp1.replace("变量[","");
 				temp1 = temp1.replace("]","");
 				temp1 = Number(temp1);
-				$gameVariables.setValue( temp1,$gameSystem._drill_EGS_count );
+				$gameVariables.setValue( temp1,$gameTemp._drill_EGS_count );
 			}
 		}
 	}
 };
+
 //=============================================================================
-// ** 存储变量初始化
+// ** 临时变量初始化
 //=============================================================================
-var _drill_EGS_sys_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function() {
-    _drill_EGS_sys_initialize.call(this);
+var _drill_EGS_temp_initialize = Game_Temp.prototype.initialize;
+Game_Temp.prototype.initialize = function() {
+    _drill_EGS_temp_initialize.call(this);
 	this._drill_EGS_count = 0;
-}
+};
 
 //=============================================================================
 // ** 事件
@@ -292,9 +293,9 @@ Game_Event.prototype.drill_EGS_readPage = function( page_list ) {
 //==============================
 // * 容器 - 初始化
 //==============================
-var _drill_EGS_temp_initialize = Game_Temp.prototype.initialize;
+var _drill_EGS_temp_initialize2 = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {	
-	_drill_EGS_temp_initialize.call(this);
+	_drill_EGS_temp_initialize2.call(this);
 	this._drill_EGS_tags = [];
 	this._drill_EGS_switchs = {};
 	this._drill_EGS_needRestatistics = true;
@@ -410,7 +411,7 @@ Game_Map.prototype.drill_EGS_updateSwitch = function() {
 						// > 打开开关
 						var s_key = [this._mapId, e._eventId, e._drill_EGS._switch ];
 						if( $gameSelfSwitches.value(s_key) !== true){
-							$gameSystem._drill_EGS_count = e_tank.length;	//记录数量
+							$gameTemp._drill_EGS_count = e_tank.length;	//记录数量
 							$gameSelfSwitches.drill_EGS_setValueWithOutChange(s_key,true);
 							$gameSelfSwitches.onChange();
 						}

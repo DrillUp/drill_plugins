@@ -1795,18 +1795,7 @@
 //=============================================================================
 if( Imported.Drill_WindowSkillElement && ImageManager.load_MenuSkillElement !== undefined ){
 	
-	
-//=============================================================================
-// ** 预加载
-//=============================================================================
-var _drill_XESI_initialize = Game_Temp.prototype.initialize;
-Game_Temp.prototype.initialize = function() {
-	_drill_XESI_initialize.call(this);	//预加载（千万不要写入gameSystem里面！object不能存入存档里面！）
-	this._drill_XESI_ex_backs = [];
-	for( var i = 0; i < DrillUp.g_XESI_back_list.length ; i++ ){
-		this._drill_XESI_ex_backs.push( ImageManager.load_MenuSkillElement(DrillUp.g_XESI_back_list[i]) );
-	};
-}
+
 //=============================================================================
 // ** 绘制背景
 //=============================================================================

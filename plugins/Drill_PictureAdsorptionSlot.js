@@ -587,16 +587,6 @@ Game_Screen.prototype.drill_PAS_isPictureExist = function( pic_id ){
 	return true;
 };
 
-//=============================================================================
-// ** 存储数据变量初始化
-//=============================================================================
-var _drill_PAS_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function() {
-	_drill_PAS_initialize.call(this);
-	// ...
-}
-
-
 
 //=============================================================================
 // ** 图片

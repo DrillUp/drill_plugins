@@ -3289,12 +3289,9 @@ if( Imported.Drill_CoreOfWindowAuxiliary &&
 			DrillUp.parameters["角色框设置-" + String(i+1) ] != "" ){
 			var data = JSON.parse(DrillUp.parameters["角色框设置-" + String(i+1) ]);
 			DrillUp.g_SMa_bind[i] = DrillUp.drill_SMa_initActorBoardBind( data );
-			DrillUp.g_SMa_bind[i]['actor_id'] = i+1 ;
-			DrillUp.g_SMa_bind[i]['inited'] = true ;
+			DrillUp.g_SMa_bind[i]['actor_id'] = i+1;
 		}else{
-			DrillUp.g_SMa_bind[i] = DrillUp.drill_SMa_initActorBoardBind( {} );
-			DrillUp.g_SMa_bind[i]['actor_id'] = i+1 ;
-			DrillUp.g_SMa_bind[i]['inited'] = false ;
+			DrillUp.g_SMa_bind[i] = null;
 		}
 	}
 	
@@ -3353,7 +3350,13 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp1 = temp1.replace("改变样式[","");
 					temp1 = temp1.replace("]","");
 					temp1 = Number(temp1) - 1;
-					$gameSystem._drill_SMa_actorBindTank[ a_id ]['style_id'] = temp1;
+					var actorBind = $gameSystem._drill_SMa_actorBindTank[ a_id ];
+					if( actorBind == undefined ){
+						alert( "【Drill_SceneMain.js 面板 - 全自定义主菜单面板】\n"+
+							"错误，角色框设置[" + (temp1+1) + "]的数据不存在。" );
+						return;
+					}
+					actorBind['style_id'] = temp1;
 				}
 				if( temp1.indexOf("改变前视图[") != -1 ){
 					temp1 = temp1.replace("改变前视图[","");
@@ -3363,10 +3366,22 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					for( var i=0; i < temp_arr.length; i++ ){
 						temp_tank.push( DrillUp.g_SMa_actorPicBackupTank[ Number(temp_arr[i])-1 ] );
 					}
-					$gameSystem._drill_SMa_actorBindTank[ a_id ]['pic_src_commandSet'] = temp_tank;
+					var actorBind = $gameSystem._drill_SMa_actorBindTank[ a_id ];
+					if( actorBind == undefined ){
+						alert( "【Drill_SceneMain.js 面板 - 全自定义主菜单面板】\n"+
+							"错误，角色框设置[" + (temp1+1) + "]的数据不存在。" );
+						return;
+					}
+					actorBind['pic_src_commandSet'] = temp_tank;
 				}
 				if( temp1 == "还原默认前视图配置" ){
-					$gameSystem._drill_SMa_actorBindTank[ a_id ]['pic_src_commandSet'] = [];
+					var actorBind = $gameSystem._drill_SMa_actorBindTank[ a_id ];
+					if( actorBind == undefined ){
+						alert( "【Drill_SceneMain.js 面板 - 全自定义主菜单面板】\n"+
+							"错误，角色框设置[" + (temp1+1) + "]的数据不存在。" );
+						return;
+					}
+					actorBind['pic_src_commandSet'] = [];
 				}
 			}
 		}
@@ -3452,32 +3467,109 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	};
 };
 
-//=============================================================================
-// ** 存储数据初始化
-//=============================================================================
-//==============================
+
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_SMa_saveEnabled = true;
+//##############################
 // * 存储数据 - 初始化
-//==============================
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_SMa_sys_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function() {	
-	_drill_SMa_sys_initialize.call(this);
-	this._drill_SMa_commandButton_x = DrillUp.g_SMa_command_button['x'];				//菜单选项按钮组 - x
-	this._drill_SMa_commandButton_y = DrillUp.g_SMa_command_button['y'];				//菜单选项按钮组 - y
-	this._drill_SMa_commandButton_index = DrillUp.g_SMa_command_button['style_id']-1;	//菜单选项按钮组 - 样式
-	this._drill_SMa_actorBindTank = JSON.parse(JSON.stringify( DrillUp.g_SMa_bind ));
+Game_System.prototype.initialize = function() {
+    _drill_SMa_sys_initialize.call(this);
+	this.drill_SMa_initSysData();
 };
-//==============================
-// * 存储数据 - 载入存档时检查
-//==============================
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_SMa_sys_extractSaveContents = DataManager.extractSaveContents;
 DataManager.extractSaveContents = function( contents ){
 	_drill_SMa_sys_extractSaveContents.call( this, contents );
 	
-	if( $gameSystem._drill_SMa_actorBindTank == undefined ){ return; }
-	for(var i=0; i < $gameSystem._drill_SMa_actorBindTank.length; i++ ){	//（设置为空时，自动覆盖新的默认配置）
-		if( DrillUp.g_SMa_bind[i] == undefined ){ continue; }
-		if( $gameSystem._drill_SMa_actorBindTank[i]['inited'] != true ){
-			$gameSystem._drill_SMa_actorBindTank[i] = JSON.parse(JSON.stringify( DrillUp.g_SMa_bind[i] ));
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_SMa_saveEnabled == true ){	
+		$gameSystem.drill_SMa_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_SMa_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_SMa_initSysData = function() {
+	this.drill_SMa_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_SMa_checkSysData = function() {
+	this.drill_SMa_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_SMa_initSysData_Private = function() {
+	
+	this._drill_SMa_commandButton_x = DrillUp.g_SMa_command_button['x'];				//菜单选项按钮组 - x
+	this._drill_SMa_commandButton_y = DrillUp.g_SMa_command_button['y'];				//菜单选项按钮组 - y
+	this._drill_SMa_commandButton_index = DrillUp.g_SMa_command_button['style_id']-1;	//菜单选项按钮组 - 样式
+	this._drill_SMa_actorBindTank = [];
+	for(var i = 0; i < DrillUp.g_SMa_bind.length; i++){
+		var temp_data = DrillUp.g_SMa_bind[i];
+		if( temp_data == undefined ){ continue; }
+		this._drill_SMa_actorBindTank[i] = JSON.parse(JSON.stringify( temp_data ));
+	}
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_SMa_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_SMa_actorBindTank == undefined ){
+		this.drill_SMa_initSysData();
+	}
+	
+	// > 容器的 空数据 检查
+	for(var i = 0; i < DrillUp.g_SMa_bind.length; i++ ){
+		var temp_data = DrillUp.g_SMa_bind[i];
+		
+		// > 已配置（undefined表示未配置的空数据）
+		if( temp_data != undefined ){
+			
+			// > 未存储的，重新初始化
+			if( this._drill_SMa_actorBindTank[i] == undefined ){
+				this._drill_SMa_actorBindTank[i] = JSON.parse(JSON.stringify( temp_data ));
+			
+			// > 已存储的，跳过
+			}else{
+				//（不操作）
+			}
 		}
 	}
 }
@@ -4020,12 +4112,16 @@ Drill_SMa_ActorSprite.prototype.initialize = function( actor, memberIndex ) {
 	this._drill_actor = actor;		//角色可能为空
 	this._drill_memberIndex = memberIndex;
 	if( this._drill_actor ){
-		this._drill_data_bind = JSON.parse(JSON.stringify( $gameSystem._drill_SMa_actorBindTank[ this._drill_actor.actorId()-1 ] ));	//深拷贝数据
-		this._drill_data_style = JSON.parse(JSON.stringify( DrillUp.g_SMa_styleList[ this._drill_data_bind['style_id']-1 ] ));	//深拷贝数据
+		var actorData = $gameSystem._drill_SMa_actorBindTank[ this._drill_actor.actorId()-1 ];
+		if( actorData != undefined ){
+			this._drill_data_bind = JSON.parse(JSON.stringify( actorData ));
+		}else{
+			this._drill_data_bind = DrillUp.g_SMa_actorArrange['visible_emptyActor'];
+		}
 	}else{
 		this._drill_data_bind = DrillUp.g_SMa_actorArrange['visible_emptyActor'];
-		this._drill_data_style = JSON.parse(JSON.stringify( DrillUp.g_SMa_styleList[ this._drill_data_bind['style_id']-1 ] ));
 	}
+	this._drill_data_style = JSON.parse(JSON.stringify( DrillUp.g_SMa_styleList[ this._drill_data_bind['style_id']-1 ] ));
 	
 	this.drill_initData();				//初始化数据
 	this.drill_initSprite();			//初始化对象

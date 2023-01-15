@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.7]        行走图 - 持续动作效果
+ * @plugindesc [v1.8]        行走图 - 持续动作效果
  * @author Drill_up
  * 
  * 
@@ -15,10 +15,13 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 使得你可以播放事件持续执行的各种动作。
- * 
+ *
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该插件可以单独使用。
+ * 该插件 不能 单独使用。
+ * 需要基于核心插件，才能运行。
+ * 基于：
+ *   - Drill_CoreOfEventFrame        行走图-行走图优化核心
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -246,6 +249,8 @@
  * 添加了插件指令获取状态信息功能。
  * [v1.7]
  * 优化了数学缩短锚点的计算公式。
+ * [v1.8]
+ * 优化了内部结构，减少性能消耗。
  * 
  */
  
@@ -315,6 +320,12 @@
 　　Imported.Drill_EventContinuedEffect = true;
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_EventContinuedEffect');
+	
+	
+//=============================================================================
+// * >>>>基于插件检测>>>>
+//=============================================================================
+if( Imported.Drill_CoreOfEventFrame ){
 	
 	
 //=============================================================================
@@ -1391,16 +1402,6 @@ Game_Map.prototype.drill_ECE_isEventExist = function( e_id ){
 
 
 //=============================================================================
-// ** 存储变量初始化
-//=============================================================================
-var _drill_ECE_sys_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function() {
-    _drill_ECE_sys_initialize.call(this);
-	
-	//没有存储的内容
-}
-
-//=============================================================================
 // * 事件注释初始化
 //=============================================================================
 //==============================
@@ -1706,19 +1707,6 @@ var _Drill_ECE_s_setCharacter = Sprite_Character.prototype.setCharacter;
 Sprite_Character.prototype.setCharacter = function(character) {
 	_Drill_ECE_s_setCharacter.call(this,character);
 	if (character) { this._Drill_ECE = character._Drill_ECE; };
-};
-
-//==============================
-// * 事件贴图 - 固定帧初始值
-//==============================
-var _Drill_ECE_s_updatePosition = Sprite_Character.prototype.updatePosition;
-Sprite_Character.prototype.updatePosition = function() {
-	_Drill_ECE_s_updatePosition.call(this);				// x、y、z
-	if( this.rotation != 0 ){ this.rotation = 0; }		// 旋转
-	if( this.scale.x != 1 ){ this.scale.x = 1; }		// 缩放x
-	if( this.scale.y != 1 ){ this.scale.y = 1; }		// 缩放y
-	if( this.skew.x != 0 ){ this.skew.x = 0; }			// 斜切x
-	if( this.skew.y != 0 ){ this.skew.y = 0; }			// 斜切y
 };
 
 //==============================
@@ -3119,6 +3107,18 @@ Game_Character.prototype.drill_ECE_updateSustainingAnchorRotate_Gradual = functi
 	}else{
 		this.drill_ECE_stopEffect();
 	}
+}
+
+
+//=============================================================================
+// * <<<<基于插件检测<<<<
+//=============================================================================
+}else{
+		Imported.Drill_EventContinuedEffect = false;
+		alert(
+			"【Drill_EventContinuedEffect.js 行走图-持续动作效果】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
+			"\n- Drill_CoreOfEventFrame 行走图-行走图优化核心"
+		);
 }
 
 

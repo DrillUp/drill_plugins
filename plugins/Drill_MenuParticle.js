@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.6]        主菜单 - 多层菜单粒子
+ * @plugindesc [v1.7]        主菜单 - 多层菜单粒子
  * @author Drill_up
  * 
  * @Drill_LE_param "粒子-%d"
@@ -113,6 +113,8 @@
  * 修复了部分粒子和默认粒子在面板中不显示的bug。
  * [v1.6]
  * 加强了粒子效果的配置，包括添加双层粒子效果。
+ * [v1.7]
+ * 优化了旧存档的识别与兼容。
  *
  *
  *
@@ -1316,11 +1318,9 @@
 		var temp = JSON.parse(DrillUp.parameters["默认粒子"]);
 		DrillUp.g_MPa_default = DrillUp.drill_MPa_particleDefaultInit( temp );
 		DrillUp.g_MPa_default['id'] = 0;
-		DrillUp.g_MPa_default['inited'] = true;
 	}else{
 		DrillUp.g_MPa_default = DrillUp.drill_MPa_particleDefaultInit( {} );
 		DrillUp.g_MPa_default['id'] = 0;
-		DrillUp.g_MPa_default['inited'] = false;
 	}
 	
 	/*-----------------粒子------------------*/
@@ -1333,11 +1333,8 @@
 			var temp = JSON.parse(DrillUp.parameters["粒子-" + String(i) ]);
 			DrillUp.g_MPa_list[i] = DrillUp.drill_MPa_particleInit( temp );
 			DrillUp.g_MPa_list[i]['id'] = Number(i);
-			DrillUp.g_MPa_list[i]['inited'] = true;
 		}else{
-			DrillUp.g_MPa_list[i] = DrillUp.drill_MPa_particleInit( {} );
-			DrillUp.g_MPa_list[i]['id'] = Number(i);
-			DrillUp.g_MPa_list[i]['inited'] = false;
+			DrillUp.g_MPa_list[i] = null;		//（强制设为空值，节约存储资源）
 		}
 	}
 	
@@ -1392,20 +1389,108 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 };
 
-//=============================================================================
-// ** 存储数据初始化
-//=============================================================================
+
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_MPa_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_MPa_sys_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function() {	
-	_drill_MPa_sys_initialize.call(this);
+Game_System.prototype.initialize = function() {
+    _drill_MPa_sys_initialize.call(this);
+	this.drill_MPa_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_MPa_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_MPa_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_MPa_saveEnabled == true ){	
+		$gameSystem.drill_MPa_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_MPa_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_MPa_initSysData = function() {
+	this.drill_MPa_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_MPa_checkSysData = function() {
+	this.drill_MPa_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_MPa_initSysData_Private = function() {
+	
 	this._drill_MPa_default = 0;
 	this._drill_MPa_visible = [];
 	for(var i = 0; i< DrillUp.g_MPa_list.length ;i++){
 		var temp_data = DrillUp.g_MPa_list[i];
 		if( temp_data == undefined ){ continue; }
-		if( temp_data['inited'] != true ){ continue; }
-		
 		this._drill_MPa_visible[i] = temp_data['visible'];
+	}
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_MPa_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_MPa_visible == undefined ){
+		this.drill_MPa_initSysData();
+	}
+	
+	// > 容器的 空数据 检查
+	for(var i = 0; i < DrillUp.g_MPa_list.length; i++ ){
+		var temp_data = DrillUp.g_MPa_list[i];
+		
+		// > 已配置（undefined表示未配置的空数据）
+		if( temp_data != undefined ){
+			
+			// > 未存储的，重新初始化
+			if( this._drill_MPa_visible[i] == undefined ){
+				this._drill_MPa_visible[i] = temp_data['visible'];
+			
+			// > 已存储的，跳过
+			}else{
+				//（不操作）
+			}
+		}
 	}
 };
 
@@ -1538,16 +1623,15 @@ Scene_MenuBase.prototype.drill_MPa_create = function() {
 	SceneManager._drill_MPa_created = true;
 	
 	if(!this._drill_MPa_spriteTankOrg){	//防止覆写报错 - 贴图初始化
-		this._drill_MPa_spriteTankOrg = [];
-		this._drill_MPa_spriteTankSec = [];
-		this._drill_MPa_dataTank = [];
+		this._drill_MPa_spriteTankOrg = [];	//（数组元素不允许出现null值）
+		this._drill_MPa_spriteTankSec = [];	//（数组元素不允许出现null值）
+		this._drill_MPa_dataTank = [];		//（数组元素不允许出现null值）
 	}
 	
 	// > 配置的粒子
 	for (var i = 1; i < DrillUp.g_MPa_list.length; i++) {
 		var temp_data = DrillUp.g_MPa_list[i];
 		if( temp_data == undefined ){ continue; }
-		if( temp_data['inited'] != true ){ continue; }
 		
 		if( this.drill_MPa_checkKeyword( temp_data ) ){
 			
@@ -1631,7 +1715,6 @@ Scene_MenuBase.prototype.drill_MPa_create = function() {
 		var i = $gameSystem._drill_MPa_default;
 		var temp_data = DrillUp.g_MPa_list[i];
 		if( temp_data == undefined ){ return; }
-		if( temp_data['inited'] != true ){ return; }
 		
 		// > 粒子层
 		var temp_layer = new Sprite();

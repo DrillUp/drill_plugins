@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.8]        地图 - 多层地图魔法圈
+ * @plugindesc [v1.9]        地图 - 多层地图魔法圈
  * @author Drill_up
  * 
  * @Drill_LE_param "魔法圈层-%d"
@@ -170,6 +170,8 @@
  * 重新整理的图片层级的位移问题，修复了贴图在图片层位移比错位的问题。
  * [v1.8]
  * 优化了与地图活动镜头的兼容结构。
+ * [v1.9]
+ * 优化了旧存档的识别与兼容。
  * 
  * 
  * 
@@ -1684,6 +1686,10 @@
 		data['dynamicMask_enabled'] = String( dataFrom["是否启用地图动态遮罩"] || "false") == "true";
 		data['dynamicMask_bind'] = String( dataFrom["关联的动态遮罩板"] || "动态遮罩板A");
 		
+		// > 私有变量初始化
+		data['cameraXAcc'] = 0;					//镜头基点（循环积累值）（像素单位）
+		data['cameraYAcc'] = 0;					//
+		
 		return data;
 	}
 
@@ -1697,12 +1703,8 @@
 		if( DrillUp.parameters['魔法圈层-' + String(i+1) ] != "" ){
 			var temp = JSON.parse(DrillUp.parameters['魔法圈层-' + String(i+1) ]);
 			DrillUp.g_LCi_layers[i] = DrillUp.drill_LCi_circleInit( temp );
-			DrillUp.g_LCi_layers[i]['id'] = Number(i)+1;
-			DrillUp.g_LCi_layers[i]['inited'] = true;
 		}else{
-			DrillUp.g_LCi_layers[i] = DrillUp.drill_LCi_circleInit( {} );
-			DrillUp.g_LCi_layers[i]['id'] = Number(i)+1;
-			DrillUp.g_LCi_layers[i]['inited'] = false;
+			DrillUp.g_LCi_layers[i] = null;		//（强制设为空值，节约存储资源）
 		}
 	}
 
@@ -1720,8 +1722,8 @@ ImageManager.load_MapLayer = function(filename) {
 var _drill_LCi_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_LCi_pluginCommand.call(this, command, args);
-	
 	if( command === ">地图魔法圈" ){ // >地图魔法圈 : 魔法圈[1] : 显示
+	
 		if(args.length >= 2){
 			var id = -1;
 			var temp1 = String(args[1]);
@@ -1866,45 +1868,116 @@ Game_Interpreter.prototype.drill_LCi_getArgNumList = function( arg_str ){
 };
 
 
-//=============================================================================
-// ** 存储数据
-//=============================================================================
-//==============================
-// ** 存储数据 - 初始化
-//==============================
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+//DrillUp.g_LCi_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_LCi_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
     _drill_LCi_sys_initialize.call(this);
-	this.drill_LCi_initData();
+	this.drill_LCi_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_LCi_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_LCi_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_LCi_saveEnabled == true ){	
+		$gameSystem.drill_LCi_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_LCi_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_LCi_initSysData = function() {
+	this.drill_LCi_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_LCi_checkSysData = function() {
+	this.drill_LCi_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_LCi_initSysData_Private = function() {
+	
+	this._drill_LCi_dataTank_changing = [];		//插件指令变化容器
+	this._drill_LCi_dataTank_curData = [];		//当前地图容器（与 g_LCi_layers/_drill_LCi_layerTank 依次对应，容器允许出现null值）
+	for(var i = 0; i < DrillUp.g_LCi_layers.length; i++){
+		var temp_data = DrillUp.g_LCi_layers[i];
+		if( temp_data == undefined ){ continue; }
+		if( temp_data['mapToAll'] == true ){		//全地图数据直接存储（每次地图刷新时，不刷新 全地图数据）
+			var data = JSON.parse(JSON.stringify( temp_data ));
+			this._drill_LCi_dataTank_curData[i] = data;
+		}
+	}
+	
+	// > 刷新当前地图
+	if( $gameMap ){
+		$gameMap.drill_LCi_initMapdata();
+	}
 };
 //==============================
-// ** 存储数据 - 初始化数据
+// * 存储数据 - 载入存档时检查数据（私有）
 //==============================
-Game_System.prototype.drill_LCi_initData = function() {
-	this._drill_LCi_dataTank_changing = [];	//插件指令变化容器
-	this._drill_LCi_dataTank_map = [];		//当前地图的魔法圈容器
-	this._drill_LCi_dataTank = [];			//魔法圈数据总容器
+Game_System.prototype.drill_LCi_checkSysData_Private = function() {
 	
-	for(var i = 0; i< DrillUp.g_LCi_layers.length ;i++){
-		var data = JSON.parse(JSON.stringify( DrillUp.g_LCi_layers[i] ));	//深拷贝数据
-		
-		// > 私有变量初始化
-		data['cameraXAcc'] = 0;					//镜头基点（循环积累值）（像素单位）
-		data['cameraYAcc'] = 0;					//
-		
-		this._drill_LCi_dataTank.push(data);
+	// > 旧存档数据自动补充
+	if( this._drill_LCi_dataTank_curData == undefined ){
+		this.drill_LCi_initSysData();
 	}
-};	
-//==============================
-// * 存档文件 - 载入存档 - 数据赋值
-//==============================
-var _drill_LCi_extractSaveContents = DataManager.extractSaveContents;
-DataManager.extractSaveContents = function(contents){
-	_drill_LCi_extractSaveContents.call( this, contents );
 	
-	if( DrillUp.g_LCi_saveEnabled == false ){	//（未开参数存储，则直接覆盖初始化数据）
-		$gameSystem.drill_LCi_initData();
-		$gameMap.drill_LCi_initMapdata();
+	// > 容器的 空数据 检查
+	for(var i = 0; i < DrillUp.g_LCi_layers.length; i++ ){
+		var temp_data = DrillUp.g_LCi_layers[i];
+		
+		// > 已配置（检查 全地图数据 的配置情况）
+		if( temp_data != undefined &&
+			temp_data['mapToAll'] == true ){
+			
+			// > 未存储的，重新初始化
+			if( this._drill_LCi_dataTank_curData[i] == undefined ){
+				this._drill_LCi_dataTank_curData[i] = JSON.parse(JSON.stringify( temp_data ));
+			
+			// > 已存储的，跳过
+			}else{
+				//（不操作）
+			}
+		}
 	}
 };
 
@@ -1916,17 +1989,32 @@ DataManager.extractSaveContents = function(contents){
 // ** 地图 - 初始化
 //==============================
 var _drill_LCi_setup = Game_Map.prototype.setup;
-Game_Map.prototype.setup = function(mapId) {
-	_drill_LCi_setup.call(this,mapId);
+Game_Map.prototype.setup = function( mapId ){
+	_drill_LCi_setup.call( this, mapId );
 	this.drill_LCi_initMapdata();
 }
 Game_Map.prototype.drill_LCi_initMapdata = function() {
-	$gameSystem._drill_LCi_dataTank_map = [];		//刷新当前地图的魔法圈
-	for(var i = 0; i< $gameSystem._drill_LCi_dataTank.length ;i++){
-		var data = $gameSystem._drill_LCi_dataTank[i];
-		if( data['inited'] != true ){ continue; }
-		if( data['mapToAll'] == true || data['map'] == this._mapId ){
-			$gameSystem._drill_LCi_dataTank_map.push(data);
+	
+	// > 刷新当前地图容器
+	for(var i = 0; i< DrillUp.g_LCi_layers.length ;i++){
+		var temp_data = DrillUp.g_LCi_layers[i];
+		if( temp_data == undefined ){
+			$gameSystem._drill_LCi_dataTank_curData[i] = null;
+			continue;
+		}
+		
+		// > 全地图数据时
+		if( temp_data['mapToAll'] == true ){
+			//（不刷新数据）
+			
+		// > 单地图数据时
+		}else if( temp_data['map'] == this._mapId ){
+			var data = JSON.parse(JSON.stringify( temp_data ));
+			$gameSystem._drill_LCi_dataTank_curData[i] = data;	//（重刷数据）
+			
+		// > 其它情况时
+		}else{
+			$gameSystem._drill_LCi_dataTank_curData[i] = null;	//（某地图不含此贴图配置，则直接置空）
 		}
 	}
 }
@@ -1940,8 +2028,9 @@ var _drill_LCi_player_update = Game_Player.prototype.update;
 Game_Player.prototype.update = function( sceneActive ){
     _drill_LCi_player_update.call( this, sceneActive );
 	
-	for(var i = 0; i< $gameSystem._drill_LCi_dataTank_map.length ;i++){
-		var data = $gameSystem._drill_LCi_dataTank_map[i];
+	for(var i = 0; i< $gameSystem._drill_LCi_dataTank_curData.length ;i++){
+		var data = $gameSystem._drill_LCi_dataTank_curData[i];
+		if( data == undefined ){ continue; }
 		
 		// > 镜头基点（循环积累值）
 		if( Imported.Drill_LayerCamera ){
@@ -2150,18 +2239,19 @@ Scene_Map.prototype.createAllWindows = function() {
 	this.drill_LCi_create();	
 };
 Scene_Map.prototype.drill_LCi_create = function() {
-	this._drill_LCi_spriteTank = [];
-	this._drill_LCi_spriteTank_bitmap = [];
+	this._drill_LCi_spriteTank = [];			//（允许出现null值）
+	this._drill_LCi_spriteTank_bitmap = [];		//（允许出现null值）
 	
-	var data_tank = $gameSystem._drill_LCi_dataTank_map;
+	var data_tank = $gameSystem._drill_LCi_dataTank_curData;
 	for(var i=0; i< data_tank.length; i++){
 		var temp_data = data_tank[i];
+		if( temp_data == undefined ){ continue; }
 		
 		// > 子贴图
 		var temp_sprite_bitmap = new Sprite( ImageManager.load_MapLayer( temp_data['src_img'] ) );
 		temp_sprite_bitmap.anchor.x = 0.5;
 		temp_sprite_bitmap.anchor.y = 0.5;
-		this._drill_LCi_spriteTank_bitmap.push(temp_sprite_bitmap);
+		this._drill_LCi_spriteTank_bitmap[i] = temp_sprite_bitmap;
 		
 		// > 贴图属性
 		var temp_sprite = new Sprite();
@@ -2189,7 +2279,7 @@ Scene_Map.prototype.drill_LCi_create = function() {
 		}
 		
 		// > 地图层级
-		this._drill_LCi_spriteTank.push(temp_sprite);
+		this._drill_LCi_spriteTank[i] = temp_sprite;
 		this.drill_LCi_layerAddSprite( temp_sprite, temp_sprite['layer_index'] );
 	}
 	this.drill_LCi_sortByZIndex();		//排序
@@ -2229,14 +2319,17 @@ Scene_Map.prototype.update = function() {
 // * 帧刷新 - 基本属性
 //==============================
 Scene_Map.prototype.drill_LCi_updateBase = function() {
-	var sprite_tank = this._drill_LCi_spriteTank ;
-	var sprite_tank_bitmap = this._drill_LCi_spriteTank_bitmap ;
-	var data_tank = $gameSystem._drill_LCi_dataTank_map;
+	var sprite_tank = this._drill_LCi_spriteTank;
+	var sprite_tank_bitmap = this._drill_LCi_spriteTank_bitmap;
+	var data_tank = $gameSystem._drill_LCi_dataTank_curData;
 	
 	for(var i=0; i< sprite_tank.length; i++){
 		var temp_sprite = sprite_tank[i];
 		var temp_sprite_bitmap = sprite_tank_bitmap[i];
 		var temp_data = data_tank[i];
+		if( temp_data == undefined ){ continue; }
+		if( temp_sprite == undefined ){ continue; }
+		if( temp_sprite_bitmap == undefined ){ continue; }
 		if( temp_sprite_bitmap.bitmap.isReady() ){
 			
 			// > 属性实时变化
@@ -2277,126 +2370,127 @@ Scene_Map.prototype.drill_LCi_updateBase = function() {
 // * 帧刷新 - 变化属性
 //==============================
 Scene_Map.prototype.drill_LCi_updateChange = function() {
-	var data_tank = $gameSystem._drill_LCi_dataTank_map;
+	var change_tank = $gameSystem._drill_LCi_dataTank_changing;	//（只变数据，不变sprite）
+	var data_tank = $gameSystem._drill_LCi_dataTank_curData;
 	var sprite_tank = this._drill_LCi_spriteTank;
 	var sprite_tank_bitmap = this._drill_LCi_spriteTank;
-	var change_tank = $gameSystem._drill_LCi_dataTank_changing;
 	//if(change_tank.length > 0){
 	//	alert(JSON.stringify(change_tank));
 	//	alert(JSON.stringify(data_tank));
 	//}
 	
-	for(var i=0; i< data_tank.length; i++){		//只变数据，不变sprite
-		var temp_data = data_tank[i];
-		var temp_sprite = sprite_tank[i];
-		var temp_sprite_bitmap = sprite_tank_bitmap[i];
-		for(var j=0; j< change_tank.length; j++){
-			var temp_change = change_tank[j];
-			if( temp_data['id'] == temp_change.id && temp_change.destroy == false ){
-				temp_change.time += 1;
-				
-				if( temp_change.type == "显示" ){
-					temp_data['visible'] = true;
+	for(var j=0; j< change_tank.length; j++){
+		var temp_change = change_tank[j];
+		var temp_data = data_tank[ temp_change.id -1 ];
+		var temp_sprite = sprite_tank[ temp_change.id -1 ];
+		var temp_sprite_bitmap = sprite_tank_bitmap[ temp_change.id -1 ];
+		if( temp_data == undefined ){ continue; }
+		if( temp_sprite == undefined ){ continue; }
+		if( temp_sprite_bitmap == undefined ){ continue; }
+		if( temp_change.destroy == false ){
+			temp_change.time += 1;
+			
+			if( temp_change.type == "显示" ){
+				temp_data['visible'] = true;
+				temp_change.destroy = true;
+			}
+			
+			if( temp_change.type == "隐藏" ){
+				temp_data['visible'] = false;
+				temp_change.destroy = true;
+			}
+			
+			if( temp_change.type == "变混合模式" ){
+				temp_data['blendMode'] = temp_change.data1;
+				temp_change.destroy = true;
+			}
+			
+			if( temp_change.type == "变坐标" ){
+				if( temp_change.time == 1 ){
+					temp_change._dest = Math.max( temp_change.data1,1 );
+					temp_change._x = temp_change.data2 - temp_data['x'];
+					temp_change._y = temp_change.data3 - temp_data['y'];
+				}
+				if( temp_change.time <= temp_change._dest ){
+					temp_data['x'] += temp_change._x / temp_change._dest;
+					temp_data['y'] += temp_change._y / temp_change._dest;
+				}
+				if( temp_change.time >= temp_change._dest ){
 					temp_change.destroy = true;
 				}
-				
-				if( temp_change.type == "隐藏" ){
-					temp_data['visible'] = false;
+			}
+			
+			if( temp_change.type == "变透明" ){
+				if( temp_change.time == 1 ){
+					temp_change._dest = Math.max( temp_change.data1,1 );
+					temp_change._opacity = temp_change.data2 - temp_data['opacity'];
+				}
+				temp_data['opacity'] += temp_change._opacity / temp_change._dest;
+				if( temp_change.time >= temp_change._dest ){
 					temp_change.destroy = true;
 				}
-				
-				if( temp_change.type == "变混合模式" ){
-					temp_data['blendMode'] = temp_change.data1;
+			}
+			
+			if( temp_change.type == "变转速" ){
+				if( temp_change.time == 1 ){
+					temp_change._dest = Math.max( temp_change.data1,1 );
+					temp_change._rotate = temp_change.data2 - temp_data['rotate'];
+				}
+				temp_data['rotate'] += temp_change._rotate / temp_change._dest;
+				if( temp_change.time >= temp_change._dest ){
 					temp_change.destroy = true;
 				}
-				
-				if( temp_change.type == "变坐标" ){
-					if( temp_change.time == 1 ){
-						temp_change._dest = Math.max( temp_change.data1,1 );
-						temp_change._x = temp_change.data2 - temp_data['x'];
-						temp_change._y = temp_change.data3 - temp_data['y'];
-					}
-					if( temp_change.time <= temp_change._dest ){
-						temp_data['x'] += temp_change._x / temp_change._dest;
-						temp_data['y'] += temp_change._y / temp_change._dest;
-					}
-					if( temp_change.time >= temp_change._dest ){
-						temp_change.destroy = true;
-					}
+			}
+			
+			/*
+			if( temp_change.type == "变色调" ){
+				if( temp_change.time == 1 ){
+					temp_change._dest = Math.max( temp_change.data1,1 );
+					temp_change._color_tone = temp_sprite_bitmap.getColorTone();
+					temp_change._r = temp_change.data2 - temp_change._color_tone[0];
+					temp_change._g = temp_change.data3 - temp_change._color_tone[1];
+					temp_change._b = temp_change.data4 - temp_change._color_tone[2];
+					temp_change._a = temp_change.data5 - temp_change._color_tone[3];
 				}
-				
-				if( temp_change.type == "变透明" ){
-					if( temp_change.time == 1 ){
-						temp_change._dest = Math.max( temp_change.data1,1 );
-						temp_change._opacity = temp_change.data2 - temp_data['opacity'];
-					}
-					temp_data['opacity'] += temp_change._opacity / temp_change._dest;
-					if( temp_change.time >= temp_change._dest ){
-						temp_change.destroy = true;
-					}
+				temp_change._color_tone[0] += temp_change._r / temp_change._dest;
+				temp_change._color_tone[1] += temp_change._g / temp_change._dest;
+				temp_change._color_tone[2] += temp_change._b / temp_change._dest;
+				temp_change._color_tone[3] += temp_change._a / temp_change._dest;
+				if( temp_change.time % 8 == 0 ){
+					temp_sprite_bitmap.setColorTone( 
+						[ temp_change._color_tone[0] ,temp_change._color_tone[1],
+						temp_change._color_tone[2],temp_change._color_tone[3]	]);
 				}
-				
-				if( temp_change.type == "变转速" ){
-					if( temp_change.time == 1 ){
-						temp_change._dest = Math.max( temp_change.data1,1 );
-						temp_change._rotate = temp_change.data2 - temp_data['rotate'];
-					}
-					temp_data['rotate'] += temp_change._rotate / temp_change._dest;
-					if( temp_change.time >= temp_change._dest ){
-						temp_change.destroy = true;
-					}
+				if( temp_change.time >= temp_change._dest ){
+					temp_sprite_bitmap.setColorTone( 
+						[ 255,0,0,255	]);
+					temp_change.destroy = true;
 				}
-				
-				/*
-				if( temp_change.type == "变色调" ){
-					if( temp_change.time == 1 ){
-						temp_change._dest = Math.max( temp_change.data1,1 );
-						temp_change._color_tone = temp_sprite_bitmap.getColorTone();
-						temp_change._r = temp_change.data2 - temp_change._color_tone[0];
-						temp_change._g = temp_change.data3 - temp_change._color_tone[1];
-						temp_change._b = temp_change.data4 - temp_change._color_tone[2];
-						temp_change._a = temp_change.data5 - temp_change._color_tone[3];
-					}
-					temp_change._color_tone[0] += temp_change._r / temp_change._dest;
-					temp_change._color_tone[1] += temp_change._g / temp_change._dest;
-					temp_change._color_tone[2] += temp_change._b / temp_change._dest;
-					temp_change._color_tone[3] += temp_change._a / temp_change._dest;
-					if( temp_change.time % 8 == 0 ){
-						temp_sprite_bitmap.setColorTone( 
-							[ temp_change._color_tone[0] ,temp_change._color_tone[1],
-							temp_change._color_tone[2],temp_change._color_tone[3]	]);
-					}
-					if( temp_change.time >= temp_change._dest ){
-						temp_sprite_bitmap.setColorTone( 
-							[ 255,0,0,255	]);
-						temp_change.destroy = true;
-					}
-				}*/
-				
-				if( temp_change.type == "变缩放" ){
-					if( temp_change.time == 1 ){
-						temp_change._dest = Math.max( temp_change.data1,1 );
-						temp_change._scale_x = temp_change.data2 - temp_sprite.scale.x;
-						temp_change._scale_y = temp_change.data3 - temp_sprite.scale.y;
-					}
-					temp_sprite.scale.x += temp_change._scale_x / temp_change._dest;
-					temp_sprite.scale.y += temp_change._scale_y / temp_change._dest;
-					if( temp_change.time >= temp_change._dest ){
-						temp_change.destroy = true;
-					}
+			}*/
+			
+			if( temp_change.type == "变缩放" ){
+				if( temp_change.time == 1 ){
+					temp_change._dest = Math.max( temp_change.data1,1 );
+					temp_change._scale_x = temp_change.data2 - temp_sprite.scale.x;
+					temp_change._scale_y = temp_change.data3 - temp_sprite.scale.y;
 				}
-				
-				if( temp_change.type == "变斜切" ){
-					if( temp_change.time == 1 ){
-						temp_change._dest = Math.max( temp_change.data1,1 );
-						temp_change._skew_x = temp_change.data2 - temp_sprite.skew.x;
-						temp_change._skew_y = temp_change.data3 - temp_sprite.skew.y;
-					}
-					temp_sprite.skew.x += temp_change._skew_x / temp_change._dest;
-					temp_sprite.skew.y += temp_change._skew_y / temp_change._dest;
-					if( temp_change.time >= temp_change._dest ){
-						temp_change.destroy = true;
-					}
+				temp_sprite.scale.x += temp_change._scale_x / temp_change._dest;
+				temp_sprite.scale.y += temp_change._scale_y / temp_change._dest;
+				if( temp_change.time >= temp_change._dest ){
+					temp_change.destroy = true;
+				}
+			}
+			
+			if( temp_change.type == "变斜切" ){
+				if( temp_change.time == 1 ){
+					temp_change._dest = Math.max( temp_change.data1,1 );
+					temp_change._skew_x = temp_change.data2 - temp_sprite.skew.x;
+					temp_change._skew_y = temp_change.data3 - temp_sprite.skew.y;
+				}
+				temp_sprite.skew.x += temp_change._skew_x / temp_change._dest;
+				temp_sprite.skew.y += temp_change._skew_y / temp_change._dest;
+				if( temp_change.time >= temp_change._dest ){
+					temp_change.destroy = true;
 				}
 			}
 		}

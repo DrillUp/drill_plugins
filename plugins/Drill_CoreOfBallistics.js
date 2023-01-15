@@ -411,11 +411,11 @@ Game_Temp.prototype.drill_COBa_preBallisticsRotate = function( obj_data, obj_ind
 
 
 //=============================================================================
-// ** 临时变量
+// ** 临时变量初始化
 //=============================================================================
-var _drill_COBa_initialize = Game_Temp.prototype.initialize;
+var _drill_COBa_temp_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function(bitmap){
-	_drill_COBa_initialize.call(this, bitmap);
+	_drill_COBa_temp_initialize.call(this, bitmap);
 	this._drill_COBa_moveData = {};			//临时容器 - 移动弹道
 	this._drill_COBa_commonData = {};		//临时容器 - 通用弹道
 }
@@ -749,11 +749,13 @@ Game_Temp.prototype.drill_COBa_preBallisticsMove_Private = function( obj_data, o
 	}
 	
 	// > 终止条件（矩形范围）
-	var rect_enabled = data['terminateRectEnabled'];
-	var x_min = data['terminateRect']['x'];
-	var x_max = data['terminateRect']['x'] + data['terminateRect']['width'];
-	var y_min = data['terminateRect']['y'];
-	var y_max = data['terminateRect']['y'] + data['terminateRect']['height'];
+	var rect_enabled = data['terminateRectEnabled'] || false;
+	if( rect_enabled ){			
+		var x_min = data['terminateRect']['x'];
+		var x_max = data['terminateRect']['x'] + data['terminateRect']['width'];
+		var y_min = data['terminateRect']['y'];
+		var y_max = data['terminateRect']['y'] + data['terminateRect']['height'];
+	}
 	
 	
 	/*-----------------极坐标模式------------------*/

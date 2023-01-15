@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.9]        动画 - 多层动画魔法圈
+ * @plugindesc [v2.0]        动画 - 多层动画魔法圈
  * @author Drill_up
  * 
  * @Drill_LE_param "魔法圈样式-%d"
@@ -190,6 +190,8 @@
  * 大幅度优化了插件结构。
  * [v1.9]
  * 优化了装饰贴图自动销毁与动画销毁关系，减少了内存累积问题。
+ * [v2.0]
+ * 优化了旧存档的识别与兼容。
  * 
  * 
  * @param ---魔法圈样式组 1至20---
@@ -1796,7 +1798,16 @@
 //		★存在的问题：
 //			暂无
 //
-//
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_ACi_tipCurName = "Drill_AnimationCircle.js 动画-多层动画魔法圈";
+	DrillUp.g_ACi_tipBasePluginList = [];
 
 //=============================================================================
 // ** 变量获取
@@ -2173,15 +2184,72 @@ Game_Map.prototype.drill_ACi_isEventExist = function( e_id ){
 };
 
 
-//=============================================================================
-// ** 存储变量初始化
-//=============================================================================
-//==============================
-// * 存储变量 - 初始化
-//==============================
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_ACi_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_ACi_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
     _drill_ACi_sys_initialize.call(this);
+	this.drill_ACi_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_ACi_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_ACi_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_ACi_saveEnabled == true ){	
+		$gameSystem.drill_ACi_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_ACi_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_ACi_initSysData = function() {
+	this.drill_ACi_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_ACi_checkSysData = function() {
+	this.drill_ACi_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_ACi_initSysData_Private = function() {
 	
 	this._drill_ACi_visible = [];
 	for(var i = 0; i < DrillUp.g_ACi_style.length ;i++){
@@ -2189,7 +2257,36 @@ Game_System.prototype.initialize = function() {
 		if( data['inited'] == false ){ continue; }
 		this._drill_ACi_visible[i] = data['visible'];
 	}
-};	
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_ACi_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_ACi_visible == undefined ){
+		this.drill_ACi_initSysData();
+	}
+	
+	// > 容器的 空数据 检查
+	for(var i = 0; i < DrillUp.g_ACi_style.length; i++ ){
+		var temp_data = JSON.parse(JSON.stringify( DrillUp.g_ACi_style[i] ));
+		
+		// > 已配置（'inited'为 false 表示空数据）
+		if( temp_data['inited'] == true ){
+			
+			// > 未存储的，重新初始化
+			if( this._drill_ACi_visible[i] == undefined ){
+				this._drill_ACi_visible[i] = temp_data['visible'];
+			
+			// > 已存储的，跳过
+			}else{
+				//（不操作）
+			}
+		}
+	}
+};
+
 
 //=============================================================================
 // * 优化

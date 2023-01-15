@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        图片 - GIF动画序列
+ * @plugindesc [v1.2]        图片 - GIF动画序列
  * @author Drill_up
  * 
  * 
@@ -57,9 +57,9 @@
  * ----可选设定 - 动作元与状态元
  * 你需要通过下面插件指令来操作动画序列：
  * 
- * 插件指令：>图片动画序列 : 图片[1] : 修改状态元集合 : 集合[小爱丽丝静止1,小爱丽丝静止2]
- * 插件指令：>图片动画序列 : 图片[1] : 修改状态元集合(立即切换) : 集合[小爱丽丝静止1,小爱丽丝静止2]
- * 插件指令：>图片动画序列 : 图片[1] : 还原默认状态元集合
+ * 插件指令：>图片动画序列 : 图片[1] : 播放状态节点 : 小爱丽丝拍裙子流程
+ * 插件指令：>图片动画序列 : 图片[1] : 播放简单状态元集合 : 集合[小爱丽丝静止1,小爱丽丝静止2]
+ * 插件指令：>图片动画序列 : 图片[1] : 播放默认的状态元集合
  * 插件指令：>图片动画序列 : 图片[1] : 播放动作 : 动作元[小爱丽丝发火]
  * 插件指令：>图片动画序列 : 图片[1] : 立即停止动作
  * 
@@ -69,6 +69,7 @@
  * 3."集合[]"中，填入 状态元名 ，填入多个表示随机播放的几个状态。
  *   "动作元[]"中，填入 动作元名 ，填入后只播放一次动作；
  *   如果动作元优先级不够，则没有效果。
+ * 4.插件1.1之前版本的状态元不会立刻改变，新版本的切换都为立刻改变。
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -158,6 +159,17 @@
 //=============================================================================
 if( Imported.Drill_CoreOfActionSequence ){
 	
+	
+//=============================================================================
+// * 强制更新要求
+//=============================================================================
+if( DrillUp.drill_COAS_getSequenceData == undefined ){
+	alert(
+		"【Drill_PictureActionSequence.js 图片 - GIF动画序列】\n"+
+		"GIF动画序列核心 插件版本过低，请及时更新核心插件，以及所有动画序列相关子插件。"
+	);
+};
+	
 
 //=============================================================================
 // ** 插件指令
@@ -165,7 +177,6 @@ if( Imported.Drill_CoreOfActionSequence ){
 var _Drill_PASe_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_Drill_PASe_pluginCommand.call(this, command, args);
-	
 	if( command === ">图片动画序列" ){ 
 	
 		/*-----------------对象组获取------------------*/
@@ -254,10 +265,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		/*-----------------动画序列操作------------------*/
 		if( args.length == 4 ){
 			var type = String(args[3]);
-			if( type == "还原默认集合" || type == "还原默认状态元集合" ){
+			if( type == "播放默认的状态元集合" ){
 				if( pics != null){
 					for( var k=0; k < pics.length; k++ ){
-						pics[k].drill_PASe_setSequenceDefault();
+						pics[k].drill_PASe_setStateNodeDefault();
 					}
 				}
 			}
@@ -272,21 +283,19 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		if( args.length == 6 ){
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
-			if( type == "修改集合" || type == "修改状态元集合" ){
-				temp1 = temp1.replace("集合[","");
-				temp1 = temp1.replace("]","");
+			if( type == "播放状态节点" ){
 				if( pics != null ){
 					for( var k=0; k < pics.length; k++ ){
-						pics[k].drill_PASe_setSequence( temp1.split(",") );
+						pics[k].drill_PASe_setStateNode( temp1 );
 					}
 				}
 			}
-			if( type == "修改集合(立即切换)" || type == "修改状态元集合(立即切换)"  ){
+			if( type == "播放简单状态元集合" || type == "修改状态元集合" || type == "修改集合" ){
 				temp1 = temp1.replace("集合[","");
 				temp1 = temp1.replace("]","");
 				if( pics != null ){
 					for( var k=0; k < pics.length; k++ ){
-						pics[k].drill_PASe_setSequenceImmediate( temp1.split(",") );
+						pics[k].drill_PASe_setSimpleStateNode( temp1.split(",") );
 					}
 				}
 			}
@@ -321,17 +330,6 @@ Game_Screen.prototype.drill_PASe_isPictureExist = function( pic_id ){
 
 
 //=============================================================================
-// ** 存储变量初始化
-//=============================================================================
-var _drill_PASe_sys_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function() {
-    _drill_PASe_sys_initialize.call(this);
-	
-	//没有存储的内容
-}
-
-
-//=============================================================================
 // ** 图片
 //=============================================================================
 //==============================
@@ -341,8 +339,8 @@ var _Drill_PASe_c_initialize = Game_Picture.prototype.initialize;
 Game_Picture.prototype.initialize = function() {
 	_Drill_PASe_c_initialize.call(this);	
 	
-	this._Drill_PASe_enabled = false;			//开关
-	this._Drill_PASe_data = null;				//动画序列数据
+	this._Drill_PASe_enabled = false;				//开关
+	this._Drill_PASe_controller = null;				//动画序列数据
 	
 	this._Drill_PASe_commandInit = false;			//指令-对象初始化开关
 	this._Drill_PASe_commandDestroy = false;		//指令-对象销毁开关
@@ -355,68 +353,67 @@ Game_Picture.prototype.update = function() {
 	_Drill_PASe_c_update.call(this);	
 	
 	// > 数据帧刷新
-	if( this._Drill_PASe_data != undefined ){
-		this._Drill_PASe_data.update();
+	if( this._Drill_PASe_controller != undefined ){
+		this._Drill_PASe_controller.update();
 	}
 }
 //==============================
-// * 图片 - 销毁
+// * 图片 - 销毁时
 //==============================
 var _Drill_PASe_c_erase = Game_Picture.prototype.erase;
 Game_Picture.prototype.erase = function() {
 	_Drill_PASe_c_erase.call(this);	
-	
 	this._Drill_PASe_commandDestroy = true;		//强制执行销毁指令
 }
 
 //==============================
-// * 图片 - 设置动画序列
+// * 图片 - 创建动画序列
 //==============================
 Game_Picture.prototype.drill_PASe_setActionSequence = function( as_id ){
 	this._Drill_PASe_enabled = true;
-	this._Drill_PASe_data = new Drill_COAS_Data( DrillUp.g_COAS_list[ as_id ] );
+	this._Drill_PASe_controller = new Drill_COAS_MainController( DrillUp.g_COAS_list[ as_id ] );
 	this._Drill_PASe_commandInit = true;
 }
 //==============================
-// * 图片 - 去除动画序列
+// * 图片 - 销毁动画序列
 //==============================
 Game_Picture.prototype.drill_PASe_removeActionSequence = function(){
 	this._Drill_PASe_enabled = false;
-	this._Drill_PASe_data = null;
+	this._Drill_PASe_controller = null;
 	this._Drill_PASe_commandDestroy = true;
 }
 //==============================
-// * 动画序列 - 还原默认状态元集合
+// * 动画序列 - 播放默认的状态元集合（开放函数）
 //
 //			说明：	直接调用核心提供的接口即可，
 //					注意，不要为了简化，让插件指令直接去操作COAS核心函数。
 //==============================
-Game_Picture.prototype.drill_PASe_setSequenceDefault = function(){
-	this._Drill_PASe_data.drill_COAS_setSequence( this._Drill_PASe_data._drill_data['state_default_randomSeq'] );
+Game_Picture.prototype.drill_PASe_setStateNodeDefault = function(){
+	this._Drill_PASe_controller.drill_COAS_setStateNodeDefault();
 }
 //==============================
-// * 动画序列 - 设置状态元集合
+// * 动画序列 - 播放状态节点（开放函数）
 //==============================
-Game_Picture.prototype.drill_PASe_setSequence = function( seq ){
-	this._Drill_PASe_data.drill_COAS_setSequence( seq );
+Game_Picture.prototype.drill_PASe_setStateNode = function( node_name ){
+	this._Drill_PASe_controller.drill_COAS_setStateNode( node_name );
 }
 //==============================
-// * 动画序列 - 设置状态元集合，立刻改变
+// * 动画序列 - 播放简易状态节点（开放函数）
 //==============================
-Game_Picture.prototype.drill_PASe_setSequenceImmediate = function( seq ){
-	this._Drill_PASe_data.drill_COAS_setSequenceImmediate( seq );
+Game_Picture.prototype.drill_PASe_setSimpleStateNode = function( state_nameList ){
+	this._Drill_PASe_controller.drill_COAS_setSimpleStateNode( state_nameList );
 }
 //==============================
-// * 动画序列 - 添加动作
+// * 动画序列 - 播放动作元（开放函数）
 //==============================
 Game_Picture.prototype.drill_PASe_setAct = function( act_name ){
-	this._Drill_PASe_data.drill_COAS_setAct( act_name );
+	this._Drill_PASe_controller.drill_COAS_setAct( act_name );
 }
 //==============================
-// * 动画序列 - 立刻终止动作
+// * 动画序列 - 立刻终止动作（开放函数）
 //==============================
 Game_Picture.prototype.drill_PASe_stopAct = function(){
-	this._Drill_PASe_data.drill_COAS_stopAct();
+	this._Drill_PASe_controller.drill_COAS_stopAct();
 }
 
 
@@ -449,15 +446,15 @@ Sprite_Picture.prototype.update = function() {
 		if( this._drill_PASe_decorator != null ){		//（销毁旧对象）
 			this._drill_PASe_decorator.drill_COAS_destroy(); 
 		}
-		this._drill_PASe_decorator = new Drill_COAS_SpriteDecorator( this, this.picture()._Drill_PASe_data );
+		this._drill_PASe_decorator = new Drill_COAS_SpriteDecorator( this, this.picture()._Drill_PASe_controller );
 	}
 	
 	// > 跨地图，贴图销毁时重建（要在初始化指令后面，防止new执行后立即销毁）
 	if( this.picture()._Drill_PASe_enabled == true &&
-		this.picture()._Drill_PASe_data != null &&
+		this.picture()._Drill_PASe_controller != null &&
 		this._drill_PASe_decorator == null ){
 		
-		this._drill_PASe_decorator = new Drill_COAS_SpriteDecorator( this, this.picture()._Drill_PASe_data );
+		this._drill_PASe_decorator = new Drill_COAS_SpriteDecorator( this, this.picture()._Drill_PASe_controller );
 	}
 	
 	// > 动画序列对象 帧刷新

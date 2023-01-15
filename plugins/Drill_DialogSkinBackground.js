@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        对话框 - 对话框背景
+ * @plugindesc [v1.2]        对话框 - 对话框背景
  * @author Drill_up
  * 
  * @Drill_LE_param "背景层-%d"
@@ -93,6 +93,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 修复了对话框宽高变化时，背景没有跟随变化的bug。
+ * [v1.2]
+ * 优化了旧存档的识别与兼容。
  * 
  *
  *
@@ -474,21 +476,106 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 };
 
 
-//=============================================================================
-// * 存储数据
-//=============================================================================
-//==============================
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_DSB_saveEnabled = true;
+//##############################
 // * 存储数据 - 初始化
-//==============================
-var _drill_DSB_system_initialize = Game_System.prototype.initialize;
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_DSB_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-    _drill_DSB_system_initialize.call(this);
+    _drill_DSB_sys_initialize.call(this);
+	this.drill_DSB_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_DSB_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_DSB_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_DSB_saveEnabled == true ){	
+		$gameSystem.drill_DSB_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_DSB_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_DSB_initSysData = function() {
+	this.drill_DSB_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_DSB_checkSysData = function() {
+	this.drill_DSB_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_DSB_initSysData_Private = function() {
 	
 	this._drill_DSB_visibleTank = [];		//显示情况
 	for(var i = 0; i < DrillUp.g_DSB_list.length; i++ ){
 		this._drill_DSB_visibleTank[i] = DrillUp.g_DSB_list[i]['visible'];
 	}
-}
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_DSB_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_DSB_visibleTank == undefined ){
+		this.drill_DSB_initSysData();
+	}
+	
+	// > 容器的 空数据 检查
+	for(var i = 0; i < DrillUp.g_DSB_list.length; i++ ){
+		var temp_data = JSON.parse(JSON.stringify( DrillUp.g_DSB_list[i] ));
+		
+		// > 已配置（'inited'为 false 表示空数据）
+		if( temp_data['inited'] == true ){
+			
+			// > 未存储的，重新初始化
+			if( this._drill_DSB_visibleTank[i] == undefined ){
+				this._drill_DSB_visibleTank[i] = temp_data['visible'];
+			
+			// > 已存储的，跳过
+			}else{
+				//（不操作）
+			}
+		}
+	}
+};
 
 
 //=============================================================================

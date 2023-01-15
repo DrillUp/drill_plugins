@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        行走图 - 玩家接近自动透明化
+ * @plugindesc [v1.3]        行走图 - 玩家接近自动透明化
  * @author Drill_up
  * 
  * 
@@ -108,6 +108,8 @@
  * 添加了插件指令临时修改功能。
  * [v1.2]
  * 修复了接近透明失效的bug。
+ * [v1.3]
+ * 优化了旧存档的识别与兼容。
  * 
  * 
  *
@@ -310,17 +312,90 @@ Game_Event.prototype.drill_EATran_setupPage = function() {
 	}, this);};
 };
 
-//=============================================================================
-// ** 存储变量初始化
-//=============================================================================
-//==============================
-// * 存储容器 - 初始化
-//==============================
+
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_EATran_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_EATran_sys_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function() {	
-	_drill_EATran_sys_initialize.call(this);
+Game_System.prototype.initialize = function() {
+    _drill_EATran_sys_initialize.call(this);
+	this.drill_EATran_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_EATran_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_EATran_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_EATran_saveEnabled == true ){	
+		$gameSystem.drill_EATran_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_EATran_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_EATran_initSysData = function() {
+	this.drill_EATran_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_EATran_checkSysData = function() {
+	this.drill_EATran_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_EATran_initSysData_Private = function() {
+	
 	this._drill_EATran_idTank = [];						//缓冲池 - 事件id
-}
+	//（初始为空容器，不需要初始化）
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_EATran_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_EATran_idTank == undefined ){
+		this.drill_EATran_initSysData();
+	}
+	
+	// > 容器的 空数据 检查
+	//	（容器一开始就是空数据，存放 地图注释 的标记）
+};
 //==============================
 // * 存储容器 - 添加
 //==============================
@@ -350,6 +425,7 @@ Game_System.prototype.drill_EATran_removeId = function( id ) {
 		}
 	}
 };
+
 
 //=============================================================================
 // * 优化

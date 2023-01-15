@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        对话框 - 对话选项按钮组
+ * @plugindesc [v1.2]        对话框 - 对话选项按钮组
  * @author Drill_up
  * 
  * @Drill_LE_param "对话选项样式-%d"
@@ -99,6 +99,8 @@
  * [v1.1]
  * 优化了与战斗活动镜头的变换关系。
  * 优化了与地图活动镜头的变换关系。
+ * [v1.2]
+ * 优化了旧存档的识别与兼容。
  * 
  *
  * 
@@ -399,19 +401,87 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 };
 
 
-//=============================================================================
-// ** 存储数据初始化
-//=============================================================================
-//==============================
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_DCB_saveEnabled = true;
+//##############################
 // * 存储数据 - 初始化
-//==============================
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_DCB_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-	_drill_DCB_sys_initialize.call(this);
+    _drill_DCB_sys_initialize.call(this);
+	this.drill_DCB_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_DCB_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_DCB_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_DCB_saveEnabled == true ){	
+		$gameSystem.drill_DCB_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_DCB_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_DCB_initSysData = function() {
+	this.drill_DCB_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_DCB_checkSysData = function() {
+	this.drill_DCB_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_DCB_initSysData_Private = function() {
 	
 	this._drill_DCB_enable = DrillUp.g_DCB_enable;
 	this._drill_DCB_curStyle = DrillUp.g_DCB_defaultStyle;
-}
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_DCB_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_DCB_curStyle == undefined ){
+		this.drill_DCB_initSysData();
+	}
+	
+};
 
 
 //#############################################################################

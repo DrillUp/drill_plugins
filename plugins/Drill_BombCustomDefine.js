@@ -3,12 +3,12 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        炸弹人 - 自定义炸弹
+ * @plugindesc [v1.2]        炸弹人 - 自定义炸弹
  * @author Drill_up
  * 
  * @Drill_LE_param "玩家炸弹-火力%d"
  * @Drill_LE_parentKey ""
- * @Drill_LE_var "DrillUp.g_BoCD_a_list_length"
+ * @Drill_LE_var "DrillUp.g_BoCD_p_list_length"
  * 
  * @Drill_LE_param "事件炸弹-火力%d"
  * @Drill_LE_parentKey ""
@@ -128,6 +128,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 添加了游戏时，对地图id的校验检查功能。
+ * [v1.2]
+ * 优化了旧存档的识别与兼容。
  * 
  * 
  * @param ----自定义玩家炸弹----
@@ -586,29 +588,29 @@
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_BombCustomDefine');
 	
-	DrillUp.g_BoCD_a_canPick = String(DrillUp.parameters["玩家标准炸弹是否可举起"] || "true") == "true";
-	DrillUp.g_BoCD_a_throwRange = Number(DrillUp.parameters["玩家标准炸弹投掷距离"] || 1);
+	DrillUp.g_BoCD_p_canPick = String(DrillUp.parameters["玩家标准炸弹是否可举起"] || "true") == "true";
+	DrillUp.g_BoCD_p_throwRange = Number(DrillUp.parameters["玩家标准炸弹投掷距离"] || 1);
 	DrillUp.g_BoCD_e_canPick = String(DrillUp.parameters["事件标准炸弹是否可举起"] || "true") == "true";
 	DrillUp.g_BoCD_e_throwRange = Number(DrillUp.parameters["事件标准炸弹投掷距离"] || 1);
 	
-	DrillUp.g_BoCD_a_enable = String(DrillUp.parameters["玩家初始是否启用"] || "false") == "true";
+	DrillUp.g_BoCD_p_enable = String(DrillUp.parameters["玩家初始是否启用"] || "false") == "true";
 	DrillUp.g_BoCD_e_enable = String(DrillUp.parameters["事件初始是否启用"] || "false") == "true";
 	
-	DrillUp.g_BoCD_a_list_length = 30;
-	DrillUp.g_BoCD_a_list = [];
-	for (var i = 0; i < DrillUp.g_BoCD_a_list_length; i++) {
+	DrillUp.g_BoCD_p_list_length = 30;
+	DrillUp.g_BoCD_p_list = [];
+	for( var i = 0; i < DrillUp.g_BoCD_p_list_length; i++ ){
 		if( DrillUp.parameters['玩家炸弹-火力' + String(i+1) ] != "" ){
-			DrillUp.g_BoCD_a_list[i] = JSON.parse(DrillUp.parameters['玩家炸弹-火力' + String(i+1) ]);
-			DrillUp.g_BoCD_a_list[i]['enable'] = String(DrillUp.g_BoCD_a_list[i]["是否开启"] || "true") == "true";
-			DrillUp.g_BoCD_a_list[i]['map_id'] = Number(DrillUp.g_BoCD_a_list[i]["自定义炸弹所在地图ID"]);
-			DrillUp.g_BoCD_a_list[i]['event_id'] = Number(DrillUp.g_BoCD_a_list[i]["自定义炸弹对应的事件ID"]);
+			DrillUp.g_BoCD_p_list[i] = JSON.parse(DrillUp.parameters['玩家炸弹-火力' + String(i+1) ]);
+			DrillUp.g_BoCD_p_list[i]['enable'] = String(DrillUp.g_BoCD_p_list[i]["是否开启"] || "true") == "true";
+			DrillUp.g_BoCD_p_list[i]['map_id'] = Number(DrillUp.g_BoCD_p_list[i]["自定义炸弹所在地图ID"]);
+			DrillUp.g_BoCD_p_list[i]['event_id'] = Number(DrillUp.g_BoCD_p_list[i]["自定义炸弹对应的事件ID"]);
 		}else{
-			DrillUp.g_BoCD_a_list[i] = [];
+			DrillUp.g_BoCD_p_list[i] = [];
 		}
 	}
 	DrillUp.g_BoCD_e_list_length = 30;
 	DrillUp.g_BoCD_e_list = [];
-	for (var i = 0; i < DrillUp.g_BoCD_e_list_length; i++) {
+	for( var i = 0; i < DrillUp.g_BoCD_e_list_length; i++ ){
 		if( DrillUp.parameters['事件炸弹-火力' + String(i+1) ] != "" ){
 			DrillUp.g_BoCD_e_list[i] = JSON.parse(DrillUp.parameters['事件炸弹-火力' + String(i+1) ]);
 			DrillUp.g_BoCD_e_list[i]['enable'] = String(DrillUp.g_BoCD_e_list[i]["是否开启"] || "true") == "true";
@@ -631,7 +633,8 @@ if( Imported.Drill_BombCore ){
 var _drill_BoCD_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_BoCD_pluginCommand.call(this, command, args);
-	if (command === '>炸弹人控制台') {
+	if( command === ">炸弹人控制台" ){
+		
 		if(args.length == 2){
 			var type = String(args[1]);
 			if( type == "玩家使用标准炸弹" ){
@@ -671,17 +674,89 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 };
 
-//=============================================================================
-// ** 存储变量初始化
-//=============================================================================
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_BoCD_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_BoCD_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
     _drill_BoCD_sys_initialize.call(this);
-	this._drill_BoCD_playerCustomBomb = DrillUp.g_BoCD_a_enable;
+	this.drill_BoCD_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_BoCD_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_BoCD_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_BoCD_saveEnabled == true ){	
+		$gameSystem.drill_BoCD_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_BoCD_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_BoCD_initSysData = function() {
+	this.drill_BoCD_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_BoCD_checkSysData = function() {
+	this.drill_BoCD_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_BoCD_initSysData_Private = function() {
+	this._drill_BoCD_playerCustomBomb = DrillUp.g_BoCD_p_enable;
 	this._drill_BoCD_eventCustomBomb = DrillUp.g_BoCD_e_enable;
-	this._drill_BoCD_a_list = JSON.parse(JSON.stringify( DrillUp.g_BoCD_a_list ));	//玩家炸弹id数据
-	this._drill_BoCD_e_list = JSON.parse(JSON.stringify( DrillUp.g_BoCD_e_list ));	//事件炸弹id数据
-}
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_BoCD_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_BoCD_playerCustomBomb == undefined ){
+		this.drill_BoCD_initSysData();
+	}
+	
+	// > 容器的 空数据 检查
+	//	（不含容器）
+};
+
 
 //=============================================================================
 // * 地图数据预加载
@@ -692,8 +767,8 @@ Game_Temp.prototype.initialize = function() {
 	
 	// > 统计配置的地图id
 	var maps = {};
-	for(var i = 0; i<DrillUp.g_BoCD_a_list.length; i++){
-		var temp = DrillUp.g_BoCD_a_list[i];
+	for(var i = 0; i<DrillUp.g_BoCD_p_list.length; i++){
+		var temp = DrillUp.g_BoCD_p_list[i];
 		if( temp['map_id'] ){
 			maps[ temp['map_id'] ] = true;
 		}
@@ -746,7 +821,7 @@ Game_Map.prototype.drill_BoC_putBomb = function( input_data ) {
 	
 	if( $gameSystem._drill_BoCD_playerCustomBomb == true &&	//玩家自定义炸弹
 		( input_data['bomber'] == "玩家" ) ){
-		var temp = $gameSystem._drill_BoCD_a_list[ input_data['fire']-1 ];
+		var temp = DrillUp.g_BoCD_p_list[ input_data['fire']-1 ];
 			
 		if( temp['enable'] && this.drill_BoC_isBombCanPut( input_data['x'],input_data['y'] ) ){	//验证炸弹是否能放
 			// > 找到火力对应的地图事件
@@ -773,7 +848,7 @@ Game_Map.prototype.drill_BoC_putBomb = function( input_data ) {
 	}
 	if( $gameSystem._drill_BoCD_eventCustomBomb == true &&	//事件自定义炸弹
 		( input_data['bomber'] == "事件" || input_data['bomber'] == "控制台(事件)" ) ){
-		var temp = $gameSystem._drill_BoCD_e_list[ input_data['fire']-1 ];
+		var temp = DrillUp.g_BoCD_e_list[ input_data['fire']-1 ];
 			
 		if( temp['enable'] && this.drill_BoC_isBombCanPut( input_data['x'],input_data['y'] ) ){	//验证炸弹是否能放
 			// > 找到火力对应的地图事件

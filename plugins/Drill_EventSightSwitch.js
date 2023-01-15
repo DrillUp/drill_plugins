@@ -261,6 +261,7 @@ Game_Map.prototype.drill_ESiS_updateSightSwitch = function() {
 		}
 	}
 }
+DrillUp.g_LCa_alert = true;
 //==============================
 // * 视野 - 判断点是否在镜头内
 //==============================
@@ -271,11 +272,15 @@ Game_Map.prototype.drill_ESiS_posIsInCamera = function( realX, realY ){
 	var sww = oww;
 	var shh = ohh;
 	if( Imported.Drill_LayerCamera ){
+		if( $gameSystem._drill_LCa_controller == undefined && DrillUp.g_LCa_alert == true ){ 
+			alert("【Drill_EventSightSwitch.js 物体 - 镜头视野开关】\n活动地图镜头插件版本过低，你需要更新 镜头插件 至少v1.9及以上版本。");
+			DrillUp.g_LCa_alert = false;
+		}
 		sww = sww / $gameSystem._drill_LCa_controller._drill_scaleX;
 		shh = shh / $gameSystem._drill_LCa_controller._drill_scaleY;
 	}
-	return  Math.abs($gameMap.adjustX(realX + 0.5 - oww*0.5)) <= sww*0.5 + 0.5 && 
-			Math.abs($gameMap.adjustY(realY + 0.5 - ohh*0.5)) <= shh*0.5 + 0.5 ;
+	return  Math.abs($gameMap.adjustX(realX + 0.5) - oww*0.5) <= sww*0.5 + 0.5 && 
+			Math.abs($gameMap.adjustY(realY + 0.5) - ohh*0.5) <= shh*0.5 + 0.5 ;
 }
 //==============================
 // * 优化 - 独立开关赋值时不刷新地图

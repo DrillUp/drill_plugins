@@ -991,11 +991,9 @@
 			DrillUp.parameters["粒子-" + String(i+1) ] != "" ){
 			var temp = JSON.parse(DrillUp.parameters["粒子-" + String(i+1) ]);
 			DrillUp.g_TPa_list[i] = DrillUp.drill_TPa_particleInit( temp );
-			DrillUp.g_TPa_list[i]['id'] = Number(i)+1;
 			DrillUp.g_TPa_list[i]['inited'] = true;
 		}else{
 			DrillUp.g_TPa_list[i] = DrillUp.drill_TPa_particleInit( {} );
-			DrillUp.g_TPa_list[i]['id'] = Number(i)+1;
 			DrillUp.g_TPa_list[i]['inited'] = false;
 		}
 	}
@@ -1061,7 +1059,8 @@ StorageManager.drill_TPa_saveData = function(){
 var _drill_TPa_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_TPa_pluginCommand.call(this, command, args);
-	if (command === ">标题粒子") {
+	if( command === ">标题粒子" ){
+		
 		if(args.length == 4){
 			var temp1 = String(args[1]);
 			var type = String(args[3]);
@@ -1093,15 +1092,6 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			}
 		}
 	}
-};
-
-//=============================================================================
-// ** 存储数据初始化
-//=============================================================================
-var _drill_TPa_sys_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function() {	
-	_drill_TPa_sys_initialize.call(this);
-	//无
 };
 
 

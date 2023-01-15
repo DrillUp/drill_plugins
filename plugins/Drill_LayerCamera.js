@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.9]        地图 - 活动地图镜头
+ * @plugindesc [v2.1]        地图 - 活动地图镜头
  * @author Drill_up
  * 
  * 
@@ -74,6 +74,7 @@
  *   (2.镜头墙是一种阻止镜头单向上/下/左/右移动的墙，若玩家越过了墙壁线，
  *      则镜头将不再受阻止。
  *   (3.事件注释设置不跨事件页，切换无相关注释的事件页后，墙会被关闭。
+ *   (4.镜头墙摆放有特殊要求，如果摆放位置不对，会失效。详细去看看文档。
  * 设计：
  *   (1.将镜头稍微旋转12度，有很多特殊代入效果，比如摇晃的船只、塌陷的斜坡、
  *      某种震击地面技能造成的整个世界倾斜的特效。
@@ -246,6 +247,10 @@
  * 修复了镜头翻转时偏移的bug。
  * [v1.9]
  * 大幅度改进了插件的镜头控制结构。
+ * [v2.0]
+ * 修复了镜头墙在 小的+循环的 地图中，镜头墙会卡住的问题。
+ * [v2.1]
+ * 优化了旧存档的识别与兼容。
  * 
  * 
  * 
@@ -753,22 +758,72 @@ Game_Map.prototype.drill_LCa_isEventExist = function( e_id ){
 };
 
 
-
-//=============================================================================
-// ** 存储数据
-//=============================================================================
-//==============================
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_LCa_saveEnabled = true;
+//##############################
 // * 存储数据 - 初始化
-//==============================
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_LCa_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
     _drill_LCa_sys_initialize.call(this);
-	this.drill_LCa_initData();
+	this.drill_LCa_initSysData();
 };
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_LCa_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_LCa_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_LCa_saveEnabled == true ){	
+		$gameSystem.drill_LCa_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_LCa_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_LCa_initSysData = function() {
+	this.drill_LCa_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_LCa_checkSysData = function() {
+	this.drill_LCa_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
 //==============================
-// * 存储数据 - 初始化数据
+// * 存储数据 - 初始化数据（私有）
 //==============================
-Game_System.prototype.drill_LCa_initData = function() {
+Game_System.prototype.drill_LCa_initSysData_Private = function() {
 	
 	// > 控制器
 	var data = {
@@ -797,15 +852,15 @@ Game_System.prototype.drill_LCa_initData = function() {
 	
 };	
 //==============================
-// * 存档文件 - 载入存档 - 数据赋值
+// * 存储数据 - 载入存档时检查数据（私有）
 //==============================
-var _drill_LCa_extractSaveContents = DataManager.extractSaveContents;
-DataManager.extractSaveContents = function(contents){
-	_drill_LCa_extractSaveContents.call( this, contents );
+Game_System.prototype.drill_LCa_checkSysData_Private = function() {
 	
-	if( $gameSystem._drill_LCa_controller == undefined ){	//（空数据时，强制赋值）
-		$gameSystem.drill_LCa_initData();
+	// > 旧存档数据自动补充
+	if( this._drill_LCa_controller == undefined ){
+		this.drill_LCa_initSysData();
 	}
+	
 };
 
 
@@ -2343,9 +2398,33 @@ Drill_LCa_Controller.prototype.drill_updateAutoMode_posAccumulate = function(){
 	
 	// > 切换到相对镜头位置
 	//		（注意，adjustX 包含了对 _displayX、_displayY 的处理，具体去看看函数本身）
-	x2 = $gameMap.adjustX( x2 );
-	y2 = $gameMap.adjustY( y2 );
+	var tar_x = $gameMap.adjustX( x2 );
+	var tar_y = $gameMap.adjustY( y2 );
 	
+	// > 切换到相对镜头位置（全展开形式）
+	//		（如果玩家的位移跨度有点大，可能会绕镜头一圈，然后再回来）
+	//var tar_x = 0;
+	//var tar_y = 0;
+	//var half_width  = ($gameMap.width()  - $gameMap.screenTileX()) *0.5;
+	//var half_height = ($gameMap.height() - $gameMap.screenTileY()) *0.5;
+	//if( $gameMap.isLoopHorizontal() ){
+	//	if( half_width < $gameMap._displayX - x2 ){
+	//		tar_x = x2 - $gameMap._displayX + $dataMap.width;
+	//	}else{
+	//		tar_x = x2 - $gameMap._displayX;
+	//	}
+	//}else{
+	//	tar_x = x2 - $gameMap._displayX;
+	//}
+	//if( $gameMap.isLoopVertical() ){
+	//	if( half_height < $gameMap._displayY - y2 ){
+	//		tar_y = y2 - $gameMap._displayY + $dataMap.height;
+	//	}else{
+	//		tar_y = y2 - $gameMap._displayY;
+	//	}
+	//}else{
+	//	tar_y = y2 - $gameMap._displayY;
+	//}
 	
 	
 	// > 镜头移动 - 弹性移动
@@ -2354,8 +2433,8 @@ Drill_LCa_Controller.prototype.drill_updateAutoMode_posAccumulate = function(){
 	var pixel_speedPlus = 1 / 1000000;	//手动误差值
 	
 	// > 镜头移动 - 向下
-    if( y2 > 0 ){
-		var distance = Math.abs(y2);
+    if( tar_y > 0 ){
+		var distance = Math.abs(tar_y);
 		var pixel_distance = distance * this.tileHeight();								//像素距离
 		var pixel_speed = Math.min(pixel_distance/speedRatio_y, data['autoSpeedMax'] );		//像素速度
 		if( pixel_speed < 0.25 ){ pixel_speed = 0.25; }										//像素最小速度（1/4像素）
@@ -2378,8 +2457,8 @@ Drill_LCa_Controller.prototype.drill_updateAutoMode_posAccumulate = function(){
 		}   
     }
 	// > 镜头移动 - 向左
-    if( x2 < 0 ){
-		var distance = Math.abs(x2);
+    if( tar_x < 0 ){
+		var distance = Math.abs(tar_x);
 		var pixel_distance = distance * this.tileWidth();
 		var pixel_speed = Math.min(pixel_distance/speedRatio_x, data['autoSpeedMax'] );
 		if( pixel_speed < 0.25 ){ pixel_speed = 0.25; }
@@ -2402,8 +2481,8 @@ Drill_LCa_Controller.prototype.drill_updateAutoMode_posAccumulate = function(){
 		}
     }
 	// > 镜头移动 - 向右
-    if( x2 > 0 ){
-		var distance = Math.abs(x2);
+    if( tar_x > 0 ){
+		var distance = Math.abs(tar_x);
 		var pixel_distance = distance * this.tileWidth();
 		var pixel_speed = Math.min(pixel_distance/speedRatio_x, data['autoSpeedMax'] );
 		if( pixel_speed < 0.25 ){ pixel_speed = 0.25; }
@@ -2426,8 +2505,8 @@ Drill_LCa_Controller.prototype.drill_updateAutoMode_posAccumulate = function(){
 		}
     }
 	// > 镜头移动 - 向上
-    if( y2 < 0 ){
-		var distance = Math.abs(y2);
+    if( tar_y < 0 ){
+		var distance = Math.abs(tar_y);
 		var pixel_distance = distance * this.tileHeight();
 		var pixel_speed = Math.min(pixel_distance/speedRatio_y, data['autoSpeedMax'] );
 		if( pixel_speed < 0.25 ){ pixel_speed = 0.25; }	
@@ -3350,11 +3429,19 @@ Drill_LCa_Controller.prototype.drill_getAutoPosition = function(){
 		var rxx = temp_event._realX - oww*0.5;
 		var ryy = temp_event._realY - ohh*0.5;
 		
+		// > 镜头墙 - 数学问题兼容
+		//		（如果在 循环+镜头墙 情况下，镜头墙处于初始的镜头范围内，则镜头墙无效）
+		if( $gameMap.isLoopHorizontal() && temp_event._realX < sww ){
+			continue;
+		}
+		if( $gameMap.isLoopVertical() && temp_event._realY < shh ){
+			continue;
+		}
+		
 		// > 镜头墙 - 优化（镜头+边界 内未出现墙，则不执行阻塞）
-		var tile_margin = 2.0;
-		var a_x = Math.abs($gameMap.adjustX( rxx + 0.5*unit_x ));
-		var a_y = Math.abs($gameMap.adjustY( ryy + 0.5*unit_y ));
-		if( (a_x <= sww*0.5 + 0.5*unit_x + tile_margin && a_y <= shh*0.5 + 0.5*unit_y + tile_margin) == false ){
+		if( Math.abs($gameMap.adjustX(temp_event._realX + 0.5) - oww*0.5) <= sww*0.5 + 5.5 &&	//（镜头范围+5个图块边框区域） 
+			Math.abs($gameMap.adjustY(temp_event._realY + 0.5) - ohh*0.5) <= shh*0.5 + 5.5 ){
+		}else{
 			continue;
 		}
 		
@@ -3385,6 +3472,9 @@ Drill_LCa_Controller.prototype.drill_getAutoPosition = function(){
 					$gameTemp.drill_LCa_isValueInLoopRange( yy, y_min, y_max, this.height() ) ){
 					
 					xx = rxx + rect_lr_width;
+					if( xx == $dataMap.width ){
+						xx = $dataMap.width + 0.01;
+					}
 					break;
 				}
 			}

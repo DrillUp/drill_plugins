@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        鼠标 - 图片说明窗口
+ * @plugindesc [v1.4]        鼠标 - 图片说明窗口
  * @author Drill_up
  * 
  * @Drill_LE_param "皮肤样式-%d"
@@ -132,6 +132,8 @@
  * [v1.3]
  * 优化了部分结构，减少了性能消耗。
  * 支持多个窗口皮肤样式的自定义。
+ * [v1.4]
+ * 优化了旧存档的识别与兼容。
  * 
  * 
  * 
@@ -1226,17 +1228,88 @@ Game_Screen.prototype.drill_MPFP_isPictureExist = function( pic_id ){
 };
 
 
-//=============================================================================
-// ** 存储变量初始化
-//=============================================================================
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_MPFP_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_MPFP_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
     _drill_MPFP_sys_initialize.call(this);
+	this.drill_MPFP_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_MPFP_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_MPFP_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_MPFP_saveEnabled == true ){	
+		$gameSystem.drill_MPFP_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_MPFP_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_MPFP_initSysData = function() {
+	this.drill_MPFP_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_MPFP_checkSysData = function() {
+	this.drill_MPFP_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_MPFP_initSysData_Private = function() {
 	
 	this._drill_MPFP_defaultStyle = DrillUp.g_MPFP_defaultStyle;	//（默认皮肤样式）
 	this._drill_MPFP_ex_width = DrillUp.g_MPFP_ex_width;			//（窗口附加宽度）
 	this._drill_MPFP_ex_height = DrillUp.g_MPFP_ex_height; 			//（窗口附加高度）
-};	
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_MPFP_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_MPFP_defaultStyle == undefined ){
+		this.drill_MPFP_initSysData();
+	}
+	
+};
 
 
 //=============================================================================

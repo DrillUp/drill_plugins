@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.0]        UI - 高级BOSS生命固定框
+ * @plugindesc [v2.1]        UI - 高级BOSS生命固定框
  * @author Drill_up
  * 
  * @Drill_LE_param "固定框样式-%d"
@@ -236,6 +236,8 @@
  * 添加了boss框可修改 上层、图片层、最顶层 的设置。
  * [v2.0]
  * 优化了与战斗活动镜头的变换关系。
+ * [v2.1]
+ * 优化了旧存档的识别与兼容。
  *
  *
  * @param 战斗结算时是否隐藏框
@@ -1501,7 +1503,8 @@
 	
 	
 	//==============================
-	// * 变量获取 - BOSS固定框样式（必须写在前面）
+	// * 变量获取 - BOSS固定框样式
+	//				（~struct~GFBStyle）
 	//==============================
 	DrillUp.drill_GFB_initStyle = function( dataFrom ) {
 		var data = {};
@@ -1587,7 +1590,8 @@
 	}
 	
 	//==============================
-	// * 变量获取 - BOSS设置（必须写在前面）
+	// * 变量获取 - BOSS设置
+	//				（~struct~GFBBind）
 	//==============================
 	DrillUp.drill_GFB_initBind = function( dataFrom ) {
 		var data = {};
@@ -1664,10 +1668,8 @@
 		if( DrillUp.parameters["BOSS设置-" + String(i+1) ] != "" ){
 			var data = JSON.parse(DrillUp.parameters["BOSS设置-" + String(i+1) ]);
 			DrillUp.g_GFB_bind[i] = DrillUp.drill_GFB_initBind( data );
-			DrillUp.g_GFB_bind[i]['inited'] = true;
 		}else{
-			DrillUp.g_GFB_bind[i] = DrillUp.drill_GFB_initBind( {} );
-			DrillUp.g_GFB_bind[i]['inited'] = false;
+			DrillUp.g_GFB_bind[i] = null;		//（强制设为空值，节约存储资源）
 		}
 	}
 	
@@ -1731,28 +1733,36 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var temp3 = String(args[5]);
 			for(var j = 0; j < bind_ids.length; j++ ){
 				var id = bind_ids[j];
+				var dataBind = $gameSystem._drill_GFB_bindTank[ id ];
+				if( dataBind == undefined ){
+					alert(
+						"【Drill_GaugeForBoss.js  UI - 高级BOSS生命固定框】\n"+
+						"错误，未找到BOSS设置["+id+"]的配置数据。"
+					);
+					continue;
+				}
 				
 				if( temp2 == "固定框" ){
 					if( temp3 == "显示" ){
-						$gameSystem._drill_GFB_bindTank[ id ]['visible'] = true;
+						dataBind['visible'] = true;
 						$gameTemp._drill_GFB_needRefresh = true;
 					}
 					if( temp3 == "隐藏" ){
-						$gameSystem._drill_GFB_bindTank[ id ]['visible'] = false;
+						dataBind['visible'] = false;
 						$gameTemp._drill_GFB_needRefresh = true;
 					}
 					if( temp3.indexOf("修改样式[") != -1 ){	//不能立即生效
 						temp3 = temp3.replace("修改样式[","");
 						temp3 = temp3.replace("]","");
-						$gameSystem._drill_GFB_bindTank[ id ]['style_id'] = Number(temp3);
+						dataBind['style_id'] = Number(temp3);
 						// > 切换参数时，实例参数需要全部去掉
-						$gameSystem._drill_GFB_bindTank[ id ]['name_visible'] = null;
-						$gameSystem._drill_GFB_bindTank[ id ]['hp_symbol_visible'] = null;
-						$gameSystem._drill_GFB_bindTank[ id ]['mp_symbol_visible'] = null;
-						$gameSystem._drill_GFB_bindTank[ id ]['tp_symbol_visible'] = null;
-						$gameSystem._drill_GFB_bindTank[ id ]['hpx_symbol_visible'] = null;
-						$gameSystem._drill_GFB_bindTank[ id ]['mpx_symbol_visible'] = null;
-						$gameSystem._drill_GFB_bindTank[ id ]['tpx_symbol_visible'] = null;
+						dataBind['name_visible'] = null;
+						dataBind['hp_symbol_visible'] = null;
+						dataBind['mp_symbol_visible'] = null;
+						dataBind['tp_symbol_visible'] = null;
+						dataBind['hpx_symbol_visible'] = null;
+						dataBind['mpx_symbol_visible'] = null;
+						dataBind['tpx_symbol_visible'] = null;
 						$gameTemp._drill_GFB_needRefresh = true;
 					}
 					else if( temp3.indexOf("修改当前层级[") != -1 ){
@@ -1760,124 +1770,124 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 						temp3 = temp3.replace("]","");
 						for(var k = 0; k < bind_ids.length; k++ ){
 							var id = bind_ids[k];
-							$gameSystem._drill_GFB_bindTank[ id ]['layerIndex_map'] = temp3;
-							$gameSystem._drill_GFB_bindTank[ id ]['layerIndex_battle'] = temp3;
+							dataBind['layerIndex_map'] = temp3;
+							dataBind['layerIndex_battle'] = temp3;
 						}
 						$gameTemp._drill_GFB_needRefresh = true;
 					}
 				}
 				if( temp2 == "名称" ){
 					if( temp3 == "显示" ){
-						$gameSystem._drill_GFB_bindTank[ id ]['name_visible'] = true;
-						$gameSystem._drill_GFB_bindTank[ id ]['commandParamChanged'] = true;
+						dataBind['name_visible'] = true;
+						dataBind['commandParamChanged'] = true;
 					}
 					if( temp3 == "隐藏" ){
-						$gameSystem._drill_GFB_bindTank[ id ]['name_visible'] = false;
-						$gameSystem._drill_GFB_bindTank[ id ]['commandParamChanged'] = true;
+						dataBind['name_visible'] = false;
+						dataBind['commandParamChanged'] = true;
 					}
 				}
 				if( temp2 == "头像" ){
 					if( temp3 == "显示" ){
-						$gameSystem._drill_GFB_bindTank[ id ]['head_visible'] = true;
-						$gameSystem._drill_GFB_bindTank[ id ]['commandParamChanged'] = true;
+						dataBind['head_visible'] = true;
+						dataBind['commandParamChanged'] = true;
 					}
 					if( temp3 == "隐藏" ){
-						$gameSystem._drill_GFB_bindTank[ id ]['head_visible'] = false;
-						$gameSystem._drill_GFB_bindTank[ id ]['commandParamChanged'] = true;
+						dataBind['head_visible'] = false;
+						dataBind['commandParamChanged'] = true;
 					}
 					if( temp3 == "还原头像" ){
-						$gameSystem._drill_GFB_bindTank[ id ]['head_bitmap_id'] = 0;
-						$gameSystem._drill_GFB_bindTank[ id ]['commandParamChanged'] = true;
+						dataBind['head_bitmap_id'] = 0;
+						dataBind['commandParamChanged'] = true;
 					}
 					if( temp3.indexOf("切换备用头像[") != -1 ){
 						temp3 = temp3.replace("切换备用头像[","");
 						temp3 = temp3.replace("]","");
-						$gameSystem._drill_GFB_bindTank[ id ]['head_bitmap_id'] = Number(temp3);
-						$gameSystem._drill_GFB_bindTank[ id ]['commandParamChanged'] = true;
+						dataBind['head_bitmap_id'] = Number(temp3);
+						dataBind['commandParamChanged'] = true;
 					}
 				}
 				if( temp2 == "生命条" ){
 					if( temp3.indexOf("修改段上限[") != -1 ){
 						temp3 = temp3.replace("修改段上限[","");
 						temp3 = temp3.replace("]","");
-						$gameSystem._drill_GFB_bindTank[ id ]['hp_level_max'] = Number(temp3);
-						$gameSystem._drill_GFB_bindTank[ id ]['commandParamChanged'] = true;
+						dataBind['hp_level_max'] = Number(temp3);
+						dataBind['commandParamChanged'] = true;
 					}
 				}
 				if( temp2 == "魔法条" ){
 					if( temp3.indexOf("修改段上限[") != -1 ){
 						temp3 = temp3.replace("修改段上限[","");
 						temp3 = temp3.replace("]","");
-						$gameSystem._drill_GFB_bindTank[ id ]['mp_level_max'] = Number(temp3);
-						$gameSystem._drill_GFB_bindTank[ id ]['commandParamChanged'] = true;
+						dataBind['mp_level_max'] = Number(temp3);
+						dataBind['commandParamChanged'] = true;
 					}
 				}
 				if( temp2 == "怒气条" ){
 					if( temp3.indexOf("修改段上限[") != -1 ){
 						temp3 = temp3.replace("修改段上限[","");
 						temp3 = temp3.replace("]","");
-						$gameSystem._drill_GFB_bindTank[ id ]['tp_level_max'] = Number(temp3);
-						$gameSystem._drill_GFB_bindTank[ id ]['commandParamChanged'] = true;
+						dataBind['tp_level_max'] = Number(temp3);
+						dataBind['commandParamChanged'] = true;
 					}
 				}
 				if( temp2 == "生命数字" ){
 					if( temp3 == "显示" ){
-						$gameSystem._drill_GFB_bindTank[ id ]['hp_symbol_visible'] = true;
-						$gameSystem._drill_GFB_bindTank[ id ]['commandParamChanged'] = true;
+						dataBind['hp_symbol_visible'] = true;
+						dataBind['commandParamChanged'] = true;
 					}
 					if( temp3 == "隐藏" ){
-						$gameSystem._drill_GFB_bindTank[ id ]['hp_symbol_visible'] = false;
-						$gameSystem._drill_GFB_bindTank[ id ]['commandParamChanged'] = true;
+						dataBind['hp_symbol_visible'] = false;
+						dataBind['commandParamChanged'] = true;
 					}
 				}
 				if( temp2 == "魔法数字" ){
 					if( temp3 == "显示" ){
-						$gameSystem._drill_GFB_bindTank[ id ]['mp_symbol_visible'] = true;
-						$gameSystem._drill_GFB_bindTank[ id ]['commandParamChanged'] = true;
+						dataBind['mp_symbol_visible'] = true;
+						dataBind['commandParamChanged'] = true;
 					}
 					if( temp3 == "隐藏" ){
-						$gameSystem._drill_GFB_bindTank[ id ]['mp_symbol_visible'] = false;
-						$gameSystem._drill_GFB_bindTank[ id ]['commandParamChanged'] = true;
+						dataBind['mp_symbol_visible'] = false;
+						dataBind['commandParamChanged'] = true;
 					}
 				}
 				if( temp2 == "怒气数字" ){
 					if( temp3 == "显示" ){
-						$gameSystem._drill_GFB_bindTank[ id ]['tp_symbol_visible'] = true;
-						$gameSystem._drill_GFB_bindTank[ id ]['commandParamChanged'] = true;
+						dataBind['tp_symbol_visible'] = true;
+						dataBind['commandParamChanged'] = true;
 					}
 					if( temp3 == "隐藏" ){
-						$gameSystem._drill_GFB_bindTank[ id ]['tp_symbol_visible'] = false;
-						$gameSystem._drill_GFB_bindTank[ id ]['commandParamChanged'] = true;
+						dataBind['tp_symbol_visible'] = false;
+						dataBind['commandParamChanged'] = true;
 					}
 				}
 				if( temp2 == "生命段数" ){
 					if( temp3 == "显示" ){
-						$gameSystem._drill_GFB_bindTank[ id ]['hpx_symbol_visible'] = true;
-						$gameSystem._drill_GFB_bindTank[ id ]['commandParamChanged'] = true;
+						dataBind['hpx_symbol_visible'] = true;
+						dataBind['commandParamChanged'] = true;
 					}
 					if( temp3 == "隐藏" ){
-						$gameSystem._drill_GFB_bindTank[ id ]['hpx_symbol_visible'] = false;
-						$gameSystem._drill_GFB_bindTank[ id ]['commandParamChanged'] = true;
+						dataBind['hpx_symbol_visible'] = false;
+						dataBind['commandParamChanged'] = true;
 					}
 				}
 				if( temp2 == "魔法段数" ){
 					if( temp3 == "显示" ){
-						$gameSystem._drill_GFB_bindTank[ id ]['mpx_symbol_visible'] = true;
-						$gameSystem._drill_GFB_bindTank[ id ]['commandParamChanged'] = true;
+						dataBind['mpx_symbol_visible'] = true;
+						dataBind['commandParamChanged'] = true;
 					}
 					if( temp3 == "隐藏" ){
-						$gameSystem._drill_GFB_bindTank[ id ]['mpx_symbol_visible'] = false;
-						$gameSystem._drill_GFB_bindTank[ id ]['commandParamChanged'] = true;
+						dataBind['mpx_symbol_visible'] = false;
+						dataBind['commandParamChanged'] = true;
 					}
 				}
 				if( temp2 == "怒气段数" ){
 					if( temp3 == "显示" ){
-						$gameSystem._drill_GFB_bindTank[ id ]['tpx_symbol_visible'] = true;
-						$gameSystem._drill_GFB_bindTank[ id ]['commandParamChanged'] = true;
+						dataBind['tpx_symbol_visible'] = true;
+						dataBind['commandParamChanged'] = true;
 					}
 					if( temp3 == "隐藏" ){
-						$gameSystem._drill_GFB_bindTank[ id ]['tpx_symbol_visible'] = false;
-						$gameSystem._drill_GFB_bindTank[ id ]['commandParamChanged'] = true;
+						dataBind['tpx_symbol_visible'] = false;
+						dataBind['commandParamChanged'] = true;
 					}
 				}
 			}
@@ -1922,46 +1932,102 @@ Game_Temp.prototype.drill_GFB_forceDestroyByBindIdList = function( bindId_list )
 		temp_sprite.drill_setForceDestroy( true );
 	}
 }
-//=============================================================================
-// * 存储数据
-//=============================================================================
-//==============================
+
+
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_GFB_saveEnabled = true;
+//##############################
 // * 存储数据 - 初始化
-//==============================
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_GFB_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-	_drill_GFB_sys_initialize.call(this);
+    _drill_GFB_sys_initialize.call(this);
+	this.drill_GFB_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_GFB_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_GFB_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_GFB_saveEnabled == true ){	
+		$gameSystem.drill_GFB_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_GFB_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_GFB_initSysData = function() {
+	this.drill_GFB_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_GFB_checkSysData = function() {
+	this.drill_GFB_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_GFB_initSysData_Private = function() {
 	
 	this._drill_GFB_bindTank = [];				// 绑定数据容器
 	for(var i = 0; i < DrillUp.g_GFB_bind.length; i++ ){
-		var temp_bind = JSON.parse(JSON.stringify( DrillUp.g_GFB_bind[i] ));
-		this._drill_GFB_bindTank.push( temp_bind );
-	}
-}
-//==============================
-// * 管理器 - 读取数据
-//==============================
-var _drill_GFB_extractSaveContents = DataManager.extractSaveContents;
-DataManager.extractSaveContents = function( contents ){
-	_drill_GFB_extractSaveContents.call( this, contents );
-	$gameSystem.drill_GFB_checkData();
-}
-//==============================
-// * 管理器 - 检查数据
-//==============================
-Game_System.prototype.drill_GFB_checkData = function() {
-	
-	// > 绑定数据容器
-	for(var i = 0; i < DrillUp.g_GFB_bind.length; i++ ){
 		var temp_data = JSON.parse(JSON.stringify( DrillUp.g_GFB_bind[i] ));
+		if( temp_data == undefined ){ continue; }
+		this._drill_GFB_bindTank.push( temp_data );
+	}
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_GFB_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_GFB_bindTank == undefined ){
+		this.drill_GFB_initSysData();
+	}
+	
+	// > 容器的 空数据 检查
+	for(var i = 0; i < DrillUp.g_GFB_bind.length; i++ ){
+		var temp_data = DrillUp.g_GFB_bind[i];
 		
-		// > 已配置（'inited'为 false 表示空数据）
-		if( temp_data['inited'] == true ){
+		// > 已配置（undefined表示未配置的空数据）
+		if( temp_data != undefined ){
 			
 			// > 未存储的，重新初始化
-			if( this._drill_GFB_bindTank[i] == undefined ||
-				this._drill_GFB_bindTank[i]['inited'] == false ){
-				this._drill_GFB_bindTank[i] = temp_data;
+			if( this._drill_GFB_bindTank[i] == undefined ){
+				this._drill_GFB_bindTank[i] = JSON.parse(JSON.stringify( temp_data ));
 			
 			// > 已存储的，跳过
 			}else{
@@ -1969,7 +2035,7 @@ Game_System.prototype.drill_GFB_checkData = function() {
 			}
 		}
 	}
-}
+};
 
 
 //#############################################################################
@@ -2179,6 +2245,7 @@ Scene_Battle.prototype.drill_GFB_updateRefreshGauge = function() {
 	for(var i=0; i < $gameSystem._drill_GFB_bindTank.length; i++){
 		var temp_bind = $gameSystem._drill_GFB_bindTank[i];
 		var temp_sprite = $gameTemp._drill_GFB_spriteTank[i];		//一个贴图对应一个绑定
+		if( temp_bind == null ){ continue; }
 		if( temp_sprite == null ){ continue; }
 		
 		// > 关闭显示的 消除
@@ -2199,6 +2266,7 @@ Scene_Battle.prototype.drill_GFB_updateRefreshGauge = function() {
 	for(var i = 0; i< $gameSystem._drill_GFB_bindTank.length; i++ ){
 		var temp_bind = $gameSystem._drill_GFB_bindTank[i];
 		var temp_sprite = $gameTemp._drill_GFB_spriteTank[i];		//一个贴图对应一个绑定
+		if( temp_bind == null ){ continue; }
 		if( temp_sprite != null ){ continue; }
 		
 		if( temp_bind['visible'] == true && 
@@ -2229,6 +2297,7 @@ Scene_Battle.prototype.drill_GFB_updateRefreshGauge = function() {
 	for(var i = 0; i< $gameSystem._drill_GFB_bindTank.length; i++ ){
 		var temp_bind = $gameSystem._drill_GFB_bindTank[i];
 		var temp_sprite = $gameTemp._drill_GFB_spriteTank[i];
+		if( temp_bind == null ){ continue; }
 		if( temp_sprite == null ){ continue; }
 		this.drill_GFB_layerAddSprite( temp_sprite, temp_bind['layerIndex_battle'] );
 	}

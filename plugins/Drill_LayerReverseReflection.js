@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.2]        行走图 - 图块倒影镜像
+ * @plugindesc [v2.3]        行走图 - 图块倒影镜像
  * @author Drill_up
  * 
  * @Drill_LE_param "地图镜面-%d"
@@ -20,10 +20,13 @@
  * =============================================================================
  * 使得你可以让图块反射出上下镜像倒影，并且镜像支持大部分效果。
  * ★★尽量放在所有 行走图效果 的插件后面，放后面可以支持更多叠加效果★★ 
- * 
+ *
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该插件可以单独使用。
+ * 该插件 不能 单独使用。
+ * 需要基于核心插件，才能运行。
+ * 基于：
+ *   - Drill_CoreOfEventFrame        行走图-行走图优化核心
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -204,6 +207,8 @@
  * 修正了地图备注，以及添加了 毛玻璃效果 。
  * [v2.2]
  * 兼容了 事件彻底删除时，也包括删除镜像的功能。
+ * [v2.3]
+ * 调整了与行走图优化核心的兼容结构，减少性能消耗。
  *
  * 
  * 
@@ -833,6 +838,7 @@
     DrillUp.g_LRR_height_size = Number(DrillUp.parameters['镜像长度缩放'] || 1.0);	
 	DrillUp.g_LRR_auto_close = String(DrillUp.parameters['镜像离开镜头是否自动关闭'] || "true") === "true";	
 	DrillUp.g_LRR_reflectionMap = "";		//（当前镜面资源，备注中设置）
+	
 	/*-----------------标记------------------*/
 	if( DrillUp.parameters['图块标记'] != "" &&
 		DrillUp.parameters['图块标记'] != undefined ){
@@ -854,6 +860,11 @@
 		DrillUp.g_LRR_mirror[i] = String( DrillUp.parameters['地图镜面-'+String(i+1)] ) || "";
 	}
 	
+	
+//=============================================================================
+// * >>>>基于插件检测>>>>
+//=============================================================================
+if( Imported.Drill_CoreOfEventFrame ){
 	
 	
 //=============================================================================
@@ -1150,19 +1161,6 @@ Game_CharacterBase.prototype.drill_reverseOffsetY = function(){
 	return yy;
 }
 
-//==============================
-// * 事件贴图 - 固定帧初始值
-//==============================
-var _Drill_LRR_s_updatePosition = Sprite_Character.prototype.updatePosition;
-Sprite_Character.prototype.updatePosition = function() {
-	_Drill_LRR_s_updatePosition.call(this);
-	if( this.scale.x != 1 ){ this.scale.x = 1; }
-	if( this.scale.y != 1 ){ this.scale.y = 1; }
-	//if( this.rotation != 0 ){ this.rotation = 0; }
-	//if( this.skew.x != 0 ){ this.skew.x = 0; }
-	//if( this.skew.y != 0 ){ this.skew.y = 0; }
-	//从这里开始，参数都被固定值（不需要考虑多次update的叠加影响）
-};
 
 //=============================================================================
 // ** 地图图层
@@ -1338,27 +1336,15 @@ Drill_Sprite_LRR.prototype.initialize = function(character) {
 	this._drill_hide = false;			//（隐藏标记）
 };
 //==============================
-// * 优化 - 镜头之外的事件，不刷新镜像
-//==============================
-Drill_Sprite_LRR.prototype.drill_LRR_isNearTheScreen = function() {
-	if( this._character == undefined ){ return false; }	//无事件的贴图直接跳过
-	
-    var tw = $gameMap.tileWidth();
-    var th = $gameMap.tileHeight();
-    var gw = Graphics.width + tw*4;		//加宽识别范围
-    var gh = Graphics.height + th*4;
-    var px = this._character.scrolledX() * tw + tw / 2 - gw / 2;
-    var py = this._character.scrolledY() * th + th / 2 - gh / 2;
-    return px >= -gw && px <= gw && py >= -gh && py <= gh;
-}
-//==============================
 // * 镜像贴图 - 帧刷新
 //==============================
 Drill_Sprite_LRR.prototype.update = function() {
 	
-	// > 性能优化
-	if( DrillUp.g_LRR_auto_close == true && 
-		this.drill_LRR_isNearTheScreen() == false ){	//不在镜头范围内，直接关闭update（能直接节省210ms左右性能）
+	// > 【行走图 - 行走图优化核心】优化策略 - 必要执行函数
+	this.drill_COEF_updateImportant();
+	
+	// > 【行走图 - 行走图优化核心】优化策略 - 阻塞判定
+	if( this.drill_COEF_isOptimizationPassed() == false ){ 
 		this.visible = false;
 		return;
 	}
@@ -1543,6 +1529,18 @@ Drill_Sprite_LRR_Mask.prototype.update = function() {
 		
 		this.bitmap = n_bitmap;
 	}
+}
+
+
+//=============================================================================
+// * <<<<基于插件检测<<<<
+//=============================================================================
+}else{
+		Imported.Drill_LayerReverseReflection = false;
+		alert(
+			"【Drill_LayerReverseReflection.js 行走图-图块倒影镜像】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
+			"\n- Drill_CoreOfEventFrame 行走图-行走图优化核心"
+		);
 }
 
 

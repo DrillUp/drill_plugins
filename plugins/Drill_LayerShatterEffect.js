@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        地图 - 方块粉碎效果
+ * @plugindesc [v1.3]        地图 - 方块粉碎效果
  * @author Drill_up
  * 
  * @Drill_LE_param "粉碎背景-%d"
@@ -106,6 +106,9 @@
  * 修改了与核心的部分兼容设置。
  * [v1.2]
  * 较大改动了结构，支持了 暂停播放和继续播放 功能。
+ * [v1.3]
+ * 优化了旧存档的识别与兼容。
+ * 
  * 
  * 
  * @param 默认地图碎片消失方式
@@ -613,15 +616,86 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 };
 
 
-
-//=============================================================================
-// * 存储数据初始化
-//=============================================================================
-var _drill_LSE_system_initialize = Game_System.prototype.initialize;
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_LSE_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_LSE_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-    _drill_LSE_system_initialize.call(this);
+    _drill_LSE_sys_initialize.call(this);
+	this.drill_LSE_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_LSE_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_LSE_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_LSE_saveEnabled == true ){	
+		$gameSystem.drill_LSE_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_LSE_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_LSE_initSysData = function() {
+	this.drill_LSE_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_LSE_checkSysData = function() {
+	this.drill_LSE_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_LSE_initSysData_Private = function() {
+	
 	this._drill_LSE_opacityType = DrillUp.g_LSE_opacityType;
 }
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_LSE_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_LSE_opacityType == undefined ){
+		this.drill_LSE_initSysData();
+	}
+	
+};
 
 
 //=============================================================================
@@ -652,9 +726,9 @@ Scene_Map.prototype.drill_LSE_sortByZIndex = function() {
 //==============================
 // * 粉碎贴图 - 初始化
 //==============================
-var _drill_LSE_sTank_initialize = Game_Temp.prototype.initialize;
+var _drill_LSE_temp_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {
-	_drill_LSE_sTank_initialize.call(this);
+	_drill_LSE_temp_initialize.call(this);
 	this._drill_LSE_controller = null;				//粉碎控制器
 	this._drill_LSE_controlled_sprite = null;		//粉碎贴图容器
 };

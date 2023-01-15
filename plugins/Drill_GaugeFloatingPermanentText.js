@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        地图UI - 永久漂浮文字
+ * @plugindesc [v1.4]        地图UI - 永久漂浮文字
  * @author Drill_up
  * 
  * @Drill_LE_param "永久漂浮样式-%d"
@@ -147,6 +147,8 @@
  * 优化了内部结构。
  * [v1.3]
  * 优化了与地图活动镜头的变换关系。
+ * [v1.4]
+ * 优化了旧存档的识别与兼容。
  *
  *
  *
@@ -975,22 +977,93 @@ Scene_Map.prototype.drill_GFPT_layerCameraMoving_Private = function( xx, yy, lay
 }
 
 
-//=============================================================================
-// ** 存储变量
-//=============================================================================
-//==============================
-// ** 存储变量 - 初始化
-//==============================
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_GFPT_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_GFPT_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
     _drill_GFPT_sys_initialize.call(this);
+	this.drill_GFPT_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_GFPT_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_GFPT_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_GFPT_saveEnabled == true ){	
+		$gameSystem.drill_GFPT_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_GFPT_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_GFPT_initSysData = function() {
+	this.drill_GFPT_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_GFPT_checkSysData = function() {
+	this.drill_GFPT_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_GFPT_initSysData_Private = function() {
 	
 	this._drill_GFPT_dataTank = [];					//漂浮文字数据总容器
 	this._drill_GFPT_dataTank_moveBuffer = [];		//漂浮文字变化容器
 	this._drill_GFPT_dataTank_opacityBuffer = [];	//漂浮文字变化容器
-};	
+	//（初始为空容器，不需要初始化）
+};
 //==============================
-// ** 存储变量 - 创建
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_GFPT_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_GFPT_dataTank == undefined ){
+		this.drill_GFPT_initSysData();
+	}
+	
+	// > 容器的 空数据 检查
+	//	（容器一直就是空数据，插件指令使用时才赋值）
+};
+//==============================
+// * 存储数据 - 创建
 //==============================
 Game_System.prototype.drill_GFPT_create = function( slot_id, style_id ){
 	if( $gameTemp._drill_GFPT_dataTank_state[ slot_id ] == "binded" ||
@@ -1015,7 +1088,7 @@ Game_System.prototype.drill_GFPT_create = function( slot_id, style_id ){
 	this._drill_GFPT_dataTank[ slot_id ]['_drill_COBa_opacity'] = [];					//弹道透明度列表
 };
 //==============================
-// ** 存储变量 - 清除
+// * 存储数据 - 清除
 //==============================
 Game_System.prototype.drill_GFPT_remove = function( slot_id, style_id ){
 	$gameTemp._drill_GFPT_dataTank_state[ slot_id ] = "remove";		//（并非瞬间删除，而是需要等一帧）

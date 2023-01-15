@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        主菜单 - 返回按钮
+ * @plugindesc [v1.4]        主菜单 - 返回按钮
  * @author Drill_up
  * 
  * @Drill_LE_param "返回按钮-%d"
@@ -107,6 +107,8 @@
  * 修改了插件关联的资源文件夹。
  * [v1.3]
  * 优化了内部结构。
+ * [v1.4]
+ * 优化了旧存档的识别与兼容。
  *
  *
  *
@@ -922,88 +924,122 @@
     DrillUp.parameters = PluginManager.parameters('Drill_MenuBackButton');
 	
 	
+	//==============================
+	// * 变量获取 - 默认返回按钮
+	//				（~struct~BackButtonDefault）
+	//==============================
+	DrillUp.drill_MBB_initBackButtonDefault = function( dataFrom ) {
+		var data = {};
+		data['visible'] = String( dataFrom["初始是否显示"] || "true") === "true";
+		//data['menu'] = String( dataFrom["所属菜单"] || "");
+		//data['menu_key'] = String( dataFrom["自定义关键字"] || "");
+		data['x'] = Number( dataFrom["平移-返回按钮 X"] || 0 );
+		data['y'] = Number( dataFrom["平移-返回按钮 Y"] || 0 );
+		data['style_id'] = Number( dataFrom["返回按钮的样式"] || 0 );
+		if( dataFrom["移动动画"] != "" &&
+			dataFrom["移动动画"] != undefined ){
+			var slideAnim = JSON.parse( dataFrom["移动动画"] );
+			data['slideAnim'] = DrillUp.drill_MBB_initWindowMoving( slideAnim );
+		}else{
+			data['slideAnim'] = DrillUp.drill_MBB_initWindowMoving( {} );
+		}
+		return data;
+	};
+	//==============================
+	// * 变量获取 - 返回按钮
+	//				（~struct~BackButton）
+	//==============================
+	DrillUp.drill_MBB_initBackButton = function( dataFrom ) {
+		var data = {};
+		data['visible'] = String( dataFrom["初始是否显示"] || "true") === "true";
+		data['menu'] = String( dataFrom["所属菜单"] || "");
+		data['menu_key'] = String( dataFrom["自定义关键字"] || "");
+		data['x'] = Number( dataFrom["平移-返回按钮 X"] || 0 );
+		data['y'] = Number( dataFrom["平移-返回按钮 Y"] || 0 );
+		data['style_id'] = Number( dataFrom["返回按钮的样式"] || 0 );
+		if( dataFrom["移动动画"] != "" &&
+			dataFrom["移动动画"] != undefined ){
+			var slideAnim = JSON.parse( dataFrom["移动动画"] );
+			data['slideAnim'] = DrillUp.drill_MBB_initWindowMoving( slideAnim );
+		}else{
+			data['slideAnim'] = DrillUp.drill_MBB_initWindowMoving( {} );
+		}
+		return data;
+	};
+	//==============================
+	// * 变量获取 - 移动动画
+	//				（~struct~DrillWindowMoving）
+	//==============================
+	DrillUp.drill_MBB_initWindowMoving = function( dataFrom ) {
+		var data = {};
+		data['slideMoveType'] = String( dataFrom["移动类型"] || "匀速移动");
+		data['slideTime'] = Number( dataFrom["移动时长"] || 20);
+		data['slideDelay'] = Number( dataFrom["移动延迟"] || 0);
+		data['slidePosType'] = String( dataFrom["坐标类型"] || "相对坐标");
+		data['slideX'] = Number( dataFrom["起点-相对坐标 X"] || 0);
+		data['slideY'] = Number( dataFrom["起点-相对坐标 Y"] || 0);
+		data['slideAbsoluteX'] = Number( dataFrom["起点-绝对坐标 X"] || 0);
+		data['slideAbsoluteY'] = Number( dataFrom["起点-绝对坐标 Y"] || 0);
+		return data;
+	};
+	//==============================
+	// * 变量获取 - 返回按钮样式
+	//				（~struct~BackButtonStyle）
+	//==============================
+	DrillUp.drill_MBB_initBackButtonStyle = function( dataFrom ) {
+		var data = {};
+		if( dataFrom["资源-返回按钮"] != "" &&
+			dataFrom["资源-返回按钮"] != undefined ){
+			data['src_img'] = JSON.parse( dataFrom["资源-返回按钮"] );
+		}else{
+			data['src_img'] = [];
+		}
+		data['src_bitmaps'] = [];
+		data['interval'] = Number( dataFrom["帧间隔"] || 4);
+		data['back_run'] = String( dataFrom["是否倒放"] || "false") === "true";
+		data['opacity'] = Number( dataFrom["透明度"] || 255);
+		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
+		data['zIndex'] = Number( dataFrom["图片层级"] || 20);
+		data['highlight_mode'] = String( dataFrom["高亮效果"] || "关闭高亮效果");
+		data['highlight_src_img'] = String( dataFrom["资源-高亮图片"] || "");
+		data['pushdown_mode'] = String( dataFrom["按下效果"] || "关闭按下效果");
+		data['pushdown_src_img'] = String( dataFrom["资源-按下图片"] || "");
+		return data;
+	};
+	
+	/*-----------------默认返回按钮------------------*/
 	if( DrillUp.parameters["默认返回按钮"] != undefined &&
 		DrillUp.parameters["默认返回按钮"] != "" ){
-		DrillUp.g_MBB_default = JSON.parse(DrillUp.parameters["默认返回按钮"]);
-		DrillUp.g_MBB_default['visible'] = String(DrillUp.g_MBB_default["初始是否显示"] || "true") == "true";
-		DrillUp.g_MBB_default['menu'] = String(DrillUp.g_MBB_default["所属菜单"] || "");
-		DrillUp.g_MBB_default['menu_key'] = String(DrillUp.g_MBB_default["自定义关键字"] || "");
-		DrillUp.g_MBB_default['x'] = Number(DrillUp.g_MBB_default["平移-返回按钮 X"] || 0);
-		DrillUp.g_MBB_default['y'] = Number(DrillUp.g_MBB_default["平移-返回按钮 Y"] || 0);
-		DrillUp.g_MBB_default['style_id'] = Number(DrillUp.g_MBB_default["返回按钮的样式"] || 0);
-		if( DrillUp.g_MBB_default["移动动画"] != undefined &&
-			DrillUp.g_MBB_default["移动动画"] != ""){
-			var slideAnim = JSON.parse( DrillUp.g_MBB_default["移动动画"] );
-			slideAnim['slideMoveType'] = String(slideAnim['移动类型'] || "匀速移动");
-			slideAnim['slideTime'] = Number(slideAnim['移动时长'] || 20);
-			slideAnim['slideDelay'] = Number(slideAnim['移动延迟'] || 0);
-			slideAnim['slidePosType'] = String(slideAnim['坐标类型'] || "相对坐标");
-			slideAnim['slideX'] = Number(slideAnim['起点-相对坐标 X'] || -100);
-			slideAnim['slideY'] = Number(slideAnim['起点-相对坐标 Y'] || 0);
-			slideAnim['slideAbsoluteX'] = Number(slideAnim['起点-绝对坐标 X'] || 0);
-			slideAnim['slideAbsoluteY'] = Number(slideAnim['起点-绝对坐标 Y'] || 0);
-			DrillUp.g_MBB_default['slideAnim'] = slideAnim;
-		}else{
-			DrillUp.g_MBB_default['slideAnim'] = {};
-		}
+		var data = JSON.parse(DrillUp.parameters["默认返回按钮"]);
+		DrillUp.g_MBB_default = DrillUp.drill_MBB_initBackButtonDefault( data );
 	}else{
-		DrillUp.g_MBB_default = {};
+		DrillUp.g_MBB_default = null;
 	}
 	
+	/*-----------------返回按钮------------------*/
 	DrillUp.g_MBB_list_length = 40;
 	DrillUp.g_MBB_list = [];
 	DrillUp.g_MBB_list[0] = DrillUp.g_MBB_default;
 	for (var i = 1; i <= DrillUp.g_MBB_list_length; i++) {
 		if( DrillUp.parameters["返回按钮-" + String(i) ] != undefined &&
 			DrillUp.parameters["返回按钮-" + String(i) ] != "" ){
-			DrillUp.g_MBB_list[i] = JSON.parse(DrillUp.parameters["返回按钮-" + String(i) ]);
-			DrillUp.g_MBB_list[i]['visible'] = String(DrillUp.g_MBB_list[i]["初始是否显示"] || "true") == "true";
-			DrillUp.g_MBB_list[i]['menu'] = String(DrillUp.g_MBB_list[i]["所属菜单"] || "");
-			DrillUp.g_MBB_list[i]['menu_key'] = String(DrillUp.g_MBB_list[i]["自定义关键字"] || "");
-			DrillUp.g_MBB_list[i]['x'] = Number(DrillUp.g_MBB_list[i]["平移-返回按钮 X"] || 0);
-			DrillUp.g_MBB_list[i]['y'] = Number(DrillUp.g_MBB_list[i]["平移-返回按钮 Y"] || 0);
-			DrillUp.g_MBB_list[i]['style_id'] = Number(DrillUp.g_MBB_list[i]["返回按钮的样式"] || 0);
-			if( DrillUp.g_MBB_list[i]["移动动画"] != undefined &&
-				DrillUp.g_MBB_list[i]["移动动画"] != ""){
-				var slideAnim = JSON.parse( DrillUp.g_MBB_list[i]["移动动画"] );
-				slideAnim['slideMoveType'] = String(slideAnim['移动类型'] || "匀速移动");
-				slideAnim['slideTime'] = Number(slideAnim['移动时长'] || 20);
-				slideAnim['slideDelay'] = Number(slideAnim['移动延迟'] || 0);
-				slideAnim['slidePosType'] = String(slideAnim['坐标类型'] || "相对坐标");
-				slideAnim['slideX'] = Number(slideAnim['起点-相对坐标 X'] || -100);
-				slideAnim['slideY'] = Number(slideAnim['起点-相对坐标 Y'] || 0);
-				slideAnim['slideAbsoluteX'] = Number(slideAnim['起点-绝对坐标 X'] || 0);
-				slideAnim['slideAbsoluteY'] = Number(slideAnim['起点-绝对坐标 Y'] || 0);
-				DrillUp.g_MBB_list[i]['slideAnim'] = slideAnim;
-			}else{
-				DrillUp.g_MBB_list[i]['slideAnim'] = {};
-			}
+			var data = JSON.parse(DrillUp.parameters["返回按钮-" + String(i) ]);
+			DrillUp.g_MBB_list[i] = DrillUp.drill_MBB_initBackButton( data );
 		}else{
-			DrillUp.g_MBB_list[i] = {};
+			DrillUp.g_MBB_list[i] = null;
 		}
 	}
 	
+	/*-----------------返回按钮样式------------------*/
 	DrillUp.g_MBB_style_list_length = 40;
 	DrillUp.g_MBB_style_list = [];
 	for (var i = 0; i < DrillUp.g_MBB_style_list_length; i++) {
 		if( DrillUp.parameters["返回按钮样式-" + String(i+1) ] != undefined &&
 			DrillUp.parameters["返回按钮样式-" + String(i+1) ] != "" ){
-			DrillUp.g_MBB_style_list[i] = JSON.parse(DrillUp.parameters["返回按钮样式-" + String(i+1) ]);
-			DrillUp.g_MBB_style_list[i]['src_img'] = JSON.parse(DrillUp.g_MBB_style_list[i]["资源-返回按钮"] || []);
-			DrillUp.g_MBB_style_list[i]['src_bitmaps'] = [];
-			DrillUp.g_MBB_style_list[i]['interval'] = Number(DrillUp.g_MBB_style_list[i]["帧间隔"] || 4);
-			DrillUp.g_MBB_style_list[i]['back_run'] = String(DrillUp.g_MBB_style_list[i]["是否倒放"] || "false") == "true";
-			DrillUp.g_MBB_style_list[i]['opacity'] = Number(DrillUp.g_MBB_style_list[i]["透明度"] || 255);
-			DrillUp.g_MBB_style_list[i]['blendMode'] = Number(DrillUp.g_MBB_style_list[i]["混合模式"] || 0);
-			DrillUp.g_MBB_style_list[i]['zIndex'] = Number(DrillUp.g_MBB_style_list[i]["图片层级"] || 20);
-			DrillUp.g_MBB_style_list[i]['highlight_mode'] = String(DrillUp.g_MBB_style_list[i]["高亮效果"] || "关闭高亮效果");
-			DrillUp.g_MBB_style_list[i]['highlight_src_img'] = String(DrillUp.g_MBB_style_list[i]["资源-高亮图片"] );
-			DrillUp.g_MBB_style_list[i]['pushdown_mode'] = String(DrillUp.g_MBB_style_list[i]["按下效果"] || "关闭按下效果");
-			DrillUp.g_MBB_style_list[i]['pushdown_src_img'] = String(DrillUp.g_MBB_style_list[i]["资源-按下图片"] );
-			
-			//alert(JSON.stringify(DrillUp.g_MBB_style_list[i]['src_img']));
+			var data = JSON.parse(DrillUp.parameters["返回按钮样式-" + String(i+1) ]);
+			DrillUp.g_MBB_style_list[i] = DrillUp.drill_MBB_initBackButtonStyle( data );
 		}else{
-			DrillUp.g_MBB_style_list[i] = {};
+			DrillUp.g_MBB_style_list[i] = null;
 		}
 	}
 	
@@ -1041,15 +1077,107 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 };
 
-//=============================================================================
-// ** 存储数据初始化
-//=============================================================================
+
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_MBB_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_MBB_sys_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function() {	
-	_drill_MBB_sys_initialize.call(this);
+Game_System.prototype.initialize = function() {
+    _drill_MBB_sys_initialize.call(this);
+	this.drill_MBB_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_MBB_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_MBB_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_MBB_saveEnabled == true ){	
+		$gameSystem.drill_MBB_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_MBB_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_MBB_initSysData = function() {
+	this.drill_MBB_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_MBB_checkSysData = function() {
+	this.drill_MBB_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_MBB_initSysData_Private = function() {
+	
 	this._drill_MBB_visible = [];
-	for(var i = 0; i< DrillUp.g_MBB_list.length ;i++){
-		this._drill_MBB_visible[i] = DrillUp.g_MBB_list[i]['visible'];
+	for(var i = 0; i < DrillUp.g_MBB_list.length ;i++){
+		var temp_data = DrillUp.g_MBB_list[i];
+		if( temp_data == undefined ){ continue; }
+		this._drill_MBB_visible[i] = temp_data['visible'];
+	}
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_MBB_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_MBB_visible == undefined ){
+		this.drill_MBB_initSysData();
+	}
+	
+	// > 容器的 空数据 检查
+	for(var i = 0; i < DrillUp.g_MBB_list.length; i++ ){
+		var temp_data = DrillUp.g_MBB_list[i];
+		
+		// > 已配置（undefined表示未配置的空数据）
+		if( temp_data != undefined ){
+			
+			// > 未存储的，重新初始化
+			if( this._drill_MBB_visible[i] == undefined ){
+				this._drill_MBB_visible[i] = temp_data['visible'];
+			
+			// > 已存储的，跳过
+			}else{
+				//（不操作）
+			}
+		}
 	}
 };
 
@@ -1213,6 +1341,8 @@ Scene_MenuBase.prototype.drill_MBB_create = function() {
 	
 	// > 配置的按钮
 	for( var i = 1; i < DrillUp.g_MBB_list.length; i++ ){
+		var temp_data = DrillUp.g_MBB_list[i];
+		if( temp_data == undefined ){ continue; }
 		if( this.drill_MBB_checkKeyword(i) ){
 			// > 父层级
 			var temp_layer = new Sprite();
@@ -1220,9 +1350,16 @@ Scene_MenuBase.prototype.drill_MBB_create = function() {
 			this._drill_MBB_sprites_layer.push(temp_layer);
 			
 			// > 按钮贴图
-			var temp_sprite_data = JSON.parse(JSON.stringify( DrillUp.g_MBB_list[i] ));	//深拷贝数据
+			var temp_sprite_data = JSON.parse(JSON.stringify( temp_data ));	//深拷贝数据
 			var temp_style_id = temp_sprite_data['style_id']-1 || 0;
-			var temp_style = JSON.parse(JSON.stringify( DrillUp.g_MBB_style_list[ temp_style_id ] || {} ));
+			var temp_style = DrillUp.g_MBB_style_list[ temp_style_id ];
+			if( temp_style == undefined ){
+				alert(
+					"【Drill_MenuBackButton.js  主菜单 - 返回按钮】\n"+
+					"配置错误，返回按钮样式["+ temp_sprite_data['style_id'] +"]不存在。"
+				);
+			}
+			temp_style = JSON.parse(JSON.stringify( temp_style ));
 			for(var j = 0; j < temp_style['src_img'].length ; j++){
 				temp_style['src_bitmaps'].push(ImageManager.load_MenuBackBtn( temp_style['src_img'][j] ));
 			}
@@ -1277,7 +1414,8 @@ Scene_MenuBase.prototype.drill_MBB_create = function() {
 			this.drill_MBB_layerAddSprite( temp_layer, "菜单前面层" );
 		}
 	}
-	if( this._drill_MBB_sprites.length == 0 ){
+	if( this._drill_MBB_sprites.length == 0 && 
+		DrillUp.g_MBB_list[0] != undefined ){
 		var i = 0;
 		
 		//（默认的与上面的一模一样）
@@ -1289,7 +1427,14 @@ Scene_MenuBase.prototype.drill_MBB_create = function() {
 			// > 按钮贴图
 			var temp_sprite_data = JSON.parse(JSON.stringify( DrillUp.g_MBB_list[i] ));	//深拷贝数据
 			var temp_style_id = temp_sprite_data['style_id']-1 || 0;
-			var temp_style = JSON.parse(JSON.stringify( DrillUp.g_MBB_style_list[ temp_style_id ] ));
+			var temp_style = DrillUp.g_MBB_style_list[ temp_style_id ];
+			if( temp_style == undefined ){
+				alert(
+					"【Drill_MenuBackButton.js  主菜单 - 返回按钮】\n"+
+					"配置错误，返回按钮样式["+ temp_sprite_data['style_id'] +"]不存在。"
+				);
+			}
+			temp_style = JSON.parse(JSON.stringify( temp_style ));
 			for(var j = 0; j < temp_style['src_img'].length ; j++){
 				temp_style['src_bitmaps'].push(ImageManager.load_MenuBackBtn( temp_style['src_img'][j] ));
 			}

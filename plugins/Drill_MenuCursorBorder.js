@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        主菜单 - 多样式菜单选项边框
+ * @plugindesc [v1.2]        主菜单 - 多样式菜单选项边框
  * @author Drill_up
  * 
  * @Drill_LE_param "选项边框样式-%d"
@@ -94,6 +94,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 添加了选项边框设置偏移位置功能。
+ * [v1.2]
+ * 优化了旧存档的识别与兼容。
  * 
  *
  *
@@ -498,8 +500,7 @@
 var _drill_MCB_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_MCB_pluginCommand.call(this, command, args);
-	
-	if (command === ">菜单选项边框") {
+	if( command === ">菜单选项边框" ){
 		if(args.length == 2){
 			var type = String(args[1]);
 			if( type == "显示" ){	
@@ -522,34 +523,87 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 };
 
 
-//=============================================================================
-// ** 存储数据
-//=============================================================================
-//==============================
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_MCB_saveEnabled = true;
+//##############################
 // * 存储数据 - 初始化
-//==============================
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_MCB_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
     _drill_MCB_sys_initialize.call(this);
 	this.drill_MCB_initSysData();
 };
-//==============================
-// * 存储数据 - 初始化数据
-//==============================
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_MCB_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_MCB_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_MCB_saveEnabled == true ){	
+		$gameSystem.drill_MCB_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_MCB_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
 Game_System.prototype.drill_MCB_initSysData = function() {
+	this.drill_MCB_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_MCB_checkSysData = function() {
+	this.drill_MCB_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_MCB_initSysData_Private = function() {
+	
 	this._drill_MCB_visible = true;
 	this._drill_MCB_style = DrillUp.g_MCB_defaultStyle;
 	this._drill_MCB_glimmerRect_visible = true;
-};	
+};
 //==============================
-// * 存档文件 - 载入存档 - 数据赋值
+// * 存储数据 - 载入存档时检查数据（私有）
 //==============================
-var _drill_MCB_sys_extractSaveContents = DataManager.extractSaveContents;
-DataManager.extractSaveContents = function(contents){
-	_drill_MCB_sys_extractSaveContents.call( this, contents );
-	if( $gameSystem._drill_MCB_style == undefined ){
-		$gameSystem.drill_MCB_initSysData();
+Game_System.prototype.drill_MCB_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_MCB_style == undefined ){
+		this.drill_MCB_initSysData();
 	}
+	
 };
 
 

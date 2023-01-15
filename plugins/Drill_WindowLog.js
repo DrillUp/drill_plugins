@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        战斗UI - 窗口提示消息
+ * @plugindesc [v1.5]        战斗UI - 窗口提示消息
  * @author Drill_up
  *
  *
@@ -22,9 +22,9 @@
  * 该插件可以单独使用。
  * 也可以被下列插件扩展。
  * 被扩展：
- *   - Drill_ActorTextColor     UI-角色文本颜色
+ *   - Drill_ActorTextColor     UI-角色文本颜色★★v1.9及以上★★
  *     通过该插件，消息提示中的角色名字可以变色。
- *   - Drill_EnemyTextColor     UI-敌人文本颜色
+ *   - Drill_EnemyTextColor     UI-敌人文本颜色★★v2.1及以上★★
  *     通过该插件，消息提示中的敌人名字可以变色。
  * 
  * -----------------------------------------------------------------------------
@@ -71,6 +71,8 @@
  * 修改了内部结构。
  * [v1.4]
  * 修复了使用颜色核心时，冲突的bug。
+ * [v1.5]
+ * 更新了敌人文本和角色文本的兼容。
  *
  *
  *
@@ -1030,7 +1032,7 @@ Game_Troop.prototype.drill_WL_enemyColorNames = function(){
 Game_Enemy.prototype.drill_WL_enemyColorName = function(){
 	if( Imported.Drill_EnemyTextColor && DrillUp.g_ETC_message ){
 		var name = this.name();
-		var color = $gameSystem._drill_ETC_enemyCount[this.enemyId()];
+		var color = $gameTemp.drill_ETC_getColorId( this.enemyId() );
 		if( color >= 0 ){
 			name = "\\c["+ String(Number(color)+100) + "]" + name + "\\c[0]";
 		}
@@ -1046,7 +1048,7 @@ Game_Enemy.prototype.drill_WL_enemyColorName = function(){
 Game_Actor.prototype.drill_WL_actorColorName = function(){
 	if( Imported.Drill_ActorTextColor && DrillUp.g_ATC_message ){
 		var name = this.name();
-		var color = $gameSystem._drill_ATC_actorCount[this.actorId()];
+		var color = $gameTemp.drill_ATC_getColorId( this.actorId() );
 		if( color >= 0 ){
 			name = "\\c["+ String(Number(color)+100) + "]" + name + "\\c[0]";
 		}

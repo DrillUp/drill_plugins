@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        地图 - 全图纯色滤镜[扩展]
+ * @plugindesc [v1.2]        地图 - 全图纯色滤镜[扩展]
  * @author Drill_up
  *
  *
@@ -98,6 +98,9 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 添加了插件性能说明。
+ * [v1.2]
+ * 优化了旧存档的识别与兼容。
+ * 
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -191,13 +194,75 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		}
 	}
 };
-	
-//=============================================================================
-// ** 存储数据初始化
-//=============================================================================
-var _drill_XLCF_system_initialize = Game_System.prototype.initialize;
+
+
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_XLCF_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_XLCF_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-    _drill_XLCF_system_initialize.call(this);
+    _drill_XLCF_sys_initialize.call(this);
+	this.drill_XLCF_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_XLCF_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_XLCF_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_XLCF_saveEnabled == true ){	
+		$gameSystem.drill_XLCF_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_XLCF_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_XLCF_initSysData = function() {
+	this.drill_XLCF_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_XLCF_checkSysData = function() {
+	this.drill_XLCF_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_XLCF_initSysData_Private = function() {
+	
 	this._drill_XLCF_color = "#ffffff";
 	this._drill_XLCF_opacity = {};
 	this._drill_XLCF_opacity.cur = 0;
@@ -205,7 +270,19 @@ Game_System.prototype.initialize = function() {
 	this._drill_XLCF_opacity.speed = 0;
 	this._drill_XLCF_opacity.move = 0;
 	this._drill_XLCF_opacity.time = 0;
-};	
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_XLCF_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_XLCF_opacity == undefined ){
+		this.drill_XLCF_initSysData();
+	}
+	
+};
+
 
 //=============================================================================
 // ** 场景

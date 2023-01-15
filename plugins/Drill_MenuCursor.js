@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        主菜单 - 多样式菜单指针
+ * @plugindesc [v1.1]        主菜单 - 多样式菜单指针
  * @author Drill_up
  * 
  * @Drill_LE_param "菜单指针样式-%d"
@@ -103,6 +103,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 优化了旧存档的识别与兼容。
  * 
  * 
  *
@@ -549,8 +551,8 @@
 	for( var i = 0; i < DrillUp.g_MCu_list_length; i++ ){
 		if( DrillUp.parameters["菜单指针样式-" + String(i+1) ] != undefined &&
 			DrillUp.parameters["菜单指针样式-" + String(i+1) ] != "" ){
-			var sequence = JSON.parse(DrillUp.parameters["菜单指针样式-" + String(i+1) ]);
-			DrillUp.g_MCu_list[i] = DrillUp.drill_MCu_initStyle( sequence );
+			var data = JSON.parse(DrillUp.parameters["菜单指针样式-" + String(i+1) ]);
+			DrillUp.g_MCu_list[i] = DrillUp.drill_MCu_initStyle( data );
 		}else{
 			DrillUp.g_MCu_list[i] = DrillUp.drill_MCu_initStyle( {} );
 		}
@@ -569,8 +571,7 @@ if( Imported.Drill_CoreOfBallistics ){
 var _drill_MCu_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_MCu_pluginCommand.call(this, command, args);
-	
-	if (command === ">菜单指针") {
+	if( command === ">菜单指针" ){
 		if(args.length == 2){
 			var type = String(args[1]);
 			if( type == "显示" ){	
@@ -591,37 +592,92 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		}
 	}
 }
-	
-//=============================================================================
-// ** 存储数据
-//=============================================================================
-//==============================
+
+
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_MCu_saveEnabled = true;
+//##############################
 // * 存储数据 - 初始化
-//==============================
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_MCu_sys_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function() {	
-	_drill_MCu_sys_initialize.call(this);
+Game_System.prototype.initialize = function() {
+    _drill_MCu_sys_initialize.call(this);
 	this.drill_MCu_initSysData();
 };
-//==============================
-// * 存储数据 - 初始化数据
-//==============================
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_MCu_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_MCu_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_MCu_saveEnabled == true ){	
+		$gameSystem.drill_MCu_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_MCu_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
 Game_System.prototype.drill_MCu_initSysData = function() {
+	this.drill_MCu_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_MCu_checkSysData = function() {
+	this.drill_MCu_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_MCu_initSysData_Private = function() {
+	
 	this._drill_MCu_visible = true;
 	this._drill_MCu_style = DrillUp.g_MCu_defaultStyle;
 	DrillUp.g_MCu_init_x = Graphics.boxWidth*0.5;		//（最初点）
 	DrillUp.g_MCu_init_y = Graphics.boxHeight*0.5;		//
-};	
-//==============================
-// * 存档文件 - 载入存档 - 数据赋值
-//==============================
-var _drill_MCu_sys_extractSaveContents = DataManager.extractSaveContents;
-DataManager.extractSaveContents = function(contents){
-	_drill_MCu_sys_extractSaveContents.call( this, contents );
-	if( $gameSystem._drill_MCu_style == undefined ){
-		$gameSystem.drill_MCu_initSysData();
-	}
 };
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_MCu_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_MCu_style == undefined ){
+		this.drill_MCu_initSysData();
+	}
+	
+};
+
 
 //=============================================================================
 // ** 强制鼠标滚轮切换选项（默认的鼠标滚动，真就是翻页，而不是切换选项）

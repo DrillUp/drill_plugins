@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        管理器 - 存档管理器
+ * @plugindesc [v1.3]        管理器 - 存档管理器
  * @author Drill_up
  * 
  * 
@@ -43,8 +43,10 @@
  * 插件指令：>存档管理器 : 当前存档 : 立即保存
  * 插件指令：>存档管理器 : 存档[4] : 立即保存
  * 插件指令：>存档管理器 : 存档[4] : 立即载入
+ * 插件指令：>存档管理器 : 存档[4] : 删除存档文件
  * 插件指令：>存档管理器 : 存档变量[21] : 立即保存
  * 插件指令：>存档管理器 : 存档变量[21] : 立即载入
+ * 插件指令：>存档管理器 : 存档变量[21] : 删除存档文件
  * 
  * 1.你可以使用插件指令，立即保存或载入存档。
  *   注意，插件指令执行后，后面执行的事件指令都会被断开，
@@ -56,6 +58,7 @@
  * 
  * 插件指令：>存档管理器 : 变量[21] : 获取值 : 当前存档的ID
  * 插件指令：>存档管理器 : 变量[21] : 获取值 : 存档文件数量
+ * 插件指令：>存档管理器 : 开关[21] : 获取值 : 存档[4]是否存在
  * 
  * 1.获取后，指定变量得到的数字为结果值。
  * 
@@ -114,6 +117,8 @@
  * 添加了旧存档的识别指令。
  * [v1.2]
  * 修改了插件分类。
+ * [v1.3]
+ * 添加了删除存档功能。
  * 
  * 
  * 
@@ -222,6 +227,9 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				if( type == "立即载入" ){
 					DataManager.drill_GSM_doLoad( save_id );
 				}
+				if( type == "删除存档文件" ){
+					DataManager.drill_GSM_doDelete( save_id );
+				}
 			}
 		}
 		
@@ -233,6 +241,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			
 			if( type == "获取值" ){
 				temp1 = temp1.replace("变量[","");
+				temp1 = temp1.replace("开关[","");
 				temp1 = temp1.replace("]","");
 				temp1 = Number(temp1);
 				
@@ -243,6 +252,12 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					var globalInfo = DataManager.loadGlobalInfo();
 					var numSavefiles = Math.max(0, globalInfo.length - 1);
 					$gameVariables.setValue( temp1, numSavefiles );
+				}
+				if( temp2.indexOf("]是否存在") != -1 ){
+					temp2 = temp2.replace("存档[","");
+					temp2 = temp2.replace("]是否存在","");
+					temp2 = Number(temp2);
+					$gameSwitches.setValue( temp1, StorageManager.exists(temp2) );
 				}
 			}
 			if( type == "检查存档是否为旧存档" ){
@@ -283,6 +298,13 @@ DataManager.drill_GSM_doLoad = function( save_file_id ){
         $gamePlayer.requestMapReload();
 	}
 	return success;
+}
+//==============================
+// * 存档管理器 - 执行删除
+//==============================
+DataManager.drill_GSM_doDelete = function( save_file_id ){
+	StorageManager.remove( save_file_id );
+	StorageManager.cleanBackup( save_file_id );
 }
 
 

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        公共事件 - 物品积累时
+ * @plugindesc [v1.2]        公共事件 - 物品积累时
  * @author Drill_up
  * 
  * @Drill_LE_param "积累触发-%d"
@@ -93,6 +93,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 修改了插件分类。
+ * [v1.2]
+ * 优化了旧存档的识别与兼容。
  *
  *
  * 
@@ -435,15 +437,72 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 };
 
 
-//=============================================================================
-// * 存储数据
-//=============================================================================
-//==============================
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_PICT_saveEnabled = true;
+//##############################
 // * 存储数据 - 初始化
-//==============================
-var _drill_PICT_system_initialize = Game_System.prototype.initialize;
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_PICT_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-    _drill_PICT_system_initialize.call(this);
+    _drill_PICT_sys_initialize.call(this);
+	this.drill_PICT_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_PICT_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_PICT_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_PICT_saveEnabled == true ){	
+		$gameSystem.drill_PICT_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_PICT_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_PICT_initSysData = function() {
+	this.drill_PICT_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_PICT_checkSysData = function() {
+	this.drill_PICT_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_PICT_initSysData_Private = function() {
 	
 	this._drill_PICT_dataTank = [];
 	for(var i=0; i < DrillUp.g_PICT_trigger.length; i++){
@@ -453,25 +512,22 @@ Game_System.prototype.initialize = function() {
 		this._drill_PICT_dataTank[i]['lastItemCount'] = 0;
 		this._drill_PICT_dataTank[i]['activeCount'] = 0;
 	}
-}
+};
 //==============================
-// * 管理器 - 读取数据
+// * 存储数据 - 载入存档时检查数据（私有）
 //==============================
-var _drill_PICT_extractSaveContents = DataManager.extractSaveContents;
-DataManager.extractSaveContents = function( contents ){
-	_drill_PICT_extractSaveContents.call( this, contents );
-	$gameSystem.drill_PICT_checkData();
-}
-//==============================
-// * 管理器 - 检查数据
-//==============================
-Game_System.prototype.drill_PICT_checkData = function() {
+Game_System.prototype.drill_PICT_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_PICT_dataTank == undefined ){
+		this.drill_PICT_initSysData();
+	}
 	
 	// > 绑定数据容器
 	for(var i = 0; i < DrillUp.g_PICT_trigger.length; i++ ){
 		var temp_data = DrillUp.g_PICT_trigger[i];
 		
-		// > 已配置
+		// > 已配置（undefined表示未配置的空数据）
 		if( temp_data != undefined ){
 			
 			// > 未存储的，重新初始化

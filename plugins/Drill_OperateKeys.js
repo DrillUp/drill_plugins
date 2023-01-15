@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.7]        键盘 - 键盘手柄按键修改器
+ * @plugindesc [v1.8]        键盘 - 键盘手柄按键修改器
  * @author Drill_up
  * 
  * 
@@ -114,6 +114,8 @@
  * 修复了tab物理按键无效的bug，感谢群友"sacredbless"。
  * [v1.7]
  * 修改了插件分类。
+ * [v1.8]
+ * 优化了旧存档的识别与兼容。
  * 
  * 
  * 
@@ -652,21 +654,22 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		无（结构精密，不要破坏）
-//		临时全局变量	DrillUp.xxx
+//		插件简称		OKe（Operate_Keys）
+//		临时全局变量	DrillUp.g_OKe_xxxx
 //		临时局部变量	无
-//		存储数据变量	$gameSystem._drill_input_pad
-//						$gameSystem._drill_input_keyboard
+//		存储数据变量	$gameSystem._drill_OKe_pad
+//						$gameSystem._drill_OKe_keyboard
 //		全局存储变量	无
-//		覆盖重写方法	Input.gamepadMapper变量
-//						Input.keyMapper变量
+//		覆盖重写方法	Input.gamepadMapper 变量
+//						Input.keyMapper 变量
+//						Scene_Map.prototype.isMenuCalled
 //
 //<<<<<<<<性能记录<<<<<<<<
 //
 //		★工作类型		单次执行
 //		★时间复杂度		o(n^2)
 //		★性能测试因素	乱跑
-//		★性能测试消耗	11.87ms  17.48ms（drill_isGamepadControling函数，Bomb判断占了9.32ms）
+//		★性能测试消耗	11.87ms  17.48ms（drill_OKe_isGamepadControling函数，Bomb判断占了9.32ms）
 //		★最坏情况		无
 //		★备注			不好测，低消耗有时候找的到，有时候找不到。
 //		
@@ -708,7 +711,7 @@
 //			【为了使得同一个按钮可以触发不同情况，在不同功能写 isTriggered("jump")来判断就可以了。】	
 //			如果键位少了，需要重新利用，添加新的字段，比如"jump"字段等。	
 //		
-//			$gameSystem._drill_input_pad 存储所有【手柄的】键位内容。
+//			$gameSystem._drill_OKe_pad 存储所有【手柄的】键位内容。
 //				如果临时修改了键位，执行init方法即可。
 //				['aaa']：当前key的键位【值】
 //				['aaa_str']：当前key的键位【名】
@@ -719,7 +722,7 @@
 //			总体来说，非常绕，如果你要添加键位或者修改键位，依葫芦画瓢吧。
 //			手柄是单个的，键盘更恶心，是数组……完全多对多。
 //	
-//			$gameSystem._drill_input_keyboard 存储所有【键盘的】键位内容。
+//			$gameSystem._drill_OKe_keyboard 存储所有【键盘的】键位内容。
 //				['aaa']：json字段
 //				['aaa']['A']：当前key的A键位【值】
 //				['aaa']['B']：当前key的B键位【值】（没有则为-1）
@@ -744,46 +747,46 @@
 
 
 	/*-----------------手柄 基本键------------------*/
-    DrillUp.oKeys_pad_ok = String(DrillUp.parameters['手柄-确定键'] || "A");
-    DrillUp.oKeys_pad_cancel = String(DrillUp.parameters['手柄-取消键'] || "B");
-    DrillUp.oKeys_pad_shift = String(DrillUp.parameters['手柄-加速键'] || "X");
-    DrillUp.oKeys_pad_pageup = String(DrillUp.parameters['手柄-上一页'] || "LB");
-    DrillUp.oKeys_pad_pagedown = String(DrillUp.parameters['手柄-下一页'] || "RB");
-    DrillUp.oKeys_pad_up = String(DrillUp.parameters['手柄-上'] || "上");
-    DrillUp.oKeys_pad_down = String(DrillUp.parameters['手柄-下'] || "下");
-    DrillUp.oKeys_pad_left = String(DrillUp.parameters['手柄-左'] || "左");
-    DrillUp.oKeys_pad_right = String(DrillUp.parameters['手柄-右'] || "右");
+    DrillUp.g_OKe_pad_ok = String(DrillUp.parameters['手柄-确定键'] || "A");
+    DrillUp.g_OKe_pad_cancel = String(DrillUp.parameters['手柄-取消键'] || "B");
+    DrillUp.g_OKe_pad_shift = String(DrillUp.parameters['手柄-加速键'] || "X");
+    DrillUp.g_OKe_pad_pageup = String(DrillUp.parameters['手柄-上一页'] || "LB");
+    DrillUp.g_OKe_pad_pagedown = String(DrillUp.parameters['手柄-下一页'] || "RB");
+    DrillUp.g_OKe_pad_up = String(DrillUp.parameters['手柄-上'] || "上");
+    DrillUp.g_OKe_pad_down = String(DrillUp.parameters['手柄-下'] || "下");
+    DrillUp.g_OKe_pad_left = String(DrillUp.parameters['手柄-左'] || "左");
+    DrillUp.g_OKe_pad_right = String(DrillUp.parameters['手柄-右'] || "右");
 	
 	/*-----------------手柄 扩展键------------------*/
-    DrillUp.oKeys_pad_fn = String(DrillUp.parameters['手柄-功能键'] || "RB");
-    DrillUp.oKeys_pad_menu = String(DrillUp.parameters['手柄-菜单键'] || "Y");
-    DrillUp.oKeys_pad_jump = String(DrillUp.parameters['手柄-跳跃键'] || "LB");
-    DrillUp.oKeys_pad_rotate = String(DrillUp.parameters['手柄-原地转向键'] || "功能键 + 十字键");
-    DrillUp.oKeys_pad_pick = String(DrillUp.parameters['手柄-举起花盆键'] || "A");
-    DrillUp.oKeys_pad_throw = String(DrillUp.parameters['手柄-投掷花盆键'] || "A");
-    DrillUp.oKeys_pad_bomb = String(DrillUp.parameters['手柄-放置炸弹键'] || "功能键 + X");
+    DrillUp.g_OKe_pad_fn = String(DrillUp.parameters['手柄-功能键'] || "RB");
+    DrillUp.g_OKe_pad_menu = String(DrillUp.parameters['手柄-菜单键'] || "Y");
+    DrillUp.g_OKe_pad_jump = String(DrillUp.parameters['手柄-跳跃键'] || "LB");
+    DrillUp.g_OKe_pad_rotate = String(DrillUp.parameters['手柄-原地转向键'] || "功能键 + 十字键");
+    DrillUp.g_OKe_pad_pick = String(DrillUp.parameters['手柄-举起花盆键'] || "A");
+    DrillUp.g_OKe_pad_throw = String(DrillUp.parameters['手柄-投掷花盆键'] || "A");
+    DrillUp.g_OKe_pad_bomb = String(DrillUp.parameters['手柄-放置炸弹键'] || "功能键 + X");
 
 	/*-----------------键盘 基本键------------------*/
-	if( DrillUp.parameters['键盘-确定键'] != "" ){ DrillUp.oKeys_keyboard_ok = JSON.parse(DrillUp.parameters['键盘-确定键']); }else{ DrillUp.oKeys_keyboard_ok = [];}
-	if( DrillUp.parameters['键盘-取消键'] != "" ){ DrillUp.oKeys_keyboard_cancel = JSON.parse(DrillUp.parameters['键盘-取消键']); }else{ DrillUp.oKeys_keyboard_cancel = [];}
-	if( DrillUp.parameters['键盘-加速键'] != "" ){ DrillUp.oKeys_keyboard_shift = JSON.parse(DrillUp.parameters['键盘-加速键']); }else{ DrillUp.oKeys_keyboard_shift = [];}
-	if( DrillUp.parameters['键盘-上一页'] != "" ){ DrillUp.oKeys_keyboard_pageup = JSON.parse(DrillUp.parameters['键盘-上一页']); }else{ DrillUp.oKeys_keyboard_pageup = [];}
-	if( DrillUp.parameters['键盘-下一页'] != "" ){ DrillUp.oKeys_keyboard_pagedown = JSON.parse(DrillUp.parameters['键盘-下一页']); }else{ DrillUp.oKeys_keyboard_pagedown = [];}
-	if( DrillUp.parameters['键盘-上'] != "" ){ DrillUp.oKeys_keyboard_up = JSON.parse(DrillUp.parameters['键盘-上']); }else{ DrillUp.oKeys_keyboard_up = [];}
-	if( DrillUp.parameters['键盘-下'] != "" ){ DrillUp.oKeys_keyboard_down = JSON.parse(DrillUp.parameters['键盘-下']); }else{ DrillUp.oKeys_keyboard_down = [];}
-	if( DrillUp.parameters['键盘-左'] != "" ){ DrillUp.oKeys_keyboard_left = JSON.parse(DrillUp.parameters['键盘-左']); }else{ DrillUp.oKeys_keyboard_left = [];}
-	if( DrillUp.parameters['键盘-右'] != "" ){ DrillUp.oKeys_keyboard_right = JSON.parse(DrillUp.parameters['键盘-右']); }else{ DrillUp.oKeys_keyboard_right = [];}
-	if( DrillUp.parameters['键盘-辅助Tab键'] != "" ){ DrillUp.oKeys_keyboard_tab = JSON.parse(DrillUp.parameters['键盘-辅助Tab键']); }else{ DrillUp.oKeys_keyboard_tab = [];}
-	if( DrillUp.parameters['键盘-游戏测试中Debug键'] != "" ){ DrillUp.oKeys_keyboard_debug = JSON.parse(DrillUp.parameters['键盘-游戏测试中Debug键']); }else{ DrillUp.oKeys_keyboard_debug = [];}
-	if( DrillUp.parameters['键盘-游戏测试中穿墙键'] != "" ){ DrillUp.oKeys_keyboard_control = JSON.parse(DrillUp.parameters['键盘-游戏测试中穿墙键']); }else{ DrillUp.oKeys_keyboard_control = [];}
+	if( DrillUp.parameters['键盘-确定键'] != "" ){ DrillUp.g_OKe_keyboard_ok = JSON.parse(DrillUp.parameters['键盘-确定键']); }else{ DrillUp.g_OKe_keyboard_ok = [];}
+	if( DrillUp.parameters['键盘-取消键'] != "" ){ DrillUp.g_OKe_keyboard_cancel = JSON.parse(DrillUp.parameters['键盘-取消键']); }else{ DrillUp.g_OKe_keyboard_cancel = [];}
+	if( DrillUp.parameters['键盘-加速键'] != "" ){ DrillUp.g_OKe_keyboard_shift = JSON.parse(DrillUp.parameters['键盘-加速键']); }else{ DrillUp.g_OKe_keyboard_shift = [];}
+	if( DrillUp.parameters['键盘-上一页'] != "" ){ DrillUp.g_OKe_keyboard_pageup = JSON.parse(DrillUp.parameters['键盘-上一页']); }else{ DrillUp.g_OKe_keyboard_pageup = [];}
+	if( DrillUp.parameters['键盘-下一页'] != "" ){ DrillUp.g_OKe_keyboard_pagedown = JSON.parse(DrillUp.parameters['键盘-下一页']); }else{ DrillUp.g_OKe_keyboard_pagedown = [];}
+	if( DrillUp.parameters['键盘-上'] != "" ){ DrillUp.g_OKe_keyboard_up = JSON.parse(DrillUp.parameters['键盘-上']); }else{ DrillUp.g_OKe_keyboard_up = [];}
+	if( DrillUp.parameters['键盘-下'] != "" ){ DrillUp.g_OKe_keyboard_down = JSON.parse(DrillUp.parameters['键盘-下']); }else{ DrillUp.g_OKe_keyboard_down = [];}
+	if( DrillUp.parameters['键盘-左'] != "" ){ DrillUp.g_OKe_keyboard_left = JSON.parse(DrillUp.parameters['键盘-左']); }else{ DrillUp.g_OKe_keyboard_left = [];}
+	if( DrillUp.parameters['键盘-右'] != "" ){ DrillUp.g_OKe_keyboard_right = JSON.parse(DrillUp.parameters['键盘-右']); }else{ DrillUp.g_OKe_keyboard_right = [];}
+	if( DrillUp.parameters['键盘-辅助Tab键'] != "" ){ DrillUp.g_OKe_keyboard_tab = JSON.parse(DrillUp.parameters['键盘-辅助Tab键']); }else{ DrillUp.g_OKe_keyboard_tab = [];}
+	if( DrillUp.parameters['键盘-游戏测试中Debug键'] != "" ){ DrillUp.g_OKe_keyboard_debug = JSON.parse(DrillUp.parameters['键盘-游戏测试中Debug键']); }else{ DrillUp.g_OKe_keyboard_debug = [];}
+	if( DrillUp.parameters['键盘-游戏测试中穿墙键'] != "" ){ DrillUp.g_OKe_keyboard_control = JSON.parse(DrillUp.parameters['键盘-游戏测试中穿墙键']); }else{ DrillUp.g_OKe_keyboard_control = [];}
 	
 	/*-----------------键盘 扩展键------------------*/
-	if( DrillUp.parameters['键盘-菜单键'] != "" ){ DrillUp.oKeys_keyboard_menu = JSON.parse(DrillUp.parameters['键盘-菜单键']); }else{ DrillUp.oKeys_keyboard_menu = [];}
-	if( DrillUp.parameters['键盘-跳跃键'] != "" ){ DrillUp.oKeys_keyboard_jump = JSON.parse(DrillUp.parameters['键盘-跳跃键']); }else{ DrillUp.oKeys_keyboard_jump = [];}
-	if( DrillUp.parameters['键盘-原地转向键'] != "" ){ DrillUp.oKeys_keyboard_rotate = JSON.parse(DrillUp.parameters['键盘-原地转向键']); }else{ DrillUp.oKeys_keyboard_rotate = [];}
-	if( DrillUp.parameters['键盘-举起花盆键'] != "" ){ DrillUp.oKeys_keyboard_pick = JSON.parse(DrillUp.parameters['键盘-举起花盆键']); }else{ DrillUp.oKeys_keyboard_pick = [];}
-	if( DrillUp.parameters['键盘-投掷花盆键'] != "" ){ DrillUp.oKeys_keyboard_throw = JSON.parse(DrillUp.parameters['键盘-投掷花盆键']); }else{ DrillUp.oKeys_keyboard_throw = [];}
-	if( DrillUp.parameters['键盘-放置炸弹键'] != "" ){ DrillUp.oKeys_keyboard_bomb = JSON.parse(DrillUp.parameters['键盘-放置炸弹键']); }else{ DrillUp.oKeys_keyboard_bomb = [];}
+	if( DrillUp.parameters['键盘-菜单键'] != "" ){ DrillUp.g_OKe_keyboard_menu = JSON.parse(DrillUp.parameters['键盘-菜单键']); }else{ DrillUp.g_OKe_keyboard_menu = [];}
+	if( DrillUp.parameters['键盘-跳跃键'] != "" ){ DrillUp.g_OKe_keyboard_jump = JSON.parse(DrillUp.parameters['键盘-跳跃键']); }else{ DrillUp.g_OKe_keyboard_jump = [];}
+	if( DrillUp.parameters['键盘-原地转向键'] != "" ){ DrillUp.g_OKe_keyboard_rotate = JSON.parse(DrillUp.parameters['键盘-原地转向键']); }else{ DrillUp.g_OKe_keyboard_rotate = [];}
+	if( DrillUp.parameters['键盘-举起花盆键'] != "" ){ DrillUp.g_OKe_keyboard_pick = JSON.parse(DrillUp.parameters['键盘-举起花盆键']); }else{ DrillUp.g_OKe_keyboard_pick = [];}
+	if( DrillUp.parameters['键盘-投掷花盆键'] != "" ){ DrillUp.g_OKe_keyboard_throw = JSON.parse(DrillUp.parameters['键盘-投掷花盆键']); }else{ DrillUp.g_OKe_keyboard_throw = [];}
+	if( DrillUp.parameters['键盘-放置炸弹键'] != "" ){ DrillUp.g_OKe_keyboard_bomb = JSON.parse(DrillUp.parameters['键盘-放置炸弹键']); }else{ DrillUp.g_OKe_keyboard_bomb = [];}
 	
 	
 //=============================================================================
@@ -792,28 +795,28 @@
 var _drill_OperateKeys_pluginCommand = Game_Interpreter.prototype.pluginCommand
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_OperateKeys_pluginCommand.call(this,command, args);
-	if (command === ">按键修改")  { 
-		if(args.length == 4){
+	if( command === ">按键修改" ){
+		
+		if( args.length == 4 ){
 			var type = String(args[1]);
 			var temp1 = String(args[3]);
-			if (type === "倒置效果"){
-				$gameSystem._drill_input_is_converted = true;
-				$gameSystem._drill_input_convert_type = temp1;
-				if (temp1 === "恢复方向"){
-					$gameSystem._drill_input_is_converted = false;
+			if( type === "倒置效果" ){
+				$gameSystem._drill_Oke_isConvert = true;
+				$gameSystem._drill_Oke_convertType = temp1;
+				if( temp1 === "恢复方向" ){
+					$gameSystem._drill_Oke_isConvert = false;
 				}
-				$gameSystem.drill_changeGamePadKeys();
-				$gameSystem.drill_changeKeyBoardKeys();
+				$gameSystem.drill_OKe_changeGamePadKeys();
+				$gameSystem.drill_OKe_changeKeyBoardKeys();
 			}
 		}
 	};
-	return true;
 };
 
 //=============================================================================
 // ** 键位配置
 //=============================================================================
-	DrillUp.oKeys_padMapper = {			// 【手柄物理按键映射】
+	DrillUp.g_OKe_padMapper = {			// 【手柄物理按键映射】
 										// （比如'A':0，表示物理手柄的A键(键位0)，对应了字符串"A"，不能重复）
 		'A': 0,  
 		'B': 1,  
@@ -826,7 +829,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		'左': 14,   
 		'右': 15,  
 	};
-	DrillUp.oKeys_org_padMapper = {		// 【手柄逻辑按键映射】
+	DrillUp.g_OKe_org_padMapper = {		// 【手柄逻辑按键映射】
 		0: 'ok',        				// 手柄的A 			（确定键）
 		1: 'cancel',    				// 手柄的B 			（取消键）
 		2: 'shift',     				// 手柄的X 			（加速键）
@@ -839,7 +842,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		15: 'right',    				// 手柄的right		（右）
 	};
 	
-	DrillUp.oKeys_keyboardMapper = {	// 【键盘物理按键映射】
+	DrillUp.g_OKe_keyboardMapper = {	// 【键盘物理按键映射】
 										// （比如'ESC':27，表示物理键盘的ESC键(ASCII码27)，对应了字符串"ESC"，不能重复）
 		'ESC':27,  'F1':112,  'F2':113,  'F3':114,  'F4':115,  'F5':116,  'F6':117,  'F7':118,  'F8':119,  'F9':120,  'F10':121,  'F11':122,  'F12':123,
 		'~':192,  '0':48,  '1':49,  '2':50,  '3':51,  '4':52,  '5':53,  '6':54,  '7':55,  '8':56,  '9':57,  '-':189,  '=':187,
@@ -850,7 +853,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		'PAGEUP':33,  'PAGEDOWN':34,  'END':35,  'HOME':36,  'INSERT':45,  'DELETE':46,  
 		'NUM0':96,  'NUM1':97,  'NUM2':98,  'NUM3':99,  'NUM4':100,  'NUM5':101,  'NUM6':102,  'NUM7':103,  'NUM8':104,  'NUM9':105,  'NUM*':106,  'NUM+':107,  'NUMENTER':108,  'NUM-':109,  'NUM.':110,  'NUM/':111,  
 	};
-	DrillUp.oKeys_org_keyMapper = {		// 【键盘逻辑按键映射】
+	DrillUp.g_OKe_org_keyMapper = {		// 【键盘逻辑按键映射】
 		9: 'tab',       				// 键盘的tab		（辅助Tab键）
 		13: 'ok',       				// 键盘的enter		（确定键）
 		16: 'shift',    				// 键盘的shift		（加速键）
@@ -877,197 +880,272 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		120: 'debug'    				// 键盘的F9			（游戏测试中Debug键）
 	};
 	
-//==============================
-// * 键位初始化
-//==============================
-var _drill_okeys_sys_initialize = Game_System.prototype.initialize;
+
+
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_OKe_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_OKe_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-	_drill_okeys_sys_initialize.call(this);
-	this._drill_input_is_converted = false;
-	this._drill_input_convert_type = "";
-	//alert(this.drill_getRandomString(4,["up","down","left","right"]));
+    _drill_OKe_sys_initialize.call(this);
+	this.drill_OKe_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_OKe_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_OKe_sys_extractSaveContents.call( this, contents );
 	
-    this.drill_gamePadKeysInit();
-    this.drill_changeGamePadKeys();
-	this.drill_keyboardKeysInit();
-	this.drill_changeKeyBoardKeys();
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_OKe_saveEnabled == true ){	
+		$gameSystem.drill_OKe_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_OKe_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_OKe_initSysData = function() {
+	this.drill_OKe_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_OKe_checkSysData = function() {
+	this.drill_OKe_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_OKe_initSysData_Private = function() {
+	
+	this._drill_Oke_isConvert = false;
+	this._drill_Oke_convertType = "";
+	//alert(this.drill_OKe_getRandomString(4,["up","down","left","right"]));
+	
+    this.drill_OKe_gamePadKeysInit();		//手柄 - 键位初始化
+    this.drill_OKe_changeGamePadKeys();		//手柄 - 键位改变
+	this.drill_OKe_keyboardKeysInit();		//键盘 - 键位初始化
+	this.drill_OKe_changeKeyBoardKeys();	//键盘 - 改变键位
 };
 //==============================
-// * 手柄键位初始化
+// * 存储数据 - 载入存档时检查数据（私有）
 //==============================
-Game_System.prototype.drill_gamePadKeysInit = function() {
+Game_System.prototype.drill_OKe_checkSysData_Private = function() {
 	
-	this._drill_input_pad = {}			
-	var pad = this._drill_input_pad;
-	var mapper = DrillUp.oKeys_padMapper;
+	// > 旧存档数据自动补充
+	if( this._drill_Oke_convertType == undefined ){
+		this.drill_OKe_initSysData();
+	}
+	
+};
+
+//==============================
+// * 手柄 - 键位初始化
+//==============================
+Game_System.prototype.drill_OKe_gamePadKeysInit = function() {
+	
+	this._drill_OKe_pad = {}			
+	var pad = this._drill_OKe_pad;
+	var mapper = DrillUp.g_OKe_padMapper;
 	
 	/*----------获取基本键----------*/
-	pad['ok'] = Number(mapper[DrillUp.oKeys_pad_ok]);
-	pad['cancel'] = Number(mapper[DrillUp.oKeys_pad_cancel]);
-	pad['shift'] = Number(mapper[DrillUp.oKeys_pad_shift]);
-	pad['pageup'] = Number(mapper[DrillUp.oKeys_pad_pageup]);
-	pad['pagedown'] = Number(mapper[DrillUp.oKeys_pad_pagedown]);
-	pad['up'] = Number(mapper[DrillUp.oKeys_pad_up]);
-	pad['down'] = Number(mapper[DrillUp.oKeys_pad_down]);
-	pad['left'] = Number(mapper[DrillUp.oKeys_pad_left]);
-	pad['right'] = Number(mapper[DrillUp.oKeys_pad_right]);
+	pad['ok'] = Number(mapper[DrillUp.g_OKe_pad_ok]);
+	pad['cancel'] = Number(mapper[DrillUp.g_OKe_pad_cancel]);
+	pad['shift'] = Number(mapper[DrillUp.g_OKe_pad_shift]);
+	pad['pageup'] = Number(mapper[DrillUp.g_OKe_pad_pageup]);
+	pad['pagedown'] = Number(mapper[DrillUp.g_OKe_pad_pagedown]);
+	pad['up'] = Number(mapper[DrillUp.g_OKe_pad_up]);
+	pad['down'] = Number(mapper[DrillUp.g_OKe_pad_down]);
+	pad['left'] = Number(mapper[DrillUp.g_OKe_pad_left]);
+	pad['right'] = Number(mapper[DrillUp.g_OKe_pad_right]);
 	
-	this._drill_gamepadMapper = {};		//预置插入基本键（判断重复）
-	this._drill_gamepadMapper[ pad['ok'] ] = 'ok';
-	this._drill_gamepadMapper[ pad['cancel'] ] = 'cancel';
-	this._drill_gamepadMapper[ pad['shift'] ] = 'shift';
-	this._drill_gamepadMapper[ pad['pageup'] ] = 'pageup';
-	this._drill_gamepadMapper[ pad['pagedown'] ] = 'pagedown';
-	this._drill_gamepadMapper[ pad['up'] ] = 'up';
-	this._drill_gamepadMapper[ pad['down'] ] = 'down';
-	this._drill_gamepadMapper[ pad['left'] ] = 'left';
-	this._drill_gamepadMapper[ pad['right'] ] = 'right';
-	if(Object.keys(this._drill_gamepadMapper).length < 9){
+	this._drill_OKe_gamepadMapper = {};		//预置插入基本键（判断重复）
+	this._drill_OKe_gamepadMapper[ pad['ok'] ] = 'ok';
+	this._drill_OKe_gamepadMapper[ pad['cancel'] ] = 'cancel';
+	this._drill_OKe_gamepadMapper[ pad['shift'] ] = 'shift';
+	this._drill_OKe_gamepadMapper[ pad['pageup'] ] = 'pageup';
+	this._drill_OKe_gamepadMapper[ pad['pagedown'] ] = 'pagedown';
+	this._drill_OKe_gamepadMapper[ pad['up'] ] = 'up';
+	this._drill_OKe_gamepadMapper[ pad['down'] ] = 'down';
+	this._drill_OKe_gamepadMapper[ pad['left'] ] = 'left';
+	this._drill_OKe_gamepadMapper[ pad['right'] ] = 'right';
+	if(Object.keys(this._drill_OKe_gamepadMapper).length < 9){
 		alert("【Drill_OperateKeys.js  键盘 - 键盘手柄按键修改器】\n手柄检测到重复的基本键设置，一些按键可能会无法使用。");
 	}
 	
 	/*----------获取扩展键----------*/
-	pad['fn'] = Number(mapper[DrillUp.oKeys_pad_fn]);
-	if( DrillUp.oKeys_pad_menu.indexOf('功能键') != -1 ){	//菜单键
+	pad['fn'] = Number(mapper[DrillUp.g_OKe_pad_fn]);
+	if( DrillUp.g_OKe_pad_menu.indexOf('功能键') != -1 ){	//菜单键
 		pad['menu_has_fn'] = true;
-		pad['menu_str'] = String(DrillUp.oKeys_pad_menu.split(' + ')[1]);
+		pad['menu_str'] = String(DrillUp.g_OKe_pad_menu.split(' + ')[1]);
 		pad['menu'] = Number(mapper[pad['menu_str']]);
 	}else{
 		pad['menu_has_fn'] = false;
-		pad['menu_str'] = DrillUp.oKeys_pad_menu;
+		pad['menu_str'] = DrillUp.g_OKe_pad_menu;
 		pad['menu'] = Number(mapper[pad['menu_str']]);
 	}
-	if( DrillUp.oKeys_pad_jump.indexOf('功能键') != -1 ){	//跳跃键
+	if( DrillUp.g_OKe_pad_jump.indexOf('功能键') != -1 ){	//跳跃键
 		pad['jump_has_fn'] = true;
-		pad['jump_str'] = String(DrillUp.oKeys_pad_jump.split(' + ')[1]);
+		pad['jump_str'] = String(DrillUp.g_OKe_pad_jump.split(' + ')[1]);
 		pad['jump'] = Number(mapper[pad['jump_str']]);
 	}else{
 		pad['jump_has_fn'] = false;
-		pad['jump_str'] = DrillUp.oKeys_pad_jump;
+		pad['jump_str'] = DrillUp.g_OKe_pad_jump;
 		pad['jump'] = Number(mapper[pad['jump_str']]);
 	}
-	if( DrillUp.oKeys_pad_rotate.indexOf('功能键') != -1 ){	//原地转向（比较特殊）
+	if( DrillUp.g_OKe_pad_rotate.indexOf('功能键') != -1 ){	//原地转向（比较特殊）
 		pad['rotate_has_fn'] = true;
 	}else{
 		pad['rotate_has_fn'] = false;
 	}
-	if( DrillUp.oKeys_pad_pick.indexOf('功能键') != -1 ){	//举起花盆
+	if( DrillUp.g_OKe_pad_pick.indexOf('功能键') != -1 ){	//举起花盆
 		pad['pick_has_fn'] = true;
-		pad['pick_str'] = String(DrillUp.oKeys_pad_pick.split(' + ')[1]);
+		pad['pick_str'] = String(DrillUp.g_OKe_pad_pick.split(' + ')[1]);
 		pad['pick'] = Number(mapper[pad['pick_str']]);
 	}else{
 		pad['pick_has_fn'] = false;
-		pad['pick_str'] = DrillUp.oKeys_pad_pick;
+		pad['pick_str'] = DrillUp.g_OKe_pad_pick;
 		pad['pick'] = Number(mapper[pad['pick_str']]);
 	}
-	if( DrillUp.oKeys_pad_throw.indexOf('功能键') != -1 ){	//投掷花盆
+	if( DrillUp.g_OKe_pad_throw.indexOf('功能键') != -1 ){	//投掷花盆
 		pad['throw_has_fn'] = true;
-		pad['throw_str'] = String(DrillUp.oKeys_pad_throw.split(' + ')[1]);
+		pad['throw_str'] = String(DrillUp.g_OKe_pad_throw.split(' + ')[1]);
 		pad['throw'] = Number(mapper[pad['throw_str']]);
 	}else{
 		pad['throw_has_fn'] = false;
-		pad['throw_str'] = DrillUp.oKeys_pad_throw;
+		pad['throw_str'] = DrillUp.g_OKe_pad_throw;
 		pad['throw'] = Number(mapper[pad['throw_str']]);
 	}
-	if( DrillUp.oKeys_pad_bomb.indexOf('功能键') != -1 ){	//放置炸弹
+	if( DrillUp.g_OKe_pad_bomb.indexOf('功能键') != -1 ){	//放置炸弹
 		pad['bomb_has_fn'] = true;
-		pad['bomb_str'] = String(DrillUp.oKeys_pad_bomb.split(' + ')[1]);
+		pad['bomb_str'] = String(DrillUp.g_OKe_pad_bomb.split(' + ')[1]);
 		pad['bomb'] = Number(mapper[pad['bomb_str']]);
 	}else{
 		pad['bomb_has_fn'] = false;
-		pad['bomb_str'] = DrillUp.oKeys_pad_bomb;
+		pad['bomb_str'] = DrillUp.g_OKe_pad_bomb;
 		pad['bomb'] = Number(mapper[pad['bomb_str']]);
 	}
 	
 	/*----------扩展键查重复----------*/
 	pad['fn_repeat'] = '';			//功能键
-	var temp_str = this._drill_gamepadMapper[pad['fn']];	//从基本键中获取字段
+	var temp_str = this._drill_OKe_gamepadMapper[pad['fn']];	//从基本键中获取字段
 	if( temp_str != undefined  ){
 		pad['fn_repeat'] = temp_str;
 	}else{
 		pad['fn_repeat'] = 'fn' ;
-		this._drill_gamepadMapper[ pad['fn'] ] = 'fn';		//如果没有重合，新建一个key映射
+		this._drill_OKe_gamepadMapper[ pad['fn'] ] = 'fn';		//如果没有重合，新建一个key映射
 	}
 	
 	pad['menu_repeat'] = '';		//菜单键
-	var temp_str = this._drill_gamepadMapper[pad['menu']];	//从基本键中获取字段
+	var temp_str = this._drill_OKe_gamepadMapper[pad['menu']];	//从基本键中获取字段
 	if( temp_str != undefined ){
 		pad['menu_repeat'] = temp_str;
 	}else{
 		pad['menu_repeat'] = 'menu' ;
-		this._drill_gamepadMapper[ pad['menu'] ] = 'menu';	//如果没有重合，新建一个key映射
+		this._drill_OKe_gamepadMapper[ pad['menu'] ] = 'menu';	//如果没有重合，新建一个key映射
 	}
 	
 	pad['jump_repeat'] = '';		//跳跃键
-	var temp_str = this._drill_gamepadMapper[pad['jump']];	//从基本键中获取字段
+	var temp_str = this._drill_OKe_gamepadMapper[pad['jump']];	//从基本键中获取字段
 	if( temp_str != undefined ){
 		pad['jump_repeat'] = temp_str;
 	}else{
 		pad['jump_repeat'] = 'jump' ;
-		this._drill_gamepadMapper[ pad['jump'] ] = 'jump';	//如果没有重合，新建一个key映射
+		this._drill_OKe_gamepadMapper[ pad['jump'] ] = 'jump';	//如果没有重合，新建一个key映射
 	}
 	
 	pad['pick_repeat'] = '';		//举起花盆
-	var temp_str = this._drill_gamepadMapper[pad['pick']];	//从基本键中获取字段
+	var temp_str = this._drill_OKe_gamepadMapper[pad['pick']];	//从基本键中获取字段
 	if( temp_str != undefined ){
 		pad['pick_repeat'] = temp_str;
 	}else{
 		pad['pick_repeat'] = 'pick' ;
-		this._drill_gamepadMapper[ pad['pick'] ] = 'pick';	//如果没有重合，新建一个key映射
+		this._drill_OKe_gamepadMapper[ pad['pick'] ] = 'pick';	//如果没有重合，新建一个key映射
 	}
 	
 	pad['throw_repeat'] = '';		//投掷花盆
-	var temp_str = this._drill_gamepadMapper[pad['throw']];	//从基本键中获取字段
+	var temp_str = this._drill_OKe_gamepadMapper[pad['throw']];	//从基本键中获取字段
 	if( temp_str != undefined  ){
 		pad['throw_repeat'] = temp_str;
 	}else{
 		pad['throw_repeat'] = 'throw' ;
-		this._drill_gamepadMapper[ pad['throw'] ] = 'throw';	//如果没有重合，新建一个key映射
+		this._drill_OKe_gamepadMapper[ pad['throw'] ] = 'throw';	//如果没有重合，新建一个key映射
 	}
 	
 	pad['bomb_repeat'] = '';		//放置炸弹
-	var temp_str = this._drill_gamepadMapper[pad['bomb']];	//从基本键中获取字段
+	var temp_str = this._drill_OKe_gamepadMapper[pad['bomb']];	//从基本键中获取字段
 	if( temp_str != undefined  ){
 		pad['bomb_repeat'] = temp_str;
 	}else{
 		pad['bomb_repeat'] = 'bomb' ;
-		this._drill_gamepadMapper[ pad['bomb'] ] = 'bomb';	//如果没有重合，新建一个key映射
+		this._drill_OKe_gamepadMapper[ pad['bomb'] ] = 'bomb';	//如果没有重合，新建一个key映射
 	}
 	
 }
 //==============================
-// * 改变手柄键位
+// * 手柄 - 键位改变
 //==============================
-Game_System.prototype.drill_changeGamePadKeys = function() {
-	//alert(JSON.stringify(this._drill_gamepadMapper));
+Game_System.prototype.drill_OKe_changeGamePadKeys = function() {
+	//alert(JSON.stringify(this._drill_OKe_gamepadMapper));
 	
-	var temp_mapper = JSON.parse(JSON.stringify( this._drill_gamepadMapper ));
-	var result_mapper = JSON.parse(JSON.stringify( this._drill_gamepadMapper ));	//克隆新实例
-	if( this._drill_input_is_converted ){
+	var temp_mapper = JSON.parse(JSON.stringify( this._drill_OKe_gamepadMapper ));
+	var result_mapper = JSON.parse(JSON.stringify( this._drill_OKe_gamepadMapper ));	//克隆新实例
+	if( this._drill_Oke_isConvert ){
 		for(var key in result_mapper){		//去除方向键
-			if(result_mapper[key] == "up" ||
+			if( result_mapper[key] == "up" ||
 				result_mapper[key] == "down" ||
 				result_mapper[key] == "left" ||
 				result_mapper[key] == "right"){
 				delete result_mapper[key];
 			}
 		}
-		if( this._drill_input_convert_type == "方向翻转"){
+		if( this._drill_Oke_convertType == "方向翻转" ){
 			for(var key in temp_mapper){
 				if(temp_mapper[key] == "up" ){ result_mapper[key] = "down";}
 				if(temp_mapper[key] == "down" ){ result_mapper[key] = "up";}
 				if(temp_mapper[key] == "left" ){ result_mapper[key] = "right";}
 				if(temp_mapper[key] == "right" ){ result_mapper[key] = "left";}
 			}
-		}else if( this._drill_input_convert_type == "方向右旋置换"){
+		}else if( this._drill_Oke_convertType == "方向右旋置换" ){
 			for(var key in temp_mapper){
 				if(temp_mapper[key] == "up" ){ result_mapper[key] = "left";}
 				if(temp_mapper[key] == "down" ){ result_mapper[key] = "right";}
 				if(temp_mapper[key] == "left" ){ result_mapper[key] = "up";}
 				if(temp_mapper[key] == "right" ){ result_mapper[key] = "down";}
 			}
-		}else if( this._drill_input_convert_type == "方向随机混乱"){
-			var r_string = this.drill_getRandomString(4,["up","down","left","right"]);
+		}else if( this._drill_Oke_convertType == "方向随机混乱" ){
+			var r_string = this.drill_OKe_getRandomString(4,["up","down","left","right"]);
 			for(var key in temp_mapper){
 				if(temp_mapper[key] == "up" ){ result_mapper[key] = r_string[0];}
 				if(temp_mapper[key] == "down" ){ result_mapper[key] = r_string[1];}
@@ -1077,62 +1155,47 @@ Game_System.prototype.drill_changeGamePadKeys = function() {
 		}
 	}
 	
+	// > 键位赋值
 	Input.gamepadMapper = result_mapper;
-
 }
-//==============================
-// * 判断手柄控制
-//==============================
-Input.drill_isGamepadControling = function() {
-	if (navigator.getGamepads) {
-		var gamepads = navigator.getGamepads();
-		if (gamepads) {
-			for (var i = 0; i < gamepads.length; i++) {
-				var gamepad = gamepads[i];
-				if (gamepad && gamepad.connected) return true;
-			}
-		}
-	}
-	return false;
-};
 
 //==============================
-// * 键盘键位初始化
+// * 键盘 - 键位初始化
 //==============================
-Game_System.prototype.drill_keyboardKeysInit = function() {
+Game_System.prototype.drill_OKe_keyboardKeysInit = function() {
 		
-	this._drill_input_keyboard = {}			
-	var board = this._drill_input_keyboard;
-	var mapper = DrillUp.oKeys_keyboardMapper;
+	this._drill_OKe_keyboard = {}			
+	var board = this._drill_OKe_keyboard;
+	var mapper = DrillUp.g_OKe_keyboardMapper;
 	
 	/*----------获取基本键----------*/
-	board['ok'] = DrillUp.oKeys_keyboard_ok.map( function(value,index,array){ return Number(mapper[ String(value).toUpperCase() ]); } , this)
-	board['cancel'] = DrillUp.oKeys_keyboard_cancel.map( function(value,index,array){ return Number(mapper[ String(value).toUpperCase() ]); } , this)
-	board['shift'] = DrillUp.oKeys_keyboard_shift.map( function(value,index,array){ return Number(mapper[ String(value).toUpperCase() ]); } , this)
-	board['pageup'] = DrillUp.oKeys_keyboard_pageup.map( function(value,index,array){ return Number(mapper[ String(value).toUpperCase() ]); } , this)
-	board['pagedown'] = DrillUp.oKeys_keyboard_pagedown.map( function(value,index,array){ return Number(mapper[ String(value).toUpperCase() ]); } , this)
-	board['up'] = DrillUp.oKeys_keyboard_up.map( function(value,index,array){ return Number(mapper[ String(value).toUpperCase() ]); } , this)
-	board['down'] = DrillUp.oKeys_keyboard_down.map( function(value,index,array){ return Number(mapper[ String(value).toUpperCase() ]); } , this)
-	board['left'] = DrillUp.oKeys_keyboard_left.map( function(value,index,array){ return Number(mapper[ String(value).toUpperCase() ]); } , this)
-	board['right'] = DrillUp.oKeys_keyboard_right.map( function(value,index,array){ return Number(mapper[ String(value).toUpperCase() ]); } , this)
-	board['tab'] = DrillUp.oKeys_keyboard_tab.map( function(value,index,array){ return Number(mapper[ String(value).toUpperCase() ]); } , this)
-	board['debug'] = DrillUp.oKeys_keyboard_debug.map( function(value,index,array){ return Number(mapper[ String(value).toUpperCase() ]); } , this)
-	board['control'] = DrillUp.oKeys_keyboard_control.map( function(value,index,array){ return Number(mapper[ String(value).toUpperCase() ]); } , this)
+	board['ok'] = DrillUp.g_OKe_keyboard_ok.map( function(value,index,array){ return Number(mapper[ String(value).toUpperCase() ]); } , this)
+	board['cancel'] = DrillUp.g_OKe_keyboard_cancel.map( function(value,index,array){ return Number(mapper[ String(value).toUpperCase() ]); } , this)
+	board['shift'] = DrillUp.g_OKe_keyboard_shift.map( function(value,index,array){ return Number(mapper[ String(value).toUpperCase() ]); } , this)
+	board['pageup'] = DrillUp.g_OKe_keyboard_pageup.map( function(value,index,array){ return Number(mapper[ String(value).toUpperCase() ]); } , this)
+	board['pagedown'] = DrillUp.g_OKe_keyboard_pagedown.map( function(value,index,array){ return Number(mapper[ String(value).toUpperCase() ]); } , this)
+	board['up'] = DrillUp.g_OKe_keyboard_up.map( function(value,index,array){ return Number(mapper[ String(value).toUpperCase() ]); } , this)
+	board['down'] = DrillUp.g_OKe_keyboard_down.map( function(value,index,array){ return Number(mapper[ String(value).toUpperCase() ]); } , this)
+	board['left'] = DrillUp.g_OKe_keyboard_left.map( function(value,index,array){ return Number(mapper[ String(value).toUpperCase() ]); } , this)
+	board['right'] = DrillUp.g_OKe_keyboard_right.map( function(value,index,array){ return Number(mapper[ String(value).toUpperCase() ]); } , this)
+	board['tab'] = DrillUp.g_OKe_keyboard_tab.map( function(value,index,array){ return Number(mapper[ String(value).toUpperCase() ]); } , this)
+	board['debug'] = DrillUp.g_OKe_keyboard_debug.map( function(value,index,array){ return Number(mapper[ String(value).toUpperCase() ]); } , this)
+	board['control'] = DrillUp.g_OKe_keyboard_control.map( function(value,index,array){ return Number(mapper[ String(value).toUpperCase() ]); } , this)
 	
 	
-	this._drill_keyboardMapper = {};		//预置插入基本键（判断重复）
-	board['ok'].forEach( function(value,index,array){ this._drill_keyboardMapper[ value ] = 'ok'; }, this )
-	board['cancel'].forEach( function(value,index,array){ this._drill_keyboardMapper[ value ] = 'cancel'; }, this )
-	board['shift'].forEach( function(value,index,array){ this._drill_keyboardMapper[ value ] = 'shift'; }, this )
-	board['pageup'].forEach( function(value,index,array){ this._drill_keyboardMapper[ value ] = 'pageup'; }, this )
-	board['pagedown'].forEach( function(value,index,array){ this._drill_keyboardMapper[ value ] = 'pagedown'; }, this )
-	board['up'].forEach( function(value,index,array){ this._drill_keyboardMapper[ value ] = 'up'; }, this )
-	board['down'].forEach( function(value,index,array){ this._drill_keyboardMapper[ value ] = 'down'; }, this )
-	board['left'].forEach( function(value,index,array){ this._drill_keyboardMapper[ value ] = 'left'; }, this )
-	board['right'].forEach( function(value,index,array){ this._drill_keyboardMapper[ value ] = 'right'; }, this )
-	board['tab'].forEach( function(value,index,array){ this._drill_keyboardMapper[ value ] = 'tab'; }, this )
-	board['debug'].forEach( function(value,index,array){ this._drill_keyboardMapper[ value ] = 'debug'; }, this )
-	board['control'].forEach( function(value,index,array){ this._drill_keyboardMapper[ value ] = 'control'; }, this )
+	this._drill_OKe_keyboardMapper = {};		//预置插入基本键（判断重复）
+	board['ok'].forEach( function(value,index,array){ this._drill_OKe_keyboardMapper[ value ] = 'ok'; }, this )
+	board['cancel'].forEach( function(value,index,array){ this._drill_OKe_keyboardMapper[ value ] = 'cancel'; }, this )
+	board['shift'].forEach( function(value,index,array){ this._drill_OKe_keyboardMapper[ value ] = 'shift'; }, this )
+	board['pageup'].forEach( function(value,index,array){ this._drill_OKe_keyboardMapper[ value ] = 'pageup'; }, this )
+	board['pagedown'].forEach( function(value,index,array){ this._drill_OKe_keyboardMapper[ value ] = 'pagedown'; }, this )
+	board['up'].forEach( function(value,index,array){ this._drill_OKe_keyboardMapper[ value ] = 'up'; }, this )
+	board['down'].forEach( function(value,index,array){ this._drill_OKe_keyboardMapper[ value ] = 'down'; }, this )
+	board['left'].forEach( function(value,index,array){ this._drill_OKe_keyboardMapper[ value ] = 'left'; }, this )
+	board['right'].forEach( function(value,index,array){ this._drill_OKe_keyboardMapper[ value ] = 'right'; }, this )
+	board['tab'].forEach( function(value,index,array){ this._drill_OKe_keyboardMapper[ value ] = 'tab'; }, this )
+	board['debug'].forEach( function(value,index,array){ this._drill_OKe_keyboardMapper[ value ] = 'debug'; }, this )
+	board['control'].forEach( function(value,index,array){ this._drill_OKe_keyboardMapper[ value ] = 'control'; }, this )
 	var count = 0;
 	count += board['ok'].length;
 	count += board['cancel'].length;
@@ -1146,17 +1209,17 @@ Game_System.prototype.drill_keyboardKeysInit = function() {
 	count += board['tab'].length;
 	count += board['debug'].length;
 	count += board['control'].length;
-	if(Object.keys(this._drill_keyboardMapper).length < count ){
+	if(Object.keys(this._drill_OKe_keyboardMapper).length < count ){
 		alert("【Drill_OperateKeys.js  键盘 - 键盘手柄按键修改器】\n键盘检测到重复的基本键设置，一些按键可能会无法使用。");
 	}
 	
 	/*----------获取扩展键----------*/
 	//干脆，扩展键直接全部是两个键控制的，两个键同时按下才可以生效
 	
-	board['menu'] = DrillUp.oKeys_keyboard_menu.map( function(value,index,array){ 
+	board['menu'] = DrillUp.g_OKe_keyboard_menu.map( function(value,index,array){ 
 		var _map = {};
 		var keys = value.split(/ \+ /);	//分离AB键
-		if(keys.length == 1){
+		if( keys.length == 1 ){
 			_map.A = Number(mapper[keys[0].toUpperCase()]);
 			_map.B = -1;
 		}else{
@@ -1167,78 +1230,78 @@ Game_System.prototype.drill_keyboardKeysInit = function() {
 		if( _map.A == -1 ){ 
 			_map.AA = "" 
 		}else{
-			if( this._drill_keyboardMapper[ _map.A ] == undefined ){ 
+			if( this._drill_OKe_keyboardMapper[ _map.A ] == undefined ){ 
 				if( _map.B == -1 ){
 					_map.AA = 'menu_SA';	//单键时
 				}else{
 					_map.AA = 'menu_A';		//双键时
 				}
-				this._drill_keyboardMapper[ _map.A ] = _map.AA; 
+				this._drill_OKe_keyboardMapper[ _map.A ] = _map.AA; 
 			}else{
-				if( this._drill_keyboardMapper[ _map.A ] == "cancel" ){	//菜单键合并的特殊情况
-					this._drill_keyboardMapper[ _map.A ] = "escape"; 
+				if( this._drill_OKe_keyboardMapper[ _map.A ] == "cancel" ){	//菜单键合并的特殊情况
+					this._drill_OKe_keyboardMapper[ _map.A ] = "escape"; 
 				}
-				_map.AA = this._drill_keyboardMapper[ _map.A ];
+				_map.AA = this._drill_OKe_keyboardMapper[ _map.A ];
 			}
 		}
 		if( _map.B == -1 ){ 
 			_map.BB = "" 
 		}else{
-			if( this._drill_keyboardMapper[ _map.B ] == undefined ){ 
+			if( this._drill_OKe_keyboardMapper[ _map.B ] == undefined ){ 
 				_map.BB = 'menu_B';
-				this._drill_keyboardMapper[ _map.B ] = _map.BB; 
+				this._drill_OKe_keyboardMapper[ _map.B ] = _map.BB; 
 			}else{
-				if( this._drill_keyboardMapper[ _map.B ] == "cancel" ){	//菜单键合并的特殊情况
-					this._drill_keyboardMapper[ _map.B ] = "escape"; 
+				if( this._drill_OKe_keyboardMapper[ _map.B ] == "cancel" ){	//菜单键合并的特殊情况
+					this._drill_OKe_keyboardMapper[ _map.B ] = "escape"; 
 				}
-				_map.BB = this._drill_keyboardMapper[ _map.B ];
+				_map.BB = this._drill_OKe_keyboardMapper[ _map.B ];
 			}
 		}
 		return _map; 
 	} , this);
 	
 	//后面的原理一样
-	board['jump'] = DrillUp.oKeys_keyboard_jump.map( function(value,index,array){ var _map = {};var keys = value.split(/ \+ /);if(keys.length == 1){ _map.A = Number(mapper[keys[0].toUpperCase()]); _map.B = -1;}else{ _map.A = Number(mapper[keys[0].toUpperCase()]); _map.B = Number(mapper[keys[1].toUpperCase()]);}if( _map.A == -1 ){ _map.AA = "" }else{if( this._drill_keyboardMapper[ _map.A ] == undefined ){if( _map.B == -1 ){_map.AA = 'jump_SA';}else{_map.AA = 'jump_A';};this._drill_keyboardMapper[ _map.A ] = _map.AA; }else{_map.AA = this._drill_keyboardMapper[ _map.A ];}}if( _map.B == -1 ){ _map.BB = "" }else{if( this._drill_keyboardMapper[ _map.B ] == undefined ){ _map.BB = 'jump_B';this._drill_keyboardMapper[ _map.B ] = _map.BB; }else{_map.BB = this._drill_keyboardMapper[ _map.B ];}}return _map; } , this);
-	board['rotate'] = DrillUp.oKeys_keyboard_rotate.map( function(value,index,array){ var _map = {};var keys = value.split(/ \+ /);if(keys.length == 1){ _map.A = Number(mapper[keys[0].toUpperCase()]); _map.B = -1;}else{ _map.A = Number(mapper[keys[0].toUpperCase()]); _map.B = Number(mapper[keys[1].toUpperCase()]);}if( _map.A == -1 ){ _map.AA = "" }else{if( this._drill_keyboardMapper[ _map.A ] == undefined ){if( _map.B == -1 ){_map.AA = 'rotate_SA';}else{_map.AA = 'rotate_A';};this._drill_keyboardMapper[ _map.A ] = _map.AA; }else{_map.AA = this._drill_keyboardMapper[ _map.A ];}}if( _map.B == -1 ){ _map.BB = "" }else{if( this._drill_keyboardMapper[ _map.B ] == undefined ){ _map.BB = 'rotate_B';this._drill_keyboardMapper[ _map.B ] = _map.BB; }else{_map.BB = this._drill_keyboardMapper[ _map.B ];}}return _map; } , this);
-	board['pick'] = DrillUp.oKeys_keyboard_pick.map( function(value,index,array){ var _map = {};var keys = value.split(/ \+ /);if(keys.length == 1){ _map.A = Number(mapper[keys[0].toUpperCase()]); _map.B = -1;}else{ _map.A = Number(mapper[keys[0].toUpperCase()]); _map.B = Number(mapper[keys[1].toUpperCase()]);}if( _map.A == -1 ){ _map.AA = "" }else{if( this._drill_keyboardMapper[ _map.A ] == undefined ){if( _map.B == -1 ){_map.AA = 'pick_SA';}else{_map.AA = 'pick_A';};this._drill_keyboardMapper[ _map.A ] = _map.AA; }else{_map.AA = this._drill_keyboardMapper[ _map.A ];}}if( _map.B == -1 ){ _map.BB = "" }else{if( this._drill_keyboardMapper[ _map.B ] == undefined ){ _map.BB = 'pick_B';this._drill_keyboardMapper[ _map.B ] = _map.BB; }else{_map.BB = this._drill_keyboardMapper[ _map.B ];}}return _map; } , this);
-	board['throw'] = DrillUp.oKeys_keyboard_throw.map( function(value,index,array){ var _map = {};var keys = value.split(/ \+ /);if(keys.length == 1){ _map.A = Number(mapper[keys[0].toUpperCase()]); _map.B = -1;}else{ _map.A = Number(mapper[keys[0].toUpperCase()]); _map.B = Number(mapper[keys[1].toUpperCase()]);}if( _map.A == -1 ){ _map.AA = "" }else{if( this._drill_keyboardMapper[ _map.A ] == undefined ){if( _map.B == -1 ){_map.AA = 'throw_SA';}else{_map.AA = 'throw_A';};this._drill_keyboardMapper[ _map.A ] = _map.AA; }else{_map.AA = this._drill_keyboardMapper[ _map.A ];}}if( _map.B == -1 ){ _map.BB = "" }else{if( this._drill_keyboardMapper[ _map.B ] == undefined ){ _map.BB = 'throw_B';this._drill_keyboardMapper[ _map.B ] = _map.BB; }else{_map.BB = this._drill_keyboardMapper[ _map.B ];}}return _map; } , this);
-	board['bomb'] = DrillUp.oKeys_keyboard_bomb.map( function(value,index,array){ var _map = {};var keys = value.split(/ \+ /);if(keys.length == 1){ _map.A = Number(mapper[keys[0].toUpperCase()]); _map.B = -1;}else{ _map.A = Number(mapper[keys[0].toUpperCase()]); _map.B = Number(mapper[keys[1].toUpperCase()]);}if( _map.A == -1 ){ _map.AA = "" }else{if( this._drill_keyboardMapper[ _map.A ] == undefined ){if( _map.B == -1 ){_map.AA = 'bomb_SA';}else{_map.AA = 'bomb_A';};this._drill_keyboardMapper[ _map.A ] = _map.AA; }else{_map.AA = this._drill_keyboardMapper[ _map.A ];}}if( _map.B == -1 ){ _map.BB = "" }else{if( this._drill_keyboardMapper[ _map.B ] == undefined ){ _map.BB = 'bomb_B';this._drill_keyboardMapper[ _map.B ] = _map.BB; }else{_map.BB = this._drill_keyboardMapper[ _map.B ];}}return _map; } , this);
+	board['jump'] = DrillUp.g_OKe_keyboard_jump.map( function(value,index,array){ var _map = {};var keys = value.split(/ \+ /);if(keys.length == 1){ _map.A = Number(mapper[keys[0].toUpperCase()]); _map.B = -1;}else{ _map.A = Number(mapper[keys[0].toUpperCase()]); _map.B = Number(mapper[keys[1].toUpperCase()]);}if( _map.A == -1 ){ _map.AA = "" }else{if( this._drill_OKe_keyboardMapper[ _map.A ] == undefined ){if( _map.B == -1 ){_map.AA = 'jump_SA';}else{_map.AA = 'jump_A';};this._drill_OKe_keyboardMapper[ _map.A ] = _map.AA; }else{_map.AA = this._drill_OKe_keyboardMapper[ _map.A ];}}if( _map.B == -1 ){ _map.BB = "" }else{if( this._drill_OKe_keyboardMapper[ _map.B ] == undefined ){ _map.BB = 'jump_B';this._drill_OKe_keyboardMapper[ _map.B ] = _map.BB; }else{_map.BB = this._drill_OKe_keyboardMapper[ _map.B ];}}return _map; } , this);
+	board['rotate'] = DrillUp.g_OKe_keyboard_rotate.map( function(value,index,array){ var _map = {};var keys = value.split(/ \+ /);if(keys.length == 1){ _map.A = Number(mapper[keys[0].toUpperCase()]); _map.B = -1;}else{ _map.A = Number(mapper[keys[0].toUpperCase()]); _map.B = Number(mapper[keys[1].toUpperCase()]);}if( _map.A == -1 ){ _map.AA = "" }else{if( this._drill_OKe_keyboardMapper[ _map.A ] == undefined ){if( _map.B == -1 ){_map.AA = 'rotate_SA';}else{_map.AA = 'rotate_A';};this._drill_OKe_keyboardMapper[ _map.A ] = _map.AA; }else{_map.AA = this._drill_OKe_keyboardMapper[ _map.A ];}}if( _map.B == -1 ){ _map.BB = "" }else{if( this._drill_OKe_keyboardMapper[ _map.B ] == undefined ){ _map.BB = 'rotate_B';this._drill_OKe_keyboardMapper[ _map.B ] = _map.BB; }else{_map.BB = this._drill_OKe_keyboardMapper[ _map.B ];}}return _map; } , this);
+	board['pick'] = DrillUp.g_OKe_keyboard_pick.map( function(value,index,array){ var _map = {};var keys = value.split(/ \+ /);if(keys.length == 1){ _map.A = Number(mapper[keys[0].toUpperCase()]); _map.B = -1;}else{ _map.A = Number(mapper[keys[0].toUpperCase()]); _map.B = Number(mapper[keys[1].toUpperCase()]);}if( _map.A == -1 ){ _map.AA = "" }else{if( this._drill_OKe_keyboardMapper[ _map.A ] == undefined ){if( _map.B == -1 ){_map.AA = 'pick_SA';}else{_map.AA = 'pick_A';};this._drill_OKe_keyboardMapper[ _map.A ] = _map.AA; }else{_map.AA = this._drill_OKe_keyboardMapper[ _map.A ];}}if( _map.B == -1 ){ _map.BB = "" }else{if( this._drill_OKe_keyboardMapper[ _map.B ] == undefined ){ _map.BB = 'pick_B';this._drill_OKe_keyboardMapper[ _map.B ] = _map.BB; }else{_map.BB = this._drill_OKe_keyboardMapper[ _map.B ];}}return _map; } , this);
+	board['throw'] = DrillUp.g_OKe_keyboard_throw.map( function(value,index,array){ var _map = {};var keys = value.split(/ \+ /);if(keys.length == 1){ _map.A = Number(mapper[keys[0].toUpperCase()]); _map.B = -1;}else{ _map.A = Number(mapper[keys[0].toUpperCase()]); _map.B = Number(mapper[keys[1].toUpperCase()]);}if( _map.A == -1 ){ _map.AA = "" }else{if( this._drill_OKe_keyboardMapper[ _map.A ] == undefined ){if( _map.B == -1 ){_map.AA = 'throw_SA';}else{_map.AA = 'throw_A';};this._drill_OKe_keyboardMapper[ _map.A ] = _map.AA; }else{_map.AA = this._drill_OKe_keyboardMapper[ _map.A ];}}if( _map.B == -1 ){ _map.BB = "" }else{if( this._drill_OKe_keyboardMapper[ _map.B ] == undefined ){ _map.BB = 'throw_B';this._drill_OKe_keyboardMapper[ _map.B ] = _map.BB; }else{_map.BB = this._drill_OKe_keyboardMapper[ _map.B ];}}return _map; } , this);
+	board['bomb'] = DrillUp.g_OKe_keyboard_bomb.map( function(value,index,array){ var _map = {};var keys = value.split(/ \+ /);if(keys.length == 1){ _map.A = Number(mapper[keys[0].toUpperCase()]); _map.B = -1;}else{ _map.A = Number(mapper[keys[0].toUpperCase()]); _map.B = Number(mapper[keys[1].toUpperCase()]);}if( _map.A == -1 ){ _map.AA = "" }else{if( this._drill_OKe_keyboardMapper[ _map.A ] == undefined ){if( _map.B == -1 ){_map.AA = 'bomb_SA';}else{_map.AA = 'bomb_A';};this._drill_OKe_keyboardMapper[ _map.A ] = _map.AA; }else{_map.AA = this._drill_OKe_keyboardMapper[ _map.A ];}}if( _map.B == -1 ){ _map.BB = "" }else{if( this._drill_OKe_keyboardMapper[ _map.B ] == undefined ){ _map.BB = 'bomb_B';this._drill_OKe_keyboardMapper[ _map.B ] = _map.BB; }else{_map.BB = this._drill_OKe_keyboardMapper[ _map.B ];}}return _map; } , this);
 	
 }
 //==============================
-// * 改变键盘键位
+// * 键盘 - 改变键位
 //==============================
-Game_System.prototype.drill_changeKeyBoardKeys = function() {
-	//alert(JSON.stringify(this._drill_keyboardMapper));
-	//alert(JSON.stringify(this._drill_input_keyboard));
+Game_System.prototype.drill_OKe_changeKeyBoardKeys = function() {
+	//alert(JSON.stringify(this._drill_OKe_keyboardMapper));
+	//alert(JSON.stringify(this._drill_OKe_keyboard));
 	
-	var temp_mapper = JSON.parse(JSON.stringify( this._drill_keyboardMapper ));
-	var result_mapper = JSON.parse(JSON.stringify( this._drill_keyboardMapper ));	//克隆新实例
-	if( this._drill_input_is_converted ){
+	var temp_mapper = JSON.parse(JSON.stringify( this._drill_OKe_keyboardMapper ));
+	var result_mapper = JSON.parse(JSON.stringify( this._drill_OKe_keyboardMapper ));	//克隆新实例
+	if( this._drill_Oke_isConvert ){
 		for(var key in result_mapper){		//去除方向键
-			if(result_mapper[key] == "up" ||
+			if( result_mapper[key] == "up" ||
 				result_mapper[key] == "down" ||
 				result_mapper[key] == "left" ||
 				result_mapper[key] == "right"){
 				delete result_mapper[key];
 			}
 		}
-		if( this._drill_input_convert_type == "方向翻转"){
+		if( this._drill_Oke_convertType == "方向翻转" ){
 			for(var key in temp_mapper){
 				if(temp_mapper[key] == "up" ){ result_mapper[key] = "down";}
 				if(temp_mapper[key] == "down" ){ result_mapper[key] = "up";}
 				if(temp_mapper[key] == "left" ){ result_mapper[key] = "right";}
 				if(temp_mapper[key] == "right" ){ result_mapper[key] = "left";}
 			}
-		}else if( this._drill_input_convert_type == "方向右旋置换"){
+		}else if( this._drill_Oke_convertType == "方向右旋置换" ){
 			for(var key in temp_mapper){
 				if(temp_mapper[key] == "up" ){ result_mapper[key] = "left";}
 				if(temp_mapper[key] == "down" ){ result_mapper[key] = "right";}
 				if(temp_mapper[key] == "left" ){ result_mapper[key] = "up";}
 				if(temp_mapper[key] == "right" ){ result_mapper[key] = "down";}
 			}
-		}else if( this._drill_input_convert_type == "方向随机混乱"){
-			var r_string = this.drill_getRandomString(4,["up","down","left","right"]);
+		}else if( this._drill_Oke_convertType == "方向随机混乱" ){
+			var r_string = this.drill_OKe_getRandomString(4,["up","down","left","right"]);
 			for(var key in temp_mapper){
 				if(temp_mapper[key] == "up" ){ result_mapper[key] = r_string[0];}
 				if(temp_mapper[key] == "down" ){ result_mapper[key] = r_string[1];}
@@ -1248,12 +1311,29 @@ Game_System.prototype.drill_changeKeyBoardKeys = function() {
 		}
 	}
 	
+	// > 键位赋值
 	Input.keyMapper = result_mapper;
 }
+
 //==============================
-// * 从数组中随机抽取指定数量的值
+// * 工具 - 判断手柄控制
 //==============================
-Game_System.prototype.drill_getRandomString = function(count,list) {
+Input.drill_OKe_isGamepadControling = function() {
+	if( navigator.getGamepads ){
+		var gamepads = navigator.getGamepads();
+		if( gamepads ){
+			for( var i = 0; i < gamepads.length; i++ ){
+				var gamepad = gamepads[i];
+				if( gamepad && gamepad.connected ){ return true; }
+			}
+		}
+	}
+	return false;
+};
+//==============================
+// * 工具 - 随机抽取N个
+//==============================
+Game_System.prototype.drill_OKe_getRandomString = function( count, list ){
 	var list_from = JSON.parse(JSON.stringify( list ));
 	var list_result = [];
 	for(var i=0; i < count ; i++){
@@ -1265,22 +1345,25 @@ Game_System.prototype.drill_getRandomString = function(count,list) {
 }
 
 
-//==============================
-// * 进入菜单按键条件
-//==============================
+//=============================================================================
+// * 进入菜单按键条件（覆写）
+//=============================================================================
 Scene_Map.prototype.isMenuCalled = function() {
 	
-	if(Input.drill_isGamepadControling()){	//手柄
-		if( $gameSystem._drill_input_pad['menu_has_fn'] ){
-			return ( Input.isTriggered($gameSystem._drill_input_pad['menu_repeat']) 
-			&& Input.isPressed($gameSystem._drill_input_pad['fn_repeat']) );
+	// > 手柄
+	if( Input.drill_OKe_isGamepadControling() ){
+		if( $gameSystem._drill_OKe_pad['menu_has_fn'] ){
+			return ( Input.isTriggered($gameSystem._drill_OKe_pad['menu_repeat']) 
+			&& Input.isPressed($gameSystem._drill_OKe_pad['fn_repeat']) );
 		}
-		return Input.isTriggered($gameSystem._drill_input_pad['menu_repeat']);
+		return Input.isTriggered($gameSystem._drill_OKe_pad['menu_repeat']);
 	}else{
-		if( TouchInput.isCancelled() ){return true;}	//鼠标按下
 		
-		//键盘
-		if( $gameSystem._drill_input_keyboard['menu'].map( function(value,index,array){ 
+		// > 鼠标按下
+		if( TouchInput.isCancelled() ){ return true; }
+		
+		// > 键盘
+		if( $gameSystem._drill_OKe_keyboard['menu'].map( function(value,index,array){ 
 				//alert(JSON.stringify(value));
 				var b = false;
 				if( value.BB == "" ){
@@ -1304,17 +1387,17 @@ Scene_Map.prototype.isMenuCalled = function() {
 	}
 };
 
-//==============================
+//=============================================================================
 // * 【互动-举起花盆能力】按键条件
-//==============================
+//=============================================================================
 if( Imported.Drill_PickThrow ){
 	//举起默认与确定键绑定，如果举起与确定键分离，则换为手动与举起的花盆互动。
-	var _drill_okeys_pick_triggerButtonAction = Game_Player.prototype.triggerButtonAction;
+	var _drill_OKe_pick_triggerButtonAction = Game_Player.prototype.triggerButtonAction;
 	Game_Player.prototype.triggerButtonAction = function() {
-		var r = _drill_okeys_pick_triggerButtonAction.call(this);
+		var r = _drill_OKe_pick_triggerButtonAction.call(this);
 		if(r == false){
-			if(Input.drill_isGamepadControling()){	//手柄
-				if ( Input.isTriggered($gameSystem._drill_input_pad['pick_repeat']) ) {
+			if(Input.drill_OKe_isGamepadControling()){	//手柄
+				if ( Input.isTriggered($gameSystem._drill_OKe_pad['pick_repeat']) ) {
 					this.checkEventTriggerHere([0]);
 					if ($gameMap.setupStartingEvent()) {
 						return true;
@@ -1325,7 +1408,7 @@ if( Imported.Drill_PickThrow ){
 					}
 				}
 			}else{	//键盘
-				if( $gameSystem._drill_input_keyboard['pick'].map( function(value,index,array){ 
+				if( $gameSystem._drill_OKe_keyboard['pick'].map( function(value,index,array){ 
 						var b = false;
 						if( value.BB == "" ){
 							if(Input.isTriggered( value.AA )){
@@ -1351,14 +1434,14 @@ if( Imported.Drill_PickThrow ){
 	
 	Game_Player.prototype.drill_isPickControl = function() {
 		if( TouchInput.isPressed() || Input.isPressed('ok') ){return true;}	//鼠标
-		if(Input.drill_isGamepadControling()){	//手柄
-			if( $gameSystem._drill_input_pad['pick_has_fn'] ){
-				return ( Input.isPressed($gameSystem._drill_input_pad['pick_repeat']) 
-				&& Input.isPressed($gameSystem._drill_input_pad['fn_repeat']) );
+		if(Input.drill_OKe_isGamepadControling()){	//手柄
+			if( $gameSystem._drill_OKe_pad['pick_has_fn'] ){
+				return ( Input.isPressed($gameSystem._drill_OKe_pad['pick_repeat']) 
+				&& Input.isPressed($gameSystem._drill_OKe_pad['fn_repeat']) );
 			}
-			return Input.isPressed($gameSystem._drill_input_pad['pick_repeat']);
+			return Input.isPressed($gameSystem._drill_OKe_pad['pick_repeat']);
 		}else{	//键盘
-			if( $gameSystem._drill_input_keyboard['pick'].map( function(value,index,array){ 
+			if( $gameSystem._drill_OKe_keyboard['pick'].map( function(value,index,array){ 
 					var b = true;
 					if( value.AA != "" && !Input.isPressed( value.AA ) ){
 						b = false;
@@ -1376,14 +1459,14 @@ if( Imported.Drill_PickThrow ){
 		}
 	}
 	Game_Player.prototype.drill_isThrowControl = function() {
-		if(Input.drill_isGamepadControling()){	//手柄
-			if( $gameSystem._drill_input_pad['throw_has_fn'] ){
-				return ( Input.isPressed($gameSystem._drill_input_pad['throw_repeat']) 
-				&& Input.isPressed($gameSystem._drill_input_pad['fn_repeat']) );
+		if(Input.drill_OKe_isGamepadControling()){	//手柄
+			if( $gameSystem._drill_OKe_pad['throw_has_fn'] ){
+				return ( Input.isPressed($gameSystem._drill_OKe_pad['throw_repeat']) 
+				&& Input.isPressed($gameSystem._drill_OKe_pad['fn_repeat']) );
 			}
-			return Input.isPressed($gameSystem._drill_input_pad['throw_repeat']);
+			return Input.isPressed($gameSystem._drill_OKe_pad['throw_repeat']);
 		}else{	//键盘
-			if( $gameSystem._drill_input_keyboard['throw'].map( function(value,index,array){ 
+			if( $gameSystem._drill_OKe_keyboard['throw'].map( function(value,index,array){ 
 					var b = true;
 					if( value.AA != "" && !Input.isPressed( value.AA ) ){
 						b = false;
@@ -1402,21 +1485,21 @@ if( Imported.Drill_PickThrow ){
 	}
 }
 
-//==============================
+//=============================================================================
 // * 【互动-跳跃能力】按键条件
-//==============================
+//=============================================================================
 if( Imported.Drill_Jump ){
 	Game_Player.prototype.drill_isJumpControl = function() {
 		if(DrillUp.g_jump_mouse || DrillUp.jump_mouse){ return true; }
-		if(Input.drill_isGamepadControling()){	//手柄
-			if( $gameSystem._drill_input_pad['jump_has_fn'] ){
-				return ( Input.isPressed($gameSystem._drill_input_pad['jump_repeat']) 
-				&& Input.isPressed($gameSystem._drill_input_pad['fn_repeat']) );
+		if(Input.drill_OKe_isGamepadControling()){	//手柄
+			if( $gameSystem._drill_OKe_pad['jump_has_fn'] ){
+				return ( Input.isPressed($gameSystem._drill_OKe_pad['jump_repeat']) 
+				&& Input.isPressed($gameSystem._drill_OKe_pad['fn_repeat']) );
 			}
-			return Input.isPressed($gameSystem._drill_input_pad['jump_repeat']);
+			return Input.isPressed($gameSystem._drill_OKe_pad['jump_repeat']);
 		}else{
 			//键盘监听
-			if( $gameSystem._drill_input_keyboard['jump'].map( function(value,index,array){ 
+			if( $gameSystem._drill_OKe_keyboard['jump'].map( function(value,index,array){ 
 					var b = false;
 					if( value.BB == "" ){
 						if(Input.isTriggered( value.AA )){
@@ -1439,21 +1522,21 @@ if( Imported.Drill_Jump ){
 	}
 }
 
-//==============================
+//=============================================================================
 // * 【互动-原地转向能力】按键条件
-//==============================
+//=============================================================================
 if( Imported.Drill_RotateDirection ){
 	Game_Player.prototype.drill_isRotateControl = function() {
-		if(Input.drill_isGamepadControling()){	//手柄
-			if( $gameSystem._drill_input_pad['rotate_has_fn'] ){
-				return Input.isPressed( $gameSystem._drill_input_pad['fn_repeat'] ) && 
+		if(Input.drill_OKe_isGamepadControling()){	//手柄
+			if( $gameSystem._drill_OKe_pad['rotate_has_fn'] ){
+				return Input.isPressed( $gameSystem._drill_OKe_pad['fn_repeat'] ) && 
 					( this.getInputDirection() == 2 ||
 					 this.getInputDirection() == 4 ||
 					 this.getInputDirection() == 6 ||
 					 this.getInputDirection() == 8 
 					);
 			}else{
-				return  !Input.isPressed( $gameSystem._drill_input_pad['fn_repeat'] ) && 
+				return  !Input.isPressed( $gameSystem._drill_OKe_pad['fn_repeat'] ) && 
 					( this.getInputDirection() == 2 ||
 					 this.getInputDirection() == 4 ||
 					 this.getInputDirection() == 6 ||
@@ -1461,7 +1544,7 @@ if( Imported.Drill_RotateDirection ){
 					);
 			}
 		}else{	//键盘
-			if( $gameSystem._drill_input_keyboard['rotate'].map( function(value,index,array){ 
+			if( $gameSystem._drill_OKe_keyboard['rotate'].map( function(value,index,array){ 
 					return Input.isPressed( value.AA ) ;
 				}, this).indexOf(true) != -1
 			){
@@ -1476,20 +1559,20 @@ if( Imported.Drill_RotateDirection ){
 	}
 }
 
-//==============================
+//=============================================================================
 // * 【炸弹人-游戏核心】按键条件
-//==============================
+//=============================================================================
 if( Imported.Drill_BombCore ){
 	Game_Player.prototype.drill_isBombControl = function() {
-		if(Input.drill_isGamepadControling()){	//手柄
-			if( $gameSystem._drill_input_pad['bomb_has_fn'] ){
-				return ( Input.isPressed($gameSystem._drill_input_pad['bomb_repeat']) 
-				&& Input.isPressed($gameSystem._drill_input_pad['fn_repeat']) );
+		if(Input.drill_OKe_isGamepadControling()){	//手柄
+			if( $gameSystem._drill_OKe_pad['bomb_has_fn'] ){
+				return ( Input.isPressed($gameSystem._drill_OKe_pad['bomb_repeat']) 
+				&& Input.isPressed($gameSystem._drill_OKe_pad['fn_repeat']) );
 			}
-			return Input.isPressed($gameSystem._drill_input_pad['bomb_repeat']);
+			return Input.isPressed($gameSystem._drill_OKe_pad['bomb_repeat']);
 		}else{
 			//键盘监听
-			return $gameSystem._drill_input_keyboard['bomb'].some( function(value,index,array){ 
+			return $gameSystem._drill_OKe_keyboard['bomb'].some( function(value,index,array){ 
 				if( value.BB == "" ){
 					if(Input.isTriggered( value.AA )){
 						return true;

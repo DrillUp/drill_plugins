@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.5]        图片 - 快捷操作
+ * @plugindesc [v1.6]        图片 - 快捷操作
  * @author Drill_up
  * 
  * @Drill_LE_param "预加载资源-%d"
@@ -192,6 +192,8 @@
  * 优化了部分内容的兼容性。
  * [v1.5]
  * 优化了数学缩短锚点的计算公式。
+ * [v1.6]
+ * 修复了预加载有时候失效的bug。
  * 
  * 
  * 
@@ -1913,9 +1915,10 @@
 var _drill_PSh_temp_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {
     _drill_PSh_temp_initialize.call(this);
-    this._drill_PSh_preloadTank = [];			//图片贴图容器
+	this._drill_PSh_cacheId = Utils.generateRuntimeId();	//图片缓存id
+    this._drill_PSh_preloadTank = [];						//图片贴图容器
 	for( var i=0; i < DrillUp.g_PSh_pics.length; i++ ){
-		var temp_bitmap = ImageManager.loadPicture( DrillUp.g_PSh_pics[i] );
+		var temp_bitmap = ImageManager.reservePicture( DrillUp.g_PSh_pics[i], 0, this._drill_PSh_cacheId );
 		this._drill_PSh_preloadTank.push(temp_bitmap);
 	}
 }
@@ -1925,8 +1928,8 @@ Game_Temp.prototype.initialize = function() {
 var _drill_PSh_sp_updateBitmap = Sprite_Picture.prototype.updateBitmap;
 Sprite_Picture.prototype.updateBitmap = function() {
     var picture = this.picture();
-    if( picture && picture._name_id != -1 ){
-		this.bitmap = $gameTemp._drill_PSh_preloadTank[ picture._name_id ];
+    if( picture && picture._drill_nameId != -1 ){
+		this.bitmap = $gameTemp._drill_PSh_preloadTank[ picture._drill_nameId ];
 	}else{
 		_drill_PSh_sp_updateBitmap.call(this);
 	}
@@ -1937,10 +1940,9 @@ Sprite_Picture.prototype.updateBitmap = function() {
 // ** 插件指令
 //=============================================================================
 var _Drill_PSh_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
-	_Drill_PSh_pluginCommand.call(this, command, args);
-	
-	if( command === ">图片快捷操作" ){ 
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
+	_Drill_PSh_pluginCommand.call( this, command, args );
+	if( command == ">图片快捷操作" ){ 
 		
 		/*-----------------对象组获取------------------*/
 		var pics = null;			// 图片对象组
@@ -2636,7 +2638,7 @@ Game_Picture.prototype.drill_PSh_updateCommandExecute = function() {
 		
 		// > 预加载资源
 		if( command["type"] == "preload" ){
-			this._name_id = command["value"];
+			this._drill_nameId = command["value"];
 			command["needDestroy"] = true;
 		}
 		// > 混合模式
@@ -2910,7 +2912,7 @@ Scene_Battle.prototype.drill_PSh_updatePicLayer = Scene_Map.prototype.drill_PSh_
 var _Drill_PSh_p_initialize2 = Game_Picture.prototype.initialize;
 Game_Picture.prototype.initialize = function() {
 	_Drill_PSh_p_initialize2.call(this);
-	this._name_id = -1;				//预加载设置
+	this._drill_nameId = -1;		//预加载设置
 	this._last_origin = 0;			//上一个origin捕获
 	this._anchorX = 0;				//锚点X
 	this._anchorY = 0;				//锚点Y
@@ -2925,7 +2927,7 @@ var _Drill_PSh_p_show = Game_Picture.prototype.show;
 Game_Picture.prototype.show = function(name, origin, x, y, scaleX, scaleY, opacity, blendMode) {
 	
 	// > 预加载设置
-	this._name_id = -1;
+	this._drill_nameId = -1;
 	
 	// > origin切换时控制
 	if( this._last_origin != origin ){

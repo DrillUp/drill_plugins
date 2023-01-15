@@ -398,19 +398,92 @@ Game_Screen.prototype.drill_MDP_isPictureExist = function( pic_id ){
 	return true;
 };
 
-//=============================================================================
-// ** 存储数据变量初始化
-//=============================================================================
-var _drill_MDP_initialize = Game_System.prototype.initialize;
+
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_MDP_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_MDP_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-	_drill_MDP_initialize.call(this);
+    _drill_MDP_sys_initialize.call(this);
+	this.drill_MDP_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_MDP_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_MDP_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_MDP_saveEnabled == true ){	
+		$gameSystem.drill_MDP_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_MDP_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_MDP_initSysData = function() {
+	this.drill_MDP_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_MDP_checkSysData = function() {
+	this.drill_MDP_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_MDP_initSysData_Private = function() {
 	
 	this._drill_MDP_dragableLeft = DrillUp.g_MDP_dragableLeft ;			//鼠标左键是否可拖拽
 	this._drill_MDP_dragableMiddle = DrillUp.g_MDP_dragableMiddle ;		//鼠标中键是否可拖拽
 	this._drill_MDP_dragableRight = DrillUp.g_MDP_dragableRight ;		//鼠标右键是否可拖拽
 	this._drill_MDP_dragMode = DrillUp.g_MDP_dragMode ;					//拖拽模式
 	this._drill_MDP_dragAutoTop = DrillUp.g_MDP_dragAutoTop ;			//自动顺序置顶
-}
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_MDP_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_MDP_dragMode == undefined ){
+		this.drill_MDP_initSysData();
+	}
+	
+};
+
 
 //=============================================================================
 // ** 图片容器

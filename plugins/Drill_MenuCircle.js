@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.5]        主菜单 - 多层菜单魔法圈
+ * @plugindesc [v1.6]        主菜单 - 多层菜单魔法圈
  * @author Drill_up
  * 
  * @Drill_LE_param "魔法圈-%d"
@@ -104,6 +104,8 @@
  * [v1.5]
  * 优化了内部结构。
  * 旋转速度单位改为 角度/帧。
+ * [v1.6]
+ * 优化了旧存档的识别与兼容。
  *
  *
  * @param ---魔法圈组 1至20---
@@ -845,11 +847,8 @@
 			var temp = JSON.parse(DrillUp.parameters["魔法圈-" + String(i+1) ]);
 			DrillUp.g_MCi_list[i] = DrillUp.drill_MCi_circleInit( temp );
 			DrillUp.g_MCi_list[i]['id'] = Number(i)+1;
-			DrillUp.g_MCi_list[i]['inited'] = true;
 		}else{
-			DrillUp.g_MCi_list[i] = DrillUp.drill_MCi_circleInit( {} );
-			DrillUp.g_MCi_list[i]['id'] = Number(i)+1;
-			DrillUp.g_MCi_list[i]['inited'] = false;
+			DrillUp.g_MCi_list[i] = null;		//（强制设为空值，节约存储资源）
 		}
 	}
 	
@@ -867,7 +866,7 @@ ImageManager.load_MenuLayer = function(filename) {
 var _drill_MCi_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_MCi_pluginCommand.call(this, command, args);
-	if (command === '>菜单魔法圈') {
+	if( command === ">菜单魔法圈" ){
 		if(args.length == 4){
 			var temp1 = String(args[1]);
 			temp1 = temp1.replace("魔法圈[","");
@@ -884,19 +883,107 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 };
 
-//=============================================================================
-// ** 存储数据初始化
-//=============================================================================
+
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_MCi_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_MCi_sys_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function() {	
-	_drill_MCi_sys_initialize.call(this);
+Game_System.prototype.initialize = function() {
+    _drill_MCi_sys_initialize.call(this);
+	this.drill_MCi_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_MCi_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_MCi_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_MCi_saveEnabled == true ){	
+		$gameSystem.drill_MCi_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_MCi_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_MCi_initSysData = function() {
+	this.drill_MCi_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_MCi_checkSysData = function() {
+	this.drill_MCi_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_MCi_initSysData_Private = function() {
+	
 	this._drill_MCi_visible = [];
 	for(var i = 0; i< DrillUp.g_MCi_list.length ;i++){
 		var temp_data = DrillUp.g_MCi_list[i];
 		if( temp_data == undefined ){ continue; }
-		if( temp_data['inited'] != true ){ continue; }
-		
 		this._drill_MCi_visible[i] = temp_data['visible'];
+	}
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_MCi_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_MCi_visible == undefined ){
+		this.drill_MCi_initSysData();
+	}
+	
+	// > 容器的 空数据 检查
+	for(var i = 0; i < DrillUp.g_MCi_list.length; i++ ){
+		var temp_data = DrillUp.g_MCi_list[i];
+		
+		// > 已配置（undefined表示未配置的空数据）
+		if( temp_data != undefined ){
+			
+			// > 未存储的，重新初始化
+			if( this._drill_MCi_visible[i] == undefined ){
+				this._drill_MCi_visible[i] = temp_data['visible'];
+			
+			// > 已存储的，跳过
+			}else{
+				//（不操作）
+			}
+		}
 	}
 };
 
@@ -1030,16 +1117,15 @@ Scene_MenuBase.prototype.drill_MCi_create = function() {
 	SceneManager._drill_MCi_created = true;
 	
 	if(!this._drill_MCi_spriteTank){	//防止覆写报错 - 贴图初始化
-		this._drill_MCi_spriteTank = [];
-		this._drill_MCi_spriteChildTank = [];
-		this._drill_MCi_dataTank = [];
+		this._drill_MCi_spriteTank = [];		//（数组元素不允许出现null值）
+		this._drill_MCi_spriteChildTank = [];	//（数组元素不允许出现null值）
+		this._drill_MCi_dataTank = [];			//（数组元素不允许出现null值）
 	}
 	
 	// > 配置的魔法圈
 	for (var i = 0; i < DrillUp.g_MCi_list.length; i++) {
 		var temp_data = DrillUp.g_MCi_list[i];
 		if( temp_data == undefined ){ continue; }
-		if( temp_data['inited'] != true ){ continue; }
 		
 		if( this.drill_MCi_checkKeyword( temp_data ) ){
 			// > 魔法圈贴图

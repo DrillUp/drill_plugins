@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        键盘 - 秘籍输入器
+ * @plugindesc [v1.5]        键盘 - 秘籍输入器
  * @author Drill_up
  * 
  * @Drill_LE_param "秘籍-%d"
@@ -94,8 +94,11 @@
  * 添加了 地图界面 中串行并行的支持。
  * [v1.4]
  * 修改了插件分类。
+ * [v1.5]
+ * 优化了旧存档的识别与兼容。
  * 
- *
+ * 
+ * 
  * @param ---秘籍组 1至20---
  * @default
  *
@@ -484,39 +487,52 @@
 	DrillUp.parameters = PluginManager.parameters('Drill_SecretCode');
 	
 	
+	//==============================
+	// * 变量获取 - 指针与边框
+	//				（~struct~DrillSCo）
+	//==============================
+	DrillUp.drill_SCo_initDrillSCo = function( dataFrom ){
+		var data = {};
+		data['enable'] = String( dataFrom["初始是否开启"] || "true") == "true";
+		data['commonEventId'] = Number( dataFrom["执行的公共事件"] || 0);
+		data['pipeType'] = String( dataFrom["公共事件执行方式"] || "串行");
+		data['mouse_enable'] = String( dataFrom["是否启用鼠标触发"] || "false") == "true";
+		if( dataFrom["鼠标触发顺序"] != undefined &&
+			dataFrom["鼠标触发顺序"] != "" ){
+			data['mouse_seq'] = JSON.parse( dataFrom["鼠标触发顺序"] );
+		}else{
+			data['mouse_seq'] = [];
+		}
+		data['key_enable'] = String( dataFrom["是否启用键盘触发"] || "false") == "true";
+		if( dataFrom["键盘触发顺序"] != undefined &&
+			dataFrom["键盘触发顺序"] != "" ){
+			data['key_seq'] = JSON.parse( dataFrom["键盘触发顺序"] );
+		}else{
+			data['key_seq'] = [];
+		}
+		data['pad_enable'] = String( dataFrom["是否启用手柄触发"] || "false") == "true";
+		if( dataFrom["手柄触发顺序"] != undefined &&
+			dataFrom["手柄触发顺序"] != "" ){
+			data['pad_seq'] = JSON.parse( dataFrom["手柄触发顺序"] );
+		}else{
+			data['pad_seq'] = [];
+		}
+		data['mouse_cur'] = 0;
+		data['key_cur'] = 0;
+		data['pad_cur'] = 0;
+		return data;
+	}
+	
 	/*-----------------秘籍------------------*/
 	DrillUp.g_SCo_list_length = 40;
 	DrillUp.g_SCo_list = [];
 	for (var i = 0; i < DrillUp.g_SCo_list_length; i++) {
 		if( DrillUp.parameters["秘籍-" + String(i+1) ] != undefined &&
 			DrillUp.parameters["秘籍-" + String(i+1) ] != "" ){
-			DrillUp.g_SCo_list[i] = JSON.parse(DrillUp.parameters["秘籍-" + String(i+1) ]);
-			DrillUp.g_SCo_list[i]['enable'] = String(DrillUp.g_SCo_list[i]["初始是否开启"] || "true") == "true";
-			DrillUp.g_SCo_list[i]['commonEventId'] = Number(DrillUp.g_SCo_list[i]["执行的公共事件"] || 0);
-			DrillUp.g_SCo_list[i]['pipeType'] = String(DrillUp.g_SCo_list[i]["公共事件执行方式"] || "串行");
-			DrillUp.g_SCo_list[i]['mouse_enable'] = String(DrillUp.g_SCo_list[i]["是否启用鼠标触发"] || "false") == "true";
-			if( DrillUp.g_SCo_list[i]["鼠标触发顺序"] != undefined &&
-				DrillUp.g_SCo_list[i]["鼠标触发顺序"] != "" ){
-				DrillUp.g_SCo_list[i]['mouse_seq'] = JSON.parse(DrillUp.g_SCo_list[i]["鼠标触发顺序"]);
-			}else{
-				DrillUp.g_SCo_list[i]['mouse_seq'] = [];
-			}
-			DrillUp.g_SCo_list[i]['key_enable'] = String(DrillUp.g_SCo_list[i]["是否启用键盘触发"] || "false") == "true";
-			if( DrillUp.g_SCo_list[i]["键盘触发顺序"] != undefined &&
-				DrillUp.g_SCo_list[i]["键盘触发顺序"] != "" ){
-				DrillUp.g_SCo_list[i]['key_seq'] = JSON.parse(DrillUp.g_SCo_list[i]["键盘触发顺序"]);
-			}else{
-				DrillUp.g_SCo_list[i]['key_seq'] = [];
-			}
-			DrillUp.g_SCo_list[i]['pad_enable'] = String(DrillUp.g_SCo_list[i]["是否启用手柄触发"] || "false") == "true";
-			if( DrillUp.g_SCo_list[i]["手柄触发顺序"] != undefined &&
-				DrillUp.g_SCo_list[i]["手柄触发顺序"] != "" ){
-				DrillUp.g_SCo_list[i]['pad_seq'] = JSON.parse(DrillUp.g_SCo_list[i]["手柄触发顺序"]);
-			}else{
-				DrillUp.g_SCo_list[i]['pad_seq'] = [];
-			}
+			var data = JSON.parse(DrillUp.parameters["秘籍-" + String(i+1) ]);
+			DrillUp.g_SCo_list[i] = DrillUp.drill_SCo_initDrillSCo( data );
 		}else{
-			DrillUp.g_SCo_list[i] = [];
+			DrillUp.g_SCo_list[i] = null;
 		}
 	}
 
@@ -532,35 +548,128 @@ if( Imported.Drill_CoreOfInput ){
 var _drill_SCo_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_SCo_pluginCommand.call(this, command, args);
-	
-	if (command === ">开启秘籍")  {
+	if( command === ">开启秘籍" ){
 		if( args.length == 2 ){
 			var temp1 = Number(args[1]) - 1;
-			$gameSystem._drill_SCo[temp1]['enable'] = true;
+			var data = $gameSystem._drill_SCo_list[temp1];
+			if( data == undefined ){ return; }
+			data['enable'] = true;
 		}
 	};
-	if (command === ">关闭秘籍")  {
+	if( command === ">关闭秘籍" ){
 		if( args.length == 2 ){
 			var temp1 = Number(args[1]) - 1;
-			$gameSystem._drill_SCo[temp1]['enable'] = false;
+			var data = $gameSystem._drill_SCo_list[temp1];
+			if( data == undefined ){ return; }
+			data['enable'] = false;
 		}
 	}
 };
-//=============================================================================
-// ** 存储初始化
-//=============================================================================
-var _drill_SCo_system_initialize = Game_System.prototype.initialize;
+
+
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_SCo_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_SCo_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-    _drill_SCo_system_initialize.call(this);
-	this._drill_SCo = [];
-	for(var i=0; i<DrillUp.g_SCo_list.length; i++){
-		var data = JSON.parse(JSON.stringify( DrillUp.g_SCo_list[i] ));
-		data['mouse_cur'] = 0;
-		data['key_cur'] = 0;
-		data['pad_cur'] = 0;
-		this._drill_SCo.push(data);
+    _drill_SCo_sys_initialize.call(this);
+	this.drill_SCo_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_SCo_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_SCo_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_SCo_saveEnabled == true ){	
+		$gameSystem.drill_SCo_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_SCo_initSysData();
 	}
-};	
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_SCo_initSysData = function() {
+	this.drill_SCo_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_SCo_checkSysData = function() {
+	this.drill_SCo_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_SCo_initSysData_Private = function() {
+	
+	this._drill_SCo_list = [];
+	for(var i=0; i < DrillUp.g_SCo_list.length; i++){
+		var temp_data = DrillUp.g_SCo_list[i];
+		if( temp_data == undefined ){ continue; }
+		this._drill_SCo_list[i] = JSON.parse(JSON.stringify( temp_data ));
+	}
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_SCo_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_SCo_list == undefined ){
+		this.drill_SCo_initSysData();
+	}
+	
+	// > 绑定数据容器
+	for(var i = 0; i < DrillUp.g_SCo_list.length; i++ ){
+		var temp_data = DrillUp.g_SCo_list[i];
+		
+		// > 已配置（undefined表示未配置的空数据）
+		if( temp_data != undefined ){
+			
+			// > 未存储的，重新初始化
+			if( this._drill_SCo_list[i] == undefined ){
+				this._drill_SCo_list[i] = JSON.parse(JSON.stringify( temp_data ));
+			
+			// > 已存储的，跳过
+			}else{
+				//（不操作）
+			}
+		}
+	}
+};
+
 
 //=============================================================================
 // ** 地图界面
@@ -579,8 +688,9 @@ Scene_Map.prototype.update = function() {
 // * 帧刷新 - 输入监听
 //==============================
 Scene_Map.prototype.drill_SCo_updateInput = function() {
-	for(var i=0; i<$gameSystem._drill_SCo.length; i++){
-		var data = $gameSystem._drill_SCo[i];
+	for(var i=0; i<$gameSystem._drill_SCo_list.length; i++){
+		var data = $gameSystem._drill_SCo_list[i];
+		if( data == undefined ){ continue; }
 		if( data['enable'] == false ){ continue; }
 		
 		// > 鼠标监听
@@ -669,9 +779,9 @@ Scene_Map.prototype.drill_SCo_doCommonEvent = function( data ){
 // * 帧刷新 - 鼠标按下监听
 //==============================
 Scene_Map.prototype.drill_SCo_isAnyOnMouse = function() {
-	if ( TouchInput.drill_isLeftReleased() ) {return true};
-	if ( TouchInput.drill_isRightReleased() ) {return true};
-	if ( TouchInput.drill_isMiddleReleased() ) {return true};
+	if( TouchInput.drill_isLeftReleased() ){ return true };
+	if( TouchInput.drill_isRightReleased() ){ return true };
+	if( TouchInput.drill_isMiddleReleased() ){ return true };
 	//鼠标滚轮是持续性动作，这里不能记录，否则 上滚 + 上滚 无法识别。
 	return false;	
 };
@@ -680,11 +790,11 @@ Scene_Map.prototype.drill_SCo_isAnyOnMouse = function() {
 //==============================
 Scene_Map.prototype.drill_SCo_isOnMouse = function( type ) {
 	if( type == "左键释放[一帧]" ){
-		if ( TouchInput.drill_isLeftReleased() ) {return true};
+		if( TouchInput.drill_isLeftReleased() ){ return true };
 	}else if( type == "右键释放[一帧]" ){
-		if ( TouchInput.drill_isRightReleased() ) {return true};
+		if( TouchInput.drill_isRightReleased() ){ return true };
 	}else if( type == "滚轮释放[一帧]" ){
-		if ( TouchInput.drill_isMiddleReleased() ) {return true};
+		if( TouchInput.drill_isMiddleReleased() ){ return true };
 	}
 	return false;	
 };

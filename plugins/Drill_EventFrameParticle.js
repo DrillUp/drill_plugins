@@ -1954,15 +1954,6 @@ Game_Event.prototype.drill_EFPa_setupPageSettings = function() {
 
 
 //=============================================================================
-// ** 存储变量初始化
-//=============================================================================
-var _drill_EFPa_sys_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function() {
-    _drill_EFPa_sys_initialize.call(this);
-	
-	//...
-};	
-//=============================================================================
 // ** 临时变量初始化
 //=============================================================================
 var _drill_EFPa_temp_initialize = Game_Temp.prototype.initialize;
@@ -3078,7 +3069,6 @@ Drill_EFPa_Sprite.prototype.drill_EFPa_initSprite_Private = function(){
 	// > 属性初始化
 	this.anchor.x = 0.5;
 	this.anchor.y = 0.5;
-	this.blendMode = data['blendMode'];
 	this.zIndex = data['zIndex'];
 	this.visible = false;
 	
@@ -3090,6 +3080,7 @@ Drill_EFPa_Sprite.prototype.drill_EFPa_initSprite_Private = function(){
 		temp_sprite.bitmap = ImageManager.loadBitmap( data['src_img_file'], data['src_img'], 0, true );
 		temp_sprite.anchor.x = 0.5;
 		temp_sprite.anchor.y = 0.5;
+		temp_sprite.blendMode = data['blendMode'];
 		temp_sprite.opacity = 0;
 		this._drill_EFPa_parSprite.push(temp_sprite);
 		this.addChild(temp_sprite);
@@ -3261,6 +3252,7 @@ Drill_EFPa_Sprite.prototype.drill_EFPa_isOptimizationPassed_Private = function()
 	}
 	return true;
 }
+DrillUp.g_LCa_alert = true;
 //==============================
 // * 优化策略 - 判断贴图是否在镜头范围内
 //==============================
@@ -3270,11 +3262,15 @@ Drill_EFPa_Sprite.prototype.drill_EFPa_posIsInCamera = function( realX, realY ){
 	var sww = oww;
 	var shh = ohh;
 	if( Imported.Drill_LayerCamera ){
+		if( $gameSystem._drill_LCa_controller == undefined && DrillUp.g_LCa_alert == true ){ 
+			alert("【Drill_EventFrameParticle.js 行走图 - 多层行走图粒子】\n活动地图镜头插件版本过低，你需要更新 镜头插件 至少v1.9及以上版本。");
+			DrillUp.g_LCa_alert = false;
+		}
 		sww = sww / $gameSystem._drill_LCa_controller._drill_scaleX;
 		shh = shh / $gameSystem._drill_LCa_controller._drill_scaleY;
 	}
-	return  Math.abs($gameMap.adjustX(realX + 0.5 - oww*0.5)) <= sww*0.5 + 5.5 &&	//（镜头范围+5个图块边框区域） 
-			Math.abs($gameMap.adjustY(realY + 0.5 - ohh*0.5)) <= shh*0.5 + 5.5 ;
+	return  Math.abs($gameMap.adjustX(realX + 0.5) - oww*0.5) <= sww*0.5 + 5.5 &&	//（镜头范围+5个图块边框区域） 
+			Math.abs($gameMap.adjustY(realY + 0.5) - ohh*0.5) <= shh*0.5 + 5.5 ;
 }
 
 
@@ -3302,7 +3298,6 @@ Drill_EFPa_SecSprite.prototype.initialize = function( parentSprite ){
 	// > 私有属性初始化
 	this.anchor.x = 0.5;
 	this.anchor.y = 0.5;
-	this.blendMode = this._drill_parentSprite.blendMode;
 	this.zIndex = this._drill_controller._drill_data['second_zIndex'];
 	this.opacity = 0;
 	this.visible = false;
@@ -3411,6 +3406,7 @@ Drill_EFPa_SecSprite.prototype.drill_EFPa_isOptimizationPassed_Private = functio
 	}
 	return true;
 }
+DrillUp.g_LCa_alert = true;
 //==============================
 // * 优化策略 - 判断贴图是否在镜头范围内
 //==============================
@@ -3420,11 +3416,15 @@ Drill_EFPa_SecSprite.prototype.drill_EFPa_posIsInCamera = function( realX, realY
 	var sww = oww;
 	var shh = ohh;
 	if( Imported.Drill_LayerCamera ){
+		if( $gameSystem._drill_LCa_controller == undefined && DrillUp.g_LCa_alert == true ){ 
+			alert("【Drill_EventFrameParticle.js 行走图 - 多层行走图粒子】\n活动地图镜头插件版本过低，你需要更新 镜头插件 至少v1.9及以上版本。");
+			DrillUp.g_LCa_alert = false;
+		}
 		sww = sww / $gameSystem._drill_LCa_controller._drill_scaleX;
 		shh = shh / $gameSystem._drill_LCa_controller._drill_scaleY;
 	}
-	return  Math.abs($gameMap.adjustX(realX + 0.5 - oww*0.5)) <= sww*0.5 + 5.5 &&	//（镜头范围+5个图块边框区域） 
-			Math.abs($gameMap.adjustY(realY + 0.5 - ohh*0.5)) <= shh*0.5 + 5.5 ;
+	return  Math.abs($gameMap.adjustX(realX + 0.5) - oww*0.5) <= sww*0.5 + 5.5 &&	//（镜头范围+5个图块边框区域） 
+			Math.abs($gameMap.adjustY(realY + 0.5) - ohh*0.5) <= shh*0.5 + 5.5 ;
 }
 
 

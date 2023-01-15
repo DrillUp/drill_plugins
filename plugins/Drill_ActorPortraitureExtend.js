@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        战斗UI - 高级角色肖像
+ * @plugindesc [v1.5]        战斗UI - 高级角色肖像
  * @author Drill_up
  * 
  * @Drill_LE_param "角色肖像-%d"
@@ -43,6 +43,7 @@
  *      一般设定X轴正数向右负数向左，这里是正数向左负数向右。
  *   (3.每个肖像都对应两个动画序列，动画序列在核心中进行配置。
  *      一个前视图GIF动画序列，一个背景图GIF动画序列。
+ *   (4.插件1.4之前版本的状态元不会立刻改变，新版本的切换都为立刻改变。
  * 触发时机：
  *   (1.触发时机与事件页的功能相似，
  *      如果触发同时满足多个触发时机，则序号大的触发时机优先。
@@ -87,6 +88,9 @@
  * 修复了 选择随机技能时 角色肖像不消失的bug。
  * [v1.4]
  * 在触发条件中添加了 状态条件，可以设置指定状态下的角色肖像。
+ * [v1.5]
+ * 较大幅度更新了 动画序列底层，该插件重新兼容。
+ * 
  * 
  *
  * @param ----常规----
@@ -881,7 +885,7 @@
  * @param --触发前视图--
  * @desc 
  * 
- * @param 前视图-是否切换状态元集合
+ * @param 前视图-是否播放状态节点
  * @parent --触发前视图--
  * @type boolean
  * @on 切换
@@ -889,11 +893,10 @@
  * @desc true - 切换，false - 关闭
  * @default false
  *
- * @param 前视图-切换的状态元集合
- * @parent 前视图-是否切换状态元集合
- * @type text[]
- * @desc 角色肖像的动画序列切换的状态元集合，比如['小爱丽丝静止1']，如果动画序列没有对应的状态名，则没有效果。
- * @default [""]
+ * @param 前视图-播放状态节点
+ * @parent 前视图-是否播放状态节点
+ * @desc 角色肖像的动画序列播放的状态节点，如果动画序列没有对应的状态节点，则没有效果。
+ * @default 状态节点名称(需配置)
  * 
  * @param 前视图-是否播放一次动作
  * @parent --触发前视图--
@@ -906,13 +909,13 @@
  * @param 前视图-播放的动作名
  * @parent 前视图-是否播放一次动作
  * @desc 角色肖像的动画序列播放的动作元，如果动画序列没有对应动作名，则没有效果。
- * @default 默认动作
+ * @default 动作元名称(需配置)
  * 
  * 
  * @param --触发背景图--
  * @desc 
  * 
- * @param 背景图-是否切换状态元集合
+ * @param 背景图-是否播放状态节点
  * @parent --触发背景图--
  * @type boolean
  * @on 切换
@@ -920,11 +923,10 @@
  * @desc true - 切换，false - 关闭
  * @default false
  *
- * @param 背景图-切换的状态元集合
- * @parent 背景图-是否切换状态元集合
- * @type text[]
- * @desc 背景的动画序列进入的状态元集合，比如['小爱丽丝静止1']，如果动画序列没有对应的状态名，则没有效果。
- * @default [""]
+ * @param 背景图-播放状态节点
+ * @parent 背景图-是否播放状态节点
+ * @desc 背景的动画序列播放的状态节点，如果动画序列没有对应的状态节点，则没有效果。
+ * @default 状态节点名称(需配置)
  * 
  * @param 背景图-是否播放一次动作
  * @parent --触发背景图--
@@ -937,7 +939,7 @@
  * @param 背景图-播放的动作名
  * @parent 背景图-是否播放一次动作
  * @desc 背景的动画序列播放的动作元，如果动画序列没有对应动作名，则没有效果。
- * @default 默认动作
+ * @default 动作元名称(需配置)
  * 
  *
  */
@@ -991,6 +993,36 @@
 //			
 
 //=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_APEx_tipCurName = "Drill_ActorPortraitureExtend.js 战斗UI-高级角色肖像";
+	DrillUp.g_APEx_tipBasePluginList = ["Drill_CoreOfActionSequence.js 系统-GIF动画序列核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_APEx_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_APEx_tipBasePluginList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_APEx_tipCurName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_APEx_tipBasePluginList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_APEx_tipBasePluginList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 强制更新要求
+	//==============================
+	DrillUp.drill_APEx_getPluginTip_NeedUpdate = function(){
+		return DrillUp.g_APEx_tipCurName + "\n GIF动画序列核心 插件版本过低，请及时更新核心插件，以及所有动画序列相关子插件。";
+	};
+
+//=============================================================================
 // ** 变量获取
 //=============================================================================
 　　var Imported = Imported || {};
@@ -1032,14 +1064,14 @@
 		// > 触发条件(一帧)
 		data['action_type'] = String( dataFrom["触发条件(一帧)"] || "" );
 		// > 触发动作
-		data['trigger_p_state_enable'] = String( dataFrom["前视图-是否切换状态元集合"] || "false") == "true";
-		data['trigger_p_state_default'] = String( dataFrom["前视图-是否恢复为默认集合"] || "false") == "true";		// （此编辑项去掉，严重影响配置时的理解）
-		data['trigger_p_state_seq'] = JSON.parse( dataFrom["前视图-切换的状态元集合"] || "[]");
+		data['trigger_p_state_enable'] = String( dataFrom["前视图-是否播放状态节点"] || "false") == "true";
+		data['trigger_p_state_node'] = String( dataFrom["前视图-播放状态节点"] || "");
+		//data['trigger_p_state_default'] = String( dataFrom["前视图-是否恢复为默认集合"] || "false") == "true";		// （此编辑项去掉，严重影响配置时的理解）
 		data['trigger_p_act_enable'] = String( dataFrom["前视图-是否播放一次动作"] || "false") == "true";
 		data['trigger_p_act'] = String( dataFrom["前视图-播放的动作名"] || "");
-		data['trigger_b_state_enable'] = String( dataFrom["背景图-是否切换状态元集合"] || "false") == "true";
-		data['trigger_b_state_default'] = String( dataFrom["背景图-是否恢复为默认集合"] || "false") == "true";		// （此编辑项去掉，严重影响配置时的理解）
-		data['trigger_b_state_seq'] = JSON.parse( dataFrom["背景图-切换的状态元集合"] || "[]");
+		data['trigger_b_state_enable'] = String( dataFrom["背景图-是否播放状态节点"] || "false") == "true";
+		data['trigger_b_state_node'] = String( dataFrom["背景图-播放状态节点"] || "");
+		//data['trigger_b_state_default'] = String( dataFrom["背景图-是否恢复为默认集合"] || "false") == "true";		// （此编辑项去掉，严重影响配置时的理解）
 		data['trigger_b_act_enable'] = String( dataFrom["背景图-是否播放一次动作"] || "false") == "true";
 		data['trigger_b_act'] = String( dataFrom["背景图-播放的动作名"] || "");
 		return data;
@@ -1114,13 +1146,22 @@ if( Imported.Drill_CoreOfActionSequence ){
 	
 	
 //=============================================================================
+// * 强制更新要求
+//=============================================================================
+if( DrillUp.drill_COAS_getSequenceData == undefined ){
+	var tip = DrillUp.drill_APEx_getPluginTip_NeedUpdate();
+	alert( tip );
+};
+	
+	
+//=============================================================================
 // * 插件指令
 //=============================================================================
 var _drill_APEx_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_APEx_pluginCommand.call(this, command, args);
-	
-	if (command === ">角色肖像") { // >角色肖像 : 我方 : 1 : 强制处于条件 : 1
+	if( command === ">角色肖像" ){	// >角色肖像 : 我方 : 1 : 强制处于条件 : 1
+		
 		if(args.length == 8){
 			var group = String(args[1]);
 			var temp1 = Number(args[3]);
@@ -1135,7 +1176,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				if( group == "角色" ){
 					actor = $gameActors.actor(temp1);
 				}
-				if ( actor ) {
+				if( actor ){
 					actor._drill_APEx_force = temp2 -1;
 				}
 			}
@@ -1153,7 +1194,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				if( group == "角色" ){
 					actor = $gameActors.actor(temp1);
 				}
-				if ( actor ) {
+				if( actor ){
 					actor._drill_APEx_force = -1;
 				}
 			}
@@ -1450,13 +1491,10 @@ Drill_APEx_Sprite.prototype.drill_APEx_initSprite = function() {
 	this._drill_p_sprite._breath = Math.random() * 10;
 	this._drill_p_sprite._breath_dir = Math.floor(Math.random() * 2);
 	this._drill_p_sprite._f_time = 0;
-	if( data['p_actionSeq'] <= 0 ){  
-		this._drill_p_data = new Drill_COAS_Data( {} );
-	}else{
-		this._drill_p_data = new Drill_COAS_Data( DrillUp.g_COAS_list[ data['p_actionSeq']-1 ] );
-		this._drill_p_data['waitForPreload'] = true;		//（强制等待图片载入）
-	}
-	this._drill_p_decorator = new Drill_COAS_SpriteDecorator( this._drill_p_sprite, this._drill_p_data );
+	var seq_data = DrillUp.drill_COAS_getSequenceData( data['p_actionSeq']-1 );
+	if( seq_data == null ){ seq_data = {}; }
+	this._drill_p_controller = new Drill_COAS_MainController( seq_data );
+	this._drill_p_decorator = new Drill_COAS_SpriteDecorator( this._drill_p_sprite, this._drill_p_controller );
 	
 	// > 背景图
 	this._drill_b_sprite = new Sprite();
@@ -1466,12 +1504,10 @@ Drill_APEx_Sprite.prototype.drill_APEx_initSprite = function() {
 	this._drill_b_sprite.y = Graphics.boxHeight - DrillUp.g_APEx_b_y - DrillUp.g_APEx_b_silde_y;
 	this._drill_b_sprite.opacity = 0;
 	this._drill_b_sprite._move = 0;
-	if( data['b_actionSeq'] <= 0 ){  
-		this._drill_b_data = new Drill_COAS_Data( {} );
-	}else{
-		this._drill_b_data = new Drill_COAS_Data( DrillUp.g_COAS_list[ data['b_actionSeq']-1 ] );
-	}
-	this._drill_b_decorator = new Drill_COAS_SpriteDecorator( this._drill_b_sprite, this._drill_b_data );
+	var seq_data = DrillUp.drill_COAS_getSequenceData( data['b_actionSeq']-1 );
+	if( seq_data == null ){ seq_data = {}; }
+	this._drill_b_controller = new Drill_COAS_MainController( seq_data );
+	this._drill_b_decorator = new Drill_COAS_SpriteDecorator( this._drill_b_sprite, this._drill_b_controller );
 	
 	this.addChild(this._drill_b_sprite);	//背景图在后面
 	this.addChild(this._drill_p_sprite);
@@ -1626,9 +1662,9 @@ Drill_APEx_Sprite.prototype.drill_APEx_updateCondition = function() {
 		// > 前视图-切换状态元
 		if( condition['trigger_p_state_enable'] == true ){
 			if( condition['trigger_p_state_default'] == true ){
-				this.drill_APEx_p_setSequenceDefault();
+				this.drill_APEx_p_setStateNodeDefault();
 			}else{
-				this.drill_APEx_p_setSequence( condition['trigger_p_state_seq'] );
+				this.drill_APEx_p_setStateNode( condition['trigger_p_state_node'] );
 			}
 		}
 		// > 前视图-播放动作
@@ -1638,9 +1674,9 @@ Drill_APEx_Sprite.prototype.drill_APEx_updateCondition = function() {
 		// > 背景图-切换状态元
 		if( condition['trigger_b_state_enable'] == true ){
 			if( condition['trigger_b_state_default'] == true ){
-				this.drill_APEx_b_setSequenceDefault();
+				this.drill_APEx_b_setStateNodeDefault();
 			}else{
-				this.drill_APEx_b_setSequence( condition['trigger_b_state_seq'] );
+				this.drill_APEx_b_setStateNode( condition['trigger_b_state_node'] );
 			}
 		}
 		// > 背景图-播放动作
@@ -1709,10 +1745,10 @@ Drill_APEx_Sprite.prototype.drill_APEx_updatePosition = function() {
 //==============================
 Drill_APEx_Sprite.prototype.drill_APEx_updateGIF = function() {
 	
-	this._drill_p_data.update();		//（COAS核心控制刷新bitmap部分）
+	this._drill_p_controller.update();		//（COAS核心控制刷新bitmap部分）
 	this._drill_p_decorator.update();
 	
-	this._drill_b_data.update();
+	this._drill_b_controller.update();
 	this._drill_b_decorator.update();
 }
 
@@ -1760,68 +1796,77 @@ Drill_APEx_Sprite.prototype.drill_APEx_updateEffects = function() {
 }
 
 //==============================
-// * 动画序列 - 前视图 - 还原默认状态元集合
-//
-//			说明：	直接调用核心提供的接口即可，
-//					注意，不要为了简化，让插件指令直接去操作COAS核心函数。
+// * 动画序列-前视图 - 播放默认的状态元集合（开放函数）
 //==============================
-Drill_APEx_Sprite.prototype.drill_APEx_p_setSequenceDefault = function(){
-	this._drill_p_data.drill_COAS_setSequence( this._drill_p_data._drill_data['state_default_randomSeq'] );
+Drill_APEx_Sprite.prototype.drill_APEx_p_setStateNodeDefault = function(){
+	this.drill_APEx_p_setStateNode( "默认的状态元集合" );
 }
 //==============================
-// * 动画序列 - 前视图 - 设置状态元集合
+// * 动画序列-前视图 - 播放状态节点（开放函数）
+//			
+//			说明：	> 父函数执行一次就重置一次，父函数不能 放帧刷新里面反复执行。
+//					> 输入空名称时/无对应名称时 无效。
 //==============================
-Drill_APEx_Sprite.prototype.drill_APEx_p_setSequence = function( seq ){
-	this._drill_p_data.drill_COAS_setSequence( seq );
+Drill_APEx_Sprite.prototype.drill_APEx_p_setStateNode = function( node_name ){
+	
+	// > 去重处理
+	if( this._drill_APEx_p_lastName == node_name ){ return; }
+	this._drill_APEx_p_lastName = node_name;
+	
+	this._drill_p_controller.drill_COAS_setStateNode( node_name );
 }
 //==============================
-// * 动画序列 - 前视图 - 设置状态元集合，立刻改变
+// * 动画序列-前视图 - 播放简单状态元集合（开放函数）
 //==============================
-Drill_APEx_Sprite.prototype.drill_APEx_p_setSequenceImmediate = function( seq ){
-	this._drill_p_data.drill_COAS_setSequenceImmediate( seq );
-}
+//	（暂时不考虑用这个函数，不写了）
 //==============================
-// * 动画序列 - 前视图 - 添加动作
+// * 动画序列-前视图 - 播放动作元（开放函数）
 //==============================
 Drill_APEx_Sprite.prototype.drill_APEx_p_setAct = function( act_name ){
-	this._drill_p_data.drill_COAS_setAct( act_name );
+	this._drill_p_controller.drill_COAS_setAct( act_name );
 }
 //==============================
-// * 动画序列 - 前视图 - 立刻终止动作
+// * 动画序列-前视图 - 立刻终止动作（开放函数）
 //==============================
 Drill_APEx_Sprite.prototype.drill_APEx_p_stopAct = function(){
-	this._drill_p_data.drill_COAS_stopAct();
+	this._drill_p_controller.drill_COAS_stopAct();
 }
 
 //==============================
-// * 动画序列 - 背景图 - 还原默认状态元集合
+// * 动画序列-背景图 - 播放默认的状态元集合（开放函数）
 //==============================
-Drill_APEx_Sprite.prototype.drill_APEx_b_setSequenceDefault = function(){
-	this._drill_b_data.drill_COAS_setSequence( this._drill_b_data._drill_data['state_default_randomSeq'] );
+Drill_APEx_Sprite.prototype.drill_APEx_b_setStateNodeDefault = function(){
+	this.drill_APEx_b_setStateNode( "默认的状态元集合" );
 }
 //==============================
-// * 动画序列 - 背景图 - 设置状态元集合
+// * 动画序列-背景图 - 播放状态节点（开放函数）
+//			
+//			说明：	> 父函数执行一次就重置一次，父函数不能 放帧刷新里面反复执行。
+//					> 输入空名称时/无对应名称时 无效。
 //==============================
-Drill_APEx_Sprite.prototype.drill_APEx_b_setSequence = function( seq ){
-	this._drill_b_data.drill_COAS_setSequence( seq );
+Drill_APEx_Sprite.prototype.drill_APEx_b_setStateNode = function( node_name ){
+	
+	// > 去重处理
+	if( this._drill_APEx_b_lastName == node_name ){ return; }
+	this._drill_APEx_b_lastName = node_name;
+	
+	this._drill_b_controller.drill_COAS_setStateNode( node_name );
 }
 //==============================
-// * 动画序列 - 背景图 - 设置状态元集合，立刻改变
+// * 动画序列-背景图 - 播放简单状态元集合（开放函数）
 //==============================
-Drill_APEx_Sprite.prototype.drill_APEx_b_setSequenceImmediate = function( seq ){
-	this._drill_b_data.drill_COAS_setSequenceImmediate( seq );
-}
+//	（暂时不考虑用这个函数，不写了）
 //==============================
-// * 动画序列 - 背景图 - 添加动作
+// * 动画序列-背景图 - 设置动作元（开放函数）
 //==============================
 Drill_APEx_Sprite.prototype.drill_APEx_b_setAct = function( act_name ){
-	this._drill_b_data.drill_COAS_setAct( act_name );
+	this._drill_b_controller.drill_COAS_setAct( act_name );
 }
 //==============================
-// * 动画序列 - 背景图 - 立刻终止动作
+// * 动画序列-背景图 - 立刻终止动作（开放函数）
 //==============================
 Drill_APEx_Sprite.prototype.drill_APEx_b_stopAct = function(){
-	this._drill_b_data.drill_COAS_stopAct();
+	this._drill_b_controller.drill_COAS_stopAct();
 }
 
 
@@ -1926,10 +1971,8 @@ Game_BattlerBase.prototype.drill_APEx_isAnyStateAffected = function( state_list 
 //=============================================================================
 }else{
 		Imported.Drill_ActorPortraitureExtend = false;
-		alert(
-			"【Drill_ActorPortraitureExtend.js 战斗UI - 高级角色肖像】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfActionSequence  系统-GIF动画序列核心"
-		);
+		var tip = DrillUp.drill_APEx_getPluginTip_NoBasePlugin();
+		alert( tip );
 }
 
 

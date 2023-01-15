@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        面板 - 全自定义信息面板M
+ * @plugindesc [v1.3]        面板 - 全自定义信息面板M
  * @author Drill_up
  * 
  * @Drill_LE_param "内容-%d"
@@ -37,7 +37,7 @@
  * 2.该面板属于菜单面板，可以被菜单背景、菜单魔法圈等插件作用到。
  *   该面板关键字为：Scene_Drill_SSpM
  *   更多关键字内容，见 "17.主菜单 > 菜单关键字.docx"。
- * 3.若要开始上手设计，去看看 "17.主菜单 > 关于全自定义信息面板.docx"。
+ * 3.若要开始上手设计，去看看 "18.面板 > 关于全自定义信息面板.docx"。
  * 结构：
  *   (1.插件包含：1个选项窗口 + 1个按钮组 + 4个文本描述窗口 + 4个描述图
  *      选项窗口中，每个选项都会改变 描述图和描述窗口 的内容。
@@ -156,6 +156,8 @@
  * 修复了设置 按钮贴图序列 时无效的bug。
  * [v1.2]
  * 大幅度修改了全局存储的文件存储结构。
+ * [v1.3]
+ * 优化了旧存档的识别与兼容。
  * 
  *
  * @param ----杂项----
@@ -1360,7 +1362,7 @@
 //					->选项窗口、详细窗口、描述图片
 //					->当前选项
 //					->全局存储
-//					->描述图预加载
+//					->描述图全加载
 //
 //		★必要注意事项：
 //			1.替换以下字符变成新面板：
@@ -1794,57 +1796,116 @@ StorageManager.drill_SSpM_saveData = function(){
 };
 
 
-
-//=============================================================================
-// ** 正常存储
-//=============================================================================
-//==============================
-// * 正常 - 初始化
-//==============================
+//#############################################################################
+// ** 【标准模块】存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_SSpM_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
 var _drill_SSpM_sys_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function() {	
-	_drill_SSpM_sys_initialize.call(this);
+Game_System.prototype.initialize = function() {
+    _drill_SSpM_sys_initialize.call(this);
+	this.drill_SSpM_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_SSpM_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_SSpM_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_SSpM_saveEnabled == true ){	
+		$gameSystem.drill_SSpM_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_SSpM_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_SSpM_initSysData = function() {
+	this.drill_SSpM_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_SSpM_checkSysData = function() {
+	this.drill_SSpM_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_SSpM_initSysData_Private = function() {
+	
 	this._drill_SSpM_enableTank = [];				//显示情况
 	this._drill_SSpM_lockTank = [];					//锁定情况
+	for(var i = 0; i < DrillUp.g_SSpM_context_list.length; i++){
+		var temp_data = DrillUp.g_SSpM_context_list[i];
+		if( temp_data == undefined ){ continue; }
+		this._drill_SSpM_enableTank[i] = temp_data['enabled'];
+		this._drill_SSpM_lockTank[i] = temp_data['locked'];
+	}
 };
 //==============================
-// * 正常 - 检查数据
+// * 存储数据 - 载入存档时检查数据（私有）
 //==============================
-Game_System.prototype.drill_SSpM_sysCheckData = function() {
-	if( this._drill_SSpM_enableTank == null ){ this._drill_SSpM_enableTank = []; }
-	if( this._drill_SSpM_lockTank == null   ){ this._drill_SSpM_lockTank = []; }
+Game_System.prototype.drill_SSpM_checkSysData_Private = function() {
 	
-	for( var i = 1; i <= DrillUp.g_SSpM_context_list_length ; i++ ){
-		var temp_c = DrillUp.g_SSpM_context_list[i];
-		
-		// > 指定数据为空时
-		if( this._drill_SSpM_enableTank[i] == null ){
-			if( temp_c == null ){		//（无内容配置，跳过）
-				this._drill_SSpM_enableTank[i] = null;
-			}else{						//（有内容配置，初始化默认）
-				this._drill_SSpM_enableTank[i] = temp_c['enabled'];
-			}
-			
-		// > 不为空则跳过检查
-		}else{
-			//（不操作）
-		}
+	// > 旧存档数据自动补充
+	if( this._drill_SSpM_enableTank == undefined ){
+		this.drill_SSpM_initSysData();
 	}
-	for( var i = 1; i <= DrillUp.g_SSpM_context_list_length ; i++ ){
-		var temp_c = DrillUp.g_SSpM_context_list[i];
-		if( temp_c == null ){ continue; }
+	
+	// > 容器的 空数据 检查
+	for( var i = 0; i < DrillUp.g_SSpM_context_list.length; i++ ){
+		var temp_data = DrillUp.g_SSpM_context_list[i];
 		
-		// > 指定数据为空时
-		if( this._drill_SSpM_lockTank[i] == null ){
-			if( temp_c == null ){		//（无内容配置，跳过）
-				this._drill_SSpM_lockTank[i] = null;
-			}else{						//（有内容配置，初始化默认）
-				this._drill_SSpM_lockTank[i] = temp_c['locked'];
+		// > 已配置（undefined表示未配置的空数据）
+		if( temp_data != undefined ){
+			
+			// > 未存储的，重新初始化
+			if( this._drill_SSpM_enableTank[i] == undefined ){
+				this._drill_SSpM_enableTank[i] = temp_data['enabled'];
+			
+			// > 已存储的，跳过
+			}else{
+				//（不操作）
 			}
 			
-		// > 不为空则跳过检查
-		}else{
-			//（不操作）
+			// > 未存储的，重新初始化
+			if( this._drill_SSpM_lockTank[i] == undefined ){
+				this._drill_SSpM_lockTank[i] = temp_data['locked'];
+			
+			// > 已存储的，跳过
+			}else{
+				//（不操作）
+			}
 		}
 	}
 };
@@ -1864,9 +1925,8 @@ ImageManager.load_MenuSelfDef = function(filename) {
 var _drill_SSpM_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_SSpM_pluginCommand.call(this, command, args);
-	
 	if( command === ">信息面板M" ){
-		$gameSystem.drill_SSpM_sysCheckData();	//（初始化）
+		
 		if(args.length == 2){
 			var type = String(args[1]);
 			if( type == "打开面板" ){			//打开菜单
@@ -1901,9 +1961,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				StorageManager.drill_SSpM_saveData();
 			}
 		}
-	}
-	if( command === ">信息面板M" ){
-		$gameSystem.drill_SSpM_sysCheckData();	//（初始化）
+		
 		if(args.length == 4){
 			var type = String(args[1]);
 			var temp1 = String(args[3]);
@@ -2075,7 +2133,6 @@ Scene_Drill_SSpM.prototype.constructor = Scene_Drill_SSpM;
 Scene_Drill_SSpM.prototype.initialize = function() {
     Scene_MenuBase.prototype.initialize.call(this);
 	this._cur_index = -1;
-	$gameSystem.drill_SSpM_sysCheckData();
 };
 //==============================
 // * 信息面板M - 创建
@@ -2239,7 +2296,7 @@ Scene_Drill_SSpM.prototype.drill_refreshDescPic = function( cur_index ) {
 	var src_tank_3 = this._sprite_descPic_3._drill_bitmaps;
 	var src_tank_4 = this._sprite_descPic_4._drill_bitmaps;
 	
-	// > 资源预加载 1
+	// > 资源全加载 1
 	if( src_tank_1.length == 0 ){
 		src_tank_1[0] = ImageManager.load_MenuSelfDef(DrillUp.g_SSpM_locked_pic);
 		for( var i=0; i < temp_list.length; i++ ){
@@ -2260,7 +2317,7 @@ Scene_Drill_SSpM.prototype.drill_refreshDescPic = function( cur_index ) {
 		this._sprite_descPic_1.opacity = 0;
 	}
 	
-	// > 资源预加载 2
+	// > 资源全加载 2
 	if( src_tank_2.length == 0 ){
 		src_tank_2[0] = ImageManager.load_MenuSelfDef(DrillUp.g_SSpM_locked_pic);
 		for( var i=0; i < temp_list.length; i++ ){
@@ -2281,7 +2338,7 @@ Scene_Drill_SSpM.prototype.drill_refreshDescPic = function( cur_index ) {
 		this._sprite_descPic_2.opacity = 0;
 	}
 	
-	// > 资源预加载 3
+	// > 资源全加载 3
 	if( src_tank_3.length == 0 ){
 		src_tank_3[0] = ImageManager.load_MenuSelfDef(DrillUp.g_SSpM_locked_pic);
 		for( var i=0; i < temp_list.length; i++ ){
@@ -2302,7 +2359,7 @@ Scene_Drill_SSpM.prototype.drill_refreshDescPic = function( cur_index ) {
 		this._sprite_descPic_3.opacity = 0;
 	}
 	
-	// > 资源预加载 4
+	// > 资源全加载 4
 	if( src_tank_4.length == 0 ){
 		src_tank_4[0] = ImageManager.load_MenuSelfDef(DrillUp.g_SSpM_locked_pic);
 		for( var i=0; i < temp_list.length; i++ ){
