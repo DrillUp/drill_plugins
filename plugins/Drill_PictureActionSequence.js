@@ -125,7 +125,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			图片动画序列：
 //				->动画序列
 //					->数据绑定
@@ -144,7 +144,44 @@
 //		★存在的问题：
 //			暂无
 //
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_PASe_PluginTip_curName = "Drill_PictureActionSequence.js 图片-GIF动画序列";
+	DrillUp.g_PASe_PluginTip_baseList = ["Drill_CoreOfActionSequence.js 系统-GIF动画序列核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_PASe_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_PASe_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_PASe_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_PASe_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_PASe_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到图片
+	//==============================
+	DrillUp.drill_PASe_getPluginTip_PictureNotFind = function( pic_id ){
+		return "【" + DrillUp.g_PASe_PluginTip_curName + "】\n插件指令错误，id为"+pic_id+"的图片还没被创建。\n你可能需要将指令放在'显示图片'事件指令之后。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 强制更新要求
+	//==============================
+	DrillUp.drill_PASe_getPluginTip_NeedUpdate = function(){
+		return "【" + DrillUp.g_APEx_PluginTip_curName + "】\n GIF动画序列核心 插件版本过低，请及时更新核心插件，以及所有动画序列相关子插件。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -164,10 +201,7 @@ if( Imported.Drill_CoreOfActionSequence ){
 // * 强制更新要求
 //=============================================================================
 if( DrillUp.drill_COAS_getSequenceData == undefined ){
-	alert(
-		"【Drill_PictureActionSequence.js 图片 - GIF动画序列】\n"+
-		"GIF动画序列核心 插件版本过低，请及时更新核心插件，以及所有动画序列相关子插件。"
-	);
+	alert( DrillUp.drill_PASe_getPluginTip_NeedUpdate() );
 };
 	
 
@@ -320,9 +354,7 @@ Game_Screen.prototype.drill_PASe_isPictureExist = function( pic_id ){
 	
 	var pic = this.picture( pic_id );
 	if( pic == undefined ){
-		alert( "【Drill_PictureActionSequence.js 图片 - GIF动画序列】\n" +
-				"插件指令错误，id为"+pic_id+"的图片还没被创建。\n" + 
-				"你可能需要将指令放在'显示图片'事件指令之后。");
+		alert( DrillUp.drill_PASe_getPluginTip_PictureNotFind( pic_id ) );
 		return false;
 	}
 	return true;
@@ -488,10 +520,8 @@ Sprite_Picture.prototype.loadBitmap = function() {
 //=============================================================================
 }else{
 		Imported.Drill_PictureActionSequence = false;
-		alert(
-			"【Drill_PictureActionSequence.js 图片 - GIF动画序列】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfActionSequence  系统-GIF动画序列核心"
-		);
+		var pluginTip = DrillUp.drill_PASe_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
 

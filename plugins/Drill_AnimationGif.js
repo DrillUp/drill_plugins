@@ -1483,19 +1483,32 @@
  * @type select
  * @option 普通
  * @value 0
- * @option 叠加
+ * @option 发光
  * @value 1
  * @option 实色混合(正片叠底)
  * @value 2
  * @option 浅色
  * @value 3
- * @desc pixi的渲染混合模式。0-普通,1-叠加。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
+ * @option 叠加
+ * @value 4
+ * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
  * @default 0
  *
- * @param 旋转速度
+ * @param 图像-色调值
  * @parent ---贴图---
- * @desc 正数逆时针，负数顺时针，单位 角度/帧。(1秒60帧)
- * @default 10.0
+ * @type number
+ * @min 0
+ * @max 360
+ * @desc GIF图像的色调值。
+ * @default 0
+ *
+ * @param 图像-模糊边缘
+ * @parent ---贴图---
+ * @type boolean
+ * @on 模糊
+ * @off 关闭
+ * @desc 可以模糊GIF图像的边缘，防止出现像素锯齿。
+ * @default false
  *
  * @param 动画层级
  * @parent ---贴图---
@@ -1515,6 +1528,11 @@
  * @min 0
  * @desc GIF在同一个动画，并且在同一动画层级下，先后排序的位置，0表示最后面。
  * @default 0
+ *
+ * @param 旋转速度
+ * @parent ---贴图---
+ * @desc 正数逆时针，负数顺时针，单位 角度/帧。(1秒60帧)
+ * @default 10.0
  * 
  * @param ---随机位置---
  * @desc 
@@ -1735,7 +1753,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			动画GIF：
 //				->动画GIF 容器
 //					->获取贴图（接口）
@@ -1769,7 +1787,7 @@
 //				->动画GIF控制器【Drill_AGi_Controller】
 //				->动画GIF贴图【Drill_AGi_Sprite】
 //		
-//		★私有类如下：
+//		★插件私有类：
 //			* Drill_AGi_Controller	【动画GIF控制器】
 //			* Drill_AGi_Sprite		【动画GIF贴图】
 //		
@@ -1808,9 +1826,22 @@
 	// * 提示信息 - 参数
 	//==============================
 	var DrillUp = DrillUp || {}; 
-	DrillUp.g_AGi_tipCurName = "Drill_AnimationGIF.js 动画-多层动画GIF";
-	DrillUp.g_AGi_tipBasePluginList = [];
-
+	DrillUp.g_AGi_PluginTip_curName = "Drill_AnimationGIF.js 动画-多层动画GIF";
+	DrillUp.g_AGi_PluginTip_baseList = [];
+	//==============================
+	// * 提示信息 - 报错 - 找不到事件
+	//==============================
+	DrillUp.drill_AGi_getPluginTip_EventNotFind = function( e_id ){
+		return "【" + DrillUp.g_AGi_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - NaN校验值
+	//==============================
+	DrillUp.drill_AGi_getPluginTip_ParamIsNaN = function( param_name ){
+		return "【" + DrillUp.g_AGi_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -1846,6 +1877,8 @@
 		data['x'] = Number( dataFrom["平移-GIF X"] || 0);
 		data['y'] = Number( dataFrom["平移-GIF Y"] || 0);
 		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
+		data['tint'] = Number( dataFrom["图像-色调值"] || 0);
+		data['smooth'] = String( dataFrom["图像-模糊边缘"] || "false") == "true";
 		data['anim_index'] = String( dataFrom["动画层级"] || "在动画后面");
 		data['zIndex'] = Number( dataFrom["图片层级"] || 0);
 		data['rotate'] = Number( dataFrom["旋转速度"] || 0);
@@ -2186,8 +2219,7 @@ Game_Map.prototype.drill_AGi_isEventExist = function( e_id ){
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_AnimationGIF.js 动画 - 多层动画GIF】\n" +
-				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
+		alert( DrillUp.drill_AGi_getPluginTip_EventNotFind( e_id ) );
 		return false;
 	}
 	return true;
@@ -3034,6 +3066,8 @@ Drill_AGi_Controller.prototype.drill_initData = function(){
 	if( data['x'] == undefined ){ data['x'] = 0 };								//贴图 - 平移X
 	if( data['y'] == undefined ){ data['y'] = 0 };								//贴图 - 平移Y
 	if( data['blendMode'] == undefined ){ data['blendMode'] = 0 };				//贴图 - 混合模式
+	if( data['tint'] == undefined ){ data['tint'] = 0 };						//贴图 - 图像-色调值
+	if( data['smooth'] == undefined ){ data['smooth'] = false };				//贴图 - 图像-模糊边缘
 	if( data['anim_index'] == undefined ){ data['anim_index'] = "在动画后面" };	//贴图 - 动画层级
 	if( data['zIndex'] == undefined ){ data['zIndex'] = 0 };					//贴图 - 图片层级
 	if( data['rotate'] == undefined ){ data['rotate'] = 0 };					//贴图 - 自旋转速度（单位角度）
@@ -3402,38 +3436,23 @@ Drill_AGi_Controller.prototype.drill_AGi_updateCheckNaN = function(){
 	if( DrillUp.g_AGi_checkNaN == true ){
 		if( isNaN( this._drill_x ) ){
 			DrillUp.g_AGi_checkNaN = false;
-			alert(
-				"【Drill_AnimationGIF.js 动画 - 多层动画GIF】\n"+
-				"检测到控制器参数_drill_x出现了NaN值，请及时检查你的函数。"
-			);
+			alert( DrillUp.drill_AGi_getPluginTip_ParamIsNaN( "_drill_x" ) );
 		}
 		if( isNaN( this._drill_y ) ){
 			DrillUp.g_AGi_checkNaN = false;
-			alert(
-				"【Drill_AnimationGIF.js 动画 - 多层动画GIF】\n"+
-				"检测到控制器参数_drill_y出现了NaN值，请及时检查你的函数。"
-			);
+			alert( DrillUp.drill_AGi_getPluginTip_ParamIsNaN( "_drill_y" ) );
 		}
 		if( isNaN( this._drill_opacity ) ){
 			DrillUp.g_AGi_checkNaN = false;
-			alert(
-				"【Drill_AnimationGIF.js 动画 - 多层动画GIF】\n"+
-				"检测到控制器参数_drill_opacity出现了NaN值，请及时检查你的函数。"
-			);
+			alert( DrillUp.drill_AGi_getPluginTip_ParamIsNaN( "_drill_opacity" ) );
 		}
 		if( isNaN( this._drill_scaleX ) ){
 			DrillUp.g_AGi_checkNaN = false;
-			alert(
-				"【Drill_AnimationGIF.js 动画 - 多层动画GIF】\n"+
-				"检测到控制器参数_drill_scaleX出现了NaN值，请及时检查你的函数。"
-			);
+			alert( DrillUp.drill_AGi_getPluginTip_ParamIsNaN( "_drill_scaleX" ) );
 		}
 		if( isNaN( this._drill_scaleY ) ){
 			DrillUp.g_AGi_checkNaN = false;
-			alert(
-				"【Drill_AnimationGIF.js 动画 - 多层动画GIF】\n"+
-				"检测到控制器参数_drill_scaleY出现了NaN值，请及时检查你的函数。"
-			);
+			alert( DrillUp.drill_AGi_getPluginTip_ParamIsNaN( "_drill_scaleY" ) );
 		}
 	}
 }
@@ -3605,7 +3624,7 @@ Drill_AGi_Sprite.prototype.drill_AGi_initSprite_Private = function(){
 	// > 资源对象组
 	this._drill_bitmapTank = [];
 	for(var j = 0; j < data['src_img_gif'].length; j++ ){
-		var bitmap = ImageManager.loadBitmap( data['src_img_file'], data['src_img_gif'][j], 0, true );
+		var bitmap = ImageManager.loadBitmap( data['src_img_file'], data['src_img_gif'][j], data['tint'], data['smooth'] );
 		this._drill_bitmapTank.push( bitmap );
 	}
 			

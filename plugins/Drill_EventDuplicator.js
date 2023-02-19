@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.9]        物体管理 - 事件复制器
+ * @plugindesc [v2.0]        物体管理 - 事件复制器
  * @author Drill_up
  * 
  * 
@@ -143,6 +143,8 @@
  * 添加了 "源事件变量" 的设置。
  * [v1.9]
  * 优化了旧存档的识别与兼容。
+ * [v2.0]
+ * 修复了部分旧插件指令报错的bug。
  * 
  */
  
@@ -167,7 +169,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			事件复制器：
 //				->流程
 //					->复制本地图的事件
@@ -193,7 +195,47 @@
 //		★存在的问题：
 //			1.低版本的rmmv中没有ResourceHandler的定义。（已解决，通过添加版本限制）
 //		
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_EDu_PluginTip_curName = "Drill_EventDuplicator.js 物体管理-事件复制器";
+	DrillUp.g_EDu_PluginTip_baseList = ["Drill_CoreOfEventManager.js 物体管理-事件管理核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_EDu_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_EDu_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_EDu_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_EDu_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_EDu_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到事件
+	//==============================
+	DrillUp.drill_EDu_getPluginTip_EventNotFind = function( e_id ){
+		return "【" + DrillUp.g_EDu_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 地图文件丢失
+	//==============================
+	DrillUp.drill_EDu_getPluginTip_MapLost = function( key ){
+		return "【" + DrillUp.g_EDu_PluginTip_curName + "】\n"+
+				"插件指令指定要复制地图"+ key +"中的某个事件。\n"+
+				"但是系统并没有找到这个地图文件。\n"+
+				"请检查你的地图文件是否存在，或者修改插件指令。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -228,7 +270,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( type == "复制本图事件" ){
 				var e_id = 0;
 				if( temp1.indexOf("源事件[") != -1 ||
-					temp1.indexOf("原事件[") != -1 ){
+					temp1.indexOf("原事件[") != -1 ||
+					/^\d+$/.test(temp1) == true ){	//（判断数字）
 					temp1 = temp1.replace("源事件[","");
 					temp1 = temp1.replace("原事件[","");
 					temp1 = temp1.replace("]","");
@@ -291,7 +334,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp1 = Number(temp1);
 				var e_id = 0;
 				if( temp2.indexOf("源事件[") != -1 ||
-					temp2.indexOf("原事件[") != -1 ){
+					temp2.indexOf("原事件[") != -1 ||
+					/^\d+$/.test(temp2) == true ){	//（判断数字）
 					temp2 = temp2.replace("源事件[","");
 					temp2 = temp2.replace("原事件[","");
 					temp2 = temp2.replace("]","");
@@ -374,8 +418,7 @@ Game_Map.prototype.drill_EDu_isEventExist = function( e_id ){
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_EventDuplicator.js 物体管理 - 事件复制器】\n" +
-				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
+		alert( DrillUp.drill_EDu_getPluginTip_EventNotFind( e_id ) );
 		return false;
 	}
 	return true;
@@ -413,12 +456,7 @@ Scene_Map.prototype.drill_EDu_loadMapData = function() {
 	// > 加载地图id
 	for( var key in temp_map ){
 		if( $gameTemp.drill_COEM_isMapExist( key ) == false ){
-			alert(
-				"【Drill_EventDuplicator.js 物体管理 - 事件复制器】\n" + 
-				"插件指令指定要复制地图"+ key +"中的某个事件。\n"+
-				"但是系统并没有找到这个地图文件。\n"+
-				"请检查你的地图文件是否存在，或者修改插件指令。"
-			);
+			alert( DrillUp.drill_EDu_getPluginTip_MapLost( key ) );
 		}
 		DataManager.drill_COEM_loadMapData( key );
 	}
@@ -554,9 +592,7 @@ Game_Temp.prototype.drill_EDu_hasMapId = function( map_id ){
 //=============================================================================
 }else{
 		Imported.Drill_EventDuplicator = false;
-		alert(
-			"【Drill_EventDuplicator.js 物体管理 - 事件复制器】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfEventManager 物体管理-事件管理核心"
-		);
+		var pluginTip = DrillUp.drill_EDu_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.6]        窗口字符 - 窗口字符核心
+ * @plugindesc [v1.7]        窗口字符 - 窗口字符核心
  * @author Drill_up
  * 
  * 
@@ -111,6 +111,7 @@
  * 窗口字符：\nw[n]       替换为第n个武器的名字
  * 窗口字符：\na[n]       替换为第n个防具的名字
  * 窗口字符：\ns[n]       替换为第n个技能的名字
+ * 窗口字符：\ne[n]       替换为第n个敌人的名字
  * 窗口字符：\nt[n]       替换为第n个状态的名字
  * 窗口字符：\ii[n]       替换为第n个物品的名字 + 图标
  * 窗口字符：\iw[n]       替换为第n个武器的名字 + 图标
@@ -248,6 +249,8 @@
  * 优化了字符块的结构。
  * [v1.6]
  * 优化了旧存档的识别与兼容。
+ * [v1.7]
+ * 规范了 指代字符 的变色功能。
  * 
  * 
  * 
@@ -297,57 +300,97 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
-//			窗口字符核心：
-//				->表达式阶段
-//					->标准模块
-//						->表达式转义【标准接口】
-//						->提交转义【标准函数】
-//					->表达式应用
-//				->转义字符阶段
-//					->标准模块
-//						->简单符【标准接口】
-//						->组合符【标准接口】
-//						->提交转义【标准函数】
-//					->执行转义
-//					->字符分析
-//					->转义字符应用
-//						> 职业名称
-//						> 昵称
-//						> 物品/武器/护甲/技能名称
-//						> 敌人名称
-//						> 状态名称
-//						> 图标+物品/武器/护甲/技能名
-//						> 图标+状态名
-//				->效果字符阶段
-//					->标准模块
-//						->简单符【标准接口】
-//						->组合符【标准接口】
-//						->当前行【标准接口】
-//						->提交效果【标准函数】
-//					->执行效果
-//					->字符分析
+//		★功能结构树：
+//			->☆提示信息
+//			->☆变量获取
+//			->☆存储数据
+//			->☆插件指令
+//			
+//			->☆表达式阶段 标准模块
+//				->表达式转义【标准接口】
+//				->提交转义【标准函数】
+//			->☆转义字符阶段 标准模块
+//				->简单符【标准接口】
+//				->组合符【标准接口】
+//				->提交转义【标准函数】
+//			->☆效果字符阶段 标准模块
+//				->简单符【标准接口】
+//				->组合符【标准接口】
+//				->提交效果【标准函数】
+//			->☆效果字符阶段 当前行
+//				->执行当前行【标准接口】
+//				->获取当前行宽度【标准函数】
+//				->获取当前行高度【标准函数】
+//			->☆效果字符阶段 字符块
+//				->画笔同步【标准接口】
+//				->添加字符块【标准函数】
+//				->清除字符块【标准函数】
+//				->获取字符块【标准函数】
+//			->☆自动换行 标准模块
+//				->执行换行【标准函数】
+//			
+//			->☆表达式阶段
+//				->执行
+//					->执行表达式
+//				->字符分析
+//					->获取简单符列表
+//			->☆转义字符阶段
+//				->执行
+//					->执行简单符
+//					->执行组合符
+//				->字符分析
+//					->获取简单符列表
+//					->获取组合符列表
 //					->找到 闭包右括号 字符位置
-//					->效果字符应用
-//						> 字体加粗/切换斜体
-//						> 脸图切换
-//						> 重置字体
-//				->窗口的画布
-//					->标准模块
-//						->画笔同步【标准接口】
-//						->添加字符块【标准函数】
-//						->清除字符块【标准函数】
-//						->获取字符块【标准函数】
-//					->画布标记
-//					->创建字符块贴图
-//				->自动换行
-//					->标准模块
-//						->执行换行【标准函数】
-//					->计算标记
-//					->记录索引和宽度
-//				->消息快进
-//					->按键监听
-//					->跳过 等待按键输入字符 的功能
+//			->☆效果字符阶段
+//				->执行
+//					->执行简单符
+//					->执行组合符
+//				->字符分析
+//					->获取单个组合符
+//					->找到 闭包右括号 字符位置
+//			->☆当前行
+//				->清理标记
+//				->捕获
+//					->绘制扩展文本
+//					->对话框新建页
+//					->换行符
+//				->获取当前行宽度
+//				->获取当前行高度
+//
+//			->☆表达式应用
+//				> 复制内容
+//				> 单选内容
+//			->☆转义字符应用
+//				> 职业名称
+//				> 昵称
+//				> 物品/武器/护甲/技能名称
+//				> 敌人名称
+//				> 状态名称
+//				> 图标+物品/武器/护甲/技能名
+//				> 图标+状态名
+//			->☆效果字符应用
+//				> 字体加粗/切换斜体
+//				> 脸图切换
+//				> 重置字体
+//			->☆窗口的画布
+//				->画布标记
+//				->添加字符块
+//				->清除字符块
+//				->获取字符块
+//				->效果字符应用
+//					> dCOWCf
+//					> dCOWCfv
+//					> dCOWCfh
+//					> dCOWC
+//			->☆自动换行
+//				->计算文本宽度前/推进字符时/计算文本宽度后
+//				->执行换行
+//					->自动换行计算
+//			->☆消息快进按键
+//				->按键监听
+//				->跳过 等待按键输入字符 的功能
+//			->☆核心漏洞修复
 //
 //		★必要注意事项：
 //			1.窗口字符的绘制流程如下：
@@ -367,9 +410,42 @@
 //		★存在的问题：
 //			暂无
 //
- 
+
 //=============================================================================
-// ** 变量获取
+// ** ☆提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_COWC_PluginTip_curName = "Drill_CoreOfWindowCharacter.js 窗口字符-窗口字符核心";
+	DrillUp.g_COWC_PluginTip_baseList = ["Drill_CoreOfWindowAuxiliary.js 系统-窗口辅助核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_COWC_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_COWC_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_COWC_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_COWC_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_COWC_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 兼容冲突
+	//==============================
+	DrillUp.drill_COWC_getPluginTip_CompatibilityYEP = function(){
+		return  "【" + DrillUp.g_COWC_PluginTip_curName + "】\n"+
+				"检测到你开启了 YEP_MessageCore插件。\n"+
+				"请及时关闭该插件，该插件与 窗口字符核心 存在兼容冲突。";
+	};
+	
+	
+//=============================================================================
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_CoreOfWindowCharacter = true;
@@ -396,17 +472,117 @@ SceneManager.initialize = function() {
 	_drill_COWC_scene_initialize.call(this);
 	
 	if( Imported.YEP_MessageCore ){
-		alert(
-			"【Drill_CoreOfWindowCharacter.js 窗口字符 - 窗口字符核心】\n"+
-			"检测到你开启了 YEP_MessageCore插件。\n"+
-			"请及时关闭该插件，该插件与 窗口字符核心 兼容性冲突。"
-		);
+		alert( DrillUp.drill_COWC_getPluginTip_CompatibilityYEP() );
 	}
 };
 
 
 //#############################################################################
-// ** 标准接口（表达式阶段）
+// ** 【标准模块】存储数据 ☆存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_COWC_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_COWC_sys_initialize = Game_System.prototype.initialize;
+Game_System.prototype.initialize = function() {
+    _drill_COWC_sys_initialize.call(this);
+	this.drill_COWC_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_COWC_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_COWC_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_COWC_saveEnabled == true ){	
+		$gameSystem.drill_COWC_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_COWC_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_COWC_initSysData = function() {
+	this.drill_COWC_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_COWC_checkSysData = function() {
+	this.drill_COWC_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_COWC_initSysData_Private = function() {
+
+	this._drill_COWC_fastForwardEnabled = DrillUp.g_COWC_fastForwardEnabled;	//消息快进 - 功能开关
+	this._drill_COWC_fastForwardKey = DrillUp.g_COWC_fastForwardKey;			//消息快进 - 快进键
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_COWC_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_COWC_fastForwardKey == undefined ){
+		this.drill_COWC_initSysData();
+	}
+
+};
+
+    
+//=============================================================================
+// ** ☆插件指令
+//=============================================================================
+var _drill_COWC_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
+    _drill_COWC_pluginCommand.call(this, command, args);
+    if( command === ">窗口字符核心" ){    //>窗口字符核心 : 启用快进键
+		
+        if( args.length == 2 ){
+            var type = String(args[1]);
+            if( type == "启用快进键" ){
+                $gameSystem._drill_COWC_fastForwardEnabled = true;
+            }
+            if( type == "关闭快进键" ){
+                $gameSystem._drill_COWC_fastForwardEnabled = false;
+            }
+        }
+    }
+}
+
+
+//#############################################################################
+// ** 标准接口（☆表达式阶段 标准模块）
 //
 //			说明：	即对子插件开放的固定函数，无论插件如何变化，标准函数都不变。
 //#############################################################################
@@ -449,7 +625,7 @@ Window_Message.prototype.drill_COWC_processNewExpressionChar = function( matched
 }
 
 //#############################################################################
-// ** 标准接口（转义字符阶段）
+// ** 标准接口（☆转义字符阶段 标准模块）
 //#############################################################################
 //##############################
 // * 转义字符阶段 - 简单符【标准接口】
@@ -512,7 +688,7 @@ Window_Message.prototype.drill_COWC_processNewTransformChar_Combined = function(
 }
 
 //#############################################################################
-// ** 标准接口（效果字符阶段）
+// ** 标准接口（☆效果字符阶段 标准模块）
 //#############################################################################
 //##############################
 // * 效果字符阶段 - 简单符【标准接口】
@@ -590,7 +766,7 @@ Window_Message.prototype.drill_COWC_processNewEffectChar_Combined = function( ma
 }
 
 //#############################################################################
-// ** 标准接口（当前行）
+// ** 标准接口（☆效果字符阶段 当前行）
 //#############################################################################
 //##############################
 // * 当前行 - 执行当前行【标准接口】
@@ -634,6 +810,18 @@ Window_Base.prototype.drill_COWC_getCurLineHeight = function(){
 	return this.drill_COWC_getCurLineHeight_Private();
 }
 //##############################
+// * 当前行 - 获取当前行字数【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 数字（当前行字数，只统计 一般字符，不包括字符块）
+//			
+//			说明：	> 此函数只在 效果字符阶段 有效。
+//					> 尽量使用该接口来反复获取，如果自己计算，可能会额外消耗更多性能。
+//##############################
+Window_Base.prototype.drill_COWC_getCurLineNormalCharCount = function(){
+	return this.drill_COWC_getCurLineNormalCharCount_Private();
+}
+//##############################
 // * 当前行 - 子窗口强制继承
 //##############################
 Window_Message.prototype.drill_COWC_processNewLine = function( line_index, line_text ){
@@ -641,7 +829,7 @@ Window_Message.prototype.drill_COWC_processNewLine = function( line_index, line_
 }
 
 //#############################################################################
-// ** 标准接口（字符块）
+// ** 标准接口（☆效果字符阶段 字符块）
 //#############################################################################
 //##############################
 // * 字符块 - 画笔同步【标准接口】
@@ -728,7 +916,7 @@ Window_Base.prototype.drill_COWC_getSpriteInRect = function( rect ){
 }
 
 //#############################################################################
-// ** 标准接口（自动换行）
+// ** 标准接口（☆自动换行）
 //#############################################################################
 //##############################
 // * 自动换行 - 执行换行【标准接口】
@@ -746,112 +934,11 @@ Window_Base.prototype.drill_COWC_setWordWrap = function( text, max_width ){
 }
 
 
-
-//#############################################################################
-// ** 【标准模块】存储数据
-//#############################################################################
-//##############################
-// * 存储数据 - 参数存储 开关
-//          
-//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
-//##############################
-DrillUp.g_COWC_saveEnabled = true;
-//##############################
-// * 存储数据 - 初始化
-//          
-//			说明：	> 下方为固定写法，不要动。
-//##############################
-var _drill_COWC_sys_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function() {
-    _drill_COWC_sys_initialize.call(this);
-	this.drill_COWC_initSysData();
-};
-//##############################
-// * 存储数据 - 载入存档
-//          
-//			说明：	> 下方为固定写法，不要动。
-//##############################
-var _drill_COWC_sys_extractSaveContents = DataManager.extractSaveContents;
-DataManager.extractSaveContents = function( contents ){
-	_drill_COWC_sys_extractSaveContents.call( this, contents );
-	
-	// > 参数存储 启用时（检查数据）
-	if( DrillUp.g_COWC_saveEnabled == true ){	
-		$gameSystem.drill_COWC_checkSysData();
-		
-	// > 参数存储 关闭时（直接覆盖）
-	}else{
-		$gameSystem.drill_COWC_initSysData();
-	}
-};
-//##############################
-// * 存储数据 - 初始化数据【标准函数】
-//			
-//			参数：	> 无
-//			返回：	> 无
-//          
-//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
-//##############################
-Game_System.prototype.drill_COWC_initSysData = function() {
-	this.drill_COWC_initSysData_Private();
-};
-//##############################
-// * 存储数据 - 载入存档时检查数据【标准函数】
-//			
-//			参数：	> 无
-//			返回：	> 无
-//          
-//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
-//##############################
-Game_System.prototype.drill_COWC_checkSysData = function() {
-	this.drill_COWC_checkSysData_Private();
-};
 //=============================================================================
-// ** 存储数据（接口实现）
-//=============================================================================
-//==============================
-// * 存储数据 - 初始化数据（私有）
-//==============================
-Game_System.prototype.drill_COWC_initSysData_Private = function() {
-
-	this._drill_COWC_fastForwardEnabled = DrillUp.g_COWC_fastForwardEnabled;	//消息快进 - 功能开关
-	this._drill_COWC_fastForwardKey = DrillUp.g_COWC_fastForwardKey;			//消息快进 - 快进键
-};
-//==============================
-// * 存储数据 - 载入存档时检查数据（私有）
-//==============================
-Game_System.prototype.drill_COWC_checkSysData_Private = function() {
-	
-	// > 旧存档数据自动补充
-	if( this._drill_COWC_fastForwardKey == undefined ){
-		this.drill_COWC_initSysData();
-	}
-
-};
-
-    
-//=============================================================================
-// * 插件指令
-//=============================================================================
-var _drill_COWC_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function( command, args ){
-    _drill_COWC_pluginCommand.call(this, command, args);
-    if( command === ">窗口字符核心" ){    //>窗口字符核心 : 启用快进键
-        if( args.length == 2 ){
-            var type = String(args[1]);
-            if( type == "启用快进键" ){
-                $gameSystem._drill_COWC_fastForwardEnabled = true;
-            }
-            if( type == "关闭快进键" ){
-                $gameSystem._drill_COWC_fastForwardEnabled = false;
-            }
-        }
-    }
-
-}
-
-//=============================================================================
-// * 表达式阶段（执行）
+// ** ☆表达式阶段（执行）
+//
+//			说明：	> 表达式阶段是最先执行的转义阶段。详细可以看看 窗口字符的绘制流程。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 表达式 - 执行
@@ -890,7 +977,7 @@ Window_Base.prototype.drill_COWC_Expression = function( text ){
 	return text;
 };
 //=============================================================================
-// * 表达式阶段（字符分析）
+// ** 表达式阶段（字符分析）
 //=============================================================================
 //==============================
 // * 表达式 - 获取简单符列表
@@ -921,7 +1008,10 @@ Window_Base.prototype.drill_COWC_Expression_Analysis = function( text ){
 
 
 //=============================================================================
-// * 转义字符阶段（执行）
+// ** ☆转义字符阶段（执行）
+//
+//			说明：	> 转义字符阶段在 表达式阶段 之后执行。详细可以看看 窗口字符的绘制流程。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 转义字符 - 执行
@@ -990,7 +1080,7 @@ Window_Base.prototype.drill_COWC_Tran_Combined = function( text ){
 	return text;
 }
 //=============================================================================
-// * 转义字符阶段（字符分析）
+// ** 转义字符阶段（字符分析）
 //=============================================================================
 //==============================
 // * 转义字符 - 获取简单符列表
@@ -1060,7 +1150,10 @@ Window_Base.prototype.drill_COWC_Tran_CombinedAnalysis = function( text ){
 
 
 //=============================================================================
-// ** 效果字符阶段（执行）
+// ** ☆效果字符阶段（执行）
+//
+//			说明：	> 效果字符是最后执行的阶段，处理各种剩下的 简单符 和 组合符。详细可以看看 窗口字符的绘制流程。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 效果字符 - 执行
@@ -1134,7 +1227,7 @@ Window_Base.prototype.drill_COWC_Effect_Combined = function( code, textState ){
 	}
 };
 //=============================================================================
-// * 效果字符阶段（字符分析）
+// ** 效果字符阶段（字符分析）
 //=============================================================================
 //==============================
 // * 效果字符 - 获取单个组合符
@@ -1166,7 +1259,7 @@ Window_Base.prototype.drill_COWC_Effect_CombinedAnalysis = function( code, textS
 };
 
 //=============================================================================
-// * 窗口字符 - 找到 闭包右括号 字符位置
+// * 工具 - 找到 闭包右括号 字符位置
 //
 //			说明：	> 字符串的第一个字符必须是左括号，否则返回-1。
 //					> 在找位置前，必须先截取字符串，并且确保截取的第一个字符是"["。
@@ -1192,8 +1285,13 @@ Window_Base.prototype.drill_COWC_indexOfRightBracket = function( text ){
 	return -1;
 };
 
+
 //=============================================================================
-// * 效果字符阶段（当前行）
+// ** ☆当前行
+//
+//			说明：	> 当前行表示遇到换行符/新建页的时机。详细可以看看 窗口字符的绘制流程。
+//					> 此部分继承 计算文本高度/宽度 的函数，并进行当前行的数据记录。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 当前行标记 - 画布标记
@@ -1214,16 +1312,18 @@ Bitmap.prototype.clear = function(){
 	}
 }
 //==============================
-// * 当前行 - 清理标记
+// * 当前行标记 - 清理标记
 //==============================
 Window_Base.prototype.drill_COWC_resetLineNum = function(){
-	this._drill_COWC_lineIndex = 0;
-	this._drill_COWC_lineText = "";
-	this._drill_COWC_lineWidth = 0;
-	this._drill_COWC_lineHeight = 0;
+	this._drill_COWC_lineIndex = 0;				//当前行号
+	this._drill_COWC_lineText = "";				//当前行文本
+	this._drill_COWC_lineWidth = 0;				//当前行宽度
+	this._drill_COWC_lineHeight = 0;			//当前行高度
+	this._drill_COWC_lineNormalCharCount = 0;			//当前行字数（一般字符 的数量）
 }
+
 //==============================
-// * 当前行 - 捕获 - 绘制扩展文本
+// * 当前行捕获 - 绘制扩展文本
 //==============================
 var _drill_COWC_line_drawTextEx = Window_Base.prototype.drawTextEx;
 Window_Base.prototype.drawTextEx = function( text, x, y ){
@@ -1242,7 +1342,7 @@ Window_Base.prototype.drawTextEx = function( text, x, y ){
 	return _drill_COWC_line_drawTextEx.call( this, text, x, y );
 }
 //==============================
-// * 当前行 - 捕获 - 绘制扩展文本（窗口辅助核心中的 副本）
+// * 当前行捕获 - 绘制扩展文本（窗口辅助核心中的 副本）
 //==============================
 var _drill_COWC_line_drawTextEx2 = Window_Base.prototype.drill_COWA_drawTextEx_Copyed;
 Window_Base.prototype.drill_COWA_drawTextEx_Copyed = function( text, x, y ){
@@ -1261,7 +1361,7 @@ Window_Base.prototype.drill_COWA_drawTextEx_Copyed = function( text, x, y ){
 	return _drill_COWC_line_drawTextEx2.call( this, text, x, y );
 }
 //==============================
-// * 当前行 - 捕获 - 对话框新建页
+// * 当前行捕获 - 对话框新建页
 //==============================
 var _drill_COWC_newPage = Window_Message.prototype.newPage;
 Window_Message.prototype.newPage = function( textState ){
@@ -1277,7 +1377,7 @@ Window_Message.prototype.newPage = function( textState ){
 	this.drill_COWC_prepareNewLine( data );
 }
 //==============================
-// * 当前行 - 捕获 - 换行符
+// * 当前行捕获 - 换行符
 //==============================
 var _drill_COWC_processNewLine = Window_Base.prototype.processNewLine;
 Window_Base.prototype.processNewLine = function( textState ){
@@ -1292,8 +1392,9 @@ Window_Base.prototype.processNewLine = function( textState ){
 	data['y'] = textState['y'];
 	this.drill_COWC_prepareNewLine( data );
 }
+
 //==============================
-// * 当前行 - 换行准备
+// * 执行换行 - 执行
 //==============================
 Window_Base.prototype.drill_COWC_prepareNewLine = function( data ){
 	
@@ -1323,17 +1424,19 @@ Window_Base.prototype.drill_COWC_prepareNewLine = function( data ){
 	this._drill_COWC_lineIndex += 1;
 	this._drill_COWC_lineWidth = 0;
 	this._drill_COWC_lineHeight = 0;
+	this._drill_COWC_lineNormalCharCount = 0;
 }
 //==============================
-// * 当前行 - 子窗口强制继承
+// * 执行换行 - 子窗口强制继承
 //==============================
 Window_Message.prototype.drill_COWC_prepareNewLine = function( data ){
 	Window_Base.prototype.drill_COWC_prepareNewLine.call( this, data );
 }
+
 //==============================
 // * 当前行 - 获取当前行宽度
 //
-//			说明：	获取一次后，记录宽度。
+//			说明：	获取一次后，记录宽度。（走一遍这个，字数也顺带被记录了）
 //==============================
 Window_Base.prototype.drill_COWC_getCurLineWidth_Private = function(){
 	if( this._drill_COWC_lineWidth > 0 ){ return this._drill_COWC_lineWidth; }
@@ -1351,9 +1454,34 @@ Window_Base.prototype.drill_COWC_getCurLineHeight_Private = function(){
 	return this._drill_COWC_lineHeight;
 }
 
+//==============================
+// * 当前行字数 - 开始计数
+//==============================
+var _drill_COWC_processNormalCharacter = Window_Base.prototype.processNormalCharacter;
+Window_Base.prototype.processNormalCharacter = function( textState ){
+	_drill_COWC_processNormalCharacter.call( this, textState );
+	if( this.drill_COWA_isCalculating() == true ){	//（计算时才进行统计，绘制文本时不统计）
+		this._drill_COWC_lineNormalCharCount += 1;
+	}
+}
+//==============================
+// * 当前行字数 - 获取当前行字数
+//
+//			说明：	获取一次后，记录字数。
+//==============================
+Window_Base.prototype.drill_COWC_getCurLineNormalCharCount_Private = function(){
+	if( this._drill_COWC_lineNormalCharCount > 0 ){ return this._drill_COWC_lineNormalCharCount; }
+	this.drill_COWA_getTextExWidth( this._drill_COWC_lineText );	//（强制绘制一次后，得到字数）
+	return this._drill_COWC_lineNormalCharCount;
+}
+
 
 //=============================================================================
-// ** 表达式应用
+// ** ☆表达式应用
+//
+//			说明：	> 表达式阶段的 接口继承、执行 的相关应用。
+//					> 相关 子插件 继承/应用 时，建议单独作为一个大模块，名为："表达式应用"。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 表达式应用 - 字符转换（简单符）
@@ -1405,7 +1533,11 @@ Window_Base.prototype.drill_COWC_processNewExpressionChar = function( matched_in
 
 
 //=============================================================================
-// ** 转义字符应用
+// ** ☆转义字符应用
+//
+//			说明：	> 转义字符阶段的 接口继承、执行 的相关应用。
+//					> 相关 子插件 继承/应用 时，建议单独作为一个大模块，名为："转义字符应用"。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 转义字符应用 - 字符转换
@@ -1446,49 +1578,49 @@ Window_Base.prototype.drill_COWC_processNewTransformChar_Combined = function( ma
 	// > 职业名称（\NC[n]）
 	if( command.toUpperCase() == "NC" ){
 		if( args.length == 1 ){
-			var str = $dataClasses[ Number(args[0]) ].name;
+			var str = this.drill_COWC_className( Number(args[0]) );
 			this.drill_COWC_charSubmit_Transform( str );
 		}
 	}
 	// > 物品名称（\NI[n]）
 	if( command.toUpperCase() == "NI" ){
 		if( args.length == 1 ){
-			var str = $dataItems[ Number(args[0]) ].name;
+			var str = this.drill_COWC_itemName( Number(args[0]) );
 			this.drill_COWC_charSubmit_Transform( str );
 		}
 	}
 	// > 武器名称（\NW[n]）
 	if( command.toUpperCase() == "NW" ){
 		if( args.length == 1 ){
-			var str = $dataWeapons[ Number(args[0]) ].name;
+			var str = this.drill_COWC_weaponName( Number(args[0]) );
 			this.drill_COWC_charSubmit_Transform( str );
 		}
 	}
 	// > 护甲名称（\NA[n]）
 	if( command.toUpperCase() == "NA" ){
 		if( args.length == 1 ){
-			var str = $dataArmors[ Number(args[0]) ].name;
+			var str = this.drill_COWC_armorName( Number(args[0]) );
 			this.drill_COWC_charSubmit_Transform( str );
 		}
 	}
 	// > 技能名称（\NS[n]）
 	if( command.toUpperCase() == "NS" ){
 		if( args.length == 1 ){
-			var str = $dataSkills[ Number(args[0]) ].name;
+			var str = this.drill_COWC_skillName( Number(args[0]) );
 			this.drill_COWC_charSubmit_Transform( str );
 		}
 	}
 	// > 敌人名称（\NE[n]）
 	if( command.toUpperCase() == "NE" ){
 		if( args.length == 1 ){
-			var str = $dataEnemies[ Number(args[0]) ].name;
+			var str = this.drill_COWC_enemyName( Number(args[0]) );
 			this.drill_COWC_charSubmit_Transform( str );
 		}
 	}
 	// > 状态名称（\NT[n]）
 	if( command.toUpperCase() == "NT" ){
 		if( args.length == 1 ){
-			var str = $dataStates[ Number(args[0]) ].name;
+			var str = this.drill_COWC_stateName( Number(args[0]) );
 			this.drill_COWC_charSubmit_Transform( str );
 		}
 	}
@@ -1496,47 +1628,42 @@ Window_Base.prototype.drill_COWC_processNewTransformChar_Combined = function( ma
 	// > 图标+物品名（\II[n]）
 	if( command.toUpperCase() == "II" ){
 		if( args.length == 1 ){
-			var n = Number(args[0]);
-			var str = '\x1bI[' + $dataItems[n].iconIndex + ']' + $dataItems[n].name;
+			var str = this.drill_COWC_itemNameWithIcon( Number(args[0]) );
 			this.drill_COWC_charSubmit_Transform( str );
 		}
 	}
 	// > 图标+武器名（\IW[n]）
 	if( command.toUpperCase() == "IW" ){
 		if( args.length == 1 ){
-			var n = Number(args[0]);
-			var str = '\x1bI[' + $dataWeapons[n].iconIndex + ']' + $dataWeapons[n].name;
+			var str = this.drill_COWC_weaponNameWithIcon( Number(args[0]) );
 			this.drill_COWC_charSubmit_Transform( str );
 		}
 	}
 	// > 图标+护甲名（\IA[n]）
 	if( command.toUpperCase() == "IA" ){
 		if( args.length == 1 ){
-			var n = Number(args[0]);
-			var str = '\x1bI[' + $dataArmors[n].iconIndex + ']' + $dataArmors[n].name;
+			var str = this.drill_COWC_armorNameWithIcon( Number(args[0]) );
 			this.drill_COWC_charSubmit_Transform( str );
 		}
 	}
 	// > 图标+技能名（\IS[n]）
 	if( command.toUpperCase() == "IS" ){
 		if( args.length == 1 ){
-			var n = Number(args[0]);
-			var str = '\x1bI[' + $dataSkills[n].iconIndex + ']' + $dataSkills[n].name;
+			var str = this.drill_COWC_skillNameWithIcon( Number(args[0]) );
 			this.drill_COWC_charSubmit_Transform( str );
 		}
 	}
 	// > 图标+状态名（\IT[n]）
 	if( command.toUpperCase() == "IT" ){
 		if( args.length == 1 ){
-			var n = Number(args[0]);
-			var str = '\x1bI[' + $dataStates[n].iconIndex + ']' + $dataStates[n].name;
+			var str = this.drill_COWC_stateNameWithIcon( Number(args[0]) );
 			this.drill_COWC_charSubmit_Transform( str );
 		}
 	}
 };
 
 //==============================
-// * 转义字符应用 - 职业名称（指定角色）
+// * 转义字符应用 - 角色职业名称（\AC[n]）
 //==============================
 Window_Base.prototype.drill_COWC_actorClassName = function( n ){
     var actor = $gameActors.actor(n);
@@ -1544,7 +1671,7 @@ Window_Base.prototype.drill_COWC_actorClassName = function( n ){
     return actor.currentClass().name;
 };
 //==============================
-// * 转义字符应用 - 昵称（指定角色）
+// * 转义字符应用 - 角色昵称（\AN[n]）
 //==============================
 Window_Base.prototype.drill_COWC_actorNickname = function( n ){
     var actor = $gameActors.actor(n);
@@ -1552,100 +1679,128 @@ Window_Base.prototype.drill_COWC_actorNickname = function( n ){
     return actor.nickname();
 };
 //==============================
-// * 转义字符应用 - 职业名称（队伍成员）
+// * 转义字符应用 - 队伍成员职业名称（\PC[n]）
 //==============================
-Window_Base.prototype.drill_COWC_partyClassName = function(n) {
+Window_Base.prototype.drill_COWC_partyClassName = function( n ){
     var actor = $gameParty.members()[n - 1];
 	if( actor == undefined ){ return ""; }
     return actor.currentClass().name;
 };
 //==============================
-// * 转义字符应用 - 昵称（队伍成员）
+// * 转义字符应用 - 队伍成员昵称（\PN[n]）
 //==============================
-Window_Base.prototype.drill_COWC_partyNickname = function(n) {
+Window_Base.prototype.drill_COWC_partyNickname = function( n ){
     var actor = $gameParty.members()[n - 1];
 	if( actor == undefined ){ return ""; }
     return actor.nickname();
 };
 
-
-
-//=============================================================================
-// ** 效果字符 - 字体加粗
-//=============================================================================
 //==============================
-// * 字体加粗 - bitmap标记
+// * 转义字符应用 - 职业名称（\NC[n]）
 //==============================
-var _drill_COWC_bitmap_initialize = Bitmap.prototype.initialize;
-Bitmap.prototype.initialize = function( width, height ){
-	_drill_COWC_bitmap_initialize.call(this, width, height);
-	this._drill_COWC_fontBold = false;
+Window_Base.prototype.drill_COWC_className = function( n ){
+    var data = $dataClasses[ n ];
+	if( data == undefined ){ return ""; }
+    return data.name;
 };
 //==============================
-// * 字体加粗 - 执行加粗
+// * 转义字符应用 - 物品名称（\NI[n]）
 //==============================
-var _drill_COWC_bitmap_makeFontNameText = Bitmap.prototype._makeFontNameText;
-Bitmap.prototype._makeFontNameText = function() {
-	
-	// > 加粗设置
-    if( this._drill_COWC_fontBold == true ){
-		return 'Bold ' + this.fontSize + 'px ' + this.fontFace;
-	}
-	
-	// > 斜体设置（核心中默认）
-    return _drill_COWC_bitmap_makeFontNameText.call(this);
+Window_Base.prototype.drill_COWC_itemName = function( n ){
+    var data = $dataItems[ n ];
+	if( data == undefined ){ return ""; }
+    return data.name;
+};
+//==============================
+// * 转义字符应用 - 武器名称（\NW[n]）
+//==============================
+Window_Base.prototype.drill_COWC_weaponName = function( n ){
+    var data = $dataWeapons[ n ];
+	if( data == undefined ){ return ""; }
+    return data.name;
+};
+//==============================
+// * 转义字符应用 - 护甲名称（\NA[n]）
+//==============================
+Window_Base.prototype.drill_COWC_armorName = function( n ){
+    var data = $dataArmors[ n ];
+	if( data == undefined ){ return ""; }
+    return data.name;
+};
+//==============================
+// * 转义字符应用 - 技能名称（\NS[n]）
+//==============================
+Window_Base.prototype.drill_COWC_skillName = function( n ){
+    var data = $dataSkills[ n ];
+	if( data == undefined ){ return ""; }
+    return data.name;
+};
+//==============================
+// * 转义字符应用 - 敌人名称（\NE[n]）
+//==============================
+Window_Base.prototype.drill_COWC_enemyName = function( n ){
+    var data = $dataEnemies[ n ];
+	if( data == undefined ){ return ""; }
+    return data.name;
+};
+//==============================
+// * 转义字符应用 - 状态名称（\NT[n]）
+//==============================
+Window_Base.prototype.drill_COWC_stateName = function( n ){
+    var data = $dataStates[ n ];
+	if( data == undefined ){ return ""; }
+    return data.name;
 };
 
-//=============================================================================
-// ** 效果字符 - 脸图切换
-//=============================================================================
 //==============================
-// * 脸图切换 - 字符转换
+// * 转义字符应用 - 图标+物品名（\II[n]）
 //==============================
-var _drill_COWC_processNewEffectChar_Combined_face = Window_Base.prototype.drill_COWC_processNewEffectChar_Combined;
-Window_Base.prototype.drill_COWC_processNewEffectChar_Combined = function( matched_index, matched_str, command, args ){
-	_drill_COWC_processNewEffectChar_Combined_face.call( this, matched_index, matched_str, command, args );
-
-	if( this instanceof Window_Message ){
-		if( command.toUpperCase() == "AF" ){	//（想办法实时绘制/换脸图）
-			if( args.length == 1 ){
-				var temp1 = String(args[0]);
-				var actor = $gameActors.actor( Number(temp1) );
-				$gameMessage.setFaceImage( actor.faceName(), actor.faceIndex() );
-				this.drill_COWC_clearContentsRect( 0, 0, Window_Base._faceWidth, Window_Base._faceHeight );	//（擦掉脸图区域）
-				this.loadMessageFace();						//（再次读取新脸图）
-				this.drill_COWC_charSubmit_Effect(0,0);
-			}
-		}
-		if( command.toUpperCase() == "PF" ){
-			if( args.length == 1 ){
-				var temp1 = String(args[0]);
-				var actor = $gameParty.members()[ Number(temp1) -1 ];
-				$gameMessage.setFaceImage( actor.faceName(), actor.faceIndex() );
-				this.drill_COWC_clearContentsRect( 0, 0, Window_Base._faceWidth, Window_Base._faceHeight );	//（擦掉脸图区域）
-				this.loadMessageFace();						//（再次读取新脸图）
-				this.drill_COWC_charSubmit_Effect(0,0);
-			}
-		}
-	}
+Window_Base.prototype.drill_COWC_itemNameWithIcon = function( n ){
+    var data = $dataItems[ n ];
+	if( data == undefined ){ return ""; }
+    return '\x1bI[' + data.iconIndex + ']' + data.name;
+};
+//==============================
+// * 转义字符应用 - 图标+武器名（\IW[n]）
+//==============================
+Window_Base.prototype.drill_COWC_weaponNameWithIcon = function( n ){
+    var data = $dataWeapons[ n ];
+	if( data == undefined ){ return ""; }
+    return '\x1bI[' + data.iconIndex + ']' + data.name;
+};
+//==============================
+// * 转义字符应用 - 图标+护甲名（\IA[n]）
+//==============================
+Window_Base.prototype.drill_COWC_armorNameWithIcon = function( n ){
+    var data = $dataArmors[ n ];
+	if( data == undefined ){ return ""; }
+    return '\x1bI[' + data.iconIndex + ']' + data.name;
+};
+//==============================
+// * 转义字符应用 - 图标+技能名（\IS[n]）
+//==============================
+Window_Base.prototype.drill_COWC_skillNameWithIcon = function( n ){
+    var data = $dataSkills[ n ];
+	if( data == undefined ){ return ""; }
+    return '\x1bI[' + data.iconIndex + ']' + data.name;
+};
+//==============================
+// * 转义字符应用 - 图标+状态名（\IT[n]）
+//==============================
+Window_Base.prototype.drill_COWC_stateNameWithIcon = function( n ){
+    var data = $dataStates[ n ];
+	if( data == undefined ){ return ""; }
+    return '\x1bI[' + data.iconIndex + ']' + data.name;
 };
 
-//=============================================================================
-// ** 效果字符 - 重置字体
-//=============================================================================
-var _drill_COWC_resetFontSettings = Window_Base.prototype.resetFontSettings;
-Window_Base.prototype.resetFontSettings = function() {
-	_drill_COWC_resetFontSettings.call(this);
-    //this.contents.fontFace = this.standardFontFace();			//原函数 - 字体类型
-    //this.contents.fontSize = this.standardFontSize();			//原函数 - 字体大小
-    //this.resetTextColor();									//原函数 - 字体颜色
-	
-	this.contents._drill_COWC_fontBold = false;					//标记 - 加粗
-	this.contents.fontItalic = false;							//标记 - 斜体
-};
+
 
 //=============================================================================
-// ** 效果字符应用
+// ** ☆效果字符应用
+//
+//			说明：	> 效果字符阶段的 接口继承、执行 的相关应用。
+//					> 相关 子插件 继承/应用 时，建议单独作为一个大模块，名为："效果字符应用"。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 效果字符应用 - 字符转换（简单符）
@@ -1766,9 +1921,87 @@ Window_Base.prototype.drill_COWA_getTextExHeight_Private = function( text ){
 	return hh;
 }
 
+//=============================================================================
+// ** 效果字符应用 - 字体加粗
+//=============================================================================
+//==============================
+// * 字体加粗 - bitmap标记
+//==============================
+var _drill_COWC_bitmap_initialize = Bitmap.prototype.initialize;
+Bitmap.prototype.initialize = function( width, height ){
+	_drill_COWC_bitmap_initialize.call(this, width, height);
+	this._drill_COWC_fontBold = false;
+};
+//==============================
+// * 字体加粗 - 执行加粗
+//==============================
+var _drill_COWC_bitmap_makeFontNameText = Bitmap.prototype._makeFontNameText;
+Bitmap.prototype._makeFontNameText = function() {
+	
+	// > 加粗设置
+    if( this._drill_COWC_fontBold == true ){
+		return 'Bold ' + this.fontSize + 'px ' + this.fontFace;
+	}
+	
+	// > 斜体设置（核心中默认）
+    return _drill_COWC_bitmap_makeFontNameText.call(this);
+};
 
 //=============================================================================
-// ** 窗口的画布
+// ** 效果字符应用 - 脸图切换
+//=============================================================================
+//==============================
+// * 脸图切换 - 字符转换
+//==============================
+var _drill_COWC_processNewEffectChar_Combined_face = Window_Base.prototype.drill_COWC_processNewEffectChar_Combined;
+Window_Base.prototype.drill_COWC_processNewEffectChar_Combined = function( matched_index, matched_str, command, args ){
+	_drill_COWC_processNewEffectChar_Combined_face.call( this, matched_index, matched_str, command, args );
+
+	if( this instanceof Window_Message ){
+		if( command.toUpperCase() == "AF" ){	//（想办法实时绘制/换脸图）
+			if( args.length == 1 ){
+				var temp1 = String(args[0]);
+				var actor = $gameActors.actor( Number(temp1) );
+				$gameMessage.setFaceImage( actor.faceName(), actor.faceIndex() );
+				this.drill_COWC_clearContentsRect( 0, 0, Window_Base._faceWidth, Window_Base._faceHeight );	//（擦掉脸图区域）
+				this.loadMessageFace();						//（再次读取新脸图）
+				this.drill_COWC_charSubmit_Effect(0,0);
+			}
+		}
+		if( command.toUpperCase() == "PF" ){
+			if( args.length == 1 ){
+				var temp1 = String(args[0]);
+				var actor = $gameParty.members()[ Number(temp1) -1 ];
+				$gameMessage.setFaceImage( actor.faceName(), actor.faceIndex() );
+				this.drill_COWC_clearContentsRect( 0, 0, Window_Base._faceWidth, Window_Base._faceHeight );	//（擦掉脸图区域）
+				this.loadMessageFace();						//（再次读取新脸图）
+				this.drill_COWC_charSubmit_Effect(0,0);
+			}
+		}
+	}
+};
+
+//=============================================================================
+// ** 效果字符应用 - 重置字体
+//=============================================================================
+var _drill_COWC_resetFontSettings = Window_Base.prototype.resetFontSettings;
+Window_Base.prototype.resetFontSettings = function() {
+	_drill_COWC_resetFontSettings.call(this);
+    //this.contents.fontFace = this.standardFontFace();			//原函数 - 字体类型
+    //this.contents.fontSize = this.standardFontSize();			//原函数 - 字体大小
+    //this.resetTextColor();									//原函数 - 字体颜色
+	
+	this.contents._drill_COWC_fontBold = false;					//标记 - 加粗
+	this.contents.fontItalic = false;							//标记 - 斜体
+};
+
+
+
+//=============================================================================
+// ** ☆窗口的画布
+//
+//			说明：	> 该模块专用于字符块，在窗口画布内选择指定一块区域清除，能清除贴上的字符块。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //=============================
 // * 窗口的画布 - 初始化
@@ -1964,7 +2197,7 @@ Window_Base.prototype.drill_COWC_createBlockSprite = function( text ){
 	return temp_sprite;
 }
 //==============================
-// * 效果字符应用 - 字符转换（组合符）
+// * 字符块 - 效果字符应用 - 字符转换（组合符）
 //==============================
 var _drill_COWC_processNewEffectChar_Combined_4 = Window_Base.prototype.drill_COWC_processNewEffectChar_Combined;
 Window_Base.prototype.drill_COWC_processNewEffectChar_Combined = function( matched_index, matched_str, command, args ){
@@ -2059,7 +2292,10 @@ Window_Base.prototype.drill_COWC_processNewEffectChar_Combined = function( match
 
 
 //=============================================================================
-// ** 自动换行
+// ** ☆自动换行
+//
+//			说明：	> 该模块用于自动换行，先去除全部"\n"换行符，并重新在指定位置插入"\n"换行符。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 计算标记 - 计算文本宽度前（继承 窗口辅助核心）
@@ -2209,7 +2445,10 @@ Window_Base.prototype.drill_COWC_setWordWrap_Private = function( text, max_width
 
 
 //=============================================================================
-// ** 消息快进按键
+// ** ☆消息快进按键
+//
+//			说明：	> 玩家在对话框按快进键时，消息快进的功能。（包含 存储数据、插件指令 的功能）
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //=============================
 // * 消息快进 - 按键监听
@@ -2275,8 +2514,12 @@ Window_Message.prototype.processEscapeCharacter = function( code, textState ){
 	_drill_COWC_msg_processEscapeCharacter.call( this, code, textState );
 }
 
+
 //=============================================================================
-// ** 核心漏洞修复
+// ** ☆核心漏洞修复
+//
+//			说明：	> 把 消息输入字符 的功能，分离出一个单独的函数，用于后期扩展。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 核心漏洞修复 - 等待消息显示（覆写）
@@ -2312,7 +2555,9 @@ Window_Message.prototype.updateMessage = function(){
     }
 }
 //==============================
-// * 核心漏洞修复 - 跳出字符绘制情况（false继续绘制，true跳出绘制）
+// * 核心漏洞修复 - 等待消息显示 - 跳出字符绘制情况
+//
+//			说明：	返回false继续绘制，返回true跳出绘制。
 //==============================
 Window_Message.prototype.drill_COWC_canBreakProcess = function(){
 	
@@ -2334,10 +2579,8 @@ Window_Message.prototype.drill_COWC_canBreakProcess = function(){
 //=============================================================================
 }else{
 		Imported.Drill_CoreOfWindowCharacter = false;
-		alert(
-			"【Drill_CoreOfWindowCharacter.js 窗口字符-窗口字符核心】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfWindowAuxiliary 系统-窗口辅助核心"
-		);
+		var pluginTip = DrillUp.drill_COWC_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
 

@@ -1434,13 +1434,15 @@
  * @type select
  * @option 普通
  * @value 0
- * @option 叠加
+ * @option 发光
  * @value 1
  * @option 实色混合(正片叠底)
  * @value 2
  * @option 浅色
  * @value 3
- * @desc pixi的渲染混合模式。0-普通,1-叠加。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
+ * @option 叠加
+ * @value 4
+ * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
  * @default 0
  *
  * @param 地图层级
@@ -1539,7 +1541,7 @@
  * @value 2
  * @option 浅色
  * @value 3
- * @desc pixi的渲染混合模式。0-普通,1-叠加。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
+ * @desc pixi的渲染混合模式。0-普通,1-变亮。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
  * @default 1
  * 
  * 
@@ -1699,7 +1701,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			多层地图数字雨：
 //				->基本属性
 //					->地图层级
@@ -1712,7 +1714,7 @@
 //					->透明、混合模式
 //					x->坐标、速度、色调、缩放、斜切
 //
-//		★私有类如下：
+//		★插件私有类：
 //			* Drill_LPR_RaindropSprite 【雨滴贴图】
 //
 //		★必要注意事项：
@@ -1731,7 +1733,23 @@
 //			暂无
 //
 
-
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_LPR_PluginTip_curName = "Drill_LayerParticleRain.js 地图-多层地图数字雨";
+	DrillUp.g_LPR_PluginTip_baseList = [];
+	//==============================
+	// * 提示信息 - 报错 - 强制更新提示
+	//==============================
+	DrillUp.drill_LPR_getPluginTip_NeedUpdate_Camera = function(){
+		return "【" + DrillUp.g_LPR_PluginTip_curName + "】\n活动地图镜头插件版本过低，你需要更新 镜头插件 至少v2.2及以上版本。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -2063,6 +2081,7 @@ Game_Map.prototype.drill_LPR_initMapdata = function() {
 		}
 	}
 }
+// > 强制更新提示 锁
 DrillUp.g_LPa_alert = true;
 //==============================
 // * 玩家 - 帧刷新 镜头位置
@@ -2080,13 +2099,16 @@ Game_Player.prototype.update = function( sceneActive ){
 		var data = $gameSystem._drill_LPR_dataTank_curData[i];
 		if( data == undefined ){ continue; }
 		
-		// > 镜头基点（循环积累值）
-		if( Imported.Drill_LayerCamera ){
+		// > 镜头基点
+		if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】循环积累值
+		
+			// > 强制更新提示
 			if( $gameSystem._drill_LCa_controller == undefined && DrillUp.g_LPa_alert == true ){ 
-				alert("【Drill_LayerParticleRain.js 地图 - 多层地图数字雨】\n活动地图镜头插件版本过低，你需要更新 镜头插件 至少v1.9及以上版本。");
+				alert( DrillUp.drill_LPR_getPluginTip_NeedUpdate_Camera() );
 				DrillUp.g_LPa_alert = false;
 				return; 
 			}
+			
 			data['cameraXAcc'] = $gameSystem._drill_LCa_controller._drill_cameraX_offsetAcc * $gameMap.tileWidth();
 			data['cameraYAcc'] = $gameSystem._drill_LCa_controller._drill_cameraY_offsetAcc * $gameMap.tileHeight();
 			

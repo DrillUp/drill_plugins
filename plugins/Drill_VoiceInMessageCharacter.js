@@ -288,7 +288,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			对话文字响声：
 //				->字数跳跃
 //				->声音配置
@@ -304,6 +304,31 @@
 //			暂无
 //		
 
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_VIMC_PluginTip_curName = "Drill_VoiceInMessageCharacter.js 声音-对话文字响声";
+	DrillUp.g_VIMC_PluginTip_baseList = ["Drill_CoreOfWindowCharacter.js 窗口字符-窗口字符核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_VIMC_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_VIMC_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_VIMC_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_VIMC_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_VIMC_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -570,9 +595,7 @@ Window_Message.prototype.update = function() {
 //=============================================================================
 }else{
 		Imported.Drill_VoiceInMessageCharacter = false;
-		alert(
-			"【Drill_VoiceInMessageCharacter.js 声音-对话文字响声】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfWindowCharacter  窗口字符-窗口字符核心"
-		);
+		var pluginTip = DrillUp.drill_VIMC_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 

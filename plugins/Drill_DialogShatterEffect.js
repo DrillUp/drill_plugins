@@ -176,7 +176,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			图片方块粉碎：
 //				->延迟插件指令
 //				->粉碎配置
@@ -204,6 +204,31 @@
 //			暂无
 //
 
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_DSE_PluginTip_curName = "Drill_DialogShatterEffect.js 对话框-方块粉碎效果";
+	DrillUp.g_DSE_PluginTip_baseList = ["Drill_CoreOfShatterEffect.js 系统-方块粉碎核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_DSE_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_DSE_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_DSE_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_DSE_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_DSE_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -822,10 +847,8 @@ Scene_Battle.prototype.drill_DSE_scene_updateAfter = Scene_Map.prototype.drill_D
 //=============================================================================
 }else{
 		Imported.Drill_DialogShatterEffect = false;
-		alert(
-			"【Drill_DialogShatterEffect.js 对话框-方块粉碎效果】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfShatterEffect 系统-方块粉碎核心"
-		);
+		var pluginTip = DrillUp.drill_DSE_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
 

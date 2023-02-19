@@ -105,7 +105,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			镜头视野开关：
 //				->
 //
@@ -119,6 +119,23 @@
 //			暂无
 //
 
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_ESiS_PluginTip_curName = "Drill_EventSightSwitch.js 物体-镜头视野开关";
+	DrillUp.g_ESiS_PluginTip_baseList = [];
+	//==============================
+	// * 提示信息 - 报错 - 强制更新提示
+	//==============================
+	DrillUp.drill_ESiS_getPluginTip_NeedUpdate_Camera = function(){
+		return "【" + DrillUp.g_ESiS_PluginTip_curName + "】\n活动地图镜头插件版本过低，你需要更新 镜头插件 至少v2.2及以上版本。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -261,6 +278,7 @@ Game_Map.prototype.drill_ESiS_updateSightSwitch = function() {
 		}
 	}
 }
+// > 强制更新提示 锁
 DrillUp.g_LCa_alert = true;
 //==============================
 // * 视野 - 判断点是否在镜头内
@@ -271,11 +289,14 @@ Game_Map.prototype.drill_ESiS_posIsInCamera = function( realX, realY ){
 	var ohh = Graphics.boxHeight / $gameMap.tileHeight();
 	var sww = oww;
 	var shh = ohh;
-	if( Imported.Drill_LayerCamera ){
+	if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】镜头范围内+缩放
+		
+		// > 强制更新提示
 		if( $gameSystem._drill_LCa_controller == undefined && DrillUp.g_LCa_alert == true ){ 
-			alert("【Drill_EventSightSwitch.js 物体 - 镜头视野开关】\n活动地图镜头插件版本过低，你需要更新 镜头插件 至少v1.9及以上版本。");
+			alert( DrillUp.drill_ESiS_getPluginTip_NeedUpdate_Camera() );
 			DrillUp.g_LCa_alert = false;
 		}
+		
 		sww = sww / $gameSystem._drill_LCa_controller._drill_scaleX;
 		shh = shh / $gameSystem._drill_LCa_controller._drill_scaleY;
 	}

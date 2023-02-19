@@ -1762,7 +1762,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			自定义照明效果：
 //				->物体照明
 //					->gif光源
@@ -1773,7 +1773,7 @@
 //				->限时动态照明
 //					->突然爆炸的闪亮光源
 //		
-//		★私有类如下：
+//		★插件私有类：
 //			* Drill_LIl_Renderer【遮罩渲染器】
 //			* Drill_LIl_MaskSprite【黑暗层贴图】
 //			* Drill_LIl_Sprite【光源贴图】
@@ -1819,7 +1819,67 @@
 //			1.pixi底层的部分功能有限，且难以修改，只能基于该渲染器作额外扩充。
 //
 
-
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_LIl_PluginTip_curName = "Drill_LayerIllumination.js 地图-自定义照明效果";
+	DrillUp.g_LIl_PluginTip_baseList = ["Drill_CoreOfDynamicMask.js 系统-动态遮罩核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_LIl_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_LIl_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_LIl_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_LIl_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_LIl_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到事件
+	//==============================
+	DrillUp.drill_LIl_getPluginTip_EventNotFind = function( e_id ){
+		return "【" + DrillUp.g_LIl_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到图片
+	//==============================
+	DrillUp.drill_LIl_getPluginTip_PictureNotFind = function( pic_id ){
+		return "【" + DrillUp.g_LIl_PluginTip_curName + "】\n插件指令错误，id为"+pic_id+"的图片还没被创建。\n你可能需要将指令放在'显示图片'事件指令之后。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到样式配置
+	//==============================
+	DrillUp.drill_LIl_getPluginTip_StyleDataNotFind = function( data_id ){
+		return "【" + DrillUp.g_LIl_PluginTip_curName + "】\n插件指令错误，不存在id为"+data_id+"的光源配置。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 照明未创建
+	//==============================
+	DrillUp.drill_LIl_getPluginTip_DataNotCreate = function( data_id ){
+		return "【" + DrillUp.g_LIl_PluginTip_curName + "】\n插件指令错误，id为"+data_id+"的高级照明未创建，需要创建再使用。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 插件指令过载
+	//==============================
+	DrillUp.drill_LIl_getPluginTip_Overdrive = function( ch_str ){
+		return "【" + DrillUp.g_LIl_PluginTip_curName + "】\n插件指令过载，控制\""+ch_str+"\"的指令在3秒内重复执行了50次以上！\n请重新检查你写的事件，注意不要把指令放入并行事件反复执行！";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 黑暗层透明度
+	//==============================
+	DrillUp.drill_LIl_getPluginTip_OpacityWrong = function(){
+		return "【" + DrillUp.g_LIl_PluginTip_curName + "】\n提示：你将临时锁定设为开启，又将当前地图的透明度设为了0。\n由于黑暗层是0为全亮，255为全黑，所以这样设置将没有任何效果，建议直接关闭。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -2098,8 +2158,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp1 = Number(temp1);
 				marker = $gameSystem._drill_LIl_container.drill_CODM_getSeniorMarkerById( temp1 );
 				if( marker == undefined ){
-					alert( "【Drill_LayerIllumination.js 地图 - 自定义照明】\n" +
-							"插件指令错误，id为"+temp1+"的高级照明未创建，需要创建再使用。");
+					alert( DrillUp.drill_LIl_getPluginTip_DataNotCreate( temp1 ) );
 				}
 				
 			}else if( temp1.indexOf("高级照明变量[") != -1 ){
@@ -2108,8 +2167,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp1 = $gameVariables.value( Number(temp1) );
 				marker = $gameSystem._drill_LIl_container.drill_CODM_getSeniorMarkerById( temp1 );
 				if( marker == undefined ){
-					alert( "【Drill_LayerIllumination.js 地图 - 自定义照明】\n" +
-							"插件指令错误，id为"+temp1+"的高级照明未创建，需要创建再使用。");
+					alert( DrillUp.drill_LIl_getPluginTip_DataNotCreate( temp1 ) );
 				}
 			}
 		}
@@ -2434,8 +2492,7 @@ Game_Map.prototype.drill_LIl_isEventExist = function( e_id ){
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_LayerIllumination.js 地图 - 自定义照明效果】\n" +
-				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
+		alert( DrillUp.drill_LIl_getPluginTip_EventNotFind( e_id ) );
 		return false;
 	}
 	return true;
@@ -2448,9 +2505,7 @@ Game_Screen.prototype.drill_LIl_isPictureExist = function( pic_id ){
 	
 	var pic = this.picture( pic_id );
 	if( pic == undefined ){
-		alert( "【Drill_LayerIllumination.js 地图 - 自定义照明效果】\n" +
-				"插件指令错误，id为"+pic_id+"的图片还没被创建。\n" + 
-				"你可能需要将指令放在'显示图片'事件指令之后。");
+		alert( DrillUp.drill_LIl_getPluginTip_PictureNotFind( pic_id ) );
 		return false;
 	}
 	return true;
@@ -2900,8 +2955,7 @@ Game_Map.prototype.drill_LIl_setupIllumination = function() {
 					if( type == "黑暗层透明度"){
 						temp2 = Number(temp2);
 						if( temp2 == 0 && this._drill_LIl_lock['enable'] == true ){
-							alert( "【Drill_LayerIllumination.js 地图 - 自定义照明效果】\n" +
-									"提示：你将临时锁定设为开启，又将当前地图的透明度设为了0。\n由于黑暗层是0为全亮，255为全黑，所以这样设置将没有任何效果，建议直接关闭。");
+							alert( DrillUp.drill_LIl_getPluginTip_OpacityWrong() );
 						}
 						this._drill_LIl_lock['targetOpacity'] = temp2;
 					}
@@ -3283,7 +3337,7 @@ Scene_Map.prototype.updateMain = function(){
 Game_Map.prototype.drill_LIl_addSimplePerspect_characterId = function( character_id, style_id ){	
 	var data = DrillUp.g_LIl_light[ style_id ];				//（参数准备）
 	if( data == undefined ){
-		alert("【Drill_LayerIllumination.js  地图 - 自定义照明】\n插件指令错误，不存在id为" + (style_id+1) +"的光源配置。");
+		alert( DrillUp.drill_LIl_getPluginTip_StyleDataNotFind(style_id+1) );
 		return;
 	}
 	
@@ -3296,7 +3350,7 @@ Game_Map.prototype.drill_LIl_addSimplePerspect_characterId = function( character
 		this._drill_LIl_commandLock[character_id] = -1000;
 		var ch_str = "事件["+character_id+"]";
 		if( character_id == -2 ){ ch_str = "玩家"; }
-		alert("【Drill_LayerIllumination.js  地图 - 自定义照明】\n插件指令过载，控制\""+ch_str+"\"的指令在3秒内重复执行了50次以上！\n请重新检查你写的事件，注意不要把指令放入并行事件反复执行！");
+		alert( DrillUp.drill_LIl_getPluginTip_Overdrive( ch_str ) );
 		return;
 	}
 	
@@ -3328,7 +3382,7 @@ Game_Map.prototype.drill_LIl_changeSimplePerspectZIndex_characterId = function( 
 Game_Map.prototype.drill_LIl_addSimplePerspect_mouse = function( style_id ){
 	var data = DrillUp.g_LIl_light[ style_id ];				//（参数准备）
 	if( data == undefined ){
-		alert("【Drill_LayerIllumination.js  地图 - 自定义照明】\n插件指令错误，不存在id为" + (style_id+1) +"的光源配置。");
+		alert( DrillUp.drill_LIl_getPluginTip_StyleDataNotFind(style_id+1) );
 		return;
 	}
 	var marker = new Drill_CODM_PerspectiveMarker( data );			//（创建透视镜）
@@ -3350,7 +3404,7 @@ Game_Map.prototype.drill_LIl_removeSimplePerspect_mouse = function(){
 Game_Map.prototype.drill_LIl_addSimplePerspect_picId = function( pic_id, style_id ){
 	var data = DrillUp.g_LIl_light[ style_id ];				//（参数准备）
 	if( data == undefined ){
-		alert("【Drill_LayerIllumination.js  地图 - 自定义照明】\n插件指令错误，不存在id为" + (style_id+1) +"的光源配置。");
+		alert( DrillUp.drill_LIl_getPluginTip_StyleDataNotFind(style_id+1) );
 		return;
 	}
 	var marker = new Drill_CODM_PerspectiveMarker( data );			//（创建透视镜）
@@ -3372,7 +3426,7 @@ Game_Map.prototype.drill_LIl_removeSimplePerspect_picId = function( pic_id ){
 Game_Map.prototype.drill_LIl_addSeniorPerspect = function( marker_id, style_id ){
 	var data = DrillUp.g_LIl_light[ style_id ];				//（参数准备）
 	if( data == undefined ){
-		alert("【Drill_LayerIllumination.js  地图 - 自定义照明】\n插件指令错误，不存在id为" + (style_id+1) +"的光源配置。");
+		alert( DrillUp.drill_LIl_getPluginTip_StyleDataNotFind(style_id+1) );
 		return;
 	}
 	var marker = new Drill_CODM_PerspectiveMarker( data );			//（创建透视镜）
@@ -3478,8 +3532,6 @@ Scene_Map.prototype.drill_LIl_updateLightCheck = function() {
 //=============================================================================
 }else{
 		Imported.Drill_LayerIllumination = false;
-		alert(
-			"【Drill_LayerIllumination.js  地图 - 自定义照明效果】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfDynamicMask  系统-动态遮罩核心"
-		);
+		var pluginTip = DrillUp.drill_LIl_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }

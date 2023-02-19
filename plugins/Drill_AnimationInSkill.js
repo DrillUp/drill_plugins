@@ -112,7 +112,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			并行动画绑定于状态：
 //				->战斗不阻塞设置
 //				->并行播放
@@ -137,23 +137,24 @@
 	// * 提示信息 - 参数
 	//==============================
 	var DrillUp = DrillUp || {}; 
-	DrillUp.g_AISk_tipCurName = "Drill_AnimationInSkill.js 动画-并行动画绑定于技能";
-	DrillUp.g_AISk_tipBasePluginList = ["Drill_AnimationInParallel.js 动画-并行战斗动画"];
+	DrillUp.g_AISk_PluginTip_curName = "Drill_AnimationInSkill.js 动画-并行动画绑定于技能";
+	DrillUp.g_AISk_PluginTip_baseList = ["Drill_AnimationInParallel.js 动画-并行战斗动画"];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
 	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_AISk_getPluginTip_NoBasePlugin = function(){
-		if( DrillUp.g_AISk_tipBasePluginList.length == 0 ){ return ""; }
-		var message = "【" + DrillUp.g_AISk_tipCurName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
-		for(var i=0; i < DrillUp.g_AISk_tipBasePluginList.length; i++){
+		if( DrillUp.g_AISk_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_AISk_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_AISk_PluginTip_baseList.length; i++){
 			message += "\n- ";
-			message += DrillUp.g_AISk_tipBasePluginList[i];
+			message += DrillUp.g_AISk_PluginTip_baseList[i];
 		}
 		return message;
 	};
-
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -251,7 +252,7 @@ Game_Action.prototype.drill_AISk_startParallelAnimation = function( battler , a_
 //=============================================================================
 }else{
 		Imported.Drill_AnimationInSkill = false;
-		var tip = DrillUp.drill_AISk_getPluginTip_NoBasePlugin();
-		alert( tip );
+		var pluginTip = DrillUp.drill_AISk_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 

@@ -73,6 +73,7 @@
  * 大幅度改进了内部结构，以及完成 透视镜物体和透视镜贴图 的数据结构。
  * [v1.2]
  * 添加了透视镜容器的部分接口。
+ * 
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -98,7 +99,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			动态遮罩核心：
 //				->动态遮罩
 //					->渲染器（Renderer）
@@ -110,7 +111,7 @@
 //					->物体容器（MarkerContainer） - 贴图容器（子插件实现）
 //						->物体添加/删除（drill_CODM_addOne） - 贴图添加/删除（子插件实现）
 //		
-//		★私有类如下：
+//		★插件私有类：
 //			* Drill_CODM_Renderer【遮罩渲染器】
 //			* Drill_CODM_MaskStage【动态遮罩容器】
 //			* Drill_CODM_MaskSprite【动态遮罩贴图】
@@ -132,7 +133,31 @@
 //			（此问题搁置，因为继续探讨没有意义了，只要加了动态遮罩就一定费性能，换自写的并不能优化性能）
 //
 
-
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_CODM_PluginTip_curName = "Drill_CoreOfDynamicMask.js 系统-动态遮罩核心";
+	DrillUp.g_CODM_PluginTip_baseList = ["Drill_CoreOfBallistics.js 系统-弹道核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_CODM_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_CODM_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_CODM_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_CODM_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_CODM_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -1785,10 +1810,8 @@ Scene_Load.prototype.reloadMapIfUpdated = function() {
 //=============================================================================
 }else{
 		Imported.Drill_CoreOfDynamicMask = false;
-		alert(
-			"【Drill_CoreOfDynamicMask.js  系统 - 动态遮罩核心】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfBallistics  系统-弹道核心"
-		);
+		var pluginTip = DrillUp.drill_CODM_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
 

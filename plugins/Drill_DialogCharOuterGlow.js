@@ -261,7 +261,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			外发光效果：
 //				->参数设置
 //
@@ -274,7 +274,44 @@
 //		★存在的问题：
 //			暂无
 //
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_DCOG_PluginTip_curName = "Drill_DialogCharOuterGlow.js 窗口字符-外发光效果";
+	DrillUp.g_DCOG_PluginTip_baseList = ["Drill_CoreOfWindowCharacter.js 窗口字符-窗口字符核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_DCOG_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_DCOG_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_DCOG_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_DCOG_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_DCOG_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 日志 - 无效参数
+	//==============================
+	DrillUp.drill_DCOG_getPluginTip_ColorError = function( n ){
+		return "【" + DrillUp.g_DCOG_PluginTip_curName + "】\n外发光颜色接受到一个无效的参数："+n+"。";
+	};
+	//==============================
+	// * 提示信息 - 日志 - 未配置的参数
+	//==============================
+	DrillUp.drill_DCOG_getPluginTip_ColorNotFind = function( n ){
+		return "【" + DrillUp.g_DCOG_PluginTip_curName + "】\n你没有在 外发光颜色-"+n+" 中配置颜色，而你在游戏中使用了它。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -297,8 +334,8 @@
 	// * 临时全局 - 获取外发光颜色
 	//==============================
 	DrillUp.drill_DCOG_getColor = function( n ){
-		if( !DrillUp.g_DCOG_color_list[n] ){ console.log("【窗口字符-外发光效果】外发光颜色接受到一个无效的参数："+n+"。" ); return "#ffffff" }
-		if( !DrillUp.g_DCOG_color_list[n]['color'] ){ console.log("【窗口字符-外发光效果】你没有在 外发光颜色-"+n+" 中配置，而你在游戏中使用了它。" ); return "#ffffff" }
+		if( !DrillUp.g_DCOG_color_list[n] ){ console.log( DrillUp.drill_DCOG_getPluginTip_ColorError( n ) ); return "#ffffff" }
+		if( !DrillUp.g_DCOG_color_list[n]['color'] ){ console.log( DrillUp.drill_DCOG_getPluginTip_ColorNotFind( n ) ); return "#ffffff" }
 		return DrillUp.g_DCOG_color_list[n]['color'];
 	}
 	
@@ -451,9 +488,7 @@ Bitmap.prototype._drawTextOutline = function( text, tx, ty, maxWidth ){
 //=============================================================================
 }else{
 		Imported.Drill_DialogCharOuterGlow = false;
-		alert(
-			"【Drill_DialogCharOuterGlow.js 窗口字符 - 外发光效果】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfWindowCharacter 窗口字符-窗口字符核心"
-		);
+		var pluginTip = DrillUp.drill_DCOG_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 

@@ -176,7 +176,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			独立开关：
 //				->多个独立开关
 //				->控制独立开关快速指令
@@ -190,7 +190,25 @@
 //
 //		★存在的问题：
 //			暂无
+//
 
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_ESS_PluginTip_curName = "Drill_EventSelfSwitch.js 物体-独立开关";
+	DrillUp.g_ESS_PluginTip_baseList = [];
+	//==============================
+	// * 提示信息 - 报错 - 找不到事件
+	//==============================
+	DrillUp.drill_ESS_getPluginTip_EventNotFind = function( e_id ){
+		return "【" + DrillUp.g_ESS_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -261,7 +279,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				var all_e = $gameMap._events;
 				e_chars = [];
 				for( var i=0; i < all_e.length; i++ ){
-					if( !all_e[i] ){ continue; }
+					if( all_e[i] == undefined ){ continue; }
 					e_chars.push( all_e[i] );
 				}
 			}
@@ -403,8 +421,7 @@ Game_Map.prototype.drill_ESS_isEventExist = function( e_id ){
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_EventSelfSwitch.js 物体 - 独立开关】\n" +
-				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
+		alert( DrillUp.drill_ESS_getPluginTip_EventNotFind( e_id ) );
 		return false;
 	}
 	return true;

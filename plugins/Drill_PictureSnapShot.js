@@ -94,7 +94,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			临时屏幕快照：
 //				->临时快照
 //
@@ -107,7 +107,24 @@
 //		★存在的问题：
 //			暂无
 //		
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_PSS_PluginTip_curName = "Drill_PictureSnapShot.js 图片-临时屏幕快照";
+	DrillUp.g_PSS_PluginTip_baseList = [];
+	//==============================
+	// * 提示信息 - 报错 - 找不到图片
+	//==============================
+	DrillUp.drill_PSS_getPluginTip_PictureNotFind = function( pic_id ){
+		return "【" + DrillUp.g_PSS_PluginTip_curName + "】\n插件指令错误，id为"+pic_id+"的图片还没被创建。\n你可能需要将指令放在'显示图片'事件指令之后。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -212,9 +229,7 @@ Game_Screen.prototype.drill_PSS_isPictureExist = function( pic_id ){
 	
 	var pic = this.picture( pic_id );
 	if( pic == undefined ){
-		alert( "【Drill_PictureSnapShot.js 图片 - 临时屏幕快照】\n" +
-				"插件指令错误，id为"+pic_id+"的图片还没被创建。\n" + 
-				"你可能需要将指令放在'显示图片'事件指令之后。");
+		alert( DrillUp.drill_PSS_getPluginTip_PictureNotFind( pic_id ) );
 		return false;
 	}
 	return true;

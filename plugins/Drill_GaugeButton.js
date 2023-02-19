@@ -475,7 +475,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			地图按钮集：（鼠标+触屏）
 //				->地图点击拦截
 //				->激活状态
@@ -494,7 +494,7 @@
 //			~struct~DrillGBuBtn:		按钮参数
 //		
 //		
-//		★私有类如下：
+//		★插件私有类：
 //			* Drill_GBu_ButtonSprite		固定按钮
 //
 //		★必要注意事项：
@@ -508,8 +508,41 @@
 //		★存在的问题：
 //			暂无
 //
-//
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_GBu_PluginTip_curName = "Drill_GaugeButton.js 鼠标-地图按钮集";
+	DrillUp.g_GBu_PluginTip_baseList = [
+		"Drill_CoreOfInput.js 系统-输入设备核心",
+		"Drill_LayerCommandThread.js 地图-多线程"
+	];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_GBu_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_GBu_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_GBu_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_GBu_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_GBu_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 强制更新提示
+	//==============================
+	DrillUp.drill_GBu_getPluginTip_NeedUpdate_Camera = function(){
+		return "【" + DrillUp.g_GBu_PluginTip_curName + "】\n活动地图镜头插件版本过低，你需要更新 镜头插件 至少v2.2及以上版本。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -985,6 +1018,8 @@ Scene_Map.prototype.drill_GBu_setUnhoverInTank = function( index ){
 	// > 设置未高亮
 	this._drill_GBu_hoveringOne = null;
 }
+// > 强制更新提示 锁
+DrillUp.g_LCa_alert = false;
 //==============================
 // * 高亮 - 判断指定按钮高亮
 //==============================
@@ -1006,6 +1041,34 @@ Scene_Map.prototype.drill_GBu_isHoverInTank = function( index ){
 	
 	var _x = _drill_mouse_x;
 	var _y = _drill_mouse_y;
+	
+	if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】地图鼠标落点
+		
+		// > 强制更新提示
+		if( DrillUp.drill_LCa_isInScene_Map == undefined && DrillUp.g_LCa_alert == true ){ 
+			alert( DrillUp.drill_GBu_getPluginTip_NeedUpdate_Camera() );
+			DrillUp.g_LCa_alert = false;
+			return; 
+		}
+		
+		if( DrillUp.drill_LCa_isInScene_Map() ){
+			
+			// > 下层/中层/上层
+			if( DrillUp.drill_LCa_isInArea_DownOrCenterOrUp(sprite) ){
+				var mouse_pos = $gameSystem._drill_LCa_controller.drill_LCa_getMousePos_OnChildren();
+				_x = mouse_pos.x;
+				_y = mouse_pos.y;
+			}
+			
+			// > 图片层/最顶层
+			else if( DrillUp.drill_LCa_isInArea_PicOrTop(sprite) ){
+				var mouse_pos = $gameSystem._drill_LCa_controller.drill_LCa_getMousePos_OnOuterSprite();
+				_x = mouse_pos.x;	//（此函数与直接赋值 _drill_mouse_x 效果一样）
+				_y = mouse_pos.y;
+			}
+		}
+	}
+	
 	if( _x < this.x + cx - cw*sprite.anchor.x + 0  ){return false};
 	if( _x > this.x + cx - cw*sprite.anchor.x + cw ){return false};
 	if( _y < this.y + cy - ch*sprite.anchor.y + 0  ){return false};
@@ -1351,9 +1414,9 @@ Drill_GBu_ButtonSprite.prototype.drill_updatePosition = function() {
 	var xx = data['x'];
 	var yy = data['y'];
 	
-	// > 镜头缩放与位移【地图 - 活动地图镜头】
+	// > 镜头缩放与位移
 	//		（由于按钮 只在 图片层和最顶层，下面的函数执行不到。）
-	if( Imported.Drill_LayerCamera ){
+	if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】UI缩放与位移
 		var layer = data['layer_index'];
 		if( layer == "下层" || layer == "中层" || layer == "上层" ){
 			this.scale.x = 1.00 / $gameSystem.drill_LCa_curScaleX();
@@ -1388,10 +1451,7 @@ Drill_GBu_ButtonSprite.prototype.drill_getUIposY = function() {
 //=============================================================================
 }else{
 		Imported.Drill_GaugeButton = false;
-		alert(
-			"【Drill_GaugeButton.js 地图UI - 地图公共事件按钮集】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfInput 系统-输入设备核心" + 
-			"\n- Drill_LayerCommandThread 地图-多线程"
-		);
+		var pluginTip = DrillUp.drill_GBu_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 

@@ -145,7 +145,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			姓名框窗口：
 //				->姓名框
 //
@@ -158,7 +158,40 @@
 //		★存在的问题：
 //			暂无
 //
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_DNB_PluginTip_curName = "Drill_DialogNameBox.js 对话框-姓名框窗口";
+	DrillUp.g_DNB_PluginTip_baseList = ["Drill_CoreOfWindowAuxiliary.js 系统-窗口辅助核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_DNB_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_DNB_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_DNB_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_DNB_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_DNB_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 兼容冲突
+	//==============================
+	DrillUp.drill_DNB_getPluginTip_CompatibilityYEP = function(){
+		return  "【" + DrillUp.g_DNB_PluginTip_curName + "】\n"+
+				"检测到你开启了 YEP_MessageCore插件。\n"+
+				"请及时关闭该插件，该插件与 窗口字符核心 存在兼容冲突。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -192,11 +225,7 @@ SceneManager.initialize = function() {
 	_drill_DNB_scene_initialize.call(this);
 	
 	if( Imported.YEP_MessageCore ){
-		alert(
-			"【Drill_DialogNameBox.js 对话框 - 姓名框窗口】\n"+
-			"检测到你开启了 YEP_MessageCore插件。\n"+
-			"请及时关闭该插件，该插件与 姓名框窗口 兼容性冲突。"
-		);
+		alert( DrillUp.drill_DNB_getPluginTip_CompatibilityYEP() );
 	}
 };
 
@@ -498,9 +527,7 @@ Drill_DNB_NameBoxWindow.prototype.drill_refreshPositionY = function() {
 //=============================================================================
 }else{
 		Imported.Drill_DialogNameBox = false;
-		alert(
-			"【Drill_DialogNameBox.js  对话框 - 姓名框窗口】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfWindowAuxiliary  系统-窗口辅助核心"
-		);
+		var pluginTip = DrillUp.drill_DNB_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 

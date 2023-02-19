@@ -1466,13 +1466,15 @@
  * @type select
  * @option 普通
  * @value 0
- * @option 叠加
+ * @option 发光
  * @value 1
  * @option 实色混合(正片叠底)
  * @value 2
  * @option 浅色
  * @value 3
- * @desc pixi的渲染混合模式。0-普通,1-叠加。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
+ * @option 叠加
+ * @value 4
+ * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
  * @default 0
  *
  * @param 自旋转速度
@@ -1735,7 +1737,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			动画环绕球：
 //				->动画环绕球 容器
 //					->获取贴图（接口）
@@ -1770,7 +1772,7 @@
 //				->动画环绕球控制器【Drill_ASu_Controller】
 //				->动画环绕球贴图【Drill_ASu_Sprite】
 //		
-//		★私有类如下：
+//		★插件私有类：
 //			* Drill_ASu_Controller	【动画环绕球控制器】
 //			* Drill_ASu_Sprite		【动画环绕球贴图】
 //		
@@ -1808,10 +1810,22 @@
 	// * 提示信息 - 参数
 	//==============================
 	var DrillUp = DrillUp || {}; 
-	DrillUp.g_ASu_tipCurName = "Drill_AnimationSurround.js 动画-多层动画环绕球";
-	DrillUp.g_ASu_tipBasePluginList = [];
-
-
+	DrillUp.g_ASu_PluginTip_curName = "Drill_AnimationSurround.js 动画-多层动画环绕球";
+	DrillUp.g_ASu_PluginTip_baseList = [];
+	//==============================
+	// * 提示信息 - 报错 - 找不到事件
+	//==============================
+	DrillUp.drill_ASu_getPluginTip_EventNotFind = function( e_id ){
+		return "【" + DrillUp.g_ASu_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - NaN校验值
+	//==============================
+	DrillUp.drill_ASu_getPluginTip_ParamIsNaN = function( param_name ){
+		return "【" + DrillUp.g_ASu_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -2193,8 +2207,7 @@ Game_Map.prototype.drill_ASu_isEventExist = function( e_id ){
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_AnimationSurround.js 动画 - 多层动画环绕球】\n" +
-				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
+		alert( DrillUp.drill_ASu_getPluginTip_EventNotFind( e_id ) );
 		return false;
 	}
 	return true;
@@ -3460,38 +3473,23 @@ Drill_ASu_Controller.prototype.drill_ASu_updateCheckNaN = function(){
 	if( DrillUp.g_ASu_checkNaN == true ){
 		if( isNaN( this._drill_x ) ){
 			DrillUp.g_ASu_checkNaN = false;
-			alert(
-				"【Drill_AnimationSurround.js 动画 - 多层动画环绕球】\n"+
-				"检测到控制器参数_drill_x出现了NaN值，请及时检查你的函数。"
-			);
+			alert( DrillUp.drill_ASu_getPluginTip_ParamIsNaN( "_drill_x" ) );
 		}
 		if( isNaN( this._drill_y ) ){
 			DrillUp.g_ASu_checkNaN = false;
-			alert(
-				"【Drill_AnimationSurround.js 动画 - 多层动画环绕球】\n"+
-				"检测到控制器参数_drill_y出现了NaN值，请及时检查你的函数。"
-			);
+			alert( DrillUp.drill_ASu_getPluginTip_ParamIsNaN( "_drill_y" ) );
 		}
 		if( isNaN( this._drill_opacity ) ){
 			DrillUp.g_ASu_checkNaN = false;
-			alert(
-				"【Drill_AnimationSurround.js 动画 - 多层动画环绕球】\n"+
-				"检测到控制器参数_drill_opacity出现了NaN值，请及时检查你的函数。"
-			);
+			alert( DrillUp.drill_ASu_getPluginTip_ParamIsNaN( "_drill_opacity" ) );
 		}
 		if( isNaN( this._drill_scaleX ) ){
 			DrillUp.g_ASu_checkNaN = false;
-			alert(
-				"【Drill_AnimationSurround.js 动画 - 多层动画环绕球】\n"+
-				"检测到控制器参数_drill_scaleX出现了NaN值，请及时检查你的函数。"
-			);
+			alert( DrillUp.drill_ASu_getPluginTip_ParamIsNaN( "_drill_scaleX" ) );
 		}
 		if( isNaN( this._drill_scaleY ) ){
 			DrillUp.g_ASu_checkNaN = false;
-			alert(
-				"【Drill_AnimationSurround.js 动画 - 多层动画环绕球】\n"+
-				"检测到控制器参数_drill_scaleY出现了NaN值，请及时检查你的函数。"
-			);
+			alert( DrillUp.drill_ASu_getPluginTip_ParamIsNaN( "_drill_scaleY" ) );
 		}
 	}
 }

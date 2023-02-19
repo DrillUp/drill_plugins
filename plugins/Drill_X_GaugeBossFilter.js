@@ -427,7 +427,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			BOSS框-滤镜效果：
 //				->BOSS头像同步
 //				->生命状态阶段
@@ -444,7 +444,36 @@
 //				
 //		★存在的问题：
 //			暂无
- 
+//
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_XGBF_PluginTip_curName = "Drill_X_GaugeBossFilter.js UI-高级BOSS框的滤镜效果[扩展]";
+	DrillUp.g_XGBF_PluginTip_baseList = [
+		"Drill_CoreOfFilter.js 系统-滤镜核心",
+		"Drill_GaugeForBoss.js UI-高级BOSS生命固定框"
+	];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_XGBF_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_XGBF_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_XGBF_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_XGBF_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_XGBF_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -453,9 +482,11 @@
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_X_GaugeBossFilter');
 	
+	/*-----------------杂项------------------*/
 	DrillUp.g_XGBF_boss_gauge = String(Moghunter.parameters['头像是否与敌人滤镜同步'] || "true") == "true";
 	DrillUp.g_XGBF_deathBlackWhite = String(Moghunter.parameters['BOSS死亡时是否加整体黑白滤镜'] || "true") == "true";
 
+	/*-----------------滤镜条件------------------*/
 	DrillUp.g_XGBF_condition_list_length = 10;
 	DrillUp.g_XGBF_condition_list = [];
 	for (var i = 0; i < DrillUp.g_XGBF_condition_list_length; i++) {
@@ -880,11 +911,8 @@ if(Imported.Drill_EnemyFilter && DrillUp.g_XGBF_boss_gauge){
 //=============================================================================
 }else{
 		Imported.Drill_X_GaugeBossFilter = false;
-		alert(
-			"【Drill_X_GaugeBossFilter.js UI - 高级BOSS框的滤镜效果[扩展]】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfFilter 系统-滤镜核心"+
-			"\n- Drill_GaugeForBoss UI-高级BOSS生命固定框"
-		);
+		var pluginTip = DrillUp.drill_XGBF_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
 

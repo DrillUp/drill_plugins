@@ -262,7 +262,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			移动路线指令集：
 //				->遇障碍结束
 //				->接近/远离
@@ -285,7 +285,32 @@
 //		★存在的问题：
 //			暂无
 //		
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_RCG_PluginTip_curName = "Drill_RouteCommandGroup.js 移动路线-指令集";
+	DrillUp.g_RCG_PluginTip_baseList = ["Drill_CoreOfMoveRoute.js 移动路线-移动路线核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_RCG_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_RCG_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_RCG_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_RCG_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_RCG_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -1112,8 +1137,6 @@ if( typeof(_drill_touchPad_getCurPos) == "undefined" ){	//防止重复定义
 //=============================================================================
 }else{
 		Imported.Drill_RouteCommandGroup = false;
-		alert(
-			"【Drill_RouteCommandGroup.js 移动路线 - 指令集】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfMoveRoute 移动路线-移动路线核心"
-		);
+		var pluginTip = DrillUp.drill_RCG_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }

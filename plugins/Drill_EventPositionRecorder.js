@@ -149,7 +149,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			位置存储器：
 //				->位置存储
 //				->位置记忆
@@ -165,6 +165,23 @@
 //			暂无
 //
 
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_EPR_PluginTip_curName = "Drill_EventPositionRecorder.js 物体-位置存储器";
+	DrillUp.g_EPR_PluginTip_baseList = [];
+	//==============================
+	// * 提示信息 - 报错 - 找不到事件
+	//==============================
+	DrillUp.drill_EPR_getPluginTip_EventNotFind = function( e_id ){
+		return "【" + DrillUp.g_EPR_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -371,8 +388,7 @@ Game_Map.prototype.drill_EPR_isEventExist = function( e_id ){
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_EventPositionRecorder.js 物体 - 位置存储器】\n" +
-				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
+		alert( DrillUp.drill_EPR_getPluginTip_EventNotFind( e_id ) );
 		return false;
 	}
 	return true;

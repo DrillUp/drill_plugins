@@ -7513,7 +7513,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			旋转卡牌扩展：
 //				->修改卡面图像
 //
@@ -7526,7 +7526,32 @@
 //		★存在的问题：
 //			暂无
 //
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_XII_PluginTip_curName = "Drill_X_ItemImage.js 控件-物品+技能详细图片[扩展]";
+	DrillUp.g_XII_PluginTip_baseList = ["Drill_RotateCard.js 控件-旋转卡牌"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_XII_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_XII_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_XII_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_XII_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_XII_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -7633,8 +7658,6 @@ Drill_RCardSprite.prototype.drill_refreshImage = function( item ){
 //=============================================================================
 }else{
 		Imported.Drill_X_ItemImage = false;
-		alert(
-			"【Drill_X_ItemImage.js 控件 - 物品+技能详细图片[扩展]】\n缺少基础插件，去看看插件是不是 未添加 / 被关闭 / 顺序不对 / 版本过低："+
-			"\n- Drill_RotateCard 控件-旋转卡牌"
-		);
+		var pluginTip = DrillUp.drill_XII_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }

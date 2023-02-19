@@ -228,7 +228,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			图片吸附槽：（鼠标+触屏）
 //				->图片
 //					->吸附属性
@@ -261,7 +261,7 @@
 //					->获取槽吸附的图片数量		x
 //					->吸附时音效	x
 //			
-//		★私有类如下：
+//		★插件私有类：
 //			* Drill_PAS_GamePicSlot      吸附槽
 //
 //		★必要注意事项：
@@ -274,8 +274,47 @@
 //		★存在的问题：
 //			暂无
 //
-//
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_PAS_PluginTip_curName = "Drill_PictureAdsorptionSlot.js 图片-图片吸附槽";
+	DrillUp.g_PAS_PluginTip_baseList = [
+		"Drill_CoreOfBallistics.js 系统-弹道核心",
+		"Drill_MouseDragPicture.js 鼠标-可拖拽的图片"
+	];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_PAS_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_PAS_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_PAS_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_PAS_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_PAS_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到槽
+	//==============================
+	DrillUp.drill_PAS_getPluginTip_SlotNotFind = function( slot_id ){
+		return "【" + DrillUp.g_PAS_PluginTip_curName + "】\n插件指令错误，id为"+slot_id+"的槽还没被创建。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到图片
+	//==============================
+	DrillUp.drill_PAS_getPluginTip_PictureNotFind = function( pic_id ){
+		return "【" + DrillUp.g_PAS_PluginTip_curName + "】\n插件指令错误，id为"+pic_id+"的图片还没被创建。\n你可能需要将指令放在'显示图片'事件指令之后。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -565,8 +604,7 @@ Game_Screen.prototype.drill_PAS_isSlotExist = function( slot_id ){
 	
 	var slot = this.drill_PAS_getSlot( slot_id );
 	if( slot == undefined ){
-		alert( "【Drill_PictureAdsorptionSlot.js 图片 - 图片吸附槽】\n" +
-				"插件指令错误，id为"+slot_id+"的槽还没被创建。");
+		alert( DrillUp.drill_PAS_getPluginTip_SlotNotFind( slot_id ) );
 		return false;
 	}
 	return true;
@@ -579,9 +617,7 @@ Game_Screen.prototype.drill_PAS_isPictureExist = function( pic_id ){
 	
 	var pic = this.picture( pic_id );
 	if( pic == undefined ){
-		alert( "【Drill_PictureAdsorptionSlot.js 图片 - 图片吸附槽】\n" +
-				"插件指令错误，id为"+pic_id+"的图片还没被创建。\n" + 
-				"你可能需要将指令放在'显示图片'事件指令之后。");
+		alert( DrillUp.drill_PAS_getPluginTip_PictureNotFind( pic_id ) );
 		return false;
 	}
 	return true;
@@ -1346,10 +1382,7 @@ Spriteset_Base.prototype.drill_PAS_getDebugRange = function( temp_slot ) {
 //=============================================================================
 }else{
 		Imported.Drill_PictureAdsorptionSlot = false;
-		alert(
-			"【Drill_PictureAdsorptionSlot.js 图片 - 图片吸附槽】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfBallistics 系统-弹道核心" + 
-			"\n- Drill_MouseDragPicture 鼠标-可拖拽的图片"
-		);
+		var pluginTip = DrillUp.drill_PAS_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 

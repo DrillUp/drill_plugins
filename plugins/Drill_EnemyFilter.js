@@ -213,7 +213,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			单位滤镜效果：
 //				->敌人注释初始化
 //				->战斗角色头像
@@ -233,7 +233,33 @@
 //			  因为 贴图和物体 是 多对一，只能从多的一方着手。
 //			  本质是物体控制数据，贴图直接变化即可，而滤镜直接破坏了规则，控制数据和变化数据直接交织。
 //			  导致了物体传数据给贴图成了麻烦。
- 
+//
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_EFi_PluginTip_curName = "Drill_EnemyFilter.js 单位-滤镜效果";
+	DrillUp.g_EFi_PluginTip_baseList = ["Drill_CoreOfFilter.js 系统-滤镜核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_EFi_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_EFi_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_EFi_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_EFi_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_EFi_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -241,13 +267,14 @@
 　　Imported.Drill_EnemyFilter = true;
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_EnemyFilter');
-
+	
 	
 //=============================================================================
 // * >>>>基于插件检测>>>>
 //=============================================================================
 if( Imported.Drill_CoreOfFilter ){
-	
+
+
 //=============================================================================
 // ** 插件指令
 //=============================================================================
@@ -735,8 +762,6 @@ Sprite_Actor.prototype.drill_EFi_updateActorFilter = function() {
 //=============================================================================
 }else{
 		Imported.Drill_EnemyFilter = false;
-		alert(
-			"【Drill_EnemyFilter.js 单位 - 滤镜效果】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfFilter 系统-滤镜核心"
-		);
+		var pluginTip = DrillUp.drill_EFi_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }

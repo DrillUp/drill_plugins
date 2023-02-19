@@ -862,7 +862,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			漂浮参数数字：
 //				->结构
 //					->窗口字符
@@ -888,8 +888,47 @@
 //		★存在的问题：
 //			暂无
 //
-//
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_GFTT_PluginTip_curName = "Drill_GaugeFloatingTemporaryText.js 地图UI-临时漂浮文字";
+	DrillUp.g_GFTT_PluginTip_baseList = [
+		"Drill_CoreOfBallistics.js 系统-弹道核心",
+		"Drill_CoreOfWindowAuxiliary.js 系统-窗口辅助核心"
+	];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_GFTT_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_GFTT_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_GFTT_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_GFTT_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_GFTT_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 缺少支持的插件
+	//==============================
+	DrillUp.drill_GFTT_getPluginTip_NoSupportPlugin = function(){
+		return "【" + DrillUp.g_GFTT_PluginTip_curName + "】\n缺少 字符串核心 插件，插件指令执行失败。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到事件
+	//==============================
+	DrillUp.drill_GFTT_getPluginTip_EventNotFind = function( e_id ){
+		return "【" + DrillUp.g_GFTT_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -1086,8 +1125,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 						temp1 = $gameStrings.value( Number(temp1) );
 						$gameTemp.drill_GFTT_setBufferContext( temp1 );
 					}else{
-						alert( "【Drill_GaugeFloatingTemporaryText.js 地图UI - 临时漂浮文字】\n" +
-								"缺少 字符串核心 插件，插件指令执行失败。");
+						alert( DrillUp.drill_GFTT_getPluginTip_NoSupportPlugin() );
 					}
 					
 				}else{	
@@ -1207,8 +1245,7 @@ Game_Map.prototype.drill_GFTT_isEventExist = function( e_id ){
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_GaugeFloatingTemporaryText.js 地图UI - 临时漂浮文字】\n" +
-				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
+		alert( DrillUp.drill_GFTT_getPluginTip_EventNotFind( e_id ) );
 		return false;
 	}
 	return true;
@@ -1573,8 +1610,8 @@ Scene_Map.prototype.drill_GFTT_updateWindowPosition = function() {
 		yy = pos['y'];
 		
 	
-		// > 镜头缩放与位移【地图 - 活动地图镜头】
-		if( Imported.Drill_LayerCamera ){
+		// > 镜头缩放与位移
+		if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】UI缩放与位移
 			var layer = s_data['window_map_layer'];
 			if( layer == "下层" || layer == "中层" || layer == "上层" ){
 				temp_window.scale.x = 1.00 / $gameSystem.drill_LCa_curScaleX();
@@ -1583,8 +1620,11 @@ Scene_Map.prototype.drill_GFTT_updateWindowPosition = function() {
 			}
 			if( layer == "图片层" || layer == "最顶层" ){
 				if( s_data['window_benchmark'] == "相对于地图" ){
-					xx = $gameSystem.drill_LCa_mapToCameraX( xx );
-					yy = $gameSystem.drill_LCa_mapToCameraY( yy );
+					var tar_pos = $gameSystem._drill_LCa_controller.drill_LCa_getCameraPos_OuterSprite( xx, yy );
+					xx = tar_pos.x;
+					yy = tar_pos.y;
+					//xx = $gameSystem.drill_LCa_mapToCameraX( xx );
+					//yy = $gameSystem.drill_LCa_mapToCameraY( yy );
 				}
 			}
 		}
@@ -1889,10 +1929,7 @@ Drill_GFTT_Window.prototype.drill_refreshMessage = function( context_list ){
 //=============================================================================
 }else{
 		Imported.Drill_GaugeFloatingTemporaryText = false;
-		alert(
-			"【Drill_GaugeFloatingTemporaryText.js 地图UI - 临时漂浮文字】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfBallistics 系统-弹道核心" + 
-			"\n- Drill_CoreOfWindowAuxiliary 系统-窗口辅助核心"
-		);
+		var pluginTip = DrillUp.drill_GFTT_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 

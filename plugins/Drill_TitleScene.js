@@ -713,7 +713,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			标题界面：
 //				->退出选项
 //				->跳过标题界面
@@ -738,8 +738,67 @@
 //		★存在的问题：
 //			暂无
 //
-//
 
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_TSc_PluginTip_curName = "Drill_TitleScene.js 标题-全自定义标题界面";
+	DrillUp.g_TSc_PluginTip_baseList = [
+		"Drill_CoreOfGlobalSave.js 管理器-全局存储核心",
+		"Drill_CoreOfWindowAuxiliary.js 系统-窗口辅助核心"
+	];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_TSc_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_TSc_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_TSc_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_TSc_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_TSc_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 缺少插件
+	//==============================
+	DrillUp.drill_TSc_getPluginTip_NoSupportPlugin = function(){
+		return "【" + DrillUp.g_TSc_PluginTip_curName + "】\n你未添加 按钮组核心 插件，请及时添加。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 缺少配置
+	//==============================
+	DrillUp.drill_TSc_getPluginTip_NoSupportData_window = function(){
+		return "【" + DrillUp.g_TSc_PluginTip_curName + "】\n你未配置 标题选项窗口 参数，请及时配置。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 缺少配置
+	//==============================
+	DrillUp.drill_TSc_getPluginTip_NoSupportData_btn = function(){
+		return "【" + DrillUp.g_TSc_PluginTip_curName + "】\n你未配置 标题选项按钮组 参数，请及时配置。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 缺少配置
+	//==============================
+	DrillUp.drill_TSc_getPluginTip_NoSupportData_style = function( style_id ){
+		return "【" + DrillUp.g_TSc_PluginTip_curName + "】\n你未配置 按钮组核心样式 "+ style_id +" 参数，请及时配置。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 兼容冲突
+	//==============================
+	DrillUp.drill_TSc_getPluginTip_CompatibilityOther = function(){
+		return  "【" + DrillUp.g_TSc_PluginTip_curName + "】\n"+
+				"检测到你开启了 TitleCommandPosition插件 或 基于该插件写的派生插件 。\n"+
+				"请及时关闭该插件，该插件与 全自定义标题界面 的控制造成干扰。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -865,8 +924,7 @@
 	if( DrillUp.g_TSc_command_mode == "按钮组模式" && 	// 按钮组校验
 		!Imported.Drill_CoreOfSelectableButton ){
 		DrillUp.g_TSc_command_mode = "窗口模式";
-		alert( "【Drill_TitleScene.js 标题 - 全自定义标题界面】\n" +
-				"你未添加 按钮组核心 插件，请及时添加。");
+		alert( DrillUp.drill_TSc_getPluginTip_NoSupportPlugin() );
 	}
 	if( DrillUp.parameters["标题选项窗口"] != undefined &&
 		DrillUp.parameters["标题选项窗口"] != "" &&
@@ -875,8 +933,7 @@
 		DrillUp.drill_TSc_initCommandWindow( data ); // 直接执行变量获取
 	}else{
 		if( DrillUp.g_TSc_command_mode == "窗口模式" ){
-			alert( "【Drill_TitleScene.js 标题 - 全自定义标题界面】\n" +
-					"你未配置 标题选项窗口 参数，请及时配置。");
+			alert( DrillUp.drill_TSc_getPluginTip_NoSupportData_window() );
 		}
 	}
 	if( DrillUp.parameters["标题选项按钮组"] != undefined &&
@@ -886,8 +943,7 @@
 		DrillUp.g_TSc_command_button = DrillUp.drill_TSc_initCommandButton( data );
 	}else{
 		if( DrillUp.g_TSc_command_mode == "按钮组模式" ){
-			alert( "【Drill_TitleScene.js 标题 - 全自定义标题界面】\n" +
-					"你未配置 标题选项按钮组 参数，请及时配置。");
+			alert( DrillUp.drill_TSc_getPluginTip_NoSupportData_btn() );
 		}
 		DrillUp.g_TSc_command_button = {};
 	}
@@ -906,11 +962,7 @@
 //=============================================================================
 if( typeof(_Window_TitleCommand_updatePlacement) != "undefined" ){
 	
-	alert(
-		"【Drill_TitleScene.js 标题 - 全自定义标题界面】\n"+
-		"检测到你开启了 TitleCommandPosition插件 或 基于该插件写的派生插件 。\n"+
-		"请及时关闭这类插件，其会对 标题窗口 的控制造成干扰。"
-	);
+	alert( DrillUp.drill_TSc_getPluginTip_CompatibilityOther() );
 };
 
 
@@ -1154,8 +1206,7 @@ Scene_Title.prototype.drill_TSc_createCommandButton = function() {
 	// > 准备按钮组参数
 	var data_style = JSON.parse(JSON.stringify( DrillUp.g_COSB_btn[DrillUp.global_TSc_commandButton_index] ));	//深拷贝数据
 	if( data_style == undefined ){
-		alert( "【Drill_TitleScene.js 标题 - 全自定义标题界面】\n" +
-				"你未配置 按钮组核心样式 "+ (DrillUp.global_TSc_commandButton_index + 1 ) +" 参数，请及时配置。");
+		alert( DrillUp.drill_TSc_getPluginTip_NoSupportData_style( DrillUp.global_TSc_commandButton_index+1 ) );
 	}else{
 		var keys = Object.keys(data_org);
 		for(var i = 0; i < keys.length; i++){	//（传入值）
@@ -1321,11 +1372,8 @@ Window_TitleCommand.prototype.makeCommandList = function() {
 //=============================================================================
 }else{
 		Imported.Drill_TitleScene = false;
-		alert(
-			"【Drill_TitleScene.js 标题 - 全自定义标题界面】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfGlobalSave 管理器-全局存储核心" + 
-			"\n- Drill_CoreOfWindowAuxiliary 系统-窗口辅助核心"
-		);
+		var pluginTip = DrillUp.drill_TSc_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
 

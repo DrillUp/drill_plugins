@@ -1254,85 +1254,100 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
-//			按钮组核心：
-//				->主体
-//					->窗口子类类型
-//					->移动动画
-//					->按钮名称
-//					->debug规划网格线
-//						->按钮组原点
-//						->排列线
-//				->模式
-//					->固定指针式
-//					->流线滚动式		x
-//				->按钮贴图
-//					->菜单关键字关联（Window_Command）
-//					->交错索引列表/默认顺序（Window_Selectable）
-//					->鼠标点击选中
-//					->单图模式（目前只能单图）
-//					x->gif模式+高亮+按下+封印
-//				->排列
-//					->直线排列
-//					->环形排列
-//					->矩阵排列
-//					->固定离散排列
-//				->名称块
-//					->固定位置
-//					->单一切换
-//					->切换时亮光动画	x
-//				->额外文本域		?
-//					->高宽划分			?
-//					->子插件文本编写	?
-//				->窗口refresh
+//		★功能结构树：
+//			->☆提示信息
+//			->☆变量获取
+//			->按钮组贴图【Drill_COSB_LayerSprite】
+//				->A主体
+//				->B父窗口
+//				->C按钮集合
+//				->D名称块
+//				->E选中的按钮
+//				->F激活
+//				->G键盘控制
+//				->H鼠标控制
+//				->DEBUG
+//			
+//			->☆窗口重刷
+//				->标记
+//				->延迟执行
 //					->按钮名称
 //					->按钮贴图
-//					->选中的按钮（实时刷）
-//				->选中的按钮
-//					->指针
-//						->连接MenuCursor插件
-//					->鼠标再点击进入
-//					->鼠标接近自动选中
-//					->变化方式
-//						->出列、浮动
-//						->闪烁、整体透明度
-//						->缩放
-//				->激活
-//					->按钮回落/折回（零散分布于函数中）
-//					->激活前状态
-//					->激活后状态
-//					->按钮移动到指定位置
-//					->激活后瞬间隐藏（克隆选中按钮用）	x
-//				->输入设备
-//					->鼠标-接近是否自动选中	
-//					->键盘-按键模式
-//					->键盘-起始项终止项是否循环	
+//			->☆窗口操作
+//				->前进一项
+//				->后退一项
+//			->文本贴图【Drill_COSB_WindowSprite】
 //		
+//			
+//		★插件私有类：
+//			* Drill_COSB_LayerSprite【按钮组贴图】
+//			* Drill_COSB_WindowSprite【文本贴图】
 //		
 //		★配置参数结构体如下：
 //			~struct~DrillCOSBCommandButton:			按钮组样式
 //			~struct~DrillNameMoving:				名称块移动动画（弹道核心-两点式）
 //			~struct~DrillButtonGroupMoving:			按钮组移动动画（弹道核心-两点式）
-//			
-//		★私有类如下：
-//			* Drill_COSB_LayerSprite【按钮组】
-//			* Drill_COSB_WindowSprite【单行文字贴图】
 //
 //		★必要注意事项：
 //			1. Window_Selectable是一个父类，单独不可使用。
 //				其子类一定会覆写.maxCols和.maxItems函数。
 //			2. 如果你的子窗口【覆写了refresh函数】，那么要记得添加刷新标记。
-//	
+//			
 //		★其它说明细节：
 //			1.
 //
 //		★存在的问题：
 //			暂无
 //
-//
- 
+
 //=============================================================================
-// ** 变量获取
+// ** ☆提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_COSB_PluginTip_curName = "Drill_CoreOfSelectableButton.js 系统-按钮组核心";
+	DrillUp.g_COSB_PluginTip_baseList = [
+		"Drill_CoreOfBallistics.js 系统-弹道核心",
+		"Drill_CoreOfWindowAuxiliary.js 系统-窗口辅助核心"
+	];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_COSB_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_COSB_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_COSB_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_COSB_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_COSB_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 未找到样式配置
+	//==============================
+	DrillUp.drill_COSB_getPluginTip_DataNotFind = function( index ){
+		return "【" + DrillUp.g_COSB_PluginTip_curName + "】\n未找到id为"+(index+1)+"的按钮组样式配置。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 强制更新提示
+	//==============================
+	DrillUp.drill_COSB_getPluginTip_NeedUpdate_Camera = function(){
+		return "【" + DrillUp.g_COSB_PluginTip_curName + "】\n活动地图镜头插件版本过低，你需要更新 镜头插件 至少v2.2及以上版本。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 继承项错误
+	//==============================
+	DrillUp.drill_COSB_getPluginTip_InheritError = function( class_name ){
+		return "【" + DrillUp.g_COSB_PluginTip_curName + "】\n窗口继承项"+ class_name +"错误，请重新检查参数配置。";
+	};
+	
+	
+//=============================================================================
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_CoreOfSelectableButton = true;
@@ -1497,13 +1512,12 @@
 	DrillUp.drill_COSB_getCopyedBtnData = function( index ){
 		var data = DrillUp.g_COSB_btn[ index ];
 		if( data == null ){
-			alert(	"【Drill_CoreOfSelectableButton.js 系统 - 按钮组核心】\n"+
-					"未找到id为"+(index+1)+"的按钮组样式配置。"
-			);
+			alert( DrillUp.drill_COSB_getPluginTip_DataNotFind( index ) );
 			return {};
 		}
 		return JSON.parse(JSON.stringify( data ));
 	}
+	
 	
 	
 //=============================================================================
@@ -1514,16 +1528,98 @@ if( Imported.Drill_CoreOfBallistics &&
 
 
 //=============================================================================
-// ** 按钮组【Drill_COSB_LayerSprite】
+// ** 按钮组贴图【Drill_COSB_LayerSprite】
 // **			
 // **		索引：	COSB（可从子插件搜索到函数、类用法）
 // **		来源：	继承于Sprite
-// **		实例：	> 
-// **		应用：	> 
+// **		实例：	> 可见 Drill_DialogChoiceButton插件 的 _drill_layer_sprite 成员
+// **		应用：	> 可见 Drill_DialogChoiceButton插件 的 drill_rebuildLayer 函数
 // **
 // **		作用域：	地图界面、战斗界面、菜单界面
 // **		主功能：	> 定义一个贴图组合体，根据预设定义，得到一个参数条贴图。
 // **					> 具体功能见 "1.系统 > 关于参数条.docx"。
+// **		子功能：	->贴图
+// **						->显示/隐藏
+// **						->是否就绪
+// **						->销毁
+// **						->帧刷新
+// **						->初始化数据
+// **						->初始化父窗口
+// **						->初始化对象
+// **					->A主体
+// **						->创建层级
+// **					->B父窗口
+// **						->初始化父窗口
+// **							->窗口子类检验
+// **							->菜单关键字关联（Window_Command）
+// **							->交错索引列表/默认顺序（Window_Selectable）
+// **						->父窗口设置（内部接口）
+// **						->父窗口还原（内部接口）
+// **						->父窗口设置/父窗口还原
+// **							->参数 - 占领标记
+// **							->参数 - 交错列表
+// **							->函数 - 强制窗口选项高度
+// **						->获取
+// **							->选项文本
+// **							->资源贴图索引
+// **							->索引（根据关键字）
+// **							->可见按钮数量
+// **					->C按钮集合
+// **						->按钮贴图
+// **							->移动动画
+// **							->按钮名称
+// **							->固定帧初始值
+// **							->固定帧赋值
+// **							->按钮是否就绪
+// **						->按钮排列
+// **							->直线排列
+// **							->环形排列
+// **							->矩阵排列
+// **							->固定离散排列
+// **						->模式
+// **							> 固定指针式
+// **							> 流线滚动式	x
+// **						->按钮模式
+// **							->单图模式（目前只能单图）
+// **							?->gif模式+高亮+按下+封印
+// **					->D名称块
+// **						->固定位置
+// **						->单一切换
+// **						->切换时亮光动画	x
+// **					->E选中的按钮
+// **						->指针跟随
+// **							->连接 Drill_MenuCursor 插件
+// **						->鼠标再点击进入
+// **						->鼠标接近自动选中
+// **						->变化方式
+// **							->出列、浮动
+// **							->闪烁、整体透明度
+// **							->缩放
+// **					->F激活
+// **						->父窗口设置/父窗口还原
+// **							->激活状态
+// **						->捕获
+// **							->激活前状态
+// **							->激活后状态
+// **						->激活的按钮 出列
+// **						?->激活后瞬间隐藏（克隆选中按钮用）
+// **					->G键盘控制
+// **						->按键模式
+// **							> 只能上下切换
+// **							> 只能左右切换
+// **							> 能上左与下右切换
+// **							> 只能上下切换(反向)
+// **							> 只能左右切换(反向)
+// **							> 能上左与下右切换(反向)
+// **						->起始项终止项是否循环 （对应 窗口操作）
+// **					->H鼠标控制
+// **						->点击选中
+// **						->接近自动选中
+// **					->DEBUG
+// **						->创建规划网格线
+// **					?->额外文本域
+// **						?->高宽划分
+// **						?->子插件文本编写
 // **
 // **		说明：	> sprite贴在任意地方都可以。
 // **		
@@ -1544,7 +1640,7 @@ if( Imported.Drill_CoreOfBallistics &&
 // **					this.addChild( temp_sprite );
 //=============================================================================
 //==============================
-// * 按钮组 - 定义
+// * 按钮组贴图 - 定义
 //==============================
 function Drill_COSB_LayerSprite() {
 	this.initialize.apply(this, arguments);
@@ -1552,28 +1648,83 @@ function Drill_COSB_LayerSprite() {
 Drill_COSB_LayerSprite.prototype = Object.create(Sprite.prototype);
 Drill_COSB_LayerSprite.prototype.constructor = Drill_COSB_LayerSprite;
 //==============================
-// * 按钮组 - 初始化
+// * 按钮组贴图 - 初始化
 //==============================
 Drill_COSB_LayerSprite.prototype.initialize = function( data, selectableWindow ){
 	Sprite.prototype.initialize.call(this);
 	this._drill_data = JSON.parse(JSON.stringify( data ));	//深拷贝数据
-	this._drill_window = selectableWindow;					//选项窗口对象
+	this._drill_window = selectableWindow;					//选项窗口指针
 	
 	this.drill_initData();				//初始化数据
-	this.drill_initWindow();			//初始化窗口
 	this.drill_initSprite();			//初始化对象
 };
 //==============================
-// * 按钮组 - 帧刷新
+// * 按钮组贴图 - 帧刷新
 //==============================
 Drill_COSB_LayerSprite.prototype.update = function() {
+	this._drill_time += 1;
+	if( this.drill_isAllButtonReady() == false ){ return; }
 	Sprite.prototype.update.call(this);
+	this.drill_updateDelayingInit();				//帧刷新 - 延迟初始化
 	
-	this.drill_updateDelayingInit();	//延迟初始化
-	this.drill_updateSprite();			//帧刷新对象
+													//帧刷新 - A主体（无）
+													//帧刷新 - B父窗口（无）
+	this.drill_updateName();						//帧刷新 - D名称块
+	
+	this.drill_updateButtonAttrInit();				//帧刷新 - C按钮集合 - 固定帧初始值
+	this.drill_updateButtonStartMove();				//帧刷新 - C按钮集合 - 固定指针式
+	this.drill_updateButtonStreamlineMove();		//帧刷新 - C按钮集合 - 流线式移动
+	this.drill_updateSelectionBtn_cursor();			//帧刷新 - E选中的按钮 - 指针跟随
+	this.drill_updateSelectionBtn_transform();		//帧刷新 - E选中的按钮 - 按钮变换
+	this.drill_updateActivation();					//帧刷新 - F激活
+	this.drill_updateButtonAttrSet();				//帧刷新 - C按钮集合 - 固定帧赋值
+	
+													//帧刷新 - G键盘控制（无）
+	this.drill_updateMousePos();					//帧刷新 - H鼠标控制 - 位置
+	this.drill_updateMouseSelect();					//帧刷新 - H鼠标控制 - 点击选中
+	this.drill_updateMouseHoverSelect();			//帧刷新 - H鼠标控制 - 接近自动选中
+	this.drill_updateMouseWheelSelect();			//帧刷新 - H鼠标控制 - 滚轮切换
+	
+	this.drill_updateButtonRefresh();				//帧刷新 - 窗口重刷
 };
+//==============================
+// * 按钮组贴图 - 帧刷新 - 延迟初始化
+//==============================
+Drill_COSB_LayerSprite.prototype.drill_updateDelayingInit = function() {
+	var data = this._drill_data;
+	
+	// > A主体
+	if( this.visible != data['visible'] ){
+		this.visible = data['visible'];
+	}
+	
+	// > B父窗口（无）
+	
+	// > C按钮集合
+	if( this._drill_button_needInit ){	
+		this._drill_button_needInit = false;
+		for( var i = 0; i < this._drill_button_spriteTank.length; i++ ){
+			var temp_sprite = this._drill_button_spriteTank[i];
+			temp_sprite.visible = true;
+			temp_sprite.opacity = 0;
+		}
+	}
+	
+	// > D名称块（无）
+	
+	// > E选中的按钮（无）
+	
+	// > F激活（无）
+	
+	// > G键盘控制（无）
+	
+	// > H鼠标控制（无）
+	
+	// > DEBUG（无）
+	
+}
 //##############################
-// * 按钮组 - 显示/隐藏【标准函数】
+// * 按钮组贴图 - 显示/隐藏【标准函数】
 //
 //			参数：	> visible 布尔（是否显示）
 //			返回：	> 无
@@ -1585,7 +1736,7 @@ Drill_COSB_LayerSprite.prototype.drill_COSB_setVisible = function( visible ){
 	data['visible'] = visible;
 };
 //##############################
-// * 参数数字 - 是否就绪【标准函数】
+// * 按钮组贴图 - 是否就绪【标准函数】
 //
 //			参数：	> 无
 //			返回：	> visible 布尔
@@ -1597,7 +1748,7 @@ Drill_COSB_LayerSprite.prototype.drill_COSB_isReady = function(){
 	return true;
 };
 //##############################
-// * 按钮组 - 销毁【标准函数】
+// * 按钮组贴图 - 销毁【标准函数】
 //
 //			参数：	> 无
 //			返回：	> 无
@@ -1608,7 +1759,7 @@ Drill_COSB_LayerSprite.prototype.drill_COSB_destroy = function(){
 	this.drill_COSB_destroy_Private();
 };
 //##############################
-// * 按钮组 - 初始化数据【标准默认值】
+// * 按钮组贴图 - 初始化数据【标准默认值】
 //
 //			参数：	> 无
 //			返回：	> 无
@@ -1621,90 +1772,211 @@ Drill_COSB_LayerSprite.prototype.drill_COSB_destroy = function(){
 Drill_COSB_LayerSprite.prototype.drill_initData = function() {
 	var data = this._drill_data;
 	
-	// > 默认值
+	// > A主体
 	data['enable'] = true;	
-	if( data['x'] == undefined ){ data['x'] = 0 };													//主体 - 平移x
-	if( data['y'] == undefined ){ data['y'] = 0 };													//主体 - 平移y
-	if( data['visible'] == undefined ){ data['visible'] = true };									//主体 - 可见
-	if( data['btn_constructor'] == undefined ){ data['btn_constructor'] = "Window_Selectable" };	//主体 - 窗口子类类型（Window_Selectable / Window_Command）
-	if( data['btn_debugArrange'] == undefined ){ data['btn_debugArrange'] = false };				//主体 - DEBUG规划网格线
-	if( data['btn_nameEnable'] == undefined ){ data['btn_nameEnable'] = false };					//主体 - 是否显示按钮名称
-	if( data['btn_nameX'] == undefined ){ data['btn_nameX'] = 0 };									//主体 - 按钮名称x
-	if( data['btn_nameY'] == undefined ){ data['btn_nameY'] = 0 };									//主体 - 按钮名称y
-	if( data['btn_nameFontsize'] == undefined ){ data['btn_nameFontsize'] = 28 };					//主体 - 按钮名称字体大小
-	if( data['btn_nameAnchorType'] == undefined ){ data['btn_nameAnchorType'] = "正左方" };			//主体 - 按钮名称中心锚点
-	if( data['btn_nameWidthType'] == undefined ){ data['btn_nameWidthType'] = "与最长文本宽度一致" };//主体 - 按钮名称宽度模式
-	if( data['btn_nameWidthValue'] == undefined ){ data['btn_nameWidthValue'] = 816 };				//主体 - 按钮名称宽度自定义值
-	if( data['btn_slideAnim'] == undefined ){ data['btn_slideAnim'] = {} };							//主体 - 按钮组移动动画
+	if( data['x'] == undefined ){ data['x'] = 0 };													//A主体 - 平移x
+	if( data['y'] == undefined ){ data['y'] = 0 };													//A主体 - 平移y
+	if( data['visible'] == undefined ){ data['visible'] = true };									//A主体 - 可见
 	
-	if( data['arrange_mode'] == undefined ){ data['arrange_mode'] = "直线排列" };					//排列 - 排列方式
-	if( data['arrange_spacing'] == undefined ){ data['arrange_spacing'] = 10 };						//排列 - 直线间距
-	if( data['arrange_wSpacing'] == undefined ){ data['arrange_wSpacing'] = 0 };					//排列 - 直线W间距
-	if( data['arrange_angle'] == undefined ){ data['arrange_angle'] = 0 };							//排列 - 直线旋转角度
-	if( data['arrange_limitEnable'] == undefined ){ data['arrange_limitEnable'] = false };			//排列 - 是否限制最大长度
-	if( data['arrange_limitLength'] == undefined ){ data['arrange_limitLength'] = 0 };				//排列 - 直线最大长度
-	if( data['arrange_radius'] == undefined ){ data['arrange_radius'] = 10 };						//排列 - 环形半径
-	if( data['arrange_angleStart'] == undefined ){ data['arrange_angleStart'] = 0 };				//排列 - 环形起始角
-	if( data['arrange_angleEnd'] == undefined ){ data['arrange_angleEnd'] = 0 };					//排列 - 环形终止角
-	if( data['arrange_col'] == undefined ){ data['arrange_col'] = 1 };								//排列 - 矩阵列数
-	if( data['arrange_width'] == undefined ){ data['arrange_width'] = 10 };							//排列 - 矩阵列宽
-	if( data['arrange_height'] == undefined ){ data['arrange_height'] = 10 };						//排列 - 矩阵行高
-	if( data['arrange_squeeze'] == undefined ){ data['arrange_squeeze'] = [] };						//排列 - 固定位置序列（["200,200","0,0"] 字符串数组）
-	
-	if( data['name_visible'] == undefined ){ data['name_visible'] = false };						//名称块 - 是否显示
-	if( data['name_x'] == undefined ){ data['name_x'] = 0 };										//名称块 - 平移x
-	if( data['name_y'] == undefined ){ data['name_y'] = 0 };										//名称块 - 平移y
-	if( data['name_fontsize'] == undefined ){ data['name_fontsize'] = 22 };							//名称块 - 名称块字体大小
-	if( data['name_anchorType'] == undefined ){ data['name_anchorType'] = "正中心" };				//名称块 - 名称块中心锚点
-	if( data['name_widthType'] == undefined ){ data['name_widthType'] = "与最长文本宽度一致" };		//名称块 - 名称块宽度模式
-	if( data['name_widthValue'] == undefined ){ data['name_widthValue'] = 816 };					//名称块 - 名称块宽度自定义值
-	if( data['name_slideAnim'] == undefined ){ data['name_slideAnim'] = {} };						//名称块 - 名称块移动动画
-	
-	if( data['btn_src_default'] == undefined ){ data['btn_src_default'] = "" };						//贴图 - 默认资源
-	if( data['btn_src_file'] == undefined ){ data['btn_src_file'] = "img/system/" };				//贴图 - 资源文件夹
-	if( data['btn_src'] == undefined ){ data['btn_src'] = [] };										//贴图 - 资源列表
-	if( data['btn_srcKeyword'] == undefined ){ data['btn_srcKeyword'] = [] };						//贴图 - 资源关键字列表
-	
-	if( data['selected_opacity_default'] == undefined ){ data['selected_opacity_default'] = 160 };	//选中的按钮 - 未选中按钮透明度
-	if( data['selected_opacity_time'] == undefined ){ data['selected_opacity_time'] = 20 };			//选中的按钮 - 选中后透明度变化时长
-	if( data['selected_flicker'] == undefined ){ data['selected_flicker'] = "关闭" };					//选中的按钮 - 闪烁效果
-	if( data['selected_flickerSpeed'] == undefined ){ data['selected_flickerSpeed'] = 6.0 };			//选中的按钮 - 闪烁速度
-	if( data['selected_flickerRange'] == undefined ){ data['selected_flickerRange'] = 20 };				//选中的按钮 - 闪烁幅度范围
-	if( data['selected_swing'] == undefined ){ data['selected_swing'] = "关闭" };					//选中的按钮 - 摇晃效果
-	if( data['selected_swingSpeed'] == undefined ){ data['selected_swingSpeed'] = 20 };				//选中的按钮 - 摇晃速度
-	if( data['selected_swingRange'] == undefined ){ data['selected_swingRange'] = 20 };				//选中的按钮 - 摇晃幅度范围
-	if( data['selected_zoom'] == undefined ){ data['selected_zoom'] = "关闭" };						//选中的按钮 - 缩放效果
-	if( data['selected_zoomSpeed'] == undefined ){ data['selected_zoomSpeed'] = 20 };				//选中的按钮 - 缩放速度
-	if( data['selected_zoomRange'] == undefined ){ data['selected_zoomRange'] = 20 };				//选中的按钮 - 缩放幅度范围
-	if( data['selected_float'] == undefined ){ data['selected_float'] = "关闭" };					//选中的按钮 - 浮动效果
-	if( data['selected_floatSpeed'] == undefined ){ data['selected_floatSpeed'] = 20 };				//选中的按钮 - 浮动速度
-	if( data['selected_floatRange'] == undefined ){ data['selected_floatRange'] = 20 };				//选中的按钮 - 浮动偏移量
-	if( data['selected_out'] == undefined ){ data['selected_out'] = false };						//选中的按钮 - 是否出列
-	if( data['selected_out_time'] == undefined ){ data['selected_out_time'] = 20 };					//选中的按钮 - 选中后出列变化时长
-	if( data['selected_out_x'] == undefined ){ data['selected_out_x'] = 20 };						//选中的按钮 - 出列x
-	if( data['selected_out_y'] == undefined ){ data['selected_out_y'] = 20 };						//选中的按钮 - 出列y
-	if( data['selected_recoverImmediately'] == undefined ){ data['selected_recoverImmediately'] = false };//选中的按钮 - 失去焦点后立刻复原
-	
-	if( data['active_enableMouseOk'] == undefined ){ data['active_enableMouseOk'] = false };		//激活 - 鼠标ok点击
-	if( data['active_hide'] == undefined ){ data['active_hide'] = false };							//激活 - 激活后是否瞬间隐藏（克隆选中按钮用）
-	if( data['active_out'] == undefined ){ data['active_out'] = false };							//激活 - 激活后是否出列
-	if( data['active_out_time'] == undefined ){ data['active_out_time'] = 20 };						//激活 - 激活后出列变化时长
-	if( data['active_out_x'] == undefined ){ data['active_out_x'] = 100 };							//激活 - 激活后出列x
-	if( data['active_out_y'] == undefined ){ data['active_out_y'] = 100 };							//激活 - 激活后出列y
-	
-	if( data['input_enableMouseHover'] == undefined ){ data['input_enableMouseHover'] = false };	//输入设备 - 鼠标接近选中
-	if( data['input_enableMouseWheel'] == undefined ){ data['input_enableMouseWheel'] = true };		//输入设备 - 滚轮切换
-	if( data['input_mouseWheelInterval'] == undefined ){ data['input_mouseWheelInterval'] = 6 };	//输入设备 - 滚轮切换间隔
-	if( data['input_keyBoardMode'] == undefined ){ data['input_keyBoardMode'] = "只能上下切换" };	//输入设备 - 键盘按键模式
-	if( data['input_keyBoardLoop'] == undefined ){ data['input_keyBoardLoop'] = false };			//输入设备 - 键盘起始与末尾是否循环
-	
-	// > 窗口修改开关
+	// > B父窗口
+	if( data['btn_constructor'] == undefined ){ data['btn_constructor'] = "Window_Selectable" };	//B父窗口 - 窗口子类类型（Window_Selectable / Window_Command）
+	if( data['enable_windowRebuild'] == undefined ){ data['enable_windowRebuild'] = true };			//B父窗口 - 窗口修改开关
 	//		（如果你不想让按钮组破坏原来的窗口，可设置false，但是会影响部分按钮组功能）
-	if( data['enable_windowRebuild'] == undefined ){ data['enable_windowRebuild'] = true };
+	if( data['btn_src_default'] == undefined ){ data['btn_src_default'] = "" };						//B父窗口 - 默认资源
+	if( data['btn_src_file'] == undefined ){ data['btn_src_file'] = "img/system/" };				//B父窗口 - 资源文件夹
+	if( data['btn_src'] == undefined ){ data['btn_src'] = [] };										//B父窗口 - 资源列表
+	if( data['btn_srcKeyword'] == undefined ){ data['btn_srcKeyword'] = [] };						//B父窗口 - 资源关键字列表
+	
+	// > C按钮集合
+	if( data['btn_nameEnable'] == undefined ){ data['btn_nameEnable'] = false };					//C按钮集合 - 是否显示按钮名称
+	if( data['btn_nameX'] == undefined ){ data['btn_nameX'] = 0 };									//C按钮集合 - 按钮名称x
+	if( data['btn_nameY'] == undefined ){ data['btn_nameY'] = 0 };									//C按钮集合 - 按钮名称y
+	if( data['btn_nameFontsize'] == undefined ){ data['btn_nameFontsize'] = 28 };					//C按钮集合 - 按钮名称字体大小
+	if( data['btn_nameAnchorType'] == undefined ){ data['btn_nameAnchorType'] = "正左方" };			//C按钮集合 - 按钮名称中心锚点
+	if( data['btn_nameWidthType'] == undefined ){ data['btn_nameWidthType'] = "与最长文本宽度一致" };//C按钮集合 - 按钮名称宽度模式
+	if( data['btn_nameWidthValue'] == undefined ){ data['btn_nameWidthValue'] = 816 };				//C按钮集合 - 按钮名称宽度自定义值
+	if( data['btn_slideAnim'] == undefined ){ data['btn_slideAnim'] = {} };							//C按钮集合 - 按钮组移动动画
+	
+	if( data['arrange_mode'] == undefined ){ data['arrange_mode'] = "直线排列" };					//C按钮集合 - 按钮排列 - 排列方式
+	if( data['arrange_spacing'] == undefined ){ data['arrange_spacing'] = 10 };						//C按钮集合 - 按钮排列 - 直线间距
+	if( data['arrange_wSpacing'] == undefined ){ data['arrange_wSpacing'] = 0 };					//C按钮集合 - 按钮排列 - 直线W间距
+	if( data['arrange_angle'] == undefined ){ data['arrange_angle'] = 0 };							//C按钮集合 - 按钮排列 - 直线旋转角度
+	if( data['arrange_limitEnable'] == undefined ){ data['arrange_limitEnable'] = false };			//C按钮集合 - 按钮排列 - 是否限制最大长度
+	if( data['arrange_limitLength'] == undefined ){ data['arrange_limitLength'] = 0 };				//C按钮集合 - 按钮排列 - 直线最大长度
+	if( data['arrange_radius'] == undefined ){ data['arrange_radius'] = 10 };						//C按钮集合 - 按钮排列 - 环形半径
+	if( data['arrange_angleStart'] == undefined ){ data['arrange_angleStart'] = 0 };				//C按钮集合 - 按钮排列 - 环形起始角
+	if( data['arrange_angleEnd'] == undefined ){ data['arrange_angleEnd'] = 0 };					//C按钮集合 - 按钮排列 - 环形终止角
+	if( data['arrange_col'] == undefined ){ data['arrange_col'] = 1 };								//C按钮集合 - 按钮排列 - 矩阵列数
+	if( data['arrange_width'] == undefined ){ data['arrange_width'] = 10 };							//C按钮集合 - 按钮排列 - 矩阵列宽
+	if( data['arrange_height'] == undefined ){ data['arrange_height'] = 10 };						//C按钮集合 - 按钮排列 - 矩阵行高
+	if( data['arrange_squeeze'] == undefined ){ data['arrange_squeeze'] = [] };						//C按钮集合 - 按钮排列 - 固定位置序列（["200,200","0,0"] 字符串数组）
+	
+	// > D名称块
+	if( data['name_visible'] == undefined ){ data['name_visible'] = false };						//D名称块 - 是否显示
+	if( data['name_x'] == undefined ){ data['name_x'] = 0 };										//D名称块 - 平移x
+	if( data['name_y'] == undefined ){ data['name_y'] = 0 };										//D名称块 - 平移y
+	if( data['name_fontsize'] == undefined ){ data['name_fontsize'] = 22 };							//D名称块 - 名称块字体大小
+	if( data['name_anchorType'] == undefined ){ data['name_anchorType'] = "正中心" };				//D名称块 - 名称块中心锚点
+	if( data['name_widthType'] == undefined ){ data['name_widthType'] = "与最长文本宽度一致" };		//D名称块 - 名称块宽度模式
+	if( data['name_widthValue'] == undefined ){ data['name_widthValue'] = 816 };					//D名称块 - 名称块宽度自定义值
+	if( data['name_slideAnim'] == undefined ){ data['name_slideAnim'] = {} };						//D名称块 - 名称块移动动画
+	
+	// > E选中的按钮
+	if( data['selected_opacity_default'] == undefined ){ data['selected_opacity_default'] = 160 };	//E选中的按钮 - 未选中按钮透明度
+	if( data['selected_opacity_time'] == undefined ){ data['selected_opacity_time'] = 20 };			//E选中的按钮 - 选中后透明度变化时长
+	if( data['selected_flicker'] == undefined ){ data['selected_flicker'] = "关闭" };				//E选中的按钮 - 闪烁效果
+	if( data['selected_flickerSpeed'] == undefined ){ data['selected_flickerSpeed'] = 6.0 };		//E选中的按钮 - 闪烁速度
+	if( data['selected_flickerRange'] == undefined ){ data['selected_flickerRange'] = 20 };			//E选中的按钮 - 闪烁幅度范围
+	if( data['selected_swing'] == undefined ){ data['selected_swing'] = "关闭" };					//E选中的按钮 - 摇晃效果
+	if( data['selected_swingSpeed'] == undefined ){ data['selected_swingSpeed'] = 20 };				//E选中的按钮 - 摇晃速度
+	if( data['selected_swingRange'] == undefined ){ data['selected_swingRange'] = 20 };				//E选中的按钮 - 摇晃幅度范围
+	if( data['selected_zoom'] == undefined ){ data['selected_zoom'] = "关闭" };						//E选中的按钮 - 缩放效果
+	if( data['selected_zoomSpeed'] == undefined ){ data['selected_zoomSpeed'] = 20 };				//E选中的按钮 - 缩放速度
+	if( data['selected_zoomRange'] == undefined ){ data['selected_zoomRange'] = 20 };				//E选中的按钮 - 缩放幅度范围
+	if( data['selected_float'] == undefined ){ data['selected_float'] = "关闭" };					//E选中的按钮 - 浮动效果
+	if( data['selected_floatSpeed'] == undefined ){ data['selected_floatSpeed'] = 20 };				//E选中的按钮 - 浮动速度
+	if( data['selected_floatRange'] == undefined ){ data['selected_floatRange'] = 20 };				//E选中的按钮 - 浮动偏移量
+	if( data['selected_out'] == undefined ){ data['selected_out'] = false };						//E选中的按钮 - 是否出列
+	if( data['selected_out_time'] == undefined ){ data['selected_out_time'] = 20 };					//E选中的按钮 - 选中后出列变化时长
+	if( data['selected_out_x'] == undefined ){ data['selected_out_x'] = 20 };						//E选中的按钮 - 出列x
+	if( data['selected_out_y'] == undefined ){ data['selected_out_y'] = 20 };						//E选中的按钮 - 出列y
+	if( data['selected_recoverImmediately'] == undefined ){ data['selected_recoverImmediately'] = false };//E选中的按钮 - 失去焦点后立刻复原
+	
+	// > F激活
+	if( data['active_enableMouseOk'] == undefined ){ data['active_enableMouseOk'] = false };		//F激活 - 鼠标ok点击
+	if( data['active_hide'] == undefined ){ data['active_hide'] = false };							//F激活 - 激活后是否瞬间隐藏（克隆选中按钮用）
+	if( data['active_out'] == undefined ){ data['active_out'] = false };							//F激活 - 激活后是否出列
+	if( data['active_out_time'] == undefined ){ data['active_out_time'] = 20 };						//F激活 - 激活后出列变化时长
+	if( data['active_out_x'] == undefined ){ data['active_out_x'] = 100 };							//F激活 - 激活后出列x
+	if( data['active_out_y'] == undefined ){ data['active_out_y'] = 100 };							//F激活 - 激活后出列y
+	
+	// > G键盘控制
+	if( data['input_keyBoardMode'] == undefined ){ data['input_keyBoardMode'] = "只能上下切换" };	//G键盘控制 - 键盘按键模式
+	if( data['input_keyBoardLoop'] == undefined ){ data['input_keyBoardLoop'] = false };			//G键盘控制 - 键盘起始与末尾是否循环
+	
+	// > H鼠标控制
+	if( data['input_enableMouseHover'] == undefined ){ data['input_enableMouseHover'] = false };	//H鼠标控制 - 鼠标接近选中
+	if( data['input_enableMouseWheel'] == undefined ){ data['input_enableMouseWheel'] = true };		//H鼠标控制 - 滚轮切换
+	if( data['input_mouseWheelInterval'] == undefined ){ data['input_mouseWheelInterval'] = 6 };	//H鼠标控制 - 滚轮切换间隔
+	
+	// > DEBUG
+	if( data['btn_debugArrange'] == undefined ){ data['btn_debugArrange'] = false };				//DEBUG - 规划网格线
 	
 };
 //==============================
-// * 窗口 - 初始化
+// * 按钮组贴图 - 初始化对象
+//==============================
+Drill_COSB_LayerSprite.prototype.drill_initSprite = function() {
+	this.drill_initAttr();					//初始化对象 - A主体
+	this.drill_initWindow();				//初始化对象 - B父窗口
+	this.drill_initButton();				//初始化对象 - C按钮集合
+	this.drill_initName();					//初始化对象 - D名称块
+	this.drill_initSelectionBtn();			//初始化对象 - E选中的按钮
+	this.drill_initActivation();			//初始化对象 - F激活
+	this.drill_initKeyboard();				//初始化对象 - G键盘控制
+	this.drill_initMouse();					//初始化对象 - H鼠标控制
+	this.drill_initDEBUG();					//初始化对象 - DEBUG
+};
+//==============================
+// * 按钮组贴图 - 执行销毁
+//==============================
+Drill_COSB_LayerSprite.prototype.drill_COSB_destroy_Private = function(){
+	this.visible = false;
+	
+	// > 销毁 - A主体
+	this.drill_COSB_removeChildConnect( this._layer_context );
+	this.drill_COSB_removeChildConnect( this._layer_outer );
+	// > 销毁 - A主体 - 层级
+	this._layer_context = null;
+	this._layer_outer = null;
+	
+	// > 销毁 - B父窗口 - 父窗口还原
+	this.drill_window_restoreParam( this._drill_window );
+	
+	// > 销毁 - C按钮集合
+	this._drill_button_needInit = false;
+	this._drill_button_spriteTank.length = 0;
+	this._drill_button_orgPositionTank.length = 0;
+	
+	// > 销毁 - D名称块
+	this._drill_name_sprite = null;
+	this._drill_name_window = null;
+	
+	// > 销毁 - E选中的按钮（无）
+	
+	// > 销毁 - F激活（无）
+	
+	// > 销毁 - G键盘控制（无）
+	
+	// > 销毁 - H鼠标控制（无）
+	
+	// > 销毁 - DEBUG（无）
+};
+
+
+
+//=============================================================================
+// ** A主体
+//
+//			说明：	> 按钮组贴图的基本属性设置，以及贴图层级分配。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * A主体 - 初始化对象
+//==============================
+Drill_COSB_LayerSprite.prototype.drill_initAttr = function() {
+	
+	// > 私有对象初始化
+	this._drill_time = 0;							//时间
+	
+	// > 主体属性
+	this.width = Graphics.boxWidth;
+	this.height = Graphics.boxHeight;
+	this.visible = false;
+	
+	// > 创建层级
+	this.drill_createLayer();
+};
+//==============================
+// * A主体 - 创建层级
+//==============================
+Drill_COSB_LayerSprite.prototype.drill_createLayer = function() {
+	var data = this._drill_data;
+	
+	// > 层级初始化
+	this._layer_context = new Sprite();				//内容层
+	this._layer_context.x = data['x'];				//
+	this._layer_context.y = data['y'];				//
+	this.addChild(this._layer_context);				//
+	this._layer_outer = new Sprite();				//外层
+	this.addChild(this._layer_outer);				//
+};
+//==============================
+// * A主体 - 递归断开贴图连接
+//==============================
+Drill_COSB_LayerSprite.prototype.drill_COSB_removeChildConnect = function( parent_sprite ){
+	if( parent_sprite == undefined ){ return; }
+	var sprite_list = parent_sprite.children;
+	if( sprite_list == undefined ){ return; }
+	for(var i = 0; i < sprite_list.length; i++ ){
+		var sprite = sprite_list[i];
+		if( sprite == undefined ){ continue; }
+		parent_sprite.removeChild( sprite );
+		this.drill_COSB_removeChildConnect( sprite );
+	}
+};
+
+
+
+//=============================================================================
+// ** B父窗口
+//
+//			说明：	> 按钮组完全根据一个 父窗口 进行相应变换。
+//					  初始化时父窗口需要进行配置，并开放了内部继承用接口。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * B父窗口 - 初始化对象
 //==============================
 Drill_COSB_LayerSprite.prototype.drill_initWindow = function() {
 	var temp_data = this._drill_data;
@@ -1713,170 +1985,113 @@ Drill_COSB_LayerSprite.prototype.drill_initWindow = function() {
 	// > 数据赋值
 	this._drill_window._drill_COSB_data = this._drill_data;
 	
-	// > 子类检验
+	// > 窗口子类检验
 	this.drill_window_check();
 	
 	
-	// > 特殊参数 - 占领标记（注意不要把sprite自己指针传给 window ）
-	//			"_drill_COSB_isOccupyed"表示这个窗口被按钮组占领了，
-	//			用于判断选项窗口是否被装饰。
-	temp_window._drill_COSB_isOccupyed = true;
+	// > 父窗口设置
+	this.drill_window_setParam( temp_window );
 	
-	// > 特殊参数 - 交错列表
-	//			当['btn_constructor'] == "Window_Selectable" 时，
-	//			在window上挂一个 ._drill_COSB_indexList 交错索引列表，可以使得按钮按 索引列表 的顺序对应 ，
-	//			如果没有该交错列表，那么则默认文档中的 "1.系统 > 关于按钮组核心.docx" 顺序对应。
-	temp_window._drill_COSB_indexList;
 	
-	// > 特殊参数 - 激活状态
-	//			"_drill_COSB_curStatus"用于监听窗口确认/取消情况。
-	//			在 窗口未激活 + status为"cancel" 时，按钮处于 "激活前状态"。
-	//			在 窗口未激活 + status为"ok" 时，    按钮处于 "激活后状态"。
-	temp_window._drill_COSB_curStatus = "cancel";
-	
-	// > 特殊参数 - 菜单指针
-	//			"_drill_COSB_selectedBtnX"表示选中按钮的坐标，
-	//			给菜单指针用的。
-	temp_window._drill_COSB_selectedBtnX = 0;
-	temp_window._drill_COSB_selectedBtnY = 0;
-	temp_window._drill_COSB_forceCursorStyle = 0;
-	
-	// > 
-	if( temp_data['enable_windowRebuild'] == true ){
-		
-		// > 强制窗口选项高度（覆写）（在高度不够时，避免topIndex + 1）
-		temp_window._drill_COSB_orgMethod_itemHeight = temp_window.itemHeight;
-		temp_window.itemHeight = function(){
-			var clientHeight = this.height - this.padding * 2;
-			return Math.floor(clientHeight / this.drill_COSB_getVisibleRowNum());
-		};
-		
-		// > 强制窗口列（继承）
-		temp_window._drill_COSB_orgMethod_maxCols = temp_window.maxCols;
-		temp_window.maxCols = function(){
-			var data = this._drill_COSB_data;
-			if( data && data['input_keyBoardMode'] == "只能上下切换" ){ return 1; }
-			if( data && data['input_keyBoardMode'] == "只能左右切换" ){ return 1; }	//（键盘被锁死只能 cursorDown 和 cursorUp）
-			if( data && data['input_keyBoardMode'] == "能上左与下右切换" ){ return 1; }
-			if( data && data['input_keyBoardMode'] == "只能上下切换(反向)" ){ return 1; }
-			if( data && data['input_keyBoardMode'] == "只能左右切换(反向)" ){ return 1; }
-			if( data && data['input_keyBoardMode'] == "能上左与下右切换(反向)" ){ return 1; }
-			return this._drill_COSB_orgMethod_maxCols.call(this);	//以矩阵排列框架为准
-		};
-		
-		// > 键盘按键模式（继承）
-		temp_window._drill_COSB_orgMethod_processCursorMove = temp_window.processCursorMove;
-		temp_window.processCursorMove = function(){
-			var data = this._drill_COSB_data;
-			if( data && this.isCursorMovable() ){
-				var lastIndex = this.index();
-				
-				if( data['input_keyBoardMode'] == "只能上下切换" ){
-					// > 下
-					if( Input.isRepeated('down') ){
-						this.drill_COSB_cursorForward( lastIndex );
-						return;
-					};
-					// > 上
-					if( Input.isRepeated('up') ){
-						this.drill_COSB_cursorBack( lastIndex );
-						return;
-					};
-				}
-				if( data['input_keyBoardMode'] == "只能左右切换" ){
-					// > 右
-					if( Input.isRepeated('right') ){
-						this.drill_COSB_cursorForward( lastIndex );
-						return;
-					};
-					// > 左
-					if( Input.isRepeated('left') ){
-						this.drill_COSB_cursorBack( lastIndex );
-						return;
-					};
-					if( Input.isRepeated('down') || Input.isRepeated('up') ){ return; }
-					
-				}
-				if( data['input_keyBoardMode'] == "能上左与下右切换" ){
-					// > 下、右
-					if( Input.isRepeated('down') || Input.isRepeated('right') ){
-						this.drill_COSB_cursorForward( lastIndex );
-						return;
-					};
-					// > 上、左
-					if( Input.isRepeated('up') || Input.isRepeated('left') ){
-						this.drill_COSB_cursorBack( lastIndex );
-						return;
-					};
-				}
-				if( data['input_keyBoardMode'] == "只能上下切换(反向)" ){
-					// > 上
-					if( Input.isRepeated('up') ){
-						this.drill_COSB_cursorForward( lastIndex );
-						return;
-					};
-					// > 下
-					if( Input.isRepeated('down') ){
-						this.drill_COSB_cursorBack( lastIndex );
-						return;
-					};
-				}
-				if( data['input_keyBoardMode'] == "只能左右切换(反向)" ){
-					// > 左
-					if( Input.isRepeated('left') ){
-						this.drill_COSB_cursorForward( lastIndex );
-						return;
-					};
-					// > 右
-					if( Input.isRepeated('right') ){
-						this.drill_COSB_cursorBack( lastIndex );
-						return;
-					};
-					if( Input.isRepeated('down') || Input.isRepeated('up') ){ return; }
-					
-				}
-				if( data['input_keyBoardMode'] == "能上左与下右切换(反向)" ){
-					// > 上、左
-					if( Input.isRepeated('up') || Input.isRepeated('left') ){
-						this.drill_COSB_cursorForward( lastIndex );
-						return;
-					};
-					// > 下、右
-					if( Input.isRepeated('down') || Input.isRepeated('right') ){
-						this.drill_COSB_cursorBack( lastIndex );
-						return;
-					};
-				}
-			};
-			this._drill_COSB_orgMethod_processCursorMove.call(this);
-		};
-		
-		// > 强制去掉鼠标滚轮（覆写）（放在 drill_updateMouseWheelSelect 中处理）
-		temp_window._drill_COSB_orgMethod_processWheel = temp_window.processWheel;
-		temp_window.processWheel = function(){ };
-		
-	};
-	
+	// > 强制刷新一次
+	this._drill_window.refresh();
 };
 //==============================
-// * 窗口 - 子类检验
+// * B父窗口 - 初始化对象 - 窗口子类检验
 //==============================
 Drill_COSB_LayerSprite.prototype.drill_window_check = function(){
 	var temp_data = this._drill_data;
 	var temp_window = this._drill_window;
 	if( temp_data['btn_constructor'] == "Window_Command" ){
 		if( temp_window instanceof Window_Command == false ){
-			alert("系统-按钮组核心：\n窗口继承项Window_Command错误，注意参数配置。");
+			alert( DrillUp.drill_COSB_getPluginTip_InheritError( "Window_Command" ) );
 		}
 	}
 	if( temp_data['btn_constructor'] == "Window_Selectable" ){
 		if( temp_window._list == undefined ){
-			alert("系统-按钮组核心：\n窗口继承项Window_Selectable错误，注意参数配置。");
+			alert( DrillUp.drill_COSB_getPluginTip_InheritError( "Window_Selectable" ) );
 		}
 	}
 };
+//##############################
+// * B父窗口 - 父窗口设置（内部接口）
+//
+//			参数：	> parent_window 对象指针（父窗口）
+//			返回：	> 无
+//
+//			说明：	> 内部用接口，继承此函数表示在 初始化 时，对 父窗口 进行参数/函数修改。
+//##############################
+Drill_COSB_LayerSprite.prototype.drill_window_setParam = function( parent_window ){
+	
+	//（需要继承）
+	
+};
+//##############################
+// * B父窗口 - 父窗口还原（内部接口）
+//
+//			参数：	> parent_window 对象指针（父窗口）
+//			返回：	> 无
+//
+//			说明：	> 内部用接口，继承此贴图在 销毁 时，对 父窗口 进行参数/函数还原。
+//##############################
+Drill_COSB_LayerSprite.prototype.drill_window_restoreParam = function( parent_window ){
+	
+	//（需要继承）
+	
+};
 //==============================
-// * 窗口 - 获取 - 选项文本
+// * B父窗口 - 父窗口设置（继承）
+//==============================
+var _drill_COSB_parentWindow_setParam = Drill_COSB_LayerSprite.prototype.drill_window_setParam;
+Drill_COSB_LayerSprite.prototype.drill_window_setParam = function( parent_window ){
+	_drill_COSB_parentWindow_setParam.call( this, parent_window );
+	
+	
+	// > 参数 - 占领标记（注意不要把sprite自己指针传给 window ）
+	//			"_drill_COSB_isOccupyed"表示这个窗口被按钮组占领了，
+	//			用于判断选项窗口是否被装饰。
+	parent_window._drill_COSB_isOccupyed = true;
+	
+	// > 参数 - 交错列表
+	//			当['btn_constructor'] == "Window_Selectable" 时，
+	//			在window上挂一个 ._drill_COSB_indexList 交错索引列表，可以使得按钮按 索引列表 的顺序对应 ，
+	//			如果没有该交错列表，那么则默认文档中的 "1.系统 > 关于按钮组核心.docx" 顺序对应。
+	parent_window._drill_COSB_indexList;
+	
+	
+	if( this._drill_data['enable_windowRebuild'] == true ){
+		
+		// > 函数 - 强制窗口选项高度（覆写）
+		parent_window._drill_COSB_orgMethod_itemHeight = parent_window.itemHeight;
+		parent_window.itemHeight = function(){	//（在高度不够时，避免topIndex + 1）
+			var clientHeight = this.height - this.padding * 2;
+			return Math.floor(clientHeight / this.drill_COSB_getVisibleRowNum());
+		};
+		
+	}
+};
+//==============================
+// * B父窗口 - 父窗口还原（继承）
+//==============================
+var _drill_COSB_parentWindow_restoreParam = Drill_COSB_LayerSprite.prototype.drill_window_restoreParam;
+Drill_COSB_LayerSprite.prototype.drill_window_restoreParam = function( parent_window ){
+	_drill_COSB_parentWindow_restoreParam.call( this, parent_window );
+	
+	// > 参数 - 占领标记
+	parent_window._drill_COSB_isOccupyed = false;
+	
+	// > 参数 - 交错列表
+	parent_window._drill_COSB_indexList = null;
+	
+	
+	if( this._drill_data['enable_windowRebuild'] == true ){
+	
+		// > 函数 - 强制窗口选项高度（还原）
+		parent_window.itemHeight = parent_window._drill_COSB_orgMethod_itemHeight;
+	};
+};
+//==============================
+// * B父窗口 - 获取 - 选项文本
 //
 //			说明：	这里是 real_index，注意考虑 i+topIndex() 的相对索引偏移问题。
 //					（temp_window.index() 是绝对索引，不需要考虑 topIndex() ）
@@ -1900,7 +2115,7 @@ Drill_COSB_LayerSprite.prototype.drill_window_getOptionText = function( real_ind
 	return "";
 };
 //==============================
-// * 窗口 - 获取 - 资源贴图索引
+// * B父窗口 - 获取 - 资源贴图索引
 //
 //			说明：	这里是 real_index，注意考虑 i+topIndex() 的相对索引偏移问题。
 //==============================
@@ -1952,7 +2167,7 @@ Drill_COSB_LayerSprite.prototype.drill_window_getBitmapIndex = function( real_in
 	return -1;
 };
 //==============================
-// * 窗口 - 获取 - 根据关键字找到索引
+// * B父窗口 - 获取 - 索引（根据关键字）
 //==============================
 Drill_COSB_LayerSprite.prototype.drill_window_getKeywordIndex = function( keyword ){
 	var temp_data = this._drill_data;
@@ -1964,7 +2179,7 @@ Drill_COSB_LayerSprite.prototype.drill_window_getKeywordIndex = function( keywor
 	return -1;
 };
 //==============================
-// * 窗口 - 获取 - 可见按钮数量
+// * B父窗口 - 获取 - 可见按钮数量
 //==============================
 Window_Selectable.prototype.drill_COSB_getVisibleRowNum = function(){
 	var temp_data = this._drill_COSB_data;
@@ -1976,166 +2191,28 @@ Window_Selectable.prototype.drill_COSB_getVisibleRowNum = function(){
 	}
 	return this.maxItems();
 };
+
+
+
+//=============================================================================
+// ** C按钮集合
+//
+//			说明：	> 每个按钮对应一个按钮贴图，此处为创建、移动控制。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
 //==============================
-// * 初始化 - 对象
+// * C按钮集合 - 初始化对象
 //==============================
-Drill_COSB_LayerSprite.prototype.drill_initSprite = function() {
-	var data = this._drill_data;
-	
-	// > 私有对象初始化
-	this._drill_time = 0;							//时间
-	this._drill_index = -1;							//当前索引
-	
+Drill_COSB_LayerSprite.prototype.drill_initButton = function() {
 	this._drill_button_needInit = true;				//按钮集合 - 初始化
 	this._drill_button_spriteTank = [];				//按钮集合 - 贴图（与实际窗口出现的选项一一对应，且顺序一致）
 	this._drill_button_orgPositionTank = [];		//按钮集合 - 原始坐标集
-	this._drill_name_sprite = null;					//名称块 - 按钮块
-	this._drill_name_window = null;					//名称块 - 按钮文本对象
-	this._drill_name_curIndex = -1;					//名称块 - 当前选项
 	
-	this._drill_last_mouse_x = 0;					//鼠标接近自动选中 - 记录
-	this._drill_last_mouse_y = 0;					//
-	
-	// > 主体属性
-	this.width = Graphics.boxWidth;
-	this.height = Graphics.boxHeight;
-	this.visible = false;
-	
-	// > 创建函数
-	this.drill_createLayer();				//创建 - 层级
-	this.drill_createDebugArrange();		//创建 - DEBUG规划网格线
-	this.drill_createButton();				//创建 - 按钮集合
-	this.drill_createName();				//创建 - 名称块
-	
-	// > 强制窗口refresh
-	this._drill_window.refresh();
-};
-//==============================
-// * 创建 - 层级
-//==============================
-Drill_COSB_LayerSprite.prototype.drill_createLayer = function() {
-	var data = this._drill_data;
-	
-	// > 层级初始化
-	this._layer_context = new Sprite();				//内容层
-	this._layer_context.x = data['x'];				//
-	this._layer_context.y = data['y'];				//
-	this.addChild(this._layer_context);				//
-	this._layer_outer = new Sprite();				//外层
-	this.addChild(this._layer_outer);				//
+	// > 创建按钮集合
+	this.drill_createButton();
 }
 //==============================
-// * 创建 - DEBUG规划网格线
-//==============================
-Drill_COSB_LayerSprite.prototype.drill_createDebugArrange = function() {
-	var temp_data = this._drill_data;
-	var temp_window = this._drill_window;
-	if( temp_data['btn_debugArrange'] == false ){ return; }
-	
-	var temp_sprite = new Sprite();
-	var temp_bitmap = null;
-	// > 直线排列
-	if( temp_data['arrange_mode'] == "直线排列" ){
-		// > 延长线
-		temp_bitmap = new Bitmap( 2400, temp_data['arrange_wSpacing'] );
-		temp_bitmap.fillRect(0,0,2400,2,"#ff0000");
-		// > 偶数线与奇数点
-		var count = 2400 / temp_data['arrange_spacing'];
-		for(var i=0; i < count; i++){
-			if( i % 2 == 1 ){
-				temp_bitmap.fillRect( temp_data['arrange_spacing']*i,0,2,temp_data['arrange_wSpacing'],"#ffff00");
-			}else{
-				temp_bitmap.drawCircle( temp_data['arrange_spacing']*i,0,4,"#ffff00");
-			}
-		}
-		// > 按钮组原点
-		temp_bitmap.drawCircle(1,1,2,"#ff00ff");
-		temp_sprite.anchor.x = 0.0;
-		temp_sprite.anchor.y = 0.0;
-		temp_sprite.rotation = temp_data['arrange_angle'] / 180.0 * Math.PI;
-	}
-	// > 环形排列
-	if( temp_data['arrange_mode'] == "环形排列" ){
-		var r = temp_data['arrange_radius'];
-		temp_bitmap = new Bitmap( r*2, r*2 );
-		// > 圆心
-		temp_bitmap.drawCircle(r,r,4,"#ffff00");
-		// > 圆弧
-		var context = temp_bitmap._context;
-		context.save();
-		context.beginPath();
-		context.arc( r, r, r, 0, Math.PI * 2, false);
-		context.strokeStyle = "#ff0000";
-		context.stroke();
-		context.closePath();
-		context.restore();
-		temp_bitmap._setDirty();
-		// > 起始角
-		var temp_spriteStart = new Sprite();
-		temp_spriteStart.bitmap = new Bitmap( r,2 );
-		temp_spriteStart.bitmap.fillAll("#ffff00");
-		temp_spriteStart.rotation = temp_data['arrange_angleStart'] / 180.0 * Math.PI;
-		temp_sprite.addChild(temp_spriteStart);
-		// > 终止角
-		var temp_spriteEnd = new Sprite();
-		temp_spriteEnd.bitmap = new Bitmap( r,2 );
-		temp_spriteEnd.bitmap.fillAll("#ff0000");
-		temp_spriteEnd.y = -2;
-		temp_spriteEnd.rotation = temp_data['arrange_angleEnd'] / 180.0 * Math.PI;
-		temp_sprite.addChild(temp_spriteEnd);
-		// > 按钮组原点
-		temp_bitmap.drawCircle(r,r,2,"#ff00ff");
-		temp_sprite.anchor.x = 0.5;
-		temp_sprite.anchor.y = 0.5;
-	}
-	// > 矩阵排列
-	if( temp_data['arrange_mode'] == "矩阵排列" ){
-		var count = temp_window.maxItems();
-		// > 画布空间
-		var width = temp_data['arrange_col'] * temp_data['arrange_width'];
-		var height = temp_data['arrange_col'] * temp_data['arrange_height'];	//（干脆多给点空间）
-		temp_bitmap = new Bitmap( width, height );
-		// > 圆点 和 向左连接线
-		for(var i = 0; i < count; i++ ){
-			var xx = Math.floor(i % temp_data['arrange_col']) * temp_data['arrange_width'] ;
-			var yy = Math.floor(i / temp_data['arrange_col']) * temp_data['arrange_height'] ;
-			temp_bitmap.drawCircle(xx,yy,4,"#ffff00");
-			if( i % temp_data['arrange_col'] != temp_data['arrange_col'] - 1 ||		//（末尾的按钮不加向左的连接线）
-				i != count - 1 ){
-				temp_bitmap.fillRect(xx,yy,temp_data['arrange_width'],2,"#ff0000");
-			}
-		}
-		// > 按钮组原点
-		temp_bitmap.drawCircle(1,1,2,"#ff00ff");
-		temp_sprite.anchor.x = 0.0;
-		temp_sprite.anchor.y = 0.0;
-	}
-	// > 固定离散排列
-	if( temp_data['arrange_mode'] == "固定离散排列" ){
-		// > 固定坐标点
-		for( var i=0; i < temp_data['arrange_squeeze'].length; i++ ){
-			var str = String( temp_data['arrange_squeeze'][i] );
-			str = str.replace("(","");
-			str = str.replace(")","");
-			var str_arr = str.split(/[,，]/);
-			var temp_spritePoint = new Sprite();
-			temp_spritePoint.bitmap = new Bitmap( 2,2 );
-			temp_spritePoint.bitmap.fillAll("#ffff00");
-			temp_spritePoint.x = Number( str_arr[0] );
-			temp_spritePoint.y = Number( str_arr[1] );
-			temp_sprite.addChild(temp_spritePoint);
-		}
-		// > 按钮组原点
-		temp_bitmap.drawCircle(2,2,4,"#ff00ff");
-		temp_sprite.anchor.x = 0.0;
-		temp_sprite.anchor.y = 0.0;
-	}
-	
-	temp_sprite.bitmap = temp_bitmap;
-	this._layer_context.addChild(temp_sprite);
-}
-//==============================
-// * 创建 - 按钮集合
+// * C按钮集合 - 创建按钮集合
 //==============================
 Drill_COSB_LayerSprite.prototype.drill_createButton = function() {
 	var temp_data = this._drill_data;
@@ -2256,7 +2333,122 @@ Drill_COSB_LayerSprite.prototype.drill_createButton = function() {
 	}
 }
 //==============================
-// * 创建 - 名称块
+// * C按钮集合 - 帧刷新 - 固定指针式（起点移动）
+//==============================
+Drill_COSB_LayerSprite.prototype.drill_updateButtonStartMove = function() {
+	var temp_data = this._drill_data;
+	var temp_window = this._drill_window;
+	
+	for(var i = 0; i < this._drill_button_spriteTank.length; i++ ){
+		var temp_sprite = this._drill_button_spriteTank[i];
+		
+		// > 激活与未激活（可折回倒转的移动）
+		var end_index = temp_sprite['_drill_COBa_x'].length - 1;
+		if( temp_window.isOpenAndActive() ){ 
+			temp_sprite._drill_foldTime += 1;
+		}else{
+			temp_sprite._drill_foldTime -= 1;
+		}
+		if( temp_sprite._drill_foldTime > end_index ){ temp_sprite._drill_foldTime = end_index; }
+		if( temp_sprite._drill_foldTime < 0 ){ temp_sprite._drill_foldTime = 0; }
+		
+		// > 播放轨迹（注意，轨迹都在temp_sprite中）
+		var time = temp_sprite._drill_foldTime;
+		var xx = temp_sprite['_org_x'] + temp_sprite['_drill_COBa_x'][ end_index ] - temp_sprite['_drill_COBa_x'][ time ];
+		var yy = temp_sprite['_org_y'] + temp_sprite['_drill_COBa_y'][ end_index ] - temp_sprite['_drill_COBa_y'][ time ];
+		
+		//if( temp_data['btn_slideAnim']['slideMoveType'] == "不移动" ){
+		//	（注意，不移动的轨迹，是真的不会移动，终点设置无效的，链式移动时，要注意该情况。）
+		//}
+		
+		temp_sprite['_x'] += Math.floor(xx);
+		temp_sprite['_y'] += Math.floor(yy);
+		
+		
+		// > 透明度设置
+		var o_time = temp_sprite._drill_foldTime - temp_sprite._drill_delayTime;
+		if( o_time < 0 ){ o_time = 0; }
+		if( o_time >= temp_sprite._drill_slideTime ){ o_time = temp_sprite._drill_slideTime; }
+		var oo = temp_data['selected_opacity_default'] * o_time / temp_sprite._drill_slideTime;
+		temp_sprite['_opacity'] += oo;
+	}
+}
+//==============================
+// * C按钮集合 - 帧刷新 - 流线式移动
+//==============================
+Drill_COSB_LayerSprite.prototype.drill_updateButtonStreamlineMove = function() {
+	var temp_data = this._drill_data;
+	var temp_window = this._drill_window;
+	
+	//...
+}
+//==============================
+// * C按钮集合 - 帧刷新 固定帧初始值
+//==============================
+Drill_COSB_LayerSprite.prototype.drill_updateButtonAttrInit = function() {
+	for(var i = 0; i < this._drill_button_spriteTank.length; i++ ){
+		var temp_sprite = this._drill_button_spriteTank[i];
+		
+		temp_sprite['_x'] = 0;				// x
+		temp_sprite['_y'] = 0;				// y
+		temp_sprite['_opacity'] = 0;		// 透明度
+		temp_sprite['_rotation'] = 0;		// 旋转
+		temp_sprite['_scale_x'] = 1; 		// 缩放x
+		temp_sprite['_scale_y'] = 1; 		// 缩放y
+		temp_sprite['_skew_x'] = 0;  		// 斜切x
+		temp_sprite['_skew_y'] = 0;  		// 斜切y
+	}
+}
+//==============================
+// * C按钮集合 - 帧刷新 固定帧赋值
+//==============================
+Drill_COSB_LayerSprite.prototype.drill_updateButtonAttrSet = function() {
+	for(var i = 0; i < this._drill_button_spriteTank.length; i++ ){
+		var temp_sprite = this._drill_button_spriteTank[i];
+		
+		if( temp_sprite.x != temp_sprite['_x'] ){ temp_sprite.x = temp_sprite['_x']; }								// x
+		if( temp_sprite.y != temp_sprite['_y'] ){ temp_sprite.y = temp_sprite['_y']; }								// y
+		if( temp_sprite.opacity != temp_sprite['_opacity'] ){ temp_sprite.opacity = temp_sprite['_opacity']; }		// 透明度
+		if( temp_sprite.rotation != temp_sprite['_rotation'] ){ temp_sprite.rotation = temp_sprite['_rotation']; }	// 旋转
+		if( temp_sprite.scale.x != temp_sprite['_scale_x'] ){ temp_sprite.scale.x = temp_sprite['_scale_x']; }		// 缩放x
+		if( temp_sprite.scale.y != temp_sprite['_scale_y'] ){ temp_sprite.scale.y = temp_sprite['_scale_y']; }		// 缩放y
+		if( temp_sprite.skew != undefined && temp_sprite.skew.x != temp_sprite['_skew_x'] ){ temp_sprite.skew.x = temp_sprite['_skew_x']; }			// 斜切x
+		if( temp_sprite.skew != undefined && temp_sprite.skew.y != temp_sprite['_skew_y'] ){ temp_sprite.skew.y = temp_sprite['_skew_y']; }			// 斜切y
+	}
+}
+//==============================
+// * C按钮集合 - 按钮是否就绪
+//==============================
+Drill_COSB_LayerSprite.prototype.drill_isAllButtonReady = function(){	
+	for( var i = 0; i < this._drill_button_spriteTank.length; i++ ){
+		if( this._drill_button_spriteTank[i] == undefined ){ continue; }
+		if( this._drill_button_spriteTank[i].bitmap == undefined ){ continue; }
+		if( this._drill_button_spriteTank[i].bitmap.isReady() == false ){ return false; }
+	}
+	return true;
+};
+
+
+
+//=============================================================================
+// ** D名称块
+//
+//			说明：	> 按钮组贴图中，专门显示名称的单独贴图。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * D名称块 - 初始化对象
+//==============================
+Drill_COSB_LayerSprite.prototype.drill_initName = function() {
+	this._drill_name_sprite = null;			//名称块 - 按钮块
+	this._drill_name_window = null;			//名称块 - 按钮文本对象
+	this._drill_name_curIndex = -1;			//名称块 - 当前选项
+	
+	// > 创建名称块
+	this.drill_createName();
+}
+//==============================
+// * D名称块 - 创建名称块
 //==============================
 Drill_COSB_LayerSprite.prototype.drill_createName = function() {
 	var temp_data = this._drill_data;
@@ -2302,147 +2494,9 @@ Drill_COSB_LayerSprite.prototype.drill_createName = function() {
 	temp_layer._drill_delayTime = data['movementDelay'];					//延迟时间
 }
 //==============================
-// * 销毁 - 执行销毁
+// * D名称块 - 帧刷新
 //==============================
-Drill_COSB_LayerSprite.prototype.drill_COSB_destroy_Private = function(){
-	this.visible = false;
-	
-	// > 断开联系
-	this.drill_COSB_removeChildConnect( this._layer_context );
-	this.drill_COSB_removeChildConnect( this._layer_outer );
-	
-	// > 销毁 - 层级
-	this._layer_context = null;
-	this._layer_outer = null;
-	
-	// > 销毁 - 按钮集合
-	this._drill_button_needInit = false;
-	this._drill_button_spriteTank.length = 0;
-	this._drill_button_orgPositionTank.length = 0;
-	
-	// > 销毁 - 名称块
-	this._drill_name_sprite = null;
-	this._drill_name_window = null;
-	
-	// > 父窗口复原
-	var temp_window = this._drill_window;
-	temp_window.itemHeight = temp_window._drill_COSB_orgMethod_itemHeight;
-	temp_window.maxCols = temp_window._drill_COSB_orgMethod_maxCols;
-	temp_window.processCursorMove = temp_window._drill_COSB_orgMethod_processCursorMove;
-	temp_window.processWheel = temp_window._drill_COSB_orgMethod_processWheel;
-	
-	// > 特殊参数 - 占领标记
-	temp_window._drill_COSB_isOccupyed = false;
-	
-	// > 特殊参数 - 交错列表
-	temp_window._drill_COSB_indexList = null;
-	
-	// > 特殊参数 - 激活状态
-	temp_window._drill_COSB_curStatus = null;
-	
-	// > 特殊参数 - 菜单指针
-	temp_window._drill_COSB_selectedBtnX = Graphics.boxWidth * 0.5;
-	temp_window._drill_COSB_selectedBtnY = Graphics.boxHeight * 1.25;
-	temp_window._drill_COSB_forceCursorStyle = 0;
-};
-//==============================
-// * 销毁 - 递归断开连接
-//==============================
-Drill_COSB_LayerSprite.prototype.drill_COSB_removeChildConnect = function( parent_sprite ){
-	if( parent_sprite == undefined ){ return; }
-	var sprite_list = parent_sprite.children;
-	if( sprite_list == undefined ){ return; }
-	for(var i = 0; i < sprite_list.length; i++ ){
-		var sprite = sprite_list[i];
-		if( sprite == undefined ){ continue; }
-		parent_sprite.removeChild( sprite );
-		this.drill_COSB_removeChildConnect( sprite );
-	}
-};
-
-//==============================
-// * 帧刷新 - 延迟初始化
-//==============================
-Drill_COSB_LayerSprite.prototype.drill_updateDelayingInit = function() {
-	var data = this._drill_data;
-	
-	// > 主体
-	if( this.drill_isAllButtonReady() && 
-		this._drill_button_needInit ){	
-		
-		this._drill_button_needInit = false;
-		for( var i = 0; i < this._drill_button_spriteTank.length; i++ ){
-			var temp_sprite = this._drill_button_spriteTank[i];
-			temp_sprite.visible = true;
-			temp_sprite.opacity = 0;
-		}
-	}
-	// > 显示
-	if( this.drill_isAllButtonReady() &&
-		this.visible != data['visible'] ){
-		this.visible = data['visible'];
-	}
-}
-//==============================
-// * 帧刷新 - 帧刷新对象
-//==============================
-Drill_COSB_LayerSprite.prototype.drill_updateSprite = function() {
-	if( this.drill_isAllButtonReady() == false ){ return; }
-	
-	this._drill_time += 1;
-	this.drill_updateNameSprite();					//名称块
-	
-	this.drill_updateButtonAttrInit();				//按钮 - 固定帧初始值
-	this.drill_updateButtonStartMove();				//按钮 - 起点移动
-	this.drill_updateButtonStreamlineMove();		//按钮 - 流线式移动
-	this.drill_updateButtonSelectionCursor();		//按钮 - 选中的按钮指针跟随
-	this.drill_updateButtonSelectionTransfer();		//按钮 - 选中非选中变换
-	this.drill_updateButtonActiveTransfer();		//按钮 - 激活后变换
-	this.drill_updateButtonAttrSet();				//按钮 - 固定帧赋值
-	
-	this.drill_updateMouseSelect();					//按钮 - 鼠标点击选中
-	this.drill_updateMouseHoverSelect();			//按钮 - 鼠标接近自动选中
-	this.drill_updateMouseWheelSelect();			//按钮 - 鼠标滚轮切换
-	this.drill_updateButtonRefresh();				//按钮 - refresh
-}
-//==============================
-// * 帧刷新 - 按钮 固定帧初始值
-//==============================
-Drill_COSB_LayerSprite.prototype.drill_updateButtonAttrInit = function() {
-	for(var i = 0; i < this._drill_button_spriteTank.length; i++ ){
-		var temp_sprite = this._drill_button_spriteTank[i];
-		
-		temp_sprite['_x'] = 0;				// x
-		temp_sprite['_y'] = 0;				// y
-		temp_sprite['_opacity'] = 0;		// 透明度
-		temp_sprite['_rotation'] = 0;		// 旋转
-		temp_sprite['_scale_x'] = 1; 		// 缩放x
-		temp_sprite['_scale_y'] = 1; 		// 缩放y
-		temp_sprite['_skew_x'] = 0;  		// 斜切x
-		temp_sprite['_skew_y'] = 0;  		// 斜切y
-	}
-}
-//==============================
-// * 帧刷新 - 按钮 固定帧赋值
-//==============================
-Drill_COSB_LayerSprite.prototype.drill_updateButtonAttrSet = function() {
-	for(var i = 0; i < this._drill_button_spriteTank.length; i++ ){
-		var temp_sprite = this._drill_button_spriteTank[i];
-		
-		if( temp_sprite.x != temp_sprite['_x'] ){ temp_sprite.x = temp_sprite['_x']; }								// x
-		if( temp_sprite.y != temp_sprite['_y'] ){ temp_sprite.y = temp_sprite['_y']; }								// y
-		if( temp_sprite.opacity != temp_sprite['_opacity'] ){ temp_sprite.opacity = temp_sprite['_opacity']; }		// 透明度
-		if( temp_sprite.rotation != temp_sprite['_rotation'] ){ temp_sprite.rotation = temp_sprite['_rotation']; }	// 旋转
-		if( temp_sprite.scale.x != temp_sprite['_scale_x'] ){ temp_sprite.scale.x = temp_sprite['_scale_x']; }		// 缩放x
-		if( temp_sprite.scale.y != temp_sprite['_scale_y'] ){ temp_sprite.scale.y = temp_sprite['_scale_y']; }		// 缩放y
-		if( temp_sprite.skew != undefined && temp_sprite.skew.x != temp_sprite['_skew_x'] ){ temp_sprite.skew.x = temp_sprite['_skew_x']; }			// 斜切x
-		if( temp_sprite.skew != undefined && temp_sprite.skew.y != temp_sprite['_skew_y'] ){ temp_sprite.skew.y = temp_sprite['_skew_y']; }			// 斜切y
-	}
-}
-//==============================
-// * 帧刷新 - 名称块
-//==============================
-Drill_COSB_LayerSprite.prototype.drill_updateNameSprite = function() {
+Drill_COSB_LayerSprite.prototype.drill_updateName = function() {
 	var temp_data = this._drill_data;
 	var temp_window = this._drill_window;
 	if( temp_data['name_visible'] == false ){ return; }
@@ -2483,60 +2537,52 @@ Drill_COSB_LayerSprite.prototype.drill_updateNameSprite = function() {
 	// > 轨迹重置
 	this._drill_name_sprite._drill_foldTime = 0;
 }
+
+
+
+//=============================================================================
+// ** E选中的按钮
+//
+//			说明：	> 按钮被选中时，执行的相关操作。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
 //==============================
-// * 帧刷新 - 按钮 起点移动
+// * E选中的按钮 - 初始化对象
 //==============================
-Drill_COSB_LayerSprite.prototype.drill_updateButtonStartMove = function() {
-	var temp_data = this._drill_data;
-	var temp_window = this._drill_window;
-	
-	for(var i = 0; i < this._drill_button_spriteTank.length; i++ ){
-		var temp_sprite = this._drill_button_spriteTank[i];
-		
-		// > 激活与未激活（可折回倒转的移动）
-		var end_index = temp_sprite['_drill_COBa_x'].length - 1;
-		if( temp_window.isOpenAndActive() ){ 
-			temp_sprite._drill_foldTime += 1;
-		}else{
-			temp_sprite._drill_foldTime -= 1;
-		}
-		if( temp_sprite._drill_foldTime > end_index ){ temp_sprite._drill_foldTime = end_index; }
-		if( temp_sprite._drill_foldTime < 0 ){ temp_sprite._drill_foldTime = 0; }
-		
-		// > 播放轨迹（注意，轨迹都在temp_sprite中）
-		var time = temp_sprite._drill_foldTime;
-		var xx = temp_sprite['_org_x'] + temp_sprite['_drill_COBa_x'][ end_index ] - temp_sprite['_drill_COBa_x'][ time ];
-		var yy = temp_sprite['_org_y'] + temp_sprite['_drill_COBa_y'][ end_index ] - temp_sprite['_drill_COBa_y'][ time ];
-		
-		//if( temp_data['btn_slideAnim']['slideMoveType'] == "不移动" ){
-		//	（注意，不移动的轨迹，是真的不会移动，终点设置无效的，链式移动时，要注意该情况。）
-		//}
-		
-		temp_sprite['_x'] += Math.floor(xx);
-		temp_sprite['_y'] += Math.floor(yy);
-		
-		
-		// > 透明度设置
-		var o_time = temp_sprite._drill_foldTime - temp_sprite._drill_delayTime;
-		if( o_time < 0 ){ o_time = 0; }
-		if( o_time >= temp_sprite._drill_slideTime ){ o_time = temp_sprite._drill_slideTime; }
-		var oo = temp_data['selected_opacity_default'] * o_time / temp_sprite._drill_slideTime;
-		temp_sprite['_opacity'] += oo;
-	}
+Drill_COSB_LayerSprite.prototype.drill_initSelectionBtn = function() {
+	//（无）
 }
 //==============================
-// * 帧刷新 - 按钮 流线式移动
+// * E选中的按钮 - 父窗口设置（继承）
 //==============================
-Drill_COSB_LayerSprite.prototype.drill_updateButtonStreamlineMove = function() {
-	var temp_data = this._drill_data;
-	var temp_window = this._drill_window;
+var _drill_COSB_selectionBtn_setParam = Drill_COSB_LayerSprite.prototype.drill_window_setParam;
+Drill_COSB_LayerSprite.prototype.drill_window_setParam = function( parent_window ){
+	_drill_COSB_selectionBtn_setParam.call( this, parent_window );
 	
-	//...
+	// > 参数 - 菜单指针
+	//			"_drill_COSB_selectedBtnX"表示选中按钮的坐标，
+	//			给菜单指针 Drill_MenuCursor 用的。
+	parent_window._drill_COSB_selectedBtnX = 0;
+	parent_window._drill_COSB_selectedBtnY = 0;
+	parent_window._drill_COSB_forceCursorStyle = 0;
+}
+
+//==============================
+// * E选中的按钮 - 父窗口还原（继承）
+//==============================
+var _drill_COSB_selectionBtn_restoreParam = Drill_COSB_LayerSprite.prototype.drill_window_restoreParam;
+Drill_COSB_LayerSprite.prototype.drill_window_restoreParam = function( parent_window ){
+	_drill_COSB_selectionBtn_restoreParam.call( this, parent_window );
+	
+	// > 参数 - 菜单指针
+	parent_window._drill_COSB_selectedBtnX = Graphics.boxWidth * 0.5;
+	parent_window._drill_COSB_selectedBtnY = Graphics.boxHeight * 1.25;
+	parent_window._drill_COSB_forceCursorStyle = 0;
 }
 //==============================
-// * 帧刷新 - 按钮 选中的按钮指针跟随
+// * E选中的按钮 - 帧刷新 - 指针跟随
 //==============================
-Drill_COSB_LayerSprite.prototype.drill_updateButtonSelectionCursor = function() {
+Drill_COSB_LayerSprite.prototype.drill_updateSelectionBtn_cursor = function() {
 	var temp_data = this._drill_data;
 	var temp_window = this._drill_window;
 	if( temp_data['cursor_enable'] == false ){ 
@@ -2564,9 +2610,9 @@ Drill_COSB_LayerSprite.prototype.drill_updateButtonSelectionCursor = function() 
 	}
 }
 //==============================
-// * 帧刷新 - 按钮 选中非选中变换
+// * E选中的按钮 - 帧刷新 - 按钮变换
 //==============================
-Drill_COSB_LayerSprite.prototype.drill_updateButtonSelectionTransfer = function() {
+Drill_COSB_LayerSprite.prototype.drill_updateSelectionBtn_transform = function() {
 	var temp_data = this._drill_data;
 	var temp_window = this._drill_window;
 	var btn_index = temp_window.index() - temp_window.topIndex();
@@ -2721,9 +2767,107 @@ Drill_COSB_LayerSprite.prototype.drill_updateButtonSelectionTransfer = function(
 	}
 }
 //==============================
-// * 帧刷新 - 按钮 激活后变换
+// * E选中的按钮 - 获取 - 贴图的绝对坐标X
 //==============================
-Drill_COSB_LayerSprite.prototype.drill_updateButtonActiveTransfer = function() {
+Drill_COSB_LayerSprite.prototype.drill_getSpriteAbsoluteX = function( sprite ){
+	//return sprite.x + this._layer_context.x;
+	var x = 0;
+    var object = sprite;
+    while( object ){
+        x += object.x;
+        object = object.parent;
+    }
+    return x;
+}
+//==============================
+// * E选中的按钮 - 获取 - 贴图的绝对坐标Y
+//==============================
+Drill_COSB_LayerSprite.prototype.drill_getSpriteAbsoluteY = function( sprite ){
+	//return sprite.y + this._layer_context.y;
+	var y = 0;
+    var object = sprite;
+    while( object ){
+        y += object.y;
+        object = object.parent;
+    }
+    return y;
+}
+
+
+
+//=============================================================================
+// ** F激活
+//
+//			说明：	> 父窗口的激活状态变化时，执行的相关操作。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * F激活 - 初始化对象
+//==============================
+Drill_COSB_LayerSprite.prototype.drill_initActivation = function(){
+	//（无）
+};
+//==============================
+// * F激活 - 父窗口设置（继承）
+//==============================
+var _drill_COSB_activation_setParam = Drill_COSB_LayerSprite.prototype.drill_window_setParam;
+Drill_COSB_LayerSprite.prototype.drill_window_setParam = function( parent_window ){
+	_drill_COSB_activation_setParam.call( this, parent_window );
+	
+	// > 参数 - 激活状态
+	//			"_drill_COSB_curStatus"用于监听窗口确认/取消情况。
+	//			在 窗口未激活 + status为"cancel" 时，按钮处于 "激活前状态"。
+	//			在 窗口未激活 + status为"ok" 时，    按钮处于 "激活后状态"。
+	parent_window._drill_COSB_curStatus = "cancel";
+};
+//==============================
+// * F激活 - 父窗口还原（继承）
+//==============================
+var _drill_COSB_activation_restoreParam = Drill_COSB_LayerSprite.prototype.drill_window_restoreParam;
+Drill_COSB_LayerSprite.prototype.drill_window_restoreParam = function( parent_window ){
+	_drill_COSB_activation_restoreParam.call( this, parent_window );
+	
+	// > 参数 - 激活状态
+	parent_window._drill_COSB_curStatus = null;
+};
+//==============================
+// * F激活 - 捕获 - 确定按钮
+//
+//			说明：	注意，当前函数的类为 Window_Selectable ，即父窗口函数。
+//==============================
+var _drill_COSB_activation_callOkHandler = Window_Selectable.prototype.processOk;
+Window_Selectable.prototype.processOk = function() {
+	_drill_COSB_activation_callOkHandler.call(this);
+    if (this.isCurrentItemEnabled()) {
+		this._drill_COSB_curStatus = "ok";
+	}
+};
+//==============================
+// * F激活 - 捕获 - 取消按钮
+//==============================
+var _drill_COSB_activation_callCancelHandler = Window_Selectable.prototype.processCancel;
+Window_Selectable.prototype.processCancel = function() {
+	_drill_COSB_activation_callCancelHandler.call(this);
+	this._drill_COSB_curStatus = "cancel";
+};
+//==============================
+// * F激活 - 获取 - 激活前状态（开放函数）
+//==============================
+Window_Selectable.prototype.drill_COSB_isActiveBefore = function() {
+	if( this.isOpenAndActive() == true ){ return false; }
+	return this._drill_COSB_curStatus == "cancel";
+};
+//==============================
+// * F激活 - 获取 - 激活后状态（开放函数）
+//==============================
+Window_Selectable.prototype.drill_COSB_isActiveAfter = function() {
+	if( this.isOpenAndActive() == true ){ return false; }
+	return this._drill_COSB_curStatus == "ok";
+};
+//==============================
+// * F激活 - 帧刷新 激活后变换
+//==============================
+Drill_COSB_LayerSprite.prototype.drill_updateActivation = function() {
 	var temp_data = this._drill_data;
 	var temp_window = this._drill_window;
 	var btn_index = temp_window.index() - temp_window.topIndex();
@@ -2777,8 +2921,250 @@ Drill_COSB_LayerSprite.prototype.drill_updateButtonActiveTransfer = function() {
 		
 	}
 }
+
+
+
+//=============================================================================
+// ** G键盘控制
+//
+//			说明：	> 键盘控制按钮组的功能。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
 //==============================
-// * 帧刷新 - 按钮 鼠标点击选中
+// * G键盘控制 - 初始化对象
+//==============================
+Drill_COSB_LayerSprite.prototype.drill_initKeyboard = function(){
+	//（无）
+}
+//==============================
+// * G键盘控制 - 父窗口设置（继承）
+//==============================
+var _drill_COSB_keyboard_setParam = Drill_COSB_LayerSprite.prototype.drill_window_setParam;
+Drill_COSB_LayerSprite.prototype.drill_window_setParam = function( parent_window ){
+	_drill_COSB_keyboard_setParam.call( this, parent_window );
+	
+	if( this._drill_data['enable_windowRebuild'] == true ){
+		
+		// > 函数 - 强制窗口列（覆盖）
+		parent_window._drill_COSB_orgMethod_maxCols = parent_window.maxCols;
+		parent_window.maxCols = function(){
+			var data = this._drill_COSB_data;
+			if( data && data['input_keyBoardMode'] == "只能上下切换" ){ return 1; }
+			if( data && data['input_keyBoardMode'] == "只能左右切换" ){ return 1; }	//（键盘被锁死只能 cursorDown 和 cursorUp）
+			if( data && data['input_keyBoardMode'] == "能上左与下右切换" ){ return 1; }
+			if( data && data['input_keyBoardMode'] == "只能上下切换(反向)" ){ return 1; }
+			if( data && data['input_keyBoardMode'] == "只能左右切换(反向)" ){ return 1; }
+			if( data && data['input_keyBoardMode'] == "能上左与下右切换(反向)" ){ return 1; }
+			return this._drill_COSB_orgMethod_maxCols.call(this);	//以矩阵排列框架为准
+		};
+		
+		// > 函数 - 键盘按键模式（覆盖）
+		parent_window._drill_COSB_orgMethod_processCursorMove = parent_window.processCursorMove;
+		parent_window.processCursorMove = function(){
+			var data = this._drill_COSB_data;
+			if( data && this.isCursorMovable() ){
+				var lastIndex = this.index();
+				
+				if( data['input_keyBoardMode'] == "只能上下切换" ){
+					// > 下
+					if( Input.isRepeated('down') ){
+						this.drill_COSB_cursorForward( lastIndex );
+						return;
+					};
+					// > 上
+					if( Input.isRepeated('up') ){
+						this.drill_COSB_cursorBack( lastIndex );
+						return;
+					};
+				}
+				if( data['input_keyBoardMode'] == "只能左右切换" ){
+					// > 右
+					if( Input.isRepeated('right') ){
+						this.drill_COSB_cursorForward( lastIndex );
+						return;
+					};
+					// > 左
+					if( Input.isRepeated('left') ){
+						this.drill_COSB_cursorBack( lastIndex );
+						return;
+					};
+					if( Input.isRepeated('down') || Input.isRepeated('up') ){ return; }
+					
+				}
+				if( data['input_keyBoardMode'] == "能上左与下右切换" ){
+					// > 下、右
+					if( Input.isRepeated('down') || Input.isRepeated('right') ){
+						this.drill_COSB_cursorForward( lastIndex );
+						return;
+					};
+					// > 上、左
+					if( Input.isRepeated('up') || Input.isRepeated('left') ){
+						this.drill_COSB_cursorBack( lastIndex );
+						return;
+					};
+				}
+				if( data['input_keyBoardMode'] == "只能上下切换(反向)" ){
+					// > 上
+					if( Input.isRepeated('up') ){
+						this.drill_COSB_cursorForward( lastIndex );
+						return;
+					};
+					// > 下
+					if( Input.isRepeated('down') ){
+						this.drill_COSB_cursorBack( lastIndex );
+						return;
+					};
+				}
+				if( data['input_keyBoardMode'] == "只能左右切换(反向)" ){
+					// > 左
+					if( Input.isRepeated('left') ){
+						this.drill_COSB_cursorForward( lastIndex );
+						return;
+					};
+					// > 右
+					if( Input.isRepeated('right') ){
+						this.drill_COSB_cursorBack( lastIndex );
+						return;
+					};
+					if( Input.isRepeated('down') || Input.isRepeated('up') ){ return; }
+					
+				}
+				if( data['input_keyBoardMode'] == "能上左与下右切换(反向)" ){
+					// > 上、左
+					if( Input.isRepeated('up') || Input.isRepeated('left') ){
+						this.drill_COSB_cursorForward( lastIndex );
+						return;
+					};
+					// > 下、右
+					if( Input.isRepeated('down') || Input.isRepeated('right') ){
+						this.drill_COSB_cursorBack( lastIndex );
+						return;
+					};
+				}
+			};
+			this._drill_COSB_orgMethod_processCursorMove.call(this);
+		};
+	}
+}
+//==============================
+// * G键盘控制 - 父窗口还原（继承）
+//==============================
+var _drill_COSB_keyboard_restoreParam = Drill_COSB_LayerSprite.prototype.drill_window_restoreParam;
+Drill_COSB_LayerSprite.prototype.drill_window_restoreParam = function( parent_window ){
+	_drill_COSB_keyboard_restoreParam.call( this, parent_window );
+	
+	if( this._drill_data['enable_windowRebuild'] == true ){
+		
+		// > 函数 - 强制窗口列（还原）
+		parent_window.maxCols = parent_window._drill_COSB_orgMethod_maxCols;
+		
+		// > 函数 - 键盘按键模式（还原）
+		parent_window.processCursorMove = parent_window._drill_COSB_orgMethod_processCursorMove;
+	}
+}
+
+
+//=============================================================================
+// ** H鼠标控制
+//
+//			说明：	> 鼠标控制按钮组的功能。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * H鼠标控制 - 初始化对象
+//==============================
+Drill_COSB_LayerSprite.prototype.drill_initMouse = function(){
+	this._drill_lastMouseX = 0;				//鼠标控制 - 上一次位置X（接近自动选中）
+	this._drill_lastMouseY = 0;				//鼠标控制 - 上一次位置Y
+}
+//==============================
+// * H鼠标控制 - 父窗口设置（继承）
+//==============================
+var _drill_COSB_mouse_setParam = Drill_COSB_LayerSprite.prototype.drill_window_setParam;
+Drill_COSB_LayerSprite.prototype.drill_window_setParam = function( parent_window ){
+	_drill_COSB_mouse_setParam.call( this, parent_window );
+	
+	if( this._drill_data['enable_windowRebuild'] == true ){
+		
+		// > 函数 - 强制去掉鼠标滚轮（覆盖）
+		//		（放在 drill_updateMouseWheelSelect 中处理）
+		parent_window._drill_COSB_orgMethod_processWheel = parent_window.processWheel;
+		parent_window.processWheel = function(){ };
+	}
+}
+//==============================
+// * H鼠标控制 - 父窗口还原（继承）
+//==============================
+var _drill_COSB_mouse_restoreParam = Drill_COSB_LayerSprite.prototype.drill_window_restoreParam;
+Drill_COSB_LayerSprite.prototype.drill_window_restoreParam = function( parent_window ){
+	_drill_COSB_mouse_restoreParam.call( this, parent_window );
+	
+	if( this._drill_data['enable_windowRebuild'] == true ){
+		
+		// > 函数 - 强制去掉鼠标滚轮（还原）
+		parent_window.processWheel = parent_window._drill_COSB_orgMethod_processWheel;
+	}
+}
+//==============================
+// * H鼠标控制 - 获取鼠标位置（输入设备核心的片段）
+//==============================
+if( typeof(_drill_mouse_getCurPos) == "undefined" ){	//防止重复定义
+
+	var _drill_mouse_getCurPos = TouchInput._onMouseMove;
+	var _drill_mouse_x = 0;
+	var _drill_mouse_y = 0;
+	TouchInput._onMouseMove = function(event) {		//鼠标位置
+		_drill_mouse_getCurPos.call(this,event);
+		
+        _drill_mouse_x = Graphics.pageToCanvasX(event.pageX);
+        _drill_mouse_y = Graphics.pageToCanvasY(event.pageY);
+	};
+}
+// > 强制更新提示 锁
+DrillUp.g_LCa_alert = true;
+//==============================
+// * H鼠标控制 - 帧刷新 位置
+//==============================
+Drill_COSB_LayerSprite.prototype.drill_updateMousePos = function() {
+	var temp_data = this._drill_data;
+	var temp_window = this._drill_window;
+	this._drill_curMouseX = _drill_mouse_x;
+	this._drill_curMouseY = _drill_mouse_y;
+	
+	
+	// > 活动地图镜头 情况
+	if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】地图鼠标落点
+		
+		// > 强制更新提示
+		if( DrillUp.drill_LCa_isInScene_Map == undefined && DrillUp.g_LCa_alert == true ){ 
+			alert( DrillUp.drill_COSB_getPluginTip_NeedUpdate_Camera() );
+			DrillUp.g_LCa_alert = false;
+			return; 
+		}
+		
+		if( DrillUp.drill_LCa_isInScene_Map() ){
+			
+			// > 下层/中层/上层
+			if( DrillUp.drill_LCa_isInArea_DownOrCenterOrUp(this) ){
+				var mouse_pos = $gameSystem._drill_LCa_controller.drill_LCa_getMousePos_OnChildren();
+				this._drill_curMouseX = mouse_pos.x;
+				this._drill_curMouseY = mouse_pos.y;
+			}
+			
+			// > 图片层/最顶层
+			else if( DrillUp.drill_LCa_isInArea_PicOrTop(this) ){
+				var mouse_pos = $gameSystem._drill_LCa_controller.drill_LCa_getMousePos_OnOuterSprite();
+				this._drill_curMouseX = mouse_pos.x;	//（此函数与直接赋值 _drill_mouse_x 效果一样）
+				this._drill_curMouseY = mouse_pos.y;
+			}
+		}
+	}
+	
+	// > 活动战斗镜头 情况
+		//...
+}
+//==============================
+// * H鼠标控制 - 帧刷新 点击选中
 //==============================
 Drill_COSB_LayerSprite.prototype.drill_updateMouseSelect = function() {
 	var temp_data = this._drill_data;
@@ -2806,17 +3192,17 @@ Drill_COSB_LayerSprite.prototype.drill_updateMouseSelect = function() {
 	}
 }
 //==============================
-// * 帧刷新 - 按钮 鼠标接近自动选中
+// * H鼠标控制 - 帧刷新 接近自动选中
 //==============================
 Drill_COSB_LayerSprite.prototype.drill_updateMouseHoverSelect = function() {
 	var temp_data = this._drill_data;
 	var temp_window = this._drill_window;
 	if(!temp_window.isCursorMovable() ){ return; }	//（不可选中时跳过）
-	if( temp_data['input_enableMouseHover'] == false ){ return; }
-	if( this._drill_last_mouse_x == _drill_mouse_x && 
-		this._drill_last_mouse_y == _drill_mouse_y ){ return; }	//（鼠标没有移动操作，跳过）
-	this._drill_last_mouse_x = _drill_mouse_x;
-	this._drill_last_mouse_y = _drill_mouse_y;
+	if( temp_data['input_enableMouseHover'] == false ){ return; }	//接近是否自动选中
+	if( this._drill_lastMouseX == this._drill_curMouseX && 
+		this._drill_lastMouseY == this._drill_curMouseY ){ return; }	//（鼠标没有移动操作，跳过）
+	this._drill_lastMouseX = this._drill_curMouseX;
+	this._drill_lastMouseY = this._drill_curMouseY;
 	
 	for(var i = 0; i < this._drill_button_spriteTank.length; i++ ){
 		var temp_sprite = this._drill_button_spriteTank[i];
@@ -2834,7 +3220,7 @@ Drill_COSB_LayerSprite.prototype.drill_updateMouseHoverSelect = function() {
 	}
 }
 //==============================
-// * 帧刷新 - 按钮 鼠标滚轮切换
+// * H鼠标控制 - 帧刷新 滚轮切换
 //==============================
 Drill_COSB_LayerSprite.prototype.drill_updateMouseWheelSelect = function() {
 	var temp_data = this._drill_data;
@@ -2845,11 +3231,11 @@ Drill_COSB_LayerSprite.prototype.drill_updateMouseWheelSelect = function() {
 	// > 滚轮监听
 	var lastIndex = temp_window.index();
 	var threshold = 20;
-	if (TouchInput.wheelY >= threshold) {
+	if( TouchInput.wheelY >= threshold ){
 		this._drill_COSB_mouseWheelDown = true;
 		this._drill_COSB_mouseWheelUp = false;
 	}
-	if (TouchInput.wheelY <= -threshold) {
+	if( TouchInput.wheelY <= -threshold ){
 		this._drill_COSB_mouseWheelDown = false;
 		this._drill_COSB_mouseWheelUp = true;
 	}
@@ -2868,29 +3254,24 @@ Drill_COSB_LayerSprite.prototype.drill_updateMouseWheelSelect = function() {
 		}
 	}
 }
-
 //==============================
-// * 获取 - 指定贴图的绝对坐标
+// * H鼠标控制 - 判断 - 接近图片范围
 //==============================
-Drill_COSB_LayerSprite.prototype.drill_getSpriteAbsoluteX = function( sprite ){
-	return sprite.x + this._layer_context.x;
-}
-Drill_COSB_LayerSprite.prototype.drill_getSpriteAbsoluteY = function( sprite ){
-	return sprite.y + this._layer_context.y;
-}
-//==============================
-// * 判断 - 所有按钮加载完成
-//==============================
-Drill_COSB_LayerSprite.prototype.drill_isAllButtonReady = function(){	
-	for( var i = 0; i < this._drill_button_spriteTank.length; i++ ){
-		if( this._drill_button_spriteTank[i] == undefined ){ continue; }
-		if( this._drill_button_spriteTank[i].bitmap == undefined ){ continue; }
-		if( this._drill_button_spriteTank[i].bitmap.isReady() == false ){ return false; }
-	}
-	return true;
+Drill_COSB_LayerSprite.prototype.drill_isOnHoverButton = function( sprite ) {
+	if( sprite.bitmap == null ){ return false };
+	if(!sprite.bitmap.isReady() ){ return false };
+	if( sprite.visible === false ){ return false };
+	var pw = sprite.bitmap.width /2 + 10;
+	var ph = sprite.bitmap.height /2 + 10;
+	
+	if( this._drill_curMouseX < sprite.x + this._layer_context.x - pw ){ return false };
+	if( this._drill_curMouseX > sprite.x + this._layer_context.x + pw ){ return false };
+	if( this._drill_curMouseY < sprite.y + this._layer_context.y - ph ){ return false };
+	if( this._drill_curMouseY > sprite.y + this._layer_context.y + ph ){ return false };
+	return true;	
 };
 //==============================
-// * 判断 - 鼠标点击图片范围判断
+// * H鼠标控制 - 判断 - 点击图片范围
 //==============================
 Drill_COSB_LayerSprite.prototype.drill_isOnButton = function( sprite ) {
 	if( sprite.bitmap == null ){ return false };
@@ -2905,73 +3286,174 @@ Drill_COSB_LayerSprite.prototype.drill_isOnButton = function( sprite ) {
 	if( TouchInput.y > this.drill_getSpriteAbsoluteY(sprite) + ph ){ return false };
 	return true;	
 };
-//==============================
-// * 判断 - 鼠标点击图片范围判断
-//==============================
-Drill_COSB_LayerSprite.prototype.drill_isOnHoverButton = function( sprite ) {
-	if( sprite.bitmap == null ){ return false };
-	if(!sprite.bitmap.isReady() ){ return false };
-	if( sprite.visible === false ){ return false };
-	var pw = sprite.bitmap.width /2 + 10;
-	var ph = sprite.bitmap.height /2 + 10;
-	
-	if( _drill_mouse_x < sprite.x + this._layer_context.x - pw ){ return false };
-	if( _drill_mouse_x > sprite.x + this._layer_context.x + pw ){ return false };
-	if( _drill_mouse_y < sprite.y + this._layer_context.y - ph ){ return false };
-	if( _drill_mouse_y > sprite.y + this._layer_context.y + ph ){ return false };
-	return true;	
-};
-//=============================================================================
-// ** 获取鼠标位置（输入设备核心的片段）
-//=============================================================================
-if( typeof(_drill_mouse_getCurPos) == "undefined" ){	//防止重复定义
 
-	var _drill_mouse_getCurPos = TouchInput._onMouseMove;
-	var _drill_mouse_x = 0;
-	var _drill_mouse_y = 0;
-	TouchInput._onMouseMove = function(event) {		//鼠标位置
-		_drill_mouse_getCurPos.call(this,event);
-		
-        _drill_mouse_x = Graphics.pageToCanvasX(event.pageX);
-        _drill_mouse_y = Graphics.pageToCanvasY(event.pageY);
-	};
+
+
+//=============================================================================
+// ** DEBUG
+//
+//			说明：	> DEBUG相关操作，用于对齐查看 按钮排列 情况。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * DEBUG - 初始化对象
+//==============================
+Drill_COSB_LayerSprite.prototype.drill_initDEBUG = function() {
+	
+	// > 创建规划网格线
+	this.drill_createDebugArrange();
+}
+//==============================
+// * DEBUG - 创建规划网格线
+//==============================
+Drill_COSB_LayerSprite.prototype.drill_createDebugArrange = function() {
+	var temp_data = this._drill_data;
+	var temp_window = this._drill_window;
+	if( temp_data['btn_debugArrange'] == false ){ return; }
+	
+	var temp_sprite = new Sprite();
+	var temp_bitmap = null;
+	// > 直线排列
+	if( temp_data['arrange_mode'] == "直线排列" ){
+		// > 延长线
+		temp_bitmap = new Bitmap( 2400, temp_data['arrange_wSpacing'] );
+		temp_bitmap.fillRect(0,0,2400,2,"#ff0000");
+		// > 偶数线与奇数点
+		var count = 2400 / temp_data['arrange_spacing'];
+		for(var i=0; i < count; i++){
+			if( i % 2 == 1 ){
+				temp_bitmap.fillRect( temp_data['arrange_spacing']*i,0,2,temp_data['arrange_wSpacing'],"#ffff00");
+			}else{
+				temp_bitmap.drawCircle( temp_data['arrange_spacing']*i,0,4,"#ffff00");
+			}
+		}
+		// > 按钮组原点
+		temp_bitmap.drawCircle(1,1,2,"#ff00ff");
+		temp_sprite.anchor.x = 0.0;
+		temp_sprite.anchor.y = 0.0;
+		temp_sprite.rotation = temp_data['arrange_angle'] / 180.0 * Math.PI;
+	}
+	// > 环形排列
+	if( temp_data['arrange_mode'] == "环形排列" ){
+		var r = temp_data['arrange_radius'];
+		temp_bitmap = new Bitmap( r*2, r*2 );
+		// > 圆心
+		temp_bitmap.drawCircle(r,r,4,"#ffff00");
+		// > 圆弧
+		var context = temp_bitmap._context;
+		context.save();
+		context.beginPath();
+		context.arc( r, r, r, 0, Math.PI * 2, false);
+		context.strokeStyle = "#ff0000";
+		context.stroke();
+		context.closePath();
+		context.restore();
+		temp_bitmap._setDirty();
+		// > 起始角
+		var temp_spriteStart = new Sprite();
+		temp_spriteStart.bitmap = new Bitmap( r,2 );
+		temp_spriteStart.bitmap.fillAll("#ffff00");
+		temp_spriteStart.rotation = temp_data['arrange_angleStart'] / 180.0 * Math.PI;
+		temp_sprite.addChild(temp_spriteStart);
+		// > 终止角
+		var temp_spriteEnd = new Sprite();
+		temp_spriteEnd.bitmap = new Bitmap( r,2 );
+		temp_spriteEnd.bitmap.fillAll("#ff0000");
+		temp_spriteEnd.y = -2;
+		temp_spriteEnd.rotation = temp_data['arrange_angleEnd'] / 180.0 * Math.PI;
+		temp_sprite.addChild(temp_spriteEnd);
+		// > 按钮组原点
+		temp_bitmap.drawCircle(r,r,2,"#ff00ff");
+		temp_sprite.anchor.x = 0.5;
+		temp_sprite.anchor.y = 0.5;
+	}
+	// > 矩阵排列
+	if( temp_data['arrange_mode'] == "矩阵排列" ){
+		var count = temp_window.maxItems();
+		// > 画布空间
+		var width = temp_data['arrange_col'] * temp_data['arrange_width'];
+		var height = temp_data['arrange_col'] * temp_data['arrange_height'];	//（干脆多给点空间）
+		temp_bitmap = new Bitmap( width, height );
+		// > 圆点 和 向左连接线
+		for(var i = 0; i < count; i++ ){
+			var xx = Math.floor(i % temp_data['arrange_col']) * temp_data['arrange_width'] ;
+			var yy = Math.floor(i / temp_data['arrange_col']) * temp_data['arrange_height'] ;
+			temp_bitmap.drawCircle(xx,yy,4,"#ffff00");
+			if( i % temp_data['arrange_col'] != temp_data['arrange_col'] - 1 ||		//（末尾的按钮不加向左的连接线）
+				i != count - 1 ){
+				temp_bitmap.fillRect(xx,yy,temp_data['arrange_width'],2,"#ff0000");
+			}
+		}
+		// > 按钮组原点
+		temp_bitmap.drawCircle(1,1,2,"#ff00ff");
+		temp_sprite.anchor.x = 0.0;
+		temp_sprite.anchor.y = 0.0;
+	}
+	// > 固定离散排列
+	if( temp_data['arrange_mode'] == "固定离散排列" ){
+		// > 固定坐标点
+		for( var i=0; i < temp_data['arrange_squeeze'].length; i++ ){
+			var str = String( temp_data['arrange_squeeze'][i] );
+			str = str.replace("(","");
+			str = str.replace(")","");
+			var str_arr = str.split(/[,，]/);
+			var temp_spritePoint = new Sprite();
+			temp_spritePoint.bitmap = new Bitmap( 2,2 );
+			temp_spritePoint.bitmap.fillAll("#ffff00");
+			temp_spritePoint.x = Number( str_arr[0] );
+			temp_spritePoint.y = Number( str_arr[1] );
+			temp_sprite.addChild(temp_spritePoint);
+		}
+		// > 按钮组原点
+		temp_bitmap.drawCircle(2,2,4,"#ff00ff");
+		temp_sprite.anchor.x = 0.0;
+		temp_sprite.anchor.y = 0.0;
+	}
+	
+	temp_sprite.bitmap = temp_bitmap;
+	this._layer_context.addChild(temp_sprite);
 }
 
 
+
 //=============================================================================
-// ** 窗口refresh
+// ** ☆窗口重刷
+//
+//			说明：	> 当父窗口执行 refresh 时，按钮组都需要及时同步重刷。
+//					> 如果你的子窗口覆写了Window_Selectable的 refresh 函数，那么要留意添加此刷新标记。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 窗口refresh - 标记
-//
-//				说明：	如果你的子窗口覆写了refresh函数，那么要记得添加刷新标记。
+// * 窗口重刷 - 标记
 //==============================
 var _drill_COSB_windowSelectableRefresh = Window_Selectable.prototype.refresh;
 Window_Selectable.prototype.refresh = function(){
-	this._drill_COSB_windowSelectable_refreshing = true;
+	this._drill_COSB_windowSelectable_refreshing = true;	//标记
 	_drill_COSB_windowSelectableRefresh.call(this);
 }
 //==============================
-// * 帧刷新 - refresh监听
+// * 窗口重刷 - 延迟执行
 //==============================
 Drill_COSB_LayerSprite.prototype.drill_updateButtonRefresh = function() {
 	var temp_data = this._drill_data;
 	var temp_window = this._drill_window;
+	
+	// > 标记监听
 	if( temp_window._drill_COSB_windowSelectable_refreshing != true ){ return; }
 	temp_window._drill_COSB_windowSelectable_refreshing = false;
 	
-	// > 实际按钮重刷
+	// > 按钮组重刷
 	for( var i = 0; i < this._drill_button_spriteTank.length; i++ ){
 		var temp_sprite = this._drill_button_spriteTank[i];
 		var real_index = i + temp_window.topIndex();
 		
-		// > 按钮名称切换
+		// > 重刷 - 按钮名称
 		if( temp_data['btn_nameEnable'] == true ){
 			var str = this.drill_window_getOptionText( real_index );
 			temp_sprite._drill_COSB_btnNameWindow.setText( str );
 		}
 		
-		// > 按钮贴图切换
+		// > 重刷 - 按钮贴图
 		var bitmap_index = this.drill_window_getBitmapIndex( real_index );
 		if( bitmap_index != -1 ){
 			temp_sprite.bitmap = ImageManager.loadBitmap( temp_data['btn_src_file'], temp_data['btn_src'][ bitmap_index ], 0, true);
@@ -2983,42 +3465,13 @@ Drill_COSB_LayerSprite.prototype.drill_updateButtonRefresh = function() {
 
 
 //=============================================================================
-// ** 窗口控制
+// ** ☆窗口操作
+//
+//			说明：	> 对父窗口的直接操作的函数。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 获取 - 确定按钮
-//==============================
-var _drill_COSB_callOkHandler = Window_Selectable.prototype.processOk;
-Window_Selectable.prototype.processOk = function() {
-	_drill_COSB_callOkHandler.call(this);
-    if (this.isCurrentItemEnabled()) {
-		this._drill_COSB_curStatus = "ok";
-	}
-};
-//==============================
-// * 获取 - 取消按钮
-//==============================
-var _drill_COSB_callCancelHandler = Window_Selectable.prototype.processCancel;
-Window_Selectable.prototype.processCancel = function() {
-	_drill_COSB_callCancelHandler.call(this);
-	this._drill_COSB_curStatus = "cancel";
-};
-//==============================
-// * 获取 - 激活前状态
-//==============================
-Window_Selectable.prototype.drill_COSB_isActiveBefore = function() {
-	if( this.isOpenAndActive() == true ){ return false; }
-	return this._drill_COSB_curStatus == "cancel";
-};
-//==============================
-// * 获取 - 激活后状态
-//==============================
-Window_Selectable.prototype.drill_COSB_isActiveAfter = function() {
-	if( this.isOpenAndActive() == true ){ return false; }
-	return this._drill_COSB_curStatus == "ok";
-};
-//==============================
-// * 窗口 - 前进一项
+// * 窗口操作 - 前进一项（开放函数，单次执行）
 //==============================
 Window_Selectable.prototype.drill_COSB_cursorForward = function( lastIndex ){
 	var data = this._drill_COSB_data;
@@ -3033,7 +3486,7 @@ Window_Selectable.prototype.drill_COSB_cursorForward = function( lastIndex ){
 	};
 }
 //==============================
-// * 窗口 - 后退一项
+// * 窗口操作 - 后退一项（开放函数，单次执行）
 //==============================
 Window_Selectable.prototype.drill_COSB_cursorBack = function( lastIndex ){
 	var data = this._drill_COSB_data;
@@ -3051,11 +3504,15 @@ Window_Selectable.prototype.drill_COSB_cursorBack = function( lastIndex ){
 
 
 //=============================================================================
-// ** 单行文字贴图【Drill_COSB_WindowSprite】
-//
+// ** 文本贴图【Drill_COSB_WindowSprite】
+// **
+// **		作用域：	地图界面、战斗界面、菜单界面
+// **		主功能：	> 定义一个窗口贴图来显示自定义文本，支持多行文本。
+// **
+// **		说明：	> 底层就是一个窗口，支持 窗口字符 的全部功能。
 //=============================================================================
 //==============================
-// * 文字贴图 - 定义
+// * 文本贴图 - 定义
 //==============================
 function Drill_COSB_WindowSprite() {
     this.initialize.apply(this, arguments);
@@ -3063,33 +3520,28 @@ function Drill_COSB_WindowSprite() {
 Drill_COSB_WindowSprite.prototype = Object.create(Window_Base.prototype);
 Drill_COSB_WindowSprite.prototype.constructor = Drill_COSB_WindowSprite;
 //==============================
-// * 文字贴图 - 初始化
+// * 文本贴图 - 初始化
 //==============================
 Drill_COSB_WindowSprite.prototype.initialize = function( data ){
 	this._drill_data = JSON.parse(JSON.stringify( data ));	//深拷贝数据
     Window_Base.prototype.initialize.call(this);
-	
 	this.drill_initData();				//初始化数据
 	this.drill_initSprite();			//初始化对象
 }
 //==============================
-// * 文字贴图 - 帧刷新
+// * 文本贴图 - 帧刷新
 //==============================
 Drill_COSB_WindowSprite.prototype.update = function() {
 	Window_Base.prototype.update.call(this);
-	this.drill_COSB_updateText();		//文本变化
+	this.drill_COSB_updateText();		//帧刷新 - 文本变化
 }
 //==============================
-// * 文字贴图 - 属性
+// * 文本贴图 - 属性
 //==============================
-Drill_COSB_WindowSprite.prototype.standardFontSize = function() {
-    return this._drill_data['fontsize'] || 28;
-};
-Drill_COSB_WindowSprite.prototype.standardPadding = function() {
-    return 6;
-};
+Drill_COSB_WindowSprite.prototype.standardFontSize = function(){ return this._drill_data['fontsize'] || 28; };
+Drill_COSB_WindowSprite.prototype.standardPadding = function(){ return 6; };
 //==============================
-// * 文字贴图 - 接口（内部单次调用）
+// * 文本贴图 - 接口（内部单次调用）
 //
 //			说明：	名称块根据 窗口选项 的文本定死了结构，仅 Drill_COSB_LayerSprite 调用，不对外开放。
 //==============================
@@ -3101,7 +3553,7 @@ Drill_COSB_WindowSprite.prototype.setText = function( text ){
 };
 
 //==============================
-// * 初始化 - 数据
+// * 文本贴图 - 初始化数据
 //==============================
 Drill_COSB_WindowSprite.prototype.drill_initData = function() {
 	var data = this._drill_data;
@@ -3114,7 +3566,7 @@ Drill_COSB_WindowSprite.prototype.drill_initData = function() {
 	if( data['widthValue'] == undefined ){ data['widthValue'] = 816 };								
 }
 //==============================
-// * 初始化 - 对象
+// * 文本贴图 - 初始化对象
 //==============================
 Drill_COSB_WindowSprite.prototype.drill_initSprite = function() {
 	var data = this._drill_data;
@@ -3130,7 +3582,7 @@ Drill_COSB_WindowSprite.prototype.drill_initSprite = function() {
 	this.contents.opacity = 255;
 };
 //==============================
-// * 帧刷新 - 文本变化
+// * 文本贴图 - 帧刷新文本变化
 //==============================
 Drill_COSB_WindowSprite.prototype.drill_COSB_updateText = function() {
 	if( this._drill_needRefresh == false ){ return; }
@@ -3230,10 +3682,7 @@ Drill_COSB_WindowSprite.prototype.drill_COSB_updateText = function() {
 //=============================================================================
 }else{
 		Imported.Drill_CoreOfSelectableButton = false;
-		alert(
-			"【Drill_CoreOfSelectableButton.js 系统 - 按钮组核心】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfBallistics 系统-弹道核心" + 
-			"\n- Drill_CoreOfWindowAuxiliary 系统-窗口辅助核心"
-		);
+		var pluginTip = DrillUp.drill_COSB_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 

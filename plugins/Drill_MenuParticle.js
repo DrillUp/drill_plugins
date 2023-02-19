@@ -702,13 +702,15 @@
  * @type select
  * @option 普通
  * @value 0
- * @option 叠加
+ * @option 发光
  * @value 1
  * @option 实色混合(正片叠底)
  * @value 2
  * @option 浅色
  * @value 3
- * @desc pixi的渲染混合模式。0-普通,1-叠加。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
+ * @option 叠加
+ * @value 4
+ * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
  * @default 0
  *
  * @param 菜单层级
@@ -953,13 +955,15 @@
  * @type select
  * @option 普通
  * @value 0
- * @option 叠加
+ * @option 发光
  * @value 1
  * @option 实色混合(正片叠底)
  * @value 2
  * @option 浅色
  * @value 3
- * @desc pixi的渲染混合模式。0-普通,1-叠加。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
+ * @option 叠加
+ * @value 4
+ * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
  * @default 0
  *
  * @param 图片层级
@@ -1174,7 +1178,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			菜单粒子：
 //				->基本属性
 //					->显示/隐藏
@@ -1212,6 +1216,17 @@
 //
 
 //=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_MPa_PluginTip_curName = "Drill_MenuParticle.js 主菜单-多层菜单粒子";
+	DrillUp.g_MPa_PluginTip_baseList = [];
+	
+	
+//=============================================================================
 // ** 变量获取
 //=============================================================================
 　　var Imported = Imported || {};
@@ -1230,6 +1245,7 @@
 		data['visible'] = String( dataFrom["初始是否显示"] || "true") == "true";
 		data['src_img'] = String( dataFrom["资源-粒子"] || "");
 		data['src_img_mask'] = String( dataFrom["资源-粒子遮罩"] || "");
+		data['src_img_file'] = "img/Menu__layer/";
 		data['opacity'] = Number( dataFrom["透明度"] || 255);
 		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
 		//data['menu_index'] = Number( dataFrom["菜单层级"] || 0);
@@ -1258,6 +1274,7 @@
 		// > 双层效果
 		data['second_enable'] = String( dataFrom["是否开启双层效果"] || "false") == "true";
 		data['second_src_img'] = String( dataFrom["资源-第二层粒子"] || "");
+		data['second_src_img_file'] = "img/Menu__layer/";
 		data['second_menuIndex'] = Number( dataFrom["第二层粒子菜单层级"] || 0);
 		data['second_zIndex'] = Number( dataFrom["第二层粒子图片层级"] || 7);
 		
@@ -1278,6 +1295,7 @@
 		data['visible'] = String( dataFrom["初始是否显示"] || "true") == "true";
 		data['src_img'] = String( dataFrom["资源-粒子"] || "");
 		data['src_img_mask'] = String( dataFrom["资源-粒子遮罩"] || "");
+		data['src_img_file'] = "img/Menu__layer/";
 		data['opacity'] = Number( dataFrom["透明度"] || 255);
 		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
 		data['menu_index'] = Number( dataFrom["菜单层级"] || 0);
@@ -1306,6 +1324,7 @@
 		// > 双层效果
 		data['second_enable'] = String( dataFrom["是否开启双层效果"] || "false") == "true";
 		data['second_src_img'] = String( dataFrom["资源-第二层粒子"] || "");
+		data['second_src_img_file'] = "img/Menu__layer/";
 		data['second_menuIndex'] = Number( dataFrom["第二层粒子菜单层级"] || 0);
 		data['second_zIndex'] = Number( dataFrom["第二层粒子图片层级"] || 7);
 		
@@ -1339,13 +1358,7 @@
 	}
 	
 	
-//=============================================================================
-// ** 资源文件夹
-//=============================================================================
-ImageManager.load_MenuLayer = function(filename) {
-    return this.loadBitmap('img/Menu__layer/', filename, 0, true);
-};
-
+	
 //=============================================================================
 // * 插件指令
 //=============================================================================
@@ -1645,7 +1658,7 @@ Scene_MenuBase.prototype.drill_MPa_create = function() {
 			for( var j = 0; j < temp_data['par_count'] ; j++ ){	
 				var temp_sprite_data = JSON.parse(JSON.stringify( temp_data ));		//深拷贝数据（杜绝引用造成的修改）
 				var temp_sprite = new Sprite();
-				temp_sprite.bitmap = ImageManager.load_MenuLayer(temp_sprite_data['src_img']);
+				temp_sprite.bitmap = ImageManager.loadBitmap( temp_sprite_data['src_img_file'], temp_sprite_data['src_img'], 0, true );
 				temp_sprite.anchor.x = 0.5;
 				temp_sprite.anchor.y = 0.5;
 				temp_sprite.blendMode = temp_sprite_data['blendMode'];
@@ -1665,7 +1678,7 @@ Scene_MenuBase.prototype.drill_MPa_create = function() {
 			
 			// > 粒子层 - 粒子遮罩
 			if( temp_data['src_img_mask'] != "" ){
-				var temp_mask = new Sprite(ImageManager.load_MenuLayer( temp_data['src_img_mask'] ));
+				var temp_mask = new Sprite( ImageManager.loadBitmap( temp_data['src_img_file'], temp_data['src_img_mask'], 0, true ) );
 				temp_layer.addChild(temp_mask);
 				temp_layer.mask = temp_mask;
 			}
@@ -1684,7 +1697,7 @@ Scene_MenuBase.prototype.drill_MPa_create = function() {
 					var org_sprite = temp_layer.children[j];
 					
 					var temp_sprite = new Sprite();
-					temp_sprite.bitmap = ImageManager.load_MenuLayer(temp_data['second_src_img']);
+					temp_sprite.bitmap = ImageManager.loadBitmap( temp_data['second_src_img_file'], temp_data['second_src_img'], 0, true );
 					temp_sprite.anchor.x = 0.5;
 					temp_sprite.anchor.y = 0.5;
 					temp_sprite.blendMode = org_sprite.blendMode;
@@ -1702,7 +1715,7 @@ Scene_MenuBase.prototype.drill_MPa_create = function() {
 				
 				// > 第二层 - 粒子遮罩
 				if( temp_data['src_img_mask'] != "" ){
-					var temp_mask = new Sprite(ImageManager.load_MenuLayer(temp_data['src_img_mask']));
+					var temp_mask = new Sprite(ImageManager.loadBitmap( temp_data['src_img_file'], temp_data['src_img_mask'], 0, true ));
 					temp_layerSec.addChild(temp_mask);
 					temp_layerSec.mask = temp_mask;
 				}
@@ -1726,7 +1739,7 @@ Scene_MenuBase.prototype.drill_MPa_create = function() {
 		for( var j = 0; j < temp_data['par_count'] ; j++ ){	
 			var temp_sprite_data = JSON.parse(JSON.stringify( temp_data ));	//深拷贝数据（杜绝引用造成的修改）
 			var temp_sprite = new Sprite();
-			temp_sprite.bitmap = ImageManager.load_MenuLayer(temp_sprite_data['src_img']);
+			temp_sprite.bitmap = ImageManager.loadBitmap( temp_sprite_data['src_img_file'], temp_sprite_data['src_img'], 0, true );
 			temp_sprite.anchor.x = 0.5;
 			temp_sprite.anchor.y = 0.5;
 			temp_sprite.blendMode = temp_sprite_data['blendMode'];
@@ -1746,7 +1759,7 @@ Scene_MenuBase.prototype.drill_MPa_create = function() {
 		
 		// > 粒子层 - 粒子遮罩
 		if( temp_data['src_img_mask'] != "" ){
-			var temp_mask = new Sprite(ImageManager.load_MenuLayer( temp_data['src_img_mask'] ));
+			var temp_mask = new Sprite( ImageManager.loadBitmap( temp_data['src_img_file'], temp_data['src_img_mask'], 0, true ) );
 			temp_layer.addChild(temp_mask);
 			temp_layer.mask = temp_mask;
 		}
@@ -1765,7 +1778,7 @@ Scene_MenuBase.prototype.drill_MPa_create = function() {
 				var org_sprite = temp_layer.children[j];
 				
 				var temp_sprite = new Sprite();
-				temp_sprite.bitmap = ImageManager.load_MenuLayer(temp_data['second_src_img']);
+				temp_sprite.bitmap = ImageManager.loadBitmap( temp_data['second_src_img_file'], temp_data['second_src_img'], 0, true );
 				temp_sprite.anchor.x = 0.5;
 				temp_sprite.anchor.y = 0.5;
 				temp_sprite.blendMode = org_sprite.blendMode;
@@ -1783,7 +1796,7 @@ Scene_MenuBase.prototype.drill_MPa_create = function() {
 			
 			// > 第二层 - 粒子遮罩
 			if( temp_data['src_img_mask'] != "" ){
-				var temp_mask = new Sprite(ImageManager.load_MenuLayer(temp_data['src_img_mask']));
+				var temp_mask = new Sprite( ImageManager.loadBitmap( temp_data['src_img_file'], temp_data['src_img_mask'], 0, true ) );
 				temp_layerSec.addChild(temp_mask);
 				temp_layerSec.mask = temp_mask;
 			}
@@ -2074,7 +2087,7 @@ Scene_MenuBase.prototype.drill_MPa_resetParticles = function(i) {
 				continue;
 			}
 			
-			// > 计算通用落点
+			// > 计算通用落脚点
 			var p_start = data['anchorPointTank'][start_index];
 			var p_end = data['anchorPointTank'][end_index];
 			var d_time = p_end['t'] - p_start['t'];

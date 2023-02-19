@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.8]        战斗 - 活动战斗镜头
+ * @plugindesc [v1.9]        战斗 - 活动战斗镜头
  * @author Drill_up
  * 
  * 
@@ -176,6 +176,25 @@
  *   只有恢复翻转后，才能进行其它翻转操作。
  * 
  * -----------------------------------------------------------------------------
+ * ----可选设定 - 整体平移/聚焦偏移
+ * 你可以通过插件指令设置下面功能：
+ * 
+ * 插件指令：>战斗镜头 : 修改整体平移 : 位置[100,100] : 时间[60] : 匀速移动
+ * 插件指令：>战斗镜头 : 修改整体平移 : 位置[100,100] : 时间[60] : 弹性移动
+ * 插件指令：>战斗镜头 : 修改整体平移 : 位置[100,100] : 时间[60] : 增减速移动
+ * 插件指令：>战斗镜头 : 边缘遮挡层 : 启用
+ * 插件指令：>战斗镜头 : 边缘遮挡层 : 关闭
+ * 插件指令：>战斗镜头 : 边缘遮挡层 : 修改颜色 : #ffffff
+ * 
+ * 1.聚焦偏移默认位置为[0,0]。
+ *   由于 聚焦偏移 是自动模式中的参数，因此只能瞬间修改。
+ *   修改后，镜头会对聚焦进行偏移。
+ * 2.整体平移默认位置为[0,0]。
+ *   修改后能在一段时间内进行镜头整体平移变化，并且永久有效。
+ *   注意此指令只对 战斗界面 有效。
+ * 3.边缘遮挡层只能在 整体平移 之后才能看见，并且能修改颜色。
+ * 
+ * -----------------------------------------------------------------------------
  * ----插件性能
  * 测试仪器：   4G 内存，Intel Core i5-2520M CPU 2.5GHz 处理器
  *              Intel(R) HD Graphics 3000 集显 的垃圾笔记本
@@ -217,11 +236,36 @@
  * 大幅度改进了插件的镜头控制结构。
  * [v1.8]
  * 优化了旧存档的识别与兼容。
+ * [v1.9]
+ * 添加了 修改整体平移/边缘遮挡层 的功能。
  * 
  * 
  * 
  * @param ---常规---
  * @default
+ * 
+ * @param 整体平移-镜头 X
+ * @parent ---常规---
+ * @desc 可将镜头整体平移，单位像素。（可为负数）可以用插件指令修改，平移后要想办法用菜单或图片遮挡住平移漏出的部分。
+ * @default 0
+ * 
+ * @param 整体平移-镜头 Y
+ * @parent ---常规---
+ * @desc 可将镜头整体平移，单位像素。（可为负数）可以用插件指令修改，平移后要想办法用菜单或图片遮挡住平移漏出的部分。
+ * @default 0
+ * 
+ * @param 整体平移-是否启用边缘遮挡层
+ * @parent ---常规---
+ * @type boolean
+ * @on 启用
+ * @off 关闭
+ * @desc 当整体平移出界一段距离时，边缘遮挡层能防止玩家看到不合适的镜头边缘，也可以作为空白区域的菜单/立绘的底色。
+ * @default true
+ * 
+ * @param 边缘遮挡层颜色
+ * @parent 整体平移-是否启用边缘遮挡层
+ * @desc 边缘遮挡层的颜色，可以作为空白区域的菜单/立绘的底色。
+ * @default #ffffff
  * 
  * @param 镜头架宽度
  * @parent ---常规---
@@ -376,49 +420,55 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
-//			战斗活动镜头：
-//				->单位贴图
-//					->获取 - 敌人容器指针【标准函数】
-//					->获取 - 根据敌方索引【标准函数】
-//					->获取 - 根据敌人ID【标准函数】
-//					->获取 - 角色容器指针【标准函数】
-//					->获取 - 根据我方索引【标准函数】
-//					->获取 - 根据角色ID【标准函数】
-//				->镜头控制器函数
+//		★功能结构树：
+//			->☆提示信息
+//			->☆变量获取
+//			->☆插件指令
+//			->☆存储数据
+//			->☆单位贴图
+//				->获取 - 敌人容器指针【标准函数】
+//				->获取 - 根据敌方索引【标准函数】
+//				->获取 - 根据敌人ID【标准函数】
+//				->获取 - 角色容器指针【标准函数】
+//				->获取 - 根据我方索引【标准函数】
+//				->获取 - 根据角色ID【标准函数】
+//			->☆镜头控制器函数
+//			->☆自动模式标记
+//				->菜单标记
+//				->战斗流程标记
+//				->单位标记
+//			->☆自动模式聚焦
+//				->聚焦中心
+//				->聚焦角色
+//				->聚焦敌人
+//			->☆兼容
+//				->兼容YEP
+//				->兼容MOG
+//			->☆镜头控制
+//				->控制器帧刷新
+//				->战斗结束恢复默认
+//				->基本属性赋值
+//					> 坐标X
+//					> 坐标Y
+//					> 旋转（弧度）
+//					> 缩放X
+//					> 缩放Y
+//				->镜头位置赋值（$gameTemp._drill_cam_pos）
+//				->镜头架赋值（$gameSystem._drill_cam_limit_width）
+//			->☆整体平移
+//				->边缘遮挡层
+//			->镜头控制器【Drill_BCa_Controller】
+//				->镜头架
+//				->镜头基点
 //				->自动模式
-//					->自动模式标记
-//						->菜单标记
-//						->战斗流程标记
-//						->单位标记
-//					->自动模式聚焦
-//						->聚焦中心
-//						->聚焦角色
-//						->聚焦敌人
-//				->兼容
-//					->兼容YEP
-//					->兼容MOG
-//				->镜头控制
-//					->控制器帧刷新
-//					->战斗结束恢复默认
-//					->基本属性赋值
-//						> 坐标X
-//						> 坐标Y
-//						> 旋转（弧度）
-//						> 缩放X
-//						> 缩放Y
-//					->镜头位置赋值（$gameTemp._drill_cam_pos）
-//					->镜头架赋值（$gameSystem._drill_cam_limit_width）
-//					
-//				->镜头控制器【Drill_BCa_Controller】
-//					->镜头架
-//					->镜头基点
-//					->自动模式
-//					->固定看向
-//					->叠加变化
-//						->镜头自定义放大 ?
+//				->固定看向
+//				->叠加变化
+//					->镜头自定义放大 ?
+//			->☆层级标记器
+//			->☆DEBUG镜头对齐框
+//				->镜头对齐框 贴图【Drill_BCa_DebugSprite】
 //
-//		★私有类如下：
+//		★插件私有类：
 //			* Drill_BCa_Controller【镜头控制器】
 //			* Drill_BCa_DebugSprite【镜头对齐框 贴图】
 //	
@@ -445,7 +495,47 @@
 //			
 
 //=============================================================================
-// ** 变量获取
+// ** ☆提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_BCa_PluginTip_curName = "Drill_BattleCamera.js 战斗-活动战斗镜头";
+	DrillUp.g_BCa_PluginTip_baseList = [
+		"Drill_CoreOfBallistics.js 系统-弹道核心",
+		"Drill_CoreOfInput.js 系统-输入设备核心"
+	];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_BCa_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_BCa_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_BCa_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_BCa_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_BCa_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - NaN校验值
+	//==============================
+	DrillUp.drill_BCa_getPluginTip_ParamIsNaN = function( param_name ){
+		return "【" + DrillUp.g_BCa_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 镜头架高度宽度
+	//==============================
+	DrillUp.drill_BCa_getPluginTip_Holder = function(){
+		return "【" + DrillUp.g_BCa_PluginTip_curName + "】\n参数错误，出现了镜头架宽度或镜头架高度不能为零。";
+	};
+	
+	
+//=============================================================================
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_BattleCamera = true;
@@ -454,6 +544,10 @@
 
 
 	/*-----------------杂项------------------*/
+	DrillUp.g_BCa_globalOffset_x = Number(DrillUp.parameters['整体平移-镜头 X'] || 0);
+	DrillUp.g_BCa_globalOffset_y = Number(DrillUp.parameters['整体平移-镜头 Y'] || 0);
+    DrillUp.g_BCa_globalBarrierLayerEnabled = String(DrillUp.parameters['整体平移-是否启用边缘遮挡层'] || "true") == "true";
+    DrillUp.g_BCa_globalBarrierLayerColor = String(DrillUp.parameters['边缘遮挡层颜色'] || '#ffffff');
 	DrillUp.g_BCa_limit_width = Number(DrillUp.parameters['镜头架宽度'] || 1000);
 	DrillUp.g_BCa_limit_height = Number(DrillUp.parameters['镜头架高度'] || 740);
     DrillUp.g_BCa_mode = String(DrillUp.parameters['默认镜头模式'] || '自动模式');
@@ -485,7 +579,7 @@ if( Imported.Drill_CoreOfBallistics &&
 	
 	
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================	
 var _drill_BCa_pluginCommand = Game_Interpreter.prototype.pluginCommand
 Game_Interpreter.prototype.pluginCommand = function(command, args ){
@@ -742,6 +836,48 @@ Game_Interpreter.prototype.pluginCommand = function(command, args ){
 				return;
 			}
 		}
+		
+		/*-----------------整体平移------------------*/
+		if(args.length == 8){
+			var type = String(args[1]);
+			var temp1 = String(args[3]);
+			var temp2 = String(args[5]);
+			var temp3 = String(args[7]);
+			if( type == "修改整体平移" ){
+				temp1 = temp1.replace("位置[", "");
+				temp1 = temp1.replace("]", "");
+				temp2 = temp2.replace("时间[", "");
+				temp2 = temp2.replace("]", "");
+				var pos = temp1.split(/[,，]/);
+				if( pos.length >= 2 ){
+					var xx = Number(pos[0]);
+					var yy = Number(pos[1]);
+					$gameSystem._drill_BCa_controller.drill_BCa_setGlobalOffset( xx, yy, Number(temp2), temp3 );
+				}
+			}
+		}
+		if(args.length == 4){
+			var type = String(args[1]);
+			var temp1 = String(args[3]);
+			if( type == "边缘遮挡层" ){
+				if( temp1 == "开启" ){
+					$gameSystem._drill_BCa_controller.drill_BCa_setGlobalBarrierLayerEnabled( true );
+				}
+				if( temp1 == "关闭" ){
+					$gameSystem._drill_BCa_controller.drill_BCa_setGlobalBarrierLayerEnabled( false );
+				}
+			}
+		}
+		if(args.length == 6){
+			var type = String(args[1]);
+			var temp1 = String(args[3]);
+			var temp2 = String(args[5]);
+			if( type == "边缘遮挡层" ){
+				if( temp1 == "修改颜色" ){
+					$gameSystem._drill_BCa_controller.drill_BCa_setGlobalBarrierLayerColor( temp2 );
+				}
+			}
+		}
 	}
 	
 	/*-----------------旧指令------------------*/
@@ -766,7 +902,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args ){
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -838,6 +974,10 @@ Game_System.prototype.drill_BCa_initSysData_Private = function() {
 		'pause':false,
 		'holderWidth':DrillUp.g_BCa_limit_width,
 		'holderHeight':DrillUp.g_BCa_limit_height,
+		'globalOffsetX':DrillUp.g_BCa_globalOffset_x,
+		'globalOffsetY':DrillUp.g_BCa_globalOffset_y,
+		'globalBarrierLayerEnabled':DrillUp.g_BCa_globalBarrierLayerEnabled,
+		'globalBarrierLayerColor':DrillUp.g_BCa_globalBarrierLayerColor,
 		'mode':DrillUp.g_BCa_mode,
 		
 		'autoOffsetX':DrillUp.g_BCa_auto_x,
@@ -892,7 +1032,7 @@ Game_Temp.prototype.initialize = function(){
 
 
 //#############################################################################
-// ** 【标准模块】单位贴图
+// ** 【标准模块】单位贴图 ☆单位贴图
 //#############################################################################
 //##############################
 // * 单位贴图 - 获取 - 敌人容器指针【标准函数】
@@ -1048,9 +1188,10 @@ Game_Temp.prototype.drill_BCa_getActorSpriteByActorId_Private = function( actor_
 
 
 //=============================================================================
-// ** 镜头控制器函数
+// ** ☆镜头控制器函数
 //
-//			说明：	此处都调用的 控制器 的函数。方便子插件使用函数。
+//			说明：	> 此处全都调用 镜头控制器 的函数。方便子插件使用函数。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 控制器 - 是否启用【标准函数】
@@ -1127,25 +1268,25 @@ Game_System.prototype.drill_BCa_getCameraPos_OuterSprite = function( x, y ){
 	return this._drill_BCa_controller.drill_BCa_getCameraPos_OuterSprite( x, y );
 }
 //==============================
-// * 镜头基点 - 落点位置转换（外部贴图 -> 子贴图）【标准函数】
+// * 镜头基点 - 战斗落点 转换（外部贴图 -> 子贴图）【标准函数】
 //==============================
 Game_System.prototype.drill_BCa_getPos_OuterToChildren = function( x, y ){
 	return this._drill_BCa_controller.drill_BCa_getPos_OuterToChildren( x, y );
 }
 //==============================
-// * 镜头基点 - 落点位置转换（子贴图 -> 外部贴图）【标准函数】
+// * 镜头基点 - 战斗落点 转换（子贴图 -> 外部贴图）【标准函数】
 //==============================
 Game_System.prototype.drill_BCa_getPos_ChildrenToOuter = function( x, y ){
 	return this._drill_BCa_controller.drill_BCa_getPos_ChildrenToOuter( x, y );
 }
 //==============================
-// * 镜头基点 - 获取鼠标落点位置（子贴图用）【标准函数】
+// * 镜头基点 - 获取战斗鼠标落点（子贴图用）【标准函数】
 //==============================
 Game_System.prototype.drill_BCa_getMousePos_OnChildren = function(){
 	return this._drill_BCa_controller.drill_BCa_getMousePos_OnChildren();
 }
 //==============================
-// * 镜头基点 - 获取鼠标落点位置（外部贴图用）【标准函数】
+// * 镜头基点 - 获取战斗鼠标落点（外部贴图用）【标准函数】
 //==============================
 Game_System.prototype.drill_BCa_getMousePos_OnOuterSprite = function(){
 	return this._drill_BCa_controller.drill_BCa_getMousePos_OnOuterSprite();
@@ -1230,9 +1371,10 @@ Game_System.prototype.drill_BCa_getScaleYValue = function(){
 
 
 //=============================================================================
-// ** 自动模式标记
+// ** ☆自动模式标记
 //
-//			说明：	所有标记内容都会暂存在 $gameTemp 对象中。
+//			说明：	> 所有标记内容都会暂存在 $gameTemp 对象中。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================	
 //==============================
 // * 自动模式标记 - 初始化
@@ -1434,7 +1576,10 @@ Sprite_Battler.prototype.drill_BCa_heightFix = function(){
 
 
 //=============================================================================
-// ** 自动模式聚焦
+// ** ☆自动模式聚焦
+//
+//			说明：	> 自动模式的标记发生变化时，根据先后顺序进行 聚焦位置 赋值。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 聚焦 - 设置聚焦位置
@@ -1463,7 +1608,8 @@ Spriteset_Battle.prototype.initialize = function(){
 var _drill_BCa_spriteset_update = Spriteset_Battle.prototype.update;
 Spriteset_Battle.prototype.update = function(){
 	_drill_BCa_spriteset_update.call( this );
-	this.drill_BCa_updateCameraTarget();
+	this.drill_BCa_updateCameraTarget();		//帧刷新 - 镜头控制
+	this.drill_BCa_updateBarrierLayer();		//帧刷新 - 边缘遮挡层
 }
 Spriteset_Battle.prototype.drill_BCa_updateCameraTarget = function(){
 	
@@ -1561,8 +1707,11 @@ Spriteset_Battle.prototype.drill_BCa_isActor = function(){
 
 
 //=============================================================================
-// ** 兼容YEP
+// ** ☆兼容
 //=============================================================================
+//==============================
+// * 兼容YEP - 战斗背景的中心锚点
+//==============================
 if( Imported.YEP_CoreEngine ){
 	var _drill_BCa_scaleSprite = Sprite_Battleback.prototype.scaleSprite;
 	Sprite_Battleback.prototype.scaleSprite = function(){
@@ -1573,11 +1722,8 @@ if( Imported.YEP_CoreEngine ){
 		}
 	};
 }
-//=============================================================================
-// ** 兼容MOG
-//=============================================================================
 //==============================
-// * MOG - 帧刷新
+// * 兼容MOG - 帧刷新
 //==============================
 var _drill_mog_ballon_update = Spriteset_Battle.prototype.update;
 Spriteset_Battle.prototype.update = function(){
@@ -1596,7 +1742,7 @@ Spriteset_Battle.prototype.update = function(){
 	};
 };
 //==============================
-// * MOG - 按键连锁攻击
+// * 兼容MOG - 按键连锁攻击
 //==============================
 if( Imported.MOG_ChainCommands ){
 	var _drill_mog_updateFocus = Spriteset_Battle.prototype.updateFocus;
@@ -1606,7 +1752,7 @@ if( Imported.MOG_ChainCommands ){
 	};
 };
 //==============================
-// * MOG - 车轮战
+// * 兼容MOG - 车轮战
 //==============================
 if( Imported.MOG_ConsecutiveBattles ){
 	var _drill_mog_prepareConBat = BattleManager.prepareConBat;
@@ -1619,7 +1765,7 @@ if( Imported.MOG_ConsecutiveBattles ){
 
 
 //=============================================================================
-// ** 镜头控制
+// ** ☆镜头控制
 //=============================================================================
 //==============================
 // * 镜头控制 - 战斗结束恢复默认
@@ -1691,6 +1837,91 @@ Spriteset_Battle.prototype.createBattleback = function(){
 
 
 //=============================================================================
+// ** ☆整体平移
+//
+//			说明：	> 此模块使用 镜头控制器 的结果数据，进行实时变化。
+//					> 边缘遮挡层 所在的位置需要同步平移。搜索关键字：整体平移。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 整体平移 - 边缘遮挡层 - 创建
+//==============================
+var _drill_BCa_battle_createLowerLayer = Spriteset_Battle.prototype.createLowerLayer;
+Spriteset_Battle.prototype.createLowerLayer = function() {
+	_drill_BCa_battle_createLowerLayer.call(this);
+	
+	// > 上层
+	if( !this._drill_battleUpArea ){
+		this._drill_battleUpArea = new Sprite();
+		this._drill_battleUpArea.z = 9999;	//（yep层级适配，YEP_BattleEngineCore）
+		this._battleField.addChild(this._drill_battleUpArea);
+	}
+	
+	// > 创建 边缘遮挡层
+	//		（边缘遮挡层是为了防止 整体平移后 玩家对 镜头聚焦 理解会有偏差而定的）
+	if( this._drill_BCa_barrierLayer == undefined ){
+		var data = $gameSystem._drill_BCa_controller._drill_data;
+		var ww = Graphics.boxWidth;
+		var hh = Graphics.boxHeight;
+		
+		// > 建立画布
+		var temp_bitmap = new Bitmap( ww*3, hh*3 );
+		temp_bitmap.fillAll( data['globalBarrierLayerColor'] );
+		temp_bitmap.clearRect( ww,hh, ww,hh );
+		
+		// > 建立贴图
+		var temp_sprite = new Sprite();
+		temp_sprite.bitmap = temp_bitmap;
+		temp_sprite._drill_BCa_curColor = data['globalBarrierLayerColor'];
+		temp_sprite.visible = false;
+		temp_sprite.x = (-1) * ww;
+		temp_sprite.y = (-1) * hh;
+		this.addChild( temp_sprite );
+		this._drill_BCa_barrierLayer = temp_sprite;
+	}
+}
+//==============================
+// * 整体平移 - 边缘遮挡层 - 帧刷新
+//==============================
+Spriteset_Battle.prototype.drill_BCa_updateBarrierLayer = function() {
+	if( this._drill_BCa_barrierLayer == undefined ){ return; }
+	var controller = $gameSystem._drill_BCa_controller;
+	var data = $gameSystem._drill_BCa_controller._drill_data;
+	
+	// > 整体平移
+	var ww = Graphics.boxWidth;
+	var hh = Graphics.boxHeight;
+	var xx = (-1) * ww;
+	var yy = (-1) * hh;
+	xx += controller._drill_globalOffsetX*2;	//（边缘遮挡层两倍偏移量）
+	yy += controller._drill_globalOffsetY*2;
+	this._drill_BCa_barrierLayer.x = xx;
+	this._drill_BCa_barrierLayer.y = yy;
+	
+	// > 边缘遮挡层 显示
+	if( data['globalBarrierLayerEnabled'] == true ){
+		if( controller._drill_globalOffsetX == 0 && controller._drill_globalOffsetY == 0 ){
+			this._drill_BCa_barrierLayer.visible = false;
+		}else{
+			this._drill_BCa_barrierLayer.visible = true;
+		}
+	}
+	
+	// > 边缘遮挡层 颜色
+	if( this._drill_BCa_barrierLayer._drill_BCa_curColor != data['globalBarrierLayerColor'] ){
+		this._drill_BCa_barrierLayer._drill_BCa_curColor =  data['globalBarrierLayerColor'];
+		
+		// > 重建画布
+		var temp_bitmap = new Bitmap( ww*3, hh*3 );
+		temp_bitmap.fillAll( data['globalBarrierLayerColor'] );
+		temp_bitmap.clearRect( ww,hh, ww,hh );
+		this._drill_BCa_barrierLayer.bitmap = temp_bitmap;
+	}
+}
+
+
+
+//=============================================================================
 // ** 镜头控制器【Drill_BCa_Controller】
 // **			
 // **		索引：	BCa（可从子插件搜索到函数、类用法）
@@ -1716,10 +1947,10 @@ Spriteset_Battle.prototype.createBattleback = function(){
 // **						->获取镜头基点偏移位置
 // **						->获取镜头变换位置（子贴图用）
 // **						->获取镜头变换位置（外部贴图用）
-// **						->落点位置转换（外部贴图 -> 子贴图）
-// **						->落点位置转换（子贴图 -> 外部贴图）
-// **						->获取鼠标落点位置（子贴图用）
-// **						->获取鼠标落点位置（外部贴图用）
+// **						->战斗落点 转换（外部贴图 -> 子贴图）
+// **						->战斗落点 转换（子贴图 -> 外部贴图）
+// **						->获取战斗鼠标落点（子贴图用）
+// **						->获取战斗鼠标落点（外部贴图用）【如果还没回忆起 战斗落点 与 战斗鼠标落点，去看看"Drill插件高级手册.docx"】
 // **					->镜头模式
 // **						->保持切换模式时的位置
 // **						->自动模式
@@ -1740,6 +1971,9 @@ Spriteset_Battle.prototype.createBattleback = function(){
 // **						->镜头旋转
 // **						->镜头缩放
 // **						->镜头翻转
+// **						->整体平移
+// **							->游戏坐标X 转 html坐标X 控制
+// **							->游戏坐标Y 转 html坐标Y 控制
 // **					
 // **		说明：	> 该类为单例，并存储在 $gameSystem 中。
 // **				> 如果思路没跟上，去看 必要注意事项。
@@ -1780,9 +2014,13 @@ Drill_BCa_Controller.prototype.drill_BCa_update = function(){
 	if( this._drill_data['pause'] == true ){ return; }
 	
 	this.drill_updateTouristMode();		//帧刷新 - 观光模式
-	this.drill_updateRotation();		//帧刷新 - 旋转
-	this.drill_updateScale();			//帧刷新 - 缩放
+	
+	this.drill_updateRotation();		//帧刷新 - 叠加变化 - 旋转
+	this.drill_updateScale();			//帧刷新 - 叠加变化 - 缩放
+	this.drill_updateGlobalOffset();	//帧刷新 - 叠加变化 - 整体平移
+	
 	this.drill_updateOffset();			//帧刷新 - 镜头基点
+	
 	this.drill_updatePosition();		//帧刷新 - 平移
 	this.drill_updateCheckNaN();		//帧刷新 - 校验值
 }
@@ -1961,46 +2199,46 @@ Drill_BCa_Controller.prototype.drill_BCa_getCameraPos_OuterSprite = function( cu
 	return this.drill_BCa_getCameraPos_OuterSprite_Private( cur_x, cur_y );
 }
 //##############################
-// * 镜头基点 - 落点位置转换（外部贴图 -> 子贴图）【标准函数】
+// * 镜头基点 - 战斗落点 转换（外部贴图 -> 子贴图）【标准函数】
 //
 //			参数：	> 坐标对象（x,y）（单位像素）
 //			返回：	> 坐标对象（x,y）（单位像素）
 //			
-//			说明：	> 此函数适用于 图片层、最顶层 的坐标，落点到 上层、中层、下层 的坐标。
+//			说明：	> 此函数适用于 图片层、最顶层 的坐标，落到 上层、中层、下层 的坐标。
 //##############################
 Drill_BCa_Controller.prototype.drill_BCa_getPos_OuterToChildren = function( x, y ){
 	return this.drill_BCa_getPos_OuterToChildren_Private( x, y );
 }
 //##############################
-// * 镜头基点 - 落点位置转换（子贴图 -> 外部贴图）【标准函数】
+// * 镜头基点 - 战斗落点 转换（子贴图 -> 外部贴图）【标准函数】
 //
 //			参数：	> 坐标对象（x,y）（单位像素）
 //			返回：	> 坐标对象（x,y）（单位像素）
 //			
-//			说明：	> 此函数适用于 上层、中层、下层 的坐标，落点到 图片层、最顶层 的坐标。
+//			说明：	> 此函数适用于 上层、中层、下层 的坐标，落到 图片层、最顶层 的坐标。
 //##############################
 Drill_BCa_Controller.prototype.drill_BCa_getPos_ChildrenToOuter = function( x, y ){
 	return this.drill_BCa_getPos_ChildrenToOuter_Private( x, y );
 }
 //##############################
-// * 镜头基点 - 获取落点位置 - 鼠标（子贴图用）【标准函数】
+// * 镜头基点 - 获取战斗鼠标落点（子贴图用）【标准函数】
 //
 //			参数：	无
 //			返回：	> 坐标对象（x,y）（单位像素）
 //			
-//			说明：	> 此函数适用于 下层、上层 的贴图对象，获取到鼠标的 落点位置 。不含触屏情况。
+//			说明：	> 此函数适用于 下层、上层 的贴图对象，获取到鼠标的 战斗落点 。不含触屏情况。
 //					> 使用方法可以见后面函数：drill_BCa_DEBUG_updateMousePosition
 //##############################
 Drill_BCa_Controller.prototype.drill_BCa_getMousePos_OnChildren = function(){
 	return this._drill_mousePos_OnChildren;
 }
 //##############################
-// * 镜头基点 - 获取落点位置 - 鼠标（外部贴图用）【标准函数】
+// * 镜头基点 - 获取战斗鼠标落点（外部贴图用）【标准函数】
 //
 //			参数：	无
 //			返回：	> 坐标对象（x,y）（单位像素）
 //			
-//			说明：	> 此函数适用于 图片层、最顶层 的贴图对象，获取到鼠标的 落点位置 。不含触屏情况。
+//			说明：	> 此函数适用于 图片层、最顶层 的贴图对象，获取到鼠标的 战斗落点 。不含触屏情况。
 //					> 使用方法可以见后面函数：drill_BCa_DEBUG_updateMousePosition
 //##############################
 Drill_BCa_Controller.prototype.drill_BCa_getMousePos_OnOuterSprite = function(){
@@ -2144,6 +2382,38 @@ Drill_BCa_Controller.prototype.drill_BCa_getScaleXValue = function(){
 Drill_BCa_Controller.prototype.drill_BCa_getScaleYValue = function(){
     return this._drill_scaleY;
 }
+//##############################
+// * 叠加变化 - 修改整体平移【标准函数】
+//
+//			参数：	> globalOffsetX 数字（整体平移X）
+//					> globalOffsetY 数字（整体平移Y）
+//					> time 数字         （时长）
+//					> changeType 字符串 （匀速移动/弹性移动/增减速移动）
+//			返回：	> 无
+//##############################
+Drill_BCa_Controller.prototype.drill_BCa_setGlobalOffset = function( globalOffsetX, globalOffsetY, time, changeType ){
+    this.drill_BCa_setGlobalOffset_Private( globalOffsetX, globalOffsetY, time, changeType );
+}
+//##############################
+// * 叠加变化 - 边缘遮挡层 开启/关闭【标准函数】
+//
+//			参数：	> enable 布尔
+//			返回：	> 无
+//##############################
+Drill_BCa_Controller.prototype.drill_BCa_setGlobalBarrierLayerEnabled = function( enable ){
+    var data = this._drill_data;
+	data['globalBarrierLayerEnabled'] = enable;
+}
+//##############################
+// * 叠加变化 - 边缘遮挡层 修改颜色【标准函数】
+//
+//			参数：	> color 字符串 （颜色）
+//			返回：	> 无
+//##############################
+Drill_BCa_Controller.prototype.drill_BCa_setGlobalBarrierLayerColor = function( color ){
+    var data = this._drill_data;
+	data['globalBarrierLayerColor'] = color;
+}
 
 //##############################
 // * 控制器 - 初始化数据【标准默认值】
@@ -2158,26 +2428,30 @@ Drill_BCa_Controller.prototype.drill_initData = function(){
 	var data = this._drill_data;
 	
 	// > 默认值
-	if( data['enable'] == undefined ){ data['enable'] = true };									//启用情况
-	if( data['pause'] == undefined ){ data['pause'] = false };									//暂停情况
-	if( data['holderWidth'] == undefined ){ data['holderWidth'] = 100 };						//镜头架宽度
-	if( data['holderHeight'] == undefined ){ data['holderHeight'] = 100 };						//镜头架高度
-	if( data['mode'] == undefined ){ data['mode'] = "自动模式" };								//镜头模式
+	if( data['enable'] == undefined ){ data['enable'] = true };											//启用情况
+	if( data['pause'] == undefined ){ data['pause'] = false };											//暂停情况
+	if( data['holderWidth'] == undefined ){ data['holderWidth'] = 100 };								//镜头架宽度
+	if( data['holderHeight'] == undefined ){ data['holderHeight'] = 100 };								//镜头架高度
+	if( data['globalOffsetX'] == undefined ){ data['globalOffsetX'] = 0 };								//整体平移X
+	if( data['globalOffsetY'] == undefined ){ data['globalOffsetY'] = 0 };								//整体平移Y
+	if( data['globalBarrierLayerEnabled'] == undefined ){ data['globalBarrierLayerEnabled'] = true };	//边缘遮挡层 - 开关
+	if( data['globalBarrierLayerColor'] == undefined ){ data['globalBarrierLayerColor'] = 0 };			//边缘遮挡层 - 颜色
+	if( data['mode'] == undefined ){ data['mode'] = "自动模式" };										//镜头模式
 	
-	if( data['autoOffsetX'] == undefined ){ data['autoOffsetX'] = 0 };							//自动模式 - 偏移X
-	if( data['autoOffsetY'] == undefined ){ data['autoOffsetY'] = 0 };							//自动模式 - 偏移Y
-	if( data['autoMoveType'] == undefined ){ data['autoMoveType'] = "弹性移动" };				//自动模式 - 镜头切换时移动模式
-	if( data['autoMovingTime'] == undefined ){ data['autoMovingTime'] = 30 };					//自动模式 - 镜头切换时间
-	if( data['autoMovingDelay'] == undefined ){ data['autoMovingDelay'] = 20 };					//自动模式 - 镜头切换延迟
+	if( data['autoOffsetX'] == undefined ){ data['autoOffsetX'] = 0 };									//自动模式 - 偏移X
+	if( data['autoOffsetY'] == undefined ){ data['autoOffsetY'] = 0 };									//自动模式 - 偏移Y
+	if( data['autoMoveType'] == undefined ){ data['autoMoveType'] = "弹性移动" };						//自动模式 - 镜头切换时移动模式
+	if( data['autoMovingTime'] == undefined ){ data['autoMovingTime'] = 30 };							//自动模式 - 镜头切换时间
+	if( data['autoMovingDelay'] == undefined ){ data['autoMovingDelay'] = 20 };							//自动模式 - 镜头切换延迟
 	
-	if( data['touristKeyboardEnabled'] == undefined ){ data['touristKeyboardEnabled'] = true };	//观光模式 - 是否启用键盘操作
-	if( data['touristMouseEnabled'] == undefined ){ data['touristMouseEnabled'] = true };		//观光模式 - 是否启用鼠标操作
-	if( data['touristMouseThickness'] == undefined ){ data['touristMouseThickness'] = 40 };		//观光模式 - 鼠标触发区域的厚度
-	if( data['touristSpeed'] == undefined ){ data['touristSpeed'] = 4.5 };						//观光模式 - 镜头移动速度
+	if( data['touristKeyboardEnabled'] == undefined ){ data['touristKeyboardEnabled'] = true };			//观光模式 - 是否启用键盘操作
+	if( data['touristMouseEnabled'] == undefined ){ data['touristMouseEnabled'] = true };				//观光模式 - 是否启用鼠标操作
+	if( data['touristMouseThickness'] == undefined ){ data['touristMouseThickness'] = 40 };				//观光模式 - 鼠标触发区域的厚度
+	if( data['touristSpeed'] == undefined ){ data['touristSpeed'] = 4.5 };								//观光模式 - 镜头移动速度
 	
-	if( data['defaultRotation'] == undefined ){ data['defaultRotation'] = 0 };					//叠加变化 - 默认旋转角度
-	if( data['defaultScaleX'] == undefined ){ data['defaultScaleX'] = 1.0 };					//叠加变化 - 默认X缩放比例
-	if( data['defaultScaleY'] == undefined ){ data['defaultScaleY'] = 1.0 };					//叠加变化 - 默认Y缩放比例
+	if( data['defaultRotation'] == undefined ){ data['defaultRotation'] = 0 };							//叠加变化 - 默认旋转角度
+	if( data['defaultScaleX'] == undefined ){ data['defaultScaleX'] = 1.0 };							//叠加变化 - 默认X缩放比例
+	if( data['defaultScaleY'] == undefined ){ data['defaultScaleY'] = 1.0 };							//叠加变化 - 默认Y缩放比例
 }
 //==============================
 // * 初始化 - 私有数据初始化
@@ -2187,10 +2461,7 @@ Drill_BCa_Controller.prototype.drill_initPrivateData = function(){
 	
 	// > 不接受零高宽情况
 	if( data['holderWidth'] == 0 || data['holderHeight'] == 0 ){
-		alert(
-			"【Drill_BattleCamera.js 战斗-活动战斗镜头】\n"+
-			"参数错误，出现了镜头架宽度或镜头架高度不能为零。"
-		);
+		alert( DrillUp.drill_BCa_getPluginTip_Holder() );
 		return;
 	}
 	
@@ -2208,8 +2479,8 @@ Drill_BCa_Controller.prototype.drill_initPrivateData = function(){
 	this._drill_cameraY_offset = 0;			//镜头基点 - 位置y
 	this._drill_cameraX_Children = 0;		//镜头基点 - 变换位置x（子贴图用）
 	this._drill_cameraY_Children = 0;		//镜头基点 - 变换位置y（子贴图用）
-	this._drill_mousePos_OnChildren = 0;	//镜头基点 - 鼠标落点位置（子贴图用）
-	this._drill_mousePos_OnOuterSprite = 0;	//镜头基点 - 鼠标落点位置（外部贴图用）
+	this._drill_mousePos_OnChildren = 0;	//镜头基点 - 战斗鼠标落点（子贴图用）
+	this._drill_mousePos_OnOuterSprite = 0;	//镜头基点 - 战斗鼠标落点（外部贴图用）
 	
 	
 	this._drill_autoPos_cutTime = 0;		//自动模式 - 当前时间
@@ -2217,8 +2488,8 @@ Drill_BCa_Controller.prototype.drill_initPrivateData = function(){
 	this._drill_autoPos_curY = 0;			//自动模式 - 当前位置y
 	this._drill_autoPos_lastX = -1;			//自动模式 - 位置标记x
 	this._drill_autoPos_lastY = -1;			//自动模式 - 位置标记y
-	this._drill_COBa_x = [0];				//自动模式 - 弹道x
-	this._drill_COBa_y = [0];				//自动模式 - 弹道y
+	this._drill_COBa_x = null;				//自动模式 - 弹道x
+	this._drill_COBa_y = null;				//自动模式 - 弹道y
 	
 	this._drill_tourist_mouseX = 0;			//观光模式 - 当前鼠标位置X
 	this._drill_tourist_mouseY = 0;			//观光模式 - 当前鼠标位置Y
@@ -2236,12 +2507,19 @@ Drill_BCa_Controller.prototype.drill_initPrivateData = function(){
 	this._drill_rotation_curTime = 0;		//叠加变化 - 旋转 - 当前时间
 	this._drill_rotation_tarTime = 0;		//叠加变化 - 旋转 - 目标时间
 	this._drill_rotation_ballistics = null;	//叠加变化 - 旋转 - 弹道
-	this._drill_scaleX_curTime = 0;			//叠加变化 - 旋转 - 当前时间
-	this._drill_scaleX_tarTime = 0;			//叠加变化 - 旋转 - 目标时间
-	this._drill_scaleX_ballistics = null;	//叠加变化 - 旋转 - 弹道
-	this._drill_scaleY_curTime = 0;			//叠加变化 - 旋转 - 当前时间
-	this._drill_scaleY_tarTime = 0;			//叠加变化 - 旋转 - 目标时间
-	this._drill_scaleY_ballistics = null;	//叠加变化 - 旋转 - 弹道
+	this._drill_scaleX_curTime = 0;			//叠加变化 - 缩放X - 当前时间
+	this._drill_scaleX_tarTime = 0;			//叠加变化 - 缩放X - 目标时间
+	this._drill_scaleX_ballistics = null;	//叠加变化 - 缩放X - 弹道
+	this._drill_scaleY_curTime = 0;			//叠加变化 - 缩放Y - 当前时间
+	this._drill_scaleY_tarTime = 0;			//叠加变化 - 缩放Y - 目标时间
+	this._drill_scaleY_ballistics = null;	//叠加变化 - 缩放Y - 弹道
+	
+	this._drill_globalOffsetX = 0;					//叠加变化 - 整体平移X
+	this._drill_globalOffsetY = 0;					//叠加变化 - 整体平移Y
+	this._drill_globalOffset_curTime = 0;			//叠加变化 - 整体平移 - 当前时间
+	this._drill_globalOffset_tarTime = 0;			//叠加变化 - 整体平移 - 目标时间
+	this._drill_globalOffset_ballisticsX = null;	//叠加变化 - 整体平移 - 弹道
+	this._drill_globalOffset_ballisticsY = null;	//叠加变化 - 整体平移 - 弹道
 	
 	// > 初始化 - 函数
 	this.drill_BCa_refreshHolder();			//镜头架 - 刷新范围
@@ -2371,6 +2649,10 @@ Drill_BCa_Controller.prototype.drill_BCa_updateCameraPos_Children = function(){
 		oy *= -1;
 	}
 	
+	// > 整体平移 的影响
+	ox -= this._drill_globalOffsetX;
+	oy -= this._drill_globalOffsetY;
+	
 	this._drill_cameraX_Children = ox;
 	this._drill_cameraY_Children = oy;
 }
@@ -2386,10 +2668,15 @@ Drill_BCa_Controller.prototype.drill_BCa_getCameraPos_OuterSprite_Private = func
 							this._drill_rotation /180*Math.PI, 
 							this._drill_scaleX, this._drill_scaleY 
 					  );
+	
+	// > 整体平移 的影响
+	outer_point.x = outer_point.x + this._drill_globalOffsetX;
+	outer_point.y = outer_point.y + this._drill_globalOffsetY;
+	
 	return outer_point;
 }
 //==============================
-// * 镜头基点 - 落点位置转换（外部贴图 -> 子贴图）（私有）
+// * 镜头基点 - 战斗落点 转换（外部贴图 -> 子贴图）（私有）
 //==============================
 Drill_BCa_Controller.prototype.drill_BCa_getPos_OuterToChildren_Private = function( x, y ){
 	var xx = x;
@@ -2423,10 +2710,14 @@ Drill_BCa_Controller.prototype.drill_BCa_getPos_OuterToChildren_Private = functi
 	xx -= this._drill_cameraX_Children;
 	yy -= this._drill_cameraY_Children;
 	
+	// > 整体平移 的影响
+	xx -= this._drill_globalOffsetX;
+	yy -= this._drill_globalOffsetY;
+	
 	return { 'x':xx, 'y':yy };
 }
 //==============================
-// * 镜头基点 - 落点位置转换（子贴图 -> 外部贴图）（私有）
+// * 镜头基点 - 战斗落点 转换（子贴图 -> 外部贴图）（私有）
 //==============================
 Drill_BCa_Controller.prototype.drill_BCa_getPos_ChildrenToOuter_Private = function( x, y ){
 	var xx = x;
@@ -2439,10 +2730,15 @@ Drill_BCa_Controller.prototype.drill_BCa_getPos_ChildrenToOuter_Private = functi
 							this._drill_rotation /180*Math.PI, 
 							this._drill_scaleX, this._drill_scaleY 
 					  );
+	
+	// > 整体平移 的影响
+	outer_point.x = outer_point.x + this._drill_globalOffsetX;
+	outer_point.y = outer_point.y + this._drill_globalOffsetY;
+	
 	return outer_point;
 }
 //==============================
-// * 镜头基点 - 获取落点位置 - 鼠标（子贴图用）（私有）
+// * 镜头基点 - 获取战斗鼠标落点（子贴图用）（私有）
 //
 //			说明：	为防止调用太多增加计算负担，此函数每帧执行一次，将结果放在参数中。
 //==============================
@@ -2452,7 +2748,7 @@ Drill_BCa_Controller.prototype.drill_BCa_updateMousePos_OnChildren = function(){
 	this._drill_mousePos_OnChildren = this.drill_BCa_getPos_OuterToChildren_Private( xx, yy );
 }
 //==============================
-// * 镜头基点 - 获取落点位置 - 鼠标（外部贴图用）（私有）
+// * 镜头基点 - 获取战斗鼠标落点（外部贴图用）（私有）
 //
 //			说明：	为防止调用太多增加计算负担，此函数每帧执行一次，将结果放在参数中。
 //==============================
@@ -2509,6 +2805,10 @@ Drill_BCa_Controller.prototype.drill_BCa_rebuildAutoBallistics = function( x, y 
     data['twoPointDifferenceY'] = yy - this._drill_autoPos_curY;
     $gameTemp.drill_COBa_setBallisticsMove( data );
     $gameTemp.drill_COBa_preBallisticsMove( this, 0, this._drill_autoPos_curX, this._drill_autoPos_curY );
+	this._drill_auto_ballisticsX = this['_drill_COBa_x'];
+	this._drill_auto_ballisticsY = this['_drill_COBa_y'];
+	this['_drill_COBa_x'] = null;
+	this['_drill_COBa_y'] = null;
 
     // > 时间置零
     this._drill_autoPos_cutTime = 0;
@@ -2796,6 +3096,27 @@ Drill_BCa_Controller.prototype.drill_BCa_doScaleY_Private = function( scaleY, ti
 	this._drill_scaleY_ballistics = this['_drill_COBa_scaleY'];
 	this['_drill_COBa_scaleY'] = null;
 }
+//==============================
+// * 叠加变化 - 修改整体平移（私有）
+//==============================
+Drill_BCa_Controller.prototype.drill_BCa_setGlobalOffset_Private = function( globalOffsetX, globalOffsetY, time, changeType ){
+    if( this.drill_BCa_isEnable() == false ){ return; }
+	this._drill_globalOffset_curTime = 0;
+	this._drill_globalOffset_tarTime = time;
+	var data = {};
+	data['movementNum'] = 1; 
+	data['movementTime'] = time; 
+	data['movementMode'] = "两点式"; 
+	data['twoPointType'] = changeType; 
+	data['twoPointDifferenceX'] = globalOffsetX - this._drill_globalOffsetX; 
+	data['twoPointDifferenceY'] = globalOffsetY - this._drill_globalOffsetY; 
+	$gameTemp.drill_COBa_setBallisticsMove( data );
+	$gameTemp.drill_COBa_preBallisticsMove( this, 0, this._drill_globalOffsetX, this._drill_globalOffsetY );
+	this._drill_globalOffset_ballisticsX = this['_drill_COBa_x'];
+	this._drill_globalOffset_ballisticsY = this['_drill_COBa_y'];
+	this['_drill_COBa_x'] = null;
+	this['_drill_COBa_y'] = null;
+}
 
 //==============================
 // * 帧刷新 - 旋转
@@ -2864,6 +3185,44 @@ Drill_BCa_Controller.prototype.drill_updateScale = function(){
 	}
 }
 //==============================
+// * 叠加变化 - 帧刷新 - 整体平移
+//==============================
+Drill_BCa_Controller.prototype.drill_updateGlobalOffset = function(){
+	var data = this._drill_data;
+	
+	// > 整体平移
+	this._drill_globalOffsetX = 0;
+	this._drill_globalOffsetY = 0;
+	if( data['enable'] == false ){ return; }
+	
+	// > 叠加变化 - 整体平移
+	if( this._drill_globalOffset_ballisticsX == null ){
+		this._drill_globalOffsetX = data['globalOffsetX'];
+		this._drill_globalOffsetY = data['globalOffsetY'];
+	}else{
+		
+		// > 播放弹道
+		var time = this._drill_globalOffset_curTime;
+		if( time < 0 ){ time = 0; }
+		if( time > this._drill_globalOffset_ballisticsX.length-1 ){ time = this._drill_globalOffset_ballisticsX.length-1; }
+		this._drill_globalOffsetX = this._drill_globalOffset_ballisticsX[time];
+		this._drill_globalOffsetY = this._drill_globalOffset_ballisticsY[time];
+		
+		// > 时间+1
+		this._drill_globalOffset_curTime += 1;
+	}
+	
+	// > 不能越界
+	var ww = Graphics.boxWidth *0.5;
+	var hh = Graphics.boxHeight *0.5;
+	if( this._drill_globalOffsetX > ww ){ this._drill_globalOffsetX = ww; }
+	if( this._drill_globalOffsetX < (-1)*ww ){ this._drill_globalOffsetX = (-1)*ww; }
+	if( this._drill_globalOffsetY > hh ){ this._drill_globalOffsetY = hh; }
+	if( this._drill_globalOffsetY < (-1)*hh ){ this._drill_globalOffsetY = (-1)*hh; }
+}
+
+
+//==============================
 // * 帧刷新 - 镜头基点
 //==============================
 Drill_BCa_Controller.prototype.drill_updateOffset = function(){
@@ -2874,14 +3233,13 @@ Drill_BCa_Controller.prototype.drill_updateOffset = function(){
 	var yy = 0;
 	if( data['enable'] == false ){ return; }
 	
-	
 	// > 自动模式 位移
 	if( data['mode'] == "自动模式" ){
 		this._drill_autoPos_cutTime += 1;
 		var time = this._drill_autoPos_cutTime;
-		if( time > this._drill_COBa_x.length-1 ){ time = this._drill_COBa_x.length-1; }
-		this._drill_autoPos_curX = this._drill_COBa_x[time];
-		this._drill_autoPos_curY = this._drill_COBa_y[time];
+		if( time > this._drill_auto_ballisticsX.length-1 ){ time = this._drill_auto_ballisticsX.length-1; }
+		this._drill_autoPos_curX = this._drill_auto_ballisticsX[time];
+		this._drill_autoPos_curY = this._drill_auto_ballisticsY[time];
 		xx += this._drill_autoPos_curX;
 		yy += this._drill_autoPos_curY;
 	}
@@ -2948,6 +3306,10 @@ Drill_BCa_Controller.prototype.drill_updatePosition = function(){
 		this._drill_x += fix_point.x;
 		this._drill_y += fix_point.y;
 	}
+	
+	// > 整体平移
+	this._drill_x += this._drill_globalOffsetX;
+	this._drill_y += this._drill_globalOffsetY;
 }
 //==============================
 // * 帧刷新 - 校验值
@@ -2958,38 +3320,23 @@ Drill_BCa_Controller.prototype.drill_updateCheckNaN = function(){
 	if( DrillUp.g_BCa_checkNaN == true ){
 		if( isNaN( this._drill_x ) ){
 			DrillUp.g_BCa_checkNaN = false;
-			alert(
-				"【Drill_BattleCamera.js 战斗 - 活动战斗镜头】\n"+
-				"检测到控制器参数_drill_x出现了NaN值，请及时检查你的函数。"
-			);
+			alert( DrillUp.drill_BCa_getPluginTip_ParamIsNaN("_drill_x") );
 		}
 		if( isNaN( this._drill_y ) ){
 			DrillUp.g_BCa_checkNaN = false;
-			alert(
-				"【Drill_BattleCamera.js 战斗 - 活动战斗镜头】\n"+
-				"检测到控制器参数_drill_y出现了NaN值，请及时检查你的函数。"
-			);
+			alert( DrillUp.drill_BCa_getPluginTip_ParamIsNaN("_drill_y") );
 		}
 		if( isNaN( this._drill_rotation ) ){
 			DrillUp.g_BCa_checkNaN = false;
-			alert(
-				"【Drill_BattleCamera.js 战斗 - 活动战斗镜头】\n"+
-				"检测到控制器参数_drill_rotation出现了NaN值，请及时检查你的函数。"
-			);
+			alert( DrillUp.drill_BCa_getPluginTip_ParamIsNaN("_drill_rotation") );
 		}
 		if( isNaN( this._drill_scaleX ) ){
 			DrillUp.g_BCa_checkNaN = false;
-			alert(
-				"【Drill_BattleCamera.js 战斗 - 活动战斗镜头】\n"+
-				"检测到控制器参数_drill_scaleX出现了NaN值，请及时检查你的函数。"
-			);
+			alert( DrillUp.drill_BCa_getPluginTip_ParamIsNaN("_drill_scaleX") );
 		}
 		if( isNaN( this._drill_scaleY ) ){
 			DrillUp.g_BCa_checkNaN = false;
-			alert(
-				"【Drill_BattleCamera.js 战斗 - 活动战斗镜头】\n"+
-				"检测到控制器参数_drill_scaleY出现了NaN值，请及时检查你的函数。"
-			);
+			alert( DrillUp.drill_BCa_getPluginTip_ParamIsNaN("_drill_scaleY") );
 		}
 	}
 }
@@ -3136,61 +3483,186 @@ Game_Temp.prototype.drill_BCa_getPointWithTransformInversed = function(
 
 
 
+//=============================================================================
+// ** ☆层级标记器
+//
+//			说明：	> 此模块与镜头控制功能不相关。
+//					> 可以单独分离出去。但现在不打算分离。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 战斗层级 - 下层
+//==============================
+var _drill_BCa_layerName_battle_createBattleback = Spriteset_Battle.prototype.createBattleback;
+Spriteset_Battle.prototype.createBattleback = function() {    
+	_drill_BCa_layerName_battle_createBattleback.call(this);
+	if( !this._drill_battleDownArea ){
+		this._drill_battleDownArea = new Sprite();
+		this._drill_battleDownArea.z = 0;	//（yep层级适配，YEP_BattleEngineCore）
+		this._battleField.addChild(this._drill_battleDownArea);	
+	}
+	
+	// > 标记
+	this._drill_battleDownArea._drill_BCa_layerName = "下层";
+	this._battleField._drill_BCa_layerName = "下层/上层";
+};
+//==============================
+// * 战斗层级 - 上层
+//==============================
+var _drill_BCa_layerName_battle_createLowerLayer = Spriteset_Battle.prototype.createLowerLayer;
+Spriteset_Battle.prototype.createLowerLayer = function() {
+	_drill_BCa_layerName_battle_createLowerLayer.call(this);
+	if( !this._drill_battleUpArea ){
+		this._drill_battleUpArea = new Sprite();
+		this._drill_battleUpArea.z = 9999;	//（yep层级适配，YEP_BattleEngineCore）
+		this._battleField.addChild(this._drill_battleUpArea);
+	}
+	
+	// > 标记
+	this._drill_battleUpArea._drill_BCa_layerName = "上层";
+	this._battleField._drill_BCa_layerName = "下层/上层";
+};
+//==============================
+// * 战斗层级 - 图片层
+//==============================
+var _drill_BCa_layerName_battle_createPictures = Spriteset_Battle.prototype.createPictures;
+Spriteset_Battle.prototype.createPictures = function() {
+	_drill_BCa_layerName_battle_createPictures.call(this);		//图片对象层 < 图片层 < 对话框集合
+	if( !this._drill_battlePicArea ){
+		this._drill_battlePicArea = new Sprite();
+		this.addChild(this._drill_battlePicArea);	
+	}
+	
+	// > 标记
+	this._drill_battlePicArea._drill_BCa_layerName = "图片层";
+	this._pictureContainer._drill_BCa_layerName = "图片层";
+}
+//==============================
+// * 战斗层级 - 图片层标记
+//==============================
+var _drill_BCa_layerName_battle_createWindowLayer = Scene_Battle.prototype.createWindowLayer;
+Scene_Battle.prototype.createWindowLayer = function() {
+	_drill_BCa_layerName_battle_createWindowLayer.call(this);	
+	this._windowLayer._drill_BCa_layerName = "图片层";
+};
+//==============================
+// * 战斗层级 - 最顶层
+//==============================
+var _drill_BCa_layerName_battle_createAllWindows = Scene_Battle.prototype.createAllWindows;
+Scene_Battle.prototype.createAllWindows = function() {
+	_drill_BCa_layerName_battle_createAllWindows.call(this);	//对话框集合 < 最顶层
+	if( !this._drill_SenceTopArea ){
+		this._drill_SenceTopArea = new Sprite();
+		this.addChild(this._drill_SenceTopArea);	
+	}
+	
+	// > 标记
+	this._drill_SenceTopArea._drill_BCa_layerName = "最顶层";
+}
+//==============================
+// * 层级标记器 - 标记溯源
+//
+//			说明：	输入对象、层级标记，返回层级对象。没有则返回空。
+//==============================
+DrillUp.drill_BCa_getAncestorLayerSprite = function( sprite, layerName ){
+	for( var i=0; i < 8; i++ ){
+		if( sprite.parent == undefined ){
+			break;
+		}
+		var sprite = sprite.parent;
+		if( sprite._drill_BCa_layerName == layerName ){
+			return sprite;
+		}
+	}
+	return null;
+}
+//#############################################################################
+// ** 【标准模块】层级标记器
+//#############################################################################
+//##############################
+// * 层级标记器 - 是否处于战斗界面【标准函数】
+//			
+//			参数：	> sprite/window 贴图/窗口
+//			返回：	> 布尔
+//          
+//			说明：	> 此函数用于难以获取到 当前层级 的对象或函数。比如按钮组。
+//##############################
+DrillUp.drill_BCa_isInScene_Battle = function(){
+	return SceneManager._scene instanceof Scene_Battle;
+};
+//##############################
+// * 层级标记器 - 是否处于下层【标准函数】
+//			
+//			参数：	> sprite/window 贴图/窗口
+//			返回：	> 布尔
+//          
+//			说明：	> 此函数用于难以获取到 当前层级 的对象或函数。比如按钮组。
+//##############################
+DrillUp.drill_BCa_isInArea_Down = function( sprite ){
+	return this.drill_BCa_getAncestorLayerSprite( sprite, "下层" ) != null;
+};
+//##############################
+// * 层级标记器 - 是否处于上层【标准函数】
+//			
+//			参数：	> sprite/window 贴图/窗口
+//			返回：	> 布尔
+//##############################
+DrillUp.drill_BCa_isInArea_Up = function( sprite ){
+	return this.drill_BCa_getAncestorLayerSprite( sprite, "上层" ) != null;
+};
+//##############################
+// * 层级标记器 - 是否处于下层/上层任意一层【标准函数】
+//			
+//			参数：	> sprite/window 贴图/窗口
+//			返回：	> 布尔
+//          
+//			说明：	> 只要处于_battleField的贴图，就都算。
+//##############################
+DrillUp.drill_BCa_isInArea_DownOrUp = function( sprite ){
+	return this.drill_BCa_getAncestorLayerSprite( sprite, "下层/上层" ) != null;
+};
+//##############################
+// * 层级标记器 - 是否处于图片层【标准函数】
+//			
+//			参数：	> sprite/window 贴图/窗口
+//			返回：	> 布尔
+//##############################
+DrillUp.drill_BCa_isInArea_Pic = function( sprite ){
+	return this.drill_BCa_getAncestorLayerSprite( sprite, "图片层" ) != null;
+};
+//##############################
+// * 层级标记器 - 是否处于最顶层【标准函数】
+//			
+//			参数：	> sprite/window 贴图/窗口
+//			返回：	> 布尔
+//##############################
+DrillUp.drill_BCa_isInArea_Top = function( sprite ){
+	return this.drill_BCa_getAncestorLayerSprite( sprite, "最顶层" ) != null;
+};
+//##############################
+// * 层级标记器 - 是否处于图片层/最顶层任意一层【标准函数】
+//			
+//			参数：	> sprite/window 贴图/窗口
+//			返回：	> 布尔
+//##############################
+DrillUp.drill_BCa_isInArea_PicOrTop = function( sprite ){
+	if( this.drill_BCa_getAncestorLayerSprite( sprite, "图片层" ) != null ){ return true; }
+	if( this.drill_BCa_getAncestorLayerSprite( sprite, "最顶层" ) != null ){ return true; }
+	return false;
+};
+
+
+
 
 //=============================================================================
-// ** DEBUG - 镜头对齐框
+// ** ☆DEBUG镜头对齐框
 //
-//			说明：	子贴图用   == 在图层内 == 下层、上层
-//					外部贴图用 == 在图层外 == 图片层、最顶层
+//			说明：	> 此模块显示完整的DEBUG镜头对齐框，需要通过参数开启。
+//					> 子贴图用   == 在图层内 == 下层、上层
+//					  外部贴图用 == 在图层外 == 图片层、最顶层
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 if( DrillUp.g_BCa_debugEnabled == true ){
-	
-	//==============================
-	// * DEBUG战斗层级 - 下层
-	//==============================
-	var _drill_BCa_DEBUG_battle_createBattleback = Spriteset_Battle.prototype.createBattleback;
-	Spriteset_Battle.prototype.createBattleback = function() {    
-		_drill_BCa_DEBUG_battle_createBattleback.call(this);
-		if( !this._drill_battleDownArea ){
-			this._drill_battleDownArea = new Sprite();
-			this._drill_battleDownArea.z = 0;	//（yep层级适配，YEP_BattleEngineCore）
-			this._battleField.addChild(this._drill_battleDownArea);	
-		}
-	};
-	//==============================
-	// * DEBUG战斗层级 - 上层
-	//==============================
-	var _drill_BCa_DEBUG_battle_createLowerLayer = Spriteset_Battle.prototype.createLowerLayer;
-	Spriteset_Battle.prototype.createLowerLayer = function() {
-		_drill_BCa_DEBUG_battle_createLowerLayer.call(this);
-		if( !this._drill_battleUpArea ){
-			this._drill_battleUpArea = new Sprite();
-			this._drill_battleUpArea.z = 9999;	//（yep层级适配，YEP_BattleEngineCore）
-			this._battleField.addChild(this._drill_battleUpArea);
-		}
-	};
-	//==============================
-	// * DEBUG战斗层级 - 图片层
-	//==============================
-	var _drill_BCa_DEBUG_battle_createPictures = Spriteset_Battle.prototype.createPictures;
-	Spriteset_Battle.prototype.createPictures = function() {
-		_drill_BCa_DEBUG_battle_createPictures.call(this);		//图片对象层 < 图片层 < 对话框集合
-		if( !this._drill_battlePicArea ){
-			this._drill_battlePicArea = new Sprite();
-			this.addChild(this._drill_battlePicArea);	
-		}
-	}
-	//==============================
-	// * DEBUG战斗层级 - 最顶层
-	//==============================
-	var _drill_BCa_DEBUG_battle_createAllWindows = Scene_Battle.prototype.createAllWindows;
-	Scene_Battle.prototype.createAllWindows = function() {
-		_drill_BCa_DEBUG_battle_createAllWindows.call(this);	//对话框集合 < 最顶层
-		if( !this._drill_SenceTopArea ){
-			this._drill_SenceTopArea = new Sprite();
-			this.addChild(this._drill_SenceTopArea);	
-		}
-	}
 	
 	//==============================
 	// * 镜头对齐框 - 初始化
@@ -3500,14 +3972,14 @@ if( DrillUp.g_BCa_debugEnabled == true ){
 			
 			if( i <= 1 ){
 				
-				// > 鼠标落点位置（子贴图用）
+				// > 战斗鼠标落点（子贴图用）
 				var mouse_pos = $gameSystem._drill_BCa_controller.drill_BCa_getMousePos_OnChildren();
 				xx += mouse_pos.x;
 				yy += mouse_pos.y;
 				
 			}else{
 				
-				// > 鼠标落点位置（外部贴图用）
+				// > 战斗鼠标落点（外部贴图用）
 				var mouse_pos = $gameSystem._drill_BCa_controller.drill_BCa_getMousePos_OnOuterSprite();
 				xx += mouse_pos.x;
 				yy += mouse_pos.y;
@@ -3670,9 +4142,6 @@ Drill_BCa_DebugSprite.prototype.drill_updateRedraw = function() {
 //=============================================================================
 }else{
 		Imported.Drill_BattleCamera = false;
-		alert(
-			"【Drill_BattleCamera.js 战斗 - 活动战斗镜头】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfBallistics 系统-弹道核心"+
-			"\n- Drill_CoreOfInput 系统-输入设备核心"
-		);
+		var pluginTip = DrillUp.drill_BCa_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }

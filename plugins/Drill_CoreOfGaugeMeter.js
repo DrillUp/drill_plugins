@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.6]        系统 - 参数条核心
+ * @plugindesc [v1.7]        系统 - 参数条核心
  * @author Drill_up
  * 
  * @Drill_LE_param "参数条样式-%d"
@@ -149,8 +149,17 @@
  * 整理规范了插件的数据结构。
  * [v1.6]
  * 优化了内部结构，减少性能消耗。
+ * [v1.7]
+ * 设置了自动预加载资源的功能。
  * 
  * 
+ *
+ * @param 是否启用预加载
+ * @type boolean
+ * @on 启用
+ * @off 关闭
+ * @desc 核心中所有配置的参数条资源，都在游戏初始化时执行预加载。
+ * @default true
  *
  * @param ---参数条样式 1至20---
  * @default
@@ -1113,39 +1122,40 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
-//			参数条核心：
-//				->贴图
-//					->标准模块
-//						->显示/隐藏【标准函数】
-//						->是否就绪【标准函数】
-//						->销毁【标准函数】
-//						->修改变化因子【标准函数】
-//						->修改段上限【标准函数】
-//						->初始化数据【标准默认值】
-//				->主要概念
-//					->段（level）
-//					->段上限（level_max）
-//					->上段/下段（section）
-//					->多段结构
-//					->段循环
-//					->伸长方式/缩短方式
-//						> 瞬间
-//						> 弹性
-//						> 匀速
-//					->流动效果
-//						->头段/尾段
-//						->段长度
+//		★功能结构树：
+//			->☆提示信息
+//			->☆变量获取
+//			->☆临时变量初始化
+//				->资源提前预加载
+//			->参数条【Drill_COGM_MeterSprite】
+//				->标准模块
+//					->显示/隐藏【标准函数】
+//					->是否就绪【标准函数】
+//					->销毁【标准函数】
+//					->修改变化因子【标准函数】
+//					->修改段上限【标准函数】
+//					->初始化数据【标准默认值】
+//				->A主体
+//				->B分段条
+//				->C追逐值
+//				->D流动效果
+//				->E凹槽条
+//				->F弹出条
+//				->G粒子
+//				->H游标
+//				->I加满动画
+//			->弹出条【Drill_COGM_SpringSprite】
+//			->加满动画遮罩【Drill_COGM_MeterSpriteMask】
 //		
+//				
+//		★插件私有类：
+//			* Drill_COGM_MeterSprite【参数条】
+//			* Drill_COGM_MeterSpriteMask【参数条遮罩】
+//			* Drill_COGM_SpringSprite【弹出条】
 //		
 //		★配置参数结构体如下：
 //			~struct~GaugeMeter:						参数条样式
 //			~struct~DrillCOGMBallistics:			弹出条弹道（弹道核心）
-//				
-//		★私有类如下：
-//			* Drill_COGM_MeterSprite【参数条】
-//			* Drill_COGM_MeterSpriteMask【参数条遮罩】
-//			* Drill_COGM_SpringSprite【弹出条】
 //
 //		★必要注意事项：
 //			1.参数条只分两层，内容层 和 外层。两层级可以通过zIndex排序。
@@ -1168,9 +1178,46 @@
 //		★存在的问题：
 //			1.同时开7个缓冲时间条，并且弹出条开启。210个弹出条同时运动时，地图界面会卡爆。
 //		
- 
+
 //=============================================================================
-// ** 变量获取
+// ** ☆提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_COGM_PluginTip_curName = "Drill_CoreOfGaugeMeter.js 系统-参数条核心";
+	DrillUp.g_COGM_PluginTip_baseList = ["Drill_CoreOfBallistics.js 系统-弹道核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_COGM_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_COGM_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_COGM_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_COGM_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_COGM_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到数据
+	//==============================
+	DrillUp.drill_COGM_getPluginTip_DataNotFind = function( index ){
+		return "【" + DrillUp.g_COGM_PluginTip_curName + "】\未找到id为"+ (index+1) +"的参数条样式配置。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 底层版本过低
+	//==============================
+	DrillUp.drill_COGM_getPluginTip_LowVersion = function(){
+		return "【" + DrillUp.g_COGM_PluginTip_curName + "】\n游戏底层版本过低，插件基本功能无法执行。\n你可以去看\"rmmv软件版本（必看）.docx\"中的 \"旧工程升级至1.6版本\" 章节，来升级你的游戏底层版本。";
+	};
+	
+	
+//=============================================================================
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_CoreOfGaugeMeter = true;
@@ -1261,9 +1308,9 @@
 		//		data['anchor_x']【中心锚点x（非实时赋值）】
 		//		data['anchor_y']【中心锚点y（非实时赋值）】
 		//		data['visible']【可见】
-		//		data['meter_src_file']【资源文件夹】
 		data['rotation'] = Number( dataFrom["整体旋转角度"] || 0 );
 		data['meter_src'] = String( dataFrom["资源-参数条"] || "" );
+		data['meter_src_file'] = "img/Special__meter/";
 		data['meter_src_mask'] = String( dataFrom["资源-参数条遮罩"] || "" );
 		
 		// > 分段条（段）
@@ -1283,9 +1330,9 @@
 		data['flow_levelLength'] = Number( dataFrom["段长度"] || 0 );
 		
 		// > 凹槽条
-		//		data['leak_src_file']【资源文件夹】
 		data['leak_enable'] = String( dataFrom["是否启用凹槽条"] || "true") === "true";
 		data['leak_src'] = String( dataFrom["资源-凹槽条"] || "" );
+		data['leak_src_file'] = "img/Special__meter/";
 		data['leak_speed'] = Number( dataFrom["扣除速度"] || 15.0 );
 		data['leak_delay'] = Number( dataFrom["扣除延迟"] || 0 );
 		data['leak_delayRefresh'] = String( dataFrom["连续扣除是否刷新延迟"] || "true") === "true";
@@ -1301,9 +1348,9 @@
 		}
 		
 		// > 粒子
-		//		data['par_src_file']【资源文件夹】
 		data['par_enable'] = String( dataFrom["是否启用粒子效果"] || "true") === "true";
 		data['par_src'] = String( dataFrom["资源-粒子"] || "" );
+		data['par_src_file'] = "img/Special__meter/";
 		data['par_mode'] = String( dataFrom["粒子出现模式"] || "底部出现");
 		data['par_speedX'] = Number( dataFrom["粒子X速度"] || 0);
 		data['par_speedY'] = Number( dataFrom["粒子Y速度"] || -1.5);
@@ -1311,13 +1358,13 @@
 		data['par_life'] = Number( dataFrom["粒子持续时间"] || 20);
 		
 		// > 游标
-		//		data['vernier_src_file']【资源文件夹】
 		data['vernier_enable'] = String( dataFrom["是否启用游标"] || "false") === "true";
 		if( dataFrom["资源-游标"] != undefined && dataFrom["资源-游标"] != "" ){
 			data['vernier_src'] = JSON.parse( dataFrom["资源-游标"] );
 		}else{
 			data['vernier_src'] = [];
 		}
+		data['vernier_src_file'] = "img/Special__meter/";
 		data['vernier_gif_interval'] = Number( dataFrom["动画帧间隔"] || 0);
 		data['vernier_gif_backrun'] = String( dataFrom["是否倒放"] || "true") === "true";
 		data['vernier_x'] = Number( dataFrom["偏移-游标 X"] || 0);
@@ -1334,6 +1381,9 @@
 		
 		return data;
 	};
+	
+	/*-----------------杂项------------------*/
+	DrillUp.g_COGM_preloadEnabled = String(DrillUp.parameters["是否启用预加载"] || "true") === "true";	
 	
 	/*-----------------参数条样式（配置）------------------*/
 	DrillUp.g_COGM_list_length = 60;
@@ -1355,10 +1405,9 @@
 	//==============================
 	DrillUp.drill_COGM_getCopyedData = function( index ){
 		var data = DrillUp.g_COGM_list[ index ];
-		if( data['level_count'] == undefined ){
-			alert(	"【Drill_CoreOfGaugeMeter.js 系统 - 参数条核心】\n"+
-					"未找到id为"+(index+1)+"的参数条样式配置。"
-			);
+		if( data == undefined ||
+			data['level_count'] == undefined ){
+			alert( DrillUp.drill_COGM_getPluginTip_DataNotFind( index ) );
 			return {};
 		}
 		return JSON.parse(JSON.stringify( data ));
@@ -1372,24 +1421,68 @@ if( Imported.Drill_CoreOfBallistics ){
 	
 	
 //=============================================================================
-// ** 资源标记容器
+// ** ☆临时变量初始化
 //
-//			说明：	用过的bitmap，全部标记不删除，防止刷菜单时重建导致浪费资源。
+//			说明：	> 用过的bitmap，全部标记不删除，防止刷菜单时重建导致浪费资源。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
-//==============================
-// * 容器 - 初始化
-//==============================
-var _drill_COGM_temp_initialize = Game_Temp.prototype.initialize;
-Game_Temp.prototype.initialize = function() {
-    _drill_COGM_temp_initialize.call(this);
-	this._drill_COGM_bitmapTank = [];			//参数数字用过的贴图
-}
-//==============================
-// * 容器 - 添加贴图标记
-//==============================
-Game_Temp.prototype.drill_COGM_addBitmap = function( bitmap ){
-	if( this._drill_COGM_bitmapTank.contains( bitmap ) ){ return; }
-	this._drill_COGM_bitmapTank.push( bitmap );
+if( DrillUp.g_COGM_preloadEnabled == true ){
+	//==============================
+	// * 临时变量 - 初始化
+	//==============================
+	var _drill_COGM_temp_initialize = Game_Temp.prototype.initialize;
+	Game_Temp.prototype.initialize = function() {
+		_drill_COGM_temp_initialize.call(this);
+		this.drill_COGM_preloadInit();
+	}
+	//==============================
+	// * 临时变量 - 预加载 版本校验
+	//==============================
+	if( Utils.generateRuntimeId == undefined ){
+		alert( DrillUp.drill_COGM_getPluginTip_LowVersion() );
+	}
+	//==============================
+	// * 临时变量 - 资源提前预加载
+	//
+	//			说明：	遍历全部资源，提前预加载标记过的资源。
+	//==============================
+	Game_Temp.prototype.drill_COGM_preloadInit = function() {
+		this._drill_COGM_cacheId = Utils.generateRuntimeId();	//资源缓存id
+		this._drill_COGM_preloadTank = [];						//bitmap容器
+		for( var i = 0; i < DrillUp.g_COGM_list.length; i++ ){
+			var temp_data = DrillUp.g_COGM_list[i];
+			if( temp_data == undefined ){ continue; }
+			if( temp_data['meter_src'] == undefined ){ continue; }
+			
+			this._drill_COGM_preloadTank.push( 
+				ImageManager.reserveBitmap( temp_data['meter_src_file'], temp_data['meter_src'], 0, true ) 
+			);
+			this._drill_COGM_preloadTank.push( 
+				ImageManager.reserveBitmap( temp_data['meter_src_file'], temp_data['meter_src_mask'], 0, true ) 
+			);
+			
+			if( temp_data['leak_enable'] == true ){
+				this._drill_COGM_preloadTank.push( 
+					ImageManager.reserveBitmap( temp_data['leak_src_file'], temp_data['leak_src'], 0, true ) 
+				);
+			}
+			
+			if( temp_data['par_enable'] == true ){
+				this._drill_COGM_preloadTank.push( 
+					ImageManager.reserveBitmap( temp_data['par_src_file'], temp_data['par_src'], 0, true ) 
+				);
+			}
+			
+			if( temp_data['vernier_enable'] == true ){
+				for(var j=0; j < temp_data['vernier_src'].length; j++){
+					this._drill_COGM_preloadTank.push( 
+						ImageManager.reserveBitmap( temp_data['vernier_src_file'], temp_data['vernier_src'][j], 0, true ) 
+					);
+				}
+			}
+		}
+	}
+
 }
 
 
@@ -1879,7 +1972,6 @@ Drill_COGM_MeterSprite.prototype.drill_initAttr = function() {
 	if( data['meter_src_mask'] != "" ){
 		var bitmap = ImageManager.loadBitmap( data['meter_src_file'], data['meter_src_mask'], 0, true);
 		this._layer_contextMask.bitmap = bitmap;
-		$gameTemp.drill_COGM_addBitmap( bitmap );
 		
 		this._layer_context.addChild(this._layer_contextMask);
 		this._layer_context.mask = this._layer_contextMask;
@@ -1937,7 +2029,6 @@ Drill_COGM_MeterSprite.prototype.drill_initSection = function() {
 	// > 资源bitmap
 	var data = this._drill_data;
 	this._drill_section_bitmap = ImageManager.loadBitmap( data['meter_src_file'], data['meter_src'], 0, true);
-	$gameTemp.drill_COGM_addBitmap( this._drill_section_bitmap );
 	
 	// > 分段条初始化 - 上段
 	this._drill_sectionUp_sprite = new Sprite();
@@ -2331,7 +2422,6 @@ Drill_COGM_MeterSprite.prototype.drill_initLeak = function() {
 	var data = this._drill_data;
 	if( data['leak_enable'] != true ){ return };
 	var bitmap = ImageManager.loadBitmap( data['leak_src_file'], data['leak_src'], 0, true);
-	$gameTemp.drill_COGM_addBitmap( bitmap );
 	
 	// > 创建贴图
 	this._drill_leak_sprite = new Sprite();
@@ -2569,7 +2659,6 @@ Drill_COGM_MeterSprite.prototype.drill_initParticle = function() {
 	var data = this._drill_data;
 	if( data['par_enable'] == false ){ return; }
 	this._drill_par_bitmap = ImageManager.loadBitmap( data['par_src_file'], data['par_src'], 0, true);
-	$gameTemp.drill_COGM_addBitmap( this._drill_par_bitmap );
 }
 //==============================
 // * G粒子 - 延迟初始化
@@ -2671,7 +2760,6 @@ Drill_COGM_MeterSprite.prototype.drill_initVernier = function() {
 	for(var j=0; j < data['vernier_src'].length; j++){
 		var bitmap = ImageManager.loadBitmap( data['vernier_src_file'], data['vernier_src'][j], 0, true);
 		this._drill_vernier_bitmaps[j] = bitmap;
-		$gameTemp.drill_COGM_addBitmap( bitmap );
 	}
 }
 //==============================
@@ -3126,10 +3214,8 @@ Drill_COGM_MeterSpriteMask.prototype.drill_isPlaying = function() {
 //=============================================================================
 }else{
 		Imported.Drill_CoreOfGaugeMeter = false;
-		alert(
-			"【Drill_CoreOfGaugeMeter.js 系统-参数条核心】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfBallistics 系统-弹道核心"
-		);
+		var pluginTip = DrillUp.drill_COGM_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
 

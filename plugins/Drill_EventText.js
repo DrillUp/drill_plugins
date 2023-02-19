@@ -274,7 +274,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			事件漂浮文字：
 //				->容器
 //					->事件容器（统计有 控制器 的事件）
@@ -306,7 +306,7 @@
 //					->对齐方式
 //					->根据字符长宽变化窗口大小
 //
-//		★私有类如下：
+//		★插件私有类：
 //			* Drill_ET_Controller【漂浮文字控制器】
 //			* Drill_ET_WindowSprite【漂浮文字贴图】
 //
@@ -338,7 +338,44 @@
 //		★存在的问题：
 //			1.循环地图中，如果在地图边界徘徊，文字变化和滤镜会被累加。 （2021-7-5 此问题似乎已被解决，"创建新的漂浮文字"结构修改之后，问题似乎不见了）
 //
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_ET_PluginTip_curName = "Drill_EventText.js 行走图-事件漂浮文字";
+	DrillUp.g_ET_PluginTip_baseList = ["Drill_CoreOfWindowAuxiliary.js 系统-窗口辅助核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_ET_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_ET_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_ET_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_ET_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_ET_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到事件
+	//==============================
+	DrillUp.drill_ET_getPluginTip_EventNotFind = function( e_id ){
+		return "【" + DrillUp.g_ET_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 强制更新提示
+	//==============================
+	DrillUp.drill_ET_getPluginTip_NeedUpdate_Camera = function(){
+		return "【" + DrillUp.g_ET_PluginTip_curName + "】\n活动地图镜头插件版本过低，你需要更新 镜头插件 至少v2.2及以上版本。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -520,8 +557,7 @@ Game_Map.prototype.drill_ET_isEventExist = function( e_id ){
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_EventText.js 行走图 - 事件漂浮文字】\n" +
-				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
+		alert( DrillUp.drill_ET_getPluginTip_EventNotFind( e_id ) );
 		return false;
 	}
 	return true;
@@ -1494,6 +1530,7 @@ Drill_ET_WindowSprite.prototype.drill_ET_isOptimizationPassed_Private = function
 	}
 	return true;
 }
+// > 强制更新提示 锁
 DrillUp.g_LCa_alert = true;
 //==============================
 // * 优化策略 - 判断贴图是否在镜头范围内
@@ -1503,11 +1540,14 @@ Drill_ET_WindowSprite.prototype.drill_ET_posIsInCamera = function( realX, realY 
 	var ohh = Graphics.boxHeight / $gameMap.tileHeight();
 	var sww = oww;
 	var shh = ohh;
-	if( Imported.Drill_LayerCamera ){
+	if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】镜头范围内+缩放
+		
+		// > 强制更新提示
 		if( $gameSystem._drill_LCa_controller == undefined && DrillUp.g_LCa_alert == true ){ 
-			alert("【Drill_EventText.js 行走图 - 事件漂浮文字】\n活动地图镜头插件版本过低，你需要更新 镜头插件 至少v1.9及以上版本。");
+			alert( DrillUp.drill_ET_getPluginTip_NeedUpdate_Camera() );
 			DrillUp.g_LCa_alert = false;
 		}
+		
 		sww = sww / $gameSystem._drill_LCa_controller._drill_scaleX;
 		shh = shh / $gameSystem._drill_LCa_controller._drill_scaleY;
 	}
@@ -1521,9 +1561,7 @@ Drill_ET_WindowSprite.prototype.drill_ET_posIsInCamera = function( realX, realY 
 //=============================================================================
 }else{
 		Imported.Drill_EventText = false;
-		alert(
-			"【Drill_EventText.js 行走图 - 事件漂浮文字】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfWindowAuxiliary 系统-窗口辅助核心"
-		);
+		var pluginTip = DrillUp.drill_ET_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 

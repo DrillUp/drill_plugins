@@ -1470,13 +1470,15 @@
  * @type select
  * @option 普通
  * @value 0
- * @option 叠加
+ * @option 发光
  * @value 1
  * @option 实色混合(正片叠底)
  * @value 2
  * @option 浅色
  * @value 3
- * @desc pixi的渲染混合模式。0-普通,1-叠加。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
+ * @option 叠加
+ * @value 4
+ * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
  * @default 0
  *
  * @param 平移-魔法圈 X
@@ -1605,7 +1607,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			多层地图魔法圈：
 //				->基本属性
 //					->地图层级
@@ -1640,7 +1642,23 @@
 //			  使用Number会变成NAN。
 //
 
-
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_LCi_PluginTip_curName = "Drill_LayerCircle.js 地图-多层地图魔法圈";
+	DrillUp.g_LCi_PluginTip_baseList = [];
+	//==============================
+	// * 提示信息 - 报错 - 强制更新提示
+	//==============================
+	DrillUp.drill_LCi_getPluginTip_NeedUpdate_Camera = function(){
+		return "【" + DrillUp.g_LCi_PluginTip_curName + "】\n活动地图镜头插件版本过低，你需要更新 镜头插件 至少v2.2及以上版本。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -2018,6 +2036,7 @@ Game_Map.prototype.drill_LCi_initMapdata = function() {
 		}
 	}
 }
+// > 强制更新提示 锁
 DrillUp.g_LCi_alert = true;
 //==============================
 // * 玩家 - 帧刷新 累计的偏移位置
@@ -2032,13 +2051,16 @@ Game_Player.prototype.update = function( sceneActive ){
 		var data = $gameSystem._drill_LCi_dataTank_curData[i];
 		if( data == undefined ){ continue; }
 		
-		// > 镜头基点（循环积累值）
-		if( Imported.Drill_LayerCamera ){
+		// > 镜头基点
+		if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】循环积累值
+			
+			// > 强制更新提示
 			if( $gameSystem._drill_LCa_controller == undefined && DrillUp.g_LCi_alert == true ){ 
-				alert("【Drill_LayerCircle.js 地图 - 多层地图魔法圈】\n活动地图镜头插件版本过低，你需要更新 镜头插件 至少v1.9及以上版本。");
+				alert( DrillUp.drill_LCi_getPluginTip_NeedUpdate_Camera() );
 				DrillUp.g_LCi_alert = false;
 				return; 
 			}
+			
 			data['cameraXAcc'] = $gameSystem._drill_LCa_controller._drill_cameraX_offsetAcc * $gameMap.tileWidth();
 			data['cameraYAcc'] = $gameSystem._drill_LCa_controller._drill_cameraY_offsetAcc * $gameMap.tileHeight();
 			

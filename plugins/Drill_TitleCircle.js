@@ -679,13 +679,15 @@
  * @type select
  * @option 普通
  * @value 0
- * @option 叠加
+ * @option 发光
  * @value 1
  * @option 实色混合(正片叠底)
  * @value 2
  * @option 浅色
  * @value 3
- * @desc pixi的渲染混合模式。0-普通,1-叠加。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
+ * @option 叠加
+ * @value 4
+ * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
  * @default 0
  *
  * @param 旋转速度
@@ -757,7 +759,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			标题魔法圈：
 //				->标题层级
 //				->显示/隐藏
@@ -778,6 +780,31 @@
 //
 
 //=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_TCi_PluginTip_curName = "Drill_TitleCircle.js 标题-多层标题魔法圈";
+	DrillUp.g_TCi_PluginTip_baseList = ["Drill_CoreOfGlobalSave.js 管理器-全局存储核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_TCi_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_TCi_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_TCi_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_TCi_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_TCi_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	
+	
+//=============================================================================
 // ** 变量获取
 //=============================================================================
 　　var Imported = Imported || {};
@@ -796,6 +823,7 @@
 		data['visible'] = String( dataFrom["初始是否显示"] || "true") == "true";
 		data['src_img'] = String( dataFrom["资源-魔法圈"] || "");
 		data['src_img_mask'] = String( dataFrom["资源-魔法圈遮罩"] || "");
+		data['src_img_file'] = "img/titles1/";
 		data['x'] = Number( dataFrom["平移-魔法圈 X"] || 0);
 		data['y'] = Number( dataFrom["平移-魔法圈 Y"] || 0);
 		data['opacity'] = Number( dataFrom["透明度"] || 255);
@@ -937,7 +965,7 @@ Game_Temp.prototype.initialize = function() {
 		if( temp_data == undefined ){ continue; }
 		if( temp_data['inited'] != true ){ continue; }
 		
-		this._drill_TCi_preloadTank.push( ImageManager.loadTitle1( temp_data['src_img'] ) );
+		this._drill_TCi_preloadTank.push( ImageManager.loadBitmap( temp_data['src_img_file'], temp_data['src_img'], 0, true ) );
 	}
 }
 
@@ -1024,7 +1052,7 @@ Scene_Title.prototype.drill_TCi_create = function() {
 		// > 魔法圈贴图
 		var temp_sprite_data = JSON.parse(JSON.stringify( temp_data ));		//深拷贝数据（杜绝引用造成的修改）
 		
-		var temp_sprite_bitmap = new Sprite(ImageManager.loadTitle1(temp_sprite_data['src_img']));
+		var temp_sprite_bitmap = new Sprite( ImageManager.loadBitmap( temp_sprite_data['src_img_file'], temp_sprite_data['src_img'], 0, true ) );
 		temp_sprite_bitmap.anchor.x = 0.5;
 		temp_sprite_bitmap.anchor.y = 0.5;
 		this._drill_TCi_spriteChildTank.push(temp_sprite_bitmap);
@@ -1053,7 +1081,7 @@ Scene_Title.prototype.drill_TCi_create = function() {
 		
 		// > 魔法圈遮罩
 		if( temp_sprite_data['src_img_mask'] != "" ){
-			var temp_mask = new Sprite(ImageManager.loadTitle1(temp_sprite_data['src_img_mask']));
+			var temp_mask = new Sprite( ImageManager.loadBitmap( temp_sprite_data['src_img_file'], temp_sprite_data['src_img_mask'], 0, true ) );
 			temp_layer.addChild(temp_mask);
 			temp_layer.mask = temp_mask;
 		}
@@ -1080,10 +1108,8 @@ Scene_Title.prototype.drill_TCi_update = function() {
 //=============================================================================
 }else{
 		Imported.Drill_TitleCircle = false;
-		alert(
-			"【Drill_TitleCircle.js 标题 - 多层标题魔法圈】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfGlobalSave 管理器-全局存储核心"
-		);
+		var pluginTip = DrillUp.drill_TCi_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
 

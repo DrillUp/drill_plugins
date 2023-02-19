@@ -188,7 +188,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			位置与位移：
 //				->载入地图时处在随机出生点
 //				->获取随机坐标
@@ -204,6 +204,37 @@
 //			暂无
 //			
 
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_ERP_PluginTip_curName = "Drill_EventRandomPoint.js 物体触发-固定区域 & 随机点";
+	DrillUp.g_ERP_PluginTip_baseList = ["Drill_CoreOfFixedArea.js 物体触发-固定区域核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_ERP_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_ERP_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_ERP_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_ERP_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_ERP_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到事件
+	//==============================
+	DrillUp.drill_ERP_getPluginTip_EventNotFind = function( e_id ){
+		return "【" + DrillUp.g_ERP_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -479,8 +510,7 @@ Game_Map.prototype.drill_ERP_isEventExist = function( e_id ){
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_EventRandomPoint.js 物体触发 - 固定区域 & 随机点】\n" +
-				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
+		alert( DrillUp.drill_ERP_getPluginTip_EventNotFind( e_id ) );
 		return false;
 	}
 	return true;
@@ -575,9 +605,7 @@ Game_System.prototype.drill_ERP_checkSysData_Private = function() {
 //=============================================================================
 }else{
 		Imported.Drill_EventRandomPoint = false;
-		alert(
-			"【Drill_EventRandomPoint.js 物体触发 - 固定区域 & 随机点】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfFixedArea 物体触发-固定区域核心"
-		);
+		var pluginTip = DrillUp.drill_ERP_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 

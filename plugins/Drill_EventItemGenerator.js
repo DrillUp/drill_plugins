@@ -48,7 +48,7 @@
  *   (2.可拾取道具用 纯事件 也可以做，只是比较复杂。
  *      你可以去示例中 物体触发管理层 去看看道具生成方法。
  *   (3.如果你没有导入 固定区域核心 则你无法使用"自定义区域"和"筛选器"功能。
- *      并且【默认只避开不可通行】图块。要了解更多物品落点的方法，
+ *      并且【默认只避开不可通行】图块。要了解更多物品落脚点的方法，
  *      去看看 "9.物体触发 > 关于物体触发-固定区域.docx"中的 筛选器 章节。
  *   (4.生成器生成的事件是临时的，捡起物品后 或 离开地图就会消失。
  * 选项配置：
@@ -272,7 +272,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			可拾取物生成器：
 //				->随机位置
 //					->随机可通行位置
@@ -298,7 +298,44 @@
 //		★存在的问题：
 //			1.每多一条可选注释，插件就要多一个额外扩展。需要想办法优化。
 //
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_EIG_PluginTip_curName = "Drill_EventItemGenerator.js 物体管理-可拾取物生成器";
+	DrillUp.g_EIG_PluginTip_baseList = ["Drill_CoreOfEventManager.js 物体管理-事件管理核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_EIG_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_EIG_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_EIG_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_EIG_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_EIG_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到事件
+	//==============================
+	DrillUp.drill_EIG_getPluginTip_EventNotFind = function( e_id ){
+		return "【" + DrillUp.g_EIG_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 缺少插件
+	//==============================
+	DrillUp.drill_EIG_getPluginTip_NoSupportPlugin = function(){
+		return "【" + DrillUp.g_EIG_PluginTip_curName + "】\n生成的事件缺少插件 Drill_EventIcon 行走图-图标行走图，\n你可以选择 添加该插件 或者 关闭自动图标行走图功能。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -921,8 +958,7 @@ Game_Map.prototype.drill_EIG_isEventExist = function( e_id ){
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_EventItemGenerator.js 物体管理 - 可拾取物生成器】\n" +
-				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
+		alert( DrillUp.drill_EIG_getPluginTip_EventNotFind( e_id ) );
 		return false;
 	}
 	return true;
@@ -1109,8 +1145,7 @@ Game_Map.prototype.drill_EIG_createEventDataTemplate = function( input_data ){
 			var com1 = {"code":108,"indent":0,"parameters":["=>图标行走图 : 设置图标 : "+ input_data['item_icon'] ]} ;
 			new_list.push(com1);
 		}else{
-			alert( "【Drill_EventItemGenerator.js 物体管理 - 可拾取物生成器】\n" +
-					"生成的事件缺少插件 Drill_EventIcon 行走图-图标行走图，\n你可以选择 添加该插件 或者 关闭自动图标行走图功能。");
+			alert( DrillUp.drill_EIG_getPluginTip_NoSupportPlugin() );
 		}
 	}
 	if( input_data['item_type'] == "金钱" ){
@@ -1208,9 +1243,7 @@ Game_Map.prototype.drill_EIG_isAnyPassable = function( x, y ){
 //=============================================================================
 }else{
 		Imported.Drill_EventItemGenerator = false;
-		alert(
-			"【Drill_EventItemGenerator.js 物体管理 - 可拾取物生成器】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfEventManager 物体管理-事件管理核心"
-		);
+		var pluginTip = DrillUp.drill_EIG_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 

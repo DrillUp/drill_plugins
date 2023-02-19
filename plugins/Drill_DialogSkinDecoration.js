@@ -333,7 +333,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			对话框装饰图：
 //				->绑定到皮肤
 //					->样式切换时重贴装饰图
@@ -342,7 +342,7 @@
 //					->播放GIF
 //					->窗口y缩放大小同步
 //
-//		★私有类如下：
+//		★插件私有类：
 //			* Drill_DSD_Sprite【对话框装饰图】
 //
 //		★必要注意事项：
@@ -355,6 +355,31 @@
 //			暂无
 //		
 
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_DSD_PluginTip_curName = "Drill_DialogSkinDecoration.js 对话框-对话框装饰图";
+	DrillUp.g_DSD_PluginTip_baseList = ["Drill_DialogSkin.js 对话框-对话框皮肤"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_DSD_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_DSD_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_DSD_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_DSD_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_DSD_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -851,10 +876,8 @@ Drill_DSD_DecorationSprite.prototype.drill_DSD_updateGIF = function() {
 //=============================================================================
 }else{
 		Imported.Drill_DialogSkinDecoration = false;
-		alert(
-			"【Drill_DialogSkinDecoration.js  对话框 - 对话框装饰图】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_DialogSkin  对话框-对话框皮肤"
-		);
+		var pluginTip = DrillUp.drill_DSD_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
 

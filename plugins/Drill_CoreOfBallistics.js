@@ -124,7 +124,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			弹道：
 //				->移动弹道【二维数组】：
 //					->标准模块
@@ -211,6 +211,30 @@
 //			暂无
 //
 
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_COBa_PluginTip_curName = "Drill_CoreOfBallistics.js 系统-弹道核心";
+	DrillUp.g_COBa_PluginTip_baseList = [];
+	//==============================
+	// * 提示信息 - 报错 - 参数错误
+	//==============================
+	DrillUp.drill_COBa_getPluginTip_ValueError = function( param_msg, p ){
+		return  "【" + DrillUp.g_COBa_PluginTip_curName + "】\n检测到公式值出现"+param_msg+"，请及时检查你的公式是否正确。"+
+				"\n当前取值：" + JSON.stringify( p );
+	};
+	//==============================
+	// * 提示信息 - 报错 - NaN校验值
+	//==============================
+	DrillUp.drill_COBa_getPluginTip_ParamIsNaN = function( param_name ){
+		return "【" + DrillUp.g_COBa_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -514,26 +538,15 @@ DrillUp.drill_COBa_checkValue = function( p, result ){
 	
 	if( result == undefined ){
 		DrillUp._drill_COBa_checkOn = false;
-		alert(
-			"【Drill_CoreOfBallistics.js 系统 - 弹道核心】"+
-			"\n检测到公式值出现undefined未定义，请及时检查你的公式是否正确。"+
-			"\n当前取值：" + JSON.stringify( p )
-		);
+		alert( DrillUp.drill_COBa_getPluginTip_ValueError("undefined未定义",p ) );
 	}
 	if( isNaN( result ) == true ){
 		DrillUp._drill_COBa_checkOn = false;
-		alert(
-			"【Drill_CoreOfBallistics.js 系统 - 弹道核心】"+
-			"\n检测到公式值出现NaN值，请及时检查你的公式是否正确。"+
-			"\n当前取值：" + JSON.stringify( p )
-		);
+		alert( DrillUp.drill_COBa_getPluginTip_ValueError("NaN值",p ) );
+		
 	}else if( isFinite( result ) == false ){
 		DrillUp._drill_COBa_checkOn = false;
-		alert(
-			"【Drill_CoreOfBallistics.js 系统 - 弹道核心】"+
-			"\n检测到公式值出现无穷大/无穷小，请及时检查你的公式是否正确。"+
-			"\n当前取值：" + JSON.stringify( p )
-		);
+		alert( DrillUp.drill_COBa_getPluginTip_ValueError("无穷大/无穷小",p ) );
 	}
 }
 
@@ -704,24 +717,15 @@ Game_Temp.prototype.drill_COBa_preBallisticsMove_Private = function( obj_data, o
 	// > 初始化校验
 	if( isNaN( obj_index ) == true && DrillUp._drill_COBa_checkOn == true ){
 		DrillUp._drill_COBa_checkOn = false;
-		alert(
-			"【Drill_CoreOfBallistics.js 系统 - 弹道核心】"+
-			"\n检测到obj_index出现NaN值，请及时检查你的函数。"
-		);
+		alert( DrillUp.drill_COBa_getPluginTip_ParamIsNaN( "obj_index" ) );
 	}
 	if( isNaN( orgX ) == true && DrillUp._drill_COBa_checkOn == true ){
 		DrillUp._drill_COBa_checkOn = false;
-		alert(
-			"【Drill_CoreOfBallistics.js 系统 - 弹道核心】"+
-			"\n检测到orgX出现NaN值，请及时检查你的函数。"
-		);
+		alert( DrillUp.drill_COBa_getPluginTip_ParamIsNaN( "orgX" ) );
 	}
 	if( isNaN( orgY ) == true && DrillUp._drill_COBa_checkOn == true ){
 		DrillUp._drill_COBa_checkOn = false;
-		alert(
-			"【Drill_CoreOfBallistics.js 系统 - 弹道核心】"+
-			"\n检测到orgY出现NaN值，请及时检查你的函数。"
-		);
+		alert( DrillUp.drill_COBa_getPluginTip_ParamIsNaN( "orgY" ) );
 	}
 	obj_data['_drill_COBa_x'] = [];
 	obj_data['_drill_COBa_y'] = [];
@@ -1449,17 +1453,11 @@ Game_Temp.prototype.drill_COBa_preBallisticsCommon = function( obj_data, obj_ind
 	// > 初始化校验
 	if( isNaN( obj_index ) == true && DrillUp._drill_COBa_checkOn == true ){
 		DrillUp._drill_COBa_checkOn = false;
-		alert(
-			"【Drill_CoreOfBallistics.js 系统 - 弹道核心】"+
-			"\n检测到obj_index出现NaN值，请及时检查你的函数。"
-		);
+		alert( DrillUp.drill_COBa_getPluginTip_ParamIsNaN( "obj_index" ) );
 	}
 	if( isNaN( orgCommon ) == true && DrillUp._drill_COBa_checkOn == true ){
 		DrillUp._drill_COBa_checkOn = false;
-		alert(
-			"【Drill_CoreOfBallistics.js 系统 - 弹道核心】"+
-			"\n检测到orgCommon出现NaN值，请及时检查你的函数。"
-		);
+		alert( DrillUp.drill_COBa_getPluginTip_ParamIsNaN( "orgCommon" ) );
 	}
 	obj_data['_drill_COBa_common'] = [];
 	
@@ -1553,7 +1551,7 @@ Game_Temp.prototype.drill_COBa_preBallisticsCommon = function( obj_data, obj_ind
 				continue;
 			}
 			
-			// > 计算通用落点
+			// > 计算通用落脚点
 			var p_start = data['anchorPointTank'][start_index];
 			var p_end = data['anchorPointTank'][end_index];
 			var d_time = p_end['t'] - p_start['t'];

@@ -287,13 +287,15 @@
  * @type select
  * @option 普通
  * @value 0
- * @option 叠加
+ * @option 发光
  * @value 1
  * @option 实色混合(正片叠底)
  * @value 2
  * @option 浅色
  * @value 3
- * @desc pixi的渲染混合模式。0-普通,1-叠加。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
+ * @option 叠加
+ * @value 4
+ * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
  * @default 0
  * 
  * @param ---移动方式---
@@ -456,7 +458,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			多样式菜单指针：
 //				->强制鼠标滚轮切换选项
 //				->指针属性
@@ -468,7 +470,7 @@
 //					->浮动效果
 //					->持续自旋转
 // 
-//		★私有类如下：
+//		★插件私有类：
 //			* Drill_MCu_Sprite【菜单指针贴图】
 //
 //		★必要注意事项：
@@ -489,6 +491,31 @@
 //			  解决：除了窗口x、矩形x，还有画布的内边距，因为窗口坐标和画布坐标直接有内边距，所以出现了偏移。
 //
 
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_MCu_PluginTip_curName = "Drill_MenuCursor.js 主菜单-多样式菜单指针";
+	DrillUp.g_MCu_PluginTip_baseList = ["Drill_CoreOfBallistics.js 系统-弹道核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_MCu_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_MCu_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_MCu_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_MCu_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_MCu_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -1218,10 +1245,8 @@ Drill_MCu_Sprite.prototype.drill_MCu_tarY = function() {
 //=============================================================================
 }else{
 		Imported.Drill_MenuCursor = false;
-		alert(
-			"【Drill_MenuCursor.js 主菜单 - 多样式菜单指针】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfBallistics 系统-弹道核心"
-		);
+		var pluginTip = DrillUp.drill_MCu_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
 

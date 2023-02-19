@@ -1851,6 +1851,16 @@
  * @desc 以样式框的位置为基准，y轴方向平移，单位像素。正数向下，负数向上。
  * @default 10
  * 
+ * @param 缩放-角色前视图 X
+ * @parent ---角色前视图---
+ * @desc 前视图的缩放X值，默认比例1.0。如果你要对所有前视图进行缩放，去看参数 角色前视图-整体缩放 X。
+ * @default 1.0
+ * 
+ * @param 缩放-角色前视图 Y
+ * @parent ---角色前视图---
+ * @desc 前视图的缩放Y值，默认比例1.0。如果你要对所有前视图进行缩放，去看参数 角色前视图-整体缩放 Y。
+ * @default 1.0
+ * 
  * 
  */
 /*~struct~DrillSMaActorBoardArrange:
@@ -1867,6 +1877,16 @@
  * @parent ---主体---
  * @desc 以固定框组整体的位置为基准，y轴方向平移，0为贴在最上面。单位像素。
  * @default 0
+ * 
+ * @param 角色前视图-整体缩放 X
+ * @parent ---主体---
+ * @desc 前视图的缩放X值，默认比例1.0。如果你只想对指定的前视图进行缩放，去看参数 缩放-角色前视图 X。
+ * @default 1.0
+ * 
+ * @param 角色前视图-整体缩放 Y
+ * @parent ---主体---
+ * @desc 前视图的缩放Y值，默认比例1.0。如果你只想对指定的前视图进行缩放，去看参数 缩放-角色前视图 Y。
+ * @default 1.0
  * 
  * @param 角色框数量上限
  * @parent ---主体---
@@ -2514,7 +2534,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			主菜单面板：
 //				->原装结构
 //					->菜单选项窗口	
@@ -2600,7 +2620,7 @@
 //			~struct~DrillActorGroupMoving:		角色固定框组设置 > 固定框组移动动画
 //
 //			
-//		★私有类如下：
+//		★插件私有类：
 //			* Drill_SMa_ActorSprite      角色固定框
 //			* Scene_Drill_SMa_Formation  对象界面
 //			* Window_Drill_SMa_Formation 队形窗口
@@ -2621,8 +2641,63 @@
 //		★存在的问题：
 //			暂无
 //
-//
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_SMa_PluginTip_curName = "Drill_SceneMain.js 面板-全自定义主菜单面板";
+	DrillUp.g_SMa_PluginTip_baseList = [
+		"Drill_CoreOfWindowAuxiliary.js 系统-窗口辅助核心",
+		"Drill_CoreOfGaugeMeter.js 系统-参数条核心",
+		"Drill_CoreOfGaugeNumber.js 系统-参数数字核心",
+		"Drill_CoreOfSelectableButton.js 系统-按钮组核心"
+	];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_SMa_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_SMa_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_SMa_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_SMa_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_SMa_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 缺少配置
+	//==============================
+	DrillUp.drill_SMa_getPluginTip_NoSupportData_optionBtn = function(){
+		return "【" + DrillUp.g_SMa_PluginTip_curName + "】\n你未配置 菜单选项按钮组 参数，请及时配置。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 缺少配置
+	//==============================
+	DrillUp.drill_SMa_getPluginTip_NoSupportData_avatarBtn = function(){
+		return "【" + DrillUp.g_SMa_PluginTip_curName + "】\n你未配置 角色头像按钮组 参数，请及时配置。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 缺少配置
+	//==============================
+	DrillUp.drill_SMa_getPluginTip_NoSupportData_style = function( style_id ){
+		return "【" + DrillUp.g_SMa_PluginTip_curName + "】\n你未配置 角色框设置["+ style_id +"]，请及时配置。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 兼容冲突
+	//==============================
+	DrillUp.drill_SMa_getPluginTip_CompatibilityOther = function(){
+		return  "【" + DrillUp.g_SMa_PluginTip_curName + "】\n"+
+				"检测到你开启了 AltMenuScreen插件 或 基于该插件写的派生插件 。\n"+
+				"请及时关闭该插件，该插件与 菜单选项按钮 的控制造成干扰。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -2638,11 +2713,7 @@
 //=============================================================================
 if( typeof(_Scene_Menu_create) != "undefined" || typeof(_Window_MenuActor_initialize) != "undefined" ){
 	
-	alert(
-		"【Drill_SceneMain.js 面板 - 全自定义主菜单面板】\n"+
-		"检测到你开启了 AltMenuScreen插件 或 基于该插件写的派生插件 。\n"+
-		"请及时关闭这类插件，其会对 菜单选项按钮 的显示造成干扰。"
-	);
+	alert( DrillUp.drill_SMa_getPluginTip_CompatibilityOther() );
 };
 
 //=============================================================================
@@ -3114,6 +3185,8 @@ if( Imported.Drill_CoreOfWindowAuxiliary &&
 		data['pic_back_run'] = String( dataFrom["是否倒放"] || "false") === "true";
 		data['pic_x'] = Number( dataFrom["平移-角色前视图 X"] || 0 );
 		data['pic_y'] = Number( dataFrom["平移-角色前视图 Y"] || 0 );
+		data['pic_scale_x'] = Number( dataFrom["缩放-角色前视图 X"] || 1.0);
+		data['pic_scale_y'] = Number( dataFrom["缩放-角色前视图 Y"] || 1.0);
 		
 		return data;
 	}
@@ -3126,6 +3199,8 @@ if( Imported.Drill_CoreOfWindowAuxiliary &&
 		// > 主体
 		data['x'] = Number( dataFrom["平移-固定框组 X"] || 0 );
 		data['y'] = Number( dataFrom["平移-固定框组 Y"] || 0 );
+		data['picAll_scale_x'] = Number( dataFrom["角色前视图-整体缩放 X"] || 0 );
+		data['picAll_scale_y'] = Number( dataFrom["角色前视图-整体缩放 Y"] || 0 );
 		data['visible_rowCount'] = Number( dataFrom["角色框数量上限"] || 4 );
 		data['visible_force'] = String( dataFrom["无角色时是否仍然显示框"] || "true") === "true";
 		if( dataFrom["无角色时设置"] != undefined &&
@@ -3234,8 +3309,7 @@ if( Imported.Drill_CoreOfWindowAuxiliary &&
 		DrillUp.g_SMa_command_button = DrillUp.drill_SMa_initCommandButton( data );
 	}else{
 		if( DrillUp.g_SMa_command_mode == "按钮组模式" ){
-			alert( "【Drill_SceneMain.js 面板 - 全自定义主菜单面板】\n" +
-					"你未配置 菜单选项按钮组 参数，请及时配置。");
+			alert( DrillUp.drill_SMa_getPluginTip_NoSupportData_optionBtn() );
 		}
 		DrillUp.g_SMa_command_button = DrillUp.drill_SMa_initCommandButton( {} );
 	}
@@ -3249,8 +3323,7 @@ if( Imported.Drill_CoreOfWindowAuxiliary &&
 		var data = JSON.parse( DrillUp.parameters["角色头像按钮组"] );
 		DrillUp.g_SMa_actorAvatar_button = DrillUp.drill_SMa_initActorAvatarButton( data );
 	}else{
-		alert( "【Drill_SceneMain.js 面板 - 全自定义主菜单面板】\n" +
-				"你未配置 角色头像按钮组 参数，请及时配置。");
+		alert( DrillUp.drill_SMa_getPluginTip_NoSupportData_avatarBtn() );
 		DrillUp.g_SMa_actorAvatar_button = {};
 	}
 
@@ -3352,8 +3425,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp1 = Number(temp1) - 1;
 					var actorBind = $gameSystem._drill_SMa_actorBindTank[ a_id ];
 					if( actorBind == undefined ){
-						alert( "【Drill_SceneMain.js 面板 - 全自定义主菜单面板】\n"+
-							"错误，角色框设置[" + (temp1+1) + "]的数据不存在。" );
+						alert( DrillUp.drill_SMa_getPluginTip_NoSupportData_style(temp1+1) );
 						return;
 					}
 					actorBind['style_id'] = temp1;
@@ -3368,8 +3440,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					}
 					var actorBind = $gameSystem._drill_SMa_actorBindTank[ a_id ];
 					if( actorBind == undefined ){
-						alert( "【Drill_SceneMain.js 面板 - 全自定义主菜单面板】\n"+
-							"错误，角色框设置[" + (temp1+1) + "]的数据不存在。" );
+						alert( DrillUp.drill_SMa_getPluginTip_NoSupportData_style(temp1+1) );
 						return;
 					}
 					actorBind['pic_src_commandSet'] = temp_tank;
@@ -3377,8 +3448,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				if( temp1 == "还原默认前视图配置" ){
 					var actorBind = $gameSystem._drill_SMa_actorBindTank[ a_id ];
 					if( actorBind == undefined ){
-						alert( "【Drill_SceneMain.js 面板 - 全自定义主菜单面板】\n"+
-							"错误，角色框设置[" + (temp1+1) + "]的数据不存在。" );
+						alert( DrillUp.drill_SMa_getPluginTip_NoSupportData_style(temp1+1) );
 						return;
 					}
 					actorBind['pic_src_commandSet'] = [];
@@ -4352,6 +4422,8 @@ Drill_SMa_ActorSprite.prototype.drill_createPictureImage = function() {
 	temp_sprite.bitmap = this._drill_picture_spriteTank[0];
 	temp_sprite.x = data_b['pic_x'];
 	temp_sprite.y = data_b['pic_y'];
+	temp_sprite.scale.x = data_b['pic_scale_x'] * DrillUp.g_SMa_actorArrange['picAll_scale_x'];
+	temp_sprite.scale.y = data_b['pic_scale_y'] * DrillUp.g_SMa_actorArrange['picAll_scale_y'];
 	temp_sprite.visible = data_b['pic_visible'];		//（不显示，也要创建）
 	this.addChild(temp_sprite);
 	this._drill_picture_sprite = temp_sprite;
@@ -5072,12 +5144,7 @@ if( Imported.MOG_TimeSystem ){
 //=============================================================================
 }else{
 		Imported.Drill_SceneMain = false;
-		alert(
-			"【Drill_SceneMain.js 面板 - 全自定义主菜单面板】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfWindowAuxiliary  系统-窗口辅助核心"+
-			"\n- Drill_CoreOfGaugeMeter       系统-参数条核心"+
-			"\n- Drill_CoreOfGaugeNumber      系统-参数数字核心"+
-			"\n- Drill_CoreOfSelectableButton 系统-按钮组核心"
-		);
+		var pluginTip = DrillUp.drill_SMa_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 

@@ -236,7 +236,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			地形伤害与地形治愈：
 //				->默认地形伤害
 //					->公式设置
@@ -256,6 +256,17 @@
 //			暂无
 //
 
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_LDF_PluginTip_curName = "Drill_LayerDamageFloor.js 图块-地形伤害与地形治愈";
+	DrillUp.g_LDF_PluginTip_baseList = [];
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -429,7 +440,7 @@ Game_System.prototype.drill_LDF_initSysData_Private = function() {
 Game_System.prototype.drill_LDF_checkSysData_Private = function() {
 	
 	// > 旧存档数据自动补充
-	if( this._drill_LDF_seq == undefined ){
+	if( this._drill_LDF_custom == undefined ){
 		this.drill_LDF_initSysData();
 	}
 	

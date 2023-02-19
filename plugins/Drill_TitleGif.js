@@ -701,14 +701,32 @@
  * @type select
  * @option 普通
  * @value 0
- * @option 叠加
+ * @option 发光
  * @value 1
  * @option 实色混合(正片叠底)
  * @value 2
  * @option 浅色
  * @value 3
- * @desc pixi的渲染混合模式。0-普通,1-叠加。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
+ * @option 叠加
+ * @value 4
+ * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
  * @default 0
+ *
+ * @param 图像-色调值
+ * @parent ---贴图---
+ * @type number
+ * @min 0
+ * @max 360
+ * @desc GIF图像的色调值。
+ * @default 0
+ *
+ * @param 图像-模糊边缘
+ * @parent ---贴图---
+ * @type boolean
+ * @on 模糊
+ * @off 关闭
+ * @desc 可以模糊GIF图像的边缘，防止出现像素锯齿。
+ * @default false
  * 
  * @param 旋转速度
  * @parent ---贴图---
@@ -849,7 +867,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			标题GIF：
 //				->菜单层级
 //				->显示/隐藏
@@ -870,6 +888,31 @@
 //			暂无
 //
 
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_TGi_PluginTip_curName = "Drill_TitleGIF.js 标题-多层标题GIF";
+	DrillUp.g_TGi_PluginTip_baseList = ["Drill_CoreOfGlobalSave.js 管理器-全局存储核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_TGi_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_TGi_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_TGi_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_TGi_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_TGi_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -893,6 +936,7 @@
 		}else{
 			data['src_img'] = [];
 		}
+		data['src_img_file'] = "img/titles1/";
 		data['src_bitmaps'] = [];
 		data['src_img_mask'] = String( dataFrom["资源-GIF遮罩"] || "");
 		data['interval'] = Number( dataFrom["帧间隔"] || 4);
@@ -901,6 +945,8 @@
 		data['y'] = Number( dataFrom["平移-GIF Y"] || 0);
 		data['opacity'] = Number( dataFrom["透明度"] || 255);
 		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
+		data['tint'] = Number( dataFrom["图像-色调值"] || 0);
+		data['smooth'] = String( dataFrom["图像-模糊边缘"] || "false") == "true";
 		data['rotate'] = Number( dataFrom["旋转速度"] || 0.0);
 		data['menu_index'] = Number( dataFrom["菜单层级"] || 0);
 		data['zIndex'] = Number( dataFrom["图片层级"] || 0);
@@ -1060,7 +1106,7 @@ Game_Temp.prototype.initialize = function() {
 		
 		var src_img_list = temp_data['src_img'];
 		for(var j = 0; j < src_img_list.length ; j++){
-			this._drill_TGi_preloadTank.push( ImageManager.loadTitle1( src_img_list[j] ) );	
+			this._drill_TGi_preloadTank.push( ImageManager.loadBitmap( temp_data['src_img_file'], src_img_list[j], temp_data['tint'], temp_data['smooth'] ) );	
 		}
 	}
 }
@@ -1138,7 +1184,7 @@ Scene_Title.prototype.drill_TGi_create = function() {
 	}
 	
 	// > 配置的GIF
-	for (var i = 0; i < DrillUp.g_TGi_list.length; i++) {
+	for( var i = 0; i < DrillUp.g_TGi_list.length; i++ ){
 		var temp_data = DrillUp.g_TGi_list[i];
 		if( temp_data == undefined ){ continue; }
 		if( temp_data['inited'] != true ){ continue; }
@@ -1146,7 +1192,7 @@ Scene_Title.prototype.drill_TGi_create = function() {
 		// > GIF贴图
 		var temp_sprite_data = JSON.parse(JSON.stringify( temp_data ));	//深拷贝数据（杜绝引用造成的修改）
 		for(var j = 0; j < temp_sprite_data['src_img'].length ; j++){
-			temp_sprite_data['src_bitmaps'].push(ImageManager.loadTitle1(temp_sprite_data['src_img'][j]));
+			temp_sprite_data['src_bitmaps'].push( ImageManager.loadBitmap( temp_sprite_data['src_img_file'], temp_sprite_data['src_img'][j], temp_sprite_data['tint'], temp_sprite_data['smooth'] ) );
 		}
 		var temp_sprite = new Sprite();
 		temp_sprite.bitmap = temp_sprite_data['src_bitmaps'][0];
@@ -1178,7 +1224,7 @@ Scene_Title.prototype.drill_TGi_create = function() {
 		
 		// > GIF遮罩
 		if( temp_sprite_data['src_img_mask'] != "" ){
-			var temp_mask = new Sprite(ImageManager.loadTitle1(temp_sprite_data['src_img_mask']));
+			var temp_mask = new Sprite( ImageManager.loadBitmap( temp_sprite_data['src_img_file'], temp_sprite_data['src_img_mask'], temp_sprite_data['tint'], temp_sprite_data['smooth'] ) );
 			temp_layer.addChild(temp_mask);
 			temp_layer.mask = temp_mask;
 		}
@@ -1256,10 +1302,8 @@ Scene_Title.prototype.drill_TGi_update = function() {
 //=============================================================================
 }else{
 		Imported.Drill_TitleGIF = false;
-		alert(
-			"【Drill_TitleGIF.js 标题 - 多层标题GIF】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfGlobalSave 管理器-全局存储核心"
-		);
+		var pluginTip = DrillUp.drill_TGi_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
 

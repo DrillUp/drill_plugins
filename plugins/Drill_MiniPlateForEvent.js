@@ -484,7 +484,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			事件说明窗口：
 //				->全局配置
 //					->附加高宽
@@ -506,7 +506,7 @@
 //					->窗口皮肤
 //				
 //				
-//		★私有类如下：
+//		★插件私有类：
 //			* Drill_MPFE_Bean		【事件说明窗口实体类】
 //			* Drill_MPFE_Window		【事件说明窗口】
 //		
@@ -538,7 +538,47 @@
 //		★存在的问题：
 //			暂无
 //
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_MPFE_PluginTip_curName = "Drill_MiniPlateForEvent.js 鼠标-事件说明窗口";
+	DrillUp.g_MPFE_PluginTip_baseList = [
+		"Drill_CoreOfInput.js 系统-输入设备核心",
+		"Drill_CoreOfWindowAuxiliary.js 系统-窗口辅助核心"
+	];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_MPFE_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_MPFE_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_MPFE_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_MPFE_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_MPFE_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到事件
+	//==============================
+	DrillUp.drill_MPFE_getPluginTip_EventNotFind = function( e_id ){
+		return "【" + DrillUp.g_MPFE_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 配置错误
+	//==============================
+	DrillUp.drill_MPFE_getPluginTip_ErrorData = function( e_id ){
+		return "【" + DrillUp.g_MPFE_PluginTip_curName + "】\n事件注释错误，id为"+e_id+"的事件并没有添加说明文本。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -720,13 +760,11 @@ Game_Map.prototype.drill_MPFE_isEventExist = function( e_id ){
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_MiniPlateForEvent.js 鼠标 - 事件说明窗口】\n" +
-				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
+		alert( DrillUp.drill_MPFE_getPluginTip_EventNotFind( e_id ) );
 		return false;
 	}
 	if( e._drill_MPFE_bean == undefined ){
-		alert( "【Drill_MiniPlateForEvent.js 鼠标 - 事件说明窗口】\n" +
-				"事件注释错误，id为"+e_id+"的事件并没有添加说明文本。");
+		alert( DrillUp.drill_MPFE_getPluginTip_ErrorData( e_id ) );
 		return false;
 	}
 	return true;
@@ -1458,9 +1496,8 @@ Drill_MPFE_Window.prototype.drill_updatePosition = function() {
 		xx += _drill_mouse_x;
 		yy += _drill_mouse_y;
 		
-		// > 【地图 - 活动地图镜头】落点位置
-		//		（注意，这里只改变窗口的位置 ）
-		if( Imported.Drill_LayerCamera ){
+		// > 地图落点 转换（注意，这里只改变窗口的位置 ）
+		if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】地图落点 转换
 			if( this._drill_curScene == "Scene_Map" ){
 				var layer = this._drill_curData['layer_index'];
 				if( layer == "下层" || layer == "中层" || layer == "上层" ){
@@ -1545,13 +1582,17 @@ Drill_MPFE_Window.prototype.drill_isInFrame = function( bean ){
 		_y = TouchInput.y;
 	}
 	
-	// > 【地图 - 活动地图镜头】落点位置
-	//		（注意，这里是 鼠标落点 与 矩形范围的图层 偏移关系 ）
-	if( Imported.Drill_LayerCamera ){
+	if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】地图鼠标落点
+										//		（注意，这里是 地图鼠标落点 与 矩形范围的图层 偏移关系 ）
 		if( this._drill_curScene == "Scene_Map" ){
+			
+			// > 下层/中层/上层（这是事件的层级，事件处于 下层、中层、上层）
 			var convert_pos = $gameSystem._drill_LCa_controller.drill_LCa_getPos_OuterToChildren( _x, _y );
 			_x = convert_pos.x;
-			_y = convert_pos.y;					//（这是事件的层级，事件处于 下层、中层、上层）
+			_y = convert_pos.y;
+			
+			// > 图片层/最顶层
+			//（不考虑，因此也不写if判断了）
 		}
 	}
 	
@@ -1786,11 +1827,8 @@ Drill_MPFE_Window.prototype.updateTone = function() {
 //=============================================================================
 }else{
 		Imported.Drill_MiniPlateForEvent = false;
-		alert(
-			"【Drill_MiniPlateForEvent.js 鼠标 - 事件说明窗口】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfInput 系统-输入设备核心"+
-			"\n- Drill_CoreOfWindowAuxiliary 系统-窗口辅助核心"
-		);
+		var pluginTip = DrillUp.drill_MPFE_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
 

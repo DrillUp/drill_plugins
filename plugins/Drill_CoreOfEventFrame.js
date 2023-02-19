@@ -99,22 +99,26 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
-//			行走图性能优化核心：
-//				->判断图块行走图
-//				->初始帧
-//				->贴图参数
-//				->固定帧初始值
-//					> 可见
-//					> x、y、z
-//					> 旋转
-//					> 缩放x
-//					> 缩放y
-//					> 斜切x
-//					> 斜切y
-//				->优化策略
-//					->镜头范围外时，不工作
-//
+//		★功能结构树：
+//			->☆提示信息
+//			->☆变量获取
+//			->☆核心漏洞修复 - 判断图块行走图
+//			->☆核心漏洞修复 - 初始帧
+//			->☆性能优化 - 贴图参数
+//			->☆性能优化 - 固定帧初始值
+//				> 可见
+//				> x、y、z
+//				> 旋转
+//				> 缩放x
+//				> 缩放y
+//				> 斜切x
+//				> 斜切y
+//			->☆性能优化 - 优化策略
+//				->必要执行函数（开放接口）
+//				->允许第一次帧刷新
+//				->镜头范围外时，不工作
+//			
+//			
 //		★必要注意事项：
 //			1."_pattern"与方向没有直接关系，方向和帧数 是两个独立功能。
 //			2."_originalPattern"原先只有事件有，这里强加给了所有物体。
@@ -152,33 +156,50 @@
 //		★存在的问题：
 //			暂无
 //
- 
+
 //=============================================================================
-// ** 变量获取
+// ** ☆提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_COEF_PluginTip_curName = "Drill_CoreOfEventFrame.js 行走图-行走图优化核心";
+	DrillUp.g_COEF_PluginTip_baseList = [];
+	//==============================
+	// * 提示信息 - 报错 - 强制更新提示
+	//==============================
+	DrillUp.drill_COEF_getPluginTip_NeedUpdate_Camera = function(){
+		return "【" + DrillUp.g_COEF_PluginTip_curName + "】\n活动地图镜头插件版本过低，你需要更新 镜头插件 至少v2.2及以上版本。";
+	};
+	
+	
+//=============================================================================
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_CoreOfEventFrame = true;
 　　var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_CoreOfEventFrame');
-	DrillUp.g_COEF_pluginName = "【Drill_CoreOfEventFrame.js 行走图 - 行走图优化核心】";
-	DrillUp.g_COEF_pluginVersion = 1.0;
 	
 	
 	
 //=============================================================================
-// ** 核心漏洞修复 - 判断图块行走图
+// ** ☆核心漏洞修复 - 判断图块行走图
 //			
 //			说明：	> 原函数有bug，已修正。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 核心漏洞修复 - 判断图块行走图（覆写）
+// * 判断图块行走图（覆写）
 //==============================
 Sprite_Character.prototype.isTile = function(){
 	return this._character._tileId > 0;
 };
 
+
 //=============================================================================
-// ** 核心漏洞修复 - 初始帧
+// ** ☆核心漏洞修复 - 初始帧
 //			
 //			原函数：	Game_CharacterBase.prototype.straighten
 //						Game_CharacterBase.prototype.isOriginalPattern
@@ -187,9 +208,10 @@ Sprite_Character.prototype.isTile = function(){
 //						Game_Event.prototype.resetPattern
 //			
 //			说明：	> 强制设定初始帧，并覆写相关函数项，给其他插件方便扩展。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 核心漏洞修复 - 初始化
+// * 初始帧 - 初始化
 //==============================
 var _drill_COEF_initMembers = Game_CharacterBase.prototype.initMembers;
 Game_CharacterBase.prototype.initMembers = function() {
@@ -293,7 +315,7 @@ Game_Follower.prototype.isOriginalPattern = function() {
 	
 	
 //=============================================================================
-// ** 性能优化 - 贴图参数
+// ** ☆性能优化 - 贴图参数
 //			
 //			原函数：	Sprite_Character.prototype.characterBlockX
 //						Sprite_Character.prototype.characterBlockY
@@ -303,6 +325,7 @@ Game_Follower.prototype.isOriginalPattern = function() {
 //						Sprite_Character.prototype.patternHeight
 //			
 //			说明：	> 为了让其他插件继承不产生冗余的计算量，这里每帧都提前算一次，然后才被其他插件功能调用。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 贴图参数 - 初始化
@@ -322,8 +345,6 @@ Sprite_Character.prototype.initialize = function( character ){
 //==============================
 var _drill_COEF_sp_update = Sprite_Character.prototype.update;
 Sprite_Character.prototype.update = function(){
-	
-	// > 固定帧初始值
 	
 	// > 行走图赋值
 	this.drill_COEF_updateValue_BlockX();
@@ -472,12 +493,15 @@ Sprite_Character.prototype.patternHeight = function(){
 
 
 //=============================================================================
-// ** 性能优化 - 固定帧初始值
+// ** ☆性能优化 - 固定帧初始值
+//			
+//			说明：	> 强制每帧都将 基础属性 都赋值一次，用于实现贴图 定量变化，防止 增量变化。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 帧刷新 - 固定帧初始值
+// * 固定帧初始值
 //==============================
-var _Drill_COEF_updatePosition = Sprite_Character.prototype.updatePosition;
+var _drill_COEF_updatePosition = Sprite_Character.prototype.updatePosition;
 Sprite_Character.prototype.updatePosition = function() {
 	
 	// > 父类的函数 Sprite_Base.prototype.updateVisibility
@@ -485,7 +509,7 @@ Sprite_Character.prototype.updatePosition = function() {
 	
 	// > 原函数
 	//	（每帧赋值 this.x、this.y、this.z）
-	_Drill_COEF_updatePosition.call(this);
+	_drill_COEF_updatePosition.call(this);
 	
 	this.rotation = 0;			// 旋转
 	this.scale.x = 1;			// 缩放x
@@ -496,15 +520,30 @@ Sprite_Character.prototype.updatePosition = function() {
 
 
 //=============================================================================
-// ** 性能优化 - 优化策略
+// ** ☆性能优化 - 优化策略
 //
-//			说明：	被优化的 行走图，不工作，不帧刷新。
+//			说明：	> 被优化的 行走图，不工作，不帧刷新。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 优化策略 - 必要执行函数
+// * 优化策略 - 必要执行函数（开放接口）
 //==============================
 Sprite_Character.prototype.drill_COEF_updateImportant = function(){
+	
 	//（如果有必须帧刷新且不能被优化的功能，继承此函数去执行。）
+	
+}
+//==============================
+// * 优化策略 - 必要执行函数 - 执行
+//==============================
+var _drill_COEF_spO_updateImportant = Sprite_Character.prototype.drill_COEF_updateImportant;
+Sprite_Character.prototype.drill_COEF_updateImportant = function(){
+	_drill_COEF_spO_updateImportant.call(this);
+	
+	// > 强制帧刷新z轴，防止z轴闪烁问题
+	if( this._character != undefined ){
+		this.z = this._character.screenZ();
+	}
 }
 //==============================
 // * 优化策略 - 阻塞判定
@@ -522,6 +561,7 @@ Sprite_Character.prototype.drill_COEF_isOptimizationPassed = function(){
 	}
 	return true;
 }
+// > 强制更新提示 锁
 DrillUp.g_LCa_alert = true;
 //==============================
 // * 优化策略 - 判断贴图是否在镜头范围内
@@ -531,11 +571,14 @@ Sprite_Character.prototype.drill_COEF_posIsInCamera = function( realX, realY ){
 	var ohh = Graphics.boxHeight / $gameMap.tileHeight();
 	var sww = oww;
 	var shh = ohh;
-	if( Imported.Drill_LayerCamera ){
-		if( $gameSystem._drill_LCa_controller == undefined && DrillUp.g_LCa_alert == true ){ 
-			alert( DrillUp.g_COEF_pluginName + "\n活动地图镜头插件版本过低，你需要更新 镜头插件 至少v1.9及以上版本。");
+	if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】镜头范围内+缩放
+	
+		// > 强制更新提示
+		if( DrillUp.drill_LCa_isInScene_Map == undefined && DrillUp.g_LCa_alert == true ){ 
+			alert( DrillUp.drill_COEF_getPluginTip_NeedUpdate_Camera() );
 			DrillUp.g_LCa_alert = false;
 		}
+		
 		sww = sww / $gameSystem._drill_LCa_controller._drill_scaleX;
 		shh = shh / $gameSystem._drill_LCa_controller._drill_scaleY;
 	}
@@ -552,22 +595,36 @@ SceneManager.initialize = function() {
 	_drill_COEF_scene_initialize.call(this);
 	
 	//==============================
+	// * 优化策略 - 初始化
+	//==============================
+	var _drill_COEF_spO_initialize = Sprite_Character.prototype.initialize;
+	Sprite_Character.prototype.initialize = function( character ){
+		_drill_COEF_spO_initialize.call( this, character );
+		this._drill_COEF_isFristUpdate = true;	//允许第一次帧刷新
+	}
+	
+	//==============================
 	// * 优化策略 - 帧刷新
 	//==============================
 	var _drill_COEF_spO_update = Sprite_Character.prototype.update;
 	Sprite_Character.prototype.update = function(){
 		
-		// > 优化策略 - 必要执行函数
-		this.drill_COEF_updateImportant();
-		
-		// > 优化策略 - 阻塞判定
-		if( this.drill_COEF_isOptimizationPassed() == false ){ 
-			this.visible = false;
-			return;
+		// > 优化策略 - 允许第一次帧刷新（考虑到部分插件可能会在 帧刷新 中初始化）
+		if( this._drill_COEF_isFristUpdate == true ){
+			this._drill_COEF_isFristUpdate = false;
+		}else{
+			
+			// > 优化策略 - 必要执行函数
+			this.drill_COEF_updateImportant();
+			
+			// > 优化策略 - 阻塞判定
+			if( this.drill_COEF_isOptimizationPassed() == false ){ 
+				this.visible = false;
+				return;
+			}
 		}
 		
 		// > 原函数
 		_drill_COEF_spO_update.call(this);
 	}
 }
-

@@ -319,7 +319,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			物品积累公共事件：
 //				->物品数量变化
 //
@@ -333,6 +333,31 @@
 //			暂无
 //
 
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_PICT_PluginTip_curName = "Drill_PlayerItemCollectTiming.js 公共事件-物品积累时";
+	DrillUp.g_PICT_PluginTip_baseList = ["Drill_LayerCommandThread.js 地图-多线程"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_PICT_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_PICT_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_PICT_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_PICT_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_PICT_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -614,10 +639,8 @@ Scene_Map.prototype.drill_PICT_updateCommonEvent = function() {
 //=============================================================================
 }else{
 		Imported.Drill_PlayerItemCollectTiming = false;
-		alert(
-			"【Drill_PlayerItemCollectTiming.js 公共事件 - 物品积累时】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_LayerCommandThread 地图-多线程"
-		);
+		var pluginTip = DrillUp.drill_PICT_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
 

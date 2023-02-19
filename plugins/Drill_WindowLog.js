@@ -448,7 +448,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			窗口提示消息：
 //				->消息提示
 //				->初始战斗消息
@@ -462,7 +462,18 @@
 //		★存在的问题：
 //			暂无
 //
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_WL_PluginTip_curName = "Drill_WindowLog.js 战斗UI-窗口提示消息";
+	DrillUp.g_WL_PluginTip_baseList = [];
+	
+	
 //=============================================================================
 // ** 变量配置
 //=============================================================================
@@ -472,6 +483,7 @@
     DrillUp.parameters = PluginManager.parameters('Drill_WindowLog');
 	
 	
+	/*-----------------杂项------------------*/
     DrillUp.g_WL_speed = Number(DrillUp.parameters['战斗间隔'] || 12);
     DrillUp.g_WL_color = String(DrillUp.parameters['消息框颜色'] || '#0022ff');
     DrillUp.g_WL_opacity = Number(DrillUp.parameters['消息框透明度'] || 176);
@@ -1050,7 +1062,7 @@ Game_Actor.prototype.drill_WL_actorColorName = function(){
 		var name = this.name();
 		var color = $gameTemp.drill_ATC_getColorId( this.actorId() );
 		if( color >= 0 ){
-			name = "\\c["+ String(Number(color)+100) + "]" + name + "\\c[0]";
+			name = "\\c["+ String(color) + "]" + name + "\\c[0]";
 		}
 		return name;
 	}else{

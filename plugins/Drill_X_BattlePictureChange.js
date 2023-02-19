@@ -252,7 +252,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			角色立绘切换：
 //				x->角色图像-前视图
 //				x->角色图像-背景图
@@ -271,21 +271,33 @@
 //			暂无
 //		该插件有 $gameSystem._drill_xxx ，但都为临时使用的变量。
 //
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_XBPC_PluginTip_curName = "Drill_X_BattlePictureChange.js 战斗UI-角色头像切换[扩展]";
+	DrillUp.g_XBPC_PluginTip_baseList = [];
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_X_BattlePictureChange = true;
 　　var DrillUp = DrillUp || {}; 
-
     DrillUp.parameters = PluginManager.parameters('Drill_X_BattlePictureChange');
+	
 	
 	DrillUp.g_XBPC_face_list_length = 20;
 	DrillUp.g_XBPC_face_list = {};
 	for (var i = 1; i <= DrillUp.g_XBPC_face_list_length ; i++ ) {
 		DrillUp.g_XBPC_face_list[i] = DrillUp.parameters['角色头像-' + String(i) ];
 	};
+
 
 //=============================================================================
 // ** 插件指令

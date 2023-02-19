@@ -65,12 +65,12 @@
  * @param 校验失败-缺少md5库时
  * @type note
  * @desc 此内容表示在缺少md5库时输出的提示文字，为空则不提示。
- * @default "【Drill_GlobalStaticFileChecker.js 管理器 - 静态文件密钥校验器】\n缺少外部md5库，你需要手动添加该库。\n具体去看看文档'关于静态文件秘钥生成器.docx'。"
+ * @default " 【Drill_GlobalStaticFileChecker.js 管理器 - 静态文件密钥校验器】\n缺少外部md5库，你需要手动添加该库。\n具体去看看文档'关于静态文件秘钥生成器.docx'。"
  * 
  * @param 校验失败-缺少密钥数据时
  * @type note
  * @desc 此内容表示在缺少密钥设置时输出的提示文字，为空则不提示。
- * @default "【Drill_GlobalStaticFileChecker.js 管理器 - 静态文件密钥校验器】\n插件缺少密钥数据，插件至少要一个密钥才能工作。\n具体去看看文档'关于静态文件秘钥生成器.docx'。"
+ * @default " 【Drill_GlobalStaticFileChecker.js 管理器 - 静态文件密钥校验器】\n插件缺少密钥数据，插件至少要一个密钥才能工作。\n具体去看看文档'关于静态文件秘钥生成器.docx'。"
  * 
  * @param 校验失败-检测到外部改动时
  * @type note
@@ -100,7 +100,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			静态文件密钥校验器：
 //				->校验规则
 //
@@ -113,7 +113,18 @@
 //		★存在的问题：
 //			暂无
 //
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_GSFC_PluginTip_curName = "Drill_GlobalStaticFileChecker.js 管理器-静态文件密钥校验器";
+	DrillUp.g_GSFC_PluginTip_baseList = [];
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -131,7 +142,7 @@
 	
 	/*-----------------秘钥列表------------------*/
     DrillUp.g_GSFC_data = [
-		"N4IgZglgNgpg+lCBnALiAXAbVAaxgTwxAE4wAGAFjIBMAmANmoEMmB2AZgGNqYAOARlYVaAVnojW9MELBMRIADQgADkxQALIsxRMA9AEFOKAPYAnJADoAVkmMA7EAF8AukryF0IaqehQnQA=",
+		"N4IgZglgNgpg+lCBnALiAXAbVAaxgTwxABMBmAdnLADYBOWgQwCMKAmB86pgBgA4YAxmAHkALAEZxtAUya8QAGhAAHBigAWRYmoYB6AIICUAewBOSAHQArJMYB2IAL4LcBItwG9xrbmG2yaIWJRagYAVlFSUW4GXm5yMlYmRRU1TXQSHQM7CABbNQh7Sxt7JwBdJTxCDIZapyA==",
 	];
 	
 	

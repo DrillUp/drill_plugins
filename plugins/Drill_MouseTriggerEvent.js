@@ -45,6 +45,10 @@
  *      触发范围具体介绍可以去看看 "7.行走图 > 关于行走图与图块.docx"。
  *   (2.如果你设置了"悬停"+"不在悬停区域时"，一定要确保事件页AB两边都配
  *      置了行走图，不然会不停地 行走图 -> 空行走图 来回切换。
+ *   (3.由于注释设置全部跨事件页，也就是说 鼠标触发 与 事件对象 一一绑定，
+ *      与事件页无关，切换事件页不能关闭鼠标触发。
+ *      因此，最好将所有 鼠标触发 的注释都写在事件页的第一页，然后根据
+ *      每页的条件来区分不同的状态工作流程。
  * 可选设置：
  *   (1.默认右键会进入菜单，你如果需要使用右键，可以在插件"互动-鼠
  *      标辅助操作面板" 里面禁用右键菜单。
@@ -83,6 +87,10 @@
  * 2.注意，"持续"和"一帧"的区别，就是你按住小爱丽丝，前者会不停地跳，
  *   后者只跳一次。
  * 3."持续"实际上是在时间段内，一直保持独立开关为开启状态。
+ * 4.由于注释设置全部跨事件页，也就是说 鼠标触发 与 事件对象 一一绑定，
+ *   与事件页无关，切换事件页不能关闭鼠标触发。
+ *   因此，最好将所有 鼠标触发 的注释都写在事件页的第一页，然后根据
+ *   每页的条件来区分不同的状态工作流程。
  * 
  * -----------------------------------------------------------------------------
  * ----激活条件 - OFF条件
@@ -110,7 +118,7 @@
  *
  * 插件指令：>鼠标触发 : 去除 : 1 : 全部
  *
- * 注意，插件指令添加的触发事件都是暂时的，刷新地图后失效。
+ * 1.注意，插件指令添加的触发事件都是暂时的，刷新地图后失效。
  *
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -210,7 +218,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			鼠标触发事件：
 //				->接近触发
 //				->按下触发
@@ -239,7 +247,44 @@
 //			  正常情况都会停留回原来有注释页的那一面。正常状态下保存，则没有任何问题。
 //			  该插件的解决办法是：pushdata到$gameSystem中，sprite临时贴图放$gameTemp中。数据存储，贴图随着数据刷新。
 //		
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_MTE_PluginTip_curName = "Drill_MouseTriggerEvent.js 鼠标-鼠标触发事件";
+	DrillUp.g_MTE_PluginTip_baseList = ["Drill_CoreOfInput.js 系统-输入设备核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_MTE_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_MTE_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_MTE_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_MTE_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_MTE_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到事件
+	//==============================
+	DrillUp.drill_MTE_getPluginTip_EventNotFind = function( e_id ){
+		return "【" + DrillUp.g_MTE_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 强制更新提示
+	//==============================
+	DrillUp.drill_MTE_getPluginTip_NeedUpdate_Camera = function(){
+		return "【" + DrillUp.g_MTE_PluginTip_curName + "】\n活动地图镜头插件版本过低，你需要更新 镜头插件 至少v2.2及以上版本。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -251,6 +296,7 @@
 	
 	/*-----------------杂项------------------*/
     DrillUp.g_MTE_remainTrigger = String(DrillUp.parameters['对话框弹出时是否仍然可触发'] || "true") === "true";
+
 
 
 //=============================================================================
@@ -273,9 +319,9 @@ Game_Interpreter.prototype.pluginCommand = function(command, args){
 			var type = String(args[5]);
 			var temp3 = String(args[7]);
 			var temp4 = String(args[9]);
-			if(temp1 == "添加"){
+			if( temp1 == "添加" ){
 				var obj = {};
-				if(temp2 == "本事件"){
+				if( temp2 == "本事件" ){
 					obj._event_id = this._eventId;
 				}else{
 					obj._event_id = Number(temp2);
@@ -747,7 +793,8 @@ Scene_Map.prototype.drill_MTE_isBitmapReady = function( sprite ){
 	if( sprite.opacity === 0 ){ return false};
 	return true;	
 }
-DrillUp.g_LPa_alert = true;
+// > 强制更新提示 锁
+DrillUp.g_LCa_alert = true;
 //==============================
 // * 贴图判定 - 是否处在范围
 //==============================
@@ -758,16 +805,22 @@ Scene_Map.prototype.drill_MTE_isOnRange = function( sprite ){
 	var cy = sprite.y;
 	var _x = _drill_mouse_x;
 	var _y = _drill_mouse_y;
-	if( Imported.Drill_LayerCamera ){		// 【地图 - 活动地图镜头】获取鼠标落点位置
-											//	（这是事件的层级，事件处于 下层、中层、上层）
-		if( $gameSystem._drill_LCa_controller == undefined && DrillUp.g_LPa_alert == true ){ 
-			alert("【Drill_MouseTriggerEvent.js 鼠标 - 鼠标触发事件】\n活动地图镜头插件版本过低，你需要更新 镜头插件 至少v1.9及以上版本。");
-			DrillUp.g_LPa_alert = false;
+	if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】地图鼠标落点
+		
+		// > 强制更新提示
+		if( $gameSystem._drill_LCa_controller == undefined && DrillUp.g_LCa_alert == true ){ 
+			alert( DrillUp.drill_MTE_getPluginTip_NeedUpdate_Camera() );
+			DrillUp.g_LCa_alert = false;
 			return; 
 		}
+		
+		// > 下层/中层/上层（这是事件的层级，事件处于 下层、中层、上层）
 		var mouse_pos = $gameSystem._drill_LCa_controller.drill_LCa_getMousePos_OnChildren();
 		_x = mouse_pos.x;
 		_y = mouse_pos.y;
+			
+		// > 图片层/最顶层
+		//（不考虑，因此也不写if判断了）
 	}
 	if( _x <  cx + 0  - cw*sprite.anchor.x ){ return false };
 	if( _x >= cx + cw - cw*sprite.anchor.x ){ return false };
@@ -792,10 +845,8 @@ Scene_Map.prototype.drill_MTE_isOnRangeList = function( sprite_list ){
 //=============================================================================
 }else{
 		Imported.Drill_MouseTriggerEvent = false;
-		alert(
-			"【Drill_MouseTriggerEvent.js 鼠标 - 鼠标触发事件】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfInput 系统-输入设备核心"
-		);
+		var pluginTip = DrillUp.drill_MTE_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
 

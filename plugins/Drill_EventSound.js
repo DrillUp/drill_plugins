@@ -202,7 +202,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			声音距离化
 //				->根据事件声音远近变化
 //				->下一个声音不衰减
@@ -223,6 +223,37 @@
 //			1.捕获SE的方法有些零散，代码的结构有些复杂，不直观。
 //			
 
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_ESo_PluginTip_curName = "Drill_EventSound.js 声音-事件的声音";
+	DrillUp.g_ESo_PluginTip_baseList = ["Drill_RmmvCoreFix.js 系统-rmmv核心修复"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_ESo_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_ESo_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_ESo_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_ESo_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_ESo_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到事件
+	//==============================
+	DrillUp.drill_ESo_getPluginTip_EventNotFind = function( e_id ){
+		return "【" + DrillUp.g_ESo_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -343,8 +374,7 @@ Game_Map.prototype.drill_ESo_isEventExist = function( e_id ){
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_EventSound.js 声音 - 事件的声音】\n" +
-				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
+		alert( DrillUp.drill_ESo_getPluginTip_EventNotFind( e_id ) );
 		return false;
 	}
 	return true;
@@ -708,7 +738,7 @@ Game_Map.prototype.drill_ESo_updateDistanceDecay = function() {
 			var _width = $gameSystem._drill_ESo_width;
 			
 			// > 镜头缩放与位移【地图 - 活动地图镜头】
-			if( Imported.Drill_LayerCamera && $gameSystem.drill_LCa_curScaleX ){
+			if( Imported.Drill_LayerCamera && $gameSystem.drill_LCa_curScaleX ){	// 【地图 - 活动地图镜头】声音距离计算？
 				_start = _start * 2 / ( $gameSystem.drill_LCa_curScaleX() + $gameSystem.drill_LCa_curScaleY() );
 				_width = _width * 2 / ( $gameSystem.drill_LCa_curScaleX() + $gameSystem.drill_LCa_curScaleY() );
 			}
@@ -779,10 +809,8 @@ Game_Map.prototype.drill_ESo_updateSoundInterrupt = function() {
 //=============================================================================
 }else{
 		Imported.Drill_EventSound = false;
-		alert(
-			"【Drill_EventSound.js 声音 - 事件的声音】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_RmmvCoreFix 系统-rmmv核心修复"
-		);
+		var pluginTip = DrillUp.drill_ESo_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
 

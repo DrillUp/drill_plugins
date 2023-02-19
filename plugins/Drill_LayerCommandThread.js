@@ -108,7 +108,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			多线程：
 //				->地图容器
 //					->标准模块
@@ -118,7 +118,7 @@
 //					->串行
 //					->并行处理
 //		
-//		★私有类如下：
+//		★插件私有类：
 //			* Drill_LCT_GamePipeEvent		管道物体
 //
 //		★必要注意事项：
@@ -139,7 +139,30 @@
 //		★存在的问题：
 //			暂无
 //		
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_LCT_PluginTip_curName = "Drill_LayerCommandThread.js 地图-多线程";
+	DrillUp.g_LCT_PluginTip_baseList = [];
+	//==============================
+	// * 提示信息 - 报错 - 参数不存在
+	//==============================
+	DrillUp.drill_LCT_getPluginTip_ErrorDataNull = function( commonEventId ){
+		return "【" + DrillUp.g_LCT_PluginTip_curName + "】\n参数错误，游戏中并不存在id为"+e_id+"的公共事件。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 参数指向公共事件为空
+	//==============================
+	DrillUp.drill_LCT_getPluginTip_ErrorDataEmpty = function( commonEventId ){
+		return "【" + DrillUp.g_LCT_PluginTip_curName + "】\n参数错误，游戏中id为"+e_id+"的公共事件是空的，没有任何事件指令。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -236,14 +259,10 @@ Game_Map.prototype.drill_LCT_addPipeEvent_private = function( data ){
 	// > 校验
     var commonEvent = $dataCommonEvents[ data['commonEventId'] ];
     if( commonEvent == undefined ){
-		
-		alert( "【Drill_LayerCommandThread.js 地图 - 多线程】\n" +
-				"参数错误，游戏中并不存在id为"+data['commonEventId']+"的公共事件。");
+		alert( DrillUp.drill_LCT_getPluginTip_ErrorDataNull( data['commonEventId'] ) );
 		return;
     }else if( commonEvent.list.length == 0 ){
-		
-		alert( "【Drill_LayerCommandThread.js 地图 - 多线程】\n" +
-				"参数错误，游戏中id为"+data['commonEventId']+"的公共事件是空的，没有任何事件指令。");
+		alert( DrillUp.drill_LCT_getPluginTip_ErrorDataEmpty( data['commonEventId'] ) );
 		return;
 	}
 	

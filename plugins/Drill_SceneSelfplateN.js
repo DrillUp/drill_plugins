@@ -1356,7 +1356,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			全自定义面板：
 //				->窗口
 //					->选项窗口、详细窗口、描述图片
@@ -1377,6 +1377,35 @@
 //			暂无
 //
 
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_SSpN_PluginTip_curName = "Drill_SceneSelfplateN.js 面板-全自定义信息面板N";
+	DrillUp.g_SSpN_PluginTip_baseList = [
+		"Drill_CoreOfGlobalSave.js 管理器-全局存储核心",
+		"Drill_CoreOfWindowAuxiliary.js 系统-窗口辅助核心",
+		"Drill_CoreOfSelectableButton.js 系统-按钮组核心"
+	];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_SSpN_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_SSpN_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_SSpN_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_SSpN_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_SSpN_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -2686,11 +2715,7 @@ Drill_SSpN_DescWindow.prototype.drill_refreshDesc = function( cur_index ) {
 //=============================================================================
 }else{
 		Imported.Drill_SceneSelfplateN = false;
-		alert(
-			"【Drill_SceneSelfplateN.js 面板 - 全自定义信息面板N】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfGlobalSave 管理器-全局存储核心"+
-			"\n- Drill_CoreOfWindowAuxiliary 系统-窗口辅助核心" +
-			"\n- Drill_CoreOfSelectableButton 系统-按钮组核心"
-		);
+		var pluginTip = DrillUp.drill_SSpN_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 

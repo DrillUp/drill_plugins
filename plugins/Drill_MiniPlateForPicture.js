@@ -969,7 +969,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			图片说明窗口：
 //				->全局配置
 //					->锁定皮肤样式
@@ -991,7 +991,7 @@
 //					->窗口皮肤
 //				
 //				
-//		★私有类如下：
+//		★插件私有类：
 //			* Drill_MPFP_Bean		【图片说明窗口实体类】
 //			* Drill_MPFP_Window		【图片说明窗口】
 //		
@@ -1005,7 +1005,41 @@
 //		★存在的问题：
 //			暂无
 //
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_MPFP_PluginTip_curName = "Drill_MiniPlateForPicture.js 鼠标-图片说明窗口";
+	DrillUp.g_MPFP_PluginTip_baseList = [
+		"Drill_CoreOfInput.js 系统-输入设备核心",
+		"Drill_CoreOfWindowAuxiliary.js 系统-窗口辅助核心"
+	];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_MPFP_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_MPFP_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_MPFP_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_MPFP_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_MPFP_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到图片
+	//==============================
+	DrillUp.drill_MPFP_getPluginTip_PictureNotFind = function( pic_id ){
+		return "【" + DrillUp.g_MPFP_PluginTip_curName + "】\n插件指令错误，id为"+pic_id+"的图片还没被创建。\n你可能需要将指令放在'显示图片'事件指令之后。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -1219,9 +1253,7 @@ Game_Screen.prototype.drill_MPFP_isPictureExist = function( pic_id ){
 	
 	var pic = this.picture( pic_id );
 	if( pic == undefined ){
-		alert( "【Drill_MiniPlateForPicture.js 鼠标 - 图片说明窗口】\n" +
-				"插件指令错误，id为"+pic_id+"的图片还没被创建。\n" + 
-				"你可能需要将指令放在'显示图片'事件指令之后。");
+		alert( DrillUp.drill_MPFP_getPluginTip_PictureNotFind( pic_id ) );
 		return false;
 	}
 	return true;
@@ -2028,7 +2060,7 @@ Drill_MPFP_Window.prototype.drill_updatePosition = function() {
 		xx += _drill_mouse_x;
 		yy += _drill_mouse_y;
 		
-		// > 【战斗 - 活动战斗镜头】落点位置	
+		// > 【战斗 - 活动战斗镜头】战斗落点 转换
 		//		（注意，这里只改变窗口的位置 ）
 		if( Imported.Drill_BattleCamera ){
 			if( this._drill_curScene == "Scene_Battle" ){
@@ -2044,9 +2076,8 @@ Drill_MPFP_Window.prototype.drill_updatePosition = function() {
 			}
 		}
 		
-		// > 【地图 - 活动地图镜头】落点位置	
-		//		（注意，这里只改变窗口的位置 ）
-		if( Imported.Drill_LayerCamera ){
+		// > 地图落点 转换（注意，这里只改变窗口的位置 ）
+		if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】地图落点 转换
 			if( this._drill_curScene == "Scene_Map" ){
 				var layer = this._drill_curData['map_layerIndex'];
 				if( layer == "下层" || layer == "中层" || layer == "上层" ){
@@ -2369,10 +2400,7 @@ Drill_MPFP_Window.prototype.updateTone = function() {
 //=============================================================================
 }else{
 		Imported.Drill_MiniPlateForPicture = false;
-		alert(
-			"【Drill_MiniPlateForPicture.js 鼠标 - 图片说明窗口】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfInput 系统-输入设备核心"+
-			"\n- Drill_CoreOfWindowAuxiliary 系统-窗口辅助核心"
-		);
+		var pluginTip = DrillUp.drill_MPFP_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 

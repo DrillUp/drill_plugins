@@ -112,12 +112,12 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			鼠标照明：
 //				->鼠标的 物体照明
 //				->鼠标的 限时动态照明
 //
-//		★私有类如下：
+//		★插件私有类：
 //			* Drill_MIl_MouseFakeEvent【鼠标伪事件】
 //		
 //		★必要注意事项：
@@ -129,8 +129,32 @@
 //		★存在的问题：
 //			暂无
 //		
-//
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_MIl_PluginTip_curName = "Drill_MouseIllumination.js 鼠标-自定义照明效果";
+	DrillUp.g_MIl_PluginTip_baseList = ["Drill_LayerIllumination.js 地图-自定义照明效果"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_MIl_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_MIl_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_MIl_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_MIl_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_MIl_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -152,7 +176,6 @@ if( Imported.Drill_LayerIllumination ){
 var _drill_MIl_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_MIl_pluginCommand.call(this, command, args);
-	
 	if( command === ">自定义照明" ){
 		
 		// > 如果黑暗层未开，则插件指令无效
@@ -246,9 +269,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 //=============================================================================
 }else{
 		Imported.Drill_MouseIllumination = false;
-		alert(
-			"【Drill_MouseIllumination.js 鼠标 - 自定义照明效果】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_LayerIllumination 地图-自定义照明效果"
-		);
+		var pluginTip = DrillUp.drill_MIl_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 

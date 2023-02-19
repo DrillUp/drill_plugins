@@ -1396,14 +1396,32 @@
  * @type select
  * @option 普通
  * @value 0
- * @option 叠加
+ * @option 发光
  * @value 1
  * @option 实色混合(正片叠底)
  * @value 2
  * @option 浅色
  * @value 3
- * @desc pixi的渲染混合模式。0-普通,1-叠加。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
+ * @option 叠加
+ * @value 4
+ * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
  * @default 0
+ *
+ * @param 图像-色调值
+ * @parent ---贴图---
+ * @type number
+ * @min 0
+ * @max 360
+ * @desc GIF图像的色调值。
+ * @default 0
+ *
+ * @param 图像-模糊边缘
+ * @parent ---贴图---
+ * @type boolean
+ * @on 模糊
+ * @off 关闭
+ * @desc 可以模糊GIF图像的边缘，防止出现像素锯齿。
+ * @default false
  *
  * @param 行走图层级
  * @parent ---贴图---
@@ -1523,7 +1541,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			行走图GIF：
 //				->个体层级
 //					->添加贴图到层级【标准函数】
@@ -1548,7 +1566,7 @@
 //				->行走图GIF控制器【Drill_EFGi_Controller】
 //				->行走图GIF贴图【Drill_EFGi_Sprite】
 //		
-//		★私有类如下：
+//		★插件私有类：
 //			* Drill_EFGi_Controller	【行走图GIF控制器】
 //			* Drill_EFGi_Sprite		【行走图GIF贴图】
 //		
@@ -1568,8 +1586,36 @@
 //		★存在的问题：
 //			暂无
 //
-//
 
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_EFGi_PluginTip_curName = "Drill_EventFrameGif.js 行走图-多层行走图GIF";
+	DrillUp.g_EFGi_PluginTip_baseList = [];
+	//==============================
+	// * 提示信息 - 报错 - 找不到事件
+	//==============================
+	DrillUp.drill_EFGi_getPluginTip_EventNotFind = function( e_id ){
+		return "【" + DrillUp.g_EFGi_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 强制更新提示
+	//==============================
+	DrillUp.drill_EFGi_getPluginTip_NeedUpdate_Camera = function(){
+		return "【" + DrillUp.g_EFGi_PluginTip_curName + "】\n活动地图镜头插件版本过低，你需要更新 镜头插件 至少v2.2及以上版本。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - NaN校验值
+	//==============================
+	DrillUp.drill_EFGi_getPluginTip_ParamIsNaN = function( param_name ){
+		return "【" + DrillUp.g_EFGi_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -1605,6 +1651,8 @@
 		data['x'] = Number( dataFrom["平移-GIF X"] || 0);
 		data['y'] = Number( dataFrom["平移-GIF Y"] || 0);
 		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
+		data['tint'] = Number( dataFrom["图像-色调值"] || 0);
+		data['smooth'] = String( dataFrom["图像-模糊边缘"] || "false") == "true";
 		data['anim_index'] = String( dataFrom["行走图层级"] || "在行走图前面");
 		data['zIndex'] = Number( dataFrom["图片层级"] || 0);
 		data['rotate'] = Number( dataFrom["旋转速度"] || 0);
@@ -1776,8 +1824,7 @@ Game_Map.prototype.drill_EFGi_isEventExist = function( e_id ){
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_EventFrameGif.js 行走图 - 多层行走图GIF】\n" +
-				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
+		alert( DrillUp.drill_EFGi_getPluginTip_EventNotFind( e_id ) );
 		return false;
 	}
 	return true;
@@ -2378,6 +2425,8 @@ Drill_EFGi_Controller.prototype.drill_initData = function(){
 	if( data['x'] == undefined ){ data['x'] = 0 };								//贴图 - 平移X
 	if( data['y'] == undefined ){ data['y'] = 0 };								//贴图 - 平移Y
 	if( data['blendMode'] == undefined ){ data['blendMode'] = 0 };				//贴图 - 混合模式
+	if( data['tint'] == undefined ){ data['tint'] = 0 };						//贴图 - 图像-色调值
+	if( data['smooth'] == undefined ){ data['smooth'] = false };				//贴图 - 图像-模糊边缘
 	if( data['anim_index'] == undefined ){ data['anim_index'] = "在行走图前面" };//贴图 - 行走图层级
 	if( data['zIndex'] == undefined ){ data['zIndex'] = 0 };					//贴图 - 图片层级
 	if( data['rotate'] == undefined ){ data['rotate'] = 0 };					//贴图 - 自旋转速度（单位角度）
@@ -2537,38 +2586,23 @@ Drill_EFGi_Controller.prototype.drill_EFGi_updateCheckNaN = function(){
 	if( DrillUp.g_EFGi_checkNaN == true ){
 		if( isNaN( this._drill_x ) ){
 			DrillUp.g_EFGi_checkNaN = false;
-			alert(
-				"【Drill_AnimationSurround.js 行走图 - 多层行走图GIF】\n"+
-				"检测到控制器参数_drill_x出现了NaN值，请及时检查你的函数。"
-			);
+			alert( DrillUp.drill_EFGi_getPluginTip_ParamIsNaN( "_drill_x" ) );
 		}
 		if( isNaN( this._drill_y ) ){
 			DrillUp.g_EFGi_checkNaN = false;
-			alert(
-				"【Drill_AnimationSurround.js 行走图 - 多层行走图GIF】\n"+
-				"检测到控制器参数_drill_y出现了NaN值，请及时检查你的函数。"
-			);
+			alert( DrillUp.drill_EFGi_getPluginTip_ParamIsNaN( "_drill_y" ) );
 		}
 		if( isNaN( this._drill_opacity ) ){
 			DrillUp.g_EFGi_checkNaN = false;
-			alert(
-				"【Drill_AnimationSurround.js 行走图 - 多层行走图GIF】\n"+
-				"检测到控制器参数_drill_opacity出现了NaN值，请及时检查你的函数。"
-			);
+			alert( DrillUp.drill_EFGi_getPluginTip_ParamIsNaN( "_drill_opacity" ) );
 		}
 		if( isNaN( this._drill_scaleX ) ){
 			DrillUp.g_EFGi_checkNaN = false;
-			alert(
-				"【Drill_AnimationSurround.js 行走图 - 多层行走图GIF】\n"+
-				"检测到控制器参数_drill_scaleX出现了NaN值，请及时检查你的函数。"
-			);
+			alert( DrillUp.drill_EFGi_getPluginTip_ParamIsNaN( "_drill_scaleX" ) );
 		}
 		if( isNaN( this._drill_scaleY ) ){
 			DrillUp.g_EFGi_checkNaN = false;
-			alert(
-				"【Drill_AnimationSurround.js 行走图 - 多层行走图GIF】\n"+
-				"检测到控制器参数_drill_scaleY出现了NaN值，请及时检查你的函数。"
-			);
+			alert( DrillUp.drill_EFGi_getPluginTip_ParamIsNaN( "_drill_scaleY" ) );
 		}
 	}
 }
@@ -2726,7 +2760,7 @@ Drill_EFGi_Sprite.prototype.drill_EFGi_initSprite_Private = function(){
 	// > 资源对象组
 	this._drill_bitmapTank = [];
 	for(var j = 0; j < data['src_img_gif'].length; j++ ){
-		var bitmap = ImageManager.loadBitmap( data['src_img_file'], data['src_img_gif'][j], 0, true );
+		var bitmap = ImageManager.loadBitmap( data['src_img_file'], data['src_img_gif'][j], data['tint'], data['smooth'] );
 		this._drill_bitmapTank.push( bitmap );
 	}
 	
@@ -2845,6 +2879,7 @@ Drill_EFGi_Sprite.prototype.drill_EFGi_isOptimizationPassed_Private = function()
 	}
 	return true;
 }
+// > 强制更新提示 锁
 DrillUp.g_LCa_alert = true;
 //==============================
 // * 优化策略 - 判断贴图是否在镜头范围内
@@ -2854,11 +2889,14 @@ Drill_EFGi_Sprite.prototype.drill_EFGi_posIsInCamera = function( realX, realY ){
 	var ohh = Graphics.boxHeight / $gameMap.tileHeight();
 	var sww = oww;
 	var shh = ohh;
-	if( Imported.Drill_LayerCamera ){
+	if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】镜头范围内+缩放
+		
+		// > 强制更新提示
 		if( $gameSystem._drill_LCa_controller == undefined && DrillUp.g_LCa_alert == true ){ 
-			alert("【Drill_EventFrameGif.js 行走图 - 多层行走图GIF】\n活动地图镜头插件版本过低，你需要更新 镜头插件 至少v1.9及以上版本。");
+			alert( DrillUp.drill_EFGi_getPluginTip_NeedUpdate_Camera() );
 			DrillUp.g_LCa_alert = false;
 		}
+		
 		sww = sww / $gameSystem._drill_LCa_controller._drill_scaleX;
 		shh = shh / $gameSystem._drill_LCa_controller._drill_scaleY;
 	}

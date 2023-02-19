@@ -208,7 +208,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			持续动作效果：
 //				->动作
 //					->标准闪烁
@@ -233,7 +233,30 @@
 //		★存在的问题：
 //			暂无
 //
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_PCE_PluginTip_curName = "Drill_PictureContinuedEffect.js 图片-持续动作效果";
+	DrillUp.g_PCE_PluginTip_baseList = [];
+	//==============================
+	// * 提示信息 - 报错 - 找不到图片
+	//==============================
+	DrillUp.drill_PCE_getPluginTip_PictureNotFind = function( pic_id ){
+		return "【" + DrillUp.g_PCE_PluginTip_curName + "】\n插件指令错误，id为"+pic_id+"的图片还没被创建。\n你可能需要将指令放在'显示图片'事件指令之后。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - NaN校验值
+	//==============================
+	DrillUp.drill_PCE_getPluginTip_ParamIsNaN = function( param_name ){
+		return "【" + DrillUp.g_PCE_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -926,9 +949,7 @@ Game_Screen.prototype.drill_PCE_isPictureExist = function( pic_id ){
 	
 	var pic = this.picture( pic_id );
 	if( pic == undefined ){
-		alert( "【Drill_PictureContinuedEffect.js 图片 - 持续动作效果】\n" +
-				"插件指令错误，id为"+pic_id+"的图片还没被创建。\n" + 
-				"你可能需要将指令放在'显示图片'事件指令之后。");
+		alert( DrillUp.drill_PCE_getPluginTip_PictureNotFind( pic_id ) );
 		return false;
 	}
 	return true;
@@ -1116,8 +1137,7 @@ Game_Picture.prototype.drill_PCE_isPlaying = function() {
 //==============================
 Game_Picture.prototype.drill_PCE_setOpacity = function( opacity ){
 	if( isNaN(opacity) ){
-		alert(	"【Drill_PictureContinuedEffect.js 图片 - 持续动作效果】\n" +
-				"错误，透明度赋值时出现了NaN错误值。");
+		alert( DrillUp.drill_PCE_getPluginTip_ParamIsNaN( "opacity" ) );
 	}
 	this._opacity = opacity;
 }

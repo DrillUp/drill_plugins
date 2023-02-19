@@ -1131,7 +1131,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			固定框样式：
 //				->外框
 //					->背景
@@ -1165,7 +1165,7 @@
 //			~struct~GFVBindSlot:			槽数据列表
 //			~struct~DrillWindowMoving:		整体移动动画（弹道核心-两点式）
 //		
-//		★私有类如下：
+//		★插件私有类：
 //			* Drill_GFV_StyleSprite【固定框样式】
 //
 //		★必要注意事项：
@@ -1184,6 +1184,35 @@
 //			暂无
 //		
 
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_GFV_PluginTip_curName = "Drill_GaugeForVariable.js UI-高级变量固定框";
+	DrillUp.g_GFV_PluginTip_baseList = [
+		"Drill_CoreOfBallistics.js 系统-弹道核心",
+		"Drill_CoreOfGaugeMeter.js 系统-参数条核心",
+		"Drill_CoreOfGaugeNumber.js 系统-参数数字核心"
+	];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_GFV_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_GFV_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_GFV_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_GFV_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_GFV_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -1672,7 +1701,7 @@ Game_System.prototype.drill_GFV_initSysData_Private = function() {
 Game_System.prototype.drill_GFV_checkSysData_Private = function() {
 	
 	// > 旧存档数据自动补充
-	if( this._drill_GFV_seq == undefined ){
+	if( this._drill_GFV_bindTank == undefined ){
 		this.drill_GFV_initSysData();
 	}
 	
@@ -1693,6 +1722,9 @@ Game_System.prototype.drill_GFV_checkSysData_Private = function() {
 			}
 		}
 	}
+	
+	// > 载入存档时，强刷一次容器
+	$gameTemp._drill_GFV_needRefresh = true;
 };
 
 
@@ -1938,9 +1970,9 @@ Scene_Map.prototype.drill_GFV_updateGaugePosition = function() {
 		yy += temp_sprite['_drill_COBa_y'][ time_max ] - temp_sprite['_drill_COBa_y'][ time ];
 		
 		
-		// > 镜头缩放与位移【地图 - 活动地图镜头】
+		// > 镜头缩放与位移
 		if( data_b['parentName'] == "Scene_Map" ){
-			if( Imported.Drill_LayerCamera ){
+			if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】UI缩放与位移
 				var layer = data_b['layerIndex_map'];
 				if( layer == "下层" || layer == "中层" || layer == "上层" ){
 					temp_sprite.scale.x = 1.00 / $gameSystem.drill_LCa_curScaleX();
@@ -2670,12 +2702,8 @@ Drill_GFV_StyleSprite.prototype.drill_updateCommandParam = function() {
 //=============================================================================
 }else{
 		Imported.Drill_GaugeForVariable = false;
-		alert(
-			"【Drill_GaugeForVariable.js  UI - 高级变量固定框】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfBallistics  系统-弹道核心"+
-			"\n- Drill_CoreOfGaugeMeter  系统-参数条核心"+
-			"\n- Drill_CoreOfGaugeNumber 系统-参数数字核心"
-		);
+		var pluginTip = DrillUp.drill_GFV_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
 

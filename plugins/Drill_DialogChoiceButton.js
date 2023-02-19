@@ -282,7 +282,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			对话选项按钮组：
 //				->结构
 //					->按钮组
@@ -298,7 +298,32 @@
 //		★存在的问题：
 //			暂无
 //
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_DCB_PluginTip_curName = "Drill_DialogChoiceButton.js 对话框-对话选项按钮组";
+	DrillUp.g_DCB_PluginTip_baseList = ["Drill_CoreOfSelectableButton.js 系统-按钮组核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_DCB_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_DCB_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_DCB_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_DCB_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_DCB_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -671,8 +696,8 @@ Scene_Map.prototype.drill_DCB_updatePosition = function() {
 	var xx = 0;
 	var yy = 0;
 	
-	// > 镜头缩放与位移【地图 - 活动地图镜头】
-	if( Imported.Drill_LayerCamera ){
+	// > 镜头缩放与位移
+	if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】UI缩放与位移
 		var layer = temp_data['map_layerIndex'];
 		if( layer == "下层" || layer == "中层" || layer == "上层" ){
 			temp_sprite.scale.x = 1.00 / $gameSystem.drill_LCa_curScaleX();
@@ -1062,9 +1087,7 @@ Drill_DCB_BtnLayerSprite.prototype.drill_updateVisible = function() {
 //=============================================================================
 }else{
 		Imported.Drill_DialogChoiceButton = false;
-		alert(
-			"【Drill_DialogChoiceButton.js 对话框 - 对话选项按钮组】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfSelectableButton 系统-按钮组核心"
-		);
+		var pluginTip = DrillUp.drill_DCB_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.3]        鼠标 - 状态和buff说明窗口
+ * @plugindesc [v2.4]        鼠标 - 状态和buff说明窗口
  * @author Drill_up
  * 
  * @Drill_LE_param "状态-%d"
@@ -38,8 +38,8 @@
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
- * 1.插件的作用域：战斗界面。
- *   作用于战斗图、战斗UI。
+ * 1.插件的作用域：战斗界面、地图界面。
+ *   作用于战斗图、战斗UI、地图UI。
  *   单独对鼠标有效，支持触屏按住。
  * 2.具体内容可以去看看 "14.鼠标 > 关于鼠标悬浮窗口.docx"。
  * 细节：
@@ -76,10 +76,10 @@
  * 你可以通过插件指令手动控制状态信息：
  * （冒号两边都有一个空格）
  * 
- * 插件指令：>状态说明窗口 : 1 : 使用模糊说明
- * 插件指令：>状态说明窗口 : 2 : 使用详细说明
- * 插件指令：>状态说明窗口 : 1 : 修改模糊说明 : 这是一条模糊说明内容
- * 插件指令：>状态说明窗口 : 2 : 修改详细说明 : 这是一条详细说明内容
+ * 插件指令：>状态说明窗口 : 状态[1] : 使用模糊说明
+ * 插件指令：>状态说明窗口 : 状态[2] : 使用详细说明
+ * 插件指令：>状态说明窗口 : 状态[1] : 修改模糊说明 : 这是一条模糊说明内容
+ * 插件指令：>状态说明窗口 : 状态[2] : 修改详细说明 : 这是一条详细说明内容
  *
  * 1.编号对应配置的编号，也对应状态的id编号。
  * 
@@ -112,6 +112,7 @@
  * 时间复杂度： o(n^2)+o(贴图处理) 每帧
  * 测试方法：   以正常流程进行游戏，记录鼠标靠近区域显示窗口的消耗。
  * 测试结果：   战斗界面，平均消耗为：【24.96ms】
+ *              地图界面，平均消耗为：【23.35ms】
  * 
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
  *   测试结果并不是精确值，范围在给定值的10ms范围内波动。
@@ -150,6 +151,8 @@
  * 优化了部分结构，减少了性能消耗。
  * [v2.3]
  * 优化了旧存档的识别与兼容。
+ * [v2.4]
+ * 添加了对 玩家信息固定框 的状态图标说明支持。
  * 
  * 
  * 
@@ -342,13 +345,32 @@
  * @option 最顶层
  * @value 最顶层
  * @desc 窗口所在的战斗层级位置，你需要以此来考虑分配ui遮挡关系。
- * @default 图片层
+ * @default 最顶层
  *
- * @param 图片层级
+ * @param 战斗图片层级
  * @parent ---窗口---
  * @type number
  * @min 0
- * @desc 窗口在同一个层级时，先后排序的位置，0表示最后面。
+ * @desc 窗口在同一个战斗层级时，先后排序的位置，0表示最后面。
+ * @default 90
+ *
+ * @param 地图层级
+ * @parent ---窗口---
+ * @type select
+ * @option 上层
+ * @value 上层
+ * @option 图片层
+ * @value 图片层
+ * @option 最顶层
+ * @value 最顶层
+ * @desc 窗口所在的战斗层级位置，你需要以此来考虑分配ui遮挡关系。
+ * @default 最顶层
+ *
+ * @param 地图图片层级
+ * @parent ---窗口---
+ * @type number
+ * @min 0
+ * @desc 窗口在同一个地图层级时，先后排序的位置，0表示最后面。
  * @default 90
  *
  *
@@ -996,31 +1018,49 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
-//			事件说明窗口：
+//		★功能结构树：
+//			->☆提示信息
+//			->☆变量获取
+//			->☆插件指令
+//			->☆存储数据
+//			->☆实体类绑定
+//				->绑定 - 敌人贴图
+//				->绑定 - 角色贴图
+//				->绑定 - mog角色窗口（MOG_BattleHud）
+//				->绑定 - mog玩家信息固定框（MOG_ActorHud）
+//				->绑定 - drill高级boss框（Drill_GaugeForBoss）
+//			->☆实体类容器
+//			->状态和buff说明窗口实体类【Drill_MPFS_Bean】
+//				->设置位置
+//				->设置框架数据
+//				->设置状态和buff
+//				->设置所在层级
+//			->☆战斗层级
+//			->☆地图层级
+//			->状态和buff说明窗口【Drill_MPFS_Window】
 //				->全局配置
 //					->鼠标激活方式
 //					->附加高宽
-//				->实体类容器
-//				->实体类
-//					->绑定 - mog角色窗口
-//					->绑定 - 敌人图像
-//					->绑定 - 角色图像
-//					->绑定 - drill高级boss框
-//				->说明窗口
-//					->位置
-//						->跟随鼠标位置
-//					->内容
-//						->遍历实体类容器
+//				->位置
+//					->跟随鼠标位置
+//					->中心锚点
+//					->边缘修正
+//				->内容
+//					->遍历实体类容器
+//					->刷新内容
 //						->状态的详细说明
 //						->状态的模糊说明
 //						->buff的说明
-//					->窗口皮肤
+//				->窗口皮肤
+//					> 默认窗口皮肤
+//					> 自定义窗口皮肤
+//					> 自定义背景图片
+//					> 黑底背景
 //				
 //				
-//		★私有类如下：
-//			* Drill_MPFS_Bean		【事件说明窗口实体类】
-//			* Drill_MPFS_Window		【事件说明窗口】
+//		★插件私有类：
+//			* Drill_MPFS_Bean		【状态和buff说明窗口实体类】
+//			* Drill_MPFS_Window		【状态和buff说明窗口】
 //		
 //		★必要注意事项：
 //			1.Bean实体类在 事件贴图 中被动赋值。
@@ -1045,9 +1085,37 @@
 //		★存在的问题：
 //			暂无
 //
- 
+
 //=============================================================================
-// ** 变量获取
+// ** ☆提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_MPFS_PluginTip_curName = "Drill_MiniPlateForState.js 鼠标-状态和buff说明窗口";
+	DrillUp.g_MPFS_PluginTip_baseList = [
+		"Drill_CoreOfInput.js 系统-输入设备核心",
+		"Drill_CoreOfWindowAuxiliary.js 系统-窗口辅助核心"
+	];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_MPFS_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_MPFS_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_MPFS_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_MPFS_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_MPFS_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	
+	
+//=============================================================================
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_MiniPlateForState = true;
@@ -1071,8 +1139,10 @@
 	DrillUp.g_MPFS_fontsize = Number(DrillUp.parameters["窗口字体大小"] || 22);
 	DrillUp.g_MPFS_ex_width = Number(DrillUp.parameters["窗口附加宽度"] || 0);
 	DrillUp.g_MPFS_ex_height = Number(DrillUp.parameters["窗口附加高度"] || 0);
-	DrillUp.g_MPFS_layer = String(DrillUp.parameters["战斗层级"] || "图片层");
-	DrillUp.g_MPFS_zIndex = Number(DrillUp.parameters["图片层级"] || 0);
+	DrillUp.g_MPFS_battleLayer = String(DrillUp.parameters["战斗层级"] || "最顶层");
+	DrillUp.g_MPFS_battleZIndex = Number(DrillUp.parameters["战斗图片层级"] || 90);
+	DrillUp.g_MPFS_mapLayer = String(DrillUp.parameters["地图层级"] || "最顶层");
+	DrillUp.g_MPFS_mapZIndex = Number(DrillUp.parameters["地图图片层级"] || 90);
 	
 	/*----------------窗口皮肤---------------*/
 	DrillUp.g_MPFS_layout_type = String(DrillUp.parameters["布局模式"] || "黑底背景");
@@ -1193,26 +1263,49 @@ if( Imported.Drill_CoreOfInput &&
 
 
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _drill_MPFS_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_MPFS_pluginCommand.call(this, command, args);
 	if( command === ">状态说明窗口" ){	// >状态说明窗口 : A : 使用模糊说明
 		
+		/*-----------------内容------------------*/
 		if(args.length == 4){
-			var temp1 = Number(args[1]) -1;
+			var temp1 = String(args[1]);
 			var type = String(args[3]);
-			if( type == "使用模糊说明" ){ $gameSystem._drill_MPFS_enables[temp1] = false; }
-			if( type == "使用详细说明" ){ $gameSystem._drill_MPFS_enables[temp1] = true; }
+			if( type == "使用模糊说明" ){
+				temp1 = temp1.replace("状态[","");
+				temp1 = temp1.replace("]","");
+				temp1 = Number(args[1]) -1;
+				$gameSystem._drill_MPFS_enables[temp1] = false;
+			}
+			if( type == "使用详细说明" ){
+				temp1 = temp1.replace("状态[","");
+				temp1 = temp1.replace("]","");
+				temp1 = Number(args[1]) -1;
+				$gameSystem._drill_MPFS_enables[temp1] = true;
+			}
 		}
 		if(args.length == 6){
-			var temp1 = Number(args[1]) -1;
+			var temp1 = String(args[1]);
 			var type = String(args[3]);
 			var temp2 = String(args[5]);
-			if( type == "修改模糊说明" ){ $gameSystem._drill_MPFS_m_context[temp1] = temp2; }
-			if( type == "修改详细说明" ){ $gameSystem._drill_MPFS_x_context[temp1] = temp2; }
+			if( type == "修改模糊说明" ){
+				temp1 = temp1.replace("状态[","");
+				temp1 = temp1.replace("]","");
+				temp1 = Number(args[1]) -1;
+				$gameSystem._drill_MPFS_m_context[temp1] = temp2;
+			}
+			if( type == "修改详细说明" ){
+				temp1 = temp1.replace("状态[","");
+				temp1 = temp1.replace("]","");
+				temp1 = Number(args[1]) -1;
+				$gameSystem._drill_MPFS_x_context[temp1] = temp2;
+			}
 		}
+		
+		/*-----------------窗口属性------------------*/
 		if(args.length == 4){
 			var type = String(args[1]);
 			var temp1 = String(args[3]);
@@ -1239,7 +1332,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -1369,10 +1462,92 @@ Game_System.prototype.drill_MPFS_checkSysData_Private = function() {
 
 
 //=============================================================================
-// ** 状态图标绑定
+// ** ☆实体类绑定
+//
+//			说明：	> 此模块根据ui插件的具体位置，进行实体类创建与触发区域绑定。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 绑定 - mog角色窗口
+// * 实体类绑定 - 敌人贴图（战斗界面）
+//==============================
+var _drill_MPFS_Enemy_updateStateSprite = Sprite_Enemy.prototype.updateStateSprite;
+Sprite_Enemy.prototype.updateStateSprite = function() {
+	_drill_MPFS_Enemy_updateStateSprite.call(this);
+	
+	
+	// > 实体类创建
+	if( this._drill_MPFS_bean == undefined ){
+		this._drill_MPFS_bean = new Drill_MPFS_Bean();
+		$gameTemp._drill_MPFS_beanTank.push( this._drill_MPFS_bean );
+	}
+	
+	
+	// > 范围捕获
+	//		（此处不需镜头修正，后面转换为 战斗落点 来捕获范围）
+	var xx = 0;
+	var yy = 0;
+	var ww = 0;
+	var hh = 0;
+	xx = this.x - this._stateIconSprite.anchor.x * Sprite_StateIcon._iconWidth;
+	yy = this.y - this._stateIconSprite.anchor.y * Sprite_StateIcon._iconHeight + this._stateIconSprite.y;
+	ww = Sprite_StateIcon._iconWidth;
+	hh = Sprite_StateIcon._iconHeight;
+	
+	// > 实体类设置
+	var bean = this._drill_MPFS_bean;
+	bean.drill_MPFS_setPosition( xx, yy );
+	bean.drill_MPFS_resetFrame( 0, 0, ww, hh );
+	bean.drill_MPFS_setStateAndBuff( this._stateIconSprite._battler._states, this._battler._buffs );
+	bean.drill_MPFS_setLayer( "上层" );
+};
+//==============================
+// * 实体类绑定 - 角色贴图（战斗界面）
+//==============================
+var _drill_MPFS_Actor_update = Sprite_Actor.prototype.update;
+Sprite_Actor.prototype.update = function() {
+	_drill_MPFS_Actor_update.call(this);
+    if( this._actor == undefined ){ return; }
+	
+	
+	// > 实体类创建
+	if( this._drill_MPFS_bean == undefined ){
+		this._drill_MPFS_bean = new Drill_MPFS_Bean();
+		$gameTemp._drill_MPFS_beanTank.push( this._drill_MPFS_bean );
+	}
+	
+	
+	// > 范围捕获
+	//		（此处不需镜头修正，后面转换为 战斗落点 来捕获范围）
+	var xx = 0;
+	var yy = 0;
+	var ww = 0;
+	var hh = 0;
+	if( this._stateIconSprite ){	//如果有 Sprite_StateIcon（yep的）则按照那个来
+		xx = this.x - this._stateIconSprite.anchor.x * Sprite_StateIcon._iconWidth;
+		yy = this.y - this._stateIconSprite.anchor.y * Sprite_StateIcon._iconHeight + this._stateIconSprite.y;
+		ww = Sprite_StateIcon._iconWidth;
+		hh = Sprite_StateIcon._iconHeight;
+	}else{
+		xx = this.x - this._stateSprite.anchor.x * 48;
+		yy = this.y - this._stateSprite.anchor.y * 48 - 24;
+		ww = 48;		//（来自Sprite_StateOverlay，固定48像素）
+		hh = 48;
+	}
+	
+	// > 实体类设置
+	var bean = this._drill_MPFS_bean;
+	bean.drill_MPFS_setPosition( xx, yy );
+	bean.drill_MPFS_resetFrame( 0, 0, ww, hh );
+	if( this._stateIconSprite ){
+		bean.drill_MPFS_setStateAndBuff( this._stateIconSprite._battler._states, this._battler._buffs );
+		bean.drill_MPFS_setLayer( "上层" );
+	}else{
+		bean.drill_MPFS_setStateAndBuff( this._battler._states, this._battler._buffs );
+		bean.drill_MPFS_setLayer( "上层" );
+	}
+};
+//==============================
+// * 实体类绑定 - mog角色窗口（战斗界面）
 //==============================
 if( Imported.MOG_BattleHud ){
 	var _drill_MPFS_BHud_update = Battle_Hud.prototype.update;
@@ -1432,86 +1607,43 @@ if( Imported.MOG_BattleHud ){
 	}
 }
 //==============================
-// * 绑定 - 敌人图像
+// * 实体类绑定 - mog玩家信息固定框（地图界面）
 //==============================
-var _drill_MPFS_Enemy_updateStateSprite = Sprite_Enemy.prototype.updateStateSprite;
-Sprite_Enemy.prototype.updateStateSprite = function() {
-	_drill_MPFS_Enemy_updateStateSprite.call(this);
-	
-	
-	// > 实体类创建
-	if( this._drill_MPFS_bean == undefined ){
-		this._drill_MPFS_bean = new Drill_MPFS_Bean();
-		$gameTemp._drill_MPFS_beanTank.push( this._drill_MPFS_bean );
-	}
-	
-	
-	// > 范围捕获
-	//		（此处不需镜头修正，使用 鼠标落点位置 来捕获范围）
-	var xx = 0;
-	var yy = 0;
-	var ww = 0;
-	var hh = 0;
-	xx = this.x - this._stateIconSprite.anchor.x * Sprite_StateIcon._iconWidth;
-	yy = this.y - this._stateIconSprite.anchor.y * Sprite_StateIcon._iconHeight + this._stateIconSprite.y;
-	ww = Sprite_StateIcon._iconWidth;
-	hh = Sprite_StateIcon._iconHeight;
-	
-	// > 实体类设置
-	var bean = this._drill_MPFS_bean;
-	bean.drill_MPFS_setPosition( xx, yy );
-	bean.drill_MPFS_resetFrame( 0, 0, ww, hh );
-	bean.drill_MPFS_setStateAndBuff( this._stateIconSprite._battler._states, this._battler._buffs );
-	bean.drill_MPFS_setLayer( "上层" );
-};
-//==============================
-// * 绑定 - 角色图像
-//==============================
-var _drill_MPFS_Actor_update = Sprite_Actor.prototype.update;
-Sprite_Actor.prototype.update = function() {
-	_drill_MPFS_Actor_update.call(this);
-    if( this._actor == undefined ){ return; }
-	
-	
-	// > 实体类创建
-	if( this._drill_MPFS_bean == undefined ){
-		this._drill_MPFS_bean = new Drill_MPFS_Bean();
-		$gameTemp._drill_MPFS_beanTank.push( this._drill_MPFS_bean );
-	}
-	
-	
-	// > 范围捕获
-	//		（此处不需镜头修正，使用 鼠标落点位置 来捕获范围）
-	var xx = 0;
-	var yy = 0;
-	var ww = 0;
-	var hh = 0;
-	if( this._stateIconSprite ){	//如果有 Sprite_StateIcon（yep的）则按照那个来
-		xx = this.x - this._stateIconSprite.anchor.x * Sprite_StateIcon._iconWidth;
-		yy = this.y - this._stateIconSprite.anchor.y * Sprite_StateIcon._iconHeight + this._stateIconSprite.y;
-		ww = Sprite_StateIcon._iconWidth;
-		hh = Sprite_StateIcon._iconHeight;
-	}else{
-		xx = this.x - this._stateSprite.anchor.x * 48;
-		yy = this.y - this._stateSprite.anchor.y * 48 - 24;
-		ww = 48;		//（来自Sprite_StateOverlay，固定48像素）
-		hh = 48;
-	}
-	
-	// > 实体类设置
-	var bean = this._drill_MPFS_bean;
-	bean.drill_MPFS_setPosition( xx, yy );
-	bean.drill_MPFS_resetFrame( 0, 0, ww, hh );
-	if( this._stateIconSprite ){
-		bean.drill_MPFS_setStateAndBuff( this._stateIconSprite._battler._states, this._battler._buffs );
-		bean.drill_MPFS_setLayer( "上层" );
-	}else{
+if( Imported.MOG_ActorHud ){
+	var _drill_MPFS_AHud_update = Actor_Hud.prototype.update;
+	Actor_Hud.prototype.update = function() {
+		_drill_MPFS_AHud_update.call(this);
+		if( this._state_icon == undefined ){ return; }
+		
+		
+		// > 实体类创建
+		if( this._drill_MPFS_bean == undefined ){
+			this._drill_MPFS_bean = new Drill_MPFS_Bean();
+			$gameTemp._drill_MPFS_beanTank.push( this._drill_MPFS_bean );
+		}
+		
+		
+		// > 范围捕获
+		var xx = 0;
+		var yy = 0;
+		var ww = 0;
+		var hh = 0;
+		xx = this._state_icon.x;
+		yy = this._state_icon.y;
+		ww = Window_Base._iconWidth;
+		hh = Window_Base._iconHeight;
+		
+		// > 实体类设置
+		var bean = this._drill_MPFS_bean;
+		bean.drill_MPFS_setVisible( this.opacity > 0 );	//（该框根据透明度来控制是否显示）
+		bean.drill_MPFS_setPosition( xx, yy );
+		bean.drill_MPFS_resetFrame( 0, 0, ww, hh );
 		bean.drill_MPFS_setStateAndBuff( this._battler._states, this._battler._buffs );
-		bean.drill_MPFS_setLayer( "上层" );
+		bean.drill_MPFS_setLayer( "图片层" );
 	}
-};
+}
 //==============================
-// * 绑定 - drill高级boss框
+// * 实体类绑定 - drill高级boss框（战斗界面）
 //==============================
 if( Imported.Drill_GaugeForBoss ){
 	var _drill_MPFS_GFB_update = Drill_GFB_StyleSprite.prototype.drill_updateStates ;
@@ -1574,6 +1706,7 @@ if( Imported.Drill_GaugeForBoss ){
 		
 		// > 实体类设置
 		var bean = this._drill_MPFS_bean;
+		bean.drill_MPFS_setVisible( this.visible );
 		bean.drill_MPFS_setPosition( xx, yy );
 		bean.drill_MPFS_resetFrame( 0, 0, ww, hh );
 		bean.drill_MPFS_setStateAndBuff( this._drill_enemy._states, this._drill_enemy._buffs );
@@ -1583,7 +1716,10 @@ if( Imported.Drill_GaugeForBoss ){
 
 
 //=============================================================================
-// ** 实体类容器
+// ** ☆实体类容器
+//
+//			说明：	> 此模块在战斗界面/地图界面建立一个实体类容器。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 容器 - 初始化
@@ -1594,25 +1730,41 @@ Game_Temp.prototype.initialize = function() {
 	this._drill_MPFS_beanTank = [];				//实体类容器
 };
 //==============================
-// * 容器 - 切换贴图时（战斗界面刷新）
+// * 容器 - 切换贴图时（战斗界面）
 //==============================
-var _drill_MPFS_battle_createCharacters = Spriteset_Battle.prototype.createCharacters;
-Spriteset_Battle.prototype.createCharacters = function() {
+var _drill_MPFS_battle_createLowerLayer2 = Spriteset_Battle.prototype.createLowerLayer;
+Spriteset_Battle.prototype.createLowerLayer = function() {
 	$gameTemp._drill_MPFS_beanTank = [];		//实体类容器
-	_drill_MPFS_battle_createCharacters.call(this);
+	_drill_MPFS_battle_createLowerLayer2.call(this);
 };
 //==============================
-// * 容器 - 界面销毁时
+// * 容器 - 界面销毁时（战斗界面）
 //==============================
 var _drill_MPFS_battle_terminate = Scene_Battle.prototype.terminate;
 Scene_Battle.prototype.terminate = function() {
 	_drill_MPFS_battle_terminate.call(this);
 	$gameTemp._drill_MPFS_beanTank = [];		//实体类容器
 };
+//==============================
+// * 容器 - 切换贴图时（地图界面）
+//==============================
+var _drill_MPFS_map_createCharacters = Spriteset_Map.prototype.createCharacters;
+Spriteset_Map.prototype.createCharacters = function() {
+	$gameTemp._drill_MPFS_beanTank = [];		//实体类容器
+	_drill_MPFS_map_createCharacters.call(this);
+};
+//==============================
+// * 容器 - 界面销毁时（地图界面）
+//==============================
+var _drill_MPFS_map_terminate = Scene_Map.prototype.terminate;
+Scene_Map.prototype.terminate = function() {
+	_drill_MPFS_map_terminate.call(this);
+	$gameTemp._drill_MPFS_beanTank = [];		//实体类容器
+};
 
 
 //=============================================================================
-// ** 状态说明窗口 实体类【Drill_MPFS_Bean】
+// ** 状态和buff说明窗口 实体类【Drill_MPFS_Bean】
 // **		
 // **		作用域：	地图界面
 // **		主功能：	> 定义一个专门的实体类数据类。
@@ -1715,7 +1867,7 @@ Drill_MPFS_Bean.prototype.drill_initPrivateData = function(){
 
 
 //#############################################################################
-// ** 【标准模块】战斗层级
+// ** 【标准模块】战斗层级 ☆战斗层级
 //#############################################################################
 //##############################
 // * 战斗层级 - 添加贴图到层级【标准函数】
@@ -1838,16 +1990,153 @@ Scene_Battle.prototype.createAllWindows = function() {
 	
 	if( this._drill_MPFS_window == undefined ){		//（只建立一个窗口）
 		this._drill_MPFS_window = new Drill_MPFS_Window();
-		this._drill_MPFS_window.zIndex = DrillUp.g_MPFS_zIndex;
+		this._drill_MPFS_window.zIndex = DrillUp.g_MPFS_battleZIndex;
 		this._drill_MPFS_window._drill_curScene = "Scene_Battle";
 		
 		// > 添加贴图到层级
-		this.drill_MPFS_layerAddSprite( this._drill_MPFS_window, DrillUp.g_MPFS_layer );
+		this.drill_MPFS_layerAddSprite( this._drill_MPFS_window, DrillUp.g_MPFS_battleLayer );
 		
 		// > 图片层级排序
 		this.drill_MPFS_sortByZIndex();
 	}
 };
+
+
+
+//#############################################################################
+// ** 【标准模块】地图层级 ☆地图层级
+//#############################################################################
+//##############################
+// * 地图层级 - 添加贴图到层级【标准函数】
+//				
+//			参数：	> sprite 贴图        （添加的贴图对象）
+//					> layer_index 字符串 （添加到的层级名，上层/图片层/最顶层）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图添加到目标层级中。
+//##############################
+Scene_Map.prototype.drill_MPFS_layerAddSprite = function( sprite, layer_index ){
+    this.drill_MPFS_layerAddSprite_Private(sprite, layer_index);
+}
+//##############################
+// * 地图层级 - 去除贴图【标准函数】
+//				
+//			参数：	> sprite 贴图（添加的贴图对象）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图从地图层级中移除。
+//##############################
+Scene_Map.prototype.drill_MPFS_layerRemoveSprite = function( sprite ){
+	//（不操作）
+}
+//##############################
+// * 地图层级 - 图片层级排序【标准函数】
+//				
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 执行该函数后，地图层级的子贴图，按照zIndex属性来进行先后排序。值越大，越靠前。
+//##############################
+Scene_Map.prototype.drill_MPFS_sortByZIndex = function () {
+    this.drill_MPFS_sortByZIndex_Private();
+}
+//##############################
+// * 地图层级 - 层级与镜头的位移【标准函数】
+//				
+//			参数：	> x 数字              （x位置）
+//					> y 数字              （y位置）
+//					> layer 字符串        （层级，下层/中层/上层/图片层/最顶层）
+//					> option 动态参数对象 （计算时的必要数据）
+//			返回：	> pos 动态参数对象
+//                  > pos['x']
+//                  > pos['y']
+//          
+//			说明：	> 强行规范的接口，必须按照接口的结构来，把要考虑的问题全考虑清楚了再去实现。
+//##############################
+Scene_Map.prototype.drill_MPFS_layerCameraMoving = function( x, y, layer, option ){
+	//（当前为窗口，被点击对象，不适用位移）
+}
+//=============================================================================
+// ** 地图层级（接口实现）
+//=============================================================================
+//==============================
+// * 地图层级 - 上层
+//==============================
+var _drill_MPFS_layer_createDestination = Spriteset_Map.prototype.createDestination;
+Spriteset_Map.prototype.createDestination = function() {
+	_drill_MPFS_layer_createDestination.call(this);		//鼠标目的地 < 上层 < 天气层
+	if( !this._drill_mapUpArea ){
+		this._drill_mapUpArea = new Sprite();
+		this._baseSprite.addChild(this._drill_mapUpArea);	
+	}
+}
+//==============================
+// * 地图层级 - 图片层
+//==============================
+var _drill_MPFS_layer_createPictures = Spriteset_Map.prototype.createPictures;
+Spriteset_Map.prototype.createPictures = function() {
+	_drill_MPFS_layer_createPictures.call(this);		//图片对象层 < 图片层 < 对话框集合
+	if( !this._drill_mapPicArea ){
+		this._drill_mapPicArea = new Sprite();
+		this.addChild(this._drill_mapPicArea);	
+	}
+}
+//==============================
+// * 地图层级 - 最顶层
+//==============================
+var _drill_MPFS_layer_createAllWindows = Scene_Map.prototype.createAllWindows;
+Scene_Map.prototype.createAllWindows = function() {
+	_drill_MPFS_layer_createAllWindows.call(this);		//对话框集合 < 最顶层
+	if( !this._drill_SenceTopArea ){
+		this._drill_SenceTopArea = new Sprite();
+		this.addChild(this._drill_SenceTopArea);	
+	}
+}
+//==============================
+// * 地图层级 - 图片层级排序（私有）
+//==============================
+Scene_Map.prototype.drill_MPFS_sortByZIndex_Private = function() {
+	this._spriteset._drill_mapUpArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
+	this._spriteset._drill_mapPicArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
+	this._drill_SenceTopArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
+};
+//==============================
+// * 地图层级 - 添加贴图到层级（私有）
+//==============================
+Scene_Map.prototype.drill_MPFS_layerAddSprite_Private = function( sprite, layer_index ){
+	if( layer_index == "上层" ){
+		this._spriteset._drill_mapUpArea.addChild( sprite );
+	}
+	if( layer_index == "图片层" ){
+		this._spriteset._drill_mapPicArea.addChild( sprite );
+	}
+	if( layer_index == "最顶层" ){
+		this._drill_SenceTopArea.addChild( sprite );
+	}
+};
+//=============================================================================
+// ** 地图界面
+//=============================================================================
+//==============================
+// * 地图界面 - 创建说明窗口
+//==============================
+var _drill_MPFS_map_createAllWindows = Scene_Map.prototype.createAllWindows;
+Scene_Map.prototype.createAllWindows = function(){
+	_drill_MPFS_map_createAllWindows.call(this);
+	
+	if( this._drill_MPFS_window == undefined ){		//只建立一个窗口
+		this._drill_MPFS_window = new Drill_MPFS_Window();
+		this._drill_MPFS_window.zIndex = DrillUp.g_MPFS_mapZIndex;
+		this._drill_MPFS_window._drill_curScene = "Scene_Map";
+		
+		// > 添加贴图到层级
+		this.drill_MPFS_layerAddSprite( this._drill_MPFS_window, DrillUp.g_MPFS_mapLayer );
+		
+		// > 图片层级排序
+		this.drill_MPFS_sortByZIndex();
+	}
+};
+
 
 	
 //=============================================================================
@@ -1963,16 +2252,32 @@ Drill_MPFS_Window.prototype.drill_updatePosition = function() {
 	}else{
 		xx += _drill_mouse_x;
 		yy += _drill_mouse_y;
-	
-		// > 【战斗 - 活动战斗镜头】落点位置
+		
+		// > 【战斗 - 活动战斗镜头】战斗落点 转换
 		//  	（注意，这里只改变窗口的位置 ）
 		if( Imported.Drill_BattleCamera ){
 			if( this._drill_curScene == "Scene_Battle" ){
-				var layer = DrillUp.g_MPFS_layer;
+				var layer = DrillUp.g_MPFS_battleLayer;
 				if( layer == "下层" || layer == "上层" ){
 					var convert_pos = $gameSystem._drill_BCa_controller.drill_BCa_getPos_OuterToChildren( xx, yy );
 					xx = convert_pos.x;
-					yy = convert_pos.y;	
+					yy = convert_pos.y;
+				}
+				if( layer == "图片层" || layer == "最顶层" ){
+					//（不操作）
+				}
+			}
+		}
+		
+		// > 【地图 - 活动地图镜头】地图落点 转换
+		//  	（注意，这里只改变窗口的位置 ）
+		if( Imported.Drill_LayerCamera ){
+			if( this._drill_curScene == "Scene_Map" ){
+				var layer = DrillUp.g_MPFS_mapLayer;
+				if( layer == "下层" || layer == "上层" ){
+					var convert_pos = $gameSystem._drill_LCa_controller.drill_LCa_getPos_OuterToChildren( xx, yy );
+					xx = convert_pos.x;
+					yy = convert_pos.y;
 				}
 				if( layer == "图片层" || layer == "最顶层" ){
 					//（不操作）
@@ -2043,13 +2348,29 @@ Drill_MPFS_Window.prototype.drill_isInFrame = function( bean ){
 		_y = TouchInput.y;
 	}
 	
-	// 【战斗 - 活动战斗镜头】落点位置
-	//  （注意，这里是 鼠标落点 与 矩形范围的图层 偏移关系 ）
+	// 【战斗 - 活动战斗镜头】战斗鼠标落点
+	//  （注意，这里是 战斗鼠标落点 与 矩形范围的图层 偏移关系 ）
 	if( Imported.Drill_BattleCamera ){
 		if( this._drill_curScene == "Scene_Battle" ){
 			var layer = bean['_drill_layer'];
 			if( layer == "下层" || layer == "上层" ){
 				var convert_pos = $gameSystem._drill_BCa_controller.drill_BCa_getPos_OuterToChildren( _x, _y );
+				_x = convert_pos.x;
+				_y = convert_pos.y;	
+			}
+			if( layer == "图片层" || layer == "最顶层" ){
+				//（不操作）
+			}
+		}
+	}
+	
+	// 【地图 - 活动地图镜头】地图鼠标落点
+	//  （注意，这里是 地图鼠标落点 与 矩形范围的图层 偏移关系 ）
+	if( Imported.Drill_LayerCamera ){
+		if( this._drill_curScene == "Scene_Map" ){
+			var layer = bean['_drill_layer'];
+			if( layer == "下层" || layer == "中层" || layer == "上层" ){
+				var convert_pos = $gameSystem._drill_LCa_controller.drill_LCa_getPos_OuterToChildren( _x, _y );
 				_x = convert_pos.x;
 				_y = convert_pos.y;	
 			}
@@ -2382,10 +2703,7 @@ Drill_MPFS_Window.prototype.updateTone = function() {
 //=============================================================================
 }else{
 		Imported.Drill_MiniPlateForState = false;
-		alert(
-			"【Drill_MiniPlateForState.js 鼠标 - 状态和buff说明窗口】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfInput 系统-输入设备核心"+
-			"\n- Drill_CoreOfWindowAuxiliary 系统-窗口辅助核心"
-		);
+		var pluginTip = DrillUp.drill_MPFS_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 

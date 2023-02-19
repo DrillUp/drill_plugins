@@ -1662,7 +1662,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			行走图动态遮罩板A：
 //				->动态遮罩容器
 //					->创建 动态遮罩板
@@ -1680,7 +1680,7 @@
 //					x->资源预加载
 //					->事件未显示时不开遮罩
 //		
-//		★私有类如下：
+//		★插件私有类：
 //			无
 //
 //		★必要注意事项：
@@ -1705,7 +1705,55 @@
 //			暂无
 //
 
-
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_EDMA_PluginTip_curName = "Drill_EventDynamicMaskA.js 地图-行走图动态遮罩板A";
+	DrillUp.g_EDMA_PluginTip_baseList = ["Drill_CoreOfDynamicMask.js 系统-动态遮罩核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_EDMA_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_EDMA_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_EDMA_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_EDMA_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_EDMA_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到事件
+	//==============================
+	DrillUp.drill_EDMA_getPluginTip_EventNotFind = function( e_id ){
+		return "【" + DrillUp.g_EDMA_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到图片
+	//==============================
+	DrillUp.drill_EDMA_getPluginTip_PictureNotFind = function( pic_id ){
+		return "【" + DrillUp.g_EDMA_PluginTip_curName + "】\n插件指令错误，id为"+pic_id+"的图片还没被创建。\n你可能需要将指令放在'显示图片'事件指令之后。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 高级透视镜未创建
+	//==============================
+	DrillUp.drill_EDMA_getPluginTip_DataNotCreate = function( data_id ){
+		return "【" + DrillUp.g_EDMA_PluginTip_curName + "】\n插件指令错误，id为"+data_id+"的高级透视镜未创建，需要创建再使用。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到样式配置
+	//==============================
+	DrillUp.drill_EDMA_getPluginTip_DataNotFind = function( data_id ){
+		return "【" + DrillUp.g_EDMA_PluginTip_curName + "】\n插件指令错误，不存在id为"+data_id+"的透视镜样式配置。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -2080,8 +2128,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp1 = Number(temp1);
 				marker = $gameSystem._drill_EDMA_container.drill_CODM_getSeniorMarkerById( temp1 );
 				if( marker == undefined ){
-					alert( "【Drill_LayerIllumination.js 地图 - 行走图动态遮罩板A】\n" +
-							"插件指令错误，id为"+temp1+"的高级透视镜未创建，需要创建再使用。");
+					alert( DrillUp.drill_EDMA_getPluginTip_DataNotCreate( temp1 ) );
 				}
 			
 			}else if( temp1.indexOf("高级透视镜变量[") != -1 ){
@@ -2090,8 +2137,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp1 = $gameVariables.value( Number(temp1) );
 				marker = $gameSystem._drill_EDMA_container.drill_CODM_getSeniorMarkerById( temp1 );
 				if( marker == undefined ){
-					alert( "【Drill_LayerIllumination.js 地图 - 行走图动态遮罩板A】\n" +
-							"插件指令错误，id为"+temp1+"的高级透视镜未创建，需要创建再使用。");
+					alert( DrillUp.drill_EDMA_getPluginTip_DataNotCreate( temp1 ) );
 				}
 			}
 		}
@@ -2337,8 +2383,7 @@ Game_Map.prototype.drill_EDMA_isEventExist = function( e_id ){
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_LayerIllumination.js 地图 - 行走图动态遮罩板A】\n" +
-				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
+		alert( DrillUp.drill_EDMA_getPluginTip_EventNotFind( e_id ) );
 		return false;
 	}
 	return true;
@@ -2351,9 +2396,7 @@ Game_Screen.prototype.drill_EDMA_isPictureExist = function( pic_id ){
 	
 	var pic = this.picture( pic_id );
 	if( pic == undefined ){
-		alert( "【Drill_LayerIllumination.js 地图 - 行走图动态遮罩板A】\n" +
-				"插件指令错误，id为"+pic_id+"的图片还没被创建。\n" + 
-				"你可能需要将指令放在'显示图片'事件指令之后。");
+		alert( DrillUp.drill_EDMA_getPluginTip_PictureNotFind( pic_id ) );
 		return false;
 	}
 	return true;
@@ -2645,7 +2688,7 @@ Game_Map.prototype.update = function( sceneActive ){
 Game_Map.prototype.drill_EDMA_addSimplePerspect_characterId = function( character_id, style_id ){	
 	var data = DrillUp.g_EDMA_childData[ style_id ];				//（参数准备）
 	if( data == undefined ){
-		alert("【Drill_EventDynamicMaskA.js  行走图 - 行走图动态遮罩板A】\n插件指令错误，不存在id为" + (style_id+1) +"的透视镜样式配置。");
+		alert( DrillUp.drill_EDMA_getPluginTip_DataNotFind(style_id+1) );
 		return;
 	}
 	var marker = new Drill_CODM_PerspectiveMarker( data );			//（创建透视镜）
@@ -2667,7 +2710,7 @@ Game_Map.prototype.drill_EDMA_removeSimplePerspect_characterId = function( chara
 Game_Map.prototype.drill_EDMA_addSimplePerspect_mouse = function( style_id ){
 	var data = DrillUp.g_EDMA_childData[ style_id ];				//（参数准备）
 	if( data == undefined ){
-		alert("【Drill_EventDynamicMaskA.js  行走图 - 行走图动态遮罩板A】\n插件指令错误，不存在id为" + (style_id+1) +"的透视镜样式配置。");
+		alert( DrillUp.drill_EDMA_getPluginTip_DataNotFind(style_id+1) );
 		return;
 	}
 	var marker = new Drill_CODM_PerspectiveMarker( data );			//（创建透视镜）
@@ -2689,7 +2732,7 @@ Game_Map.prototype.drill_EDMA_removeSimplePerspect_mouse = function(){
 Game_Map.prototype.drill_EDMA_addSimplePerspect_picId = function( pic_id, style_id ){
 	var data = DrillUp.g_EDMA_childData[ style_id ];				//（参数准备）
 	if( data == undefined ){
-		alert("【Drill_EventDynamicMaskA.js  行走图 - 行走图动态遮罩板A】\n插件指令错误，不存在id为" + (style_id+1) +"的透视镜样式配置。");
+		alert( DrillUp.drill_EDMA_getPluginTip_DataNotFind(style_id+1) );
 		return;
 	}
 	var marker = new Drill_CODM_PerspectiveMarker( data );			//（创建透视镜）
@@ -2711,7 +2754,7 @@ Game_Map.prototype.drill_EDMA_removeSimplePerspect_picId = function( pic_id ){
 Game_Map.prototype.drill_EDMA_addSeniorPerspect = function( marker_id, style_id ){
 	var data = DrillUp.g_EDMA_childData[ style_id ];				//（参数准备）
 	if( data == undefined ){
-		alert("【Drill_EventDynamicMaskA.js  行走图 - 行走图动态遮罩板A】\n插件指令错误，不存在id为" + (style_id+1) +"的透视镜样式配置。");
+		alert( DrillUp.drill_EDMA_getPluginTip_DataNotFind(style_id+1) );
 		return;
 	}
 	var marker = new Drill_CODM_PerspectiveMarker( data );			//（创建透视镜）
@@ -2982,9 +3025,7 @@ Scene_Map.prototype.update = function() {
 //=============================================================================
 }else{
 		Imported.Drill_EventDynamicMaskA = false;
-		alert(
-			"【Drill_EventDynamicMaskA.js  地图 - 行走图动态遮罩板A】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfDynamicMask  系统-动态遮罩核心"
-		);
+		var pluginTip = DrillUp.drill_EDMA_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 

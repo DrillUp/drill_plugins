@@ -104,7 +104,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			事件管理核心：
 //				->版本检验
 //				->流程
@@ -136,6 +136,7 @@
 //			1.事件的独立开关是独立于事件的，需要额外刷新。
 //			2.如果你需要引用该插件来创建一个外部地图的事件，
 //			  那么必须先加载地图文本数据，再创建事件。（可参考 Drill_EventForPlayer ）
+//			3.【暂时消除事件】的事件无法还原。
 //			
 //		★其它说明细节：
 //			1.先有事件数据，再通过事件数据new事件。
@@ -145,7 +146,48 @@
 //		★存在的问题：
 //			1.低版本的rmmv中没有ResourceHandler的定义。（已解决，通过添加版本限制）
 //		
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_COEM_PluginTip_curName = "Drill_CoreOfEventManager.js 物体管理-事件管理核心";
+	DrillUp.g_COEM_PluginTip_baseList = [];
+	//==============================
+	// * 提示信息 - 报错 - 版本过低
+	//==============================
+	DrillUp.drill_COEM_getPluginTip_LowVersion = function(){
+		return "【" + DrillUp.g_COEM_PluginTip_curName + "】\n检测到你的rmmv工程版本太低，事件管理核心无法使用。\n会报ResourceHandler资源指针错误。\n你可以使用\"rmmv软件版本.docx\"中的升级工程的方法来升级你的工程。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到事件
+	//==============================
+	DrillUp.drill_COEM_getPluginTip_EventNotFind = function( e_id ){
+		return "【" + DrillUp.g_COEM_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 复制事件错误
+	//==============================
+	DrillUp.drill_COEM_getPluginTip_CopyEventError = function( e_id ){
+		return "【" + DrillUp.g_COEM_PluginTip_curName + "】\n复制事件时错误，当前地图并不存在id为"+e_id+"的事件。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 复制事件错误2
+	//==============================
+	DrillUp.drill_COEM_getPluginTip_CopyEventError2 = function( map_id, e_id ){
+		return "【" + DrillUp.g_COEM_PluginTip_curName + "】\n复制事件时错误，地图["+map_id+"]并不存在id为"+e_id+"的事件。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 事件数量异常
+	//==============================
+	DrillUp.drill_COEM_getPluginTip_CopyEventNum = function(){
+		return "【" + DrillUp.g_COEM_PluginTip_curName + "】\n有效事件容器 的事件数量异常，请及时检查你的指针调用。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -160,7 +202,7 @@
 //=============================================================================
 if( !Utils.RPGMAKER_VERSION || Utils.RPGMAKER_VERSION < "1.5.0" ){
 	
-	alert("【Drill_CoreOfEventManager.js 物体管理 - 事件管理核心】\n检测到你的rmmv工程版本太低，事件管理核心无法使用。\n会报ResourceHandler资源指针错误。\n你可以使用\"rmmv软件版本.docx\"中的升级工程的方法来升级你的工程。 ");
+	alert( DrillUp.drill_COEM_getPluginTip_LowVersion() );
 	Imported.Drill_CoreOfEventManager = false;
 	
 }else{
@@ -487,8 +529,7 @@ Game_Map.prototype.drill_COEM_isEventExist = function( e_id ){
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_CoreOfEventManager.js 物体管理 - 事件管理核心】\n" +
-				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
+		alert( DrillUp.drill_COEM_getPluginTip_EventNotFind( e_id ) );
 		return false;
 	}
 	return true;
@@ -624,8 +665,7 @@ Game_Map.prototype.drill_COEM_offspring_createEvent_Private = function( map_id, 
 		// > 检查 源事件
 		var src_event = this.event( event_id );
 		if( src_event == undefined ){
-			alert( "【Drill_CoreOfEventManager.js 物体管理 - 事件管理核心】\n" +
-					"复制事件时错误，当前地图并不存在id为"+event_id+"的事件。");
+			alert( DrillUp.drill_COEM_getPluginTip_CopyEventError( event_id ) );
 			return null;
 		}
 					
@@ -648,8 +688,7 @@ Game_Map.prototype.drill_COEM_offspring_createEvent_Private = function( map_id, 
 			// > 检查 源事件
 			var src_eventData = map_data.events[event_id];
 			if( src_eventData == undefined ){
-				alert( "【Drill_CoreOfEventManager.js 物体管理 - 事件管理核心】\n" +
-						"复制事件时错误，地图["+map_id+"]并不存在id为"+event_id+"的事件。");
+				alert( DrillUp.drill_COEM_getPluginTip_CopyEventError2( map_id, event_id ) );
 				return null;
 			}
 			
@@ -922,10 +961,7 @@ Game_Map.prototype.drill_COEM_updateCheck = function(){
 	if( DrillUp.g_COEM_checkATank == true ){
 		if( this._drill_COEM_availableTank.length > this._drill_COEM_countPrivate ){
 			DrillUp.g_COEM_checkATank = false;
-			alert(
-				"【Drill_CoreOfEventManager.js 物体管理 - 事件管理核心】\n"+
-				"有效事件容器 的事件数量异常，请及时检查你的指针调用。"
-			);
+			alert( DrillUp.drill_COEM_getPluginTip_CopyEventNum() );
 		}
 	}
 };

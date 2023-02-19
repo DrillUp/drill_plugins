@@ -901,7 +901,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			字符块的说明窗口：
 //				->全局配置
 //					->附加高宽
@@ -918,7 +918,7 @@
 //					->窗口皮肤
 //				
 //				
-//		★私有类如下：
+//		★插件私有类：
 //			* Drill_MPFC_Bean		【字符块的说明窗口实体类】
 //			* Drill_MPFC_Window		【字符块的说明窗口】
 //		
@@ -933,7 +933,35 @@
 //		★存在的问题：
 //			暂无
 //
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_MPFC_PluginTip_curName = "Drill_MiniPlateForChar.js 鼠标-字符块的说明窗口";
+	DrillUp.g_MPFC_PluginTip_baseList = [
+		"Drill_CoreOfInput.js 系统-输入设备核心",
+		"Drill_CoreOfWindowCharacter.js 窗口字符-窗口字符核心"
+	];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_MPFC_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_MPFC_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_MPFC_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_MPFC_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_MPFC_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -1901,9 +1929,8 @@ Drill_MPFC_Window.prototype.drill_updatePosition = function() {
 		xx += _drill_mouse_x;
 		yy += _drill_mouse_y;
 		
-		// > 【地图 - 活动地图镜头】落点位置
-		//		（注意，这里只改变窗口的位置 ）
-		if( Imported.Drill_LayerCamera ){
+		// > 地图落点 转换（注意，这里只改变窗口的位置 ）
+		if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】地图落点 转换
 			if( this._drill_curScene == "Scene_Map" ){
 				//（最顶层不操作）
 			}
@@ -1986,7 +2013,7 @@ Drill_MPFC_Window.prototype.drill_canVisible = function( bean ){
 		_y = TouchInput.y;
 	}
 	
-	// （不考虑鼠标镜头的落点位置）
+	// （最顶层，不考虑 地图鼠标落点 ）
 	
 	if( _x > bean['_drill_x'] + bean['_drill_frameW'] ){ return false; }
 	if( _x < bean['_drill_x'] + 0 ){ return false; }
@@ -2213,17 +2240,13 @@ Drill_MPFC_Window.prototype.updateTone = function() {
 }
 	
 	
-	
 //=============================================================================
 // * <<<<基于插件检测<<<<
 //=============================================================================
 }else{
 		Imported.Drill_MiniPlateForChar = false;
-		alert(
-			"【Drill_MiniPlateForChar.js 鼠标 - 字符块的说明窗口】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfInput 系统-输入设备核心"+
-			"\n- Drill_CoreOfWindowCharacter 窗口字符-窗口字符核心"
-		);
+		var pluginTip = DrillUp.drill_MPFC_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
 

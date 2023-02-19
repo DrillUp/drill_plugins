@@ -933,6 +933,14 @@
  * @desc true - 倒放，false - 不倒放
  * @default false
  *
+ * @param 是否预加载
+ * @parent ---GIF---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭
+ * @default false
+ *
  * @param 图像-色调值
  * @parent ---GIF---
  * @type number
@@ -1078,6 +1086,14 @@
  * @desc true - 倒放，false - 不倒放
  * @default false
  *
+ * @param 是否预加载
+ * @parent ---GIF---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭
+ * @default false
+ *
  * @param 图像-色调值
  * @parent ---GIF---
  * @type number
@@ -1123,7 +1139,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			动画序列核心：
 //				->数据访问器
 //					->动画序列
@@ -1135,7 +1151,7 @@
 //					->嵌套检查
 //				->动画序列核心DEBUG
 // 
-//		★私有类如下：
+//		★插件私有类：
 //			* Drill_COAS_StateController【状态元控制器】
 //			* Drill_COAS_StateNodeController【状态节点控制器】
 //			* Drill_COAS_ActController【动作元控制器】
@@ -1162,6 +1178,60 @@
 //			暂无
 //
 
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_COAS_PluginTip_curName = "Drill_CoreOfActionSequence.js 系统-GIF动画序列核心";
+	DrillUp.g_COAS_PluginTip_baseList = [];
+	//==============================
+	// * 提示信息 - 报错 - 非数组对象
+	//==============================
+	DrillUp.drill_COAS_getPluginTip_NotArray = function( arr ){
+		return "【" + DrillUp.g_COAS_PluginTip_curName + "】\n接口调用错误，数组接口获取到了 非数组 参数："+arr+"。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 动画序列 - 没有状态元
+	//==============================
+	DrillUp.drill_COAS_getPluginTip_Sequence_NoState = function( seq_name, stateName_list ){
+		return "【" + DrillUp.g_COAS_PluginTip_curName + "】\n错误，动画序列"+seq_name+"中没有状态元\""+ stateName_list.join("、") +"\"。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 动画序列 - 没有状态节点
+	//==============================
+	DrillUp.drill_COAS_getPluginTip_Sequence_NoStateNode = function( seq_name, stateNodeName_list ){
+		return "【" + DrillUp.g_COAS_PluginTip_curName + "】\n错误，动画序列"+seq_name+"中没有状态节点\""+ stateNodeName_list.join("、") +"\"。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 状态节点 - 死循环
+	//==============================
+	DrillUp.drill_COAS_getPluginTip_StateNode_DeadLoop = function( node_name ){
+		return "【" + DrillUp.g_COAS_PluginTip_curName + "】\n错误，状态节点\""+node_name+"\"的嵌套出现死循环。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 状态节点 - 自连接
+	//==============================
+	DrillUp.drill_COAS_getPluginTip_StateNode_SelfConnect = function( node_name ){
+		return "【" + DrillUp.g_COAS_PluginTip_curName + "】\n错误，状态节点\""+node_name+"\"不能自己嵌套自己。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 状态节点 - 抽取时未找到资源
+	//==============================
+	DrillUp.drill_COAS_getPluginTip_StateNode_RollError = function( node_name, play_type, play_randomStateSeq ){
+		return "【" + DrillUp.g_COAS_PluginTip_curName + "】\n错误，状态节点\""+node_name+"\"未找到资源名列表。\n"+
+				"当前为\""+ play_type +"\"，序列数据为："+ play_randomStateSeq.join(",") +"。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 底层版本过低
+	//==============================
+	DrillUp.drill_COAS_getPluginTip_LowVersion = function(){
+		return "【" + DrillUp.g_COAS_PluginTip_curName + "】\n游戏底层版本过低，插件基本功能无法执行。\n你可以去看\"rmmv软件版本（必看）.docx\"中的 \"旧工程升级至1.6版本\" 章节，来升级你的游戏底层版本。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -1517,20 +1587,10 @@
 		
 		// > 空校验信息
 		if( DrillUp.g_drill_COAS_stateMiss_list.length > 0 ){
-			alert(
-				"【Drill_CoreOfActionSequence.js 系统 - GIF动画序列核心】\n"+
-				"错误，动画序列"+String(sequence_data['id'])+"中没有状态元\""+
-					DrillUp.g_drill_COAS_stateMiss_list.join("、")
-				+"\"。"
-			);
+			alert( DrillUp.drill_COAS_getPluginTip_Sequence_NoState( String(sequence_data['id']+1), DrillUp.g_drill_COAS_stateMiss_list ) );
 		}
 		if( DrillUp.g_drill_COAS_stateNodeMiss_list.length > 0 ){
-			alert(
-				"【Drill_CoreOfActionSequence.js 系统 - GIF动画序列核心】\n"+
-				"错误，动画序列"+String(sequence_data['id'])+"中没有状态节点\""+
-					DrillUp.g_drill_COAS_stateNodeMiss_list.join("、")
-				+"\"。"
-			);
+			alert( DrillUp.drill_COAS_getPluginTip_Sequence_NoStateNode( String(sequence_data['id']+1), DrillUp.g_drill_COAS_stateNodeMiss_list ) );
 		}
 	}
 	//==============================
@@ -1626,10 +1686,7 @@
 		
 		// > 校验
 		if( layer >= 20 ){
-			alert(
-				"【Drill_CoreOfActionSequence.js 系统 - GIF动画序列核心】\n"+
-				"错误，状态节点\""+stateNode_data['name']+"\"的嵌套出现死循环。"
-			);
+			alert( DrillUp.drill_COAS_getPluginTip_StateNode_DeadLoop( stateNode_data['name'] ) );
 			return;
 		}
 		
@@ -1640,10 +1697,7 @@
 			for(var i=0; i < stateNode_data['play_randomNodeSeq'].length; i++ ){
 				var node_name = stateNode_data['play_randomNodeSeq'][i];
 				if( node_name == cur_name ){
-					alert(
-						"【Drill_CoreOfActionSequence.js 系统 - GIF动画序列核心】\n"+
-						"错误，状态节点\""+node_name+"\"不能自己嵌套自己。"
-					);
+					alert( DrillUp.drill_COAS_getPluginTip_StateNode_SelfConnect( node_name ) );
 					return;
 				}
 				var next_node = DrillUp.drill_COAS_getStateNodeData( sequence_data, node_name );
@@ -1654,10 +1708,7 @@
 			for(var i=0; i < stateNode_data['play_plainNodeSeq'].length; i++ ){
 				var node_name = stateNode_data['play_plainNodeSeq'][i];
 				if( node_name == cur_name ){
-					alert(
-						"【Drill_CoreOfActionSequence.js 系统 - GIF动画序列核心】\n"+
-						"错误，状态节点\""+node_name+"\"不能自己嵌套自己。"
-					);
+					alert( DrillUp.drill_COAS_getPluginTip_StateNode_SelfConnect( node_name ) );
 					return;
 				}
 				var next_node = DrillUp.drill_COAS_getStateNodeData( sequence_data, node_name );
@@ -1750,6 +1801,12 @@ Game_Temp.prototype.initialize = function() {
     _drill_COAS_temp_initialize.call(this);
 	this._drill_COAS_lastCreatedMainController = null;		//（上一个创建的动画序列）
 	this.drill_COAS_preloadInit();
+}
+//==============================
+// * 临时变量 - 预加载 版本校验
+//==============================
+if( Utils.generateRuntimeId == undefined ){
+	alert( DrillUp.drill_COAS_getPluginTip_LowVersion() );
 }
 //==============================
 // * 临时变量 - 资源提前预加载
@@ -2549,11 +2606,7 @@ Drill_COAS_StateNodeController.prototype.drill_COAS_refreshNext_Private = functi
 		// > 随机抽取数据
 		var next_data = this.drill_COAS_rollObjData( data_list );
 		if( next_data == undefined ){	//（空数据时直接报错提示）
-			alert(
-				"【Drill_CoreOfActionSequence.js 系统 - GIF动画序列核心】\n"+
-				"错误，状态节点\""+data['name']+"\"未找到资源名列表。\n"+
-				"当前为\""+data['play_type']+"\"，序列数据为：" + data['play_randomStateSeq'].join(",") + "。"
-			);
+			alert( DrillUp.drill_COAS_getPluginTip_StateNode_RollError( data['name'], data['play_type'], data['play_randomStateSeq'] ) );
 			data['play_type'] = ""; 
 			return;
 		}
@@ -2567,11 +2620,7 @@ Drill_COAS_StateNodeController.prototype.drill_COAS_refreshNext_Private = functi
 		var next_name = data['play_plainStateSeq'][ this._drill_curIndex ];
 		var next_data = DrillUp.drill_COAS_getStateData( this._drill_parentDataId, next_name );
 		if( next_data == undefined ){	//（空数据时直接报错提示）
-			alert(
-				"【Drill_CoreOfActionSequence.js 系统 - GIF动画序列核心】\n"+
-				"错误，状态节点\""+data['name']+"\"未找到资源名列表。\n"+
-				"当前为\""+data['play_type']+"\"，序列数据为：" + data['play_plainStateSeq'].join(",") + "。"
-			);
+			alert( DrillUp.drill_COAS_getPluginTip_StateNode_RollError( data['name'], data['play_type'], data['play_randomStateSeq'] ) );
 			data['play_type'] = ""; 
 			return;
 		}
@@ -2593,11 +2642,7 @@ Drill_COAS_StateNodeController.prototype.drill_COAS_refreshNext_Private = functi
 		// > 随机抽取数据
 		var next_data = this.drill_COAS_rollObjData( data_list );
 		if( next_data == undefined ){	//（空数据时直接报错提示）
-			alert(
-				"【Drill_CoreOfActionSequence.js 系统 - GIF动画序列核心】\n"+
-				"错误，状态节点\""+data['name']+"\"未找到资源名列表。\n"+
-				"当前为\""+data['play_type']+"\"，序列数据为：" + data['play_randomNodeSeq'].join(",") + "。"
-			);
+			alert( DrillUp.drill_COAS_getPluginTip_StateNode_RollError( data['name'], data['play_type'], data['play_randomStateSeq'] ) );
 			data['play_type'] = ""; 
 			return;
 		}
@@ -2611,11 +2656,7 @@ Drill_COAS_StateNodeController.prototype.drill_COAS_refreshNext_Private = functi
 		var next_name = data['play_plainNodeSeq'][ this._drill_curIndex ];
 		var next_data = DrillUp.drill_COAS_getStateNodeData( this._drill_parentDataId, next_name );
 		if( next_data == undefined ){	//（空数据时直接报错提示）
-			alert(
-				"【Drill_CoreOfActionSequence.js 系统 - GIF动画序列核心】\n"+
-				"错误，状态节点\""+data['name']+"\"未找到资源名列表。\n"+
-				"当前为\""+data['play_type']+"\"，序列数据为：" + data['play_plainNodeSeq'].join(",") + "。"
-			);
+			alert( DrillUp.drill_COAS_getPluginTip_StateNode_RollError( data['name'], data['play_type'], data['play_randomStateSeq'] ) );
 			data['play_type'] = ""; 
 			return;
 		}
@@ -2678,10 +2719,7 @@ Drill_COAS_StateNodeController.prototype.drill_COAS_refreshNextNode = function( 
 	var next_layer = this._drill_curLayer + 1;
 	if( next_layer >= 20 ){		//（层级溢出，则跳出）
 		this._drill_curNode = null;
-		alert(
-			"【Drill_CoreOfActionSequence.js 系统 - GIF动画序列核心】\n"+
-			"错误，状态节点\""+next_data['name']+"\"的嵌套出现死循环。"
-		);
+		alert( DrillUp.drill_COAS_getPluginTip_StateNode_DeadLoop( next_data['name'] ) );
 		return;
 	}
 	
@@ -3423,8 +3461,7 @@ Drill_COAS_MainController.prototype.drill_COAS_checkArray = function( arr ){
 		// > 通过
 	}else{
 		// > 报错提示
-		alert( "【Drill_CoreOfActionSequence.js 系统 - GIF动画序列核心】\n" +
-				"接口调用错误，数组接口获取到了 非数组 参数："+ arr +" 。");
+		alert( DrillUp.drill_COAS_getPluginTip_NotArray( arr ) );
 		this._drill_checkArrayEnabled = false;
 	}	
 };

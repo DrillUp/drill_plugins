@@ -166,7 +166,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			移动速度：
 //				->精确速度
 //					->速度细节误差修复
@@ -195,6 +195,37 @@
 //			  这种不平滑的感觉个人而言非常难受。以后专研透了，需要好好修复一下。（已修复，是事件移动一体化 造成的变速bug）
 //
 
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_MS_PluginTip_curName = "Drill_MoveSpeed.js 物体-移动速度";
+	DrillUp.g_MS_PluginTip_baseList = ["Drill_CoreOfMoveRoute.js 移动路线-移动路线核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_MS_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_MS_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_MS_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_MS_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_MS_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到事件
+	//==============================
+	DrillUp.drill_MS_getPluginTip_EventNotFind = function( e_id ){
+		return "【" + DrillUp.g_MS_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -370,8 +401,7 @@ Game_Map.prototype.drill_MS_isEventExist = function( e_id ){
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_MoveSpeed.js 物体 - 移动速度】\n" +
-				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
+		alert( DrillUp.drill_MS_getPluginTip_EventNotFind( e_id ) );
 		return false;
 	}
 	return true;
@@ -786,9 +816,7 @@ Game_Character.prototype.advanceMoveRouteIndex = function(){
 //=============================================================================
 }else{
 		Imported.Drill_MoveSpeed = false;
-		alert(
-			"【Drill_MoveSpeed.js 物体 - 移动速度】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfMoveRoute 移动路线-移动路线核心"
-		);
+		var pluginTip = DrillUp.drill_MS_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 

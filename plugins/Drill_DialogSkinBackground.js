@@ -289,13 +289,15 @@
  * @type select
  * @option 普通
  * @value 0
- * @option 叠加
+ * @option 发光
  * @value 1
  * @option 实色混合(正片叠底)
  * @value 2
  * @option 浅色
  * @value 3
- * @desc pixi的渲染混合模式。0-普通,1-叠加。其他更详细相关介绍，去看看 "0.基本定义 > 混合模式.docx"。
+ * @option 叠加
+ * @value 4
+ * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看 "0.基本定义 > 混合模式.docx"。
  * @default 0
  *
  * @param 背景X速度
@@ -363,7 +365,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			对话框背景：
 //				->绑定到皮肤
 //					->样式切换时重贴背景
@@ -372,7 +374,7 @@
 //					->播放GIF
 //					->窗口y缩放大小同步
 //
-//		★私有类如下：
+//		★插件私有类：
 //			* Drill_DSB_Sprite【对话框背景】
 //
 //		★必要注意事项：
@@ -385,6 +387,34 @@
 //			暂无
 //		
 
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_DSB_PluginTip_curName = "Drill_DialogSkinBackground.js 对话框-对话框背景";
+	DrillUp.g_DSB_PluginTip_baseList = [
+		"Drill_CoreOfDynamicMask.js 系统-动态遮罩核心",
+		"Drill_DialogSkin.js 对话框-对话框皮肤"
+	];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_DSB_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_DSB_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_DSB_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_DSB_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_DSB_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -890,11 +920,8 @@ if( typeof(_drill_mouse_getCurPos) == "undefined" ){	//防止重复定义
 //=============================================================================
 }else{
 		Imported.Drill_DialogSkinBackground = false;
-		alert(
-			"【Drill_DialogSkinBackground.js  对话框 - 对话框背景】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfDynamicMask  系统-动态遮罩核心"+
-			"\n- Drill_DialogSkin  对话框-对话框皮肤"
-		);
+		var pluginTip = DrillUp.drill_DSB_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
 

@@ -965,7 +965,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			角色肖像：
 //				->条件
 //					->根据生命/魔法值切换
@@ -978,7 +978,7 @@
 //					->长期保持显示状态
 //					->前视图的滤镜扩展	x
 //
-//		★私有类如下：
+//		★插件私有类：
 //			* Drill_APEx_Sprite【单角色肖像】
 //
 //		★必要注意事项：
@@ -999,29 +999,30 @@
 	// * 提示信息 - 参数
 	//==============================
 	var DrillUp = DrillUp || {}; 
-	DrillUp.g_APEx_tipCurName = "Drill_ActorPortraitureExtend.js 战斗UI-高级角色肖像";
-	DrillUp.g_APEx_tipBasePluginList = ["Drill_CoreOfActionSequence.js 系统-GIF动画序列核心"];
+	DrillUp.g_APEx_PluginTip_curName = "Drill_ActorPortraitureExtend.js 战斗UI-高级角色肖像";
+	DrillUp.g_APEx_PluginTip_baseList = ["Drill_CoreOfActionSequence.js 系统-GIF动画序列核心"];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
 	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_APEx_getPluginTip_NoBasePlugin = function(){
-		if( DrillUp.g_APEx_tipBasePluginList.length == 0 ){ return ""; }
-		var message = "【" + DrillUp.g_APEx_tipCurName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
-		for(var i=0; i < DrillUp.g_APEx_tipBasePluginList.length; i++){
+		if( DrillUp.g_APEx_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_APEx_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_APEx_PluginTip_baseList.length; i++){
 			message += "\n- ";
-			message += DrillUp.g_APEx_tipBasePluginList[i];
+			message += DrillUp.g_APEx_PluginTip_baseList[i];
 		}
 		return message;
 	};
 	//==============================
 	// * 提示信息 - 报错 - 强制更新要求
 	//==============================
-	DrillUp.drill_APEx_getPluginTip_NeedUpdate = function(){
-		return DrillUp.g_APEx_tipCurName + "\n GIF动画序列核心 插件版本过低，请及时更新核心插件，以及所有动画序列相关子插件。";
+	DrillUp.drill_APEx_getPluginTip_NeedUpdate_actionSeq = function(){
+		return "【" + DrillUp.g_APEx_PluginTip_curName + "】\n GIF动画序列核心 插件版本过低，请及时更新核心插件，以及所有动画序列相关子插件。";
 	};
-
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -1149,8 +1150,7 @@ if( Imported.Drill_CoreOfActionSequence ){
 // * 强制更新要求
 //=============================================================================
 if( DrillUp.drill_COAS_getSequenceData == undefined ){
-	var tip = DrillUp.drill_APEx_getPluginTip_NeedUpdate();
-	alert( tip );
+	alert( DrillUp.drill_APEx_getPluginTip_NeedUpdate_actionSeq() );
 };
 	
 	
@@ -1971,8 +1971,8 @@ Game_BattlerBase.prototype.drill_APEx_isAnyStateAffected = function( state_list 
 //=============================================================================
 }else{
 		Imported.Drill_ActorPortraitureExtend = false;
-		var tip = DrillUp.drill_APEx_getPluginTip_NoBasePlugin();
-		alert( tip );
+		var pluginTip = DrillUp.drill_APEx_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
 

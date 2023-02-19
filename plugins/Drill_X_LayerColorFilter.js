@@ -125,7 +125,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			全图纯色滤镜：
 //				->图片修改透明度
 //
@@ -139,14 +139,24 @@
 //		★存在的问题：
 //			无
 //
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_XLCF_PluginTip_curName = "Drill_X_LayerColorFilter.js 地图-全图纯色滤镜[扩展]";
+	DrillUp.g_XLCF_PluginTip_baseList = [];
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_X_LayerColorFilter = true;
 　　var DrillUp = DrillUp || {}; 
-
     DrillUp.parameters = PluginManager.parameters('Drill_X_LayerColorFilter');
 	
 
@@ -156,7 +166,7 @@
 var _drill_XLCF_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_XLCF_pluginCommand.call(this, command, args);
-	if (command === '>全图纯色滤镜' || command === '>全图滤色镜') { // >全图纯色滤镜 : 透明度 : 255
+	if( command === '>全图纯色滤镜' || command === '>全图滤色镜' ){ // >全图纯色滤镜 : 透明度 : 255
 		if(args.length == 4){
 			var type = String(args[1]);
 			var temp1 = String(args[3]);

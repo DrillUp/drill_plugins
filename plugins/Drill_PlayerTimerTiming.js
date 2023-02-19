@@ -133,7 +133,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			时间计时器到零时公共事件：
 //				->判定执行
 //
@@ -146,7 +146,32 @@
 //		★存在的问题：
 //			暂无
 //
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_PTT_PluginTip_curName = "Drill_PlayerTimerTiming.js 公共事件-时间计时器到零时";
+	DrillUp.g_PTT_PluginTip_baseList = ["Drill_LayerCommandThread.js 地图-多线程"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_PTT_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_PTT_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_PTT_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_PTT_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_PTT_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -188,7 +213,7 @@ Game_Timer.prototype.onExpire = function(){
 			'pipeType': DrillUp.g_PTT_map_pipeType,
 			'commonEventId': DrillUp.g_PTT_map_commonEventId,
 		};
-		$gameMap.drill_LCT_addPipeEvent( e_data );
+		$gameMap.drill_PTT_addPipeEvent( e_data );
 	}
 	
 	// > 战斗界面情况
@@ -220,9 +245,7 @@ Game_Timer.prototype.onExpire = function(){
 //=============================================================================
 }else{
 		Imported.Drill_PlayerTimerTiming = false;
-		alert(
-			"【Drill_PlayerTimerTiming.js 公共事件 - 时间计时器到零时】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_LayerCommandThread 地图-多线程"
-		);
+		var pluginTip = DrillUp.drill_PTT_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 

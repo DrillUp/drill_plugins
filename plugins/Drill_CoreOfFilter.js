@@ -98,7 +98,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			滤镜核心：
 //				->纯色滤镜 pB
 //				->着色滤镜 cB
@@ -176,13 +176,29 @@
 //			  为了更多效果，插件可能后期会被进一步分裂。
 //			2.滤镜会造成图像扭曲问题。
 //	
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_COF_PluginTip_curName = "Drill_CoreOfFilter.js 系统-滤镜核心";
+	DrillUp.g_COF_PluginTip_baseList = [];
+	//==============================
+	// * 提示信息 - 日志 - 强制更新提示
+	//==============================
+	DrillUp.drill_COF_getPluginTip_DebugLog = function( method_name, param_name ){
+		return "【" + DrillUp.g_COF_PluginTip_curName + "】\n警告："+ method_name +"中的"+ param_name + "参数有误。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_CoreOfFilter = true;
-	Imported.Drill_CoreOfFilter_version = 1.20;
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_CoreOfFilter');
 	
@@ -1701,8 +1717,8 @@ Sprite.prototype.drill_COF_setNoiseWave_ONCE = function( range_,period_ ){
 //=============================================================================
 // ** 函数错误检查机制
 //=============================================================================
-DrillUp.g_drill_COF_DebugLog = function( method_name, param_name ) {
-	console.log("【滤镜核心】警告："+ method_name +"中的"+ param_name + "参数有误。");
+DrillUp.g_drill_COF_DebugLog = function( method_name, param_name ){
+	console.log( DrillUp.drill_COF_getPluginTip_DebugLog( method_name, param_name ) );
 }
 
 

@@ -552,7 +552,7 @@
 //		
 //<<<<<<<<插件记录<<<<<<<<
 //		
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			玩家接近触发：
 //				->指令
 //					->插件指令
@@ -612,6 +612,43 @@
 //			暂无
 //	
 
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_EAT_PluginTip_curName = "Drill_EventAutoTrigger.js 物体触发-固定区域 & 玩家接近 & 条件触发";
+	DrillUp.g_EAT_PluginTip_baseList = ["Drill_CoreOfFixedArea.js 物体触发-固定区域核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_EAT_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_EAT_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_EAT_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_EAT_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_EAT_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到事件
+	//==============================
+	DrillUp.drill_EAT_getPluginTip_EventNotFind = function( e_id ){
+		return "【" + DrillUp.g_EAT_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 重复关键字
+	//==============================
+	DrillUp.drill_EAT_getPluginTip_keyWord = function( keyword ){
+		return "【" + DrillUp.g_EAT_PluginTip_curName + "】\n错误，玩家触发-"+keyword+"的触发关键字，与之前的设置重复，你需要手动修改确保 触发关键字 唯一。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -675,10 +712,7 @@
 		var area = DrillUp.g_EAT_area[i];
 		if( area == undefined ){ continue; }
 		if( DrillUp.g_EAT_area_keyWordList.contains(area['keyword']) ){
-			alert(
-				"【Drill_EventAutoTrigger.js 物体触发 - 固定区域 & 玩家接近 & 条件触发】\n"+
-				"错误，玩家触发-"+String(i+1)+"的触发关键字，与之前的设置重复，你需要手动修改确保 触发关键字 唯一。"
-			);
+			alert( DrillUp.drill_EAT_getPluginTip_keyWord( String(i+1) ) );
 			continue;
 		}
 		DrillUp.g_EAT_area_keyWordList.push( area['keyword'] );
@@ -815,8 +849,7 @@ Game_Map.prototype.drill_EAT_isEventExist = function( e_id ){
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_EventAutoTrigger.js 物体触发 - 固定区域 & 玩家接近 & 条件触发】\n" +
-				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
+		alert( DrillUp.drill_EAT_getPluginTip_EventNotFind( e_id ) );
 		return false;
 	}
 	return true;
@@ -1961,10 +1994,8 @@ Game_Player.prototype.drill_EAT_DEBUG_adjustPoints = function( point_list ){
 //=============================================================================
 }else{
 		Imported.Drill_EventAutoTrigger = false;
-		alert(
-			"【Drill_EventAutoTrigger.js 物体触发 - 固定区域 & 玩家接近 & 条件触发】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfFixedArea 物体触发-固定区域核心"
-		);
+		var pluginTip = DrillUp.drill_EAT_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
 

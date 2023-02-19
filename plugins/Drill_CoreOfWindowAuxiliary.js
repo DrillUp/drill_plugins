@@ -118,38 +118,54 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			窗口辅助核心：
-//				->计算文本高度/宽度
-//					->标准模块
-//						->文本宽度【标准函数】
-//						->文本高度【标准函数】
-//						->扩展文本宽度【标准函数】
-//						->扩展文本高度【标准函数】
-//						->是否正在计算【标准函数】
-//						->扩展文本列表的高宽列表【标准函数】
-//				->绘制内容 
-//					->标准模块
-//						->绘制文本【标准函数】
-//						->绘制文本列表【标准函数】
-//						->绘制扩展文本【标准函数】
-//						->绘制扩展文本列表【标准函数】
-//					->把指定的文字画在面板中
-//					->固定行间距/自适应行间距
-//				->窗口属性修改 
-//					->标准模块
-//						->窗口属性修改【标准函数】
-//				->属性动画 
-//					->标准模块
-//						->移动设置【标准函数】
-//						->透明度设置【标准函数】
-//						->重新移动【标准函数】
-//						->重设透明度【标准函数】
-//					->旧接口
-//						->设置简易窗口动画【标准函数】
-//						->重设简易窗口动画【标准函数】
-//						->设置简易贴图动画【标准函数】
-//						->重设简易贴图动画【标准函数】
+//				->☆提示信息
+//				->☆变量获取
+//				->☆计算文本高度/宽度 标准模块
+//					->文本宽度【标准函数】
+//					->文本高度【标准函数】
+//					->扩展文本宽度【标准函数】
+//					->扩展文本高度【标准函数】
+//					->是否正在计算【标准函数】
+//					->获取 扩展文本列表 的高度列表和宽度列表【标准函数】
+//				->☆绘制内容 标准模块
+//					->绘制文本【标准函数】
+//					->绘制文本列表【标准函数】
+//					->绘制扩展文本【标准函数】
+//					->绘制扩展文本列表【标准函数】
+//				->☆窗口属性修改 标准模块
+//					->窗口属性修改【标准函数】
+//				->☆属性动画 标准模块
+//					->移动设置【标准函数】
+//					->透明度设置【标准函数】
+//					->重新移动【标准函数】
+//					->重设透明度【标准函数】
+//				->☆属性动画 旧接口
+//					->设置简易窗口动画【标准函数】
+//					->重设简易窗口动画【标准函数】
+//					->设置简易贴图动画【标准函数】
+//					->重设简易贴图动画【标准函数】
+//
+//				->☆计算文本高度/宽度
+//					->文本计算 
+//					->扩展文本计算 
+//						->拦截 
+//						->原函数副本
+//						->计算文本宽度前
+//						->扩展文本宽度（私有）
+//						->计算文本宽度后
+//						->扩展文本高度（私有）
+//				->☆绘制内容
+//					->绘制文本（不清理画布）
+//					->绘制文本列表（不清理画布）
+//					->绘制扩展文本（不清理画布）
+//					->绘制扩展文本列表（不清理画布）
+//					->开始绘制
+//						->把指定的文字画在面板中
+//						->固定行间距/自适应行间距
+//				->☆窗口属性修改
+//				->☆属性动画（窗口/贴图）
 //					->窗口属性
 //						->窗口高宽
 //						->窗口布局
@@ -160,7 +176,7 @@
 //						->匀速移动/弹性移动/不移动
 //					->透明度属性
 //					->回调属性
-//				->核心功能扩展
+//				->☆核心功能扩展
 //					->帮助窗口换行
 //
 //		★必要注意事项：
@@ -176,9 +192,20 @@
 //		★存在的问题：
 //			暂无
 //		
- 
+
 //=============================================================================
-// ** 变量获取
+// ** ☆提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_COWA_PluginTip_curName = "Drill_CoreOfWindowAuxiliary.js 系统-窗口辅助核心";
+	DrillUp.g_COWA_PluginTip_baseList = [];
+	
+	
+//=============================================================================
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_CoreOfWindowAuxiliary = true;
@@ -186,8 +213,9 @@
     DrillUp.parameters = PluginManager.parameters('Drill_CoreOfWindowAuxiliary');
 	
 	
+	
 //#############################################################################
-// ** 【标准模块】计算文本高度/宽度
+// ** 【标准模块】☆计算文本高度/宽度
 //
 //			说明：	即对子插件开放的固定函数，无论插件如何变化，标准函数都不变。
 //#############################################################################
@@ -255,7 +283,7 @@ Game_Temp.prototype.drill_COWA_isCalculating = function(){
 	return this._drill_COWA_bitmap_isCalculating == true;
 }
 //##############################
-// * 计算 - 计算 扩展文本列表 的高度列表和宽度列表【标准函数】
+// * 计算 - 获取 扩展文本列表 的高度列表和宽度列表【标准函数】
 //			
 //			参数：	> context_list 字符串列表
 //					> options 动态参数对象（目前没用，可以为null）
@@ -275,7 +303,7 @@ Window_Base.prototype.drill_COWA_DTLE_calculateHeightAndWidth = function( contex
 
 
 //#############################################################################
-// ** 【标准模块】绘制内容
+// ** 【标准模块】☆绘制内容
 //#############################################################################
 //##############################
 // * 绘制内容 - 绘制文本【标准函数】
@@ -359,7 +387,7 @@ Window_Base.prototype.drill_COWA_drawTextListEx_notClean = function( context_lis
 }
 
 //#############################################################################
-// ** 【标准模块】窗口属性修改
+// ** 【标准模块】☆窗口属性修改
 //#############################################################################
 //##############################
 // * 窗口属性修改 - 执行窗口属性修改【标准函数】
@@ -395,7 +423,7 @@ Window_Base.prototype.drill_COWA_changeParamData = function( data ){
 }
 
 //#############################################################################
-// ** 【标准模块】属性动画
+// ** 【标准模块】☆属性动画
 //#############################################################################
 //##############################
 // * 属性动画 - 移动设置【标准函数】
@@ -471,7 +499,7 @@ Sprite.prototype.drill_COWA_resetAttrOpacity = function(){
 }
 
 //#############################################################################
-// ** 【标准模块】旧接口
+// ** 【标准模块】☆属性动画 旧接口
 //#############################################################################
 //##############################
 // * 旧接口 - 简易窗口动画 - 设置【标准函数】
@@ -530,33 +558,37 @@ Sprite.prototype.drill_COWA_SBM_resetMove = function(){
 
 
 //=============================================================================
-// ** 计算文本高度/宽度
+// ** ☆计算文本高度/宽度（实现）
+//
+//			说明：	> 计算文本高度/宽度 的实现部分。
+//					> 通过对大部分函数 拦截 的方式，走一遍 文本绘制 流程，得到字符的宽度。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 计算 - 文本宽度
+// * 文本计算 - 文本宽度
 //==============================
 Window_Base.prototype.drill_COWA_getTextWidth_Private = function( text ){
 	return this.textWidth( text );
 };
 //==============================
-// * 计算 - 文本高度
+// * 文本计算 - 文本高度
 //==============================
 Window_Base.prototype.drill_COWA_getTextHeight_Private = function( text ){
 	var maxFontSize = this.contents.fontSize;
 	return maxFontSize + 8;
 };
 
-//=============================================================================
-// ** 计算Ex文本高度/宽度
+//==============================
+// * 扩展文本计算 - 拦截
 //
 //			说明：	对于一些继承了并且抢先执行 processEscapeCharacter 函数的插件，最好加上 不准套娃 标记。（现在已经不需要了，因为直接最后继承）
-//=============================================================================
+//==============================
 var _drill_COWA_scene_initialize = SceneManager.initialize;
 SceneManager.initialize = function() {
 	_drill_COWA_scene_initialize.call(this);		//（套两层，能够让下列函数在最后才执行继承）
 	
 	//==============================
-	// * 计算 - 拦截文本绘制（私有）
+	// * 拦截 - 文本绘制（私有）
 	//==============================
 	var _drill_COWA_bitmap_drawText = Bitmap.prototype.drawText;
 	Bitmap.prototype.drawText = function(text, x, y, maxWidth, lineheight, align) {
@@ -566,7 +598,7 @@ SceneManager.initialize = function() {
 		_drill_COWA_bitmap_drawText.call( this,text, x, y, maxWidth, lineheight, align );
 	}
 	//==============================
-	// * 计算 - 拦截文本清理（私有）
+	// * 拦截 - 文本清理（私有）
 	//==============================
 	var _drill_COWA_bitmap_clearRect = Bitmap.prototype.clearRect;
 	Bitmap.prototype.clearRect = function(x, y, width, height) {
@@ -576,7 +608,7 @@ SceneManager.initialize = function() {
 		_drill_COWA_bitmap_clearRect.call( this, x, y, width, height );
 	}
 	//==============================
-	// * 计算 - 拦截图标绘制（私有）
+	// * 拦截 - 图标绘制（私有）
 	//==============================
 	var _drill_COWA_bitmap_drawIcon = Window_Base.prototype.drawIcon;
 	Window_Base.prototype.drawIcon = function(iconIndex, x, y) {
@@ -586,7 +618,7 @@ SceneManager.initialize = function() {
 		_drill_COWA_bitmap_drawIcon.call( this, iconIndex, x, y );
 	}
 	//==============================
-	// * 计算 - 拦截换行符影响（私有）
+	// * 拦截 - 换行符影响（私有）
 	//==============================
 	var _drill_COWA_processNewLine = Window_Base.prototype.processNewLine;
 	Window_Base.prototype.processNewLine = function( textState ){
@@ -595,7 +627,7 @@ SceneManager.initialize = function() {
 		if( $gameTemp._drill_COWA_bitmap_isCalculating == true ){ textState.x = xx; }	//（如果正在计算，换行符不能影响宽度）
 	}
 	//==============================
-	// * 计算 - 拦截对话框的暂停字符（私有）
+	// * 拦截 - 对话框的暂停字符（私有）
 	//==============================
 	var _drill_COWA_startWait = Window_Message.prototype.startWait;
 	Window_Message.prototype.startWait = function(count) {
@@ -603,7 +635,7 @@ SceneManager.initialize = function() {
 		if( $gameTemp._drill_COWA_bitmap_isCalculating == true ){ this._waitCount = 0; }	//（如果正在计算，暂停符不能等待）
 	}
 	//==============================
-	// * 计算 - 拦截文本重建（私有）
+	// * 拦截 - 文本重建（私有）
 	//==============================
 	var _drill_COWA_createContents = Window_Base.prototype.createContents;
 	Window_Base.prototype.createContents = function() {
@@ -613,7 +645,7 @@ SceneManager.initialize = function() {
 		_drill_COWA_createContents.call( this );
 	}
 	//==============================
-	// * 计算 - 拦截字体颜色重置（私有）
+	// * 拦截 - 字体颜色重置（私有）
 	//==============================
 	var _drill_COWA_resetTextColor = Window_Base.prototype.resetTextColor;
 	Window_Base.prototype.resetTextColor = function() {
@@ -623,7 +655,7 @@ SceneManager.initialize = function() {
 		_drill_COWA_resetTextColor.call( this );
 	}
 	////==============================
-	//// * 计算 - 拦截效果字符（私有）（窗口字符核心的字符需要纳入计算）
+	//// * 拦截 - 效果字符（私有）（窗口字符核心的字符需要纳入计算）
 	////==============================
 	//var _drill_COWA_processEscapeCharacter = Window_Base.prototype.processEscapeCharacter;
 	//Window_Base.prototype.processEscapeCharacter = function( code, textState ){
@@ -634,7 +666,7 @@ SceneManager.initialize = function() {
 	//}
 }
 //==============================
-// * 绘制 - 扩展文本 - 原函数副本
+// * 扩展文本 - 绘制（原函数副本）
 //
 //			说明：	这只是一个drawTextEx函数的副本。
 //==============================
@@ -657,7 +689,7 @@ Window_Base.prototype.drill_COWA_drawTextEx_Copyed = function( text, x, y ){
 	return textState['x'] - x;
 };
 //==============================
-// * 绘制 - 扩展文本 - 自定义函数
+// * 扩展文本 - 绘制（自定义函数）
 //
 //			说明：	原函数基础上，加了 递归嵌套锁 和 起始光标Y。
 //==============================
@@ -684,7 +716,7 @@ Window_Base.prototype.drill_COWA_drawTextEx_Custom = function( text, x, y ){
 	return textState['x'] - x;
 };
 //==============================
-// * 计算 - 计算文本宽度前（核心用接口，比如 窗口字符核心 继承此函数）
+// * 扩展文本计算 - 计算文本宽度前（核心用接口，比如 窗口字符核心 继承此函数）
 //==============================
 Window_Base.prototype.drill_COWA_calculateExWidth_Before = function(){
 	
@@ -702,7 +734,7 @@ Window_Base.prototype.drill_COWA_calculateExWidth_Before = function(){
 	this._drill_COWA_lastFontSettings['outlineWidth'] = this.contents.outlineWidth;
 };
 //==============================
-// * 计算 - 计算文本宽度后（核心用接口，比如 窗口字符核心 继承此函数）
+// * 扩展文本计算 - 计算文本宽度后（核心用接口，比如 窗口字符核心 继承此函数）
 //==============================
 Window_Base.prototype.drill_COWA_calculateExWidth_After = function(){
 	
@@ -722,7 +754,7 @@ Window_Base.prototype.drill_COWA_calculateExWidth_After = function(){
 	this.contents.outlineWidth = this._drill_COWA_lastFontSettings['outlineWidth'];
 };
 //==============================
-// * 计算 - 扩展文本宽度（私有函数）
+// * 扩展文本计算 - 扩展文本宽度（私有，单次调用）
 //
 //			说明：	> 修改 textState.x 的值时一定要谨慎，会无限套娃。
 //					> 注意版本中，隔行重置字体的情况。
@@ -755,7 +787,7 @@ Window_Base.prototype.drill_COWA_getTextExWidth_Private = function( text ){
 	return this._drill_COWA_calculatedExWidth;
 }
 //==============================
-// * 计算 - 扩展文本高度（接口，单次调用）
+// * 扩展文本计算 - 扩展文本高度（私有，单次调用）
 //			
 //==============================
 Window_Base.prototype.drill_COWA_getTextExHeight_Private = function( text ){
@@ -769,11 +801,36 @@ Window_Base.prototype.drill_COWA_getTextExHeight_Private = function( text ){
 	this._drill_COWA_recursionLock3 = false;
 	return hh;
 }
+//==============================
+// * 扩展文本计算 - 获取 扩展文本列表 的高度列表和宽度列表（私有，单次调用）
+//
+//			参数：	> context_list 字符串列表
+//					> options 动态参数对象（可以为null，没用到）
+//			返回：	高度列表 this.drill_COWA_heightList
+//					宽度列表 this.drill_COWA_widthList
+//==============================
+Window_Base.prototype.drill_COWA_calculateHeightAndWidth_Private = function( context_list, options ){
+	var height_list = [];
+	var width_list = [];
+	for( var i=0; i < context_list.length; i++ ){
+		var temp_text = context_list[i];
+		var ww = this.drill_COWA_getTextExWidth(temp_text);
+		var hh = this.drill_COWA_getTextExHeight(temp_text);
+		height_list.push(hh);
+		width_list.push(ww);
+	}
+	this.drill_COWA_heightList = height_list;
+	this.drill_COWA_widthList = width_list;
+}
 
 
 
 //=============================================================================
-// ** 绘制内容
+// ** ☆绘制内容（实现）
+//
+//			说明：	> 将 绘制文本/绘制扩展文本 改进实现的功能。
+//					> 注意，不要用原 绘制文本 的函数，多使用该插件的函数，能支持更多子插件的扩展功能。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 绘制内容 - 绘制文本（不清理画布）
@@ -854,27 +911,6 @@ Window_Base.prototype.drill_COWA_checkDrawExOptions = function( options ){
 	return options;
 }
 //==============================
-// * 绘制内容 - 计算高宽（接口，单次调用）
-//
-//			参数：	> context_list 字符串列表
-//					> options 动态参数对象（可以为null，没用到）
-//			返回：	高度列表 this.drill_COWA_heightList
-//					宽度列表 this.drill_COWA_widthList
-//==============================
-Window_Base.prototype.drill_COWA_calculateHeightAndWidth_Private = function( context_list, options ){
-	var height_list = [];
-	var width_list = [];
-	for( var i=0; i < context_list.length; i++ ){
-		var temp_text = context_list[i];
-		var ww = this.drill_COWA_getTextExWidth(temp_text);
-		var hh = this.drill_COWA_getTextExHeight(temp_text);
-		height_list.push(hh);
-		width_list.push(ww);
-	}
-	this.drill_COWA_heightList = height_list;
-	this.drill_COWA_widthList = width_list;
-}
-//==============================
 // * 绘制内容 - 开始绘制（接口，单次调用）
 //
 //			参数：	字符串列表，选项参数
@@ -918,11 +954,12 @@ Window_Base.prototype.drill_COWA_startDrawListEx = function( context_list, optio
 
 
 //=============================================================================
-// ** 窗口属性修改
+// ** ☆窗口属性修改（实现）
 // 		
-// 			功能：	> 建立窗口后，初始化参数的操作。【包含窗口与布局的标准属性设置】
+// 			说明：	> 建立窗口后，初始化参数的操作。【包含窗口与布局的标准属性设置】
 // 				  	  直接初始化一个window容易被参数交联弄的晕头转向，
 // 				  	  这里聚拢了接口与参数，方便统一控制。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 窗口属性修改 - 执行修改
@@ -955,7 +992,10 @@ Window_Base.prototype.drill_COWA_changeParamData_Private = function( new_data ){
 
 
 //=============================================================================
-// ** 属性修改（窗口）
+// ** ☆属性动画（窗口）
+// 		
+// 			说明：	> 此动画没有基于 弹道核心，而是一般的窗口/贴图平移函数的实现。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 窗口 - 初始化
@@ -1397,7 +1437,7 @@ Window_Base.prototype.drill_COWA_updateAttrCallBack = function(){
 }
 
 //=============================================================================
-// ** 属性修改（贴图）
+// ** 属性动画（贴图）
 //=============================================================================
 //==============================
 // * 贴图 - 相关函数
@@ -1436,8 +1476,11 @@ Sprite.prototype.update = function(){
 
 	
 //=============================================================================
-// ** 核心功能扩展 - 帮助窗口换行
+// ** ☆核心功能扩展
 //=============================================================================
+//==============================
+// * 核心功能扩展 - 帮助窗口换行
+//==============================
 var _drill_COWA_setItem = Window_Help.prototype.setItem;
 Window_Help.prototype.setItem = function(item) {
 	var str = item ? item.description : "";

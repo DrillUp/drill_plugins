@@ -248,7 +248,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			可变激光区域：
 //				->单方向激光区域
 //				->激光穿透
@@ -269,7 +269,25 @@
 //
 //		★存在的问题：
 //			暂无
+//
 
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_ELA_PluginTip_curName = "Drill_EventLaserAnimation.js 物体触发-可变激光区域 & 播放并行动画";
+	DrillUp.g_ELA_PluginTip_baseList = [];
+	//==============================
+	// * 提示信息 - 报错 - 找不到事件
+	//==============================
+	DrillUp.drill_ELA_getPluginTip_EventNotFind = function( e_id ){
+		return "【" + DrillUp.g_ELA_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -278,10 +296,12 @@
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_EventLaserAnimation');
 
+
 	DrillUp.g_ELA_diagonalThrough = String(DrillUp.parameters['斜向激光是否穿透两边阻碍'] || "true") === "true";
 	DrillUp.g_ELA_startAnim = String(DrillUp.parameters['起始点是否播放动画'] || "false") === "true";
 	DrillUp.g_ELA_endAnim = String(DrillUp.parameters['终止点是否播放动画'] || "false") === "true";
 	DrillUp.g_ELA_autoRotate = String(DrillUp.parameters['动画自适应旋转'] || "true") === "true";
+
 	
 //=============================================================================
 // * 插件指令
@@ -450,8 +470,7 @@ Game_Map.prototype.drill_ELA_isEventExist = function( e_id ){
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_EventLaserAnimation.js 物体触发 - 可变激光区域 & 播放并行动画】\n" +
-				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
+		alert( DrillUp.drill_ELA_getPluginTip_EventNotFind( e_id ) );
 		return false;
 	}
 	return true;

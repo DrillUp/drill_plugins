@@ -117,7 +117,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			文本居中：
 //				->drawTextEx捕获计算
 //					->contents重建时（ this.createContents() ）
@@ -153,7 +153,32 @@
 //			6.问题：设置多行时，超过6行，右对齐和居中会产生偏移位置。（套娃bug，已发现并解决）
 //			7.问题：信息面板k中，移动选项光标时，计算的字符长度会变长，原因不明。可以确定不是套娃问题。（行数+1的问题，这里又是比较绕的地方了）
 //
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_DTA_PluginTip_curName = "Drill_DialogTextAlign.js 窗口字符-文本居中";
+	DrillUp.g_DTA_PluginTip_baseList = ["Drill_CoreOfWindowCharacter.js 窗口字符-窗口字符核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_DTA_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_DTA_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_DTA_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_DTA_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_DTA_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -265,10 +290,8 @@ Window_Base.prototype.drill_COWC_processNewEffectChar_Simple = function( matched
 //=============================================================================
 }else{
 		Imported.Drill_DialogTextAlign = false;
-		alert(
-			"【Drill_DialogTextAlign.js 窗口字符 - 文本居中】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfWindowCharacter 窗口字符-窗口字符核心"
-		);
+		var pluginTip = DrillUp.drill_DTA_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
 

@@ -1259,7 +1259,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			全自定义商店界面：
 //				->商店界面（覆写函数）
 //					->整体布局
@@ -1299,7 +1299,7 @@
 //					->倍率/额外价格
 //					->交换商店
 // 
-//		★私有类如下：
+//		★插件私有类：
 //			* Drill_SSh_GoldWindow【金钱窗口】
 //			* Drill_SSh_SellCategoryWindow【出售类型窗口】
 //
@@ -1327,6 +1327,40 @@
 //			  包括越买越贵的物品，宝物商店等。	（该问题不再解决，后期使用其他插件进行功能替代）
 //	
 
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_SSh_PluginTip_curName = "Drill_SceneShop.js 面板-全自定义商店界面";
+	DrillUp.g_SSh_PluginTip_baseList = [
+		"Drill_CoreOfWindowAuxiliary.js 系统-窗口辅助核心",
+		"Drill_CoreOfWaitressSprite.js 主菜单-服务员核心"
+	];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_SSh_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_SSh_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_SSh_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_SSh_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_SSh_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 外部插件冲突（旧插件改名）
+	//==============================
+	DrillUp.drill_SSh_getPluginTip_ConflictOldName = function(){
+		return "【" + DrillUp.g_SSh_PluginTip_curName + "】\n注意，检测到重复的商店插件，请及时去掉旧插件。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -1739,11 +1773,8 @@
 // * >>>>基于插件检测>>>>
 //=============================================================================
 if( Imported.Drill_SenceShop ){
-	alert(
-		"【Drill_SceneShop.js 面板 - 全自定义商店界面】\n注意，检测到重复的商店插件，请及时去掉旧插件。"
-	);
-}
-
+	alert( DrillUp.drill_SSh_getPluginTip_ConflictOldName() );
+};
 if( Imported.Drill_CoreOfWindowAuxiliary && 
 	Imported.Drill_CoreOfWaitressSprite ){
 	
@@ -3163,11 +3194,8 @@ Drill_SSh_WaitressSprite.prototype.update = function() {
 //=============================================================================
 }else{
 		Imported.Drill_SceneShop = false;
-		alert(
-			"【Drill_SceneShop.js 面板 - 全自定义商店界面】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfWindowAuxiliary 系统-窗口辅助核心" +
-			"\n- Drill_CoreOfWaitressSprite 主菜单-服务员核心"
-		);
+		var pluginTip = DrillUp.drill_SSh_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
 

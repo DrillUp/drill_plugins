@@ -84,12 +84,12 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			服务员核心：
 //				->默认动作
 //				->指定指令动作
 // 
-//		★私有类如下：
+//		★插件私有类：
 //			* Drill_COWS_WaitressSprite【服务员】
 //			
 //		★其它说明细节：
@@ -107,6 +107,17 @@
 //			暂无
 //
 
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_COWS_PluginTip_curName = "Drill_CoreOfWaitressSprite.js 主菜单-服务员核心";
+	DrillUp.g_COWS_PluginTip_baseList = [];
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -136,12 +147,12 @@
 // **		调用方法：	数据格式见 >默认值 
 // **					// > 初始化
 // **					waitress = new Drill_COWS_WaitressSprite( 【default数据】 );
-// **					waitress.drill_COWS_pushNewAct("【aaa】", 【aaa的数据】);
-// **					waitress.drill_COWS_pushNewAct("【bbb】", 【bbb的数据】);
-// **					waitress.drill_COWS_pushNewAct("【ccc】", 【ccc的数据】);
+// **					waitress.drill_COWS_pushNewAct(" aaa ", 【aaa的数据】);
+// **					waitress.drill_COWS_pushNewAct(" bbb ", 【bbb的数据】);
+// **					waitress.drill_COWS_pushNewAct(" ccc ", 【ccc的数据】);
 // **					// > 播放行为
-// **					waitress.drill_COWS_playAct("【aaa】");
-// **					waitress.drill_COWS_playAct("【bbb】");
+// **					waitress.drill_COWS_playAct(" aaa ");
+// **					waitress.drill_COWS_playAct(" bbb ");
 //=============================================================================
 //==============================
 // * 服务员 - 定义

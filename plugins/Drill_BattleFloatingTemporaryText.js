@@ -857,7 +857,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			漂浮参数数字：
 //				->结构
 //					->窗口字符
@@ -890,8 +890,41 @@
 //		★存在的问题：
 //			暂无
 //
-//
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_BFTT_PluginTip_curName = "Drill_BattleFloatingTemporaryText.js 战斗UI-临时漂浮文字";
+	DrillUp.g_BFTT_PluginTip_baseList = [
+		"Drill_CoreOfBallistics.js 系统-弹道核心",
+		"Drill_CoreOfWindowAuxiliary.js 系统-窗口辅助核心"
+	];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_BFTT_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_BFTT_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_BFTT_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_BFTT_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_BFTT_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 缺少支持的插件
+	//==============================
+	DrillUp.drill_BFTT_getPluginTip_NoSupportPlugin = function(){
+		return "【" + DrillUp.g_BFTT_PluginTip_curName + "】\n缺少 字符串核心 插件，插件指令执行失败。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -1088,8 +1121,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 						temp1 = $gameStrings.value( Number(temp1) );
 						$gameTemp.drill_BFTT_setBufferContext( temp1 );
 					}else{
-						alert( "【Drill_BattleFloatingTemporaryText.js 战斗UI - 临时漂浮文字】\n" +
-								"缺少 字符串核心 插件，插件指令执行失败。");
+						alert( DrillUp.drill_BFTT_getPluginTip_NoSupportPlugin() );
 					}
 					
 				}else{	
@@ -2013,10 +2045,7 @@ Drill_BFTT_Window.prototype.drill_refreshMessage = function( context_list ){
 //=============================================================================
 }else{
 		Imported.Drill_BattleFloatingTemporaryText = false;
-		alert(
-			"【Drill_BattleFloatingTemporaryText.js 战斗UI - 临时漂浮文字】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfBallistics 系统-弹道核心" + 
-			"\n- Drill_CoreOfWindowAuxiliary 系统-窗口辅助核心"
-		);
+		var pluginTip = DrillUp.drill_BFTT_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 

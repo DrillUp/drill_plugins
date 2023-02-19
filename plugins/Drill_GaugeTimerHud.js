@@ -405,7 +405,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			时间计时器：
 //				->结构
 //					->时间数字
@@ -426,8 +426,35 @@
 //		★存在的问题：
 //			暂无
 //
-//
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_GTH_PluginTip_curName = "Drill_GaugeTimerHud.js 地图UI-时间计时器";
+	DrillUp.g_GTH_PluginTip_baseList = [
+		"Drill_CoreOfGaugeMeter.js 系统-参数条核心",
+		"Drill_CoreOfGaugeNumber.js 系统-参数数字核心"
+	];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_GTH_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_GTH_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_GTH_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_GTH_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_GTH_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -835,8 +862,8 @@ Scene_Map.prototype.drill_GTH_updatePosition = function() {
 	var xx = temp_data['x'];
 	var yy = temp_data['y'];
 	
-	// > 镜头缩放与位移【地图 - 活动地图镜头】
-	if( Imported.Drill_LayerCamera ){
+	// > 镜头缩放与位移
+	if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】UI缩放与位移
 		var layer = temp_data['map_layerIndex'];
 		if( layer == "下层" || layer == "中层" || layer == "上层" ){
 			temp_sprite.scale.x = 1.00 / $gameSystem.drill_LCa_curScaleX();
@@ -1376,10 +1403,7 @@ SceneManager.initialize = function() {
 //=============================================================================
 }else{
 		Imported.Drill_GaugeTimerHud = false;
-		alert(
-			"【Drill_GaugeTimerHud.js 地图UI - 时间计时器】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfGaugeMeter 系统-参数条核心"+
-			"\n- Drill_CoreOfGaugeNumber 系统-参数数字核心"
-		);
+		var pluginTip = DrillUp.drill_GTH_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 

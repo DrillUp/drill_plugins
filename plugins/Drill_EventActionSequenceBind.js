@@ -296,7 +296,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			行走图动画序列全绑定：
 //				->全绑定
 //					->初始播放的状态节点
@@ -312,7 +312,41 @@
 //		★存在的问题：
 //			暂无
 //
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_EASB_PluginTip_curName = "Drill_EventActionSequenceBind.js 行走图-GIF动画序列全绑定";
+	DrillUp.g_EASB_PluginTip_baseList = [
+		"Drill_EventActionSequence.js 行走图-GIF动画序列",
+		"Drill_EventActionSequenceAutomation.js 行走图-GIF动画序列全自动播放"
+	];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_EASB_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_EASB_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_EASB_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_EASB_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_EASB_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到配置数据
+	//==============================
+	DrillUp.drill_EASB_getPluginTip_DataNotFind = function( data_id ){
+		return "【" + DrillUp.g_EASB_PluginTip_curName + "】\n未找到 全绑定"+data_id+"的配置。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -381,10 +415,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp1 = Number( temp1 )-1;
 				var data = DrillUp.g_EASB_list[ temp1 ];
 				if( data == undefined ){
-					alert(
-						"【Drill_EventActionSequenceBind.js 行走图 - GIF动画序列全绑定】"+
-						"\n未找到 全绑定["+ (temp1+1) +"]的配置"
-					);
+					alert( DrillUp.drill_EASB_getPluginTip_DataNotFind(temp1+1) );
 					return;
 				}
 				$gameSystem._drill_EASB_enabledList[ temp1 ] = true;
@@ -396,10 +427,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp1 = Number( temp1 )-1;
 				var data = DrillUp.g_EASB_list[ temp1 ];
 				if( data == undefined ){
-					alert(
-						"【Drill_EventActionSequenceBind.js 行走图 - GIF动画序列全绑定】"+
-						"\n未找到 全绑定["+ (temp1+1) +"]的配置"
-					);
+					alert( DrillUp.drill_EASB_getPluginTip_DataNotFind(temp1+1) );
 					return;
 				}
 				$gameSystem._drill_EASB_enabledList[ temp1 ] = false;
@@ -644,7 +672,7 @@ Game_CharacterBase.prototype.drill_EASB_posIsInCamera = function( realX, realY )
 	var ohh = Graphics.boxHeight / $gameMap.tileHeight();
 	var sww = oww;
 	var shh = ohh;
-	if( Imported.Drill_LayerCamera ){
+	if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】镜头范围内+缩放
 		sww = sww / $gameSystem._drill_LCa_controller._drill_scaleX;
 		shh = shh / $gameSystem._drill_LCa_controller._drill_scaleY;
 	}
@@ -752,11 +780,8 @@ Game_CharacterBase.prototype.drill_EASB_closeActionSequence = function(){
 //=============================================================================
 }else{
 		Imported.Drill_EventActionSequenceBind = false;
-		alert(
-			"【Drill_EventActionSequenceBind.js 行走图 - GIF动画序列全绑定】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_EventActionSequence  行走图-GIF动画序列"+
-			"\n- Drill_EventActionSequenceAutomation  行走图-GIF动画序列全自动播放"
-		);
+		var pluginTip = DrillUp.drill_EASB_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
 

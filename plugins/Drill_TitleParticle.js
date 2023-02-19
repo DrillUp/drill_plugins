@@ -660,13 +660,15 @@
  * @type select
  * @option 普通
  * @value 0
- * @option 叠加
+ * @option 发光
  * @value 1
  * @option 实色混合(正片叠底)
  * @value 2
  * @option 浅色
  * @value 3
- * @desc pixi的渲染混合模式。0-普通,1-叠加。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
+ * @option 叠加
+ * @value 4
+ * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
  * @default 0
  *
  * @param 菜单层级
@@ -892,7 +894,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			标题粒子：
 //				->基本属性
 //					->显示/隐藏
@@ -928,6 +930,31 @@
 //
 
 //=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_TPa_PluginTip_curName = "Drill_TitleParticle.js 标题-多层标题粒子";
+	DrillUp.g_TPa_PluginTip_baseList = ["Drill_CoreOfGlobalSave.js 管理器-全局存储核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_TPa_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_TPa_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_TPa_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_TPa_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_TPa_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	
+	
+//=============================================================================
 // ** 变量获取
 //=============================================================================
 　　var Imported = Imported || {};
@@ -946,6 +973,7 @@
 		data['visible'] = String( dataFrom["初始是否显示"] || "true") == "true";
 		data['src_img'] = String( dataFrom["资源-粒子"] || "");
 		data['src_img_mask'] = String( dataFrom["资源-粒子遮罩"] || "");
+		data['src_img_file'] = "img/titles1/";
 		data['opacity'] = Number( dataFrom["透明度"] || 255);
 		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
 		data['menu_index'] = Number( dataFrom["菜单层级"] || 0);
@@ -974,6 +1002,7 @@
 		// > 双层效果
 		data['second_enable'] = String( dataFrom["是否开启双层效果"] || "false") == "true";
 		data['second_src_img'] = String( dataFrom["资源-第二层粒子"] || "");
+		data['second_src_img_file'] = "img/titles1/";
 		data['second_menuIndex'] = Number( dataFrom["第二层粒子菜单层级"] || 0);
 		data['second_zIndex'] = Number( dataFrom["第二层粒子图片层级"] || 7);
 		
@@ -1111,7 +1140,7 @@ Game_Temp.prototype.initialize = function() {
 		if( temp_data == undefined ){ continue; }
 		if( temp_data['inited'] != true ){ continue; }
 		
-		this._drill_TPa_preloadTank.push( ImageManager.loadTitle1( temp_data['src_img'] ) );
+		this._drill_TPa_preloadTank.push( ImageManager.loadBitmap( temp_data['src_img_file'], temp_data['src_img'], 0, true ) );
 	}
 }
 
@@ -1205,7 +1234,7 @@ Scene_Title.prototype.drill_TPa_create = function() {
 		for( var j = 0; j < temp_data['par_count'] ; j++ ){	
 			var temp_sprite_data = JSON.parse(JSON.stringify( temp_data ));	//深拷贝数据（杜绝引用造成的修改）
 			var temp_sprite = new Sprite();
-			temp_sprite.bitmap = ImageManager.loadTitle1(temp_sprite_data['src_img']);
+			temp_sprite.bitmap = ImageManager.loadBitmap( temp_sprite_data['src_img_file'], temp_sprite_data['src_img'], 0, true );
 			temp_sprite.anchor.x = 0.5;
 			temp_sprite.anchor.y = 0.5;
 			temp_sprite.blendMode = temp_sprite_data['blendMode'];
@@ -1229,7 +1258,7 @@ Scene_Title.prototype.drill_TPa_create = function() {
 		
 		// > 粒子层 - 粒子遮罩
 		if( temp_data['src_img_mask'] != "" ){
-			var temp_mask = new Sprite(ImageManager.loadTitle1(temp_data['src_img_mask']));
+			var temp_mask = new Sprite( ImageManager.loadBitmap( temp_data['src_img_file'], temp_data['src_img_mask'], 0, true ) );
 			temp_layer.addChild(temp_mask);
 			temp_layer.mask = temp_mask;
 		}
@@ -1248,7 +1277,7 @@ Scene_Title.prototype.drill_TPa_create = function() {
 				var org_sprite = temp_layer.children[j];
 				
 				var temp_sprite = new Sprite();
-				temp_sprite.bitmap = ImageManager.loadTitle1(temp_data['second_src_img']);
+				temp_sprite.bitmap = ImageManager.loadBitmap( temp_data['second_src_img_file'], temp_data['second_src_img'], 0, true );
 				temp_sprite.anchor.x = 0.5;
 				temp_sprite.anchor.y = 0.5;
 				temp_sprite.blendMode = org_sprite.blendMode;
@@ -1270,7 +1299,7 @@ Scene_Title.prototype.drill_TPa_create = function() {
 			
 			// > 第二层 - 粒子遮罩
 			if( temp_data['src_img_mask'] != "" ){
-				var temp_mask = new Sprite(ImageManager.loadTitle1(temp_data['src_img_mask']));
+				var temp_mask = new Sprite( ImageManager.loadBitmap( temp_data['src_img_file'], temp_data['src_img_mask'], 0, true ) );
 				temp_layerSec.addChild(temp_mask);
 				temp_layerSec.mask = temp_mask;
 			}
@@ -1514,7 +1543,7 @@ Scene_Title.prototype.drill_TPa_resetParticles = function( i ){
 				continue;
 			}
 			
-			// > 计算通用落点
+			// > 计算通用落脚点
 			var p_start = data['anchorPointTank'][start_index];
 			var p_end = data['anchorPointTank'][end_index];
 			var d_time = p_end['t'] - p_start['t'];
@@ -1584,10 +1613,8 @@ Scene_Title.prototype.drill_TPa_getPointToPointDegree = function( x1,y1,x2,y2 ){
 //=============================================================================
 }else{
 		Imported.Drill_TitleParticle = false;
-		alert(
-			"【Drill_TitleParticle.js 标题 - 多层标题粒子】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfGlobalSave 管理器-全局存储核心"
-		);
+		var pluginTip = DrillUp.drill_TPa_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
 

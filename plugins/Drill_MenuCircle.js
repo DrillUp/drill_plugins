@@ -697,13 +697,15 @@
  * @type select
  * @option 普通
  * @value 0
- * @option 叠加
+ * @option 发光
  * @value 1
  * @option 实色混合(正片叠底)
  * @value 2
  * @option 浅色
  * @value 3
- * @desc pixi的渲染混合模式。0-普通,1-叠加。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
+ * @option 叠加
+ * @value 4
+ * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
  * @default 0
  *
  * @param 旋转速度
@@ -775,7 +777,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			菜单魔法圈：
 //				->菜单层级
 //				->显示/隐藏
@@ -799,6 +801,17 @@
 //
 
 //=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_MCi_PluginTip_curName = "Drill_MenuCircle.js 主菜单-多层菜单魔法圈";
+	DrillUp.g_MCi_PluginTip_baseList = [];
+	
+	
+//=============================================================================
 // ** 变量获取
 //=============================================================================
 　　var Imported = Imported || {};
@@ -821,6 +834,7 @@
 		data['visible'] = String( dataFrom["初始是否显示"] || "true") == "true";
 		data['src_img'] = String( dataFrom["资源-魔法圈"] || "");
 		data['src_img_mask'] = String( dataFrom["资源-魔法圈遮罩"] || "");
+		data['src_img_file'] = "img/Menu__layer/";
 		data['x'] = Number( dataFrom["平移-魔法圈 X"] || 0);
 		data['y'] = Number( dataFrom["平移-魔法圈 Y"] || 0);
 		data['opacity'] = Number( dataFrom["透明度"] || 255);
@@ -853,13 +867,7 @@
 	}
 	
 	
-//=============================================================================
-// ** 资源文件夹
-//=============================================================================
-ImageManager.load_MenuLayer = function(filename) {
-    return this.loadBitmap('img/Menu__layer/', filename, 0, true);
-};
-
+	
 //=============================================================================
 // * 插件指令
 //=============================================================================
@@ -1131,7 +1139,7 @@ Scene_MenuBase.prototype.drill_MCi_create = function() {
 			// > 魔法圈贴图
 			var temp_sprite_data = JSON.parse(JSON.stringify( temp_data ));			//深拷贝数据（杜绝引用造成的修改）
 			
-			var temp_sprite_bitmap = new Sprite(ImageManager.load_MenuLayer(temp_sprite_data['src_img']));
+			var temp_sprite_bitmap = new Sprite( ImageManager.loadBitmap( temp_sprite_data['src_img_file'], temp_sprite_data['src_img'], 0, true ));
 			temp_sprite_bitmap.anchor.x = 0.5;
 			temp_sprite_bitmap.anchor.y = 0.5;
 			this._drill_MCi_spriteChildTank.push(temp_sprite_bitmap);
@@ -1160,7 +1168,7 @@ Scene_MenuBase.prototype.drill_MCi_create = function() {
 			
 			// > 魔法圈遮罩
 			if( temp_sprite_data['src_img_mask'] != "" ){
-				var temp_mask = new Sprite(ImageManager.load_MenuLayer(temp_sprite_data['src_img_mask']));
+				var temp_mask = new Sprite( ImageManager.loadBitmap( temp_sprite_data['src_img_file'], temp_sprite_data['src_img_mask'], 0, true ));
 				temp_layer.addChild(temp_mask);
 				temp_layer.mask = temp_mask;
 			}

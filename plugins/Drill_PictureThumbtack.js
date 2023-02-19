@@ -126,7 +126,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			图片图钉：
 //				->事件图钉
 //				->图片图钉
@@ -142,7 +142,30 @@
 //		★存在的问题：
 //			暂无
 //
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_PTh_PluginTip_curName = "Drill_PictureThumbtack.js 图片-图片图钉";
+	DrillUp.g_PTh_PluginTip_baseList = [];
+	//==============================
+	// * 提示信息 - 报错 - 找不到事件
+	//==============================
+	DrillUp.drill_PTh_getPluginTip_EventNotFind = function( e_id ){
+		return "【" + DrillUp.g_PTh_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到图片
+	//==============================
+	DrillUp.drill_PTh_getPluginTip_PictureNotFind = function( pic_id ){
+		return "【" + DrillUp.g_PTh_PluginTip_curName + "】\n插件指令错误，id为"+pic_id+"的图片还没被创建。\n你可能需要将指令放在'显示图片'事件指令之后。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -392,9 +415,7 @@ Game_Screen.prototype.drill_PTh_isPictureExist = function( pic_id ){
 	
 	var pic = this.picture( pic_id );
 	if( pic == undefined ){
-		alert( "【Drill_PictureThumbtack.js 图片 - 图片图钉】\n" +
-				"插件指令错误，id为"+pic_id+"的图片还没被创建。\n" + 
-				"你可能需要将指令放在'显示图片'事件指令之后。");
+		alert( DrillUp.drill_PTh_getPluginTip_PictureNotFind( pic_id ) );
 		return false;
 	}
 	return true;
@@ -407,8 +428,7 @@ Game_Map.prototype.drill_PTh_isEventExist = function( e_id ){
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_PictureThumbtack.js 图片 - 图片图钉】\n" +
-				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
+		alert( DrillUp.drill_PTh_getPluginTip_EventNotFind( e_id ) );
 		return false;
 	}
 	return true;

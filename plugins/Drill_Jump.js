@@ -200,7 +200,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			跳跃能力：
 //				->适应性
 //					->移动到目的地后跳跃，暂时禁用目的地，防止跳跃后回撤
@@ -224,7 +224,33 @@
 //
 //		★存在的问题：
 //			暂无
+//
 
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_jump_PluginTip_curName = "Drill_Jump.js 互动-跳跃能力";
+	DrillUp.g_jump_PluginTip_baseList = ["Drill_EventJump.js 物体-事件跳跃"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_jump_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_jump_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_jump_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_jump_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_jump_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -603,10 +629,8 @@ Game_Player.prototype.drill_EJu_jumpTouch = function( x, y  ){
 //=============================================================================
 }else{
 		Imported.Drill_Jump = false;
-		alert(
-			"【Drill_Jump.js 互动 - 跳跃能力】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_EventJump 物体-事件跳跃"
-		);
+		var pluginTip = DrillUp.drill_jump_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
 

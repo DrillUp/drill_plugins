@@ -384,13 +384,15 @@
  * @type select
  * @option 普通
  * @value 0
- * @option 叠加
+ * @option 发光
  * @value 1
  * @option 实色混合(正片叠底)
  * @value 2
  * @option 浅色
  * @value 3
- * @desc pixi的渲染混合模式。0-普通,1-叠加。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
+ * @option 叠加
+ * @value 4
+ * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
  * @default 0
  *
  * @param 视频色调
@@ -438,13 +440,13 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			视频动画背景：
 //				->显示隐藏
 //				->播放视频
 //				->视频贴图
 // 
-//		★私有类如下：
+//		★插件私有类：
 //			* Drill_TVi_VideoSprite【视频贴图】
 //
 //		★必要注意事项：
@@ -459,6 +461,31 @@
 //			暂无
 //			  
 
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_TVi_PluginTip_curName = "Drill_TitleVideo.js 标题-多层标题视频";
+	DrillUp.g_TVi_PluginTip_baseList = ["Drill_CoreOfGlobalSave.js 管理器-全局存储核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_TVi_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_TVi_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_TVi_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_TVi_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_TVi_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -986,10 +1013,8 @@ Drill_TVi_VideoSprite.prototype.drill_TVi_destroy = function() {
 //=============================================================================
 }else{
 		Imported.Drill_TitleVideo = false;
-		alert(
-			"【Drill_TitleVideo.js 标题 - 多层标题视频】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfGlobalSave 管理器-全局存储核心"
-		);
+		var pluginTip = DrillUp.drill_TVi_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
 

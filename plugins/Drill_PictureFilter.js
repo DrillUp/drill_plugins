@@ -186,7 +186,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			图片滤镜效果：
 //				->绑定于图片
 //				->（滤镜核）优化，滤镜/滤镜板用到的时候才new
@@ -199,7 +199,39 @@
 //				
 //		★存在的问题：
 //			暂无
- 
+//
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_PFi_PluginTip_curName = "Drill_PictureFilter.js 图片-滤镜效果";
+	DrillUp.g_PFi_PluginTip_baseList = ["Drill_CoreOfFilter.js 系统-滤镜核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_PFi_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_PFi_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_PFi_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_PFi_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_PFi_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到图片
+	//==============================
+	DrillUp.drill_PFi_getPluginTip_PictureNotFind = function( pic_id ){
+		return "【" + DrillUp.g_PFi_PluginTip_curName + "】\n插件指令错误，id为"+pic_id+"的图片还没被创建。\n你可能需要将指令放在'显示图片'事件指令之后。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -344,9 +376,7 @@ Game_Screen.prototype.drill_PFi_isPictureExist = function( pic_id ){
 	
 	var pic = this.picture( pic_id );
 	if( pic == undefined ){
-		alert( "【Drill_PictureFilter.js 图片 - 滤镜效果】\n" +
-				"插件指令错误，id为"+pic_id+"的图片还没被创建。\n" + 
-				"你可能需要将指令放在'显示图片'事件指令之后。");
+		alert( DrillUp.drill_PFi_getPluginTip_PictureNotFind( pic_id ) );
 		return false;
 	}
 	return true;
@@ -480,10 +510,8 @@ Sprite_Picture.prototype.drill_PFi_updatePicture = function() {
 //=============================================================================
 }else{
 		Imported.Drill_PictureFilter = false;
-		alert(
-			"【Drill_PictureFilter.js 图片 - 滤镜效果】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfFilter 系统-滤镜核心"
-		);
+		var pluginTip = DrillUp.drill_PFi_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 	
 

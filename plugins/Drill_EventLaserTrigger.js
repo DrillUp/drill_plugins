@@ -260,7 +260,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			可变激光区域：
 //				->单方向激光区域
 //				->激光穿透
@@ -280,6 +280,23 @@
 //			暂无
 //
 
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_ELT_PluginTip_curName = "Drill_EventLaserTrigger.js 物体触发-可变激光区域 & 条件触发";
+	DrillUp.g_ELT_PluginTip_baseList = [];
+	//==============================
+	// * 提示信息 - 报错 - 找不到事件
+	//==============================
+	DrillUp.drill_ELT_getPluginTip_EventNotFind = function( e_id ){
+		return "【" + DrillUp.g_ELT_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -499,8 +516,7 @@ Game_Map.prototype.drill_ELT_isEventExist = function( e_id ){
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_EventLaserTrigger.js 物体触发 - 可变激光区域 & 条件触发】\n" +
-				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
+		alert( DrillUp.drill_ELT_getPluginTip_EventNotFind( e_id ) );
 		return false;
 	}
 	return true;

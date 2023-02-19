@@ -714,14 +714,32 @@
  * @type select
  * @option 普通
  * @value 0
- * @option 叠加
+ * @option 发光
  * @value 1
  * @option 实色混合(正片叠底)
  * @value 2
  * @option 浅色
  * @value 3
- * @desc pixi的渲染混合模式。0-普通,1-叠加。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
+ * @option 叠加
+ * @value 4
+ * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
  * @default 0
+ *
+ * @param 图像-色调值
+ * @parent ---贴图---
+ * @type number
+ * @min 0
+ * @max 360
+ * @desc GIF图像的色调值。
+ * @default 0
+ *
+ * @param 图像-模糊边缘
+ * @parent ---贴图---
+ * @type boolean
+ * @on 模糊
+ * @off 关闭
+ * @desc 可以模糊GIF图像的边缘，防止出现像素锯齿。
+ * @default false
  *
  * @param 旋转速度
  * @parent ---贴图---
@@ -862,7 +880,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			菜单GIF：
 //				->菜单层级
 //				->显示/隐藏
@@ -887,6 +905,17 @@
 //			暂无
 //
 
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_MGi_PluginTip_curName = "Drill_MenuGif.js 主菜单-多层菜单GIF";
+	DrillUp.g_MGi_PluginTip_baseList = [];
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -914,6 +943,7 @@
 		}else{
 			data['src_img'] = [];
 		}
+		data['src_img_file'] = "img/Menu__layer_gif/";
 		data['src_bitmaps'] = [];
 		data['src_img_mask'] = String( dataFrom["资源-GIF遮罩"] || "");
 		data['interval'] = Number( dataFrom["帧间隔"] || 4);
@@ -922,6 +952,8 @@
 		data['y'] = Number( dataFrom["平移-GIF Y"] || 0);
 		data['opacity'] = Number( dataFrom["透明度"] || 255);
 		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
+		data['tint'] = Number( dataFrom["图像-色调值"] || 0);
+		data['smooth'] = String( dataFrom["图像-模糊边缘"] || "false") == "true";
 		data['rotate'] = Number( dataFrom["旋转速度"] || 0.0);
 		data['menu_index'] = Number( dataFrom["菜单层级"] || 0);
 		data['zIndex'] = Number( dataFrom["图片层级"] || 0);
@@ -962,13 +994,7 @@
 	}
 	
 	
-//=============================================================================
-// ** 资源文件夹
-//=============================================================================
-ImageManager.load_MenuLayerGIF = function(filename) {
-    return this.loadBitmap('img/Menu__layer_gif/', filename, 0, true);
-};
-
+	
 //=============================================================================
 // * 插件指令
 //=============================================================================
@@ -1248,7 +1274,7 @@ Scene_MenuBase.prototype.drill_MGi_create = function() {
 			// > GIF贴图
 			var temp_sprite_data = JSON.parse(JSON.stringify( temp_data ));	//深拷贝数据（杜绝引用造成的修改）
 			for(var j = 0; j < temp_sprite_data['src_img'].length ; j++){
-				temp_sprite_data['src_bitmaps'].push(ImageManager.load_MenuLayerGIF(temp_sprite_data['src_img'][j]));
+				temp_sprite_data['src_bitmaps'].push( ImageManager.loadBitmap( temp_sprite_data['src_img_file'], temp_sprite_data['src_img'][j], temp_sprite_data['tint'], temp_sprite_data['smooth'] ));
 			}
 			var temp_sprite = new Sprite();
 			temp_sprite.bitmap = temp_sprite_data['src_bitmaps'][0];
@@ -1280,7 +1306,7 @@ Scene_MenuBase.prototype.drill_MGi_create = function() {
 			
 			// > GIF遮罩
 			if( temp_sprite_data['src_img_mask'] != "" ){
-				var temp_mask = new Sprite(ImageManager.load_MenuLayerGIF(temp_sprite_data['src_img_mask']));
+				var temp_mask = new Sprite( ImageManager.loadBitmap( temp_sprite_data['src_img_file'], temp_sprite_data['src_img_mask'], temp_sprite_data['tint'], temp_sprite_data['smooth'] ));
 				temp_layer.addChild(temp_mask);
 				temp_layer.mask = temp_mask;
 			}

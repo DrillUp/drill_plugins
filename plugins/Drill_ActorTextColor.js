@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.9]        UI - 角色文本颜色
+ * @plugindesc [v2.0]        UI - 角色文本颜色
  * @author Drill_up
  * 
  * 
@@ -21,7 +21,7 @@
  * 该插件 不能 单独使用。
  * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfColor     窗口字符-颜色核心
+ *   - Drill_CoreOfColor     窗口字符-颜色核心★★v1.5及以上★★
  *     需要该核心才能修改颜色。
  * 作用于：
  *   - Drill_WindowLog       战斗UI-窗口提示消息
@@ -45,25 +45,34 @@
  * ----激活条件：
  * 在要修改颜色的角色设置中，添加注释即可：
  *
- * 角色注释：<颜色:1>
- * 角色注释：<高级颜色:1>
- * 角色注释：<颜色:#FF4444>
+ * 角色注释：<名称-颜色:1>
+ * 角色注释：<名称-高级颜色:1>
+ * 角色注释：<名称-颜色:#FF4444>
+ * 角色注释：<昵称-颜色:1>
+ * 角色注释：<昵称-高级颜色:1>
+ * 角色注释：<昵称-颜色:#FF4444>
  *
  * 1."颜色:1" 表示颜色核心的配置中的第1个颜色。你也可以直接写颜色代码。
  * 2."高级颜色:3" 表示核心中配置的第3个高级渐变色。
+ * 3.变色对 角色名称 的指代字符 "\n[1]"  "\p[1]" 也有效。
+ *   变色对 角色昵称 的指代字符 "\an[1]"  "\pn[1]" 也有效。
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 修改颜色：
  * 如果你要改变角色颜色，那么可以使用下面插件指令：
  * （冒号两边都有一个空格）
  * 
- * 插件指令：>文本颜色 : 角色[5] : 角色普通 : 普通颜色[2]
- * 插件指令：>文本颜色 : 角色变量[21] : 角色普通 : 普通颜色[2]
+ * 插件指令：>文本颜色 : 角色[5] : 名称普通 : 普通颜色[2]
+ * 插件指令：>文本颜色 : 角色变量[21] : 名称普通 : 普通颜色[2]
  * 
- * 插件指令：>文本颜色 : 角色[5] : 角色普通 : 普通颜色[2]
- * 插件指令：>文本颜色 : 角色[5] : 角色普通 : 普通颜色变量[21]
- * 插件指令：>文本颜色 : 角色[5] : 角色高级 : 高级颜色[4]
- * 插件指令：>文本颜色 : 角色[5] : 角色高级 : 高级颜色变量[21]
+ * 插件指令：>文本颜色 : 角色[5] : 名称普通 : 普通颜色[2]
+ * 插件指令：>文本颜色 : 角色[5] : 名称普通 : 普通颜色变量[21]
+ * 插件指令：>文本颜色 : 角色[5] : 名称高级 : 高级颜色[4]
+ * 插件指令：>文本颜色 : 角色[5] : 名称高级 : 高级颜色变量[21]
+ * 插件指令：>文本颜色 : 角色[5] : 昵称普通 : 普通颜色[2]
+ * 插件指令：>文本颜色 : 角色[5] : 昵称普通 : 普通颜色变量[21]
+ * 插件指令：>文本颜色 : 角色[5] : 昵称高级 : 高级颜色[4]
+ * 插件指令：>文本颜色 : 角色[5] : 昵称高级 : 高级颜色变量[21]
  * 
  * 1.前半部分（角色[5]）和 后半部分（角色普通 : 普通颜色[2]）
  *   的参数可以随意组合。一共有2*4种组合方式。
@@ -119,6 +128,9 @@
  * 修复了角色改名后，不变色的bug。
  * [v1.9]
  * 优化了旧存档的识别与兼容。
+ * [v2.0]
+ * 添加了 昵称 的变色设置。
+ * 添加了 窗口字符 的变色兼容功能。
  *
  * 
  * @param 消息窗口是否变色
@@ -151,10 +163,26 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
-//			角色文本颜色：
-//				->文本过滤
-//				->插件指令
+//		★功能结构树：
+//			->☆提示信息
+//			->☆变量获取
+//			->☆插件指令
+//			->☆存储数据
+//			->☆颜色数据
+//				->获取 - 角色名称
+//				->获取 - 角色昵称
+//				->获取 - 名称的颜色代码
+//				->获取 - 昵称的颜色代码
+//				->获取 - 名称的颜色ID
+//				->获取 - 昵称的颜色ID
+//			->☆指代字符同步变色
+//				-> \n[1]
+//				-> \p[1]
+//				-> \an[1]
+//				-> \pn[1]
+//			->☆角色数据
+//				->改名情况
+//			->☆颜色文本绘制
 //		
 //		★必要注意事项：
 //			暂无
@@ -168,31 +196,41 @@
 //		
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
 	//==============================
 	var DrillUp = DrillUp || {}; 
-	DrillUp.g_ATC_tipCurName = "Drill_ActorTextColor.js UI-角色文本颜色";
-	DrillUp.g_ATC_tipBasePluginList = ["Drill_CoreOfColor.js 窗口字符-颜色核心"];
+	DrillUp.g_ATC_PluginTip_curName = "Drill_ActorTextColor.js UI-角色文本颜色";
+	DrillUp.g_ATC_PluginTip_baseList = ["Drill_CoreOfColor.js 窗口字符-颜色核心"];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
 	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_ATC_getPluginTip_NoBasePlugin = function(){
-		if( DrillUp.g_ATC_tipBasePluginList.length == 0 ){ return ""; }
-		var message = "【" + DrillUp.g_ATC_tipCurName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
-		for(var i=0; i < DrillUp.g_ATC_tipBasePluginList.length; i++){
+		if( DrillUp.g_ATC_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_ATC_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_ATC_PluginTip_baseList.length; i++){
 			message += "\n- ";
-			message += DrillUp.g_ATC_tipBasePluginList[i];
+			message += DrillUp.g_ATC_PluginTip_baseList[i];
 		}
 		return message;
 	};
- 
+	//==============================
+	// * 提示信息 - 报错 - 强制同步更新
+	//==============================
+	DrillUp.drill_ATC_getPluginTip_NeedUpdate_Color = function(){
+		return "【" + DrillUp.g_ATC_PluginTip_curName + "】\n有插件在调用已经抛弃的变量，注意同步更新一下下面的插件："+
+			"\n- Drill_CoreOfColor 窗口字符-颜色核心"+
+			"\n- Drill_EnemyTextColor UI-敌人文本颜色"+
+			"\n- Drill_WindowLog 战斗UI-窗口提示消息";
+	};
+	
+	
 //=============================================================================
-// ** 变量获取
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_ActorTextColor = true;
@@ -210,7 +248,7 @@ if( Imported.Drill_CoreOfColor ){
 	
 	
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _drill_ATC_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
@@ -219,7 +257,9 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	
 		if( args.length == 6 ){
 			var type = String(args[3]);
-			if( type == "角色普通" || type == "角色高级" ){
+			if( type == "角色普通" || type == "角色高级" ||
+				type == "名称普通" || type == "名称高级" ||
+				type == "昵称普通" || type == "昵称高级" ){
 			
 				/*-----------------对象组获取------------------*/
 				var temp1 = String(args[1]);
@@ -249,15 +289,25 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				}
 				
 				/*-----------------转换------------------*/
-				if( type == "角色普通" ){
+				if( type == "角色普通" || type == "名称普通" ){
 					if( temp2.slice(0,1) === "#" ){
-						$gameSystem._drill_ATC_colorCode[Number(temp1)] = temp2;
+						$gameSystem._drill_ATC_nameColorCode[Number(temp1)] = temp2;
 					}else{
-						$gameSystem._drill_ATC_colorCode[Number(temp1)] = String(DrillUp.drill_COC_getColor( Number(temp2) -1 ));
+						$gameSystem._drill_ATC_nameColorCode[Number(temp1)] = String(DrillUp.drill_COC_getColor( Number(temp2) -1 ));
 					}
 				}
-				if( type == "角色高级" ){
-					$gameSystem._drill_ATC_colorCode[Number(temp1)] = String(DrillUp.drill_COC_getSeniorColor( Number(temp2) -1 ));
+				if( type == "角色高级" || type == "名称高级" ){
+					$gameSystem._drill_ATC_nameColorCode[Number(temp1)] = String(DrillUp.drill_COC_getSeniorColor( Number(temp2) -1 ));
+				}
+				if( type == "昵称普通" ){
+					if( temp2.slice(0,1) === "#" ){
+						$gameSystem._drill_ATC_nicknameColorCode[Number(temp1)] = temp2;
+					}else{
+						$gameSystem._drill_ATC_nicknameColorCode[Number(temp1)] = String(DrillUp.drill_COC_getColor( Number(temp2) -1 ));
+					}
+				}
+				if( type == "昵称高级" ){
+					$gameSystem._drill_ATC_nicknameColorCode[Number(temp1)] = String(DrillUp.drill_COC_getSeniorColor( Number(temp2) -1 ));
 				}
 			}
 		}
@@ -270,10 +320,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var temp2 = $gameVariables.value( Number(args[5]) ) ;
 			var type = String(args[3]);
 			if( type == "角色普通" ){
-				$gameSystem._drill_ATC_colorCode[Number(temp1)] = String(DrillUp.drill_COC_getColor( temp2-1 )) ;
+				$gameSystem._drill_ATC_nameColorCode[Number(temp1)] = String(DrillUp.drill_COC_getColor( temp2-1 )) ;
 			}
 			if( type == "角色高级" ){
-				$gameSystem._drill_ATC_colorCode[Number(temp1)] = String(DrillUp.drill_COC_getSeniorColor( temp2-1 )) ;
+				$gameSystem._drill_ATC_nameColorCode[Number(temp1)] = String(DrillUp.drill_COC_getSeniorColor( temp2-1 )) ;
 			}
 		}
 	}
@@ -281,7 +331,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -346,8 +396,9 @@ Game_System.prototype.drill_ATC_checkSysData = function() {
 // * 存储数据 - 初始化数据（私有）
 //==============================
 Game_System.prototype.drill_ATC_initSysData_Private = function() {
-	this._drill_ATC_colorCode = [];
-	this._drill_ATC_actorName = [];
+	this._drill_ATC_nameColorCode = [];			//（只存code，插件指令的任何变化，都只存code）
+	this._drill_ATC_nicknameColorCode = [];
+	this._drill_ATC_actorCurName = [];
 	//（初始为空容器，不需要初始化）
 };
 //==============================
@@ -356,7 +407,7 @@ Game_System.prototype.drill_ATC_initSysData_Private = function() {
 Game_System.prototype.drill_ATC_checkSysData_Private = function() {
 	
 	// > 旧存档数据自动补充
-	if( this._drill_ATC_colorCode == undefined ){
+	if( this._drill_ATC_nicknameColorCode == undefined ){
 		this.drill_ATC_initSysData();
 	}
 	
@@ -368,12 +419,7 @@ Game_System.prototype.drill_ATC_checkSysData_Private = function() {
 //==============================
 Object.defineProperty(Game_System.prototype, '_drill_ATC_actorCount', {
     get: function(){
-		alert(
-			"【Drill_ActorTextColor.js UI-角色文本颜色】\n有插件在调用已经抛弃的变量，注意同步更新一下下面的插件："+
-			"\n- Drill_CoreOfColor 窗口字符-颜色核心"+
-			"\n- Drill_EnemyTextColor UI-敌人文本颜色"+
-			"\n- Drill_WindowLog 战斗UI-窗口提示消息"
-		);
+		alert( DrillUp.drill_ATC_getPluginTip_NeedUpdate_Color() );
         return 0;
     },
     configurable: true
@@ -382,27 +428,69 @@ Object.defineProperty(Game_System.prototype, '_drill_ATC_actorCount', {
 
 
 //=============================================================================
-// ** 临时数据
+// ** ☆颜色数据
+//
+//			说明：	> 此处将注释中的颜色数据转移到 $gameTemp 中，方便随时获取。
+//					> 详细可见 开放函数 。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 临时数据 - 初始化
+// * 颜色数据 - 初始化
 //==============================
 var _drill_ATC_temp_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {
     _drill_ATC_temp_initialize.call(this);
 	
-	this._drill_ATC_actorData = [];
+	this._drill_ATC_actorNameData = [];
+	this._drill_ATC_actorNicknameData = [];
 	for( var i = 0; i < $dataActors.length; i++ ){
 		if( $dataActors[i] == null ){ continue; }
 		
-		// > 开始读取
+		
+		// > 名称 - 开始读取
 		var note = String($dataActors[i].note);
-		var re_color = /<颜色:([^<>]*?)>/; 				//正则获取（返回数组，第二个为匹配内容）
+		var re_color = /<(名称-)?颜色:([^<>]*?)>/; 				//正则获取（返回数组，第二个为匹配内容）
 		var color = (note.match(re_color)) || [];
-		var re_colorG = /<高级颜色:([^<>]*?)>/; 	
+		var re_colorG = /<(名称-)?高级颜色:([^<>]*?)>/; 	
 		var colorG = (note.match(re_colorG)) || [];
 		
-		// > 普通颜色
+		// > 名称 - 普通颜色
+		if( color != "" && color != [] ){
+			
+			// > 普通颜色 - 颜色代码
+			if( color[2].slice(0,1) === "#" ){
+				var data = {};
+				data['color_code'] = color[2];
+				data['color_id'] = -1;
+				this._drill_ATC_actorNameData[i] = data;
+				
+			// > 普通颜色 - 颜色编号
+			}else{
+				var data = {};
+				data['color_code'] = String(DrillUp.drill_COC_getColor( Number(color[2]) -1 )) ;
+				data['color_id'] = Number(color[2]) +100; //(101开始)
+				if( data['color_code'] == "#ffffff" ){ data['color_code'] = ""; }
+				this._drill_ATC_actorNameData[i] = data;
+			}
+			
+		// > 名称 - 高级颜色
+		}else if( colorG != "" && colorG != [] ){
+			var data = {};
+			data['color_code'] = DrillUp.drill_COC_getSeniorColor( Number(colorG[2]) -1 );
+			data['color_id'] = Number(colorG[2]) +200; //(201开始)
+			if( data['color_code'] == "#ffffff" ){ data['color_code'] = ""; }
+			this._drill_ATC_actorNameData[i] = data;
+		}
+		
+		
+		
+		// > 昵称 - 开始读取
+		var re_color = /<昵称-颜色:([^<>]*?)>/; 				//正则获取（返回数组，第二个为匹配内容）
+		var color = (note.match(re_color)) || [];
+		var re_colorG = /<昵称-高级颜色:([^<>]*?)>/; 	
+		var colorG = (note.match(re_colorG)) || [];
+		
+		// > 昵称 - 普通颜色
 		if( color != "" && color != [] ){
 			
 			// > 普通颜色 - 颜色代码
@@ -410,102 +498,223 @@ Game_Temp.prototype.initialize = function() {
 				var data = {};
 				data['color_code'] = color[1];
 				data['color_id'] = -1;
-				data['actor_name'] = $dataActors[i].name;
-				this._drill_ATC_actorData[i] = data;
+				this._drill_ATC_actorNicknameData[i] = data;
 				
 			// > 普通颜色 - 颜色编号
 			}else{
 				var data = {};
-				data['color_code'] = String(DrillUp.drill_COC_getColor( Number(color[1]) -1 )) ;
-				data['color_id'] = Number(color[1]) ; //(101开始)
-				data['actor_name'] = $dataActors[i].name;
-				this._drill_ATC_actorData[i] = data;
+				data['color_code'] = String(DrillUp.drill_COC_getColor( Number(color[1]) -1 ));
+				data['color_id'] = Number(color[1]) +100; //(101开始)
+				if( data['color_code'] == "#ffffff" ){ data['color_code'] = ""; }
+				this._drill_ATC_actorNicknameData[i] = data;
 			}
 			
-		// > 高级颜色
+		// > 昵称 - 高级颜色
 		}else if( colorG != "" && colorG != [] ){
 			var data = {};
 			data['color_code'] = DrillUp.drill_COC_getSeniorColor( Number(colorG[1]) -1 );
-			data['color_id'] = Number(colorG[1]) + 100 ; //(201开始)
-			data['actor_name'] = $dataActors[i].name;
-			this._drill_ATC_actorData[i] = data;
-		
-		}else{
-			//（不操作）
+			data['color_id'] = Number(colorG[1]) +200; //(201开始)
+			if( data['color_code'] == "#ffffff" ){ data['color_code'] = ""; }
+			this._drill_ATC_actorNicknameData[i] = data;
 		}
+		
 	}
-	//alert(JSON.stringify(this._drill_ATC_actorData));
+	//alert(JSON.stringify(this._drill_ATC_actorNicknameData));
 }
 //==============================
-// * 临时数据 - 获取 颜色代码
-//==============================
-Game_Temp.prototype.drill_ATC_getColorCode = function( actor_id ){
-	
-	// > 若存储变量有值，就用存储变量的
-	if( $gameSystem._drill_ATC_colorCode[actor_id] != undefined &&
-		$gameSystem._drill_ATC_colorCode[actor_id] != "" ){
-		return $gameSystem._drill_ATC_colorCode[actor_id];
-	}
-	var data = this._drill_ATC_actorData[actor_id];
-	if( data == undefined ){ return ""; }
-	return data['color_code'];
-}
-//==============================
-// * 临时数据 - 获取 角色名称
+// * 颜色数据 - 获取 - 角色名称（开放函数）
 //==============================
 Game_Temp.prototype.drill_ATC_getActorName = function( actor_id ){
 	
 	// > 若存储变量有值，就用存储变量的
-	if( $gameSystem._drill_ATC_colorCode[actor_id] != undefined &&
-		$gameSystem._drill_ATC_colorCode[actor_id] != "" ){
-		result = $gameSystem._drill_ATC_colorCode[actor_id];
+	if( $gameSystem._drill_ATC_actorCurName[ actor_id ] != undefined && 
+		$gameSystem._drill_ATC_actorCurName[ actor_id ] != "" ){
+		return $gameSystem._drill_ATC_actorCurName[ actor_id ];
 	}
-	var data = this._drill_ATC_actorData[actor_id];
+	
+	// > 没有，则用数据的值
+	var data = $dataActors[ actor_id ];
 	if( data == undefined ){ return ""; }
-	return data['actor_name'];
+	return data.name || "";
 }
 //==============================
-// * 临时数据 - 获取 颜色ID
+// * 颜色数据 - 获取 - 角色昵称（开放函数）
 //==============================
-Game_Temp.prototype.drill_ATC_getColorId = function( enemy_id ){
-	var data = this._drill_ATC_actorData[enemy_id];
+Game_Temp.prototype.drill_ATC_getActorNickname = function( actor_id ){
+	var data = $dataActors[ actor_id ];
+	if( data == undefined ){ return ""; }
+	return data.nickname || "";
+}
+//==============================
+// * 颜色数据 - 获取 - 名称的颜色代码（开放函数）
+//==============================
+Game_Temp.prototype.drill_ATC_getColorCode_Name = function( actor_id ){
+	
+	// > 若存储变量有值，就用存储变量的
+	if( $gameSystem._drill_ATC_nameColorCode[actor_id] != undefined &&
+		$gameSystem._drill_ATC_nameColorCode[actor_id] != "" ){
+		return $gameSystem._drill_ATC_nameColorCode[actor_id];
+	}
+	
+	// > 没有，则用注释的值
+	var data = this._drill_ATC_actorNameData[actor_id];
+	if( data == undefined ){ return ""; }
+	return data['color_code'];
+}
+//==============================
+// * 颜色数据 - 获取 - 昵称的颜色代码（开放函数）
+//==============================
+Game_Temp.prototype.drill_ATC_getColorCode_Nickname = function( actor_id ){
+	
+	// > 若存储变量有值，就用存储变量的
+	if( $gameSystem._drill_ATC_nicknameColorCode[actor_id] != undefined &&
+		$gameSystem._drill_ATC_nicknameColorCode[actor_id] != "" ){
+		return $gameSystem._drill_ATC_nicknameColorCode[actor_id];
+	}
+	
+	// > 没有，则用注释的值
+	var data = this._drill_ATC_actorNicknameData[actor_id];
+	if( data == undefined ){ return ""; }
+	return data['color_code'];
+}
+//==============================
+// * 颜色数据 - 获取 - 名称的颜色ID（开放函数）
+//==============================
+Game_Temp.prototype.drill_ATC_getColorId_Name = function( actor_id ){
+	var data = this._drill_ATC_actorNameData[actor_id];
+	if( data == undefined ){ return 0; }
+	return data['color_id'];
+}
+Game_Temp.prototype.drill_ATC_getColorId = function( actor_id ){
+	return this.drill_ATC_getColorId_Name( actor_id );
+}
+//==============================
+// * 颜色数据 - 获取 - 昵称的颜色ID（开放函数）
+//==============================
+Game_Temp.prototype.drill_ATC_getColorId_Nickname = function( actor_id ){
+	var data = this._drill_ATC_actorNicknameData[actor_id];
 	if( data == undefined ){ return 0; }
 	return data['color_id'];
 }
 
 
 //=============================================================================
-// ** 角色
+// ** ☆指代字符同步变色
+//
+//			说明：	> 与角色 名称/昵称 相关的指代字符，能同步变色。加 \csave \cload \c 等窗口字符。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 角色 - 改名情况
+// * 指代字符 - 角色名字（\n[1]）
+//==============================
+var _drill_ATC_window_actorName = Window_Base.prototype.actorName;
+Window_Base.prototype.actorName = function( n ){
+	var result = _drill_ATC_window_actorName.call( this, n );
+	if( result != "" ){
+		var actor = $gameActors.actor(n);
+		if( actor == undefined ){ return result; }
+		var code = $gameTemp.drill_ATC_getColorCode_Name( actor.actorId() );
+		if( code != "" ){
+			result = "\x1bcsave\x1bcc["+ code +"]"+ result +"\x1bcload";
+		}
+	}
+	return result;
+};
+//==============================
+// * 指代字符 - 队伍成员名字（\p[1]）
+//==============================
+var _drill_ATC_window_partyMemberName = Window_Base.prototype.partyMemberName;
+Window_Base.prototype.partyMemberName = function( n ){
+	var result = _drill_ATC_window_partyMemberName.call( this, n );
+	if( result != "" ){
+		var actor = $gameParty.members()[n - 1];
+		if( actor == undefined ){ return result; }
+		var code = $gameTemp.drill_ATC_getColorCode_Name( actor.actorId() );
+		if( code != "" ){
+			result = "\x1bcsave\x1bcc["+ code +"]"+ result +"\x1bcload";
+		}
+	}
+	return result;
+};
+//==============================
+// * 指代字符 - 角色昵称（\an[1]）
+//==============================
+var _drill_ATC_COWC_actorNickname = Window_Base.prototype.drill_COWC_actorNickname;
+Window_Base.prototype.drill_COWC_actorNickname = function( n ){
+	var result = _drill_ATC_COWC_actorNickname.call( this, n );
+	if( result != "" ){
+		var actor = $gameActors.actor(n);
+		if( actor == undefined ){ return result; }
+		var code = $gameTemp.drill_ATC_getColorCode_Nickname( actor.actorId() );
+		if( code != "" ){
+			result = "\x1bcsave\x1bcc["+ code +"]"+ result +"\x1bcload";
+		}
+	}
+	return result;
+};
+//==============================
+// * 指代字符 - 队伍成员昵称（\pn[1]）
+//==============================
+var _drill_ATC_COWC_partyNickname = Window_Base.prototype.drill_COWC_partyNickname;
+Window_Base.prototype.drill_COWC_partyNickname = function( n ){
+	var result = _drill_ATC_COWC_partyNickname.call( this, n );
+	if( result != "" ){
+		var actor = $gameParty.members()[n - 1];
+		if( actor == undefined ){ return result; }
+		var code = $gameTemp.drill_ATC_getColorCode_Nickname( actor.actorId() );
+		if( code != "" ){
+			result = "\x1bcsave\x1bcc["+ code +"]"+ result +"\x1bcload";
+		}
+	}
+	return result;
+};
+
+
+//=============================================================================
+// ** ☆角色数据
+//=============================================================================
+//==============================
+// * 角色数据 - 改名情况
 //==============================
 var _drill_ATC_setName = Game_Actor.prototype.setName;
 Game_Actor.prototype.setName = function( name ){
 	_drill_ATC_setName.call( this, name );
 	
 	// > 名称改变
-	var data = $gameTemp._drill_ATC_actorData[this._actorId];
+	var data = $gameTemp._drill_ATC_actorNameData[this._actorId];
 	if( data == undefined ){ return; }
-	$gameSystem._drill_ATC_actorName[this._actorId] = name;
+	$gameSystem._drill_ATC_actorCurName[this._actorId] = name;
 };
 
 
 //=============================================================================
-// ** 变色绑定 （Bitmap drawText）
+// ** ☆颜色文本绘制
+//
+//			说明：	> 在绘制文本前，比对 名称/昵称，并进行变色。对 this.textColor 赋值颜色。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 var _drill_ATC_drawText = Bitmap.prototype.drawText;
 Bitmap.prototype.drawText = function( text, x, y, maxWidth, lineHeight, align ){
 	
-	// > 颜色改变（所有文本都是在这里写的，只要识别字符串就可以变色了）
-	for( var i = 0; i < $gameTemp._drill_ATC_actorData.length; i++ ){
-		var data = $gameTemp._drill_ATC_actorData[i];
-		if( data == undefined ){ continue; }
-		var color_code = $gameTemp.drill_ATC_getColorCode(i);
+	// > 名称颜色改变（所有文本都是在这里写的，只要识别字符串就可以变色了）
+	for( var i = 1; i < $gameTemp._drill_ATC_actorNameData.length; i++ ){
+		var color_code = $gameTemp.drill_ATC_getColorCode_Name(i);
 		var actor_name = $gameTemp.drill_ATC_getActorName(i);
 		if( color_code == "" ){ continue; }
 		if( actor_name == "" ){ continue; }
 		if( text == actor_name ){
+			this.textColor = color_code;
+			this._drill_ATC_needReset = true;
+		}
+	}
+	
+	// > 昵称颜色改变（所有文本都是在这里写的，只要识别字符串就可以变色了）
+	for( var i = 1; i < $gameTemp._drill_ATC_actorNicknameData.length; i++ ){
+		var color_code = $gameTemp.drill_ATC_getColorCode_Nickname(i);
+		var actor_nickname = $gameTemp.drill_ATC_getActorNickname(i);
+		if( color_code == "" ){ continue; }
+		if( actor_nickname == "" ){ continue; }
+		if( text == actor_nickname ){
 			this.textColor = color_code;
 			this._drill_ATC_needReset = true;
 		}
@@ -527,7 +736,7 @@ Bitmap.prototype.drawText = function( text, x, y, maxWidth, lineHeight, align ){
 //=============================================================================
 }else{
 		Imported.Drill_ActorTextColor = false;
-		var tip = DrillUp.drill_ATC_getPluginTip_NoBasePlugin();
-		alert( tip );
+		var pluginTip = DrillUp.drill_ATC_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 

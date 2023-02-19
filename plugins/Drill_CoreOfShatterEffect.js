@@ -793,7 +793,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			方块粉碎核心：
 //				->控制器
 //					->标准模块 模板
@@ -846,6 +846,49 @@
 //			虽然这里完全封装成了一个单一函数接口。（2022/7/20 这里经过了完整重构，结构思路已经很清晰了）
 //
 
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_COSE_PluginTip_curName = "Drill_CoreOfShatterEffect.js 系统-方块粉碎核心";
+	DrillUp.g_COSE_PluginTip_baseList = ["Drill_CoreOfBallistics.js 系统-弹道核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_COSE_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_COSE_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_COSE_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_COSE_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_COSE_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 未配置的参数
+	//==============================
+	DrillUp.drill_COSE_getPluginTip_DataNotFind = function( data_id ){
+		return "【" + DrillUp.g_COSE_PluginTip_curName + "】\n没有找到编号为"+data_id+"的方块粉碎配置，请查看插件参数的配置内容。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 未配置的参数
+	//==============================
+	DrillUp.drill_COSE_getPluginTip_ErrorOpacityType = function( opacity_type ){
+		return "【" + DrillUp.g_COSE_PluginTip_curName + "】\n透明度类型错误，没有类型'"+opacity_type+"'。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 宽度高度不为零
+	//==============================
+	DrillUp.drill_COSE_getPluginTip_NoZero = function(){
+		return "【" + DrillUp.g_COSE_PluginTip_curName + "】\n碎片参数错误，出现了宽度或高度为零的碎片。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -1159,19 +1202,13 @@ Drill_COSE_Controller.prototype.drill_initPrivateData = function(){
 	// > 检查
 	var style_data = DrillUp.g_COSE_style_list[ data['shatter_id'] ];
 	if( style_data == null ){
-		alert(
-			"【Drill_CoreOfShatterEffect.js 系统-方块粉碎核心】\n"+
-			"没有找到编号为"+ (data['shatter_id']+1) +"的方块粉碎配置，请查看插件参数的配置内容。"
-		);
+		alert( DrillUp.drill_COSE_getPluginTip_DataNotFind( data['shatter_id']+1 ) );
 		return;
 	}
 	
 	// > 不接受零高宽情况
 	if( data['frameW'] == 0 || data['frameH'] == 0 ){
-		alert(
-			"【Drill_CoreOfShatterEffect.js 系统-方块粉碎核心】\n"+
-			"碎片参数错误，出现了宽度或高度为零的碎片。"
-		);
+		alert( DrillUp.drill_COSE_getPluginTip_NoZero() );
 		return;
 	}
 	
@@ -1335,10 +1372,7 @@ Drill_COSE_Controller.prototype.drill_initBallisticsOpacity = function( data, su
 		temp_b_opacity['targetDifference'] = 0 - orgOpacity;
 	}
 	else{
-		alert(
-			"【Drill_CoreOfShatterEffect.js 系统-方块粉碎核心】\n"+
-			"透明度类型错误，没有类型'" + data['shatter_opacityType'] + "'。"
-		);
+		alert( DrillUp.drill_COSE_getPluginTip_ErrorOpacityType( data['shatter_opacityType'] ) );
 	}
 	
 	//   随机因子（RandomFactor）
@@ -1950,10 +1984,8 @@ Scene_Load.prototype.reloadMapIfUpdated = function() {
 //=============================================================================
 }else{
 		Imported.Drill_CoreOfShatterEffect = false;
-		alert(
-			"【Drill_CoreOfShatterEffect.js 系统-方块粉碎核心】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfBallistics 系统-弹道核心"
-		);
+		var pluginTip = DrillUp.drill_COSE_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
 

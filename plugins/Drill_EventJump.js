@@ -323,7 +323,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			事件跳跃：
 //				->强制跳跃
 //				->普通跳跃
@@ -343,8 +343,44 @@
 //		★存在的问题：
 //			暂无
 //
-//
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_EJu_PluginTip_curName = "Drill_EventJump.js 物体-事件跳跃";
+	DrillUp.g_EJu_PluginTip_baseList = ["Drill_CoreOfMoveRoute.js 移动路线-移动路线核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_EJu_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_EJu_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_EJu_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_EJu_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_EJu_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到事件
+	//==============================
+	DrillUp.drill_EJu_getPluginTip_EventNotFind = function( e_id ){
+		return "【" + DrillUp.g_EJu_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 顺序错误
+	//==============================
+	DrillUp.drill_EJu_getPluginTip_ErrorOrder = function(){
+		return "【" + DrillUp.g_EJu_PluginTip_curName + "】\n插件顺序不对，Drill_LayerWallBlock 图块-墙壁阻塞器 插件必须放在该插件后面。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -411,10 +447,7 @@
 // * 插件顺序检测
 //=============================================================================
 if( Imported.Drill_LayerWallBlock ){
-	alert(
-		"【Drill_EventJump.js  物体 - 事件跳跃】\n"+
-		"插件顺序不对，Drill_LayerWallBlock 图块-墙壁阻塞器 插件需要放在该插件后面。"
-	);
+	alert( DrillUp.drill_EJu_getPluginTip_ErrorOrder() );
 }
 
 
@@ -896,8 +929,7 @@ Game_Map.prototype.drill_EJu_isEventExist = function( e_id ){
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_EventJump.js 物体 - 事件跳跃】\n" +
-				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
+		alert( DrillUp.drill_EJu_getPluginTip_EventNotFind( e_id ) );
 		return false;
 	}
 	return true;
@@ -1299,9 +1331,7 @@ Game_Map.prototype.drill_EJu_isAnyPassable = function( x, y  ){
 //=============================================================================
 }else{
 		Imported.Drill_EventJump = false;
-		alert(
-			"【Drill_EventJump.js 物体 - 事件跳跃】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfMoveRoute 移动路线-移动路线核心"
-		);
+		var pluginTip = DrillUp.drill_EJu_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 

@@ -696,7 +696,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			操作面板：（鼠标+触屏）
 //				->面板
 //					->收回时机
@@ -733,8 +733,41 @@
 //		★存在的问题：
 //			暂无
 //
-//
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_OH_PluginTip_curName = "Drill_OperateHud.js 鼠标-鼠标辅助操作面板";
+	DrillUp.g_OH_PluginTip_baseList = [
+		"Drill_CoreOfInput.js 系统-输入设备核心",
+		"Drill_LayerCommandThread.js 地图-多线程"
+	];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_OH_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_OH_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_OH_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_OH_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_OH_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 强制更新提示
+	//==============================
+	DrillUp.drill_OH_getPluginTip_NeedUpdate_Camera = function(){
+		return "【" + DrillUp.g_OH_PluginTip_curName + "】\n活动地图镜头插件版本过低，你需要更新 镜头插件 至少v2.2及以上版本。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -1074,7 +1107,7 @@ Scene_Map.prototype.createSpriteset = function() {
 	_drill_OH_map_createSpriteset.call(this);
 	
 	// > 创建层
-	if (!this._drill_OH_layer) {		
+	if( !this._drill_OH_layer ){
 		this._drill_OH_layer = new Sprite();
 		this.addChild(this._drill_OH_layer);
 	};
@@ -1083,6 +1116,8 @@ Scene_Map.prototype.createSpriteset = function() {
 	this._drill_OH = new Drill_Operate_Hud();
 	this._drill_OH_layer.addChild(this._drill_OH);
 };
+// > 强制更新提示 锁
+DrillUp.g_LCa_alert = true;
 //==============================
 // * 地图 - 帧刷新
 //==============================
@@ -1096,10 +1131,27 @@ Scene_Map.prototype.update = function() {
 		var _x = p_sprite.x + DrillUp.g_OH_x;
 		var _y = p_sprite.y - 24 + DrillUp.g_OH_y;
 		
-		// > 镜头缩放【地图 - 活动地图镜头】
-		if( Imported.Drill_LayerCamera ){	//（事件处于 下层、中层、上层 之间）
-			_x = $gameSystem.drill_LCa_mapToCameraX( _x );
-			_y = $gameSystem.drill_LCa_mapToCameraY( _y );
+		// > 镜头位置
+		if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】UI缩放与位移
+		
+			// > 强制更新提示
+			if( DrillUp.drill_LCa_isInScene_Map == undefined && DrillUp.g_LCa_alert == true ){ 
+				alert( DrillUp.drill_OH_getPluginTip_NeedUpdate_Camera() );
+				DrillUp.g_LCa_alert = false;
+				return; 
+			}
+			
+			// > 下层/中层/上层
+			//（不考虑）
+			
+			// > 图片层/最顶层（鼠标辅助面板，在图片层又新建了一个自己的层）
+			var tar_pos = $gameSystem._drill_LCa_controller.drill_LCa_getCameraPos_OuterSprite( _x, _y );
+			_x = tar_pos.x;
+			_y = tar_pos.y;
+			
+			// （旧函数，推翻时重新检查一下镜头是否对应上了）
+			//_x = $gameSystem.drill_LCa_mapToCameraX( _x );
+			//_y = $gameSystem.drill_LCa_mapToCameraY( _y );
 		}
 		
 		this._drill_OH.x = _x;
@@ -1184,6 +1236,8 @@ Scene_Map.prototype.drill_OH_checkPlayerTouch = function() {
 	}
 	//展开面板后，退出面板让面板自己来做
 }
+// > 强制更新提示 锁
+DrillUp.g_LCa_alert = true;
 //==============================
 // * 点击触发 - 检查触发范围
 //==============================
@@ -1197,11 +1251,31 @@ Sprite_Character.prototype.drill_OH_isOnCharacterSprite = function() {
 	
 	var _x = _drill_mouse_x;
 	var _y = _drill_mouse_y;
-	
-	// > 镜头缩放【地图 - 活动地图镜头】
-	if( Imported.Drill_LayerCamera ){	//（事件贴图处于 下层、中层、上层 之间）
-		_x = $gameSystem.drill_LCa_cameraToMapX( _drill_mouse_x );
-		_y = $gameSystem.drill_LCa_cameraToMapY( _drill_mouse_y );
+	if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】地图鼠标落点
+		
+		// > 强制更新提示
+		if( DrillUp.drill_LCa_isInScene_Map == undefined && DrillUp.g_LCa_alert == true ){ 
+			alert( DrillUp.drill_OH_getPluginTip_NeedUpdate_Camera() );
+			DrillUp.g_LCa_alert = false;
+			return; 
+		}
+		
+		if( DrillUp.drill_LCa_isInScene_Map() ){
+			
+			// > 下层/中层/上层
+			if( DrillUp.drill_LCa_isInArea_DownOrCenterOrUp(this) ){
+				var mouse_pos = $gameSystem._drill_LCa_controller.drill_LCa_getMousePos_OnChildren();
+				_x = mouse_pos.x;
+				_y = mouse_pos.y;
+			}
+			
+			// > 图片层/最顶层
+			else if( DrillUp.drill_LCa_isInArea_PicOrTop(this) ){
+				var mouse_pos = $gameSystem._drill_LCa_controller.drill_LCa_getMousePos_OnOuterSprite();
+				_x = mouse_pos.x;	//（此函数与直接赋值 _drill_mouse_x 效果一样）
+				_y = mouse_pos.y;
+			}
+		}
 	}
 	
 	if ( _x < this.x - pw) {return false};
@@ -2032,10 +2106,7 @@ Drill_Operate_Hud.prototype.drill_isOnBtnSprite = function(sprite) {
 //=============================================================================
 }else{
 		Imported.Drill_OperateHud = false;
-		alert(
-			"【Drill_OperateHud.js 鼠标 - 鼠标辅助操作面板】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfInput 系统-输入设备核心" + 
-			"\n- Drill_LayerCommandThread 地图-多线程"
-		);
+		var pluginTip = DrillUp.drill_OH_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 

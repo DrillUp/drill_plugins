@@ -677,7 +677,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			手柄：
 //				->改键
 //				->基本键
@@ -736,7 +736,30 @@
 //			1.直接修改映射会屏蔽掉一些未知按键，比如debug时的ctrl的特权穿透键。
 //			2.如果有新的按键内容加入，必须根据脚本依葫芦画瓢。没有合适的接口，只能硬编码。
 //
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_OKe_PluginTip_curName = "Drill_OperateKeys.js 键盘-键盘手柄按键修改器";
+	DrillUp.g_OKe_PluginTip_baseList = [];
+	//==============================
+	// * 提示信息 - 报错 - 重复键检查
+	//==============================
+	DrillUp.drill_OKe_getPluginTip_HasRepeat_gamepad = function(){
+		return "【" + DrillUp.g_OKe_PluginTip_curName + "】\n手柄检测到重复的基本键设置，一些按键可能会无法使用。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 重复键检查
+	//==============================
+	DrillUp.drill_OKe_getPluginTip_HasRepeat_keyboard = function(){
+		return "【" + DrillUp.g_OKe_PluginTip_curName + "】\n键盘检测到重复的基本键设置，一些按键可能会无法使用。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -1001,7 +1024,7 @@ Game_System.prototype.drill_OKe_gamePadKeysInit = function() {
 	this._drill_OKe_gamepadMapper[ pad['left'] ] = 'left';
 	this._drill_OKe_gamepadMapper[ pad['right'] ] = 'right';
 	if(Object.keys(this._drill_OKe_gamepadMapper).length < 9){
-		alert("【Drill_OperateKeys.js  键盘 - 键盘手柄按键修改器】\n手柄检测到重复的基本键设置，一些按键可能会无法使用。");
+		alert( DrillUp.drill_OKe_getPluginTip_HasRepeat_gamepad() );
 	}
 	
 	/*----------获取扩展键----------*/
@@ -1210,7 +1233,7 @@ Game_System.prototype.drill_OKe_keyboardKeysInit = function() {
 	count += board['debug'].length;
 	count += board['control'].length;
 	if(Object.keys(this._drill_OKe_keyboardMapper).length < count ){
-		alert("【Drill_OperateKeys.js  键盘 - 键盘手柄按键修改器】\n键盘检测到重复的基本键设置，一些按键可能会无法使用。");
+		alert( DrillUp.drill_OKe_getPluginTip_HasRepeat_keyboard() );
 	}
 	
 	/*----------获取扩展键----------*/

@@ -638,7 +638,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			漂浮参数数字：
 //				->结构
 //					->参数数字
@@ -657,8 +657,53 @@
 //		★存在的问题：
 //			暂无
 //
-//
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_GFN_PluginTip_curName = "Drill_GaugeFloatingNum.js 地图UI-临时漂浮参数数字";
+	DrillUp.g_GFN_PluginTip_baseList = [
+		"Drill_CoreOfBallistics.js 系统-弹道核心",
+		"Drill_CoreOfGaugeNumber.js 系统-参数数字核心"
+	];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_GFN_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_GFN_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_GFN_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_GFN_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_GFN_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到事件
+	//==============================
+	DrillUp.drill_GFN_getPluginTip_EventNotFind = function( e_id ){
+		return "【" + DrillUp.g_GFN_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 不能为空
+	//==============================
+	DrillUp.drill_GFN_getPluginTip_DataCannotEmpty = function(){
+		return "【" + DrillUp.g_GFN_PluginTip_curName + "】\n插件指令错误，漂浮数字样式不能为空。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到配置
+	//==============================
+	DrillUp.drill_GFN_getPluginTip_DataNotFind = function( data_id ){
+		return "【" + DrillUp.g_GFN_PluginTip_curName + "】\n插件指令错误，漂浮数字样式["+data_id+"]不存在或未配置。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -898,8 +943,7 @@ Game_Map.prototype.drill_GFN_isEventExist = function( e_id ){
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_GaugeFloatingNum.js 地图UI - 漂浮参数数字】\n" +
-				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
+		alert( DrillUp.drill_GFN_getPluginTip_EventNotFind( e_id ) );
 		return false;
 	}
 	return true;
@@ -1088,19 +1132,13 @@ Scene_Map.prototype.drill_GFN_updateCommandCreate = function() {
 		// > 检查指令
 		var s_id = data['style_id'];
 		if( s_id == undefined ){
-			alert(
-				"【Drill_GaugeFloatingNum.js 地图UI - 漂浮参数数字】\n"+
-				"指令错误，漂浮数字样式不能为空。"
-			);
+			alert( DrillUp.drill_GFN_getPluginTip_DataCannotEmpty() );
 			$gameTemp._drill_GFN_commandSeq.splice( i, 1 );
 			continue;
 		}
 		if( DrillUp.g_GFN_button[ s_id ] == undefined || 
 			DrillUp.g_GFN_button[ s_id ]['inited'] == false ){
-			alert(
-				"【Drill_GaugeFloatingNum.js 地图UI - 漂浮参数数字】\n"+
-				"指令错误，漂浮数字样式["+ (s_id+1) +"]不存在或未配置。"
-			);
+			alert( DrillUp.drill_GFN_getPluginTip_DataNotFind(s_id+1) );
 			$gameTemp._drill_GFN_commandSeq.splice( i, 1 );
 			continue;
 		}
@@ -1350,8 +1388,8 @@ Drill_GFN_NumberSprite.prototype.drill_updatePosition = function() {
 		yy += $gameMap.deltaY( pos_y, this._drill_orgPos_y ) * $gameMap.tileHeight();
 	}
 	
-	// > 镜头缩放与位移【地图 - 活动地图镜头】
-	if( Imported.Drill_LayerCamera ){
+	// > 镜头缩放与位移
+	if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】UI缩放与位移
 		var layer = data['layer_index'];
 		if( layer == "下层" || layer == "中层" || layer == "上层" ){
 			this.scale.x = 1.00 / $gameSystem.drill_LCa_curScaleX();
@@ -1359,8 +1397,11 @@ Drill_GFN_NumberSprite.prototype.drill_updatePosition = function() {
 			//（暂不考虑缩放位移偏转）
 		}
 		if( layer == "图片层" || layer == "最顶层" ){
-			xx = $gameSystem.drill_LCa_mapToCameraX( xx );
-			yy = $gameSystem.drill_LCa_mapToCameraY( yy );
+			var tar_pos = $gameSystem._drill_LCa_controller.drill_LCa_getCameraPos_OuterSprite( xx, yy );
+			xx = tar_pos.x;
+			yy = tar_pos.y;
+			//xx = $gameSystem.drill_LCa_mapToCameraX( xx );
+			//yy = $gameSystem.drill_LCa_mapToCameraY( yy );
 		}
 	}
 	
@@ -1377,10 +1418,7 @@ Drill_GFN_NumberSprite.prototype.drill_updatePosition = function() {
 //=============================================================================
 }else{
 		Imported.Drill_GaugeFloatingNum = false;
-		alert(
-			"【Drill_GaugeFloatingNum.js 地图UI - 临时漂浮参数数字】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfBallistics 系统-弹道核心" + 
-			"\n- Drill_CoreOfGaugeNumber 系统-参数数字核心"
-		);
+		var pluginTip = DrillUp.drill_GFN_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 

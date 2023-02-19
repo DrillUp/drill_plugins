@@ -810,13 +810,15 @@
  * @type select
  * @option 普通
  * @value 0
- * @option 叠加
+ * @option 发光
  * @value 1
  * @option 实色混合(正片叠底)
  * @value 2
  * @option 浅色
  * @value 3
- * @desc pixi的渲染混合模式。0-普通,1-叠加。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
+ * @option 叠加
+ * @value 4
+ * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
  * @default 0
  *
  * @param 图片层级
@@ -894,7 +896,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			菜单粒子：
 //				->菜单层级
 //				->显示/隐藏
@@ -914,7 +916,38 @@
 //		★存在的问题：
 //			暂无
 //
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_MBB_PluginTip_curName = "Drill_MenuBackButton.js 主菜单-返回按钮";
+	DrillUp.g_MBB_PluginTip_baseList = ["Drill_CoreOfWindowAuxiliary.js 系统-窗口辅助核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_MBB_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_MBB_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_MBB_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_MBB_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_MBB_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 样式配置错误
+	//==============================
+	DrillUp.drill_MBB_getPluginTip_ErrorData = function( style_id ){
+		return "【" + DrillUp.g_MBB_PluginTip_curName + "】\n配置错误，返回按钮样式["+style_id+"]不存在。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -994,6 +1027,7 @@
 		}else{
 			data['src_img'] = [];
 		}
+		data['src_img_file'] = "img/Menu__layer_backBtn/";
 		data['src_bitmaps'] = [];
 		data['interval'] = Number( dataFrom["帧间隔"] || 4);
 		data['back_run'] = String( dataFrom["是否倒放"] || "false") === "true";
@@ -1002,8 +1036,10 @@
 		data['zIndex'] = Number( dataFrom["图片层级"] || 20);
 		data['highlight_mode'] = String( dataFrom["高亮效果"] || "关闭高亮效果");
 		data['highlight_src_img'] = String( dataFrom["资源-高亮图片"] || "");
+		data['highlight_src_img_file'] = "img/Menu__layer_backBtn/";
 		data['pushdown_mode'] = String( dataFrom["按下效果"] || "关闭按下效果");
 		data['pushdown_src_img'] = String( dataFrom["资源-按下图片"] || "");
+		data['pushdown_src_img_file'] = "img/Menu__layer_backBtn/";
 		return data;
 	};
 	
@@ -1050,13 +1086,7 @@
 if( Imported.Drill_CoreOfWindowAuxiliary ){
 	
 	
-//=============================================================================
-// ** 资源文件夹
-//=============================================================================
-ImageManager.load_MenuBackBtn = function(filename) {
-    return this.loadBitmap('img/Menu__layer_backBtn/', filename, 0, true);
-};
-
+	
 //=============================================================================
 // * 插件指令
 //=============================================================================
@@ -1354,14 +1384,11 @@ Scene_MenuBase.prototype.drill_MBB_create = function() {
 			var temp_style_id = temp_sprite_data['style_id']-1 || 0;
 			var temp_style = DrillUp.g_MBB_style_list[ temp_style_id ];
 			if( temp_style == undefined ){
-				alert(
-					"【Drill_MenuBackButton.js  主菜单 - 返回按钮】\n"+
-					"配置错误，返回按钮样式["+ temp_sprite_data['style_id'] +"]不存在。"
-				);
+				alert( DrillUp.drill_MBB_getPluginTip_ErrorData( temp_sprite_data['style_id'] ) );
 			}
 			temp_style = JSON.parse(JSON.stringify( temp_style ));
 			for(var j = 0; j < temp_style['src_img'].length ; j++){
-				temp_style['src_bitmaps'].push(ImageManager.load_MenuBackBtn( temp_style['src_img'][j] ));
+				temp_style['src_bitmaps'].push( ImageManager.loadBitmap( temp_style['src_img_file'], temp_style['src_img'][j], 0, false ) );
 			}
 			var temp_sprite = new Sprite();
 			temp_sprite.bitmap = temp_style['src_bitmaps'][0];
@@ -1393,7 +1420,7 @@ Scene_MenuBase.prototype.drill_MBB_create = function() {
 			this._drill_MBB_sprites_style.push(temp_style);
 			// > 高亮效果
 			var temp_highlight = new Sprite();
-			temp_highlight.bitmap = ImageManager.load_MenuBackBtn(temp_style['highlight_src_img']);
+			temp_highlight.bitmap = ImageManager.loadBitmap( temp_style['highlight_src_img_file'], temp_style['highlight_src_img'], 0, false );
 			temp_highlight.anchor.x = 0.5;
 			temp_highlight.anchor.y = 0.5;
 			temp_highlight.visible = false;
@@ -1402,7 +1429,7 @@ Scene_MenuBase.prototype.drill_MBB_create = function() {
 			this._drill_MBB_sprites_highlight.push(temp_highlight);
 			// > 按下效果
 			var temp_pushdown = new Sprite();
-			temp_pushdown.bitmap = ImageManager.load_MenuBackBtn(temp_style['pushdown_src_img']);
+			temp_pushdown.bitmap = ImageManager.loadBitmap( temp_style['pushdown_src_img_file'], temp_style['pushdown_src_img'], 0, false );
 			temp_pushdown.anchor.x = 0.5;
 			temp_pushdown.anchor.y = 0.5;
 			temp_pushdown.visible = false;
@@ -1429,14 +1456,11 @@ Scene_MenuBase.prototype.drill_MBB_create = function() {
 			var temp_style_id = temp_sprite_data['style_id']-1 || 0;
 			var temp_style = DrillUp.g_MBB_style_list[ temp_style_id ];
 			if( temp_style == undefined ){
-				alert(
-					"【Drill_MenuBackButton.js  主菜单 - 返回按钮】\n"+
-					"配置错误，返回按钮样式["+ temp_sprite_data['style_id'] +"]不存在。"
-				);
+				alert( DrillUp.drill_MBB_getPluginTip_ErrorData( temp_sprite_data['style_id'] ) );
 			}
 			temp_style = JSON.parse(JSON.stringify( temp_style ));
 			for(var j = 0; j < temp_style['src_img'].length ; j++){
-				temp_style['src_bitmaps'].push(ImageManager.load_MenuBackBtn( temp_style['src_img'][j] ));
+				temp_style['src_bitmaps'].push( ImageManager.loadBitmap( temp_style['src_img_file'], temp_style['src_img'][j], 0, false ) );
 			}
 			var temp_sprite = new Sprite();
 			temp_sprite.bitmap = temp_style['src_bitmaps'][0];
@@ -1469,7 +1493,7 @@ Scene_MenuBase.prototype.drill_MBB_create = function() {
 			this._drill_MBB_sprites_style.push(temp_style);
 			// > 高亮效果
 			var temp_highlight = new Sprite();
-			temp_highlight.bitmap = ImageManager.load_MenuBackBtn(temp_style['highlight_src_img']);
+			temp_highlight.bitmap = ImageManager.loadBitmap( temp_style['highlight_src_img_file'], temp_style['highlight_src_img'], 0, false );
 			temp_highlight.anchor.x = 0.5;
 			temp_highlight.anchor.y = 0.5;
 			temp_highlight.visible = false;
@@ -1478,7 +1502,7 @@ Scene_MenuBase.prototype.drill_MBB_create = function() {
 			this._drill_MBB_sprites_highlight.push(temp_highlight);
 			// > 按下效果
 			var temp_pushdown = new Sprite();
-			temp_pushdown.bitmap = ImageManager.load_MenuBackBtn(temp_style['pushdown_src_img']);
+			temp_pushdown.bitmap = ImageManager.loadBitmap( temp_style['pushdown_src_img_file'], temp_style['pushdown_src_img'], 0, false );
 			temp_pushdown.anchor.x = 0.5;
 			temp_pushdown.anchor.y = 0.5;
 			temp_pushdown.visible = false;
@@ -1678,10 +1702,8 @@ if( typeof(_drill_mouse_getCurPos) == "undefined" ){	//防止重复定义
 //=============================================================================
 }else{
 		Imported.Drill_MenuBackButton = false;
-		alert(
-			"【Drill_MenuBackButton.js  主菜单 - 返回按钮】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfWindowAuxiliary 系统-窗口辅助核心"
-		);
+		var pluginTip = DrillUp.drill_MBB_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
 

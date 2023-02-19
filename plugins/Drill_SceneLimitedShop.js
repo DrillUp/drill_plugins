@@ -1413,7 +1413,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			限量商店：
 //				->窗口
 //					->商品窗口
@@ -1433,7 +1433,7 @@
 //				->特殊
 //					->库存控制
 // 
-//		★私有类如下：
+//		★插件私有类：
 //			* Drill_SLS_GoodsWindow【商品窗口】
 //			* Drill_SLS_GoodsButtonWindow【商品按钮组】
 //			* Drill_SLS_ConfirmWindow【确认窗口】
@@ -1468,6 +1468,46 @@
 //			暂无
 //
 
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_SLS_PluginTip_curName = "Drill_SceneLimitedShop.js 面板-限量商店";
+	DrillUp.g_SLS_PluginTip_baseList = [
+		"Drill_CoreOfWindowAuxiliary.js 系统-窗口辅助核心",
+		"Drill_CoreOfWaitressSprite.js 主菜单-服务员核心"
+	];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_SLS_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_SLS_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_SLS_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_SLS_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_SLS_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到数据配置
+	//==============================
+	DrillUp.drill_SLS_getPluginTip_DataNotFind = function( data_id ){
+		return "【" + DrillUp.g_SLS_PluginTip_curName + "】\n插件指令错误，限量商店["+data_id+"]的数据不存在。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到数据配置
+	//==============================
+	DrillUp.drill_SLS_getPluginTip_ItemDataNotFind = function( data_id, item_id ){
+		return "【" + DrillUp.g_SLS_PluginTip_curName + "】\n插件指令错误，限量商店["+data_id+"]不存在id为"+item_id+"的商品。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -1986,10 +2026,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp1 = Math.max( Number(temp1) - 1, 0 );
 				var shopData = $gameSystem._drill_SLS_shopDataList[ temp1 ];
 				if( shopData == undefined ){
-					alert(
-						"【Drill_SceneLimitedShop.js 面板 - 限量商店】\n"+
-						"错误，限量商店[" + (temp1+1) + "]的数据不存在。"
-					);
+					alert( DrillUp.drill_SLS_getPluginTip_DataNotFind(temp1+1) );
 					return;
 				}
 				shopData['waitress_id'] = Math.max( Number(temp2), 1 );
@@ -2004,10 +2041,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp1 = Math.max( Number(temp1) - 1, 0 );
 				var shopData = $gameSystem._drill_SLS_shopDataList[ temp1 ];
 				if( shopData == undefined ){
-					alert(
-						"【Drill_SceneLimitedShop.js 面板 - 限量商店】\n"+
-						"错误，限量商店[" + (temp1+1) + "]的数据不存在。"
-					);
+					alert( DrillUp.drill_SLS_getPluginTip_DataNotFind(temp1+1) );
 					return;
 				}
 				shopData['waitress_id'] = 0;
@@ -2142,8 +2176,7 @@ Game_System.prototype.drill_SLS_getShopItemData = function( shop_index, item_ind
 Game_System.prototype.drill_SLS_getShopItemData_WithCheck = function( shop_index, item_index ){
 	var data = this.drill_SLS_getShopItemData( shop_index, item_index );
 	if( data == null ){
-		alert( "【Drill_SceneLimitedShop.js 面板 - 限量商店】\n" +
-				"插件指令错误，限量商店[" + String(shop_index+1) + "]不存在id为" +String(item_index+1)+ "的商品。");
+		alert( DrillUp.drill_SLS_getPluginTip_ItemDataNotFind( String(shop_index+1), String(item_index+1) ) );
 		return null;
 	}
 	return data;
@@ -3330,11 +3363,8 @@ Drill_SLS_WaitressSprite.prototype.update = function() {
 //=============================================================================
 }else{
 		Imported.Drill_SceneLimitedShop = false;
-		alert(
-			"【Drill_SceneLimitedShop.js 面板 - 限量商店】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfWindowAuxiliary 系统-窗口辅助核心" +
-			"\n- Drill_CoreOfWaitressSprite 主菜单-服务员核心"
-		);
+		var pluginTip = DrillUp.drill_SLS_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
 

@@ -116,7 +116,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			并行动画：
 //				->战斗不阻塞设置
 //				->并行播放
@@ -159,9 +159,10 @@
 	// * 提示信息 - 参数
 	//==============================
 	var DrillUp = DrillUp || {}; 
-	DrillUp.g_AIP_tipCurName = "Drill_AnimationInParallel.js 动画-并行战斗动画";
-	DrillUp.g_AIP_tipBasePluginList = [];
-
+	DrillUp.g_AIP_PluginTip_curName = "Drill_AnimationInParallel.js 动画-并行战斗动画";
+	DrillUp.g_AIP_PluginTip_baseList = [];
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================

@@ -155,7 +155,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			鼠标触发图片：（鼠标+触屏）
 //				->鼠标点击
 //				->触发记录
@@ -169,8 +169,41 @@
 //		★存在的问题：
 //			暂无
 //
-//
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_MTP_PluginTip_curName = "Drill_MouseTriggerPicture.js 鼠标-鼠标触发图片";
+	DrillUp.g_MTP_PluginTip_baseList = [
+		"Drill_CoreOfInput.js 系统-输入设备核心",
+		"Drill_LayerCommandThread.js 地图-多线程"
+	];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_MTP_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_MTP_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_MTP_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_MTP_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_MTP_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到图片
+	//==============================
+	DrillUp.drill_MTP_getPluginTip_PictureNotFind = function( pic_id ){
+		return "【" + DrillUp.g_MTP_PluginTip_curName + "】\n插件指令错误，id为"+pic_id+"的图片还没被创建。\n你可能需要将指令放在'显示图片'事件指令之后。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -293,9 +326,7 @@ Game_Screen.prototype.drill_MTP_isPictureExist = function( pic_id ){
 	
 	var pic = this.picture( pic_id );
 	if( pic == undefined ){
-		alert( "【Drill_MouseTriggerPicture.js 鼠标 - 鼠标触发图片】\n" +
-				"插件指令错误，id为"+pic_id+"的图片还没被创建。\n" + 
-				"你可能需要将指令放在'显示图片'事件指令之后。");
+		alert( DrillUp.drill_MTP_getPluginTip_PictureNotFind( pic_id ) );
 		return false;
 	}
 	return true;
@@ -758,10 +789,7 @@ Scene_Battle.prototype.drill_MTP_executeCommonEvent = function( commonId ) {
 //=============================================================================
 }else{
 		Imported.Drill_MouseTriggerPicture = false;
-		alert(
-			"【Drill_MouseTriggerPicture.js 地图UI - 地图公共事件按钮集】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfInput 系统-输入设备核心" + 
-			"\n- Drill_LayerCommandThread 地图-多线程"
-		);
+		var pluginTip = DrillUp.drill_MTP_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 

@@ -826,7 +826,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			图块同步镜像：
 //				->镜面
 //					->地图图块遮罩
@@ -843,7 +843,7 @@
 //					x->镜像滤镜（消耗太大）
 //					x->镜像粉碎（需要额外控制作用）
 // 
-//		★私有类如下：
+//		★插件私有类：
 //			* Drill_Sprite_LSR【地图图块遮罩】
 //			* Drill_Sprite_LSR_Mask【地图图块遮罩】
 //
@@ -869,7 +869,38 @@
 //			1.定义一个镜像后，事件的 动画贴图和气泡贴图 会被镜面遮挡。（已解决）
 //			2.进入循环地图边缘后，由于遮罩不是循环的，刷新位置后会出现镜像消失问题。（已解决）
 //		
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_LSR_PluginTip_curName = "Drill_LayerSynchronizedReflection.js 行走图-图块同步镜像";
+	DrillUp.g_LSR_PluginTip_baseList = ["Drill_CoreOfEventFrame.js 行走图-行走图优化核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_LSR_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_LSR_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_LSR_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_LSR_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_LSR_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到事件
+	//==============================
+	DrillUp.drill_LSR_getPluginTip_EventNotFind = function( e_id ){
+		return "【" + DrillUp.g_LSR_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -1050,8 +1081,7 @@ Game_Map.prototype.drill_LSR_isEventExist = function( e_id ){
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_LayerSynchronizedReflection.js 行走图 - 图块同步镜像】\n" +
-				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
+		alert( DrillUp.drill_LSR_getPluginTip_EventNotFind( e_id ) );
 		return false;
 	}
 	return true;
@@ -1514,155 +1544,166 @@ Spriteset_Map.prototype.drill_LSR_getBlurFilter = function() {
 function Drill_Sprite_LSR() {
 	this.initialize.apply(this, arguments);
 }
-Drill_Sprite_LSR.prototype = Object.create(Sprite_Character.prototype);
-Drill_Sprite_LSR.prototype.constructor = Drill_Sprite_LSR;
 //==============================
-// * 镜像贴图 - 初始化
-//==============================
-Drill_Sprite_LSR.prototype.initialize = function(character) {
-	Sprite_Character.prototype.initialize.call(this,character);
-	this.opacity = 0;
-	this._drill_hide = false;			//隐藏标记
-	this._drill_zIndex = 0;				//镜像之间的先后顺序
-};
-//==============================
-// * 镜像贴图 - 帧刷新
-//==============================
-Drill_Sprite_LSR.prototype.update = function() {
-	
-	// > 【行走图 - 行走图优化核心】优化策略 - 必要执行函数
-	this.drill_COEF_updateImportant();
-	
-	// > 【行走图 - 行走图优化核心】优化策略 - 阻塞判定
-	if( this.drill_COEF_isOptimizationPassed() == false ){ 
-		this.visible = false;
-		return;
-	}
-	
-	// > 父类帧刷新
-	Sprite_Character.prototype.update.call(this);
-	
-	if( this._character == undefined ){ return; }
-	this.drill_updatePosition();		//帧刷新 - 位置
-	this.drill_updateZIndex();			//帧刷新 - 先后顺序
-	this.drill_updateVisible();			//帧刷新 - 可见情况
-};
-//==============================
-// * 帧刷新 - 位置
+// * 镜像贴图 - 最后继承
 //
-//			说明：	该函数与 Game_CharacterBase.prototype.screenY 公式一样。
+//			说明：	确保最后继承，能够将所有 行走图效果 包裹并表现在镜像身上。
 //==============================
-Drill_Sprite_LSR.prototype.drill_updatePosition = function() {
-	if( this._character == undefined ){ return; }
-	var screen_real_y = 0;
+var _drill_LSR_scene_initialize = SceneManager.initialize;
+SceneManager.initialize = function() {
+	_drill_LSR_scene_initialize.call(this);
 	
-	// > 同步镜像公式 - 单行同步
-	if( $gameSystem._drill_LSR_mode == "单行同步" ){
-		screen_real_y = $gameMap.adjustY( $gameSystem._drill_LSR_tileEdge );	//（无视当前事件的位置，直接固定位置）
-	}
-	// > 同步镜像公式 - 等距同步
-	if( $gameSystem._drill_LSR_mode == "等距同步" ){
-		screen_real_y = -1 * this._character.scrolledY() + $gameMap.adjustY( $gameSystem._drill_LSR_tileEdge ) * 2;
-	}
-	
-	// > 单位换算
-	var screen_y = Math.round( screen_real_y * $gameMap.tileHeight() );
-	
-	
-	// > 偏移补正值 - 单行同步
-	if( $gameSystem._drill_LSR_mode == "单行同步" ){
-		screen_y -= this._character.jumpHeight();		//（只留高度影响）
-	}
-	// > 偏移补正值 - 等距同步
-	if( $gameSystem._drill_LSR_mode == "等距同步" ){
-		screen_y += this._character.drill_LSR_fixY();	//（插件补正）
-		screen_y -= this._character.jumpHeight();		//（跳跃高度补正）
-		screen_y -= this._character.drill_reverseOffsetY();
-	}
-	
-	this.y = screen_y;
-};
-//==============================
-// * 帧刷新 - 先后顺序
-//==============================
-Drill_Sprite_LSR.prototype.drill_updateZIndex = function() {
-	if( this._character == undefined ){ return; }
-	
-	this._drill_zIndex = -1 * Math.abs( this._character.scrolledY() - ($gameSystem._drill_LSR_tileEdge - $gameMap._displayY) );
-	
-	// > 被举起时，上调y值
-	if( this._character instanceof Game_Event &&
-		this._character._drill_PT_is_being_lift ){
-		this._drill_zIndex += 0.5;
-	}
-};
-//==============================
-// * 帧刷新 - 可见情况
-//==============================
-Drill_Sprite_LSR.prototype.drill_updateVisible = function() {
-	
-	// > 透明度
-	if( this._character.drill_LSR_isOpacitySync() ){
-		this.opacity = Math.min( this._character._opacity ,255) ;
-	}else{
-		this.opacity = 255;
-	}
-	
-	// > 可见
-	this.visible = this._character.drill_LSR_isReflect() && !this._drill_hide ;
-	if( this._character.drill_LSR_isOpacitySync() && this._character._transparent == true ){ 	//透明状态同步
-		this.visible = false; 
-	}
-};
-//==============================
-// * 行走图倒转
-//==============================
-Drill_Sprite_LSR.prototype.characterPatternY = function() {
-	if( this._character.direction() == 2 && !this._character.drill_LSR_isLockDir() ){ return (8-2) /2 ; }
-	if( this._character.direction() == 8 && !this._character.drill_LSR_isLockDir() ){ return (2-2) /2 ; }
-    return (this._character.direction() - 2) / 2;
-};
-//==============================
-// * 物体 - 插件补正高度
-//
-//			说明：	org_screenY是原函数screenY的公式。
-//					此函数返回 其他插件多次继承screenY 而造成的高度差。
-//==============================
-Game_CharacterBase.prototype.drill_LSR_fixY = function(){
-    var th = $gameMap.tileHeight();
-	var org_screenY = Math.round(this.scrolledY() * th + th - this.shiftY() - this.jumpHeight());
-    return this.screenY() - org_screenY;
-};
+	Drill_Sprite_LSR.prototype = Object.create(Sprite_Character.prototype);
+	Drill_Sprite_LSR.prototype.constructor = Drill_Sprite_LSR;
+	//==============================
+	// * 镜像贴图 - 初始化
+	//==============================
+	Drill_Sprite_LSR.prototype.initialize = function(character) {
+		Sprite_Character.prototype.initialize.call(this,character);
+		this.opacity = 0;
+		this._drill_hide = false;			//隐藏标记
+		this._drill_zIndex = 0;				//镜像之间的先后顺序
+	};
+	//==============================
+	// * 镜像贴图 - 帧刷新
+	//==============================
+	Drill_Sprite_LSR.prototype.update = function() {
+		
+		// > 【行走图 - 行走图优化核心】优化策略 - 必要执行函数
+		this.drill_COEF_updateImportant();
+		
+		// > 【行走图 - 行走图优化核心】优化策略 - 阻塞判定
+		if( this.drill_COEF_isOptimizationPassed() == false ){ 
+			this.visible = false;
+			return;
+		}
+		
+		// > 父类帧刷新
+		Sprite_Character.prototype.update.call(this);
+		
+		if( this._character == undefined ){ return; }
+		this.drill_updatePosition();		//帧刷新 - 位置
+		this.drill_updateZIndex();			//帧刷新 - 先后顺序
+		this.drill_updateVisible();			//帧刷新 - 可见情况
+	};
+	//==============================
+	// * 帧刷新 - 位置
+	//
+	//			说明：	该函数与 Game_CharacterBase.prototype.screenY 公式一样。
+	//==============================
+	Drill_Sprite_LSR.prototype.drill_updatePosition = function() {
+		if( this._character == undefined ){ return; }
+		var screen_real_y = 0;
+		
+		// > 同步镜像公式 - 单行同步
+		if( $gameSystem._drill_LSR_mode == "单行同步" ){
+			screen_real_y = $gameMap.adjustY( $gameSystem._drill_LSR_tileEdge );	//（无视当前事件的位置，直接固定位置）
+		}
+		// > 同步镜像公式 - 等距同步
+		if( $gameSystem._drill_LSR_mode == "等距同步" ){
+			screen_real_y = -1 * this._character.scrolledY() + $gameMap.adjustY( $gameSystem._drill_LSR_tileEdge ) * 2;
+		}
+		
+		// > 单位换算
+		var screen_y = Math.round( screen_real_y * $gameMap.tileHeight() );
+		
+		
+		// > 偏移补正值 - 单行同步
+		if( $gameSystem._drill_LSR_mode == "单行同步" ){
+			screen_y -= this._character.jumpHeight();		//（只留高度影响）
+		}
+		// > 偏移补正值 - 等距同步
+		if( $gameSystem._drill_LSR_mode == "等距同步" ){
+			screen_y += this._character.drill_LSR_fixY();	//（插件补正）
+			screen_y -= this._character.jumpHeight();		//（跳跃高度补正）
+			screen_y -= this._character.drill_reverseOffsetY();
+		}
+		
+		this.y = screen_y;
+	};
+	//==============================
+	// * 帧刷新 - 先后顺序
+	//==============================
+	Drill_Sprite_LSR.prototype.drill_updateZIndex = function() {
+		if( this._character == undefined ){ return; }
+		
+		this._drill_zIndex = -1 * Math.abs( this._character.scrolledY() - ($gameSystem._drill_LSR_tileEdge - $gameMap._displayY) );
+		
+		// > 被举起时，上调y值
+		if( this._character instanceof Game_Event &&
+			this._character._drill_PT_is_being_lift ){
+			this._drill_zIndex += 0.5;
+		}
+	};
+	//==============================
+	// * 帧刷新 - 可见情况
+	//==============================
+	Drill_Sprite_LSR.prototype.drill_updateVisible = function() {
+		
+		// > 透明度
+		if( this._character.drill_LSR_isOpacitySync() ){
+			this.opacity = Math.min( this._character._opacity ,255) ;
+		}else{
+			this.opacity = 255;
+		}
+		
+		// > 可见
+		this.visible = this._character.drill_LSR_isReflect() && !this._drill_hide ;
+		if( this._character.drill_LSR_isOpacitySync() && this._character._transparent == true ){ 	//透明状态同步
+			this.visible = false; 
+		}
+	};
+	//==============================
+	// * 行走图倒转
+	//==============================
+	Drill_Sprite_LSR.prototype.characterPatternY = function() {
+		if( this._character.direction() == 2 && !this._character.drill_LSR_isLockDir() ){ return (8-2) /2 ; }
+		if( this._character.direction() == 8 && !this._character.drill_LSR_isLockDir() ){ return (2-2) /2 ; }
+		return (this._character.direction() - 2) / 2;
+	};
+	//==============================
+	// * 物体 - 插件补正高度
+	//
+	//			说明：	org_screenY是原函数screenY的公式。
+	//					此函数返回 其他插件多次继承screenY 而造成的高度差。
+	//==============================
+	Game_CharacterBase.prototype.drill_LSR_fixY = function(){
+		var th = $gameMap.tileHeight();
+		var org_screenY = Math.round(this.scrolledY() * th + th - this.shiftY() - this.jumpHeight());
+		return this.screenY() - org_screenY;
+	};
 
 
-//=============================================================================
-// * 兼容设置
-//=============================================================================
-//==============================
-// * 兼容 - 去掉相关的函数
-//==============================
-Drill_Sprite_LSR.prototype.updateAnimation = function() {}	//动画遮挡
-Drill_Sprite_LSR.prototype.updateBalloon = function() {}	//气泡遮挡
-//==============================
-// * 兼容 - mog粒子
-//==============================
-if(Imported.MOG_CharParticles){
-	Drill_Sprite_LSR.prototype.canUpdateParticles = function() {
-		return false;
+	//=============================================================================
+	// * 兼容设置
+	//=============================================================================
+	//==============================
+	// * 兼容 - 去掉相关的函数
+	//==============================
+	Drill_Sprite_LSR.prototype.updateAnimation = function() {}	//动画遮挡
+	Drill_Sprite_LSR.prototype.updateBalloon = function() {}	//气泡遮挡
+	//==============================
+	// * 兼容 - mog粒子
+	//==============================
+	if(Imported.MOG_CharParticles){
+		Drill_Sprite_LSR.prototype.canUpdateParticles = function() {
+			return false;
+		}
 	}
-}
-//==============================
-// * 兼容 - mog粉碎
-//==============================
-if(Imported.MOG_CharParticles){
-	Drill_Sprite_LSR.prototype.createShatterSprites = function() {
-		this._drill_hide = true;
-		return;
+	//==============================
+	// * 兼容 - mog粉碎
+	//==============================
+	if(Imported.MOG_CharParticles){
+		Drill_Sprite_LSR.prototype.createShatterSprites = function() {
+			this._drill_hide = true;
+			return;
+		}
+		Drill_Sprite_LSR.prototype.updateShatterEffect = function() {
+			this._drill_hide = true;
+			return;
+		}
 	}
-	Drill_Sprite_LSR.prototype.updateShatterEffect = function() {
-		this._drill_hide = true;
-		return;
-	}
+
 }
 
 
@@ -1767,10 +1808,8 @@ Drill_Sprite_LSR_Mask.prototype.update = function() {
 //=============================================================================
 }else{
 		Imported.Drill_LayerSynchronizedReflection = false;
-		alert(
-			"【Drill_LayerSynchronizedReflection.js 行走图-图块同步镜像】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfEventFrame 行走图-行走图优化核心"
-		);
+		var pluginTip = DrillUp.drill_LSR_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
 

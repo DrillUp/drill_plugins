@@ -154,13 +154,15 @@
  * @type select
  * @option 普通
  * @value 0
- * @option 叠加
+ * @option 发光
  * @value 1
  * @option 实色混合(正片叠底)
  * @value 2
  * @option 浅色
  * @value 3
- * @desc pixi的渲染混合模式。0-普通,1-叠加。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
+ * @option 叠加
+ * @value 4
+ * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
  * @default 0
  * 
  */
@@ -187,11 +189,11 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			活动地图镜头控制台：
 //				->边界移动指向标
 //
-//		★私有类如下：
+//		★插件私有类：
 //			* Drill_LCC_MouseBorderSprite【边界移动指向标 贴图】
 //
 //		★必要注意事项：
@@ -203,8 +205,32 @@
 //		★存在的问题：
 //			暂无
 //		
-//
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_LCC_PluginTip_curName = "Drill_LayerCameraConsole.js 地图UI-活动地图镜头控制台";
+	DrillUp.g_LCC_PluginTip_baseList = ["Drill_LayerCamera.js 地图-活动地图镜头"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_LCC_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_LCC_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_LCC_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_LCC_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_LCC_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -556,8 +582,6 @@ Drill_LCC_MouseBorderSprite.prototype.drill_LCC_updateGif = function() {
 //=============================================================================
 }else{
 		Imported.Drill_LayerCameraConsole = false;
-		alert(
-			"【Drill_LayerCameraConsole.js 地图UI - 活动地图镜头控制台】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_LayerCamera 地图-活动地图镜头"
-		);
+		var pluginTip = DrillUp.drill_LCC_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }

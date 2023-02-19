@@ -5,7 +5,8 @@
 /*:
  * @plugindesc [v1.3]        控件 - 技能块元素的背景图片[扩展]
  * @author Drill_up
- *
+ * 
+ * 
  * @help  
  * =============================================================================
  * +++ Drill_X_ElementSkillImage +++
@@ -1755,7 +1756,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			技能图片扩展：
 //				->修改背景
 //
@@ -1770,7 +1771,32 @@
 //		★存在的问题：
 //			暂无
 //
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_XESI_PluginTip_curName = "Drill_X_ElementSkillImage.js 控件-技能块元素的背景图片[扩展]";
+	DrillUp.g_XESI_PluginTip_baseList = ["Drill_WindowSkillElement.js 控件-技能窗口块元素"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_XESI_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_XESI_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_XESI_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_XESI_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_XESI_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -1847,9 +1873,7 @@ if( Imported.MOG_SceneSkill ){
 //=============================================================================
 }else{
 		Imported.Drill_X_ElementSkillImage = false;
-		alert(
-			"【Drill_X_ElementSkillImage.js 控件-技能块元素的背景图片[扩展]】\n缺少基础插件，去看看插件是不是 未添加 / 被关闭 / 顺序不对 / 版本过低："+
-			"\n- Drill_WindowSkillElement 控件-技能窗口块元素"
-		);
+		var pluginTip = DrillUp.drill_XESI_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 

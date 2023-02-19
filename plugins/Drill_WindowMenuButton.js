@@ -462,7 +462,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			窗口按钮管理器：
 //				->拦截器
 //				->callHandler 绑定传值
@@ -484,7 +484,24 @@
 //		★存在的问题：
 //			暂无
 //
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_WMB_PluginTip_curName = "Drill_WindowMenuButton.js 控件-主菜单选项按钮管理器";
+	DrillUp.g_WMB_PluginTip_baseList = [];
+	//==============================
+	// * 提示信息 - 报错 - 缺少插件
+	//==============================
+	DrillUp.drill_WMB_getPluginTip_NoSupportPlugin = function( btn_name ){
+		return "【" + DrillUp.g_WMB_PluginTip_curName + "】\n按钮'" + btn_name + "'执行公共事件时，缺少基础插件 Drill_LayerCommandThread 地图-多线程。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -864,9 +881,7 @@ Scene_Menu.prototype.drill_WMB_methodCall = function( symbol ) {
 					};
 					$gameMap.drill_LCT_addPipeEvent( e_data );
 				}else{
-					alert(
-						"【Drill_WindowMenuButton.js 控件 - 选项窗口管理器】\n按钮'" + temp_btn['btn_name'] + "'执行公共事件时，缺少基础插件 Drill_LayerCommandThread 地图-多线程。"
-					);
+					alert( DrillUp.drill_WMB_getPluginTip_NoSupportPlugin( temp_btn['btn_name'] ) );
 				}
 			}
 		}

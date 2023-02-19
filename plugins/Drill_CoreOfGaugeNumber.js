@@ -113,8 +113,17 @@
  * 整理规范了插件的数据结构。
  * [v1.3]
  * 优化了内部结构，减少性能消耗。
+ * [v1.4]
+ * 设置了 预加载资源 的功能。
  * 
  * 
+ * 
+ * @param 是否启用预加载
+ * @type boolean
+ * @on 启用
+ * @off 关闭
+ * @desc 核心中所有配置的参数数字资源，都在游戏初始化时执行预加载。
+ * @default true
  *
  * @param ---数字样式 1至20---
  * @default
@@ -753,44 +762,33 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
-//			参数数字核心：
-//				->贴图
-//					->标准模块
-//						->显示/隐藏【标准函数】
-//						->是否就绪【标准函数】
-//						->销毁【标准函数】
-//						->修改变化因子【标准函数】
-//						->修改额定值【标准函数】
-//						->修改额定值显示【标准函数】
-//						->初始化数据【标准默认值】
-//				->主体
-//				->符号
-//					->负号
-//					->零填充	x
-//					->前缀后缀
-//				->排列
-//					->对齐方式
-//					->宽度限制	
-//				->滚动效果
-//					->滚动方式
-//					->滚动速度
-//				->额定值
-//					->最大值（除号）
-//					->满足额定条件变化
-//				->时间符号
-//					->格式结构
-//					->秒单位
-//					->帧单位
-//				->弹出数字 ？ （扣除超过某个量，直接扣除，弹出一个数字？）
-//				->粒子 ？
+//		★功能结构树：
+//			->☆提示信息
+//			->☆变量获取
+//			->☆临时变量初始化
+//				->资源提前预加载
+//			->参数数字【Drill_COGN_NumberSprite】
+//				->标准模块
+//					->显示/隐藏【标准函数】
+//					->是否就绪【标准函数】
+//					->销毁【标准函数】
+//					->修改变化因子【标准函数】
+//					->修改额定值【标准函数】
+//					->修改额定值显示【标准函数】
+//					->初始化数据【标准默认值】
+//				->A主体
+//				->B追逐值
+//				->C输出字符串
+//				->D符号
+//				->E排列
+//				->F额定值
 //		
+//				
+//		★插件私有类：
+//			* Drill_COGN_NumberSprite【参数数字】
 //		
 //		★配置参数结构体如下：
 //			~struct~GaugeNumber:					参数数字样式
-//				
-//		★私有类如下：
-//			* Drill_COGN_NumberSprite【参数数字】
 //
 //		★必要注意事项：
 //			1.参数数字只分两层，内容层 和 外层。两层级可以通过zIndex排序。
@@ -805,9 +803,32 @@
 //		★存在的问题：
 //			暂无
 //		
- 
+
 //=============================================================================
-// ** 变量获取
+// ** ☆提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_COGN_PluginTip_curName = "Drill_CoreOfGaugeNumber.js 系统-参数数字核心";
+	DrillUp.g_COGN_PluginTip_baseList = [];
+	//==============================
+	// * 提示信息 - 报错 - 找不到数据
+	//==============================
+	DrillUp.drill_COGN_getPluginTip_DataNotFind = function( index ){
+		return "【" + DrillUp.g_COGN_PluginTip_curName + "】\未找到id为"+ (index+1) +"的参数数字样式配置。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 底层版本过低
+	//==============================
+	DrillUp.drill_COGN_getPluginTip_LowVersion = function(){
+		return "【" + DrillUp.g_COGN_PluginTip_curName + "】\n游戏底层版本过低，插件基本功能无法执行。\n你可以去看\"rmmv软件版本（必看）.docx\"中的 \"旧工程升级至1.6版本\" 章节，来升级你的游戏底层版本。";
+	};
+	
+	
+//=============================================================================
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_CoreOfGaugeNumber = true;
@@ -832,7 +853,9 @@
 		
 		// > D符号
 		data['symbol_src'] = String( dataFrom["资源-基本符号"] || "" );
+		data['symbol_src_file'] = "img/Special__number/";
 		data['symbolEx_src'] = String( dataFrom["资源-扩展符号"] || "" );
+		data['symbolEx_src_file'] = "img/Special__number/";
 		data['symbol_hasNegative'] = String( dataFrom["是否显示负号"] || "true") === "true";
 		data['symbol_prefix'] = String( dataFrom["额外符号前缀"] || "");
 		data['symbol_suffix'] = String( dataFrom["额外符号后缀"] || "");
@@ -856,7 +879,9 @@
 		data['specified_remainChange'] = String( dataFrom["达到条件后是否限制值"] || "true") === "true";
 		data['specified_changeType'] = String( dataFrom["达到条件时符号"] || "不变化") ;
 		data['specified_symbol_src'] = String( dataFrom["资源-额定基本符号"] || "" );
+		data['specified_symbol_src_file'] = "img/Special__number/";
 		data['specified_symbolEx_src'] = String( dataFrom["资源-额定扩展符号"] || "" );
+		data['specified_symbolEx_src_file'] = "img/Special__number/";
 		
 		// > C输出字符串 - 时间单位
 		data['timeUnit_enable'] = String( dataFrom["是否启用时间格式"] || "false") === "true";
@@ -867,14 +892,17 @@
 		return data;
 	};
 	
+	/*-----------------杂项------------------*/
+	DrillUp.g_COGN_preloadEnabled = String(DrillUp.parameters["是否启用预加载"] || "true") === "true";	
+	
 	/*-----------------参数数字样式（配置）------------------*/
 	DrillUp.g_COGN_list_length = 60;
 	DrillUp.g_COGN_list = [];
 	for (var i = 0; i < DrillUp.g_COGN_list_length; i++) {
 		if( DrillUp.parameters["数字样式-" + String(i+1) ] != undefined &&
 			DrillUp.parameters["数字样式-" + String(i+1) ] != "" ){
-			DrillUp.g_COGN_list[i] = JSON.parse(DrillUp.parameters["数字样式-" + String(i+1) ]);
-			DrillUp.g_COGN_list[i] = DrillUp.drill_COGN_initStyle( DrillUp.g_COGN_list[i] );
+			var data = JSON.parse(DrillUp.parameters["数字样式-" + String(i+1) ]);
+			DrillUp.g_COGN_list[i] = DrillUp.drill_COGN_initStyle( data );
 		}else{
 			DrillUp.g_COGN_list[i] = {};
 		}
@@ -887,10 +915,9 @@
 	//==============================
 	DrillUp.drill_COGN_getCopyedData = function( index ){
 		var data = DrillUp.g_COGN_list[ index ];
-		if( data['specified_enable'] == undefined ){
-			alert(	"【Drill_CoreOfGaugeNumber.js 系统 - 参数数字核心】\n"+
-					"未找到id为"+(index+1)+"的参数数字样式配置。"
-			);
+		if( data == undefined || 
+			data['specified_enable'] == undefined ){
+			alert( DrillUp.drill_COGN_getPluginTip_DataNotFind( index ) );
 			return {};
 		}
 		return JSON.parse(JSON.stringify( data ));
@@ -898,24 +925,58 @@
 	
 	
 //=============================================================================
-// ** 资源标记容器
+// ** ☆临时变量初始化
 //
-//			说明：	用过的bitmap，全部标记不删除，防止刷菜单时重建导致浪费资源。
+//			说明：	> 用过的bitmap，全部标记不删除，防止刷菜单时重建导致浪费资源。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
-//==============================
-// * 容器 - 初始化
-//==============================
-var _drill_COGN_temp_initialize = Game_Temp.prototype.initialize;
-Game_Temp.prototype.initialize = function() {
-    _drill_COGN_temp_initialize.call(this);
-	this._drill_COGN_bitmapTank = [];			//参数数字用过的贴图
-}
-//==============================
-// * 容器 - 添加贴图标记
-//==============================
-Game_Temp.prototype.drill_COGN_addBitmap = function( bitmap ){
-	if( this._drill_COGN_bitmapTank.contains( bitmap ) ){ return; }
-	this._drill_COGN_bitmapTank.push( bitmap );
+if( DrillUp.g_COGN_preloadEnabled == true ){
+	//==============================
+	// * 临时变量 - 初始化
+	//==============================
+	var _drill_COGN_temp_initialize = Game_Temp.prototype.initialize;
+	Game_Temp.prototype.initialize = function() {
+		_drill_COGN_temp_initialize.call(this);
+		this.drill_COGN_preloadInit();
+	}
+	//==============================
+	// * 临时变量 - 预加载 版本校验
+	//==============================
+	if( Utils.generateRuntimeId == undefined ){
+		alert( DrillUp.drill_COGN_getPluginTip_LowVersion() );
+	}
+	//==============================
+	// * 临时变量 - 资源提前预加载
+	//
+	//			说明：	遍历全部资源，提前预加载标记过的资源。
+	//==============================
+	Game_Temp.prototype.drill_COGN_preloadInit = function() {
+		this._drill_COGN_cacheId = Utils.generateRuntimeId();	//资源缓存id
+		this._drill_COGN_preloadTank = [];						//bitmap容器
+		for( var i = 0; i < DrillUp.g_COGN_list.length; i++ ){
+			var temp_data = DrillUp.g_COGN_list[i];
+			if( temp_data == undefined ){ continue; }
+			if( temp_data['symbol_src'] == undefined ){ continue; }
+			
+			this._drill_COGN_preloadTank.push( 
+				ImageManager.reserveBitmap( temp_data['symbol_src_file'], temp_data['symbol_src'], 0, true ) 
+			);
+			this._drill_COGN_preloadTank.push( 
+				ImageManager.reserveBitmap( temp_data['symbolEx_src_file'], temp_data['symbolEx_src'], 0, true ) 
+			);
+			
+			if( temp_data['specified_enable'] == true ){
+				this._drill_COGN_preloadTank.push( 
+					ImageManager.reserveBitmap( temp_data['specified_symbol_src_file'], temp_data['specified_symbol_src'], 0, true ) 
+				);
+				this._drill_COGN_preloadTank.push( 
+					ImageManager.reserveBitmap( temp_data['specified_symbolEx_src_file'], temp_data['specified_symbolEx_src'], 0, true ) 
+				);
+			}
+			
+		}
+	}
+
 }
 
 
@@ -962,12 +1023,15 @@ Game_Temp.prototype.drill_COGN_addBitmap = function( bitmap ){
 // **					->D符号
 // **						->设置符号
 // **						->字符转贴图
+// **						->零填充	x
 // **					->E排列
 // **						->帧刷新排列
 // **					->F额定值
 // **						->设置字符串（继承）
 // **						->设置前缀后缀（继承）
 // **						->设置符号（继承）
+// **					?->弹出数字（扣除超过某个量，直接扣除，弹出一个数字？）
+// **					?->粒子
 // **				
 // **		说明：	> sprite贴在任意地方都可以。
 // **			  	> 你可以先取【DrillUp.g_COGN_list样式数据】再赋值各个额外属性，也可以【直接new】全参数自己建立控制。
@@ -1492,9 +1556,6 @@ Drill_COGN_NumberSprite.prototype.drill_initSymbol = function() {
 	this._drill_symbol_bitmap = ImageManager.loadBitmap( data['symbol_src_file'], data['symbol_src'], 0, true);
 	this._drill_symbolEx_bitmap = ImageManager.loadBitmap( data['symbolEx_src_file'], data['symbolEx_src'], 0, true);
 	
-	// > 标记资源（切换菜单时不会重复创建）
-	$gameTemp.drill_COGN_addBitmap( this._drill_symbol_bitmap );
-	$gameTemp.drill_COGN_addBitmap( this._drill_symbolEx_bitmap );
 }
 //==============================
 // * D符号 - 帧刷新
@@ -1732,9 +1793,6 @@ Drill_COGN_NumberSprite.prototype.drill_initSpecified = function() {
 		this._drill_specifiedEx_bitmap = ImageManager.loadBitmap( data['specified_symbolEx_src_file'], data['specified_symbolEx_src'], 0, true);
 	}
 	
-	// > 标记资源（切换菜单时不会重复创建）
-	$gameTemp.drill_COGN_addBitmap( this._drill_specified_bitmap );
-	$gameTemp.drill_COGN_addBitmap( this._drill_specifiedEx_bitmap );
 }
 //==============================
 // * F额定值 - 设置字符串（继承）

@@ -1413,7 +1413,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			固定框样式：
 //				->外框
 //					->背景
@@ -1463,7 +1463,7 @@
 //			~struct~GFBBind:				BOSS设置
 //			~struct~DrillWindowMoving:		整体移动动画（弹道核心-两点式）
 //
-//		★私有类如下：
+//		★插件私有类：
 //			* Drill_GFB_StyleSprite【固定框样式】
 //	
 //
@@ -1492,7 +1492,43 @@
 //			
 //		★存在的问题：
 //			暂无
+//
 
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_GFB_PluginTip_curName = "Drill_GaugeForBoss.js UI-高级BOSS生命固定框";
+	DrillUp.g_GFB_PluginTip_baseList = [
+		"Drill_CoreOfBallistics.js 系统-弹道核心",
+		"Drill_CoreOfGaugeMeter.js 系统-参数条核心",
+		"Drill_CoreOfGaugeNumber.js 系统-参数数字核心"
+	];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_GFB_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_GFB_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_GFB_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_GFB_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_GFB_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到配置
+	//==============================
+	DrillUp.drill_GFB_getPluginTip_DataNotFind = function( data_id ){
+		return "【" + DrillUp.g_GFB_PluginTip_curName + "】\n插件指令错误，未找到BOSS设置["+data_id+"]的配置数据。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -1735,10 +1771,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				var id = bind_ids[j];
 				var dataBind = $gameSystem._drill_GFB_bindTank[ id ];
 				if( dataBind == undefined ){
-					alert(
-						"【Drill_GaugeForBoss.js  UI - 高级BOSS生命固定框】\n"+
-						"错误，未找到BOSS设置["+id+"]的配置数据。"
-					);
+					alert( DrillUp.drill_GFB_getPluginTip_DataNotFind( id ) );
 					continue;
 				}
 				
@@ -3184,12 +3217,8 @@ Drill_GFB_StyleSprite.prototype.drill_updateCommandParam = function() {
 //=============================================================================
 }else{
 		Imported.Drill_GaugeForBoss = false;
-		alert(
-			"【Drill_GaugeForBoss.js  UI - 高级BOSS生命固定框】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfBallistics  系统-弹道核心"+
-			"\n- Drill_CoreOfGaugeMeter  系统-参数条核心"+
-			"\n- Drill_CoreOfGaugeNumber 系统-参数数字核心"
-		);
+		var pluginTip = DrillUp.drill_GFB_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
 

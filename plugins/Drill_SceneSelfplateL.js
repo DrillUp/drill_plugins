@@ -1292,7 +1292,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			全自定义面板：
 //				->窗口
 //					->选项窗口、详细窗口、描述图片
@@ -1314,6 +1314,41 @@
 //			暂无
 //
 
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_SSpL_PluginTip_curName = "Drill_SceneSelfplateL.js 面板-全自定义信息面板L";
+	DrillUp.g_SSpL_PluginTip_baseList = [
+		"Drill_CoreOfWindowAuxiliary.js 系统-窗口辅助核心",
+		"Drill_CoreOfSelectableButton.js 系统-按钮组核心",
+		"Drill_LayerCommandThread.js 地图-多线程"
+	];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_SSpL_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_SSpL_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_SSpL_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_SSpL_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_SSpL_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 缺少插件
+	//==============================
+	DrillUp.drill_SSpL_getPluginTip_NoSupportPlugin = function( option_name ){
+		return "【" + DrillUp.g_SSpL_PluginTip_curName + "】\n选项'" + option_name + "'执行公共事件时，缺少基础插件 Drill_LayerCommandThread 地图-多线程。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -2071,9 +2106,7 @@ Scene_Drill_SSpL.prototype.drill_processOk = function() {
 			};
 			$gameMap.drill_LCT_addPipeEvent( e_data );
 		}else{
-			alert(
-				"【Drill_SceneSelfplateL.js 面板 - 全自定义信息面板L】\n选项'" + temp_context['name'] + "'执行公共事件时，缺少基础插件 Drill_LayerCommandThread 地图-多线程。"
-			);
+			alert( DrillUp.drill_SSpL_getPluginTip_NoSupportPlugin( temp_context['name'] ) );
 		}
 	}else{
 		this._window_select.activate(); return; 
@@ -2372,11 +2405,7 @@ Drill_SSpL_DescWindow.prototype.drill_refreshDesc = function( cur_index ) {
 //=============================================================================
 }else{
 		Imported.Drill_SceneSelfplateL = false;
-		alert(
-			"【Drill_SceneSelfplateL.js 面板 - 全自定义信息面板L】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfWindowAuxiliary  系统-窗口辅助核心" +
-			"\n- Drill_CoreOfSelectableButton 系统-按钮组核心" +
-			"\n- Drill_LayerCommandThread  地图-多线程"
-		);
+		var pluginTip = DrillUp.drill_SSpL_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 

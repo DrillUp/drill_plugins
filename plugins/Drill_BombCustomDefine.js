@@ -563,7 +563,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			自定义炸弹
 //				->火力对应自定义炸弹id
 //				->事件复制器指令
@@ -580,6 +580,40 @@
 //			1.AI目前没法知道自己的炸弹是什么样的火力、范围。
 //			
 
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_BoCD_PluginTip_curName = "Drill_BombCustomDefine.js 炸弹人-自定义炸弹";
+	DrillUp.g_BoCD_PluginTip_baseList = ["Drill_BombCore.js 炸弹人-游戏核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_BoCD_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_BoCD_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_BoCD_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_BoCD_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_BoCD_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 地图文件丢失
+	//==============================
+	DrillUp.drill_BoCD_getPluginTip_MapLost = function( map_id ){
+		return "【" + DrillUp.g_BoCD_PluginTip_curName + "】\n"+ 
+				"你在插件配置中，配置了模板地图"+ map_id +"中的自定义炸弹事件id。\n"+
+				"但是系统并没有找到这个地图文件。\n"+
+				"请检查你的地图文件是否存在，或者修改插件配置的内容。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -790,12 +824,7 @@ Game_Temp.prototype.initialize = function() {
 			
 		}else{
 			this._drill_BoCD_dataMaps[ map_ids[i] ] = null;
-			alert(
-				"【Drill_BombCustomDefine.js 炸弹人 - 自定义炸弹】\n" + 
-				"你在插件配置中，配置了模板地图"+ map_ids +"中的自定义炸弹事件id。\n"+
-				"但是系统并没有找到这个地图文件。\n"+
-				"请检查你的地图文件是否存在，或者修改插件配置的内容。"
-			);
+			alert( DrillUp.drill_BoCD_getPluginTip_MapLost( map_ids[i] ) );
 		}
 	}
 };
@@ -883,9 +912,7 @@ Game_Map.prototype.drill_BoC_putBomb = function( input_data ) {
 //=============================================================================
 }else{
 		Imported.Drill_BombCustomDefine = false;
-		alert(
-			"【Drill_BombCustomDefine.js 炸弹人 - 自定义炸弹】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_BombCore 炸弹人-游戏核心"
-		);
+		var pluginTip = DrillUp.drill_BoCD_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 

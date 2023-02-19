@@ -1433,7 +1433,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			变量数组核心：
 //				->脚本提供
 //				->重名检查
@@ -1461,7 +1461,36 @@
 //		★存在的问题：
 //			暂无
 //
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_CONA_PluginTip_curName = "Drill_CoreOfNumberArray.js 系统-变量数组核心";
+	DrillUp.g_CONA_PluginTip_baseList = [];
+	//==============================
+	// * 提示信息 - 报错 - 找不到数组
+	//==============================
+	DrillUp.drill_CONA_getPluginTip_DataNotFind = function( na_id ){
+		return "【" + DrillUp.g_CONA_PluginTip_curName + "】\n插件指令错误，数组["+na_id+"] 不存在，需要先创建再使用。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 重名数组
+	//==============================
+	DrillUp.drill_CONA_getPluginTip_RepeatName = function( name ){
+		return "【" + DrillUp.g_CONA_PluginTip_curName + "】\n注意，变量数组中，有重名的数组： "+name+" 。数组调用时会出现未知影响。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 缺少插件
+	//==============================
+	DrillUp.drill_CONA_getPluginTip_NoSupportPlugin = function(){
+		return "【" + DrillUp.g_CONA_PluginTip_curName + "】\n缺少 字符串核心 插件，插件指令执行失败。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -1516,8 +1545,7 @@
 		if( name == "" ){ continue; }
 		if( name_next == "" ){ continue; }
 		if( name == name_next ){
-			alert( "【Drill_CoreOfNumberArray.js 系统 - 变量数组核心】\n" +
-					"注意，变量数组中，有重名的数组： "+name+" 。数组调用时会出现未知影响。");
+			alert( DrillUp.drill_CONA_getPluginTip_RepeatName( name ) );
 		}
 	}
 	
@@ -1677,8 +1705,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			arr_index = $gameNumberArray.drill_CONA_getArrayIndex( na_id );
 			if( arr_index == -1 ){
 				
-				alert( "【Drill_CoreOfNumberArray.js 系统 - 变量数组核心】\n" +
-						"插件指令错误，数组["+na_id+"] 不存在，需要先创建再使用。");
+				alert( DrillUp.drill_CONA_getPluginTip_DataNotFind( na_id ) );
 				return;
 			}
 		}
@@ -2243,8 +2270,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					if( Imported.Drill_CoreOfString ){
 						$gameStrings.setValue( temp1, result );
 					}else{
-						alert( "【Drill_CoreOfNumberArray.js 系统 - 变量数组核心】\n" +
-								"缺少 字符串核心 插件，插件指令执行失败。");
+						alert( DrillUp.drill_CONA_getPluginTip_NoSupportPlugin() );
 					}
 				}
 				
@@ -2263,8 +2289,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					if( Imported.Drill_CoreOfString ){
 						$gameStrings.setValue( temp1, result );
 					}else{
-						alert( "【Drill_CoreOfNumberArray.js 系统 - 变量数组核心】\n" +
-								"缺少 字符串核心 插件，插件指令执行失败。");
+						alert( DrillUp.drill_CONA_getPluginTip_NoSupportPlugin() );
 					}
 				}
 			}

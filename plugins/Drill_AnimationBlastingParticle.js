@@ -1375,13 +1375,15 @@
  * @type select
  * @option 普通
  * @value 0
- * @option 叠加
+ * @option 发光
  * @value 1
  * @option 实色混合(正片叠底)
  * @value 2
  * @option 浅色
  * @value 3
- * @desc pixi的渲染混合模式。0-普通,1-叠加。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
+ * @option 叠加
+ * @value 4
+ * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
  * @default 0
  *
  * @param 动画层级
@@ -1568,13 +1570,13 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			粒子小爆炸：
 //				->单位贴图容器【标准模块】
 //				->物体贴图容器【标准模块】
 //				->个体层级【标准模块】
 //		
-//		★私有类如下：
+//		★插件私有类：
 //			* Drill_ABPa_Sprite		【小爆炸粒子贴图】
 //		
 //		★必要注意事项：
@@ -1610,23 +1612,36 @@
 	// * 提示信息 - 参数
 	//==============================
 	var DrillUp = DrillUp || {}; 
-	DrillUp.g_ABPa_tipCurName = "Drill_AnimationBlastingParticle.js 动画-粒子小爆炸";
-	DrillUp.g_ABPa_tipBasePluginList = ["Drill_CoreOfBallistics.js 系统-弹道核心"];
+	DrillUp.g_ABPa_PluginTip_curName = "Drill_AnimationBlastingParticle.js 动画-粒子小爆炸";
+	DrillUp.g_ABPa_PluginTip_baseList = ["Drill_CoreOfBallistics.js 系统-弹道核心"];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
 	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_ABPa_getPluginTip_NoBasePlugin = function(){
-		if( DrillUp.g_ABPa_tipBasePluginList.length == 0 ){ return ""; }
-		var message = "【" + DrillUp.g_ABPa_tipCurName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
-		for(var i=0; i < DrillUp.g_ABPa_tipBasePluginList.length; i++){
+		if( DrillUp.g_ABPa_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_ABPa_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_ABPa_PluginTip_baseList.length; i++){
 			message += "\n- ";
-			message += DrillUp.g_ABPa_tipBasePluginList[i];
+			message += DrillUp.g_ABPa_PluginTip_baseList[i];
 		}
 		return message;
 	};
-
+	//==============================
+	// * 提示信息 - 报错 - 找不到事件
+	//==============================
+	DrillUp.drill_ABPa_getPluginTip_EventNotFind = function( e_id ){
+		return "【" + DrillUp.g_ABPa_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
+	};
+	//==============================
+	// * 提示信息 - 配置错误 - 透明度类型错误
+	//==============================
+	DrillUp.drill_ABPa_getPluginTip_ErrorOpacityMode = function( opacity_name ){
+		return "【" + DrillUp.g_ABPa_PluginTip_curName + "】\n透明度类型错误，没有类型'"+opacity_name+"'。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -1889,8 +1904,7 @@ Game_Map.prototype.drill_ABPa_isEventExist = function( e_id ){
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_AnimationBlastingParticle.js 动画 - 粒子小爆炸】\n" +
-				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
+		alert( DrillUp.drill_ABPa_getPluginTip_EventNotFind( e_id ) );
 		return false;
 	}
 	return true;
@@ -2660,10 +2674,7 @@ Drill_ABPa_Sprite.prototype.drill_initBallisticsOpacity = function( data, sustai
 		temp_b_opacity['anchorPointTank'].push( {'t':100,'o':0} );
 	}
 	else{
-		alert(
-			"【Drill_EventFrameParticle.js 行走图-多层行走图粒子】\n"+
-			"透明度类型错误，没有类型'" + data['par_opacityMode'] + "'。"
-		);
+		alert( DrillUp.drill_ABPa_getPluginTip_ErrorOpacityMode( data['par_opacityMode'] ) );
 	}
 	
 	// > 随机因子（RandomFactor）
@@ -2824,7 +2835,7 @@ Drill_ABPa_Sprite.prototype.drill_updatePosition = function() {
 //=============================================================================
 }else{
 		Imported.Drill_AnimationBlastingParticle = false;
-		var tip = DrillUp.drill_ABPa_getPluginTip_NoBasePlugin();
-		alert( tip );
+		var pluginTip = DrillUp.drill_ABPa_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 

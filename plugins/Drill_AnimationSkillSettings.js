@@ -113,7 +113,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			随机朝向与位移：
 //				->原生技能与动画 的数据连接
 //				->技能与并行动画 的数据连接
@@ -143,8 +143,9 @@
 	// * 提示信息 - 参数
 	//==============================
 	var DrillUp = DrillUp || {}; 
-	DrillUp.g_ASS_tipCurName = "Drill_AnimationSkillSettings.js 动画-技能动画设置";
-	DrillUp.g_ASS_tipBasePluginList = [];
+	DrillUp.g_ASS_PluginTip_curName = "Drill_AnimationSkillSettings.js 动画-技能动画设置";
+	DrillUp.g_ASS_PluginTip_baseList = [];
+	
 	
 //=============================================================================
 // ** 变量获取

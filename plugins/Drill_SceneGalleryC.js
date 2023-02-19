@@ -1493,7 +1493,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			全自定义画廊：
 //				->部件
 //					->选项
@@ -1527,7 +1527,7 @@
 //				->特殊
 //					->原图全部全加载
 //			
-//		★私有类如下：
+//		★插件私有类：
 //			* Scene_Drill_SGaC				画廊C
 //			* Drill_SGaC_SelectWindow		选项窗口
 //			* Drill_SGaC_DescWindow			显示窗口
@@ -1547,6 +1547,35 @@
 //			暂无
 //
 
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_SGaC_PluginTip_curName = "Drill_SceneGalleryC.js 面板-全自定义画廊C";
+	DrillUp.g_SGaC_PluginTip_baseList = [
+		"Drill_CoreOfInput.js 系统-输入设备核心",
+		"Drill_CoreOfGlobalSave.js 管理器-全局存储核心",
+		"Drill_CoreOfWindowAuxiliary.js 系统-窗口辅助核心"
+	];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_SGaC_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_SGaC_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_SGaC_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_SGaC_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_SGaC_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -3454,11 +3483,7 @@ Drill_SGaC_ImgExpandWindow.prototype.scrollUp = function(){}
 //=============================================================================
 }else{
 		Imported.Drill_SceneGalleryC = false;
-		alert(
-			"【Drill_SceneGalleryC.js 面板 - 全自定义画廊C】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfInput  系统-输入设备核心" +
-			"\n- Drill_CoreOfGlobalSave 管理器-全局存储核心"+
-			"\n- Drill_CoreOfWindowAuxiliary  系统-窗口辅助核心"
-		);
+		var pluginTip = DrillUp.drill_SGaC_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 

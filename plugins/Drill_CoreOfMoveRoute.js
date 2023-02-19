@@ -166,7 +166,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			移动路线核心：
 //				->脚本转义
 //					->执行转义【标准接口】
@@ -201,7 +201,30 @@
 //		★存在的问题：
 //			暂无
 //		
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_COMR_PluginTip_curName = "Drill_CoreOfMoveRoute.js 移动路线-移动路线核心";
+	DrillUp.g_COMR_PluginTip_baseList = [];
+	//==============================
+	// * 提示信息 - 报错 - 找不到事件
+	//==============================
+	DrillUp.drill_COMR_getPluginTip_EventNotFind = function( e_id ){
+		return "【" + DrillUp.g_COMR_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
+	};
+	//==============================
+	// * 提示信息 - 日志 - 不识别脚本
+	//==============================
+	DrillUp.drill_COMR_getPluginTip_UnknownScript = function( script_text ){
+		return "【" + DrillUp.g_COMR_PluginTip_curName + "】\n不能识别脚本：\""+script_text+"\"。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -364,8 +387,7 @@ Game_Map.prototype.drill_COMR_isEventExist = function( e_id ){
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_CoreOfMoveRoute.js 移动路线 - 移动路线核心】\n" +
-				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
+		alert( DrillUp.drill_COMR_getPluginTip_EventNotFind( e_id ) );
 		return false;
 	}
 	return true;
@@ -404,7 +426,7 @@ DrillUp.g_COMR_errorMsgTank = [];				//脚本拦截容器
 // * 指令执行阶段 - 添加拦截的指令
 //==============================
 DrillUp.drill_COMR_addScript = function( temp_script ){
-	var message = "【移动路线-移动路线核心】不能识别脚本：\""+ temp_script +"\"";
+	var message = DrillUp.drill_COMR_getPluginTip_UnknownScript( temp_script );
 	if( DrillUp.g_COMR_errorMsgTank.indexOf(message) == -1 ){
 		DrillUp.g_COMR_errorMsgTank.push(message);
 		console.log("%c"+message, "color:#f67; font-size:14px;");

@@ -116,23 +116,24 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
-//			GIF动画序列全自动播放：
-//				->物体
-//					->检查 - 未开启功能
-//					->检查 - 控制器为空
-//					->检查 - 镜头范围外
-//					->注解
-//						->@行走图-静止
-//						->@行走图-移动
-//						->@行走图-奔跑
-//						->@行走图-跳跃
-//						->@行走图-滑行
-//						->@行走图-被举起
-//						->@行走图-举花盆
-//					->变化锁
-//				->动画序列 继承
-//				->固定帧
+//		★功能结构树：
+//			->☆提示信息
+//			->☆变量获取
+//			->☆插件指令
+//			->☆状态规划器
+//				->检查 - 未开启功能
+//				->检查 - 控制器为空
+//				->检查 - 镜头范围外
+//				->注解
+//					->@行走图-静止
+//					->@行走图-移动
+//					->@行走图-奔跑
+//					->@行走图-跳跃
+//					->@行走图-滑行
+//					->@行走图-被举起
+//					->@行走图-举花盆
+//			->☆动画序列
+//			->☆固定帧
 //
 //		★必要注意事项：
 //			1.该插件需要随时控制 播放 状态节点。
@@ -144,9 +145,40 @@
 //		★存在的问题：
 //			暂无
 //
- 
+
 //=============================================================================
-// ** 变量获取
+// ** ☆提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_EASA_PluginTip_curName = "Drill_EventActionSequenceAutomation.js 行走图-GIF动画序列自动化";
+	DrillUp.g_EASA_PluginTip_baseList = ["Drill_EventActionSequence.js 行走图-GIF动画序列"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_EASA_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_EASA_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_EASA_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_EASA_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_EASA_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到事件
+	//==============================
+	DrillUp.drill_EASA_getPluginTip_EventNotFind = function( e_id ){
+		return "【" + DrillUp.g_EASA_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
+	};
+	
+	
+//=============================================================================
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_EventActionSequenceAutomation = true;
@@ -161,7 +193,7 @@ if( Imported.Drill_EventActionSequence ){
 	
 
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _Drill_EASA_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
@@ -275,15 +307,14 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		
 };
 //==============================
-// ** 插件指令 - 事件检查
+// * 插件指令 - 事件检查
 //==============================
 Game_Map.prototype.drill_EASA_isEventExist = function( e_id ){
 	if( e_id == 0 ){ return false; }
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_EventActionSequenceAutomation.js 事件 - GIF动画序列全自动播放】\n" +
-				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
+		alert( DrillUp.drill_EASA_getPluginTip_EventNotFind( e_id ) );
 		return false;
 	}
 	return true;
@@ -291,20 +322,23 @@ Game_Map.prototype.drill_EASA_isEventExist = function( e_id ){
 
 
 //=============================================================================
-// ** 物体
+// ** ☆状态规划器
+//
+//			说明：	> 物体处于任一状态时，即时捕获，并播放状态节点。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 物体 - 初始化
+// * 状态规划器 - 初始化
 //==============================
 var _Drill_EASA_c_initialize = Game_Character.prototype.initialize;
 Game_Character.prototype.initialize = function() {
 	_Drill_EASA_c_initialize.call(this);
 	this._Drill_EASA_enabled = false;		//自动化开关（默认关闭）
-	this._Drill_EASA_lastAnnotation = "";	//上一个标签
-	this._Drill_EASA_lastChangeDelay = 0;	//上一个标签 变化锁
+	this._Drill_EASA_lastChangeDelay = 0;	//状态规划器 - 变化锁
+	this._Drill_EASA_lastAnnotation = "";	//状态规划器 - 上一次的状态
 }
 //==============================
-// * 物体 - 帧刷新
+// * 状态规划器 - 帧刷新
 //==============================
 var _drill_EASA_ch_update = Game_CharacterBase.prototype.update;
 Game_CharacterBase.prototype.update = function(){
@@ -363,7 +397,8 @@ Game_CharacterBase.prototype.update = function(){
 	}
 	
 	
-	// > 变化锁
+	// > 【行走图状态变化锁】
+	//		（当玩家/事件持续移动时，每经过一个图块时，都会出现1帧的静止问题，变化锁用于解决此问题）
 	if( this._Drill_EASA_lastAnnotation == cur_annotation ){
 		this._Drill_EASA_lastChangeDelay = 3;		//（注解变化后，需要至少持续3帧）
 		return;
@@ -384,7 +419,7 @@ Game_CharacterBase.prototype.drill_EASA_posIsInCamera = function( realX, realY )
 	var ohh = Graphics.boxHeight / $gameMap.tileHeight();
 	var sww = oww;
 	var shh = ohh;
-	if( Imported.Drill_LayerCamera ){
+	if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】镜头范围内+缩放
 		sww = sww / $gameSystem._drill_LCa_controller._drill_scaleX;
 		shh = shh / $gameSystem._drill_LCa_controller._drill_scaleY;
 	}
@@ -394,7 +429,10 @@ Game_CharacterBase.prototype.drill_EASA_posIsInCamera = function( realX, realY )
 
 
 //=============================================================================
-// ** 动画序列
+// ** ☆动画序列
+//
+//			说明：	> 继承于 行走图动画序列 ，并标记 自动化 的功能。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 动画序列 - 播放默认的状态元集合（继承）
@@ -431,7 +469,7 @@ Game_Character.prototype.drill_EASA_setAnnotation = function( annotation ){
 
 
 //=============================================================================
-// ** 固定帧
+// ** ☆固定帧
 //=============================================================================
 //...
 
@@ -441,10 +479,8 @@ Game_Character.prototype.drill_EASA_setAnnotation = function( annotation ){
 //=============================================================================
 }else{
 		Imported.Drill_EventActionSequenceAutomation = false;
-		alert(
-			"【Drill_EventActionSequenceAutomation.js 行走图 - GIF动画序列自动化】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_EventActionSequence  行走图-GIF动画序列"
-		);
+		var pluginTip = DrillUp.drill_EASA_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
 

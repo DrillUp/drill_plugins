@@ -124,7 +124,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			玩家的事件：
 //				->绑定
 //					->绑定事件名
@@ -145,8 +145,56 @@
 //			
 //		★存在的问题：
 //			暂无
+//
 
-
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_EFP_PluginTip_curName = "Drill_EventForPlayer.js 物体管理-玩家的事件";
+	DrillUp.g_EFP_PluginTip_baseList = ["Drill_EventDuplicator.js 物体管理-事件复制器"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_EFP_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_EFP_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_EFP_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_EFP_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_EFP_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到事件
+	//==============================
+	DrillUp.drill_EFP_getPluginTip_EventNotFind = function( e_id ){
+		return "【" + DrillUp.g_EFP_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 地图文件丢失
+	//==============================
+	DrillUp.drill_EFP_getPluginTip_MapLost = function( key ){
+		return "【" + DrillUp.g_EFP_PluginTip_curName + "】\n"+
+				"插件指令指定要复制地图"+ key +"中的某个事件。\n"+
+				"但是系统并没有找到这个地图文件。\n"+
+				"请检查你的地图文件是否存在，或者修改插件指令。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到事件（名称）
+	//==============================
+	DrillUp.drill_EFP_getPluginTip_EventNameNotFind = function( mapId, eventName ){
+		return "【" + DrillUp.g_EFP_PluginTip_curName + "】\n"+
+				"插件指令指定的地图"+ mapId +"中，\n"+
+				"并没有名称为"+ eventName +" 的事件。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -242,8 +290,7 @@ Game_Map.prototype.drill_EFP_isEventExist = function( e_id ){
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_EventForPlayer.js 物体管理 - 玩家的事件】\n" +
-				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
+		alert( DrillUp.drill_EFP_getPluginTip_EventNotFind( e_id ) );
 		return false;
 	}
 	return true;
@@ -429,12 +476,7 @@ Game_Map.prototype.drill_EFP_setupMap = function( mapId ){
 	// > 预加载 - 加载数据
 	for( var key in temp_map ){
 		if( $gameTemp.drill_EDu_hasMapId( key ) == false ){
-			alert(
-				"【Drill_EventForPlayer.js 物体管理 - 玩家的事件】\n" + 
-				"插件指令指定要复制地图"+ key +"中的某个事件。\n"+
-				"但是系统并没有找到这个地图文件。\n"+
-				"请检查你的地图文件是否存在，或者修改插件指令。"
-			);
+			alert( DrillUp.drill_EFP_getPluginTip_MapLost( key ) );
 		}
 		DataManager.drill_loadMapData( key );
 	}
@@ -494,7 +536,7 @@ Game_Map.prototype.drill_EFP_updateCreate = function(){
 			e._drill_EFP_isBinded = true;	//（玩家的事件 标记）
 		
 			// > 记录上一个id
-			$gameSystem._drill_EDu_last_id = e._eventId;
+			$gameSystem._drill_EFP_last_id = e._eventId;
 			
 			// > 独立开关取出值
 			var switch_data = $gameSystem._drill_EFP_switchTank[i];
@@ -558,11 +600,7 @@ Game_Map.prototype.drill_EFP_getTarMapEventDataByName = function( mapId, eventNa
 					return e_data;
 				}
 			}
-			alert(
-				"【Drill_EventForPlayer.js 物体管理 - 玩家的事件】\n" + 
-				"插件指令指定的地图"+ mapId +"中，\n"+
-				"并没有名称为 "+ eventName +" 的事件。"
-			);
+			alert( DrillUp.drill_EFP_getPluginTip_EventNameNotFind( mapId, eventName ) );
 			return {};
 			
 		}else{
@@ -669,10 +707,8 @@ Sprite_Character.prototype.drill_EFP_updateSpriteData = function() {
 //=============================================================================
 }else{
 		Imported.Drill_EventForPlayer = false;
-		alert(
-			"【Drill_EventForPlayer.js 物体管理 - 玩家的事件】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_EventDuplicator 物体管理-事件复制器"
-		);
+		var pluginTip = DrillUp.drill_EFP_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
 

@@ -457,7 +457,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			大图片字符：
 //				->绘制图片
 //
@@ -470,8 +470,32 @@
 //		★存在的问题：
 //			暂无
 //		
-//
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_DTBI_PluginTip_curName = "Drill_DialogTextBigImage.js 窗口字符-大图片字符";
+	DrillUp.g_DTBI_PluginTip_baseList = ["Drill_CoreOfWindowCharacter.js 系统-窗口字符核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_DTBI_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_DTBI_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_DTBI_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_DTBI_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_DTBI_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -573,10 +597,8 @@ Window_Base.prototype.drill_DTBI_drawImg = function( imgIndex, x, y ){
 //=============================================================================
 }else{
 		Imported.Drill_DialogTextBigImage = false;
-		alert(
-			"【Drill_DialogTextBigImage.js 窗口字符 - 大图片字符】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfWindowCharacter 系统-窗口字符核心"
-		);
+		var pluginTip = DrillUp.drill_DTBI_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
 

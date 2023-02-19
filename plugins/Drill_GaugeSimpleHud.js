@@ -519,7 +519,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			简单生命框：
 //				->结构
 //					->生命条
@@ -538,8 +538,44 @@
 //		★存在的问题：
 //			暂无
 //
-//
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_GSH_PluginTip_curName = "Drill_GaugeSimpleHud.js 地图UI-简单生命框";
+	DrillUp.g_GSH_PluginTip_baseList = ["Drill_CoreOfGaugeMeter.js 系统-参数条核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_GSH_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_GSH_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_GSH_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_GSH_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_GSH_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到事件
+	//==============================
+	DrillUp.drill_GSH_getPluginTip_EventNotFind = function( e_id ){
+		return "【" + DrillUp.g_GSH_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到配置
+	//==============================
+	DrillUp.drill_GSH_getPluginTip_DataNotFind = function( data_id ){
+		return "【" + DrillUp.g_GSH_PluginTip_curName + "】\n插件指令错误，未找到生命框["+data_id+"]的配置数据。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -665,10 +701,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			temp1 = Number(temp1) - 1;
 			var data = $gameSystem._drill_GSH_dataTank[ temp1 ];
 			if( data == undefined ){
-				alert(
-					"【Drill_GaugeSimpleHud.js  地图UI - 简单生命框】\n"+
-					"错误，未找到生命框["+id+"]的配置数据。"
-				);
+				alert( DrillUp.drill_GSH_getPluginTip_DataNotFind( id ) );
 				return;
 			}
 			
@@ -748,8 +781,7 @@ Game_Map.prototype.drill_GSH_isEventExist = function( e_id ){
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_GaugeSimpleHud.js 地图UI - 简单生命框】\n" +
-				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
+		alert( DrillUp.drill_GSH_getPluginTip_EventNotFind( e_id ) );
 		return false;
 	}
 	return true;
@@ -1224,8 +1256,8 @@ Drill_GSH_LifeSprite.prototype.drill_updatePosition = function() {
 		yy -= this._drill_foreground_sprite.bitmap.height *0.5;		
 	}
 	
-	// > 镜头缩放与位移【地图 - 活动地图镜头】
-	if( Imported.Drill_LayerCamera ){
+	// > 镜头缩放与位移
+	if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】UI缩放与位移
 		var layer = data['layer_index'];
 		if( layer == "下层" || layer == "中层" || layer == "上层" ){
 			this.scale.x = 1.00 / $gameSystem.drill_LCa_curScaleX();
@@ -1233,8 +1265,11 @@ Drill_GSH_LifeSprite.prototype.drill_updatePosition = function() {
 			//（暂不考虑缩放位移偏转）
 		}
 		if( layer == "图片层" || layer == "最顶层" ){
-			xx = $gameSystem.drill_LCa_mapToCameraX( xx );
-			yy = $gameSystem.drill_LCa_mapToCameraY( yy );
+			var tar_pos = $gameSystem._drill_LCa_controller.drill_LCa_getCameraPos_OuterSprite( xx, yy );
+			xx = tar_pos.x;
+			yy = tar_pos.y;
+			//xx = $gameSystem.drill_LCa_mapToCameraX( xx );
+			//yy = $gameSystem.drill_LCa_mapToCameraY( yy );
 		}
 	}
 	
@@ -1298,9 +1333,7 @@ Drill_GSH_LifeSprite.prototype.drill_updateValue = function() {
 //=============================================================================
 }else{
 		Imported.Drill_GaugeSimpleHud = false;
-		alert(
-			"【Drill_GaugeSimpleHud.js 地图UI - 简单生命框】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfGaugeMeter 系统-参数条核心"
-		);
+		var pluginTip = DrillUp.drill_GSH_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 

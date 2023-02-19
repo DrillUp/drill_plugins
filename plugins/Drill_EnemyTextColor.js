@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.1]        UI - 敌人文本颜色
+ * @plugindesc [v2.2]        UI - 敌人文本颜色
  * @author Drill_up
  * 
  * 
@@ -23,7 +23,7 @@
  * 该插件 不能 单独使用。
  * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfColor    窗口字符-颜色核心
+ *   - Drill_CoreOfColor    窗口字符-颜色核心★★v1.5及以上★★
  *     需要该核心才能修改颜色。
  * 作用于：
  *   - Drill_WindowLog      战斗UI-窗口提示消息★★v1.3及以上★★
@@ -52,6 +52,7 @@
  * 
  * 1."颜色:1" 表示颜色核心的配置中的第1个颜色。你也可以直接写颜色代码。
  * 2."高级颜色:3" 表示核心中配置的第3个高级渐变色。
+ * 3.变色对 敌人名称 的指代字符 "\ne[1]" 也有效。
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 修改颜色：
@@ -125,6 +126,8 @@
  * 改进了 新加的敌人 在旧存档中显示为黑色的问题。
  * [v2.1]
  * 优化了旧存档的识别与兼容。
+ * [v2.2]
+ * 添加了 窗口字符 的变色兼容功能。
  *
  *
  * @param MOG-敌人指针是否变色
@@ -172,11 +175,22 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
-//			敌人文本颜色：
-//				->敌人指针
-//				->boss框
-//				->插件指令
+//		★功能结构树：
+//			->☆提示信息
+//			->☆变量获取
+//			->☆插件指令
+//			->☆存储数据
+//			->☆颜色数据
+//				->获取 - 敌人名称
+//				->获取 - 敌人颜色代码
+//				->获取 - 敌人颜色ID
+//			->☆指代字符同步变色
+//				-> \ne[1]
+//			->☆变色绑定
+//				->绑定 - 敌人选择窗口（覆写）
+//				->绑定 - mog指针
+//				->绑定 - mog的boss框
+//				->绑定 - drill的boss框
 //		
 //		★必要注意事项：
 //			暂无
@@ -188,17 +202,51 @@
 //		★存在的问题：
 //			1.插件的作用域不是很稳定，如果有某部分的改动，则随时可能牵连其它插件一起升级。
 //
- 
+
 //=============================================================================
-// ** 变量获取
+// ** ☆提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_ETC_PluginTip_curName = "Drill_EnemyTextColor.js UI-敌人文本颜色";
+	DrillUp.g_ETC_PluginTip_baseList = ["Drill_CoreOfColor.js 窗口字符-颜色核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_ETC_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_ETC_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_ETC_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_ETC_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_ETC_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 强制同步更新
+	//==============================
+	DrillUp.drill_ETC_getPluginTip_NeedUpdate_Color = function(){
+		return "【" + DrillUp.g_ETC_PluginTip_curName + "】\n有插件在调用已经抛弃的变量，注意同步更新一下下面的插件："+
+			"\n- Drill_CoreOfColor 窗口字符-颜色核心"+
+			"\n- Drill_ActorTextColor UI-角色文本颜色"+
+			"\n- Drill_WindowLog 战斗UI-窗口提示消息";
+	};
+	
+	
+//=============================================================================
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_EnemyTextColor = true;
 　　var DrillUp = DrillUp || {}; 
+    DrillUp.parameters = PluginManager.parameters('Drill_EnemyTextColor');
 
 
 	/*-----------------杂项------------------*/
-    DrillUp.parameters = PluginManager.parameters('Drill_EnemyTextColor');
     DrillUp.g_ETC_mogCursor = String(DrillUp.parameters['MOG-敌人指针是否变色'] || "true") === "true";
     DrillUp.g_ETC_mogBoss = String(DrillUp.parameters['BOSS框是否变色'] || "true") === "true";
     DrillUp.g_ETC_message = String(DrillUp.parameters['消息窗口是否变色'] || "true") === "true";
@@ -212,13 +260,13 @@ if( Imported.Drill_CoreOfColor ){
 	
 	
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _drill_ETC_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_ETC_pluginCommand.call(this, command, args);
-	
-	if( command === ">文本颜色" ){	// >文本颜色 : B : 敌人普通 : A1
+	if( command === ">文本颜色" ){
+		
 		if(args.length == 6){
 			var type = String(args[3]);
 			if( type == "敌人普通" || type == "敌人高级" ){
@@ -283,7 +331,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -369,12 +417,7 @@ Game_System.prototype.drill_ETC_checkSysData_Private = function() {
 //==============================
 Object.defineProperty(Game_System.prototype, '_drill_ETC_enemyCount', {
     get: function(){
-		alert(
-			"【Drill_EnemyTextColor.js UI-敌人文本颜色】\n有插件在调用已经抛弃的变量，注意同步更新一下下面的插件："+
-			"\n- Drill_CoreOfColor 窗口字符-颜色核心"+
-			"\n- Drill_ActorTextColor UI-角色文本颜色"+
-			"\n- Drill_WindowLog 战斗UI-窗口提示消息"
-		);
+		alert( DrillUp.drill_ETC_getPluginTip_NeedUpdate_Color() );
         return 0;
     },
     configurable: true
@@ -383,10 +426,14 @@ Object.defineProperty(Game_System.prototype, '_drill_ETC_enemyCount', {
 
 
 //=============================================================================
-// ** 临时数据
+// ** ☆颜色数据
+//
+//			说明：	> 此处将注释中的颜色数据转移到 $gameTemp 中，方便随时获取。
+//					> 详细可见 开放函数 。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 临时数据 - 初始化
+// * 颜色数据 - 初始化
 //==============================
 var _drill_ETC_temp_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {
@@ -418,6 +465,7 @@ Game_Temp.prototype.initialize = function() {
 				var data = {};
 				data['color_code'] = String(DrillUp.drill_COC_getColor( Number(color[1]) -1 )) ;
 				data['color_id'] = Number(color[1]) ; //(101开始)
+				if( data['color_code'] == "#ffffff" ){ data['color_code'] = ""; }
 				this._drill_ETC_enemyData[i] = data;
 			}
 			
@@ -426,6 +474,7 @@ Game_Temp.prototype.initialize = function() {
 			var data = {};
 			data['color_code'] = DrillUp.drill_COC_getSeniorColor( Number(colorG[1]) -1 );
 			data['color_id'] = Number(colorG[1]) + 100 ; //(201开始)
+			if( data['color_code'] == "#ffffff" ){ data['color_code'] = ""; }
 			this._drill_ETC_enemyData[i] = data;
 		
 		}else{
@@ -435,7 +484,15 @@ Game_Temp.prototype.initialize = function() {
 	//alert(JSON.stringify(this._drill_ETC_enemyData));
 }
 //==============================
-// * 临时数据 - 获取 颜色代码
+// * 颜色数据 - 获取 - 敌人名称（开放函数）
+//==============================
+Game_Temp.prototype.drill_ETC_getEnemyName = function( enemy_id ){
+	var data = $dataEnemies[ enemy_id ];
+	if( data == undefined ){ return ""; }
+	return data.name || "";
+}
+//==============================
+// * 颜色数据 - 获取 - 敌人颜色代码（开放函数）
 //==============================
 Game_Temp.prototype.drill_ETC_getColorCode = function( enemy_id ){
 	
@@ -444,12 +501,14 @@ Game_Temp.prototype.drill_ETC_getColorCode = function( enemy_id ){
 		$gameSystem._drill_ETC_colorCode[enemy_id] != "" ){
 		return $gameSystem._drill_ETC_colorCode[enemy_id];
 	}
+	
+	// > 没有，则用注释的值
 	var data = this._drill_ETC_enemyData[enemy_id];
 	if( data == undefined ){ return ""; }
 	return data['color_code'];
 }
 //==============================
-// * 临时数据 - 获取 颜色ID
+// * 颜色数据 - 获取 - 敌人颜色ID（开放函数）
 //==============================
 Game_Temp.prototype.drill_ETC_getColorId = function( enemy_id ){
 	var data = this._drill_ETC_enemyData[enemy_id];
@@ -459,8 +518,36 @@ Game_Temp.prototype.drill_ETC_getColorId = function( enemy_id ){
 
 
 //=============================================================================
-// ** 敌人选择窗口绘制（覆写） 
+// ** ☆指代字符同步变色
+//
+//			说明：	> 与 物品/武器/护甲/技能 相关的指代字符，能同步变色。加 \csave \cload \c 等窗口字符。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
+//==============================
+// * 指代字符 - 敌人名称（\NE[n]）
+//==============================
+var _drill_ETC_COWC_enemyName = Window_Base.prototype.drill_COWC_enemyName;
+Window_Base.prototype.drill_COWC_enemyName = function( n ){
+	var result = _drill_ETC_COWC_enemyName.call( this, n );
+	if( result != "" ){
+		var code = $gameTemp.drill_ETC_getColorCode( n );
+		if( code != "" ){
+			result = "\x1bcsave\x1bcc["+ code +"]"+ result +"\x1bcload";
+		}
+	}
+	return result;
+};
+
+
+//=============================================================================
+// ** ☆变色绑定 
+//
+//			说明：	> 此模块根据 敌人名称 绘制的位置，进行变色控制。（与窗口字符无关）
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//=============================
+// * 绑定 - 敌人选择窗口（覆写）
+//=============================
 Window_BattleEnemy.prototype.drawItem = function( index ){
 	var color = $gameTemp.drill_ETC_getColorCode( index );
 	if( color != "" ){
@@ -471,22 +558,12 @@ Window_BattleEnemy.prototype.drawItem = function( index ){
     this.drawText(name, rect.x, rect.y, rect.width);
 	this.resetTextColor();
 };
-
-
-//=============================================================================
-// ** 兼容设置 
-//=============================================================================
 //=============================
-// * 兼容 - 与mog指针相适应
+// * 绑定 - mog指针
 //=============================
 var _drill_ETC_mogCursor_refresh = BattleCursor.prototype.refresh_arrow_name;
-BattleCursor.prototype.refresh_arrow_name = function(battler,sprite) {
-	if(Imported.MOG_BattleCursor && DrillUp.g_ETC_mogCursor){
-		//for(var a in battler){
-		//	textb ="key:"+a+" value:"+ battler[a]+"\n";
-		//	alert(textb);
-		//}
-		//battler._enemyId
+BattleCursor.prototype.refresh_arrow_name = function( battler, sprite ){
+	if( Imported.MOG_BattleCursor && DrillUp.g_ETC_mogCursor ){
 		if( battler._enemyId ){
 			var color = $gameTemp.drill_ETC_getColorCode( battler._enemyId );
 			if( color != "" ){
@@ -500,7 +577,7 @@ BattleCursor.prototype.refresh_arrow_name = function(battler,sprite) {
 	}
 };
 //=============================
-// * 兼容 - 与mog bosshp相适应
+// * 绑定 - mog的boss框
 //=============================
 if( Imported.MOG_BossHP ){
 	var _drill_ETC_mogBossHP_refresh = Sprite_BossHP.prototype.refresh_name;
@@ -521,7 +598,7 @@ if( Imported.MOG_BossHP ){
 	};
 }
 //=============================
-// * 兼容 - 与 Drill_GaugeForBoss 相适应
+// * 绑定 - drill的boss框
 //=============================
 if( Imported.Drill_GaugeForBoss ){
 	var _drill_ETC_GFB_drawName = Drill_GFB_StyleSprite.prototype.drill_drawName;
@@ -546,8 +623,6 @@ if( Imported.Drill_GaugeForBoss ){
 //=============================================================================
 }else{
 		Imported.Drill_EnemyTextColor = false;
-		alert(
-			"【Drill_EnemyTextColor.js UI-敌人文本颜色】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfColor 窗口字符-颜色核心"
-		);
+		var pluginTip = DrillUp.drill_ETC_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }

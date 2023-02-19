@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        窗口字符 - 颜色核心
+ * @plugindesc [v1.5]        窗口字符 - 颜色核心
  * @author Drill_up
  * 
  * @Drill_LE_editForbidden
@@ -20,12 +20,14 @@
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该插件可以单独使用。
- * 该插件为基础核心，可以作用于以下子插件。
+ * 该插件 不能 单独使用。
+ * 需要基于其他核心插件，才能运行，并作用于其他子插件。
+ * 基于：
+ *   - Drill_CoreOfWindowCharacter   窗口字符-窗口字符核心★★v1.7及以上★★
  * 可作用于：
- *   - Drill_ActorTextColor        UI-角色文本颜色
- *   - Drill_EnemyTextColor        UI-敌人文本颜色
- *   - Drill_ItemTextColor         UI-物品+技能文本颜色
+ *   - Drill_ActorTextColor          UI-角色文本颜色
+ *   - Drill_EnemyTextColor          UI-敌人文本颜色
+ *   - Drill_ItemTextColor           UI-物品+技能文本颜色
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -45,7 +47,7 @@
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 颜色窗口字符：
- * 使用该插件后，你可以使用窗口字符调整 自定义颜色：
+ * 你可以使用窗口字符调整 自定义颜色：
  * 
  * 窗口字符：\c[101]
  * 窗口字符：\c[102]
@@ -57,6 +59,31 @@
  * 2.颜色和高级颜色固定99种自定义设置。
  *   "\c[101] - \c[199]"对应了 颜色1 至 颜色99。
  *   "\c[201] - \c[299]"对应了 高级颜色1 至 高级颜色99。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 普通颜色：
+ * 你可以使用窗口字符设置 普通颜色：
+ * 
+ * 窗口字符：\cc[#ffffff]
+ * 窗口字符：\clc[#ffffff:#ffffff:10]
+ * 窗口字符：\clc[#ffffff:#ffffff:当前行字数]
+ * 
+ * 1."\cc"由于普通颜色非常多，通过序号来定义比较麻烦，你可以使用 \cc 直接
+ *   定义普通颜色来使用。
+ * 2."\clc"可以使得后面的字符每个字变一种普通颜色，合起来看起来像渐变。
+ *   分别表示 起始颜色、终止颜色、过渡的字数 。
+ * 3."当前行字数"即当前行 一般字符 的字数。
+ *    注意，当前行字数统计不含 效果字符、字符块 的数量。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 颜色暂存：
+ * 你可以使用窗口字符暂存颜色：
+ * 
+ * 窗口字符：\csave
+ * 窗口字符：\cload
+ * 
+ * 1.窗口字符 是一个一个顺序绘制上去的，存在先后顺序。
+ *   如果你有 插播的字符串 要临时变色，可以先暂存之前的颜色，在最后恢复颜色。
  * 
  * -----------------------------------------------------------------------------
  * ----知识点 - 关于颜色：
@@ -106,6 +133,8 @@
  * 修复了高级渐变色的角度bug，支持了0-360的角度设置。
  * [v1.4]
  * 修改了插件的分类。
+ * [v1.5]
+ * 添加了 颜色暂存、普通颜色 的窗口字符功能。
  * 
  *
  * 
@@ -1402,10 +1431,13 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
-//			颜色核心：
-//				->普通颜色
-//				->高级颜色
+//		★功能结构树：
+//			->☆提示信息
+//			->☆变量获取
+//			->☆效果字符应用
+//			->☆文本颜色
+//			->☆颜色文本绘制
+//			->☆逐个字符变色
 //		
 //		★必要注意事项：
 //			1.变色由两个核心函数组成。
@@ -1424,9 +1456,59 @@
 //
 //		★存在的问题：
 //			暂无
- 
+//
+
 //=============================================================================
-// ** 变量获取
+// ** ☆提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_COC_PluginTip_curName = "Drill_CoreOfColor.js 窗口字符-颜色核心";
+	DrillUp.g_COC_PluginTip_baseList = ["Drill_CoreOfWindowCharacter.js 窗口字符-窗口字符核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_COC_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_COC_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_COC_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_COC_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_COC_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 日志 - 无效参数
+	//==============================
+	DrillUp.drill_COC_getPluginTip_ColorError1 = function( n ){
+		return "【" + DrillUp.g_COC_PluginTip_curName + "】\n普通颜色接受到一个无效的参数："+n+"。";
+	};
+	//==============================
+	// * 提示信息 - 日志 - 无效参数
+	//==============================
+	DrillUp.drill_COC_getPluginTip_ColorError2 = function( n ){
+		return "【" + DrillUp.g_COC_PluginTip_curName + "】\n高级颜色接受到一个无效的参数："+n+"。";
+	};
+	//==============================
+	// * 提示信息 - 日志 - 未配置的参数
+	//==============================
+	DrillUp.drill_COC_getPluginTip_ColorNotFind1 = function( n ){
+		return "【" + DrillUp.g_COC_PluginTip_curName + "】\n你没有在 颜色-"+n+" 中配置颜色，而你在游戏中使用了它。";
+	};
+	//==============================
+	// * 提示信息 - 日志 - 未配置的参数
+	//==============================
+	DrillUp.drill_COC_getPluginTip_ColorNotFind2 = function( n ){
+		return "【" + DrillUp.g_COC_PluginTip_curName + "】\n你没有在 高级颜色-"+n+" 中配置颜色，而你在游戏中使用了它。";
+	};
+	
+	
+//=============================================================================
+// ** ☆变量获取
 //=============================================================================
 	var Imported = Imported || {};
 	Imported.Drill_CoreOfColor = true;
@@ -1462,16 +1544,16 @@
 	// * 临时全局 - 获取普通颜色
 	//==============================
 	DrillUp.drill_COC_getColor = function( n ) {
-		if( !DrillUp.g_COC_color_list[n] ){ console.log("【窗口字符-颜色核心】普通颜色接受到一个无效的参数："+n+"。" ); return "#ffffff" }
-		if( !DrillUp.g_COC_color_list[n]['color'] ){ console.log("【窗口字符-颜色核心】你没有在 颜色-"+n+" 中配置颜色，而你在游戏中使用了它。" ); return "#ffffff" }
+		if( !DrillUp.g_COC_color_list[n] ){ console.log( DrillUp.drill_COC_getPluginTip_ColorError1( n ) ); return "#ffffff" }
+		if( !DrillUp.g_COC_color_list[n]['color'] ){ console.log( DrillUp.drill_COC_getPluginTip_ColorNotFind1( n ) ); return "#ffffff" }
 		return DrillUp.g_COC_color_list[n]['color'];
 	}
 	//==============================
 	// * 临时全局 - 获取高级颜色
 	//==============================
 	DrillUp.drill_COC_getSeniorColor = function( n ) {
-		if( !DrillUp.g_COC_seniorColor_list[n] ){ console.log("【窗口字符-颜色核心】高级颜色接受到一个无效的参数："+n+"。" ); return "#ffffff" }
-		if( !DrillUp.g_COC_seniorColor_list[n]['color'] ){ console.log("【窗口字符-颜色核心】你没有在 高级颜色-"+n+" 中配置颜色，而你在游戏中使用了它。" ); return "#ffffff" }
+		if( !DrillUp.g_COC_seniorColor_list[n] ){ console.log( DrillUp.drill_COC_getPluginTip_ColorError2( n ) ); return "#ffffff" }
+		if( !DrillUp.g_COC_seniorColor_list[n]['color'] ){ console.log( DrillUp.drill_COC_getPluginTip_ColorNotFind2( n ) ); return "#ffffff" }
 		return DrillUp.g_COC_seniorColor_list[n]['color'];
 	}
 	
@@ -1499,23 +1581,119 @@
 		}
 	}
 	
+	
+//=============================================================================
+// * >>>>基于插件检测>>>>
+//=============================================================================
+if( Imported.Drill_CoreOfWindowCharacter ){
+	
 
 //=============================================================================
-// ** \c[100]与\c[200]识别
+// ** ☆效果字符应用
 //=============================================================================
+//==============================
+// * 效果字符应用 - 字符转换（简单符）
+//==============================
+var _drill_COC_COWC_processNewEffectChar_Simple = Window_Base.prototype.drill_COWC_processNewEffectChar_Simple;
+Window_Base.prototype.drill_COWC_processNewEffectChar_Simple = function( matched_index, command ){
+	_drill_COC_COWC_processNewEffectChar_Simple.call( this, matched_index, command );
+	
+	if( command == "csave" ){
+		this._drill_COC_tempColor = this.contents.textColor;
+		this.drill_COWC_charSubmit_Effect( 0, 0 );
+	}
+	if( command == "cload" ){
+		if( this._drill_COC_tempColor != undefined ){
+			this.contents.textColor = this._drill_COC_tempColor;
+		}
+		this.drill_COWC_charSubmit_Effect( 0, 0 );
+	}
+}
+//==============================
+// * 效果字符应用 - 字符转换（组合符）
+//==============================
+var _drill_COC_COWC_processNewEffectChar_Combined = Window_Base.prototype.drill_COWC_processNewEffectChar_Combined;
+Window_Base.prototype.drill_COWC_processNewEffectChar_Combined = function( matched_index, matched_str, command, args ){
+	_drill_COC_COWC_processNewEffectChar_Combined.call( this, matched_index, matched_str, command, args );
+	
+	if( command == "cc" ){
+		if( args.length == 1 ){
+			var temp1 = String(args[0]);
+			this.drill_COC_setColor_Code( temp1 );	//（文本颜色）
+			this.drill_COWC_charSubmit_Effect( 0, 0 );
+		}
+	}
+	if( command == "clc" ){
+		if( args.length == 3 ){
+			var temp1 = String(args[0]);
+			var temp2 = String(args[1]);
+			var temp3 = String(args[2]);
+			if( temp3 == "当前行字数" ){
+				this.drill_COC_setColorLinearCode( temp1, temp2, null );
+			}else{
+				this.drill_COC_setColorLinearCode( temp1, temp2, Number(temp3) );
+			}
+			this.drill_COWC_charSubmit_Effect( 0, 0 );
+		}
+	}
+}
+//==============================
+// * 效果字符应用 - 当前行
+//==============================
+var _drill_COC_COWC_processNewLine = Window_Base.prototype.drill_COWC_processNewLine;
+Window_Base.prototype.drill_COWC_processNewLine = function( line_index, line_text ){
+	_drill_COC_COWC_processNewLine.call( this, line_index, line_text );
+	
+	// > 得到当前行字数
+	this._drill_COC_curLineNormalCharacterCount = this.drill_COWC_getCurLineNormalCharCount();
+	
+	// > 清除 逐个字符变色 设置
+	this._drill_COC_linearCodeData = null;
+}
+
+
+//=============================================================================
+// ** ☆文本颜色
+//
+//			说明：	> 此处将 文本颜色 功能统一为 开放函数 。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 文本颜色 - 设置颜色代码（开放函数）
+//
+//			说明：	普通颜色(#开头)和高级颜色(drill开头)都可以。
+//==============================
+Window_Base.prototype.drill_COC_setColor_Code = function( color ){
+	this.contents.textColor = color;
+};
+//==============================
+// * 文本颜色 - 设置颜色ID（开放函数）
+//==============================
+Window_Base.prototype.drill_COC_setColor_Id = function( id ){
+	if( typeof id != "number" ){ return; }
+	this.contents.textColor = this.textColor( id );
+};
+//==============================
+// * 文本颜色 - 获取颜色代码 根据ID
+//
+//			说明：	调用此函数时，可以写："var color = this.textColor(101)"。
+//==============================
 var _drill_COC_textColor = Window_Base.prototype.textColor;
 Window_Base.prototype.textColor = function( n ){
-	if( n > 200 ){			//高级颜色
+	if( n > 200 ){			// 高级颜色（\c[200] - \c[299]）
 		return DrillUp.drill_COC_getSeniorColor( n-201 );
-	}else if(n > 100){		//颜色
+	}else if(n > 100){		// 颜色（\c[100] - \c[199]）
 		return DrillUp.drill_COC_getColor( n-101 );
-	}else{					//默认颜色
+	}else{					// 默认颜色（\c[0] - \c[31]）
 		return _drill_COC_textColor.call(this,n);
 	}
 };
 
 //=============================================================================
-// ** 渐变读取+绘制
+// ** ☆颜色文本绘制
+//
+//			说明：	> 在文本绘制时，解析高级颜色并使用渐变。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 var _drill_COC_bitmap_drawTextBody = Bitmap.prototype._drawTextBody;
 Bitmap.prototype._drawTextBody = function( text, tx, ty, maxWidth ){
@@ -1608,4 +1786,87 @@ Bitmap.prototype._drawTextBody = function( text, tx, ty, maxWidth ){
 	}
 };
 
+//=============================================================================
+// ** ☆逐个字符变色
+//=============================================================================
+//==============================
+// * 逐个变色 - 初始化（开放函数）
+//==============================
+Window_Base.prototype.drill_COC_setColorLinearCode = function( color1, color2, char_num ){
+	if( color1.slice(0,1) != "#" ){ return; }
+	if( color2.slice(0,1) != "#" ){ return; }
+    this.contents.textColor = color1;
+	
+	// > 如果为空，则获取到 当前行字数
+	if( char_num == undefined ){
+		char_num = this._drill_COC_curLineNormalCharacterCount;
+	}
+	if( char_num <= 1 ){ return; }
+	
+	// > 数据标记
+	var rgb1 = this.drill_COC_colorToRGB( color1 );
+	var rgb2 = this.drill_COC_colorToRGB( color2 );
+	var data = {};
+	data['cur_index'] = -1;
+	data['tar_index'] = char_num;
+	data['org_r'] = rgb1['r'];
+	data['org_g'] = rgb1['g'];
+	data['org_b'] = rgb1['b'];
+	data['inc_r'] = (rgb2['r'] - rgb1['r'])/(char_num-1);
+	data['inc_g'] = (rgb2['g'] - rgb1['g'])/(char_num-1);
+	data['inc_b'] = (rgb2['b'] - rgb1['b'])/(char_num-1);
+	this._drill_COC_linearCodeData = data;
+};
+//==============================
+// * 逐个变色 - 逐一绘制 - 一般字符
+//==============================
+var _drill_COC_processNormalCharacter = Window_Base.prototype.processNormalCharacter;
+Window_Base.prototype.processNormalCharacter = function( textState ){
+	_drill_COC_processNormalCharacter.call( this,textState );
+	if( this.drill_COWA_isCalculating() == true ){ return; }	//（排除 计算文本高度/宽度 情况）
+	
+	if( this._drill_COC_linearCodeData != undefined ){
+		var data = this._drill_COC_linearCodeData;
+		data['cur_index'] += 1;
+		
+		// > 设置颜色
+		var r = Math.floor( data['org_r'] + data['inc_r'] * data['cur_index'] );
+		var g = Math.floor( data['org_g'] + data['inc_g'] * data['cur_index'] );
+		var b = Math.floor( data['org_b'] + data['inc_b'] * data['cur_index'] );
+		var str = "rgb("+r+","+g+","+b+")";
+		this.drill_COC_setColor_Code( str );
+		
+		// > 结束后 销毁标记
+		if( data['cur_index'] > data['tar_index'] ){
+			this._drill_COC_linearCodeData = null;
+		}
+	}
+}
+//==============================
+// * 逐个变色 - 工具 - 颜色文本 转 RGB
+//==============================
+Window_Base.prototype.drill_COC_colorToRGB = function( color ){
+	if( color.charAt(0) != "#" ){ return null; }
+	color = color.substring(1);
+	if( color.length == 3 ){ color = color[0]+color[0]+color[1]+color[1]+color[2]+color[2]; }
+	if( /^[0-9a-fA-F]{6}$/.test(color) ){
+		var data = {};
+		data['r'] = parseInt(color.substr(0,2), 16 );
+		data['g'] = parseInt(color.substr(2,2), 16 );
+		data['b'] = parseInt(color.substr(4,2), 16 );
+		return data;
+	}
+	return null;
+}
+
+
+
+//=============================================================================
+// * <<<<基于插件检测<<<<
+//=============================================================================
+}else{
+		Imported.Drill_CoreOfColor = false;
+		var pluginTip = DrillUp.drill_COC_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
+}
 

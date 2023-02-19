@@ -559,7 +559,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			缓冲时间条：
 //				->物体
 //					->创建、控制、删除
@@ -573,7 +573,7 @@
 //					->设置时间值
 //					->增加时间值
 //
-//		★私有类如下：
+//		★插件私有类：
 //			* Drill_GOBTB_GameTimeBar 【时间条物体】
 //			* Drill_GOBTB_TimeBarSprite 【时间条贴图】
 //
@@ -594,7 +594,38 @@
 //		★存在的问题：
 //			暂无
 //
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_GOBTB_PluginTip_curName = "Drill_GaugeOfBufferTimeBar.js UI-缓冲时间条";
+	DrillUp.g_GOBTB_PluginTip_baseList = ["Drill_CoreOfGaugeMeter.js 系统-参数条核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_GOBTB_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_GOBTB_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_GOBTB_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_GOBTB_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_GOBTB_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到事件
+	//==============================
+	DrillUp.drill_GOBTB_getPluginTip_EventNotFind = function( e_id ){
+		return "【" + DrillUp.g_GOBTB_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -921,8 +952,7 @@ Game_Map.prototype.drill_GOBTB_isEventExist = function( e_id ){
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
-		alert( "【Drill_GaugeOfBufferTimeBar.js UI - 缓冲时间条】\n" +
-				"插件指令错误，当前地图并不存在id为"+e_id+"的事件。");
+		alert( DrillUp.drill_GOBTB_getPluginTip_EventNotFind( e_id ) );
 		return false;
 	}
 	return true;
@@ -1387,10 +1417,8 @@ Drill_GOBTB_TimeBarSprite.prototype.drill_GOBTB_updatePos = function() {
 //=============================================================================
 }else{
 		Imported.Drill_GaugeOfBufferTimeBar = false;
-		alert(
-			"【Drill_GaugeOfBufferTimeBar.js  UI - 缓冲时间条】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfGaugeMeter 系统-参数条核心"
-		);
+		var pluginTip = DrillUp.drill_GOBTB_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
 

@@ -266,7 +266,7 @@
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
-//		★大体框架与功能如下：
+//		★功能结构树：
 //			描边效果：
 //				->参数设置
 //
@@ -279,7 +279,44 @@
 //		★存在的问题：
 //			暂无
 //
- 
+
+//=============================================================================
+// ** 提示信息
+//=============================================================================
+	//==============================
+	// * 提示信息 - 参数
+	//==============================
+	var DrillUp = DrillUp || {}; 
+	DrillUp.g_DCOB_PluginTip_curName = "Drill_DialogCharOuterBorder.js 窗口字符-描边效果";
+	DrillUp.g_DCOB_PluginTip_baseList = ["Drill_CoreOfWindowCharacter.js 窗口字符-窗口字符核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_DCOB_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_DCOB_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_DCOB_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_DCOB_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_DCOB_PluginTip_baseList[i];
+		}
+		return message;
+	};
+	//==============================
+	// * 提示信息 - 日志 - 无效参数
+	//==============================
+	DrillUp.drill_DCOB_getPluginTip_ColorError = function( n ){
+		return "【" + DrillUp.g_DCOB_PluginTip_curName + "】\n描边颜色接受到一个无效的参数："+n+"。";
+	};
+	//==============================
+	// * 提示信息 - 日志 - 未配置的参数
+	//==============================
+	DrillUp.drill_DCOB_getPluginTip_ColorNotFind = function( n ){
+		return "【" + DrillUp.g_DCOB_PluginTip_curName + "】\n你没有在 描边颜色-"+n+" 中配置颜色，而你在游戏中使用了它。";
+	};
+	
+	
 //=============================================================================
 // ** 变量获取
 //=============================================================================
@@ -305,8 +342,8 @@
 	//			说明：	返回字符串，格式为 rgba(255,255,255,0.5)
 	//==============================
 	DrillUp.drill_DCOB_getColor = function( n ){
-		if( !DrillUp.g_DCOB_color_list[n-1] ){ console.log("【窗口字符-描边效果】描边颜色接受到一个无效的参数："+n+"。" ); return "rgba(0,0,0,0.5)" }
-		if( !DrillUp.g_DCOB_color_list[n-1]['color'] ){ console.log("【窗口字符-描边效果】你没有在 描边颜色-"+n+" 中配置，而你在游戏中使用了它。" ); return "rgba(0,0,0,0.5)" }
+		if( !DrillUp.g_DCOB_color_list[n-1] ){ console.log( DrillUp.drill_DCOB_getPluginTip_ColorError( n ) ); return "rgba(0,0,0,0.5)" }
+		if( !DrillUp.g_DCOB_color_list[n-1]['color'] ){ console.log( DrillUp.drill_DCOB_getPluginTip_ColorNotFind( n ) ); return "rgba(0,0,0,0.5)" }
 		var str = DrillUp.g_DCOB_color_list[n-1]['color'];
 		if( str.length == 7 ){
 			var r = parseInt(str.substring(1, 3), 16);
@@ -527,9 +564,7 @@ Bitmap.prototype._drawTextOutline = function( text, tx, ty, maxWidth ){
 //=============================================================================
 }else{
 		Imported.Drill_DialogCharOuterBorder = false;
-		alert(
-			"【Drill_DialogCharOuterBorder.js 窗口字符 - 描边效果】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对："+
-			"\n- Drill_CoreOfWindowCharacter 窗口字符-窗口字符核心"
-		);
+		var pluginTip = DrillUp.drill_DCOB_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
 }
 
