@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        图块 - 地形伤害漂浮数字[扩展]
+ * @plugindesc [v1.1]        图块 - 地形伤害漂浮数字[扩展]
  * @author Drill_up
  * 
  * @Drill_LE_param "自定义地形伤害-%d-绑定数字"
@@ -63,6 +63,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 兼容了新版 地图UI-临时漂浮参数数字 插件。
  * 
  * 
  *
@@ -183,12 +185,13 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			地形伤害与地形治愈：
-//				->默认地形伤害
-//					->公式设置
-//					->伤害闪烁效果
-//				->自定义地形伤害
-//
+//			->☆提示信息
+//			->☆变量获取
+//			
+//			->☆默认地形伤害（_default）
+//			->☆自定义地形伤害（_custom）
+//			
+//			
 //		★必要注意事项：
 //			暂无
 //			
@@ -200,7 +203,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -228,7 +231,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_X_GaugeForFloorDamage = true;
@@ -257,7 +260,7 @@ if( Imported.Drill_LayerDamageFloor &&
 	
 
 //=============================================================================
-// * 地形伤害 - 伤害效果（默认）
+// ** ☆默认地形伤害（_default）
 //=============================================================================
 var _drill_XGFFD_executeFloorDamage = Game_Actor.prototype.executeFloorDamage;
 Game_Actor.prototype.executeFloorDamage = function(){
@@ -295,32 +298,42 @@ Game_Actor.prototype.executeFloorDamage = function(){
 			damage_str = "+" + damage_str;
 		}
 		if( this._drill_LDF_lastDamage_default > 0 ){
-			var data = {
-				'x': pos[0],
-				'y': pos[1],
-				'style_id': DrillUp.g_XGFFD_defaultBind1 -1,
-				'symbol_data': damage_str,
-				'sustain_time': 120,
-			}
-			if( data['style_id'] == -1 ){ return; }	//（未配置则跳过）
-			$gameTemp._drill_GFN_commandSeq.push( data );
+			
+			// > 【地图UI - 临时漂浮参数数字】简单指令
+			var style_id = DrillUp.g_XGFFD_defaultBind1 -1;
+			var ballistics_id = DrillUp.g_GFN_simple_defaultBallisticsId -1;
+			var sustain_time = DrillUp.g_GFN_simple_defaultTime;
+			
+			if( style_id == -1 ){ return; }	//（未配置则跳过）
+			$gameTemp.drill_GFN_createSimple(
+				pos,
+				damage_str,
+				style_id,
+				ballistics_id,
+				sustain_time
+			);
 		}
 		if( this._drill_LDF_lastDamage_default < 0 ){
-			var data = {
-				'x': pos[0],
-				'y': pos[1],
-				'style_id': DrillUp.g_XGFFD_defaultBind2 -1,
-				'symbol_data': damage_str,
-				'sustain_time': 120,
-			}
-			if( data['style_id'] == -1 ){ return; }	//（未配置则跳过）
-			$gameTemp._drill_GFN_commandSeq.push( data );
+			
+			// > 【地图UI - 临时漂浮参数数字】简单指令
+			var style_id = DrillUp.g_XGFFD_defaultBind2 -1;
+			var ballistics_id = DrillUp.g_GFN_simple_defaultBallisticsId -1;
+			var sustain_time = DrillUp.g_GFN_simple_defaultTime;
+			
+			if( style_id == -1 ){ return; }	//（未配置则跳过）
+			$gameTemp.drill_GFN_createSimple(
+				pos,
+				damage_str,
+				style_id,
+				ballistics_id,
+				sustain_time
+			);
 		}
 	}
 };
 
 //=============================================================================
-// * 地形伤害 - 伤害效果（自定义）
+// ** ☆自定义地形伤害（_custom）
 //=============================================================================
 var _drill_XGFFD_LDF_executeFloorDamage = Game_Actor.prototype.drill_LDF_executeFloorDamage;
 Game_Actor.prototype.drill_LDF_executeFloorDamage = function(){
@@ -358,15 +371,20 @@ Game_Actor.prototype.drill_LDF_executeFloorDamage = function(){
 			damage_str = "+" + damage_str;
 		}
 		if( this._drill_LDF_lastDamage_custom == 0 ){ return; }
-		var data = {
-			'x': pos[0],
-			'y': pos[1],
-			'style_id': DrillUp.g_XGFFD_bind[ $gamePlayer._drill_LDF_lastCustomType ] -1,
-			'symbol_data': damage_str,
-			'sustain_time': 120,
-		}
-		if( data['style_id'] == -1 ){ return; }	//（未配置则跳过）
-		$gameTemp._drill_GFN_commandSeq.push( data );
+		
+		// > 【地图UI - 临时漂浮参数数字】简单指令
+		var style_id = DrillUp.g_XGFFD_bind[ $gamePlayer._drill_LDF_lastCustomType ] -1;
+		var ballistics_id = DrillUp.g_GFN_simple_defaultBallisticsId -1;
+		var sustain_time = DrillUp.g_GFN_simple_defaultTime;
+		
+		if( style_id == -1 ){ return; }	//（未配置则跳过）
+		$gameTemp.drill_GFN_createSimple(
+			pos,
+			damage_str,
+			style_id,
+			ballistics_id,
+			sustain_time
+		);
 	}
 };
 

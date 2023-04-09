@@ -143,19 +143,20 @@
  * 修复了去掉标题界面后，玩家在失败界面后，仍然可以回到标题界面的bug。
  * [v1.6]
  * 大幅度修改了全局存储的文件存储结构。
- *
- *
+ * 
+ * 
+ * 
  * @param 全局存储的文件路径
  * @type number
  * @min 1
  * @desc 指对应的文件路径ID，该插件的数据将存储到指定的文件路径中，具体去 全局存储核心 看看。
  * @default 1
  * 
- * @param ----杂项----
+ * @param ---杂项---
  * @default 
  *
  * @param 是否直接去掉标题界面
- * @parent ----杂项----
+ * @parent ---杂项---
  * @type boolean
  * @on 跳过
  * @off 不跳过
@@ -163,7 +164,7 @@
  * @default false
  *
  * @param 是否自动隐藏'继续'选项
- * @parent ----杂项----
+ * @parent ---杂项---
  * @type boolean
  * @on 隐藏
  * @off 不隐藏
@@ -171,7 +172,7 @@
  * @default true
  *
  * @param 是否隐藏'设置'选项
- * @parent ----杂项----
+ * @parent ---杂项---
  * @type boolean
  * @on 隐藏
  * @off 不隐藏
@@ -179,7 +180,7 @@
  * @default false
  *
  * @param 是否添加退出选项
- * @parent ----杂项----
+ * @parent ---杂项---
  * @type boolean
  * @on 添加
  * @off 不添加
@@ -191,11 +192,11 @@
  * @desc 退出选项的用语显示文本。（新游戏、继续等其他选项，在 数据库>用语 中设置。）
  * @default 退出
  * 
- * @param ----标题贴图----
+ * @param ---标题贴图---
  * @default 
  *
  * @param 是否显示标题文字
- * @parent ----标题贴图----
+ * @parent ---标题贴图---
  * @type boolean
  * @on 显示
  * @off 不显示
@@ -203,24 +204,24 @@
  * @default true
  *
  * @param 标题文字 X
- * @parent ----标题贴图----
+ * @parent ---标题贴图---
  * @desc x轴方向平移，单位像素。0为文字中心贴在正中间。正数向右，负数向左。
  * @default 0
  *
  * @param 标题文字 Y
- * @parent ----标题贴图----
+ * @parent ---标题贴图---
  * @desc y轴方向平移，单位像素。0为文字中心贴在最上面。正数向下，负数向上。
  * @default 156
  *
  * @param 标题文字字体大小
- * @parent ----标题贴图----
+ * @parent ---标题贴图---
  * @type number
  * @min 1
  * @desc 标题文字的字体大小。
  * @default 72
  *
  * @param 标题文字描边厚度
- * @parent ----标题贴图----
+ * @parent ---标题贴图---
  * @type number
  * @min 0
  * @desc 标题文字的描黑边的厚度，单位像素。
@@ -228,11 +229,11 @@
  * 
  * 
  * 
- * @param ----标题选项----
+ * @param ---标题选项---
  * @default 
  * 
  * @param 标题选项模式
- * @parent ----标题选项----
+ * @parent ---标题选项---
  * @type select
  * @option 按钮组模式
  * @value 按钮组模式
@@ -242,31 +243,31 @@
  * @default 窗口模式
  * 
  * @param 标题选项按钮组
- * @parent ----标题选项----
+ * @parent ---标题选项---
  * @desc 标题选项为 按钮组模式 时，标题选项按钮组的配置数据。
  * @type struct<DrillTScCommandButton>
  * @default {}
  * 
  * @param 标题选项窗口
- * @parent ----标题选项----
+ * @parent ---标题选项---
  * @desc 标题选项为 窗口模式 时，标题选项窗口的配置数据。
  * @type struct<DrillTScCommandWindow>
  * @default {}
  * 
  * 
  * 
- * @param ----背景音乐----
+ * @param ---背景音乐---
  * @default
  *
  * @param 初始播放的音乐
- * @parent ----背景音乐----
+ * @parent ---背景音乐---
  * @type number
  * @min 1
  * @desc 第一次进入标题界面时，播放的音乐的id。
  * @default 1
  *
  * @param 背景音乐-1
- * @parent ----背景音乐----
+ * @parent ---背景音乐---
  * @desc 背景音乐的资源。
  * @default 
  * @require 1
@@ -274,7 +275,7 @@
  * @type file
  *
  * @param 背景音乐-2
- * @parent ----背景音乐----
+ * @parent ---背景音乐---
  * @desc 背景音乐的资源。
  * @default 
  * @require 1
@@ -282,7 +283,7 @@
  * @type file
  *
  * @param 背景音乐-3
- * @parent ----背景音乐----
+ * @parent ---背景音乐---
  * @desc 背景音乐的资源。
  * @default 
  * @require 1
@@ -290,7 +291,7 @@
  * @type file
  *
  * @param 背景音乐-4
- * @parent ----背景音乐----
+ * @parent ---背景音乐---
  * @desc 背景音乐的资源。
  * @default 
  * @require 1
@@ -298,7 +299,7 @@
  * @type file
  *
  * @param 背景音乐-5
- * @parent ----背景音乐----
+ * @parent ---背景音乐---
  * @desc 背景音乐的资源。
  * @default 
  * @require 1
@@ -306,7 +307,7 @@
  * @type file
  *
  * @param 背景音乐-6
- * @parent ----背景音乐----
+ * @parent ---背景音乐---
  * @desc 背景音乐的资源。
  * @default 
  * @require 1
@@ -314,7 +315,7 @@
  * @type file
  *
  * @param 背景音乐-7
- * @parent ----背景音乐----
+ * @parent ---背景音乐---
  * @desc 背景音乐的资源。
  * @default 
  * @require 1
@@ -322,7 +323,7 @@
  * @type file
  *
  * @param 背景音乐-8
- * @parent ----背景音乐----
+ * @parent ---背景音乐---
  * @desc 背景音乐的资源。
  * @default 
  * @require 1
@@ -330,7 +331,7 @@
  * @type file
  *
  * @param 背景音乐-9
- * @parent ----背景音乐----
+ * @parent ---背景音乐---
  * @desc 背景音乐的资源。
  * @default 
  * @require 1
@@ -338,7 +339,7 @@
  * @type file
  *
  * @param 背景音乐-10
- * @parent ----背景音乐----
+ * @parent ---背景音乐---
  * @desc 背景音乐的资源。
  * @default 
  * @require 1
@@ -346,7 +347,7 @@
  * @type file
  *
  * @param 背景音乐-11
- * @parent ----背景音乐----
+ * @parent ---背景音乐---
  * @desc 背景音乐的资源。
  * @default 
  * @require 1
@@ -354,7 +355,7 @@
  * @type file
  *
  * @param 背景音乐-12
- * @parent ----背景音乐----
+ * @parent ---背景音乐---
  * @desc 背景音乐的资源。
  * @default 
  * @require 1
@@ -362,7 +363,7 @@
  * @type file
  *
  * @param 背景音乐-13
- * @parent ----背景音乐----
+ * @parent ---背景音乐---
  * @desc 背景音乐的资源。
  * @default 
  * @require 1
@@ -370,7 +371,7 @@
  * @type file
  *
  * @param 背景音乐-14
- * @parent ----背景音乐----
+ * @parent ---背景音乐---
  * @desc 背景音乐的资源。
  * @default 
  * @require 1
@@ -378,7 +379,7 @@
  * @type file
  *
  * @param 背景音乐-15
- * @parent ----背景音乐----
+ * @parent ---背景音乐---
  * @desc 背景音乐的资源。
  * @default 
  * @require 1
@@ -386,7 +387,7 @@
  * @type file
  *
  * @param 背景音乐-16
- * @parent ----背景音乐----
+ * @parent ---背景音乐---
  * @desc 背景音乐的资源。
  * @default 
  * @require 1
@@ -658,7 +659,7 @@
  * 
  * @param 标签
  * @desc 只用于方便区分查看的标签，不作用在插件中。
- * @default --新的按钮关键字对应--
+ * @default ==新的按钮关键字对应==
  * 
  * @param 指定按钮
  * @type select
@@ -904,7 +905,7 @@
 	}
 	
 	
-	/*-----------------杂项------------------*/
+	/*----------------杂项-----------------*/
 	DrillUp.g_TSc_skip = String(DrillUp.parameters["是否直接去掉标题界面"] || "false") === "true";
 	DrillUp.g_TSc_continueAutoHide = String(DrillUp.parameters["是否自动隐藏'继续'选项"] || "true") === "true";
 	DrillUp.g_TSc_optionHide = String(DrillUp.parameters["是否隐藏'设置'选项"] || "false") === "true";
@@ -912,14 +913,14 @@
 	DrillUp.g_TSc_quit_text = String(DrillUp.parameters["用语-退出选项"] || "退出");
     DrillUp.g_TSc_dataFileId = Number(DrillUp.parameters["全局存储的文件路径"] || 1);
 	
-	/*-----------------标题贴图------------------*/
+	/*----------------标题贴图-----------------*/
 	DrillUp.g_TSc_text_visible = String(DrillUp.parameters["是否显示标题文字"] || "true") === "true";	
 	DrillUp.g_TSc_text_x = Number(DrillUp.parameters["标题文字 X"] || 30);
 	DrillUp.g_TSc_text_y = Number(DrillUp.parameters["标题文字 Y"] || 120);
 	DrillUp.g_TSc_text_fontsize = Number(DrillUp.parameters["标题文字字体大小"] || 72);
 	DrillUp.g_TSc_text_outlineWidth = Number(DrillUp.parameters["标题文字描边厚度"] || 8);
 	
-	/*-----------------标题选项------------------*/
+	/*----------------标题选项-----------------*/
 	DrillUp.g_TSc_command_mode = String(DrillUp.parameters["标题选项模式"] || "按钮组模式");
 	if( DrillUp.g_TSc_command_mode == "按钮组模式" && 	// 按钮组校验
 		!Imported.Drill_CoreOfSelectableButton ){
@@ -948,7 +949,7 @@
 		DrillUp.g_TSc_command_button = {};
 	}
 	
-	/*------------------背景音乐-------------------*/
+	/*-----------------背景音乐------------------*/
 	DrillUp.g_TSc_bgmId = Number(DrillUp.parameters["初始播放的音乐"] || 1);
 	DrillUp.g_TSc_bgm_list_length = 16;
 	DrillUp.g_TSc_bgm_list= [];

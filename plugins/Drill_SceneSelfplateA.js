@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.5]        面板 - 全自定义信息面板A
+ * @plugindesc [v2.6]        面板 - 全自定义信息面板A
  * @author Drill_up
  * 
  * @Drill_LE_param "内容-%d"
@@ -52,7 +52,7 @@
  *      设置两个选项，一个激活，一个未激活（灰色），
  *      通过插件指令显示/隐藏两个按钮,只显示一个,使其看起来像一个选项。
  *   (3.注意，信息面板具有当前页记忆，如果你修改了一些选项，你需要用插
- *      件指令设置一下当前选中页。
+ *      件指令设置一下当前选中选项。
  * 内容：
  *   (1.每篇内容可以单独控制行间距，居中对齐等功能。
  *   (2.选项窗口和描述窗口支持所有文本的特殊字符：
@@ -94,30 +94,35 @@
  * ----激活条件
  * 打开全自定义信息面板，使用下面的插件指令：
  * （冒号两边都有一个空格）
- *
- * 插件指令：>信息面板A : 打开面板
- *
- * 插件指令：>信息面板A : 显示选项 : 1
- * 插件指令：>信息面板A : 隐藏选项 : 1
- * 插件指令：>信息面板A : 显示全部
- * 插件指令：>信息面板A : 隐藏全部
  * 
- * 插件指令：>信息面板A : 锁定选项 : 1
- * 插件指令：>信息面板A : 解锁选项 : 1
- * 插件指令：>信息面板A : 锁定全部
- * 插件指令：>信息面板A : 解锁全部
- *
+ * 插件指令：>信息面板A : 打开面板
+ * 
+ * 插件指令：>信息面板A : 显示选项 : 选项[1]
+ * 插件指令：>信息面板A : 显示选项 : 选项变量[21]
+ * 插件指令：>信息面板A : 隐藏选项 : 选项[1]
+ * 插件指令：>信息面板A : 隐藏选项 : 选项变量[21]
+ * 插件指令：>信息面板A : 显示全部选项
+ * 插件指令：>信息面板A : 隐藏全部选项
+ * 
+ * 插件指令：>信息面板A : 锁定选项 : 选项[1]
+ * 插件指令：>信息面板A : 锁定选项 : 选项变量[21]
+ * 插件指令：>信息面板A : 解锁选项 : 选项[1]
+ * 插件指令：>信息面板A : 解锁选项 : 选项变量[21]
+ * 插件指令：>信息面板A : 锁定全部选项
+ * 插件指令：>信息面板A : 解锁全部选项
+ * 
  * 1.面板打开时，游戏是暂停的，所以你不能在面板中实时变化某些数值。
- *
+ * 
  * -----------------------------------------------------------------------------
- * ----可选设定 - 选中页
+ * ----可选设定 - 选中选项
  * 你可以控制选项窗口当前选中第N页。（选项有3个，表示有3页）
  * 
- * 插件指令：>信息面板A : 选中页 : N
+ * 插件指令：>信息面板A : 选中选项 : 选项[1]
+ * 插件指令：>信息面板A : 选中选项 : 选项变量[21]
  * 
  * 1.信息面板具有当前页记忆，如果你修改了一些选项，你需要用该指令
- *   设置一下当前选中页。
- * 2.不存在第0页，如果选中页大于页数，将选择最末尾的页。
+ *   设置一下当前选中的选项。
+ * 2.不存在第0页，如果选中选项大于页数，将选择最末尾的页。
  *
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -154,7 +159,7 @@
  * 修复了 未打开面板时，插件指令没效果 的bug。
  * 以及修复了全局与存档设置紊乱的问题。
  * [v1.4]
- * 添加了操作全部、选中页的插件指令。
+ * 添加了操作全部、选中选项的插件指令。
  * [v1.5]
  * 规范了插件指令格式。
  * [v1.6]
@@ -178,6 +183,8 @@
  * 大幅度修改了全局存储的文件存储结构。
  * [v2.5]
  * 优化了旧存档的识别与兼容。
+ * [v2.6]
+ * 优化了插件指令。
  * 
  *
  * @param ----杂项----
@@ -1239,12 +1246,23 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			全自定义面板：
-//				->窗口
-//					->选项窗口、详细窗口、描述图片
-//					->当前选项
-//					->全局存储
-//					->描述图全加载
+//			->☆提示信息
+//			->☆变量获取
+//			->☆全局存储
+//			->☆存储数据
+//			->☆插件指令
+//			
+//			->☆主菜单选项
+//			->☆标题选项
+//			->☆面板控制
+//			
+//			->信息面板A【Scene_Drill_SSpA】
+//				->选项窗口、详细窗口、描述图片
+//				->当前选项
+//				->描述图全加载
+//			->选项窗口【Drill_SSpA_SelectWindow】
+//			->显示窗口【Drill_SSpA_DescWindow】
+//
 //
 //		★必要注意事项：
 //			1.替换以下字符变成新面板：
@@ -1260,7 +1278,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -1288,7 +1306,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_SceneSelfplateA = true;
@@ -1484,6 +1502,7 @@
 	DrillUp.global_SSpA_enableTank = null;
 	DrillUp.global_SSpA_lockTank = null;
 	
+	
 //=============================================================================
 // * >>>>基于插件检测>>>>
 //=============================================================================
@@ -1492,7 +1511,7 @@ if( Imported.Drill_CoreOfGlobalSave &&
 	
 	
 //=============================================================================
-// ** 全局存储
+// ** ☆全局存储
 //=============================================================================
 //==============================
 // * 全局 - 检查数据 - 显示情况
@@ -1570,7 +1589,7 @@ StorageManager.drill_SSpA_saveData = function(){
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -1684,16 +1703,8 @@ Game_System.prototype.drill_SSpA_checkSysData_Private = function() {
 };
 
 
-
 //=============================================================================
-// ** 资源文件夹
-//=============================================================================
-ImageManager.load_MenuSelfDef = function(filename) {
-    return this.loadBitmap('img/Menu__self/', filename, 0, true);
-};
-
-//=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _drill_SSpA_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
@@ -1705,28 +1716,28 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( type == "打开面板" ){			//打开菜单
 				SceneManager.push(Scene_Drill_SSpA);
 			}
-			if( type == "显示全部" ){
+			if( type == "显示全部选项" || type == "显示全部" ){
 				for( var i = 1; i <= DrillUp.g_SSpA_context_list_length; i++){
 					DrillUp.global_SSpA_enableTank[i] = true;			//全局存储
 					$gameSystem._drill_SSpA_enableTank[i] = true;		//正常存储
 				}
 				StorageManager.drill_SSpA_saveData();
 			}
-			if( type == "隐藏全部" ){
+			if( type == "隐藏全部选项" || type == "隐藏全部" ){
 				for( var i = 1; i <= DrillUp.g_SSpA_context_list_length; i++){
 					DrillUp.global_SSpA_enableTank[i] = false;			//全局存储
 					$gameSystem._drill_SSpA_enableTank[i] = false;		//正常存储
 				}
 				StorageManager.drill_SSpA_saveData();
 			}
-			if( type == "锁定全部" ){
+			if( type == "锁定全部选项" || type == "锁定全部" ){
 				for( var i = 1; i <= DrillUp.g_SSpA_context_list_length; i++){
 					DrillUp.global_SSpA_lockTank[i] = true;				//全局存储
 					$gameSystem._drill_SSpA_lockTank[i] = true;			//正常存储
 				}
 				StorageManager.drill_SSpA_saveData();
 			}
-			if( type == "解锁全部" ){
+			if( type == "解锁全部选项" || type == "解锁全部" ){
 				for( var i = 1; i <= DrillUp.g_SSpA_context_list_length; i++){
 					DrillUp.global_SSpA_lockTank[i] = false;			//全局存储
 					$gameSystem._drill_SSpA_lockTank[i] = false;		//正常存储
@@ -1738,6 +1749,15 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		if(args.length == 4){
 			var type = String(args[1]);
 			var temp1 = String(args[3]);
+			if( temp1.indexOf("选项变量[") != -1 ){
+				temp1 = temp1.replace("选项变量[","");
+				temp1 = temp1.replace("]","");
+				temp1 = $gameVariables.value(Number(temp1));
+			}else if( temp1.indexOf("选项[") != -1 ){
+				temp1 = temp1.replace("选项[","");
+				temp1 = temp1.replace("]","");
+				temp1 = Number(temp1);
+			}
 			if( type == "显示选项" ){
 				DrillUp.global_SSpA_enableTank[ Number(temp1) ] = true;			//全局存储
 				$gameSystem._drill_SSpA_enableTank[ Number(temp1) ] = true;		//正常存储
@@ -1758,7 +1778,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				$gameSystem._drill_SSpA_lockTank[ Number(temp1) ] = false;		//正常存储
 				StorageManager.drill_SSpA_saveData();
 			}
-			if( type == "选中页" ){
+			if( type == "选中选项" || type == "选中页" ){
 				$gameSystem._drill_SSpA_context_index = Number(temp1) -1;
 			}
 		}
@@ -1766,8 +1786,13 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	
 };
 
+
+
 //=============================================================================
-// * Scene_Menu 主菜单按钮
+// ** ☆主菜单选项
+//
+//			说明：	> 此模块专门关联主菜单选项，选项进入后跳转到 信息面板A 界面。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 var _drill_SSpA_createCommandWindow = Scene_Menu.prototype.createCommandWindow;
 Scene_Menu.prototype.createCommandWindow = function() {
@@ -1786,7 +1811,10 @@ Window_MenuCommand.prototype.addOriginalCommands = function() {
 };
 
 //=============================================================================
-// ** Scene Tittle 标题选项
+// ** ☆标题选项
+//
+//			说明：	> 此模块专门关联标题选项，选项进入后跳转到 信息面板A 界面。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================	
 var _drill_SSpA_title_createCommandWindow = Scene_Title.prototype.createCommandWindow;
 Scene_Title.prototype.createCommandWindow = function() {
@@ -1805,11 +1833,15 @@ Window_TitleCommand.prototype.makeCommandList = function() {
 	}
 };	
 
+
 //=============================================================================
-// * 临时数据
+// ** ☆面板控制
+//
+//			说明：	> 此模块专门将部分面板配置转移到 Game_Temp 方便随时调用。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 临时 - 初始化
+// * 面板控制 - 初始化
 //==============================
 var _drill_SSpA_temp_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {	
@@ -1817,7 +1849,7 @@ Game_Temp.prototype.initialize = function() {
 	this._drill_SSpA_visibleList = [];			//可见的列表
 };
 //==============================
-// * 临时 - 判断 锁定情况
+// * 面板控制 - 判断 锁定情况
 //==============================
 Game_Temp.prototype.drill_SSpA_isLocked = function( context_realIndex ){
 	
@@ -1839,7 +1871,7 @@ Game_Temp.prototype.drill_SSpA_isLocked = function( context_realIndex ){
 	}
 }
 //==============================
-// * 临时 - 判断 显示情况
+// * 面板控制 - 判断 显示情况
 //==============================
 Game_Temp.prototype.drill_SSpA_isEnabled = function( context_realIndex ){
 	
@@ -1860,6 +1892,13 @@ Game_Temp.prototype.drill_SSpA_isEnabled = function( context_realIndex ){
 		}
 	}
 }
+//==============================
+// * 面板控制 - 资源文件夹
+//==============================
+ImageManager.load_MenuSelfDef = function(filename) {
+    return this.loadBitmap('img/Menu__self/', filename, 0, true);
+};
+
 
 
 //=============================================================================
@@ -2090,7 +2129,7 @@ Scene_Drill_SSpA.prototype.drill_updateIndex = function() {
 		$gameSystem._drill_SSpA_context_index = null;	//（激活后清空）
 		if( temp < 0 ){ temp = 0; };
 		if( temp > $gameTemp._drill_SSpA_visibleList.length -1 ){ temp = $gameTemp._drill_SSpA_visibleList.length -1; };
-		this._window_select.select( temp );				//（设置选中页）
+		this._window_select.select( temp );				//（设置选中选项）
 	}
 	if( this._window_select._index == null || 
 		this._window_select._index > $gameTemp._drill_SSpA_visibleList.length -1 ||

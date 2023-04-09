@@ -105,33 +105,54 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			事件管理核心：
-//				->版本检验
+//			->☆提示信息
+//			->☆变量获取
+//			->☆插件指令
+//			
+//			->☆原代容器 标准模块
+//				->创建事件【标准函数】
+//				->删除事件【标准函数】
+//				->获取 - 是否为原代事件【标准函数】
+//				->获取 - 所有原代事件【标准函数】
+//				->获取 - 所有原代事件贴图【标准函数】
+//			->☆子代容器 标准模块
+//				->创建事件（主流程）【标准函数】
+//				->创建事件（根据数据）【标准函数】
+//				->删除事件【标准函数】
+//				->获取 - 是否为子代事件【标准函数】
+//				->获取 - 所有子代事件【标准函数】
+//				->获取 - 所有子代事件贴图【标准函数】
+//				->获取 - 上一个子代事件【标准函数】
+//				->获取 - 上一个子代事件贴图【标准函数】
+//			->☆地图读取器 标准模块
+//				->获取资源【标准函数】
+//				->提前加载资源【标准函数】
+//				->地图资源是否存在【标准函数】
+//			->☆事件常用函数 标准模块
+//				->全部事件【标准函数】
+//				->有效事件容器指针【标准函数】
+//				->有效事件容器备份【标准函数】
+//				->删除全部独立开关【标准函数】
+//				
+//			->☆原代容器
+//				->容器初始化
+//				->捕获事件
+//				->删除事件
+//			->☆子代容器
+//				->容器初始化
 //				->流程
 //					->复制本地图的事件
 //					->复制其它地图的事件
-//				->原代容器
-//					->创建事件【标准函数】
-//					->删除事件【标准函数】
-//					->获取 - 是否为原代事件【标准函数】
-//					->获取 - 所有原代事件【标准函数】
-//					->获取 - 所有原代事件贴图【标准函数】
-//				->子代容器
-//					->创建事件（主流程）【标准函数】
-//					->创建事件（根据数据）【标准函数】
-//					->删除事件【标准函数】
-//					->获取 - 是否为子代事件【标准函数】
-//					->获取 - 所有子代事件【标准函数】
-//					->获取 - 所有子代事件贴图【标准函数】
-//					->获取 - 上一个子代事件【标准函数】
-//					->获取 - 上一个子代事件贴图【标准函数】
-//				->事件常用函数
-//					->全部事件【标准函数】
-//					->有效事件容器指针【标准函数】
-//					->有效事件容器备份【标准函数】
-//					->删除全部独立开关【标准函数】
-//				->地图读取器
-//
+//				->删除事件
+//			->☆地图读取器
+//			->☆删除流程
+//				->删除事件
+//				->删除全部独立开关
+//			->☆核心功能扩展
+//				->有效事件容器
+//			->☆核心漏洞修复
+//			
+//			
 //		★必要注意事项：
 //			1.事件的独立开关是独立于事件的，需要额外刷新。
 //			2.如果你需要引用该插件来创建一个外部地图的事件，
@@ -148,7 +169,7 @@
 //		
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -189,7 +210,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_CoreOfEventManager = true;
@@ -198,7 +219,7 @@
 	
 	
 //=============================================================================
-// * 版本检验
+// ** 版本检验
 //=============================================================================
 if( !Utils.RPGMAKER_VERSION || Utils.RPGMAKER_VERSION < "1.5.0" ){
 	
@@ -206,14 +227,91 @@ if( !Utils.RPGMAKER_VERSION || Utils.RPGMAKER_VERSION < "1.5.0" ){
 	Imported.Drill_CoreOfEventManager = false;
 	
 }else{
+
+
+//=============================================================================
+// ** ☆插件指令
+//=============================================================================
+var _drill_COEM_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+Game_Interpreter.prototype.pluginCommand = function(command, args) {
+	_drill_COEM_pluginCommand.call(this, command, args);
+	if( command === ">事件管理核心" ){
+		
+		/*-----------------对象组获取------------------*/
+		var e_ids = null;
+		if( args.length >= 2 ){
+			var unit = String(args[1]);
+			if( unit == "本事件" ){
+				e_ids = [ this._eventId ];
+			}else if( unit.indexOf("批量事件变量[") != -1 ){
+				unit = unit.replace("批量事件变量[","");
+				unit = unit.replace("]","");
+				e_ids = [];
+				var temp_arr = unit.split(/[,，]/);
+				for( var k=0; k < temp_arr.length; k++ ){
+					e_ids.push( $gameVariables.value(Number(temp_arr[k])) );
+				}
+			}else if( unit.indexOf("批量事件[") != -1 ){
+				unit = unit.replace("批量事件[","");
+				unit = unit.replace("]","");
+				e_ids = [];
+				var temp_arr = unit.split(/[,，]/);
+				for( var k=0; k < temp_arr.length; k++ ){
+					e_ids.push( Number(temp_arr[k]) );
+				}
+			}else if( unit.indexOf("事件变量[") != -1 ){
+				unit = unit.replace("事件变量[","");
+				unit = unit.replace("]","");
+				e_ids = [ $gameVariables.value(Number(unit)) ];
+			}else if( unit.indexOf("事件[") != -1 ){
+				unit = unit.replace("事件[","");
+				unit = unit.replace("]","");
+				e_ids = [ Number(unit) ];
+			}
+		}
+		
+		/*-----------------执行删除------------------*/
+		if( e_ids != null && args.length == 4 ){
+			var type = String(args[3]);
+			if( type == "彻底删除" ){
+				for( var k=0; k < e_ids.length; k++ ){
+					var e_id = e_ids[k];		//（删除事件不需要校验是否存在）
+					$gameSelfSwitches.drill_COEM_deleteEventKeys( this._mapId, e_id );
+					$gameMap.drill_COEM_primary_deleteEvent( e_id );	//（直接删除）
+					$gameMap.drill_COEM_offspring_deleteEvent( e_id );
+				}
+			}
+			if( type == "暂时消除事件" ){
+				for( var k=0; k < e_ids.length; k++ ){
+					var e_id = e_ids[k];
+					if( $gameMap.drill_COEM_isEventExist( e_id ) == false ){ continue; }
+					$gameMap.eraseEvent( e_id );
+				}
+			}
+		}
+	}
+};
+//==============================
+// ** 插件指令 - 事件检查
+//==============================
+Game_Map.prototype.drill_COEM_isEventExist = function( e_id ){
+	if( e_id == 0 ){ return false; }
+	
+	var e = this.event( e_id );
+	if( e == undefined ){
+		alert( DrillUp.drill_COEM_getPluginTip_EventNotFind( e_id ) );
+		return false;
+	}
+	return true;
+};
 	
 	
 //#############################################################################
-// ** 【标准模块】原代容器primary
+// ** 【标准模块】原代容器primary ☆原代容器
 //          
 //			说明：	> 原代事件指：通过游戏编辑器中，手动添加的独立事件。
 //					  进入地图前会完整创建，离开地图后会全销毁。
-//					> 这些事件的数据在 Map00X.json 中是真实存在的。
+//					> 这些事件的数据在 Map00X.json 中真实存在。
 //#############################################################################
 //##############################
 // * 原代容器 - 创建事件【标准函数】
@@ -269,7 +367,7 @@ Game_Map.prototype.drill_COEM_primary_getAllSprite = function(){
 
 
 //#############################################################################
-// ** 【标准模块】子代容器offspring
+// ** 【标准模块】子代容器offspring ☆子代容器
 //          
 //			说明：	> 子代事件指：游戏过程中，在当前地图中即时生成的事件。
 //					  需要延迟创建，离开地图后会全销毁。
@@ -361,10 +459,51 @@ Game_Map.prototype.drill_COEM_offspring_getLastCreatedEvent = function(){
 Game_Map.prototype.drill_COEM_offspring_getLastCreatedSprite = function(){
 	return $gameTemp._drill_COEM_offspringLastCreatedSprite;
 };
+	
+	
+//#############################################################################
+// ** 【标准模块】地图读取器 ☆地图读取器
+//#############################################################################
+//##############################
+// * 地图读取器 - 获取资源【标准函数】
+//				
+//			参数：	> map_id 数字  （指定地图的id）
+//			返回：	> 地图数据对象 （地图json数据）
+//          
+//			说明：	> 注意，由于含异步请求，如果未提前加载，则不能立即返回数据。
+//##############################
+DataManager.drill_COEM_getMapData = function( map_id ){
+	return this.drill_COEM_getMapData_Private( map_id );
+};
+//##############################
+// * 地图读取器 - 提前加载资源【标准函数】
+//				
+//			参数：	> map_id 数字  （指定地图的id）
+//			返回：	> 无
+//          
+//			说明：	> 执行可以提前加载地图数据，防止要用时来不及读取。
+//##############################
+DataManager.drill_COEM_loadMapData = function( map_id ){
+	this.drill_COEM_loadMapData_Private( map_id );
+};
+//##############################
+// * 地图读取器 - 地图资源是否存在【标准函数】
+//				
+//			参数：	> map_id 数字  （指定地图的id）
+//			返回：	> 布尔
+//          
+//			说明：	> 通过此函数来判断地图资源是否存在。
+//##############################
+DataManager.drill_COEM_isMapExist = function( map_id ){
+	return this.drill_COEM_isMapExist_Private( map_id );
+};
+Game_Temp.prototype.drill_COEM_isMapExist = function( map_id ){
+	return DataManager.drill_COEM_isMapExist_Private( map_id );
+};
 
 
 //#############################################################################
-// ** 【标准模块】事件常用函数
+// ** 【标准模块】事件常用函数 ☆事件常用函数
 //#############################################################################
 //##############################
 // * 事件 - 获取全部事件【标准函数】
@@ -416,128 +555,15 @@ Game_SelfSwitches.prototype.drill_COEM_deleteEventKeys = function( map_id, e_id 
 	this.drill_COEM_deleteEventKeys_Private( map_id, e_id );
 };
 
-	
-//#############################################################################
-// ** 【标准模块】地图读取器
-//#############################################################################
-//##############################
-// * 地图读取器 - 获取资源【标准函数】
-//				
-//			参数：	> map_id 数字  （指定地图的id）
-//			返回：	> 地图数据对象 （地图json数据）
-//          
-//			说明：	> 注意，由于含异步请求，如果未提前加载，则不能立即返回数据。
-//##############################
-DataManager.drill_COEM_getMapData = function( map_id ){
-	return this.drill_COEM_getMapData_Private( map_id );
-};
-//##############################
-// * 地图读取器 - 提前加载资源【标准函数】
-//				
-//			参数：	> map_id 数字  （指定地图的id）
-//			返回：	> 无
-//          
-//			说明：	> 执行可以提前加载地图数据，防止要用时来不及读取。
-//##############################
-DataManager.drill_COEM_loadMapData = function( map_id ){
-	this.drill_COEM_loadMapData_Private( map_id );
-};
-//##############################
-// * 地图读取器 - 地图资源是否存在【标准函数】
-//				
-//			参数：	> map_id 数字  （指定地图的id）
-//			返回：	> 布尔
-//          
-//			说明：	> 通过此函数来判断地图资源是否存在。
-//##############################
-DataManager.drill_COEM_isMapExist = function( map_id ){
-	return this.drill_COEM_isMapExist_Private( map_id );
-};
-Game_Temp.prototype.drill_COEM_isMapExist = function( map_id ){
-	return DataManager.drill_COEM_isMapExist_Private( map_id );
-};
-
 
 
 //=============================================================================
-// * 插件指令
-//=============================================================================
-var _drill_COEM_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
-	_drill_COEM_pluginCommand.call(this, command, args);
-	if( command === ">事件管理核心" ){
-		
-		/*-----------------对象组获取------------------*/
-		var e_ids = null;
-		if( args.length >= 2 ){
-			var unit = String(args[1]);
-			if( unit == "本事件" ){
-				e_ids = [ this._eventId ];
-			}else if( unit.indexOf("批量事件变量[") != -1 ){
-				unit = unit.replace("批量事件变量[","");
-				unit = unit.replace("]","");
-				e_ids = [];
-				var temp_arr = unit.split(/[,，]/);
-				for( var k=0; k < temp_arr.length; k++ ){
-					e_ids.push( $gameVariables.value(Number(temp_arr[k])) );
-				}
-			}else if( unit.indexOf("批量事件[") != -1 ){
-				unit = unit.replace("批量事件[","");
-				unit = unit.replace("]","");
-				e_ids = [];
-				var temp_arr = unit.split(/[,，]/);
-				for( var k=0; k < temp_arr.length; k++ ){
-					e_ids.push( Number(temp_arr[k]) );
-				}
-			}else if( unit.indexOf("事件变量[") != -1 ){
-				unit = unit.replace("事件变量[","");
-				unit = unit.replace("]","");
-				e_ids = [ $gameVariables.value(Number(unit)) ];
-			}else if( unit.indexOf("事件[") != -1 ){
-				unit = unit.replace("事件[","");
-				unit = unit.replace("]","");
-				e_ids = [ Number(unit) ];
-			}
-		}
-		
-		/*-----------------执行删除------------------*/
-		if( e_ids != null && args.length == 4 ){
-			var type = String(args[3]);
-			if( type == "彻底删除" ){
-				for( var k=0; k < e_ids.length; k++ ){
-					var e_id = e_ids[k];		//（删除事件不需要校验是否存在）
-					$gameSelfSwitches.drill_COEM_deleteEventKeys( this._mapId, e_id );
-					$gameMap.drill_COEM_primary_deleteEvent( e_id );	//（直接删除）
-					$gameMap.drill_COEM_offspring_deleteEvent( e_id );
-				}
-			}
-			if( type == "暂时消除事件" ){
-				for( var k=0; k < e_ids.length; k++ ){
-					var e_id = e_ids[k];
-					if( $gameMap.drill_COEM_isEventExist( e_id ) == false ){ continue; }
-					$gameMap.eraseEvent( e_id );
-				}
-			}
-		}
-	}
-};
-//==============================
-// ** 插件指令 - 事件检查
-//==============================
-Game_Map.prototype.drill_COEM_isEventExist = function( e_id ){
-	if( e_id == 0 ){ return false; }
-	
-	var e = this.event( e_id );
-	if( e == undefined ){
-		alert( DrillUp.drill_COEM_getPluginTip_EventNotFind( e_id ) );
-		return false;
-	}
-	return true;
-};
-
-
-//=============================================================================
-// ** 原代容器
+// ** ☆原代容器
+//
+//			说明：	> 此模块专门管理 原代容器。
+//					> 原代事件指：通过游戏编辑器中，手动添加的独立事件。
+//					  进入地图前会完整创建，离开地图后会全销毁。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 原代容器 - 场景初始化
@@ -588,13 +614,18 @@ Game_Map.prototype.drill_COEM_primary_deleteEvent_Private = function( e_id ){
 	// > 只允许删除 原代事件
 	if( this.drill_COEM_primary_isPrimaryEvent( e_id ) == false ){ return; }
 	
-	// > 执行删除
+	// > 删除流程
 	this.drill_COEM_deleteEvent_Private( e_id );
 };
 
 
 //=============================================================================
-// ** 子代容器
+// ** ☆子代容器
+//
+//			说明：	> 此模块专门管理 子代容器。
+//					> 子代事件指：游戏过程中，在当前地图中即时生成的事件。
+//					  需要延迟创建，离开地图后会全销毁。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 子代容器 - 场景初始化
@@ -652,7 +683,6 @@ Game_Event.prototype.event = function() {
 	// > 原函数
 	return _drill_COEM_o_event.call(this);
 };
-
 
 //==============================
 // * 子代容器 - 创建事件 - 主流程（私有）
@@ -763,16 +793,69 @@ Game_Map.prototype.drill_COEM_offspring_deleteEvent_Private = function( e_id ){
 	// > 只允许删除 子代事件
 	if( this.drill_COEM_offspring_isOffspringEvent( e_id ) == false ){ return; }
 	
-	// > 执行删除
+	// > 删除流程
 	this.drill_COEM_deleteEvent_Private( e_id );
 };
 
 
 //=============================================================================
-// * 删除事件（私有）
+// ** ☆地图读取器
 //
-//			说明：	此删除不分 原代容器 和 子代容器。
+//			说明：	> 此模块专门管理 地图读取。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
+//==============================
+// * 地图读取器 - 获取资源（私有）
+//==============================
+DataManager.drill_COEM_getMapData_Private = function( map_id ){
+	var map_data = window[ "_drill_mapData_"+map_id ];
+	if( map_data == undefined ){
+		DataManager.drill_COEM_loadMapData( map_id );
+		return null;
+	}else{
+		return map_data;
+	}
+}
+//==============================
+// * 地图读取器 - 加载资源（私有）
+//==============================
+DataManager.drill_COEM_loadMapData_Private = function( map_id ){
+	if( this.drill_COEM_isMapExist( map_id ) == false ){ return; }
+	
+	// > 绑定加载数据
+	if( window[ "_drill_mapData_"+map_id ] == undefined ){
+		var filename = 'Map%1.json'.format(map_id.padZero(3));
+		var param_name = "_drill_mapData_" + map_id;
+		
+		ResourceHandler.createLoader('data/' + filename, this.loadDataFile.bind(this, param_name, filename));		//（this._mapLoader是一个完全没用的变量）
+		this.loadDataFile(param_name, filename);
+	}
+};
+//==============================
+// * 地图读取器 - 地图资源是否存在（私有）
+//==============================
+DataManager.drill_COEM_isMapExist_Private = function( map_id ){
+	for( var j=0; j < $dataMapInfos.length; j++ ){
+		var temp_info = $dataMapInfos[j];
+		if( temp_info == undefined ){ continue; }
+		if( temp_info['id'] == map_id ){
+			return true;
+		}
+	}
+	return false;
+};
+
+
+//=============================================================================
+// ** ☆删除流程
+//
+//			说明：	> 此模块专门管理 删除流程。
+//					> 此删除不分 原代容器 和 子代容器。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 删除流程 - 删除事件（私有）
+//==============================
 Game_Map.prototype.drill_COEM_deleteEvent_Private = function( e_id ){
 	var tar_event = this._events[ e_id ];
 	if( tar_event == null ){ return; }
@@ -842,9 +925,9 @@ Game_Map.prototype.drill_COEM_deleteEvent_Private = function( e_id ){
 	this._events[ e_id ] = null;
 	delete tar_event;
 };
-//=============================================================================
-// * 删除全部独立开关（私有）
-//=============================================================================
+//==============================
+// * 删除流程 - 删除全部独立开关（私有）
+//==============================
 Game_SelfSwitches.prototype.drill_COEM_deleteEventKeys_Private = function( map_id, e_id ){
 	
 	// > 获取键
@@ -868,7 +951,7 @@ Game_SelfSwitches.prototype.drill_COEM_deleteEventKeys_Private = function( map_i
 
 
 //=============================================================================
-// ** 核心功能扩展 - 有效事件容器
+// ** ☆核心功能扩展 - 有效事件容器
 //
 //			说明：	有效事件指：非空、未被清除 的事件。
 //					注意，容器的序号不与id对应。
@@ -989,51 +1072,7 @@ Game_Map.prototype.drill_COEM_getAvailableEventTank_Copyed_Private = function(){
 
 
 //=============================================================================
-// ** 地图读取器
-//=============================================================================
-//==============================
-// * 地图读取器 - 获取资源（私有）
-//==============================
-DataManager.drill_COEM_getMapData_Private = function( map_id ){
-	var map_data = window[ "_drill_mapData_"+map_id ];
-	if( map_data == undefined ){
-		DataManager.drill_COEM_loadMapData( map_id );
-		return null;
-	}else{
-		return map_data;
-	}
-}
-//==============================
-// * 地图读取器 - 加载资源（私有）
-//==============================
-DataManager.drill_COEM_loadMapData_Private = function( map_id ){
-	if( this.drill_COEM_isMapExist( map_id ) == false ){ return; }
-	
-	// > 绑定加载数据
-	if( window[ "_drill_mapData_"+map_id ] == undefined ){
-		var filename = 'Map%1.json'.format(map_id.padZero(3));
-		var param_name = "_drill_mapData_" + map_id;
-		
-		ResourceHandler.createLoader('data/' + filename, this.loadDataFile.bind(this, param_name, filename));		//（this._mapLoader是一个完全没用的变量）
-		this.loadDataFile(param_name, filename);
-	}
-};
-//==============================
-// * 地图读取器 - 地图资源是否存在（私有）
-//==============================
-DataManager.drill_COEM_isMapExist_Private = function( map_id ){
-	for( var j=0; j < $dataMapInfos.length; j++ ){
-		var temp_info = $dataMapInfos[j];
-		if( temp_info == undefined ){ continue; }
-		if( temp_info['id'] == map_id ){
-			return true;
-		}
-	}
-	return false;
-};
-
-//=============================================================================
-// ** 核心漏洞修复
+// ** ☆核心漏洞修复
 //=============================================================================
 //==============================
 // * 核心漏洞修复 - 屏蔽根据版本重刷地图

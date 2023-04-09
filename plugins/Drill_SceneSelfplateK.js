@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.6]        面板 - 全自定义信息面板K
+ * @plugindesc [v1.7]        面板 - 全自定义信息面板K
  * @author Drill_up
  * 
  * @Drill_LE_param "内容-%d"
@@ -52,7 +52,7 @@
  *      设置两个选项，一个激活，一个未激活（灰色），
  *      通过插件指令显示/隐藏两个按钮,只显示一个,使其看起来像一个选项。
  *   (3.注意，信息面板具有当前页记忆，如果你修改了一些选项，你需要用插
- *      件指令设置一下当前选中页。
+ *      件指令设置一下当前选中选项。
  * 公共事件触发：
  *   (1.由于需要支持公共事件的触发，所以放弃了全局存储的功能。
  *      选择一个按钮之后，将会返回到地图界面，并执行对应的公共事件。
@@ -103,27 +103,32 @@
  *
  * 插件指令：>信息面板K : 打开面板
  *
- * 插件指令：>信息面板K : 显示选项 : 1
- * 插件指令：>信息面板K : 隐藏选项 : 1
- * 插件指令：>信息面板K : 显示全部
- * 插件指令：>信息面板K : 隐藏全部
+ * 插件指令：>信息面板K : 显示选项 : 选项[1]
+ * 插件指令：>信息面板K : 显示选项 : 选项变量[21]
+ * 插件指令：>信息面板K : 隐藏选项 : 选项[1]
+ * 插件指令：>信息面板K : 隐藏选项 : 选项变量[21]
+ * 插件指令：>信息面板K : 显示全部选项
+ * 插件指令：>信息面板K : 隐藏全部选项
  * 
- * 插件指令：>信息面板K : 锁定选项 : 1
- * 插件指令：>信息面板K : 解锁选项 : 1
- * 插件指令：>信息面板K : 锁定全部
- * 插件指令：>信息面板K : 解锁全部
+ * 插件指令：>信息面板K : 锁定选项 : 选项[1]
+ * 插件指令：>信息面板K : 锁定选项 : 选项变量[21]
+ * 插件指令：>信息面板K : 解锁选项 : 选项[1]
+ * 插件指令：>信息面板K : 解锁选项 : 选项变量[21]
+ * 插件指令：>信息面板K : 锁定全部选项
+ * 插件指令：>信息面板K : 解锁全部选项
  *
  * 1.面板打开时，游戏是暂停的，所以你不能在面板中实时变化某些数值。
  *
  * -----------------------------------------------------------------------------
- * ----可选设定 - 选中页
+ * ----可选设定 - 选中选项
  * 你可以控制选项窗口当前选中第N页。（选项有3个，表示有3页）
  * 
- * 插件指令：>信息面板K : 选中页 : N
+ * 插件指令：>信息面板K : 选中选项 : 选项[1]
+ * 插件指令：>信息面板K : 选中选项 : 选项变量[21]
  * 
- * 1.信息面板具有当前页记忆，如果你修改了一些选项，你需要用该指令
- *   设置一下当前选中页。
- * 2.不存在第0页，如果选中页大于页数，将选择最末尾的页。
+ * 1.信息面板具有当前选项的记忆，如果你修改了一些选项，你需要用该指令
+ *   设置一下当前选中的选项。
+ * 2.不存在第0页，如果选中选项大于页数，将选择最末尾的页。
  *
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -166,6 +171,8 @@
  * 修复了锁定选项后，点击却仍然可以执行选项的bug。
  * [v1.6]
  * 优化了旧存档的识别与兼容。
+ * [v1.7]
+ * 优化了插件指令。
  * 
  *
  * @param ----杂项----
@@ -1293,13 +1300,21 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			全自定义面板：
-//				->窗口
-//					->选项窗口、详细窗口、描述图片
-//					->当前选项
-//					x->全局存储
-//					->公共事件触发
-//					->描述图全加载
+//			->☆提示信息
+//			->☆变量获取
+//			x->☆全局存储
+//			->☆存储数据
+//			->☆插件指令
+//			
+//			->☆主菜单选项
+//			x->☆标题选项
+//			->☆面板控制
+//			
+//			->信息面板K【Scene_Drill_SSpK】
+//				->公共事件触发
+//			->选项窗口【Drill_SSpK_SelectWindow】
+//			->显示窗口【Drill_SSpK_DescWindow】
+//
 //
 //		★必要注意事项：
 //			1.替换以下字符变成新面板：
@@ -1315,7 +1330,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -1350,7 +1365,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_SceneSelfplateK = true;
@@ -1591,6 +1606,7 @@
 	/*-----------------全局存储对象------------------*/
 	//（无）
 	
+	
 //=============================================================================
 // * >>>>基于插件检测>>>>
 //=============================================================================
@@ -1599,10 +1615,8 @@ if( Imported.Drill_CoreOfWindowAuxiliary &&
 	Imported.Drill_LayerCommandThread ){
 	
 	
-
-
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -1718,16 +1732,8 @@ Game_System.prototype.drill_SSpK_checkSysData_Private = function() {
 };
 
 
-
 //=============================================================================
-// ** 资源文件夹
-//=============================================================================
-ImageManager.load_MenuSelfDef = function(filename) {
-    return this.loadBitmap('img/Menu__self/', filename, 0, true);
-};
-
-//=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _drill_SSpK_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
@@ -1739,22 +1745,22 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( type == "打开面板" ){			//打开菜单
 				SceneManager.push(Scene_Drill_SSpK);
 			}
-			if( type == "显示全部" ){
+			if( type == "显示全部选项" || type == "显示全部" ){
 				for( var i = 1; i <= DrillUp.g_SSpK_context_list_length; i++){
 					$gameSystem._drill_SSpK_enableTank[i] = true;		//正常存储
 				}
 			}
-			if( type == "隐藏全部" ){
+			if( type == "隐藏全部选项" || type == "隐藏全部" ){
 				for( var i = 1; i <= DrillUp.g_SSpK_context_list_length; i++){
 					$gameSystem._drill_SSpK_enableTank[i] = false;		//正常存储
 				}
 			}
-			if( type == "锁定全部" ){
+			if( type == "锁定全部选项" || type == "锁定全部" ){
 				for( var i = 1; i <= DrillUp.g_SSpK_context_list_length; i++){
 					$gameSystem._drill_SSpK_lockTank[i] = true;			//正常存储
 				}
 			}
-			if( type == "解锁全部" ){
+			if( type == "解锁全部选项" || type == "解锁全部" ){
 				for( var i = 1; i <= DrillUp.g_SSpK_context_list_length; i++){
 					$gameSystem._drill_SSpK_lockTank[i] = false;		//正常存储
 				}
@@ -1764,6 +1770,15 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		if(args.length == 4){
 			var type = String(args[1]);
 			var temp1 = String(args[3]);
+			if( temp1.indexOf("选项变量[") != -1 ){
+				temp1 = temp1.replace("选项变量[","");
+				temp1 = temp1.replace("]","");
+				temp1 = $gameVariables.value(Number(temp1));
+			}else if( temp1.indexOf("选项[") != -1 ){
+				temp1 = temp1.replace("选项[","");
+				temp1 = temp1.replace("]","");
+				temp1 = Number(temp1);
+			}
 			if( type == "显示选项" ){
 				$gameSystem._drill_SSpK_enableTank[ Number(temp1) ] = true;		//正常存储
 			}
@@ -1776,7 +1791,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( type == "解锁选项" ){
 				$gameSystem._drill_SSpK_lockTank[ Number(temp1) ] = false;		//正常存储
 			}
-			if( type == "选中页" ){
+			if( type == "选中选项" || type == "选中页" ){
 				$gameSystem._drill_SSpK_context_index = Number(temp1) -1;
 			}
 		}
@@ -1784,8 +1799,12 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	
 };
 
+
 //=============================================================================
-// * Scene_Menu 主菜单按钮
+// ** ☆主菜单选项
+//
+//			说明：	> 此模块专门关联主菜单选项，选项进入后跳转到 信息面板K 界面。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 var _drill_SSpK_createCommandWindow = Scene_Menu.prototype.createCommandWindow;
 Scene_Menu.prototype.createCommandWindow = function() {
@@ -1805,10 +1824,13 @@ Window_MenuCommand.prototype.addOriginalCommands = function() {
 
 
 //=============================================================================
-// * 临时数据
+// ** ☆面板控制
+//
+//			说明：	> 此模块专门将部分面板配置转移到 Game_Temp 方便随时调用。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 临时 - 初始化
+// * 面板控制 - 初始化
 //==============================
 var _drill_SSpK_temp_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {	
@@ -1816,7 +1838,7 @@ Game_Temp.prototype.initialize = function() {
 	this._drill_SSpK_visibleList = [];			//可见的列表
 };
 //==============================
-// * 临时 - 判断 锁定情况
+// * 面板控制 - 判断 锁定情况
 //==============================
 Game_Temp.prototype.drill_SSpK_isLocked = function( context_realIndex ){
 	
@@ -1828,7 +1850,7 @@ Game_Temp.prototype.drill_SSpK_isLocked = function( context_realIndex ){
 	}
 }
 //==============================
-// * 临时 - 判断 显示情况
+// * 面板控制 - 判断 显示情况
 //==============================
 Game_Temp.prototype.drill_SSpK_isEnabled = function( context_realIndex ){
 	
@@ -1839,6 +1861,13 @@ Game_Temp.prototype.drill_SSpK_isEnabled = function( context_realIndex ){
 		return false;
 	}
 }
+//==============================
+// * 面板控制 - 资源文件夹
+//==============================
+ImageManager.load_MenuSelfDef = function(filename) {
+    return this.loadBitmap('img/Menu__self/', filename, 0, true);
+};
+
 
 
 //=============================================================================
@@ -2130,7 +2159,7 @@ Scene_Drill_SSpK.prototype.drill_updateIndex = function() {
 		$gameSystem._drill_SSpK_context_index = null;	//（激活后清空）
 		if( temp < 0 ){ temp = 0; };
 		if( temp > $gameTemp._drill_SSpK_visibleList.length -1 ){ temp = $gameTemp._drill_SSpK_visibleList.length -1; };
-		this._window_select.select( temp );				//（设置选中页）
+		this._window_select.select( temp );				//（设置选中选项）
 	}
 	if( this._window_select._index == null || 
 		this._window_select._index > $gameTemp._drill_SSpK_visibleList.length -1 ||

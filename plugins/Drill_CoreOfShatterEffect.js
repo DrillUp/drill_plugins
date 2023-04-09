@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.6]        系统 - 方块粉碎核心
+ * @plugindesc [v1.7]        系统 - 方块粉碎核心
  * @author Drill_up
  * 
  * @Drill_LE_param "方块粉碎-%d"
@@ -26,7 +26,7 @@
  * 该插件为基础核心，单独使用没有效果。
  * 插件可以作用于各个粉碎效果子插件，但是要基于核心才能运行。
  * 基于：
- *   - Drill_CoreOfBallistics       系统-弹道核心★★v1.9及以上★★
+ *   - Drill_CoreOfBallistics       系统-弹道核心★★v2.1及以上★★
  * 作用于：
  *   - Drill_BattleShatterEffect    战斗-方块粉碎效果
  *   - Drill_LayerShatterEffect     地图-方块粉碎效果
@@ -94,6 +94,8 @@
  * 优化了内部结构。
  * [v1.6]
  * 修复了空碎片数据的bug。
+ * [v1.7]
+ * 优化了弹道的支持。
  * 
  * 
  * @param ---方块粉碎组 1至20---
@@ -641,23 +643,23 @@
  * 
  * @param 固定方向
  * @parent 方向类型
- * @desc 类型为固定方向时，碎片固定方向的角度值。
+ * @desc 类型为"固定方向"时，固定方向的角度值。0朝右，90朝下，180朝左，270朝上。
  * @default 90.0
  * 
  * @param 扇形朝向
  * @parent 方向类型
- * @desc 类型为扇形范围方向时，扇形的朝向角度。
+ * @desc 类型为"扇形范围方向"时，扇形的朝向角度。0朝右，90朝下，180朝左，270朝上。
  * @default 45.0
  * 
  * @param 扇形角度
  * @parent 方向类型
- * @desc 类型为扇形范围方向时，扇形弧的角度数。
+ * @desc 类型为"扇形范围方向"时，扇形弧的角度数。
  * @default 90.0
  * 
  * @param 方向计算公式
  * @parent 方向类型
  * @type note
- * @desc 碎片的方向计算公式。可使用 变量和常量 来设计公式，具体看看文档 "1.系统 > 关于弹道.docx"介绍。
+ * @desc 类型为"方向计算公式"时。可使用 变量和常量 来设计公式，具体看看文档 "1.系统 > 关于弹道.docx"介绍。
  * @default "return 0.0"
  * 
  * @param ---直角坐标模式---
@@ -1828,10 +1830,10 @@ Drill_COSE_LayerSprite.prototype.drill_rebuildBallistics = function(){
 	var rowNum = c_data._drill_spriteRowCount;
 	
 	var max_per = Math.floor( Math.abs( (Math.max( colNum,rowNum )-1) /2 ) );
-	$gameTemp._drill_COBa_moveData = c_data._drill_COSE_ballistics_move;	//（存储的弹道数据，赋值后预推演）
-	$gameTemp._drill_COBa_commonData = c_data._drill_COSE_ballistics_opacity;
-	//alert( JSON.stringify(  $gameTemp._drill_COBa_moveData ) );
-	//alert( JSON.stringify(  $gameTemp._drill_COBa_commonData ) );
+	Drill_COBa_Manager._drill_COBa_planimetryData = c_data._drill_COSE_ballistics_move;	//（存储的弹道数据，赋值后预推演）
+	Drill_COBa_Manager._drill_COBa_commonData = c_data._drill_COSE_ballistics_opacity;
+	//alert( JSON.stringify(  Drill_COBa_Manager._drill_COBa_planimetryData ) );
+	//alert( JSON.stringify(  Drill_COBa_Manager._drill_COBa_commonData ) );
 	
 	for( var i=0; i < colNum; i++ ){
 		for( var j=0; j < rowNum; j++ ){

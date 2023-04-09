@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        窗口字符 - 大图片字符
+ * @plugindesc [v1.3]        窗口字符 - 大图片字符
  * @author Drill_up
  * 
  * @Drill_LE_param "字符图-%d"
@@ -105,6 +105,8 @@
  * 修改了注释说明。
  * [v1.2]
  * 修改了插件的分类。
+ * [v1.3]
+ * 修复了部分情况下无法显示图片的问题。
  * 
  * 
  * 
@@ -458,9 +460,15 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			大图片字符：
-//				->绘制图片
-//
+//			->☆提示信息
+//			->☆变量获取
+//			
+//			->☆临时变量初始化
+//				->预加载
+//			->☆字符图
+//				->绘制大图片
+//		
+//		
 //		★必要注意事项：
 //			暂无
 //			
@@ -472,7 +480,7 @@
 //		
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -494,10 +502,16 @@
 		}
 		return message;
 	};
+	//==============================
+	// * 提示信息 - 报错 - 底层版本过低
+	//==============================
+	DrillUp.drill_DTBI_getPluginTip_LowVersion = function(){
+		return "【" + DrillUp.g_DTBI_PluginTip_curName + "】\n游戏底层版本过低，插件基本功能无法执行。\n你可以去看\"rmmv软件版本（必看）.docx\"中的 \"旧工程升级至1.6版本\" 章节，来升级你的游戏底层版本。";
+	};
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_DialogTextBigImage = true;
@@ -507,7 +521,7 @@
 	/*------------------字符图-------------------*/
 	DrillUp.g_DTBI_list_length = 40;
 	DrillUp.g_DTBI_list = [];
-	for (var i = 0; i < DrillUp.g_DTBI_list_length; i++) {
+	for( var i = 0; i < DrillUp.g_DTBI_list_length; i++ ){
 		DrillUp.g_DTBI_list[i] = String(DrillUp.parameters['字符图-' + String(i+1) ] || "");
 	}
 	
@@ -519,34 +533,55 @@ if( Imported.Drill_CoreOfWindowCharacter ){
 	
 	
 //=============================================================================
-// ** 资源文件夹
+// ** ☆临时变量初始化
+//
+//			说明：	> 用过的bitmap，全部标记不删除，防止刷菜单时重建导致浪费资源。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
-ImageManager.load_MenuTextBigImg = function(filename) {
-    return this.loadBitmap('img/Menu__textBigImg/', filename, 0, true);
-};
-
-//=============================================================================
-// ** 资源加载
-//=============================================================================
-//==============================
-// * 初始化 - 读取皮肤时加载图片
-//==============================
-var _drill_DTBI_loadWindowskin = Window_Base.prototype.loadWindowskin;
-Window_Base.prototype.loadWindowskin = function(){
-	_drill_DTBI_loadWindowskin.call(this);
-	
-    this._drill_DTBI_tank = [];			//图片贴图容器
-	for( var i=0; i < DrillUp.g_DTBI_list.length; i++ ){
-		var temp_bitmap = ImageManager.load_MenuTextBigImg( DrillUp.g_DTBI_list[i] );
-		this._drill_DTBI_tank.push(temp_bitmap);
+DrillUp.g_DTBI_preloadEnabled = true;		//（强制预加载）
+if( DrillUp.g_DTBI_preloadEnabled == true ){
+	//==============================
+	// * 临时变量 - 初始化
+	//==============================
+	var _drill_DTBI_temp_initialize = Game_Temp.prototype.initialize;
+	Game_Temp.prototype.initialize = function() {
+		_drill_DTBI_temp_initialize.call(this);
+		this.drill_DTBI_preloadInit();
 	}
-};
+	//==============================
+	// * 临时变量 - 预加载 版本校验
+	//==============================
+	if( Utils.generateRuntimeId == undefined ){
+		alert( DrillUp.drill_DTBI_getPluginTip_LowVersion() );
+	}
+	//==============================
+	// * 临时变量 - 资源提前预加载
+	//
+	//			说明：	遍历全部资源，提前预加载标记过的资源。
+	//==============================
+	Game_Temp.prototype.drill_DTBI_preloadInit = function() {
+		this._drill_DTBI_cacheId = Utils.generateRuntimeId();	//资源缓存id
+		this._drill_DTBI_preloadTank = [];						//bitmap容器
+		for( var i = 0; i < DrillUp.g_DTBI_list.length; i++ ){
+			var temp_data = DrillUp.g_DTBI_list[i];
+			if( temp_data == undefined ){ continue; }
+			
+			this._drill_DTBI_preloadTank.push( 
+				ImageManager.reserveBitmap( "img/Menu__textBigImg/", temp_data, 0, true ) 
+			);
+		}
+	}
+}
+
 
 //=============================================================================
-// ** 文本转义
+// ** ☆字符图
+//			
+//			说明：	> 此模块对 效果字符 进行转义，并绘制大图片。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// ** 文本转义 - 获取效果字符中的数组
+// * 字符图 - 效果字符转义
 //==============================
 var _drill_DTBI_processNewEffectChar_Combined = Window_Base.prototype.drill_COWC_processNewEffectChar_Combined;
 Window_Base.prototype.drill_COWC_processNewEffectChar_Combined = function( matched_index, matched_str, command, args ){
@@ -575,13 +610,11 @@ Window_Base.prototype.drill_COWC_processNewEffectChar_Combined = function( match
 		
 	}
 };
-
-
 //==============================
-// * 绘制 - 绘制大图片
+// * 字符图 - 绘制大图片
 //==============================
 Window_Base.prototype.drill_DTBI_drawImg = function( imgIndex, x, y ){
-    var bitmap = this._drill_DTBI_tank[ imgIndex-1 ];
+    var bitmap = $gameTemp._drill_DTBI_preloadTank[ imgIndex-1 ];	//（直接从 预加载容器 中取出并绘制）
 	if( bitmap && bitmap.isReady() ){
 		var pw = bitmap.width;
 		var ph = bitmap.height;

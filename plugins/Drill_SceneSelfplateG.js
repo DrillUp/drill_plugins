@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.7]        面板 - 全自定义信息面板G
+ * @plugindesc [v1.8]        面板 - 全自定义信息面板G
  * @author Drill_up
  * 
  * @Drill_LE_param "内容-%d"
@@ -54,7 +54,7 @@
  *      设置两个选项，一个激活，一个未激活（灰色），
  *      通过插件指令显示/隐藏两个按钮,只显示一个,使其看起来像一个选项。
  *   (3.注意，信息面板具有当前页记忆，如果你修改了一些选项，你需要用插
- *      件指令设置一下当前选中页。
+ *      件指令设置一下当前选中选项。
  * 内容：
  *   (1.每篇内容可以单独控制行间距，居中对齐等功能。
  *   (2.选项窗口和描述窗口支持所有文本的特殊字符：
@@ -73,9 +73,9 @@
  *   (1.上下左右箭头会根据选项矩阵中，所处的位置自动显示隐藏。
  *      选项窗口2列且含5个选项，那么矩阵就为2x3。
  * 流程锁定：
- *   (1.只有在末尾页按退出键才能退出。
- *      只有在末尾页才会出现结束按钮。
- *   (2.未在末尾页时，玩家的退出键被占用，只能翻页。
+ *   (1.只有在末尾选项按退出键才能退出。
+ *      只有在末尾选项才会出现结束按钮。
+ *   (2.未在末尾选项时，玩家的退出键被占用，只能翻页。
  *      并且，菜单返回按钮 也会被强制屏蔽。
  *   (3.流程锁定适用于 强制的新手教程 或者 必经的故事插曲 。
  *      要求玩家必须全部浏览一遍才能结束。
@@ -109,40 +109,46 @@
  *
  * 插件指令：>信息面板G : 打开面板
  *
- * 插件指令：>信息面板G : 显示选项 : 1
- * 插件指令：>信息面板G : 隐藏选项 : 1
- * 插件指令：>信息面板G : 显示全部
- * 插件指令：>信息面板G : 隐藏全部
+ * 插件指令：>信息面板G : 显示选项 : 选项[1]
+ * 插件指令：>信息面板G : 显示选项 : 选项变量[21]
+ * 插件指令：>信息面板G : 隐藏选项 : 选项[1]
+ * 插件指令：>信息面板G : 隐藏选项 : 选项变量[21]
+ * 插件指令：>信息面板G : 显示全部选项
+ * 插件指令：>信息面板G : 隐藏全部选项
  * 
- * 插件指令：>信息面板G : 锁定选项 : 1
- * 插件指令：>信息面板G : 解锁选项 : 1
- * 插件指令：>信息面板G : 锁定全部
- * 插件指令：>信息面板G : 解锁全部
+ * 插件指令：>信息面板G : 锁定选项 : 选项[1]
+ * 插件指令：>信息面板G : 锁定选项 : 选项变量[21]
+ * 插件指令：>信息面板G : 解锁选项 : 选项[1]
+ * 插件指令：>信息面板G : 解锁选项 : 选项变量[21]
+ * 插件指令：>信息面板G : 锁定全部选项
+ * 插件指令：>信息面板G : 解锁全部选项
  *
  * 1.面板打开时，游戏是暂停的，所以你不能在面板中实时变化某些数值。
  *
  * -----------------------------------------------------------------------------
- * ----可选设定 - 选中页
+ * ----可选设定 - 选中选项
  * 你可以控制选项窗口当前选中第N页。（选项有3个，表示有3页）
  * 
- * 插件指令：>信息面板G : 选中页 : N
+ * 插件指令：>信息面板G : 选中选项 : 选项[1]
+ * 插件指令：>信息面板G : 选中选项 : 选项变量[21]
  * 
  * 1.信息面板具有当前页记忆，如果你修改了一些选项，你需要用该指令
- *   设置一下当前选中页。
- * 2.不存在第0页，如果选中页大于页数，将选择最末尾的页。
+ *   设置一下当前选中的选项。
+ * 2.不存在第0页，如果选中选项大于页数，将选择最末尾的页。
  *
  * -----------------------------------------------------------------------------
- * ----可选设定 - 末尾页
- * 你可以指定某一页为末尾页。
+ * ----可选设定 - 末尾选项
+ * 你可以指定某一页为末尾选项。
  * 
- * 插件指令：>信息面板G : 末尾页 : 最后一页
- * 插件指令：>信息面板G : 末尾页 : 3
+ * 插件指令：>信息面板G : 设置末尾选项 : 最后
+ * 插件指令：>信息面板G : 设置末尾选项 : 选项[3]
+ * 插件指令：>信息面板G : 设置末尾选项 : 选项变量[3]
  * 
  * 1."1"表示第1页，"3"表示第3页。
  *   "最后一页"表示打开菜单后，显示的选项中，最后的一个。
- *   注意，如果只有3个选项，末尾页却设为6，那么将以最后一页为准。
- * 2.只有在末尾页按退出键才能退出。
- *   只有在末尾页才会出现结束按钮。
+ *   注意，如果只有3个选项，末尾选项却设为6，那么将以最后一页为准。
+ * 2.只有在末尾选项按退出键才能退出。
+ *   只有在末尾选项才会出现结束按钮。
  *   你可以设置只有某页才可以退出，后面的页反而不能退出。
  *
  * -----------------------------------------------------------------------------
@@ -186,6 +192,8 @@
  * 大幅度修改了全局存储的文件存储结构。
  * [v1.7]
  * 优化了旧存档的识别与兼容。
+ * [v1.8]
+ * 优化了插件指令。
  * 
  *
  * @param ----杂项----
@@ -278,7 +286,7 @@
  * @param ----流程锁定----
  * @default 
  *
- * @param 末尾页
+ * @param 末尾选项
  * @parent ----流程锁定----
  * @type number
  * @min 0
@@ -1400,17 +1408,26 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			全自定义面板：
-//				->窗口
-//					->选项窗口、详细窗口、描述图片
-//					->当前选项
-//					->全局存储
-//					->描述图全加载
-//				->四箭头
-//				->箭头点击事件
-//				->流程锁定
-//					->末尾页
-//					->屏蔽返回按钮
+//			->☆提示信息
+//			->☆变量获取
+//			->☆全局存储
+//			->☆存储数据
+//			->☆插件指令
+//			
+//			->☆主菜单选项
+//			->☆标题选项
+//			->☆面板控制
+//			
+//			->信息面板G【Scene_Drill_SSpG】
+//				->☆箭头
+//			->选项窗口【Drill_SSpG_SelectWindow】
+//			->显示窗口【Drill_SSpG_DescWindow】
+//
+//			->☆流程锁定
+//				->末尾选项
+//				->屏蔽返回按钮
+//				->结束按钮
+//
 //
 //		★必要注意事项：
 //			1.替换以下字符变成新面板：
@@ -1426,7 +1443,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -1454,7 +1471,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_SceneSelfplateG = true;
@@ -1551,7 +1568,7 @@
 	DrillUp.g_SSpG_arrow_float_ud = String(DrillUp.parameters['是否使用上下浮动'] || "true") === "true";	
 	
 	/*-----------------流程锁定------------------*/
-	DrillUp.g_SSpG_end_page = Number(DrillUp.parameters['末尾页'] || 0);
+	DrillUp.g_SSpG_end_page = Number(DrillUp.parameters['末尾选项'] || DrillUp.parameters['末尾页'] || 0);
 	DrillUp.g_SSpG_end_se = String(DrillUp.parameters['翻页音效'] || "");	
 	DrillUp.g_SSpG_end_src = String(DrillUp.parameters['资源-结束按钮'] || "");
 	DrillUp.g_SSpG_end_x = Number(DrillUp.parameters['平移-结束按钮 X'] || 0);
@@ -1675,6 +1692,7 @@
 	DrillUp.global_SSpG_enableTank = null;
 	DrillUp.global_SSpG_lockTank = null;
 	
+	
 //=============================================================================
 // * >>>>基于插件检测>>>>
 //=============================================================================
@@ -1683,7 +1701,7 @@ if( Imported.Drill_CoreOfGlobalSave &&
 	
 	
 //=============================================================================
-// ** 全局存储
+// ** ☆全局存储
 //=============================================================================
 //==============================
 // * 全局 - 检查数据 - 显示情况
@@ -1761,7 +1779,7 @@ StorageManager.drill_SSpG_saveData = function(){
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -1836,7 +1854,7 @@ Game_System.prototype.drill_SSpG_initSysData_Private = function() {
 		this._drill_SSpG_lockTank[i] = temp_data['locked'];
 	}
 	
-	this._drill_SSpG_end_page = DrillUp.g_SSpG_end_page;	//末尾页
+	this._drill_SSpG_end_page = DrillUp.g_SSpG_end_page;	//末尾选项
 };
 //==============================
 // * 存储数据 - 载入存档时检查数据（私有）
@@ -1878,16 +1896,8 @@ Game_System.prototype.drill_SSpG_checkSysData_Private = function() {
 };
 
 
-
 //=============================================================================
-// ** 资源文件夹
-//=============================================================================
-ImageManager.load_MenuSelfDef = function(filename) {
-    return this.loadBitmap('img/Menu__self/', filename, 0, true);
-};
-
-//=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _drill_SSpG_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
@@ -1899,28 +1909,28 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( type == "打开面板" ){			//打开菜单
 				SceneManager.push(Scene_Drill_SSpG);
 			}
-			if( type == "显示全部" ){
+			if( type == "显示全部选项" || type == "显示全部" ){
 				for( var i = 1; i <= DrillUp.g_SSpG_context_list_length; i++){
 					DrillUp.global_SSpG_enableTank[i] = true;			//全局存储
 					$gameSystem._drill_SSpG_enableTank[i] = true;		//正常存储
 				}
 				StorageManager.drill_SSpG_saveData();
 			}
-			if( type == "隐藏全部" ){
+			if( type == "隐藏全部选项" || type == "隐藏全部" ){
 				for( var i = 1; i <= DrillUp.g_SSpG_context_list_length; i++){
 					DrillUp.global_SSpG_enableTank[i] = false;			//全局存储
 					$gameSystem._drill_SSpG_enableTank[i] = false;		//正常存储
 				}
 				StorageManager.drill_SSpG_saveData();
 			}
-			if( type == "锁定全部" ){
+			if( type == "锁定全部选项" || type == "锁定全部" ){
 				for( var i = 1; i <= DrillUp.g_SSpG_context_list_length; i++){
 					DrillUp.global_SSpG_lockTank[i] = true;				//全局存储
 					$gameSystem._drill_SSpG_lockTank[i] = true;			//正常存储
 				}
 				StorageManager.drill_SSpG_saveData();
 			}
-			if( type == "解锁全部" ){
+			if( type == "解锁全部选项" || type == "解锁全部" ){
 				for( var i = 1; i <= DrillUp.g_SSpG_context_list_length; i++){
 					DrillUp.global_SSpG_lockTank[i] = false;			//全局存储
 					$gameSystem._drill_SSpG_lockTank[i] = false;		//正常存储
@@ -1932,6 +1942,15 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		if(args.length == 4){
 			var type = String(args[1]);
 			var temp1 = String(args[3]);
+			if( temp1.indexOf("选项变量[") != -1 ){
+				temp1 = temp1.replace("选项变量[","");
+				temp1 = temp1.replace("]","");
+				temp1 = $gameVariables.value(Number(temp1));
+			}else if( temp1.indexOf("选项[") != -1 ){
+				temp1 = temp1.replace("选项[","");
+				temp1 = temp1.replace("]","");
+				temp1 = Number(temp1);
+			}
 			if( type == "显示选项" ){
 				DrillUp.global_SSpG_enableTank[ Number(temp1) ] = true;			//全局存储
 				$gameSystem._drill_SSpG_enableTank[ Number(temp1) ] = true;		//正常存储
@@ -1952,11 +1971,11 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				$gameSystem._drill_SSpG_lockTank[ Number(temp1) ] = false;		//正常存储
 				StorageManager.drill_SSpG_saveData();
 			}
-			if( type == "选中页" ){
+			if( type == "选中选项" || type == "选中页" ){
 				$gameSystem._drill_SSpG_context_index = Number(temp1) -1;
 			}
-			if( type == "末尾页" ){
-				if( temp1 == "最后一页" ){					//只正常存储
+			if( type == "设置末尾选项" || type == "末尾页" ){
+				if( temp1 == "最后" || temp1 == "最后一页" ){					//只正常存储
 					$gameSystem._drill_SSpG_end_page = 0;
 				}else{
 					$gameSystem._drill_SSpG_end_page = Number(temp1);
@@ -1967,8 +1986,13 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	
 };
 
+
+
 //=============================================================================
-// * Scene_Menu 主菜单按钮
+// ** ☆主菜单选项
+//
+//			说明：	> 此模块专门关联主菜单选项，选项进入后跳转到 信息面板G 界面。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 var _drill_SSpG_createCommandWindow = Scene_Menu.prototype.createCommandWindow;
 Scene_Menu.prototype.createCommandWindow = function() {
@@ -1987,7 +2011,10 @@ Window_MenuCommand.prototype.addOriginalCommands = function() {
 };
 
 //=============================================================================
-// ** Scene Tittle 标题选项
+// ** ☆标题选项
+//
+//			说明：	> 此模块专门关联标题选项，选项进入后跳转到 信息面板G 界面。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================	
 var _drill_SSpG_title_createCommandWindow = Scene_Title.prototype.createCommandWindow;
 Scene_Title.prototype.createCommandWindow = function() {
@@ -2006,11 +2033,15 @@ Window_TitleCommand.prototype.makeCommandList = function() {
 	}
 };	
 
+
 //=============================================================================
-// * 临时数据
+// ** ☆面板控制
+//
+//			说明：	> 此模块专门将部分面板配置转移到 Game_Temp 方便随时调用。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 临时 - 初始化
+// * 面板控制 - 初始化
 //==============================
 var _drill_SSpG_temp_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {	
@@ -2018,7 +2049,7 @@ Game_Temp.prototype.initialize = function() {
 	this._drill_SSpG_visibleList = [];			//可见的列表
 };
 //==============================
-// * 临时 - 判断 锁定情况
+// * 面板控制 - 判断 锁定情况
 //==============================
 Game_Temp.prototype.drill_SSpG_isLocked = function( context_realIndex ){
 	
@@ -2040,7 +2071,7 @@ Game_Temp.prototype.drill_SSpG_isLocked = function( context_realIndex ){
 	}
 }
 //==============================
-// * 临时 - 判断 显示情况
+// * 面板控制 - 判断 显示情况
 //==============================
 Game_Temp.prototype.drill_SSpG_isEnabled = function( context_realIndex ){
 	
@@ -2061,6 +2092,13 @@ Game_Temp.prototype.drill_SSpG_isEnabled = function( context_realIndex ){
 		}
 	}
 }
+//==============================
+// * 面板控制 - 资源文件夹
+//==============================
+ImageManager.load_MenuSelfDef = function(filename) {
+    return this.loadBitmap('img/Menu__self/', filename, 0, true);
+};
+
 
 
 //=============================================================================
@@ -2080,8 +2118,8 @@ Game_Temp.prototype.drill_SSpG_isEnabled = function( context_realIndex ){
 //							->刷新箭头
 //						->流程
 //							->翻下一页
-//							->退出窗口（末尾页才生效）
-//							->返回按钮（末尾页才生效）
+//							->退出窗口（末尾选项才生效）
+//							->返回按钮（末尾选项才生效）
 //			主要成员：
 //						> ._window_select			选项窗口
 //						> ._window_desc				描述窗口
@@ -2091,7 +2129,7 @@ Game_Temp.prototype.drill_SSpG_isEnabled = function( context_realIndex ){
 //                      > ._arrow_up 				上箭头
 //                      > ._arrow_down 				下箭头
 //
-//			说明：	> 实时锁定退出键、鼠标按键，确保必须看到末尾页才能离开。
+//			说明：	> 实时锁定退出键、鼠标按键，确保必须看到末尾选项才能离开。
 //=============================================================================
 //==============================
 // * 信息面板G - 定义
@@ -2309,7 +2347,7 @@ Scene_Drill_SSpG.prototype.drill_updateIndex = function() {
 		$gameSystem._drill_SSpG_context_index = null;	//（激活后清空）
 		if( temp < 0 ){ temp = 0; };
 		if( temp > $gameTemp._drill_SSpG_visibleList.length -1 ){ temp = $gameTemp._drill_SSpG_visibleList.length -1; };
-		this._window_select.select( temp );				//（设置选中页）
+		this._window_select.select( temp );				//（设置选中选项）
 	}
 	if( this._window_select._index == null || 
 		this._window_select._index > $gameTemp._drill_SSpG_visibleList.length -1 ||
@@ -2326,7 +2364,7 @@ Scene_Drill_SSpG.prototype.drill_updateIndex = function() {
 }
 
 //==========================================================================================
-// * 箭头
+// ** ☆箭头
 //==========================================================================================
 //==============================
 // * 帧刷新 - 箭头 - 窗口点击事件
@@ -2754,10 +2792,16 @@ Drill_SSpG_DescWindow.prototype.drill_refreshDesc = function( cur_index ) {
 
 
 //==========================================================================================
-// * 末尾页
+// ** ☆流程锁定
 //==========================================================================================
 //==============================
-// * 末尾页 - 判断
+// * 流程锁定 - 判断 末尾选项
+//==============================
+Scene_Drill_SSpG.prototype.drill_isInEndPage = function() {
+	return this._window_select.drill_isInEndPage();
+}
+//==============================
+// * 流程锁定 - 判断 末尾选项
 //==============================
 Drill_SSpG_SelectWindow.prototype.drill_isInEndPage = function() {
 	if( $gameSystem._drill_SSpG_end_page != 0 && $gameSystem._drill_SSpG_end_page <= this.maxItems() ){
@@ -2765,19 +2809,12 @@ Drill_SSpG_SelectWindow.prototype.drill_isInEndPage = function() {
 	}
 	return this.index() >= this.maxItems()-1 ;
 }
-Scene_Drill_SSpG.prototype.drill_isInEndPage = function() {
-	return this._window_select.drill_isInEndPage();
-}
-
-//==========================================================================================
-// * 流程锁定
-//==========================================================================================
 //==============================
 // * 流程锁定 - 退出键
 //==============================
 var _drill_SSpG_processCancel = Drill_SSpG_SelectWindow.prototype.processCancel;
 Drill_SSpG_SelectWindow.prototype.processCancel = function() {
-	if( !this.drill_isInEndPage() ){		//非末尾页，只翻页
+	if( !this.drill_isInEndPage() ){		//非末尾选项，只翻页
 		this.cursorRight();
 		SoundManager.drill_SSpG_playCursor();
 		return ;
@@ -2807,6 +2844,9 @@ Drill_SSpG_SelectWindow.prototype.processCursorMove = function() {
 		}
 	}
 };
+//==============================
+// * 流程锁定 - 按键屏蔽
+//==============================
 Drill_SSpG_SelectWindow.prototype.processPageup = function() {
     // 置空函数
 };
@@ -2814,7 +2854,7 @@ Drill_SSpG_SelectWindow.prototype.processPagedown = function() {
     // 置空函数
 };
 //==============================
-// * 流程锁定 - 末尾页退出
+// * 流程锁定 - 末尾选项退出
 //==============================
 var _drill_SSpG_drill_createSelect = Scene_Drill_SSpG.prototype.drill_createSelect;
 Scene_Drill_SSpG.prototype.drill_createSelect = function() {
@@ -2837,7 +2877,7 @@ Scene_Drill_SSpG.prototype.drill_updateBackBtnControl = function() {
 	}
 }
 //==============================
-// * 翻页声音
+// * 流程锁定 - 翻页声音
 //==============================
 SoundManager.drill_SSpG_playCursor = function() {
 	var se = {};
@@ -2846,11 +2886,9 @@ SoundManager.drill_SSpG_playCursor = function() {
     se.volume = 100;
 	AudioManager.playStaticSe(se);
 }
-//==========================================================================================
-// * 结束按钮
-//==========================================================================================
+
 //==============================
-// * 创建 - 结束按钮
+// * 流程锁定 - 结束按钮 - 创建
 //==============================
 Scene_Drill_SSpG.prototype.drill_createEndButton = function() {
 	this._end_button = new Sprite(ImageManager.load_MenuSelfDef(DrillUp.g_SSpG_end_src));
@@ -2859,7 +2897,7 @@ Scene_Drill_SSpG.prototype.drill_createEndButton = function() {
 	this._drill_field.addChild(this._end_button);	
 }
 //==============================
-// * 帧刷新 - 结束按钮
+// * 流程锁定 - 结束按钮 - 帧刷新
 //==============================
 Scene_Drill_SSpG.prototype.drill_updateEndButton = function() {
 	// > 位置
@@ -2874,7 +2912,7 @@ Scene_Drill_SSpG.prototype.drill_updateEndButton = function() {
 	if( this.drill_isOnHoverArrow(this._end_button) ){ this._end_button.opacity = 255; }
 }
 //==============================
-// * 帧刷新 - 箭头 - 窗口点击事件
+// * 流程锁定 - 结束按钮 - 帧刷新 - 箭头 窗口点击事件
 //==============================
 Scene_Drill_SSpG.prototype.drill_checkEndButtonTouch = function() {
 	if (this.drill_isOnArrow( this._end_button ) ) {

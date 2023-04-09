@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        管理器 - 静态文件密钥校验器
+ * @plugindesc [v1.1]        管理器 - 静态文件密钥校验器
  * @author Drill_up
  * 
  *
@@ -28,6 +28,9 @@
  * 细节：
  *   (1.该插件可以在迷宫密钥的基础上，再进行一次密钥加密。
  *   (2.插件支持安卓打包后，在手机平台的密钥校验。
+ *   (3.如果插件遇到了任何问题，那么校验器的开关都不会处于 ON开启状态 。
+ *      你可以通过此方法来判断 玩家 是否对你的游戏文件有修改，从而根据
+ *      情况影响游戏中的内容。
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -53,7 +56,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
- *
+ * [v1.1]
+ * 更新了部分注释内容。
  * 
  * 
  *
@@ -101,11 +105,17 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			静态文件密钥校验器：
-//				->校验规则
-//
+//			->☆提示信息
+//			->☆变量获取
+//			
+//			->☆校验器
+//				->库检测
+//				->数据库文件读取
+//				->数据赋值
+//		
+//		
 //		★必要注意事项：
-//			1.插件没有做加密处理，也没必要加密。
+//			1.该插件没有做加密处理，也没必要加密。
 //
 //		★其它说明细节：
 //			暂无
@@ -115,7 +125,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -126,7 +136,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_GlobalStaticFileChecker = true;
@@ -142,7 +152,7 @@
 	
 	/*-----------------秘钥列表------------------*/
     DrillUp.g_GSFC_data = [
-		"N4IgZglgNgpg+lCBnALiAXAbVAaxgTwxABMBmAdnLADYBOWgQwCMKAmB86pgBgA4YAxmAHkALAEZxtAUya8QAGhAAHBigAWRYmoYB6AIICUAewBOSAHQArJMYB2IAL4LcBItwG9xrbmG2yaIWJRagYAVlFSUW4GXm5yMlYmRRU1TXQSHQM7CABbNQh7Sxt7JwBdJTxCDIZapyA==",
+		"N4IgZglgNgpg+lCBnALiAXAbVAaxgTwxABMBmAdnLADYBOWgQwCMKAmB86pgBgA4YAxmAHkALAEZxtAUya8QAGhAAHBigAWRYmoYB6AIICUAewBOSAHQArJMYB2IAL4BdJXkLoQ41qVEBWaicgA=",
 	];
 	
 	
@@ -150,51 +160,12 @@
 // * >>>>库检测>>>>
 //=============================================================================
 if( typeof(md5) != "undefined" ){
-
-	//==============================
-	// * 文件 - 版本遍历
-	//==============================
-	DataManager.drill_GSFC_checkData = function() {
-		
-		// > 数据转换
-		var data_tank = [];
-		for(var i=0; i < DrillUp.g_GSFC_data.length; i++ ){
-			var data_str = DrillUp.g_GSFC_data[i];
-			if( data_str == "" ){ continue; }
-			var data = JSON.parse( LZString.decompressFromBase64(data_str) );
-			data_tank.push( data );
-		}
-		if( data_tank.length == 0 ){ return "noData"; }
-		
-		// > key校验
-		var key_first = data_tank[0]['key'];
-		for( var i = 1; i < data_tank.length; i++ ){
-			if( key_first != data_tank[i]['key'] ){
-				return "keyError";
-			}
-		}
-		
-		// > 文件校验
-		this._drill_GSFC_data = [];
-		for( var i = 0; i < data_tank.length; i++ ){
-			var file_list = data_tank[i]['file_list'];
-			if( file_list == undefined ){ return "fail" }
-			if( file_list.length == 0  ){ return "fail" }
-			var flag = true;
-			for( var j = 0; j < file_list.length; j++ ){
-				var file_data = file_list[j];
-				this._drill_GSFC_data.push( {"data":file_data,"state":"sending"} );
-				this.drill_GSFC_loadDataFile( file_data['path'] );
-			}
-		}
-		return "sended"
-	}
 	
-		
+	
 	//==============================
 	// * 数据库文件 - 读取单文件
 	//
-	//				说明：	如果读取失败，全局的name，将会为null。
+	//			说明：	如果读取失败，全局的name，将会为null。
 	//==============================
 	DataManager.drill_GSFC_loadDataFile = function( src_path ){
 		
@@ -255,7 +226,47 @@ if( typeof(md5) != "undefined" ){
 	};
 	
 	//==============================
-	// * 文件 - 信息标记
+	// * ☆校验器 - 数据检查
+	//
+	//			说明：	需要放在 数据库文件 函数之后。
+	//==============================
+	DataManager.drill_GSFC_checkData = function() {
+		
+		// > 数据转换
+		var data_tank = [];
+		for(var i=0; i < DrillUp.g_GSFC_data.length; i++ ){
+			var data_str = DrillUp.g_GSFC_data[i];
+			if( data_str == "" ){ continue; }
+			var data = JSON.parse( LZString.decompressFromBase64(data_str) );
+			data_tank.push( data );
+		}
+		if( data_tank.length == 0 ){ return "noData"; }
+		
+		// > key校验
+		var key_first = data_tank[0]['key'];
+		for( var i = 1; i < data_tank.length; i++ ){
+			if( key_first != data_tank[i]['key'] ){
+				return "keyError";
+			}
+		}
+		
+		// > 文件校验
+		this._drill_GSFC_data = [];
+		for( var i = 0; i < data_tank.length; i++ ){
+			var file_list = data_tank[i]['file_list'];
+			if( file_list == undefined ){ return "fail" }
+			if( file_list.length == 0  ){ return "fail" }
+			var flag = true;
+			for( var j = 0; j < file_list.length; j++ ){
+				var file_data = file_list[j];
+				this._drill_GSFC_data.push( {"data":file_data,"state":"sending"} );
+				this.drill_GSFC_loadDataFile( file_data['path'] );
+			}
+		}
+		return "sended"
+	};
+	//==============================
+	// * 校验器 - 信息标记
 	//==============================
 	DataManager.drill_GSFC_msg = DataManager.drill_GSFC_checkData();
 	if( DataManager.drill_GSFC_msg == "noData" ){
@@ -269,9 +280,8 @@ if( typeof(md5) != "undefined" ){
 		}
 	};
 	
-	
 	//==============================
-	// * 新游戏 - 数据赋值
+	// * 数据赋值 - 新游戏
 	//==============================
 	var _drill_GSFC_setupNewGame = DataManager.setupNewGame;
 	DataManager.setupNewGame = function() {
@@ -283,9 +293,8 @@ if( typeof(md5) != "undefined" ){
 			$gameSwitches._data[ DrillUp.g_GSFC_var ] = false;
 		}
 	}
-		
 	//==============================
-	// * 载入存档 - 数据赋值
+	// * 数据赋值 - 载入存档
 	//==============================
 	var _drill_GSFC_extractSaveContents = DataManager.extractSaveContents;
 	DataManager.extractSaveContents = function( contents ){

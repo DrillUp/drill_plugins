@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        行走图 - 玩家接近自动透明化
+ * @plugindesc [v1.4]        行走图 - 玩家接近自动透明化
  * @author Drill_up
  * 
  * 
@@ -110,9 +110,11 @@
  * 修复了接近透明失效的bug。
  * [v1.3]
  * 优化了旧存档的识别与兼容。
+ * [v1.4]
+ * 修复了部分情况下贴图解除绑定时会报错的bug。
  * 
  * 
- *
+ * 
  * @param 最小透明度
  * @type number
  * @min 0
@@ -126,6 +128,7 @@
  * @max 255
  * @desc 透明度变透明的速度。
  * @default 10
+ * 
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -150,8 +153,15 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			玩家接近自动透明化：
+//			->☆提示信息
+//			->☆变量获取
+//			->☆插件指令
+//			->☆事件注释
+//			->☆存储数据
+//			
+//			->☆贴图容器
 //				->id与贴图绑定容器
+//			->☆贴图变化
 //				->矩形碰撞
 //				->玩家在事件前面不透明
 //
@@ -172,7 +182,7 @@
 //			
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -189,7 +199,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_EventAutoTransparent = true;
@@ -203,7 +213,7 @@
 	
 	
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _Drill_EATran_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
@@ -280,7 +290,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 };
 //==============================
-// ** 插件指令 - 事件检查
+// * 插件指令 - 事件检查
 //==============================
 Game_Map.prototype.drill_EATran_isEventExist = function( e_id ){
 	if( e_id == 0 ){ return false; }
@@ -293,17 +303,24 @@ Game_Map.prototype.drill_EATran_isEventExist = function( e_id ){
 	return true;
 };
 
+
+//=============================================================================
+// ** ☆事件注释
+//=============================================================================
 //==============================
-// * 注释初始化
+// * 事件注释 - 初始化绑定
 //==============================
 var _drill_EATran_event_setupPage = Game_Event.prototype.setupPage;
 Game_Event.prototype.setupPage = function() {
 	_drill_EATran_event_setupPage.call(this);
     this.drill_EATran_setupPage();
 };
+//==============================
+// * 事件注释 - 初始化
+//==============================
 Game_Event.prototype.drill_EATran_setupPage = function() {
 	if( !this._erased && this.page() ){ this.list().forEach(function( l ){
-		if (l.code === 108) {
+		if( l.code === 108 ){
 			var args = l.parameters[0].split(' ');
 			var command = args.shift();
 			if( command == "=>玩家接近自动透明化" ){	//=>玩家接近自动透明化 : 开启
@@ -330,7 +347,7 @@ Game_Event.prototype.drill_EATran_setupPage = function() {
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -426,37 +443,34 @@ Game_System.prototype.drill_EATran_pushId = function( id ) {
 //==============================
 // * 存储容器 - 去除
 //==============================
-Game_System.prototype.drill_EATran_removeId = function( id ) {	
-	for(var i=this._drill_EATran_idTank.length-1; i>=0; i--){
+Game_System.prototype.drill_EATran_removeId = function( id ){
+	for(var i = this._drill_EATran_idTank.length-1; i>=0; i--){
 		if( this._drill_EATran_idTank[i] == id ){
 			
 			// > 透明度强制恢复
 			var e = $gameMap.event( id );
-			e.setOpacity(255);
-			$gameTemp._drill_EATran_sprites[i].opacity = 255;
+			if( e != undefined ){
+				e.setOpacity(255);
+			}
 			
 			// > 事件容器和贴图容器 同步去除
-			this._drill_EATran_idTank.splice(i,1);
+			var temp_sprite = $gameTemp._drill_EATran_sprites[i];
+			if( temp_sprite != undefined ){
+				temp_sprite.opacity = 255;
+			}
 			$gameTemp._drill_EATran_sprites.splice(i,1);
+			
+			this._drill_EATran_idTank.splice(i,1);
 		}
 	}
 };
 
 
 //=============================================================================
-// * 优化
-//=============================================================================
-//==============================
-// * 优化 - 检查镜像情况
-//==============================
-Game_Temp.prototype.drill_EATran_isReflectionSprite = function( sprite ){
-	if( Imported.Drill_LayerReverseReflection      && sprite instanceof Drill_Sprite_LRR ){ return true; }
-	if( Imported.Drill_LayerSynchronizedReflection && sprite instanceof Drill_Sprite_LSR ){ return true; }
-	return false;
-}
-
-//=============================================================================
-// ** 容器
+// ** ☆贴图容器
+//
+//			说明：	> 此模块标记 事件贴图 与 玩家贴图 。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 容器 - 初始化
@@ -487,22 +501,8 @@ Spriteset_Map.prototype.createCharacters = function() {
 	}
 	_drill_EATran_smap_createCharacters.call(this);
 }
-//=============================================================================
-// ** 贴图变化
-//=============================================================================
 //==============================
-// * 地图界面 - 帧刷新
-//==============================
-var _drill_EATran_smap_update = Scene_Map.prototype.update;
-Scene_Map.prototype.update = function() {	
-	_drill_EATran_smap_update.call(this);
-	if( this.isActive() ){
-		this.drill_EATran_refreshArray();			//帧刷新 - 贴图绑定
-		this.drill_EATran_updateTransparent();		//帧刷新 - 贴图变化
-	}
-}
-//==============================
-// * 帧刷新 - 贴图绑定
+// * 容器 - 帧刷新 贴图绑定
 //==============================
 Scene_Map.prototype.drill_EATran_refreshArray = function() {
 	if( $gameSystem._drill_EATran_idTank.length == 0 ){ return; }
@@ -537,7 +537,34 @@ Scene_Map.prototype.drill_EATran_refreshArray = function() {
 	}
 }
 //==============================
-// * 帧刷新 - 贴图变化
+// * 容器 - 优化 - 检查镜像情况
+//==============================
+Game_Temp.prototype.drill_EATran_isReflectionSprite = function( sprite ){
+	if( Imported.Drill_LayerReverseReflection      && sprite instanceof Drill_Sprite_LRR ){ return true; }
+	if( Imported.Drill_LayerSynchronizedReflection && sprite instanceof Drill_Sprite_LSR ){ return true; }
+	return false;
+}
+
+
+//=============================================================================
+// ** ☆贴图变化
+//
+//			说明：	> 此模块专门处理 矩形碰撞，确保 玩家在事件前面不透明。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 贴图变化 - 帧刷新
+//==============================
+var _drill_EATran_smap_update = Scene_Map.prototype.update;
+Scene_Map.prototype.update = function() {	
+	_drill_EATran_smap_update.call(this);
+	if( this.isActive() ){
+		this.drill_EATran_refreshArray();			//帧刷新 - 贴图绑定
+		this.drill_EATran_updateTransparent();		//帧刷新 - 贴图变化
+	}
+}
+//==============================
+// * 贴图变化 - 帧刷新 贴图变化
 //==============================
 Scene_Map.prototype.drill_EATran_updateTransparent = function() {
 	if( $gameSystem._drill_EATran_idTank.length == 0 ){ return; }
@@ -549,6 +576,7 @@ Scene_Map.prototype.drill_EATran_updateTransparent = function() {
 		if( this.drill_EATran_isBitmapReady( temp_sprite ) ){					//贴图已加载
 			
 			var e = $gameMap.event( temp_id );
+			if( e == undefined ){ continue; }
 			var is_coverd = false;
 			if( e._drill_EATran_type == "只要接触就透明" ){
 				if( this.drill_EATran_isCovered( player_sprite,temp_sprite ) ){
@@ -573,9 +601,8 @@ Scene_Map.prototype.drill_EATran_updateTransparent = function() {
 		}
 	}
 }
-
 //==============================
-// * 贴图判定 - 是否准备完毕
+// * 贴图变化 - 是否准备完毕
 //==============================
 Scene_Map.prototype.drill_EATran_isBitmapReady = function( sprite ) {
 	if( !sprite ){ return false };
@@ -586,7 +613,7 @@ Scene_Map.prototype.drill_EATran_isBitmapReady = function( sprite ) {
 	return true;	
 }
 //==============================
-// * 贴图判定 - 是否相互碰撞
+// * 贴图变化 - 是否相互碰撞
 //==============================
 Scene_Map.prototype.drill_EATran_isCovered = function( sprite_A , sprite_B ) {
 	

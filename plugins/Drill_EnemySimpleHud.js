@@ -43,6 +43,7 @@
  *   (3.你可以将生命框放置在地图层级的 下层、中层、上层、图片层、
  *      最顶层 中。
  *   (4.每个生命框只能绑定到一个物体上。
+ *      注意，必须写角色/敌人注释设置样式后，才能显示出生命框。
  * 参数条：
  *   (1.参数值：　固定绑定角色/敌人属性。
  *      遮罩：　　可自定义。
@@ -98,13 +99,15 @@
  * ----激活条件
  * 你可以通过添加角色备注或敌人备注实现相关配置：
  * 
- * 角色注释：<战斗简单生命框:隐藏>
  * 角色注释：<战斗简单生命框:样式:1>
  * 角色注释：<战斗简单生命框:偏移:-24:0>
+ * 角色注释：<战斗简单生命框:隐藏>
  * 
- * 敌人注释：<战斗简单生命框:隐藏>
  * 敌人注释：<战斗简单生命框:样式:1>
  * 敌人注释：<战斗简单生命框:偏移:-24:0>
+ * 敌人注释：<战斗简单生命框:隐藏>
+ * 
+ * 1.注意，必须写注释设置样式后，才能显示出生命框。
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定
@@ -1260,7 +1263,7 @@ Game_Troop.prototype.setup = function( troopId ){
 		bean.drill_ESH_setEnemy( enemy.enemyId(), i );
 		$gameTemp._drill_ESH_enemyBeanTank[i] = bean;
 		
-		//alert( enemy.enemyId() );
+		//alert( "enemy:"+enemy.enemyId() );
 	}
 	
 	// > 重建标记
@@ -1855,8 +1858,10 @@ Scene_Battle.prototype.drill_ESH_updatePosition = function( sprite ){
 	
 	
 	// > 位移（战斗参照）
-	var xx = b_data._drill_spriteX;
-	var yy = b_data._drill_spriteY;
+	var xx = s_data['x'];
+	var yy = s_data['y'];
+	xx += b_data._drill_spriteX;
+	yy += b_data._drill_spriteY;
 	
 	// > 固定生命框
 	if( s_data['lockHomePos_enable'] == true ){

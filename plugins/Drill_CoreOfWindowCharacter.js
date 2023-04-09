@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.7]        窗口字符 - 窗口字符核心
+ * @plugindesc [v1.8]        窗口字符 - 窗口字符核心
  * @author Drill_up
  * 
  * 
@@ -251,6 +251,9 @@
  * 优化了旧存档的识别与兼容。
  * [v1.7]
  * 规范了 指代字符 的变色功能。
+ * [v1.8]
+ * 修复了自动换行时，第一行多出一个字的bug。
+ * 修复了行高和字体大小计算时的误差bug。
  * 
  * 
  * 
@@ -1425,6 +1428,10 @@ Window_Base.prototype.drill_COWC_prepareNewLine = function( data ){
 	this._drill_COWC_lineWidth = 0;
 	this._drill_COWC_lineHeight = 0;
 	this._drill_COWC_lineNormalCharCount = 0;
+	this._drill_COWC_lineMaxHeight = this.standardFontSize() +8;	//（正常fontsize转行高都+8，见函数 calcTextHeight ）
+	if( this._drill_COWC_lineMaxHeight < this.lineHeight() ){
+		this._drill_COWC_lineMaxHeight = this.lineHeight();
+	}
 }
 //==============================
 // * 执行换行 - 子窗口强制继承
@@ -1836,6 +1843,9 @@ Window_Base.prototype.drill_COWC_processNewEffectChar_Combined = function( match
 	if( command.toUpperCase() == "FS" ){
 		if( args.length == 1 ){
 			this.contents.fontSize = Number(args[0]);
+			if( this._drill_COWC_lineMaxHeight < Number(args[0]) + 8 ){
+				this._drill_COWC_lineMaxHeight = Number(args[0]) + 8;
+			}
 			this.drill_COWC_charSubmit_Effect(0,0);
 		}
 	}
@@ -1893,6 +1903,19 @@ Window_Message.prototype.drill_COWC_processNewEffectChar_Combined = function( ma
 	}
 }
 //==============================
+// * 效果字符应用 - 字体大小 高度影响
+//			
+//			说明：	修改字体大小会对高度计算有很大影响。
+//==============================
+var _drill_COWC_COWA_getTextExHeight_Private = Window_Base.prototype.drill_COWA_getTextExHeight_Private;
+Window_Base.prototype.drill_COWA_getTextExHeight_Private = function( text ){
+	var hh = _drill_COWC_COWA_getTextExHeight_Private.call( this, text );
+	if( hh < this._drill_COWC_lineMaxHeight ){
+		hh = this._drill_COWC_lineMaxHeight;
+	}
+	return hh;
+}
+//==============================
 // * 效果字符应用 - 光标偏移X（\PX 效果字符专用）
 //
 //			说明：	居中插件 会需要记录此函数的变化。
@@ -1909,9 +1932,9 @@ Window_Base.prototype.drill_COWC_charOffsetY = function( yy ){
 //==============================
 // * 效果字符应用 - 光标偏移Y - 高度变化
 //==============================
-var _drill_COWC_COWA_getTextExHeight_Private = Window_Base.prototype.drill_COWA_getTextExHeight_Private;
+var _drill_COWC_COWA_getTextExHeight_Private2 = Window_Base.prototype.drill_COWA_getTextExHeight_Private;
 Window_Base.prototype.drill_COWA_getTextExHeight_Private = function( text ){
-	var hh = _drill_COWC_COWA_getTextExHeight_Private.call( this, text );
+	var hh = _drill_COWC_COWA_getTextExHeight_Private2.call( this, text );
 	var data = text.match( /PY\[(\d+)\]/i );
 	if( data != null ){
 		if( data[1] != "" ){
@@ -2397,8 +2420,11 @@ Window_Base.prototype.drill_COWC_setWordWrap_Private = function( text, max_width
 	br_indexList.push( text.length * 2 );
 	text = text.replace(/\<br\>/gi, '');		//去掉换行符
 	
-	// > 缩小两个内边距的划分范围
-	max_width -= this.standardPadding() * 2;
+	// > 缩小两个内边距的划分范围（不需要）
+	//max_width -= this.standardPadding() * 2;
+	
+	// > 缩小固定像素宽
+	max_width -= 6;
 	
 	// > 寻找插入点
 	var all_width = this.drill_COWA_getTextExWidth( text );
@@ -2436,7 +2462,7 @@ Window_Base.prototype.drill_COWC_setWordWrap_Private = function( text, max_width
 	
 	// > 插入换行符（倒序插入）
 	for( var i = index_pos.length-1; i >= 0; i-- ){
-		var index = index_pos[i];
+		var index = index_pos[i] -1;		//（-1是为了防止 第一行 多出一个字的bug）
 		text = text.slice(0,index) + "\n" + text.slice(index);
 	}
 	

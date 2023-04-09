@@ -3,12 +3,13 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.7]        主菜单 - 多层菜单粒子
+ * @plugindesc [v1.8]        主菜单 - 多层菜单粒子
  * @author Drill_up
  * 
  * @Drill_LE_param "粒子-%d"
  * @Drill_LE_parentKey "---粒子组%d至%d---"
  * @Drill_LE_var "DrillUp.g_MPa_list_length"
+ *
  *
  * @help
  * =============================================================================
@@ -22,7 +23,9 @@
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该插件可以单独使用。
+ * 该插件 不能 单独使用。
+ * 基于：
+ *   - Drill_CoreOfParticle        系统-粒子核心
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -115,6 +118,8 @@
  * 加强了粒子效果的配置，包括添加双层粒子效果。
  * [v1.7]
  * 优化了旧存档的识别与兼容。
+ * [v1.8]
+ * 结合粒子核心，加强了粒子相关功能。
  *
  *
  *
@@ -717,11 +722,11 @@
  * @parent ---贴图---
  * @type select
  * @option 菜单后面层
- * @value 0
+ * @value 菜单后面层
  * @option 菜单前面层
- * @value 1
+ * @value 菜单前面层
  * @desc 粒子所属的菜单层级。
- * @default 0
+ * @default 菜单后面层
  *
  * @param 图片层级
  * @parent ---贴图---
@@ -747,10 +752,13 @@
  * @desc 一个粒子从显现到消失的周期时长，单位帧。(1秒60帧)
  * @default 180
  *
- * @param 粒子自旋转速度
+ * @param 粒子弹道是否倒放
  * @parent ---粒子效果---
- * @desc 正数逆时针，负数顺时针，单位 角度/帧。(1秒60帧，360.0为一周)
- * @default 0.5
+ * @type boolean
+ * @on 倒放
+ * @off 关闭
+ * @desc true - 倒放，false - 关闭，粒子弹道完全倒放。比如 四周扩散效果 变成 四周吸收效果。
+ * @default false
  *
  * @param 粒子出现模式
  * @parent ---粒子效果---
@@ -796,8 +804,6 @@
  * @value 四周扩散(随机)
  * @option 扇形范围方向(随机)
  * @value 扇形范围方向(随机)
- * @option 方向聚焦于粒子固定点
- * @value 方向聚焦于粒子固定点
  * @desc 粒子出现后，朝向的方向模式设置。
  * @default 四周扩散(随机)
  *
@@ -841,18 +847,42 @@
  * @type select
  * @option 逐渐消失
  * @value 逐渐消失
+ * @option 保持原透明度
+ * @value 保持原透明度
+ * @option 等一半时间后逐渐消失
+ * @value 等一半时间后逐渐消失
  * @option 先显现后消失(慢速)
  * @value 先显现后消失(慢速)
  * @option 先显现后消失
  * @value 先显现后消失
  * @option 先显现后消失(快速)
  * @value 先显现后消失(快速)
- * @option 保持原透明度
- * @value 保持原透明度
  * @option 一闪一闪
  * @value 一闪一闪
  * @desc 粒子出现后，向前移动的方向设置。四周扩散模式不需要指定方向。
  * @default 先显现后消失
+ *
+ * @param 粒子自旋转模式
+ * @parent ---粒子效果---
+ * @type select
+ * @option 随机角度
+ * @value 随机角度
+ * @option 固定角度
+ * @value 固定角度
+ * @option 始终与朝向一致
+ * @value 始终与朝向一致
+ * @desc 粒子自旋转的模式。
+ * @default 固定角度
+ *
+ * @param 粒子自旋转初始角度
+ * @parent 粒子自旋转模式
+ * @desc 粒子自旋转的初始角度，单位角度。
+ * @default 0.0
+ *
+ * @param 粒子自旋转速度
+ * @parent 粒子自旋转模式
+ * @desc 正数逆时针，负数顺时针，单位 角度/帧。(1秒60帧)
+ * @default 10.0
  *
  * @param 粒子缩放模式
  * @parent ---粒子效果---
@@ -898,11 +928,11 @@
  * @parent ---双层效果---
  * @type select
  * @option 菜单后面层
- * @value 0
+ * @value 菜单后面层
  * @option 菜单前面层
- * @value 1
+ * @value 菜单前面层
  * @desc 第二层粒子所属的菜单层级。
- * @default 0
+ * @default 菜单后面层
  *
  * @param 第二层粒子图片层级
  * @parent ---双层效果---
@@ -911,7 +941,51 @@
  * @desc 第二层粒子，先后排序的位置，0表示最后面。
  * @default 7
  * 
+ * 
+ * @param ---随机种子---
+ * @desc 
  *
+ * @param 是否固定随机种子
+ * @parent ---随机种子---
+ * @type boolean
+ * @on 固定
+ * @off 关闭
+ * @desc true - 固定，false - 关闭，固定随机种子，能使得所有该样式的粒子，随机轨迹都一模一样。
+ * @default false
+ * 
+ * @param 固定随机种子
+ * @parent 是否固定随机种子
+ * @desc 固定的随机种子值，范围在0.0000至1.0000之间。
+ * @default 0.20221002
+ * 
+ * 
+ * @param ---直线拖尾效果---
+ * @desc 
+ *
+ * @param 是否开启直线拖尾效果
+ * @parent ---直线拖尾效果---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭，拖尾贴图会根据粒子的方向进行旋转。
+ * @default false
+ *
+ * @param 是否固定拖尾在粒子中心
+ * @parent ---直线拖尾效果---
+ * @type boolean
+ * @on 固定在中心
+ * @off 正右方锚点
+ * @desc true - 固定在中心，false - 正右方锚点。
+ * @default false
+ *
+ * @param 资源-直线拖尾
+ * @parent ---直线拖尾效果---
+ * @desc 粒子的图片资源。
+ * @default (需配置)地图临时粒子小爆炸直线拖尾贴图
+ * @require 1
+ * @dir img/Menu__layer/
+ * @type file
+ * 
  */
 /*~struct~MenuParticleDefault:
  * 
@@ -990,10 +1064,13 @@
  * @desc 一个粒子从显现到消失的周期时长，单位帧。(1秒60帧)
  * @default 180
  *
- * @param 粒子自旋转速度
+ * @param 粒子弹道是否倒放
  * @parent ---粒子效果---
- * @desc 正数逆时针，负数顺时针，单位 角度/帧。(1秒60帧，360.0为一周)
- * @default 0.5
+ * @type boolean
+ * @on 倒放
+ * @off 关闭
+ * @desc true - 倒放，false - 关闭，粒子弹道完全倒放。比如 四周扩散效果 变成 四周吸收效果。
+ * @default false
  *
  * @param 粒子出现模式
  * @parent ---粒子效果---
@@ -1039,8 +1116,6 @@
  * @value 四周扩散(随机)
  * @option 扇形范围方向(随机)
  * @value 扇形范围方向(随机)
- * @option 方向聚焦于粒子固定点
- * @value 方向聚焦于粒子固定点
  * @desc 粒子出现后，朝向的方向模式设置。
  * @default 四周扩散(随机)
  *
@@ -1097,6 +1172,28 @@
  * @desc 粒子出现后，向前移动的方向设置。四周扩散模式不需要指定方向。
  * @default 先显现后消失
  *
+ * @param 粒子自旋转模式
+ * @parent ---粒子效果---
+ * @type select
+ * @option 随机角度
+ * @value 随机角度
+ * @option 固定角度
+ * @value 固定角度
+ * @option 始终与朝向一致
+ * @value 始终与朝向一致
+ * @desc 粒子自旋转的模式。
+ * @default 固定角度
+ *
+ * @param 粒子自旋转初始角度
+ * @parent 粒子自旋转模式
+ * @desc 粒子自旋转的初始角度，单位角度。
+ * @default 0.0
+ *
+ * @param 粒子自旋转速度
+ * @parent 粒子自旋转模式
+ * @desc 正数逆时针，负数顺时针，单位 角度/帧。(1秒60帧)
+ * @default 10.0
+ *
  * @param 粒子缩放模式
  * @parent ---粒子效果---
  * @type select
@@ -1141,11 +1238,11 @@
  * @parent ---双层效果---
  * @type select
  * @option 菜单后面层
- * @value 0
+ * @value 菜单后面层
  * @option 菜单前面层
- * @value 1
+ * @value 菜单前面层
  * @desc 第二层粒子所属的菜单层级。
- * @default 0
+ * @default 菜单后面层
  *
  * @param 第二层粒子图片层级
  * @parent ---双层效果---
@@ -1154,7 +1251,51 @@
  * @desc 第二层粒子，先后排序的位置，0表示最后面。
  * @default 7
  * 
+ * 
+ * @param ---随机种子---
+ * @desc 
  *
+ * @param 是否固定随机种子
+ * @parent ---随机种子---
+ * @type boolean
+ * @on 固定
+ * @off 关闭
+ * @desc true - 固定，false - 关闭，固定随机种子，能使得所有该样式的粒子，随机轨迹都一模一样。
+ * @default false
+ * 
+ * @param 固定随机种子
+ * @parent 是否固定随机种子
+ * @desc 固定的随机种子值，范围在0.0000至1.0000之间。
+ * @default 0.20221002
+ * 
+ * 
+ * @param ---直线拖尾效果---
+ * @desc 
+ *
+ * @param 是否开启直线拖尾效果
+ * @parent ---直线拖尾效果---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭，拖尾贴图会根据粒子的方向进行旋转。
+ * @default false
+ *
+ * @param 是否固定拖尾在粒子中心
+ * @parent ---直线拖尾效果---
+ * @type boolean
+ * @on 固定在中心
+ * @off 正右方锚点
+ * @desc true - 固定在中心，false - 正右方锚点。
+ * @default false
+ *
+ * @param 资源-直线拖尾
+ * @parent ---直线拖尾效果---
+ * @desc 粒子的图片资源。
+ * @default (需配置)地图临时粒子小爆炸直线拖尾贴图
+ * @require 1
+ * @dir img/Menu__layer/
+ * @type file
+ * 
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -1179,33 +1320,28 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			菜单粒子：
-//				->基本属性
-//					->显示/隐藏
-//					->透明度
-//					->菜单层级
-//					->遮罩
-//				->粒子效果
-//					->数量
-//					->生命周期
-//					->自旋转
-//					->出现模式
-//						->固定点
-//					->方向模式
-//					->速度模式
-//					->透明度模式
-//						->时间锚点公式
-//						->一闪一闪
-//					->缩放模式
-//				->双层效果
+//			->☆提示信息
+//			->☆变量获取
+//			->☆插件指令
+//			->☆存储数据
+//			->☆菜单层级
+//			
+//			->☆贴图控制
+//				->不考虑销毁情况
+//			
+//			->粒子控制器【Drill_MPa_Controller】
+//			->粒子贴图【Drill_MPa_Sprite】
+//			->粒子贴图（第二层）【Drill_MPa_SecSprite】
+//
 //
 //		★必要注意事项：
-//			1.该插件不依赖弹道核心，因为部分公式直接写在插件的代码里了。
+//			1.插件继承至 粒子核心。
+//			  核心与所有子插件功能介绍去看看："1.系统 > 大家族-粒子核心（脚本）.docx"
 //
 //		★其它说明细节：
 //			1.插件结构比背景复杂，多一个数组的量级，需要理清楚下面变量的关系：
 //				DrillUp.g_MPa_list				获取的值（80个）
-//				this._drill_MPa_dataTank			符合的值（小于80个，不要将数组二者混合使用）
+//				this._drill_MPa_controllerTank			符合的值（小于80个，不要将数组二者混合使用）
 //				this._drill_MPa_spriteTankOrg				符合的图片（小于80个）
 //				DrillUp.g_MPa_list[i]['par_count']	粒子数量（直接遍历塞进符合图片中）
 //				temp_sprite			临时图片
@@ -1216,18 +1352,32 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
 	//==============================
 	var DrillUp = DrillUp || {}; 
 	DrillUp.g_MPa_PluginTip_curName = "Drill_MenuParticle.js 主菜单-多层菜单粒子";
-	DrillUp.g_MPa_PluginTip_baseList = [];
+	DrillUp.g_MPa_PluginTip_baseList = ["Drill_CoreOfParticle.js 系统-粒子核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_MPa_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_MPa_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_MPa_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_MPa_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_MPa_PluginTip_baseList[i];
+		}
+		return message;
+	};
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_MenuParticle = true;
@@ -1241,24 +1391,32 @@
 	DrillUp.drill_MPa_particleDefaultInit = function( dataFrom ) {
 		var data = {};
 		
-		// > 贴图
+		// > 控制器
 		data['visible'] = String( dataFrom["初始是否显示"] || "true") == "true";
+		data['pause'] = false;
+		
+		// > 贴图
 		data['src_img'] = String( dataFrom["资源-粒子"] || "");
 		data['src_img_mask'] = String( dataFrom["资源-粒子遮罩"] || "");
 		data['src_img_file'] = "img/Menu__layer/";
+		data['x'] = 0;
+		data['y'] = 0;
 		data['opacity'] = Number( dataFrom["透明度"] || 255);
 		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
-		//data['menu_index'] = Number( dataFrom["菜单层级"] || 0);
+		//data['layerIndex'] = Number( dataFrom["菜单层级"] || "菜单后面层");
 		data['zIndex'] = Number( dataFrom["图片层级"] || 0);
 		
 		// > 粒子效果
 		data['par_count'] = Number( dataFrom["粒子数量"] || 0);
 		data['par_life'] = Number( dataFrom["粒子生命周期"] || 180);
-		data['par_selfRotate'] = Number( dataFrom["粒子自旋转速度"] || 1.5);
+		data['par_backrun'] = String( dataFrom["粒子弹道是否倒放"] || "false") == "true";
+		//data['par_holdingBirthPosition'] = String( dataFrom["粒子是否滞留"] || "false") == "true";
+		
 		data['par_birthMode'] = String( dataFrom["粒子出现模式"] || "随机出现");
 		data['par_birthX'] = Number( dataFrom["粒子固定点 X"] || 0);
 		data['par_birthY'] = Number( dataFrom["粒子固定点 Y"] || 0);
 		data['par_birthRange'] = Number( dataFrom["粒子固定点范围"] || 120);
+		
 		data['par_dirMode'] = String( dataFrom["粒子方向模式"] || "四周扩散(随机)");
 		data['par_dirFix'] = Number( dataFrom["粒子固定方向"] || 90.0);
 		data['par_dirSectorFace'] = Number( dataFrom["粒子扇形朝向"] || 45.0);
@@ -1267,6 +1425,11 @@
 		data['par_speedBase'] = Number( dataFrom["粒子初速度"] || 0.5);
 		data['par_speedRandom'] = Number( dataFrom["粒子速度随机波动量"] || 2.0);
 		data['par_opacityMode'] = String( dataFrom["粒子透明度模式"] || "先显现后消失");
+		
+		data['par_selfRotateMode'] = String( dataFrom["粒子自旋转模式"] || "固定角度");
+		data['par_selfRotateFix'] = Number( dataFrom["粒子自旋转初始角度"] || 0.0);
+		data['par_selfRotateSpeed'] = Number( dataFrom["粒子自旋转速度"] || 1.5);
+		
 		data['par_scaleMode'] = String( dataFrom["粒子缩放模式"] || "固定缩放值");
 		data['par_scaleBase'] = Number( dataFrom["粒子缩放值"] || 1.0);
 		data['par_scaleRandom'] = Number( dataFrom["粒子缩放随机波动量"] || 0.2);
@@ -1274,9 +1437,18 @@
 		// > 双层效果
 		data['second_enable'] = String( dataFrom["是否开启双层效果"] || "false") == "true";
 		data['second_src_img'] = String( dataFrom["资源-第二层粒子"] || "");
-		data['second_src_img_file'] = "img/Menu__layer/";
-		data['second_menuIndex'] = Number( dataFrom["第二层粒子菜单层级"] || 0);
+		data['second_layerIndex'] = Number( dataFrom["第二层粒子菜单层级"] || "菜单后面层");
 		data['second_zIndex'] = Number( dataFrom["第二层粒子图片层级"] || 7);
+		
+		// > 随机种子
+		data['seed_enable'] = String( dataFrom["是否固定随机种子"] || "false") == "true";
+		data['seed_value'] = Number( dataFrom["固定随机种子"] || 0.20221002);
+		
+		// > 直线拖尾贴图
+		data['trailing_enable'] = String( dataFrom["是否开启直线拖尾效果"] || "false") == "true";
+		data['trailing_centerAnchor'] = String( dataFrom["是否固定拖尾在粒子中心"] || "false") == "true";
+		data['trailing_src_img'] = String( dataFrom["资源-直线拖尾"] || "");
+		data['trailing_src_img_file'] = "img/Menu__layer/";
 		
 		return data;
 	}
@@ -1291,24 +1463,33 @@
 		data['menu'] = String( dataFrom["所属菜单"] || "");
 		data['menu_key'] = String( dataFrom["自定义关键字"] || "");
 		
-		// > 贴图
+		
+		// > 控制器
 		data['visible'] = String( dataFrom["初始是否显示"] || "true") == "true";
+		data['pause'] = false;
+		
+		// > 贴图
 		data['src_img'] = String( dataFrom["资源-粒子"] || "");
 		data['src_img_mask'] = String( dataFrom["资源-粒子遮罩"] || "");
 		data['src_img_file'] = "img/Menu__layer/";
+		data['x'] = 0;
+		data['y'] = 0;
 		data['opacity'] = Number( dataFrom["透明度"] || 255);
 		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
-		data['menu_index'] = Number( dataFrom["菜单层级"] || 0);
+		data['layerIndex'] = Number( dataFrom["菜单层级"] || "菜单后面层");
 		data['zIndex'] = Number( dataFrom["图片层级"] || 0);
 		
 		// > 粒子效果
 		data['par_count'] = Number( dataFrom["粒子数量"] || 0);
 		data['par_life'] = Number( dataFrom["粒子生命周期"] || 180);
-		data['par_selfRotate'] = Number( dataFrom["粒子自旋转速度"] || 1.5);
+		data['par_backrun'] = String( dataFrom["粒子弹道是否倒放"] || "false") == "true";
+		//data['par_holdingBirthPosition'] = String( dataFrom["粒子是否滞留"] || "false") == "true";
+		
 		data['par_birthMode'] = String( dataFrom["粒子出现模式"] || "随机出现");
 		data['par_birthX'] = Number( dataFrom["粒子固定点 X"] || 0);
 		data['par_birthY'] = Number( dataFrom["粒子固定点 Y"] || 0);
 		data['par_birthRange'] = Number( dataFrom["粒子固定点范围"] || 120);
+		
 		data['par_dirMode'] = String( dataFrom["粒子方向模式"] || "四周扩散(随机)");
 		data['par_dirFix'] = Number( dataFrom["粒子固定方向"] || 90.0);
 		data['par_dirSectorFace'] = Number( dataFrom["粒子扇形朝向"] || 45.0);
@@ -1317,6 +1498,11 @@
 		data['par_speedBase'] = Number( dataFrom["粒子初速度"] || 0.5);
 		data['par_speedRandom'] = Number( dataFrom["粒子速度随机波动量"] || 2.0);
 		data['par_opacityMode'] = String( dataFrom["粒子透明度模式"] || "先显现后消失");
+		
+		data['par_selfRotateMode'] = String( dataFrom["粒子自旋转模式"] || "固定角度");
+		data['par_selfRotateFix'] = Number( dataFrom["粒子自旋转初始角度"] || 0.0);
+		data['par_selfRotateSpeed'] = Number( dataFrom["粒子自旋转速度"] || 1.5);
+		
 		data['par_scaleMode'] = String( dataFrom["粒子缩放模式"] || "固定缩放值");
 		data['par_scaleBase'] = Number( dataFrom["粒子缩放值"] || 1.0);
 		data['par_scaleRandom'] = Number( dataFrom["粒子缩放随机波动量"] || 0.2);
@@ -1324,9 +1510,18 @@
 		// > 双层效果
 		data['second_enable'] = String( dataFrom["是否开启双层效果"] || "false") == "true";
 		data['second_src_img'] = String( dataFrom["资源-第二层粒子"] || "");
-		data['second_src_img_file'] = "img/Menu__layer/";
-		data['second_menuIndex'] = Number( dataFrom["第二层粒子菜单层级"] || 0);
+		data['second_layerIndex'] = Number( dataFrom["第二层粒子菜单层级"] || "菜单后面层");
 		data['second_zIndex'] = Number( dataFrom["第二层粒子图片层级"] || 7);
+		
+		// > 随机种子
+		data['seed_enable'] = String( dataFrom["是否固定随机种子"] || "false") == "true";
+		data['seed_value'] = Number( dataFrom["固定随机种子"] || 0.20221002);
+		
+		// > 直线拖尾贴图
+		data['trailing_enable'] = String( dataFrom["是否开启直线拖尾效果"] || "false") == "true";
+		data['trailing_centerAnchor'] = String( dataFrom["是否固定拖尾在粒子中心"] || "false") == "true";
+		data['trailing_src_img'] = String( dataFrom["资源-直线拖尾"] || "");
+		data['trailing_src_img_file'] = "img/Menu__layer/";
 		
 		return data;
 	}
@@ -1358,14 +1553,20 @@
 	}
 	
 	
+//=============================================================================
+// * >>>>基于插件检测>>>>
+//=============================================================================
+if( Imported.Drill_CoreOfParticle ){
+	
 	
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _drill_MPa_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_MPa_pluginCommand.call(this, command, args);
 	if( command === ">菜单粒子" ){
+		
 		if(args.length == 4){
 			var temp1 = String(args[1]);
 			var type = String(args[3]);
@@ -1401,10 +1602,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		}
 	}
 };
-
+	
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -1509,7 +1710,7 @@ Game_System.prototype.drill_MPa_checkSysData_Private = function() {
 
 
 //#############################################################################
-// ** 【标准模块】菜单层级
+// ** 【标准模块】菜单层级 ☆菜单层级
 //#############################################################################
 //##############################
 // * 菜单层级 - 添加贴图到层级【标准函数】
@@ -1582,11 +1783,15 @@ Scene_MenuBase.prototype.drill_MPa_layerAddSprite_Private = function( sprite, la
 	}
 };
 
+
 //=============================================================================
-// ** 菜单界面
+// ** ☆贴图控制
+//
+//			说明：	> 此模块专门管理 贴图 的创建。不考虑 控制器/贴图 销毁情况。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// ** 菜单 - 创建菜单后面层
+// * 贴图控制 - 粒子初始化
 //==============================
 var _drill_MPa_createBackground = Scene_MenuBase.prototype.createBackground;
 Scene_MenuBase.prototype.createBackground = function() {
@@ -1595,13 +1800,13 @@ Scene_MenuBase.prototype.createBackground = function() {
 	SceneManager._drill_MPa_created = false;	
    	this._drill_MPa_spriteTankOrg = [];
    	this._drill_MPa_spriteTankSec = [];
-   	this._drill_MPa_dataTank = [];
+   	this._drill_MPa_controllerTank = [];
 	
 	// > 菜单后面层
 	_drill_MPa_createBackground.call(this);
 };
 //==============================
-// ** 菜单 - 退出界面
+// * 贴图控制 - 退出界面
 //==============================
 var _drill_MPa_terminate = Scene_MenuBase.prototype.terminate;
 Scene_MenuBase.prototype.terminate = function() {
@@ -1609,7 +1814,7 @@ Scene_MenuBase.prototype.terminate = function() {
 	SceneManager._drill_MPa_created = false;
 };
 //==============================
-// * 菜单 - 帧刷新
+// * 贴图控制 - 帧刷新
 //==============================
 var _drill_MPa_update = Scene_MenuBase.prototype.update;
 Scene_MenuBase.prototype.update = function() {
@@ -1622,23 +1827,20 @@ Scene_MenuBase.prototype.update = function() {
 	}
 	// > 帧刷新
 	if( SceneManager._drill_MPa_created == true ){
-		this.drill_MPa_update();
+		this.drill_MPa_updateController();
 	};
 };
 
-//=============================================================================
-// ** 粒子
-//=============================================================================
 //==============================
-// * 粒子 - 创建
+// * 贴图控制 - 创建
 //==============================
 Scene_MenuBase.prototype.drill_MPa_create = function() {	
 	SceneManager._drill_MPa_created = true;
 	
 	if(!this._drill_MPa_spriteTankOrg){	//防止覆写报错 - 贴图初始化
-		this._drill_MPa_spriteTankOrg = [];	//（数组元素不允许出现null值）
-		this._drill_MPa_spriteTankSec = [];	//（数组元素不允许出现null值）
-		this._drill_MPa_dataTank = [];		//（数组元素不允许出现null值）
+		this._drill_MPa_spriteTankOrg = [];		//（数组元素不允许出现null值）
+		this._drill_MPa_spriteTankSec = [];		//（数组元素不允许出现null值）
+		this._drill_MPa_controllerTank = [];	//（数组元素不允许出现null值）
 	}
 	
 	// > 配置的粒子
@@ -1648,77 +1850,43 @@ Scene_MenuBase.prototype.drill_MPa_create = function() {
 		
 		if( this.drill_MPa_checkKeyword( temp_data ) ){
 			
-			// > 粒子层
-			var temp_layer = new Sprite();
-			temp_layer.opacity = temp_data['opacity'];
-			temp_layer.zIndex = temp_data['zIndex'];
-			temp_layer.visible = $gameSystem._drill_MPa_visible[i] || false;
+			// > 创建数据
+			var temp_controller = new Drill_MPa_Controller( temp_data );
+			this._drill_MPa_controllerTank.push( temp_controller );
 			
-			// > 粒子集合
-			for( var j = 0; j < temp_data['par_count'] ; j++ ){	
-				var temp_sprite_data = JSON.parse(JSON.stringify( temp_data ));		//深拷贝数据（杜绝引用造成的修改）
-				var temp_sprite = new Sprite();
-				temp_sprite.bitmap = ImageManager.loadBitmap( temp_sprite_data['src_img_file'], temp_sprite_data['src_img'], 0, true );
-				temp_sprite.anchor.x = 0.5;
-				temp_sprite.anchor.y = 0.5;
-				temp_sprite.blendMode = temp_sprite_data['blendMode'];
-				temp_sprite.opacity = 0;
-				
-				this._drill_MPa_spriteTankOrg.push(temp_sprite);
-				this._drill_MPa_dataTank.push(temp_sprite_data);
-				temp_layer.addChild(temp_sprite);
-				
-				// > 粒子初始化
-				this.drill_MPa_resetParticles(this._drill_MPa_dataTank.length-1);	//（创建时刷新添加的粒子）
-				temp_sprite['_time'] = Math.floor( temp_sprite_data['par_life'] * Math.random() );
-			}
+			// > 创建贴图
+			var temp_sprite = new Drill_MPa_Sprite();
+			temp_sprite.drill_sprite_setController( temp_controller );
+			temp_sprite.drill_sprite_initChild();
 			
-			// > 粒子层 - 菜单层级
-			this.drill_MPa_layerAddSprite( temp_layer, temp_data['menu_index'] );
 			
-			// > 粒子层 - 粒子遮罩
-			if( temp_data['src_img_mask'] != "" ){
-				var temp_mask = new Sprite( ImageManager.loadBitmap( temp_data['src_img_file'], temp_data['src_img_mask'], 0, true ) );
-				temp_layer.addChild(temp_mask);
-				temp_layer.mask = temp_mask;
-			}
-		
 			// > 双层效果
-			if( temp_data['second_enable'] == true ){
+			if( temp_controller._drill_data['second_enable'] == true ){
 				
-				// > 第二层
-				var temp_layerSec = new Sprite();
-				temp_layerSec.opacity = temp_layer.opacity;
-				temp_layerSec.zIndex = temp_data['second_zIndex'];
-				temp_layerSec.visible = temp_layer.visible;
+				// > 双层效果 - 创建贴图
+				var temp_secSprite = new Drill_MPa_SecSprite( temp_sprite );
 				
-				// > 粒子集合
-				for( var j = 0; j < temp_layer.children.length; j++ ){	
-					var org_sprite = temp_layer.children[j];
-					
-					var temp_sprite = new Sprite();
-					temp_sprite.bitmap = ImageManager.loadBitmap( temp_data['second_src_img_file'], temp_data['second_src_img'], 0, true );
-					temp_sprite.anchor.x = 0.5;
-					temp_sprite.anchor.y = 0.5;
-					temp_sprite.blendMode = org_sprite.blendMode;
-					temp_sprite.opacity = 0;
-					temp_sprite.scale.x = org_sprite.scale.x;
-					temp_sprite.scale.y = org_sprite.scale.y;
-					temp_sprite._followingSprite = org_sprite;
-					
-					this._drill_MPa_spriteTankSec.push(temp_sprite);
-					temp_layerSec.addChild(temp_sprite);
-				}
-			
-				// > 第二层 - 菜单层级
-				this.drill_MPa_layerAddSprite( temp_layer, temp_data['second_menuIndex'] );
+				// > 双层效果 - 添加贴图到层级（先添加）
+				this._drill_MPa_spriteTankSec.push( temp_secSprite );
+				this.drill_MPa_layerAddSprite( temp_secSprite, temp_data['second_layerIndex'] );
 				
-				// > 第二层 - 粒子遮罩
+				// > 双层效果 - 粒子遮罩
 				if( temp_data['src_img_mask'] != "" ){
 					var temp_mask = new Sprite(ImageManager.loadBitmap( temp_data['src_img_file'], temp_data['src_img_mask'], 0, true ));
-					temp_layerSec.addChild(temp_mask);
-					temp_layerSec.mask = temp_mask;
+					temp_secSprite.addChild(temp_mask);
+					temp_secSprite.mask = temp_mask;
 				}
+			}
+			
+			// > 添加贴图到层级
+			this._drill_MPa_spriteTankOrg.push( temp_sprite );
+			this.drill_MPa_layerAddSprite( temp_sprite, temp_data['layerIndex'] );
+			
+			// > 粒子遮罩
+			if( temp_data['src_img_mask'] != "" ){
+				var temp_mask = new Sprite( ImageManager.loadBitmap( temp_data['src_img_file'], temp_data['src_img_mask'], 0, true ) );
+				temp_sprite.addChild(temp_mask);
+				temp_sprite.mask = temp_mask;
 			}
 			
 		}
@@ -1728,85 +1896,51 @@ Scene_MenuBase.prototype.drill_MPa_create = function() {
 		var i = $gameSystem._drill_MPa_default;
 		var temp_data = DrillUp.g_MPa_list[i];
 		if( temp_data == undefined ){ return; }
+	
+		// > 创建数据
+		var temp_controller = new Drill_MPa_Controller( temp_data );
+		this._drill_MPa_controllerTank.push( temp_controller );
 		
-		// > 粒子层
-		var temp_layer = new Sprite();
-		temp_layer.opacity = temp_data['opacity'];
-		temp_layer.zIndex = temp_data['zIndex'];
-		temp_layer.visible = $gameSystem._drill_MPa_visible[i] || false;
+		// > 创建贴图
+		var temp_sprite = new Drill_MPa_Sprite();
+		temp_sprite.drill_sprite_setController( temp_controller );
+		temp_sprite.drill_sprite_initChild();
 		
-		// > 粒子集合
-		for( var j = 0; j < temp_data['par_count'] ; j++ ){	
-			var temp_sprite_data = JSON.parse(JSON.stringify( temp_data ));	//深拷贝数据（杜绝引用造成的修改）
-			var temp_sprite = new Sprite();
-			temp_sprite.bitmap = ImageManager.loadBitmap( temp_sprite_data['src_img_file'], temp_sprite_data['src_img'], 0, true );
-			temp_sprite.anchor.x = 0.5;
-			temp_sprite.anchor.y = 0.5;
-			temp_sprite.blendMode = temp_sprite_data['blendMode'];
-			temp_sprite.opacity = 0;
-			
-			this._drill_MPa_spriteTankOrg.push(temp_sprite);
-			this._drill_MPa_dataTank.push(temp_sprite_data);
-			temp_layer.addChild(temp_sprite);
-			
-			// > 粒子初始化
-			this.drill_MPa_resetParticles(this._drill_MPa_dataTank.length-1);	//（创建时刷新添加的粒子）
-			temp_sprite['_time'] = Math.floor( temp_sprite_data['par_life'] * Math.random() );
-		}
-		
-		// > 粒子层 - 菜单层级
-		this.drill_MPa_layerAddSprite( temp_layer, "菜单后面层" );
-		
-		// > 粒子层 - 粒子遮罩
-		if( temp_data['src_img_mask'] != "" ){
-			var temp_mask = new Sprite( ImageManager.loadBitmap( temp_data['src_img_file'], temp_data['src_img_mask'], 0, true ) );
-			temp_layer.addChild(temp_mask);
-			temp_layer.mask = temp_mask;
-		}
 		
 		// > 双层效果
-		if( temp_data['second_enable'] == true ){
+		if( temp_controller._drill_data['second_enable'] == true ){
 			
-			// > 第二层
-			var temp_layerSec = new Sprite();
-			temp_layerSec.opacity = temp_layer.opacity;
-			temp_layerSec.zIndex = temp_data['second_zIndex'];
-			temp_layerSec.visible = temp_layer.visible;
+			// > 双层效果 - 创建贴图
+			var temp_secSprite = new Drill_MPa_SecSprite( temp_sprite );
 			
-			// > 粒子集合
-			for( var j = 0; j < temp_layer.children.length; j++ ){	
-				var org_sprite = temp_layer.children[j];
-				
-				var temp_sprite = new Sprite();
-				temp_sprite.bitmap = ImageManager.loadBitmap( temp_data['second_src_img_file'], temp_data['second_src_img'], 0, true );
-				temp_sprite.anchor.x = 0.5;
-				temp_sprite.anchor.y = 0.5;
-				temp_sprite.blendMode = org_sprite.blendMode;
-				temp_sprite.opacity = 0;
-				temp_sprite.scale.x = org_sprite.scale.x;
-				temp_sprite.scale.y = org_sprite.scale.y;
-				temp_sprite._followingSprite = org_sprite;
-				
-				this._drill_MPa_spriteTankSec.push(temp_sprite);
-				temp_layerSec.addChild(temp_sprite);
-			}
+			// > 双层效果 - 添加贴图到层级（先添加）
+			this._drill_MPa_spriteTankSec.push( temp_secSprite );
+			this.drill_MPa_layerAddSprite( temp_secSprite, temp_data['second_layerIndex'] );
 		
-			// > 第二层 - 菜单层级
-			this.drill_MPa_layerAddSprite( temp_layer, temp_data['second_menuIndex'] );
-			
-			// > 第二层 - 粒子遮罩
+			// > 双层效果 - 粒子遮罩
 			if( temp_data['src_img_mask'] != "" ){
-				var temp_mask = new Sprite( ImageManager.loadBitmap( temp_data['src_img_file'], temp_data['src_img_mask'], 0, true ) );
-				temp_layerSec.addChild(temp_mask);
-				temp_layerSec.mask = temp_mask;
+				var temp_mask = new Sprite(ImageManager.loadBitmap( temp_data['src_img_file'], temp_data['src_img_mask'], 0, true ));
+				temp_secSprite.addChild(temp_mask);
+				temp_secSprite.mask = temp_mask;
 			}
 		}
+		
+		// > 添加贴图到层级
+		this._drill_MPa_spriteTankOrg.push( temp_sprite );
+		this.drill_MPa_layerAddSprite( temp_sprite, "菜单后面层" );
+		
+		// > 粒子遮罩
+		if( temp_data['src_img_mask'] != "" ){
+			var temp_mask = new Sprite( ImageManager.loadBitmap( temp_data['src_img_file'], temp_data['src_img_mask'], 0, true ) );
+			temp_sprite.addChild(temp_mask);
+			temp_sprite.mask = temp_mask;
+		}
+		
 	}
 	this.drill_MPa_sortByZIndex();
 };
-
 //==============================
-// * 粒子 - 检查位置
+// * 贴图控制 - 检查位置
 //==============================
 Scene_MenuBase.prototype.drill_MPa_checkKeyword = function( temp_sprite_data ){
 	
@@ -1852,303 +1986,684 @@ Scene_MenuBase.prototype.drill_MPa_checkKeyword = function( temp_sprite_data ){
 	}
 	return false;
 };
-
 //==============================
-// * 粒子 - 帧刷新
+// * 贴图控制 - 帧刷新 控制器
 //==============================
-Scene_MenuBase.prototype.drill_MPa_update = function() {
-	
-	// > 粒子贴图
-	for(var i = 0; i < this._drill_MPa_spriteTankOrg.length; i++ ){
-		var spr = this._drill_MPa_spriteTankOrg[i];
-		var data = this._drill_MPa_dataTank[i];
-		spr['_time'] += 1;
+Scene_MenuBase.prototype.drill_MPa_updateController = function(){
+	for( var i = 0; i < this._drill_MPa_controllerTank.length; i++ ){
+		var controller = this._drill_MPa_controllerTank[i];
 		
-		// > 位置
-		var xx = 0;
-		var yy = 0;
-		xx += data['start_x'];
-		yy += data['start_y'];
-		xx += spr['_time'] * data['cur_speed'] * Math.cos( data['start_dir'] );
-		yy += spr['_time'] *data['cur_speed'] * Math.sin( data['start_dir'] );
-		spr.x = xx;
-		spr.y = yy;
-		
-		// > 透明度
-		var index = spr['_time'];
-		if( index >= data['_drill_COBa_opacity'].length ){
-			index = data['_drill_COBa_opacity'].length -1;
-		}
-		spr.opacity = data['_drill_COBa_opacity'][index];
-		
-		// > 自旋转
-		spr.rotation += data['par_selfRotate'] /180*Math.PI;
-		
-		// > 过界刷新
-    	if( this.drill_MPa_isNeedResetParticles(i) ){
-			this.drill_MPa_resetParticles(i);
-		};
-	};
-	
-	// > 第二层贴图
-	for(var i = 0; i < this._drill_MPa_spriteTankSec.length; i++ ){
-		var spr_sec = this._drill_MPa_spriteTankSec[i];
-		if( spr_sec._followingSprite == undefined ){ return; }
-		
-		// > 位置
-		spr_sec.x = spr_sec._followingSprite.x;
-		spr_sec.y = spr_sec._followingSprite.y;
-		
-		// > 透明度
-		spr_sec.opacity = spr_sec._followingSprite.opacity;
-		
-		// > 缩放大小
-		spr_sec.scale.x = spr_sec._followingSprite.scale.x;
-		spr_sec.scale.y = spr_sec._followingSprite.scale.y;
-		
-		// > 自旋转
-		spr_sec.rotation = spr_sec._followingSprite.rotation;
-		
-	};
+		// > 控制器 帧刷新
+		controller.drill_controller_update();
+	}
 };
 
+
+
+//=============================================================================
+// ** 粒子控制器【Drill_MPa_Controller】
+// **		
+// **		作用域：	地图界面
+// **		主功能：	> 定义一个专门控制动画粒子的数据类。
+// **		子功能：	->控制器
+// **						->帧刷新
+// **						->重设数据
+// **							->序列号
+// **						->显示/隐藏
+// **						->暂停/继续
+// **						->销毁
+// **					->A主体
+// **					->B粒子群弹道
+// **					->C随机因子
+// **					->D粒子变化
+// **					->E粒子重设
+// **					->F双层效果
+// **					->G直线拖尾贴图
+// **					->H贴图高宽
+// **					->I粒子生命周期
+// **		
+// **		说明：	> 该类可与 Game_CharacterBase 一并存储在 $gameMap 中。
+//=============================================================================
 //==============================
-// * 粒子 - 重设条件
-//==============================	
-Scene_MenuBase.prototype.drill_MPa_isNeedResetParticles = function(i) {
-	var spr = this._drill_MPa_spriteTankOrg[i];
-	var data = this._drill_MPa_dataTank[i];
-	var ww = Math.max( spr.width, 100 );
-	var hh = Math.max( spr.height, 100 );
-	
-	// > 过边界
-	if( spr.x < 0 - ww ){ return true };
-	if( spr.x > Graphics.boxWidth + ww ){ return true };
-	if( spr.y < 0 - hh ){ return true };
-	if( spr.y > Graphics.boxHeight + hh ){ return true };
-	
-	// > 生命周期结束
-	if( spr['_time'] > data['par_life'] ){ return true; }
-	
-	return false;
+// * 控制器 - 定义
+//==============================
+function Drill_MPa_Controller(){
+    this.initialize.apply(this, arguments);
 };
+Drill_MPa_Controller.prototype = Object.create(Drill_COPa_Controller.prototype);
+Drill_MPa_Controller.prototype.constructor = Drill_MPa_Controller;
+//==============================
+// * 控制器 - 初始化
+//==============================
+Drill_MPa_Controller.prototype.initialize = function( data ){
+    Drill_COPa_Controller.prototype.initialize.call( this, data );
+}
+//##############################
+// * 控制器 - 帧刷新【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//			
+//			说明：	> 此函数必须在 帧刷新 中手动调用执行。
+//##############################
+Drill_MPa_Controller.prototype.drill_controller_update = function(){
+    Drill_COPa_Controller.prototype.drill_controller_update.call( this );
+}
+//##############################
+// * 控制器 - 重设数据【标准函数】
+//			
+//			参数：	> data 动态参数对象
+//			返回：	> 无
+//			
+//			说明：	> 通过此函数，你不需要再重新创建一个数据对象，并且贴图能直接根据此数据来变化。
+//					> 参数对象中的参数【可以缺项】，只要的参数项不一样，就刷新；参数项一样，则不变化。
+//##############################
+Drill_MPa_Controller.prototype.drill_controller_resetData = function( data ){
+    Drill_COPa_Controller.prototype.drill_controller_resetData.call( this, data );
+};
+//##############################
+// * 控制器 - 显示/隐藏【标准函数】
+//
+//			参数：	> visible 布尔（是否显示）
+//			返回：	> 无
+//			
+//			说明：	> 可放在帧刷新函数中实时调用。
+//##############################
+Drill_MPa_Controller.prototype.drill_controller_setVisible = function( visible ){
+    Drill_COPa_Controller.prototype.drill_controller_setVisible.call( this, visible );
+};
+//##############################
+// * 控制器 - 暂停/继续【标准函数】
+//
+//			参数：	> enable 布尔
+//			返回：	> 无
+//			
+//			说明：	> 可放在帧刷新函数中实时调用。
+//##############################
+Drill_MPa_Controller.prototype.drill_controller_setPause = function( pause ){
+    Drill_COPa_Controller.prototype.drill_controller_setPause.call( this, pause );
+};
+//##############################
+// * 控制器 - 设置销毁【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 布尔
+//##############################
+Drill_MPa_Controller.prototype.drill_controller_destroy = function(){
+    Drill_COPa_Controller.prototype.drill_controller_destroy.call( this );
+};
+//##############################
+// * 控制器 - 判断销毁【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 布尔
+//##############################
+Drill_MPa_Controller.prototype.drill_MPa_isDead = function(){
+	return Drill_COPa_Controller.prototype.drill_controller_isDead.call( this );
+};
+//##############################
+// * 控制器 - 初始化数据【标准默认值】
+//
+//			参数：	> 无
+//			返回：	> 无
+//			
+//			说明：	> data 动态参数对象（来自类初始化）
+//					  该对象包含 类所需的所有默认值。
+//##############################
+Drill_MPa_Controller.prototype.drill_controller_initData = function(){
+	Drill_COPa_Controller.prototype.drill_controller_initData.call( this );
+	var data = this._drill_data;
+	
+	// > 贴图
+	data['src_img_file'] = "img/Menu__layer/";
+	data['trailing_src_img_file'] = "img/Menu__layer/";
+	if( data['layerIndex'] == undefined ){ data['layerIndex'] = "菜单后面层" };							//贴图 - 所在层级（贴图用）
+	if( data['zIndex'] == undefined ){ data['zIndex'] = 0 };											//贴图 - 图片层级（贴图用）
+	
+	// > D粒子变化
+	data['par_holdingBirthPosition'] = false;															//D粒子变化 - 粒子是否滞留
+	
+	// > E粒子重设
+	if( data['par_birthMode'] == undefined ){ data['par_birthMode'] = "随机出现" };						//E粒子重设 - 粒子出现模式
+	if( data['par_birthX'] == undefined ){ data['par_birthX'] = 0 };									//E粒子重设 - 粒子固定点 X
+	if( data['par_birthY'] == undefined ){ data['par_birthY'] = 0 };									//E粒子重设 - 粒子固定点 Y
+	if( data['par_birthRange'] == undefined ){ data['par_birthRange'] = 40 };							//E粒子重设 - 粒子出现范围
+	
+	// > F双层效果
+	if( data['second_layerIndex'] == undefined ){ data['second_layerIndex'] = "菜单后面层" };			//F双层效果 - 第二层粒子层级
+	if( data['second_zIndex'] == undefined ){ data['second_zIndex'] = 3 };								//F双层效果 - 第二层粒子图片层级
+	
+	// > I粒子生命周期
+	data['par_lifeType'] = "跳过产生过程";
+}
+//==============================
+// * 控制器 - 初始化子功能
+//==============================
+Drill_MPa_Controller.prototype.drill_controller_initChild = function(){
+	Drill_COPa_Controller.prototype.drill_controller_initChild.call( this );
+}
+
 
 //==============================
-// * 粒子 - 重设
+// * A主体 - 初始化子功能
+//==============================
+Drill_MPa_Controller.prototype.drill_controller_initAttr = function() {
+	Drill_COPa_Controller.prototype.drill_controller_initAttr.call( this );
+	// > 常规
+	this._drill_curPluginTipName = DrillUp.g_MPa_PluginTip_curName;	//常规 - 当前插件名（提示信息）
+}
+//==============================
+// * B粒子群弹道 - 初始化子功能
+//==============================
+Drill_MPa_Controller.prototype.drill_controller_initBallistics = function() {
+	Drill_COPa_Controller.prototype.drill_controller_initBallistics.call( this );
+}
+//==============================
+// * C随机因子 - 初始化子功能
+//==============================
+Drill_MPa_Controller.prototype.drill_controller_initRandom = function() {
+	Drill_COPa_Controller.prototype.drill_controller_initRandom.call( this );
+}
+//==============================
+// * D粒子变化 - 初始化子功能
+//==============================
+Drill_MPa_Controller.prototype.drill_controller_initTransform = function() {
+	Drill_COPa_Controller.prototype.drill_controller_initTransform.call( this );
+	//（注意，控制器不存 弹道值 ，因此这里的 x、y、opacity 都不含弹道的影响）
+	//（如果需要弹道影响后的值，去贴图中进行控制）
+}
+//==============================
+// * E粒子重设 - 初始化子功能
+//==============================
+Drill_MPa_Controller.prototype.drill_controller_initReset = function() {
+	Drill_COPa_Controller.prototype.drill_controller_initReset.call( this );
+}
+//==============================
+// * E粒子重设 - 帧刷新
+//==============================
+Drill_MPa_Controller.prototype.drill_controller_updateReset = function() {
+	Drill_COPa_Controller.prototype.drill_controller_updateReset.call( this );
+}
+//==============================
+// * E粒子重设 - 判断条件
+//==============================
+Drill_MPa_Controller.prototype.drill_controller_isParticleDead = function( i ){
+	return Drill_COPa_Controller.prototype.drill_controller_isParticleDead.call( this, i );
+}
+//==============================
+// * E粒子重设 - 执行重设 - 位置
+//
+//			说明：	> 由于当前插件为 个体装饰，因此起始点为 一个圆内随机出现 。
 //==============================	
-Scene_MenuBase.prototype.drill_MPa_resetParticles = function(i) {
-	var spr = this._drill_MPa_spriteTankOrg[i];
-	var data = this._drill_MPa_dataTank[i];
-	var ww = Math.max( spr.width, 100 );
-	var hh = Math.max( spr.height, 100 );
+Drill_MPa_Controller.prototype.drill_controller_resetParticles_Position = function( i ){
+	Drill_COPa_Controller.prototype.drill_controller_resetParticles_Position.call( this, i );
+	var data = this._drill_data;
+	var cur_iteration = this._drill_parList_randomIteration[i];
+	var xx = 0;
+	var yy = 0;
+	var margin = this.drill_controller_getBitmapMargin();
+	var ww = margin['ww'];
+	var hh = margin['hh'];
+	var ran1 = this.drill_controller_curRandom( cur_iteration*i +41*i );
+	var ran2 = this.drill_controller_curRandom( cur_iteration*i +43*i +1000 );
 	
-	spr['_time'] = 0;
-	spr.rotation = 2*Math.PI*Math.random();
-	
-	// > 粒子出现模式
 	if( data['par_birthMode'] == "随机出现" ){
-		data['start_x'] = Math.randomInt(Graphics.boxWidth);
-		data['start_y'] = Math.randomInt(Graphics.boxHeight);
+		xx = Graphics.boxWidth * ran1;
+		yy = Graphics.boxHeight * ran2;
 	}
 	if( data['par_birthMode'] == "左侧出现" ){
-		data['start_x'] = 0 - ww*0.5;
-		data['start_y'] = Math.randomInt(Graphics.boxHeight);
+		xx = 0 - ww*0.5;
+		yy = Graphics.boxHeight * ran2;
 	}
 	if( data['par_birthMode'] == "右侧出现" ){
-		data['start_x'] = Graphics.boxWidth + ww*0.5;
-		data['start_y'] = Math.randomInt(Graphics.boxHeight);
+		xx = Graphics.boxWidth + ww*0.5;
+		yy = Graphics.boxHeight * ran2;
 	}
 	if( data['par_birthMode'] == "顶部出现" ){
-		data['start_x'] = Math.randomInt(Graphics.boxWidth);
-		data['start_y'] = 0 - hh*0.5;
+		xx = Graphics.boxWidth * ran1;
+		yy = 0 - hh*0.5;
 	}
 	if( data['par_birthMode'] == "底部出现" ){
-		data['start_x'] = Math.randomInt(Graphics.boxWidth);
-		data['start_y'] = Graphics.boxHeight + hh*0.5;
+		xx = Graphics.boxWidth * ran1;
+		yy = Graphics.boxHeight + hh*0.5;
 	}
 	if( data['par_birthMode'] == "固定点范围出现" ){
-		data['start_x'] = data['par_birthX'] + data['par_birthRange'] * Math.cos( 2*Math.PI*Math.random() );
-		data['start_y'] = data['par_birthY'] + data['par_birthRange'] * Math.sin( 2*Math.PI*Math.random() );
+		angle = 360 * ran1;
+		radius = data['par_birthRange'] * ran2;
+		xx = radius * Math.cos( angle *Math.PI/180 );
+		yy = radius * Math.sin( angle *Math.PI/180 );
 	}
 	
-	// > 粒子方向模式
-	if( data['par_dirMode'] == "固定方向" ){
-		data['start_dir'] = data['par_dirFix'];
-		data['start_dir'] = data['start_dir'] /180*Math.PI;
-	}
-	if( data['par_dirMode'] == "四周扩散(随机)" ){
-		data['start_dir'] = 360 * Math.random();
-		data['start_dir'] = data['start_dir'] /180*Math.PI;
-	}
-	if( data['par_dirMode'] == "扇形范围方向(随机)" ){
-		data['start_dir'] = data['par_dirSectorFace'] + (Math.random() - 0.5) * data['par_dirSectorDegree'];
-		data['start_dir'] = data['start_dir'] /180*Math.PI;
-	}
-	if( data['par_dirMode'] == "方向聚焦于粒子固定点" ){
-		data['start_dir'] = this.drill_MPa_getPointToPointDegree( data['start_x'],data['start_y'], data['par_birthX'],data['par_birthY'] );
-		data['start_dir'] = data['start_dir'] /180*Math.PI;
-	}
-	
-	// > 粒子速度模式
-	if( data['par_speedMode'] == "只初速度" ){
-		data['cur_speed'] = data['par_speedBase'];
-	}
-	if( data['par_speedMode'] == "初速度+波动量" ){
-		data['cur_speed'] = data['par_speedBase'] + (Math.random() - 0.5) * data['par_speedRandom'];
-	}
-	
-	// > 粒子透明度模式
-	if( data['par_opacityMode'] == "逐渐消失" ){
-		data['anchorPointTank'] = [];
-		data['anchorPointTank'].push( {'t':0,'o':255} );
-		data['anchorPointTank'].push( {'t':100,'o':0} );
-	}
-	if( data['par_opacityMode'] == "先显现后消失(慢速)" ){
-		data['anchorPointTank'] = [];
-		data['anchorPointTank'].push( {'t':0,'o':0} );
-		data['anchorPointTank'].push( {'t':45,'o':255} );
-		data['anchorPointTank'].push( {'t':55,'o':255} );
-		data['anchorPointTank'].push( {'t':100,'o':0} );
-	}
-	if( data['par_opacityMode'] == "先显现后消失" ){
-		data['anchorPointTank'] = [];
-		data['anchorPointTank'].push( {'t':0,'o':0} );
-		data['anchorPointTank'].push( {'t':25,'o':255} );
-		data['anchorPointTank'].push( {'t':75,'o':255} );
-		data['anchorPointTank'].push( {'t':100,'o':0} );
-	}
-	if( data['par_opacityMode'] == "先显现后消失(快速)" ){
-		data['anchorPointTank'] = [];
-		data['anchorPointTank'].push( {'t':0,'o':0} );
-		data['anchorPointTank'].push( {'t':10,'o':255} );
-		data['anchorPointTank'].push( {'t':90,'o':255} );
-		data['anchorPointTank'].push( {'t':100,'o':0} );
-	}
-	if( data['par_opacityMode'] == "保持原透明度" ){
-		data['anchorPointTank'] = [];
-		data['anchorPointTank'].push( {'t':0,'o':255} );
-		data['anchorPointTank'].push( {'t':100,'o':255} );
-	}
-	if( data['par_opacityMode'] == "一闪一闪" ){
-		data['anchorPointTank'] = [];
-		data['anchorPointTank'].push( {'t':0,'o':0} );
-		data['anchorPointTank'].push( {'t':30,'o':125} );
-		data['anchorPointTank'].push( {'t':35,'o':255} );
-		data['anchorPointTank'].push( {'t':40,'o':125} );
-		data['anchorPointTank'].push( {'t':45,'o':255} );
-		data['anchorPointTank'].push( {'t':50,'o':125} );
-		data['anchorPointTank'].push( {'t':70,'o':125} );
-		data['anchorPointTank'].push( {'t':75,'o':255} );
-		data['anchorPointTank'].push( {'t':80,'o':125} );
-		data['anchorPointTank'].push( {'t':85,'o':255} );
-		data['anchorPointTank'].push( {'t':90,'o':125} );
-		data['anchorPointTank'].push( {'t':100,'o':0} );
-	}
-	
-	// > 粒子透明度模式（复刻至"弹道核心 - 时间锚点公式"）
-	data['_drill_COBa_opacity'] = [ 0 ];
-	if( data['anchorPointTank'] != undefined ){
-		data['_drill_COBa_opacity'] = [];
-		
-		// > 起点值
-		data['_drill_COBa_opacity'].push( 0 );
-		
-		// > 时间锚点初始化
-		if( data['anchorPointTank'].length < 2 ){	//（至少要两个点才能计算）
-			data['anchorPointTank'] = [];
-			data['anchorPointTank'].push( {'t':0,'o':0} );
-			data['anchorPointTank'].push( {'t':100,'o':255} );
-		}
-		
-		// > 开始找点（这里默认 data['anchorPointTank'] 已根据 t 排序 ）
-		for(var time = 1; time <= data['par_life']; time++){
-			var time_per = time * 100 / data['par_life'];	//（时间百分比） 
-			
-			// > 找到百分比的落脚点
-			var start_index = 0;
-			var end_index = 0;
-			for( var i = 0; i < data['anchorPointTank'].length; i++ ){
-				var p = data['anchorPointTank'][i];
-				if( time_per < p['t'] ){
-					start_index = i-1;
-					end_index = i;
-					break;
-				}
-			}
-			
-			// > 直接找到末尾点
-			if( end_index == 0 ){
-				data['_drill_COBa_opacity'].push( data['anchorPointTank'][ data['anchorPointTank'].length-1 ]['o'] );
-				continue;
-			}
-			// > 开头点都没接触到
-			if( start_index == -1 ){
-				data['_drill_COBa_opacity'].push( data['anchorPointTank'][0]['o'] );
-				continue;
-			}
-			
-			// > 计算通用落脚点
-			var p_start = data['anchorPointTank'][start_index];
-			var p_end = data['anchorPointTank'][end_index];
-			var d_time = p_end['t'] - p_start['t'];
-			var cur_time = time_per - p_start['t'];
-			var cc = cur_time / d_time * ( p_end['o'] - p_start['o'] ) + p_start['o'];
-			data['_drill_COBa_opacity'].push( cc );
-		}
-	}
-	
-	// > 粒子缩放模式
-	if( data['par_scaleMode'] == "固定缩放值" ){
-		spr.scale.x = data['par_scaleBase'];
-		spr.scale.y = data['par_scaleBase'];
-	}
-	if( data['par_scaleMode'] == "缩放值+波动量" ){
-		var ran = Math.random();
-		spr.scale.x = data['par_scaleBase'] + (ran - 0.5) * data['par_scaleRandom'];
-		spr.scale.y = data['par_scaleBase'] + (ran - 0.5) * data['par_scaleRandom'];
-	}
-	
+	this._drill_parList_x[i] = xx;
+	this._drill_parList_y[i] = yy;
+}
+//==============================
+// * F双层效果 - 初始化子功能
+//==============================
+// * G直线拖尾贴图 - 初始化子功能
+//==============================
+// * H贴图高宽 - 初始化子功能
+//==============================
+// * I粒子生命周期 - 初始化子功能
+//==============================
+
+
+
+//=============================================================================
+// ** 粒子贴图【Drill_MPa_Sprite】
+// **
+// **		作用域：	地图界面
+// **		主功能：	> 定义一个粒子贴图。
+// **		子功能：	->贴图
+// **						->是否就绪
+// **						->优化策略
+// **						->是否需要销毁
+// **						->销毁
+// **					->A主体
+// **					->B粒子群弹道
+// **					->C对象绑定
+// **					->D粒子变化
+// **					->E粒子重设
+// **					->F双层效果
+// **					->G直线拖尾贴图
+// **					->H贴图高宽
+// **					->I粒子生命周期
+// **
+// **		说明：	> 你必须在创建贴图后，手动初始化。（还需要先设置 控制器和个体贴图 ）
+// **
+// **		代码：	> 范围 - 该类显示单独的动画装饰。
+// **				> 结构 - [合并/ ●分离 /混乱] 贴图与数据分离。
+// **				> 数量 - [单个/ ●多个] 
+// **				> 创建 - [ ●一次性 /自延迟/外部延迟] 先创建控制器，在 _spriteset 创建后，再创建此贴图。
+// **				> 销毁 - [不考虑/自销毁/ ●外部销毁 ] 
+// **				> 样式 - [ ●不可修改 /自变化/外部变化] 
+//=============================================================================
+//==============================
+// * 粒子贴图 - 定义
+//==============================
+function Drill_MPa_Sprite() {
+    this.initialize.apply(this, arguments);
+};
+Drill_MPa_Sprite.prototype = Object.create(Drill_COPa_Sprite.prototype);
+Drill_MPa_Sprite.prototype.constructor = Drill_MPa_Sprite;
+//==============================
+// * 粒子贴图 - 初始化
+//==============================
+Drill_MPa_Sprite.prototype.initialize = function(){
+    Drill_COPa_Sprite.prototype.initialize.call( this );
 };
 //==============================
-// * 数学 - 计算点A朝向点B的角度
-//			
-//			参数：	> x1,y1 数字（点A）
-//					> x2,y2 数字（点B）
-//			返回：	> 数字      （角度，0 至 360 之间）
-//			
-//			说明：	0度朝右，90度朝下，180度朝左，270度朝上。
+// * 粒子贴图 - 帧刷新
 //==============================
-Scene_Title.prototype.drill_MPa_getPointToPointDegree = function( x1,y1,x2,y2 ){
-	var degree = 0;
-	
-	// > arctan不能为0情况
-	if( x2 == x1 ){
-		if( y2 > y1 ){
-			degree = 90;
-		}else{
-			degree = 270;
-		}
-	}else if( y2 == y1 ){
-		if( x2 > x1 ){
-			degree = 0;
-		}else{
-			degree = 180;
-		}
-	
-	// > arctan正常计算
-	}else{
-		degree = Math.atan( (y2 - y1)/(x2 - x1) );
-		degree = degree / Math.PI * 180;
-		if( x2 < x1 ){
-			degree += 180;
-		}
-	}
-	
-	// > 修正值
-	degree = degree % 360;
-	if( degree < 0 ){ degree += 360; }
-	
-	return degree;
+Drill_MPa_Sprite.prototype.update = function() {
+	Drill_COPa_Sprite.prototype.update.call(this);
+}
+
+//##############################
+// * C对象绑定 - 设置控制器【开放函数】
+//			
+//			参数：	> controller 控制器对象
+//			返回：	> 无
+//			
+//			说明：	> 由于贴图与数据分离，贴图必须依赖一个数据对象。
+//##############################
+Drill_MPa_Sprite.prototype.drill_sprite_setController = function( controller ){
+    Drill_COPa_Sprite.prototype.drill_sprite_setController.call( this, controller );
 };
+//##############################
+// * C对象绑定 - 初始化子功能【开放函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//			
+//			说明：	> 需要设置 控制器和个体贴图 之后，才能进行手动初始化。
+//##############################
+Drill_MPa_Sprite.prototype.drill_sprite_initChild = function(){
+    Drill_COPa_Sprite.prototype.drill_sprite_initChild.call( this );
+};
+
+//##############################
+// * 粒子贴图 - 是否就绪【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 布尔（是否显示）
+//			
+//			说明：	> 这里完全 不考虑 延迟加载问题。
+//##############################
+Drill_MPa_Sprite.prototype.drill_sprite_isReady = function(){
+    return Drill_COPa_Sprite.prototype.drill_sprite_isReady.call( this );
+};
+//##############################
+// * 粒子贴图 - 优化策略【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 布尔（是否通过）
+//			
+//			说明：	> 通过时，正常帧刷新；未通过时，不执行帧刷新。
+//##############################
+Drill_MPa_Sprite.prototype.drill_sprite_isOptimizationPassed = function(){
+    return Drill_COPa_Sprite.prototype.drill_sprite_isOptimizationPassed.call( this );
+};
+//##############################
+// * 粒子贴图 - 是否需要销毁【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 布尔（是否需要销毁）
+//			
+//			说明：	> 此函数可用于监听 控制器数据 是否被销毁，数据销毁后，贴图可自动销毁。
+//##############################
+Drill_MPa_Sprite.prototype.drill_sprite_isNeedDestroy = function(){
+    return Drill_COPa_Sprite.prototype.drill_sprite_isNeedDestroy.call( this );
+};
+//##############################
+// * 粒子贴图 - 销毁【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//			
+//			说明：	> 销毁不是必要的，但最好随时留意给 旧贴图 执行销毁函数。
+//##############################
+Drill_MPa_Sprite.prototype.drill_sprite_destroy = function(){
+	Drill_COPa_Sprite.prototype.drill_sprite_destroy.call( this );
+};
+//==============================
+// * 粒子贴图 - 初始化自身
+//==============================
+Drill_MPa_Sprite.prototype.drill_sprite_initSelf = function(){
+    Drill_COPa_Sprite.prototype.drill_sprite_initSelf.call( this );
+};
+//==============================
+// * 粒子贴图 - 销毁子功能
+//==============================
+Drill_MPa_Sprite.prototype.drill_sprite_destroyChild = function(){
+    Drill_COPa_Sprite.prototype.drill_sprite_destroyChild.call( this );
+};
+//==============================
+// * 粒子贴图 - 销毁自身
+//==============================
+Drill_MPa_Sprite.prototype.drill_sprite_destroySelf = function(){
+    Drill_COPa_Sprite.prototype.drill_sprite_destroySelf.call( this );
+};
+//==============================
+// * 优化策略 - 判断通过（私有）
+//==============================
+Drill_MPa_Sprite.prototype.drill_sprite_isOptimizationPassed_Private = function(){
+	return Drill_COPa_Sprite.prototype.drill_sprite_isOptimizationPassed_Private.call( this );
+};
+
+
+//==============================
+// * A主体 - 初始化子功能
+//==============================
+Drill_MPa_Sprite.prototype.drill_sprite_initAttr = function() {
+    Drill_COPa_Sprite.prototype.drill_sprite_initAttr.call( this );
+	// > 常规
+	this._drill_curPluginTipName = DrillUp.g_MPa_PluginTip_curName;	//常规 - 当前插件名（提示信息）
+	this.zIndex = this._drill_controller._drill_data['zIndex'];
+};
+//==============================
+// * A主体 - 帧刷新 - 位置
+//==============================
+Drill_MPa_Sprite.prototype.drill_sprite_updateAttr_Position = function() {
+    Drill_COPa_Sprite.prototype.drill_sprite_updateAttr_Position.call( this );
+};
+//==============================
+// * A主体 - 帧刷新 - 可见（覆写）
+//==============================
+Drill_MPa_Sprite.prototype.drill_sprite_updateAttr_Visible = function() {
+	var data = this._drill_controller._drill_data;
+	this._drill_visible = $gameSystem._drill_MPa_visible[ data['id'] ];
+};
+//==============================
+// * B粒子群弹道 - 初始化子功能
+//==============================
+Drill_MPa_Sprite.prototype.drill_sprite_initBallistics = function() {
+    Drill_COPa_Sprite.prototype.drill_sprite_initBallistics.call( this );
+}
+//==============================
+// * B粒子群弹道 - 推演弹道
+//==============================
+Drill_MPa_Sprite.prototype.drill_sprite_refreshBallistics = function( i ){
+    Drill_COPa_Sprite.prototype.drill_sprite_refreshBallistics.call( this, i );
+}
+//==============================
+// * D粒子变化 - 初始化子功能
+//==============================
+Drill_MPa_Sprite.prototype.drill_sprite_initTransform = function() {
+    Drill_COPa_Sprite.prototype.drill_sprite_initTransform.call( this );
+}
+//==============================
+// * D粒子变化 - 帧刷新 - 位置
+//==============================
+Drill_MPa_Sprite.prototype.drill_sprite_updateTransform_Position = function( i, time ){
+    Drill_COPa_Sprite.prototype.drill_sprite_updateTransform_Position.call( this, i, time );
+	
+	
+	// > 粒子过边界时（直接取余，不要重置）
+	var margin = this._drill_controller.drill_controller_getBitmapMargin();
+	var ww = margin['ww'];
+	var hh = margin['hh'];
+	var bww = Graphics.boxWidth + ww*2;
+	var bhh = Graphics.boxHeight + hh*2;
+	
+	// > 边界取余
+	this._drill_par_x %= bww;
+	this._drill_par_x += bww;
+	this._drill_par_x %= bww;
+	this._drill_par_x -= ww;
+	this._drill_par_y %= bww;
+	this._drill_par_y += bww;
+	this._drill_par_y %= bww;
+	this._drill_par_y -= hh;
+	
+}
+//==============================
+// * E粒子重设 - 初始化子功能
+//==============================
+Drill_MPa_Sprite.prototype.drill_sprite_initReset = function() {
+    Drill_COPa_Sprite.prototype.drill_sprite_initReset.call( this );
+}
+//==============================
+// * F双层效果 - 初始化子功能
+//==============================
+// * G直线拖尾贴图 - 初始化子功能
+//==============================
+// * H贴图高宽 - 初始化子功能
+//==============================
+// * I粒子生命周期 - 初始化子功能
+//==============================
+
+
+
+//=============================================================================
+// ** 粒子贴图（第二层）【Drill_MPa_SecSprite】
+// **
+// **		作用域：	地图界面
+// **		主功能：	> 定义一个 第二层粒子贴图 。
+// **		子功能：	->贴图
+// **						->是否就绪
+// **						->优化策略
+// **						->是否需要销毁
+// **						->销毁
+// **					->A主体
+// **					->B粒子群弹道（无）
+// **					->C对象绑定（无）
+// **					->D粒子变化
+// **					->E粒子重设（无）
+// **					->F双层效果（无）
+// **					->G直线拖尾贴图（无）
+// **					->H贴图高宽（无）
+// **					->I粒子生命周期（无）
+// **
+// **		说明：	> 第二层粒子与 父贴图 的 D粒子变化 保持一致。
+//=============================================================================
+//==============================
+// * 第二层粒子 - 定义
+//==============================
+function Drill_MPa_SecSprite() {
+    this.initialize.apply(this, arguments);
+};
+Drill_MPa_SecSprite.prototype = Object.create(Drill_COPa_SecSprite.prototype);
+Drill_MPa_SecSprite.prototype.constructor = Drill_MPa_SecSprite;
+//==============================
+// * 第二层粒子 - 初始化
+//==============================
+Drill_MPa_SecSprite.prototype.initialize = function( parentSprite ){
+	Drill_COPa_SecSprite.prototype.initialize.call( this, parentSprite );
+}
+//==============================
+// * 第二层粒子 - 帧刷新
+//==============================
+Drill_MPa_SecSprite.prototype.update = function() {
+	Drill_COPa_SecSprite.prototype.update.call(this);
+}
+//##############################
+// * 第二层粒子 - 是否就绪【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 布尔（是否显示）
+//			
+//			说明：	> 这里完全 不考虑 延迟加载问题。
+//##############################
+Drill_MPa_SecSprite.prototype.drill_spriteSec_isReady = function(){
+    return Drill_COPa_SecSprite.prototype.drill_spriteSec_isReady.call(this);
+};
+//##############################
+// * 第二层粒子 - 优化策略【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 布尔（是否通过）
+//			
+//			说明：	> 通过时，正常帧刷新；未通过时，不执行帧刷新。
+//##############################
+Drill_MPa_SecSprite.prototype.drill_spriteSec_isOptimizationPassed = function(){
+    return Drill_COPa_SecSprite.prototype.drill_spriteSec_isOptimizationPassed.call(this);
+};
+//##############################
+// * 第二层粒子 - 是否需要销毁【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 布尔（是否需要销毁）
+//			
+//			说明：	> 此函数可用于监听 控制器数据 是否被销毁，数据销毁后，贴图可自动销毁。
+//##############################
+Drill_MPa_SecSprite.prototype.drill_spriteSec_isNeedDestroy = function(){
+    return Drill_COPa_SecSprite.prototype.drill_spriteSec_isNeedDestroy.call(this);
+};
+//##############################
+// * 第二层粒子 - 销毁【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//			
+//			说明：	> 销毁不是必要的，但最好随时留意给 旧贴图 执行销毁函数。
+//##############################
+Drill_MPa_SecSprite.prototype.drill_spriteSec_destroy = function(){
+    return Drill_COPa_SecSprite.prototype.drill_spriteSec_destroy.call(this);
+};
+//==============================
+// * 第二层粒子 - 初始化自身
+//==============================
+Drill_MPa_SecSprite.prototype.drill_spriteSec_initSelf = function( parentSprite ){
+	Drill_COPa_SecSprite.prototype.drill_spriteSec_initSelf.call( this, parentSprite );
+};
+//==============================
+// * 第二层粒子 - 初始化子功能
+//==============================
+Drill_MPa_SecSprite.prototype.drill_spriteSec_initChild = function(){
+	Drill_COPa_SecSprite.prototype.drill_spriteSec_initChild.call( this );
+};
+//==============================
+// * 第二层粒子 - 销毁子功能
+//==============================
+Drill_MPa_SecSprite.prototype.drill_spriteSec_destroyChild = function(){
+	Drill_COPa_SecSprite.prototype.drill_spriteSec_destroyChild.call( this );
+};
+//==============================
+// * 第二层粒子 - 销毁自身
+//==============================
+Drill_MPa_SecSprite.prototype.drill_spriteSec_destroySelf = function(){
+	Drill_COPa_SecSprite.prototype.drill_spriteSec_destroySelf.call( this );
+};
+//==============================
+// * 优化策略 - 判断通过（私有）
+//==============================
+Drill_MPa_SecSprite.prototype.drill_spriteSec_isOptimizationPassed_Private = function(){
+	return Drill_COPa_SecSprite.prototype.drill_spriteSec_isOptimizationPassed_Private.call( this );
+}
+
+//==============================
+// * A主体（第二层） - 初始化子功能
+//==============================
+Drill_MPa_SecSprite.prototype.drill_spriteSec_initAttr = function() {
+	Drill_COPa_SecSprite.prototype.drill_spriteSec_initAttr.call( this );
+	this.zIndex = this._drill_controller._drill_data['second_zIndex'];
+};
+//==============================
+// * B粒子群弹道（第二层） - 初始化子功能
+//==============================
+Drill_MPa_SecSprite.prototype.drill_spriteSec_initBallistics = function() {
+	Drill_COPa_SecSprite.prototype.drill_spriteSec_initBallistics.call( this );
+};
+//==============================
+// * D粒子变化（第二层） - 初始化子功能
+//==============================
+Drill_MPa_SecSprite.prototype.drill_spriteSec_initTransform = function() {
+	Drill_COPa_SecSprite.prototype.drill_spriteSec_initTransform.call( this );
+}
+//==============================
+// * D粒子变化（第二层） - 帧刷新 - 位置
+//==============================
+Drill_MPa_SecSprite.prototype.drill_spriteSec_updateTransform_Position = function( i, time ) {
+	Drill_COPa_SecSprite.prototype.drill_spriteSec_updateTransform_Position.call( this, i, time );
+	
+	
+	// > 粒子过边界时（直接取余，不要重置）
+	var margin = this._drill_controller.drill_controller_getBitmapMargin();
+	var ww = margin['ww'];
+	var hh = margin['hh'];
+	var bww = Graphics.boxWidth + ww*2;
+	var bhh = Graphics.boxHeight + hh*2;
+	
+	// > 边界取余
+	this._drill_parSec_x %= bww;
+	this._drill_parSec_x += bww;
+	this._drill_parSec_x %= bww;
+	this._drill_parSec_x -= ww;
+	this._drill_parSec_y %= bww;
+	this._drill_parSec_y += bww;
+	this._drill_parSec_y %= bww;
+	this._drill_parSec_y -= hh;
+	
+}
+//==============================
+// * E粒子重设（第二层） - 初始化子功能
+//==============================
+Drill_MPa_SecSprite.prototype.drill_spriteSec_initReset = function() {
+	Drill_COPa_SecSprite.prototype.drill_spriteSec_initReset.call( this );
+};
+//==============================
+// * F双层效果（第二层） - 初始化子功能
+//==============================
+// * G直线拖尾贴图（第二层） - 初始化子功能
+//==============================
+// * H贴图高宽（第二层） - 初始化子功能
+//==============================
+// * I粒子生命周期（第二层） - 初始化子功能
+//==============================
+
+
+
+//=============================================================================
+// * <<<<基于插件检测<<<<
+//=============================================================================
+}else{
+		Imported.Drill_LayerParticle = false;
+		var pluginTip = DrillUp.drill_MPa_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
+}
+
+
+
 
 

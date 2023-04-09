@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        窗口字符 - 描边效果
+ * @plugindesc [v1.2]        窗口字符 - 描边效果
  * @author Drill_up
  * 
  * @Drill_LE_param "颜色-%d"
@@ -48,11 +48,23 @@
  * 
  * 窗口字符：\oc[1]         之后的文字使用描边颜色1，简写形式。
  * 窗口字符：\ow[4]         之后的文字描边厚度为4，简写形式。
- * 窗口字符：\fr            重置之后文字所有设置。包括恢复默认描边。
+ * 窗口字符：\fr            重置之后文字所有设置。能恢复为默认描边。
  * 
  * 1.这里的窗口字符均为效果字符，
  *   比如"\dDCOB[1]描边\fr"，包裹的字符将会产生描边效果。
  * 2.你不想让文字带有描边效果，设置厚度0即可去掉。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 对话框
+ * 你可以通过插件指令修改默认设置：
+ * 
+ * 插件指令：>描边效果 : 固定对话框描边 : 颜色[1] : 厚度[4]
+ * 插件指令：>描边效果 : 恢复对话框描边
+ * 插件指令：>描边效果 : 固定对话框描边颜色 : 颜色[1]
+ * 插件指令：>描边效果 : 固定对话框描边厚度 : 厚度[4]
+ * 
+ * 1.插件指令设置后，对话框描边的修改 永久有效。
+ *   但注意，窗口字符的优先级 比该指令高，若有窗口字符，优先用窗口字符效果。
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -82,24 +94,26 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 优化了旧存档的识别与兼容。
+ * [v1.2]
+ * 添加了 插件指令 固定对话框的 描边功能。
  * 
  *
  * 
  * @param ---默认设置---
  * @desc 
  * 
- * @param 默认描边颜色ID
+ * @param 默认描边颜色ID(全局)
  * @parent ---默认设置---
  * @type number
  * @min 1
- * @desc 默认字符外框的颜色，对应当前描边颜色的id。
+ * @desc 默认字符外框的颜色，对应当前描边颜色的id。注意，对游戏中的所有窗口都有效。
  * @default 11
  * 
- * @param 默认描边厚度
+ * @param 默认描边厚度(全局)
  * @parent ---默认设置---
  * @type number
  * @min 0
- * @desc 默认字符外框的厚度。设为0时，则不绘制字符外框。
+ * @desc 默认字符外框的厚度。设为0时，则不绘制字符外框。注意，对游戏中的所有窗口都有效。
  * @default 4
  * 
  * @param ---描边颜色---
@@ -267,8 +281,13 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			描边效果：
-//				->参数设置
+//			->☆提示信息
+//			->☆变量获取
+//			->☆插件指令
+//			->☆存储数据
+//			
+//			->☆描边绑定
+//			->☆厚度设置
 //
 //		★必要注意事项：
 //			暂无
@@ -281,7 +300,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -318,7 +337,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_DialogCharOuterBorder = true;
@@ -342,8 +361,8 @@
 	//			说明：	返回字符串，格式为 rgba(255,255,255,0.5)
 	//==============================
 	DrillUp.drill_DCOB_getColor = function( n ){
-		if( !DrillUp.g_DCOB_color_list[n-1] ){ console.log( DrillUp.drill_DCOB_getPluginTip_ColorError( n ) ); return "rgba(0,0,0,0.5)" }
-		if( !DrillUp.g_DCOB_color_list[n-1]['color'] ){ console.log( DrillUp.drill_DCOB_getPluginTip_ColorNotFind( n ) ); return "rgba(0,0,0,0.5)" }
+		if( DrillUp.g_DCOB_color_list[n-1] == undefined ){ console.log( DrillUp.drill_DCOB_getPluginTip_ColorError( n ) ); return "rgba(0,0,0,0.5)" }
+		if( DrillUp.g_DCOB_color_list[n-1]['color'] == undefined ){ console.log( DrillUp.drill_DCOB_getPluginTip_ColorNotFind( n ) ); return "rgba(0,0,0,0.5)" }
 		var str = DrillUp.g_DCOB_color_list[n-1]['color'];
 		if( str.length == 7 ){
 			var r = parseInt(str.substring(1, 3), 16);
@@ -356,8 +375,8 @@
 	}
 	
 	/*-----------------杂项------------------*/
-	DrillUp.g_DCOB_fontEdgeColorIndex = String(DrillUp.parameters["默认描边颜色ID"] || 1); 
-	DrillUp.g_DCOB_fontEdgeThickness = Number(DrillUp.parameters["默认描边厚度"] || 4); 
+	DrillUp.g_DCOB_fontEdgeColorIndex = Number(DrillUp.parameters["默认描边颜色ID(全局)"] || 1); 
+	DrillUp.g_DCOB_fontEdgeThickness = Number(DrillUp.parameters["默认描边厚度(全局)"] || 4); 
 	
 	/*-----------------描边颜色------------------*/
 	DrillUp.g_DCOB_color_list_length = 20;
@@ -379,8 +398,53 @@
 if( Imported.Drill_CoreOfWindowCharacter ){
 	
 
+//=============================================================================
+// ** ☆插件指令
+//=============================================================================
+var _drill_DCOB_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+Game_Interpreter.prototype.pluginCommand = function(command, args) {
+	_drill_DCOB_pluginCommand.call(this, command, args);
+	if( command === ">描边效果" ){
+		
+		if( args.length == 2 ){
+			var type = String(args[1]);
+			if( type == "恢复对话框描边" ){
+				$gameSystem._drill_DCOB_dialog_fontEdgeColorIndex = DrillUp.g_DCOB_fontEdgeColorIndex;
+				$gameSystem._drill_DCOB_dialog_fontEdgeThickness = DrillUp.g_DCOB_fontEdgeThickness;
+			}
+		}
+		if( args.length == 4 ){
+			var type = String(args[1]);
+			var temp1 = String(args[3]);
+			temp1 = temp1.replace("颜色[","");
+			temp1 = temp1.replace("厚度[","");
+			temp1 = temp1.replace("]","");
+			if( type == "固定对话框描边颜色" ){
+				$gameSystem._drill_DCOB_dialog_fontEdgeColorIndex = Number(temp1)-1;
+			}
+			if( type == "固定对话框描边厚度" ){
+				$gameSystem._drill_DCOB_dialog_fontEdgeThickness = Number(temp1);
+			}
+		}
+		if( args.length == 6 ){
+			var type = String(args[1]);
+			var temp1 = String(args[3]);
+			var temp2 = String(args[5]);
+			temp1 = temp1.replace("颜色[","");
+			temp1 = temp1.replace("]","");
+			temp2 = temp2.replace("厚度[","");
+			temp2 = temp2.replace("]","");
+			if( type == "固定对话框描边" ){
+				$gameSystem._drill_DCOB_dialog_fontEdgeColorIndex = Number(temp1)-1;
+				$gameSystem._drill_DCOB_dialog_fontEdgeThickness = Number(temp2);
+			}
+		}
+	}
+}
+	
+	
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -446,8 +510,12 @@ Game_System.prototype.drill_DCOB_checkSysData = function() {
 //==============================
 Game_System.prototype.drill_DCOB_initSysData_Private = function() {
 	
-	this._drill_DCOB_fontEdgeColorIndex = DrillUp.g_DCOB_fontEdgeColorIndex;	//窗口字符 - 字符外框颜色
-	this._drill_DCOB_fontEdgeThickness = DrillUp.g_DCOB_fontEdgeThickness;		//窗口字符 - 字符外框厚度
+	this._drill_DCOB_fontEdgeColorIndex = DrillUp.g_DCOB_fontEdgeColorIndex;			//字符外框颜色（全局默认）
+	this._drill_DCOB_fontEdgeThickness = DrillUp.g_DCOB_fontEdgeThickness;				//字符外框厚度（全局默认）
+	
+	this._drill_DCOB_dialog_fontEdgeColorIndex = DrillUp.g_DCOB_fontEdgeColorIndex;		//字符外框颜色（对话框）
+	this._drill_DCOB_dialog_fontEdgeThickness = DrillUp.g_DCOB_fontEdgeThickness;		//字符外框厚度（对话框）
+	
 };
 //==============================
 // * 存储数据 - 载入存档时检查数据（私有）
@@ -455,7 +523,7 @@ Game_System.prototype.drill_DCOB_initSysData_Private = function() {
 Game_System.prototype.drill_DCOB_checkSysData_Private = function() {
 	
 	// > 旧存档数据自动补充
-	if( this._drill_DCOB_fontEdgeColorIndex == undefined ){
+	if( this._drill_DCOB_dialog_fontEdgeColorIndex == undefined ){
 		this.drill_DCOB_initSysData();
 	}
 	
@@ -463,10 +531,10 @@ Game_System.prototype.drill_DCOB_checkSysData_Private = function() {
 
 
 //=============================================================================
-// * 描边颜色
+// ** ☆描边绑定
 //=============================================================================
 //==============================
-// * 描边颜色 - 效果字符转换 - 组合符（继承）
+// * 描边绑定 - 效果字符转换 - 组合符（继承）
 //==============================
 var _drill_COWC_DCOB_processNewEffectChar_Combined = Window_Base.prototype.drill_COWC_processNewEffectChar_Combined;
 Window_Base.prototype.drill_COWC_processNewEffectChar_Combined = function( matched_index, matched_str, command, args ){
@@ -505,24 +573,16 @@ Window_Base.prototype.drill_COWC_processNewEffectChar_Combined = function( match
 	}
 }
 //==============================
-// * 描边颜色 - 画笔同步（继承）
+// * 描边绑定 - 画笔同步（继承）
 //==============================
 var _drill_COWC_DCOB_drawSynchronization = Window_Base.prototype.drill_COWC_drawSynchronization;
 Window_Base.prototype.drill_COWC_drawSynchronization = function( bitmap_from, bitmap_to ){
 	_drill_COWC_DCOB_drawSynchronization.call( this, bitmap_from, bitmap_to );
 	bitmap_to.outlineColor = bitmap_from.outlineColor;
 	bitmap_to.outlineWidth = bitmap_from.outlineWidth;
-}
-//==============================
-// * 描边颜色 - 重置
-//==============================
-Window_Base.prototype.drill_DCOB_resetOuterBorder = function() {
-	if( this.contents == undefined ){ return; }
-	this.contents.outlineColor = DrillUp.drill_DCOB_getColor( $gameSystem._drill_DCOB_fontEdgeColorIndex || 15 );
-	this.contents.outlineWidth = $gameSystem._drill_DCOB_fontEdgeThickness || 4;	
 };
 //==============================
-// * 描边颜色 - 重置绑定
+// * 描边绑定 - 重置绑定
 //==============================
 var _drill_DCOB_resetFontSettings = Window_Base.prototype.resetFontSettings;
 Window_Base.prototype.resetFontSettings = function() {
@@ -530,7 +590,37 @@ Window_Base.prototype.resetFontSettings = function() {
 	this.drill_DCOB_resetOuterBorder();
 };
 //==============================
-// * 描边厚度 - 初始化
+// * 描边绑定 - 重置（全局默认）
+//==============================
+Window_Base.prototype.drill_DCOB_resetOuterBorder = function() {
+	if( this.contents == undefined ){ return; }
+	
+	var color_index = $gameSystem._drill_DCOB_fontEdgeColorIndex;
+	if( color_index == 0 ){ color_index = 11; }
+	this.contents.outlineColor = DrillUp.drill_DCOB_getColor( color_index );
+	this.contents.outlineWidth = $gameSystem._drill_DCOB_fontEdgeThickness;
+};
+//==============================
+// * 描边绑定 - 重置（对话框）
+//==============================
+Window_Message.prototype.drill_DCOB_resetOuterBorder = function() {
+	if( this.contents == undefined ){ return; }
+	
+	var color_index = $gameSystem._drill_DCOB_dialog_fontEdgeColorIndex;
+	if( color_index == 0 ){ color_index = 11; }
+	this.contents.outlineColor = DrillUp.drill_DCOB_getColor( color_index );
+	this.contents.outlineWidth = $gameSystem._drill_DCOB_dialog_fontEdgeThickness;
+};
+
+
+//=============================================================================
+// ** ☆厚度设置
+//
+//			说明：	> 此处对 厚度设置为0 时进行专门兼容。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 厚度设置 - 初始化
 //==============================
 var _drill_DCOB_bitmap_initialize2 = Bitmap.prototype.initialize;
 Bitmap.prototype.initialize = function( width, height ){
@@ -546,7 +636,7 @@ Bitmap.prototype.initialize = function( width, height ){
 	}
 }
 //==============================
-// * 描边厚度 - 绘制设置
+// * 厚度设置 - 绘制设置
 //==============================
 var _drill_DCOB__drawTextOutline = Bitmap.prototype._drawTextOutline;
 Bitmap.prototype._drawTextOutline = function( text, tx, ty, maxWidth ){

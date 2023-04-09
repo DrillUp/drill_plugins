@@ -73,8 +73,11 @@
  * 事件注释：=>事件说明窗口 : 激活方式 : 触屏按下[持续]
  * 事件注释：=>事件说明窗口 : 设置皮肤样式 : 样式[1]
  * 事件注释：=>事件说明窗口 : 设置皮肤样式 : 默认样式
+ * 事件注释：=>事件说明窗口 : 当前事件页不显示文本
  *
  * 1.注意，一条注释最多能填入六行，如果你要设置更多内容，多加几个注释即可。
+ * 2.注释的文本 跨事件页 ，如果你不希望事件页切换后窗口仍在，那么在下一事件页
+ *   使用"当前事件页不显示文本"即可。
  * 
  * 事件注释(旧)：=>事件说明窗口 : 鼠标接近 : 显示下列说明
  * 事件注释(旧)：=>事件说明窗口 : 鼠标左键按下[持续] : 显示下列说明
@@ -204,7 +207,7 @@
  * @parent ---皮肤样式集---
  * @type struct<DrillMPFEStyle>
  * @desc 事件说明窗口的皮肤样式配置。
- * @default {"标签":"--默认皮肤--","---窗口---":"","布局模式":"默认窗口皮肤","布局透明度":"225","资源-自定义窗口皮肤":"Window","资源-自定义背景图片":"","平移-自定义背景图片 X":"0","平移-自定义背景图片 Y":"0","是否锁定窗口色调":"false","窗口色调-红":"0","窗口色调-绿":"0","窗口色调-蓝":"0","窗口中心锚点":"正中心","是否锁定窗口位置":"false","平移-锁定位置 X":"0","平移-锁定位置 Y":"0","地图层级":"图片层","图片层级":"90"}
+ * @default {"标签":"==默认皮肤==","---窗口---":"","布局模式":"默认窗口皮肤","布局透明度":"225","资源-自定义窗口皮肤":"Window","资源-自定义背景图片":"","平移-自定义背景图片 X":"0","平移-自定义背景图片 Y":"0","是否锁定窗口色调":"false","窗口色调-红":"0","窗口色调-绿":"0","窗口色调-蓝":"0","窗口中心锚点":"正中心","是否锁定窗口位置":"false","平移-锁定位置 X":"0","平移-锁定位置 Y":"0","地图层级":"图片层","图片层级":"90"}
  * 
  * @param 皮肤样式-2
  * @parent ---皮肤样式集---
@@ -326,7 +329,7 @@
  * 
  * @param 标签
  * @desc 只用于方便区分查看的标签，不作用在插件中。
- * @default --新的皮肤样式--
+ * @default ==新的皮肤样式==
  * 
  * @param ---窗口---
  * @default 
@@ -880,6 +883,10 @@ Game_Event.prototype.setupPageSettings = function() {
 Game_Event.prototype.drill_MPFE_setupPageSettings = function() {
 	
 	//（每次不要清空注释）
+	if( this._drill_MPFE_bean != undefined &&
+		this._characterName == "" ){		//（空图片时，清空注释）
+		this.drill_MPFE_destroyBean();
+	}
 	
 	var page = this.page();
     if( page ){
@@ -908,6 +915,10 @@ Game_Event.prototype.drill_MPFE_setupPageSettings = function() {
 						if(args[1]){ var temp1 = String(args[1]); }
 						if( temp1 == "显示下列说明" || temp1 == "显示下列文本" ){
 							start_count = true;
+							continue;
+						}
+						if( temp1 == "当前事件页不显示文本" ){
+							this._drill_MPFE_bean.drill_MPFE_setContextList( [] );
 							continue;
 						}
 					}
@@ -958,6 +969,24 @@ Game_Event.prototype.drill_MPFE_setupPageSettings = function() {
 		}
     }
 };
+//==============================
+// * 事件注释 - 销毁时清除
+//==============================
+var _drill_MPFE_erase = Game_Event.prototype.erase;
+Game_Event.prototype.erase = function() {	
+	_drill_MPFE_erase.call(this);
+	this.drill_MPFE_destroyBean();
+};
+//==============================
+// * 事件注释 - 销毁
+//==============================
+Game_Event.prototype.drill_MPFE_destroyBean = function() {	
+	if( this._drill_MPFE_bean != undefined ){
+		this._drill_MPFE_bean = null;
+		$gameTemp._drill_MPFE_needRestatistics = true;
+	}
+};
+
 
 
 //=============================================================================

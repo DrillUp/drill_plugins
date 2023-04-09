@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.5]        窗口字符 - 颜色核心
+ * @plugindesc [v1.6]        窗口字符 - 颜色核心
  * @author Drill_up
  * 
  * @Drill_LE_editForbidden
@@ -86,6 +86,17 @@
  *   如果你有 插播的字符串 要临时变色，可以先暂存之前的颜色，在最后恢复颜色。
  * 
  * -----------------------------------------------------------------------------
+ * ----可选设定 - 对话框
+ * 你可以通过插件指令修改默认设置：
+ * 
+ * 插件指令：>颜色核心 : 固定对话框文本色 : 文本色[0]
+ * 插件指令：>颜色核心 : 恢复对话框文本色
+ * 
+ * 1.插件指令设置后，对话框文本颜色的修改 永久有效。
+ *   但注意，窗口字符的优先级 比该指令高，若有窗口字符，优先用窗口字符效果。
+ * 2.注意，"文本色[0]" 与 "\c[0]" 意思一样。
+ * 
+ * -----------------------------------------------------------------------------
  * ----知识点 - 关于颜色：
  * 默认配置有：
  *  #FF4444 赤     #FF784C 橙
@@ -135,8 +146,20 @@
  * 修改了插件的分类。
  * [v1.5]
  * 添加了 颜色暂存、普通颜色 的窗口字符功能。
+ * [v1.6]
+ * 添加了 插件指令 固定对话框的 文本色功能。
  * 
- *
+ * 
+ * 
+ * @param ---默认设置---
+ * @desc 
+ * 
+ * @param 默认文本颜色(全局)
+ * @parent ---默认设置---
+ * @type number
+ * @min 0
+ * @desc 全局默认的文本颜色，对应"\c[0]"中的数字。注意，对游戏中的所有窗口都有效。
+ * @default 0
  * 
  * @param ---普通颜色---
  * @default 
@@ -1416,7 +1439,8 @@
 //		临时局部变量	无
 //		存储数据变量	无
 //		全局存储变量	无
-//		覆盖重写方法	无
+//		覆盖重写方法	Window_Base.prototype.normalColor
+//						Window_Message.prototype.normalColor
 //
 //<<<<<<<<性能记录<<<<<<<<
 //
@@ -1434,10 +1458,15 @@
 //		★功能结构树：
 //			->☆提示信息
 //			->☆变量获取
+//			->☆插件指令
+//			->☆存储数据
 //			->☆效果字符应用
+//			
 //			->☆文本颜色
 //			->☆颜色文本绘制
+//			->☆文本颜色绑定
 //			->☆逐个字符变色
+//		
 //		
 //		★必要注意事项：
 //			1.变色由两个核心函数组成。
@@ -1544,18 +1573,21 @@
 	// * 临时全局 - 获取普通颜色
 	//==============================
 	DrillUp.drill_COC_getColor = function( n ) {
-		if( !DrillUp.g_COC_color_list[n] ){ console.log( DrillUp.drill_COC_getPluginTip_ColorError1( n ) ); return "#ffffff" }
-		if( !DrillUp.g_COC_color_list[n]['color'] ){ console.log( DrillUp.drill_COC_getPluginTip_ColorNotFind1( n ) ); return "#ffffff" }
+		if( DrillUp.g_COC_color_list[n] == undefined ){ console.log( DrillUp.drill_COC_getPluginTip_ColorError1( n ) ); return "#ffffff" }
+		if( DrillUp.g_COC_color_list[n]['color'] == undefined ){ console.log( DrillUp.drill_COC_getPluginTip_ColorNotFind1( n ) ); return "#ffffff" }
 		return DrillUp.g_COC_color_list[n]['color'];
 	}
 	//==============================
 	// * 临时全局 - 获取高级颜色
 	//==============================
 	DrillUp.drill_COC_getSeniorColor = function( n ) {
-		if( !DrillUp.g_COC_seniorColor_list[n] ){ console.log( DrillUp.drill_COC_getPluginTip_ColorError2( n ) ); return "#ffffff" }
-		if( !DrillUp.g_COC_seniorColor_list[n]['color'] ){ console.log( DrillUp.drill_COC_getPluginTip_ColorNotFind2( n ) ); return "#ffffff" }
+		if( DrillUp.g_COC_seniorColor_list[n] == undefined ){ console.log( DrillUp.drill_COC_getPluginTip_ColorError2( n ) ); return "#ffffff" }
+		if( DrillUp.g_COC_seniorColor_list[n]['color'] == undefined ){ console.log( DrillUp.drill_COC_getPluginTip_ColorNotFind2( n ) ); return "#ffffff" }
 		return DrillUp.g_COC_seniorColor_list[n]['color'];
 	}
+	
+	/*-----------------杂项------------------*/
+	DrillUp.g_COC_fontColorIndex = Number(DrillUp.parameters["默认文本颜色(全局)"] || 0); 
 	
 	/*-----------------普通颜色------------------*/
 	DrillUp.g_COC_color_list_length = 99;
@@ -1586,6 +1618,118 @@
 // * >>>>基于插件检测>>>>
 //=============================================================================
 if( Imported.Drill_CoreOfWindowCharacter ){
+	
+	
+//=============================================================================
+// ** ☆插件指令
+//=============================================================================
+var _drill_COC_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+Game_Interpreter.prototype.pluginCommand = function(command, args) {
+	_drill_COC_pluginCommand.call(this, command, args);
+	if( command === ">颜色核心" ){
+		
+		if( args.length == 2 ){
+			var type = String(args[1]);
+			if( type == "恢复对话框文本色" ){
+				$gameSystem._drill_COC_dialog_fontColorIndex = DrillUp.g_COC_fontColorIndex;
+			}
+		}
+		if( args.length == 4 ){
+			var type = String(args[1]);
+			var temp1 = String(args[3]);
+			temp1 = temp1.replace("文本色[","");
+			temp1 = temp1.replace("]","");
+			if( type == "固定对话框文本色" ){
+				$gameSystem._drill_COC_dialog_fontColorIndex = Number(temp1);
+			}
+		}
+	}
+}
+	
+	
+//#############################################################################
+// ** 【标准模块】存储数据 ☆存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_COC_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_COC_sys_initialize = Game_System.prototype.initialize;
+Game_System.prototype.initialize = function() {
+    _drill_COC_sys_initialize.call(this);
+	this.drill_COC_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_COC_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_COC_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_COC_saveEnabled == true ){	
+		$gameSystem.drill_COC_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_COC_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_COC_initSysData = function() {
+	this.drill_COC_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_COC_checkSysData = function() {
+	this.drill_COC_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_COC_initSysData_Private = function() {
+	
+	this._drill_COC_fontColorIndex = DrillUp.g_COC_fontColorIndex;				//字符文本色（全局默认）
+	
+	this._drill_COC_dialog_fontColorIndex = DrillUp.g_COC_fontColorIndex;		//字符文本色（对话框）
+	
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_COC_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_COC_dialog_fontColorIndex == undefined ){
+		this.drill_COC_initSysData();
+	}
+	
+};
 	
 
 //=============================================================================
@@ -1787,7 +1931,60 @@ Bitmap.prototype._drawTextBody = function( text, tx, ty, maxWidth ){
 };
 
 //=============================================================================
+// ** ☆文本颜色绑定
+//
+//			说明：	> 此模块管理 默认文本色 的配置，其中包含插件指令 固定对话框文本色 的功能。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 文本颜色绑定 - 画笔同步（继承）
+//==============================
+var _drill_COWC_COC_drawSynchronization = Window_Base.prototype.drill_COWC_drawSynchronization;
+Window_Base.prototype.drill_COWC_drawSynchronization = function( bitmap_from, bitmap_to ){
+	_drill_COWC_COC_drawSynchronization.call( this, bitmap_from, bitmap_to );
+	bitmap_to.color = bitmap_from.color;
+};
+/*
+//==============================
+// * 文本颜色绑定 - 重置绑定
+//==============================
+var _drill_COC_resetFontSettings = Window_Base.prototype.resetFontSettings;
+Window_Base.prototype.resetFontSettings = function() {
+	_drill_COC_resetFontSettings.call(this);
+	this.drill_COC_resetTextColor();
+};
+//==============================
+// * 文本颜色绑定 - 重置（全局默认）
+//==============================
+Window_Base.prototype.drill_COC_resetTextColor = function() {
+	if( this.contents == undefined ){ return; }
+	this.contents.color = this.textColor( $gameSystem._drill_COC_fontColorIndex );
+};
+//==============================
+// * 文本颜色绑定 - 重置（对话框）
+//==============================
+Window_Message.prototype.drill_COC_resetTextColor = function() {
+	if( this.contents == undefined ){ return; }
+	this.contents.color = this.textColor( $gameSystem._drill_COC_dialog_fontColorIndex );
+};*/
+//==============================
+// * 文本颜色绑定 - 默认颜色（覆写）
+//==============================
+Window_Base.prototype.normalColor = function(){
+	return this.textColor( $gameSystem._drill_COC_fontColorIndex );
+};
+//==============================
+// * 文本颜色绑定 - 默认颜色（对话框，覆写）
+//==============================
+Window_Message.prototype.normalColor = function(){
+	return this.textColor( $gameSystem._drill_COC_dialog_fontColorIndex );
+};
+
+//=============================================================================
 // ** ☆逐个字符变色
+//
+//			说明：	> 此模块专门提供 普通颜色的多个文字 变色功能。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 逐个变色 - 初始化（开放函数）

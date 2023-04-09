@@ -569,7 +569,7 @@
  * 
  * @param 标签
  * @desc 只用于方便区分查看的标签，不作用在插件中。
- * @default --新的肖像--
+ * @default ==新的肖像==
  *
  * @param 肖像条件-1
  * @type struct<ActorPortraitureCondition>
@@ -606,7 +606,7 @@
  * 
  * @param 标签
  * @desc 只用于方便区分查看的标签，不作用在插件中。
- * @default --新的肖像条件--
+ * @default ==新的肖像条件==
  *
  * @param ===条件===
  * @desc 

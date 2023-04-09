@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        系统 - 字符串核心
+ * @plugindesc [v1.2]        系统 - 字符串核心
  * @author Drill_up
  * 
  * @Drill_LE_param "字符串-%d"
@@ -107,6 +107,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 修复了 \str[\v[21]] 不生效的bug。感谢群友 孑然一身。
+ * [v1.2]
+ * 修复了 对话框中 \str[21] 不能及时生效的bug。
  * 
  * 
  * @param ---字符串组 1至20---
@@ -1351,7 +1353,6 @@
  * @desc 字符串的内容，可以含有窗口字符，包括\str[]来嵌套其它的自定义字符串，但是要注意不能死循环嵌套。
  * @default ""
  * 
- * 
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -1376,26 +1377,31 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			字符串核心：
+//			->☆提示信息
+//			->☆变量获取
+//			->☆插件指令
+//				->字符串输入框
+//			
+//			->字符串【Game_Strings】
 //				->脚本提供
 //				->指代内容
-//				->自我嵌套
-//				->插件指令
-//					->字符串输入框
+//			->☆数据管理器
+//				->多重嵌套转义
+//			->☆字符串应用
 //
 //		★必要注意事项：
 //			1.这里相对完整地复刻了 变量、开关 的程序结构，将字符串对象化。
 //			  插件本身就相当于 核心功能扩展 。
 //			
 //		★其它说明细节：
-//			1.
+//			暂无
 //
 //		★存在的问题：
 //			暂无
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -1412,7 +1418,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_CoreOfString = true;
@@ -1449,63 +1455,41 @@
 	
 	
 //=============================================================================
-// * 全局管理器
+// ** ☆插件指令
 //=============================================================================
-//==============================
-// * 管理器 - 定义
-//==============================
-var $gameStrings    = null;
-//==============================
-// * 管理器 - 初始化
-//==============================
-var _drill_COSt_createGameObjects = DataManager.createGameObjects;
-DataManager.createGameObjects = function() {
-	_drill_COSt_createGameObjects.call( this );
-	$gameStrings    = new Game_Strings();
-};
-//==============================
-// * 管理器 - 保存数据
-//==============================
-var _drill_COSt_makeSaveContents = DataManager.makeSaveContents;
-DataManager.makeSaveContents = function() {
-	var contents = _drill_COSt_makeSaveContents.call( this );
-	contents.strings    = $gameStrings;
-	return contents;
-};
-//==============================
-// * 管理器 - 读取数据
-//==============================
-var _drill_COSt_extractSaveContents = DataManager.extractSaveContents;
-DataManager.extractSaveContents = function( contents ){
-	_drill_COSt_extractSaveContents.call( this,contents );
-	if( contents.strings != undefined ){
-		$gameStrings        = contents.strings;
-	}
-};
-//==============================
-// * 管理器 - 转义嵌套处理
-//==============================
-DataManager.drill_COSt_replaceChar = function( text ){
-	var re = /\\[sS][tT][rR]\[(\d+)\]/;
-	
-	// > 引用嵌套
-	var str_index = 0;
-	var j = 0;
-	for(j = 0; j < 100; j++ ){
-		var arr = re.exec(text);
-		if( arr ){
-			str_index = Number(arr[1]);
-			text = text.replace( re, $gameStrings.value( str_index ) );
-		}else{
-			break;
+var _drill_COSt_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+Game_Interpreter.prototype.pluginCommand = function(command, args) {
+	_drill_COSt_pluginCommand.call(this, command, args);
+	if( command === ">字符串核心" ){		//>字符串核心 : 字符串[1] : 修改字符串 : 某\c[2]字符串
+		
+		if(args.length == 6){
+			var temp1 = String(args[1]);
+			var type = String(args[3]);
+			var temp2 = String(args[5]);
+			if( type == "修改字符串" ){	
+				temp1 = temp1.replace("字符串[","");
+				temp1 = temp1.replace("]","");
+				$gameStrings.setValue( Number(temp1), temp2 );
+			}
+			if( type == "使用弹出框修改" ){	
+				temp1 = temp1.replace("字符串[","");
+				temp1 = temp1.replace("]","");
+				var ss = prompt( temp2, $gameStrings.value(temp1) );
+				if( ss != undefined ){
+					$gameStrings.setValue( Number(temp1), ss );
+				}
+			}
+		}
+		if(args.length == 4){
+			var temp1 = String(args[1]);
+			var type = String(args[3]);
+			if( type == "还原字符串" ){	
+				temp1 = temp1.replace("字符串[","");
+				temp1 = temp1.replace("]","");
+				$gameStrings.setValue( Number(temp1), DrillUp.g_COSt_list[ Number(temp1)-1 ]['context'] );
+			}
 		}
 	}
-	
-	// > 校验
-	if( j >= 99 ){
-		alert( DrillUp.drill_COSt_getPluginTip_DeadLoop( str_index ) );
-	}
-	return text;
 };
 	
 
@@ -1516,8 +1500,9 @@ DataManager.drill_COSt_replaceChar = function( text ){
 //			索引：	无
 //			来源：	无（独立数据）
 //			应用：	> 事件指令
-//			功能：	> 提供基本的字符串数据存储功能。
-//					> 字符串转义
+//			
+//			主功能：	> 提供基本的字符串数据存储功能。
+//						> 字符串转义
 //=============================================================================
 //==============================
 // * 变量 - 定义
@@ -1572,56 +1557,87 @@ Game_Strings.prototype.convertedValue = function( stringId ){
     return value;
 };
 	
-//=============================================================================
-// * 插件指令
-//=============================================================================
-var _drill_COSt_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
-	_drill_COSt_pluginCommand.call(this, command, args);
-	
-	if( command === ">字符串核心" ){		//>字符串核心 : 字符串[1] : 修改字符串 : 某\c[2]字符串
-		if(args.length == 6){
-			var temp1 = String(args[1]);
-			var type = String(args[3]);
-			var temp2 = String(args[5]);
-			if( type == "修改字符串" ){	
-				temp1 = temp1.replace("字符串[","");
-				temp1 = temp1.replace("]","");
-				$gameStrings.setValue( Number(temp1), temp2 );
-			}
-			if( type == "使用弹出框修改" ){	
-				temp1 = temp1.replace("字符串[","");
-				temp1 = temp1.replace("]","");
-				var ss = prompt( temp2, $gameStrings.value(temp1) );
-				if( ss != undefined ){
-					$gameStrings.setValue( Number(temp1), ss );
-				}
-			}
-		}
-		if(args.length == 4){
-			var temp1 = String(args[1]);
-			var type = String(args[3]);
-			if( type == "还原字符串" ){	
-				temp1 = temp1.replace("字符串[","");
-				temp1 = temp1.replace("]","");
-				$gameStrings.setValue( Number(temp1), DrillUp.g_COSt_list[ Number(temp1)-1 ]['context'] );
-			}
-		}
-	}
-};
 	
 //=============================================================================
-// ** 文本转义
+// ** ☆数据管理器
+//
+//			说明：	> 此模块定义 $gameStrings ，并提供 存储、多重嵌套转义 功能。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// ** 文本转义 - 指代字符 转换
+// * 管理器 - 定义
+//==============================
+var $gameStrings    = null;
+//==============================
+// * 管理器 - 初始化
+//==============================
+var _drill_COSt_createGameObjects = DataManager.createGameObjects;
+DataManager.createGameObjects = function() {
+	_drill_COSt_createGameObjects.call( this );
+	$gameStrings    = new Game_Strings();
+};
+//==============================
+// * 管理器 - 保存数据
+//==============================
+var _drill_COSt_makeSaveContents = DataManager.makeSaveContents;
+DataManager.makeSaveContents = function() {
+	var contents = _drill_COSt_makeSaveContents.call( this );
+	contents.strings    = $gameStrings;
+	return contents;
+};
+//==============================
+// * 管理器 - 读取数据
+//==============================
+var _drill_COSt_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_COSt_extractSaveContents.call( this,contents );
+	if( contents.strings != undefined ){
+		$gameStrings        = contents.strings;
+	}
+};
+//==============================
+// * 管理器 - 多重嵌套转义（开放函数）
+//
+//			说明：	> 能将\str[21]进行转义，如果\str[21]还含\str[22]，那么继续转义，直到没有\str[]为止。
+//==============================
+DataManager.drill_COSt_replaceChar = function( text ){
+	var re = /\\[sS][tT][rR]\[(\d+)\]/;
+	
+	// > 引用嵌套
+	var str_index = 0;
+	var j = 0;
+	for(j = 0; j < 100; j++ ){
+		var arr = re.exec(text);
+		if( arr ){
+			str_index = Number(arr[1]);
+			text = text.replace( re, $gameStrings.value( str_index ) );
+		}else{
+			break;
+		}
+	}
+	
+	// > 校验
+	if( j >= 99 ){
+		alert( DrillUp.drill_COSt_getPluginTip_DeadLoop( str_index ) );
+	}
+	return text;
+};
+	
+	
+//=============================================================================
+// ** ☆字符串应用
+//
+//			说明：	> 此模块将字符串的功能应用到基础功能中。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 字符串应用 - 指代字符 转义
 //==============================
 var _drill_COSt_convertExtraEscapeCharacters = Window_Base.prototype.convertEscapeCharacters;
 Window_Base.prototype.convertEscapeCharacters = function(text) {
 	
 	// > 指代字符（含变量的）
     text = text.replace(/[\\]?\\STR\[\\V\[(\d+)\]\]/gi, function() {
-		alert( arguments[1] );
         return $gameStrings.convertedValue( $gameVariables.value(parseInt(arguments[1])) );
     }.bind(this));
 	
@@ -1633,5 +1649,15 @@ Window_Base.prototype.convertEscapeCharacters = function(text) {
 	var text = _drill_COSt_convertExtraEscapeCharacters.call( this, text );
 	return text;
 }
-
+//==============================
+// * 字符串应用 - 对话框 转义
+//==============================
+var _drill_COSt_message_add = Game_Message.prototype.add;
+Game_Message.prototype.add = function( text ){
+	
+	//（添加字符串时，提前 多重嵌套转义）
+	text = DataManager.drill_COSt_replaceChar( text );
+	
+	_drill_COSt_message_add.call( this, text );
+};
 

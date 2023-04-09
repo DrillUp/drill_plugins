@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        地图UI - 临时漂浮文字
+ * @plugindesc [v1.4]        地图UI - 临时漂浮文字
  * @author Drill_up
  * 
  * @Drill_LE_param "临时漂浮样式-%d"
@@ -29,7 +29,7 @@
  * 该插件 不能 单独使用。
  * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfBallistics       系统-弹道核心★★v1.7及以上★★
+ *   - Drill_CoreOfBallistics       系统-弹道核心★★v2.1及以上★★
  *   - Drill_CoreOfWindowAuxiliary  系统-窗口辅助核心
  * 可扩展：
  *   - Drill_CoreOfString           系统-字符串核心
@@ -40,6 +40,7 @@
  * 1.插件的作用域：地图界面。
  *   作用于地图的各个层级。
  * 2.更多详细内容，去看看文档 "13.UI > 关于漂浮文字.docx"。
+ *   临时对象相关内容，去看看文档 "13.UI > 关于临时对象与模板.docx"。
  * 3.该插件的指令较多且使用频繁，建议使用小工具：插件信息查看器。
  *   在开启游戏编辑器时，可以并行使用读取器复制指令。
  * 细节：
@@ -60,32 +61,87 @@
  *   (1.你可以添加一些简单的字符串，用来表示 "生命+10" 这些漂浮文字。
  * 
  * -----------------------------------------------------------------------------
- * ----激活条件 - 创建
- * 你可以通过插件指令控制永久漂浮内容集合：
+ * ----激活条件 - 简单指令
+ * 你可以通过插件指令快速生成对象：
+ * 
+ * 插件指令：>地图临时漂浮文字 : 简单临时对象 : 位置-玩家 : 文本[一段文字]
+ * 插件指令：>地图临时漂浮文字 : 简单临时对象 : 位置-玩家 : 文本[一段文字] : 样式[1]
+ * 插件指令：>地图临时漂浮文字 : 简单临时对象 : 位置-玩家 : 文本[一段文字] : 样式[1] : 弹道[1]
+ * 插件指令：>地图临时漂浮文字 : 简单临时对象 : 位置-玩家 : 文本[一段文字] : 样式[1] : 弹道[1] : 持续时间[20]
+ * 
+ * 插件指令：>地图临时漂浮文字 : 简单临时对象 : 位置[100,200] : 文本[一段文字]
+ * 插件指令：>地图临时漂浮文字 : 简单临时对象 : 位置变量[25,26] : 文本[一段文字]
+ * 插件指令：>地图临时漂浮文字 : 简单临时对象 : 位置-玩家 : 文本[一段文字]
+ * 插件指令：>地图临时漂浮文字 : 简单临时对象 : 位置-本事件 : 文本[一段文字]
+ * 插件指令：>地图临时漂浮文字 : 简单临时对象 : 位置-事件[10] : 文本[一段文字]
+ * 插件指令：>地图临时漂浮文字 : 简单临时对象 : 位置-事件变量[21] : 文本[一段文字]
+ * 插件指令：>地图临时漂浮文字 : 简单临时对象 : 位置-图块[10] : 文本[一段文字]
+ * 插件指令：>地图临时漂浮文字 : 简单临时对象 : 位置-图块变量[21] : 文本[一段文字]
+ * 插件指令：>地图临时漂浮文字 : 简单临时对象 : 位置-鼠标 : 文本[一段文字]
+ * 
+ * 1.前半部分（位置-玩家）和 后半部分（文本[一段文字]）
+ *   的参数可以随意组合。一共有4*9种组合方式。
+ * 2.临时对象创建后，持续时间结束会自动清掉。
+ *   切换菜单或离开地图也会清掉漂浮文字。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----激活条件 - 高级指令
+ * 你可以通过插件指令控制临时对象的具体参数：
  * 
  * 插件指令：>地图临时漂浮文字 : 临时对象 : 初始化 : 样式[1] : 弹道[1]
- * 插件指令：>地图临时漂浮文字 : 临时对象 : 修改内容文本 : 字符串[1]
- * 插件指令：>地图临时漂浮文字 : 临时对象 : 修改内容文本 : 文本[一段文字]
- * 插件指令：>地图临时漂浮文字 : 临时对象 : 修改额外位置偏移 : 偏移[-10,20]
+ * 
+ * 插件指令：>地图临时漂浮文字 : 临时对象 : 修改样式属性-内容文本 : 文本[一段文字]
+ * 插件指令：>地图临时漂浮文字 : 临时对象 : 修改样式属性-内容文本 : 字符串[21]
+ * 插件指令：>地图临时漂浮文字 : 临时对象 : 修改样式属性-额外位置偏移 : 偏移[-10,20]
+ * 插件指令：>地图临时漂浮文字 : 临时对象 : 修改样式属性-UI基准 : 相对于地图
+ * 插件指令：>地图临时漂浮文字 : 临时对象 : 修改样式属性-UI基准 : 相对于镜头
+ * 插件指令：>地图临时漂浮文字 : 临时对象 : 修改样式属性-地图层级 : 下层
+ * 插件指令：>地图临时漂浮文字 : 临时对象 : 修改样式属性-地图层级 : 中层
+ * 插件指令：>地图临时漂浮文字 : 临时对象 : 修改样式属性-地图层级 : 上层
+ * 插件指令：>地图临时漂浮文字 : 临时对象 : 修改样式属性-地图层级 : 图片层
+ * 插件指令：>地图临时漂浮文字 : 临时对象 : 修改样式属性-地图层级 : 最顶层
+ * 插件指令：>地图临时漂浮文字 : 临时对象 : 修改样式属性-图片层级 : 图片层级[4]
+ * 插件指令：>地图临时漂浮文字 : 临时对象 : 修改样式属性-布局透明度 : 透明度[255]
+ * 插件指令：>地图临时漂浮文字 : 临时对象 : 修改样式属性-布局透明度 : 透明度变量[21]
+ * 插件指令：>地图临时漂浮文字 : 临时对象 : 修改样式属性-窗口附加宽度 : 值[+5]
+ * 插件指令：>地图临时漂浮文字 : 临时对象 : 修改样式属性-窗口附加高度 : 值[+5]
+ * 
+ * 插件指令：>地图临时漂浮文字 : 临时对象 : 修改弹道属性-开始移动前延迟时间 : 时长[60]
+ * 插件指令：>地图临时漂浮文字 : 临时对象 : 修改弹道属性-移动结束后等待时间 : 时长[60]
+ * 插件指令：>地图临时漂浮文字 : 临时对象 : 修改弹道属性-极坐标模式-初速度 : 速度[1.0]
+ * 插件指令：>地图临时漂浮文字 : 临时对象 : 修改弹道属性-极坐标模式-固定方向 : 角度[90.0]
+ * 插件指令：>地图临时漂浮文字 : 临时对象 : 修改弹道属性-极坐标模式-固定方向 : 角度变量[21]
+ * 插件指令：>地图临时漂浮文字 : 临时对象 : 修改弹道属性-极坐标模式-扇形朝向 : 角度[90.0]
+ * 插件指令：>地图临时漂浮文字 : 临时对象 : 修改弹道属性-极坐标模式-扇形朝向 : 角度变量[21]
+ * 插件指令：>地图临时漂浮文字 : 临时对象 : 修改弹道属性-直角坐标模式-X轴初速度 : 速度[1.0]
+ * 插件指令：>地图临时漂浮文字 : 临时对象 : 修改弹道属性-直角坐标模式-Y轴初速度 : 速度[1.0]
+ * 插件指令：>地图临时漂浮文字 : 临时对象 : 修改弹道属性-轨道锚点模式-轨道初速度 : 速度[1.0]
  * 
  * 插件指令：>地图临时漂浮文字 : 临时对象 : 创建 : 位置[100,200] : 持续时间[20]
  * 插件指令：>地图临时漂浮文字 : 临时对象 : 创建 : 位置变量[25,26] : 持续时间[20]
- * 插件指令：>地图临时漂浮文字 : 临时对象 : 创建 : 相对位置[-100,0] : 持续时间[20]
- * 插件指令：>地图临时漂浮文字 : 临时对象 : 创建 : 相对位置变量[25,26] : 持续时间[20]
- * 插件指令：>地图临时漂浮文字 : 临时对象 : 创建 : 玩家 : 持续时间[20]
- * 插件指令：>地图临时漂浮文字 : 临时对象 : 创建 : 本事件 : 持续时间[20]
- * 插件指令：>地图临时漂浮文字 : 临时对象 : 创建 : 鼠标位置 : 持续时间[20]
- * 插件指令：>地图临时漂浮文字 : 临时对象 : 创建 : 事件[10] : 持续时间[20]
- * 插件指令：>地图临时漂浮文字 : 临时对象 : 创建 : 事件变量[21] : 持续时间[20]
+ * 插件指令：>地图临时漂浮文字 : 临时对象 : 创建 : 位置-玩家 : 持续时间[20]
+ * 插件指令：>地图临时漂浮文字 : 临时对象 : 创建 : 位置-本事件 : 持续时间[20]
+ * 插件指令：>地图临时漂浮文字 : 临时对象 : 创建 : 位置-事件[10] : 持续时间[20]
+ * 插件指令：>地图临时漂浮文字 : 临时对象 : 创建 : 位置-事件变量[21] : 持续时间[20]
+ * 插件指令：>地图临时漂浮文字 : 临时对象 : 创建 : 位置-图块[10] : 持续时间[20]
+ * 插件指令：>地图临时漂浮文字 : 临时对象 : 创建 : 位置-图块变量[21] : 持续时间[20]
+ * 插件指令：>地图临时漂浮文字 : 临时对象 : 创建 : 位置-鼠标 : 持续时间[20]
  * 
- * 1.临时漂浮文字可以在很多位置创建。
- *   但是注意，切换菜单或离开地图都会清掉漂浮文字。
+ * 1.插件指令需要先后执行： 初始化、修改样式属性、修改弹道属性、创建 。
+ *   如果 样式属性/弹道属性 不需要变化，直接先后执行： 初始化、创建 即可。
+ *   临时对象创建之后，将不再受控制。
+ * 2.注意你配置的 弹道 的 模式与类型 ，比如 速度类型、方向类型，
+ *   并不是修改了任意属性就都会生效，还要看配置的类型是否用到了该参数。
+ *   比如 "修改弹道属性-固定方向"，只在 方向类型 为 固定方向 的情况下才有效。
+ * 3.临时对象创建后，持续时间结束会自动清掉。
+ *   切换菜单或离开地图也会清掉漂浮文字。
+ * 4."修改样式属性-内容文本"中的"字符串"对应字符串核心中指定编号的自定义文本。
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 空格支持
  * 插件指令下面的写法也是有效的：
  * 
- * 插件指令：>地图临时漂浮文字 : 临时对象 : 修改内容文本 : 文本[药水 + 1]
+ * 插件指令：>地图临时漂浮文字 : 临时对象 : 修改样式属性-内容文本 : 文本[药水 + 1]
  * 
  * 1.你可以在该插件指令中的文本使用空格。
  *   从原则上来说，脚本会将插件指令的空格分开，所以含空格的写法是不推荐的。
@@ -126,9 +182,29 @@
  * 优化了内部结构。
  * [v1.3]
  * 优化了与地图活动镜头的变换关系。
+ * [v1.4]
+ * 大幅度改进了 插件指令 结构，完善了 临时对象 的设置。
  *
  *
  *
+ * @param 简单指令的默认样式
+ * @type number
+ * @min 1
+ * @desc 简单指令若未配置样式时，则使用默认样式。默认样式对应配置样式的编号。
+ * @default 2
+ * 
+ * @param 简单指令的默认弹道
+ * @type number
+ * @min 1
+ * @desc 简单指令若未配置弹道时，则使用默认弹道。默认样式对应配置样式的弹道。
+ * @default 4
+ * 
+ * @param 简单指令的默认持续时间
+ * @type number
+ * @min 1
+ * @desc 简单指令若未配置持续时间时，则使用默认的持续时间。
+ * @default 120
+ * 
  *
  * @param ---样式组 1至20---
  * @default 
@@ -137,25 +213,25 @@
  * @parent ---样式组 1至20---
  * @type struct<DrillGFTTStyle>
  * @desc 漂浮文字的内容配置信息。
- * @default 
+ * @default {"标签":"==文字（相对于地图）==","--常规--":"","默认内容文本":"\"\"","--层级--":"","UI基准":"相对于地图","地图层级":"上层","地图图片层级":"80","--窗口--":"","布局模式":"黑底背景","布局透明度":"0","资源-自定义窗口皮肤":"Window","资源-自定义背景图片":"","平移-自定义背景图片 X":"0","平移-自定义背景图片 Y":"0","窗口中心锚点":"正中心","窗口是否自适应行间距":"true","窗口固定行间距":"24","窗口内边距":"10","窗口字体大小":"22","窗口附加宽度":"0","窗口附加高度":"0"}
  * 
  * @param 临时漂浮样式-2
  * @parent ---样式组 1至20---
  * @type struct<DrillGFTTStyle>
  * @desc 漂浮文字的内容配置信息。
- * @default 
+ * @default {"标签":"==文字（相对于镜头）==","--常规--":"","默认内容文本":"\"\"","--层级--":"","UI基准":"相对于镜头","地图层级":"上层","地图图片层级":"80","--窗口--":"","布局模式":"黑底背景","布局透明度":"0","资源-自定义窗口皮肤":"Window","资源-自定义背景图片":"","平移-自定义背景图片 X":"0","平移-自定义背景图片 Y":"0","窗口中心锚点":"正中心","窗口是否自适应行间距":"true","窗口固定行间距":"24","窗口内边距":"10","窗口字体大小":"22","窗口附加宽度":"0","窗口附加高度":"0"}
  * 
  * @param 临时漂浮样式-3
  * @parent ---样式组 1至20---
  * @type struct<DrillGFTTStyle>
  * @desc 漂浮文字的内容配置信息。
- * @default 
+ * @default {"标签":"==带框文字（相对于地图）==","--常规--":"","默认内容文本":"\"\"","--层级--":"","UI基准":"相对于地图","地图层级":"图片层","地图图片层级":"80","--窗口--":"","布局模式":"默认窗口皮肤","布局透明度":"192","资源-自定义窗口皮肤":"Window","资源-自定义背景图片":"","平移-自定义背景图片 X":"0","平移-自定义背景图片 Y":"0","窗口中心锚点":"正中心","窗口是否自适应行间距":"true","窗口固定行间距":"24","窗口内边距":"10","窗口字体大小":"22","窗口附加宽度":"0","窗口附加高度":"0"}
  * 
  * @param 临时漂浮样式-4
  * @parent ---样式组 1至20---
  * @type struct<DrillGFTTStyle>
  * @desc 漂浮文字的内容配置信息。
- * @default 
+ * @default {"标签":"==带框文字（相对于镜头）==","--常规--":"","默认内容文本":"\"\"","--层级--":"","UI基准":"相对于镜头","地图层级":"图片层","地图图片层级":"80","--窗口--":"","布局模式":"默认窗口皮肤","布局透明度":"192","资源-自定义窗口皮肤":"Window","资源-自定义背景图片":"","平移-自定义背景图片 X":"0","平移-自定义背景图片 Y":"0","窗口中心锚点":"正中心","窗口是否自适应行间距":"true","窗口固定行间距":"24","窗口内边距":"10","窗口字体大小":"22","窗口附加宽度":"0","窗口附加高度":"0"}
  * 
  * @param 临时漂浮样式-5
  * @parent ---样式组 1至20---
@@ -261,31 +337,31 @@
  * @parent ---弹道组 1至20---
  * @type struct<DrillGFTTBallistic>
  * @desc 漂浮文字的内容配置信息。
- * @default 
+ * @default {"标签":"==常规-匀速向上==","开始移动前延迟时间":"0","移动结束后等待时间":"0","透明度模式":"先显现后消失","移动模式":"极坐标模式","---极坐标模式---":"","速度类型":"只初速度","初速度":"1.0","速度随机波动量":"2.0","加速度":"0.0","最大速度":"99.0","最小速度":"0.0","路程计算公式":"\"return 0.0\"","方向类型":"固定方向","固定方向":"270","扇形朝向":"270.0","扇形角度":"90.0","方向计算公式":"\"return 0.0\"","---直角坐标模式---":"","直角坐标整体旋转":"0.0","X轴速度类型":"只初速度","X轴初速度":"0.0","X轴速度随机波动量":"0.0","X轴加速度":"0.0","X轴最大速度":"99.0","X轴最小速度":"0.0","X轴路程计算公式":"\"return 0.0\"","Y轴速度类型":"只初速度","Y轴初速度":"-1.5","Y轴速度随机波动量":"0.0","Y轴加速度":"0.0","Y轴最大速度":"99.0","Y轴最小速度":"0.0","Y轴路程计算公式":"\"return 0.0\"","---轨道锚点模式---":"","轨道锚点整体旋转":"0.0","锚点列表":"(0,0),(100,0)","轨道速度类型":"只初速度","轨道初速度":"1.0","轨道速度随机波动量":"2.0","轨道加速度":"0.0","轨道最大速度":"99.0","轨道最小速度":"0.0","轨道路程计算公式":"\"return 0.0\""}
  * 
  * @param 临时漂浮弹道-2
  * @parent ---弹道组 1至20---
  * @type struct<DrillGFTTBallistic>
  * @desc 漂浮文字的内容配置信息。
- * @default 
+ * @default {"标签":"==常规-匀速向上(小幅度随机)==","开始移动前延迟时间":"0","移动结束后等待时间":"0","透明度模式":"先显现后消失","移动模式":"极坐标模式","---极坐标模式---":"","速度类型":"只初速度","初速度":"1.5","速度随机波动量":"1.0","加速度":"0.0","最大速度":"99.0","最小速度":"0.0","路程计算公式":"\"return 0.0\"","方向类型":"扇形范围方向(随机)","固定方向":"270.0","扇形朝向":"270.0","扇形角度":"90.0","方向计算公式":"\"return 0.0\"","---直角坐标模式---":"","直角坐标整体旋转":"0.0","X轴速度类型":"只初速度","X轴初速度":"1.0","X轴速度随机波动量":"2.0","X轴加速度":"0.0","X轴最大速度":"99.0","X轴最小速度":"0.0","X轴路程计算公式":"\"return 0.0\"","Y轴速度类型":"只初速度","Y轴初速度":"1.0","Y轴速度随机波动量":"2.0","Y轴加速度":"0.0","Y轴最大速度":"99.0","Y轴最小速度":"0.0","Y轴路程计算公式":"\"return 0.0\"","---轨道锚点模式---":"","轨道锚点整体旋转":"0.0","锚点列表":"(0,0),(100,0)","轨道速度类型":"只初速度","轨道初速度":"1.0","轨道速度随机波动量":"2.0","轨道加速度":"0.0","轨道最大速度":"99.0","轨道最小速度":"0.0","轨道路程计算公式":"\"return 0.0\""}
  * 
  * @param 临时漂浮弹道-3
  * @parent ---弹道组 1至20---
  * @type struct<DrillGFTTBallistic>
  * @desc 漂浮文字的内容配置信息。
- * @default 
+ * @default {"标签":"==常规-减速向上==","开始移动前延迟时间":"0","移动结束后等待时间":"0","透明度模式":"先显现后消失","移动模式":"极坐标模式","---极坐标模式---":"","速度类型":"初速度+波动量+加速度+最大最小","初速度":"3.0","速度随机波动量":"0.0","加速度":"-0.2","最大速度":"99.0","最小速度":"0.0","路程计算公式":"\"return 0.0\"","方向类型":"固定方向","固定方向":"270","扇形朝向":"45.0","扇形角度":"90.0","方向计算公式":"\"return 0.0\"","---直角坐标模式---":"","直角坐标整体旋转":"0.0","X轴速度类型":"只初速度","X轴初速度":"0.0","X轴速度随机波动量":"0.0","X轴加速度":"0.0","X轴最大速度":"99.0","X轴最小速度":"0.0","X轴路程计算公式":"\"return 0.0\"","Y轴速度类型":"只初速度","Y轴初速度":"-1.5","Y轴速度随机波动量":"0.0","Y轴加速度":"0.0","Y轴最大速度":"99.0","Y轴最小速度":"0.0","Y轴路程计算公式":"\"return 0.0\"","---轨道锚点模式---":"","轨道锚点整体旋转":"0.0","锚点列表":"(0,0),(100,0)","轨道速度类型":"只初速度","轨道初速度":"1.0","轨道速度随机波动量":"2.0","轨道加速度":"0.0","轨道最大速度":"99.0","轨道最小速度":"0.0","轨道路程计算公式":"\"return 0.0\""}
  * 
  * @param 临时漂浮弹道-4
  * @parent ---弹道组 1至20---
  * @type struct<DrillGFTTBallistic>
  * @desc 漂浮文字的内容配置信息。
- * @default 
+ * @default {"标签":"==常规-抛物线==","开始移动前延迟时间":"0","移动结束后等待时间":"0","透明度模式":"先显现后消失","移动模式":"直角坐标模式","---极坐标模式---":"","速度类型":"只初速度","初速度":"1.0","速度随机波动量":"2.0","加速度":"0.0","最大速度":"99.0","最小速度":"0.0","路程计算公式":"\"return 0.0\"","方向类型":"四周扩散(线性)","固定方向":"90.0","扇形朝向":"45.0","扇形角度":"90.0","方向计算公式":"\"return 0.0\"","---直角坐标模式---":"","直角坐标整体旋转":"0.0","X轴速度类型":"初速度+波动量","X轴初速度":"0.0","X轴速度随机波动量":"3.0","X轴加速度":"0.0","X轴最大速度":"99.0","X轴最小速度":"0.0","X轴路程计算公式":"\"return 0.0\"","Y轴速度类型":"初速度+波动量+加速度+最大最小","Y轴初速度":"-12.0","Y轴速度随机波动量":"2.0","Y轴加速度":"0.4","Y轴最大速度":"99.0","Y轴最小速度":"-20.0","Y轴路程计算公式":"\"return 0.0\"","---轨道锚点模式---":"","轨道锚点整体旋转":"0.0","锚点列表":"(0,0),(100,0)","轨道速度类型":"只初速度","轨道初速度":"1.0","轨道速度随机波动量":"2.0","轨道加速度":"0.0","轨道最大速度":"99.0","轨道最小速度":"0.0","轨道路程计算公式":"\"return 0.0\""}
  * 
  * @param 临时漂浮弹道-5
  * @parent ---弹道组 1至20---
  * @type struct<DrillGFTTBallistic>
  * @desc 漂浮文字的内容配置信息。
- * @default 
+ * @default {"标签":"==常规-螺旋锚点轨道==","开始移动前延迟时间":"0","移动结束后等待时间":"0","透明度模式":"匀速消失","移动模式":"轨道锚点模式","---极坐标模式---":"","速度类型":"只初速度","初速度":"1.0","速度随机波动量":"2.0","加速度":"0.0","最大速度":"99.0","最小速度":"0.0","路程计算公式":"\"return 0.0\"","方向类型":"四周扩散(线性)","固定方向":"90.0","扇形朝向":"45.0","扇形角度":"90.0","方向计算公式":"\"return 0.0\"","---直角坐标模式---":"","直角坐标整体旋转":"0.0","X轴速度类型":"只初速度","X轴初速度":"1.0","X轴速度随机波动量":"2.0","X轴加速度":"0.0","X轴最大速度":"99.0","X轴最小速度":"0.0","X轴路程计算公式":"\"return 0.0\"","Y轴速度类型":"只初速度","Y轴初速度":"1.0","Y轴速度随机波动量":"2.0","Y轴加速度":"0.0","Y轴最大速度":"99.0","Y轴最小速度":"0.0","Y轴路程计算公式":"\"return 0.0\"","---轨道锚点模式---":"","轨道锚点整体旋转":"0.0","锚点列表":"(0,0),(51,5),(64,47),(-8,69),(-70,18),(-45,-48),(28,-59),(97,-18),(111,44),(47,101),(-41,104),(-100,56),(-108,-19),(-72,-85),(25,-110),(134,-68)","轨道速度类型":"只初速度","轨道初速度":"5.5","轨道速度随机波动量":"0.0","轨道加速度":"0.0","轨道最大速度":"99.0","轨道最小速度":"0.0","轨道路程计算公式":"\"return 0.0\""}
  * 
  * @param 临时漂浮弹道-6
  * @parent ---弹道组 1至20---
@@ -562,14 +638,26 @@
  *  
  * @param 透明度模式
  * @type select
- * @option 匀速消失
- * @value 匀速消失
- * @option 等一半时间后匀速消失
- * @value 等一半时间后匀速消失
+ * @option 逐渐消失
+ * @value 逐渐消失
+ * @option 逐渐显现
+ * @value 逐渐显现
+ * @option 保持原透明度
+ * @value 保持原透明度
+ * @option 等一半时间后逐渐消失
+ * @value 等一半时间后逐渐消失
+ * @option 前一半时间先显现再保持
+ * @value 前一半时间先显现再保持
+ * @option 先显现后消失(慢速)
+ * @value 先显现后消失(慢速)
  * @option 先显现后消失
  * @value 先显现后消失
+ * @option 先显现后消失(快速)
+ * @value 先显现后消失(快速)
+ * @option 一闪一闪
+ * @value 一闪一闪
  * @desc 漂浮文字的消失方式。
- * @default 匀速消失
+ * @default 先显现后消失
  *
  * 
  * @param 移动模式
@@ -638,12 +726,6 @@
  * @type select
  * @option 固定方向
  * @value 固定方向
- * @option 四周扩散(线性)
- * @value 四周扩散(线性)
- * @option 四周扩散(随机)
- * @value 四周扩散(随机)
- * @option 四周扩散(抖动)
- * @value 四周扩散(抖动)
  * @option 扇形范围方向(线性)
  * @value 扇形范围方向(线性)
  * @option 扇形范围方向(随机)
@@ -651,27 +733,27 @@
  * @option 方向计算公式
  * @value 方向计算公式
  * @desc 描述漂浮文字速度的模式。
- * @default 四周扩散(线性)
+ * @default 固定方向
  * 
  * @param 固定方向
  * @parent 方向类型
- * @desc 类型为固定方向时，漂浮文字固定方向的角度值。
+ * @desc 类型为"固定方向"时，固定方向的角度值。0朝右，90朝下，180朝左，270朝上。
  * @default 90.0
  * 
  * @param 扇形朝向
  * @parent 方向类型
- * @desc 类型为扇形范围方向时，扇形的朝向角度。
+ * @desc 类型为"扇形范围方向"时，扇形的朝向角度。0朝右，90朝下，180朝左，270朝上。
  * @default 45.0
  * 
  * @param 扇形角度
  * @parent 方向类型
- * @desc 类型为扇形范围方向时，扇形弧的角度数。
+ * @desc 类型为"扇形范围方向"时，扇形弧的角度数。
  * @default 90.0
  * 
  * @param 方向计算公式
  * @parent 方向类型
  * @type note
- * @desc 漂浮文字的方向计算公式。可使用 变量和常量 来设计公式，具体看看文档 "1.系统 > 关于弹道.docx"介绍。
+ * @desc 类型为"方向计算公式"时。可使用 变量和常量 来设计公式，具体看看文档 "1.系统 > 关于弹道.docx"介绍。
  * @default "return 0.0"
  * 
  * @param ---直角坐标模式---
@@ -863,19 +945,31 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			漂浮参数数字：
-//				->结构
-//					->窗口字符
-//					->文本域自适应
-//					->弹道核心（绑定移动）
-//					->透明度类型设置
-//				->插件指令添加
-//				->地图层级
-//					->添加贴图到层级【标准函数】
-//					->去除贴图【标准函数】
-//					->图片层级排序【标准函数】
-//					->层级与镜头的位移【标准函数】
-//
+//			->☆提示信息
+//			->☆变量获取
+//			->☆插件指令
+//				->简单指令
+//				->高级指令
+//			->☆地图层级
+//				->添加贴图到层级【标准函数】
+//				->去除贴图【标准函数】
+//				->图片层级排序【标准函数】
+//				->层级与镜头的位移【标准函数】
+//			
+//			->☆临时对象
+//				->高级指令 初始化
+//				->高级指令 创建
+//				->修改样式属性
+//				->修改弹道属性
+//			->☆贴图控制
+//			
+//			->地图临时 漂浮文字窗口【Drill_GFTT_Window】
+//				->窗口字符
+//				->文本域自适应
+//				->弹道核心（绑定移动）
+//				->透明度类型设置
+//			
+//			
 //		★必要注意事项：
 //			1.插件的图片层级与多个插件共享。【必须自写 层级排序 函数】
 //			2.【镜头兼容】该插件的漂浮文字如果放在 下层、中层、上层、图片层 ，需要对其进行相关的镜头缩放控制。
@@ -890,7 +984,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -927,10 +1021,22 @@
 	DrillUp.drill_GFTT_getPluginTip_EventNotFind = function( e_id ){
 		return "【" + DrillUp.g_GFTT_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
 	};
+	//==============================
+	// * 提示信息 - 报错 - 临时对象 内容文本为空
+	//==============================
+	DrillUp.drill_GFTT_getPluginTip_DataIsEmpty = function(){
+		return "【" + DrillUp.g_GFTT_PluginTip_curName + "】\n插件指令错误，你使用高级指令时，内容文本为空，将不显示任何文本。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 临时对象 未初始化
+	//==============================
+	DrillUp.drill_GFTT_getPluginTip_BufferIsNull = function(){
+		return "【" + DrillUp.g_GFTT_PluginTip_curName + "】\n插件指令错误，你使用高级指令时，未执行临时对象的初始化指令。";
+	};
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_GaugeFloatingTemporaryText = true;
@@ -970,8 +1076,8 @@
 		data['window_ex_width'] = Number( dataFrom["窗口附加宽度"] || 0);
 		data['window_ex_height'] = Number( dataFrom["窗口附加高度"] || 0);
 		
-		data['offset_x'] = 0;
-		data['offset_y'] = 0;
+		data['offsetEx_x'] = 0;	//（额外位置偏移，注意此配置在样式中）
+		data['offsetEx_y'] = 0;
 		return data;
 	}
 	//==============================
@@ -982,7 +1088,7 @@
 		var data = {};
 		
 		// > 透明度（opacity）
-		data['opacity_type'] = String( dataFrom["透明度模式"] || "等一半时间后匀速消失" );
+		data['opacity_type'] = String( dataFrom["透明度模式"] || "等一半时间后逐渐消失" );
 		
 		// > 移动（movement）
 		data['movementNum'] = 1;
@@ -1002,7 +1108,7 @@
 		temp_str = temp_str.replace(/\\n/g,"\n");
 		temp_str = temp_str.replace(/\\\\/g,"\\");
 		data['polarDistanceFormula'] = temp_str;
-		data['polarDirType'] = String( dataFrom["方向类型"] || "只初速度" );
+		data['polarDirType'] = String( dataFrom["方向类型"] || "固定方向" );
 		data['polarDirFixed'] = Number( dataFrom["固定方向"] || 0);
 		data['polarDirSectorFace'] = Number( dataFrom["扇形朝向"] || 0);
 		data['polarDirSectorDegree'] = Number( dataFrom["扇形角度"] || 0);
@@ -1054,6 +1160,11 @@
 	}
 	
 	
+	/*-----------------杂项------------------*/
+	DrillUp.g_GFTT_simple_defaultStyleId = Number(DrillUp.parameters["简单指令的默认样式"] || 1); 
+	DrillUp.g_GFTT_simple_defaultBallisticsId = Number(DrillUp.parameters["简单指令的默认弹道"] || 1); 
+	DrillUp.g_GFTT_simple_defaultTime = Number(DrillUp.parameters["简单指令的默认持续时间"] || 60); 
+	
 	/*-----------------临时漂浮样式集合------------------*/
 	DrillUp.g_GFTT_style_length = 20;
 	DrillUp.g_GFTT_style = [];
@@ -1089,14 +1200,121 @@ if( Imported.Drill_CoreOfBallistics &&
 	
 	
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _drill_GFTT_pluginCommand = Game_Interpreter.prototype.pluginCommand
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_GFTT_pluginCommand.call(this, command, args);
 	if(command === ">地图临时漂浮文字"){
 		
-		/*-----------------初始化------------------*/
+		
+		/*-----------------简单指令------------------*/
+		if( args.length >= 6 ){		//（考虑变化参数数量情况）
+			var unit = String(args[1]);
+			var temp1 = String(args[3]);
+			var temp2 = String(args[5]);
+			if( unit == "简单临时对象" ){
+				
+				var pos = null;
+				var tw = $gameMap.tileWidth();
+				var th = $gameMap.tileHeight();
+				if( temp1.indexOf("位置变量[") != -1 ){
+					temp1 = temp1.replace("位置变量[","");
+					temp1 = temp1.replace("]","");
+					temp1 = temp1.split(/[,，]/);
+					pos = [ $gameVariables.value(Number(temp1[0])), 
+							$gameVariables.value(Number(temp1[1])) ];
+				}
+				else if( temp1.indexOf("位置[") != -1 ){
+					temp1 = temp1.replace("位置[","");
+					temp1 = temp1.replace("]","");
+					temp1 = temp1.split(/[,，]/);
+					pos = [ Number(temp1[0]), 
+							Number(temp1[1]) ];
+				}
+				else if( temp1 == "位置-本事件" || temp1 == "本事件" ){
+					var e = $gameMap.event( this._eventId );
+					var e_pos = [ e._realX, e._realY ];
+					pos = [ Math.round( $gameMap.adjustX( e_pos[0] ) * tw + tw*0.5 ), 
+							Math.round( $gameMap.adjustY( e_pos[1] ) * th + th*0.5 ) ];
+				}
+				else if( temp1 == "位置-玩家" || temp1 == "玩家" ){
+					var e_pos = [ $gamePlayer._realX, $gamePlayer._realY ];
+					pos = [ Math.round( $gameMap.adjustX( e_pos[0] ) * tw + tw*0.5 ), 
+							Math.round( $gameMap.adjustY( e_pos[1] ) * th + th*0.5 ) ];
+				}
+				else if( temp1 == "位置-鼠标" || temp1 == "鼠标位置" ){
+					pos = [ _drill_mouse_x, _drill_mouse_y ];
+				}
+				else if( temp1 == "位置-事件变量[" || temp1.indexOf("事件变量[") != -1 ){
+					temp1 = temp1.replace("位置-事件变量[","");
+					temp1 = temp1.replace("事件变量[","");
+					temp1 = temp1.replace("]","");
+					var e_id = $gameVariables.value(Number(temp1));
+					if( $gameMap.drill_GFTT_isEventExist( e_id ) == false ){ return; }
+					var e = $gameMap.event( e_id );
+					var e_pos = [ e._realX, e._realY ];
+					pos = [ Math.round( $gameMap.adjustX( e_pos[0] ) * tw + tw*0.5 ), 
+							Math.round( $gameMap.adjustY( e_pos[1] ) * th + th*0.5 ) ];
+				}
+				else if( temp1 == "位置-事件[" || temp1.indexOf("事件[") != -1 ){
+					temp1 = temp1.replace("位置-事件[","");
+					temp1 = temp1.replace("事件[","");
+					temp1 = temp1.replace("]","");
+					var e_id = Number(temp1);
+					if( $gameMap.drill_GFTT_isEventExist( e_id ) == false ){ return; }
+					var e = $gameMap.event( e_id );
+					var e_pos = [ e._realX, e._realY ];
+					pos = [ Math.round( $gameMap.adjustX( e_pos[0] ) * tw + tw*0.5 ), 
+							Math.round( $gameMap.adjustY( e_pos[1] ) * th + th*0.5 ) ];
+				}
+				else if( temp1 == "位置-图块变量[" || temp1.indexOf("图块变量[") != -1 ){
+					temp1 = temp1.replace("位置-图块变量[","");
+					temp1 = temp1.replace("图块变量[","");
+					temp1 = temp1.replace("]","");
+					temp1 = temp1.split(/[,，]/);
+					pos = [ Math.round( $gameMap.adjustX( $gameVariables.value(Number(temp1[0])) ) * tw + tw*0.5 ), 
+							Math.round( $gameMap.adjustY( $gameVariables.value(Number(temp1[1])) ) * th + th*0.5 ) ];
+				}
+				else if( temp1 == "位置-图块[" || temp1.indexOf("图块[") != -1 ){
+					temp1 = temp1.replace("位置-图块[","");
+					temp1 = temp1.replace("图块[","");
+					temp1 = temp1.replace("]","");
+					temp1 = temp1.split(/[,，]/);
+					pos = [ Math.round( $gameMap.adjustX( Number(temp1[0]) ) * tw + tw*0.5 ), 
+							Math.round( $gameMap.adjustY( Number(temp1[1]) ) * th + th*0.5 ) ];
+				}
+				
+				if( pos != null ){
+					if( temp2.indexOf("文本[") != -1 ){
+						temp2 = temp2.replace("文本[","");
+						temp2 = temp2.replace(/\]$/,"");	//（去掉末尾的]）
+					}
+					var style_id = args[7];
+					var ballistics_id = args[9];
+					var sustain_time = args[11];
+					if( style_id != undefined ){
+						style_id = style_id.replace("样式[","");
+						style_id = style_id.replace("]","");
+						style_id = Number(style_id)-1; 
+					}
+					if( ballistics_id != undefined ){
+						ballistics_id = ballistics_id.replace("弹道[","");
+						ballistics_id = ballistics_id.replace("]","");
+						ballistics_id = Number(ballistics_id)-1;
+					}
+					if( sustain_time != undefined ){
+						sustain_time = sustain_time.replace("持续时间[","");
+						sustain_time = sustain_time.replace("]","");
+						sustain_time = Number(sustain_time)-1;
+					}
+					$gameTemp.drill_GFTT_createSimple( pos, temp2, style_id, ballistics_id, sustain_time );
+				}
+			}
+		}
+		
+		
+		/*-----------------高级指令 - 初始化------------------*/
 		if( args.length == 8 ){	
 			var unit = String(args[1]);
 			var type = String(args[3]);
@@ -1112,46 +1330,161 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				$gameTemp.drill_GFTT_setBuffer( temp1, temp2 );
 			}
 		}
-		if( args.length >= 6 ){	
+		
+		/*-----------------高级指令 - 修改样式属性------------------*/
+		if( args.length >= 6 ){		//（考虑变化参数数量情况）
 			var unit = String(args[1]);
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
-			if( unit == "临时对象" && type == "修改内容文本" ){
+			if( unit == "临时对象" ){
 				
-				if( temp1.indexOf("字符串[") != -1 ){
-					if( Imported.Drill_CoreOfString ){
-						temp1 = temp1.replace("字符串[","");
-						temp1 = temp1.replace("]","");
-						temp1 = $gameStrings.value( Number(temp1) );
-						$gameTemp.drill_GFTT_setBufferContext( temp1 );
+				if( type == "修改样式属性-内容文本" || type == "修改内容文本" ){
+					if( temp1.indexOf("字符串[") != -1 ){
+						if( Imported.Drill_CoreOfString ){
+							temp1 = temp1.replace("字符串[","");
+							temp1 = temp1.replace("]","");
+							temp1 = $gameStrings.value( Number(temp1) );
+							$gameTemp.drill_GFTT_setStyle_context( temp1 );
+						}else{
+							alert( DrillUp.drill_GFTT_getPluginTip_NoSupportPlugin() );
+						}
 					}else{
-						alert( DrillUp.drill_GFTT_getPluginTip_NoSupportPlugin() );
+						var data_str = "";	//（支持空格的多行结构）
+						for(var m = 5; m < args.length ; m++ ){
+							data_str += String(args[ m ]);
+							if( m < args.length-1 ){  data_str += " "; }
+						}
+						if( data_str.indexOf("文本[") != -1 ){
+							data_str = data_str.replace("文本[","");
+							data_str = data_str.replace(/\]$/,"");	//（去掉末尾的]）
+						}
+						$gameTemp.drill_GFTT_setStyle_context( data_str );
+						
 					}
-					
-				}else{	
-					
-					var data_str = "";	//（支持空格的多行结构）
-					for(var m = 5; m < args.length ; m++ ){
-						data_str += String(args[ m ]);
-						if( m < args.length-1 ){  data_str += " "; }
-					}
-					data_str = data_str.replace("文本[","");
-					data_str = data_str.replace(/\]$/,"");	//（去掉末尾的]）
-					$gameTemp.drill_GFTT_setBufferContext( data_str );
-					
 				}
 			}
-			if( unit == "临时对象" && type == "修改额外位置偏移" ){
-				temp1 = temp1.replace("偏移[","");
-				temp1 = temp1.replace("]","");
-				temp1 = temp1.split(/[,，]/);
-				if( temp1.length >= 2 ){
-					$gameTemp.drill_GFTT_setOffset( Number(temp1[0]), Number(temp1[1]) );
+		}
+		if( args.length == 6 ){	
+			var unit = String(args[1]);
+			var type = String(args[3]);
+			var temp1 = String(args[5]);
+			if( unit == "临时对象" ){
+				
+				if( type == "修改样式属性-额外位置偏移" || type == "修改额外位置偏移" ){
+					temp1 = temp1.replace("偏移[","");
+					temp1 = temp1.replace("]","");
+					temp1 = temp1.split(/[,，]/);
+					if( temp1.length >= 2 ){
+						$gameTemp.drill_GFTT_setStyle_offset( Number(temp1[0]), Number(temp1[1]) );
+					}
+				}
+				if( type == "修改样式属性-UI基准" ){
+					$gameTemp.drill_GFTT_setStyle_benchmark( temp1 );
+				}
+				if( type == "修改样式属性-地图层级" ){
+					$gameTemp.drill_GFTT_setStyle_layer( temp1 );
+				}
+				if( type == "修改样式属性-图片层级" ){
+					temp1 = temp1.replace("图片层级[","");
+					temp1 = temp1.replace("]","");
+					$gameTemp.drill_GFTT_setStyle_zIndex( Number(temp1) );
+				}
+				if( type == "修改样式属性-布局透明度" ){
+					if( temp1.indexOf("透明度变量[") != -1 ){
+						temp1 = temp1.replace("透明度变量[","");
+						temp1 = temp1.replace("]","");
+						temp1 = $gameVariables.value(Number(temp1));
+						$gameTemp.drill_GFTT_setStyle_opacity( temp1 );
+					}
+					else if( temp1.indexOf("透明度[") != -1 ){
+						temp1 = temp1.replace("透明度[","");
+						temp1 = temp1.replace("]","");
+						temp1 = Number(temp1);
+						$gameTemp.drill_GFTT_setStyle_opacity( temp1 );
+					}
+				}
+				if( type == "修改样式属性-窗口附加宽度" ){
+					temp1 = temp1.replace("值[","");
+					temp1 = temp1.replace("]","");
+					$gameTemp.drill_GFTT_setStyle_exWidth( Number(temp1) );
+				}
+				if( type == "修改样式属性-窗口附加高度" ){
+					temp1 = temp1.replace("值[","");
+					temp1 = temp1.replace("]","");
+					$gameTemp.drill_GFTT_setStyle_exHeight( Number(temp1) );
 				}
 			}
 		}
 		
-		/*-----------------创建------------------*/
+		/*-----------------高级指令 - 修改弹道属性------------------*/
+		if( args.length == 6 ){	
+			var unit = String(args[1]);
+			var type = String(args[3]);
+			var temp1 = String(args[5]);
+			if( unit == "临时对象" ){
+				
+				if( type == "修改弹道属性-开始移动前延迟时间" ){
+					temp1 = temp1.replace("时长[","");
+					temp1 = temp1.replace("]","");
+					$gameTemp.drill_GFTT_setBallistics_movementDelay( Number(temp1) );
+				}
+				if( type == "修改弹道属性-移动结束后等待时间" ){
+					temp1 = temp1.replace("时长[","");
+					temp1 = temp1.replace("]","");
+					$gameTemp.drill_GFTT_setBallistics_movementEndDelay( Number(temp1) );
+				}
+				if( type == "修改弹道属性-极坐标模式-初速度" ){
+					temp1 = temp1.replace("速度[","");
+					temp1 = temp1.replace("]","");
+					$gameTemp.drill_GFTT_setBallistics_polarSpeedBase( Number(temp1) );
+				}
+				if( type == "修改弹道属性-极坐标模式-固定方向" ){
+					if( temp1.indexOf("角度变量[") != -1 ){
+						temp1 = temp1.replace("角度变量[","");
+						temp1 = temp1.replace("]","");
+						temp1 = $gameVariables.value(Number(temp1));
+						$gameTemp.drill_GFTT_setBallistics_polarDirFixed( temp1 );
+					}
+					else if( temp1.indexOf("角度[") != -1 ){
+						temp1 = temp1.replace("角度[","");
+						temp1 = temp1.replace("]","");
+						temp1 = Number(temp1);
+						$gameTemp.drill_GFTT_setBallistics_polarDirFixed( temp1 );
+					}
+				}
+				if( type == "修改弹道属性-极坐标模式-扇形朝向" ){
+					if( temp1.indexOf("角度变量[") != -1 ){
+						temp1 = temp1.replace("角度变量[","");
+						temp1 = temp1.replace("]","");
+						temp1 = $gameVariables.value(Number(temp1));
+						$gameTemp.drill_GFTT_setBallistics_polarDirSectorFace( temp1 );
+					}
+					else if( temp1.indexOf("角度[") != -1 ){
+						temp1 = temp1.replace("角度[","");
+						temp1 = temp1.replace("]","");
+						temp1 = Number(temp1);
+						$gameTemp.drill_GFTT_setBallistics_polarDirSectorFace( temp1 );
+					}
+				}
+				if( type == "修改弹道属性-直角坐标模式-X轴初速度" ){
+					temp1 = temp1.replace("速度[","");
+					temp1 = temp1.replace("]","");
+					$gameTemp.drill_GFTT_setBallistics_cartXSpeedBase( Number(temp1) );
+				}
+				if( type == "修改弹道属性-直角坐标模式-Y轴初速度" ){
+					temp1 = temp1.replace("速度[","");
+					temp1 = temp1.replace("]","");
+					$gameTemp.drill_GFTT_setBallistics_cartYSpeedBase( Number(temp1) );
+				}
+				if( type == "修改弹道属性-轨道锚点模式-轨道初速度" ){
+					temp1 = temp1.replace("速度[","");
+					temp1 = temp1.replace("]","");
+					$gameTemp.drill_GFTT_setBallistics_trackSpeedBase( Number(temp1) );
+				}
+			}
+		}
+		
+		/*-----------------高级指令 - 创建------------------*/
 		if( args.length == 8 ){	
 			var unit = String(args[1]);
 			var type = String(args[3]);
@@ -1162,21 +1495,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				var pos = null;
 				var tw = $gameMap.tileWidth();
 				var th = $gameMap.tileHeight();
-				if( temp1.indexOf("相对位置变量[") != -1 ){
-					temp1 = temp1.replace("相对位置变量[","");
-					temp1 = temp1.replace("]","");
-					temp1 = temp1.split(/[,，]/);
-					pos = [ $gameVariables.value(Number(temp1[0])), 
-							$gameVariables.value(Number(temp1[1])) ];
-					
-				}else if( temp1.indexOf("相对位置[") != -1 ){
-					temp1 = temp1.replace("相对位置[","");
-					temp1 = temp1.replace("]","");
-					temp1 = temp1.split(/[,，]/);
-					pos = [ Number(temp1[0]), 
-							Number(temp1[1]) ];
-					
-				}else if( temp1.indexOf("位置变量[") != -1 ){
+				if( temp1.indexOf("位置变量[") != -1 ){
 					temp1 = temp1.replace("位置变量[","");
 					temp1 = temp1.replace("]","");
 					temp1 = temp1.split(/[,，]/);
@@ -1190,21 +1509,22 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					pos = [ Number(temp1[0]), 
 							Number(temp1[1]) ];
 				}
-				else if( temp1 == "本事件" ){
+				else if( temp1 == "位置-本事件" || temp1 == "本事件" ){
 					var e = $gameMap.event( this._eventId );
 					var e_pos = [ e._realX, e._realY ];
 					pos = [ Math.round( $gameMap.adjustX( e_pos[0] ) * tw + tw*0.5 ), 
 							Math.round( $gameMap.adjustY( e_pos[1] ) * th + th*0.5 ) ];
 				}
-				else if( temp1 == "玩家" ){
+				else if( temp1 == "位置-玩家" || temp1 == "玩家" ){
 					var e_pos = [ $gamePlayer._realX, $gamePlayer._realY ];
 					pos = [ Math.round( $gameMap.adjustX( e_pos[0] ) * tw + tw*0.5 ), 
 							Math.round( $gameMap.adjustY( e_pos[1] ) * th + th*0.5 ) ];
 				}
-				else if( temp1 == "鼠标位置" ){
+				else if( temp1 == "位置-鼠标" || temp1 == "鼠标位置" ){
 					pos = [ _drill_mouse_x, _drill_mouse_y ];
 				}
-				else if( temp1.indexOf("事件变量[") != -1 ){
+				else if( temp1 == "位置-事件变量[" || temp1.indexOf("事件变量[") != -1 ){
+					temp1 = temp1.replace("位置-事件变量[","");
 					temp1 = temp1.replace("事件变量[","");
 					temp1 = temp1.replace("]","");
 					var e_id = $gameVariables.value(Number(temp1));
@@ -1214,7 +1534,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					pos = [ Math.round( $gameMap.adjustX( e_pos[0] ) * tw + tw*0.5 ), 
 							Math.round( $gameMap.adjustY( e_pos[1] ) * th + th*0.5 ) ];
 				}
-				else if( temp1.indexOf("事件[") != -1 ){
+				else if( temp1 == "位置-事件[" || temp1.indexOf("事件[") != -1 ){
+					temp1 = temp1.replace("位置-事件[","");
 					temp1 = temp1.replace("事件[","");
 					temp1 = temp1.replace("]","");
 					var e_id = Number(temp1);
@@ -1224,12 +1545,28 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					pos = [ Math.round( $gameMap.adjustX( e_pos[0] ) * tw + tw*0.5 ), 
 							Math.round( $gameMap.adjustY( e_pos[1] ) * th + th*0.5 ) ];
 				}
+				else if( temp1 == "位置-图块变量[" || temp1.indexOf("图块变量[") != -1 ){
+					temp1 = temp1.replace("位置-图块变量[","");
+					temp1 = temp1.replace("图块变量[","");
+					temp1 = temp1.replace("]","");
+					temp1 = temp1.split(/[,，]/);
+					pos = [ Math.round( $gameMap.adjustX( $gameVariables.value(Number(temp1[0])) ) * tw + tw*0.5 ), 
+							Math.round( $gameMap.adjustY( $gameVariables.value(Number(temp1[1])) ) * th + th*0.5 ) ];
+				}
+				else if( temp1 == "位置-图块[" || temp1.indexOf("图块[") != -1 ){
+					temp1 = temp1.replace("位置-图块[","");
+					temp1 = temp1.replace("图块[","");
+					temp1 = temp1.replace("]","");
+					temp1 = temp1.split(/[,，]/);
+					pos = [ Math.round( $gameMap.adjustX( Number(temp1[0]) ) * tw + tw*0.5 ), 
+							Math.round( $gameMap.adjustY( Number(temp1[1]) ) * th + th*0.5 ) ];
+				}
 				
 				if( pos != null ){
 					temp2 = temp2.replace("持续时间[","");
 					temp2 = temp2.replace("]","");
 					temp2 = Number(temp2);
-					$gameTemp.drill_GFTT_create( pos, temp2 );
+					$gameTemp.drill_GFTT_createByBuffer( pos, temp2 );
 				}
 			}
 		}
@@ -1254,7 +1591,7 @@ Game_Map.prototype.drill_GFTT_isEventExist = function( e_id ){
 
 
 //#############################################################################
-// ** 【标准模块】地图层级
+// ** 【标准模块】地图层级 ☆地图层级
 //#############################################################################
 //##############################
 // * 地图层级 - 添加贴图到层级【标准函数】
@@ -1450,86 +1787,250 @@ Scene_Map.prototype.drill_GFTT_layerCameraMoving_Private = function( xx, yy, lay
 }
 
 
+
 //=============================================================================
-// ** 缓冲数据
+// ** ☆临时对象
+//			
+//			说明：	> 此模块专门管理 插件指令控制的临时对象 。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// ** 缓冲数据 - 初始化
+// * 临时对象 - 容器初始化
 //==============================
 var _drill_GFTT_temp_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {
 	_drill_GFTT_temp_initialize.call(this);
-	
 	this._drill_GFTT_commandBuffer = null;		//临时对象
 	this._drill_GFTT_commandSeq = [];			//漂浮文字容器
 };
 //==============================
-// ** 缓冲数据 - 设置临时对象
+// * 临时对象 - 容器销毁
 //==============================
-Game_Temp.prototype.drill_GFTT_setBuffer = function( style_id, ballistics_id ){
+var _drill_GFTT_temp_terminate2 = Scene_Map.prototype.terminate;
+Scene_Map.prototype.terminate = function() {
+	_drill_GFTT_temp_terminate2.call(this);
+	this._drill_GFTT_commandBuffer = null;		//临时对象
+	this._drill_GFTT_commandSeq = [];			//漂浮文字容器
+};
+//==============================
+// * 临时对象 - 简单指令
+//==============================
+Game_Temp.prototype.drill_GFTT_createSimple = function( pos, text, style_id, ballistics_id, sustain_time ){
+	if( style_id == undefined ){ style_id = DrillUp.g_GFTT_simple_defaultStyleId -1; }
+	if( ballistics_id == undefined ){ ballistics_id = DrillUp.g_GFTT_simple_defaultBallisticsId -1; }
+	if( sustain_time == undefined ){ sustain_time = DrillUp.g_GFTT_simple_defaultTime; }
 	
-	var s_data = JSON.parse(JSON.stringify( DrillUp.g_GFTT_style[ style_id ] ));			//深拷贝
-	var b_data = JSON.parse(JSON.stringify( DrillUp.g_GFTT_ballistics[ ballistics_id ] ));	//深拷贝
-	
+	// > 基本参数初始化
 	var data = {};
-	data['s_data'] = s_data;
-	data['b_data'] = b_data;
-	this._drill_GFTT_commandBuffer = data;
-};
-//==============================
-// ** 缓冲数据 - 修改内容文本
-//==============================
-Game_Temp.prototype.drill_GFTT_setBufferContext = function( context ){
-	this._drill_GFTT_commandBuffer['s_data']['context'] = context;
-};
-//==============================
-// ** 缓冲数据 - 修改额外位置偏移
-//==============================
-Game_Temp.prototype.drill_GFTT_setOffset = function( xx, yy ){
-	this._drill_GFTT_commandBuffer['s_data']['offset_x'] = xx;
-	this._drill_GFTT_commandBuffer['s_data']['offset_y'] = yy;
-};
-//==============================
-// ** 缓冲数据 - 创建
-//==============================
-Game_Temp.prototype.drill_GFTT_create = function( pos, time ){
-	var data = this._drill_GFTT_commandBuffer;
-	if( data == undefined ){ return; }
+	data['s_data'] = JSON.parse(JSON.stringify( DrillUp.g_GFTT_style[ style_id ] ));
+	data['b_data'] = JSON.parse(JSON.stringify( DrillUp.g_GFTT_ballistics[ ballistics_id ] ));
 	
-	data['b_data']['movementNum'] = 1;						//对象数量
-	data['b_data']['movementTime'] = time;					//时长
-	data['b_data']['temp_org_x'] = pos[0];
-	data['b_data']['temp_org_y'] = pos[1];
+	// > 临时对象设置
+	data['b_data']['movementNum'] = 1;
+	data['b_data']['movementTime'] = sustain_time;
+	data['param_x'] = pos[0];
+	data['param_y'] = pos[1];
+	
+	// > 内容文本初始化
+	//text = text.replace(/\\[vV]\[(\d+)\]/gi, function() {	// 变量转换（\v[2]）
+	//	return $gameVariables.value(parseInt(arguments[1]));
+	//}.bind(this));
+	//text = text.replace(/\\[vV]\[(\d+)\]/gi, function() {
+	//	return $gameVariables.value(parseInt(arguments[1]));
+	//}.bind(this));
+	data['s_data']['context'] = text;
 	
 	this._drill_GFTT_commandSeq.push( data );
 };
+//==============================
+// * 临时对象 - 高级指令 初始化
+//==============================
+Game_Temp.prototype.drill_GFTT_setBuffer = function( style_id, ballistics_id ){
+	
+	// > 基本参数初始化
+	var data = {};
+	data['s_data'] = JSON.parse(JSON.stringify( DrillUp.g_GFTT_style[ style_id ] ));
+	data['b_data'] = JSON.parse(JSON.stringify( DrillUp.g_GFTT_ballistics[ ballistics_id ] ));
+	
+	// > 临时对象设置
+	data['param_x'] = 0;
+	data['param_y'] = 0;
+	
+	this._drill_GFTT_commandBuffer = data;
+};
+//==============================
+// * 临时对象 - 高级指令 创建
+//==============================
+Game_Temp.prototype.drill_GFTT_createByBuffer = function( pos, time ){
+	var data = this._drill_GFTT_commandBuffer;
+	if( data == undefined ){ alert( DrillUp.drill_GFTT_getPluginTip_BufferIsNull() ); return; }
+	data = JSON.parse(JSON.stringify( data ));
+	
+	// > 临时对象设置
+	data['b_data']['movementNum'] = 1;
+	data['b_data']['movementTime'] = time;
+	data['param_x'] = pos[0];
+	data['param_y'] = pos[1];
+	
+	// > 内容文本初始化
+	var text = data['s_data']['context'];
+	if( text == "" ){										// 空文本 提示错误
+		alert( DrillUp.drill_GFTT_getPluginTip_DataIsEmpty() );
+		return;
+	}
+	//text = text.replace(/\\[vV]\[(\d+)\]/gi, function() {	// 不需要转，窗口绘制直接支持 \v[2]、\str[21]
+	//	return $gameVariables.value(parseInt(arguments[1]));
+	//}.bind(this));
+	//text = text.replace(/\\[vV]\[(\d+)\]/gi, function() {
+	//	return $gameVariables.value(parseInt(arguments[1]));
+	//}.bind(this));
+	data['s_data']['context'] = text;
+	
+	this._drill_GFTT_commandSeq.push( data );
+};
+//==============================
+// * 临时对象 - 修改样式属性-内容文本
+//==============================
+Game_Temp.prototype.drill_GFTT_setStyle_context = function( context ){
+	if( this._drill_GFTT_commandBuffer == undefined ){ alert( DrillUp.drill_GFTT_getPluginTip_BufferIsNull() ); return; }
+	this._drill_GFTT_commandBuffer['s_data']['context'] = context;
+};
+//==============================
+// * 临时对象 - 修改样式属性-额外位置偏移
+//==============================
+Game_Temp.prototype.drill_GFTT_setStyle_offset = function( xx, yy ){
+	if( this._drill_GFTT_commandBuffer == undefined ){ alert( DrillUp.drill_GFTT_getPluginTip_BufferIsNull() ); return; }
+	this._drill_GFTT_commandBuffer['s_data']['offsetEx_x'] = xx;
+	this._drill_GFTT_commandBuffer['s_data']['offsetEx_y'] = yy;
+};
+//==============================
+// * 临时对象 - 修改样式属性-UI基准
+//==============================
+Game_Temp.prototype.drill_GFTT_setStyle_benchmark = function( benchmark ){
+	if( this._drill_GFTT_commandBuffer == undefined ){ alert( DrillUp.drill_GFTT_getPluginTip_BufferIsNull() ); return; }
+	this._drill_GFTT_commandBuffer['s_data']['window_benchmark'] = benchmark;
+};
+//==============================
+// * 临时对象 - 修改样式属性-地图层级
+//==============================
+Game_Temp.prototype.drill_GFTT_setStyle_layer = function( layer ){
+	if( this._drill_GFTT_commandBuffer == undefined ){ alert( DrillUp.drill_GFTT_getPluginTip_BufferIsNull() ); return; }
+	this._drill_GFTT_commandBuffer['s_data']['window_map_layer'] = layer;
+};
+//==============================
+// * 临时对象 - 修改样式属性-图片层级
+//==============================
+Game_Temp.prototype.drill_GFTT_setStyle_zIndex = function( zIndex ){
+	if( this._drill_GFTT_commandBuffer == undefined ){ alert( DrillUp.drill_GFTT_getPluginTip_BufferIsNull() ); return; }
+	this._drill_GFTT_commandBuffer['s_data']['window_map_zIndex'] = zIndex;
+};
+//==============================
+// * 临时对象 - 修改样式属性-布局透明度
+//==============================
+Game_Temp.prototype.drill_GFTT_setStyle_opacity = function( opacity ){
+	if( this._drill_GFTT_commandBuffer == undefined ){ alert( DrillUp.drill_GFTT_getPluginTip_BufferIsNull() ); return; }
+	this._drill_GFTT_commandBuffer['s_data']['window_opacity'] = opacity;
+};
+//==============================
+// * 临时对象 - 修改样式属性-窗口附加宽度
+//==============================
+Game_Temp.prototype.drill_GFTT_setStyle_exWidth = function( width ){
+	if( this._drill_GFTT_commandBuffer == undefined ){ alert( DrillUp.drill_GFTT_getPluginTip_BufferIsNull() ); return; }
+	this._drill_GFTT_commandBuffer['s_data']['window_ex_width'] = width;
+};
+//==============================
+// * 临时对象 - 修改样式属性-窗口附加高度
+//==============================
+Game_Temp.prototype.drill_GFTT_setStyle_exHeight = function( height ){
+	if( this._drill_GFTT_commandBuffer == undefined ){ alert( DrillUp.drill_GFTT_getPluginTip_BufferIsNull() ); return; }
+	this._drill_GFTT_commandBuffer['s_data']['window_ex_height'] = height;
+};
+//==============================
+// * 临时对象 - 修改弹道属性-开始移动前延迟时间
+//==============================
+Game_Temp.prototype.drill_GFTT_setBallistics_movementDelay = function( movementDelay ){
+	if( this._drill_GFTT_commandBuffer == undefined ){ alert( DrillUp.drill_GFTT_getPluginTip_BufferIsNull() ); return; }
+	this._drill_GFTT_commandBuffer['b_data']['movementDelay'] = movementDelay;
+};
+//==============================
+// * 临时对象 - 修改弹道属性-移动结束后等待时间
+//==============================
+Game_Temp.prototype.drill_GFTT_setBallistics_movementEndDelay = function( movementEndDelay ){
+	if( this._drill_GFTT_commandBuffer == undefined ){ alert( DrillUp.drill_GFTT_getPluginTip_BufferIsNull() ); return; }
+	this._drill_GFTT_commandBuffer['b_data']['movementEndDelay'] = movementEndDelay;
+};
+//==============================
+// * 临时对象 - 修改弹道属性-极坐标模式-初速度
+//==============================
+Game_Temp.prototype.drill_GFTT_setBallistics_polarSpeedBase = function( polarSpeedBase ){
+	if( this._drill_GFTT_commandBuffer == undefined ){ alert( DrillUp.drill_GFTT_getPluginTip_BufferIsNull() ); return; }
+	this._drill_GFTT_commandBuffer['b_data']['polarSpeedBase'] = polarSpeedBase;
+};
+//==============================
+// * 临时对象 - 修改弹道属性-极坐标模式-固定方向
+//==============================
+Game_Temp.prototype.drill_GFTT_setBallistics_polarDirFixed = function( polarDirFixed ){
+	if( this._drill_GFTT_commandBuffer == undefined ){ alert( DrillUp.drill_GFTT_getPluginTip_BufferIsNull() ); return; }
+	this._drill_GFTT_commandBuffer['b_data']['polarDirFixed'] = polarDirFixed;
+};
+//==============================
+// * 临时对象 - 修改弹道属性-极坐标模式-扇形朝向
+//==============================
+Game_Temp.prototype.drill_GFTT_setBallistics_polarDirSectorFace = function( polarDirSectorFace ){
+	if( this._drill_GFTT_commandBuffer == undefined ){ alert( DrillUp.drill_GFTT_getPluginTip_BufferIsNull() ); return; }
+	this._drill_GFTT_commandBuffer['b_data']['polarDirSectorFace'] = polarDirSectorFace;
+};
+//==============================
+// * 临时对象 - 修改弹道属性-直角坐标模式-X轴初速度
+//==============================
+Game_Temp.prototype.drill_GFTT_setBallistics_cartXSpeedBase = function( cartXSpeedBase ){
+	if( this._drill_GFTT_commandBuffer == undefined ){ alert( DrillUp.drill_GFTT_getPluginTip_BufferIsNull() ); return; }
+	this._drill_GFTT_commandBuffer['b_data']['cartXSpeedBase'] = cartXSpeedBase;
+};
+//==============================
+// * 临时对象 - 修改弹道属性-直角坐标模式-Y轴初速度
+//==============================
+Game_Temp.prototype.drill_GFTT_setBallistics_cartYSpeedBase = function( cartYSpeedBase ){
+	if( this._drill_GFTT_commandBuffer == undefined ){ alert( DrillUp.drill_GFTT_getPluginTip_BufferIsNull() ); return; }
+	this._drill_GFTT_commandBuffer['b_data']['cartYSpeedBase'] = cartYSpeedBase;
+};
+//==============================
+// * 临时对象 - 修改弹道属性-轨道锚点模式-轨道初速度
+//==============================
+Game_Temp.prototype.drill_GFTT_setBallistics_trackSpeedBase = function( trackSpeedBase ){
+	if( this._drill_GFTT_commandBuffer == undefined ){ alert( DrillUp.drill_GFTT_getPluginTip_BufferIsNull() ); return; }
+	this._drill_GFTT_commandBuffer['b_data']['trackSpeedBase'] = trackSpeedBase;
+};
 
 
 //=============================================================================
-// ** 地图界面
+// ** ☆贴图控制
+//			
+//			说明：	> 此模块专门管理 漂浮文字窗口 的创建与销毁。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 地图 - 初始化
+// * 贴图控制 - 贴图容器 初始化
 //==============================
 var _drill_GFTT_map_initialize = Scene_Map.prototype.initialize;
 Scene_Map.prototype.initialize = function() {	
 	_drill_GFTT_map_initialize.call(this);
-	this._drill_GFTT_windowTank = [];
+	this._drill_GFTT_windowTank = [];			//贴图容器
 };
 //==============================
-// * 地图 - 帧刷新
+// * 贴图控制 - 帧刷新
 //==============================
 var _drill_GFTT_map_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {	
 	_drill_GFTT_map_update.call(this);
 	if( this.isActive() ){
-		this.drill_GFTT_updateWindowAddChild();			//帧刷新 - 插件指令建立贴图
+		this.drill_GFTT_updateWindowAddChild();			//帧刷新 - 指令建立贴图
 		this.drill_GFTT_updateWindowDelete();			//帧刷新 - 贴图删除
 		this.drill_GFTT_updateWindowPosition();			//帧刷新 - 位置
 	}
 };
 //==============================
-// * 帧刷新 - 插件指令设置贴图
+// * 贴图控制 - 帧刷新 指令建立贴图
 //==============================
 Scene_Map.prototype.drill_GFTT_updateWindowAddChild = function() {
 	for( var i = $gameTemp._drill_GFTT_commandSeq.length-1; i >= 0; i-- ){
@@ -1537,14 +2038,12 @@ Scene_Map.prototype.drill_GFTT_updateWindowAddChild = function() {
 		if( temp_data == undefined ){ continue; }
 		
 		// > 层级初始化
-		var s_data = temp_data['s_data'];
-		var b_data = temp_data['b_data'];
-		var temp_window = new Drill_GFTT_Window( s_data, b_data );
-		temp_window.zIndex = s_data['window_map_zIndex'];
+		var temp_window = new Drill_GFTT_Window( temp_data );
+		temp_window.zIndex = temp_data['s_data']['window_map_zIndex'];
 		this._drill_GFTT_windowTank.push( temp_window );
 		
 		// > 层级初始化
-		this.drill_GFTT_layerAddSprite( temp_window, s_data['window_map_layer'] );
+		this.drill_GFTT_layerAddSprite( temp_window, temp_data['s_data']['window_map_layer'] );
 		
 		// > 层级排序
 		this.drill_GFTT_sortByZIndex();
@@ -1554,7 +2053,7 @@ Scene_Map.prototype.drill_GFTT_updateWindowAddChild = function() {
 	}
 }
 //==============================
-// * 帧刷新 - 贴图删除
+// * 贴图控制 - 帧刷新 贴图删除
 //==============================
 Scene_Map.prototype.drill_GFTT_updateWindowDelete = function() {
 	for( var i = this._drill_GFTT_windowTank.length-1; i >= 0; i-- ){
@@ -1570,20 +2069,22 @@ Scene_Map.prototype.drill_GFTT_updateWindowDelete = function() {
 	}
 }
 //==============================
-// * 帧刷新 - 帧刷新位置
+// * 贴图控制 - 帧刷新 位置
 //==============================
 Scene_Map.prototype.drill_GFTT_updateWindowPosition = function() {
 	for( var i = 0; i < this._drill_GFTT_windowTank.length; i++ ){
 		var temp_window = this._drill_GFTT_windowTank[i];
-		var s_data = temp_window._drill_style_data;
-		var b_data = temp_window._drill_ballistics_data;
+		var s_data = temp_window._drill_data['s_data'];
+		var b_data = temp_window._drill_data['b_data'];
 		if( temp_window['_drill_COBa_x'].length == 0 ){ continue; }
 			
 		// > 位移
 		var xx = 0;
 		var yy = 0;
-		xx += s_data['offset_x'];
-		yy += s_data['offset_y'];
+		
+		// > 额外位置偏移
+		xx += s_data['offsetEx_x'];
+		yy += s_data['offsetEx_y'];
 		
 		// > 窗口的锚点
 		xx -= temp_window._drill_width * temp_window._drill_anchor_x;
@@ -1674,9 +2175,8 @@ Drill_GFTT_Window.prototype.constructor = Drill_GFTT_Window;
 //==============================
 // * 漂浮文字窗口 - 初始化
 //==============================
-Drill_GFTT_Window.prototype.initialize = function( s_data, b_data ){
-	this._drill_style_data = s_data;			//样式数据（直接传指针）
-	this._drill_ballistics_data = b_data;		//弹道数据（直接传指针）
+Drill_GFTT_Window.prototype.initialize = function( data ){
+	this._drill_data = data;			//（直接传指针）
 	
     Window_Base.prototype.initialize.call(this, 0, 0, 0, 0);
 	
@@ -1697,22 +2197,22 @@ Drill_GFTT_Window.prototype.update = function() {
 //==============================
 // * 漂浮文字窗口 - 窗口属性
 //==============================
-Drill_GFTT_Window.prototype.lineHeight = function(){ return this._drill_style_data['window_lineheight']; };			//窗口行间距
-Drill_GFTT_Window.prototype.standardPadding = function(){ return this._drill_style_data['window_padding']; };			//窗口内边距
-Drill_GFTT_Window.prototype.standardFontSize = function(){ return this._drill_style_data['window_fontsize']; };		//窗口字体大小
+Drill_GFTT_Window.prototype.lineHeight = function(){ return this._drill_data['s_data']['window_lineheight']; };			//窗口行间距
+Drill_GFTT_Window.prototype.standardPadding = function(){ return this._drill_data['s_data']['window_padding']; };		//窗口内边距
+Drill_GFTT_Window.prototype.standardFontSize = function(){ return this._drill_data['s_data']['window_fontsize']; };		//窗口字体大小
 //==============================
 // * 漂浮文字窗口 - 持续时间
 //==============================
 Drill_GFTT_Window.prototype.drill_isDead = function() {
-	var b_data = this._drill_ballistics_data;
+	var b_data = this._drill_data['b_data'];
 	return this._drill_time > (b_data['movementDelay'] + b_data['movementTime'] + b_data['movementEndDelay']);
 };
 //==============================
 // * 初始化 - 数据
 //==============================
 Drill_GFTT_Window.prototype.drill_initData = function() {
-	var s_data = this._drill_style_data;
-	var b_data = this._drill_ballistics_data;
+	var s_data = this._drill_data['s_data'];
+	var b_data = this._drill_data['b_data'];
 	
 	// > 皮肤设置
 	this._drill_window_sys_bitmap = ImageManager.loadSystem( s_data['window_sys_src'] );
@@ -1739,38 +2239,79 @@ Drill_GFTT_Window.prototype.drill_initData = function() {
 	this._drill_orgPos_y = $gameMap.adjustY(0);
 	
 	// > 移动弹道初始化
-	$gameTemp.drill_COBa_setBallisticsMove( b_data );												//弹道核心 - 坐标初始化
-	$gameTemp.drill_COBa_preBallisticsMove( this, 0 , b_data['temp_org_x'], b_data['temp_org_y'] );	//弹道核心 - 推演
+	$gameTemp.drill_COBa_setBallisticsMove( b_data );																//弹道核心 - 坐标初始化
+	$gameTemp.drill_COBa_preBallisticsMove( this, 0 , this._drill_data['param_x'], this._drill_data['param_y'] );	//弹道核心 - 推演
 	
 	// > 透明度弹道初始化
 	var org_opacity = 255;
 	var o_time = b_data['movementDelay'] + b_data['movementTime'] + b_data['movementEndDelay'];
 	var o_data = {};
 	o_data['opacityNum'] = 1;											//对象数量
-	if( b_data['opacity_type'] == "匀速消失" ){
-		o_data['opacityMode'] = "目标值模式";								//移动模式
-		o_data['targetType'] = "匀速变化";									//目标值模式 - 类型（匀速变化/弹性变化/…）
-		o_data['targetDifference'] = 0 - org_opacity;						//目标值模式 - 距离差值
-		o_data['opacityTime'] = o_time;	
-		o_data['opacityDelay'] = 0;		
-		o_data['opacityEndDelay'] = 0;	
+	o_data['opacityTime'] = o_time;
+	o_data['opacityMode'] = "时间锚点模式";
+	
+	if( b_data['opacity_type'] == "逐渐消失" || b_data['opacity_type'] == "匀速消失" ){
+		o_data['anchorPointTank'] = [];
+		o_data['anchorPointTank'].push( {'t':0,'o':255} );
+		o_data['anchorPointTank'].push( {'t':100,'o':0} );
 	}
-	if( b_data['opacity_type'] == "等一半时间后匀速消失" ){
-		o_data['opacityMode'] = "目标值模式";								//移动模式
-		o_data['targetType'] = "匀速变化";									//目标值模式 - 类型（匀速变化/弹性变化/…）
-		o_data['targetDifference'] = 0 - org_opacity;						//目标值模式 - 距离差值
-		o_data['opacityTime'] = o_time * 0.5;	
-		o_data['opacityDelay'] = o_time * 0.5;		
-		o_data['opacityEndDelay'] = 0;	
+	else if( b_data['opacity_type'] == "逐渐显现" ){
+		o_data['anchorPointTank'] = [];
+		o_data['anchorPointTank'].push( {'t':0,'o':0} );
+		o_data['anchorPointTank'].push( {'t':100,'o':255} );
 	}
-	if( b_data['opacity_type'] == "先显现后消失" ){
-		o_data['opacityMode'] = "时间锚点模式";			
-		o_data['opacityTime'] = o_time;		
-		o_data['anchorPointTank'] = [];	
-		o_data['anchorPointTank'].push( {'t':0,'o':0} );		//（四分之一时间显现，而后四分之一消失）
-		o_data['anchorPointTank'].push( {'t':25,'o':255} );		
-		o_data['anchorPointTank'].push( {'t':75,'o':255} );		
-		o_data['anchorPointTank'].push( {'t':100,'o':0} );		
+	else if( b_data['opacity_type'] == "保持原透明度" ){
+		o_data['anchorPointTank'] = [];
+		o_data['anchorPointTank'].push( {'t':0,'o':255} );
+		o_data['anchorPointTank'].push( {'t':100,'o':255} );
+	}
+	else if( b_data['opacity_type'] == "等一半时间后逐渐消失" || b_data['opacity_type'] == "等一半时间后匀速消失" ){
+		o_data['anchorPointTank'] = [];
+		o_data['anchorPointTank'].push( {'t':0,'o':255} );
+		o_data['anchorPointTank'].push( {'t':50,'o':255} );
+		o_data['anchorPointTank'].push( {'t':100,'o':0} );
+	}
+	else if( b_data['opacity_type'] == "前一半时间先显现再保持" ){
+		o_data['anchorPointTank'] = [];
+		o_data['anchorPointTank'].push( {'t':0,'o':0} );
+		o_data['anchorPointTank'].push( {'t':50,'o':255} );
+		o_data['anchorPointTank'].push( {'t':100,'o':255} );
+	}
+	else if( b_data['opacity_type'] == "先显现后消失(慢速)" ){
+		o_data['anchorPointTank'] = [];
+		o_data['anchorPointTank'].push( {'t':0,'o':0} );
+		o_data['anchorPointTank'].push( {'t':45,'o':255} );
+		o_data['anchorPointTank'].push( {'t':55,'o':255} );
+		o_data['anchorPointTank'].push( {'t':100,'o':0} );
+	}
+	else if( b_data['opacity_type'] == "先显现后消失" ){
+		o_data['anchorPointTank'] = [];
+		o_data['anchorPointTank'].push( {'t':0,'o':0} );
+		o_data['anchorPointTank'].push( {'t':25,'o':255} );
+		o_data['anchorPointTank'].push( {'t':75,'o':255} );
+		o_data['anchorPointTank'].push( {'t':100,'o':0} );
+	}
+	else if( b_data['opacity_type'] == "先显现后消失(快速)" ){
+		o_data['anchorPointTank'] = [];
+		o_data['anchorPointTank'].push( {'t':0,'o':0} );
+		o_data['anchorPointTank'].push( {'t':10,'o':255} );
+		o_data['anchorPointTank'].push( {'t':90,'o':255} );
+		o_data['anchorPointTank'].push( {'t':100,'o':0} );
+	}
+	else if( b_data['opacity_type'] == "一闪一闪" ){
+		o_data['anchorPointTank'] = [];
+		o_data['anchorPointTank'].push( {'t':0,'o':0} );
+		o_data['anchorPointTank'].push( {'t':30,'o':125} );
+		o_data['anchorPointTank'].push( {'t':35,'o':255} );
+		o_data['anchorPointTank'].push( {'t':40,'o':125} );
+		o_data['anchorPointTank'].push( {'t':45,'o':255} );
+		o_data['anchorPointTank'].push( {'t':50,'o':125} );
+		o_data['anchorPointTank'].push( {'t':70,'o':125} );
+		o_data['anchorPointTank'].push( {'t':75,'o':255} );
+		o_data['anchorPointTank'].push( {'t':80,'o':125} );
+		o_data['anchorPointTank'].push( {'t':85,'o':255} );
+		o_data['anchorPointTank'].push( {'t':90,'o':125} );
+		o_data['anchorPointTank'].push( {'t':100,'o':0} );
 	}
 	
 	// > 弹道（透明度）
@@ -1793,7 +2334,7 @@ Drill_GFTT_Window.prototype.drill_initSprite = function() {
 // * 创建 - 背景
 //==============================
 Drill_GFTT_Window.prototype.drill_createBackground = function() {
-	var s_data = this._drill_style_data;
+	var s_data = this._drill_data['s_data'];
 	this._drill_background = new Sprite();
 	
 	// > 图层顺序处理
@@ -1860,12 +2401,12 @@ Drill_GFTT_Window.prototype.drill_sortBottomByZIndex = function() {
 
 
 //==============================
-// * 帧刷新 - 位置
+// * 帧刷新 - 透明度
 //==============================
 Drill_GFTT_Window.prototype.drill_updateOpacity = function() {
-	var s_data = this._drill_style_data;
-	var b_data = this._drill_ballistics_data;
-	if( this['_drill_COBa_x'].length == 0 ){ return; }
+	var s_data = this._drill_data['s_data'];
+	var b_data = this._drill_data['b_data'];
+	if( this['_drill_COBa_opacity'].length == 0 ){ return; }
 		
 	// > 根据轨迹进行播放
 	var time = this._drill_time;
@@ -1880,15 +2421,15 @@ Drill_GFTT_Window.prototype.drill_updateOpacity = function() {
 // * 激活 - 刷新内容
 //==============================
 Drill_GFTT_Window.prototype.drill_refreshMessageFromData = function(){
-	var s_data = this._drill_style_data;
+	var s_data = this._drill_data['s_data'];
 	this.drill_refreshMessage( s_data['context'].split("\n") );
 }
 //==============================
 // * 激活 - 刷新内容
 //==============================
 Drill_GFTT_Window.prototype.drill_refreshMessage = function( context_list ){
-	var s_data = this._drill_style_data;
-	var b_data = this._drill_ballistics_data;
+	var s_data = this._drill_data['s_data'];
+	var b_data = this._drill_data['b_data'];
 	if( context_list.length == 0 ){ return; }
 	
 	// > 窗口高宽 - 计算

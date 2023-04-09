@@ -1542,29 +1542,33 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			行走图GIF：
-//				->个体层级
-//					->添加贴图到层级【标准函数】
-//					->去除贴图【标准函数】
-//					->图片层级排序（界面装饰）【标准函数】
-//					->图片层级排序（个体装饰）【标准函数】
-//				->物体容器
-//					->统计含控制器的物体
-//				->事件
-//					->创建控制器（接口）
-//					->删除控制器（接口）
-//					->删除全部控制器（接口）
-//					->控制器帧刷新
-//					->控制器销毁
-//				->外部控制
-//					->创建贴图
-//						->控制器与序列号判定
-//					->贴图自动销毁
-//				->优化策略
-//					->判断贴图是否在镜头范围内
+//			->☆提示信息
+//			->☆变量获取
+//			->☆插件指令
+//			->☆事件注释
+//			->☆个体层级
+//				->添加贴图到层级【标准函数】
+//				->去除贴图【标准函数】
+//				->图片层级排序（界面装饰）【标准函数】
+//				->图片层级排序（个体装饰）【标准函数】
+//			
+//			->☆物体容器（未使用）
+//				->统计含控制器的物体
+//			->☆物体绑定
+//				->创建控制器（开放函数）
+//				->删除控制器（开放函数）
+//				->删除全部控制器（开放函数）
+//				->控制器帧刷新
+//				->控制器销毁
+//			->☆贴图控制
+//				->创建
+//					->控制器与序列号判定
+//				->帧刷新
+//					->自动销毁
 //
-//				->行走图GIF控制器【Drill_EFGi_Controller】
-//				->行走图GIF贴图【Drill_EFGi_Sprite】
+//			->行走图GIF控制器【Drill_EFGi_Controller】
+//			->行走图GIF贴图【Drill_EFGi_Sprite】
+//		
 //		
 //		★插件私有类：
 //			* Drill_EFGi_Controller	【行走图GIF控制器】
@@ -1588,7 +1592,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -1617,7 +1621,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_EventFrameGif = true;
@@ -1653,7 +1657,7 @@
 		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
 		data['tint'] = Number( dataFrom["图像-色调值"] || 0);
 		data['smooth'] = String( dataFrom["图像-模糊边缘"] || "false") == "true";
-		data['anim_index'] = String( dataFrom["行走图层级"] || "在行走图前面");
+		data['individualIndex'] = String( dataFrom["行走图层级"] || "在行走图前面");
 		data['zIndex'] = Number( dataFrom["图片层级"] || 0);
 		data['rotate'] = Number( dataFrom["旋转速度"] || 0);
 		
@@ -1693,7 +1697,7 @@
 	
 	
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _drill_EFGi_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
@@ -1817,7 +1821,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 };
 //==============================
-// ** 插件指令 - 事件检查
+// * 插件指令 - 事件检查
 //==============================
 Game_Map.prototype.drill_EFGi_isEventExist = function( e_id ){
 	if( e_id == 0 ){ return false; }
@@ -1832,16 +1836,19 @@ Game_Map.prototype.drill_EFGi_isEventExist = function( e_id ){
 
 
 //=============================================================================
-// ** 事件注释初始化
+// ** ☆事件注释
 //=============================================================================
 //==============================
-// * 事件 - 注释初始化
+// * 事件注释 - 初始化绑定
 //==============================
 var _drill_EFGi_c_setupPageSettings = Game_Event.prototype.setupPageSettings;
 Game_Event.prototype.setupPageSettings = function() {
 	_drill_EFGi_c_setupPageSettings.call(this);
 	this.drill_EFGi_setupPageSettings();
 }
+//==============================
+// * 事件注释 - 初始化
+//==============================
 Game_Event.prototype.drill_EFGi_setupPageSettings = function() {
 	
 	var page = this.page();
@@ -1893,31 +1900,8 @@ Game_Event.prototype.drill_EFGi_setupPageSettings = function() {
 }
 
 
-//=============================================================================
-// ** 临时变量初始化
-//=============================================================================
-var _drill_EFGi_temp_initialize = Game_Temp.prototype.initialize;
-Game_Temp.prototype.initialize = function() {
-    _drill_EFGi_temp_initialize.call(this);
-	this._drill_EFGi_spriteTank = [];		//GIF贴图容器
-};
-
-
-//=============================================================================
-// * 优化
-//=============================================================================
-//==============================
-// * 优化 - 检查镜像情况
-//==============================
-Game_Temp.prototype.drill_EFGi_isReflectionSprite = function( sprite ){
-	if( Imported.Drill_LayerReverseReflection      && sprite instanceof Drill_Sprite_LRR ){ return true; }
-	if( Imported.Drill_LayerSynchronizedReflection && sprite instanceof Drill_Sprite_LSR ){ return true; }
-	return false;
-}
-
-
 //#############################################################################
-// ** 【标准模块】个体层级
+// ** 【标准模块】个体层级 ☆个体层级
 //#############################################################################
 //##############################
 // * 个体层级 - 添加贴图到层级【标准函数】
@@ -2040,9 +2024,11 @@ Game_Temp.prototype.drill_EFGi_layerRemoveSprite_Private = function( sprite ){
 };
 
 
-
 //=============================================================================
-// ** 物体容器
+// ** ☆物体容器（未使用）
+//
+//			说明：	> 此模块能随时刷新捕获拥有 该个体装饰 的事件。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 容器 - 初始化
@@ -2112,10 +2098,13 @@ Game_Map.prototype.drill_EFGi_updateRestatistics = function() {
 
 
 //=============================================================================
-// ** 事件
+// ** ☆物体绑定
+//
+//			说明：	> 此模块专门管理 控制器 对象。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 事件 - 初始化
+// * 物体绑定 - 初始化
 //==============================
 var _drill_EFGi_c_initMembers = Game_CharacterBase.prototype.initMembers;
 Game_CharacterBase.prototype.initMembers = function(){
@@ -2123,7 +2112,7 @@ Game_CharacterBase.prototype.initMembers = function(){
 	_drill_EFGi_c_initMembers.call( this );
 }
 //==============================
-// * 事件 - 创建控制器（接口）
+// * 物体绑定 - 创建控制器（开放函数）
 //==============================
 Game_CharacterBase.prototype.drill_EFGi_createController = function( slot_id, style_id ){
 	if( this._drill_EFGi_controllerTank == undefined ){
@@ -2142,7 +2131,7 @@ Game_CharacterBase.prototype.drill_EFGi_createController = function( slot_id, st
 	$gameTemp._drill_EFGi_needRestatistics = true;
 }
 //==============================
-// * 事件 - 去除控制器（接口）
+// * 物体绑定 - 去除控制器（开放函数）
 //==============================
 Game_CharacterBase.prototype.drill_EFGi_removeController = function( slot_id ){
 	if( this._drill_EFGi_controllerTank == undefined ){ return; }
@@ -2151,7 +2140,7 @@ Game_CharacterBase.prototype.drill_EFGi_removeController = function( slot_id ){
 	this._drill_EFGi_controllerTank[ slot_id ] = null;
 }
 //==============================
-// * 事件 - 去除全部控制器（接口）
+// * 物体绑定 - 去除全部控制器（开放函数）
 //==============================
 Game_CharacterBase.prototype.drill_EFGi_removeControllerAll = function(){
 	if( this._drill_EFGi_controllerTank == undefined ){ return; }
@@ -2161,7 +2150,9 @@ Game_CharacterBase.prototype.drill_EFGi_removeControllerAll = function(){
 	this._drill_EFGi_controllerTank = null;
 }
 //==============================
-// * 事件 - 帧刷新
+// * 物体绑定 - 帧刷新
+//
+//			说明：	当前直接在物体中帧刷新，也可以通过 物体容器 进行遍历帧刷新。
 //==============================
 var _drill_EFGi_c_update = Game_CharacterBase.prototype.update;
 Game_CharacterBase.prototype.update = function(){
@@ -2192,12 +2183,22 @@ Game_CharacterBase.prototype.update = function(){
 }
 
 
-
 //=============================================================================
-// ** 外部控制
+// ** ☆贴图控制
+//
+//			说明：	> 此模块专门管理 贴图 对象。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 外部控制 - 创建贴图
+// * 贴图控制 - 初始化
+//==============================
+var _drill_EFGi_temp_initialize = Game_Temp.prototype.initialize;
+Game_Temp.prototype.initialize = function() {
+    _drill_EFGi_temp_initialize.call(this);
+	this._drill_EFGi_spriteTank = [];		//GIF贴图容器
+};
+//==============================
+// * 贴图控制 - 创建
 //==============================
 var _drill_EFGi_update = Sprite_Character.prototype.update;
 Sprite_Character.prototype.update = function(){
@@ -2237,7 +2238,7 @@ Sprite_Character.prototype.update = function(){
 		
 		// > 添加贴图到层级
 		var data = controller._drill_data;
-		$gameTemp.drill_EFGi_layerAddSprite( temp_sprite, data['anim_index'], this );
+		$gameTemp.drill_EFGi_layerAddSprite( temp_sprite, data['individualIndex'], this );
 		
 	}
 	
@@ -2247,7 +2248,7 @@ Sprite_Character.prototype.update = function(){
 	
 }
 //==============================
-// * 外部控制 - 是否含有绑定控制器的贴图
+// * 贴图控制 - 是否含有绑定控制器的贴图
 //==============================
 Sprite_Character.prototype.drill_EFGi_hasSpriteBinding = function( serial ){
 	for( var i=0; i < this._drill_EFGi_childSprites.length; i++){
@@ -2258,13 +2259,24 @@ Sprite_Character.prototype.drill_EFGi_hasSpriteBinding = function( serial ){
 	return false;
 }
 //==============================
-// * 外部控制 - 帧刷新 - 地图界面
+// * 贴图控制 - 检查镜像情况
+//==============================
+Game_Temp.prototype.drill_EFGi_isReflectionSprite = function( sprite ){
+	if( Imported.Drill_LayerReverseReflection      && sprite instanceof Drill_Sprite_LRR ){ return true; }
+	if( Imported.Drill_LayerSynchronizedReflection && sprite instanceof Drill_Sprite_LSR ){ return true; }
+	return false;
+}
+//==============================
+// * 贴图控制 - 帧刷新（地图界面）
 //==============================
 var _drill_EFGi_smap_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {
 	_drill_EFGi_smap_update.call(this);
 	this.drill_EFGi_updateInScene();
 }
+//==============================
+// * 贴图控制 - 帧刷新
+//==============================
 Scene_Map.prototype.drill_EFGi_updateInScene = function() {
 	
 	// > 自动销毁 - 贴图
@@ -2427,7 +2439,7 @@ Drill_EFGi_Controller.prototype.drill_initData = function(){
 	if( data['blendMode'] == undefined ){ data['blendMode'] = 0 };				//贴图 - 混合模式
 	if( data['tint'] == undefined ){ data['tint'] = 0 };						//贴图 - 图像-色调值
 	if( data['smooth'] == undefined ){ data['smooth'] = false };				//贴图 - 图像-模糊边缘
-	if( data['anim_index'] == undefined ){ data['anim_index'] = "在行走图前面" };//贴图 - 行走图层级
+	if( data['individualIndex'] == undefined ){ data['individualIndex'] = "在行走图前面" };//贴图 - 行走图层级
 	if( data['zIndex'] == undefined ){ data['zIndex'] = 0 };					//贴图 - 图片层级
 	if( data['rotate'] == undefined ){ data['rotate'] = 0 };					//贴图 - 自旋转速度（单位角度）
 	

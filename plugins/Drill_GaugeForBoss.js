@@ -1207,7 +1207,7 @@
  * 
  * @param 标签
  * @desc 只用于方便区分查看的标签，不作用在插件中。
- * @default --新的boss设置--
+ * @default ==新的boss设置==
  * 
  * @param ---绑定---
  * @desc 

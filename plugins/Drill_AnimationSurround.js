@@ -1738,39 +1738,43 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			动画环绕球：
-//				->动画环绕球 容器
-//					->获取贴图（接口）
-//					->获取贴图 - 根据敌人对象（接口）
-//					->获取贴图 - 根据角色对象（接口）
-//					->获取贴图 - 根据物体对象（接口）
-//					->获取全部控制器（接口）
-//					->获取全部贴图（接口）
-//					->获取全部贴图 - 根据敌人对象（接口）
-//					->获取全部贴图 - 根据角色对象（接口）
-//					->获取全部贴图 - 根据物体对象（接口）
-//					->获取列表中指定动画的贴图
-//					->设置贴图立即显示/隐藏（接口）
-//					->设置贴图立即出现（接口）
-//					->设置贴图立即消失（接口）
-//				->插件指令
-//					->立即出现
-//					->立即消失
-//				->个体层级
-//					->添加贴图到层级【标准函数】
-//					->去除贴图【标准函数】
-//					->图片层级排序（界面装饰）【标准函数】
-//					->图片层级排序（个体装饰）【标准函数】
-//				->动画创建
-//					->创建数据/创建贴图
-//					->外键标记
-//				->外部控制
-//					->层级变化
-//					->控制器刷新
-//					->自动销毁
+//			->☆提示信息
+//			->☆变量获取
+//			->☆插件指令
+//				->立即出现
+//				->立即消失
+//			->☆存储数据
+//			->☆个体层级
+//				->添加贴图到层级【标准函数】
+//				->去除贴图【标准函数】
+//				->图片层级排序（界面装饰）【标准函数】
+//				->图片层级排序（个体装饰）【标准函数】
+//			
+//			->☆动画环绕球 容器
+//				->获取贴图（开放函数）
+//				->获取贴图 - 根据敌人对象（开放函数）
+//				->获取贴图 - 根据角色对象（开放函数）
+//				->获取贴图 - 根据物体对象（开放函数）
+//				->获取全部控制器（开放函数）
+//				->获取全部贴图（开放函数）
+//				->获取全部贴图 - 根据敌人对象（开放函数）
+//				->获取全部贴图 - 根据角色对象（开放函数）
+//				->获取全部贴图 - 根据物体对象（开放函数）
+//				->获取列表中指定动画的贴图
+//				->设置贴图立即显示/隐藏（开放函数）
+//				->设置贴图立即出现（开放函数）
+//				->设置贴图立即消失（开放函数）
+//			->☆动画绑定
+//				->创建数据/创建贴图
+//				->外键标记
+//			->☆动画控制
+//				->层级变化
+//				->帧刷新
+//				->自动销毁
 //
-//				->动画环绕球控制器【Drill_ASu_Controller】
-//				->动画环绕球贴图【Drill_ASu_Sprite】
+//			->动画环绕球控制器【Drill_ASu_Controller】
+//			->动画环绕球贴图【Drill_ASu_Sprite】
+//		
 //		
 //		★插件私有类：
 //			* Drill_ASu_Controller	【动画环绕球控制器】
@@ -1804,7 +1808,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -1827,7 +1831,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_AnimationSurround = true;
@@ -1925,7 +1929,7 @@
 	
 
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _drill_ASu_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
@@ -2200,7 +2204,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 };
 //==============================
-// ** 插件指令 - 事件检查
+// * 插件指令 - 事件检查
 //==============================
 Game_Map.prototype.drill_ASu_isEventExist = function( e_id ){
 	if( e_id == 0 ){ return false; }
@@ -2215,7 +2219,7 @@ Game_Map.prototype.drill_ASu_isEventExist = function( e_id ){
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -2318,228 +2322,8 @@ Game_System.prototype.drill_ASu_checkSysData_Private = function() {
 };	
 
 
-//=============================================================================
-// * 优化
-//=============================================================================
-//==============================
-// * 优化 - 检查镜像情况
-//==============================
-Game_Temp.prototype.drill_ASu_isReflectionSprite = function( sprite ){
-	if( Imported.Drill_LayerReverseReflection      && sprite instanceof Drill_Sprite_LRR ){ return true; }
-	if( Imported.Drill_LayerSynchronizedReflection && sprite instanceof Drill_Sprite_LSR ){ return true; }
-	return false;
-}
-
-//=============================================================================
-// * 动画环绕球 容器
-//=============================================================================
-//==============================
-// * 容器 - 初始化
-//==============================
-var _drill_ASu_temp_initialize = Game_Temp.prototype.initialize;
-Game_Temp.prototype.initialize = function() {
-    _drill_ASu_temp_initialize.call(this);
-	
-	this._drill_ASu_spriteTank = [];			//当前播放中的贴图
-	this._drill_ASu_controllerTank = [];		//当前播放中的控制器
-	this._drill_ASu_lastAdded = [];				//上一次添加的 贴图
-}
-//==============================
-// * 容器 - 获取贴图（接口）
-//==============================
-Game_Temp.prototype.drill_ASu_getSpriteList = function( style_id ){
-	var result = [];
-	for(var i = 0; i < this._drill_ASu_spriteTank.length; i++){
-		var temp_sprite = this._drill_ASu_spriteTank[i];
-		if( temp_sprite == undefined ){ continue; }
-		var temp_controller = temp_sprite._drill_controller;
-		if( temp_controller == undefined ){ continue; }
-		if( temp_controller._drill_data['id'] == style_id ){
-			result.push( temp_sprite );
-		}
-	}
-	return result;
-}
-//==============================
-// * 容器 - 获取贴图 - 根据敌人对象（接口）
-//==============================
-Game_Temp.prototype.drill_ASu_getSpriteList_Enemy = function( style_id, enemy_obj ){
-	var result = [];
-	for(var i = 0; i < this._drill_ASu_spriteTank.length; i++){
-		var temp_sprite = this._drill_ASu_spriteTank[i];
-		if( temp_sprite == undefined ){ continue; }
-		var temp_controller = temp_sprite._drill_controller;
-		if( temp_controller == undefined ){ continue; }
-		if( temp_controller._drill_data['id'] == style_id &&
-			temp_sprite._drill_parent_enemyObj == enemy_obj ){
-			result.push( temp_sprite );
-		}
-	}
-	return result;
-}
-//==============================
-// * 容器 - 获取贴图 - 根据角色对象（接口）
-//==============================
-Game_Temp.prototype.drill_ASu_getSpriteList_Actor = function( style_id, actor_obj ){
-	var result = [];
-	for(var i = 0; i < this._drill_ASu_spriteTank.length; i++){
-		var temp_sprite = this._drill_ASu_spriteTank[i];
-		if( temp_sprite == undefined ){ continue; }
-		var temp_controller = temp_sprite._drill_controller;
-		if( temp_controller == undefined ){ continue; }
-		if( temp_controller._drill_data['id'] == style_id &&
-			temp_sprite._drill_parent_actorObj == actor_obj ){
-			result.push( temp_sprite );
-		}
-	}
-	return result;
-}
-//==============================
-// * 容器 - 获取贴图 - 根据物体对象（接口）
-//==============================
-Game_Temp.prototype.drill_ASu_getSpriteList_Character = function( style_id, character_obj ){
-	var result = [];
-	for(var i = 0; i < this._drill_ASu_spriteTank.length; i++){
-		var temp_sprite = this._drill_ASu_spriteTank[i];
-		if( temp_sprite == undefined ){ continue; }
-		var temp_controller = temp_sprite._drill_controller;
-		if( temp_controller == undefined ){ continue; }
-		if( temp_controller._drill_data['id'] == style_id &&
-			temp_sprite._drill_parent_characterObj == character_obj ){
-			result.push( temp_sprite );
-		}
-	}
-	return result;
-}
-//==============================
-// * 容器 - 获取全部控制器（接口）
-//==============================
-Game_Temp.prototype.drill_ASu_getAllControllerList = function(){
-	return this._drill_ASu_controllerTank;
-}
-//==============================
-// * 容器 - 获取全部贴图（接口）
-//==============================
-Game_Temp.prototype.drill_ASu_getAllSpriteList = function(){
-	return this._drill_ASu_spriteTank;
-}
-//==============================
-// * 容器 - 获取全部贴图 - 根据敌人对象（接口）
-//==============================
-Game_Temp.prototype.drill_ASu_getAllSpriteList_Enemy = function( enemy_obj ){
-	var result = [];
-	for(var i = 0; i < this._drill_ASu_spriteTank.length; i++){
-		var temp_sprite = this._drill_ASu_spriteTank[i];
-		if( temp_sprite == undefined ){ continue; }
-		if( temp_sprite._drill_parent_enemyObj == enemy_obj ){
-			result.push( temp_sprite );
-		}
-	}
-	return result;
-}
-//==============================
-// * 容器 - 获取全部贴图 - 根据角色对象（接口）
-//==============================
-Game_Temp.prototype.drill_ASu_getAllSpriteList_Actor = function( actor_obj ){
-	var result = [];
-	for(var i = 0; i < this._drill_ASu_spriteTank.length; i++){
-		var temp_sprite = this._drill_ASu_spriteTank[i];
-		if( temp_sprite == undefined ){ continue; }
-		if( temp_sprite._drill_parent_actorObj == actor_obj ){
-			result.push( temp_sprite );
-		}
-	}
-	return result;
-}
-//==============================
-// * 容器 - 获取全部贴图 - 根据物体对象（接口）
-//==============================
-Game_Temp.prototype.drill_ASu_getAllSpriteList_Character = function( character_obj ){
-	var result = [];
-	for(var i = 0; i < this._drill_ASu_spriteTank.length; i++){
-		var temp_sprite = this._drill_ASu_spriteTank[i];
-		if( temp_sprite == undefined ){ continue; }
-		if( temp_sprite._drill_parent_characterObj == character_obj ){
-			result.push( temp_sprite );
-		}
-	}
-	return result;
-}
-//==============================
-// * 容器筛选器 - 获取列表中指定动画的贴图
-//==============================
-Game_Temp.prototype.drill_ASu_selectSpriteByAnimId = function( sprite_list, anim_id ){
-	var result = [];
-	for(var i = 0; i < sprite_list.length ;i++){
-		var temp_sprite = sprite_list[i];
-		if( temp_sprite == undefined ){ continue; }
-		var temp_controller = temp_sprite._drill_controller;
-		if( temp_controller == undefined ){ continue; }
-		if( temp_controller._drill_data['anim'] == anim_id ){
-			result.push( temp_sprite );
-		}
-	}
-	return result;
-}
-//==============================
-// * 容器操作 - 设置贴图 立即显示/隐藏（接口）
-//==============================
-Game_Temp.prototype.drill_ASu_setAnimVisible = function( sprite_list, v ){
-	for(var i = 0; i < sprite_list.length ;i++){
-		var temp_sprite = sprite_list[i];
-		if( temp_sprite == undefined ){ continue; }
-		var temp_controller = temp_sprite._drill_controller;
-		if( temp_controller == undefined ){ continue; }
-		temp_controller.drill_ASu_setVisible( v );
-	}
-}
-//==============================
-// * 容器操作 - 设置贴图 暂停/继续（接口）
-//==============================
-Game_Temp.prototype.drill_ASu_setAnimPause = function( sprite_list, b ){
-	for(var i = 0; i < sprite_list.length ;i++){
-		var temp_sprite = sprite_list[i];
-		if( temp_sprite == undefined ){ continue; }
-		var temp_controller = temp_sprite._drill_controller;
-		if( temp_controller == undefined ){ continue; }
-		temp_controller.drill_ASu_setPause( b );
-	}
-}
-//==============================
-// * 容器操作 - 设置贴图立即出现（接口）
-//==============================
-Game_Temp.prototype.drill_ASu_setAnimBirth = function( sprite_list ){
-	for(var i = 0; i < sprite_list.length ;i++){
-		var temp_sprite = sprite_list[i];
-		if( temp_sprite == undefined ){ continue; }
-		var temp_controller = temp_sprite._drill_controller;
-		if( temp_controller == undefined ){ continue; }
-		if( temp_controller.drill_ASu_getState() == "延迟" ||
-			temp_controller.drill_ASu_getState() == "出现" ){
-			temp_controller.drill_ASu_setState("持续");
-			temp_controller.drill_ASu_setPause( false );
-		}
-	}
-}
-//==============================
-// * 容器操作 - 设置贴图立即消失（接口）
-//==============================
-Game_Temp.prototype.drill_ASu_setAnimDeath = function( sprite_list ){
-	for(var i = 0; i < sprite_list.length ;i++){
-		var temp_sprite = sprite_list[i];
-		if( temp_sprite == undefined ){ continue; }
-		var temp_controller = temp_sprite._drill_controller;
-		if( temp_controller == undefined ){ continue; }
-		if( temp_controller.drill_ASu_getState() != "消失" ){
-			temp_controller.drill_ASu_setState("消失");
-			temp_controller.drill_ASu_setPause( false );
-		}
-	}
-}
-
-
 //#############################################################################
-// ** 【标准模块】个体层级
+// ** 【标准模块】个体层级 ☆个体层级
 //#############################################################################
 //##############################
 // * 个体层级 - 添加贴图到层级【标准函数】
@@ -2687,8 +2471,224 @@ Game_Temp.prototype.drill_ASu_layerRemoveSprite_Private = function( sprite ){
 };
 
 
+
 //=============================================================================
-// ** 动画创建
+// ** ☆动画环绕球 容器
+//
+//			说明：	> 此模块提供对 动画环绕球 各种操作的功能。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 容器 - 初始化
+//==============================
+var _drill_ASu_temp_initialize = Game_Temp.prototype.initialize;
+Game_Temp.prototype.initialize = function() {
+    _drill_ASu_temp_initialize.call(this);
+	
+	this._drill_ASu_spriteTank = [];			//当前播放中的贴图
+	this._drill_ASu_controllerTank = [];		//当前播放中的控制器
+	this._drill_ASu_lastAdded = [];				//上一次添加的 贴图
+}
+//==============================
+// * 容器 - 获取贴图（开放函数）
+//==============================
+Game_Temp.prototype.drill_ASu_getSpriteList = function( style_id ){
+	var result = [];
+	for(var i = 0; i < this._drill_ASu_spriteTank.length; i++){
+		var temp_sprite = this._drill_ASu_spriteTank[i];
+		if( temp_sprite == undefined ){ continue; }
+		var temp_controller = temp_sprite._drill_controller;
+		if( temp_controller == undefined ){ continue; }
+		if( temp_controller._drill_data['id'] == style_id ){
+			result.push( temp_sprite );
+		}
+	}
+	return result;
+}
+//==============================
+// * 容器 - 获取贴图 - 根据敌人对象（开放函数）
+//==============================
+Game_Temp.prototype.drill_ASu_getSpriteList_Enemy = function( style_id, enemy_obj ){
+	var result = [];
+	for(var i = 0; i < this._drill_ASu_spriteTank.length; i++){
+		var temp_sprite = this._drill_ASu_spriteTank[i];
+		if( temp_sprite == undefined ){ continue; }
+		var temp_controller = temp_sprite._drill_controller;
+		if( temp_controller == undefined ){ continue; }
+		if( temp_controller._drill_data['id'] == style_id &&
+			temp_sprite._drill_parent_enemyObj == enemy_obj ){
+			result.push( temp_sprite );
+		}
+	}
+	return result;
+}
+//==============================
+// * 容器 - 获取贴图 - 根据角色对象（开放函数）
+//==============================
+Game_Temp.prototype.drill_ASu_getSpriteList_Actor = function( style_id, actor_obj ){
+	var result = [];
+	for(var i = 0; i < this._drill_ASu_spriteTank.length; i++){
+		var temp_sprite = this._drill_ASu_spriteTank[i];
+		if( temp_sprite == undefined ){ continue; }
+		var temp_controller = temp_sprite._drill_controller;
+		if( temp_controller == undefined ){ continue; }
+		if( temp_controller._drill_data['id'] == style_id &&
+			temp_sprite._drill_parent_actorObj == actor_obj ){
+			result.push( temp_sprite );
+		}
+	}
+	return result;
+}
+//==============================
+// * 容器 - 获取贴图 - 根据物体对象（开放函数）
+//==============================
+Game_Temp.prototype.drill_ASu_getSpriteList_Character = function( style_id, character_obj ){
+	var result = [];
+	for(var i = 0; i < this._drill_ASu_spriteTank.length; i++){
+		var temp_sprite = this._drill_ASu_spriteTank[i];
+		if( temp_sprite == undefined ){ continue; }
+		var temp_controller = temp_sprite._drill_controller;
+		if( temp_controller == undefined ){ continue; }
+		if( temp_controller._drill_data['id'] == style_id &&
+			temp_sprite._drill_parent_characterObj == character_obj ){
+			result.push( temp_sprite );
+		}
+	}
+	return result;
+}
+//==============================
+// * 容器 - 获取全部控制器（开放函数）
+//==============================
+Game_Temp.prototype.drill_ASu_getAllControllerList = function(){
+	return this._drill_ASu_controllerTank;
+}
+//==============================
+// * 容器 - 获取全部贴图（开放函数）
+//==============================
+Game_Temp.prototype.drill_ASu_getAllSpriteList = function(){
+	return this._drill_ASu_spriteTank;
+}
+//==============================
+// * 容器 - 获取全部贴图 - 根据敌人对象（开放函数）
+//==============================
+Game_Temp.prototype.drill_ASu_getAllSpriteList_Enemy = function( enemy_obj ){
+	var result = [];
+	for(var i = 0; i < this._drill_ASu_spriteTank.length; i++){
+		var temp_sprite = this._drill_ASu_spriteTank[i];
+		if( temp_sprite == undefined ){ continue; }
+		if( temp_sprite._drill_parent_enemyObj == enemy_obj ){
+			result.push( temp_sprite );
+		}
+	}
+	return result;
+}
+//==============================
+// * 容器 - 获取全部贴图 - 根据角色对象（开放函数）
+//==============================
+Game_Temp.prototype.drill_ASu_getAllSpriteList_Actor = function( actor_obj ){
+	var result = [];
+	for(var i = 0; i < this._drill_ASu_spriteTank.length; i++){
+		var temp_sprite = this._drill_ASu_spriteTank[i];
+		if( temp_sprite == undefined ){ continue; }
+		if( temp_sprite._drill_parent_actorObj == actor_obj ){
+			result.push( temp_sprite );
+		}
+	}
+	return result;
+}
+//==============================
+// * 容器 - 获取全部贴图 - 根据物体对象（开放函数）
+//==============================
+Game_Temp.prototype.drill_ASu_getAllSpriteList_Character = function( character_obj ){
+	var result = [];
+	for(var i = 0; i < this._drill_ASu_spriteTank.length; i++){
+		var temp_sprite = this._drill_ASu_spriteTank[i];
+		if( temp_sprite == undefined ){ continue; }
+		if( temp_sprite._drill_parent_characterObj == character_obj ){
+			result.push( temp_sprite );
+		}
+	}
+	return result;
+}
+//==============================
+// * 容器筛选器 - 获取列表中指定动画的贴图
+//==============================
+Game_Temp.prototype.drill_ASu_selectSpriteByAnimId = function( sprite_list, anim_id ){
+	var result = [];
+	for(var i = 0; i < sprite_list.length ;i++){
+		var temp_sprite = sprite_list[i];
+		if( temp_sprite == undefined ){ continue; }
+		var temp_controller = temp_sprite._drill_controller;
+		if( temp_controller == undefined ){ continue; }
+		if( temp_controller._drill_data['anim'] == anim_id ){
+			result.push( temp_sprite );
+		}
+	}
+	return result;
+}
+//==============================
+// * 容器操作 - 设置贴图 立即显示/隐藏（开放函数）
+//==============================
+Game_Temp.prototype.drill_ASu_setAnimVisible = function( sprite_list, v ){
+	for(var i = 0; i < sprite_list.length ;i++){
+		var temp_sprite = sprite_list[i];
+		if( temp_sprite == undefined ){ continue; }
+		var temp_controller = temp_sprite._drill_controller;
+		if( temp_controller == undefined ){ continue; }
+		temp_controller.drill_ASu_setVisible( v );
+	}
+}
+//==============================
+// * 容器操作 - 设置贴图 暂停/继续（开放函数）
+//==============================
+Game_Temp.prototype.drill_ASu_setAnimPause = function( sprite_list, b ){
+	for(var i = 0; i < sprite_list.length ;i++){
+		var temp_sprite = sprite_list[i];
+		if( temp_sprite == undefined ){ continue; }
+		var temp_controller = temp_sprite._drill_controller;
+		if( temp_controller == undefined ){ continue; }
+		temp_controller.drill_ASu_setPause( b );
+	}
+}
+//==============================
+// * 容器操作 - 设置贴图立即出现（开放函数）
+//==============================
+Game_Temp.prototype.drill_ASu_setAnimBirth = function( sprite_list ){
+	for(var i = 0; i < sprite_list.length ;i++){
+		var temp_sprite = sprite_list[i];
+		if( temp_sprite == undefined ){ continue; }
+		var temp_controller = temp_sprite._drill_controller;
+		if( temp_controller == undefined ){ continue; }
+		if( temp_controller.drill_ASu_getState() == "延迟" ||
+			temp_controller.drill_ASu_getState() == "出现" ){
+			temp_controller.drill_ASu_setState("持续");
+			temp_controller.drill_ASu_setPause( false );
+		}
+	}
+}
+//==============================
+// * 容器操作 - 设置贴图立即消失（开放函数）
+//==============================
+Game_Temp.prototype.drill_ASu_setAnimDeath = function( sprite_list ){
+	for(var i = 0; i < sprite_list.length ;i++){
+		var temp_sprite = sprite_list[i];
+		if( temp_sprite == undefined ){ continue; }
+		var temp_controller = temp_sprite._drill_controller;
+		if( temp_controller == undefined ){ continue; }
+		if( temp_controller.drill_ASu_getState() != "消失" ){
+			temp_controller.drill_ASu_setState("消失");
+			temp_controller.drill_ASu_setPause( false );
+		}
+	}
+}
+
+
+
+//=============================================================================
+// ** ☆动画绑定
+//
+//			说明：	> 此模块专门管理 控制器+贴图 的创建。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 工具 - 父类溯源
@@ -2708,7 +2708,7 @@ DrillUp.drill_ASu_getAncestor = function( sprite, ancestor_class ){
 	return null;
 }
 //==============================
-// * 动画创建 - 初始化
+// * 动画绑定 - 初始化
 //==============================
 var _drill_ASu_initMembers = Sprite_Animation.prototype.initMembers;
 Sprite_Animation.prototype.initMembers = function() {
@@ -2716,7 +2716,7 @@ Sprite_Animation.prototype.initMembers = function() {
 	this._drill_duration = 0;			//最大持续时间
 }
 //==============================
-// * 动画创建 - 创建数据/创建贴图
+// * 动画绑定 - 创建数据/创建贴图
 //==============================
 var _drill_ASu_setup = Sprite_Animation.prototype.setup;
 Sprite_Animation.prototype.setup = function(target, animation, mirror, delay) {
@@ -2754,23 +2754,23 @@ Sprite_Animation.prototype.setup = function(target, animation, mirror, delay) {
 	}
 	
 	
-	// 连接-> （动画创建 - 外键标记）
+	// 连接-> （动画绑定 - 外键标记）
 };
 //==============================
-// * 动画创建 - 外键标记
+// * 动画绑定 - 外键标记
 //==============================
 var _drill_ASu_startAnimation = Sprite_Base.prototype.startAnimation;
 Sprite_Base.prototype.startAnimation = function(animation, mirror, delay) {
     _drill_ASu_startAnimation.call(this,animation, mirror, delay);
 	
-	// <-承接 （动画创建 - 创建数据/创建贴图）
+	// <-承接 （动画绑定 - 创建数据/创建贴图）
 	//	（前面的函数执行完后，会进入到该函数继续）
 	
 	this.drill_ASu_foreignKeyBinding();			//外键标记
 	$gameTemp._drill_ASu_lastAdded = [];		//清空上一次添加的标记
 }
 //==============================
-// * 动画创建 - 外键标记
+// * 动画绑定 - 外键标记
 //==============================
 Sprite_Base.prototype.drill_ASu_foreignKeyBinding = function(){
 	if( $gameTemp._drill_ASu_lastAdded.length == 0 ){ return; }
@@ -2802,12 +2802,24 @@ Sprite_Base.prototype.drill_ASu_foreignKeyBinding = function(){
 		}
 	}
 }
+//==============================
+// * 动画绑定 - 优化 - 检查镜像情况
+//==============================
+Game_Temp.prototype.drill_ASu_isReflectionSprite = function( sprite ){
+	if( Imported.Drill_LayerReverseReflection      && sprite instanceof Drill_Sprite_LRR ){ return true; }
+	if( Imported.Drill_LayerSynchronizedReflection && sprite instanceof Drill_Sprite_LSR ){ return true; }
+	return false;
+}
+
 
 //=============================================================================
-// ** 外部控制
+// ** ☆动画控制
+//
+//			说明：	> 此模块专门管理 控制器+贴图 的帧刷新与销毁。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 外部控制 - 帧刷新 - 地图界面
+// * 动画控制 - 帧刷新（地图界面）
 //==============================
 var _drill_ASu_smap_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {
@@ -2876,7 +2888,7 @@ Scene_Map.prototype.drill_ASu_updateInScene = function() {
 	}
 };
 //==============================
-// * 外部控制 - 帧刷新 - 战斗界面
+// * 动画控制 - 帧刷新（战斗界面）
 //==============================
 var _drill_ASu_sbattle_update = Scene_Battle.prototype.update;
 Scene_Battle.prototype.update = function() {
@@ -2885,7 +2897,7 @@ Scene_Battle.prototype.update = function() {
 }
 Scene_Battle.prototype.drill_ASu_updateInScene = Scene_Map.prototype.drill_ASu_updateInScene;
 //==============================
-// * 动画 - 播放中
+// * 动画控制 - 播放中
 //==============================
 var _drill_ASu_isPlaying = Sprite_Animation.prototype.isPlaying;
 Sprite_Animation.prototype.isPlaying = function() {
@@ -2895,7 +2907,7 @@ Sprite_Animation.prototype.isPlaying = function() {
 	return _drill_ASu_isPlaying.call(this);
 };
 //==============================
-// * 动画 - 帧刷新
+// * 动画控制 - 帧刷新
 //==============================
 var _drill_ASu_update = Sprite_Animation.prototype.update;
 Sprite_Animation.prototype.update = function() {
@@ -2907,7 +2919,7 @@ Sprite_Animation.prototype.update = function() {
 	}
 };
 //==============================
-// * 动画 - 移除自身（空指针优化）
+// * 动画控制 - 移除自身（空指针优化）
 //==============================
 var _drill_ASu_remove = Sprite_Animation.prototype.remove;
 Sprite_Animation.prototype.remove = function() {
@@ -3599,7 +3611,8 @@ Drill_ASu_Sprite.prototype.drill_ASu_initSprite = function(){
 //##############################
 Drill_ASu_Sprite.prototype.drill_ASu_isReady = function(){
 	if( this._drill_controller == undefined ){ return false; }
-	if( this._drill_individualSprite == undefined ){ return false; }
+	if( this._drill_animationSprite == undefined ){ return false; }
+	//if( this._drill_individualSprite == undefined ){ return false; }	//（注意，如果只播放单纯动画，个体贴图为null）
     return true;
 };
 //##############################
@@ -3740,6 +3753,13 @@ Drill_ASu_Sprite.prototype.drill_updateLayer = function() {
 	if( cur_layer == "父贴图后面层" || cur_layer == "在父贴图后面" ){
 		xx = xx + this._drill_animationSprite.x;	//（直接保持与动画位置一致）
 		yy = yy + this._drill_animationSprite.y;
+		
+		// > 动画贴图还未初始化的情况
+		if( this._drill_animationSprite.x == 0 &&
+			this._drill_animationSprite.y == 0 ){
+			this.visible = false;
+			return;	//（当前帧直接跳过）
+		}
 		
 		// > 敌人位置修正（无操作）
 		
