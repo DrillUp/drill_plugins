@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.2]        UI - 物品+技能文本颜色
+ * @plugindesc [v2.3]        UI - 物品+技能文本颜色
  * @author Drill_up
  * 
  * 
@@ -173,6 +173,8 @@
  * 优化了旧存档的识别与兼容。
  * [v2.2]
  * 添加了 窗口字符 的变色兼容功能。
+ * [v2.3]
+ * 优化了yep物品核心的兼容。
  * 
  * 
  * @param MOG-技能浮动框是否变色
@@ -190,8 +192,7 @@
 //		临时局部变量	无
 //		存储数据变量	$gameSystem._drill_ITC_xxx
 //		全局存储变量	无
-//		覆盖重写方法	TreasureIcons.prototype.refreshName（mog）
-//						Treasure_Hud.prototype.refresh_name（mog）
+//		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
 //
@@ -211,6 +212,7 @@
 //			->☆变量获取
 //			->☆插件指令
 //			->☆存储数据
+//			
 //			->☆颜色数据
 //				->获取 - 物品的颜色代码
 //				->获取 - 武器的颜色代码
@@ -227,6 +229,12 @@
 //				->绑定 - mog战斗结果界面
 //				->绑定 - mog道具浮动文字（覆写）
 //				->绑定 - mog道具浮动框（覆写）
+//		
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			无
 //		
 //		★必要注意事项：
 //			暂无
@@ -783,8 +791,14 @@ Game_Temp.prototype.initialize = function() {
 }
 //==============================
 // * 颜色数据 - 获取 - 物品的颜色代码（开放函数）
+//
+//			说明：	> 返回如"#ffffff"的颜色代码。包括 普通颜色和高级颜色。窗口字符拼接时，建议用"\\cc[]"。
+//					> 如果没对应配置，返回【空字符串】。
 //==============================
 Game_Temp.prototype.drill_ITC_getColorCode_Item = function( i ){
+	
+	// > 兼容 - Yep物品核心
+	if( $dataItems[i].baseItemId != undefined ){ i = $dataItems[i].baseItemId; }
 	
 	// > 若存储变量有值，就用存储变量的
 	if( $gameSystem._drill_ITC_colorCode_Item[i] != undefined &&
@@ -797,8 +811,14 @@ Game_Temp.prototype.drill_ITC_getColorCode_Item = function( i ){
 }
 //==============================
 // * 颜色数据 - 获取 - 武器的颜色代码（开放函数）
+//
+//			说明：	> 返回如"#ffffff"的颜色代码。包括 普通颜色和高级颜色。窗口字符拼接时，建议用"\\cc[]"。
+//					> 如果没对应配置，返回【空字符串】。
 //==============================
 Game_Temp.prototype.drill_ITC_getColorCode_Weapon = function( i ){
+	
+	// > 兼容 - Yep物品核心
+	if( $dataWeapons[i].baseItemId != undefined ){ i = $dataWeapons[i].baseItemId; }
 	
 	// > 若存储变量有值，就用存储变量的
 	if( $gameSystem._drill_ITC_colorCode_Weapon[i] != undefined &&
@@ -811,8 +831,14 @@ Game_Temp.prototype.drill_ITC_getColorCode_Weapon = function( i ){
 }
 //==============================
 // * 颜色数据 - 获取 - 护甲的颜色代码（开放函数）
+//
+//			说明：	> 返回如"#ffffff"的颜色代码。包括 普通颜色和高级颜色。窗口字符拼接时，建议用"\\cc[]"。
+//					> 如果没对应配置，返回【空字符串】。
 //==============================
 Game_Temp.prototype.drill_ITC_getColorCode_Armor = function( i ){
+	
+	// > 兼容 - Yep物品核心
+	if( $dataArmors[i].baseItemId != undefined ){ i = $dataArmors[i].baseItemId; }
 	
 	// > 若存储变量有值，就用存储变量的
 	if( $gameSystem._drill_ITC_colorCode_Armor[i] != undefined &&
@@ -825,6 +851,9 @@ Game_Temp.prototype.drill_ITC_getColorCode_Armor = function( i ){
 }
 //==============================
 // * 颜色数据 - 获取 - 技能的颜色代码（开放函数）
+//
+//			说明：	> 返回如"#ffffff"的颜色代码。包括 普通颜色和高级颜色。窗口字符拼接时，建议用"\\cc[]"。
+//					> 如果没对应配置，返回【空字符串】。
 //==============================
 Game_Temp.prototype.drill_ITC_getColorCode_Skill = function( i ){
 	
@@ -1096,9 +1125,9 @@ if(Imported.MOG_BattleResult ){
 		}
 	}
 }
-//=============================================================================
+//=============================
 // * 绑定 - mog道具浮动文字（覆写）
-//=============================================================================
+//=============================
 if( Imported.MOG_TreasurePopup ){
 	
 	TreasureIcons.prototype.refreshName = function() {
@@ -1132,9 +1161,9 @@ if( Imported.MOG_TreasurePopup ){
 		this._name.bitmap.textColor = "#ffffff";
 	};
 }
-//=============================================================================
+//=============================
 // * 绑定 - mog道具浮动框（覆写）
-//=============================================================================
+//=============================
 if( Imported.MOG_TreasureHud  ){
 	
 	Treasure_Hud.prototype.refresh_name = function() {

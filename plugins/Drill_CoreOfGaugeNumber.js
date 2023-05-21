@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.5]        系统 - 参数数字核心
+ * @plugindesc [v1.6]        系统 - 参数数字核心
  * @author Drill_up
  * 
  * @Drill_LE_param "数字样式-%d"
@@ -117,6 +117,8 @@
  * 设置了 预加载资源 的功能。
  * [v1.5]
  * 大幅度改进了内部结构，支持字符串设置。
+ * [v1.6]
+ * 修复了 字符串、额定值 修改后，参数数字不刷新的bug。
  * 
  * 
  * 
@@ -789,22 +791,22 @@
 //				->F追逐值
 //				->G额定值
 //			
-//				
-//		★插件私有类：
-//			* Drill_COGN_NumberSprite【参数数字】
+//			
+//		★家谱：
+//			无
 //		
-//		★配置参数结构体如下：
-//			~struct~GaugeNumber: 参数数字样式
-//
+//		★插件私有类：
+//			* 参数数字【Drill_COGN_NumberSprite】
+//		
+//		★核心说明：
+//			1.整个核心只提供了一个封装好的【Sprite独立子类】。
+//			  具体见类的说明。
+//		
 //		★必要注意事项：
 //			1.参数数字只分两层，内容层 和 外层。两层级可以通过zIndex排序。
 //			
 //		★其它说明细节：
 //			暂无
-//		
-//		★核心接口说明：
-//			1.整个核心只提供了一个封装好的【Sprite独立子类】。
-//			  具体见类的说明。
 //
 //		★存在的问题：
 //			暂无
@@ -1051,9 +1053,10 @@ if( DrillUp.g_COGN_preloadEnabled == true ){
 // **							->时间单位
 // **						->零填充	x
 // **					->F追逐值
-// **						->滚动效果
-// **							->瞬间变化
-// **							->弹性滚动
+// **						->字符串模式 的追逐
+// **						->数字模式 的追逐
+// **							->滚动效果 - 瞬间变化
+// **							->滚动效果 - 弹性滚动
 // **					->G额定值
 // **						->设置字符串（继承）
 // **						->设置前缀后缀（继承）
@@ -1362,7 +1365,7 @@ Drill_COGN_NumberSprite.prototype.drill_COGN_removeChildConnect = function( pare
 	if( parent_sprite == undefined ){ return; }
 	var sprite_list = parent_sprite.children;
 	if( sprite_list == undefined ){ return; }
-	for(var i = 0; i < sprite_list.length; i++ ){
+	for( var i = sprite_list.length-1; i >= 0; i-- ){
 		var sprite = sprite_list[i];
 		if( sprite == undefined ){ continue; }
 		parent_sprite.removeChild( sprite );
@@ -1840,36 +1843,51 @@ Drill_COGN_NumberSprite.prototype.drill_convertNumberToString = function( value 
 //==============================
 Drill_COGN_NumberSprite.prototype.drill_initChase = function() {
 	this._drill_chase_curValue = -1;				//F追逐值 - 当前数值
+	this._drill_chase_curString = "";				//F追逐值 - 当前字符串
 }
 //==============================
 // * F追逐值 - 帧刷新
 //==============================
 Drill_COGN_NumberSprite.prototype.drill_updateChase = function() {
-	if( this.drill_factor_isNumberMode() == false ){ return; }	//（只有 数字模式 才追逐）
-	if( this._drill_chase_curValue == this._drill_factor_value ){ return; }
-	var data = this._drill_data;
 	
-	// > F追逐值 - 滚动效果 - 瞬间变化
-	if( data['rolling_mode'] == "瞬间变化" || data['rolling_time'] == 1 ){
-		this._drill_chase_curValue = this._drill_factor_value;
+	// > 字符串模式 的追逐
+	if( this.drill_factor_isStringMode() == true ){
+		if( this._drill_chase_curString == this._drill_factor_string ){ return; }
+		
+		this._drill_chase_curString = this._drill_factor_string;
+		
+		// > 刷新锁 - E输出字符串
+		//		（字符串刷新时，输出字符串才变化）
+		this._drill_outputString_needUpdate = true;
 	}
 	
-	// > F追逐值 - 滚动效果 - 弹性滚动
-	if( data['rolling_mode'] == "弹性滚动" ){
-		var move = (this._drill_factor_value - this._drill_chase_curValue) / data['rolling_speed'];
-		if( move > 0 && move < 1 ){ 
-			this._drill_chase_curValue = this._drill_factor_value; 
-		}else if( move < 0 && move > -1 ){
-			this._drill_chase_curValue = this._drill_factor_value; 
-		}else {
-			move = Math.floor( move );
-			this._drill_chase_curValue += move;
+	// > 数字模式 的追逐
+	if( this.drill_factor_isNumberMode() == true ){
+		if( this._drill_chase_curValue == this._drill_factor_value ){ return; }
+		var data = this._drill_data;
+		
+		// > F追逐值 - 滚动效果 - 瞬间变化
+		if( data['rolling_mode'] == "瞬间变化" || data['rolling_time'] == 1 ){
+			this._drill_chase_curValue = this._drill_factor_value;
 		}
+		
+		// > F追逐值 - 滚动效果 - 弹性滚动
+		if( data['rolling_mode'] == "弹性滚动" ){
+			var move = (this._drill_factor_value - this._drill_chase_curValue) / data['rolling_speed'];
+			if( move > 0 && move < 1 ){ 
+				this._drill_chase_curValue = this._drill_factor_value; 
+			}else if( move < 0 && move > -1 ){
+				this._drill_chase_curValue = this._drill_factor_value; 
+			}else {
+				move = Math.floor( move );
+				this._drill_chase_curValue += move;
+			}
+		}
+		
+		// > 刷新锁 - E输出字符串
+		//		（数字滚动刷新时，输出字符串才变化）
+		this._drill_outputString_needUpdate = true;
 	}
-	
-	// > 刷新锁 - E输出字符串
-	//		（数字滚动刷新时，输出字符串才变化）
-	this._drill_outputString_needUpdate = true;
 }
 
 
@@ -1882,6 +1900,7 @@ Drill_COGN_NumberSprite.prototype.drill_updateChase = function() {
 Drill_COGN_NumberSprite.prototype.drill_initSpecified = function() {
 	this._drill_specified_bitmap = null;			//G额定值 - 额定基本符号bitmap
 	this._drill_specifiedEx_bitmap = null;			//G额定值 - 额定扩展符号bitmap
+	this._drill_specified_curConditionNum = -1;		//G额定值 - 当前额定值
 	this._drill_specified_checkString = "";			//G额定值 - 资源指向字符（贴图用）
 	
 	// > 额定符号bitmap
@@ -1946,29 +1965,36 @@ Drill_COGN_NumberSprite.prototype.drill_updateSpecified = function() {
 	var data = this._drill_data;
 	if( data['specified_enable'] != true ){ return; }
 	
+	// > 刷新锁 - E输出字符串
+	//		（额定值刷新时，输出字符串变化）
+	if( this._drill_specified_curConditionNum != data['specified_conditionNum'] ){
+		this._drill_specified_curConditionNum = data['specified_conditionNum'];
+		this._drill_outputString_needUpdate = true;
+	}
+		
 	// > 额定判断
 	var is_fit = false;
 	if( data['specified_conditionType'] == "小于额定值时" ){
-		is_fit = this._drill_factor_value < data['specified_conditionNum'];
+		is_fit = this._drill_factor_value < this._drill_specified_curConditionNum;
 	}else if( data['specified_conditionType'] == "大于额定值时" ){
-		is_fit = this._drill_factor_value > data['specified_conditionNum'];
+		is_fit = this._drill_factor_value > this._drill_specified_curConditionNum;
 	}else if( data['specified_conditionType'] == "等于额定值时" ){
-		is_fit = this._drill_factor_value == data['specified_conditionNum'];
+		is_fit = this._drill_factor_value == this._drill_specified_curConditionNum;
 	}else if( data['specified_conditionType'] == "小于等于额定值时" ){
-		is_fit = this._drill_factor_value <= data['specified_conditionNum'];
+		is_fit = this._drill_factor_value <= this._drill_specified_curConditionNum;
 	}else if( data['specified_conditionType'] == "大于等于额定值时" ){
-		is_fit = this._drill_factor_value >= data['specified_conditionNum'];
+		is_fit = this._drill_factor_value >= this._drill_specified_curConditionNum;
 	}
 	
 	// > 保持额定值
 	if( is_fit && data['specified_remainChange'] == true ){
-		var num_str = this.drill_convertNumberToString( data['specified_conditionNum'] );
+		var num_str = this.drill_convertNumberToString( this._drill_specified_curConditionNum );
 		this._drill_outputString = num_str;
 		this._drill_specified_checkString = this.drill_specified_getFillString( "1", num_str.length );		//资源指向字符（贴图用）
 	}
 	// > 显示额定值 (120/100)
 	if( data['specified_visible'] == true ){
-		var num_str = this.drill_convertNumberToString( data['specified_conditionNum'] );
+		var num_str = this.drill_convertNumberToString( this._drill_specified_curConditionNum );
 		this._drill_outputString += "/" + num_str;
 		this._drill_specified_checkString += this.drill_specified_getFillString( "4", num_str.length +1 );	//资源指向字符（贴图用）
 	}

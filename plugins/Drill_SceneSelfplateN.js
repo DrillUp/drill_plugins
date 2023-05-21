@@ -1375,11 +1375,21 @@
 //			->☆面板控制
 //			
 //			->信息面板N【Scene_Drill_SSpN】
-//				->公共事件触发
+//				->详细窗口（x4）
+//				->描述图片（x4）
+//				->☆原型链规范
 //			->选项窗口【Drill_SSpN_SelectWindow】
 //			->显示窗口【Drill_SSpN_DescWindow】
 //			
 //			
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			* 信息面板N【Scene_Drill_SSpN】
+//			* 选项窗口【Drill_SSpN_SelectWindow】
+//			* 显示窗口【Drill_SSpN_DescWindow】
+//		
 //		★必要注意事项：
 //			1.替换以下字符变成新面板：
 //				SSpN
@@ -2490,6 +2500,82 @@ Scene_Drill_SSpN.prototype.drill_updateIndex = function() {
 		this.drill_refreshDescPic(this._cur_index);
 	}
 }
+
+
+//=============================================================================
+// ** ☆原型链规范
+//
+//			说明：	> 此处专门补上缺失的原型链，未缺失的则注释掉。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 信息面板N（场景基类） - 初始化
+//==============================
+//Scene_Drill_SSpN.prototype.initialize = function() {
+//    Scene_MenuBase.prototype.initialize.call(this);
+//};
+//==============================
+// * 信息面板N（场景基类） - 创建
+//==============================
+//Scene_Drill_SSpN.prototype.create = function() {
+//    Scene_MenuBase.prototype.create.call(this);
+//};
+//==============================
+// * 信息面板N（场景基类） - 帧刷新
+//==============================
+//Scene_Drill_SSpN.prototype.update = function() {
+//    Scene_MenuBase.prototype.update.call(this);
+//};
+//==============================
+// * 信息面板N（场景基类） - 开始运行
+//==============================
+Scene_Drill_SSpN.prototype.start = function() {
+    Scene_MenuBase.prototype.start.call(this);
+};
+//==============================
+// * 信息面板N（场景基类） - 结束运行
+//==============================
+Scene_Drill_SSpN.prototype.stop = function() {
+    Scene_MenuBase.prototype.stop.call(this);
+};
+//==============================
+// * 信息面板N（场景基类） - 判断是否激活/启动
+//==============================
+Scene_Drill_SSpN.prototype.isActive = function() {
+	return Scene_MenuBase.prototype.isActive.call(this);
+};
+//==============================
+// * 信息面板N（场景基类） - 析构函数
+//==============================
+Scene_Drill_SSpN.prototype.terminate = function() {
+    Scene_MenuBase.prototype.terminate.call(this);
+};
+
+//==============================
+// * 信息面板N（场景基类） - 判断加载完成
+//==============================
+Scene_Drill_SSpN.prototype.isReady = function() {
+	return Scene_MenuBase.prototype.isReady.call(this);
+};
+//==============================
+// * 信息面板N（场景基类） - 忙碌状态
+//==============================
+Scene_Drill_SSpN.prototype.isBusy = function() {
+	return Scene_MenuBase.prototype.isBusy.call(this);
+};
+
+//==============================
+// * 信息面板N（菜单界面基类） - 创建 - 菜单背景
+//==============================
+Scene_Drill_SSpN.prototype.createBackground = function() {
+	Scene_MenuBase.prototype.createBackground.call(this);
+};
+//==============================
+// * 信息面板N（菜单界面基类） - 创建 - 帮助窗口
+//==============================
+Scene_Drill_SSpN.prototype.createHelpWindow = function() {
+	Scene_MenuBase.prototype.createHelpWindow.call(this);
+};
 
 
 

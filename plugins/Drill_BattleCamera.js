@@ -467,11 +467,15 @@
 //			->☆层级标记器
 //			->☆DEBUG镜头对齐框
 //				->镜头对齐框 贴图【Drill_BCa_DebugSprite】
-//
+//			
+//			
+//		★家谱：
+//			无
+//		
 //		★插件私有类：
-//			* Drill_BCa_Controller【镜头控制器】
-//			* Drill_BCa_DebugSprite【镜头对齐框 贴图】
-//	
+//			* 镜头控制器【Drill_BCa_Controller】
+//			* 镜头对齐框 贴图【Drill_BCa_DebugSprite】
+//		
 //		★必要注意事项：
 //			1.镜头原理： 将 _battleField图层 平移、旋转、缩放。
 //			  底层函数： drill_BCa_updateCameraControl。

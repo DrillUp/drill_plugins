@@ -413,9 +413,13 @@
 //					->4区域剪切
 //					->4区域移动动画
 //
-//		★插件私有类：
-//			* Drill_MCB_Sprite【选项边框贴图】
 //
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			* 选项边框贴图【Drill_MCB_Sprite】
+//		
 //		★必要注意事项：
 //			暂无
 //
@@ -961,7 +965,8 @@ Drill_MCB_Sprite.prototype.drill_MCB_updateVisible = function() {
 	}
 	
 	// > 检测父类 - 窗口被完全隐藏
-	if( this._drill_parent.opacity <= 0 && this._drill_parent.contentsOpacity <= 0 ){
+	if( this._drill_parent.contentsOpacity <= 0 && 	//（文本域 透明度）
+		this._drill_parent.opacity <= 0 ){			//（背景容器层 透明度）
 		this.visible = false;
 		return;
 	}

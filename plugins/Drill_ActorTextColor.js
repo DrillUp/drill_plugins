@@ -184,6 +184,13 @@
 //				->改名情况
 //			->☆颜色文本绘制
 //		
+//		
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			无
+//		
 //		★必要注意事项：
 //			暂无
 //
@@ -547,6 +554,9 @@ Game_Temp.prototype.drill_ATC_getActorNickname = function( actor_id ){
 }
 //==============================
 // * 颜色数据 - 获取 - 名称的颜色代码（开放函数）
+//
+//			说明：	> 返回如"#ffffff"的颜色代码。包括 普通颜色和高级颜色。窗口字符拼接时，建议用"\\cc[]"。
+//					> 如果没对应配置，返回【空字符串】。
 //==============================
 Game_Temp.prototype.drill_ATC_getColorCode_Name = function( actor_id ){
 	
@@ -563,6 +573,9 @@ Game_Temp.prototype.drill_ATC_getColorCode_Name = function( actor_id ){
 }
 //==============================
 // * 颜色数据 - 获取 - 昵称的颜色代码（开放函数）
+//
+//			说明：	> 返回如"#ffffff"的颜色代码。包括 普通颜色和高级颜色。窗口字符拼接时，建议用"\\cc[]"。
+//					> 如果没对应配置，返回【空字符串】。
 //==============================
 Game_Temp.prototype.drill_ATC_getColorCode_Nickname = function( actor_id ){
 	
@@ -579,6 +592,9 @@ Game_Temp.prototype.drill_ATC_getColorCode_Nickname = function( actor_id ){
 }
 //==============================
 // * 颜色数据 - 获取 - 名称的颜色ID（开放函数）
+//
+//			说明：	> 返回如12、102的颜色代码。包括 普通颜色和高级颜色。窗口字符拼接时，建议用"\\c[]"。
+//					> 如果没对应配置，返回0白色。
 //==============================
 Game_Temp.prototype.drill_ATC_getColorId_Name = function( actor_id ){
 	var data = this._drill_ATC_actorNameData[actor_id];
@@ -590,6 +606,9 @@ Game_Temp.prototype.drill_ATC_getColorId = function( actor_id ){
 }
 //==============================
 // * 颜色数据 - 获取 - 昵称的颜色ID（开放函数）
+//
+//			说明：	> 返回如12、102的颜色代码。包括 普通颜色和高级颜色。窗口字符拼接时，建议用"\\c[]"。
+//					> 如果没对应配置，返回0白色。
 //==============================
 Game_Temp.prototype.drill_ATC_getColorId_Nickname = function( actor_id ){
 	var data = this._drill_ATC_actorNicknameData[actor_id];

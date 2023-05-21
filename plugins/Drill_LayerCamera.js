@@ -503,10 +503,14 @@
 //				->镜头对齐框 贴图【Drill_LCa_DebugSprite】
 //			->☆其他插件兼容
 //
-//		★插件私有类：
-//			* Drill_LCa_Controller【镜头控制器】
-//			* Drill_LCa_DebugSprite【镜头对齐框 贴图】
 //
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			* 镜头控制器【Drill_LCa_Controller】
+//			* 镜头对齐框 贴图【Drill_LCa_DebugSprite】
+//		
 //		★必要注意事项：
 //			1.镜头原理： 将 整个Spriteset图层 平移、旋转、缩放。
 //			  底层函数： drill_LCa_updateCameraControl。
@@ -1971,7 +1975,9 @@ Drill_LCa_Controller.prototype.drill_LCa_restore = function(){
 //			说明：	> 可放在帧刷新函数中实时调用。
 //##############################
 Drill_LCa_Controller.prototype.drill_LCa_isEnable = function(){
-	return this._drill_data['enable'] && $gameMap != undefined;
+	if( $gameMap == undefined ){ return false; }	//【$gameSystem优先初始化】
+	if( $dataMap == undefined ){ return false; }
+	return this._drill_data['enable'];
 };
 //##############################
 // * 控制器 - 启用/关闭【标准函数】
@@ -2501,7 +2507,7 @@ Drill_LCa_Controller.prototype.drill_LCa_restore_Private = function(){
 //==============================
 // * 镜头架 - 刷新范围
 //
-//			说明：	此函数不能放在初始化中执行，因为那个时候 $gameMap 还没创建。
+//			说明：	此函数不能放在初始化中执行，因为那个时候 $gameMap 还没创建。【$gameSystem优先初始化】
 //==============================
 Drill_LCa_Controller.prototype.drill_LCa_refreshHolder = function(){
 	var holder_rect = this.drill_LCa_getCameraHolderRect();

@@ -1,5 +1,5 @@
 //=============================================================================
-// Drill_BattleGIF.js
+// Drill_BattleGif.js
 //=============================================================================
 
 /*:
@@ -13,7 +13,7 @@
  * 
  * @help
  * =============================================================================
- * +++ Drill_BattleGIF +++
+ * +++ Drill_BattleGif +++
  * 作者：Drill_up
  * 如果你有兴趣，也可以来看看更多我写的drill插件哦ヽ(*。>Д<)o゜
  * https://rpg.blue/thread-409713-1-1.html
@@ -881,6 +881,12 @@
 //					->GIF帧数插件指令
 //						->播放一次并停留在末尾帧
 //
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			无
+//		
 //		★必要注意事项：
 //			1.插件的图片层级与多个插件共享。【必须自写 层级排序 函数】
 //			2.使用插件指令变化时，changing将会作为一个变化容器，根据时间对【sprite】进行改变。
@@ -900,7 +906,7 @@
 	// * 提示信息 - 参数
 	//==============================
 	var DrillUp = DrillUp || {}; 
-	DrillUp.g_BGi_PluginTip_curName = "Drill_BattleGIF.js 战斗-多层战斗GIF";
+	DrillUp.g_BGi_PluginTip_curName = "Drill_BattleGif.js 战斗-多层战斗GIF";
 	DrillUp.g_BGi_PluginTip_baseList = [];
 	
 	
@@ -908,9 +914,10 @@
 // ** 变量获取
 //=============================================================================
 　　var Imported = Imported || {};
+　　Imported.Drill_BattleGif = true;
 　　Imported.Drill_BattleGIF = true;
 　　var DrillUp = DrillUp || {}; 
-	DrillUp.parameters = PluginManager.parameters('Drill_BattleGIF');
+	DrillUp.parameters = PluginManager.parameters('Drill_BattleGif');
 	
 	//==============================
 	// * 变量获取 - GIF

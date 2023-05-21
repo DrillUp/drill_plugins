@@ -306,10 +306,14 @@
 //					->对齐方式
 //					->根据字符长宽变化窗口大小
 //
-//		★插件私有类：
-//			* Drill_ET_Controller【漂浮文字控制器】
-//			* Drill_ET_WindowSprite【漂浮文字贴图】
 //
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			* 漂浮文字控制器【Drill_ET_Controller】
+//			* 漂浮文字贴图【Drill_ET_WindowSprite】
+//		
 //		★必要注意事项：
 //			1.插件的图片层级与多个插件共享。【必须自写 层级排序 函数】
 //			2.【该插件使用了事件容器】，必须考虑三种情况：初始化、切换地图时、切换贴图时，不然会出现指针错误！
@@ -1331,8 +1335,8 @@ Drill_ET_WindowSprite.prototype.initialize = function( obj_event ){
 	Window_Base.prototype.initialize.call(this);
 	
 	// > 主体属性
-	this.opacity = 0;
-	this.contents.opacity = 255;
+	this.contentsOpacity = 255;				//文本域 透明度
+	this.opacity = 0;						//背景容器层 透明度
 }
 //==============================
 // * 文字贴图 - 帧刷新
@@ -1506,8 +1510,8 @@ Drill_ET_WindowSprite.prototype.drill_ET_updateAttr = function() {
 	this.y = yy;
 	
 	// > 透明度
-	this.opacity = this._drill_controller._drill_frameOpacity;
-	this.contentsOpacity = this._drill_controller._drill_textOpacity;
+	this.contentsOpacity = this._drill_controller._drill_textOpacity;		//文本域 透明度
+	this.opacity = this._drill_controller._drill_frameOpacity;				//背景容器层 透明度
 	
 	// > 可见
 	this.visible = this._drill_controller._drill_visible;

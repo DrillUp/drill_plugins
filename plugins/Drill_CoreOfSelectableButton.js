@@ -1257,6 +1257,7 @@
 //		★功能结构树：
 //			->☆提示信息
 //			->☆变量获取
+//			
 //			->按钮组贴图【Drill_COSB_LayerSprite】
 //				->A主体
 //				->B父窗口
@@ -1264,30 +1265,29 @@
 //				->D名称块
 //				->E选中的按钮
 //				->F激活
-//				->G键盘控制
-//				->H鼠标控制
+//				->G键盘与手柄
+//				->H鼠标
 //				->DEBUG
 //			
-//			->☆窗口重刷
+//			->☆父窗口调用
 //				->标记
 //				->延迟执行
 //					->按钮名称
 //					->按钮贴图
-//			->☆窗口操作
-//				->前进一项
-//				->后退一项
-//			->文本贴图【Drill_COSB_WindowSprite】
-//		
 //			
-//		★插件私有类：
-//			* Drill_COSB_LayerSprite【按钮组贴图】
-//			* Drill_COSB_WindowSprite【文本贴图】
+//			->文本贴图【Drill_COSB_WindowSprite】
+//			
+//			
+//		★家谱：
+//			无
 //		
-//		★配置参数结构体如下：
-//			~struct~DrillCOSBCommandButton:			按钮组样式
-//			~struct~DrillNameMoving:				名称块移动动画（弹道核心-两点式）
-//			~struct~DrillButtonGroupMoving:			按钮组移动动画（弹道核心-两点式）
-//
+//		★插件私有类：
+//			* 按钮组贴图【Drill_COSB_LayerSprite】
+//			* 文本贴图【Drill_COSB_WindowSprite】
+//		
+//		★核心说明：
+//			无
+//		
 //		★必要注意事项：
 //			1. Window_Selectable是一个父类，单独不可使用。
 //				其子类一定会覆写.maxCols和.maxItems函数。
@@ -1365,7 +1365,7 @@
 		var data = {};
 		data['mode'] = String( dataFrom["按钮组模式"] || "固定指针式");
 		
-		// > 主体
+		// > A主体
 		//		data['x']【平移x】
 		//		data['y']【平移y】
 		//		data['visible']【可见】
@@ -1396,10 +1396,10 @@
 			data['btn_slideAnim'] = {};
 		}
 		
-		// > 额外文本域
+		// > B父窗口
+		//	（无）
 		
-		
-		// > 排列
+		// > C按钮集合 - 排列
 		data['arrange_mode'] = String( dataFrom["排列方式"] || "直线排列");
 		data['arrange_spacing'] = Number( dataFrom["直线间距"] || 10);
 		data['arrange_wSpacing'] = Number( dataFrom["直线W间距"] || 0);
@@ -1419,7 +1419,7 @@
 			data['arrange_squeeze'] = [];
 		}
 		
-		// > 名称块
+		// > D名称块
 		data['name_visible'] = String( dataFrom["是否显示名称块"] || "false") == "true";
 		data['name_x'] = Number( dataFrom["平移-名称块 X"] || 0);
 		data['name_y'] = Number( dataFrom["平移-名称块 Y"] || 0);
@@ -1447,7 +1447,7 @@
 		//		data['btn_src']【资源列表】
 		//		data['btn_srcKeyword']【资源关键字列表】
 		
-		// > 选中的按钮
+		// > E选中的按钮
 		data['selected_opacity_default'] = Number( dataFrom["未选中按钮透明度"] || 160);
 		data['selected_opacity_time'] = Number( dataFrom["选中后透明度变化时长"] || 20);
 		data['selected_flicker'] = String( dataFrom["闪烁效果"] || "关闭");
@@ -1473,7 +1473,7 @@
 		data['cursor_lockStyle'] = String( dataFrom["是否锁定菜单指针样式"] || "true") == "true";
 		data['cursor_style'] = Number( dataFrom["菜单指针样式"] || 0);
 		
-		// > 激活
+		// > F激活
 		//		data['active_enableMouseOk']【鼠标ok点击】
 		//		data['active_hide']【激活后是否瞬间隐藏，克隆选中按钮用】
 		//		data['active_out']【激活后是否出列】
@@ -1481,12 +1481,14 @@
 		//		data['active_out_x']【激活后出列x】
 		//		data['active_out_y']【激活后出列y】
 		
-		// > 输入设备
+		// > G键盘与手柄
+		data['input_keyBoardMode'] = String( dataFrom["键盘-按键模式"] || "只能上下切换");
+		data['input_keyBoardLoop'] = String( dataFrom["键盘-起始与末尾是否循环"] || "false") == "true";
+		
+		// > H鼠标
 		data['input_enableMouseHover'] = String( dataFrom["鼠标-接近是否自动选中"] || "false") == "true";
 		data['input_enableMouseWheel'] = String( dataFrom["鼠标-是否启用滚轮切换"] || "true") == "true";
 		data['input_mouseWheelInterval'] = Number( dataFrom["滚轮切换间隔"] || 6);
-		data['input_keyBoardMode'] = String( dataFrom["键盘-按键模式"] || "只能上下切换");
-		data['input_keyBoardLoop'] = String( dataFrom["键盘-起始与末尾是否循环"] || "false") == "true";
 		
 		return data;
 	}
@@ -1505,9 +1507,9 @@
 	}
 
 	//==============================
-	// * 数据获取 - 按钮组样式（接口）
+	// * 变量获取 - 按钮组样式（开放函数）
 	//	
-	//			说明：	与直接获取 "DrillUp.g_COSB_btn[i]" 一样，只是加了一道过滤提示网。
+	//			说明：	> 与直接获取 "DrillUp.g_COSB_btn[i]" 一样，只是加了一道过滤提示网。
 	//==============================
 	DrillUp.drill_COSB_getCopyedBtnData = function( index ){
 		var data = DrillUp.g_COSB_btn[ index ];
@@ -1527,6 +1529,7 @@ if( Imported.Drill_CoreOfBallistics &&
 	Imported.Drill_CoreOfWindowAuxiliary ){
 
 
+
 //=============================================================================
 // ** 按钮组贴图【Drill_COSB_LayerSprite】
 // **			
@@ -1536,8 +1539,8 @@ if( Imported.Drill_CoreOfBallistics &&
 // **		应用：	> 可见 Drill_DialogChoiceButton插件 的 drill_rebuildLayer 函数
 // **
 // **		作用域：	地图界面、战斗界面、菜单界面
-// **		主功能：	> 定义一个贴图组合体，根据预设定义，得到一个参数条贴图。
-// **					> 具体功能见 "1.系统 > 关于参数条.docx"。
+// **		主功能：	> 定义一个按钮组贴图。
+// **					> 具体功能见 "1.系统 > 关于按钮组核心.docx"。
 // **		子功能：	->贴图
 // **						->显示/隐藏
 // **						->是否就绪
@@ -1603,7 +1606,7 @@ if( Imported.Drill_CoreOfBallistics &&
 // **							->激活后状态
 // **						->激活的按钮 出列
 // **						?->激活后瞬间隐藏（克隆选中按钮用）
-// **					->G键盘控制
+// **					->G键盘与手柄
 // **						->按键模式
 // **							> 只能上下切换
 // **							> 只能左右切换
@@ -1612,9 +1615,12 @@ if( Imported.Drill_CoreOfBallistics &&
 // **							> 只能左右切换(反向)
 // **							> 能上左与下右切换(反向)
 // **						->起始项终止项是否循环 （对应 窗口操作）
-// **					->H鼠标控制
+// **					->H鼠标
 // **						->点击选中
 // **						->接近自动选中
+// **					->I输入触发
+// **						->前进一项
+// **						->后退一项
 // **					->DEBUG
 // **						->创建规划网格线
 // **					?->额外文本域
@@ -1622,6 +1628,7 @@ if( Imported.Drill_CoreOfBallistics &&
 // **						?->子插件文本编写
 // **
 // **		说明：	> sprite贴在任意地方都可以。
+// **				> 父窗口 和 按钮组贴图 最好一对一。
 // **		
 // **		代码：	> 范围 - 该类对于选项窗口的所有选项进行额外可视化。
 // **				> 结构 - [ ●合并 /分离/混乱] 数据和贴图合并。
@@ -1629,15 +1636,6 @@ if( Imported.Drill_CoreOfBallistics &&
 // **				> 创建 - [ ●一次性 /自延迟/外部延迟] 
 // **				> 销毁 - [不考虑/自销毁/ ●外部销毁 ] 如果外部要换样式，先将贴图销毁，然后重建即可。
 // **				> 样式 - [ ●不可修改 /自变化/外部变化] 设定样式和选项窗口后，不可再变。
-// **
-// **		调用方法：	// > 按钮组 数据初始化
-// **					//  （完整数据 默认值 见函数drill_initData）
-// **					var btnGroup_id = 1;
-// **					var temp_data = DrillUp.drill_COSB_getCopyedBtnData( btnGroup_id );	//深拷贝数据
-// **					temp_data['level_max'] = data['level_max'];			//段上限
-// **					// > 按钮组 贴图初始化
-// **					var temp_sprite = new Drill_COSB_LayerSprite( temp_data, temp_window );
-// **					this.addChild( temp_sprite );
 //=============================================================================
 //==============================
 // * 按钮组贴图 - 定义
@@ -1679,11 +1677,11 @@ Drill_COSB_LayerSprite.prototype.update = function() {
 	this.drill_updateActivation();					//帧刷新 - F激活
 	this.drill_updateButtonAttrSet();				//帧刷新 - C按钮集合 - 固定帧赋值
 	
-													//帧刷新 - G键盘控制（无）
-	this.drill_updateMousePos();					//帧刷新 - H鼠标控制 - 位置
-	this.drill_updateMouseSelect();					//帧刷新 - H鼠标控制 - 点击选中
-	this.drill_updateMouseHoverSelect();			//帧刷新 - H鼠标控制 - 接近自动选中
-	this.drill_updateMouseWheelSelect();			//帧刷新 - H鼠标控制 - 滚轮切换
+													//帧刷新 - G键盘与手柄（无）
+	this.drill_updateMousePos();					//帧刷新 - H鼠标 - 位置
+	this.drill_updateMouseSelect();					//帧刷新 - H鼠标 - 点击选中
+	this.drill_updateMouseHoverSelect();			//帧刷新 - H鼠标 - 接近自动选中
+	this.drill_updateMouseWheelSelect();			//帧刷新 - H鼠标 - 滚轮切换
 	
 	this.drill_updateButtonRefresh();				//帧刷新 - 窗口重刷
 };
@@ -1716,9 +1714,9 @@ Drill_COSB_LayerSprite.prototype.drill_updateDelayingInit = function() {
 	
 	// > F激活（无）
 	
-	// > G键盘控制（无）
+	// > G键盘与手柄（无）
 	
-	// > H鼠标控制（无）
+	// > H鼠标（无）
 	
 	// > DEBUG（无）
 	
@@ -1850,14 +1848,14 @@ Drill_COSB_LayerSprite.prototype.drill_initData = function() {
 	if( data['active_out_x'] == undefined ){ data['active_out_x'] = 100 };							//F激活 - 激活后出列x
 	if( data['active_out_y'] == undefined ){ data['active_out_y'] = 100 };							//F激活 - 激活后出列y
 	
-	// > G键盘控制
-	if( data['input_keyBoardMode'] == undefined ){ data['input_keyBoardMode'] = "只能上下切换" };	//G键盘控制 - 键盘按键模式
-	if( data['input_keyBoardLoop'] == undefined ){ data['input_keyBoardLoop'] = false };			//G键盘控制 - 键盘起始与末尾是否循环
+	// > G键盘与手柄
+	if( data['input_keyBoardMode'] == undefined ){ data['input_keyBoardMode'] = "只能上下切换" };	//G键盘与手柄 - 键盘按键模式
+	if( data['input_keyBoardLoop'] == undefined ){ data['input_keyBoardLoop'] = false };			//G键盘与手柄 - 键盘起始与末尾是否循环
 	
-	// > H鼠标控制
-	if( data['input_enableMouseHover'] == undefined ){ data['input_enableMouseHover'] = false };	//H鼠标控制 - 鼠标接近选中
-	if( data['input_enableMouseWheel'] == undefined ){ data['input_enableMouseWheel'] = true };		//H鼠标控制 - 滚轮切换
-	if( data['input_mouseWheelInterval'] == undefined ){ data['input_mouseWheelInterval'] = 6 };	//H鼠标控制 - 滚轮切换间隔
+	// > H鼠标
+	if( data['input_enableMouseHover'] == undefined ){ data['input_enableMouseHover'] = false };	//H鼠标 - 鼠标接近选中
+	if( data['input_enableMouseWheel'] == undefined ){ data['input_enableMouseWheel'] = true };		//H鼠标 - 滚轮切换
+	if( data['input_mouseWheelInterval'] == undefined ){ data['input_mouseWheelInterval'] = 6 };	//H鼠标 - 滚轮切换间隔
 	
 	// > DEBUG
 	if( data['btn_debugArrange'] == undefined ){ data['btn_debugArrange'] = false };				//DEBUG - 规划网格线
@@ -1873,8 +1871,8 @@ Drill_COSB_LayerSprite.prototype.drill_initSprite = function() {
 	this.drill_initName();					//初始化对象 - D名称块
 	this.drill_initSelectionBtn();			//初始化对象 - E选中的按钮
 	this.drill_initActivation();			//初始化对象 - F激活
-	this.drill_initKeyboard();				//初始化对象 - G键盘控制
-	this.drill_initMouse();					//初始化对象 - H鼠标控制
+	this.drill_initKeyboard();				//初始化对象 - G键盘与手柄
+	this.drill_initMouse();					//初始化对象 - H鼠标
 	this.drill_initDEBUG();					//初始化对象 - DEBUG
 };
 //==============================
@@ -1906,9 +1904,9 @@ Drill_COSB_LayerSprite.prototype.drill_COSB_destroy_Private = function(){
 	
 	// > 销毁 - F激活（无）
 	
-	// > 销毁 - G键盘控制（无）
+	// > 销毁 - G键盘与手柄（无）
 	
-	// > 销毁 - H鼠标控制（无）
+	// > 销毁 - H鼠标（无）
 	
 	// > 销毁 - DEBUG（无）
 };
@@ -1943,11 +1941,11 @@ Drill_COSB_LayerSprite.prototype.drill_initAttr = function() {
 Drill_COSB_LayerSprite.prototype.drill_createLayer = function() {
 	var data = this._drill_data;
 	
-	// > 层级初始化
 	this._layer_context = new Sprite();				//内容层
 	this._layer_context.x = data['x'];				//
 	this._layer_context.y = data['y'];				//
 	this.addChild(this._layer_context);				//
+	
 	this._layer_outer = new Sprite();				//外层
 	this.addChild(this._layer_outer);				//
 };
@@ -1958,7 +1956,7 @@ Drill_COSB_LayerSprite.prototype.drill_COSB_removeChildConnect = function( paren
 	if( parent_sprite == undefined ){ return; }
 	var sprite_list = parent_sprite.children;
 	if( sprite_list == undefined ){ return; }
-	for(var i = 0; i < sprite_list.length; i++ ){
+	for( var i = sprite_list.length-1; i >= 0; i-- ){
 		var sprite = sprite_list[i];
 		if( sprite == undefined ){ continue; }
 		parent_sprite.removeChild( sprite );
@@ -2925,19 +2923,19 @@ Drill_COSB_LayerSprite.prototype.drill_updateActivation = function() {
 
 
 //=============================================================================
-// ** G键盘控制
+// ** G键盘与手柄
 //
 //			说明：	> 键盘控制按钮组的功能。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * G键盘控制 - 初始化对象
+// * G键盘与手柄 - 初始化对象
 //==============================
 Drill_COSB_LayerSprite.prototype.drill_initKeyboard = function(){
 	//（无）
 }
 //==============================
-// * G键盘控制 - 父窗口设置（继承）
+// * G键盘与手柄 - 父窗口设置（继承）
 //==============================
 var _drill_COSB_keyboard_setParam = Drill_COSB_LayerSprite.prototype.drill_window_setParam;
 Drill_COSB_LayerSprite.prototype.drill_window_setParam = function( parent_window ){
@@ -3047,7 +3045,7 @@ Drill_COSB_LayerSprite.prototype.drill_window_setParam = function( parent_window
 	}
 }
 //==============================
-// * G键盘控制 - 父窗口还原（继承）
+// * G键盘与手柄 - 父窗口还原（继承）
 //==============================
 var _drill_COSB_keyboard_restoreParam = Drill_COSB_LayerSprite.prototype.drill_window_restoreParam;
 Drill_COSB_LayerSprite.prototype.drill_window_restoreParam = function( parent_window ){
@@ -3065,20 +3063,20 @@ Drill_COSB_LayerSprite.prototype.drill_window_restoreParam = function( parent_wi
 
 
 //=============================================================================
-// ** H鼠标控制
+// ** H鼠标
 //
 //			说明：	> 鼠标控制按钮组的功能。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * H鼠标控制 - 初始化对象
+// * H鼠标 - 初始化对象
 //==============================
 Drill_COSB_LayerSprite.prototype.drill_initMouse = function(){
 	this._drill_lastMouseX = 0;				//鼠标控制 - 上一次位置X（接近自动选中）
 	this._drill_lastMouseY = 0;				//鼠标控制 - 上一次位置Y
 }
 //==============================
-// * H鼠标控制 - 父窗口设置（继承）
+// * H鼠标 - 父窗口设置（继承）
 //==============================
 var _drill_COSB_mouse_setParam = Drill_COSB_LayerSprite.prototype.drill_window_setParam;
 Drill_COSB_LayerSprite.prototype.drill_window_setParam = function( parent_window ){
@@ -3093,7 +3091,7 @@ Drill_COSB_LayerSprite.prototype.drill_window_setParam = function( parent_window
 	}
 }
 //==============================
-// * H鼠标控制 - 父窗口还原（继承）
+// * H鼠标 - 父窗口还原（继承）
 //==============================
 var _drill_COSB_mouse_restoreParam = Drill_COSB_LayerSprite.prototype.drill_window_restoreParam;
 Drill_COSB_LayerSprite.prototype.drill_window_restoreParam = function( parent_window ){
@@ -3106,7 +3104,7 @@ Drill_COSB_LayerSprite.prototype.drill_window_restoreParam = function( parent_wi
 	}
 }
 //==============================
-// * H鼠标控制 - 获取鼠标位置（输入设备核心的片段）
+// * H鼠标 - 获取鼠标位置（输入设备核心的片段）
 //==============================
 if( typeof(_drill_mouse_getCurPos) == "undefined" ){	//防止重复定义
 
@@ -3123,7 +3121,7 @@ if( typeof(_drill_mouse_getCurPos) == "undefined" ){	//防止重复定义
 // > 强制更新提示 锁
 DrillUp.g_LCa_alert = true;
 //==============================
-// * H鼠标控制 - 帧刷新 位置
+// * H鼠标 - 帧刷新 位置
 //==============================
 Drill_COSB_LayerSprite.prototype.drill_updateMousePos = function() {
 	var temp_data = this._drill_data;
@@ -3164,7 +3162,7 @@ Drill_COSB_LayerSprite.prototype.drill_updateMousePos = function() {
 		//...
 }
 //==============================
-// * H鼠标控制 - 帧刷新 点击选中
+// * H鼠标 - 帧刷新 点击选中
 //==============================
 Drill_COSB_LayerSprite.prototype.drill_updateMouseSelect = function() {
 	var temp_data = this._drill_data;
@@ -3192,7 +3190,7 @@ Drill_COSB_LayerSprite.prototype.drill_updateMouseSelect = function() {
 	}
 }
 //==============================
-// * H鼠标控制 - 帧刷新 接近自动选中
+// * H鼠标 - 帧刷新 接近自动选中
 //==============================
 Drill_COSB_LayerSprite.prototype.drill_updateMouseHoverSelect = function() {
 	var temp_data = this._drill_data;
@@ -3220,7 +3218,7 @@ Drill_COSB_LayerSprite.prototype.drill_updateMouseHoverSelect = function() {
 	}
 }
 //==============================
-// * H鼠标控制 - 帧刷新 滚轮切换
+// * H鼠标 - 帧刷新 滚轮切换
 //==============================
 Drill_COSB_LayerSprite.prototype.drill_updateMouseWheelSelect = function() {
 	var temp_data = this._drill_data;
@@ -3255,7 +3253,7 @@ Drill_COSB_LayerSprite.prototype.drill_updateMouseWheelSelect = function() {
 	}
 }
 //==============================
-// * H鼠标控制 - 判断 - 接近图片范围
+// * H鼠标 - 判断 - 接近图片范围
 //==============================
 Drill_COSB_LayerSprite.prototype.drill_isOnHoverButton = function( sprite ) {
 	if( sprite.bitmap == null ){ return false };
@@ -3271,7 +3269,7 @@ Drill_COSB_LayerSprite.prototype.drill_isOnHoverButton = function( sprite ) {
 	return true;	
 };
 //==============================
-// * H鼠标控制 - 判断 - 点击图片范围
+// * H鼠标 - 判断 - 点击图片范围
 //==============================
 Drill_COSB_LayerSprite.prototype.drill_isOnButton = function( sprite ) {
 	if( sprite.bitmap == null ){ return false };
@@ -3287,6 +3285,43 @@ Drill_COSB_LayerSprite.prototype.drill_isOnButton = function( sprite ) {
 	return true;	
 };
 
+
+//=============================================================================
+// ** I输入触发
+//
+//			说明：	> 输入执行的 函数触发 功能。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * I输入触发 - 前进一项（开放函数，单次执行）
+//==============================
+Window_Selectable.prototype.drill_COSB_cursorForward = function( lastIndex ){
+	var data = this._drill_COSB_data;
+	if( data && data['input_keyBoardLoop'] == true &&	//（循环）
+		lastIndex == this.maxRows()-1 ){
+		this.select(0);
+	}else{
+		this.cursorDown();
+	}
+	if( this.index() !== lastIndex ){
+		SoundManager.playCursor();
+	};
+}
+//==============================
+// * I输入触发 - 后退一项（开放函数，单次执行）
+//==============================
+Window_Selectable.prototype.drill_COSB_cursorBack = function( lastIndex ){
+	var data = this._drill_COSB_data;
+	if( data && data['input_keyBoardLoop'] == true &&	//（循环）
+		lastIndex == 0 ){
+		this.select(this.maxRows()-1);
+	}else{
+		this.cursorUp();
+	}
+	if (this.index() !== lastIndex) {
+		SoundManager.playCursor();
+	};
+}
 
 
 //=============================================================================
@@ -3417,14 +3452,14 @@ Drill_COSB_LayerSprite.prototype.drill_createDebugArrange = function() {
 
 
 //=============================================================================
-// ** ☆窗口重刷
+// ** ☆父窗口调用
 //
 //			说明：	> 当父窗口执行 refresh 时，按钮组都需要及时同步重刷。
 //					> 如果你的子窗口覆写了Window_Selectable的 refresh 函数，那么要留意添加此刷新标记。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 窗口重刷 - 标记
+// * 父窗口调用 - 标记
 //==============================
 var _drill_COSB_windowSelectableRefresh = Window_Selectable.prototype.refresh;
 Window_Selectable.prototype.refresh = function(){
@@ -3432,7 +3467,7 @@ Window_Selectable.prototype.refresh = function(){
 	_drill_COSB_windowSelectableRefresh.call(this);
 }
 //==============================
-// * 窗口重刷 - 延迟执行
+// * 父窗口调用 - 延迟执行
 //==============================
 Drill_COSB_LayerSprite.prototype.drill_updateButtonRefresh = function() {
 	var temp_data = this._drill_data;
@@ -3463,43 +3498,6 @@ Drill_COSB_LayerSprite.prototype.drill_updateButtonRefresh = function() {
 	}
 }
 
-
-//=============================================================================
-// ** ☆窗口操作
-//
-//			说明：	> 对父窗口的直接操作的函数。
-//					（插件完整的功能目录去看看：功能结构树）
-//=============================================================================
-//==============================
-// * 窗口操作 - 前进一项（开放函数，单次执行）
-//==============================
-Window_Selectable.prototype.drill_COSB_cursorForward = function( lastIndex ){
-	var data = this._drill_COSB_data;
-	if( data && data['input_keyBoardLoop'] == true &&	//（循环）
-		lastIndex == this.maxRows()-1 ){
-		this.select(0);
-	}else{
-		this.cursorDown();
-	}
-	if( this.index() !== lastIndex ){
-		SoundManager.playCursor();
-	};
-}
-//==============================
-// * 窗口操作 - 后退一项（开放函数，单次执行）
-//==============================
-Window_Selectable.prototype.drill_COSB_cursorBack = function( lastIndex ){
-	var data = this._drill_COSB_data;
-	if( data && data['input_keyBoardLoop'] == true &&	//（循环）
-		lastIndex == 0 ){
-		this.select(this.maxRows()-1);
-	}else{
-		this.cursorUp();
-	}
-	if (this.index() !== lastIndex) {
-		SoundManager.playCursor();
-	};
-}
 
 
 

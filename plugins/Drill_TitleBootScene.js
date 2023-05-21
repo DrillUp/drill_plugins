@@ -461,20 +461,33 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			启动界面：
-//				->屏幕
+//			->☆提示信息
+//			->☆变量获取
+//			->☆原型链规范（Scene_Boot）
+//			
+//			->☆启动绑定
+//				->游戏窗口
 //					->全屏/指定到缩放的窗口大小
 //					->界面底色
-//					->轮播图片/视频
-//				->贴图
-//					->预加载
+//			
+//			->启动标志界面【Scene_Drill_TBS】
+//				->预加载
+//				->阶段
 //					->显示时间为0瞬间切换
 //					->第N张图片必须播放M秒才可跳过
-//				->跳过按键
-//				->播放音乐
-// 
+//					->跳过按键
+//				->单图模式
+//				->GIF模式
+//				->视频模式
+//				->音乐设置
+//				->☆原型链规范（Scene_Drill_TBS）
+//
+//
+//		★家谱：
+//			无
+//		
 //		★插件私有类：
-//			* Scene_Drill_TBS【播放场景】
+//			* 启动标志界面【Scene_Drill_TBS】
 //		
 //		★必要注意事项：
 //			暂无
@@ -510,7 +523,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -527,7 +540,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_TitleBootScene = true;
@@ -604,20 +617,75 @@ if( typeof(Liquidize) != "undefined" && typeof(Liquidize.MadeWithMV) != "undefin
 
 
 //=============================================================================
-// ** bug修复（乱按键一定会重播视频的bug）
-//=============================================================================	
-var _drill_TBS_Graphics_initialize = Graphics.initialize;
-Graphics.initialize = function( width, height, type ){
-	_drill_TBS_Graphics_initialize.call( this, width, height, type );
-    this._videoUnlocked = true;
-}
-
-
-//=============================================================================
-// ** 启动
+// ** ☆原型链规范（Scene_Boot）
+//
+//			说明：	> 此处专门补上缺失的原型链，未缺失的则注释掉。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 启动界面绑定
+// * 启动界面（场景基类） - 初始化
+//==============================
+//Scene_Boot.prototype.initialize = function() {
+//    Scene_Base.prototype.initialize.call(this);
+//};
+//==============================
+// * 启动界面（场景基类） - 创建
+//==============================
+//Scene_Boot.prototype.create = function() {
+//    Scene_Base.prototype.create.call(this);
+//};
+//==============================
+// * 启动界面（场景基类） - 帧刷新
+//==============================
+Scene_Boot.prototype.update = function() {
+    Scene_Base.prototype.update.call(this);
+};
+//==============================
+// * 启动界面（场景基类） - 开始运行
+//==============================
+//Scene_Boot.prototype.start = function() {
+//    Scene_Base.prototype.start.call(this);
+//};
+//==============================
+// * 启动界面（场景基类） - 结束运行
+//==============================
+Scene_Boot.prototype.stop = function() {
+    Scene_Base.prototype.stop.call(this);
+};
+//==============================
+// * 启动界面（场景基类） - 判断是否激活/启动
+//==============================
+Scene_Boot.prototype.isActive = function() {
+	return Scene_Base.prototype.isActive.call(this);
+};
+//==============================
+// * 启动界面（场景基类） - 析构函数
+//==============================
+Scene_Boot.prototype.terminate = function() {
+    Scene_Base.prototype.terminate.call(this);
+};
+
+//==============================
+// * 启动界面（场景基类） - 判断加载完成
+//==============================
+//Scene_Boot.prototype.isReady = function() {
+//	return Scene_Base.prototype.isReady.call(this);
+//};
+//==============================
+// * 启动界面（场景基类） - 忙碌状态
+//==============================
+Scene_Boot.prototype.isBusy = function() {
+	return Scene_Base.prototype.isBusy.call(this);
+};
+
+
+//=============================================================================
+// ** ☆启动绑定
+//=============================================================================
+//==============================
+// * 启动绑定 - 启动界面绑定
+//
+//			说明：	此处设置 全屏/窗口 ，以及分辨率大小。
 //==============================
 var _drill_TBS_boot_start = Scene_Boot.prototype.start;
 Scene_Boot.prototype.start = function() {
@@ -631,12 +699,15 @@ Scene_Boot.prototype.start = function() {
 		
 		// > 窗口最大化
 		if( DrillUp.g_TBS_screen_maximize ){
-			if( Utils.isNwjs() ){		//（nwjs情况）
+			
+			// > nwjs情况
+			if( Utils.isNwjs() ){
 				var gui = require('nw.gui'); 
 				var win = gui.Window.get(); 
 				win.maximize();
 			}
-			// ...
+			// > 浏览器情况
+			//	（不操作）
 
 		}else{
 			// > 设置指定大小
@@ -661,7 +732,7 @@ Scene_Boot.prototype.start = function() {
 	_drill_TBS_boot_start.call(this);
 };
 //==============================
-// * 拦截场景转换（跳转到Scene_Drill_TBS启动界面）
+// * 启动绑定 - 拦截场景转换（跳转到Scene_Drill_TBS启动界面）
 //==============================
 var _drill_TBS_boot_goto = SceneManager.goto;
 SceneManager.goto = function(sceneClass) {
@@ -675,23 +746,47 @@ SceneManager.goto = function(sceneClass) {
 	}
 	_drill_TBS_boot_goto.call(this, sceneClass);
 }
-	
+//==============================
+// * 启动绑定 - 锁按键（乱按键一定会重播视频的bug）
+//==============================
+var _drill_TBS_Graphics_initialize = Graphics.initialize;
+Graphics.initialize = function( width, height, type ){
+	_drill_TBS_Graphics_initialize.call( this, width, height, type );
+    this._videoUnlocked = true;
+}
+
 	
 
 //=============================================================================
-// ** logo场景
+// ** 启动标志界面【Scene_Drill_TBS】
+// **
+// **		作用域：	菜单界面
+// **		主功能：	> 启动界面时，播放各类标志、视频的界面。
+// **		子功能：	
+// **					->面板
+// **						->帧刷新
+// **					->预加载
+// **					->阶段
+// **						->显示时间为0瞬间切换
+// **						->第N张图片必须播放M秒才可跳过
+// **						->跳过按键
+// **					->单图模式
+// **					->GIF模式
+// **					->视频模式
+// **					->音乐设置
+// **
+// **		说明：	> 暂无
 //=============================================================================
 //==============================
-// * 场景-定义
+// * 启动标志界面 - 定义
 //==============================
 function Scene_Drill_TBS() {
     this.initialize.apply(this, arguments);
 }
 Scene_Drill_TBS.prototype = Object.create(Scene_Base.prototype);
 Scene_Drill_TBS.prototype.constructor = Scene_Drill_TBS;
-
 //==============================
-// * 场景 - 初始化
+// * 启动标志界面 - 初始化
 //==============================
 Scene_Drill_TBS.prototype.initialize = function() {
     Scene_Base.prototype.initialize.call(this);
@@ -715,7 +810,7 @@ Scene_Drill_TBS.prototype.initialize = function() {
 	this.drill_preloadBitmap();						//预加载
 }
 //==============================
-// * 场景 - 创建
+// * 启动标志界面 - 创建
 //==============================
 Scene_Drill_TBS.prototype.create = function() {	
     Scene_Base.prototype.create.call(this);
@@ -735,7 +830,7 @@ Scene_Drill_TBS.prototype.drill_createLayer = function() {
 	temp_sprite.bitmap.fillAll( DrillUp.g_TBS_screen_back_color );
 }
 //==============================
-// * 场景 - 帧刷新
+// * 启动标志界面 - 帧刷新
 //==============================
 Scene_Drill_TBS.prototype.update = function() {
 	Scene_Base.prototype.update.call(this);
@@ -748,11 +843,14 @@ Scene_Drill_TBS.prototype.update = function() {
 };
 
 //==============================
-// * 预加载
+// * 预加载 - 初始化
+//
+//			说明：	> 在 Scene_Drill_TBS.prototype.initialize 时执行图片资源加载是有效的。
+//					  场景基类的 isReady 会根据的图片资源缓存加载情况，进行阻塞。
 //==============================
 Scene_Drill_TBS.prototype.drill_preloadBitmap = function() {
-	
 	this._drill_bitmapTank = [];
+	
 	for( var i=0; i < this._drill_dataList.length; i++ ){
 		var temp_data = this._drill_dataList[i];
 		if( temp_data == undefined ){
@@ -761,35 +859,42 @@ Scene_Drill_TBS.prototype.drill_preloadBitmap = function() {
 			this._drill_bitmapTank[i] = {};
 			
 		}else{
-			// > bitmap加载
 			var obj = {};
+			
 			if( temp_data['mode'] == "单图模式" ){
 				obj['img_bitmap'] = ImageManager.loadTitle2(temp_data['img_src']);
 			}
+			
 			if( temp_data['mode'] == "GIF模式" ){
 				obj['gif_bitmaps'] = [];
 				for(var j = 0; j < temp_data['gif_src'].length ; j++){
 					obj['gif_bitmaps'].push( ImageManager.loadTitle2(temp_data['gif_src'][j]) );
 				}
 			}
+			
 			if( temp_data['mode'] == "视频模式" ){
 				// （无bitmap）
 			}
+			
 			this._drill_bitmapTank[i] = obj;
 		}
 	}
 }
 //==============================
-// * 预加载判断
+// * 预加载 - 判断
+//
+//			说明：	> 此函数可以没有，但保险起见先写上。
 //==============================
 Scene_Drill_TBS.prototype.drill_isAllBitmapReady = function() {
 	for(var i=0; i < this._drill_bitmapTank.length; i++ ){
 		var obj = this._drill_bitmapTank[i];
-		// > 单图模式的加载
+		
+		// > 单图模式的Bitmap
 		if( obj['img_bitmap'] != undefined && obj['img_bitmap'].isReady() == false ){
 			return false;
 		}
-		// > gif模式的加载
+		
+		// > GIF模式的Bitmap
 		if( obj['gif_bitmaps'] != undefined ){
 			for(var j = 0; j < obj['gif_bitmaps'].length ; j++){
 				if( obj['gif_bitmaps'][j].isReady() == false ){
@@ -797,11 +902,15 @@ Scene_Drill_TBS.prototype.drill_isAllBitmapReady = function() {
 				}
 			}	//（这里的判断比较松散，如果未添加bitmap，则不返回false，默认返回true）
 		}
+		
+		// > 视频模式的Bitmap
+		//	（无Bitmap）
 	}
 	return true;
 }
+
 //==============================
-// * 帧刷新 - 阶段控制
+// * 阶段 - 帧刷新
 //==============================
 Scene_Drill_TBS.prototype.drill_updateLevel = function() {
 	this._drill_level_time += 1;
@@ -835,7 +944,7 @@ Scene_Drill_TBS.prototype.drill_updateLevel = function() {
 	}
 }
 //==============================
-// * 帧刷新 - 阶段结束
+// * 阶段 - 结束标记
 //==============================
 Scene_Drill_TBS.prototype.drill_isLevelFinished = function() {
 	var temp_data = this._drill_dataList[this._drill_level];
@@ -851,8 +960,9 @@ Scene_Drill_TBS.prototype.drill_isLevelFinished = function() {
 	}
 	return true;
 }
+
 //==============================
-// * 帧刷新 - 建立单图
+// * 单图模式 - 建立单图
 //==============================
 Scene_Drill_TBS.prototype.drill_createPic = function() {
 	var temp_data = this._drill_dataList[this._drill_level];
@@ -871,7 +981,7 @@ Scene_Drill_TBS.prototype.drill_createPic = function() {
 	this._drill_gif_sprite.opacity = 1;
 }
 //==============================
-// * 帧刷新 - 播放单图
+// * 单图模式 - 帧刷新 播放
 //==============================
 Scene_Drill_TBS.prototype.drill_updatePic = function() {
 	var temp_data = this._drill_dataList[this._drill_level];
@@ -909,7 +1019,7 @@ Scene_Drill_TBS.prototype.drill_updatePic = function() {
 	}
 }
 //==============================
-// * 帧刷新 - 建立GIF
+// * GIF模式 - 建立GIF
 //==============================
 Scene_Drill_TBS.prototype.drill_createGIF = function() {
 	var temp_data = this._drill_dataList[this._drill_level];
@@ -931,7 +1041,7 @@ Scene_Drill_TBS.prototype.drill_createGIF = function() {
 	this._drill_pic_sprite.opacity = 1;
 }
 //==============================
-// * 帧刷新 - 播放GIF
+// * GIF模式 - 帧刷新 播放
 //==============================
 Scene_Drill_TBS.prototype.drill_updateGIF = function() {
 	var temp_data = this._drill_dataList[this._drill_level];
@@ -986,7 +1096,7 @@ Scene_Drill_TBS.prototype.drill_updateGIF = function() {
 	
 }
 //==============================
-// * 帧刷新 - 建立视频
+// * 视频模式 - 建立视频
 //==============================
 Scene_Drill_TBS.prototype.drill_createVideo = function() {
 	var temp_data = this._drill_dataList[this._drill_level];
@@ -997,7 +1107,7 @@ Scene_Drill_TBS.prototype.drill_createVideo = function() {
 	Graphics.playVideo('movies/' + temp_data.video_src + ext);
 }
 //==============================
-// * 帧刷新 - 播放视频
+// * 视频模式 - 帧刷新 播放
 //==============================
 Scene_Drill_TBS.prototype.drill_updateVideo = function() {
 	var temp_data = this._drill_dataList[this._drill_level];
@@ -1028,7 +1138,7 @@ Scene_Drill_TBS.prototype.drill_updateVideo = function() {
 	}
 }
 //==============================
-// * 影片后缀
+// * 视频模式 - 影片后缀
 //==============================
 Scene_Drill_TBS.prototype.videoFileExt = function() {
     if (Graphics.canPlayVideoType('video/webm') && !Utils.isMobileDevice()) {
@@ -1039,7 +1149,7 @@ Scene_Drill_TBS.prototype.videoFileExt = function() {
 };
 
 //==============================
-// ** 帧刷新 - 建立背景音乐
+// * 音乐设置 - 播放
 //==============================
 Scene_Drill_TBS.prototype.drill_createMusic = function() {
 	var temp_data = this._drill_dataList[this._drill_level];
@@ -1056,5 +1166,68 @@ Scene_Drill_TBS.prototype.drill_createMusic = function() {
 		bgm.volume = 100;
 		AudioManager.playBgm(bgm);
 	}
+};
+
+
+//=============================================================================
+// ** ☆原型链规范（Scene_Drill_TBS）
+//
+//			说明：	> 此处专门补上缺失的原型链，未缺失的则注释掉。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 启动标志界面（场景基类） - 初始化
+//==============================
+//Scene_Drill_TBS.prototype.initialize = function() {
+//    Scene_Base.prototype.initialize.call(this);
+//};
+//==============================
+// * 启动标志界面（场景基类） - 创建
+//==============================
+//Scene_Drill_TBS.prototype.create = function() {
+//    Scene_Base.prototype.create.call(this);
+//};
+//==============================
+// * 启动标志界面（场景基类） - 帧刷新
+//==============================
+//Scene_Drill_TBS.prototype.update = function() {
+//    Scene_Base.prototype.update.call(this);
+//};
+//==============================
+// * 启动标志界面（场景基类） - 开始运行
+//==============================
+Scene_Drill_TBS.prototype.start = function() {
+    Scene_Base.prototype.start.call(this);
+};
+//==============================
+// * 启动标志界面（场景基类） - 结束运行
+//==============================
+Scene_Drill_TBS.prototype.stop = function() {
+    Scene_Base.prototype.stop.call(this);
+};
+//==============================
+// * 启动标志界面（场景基类） - 判断是否激活/启动
+//==============================
+Scene_Drill_TBS.prototype.isActive = function() {
+	return Scene_Base.prototype.isActive.call(this);
+};
+//==============================
+// * 启动标志界面（场景基类） - 析构函数
+//==============================
+Scene_Drill_TBS.prototype.terminate = function() {
+    Scene_Base.prototype.terminate.call(this);
+};
+
+//==============================
+// * 启动标志界面（场景基类） - 判断加载完成
+//==============================
+Scene_Drill_TBS.prototype.isReady = function() {
+	return Scene_Base.prototype.isReady.call(this);
+};
+//==============================
+// * 启动标志界面（场景基类） - 忙碌状态
+//==============================
+Scene_Drill_TBS.prototype.isBusy = function() {
+	return Scene_Base.prototype.isBusy.call(this);
 };
 

@@ -468,6 +468,12 @@
 //				->callHandler 绑定传值
 //				->debug寻找可用按钮
 //
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			无
+//		
 //		★必要注意事项：
 //			1.	this._drill_WMB_maps 拦截器的条件，
 //				this._drill_WMB_intercepter 拦截器拦截的内容列表。

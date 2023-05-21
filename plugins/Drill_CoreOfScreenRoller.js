@@ -97,21 +97,25 @@
 //				->图片模式
 //				->文字模式
 //				->GIF模式
-// 
-//		★插件私有类：
-//			* Drill_COSR_Sprite【长画布】
-//			* Drill_COSR_WindowSprite【文本域】
 //
+//
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			* 长画布贴图【Drill_COSR_Sprite】
+//			* 文本域【Drill_COSR_WindowSprite】
+//		
+//		★核心说明：
+//			1.整个核心只提供了一个封装好的【Sprite独立子类】。
+//			  具体见类的说明。
+//		
 //		★必要注意事项：
 //			暂无
 //
 //		★其它说明细节：
 //			1.空的阶段时，阶段高度为0，根据滚轴推进可以快速跳过大量空阶段。
 //			  空阶段也会建立sprite，但是是空的sprite。
-//		
-//		★核心接口说明：
-//			1.整个核心只提供了一个封装好的【Sprite独立子类】。
-//			  具体见类的说明。
 //		
 //		★存在的问题：
 //			暂无
@@ -466,7 +470,7 @@ Drill_COSR_Sprite.prototype.drill_updateMusic = function() {
 
 
 //=============================================================================
-// ** Drill_COSR_WindowSprite 文本域
+// ** 文本域【Drill_COSR_WindowSprite】
 //=============================================================================
 function Drill_COSR_WindowSprite() {
     this.initialize.apply(this, arguments);

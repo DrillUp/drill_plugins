@@ -1150,29 +1150,36 @@
 //					->空检查
 //					->嵌套检查
 //				->动画序列核心DEBUG
-// 
+//		
+//		
+//		★家谱：
+//			大家族-GIF动画序列
+//			核心
+//		
 //		★插件私有类：
-//			* Drill_COAS_StateController【状态元控制器】
-//			* Drill_COAS_StateNodeController【状态节点控制器】
-//			* Drill_COAS_ActController【动作元控制器】
-//			* Drill_COAS_MainController【动画序列数据】
-//			* Drill_COAS_SpriteDecorator【动画序列对象】
-//			
-//		★其它说明细节：
-//			1. 2022/11/13：原插件只有状态元和动作元，后来引入了状态节点的结构。
-//				插件的底层变化特别大，但实际使用时，变化不大。
-//
-//		★核心接口说明：
+//			* 状态元 控制器【Drill_COAS_StateController】
+//			* 状态节点 控制器【Drill_COAS_StateNodeController】
+//			* 动作元 控制器【Drill_COAS_ActController】
+//			* 动画序列 主控制器【Drill_COAS_MainController】
+//			* 动画序列对象 装饰器【Drill_COAS_SpriteDecorator】
+//		
+//		★核心说明：
 //			1.整个核心只提供了两个分离的类，数据 和 对象。
 //			  具体见类的说明。
-//			2.如果只在一个 简单贴图 里面使用，直接new，然后手动update即可。
+//		
+//		★必要注意事项：
+//			1.如果只在一个 简单贴图 里面使用，直接new，然后手动update即可。
 //				this._Drill_xxx_data = new Drill_COAS_MainController( DrillUp.g_COAS_list[ 0 ] );
 //				this._Drill_xxx_decorator = new Drill_COAS_SpriteDecorator( this, this._Drill_xxx_data );
 //				this._Drill_xxx_data.update();
 //				this._Drill_xxx_decorator.update();
 //			  但是如果你需要将 二者分离，且 数据 能保存，则：
 //				见插件 Drill_PictureActionSequence 。
-//			3.如果要对data进行相关操作，可见标注"（接口）"的函数。
+//			2.如果要对data进行相关操作，可见标注"（接口）"的函数。
+//			
+//		★其它说明细节：
+//			1. 2022/11/13：原插件只有状态元和动作元，后来引入了状态节点的结构。
+//				插件的底层变化特别大，但实际使用时，变化不大。
 //				
 //		★存在的问题：
 //			暂无

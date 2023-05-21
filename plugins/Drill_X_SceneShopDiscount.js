@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        控件 - 商店节假日的折扣[扩展]
+ * @plugindesc [v1.3]        控件 - 商店节假日的折扣[扩展]
  * @author Drill_up
  * 
  * @Drill_LE_param "折扣-%d"
@@ -112,6 +112,8 @@
  * 修复了使用 自定义单图背景 模式时，切换折扣样式造成错误叠加的bug。
  * [v1.2]
  * 优化了旧存档的识别与兼容。
+ * [v1.3]
+ * 优化了窗口结构。
  * 
  * 
  * 
@@ -683,13 +685,19 @@
 //				->折扣时机
 //					->时间条件
 //					->开关条件
-//				->折扣信息框
-//					->类定义
-//					->内容
-//						> 折扣相关的文本
-//					->判定项
-//						> 鼠标移走则重刷
-//
+//				->折扣信息框【Drill_XSSD_Window】
+//					->A主体
+//					->B窗口位置
+//					->C窗口皮肤
+//					->D窗口内容
+//		
+//		
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			* 折扣信息框【Drill_XSSD_Window】
+//		
 //		★必要注意事项：
 //			1.鼠标悬浮窗口目前已经固定了一套框架，你可以找到其他的 MiniPlateXXX 插件，看看私有类的定义。
 //			  通过 drill_pushChecks 判定项 帧刷新，来控制面板显示的内容。
@@ -1388,31 +1396,37 @@ Drill_SLS_GoodsButtonWindow.prototype.drill_SLS_price = function() {
 
 //=============================================================================
 // ** 折扣信息框【Drill_XSSD_Window】
-//			
-//			索引：	无
-//			来源：	继承于Window_Base
-//			实例：	Scene_MenuBase下的 _drill_XSSD_window 成员
-//			应用：	暂无 
-//			
-//			作用域：	菜单界面
-//			主功能：	定义一个面板，能随时改变内容和高宽，用于描述折扣信息。
-//			子功能：
-//						->贴图内容
-//							->文本层
-//							->背景
-//								> 默认窗口皮肤
-//								> 自定义窗口皮肤
-//								> 自定义背景图片
-//								> 黑底背景
-//						->位置
-//							> 锁定位置
-//							> 跟随鼠标位置
-//						->显现时机
-//							->激活
-//							->显示条件
-//							->刷新内容
-//				
-//			说明：	> 整个场景只有一个该窗口。
+// **		
+// **		索引：	无
+// **		来源：	继承于Window_Base
+// **		实例：	Scene_MenuBase下的 _drill_XSSD_window 成员
+// **		应用：	暂无 
+// **		
+// **		作用域：	菜单界面
+// **		主功能：	定义一个面板，能随时改变内容和高宽，用于描述折扣信息。
+// **		子功能：	->窗口
+// **						x->是否就绪
+// **						x->优化策略
+// **						x->销毁
+// **					->A主体
+// **					->B窗口位置
+// **						> 锁定位置
+// **						> 跟随鼠标位置
+// **						> 鼠标移走则重刷
+// **					->C窗口皮肤
+// **						> 默认窗口皮肤
+// **						> 自定义窗口皮肤
+// **						> 自定义背景图片
+// **						> 黑底背景
+// **					->D窗口内容
+// **						->窗口字符
+// **						->文本域自适应
+// **						->显现时机
+// **							->激活
+// **							->显示条件
+// **							->刷新内容
+// **			
+// **		说明：	> 整个场景只有一个该窗口。
 //=============================================================================
 //==============================
 // * 折扣信息框 - 定义
@@ -1426,8 +1440,9 @@ Drill_XSSD_Window.prototype.constructor = Drill_XSSD_Window;
 // * 折扣信息框 - 初始化
 //==============================
 Drill_XSSD_Window.prototype.initialize = function(){
-    Window_Base.prototype.initialize.call(this, 0, 0, 0, 0);
 	this._drill_data = {};
+	
+    Window_Base.prototype.initialize.call(this, 0, 0, 0, 0);
 	
 	this.drill_initData();				//初始化数据
 	this.drill_initSprite();			//初始化对象
@@ -1437,9 +1452,10 @@ Drill_XSSD_Window.prototype.initialize = function(){
 //==============================
 Drill_XSSD_Window.prototype.update = function() {
 	Window_Base.prototype.update.call(this);
-	
-	this.drill_updateChecks();			//帧刷新 - 判断激活
-	this.drill_updatePosition();		//帧刷新 - 位置
+										//帧刷新 - A主体（无）
+	this.drill_updatePosition();		//帧刷新 - B窗口位置
+	this.drill_updateSkin();			//帧刷新 - C窗口皮肤
+	this.drill_updateChecks();			//帧刷新 - D窗口内容
 };
 //==============================
 // * 折扣信息框 - 私有覆写函数
@@ -1451,101 +1467,32 @@ Drill_XSSD_Window.prototype.standardFontSize = function(){ return DrillUp.g_XSSD
 // * 初始化 - 数据
 //==============================
 Drill_XSSD_Window.prototype.drill_initData = function() {
-	var data = this._drill_data;
-	
-	// > 皮肤设置
-	data['window_type'] = DrillUp.g_XSSD_layout_type;
-	data['window_opacity'] = DrillUp.g_XSSD_layout_opacity;
-	data['window_sys_bitmap'] = ImageManager.loadSystem( DrillUp.g_XSSD_layout_sys_src );
-	data['window_pic_bitmap'] = ImageManager.load_MenuShopDiscount( DrillUp.g_XSSD_layout_pic_src );
-	data['window_pic_x'] = DrillUp.g_XSSD_layout_pic_x;
-	data['window_pic_y'] = DrillUp.g_XSSD_layout_pic_y;
-	
-	// > 私有变量初始化
-	this._drill_width = 0;
-	this._drill_height = 0;
-	this._drill_visible = false;
-	this._drill_check_tank = [];
+	//（暂无 默认值）
 };
 //==============================
 // * 初始化 - 对象
 //==============================
 Drill_XSSD_Window.prototype.drill_initSprite = function() {
-	this.drill_createBackground();		//创建背景
-	this.drill_sortBottomByZIndex();	//底层层级排序
+	this.drill_initAttr();				//初始化对象 - A主体
+										//初始化对象 - B窗口位置（无）
+	this.drill_initSkin();				//初始化对象 - C窗口皮肤
+	this.drill_initMessage();			//初始化对象 - D窗口内容
 };
+
 //==============================
-// * 创建 - 背景
+// * A主体 - 初始化对象
 //==============================
-Drill_XSSD_Window.prototype.drill_createBackground = function() {
+Drill_XSSD_Window.prototype.drill_initAttr = function() {
 	var data = this._drill_data;
-	this._drill_background = new Sprite();
 	
-	// > 图层顺序处理
-	this._drill_background.zIndex = 1;
-	this._windowBackSprite.zIndex = 2;
-	this._windowFrameSprite.zIndex = 3;
-	
-	// > 信息框布局
-	if( data['window_type'] == "默认窗口皮肤" ){
-		
-		// > 透明度
-		this.opacity = data['window_opacity'];
-		this._drill_background.bitmap = null;
-		this._drill_background.opacity = data['window_opacity'];
-		this._windowBackSprite.opacity = data['window_opacity'];
-		this._windowFrameSprite.opacity = data['window_opacity'];
-		
-		
-	}else if( data['window_type'] == "自定义窗口皮肤" ){
-		
-		// > 皮肤设置
-		this.windowskin = data['window_sys_bitmap'];
-		
-		// > 透明度
-		this._drill_background.bitmap = null;
-		this._drill_background.opacity = data['window_opacity'];
-		this._windowBackSprite.opacity = data['window_opacity'];
-		this._windowFrameSprite.opacity = data['window_opacity'];
-		
-		
-	}else if( data['window_type'] == "自定义背景图片" ){
-		
-		// > bimap建立
-		this._drill_background.bitmap = data['window_pic_bitmap'];
-		this._drill_background.x = data['window_pic_x'];
-		this._drill_background.y = data['window_pic_y'];
-		
-		// > 透明度
-		this._drill_background.opacity = data['window_opacity'];
-		this._windowBackSprite.opacity = 0;
-		this._windowFrameSprite.opacity = 0;
-		
-		
-	}else if( data['window_type'] == "黑底背景" ){
-		
-		// > bimap建立
-		//（需延迟设置，见后面）
-		
-		// > 透明度
-		this._drill_background.bitmap = null;
-		this._drill_background.opacity = data['window_opacity'];
-		this._windowBackSprite.opacity = 0;
-		this._windowFrameSprite.opacity = 0;
-	}
-	
-	this._windowSpriteContainer.addChild(this._drill_background);	//（ _windowSpriteContainer 为窗口的最底层贴图）
-}
-//==============================
-// ** 底层层级排序
-//==============================
-Drill_XSSD_Window.prototype.drill_sortBottomByZIndex = function() {
-   this._windowSpriteContainer.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
+	// > 私有变量初始化
+	this._drill_width = 0;
+	this._drill_height = 0;
+	this._drill_visible = false;
 };
 
-
 //==============================
-// * 帧刷新 - 刷新位置
+// * B窗口位置 - 帧刷新
 //==============================
 Drill_XSSD_Window.prototype.drill_updatePosition = function() {
 	
@@ -1568,8 +1515,220 @@ Drill_XSSD_Window.prototype.drill_updatePosition = function() {
 	this.x = cal_x;
 	this.y = cal_y;
 }
+
 //==============================
-// * 接口 - 添加内容 判断项
+// * C窗口皮肤 - 初始化对象
+//==============================
+Drill_XSSD_Window.prototype.drill_initSkin = function() {
+	
+	// > 皮肤资源
+	this._drill_skin_defaultSkin = this.windowskin;
+	
+	// > 布局模式
+	var data = this._drill_data;
+	data['window_type'] = DrillUp.g_XSSD_layout_type;
+	data['window_opacity'] = DrillUp.g_XSSD_layout_opacity;
+	data['window_sys_src'] = DrillUp.g_XSSD_layout_sys_src;
+	data['window_pic_src'] = DrillUp.g_XSSD_layout_pic_src;
+	data['window_pic_x'] = DrillUp.g_XSSD_layout_pic_x;
+	data['window_pic_y'] = DrillUp.g_XSSD_layout_pic_y;
+	this.drill_resetSkinData( data );
+}
+//==============================
+// * C窗口皮肤 - 重设数据
+//
+//			说明：	data对象中的参数【可以缺项】。
+//==============================
+Drill_XSSD_Window.prototype.drill_resetSkinData = function( data ){
+	
+	// > 默认值
+	if( data['window_type'] == undefined ){ data['window_type'] = "默认窗口皮肤" };		//布局模式（默认窗口皮肤/自定义窗口皮肤/自定义背景图片/黑底背景）
+	if( data['window_opacity'] == undefined ){ data['window_opacity'] = 255 };			//布局透明度
+	if( data['window_sys_src'] == undefined ){ data['window_sys_src'] = "" };			//资源-自定义窗口皮肤
+	if( data['window_pic_src'] == undefined ){ data['window_pic_src'] = "" };			//资源-自定义背景图片
+	if( data['window_pic_x'] == undefined ){ data['window_pic_x'] = 0 };				//背景图片X
+	if( data['window_pic_y'] == undefined ){ data['window_pic_y'] = 0 };				//背景图片Y
+	
+	if( data['window_tone_lock'] == undefined ){ data['window_tone_lock'] = false };	//是否锁定窗口色调
+	if( data['window_tone_r'] == undefined ){ data['window_tone_r'] = 0 };				//窗口色调-红
+	if( data['window_tone_g'] == undefined ){ data['window_tone_g'] = 0 };				//窗口色调-绿
+	if( data['window_tone_b'] == undefined ){ data['window_tone_b'] = 0 };				//窗口色调-蓝
+	
+	
+	// > 窗口皮肤 - 私有变量初始化
+	this._drill_skin_type = data['window_type'];
+	this._drill_skin_opacity = data['window_opacity'];
+	
+	this._drill_skinBackground_width = 0;
+	this._drill_skinBackground_height = 0;
+	if( data['window_type'] == "自定义背景图片" && data['window_pic_src'] != "" ){
+		this._drill_skin_pic_bitmap = ImageManager.loadBitmap( "img/Menu__shopDiscount/", data['window_pic_src'], 0, true );
+		this._drill_skin_pic_x = data['window_pic_x'];
+		this._drill_skin_pic_y = data['window_pic_y'];
+	}else{
+		this._drill_skin_pic_bitmap = ImageManager.loadEmptyBitmap();
+	}
+	
+	if( data['window_type'] == "自定义窗口皮肤" && data['window_sys_src'] != "" ){
+		this._drill_skin_sys_bitmap = ImageManager.loadBitmap( "img/system/", data['window_sys_src'], 0, true );
+	}else{
+		this._drill_skin_sys_bitmap = this._drill_skin_defaultSkin;
+	}
+	
+	this._drill_skin_tone_lock = data['window_tone_lock'];
+	this._drill_skin_tone_r = data['window_tone_r'];
+	this._drill_skin_tone_g = data['window_tone_g'];
+	this._drill_skin_tone_b = data['window_tone_b'];
+	
+	
+	// > 窗口皮肤 - 贴图初始化
+	if( this._drill_skinBackground == undefined ){
+		this._drill_skinBackground = new Sprite();
+		this._windowSpriteContainer.addChild(this._drill_skinBackground);	//（ _windowSpriteContainer 为窗口的最底层贴图）
+	}
+	
+	
+	// > 窗口皮肤 - 布局模式
+	if( this._drill_skin_type == "默认窗口皮肤" || this._drill_skin_type == "默认窗口布局" ){
+		
+		// （皮肤资源）
+		this.windowskin = this._drill_skin_defaultSkin;
+		
+		// （透明度）
+		//this.contentsOpacity = 255;									//文本域 透明度（与 背景容器层 并列）
+		//this.opacity = 255;											//背景容器层 透明度
+		this._windowBackSprite.opacity = this._drill_skin_opacity;		//背景容器层 - 平铺贴图 透明度
+		this._windowFrameSprite.opacity = this._drill_skin_opacity;		//背景容器层 - 框架贴图 透明度
+		this._drill_skinBackground.opacity = 0;							//背景容器层 - 背景图片 透明度
+		
+		// （背景图片布局）
+		this._drill_skinBackground.bitmap = null;
+		
+		
+	}else if( this._drill_skin_type == "自定义窗口皮肤" || this._drill_skin_type == "系统窗口布局" ){
+		
+		// （皮肤资源）
+		this.windowskin = this._drill_skin_sys_bitmap;
+		
+		// （透明度）
+		//this.contentsOpacity = 255;									//文本域 透明度（与 背景容器层 并列）
+		//this.opacity = 255;											//背景容器层 透明度
+		this._windowBackSprite.opacity = this._drill_skin_opacity;		//背景容器层 - 平铺贴图 透明度
+		this._windowFrameSprite.opacity = this._drill_skin_opacity;		//背景容器层 - 框架贴图 透明度
+		this._drill_skinBackground.opacity = 0;							//背景容器层 - 背景图片 透明度
+		
+		// （背景图片布局）
+		this._drill_skinBackground.bitmap = null;
+		
+		
+	}else if( this._drill_skin_type == "自定义背景图片" || this._drill_skin_type == "图片窗口布局" ){
+		
+		// （皮肤资源）
+		this.windowskin = this._drill_skin_defaultSkin;
+		
+		// （透明度）
+		//this.contentsOpacity = 255;									//文本域 透明度（与 背景容器层 并列）
+		//this.opacity = 255;											//背景容器层 透明度
+		this._windowBackSprite.opacity = 0;								//背景容器层 - 平铺贴图 透明度
+		this._windowFrameSprite.opacity = 0;							//背景容器层 - 框架贴图 透明度
+		this._drill_skinBackground.opacity = this._drill_skin_opacity;	//背景容器层 - 背景图片 透明度]
+		
+		// （背景图片布局）
+		this._drill_skinBackground.bitmap = this._drill_skin_pic_bitmap;
+		this._drill_skinBackground.x = this._drill_skin_pic_x;
+		this._drill_skinBackground.y = this._drill_skin_pic_y;
+		
+		
+	}else if( this._drill_skin_type == "黑底背景" || this._drill_skin_type == "黑底布局" ){
+		
+		// （皮肤资源）
+		this.windowskin = this._drill_skin_defaultSkin;
+		
+		// （透明度）
+		//this.contentsOpacity = 255;									//文本域 透明度（与 背景容器层 并列）
+		//this.opacity = 255;											//背景容器层 透明度
+		this._windowBackSprite.opacity = 0;								//背景容器层 - 平铺贴图 透明度
+		this._windowFrameSprite.opacity = 0;							//背景容器层 - 框架贴图 透明度
+		this._drill_skinBackground.opacity = this._drill_skin_opacity;	//背景容器层 - 背景图片 透明度
+		
+		// （背景图片布局）
+		this._drill_skinBackground.bitmap = null;	//（帧刷新中会自动建立黑色画布）
+	}
+	
+	
+	// > 窗口皮肤 - 层级排序
+	this._drill_skinBackground.zIndex = 1;
+	this._windowBackSprite.zIndex = 2;
+	this._windowFrameSprite.zIndex = 3;
+	this._windowSpriteContainer.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
+}
+//==============================
+// * C窗口皮肤 - 帧刷新
+//==============================
+Drill_XSSD_Window.prototype.drill_updateSkin = function() {
+	
+	if( this._drill_skin_type == "自定义背景图片" || this._drill_skin_type == "图片窗口布局" ){
+		
+		// > 高宽改变锁
+		if( this._drill_skinBackground_width  == this._drill_width &&
+			this._drill_skinBackground_height == this._drill_height ){
+			return;
+		}
+		this._drill_skinBackground_width = this._drill_width;
+		this._drill_skinBackground_height = this._drill_height;
+		
+		// > 背景图片与中心锚点
+		var xx = this._drill_skin_pic_x;
+		var yy = this._drill_skin_pic_y;
+		//xx += this._drill_width * this._drill_anchor_x;
+		//yy += this._drill_height * this._drill_anchor_y;
+		this._drill_skinBackground.x = xx;
+		this._drill_skinBackground.y = yy;
+		//this._drill_skinBackground.anchor.x = this._drill_anchor_x;
+		//this._drill_skinBackground.anchor.y = this._drill_anchor_y;
+	}
+	
+	if( this._drill_skin_type == "黑底背景" || this._drill_skin_type == "黑底布局" ){
+		
+		// > 高宽改变锁
+		if( this._drill_skinBackground_width  == this._drill_width &&
+			this._drill_skinBackground_height == this._drill_height ){
+			return;
+		}
+		this._drill_skinBackground_width = this._drill_width;
+		this._drill_skinBackground_height = this._drill_height;
+		
+		// > 改变时新建黑色画布
+		this._drill_skinBackground_BlackBitmap = new Bitmap(this._drill_width, this._drill_height);
+		this._drill_skinBackground_BlackBitmap.fillRect(0, 0 , this._drill_width, this._drill_height, "#000000");
+		this._drill_skinBackground.bitmap = this._drill_skinBackground_BlackBitmap;
+	}
+}
+//==============================
+// * C窗口皮肤 - 帧刷新色调
+//
+//			说明：	setTone可以反复调用赋值，有变化监听的锁。
+//==============================
+var _drill_XSSD_updateTone = Drill_XSSD_Window.prototype.updateTone;
+Drill_XSSD_Window.prototype.updateTone = function() {
+	if( this._drill_skin_tone_lock == true ){
+		this.setTone( this._drill_skin_tone_r, this._drill_skin_tone_g, this._drill_skin_tone_b );
+		return;
+	}
+	_drill_XSSD_updateTone.call( this );
+}
+
+
+//==============================
+// * D窗口内容 - 初始化对象
+//==============================
+Drill_XSSD_Window.prototype.drill_initMessage = function() {
+	var data = this._drill_data;
+	
+	this._drill_check_tank = [];
+}
+//==============================
+// * D窗口内容 - 添加内容 判断项
 //
 //			参数：	c['x']: 触发范围坐标X
 //					c['y']: 触发范围坐标Y
@@ -1583,7 +1742,7 @@ Drill_XSSD_Window.prototype.drill_pushChecks = function( c ){
 	}
 }
 //==============================
-// * 帧刷新 - 判断激活
+// * D窗口内容 - 帧刷新 判断激活
 //==============================
 Drill_XSSD_Window.prototype.drill_updateChecks = function() {
 	if( !this._drill_check_tank ){ this.visible = false; return; }
@@ -1627,7 +1786,7 @@ Drill_XSSD_Window.prototype.drill_updateChecks = function() {
 	this.visible = this._drill_visible;
 }
 //==============================
-// * 激活 - 显示条件
+// * D窗口内容 - 显示条件
 //==============================
 Drill_XSSD_Window.prototype.drill_checkCondition = function( check ){
 	var _x = _drill_mouse_x;
@@ -1651,16 +1810,15 @@ Drill_XSSD_Window.prototype.drill_checkCondition = function( check ){
 	}
 	return true;
 }
-
 //==============================
-// * 激活 - 刷新内容
+// * D窗口内容 - 刷新内容
 //==============================
 Drill_XSSD_Window.prototype.drill_refreshMessage = function( context_list ){
 	var data = this._drill_data;
 	if( context_list.length == 0 ){ return; }
 	
 	
-	// > 窗口高宽 - 计算
+	// > 窗口高宽 - 计算（文本域自适应）
 	var options = {};
 	options['autoLineheight'] = true;
 	options['lineheight'] = data['window_lineheight'];
@@ -1679,16 +1837,9 @@ Drill_XSSD_Window.prototype.drill_refreshMessage = function( context_list ){
 	this.width = this._drill_width;
 	this.height = this._drill_height;
 	
+	
 	// > 绘制内容
 	this.drill_COWA_drawTextListEx( context_list, options );
-	
-	
-	if( data['window_type'] == "黑底背景" ){
-		this._drill_background_bitmap = new Bitmap(this._drill_width, this._drill_height);
-		this._drill_background_bitmap.fillRect(0, 0 , this._drill_width, this._drill_height, "#000000");//背景黑框
-		this._drill_background.bitmap = this._drill_background_bitmap;
-	}
-	
 }
 	
 	

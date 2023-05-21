@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        面板 - 限量商店
+ * @plugindesc [v1.4]        面板 - 限量商店
  * @author Drill_up
  * 
  * @Drill_LE_param "限量商店-%d"
@@ -189,6 +189,8 @@
  * 修复了服务员无法正常播放动作的bug。
  * [v1.3]
  * 添加了 空数据同步更新 的优化。
+ * [v1.4]
+ * 兼容 窗口辅助核心 2.0。
  * 
  *
  * @param ----杂项----
@@ -1432,14 +1434,19 @@
 //					->买/卖的越多，服务员穿的越少?
 //				->特殊
 //					->库存控制
-// 
-//		★插件私有类：
-//			* Drill_SLS_GoodsWindow【商品窗口】
-//			* Drill_SLS_GoodsButtonWindow【商品按钮组】
-//			* Drill_SLS_ConfirmWindow【确认窗口】
-//			* Drill_SLS_GoldWindow【金钱窗口】
-//			* Drill_SLS_WaitressSprite【服务员】
 //
+//
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			* 限量商店【Scene_Drill_SLS】
+//			* 商品窗口【Drill_SLS_GoodsWindow】
+//			* 商品按钮组【Drill_SLS_GoodsButtonWindow】
+//			* 确认窗口【Drill_SLS_ConfirmWindow】
+//			* 金钱窗口【Drill_SLS_GoldWindow】
+//			* 服务员【Drill_SLS_WaitressSprite】
+//		
 //		★必要注意事项：
 //			1.注意，商品窗口的index和内容不一定完全匹配，多用index()函数。
 //			  system的数据是【直接作为指针】放入窗口进行操作的，目前只有"limit_cur"被窗口赋值。
@@ -2668,6 +2675,82 @@ Scene_Drill_SLS.prototype.drill_SLS_buyOneItem = function() {
 };
 
 
+//=============================================================================
+// ** ☆原型链规范
+//
+//			说明：	> 此处专门补上缺失的原型链，未缺失的则注释掉。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 限量商店（场景基类） - 初始化
+//==============================
+//Scene_Drill_SLS.prototype.initialize = function() {
+//    Scene_MenuBase.prototype.initialize.call(this);
+//};
+//==============================
+// * 限量商店（场景基类） - 创建
+//==============================
+//Scene_Drill_SLS.prototype.create = function() {
+//    Scene_MenuBase.prototype.create.call(this);
+//};
+//==============================
+// * 限量商店（场景基类） - 帧刷新
+//==============================
+//Scene_Drill_SLS.prototype.update = function() {
+//    Scene_MenuBase.prototype.update.call(this);
+//};
+//==============================
+// * 限量商店（场景基类） - 开始运行
+//==============================
+Scene_Drill_SLS.prototype.start = function() {
+    Scene_MenuBase.prototype.start.call(this);
+};
+//==============================
+// * 限量商店（场景基类） - 结束运行
+//==============================
+Scene_Drill_SLS.prototype.stop = function() {
+    Scene_MenuBase.prototype.stop.call(this);
+};
+//==============================
+// * 限量商店（场景基类） - 判断是否激活/启动
+//==============================
+Scene_Drill_SLS.prototype.isActive = function() {
+	return Scene_MenuBase.prototype.isActive.call(this);
+};
+//==============================
+// * 限量商店（场景基类） - 析构函数
+//==============================
+Scene_Drill_SLS.prototype.terminate = function() {
+    Scene_MenuBase.prototype.terminate.call(this);
+};
+
+//==============================
+// * 限量商店（场景基类） - 判断加载完成
+//==============================
+Scene_Drill_SLS.prototype.isReady = function() {
+	return Scene_MenuBase.prototype.isReady.call(this);
+};
+//==============================
+// * 限量商店（场景基类） - 忙碌状态
+//==============================
+Scene_Drill_SLS.prototype.isBusy = function() {
+	return Scene_MenuBase.prototype.isBusy.call(this);
+};
+
+//==============================
+// * 限量商店（菜单界面基类） - 创建 - 菜单背景
+//==============================
+Scene_Drill_SLS.prototype.createBackground = function() {
+	Scene_MenuBase.prototype.createBackground.call(this);
+};
+//==============================
+// * 限量商店（菜单界面基类） - 创建 - 帮助窗口
+//==============================
+//Scene_Drill_SLS.prototype.createHelpWindow = function() {
+//	Scene_MenuBase.prototype.createHelpWindow.call(this);
+//};
+
+
 
 //=============================================================================
 // ** 商品窗口【Drill_SLS_GoodsWindow】
@@ -2993,11 +3076,11 @@ Drill_SLS_GoodsButtonWindow.prototype.update = function() {
 	
 	// > 透明度控制
 	if( this._drill_needHide ){
-		this.contentsOpacity -= 10;
-		this._drill_COWA_layoutOpacity -= 10;
+		this.contentsOpacity -= 10; 	//文本域 透明度
+		this.opacity -= 10;				//背景容器层 透明度
 	}else{
-		this.contentsOpacity += 10;
-		this._drill_COWA_layoutOpacity += 10;
+		this.contentsOpacity += 10; 	//文本域 透明度
+		this.opacity += 10;				//背景容器层 透明度
 	}
 };
 //==============================
@@ -3016,9 +3099,9 @@ Drill_SLS_GoodsButtonWindow.prototype.drill_SLS_redraw = function() {
 	
 	// > 重刷背景
 	if( this.drill_SLS_isEnabled() ){
-		this._drill_COWA_backSprite.bitmap = ImageManager.load_MenuLimitShop(DrillUp.g_SLS_goodsBtn_btnActived);
+		this._drill_COWA_skinBackground.bitmap = ImageManager.load_MenuLimitShop(DrillUp.g_SLS_goodsBtn_btnActived);
 	}else{
-		this._drill_COWA_backSprite.bitmap = ImageManager.load_MenuLimitShop(DrillUp.g_SLS_goodsBtn_btnDeactived);
+		this._drill_COWA_skinBackground.bitmap = ImageManager.load_MenuLimitShop(DrillUp.g_SLS_goodsBtn_btnDeactived);
 	}
 	
 	// > 重绘文本（与商品窗口相似）
@@ -3103,8 +3186,9 @@ Drill_SLS_GoodsWindow.prototype.processCursorMove = function() {
 //==============================
 Scene_Drill_SLS.prototype.drill_SLS_isOnTouchButton = function( temp_window ){
 	 if( temp_window == null ){ return false };
-	 if( temp_window.contentsOpacity == 0 ){ return false };
-	 if( !TouchInput.isTriggered() ){return false};		//需要确定是否为鼠标点击
+	 if( temp_window.contentsOpacity <= 0 ){ return false };	//文本域 透明度 为零
+	 if( temp_window.opacity <= 0 ){ return false };			//背景容器层 透明度 为零
+	 if( !TouchInput.isTriggered() ){return false};				//需要确定是否为鼠标点击
 	 var cw = temp_window.width;
 	 var ch = temp_window.height;
 	 if( TouchInput.x < temp_window.x + 0){return false};

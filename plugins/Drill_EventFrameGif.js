@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        行走图 - 多层行走图GIF
+ * @plugindesc [v1.2]        行走图 - 多层行走图GIF
  * @author Drill_up
  * 
  * @Drill_LE_param "GIF样式-%d"
@@ -108,6 +108,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 优化了插件的性能。
+ * [v1.2]
+ * 大幅度优化了内部结构。
  *
  *
  *
@@ -1412,7 +1414,7 @@
  * @type number
  * @min 0
  * @max 360
- * @desc GIF图像的色调值。
+ * @desc 资源图像的色调值，范围为0至360。
  * @default 0
  *
  * @param 图像-模糊边缘
@@ -1420,7 +1422,7 @@
  * @type boolean
  * @on 模糊
  * @off 关闭
- * @desc 可以模糊GIF图像的边缘，防止出现像素锯齿。
+ * @desc 此参数为缩放设置，设置模糊后，缩放时可以模糊资源图像的边缘，防止出现像素锯齿。
  * @default false
  *
  * @param 行走图层级
@@ -1551,6 +1553,8 @@
 //				->去除贴图【标准函数】
 //				->图片层级排序（界面装饰）【标准函数】
 //				->图片层级排序（个体装饰）【标准函数】
+//				> 行走图前面层/父贴图前面层（_drill_characterUpArea）
+//				> 父贴图后面层（_drill_characterPBackArea）
 //			
 //			->☆物体容器（未使用）
 //				->统计含控制器的物体
@@ -1567,12 +1571,24 @@
 //					->自动销毁
 //
 //			->行走图GIF控制器【Drill_EFGi_Controller】
+//				->A主体
+//				->B变化控制
+//				->C播放GIF
+//				->D随机位置
 //			->行走图GIF贴图【Drill_EFGi_Sprite】
+//				->A主体
+//				->B变化控制
+//				->C对象绑定
+//				->D播放GIF
+//				->优化策略
 //		
+//		
+//		★家谱：
+//			无
 //		
 //		★插件私有类：
-//			* Drill_EFGi_Controller	【行走图GIF控制器】
-//			* Drill_EFGi_Sprite		【行走图GIF贴图】
+//			* 行走图GIF控制器【Drill_EFGi_Controller】
+//			* 行走图GIF贴图【Drill_EFGi_Sprite】
 //		
 //		★必要注意事项：
 //			1.插件的图片层级与多个插件共享。【必须自写 层级排序 函数】
@@ -1625,6 +1641,7 @@
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_EventFrameGif = true;
+　　Imported.Drill_EventFrameGIF = true;
 　　var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_EventFrameGif');
 	
@@ -1636,11 +1653,11 @@
 	DrillUp.drill_EFGi_styleInit = function( dataFrom ){
 		var data = {};
 		
-		// > 绑定
+		// > 控制器（绑定）
 		data['visible'] = String( dataFrom["初始是否显示"] || "true") == "true";
 		data['pause'] = false;
 		
-		// > 资源
+		// > 贴图
 		if( dataFrom["资源-GIF"] != "" &&
 			dataFrom["资源-GIF"] != undefined ){
 			data['src_img_gif'] = JSON.parse( dataFrom["资源-GIF"] );
@@ -1651,29 +1668,33 @@
 		data['interval'] = Number( dataFrom["帧间隔"] || 4);
 		data['back_run'] = String( dataFrom["是否倒放"] || "false") == "true";
 		
-		// > 贴图
-		data['x'] = Number( dataFrom["平移-GIF X"] || 0);
-		data['y'] = Number( dataFrom["平移-GIF Y"] || 0);
 		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
 		data['tint'] = Number( dataFrom["图像-色调值"] || 0);
 		data['smooth'] = String( dataFrom["图像-模糊边缘"] || "false") == "true";
+		
 		data['individualIndex'] = String( dataFrom["行走图层级"] || "在行走图前面");
 		data['zIndex'] = Number( dataFrom["图片层级"] || 0);
-		data['rotate'] = Number( dataFrom["旋转速度"] || 0);
 		
-		// > 随机位置
-		data['randomPos_enable'] = String( dataFrom["是否启用随机位置"] || "false") == "true";
-		data['randomPos_width'] = Number( dataFrom["随机位置的范围宽度"] || 50);
-		data['randomPos_height'] = Number( dataFrom["随机位置的范围高度"] || 50);
-		data['randomPos_autoChange'] = String( dataFrom["是否在每次播放GIF完毕后变化位置"] || "false") == "true";
-		data['randomPos_gifFrame'] = String( dataFrom["是否随机GIF初始帧"] || "false") == "true";
+		// > A主体
+		data['x'] = Number( dataFrom["平移-GIF X"] || 0);
+		data['y'] = Number( dataFrom["平移-GIF Y"] || 0);
 		
-		// > 3d效果
+		// > A主体 - 3d效果
 		data['scale_x'] = Number( dataFrom["整体缩放 X"] || 1.0);
 		data['scale_y'] = Number( dataFrom["整体缩放 Y"] || 1.0);
 		data['skew_x'] = Number( dataFrom["整体斜切 X"] || 0.0);
 		data['skew_y'] = Number( dataFrom["整体斜切 Y"] || 0.0);
 		data['parentRotate'] = Number( dataFrom["整体再旋转角度"] || 0.0);
+		
+		// > B变化控制
+		data['rotate'] = Number( dataFrom["旋转速度"] || 0);
+		
+		// > D随机位置
+		data['randomPos_enable'] = String( dataFrom["是否启用随机位置"] || "false") == "true";
+		data['randomPos_width'] = Number( dataFrom["随机位置的范围宽度"] || 50);
+		data['randomPos_height'] = Number( dataFrom["随机位置的范围高度"] || 50);
+		data['randomPos_autoChange'] = String( dataFrom["是否在每次播放GIF完毕后变化位置"] || "false") == "true";
+		data['randomPos_gifFrame'] = String( dataFrom["是否随机GIF初始帧"] || "false") == "true";
 		
 		return data;
 	}
@@ -1995,7 +2016,8 @@ Game_Temp.prototype.drill_EFGi_layerAddSprite_Private = function( sprite, layer_
 			cur_scene._spriteset._drill_characterPBackArea.addChild( sprite );
 		}
 	}
-	if( layer_index == "行走图前面层" || layer_index == "在行走图前面" ){
+	if( layer_index == "行走图前面层" || layer_index == "在行走图前面" ||
+		layer_index == "父贴图前面层" || layer_index == "在父贴图前面" ){
 		individual_sprite._drill_characterUpArea.addChild( sprite );
 	}
 };
@@ -2015,7 +2037,7 @@ Game_Temp.prototype.drill_EFGi_layerRemoveSprite_Private = function( sprite ){
 	if( sprite == undefined ){ return; }
 	
 	// > 销毁
-	sprite.drill_EFGi_destroy();
+	sprite.drill_sprite_destroy();
 	
 	// > 断开父类
 	if( sprite.parent != undefined ){
@@ -2125,6 +2147,7 @@ Game_CharacterBase.prototype.drill_EFGi_createController = function( slot_id, st
 	// > 创建控制器
 	var data = JSON.parse(JSON.stringify( DrillUp.g_EFGi_style[ style_id ] ));
 	var controller = new Drill_EFGi_Controller( data );
+	//controller.drill_EFGi_setCharacterId( this );
 	this._drill_EFGi_controllerTank[ slot_id ] = controller;
 	
 	// > 刷新统计
@@ -2136,7 +2159,7 @@ Game_CharacterBase.prototype.drill_EFGi_createController = function( slot_id, st
 Game_CharacterBase.prototype.drill_EFGi_removeController = function( slot_id ){
 	if( this._drill_EFGi_controllerTank == undefined ){ return; }
 	if( this._drill_EFGi_controllerTank[ slot_id ] == undefined ){ return; }
-	this._drill_EFGi_controllerTank[ slot_id ].drill_EFGi_destroy();
+	this._drill_EFGi_controllerTank[ slot_id ].drill_controller_destroy();
 	this._drill_EFGi_controllerTank[ slot_id ] = null;
 }
 //==============================
@@ -2164,7 +2187,7 @@ Game_CharacterBase.prototype.update = function(){
 	for( var i=0; i < this._drill_EFGi_controllerTank.length; i++ ){
 		var controller = this._drill_EFGi_controllerTank[i];
 		if( controller == undefined ){ continue; }
-		controller.drill_EFGi_update();
+		controller.drill_controller_update();
 	}
 	
 	// > 自动销毁 - 控制器
@@ -2173,12 +2196,26 @@ Game_CharacterBase.prototype.update = function(){
 		var controller = this._drill_EFGi_controllerTank[i];
 		if( controller == undefined ){ continue; }
 		is_all_empty = false;
-		if( controller.drill_EFGi_isDead() ){
+		if( controller.drill_controller_isDead() ){
 			this._drill_EFGi_controllerTank[i] = null;
 		}
 	}
 	if( is_all_empty == true ){
 		this._drill_EFGi_controllerTank = null;
+	}
+}
+//==============================
+// * 物体绑定 - 事件销毁时
+//==============================
+var _drill_EFGi_c_erase = Game_Event.prototype.erase;
+Game_Event.prototype.erase = function(){
+	_drill_EFGi_c_erase.call(this);
+	if( this._drill_EFGi_controllerTank == undefined ){ return; }
+	if( this._drill_EFGi_controllerTank.length == 0 ){ return; }
+	for( var i=0; i < this._drill_EFGi_controllerTank.length; i++ ){
+		var controller = this._drill_EFGi_controllerTank[i];
+		if( controller == undefined ){ continue; }
+		controller.drill_controller_destroy();		//（执行销毁）
 	}
 }
 
@@ -2222,7 +2259,7 @@ Sprite_Character.prototype.update = function(){
 		if( controller == undefined ){ continue; }
 		
 		// > 过滤生命周期结束情况
-		if( controller.drill_EFGi_isDead() == true ){ continue; }
+		if( controller.drill_controller_isDead() == true ){ continue; }
 		
 		// > 有绑定控制器的贴图时，跳过
 		if( this.drill_EFGi_hasSpriteBinding( controller._drill_controllerSerial ) == true ){ continue; }
@@ -2232,7 +2269,7 @@ Sprite_Character.prototype.update = function(){
 		temp_sprite._drill_curSerial = controller._drill_controllerSerial;	//（标记序列号）
 		temp_sprite.drill_EFGi_setController( controller );
 		temp_sprite.drill_EFGi_setIndividualSprite( this );
-		temp_sprite.drill_EFGi_initSprite();
+		temp_sprite.drill_sprite_initChild();
 		this._drill_EFGi_childSprites.push( temp_sprite );
 		$gameTemp._drill_EFGi_spriteTank.push( temp_sprite );
 		
@@ -2292,7 +2329,7 @@ Scene_Map.prototype.drill_EFGi_updateInScene = function() {
 		// > 自动销毁 - 控制器生命周期结束
 		var temp_controller = temp_sprite._drill_controller;
 		if( temp_controller == undefined ||
-			temp_controller.drill_EFGi_isDead() ){
+			temp_controller.drill_controller_isDead() ){
 			$gameTemp.drill_EFGi_layerRemoveSprite( temp_sprite );	//（销毁贴图）
 			$gameTemp._drill_EFGi_spriteTank.splice(i,1);
 			delete temp_sprite;
@@ -2307,18 +2344,21 @@ Scene_Map.prototype.drill_EFGi_updateInScene = function() {
 // **		
 // **		作用域：	地图界面、战斗界面
 // **		主功能：	> 定义一个专门控制行走图GIF的数据类。
-// **		子功能：	->帧刷新
+// **		子功能：	->控制器
+// **						->帧刷新
+// **						->重设数据
+// **							->序列号
 // **						->显示/隐藏
 // **						->暂停/继续
-// **						> 平移
-// **						> 旋转
-// **						> 缩放
-// **					->重设数据
-// **						->序列号
-// **					->GIF播放
-// **					->随机位置
+// **						->销毁
+// **					->A主体
+// **						->层级位置修正
+// **					->B变化控制
+// **					->C播放GIF
+// **					->D随机位置
 // **		
 // **		说明：	> 该类可与 Game_CharacterBase 一并存储在 $gameMap 中。
+// **				> 注意，该类不能放 物体指针、贴图指针 。
 //=============================================================================
 //==============================
 // * 控制器 - 定义
@@ -2336,10 +2376,10 @@ DrillUp.g_EFGi_checkNaN = true;
 Drill_EFGi_Controller.prototype.initialize = function( data ){
 	this._drill_data = {};
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
-    this.drill_initData();													//初始化数据
-    this.drill_initPrivateData();											//私有数据初始化
+    this.drill_controller_initData();										//初始化数据
+    this.drill_controller_initChild();										//私有数据初始化
 	if( data == undefined ){ data = {}; }
-    this.drill_EFGi_resetData( data );
+    this.drill_controller_resetData( data );
 }
 //##############################
 // * 控制器 - 帧刷新【标准函数】
@@ -2349,12 +2389,14 @@ Drill_EFGi_Controller.prototype.initialize = function( data ){
 //			
 //			说明：	> 此函数必须在 帧刷新 中手动调用执行。
 //##############################
-Drill_EFGi_Controller.prototype.drill_EFGi_update = function(){
+Drill_EFGi_Controller.prototype.drill_controller_update = function(){
 	if( this._drill_data['pause'] == true ){ return; }
-	this._drill_curTime += 1;			//帧刷新 - 时间流逝
-	this.drill_EFGi_updateGIF();		//帧刷新 - GIF播放
-	this.drill_EFGi_updatePosition();	//帧刷新 - 位置
-	this.drill_EFGi_updateCheckNaN();	//帧刷新 - 校验值
+	this.drill_controller_updateAttr();					//帧刷新 - A主体
+	this.drill_controller_updateChange_Position();		//帧刷新 - B变化控制 - 平移
+	this.drill_controller_updateChange_Rotation();		//帧刷新 - B变化控制 - 旋转
+	this.drill_controller_updateGIF();					//帧刷新 - C播放GIF
+	this.drill_controller_updateRandom();				//帧刷新 - D随机位置
+	this.drill_controller_updateCheckNaN();				//帧刷新 - 校验值
 }
 //##############################
 // * 控制器 - 重设数据【标准函数】
@@ -2365,8 +2407,8 @@ Drill_EFGi_Controller.prototype.drill_EFGi_update = function(){
 //			说明：	> 通过此函数，你不需要再重新创建一个数据对象，并且贴图能直接根据此数据来变化。
 //					> 参数对象中的参数【可以缺项】，只要的参数项不一样，就刷新；参数项一样，则不变化。
 //##############################
-Drill_EFGi_Controller.prototype.drill_EFGi_resetData = function( data ){
-	this.drill_EFGi_resetData_Private( data );
+Drill_EFGi_Controller.prototype.drill_controller_resetData = function( data ){
+	this.drill_controller_resetData_Private( data );
 };
 //##############################
 // * 控制器 - 显示/隐藏【标准函数】
@@ -2376,7 +2418,7 @@ Drill_EFGi_Controller.prototype.drill_EFGi_resetData = function( data ){
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。
 //##############################
-Drill_EFGi_Controller.prototype.drill_EFGi_setVisible = function( visible ){
+Drill_EFGi_Controller.prototype.drill_controller_setVisible = function( visible ){
 	var data = this._drill_data;
 	data['visible'] = visible;
 };
@@ -2388,7 +2430,7 @@ Drill_EFGi_Controller.prototype.drill_EFGi_setVisible = function( visible ){
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。
 //##############################
-Drill_EFGi_Controller.prototype.drill_EFGi_setPause = function( pause ){
+Drill_EFGi_Controller.prototype.drill_controller_setPause = function( pause ){
 	var data = this._drill_data;
 	data['pause'] = pause;
 };
@@ -2398,7 +2440,7 @@ Drill_EFGi_Controller.prototype.drill_EFGi_setPause = function( pause ){
 //			参数：	> 无
 //			返回：	> 布尔
 //##############################
-Drill_EFGi_Controller.prototype.drill_EFGi_destroy = function(){
+Drill_EFGi_Controller.prototype.drill_controller_destroy = function(){
 	this._drill_needDestroy = true;
 };
 //##############################
@@ -2407,7 +2449,7 @@ Drill_EFGi_Controller.prototype.drill_EFGi_destroy = function(){
 //			参数：	> 无
 //			返回：	> 布尔
 //##############################
-Drill_EFGi_Controller.prototype.drill_EFGi_isDead = function(){
+Drill_EFGi_Controller.prototype.drill_controller_isDead = function(){
 	return this._drill_needDestroy == true;
 };
 
@@ -2420,96 +2462,62 @@ Drill_EFGi_Controller.prototype.drill_EFGi_isDead = function(){
 //			说明：	> data 动态参数对象（来自类初始化）
 //					  该对象包含 类所需的所有默认值。
 //##############################
-Drill_EFGi_Controller.prototype.drill_initData = function(){
+Drill_EFGi_Controller.prototype.drill_controller_initData = function(){
 	var data = this._drill_data;
 	
-	// > 绑定
-	if( data['visible'] == undefined ){ data['visible'] = true };				//显示情况
-	if( data['pause'] == undefined ){ data['pause'] = false };					//暂停情况
-	
-	// > 资源
-	if( data['src_img_gif'] == undefined ){ data['src_img_gif'] = [] };						//资源 - GIF
-	if( data['src_img_file'] == undefined ){ data['src_img_file'] = "img/Map__characterLayer_gif/" };	//资源 - 文件夹
-	if( data['interval'] == undefined ){ data['interval'] = 4 };							//资源 - 帧间隔
-	if( data['back_run'] == undefined ){ data['back_run'] = false };						//资源 - 是否倒放
+	// > 控制器
+	if( data['visible'] == undefined ){ data['visible'] = true };							//控制器 - 显示情况
+	if( data['pause'] == undefined ){ data['pause'] = false };								//控制器 - 暂停情况
 	
 	// > 贴图
-	if( data['x'] == undefined ){ data['x'] = 0 };								//贴图 - 平移X
-	if( data['y'] == undefined ){ data['y'] = 0 };								//贴图 - 平移Y
-	if( data['blendMode'] == undefined ){ data['blendMode'] = 0 };				//贴图 - 混合模式
-	if( data['tint'] == undefined ){ data['tint'] = 0 };						//贴图 - 图像-色调值
-	if( data['smooth'] == undefined ){ data['smooth'] = false };				//贴图 - 图像-模糊边缘
+	if( data['src_img_gif'] == undefined ){ data['src_img_gif'] = [] };						//贴图 - GIF
+	if( data['src_img_file'] == undefined ){ data['src_img_file'] = "img/Map__characterLayer_gif/" };	//贴图 - 文件夹
+	if( data['interval'] == undefined ){ data['interval'] = 4 };							//贴图 - 帧间隔
+	if( data['back_run'] == undefined ){ data['back_run'] = false };						//贴图 - 是否倒放
+	if( data['blendMode'] == undefined ){ data['blendMode'] = 0 };							//贴图 - 混合模式
+	if( data['tint'] == undefined ){ data['tint'] = 0 };									//贴图 - 图像-色调值
+	if( data['smooth'] == undefined ){ data['smooth'] = false };							//贴图 - 图像-模糊边缘
 	if( data['individualIndex'] == undefined ){ data['individualIndex'] = "在行走图前面" };//贴图 - 行走图层级
-	if( data['zIndex'] == undefined ){ data['zIndex'] = 0 };					//贴图 - 图片层级
-	if( data['rotate'] == undefined ){ data['rotate'] = 0 };					//贴图 - 自旋转速度（单位角度）
+	if( data['zIndex'] == undefined ){ data['zIndex'] = 0 };								//贴图 - 图片层级
 	
-	// > 随机位置
-	if( data['randomPos_enable'] == undefined ){ data['randomPos_enable'] = false };		//随机位置 - 是否启用随机位置
-	if( data['randomPos_width'] == undefined ){ data['randomPos_width'] = 50 };				//随机位置 - 随机位置的范围宽度
-	if( data['randomPos_height'] == undefined ){ data['randomPos_height'] = 50 };			//随机位置 - 随机位置的范围高度
-	if( data['randomPos_autoChange'] == undefined ){ data['randomPos_autoChange'] = false };//随机位置 - 是否在每次播放GIF完毕后变化位置
-	if( data['randomPos_gifFrame'] == undefined ){ data['randomPos_gifFrame'] = false };	//随机位置 - 是否随机GIF初始帧
+	// > A主体
+	if( data['x'] == undefined ){ data['x'] = 0 };											//A主体 - 平移X
+	if( data['y'] == undefined ){ data['y'] = 0 };											//A主体 - 平移Y
 	
-	// > 3d效果
-	if( data['scale_x'] == undefined ){ data['scale_x'] = 1.0 };				//3d效果 - 整体缩放X
-	if( data['scale_y'] == undefined ){ data['scale_y'] = 1.0 };				//3d效果 - 整体缩放Y
-	if( data['skew_x'] == undefined ){ data['skew_x'] = 0 };					//3d效果 - 整体斜切X
-	if( data['skew_y'] == undefined ){ data['skew_y'] = 0 };					//3d效果 - 整体斜切Y
-	if( data['parentRotate'] == undefined ){ data['parentRotate'] = 0 };		//3d效果 - 整体再旋转角度
+	// > A主体 - 3d效果
+	if( data['scale_x'] == undefined ){ data['scale_x'] = 1.0 };							//A主体 - 3d效果 - 整体缩放X
+	if( data['scale_y'] == undefined ){ data['scale_y'] = 1.0 };							//A主体 - 3d效果 - 整体缩放Y
+	if( data['skew_x'] == undefined ){ data['skew_x'] = 0 };								//A主体 - 3d效果 - 整体斜切X
+	if( data['skew_y'] == undefined ){ data['skew_y'] = 0 };								//A主体 - 3d效果 - 整体斜切Y
+	if( data['parentRotate'] == undefined ){ data['parentRotate'] = 0 };					//A主体 - 3d效果 - 整体再旋转角度
 	
+	// > B变化控制
+	if( data['rotate'] == undefined ){ data['rotate'] = 0 };								//B变化控制 - 自旋转速度（单位角度）
+	
+	// > C播放GIF（无）
+	
+	// > D随机位置
+	if( data['randomPos_enable'] == undefined ){ data['randomPos_enable'] = false };		//D随机位置 - 是否启用随机位置
+	if( data['randomPos_width'] == undefined ){ data['randomPos_width'] = 50 };				//D随机位置 - 随机位置的范围宽度
+	if( data['randomPos_height'] == undefined ){ data['randomPos_height'] = 50 };			//D随机位置 - 随机位置的范围高度
+	if( data['randomPos_autoChange'] == undefined ){ data['randomPos_autoChange'] = false };//D随机位置 - 是否在每次播放GIF完毕后变化位置
+	if( data['randomPos_gifFrame'] == undefined ){ data['randomPos_gifFrame'] = false };	//D随机位置 - 是否随机GIF初始帧
 }
 //==============================
-// * 初始化 - 私有数据初始化
+// * 初始化 - 初始化子功能
 //==============================
-Drill_EFGi_Controller.prototype.drill_initPrivateData = function(){
-	var data = this._drill_data;
-	
-	// > 常规
-	this._drill_curTime = 0;			//常规 - 当前时间
-	this._drill_needDestroy = false;	//常规 - 销毁
-	
-	
-	// > GIF
-	this._drill_GIF_time = 0;			//GIF - 当前时间
-	this._drill_GIF_index = 0;			//GIF - 当前索引
-	
-	
-	// > 随机位置
-	this._drill_randomPos_x = 0;		//随机位置 - 位置X
-	this._drill_randomPos_y = 0;		//随机位置 - 位置Y
-	this._drill_randomPos_lastInter = 0;//随机位置 - 上一次时间
-	if( data['randomPos_enable'] == true ){
-		this._drill_randomPos_x = Math.floor( data['randomPos_width'] *( Math.random()-0.5 ));
-		this._drill_randomPos_y = Math.floor( data['randomPos_height']*( Math.random()-0.5 ));
-	}
-	if( data['randomPos_gifFrame'] == true ){
-		this._drill_GIF_time = Math.floor( data['interval']*data['src_img_gif'].length * Math.random() );
-	}
-	
-	
-	// > 控制器 - 贴图属性
-	this._drill_x = 0;
-	this._drill_y = 0;
-	this._drill_scaleX = 1;
-	this._drill_scaleY = 1;
-	this._drill_opacity = 255;
-	this._drill_rotation = data['parentRotate'];	//（整体再旋转角度）
-	
-	// > 控制器 - 层级属性
-	this._drill_layer_scaleX = data['scale_x'];
-	this._drill_layer_scaleY = data['scale_y'];
-	this._drill_layer_skewX = data['skew_x'];
-	this._drill_layer_skewY = data['skew_y'];
-	
-	// > 控制器 - GIF属性
-	this._drill_childCircle_rotation = 0;
+Drill_EFGi_Controller.prototype.drill_controller_initChild = function(){
+	this.drill_controller_initAttr();			//初始化子功能 - A主体
+	this.drill_controller_initChange();			//初始化子功能 - B变化控制
+	this.drill_controller_initGIF();			//初始化子功能 - C播放GIF
+	this.drill_controller_initRandom();			//初始化子功能 - D随机位置
 }
 //==============================
 // * 控制器 - 重设数据（私有）
 //
 //			说明：	data对象中的参数【可以缺项】。
 //==============================
-Drill_EFGi_Controller.prototype.drill_EFGi_resetData_Private = function( data ){
+Drill_EFGi_Controller.prototype.drill_controller_resetData_Private = function( data ){
 	
 	// > 判断数据重复情况
 	if( this._drill_data != undefined ){
@@ -2535,64 +2543,47 @@ Drill_EFGi_Controller.prototype.drill_EFGi_resetData_Private = function( data ){
 	// > 执行重置
 	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
-    this.drill_initData();													//初始化数据
-    this.drill_initPrivateData();											//私有数据初始化
+    this.drill_controller_initData();										//初始化数据
+    this.drill_controller_initChild();										//私有数据初始化
 }
 
+
 //==============================
-// * 位置 - 帧刷新
+// * A主体 - 初始化子功能
 //==============================
-Drill_EFGi_Controller.prototype.drill_EFGi_updatePosition = function(){
+Drill_EFGi_Controller.prototype.drill_controller_initAttr = function() {
 	var data = this._drill_data;
 	
-	// > 位置平移
-	var xx = 0;
-	var yy = 0;
-	xx += data['x'];
-	yy += data['y'];
+	// > 常规
+	this._drill_curTime = 0;			//常规 - 当前时间
+	this._drill_needDestroy = false;	//常规 - 销毁
 	
-	// > 随机位置
-	xx += this._drill_randomPos_x;
-	yy += this._drill_randomPos_y;
+	// > 贴图属性
+	this._drill_x = 0;					//（B变化控制 控制）
+	this._drill_y = 0;					//（B变化控制 控制）
+	this._drill_scaleX = 1;				//（暂无控制）
+	this._drill_scaleY = 1;				//（暂无控制）
+	this._drill_opacity = 255;			//（暂无控制）
 	
-	this._drill_x = xx;
-	this._drill_y = yy;
-	
-	// > 自旋转
-	this._drill_childCircle_rotation += data['rotate'];
+	// > 3d效果
+	this._drill_layer_scaleX = data['scale_x'];
+	this._drill_layer_scaleY = data['scale_y'];
+	this._drill_layer_skewX = data['skew_x'];
+	this._drill_layer_skewY = data['skew_y'];
 }
-
 //==============================
-// * GIF播放 - 帧刷新
+// * A主体 - 帧刷新
 //==============================
-Drill_EFGi_Controller.prototype.drill_EFGi_updateGIF = function(){
+Drill_EFGi_Controller.prototype.drill_controller_updateAttr = function() {
 	var data = this._drill_data;
 	
-	// > gif播放
-	this._drill_GIF_time += 1;
-	var inter = this._drill_GIF_time;
-	inter = inter / data['interval'];
-	inter = inter % data['src_img_gif'].length;
-	if( data['back_run'] == true ){
-		inter = data['src_img_gif'].length - 1 - inter;
-	}
-	this._drill_GIF_index = Math.floor(inter);
-	
-	// > 每次播放结束后变化
-	if( data['randomPos_enable'] == true ){
-		var inter = Math.floor(this._drill_GIF_time / data['interval'] / data['src_img_gif'].length);
-		if( this._drill_randomPos_lastInter != inter ){
-			this._drill_randomPos_lastInter = inter;
-			this._drill_randomPos_x = Math.floor( data['randomPos_width'] *( Math.random()-0.5 ));
-			this._drill_randomPos_y = Math.floor( data['randomPos_height']*( Math.random()-0.5 ));
-		}
-	}
+	// > 时间流逝
+	this._drill_curTime += 1;
 }
-
 //==============================
-// * 帧刷新 - 校验值
+// * A主体 - 帧刷新 - 校验值
 //==============================
-Drill_EFGi_Controller.prototype.drill_EFGi_updateCheckNaN = function(){
+Drill_EFGi_Controller.prototype.drill_controller_updateCheckNaN = function(){
 	
 	// > 校验值
 	if( DrillUp.g_EFGi_checkNaN == true ){
@@ -2620,18 +2611,138 @@ Drill_EFGi_Controller.prototype.drill_EFGi_updateCheckNaN = function(){
 }
 
 
+//==============================
+// * B变化控制 - 初始化子功能
+//==============================
+Drill_EFGi_Controller.prototype.drill_controller_initChange = function() {
+	var data = this._drill_data;
+	
+	// > 位置（无）
+	
+	// > 透明度（无）
+	
+	// > 缩放（无）
+	
+	// > 旋转
+	this._drill_childGIF_rotation = 0;
+}
+//==============================
+// * B变化控制 - 帧刷新 位置
+//==============================
+Drill_EFGi_Controller.prototype.drill_controller_updateChange_Position = function(){
+	var data = this._drill_data;
+	
+	// > 位置平移
+	var xx = 0;
+	var yy = 0;
+	xx += data['x'];
+	yy += data['y'];
+	
+	// > D随机位置
+	xx += this._drill_randomPos_x;
+	yy += this._drill_randomPos_y;
+	
+	this._drill_x = xx;
+	this._drill_y = yy;
+}
+//==============================
+// * B变化控制 - 帧刷新 旋转
+//==============================
+Drill_EFGi_Controller.prototype.drill_controller_updateChange_Rotation = function(){
+	var data = this._drill_data;
+	
+	// > 自旋转
+	this._drill_childGIF_rotation += data['rotate'];
+}
+
+
+//==============================
+// * C播放GIF - 初始化子功能
+//==============================
+Drill_EFGi_Controller.prototype.drill_controller_initGIF = function() {
+	var data = this._drill_data;
+	
+	// > GIF播放
+	this._drill_GIF_time = 0;			//GIF播放 - 当前时间
+	this._drill_GIF_index = 0;			//GIF播放 - 当前索引
+}
+//==============================
+// * C播放GIF - 帧刷新
+//==============================
+Drill_EFGi_Controller.prototype.drill_controller_updateGIF = function(){
+	var data = this._drill_data;
+	
+	// > 播放GIF
+	var inter = this._drill_GIF_time;
+	inter = inter / data['interval'];
+	inter = inter % data['src_img_gif'].length;
+	if( data['back_run'] == true ){
+		inter = data['src_img_gif'].length - 1 - inter;
+	}
+	this._drill_GIF_index = Math.floor(inter);
+	
+	// > 播放GIF时间+1（放后面）
+	this._drill_GIF_time += 1;
+}
+
+
+//==============================
+// * D随机位置 - 初始化子功能
+//
+//			说明：	> 此功能对 B变化控制 和 C播放GIF 进行组合控制。
+//==============================
+Drill_EFGi_Controller.prototype.drill_controller_initRandom = function() {
+	var data = this._drill_data;
+	
+	// > 随机位置
+	this._drill_randomPos_x = 0;			//随机位置 - 位置X
+	this._drill_randomPos_y = 0;			//随机位置 - 位置Y
+	this._drill_randomPos_lastInter = 0;	//随机位置 - 上一次时间
+	if( data['randomPos_enable'] == true ){
+		this._drill_randomPos_x = Math.floor( data['randomPos_width'] *( Math.random()-0.5 ));
+		this._drill_randomPos_y = Math.floor( data['randomPos_height']*( Math.random()-0.5 ));
+	}
+	if( data['randomPos_gifFrame'] == true ){
+		this._drill_GIF_time = Math.floor( data['interval']*data['src_img_gif'].length * Math.random() );
+	}
+}
+//==============================
+// * D随机位置 - 帧刷新
+//==============================
+Drill_EFGi_Controller.prototype.drill_controller_updateRandom = function(){
+	var data = this._drill_data;
+	
+	// > 每次播放结束后变化
+	if( data['randomPos_enable'] == true ){
+		var inter = Math.floor(this._drill_GIF_time / data['interval'] / data['src_img_gif'].length);
+		if( this._drill_randomPos_lastInter != inter ){
+			this._drill_randomPos_lastInter = inter;
+			this._drill_randomPos_x = Math.floor( data['randomPos_width'] *( Math.random()-0.5 ));
+			this._drill_randomPos_y = Math.floor( data['randomPos_height']*( Math.random()-0.5 ));
+		}
+	}
+}
+
+
 
 //=============================================================================
 // ** 行走图GIF贴图【Drill_EFGi_Sprite】
 // **
 // **		作用域：	地图界面
 // **		主功能：	> 定义一个GIF贴图。
-// **		子功能：	->对象绑定
+// **		子功能：	->贴图
+// **						->是否就绪
+// **						->优化策略
+// **						->是否需要销毁（未使用）
+// **						->销毁（手动）
+// **					->A主体
+// **					->B变化控制
+// **						->层级位置修正
+// **					->C对象绑定
 // **						->设置控制器
 // **						->设置个体贴图
-// **					->贴图初始化（手动）
-// **					->销毁（手动）
-// **					->层级位置修正
+// **						->贴图初始化（手动）
+// **					->D播放GIF
 // **
 // **		说明：	> 你必须在创建贴图后，手动初始化。（还需要先设置 控制器和个体贴图 ）
 // **
@@ -2643,7 +2754,7 @@ Drill_EFGi_Controller.prototype.drill_EFGi_updateCheckNaN = function(){
 // **				> 样式 - [ ●不可修改 /自变化/外部变化] 
 //=============================================================================
 //==============================
-// * GIF贴图 - 定义
+// * 行走图GIF贴图 - 定义
 //==============================
 function Drill_EFGi_Sprite() {
     this.initialize.apply(this, arguments);
@@ -2651,27 +2762,27 @@ function Drill_EFGi_Sprite() {
 Drill_EFGi_Sprite.prototype = Object.create(Sprite.prototype);
 Drill_EFGi_Sprite.prototype.constructor = Drill_EFGi_Sprite;
 //==============================
-// * GIF贴图 - 初始化
+// * 行走图GIF贴图 - 初始化
 //==============================
 Drill_EFGi_Sprite.prototype.initialize = function(){
 	Sprite.prototype.initialize.call(this);
-	this._drill_controller = null;				//控制器对象
-	this._drill_curSerial = -1;					//当前序列号
-	this._drill_individualSprite = null;		//个体贴图
-	this._character = null;						//物体对象
+	this.drill_sprite_initSelf();				//初始化自身
 };
 //==============================
-// * GIF贴图 - 帧刷新
+// * 行走图GIF贴图 - 帧刷新
 //==============================
 Drill_EFGi_Sprite.prototype.update = function() {
-	if( this.drill_EFGi_isReady() == false ){ return; }
-	if( this.drill_EFGi_isOptimizationPassed() == false ){ return; }
+	if( this.drill_sprite_isReady() == false ){ return; }
+	if( this.drill_sprite_isOptimizationPassed() == false ){ return; }
 	Sprite.prototype.update.call(this);
-	this.drill_updateLayer();					//帧刷新 - 层级
-	this.drill_updateChild();					//帧刷新 - GIF
+	this.drill_sprite_updateAttr();				//帧刷新 - A主体
+	this.drill_sprite_updateChange();			//帧刷新 - B变化控制
+												//帧刷新 - C对象绑定（无）
+	this.drill_sprite_updateGIF();				//帧刷新 - D播放GIF
 }
+
 //##############################
-// * GIF贴图 - 设置控制器【开放函数】
+// * C对象绑定 - 设置控制器【开放函数】
 //			
 //			参数：	> controller 控制器对象
 //			返回：	> 无
@@ -2682,7 +2793,7 @@ Drill_EFGi_Sprite.prototype.drill_EFGi_setController = function( controller ){
 	this._drill_controller = controller;
 };
 //##############################
-// * GIF贴图 - 设置个体贴图【开放函数】
+// * C对象绑定 - 设置个体贴图【开放函数】
 //			
 //			参数：	> individual_sprite 贴图对象
 //			返回：	> 无
@@ -2694,73 +2805,117 @@ Drill_EFGi_Sprite.prototype.drill_EFGi_setIndividualSprite = function( individua
 	this._character = this._drill_individualSprite._character;
 };
 //##############################
-// * GIF贴图 - 贴图初始化【开放函数】
+// * C对象绑定 - 贴图初始化【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
 //			
 //			说明：	> 需要设置 控制器和个体贴图 之后，才能进行初始化。
 //##############################
-Drill_EFGi_Sprite.prototype.drill_EFGi_initSprite = function(){
-	this.drill_EFGi_initSprite_Private();
+Drill_EFGi_Sprite.prototype.drill_sprite_initChild = function(){
+	this.drill_sprite_initAttr();				//初始化子功能 - A主体
+	this.drill_sprite_initChange();				//初始化子功能 - B变化控制
+												//初始化子功能 - C对象绑定（无）
+	this.drill_sprite_initGIF();				//初始化子功能 - D播放GIF
 };
+
 //##############################
-// * GIF贴图 - 是否就绪【标准函数】
+// * 行走图GIF贴图 - 是否就绪【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 布尔（是否显示）
 //			
 //			说明：	> 这里完全 不考虑 延迟加载问题。
 //##############################
-Drill_EFGi_Sprite.prototype.drill_EFGi_isReady = function(){
+Drill_EFGi_Sprite.prototype.drill_sprite_isReady = function(){
 	if( this._drill_controller == undefined ){ return false; }
 	if( this._drill_individualSprite == undefined ){ return false; }
     return true;
 };
 //##############################
-// * GIF贴图 - 优化策略【标准函数】
+// * 行走图GIF贴图 - 优化策略【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 布尔（是否通过）
 //			
 //			说明：	> 通过时，正常帧刷新；未通过时，不执行帧刷新。
 //##############################
-Drill_EFGi_Sprite.prototype.drill_EFGi_isOptimizationPassed = function(){
-    return this.drill_EFGi_isOptimizationPassed_Private();
+Drill_EFGi_Sprite.prototype.drill_sprite_isOptimizationPassed = function(){
+    return this.drill_sprite_isOptimizationPassed_Private();
 };
 //##############################
-// * GIF贴图 - 是否需要销毁【标准函数】
+// * 行走图GIF贴图 - 是否需要销毁【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 布尔（是否需要销毁）
 //			
 //			说明：	> 此函数可用于监听 控制器数据 是否被销毁，数据销毁后，贴图可自动销毁。
 //##############################
-Drill_EFGi_Sprite.prototype.drill_EFGi_isNeedDestroy = function(){
+Drill_EFGi_Sprite.prototype.drill_sprite_isNeedDestroy = function(){
 	if( this._drill_controller == undefined ){ return false; }	//（未绑定时，不销毁）
 	if( this._drill_controller._drill_needDestroy == true ){ return true; }
     return false;
 };
 //##############################
-// * GIF贴图 - 销毁【标准函数】
+// * 行走图GIF贴图 - 销毁【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
 //			
 //			说明：	> 销毁不是必要的，但最好随时留意给 旧贴图 执行销毁函数。
 //##############################
-Drill_EFGi_Sprite.prototype.drill_EFGi_destroy = function(){
-	this.drill_EFGi_destroy_Private();
+Drill_EFGi_Sprite.prototype.drill_sprite_destroy = function(){
+	this.drill_sprite_destroyChild();			//销毁 - 销毁子功能
+	this.drill_sprite_destroySelf();			//销毁 - 销毁自身
 };
 //==============================
-// * GIF贴图 - 贴图初始化（私有）
+// * 行走图GIF贴图 - 初始化自身（私有）
 //==============================
-Drill_EFGi_Sprite.prototype.drill_EFGi_initSprite_Private = function(){
+Drill_EFGi_Sprite.prototype.drill_sprite_initSelf = function(){
+	this._drill_controller = null;				//控制器对象
+	this._drill_curSerial = -1;					//当前序列号
+	this._drill_individualSprite = null;		//个体贴图（指针）
+	this._character = null;						//物体（指针）
+};
+//==============================
+// * 行走图GIF贴图 - 销毁子功能（私有）
+//==============================
+Drill_EFGi_Sprite.prototype.drill_sprite_destroyChild = function(){
+	if( this._drill_controller == null ){ return; }
 	
-	// > 私有数据初始化
+	// > 销毁 - A主体
+	this.visible = false;
+	this._drill_layerSprite.removeChild( this._drill_childGIFSprite );
+	this.removeChild( this._drill_layerSprite );
+	this._drill_childGIFSprite = null;
+	this._drill_layerSprite = null;
+	
+	// > 销毁 - B变化控制
+	//	（无）
+	
+	// > 销毁 - C对象绑定
+	//	（无）
+	
+	// > 销毁 - D播放GIF
+	//	（无）
+};
+//==============================
+// * 行走图GIF贴图 - 销毁自身（私有）
+//==============================
+Drill_EFGi_Sprite.prototype.drill_sprite_destroySelf = function(){
+	this._drill_controller = null;				//控制器对象
+	this._drill_curSerial = -1;					//当前序列号
+	this._drill_individualSprite = null;		//个体贴图（指针）
+	this._character = null;						//物体（指针）
+};
+
+
+//==============================
+// * A主体 - 初始化子功能
+//==============================
+Drill_EFGi_Sprite.prototype.drill_sprite_initAttr = function(){
 	var data = this._drill_controller._drill_data;
-	
-	
+
 	// > 属性初始化
 	this.anchor.x = 0.5;
 	this.anchor.y = 0.5;
@@ -2775,55 +2930,64 @@ Drill_EFGi_Sprite.prototype.drill_EFGi_initSprite_Private = function(){
 		var bitmap = ImageManager.loadBitmap( data['src_img_file'], data['src_img_gif'][j], data['tint'], data['smooth'] );
 		this._drill_bitmapTank.push( bitmap );
 	}
-	
-	// > GIF 贴图
+			
+	// > GIF贴图
 	var temp_sprite = new Sprite();
 	temp_sprite.anchor.x = 0.5;
 	temp_sprite.anchor.y = 0.5;
 	temp_sprite.bitmap = this._drill_bitmapTank[0];
 	this._drill_childGIFSprite = temp_sprite;
 	
-	// > GIF 层
-	var temp_layer = new Sprite();
+	// > GIF层
+	var temp_layer = new Sprite();		//GIF两层容器
 	temp_layer.anchor.x = 0.5;
 	temp_layer.anchor.y = 0.5;
 	this._drill_layerSprite = temp_layer;
 	
 	this._drill_layerSprite.addChild( this._drill_childGIFSprite );
 	this.addChild( this._drill_layerSprite );
-};
+}
 //==============================
-// * GIF贴图 - 销毁（私有）
+// * A主体 - 初始化子功能
 //==============================
-Drill_EFGi_Sprite.prototype.drill_EFGi_destroy_Private = function(){
+Drill_EFGi_Sprite.prototype.drill_sprite_updateAttr = function(){
+	var data = this._drill_controller._drill_data;
 	
-	// > 贴图销毁
-	this._drill_layerSprite.removeChild( this._drill_childGIFSprite );
-	this.removeChild( this._drill_layerSprite );
-	this._drill_childGIFSprite = null;
-	this._drill_layerSprite = null;
+	// > 贴图 - 贴图属性
+	this.scale.x = this._drill_controller._drill_scaleX;
+	this.scale.y = this._drill_controller._drill_scaleY;
+	this.opacity = this._drill_controller._drill_opacity;
+	this.visible = data['visible'];
 	
-	// > 指针清空
-	this._drill_controller = null;				//控制器对象
-	this._drill_individualSprite = null;		//个体贴图
-	this._character = null;						//父对象
-};
+	// > 贴图 - 层级属性
+	this._drill_layerSprite.scale.x = this._drill_controller._drill_layer_scaleX;
+	this._drill_layerSprite.scale.y = this._drill_controller._drill_layer_scaleY;
+	this._drill_layerSprite.skew.x  = this._drill_controller._drill_layer_skewX;
+	this._drill_layerSprite.skew.y  = this._drill_controller._drill_layer_skewY;
+}
+
+
 //==============================
-// * 帧刷新 - 层级
+// * B变化控制 - 初始化子功能
 //==============================
-Drill_EFGi_Sprite.prototype.drill_updateLayer = function() {
+Drill_EFGi_Sprite.prototype.drill_sprite_initChange = function(){
+	var data = this._drill_controller._drill_data;
+	//	（无）
+}
+//==============================
+// * B变化控制 - 初始化子功能
+//==============================
+Drill_EFGi_Sprite.prototype.drill_sprite_updateChange = function(){
 	var data = this._drill_controller._drill_data;
 	var xx = this._drill_controller._drill_x;
 	var yy = this._drill_controller._drill_y;
 	
-	
 	// > 层级位置修正
-	var cur_layer = this._drill_EFGi_curLayer;
-	
-	if( cur_layer == "行走图前面层" || cur_layer == "在行走图前面" ){
+	var cur_layer = data['individualIndex'];
+	if( cur_layer == "行走图前面层" || cur_layer == "在行走图前面" ||
+		cur_layer == "父贴图前面层" || cur_layer == "在父贴图前面" ){
 		//（无操作）
 	}
-	
 	if( cur_layer == "父贴图后面层" || cur_layer == "在父贴图后面" ){
 		xx += this._character.screenX();		//（直接保持与行走图位置一致）
 		yy += this._character.screenY();
@@ -2843,46 +3007,49 @@ Drill_EFGi_Sprite.prototype.drill_updateLayer = function() {
 				yy += this._character._Drill_EFIE.y;
 			}
 		}
-		if( Imported.Drill_EventFadeOutEffect ){ //【行走图 - 持续动作效果】
+		if( Imported.Drill_EventFadeOutEffect ){ //【行走图 - 消失动作效果】
 			if( this._character._Drill_EFOE != undefined ){
 				xx += this._character._Drill_EFOE.x;
 				yy += this._character._Drill_EFOE.y;
 			}
 		}
 	}
-	
-	
-	// > 贴图 - 贴图属性
 	this.x = xx;
 	this.y = yy;
-	this.scale.x = this._drill_controller._drill_scaleX;
-	this.scale.y = this._drill_controller._drill_scaleY;
-	this.opacity = this._drill_controller._drill_opacity;
-	this.rotation = this._drill_controller._drill_rotation *Math.PI/180;	//（整体再旋转角度)
-	this.visible = data['visible'];
-	
-	// > 贴图 - 层级属性
-	this._drill_layerSprite.scale.x  = this._drill_controller._drill_layer_scaleX;
-	this._drill_layerSprite.scale.y  = this._drill_controller._drill_layer_scaleY;
-	this._drill_layerSprite.skew.x   = this._drill_controller._drill_layer_skewX;
-	this._drill_layerSprite.skew.y   = this._drill_controller._drill_layer_skewY;
-	
-}
-//==============================
-// * 帧刷新 - GIF
-//==============================
-Drill_EFGi_Sprite.prototype.drill_updateChild = function() {
-	var data = this._drill_controller._drill_data;
 	
 	// > 贴图 - GIF属性
-	this._drill_childGIFSprite.bitmap = this._drill_bitmapTank[ this._drill_controller._drill_GIF_index ];
-	this._drill_childGIFSprite.rotation = this._drill_controller._drill_childCircle_rotation *Math.PI/180;
-	
+	this._drill_childGIFSprite.rotation = this._drill_controller._drill_childGIF_rotation *Math.PI/180;
 }
+
+
+//==============================
+// * C对象绑定 - 初始化子功能
+//==============================
+//（无，此处不要赋值）
+
+
+//==============================
+// * D播放GIF - 初始化子功能
+//==============================
+Drill_EFGi_Sprite.prototype.drill_sprite_initGIF = function(){
+	var data = this._drill_controller._drill_data;
+	//	（无）
+}
+//==============================
+// * D播放GIF - 帧刷新
+//==============================
+Drill_EFGi_Sprite.prototype.drill_sprite_updateGIF = function(){
+	var data = this._drill_controller._drill_data;
+	
+	// > 贴图Bitmap
+	this._drill_childGIFSprite.bitmap = this._drill_bitmapTank[ this._drill_controller._drill_GIF_index ];
+}
+
+
 //==============================
 // * 优化策略 - 判断通过（私有）
 //==============================
-Drill_EFGi_Sprite.prototype.drill_EFGi_isOptimizationPassed_Private = function(){
+Drill_EFGi_Sprite.prototype.drill_sprite_isOptimizationPassed_Private = function(){
 	
 	// > 镜头范围外时，不工作
 	if( this.drill_EFGi_posIsInCamera( this._character._realX, this._character._realY ) == false ){

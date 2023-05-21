@@ -1826,9 +1826,17 @@
 //			->粒子贴图（第二层）【Drill_LPa_SecSprite】
 //			
 //			
+//		★家谱：
+//			大家族-粒子效果
+//		
+//		★插件私有类：
+//			* 粒子控制器【Drill_LPa_Controller】
+//			* 粒子贴图【Drill_LPa_Sprite】
+//			* 粒子贴图（第二层）【Drill_LPa_SecSprite】
+//		
 //		★必要注意事项：
 //			1.插件继承至 粒子核心。
-//			  核心与所有子插件功能介绍去看看："1.系统 > 大家族-粒子核心（脚本）.docx"
+//			  核心与所有子插件功能介绍去看看："1.系统 > 大家族-粒子效果（脚本）.docx"
 //			2.插件的地图层级/图片层级与多个插件共享。【必须自写 层级排序 标准函数】
 //			3.使用插件指令变化时，changing将会作为一个变化容器，根据时间对【数据】进行改变。
 //			4.原理基于【定量】赋值，【你直接用_displayX就可以了】,增量赋值方法绕太多远路！
@@ -2180,8 +2188,8 @@ Game_System.prototype.drill_LPa_initSysData_Private = function() {
 		}
 	}
 	
-	// > 刷新当前地图
-	if( $gameMap ){
+	// > 刷新当前地图【$gameSystem优先初始化】
+	if( $gameMap != undefined ){
 		$gameMap.drill_LPa_initMapdata();
 	}
 };
@@ -3033,9 +3041,11 @@ Drill_LPa_Controller.prototype.drill_controller_resetParticles_Position = functi
 		yy = radius * Math.sin( angle *Math.PI/180 );
 	}
 	
-	// > 要把当前镜头位置考虑进去
-	xx += $gameMap.adjustX(0) * $gameMap.tileWidth();
-	yy += $gameMap.adjustY(0) * $gameMap.tileHeight();
+	// > 要把当前镜头位置考虑进去【$gameSystem优先初始化】（注意此处，调用时 $gameMap和$dataMap 都可能未创建。）
+	if( $gameMap != undefined && $dataMap != undefined ){
+		xx += $gameMap.adjustX(0) * $gameMap.tileWidth();
+		yy += $gameMap.adjustY(0) * $gameMap.tileHeight();
+	}
 	
 	this._drill_parList_x[i] = xx;
 	this._drill_parList_y[i] = yy;

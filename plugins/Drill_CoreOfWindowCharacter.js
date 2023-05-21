@@ -309,6 +309,10 @@
 //			->☆存储数据
 //			->☆插件指令
 //			
+//			->☆管辖权
+//			->☆核心漏洞修复
+//				->等待消息显示
+//			
 //			->☆表达式阶段 标准模块
 //				->表达式转义【标准接口】
 //				->提交转义【标准函数】
@@ -393,8 +397,18 @@
 //			->☆消息快进按键
 //				->按键监听
 //				->跳过 等待按键输入字符 的功能
-//			->☆核心漏洞修复
 //
+//
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			无
+//			
+//		★核心说明：
+//			1.核心中含有 标准接口/标准函数 ，这是其它子插件的底座，无论核心内容怎么变，标准接口一定不能动。
+//			2.消息快进 是一个附属的小功能，不具备标准接口。
+//		
 //		★必要注意事项：
 //			1.窗口字符的绘制流程如下：
 //				表达式阶段 -> 表达式【标准接口】 ->
@@ -405,10 +419,6 @@
 //			
 //		★其它说明细节：
 //			暂无
-//			
-//		★核心接口说明：
-//			1.核心中含有 标准接口/标准函数 ，这是其它子插件的底座，无论核心内容怎么变，标准接口一定不能动。
-//			2.消息快进 是一个附属的小功能，不具备标准接口。
 //		
 //		★存在的问题：
 //			暂无
@@ -461,15 +471,16 @@
 	DrillUp.g_COWC_fastForwardKey = String(DrillUp.parameters["快进键"] || "pagedown"); 
 	
 	
+	
 //=============================================================================
 // * >>>>基于插件检测>>>>
 //=============================================================================
 if( Imported.Drill_CoreOfWindowAuxiliary ){
 	
 	
-//=============================================================================
-// ** 启动时校验
-//=============================================================================
+//==============================
+// * 基于插件检测 - 启动时校验
+//==============================
 var _drill_COWC_scene_initialize = SceneManager.initialize;
 SceneManager.initialize = function() {
 	_drill_COWC_scene_initialize.call(this);
@@ -478,6 +489,232 @@ SceneManager.initialize = function() {
 		alert( DrillUp.drill_COWC_getPluginTip_CompatibilityYEP() );
 	}
 };
+
+
+
+//=============================================================================
+// ** ☆管辖权
+//
+//			说明：	> 管辖权 即对 原函数 进行 修改、覆写、继承、控制子插件继承 等的权利。
+//					> 用于后期脱离 原游戏框架 且仍保持兼容性 的标记。
+//=============================================================================
+/*
+//==============================
+// * E绘制『窗口字符』 - 重置字体
+//==============================
+Window_Base.prototype.resetFontSettings = function(){
+    this.contents.fontFace = this.standardFontFace();		//字体类型
+    this.contents.fontSize = this.standardFontSize();		//字体大小
+    this.resetTextColor();									//字体颜色
+};
+//==============================
+// * E绘制『窗口字符』 - 扩展文本 - 指代字符转换
+//==============================
+Window_Base.prototype.convertEscapeCharacters = function( text ){
+    text = text.replace(/\\/g, '\x1b');							//单个下划线转 Escape字符
+    text = text.replace(/\x1b\x1b/g, '\\');						//两个下划线转 下划线字符
+    text = text.replace(/\x1bV\[(\d+)\]/gi, function(){		//'\v[0]'转变量值
+        return $gameVariables.value(parseInt(arguments[1]));
+    }.bind(this));
+    text = text.replace(/\x1bV\[(\d+)\]/gi, function(){		//'\v[\v[0]]'二转变量值
+        return $gameVariables.value(parseInt(arguments[1]));
+    }.bind(this));
+    text = text.replace(/\x1bN\[(\d+)\]/gi, function(){		//'\n[5]'角色名字
+        return this.actorName(parseInt(arguments[1]));
+    }.bind(this));
+    text = text.replace(/\x1bP\[(\d+)\]/gi, function(){		//'\p[1]'队伍成员名字
+        return this.partyMemberName(parseInt(arguments[1]));
+    }.bind(this));
+    text = text.replace(/\x1bG/gi, TextManager.currencyUnit);	//'\g'金钱单位
+    return text;
+};
+//==============================
+// * E绘制『窗口字符』 - 扩展文本 - 指代字符 - 角色名字
+//==============================
+Window_Base.prototype.actorName = function( n ){
+    var actor = n >= 1 ? $gameActors.actor(n) : null;
+    return actor ? actor.name() : '';
+};
+//==============================
+// * E绘制『窗口字符』 - 扩展文本 - 指代字符 - 队伍成员名字
+//==============================
+Window_Base.prototype.partyMemberName = function( n ){
+    var actor = n >= 1 ? $gameParty.members()[n - 1] : null;
+    return actor ? actor.name() : '';
+};
+
+//==============================
+// * E绘制『窗口字符』 - 逐一绘制 - 从当前光标开始绘制
+//==============================
+Window_Base.prototype.processCharacter = function( textState ){
+    switch (textState.text[textState.index] ){
+    case '\n':			//换行符
+        this.processNewLine(textState);	
+        break;
+    case '\f':			//新建页符
+        this.processNewPage(textState);	
+        break;
+    case '\x1b':		//效果字符（剩余的Escape字符）
+        this.processEscapeCharacter(this.obtainEscapeCode(textState), textState);
+        break;
+    default:			//一般字符
+        this.processNormalCharacter(textState);
+        break;
+    }
+};
+//==============================
+// * E绘制『窗口字符』 - 逐一绘制 - 一般字符
+//==============================
+Window_Base.prototype.processNormalCharacter = function( textState ){
+    var c = textState.text[textState.index++];
+    var w = this.textWidth(c);
+    this.contents.drawText(c, textState.x, textState.y, w * 2, textState.height);
+    textState.x += w;
+};
+//==============================
+// * E绘制『窗口字符』 - 逐一绘制 - 换行符
+//==============================
+Window_Base.prototype.processNewLine = function( textState ){
+    textState.x = textState.left;
+    textState.y += textState.height;
+    textState.height = this.calcTextHeight(textState, false);
+    textState.index++;
+};
+//==============================
+// * E绘制『窗口字符』 - 逐一绘制 - 新建页符（子类用属性）
+//==============================
+Window_Base.prototype.processNewPage = function( textState ){
+    textState.index++;
+};
+//==============================
+// * E绘制『窗口字符』 - 逐一绘制 - 效果字符获取
+//==============================
+Window_Base.prototype.obtainEscapeCode = function( textState ){
+    textState.index++;
+    var regExp = /^[\$\.\|\^!><\{\}\\]|^[A-Z]+/i;
+    var arr = regExp.exec(textState.text.slice(textState.index));
+    if( arr ){
+        textState.index += arr[0].length;
+        return arr[0].toUpperCase();
+    }else{
+        return '';
+    }
+};
+//==============================
+// * E绘制『窗口字符』 - 逐一绘制 - 效果字符参数
+//==============================
+Window_Base.prototype.obtainEscapeParam = function( textState ){
+    var arr = /^\[\d+\]/.exec(textState.text.slice(textState.index));
+    if( arr ){
+        textState.index += arr[0].length;
+        return parseInt(arr[0].slice(1));
+    }else{
+        return '';
+    }
+};
+//==============================
+// * E绘制『窗口字符』 - 逐一绘制 - 效果字符功能
+//==============================
+Window_Base.prototype.processEscapeCharacter = function( code, textState ){
+    switch (code ){
+    case 'C':			//改变文本色
+        this.changeTextColor(this.textColor(this.obtainEscapeParam(textState)));
+        break;
+    case 'I':			//图标字符
+        this.processDrawIcon(this.obtainEscapeParam(textState), textState);
+        break;
+    case '{':			//字体放大
+        this.makeFontBigger();
+        break;
+    case '}':			//字体缩小
+        this.makeFontSmaller();
+        break;
+    }
+};
+//==============================
+// * E绘制『窗口字符』 - 效果字符 - 图标字符
+//==============================
+Window_Base.prototype.processDrawIcon = function( iconIndex, textState ){
+    this.drawIcon(iconIndex, textState.x + 2, textState.y + 2);		//（绘制图标时，预留2像素的内边距）
+    textState.x += Window_Base._iconWidth + 4;
+};
+//==============================
+// * E绘制『窗口字符』 - 效果字符 - 字体放大
+//==============================
+Window_Base.prototype.makeFontBigger = function(){
+    if( this.contents.fontSize <= 96 ){
+        this.contents.fontSize += 12;		//这里放大的幅度太大，后使用 Drill_DialogSpecialCharSize 插件调整。
+    }
+};
+//==============================
+// * E绘制『窗口字符』 - 效果字符 - 字体缩小
+//==============================
+Window_Base.prototype.makeFontSmaller = function(){
+    if( this.contents.fontSize >= 24 ){
+        this.contents.fontSize -= 12;		//这里缩小的幅度太大，后使用 Drill_DialogSpecialCharSize 插件调整。
+    }
+};
+*/
+
+
+//=============================================================================
+// ** ☆核心漏洞修复
+//
+//			说明：	> 把 消息输入字符 的功能，分离出一个单独的函数，用于后期扩展。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 核心漏洞修复 - 等待消息显示（覆写）
+//
+//			说明：	拆分此函数，转为更适合扩展的结构。
+//==============================
+Window_Message.prototype.updateMessage = function(){
+    if( this._textState ){
+        while( !this.isEndOfText(this._textState) ){
+			
+			// > 执行新建页
+            if( this.needsNewPage(this._textState) ){
+                this.newPage(this._textState);
+            }
+			
+			// > 按确定键 瞬间显示当前页
+            this.updateShowFast();
+			
+			// > 绘制下一个字符
+            this.processCharacter(this._textState);
+			
+			// > 跳出字符绘制情况
+            if( this.drill_COWC_canBreakProcess() == true ){ break; }
+        }
+		
+		// > 绘制完 全部字符 时
+        if( this.isEndOfText(this._textState) ){
+            this.onEndOfText();
+        }
+        return true;
+    }else{
+        return false;
+    }
+}
+//==============================
+// * 核心漏洞修复 - 等待消息显示 - 跳出字符绘制情况
+//
+//			说明：	返回false继续绘制，返回true跳出绘制。
+//==============================
+Window_Message.prototype.drill_COWC_canBreakProcess = function(){
+	
+	// > 瞬间显示时，跳出
+	if( this._showFast == false && this._lineShowFast == false ){ return true; }
+	
+	// > 等待输入时，跳出
+	if( this.pause == true ){ return true; }
+	
+	// > 等待字符时，跳出
+	if( this._waitCount > 0 ){ return true; }
+	
+	return false;
+};
+
 
 
 //#############################################################################
@@ -2539,65 +2776,6 @@ Window_Message.prototype.processEscapeCharacter = function( code, textState ){
 	}
 	_drill_COWC_msg_processEscapeCharacter.call( this, code, textState );
 }
-
-
-//=============================================================================
-// ** ☆核心漏洞修复
-//
-//			说明：	> 把 消息输入字符 的功能，分离出一个单独的函数，用于后期扩展。
-//					（插件完整的功能目录去看看：功能结构树）
-//=============================================================================
-//==============================
-// * 核心漏洞修复 - 等待消息显示（覆写）
-//
-//			说明：	拆分此函数，转为更适合扩展的结构。
-//==============================
-Window_Message.prototype.updateMessage = function(){
-    if( this._textState ){
-        while( !this.isEndOfText(this._textState) ){
-			
-			// > 执行新建页
-            if( this.needsNewPage(this._textState) ){
-                this.newPage(this._textState);
-            }
-			
-			// > 按确定键 瞬间显示当前页
-            this.updateShowFast();
-			
-			// > 绘制下一个字符
-            this.processCharacter(this._textState);
-			
-			// > 跳出字符绘制情况
-            if( this.drill_COWC_canBreakProcess() == true ){ break; }
-        }
-		
-		// > 绘制完 全部字符 时
-        if( this.isEndOfText(this._textState) ){
-            this.onEndOfText();
-        }
-        return true;
-    }else{
-        return false;
-    }
-}
-//==============================
-// * 核心漏洞修复 - 等待消息显示 - 跳出字符绘制情况
-//
-//			说明：	返回false继续绘制，返回true跳出绘制。
-//==============================
-Window_Message.prototype.drill_COWC_canBreakProcess = function(){
-	
-	// > 瞬间显示时，跳出
-	if( this._showFast == false && this._lineShowFast == false ){ return true; }
-	
-	// > 等待输入时，跳出
-	if( this.pause == true ){ return true; }
-	
-	// > 等待字符时，跳出
-	if( this._waitCount > 0 ){ return true; }
-	
-	return false;
-};
 
 
 //=============================================================================

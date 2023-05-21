@@ -1,5 +1,5 @@
 //=============================================================================
-// Drill_TitleGIF.js
+// Drill_TitleGif.js
 //=============================================================================
 
 /*:
@@ -13,7 +13,7 @@
  * 
  * @help
  * =============================================================================
- * +++ Drill_TitleGIF +++
+ * +++ Drill_TitleGif +++
  * 作者：Drill_up
  * 如果你有兴趣，也可以来看看更多我写的drill插件哦ヽ(*。>Д<)o゜
  * https://rpg.blue/thread-409713-1-1.html
@@ -874,6 +874,12 @@
 //				->呼吸效果/漂浮效果
 //				->GIF遮罩
 //
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			无
+//		
 //		★必要注意事项：
 //			暂无
 //
@@ -895,7 +901,7 @@
 	// * 提示信息 - 参数
 	//==============================
 	var DrillUp = DrillUp || {}; 
-	DrillUp.g_TGi_PluginTip_curName = "Drill_TitleGIF.js 标题-多层标题GIF";
+	DrillUp.g_TGi_PluginTip_curName = "Drill_TitleGif.js 标题-多层标题GIF";
 	DrillUp.g_TGi_PluginTip_baseList = ["Drill_CoreOfGlobalSave.js 管理器-全局存储核心"];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
@@ -917,9 +923,10 @@
 // ** 变量获取
 //=============================================================================
 　　var Imported = Imported || {};
+　　Imported.Drill_TitleGif = true;
 　　Imported.Drill_TitleGIF = true;
 　　var DrillUp = DrillUp || {}; 
-	DrillUp.parameters = PluginManager.parameters('Drill_TitleGIF');
+	DrillUp.parameters = PluginManager.parameters('Drill_TitleGif');
 	
 	//==============================
 	// * 变量获取 - GIF
@@ -1301,6 +1308,7 @@ Scene_Title.prototype.drill_TGi_update = function() {
 // * <<<<基于插件检测<<<<
 //=============================================================================
 }else{
+		Imported.Drill_TitleGif = false;
 		Imported.Drill_TitleGIF = false;
 		var pluginTip = DrillUp.drill_TGi_getPluginTip_NoBasePlugin();
 		alert( pluginTip );

@@ -9,7 +9,8 @@
  * @Drill_LE_param "GIF-%d"
  * @Drill_LE_parentKey "---GIF%d至%d---"
  * @Drill_LE_var "DrillUp.g_MGi_list_length"
- *
+ * 
+ * 
  * @help
  * =============================================================================
  * +++ Drill_MenuGif +++
@@ -888,6 +889,12 @@
 //				->呼吸效果/漂浮效果
 //				->GIF遮罩
 //
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			无
+//		
 //		★必要注意事项：
 //			暂无
 //
@@ -921,6 +928,7 @@
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_MenuGif = true;
+　　Imported.Drill_MenuGIF = true;
 　　var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_MenuGif');
 	
@@ -1154,7 +1162,7 @@ Scene_MenuBase.prototype.drill_MGi_layerAddSprite = function( sprite, layer_inde
 //			参数：	> sprite 贴图（添加的贴图对象）
 //			返回：	> 无
 //          
-//			说明：	> 强行规范的接口，将指定贴图从地图层级中移除。
+//			说明：	> 强行规范的接口，将指定贴图从菜单层级中移除。
 //##############################
 Scene_MenuBase.prototype.drill_MGi_layerRemoveSprite = function( sprite ){
 	//（不操作）
@@ -1165,7 +1173,7 @@ Scene_MenuBase.prototype.drill_MGi_layerRemoveSprite = function( sprite ){
 //			参数：	> 无
 //			返回：	> 无
 //          
-//			说明：	> 执行该函数后，地图层级的子贴图，按照zIndex属性来进行先后排序。值越大，越靠前。
+//			说明：	> 执行该函数后，菜单层级的子贴图，按照zIndex属性来进行先后排序。值越大，越靠前。
 //##############################
 Scene_MenuBase.prototype.drill_MGi_sortByZIndex = function () {
     this.drill_MGi_sortByZIndex_Private();

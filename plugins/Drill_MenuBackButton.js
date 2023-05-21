@@ -903,6 +903,12 @@
 //				->粒子遮罩
 //				->样式结构分离
 //
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			无
+//		
 //		★必要注意事项：
 //			1.原来的插件结构有些绕，这里（v1.3）修改了结构，修改成了树状结构。
 //			  sprite分成了3个叶子和一个树根。另外，对齐下标时注意，默认值可能会影响i的索引。
@@ -1233,7 +1239,7 @@ Scene_MenuBase.prototype.drill_MBB_layerAddSprite = function( sprite, layer_inde
 //			参数：	> sprite 贴图（添加的贴图对象）
 //			返回：	> 无
 //          
-//			说明：	> 强行规范的接口，将指定贴图从地图层级中移除。
+//			说明：	> 强行规范的接口，将指定贴图从菜单层级中移除。
 //##############################
 Scene_MenuBase.prototype.drill_MBB_layerRemoveSprite = function( sprite ){
 	this._backgroundSprite.removeChild( sprite );
@@ -1245,7 +1251,7 @@ Scene_MenuBase.prototype.drill_MBB_layerRemoveSprite = function( sprite ){
 //			参数：	> 无
 //			返回：	> 无
 //          
-//			说明：	> 执行该函数后，地图层级的子贴图，按照zIndex属性来进行先后排序。值越大，越靠前。
+//			说明：	> 执行该函数后，菜单层级的子贴图，按照zIndex属性来进行先后排序。值越大，越靠前。
 //##############################
 Scene_MenuBase.prototype.drill_MBB_sortByZIndex = function () {
     this.drill_MBB_sortByZIndex_Private();

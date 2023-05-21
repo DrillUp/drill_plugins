@@ -141,6 +141,12 @@
 //				->事件之间穿透
 //				->事件与玩家穿透
 //
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			无
+//		
 //		★必要注意事项：
 //			1.碰撞关系见：Game_CharacterBase.prototype.canPass
 //			2.旧版本错误判定：eventsXyNt + isNormalPriority 【穿透性 + 优先级 同时满足】才阻塞。 

@@ -26,6 +26,7 @@
  * 可作用于：
  *   - Drill_EventActionSequenceAutomation   行走图-GIF动画序列全自动播放
  *   - Drill_EventActionSequenceBind         行走图-GIF动画序列全绑定
+ *   - Drill_LayerSynchronizedReflection     行走图-图块同步镜像
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -149,6 +150,13 @@
 //					->隔离原行走图
 //					->离开地图仍然保持动作序列？
 //
+//
+//		★家谱：
+//			大家族-GIF动画序列
+//		
+//		★插件私有类：
+//			无
+//		
 //		★必要注意事项：
 //			1.该插件将 核心插件 的接口进行了一一对应。
 //			  只修改贴图的 bitmap，其它都不影响。
@@ -635,7 +643,19 @@ Sprite_Character.prototype.updateFrame = function() {
 		
 		// > 四方向情况
 		if( this._character._Drill_EASe_4DirEnabled == true ){
-			var y_index = (this._character.direction() - 2) / 2;
+			var cur_dir = this._character.direction();
+			
+			// > 兼容【行走图 - 图块同步镜像】
+			if( Imported.Drill_LayerSynchronizedReflection ){
+				if( this instanceof Drill_Sprite_LSR ){
+					
+					// > 朝向倒转
+					if( cur_dir == 2 && !this._character.drill_LSR_isLockDir() ){ cur_dir = 8; }
+					else if( cur_dir == 8 && !this._character.drill_LSR_isLockDir() ){ cur_dir = 2; }
+				}
+			}
+			
+			var y_index = (cur_dir - 2) / 2;
 			sy = y_index * ph;
 		}
 		

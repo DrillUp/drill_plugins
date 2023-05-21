@@ -412,12 +412,20 @@
  * @value 左上角
  * @option 右上角
  * @value 右上角
- * @option 正中心
- * @value 正中心
  * @option 左下角
  * @value 左下角
  * @option 右下角
  * @value 右下角
+ * @option 正上方
+ * @value 正上方
+ * @option 正下方
+ * @value 正下方
+ * @option 正左方
+ * @value 正左方
+ * @option 正右方
+ * @value 正右方
+ * @option 正中心
+ * @value 正中心
  * @desc 窗口追随鼠标时，中心锚点的位置。
  * @default 左上角
  *
@@ -488,30 +496,45 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			事件说明窗口：
-//				->全局配置
-//					->附加高宽
-//				->实体类容器
-//					->事件注释
-//						->创建实体类
-//						->多行文本
-//					->刷新统计
-//				->贴图框架
-//					->刷新框架（给实体类赋值）
-//					->刷新位置（给实体类赋值）
-//				->实体类
-//					->被 Sprite_Character 赋值
-//				->说明窗口
-//					->位置
-//						->跟随鼠标位置
-//					->内容
-//						->遍历实体类容器
-//					->窗口皮肤
+//			->☆提示信息
+//			->☆变量获取
+//			->☆插件指令
+//			->☆存储数据
+//			->☆地图层级
+//				->添加贴图到层级【标准函数】
+//				x->去除贴图【标准函数】
+//				->图片层级排序【标准函数】
+//				x->层级与镜头的位移【标准函数】
+//			->☆事件注释
+//			
+//			->☆实体类容器
+//				->事件注释
+//					->创建实体类
+//					->多行文本
+//				->刷新统计
+//			->☆实体类赋值
+//			->☆贴图框架
+//				->刷新框架（给实体类赋值）
+//				->刷新位置（给实体类赋值）
+//			->事件说明窗口 实体类【Drill_MPFE_Bean】
+//				->被 Sprite_Character 赋值
+//			
+//			->☆窗口控制
+//			->事件说明窗口【Drill_MPFE_Window】
+//				->位置
+//					->跟随鼠标位置
+//				->内容
+//					->遍历实体类容器
+//				->窗口皮肤
+//				->附加高宽
 //				
 //				
+//		★家谱：
+//			无
+//		
 //		★插件私有类：
-//			* Drill_MPFE_Bean		【事件说明窗口实体类】
-//			* Drill_MPFE_Window		【事件说明窗口】
+//			* 事件说明窗口 实体类【Drill_MPFE_Bean】
+//			* 事件说明窗口【Drill_MPFE_Window】
 //		
 //		★必要注意事项：
 //			1.Bean实体类在 事件贴图 中被动赋值。
@@ -543,7 +566,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -583,7 +606,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_MiniPlateForEvent = true;
@@ -651,7 +674,7 @@ if( Imported.Drill_CoreOfInput &&
 	
 
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _drill_MPFE_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
@@ -775,7 +798,7 @@ Game_Map.prototype.drill_MPFE_isEventExist = function( e_id ){
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -857,29 +880,117 @@ Game_System.prototype.drill_MPFE_checkSysData_Private = function() {
 };
 
 
-//=============================================================================
-// * 优化
-//=============================================================================
-//==============================
-// * 优化 - 检查镜像情况
-//==============================
-Game_Temp.prototype.drill_MPFE_isReflectionSprite = function( sprite ){
-	if( Imported.Drill_LayerReverseReflection      && sprite instanceof Drill_Sprite_LRR ){ return true; }
-	if( Imported.Drill_LayerSynchronizedReflection && sprite instanceof Drill_Sprite_LSR ){ return true; }
-	return false;
+//#############################################################################
+// ** 【标准模块】地图层级 ☆地图层级
+//#############################################################################
+//##############################
+// * 地图层级 - 添加贴图到层级【标准函数】
+//				
+//			参数：	> sprite 贴图        （添加的贴图对象）
+//					> layer_index 字符串 （添加到的层级名，上层/图片层/最顶层）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图添加到目标层级中。
+//##############################
+Scene_Map.prototype.drill_MPFE_layerAddSprite = function( sprite, layer_index ){
+    this.drill_MPFE_layerAddSprite_Private(sprite, layer_index);
 }
+//##############################
+// * 地图层级 - 去除贴图【标准函数】
+//				
+//			参数：	> sprite 贴图（添加的贴图对象）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图从地图层级中移除。
+//##############################
+Scene_Map.prototype.drill_MPFE_layerRemoveSprite = function( sprite ){
+	//（不操作）
+}
+//##############################
+// * 地图层级 - 图片层级排序【标准函数】
+//				
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 执行该函数后，地图层级的子贴图，按照zIndex属性来进行先后排序。值越大，越靠前。
+//##############################
+Scene_Map.prototype.drill_MPFE_sortByZIndex = function () {
+    this.drill_MPFE_sortByZIndex_Private();
+}
+//=============================================================================
+// ** 地图层级（接口实现）
+//=============================================================================
+//==============================
+// * 地图层级 - 上层
+//==============================
+var _drill_MPFE_layer_createDestination = Spriteset_Map.prototype.createDestination;
+Spriteset_Map.prototype.createDestination = function() {
+	_drill_MPFE_layer_createDestination.call(this);		//鼠标目的地 < 上层 < 天气层
+	if( !this._drill_mapUpArea ){
+		this._drill_mapUpArea = new Sprite();
+		this._baseSprite.addChild(this._drill_mapUpArea);	
+	}
+}
+//==============================
+// * 地图层级 - 图片层
+//==============================
+var _drill_MPFE_layer_createPictures = Spriteset_Map.prototype.createPictures;
+Spriteset_Map.prototype.createPictures = function() {
+	_drill_MPFE_layer_createPictures.call(this);		//图片对象层 < 图片层 < 对话框集合
+	if( !this._drill_mapPicArea ){
+		this._drill_mapPicArea = new Sprite();
+		this.addChild(this._drill_mapPicArea);	
+	}
+}
+//==============================
+// * 地图层级 - 最顶层
+//==============================
+var _drill_MPFE_layer_createAllWindows = Scene_Map.prototype.createAllWindows;
+Scene_Map.prototype.createAllWindows = function() {
+	_drill_MPFE_layer_createAllWindows.call(this);		//对话框集合 < 最顶层
+	if( !this._drill_SenceTopArea ){
+		this._drill_SenceTopArea = new Sprite();
+		this.addChild(this._drill_SenceTopArea);	
+	}
+}
+//==============================
+// * 地图层级 - 添加贴图到层级（私有）
+//==============================
+Scene_Map.prototype.drill_MPFE_layerAddSprite_Private = function( sprite, layer_index ){
+	if( layer_index == "上层" ){
+		this._spriteset._drill_mapUpArea.addChild( sprite );
+	}
+	if( layer_index == "图片层" ){
+		this._spriteset._drill_mapPicArea.addChild( sprite );
+	}
+	if( layer_index == "最顶层" ){
+		this._drill_SenceTopArea.addChild( sprite );
+	}
+};
+//==============================
+// * 地图层级 - 图片层级排序（私有）
+//==============================
+Scene_Map.prototype.drill_MPFE_sortByZIndex_Private = function() {
+	this._spriteset._drill_mapUpArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
+	this._spriteset._drill_mapPicArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
+	this._drill_SenceTopArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
+};
+
 
 //=============================================================================
-// ** 事件注释初始化
+// ** ☆事件注释
 //=============================================================================
 //==============================
-// * 事件注释 - 初始化
+// * 事件注释 - 初始化绑定
 //==============================
 var _drill_MPFE_setupPageSettings = Game_Event.prototype.setupPageSettings;
 Game_Event.prototype.setupPageSettings = function() {
 	_drill_MPFE_setupPageSettings.call(this);
 	this.drill_MPFE_setupPageSettings();
 }
+//==============================
+// * 事件注释 - 初始化
+//==============================
 Game_Event.prototype.drill_MPFE_setupPageSettings = function() {
 	
 	//（每次不要清空注释）
@@ -969,28 +1080,14 @@ Game_Event.prototype.drill_MPFE_setupPageSettings = function() {
 		}
     }
 };
-//==============================
-// * 事件注释 - 销毁时清除
-//==============================
-var _drill_MPFE_erase = Game_Event.prototype.erase;
-Game_Event.prototype.erase = function() {	
-	_drill_MPFE_erase.call(this);
-	this.drill_MPFE_destroyBean();
-};
-//==============================
-// * 事件注释 - 销毁
-//==============================
-Game_Event.prototype.drill_MPFE_destroyBean = function() {	
-	if( this._drill_MPFE_bean != undefined ){
-		this._drill_MPFE_bean = null;
-		$gameTemp._drill_MPFE_needRestatistics = true;
-	}
-};
 
 
 
 //=============================================================================
-// ** 实体类容器
+// ** ☆实体类容器
+//			
+//			说明：	> 此模块专门对实体类进行 捕获 。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 容器 - 初始化
@@ -1045,8 +1142,59 @@ Game_Map.prototype.drill_MPFE_updateRestatistics = function() {
 	}
 };
 
+
 //=============================================================================
-// ** 贴图框架
+// ** ☆实体类赋值
+//			
+//			说明：	> 此模块专门 对实体类进行 赋值。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 实体类赋值 - 帧刷新 位置
+//==============================
+Sprite_Character.prototype.drill_MPFE_updatePosition = function() {
+	var bean = this._character._drill_MPFE_bean;
+	
+	var ww = bean._drill_frameW;
+	var hh = bean._drill_frameH;
+	//var xx = this.x - ww*this.anchor.x;	//（防止行走图旋转、持续动作时，触发点乱晃）
+	//var yy = this.y - hh*this.anchor.y;
+	var xx = this._character.screenX() - ww*this.anchor.x;
+	var yy = this._character.screenY() - hh*this.anchor.y;
+	bean.drill_MPFE_setPosition( xx, yy );
+};
+//==============================
+// * 实体类赋值 - 销毁时清除
+//==============================
+var _drill_MPFE_erase = Game_Event.prototype.erase;
+Game_Event.prototype.erase = function() {	
+	_drill_MPFE_erase.call(this);
+	this.drill_MPFE_destroyBean();
+};
+//==============================
+// * 实体类赋值 - 销毁
+//==============================
+Game_Event.prototype.drill_MPFE_destroyBean = function() {	
+	if( this._drill_MPFE_bean != undefined ){
+		this._drill_MPFE_bean = null;
+		$gameTemp._drill_MPFE_needRestatistics = true;
+	}
+};
+//==============================
+// * 实体类赋值 - 检查镜像情况
+//==============================
+Game_Temp.prototype.drill_MPFE_isReflectionSprite = function( sprite ){
+	if( Imported.Drill_LayerReverseReflection      && sprite instanceof Drill_Sprite_LRR ){ return true; }
+	if( Imported.Drill_LayerSynchronizedReflection && sprite instanceof Drill_Sprite_LSR ){ return true; }
+	return false;
+};
+
+
+//=============================================================================
+// ** ☆贴图框架
+//			
+//			说明：	> 此模块专门 对实体类进行 贴图框架值赋值。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 贴图框架 - 绑定物体
@@ -1138,18 +1286,6 @@ Sprite_Character.prototype.drill_MPFE_updateBitmapFrame = function() {
 			this._drill_MPFE_frame_h
 		);
 	}
-};
-//==============================
-// * 帧刷新 - 实体类位置
-//==============================
-Sprite_Character.prototype.drill_MPFE_updatePosition = function() {
-	var bean = this._character._drill_MPFE_bean;
-	
-	var ww = bean._drill_frameW;
-	var hh = bean._drill_frameH;
-	var xx = this.x - ww*this.anchor.x;
-	var yy = this.y - hh*this.anchor.y;
-	bean.drill_MPFE_setPosition( xx, yy );
 };
 
 
@@ -1258,106 +1394,14 @@ Drill_MPFE_Bean.prototype.drill_initPrivateData = function(){
 
 
 
-//#############################################################################
-// ** 【标准模块】地图层级
-//#############################################################################
-//##############################
-// * 地图层级 - 添加贴图到层级【标准函数】
-//				
-//			参数：	> sprite 贴图        （添加的贴图对象）
-//					> layer_index 字符串 （添加到的层级名，上层/图片层/最顶层）
-//			返回：	> 无
-//          
-//			说明：	> 强行规范的接口，将指定贴图添加到目标层级中。
-//##############################
-Scene_Map.prototype.drill_MPFE_layerAddSprite = function( sprite, layer_index ){
-    this.drill_MPFE_layerAddSprite_Private(sprite, layer_index);
-}
-//##############################
-// * 地图层级 - 去除贴图【标准函数】
-//				
-//			参数：	> sprite 贴图（添加的贴图对象）
-//			返回：	> 无
-//          
-//			说明：	> 强行规范的接口，将指定贴图从地图层级中移除。
-//##############################
-Scene_Map.prototype.drill_MPFE_layerRemoveSprite = function( sprite ){
-	//（不操作）
-}
-//##############################
-// * 地图层级 - 图片层级排序【标准函数】
-//				
-//			参数：	> 无
-//			返回：	> 无
-//          
-//			说明：	> 执行该函数后，地图层级的子贴图，按照zIndex属性来进行先后排序。值越大，越靠前。
-//##############################
-Scene_Map.prototype.drill_MPFE_sortByZIndex = function () {
-    this.drill_MPFE_sortByZIndex_Private();
-}
 //=============================================================================
-// ** 地图层级（接口实现）
+// ** ☆窗口控制
+//			
+//			说明：	> 此模块专门管理 说明窗口 的创建与销毁。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 地图层级 - 上层
-//==============================
-var _drill_MPFE_layer_createDestination = Spriteset_Map.prototype.createDestination;
-Spriteset_Map.prototype.createDestination = function() {
-	_drill_MPFE_layer_createDestination.call(this);		//鼠标目的地 < 上层 < 天气层
-	if( !this._drill_mapUpArea ){
-		this._drill_mapUpArea = new Sprite();
-		this._baseSprite.addChild(this._drill_mapUpArea);	
-	}
-}
-//==============================
-// * 地图层级 - 图片层
-//==============================
-var _drill_MPFE_layer_createPictures = Spriteset_Map.prototype.createPictures;
-Spriteset_Map.prototype.createPictures = function() {
-	_drill_MPFE_layer_createPictures.call(this);		//图片对象层 < 图片层 < 对话框集合
-	if( !this._drill_mapPicArea ){
-		this._drill_mapPicArea = new Sprite();
-		this.addChild(this._drill_mapPicArea);	
-	}
-}
-//==============================
-// * 地图层级 - 最顶层
-//==============================
-var _drill_MPFE_layer_createAllWindows = Scene_Map.prototype.createAllWindows;
-Scene_Map.prototype.createAllWindows = function() {
-	_drill_MPFE_layer_createAllWindows.call(this);		//对话框集合 < 最顶层
-	if( !this._drill_SenceTopArea ){
-		this._drill_SenceTopArea = new Sprite();
-		this.addChild(this._drill_SenceTopArea);	
-	}
-}
-//==============================
-// * 地图层级 - 图片层级排序（私有）
-//==============================
-Scene_Map.prototype.drill_MPFE_sortByZIndex_Private = function() {
-	this._spriteset._drill_mapUpArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
-	this._spriteset._drill_mapPicArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
-	this._drill_SenceTopArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
-};
-//==============================
-// * 地图层级 - 添加贴图到层级（私有）
-//==============================
-Scene_Map.prototype.drill_MPFE_layerAddSprite_Private = function( sprite, layer_index ){
-	if( layer_index == "上层" ){
-		this._spriteset._drill_mapUpArea.addChild( sprite );
-	}
-	if( layer_index == "图片层" ){
-		this._spriteset._drill_mapPicArea.addChild( sprite );
-	}
-	if( layer_index == "最顶层" ){
-		this._drill_SenceTopArea.addChild( sprite );
-	}
-};
-//=============================================================================
-// ** 地图界面
-//=============================================================================
-//==============================
-// * 地图界面 - 创建说明窗口
+// * 窗口控制 - 创建说明窗口
 //==============================
 var _drill_MPFE_map_createAllWindows = Scene_Map.prototype.createAllWindows;
 Scene_Map.prototype.createAllWindows = function(){
@@ -1375,7 +1419,7 @@ Scene_Map.prototype.createAllWindows = function(){
 	}
 };
 //==============================
-// * 地图界面 - 说明窗口层级变化
+// * 窗口控制 - 说明窗口层级变化
 //==============================
 var _drill_MPFE_smap_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function(){
@@ -1472,10 +1516,15 @@ Drill_MPFE_Window.prototype.drill_initPrivateData = function() {
 	// > 中心锚点
 	this._drill_anchor_x = 0;			//中心锚点x
 	this._drill_anchor_y = 0;			//中心锚点y
+	if( this._drill_curData['anchor'] == "左上角" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 0.0; }
 	if( this._drill_curData['anchor'] == "右上角" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 0.0; }
-	if( this._drill_curData['anchor'] == "正中心" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 0.5; }
 	if( this._drill_curData['anchor'] == "左下角" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 1.0; }
 	if( this._drill_curData['anchor'] == "右下角" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 1.0; }
+	if( this._drill_curData['anchor'] == "正上方" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 0.0; }
+	if( this._drill_curData['anchor'] == "正下方" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 1.0; }
+	if( this._drill_curData['anchor'] == "正左方" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 0.5; }
+	if( this._drill_curData['anchor'] == "正右方" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 0.5; }
+	if( this._drill_curData['anchor'] == "正中心" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 0.5; }
 	
 	// > 图片层级
 	this._drill_curLayer = this._drill_curData['layer_index'];
@@ -1495,10 +1544,15 @@ Drill_MPFE_Window.prototype.drill_refreshStyle = function( style_id ){
 	// > 中心锚点
 	this._drill_anchor_x = 0;			//中心锚点x
 	this._drill_anchor_y = 0;			//中心锚点y
+	if( this._drill_curData['anchor'] == "左上角" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 0.0; }
 	if( this._drill_curData['anchor'] == "右上角" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 0.0; }
-	if( this._drill_curData['anchor'] == "正中心" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 0.5; }
 	if( this._drill_curData['anchor'] == "左下角" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 1.0; }
 	if( this._drill_curData['anchor'] == "右下角" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 1.0; }
+	if( this._drill_curData['anchor'] == "正上方" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 0.0; }
+	if( this._drill_curData['anchor'] == "正下方" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 1.0; }
+	if( this._drill_curData['anchor'] == "正左方" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 0.5; }
+	if( this._drill_curData['anchor'] == "正右方" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 0.5; }
+	if( this._drill_curData['anchor'] == "正中心" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 0.5; }
 	
 	// > 图片层级
 	this._drill_curLayer = this._drill_curData['layer_index'];
@@ -1718,7 +1772,7 @@ Drill_MPFE_Window.prototype.drill_resetSkinData = function( data ){
 	this._drill_skinBackground_width = 0;
 	this._drill_skinBackground_height = 0;
 	if( data['window_type'] == "自定义背景图片" && data['window_pic_src'] != "" ){
-		this._drill_skin_pic_bitmap = ImageManager.loadSystem( data['window_pic_src'] );
+		this._drill_skin_pic_bitmap = ImageManager.loadBitmap( "img/system/", data['window_pic_src'], 0, true );
 		this._drill_skin_pic_x = data['window_pic_x'];
 		this._drill_skin_pic_y = data['window_pic_y'];
 	}else{
@@ -1726,7 +1780,7 @@ Drill_MPFE_Window.prototype.drill_resetSkinData = function( data ){
 	}
 	
 	if( data['window_type'] == "自定义窗口皮肤" && data['window_sys_src'] != "" ){
-		this._drill_skin_sys_bitmap = ImageManager.loadSystem( data['window_sys_src'] );
+		this._drill_skin_sys_bitmap = ImageManager.loadBitmap( "img/system/", data['window_sys_src'], 0, true );
 	}else{
 		this._drill_skin_sys_bitmap = this._drill_skin_defaultSkin;
 	}
@@ -1751,10 +1805,11 @@ Drill_MPFE_Window.prototype.drill_resetSkinData = function( data ){
 		this.windowskin = this._drill_skin_defaultSkin;
 		
 		// （透明度）
-		this.opacity = this._drill_skin_opacity;
-		this._windowBackSprite.opacity = this._drill_skin_opacity;
-		this._windowFrameSprite.opacity = this._drill_skin_opacity;
-		this._drill_skinBackground.opacity = 0;
+		//this.contentsOpacity = 255;									//文本域 透明度（与 背景容器层 并列）
+		//this.opacity = 255;											//背景容器层 透明度
+		this._windowBackSprite.opacity = this._drill_skin_opacity;		//背景容器层 - 平铺贴图 透明度
+		this._windowFrameSprite.opacity = this._drill_skin_opacity;		//背景容器层 - 框架贴图 透明度
+		this._drill_skinBackground.opacity = 0;							//背景容器层 - 背景图片 透明度
 		
 		// （背景图片布局）
 		this._drill_skinBackground.bitmap = null;
@@ -1766,10 +1821,11 @@ Drill_MPFE_Window.prototype.drill_resetSkinData = function( data ){
 		this.windowskin = this._drill_skin_sys_bitmap;
 		
 		// （透明度）
-		this.opacity = this._drill_skin_opacity;
-		this._windowBackSprite.opacity = this._drill_skin_opacity;
-		this._windowFrameSprite.opacity = this._drill_skin_opacity;
-		this._drill_skinBackground.opacity = 0;
+		//this.contentsOpacity = 255;									//文本域 透明度（与 背景容器层 并列）
+		//this.opacity = 255;											//背景容器层 透明度
+		this._windowBackSprite.opacity = this._drill_skin_opacity;		//背景容器层 - 平铺贴图 透明度
+		this._windowFrameSprite.opacity = this._drill_skin_opacity;		//背景容器层 - 框架贴图 透明度
+		this._drill_skinBackground.opacity = 0;							//背景容器层 - 背景图片 透明度
 		
 		// （背景图片布局）
 		this._drill_skinBackground.bitmap = null;
@@ -1781,10 +1837,11 @@ Drill_MPFE_Window.prototype.drill_resetSkinData = function( data ){
 		this.windowskin = this._drill_skin_defaultSkin;
 		
 		// （透明度）
-		this.opacity = 255;
-		this._windowBackSprite.opacity = 0;
-		this._windowFrameSprite.opacity = 0;
-		this._drill_skinBackground.opacity = this._drill_skin_opacity;
+		//this.contentsOpacity = 255;									//文本域 透明度（与 背景容器层 并列）
+		//this.opacity = 255;											//背景容器层 透明度
+		this._windowBackSprite.opacity = 0;								//背景容器层 - 平铺贴图 透明度
+		this._windowFrameSprite.opacity = 0;							//背景容器层 - 框架贴图 透明度
+		this._drill_skinBackground.opacity = this._drill_skin_opacity;	//背景容器层 - 背景图片 透明度]
 		
 		// （背景图片布局）
 		this._drill_skinBackground.bitmap = this._drill_skin_pic_bitmap;
@@ -1798,10 +1855,11 @@ Drill_MPFE_Window.prototype.drill_resetSkinData = function( data ){
 		this.windowskin = this._drill_skin_defaultSkin;
 		
 		// （透明度）
-		this.opacity = 255;
-		this._windowBackSprite.opacity = 0;
-		this._windowFrameSprite.opacity = 0;
-		this._drill_skinBackground.opacity = this._drill_skin_opacity;
+		//this.contentsOpacity = 255;									//文本域 透明度（与 背景容器层 并列）
+		//this.opacity = 255;											//背景容器层 透明度
+		this._windowBackSprite.opacity = 0;								//背景容器层 - 平铺贴图 透明度
+		this._windowFrameSprite.opacity = 0;							//背景容器层 - 框架贴图 透明度
+		this._drill_skinBackground.opacity = this._drill_skin_opacity;	//背景容器层 - 背景图片 透明度
 		
 		// （背景图片布局）
 		this._drill_skinBackground.bitmap = null;	//（帧刷新中会自动建立黑色画布）
@@ -1818,6 +1876,27 @@ Drill_MPFE_Window.prototype.drill_resetSkinData = function( data ){
 // * 窗口皮肤 - 帧刷新
 //==============================
 Drill_MPFE_Window.prototype.drill_updateSkin = function() {
+	
+	if( this._drill_skin_type == "自定义背景图片" || this._drill_skin_type == "图片窗口布局" ){
+		
+		// > 高宽改变锁
+		if( this._drill_skinBackground_width  == this._drill_width &&
+			this._drill_skinBackground_height == this._drill_height ){
+			return;
+		}
+		this._drill_skinBackground_width = this._drill_width;
+		this._drill_skinBackground_height = this._drill_height;
+		
+		// > 背景图片与中心锚点
+		var xx = this._drill_skin_pic_x;
+		var yy = this._drill_skin_pic_y;
+		xx += this._drill_width * this._drill_anchor_x;
+		yy += this._drill_height * this._drill_anchor_y;
+		this._drill_skinBackground.x = xx;
+		this._drill_skinBackground.y = yy;
+		this._drill_skinBackground.anchor.x = this._drill_anchor_x;
+		this._drill_skinBackground.anchor.y = this._drill_anchor_y;
+	}
 	
 	if( this._drill_skin_type == "黑底背景" || this._drill_skin_type == "黑底布局" ){
 		

@@ -439,6 +439,12 @@
 //				->图标、背景、技能块、消耗值
 //				->相同函数对应到其他类
 //
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			无
+//		
 //		★必要注意事项：
 //			1.绘制渐变颜色时，bitmap的刷子不知道为什么产生了偏移，置零了。目前解决方法是用 【Bitmap.drill_elements_drawText】 做识别。
 //
@@ -936,10 +942,6 @@ Window_SkillList.prototype.drill_WSE_updateSprite = function() {
 			this.drill_WSE_scale_move_to(temp_sprite,1.00,'y',0.01);
 		}
 		
-		//// > 透明度保持一致
-		//if( this.contentsOpacity != null ){
-		//	temp_sprite.opacity = this.contentsOpacity;
-		//}
 	}
 }
 //==============================

@@ -1458,6 +1458,7 @@
 //		★功能结构树：
 //			->☆提示信息
 //			->☆变量获取
+//			->☆管辖权
 //			->☆插件指令
 //			->☆存储数据
 //			->☆效果字符应用
@@ -1468,6 +1469,17 @@
 //			->☆逐个字符变色
 //		
 //		
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			无
+//
+//		★核心说明：
+//			1.该插件把颜色配置进行了统一。
+//			  支持了 .textColor(100) 和 .textColor(200) 的颜色变化。
+//			  没有对外接口。
+//		
 //		★必要注意事项：
 //			1.变色由两个核心函数组成。
 //				_drill_COC_textColor			 \c[200]的颜色操作
@@ -1477,11 +1489,6 @@
 //			1.Bitmap.drill_elements_drawText用于控制颜色渐变的位置修正。（目前不理解为啥bitmap绘制渐变时会产生brush偏移的情况。）
 //			2.高级颜色格式为： drill__90__0.0__#ffffff__0.5__#ff99ff__1.0__#ff55ff
 //			（见drill_COC_initSeniorColor）
-//
-//		★核心接口说明：
-//			1.该插件把颜色配置进行了统一。
-//			  支持了 .textColor(100) 和 .textColor(200) 的颜色变化。
-//			  没有对外接口。
 //
 //		★存在的问题：
 //			暂无
@@ -1570,7 +1577,10 @@
 		return data;
 	}
 	//==============================
-	// * 临时全局 - 获取普通颜色
+	// * 临时全局 - 获取普通颜色（开放函数）
+	//
+	//			说明：	> 返回如"#ffffff"的颜色代码。
+	//					> 此处的 n=1 等同于 \c[101]，等同于 <普通颜色:1> 。
 	//==============================
 	DrillUp.drill_COC_getColor = function( n ) {
 		if( DrillUp.g_COC_color_list[n] == undefined ){ console.log( DrillUp.drill_COC_getPluginTip_ColorError1( n ) ); return "#ffffff" }
@@ -1579,6 +1589,9 @@
 	}
 	//==============================
 	// * 临时全局 - 获取高级颜色
+	//
+	//			说明：	> 返回如"#ffffff"的颜色代码。
+	//					> 此处的 n=1 等同于 \c[201]，等同于 <高级颜色:1> 。
 	//==============================
 	DrillUp.drill_COC_getSeniorColor = function( n ) {
 		if( DrillUp.g_COC_seniorColor_list[n] == undefined ){ console.log( DrillUp.drill_COC_getPluginTip_ColorError2( n ) ); return "#ffffff" }
@@ -1618,6 +1631,87 @@
 // * >>>>基于插件检测>>>>
 //=============================================================================
 if( Imported.Drill_CoreOfWindowCharacter ){
+	
+	
+	
+//=============================================================================
+// ** ☆管辖权
+//
+//			说明：	> 管辖权 即对 原函数 进行 修改、覆写、继承、控制子插件继承 等的权利。
+//					> 用于后期脱离 原游戏框架 且仍保持兼容性 的标记。
+//=============================================================================
+/*
+//==============================
+// * D窗口皮肤『颜色核心』 - 取色器 - 获取皮肤中的颜色
+//
+//			说明：	> 颜色取自窗口皮肤中的特定像素点。
+//==============================
+Window_Base.prototype.textColor = function( n ){
+    var px = 96 + (n % 8) * 12 + 6;
+    var py = 144 + Math.floor(n / 8) * 12 + 6;
+    return this.windowskin.getPixel(px, py);
+};
+//==============================
+// * D窗口皮肤『颜色核心』 - 取色器 - 定义的颜色函数
+//==============================
+Window_Base.prototype.normalColor    = function(){ return this.textColor(0); };
+Window_Base.prototype.systemColor    = function(){ return this.textColor(16); };
+Window_Base.prototype.crisisColor    = function(){ return this.textColor(17); };
+Window_Base.prototype.deathColor     = function(){ return this.textColor(18); };
+Window_Base.prototype.gaugeBackColor = function(){ return this.textColor(19); };
+Window_Base.prototype.hpGaugeColor1  = function(){ return this.textColor(20); };
+Window_Base.prototype.hpGaugeColor2  = function(){ return this.textColor(21); };
+Window_Base.prototype.mpGaugeColor1  = function(){ return this.textColor(22); };
+Window_Base.prototype.mpGaugeColor2  = function(){ return this.textColor(23); };
+Window_Base.prototype.mpCostColor    = function(){ return this.textColor(23); };
+Window_Base.prototype.powerUpColor   = function(){ return this.textColor(24); };
+Window_Base.prototype.powerDownColor = function(){ return this.textColor(25); };
+Window_Base.prototype.tpGaugeColor1  = function(){ return this.textColor(28); };
+Window_Base.prototype.tpGaugeColor2  = function(){ return this.textColor(29); };
+Window_Base.prototype.tpCostColor    = function(){ return this.textColor(29); };
+//==============================
+// * D窗口皮肤『颜色核心』 - 取色器 - 背景颜色
+//==============================
+Window_Base.prototype.pendingColor = function(){
+    return this.windowskin.getPixel(120, 120);
+};
+//==============================
+// * D窗口皮肤『颜色核心』 - 取色器 - 属性增减的文本颜色
+//==============================
+Window_Base.prototype.paramchangeTextColor = function( change ){
+    if( change > 0 ){
+        return this.powerUpColor();
+    }else if( change < 0 ){
+        return this.powerDownColor();
+    }else{
+        return this.normalColor();
+    }
+};
+//==============================
+// * D窗口皮肤『颜色核心』 - 半透明（置灰的文字）
+//==============================
+Window_Base.prototype.translucentOpacity = function(){
+    return 160;
+};
+//==============================
+// * D窗口皮肤『颜色核心』 - 切换半透明（是否置灰）
+//==============================
+Window_Base.prototype.changePaintOpacity = function( enabled ){
+    this.contents.paintOpacity = enabled ? 255 : this.translucentOpacity();
+};
+//==============================
+// * D窗口皮肤『颜色核心』 - 改变文本色
+//==============================
+Window_Base.prototype.changeTextColor = function( color ){
+    this.contents.textColor = color;
+};
+//==============================
+// * D窗口皮肤『颜色核心』 - 重置字体颜色
+//==============================
+Window_Base.prototype.resetTextColor = function(){
+    this.changeTextColor(this.normalColor());
+};
+*/
 	
 	
 //=============================================================================
@@ -1974,7 +2068,7 @@ Window_Base.prototype.normalColor = function(){
 	return this.textColor( $gameSystem._drill_COC_fontColorIndex );
 };
 //==============================
-// * 文本颜色绑定 - 默认颜色（对话框，覆写）
+// * 文本颜色绑定 - 默认颜色（对话框）（覆写）
 //==============================
 Window_Message.prototype.normalColor = function(){
 	return this.textColor( $gameSystem._drill_COC_dialog_fontColorIndex );

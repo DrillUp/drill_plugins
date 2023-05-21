@@ -1673,6 +1673,12 @@
 //											< MOG的ui层【_hudField】 < ui层【_drill_map_top_board】
 //				AllWindows：WindowLayer：	< 对话框集合 < 滚动文本画布 < 最顶层【_drill_SenceTopArea】
 //
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			无
+//		
 //		★必要注意事项：
 //			1.插件的图片层级与多个插件共享。【必须自写 层级排序 函数】
 //
@@ -1994,8 +2000,8 @@ Game_System.prototype.drill_LTG_initSysData_Private = function() {
 		}
 	}
 	
-	// > 刷新当前地图
-	if( $gameMap ){
+	// > 刷新当前地图【$gameSystem优先初始化】
+	if( $gameMap != undefined ){
 		$gameMap.drill_LTG_initMapdata();
 	}
 };	

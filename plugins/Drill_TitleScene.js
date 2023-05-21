@@ -722,12 +722,12 @@
 //				->选项按钮组
 //				->背景音乐
 //		
-//		★配置参数结构体如下：
-//			~struct~DrillWindowMoving:			窗口移动动画（窗口辅助核心-通用）
-//			~struct~DrillWindowLayout:			窗口布局（窗口辅助核心-通用）
-//
-//			~struct~DrillTScCommandWindow:		标题选项窗口
-//			~struct~DrillTScCommandButton:		标题选项按钮组
+//		
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			无
 //		
 //		★必要注意事项：
 //			暂无
@@ -808,6 +808,7 @@
 　　var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_TitleScene');
 	
+	
 	//==============================
 	// * 变量获取 - 标题选项 - 标题选项按钮组（必须写在前面）
 	//				（~struct~DrillTScCommandButton）
@@ -872,6 +873,7 @@
 		DrillUp.g_TSc_selWin_fontsize = Number(dataFrom["选项窗口字体大小"] || 22);
 		DrillUp.g_TSc_selWin_col = Number(dataFrom["选项窗口列数"] || 1);
 		DrillUp.g_TSc_selWin_align = String(dataFrom["选项对齐方式"] || "center");
+//			~struct~DrillWindowMoving:			窗口移动动画（窗口辅助核心-通用）
 		if( dataFrom["选项窗口移动动画"] != undefined && 
 			dataFrom["选项窗口移动动画"] != "" ){
 			DrillUp.g_TSc_selWin_slideAnim = JSON.parse( dataFrom["选项窗口移动动画"] );
@@ -886,6 +888,7 @@
 		}else{
 			DrillUp.g_TSc_selWin_slideAnim = {};
 		}
+//			~struct~DrillWindowLayout:			窗口布局（窗口辅助核心-通用）
 		DrillUp.g_TSc_selWin_styleId = Number(dataFrom["选项窗口初始布局样式"] || 1);
 		DrillUp.g_TSc_style_list_length = 10;
 		DrillUp.g_TSc_style_list = [];
@@ -957,12 +960,12 @@
 		DrillUp.g_TSc_bgm_list[i] = String(DrillUp.parameters["背景音乐-" + String(i + 1)] || "");
 	};
 	
-		
+	
+	
 //=============================================================================
 // * 外部影响插件检测
 //=============================================================================
 if( typeof(_Window_TitleCommand_updatePlacement) != "undefined" ){
-	
 	alert( DrillUp.drill_TSc_getPluginTip_CompatibilityOther() );
 };
 
@@ -972,6 +975,70 @@ if( typeof(_Window_TitleCommand_updatePlacement) != "undefined" ){
 //=============================================================================
 if( Imported.Drill_CoreOfGlobalSave && 
 	Imported.Drill_CoreOfWindowAuxiliary ){
+	
+
+
+//=============================================================================
+// ** ☆原型链规范
+//
+//			说明：	> 此处专门补上缺失的原型链，未缺失的则注释掉。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 启动界面（场景基类） - 初始化
+//==============================
+//Scene_Title.prototype.initialize = function() {
+//    Scene_Base.prototype.initialize.call(this);
+//};
+//==============================
+// * 启动界面（场景基类） - 创建
+//==============================
+//Scene_Title.prototype.create = function() {
+//    Scene_Base.prototype.create.call(this);
+//};
+//==============================
+// * 启动界面（场景基类） - 帧刷新
+//==============================
+//Scene_Title.prototype.update = function() {
+//    Scene_Base.prototype.update.call(this);
+//};
+//==============================
+// * 启动界面（场景基类） - 开始运行
+//==============================
+//Scene_Title.prototype.start = function() {
+//    Scene_Base.prototype.start.call(this);
+//};
+//==============================
+// * 启动界面（场景基类） - 结束运行
+//==============================
+Scene_Title.prototype.stop = function() {
+    Scene_Base.prototype.stop.call(this);
+};
+//==============================
+// * 启动界面（场景基类） - 判断是否激活/启动
+//==============================
+Scene_Title.prototype.isActive = function() {
+	return Scene_Base.prototype.isActive.call(this);
+};
+//==============================
+// * 启动界面（场景基类） - 析构函数
+//==============================
+//Scene_Title.prototype.terminate = function() {
+//    Scene_Base.prototype.terminate.call(this);
+//};
+
+//==============================
+// * 启动界面（场景基类） - 判断加载完成
+//==============================
+Scene_Title.prototype.isReady = function() {
+	return Scene_Base.prototype.isReady.call(this);
+};
+//==============================
+// * 启动界面（场景基类） - 忙碌状态
+//==============================
+//Scene_Title.prototype.isBusy = function() {
+//	return Scene_Base.prototype.isBusy.call(this);
+//};
 	
 
 //=============================================================================

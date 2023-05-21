@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        地图UI - 永久漂浮文字
+ * @plugindesc [v1.5]        地图UI - 永久漂浮文字
  * @author Drill_up
  * 
  * @Drill_LE_param "永久漂浮样式-%d"
@@ -35,7 +35,7 @@
  * ----设定注意事项
  * 1.插件的作用域：地图界面。
  *   作用于地图的各个层级。
- * 2.更多详细内容，去看看文档 "13.UI > 关于漂浮文字.docx"。
+ * 2.更多详细内容，去看看文档 "13.UI > 大家族-漂浮文字.docx"。
  * 3.该插件的指令较多且使用频繁，建议使用小工具：插件信息查看器。
  *   在开启游戏编辑器时，可以并行使用读取器复制指令。
  * 细节：
@@ -60,6 +60,21 @@
  * 设计：
  *   (1.由于这类漂浮文字是可以长期存在的对象，你可以设置成某种提示性标语。
  *      或者任务清单提示、无边框的属性参数面板等。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----关联文件
+ * 资源路径：img/system
+ * 资源路径：img/Map__ui （Map后面有两个下划线）
+ * 先确保项目img文件夹下是否有system文件夹。
+ * 先确保项目img文件夹下是否有Map__ui文件夹。
+ * 要查看所有关联资源文件的插件，可以去看看"插件清单.xlsx"。
+ * 需要配置资源文件：
+ * 
+ * 物品框样式-1 资源-自定义窗口皮肤（system文件夹）
+ * 物品框样式-1 资源-自定义背景图片（Map__ui文件夹）
+ * 物品框样式-2 资源-自定义窗口皮肤（system文件夹）
+ * 物品框样式-2 资源-自定义背景图片（Map__ui文件夹）
+ * ……
  * 
  * -----------------------------------------------------------------------------
  * ----激活条件 - 创建
@@ -157,6 +172,8 @@
  * 优化了与地图活动镜头的变换关系。
  * [v1.4]
  * 优化了旧存档的识别与兼容。
+ * [v1.5]
+ * 添加了漂浮文字外框设置色调的功能。
  *
  *
  *
@@ -293,21 +310,21 @@
  * @default ==新的永久漂浮样式==
  * 
  * 
- * @param --常规--
+ * @param ---常规---
  * @default 
  *
  * @param 平移-漂浮文字 X
- * @parent --常规--
+ * @parent ---常规---
  * @desc 漂浮文字的初始x轴位置，0表示贴在最左边。
  * @default 400
  *
  * @param 平移-漂浮文字 Y
- * @parent --常规--
+ * @parent ---常规---
  * @desc 漂浮文字的初始y轴位置，0表示贴在最上面。
  * @default 300
  *
  * @param 漂浮文字透明度
- * @parent --常规--
+ * @parent ---常规---
  * @type number
  * @min 0
  * @max 255
@@ -315,17 +332,17 @@
  * @default 255
  * 
  * @param 默认内容文本
- * @parent --常规--
+ * @parent ---常规---
  * @type note
  * @desc 漂浮文字默认绑定的内容。
  * @default "一段永久的漂浮文字"
  * 
  * 
- * @param --层级--
+ * @param ---层级---
  * @default 
  *
  * @param UI基准
- * @parent --层级--
+ * @parent ---层级---
  * @type select
  * @option 相对于地图
  * @value 相对于地图
@@ -335,7 +352,7 @@
  * @default 相对于镜头
  *
  * @param 地图层级
- * @parent --层级--
+ * @parent ---层级---
  * @type select
  * @option 下层
  * @value 下层
@@ -351,18 +368,18 @@
  * @default 图片层
  *
  * @param 地图图片层级
- * @parent --层级--
+ * @parent ---层级---
  * @type number
  * @min 0
  * @desc 窗口在同一个地图层级时，先后排序的位置，0表示最后面。
  * @default 90
  * 
  * 
- * @param --窗口--
+ * @param ---窗口皮肤---
  * @default 
  * 
  * @param 布局模式
- * @parent --窗口--
+ * @parent ---窗口皮肤---
  * @type select
  * @option 默认窗口皮肤
  * @value 默认窗口皮肤
@@ -396,7 +413,7 @@
  * @desc 背景图片布局的资源。
  * @default (需配置)永久漂浮文字-自定义背景图片
  * @require 1
- * @dir img/system/
+ * @dir img/Map__ui/
  * @type file
  *
  * @param 平移-自定义背景图片 X
@@ -409,24 +426,59 @@
  * @desc 修正图片的偏移用。以窗口的点为基准，y轴方向平移，单位像素。正数向下，负数向上。
  * @default 0
  *
+ * @param 是否锁定窗口色调
+ * @parent ---窗口皮肤---
+ * @type boolean
+ * @on 锁定
+ * @off 默认色调
+ * @desc true - 锁定，false - 默认色调，你可以单独锁定该窗口的色调。
+ * @default false
+ *
+ * @param 窗口色调-红
+ * @parent 是否锁定窗口色调
+ * @desc 范围为：-255 至 255，与默认游戏中窗口色调配置的值一样。
+ * @default 0
+ *
+ * @param 窗口色调-绿
+ * @parent 是否锁定窗口色调
+ * @desc 范围为：-255 至 255，与默认游戏中窗口色调配置的值一样。
+ * @default 0
+ *
+ * @param 窗口色调-蓝
+ * @parent 是否锁定窗口色调
+ * @desc 范围为：-255 至 255，与默认游戏中窗口色调配置的值一样。
+ * @default 0
+ * 
+ * 
+ * @param ---窗口属性---
+ * @default 
+ *
  * @param 窗口中心锚点
- * @parent --窗口--
+ * @parent ---窗口属性---
  * @type select
  * @option 左上角
  * @value 左上角
  * @option 右上角
  * @value 右上角
- * @option 正中心
- * @value 正中心
  * @option 左下角
  * @value 左下角
  * @option 右下角
  * @value 右下角
+ * @option 正上方
+ * @value 正上方
+ * @option 正下方
+ * @value 正下方
+ * @option 正左方
+ * @value 正左方
+ * @option 正右方
+ * @value 正右方
+ * @option 正中心
+ * @value 正中心
  * @desc 窗口追随鼠标时，中心锚点的位置。
  * @default 左上角
  *
  * @param 窗口是否自适应行间距
- * @parent --窗口--
+ * @parent ---窗口属性---
  * @type boolean
  * @on 自适应
  * @off 固定行间距
@@ -441,26 +493,26 @@
  * @default 24
  *
  * @param 窗口内边距
- * @parent --窗口--
+ * @parent ---窗口属性---
  * @type number
  * @min 0
  * @desc 窗口内容与窗口外框的内边距。（默认标准：18）
  * @default 10
  *
  * @param 窗口字体大小
- * @parent --窗口--
+ * @parent ---窗口属性---
  * @type number
  * @min 1
  * @desc 窗口的字体大小。注意图标无法根据字体大小变化。（默认标准：28）
  * @default 22
  *
  * @param 窗口附加宽度
- * @parent --窗口--
+ * @parent ---窗口属性---
  * @desc 在当前自适应的基础上，再额外增加的宽度。可为负数。
  * @default 0
  *
  * @param 窗口附加高度
- * @parent --窗口--
+ * @parent ---窗口属性---
  * @desc 在当前自适应的基础上，再额外增加的高度。可为负数。
  * @default 0
  * 
@@ -505,20 +557,23 @@
 //			->☆数据容器
 //			
 //			->地图永久 漂浮文字窗口【Drill_GFPT_Window】
-//				->窗口字符
-//				->文本域自适应
-//				->弹道核心（插件指令）
-//				->弹道透明度控制
+//				->A主体
+//				->B窗口弹道
+//				->C窗口皮肤
+//				->D窗口内容
 //
 //		
+//		★家谱：
+//			大家族-漂浮文字
+//		
+//		★插件私有类：
+//			* 地图永久 漂浮文字窗口【Drill_GFPT_Window】
+//		
 //		★必要注意事项：
-//			1.插件的图片层级与多个插件共享。【必须自写 层级排序 函数】
-//			2.【镜头兼容】该插件的漂浮文字如果放在 下层、中层、上层、图片层 ，需要对其进行相关的镜头缩放控制。
-//			3.漂浮文字的全部数据，都存储在 $gameSystem 中。
+//			1.所有子插件功能介绍去看看："13.UI > 大家族-漂浮文字（脚本）.docx"。
 //	
 //		★其它说明细节：
-//			1.注意，图片层以下时，移动镜头时，漂浮文字会被移走，
-//			  因为漂浮文字只在最开始时锁定地图位置，并不绑定于地图。
+//			暂无
 //
 //		★存在的问题：
 //			暂无
@@ -581,6 +636,7 @@
 	//==============================
 	DrillUp.drill_GFPT_initContext = function( dataFrom ) {
 		var data = {};
+		
 		// > 常规
 		data['x'] = Number( dataFrom["平移-漂浮文字 X"] || 400);
 		data['y'] = Number( dataFrom["平移-漂浮文字 Y"] || 300);
@@ -591,17 +647,25 @@
 		}else{
 			data['context'] = "";
 		}
+		
 		// > 层级
 		data['window_benchmark'] = String( dataFrom["UI基准"] || "相对于镜头");
 		data['window_map_layer'] = String( dataFrom["地图层级"] || "");
 		data['window_map_zIndex'] = Number( dataFrom["地图图片层级"] || 22);
-		// > 窗口
+		
+		// > 窗口皮肤
 		data['window_type'] = String( dataFrom["布局模式"] || "黑底背景");
 		data['window_opacity'] = Number( dataFrom["布局透明度"] || 0);
 		data['window_sys_src'] = String( dataFrom["资源-自定义窗口皮肤"] || "");
 		data['window_pic_src'] = String( dataFrom["资源-自定义背景图片"] || "");
 		data['window_pic_x'] = Number( dataFrom["平移-自定义背景图片 X"] || 0);
 		data['window_pic_y'] = Number( dataFrom["平移-自定义背景图片 Y"] || 0);
+		data['window_tone_lock'] = String( dataFrom["是否锁定窗口色调"] || "false") == "true";
+		data['window_tone_r'] = Number( dataFrom["窗口色调-红"] || 0);
+		data['window_tone_g'] = Number( dataFrom["窗口色调-绿"] || 0);
+		data['window_tone_b'] = Number( dataFrom["窗口色调-蓝"] || 0);
+		
+		// > 窗口属性
 		data['window_anchor'] = String( dataFrom["窗口中心锚点"] || "左上角" );
 		data['window_autoLineheight'] = String(dataFrom["窗口是否自适应行间距"] || "true") === "true";	
 		data['window_lineheight'] = Number(dataFrom["窗口固定行间距"] || 28);
@@ -677,7 +741,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var type = String(args[3]);
 			if( type == "修改样式属性-刷新内容文本" || type == "刷新内容文本" ){
 				if( $gameTemp._drill_GFPT_windowTank[ text_id ] != null ){
-					$gameTemp._drill_GFPT_windowTank[ text_id ].drill_refreshMessageFromData();
+					$gameTemp._drill_GFPT_windowTank[ text_id ].drill_initMessage();
 				}
 			}	
 		}
@@ -696,7 +760,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 						
 						data['context'] = temp1;
 						if( $gameTemp._drill_GFPT_windowTank[ text_id ] != null ){
-							$gameTemp._drill_GFPT_windowTank[ text_id ].drill_refreshMessageFromData();
+							$gameTemp._drill_GFPT_windowTank[ text_id ].drill_initMessage();
 						}
 					}else{
 						alert( DrillUp.drill_GFPT_getPluginTip_NoSupportPlugin() );
@@ -713,7 +777,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					}
 					data['context'] = data_str;
 					if( $gameTemp._drill_GFPT_windowTank[ text_id ] != null ){
-						$gameTemp._drill_GFPT_windowTank[ text_id ].drill_refreshMessageFromData();
+						$gameTemp._drill_GFPT_windowTank[ text_id ].drill_initMessage();
 					}
 				}
 			}
@@ -1390,30 +1454,34 @@ Scene_Map.prototype.drill_GFPT_updateDataOpacity = function() {
 
 //=============================================================================
 // ** 地图永久 漂浮文字窗口【Drill_GFPT_Window】
-//			
-//			索引：	无
-//			来源：	继承于Window_Base
-//			实例：	Scene_Map下的 _drill_GFPT_window 成员
-//			应用：	暂无
-//			
-//			作用域：	地图界面
-//			主功能：	定义一个面板，能随时改变内容和高宽，用于描述事件内置信息。
-//			子功能：
-//						->贴图内容
-//							->文本层
-//							->背景
-//								> 默认窗口皮肤
-//								> 自定义窗口皮肤
-//								> 自定义背景图片
-//								> 黑底背景
-//						->位置
-//							->地图UI基准（外层手动控制 移动弹道）
-//							->镜头缩放与位移
-//							->窗口的锚点
-//							->透明度弹道
-//				
-//			说明：	> 该窗口在游戏中创建后永久存在，需要手动销毁。
-//					> 窗口的结构从 Drill_MPFP_Window 借鉴来，但是除了贴图内容，其他部分变化非常大。
+// **		
+// **		索引：	无
+// **		来源：	继承于Window_Base
+// **		实例：	Scene_Map下的 _drill_GFPT_window 成员
+// **		应用：	暂无
+// **		
+// **		作用域：	地图界面
+// **		主功能：	定义一个面板，能随时改变内容和高宽，用于描述事件内置信息。
+// **		子功能：	->窗口
+// **						x->是否就绪
+// **						x->优化策略
+// **						x->销毁
+// **					->A主体
+// **						->中心锚点
+// **						x->UI基准
+// **					->B窗口弹道
+// **						->外部控制（drill_GFPT_updateDataMoving）
+// **					->C窗口皮肤
+// **						> 默认窗口皮肤
+// **						> 自定义窗口皮肤
+// **						> 自定义背景图片
+// **						> 黑底背景
+// **					->D窗口内容
+// **						->窗口字符
+// **						->文本域自适应
+// **			
+// **		说明：	> 该窗口在游戏中创建后永久存在，需要手动销毁。
+// **				> 窗口的结构从 Drill_MPFP_Window 借鉴来，但是除了贴图内容，其他部分变化非常大。
 //=============================================================================
 //==============================
 // * 漂浮文字窗口 - 定义
@@ -1428,20 +1496,21 @@ Drill_GFPT_Window.prototype.constructor = Drill_GFPT_Window;
 //==============================
 Drill_GFPT_Window.prototype.initialize = function( data ){
 	this._drill_data = data;			//（直接传指针）
+	
     Window_Base.prototype.initialize.call(this, 0, 0, 0, 0);
 	
 	this.drill_initData();				//初始化数据
 	this.drill_initSprite();			//初始化对象
-	
-	this.drill_refreshMessageFromData();	//刷新初始内容
 };
 //==============================
 // * 漂浮文字窗口 - 帧刷新
 //==============================
 Drill_GFPT_Window.prototype.update = function() {
 	Window_Base.prototype.update.call(this);
-	
-	this.drill_updatePosition();		//帧刷新 - 位置
+	this.drill_updateAttr();			//帧刷新 - A主体
+	this.drill_updateBallistics();		//帧刷新 - B窗口弹道
+	this.drill_updateSkin();			//帧刷新 - C窗口皮肤
+										//帧刷新 - D窗口内容（无）
 }
 //==============================
 // * 漂浮文字窗口 - 窗口属性
@@ -1450,115 +1519,76 @@ Drill_GFPT_Window.prototype.lineHeight = function(){ return this._drill_data['wi
 Drill_GFPT_Window.prototype.standardPadding = function(){ return this._drill_data['window_padding']; };			//窗口内边距
 Drill_GFPT_Window.prototype.standardFontSize = function(){ return this._drill_data['window_fontsize']; };		//窗口字体大小
 //==============================
-// * 初始化 - 数据
+// * 漂浮文字窗口 - 初始化数据
 //==============================
 Drill_GFPT_Window.prototype.drill_initData = function() {
+	//（暂无 默认值）
+}
+//==============================
+// * 漂浮文字窗口 - 初始化对象
+//==============================
+Drill_GFPT_Window.prototype.drill_initSprite = function() {
+	this.drill_initAttr();					//初始化对象 - A主体
+	this.drill_initBallistics();			//初始化对象 - B窗口弹道
+	this.drill_initSkin();					//初始化对象 - C窗口皮肤
+	this.drill_initMessage();				//初始化对象 - D窗口内容
+}
+
+
+//==============================
+// * A主体 - 初始化对象
+//==============================
+Drill_GFPT_Window.prototype.drill_initAttr = function() {
 	var data = this._drill_data;
-	
-	// > 皮肤设置
-	this._drill_window_sys_bitmap = ImageManager.loadSystem( data['window_sys_src'] );
-	this._drill_window_pic_bitmap = ImageManager.loadSystem( data['window_pic_src'] );
 	
 	// > 私有属性初始化
 	this.x = 0;
 	this.y = Graphics.boxHeight*2;
-	this.contentsOpacity = 0;
-	this._drill_width = 0;
-	this._drill_height = 0;
+	this.contentsOpacity = 0;			//文本域 透明度
+	this.opacity = 0;					//背景容器层 透明度
 	
+	this._drill_width = 0;				//窗口宽度
+	this._drill_height = 0;				//窗口高度
+	this._drill_curTime = 0;			//当前生命周期（暂未用到）
+	
+	// > 中心锚点
 	this._drill_anchor_x = 0;			//中心锚点x
 	this._drill_anchor_y = 0;			//中心锚点y
+	if( data['window_anchor'] == "左上角" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 0.0; }
 	if( data['window_anchor'] == "右上角" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 0.0; }
-	if( data['window_anchor'] == "正中心" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 0.5; }
 	if( data['window_anchor'] == "左下角" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 1.0; }
 	if( data['window_anchor'] == "右下角" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 1.0; }
+	if( data['window_anchor'] == "正上方" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 0.0; }
+	if( data['window_anchor'] == "正下方" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 1.0; }
+	if( data['window_anchor'] == "正左方" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 0.5; }
+	if( data['window_anchor'] == "正右方" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 0.5; }
+	if( data['window_anchor'] == "正中心" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 0.5; }
 
+	// > UI基准初始位置
+	//	（存储在Game_System中，见 _drill_orgPos_x ）
 }
 //==============================
-// * 初始化 - 对象
+// * A主体 - 初始化对象
 //==============================
-Drill_GFPT_Window.prototype.drill_initSprite = function() {
-	this.drill_createBackground();		//创建背景
-	this.drill_sortBottomByZIndex();	//底层层级排序
+Drill_GFPT_Window.prototype.drill_updateAttr = function() {
 	
-	// > 窗口属性
-	this.createContents();
-    this.contents.clear();
+	// > 主体 时间流逝
+	this._drill_curTime += 1;
 }
-//==============================
-// * 创建 - 背景
-//==============================
-Drill_GFPT_Window.prototype.drill_createBackground = function() {
-	var data = this._drill_data;
-	this._drill_background = new Sprite();
-	
-	// > 图层顺序处理
-	this._drill_background.zIndex = 1;
-	this._windowBackSprite.zIndex = 2;
-	this._windowFrameSprite.zIndex = 3;
-	
-	// > 信息框布局
-	if( data['window_type'] == "默认窗口皮肤" ){
-		
-		// > 透明度
-		this.opacity = data['window_opacity'];
-		this._drill_background.bitmap = null;
-		this._drill_background.opacity = data['window_opacity'];
-		this._windowBackSprite.opacity = data['window_opacity'];
-		this._windowFrameSprite.opacity = data['window_opacity'];
-		
-		
-	}else if( data['window_type'] == "自定义窗口皮肤" ){
-		
-		// > 皮肤设置
-		this.windowskin = this._drill_window_sys_bitmap;
-		
-		// > 透明度
-		this._drill_background.bitmap = null;
-		this._drill_background.opacity = data['window_opacity'];
-		this._windowBackSprite.opacity = data['window_opacity'];
-		this._windowFrameSprite.opacity = data['window_opacity'];
-		
-		
-	}else if( data['window_type'] == "自定义背景图片" ){
-		
-		// > bimap建立
-		this._drill_background.bitmap = this._drill_window_pic_bitmap;
-		this._drill_background.x = data['window_pic_x'];
-		this._drill_background.y = data['window_pic_y'];
-		
-		// > 透明度
-		this._drill_background.opacity = data['window_opacity'];
-		this._windowBackSprite.opacity = 0;
-		this._windowFrameSprite.opacity = 0;
-		
-		
-	}else if( data['window_type'] == "黑底背景" || data['window_type'] == "黑底布局" ){
-		
-		// > bimap建立
-		//（需延迟设置，见后面）
-		
-		// > 透明度
-		this._drill_background.bitmap = null;
-		this._drill_background.opacity = data['window_opacity'];
-		this._windowBackSprite.opacity = 0;
-		this._windowFrameSprite.opacity = 0;
-	}
-	
-	this._windowSpriteContainer.addChild(this._drill_background);	//（ _windowSpriteContainer 为窗口的最底层贴图）
-}
-//==============================
-// ** 底层层级排序
-//==============================
-Drill_GFPT_Window.prototype.drill_sortBottomByZIndex = function() {
-   this._windowSpriteContainer.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
-};
 
 
 //==============================
-// * 位置 - 帧刷新
+// * B窗口弹道 - 初始化对象
 //==============================
-Drill_GFPT_Window.prototype.drill_updatePosition = function() {
+Drill_GFPT_Window.prototype.drill_initBallistics = function() {
+	//（无）
+}
+//==============================
+// * B窗口弹道 - 帧刷新
+//
+//			说明：	窗口的弹道由外部控制，见：drill_GFPT_updateDataMoving 。
+//==============================
+Drill_GFPT_Window.prototype.drill_updateBallistics = function() {
 	var data = this._drill_data;
 	
 	// > 位置 设置
@@ -1591,27 +1621,226 @@ Drill_GFPT_Window.prototype.drill_updatePosition = function() {
 	
 	// > 透明度 设置
 	var oo = data['opacity'];
-	this.contentsOpacity = oo;
+	this.contentsOpacity = oo;			//文本域 透明度
+	this.opacity = oo;					//背景容器层 透明度
 }
 
+
 //==============================
-// * 激活 - 刷新内容
+// * C窗口皮肤 - 初始化对象
 //==============================
-Drill_GFPT_Window.prototype.drill_refreshMessageFromData = function(){
-	var context = this._drill_data['context'];
+Drill_GFPT_Window.prototype.drill_initSkin = function() {
 	
-	// > 此处context不需要任何变化（\str和\v都有效）
+	// > 皮肤资源
+	this._drill_skin_defaultSkin = this.windowskin;
+	
+	// > 布局模式
+	var data = this._drill_data;
+	this.drill_resetSkinData( data );
+}
+//==============================
+// * C窗口皮肤 - 重设数据
+//
+//			说明：	data对象中的参数【可以缺项】。
+//==============================
+Drill_GFPT_Window.prototype.drill_resetSkinData = function( data ){
+	
+	// > 默认值
+	if( data['window_type'] == undefined ){ data['window_type'] = "默认窗口皮肤" };		//布局模式（默认窗口皮肤/自定义窗口皮肤/自定义背景图片/黑底背景）
+	if( data['window_opacity'] == undefined ){ data['window_opacity'] = 255 };			//布局透明度
+	if( data['window_sys_src'] == undefined ){ data['window_sys_src'] = "" };			//资源-自定义窗口皮肤
+	if( data['window_pic_src'] == undefined ){ data['window_pic_src'] = "" };			//资源-自定义背景图片
+	if( data['window_pic_x'] == undefined ){ data['window_pic_x'] = 0 };				//背景图片X
+	if( data['window_pic_y'] == undefined ){ data['window_pic_y'] = 0 };				//背景图片Y
+	
+	if( data['window_tone_lock'] == undefined ){ data['window_tone_lock'] = false };	//是否锁定窗口色调
+	if( data['window_tone_r'] == undefined ){ data['window_tone_r'] = 0 };				//窗口色调-红
+	if( data['window_tone_g'] == undefined ){ data['window_tone_g'] = 0 };				//窗口色调-绿
+	if( data['window_tone_b'] == undefined ){ data['window_tone_b'] = 0 };				//窗口色调-蓝
+	
+	
+	// > 窗口皮肤 - 私有变量初始化
+	this._drill_skin_type = data['window_type'];
+	this._drill_skin_opacity = data['window_opacity'];
+	
+	this._drill_skinBackground_width = 0;
+	this._drill_skinBackground_height = 0;
+	if( data['window_type'] == "自定义背景图片" && data['window_pic_src'] != "" ){
+		this._drill_skin_pic_bitmap = ImageManager.loadBitmap( "img/Map__ui/", data['window_pic_src'], 0, true );
+		this._drill_skin_pic_x = data['window_pic_x'];
+		this._drill_skin_pic_y = data['window_pic_y'];
+	}else{
+		this._drill_skin_pic_bitmap = ImageManager.loadEmptyBitmap();
+	}
+	
+	if( data['window_type'] == "自定义窗口皮肤" && data['window_sys_src'] != "" ){
+		this._drill_skin_sys_bitmap = ImageManager.loadBitmap( "img/system/", data['window_sys_src'], 0, true );
+	}else{
+		this._drill_skin_sys_bitmap = this._drill_skin_defaultSkin;
+	}
+	
+	this._drill_skin_tone_lock = data['window_tone_lock'];
+	this._drill_skin_tone_r = data['window_tone_r'];
+	this._drill_skin_tone_g = data['window_tone_g'];
+	this._drill_skin_tone_b = data['window_tone_b'];
+	
+	
+	// > 窗口皮肤 - 贴图初始化
+	if( this._drill_skinBackground == undefined ){
+		this._drill_skinBackground = new Sprite();
+		this._windowSpriteContainer.addChild(this._drill_skinBackground);	//（ _windowSpriteContainer 为窗口的最底层贴图）
+	}
+	
+	
+	// > 窗口皮肤 - 布局模式
+	if( this._drill_skin_type == "默认窗口皮肤" || this._drill_skin_type == "默认窗口布局" ){
+		
+		// （皮肤资源）
+		this.windowskin = this._drill_skin_defaultSkin;
+		
+		// （透明度）
+		//this.contentsOpacity = 255;									//文本域 透明度（与 背景容器层 并列）
+		//this.opacity = 255;											//背景容器层 透明度
+		this._windowBackSprite.opacity = this._drill_skin_opacity;		//背景容器层 - 平铺贴图 透明度
+		this._windowFrameSprite.opacity = this._drill_skin_opacity;		//背景容器层 - 框架贴图 透明度
+		this._drill_skinBackground.opacity = 0;							//背景容器层 - 背景图片 透明度
+		
+		// （背景图片布局）
+		this._drill_skinBackground.bitmap = null;
+		
+		
+	}else if( this._drill_skin_type == "自定义窗口皮肤" || this._drill_skin_type == "系统窗口布局" ){
+		
+		// （皮肤资源）
+		this.windowskin = this._drill_skin_sys_bitmap;
+		
+		// （透明度）
+		//this.contentsOpacity = 255;									//文本域 透明度（与 背景容器层 并列）
+		//this.opacity = 255;											//背景容器层 透明度
+		this._windowBackSprite.opacity = this._drill_skin_opacity;		//背景容器层 - 平铺贴图 透明度
+		this._windowFrameSprite.opacity = this._drill_skin_opacity;		//背景容器层 - 框架贴图 透明度
+		this._drill_skinBackground.opacity = 0;							//背景容器层 - 背景图片 透明度
+		
+		// （背景图片布局）
+		this._drill_skinBackground.bitmap = null;
+		
+		
+	}else if( this._drill_skin_type == "自定义背景图片" || this._drill_skin_type == "图片窗口布局" ){
+		
+		// （皮肤资源）
+		this.windowskin = this._drill_skin_defaultSkin;
+		
+		// （透明度）
+		//this.contentsOpacity = 255;									//文本域 透明度（与 背景容器层 并列）
+		//this.opacity = 255;											//背景容器层 透明度
+		this._windowBackSprite.opacity = 0;								//背景容器层 - 平铺贴图 透明度
+		this._windowFrameSprite.opacity = 0;							//背景容器层 - 框架贴图 透明度
+		this._drill_skinBackground.opacity = this._drill_skin_opacity;	//背景容器层 - 背景图片 透明度]
+		
+		// （背景图片布局）
+		this._drill_skinBackground.bitmap = this._drill_skin_pic_bitmap;
+		this._drill_skinBackground.x = this._drill_skin_pic_x;
+		this._drill_skinBackground.y = this._drill_skin_pic_y;
+		
+		
+	}else if( this._drill_skin_type == "黑底背景" || this._drill_skin_type == "黑底布局" ){
+		
+		// （皮肤资源）
+		this.windowskin = this._drill_skin_defaultSkin;
+		
+		// （透明度）
+		//this.contentsOpacity = 255;									//文本域 透明度（与 背景容器层 并列）
+		//this.opacity = 255;											//背景容器层 透明度
+		this._windowBackSprite.opacity = 0;								//背景容器层 - 平铺贴图 透明度
+		this._windowFrameSprite.opacity = 0;							//背景容器层 - 框架贴图 透明度
+		this._drill_skinBackground.opacity = this._drill_skin_opacity;	//背景容器层 - 背景图片 透明度
+		
+		// （背景图片布局）
+		this._drill_skinBackground.bitmap = null;	//（帧刷新中会自动建立黑色画布）
+	}
+	
+	
+	// > 窗口皮肤 - 层级排序
+	this._drill_skinBackground.zIndex = 1;
+	this._windowBackSprite.zIndex = 2;
+	this._windowFrameSprite.zIndex = 3;
+	this._windowSpriteContainer.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
+}
+//==============================
+// * C窗口皮肤 - 帧刷新
+//==============================
+Drill_GFPT_Window.prototype.drill_updateSkin = function() {
+	
+	if( this._drill_skin_type == "自定义背景图片" || this._drill_skin_type == "图片窗口布局" ){
+		
+		// > 高宽改变锁
+		if( this._drill_skinBackground_width  == this._drill_width &&
+			this._drill_skinBackground_height == this._drill_height ){
+			return;
+		}
+		this._drill_skinBackground_width = this._drill_width;
+		this._drill_skinBackground_height = this._drill_height;
+		
+		// > 背景图片与中心锚点
+		var xx = this._drill_skin_pic_x;
+		var yy = this._drill_skin_pic_y;
+		xx += this._drill_width * this._drill_anchor_x;
+		yy += this._drill_height * this._drill_anchor_y;
+		this._drill_skinBackground.x = xx;
+		this._drill_skinBackground.y = yy;
+		this._drill_skinBackground.anchor.x = this._drill_anchor_x;
+		this._drill_skinBackground.anchor.y = this._drill_anchor_y;
+	}
+	
+	if( this._drill_skin_type == "黑底背景" || this._drill_skin_type == "黑底布局" ){
+		
+		// > 高宽改变锁
+		if( this._drill_skinBackground_width  == this._drill_width &&
+			this._drill_skinBackground_height == this._drill_height ){
+			return;
+		}
+		this._drill_skinBackground_width = this._drill_width;
+		this._drill_skinBackground_height = this._drill_height;
+		
+		// > 改变时新建黑色画布
+		this._drill_skinBackground_BlackBitmap = new Bitmap(this._drill_width, this._drill_height);
+		this._drill_skinBackground_BlackBitmap.fillRect(0, 0 , this._drill_width, this._drill_height, "#000000");
+		this._drill_skinBackground.bitmap = this._drill_skinBackground_BlackBitmap;
+	}
+}
+//==============================
+// * C窗口皮肤 - 帧刷新色调
+//
+//			说明：	setTone可以反复调用赋值，有变化监听的锁。
+//==============================
+var _drill_GFPT_updateTone = Drill_GFPT_Window.prototype.updateTone;
+Drill_GFPT_Window.prototype.updateTone = function() {
+	if( this._drill_skin_tone_lock == true ){
+		this.setTone( this._drill_skin_tone_r, this._drill_skin_tone_g, this._drill_skin_tone_b );
+		return;
+	}
+	_drill_GFPT_updateTone.call( this );
+}
+
+
+//==============================
+// * D窗口内容 - 初始化对象
+//==============================
+Drill_GFPT_Window.prototype.drill_initMessage = function(){
+	var context = this._drill_data['context'];
+	//（此处context不需要任何变化，\str和\v都有效）
 	
 	this.drill_refreshMessage( context.split("\n") );
 }
 //==============================
-// * 激活 - 刷新内容
+// * D窗口内容 - 刷新内容
 //==============================
 Drill_GFPT_Window.prototype.drill_refreshMessage = function( context_list ){
 	var data = this._drill_data;
 	if( context_list.length == 0 ){ return; }
 	
-	// > 窗口高宽 - 计算
+	
+	// > 窗口高宽 - 计算（文本域自适应）
 	var options = {};
 	options['autoLineheight'] = data['window_autoLineheight'];
 	options['lineheight'] = data['window_lineheight'];
@@ -1633,14 +1862,6 @@ Drill_GFPT_Window.prototype.drill_refreshMessage = function( context_list ){
 	
 	// > 绘制内容
 	this.drill_COWA_drawTextListEx( context_list, options );
-	
-	
-	if( data['window_type'] == "黑底背景" ){
-		this._drill_background_BlackBitmap = new Bitmap(this._drill_width, this._drill_height);
-		this._drill_background_BlackBitmap.fillRect(0, 0 , this._drill_width, this._drill_height, "#000000");	//（背景黑框）
-		this._drill_background.bitmap = this._drill_background_BlackBitmap;
-	}
-	
 }
 
 

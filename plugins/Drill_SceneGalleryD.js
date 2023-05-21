@@ -42,7 +42,7 @@
  *   (1.插件包含：1个选项窗口 + 4个箭头 + 1个文本描述窗口
  *       + 1个完成度窗口 + 1个缩略图 + 1个原图查看器
  *      选项窗口中，每个选项都会改变 缩略图和描述窗口 的内容。
- *      该画廊与 画廊C 一模一样。
+ *      相比与 画廊A ，少了 按钮组功能，多了箭头功能。
  *   (2.窗口的布局规划没有限制，去了解下 "17.主菜单 > 窗口与布局.docx"。
  * 流程：
  *   (1.流程是程序内部无法改变的固定业务逻辑结构。
@@ -1494,46 +1494,58 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			全自定义画廊：
-//				->部件
-//					->选项
-//						->选项窗口模式
-//							> 标准属性
-//							> 选项图片（小图）
-//					->详细窗口
-//					->完成度窗口
-//					->缩略图（中图）
-//						> 等比缩放
-//						> 拉伸缩放
-//						->点击缩略图进入查看器
-//					->原图查看器
-//						->原图（大图）
-//							> 键盘移动
-//							> 鼠标拖拽
-//							> 自适应模式
-//						->帮助图
-//						->原图查看器窗口
-//					->箭头
-//				->结构
-//					->主菜单按钮
-//					->标题选项
-//					->全局存储
-//					->选项显示
-//					->选项锁定
-//				->指令
-//					->打开面板
-//					->打开面板（单图查看模式）
-//					->选中页
-//				->特殊
-//					->原图全部全加载
+//			->☆提示信息
+//			->☆变量获取
+//			->☆全局存储
+//			->☆存储数据
+//			->☆插件指令
+//				->打开面板
+//				->打开面板（单图查看模式）
+//				->选中页
 //			
-//		★插件私有类：
-//			* Scene_Drill_SGaD				画廊D
-//			* Drill_SGaD_SelectWindow		选项窗口
-//			* Drill_SGaD_DescWindow			显示窗口
-//			* Drill_SGaD_CompletionWindow	完成度窗口
-//			* Drill_SGaD_ImgExpandWindow	原图查看器窗口
+//			->☆主菜单选项
+//			->☆标题选项
+//			->☆面板控制
+//			
+//			->画廊D【Scene_Drill_SGaD】
+//				->选项
+//					->选项窗口模式
+//						> 标准属性
+//						> 选项图片（小图）
+//					->按钮组模式
+//						> 标准属性
+//				->详细窗口
+//				->完成度窗口
+//				->缩略图（中图）
+//					> 等比缩放
+//					> 拉伸缩放
+//					->点击缩略图进入查看器
+//				->原图查看器
+//					->原图（大图）
+//						> 键盘移动
+//						> 鼠标拖拽
+//						> 自适应模式
+//					->帮助图
+//					->原图查看器窗口
+//				->原图全部全加载
+//				->☆原型链规范
+//				->☆箭头
+//			->选项窗口【Drill_SGaD_SelectWindow】
+//			->显示窗口【Drill_SGaD_DescWindow】
+//			->完成度窗口【Drill_SGaD_CompletionWindow】
+//			->原图查看器窗口【Drill_SGaD_ImgExpandWindow】
 //
+//
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			* 画廊D【Scene_Drill_SGaD】
+//			* 选项窗口【Drill_SGaD_SelectWindow】
+//			* 显示窗口【Drill_SGaD_DescWindow】
+//			* 完成度窗口【Drill_SGaD_CompletionWindow】
+//			* 原图查看器窗口【Drill_SGaD_ImgExpandWindow】
+//		
 //		★必要注意事项：
 //			1.替换以下字符变成新面板：
 //				SGaD
@@ -1548,7 +1560,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -1577,7 +1589,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_SceneGalleryD = true;
@@ -1867,7 +1879,7 @@ if( Imported.Drill_CoreOfInput &&
 	
 	
 //=============================================================================
-// ** 全局存储
+// ** ☆全局存储
 //=============================================================================
 //==============================
 // * 全局 - 检查数据 - 显示情况
@@ -1945,7 +1957,7 @@ StorageManager.drill_SGaD_saveData = function(){
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -2061,14 +2073,7 @@ Game_System.prototype.drill_SGaD_checkSysData_Private = function() {
 
 
 //=============================================================================
-// ** 资源文件夹
-//=============================================================================
-ImageManager.load_MenuGallery = function(filename) {
-    return this.loadBitmap('img/Menu__picturegallery/', filename, 0, true);
-};
-
-//=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _drill_SGaD_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
@@ -2149,8 +2154,13 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	
 };
 
+
+
 //=============================================================================
-// * Scene_Menu 主菜单按钮
+// ** ☆主菜单选项
+//
+//			说明：	> 此模块专门关联主菜单选项，选项进入后跳转到 画廊D 界面。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 var _drill_SGaD_createCommandWindow = Scene_Menu.prototype.createCommandWindow;
 Scene_Menu.prototype.createCommandWindow = function() {
@@ -2169,7 +2179,10 @@ Window_MenuCommand.prototype.addOriginalCommands = function() {
 };
 
 //=============================================================================
-// ** Scene Tittle 标题选项
+// ** ☆标题选项
+//
+//			说明：	> 此模块专门关联标题选项，选项进入后跳转到 画廊D 界面。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================	
 var _drill_SGaD_title_createCommandWindow = Scene_Title.prototype.createCommandWindow;
 Scene_Title.prototype.createCommandWindow = function() {
@@ -2188,11 +2201,15 @@ Window_TitleCommand.prototype.makeCommandList = function() {
 	}
 };	
 
+
 //=============================================================================
-// * 临时数据
+// ** ☆面板控制
+//
+//			说明：	> 此模块专门将部分面板配置转移到 Game_Temp 方便随时调用。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 临时 - 初始化
+// * 面板控制 - 初始化
 //==============================
 var _drill_SGaD_temp_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {	
@@ -2203,7 +2220,7 @@ Game_Temp.prototype.initialize = function() {
 	this._drill_SGaD_visibleDataList = [];			//可见的列表
 };
 //==============================
-// * 临时 - 判断 锁定情况
+// * 面板控制 - 判断 锁定情况
 //==============================
 Game_Temp.prototype.drill_SGaD_isLocked = function( context_realIndex ){
 	
@@ -2225,7 +2242,7 @@ Game_Temp.prototype.drill_SGaD_isLocked = function( context_realIndex ){
 	}
 }
 //==============================
-// * 临时 - 判断 显示情况
+// * 面板控制 - 判断 显示情况
 //==============================
 Game_Temp.prototype.drill_SGaD_isEnabled = function( context_realIndex ){
 	
@@ -2246,6 +2263,13 @@ Game_Temp.prototype.drill_SGaD_isEnabled = function( context_realIndex ){
 		}
 	}
 }
+//==============================
+// * 面板控制 - 资源文件夹
+//==============================
+ImageManager.load_MenuGallery = function(filename) {
+    return this.loadBitmap('img/Menu__picturegallery/', filename, 0, true);
+};
+
 
 
 //=============================================================================
@@ -2910,8 +2934,86 @@ Scene_Drill_SGaD.prototype.drill_updateSinglePictureMode = function() {
 	this._window_desc.y = Graphics.boxHeight * 2;
 }
 
+
+//=============================================================================
+// ** ☆原型链规范
+//
+//			说明：	> 此处专门补上缺失的原型链，未缺失的则注释掉。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 画廊D（场景基类） - 初始化
+//==============================
+//Scene_Drill_SGaD.prototype.initialize = function() {
+//    Scene_MenuBase.prototype.initialize.call(this);
+//};
+//==============================
+// * 画廊D（场景基类） - 创建
+//==============================
+//Scene_Drill_SGaD.prototype.create = function() {
+//    Scene_MenuBase.prototype.create.call(this);
+//};
+//==============================
+// * 画廊D（场景基类） - 帧刷新
+//==============================
+//Scene_Drill_SGaD.prototype.update = function() {
+//    Scene_MenuBase.prototype.update.call(this);
+//};
+//==============================
+// * 画廊D（场景基类） - 开始运行
+//==============================
+Scene_Drill_SGaD.prototype.start = function() {
+    Scene_MenuBase.prototype.start.call(this);
+};
+//==============================
+// * 画廊D（场景基类） - 结束运行
+//==============================
+Scene_Drill_SGaD.prototype.stop = function() {
+    Scene_MenuBase.prototype.stop.call(this);
+};
+//==============================
+// * 画廊D（场景基类） - 判断是否激活/启动
+//==============================
+Scene_Drill_SGaD.prototype.isActive = function() {
+	return Scene_MenuBase.prototype.isActive.call(this);
+};
+//==============================
+// * 画廊D（场景基类） - 析构函数
+//==============================
+//Scene_Drill_SGaD.prototype.terminate = function() {
+//    Scene_MenuBase.prototype.terminate.call(this);
+//};
+
+//==============================
+// * 画廊D（场景基类） - 判断加载完成
+//==============================
+Scene_Drill_SGaD.prototype.isReady = function() {
+	return Scene_MenuBase.prototype.isReady.call(this);
+};
+//==============================
+// * 画廊D（场景基类） - 忙碌状态
+//==============================
+Scene_Drill_SGaD.prototype.isBusy = function() {
+	return Scene_MenuBase.prototype.isBusy.call(this);
+};
+
+//==============================
+// * 画廊D（菜单界面基类） - 创建 - 菜单背景
+//==============================
+Scene_Drill_SGaD.prototype.createBackground = function() {
+	Scene_MenuBase.prototype.createBackground.call(this);
+};
+//==============================
+// * 画廊D（菜单界面基类） - 创建 - 帮助窗口
+//==============================
+Scene_Drill_SGaD.prototype.createHelpWindow = function() {
+	Scene_MenuBase.prototype.createHelpWindow.call(this);
+};
+
+
+
 //==========================================================================================
-// * 箭头
+// ** ☆箭头
 //==========================================================================================
 //==============================
 // * 帧刷新 - 箭头 - 窗口点击事件

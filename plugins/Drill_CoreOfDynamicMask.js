@@ -100,30 +100,47 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			动态遮罩核心：
-//				->动态遮罩
-//					->渲染器（Renderer）
-//					->容器（MaskStage）
-//						->手动帧刷新（update）
-//					->贴图（容器的实例）
+//			->☆提示信息
+//			->☆变量获取
+//			
+//			->动态遮罩容器【Drill_CODM_MaskStage】
+//				->A主体
+//				->B渲染器
+//				->C绘制层
+//				->D透视镜
+//			->动态遮罩板（简易）【Drill_CODM_MaskSprite】
+//			->遮罩渲染器【Drill_CODM_Renderer】（未被使用）
+//				->A画布
+//				->B渲染器
+//				->C绑定
+//			->☆DEBUG测试
+//			
+//			->透视镜物体【Drill_CODM_PerspectiveMarker】
+//			->透视镜贴图【Drill_CODM_PerspectiveSprite】
+//			->透视镜物体容器【Drill_CODM_PerspectiveMarkerContainer】
 //				->透视镜
 //					->物体（Marker） - 贴图（Sprite）
 //					->物体容器（MarkerContainer） - 贴图容器（子插件实现）
 //						->物体添加/删除（drill_CODM_addOne） - 贴图添加/删除（子插件实现）
+//			
+//			->☆核心漏洞修复
+//			
+//			
+//		★家谱：
+//			大家族-动态遮罩
+//			核心
 //		
 //		★插件私有类：
-//			* Drill_CODM_Renderer【遮罩渲染器】
-//			* Drill_CODM_MaskStage【动态遮罩容器】
-//			* Drill_CODM_MaskSprite【动态遮罩贴图】
-//			* Drill_CODM_PerspectiveMarker【透视镜物体】
-//			* Drill_CODM_PerspectiveSprite【透视镜贴图】
-//			* Drill_CODM_PerspectiveMarkerContainer【透视镜物体容器】
-//
+//			无
+//		
+//		★核心说明：
+//			1.详细内容可以去看看 "1.系统 > 大家族-动态遮罩.docx"。
+//		
 //		★必要注意事项：
 //			1.动态遮罩容器使用了 PIXI.RenderTexture 作为底层。
 //
 //		★其它说明细节：
-//			1.
+//			暂无
 //				
 //		★存在的问题：
 //			1. 2021-10-30 使用新写的 遮罩渲染器【Drill_CODM_Renderer】进行 render渲染，没有任何效果。
@@ -134,7 +151,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -159,7 +176,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_CoreOfDynamicMask = true;
@@ -172,192 +189,290 @@
 //=============================================================================
 if( Imported.Drill_CoreOfBallistics ){
 	
-
-//=============================================================================
-// ** 遮罩渲染器【Drill_CODM_Renderer】（未被使用）
-//			
-//			说明：	> 该类为静态类，单独定义一个渲染器结构。
-//					> 该渲染器与 主游戏界面 完全并行渲染场景。
-//=============================================================================
-//==============================
-// * 渲染器 - 定义
-//==============================
-function Drill_CODM_Renderer() {
-	this.initialize.apply(this, arguments);
-}
-//==============================
-// * 渲染器 - 初始化
-//==============================
-Drill_CODM_Renderer.initialize = function(){
-	this.drill_CODM_createCanvas();			//创建 - 画布
-	this.drill_CODM_createRenderer();		//创建 - 渲染器
-};
-//==============================
-// * 渲染器 - 刷新（非帧）
-//==============================
-Drill_CODM_Renderer.update = function() {
-	this.drill_CODM_updateCanvas();			//刷新 - 画布
-	this.drill_CODM_updateRenderer();		//刷新 - 渲染器
-}
-//==============================
-// * 创建 - 画布
-//==============================
-Drill_CODM_Renderer.drill_CODM_createCanvas = function() {
-	this._drill_CODM_canvas = document.createElement('canvas');		//（canvas是非常基础的对象，一个texture/bitmap就有一个canvas）
-	this._drill_CODM_canvas.id = 'drill_CODM_canvas';
-
-	this.drill_CODM_updateCanvas();		//（创建后刷新）
-    
-	//document.body.appendChild(this._drill_CODM_canvas);
-};
-//==============================
-// * 创建 - 渲染器
-//==============================
-Drill_CODM_Renderer.drill_CODM_createRenderer = function() {
-	PIXI.dontSayHello = true;
-	var width = Graphics._width;
-	var height = Graphics._height;
-	var options = { view: this._drill_CODM_canvas };
-	try {
-		switch( Graphics._rendererType ){
-			
-		// > canvas渲染器
-		case 'canvas':
-			this._drill_CODM_renderer = new PIXI.CanvasRenderer(width, height, options);
-			break;
-			
-		// > webgl渲染器
-		case 'webgl':
-			this._drill_CODM_renderer = new PIXI.WebGLRenderer(width, height, options);
-			break;
-			
-		// > 自动渲染器（在canvas和webgl选一）
-		default:
-			this._drill_CODM_renderer = PIXI.autoDetectRenderer(width, height, options);
-			break;
-		}
 	
-		// > webgl渲染器 的材质缓存数
-		if( this._drill_CODM_renderer && this._drill_CODM_renderer.textureGC ){
-			this._drill_CODM_renderer.textureGC.maxIdle = 600;		//（最大缓存值：600）
+//=============================================================================
+// ** ☆插件指令
+//=============================================================================
+var _drill_CODM_pluginCommand = Game_Interpreter.prototype.pluginCommand
+Game_Interpreter.prototype.pluginCommand = function(command, args) {
+	_drill_CODM_pluginCommand.call(this, command, args);
+	if( command === ">动态遮罩核心" ){
+		if( args.length == 2 ){
+			var unit = String(args[1]);
+			if( unit == "DEBUG测试" ){
+				$gameTemp._drill_CODM_DebugCreate = true;
+			}
 		}
-	}catch( e ){
-		this._drill_CODM_renderer = null;
-	}
+	};
 };
-//==============================
-// * 刷新 - 画布
-//==============================
-Drill_CODM_Renderer.drill_CODM_updateCanvas = function() {
-	this._drill_CODM_canvas.style.width = Graphics._width;		//（保持窗口高宽）
-	this._drill_CODM_canvas.style.height = Graphics._height;
-	this._drill_CODM_canvas.style.zIndex = 0;
-};
-//==============================
-// * 刷新 - 渲染器
-//==============================
-Drill_CODM_Renderer.drill_CODM_updateRenderer = function() {
-	if( this._drill_CODM_renderer == undefined ){ return; }			//（保持窗口高宽）
-	this._drill_CODM_renderer.resize( Graphics._width, Graphics._height );
-};
-//==============================
-// * 渲染器 - 执行渲染（接口）
-//==============================
-Drill_CODM_Renderer.drill_CODM_doRender = function( sprite, texture ){
-	if( sprite ){
-		this._drill_CODM_renderer.render( sprite, texture );
-		if( this._drill_CODM_renderer.gl && this._drill_CODM_renderer.gl.flush ){
-			this._drill_CODM_renderer.gl.flush();
-		}
-	}
-};
-//==============================
-// * 渲染器 - 初始化（绑定）
-//==============================
-var _drill_CODM_createAllElements = Graphics._createAllElements;
-Graphics._createAllElements = function() {
-	_drill_CODM_createAllElements.call(this);
-	Drill_CODM_Renderer.initialize();		//渲染器初始化
-}
-//==============================
-// * 渲染器 - 刷新（非帧）
-//==============================
-var _drill_CODM_updateAllElements = Graphics._updateAllElements;
-Graphics._updateAllElements = function() {
-	_drill_CODM_updateAllElements.call(this);
-	Drill_CODM_Renderer.update();			//渲染器刷新
-}
 
 
+	
 //=============================================================================
 // ** 动态遮罩容器【Drill_CODM_MaskStage】
-//			
-//			
-//			主功能：	> 定义一个单独的遮罩容器。
-//						> 提供与 Graphics.render(…)函数 相似的渲染功能。
-//						> 但不含fps和帧数计数器。
-//			子功能：	
-//						->容器
-//							->获取材质
-//							->获取新贴图
-//						->渲染
-//							->低帧优化
-//							->遮罩高宽
-//							->渲染材质（PIXI.RenderTexture）
-//						->绘制层
-//							->添加透视镜（可嵌套）
-//							->移除透视镜
-//							->遮罩底色
-//							->反色绘制
-//			
-//			说明：	> 该类不是贴图，只是一个集合体。
-//					> 从集合体中，可以获取多个使用该集合体材质的贴图。
-//					> 注意，该类必须固定 高宽 ，与bitmap定义相似。
+// **		
+// **		作用域：	地图界面、战斗界面、菜单界面
+// **		主功能：	> 定义一个单独的遮罩容器。
+// **					> 提供与 Graphics.render(…)函数 相似的渲染功能。
+// **					> 但不含fps和帧数计数器。
+// **		子功能：	->容器
+// **						->帧刷新【标准函数】
+// **						->启用/关闭【标准函数】
+// **					->A主体
+// **						->低帧优化
+// **					->B渲染器
+// **						->遮罩高宽
+// **						->渲染材质（PIXI.RenderTexture）
+// **					->C绘制层
+// **						->遮罩底色
+// **					->D透视镜
+// **						->添加透视镜（可嵌套）
+// **						->移除透视镜
+// **						->反色绘制
+// **		
+// **		说明：	> 该类不是贴图，不是控制器，而是一个集合体。
+// **				> 从集合体中，可以获取多个使用该集合体材质的贴图。
+// **				> 注意，该类必须固定 高宽 ，与bitmap定义相似。如果要变高宽，只能重建。
 //=============================================================================
 //==============================
-// * 动态遮罩容器 - 定义
+// * 容器 - 定义
 //==============================
 function Drill_CODM_MaskStage() {
 	this.initialize.apply(this, arguments);
 }
 //==============================
-// * 动态遮罩容器 - 初始化
+// * 容器 - 初始化
 //==============================
 Drill_CODM_MaskStage.prototype.initialize = function( width, height ){
+	this._drill_width = width;					//遮罩宽度
+	this._drill_height = height;				//遮罩高度
 	
-	this._drill_time = 0;					//低帧优化
-	this._drill_width = width;				//遮罩宽度
-	this._drill_height = height;			//遮罩高度
-	this._drill_skipCount = 0;				//渲染计时器
-	this._drill_maxSkipCount = 3;			//最大跳过帧
-	this._drill_converted = false;			//反色标记
-	
-	this.drill_createRenderer();			//创建 - 渲染材质
-	this.drill_createLayer();				//创建 - 绘制层
+	this.drill_stage_initAttr();				//A主体 - 初始化子功能
+	this.drill_stage_initRenderer();			//B渲染器 - 初始化子功能
+	this.drill_stage_initLayer();				//C绘制层 - 初始化子功能
+	this.drill_stage_initPerspective();			//D透视镜 - 初始化子功能
+};
+//##############################
+// * 容器 - 帧刷新【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//			
+//			说明：	> 此函数必须在 帧刷新 中手动调用执行。
+//					> 此帧刷新会造成很大的消耗，子类调用此函数时，要根据情况加锁不让其工作。
+//##############################
+Drill_CODM_MaskStage.prototype.update = function(){ this.drill_CODM_update(); };
+Drill_CODM_MaskStage.prototype.drill_CODM_update = function() {
+	this.drill_stage_updateAttr();				//帧刷新 - A主体
+	if( this._drill_pause == true ){ return; }
+	if( this._drill_blockEnabled == true ){ return; }
+	this.drill_stage_updateRenderTexture();		//帧刷新 - B渲染器
+												//帧刷新 - C绘制层（无）
+												//帧刷新 - D透视镜（无）
+};
+//##############################
+// * 容器 - 启用/关闭【标准函数】
+//
+//			参数：	> enabled 布尔
+//			返回：	> 无
+//##############################
+Drill_CODM_MaskStage.prototype.drill_CODM_setEnabled = function( enabled ){
+	//...
+};
+//##############################
+// * 容器 - 暂停/继续【标准函数】
+//
+//			参数：	> enable 布尔
+//			返回：	> 无
+//			
+//			说明：	> 可放在帧刷新函数中实时调用。
+//##############################
+Drill_CODM_MaskStage.prototype.drill_CODM_setPause = function( pause ){
+    this._drill_pause = pause;
+};
+
+//##############################
+// * B渲染器 - 获取 动态遮罩 材质【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 材质对象
+//
+//			说明：	> 材质对象不能作为bitmap使用。
+//##############################
+Drill_CODM_MaskStage.prototype.drill_CODM_getTexture = function(){
+	return this._drill_CODM_texture;
+}
+//##############################
+// * B渲染器 - 获取 动态遮罩 新贴图【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 贴图对象
+//
+//			说明：	> 获取到的贴图，只能作为遮罩来用。
+//##############################
+Drill_CODM_MaskStage.prototype.drill_CODM_getNewSprite = function(){
+	var sprite = new Sprite();
+	sprite.texture = this._drill_CODM_texture;
+	return sprite;
+}
+
+//##############################
+// * C绘制层 - 设置遮罩底色【标准函数】
+//
+//			参数：	> color 字符串
+//			返回：	> 无
+//			
+//			说明：	> 可设置黑色、白色、灰色等颜色值。
+//##############################
+Drill_CODM_MaskStage.prototype.drill_CODM_setLayerColor = function( color ){
+	this.drill_stage_setLayerColor_Private( color );		
+}
+//##############################
+// * C绘制层 - 设为白底【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 无
+//##############################
+Drill_CODM_MaskStage.prototype.drill_CODM_setLayerWhite = function(){
+	this.drill_CODM_setLayerColor("#ffffff");
+}
+//##############################
+// * C绘制层 - 设为黑底【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 无
+//##############################
+Drill_CODM_MaskStage.prototype.drill_CODM_setLayerBlack = function(){
+	this.drill_CODM_setLayerColor("#000000");
+}
+
+//##############################
+// * D透视镜 - 执行反色【标准函数】
+//
+//			参数：	> converted 布尔
+//			返回：	> 无
+//
+//			说明：	> 反色设置会影响到所有添加的透视镜。
+//##############################
+Drill_CODM_MaskStage.prototype.drill_CODM_setConvert = function( converted ){
+	this.drill_CODM_setConvert_Private( converted );
+}
+//##############################
+// * D透视镜 - 添加透视镜【标准函数】
+//
+//			参数：	> sprite 贴图对象
+//			返回：	> 无
+//##############################
+Drill_CODM_MaskStage.prototype.drill_CODM_addMaskChild = function( sprite ){
+	this.drill_CODM_reverseColor( sprite, this._drill_converted );
+	this._drill_CODM_layer.addChild( sprite );
+}
+//##############################
+// * D透视镜 - 移除透视镜【标准函数】
+//
+//			参数：	> sprite 贴图对象
+//			返回：	> 无
+//##############################
+Drill_CODM_MaskStage.prototype.drill_CODM_removeMaskChild = function( sprite ){
+	this._drill_CODM_layer.removeChild( sprite );
+}
+//##############################
+// * D透视镜 - 图片层级排序【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 执行该函数后，透视镜按照zIndex属性来进行先后排序。值越大，越靠前。
+//##############################
+Drill_CODM_MaskStage.prototype.drill_CODM_sortByZIndex = function(){
+	this._drill_CODM_layer.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
+}
+
+
+//==============================
+// * A主体 - 初始化子功能
+//==============================
+Drill_CODM_MaskStage.prototype.drill_stage_initAttr = function() {
+	this._drill_curTime = 0;					//当前时间
+	this._drill_pause = false;					//暂停标记
+	this._drill_blockEnabled = false;			//低帧优化标记
 };
 //==============================
-// * 动态遮罩容器 - 帧刷新（接口）
-//
-//			说明：	该类需要放在帧刷新中 手动调用刷新。
-//					注意，此帧刷新会造成很大的消耗，子类调用此函数时，要根据情况加锁不让其工作。
+// * A主体 - 帧刷新
 //==============================
-Drill_CODM_MaskStage.prototype.update = function() {
+Drill_CODM_MaskStage.prototype.drill_stage_updateAttr = function(){
 	
-	// > fps控制（低帧优化）
-	this._drill_time += 1;
-	var fps = 1000 / Graphics._fpsMeter.duration;
-	if( fps < 10 ){
-		if( this._drill_time * 3 != 0 ){ return; }	//（低帧数时，减少刷新次数）
+	// > 时间流逝
+	this._drill_curTime += 1;
+	
+	// > fps控制（低帧优化）（别优化了，反而会出现贴图不刷新的问题）
+	//var fps = 1000 / Graphics._fpsMeter.duration;
+	//if( fps < 10 ){
+	//	if( this._drill_curTime % 3 != 0 ){
+	//		this._drill_blockEnabled = true;	//（低帧数时，减少刷新次数）
+	//	}else{
+	//		this._drill_blockEnabled = false;
+	//	}
+	//}
+};
+
+
+//==============================
+// * B渲染器 - 初始化子功能
+//==============================
+Drill_CODM_MaskStage.prototype.drill_stage_initRenderer = function(){
+	this._drill_skipCount = 0;				//渲染计时器
+	this._drill_maxSkipCount = 3;			//最大跳过帧
+	
+	// > 自带的默认渲染器
+    if( Graphics._renderer && Graphics._renderer.textureGC ){
+		Graphics._renderer.textureGC.maxIdle = 600;		//（覆写，强制改为600）（核心功能扩展）
 	}
+	
+	// > 创建材质
+	this.drill_stage_createRenderTexture();
+};
+//==============================
+// * B渲染器 - 创建材质
+//==============================
+Drill_CODM_MaskStage.prototype.drill_stage_createRenderTexture = function(){
+	
+	// > 渲染材质（遮罩渲染器）
+	//			（会出现绑定错误，.render( sprite, renderTexture ) 第二个参数必须是 RenderTexture ）
+	/*
+	//var source = Drill_CODM_Renderer._drill_canvas;
+	//var baseTexture = new PIXI.BaseTexture(source);
+    //baseTexture.mipmap = false;
+    //baseTexture.width = source.width;
+    //baseTexture.height = source.height;
+	//var texture = new PIXI.Texture( baseTexture );
+	//this._drill_CODM_texture = texture;
+	*/
+	
+	// > 渲染材质（写法1）
+	var renderTexture = PIXI.RenderTexture.create( this._drill_width, this._drill_height );
+	this._drill_CODM_texture = renderTexture;
+	
+	// > 渲染材质（写法2）
+	//var baseRenderTexture = new PIXI.BaseRenderTexture(this._drill_width, this._drill_height );
+	//var renderTexture = new PIXI.RenderTexture(baseRenderTexture);
+	//this._drill_CODM_texture = renderTexture;
+};
+//==============================
+// * B渲染器 - 帧刷新
+//==============================
+Drill_CODM_MaskStage.prototype.drill_stage_updateRenderTexture = function(){
 	
 	// > 渲染计数器
     if( this._drill_skipCount <= 0 ){
         var startTime = Date.now();
 		
 		// > 开始渲染材质（遮罩渲染器）
+		/*
 		//this._drill_CODM_layer.update();
 		//Drill_CODM_Renderer.drill_CODM_doRender( this._drill_CODM_layer, this._drill_CODM_texture );	//（可以看看pixi的 WebGLRenderer.prototype.render 和 CanvasRenderer.prototype.render）
-		//Drill_CODM_Renderer._drill_CODM_renderer.render( this._drill_CODM_layer, this._drill_CODM_texture );	//（可以看看pixi的 WebGLRenderer.prototype.render 和 CanvasRenderer.prototype.render）
+		//Drill_CODM_Renderer._drill_renderer.render( this._drill_CODM_layer, this._drill_CODM_texture );	//（可以看看pixi的 WebGLRenderer.prototype.render 和 CanvasRenderer.prototype.render）
+		*/
 		
 		// > 开始渲染材质（使用 Graphics默认的渲染器 渲染）
 		this._drill_CODM_layer.update();
@@ -374,103 +489,58 @@ Drill_CODM_MaskStage.prototype.update = function() {
     }else{
         this._drill_skipCount--;
 	}
-	
 };
+
+
 //==============================
-// * 创建 - 渲染材质
+// * C绘制层 - 初始化子功能
 //==============================
-Drill_CODM_MaskStage.prototype.drill_createRenderer = function(){
-	
-	// > 自定义渲染器 - 材质（会出现绑定错误，.render( sprite, renderTexture ) 第二个参数必须是 RenderTexture ）
-	//var source = Drill_CODM_Renderer._drill_CODM_canvas;
-	//var baseTexture = new PIXI.BaseTexture(source);
-    //baseTexture.mipmap = false;
-    //baseTexture.width = source.width;
-    //baseTexture.height = source.height;
-	//var texture = new PIXI.Texture( baseTexture );
-	//this._drill_CODM_texture = texture;
-	
-	// > 自带的默认渲染器
-    if( Graphics._renderer && Graphics._renderer.textureGC ){
-		Graphics._renderer.textureGC.maxIdle = 600;		//（覆写，强制改为600）（核心功能扩展）
-	}
-	
-	// > 渲染材质（写法1）
-	var renderTexture = PIXI.RenderTexture.create( this._drill_width, this._drill_height );
-	this._drill_CODM_texture = renderTexture;
-	
-	// > 渲染材质（写法2）
-	//var baseRenderTexture = new PIXI.BaseRenderTexture(this._drill_width, this._drill_height );
-	//var renderTexture = new PIXI.RenderTexture(baseRenderTexture);
-	//this._drill_CODM_texture = renderTexture;
-};
-//==============================
-// * 创建 - 绘制层
-//==============================
-Drill_CODM_MaskStage.prototype.drill_createLayer = function(){
+Drill_CODM_MaskStage.prototype.drill_stage_initLayer = function(){
 	
 	// > 绘制层
 	this._drill_CODM_layer = new Sprite();
 	this._drill_CODM_layer.bitmap = new Bitmap( this._drill_width, this._drill_height );
 	
-	this.drill_CODM_setBlack();			//（默认黑底）
+	// > 黑底画布（默认）
+	this.drill_CODM_setLayerBlack();
+}
+//==============================
+// * C绘制层 - 设置遮罩底色（私有）
+//==============================
+Drill_CODM_MaskStage.prototype.drill_stage_setLayerColor_Private = function( color ){
+	this._drill_CODM_layer.bitmap.fillAll( color );
 }
 
-//==============================
-// * 容器 - 获取材质（接口）
-//==============================
-Drill_CODM_MaskStage.prototype.drill_CODM_getTexture = function(){
-	return this._drill_CODM_texture;
-}
-//==============================
-// * 容器 - 获取新贴图（接口）
-//==============================
-Drill_CODM_MaskStage.prototype.drill_CODM_getNewSprite = function(){
-	var sprite = new Sprite();
-	sprite.texture = this._drill_CODM_texture;
-	return sprite;
-}
 
 //==============================
-// * 绘制层 - 设置遮罩底色
+// * D透视镜 - 初始化子功能
 //==============================
-Drill_CODM_MaskStage.prototype.drill_CODM_setColor = function( color ){
-	this._drill_CODM_layer.bitmap.fillAll( color );		
+Drill_CODM_MaskStage.prototype.drill_stage_initPerspective = function(){
+	this._drill_converted = false;		//反色标记
 }
 //==============================
-// * 绘制层 - 设为白底（接口）
+// * D透视镜 - 执行反色（私有）
 //==============================
-Drill_CODM_MaskStage.prototype.drill_CODM_setWhite = function(){
-	this.drill_CODM_setColor("#ffffff");
-}
-//==============================
-// * 绘制层 - 设为黑底（接口）
-//==============================
-Drill_CODM_MaskStage.prototype.drill_CODM_setBlack = function(){
-	this.drill_CODM_setColor("#000000");
-}
-//==============================
-// * 绘制层 - 是否反色（接口）
-//==============================
-Drill_CODM_MaskStage.prototype.drill_CODM_setConvert = function( b ){
-	if( this._drill_converted == b ){ return; }
-	this._drill_converted = b;
+Drill_CODM_MaskStage.prototype.drill_CODM_setConvert_Private = function( converted ){
+	if( this._drill_converted == converted ){ return; }
+	this._drill_converted = converted;
 	
-	// > 遮罩颜色
-	if( b == true ){
-		this.drill_CODM_setWhite();
+	// > 绘制层 反色
+	if( converted == true ){
+		this.drill_CODM_setLayerWhite();
 	}else{
-		this.drill_CODM_setBlack();
+		this.drill_CODM_setLayerBlack();
 	}
 	
 	// > 透视镜 反色
 	for(var i=0; i < this.children.length; i++){
 		var temp_sprite = this.children[i];
-		this.drill_CODM_reverseColor( temp_sprite, b );
+		this.drill_CODM_reverseColor( temp_sprite, converted );
 	}
 	
-	//if( b == true ){
-	//	var filter = new PIXI.filters.ColorMatrixFilter();	//（反色滤镜）
+	// > 滤镜 反色（不合适）
+	//if( converted == true ){
+	//	var filter = new PIXI.filters.ColorMatrixFilter();
 	//	
     //    var matrix = [-1, 0, 0, 0, 255, 	//（完全黑白颠倒）
 	//				  0, -1, 0, 0, 255, 
@@ -483,35 +553,15 @@ Drill_CODM_MaskStage.prototype.drill_CODM_setConvert = function( b ){
 	//	this.filters = null;
 	//}
 }
-
 //==============================
-// * 透视镜 - 添加透视镜（接口）
+// * D透视镜 - 执行反色 - 透视镜
 //==============================
-Drill_CODM_MaskStage.prototype.drill_CODM_addMaskChild = function( temp_sprite ){
-	this.drill_CODM_reverseColor( temp_sprite, this._drill_converted );
-	this._drill_CODM_layer.addChild( temp_sprite );
-}
-//==============================
-// * 透视镜 - 移除透视镜（接口）
-//==============================
-Drill_CODM_MaskStage.prototype.drill_CODM_removeMaskChild = function( temp_sprite ){
-	this._drill_CODM_layer.removeChild( temp_sprite );
-}
-//==============================
-// * 透视镜 - 图片层级排序（接口）
-//==============================
-Drill_CODM_MaskStage.prototype.drill_CODM_sortByZIndex = function(){
-	this._drill_CODM_layer.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
-}
-//==============================
-// * 反色绘制 - 贴图黑白反色
-//==============================
-Drill_CODM_MaskStage.prototype.drill_CODM_reverseColor = function( sprite, b ){
+Drill_CODM_MaskStage.prototype.drill_CODM_reverseColor = function( sprite, converted ){
 	if( sprite._drill_CODM_reversed == undefined ){
 		sprite._drill_CODM_reversed = false;
 	}
-	if( sprite._drill_CODM_reversed == b ){ return; }
-		sprite._drill_CODM_reversed = b;
+	if( sprite._drill_CODM_reversed == converted ){ return; }
+		sprite._drill_CODM_reversed = converted;
 	
 	// > 反色处理
 	if( sprite._drill_CODM_reversed == false ){
@@ -525,7 +575,7 @@ Drill_CODM_MaskStage.prototype.drill_CODM_reverseColor = function( sprite, b ){
 	}
 }
 //==============================
-// * 反色绘制 - bitmap反转
+// * D透视镜 - 执行反色 - bitmap反转
 //==============================
 Sprite.prototype.drill_CODM_reverseBitmap = function( bitmapLoaded ){
 	if( this._drill_CODM_reversed != true ){ return; }
@@ -540,26 +590,27 @@ Sprite.prototype.drill_CODM_reverseBitmap = function( bitmapLoaded ){
 }
 
 
+
 //=============================================================================
-// ** 动态遮罩贴图【Drill_CODM_MaskSprite】
-//			
-//			
-//			主功能：	> 定义一个贴图，能够使用自定义的动态遮罩容器。
-//						> 能通过贴图，调用容器中部分函数。
-//			子功能：	
-//						->贴图
-//							->动态遮罩容器
-//							->继承函数
-//			
-//			说明：	> 该贴图需要绑定到目标贴图的 .mask 中。单独显示也可以，为黑白蒙版的图像。
-//					> 注意，这是一个固定 高宽 的贴图对象。
-//					
-// 			代码：	> 范围 - 核心插件提供的贴图类，需调用接口来进行交互。
-//					> 结构 - [ ●合并 /分离/混乱] 贴图与数据合并。
-//					> 数量 - [ ●单个 /多个]
-//					> 创建 - [ ●一次性 /自延迟/外部延迟] 
-//					> 销毁 - [ ●不考虑 /自销毁/外部销毁] 
-//					> 样式 - [ ●不可修改 /自变化/外部变化] 
+// ** 动态遮罩板（简易）【Drill_CODM_MaskSprite】
+// **		
+// **		作用域：	地图界面、战斗界面、菜单界面
+// **		主功能：	> 定义一个贴图，能够使用自定义的动态遮罩容器。
+// **					> 此功能就是一个简易的动态遮罩板。
+// **		子功能：	
+// **					->贴图
+// **						->动态遮罩容器
+// **						->继承函数
+// **		
+// **		说明：	> 该贴图需要绑定到目标贴图的 .mask 中。单独显示也可以，为黑白蒙版的图像。
+// **				> 注意，这是一个固定 高宽 的贴图对象。
+// **				
+// **		代码：	> 范围 - 核心插件提供的贴图类，需调用接口来进行交互。
+// **				> 结构 - [ ●合并 /分离/混乱] 贴图与数据合并。
+// **				> 数量 - [ ●单个 /多个]
+// **				> 创建 - [ ●一次性 /自延迟/外部延迟] 
+// **				> 销毁 - [ ●不考虑 /自销毁/外部销毁] 
+// **				> 样式 - [ ●不可修改 /自变化/外部变化] 
 //=============================================================================
 //==============================
 // * 动态遮罩贴图 - 定义
@@ -590,41 +641,176 @@ Drill_CODM_MaskSprite.prototype.update = function() {
 	}
 }
 //==============================
-// * 容器 - 是否反色（接口）
+// * 动态遮罩贴图 - 是否反色（开放函数）
 //==============================
-Drill_CODM_MaskSprite.prototype.drill_CODM_setConvert = function( b ){
-	this._drill_CODM_stage.drill_CODM_setConvert( b );
+Drill_CODM_MaskSprite.prototype.drill_CODM_setConvert = function( converted ){
+	this._drill_CODM_stage.drill_CODM_setConvert( converted );
 }
 //==============================
-// * 容器 - 添加到父类（接口）
+// * 动态遮罩贴图 - 添加透视镜（开放函数）
 //==============================
-Drill_CODM_MaskSprite.prototype.drill_CODM_addMaskChild = function( temp_sprite ){
-	this._drill_CODM_stage.drill_CODM_addMaskChild( temp_sprite );
+Drill_CODM_MaskSprite.prototype.drill_CODM_addMaskChild = function( sprite ){
+	this._drill_CODM_stage.drill_CODM_addMaskChild( sprite );
 }
 //==============================
-// * 容器 - 从父类中移除（接口）
+// * 动态遮罩贴图 - 移除透视镜（开放函数）
 //==============================
-Drill_CODM_MaskSprite.prototype.drill_CODM_removeMaskChild = function( temp_sprite ){
-	this._drill_CODM_stage.drill_CODM_removeMaskChild( temp_sprite );
+Drill_CODM_MaskSprite.prototype.drill_CODM_removeMaskChild = function( sprite ){
+	this._drill_CODM_stage.drill_CODM_removeMaskChild( sprite );
 }
+
 
 
 /*
 //=============================================================================
-// ** 测试 绘制
+// ** 遮罩渲染器【Drill_CODM_Renderer】（未被使用）
+// **		
+// **		作用域：	地图界面、战斗界面、菜单界面
+// **		主功能：	> 单独定义的一个渲染器结构。
+// **					> 该渲染器与 主游戏界面 完全并行渲染场景。
+// **		子功能：	->定义
+// **					->A画布
+// **					->B渲染器
+// **					->C绑定
+// **		
+// **		说明：	> 此渲染器暂未使用。
 //=============================================================================
 //==============================
-// * 地图 - 创建
+// * 遮罩渲染器 - 定义
 //==============================
-var _drill_CODM_Scene_createAllWindows = Scene_Map.prototype.createAllWindows;
-Scene_Map.prototype.createAllWindows = function() {
-	_drill_CODM_Scene_createAllWindows.call(this);
-	this.drill_CODM_createLayer();	
+function Drill_CODM_Renderer() {
+	this.initialize.apply(this, arguments);
+}
+//==============================
+// * 遮罩渲染器 - 初始化
+//==============================
+Drill_CODM_Renderer.initialize = function(){
+	this.drill_CODM_createCanvas();			//创建 - A画布
+	this.drill_CODM_createRenderer();		//创建 - B渲染器
 };
 //==============================
-// * 地图 - 创建贴图
+// * 遮罩渲染器 - 刷新（非帧刷新）
 //==============================
-Scene_Map.prototype.drill_CODM_createLayer = function() {
+Drill_CODM_Renderer.update = function() {
+	this.drill_CODM_updateCanvas();			//刷新 - A画布
+	this.drill_CODM_updateRenderer();		//刷新 - B渲染器
+}
+
+//==============================
+// * A画布 - 创建
+//==============================
+Drill_CODM_Renderer.drill_CODM_createCanvas = function() {
+	this._drill_canvas = document.createElement('canvas');		//（canvas是非常基础的对象，一个texture/bitmap就有一个canvas）
+	this._drill_canvas.id = 'drill_CODM_canvas';
+    
+	//document.body.appendChild(this._drill_canvas);
+
+	this.drill_CODM_updateCanvas();		//（创建后刷新一次）
+};
+//==============================
+// * A画布 - 刷新
+//==============================
+Drill_CODM_Renderer.drill_CODM_updateCanvas = function() {
+	this._drill_canvas.style.width = Graphics._width;		//（保持窗口高宽）
+	this._drill_canvas.style.height = Graphics._height;
+	this._drill_canvas.style.zIndex = 0;
+};
+
+//==============================
+// * B渲染器 - 创建
+//==============================
+Drill_CODM_Renderer.drill_CODM_createRenderer = function() {
+	PIXI.dontSayHello = true;
+	var width = Graphics._width;
+	var height = Graphics._height;
+	var options = { view: this._drill_canvas };
+	try {
+		switch( Graphics._rendererType ){
+			
+		// > canvas渲染器
+		case 'canvas':
+			this._drill_renderer = new PIXI.CanvasRenderer(width, height, options);
+			break;
+			
+		// > webgl渲染器
+		case 'webgl':
+			this._drill_renderer = new PIXI.WebGLRenderer(width, height, options);
+			break;
+			
+		// > 自动渲染器（在canvas和webgl选一）
+		default:
+			this._drill_renderer = PIXI.autoDetectRenderer(width, height, options);
+			break;
+		}
+	
+		// > webgl渲染器 的材质缓存数
+		if( this._drill_renderer && this._drill_renderer.textureGC ){
+			this._drill_renderer.textureGC.maxIdle = 600;		//（最大缓存值：600）
+		}
+	}catch( e ){
+		this._drill_renderer = null;
+	}
+};
+//==============================
+// * B渲染器 - 刷新
+//==============================
+Drill_CODM_Renderer.drill_CODM_updateRenderer = function() {
+	if( this._drill_renderer == undefined ){ return; }			//（保持窗口高宽）
+	this._drill_renderer.resize( Graphics._width, Graphics._height );
+};
+//==============================
+// * B渲染器 - 执行渲染（接口）
+//==============================
+Drill_CODM_Renderer.drill_CODM_doRender = function( sprite, texture ){
+	if( sprite ){
+		this._drill_renderer.render( sprite, texture );
+		if( this._drill_renderer.gl && this._drill_renderer.gl.flush ){
+			this._drill_renderer.gl.flush();
+		}
+	}
+};
+
+//==============================
+// * C绑定 - 初始化绑定
+//==============================
+var _drill_CODM_createAllElements = Graphics._createAllElements;
+Graphics._createAllElements = function() {
+	_drill_CODM_createAllElements.call(this);
+	Drill_CODM_Renderer.initialize();		//渲染器初始化
+}
+//==============================
+// * C绑定 - 刷新绑定
+//==============================
+var _drill_CODM_updateAllElements = Graphics._updateAllElements;
+Graphics._updateAllElements = function() {
+	_drill_CODM_updateAllElements.call(this);
+	Drill_CODM_Renderer.update();			//渲染器刷新
+}
+*/
+
+
+/*
+//=============================================================================
+// ** ☆DEBUG测试
+//			
+//			说明：	> 此模块专门提供渲染器的 DEBUG贴图创建测试 。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * DEBUG测试 - 帧刷新
+//==============================
+var _drill_CODM_update = Scene_Map.prototype.update;
+Scene_Map.prototype.update = function() {
+    _drill_CODM_update.call(this);
+    this.drill_CODM_updateDebugCreate();		//帧刷新 - 创建贴图
+    this.drill_CODM_updateDebugSprite();		//帧刷新 - 贴图帧刷新
+}
+//==============================
+// * DEBUG测试 - 创建贴图
+//==============================
+Scene_Map.prototype.drill_CODM_updateDebugCreate = function() {
+    if( $gameTemp._drill_CODM_DebugCreate != true ){ return; }
+	$gameTemp._drill_CODM_DebugCreate = false;
 	
 	// > 遮罩容器
 	var temp_stage = new Drill_CODM_MaskStage(Graphics.boxWidth, Graphics.boxHeight);
@@ -686,11 +872,10 @@ Scene_Map.prototype.drill_CODM_createLayer = function() {
 	
 }
 //==============================
-// * 地图 - 帧刷新
+// * DEBUG测试 - 贴图帧刷新
 //==============================
-var _drill_CODM_update = Scene_Map.prototype.update;
-Scene_Map.prototype.update = function() {
-	_drill_CODM_update.call(this);
+Scene_Map.prototype.drill_CODM_updateDebugSprite = function() {
+	if( this._drill_CODM_stage == undefined ){ return; }
 	
 	// > 遮罩组
 	this._drill_CODM_stage.update();
@@ -704,6 +889,7 @@ Scene_Map.prototype.update = function() {
 	this._drill_CODM_layerSprite_2.x = 400 - 60*Math.sin( Graphics.frameCount /180 * Math.PI );
 };
 */
+
 
 
 //=============================================================================
@@ -1111,6 +1297,21 @@ Drill_CODM_PerspectiveMarker.prototype.drill_updateRotate = function(){
 	}else{
 		this._rotate = 0;
 	}	
+}
+//==============================
+// * 获取鼠标位置（输入设备核心的片段）
+//==============================
+if( typeof(_drill_mouse_getCurPos) == "undefined" ){	//防止重复定义
+
+	var _drill_mouse_getCurPos = TouchInput._onMouseMove;
+	var _drill_mouse_x = 0;
+	var _drill_mouse_y = 0;
+	TouchInput._onMouseMove = function(event) {		//鼠标位置
+		_drill_mouse_getCurPos.call(this,event);
+		
+        _drill_mouse_x = Graphics.pageToCanvasX(event.pageX);
+        _drill_mouse_y = Graphics.pageToCanvasY(event.pageY);
+	};
 }
 
 
@@ -1775,24 +1976,9 @@ Drill_CODM_PerspectiveMarkerContainer.prototype.drill_CODM_getEmptyId = function
 	return -1;
 }
 
-//=============================================================================
-// ** 获取鼠标位置（输入设备核心的片段）
-//=============================================================================
-if( typeof(_drill_mouse_getCurPos) == "undefined" ){	//防止重复定义
-
-	var _drill_mouse_getCurPos = TouchInput._onMouseMove;
-	var _drill_mouse_x = 0;
-	var _drill_mouse_y = 0;
-	TouchInput._onMouseMove = function(event) {		//鼠标位置
-		_drill_mouse_getCurPos.call(this,event);
-		
-        _drill_mouse_x = Graphics.pageToCanvasX(event.pageX);
-        _drill_mouse_y = Graphics.pageToCanvasY(event.pageY);
-	};
-}
 
 //=============================================================================
-// ** 核心漏洞修复
+// ** ☆核心漏洞修复
 //=============================================================================
 //==============================
 // * 核心漏洞修复 - 屏蔽根据版本重刷地图

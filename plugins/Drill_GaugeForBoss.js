@@ -1458,15 +1458,12 @@
 //					->车轮战			x
 //		
 //		
-//		★配置参数结构体如下：
-//			~struct~GFBStyle:				固定框样式
-//			~struct~GFBBind:				BOSS设置
-//			~struct~DrillWindowMoving:		整体移动动画（弹道核心-两点式）
-//
+//		★家谱：
+//			无
+//		
 //		★插件私有类：
-//			* Drill_GFB_StyleSprite【固定框样式】
-//	
-//
+//			* 固定框样式【Drill_GFB_StyleSprite】
+//		
 //		★必要注意事项：
 //			1.插件的图片层级与多个插件共享。【必须自写 层级排序 函数】
 //			2.  BOSS设置 和 贴图 一对一，容器内存放指针，【注意避免直接修改指针内容】
@@ -1642,6 +1639,8 @@
 		data['visible'] = String( dataFrom["初始是否显示"] || "true") === "true";
 		data['frame_x'] = Number( dataFrom["平移-固定框 X"] || 0 );
 		data['frame_y'] = Number( dataFrom["平移-固定框 Y"] || 0 );
+		
+		// > ~struct~DrillWindowMoving:		整体移动动画（弹道核心-两点式）
 		if( dataFrom["整体移动动画"] != undefined &&
 			dataFrom["整体移动动画"] != "" ){
 			var slideAnimFrom = JSON.parse( dataFrom["整体移动动画"] || {} );

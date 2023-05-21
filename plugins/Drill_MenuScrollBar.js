@@ -412,9 +412,13 @@
 //						->判定鼠标释放
 //						->拖拽计算
 //
-//		★插件私有类：
-//			* Drill_MSB_Sprite【滚动条贴图】
 //
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			* 滚动条贴图【Drill_MSB_Sprite】
+//		
 //		★必要注意事项：
 //			1.这里坐标的计算非常绕，要分清楚下面的内容：
 //				内条高度、内条可活动高度（两者相加固定为窗口高度，因为滚动条以窗口为准）
@@ -1079,7 +1083,8 @@ Drill_MSB_Sprite.prototype.drill_MSB_updateVisible = function() {
 	}
 	
 	// > 检测父类 - 窗口被完全隐藏
-	if( this._drill_parent.opacity <= 0 && this._drill_parent.contentsOpacity <= 0 ){
+	if( this._drill_parent.contentsOpacity <= 0 && 	//（文本域 透明度）
+		this._drill_parent.opacity <= 0 ){			//（背景容器层 透明度）
 		this.visible = false;
 		return;
 	}

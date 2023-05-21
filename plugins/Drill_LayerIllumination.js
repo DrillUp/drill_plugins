@@ -1773,12 +1773,14 @@
 //				->限时动态照明
 //					->突然爆炸的闪亮光源
 //		
+//		
+//		★家谱：
+//			大家族-动态遮罩
+//		
 //		★插件私有类：
-//			* Drill_LIl_Renderer【遮罩渲染器】
-//			* Drill_LIl_MaskSprite【黑暗层贴图】
-//			* Drill_LIl_Sprite【光源贴图】
-//			* Drill_LIl_FakeEvent【伪事件】
-//
+//			* 遮罩渲染器【Drill_LIl_Renderer】
+//			* 黑暗层贴图【Drill_LIl_MaskSprite】
+//		
 //		★必要注意事项：
 //			1.插件的图片层级与多个插件共享。【必须自写 层级排序 函数】
 //			2.相似的功能称呼：

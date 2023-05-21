@@ -783,6 +783,12 @@
 //				->显示/隐藏
 //				->魔法圈遮罩
 //
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			无
+//		
 //		★必要注意事项：
 //			暂无
 //
@@ -1017,7 +1023,7 @@ Scene_MenuBase.prototype.drill_MCi_layerAddSprite = function( sprite, layer_inde
 //			参数：	> sprite 贴图（添加的贴图对象）
 //			返回：	> 无
 //          
-//			说明：	> 强行规范的接口，将指定贴图从地图层级中移除。
+//			说明：	> 强行规范的接口，将指定贴图从菜单层级中移除。
 //##############################
 Scene_MenuBase.prototype.drill_MCi_layerRemoveSprite = function( sprite ){
 	//（不操作）
@@ -1028,7 +1034,7 @@ Scene_MenuBase.prototype.drill_MCi_layerRemoveSprite = function( sprite ){
 //			参数：	> 无
 //			返回：	> 无
 //          
-//			说明：	> 执行该函数后，地图层级的子贴图，按照zIndex属性来进行先后排序。值越大，越靠前。
+//			说明：	> 执行该函数后，菜单层级的子贴图，按照zIndex属性来进行先后排序。值越大，越靠前。
 //##############################
 Scene_MenuBase.prototype.drill_MCi_sortByZIndex = function () {
     this.drill_MCi_sortByZIndex_Private();

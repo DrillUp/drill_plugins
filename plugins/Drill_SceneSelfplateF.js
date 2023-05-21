@@ -617,12 +617,28 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			信息面板F：
+//			->☆提示信息
+//			->☆变量获取
+//			->☆插件指令
+//			
+//			->☆主菜单选项
+//			->☆标题选项
+//			->☆面板控制
+//			
+//			->信息面板F【Scene_Drill_SSpF】
 //				->内容遮罩
 //				->滚轴窗口
 //				->加速滚轴按键
 //				->退出滚轴按键
+//				->☆原型链规范
 //
+//
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			* 信息面板F【Scene_Drill_SSpF】
+//		
 //		★必要注意事项：
 //			1.替换以下字符变成新面板：
 //				SSpF
@@ -637,7 +653,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -662,7 +678,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_SceneSelfplateF = true;
@@ -727,21 +743,15 @@
 if( Imported.Drill_CoreOfScreenRoller ){
 	
 	
+	
 //=============================================================================
-// ** 图片路径管理器
-//=============================================================================
-ImageManager.load_MenuSelfDef = function(filename) {
-    return this.loadBitmap('img/Menu__self/', filename, 0, true);
-};
-
-//=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _drill_SSpF_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_SSpF_pluginCommand.call(this, command, args);
-	
-	if (command === ">信息面板F") {
+	if( command === ">信息面板F" ){
+		
 		if(args.length == 2){
 			var type = String(args[1]);
 			if( type == "打开面板" ){			//打开菜单
@@ -752,7 +762,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 }
 
 //=============================================================================
-// * Scene_Menu 主菜单按钮
+// ** ☆主菜单选项
+//
+//			说明：	> 此模块专门关联主菜单选项，选项进入后跳转到 信息面板F 界面。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 var _drill_SSpF_createCommandWindow = Scene_Menu.prototype.createCommandWindow;
 Scene_Menu.prototype.createCommandWindow = function() {
@@ -771,7 +784,10 @@ Window_MenuCommand.prototype.addOriginalCommands = function() {
 };
 
 //=============================================================================
-// ** Scene Tittle 标题选项
+// ** ☆标题选项
+//
+//			说明：	> 此模块专门关联标题选项，选项进入后跳转到 信息面板F 界面。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================	
 var _drill_SSpF_title_createCommandWindow = Scene_Title.prototype.createCommandWindow;
 Scene_Title.prototype.createCommandWindow = function() {
@@ -790,6 +806,13 @@ Window_TitleCommand.prototype.makeCommandList = function() {
 	}
 };	
 
+
+//=============================================================================
+// ** 资源文件夹
+//=============================================================================
+ImageManager.load_MenuSelfDef = function(filename) {
+    return this.loadBitmap('img/Menu__self/', filename, 0, true);
+};
 
 //=============================================================================
 // ** 信息面板F【Scene_Drill_SSpF】
@@ -915,6 +938,82 @@ Scene_Drill_SSpF.prototype.drill_updateQuit = function() {
 		SceneManager.pop();
 	}
 }
+
+
+//=============================================================================
+// ** ☆原型链规范
+//
+//			说明：	> 此处专门补上缺失的原型链，未缺失的则注释掉。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 信息面板F（场景基类） - 初始化
+//==============================
+//Scene_Drill_SSpF.prototype.initialize = function() {
+//    Scene_MenuBase.prototype.initialize.call(this);
+//};
+//==============================
+// * 信息面板F（场景基类） - 创建
+//==============================
+//Scene_Drill_SSpF.prototype.create = function() {
+//    Scene_MenuBase.prototype.create.call(this);
+//};
+//==============================
+// * 信息面板F（场景基类） - 帧刷新
+//==============================
+//Scene_Drill_SSpF.prototype.update = function() {
+//    Scene_MenuBase.prototype.update.call(this);
+//};
+//==============================
+// * 信息面板F（场景基类） - 开始运行
+//==============================
+Scene_Drill_SSpF.prototype.start = function() {
+    Scene_MenuBase.prototype.start.call(this);
+};
+//==============================
+// * 信息面板F（场景基类） - 结束运行
+//==============================
+Scene_Drill_SSpF.prototype.stop = function() {
+    Scene_MenuBase.prototype.stop.call(this);
+};
+//==============================
+// * 信息面板F（场景基类） - 判断是否激活/启动
+//==============================
+Scene_Drill_SSpF.prototype.isActive = function() {
+	return Scene_MenuBase.prototype.isActive.call(this);
+};
+//==============================
+// * 信息面板F（场景基类） - 析构函数
+//==============================
+Scene_Drill_SSpF.prototype.terminate = function() {
+    Scene_MenuBase.prototype.terminate.call(this);
+};
+
+//==============================
+// * 信息面板F（场景基类） - 判断加载完成
+//==============================
+Scene_Drill_SSpF.prototype.isReady = function() {
+	return Scene_MenuBase.prototype.isReady.call(this);
+};
+//==============================
+// * 信息面板F（场景基类） - 忙碌状态
+//==============================
+Scene_Drill_SSpF.prototype.isBusy = function() {
+	return Scene_MenuBase.prototype.isBusy.call(this);
+};
+
+//==============================
+// * 信息面板F（菜单界面基类） - 创建 - 菜单背景
+//==============================
+Scene_Drill_SSpF.prototype.createBackground = function() {
+	Scene_MenuBase.prototype.createBackground.call(this);
+};
+//==============================
+// * 信息面板F（菜单界面基类） - 创建 - 帮助窗口
+//==============================
+Scene_Drill_SSpF.prototype.createHelpWindow = function() {
+	Scene_MenuBase.prototype.createHelpWindow.call(this);
+};
 
 
 

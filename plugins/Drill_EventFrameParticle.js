@@ -1406,6 +1406,22 @@
  * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
  * @default 0
  *
+ * @param 图像-色调值
+ * @parent ---贴图---
+ * @type number
+ * @min 0
+ * @max 360
+ * @desc 资源图像的色调值，范围为0至360。
+ * @default 0
+ *
+ * @param 图像-模糊边缘
+ * @parent ---贴图---
+ * @type boolean
+ * @on 模糊
+ * @off 关闭
+ * @desc 此参数为缩放设置，设置模糊后，缩放时可以模糊资源图像的边缘，防止出现像素锯齿。
+ * @default false
+ *
  * @param 行走图层级
  * @parent ---贴图---
  * @type select
@@ -1707,7 +1723,7 @@
 //				->去除贴图【标准函数】
 //				->图片层级排序（界面装饰）【标准函数】
 //				->图片层级排序（个体装饰）【标准函数】
-//				> 父贴图前面层（_drill_characterUpArea）
+//				> 行走图前面层/父贴图前面层（_drill_characterUpArea）
 //				> 父贴图后面层（_drill_characterPBackArea）
 //			
 //			->☆物体容器（未使用）
@@ -1764,14 +1780,17 @@
 //				->G直线拖尾贴图（无）
 //		
 //		
+//		★家谱：
+//			大家族-粒子效果
+//		
 //		★插件私有类：
-//			* Drill_EFPa_Controller	【行走图粒子控制器】
-//			* Drill_EFPa_Sprite		【行走图粒子贴图】
-//			* Drill_EFPa_SecSprite	【行走图粒子贴图（第二层）】
+//			* 行走图粒子控制器【Drill_EFPa_Controller】
+//			* 行走图粒子贴图【Drill_EFPa_Sprite】
+//			* 行走图粒子贴图（第二层）【Drill_EFPa_SecSprite】
 //		
 //		★必要注意事项：
 //			1.插件继承至 粒子核心。
-//			  核心与所有子插件功能介绍去看看："1.系统 > 大家族-粒子核心（脚本）.docx"
+//			  核心与所有子插件功能介绍去看看："1.系统 > 大家族-粒子效果（脚本）.docx"
 //			2.插件的图片层级与多个插件共享。【必须自写 层级排序 函数】
 //				_drill_characterPBackArea 			父贴图后面层
 //				_drill_characterUpArea				父贴图前面层
@@ -1851,7 +1870,11 @@
 		data['x'] = Number( dataFrom["平移-粒子 X"] || 0);
 		data['y'] = Number( dataFrom["平移-粒子 Y"] || 0);
 		data['opacity'] = 255;
+		
 		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
+		data['tint'] = Number( dataFrom["图像-色调值"] || 0);
+		data['smooth'] = String( dataFrom["图像-模糊边缘"] || "false") == "true";
+		
 		data['individualIndex'] = String( dataFrom["行走图层级"] || "在行走图前面");
 		data['zIndex'] = Number( dataFrom["图片层级"] || 0);
 		
@@ -2413,7 +2436,8 @@ Game_Map.prototype.drill_controller_updateRestatistics = function() {
 //==============================
 var _drill_EFPa_c_initMembers = Game_CharacterBase.prototype.initMembers;
 Game_CharacterBase.prototype.initMembers = function(){
-	this._drill_EFPa_controllerTank = null;
+	this._drill_EFPa_controllerTank = null;					//粒子容器
+	this._drill_EFPa_controllerDyingTank = null;			//粒子容器（延时销毁）
 	_drill_EFPa_c_initMembers.call( this );
 }
 //==============================
@@ -2424,13 +2448,16 @@ Game_CharacterBase.prototype.drill_EFPa_createController = function( slot_id, st
 		this._drill_EFPa_controllerTank = [];
 	}
 	
+	//// > 相同的样式，不重建（防止一些群友把设置函数放 并行事件 里面反复执行）
+	//if( this._drill_EFPa_lastStyleId == style_id ){ return; }
+	//this._drill_EFPa_lastStyleId = style_id;
+	
 	// > 销毁原来的
 	this.drill_EFPa_removeController( slot_id );
 	
 	// > 创建控制器
 	var data = JSON.parse(JSON.stringify( DrillUp.g_EFPa_style[ style_id ] ));
 	var controller = new Drill_EFPa_Controller( data );
-	controller.drill_EFPa_setCharacter( this );
 	this._drill_EFPa_controllerTank[ slot_id ] = controller;
 	
 	// > 刷新统计
@@ -2442,8 +2469,17 @@ Game_CharacterBase.prototype.drill_EFPa_createController = function( slot_id, st
 Game_CharacterBase.prototype.drill_EFPa_removeController = function( slot_id ){
 	if( this._drill_EFPa_controllerTank == undefined ){ return; }
 	if( this._drill_EFPa_controllerTank[ slot_id ] == undefined ){ return; }
-	this._drill_EFPa_controllerTank[ slot_id ].drill_controller_destroyWithDelay();		//（延时销毁）
+	
+	// > 延时销毁
+	//	（不能直接销毁替换，需要转移到另一个容器中，让其自己销毁）
+	var controller = this._drill_EFPa_controllerTank[ slot_id ];
+	controller.drill_controller_destroyWithDelay();		
+	
+	if( this._drill_EFPa_controllerDyingTank == undefined ){
+		this._drill_EFPa_controllerDyingTank = [];
+	}
 	this._drill_EFPa_controllerTank[ slot_id ] = null;
+	this._drill_EFPa_controllerDyingTank.push( controller );
 }
 //==============================
 // * 物体绑定 - 去除全部控制器（开放函数）
@@ -2497,28 +2533,77 @@ Game_CharacterBase.prototype.drill_EFPa_setPauseAll = function( pause ){
 var _drill_EFPa_c_update = Game_CharacterBase.prototype.update;
 Game_CharacterBase.prototype.update = function(){
 	_drill_EFPa_c_update.call(this);
+	this.drill_EFPa_updateController();			//帧刷新 - 控制器
+	this.drill_EFPa_updateControllerDying();	//帧刷新 - 控制器延时销毁
+}
+//==============================
+// * 物体绑定 - 帧刷新 - 控制器
+//==============================
+Game_CharacterBase.prototype.drill_EFPa_updateController = function(){
 	if( this._drill_EFPa_controllerTank == undefined ){ return; }
 	if( this._drill_EFPa_controllerTank.length == 0 ){ return; }
 	
-	// > 控制器帧刷新
+	// > 控制器 - 帧刷新
 	for( var i=0; i < this._drill_EFPa_controllerTank.length; i++ ){
 		var controller = this._drill_EFPa_controllerTank[i];
 		if( controller == undefined ){ continue; }
 		controller.drill_controller_update();
 	}
 	
-	// > 自动销毁 - 控制器
+	// > 自动销毁 - 控制器（正常销毁）
 	var is_all_empty = true;
 	for( var i=0; i < this._drill_EFPa_controllerTank.length; i++ ){
 		var controller = this._drill_EFPa_controllerTank[i];
 		if( controller == undefined ){ continue; }
 		is_all_empty = false;
-		if( controller.drill_EFPa_isDead() ){
+		if( controller.drill_controller_isDead() ){
 			this._drill_EFPa_controllerTank[i] = null;
 		}
 	}
 	if( is_all_empty == true ){
 		this._drill_EFPa_controllerTank = null;
+	}
+}
+//==============================
+// * 物体绑定 - 帧刷新 - 控制器延时销毁
+//==============================
+Game_CharacterBase.prototype.drill_EFPa_updateControllerDying = function(){
+	if( this._drill_EFPa_controllerDyingTank == undefined ){ return; }
+	if( this._drill_EFPa_controllerDyingTank.length == 0 ){ return; }
+	
+	// > 控制器 - 帧刷新（延时销毁）
+	for( var i=0; i < this._drill_EFPa_controllerDyingTank.length; i++ ){
+		var controller = this._drill_EFPa_controllerDyingTank[i];
+		if( controller == undefined ){ continue; }
+		controller.drill_controller_update();
+	}
+	
+	// > 自动销毁 - 控制器（延时销毁）
+	var is_all_empty = true;
+	for( var i=0; i < this._drill_EFPa_controllerDyingTank.length; i++ ){
+		var controller = this._drill_EFPa_controllerDyingTank[i];
+		if( controller == undefined ){ continue; }
+		is_all_empty = false;
+		if( controller.drill_controller_isDead() ){
+			this._drill_EFPa_controllerDyingTank[i] = null;
+		}
+	}
+	if( is_all_empty == true ){
+		this._drill_EFPa_controllerDyingTank = null;
+	}
+}
+//==============================
+// * 物体绑定 - 事件销毁时
+//==============================
+var _drill_EFPa_c_erase = Game_Event.prototype.erase;
+Game_Event.prototype.erase = function(){
+	_drill_EFPa_c_erase.call(this);
+	if( this._drill_EFPa_controllerTank == undefined ){ return; }
+	if( this._drill_EFPa_controllerTank.length == 0 ){ return; }
+	for( var i=0; i < this._drill_EFPa_controllerTank.length; i++ ){
+		var controller = this._drill_EFPa_controllerTank[i];
+		if( controller == undefined ){ continue; }
+		controller.drill_controller_destroyWithDelay();		//（延时销毁）
 	}
 }
 
@@ -2562,7 +2647,7 @@ Sprite_Character.prototype.update = function(){
 		if( controller == undefined ){ continue; }
 		
 		// > 过滤生命周期结束情况
-		if( controller.drill_EFPa_isDead() == true ){ continue; }
+		if( controller.drill_controller_isDead() == true ){ continue; }
 		
 		// > 有绑定控制器的贴图时，跳过
 		if( this.drill_EFPa_hasSpriteBinding( controller._drill_controllerSerial ) == true ){ continue; }
@@ -2643,7 +2728,7 @@ Scene_Map.prototype.drill_controller_updateInScene = function() {
 		// > 自动销毁 - 控制器生命周期结束
 		var temp_controller = temp_sprite._drill_controller;
 		if( temp_controller == undefined ||
-			temp_controller.drill_EFPa_isDead() ){
+			temp_controller.drill_controller_isDead() ){
 			$gameTemp.drill_EFPa_layerRemoveSprite( temp_sprite );	//（销毁贴图）
 			$gameTemp._drill_EFPa_spriteTank.splice(i,1);
 			delete temp_sprite;
@@ -2685,9 +2770,9 @@ Scene_Map.prototype.drill_controller_updateInScene = function() {
 // **					->G直线拖尾贴图
 // **					->H贴图高宽
 // **					->I粒子生命周期
-// **					->2A对象绑定
 // **		
 // **		说明：	> 该类可与 Game_CharacterBase 一并存储在 $gameMap 中。
+// **				> 注意，该类不能放 物体指针、贴图指针 。
 //=============================================================================
 //==============================
 // * 控制器 - 定义
@@ -2763,18 +2848,8 @@ Drill_EFPa_Controller.prototype.drill_controller_destroy = function(){
 //			参数：	> 无
 //			返回：	> 布尔
 //##############################
-Drill_EFPa_Controller.prototype.drill_EFPa_isDead = function(){
+Drill_EFPa_Controller.prototype.drill_controller_isDead = function(){
 	return Drill_COPa_Controller.prototype.drill_controller_isDead.call( this );
-};
-
-//##############################
-// * 2A对象绑定 - 设置物体【开放函数】
-//			
-//			参数：	> character 贴图对象
-//			返回：	> 无
-//##############################
-Drill_EFPa_Controller.prototype.drill_EFPa_setCharacter = function( character ){
-	this._character = character;
 };
 
 //##############################
@@ -2885,18 +2960,6 @@ Drill_EFPa_Controller.prototype.drill_controller_resetParticles_Position = funct
 //==============================
 // * I粒子生命周期 - 初始化子功能
 //==============================
-//==============================
-// * I粒子生命周期 - 帧刷新
-//==============================
-Drill_EFPa_Controller.prototype.drill_controller_updateLife = function(){
-	Drill_COPa_Controller.prototype.drill_controller_updateLife.call( this );
-	
-	// > 与绑定的物体同步，延迟销毁
-	if( this._character != undefined && 
-		this._character._erased == true ){
-		this.drill_controller_destroyWithDelay();
-	}
-}
 
 
 

@@ -582,15 +582,25 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			制作组：
+//			->☆提示信息
+//			->☆变量获取
+//			
+//			->☆标题选项
+//			
+//			->制作组面板【Scene_Drill_SCr】
 //				->内容遮罩
 //				->滚轴窗口
 //				->加速滚轴按键
 //				->退出滚轴按键
-// 
+//				->☆原型链规范
+//			
+//			
+//		★家谱：
+//			无
+//		
 //		★插件私有类：
-//			* Scene_Drill_SCr【制作组面板】
-//
+//			* 制作组面板【Scene_Drill_SCr】
+//		
 //		★必要注意事项：
 //			暂无
 //
@@ -602,7 +612,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -627,7 +637,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_SceneCredits = true;
@@ -690,8 +700,12 @@
 if( Imported.Drill_CoreOfScreenRoller ){
 	
 
+
 //=============================================================================
-// ** 标题选项绑定
+// ** ☆标题选项
+//
+//			说明：	> 此模块专门关联标题选项，选项进入后跳转到 制作组面板 界面。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================	
 var _drill_SCr_createCommandWindow = Scene_Title.prototype.createCommandWindow;
 Scene_Title.prototype.createCommandWindow = function() {
@@ -708,25 +722,43 @@ Window_TitleCommand.prototype.makeCommandList = function() {
 	this.addCommand( DrillUp.g_SCr_commandName,   'Drill_SCr_command' );
 };	
 
+
 //=============================================================================
-// ** 制作组面板
+// ** 制作组面板【Scene_Drill_SCr】
+//
+//			主功能：	滚动画布界面的基本功能。
+//			子功能：
+//						->基本功能
+//							> 继承属性
+//							> 初始化
+//							> 创建
+//							> 帧刷新
+//						->滚轴画布
+//						->流程
+//							->画布加速（ok键）
+//							->退出窗口（cancel键）
+//			主要成员：
+//						> ._drill_roller			滚轴画布
+//						> ._drill_contextMask		内容遮罩
+//					
+//			说明：	暂无。
 //=============================================================================
+//==============================
+// * 制作组面板 - 定义
+//==============================
 function Scene_Drill_SCr() {
     this.initialize.apply(this, arguments);
 }
 Scene_Drill_SCr.prototype = Object.create(Scene_MenuBase.prototype);
 Scene_Drill_SCr.prototype.constructor = Scene_Drill_SCr;
-
 //==============================
-// * 面板 - 初始化
+// * 制作组面板 - 初始化
 //==============================
 Scene_Drill_SCr.prototype.initialize = function() {
     Scene_MenuBase.prototype.initialize.call(this);
-	
 };
-
 //==============================
-// * 面板 - 创建
+// * 制作组面板 - 创建
 //==============================
 Scene_Drill_SCr.prototype.create = function() {
     Scene_MenuBase.prototype.create.call(this);
@@ -736,17 +768,16 @@ Scene_Drill_SCr.prototype.create = function() {
 	this.drill_createLayout();			//整体布局
 	this.drill_createContextMask();		//内容遮罩
 	this.drill_createRoller();			//建立滚轴
-}
-
+};
 //==============================
-// * 面板 - 帧刷新
+// * 制作组面板 - 帧刷新
 //==============================
 Scene_Drill_SCr.prototype.update = function() { 
 	Scene_MenuBase.prototype.update.call(this);	
 	
 	this.drill_updateMask();			//遮罩缩放
 	this.drill_updateQuit();			//退出监听
-}
+};
 
 //==============================
 // * 创建 - 整体布局
@@ -813,6 +844,82 @@ Scene_Drill_SCr.prototype.drill_updateQuit = function() {
 		SceneManager.pop();
 	}
 }
+
+
+//=============================================================================
+// ** ☆原型链规范
+//
+//			说明：	> 此处专门补上缺失的原型链，未缺失的则注释掉。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 制作组面板（场景基类） - 初始化
+//==============================
+//Scene_Drill_SCr.prototype.initialize = function() {
+//    Scene_MenuBase.prototype.initialize.call(this);
+//};
+//==============================
+// * 制作组面板（场景基类） - 创建
+//==============================
+//Scene_Drill_SCr.prototype.create = function() {
+//    Scene_MenuBase.prototype.create.call(this);
+//};
+//==============================
+// * 制作组面板（场景基类） - 帧刷新
+//==============================
+//Scene_Drill_SCr.prototype.update = function() {
+//    Scene_MenuBase.prototype.update.call(this);
+//};
+//==============================
+// * 制作组面板（场景基类） - 开始运行
+//==============================
+Scene_Drill_SCr.prototype.start = function() {
+    Scene_MenuBase.prototype.start.call(this);
+};
+//==============================
+// * 制作组面板（场景基类） - 结束运行
+//==============================
+Scene_Drill_SCr.prototype.stop = function() {
+    Scene_MenuBase.prototype.stop.call(this);
+};
+//==============================
+// * 制作组面板（场景基类） - 判断是否激活/启动
+//==============================
+Scene_Drill_SCr.prototype.isActive = function() {
+	return Scene_MenuBase.prototype.isActive.call(this);
+};
+//==============================
+// * 制作组面板（场景基类） - 析构函数
+//==============================
+Scene_Drill_SCr.prototype.terminate = function() {
+    Scene_MenuBase.prototype.terminate.call(this);
+};
+
+//==============================
+// * 制作组面板（场景基类） - 判断加载完成
+//==============================
+Scene_Drill_SCr.prototype.isReady = function() {
+	return Scene_MenuBase.prototype.isReady.call(this);
+};
+//==============================
+// * 制作组面板（场景基类） - 忙碌状态
+//==============================
+Scene_Drill_SCr.prototype.isBusy = function() {
+	return Scene_MenuBase.prototype.isBusy.call(this);
+};
+
+//==============================
+// * 制作组面板（菜单界面基类） - 创建 - 菜单背景
+//==============================
+Scene_Drill_SCr.prototype.createBackground = function() {
+	Scene_MenuBase.prototype.createBackground.call(this);
+};
+//==============================
+// * 制作组面板（菜单界面基类） - 创建 - 帮助窗口
+//==============================
+Scene_Drill_SCr.prototype.createHelpWindow = function() {
+	Scene_MenuBase.prototype.createHelpWindow.call(this);
+};
 
 
 

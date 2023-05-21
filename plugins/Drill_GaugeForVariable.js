@@ -1156,18 +1156,14 @@
 //				->时机
 //					->刷菜单时 动画不重复移动	x（暂时让玩家手动关闭吧，缺乏时机判定）
 //					->刷菜单时 数值不滚动		x
-//
 //		
-//		★配置参数结构体如下：
-//			~struct~GFVStyle:				固定框样式
-//			~struct~GFVStyleSlot:			槽样式列表
-//			~struct~GFVBind:				变量框设置
-//			~struct~GFVBindSlot:			槽数据列表
-//			~struct~DrillWindowMoving:		整体移动动画（弹道核心-两点式）
+//		
+//		★家谱：
+//			无
 //		
 //		★插件私有类：
-//			* Drill_GFV_StyleSprite【固定框样式】
-//
+//			* 固定框样式【Drill_GFV_StyleSprite】
+//		
 //		★必要注意事项：
 //			1.插件的图片层级与多个插件共享。【必须自写 层级排序 函数】
 //			2.  变量框设置 和 贴图 一对一，容器内存放指针，【注意避免直接修改指针内容】
@@ -1229,6 +1225,7 @@
 	DrillUp.drill_GFV_initStyle = function( dataFrom ) {
 		var data = {};
 		// > 槽样式
+		//			~struct~GFVStyleSlot:			槽样式列表
 		if( dataFrom["槽样式列表"] != undefined &&
 			dataFrom["槽样式列表"] != "" ){
 			data['slot_list'] = JSON.parse( dataFrom["槽样式列表"] || [] );
@@ -1280,6 +1277,7 @@
 		// > 绑定
 		data['style_id'] = Number( dataFrom["绑定的样式"] || 0 );
 		// > 槽数据
+		//			~struct~GFVBindSlot:			槽数据列表
 		if( dataFrom["槽数据列表"] != undefined &&
 			dataFrom["槽数据列表"] != "" ){
 			data['slot_list'] = JSON.parse( dataFrom["槽数据列表"] || [] );
@@ -1301,6 +1299,7 @@
 		data['visible'] = String( dataFrom["初始是否显示"] || "true") === "true";
 		data['frame_x'] = Number( dataFrom["平移-固定框 X"] || 0 );
 		data['frame_y'] = Number( dataFrom["平移-固定框 Y"] || 0 );
+		//			~struct~DrillWindowMoving:		整体移动动画（弹道核心-两点式）
 		if( dataFrom["整体移动动画"] != undefined &&
 			dataFrom["整体移动动画"] != "" ){
 			var slideAnimFrom = JSON.parse( dataFrom["整体移动动画"] || {} );

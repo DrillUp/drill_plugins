@@ -605,9 +605,13 @@
 //						->GIF效果
 //						->浮动效果
 //
-//		★插件私有类：
-//			* Drill_DSk_BorderSprite【对话框边框贴图】
 //
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			* 对话框边贴图【Drill_DSk_BorderSprite】
+//		
 //		★必要注意事项：
 //			1._windowSpriteContainer 是一个 PIXI.Container，不能addChild，巨坑。
 //			  要使用提供的Window类方法： addChildToBack 。
@@ -1090,10 +1094,11 @@ Window_Base.prototype.drill_DSk_resetSkinData = function( data ){
 		this.windowskin = this._drill_skin_defaultSkin;
 		
 		// （透明度）
-		this.opacity = this._drill_skin_opacity;
-		this._windowBackSprite.opacity = this._drill_skin_opacity;
-		this._windowFrameSprite.opacity = this._drill_skin_opacity;
-		this._drill_skinBackground.opacity = 0;
+		//this.contentsOpacity = 255;									//文本域 透明度（与 背景容器层 并列）
+		//this.opacity = 255;											//背景容器层 透明度
+		this._windowBackSprite.opacity = this._drill_skin_opacity;		//背景容器层 - 平铺贴图 透明度
+		this._windowFrameSprite.opacity = this._drill_skin_opacity;		//背景容器层 - 框架贴图 透明度
+		this._drill_skinBackground.opacity = 0;							//背景容器层 - 背景图片 透明度
 		
 		// （背景图片布局）
 		this._drill_skinBackground.bitmap = null;
@@ -1105,10 +1110,11 @@ Window_Base.prototype.drill_DSk_resetSkinData = function( data ){
 		this.windowskin = this._drill_skin_sys_bitmap;
 		
 		// （透明度）
-		this.opacity = this._drill_skin_opacity;
-		this._windowBackSprite.opacity = this._drill_skin_opacity;
-		this._windowFrameSprite.opacity = this._drill_skin_opacity;
-		this._drill_skinBackground.opacity = 0;
+		//this.contentsOpacity = 255;									//文本域 透明度（与 背景容器层 并列）
+		//this.opacity = 255;											//背景容器层 透明度
+		this._windowBackSprite.opacity = this._drill_skin_opacity;		//背景容器层 - 平铺贴图 透明度
+		this._windowFrameSprite.opacity = this._drill_skin_opacity;		//背景容器层 - 框架贴图 透明度
+		this._drill_skinBackground.opacity = 0;							//背景容器层 - 背景图片 透明度
 		
 		// （背景图片布局）
 		this._drill_skinBackground.bitmap = null;
@@ -1120,10 +1126,11 @@ Window_Base.prototype.drill_DSk_resetSkinData = function( data ){
 		this.windowskin = this._drill_skin_defaultSkin;
 		
 		// （透明度）
-		this.opacity = 255;
-		this._windowBackSprite.opacity = 0;
-		this._windowFrameSprite.opacity = 0;
-		this._drill_skinBackground.opacity = this._drill_skin_opacity;
+		//this.contentsOpacity = 255;									//文本域 透明度（与 背景容器层 并列）
+		//this.opacity = 255;											//背景容器层 透明度
+		this._windowBackSprite.opacity = 0;								//背景容器层 - 平铺贴图 透明度
+		this._windowFrameSprite.opacity = 0;							//背景容器层 - 框架贴图 透明度
+		this._drill_skinBackground.opacity = this._drill_skin_opacity;	//背景容器层 - 背景图片 透明度]
 		
 		// （背景图片布局）
 		this._drill_skinBackground.bitmap = this._drill_skin_pic_bitmap;
@@ -1137,10 +1144,11 @@ Window_Base.prototype.drill_DSk_resetSkinData = function( data ){
 		this.windowskin = this._drill_skin_defaultSkin;
 		
 		// （透明度）
-		this.opacity = 255;
-		this._windowBackSprite.opacity = 0;
-		this._windowFrameSprite.opacity = 0;
-		this._drill_skinBackground.opacity = this._drill_skin_opacity;
+		//this.contentsOpacity = 255;									//文本域 透明度（与 背景容器层 并列）
+		//this.opacity = 255;											//背景容器层 透明度
+		this._windowBackSprite.opacity = 0;								//背景容器层 - 平铺贴图 透明度
+		this._windowFrameSprite.opacity = 0;							//背景容器层 - 框架贴图 透明度
+		this._drill_skinBackground.opacity = this._drill_skin_opacity;	//背景容器层 - 背景图片 透明度
 		
 		// （背景图片布局）
 		this._drill_skinBackground.bitmap = null;	//（帧刷新中会自动建立黑色画布）

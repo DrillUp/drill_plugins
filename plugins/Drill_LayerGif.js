@@ -1691,6 +1691,12 @@
 //											< MOG的ui层【_hudField】 < ui层【_drill_map_top_board】
 //				AllWindows：WindowLayer：	< 对话框集合 < 滚动文本画布 < 最顶层【_drill_SenceTopArea】
 //
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			无
+//		
 //		★必要注意事项：
 //			1.插件的地图层级/图片层级与多个插件共享。【必须自写 层级排序 标准函数】
 //			2.使用插件指令变化时，changing将会作为一个变化容器，根据时间对【数据】进行改变。
@@ -1726,6 +1732,7 @@
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_LayerGif = true;
+　　Imported.Drill_LayerGIF = true;
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_LayerGif');
 
@@ -2046,8 +2053,8 @@ Game_System.prototype.drill_LGi_initSysData_Private = function() {
 		}
 	}
 	
-	// > 刷新当前地图
-	if( $gameMap ){
+	// > 刷新当前地图【$gameSystem优先初始化】
+	if( $gameMap != undefined ){
 		$gameMap.drill_LGi_initMapdata();
 	}
 };

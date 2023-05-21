@@ -1125,6 +1125,7 @@
 //		★功能结构树：
 //			->☆提示信息
 //			->☆变量获取
+//			
 //			->☆临时变量初始化
 //				->资源提前预加载
 //			->参数条【Drill_COGM_MeterSprite】
@@ -1146,17 +1147,20 @@
 //				->I加满动画
 //			->弹出条【Drill_COGM_SpringSprite】
 //			->加满动画遮罩【Drill_COGM_MeterSpriteMask】
+//			
+//			
+//		★家谱：
+//			无
 //		
-//				
 //		★插件私有类：
-//			* Drill_COGM_MeterSprite【参数条】
-//			* Drill_COGM_MeterSpriteMask【参数条遮罩】
-//			* Drill_COGM_SpringSprite【弹出条】
+//			* 参数条【Drill_COGM_MeterSprite】
+//			* 弹出条【Drill_COGM_SpringSprite】
+//			* 加满动画遮罩【Drill_COGM_MeterSpriteMask】
 //		
-//		★配置参数结构体如下：
-//			~struct~GaugeMeter:						参数条样式
-//			~struct~DrillCOGMBallistics:			弹出条弹道（弹道核心）
-//
+//		★核心说明：
+//			1.整个核心只提供了一个封装好的【Sprite独立子类】。
+//			  具体见类的说明。
+//		
 //		★必要注意事项：
 //			1.参数条只分两层，内容层 和 外层。两层级可以通过zIndex排序。
 //			2.切换菜单时，参数条会重刷所有数据。你需要手动控制一些数据。
@@ -1170,10 +1174,6 @@
 //				（如果我要把sprite转成图片，必须先建立一个stage，然后addchild，再然后render，生成的图片还是有黑底的canvas。）
 //				（主要还是渲染消耗性能问题，render一次会费许多性能）
 //			3.参数条的中心锚点最后还是需要通过数学来锁定，因为有一定旋转角度时，参数条的位置会乱。
-//		
-//		★核心接口说明：
-//			1.整个核心只提供了一个封装好的【Sprite独立子类】。
-//			  具体见类的说明。
 //		
 //		★存在的问题：
 //			1.同时开7个缓冲时间条，并且弹出条开启。210个弹出条同时运动时，地图界面会卡爆。
@@ -1911,7 +1911,7 @@ Drill_COGM_MeterSprite.prototype.drill_COGM_removeChildConnect = function( paren
 	if( parent_sprite == undefined ){ return; }
 	var sprite_list = parent_sprite.children;
 	if( sprite_list == undefined ){ return; }
-	for(var i = 0; i < sprite_list.length; i++ ){
+	for( var i = sprite_list.length-1; i >= 0; i-- ){
 		var sprite = sprite_list[i];
 		if( sprite == undefined ){ continue; }
 		parent_sprite.removeChild( sprite );

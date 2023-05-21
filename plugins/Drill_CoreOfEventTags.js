@@ -18,8 +18,10 @@
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该插件可以单独使用。
- * 该插件为基础核心，是以下插件的依赖。
+ * 该插件 不能 单独使用。
+ * 需要基于其他核心插件，才能运行，并作用于其他子插件。
+ * 基于：
+ *   - Drill_CoreOfNumberArray     系统-变量数组核心
  * 可作用于：
  *   - Drill_CoreOfEventTags       物体触发-固定区域核心
  *     插件的筛选器可以支持"必须含指定标签的事件"的捕获。
@@ -157,6 +159,16 @@
 //					->筛选法获取
 //					->容器法获取 x
 //				
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			无
+//
+//		★核心说明：
+//			1.该插件准确地说，【不是一个标准的核心】。
+//			  没有对外接口。
+//		
 //		★必要注意事项：
 //			1.【该插件使用了事件容器】，必须考虑三种情况：初始化、切换地图时、切换贴图时，不然会出现指针错误！
 //				只要是装事件的容器，都需要考虑指针问题，不管是放在$gameMap还是$gameTemp中。
@@ -165,10 +177,6 @@
 //		★其它说明细节：
 //			1.这里只是提供了一系列"通过标签"快速筛选的功能和方法。
 //			  需要持续与子插件进行配合。
-//
-//		★核心接口说明：
-//			1.该插件准确地说，【不是一个标准的核心】。
-//			  没有对外接口。
 //				
 //		★存在的问题：
 //			暂无
@@ -182,7 +190,21 @@
 	//==============================
 	var DrillUp = DrillUp || {}; 
 	DrillUp.g_COET_PluginTip_curName = "Drill_CoreOfEventTags.js 物体管理-事件标签核心";
-	DrillUp.g_COET_PluginTip_baseList = [];
+	DrillUp.g_COET_PluginTip_baseList = ["Drill_CoreOfNumberArray.js 系统-变量数组核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_COET_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_COET_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_COET_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_COET_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_COET_PluginTip_baseList[i];
+		}
+		return message;
+	};
 	//==============================
 	// * 提示信息 - 报错 - 找不到事件
 	//==============================
@@ -199,6 +221,12 @@
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_CoreOfEventTags');
 
+	
+//=============================================================================
+// * >>>>基于插件检测>>>>
+//=============================================================================
+if( Imported.Drill_CoreOfNumberArray ){
+	
 	
 //=============================================================================
 // * 插件指令
@@ -290,7 +318,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			
 			if( type == "根据事件名" ){
 				var events = $gameMap.drill_COET_getEventsByName_direct(temp2);
-				if( temp1 == "获取事件id组" || Imported.Drill_CoreOfNumberArray ){
+				if( temp1 == "获取事件id组" ){
 					temp3 = temp3.replace("变量数组[","");
 					temp3 = temp3.replace("]","");
 					var ids = [];
@@ -329,7 +357,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			}
 			if( type == "根据标签" ){
 				var events = $gameMap.drill_COET_getEventsByTag_container(temp2);
-				if( temp1 == "获取事件id组" || Imported.Drill_CoreOfNumberArray ){
+				if( temp1 == "获取事件id组" ){
 					temp3 = temp3.replace("变量数组[","");
 					temp3 = temp3.replace("]","");
 					var ids = [];
@@ -633,4 +661,14 @@ Game_Map.prototype.drill_COET_updateRestatistics = function() {
 Scene_Load.prototype.reloadMapIfUpdated = function() {
 	// （禁止重刷）
 };
+
+
+//=============================================================================
+// * <<<<基于插件检测<<<<
+//=============================================================================
+}else{
+		Imported.Drill_CoreOfEventTags = false;
+		var pluginTip = DrillUp.drill_COET_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
+}
 

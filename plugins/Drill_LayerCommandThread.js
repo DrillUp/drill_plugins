@@ -117,10 +117,14 @@
 //				->管道物体
 //					->串行
 //					->并行处理
+//
+//
+//		★家谱：
+//			无
 //		
 //		★插件私有类：
-//			* Drill_LCT_GamePipeEvent		管道物体
-//
+//			* 管道物体【Drill_LCT_GamePipeEvent】
+//		
 //		★必要注意事项：
 //			1.简单来说，有list有interpreter就可以执行。
 //			  串行就是使用map的interpreter，将list输入栈。

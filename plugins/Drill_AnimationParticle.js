@@ -1484,6 +1484,22 @@
  * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
  * @default 0
  *
+ * @param 图像-色调值
+ * @parent ---贴图---
+ * @type number
+ * @min 0
+ * @max 360
+ * @desc 资源图像的色调值，范围为0至360。
+ * @default 0
+ *
+ * @param 图像-模糊边缘
+ * @parent ---贴图---
+ * @type boolean
+ * @on 模糊
+ * @off 关闭
+ * @desc 此参数为缩放设置，设置模糊后，缩放时可以模糊资源图像的边缘，防止出现像素锯齿。
+ * @default false
+ *
  * @param 动画层级
  * @parent ---贴图---
  * @type select
@@ -1946,18 +1962,49 @@
 //				->自动销毁
 //		
 //			->动画粒子控制器【Drill_APa_Controller】
+//				->A主体
+//				->B粒子群弹道
+//				->C随机因子
+//				->D粒子变化
+//				->E粒子重设
+//				->F双层效果
+//				->G直线拖尾贴图
+//				->H贴图高宽
+//				->I粒子生命周期
+//				->2A阶段
 //			->动画粒子贴图【Drill_APa_Sprite】
+//				->A主体
+//				->B粒子群弹道
+//				->C对象绑定
+//				->D粒子变化
+//				->E粒子重设
+//				->F双层效果
+//				->G直线拖尾贴图
+//				->H贴图高宽
+//				->I粒子生命周期
 //			->动画粒子贴图（第二层）【Drill_APa_SecSprite】
+//				->A主体
+//				->B粒子群弹道
+//				->C对象绑定
+//				->D粒子变化
+//				->E粒子重设
+//				->F双层效果
+//				->G直线拖尾贴图
+//				->H贴图高宽
+//				->I粒子生命周期
 //		
+//		
+//		★家谱：
+//			大家族-粒子效果
 //		
 //		★插件私有类：
-//			* Drill_APa_Controller	【动画粒子控制器】
-//			* Drill_APa_Sprite		【动画粒子贴图】
-//			* Drill_APa_SecSprite	【动画粒子贴图（第二层）】
+//			* 动画粒子控制器【Drill_APa_Controller】
+//			* 动画粒子贴图【Drill_APa_Sprite】
+//			* 动画粒子贴图（第二层）【Drill_APa_SecSprite】
 //		
 //		★必要注意事项：
 //			1.插件继承至 粒子核心。
-//			  核心与所有子插件功能介绍去看看："1.系统 > 大家族-粒子核心（脚本）.docx"
+//			  核心与所有子插件功能介绍去看看："1.系统 > 大家族-粒子效果（脚本）.docx"
 //			2.插件的图片层级与多个插件共享。【必须自写 层级排序 函数】
 //				_drill_animPBackArea 			父贴图后面层
 //				_drill_animDownArea				动画后面层
@@ -2041,7 +2088,11 @@
 		data['x'] = Number( dataFrom["平移-粒子 X"] || 0);
 		data['y'] = Number( dataFrom["平移-粒子 Y"] || 0);
 		data['opacity'] = 255;		//（此参数被 动画过程 覆盖）
+		
 		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
+		data['tint'] = Number( dataFrom["图像-色调值"] || 0);
+		data['smooth'] = String( dataFrom["图像-模糊边缘"] || "false") == "true";
+		
 		data['individualIndex'] = String( dataFrom["动画层级"] || "在动画后面");
 		data['zIndex'] = Number( dataFrom["图片层级"] || 4);
 		
@@ -3235,7 +3286,7 @@ Drill_APa_Controller.prototype.drill_controller_destroy = function(){
 //			参数：	> 无
 //			返回：	> 布尔
 //##############################
-Drill_APa_Controller.prototype.drill_APa_isDead = function(){
+Drill_APa_Controller.prototype.drill_controller_isDead = function(){
 	return Drill_COPa_Controller.prototype.drill_controller_isDead.call( this );
 };
 
@@ -3262,9 +3313,12 @@ Drill_APa_Controller.prototype.drill_APa_setState = function( state ){
 //
 //			参数：	> 无
 //			返回：	> 布尔
+//
+//			说明：	> 此处融合了前面的判断销毁。
 //##############################
 Drill_APa_Controller.prototype.drill_APa_isDead = function(){
-	return this._drill_curState == "销毁";
+	return  this.drill_controller_isDead() || 
+			this._drill_curState == "销毁";
 };
 
 //##############################
@@ -3611,8 +3665,8 @@ Drill_APa_Controller.prototype.drill_initDeathState = function() {
 // **		子功能：	->贴图
 // **						->是否就绪
 // **						->优化策略
-// **						->是否需要销毁
-// **						->销毁
+// **						->是否需要销毁（未使用）
+// **						->销毁（手动）
 // **					->A主体
 // **						->层级位置修正
 // **					->B粒子群弹道
@@ -3670,6 +3724,8 @@ Drill_APa_Sprite.prototype.drill_sprite_setController = function( controller ){
 //			
 //			参数：	> individual_sprite 贴图对象
 //			返回：	> 无
+//			
+//			说明：	> 如果只播放单纯动画，此项可以为null。
 //##############################
 Drill_APa_Sprite.prototype.drill_APa_setIndividualSprite = function( individual_sprite ){
 	this._drill_individualSprite = individual_sprite;

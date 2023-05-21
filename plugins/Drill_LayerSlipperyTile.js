@@ -236,6 +236,12 @@
 //					->没有冰面区域，不工作
 //				x->滑行掉入深渊后回到滑行前位置
 //		
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			无
+//		
 //		★必要注意事项：
 //			1.【该插件使用了事件容器】，必须考虑三种情况：初始化、切换地图时、切换贴图时，不然会出现指针错误！
 //				只要是装事件的容器，都需要考虑指针问题，不管是放在$gameMap还是$gameTemp中。
@@ -443,7 +449,7 @@ DataManager.isDatabaseLoaded = function(){
 // * 数据管理器 - 读取图块注释
 //==============================
 DataManager.drill_LST_readTilesets = function(){
-	for (var n = 1; n < $dataTilesets.length; n++) {
+	for( var n = 1; n < $dataTilesets.length; n++ ){
 		var data_tileset = $dataTilesets[n];
 		var note_list = data_tileset.note.split(/[\r\n]+/);
 		
@@ -486,6 +492,7 @@ Game_Map.prototype.drill_LST_isSlippery = function( x, y ){
 	// > 光滑 图块注释 标记
 	var tagId = this.terrainTag( x, y );
 	var slip_tags = this.tileset()['_drill_LST_slipTileTag'];
+	if( slip_tags == undefined ){ return false; }
 	if( slip_tags.contains(tagId) ){
 		return true;
 	}

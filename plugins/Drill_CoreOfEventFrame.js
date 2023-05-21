@@ -102,10 +102,14 @@
 //		★功能结构树：
 //			->☆提示信息
 //			->☆变量获取
-//			->☆核心漏洞修复 - 判断图块行走图
+//			
+//			->☆管辖权
+//			->☆原型链规范
+//			->☆核心漏洞修复 - 行走图贴图
 //			->☆核心漏洞修复 - 初始帧
-//			->☆性能优化 - 贴图参数
-//			->☆性能优化 - 固定帧初始值
+//			
+//			->☆行走图 参数优化
+//			->☆行走图 固定帧初始值
 //				> 可见
 //				> x、y、z
 //				> 旋转
@@ -113,12 +117,22 @@
 //				> 缩放y
 //				> 斜切x
 //				> 斜切y
-//			->☆性能优化 - 优化策略
+//			->☆行走图 优化策略
 //				->必要执行函数（开放接口）
 //				->允许第一次帧刷新
 //				->镜头范围外时，不工作
+//			->☆行走图 贴图框架标记？
 //			
 //			
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			无
+//		
+//		★核心说明：
+//			无
+//		
 //		★必要注意事项：
 //			1."_pattern"与方向没有直接关系，方向和帧数 是两个独立功能。
 //			2."_originalPattern"原先只有事件有，这里强加给了所有物体。
@@ -185,13 +199,409 @@
 	
 	
 //=============================================================================
-// ** ☆核心漏洞修复 - 判断图块行走图
+// ** ☆管辖权
+//
+//			说明：	> 管辖权 即对 原函数 进行 修改、覆写、继承、控制子插件继承 等的权利。
+//					> 用于后期脱离 原游戏框架 且仍保持兼容性 的标记。
+//=============================================================================
+/*
+//==============================
+// * A显示属性『行走图优化核心』 - 显示属性（rmmv勾选 - 是否透明）
+//
+//			说明：	> 注意，此函数从父类就在帧刷新中不断赋值visible。
+//==============================
+Sprite_Character.prototype.updateVisibility = function(){
+    Sprite_Base.prototype.updateVisibility.call(this);
+    if( this._character.isTransparent() ){
+        this.visible = false;
+    }
+};
+
+//==============================
+// * B动画『行走图优化核心』 - 帧刷新
+//==============================
+Sprite_Character.prototype.updateAnimation = function(){
+    this.setupAnimation();
+	
+	// > 停止 B动画
+    if( !this.isAnimationPlaying() ){
+        this._character.endAnimation();
+    }
+	
+	// > 停止 H气泡
+    if( !this.isBalloonPlaying() ){
+        this._character.endBalloon();
+    }
+};
+//==============================
+// * B动画『行走图优化核心』 - 动画播放监听
+//==============================
+Sprite_Character.prototype.setupAnimation = function(){
+    if( this._character.animationId() > 0 ){
+        var animation = $dataAnimations[this._character.animationId()];
+        this.startAnimation(animation, false, 0);
+        this._character.startAnimation();
+    }
+};
+
+//==============================
+// * C资源『行走图优化核心』 - 帧刷新
+//==============================
+Sprite_Character.prototype.updateBitmap = function(){
+    if( this.isImageChanged() ){
+        this._tilesetId = $gameMap.tilesetId();
+        this._tileId = this._character.tileId();
+        this._characterName = this._character.characterName();
+        this._characterIndex = this._character.characterIndex();
+        if( this._tileId > 0 ){
+            this.setTileBitmap();
+        }else{
+            this.setCharacterBitmap();
+        }
+    }
+};
+//==============================
+// * C资源『行走图优化核心』 - 判断资源变化
+//==============================
+Sprite_Character.prototype.isImageChanged = function(){
+    return (this._tilesetId !== $gameMap.tilesetId() ||
+            this._tileId !== this._character.tileId() ||
+            this._characterName !== this._character.characterName() ||
+            this._characterIndex !== this._character.characterIndex());
+};
+//==============================
+// * C资源『行走图优化核心』 - 设置 图块行走图
+//==============================
+Sprite_Character.prototype.setTileBitmap = function(){
+    this.bitmap = this.tilesetBitmap(this._tileId);
+};
+//==============================
+// * C资源『行走图优化核心』 - 设置 单行走图/八行走图
+//==============================
+Sprite_Character.prototype.setCharacterBitmap = function(){
+    this.bitmap = ImageManager.loadCharacter(this._characterName);
+    this._isBigCharacter = ImageManager.isBigCharacter(this._characterName);	//（单行走图标记）
+};
+
+//==============================
+// * D行走图『行走图优化核心』 - 帧刷新
+//==============================
+Sprite_Character.prototype.updateFrame = function(){
+	
+	// > 图块行走图
+	if( this._tileId > 0 ){
+		this.updateTileFrame();
+	
+	// > 单行走图/八行走图
+	}else{
+		this.updateCharacterFrame();
+	}
+};
+//==============================
+// * D行走图『行走图优化核心』 - 图块行走图 - 访问器（这里有bug）
+//==============================
+Sprite_Character.prototype.isTile = function(){ return this._character.tileId > 0; };
+//==============================
+// * D行走图『行走图优化核心』 - 图块行走图 - 获取资源图片
+//==============================
+Sprite_Character.prototype.tilesetBitmap = function( tileId ){
+    var tileset = $gameMap.tileset();
+    var setNumber = 5 + Math.floor(tileId / 256);
+    return ImageManager.loadTileset(tileset.tilesetNames[setNumber]);
+};
+//==============================
+// * D行走图『行走图优化核心』 - 图块行走图 - 帧刷新
+//==============================
+Sprite_Character.prototype.updateTileFrame = function(){
+    var pw = this.patternWidth();
+    var ph = this.patternHeight();
+    var sx = (Math.floor(this._tileId / 128) % 2 * 8 + this._tileId % 8) * pw;
+    var sy = Math.floor(this._tileId % 256 / 8) % 16 * ph;
+    this.setFrame(sx, sy, pw, ph);
+};
+
+//==============================
+// * D行走图『行走图优化核心』 - 单行走图/八行走图 - 帧刷新
+//==============================
+Sprite_Character.prototype.updateCharacterFrame = function(){
+    var pw = this.patternWidth();
+    var ph = this.patternHeight();
+    var sx = (this.characterBlockX() + this.characterPatternX()) * pw;
+    var sy = (this.characterBlockY() + this.characterPatternY()) * ph;
+	
+	// > E灌木丛 情况
+    this.updateHalfBodySprites();
+    if( this._bushDepth > 0 ){
+        var d = this._bushDepth;
+        this._upperBody.setFrame(sx, sy, pw, ph - d);
+        this._lowerBody.setFrame(sx, sy + ph - d, pw, d);
+        this.setFrame(sx, sy, 0, ph);
+	
+	// > 默认情况
+    }else{
+        this.setFrame(sx, sy, pw, ph);
+    }
+};
+//==============================
+// * D行走图『行走图优化核心』 - 动画帧 - 帧数（横向）
+//==============================
+Sprite_Character.prototype.characterBlockX = function(){
+	
+	// > 单行走图
+    if( this._isBigCharacter ){
+        return 0;
+		
+	// > 八行走图
+    }else{
+        var index = this._character.characterIndex();
+        return index % 4 * 3;
+    }
+};
+//==============================
+// * D行走图『行走图优化核心』 - 动画帧 - 帧数（纵向）
+//==============================
+Sprite_Character.prototype.characterBlockY = function(){
+	
+	// > 单行走图
+    if( this._isBigCharacter ){
+        return 0;
+		
+	// > 八行走图
+    }else{
+        var index = this._character.characterIndex();
+        return Math.floor(index / 4) * 4;
+    }
+};
+//==============================
+// * D行走图『行走图优化核心』 - 动画帧 - 所在列（横向）
+//==============================
+Sprite_Character.prototype.characterPatternX = function(){
+    return this._character.pattern();
+};
+//==============================
+// * D行走图『行走图优化核心』 - 动画帧 - 所在行（纵向）
+//==============================
+Sprite_Character.prototype.characterPatternY = function(){
+    return (this._character.direction() - 2) / 2;
+};
+//==============================
+// * D行走图『行走图优化核心』 - 动画帧 - 宽度
+//==============================
+Sprite_Character.prototype.patternWidth = function(){
+	
+	// > 图块行走图
+    if( this._tileId > 0 ){
+        return $gameMap.tileWidth();
+		
+	// > 单行走图
+    }else if( this._isBigCharacter ){
+        return this.bitmap.width / 3;
+		
+	// > 八行走图
+    }else{
+        return this.bitmap.width / 12;
+    }
+};
+//==============================
+// * D行走图『行走图优化核心』 - 动画帧 - 高度
+//==============================
+Sprite_Character.prototype.patternHeight = function(){
+	
+	// > 图块行走图
+    if( this._tileId > 0 ){
+        return $gameMap.tileHeight();
+		
+	// > 单行走图
+    }else if( this._isBigCharacter ){
+        return this.bitmap.height / 4;
+		
+	// > 八行走图
+    }else{
+        return this.bitmap.height / 8;
+    }
+};
+
+//==============================
+// * E灌木丛『行走图优化核心』 - 创建切半透明图层
+//==============================
+Sprite_Character.prototype.createHalfBodySprites = function(){
+    if( !this._upperBody ){
+        this._upperBody = new Sprite();
+        this._upperBody.anchor.x = 0.5;
+        this._upperBody.anchor.y = 1;
+        this.addChild(this._upperBody);
+    }
+    if( !this._lowerBody ){
+        this._lowerBody = new Sprite();
+        this._lowerBody.anchor.x = 0.5;
+        this._lowerBody.anchor.y = 1;
+        this._lowerBody.opacity = 128;
+        this.addChild(this._lowerBody);
+    }
+};
+//==============================
+// * E灌木丛『行走图优化核心』 - 帧刷新
+//==============================
+Sprite_Character.prototype.updateHalfBodySprites = function(){
+    if( this._bushDepth > 0 ){
+        this.createHalfBodySprites();
+        this._upperBody.bitmap = this.bitmap;
+        this._upperBody.visible = true;
+        this._upperBody.y = - this._bushDepth;
+        this._lowerBody.bitmap = this.bitmap;
+        this._lowerBody.visible = true;
+        this._upperBody.setBlendColor(this.getBlendColor());
+        this._lowerBody.setBlendColor(this.getBlendColor());
+        this._upperBody.setColorTone(this.getColorTone());
+        this._lowerBody.setColorTone(this.getColorTone());
+    }else if( this._upperBody ){
+        this._upperBody.visible = false;
+        this._lowerBody.visible = false;
+    }
+};
+
+//==============================
+// * F贴图属性『行走图优化核心』 - 帧刷新 位置
+//==============================
+Sprite_Character.prototype.updatePosition = function(){
+    this.x = this._character.screenX();
+    this.y = this._character.screenY();
+    this.z = this._character.screenZ();
+};
+//==============================
+// * F贴图属性『行走图优化核心』 - 帧刷新
+//==============================
+Sprite_Character.prototype.updateOther = function(){
+    this.opacity = this._character.opacity();			//贴图属性 - 透明度
+    this.blendMode = this._character.blendMode();		//贴图属性 - 混合模式
+    this._bushDepth = this._character.bushDepth();		//贴图属性 - E灌木丛 高度
+};
+
+//==============================
+// * H气泡『行走图优化核心』 - 访问器
+//==============================
+Sprite_Character.prototype.isBalloonPlaying = function(){ return !!this._balloonSprite; };
+//==============================
+// * H气泡『行走图优化核心』 - 播放气泡
+//==============================
+Sprite_Character.prototype.startBalloon = function(){
+    if( !this._balloonSprite ){
+        this._balloonSprite = new Sprite_Balloon();
+    }
+    this._balloonSprite.setup(this._character.balloonId());
+    this.parent.addChild(this._balloonSprite);
+};
+//==============================
+// * H气泡『行走图优化核心』 - 停止气泡
+//==============================
+Sprite_Character.prototype.endBalloon = function(){
+    if( this._balloonSprite ){
+        this.parent.removeChild(this._balloonSprite);
+        this._balloonSprite = null;
+    }
+};
+//==============================
+// * H气泡『行走图优化核心』 - 帧刷新
+//==============================
+Sprite_Character.prototype.updateBalloon = function(){
+    this.setupBalloon();
+    if( this._balloonSprite ){
+        this._balloonSprite.x = this.x;
+        this._balloonSprite.y = this.y - this.height;
+        if( !this._balloonSprite.isPlaying() ){
+            this.endBalloon();
+        }
+    }
+};
+//==============================
+// * H气泡『行走图优化核心』 - 气泡播放监听
+//==============================
+Sprite_Character.prototype.setupBalloon = function(){
+    if( this._character.balloonId() > 0 ){
+        this.startBalloon();
+        this._character.startBalloon();
+    }
+};
+*/
+
+
+//=============================================================================
+// ** ☆原型链规范
+//
+//			说明：	> 此处专门补上缺失的原型链，未缺失的则注释掉。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 行走图贴图（贴图基类） - 初始化
+//==============================
+//Sprite_Character.prototype.initialize = function() {
+//    Sprite_Base.prototype.initialize.call(this);
+//};
+//==============================
+// * 行走图贴图（贴图基类） - 帧刷新
+//==============================
+//Sprite_Character.prototype.update = function() {
+//    Sprite_Base.prototype.update.call(this);
+//};
+//==============================
+// * 行走图贴图（贴图基类） - A显示属性 - 隐藏
+//==============================
+Sprite_Character.prototype.hide = function() {
+    Sprite_Base.prototype.hide.call(this);
+};
+//==============================
+// * 行走图贴图（贴图基类） - A显示属性 - 显示
+//==============================
+Sprite_Character.prototype.show = function() {
+    Sprite_Base.prototype.show.call(this);
+};
+//==============================
+// * 行走图贴图（贴图基类） - A显示属性 - 帧刷新
+//==============================
+//Sprite_Character.prototype.updateVisibility = function() {
+//    Sprite_Base.prototype.updateVisibility.call(this);
+//};
+//==============================
+// * 行走图贴图（贴图基类） - B动画 - 帧刷新 动画贴图
+//==============================
+Sprite_Character.prototype.updateAnimationSprites = function() {
+    Sprite_Base.prototype.updateAnimationSprites.call(this);
+};
+//==============================
+// * 行走图贴图（贴图基类） - B动画 - 播放动画
+//==============================
+Sprite_Character.prototype.startAnimation = function( animation, mirror, delay ) {
+    Sprite_Base.prototype.startAnimation.call( this, animation, mirror, delay );
+};
+//==============================
+// * 行走图贴图（贴图基类） - B动画 - 是否正在播放动画
+//==============================
+Sprite_Character.prototype.isAnimationPlaying = function() {
+    return Sprite_Base.prototype.isAnimationPlaying.call(this);
+};
+//==============================
+// * 行走图贴图（贴图） - 
+//==============================
+Sprite_Character.prototype._refresh = function() {
+	Sprite.prototype._refresh.call(this);
+};
+//==============================
+// * 行走图贴图（贴图） - 
+//==============================
+Sprite_Character.prototype._onBitmapLoad = function( bitmapLoaded ){
+	Sprite.prototype._onBitmapLoad.call( this, bitmapLoaded );
+};
+
+
+
+//=============================================================================
+// ** ☆核心漏洞修复 - 行走图贴图
 //			
 //			说明：	> 原函数有bug，已修正。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 判断图块行走图（覆写）
+// * D行走图『行走图优化核心』 - 图块行走图 - 访问器（覆写）
 //==============================
 Sprite_Character.prototype.isTile = function(){
 	return this._character._tileId > 0;
@@ -315,7 +725,7 @@ Game_Follower.prototype.isOriginalPattern = function() {
 	
 	
 //=============================================================================
-// ** ☆性能优化 - 贴图参数
+// ** ☆行走图 参数优化
 //			
 //			原函数：	Sprite_Character.prototype.characterBlockX
 //						Sprite_Character.prototype.characterBlockY
@@ -493,7 +903,7 @@ Sprite_Character.prototype.patternHeight = function(){
 
 
 //=============================================================================
-// ** ☆性能优化 - 固定帧初始值
+// ** ☆行走图 固定帧初始值
 //			
 //			说明：	> 强制每帧都将 基础属性 都赋值一次，用于实现贴图 定量变化，防止 增量变化。
 //					（插件完整的功能目录去看看：功能结构树）
@@ -520,7 +930,7 @@ Sprite_Character.prototype.updatePosition = function() {
 
 
 //=============================================================================
-// ** ☆性能优化 - 优化策略
+// ** ☆行走图 优化策略
 //
 //			说明：	> 被优化的 行走图，不工作，不帧刷新。
 //					（插件完整的功能目录去看看：功能结构树）

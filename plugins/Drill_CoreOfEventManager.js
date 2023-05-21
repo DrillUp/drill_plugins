@@ -153,6 +153,15 @@
 //			->☆核心漏洞修复
 //			
 //			
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			无
+//		
+//		★核心说明：
+//			无
+//		
 //		★必要注意事项：
 //			1.事件的独立开关是独立于事件的，需要额外刷新。
 //			2.如果你需要引用该插件来创建一个外部地图的事件，
@@ -861,8 +870,9 @@ Game_Map.prototype.drill_COEM_deleteEvent_Private = function( e_id ){
 	if( tar_event == null ){ return; }
 	var spriteSet = SceneManager._scene._spriteset;
 	
-	// > 由于其他子插件大量存储事件对象的指针，无法彻底删除，此设置暂时为权宜之计
-	tar_event._erased = true;
+	// > 执行清除
+	//		（由于其他子插件大量存储事件对象的指针，无法彻底删除，此设置暂时为权宜之计）
+	tar_event.erase();
 	
 	// > 删除镜像贴图
 	if( Imported.Drill_LayerReverseReflection ){

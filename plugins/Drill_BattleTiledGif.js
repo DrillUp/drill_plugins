@@ -836,6 +836,12 @@
 //											< MOG的ui层【_hudField】 < ui层【_drill_battle_ui_board】
 //				AllWindows：WindowLayer：	< 对话框集合 < 滚动文本画布 < 最顶层【_drill_SenceTopArea】
 //
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			无
+//		
 //		★必要注意事项：
 //			1.插件的图片层级与多个插件共享。【必须自写 层级排序 函数】
 //			2.使用插件指令变化时，changing将会作为一个变化容器，根据时间对【sprite】进行改变。

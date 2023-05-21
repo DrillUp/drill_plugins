@@ -1260,10 +1260,19 @@
 //				->选项窗口、详细窗口、描述图片
 //				->当前选项
 //				->描述图全加载
+//				->☆原型链规范
 //			->选项窗口【Drill_SSpA_SelectWindow】
 //			->显示窗口【Drill_SSpA_DescWindow】
 //
 //
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			* 信息面板A【Scene_Drill_SSpA】
+//			* 选项窗口【Drill_SSpA_SelectWindow】
+//			* 显示窗口【Drill_SSpA_DescWindow】
+//		
 //		★必要注意事项：
 //			1.替换以下字符变成新面板：
 //				SSpA
@@ -2143,6 +2152,82 @@ Scene_Drill_SSpA.prototype.drill_updateIndex = function() {
 		this.drill_refreshDescPic(this._cur_index);
 	}
 }
+
+
+//=============================================================================
+// ** ☆原型链规范
+//
+//			说明：	> 此处专门补上缺失的原型链，未缺失的则注释掉。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 信息面板A（场景基类） - 初始化
+//==============================
+//Scene_Drill_SSpA.prototype.initialize = function() {
+//    Scene_MenuBase.prototype.initialize.call(this);
+//};
+//==============================
+// * 信息面板A（场景基类） - 创建
+//==============================
+//Scene_Drill_SSpA.prototype.create = function() {
+//    Scene_MenuBase.prototype.create.call(this);
+//};
+//==============================
+// * 信息面板A（场景基类） - 帧刷新
+//==============================
+//Scene_Drill_SSpA.prototype.update = function() {
+//    Scene_MenuBase.prototype.update.call(this);
+//};
+//==============================
+// * 信息面板A（场景基类） - 开始运行
+//==============================
+Scene_Drill_SSpA.prototype.start = function() {
+    Scene_MenuBase.prototype.start.call(this);
+};
+//==============================
+// * 信息面板A（场景基类） - 结束运行
+//==============================
+Scene_Drill_SSpA.prototype.stop = function() {
+    Scene_MenuBase.prototype.stop.call(this);
+};
+//==============================
+// * 信息面板A（场景基类） - 判断是否激活/启动
+//==============================
+Scene_Drill_SSpA.prototype.isActive = function() {
+	return Scene_MenuBase.prototype.isActive.call(this);
+};
+//==============================
+// * 信息面板A（场景基类） - 析构函数
+//==============================
+Scene_Drill_SSpA.prototype.terminate = function() {
+    Scene_MenuBase.prototype.terminate.call(this);
+};
+
+//==============================
+// * 信息面板A（场景基类） - 判断加载完成
+//==============================
+Scene_Drill_SSpA.prototype.isReady = function() {
+	return Scene_MenuBase.prototype.isReady.call(this);
+};
+//==============================
+// * 信息面板A（场景基类） - 忙碌状态
+//==============================
+Scene_Drill_SSpA.prototype.isBusy = function() {
+	return Scene_MenuBase.prototype.isBusy.call(this);
+};
+
+//==============================
+// * 信息面板A（菜单界面基类） - 创建 - 菜单背景
+//==============================
+Scene_Drill_SSpA.prototype.createBackground = function() {
+	Scene_MenuBase.prototype.createBackground.call(this);
+};
+//==============================
+// * 信息面板A（菜单界面基类） - 创建 - 帮助窗口
+//==============================
+Scene_Drill_SSpA.prototype.createHelpWindow = function() {
+	Scene_MenuBase.prototype.createHelpWindow.call(this);
+};
 
 
 

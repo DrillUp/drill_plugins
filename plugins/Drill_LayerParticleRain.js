@@ -1714,9 +1714,13 @@
 //					->透明、混合模式
 //					x->坐标、速度、色调、缩放、斜切
 //
-//		★插件私有类：
-//			* Drill_LPR_RaindropSprite 【雨滴贴图】
 //
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			* 雨滴贴图【Drill_LPR_RaindropSprite】
+//		
 //		★必要注意事项：
 //			1.插件的地图层级/图片层级与多个插件共享。【必须自写 层级排序 标准函数】
 //			2.使用插件指令变化时，changing将会作为一个变化容器，根据时间对【数据】进行改变。
@@ -2009,8 +2013,8 @@ Game_System.prototype.drill_LPR_initSysData_Private = function() {
 		}
 	}
 	
-	// > 刷新当前地图
-	if( $gameMap ){
+	// > 刷新当前地图【$gameSystem优先初始化】
+	if( $gameMap != undefined ){
 		$gameMap.drill_LPR_initMapdata();
 	}
 };

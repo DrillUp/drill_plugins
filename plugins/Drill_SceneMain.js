@@ -2598,33 +2598,16 @@
 //					->修改角色固定框样式
 //				->其它
 //					->mog时间系统的框
+//			
+//			
+//		★家谱：
+//			无
 //		
-//		★配置参数结构体如下：
-//			~struct~DrillWindowMoving:			窗口移动动画（窗口辅助核心-通用）
-//			~struct~DrillWindowLayout:			窗口布局（窗口辅助核心-通用）
-//
-//			~struct~DrillSMaGoldWindow:			金钱窗口（窗口辅助核心）
-//			~struct~DrillSMaGoldNumber:			金钱数字（参数数字核心）
-//			
-//			~struct~DrillSMaCommandWindow:		菜单选项窗口（窗口辅助核心）
-//			~struct~DrillSMaCommandButton:		菜单选项按钮组（按钮组核心）
-//			~struct~DrillSMaCommandButtonSeq:	菜单选项按钮组 > 序列（按钮组核心）
-//			
-//			~struct~DrillSMaActorButton:		角色头像按钮组（按钮组核心）
-//			
-//			~struct~DrillSMaActorBoardBind:		角色框设置
-//			~struct~DrillSMaActorBoardStyle:	角色固定框样式
-//			~struct~DrillActorMeter:			角色固定框样式 > 参数条（参数条核心）
-//			~struct~DrillActorNumber:			角色固定框样式 > 参数数字（参数数字核心）
-//			~struct~DrillSMaActorBoardArrange:	角色固定框组设置
-//			~struct~DrillActorGroupMoving:		角色固定框组设置 > 固定框组移动动画
-//
-//			
 //		★插件私有类：
-//			* Drill_SMa_ActorSprite      角色固定框
-//			* Scene_Drill_SMa_Formation  对象界面
-//			* Window_Drill_SMa_Formation 队形窗口
-//
+//			* 角色固定框【Drill_SMa_ActorSprite】
+//			* 对象界面【Scene_Drill_SMa_Formation】
+//			* 队形窗口【Window_Drill_SMa_Formation】
+//		
 //		★必要注意事项：
 //			1.插件中引用了大量核心，并且部分参数专门固定化。
 //			  【不要以该插件为模板复制制作新的菜单界面】
@@ -2706,24 +2689,24 @@
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_SceneMain');
 	
-	
-
-//=============================================================================
-// * 外部影响插件检测
-//=============================================================================
-if( typeof(_Scene_Menu_create) != "undefined" || typeof(_Window_MenuActor_initialize) != "undefined" ){
-	
-	alert( DrillUp.drill_SMa_getPluginTip_CompatibilityOther() );
-};
-
-//=============================================================================
-// * >>>>基于插件检测>>>>
-//=============================================================================
-if( Imported.Drill_CoreOfWindowAuxiliary &&
-	Imported.Drill_CoreOfGaugeMeter &&
-	Imported.Drill_CoreOfGaugeNumber &&
-	Imported.Drill_CoreOfSelectableButton	){
-	
+	//			~struct~DrillWindowMoving:			窗口移动动画（窗口辅助核心-通用）
+	//			~struct~DrillWindowLayout:			窗口布局（窗口辅助核心-通用）
+	//
+	//			~struct~DrillSMaGoldWindow:			金钱窗口（窗口辅助核心）
+	//			~struct~DrillSMaGoldNumber:			金钱数字（参数数字核心）
+	//			
+	//			~struct~DrillSMaCommandWindow:		菜单选项窗口（窗口辅助核心）
+	//			~struct~DrillSMaCommandButton:		菜单选项按钮组（按钮组核心）
+	//			~struct~DrillSMaCommandButtonSeq:	菜单选项按钮组 > 序列（按钮组核心）
+	//			
+	//			~struct~DrillSMaActorButton:		角色头像按钮组（按钮组核心）
+	//			
+	//			~struct~DrillSMaActorBoardBind:		角色框设置
+	//			~struct~DrillSMaActorBoardStyle:	角色固定框样式
+	//			~struct~DrillActorMeter:			角色固定框样式 > 参数条（参数条核心）
+	//			~struct~DrillActorNumber:			角色固定框样式 > 参数数字（参数数字核心）
+	//			~struct~DrillSMaActorBoardArrange:	角色固定框组设置
+	//			~struct~DrillActorGroupMoving:		角色固定框组设置 > 固定框组移动动画
 		
 	//==============================
 	// * 变量获取 - 金钱显示 - 金钱窗口参数（必须写在前面）
@@ -3369,15 +3352,101 @@ if( Imported.Drill_CoreOfWindowAuxiliary &&
 	}
 	
 	
+
 //=============================================================================
-// ** 资源文件夹
+// * 外部影响插件检测
 //=============================================================================
-ImageManager.load_MenuMain = function( filename ){
-    return this.loadBitmap('img/Menu__main/', filename, 0, true);
+if( typeof(_Scene_Menu_create) != "undefined" || typeof(_Window_MenuActor_initialize) != "undefined" ){
+	
+	alert( DrillUp.drill_SMa_getPluginTip_CompatibilityOther() );
 };
-ImageManager.load_MenuActorFace = function( filename ){
-    return this.loadBitmap('img/Menu__actorFaces/', filename, 0, true);
+
+//=============================================================================
+// * >>>>基于插件检测>>>>
+//=============================================================================
+if( Imported.Drill_CoreOfWindowAuxiliary &&
+	Imported.Drill_CoreOfGaugeMeter &&
+	Imported.Drill_CoreOfGaugeNumber &&
+	Imported.Drill_CoreOfSelectableButton	){
+	
+	
+	
+//=============================================================================
+// ** 原型链规范
+//
+//			说明：	> 此处专门补上缺失的原型链，未缺失的则注释掉。
+//=============================================================================
+//==============================
+// * 主菜单界面（场景基类） - 初始化
+//==============================
+//Scene_Menu.prototype.initialize = function() {
+//    Scene_MenuBase.prototype.initialize.call(this);
+//};
+//==============================
+// * 主菜单界面（场景基类） - 创建
+//==============================
+//Scene_Menu.prototype.create = function() {
+//    Scene_MenuBase.prototype.create.call(this);
+//};
+//==============================
+// * 主菜单界面（场景基类） - 帧刷新
+//==============================
+Scene_Menu.prototype.update = function() {
+    Scene_MenuBase.prototype.update.call(this);
 };
+//==============================
+// * 主菜单界面（场景基类） - 开始运行
+//==============================
+//Scene_Menu.prototype.start = function() {
+//    Scene_MenuBase.prototype.start.call(this);
+//};
+//==============================
+// * 主菜单界面（场景基类） - 结束运行
+//==============================
+Scene_Menu.prototype.stop = function() {
+    Scene_MenuBase.prototype.stop.call(this);
+};
+//==============================
+// * 主菜单界面（场景基类） - 判断是否激活/启动
+//==============================
+Scene_Menu.prototype.isActive = function() {
+	return Scene_MenuBase.prototype.isActive.call(this);
+};
+//==============================
+// * 主菜单界面（场景基类） - 析构函数
+//==============================
+Scene_Menu.prototype.terminate = function() {
+    Scene_MenuBase.prototype.terminate.call(this);
+};
+
+//==============================
+// * 主菜单界面（场景基类） - 判断加载完成
+//==============================
+Scene_Menu.prototype.isReady = function() {
+	return Scene_MenuBase.prototype.isReady.call(this);
+};
+//==============================
+// * 主菜单界面（场景基类） - 忙碌状态
+//==============================
+Scene_Menu.prototype.isBusy = function() {
+	return Scene_MenuBase.prototype.isBusy.call(this);
+};
+
+//==============================
+// * 主菜单界面（菜单界面基类） - 创建 - 菜单背景
+//==============================
+Scene_Menu.prototype.createBackground = function() {
+	Scene_MenuBase.prototype.createBackground.call(this);
+};
+//==============================
+// * 主菜单界面（菜单界面基类） - 创建 - 帮助窗口
+//==============================
+Scene_Menu.prototype.createHelpWindow = function() {
+	Scene_MenuBase.prototype.createHelpWindow.call(this);
+};
+
+
+
 //=============================================================================
 // ** 插件指令
 //=============================================================================
@@ -3644,6 +3713,16 @@ Game_System.prototype.drill_SMa_checkSysData_Private = function() {
 	}
 }
 
+
+//=============================================================================
+// ** 资源文件夹
+//=============================================================================
+ImageManager.load_MenuMain = function( filename ){
+    return this.loadBitmap('img/Menu__main/', filename, 0, true);
+};
+ImageManager.load_MenuActorFace = function( filename ){
+    return this.loadBitmap('img/Menu__actorFaces/', filename, 0, true);
+};
 
 //=============================================================================
 // ** 主菜单

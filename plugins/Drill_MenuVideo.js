@@ -10,7 +10,7 @@
  * @Drill_LE_parentKey ""
  * @Drill_LE_var "DrillUp.g_MVi_list_length"
  * 
- *
+ * 
  * @help
  * =============================================================================
  * +++ Drill_MenuVideo +++
@@ -462,10 +462,14 @@
 //				->显示隐藏
 //				->播放视频
 //				->视频贴图
-// 
-//		★插件私有类：
-//			* Drill_MVi_VideoSprite【视频贴图】
 //
+//
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			* 视频贴图【Drill_MVi_VideoSprite】
+//		
 //		★必要注意事项：
 //			1.插件的图片层级与多个插件共享。【必须自写 层级排序 函数】
 //			2.注意 addEventListener 的函数要 bind(this)。
@@ -708,7 +712,7 @@ Scene_MenuBase.prototype.drill_MVi_layerAddSprite = function( sprite, layer_inde
 //			参数：	> sprite 贴图（添加的贴图对象）
 //			返回：	> 无
 //          
-//			说明：	> 强行规范的接口，将指定贴图从地图层级中移除。
+//			说明：	> 强行规范的接口，将指定贴图从菜单层级中移除。
 //##############################
 Scene_MenuBase.prototype.drill_MVi_layerRemoveSprite = function( sprite ){
 	//（不操作）
@@ -719,7 +723,7 @@ Scene_MenuBase.prototype.drill_MVi_layerRemoveSprite = function( sprite ){
 //			参数：	> 无
 //			返回：	> 无
 //          
-//			说明：	> 执行该函数后，地图层级的子贴图，按照zIndex属性来进行先后排序。值越大，越靠前。
+//			说明：	> 执行该函数后，菜单层级的子贴图，按照zIndex属性来进行先后排序。值越大，越靠前。
 //##############################
 Scene_MenuBase.prototype.drill_MVi_sortByZIndex = function () {
     this.drill_MVi_sortByZIndex_Private();
@@ -946,7 +950,7 @@ WebAudio.setMasterVolume = function(value) {
 
 
 //=============================================================================
-// ** 视频贴图
+// ** 视频贴图【Drill_MVi_VideoSprite】
 //			
 // 			代码：	> 范围 - 仅用于单图层播放视频。
 //					> 结构 - [ ●合并 /分离/混乱] 贴图与数据合并。只有visible被控制。

@@ -106,14 +106,20 @@
 //			->粒子贴图（第二层）【Drill_COPa_SecSprite】
 //		
 //		
+//		★家谱：
+//			大家族-粒子效果
+//			核心
+//		
 //		★插件私有类：
-//			* Drill_COPa_Controller	【粒子控制器】
-//			* Drill_COPa_Sprite		【粒子贴图】
-//			* Drill_COPa_SecSprite	【粒子贴图（第二层）】
+//			* 粒子控制器【Drill_COPa_Controller】
+//			* 粒子贴图【Drill_COPa_Sprite】
+//			* 粒子贴图（第二层）【Drill_COPa_SecSprite】
+//		
+//		★核心说明：
+//			1.核心与所有子插件功能介绍去看看："1.系统 > 大家族-粒子效果（脚本）.docx"
 //		
 //		★必要注意事项：
-//			1.插件继承至 粒子核心。
-//			  核心与所有子插件功能介绍去看看："1.系统 > 大家族-粒子核心（脚本）.docx"
+//			暂无
 //
 //		★其它说明细节：
 //			暂无
@@ -180,18 +186,24 @@
 		data['visible'] = String( dataFrom["初始是否显示"] || "true") == "true";
 		data['pause'] = false;
 		
+		
 		// > 贴图
 		data['src_img'] = String( dataFrom["资源-粒子"] || "");
 		data['src_img_file'] = "img/System/";
 		data['x'] = Number( dataFrom["平移-粒子 X"] || 0);
 		data['y'] = Number( dataFrom["平移-粒子 Y"] || 0);
 		data['opacity'] = Number( dataFrom["透明度"] || 255);
+		
 		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
+		data['tint'] = Number( dataFrom["图像-色调值"] || 0);
+		data['smooth'] = String( dataFrom["图像-模糊边缘"] || "false") == "true";
+		
 		//data['battleIndex'];
 		//data['layerIndex'];
 		//data['menuIndex'];
 		//data['individualIndex'];
 		//data['zIndex'] = Number( dataFrom["图片层级"] || 4);
+		
 		
 		// > 粒子效果
 		data['par_count'] = Number( dataFrom["粒子数量"] || 15);
@@ -291,7 +303,7 @@ if( Imported.Drill_CoreOfBallistics ){
 // **						> 跳过产生过程
 // **						> 手动产生
 // **		
-// **		说明：	> 核心与所有子插件功能介绍去看看："1.系统 > 大家族-粒子核心（脚本）.docx"
+// **		说明：	> 核心与所有子插件功能介绍去看看："1.系统 > 大家族-粒子效果（脚本）.docx"
 // **				> 该类可与 Game_CharacterBase 一并存储在 $gameMap 中。
 // **				> 该类创建过程可参考子插件的写法：
 // **					Drill_LayerParticle（见该插件的 贴图控制 模块）
@@ -403,6 +415,7 @@ Drill_COPa_Controller.prototype.drill_controller_isDead = function(){
 //			返回：	> 无
 //			
 //			说明：	> 此函数可以阻止粒子重设，等待粒子全部死亡后，控制器才销毁，随后贴图销毁。
+//					> 注意，此设置执行后，仍然要保持 控制器的帧刷新，因为控制器没有被销毁。
 //##############################
 Drill_COPa_Controller.prototype.drill_controller_destroyWithDelay = function(){
 	this._drill_isDelayingDestroy = true;
@@ -427,6 +440,8 @@ Drill_COPa_Controller.prototype.drill_controller_initData = function(){
 	if( data['src_img'] == undefined ){ data['src_img'] = "" };											//贴图 - 资源粒子
 	if( data['src_img_file'] == undefined ){ data['src_img_file'] = "img/System/" };					//贴图 - 资源文件夹
 	if( data['blendMode'] == undefined ){ data['blendMode'] = 0 };										//贴图 - 混合模式（贴图用）
+	if( data['tint'] == undefined ){ data['tint'] = 0 };												//贴图 - 图像-色调值（贴图用）
+	if( data['smooth'] == undefined ){ data['smooth'] = false };										//贴图 - 图像-模糊边缘（贴图用）
 	//if( data['battleIndex'] == undefined ){ data['battleIndex'] = "" };								//贴图 - 层级（贴图用）
 	//if( data['layerIndex'] == undefined ){ data['layerIndex'] = "" };									//贴图 - 层级（贴图用）
 	//if( data['menuIndex'] == undefined ){ data['menuIndex'] = "" };									//贴图 - 层级（贴图用）
@@ -737,6 +752,7 @@ Drill_COPa_Controller.prototype.drill_controller_initBallisticsMove = function( 
 Drill_COPa_Controller.prototype.drill_controller_initBallisticsOpacity = function( data, sustain ){
 	
 	// > 弹道初始化（透明度）
+	//		（此处的透明度固定为 0-255 之间的变化，如果要改粒子透明度，去改整体的而不是单独的。）
 	var temp_b_opacity = {};
 	temp_b_opacity['opacityNum'] = data['par_count'];		//数量
 	temp_b_opacity['opacityTime'] = sustain;				//时长
@@ -1265,7 +1281,7 @@ Drill_COPa_Controller.prototype.drill_controller_getOneDeadParticleIndex = funct
 // **					->H贴图高宽
 // **					->I粒子生命周期
 // **
-// **		说明：	> 核心与所有子插件功能介绍去看看："1.系统 > 大家族-粒子核心（脚本）.docx"
+// **		说明：	> 核心与所有子插件功能介绍去看看："1.系统 > 大家族-粒子效果（脚本）.docx"
 // **				> 你必须在创建贴图后，手动初始化。（还需要先设置 控制器 ）
 // **
 // **		代码：	> 范围 - 该类显示单独的粒子贴图。
@@ -1385,8 +1401,8 @@ Drill_COPa_Sprite.prototype.drill_sprite_isNeedDestroy = function(){
 //			说明：	> 销毁不是必要的，但最好随时留意给 旧贴图 执行销毁函数。
 //##############################
 Drill_COPa_Sprite.prototype.drill_sprite_destroy = function(){
-	this.drill_sprite_destroyChild();
-	this.drill_sprite_destroySelf();
+	this.drill_sprite_destroyChild();			//销毁 - 销毁子功能
+	this.drill_sprite_destroySelf();			//销毁 - 销毁自身
 };
 //==============================
 // * 粒子贴图 - 初始化自身
@@ -1601,7 +1617,7 @@ Drill_COPa_Sprite.prototype.drill_sprite_initTransform = function() {
 Drill_COPa_Sprite.prototype.drill_sprite_createTransformParticle = function() {
 	var data = this._drill_controller._drill_data;
 	var temp_sprite = new Sprite();
-	temp_sprite.bitmap = ImageManager.loadBitmap( data['src_img_file'], data['src_img'], 0, true );
+	temp_sprite.bitmap = ImageManager.loadBitmap( data['src_img_file'], data['src_img'], data['tint'], data['smooth'] );
 	temp_sprite.blendMode = data['blendMode'];
 	temp_sprite.opacity = 0;
 	temp_sprite.anchor.x = 0.5;
@@ -1798,7 +1814,7 @@ Drill_COPa_Sprite.prototype.drill_sprite_initTrailing = function() {
 Drill_COPa_Sprite.prototype.drill_sprite_createTrailingSprite = function() {
 	var data = this._drill_controller._drill_data;
 	var temp_sprite = new Sprite();
-	temp_sprite.bitmap = ImageManager.loadBitmap( data['trailing_src_img_file'], data['trailing_src_img'], 0, true );
+	temp_sprite.bitmap = ImageManager.loadBitmap( data['trailing_src_img_file'], data['trailing_src_img'], data['tint'], data['smooth'] );
 	temp_sprite.blendMode = data['blendMode'];
 	temp_sprite.opacity = 0;
 	if( data['trailing_centerAnchor'] == true ){
@@ -2001,7 +2017,7 @@ Drill_COPa_Sprite.prototype.drill_sprite_initLife = function() {
 // **					->H贴图高宽（无）
 // **					->I粒子生命周期（无）
 // **
-// **		说明：	> 核心与所有子插件功能介绍去看看："1.系统 > 大家族-粒子核心（脚本）.docx"
+// **		说明：	> 核心与所有子插件功能介绍去看看："1.系统 > 大家族-粒子效果（脚本）.docx"
 // **				> 第二层粒子贴图会比粒子贴图 优先 执行update，所以需要考虑【慢1帧弹道】问题。
 // **				  因此，第二层粒子与 父贴图 的 D粒子变化 保持一致。
 //=============================================================================
@@ -2218,7 +2234,7 @@ Drill_COPa_SecSprite.prototype.drill_spriteSec_initTransform = function() {
 	this._drill_COPa_parSecSpriteTank = [];
 	for( var j = 0; j < p_data['par_count'] ; j++ ){	
 		var temp_sprite = new Sprite();
-		temp_sprite.bitmap = ImageManager.loadBitmap( p_data['src_img_file'], p_data['second_src_img'], 0, true );
+		temp_sprite.bitmap = ImageManager.loadBitmap( p_data['src_img_file'], p_data['second_src_img'], p_data['tint'], p_data['smooth'] );
 		temp_sprite.anchor.x = 0.5;
 		temp_sprite.anchor.y = 0.5;
 		temp_sprite.blendMode = this._drill_parentSprite.blendMode;

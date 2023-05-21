@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.9]        系统 - 窗口辅助核心
+ * @plugindesc [v2.0]        系统 - 窗口辅助核心
  * @author Drill_up
  * 
  * 
@@ -94,6 +94,8 @@
  * 优化了文本宽度的计算结构。
  * [v1.9]
  * 大幅度优化了底层结构，并定义了标准接口。
+ * [v2.0]
+ * 优化了窗口底层的部分结构。
  *
  */
  
@@ -119,75 +121,84 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			窗口辅助核心：
-//				->☆提示信息
-//				->☆变量获取
-//				->☆计算文本高度/宽度 标准模块
-//					->文本宽度【标准函数】
-//					->文本高度【标准函数】
-//					->扩展文本宽度【标准函数】
-//					->扩展文本高度【标准函数】
-//					->是否正在计算【标准函数】
-//					->获取 扩展文本列表 的高度列表和宽度列表【标准函数】
-//				->☆绘制内容 标准模块
-//					->绘制文本【标准函数】
-//					->绘制文本列表【标准函数】
-//					->绘制扩展文本【标准函数】
-//					->绘制扩展文本列表【标准函数】
-//				->☆窗口属性修改 标准模块
-//					->窗口属性修改【标准函数】
-//				->☆属性动画 标准模块
-//					->移动设置【标准函数】
-//					->透明度设置【标准函数】
-//					->重新移动【标准函数】
-//					->重设透明度【标准函数】
-//				->☆属性动画 旧接口
-//					->设置简易窗口动画【标准函数】
-//					->重设简易窗口动画【标准函数】
-//					->设置简易贴图动画【标准函数】
-//					->重设简易贴图动画【标准函数】
+//			->☆提示信息
+//			->☆变量获取
 //
-//				->☆计算文本高度/宽度
-//					->文本计算 
-//					->扩展文本计算 
-//						->拦截 
-//						->原函数副本
-//						->计算文本宽度前
-//						->扩展文本宽度（私有）
-//						->计算文本宽度后
-//						->扩展文本高度（私有）
-//				->☆绘制内容
-//					->绘制文本（不清理画布）
-//					->绘制文本列表（不清理画布）
-//					->绘制扩展文本（不清理画布）
-//					->绘制扩展文本列表（不清理画布）
-//					->开始绘制
-//						->把指定的文字画在面板中
-//						->固定行间距/自适应行间距
-//				->☆窗口属性修改
-//				->☆属性动画（窗口/贴图）
-//					->窗口属性
-//						->窗口高宽
-//						->窗口布局
-//							> 默认皮肤/单张背景贴图/隐藏布局
-//					->移动属性
-//						->位置
-//						->起点相对坐标/起点绝对坐标
-//						->匀速移动/弹性移动/不移动
-//					->透明度属性
-//					->回调属性
-//				->☆核心功能扩展
-//					->帮助窗口换行
+//			->☆管辖权
+//			->☆核心功能扩展
+//				->帮助窗口换行
+//			
+//			->☆计算文本 标准模块
+//				->文本宽度【标准函数】
+//				->文本高度【标准函数】
+//				->扩展文本宽度【标准函数】
+//				->扩展文本高度【标准函数】
+//				->是否正在计算【标准函数】
+//				->获取 扩展文本列表 的高度列表和宽度列表【标准函数】
+//			->☆绘制内容 标准模块
+//				->绘制文本【标准函数】
+//				->绘制文本列表【标准函数】
+//				->绘制扩展文本【标准函数】
+//				->绘制扩展文本列表【标准函数】
+//			->☆计算文本
+//				->文本计算 
+//				->扩展文本计算 
+//					->拦截 
+//					->原函数副本
+//					->计算文本宽度前
+//					->扩展文本宽度（私有）
+//					->计算文本宽度后
+//					->扩展文本高度（私有）
+//			->☆绘制内容
+//				->绘制文本（不清理画布）
+//				->绘制文本列表（不清理画布）
+//				->绘制扩展文本（不清理画布）
+//				->绘制扩展文本列表（不清理画布）
+//				->开始绘制
+//					->把指定的文字画在面板中
+//					->固定行间距/自适应行间距
 //
+//			->☆窗口属性修改 标准模块
+//				->窗口属性修改【标准函数】
+//			->☆属性动画 标准模块
+//				->移动设置【标准函数】
+//				->透明度设置【标准函数】
+//				->重新移动【标准函数】
+//				->重设透明度【标准函数】
+//			->☆属性动画 旧接口
+//				->设置简易窗口动画【标准函数】
+//				->重设简易窗口动画【标准函数】
+//				->设置简易贴图动画【标准函数】
+//				->重设简易贴图动画【标准函数】
+//			->☆窗口属性修改
+//			->☆属性动画（窗口/贴图）
+//				->窗口属性
+//					->窗口高宽
+//					->窗口布局
+//						> 默认皮肤/单张背景贴图/隐藏布局
+//				->移动属性
+//					->位置
+//					->起点相对坐标/起点绝对坐标
+//					->匀速移动/弹性移动/不移动
+//				->透明度属性
+//				->回调属性
+//
+//
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			无
+//			
+//		★核心说明：
+//			1.核心中含有 标准接口/标准函数 ，这是其它子插件的底座，无论核心内容怎么变，标准接口一定不能动。
+//			2.帮助窗口换行 是一个附属的小功能，不具备标准接口。
+//		
 //		★必要注意事项：
 //			1.该插件不要再对子插件开放各种新的支持了，不然多次更新反而千疮百孔。
 //			
 //		★其它说明细节：
 //			暂无
-//			
-//		★核心接口说明：
-//			1.核心中含有 标准接口/标准函数 ，这是其它子插件的底座，无论核心内容怎么变，标准接口一定不能动。
-//			2.帮助窗口换行 是一个附属的小功能，不具备标准接口。
 //
 //		★存在的问题：
 //			暂无
@@ -214,13 +225,104 @@
 	
 	
 	
+//=============================================================================
+// ** ☆管辖权
+//
+//			说明：	> 管辖权 即对 原函数 进行 修改、覆写、继承、控制子插件继承 等的权利。
+//					> 用于后期脱离 原游戏框架 且仍保持兼容性 的标记。
+//=============================================================================
+/*
+//==============================
+// * E绘制『窗口辅助核心』 - 计算【基本文本】宽度
+//==============================
+Window_Base.prototype.textWidth = function( text ){
+    return this.contents.measureTextWidth(text);
+};
+//==============================
+// * E绘制『窗口辅助核心』 - 绘制【基本文本】
+//==============================
+Window_Base.prototype.drawText = function( text, x, y, maxWidth, align ){
+    this.contents.drawText(text, x, y, maxWidth, this.lineHeight(), align);
+};
+//==============================
+// * E绘制『窗口辅助核心』 - 绘制【扩展文本】
+//==============================
+Window_Base.prototype.drawTextEx = function( text, x, y ){
+    if( text ){
+        var textState = { index: 0, x: x, y: y, left: x };			//光标准备
+        textState.text = this.convertEscapeCharacters(text);		//指代字符转换
+        textState.height = this.calcTextHeight(textState, false);	//高度计算
+        this.resetFontSettings();									//重置字体（如果是一行行绘制，效果字符会中断）
+        while (textState.index < textState.text.length ){	
+            this.processCharacter(textState);						//绘制每个字符（包含效果字符的转义）
+        }
+        return textState.x - x;
+    }else{
+        return 0;
+    }
+};
+//==============================
+// * E绘制『窗口辅助核心』 - 计算【扩展文本】高度
+//==============================
+Window_Base.prototype.calcTextHeight = function( textState, all ){
+    var lastFontSize = this.contents.fontSize;
+    var textHeight = 0;
+    var lines = textState.text.slice(textState.index).split('\n');
+    var maxLines = all ? lines.length : 1;
+
+    for( var i = 0; i < maxLines; i++ ){
+        var maxFontSize = this.contents.fontSize;
+        var regExp = /\x1b[\{\}]/g;			//识别字体缩放的字符
+        for( ;; ){
+            var array = regExp.exec(lines[i]);
+            if( array ){
+                if( array[0] === '\x1b{' ){
+                    this.makeFontBigger();
+                }
+                if( array[0] === '\x1b}' ){
+                    this.makeFontSmaller();
+                }
+                if( maxFontSize < this.contents.fontSize ){
+                    maxFontSize = this.contents.fontSize;
+                }
+            }else{
+                break;
+            }
+        }
+        textHeight += maxFontSize + 8;
+    }
+
+    this.contents.fontSize = lastFontSize;
+    return textHeight;
+};
+*/
+
+	
+//=============================================================================
+// ** ☆核心功能扩展
+//=============================================================================
+//==============================
+// * 核心功能扩展 - 帮助窗口换行
+//==============================
+var _drill_COWA_setItem = Window_Help.prototype.setItem;
+Window_Help.prototype.setItem = function(item) {
+	var str = item ? item.description : "";
+	if( str.contains("\\n") ){
+		str = str.replace("\\n","\n");
+		this.setText( str );
+	}else{
+		_drill_COWA_setItem.call(this, item);
+	}
+};
+	
+	
 //#############################################################################
-// ** 【标准模块】☆计算文本高度/宽度
+// ** 【标准模块】☆计算文本
 //
 //			说明：	即对子插件开放的固定函数，无论插件如何变化，标准函数都不变。
 //#############################################################################
 //##############################
-// * 计算 - 文本宽度【标准函数】
+// * 计算 - 基本文本 宽度【标准函数】
 //			
 //			参数：	> text 字符串（字符串中不能有换行符，否则只按第一行计算）
 //			返回：	> 数字（纯文本的总宽度）
@@ -231,7 +333,7 @@ Window_Base.prototype.drill_COWA_getTextWidth = function( text ){
 	return this.drill_COWA_getTextWidth_Private( text );
 }
 //##############################
-// * 计算 - 文本高度【标准函数】
+// * 计算 - 基本文本 高度【标准函数】
 //			
 //			参数：	> text 字符串（字符串中不能有换行符，否则只按第一行计算）
 //			返回：	> 数字（纯文本的最大高度）
@@ -242,7 +344,7 @@ Window_Base.prototype.drill_COWA_getTextHeight = function( text ){
 	return this.drill_COWA_getTextHeight_Private( text );
 }
 //##############################
-// * 计算 - 扩展文本宽度【标准函数】
+// * 计算 - 扩展文本 宽度【标准函数】
 //			
 //			参数：	> text 字符串（字符串中不能有换行符，否则只按第一行计算）
 //			返回：	> 数字（扩展文本的总宽度）
@@ -254,7 +356,7 @@ Window_Base.prototype.drill_COWA_getTextExWidth = function( text ){
 	return this.drill_COWA_getTextExWidth_Private( text );
 }
 //##############################
-// * 计算 - 扩展文本高度【标准函数】
+// * 计算 - 扩展文本 高度【标准函数】
 //			
 //			参数：	> text 字符串（字符串中不能有换行符，否则只按第一行计算）
 //			返回：	> 数字（扩展文本的最大高度）
@@ -385,6 +487,405 @@ Window_Base.prototype.drill_COWA_drawTextListEx = function( context_list, option
 Window_Base.prototype.drill_COWA_drawTextListEx_notClean = function( context_list, options ){
 	this.drill_COWA_drawTextListEx_Private( context_list, options );
 }
+
+
+//=============================================================================
+// ** ☆计算文本（实现）
+//
+//			说明：	> 计算文本 的实现部分。
+//					> 通过对大部分函数 拦截 的方式，走一遍 文本绘制 流程，得到字符的宽度。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 基本文本 - 计算 宽度
+//==============================
+Window_Base.prototype.drill_COWA_getTextWidth_Private = function( text ){
+	return this.textWidth( text );
+};
+//==============================
+// * 基本文本 - 计算 高度
+//==============================
+Window_Base.prototype.drill_COWA_getTextHeight_Private = function( text ){
+	var maxFontSize = this.contents.fontSize;
+	return maxFontSize + 8;
+};
+
+//==============================
+// * 扩展文本 - 计算拦截
+//
+//			说明：	对于一些继承了并且抢先执行 processEscapeCharacter 函数的插件，最好加上 不准套娃 标记。（现在已经不需要了，因为直接最后继承）
+//==============================
+var _drill_COWA_scene_initialize = SceneManager.initialize;
+SceneManager.initialize = function() {
+	_drill_COWA_scene_initialize.call(this);		//（套两层，能够让下列函数在最后才执行继承）
+	
+	//==============================
+	// * 拦截 - 文本绘制（私有）
+	//==============================
+	var _drill_COWA_bitmap_drawText = Bitmap.prototype.drawText;
+	Bitmap.prototype.drawText = function(text, x, y, maxWidth, lineheight, align) {
+		
+		if( $gameTemp && $gameTemp._drill_COWA_bitmap_isCalculating == true ){ return; }	//（如果正在计算，则不绘制文字）
+		
+		_drill_COWA_bitmap_drawText.call( this,text, x, y, maxWidth, lineheight, align );
+	}
+	//==============================
+	// * 拦截 - 文本清理（私有）
+	//==============================
+	var _drill_COWA_bitmap_clearRect = Bitmap.prototype.clearRect;
+	Bitmap.prototype.clearRect = function(x, y, width, height) {
+		
+		if( $gameTemp && $gameTemp._drill_COWA_bitmap_isCalculating == true ){ return; }	//（如果正在计算，则不准清理）
+		
+		_drill_COWA_bitmap_clearRect.call( this, x, y, width, height );
+	}
+	//==============================
+	// * 拦截 - 图标绘制（私有）
+	//==============================
+	var _drill_COWA_bitmap_drawIcon = Window_Base.prototype.drawIcon;
+	Window_Base.prototype.drawIcon = function(iconIndex, x, y) {
+		
+		if( $gameTemp._drill_COWA_bitmap_isCalculating == true ){ return; }	//（如果正在计算，则不绘制图标）
+		
+		_drill_COWA_bitmap_drawIcon.call( this, iconIndex, x, y );
+	}
+	//==============================
+	// * 拦截 - 换行符影响（私有）
+	//==============================
+	var _drill_COWA_processNewLine = Window_Base.prototype.processNewLine;
+	Window_Base.prototype.processNewLine = function( textState ){
+		var xx = textState.x;
+		_drill_COWA_processNewLine.call( this, textState );
+		if( $gameTemp._drill_COWA_bitmap_isCalculating == true ){ textState.x = xx; }	//（如果正在计算，换行符不能影响宽度）
+	}
+	//==============================
+	// * 拦截 - 对话框的暂停字符（私有）
+	//==============================
+	var _drill_COWA_startWait = Window_Message.prototype.startWait;
+	Window_Message.prototype.startWait = function(count) {
+		_drill_COWA_startWait.call( this, count );
+		if( $gameTemp._drill_COWA_bitmap_isCalculating == true ){ this._waitCount = 0; }	//（如果正在计算，暂停符不能等待）
+	}
+	//==============================
+	// * 拦截 - 文本重建（私有）
+	//==============================
+	var _drill_COWA_createContents = Window_Base.prototype.createContents;
+	Window_Base.prototype.createContents = function() {
+		
+		if( $gameTemp && $gameTemp._drill_COWA_bitmap_isCalculating == true ){ return; }	//（如果正在计算，也不准重建bitmap）
+		
+		_drill_COWA_createContents.call( this );
+	}
+	//==============================
+	// * 拦截 - 字体颜色重置（私有）
+	//==============================
+	var _drill_COWA_resetTextColor = Window_Base.prototype.resetTextColor;
+	Window_Base.prototype.resetTextColor = function() {
+		
+		if( $gameTemp && $gameTemp._drill_COWA_bitmap_isCalculating == true ){ return; }	//（如果正在计算，也不准重置颜色）
+		
+		_drill_COWA_resetTextColor.call( this );
+	}
+	////==============================
+	//// * 拦截 - 效果字符（私有）（窗口字符核心的字符需要纳入计算）
+	////==============================
+	//var _drill_COWA_processEscapeCharacter = Window_Base.prototype.processEscapeCharacter;
+	//Window_Base.prototype.processEscapeCharacter = function( code, textState ){
+	//	
+	//	if( $gameTemp && $gameTemp._drill_COWA_bitmap_isCalculating == true ){ return; }	//（如果正在计算，效果字符全部忽略）
+	//	
+	//	_drill_COWA_processEscapeCharacter.call( this, code, textState );
+	//}
+}
+//==============================
+// * 绘制 - 绘制【扩展文本】（原函数副本）
+//
+//			说明：	> 这只是一个drawTextEx函数的副本。
+//==============================
+Window_Base.prototype.drill_COWA_drawTextEx_Copyed = function( text, x, y ){
+	if( text == undefined ){ return 0; }
+	if( text == "" ){ return 0; }
+	this.resetFontSettings();
+	
+	var textState = {};
+	textState['index'] = 0;
+	textState['x'] = x;
+	textState['y'] = y;
+	textState['left'] = x;
+	textState['text'] = this.convertEscapeCharacters(text);
+	textState['height'] = this.calcTextHeight(textState, false);
+	
+	while( textState['index'] < textState['text'].length ){
+		this.processCharacter(textState);		//（开始绘制字符/推进字符）
+	}
+	return textState['x'] - x;
+};
+//==============================
+// * 绘制 - 绘制【扩展文本】（自定义函数）
+//
+//			说明：	> 原函数基础上，加了 递归嵌套锁 和 起始光标Y。
+//==============================
+Window_Base.prototype.drill_COWA_drawTextEx_Custom = function( text, x, y ){
+	if( text == undefined ){ return 0; }
+	if( text == "" ){ return 0; }
+	if( this._drill_COWA_recursionLock1 == true ){ return 0; }	//（递归嵌套锁）
+	this._drill_COWA_recursionLock1 = true;
+	this.resetFontSettings();
+	
+	var textState = {};
+	textState['index'] = 0;
+	textState['x'] = x;
+	textState['y'] = y;
+	textState['left'] = x;			//（起始光标X）
+	textState['top'] = y;			//（起始光标Y）
+	textState['text'] = this.convertEscapeCharacters(text);
+	textState['height'] = this.calcTextHeight(textState, false);
+	
+	while( textState['index'] < textState['text'].length ){
+		this.processCharacter(textState);		//（开始绘制字符/推进字符）
+	}
+	this._drill_COWA_recursionLock1 = false;
+	return textState['x'] - x;
+};
+//==============================
+// * 扩展文本 - 计算文本宽度前（核心用接口，比如 窗口字符核心 继承此函数）
+//==============================
+Window_Base.prototype.drill_COWA_calculateExWidth_Before = function(){
+	
+	// > 变化参数存储
+	this._drill_COWA_lastFontSettings = {};
+	this._drill_COWA_lastFontSettings['fontFace']    = this.contents.fontFace;		//（默认的三个参数）
+	this._drill_COWA_lastFontSettings['fontSize']    = this.contents.fontSize;
+	this._drill_COWA_lastFontSettings['textColor']   = this.contents.textColor;
+	
+	// > 窗口字符核心/Yep插件 控制的参数
+	this._drill_COWA_lastFontSettings['fontBold'] = this.contents.fontBold;
+	this._drill_COWA_lastFontSettings['_drill_COWC_fontBold'] = this.contents._drill_COWC_fontBold;
+	this._drill_COWA_lastFontSettings['fontItalic'] = this.contents.fontItalic;
+	this._drill_COWA_lastFontSettings['outlineColor'] = this.contents.outlineColor;
+	this._drill_COWA_lastFontSettings['outlineWidth'] = this.contents.outlineWidth;
+};
+//==============================
+// * 扩展文本 - 计算文本宽度后（核心用接口，比如 窗口字符核心 继承此函数）
+//==============================
+Window_Base.prototype.drill_COWA_calculateExWidth_After = function(){
+	
+	// > 重置字体（字体恢复，计算时会造成变色、字体大小变化）
+	this.resetFontSettings();
+	
+	// > 变化参数恢复
+	this.contents.fontFace    = this._drill_COWA_lastFontSettings['fontFace'];
+	this.contents.fontSize    = this._drill_COWA_lastFontSettings['fontSize'];
+	this.contents.textColor   = this._drill_COWA_lastFontSettings['textColor'];
+	
+	// > 窗口字符核心/Yep插件 控制的参数
+	this.contents.fontBold = this._drill_COWA_lastFontSettings['fontBold'];
+	this.contents._drill_COWC_fontBold = this._drill_COWA_lastFontSettings['_drill_COWC_fontBold'];
+	this.contents.fontItalic = this._drill_COWA_lastFontSettings['fontItalic'];
+	this.contents.outlineColor = this._drill_COWA_lastFontSettings['outlineColor'];
+	this.contents.outlineWidth = this._drill_COWA_lastFontSettings['outlineWidth'];
+};
+//==============================
+// * 扩展文本 - 计算宽度（私有，单次调用）
+//
+//			说明：	> 修改 textState.x 的值时一定要谨慎，会无限套娃。
+//					> 注意版本中，隔行重置字体的情况。
+//==============================
+Window_Base.prototype.drill_COWA_getTextExWidth_Private = function( text ){
+	if( this.contents == undefined ){ return 0; }
+	if( this._drill_COWA_recursionLock2 == true ){ return 0; }	//（递归嵌套锁）
+	this._drill_COWA_recursionLock2 = true;
+		
+	// > 确保绘制在画布外面，形成无效的绘制
+	var out_y = this.contents.height+this.lineHeight();
+	
+	// -----开始计算----
+	this.drill_COWA_calculateExWidth_Before();
+	$gameTemp._drill_COWA_bitmap_isCalculating = true;
+		
+		
+		// > 原装ex计算 （原装计算时，遇到文本居中需要计算自身长度时，会造成递归死循环）
+		//this._drill_COWA_calculatedExWidth = this.drawTextEx( text, 0, out_y );
+		
+		// > 用副本进行计算
+		this._drill_COWA_calculatedExWidth = this.drill_COWA_drawTextEx_Custom( text, 0, out_y );
+		
+		
+	$gameTemp._drill_COWA_bitmap_isCalculating = false;
+	this.drill_COWA_calculateExWidth_After();
+	// -----结束计算----
+	
+	this._drill_COWA_recursionLock2 = false;
+	return this._drill_COWA_calculatedExWidth;
+}
+//==============================
+// * 扩展文本 - 计算高度（私有，单次调用）
+//			
+//==============================
+Window_Base.prototype.drill_COWA_getTextExHeight_Private = function( text ){
+	if( this._drill_COWA_recursionLock3 == true ){ return 0; }	//（递归嵌套锁）
+	this._drill_COWA_recursionLock3 = true;
+	
+	var textState = { 'index': 0, 'x': 0, 'y': 0, 'left': 0 };
+	textState.text = this.convertEscapeCharacters( text );
+	var hh = this.calcTextHeight(textState, false);		
+	
+	this._drill_COWA_recursionLock3 = false;
+	return hh;
+}
+//==============================
+// * 扩展文本 - 获取 扩展文本列表 的高度列表和宽度列表（私有，单次调用）
+//
+//			参数：	> context_list 字符串列表
+//					> options 动态参数对象（可以为null，没用到）
+//			返回：	> 高度列表 this.drill_COWA_heightList
+//					> 宽度列表 this.drill_COWA_widthList
+//==============================
+Window_Base.prototype.drill_COWA_calculateHeightAndWidth_Private = function( context_list, options ){
+	var height_list = [];
+	var width_list = [];
+	for( var i=0; i < context_list.length; i++ ){
+		var temp_text = context_list[i];
+		var ww = this.drill_COWA_getTextExWidth(temp_text);
+		var hh = this.drill_COWA_getTextExHeight(temp_text);
+		height_list.push(hh);
+		width_list.push(ww);
+	}
+	this.drill_COWA_heightList = height_list;
+	this.drill_COWA_widthList = width_list;
+}
+
+
+//=============================================================================
+// ** ☆绘制内容（实现）
+//
+//			说明：	> 将 绘制文本/绘制扩展文本 改进实现的功能。
+//					> 注意，不要用原 绘制文本 的函数，多使用该插件的函数，能支持更多子插件的扩展功能。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 绘制内容 - 绘制文本（不清理画布）
+//==============================
+Window_Base.prototype.drill_COWA_drawText_Private = function( context, options ){
+	if( options == undefined ){ options = {}; }
+	if( options['x'] == undefined ){ options['x'] = 0; }
+	if( options['y'] == undefined ){ options['y'] = 0; }
+	if( options['maxWidth'] == undefined ){ options['maxWidth'] = 999999; }
+	if( options['lineheight'] == undefined ){ options['lineheight'] = this.lineHeight(); }
+	if( options['align'] == undefined ){ options['align'] = "left"; }	//（填left/center/right）
+	if( options['align'] == "左对齐" ){ options['align'] = "left"; }
+	if( options['align'] == "居中" ){ options['align'] = "center"; }
+	if( options['align'] == "右对齐" ){ options['align'] = "right"; }
+    this.contents.drawText( context, options['x'], options['y'], options['maxWidth'], options['lineheight'], options['align'] );
+}
+//==============================
+// * 绘制内容 - 绘制文本列表（不清理画布）
+//==============================
+Window_Base.prototype.drill_COWA_drawTextList_Private = function( context_list, options ){
+	if( options == undefined ){ options = {}; }
+	if( options['x'] == undefined ){ options['x'] = 0; }
+	if( options['y'] == undefined ){ options['y'] = 0; }
+	if( options['maxWidth'] == undefined ){ options['maxWidth'] = 999999; }
+	if( options['lineheight'] == undefined ){ options['lineheight'] = this.lineHeight(); }
+	if( options['align'] == undefined ){ options['align'] = "left"; }	//（填left/center/right）
+	if( options['align'] == "左对齐" ){ options['align'] = "left"; }
+	if( options['align'] == "居中" ){ options['align'] = "center"; }
+	if( options['align'] == "右对齐" ){ options['align'] = "right"; }
+	for( var i=0; i < context_list.length; i++ ){
+		var context = context_list[i];
+		var yy = options['y'] + i * options['lineheight'];
+		this.contents.drawText( context, options['x'], yy, options['maxWidth'], options['lineheight'], options['align'] );
+	}
+}
+//==============================
+// * 绘制内容 - 绘制扩展文本（不清理画布）
+//==============================
+Window_Base.prototype.drill_COWA_drawTextEx_Private = function( context, options ){
+	if( options == undefined ){ options = {}; }
+	if( options['x'] == undefined ){ options['x'] = 0; }
+	if( options['y'] == undefined ){ options['y'] = 0; }
+	this.drill_COWA_drawTextEx_Copyed( context, options['x'], options['y'] );	//（直接走副本结构）
+}
+//==============================
+// * 绘制内容 - 绘制扩展文本列表（不清理画布）
+//==============================
+Window_Base.prototype.drill_COWA_drawTextListEx_Private = function( context_list, options ){
+	
+	// > 动态参数对象的默认值
+	options = this.drill_COWA_checkDrawExOptions(options);
+	
+	// > 参数记录（子插件可能会用到）
+	this._drill_COWA_drawingContextList = context_list;
+	this._drill_COWA_drawingOption = options;
+	
+	// > 计算字符高宽
+	this.drill_COWA_calculateHeightAndWidth( context_list, options );
+	
+	// > 开始绘制
+	this.drill_COWA_startDrawListEx( context_list, options );
+	
+	// > 参数去除
+	this._drill_COWA_drawingContextList = null;
+	this._drill_COWA_drawingOption = null;
+}
+//==============================
+// * 绘制内容 - 默认值（私有）
+//==============================
+Window_Base.prototype.drill_COWA_checkDrawExOptions = function( options ){
+	if( options == undefined ){ options = {}; };
+	if( options['x'] == undefined ){ options['x'] = 0 };									//光标起始位置x
+	if( options['y'] == undefined ){ options['y'] = 0 };									//光标起始位置y
+	if( options['width'] == undefined ){ options['width'] = this.contentsWidth() };			//居中用宽度（默认为窗口画布宽度）
+	if( options['autoLineheight'] == undefined ){ options['autoLineheight'] = true };		//是否自适应行间距
+	if( options['lineheight'] == undefined ){ options['lineheight'] = 28 };					//行间距
+	if( options['align'] == undefined ){ options['align'] = "左对齐" };						//对齐方式
+	return options;
+}
+//==============================
+// * 绘制内容 - 开始绘制（接口，单次调用）
+//
+//			参数：	字符串列表，选项参数
+//			返回：	无
+//==============================
+Window_Base.prototype.drill_COWA_startDrawListEx = function( context_list, options ){
+	var xx = options['x'] ;
+	var yy = options['y'] ;
+	var ww = options['width'] ;
+	for(var i=0; i < context_list.length; i++ ){
+		var temp_text = context_list[i];
+		
+		// > 对齐方式
+		xx = options['x'] ;
+		if( options['align'] == "左对齐" || options['align'] == "left" ){
+			//（不操作）
+		}
+		if( options['align'] == "居中" || options['align'] == "center" ){
+			xx += ww/2 - this.drill_COWA_widthList[i]/2;
+		}
+		if( options['align'] == "右对齐" || options['align'] == "right" ){
+			xx += ww - this.drill_COWA_widthList[i];
+		}
+		
+		// > 绘制
+		this.drawTextEx( temp_text, xx, yy );
+	
+		// > 【窗口字符-文本居中】插件（绘制一次，行数+1，由于该方法把context切断了，所以就不能processNewLine了）
+		if( Imported.Drill_DialogTextAlign ){
+			this._drill_DTA_cur_line += 1;
+		}
+		
+		// > 划分行间距
+		if( options['autoLineheight'] == true ){
+			yy += this.drill_COWA_heightList[i];	//自适应行间距
+		}else{
+			yy += options['lineheight'];			//固定行间距
+		}
+	}
+}
+
+
+
+
 
 //#############################################################################
 // ** 【标准模块】☆窗口属性修改
@@ -556,403 +1057,6 @@ Sprite.prototype.drill_COWA_SBM_resetMove = function(){
 }
 
 
-
-//=============================================================================
-// ** ☆计算文本高度/宽度（实现）
-//
-//			说明：	> 计算文本高度/宽度 的实现部分。
-//					> 通过对大部分函数 拦截 的方式，走一遍 文本绘制 流程，得到字符的宽度。
-//					（插件完整的功能目录去看看：功能结构树）
-//=============================================================================
-//==============================
-// * 文本计算 - 文本宽度
-//==============================
-Window_Base.prototype.drill_COWA_getTextWidth_Private = function( text ){
-	return this.textWidth( text );
-};
-//==============================
-// * 文本计算 - 文本高度
-//==============================
-Window_Base.prototype.drill_COWA_getTextHeight_Private = function( text ){
-	var maxFontSize = this.contents.fontSize;
-	return maxFontSize + 8;
-};
-
-//==============================
-// * 扩展文本计算 - 拦截
-//
-//			说明：	对于一些继承了并且抢先执行 processEscapeCharacter 函数的插件，最好加上 不准套娃 标记。（现在已经不需要了，因为直接最后继承）
-//==============================
-var _drill_COWA_scene_initialize = SceneManager.initialize;
-SceneManager.initialize = function() {
-	_drill_COWA_scene_initialize.call(this);		//（套两层，能够让下列函数在最后才执行继承）
-	
-	//==============================
-	// * 拦截 - 文本绘制（私有）
-	//==============================
-	var _drill_COWA_bitmap_drawText = Bitmap.prototype.drawText;
-	Bitmap.prototype.drawText = function(text, x, y, maxWidth, lineheight, align) {
-		
-		if( $gameTemp && $gameTemp._drill_COWA_bitmap_isCalculating == true ){ return; }	//（如果正在计算，则不绘制文字）
-		
-		_drill_COWA_bitmap_drawText.call( this,text, x, y, maxWidth, lineheight, align );
-	}
-	//==============================
-	// * 拦截 - 文本清理（私有）
-	//==============================
-	var _drill_COWA_bitmap_clearRect = Bitmap.prototype.clearRect;
-	Bitmap.prototype.clearRect = function(x, y, width, height) {
-		
-		if( $gameTemp && $gameTemp._drill_COWA_bitmap_isCalculating == true ){ return; }	//（如果正在计算，则不准清理）
-		
-		_drill_COWA_bitmap_clearRect.call( this, x, y, width, height );
-	}
-	//==============================
-	// * 拦截 - 图标绘制（私有）
-	//==============================
-	var _drill_COWA_bitmap_drawIcon = Window_Base.prototype.drawIcon;
-	Window_Base.prototype.drawIcon = function(iconIndex, x, y) {
-		
-		if( $gameTemp._drill_COWA_bitmap_isCalculating == true ){ return; }	//（如果正在计算，则不绘制图标）
-		
-		_drill_COWA_bitmap_drawIcon.call( this, iconIndex, x, y );
-	}
-	//==============================
-	// * 拦截 - 换行符影响（私有）
-	//==============================
-	var _drill_COWA_processNewLine = Window_Base.prototype.processNewLine;
-	Window_Base.prototype.processNewLine = function( textState ){
-		var xx = textState.x;
-		_drill_COWA_processNewLine.call( this, textState );
-		if( $gameTemp._drill_COWA_bitmap_isCalculating == true ){ textState.x = xx; }	//（如果正在计算，换行符不能影响宽度）
-	}
-	//==============================
-	// * 拦截 - 对话框的暂停字符（私有）
-	//==============================
-	var _drill_COWA_startWait = Window_Message.prototype.startWait;
-	Window_Message.prototype.startWait = function(count) {
-		_drill_COWA_startWait.call( this, count );
-		if( $gameTemp._drill_COWA_bitmap_isCalculating == true ){ this._waitCount = 0; }	//（如果正在计算，暂停符不能等待）
-	}
-	//==============================
-	// * 拦截 - 文本重建（私有）
-	//==============================
-	var _drill_COWA_createContents = Window_Base.prototype.createContents;
-	Window_Base.prototype.createContents = function() {
-		
-		if( $gameTemp && $gameTemp._drill_COWA_bitmap_isCalculating == true ){ return; }	//（如果正在计算，也不准重建bitmap）
-		
-		_drill_COWA_createContents.call( this );
-	}
-	//==============================
-	// * 拦截 - 字体颜色重置（私有）
-	//==============================
-	var _drill_COWA_resetTextColor = Window_Base.prototype.resetTextColor;
-	Window_Base.prototype.resetTextColor = function() {
-		
-		if( $gameTemp && $gameTemp._drill_COWA_bitmap_isCalculating == true ){ return; }	//（如果正在计算，也不准重置颜色）
-		
-		_drill_COWA_resetTextColor.call( this );
-	}
-	////==============================
-	//// * 拦截 - 效果字符（私有）（窗口字符核心的字符需要纳入计算）
-	////==============================
-	//var _drill_COWA_processEscapeCharacter = Window_Base.prototype.processEscapeCharacter;
-	//Window_Base.prototype.processEscapeCharacter = function( code, textState ){
-	//	
-	//	if( $gameTemp && $gameTemp._drill_COWA_bitmap_isCalculating == true ){ return; }	//（如果正在计算，效果字符全部忽略）
-	//	
-	//	_drill_COWA_processEscapeCharacter.call( this, code, textState );
-	//}
-}
-//==============================
-// * 扩展文本 - 绘制（原函数副本）
-//
-//			说明：	这只是一个drawTextEx函数的副本。
-//==============================
-Window_Base.prototype.drill_COWA_drawTextEx_Copyed = function( text, x, y ){
-	if( text == undefined ){ return 0; }
-	if( text == "" ){ return 0; }
-	this.resetFontSettings();
-	
-	var textState = {};
-	textState['index'] = 0;
-	textState['x'] = x;
-	textState['y'] = y;
-	textState['left'] = x;
-	textState['text'] = this.convertEscapeCharacters(text);
-	textState['height'] = this.calcTextHeight(textState, false);
-	
-	while( textState['index'] < textState['text'].length ){
-		this.processCharacter(textState);		//（开始绘制字符/推进字符）
-	}
-	return textState['x'] - x;
-};
-//==============================
-// * 扩展文本 - 绘制（自定义函数）
-//
-//			说明：	原函数基础上，加了 递归嵌套锁 和 起始光标Y。
-//==============================
-Window_Base.prototype.drill_COWA_drawTextEx_Custom = function( text, x, y ){
-	if( text == undefined ){ return 0; }
-	if( text == "" ){ return 0; }
-	if( this._drill_COWA_recursionLock1 == true ){ return 0; }	//（递归嵌套锁）
-	this._drill_COWA_recursionLock1 = true;
-	this.resetFontSettings();
-	
-	var textState = {};
-	textState['index'] = 0;
-	textState['x'] = x;
-	textState['y'] = y;
-	textState['left'] = x;			//（起始光标X）
-	textState['top'] = y;			//（起始光标Y）
-	textState['text'] = this.convertEscapeCharacters(text);
-	textState['height'] = this.calcTextHeight(textState, false);
-	
-	while( textState['index'] < textState['text'].length ){
-		this.processCharacter(textState);		//（开始绘制字符/推进字符）
-	}
-	this._drill_COWA_recursionLock1 = false;
-	return textState['x'] - x;
-};
-//==============================
-// * 扩展文本计算 - 计算文本宽度前（核心用接口，比如 窗口字符核心 继承此函数）
-//==============================
-Window_Base.prototype.drill_COWA_calculateExWidth_Before = function(){
-	
-	// > 变化参数存储
-	this._drill_COWA_lastFontSettings = {};
-	this._drill_COWA_lastFontSettings['fontFace']    = this.contents.fontFace;		//（默认的三个参数）
-	this._drill_COWA_lastFontSettings['fontSize']    = this.contents.fontSize;
-	this._drill_COWA_lastFontSettings['textColor']   = this.contents.textColor;
-	
-	// > 窗口字符核心/Yep插件 控制的参数
-	this._drill_COWA_lastFontSettings['fontBold'] = this.contents.fontBold;
-	this._drill_COWA_lastFontSettings['_drill_COWC_fontBold'] = this.contents._drill_COWC_fontBold;
-	this._drill_COWA_lastFontSettings['fontItalic'] = this.contents.fontItalic;
-	this._drill_COWA_lastFontSettings['outlineColor'] = this.contents.outlineColor;
-	this._drill_COWA_lastFontSettings['outlineWidth'] = this.contents.outlineWidth;
-};
-//==============================
-// * 扩展文本计算 - 计算文本宽度后（核心用接口，比如 窗口字符核心 继承此函数）
-//==============================
-Window_Base.prototype.drill_COWA_calculateExWidth_After = function(){
-	
-	// > 重置字体（字体恢复，计算时会造成变色、字体大小变化）
-	this.resetFontSettings();
-	
-	// > 变化参数恢复
-	this.contents.fontFace    = this._drill_COWA_lastFontSettings['fontFace'];
-	this.contents.fontSize    = this._drill_COWA_lastFontSettings['fontSize'];
-	this.contents.textColor   = this._drill_COWA_lastFontSettings['textColor'];
-	
-	// > 窗口字符核心/Yep插件 控制的参数
-	this.contents.fontBold = this._drill_COWA_lastFontSettings['fontBold'];
-	this.contents._drill_COWC_fontBold = this._drill_COWA_lastFontSettings['_drill_COWC_fontBold'];
-	this.contents.fontItalic = this._drill_COWA_lastFontSettings['fontItalic'];
-	this.contents.outlineColor = this._drill_COWA_lastFontSettings['outlineColor'];
-	this.contents.outlineWidth = this._drill_COWA_lastFontSettings['outlineWidth'];
-};
-//==============================
-// * 扩展文本计算 - 扩展文本宽度（私有，单次调用）
-//
-//			说明：	> 修改 textState.x 的值时一定要谨慎，会无限套娃。
-//					> 注意版本中，隔行重置字体的情况。
-//==============================
-Window_Base.prototype.drill_COWA_getTextExWidth_Private = function( text ){
-	if( this.contents == undefined ){ return 0; }
-	if( this._drill_COWA_recursionLock2 == true ){ return 0; }	//（递归嵌套锁）
-	this._drill_COWA_recursionLock2 = true;
-		
-	// > 确保绘制在画布外面，形成无效的绘制
-	var out_y = this.contents.height+this.lineHeight();
-	
-	// -----开始计算----
-	this.drill_COWA_calculateExWidth_Before();
-	$gameTemp._drill_COWA_bitmap_isCalculating = true;
-		
-		
-		// > 原装ex计算 （原装计算时，遇到文本居中需要计算自身长度时，会造成递归死循环）
-		//this._drill_COWA_calculatedExWidth = this.drawTextEx( text, 0, out_y );
-		
-		// > 用副本进行计算
-		this._drill_COWA_calculatedExWidth = this.drill_COWA_drawTextEx_Custom( text, 0, out_y );
-		
-		
-	$gameTemp._drill_COWA_bitmap_isCalculating = false;
-	this.drill_COWA_calculateExWidth_After();
-	// -----结束计算----
-	
-	this._drill_COWA_recursionLock2 = false;
-	return this._drill_COWA_calculatedExWidth;
-}
-//==============================
-// * 扩展文本计算 - 扩展文本高度（私有，单次调用）
-//			
-//==============================
-Window_Base.prototype.drill_COWA_getTextExHeight_Private = function( text ){
-	if( this._drill_COWA_recursionLock3 == true ){ return 0; }	//（递归嵌套锁）
-	this._drill_COWA_recursionLock3 = true;
-	
-	var textState = { 'index': 0, 'x': 0, 'y': 0, 'left': 0 };
-	textState.text = this.convertEscapeCharacters( text );
-	var hh = this.calcTextHeight(textState, false);		
-	
-	this._drill_COWA_recursionLock3 = false;
-	return hh;
-}
-//==============================
-// * 扩展文本计算 - 获取 扩展文本列表 的高度列表和宽度列表（私有，单次调用）
-//
-//			参数：	> context_list 字符串列表
-//					> options 动态参数对象（可以为null，没用到）
-//			返回：	高度列表 this.drill_COWA_heightList
-//					宽度列表 this.drill_COWA_widthList
-//==============================
-Window_Base.prototype.drill_COWA_calculateHeightAndWidth_Private = function( context_list, options ){
-	var height_list = [];
-	var width_list = [];
-	for( var i=0; i < context_list.length; i++ ){
-		var temp_text = context_list[i];
-		var ww = this.drill_COWA_getTextExWidth(temp_text);
-		var hh = this.drill_COWA_getTextExHeight(temp_text);
-		height_list.push(hh);
-		width_list.push(ww);
-	}
-	this.drill_COWA_heightList = height_list;
-	this.drill_COWA_widthList = width_list;
-}
-
-
-
-//=============================================================================
-// ** ☆绘制内容（实现）
-//
-//			说明：	> 将 绘制文本/绘制扩展文本 改进实现的功能。
-//					> 注意，不要用原 绘制文本 的函数，多使用该插件的函数，能支持更多子插件的扩展功能。
-//					（插件完整的功能目录去看看：功能结构树）
-//=============================================================================
-//==============================
-// * 绘制内容 - 绘制文本（不清理画布）
-//==============================
-Window_Base.prototype.drill_COWA_drawText_Private = function( context, options ){
-	if( options == undefined ){ options = {}; }
-	if( options['x'] == undefined ){ options['x'] = 0; }
-	if( options['y'] == undefined ){ options['y'] = 0; }
-	if( options['maxWidth'] == undefined ){ options['maxWidth'] = 999999; }
-	if( options['lineheight'] == undefined ){ options['lineheight'] = this.lineHeight(); }
-	if( options['align'] == undefined ){ options['align'] = "left"; }	//（填left/center/right）
-	if( options['align'] == "左对齐" ){ options['align'] = "left"; }
-	if( options['align'] == "居中" ){ options['align'] = "center"; }
-	if( options['align'] == "右对齐" ){ options['align'] = "right"; }
-    this.contents.drawText( context, options['x'], options['y'], options['maxWidth'], options['lineheight'], options['align'] );
-}
-//==============================
-// * 绘制内容 - 绘制文本列表（不清理画布）
-//==============================
-Window_Base.prototype.drill_COWA_drawTextList_Private = function( context_list, options ){
-	if( options == undefined ){ options = {}; }
-	if( options['x'] == undefined ){ options['x'] = 0; }
-	if( options['y'] == undefined ){ options['y'] = 0; }
-	if( options['maxWidth'] == undefined ){ options['maxWidth'] = 999999; }
-	if( options['lineheight'] == undefined ){ options['lineheight'] = this.lineHeight(); }
-	if( options['align'] == undefined ){ options['align'] = "left"; }	//（填left/center/right）
-	if( options['align'] == "左对齐" ){ options['align'] = "left"; }
-	if( options['align'] == "居中" ){ options['align'] = "center"; }
-	if( options['align'] == "右对齐" ){ options['align'] = "right"; }
-	for( var i=0; i < context_list.length; i++ ){
-		var context = context_list[i];
-		var yy = options['y'] + i * options['lineheight'];
-		this.contents.drawText( context, options['x'], yy, options['maxWidth'], options['lineheight'], options['align'] );
-	}
-}
-//==============================
-// * 绘制内容 - 绘制扩展文本（不清理画布）
-//==============================
-Window_Base.prototype.drill_COWA_drawTextEx_Private = function( context, options ){
-	if( options == undefined ){ options = {}; }
-	if( options['x'] == undefined ){ options['x'] = 0; }
-	if( options['y'] == undefined ){ options['y'] = 0; }
-	this.drill_COWA_drawTextEx_Copyed( context, options['x'], options['y'] );	//（直接走副本结构）
-}
-//==============================
-// * 绘制内容 - 绘制扩展文本列表（不清理画布）
-//==============================
-Window_Base.prototype.drill_COWA_drawTextListEx_Private = function( context_list, options ){
-	
-	// > 动态参数对象的默认值
-	options = this.drill_COWA_checkDrawExOptions(options);
-	
-	// > 参数记录（子插件可能会用到）
-	this._drill_COWA_drawingContextList = context_list;
-	this._drill_COWA_drawingOption = options;
-	
-	// > 计算字符高宽
-	this.drill_COWA_calculateHeightAndWidth( context_list, options );
-	
-	// > 开始绘制
-	this.drill_COWA_startDrawListEx( context_list, options );
-	
-	// > 参数去除
-	this._drill_COWA_drawingContextList = null;
-	this._drill_COWA_drawingOption = null;
-}
-//==============================
-// * 绘制内容 - 默认值（私有）
-//==============================
-Window_Base.prototype.drill_COWA_checkDrawExOptions = function( options ){
-	if( options == undefined ){ options = {}; };
-	if( options['x'] == undefined ){ options['x'] = 0 };									//光标起始位置x
-	if( options['y'] == undefined ){ options['y'] = 0 };									//光标起始位置y
-	if( options['width'] == undefined ){ options['width'] = this.contentsWidth() };			//居中用宽度（默认为窗口画布宽度）
-	if( options['autoLineheight'] == undefined ){ options['autoLineheight'] = true };		//是否自适应行间距
-	if( options['lineheight'] == undefined ){ options['lineheight'] = 28 };					//行间距
-	if( options['align'] == undefined ){ options['align'] = "左对齐" };						//对齐方式
-	return options;
-}
-//==============================
-// * 绘制内容 - 开始绘制（接口，单次调用）
-//
-//			参数：	字符串列表，选项参数
-//			返回：	无
-//==============================
-Window_Base.prototype.drill_COWA_startDrawListEx = function( context_list, options ){
-	var xx = options['x'] ;
-	var yy = options['y'] ;
-	var ww = options['width'] ;
-	for(var i=0; i < context_list.length; i++ ){
-		var temp_text = context_list[i];
-		
-		// > 对齐方式
-		xx = options['x'] ;
-		if( options['align'] == "左对齐" || options['align'] == "left" ){
-			//（不操作）
-		}
-		if( options['align'] == "居中" || options['align'] == "center" ){
-			xx += ww/2 - this.drill_COWA_widthList[i]/2;
-		}
-		if( options['align'] == "右对齐" || options['align'] == "right" ){
-			xx += ww - this.drill_COWA_widthList[i];
-		}
-		
-		// > 绘制
-		this.drawTextEx( temp_text, xx, yy );
-	
-		// > 【窗口字符-文本居中】插件（绘制一次，行数+1，由于该方法把context切断了，所以就不能processNewLine了）
-		if( Imported.Drill_DialogTextAlign ){
-			this._drill_DTA_cur_line += 1;
-		}
-		
-		// > 划分行间距
-		if( options['autoLineheight'] == true ){
-			yy += this.drill_COWA_heightList[i];	//自适应行间距
-		}else{
-			yy += options['lineheight'];			//固定行间距
-		}
-	}
-}
-
-
 //=============================================================================
 // ** ☆窗口属性修改（实现）
 // 		
@@ -1015,19 +1119,6 @@ Window_Base.prototype.update = function(){
 	this.drill_COWA_update();
 }
 //==============================
-// * 窗口 - 底层部件（私有）
-//==============================
-var _drill_COWA_winAttr__createAllParts = Window_Base.prototype._createAllParts;
-Window_Base.prototype._createAllParts = function() {
-	
-	// > 背景层（窗口最底层）
-	this._drill_COWA_layer = new Sprite();
-	this.addChild( this._drill_COWA_layer );
-	
-	// > 原函数
-	_drill_COWA_winAttr__createAllParts.call(this);
-}
-//==============================
 // * 窗口 - 帧刷新（被弃用的接口）
 //==============================
 Window_Base.prototype.drill_COWA_CPD_update = function(){
@@ -1052,10 +1143,6 @@ Window_Base.prototype.drill_COWA_initialize = function(){
 //==============================
 Window_Base.prototype.drill_COWA_update = function(){
 	if( this._drill_COWA_attrEnabled != true ){ return; }
-
-	if( this._drill_COWA_isWindow ){
-		this._drill_COWA_layer.visible = !this.isClosed();	//窗口帧刷新 - 与 打开/关闭 的透明度同步
-	}
 	
 	this.drill_COWA_updateAttrMove();						//帧刷新 - 移动属性 
 	this.drill_COWA_updateAttrOpacity();					//帧刷新 - 透明度属性 
@@ -1115,32 +1202,16 @@ Window_Base.prototype.drill_COWA_initFrame = function(){
 Window_Base.prototype.drill_COWA_initLayout = function(){
 	var data = this._drill_COWA_attrData;
 	
-	// > 创建 窗口布局背景
+	// > 创建 背景图片 贴图
 	var temp_sprite = new Sprite();
 	if( data['layoutType'] == "单张背景贴图" ){ 
 		temp_sprite.bitmap = ImageManager.loadBitmap( data['layoutSrcFile'], data['layoutSrc'], 0, true);
 	}
 	temp_sprite.x = data['layoutX'];
 	temp_sprite.y = data['layoutY'];
-	this._drill_COWA_backSprite = temp_sprite ;
-	this._drill_COWA_layer.addChild( temp_sprite );
+	this._drill_COWA_skinBackground = temp_sprite ;
+	this._windowSpriteContainer.addChild(this._drill_COWA_skinBackground);	//（ _windowSpriteContainer 为窗口的最底层贴图）
 	
-	// > 窗口布局 透明度
-	if( data['layoutType'] == "默认皮肤" ){ 
-		this.contentsOpacity = 255;
-		this._drill_COWA_frameOpacity = 255;
-		this._drill_COWA_layoutOpacity = 0;
-	}
-	if( data['layoutType'] == "单张背景贴图" ){ 
-		this.contentsOpacity = 255;
-		this._drill_COWA_frameOpacity = 0;
-		this._drill_COWA_layoutOpacity = 255;
-	}
-	if( data['layoutType'] == "隐藏布局" ){ 
-		this.contentsOpacity = 255;
-		this._drill_COWA_frameOpacity = 0;
-		this._drill_COWA_layoutOpacity = 0;
-	}
 }
 
 
@@ -1369,50 +1440,35 @@ Window_Base.prototype.drill_COWA_updateAttrOpacity = function(){
 	}
 	
 	// > 设置透明度（窗口）
-	if( this._drill_COWA_isWindow && data['layoutType'] == "默认皮肤" ){ 
-		this.contentsOpacity = oo;
-		this._drill_COWA_frameOpacity = oo;
-		this._drill_COWA_layoutOpacity = 0;
-	}
-	if( this._drill_COWA_isWindow && data['layoutType'] == "单张背景贴图" ){ 
-		this.contentsOpacity = oo;
-		this._drill_COWA_frameOpacity = 0;
-		this._drill_COWA_layoutOpacity = oo;
-	}
-	if( this._drill_COWA_isWindow && data['layoutType'] == "隐藏布局" ){ 
-		this.contentsOpacity = oo;
-		this._drill_COWA_frameOpacity = 0;
-		this._drill_COWA_layoutOpacity = 0;
+	//		（注意，窗口布局['layoutType'] 的设定并没有那么灵活，后续需要使用 窗口皮肤['window_type'] 的设定）
+	if( this._drill_COWA_isWindow == true ){
+		if( data['layoutType'] == "默认皮肤" ){ 
+			this.contentsOpacity = oo;										//文本域 透明度（与 背景容器层 并列）
+			//this.opacity = 255;											//背景容器层 透明度
+			this._windowBackSprite.opacity = oo;							//背景容器层 - 平铺贴图 透明度
+			this._windowFrameSprite.opacity = oo;							//背景容器层 - 框架贴图 透明度
+			this._drill_COWA_skinBackground.opacity = 0;					//背景容器层 - 背景图片 透明度
+		}
+		if( data['layoutType'] == "单张背景贴图" ){ 
+			this.contentsOpacity = oo;										//文本域 透明度（与 背景容器层 并列）
+			//this.opacity = 255;											//背景容器层 透明度
+			this._windowBackSprite.opacity = 0;								//背景容器层 - 平铺贴图 透明度
+			this._windowFrameSprite.opacity = 0;							//背景容器层 - 框架贴图 透明度
+			this._drill_COWA_skinBackground.opacity = oo;					//背景容器层 - 背景图片 透明度
+		}
+		if( data['layoutType'] == "隐藏布局" ){ 
+			this.contentsOpacity = oo;										//文本域 透明度（与 背景容器层 并列）
+			//this.opacity = 255;											//背景容器层 透明度
+			this._windowBackSprite.opacity = 0;								//背景容器层 - 平铺贴图 透明度
+			this._windowFrameSprite.opacity = 0;							//背景容器层 - 框架贴图 透明度
+			this._drill_COWA_skinBackground.opacity = oo;					//背景容器层 - 背景图片 透明度
+		}
 	}
 	// > 设置透明度（贴图）
 	if( this._drill_COWA_isWindow != true ){
 		this.opacity = oo;
 	}
 }
-//==============================
-// * 透明度属性 - 布局透明定义（私有）
-//==============================
-Object.defineProperty(Window_Base.prototype, '_drill_COWA_layoutOpacity', {
-    get: function() {
-        return this._drill_COWA_layer.alpha * 255;
-    },
-    set: function(value) {
-        this._drill_COWA_layer.alpha = value.clamp(0, 255) / 255;
-    },
-    configurable: true
-});
-//==============================
-// * 透明度属性 - 窗口框架透明定义（私有）
-//==============================
-Object.defineProperty(Window.prototype, '_drill_COWA_frameOpacity', {	//这部分其实已经被rpg_core定义为"opacity"
-    get: function() {													//但为了防止概念混淆，这里重新定义一次
-        return this._windowSpriteContainer.alpha * 255;
-    },
-    set: function(value) {
-        this._windowSpriteContainer.alpha = value.clamp(0, 255) / 255;
-    },
-    configurable: true
-});
 
 
 //==============================
@@ -1473,22 +1529,4 @@ Sprite.prototype.update = function(){
 	this.drill_COWA_update();
 }
 
-
-	
-//=============================================================================
-// ** ☆核心功能扩展
-//=============================================================================
-//==============================
-// * 核心功能扩展 - 帮助窗口换行
-//==============================
-var _drill_COWA_setItem = Window_Help.prototype.setItem;
-Window_Help.prototype.setItem = function(item) {
-	var str = item ? item.description : "";
-	if( str.contains("\\n") ){
-		str = str.replace("\\n","\n");
-		this.setText( str );
-	}else{
-		_drill_COWA_setItem.call(this, item);
-	}
-};
 

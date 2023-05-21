@@ -1298,11 +1298,16 @@
 //				->特殊
 //					->倍率/额外价格
 //					->交换商店
-// 
-//		★插件私有类：
-//			* Drill_SSh_GoldWindow【金钱窗口】
-//			* Drill_SSh_SellCategoryWindow【出售类型窗口】
 //
+//
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			* 金钱窗口【Drill_SSh_GoldWindow】
+//			* 出售类型窗口【Drill_SSh_SellCategoryWindow】
+//			* 服务员【Drill_SSh_WaitressSprite】
+//		
 //		★必要注意事项：
 //			暂无
 //
@@ -1781,11 +1786,80 @@ if( Imported.Drill_CoreOfWindowAuxiliary &&
 
 
 //=============================================================================
-// ** 资源文件夹
+// ** 原型链规范
+//
+//			说明：	> 此处专门补上缺失的原型链，未缺失的则注释掉。
 //=============================================================================
-ImageManager.load_MenuShop = function(filename) {
-    return this.loadBitmap('img/Menu__shop/', filename, 0, true);
+//==============================
+// * 商店界面（场景基类） - 初始化
+//==============================
+//Scene_Shop.prototype.initialize = function() {
+//    Scene_MenuBase.prototype.initialize.call(this);
+//};
+//==============================
+// * 商店界面（场景基类） - 创建
+//==============================
+//Scene_Shop.prototype.create = function() {
+//    Scene_MenuBase.prototype.create.call(this);
+//};
+//==============================
+// * 商店界面（场景基类） - 帧刷新
+//==============================
+Scene_Shop.prototype.update = function() {
+    Scene_MenuBase.prototype.update.call(this);
 };
+//==============================
+// * 商店界面（场景基类） - 开始运行
+//==============================
+Scene_Shop.prototype.start = function() {
+    Scene_MenuBase.prototype.start.call(this);
+};
+//==============================
+// * 商店界面（场景基类） - 结束运行
+//==============================
+Scene_Shop.prototype.stop = function() {
+    Scene_MenuBase.prototype.stop.call(this);
+};
+//==============================
+// * 商店界面（场景基类） - 判断是否激活/启动
+//==============================
+Scene_Shop.prototype.isActive = function() {
+	return Scene_MenuBase.prototype.isActive.call(this);
+};
+//==============================
+// * 商店界面（场景基类） - 析构函数
+//==============================
+Scene_Shop.prototype.terminate = function() {
+    Scene_MenuBase.prototype.terminate.call(this);
+};
+
+//==============================
+// * 商店界面（场景基类） - 判断加载完成
+//==============================
+Scene_Shop.prototype.isReady = function() {
+	return Scene_MenuBase.prototype.isReady.call(this);
+};
+//==============================
+// * 商店界面（场景基类） - 忙碌状态
+//==============================
+Scene_Shop.prototype.isBusy = function() {
+	return Scene_MenuBase.prototype.isBusy.call(this);
+};
+
+//==============================
+// * 商店界面（菜单界面基类） - 创建 - 菜单背景
+//==============================
+Scene_Shop.prototype.createBackground = function() {
+	Scene_MenuBase.prototype.createBackground.call(this);
+};
+//==============================
+// * 商店界面（菜单界面基类） - 创建 - 帮助窗口
+//==============================
+Scene_Shop.prototype.createHelpWindow = function() {
+	Scene_MenuBase.prototype.createHelpWindow.call(this);
+};
+
+
 
 //=============================================================================
 // * 插件指令
@@ -1942,6 +2016,13 @@ Game_System.prototype.drill_SSh_checkSysData_Private = function() {
 	
 };
 
+
+//=============================================================================
+// ** 资源文件夹
+//=============================================================================
+ImageManager.load_MenuShop = function(filename) {
+    return this.loadBitmap('img/Menu__shop/', filename, 0, true);
+};
 
 //=============================================================================
 // * 商店界面
@@ -3153,7 +3234,7 @@ Drill_SSh_SellCategoryWindow.prototype.itemTextAlign = function() {
 
 
 //=============================================================================
-// ** 服务员
+// ** 服务员【Drill_SSh_WaitressSprite】
 //=============================================================================
 //==============================
 // * 服务员 - 定义（继承 服务员核心）

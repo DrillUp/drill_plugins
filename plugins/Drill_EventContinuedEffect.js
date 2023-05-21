@@ -295,6 +295,12 @@
 //					->数学锚点变换问题
 //					->结构优化（换成Game_Character）
 //
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			无
+//		
 //		★必要注意事项：
 //			1.变化原理为：每帧都【固定初始值】，然后适时赋值公式变化值。
 //			2.由于rpg_object函数中没有【Game_Character.prototype.update】，所以继承时要用【Game_CharacterBase.prototype.update】。

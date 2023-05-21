@@ -1334,9 +1334,17 @@
 //			->粒子贴图（第二层）【Drill_MPa_SecSprite】
 //
 //
+//		★家谱：
+//			大家族-粒子效果
+//		
+//		★插件私有类：
+//			* 粒子控制器【Drill_MPa_Controller】
+//			* 粒子贴图【Drill_MPa_Sprite】
+//			* 粒子贴图（第二层）【Drill_MPa_SecSprite】
+//		
 //		★必要注意事项：
 //			1.插件继承至 粒子核心。
-//			  核心与所有子插件功能介绍去看看："1.系统 > 大家族-粒子核心（脚本）.docx"
+//			  核心与所有子插件功能介绍去看看："1.系统 > 大家族-粒子效果（脚本）.docx"
 //
 //		★其它说明细节：
 //			1.插件结构比背景复杂，多一个数组的量级，需要理清楚下面变量的关系：
@@ -1730,7 +1738,7 @@ Scene_MenuBase.prototype.drill_MPa_layerAddSprite = function( sprite, layer_inde
 //			参数：	> sprite 贴图（添加的贴图对象）
 //			返回：	> 无
 //          
-//			说明：	> 强行规范的接口，将指定贴图从地图层级中移除。
+//			说明：	> 强行规范的接口，将指定贴图从菜单层级中移除。
 //##############################
 Scene_MenuBase.prototype.drill_MPa_layerRemoveSprite = function( sprite ){
 	//（不操作）
@@ -1741,7 +1749,7 @@ Scene_MenuBase.prototype.drill_MPa_layerRemoveSprite = function( sprite ){
 //			参数：	> 无
 //			返回：	> 无
 //          
-//			说明：	> 执行该函数后，地图层级的子贴图，按照zIndex属性来进行先后排序。值越大，越靠前。
+//			说明：	> 执行该函数后，菜单层级的子贴图，按照zIndex属性来进行先后排序。值越大，越靠前。
 //##############################
 Scene_MenuBase.prototype.drill_MPa_sortByZIndex = function () {
     this.drill_MPa_sortByZIndex_Private();

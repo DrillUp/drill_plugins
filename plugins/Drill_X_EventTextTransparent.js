@@ -239,6 +239,12 @@
 //					> 批注线
 //					> 背景
 //
+//		★家谱：
+//			无
+//		
+//		★插件私有类：
+//			无
+//		
 //		★必要注意事项：
 //			暂无
 //			
@@ -776,10 +782,13 @@ Drill_ET_WindowSprite.prototype.drill_XETT_updateChange = function() {
 	var d_data = this._drill_controller._drill_data;
 	if( d_data['animEnabled'] == false ){ return; }
 	
-	// > 文字透明度
+	// > 文本域 透明度
 	var time = this._drill_XETT_curTime - d_data['animText_delay'];
 	if( time < 0 ){ time = 0; }
 	this.contentsOpacity = this._drill_controller._drill_textOpacity * time / d_data['animText_time'];
+	
+	// > 背景容器层 透明度（不变）
+	//this.opacity = this._drill_controller._drill_frameOpacity;
 	
 	// > 批注线透明度
 	if( this._drill_XETL_curSprite ){

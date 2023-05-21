@@ -877,12 +877,20 @@
  * @value 左上角
  * @option 右上角
  * @value 右上角
- * @option 正中心
- * @value 正中心
  * @option 左下角
  * @value 左下角
  * @option 右下角
  * @value 右下角
+ * @option 正上方
+ * @value 正上方
+ * @option 正下方
+ * @value 正下方
+ * @option 正左方
+ * @value 正左方
+ * @option 正右方
+ * @value 正右方
+ * @option 正中心
+ * @value 正中心
  * @desc 窗口追随鼠标时，中心锚点的位置。
  * @default 左上角
  *
@@ -991,9 +999,12 @@
 //					->窗口皮肤
 //				
 //				
+//		★家谱：
+//			无
+//		
 //		★插件私有类：
-//			* Drill_MPFP_Bean		【图片说明窗口实体类】
-//			* Drill_MPFP_Window		【图片说明窗口】
+//			* 图片说明窗口 实体类【Drill_MPFP_Bean】
+//			* 图片说明窗口【Drill_MPFP_Window】
 //		
 //		★必要注意事项：
 //			1.Bean实体类在 图片贴图 中被动赋值。
@@ -1988,10 +1999,15 @@ Drill_MPFP_Window.prototype.drill_initPrivateData = function() {
 	// > 中心锚点
 	this._drill_anchor_x = 0;			//中心锚点x
 	this._drill_anchor_y = 0;			//中心锚点y
+	if( this._drill_curData['anchor'] == "左上角" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 0.0; }
 	if( this._drill_curData['anchor'] == "右上角" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 0.0; }
-	if( this._drill_curData['anchor'] == "正中心" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 0.5; }
 	if( this._drill_curData['anchor'] == "左下角" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 1.0; }
 	if( this._drill_curData['anchor'] == "右下角" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 1.0; }
+	if( this._drill_curData['anchor'] == "正上方" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 0.0; }
+	if( this._drill_curData['anchor'] == "正下方" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 1.0; }
+	if( this._drill_curData['anchor'] == "正左方" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 0.5; }
+	if( this._drill_curData['anchor'] == "正右方" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 0.5; }
+	if( this._drill_curData['anchor'] == "正中心" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 0.5; }
 	
 	// > 图片层级
 	if( this._drill_curScene == "Scene_Battle" ){
@@ -2022,10 +2038,15 @@ Drill_MPFP_Window.prototype.drill_refreshStyle = function( style_id ){
 	// > 中心锚点
 	this._drill_anchor_x = 0;			//中心锚点x
 	this._drill_anchor_y = 0;			//中心锚点y
+	if( this._drill_curData['anchor'] == "左上角" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 0.0; }
 	if( this._drill_curData['anchor'] == "右上角" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 0.0; }
-	if( this._drill_curData['anchor'] == "正中心" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 0.5; }
 	if( this._drill_curData['anchor'] == "左下角" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 1.0; }
 	if( this._drill_curData['anchor'] == "右下角" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 1.0; }
+	if( this._drill_curData['anchor'] == "正上方" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 0.0; }
+	if( this._drill_curData['anchor'] == "正下方" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 1.0; }
+	if( this._drill_curData['anchor'] == "正左方" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 0.5; }
+	if( this._drill_curData['anchor'] == "正右方" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 0.5; }
+	if( this._drill_curData['anchor'] == "正中心" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 0.5; }
 	
 	// > 图片层级
 	if( this._drill_curScene == "Scene_Battle" ){
@@ -2263,7 +2284,7 @@ Drill_MPFP_Window.prototype.drill_resetSkinData = function( data ){
 	this._drill_skinBackground_width = 0;
 	this._drill_skinBackground_height = 0;
 	if( data['window_type'] == "自定义背景图片" && data['window_pic_src'] != "" ){
-		this._drill_skin_pic_bitmap = ImageManager.loadSystem( data['window_pic_src'] );
+		this._drill_skin_pic_bitmap = ImageManager.loadBitmap( "img/system/", data['window_pic_src'], 0, true );
 		this._drill_skin_pic_x = data['window_pic_x'];
 		this._drill_skin_pic_y = data['window_pic_y'];
 	}else{
@@ -2271,7 +2292,7 @@ Drill_MPFP_Window.prototype.drill_resetSkinData = function( data ){
 	}
 	
 	if( data['window_type'] == "自定义窗口皮肤" && data['window_sys_src'] != "" ){
-		this._drill_skin_sys_bitmap = ImageManager.loadSystem( data['window_sys_src'] );
+		this._drill_skin_sys_bitmap = ImageManager.loadBitmap( "img/system/", data['window_sys_src'], 0, true );
 	}else{
 		this._drill_skin_sys_bitmap = this._drill_skin_defaultSkin;
 	}
@@ -2296,10 +2317,11 @@ Drill_MPFP_Window.prototype.drill_resetSkinData = function( data ){
 		this.windowskin = this._drill_skin_defaultSkin;
 		
 		// （透明度）
-		this.opacity = this._drill_skin_opacity;
-		this._windowBackSprite.opacity = this._drill_skin_opacity;
-		this._windowFrameSprite.opacity = this._drill_skin_opacity;
-		this._drill_skinBackground.opacity = 0;
+		//this.contentsOpacity = 255;									//文本域 透明度（与 背景容器层 并列）
+		//this.opacity = 255;											//背景容器层 透明度
+		this._windowBackSprite.opacity = this._drill_skin_opacity;		//背景容器层 - 平铺贴图 透明度
+		this._windowFrameSprite.opacity = this._drill_skin_opacity;		//背景容器层 - 框架贴图 透明度
+		this._drill_skinBackground.opacity = 0;							//背景容器层 - 背景图片 透明度
 		
 		// （背景图片布局）
 		this._drill_skinBackground.bitmap = null;
@@ -2311,10 +2333,11 @@ Drill_MPFP_Window.prototype.drill_resetSkinData = function( data ){
 		this.windowskin = this._drill_skin_sys_bitmap;
 		
 		// （透明度）
-		this.opacity = this._drill_skin_opacity;
-		this._windowBackSprite.opacity = this._drill_skin_opacity;
-		this._windowFrameSprite.opacity = this._drill_skin_opacity;
-		this._drill_skinBackground.opacity = 0;
+		//this.contentsOpacity = 255;									//文本域 透明度（与 背景容器层 并列）
+		//this.opacity = 255;											//背景容器层 透明度
+		this._windowBackSprite.opacity = this._drill_skin_opacity;		//背景容器层 - 平铺贴图 透明度
+		this._windowFrameSprite.opacity = this._drill_skin_opacity;		//背景容器层 - 框架贴图 透明度
+		this._drill_skinBackground.opacity = 0;							//背景容器层 - 背景图片 透明度
 		
 		// （背景图片布局）
 		this._drill_skinBackground.bitmap = null;
@@ -2326,10 +2349,11 @@ Drill_MPFP_Window.prototype.drill_resetSkinData = function( data ){
 		this.windowskin = this._drill_skin_defaultSkin;
 		
 		// （透明度）
-		this.opacity = 255;
-		this._windowBackSprite.opacity = 0;
-		this._windowFrameSprite.opacity = 0;
-		this._drill_skinBackground.opacity = this._drill_skin_opacity;
+		//this.contentsOpacity = 255;									//文本域 透明度（与 背景容器层 并列）
+		//this.opacity = 255;											//背景容器层 透明度
+		this._windowBackSprite.opacity = 0;								//背景容器层 - 平铺贴图 透明度
+		this._windowFrameSprite.opacity = 0;							//背景容器层 - 框架贴图 透明度
+		this._drill_skinBackground.opacity = this._drill_skin_opacity;	//背景容器层 - 背景图片 透明度]
 		
 		// （背景图片布局）
 		this._drill_skinBackground.bitmap = this._drill_skin_pic_bitmap;
@@ -2343,10 +2367,11 @@ Drill_MPFP_Window.prototype.drill_resetSkinData = function( data ){
 		this.windowskin = this._drill_skin_defaultSkin;
 		
 		// （透明度）
-		this.opacity = 255;
-		this._windowBackSprite.opacity = 0;
-		this._windowFrameSprite.opacity = 0;
-		this._drill_skinBackground.opacity = this._drill_skin_opacity;
+		//this.contentsOpacity = 255;									//文本域 透明度（与 背景容器层 并列）
+		//this.opacity = 255;											//背景容器层 透明度
+		this._windowBackSprite.opacity = 0;								//背景容器层 - 平铺贴图 透明度
+		this._windowFrameSprite.opacity = 0;							//背景容器层 - 框架贴图 透明度
+		this._drill_skinBackground.opacity = this._drill_skin_opacity;	//背景容器层 - 背景图片 透明度
 		
 		// （背景图片布局）
 		this._drill_skinBackground.bitmap = null;	//（帧刷新中会自动建立黑色画布）
@@ -2363,6 +2388,27 @@ Drill_MPFP_Window.prototype.drill_resetSkinData = function( data ){
 // * 窗口皮肤 - 帧刷新
 //==============================
 Drill_MPFP_Window.prototype.drill_updateSkin = function() {
+	
+	if( this._drill_skin_type == "自定义背景图片" || this._drill_skin_type == "图片窗口布局" ){
+		
+		// > 高宽改变锁
+		if( this._drill_skinBackground_width  == this._drill_width &&
+			this._drill_skinBackground_height == this._drill_height ){
+			return;
+		}
+		this._drill_skinBackground_width = this._drill_width;
+		this._drill_skinBackground_height = this._drill_height;
+		
+		// > 背景图片与中心锚点
+		var xx = this._drill_skin_pic_x;
+		var yy = this._drill_skin_pic_y;
+		xx += this._drill_width * this._drill_anchor_x;
+		yy += this._drill_height * this._drill_anchor_y;
+		this._drill_skinBackground.x = xx;
+		this._drill_skinBackground.y = yy;
+		this._drill_skinBackground.anchor.x = this._drill_anchor_x;
+		this._drill_skinBackground.anchor.y = this._drill_anchor_y;
+	}
 	
 	if( this._drill_skin_type == "黑底背景" || this._drill_skin_type == "黑底布局" ){
 		
