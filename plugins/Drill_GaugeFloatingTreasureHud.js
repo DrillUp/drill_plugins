@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        地图UI - 临时漂浮物品框
+ * @plugindesc [v1.1]        地图UI - 临时漂浮物品框
  * @author Drill_up
  * 
  * @Drill_LE_param "物品框样式-%d"
@@ -109,6 +109,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 修复了该插件在战斗界面会报错的bug。
  *
  *
  *
@@ -1221,9 +1223,11 @@ Game_Interpreter.prototype.command125 = function() {
 	var count = this.operateValue(this._params[0], this._params[1], this._params[2]);
 	
 	// > 文本生成
-	var context = this.drill_GFTH_getText_gold( count );
-	if( context != "" ){
-		$gameTemp.drill_GFTH_pushNewText( context );
+	if( SceneManager._scene instanceof Scene_Map ){	//（只地图界面生效）
+		var context = this.drill_GFTH_getText_gold( count );
+		if( context != "" ){
+			$gameTemp.drill_GFTH_pushNewText( context );
+		}
 	}
 	return true;	
 };
@@ -1239,9 +1243,11 @@ Game_Interpreter.prototype.command126 = function() {
 	var count = this.operateValue(this._params[1], this._params[2], this._params[3]);
 	
 	// > 文本生成
-	var context = this.drill_GFTH_getText_item( item_id, count );
-	if( context != "" ){
-		$gameTemp.drill_GFTH_pushNewText( context );
+	if( SceneManager._scene instanceof Scene_Map ){	//（只地图界面生效）
+		var context = this.drill_GFTH_getText_item( item_id, count );
+		if( context != "" ){
+			$gameTemp.drill_GFTH_pushNewText( context );
+		}
 	}
 	return true;
 };
@@ -1257,9 +1263,11 @@ Game_Interpreter.prototype.command127 = function() {
 	var count = this.operateValue(this._params[1], this._params[2], this._params[3]);
 	
 	// > 文本生成
-	var context = this.drill_GFTH_getText_weapon( weapon_id, count );
-	if( context != "" ){
-		$gameTemp.drill_GFTH_pushNewText( context );
+	if( SceneManager._scene instanceof Scene_Map ){	//（只地图界面生效）
+		var context = this.drill_GFTH_getText_weapon( weapon_id, count );
+		if( context != "" ){
+			$gameTemp.drill_GFTH_pushNewText( context );
+		}
 	}
 	return true;
 };
@@ -1275,9 +1283,11 @@ Game_Interpreter.prototype.command128 = function() {
 	var count = this.operateValue(this._params[1], this._params[2], this._params[3]);
 	
 	// > 文本生成
-	var context = this.drill_GFTH_getText_armor( armor_id, count );
-	if( context != "" ){
-		$gameTemp.drill_GFTH_pushNewText( context );
+	if( SceneManager._scene instanceof Scene_Map ){	//（只地图界面生效）
+		var context = this.drill_GFTH_getText_armor( armor_id, count );
+		if( context != "" ){
+			$gameTemp.drill_GFTH_pushNewText( context );
+		}
 	}
 	return true;
 };

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        行走图 - 事件漂浮文字批注线[扩展]
+ * @plugindesc [v1.1]        行走图 - 事件漂浮文字批注线[扩展]
  * @author Drill_up
  * 
  * 
@@ -107,6 +107,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 整理了内部模块结构。
  * 
  * 
  * @param 默认线厚度
@@ -154,9 +156,16 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			事件漂浮文字批注线：
-//				->创建画布
-//				->画布画线
+//			->☆提示信息
+//			->☆变量获取
+//			->☆插件指令
+//			->☆事件注释
+//
+//			->☆事件漂浮文字 控制器（继承）
+//			->☆事件漂浮文字 贴图（继承）
+//				->贴图创建
+//				->画布刷新
+//
 //
 //		★家谱：
 //			无
@@ -175,7 +184,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -206,7 +215,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_X_EventTextLine = true;
@@ -227,7 +236,7 @@ if( Imported.Drill_EventText ){
 	
 	
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _drill_XETL_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
@@ -321,17 +330,20 @@ Game_Map.prototype.drill_XETL_isEventExist = function( e_id ){
 
 
 //=============================================================================
-// ** 事件注释初始化
+// ** ☆事件注释
 //=============================================================================
 //==============================
-// * 事件 - 注释初始化
+// * 事件注释 - 初始化绑定
 //==============================
 var _drill_XETL_c_setupPageSettings = Game_Event.prototype.setupPageSettings;
 Game_Event.prototype.setupPageSettings = function() {
 	_drill_XETL_c_setupPageSettings.call(this);
-	this.drill_XETL_refreshBackground();
+	this.drill_XETL_setupPageSettings();
 }
-Game_Event.prototype.drill_XETL_refreshBackground = function() {
+//==============================
+// * 事件注释 - 初始化
+//==============================
+Game_Event.prototype.drill_XETL_setupPageSettings = function() {
 	
 	// > 默认情况下，关闭显示线
 	if( this._drill_ET_controller != null ){
@@ -395,46 +407,47 @@ Game_Event.prototype.drill_XETL_refreshBackground = function() {
     }
 }
 
+
 //=============================================================================
-// ** 漂浮文字控制器（继承）
+// ** ☆事件漂浮文字 控制器（继承）
 //=============================================================================
 //==============================
 // * 控制器 - 初始化（继承）
 //==============================
-var _drill_XETL_ET_c_initData = Drill_ET_Controller.prototype.drill_initData;
-Drill_ET_Controller.prototype.drill_initData = function(){
+var _drill_XETL_ET_c_initData = Drill_ET_Controller.prototype.drill_controller_initData;
+Drill_ET_Controller.prototype.drill_controller_initData = function(){
 	_drill_XETL_ET_c_initData.call(this);
 	var data = this._drill_data;
 	
-	// > 默认值
+	// > 批注线
 	if( data['line_enable'] == undefined ){ data['line_enable'] = false };
 	if( data['line_thickness'] == undefined ){ data['line_thickness'] = DrillUp.g_XETL_thickness };
 	if( data['line_color'] == undefined ){ data['line_color'] = DrillUp.g_XETL_color };
 	if( data['line_mode'] == undefined ){ data['line_mode'] = DrillUp.g_XETL_mode };
 }
 //==============================
-// * 控制器 - 设置可用（接口）
+// * 控制器 - 批注线 - 设置可用（开放函数）
 //==============================
 Drill_ET_Controller.prototype.drill_XETL_setEnabled = function( enable ){
 	var data = this._drill_data;
 	data['line_enable'] = enable;
 }
 //==============================
-// * 控制器 - 设置厚度（接口）
+// * 控制器 - 批注线 - 设置厚度（开放函数）
 //==============================
 Drill_ET_Controller.prototype.drill_XETL_setThickness = function( thickness ){
 	var data = this._drill_data;
 	data['line_thickness'] = thickness;
 }
 //==============================
-// * 控制器 - 设置颜色（接口）
+// * 控制器 - 批注线 - 设置颜色（开放函数）
 //==============================
 Drill_ET_Controller.prototype.drill_XETL_setColor = function( color ){
 	var data = this._drill_data;
 	data['line_color'] = color;
 }
 //==============================
-// * 控制器 - 设置连接位置（接口）
+// * 控制器 - 批注线 - 设置连接位置（开放函数）
 //==============================
 Drill_ET_Controller.prototype.drill_XETL_setLineMode = function( mode ){
 	var data = this._drill_data;
@@ -443,14 +456,14 @@ Drill_ET_Controller.prototype.drill_XETL_setLineMode = function( mode ){
 
 
 //=============================================================================
-// ** 漂浮文字贴图（继承）
+// ** ☆事件漂浮文字 贴图（继承）
 //=============================================================================
 //==============================
-// * 文字贴图 - 初始化（继承）
+// * 文字贴图 - 初始化子功能（继承）
 //==============================
-var _drill_XETL_ET_sp_initialize = Drill_ET_WindowSprite.prototype.initialize;
-Drill_ET_WindowSprite.prototype.initialize = function( obj_event ){
-    _drill_XETL_ET_sp_initialize.call( this,obj_event );
+var _drill_XETL_ET_sp_initChild = Drill_ET_WindowSprite.prototype.drill_sprite_initChild;
+Drill_ET_WindowSprite.prototype.drill_sprite_initChild = function(){
+    _drill_XETL_ET_sp_initChild.call( this );
 	
 	// > 线贴图
 	this._drill_XETL_curSprite = null;			//线贴图
@@ -459,11 +472,11 @@ Drill_ET_WindowSprite.prototype.initialize = function( obj_event ){
 	this._drill_XETL_lastOffsetY = -1;			//偏移y标记
 };
 //==============================
-// * 文字贴图 - 销毁（继承）
+// * 文字贴图 - 销毁子功能（继承）
 //==============================
-var _drill_XETL_ET_sp_destroy_Private = Drill_ET_WindowSprite.prototype.drill_ET_destroy_Private;
-Drill_ET_WindowSprite.prototype.drill_ET_destroy_Private = function(){
-    _drill_XETL_ET_sp_destroy_Private.call( this );
+var _drill_XETL_ET_sp_destroyChild = Drill_ET_WindowSprite.prototype.drill_sprite_destroyChild;
+Drill_ET_WindowSprite.prototype.drill_sprite_destroyChild = function(){
+    _drill_XETL_ET_sp_destroyChild.call( this );
 	
 	// > 移除层
 	this.removeChild(this._drill_XETL_curSprite);
@@ -473,19 +486,21 @@ Drill_ET_WindowSprite.prototype.drill_ET_destroy_Private = function(){
 }
 
 //==============================
-// * 文字贴图 - 帧刷新
+// * 文字贴图 - 帧刷新（继承）
 //==============================
 var _drill_XETL_ET_sp_update = Drill_ET_WindowSprite.prototype.update;
 Drill_ET_WindowSprite.prototype.update = function() {
+	if( this.drill_sprite_isReady() == false ){ return; }
+	if( this.drill_sprite_isOptimizationPassed() == false ){ return; }
 	_drill_XETL_ET_sp_update.call(this);
-	if( this._drill_controller == undefined ){ return; }
-	this.drill_XETL_updateSpriteRebuild();		//帧刷新 - 批注线贴图
+	
+	this.drill_XETL_updateSpriteRebuild();		//帧刷新 - 贴图创建
 	if( this._drill_XETL_curSprite == undefined ){ return; }
 	this.drill_XETL_updateLineRefresh();		//帧刷新 - 画布刷新
 	this.drill_XETL_updatePosition();			//帧刷新 - 位置
 }
 //==============================
-// * 帧刷新 - 批注线贴图
+// * 文字贴图 - 帧刷新 - 贴图创建
 //==============================
 Drill_ET_WindowSprite.prototype.drill_XETL_updateSpriteRebuild = function() {
 	var d_data = this._drill_controller._drill_data;
@@ -510,7 +525,7 @@ Drill_ET_WindowSprite.prototype.drill_XETL_updateSpriteRebuild = function() {
 	this._drill_XETL_curSprite.visible = true;
 }
 //==============================
-// * 帧刷新 - 批注线贴图
+// * 文字贴图 - 帧刷新 - 位置
 //==============================
 Drill_ET_WindowSprite.prototype.drill_XETL_updatePosition = function() {
 	var d_data = this._drill_controller._drill_data;
@@ -531,7 +546,7 @@ Drill_ET_WindowSprite.prototype.drill_XETL_updatePosition = function() {
 	this._drill_XETL_curSprite.y = yy;
 }
 //==============================
-// * 帧刷新 - 画布刷新
+// * 文字贴图 - 帧刷新 - 画布刷新
 //==============================
 Drill_ET_WindowSprite.prototype.drill_XETL_updateLineRefresh = function() {
 	var d_data = this._drill_controller._drill_data;
@@ -607,7 +622,7 @@ Drill_ET_WindowSprite.prototype.drill_XETL_updateLineRefresh = function() {
 	this._drill_XETL_curSprite.bitmap = temp_bitmap;
 }
 //==============================
-// * 画布 - 绘制 - 线段
+// * 文字贴图 - 绘制线段
 //==============================
 Bitmap.prototype.drill_XETL_drawLine = function( x1, y1, x2, y2, width, color ){
     var context = this._context;

@@ -666,7 +666,7 @@ Window_Base.prototype.makeFontSmaller = function(){
 //==============================
 // * 核心漏洞修复 - 等待消息显示（覆写）
 //
-//			说明：	拆分此函数，转为更适合扩展的结构。
+//			说明：	> 拆分此函数，转为更适合扩展的结构。
 //==============================
 Window_Message.prototype.updateMessage = function(){
     if( this._textState ){
@@ -697,9 +697,9 @@ Window_Message.prototype.updateMessage = function(){
     }
 }
 //==============================
-// * 核心漏洞修复 - 等待消息显示 - 跳出字符绘制情况
+// * 核心漏洞修复 - 等待消息显示 - 跳出字符绘制情况（开放函数）
 //
-//			说明：	返回false继续绘制，返回true跳出绘制。
+//			说明：	> 返回false继续绘制，返回true跳出绘制。
 //==============================
 Window_Message.prototype.drill_COWC_canBreakProcess = function(){
 	

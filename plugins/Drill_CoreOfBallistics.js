@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.1]        系统 - 弹道核心
+ * @plugindesc [v2.2]        系统 - 弹道核心
  * @author Drill_up
  * 
  * 
@@ -101,6 +101,8 @@
  * 添加了随机数迭代功能。
  * [v2.1]
  * 优化了内部底层结构。
+ * [v2.2]
+ * 优化了部分参数设置，节省子插件存储空间。添加了 变化叠加器 功能。
  * 
  */
  
@@ -150,6 +152,7 @@
 //				->初始化数据【标准默认值】
 //				->获取弹道总时间【标准函数】
 //				->预推演【标准函数】
+//			
 //			->☆弹道工具
 //				->字符串 转 锚点列表【标准函数】
 //				->锚点列表 转 字符串【标准函数】
@@ -161,8 +164,14 @@
 //				->B校验值
 //				->D一维弹道【common】
 //				->E二维弹道【planimetry】
-//				->H弹道应用（一维）
-//				->I弹道应用（二维）
+//				->H一维弹道应用
+//					->H1透明度弹道
+//					->H2缩放X弹道
+//					->H3缩放Y弹道
+//					->H4旋转角弹道
+//				->I二维弹道应用
+//					->I1移动弹道
+//			->弹道扩展工具【Drill_COBa_ExtendTool】
 //		
 //		
 //		★家谱：
@@ -249,7 +258,11 @@
 //					> Drill_COBa_Manager._drill_COBa_planimetryData	（预推演 用的数据）
 //			
 //			功能：	> 纯数学计算。给传来的data进行初始赋值。
-//                  > 执行后，需要立即执行 预推演 ，确保这两个接口在同一个函数内执行即可。
+//                  > 一次性执行：
+//						执行此函数后，立即执行 预推演，并且确保这两个接口在同一个函数内执行即可。
+//					> 控制器-贴图执行：
+//						先将 返回的初始化数据 放控制器中存储，在到贴图中再进行预推演。
+//						返回的数据参数进行了最大化的简略，存储消耗较低。
 //					
 //			说明：	> 动态参数对象 全部参数见 drill_COBa_setBallisticsMove_Private 。
 //                  > 注意，锚点列表的格式固定为：[ {'x':0,'y':0} ]，你可以用工具类转一下。
@@ -291,10 +304,11 @@ Drill_COBa_Manager.drill_COBa_getBallisticsMove_TotalTime = function(){
 //					> this['_drill_COBa_y'] 数字数组（计算的Y结果）
 //			
 //			功能：	> 纯数学计算。根据当前的弹道参数设置，开始计算轨迹。
+//					> 如果对象为碎片组/粒子组，则此函数需要在for循环内遍历 对象编号 并执行。
 //					
 //			说明：	> 对象编号 obj_index 必须按照预先给的来，即 0 到 'movementNum'-1 的值。
 //					> 每次推演返回的数组长度都一样。
-//					  弹道长度 = 时长+1，延迟参数 会影响弹道长度。
+//					  但注意 弹道长度 = 时长+1，延迟参数 会影响弹道长度。
 //					> 此处的【随机因子】已被固定，如果要再次推演不同的随机弹道，可以修改【随机迭代次数】。
 //##############################
 Game_Temp.prototype.drill_COBa_preBallisticsMove = function( obj_data, obj_index, orgX, orgY ){
@@ -315,6 +329,7 @@ Drill_COBa_Manager.drill_COBa_preBallisticsMove = function( obj_data, obj_index,
 //			返回：	> 动态参数对象								（预推演 用的数据）
 //					> Drill_COBa_Manager._drill_COBa_commonData	（预推演 用的数据）
 //			
+//			功能：	> 见 "移动弹道 - 初始化数据【标准默认值】"。
 //			说明：	> 动态参数对象 全部参数见 drill_COBa_setBallisticsOpacity_Private 。
 //##############################
 Game_Temp.prototype.drill_COBa_setBallisticsOpacity = function( data ){
@@ -362,6 +377,7 @@ Drill_COBa_Manager.drill_COBa_preBallisticsOpacity = function( obj_data, obj_ind
 //			返回：	> 动态参数对象								（预推演 用的数据）
 //					> Drill_COBa_Manager._drill_COBa_commonData	（预推演 用的数据）
 //			
+//			功能：	> 见 "移动弹道 - 初始化数据【标准默认值】"。
 //			说明：	> 动态参数对象 全部参数见 drill_COBa_setBallisticsScaleX_Private 。
 //##############################
 Game_Temp.prototype.drill_COBa_setBallisticsScaleX = function( data ){
@@ -409,6 +425,7 @@ Drill_COBa_Manager.drill_COBa_preBallisticsScaleX = function( obj_data, obj_inde
 //			返回：	> 动态参数对象								（预推演 用的数据）
 //					> Drill_COBa_Manager._drill_COBa_commonData	（预推演 用的数据）
 //			
+//			功能：	> 见 "移动弹道 - 初始化数据【标准默认值】"。
 //			说明：	> 动态参数对象 全部参数见 drill_COBa_setBallisticsScaleY_Private 。
 //##############################
 Game_Temp.prototype.drill_COBa_setBallisticsScaleY = function( data ){
@@ -456,6 +473,7 @@ Drill_COBa_Manager.drill_COBa_preBallisticsScaleY = function( obj_data, obj_inde
 //			返回：	> 动态参数对象								（预推演 用的数据）
 //					> Drill_COBa_Manager._drill_COBa_commonData	（预推演 用的数据）
 //			
+//			功能：	> 见 "移动弹道 - 初始化数据【标准默认值】"。
 //			说明：	> 动态参数对象 全部参数见 drill_COBa_setBallisticsRotate_Private 。
 //##############################
 Game_Temp.prototype.drill_COBa_setBallisticsRotate = function( data ){
@@ -623,8 +641,14 @@ Drill_COBa_Manager.drill_COBa_getRandomInIteration = function( org_ran, iteratio
 // **							->随机因子（RandomFactor）
 // **							->随机迭代次数（RandomIteration）
 // **							->终止条件（terminate）
-// **					->H弹道应用（一维）
-// **					->I弹道应用（二维）
+// **					
+// **					->H一维弹道应用
+// **						->H1透明度弹道
+// **						->H2缩放X弹道
+// **						->H3缩放Y弹道
+// **						->H4旋转角弹道
+// **					->I二维弹道应用
+// **						->I1移动弹道
 // **				
 // **		说明：	> 弹道管理器中不存储任何参数，如果需要存储，则执行 初始化、预推演 时提前取出。
 //=============================================================================
@@ -632,7 +656,7 @@ Drill_COBa_Manager.drill_COBa_getRandomInIteration = function( org_ran, iteratio
 // * 弹道管理器 - 定义
 //==============================
 function Drill_COBa_Manager() {
-    throw new Error('This is a static class');
+    throw new Error("弹道管理器 Drill_COBa_Manager 是一个静态类，不需要实例化。");
 }
 //==============================
 // * A工具函数 - 字符串 转 锚点列表（私有）
@@ -756,7 +780,7 @@ Drill_COBa_Manager.drill_COBa_setBallisticsCommon = function( data ){
 	
 	//   ■ 时间公式（o-t图）
 	if( result['commonMode'] == "时间公式模式" ){
-		result['otFormula'] = data['otFormula'] || "return 0";			//时间公式 - 公式值
+		result['otFormula'] = data['otFormula'];						//时间公式 - 公式值（字符串，可为空）
 	}
 	
 	//   ■ 时间锚点（anchor）
@@ -778,20 +802,18 @@ Drill_COBa_Manager.drill_COBa_setBallisticsCommon = function( data ){
 	// > 随机迭代次数（RandomIteration）
 	if( data['randomIterationList'] != undefined ){
 		result['randomIterationList'] = data['randomIterationList'];	//（这里直接用指针，迭代次数变化，推演跟着变）
-	}else{
-		result['randomIterationList'] = [];								//一维弹道 - 随机迭代次数（基于随机因子，反复形成新的随机数）
-		for( var i=0; i < result['commonNum']; i++ ){
-			result['randomIterationList'].push( 1 );
-		}
+																		//（可直接为空对象，节约配置参数存储空间）
 	}
 	
 	
 	// > 终止条件（terminate）
 	result['terminateRangeEnabled'] = data['terminateRangeEnabled'] || false;				//终止条件 - 范围开关
-	if( data['terminateRange'] != undefined ){												//终止条件 - 范围
-		result['terminateRange'] = JSON.parse(JSON.stringify( data['terminateRange'] ));
-	}else{
-		result['terminateRange'] = {'min':0,'max':0};
+	if( result['terminateRangeEnabled'] == true ){
+		if( data['terminateRange'] != undefined ){											//终止条件 - 范围
+			result['terminateRange'] = JSON.parse(JSON.stringify( data['terminateRange'] ));
+		}else{
+			result['terminateRange'] = {'min':0,'max':0};
+		}
 	}
 	
 	
@@ -835,7 +857,9 @@ Drill_COBa_Manager.drill_COBa_preBallisticsCommon = function( obj_data, obj_inde
 		obj = this._drill_COBa_commonObj;
 		//   公式obj
 		if( data['commonMode'] == "时间公式模式"){
-			eval("obj['otFunction'] = function( p ){ "+data['otFormula']+" }" );
+			var formula = data['otFormula'];
+			if( formula == undefined || formula == "" ){ formula = "return 0"; }
+			eval("obj['otFunction'] = function( p ){ "+formula+" }" );
 		}
 		if( data['commonMode'] == "时间锚点模式" ){		
 			//（无公式）
@@ -861,8 +885,14 @@ Drill_COBa_Manager.drill_COBa_preBallisticsCommon = function( obj_data, obj_inde
 		
 		// > 随机值（来自随机因子）
 		var randomValue = Drill_COBa_Manager.drill_COBa_getRandomInIteration( data['randomFactor'], obj_index );	//随机因子
-		var randomValue_i = data['randomIterationList'][ obj_index ];									//随机迭代次数
-		if( randomValue_i == undefined ){ randomValue_i = data['randomIterationList'][0]; }
+		var randomValue_i = 1;
+		if( data['randomIterationList'] != undefined ){
+			if( data['randomIterationList'][ obj_index ] != undefined ){
+				randomValue_i = data['randomIterationList'][ obj_index ];
+			}else{
+				randomValue_i = data['randomIterationList'][0];
+			}
+		}
 		randomValue = Drill_COBa_Manager.drill_COBa_getRandomInIteration( randomValue, data['commonNum']*randomValue_i +obj_index );
 		
 		// > 变量定义（写这里是为优化性能，减少反复创建次数）
@@ -1050,7 +1080,7 @@ Drill_COBa_Manager.drill_COBa_preBallisticsCommon = function( obj_data, obj_inde
 //					> 二维弹道走流程 初始化 > 预推演 之后，会赋值参数：_drill_COBa_x、_drill_COBa_y 。
 //=============================================================================
 //==============================
-// * D一维弹道 - 参数（私有）
+// * E二维弹道 - 参数（私有）
 //==============================
 Drill_COBa_Manager._drill_COBa_planimetryData = {};
 //==============================
@@ -1075,12 +1105,12 @@ Drill_COBa_Manager.drill_COBa_setBallisticsPlanimetry = function( data ){
 		result['polarSpeedInc'] = data['polarSpeedInc'] || 0;                           //极坐标 - 速度 - 加速度
 		result['polarSpeedMax'] = data['polarSpeedMax'] || 0;                           //极坐标 - 速度 - 最大速度
 		result['polarSpeedMin'] = data['polarSpeedMin'] || 0;                           //极坐标 - 速度 - 最小速度
-		result['polarDistanceFormula'] = data['polarDistanceFormula'] || "return 0";    //极坐标 - 速度 - 路程计算公式
+		result['polarDistanceFormula'] = data['polarDistanceFormula']; 					//极坐标 - 速度 - 路程计算公式（字符串，可为空）
 		result['polarDirType'] = data['polarDirType'] || "固定方向";                    //极坐标 - 方向 - 类型
 		result['polarDirFixed'] = data['polarDirFixed'] || 0;                           //极坐标 - 方向 - 固定方向
 		result['polarDirSectorFace'] = data['polarDirSectorFace'] || 0;                 //极坐标 - 方向 - 扇形朝向
 		result['polarDirSectorDegree'] = data['polarDirSectorDegree'] || 0;             //极坐标 - 方向 - 扇形角度
-		result['polarDirFormula'] = data['polarDirFormula'] || "return 0";              //极坐标 - 方向 - 方向计算公式
+		result['polarDirFormula'] = data['polarDirFormula'];							//极坐标 - 方向 - 方向计算公式（字符串，可为空）
 	}
 	//   ■ 直角坐标（cartesian）
 	else if( result['planimetryMode'] == "直角坐标模式" ){			
@@ -1091,14 +1121,14 @@ Drill_COBa_Manager.drill_COBa_setBallisticsPlanimetry = function( data ){
 		result['cartXSpeedInc'] = data['cartXSpeedInc'] || 0;                           //直角坐标 - x - 加速度
 		result['cartXSpeedMax'] = data['cartXSpeedMax'] || 0;                           //直角坐标 - x - 最大速度
 		result['cartXSpeedMin'] = data['cartXSpeedMin'] || 0;                           //直角坐标 - x - 最小速度
-		result['cartXDistanceFormula'] = data['cartXDistanceFormula'] || "return 0";    //直角坐标 - x - 路程计算公式
+		result['cartXDistanceFormula'] = data['cartXDistanceFormula'];					//直角坐标 - x - 路程计算公式（字符串，可为空）
 		result['cartYSpeedType'] = data['cartYSpeedType'] || "只初速度";                //直角坐标 - y - 类型
 		result['cartYSpeedBase'] = data['cartYSpeedBase'] || 0;                         //直角坐标 - y - 初速度
 		result['cartYSpeedRandom'] = data['cartYSpeedRandom'] || 0;                     //直角坐标 - y - 速度随机波动量
 		result['cartYSpeedInc'] = data['cartYSpeedInc'] || 0;                           //直角坐标 - y - 加速度
 		result['cartYSpeedMax'] = data['cartYSpeedMax'] || 0;                           //直角坐标 - y - 最大速度
 		result['cartYSpeedMin'] = data['cartYSpeedMin'] || 0;                           //直角坐标 - y - 最小速度
-		result['cartYDistanceFormula'] = data['cartYDistanceFormula'] || "return 0";    //直角坐标 - y - 路程计算公式
+		result['cartYDistanceFormula'] = data['cartYDistanceFormula'];					//直角坐标 - y - 路程计算公式（字符串，可为空）
 	}
 	//   ■ 轨道锚点（track）		
 	else if( result['planimetryMode'] == "轨道锚点模式" ){			
@@ -1108,7 +1138,7 @@ Drill_COBa_Manager.drill_COBa_setBallisticsPlanimetry = function( data ){
 		result['trackSpeedInc'] = data['trackSpeedInc'] || 0;                           //轨道锚点 - 速度 - 加速度
 		result['trackSpeedMax'] = data['trackSpeedMax'] || 0;                           //轨道锚点 - 速度 - 最大速度
 		result['trackSpeedMin'] = data['trackSpeedMin'] || 0;                           //轨道锚点 - 速度 - 最小速度
-		result['trackDistanceFormula'] = data['trackDistanceFormula'] || "return 0";    //轨道锚点 - 速度 - 路程计算公式
+		result['trackDistanceFormula'] = data['trackDistanceFormula'];					//轨道锚点 - 速度 - 路程计算公式（字符串，可为空）
 		result['trackPointTank'] = data['trackPointTank'] || [];                        //轨道锚点 - 轨道 - 锚点列表
 		result['trackRotation'] = data['trackRotation'] || 0;                           //轨道锚点 - 轨道 - 整体旋转角度
 	}
@@ -1123,6 +1153,7 @@ Drill_COBa_Manager.drill_COBa_setBallisticsPlanimetry = function( data ){
 	
 	
 	// > 随机因子（RandomFactor）
+	//		（若子插件设置参数时直接用了 Math.random()，那么此处的随机因子就没用了。）
 	//		（注意，独立参数项之间，随机因子不可共用！会造成强关联的错误关系。）
 	if( result['planimetryMode'] == "极坐标模式" ){
 		result['polarSpeedRandomFactor'] = data['polarSpeedRandomFactor'] || Math.random();
@@ -1141,41 +1172,18 @@ Drill_COBa_Manager.drill_COBa_setBallisticsPlanimetry = function( data ){
 	
 	
 	// > 随机迭代次数（RandomIteration）
+	//		（若子插件设置参数时直接用了 Math.random()，那么此处的随机迭代次数就没用了。）
 	if( result['planimetryMode'] == "极坐标模式" ){
-		if( data['polarSpeedRandomIterationList'] != undefined ){
-			result['polarSpeedRandomIterationList'] = data['polarSpeedRandomIterationList'];//（这里直接用指针，迭代次数变化，推演跟着变）
-			result['polarDirRandomIterationList'] = data['polarDirRandomIterationList'];
-		}else{
-			result['polarSpeedRandomIterationList'] = [];								//极坐标 - 速度 - 随机迭代次数（基于随机因子，反复形成新的随机数）
-			result['polarDirRandomIterationList'] = [];   								//极坐标 - 方向 - 随机迭代次数
-			for( var i=0; i < result['planimetryNum']; i++ ){
-				result['polarSpeedRandomIterationList'].push( 1 );
-				result['polarDirRandomIterationList'].push( 1 );
-			}
-		}
+		result['polarSpeedRandomIterationList'] = data['polarSpeedRandomIterationList'];	//（这里直接用指针，迭代次数变化，推演跟着变）
+		result['polarDirRandomIterationList'] = data['polarDirRandomIterationList'];		//（可直接为空对象，节约配置参数存储空间）
 	}
 	else if( result['planimetryMode'] == "直角坐标模式" ){		
-		if( data['cartXSpeedRandomIterationList'] != undefined ){
-			result['cartXSpeedRandomIterationList'] = data['cartXSpeedRandomIterationList'];//（这里直接用指针，迭代次数变化，推演跟着变）
-			result['cartYSpeedRandomIterationList'] = data['cartYSpeedRandomIterationList'];
-		}else{
-			result['cartXSpeedRandomIterationList'] = [];								//直角坐标 - x - 随机迭代次数（基于随机因子，反复形成新的随机数）
-			result['cartYSpeedRandomIterationList'] = [];								//直角坐标 - y - 随机迭代次数
-			for( var i=0; i < result['planimetryNum']; i++ ){
-				result['cartXSpeedRandomIterationList'].push( 1 );
-				result['cartYSpeedRandomIterationList'].push( 1 );
-			}
-		}
+		result['cartXSpeedRandomIterationList'] = data['cartXSpeedRandomIterationList'];	//（这里直接用指针，迭代次数变化，推演跟着变）
+		result['cartYSpeedRandomIterationList'] = data['cartYSpeedRandomIterationList'];	//（可直接为空对象，节约配置参数存储空间）
 	}
 	else if( result['planimetryMode'] == "轨道锚点模式" ){		
-		if( data['trackSpeedRandomIterationList'] != undefined ){
-			result['trackSpeedRandomIterationList'] = data['trackSpeedRandomIterationList'];//（这里直接用指针，迭代次数变化，推演跟着变）
-		}else{
-			result['trackSpeedRandomIterationList'] = [];								//轨道锚点 - 速度 - 随机迭代次数（基于随机因子，反复形成新的随机数）
-			for( var i=0; i < result['planimetryNum']; i++ ){
-				result['trackSpeedRandomIterationList'].push( 1 );
-			}
-		}
+		result['trackSpeedRandomIterationList'] = data['trackSpeedRandomIterationList'];	//（这里直接用指针，迭代次数变化，推演跟着变）
+																							//（可直接为空对象，节约配置参数存储空间）
 	}
 	else if( result['planimetryMode'] == "两点式" ){		
 		//（无随机迭代次数）
@@ -1184,10 +1192,12 @@ Drill_COBa_Manager.drill_COBa_setBallisticsPlanimetry = function( data ){
 	
 	// > 终止条件（terminate）
 	result['terminateRectEnabled'] = data['terminateRectEnabled'] || false;				//终止条件 - 矩形范围开关
-	if( data['terminateRect'] != undefined ){											//终止条件 - 矩形范围
-		result['terminateRect'] = JSON.parse(JSON.stringify( data['terminateRect'] ));
-	}else{
-		result['terminateRect'] = {'x':0,'y':0,'width':0,'height':0};
+	if( result['terminateRectEnabled'] == true ){
+		if( data['terminateRect'] != undefined ){										//终止条件 - 矩形范围
+			result['terminateRect'] = JSON.parse(JSON.stringify( data['terminateRect'] ));
+		}else{
+			result['terminateRect'] = {'x':0,'y':0,'width':0,'height':0};
+		}
 	}
 	
 	
@@ -1236,15 +1246,25 @@ Drill_COBa_Manager.drill_COBa_preBallisticsPlanimetry = function( obj_data, obj_
 		obj = this._drill_COBa_planimetryObj;
 		//   公式obj
 		if( data['planimetryMode'] == "极坐标模式"){
-			eval("obj['polarDistanceFunction'] = function( p ){ "+data['polarDistanceFormula']+" }" );
-			eval("obj['polarDirFunction'] = function( p ){ "+data['polarDirFormula']+" }" );
+			var formula = data['polarDistanceFormula'];
+			if( formula == undefined || formula == "" ){ formula = "return 0"; }
+			eval("obj['polarDistanceFunction'] = function( p ){ "+formula+" }" );
+			var formula = data['polarDirFormula'];
+			if( formula == undefined || formula == "" ){ formula = "return 0"; }
+			eval("obj['polarDirFunction'] = function( p ){ "+formula+" }" );
 		}
 		else if( data['planimetryMode'] == "直角坐标模式"){
-			eval("obj['cartXDistanceFunction'] = function( p ){ "+data['cartXDistanceFormula']+" }" );
-			eval("obj['cartYDistanceFunction'] = function( p ){ "+data['cartYDistanceFormula']+" }" );
+			var formula = data['cartXDistanceFormula'];
+			if( formula == undefined || formula == "" ){ formula = "return 0"; }
+			eval("obj['cartXDistanceFunction'] = function( p ){ "+formula+" }" );
+			var formula = data['cartYDistanceFormula'];
+			if( formula == undefined || formula == "" ){ formula = "return 0"; }
+			eval("obj['cartYDistanceFunction'] = function( p ){ "+formula+" }" );
 		}
 		else if( data['planimetryMode'] == "轨道锚点模式"){
-			eval("obj['trackDistanceFunction'] = function( p ){ "+data['trackDistanceFormula']+" }" );
+			var formula = data['trackDistanceFormula'];
+			if( formula == undefined || formula == "" ){ formula = "return 0"; }
+			eval("obj['trackDistanceFunction'] = function( p ){ "+formula+" }" );
 		}
 		else if( data['planimetryMode'] == "两点式" ){		
 			//（无公式）
@@ -1262,7 +1282,7 @@ Drill_COBa_Manager.drill_COBa_preBallisticsPlanimetry = function( obj_data, obj_
 	
 	
 	/*-----------------二维弹道 - 极坐标模式------------------*/
-	if( data['planimetryMode'] == "极坐标模式"){
+	if( data['planimetryMode'] == "极坐标模式" ){
 		
 		// > 起点值
 		obj_data['_drill_COBa_x'].push( orgX );
@@ -1270,14 +1290,26 @@ Drill_COBa_Manager.drill_COBa_preBallisticsPlanimetry = function( obj_data, obj_
 		
 		// > 随机值（方向随机因子）
 		var randomDirValue = Drill_COBa_Manager.drill_COBa_getRandomInIteration( data['polarDirRandomFactor'], obj_index +12345 );
-		var randomDirValue_i = data['polarDirRandomIterationList'][ obj_index ];
-		if( randomDirValue_i == undefined ){ randomDirValue_i = data['polarDirRandomIterationList'][0]; }
+		var randomDirValue_i = 1;
+		if( data['polarDirRandomIterationList'] != undefined ){
+			if( data['polarDirRandomIterationList'][ obj_index ] != undefined ){
+				randomDirValue_i = data['polarDirRandomIterationList'][ obj_index ];
+			}else{
+				randomDirValue_i = data['polarDirRandomIterationList'][0];
+			}
+		}
 		randomDirValue = Drill_COBa_Manager.drill_COBa_getRandomInIteration( randomDirValue, data['planimetryNum']*randomDirValue_i +obj_index +12345 );
 		
 		// > 随机值（速度随机因子）
 		var randomSpeed = Drill_COBa_Manager.drill_COBa_getRandomInIteration( data['polarSpeedRandomFactor'], obj_index +23456 );
-		var randomSpeed_i = data['polarSpeedRandomIterationList'][ obj_index ];
-		if( randomSpeed_i == undefined ){ randomSpeed_i = data['polarSpeedRandomIterationList'][0]; }
+		var randomSpeed_i = 1;
+		if( data['polarSpeedRandomIterationList'] != undefined ){
+			if( data['polarSpeedRandomIterationList'][ obj_index ] != undefined ){
+				randomSpeed_i = data['polarSpeedRandomIterationList'][ obj_index ];
+			}else{
+				randomSpeed_i = data['polarSpeedRandomIterationList'][0];
+			}
+		}
 		randomSpeed = Drill_COBa_Manager.drill_COBa_getRandomInIteration( randomSpeed, data['planimetryNum']*randomSpeed_i +obj_index +23456 );
 		
 		// > 变量定义（写这里是为优化性能，减少反复创建次数）
@@ -1378,14 +1410,26 @@ Drill_COBa_Manager.drill_COBa_preBallisticsPlanimetry = function( obj_data, obj_
 		
 		// > 随机值（X随机因子）
 		var x_randomSpeed = Drill_COBa_Manager.drill_COBa_getRandomInIteration( data['cartXSpeedRandomFactor'], obj_index +34567 );
-		var x_randomSpeed_i = data['cartXSpeedRandomIterationList'][ obj_index ];
-		if( x_randomSpeed_i == undefined ){ x_randomSpeed_i = data['cartXSpeedRandomIterationList'][0]; }
+		var x_randomSpeed_i = 1;
+		if( data['cartXSpeedRandomIterationList'] != undefined ){
+			if( data['cartXSpeedRandomIterationList'][ obj_index ] != undefined ){
+				x_randomSpeed_i = data['cartXSpeedRandomIterationList'][ obj_index ];
+			}else{
+				x_randomSpeed_i = data['cartXSpeedRandomIterationList'][0];
+			}
+		}
 		x_randomSpeed = Drill_COBa_Manager.drill_COBa_getRandomInIteration( x_randomSpeed, data['planimetryNum']*x_randomSpeed_i +obj_index +34567 );
 		
 		// > 随机值（Y随机因子）
 		var y_randomSpeed = Drill_COBa_Manager.drill_COBa_getRandomInIteration( data['cartYSpeedRandomFactor'], obj_index +45678 );
-		var y_randomSpeed_i = data['cartYSpeedRandomIterationList'][ obj_index ];
-		if( y_randomSpeed_i == undefined ){ y_randomSpeed_i = data['cartYSpeedRandomIterationList'][0]; }
+		var y_randomSpeed_i = 1;
+		if( data['cartYSpeedRandomIterationList'] != undefined ){
+			if( data['cartYSpeedRandomIterationList'][ obj_index ] != undefined ){
+				y_randomSpeed_i = data['cartYSpeedRandomIterationList'][ obj_index ];
+			}else{
+				y_randomSpeed_i = data['cartYSpeedRandomIterationList'][0];
+			}
+		}
 		y_randomSpeed = Drill_COBa_Manager.drill_COBa_getRandomInIteration( y_randomSpeed, data['planimetryNum']*y_randomSpeed_i +obj_index +45678 );
 		
 		// > 变量定义（写这里是为优化性能，减少反复创建次数）
@@ -1483,10 +1527,16 @@ Drill_COBa_Manager.drill_COBa_preBallisticsPlanimetry = function( obj_data, obj_
 		obj_data['_drill_COBa_y'].push( orgY );
 		
 		// > 随机值（随机因子）
-		var randomSpeed = Drill_COBa_Manager.drill_COBa_getRandomInIteration( data['trackSpeedRandomFactor'], obj_index +56789 );
-		var randomSpeed_i = data['trackSpeedRandomIterationList'][ obj_index ];
-		if( randomSpeed_i == undefined ){ randomSpeed_i = data['trackSpeedRandomIterationList'][0]; }
-		randomSpeed = Drill_COBa_Manager.drill_COBa_getRandomInIteration( randomSpeed, data['planimetryNum']*randomSpeed_i +obj_index +56789 );
+		var track_randomSpeed = Drill_COBa_Manager.drill_COBa_getRandomInIteration( data['trackSpeedRandomFactor'], obj_index +56789 );
+		var track_randomSpeed_i = 1;
+		if( data['trackSpeedRandomIterationList'] != undefined ){
+			if( data['trackSpeedRandomIterationList'][ obj_index ] != undefined ){
+				track_randomSpeed_i = data['trackSpeedRandomIterationList'][ obj_index ];
+			}else{
+				track_randomSpeed_i = data['trackSpeedRandomIterationList'][0];
+			}
+		}
+		track_randomSpeed = Drill_COBa_Manager.drill_COBa_getRandomInIteration( track_randomSpeed, data['planimetryNum']*track_randomSpeed_i +obj_index +56789 );
 		
 		// > 轨道点初始化
 		if( data['trackPointTank'].length < 2 ){	//（至少要两个点才能计算）
@@ -1524,7 +1574,7 @@ Drill_COBa_Manager.drill_COBa_preBallisticsPlanimetry = function( obj_data, obj_
 			distance = null;
 			p.index = obj_index;
 			p.time  = time;
-			p.ran   = randomSpeed;
+			p.ran   = track_randomSpeed;
 			p.num   = data['planimetryNum'];
 			p.v0    = data['trackSpeedBase'];
 			p.wave  = data['trackSpeedRandom'];
@@ -1879,10 +1929,10 @@ Drill_COBa_Manager.drill_COBa_speedFunction_4 = function( p ){
 
 
 //=============================================================================
-// * H弹道应用（一维） - 透明度弹道
+// * H一维弹道应用 - H1透明度弹道
 //=============================================================================
 //==============================
-// * 透明度弹道 - 初始化数据 默认值（私有）
+// * H1透明度弹道 - 初始化数据 默认值（私有）
 //			
 //			说明：	弹道 参数名称 有交叉，但不影响整体使用。正常存储/处理即可。
 //==============================
@@ -1935,7 +1985,7 @@ Drill_COBa_Manager.drill_COBa_setBallisticsOpacity_Private = function( data ){
 	return this.drill_COBa_setBallisticsCommon( result );	
 }
 //==============================
-// * 透明度弹道 - 预推演（私有）
+// * H1透明度弹道 - 预推演（私有）
 //==============================
 Drill_COBa_Manager.drill_COBa_preBallisticsOpacity_Private = function( obj_data, obj_index, orgOpacity ){
 	this.drill_COBa_preBallisticsCommon( obj_data, obj_index, orgOpacity );		//（按一维弹道规则推演）
@@ -1946,10 +1996,10 @@ Drill_COBa_Manager.drill_COBa_preBallisticsOpacity_Private = function( obj_data,
 }
 
 //=============================================================================
-// * H弹道应用（一维） - 缩放X弹道
+// * H一维弹道应用 - H2缩放X弹道
 //=============================================================================
 //==============================
-// * 缩放X弹道 - 初始化数据 默认值（私有）
+// * H2缩放X弹道 - 初始化数据 默认值（私有）
 //			
 //			说明：	弹道 参数名称 有交叉，但不影响整体使用。正常存储/处理即可。
 //==============================
@@ -2002,7 +2052,7 @@ Drill_COBa_Manager.drill_COBa_setBallisticsScaleX_Private = function( data ){
 	return this.drill_COBa_setBallisticsCommon( result );	
 }
 //==============================
-// * 缩放X弹道 - 预推演（私有）
+// * H2缩放X弹道 - 预推演（私有）
 //==============================
 Drill_COBa_Manager.drill_COBa_preBallisticsScaleX_Private = function( obj_data, obj_index, orgScaleX ){
 	this.drill_COBa_preBallisticsCommon( obj_data, obj_index, orgScaleX );		//（按一维弹道规则推演）
@@ -2013,10 +2063,10 @@ Drill_COBa_Manager.drill_COBa_preBallisticsScaleX_Private = function( obj_data, 
 }
 
 //=============================================================================
-// * H弹道应用（一维） - 缩放Y弹道
+// * H一维弹道应用 - H3缩放Y弹道
 //=============================================================================
 //==============================
-// * 缩放Y弹道 - 初始化数据 默认值（私有）
+// * H3缩放Y弹道 - 初始化数据 默认值（私有）
 //			
 //			说明：	弹道 参数名称 有交叉，但不影响整体使用。正常存储/处理即可。
 //==============================
@@ -2069,7 +2119,7 @@ Drill_COBa_Manager.drill_COBa_setBallisticsScaleY_Private = function( data ){
 	return this.drill_COBa_setBallisticsCommon( result );	
 }
 //==============================
-// * 缩放Y弹道 - 预推演（私有）
+// * H3缩放Y弹道 - 预推演（私有）
 //==============================
 Drill_COBa_Manager.drill_COBa_preBallisticsScaleY_Private = function( obj_data, obj_index, orgScaleY ){
 	this.drill_COBa_preBallisticsCommon( obj_data, obj_index, orgScaleY );		//（按一维弹道规则推演）
@@ -2080,10 +2130,10 @@ Drill_COBa_Manager.drill_COBa_preBallisticsScaleY_Private = function( obj_data, 
 }
 
 //=============================================================================
-// * H弹道应用（一维） - 旋转角弹道
+// * H一维弹道应用 - H4旋转角弹道
 //=============================================================================
 //==============================
-// * 旋转角弹道 - 初始化数据 默认值（私有）
+// * H4旋转角弹道 - 初始化数据 默认值（私有）
 //			
 //			说明：	弹道 参数名称 有交叉，但不影响整体使用。正常存储/处理即可。
 //==============================
@@ -2136,7 +2186,7 @@ Drill_COBa_Manager.drill_COBa_setBallisticsRotate_Private = function( data ){
 	return this.drill_COBa_setBallisticsCommon( result );	
 }
 //==============================
-// * 旋转角弹道 - 预推演（私有）
+// * H4旋转角弹道 - 预推演（私有）
 //==============================
 Drill_COBa_Manager.drill_COBa_preBallisticsRotate_Private = function( obj_data, obj_index, orgRotate ){
 	this.drill_COBa_preBallisticsCommon( obj_data, obj_index, orgRotate );		//（按一维弹道规则推演）
@@ -2149,10 +2199,10 @@ Drill_COBa_Manager.drill_COBa_preBallisticsRotate_Private = function( obj_data, 
 
 
 //=============================================================================
-// * I弹道应用（二维） - 移动弹道
+// * I二维弹道应用 - I1移动弹道
 //=============================================================================
 //==============================
-// * 移动弹道 - 初始化数据 默认值（私有）
+// * I1移动弹道 - 初始化数据 默认值（私有）
 //			
 //			说明：	弹道 参数名称 有交叉，但不影响整体使用。正常存储/处理即可。
 //==============================
@@ -2165,7 +2215,7 @@ Drill_COBa_Manager.drill_COBa_setBallisticsMove_Private = function( data ){
 	result['movementDelay'] = data['movementDelay'] || 0;           				//移动 - 开始前延迟时间
 	result['movementEndDelay'] = data['movementEndDelay'] || 0;     				//移动 - 到终点后延迟时间
 	result['movementOrderDelay'] = data['movementOrderDelay'] || 0;					//移动 - ID依次延迟时间
-	result['movementMode'] = data['movementMode'] || "极坐标模式";  				//移动 - 透明度模式（时间公式模式/时间锚点模式/目标值模式）
+	result['movementMode'] = data['movementMode'] || "极坐标模式";  				//移动 - 移动模式
 	
 	//   ■ 极坐标（polar）		
 	if( result['movementMode'] == "极坐标模式" ){	//（这样写是为了减少参数数量，便于存储）
@@ -2277,7 +2327,7 @@ Drill_COBa_Manager.drill_COBa_setBallisticsMove_Private = function( data ){
 	return this.drill_COBa_setBallisticsPlanimetry( result );
 }
 //==============================
-// * 移动弹道 - 预推演（私有）
+// * I1移动弹道 - 预推演（私有）
 //==============================
 Drill_COBa_Manager.drill_COBa_preBallisticsMove_Private = function( obj_data, obj_index, orgX, orgY ){
 	this.drill_COBa_preBallisticsPlanimetry( obj_data, obj_index, orgX, orgY );		//（按一维弹道规则推演）
@@ -2285,4 +2335,256 @@ Drill_COBa_Manager.drill_COBa_preBallisticsMove_Private = function( obj_data, ob
 	// > 指针结果交换（不需要交换）
 	//obj_data['_drill_COBa_x'];
 	//obj_data['_drill_COBa_y'];
+}
+
+
+
+//=============================================================================
+// ** 弹道扩展工具【Drill_COBa_ExtendTool】
+// **			
+// **		索引：	Drill_COBa_ExtendTool
+// **		来源：	独立数据
+// **		实例：	> 静态类，无实例对象
+// **		应用：	> 子插件中搜索 索引即可找到。
+// **			
+// **		作用域：	地图界面、战斗界面、菜单界面
+// **		主功能：	> 定义一个静态类，用于弹道的纯数学计算。
+// **					> 具体功能见 "1.系统 > 关于弹道.docx"。
+// **		子功能：	->A变化叠加器
+// **						->一维弹道
+// **							->控制器 设置目标
+// **							->控制器 帧刷新
+// **							->贴图 帧刷新
+// **						->二维弹道
+// **							->控制器 设置目标
+// **							->控制器 帧刷新
+// **							->贴图 帧刷新
+// **				
+// **		说明：	> 弹道管理器中不存储任何参数，如果需要存储，则执行 初始化、预推演 时提前取出。
+//=============================================================================
+//==============================
+// * 弹道扩展工具 - 定义
+//==============================
+function Drill_COBa_ExtendTool() {
+    throw new Error("弹道扩展工具 Drill_COBa_ExtendTool 是一个静态类，不需要实例化。");
+}
+
+//=============================================================================
+// * A变化叠加器
+//
+//			说明：	> 通过 调用 设置目标，可以快速定义一个弹道，并执行弹道的变化。
+//					  定义的弹道能被一并保存，没有被定义时，不消耗存储和性能。
+//					> 弹道的变化只能为 "目标值模式"（一维） 或 "两点式"（二维）。
+//
+//					> 此工具包含三个函数：
+//							设置目标、控制器帧刷新、贴图帧刷新。
+//					  需要绑定在 控制器-贴图 的结构中。如果不是此结构，则用不了此功能。
+//					> 注意，贴图会改变控制器中的数据，因此只能在 控制器-贴图 一对一的情况下使用。
+//					
+//					> 原理上类似于在 控制器-贴图 中套一个更小的弹道控制器 来获取数据。
+//					> 贴图帧刷新 完全可以避免掉，但是考虑到性能和内存，这里还是把计算转移到贴图中吧。
+//					> 用法可见 地图魔法圈 插件的 D指令叠加变化 子功能。
+//=============================================================================
+//==============================
+// * A变化叠加器（一维弹道） - 控制器 - 设置目标（开放函数）
+//
+//			参数：	> controller 对象    （控制器对象）
+//					> CDataName 字符串   （控制器中的变量名，变量初始定义必须为null）
+//					> org_value 数字     （初始值）
+//					> change_type 字符串 （目标值变化类型）
+//					> tar_value 数字     （目标值）
+//					> tar_time 数字      （变化时长）
+//			返回：	> 无
+//
+//			说明：	> 调用时要给定 初始值，虽然初始值只在第一次调用指令时有效，但必须要给。
+//==============================
+Drill_COBa_ExtendTool.drill_COBa_Common_controller_setTarget = function( controller, CDataName, org_value, change_type, tar_value, tar_time ){
+	
+	// > 第一次调用时，创建
+	if( controller[CDataName] == undefined ){
+		var c_data = {};
+		c_data['cur_value'] = org_value;
+		controller[CDataName] = c_data;
+	}
+	
+	// > 刷新目标与弹道
+	var c_data = controller[CDataName];
+	c_data['serial'] = new Date().getTime() + Math.random();
+	c_data['cur_time'] = 0;
+	c_data['change_type'] = change_type;
+	c_data['tar_value'] = tar_value;
+	c_data['tar_time'] = tar_time;
+	controller[CDataName] = c_data;
+}
+//==============================
+// * A变化叠加器（一维弹道） - 控制器 - 帧刷新（开放函数）
+//
+//			参数：	> controller 对象  （控制器对象）
+//					> CDataName 字符串 （控制器中的变量名）
+//			返回：	> 无
+//==============================
+Drill_COBa_ExtendTool.drill_COBa_Common_controller_update = function( controller, CDataName ){
+	if( controller[CDataName] == undefined ){ return; }
+	
+	controller[CDataName]['cur_time'] += 1;
+}
+//==============================
+// * A变化叠加器（一维弹道） - 贴图 - 帧刷新（开放函数）
+//
+//			参数：	> sprite 对象      （贴图对象）
+//					> SDataName 字符串 （贴图中的变量名，变量初始定义必须为null）
+//					> controller 对象  （控制器对象）
+//					> CDataName 字符串 （控制器中的变量名）
+//			返回：	> controller[CDataName]['cur_value'] 数字（当前值）
+//
+//			说明：	> 注意，此函数处于帧刷新中，通过 变量对象 的有无来进行 初始化、弹道推演、帧刷新赋值 。
+//==============================
+Drill_COBa_ExtendTool.drill_COBa_Common_sprite_update = function( sprite, SDataName, controller, CDataName ){
+	if( controller[CDataName] == undefined ){ return; }
+	
+	// > 一维弹道 - 初始化
+	var c_data = controller[CDataName];
+	var s_data = sprite[SDataName];
+	if( s_data == undefined ){
+		s_data = {};
+		s_data['serial'] = null;
+		s_data['value_seq'] = null;
+		sprite[SDataName] = s_data;
+	}
+	
+	// > 一维弹道 - 弹道推演
+	//			（在贴图中预推演，控制器只存 计时器 ）
+	if( s_data['serial'] != c_data['serial'] ){
+		s_data['serial'] =  c_data['serial'];
+		
+		// > 重建弹道
+		var org_value = c_data['cur_value'];
+		var b_data = {};
+		b_data['commonNum'] = 1;
+		b_data['commonTime'] = c_data['tar_time'];
+		b_data['commonMode'] = "目标值模式";
+		b_data['targetType'] = c_data['change_type'];
+		b_data['targetDifference'] = c_data['tar_value'] - org_value;
+		Drill_COBa_Manager.drill_COBa_setBallisticsCommon( b_data );
+		Drill_COBa_Manager.drill_COBa_preBallisticsCommon( sprite, 0, org_value );
+		s_data['value_seq'] = sprite._drill_COBa_common;
+		sprite._drill_COBa_common = null;
+	}
+	
+	// > 一维弹道 - 帧刷新赋值
+	if( s_data['value_seq'] != undefined ){
+		var cur_time = c_data['cur_time'];
+		if( cur_time >= s_data['value_seq'].length ){
+			cur_time =  s_data['value_seq'].length -1;
+		}
+		c_data['cur_value'] = s_data['value_seq'][cur_time];
+	}
+}
+
+
+//==============================
+// * A变化叠加器（二维弹道） - 控制器 - 设置目标（开放函数）
+//
+//			参数：	> controller 对象    （控制器对象）
+//					> CDataName 字符串   （控制器中的变量名，变量初始定义必须为null）
+//					> org_valueA 数字    （初始值）
+//					> org_valueB 数字    （初始值）
+//					> change_type 字符串 （两点式变化类型）
+//					> tar_valueA 数字    （目标值）
+//					> tar_valueB 数字    （目标值）
+//					> tar_time 数字      （变化时长）
+//			返回：	> 无
+//
+//			说明：	> 调用时要给定 初始值，虽然初始值只在第一次调用指令时有效，但必须要给。
+//==============================
+Drill_COBa_ExtendTool.drill_COBa_Planimetry_controller_setTarget = function( controller, CDataName, org_valueA, org_valueB, change_type, tar_valueA, tar_valueB, tar_time ){
+	
+	// > 第一次调用时，创建
+	if( controller[CDataName] == undefined ){
+		var c_data = {};
+		c_data['cur_valueA'] = org_valueA;
+		c_data['cur_valueB'] = org_valueB;
+		controller[CDataName] = c_data;
+	}
+	
+	// > 刷新目标与弹道
+	var c_data = controller[CDataName];
+	c_data['serial'] = new Date().getTime() + Math.random();
+	c_data['cur_time'] = 0;
+	c_data['change_type'] = change_type;
+	c_data['tar_valueA'] = tar_valueA;
+	c_data['tar_valueB'] = tar_valueB;
+	c_data['tar_time'] = tar_time;
+	controller[CDataName] = c_data;
+}
+//==============================
+// * A变化叠加器（二维弹道） - 控制器 - 帧刷新（开放函数）
+//
+//			参数：	> controller 对象  （控制器对象）
+//					> CDataName 字符串 （控制器中的变量名）
+//			返回：	> 无
+//==============================
+Drill_COBa_ExtendTool.drill_COBa_Planimetry_controller_update = function( controller, CDataName ){
+	if( controller[CDataName] == undefined ){ return; }
+	
+	controller[CDataName]['cur_time'] += 1;
+}
+//==============================
+// * A变化叠加器（二维弹道） - 帧刷新 - 二维弹道（开放函数）
+//
+//			参数：	> sprite 对象      （贴图对象）
+//					> SDataName 字符串 （贴图中的变量名，变量初始定义必须为null）
+//					> controller 对象  （控制器对象）
+//					> CDataName 字符串 （控制器中的变量名）
+//			返回：	> controller[CDataName]['cur_valueA'] 数字（当前值）
+//                  > controller[CDataName]['cur_valueB'] 数字（当前值）
+//               	
+//			说明：	> 注意，此函数处于帧刷新中，通过数据对象的有无来进行 初始化、弹道推演、帧刷新赋值 。
+//==============================
+Drill_COBa_ExtendTool.drill_COBa_Planimetry_sprite_update = function( sprite, SDataName, controller, CDataName ){
+	if( controller[CDataName] == undefined ){ return; }
+	
+	// > 二维弹道 - 初始化
+	var c_data = controller[CDataName];
+	var s_data = sprite[SDataName];
+	if( s_data == undefined ){
+		s_data = {};
+		s_data['serial'] = null;
+		s_data['valueA_seq'] = null;
+		s_data['valueB_seq'] = null;
+		sprite[SDataName] = s_data;
+	}
+	
+	// > 二维弹道 - 弹道推演
+	//			（在贴图中预推演，控制器只存 计时器 ）
+	if( s_data['serial'] != c_data['serial'] ){
+		s_data['serial'] =  c_data['serial'];
+		
+		// > 重建弹道
+		var org_valueA = c_data['cur_valueA'];
+		var org_valueB = c_data['cur_valueB'];
+		var b_data = {};
+		b_data['planimetryNum'] = 1;
+		b_data['planimetryTime'] = c_data['tar_time'];
+		b_data['planimetryMode'] = "两点式";
+		b_data['twoPointType'] = c_data['change_type'];
+		b_data['twoPointDifferenceX'] = c_data['tar_valueA'] - org_valueA;
+		b_data['twoPointDifferenceY'] = c_data['tar_valueB'] - org_valueB;
+		Drill_COBa_Manager.drill_COBa_setBallisticsPlanimetry( b_data );
+		Drill_COBa_Manager.drill_COBa_preBallisticsPlanimetry( sprite, 0, org_valueA, org_valueB );
+		s_data['valueA_seq'] = sprite._drill_COBa_x;
+		s_data['valueB_seq'] = sprite._drill_COBa_y;
+		sprite._drill_COBa_x = null;
+		sprite._drill_COBa_y = null;
+	}
+	
+	// > 二维弹道 - 帧刷新赋值
+	if( s_data['valueA_seq'] != undefined ){
+		var cur_time = c_data['cur_time'];
+		if( cur_time >= s_data['valueA_seq'].length ){
+			cur_time =  s_data['valueA_seq'].length -1;
+		}
+		c_data['cur_valueA'] = s_data['valueA_seq'][cur_time];
+		c_data['cur_valueB'] = s_data['valueB_seq'][cur_time];
+	}
 }

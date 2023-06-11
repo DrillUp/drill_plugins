@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        行走图 - 事件漂浮文字自动显现[扩展]
+ * @plugindesc [v1.2]        行走图 - 事件漂浮文字自动显现[扩展]
  * @author Drill_up
  * 
  * 
@@ -137,6 +137,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 优化了旧存档的识别与兼容。
+ * [v1.2]
+ * 整理了内部模块结构。
  * 
  * 
  *
@@ -232,12 +234,19 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			事件漂浮文字自动显现：
-//				->绑定控制器数据
-//				->对象透明度控制
+//			->☆提示信息
+//			->☆变量获取
+//			->☆插件指令
+//			->☆存储数据
+//			->☆事件注释
+//
+//			->☆事件漂浮文字 控制器（继承）
+//			->☆事件漂浮文字 贴图（继承）
+//				->透明度控制
 //					> 漂浮文字
 //					> 批注线
 //					> 背景
+//
 //
 //		★家谱：
 //			无
@@ -256,7 +265,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -287,7 +296,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_X_EventTextTransparent = true;
@@ -314,7 +323,7 @@ if( Imported.Drill_EventText ){
 	
 	
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _drill_XETT_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
@@ -457,7 +466,7 @@ Game_Map.prototype.drill_XETT_isEventExist = function( e_id ){
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -539,17 +548,20 @@ Game_System.prototype.drill_XETL_checkSysData_Private = function() {
 
 
 //=============================================================================
-// ** 事件注释初始化
+// ** ☆事件注释
 //=============================================================================
 //==============================
-// * 事件 - 注释初始化
+// * 事件注释 - 初始化绑定
 //==============================
 var _drill_XETT_c_setupPageSettings = Game_Event.prototype.setupPageSettings;
 Game_Event.prototype.setupPageSettings = function() {
 	_drill_XETT_c_setupPageSettings.call(this);
-	this.drill_XETT_refreshBackground();
+	this.drill_XETT_setupPageSettings();
 }
-Game_Event.prototype.drill_XETT_refreshBackground = function() {
+//==============================
+// * 事件注释 - 初始化
+//==============================
+Game_Event.prototype.drill_XETT_setupPageSettings = function() {
 	
 	// > 默认情况下，关闭自动显现
 	if( this._drill_ET_controller != null ){
@@ -632,18 +644,19 @@ Game_Event.prototype.drill_XETT_refreshBackground = function() {
     }
 }
 
+
 //=============================================================================
-// ** 漂浮文字控制器（继承）
+// ** ☆事件漂浮文字 控制器（继承）
 //=============================================================================
 //==============================
-// * 控制器 - 初始化（继承）
+// * 控制器 - 初始化数据（继承）
 //==============================
-var _drill_XETT_ET_c_initData = Drill_ET_Controller.prototype.drill_initData;
-Drill_ET_Controller.prototype.drill_initData = function(){
+var _drill_XETT_ET_c_initData = Drill_ET_Controller.prototype.drill_controller_initData;
+Drill_ET_Controller.prototype.drill_controller_initData = function(){
 	_drill_XETT_ET_c_initData.call(this);
 	var data = this._drill_data;
 	
-	// > 默认值
+	// > 自动显现
 	if( data['animEnabled'] == undefined ){ data['animEnabled'] = false };												//动画开关
 	if( data['animForceActived'] == undefined ){ data['animForceActived'] = false };									//强制显现
 	if( data['animText_time'] == undefined ){ data['animText_time'] = DrillUp.g_XETL_text_time };						//文字 - 动画时长
@@ -656,21 +669,21 @@ Drill_ET_Controller.prototype.drill_initData = function(){
 	if( data['animBackground_mode'] == undefined ){ data['animBackground_mode'] = DrillUp.g_XETL_background_mode };		//背景 - 动画模式
 }
 //==============================
-// * 控制器 - 设置可用（接口）
+// * 控制器 - 自动显现 - 设置可用（开放函数）
 //==============================
 Drill_ET_Controller.prototype.drill_XETT_setEnabled = function( enable ){
 	var data = this._drill_data;
 	data['animEnabled'] = enable;
 }
 //==============================
-// * 控制器 - 设置强制显现（接口）
+// * 控制器 - 自动显现 - 设置强制显现（开放函数）
 //==============================
 Drill_ET_Controller.prototype.drill_XETT_setForceActived = function( enable ){
 	var data = this._drill_data;
 	data['animForceActived'] = enable;
 }
 //==============================
-// * 控制器 - 设置漂浮文字 时间（接口）
+// * 控制器 - 自动显现 - 设置漂浮文字 时间（开放函数）
 //==============================
 Drill_ET_Controller.prototype.drill_XETT_setTextAnimTime = function( time, delay ){
 	var data = this._drill_data;
@@ -678,7 +691,7 @@ Drill_ET_Controller.prototype.drill_XETT_setTextAnimTime = function( time, delay
 	data['animText_delay'] = delay;
 }
 //==============================
-// * 控制器 - 设置批注线 时间（接口）
+// * 控制器 - 自动显现 - 设置批注线 时间（开放函数）
 //==============================
 Drill_ET_Controller.prototype.drill_XETT_setLineAnimTime = function( time, delay ){
 	var data = this._drill_data;
@@ -686,14 +699,14 @@ Drill_ET_Controller.prototype.drill_XETT_setLineAnimTime = function( time, delay
 	data['animLine_delay'] = delay;
 }
 //==============================
-// * 控制器 - 设置批注线 模式（接口）
+// * 控制器 - 自动显现 - 设置批注线 模式（开放函数）
 //==============================
 Drill_ET_Controller.prototype.drill_XETT_setLineAnimMode = function( mode ){
 	var data = this._drill_data;
 	data['animLine_mode'] = mode;
 }
 //==============================
-// * 控制器 - 设置背景 时间（接口）
+// * 控制器 - 自动显现 - 设置背景 时间（开放函数）
 //==============================
 Drill_ET_Controller.prototype.drill_XETT_setBackgroundAnimTime = function( time, delay ){
 	var data = this._drill_data;
@@ -701,14 +714,14 @@ Drill_ET_Controller.prototype.drill_XETT_setBackgroundAnimTime = function( time,
 	data['animBackground_delay'] = delay;
 }
 //==============================
-// * 控制器 - 设置背景 模式（接口）
+// * 控制器 - 自动显现 - 设置背景 模式（开放函数）
 //==============================
 Drill_ET_Controller.prototype.drill_XETT_setBackgroundAnimMode = function( mode ){
 	var data = this._drill_data;
 	data['animBackground_mode'] = mode;
 }
 //==============================
-// * 控制器 - 获取最大时长（接口）
+// * 控制器 - 自动显现 - 获取最大时长（开放函数）
 //==============================
 Drill_ET_Controller.prototype.drill_XETT_getMaxTime = function(){
 	var data = this._drill_data;
@@ -722,32 +735,34 @@ Drill_ET_Controller.prototype.drill_XETT_getMaxTime = function(){
 
 
 //=============================================================================
-// ** 漂浮文字贴图（继承）
+// ** ☆事件漂浮文字 贴图（继承）
 //=============================================================================
 //==============================
-// * 文字贴图 - 初始化
+// * 文字贴图 - 初始化子功能（继承）
 //==============================
-var _drill_XETT_ET_sp_initialize = Drill_ET_WindowSprite.prototype.initialize;
-Drill_ET_WindowSprite.prototype.initialize = function( obj_event ){
-    _drill_XETT_ET_sp_initialize.call( this, obj_event );
+var _drill_XETT_ET_sp_initChild = Drill_ET_WindowSprite.prototype.drill_sprite_initChild;
+Drill_ET_WindowSprite.prototype.drill_sprite_initChild = function(){
+    _drill_XETT_ET_sp_initChild.call( this );
 	
 	this._drill_XETT_curTime = 0;
 	this._drill_XETT_maxTime = 0;
 }
 //==============================
-// * 文字贴图 - 帧刷新
+// * 文字贴图 - 帧刷新（继承）
 //==============================
 var _drill_XETT_ET_sp_update = Drill_ET_WindowSprite.prototype.update;
 Drill_ET_WindowSprite.prototype.update = function() {
+	if( this.drill_sprite_isReady() == false ){ return; }
+	if( this.drill_sprite_isOptimizationPassed() == false ){ return; }
 	_drill_XETT_ET_sp_update.call(this);
-	if( this._drill_controller == undefined ){ return; }
+	
 	this.drill_XETT_updateTime();			//帧刷新 - 时间流逝
 	this.drill_XETT_updateChange();			//帧刷新 - 变化过程
 }
 //==============================
-// * 帧刷新 - 时间流逝
+// * 文字贴图 - 帧刷新 - 时间流逝
 //
-//			说明：	此流逝在贴图中进行，与控制器无关。
+//			说明：	> 此流逝在贴图中进行，与控制器无关。
 //==============================
 Drill_ET_WindowSprite.prototype.drill_XETT_updateTime = function() {
 	var d_data = this._drill_controller._drill_data;
@@ -776,7 +791,7 @@ Drill_ET_WindowSprite.prototype.drill_XETT_updateTime = function() {
 	}
 }
 //==============================
-// * 帧刷新 - 变化过程
+// * 文字贴图 - 帧刷新 - 变化过程
 //==============================
 Drill_ET_WindowSprite.prototype.drill_XETT_updateChange = function() {
 	var d_data = this._drill_controller._drill_data;
@@ -785,7 +800,7 @@ Drill_ET_WindowSprite.prototype.drill_XETT_updateChange = function() {
 	// > 文本域 透明度
 	var time = this._drill_XETT_curTime - d_data['animText_delay'];
 	if( time < 0 ){ time = 0; }
-	this.contentsOpacity = this._drill_controller._drill_textOpacity * time / d_data['animText_time'];
+	this.contentsOpacity = this._drill_controller._drill_textOpacity * time / d_data['animText_time'];	//（文本域 透明度）
 	
 	// > 背景容器层 透明度（不变）
 	//this.opacity = this._drill_controller._drill_frameOpacity;

@@ -655,6 +655,107 @@ Bitmap.prototype._drawTextOutline = function( text, tx, ty, maxWidth ){
 	_drill_DCOB__drawTextOutline.call( this, text, tx, ty, maxWidth );
 }
 
+/*
+//=============================================================================
+// ** ☆颜色文本绘制（边框色）
+//
+//			说明：	> 在文本绘制时，解析高级颜色并使用渐变。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+var _drill_DCOB_bitmap_drawTextOutline = Bitmap.prototype._drawTextOutline;
+Bitmap.prototype._drawTextOutline = function( text, tx, ty, maxWidth ){
+	
+	//// > 高级颜色（渐变色）
+	//if( typeof(this.outlineColor) == "string" && 
+	//	this.outlineColor != "" && 
+	//	this.outlineColor.indexOf("drill__") != -1 ){
+		
+		// > 渐变数据
+		//var color_strList = this.outlineColor.substring(7).split('__');
+		var color_strList = [ 270, 0, "#ff0000", 0.2, "#00ff00", 0.5, "#ffff00", 1.0, "#0000ff" ]
+		
+		var width = this.measureTextWidth( text );		//宽度
+		var height = this.fontSize *4/5 +1;				//高度（实际文字比字体大小要矮一点）
+		
+		var angle = Number(color_strList[0]);			//角度
+		if( angle >= 360 ){ angle = angle % 360; }		//
+		var radian = angle / 180 * Math.PI;				//弧度
+		
+		
+		// > 长方形与渐变斜线 求相交的两点
+		var midPoint = new Point( tx+width/2, ty-height/2 );
+		var angle_lim = Math.atan(width/height);
+		//  90度
+		if( radian === Math.PI/2 ){				
+			var x_0 = midPoint.x + width/2;
+			var y_0 = midPoint.y;
+			var x_1 = midPoint.x - width/2;
+			var y_1 = midPoint.y;
+		//  270度
+		}else if( radian === Math.PI*3/2 ){
+			var x_0 = midPoint.x - width/2;
+			var y_0 = midPoint.y;
+			var x_1 = midPoint.x + width/2;
+			var y_1 = midPoint.y;
+		}else if( radian <= angle_lim || radian > 2*Math.PI - angle_lim ){
+			var x_0 = midPoint.x + height/2 * Math.tan(radian);
+			var y_0 = midPoint.y - height/2;
+			var x_1 = midPoint.x - height/2 * Math.tan(radian);
+			var y_1 = midPoint.y + height/2;
+		}else if( radian > angle_lim && radian <= Math.PI - angle_lim ){
+			var x_0 = midPoint.x + width/2;
+			var y_0 = midPoint.y - width/(2 * Math.tan(radian));
+			var x_1 = midPoint.x - width/2;
+			var y_1 = midPoint.y + width/(2 * Math.tan(radian));
+		}else if( radian > Math.PI - angle_lim && radian <= Math.PI + angle_lim ){
+			var x_0 = midPoint.x - height/2 * Math.tan(radian);
+			var y_0 = midPoint.y + height/2;
+			var x_1 = midPoint.x + height/2 * Math.tan(radian);
+			var y_1 = midPoint.y - height/2;
+		}else {
+			var x_0 = midPoint.x - width/2;
+			var y_0 = midPoint.y + width/(2 * Math.tan(radian));
+			var x_1 = midPoint.x + width/2;
+			var y_1 = midPoint.y - width/(2 * Math.tan(radian));
+		}
+		
+		//// > DEBUG - 显示矩阵和点
+		//this.fillRect( tx, ty-height, width, height, "#00ff00" );
+		//this.drawCircle( x_0, y_0, 3, "#ffff00" );
+		//this.drawCircle( x_1, y_1, 3, "#ffff00" );
+		
+		// > 特殊偏移设置
+		//		（可能是nwjs的bug，只要是在Bitmap中设置渐变绘制，都会出现此偏移问题）
+		if( Utils.isNwjs() && this['drill_elements_drawText'] == true ){
+			y_0 -= height ;
+			y_1 -= height ;
+		}
+		
+		// > 绘制渐变文字
+		var context = this._context;
+		var grad = context.createLinearGradient( x_0,y_0, x_1,y_1 );
+		for(var i = 1; i < color_strList.length; i += 2 ){
+			var pos = String( color_strList[i] );
+			var color = String( color_strList[i+1] );
+			if( pos == "" ){ break; }
+			if( color == "" ){ break; }
+			grad.addColorStop( pos, color );
+		}
+		context.save();
+		context.strokeStyle = grad;
+		context.lineWidth = 3;
+		context.lineJoin = 'round';
+		context.strokeText(text, tx, ty, maxWidth);
+		context.restore();
+		this._setDirty();
+		
+		
+	//// > 普通颜色
+	//}else{
+	//	_drill_DCOB_bitmap_drawTextOutline.call(this,text, tx, ty, maxWidth);
+	//}
+};
+*/
 
 //=============================================================================
 // * <<<<基于插件检测<<<<

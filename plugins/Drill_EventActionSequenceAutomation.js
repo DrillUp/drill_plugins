@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        行走图 - GIF动画序列全自动播放
+ * @plugindesc [v1.3]        行走图 - GIF动画序列全自动播放
  * @author Drill_up
  * 
  * 
@@ -369,7 +369,8 @@ Game_CharacterBase.prototype.update = function(){
 	
 	
 	// > 注解 - 初始化
-	var cur_annotation = "";
+	var cur_annotation = "";		//当前注解
+	var cur_bakAnnotation = "";		//备选注解
 	
 	
 	// > 注解 - 第一层
@@ -387,6 +388,7 @@ Game_CharacterBase.prototype.update = function(){
 	}else if( this.isMoving() ){
 		if( this.isDashing() ){
 			cur_annotation = "@行走图-奔跑";
+			cur_bakAnnotation = "@行走图-移动";
 		}else{
 			cur_annotation = "@行走图-移动";
 		}
@@ -417,7 +419,10 @@ Game_CharacterBase.prototype.update = function(){
 	
 	
 	// > 播放状态元/状态节点 根据标签
-	this.drill_EASA_setAnnotation( cur_annotation );
+	var success = this.drill_EASA_setAnnotation( cur_annotation );
+	if( success == false ){
+		this.drill_EASA_setAnnotation( cur_bakAnnotation );	//（第一次的不成功，则用备选的）
+	}
 }
 //==============================
 // * 优化策略 - 判断贴图是否在镜头范围内
@@ -469,10 +474,11 @@ Game_Character.prototype.drill_EASe_setSimpleStateNode = function( state_nameLis
 //==============================
 // * 动画序列 - 播放状态元/状态节点 根据标签（继承）
 //
-//			说明：	状态元/状态节点名称中含有特定注解的，会被捕获。
+//			说明：	> 状态元/状态节点名称中含有特定注解的，会被捕获。
+//					> 如果捕获失败，返回false。
 //==============================
 Game_Character.prototype.drill_EASA_setAnnotation = function( annotation ){
-	this._Drill_EASe_controller.drill_COAS_setAnnotation( annotation );
+	return this._Drill_EASe_controller.drill_COAS_setAnnotation( annotation );
 }
 
 

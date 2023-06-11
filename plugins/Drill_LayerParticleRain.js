@@ -42,12 +42,12 @@
  *   (2.留意游戏编辑器下方的状态栏，地图id、坐标、缩放比例、事件id
  *      都有信息显示。
  * 地图层级：
- *   (1.你可以将数字雨放置在地图的五种层级中，分别为：
+ *   (1.你可以将贴图放置在地图的五种层级中，分别为：
  *      下层、中层、上层、图片层、最顶层
  *   (2.地图层级之间的关系为：
  *      地图远景 《 下层 《 图块层 《 中层 《 事件/玩家层 《 上层
  *      《 图片对象层 《 图片层 《 对话框集合 《 最顶层
- *   (3.最顶层的数字雨，可以把地图界面最高层的对话框、窗口也给挡住。
+ *   (3.处于最顶层，可以把地图界面最高层的对话框、窗口也给挡住。
  *   (4.处于同一 地图层级 时，将根据 图片层级 再先后排序。
  *   (5.如果你设置了数字雨在 中层 ，你会发现数字雨可能会切割图块画的
  *      树木。这是因为树木图块上方能够挡住事件，而下方被事件遮挡。
@@ -1702,6 +1702,14 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
+//			->☆提示信息
+//			->☆变量获取
+//			->☆插件指令
+//			->☆存储数据
+//			->☆地图层级
+//			
+//			->…………
+//			
 //			多层地图数字雨：
 //				->基本属性
 //					->地图层级
@@ -1738,7 +1746,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -1755,7 +1763,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_LayerParticleRain = true;
@@ -1840,7 +1848,7 @@
 
 	
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _drill_LPR_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
@@ -1848,25 +1856,25 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	if( command === ">地图数字雨" ){ // >地图数字雨 : 数字雨[1] : 显示
 	
 		/*-----------------对象组获取------------------*/
-		var obj_id = null;
+		var obj_index = null;
 		if( args.length >= 2 ){
 			var temp1 = String(args[1]);
 			if( temp1.indexOf("数字雨[") != -1 ){
 				temp1 = temp1.replace("数字雨[","");
 				temp1 = temp1.replace("]","");
-				obj_id = Number(temp1);
+				obj_index = Number(temp1);
 			}
 			if( temp1.indexOf("数字雨变量[") != -1 ){
 				temp1 = temp1.replace("数字雨变量[","");
 				temp1 = temp1.replace("]","");
-				obj_id = $gameVariables.value(Number(temp1));
+				obj_index = $gameVariables.value(Number(temp1));
 			}
 		}
 			
 		/*-----------------执行指令------------------*/
-		if( obj_id != null ){
+		if( obj_index != null ){
 			var changing = {};
-			changing['id'] = obj_id;
+			changing['obj_index'] = obj_index;
 			changing['time'] = 0;
 			changing['destroy'] = false;
 			
@@ -1935,7 +1943,7 @@ Game_Interpreter.prototype.drill_LPR_getArgNumList = function( arg_str ){
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -2049,84 +2057,8 @@ Game_System.prototype.drill_LPR_checkSysData_Private = function() {
 };
 
 
-//=============================================================================
-// ** 地图
-//=============================================================================
-//==============================
-// ** 地图 - 初始化
-//==============================
-var _drill_LPR_setup = Game_Map.prototype.setup;
-Game_Map.prototype.setup = function( mapId ){
-	_drill_LPR_setup.call( this, mapId );
-	this.drill_LPR_initMapdata();
-}
-Game_Map.prototype.drill_LPR_initMapdata = function() {
-	
-	// > 刷新当前地图容器
-	for(var i = 0; i< DrillUp.g_LPR_layers.length ;i++){
-		var temp_data = DrillUp.g_LPR_layers[i];
-		if( temp_data == undefined ){
-			$gameSystem._drill_LPR_dataTank_curData[i] = null;
-			continue;
-		}
-		
-		// > 全地图数据时
-		if( temp_data['mapToAll'] == true ){
-			//（不刷新数据）
-			
-		// > 单地图数据时
-		}else if( temp_data['map'] == this._mapId ){
-			var data = JSON.parse(JSON.stringify( temp_data ));
-			$gameSystem._drill_LPR_dataTank_curData[i] = data;	//（重刷数据）
-			
-		// > 其它情况时
-		}else{
-			$gameSystem._drill_LPR_dataTank_curData[i] = null;	//（某地图不含此贴图配置，则直接置空）
-		}
-	}
-}
-// > 强制更新提示 锁
-DrillUp.g_LPa_alert = true;
-//==============================
-// * 玩家 - 帧刷新 镜头位置
-//
-//			说明：	注意，玩家update与地图update有时间差，且晚1帧，所以只能继承玩家的update。
-//==============================
-var _drill_LPR_player_update = Game_Player.prototype.update;
-Game_Player.prototype.update = function( sceneActive ){
-    _drill_LPR_player_update.call( this, sceneActive );
-	
-	// （移动时，像素会提前偏移1像素，可以确定不是 this._displayX 的问题，因为 x - floor(x) 的差值小于0.0001）
-	// 该问题已解决，刷新的时机早了，要等玩家updateScroll之后才刷。
-	
-	for(var i = 0; i< $gameSystem._drill_LPR_dataTank_curData.length ;i++){
-		var data = $gameSystem._drill_LPR_dataTank_curData[i];
-		if( data == undefined ){ continue; }
-		
-		// > 镜头基点
-		if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】循环积累值
-		
-			// > 强制更新提示
-			if( $gameSystem._drill_LCa_controller == undefined && DrillUp.g_LPa_alert == true ){ 
-				alert( DrillUp.drill_LPR_getPluginTip_NeedUpdate_Camera() );
-				DrillUp.g_LPa_alert = false;
-				return; 
-			}
-			
-			data['cameraXAcc'] = $gameSystem._drill_LCa_controller._drill_cameraX_offsetAcc * $gameMap.tileWidth();
-			data['cameraYAcc'] = $gameSystem._drill_LCa_controller._drill_cameraY_offsetAcc * $gameMap.tileHeight();
-			
-		// > 镜头基点
-		}else{
-			data['cameraXAcc'] = $gameMap.displayX() * $gameMap.tileWidth();
-			data['cameraYAcc'] = $gameMap.displayY() * $gameMap.tileHeight();
-		}
-	}
-};
-
-
 //#############################################################################
-// ** 【标准模块】地图层级
+// ** 【标准模块】地图层级 ☆地图层级
 //#############################################################################
 //##############################
 // * 地图层级 - 添加贴图到层级【标准函数】
@@ -2297,6 +2229,82 @@ Scene_Map.prototype.drill_LPR_layerCameraMoving_Private = function( xx, yy, laye
 	}
 	return {'x':xx, 'y':yy };
 }
+
+
+//=============================================================================
+// ** 地图
+//=============================================================================
+//==============================
+// ** 地图 - 初始化
+//==============================
+var _drill_LPR_setup = Game_Map.prototype.setup;
+Game_Map.prototype.setup = function( mapId ){
+	_drill_LPR_setup.call( this, mapId );
+	this.drill_LPR_initMapdata();
+}
+Game_Map.prototype.drill_LPR_initMapdata = function() {
+	
+	// > 刷新当前地图容器
+	for(var i = 0; i< DrillUp.g_LPR_layers.length ;i++){
+		var temp_data = DrillUp.g_LPR_layers[i];
+		if( temp_data == undefined ){
+			$gameSystem._drill_LPR_dataTank_curData[i] = null;
+			continue;
+		}
+		
+		// > 全地图数据时
+		if( temp_data['mapToAll'] == true ){
+			//（不刷新数据）
+			
+		// > 单地图数据时
+		}else if( temp_data['map'] == this._mapId ){
+			var data = JSON.parse(JSON.stringify( temp_data ));
+			$gameSystem._drill_LPR_dataTank_curData[i] = data;	//（重刷数据）
+			
+		// > 其它情况时
+		}else{
+			$gameSystem._drill_LPR_dataTank_curData[i] = null;	//（某地图不含此贴图配置，则直接置空）
+		}
+	}
+}
+// > 强制更新提示 锁
+DrillUp.g_LPa_alert = true;
+//==============================
+// * 玩家 - 帧刷新 镜头位置
+//
+//			说明：	注意，玩家update与地图update有时间差，且晚1帧，所以只能继承玩家的update。
+//==============================
+var _drill_LPR_player_update = Game_Player.prototype.update;
+Game_Player.prototype.update = function( sceneActive ){
+    _drill_LPR_player_update.call( this, sceneActive );
+	
+	// （移动时，像素会提前偏移1像素，可以确定不是 this._displayX 的问题，因为 x - floor(x) 的差值小于0.0001）
+	// 该问题已解决，刷新的时机早了，要等玩家updateScroll之后才刷。
+	
+	for(var i = 0; i< $gameSystem._drill_LPR_dataTank_curData.length ;i++){
+		var data = $gameSystem._drill_LPR_dataTank_curData[i];
+		if( data == undefined ){ continue; }
+		
+		// > 镜头基点
+		if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】循环积累值
+		
+			// > 强制更新提示
+			if( $gameSystem._drill_LCa_controller == undefined && DrillUp.g_LPa_alert == true ){ 
+				alert( DrillUp.drill_LPR_getPluginTip_NeedUpdate_Camera() );
+				DrillUp.g_LPa_alert = false;
+				return; 
+			}
+			
+			data['cameraXAcc'] = $gameSystem._drill_LCa_controller._drill_cameraX_offsetAcc * $gameMap.tileWidth();
+			data['cameraYAcc'] = $gameSystem._drill_LCa_controller._drill_cameraY_offsetAcc * $gameMap.tileHeight();
+			
+		// > 镜头基点
+		}else{
+			data['cameraXAcc'] = $gameMap.displayX() * $gameMap.tileWidth();
+			data['cameraYAcc'] = $gameMap.displayY() * $gameMap.tileHeight();
+		}
+	}
+};
 
 
 //=============================================================================
@@ -2472,7 +2480,7 @@ Scene_Map.prototype.drill_LPR_updateChange = function() {
 	
 	for(var j=0; j< change_tank.length; j++){
 		var temp_change = change_tank[j];
-		var temp_data = data_tank[ temp_change.id -1 ];
+		var temp_data = data_tank[ temp_change['obj_index'] -1 ];
 		if( temp_data == undefined ){ continue; }
 		if( temp_change.destroy == false ){
 			temp_change.time += 1;

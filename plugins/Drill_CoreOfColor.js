@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.6]        窗口字符 - 颜色核心
+ * @plugindesc [v1.7]        窗口字符 - 颜色核心
  * @author Drill_up
  * 
  * @Drill_LE_editForbidden
@@ -148,6 +148,8 @@
  * 添加了 颜色暂存、普通颜色 的窗口字符功能。
  * [v1.6]
  * 添加了 插件指令 固定对话框的 文本色功能。
+ * [v1.7]
+ * 优化了渐变色的结构，修复了部分渐变色只显示白色的bug。
  * 
  * 
  * 
@@ -160,6 +162,14 @@
  * @min 0
  * @desc 全局默认的文本颜色，对应"\c[0]"中的数字。注意，对游戏中的所有窗口都有效。
  * @default 0
+ * 
+ * @param 是否开启Debug模式
+ * @parent ---默认设置---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc 主要用于全选出文字绘制的块区域，识别高级渐变颜色的布局。
+ * @default false
  * 
  * @param ---普通颜色---
  * @default 
@@ -1601,6 +1611,7 @@
 	
 	/*-----------------杂项------------------*/
 	DrillUp.g_COC_fontColorIndex = Number(DrillUp.parameters["默认文本颜色(全局)"] || 0); 
+	DrillUp.g_COC_debugMode = String(DrillUp.parameters["是否开启Debug模式"] || "false") == "true"; 
 	
 	/*-----------------普通颜色------------------*/
 	DrillUp.g_COC_color_list_length = 99;
@@ -1933,6 +1944,9 @@ Window_Base.prototype.textColor = function( n ){
 //			说明：	> 在文本绘制时，解析高级颜色并使用渐变。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
+//==============================
+// * 颜色文本绘制 - 绘制绑定
+//==============================
 var _drill_COC_bitmap_drawTextBody = Bitmap.prototype._drawTextBody;
 Bitmap.prototype._drawTextBody = function( text, tx, ty, maxWidth ){
 	
@@ -1942,79 +1956,22 @@ Bitmap.prototype._drawTextBody = function( text, tx, ty, maxWidth ){
 		this.textColor.indexOf("drill__") != -1 ){
 		
 		// > 渐变数据
-		var color_strList = this.textColor.substring(7).split('__');
-		
-		var width = this.measureTextWidth( text );		//宽度
-		var height = this.fontSize *4/5 +1;				//高度（实际文字比字体大小要矮一点）
-		
-		var angle = Number(color_strList[0]);			//角度
-		if( angle >= 360 ){ angle = angle % 360; }		//
-		var radian = angle / 180 * Math.PI;				//弧度
-		
-		
-		// > 长方形与渐变斜线 求相交的两点
-		var midPoint = new Point( tx+width/2, ty-height/2 );
-		var angle_lim = Math.atan(width/height);
-		//  90度
-		if( radian === Math.PI/2 ){				
-			var x_0 = midPoint.x + width/2;
-			var y_0 = midPoint.y;
-			var x_1 = midPoint.x - width/2;
-			var y_1 = midPoint.y;
-		//  270度
-		}else if( radian === Math.PI*3/2 ){
-			var x_0 = midPoint.x - width/2;
-			var y_0 = midPoint.y;
-			var x_1 = midPoint.x + width/2;
-			var y_1 = midPoint.y;
-		}else if( radian <= angle_lim || radian > 2*Math.PI - angle_lim ){
-			var x_0 = midPoint.x + height/2 * Math.tan(radian);
-			var y_0 = midPoint.y - height/2;
-			var x_1 = midPoint.x - height/2 * Math.tan(radian);
-			var y_1 = midPoint.y + height/2;
-		}else if( radian > angle_lim && radian <= Math.PI - angle_lim ){
-			var x_0 = midPoint.x + width/2;
-			var y_0 = midPoint.y - width/(2 * Math.tan(radian));
-			var x_1 = midPoint.x - width/2;
-			var y_1 = midPoint.y + width/(2 * Math.tan(radian));
-		}else if( radian > Math.PI - angle_lim && radian <= Math.PI + angle_lim ){
-			var x_0 = midPoint.x - height/2 * Math.tan(radian);
-			var y_0 = midPoint.y + height/2;
-			var x_1 = midPoint.x + height/2 * Math.tan(radian);
-			var y_1 = midPoint.y - height/2;
-		}else {
-			var x_0 = midPoint.x - width/2;
-			var y_0 = midPoint.y + width/(2 * Math.tan(radian));
-			var x_1 = midPoint.x + width/2;
-			var y_1 = midPoint.y - width/(2 * Math.tan(radian));
+		//		（比如："drill__45__0.0__#ffffff__1.0__#000000" ）
+		var str_args = this.textColor.substring(7).split('__');
+		var angle = Number( str_args[0] );
+		var stop_valueList = [];
+		var stop_colorList = [];
+		for(var i = 1; i < str_args.length; i += 2 ){
+			var stop_value = String( str_args[i] );
+			var stop_color = String( str_args[i+1] );
+			if( stop_value == "" ){ break; }
+			if( stop_color == "" ){ break; }
+			stop_valueList.push( stop_value );
+			stop_colorList.push( stop_color );
 		}
 		
-		//// > DEBUG - 显示矩阵和点
-		//this.fillRect( tx, ty-height, width, height, "#00ff00" );
-		//this.drawCircle( x_0, y_0, 3, "#ffff00" );
-		//this.drawCircle( x_1, y_1, 3, "#ffff00" );
-		
-		// > 特殊偏移设置
-		//		（可能是nwjs的bug，只要是在Bitmap中设置渐变绘制，都会出现此偏移问题）
-		if( Utils.isNwjs() && this['drill_elements_drawText'] == true ){
-			y_0 -= height ;
-			y_1 -= height ;
-		}
-		
-		// > 绘制渐变文字
-		var context = this._context;
-		var grad = context.createLinearGradient( x_0,y_0, x_1,y_1 );
-		for(var i = 1; i < color_strList.length; i += 2 ){
-			var pos = String( color_strList[i] );
-			var color = String( color_strList[i+1] );
-			if( pos == "" ){ break; }
-			if( color == "" ){ break; }
-			grad.addColorStop( pos, color );
-		}
-		context.save();
-		context.fillStyle = grad;
-		context.fillText(text, tx, ty, maxWidth);
-		context.restore();
+		// > 绘制高级颜色
+		this.drill_COC__drawSeniorTextBody( text, tx, ty, maxWidth, angle, stop_valueList, stop_colorList );
 		this._setDirty();
 		
 		
@@ -2023,6 +1980,102 @@ Bitmap.prototype._drawTextBody = function( text, tx, ty, maxWidth ){
 		_drill_COC_bitmap_drawTextBody.call(this,text, tx, ty, maxWidth);
 	}
 };
+//==============================
+// * 颜色文本绘制 - 绘制高级颜色
+//==============================
+Bitmap.prototype.drill_COC__drawSeniorTextBody = function( text, tx, ty, maxWidth, angle, stop_valueList, stop_colorList ){
+	if( angle >= 360 ){ angle = angle % 360; }		//角度
+	var radian = angle / 180 * Math.PI;				//弧度
+	
+	var width = this.measureTextWidth( text );		//宽度
+	if( width > maxWidth ){ width = maxWidth; }		//
+	var height = this.fontSize -4;					//高度（实际文字比字体大小要矮一点）
+	
+	
+	// > 长方形与渐变斜线 求相交的两点
+	var midPoint = new Point( tx+width/2, ty-height/2 );
+	var angle_lim = Math.atan(width/height);
+	//  90度
+	if( radian === Math.PI/2 ){				
+		var x_0 = midPoint.x + width/2;
+		var y_0 = midPoint.y;
+		var x_1 = midPoint.x - width/2;
+		var y_1 = midPoint.y;
+	//  270度
+	}else if( radian === Math.PI*3/2 ){
+		var x_0 = midPoint.x - width/2;
+		var y_0 = midPoint.y;
+		var x_1 = midPoint.x + width/2;
+		var y_1 = midPoint.y;
+	}else if( radian <= angle_lim || radian > 2*Math.PI - angle_lim ){
+		var x_0 = midPoint.x + height/2 * Math.tan(radian);
+		var y_0 = midPoint.y - height/2;
+		var x_1 = midPoint.x - height/2 * Math.tan(radian);
+		var y_1 = midPoint.y + height/2;
+	}else if( radian > angle_lim && radian <= Math.PI - angle_lim ){
+		var x_0 = midPoint.x + width/2;
+		var y_0 = midPoint.y - width/(2 * Math.tan(radian));
+		var x_1 = midPoint.x - width/2;
+		var y_1 = midPoint.y + width/(2 * Math.tan(radian));
+	}else if( radian > Math.PI - angle_lim && radian <= Math.PI + angle_lim ){
+		var x_0 = midPoint.x - height/2 * Math.tan(radian);
+		var y_0 = midPoint.y + height/2;
+		var x_1 = midPoint.x + height/2 * Math.tan(radian);
+		var y_1 = midPoint.y - height/2;
+	}else {
+		var x_0 = midPoint.x - width/2;
+		var y_0 = midPoint.y + width/(2 * Math.tan(radian));
+		var x_1 = midPoint.x + width/2;
+		var y_1 = midPoint.y - width/(2 * Math.tan(radian));
+	}
+	
+	// > 特殊偏移设置
+	//		（可能是nwjs的bug，只要是在Bitmap中设置渐变绘制，都会出现此偏移问题）
+	if( Utils.isNwjs() && this['drill_elements_drawText'] == true ){
+		x_0 -= tx;
+		x_1 -= tx;
+		y_0 -= ty;
+		y_1 -= ty;
+	}
+	
+	// > 绘制渐变文字
+	var context = this._context;
+	var grad = context.createLinearGradient( x_0, y_0, x_1, y_1 );
+	for( var i = 0; i < stop_valueList.length; i++ ){
+		grad.addColorStop( parseFloat(stop_valueList[i]), String(stop_colorList[i]) );
+	}
+	context.fillStyle = grad;
+	context.fillText(text, tx, ty, maxWidth);
+	
+	// > DEBUG
+	if( DrillUp.g_COC_debugMode == true ){
+		
+		// > DEBUG - 渐变矩阵范围
+		context.strokeStyle = "#ffff00";
+		context.lineWidth = 2;
+		context.strokeRect( tx, ty-height, width, height);
+
+		// > DEBUG - 中心点
+		context.fillStyle = "#ff0000";
+		context.fillRect( midPoint.x -2, midPoint.y -2, 4, 4 );
+		context.restore();
+		
+		// > DEBUG - 特殊偏移设置
+		if( Utils.isNwjs() && this['drill_elements_drawText'] == true ){
+			x_0 += tx;
+			x_1 += tx;
+			y_0 += ty;
+			y_1 += ty;
+		}
+		
+		// > DEBUG - 渐变点
+		context.fillStyle = "#ff00ff";
+		context.fillRect( x_0 -2, y_0 -2, 4, 4);
+		context.fillRect( x_1 -2, y_1 -2, 4, 4);
+		context.restore();
+	}
+};
+
 
 //=============================================================================
 // ** ☆文本颜色绑定
@@ -2073,6 +2126,7 @@ Window_Base.prototype.normalColor = function(){
 Window_Message.prototype.normalColor = function(){
 	return this.textColor( $gameSystem._drill_COC_dialog_fontColorIndex );
 };
+
 
 //=============================================================================
 // ** ☆逐个字符变色

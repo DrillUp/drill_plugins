@@ -2646,6 +2646,8 @@ Drill_EFSu_Controller.prototype.drill_controller_updateAttr = function() {
 // * A主体 - 帧刷新 - 校验值
 //==============================
 Drill_EFSu_Controller.prototype.drill_controller_updateCheckNaN = function(){
+	if( $gameTemp == undefined ){ return; }		//（测试版开启功能，发布版关闭功能）
+	if( $gameTemp.isPlaytest() != true ){ return; }
 	
 	// > 校验值
 	if( DrillUp.g_EFSu_checkNaN == true ){

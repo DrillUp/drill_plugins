@@ -4022,6 +4022,7 @@ Scene_Menu.prototype.drill_SMa_createActorBoard = function() {
 	this._drill_SMa_actorSpriteTank = [];
 	this._drill_SMa_actorPositionTank = [];
 	var count = temp_data['visible_rowCount'];
+	if( count > $gameParty.members().length ){ count = $gameParty.members().length; }	//（如果比队伍人数还大，则按队伍人数来）
 	for( var i = 0; i < count; i++ ){
 		
 		// > 固定框初始化

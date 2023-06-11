@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        地图UI - 临时漂浮物品信息
+ * @plugindesc [v1.1]        地图UI - 临时漂浮物品信息
  * @author Drill_up
  * 
  * @Drill_LE_param "物品信息样式-%d"
@@ -110,6 +110,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 修复了该插件在战斗界面会报错的bug。
  *
  *
  *
@@ -118,6 +120,13 @@
  * @on 开启
  * @off 关闭
  * @desc true - 开启，false - 关闭
+ * @default true
+ *
+ * @param 是否开启偶数图块交叉
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc 如果物品并排在x轴，获取物品后，信息会挤在一起。此设置可使偶数图块的y轴高半个图块，防止相互遮挡。
  * @default true
  *
  * @param 默认样式
@@ -788,6 +797,7 @@
 	
 	/*-----------------杂项------------------*/
 	DrillUp.g_GFTP_enabled = String(DrillUp.parameters["初始是否开启"] || "true") === "true";	
+	DrillUp.g_GFTP_crossEnabled = String(DrillUp.parameters["是否开启偶数图块交叉"] || "true") === "true";	
 	DrillUp.g_GFTP_defaultStyleId = Number(DrillUp.parameters["默认样式"] || 1); 
 	
 	/*-----------------物品信息样式集合------------------*/
@@ -1184,10 +1194,12 @@ Game_Interpreter.prototype.command125 = function() {
 	var count = this.operateValue(this._params[0], this._params[1], this._params[2]);
 	
 	// > 文本生成
-	var context = this.drill_GFTP_getText_gold( count );
-	if( context != "" ){
-		var pos = this.drill_GFTP_getEventPos();
-		$gameTemp.drill_GFTP_createText( pos, context );
+	if( SceneManager._scene instanceof Scene_Map ){	//（只地图界面生效）
+		var context = this.drill_GFTP_getText_gold( count );
+		if( context != "" ){
+			var pos = this.drill_GFTP_getEventPos();
+			$gameTemp.drill_GFTP_createText( pos, context );
+		}
 	}
 	return true;	
 };
@@ -1203,10 +1215,12 @@ Game_Interpreter.prototype.command126 = function() {
 	var count = this.operateValue(this._params[1], this._params[2], this._params[3]);
 	
 	// > 文本生成
-	var context = this.drill_GFTP_getText_item( item_id, count );
-	if( context != "" ){
-		var pos = this.drill_GFTP_getEventPos();
-		$gameTemp.drill_GFTP_createText( pos, context );
+	if( SceneManager._scene instanceof Scene_Map ){	//（只地图界面生效）
+		var context = this.drill_GFTP_getText_item( item_id, count );
+		if( context != "" ){
+			var pos = this.drill_GFTP_getEventPos();
+			$gameTemp.drill_GFTP_createText( pos, context );
+		}
 	}
 	return true;
 };
@@ -1222,10 +1236,12 @@ Game_Interpreter.prototype.command127 = function() {
 	var count = this.operateValue(this._params[1], this._params[2], this._params[3]);
 	
 	// > 文本生成
-	var context = this.drill_GFTP_getText_weapon( weapon_id, count );
-	if( context != "" ){
-		var pos = this.drill_GFTP_getEventPos();
-		$gameTemp.drill_GFTP_createText( pos, context );
+	if( SceneManager._scene instanceof Scene_Map ){	//（只地图界面生效）
+		var context = this.drill_GFTP_getText_weapon( weapon_id, count );
+		if( context != "" ){
+			var pos = this.drill_GFTP_getEventPos();
+			$gameTemp.drill_GFTP_createText( pos, context );
+		}
 	}
 	return true;
 };
@@ -1241,10 +1257,12 @@ Game_Interpreter.prototype.command128 = function() {
 	var count = this.operateValue(this._params[1], this._params[2], this._params[3]);
 	
 	// > 文本生成
-	var context = this.drill_GFTP_getText_armor( armor_id, count );
-	if( context != "" ){
-		var pos = this.drill_GFTP_getEventPos();
-		$gameTemp.drill_GFTP_createText( pos, context );
+	if( SceneManager._scene instanceof Scene_Map ){	//（只地图界面生效）
+		var context = this.drill_GFTP_getText_armor( armor_id, count );
+		if( context != "" ){
+			var pos = this.drill_GFTP_getEventPos();
+			$gameTemp.drill_GFTP_createText( pos, context );
+		}
 	}
 	return true;
 };
@@ -1464,6 +1482,14 @@ Game_Interpreter.prototype.drill_GFTP_getEventPos = function() {
 	var th = $gameMap.tileHeight();
 	var e = $gameMap.event( this._eventId );
 	var e_pos = [ e._realX, e._realY ];
+	
+	// > 偶数图块交叉
+	if( DrillUp.g_GFTP_crossEnabled == true ){
+		if( Math.floor( e_pos[0] ) % 2 == 0 ){
+			e_pos[1] += 0.5;
+		}
+	}
+	
 	var pos = [ Math.round( $gameMap.adjustX( e_pos[0] ) * tw + tw*0.5 ), 
 				Math.round( $gameMap.adjustY( e_pos[1] ) * th + th*0.5 ) ];
 	return pos;

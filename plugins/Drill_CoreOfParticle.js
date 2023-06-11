@@ -644,6 +644,8 @@ Drill_COPa_Controller.prototype.drill_controller_updateAttr_Rotation = function(
 // * A主体 - 帧刷新 - 校验值
 //==============================
 Drill_COPa_Controller.prototype.drill_controller_updateCheckNaN = function(){
+	if( $gameTemp == undefined ){ return; }		//（测试版开启功能，发布版关闭功能）
+	if( $gameTemp.isPlaytest() != true ){ return; }
 	
 	// > 校验值
 	if( DrillUp.g_COPa_checkNaN == true ){
@@ -1724,6 +1726,8 @@ Drill_COPa_Sprite.prototype.drill_sprite_updateTransform_Rotation = function( i,
 // * D粒子变化 - 帧刷新 - 校验值
 //==============================
 Drill_COPa_Sprite.prototype.drill_sprite_updateCheckNaN = function(){
+	if( $gameTemp == undefined ){ return; }		//（测试版开启功能，发布版关闭功能）
+	if( $gameTemp.isPlaytest() != true ){ return; }
 	
 	// > 校验值
 	if( DrillUp.g_COPa_checkNaN == true ){

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.0]        系统 - 窗口辅助核心
+ * @plugindesc [v2.1]        系统 - 窗口辅助核心
  * @author Drill_up
  * 
  * 
@@ -96,6 +96,8 @@
  * 大幅度优化了底层结构，并定义了标准接口。
  * [v2.0]
  * 优化了窗口底层的部分结构。
+ * [v2.1]
+ * 修复了对话框的窗口等待字符\!变成按两次才显示文本的bug。
  *
  */
  
@@ -511,7 +513,7 @@ Window_Base.prototype.drill_COWA_getTextHeight_Private = function( text ){
 };
 
 //==============================
-// * 扩展文本 - 计算拦截
+// * 扩展文本 - 拦截
 //
 //			说明：	对于一些继承了并且抢先执行 processEscapeCharacter 函数的插件，最好加上 不准套娃 标记。（现在已经不需要了，因为直接最后继承）
 //==============================
@@ -596,6 +598,22 @@ SceneManager.initialize = function() {
 	//	
 	//	_drill_COWA_processEscapeCharacter.call( this, code, textState );
 	//}
+	//==============================
+	// * 拦截 - 消息输入字符（私有）
+	//==============================
+	var _drill_COWA_msg_processEscapeCharacter = Window_Message.prototype.processEscapeCharacter;
+	Window_Message.prototype.processEscapeCharacter = function( code, textState ){
+		
+		if( code == "$" ||	//（如果正在计算，则跳过消息输入字符）
+			code == "!" ||
+			code == "<" ||
+			code == ">" ||
+			code == "^" ){
+			if( $gameTemp && $gameTemp._drill_COWA_bitmap_isCalculating == true ){ return; }
+		}
+		
+		_drill_COWA_msg_processEscapeCharacter.call( this, code, textState );
+	}
 }
 //==============================
 // * 绘制 - 绘制【扩展文本】（原函数副本）

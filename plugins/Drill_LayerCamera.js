@@ -461,6 +461,7 @@
 //			->☆变量获取
 //			->☆插件指令
 //			->☆存储数据
+//
 //			->☆镜头控制器函数
 //				->特殊镜头控制函数
 //					->缩放 - 当前X缩放值【标准函数】
@@ -487,6 +488,7 @@
 //			->☆整体平移
 //				->鼠标指向标
 //				->边缘遮挡层
+//
 //			->镜头控制器【Drill_LCa_Controller】
 //				->镜头架
 //				->镜头基点
@@ -1678,7 +1680,7 @@ Scene_Map.prototype.processMapTouch = function() {
 	$gameMap._drill_LCa_isInProcessMapTouch = false;
 }
 //==============================
-// * 整体平移 - 鼠标指向标 - 整体平移
+// * 整体平移 - 鼠标指向标 - 整体平移X
 //==============================
 var _drill_LCa_map_canvasToMapX = Game_Map.prototype.canvasToMapX;
 Game_Map.prototype.canvasToMapX = function( x ){
@@ -1687,6 +1689,9 @@ Game_Map.prototype.canvasToMapX = function( x ){
 	}
 	return _drill_LCa_map_canvasToMapX.call( this, x );
 }
+//==============================
+// * 整体平移 - 鼠标指向标 - 整体平移Y
+//==============================
 var _drill_LCa_map_canvasToMapY = Game_Map.prototype.canvasToMapY;
 Game_Map.prototype.canvasToMapY = function( y ){
 	if( this._drill_LCa_isInProcessMapTouch == true ){
@@ -3644,6 +3649,8 @@ Drill_LCa_Controller.prototype.drill_updatePosition = function(){
 // * 帧刷新 - 校验值
 //==============================
 Drill_LCa_Controller.prototype.drill_updateCheckNaN = function(){
+	if( $gameTemp == undefined ){ return; }		//（测试版开启功能，发布版关闭功能）
+	if( $gameTemp.isPlaytest() != true ){ return; }
 	
 	// > 校验值
 	if( DrillUp.g_LCa_checkNaN == true ){

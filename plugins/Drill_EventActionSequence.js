@@ -178,7 +178,10 @@
 	//==============================
 	var DrillUp = DrillUp || {}; 
 	DrillUp.g_EASe_PluginTip_curName = "Drill_EventActionSequence.js 行走图-GIF动画序列";
-	DrillUp.g_EASe_PluginTip_baseList = ["Drill_CoreOfActionSequence.js 系统-GIF动画序列核心"];
+	DrillUp.g_EASe_PluginTip_baseList = [
+		"Drill_CoreOfActionSequence.js 系统-GIF动画序列核心",
+		"Drill_CoreOfEventFrame.js 行走图-行走图优化核心"
+	];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
@@ -219,7 +222,8 @@
 //=============================================================================
 // * >>>>基于插件检测>>>>
 //=============================================================================
-if( Imported.Drill_CoreOfActionSequence ){
+if( Imported.Drill_CoreOfActionSequence &&
+	Imported.Drill_CoreOfEventFrame ){
 	
 	
 //=============================================================================

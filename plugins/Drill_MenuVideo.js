@@ -871,7 +871,7 @@ Scene_MenuBase.prototype.drill_MVi_create = function() {
 			this._drill_MVi_sprites_data.push(data);
 			$gameTemp._drill_MVi_sprites.push(temp_sprite);
 			
-			this.drill_MVi_layerAddSprite( temp_layer, temp_data['menu_index'] );
+			this.drill_MVi_layerAddSprite( temp_sprite, temp_data['menu_index'] );
 		}
 	}
 

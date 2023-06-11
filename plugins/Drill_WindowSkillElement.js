@@ -843,9 +843,9 @@ Window_SkillList.prototype.drill_WSE_s_drawBlock = function( cur_bitmap, skill )
 	
 	// > 绘制技能名 - 文本颜色
 	if( Imported.Drill_ItemTextColor ){
-		var temp_c = $gameSystem._drill_ITC_skills[ Number(skill.id) ];
-		if( temp_c != "" ){ 
-			cur_bitmap.textColor = temp_c ;
+		var color_code = $gameTemp.drill_ITC_getColorCode_Skill( Number(skill.id) );
+		if( color_code != "" ){
+			cur_bitmap.textColor = String( color_code );
 			cur_bitmap['drill_elements_drawText'] = true;		//（高级渐变颜色 偏移标记）
 		}
 	}
@@ -859,7 +859,7 @@ Window_SkillList.prototype.drill_WSE_s_drawBlock = function( cur_bitmap, skill )
 		}.bind(this));
 	}
 	cur_bitmap.drawText( skill_name, name_x, name_y, name_width, this.lineHeight(), name_align);
-	cur_bitmap.textColor = "#ffffff" ;
+	cur_bitmap.textColor = "#ffffff";
 	
 	
 	// > 绘制消耗值

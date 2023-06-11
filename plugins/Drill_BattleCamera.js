@@ -3319,6 +3319,8 @@ Drill_BCa_Controller.prototype.drill_updatePosition = function(){
 // * 帧刷新 - 校验值
 //==============================
 Drill_BCa_Controller.prototype.drill_updateCheckNaN = function(){
+	if( $gameTemp == undefined ){ return; }		//（测试版开启功能，发布版关闭功能）
+	if( $gameTemp.isPlaytest() != true ){ return; }
 	
 	// > 校验值
 	if( DrillUp.g_BCa_checkNaN == true ){

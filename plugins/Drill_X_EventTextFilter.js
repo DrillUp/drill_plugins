@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        行走图 - 事件漂浮文字的滤镜效果[扩展]
+ * @plugindesc [v1.2]        行走图 - 事件漂浮文字的滤镜效果[扩展]
  * @author Drill_up
  *
  *
@@ -158,6 +158,8 @@
  * [v1.1]
  * 分离了滤镜核心，大幅度优化了底层结构。
  * 添加了填充滤镜功能，降低了模糊滤镜的性能消耗。
+ * [v1.2]
+ * 整理了内部模块结构。
  *
  */
  
@@ -184,6 +186,11 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
+//			->☆提示信息
+//			->☆变量获取
+//			->☆插件指令
+//			->☆事件注释
+//
 //			漂浮文字-滤镜效果：
 //				->文字贴图的滤镜
 //				->（滤镜核）优化，滤镜/滤镜板用到的时候才new
@@ -206,7 +213,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -240,7 +247,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_X_EventTextFilter = true;
@@ -257,12 +264,13 @@ if( Imported.Drill_CoreOfFilter &&
 	
 	
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _drill_XETF_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_XETF_pluginCommand.call(this, command, args);
-	if (command === ">事件漂浮文字滤镜") { // >事件漂浮文字滤镜 : 本事件 : 纯色滤镜 : 纯蓝 : 155 : 60
+	if( command === ">事件漂浮文字滤镜" ){
+		
 		if(args.length == 8 || args.length == 10){
 			var unit = String(args[1]);
 			if( unit == "本事件" ){
@@ -385,42 +393,23 @@ Game_Map.prototype.drill_XETF_isEventExist = function( e_id ){
 	return true;
 };
 
+
 //=============================================================================
-// ** 物体
+// ** ☆事件注释
 //=============================================================================
 //==============================
-// * 物体 初始化
+// * 事件注释 - 初始化绑定
 //==============================
-var _drill_XETF_initialize = Game_Event.prototype.initialize;
-Game_Event.prototype.initialize = function(mapId, eventId) {
-	this.drill_XETF_init();						//初始化参数
-	this._drill_XETF.openFilter = false;		//
-	
-	_drill_XETF_initialize.call(this, mapId, eventId);
-};
-Game_Event.prototype.drill_XETF_init = function() {
-	this._drill_XETF = {};
-	this._drill_XETF.setPureLinear = ["",0,0];	//刷新事件页的滤镜参数
-	this._drill_XETF.setColorLinear = ["",0,0];
-	this._drill_XETF.setFillLinear = ["",0,0];
-	this._drill_XETF.setBlurLinear = [0,0];
-	this._drill_XETF.setNoiseLinear = [0,0];
-	this._drill_XETF.setPureWave = ["",0,0];
-	this._drill_XETF.setColorWave = ["",0,0];
-	this._drill_XETF.setFillWave = ["",0,0];
-	this._drill_XETF.setBlurWave = [0,0];
-	this._drill_XETF.setNoiseWave = [0,0];
-}
-//==============================
-// * 事件页 刷新
-//==============================
-var _drill_XETF_setupPage = Game_Event.prototype.setupPage;
+var _drill_XETF_c_setupPage = Game_Event.prototype.setupPage;
 Game_Event.prototype.setupPage = function() {
 	this.drill_XETF_init();					//刷新事件滤镜
-	_drill_XETF_setupPage.call(this);
-	this.drill_XETF_setupFilters();
+	_drill_XETF_c_setupPage.call(this);
+	this.drill_XETF_setupPage();
 }
-Game_Event.prototype.drill_XETF_setupFilters = function() {
+//==============================
+// * 事件注释 - 初始化
+//==============================
+Game_Event.prototype.drill_XETF_setupPage = function() {
 	if (!this._erased && this.page()) {this.list().forEach(function(l) {
 		if (l.code === 108) {
 			var args = l.parameters[0].split(' : ');
@@ -479,18 +468,47 @@ Game_Event.prototype.drill_XETF_setupFilters = function() {
 	}, this);};
 };
 
+
+//=============================================================================
+// ** 物体
+//=============================================================================
+//==============================
+// * 物体 初始化
+//==============================
+var _drill_XETF_initialize = Game_Event.prototype.initialize;
+Game_Event.prototype.initialize = function(mapId, eventId) {
+	this.drill_XETF_init();						//初始化参数
+	this._drill_XETF.openFilter = false;		//
+	
+	_drill_XETF_initialize.call(this, mapId, eventId);
+};
+Game_Event.prototype.drill_XETF_init = function() {
+	this._drill_XETF = {};
+	this._drill_XETF.setPureLinear = ["",0,0];	//刷新事件页的滤镜参数
+	this._drill_XETF.setColorLinear = ["",0,0];
+	this._drill_XETF.setFillLinear = ["",0,0];
+	this._drill_XETF.setBlurLinear = [0,0];
+	this._drill_XETF.setNoiseLinear = [0,0];
+	this._drill_XETF.setPureWave = ["",0,0];
+	this._drill_XETF.setColorWave = ["",0,0];
+	this._drill_XETF.setFillWave = ["",0,0];
+	this._drill_XETF.setBlurWave = [0,0];
+	this._drill_XETF.setNoiseWave = [0,0];
+}
+
+
 //=============================================================================
 // ** 文字贴图
 //=============================================================================
 //==============================
 // * 帧刷新 - 滤镜指令
 //==============================
-var _drill_XETF_c_update = Spriteset_Map.prototype.update;
-Spriteset_Map.prototype.update = function() {
+var _drill_XETF_c_update = Scene_Map.prototype.update;
+Scene_Map.prototype.update = function() {
 	_drill_XETF_c_update.call(this);
 	
-	for(var i=0; i < this._drill_ET_spriteTank.length; i++){		// ._drill_ET_spriteTank 为文字贴图集合，在ET插件中
-		var temp_WSprite = this._drill_ET_spriteTank[i];
+	for(var i=0; i < $gameTemp._drill_ET_spriteTank.length; i++){		// ._drill_ET_spriteTank 为文字贴图集合，在ET插件中
+		var temp_WSprite = $gameTemp._drill_ET_spriteTank[i];
 		if( !temp_WSprite._character ){ continue; }
 		if( !temp_WSprite._character._drill_XETF ){ continue; }
 		if( !temp_WSprite._character._drill_XETF.openFilter ) { continue; }
