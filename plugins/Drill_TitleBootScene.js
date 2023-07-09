@@ -564,8 +564,8 @@
 		data['img_skip'] = Number( dataFrom["单图立即跳过时长"] || 12 );
 		
 		// > GIF模式
-		if( dataFrom["资源-GIF"] != "" &&
-			dataFrom["资源-GIF"] != undefined ){
+		if( dataFrom["资源-GIF"] != undefined &&
+			dataFrom["资源-GIF"] != "" ){
 			data['gif_src'] = JSON.parse( dataFrom["资源-GIF"] );
 		}else{
 			data['gif_src'] = [];
@@ -597,8 +597,9 @@
 	DrillUp.g_TBS_list_length = 20;
 	DrillUp.g_TBS_list = [];
 	for (var i = 0; i < DrillUp.g_TBS_list_length; i++) {
-		if( DrillUp.parameters['阶段-' + String(i+1) ] != "" ){
-			var temp = JSON.parse(DrillUp.parameters['阶段-' + String(i+1) ]);
+		if( DrillUp.parameters["阶段-" + String(i+1) ] != undefined &&
+			DrillUp.parameters["阶段-" + String(i+1) ] != "" ){
+			var temp = JSON.parse(DrillUp.parameters["阶段-" + String(i+1) ]);
 			DrillUp.g_TBS_list[i] = DrillUp.drill_TBS_partInit( temp );
 		}else{
 			DrillUp.g_TBS_list[i] = null;

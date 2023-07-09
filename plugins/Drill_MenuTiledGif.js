@@ -719,7 +719,7 @@
  * @type number
  * @min 0
  * @max 360
- * @desc GIF图像的色调值。
+ * @desc 资源图像的色调值。
  * @default 0
  *
  * @param 图像-模糊边缘
@@ -727,7 +727,7 @@
  * @type boolean
  * @on 模糊
  * @off 关闭
- * @desc 可以模糊GIF图像的边缘，防止出现像素锯齿。
+ * @desc 此参数为缩放设置，设置模糊后，缩放时可以模糊资源图像的边缘，防止出现像素锯齿。
  * @default false
  *
  * @param 背景X速度

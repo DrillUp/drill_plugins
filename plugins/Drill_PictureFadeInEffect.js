@@ -551,7 +551,7 @@ Game_Screen.prototype.drill_PFIE_isPictureExist = function( pic_id ){
 
 
 //=============================================================================
-// * 数学 - 锁定锚点
+// * 数学工具 - 锁定锚点
 //			
 //			参数：	> org_anchor_x 数字    （原贴图锚点X）
 //					> org_anchor_y 数字    （原贴图锚点Y）
@@ -566,7 +566,7 @@ Game_Screen.prototype.drill_PFIE_isPictureExist = function( pic_id ){
 //			说明：	修正 旋转+缩放 的坐标，使其看起来像是在绕着 新的锚点 变换。
 //					旋转值和缩放值可为负数。
 //=============================================================================
-Game_Temp.prototype.drill_PFIE_getFixPointInAnchor = function( 
+Game_Temp.prototype.drill_PFIE_Math2D_getFixPointInAnchor = function( 
 					org_anchor_x,org_anchor_y,			//原贴图中心锚点 
 					target_anchor_x,target_anchor_y, 	//新的中心锚点 
 					width, height,						//贴图高宽
@@ -602,7 +602,7 @@ Game_Temp.prototype.drill_PFIE_getFixPointInAnchor = function(
 	return { "x":xx, "y":yy };
 }
 //=============================================================================
-// * 数学 - 抛物线三点式
+// * 数学工具 - 抛物线三点式
 //			
 //			参数：	> x1,y1 数字（点A）
 //					> x2,y2 数字（点B）
@@ -611,7 +611,7 @@ Game_Temp.prototype.drill_PFIE_getFixPointInAnchor = function(
 //			
 //			说明：	已知三点，返回抛物线公式 y = a*x^2 + b*x + c 的abc值。
 //=============================================================================
-Game_Temp.prototype.drill_PFIE_getParabolicThree = function( x1,y1,x2,y2,x3,y3 ){
+Game_Temp.prototype.drill_PFIE_Math2D_getParabolicThree = function( x1,y1,x2,y2,x3,y3 ){
 	
 	var b = ((x2*x2 - x3*x3)*(y1 - y2) - (x1*x1 - x2*x2)*(y2 - y3)) / ((x2*x2 - x3*x3)*(x1 - x2) - (x1*x1 - x2*x2)*(x2 - x3));
 	var a = (y1 - y2 - b*(x1 - x2)) / (x1*x1 - x2*x2);
@@ -979,7 +979,7 @@ Game_Picture.prototype.drill_PFIE_updateShowingFall = function() {
 		ef.scale_y = -ef.scale_x;
 		
 		// > 锚点(0.5,1.0)锁定
-		var fix_point = $gameTemp.drill_PFIE_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, 0.5,1.0, ef.real_width,ef.real_height, ef.rotation, ef.scale_x+1, ef.scale_y+1 );
+		var fix_point = $gameTemp.drill_PFIE_Math2D_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, 0.5,1.0, ef.real_width,ef.real_height, ef.rotation, ef.scale_x+1, ef.scale_y+1 );
 		ef.x = fix_point.x;
 		ef.y = fix_point.y;
 		
@@ -1070,7 +1070,7 @@ Game_Picture.prototype.drill_PFIE_updateShowingEnlarge = function() {
 		}
 		
 		// > 锚点(0.5,1.0)锁定
-		var fix_point = $gameTemp.drill_PFIE_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, 0.5,1.0, ef.real_width,ef.real_height, ef.rotation, ef.scale_x+1, ef.scale_y+1 );
+		var fix_point = $gameTemp.drill_PFIE_Math2D_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, 0.5,1.0, ef.real_width,ef.real_height, ef.rotation, ef.scale_x+1, ef.scale_y+1 );
 		ef.x = fix_point.x;
 		ef.y = ef.y + fix_point.y;
 		
@@ -1133,7 +1133,7 @@ Game_Picture.prototype.drill_PFIE_updateShowingHorizonFlat = function() {
 		ef.scale_y = -1.0 * (ef.f_dTime - ef.f_time)/ef.f_dTime ;
 		
 		// > 锚点(0.5,1.0)锁定
-		var fix_point = $gameTemp.drill_PFIE_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, 0.5,1.0, ef.real_width,ef.real_height, ef.rotation, ef.scale_x+1, ef.scale_y+1 );
+		var fix_point = $gameTemp.drill_PFIE_Math2D_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, 0.5,1.0, ef.real_width,ef.real_height, ef.rotation, ef.scale_x+1, ef.scale_y+1 );
 		ef.x = fix_point.x;
 		ef.y = fix_point.y;
 		
@@ -1178,7 +1178,7 @@ Game_Picture.prototype.drill_PFIE_updateShowingVerticalFlat = function() {
 		ef.scale_y = ef.f_scale_y * (ef.f_dTime - ef.f_time)/ef.f_dTime ;
 		
 		// > 锚点(0.5,1.0)锁定
-		var fix_point = $gameTemp.drill_PFIE_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, 0.5,1.0, ef.real_width,ef.real_height, ef.rotation, ef.scale_x+1, ef.scale_y+1 );
+		var fix_point = $gameTemp.drill_PFIE_Math2D_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, 0.5,1.0, ef.real_width,ef.real_height, ef.rotation, ef.scale_x+1, ef.scale_y+1 );
 		ef.x = fix_point.x;
 		ef.y = fix_point.y;
 		
@@ -1211,7 +1211,7 @@ Game_Picture.prototype.drill_PFIE_playShowingEnlargeSpring = function( dtime, ov
 	ef.f_anchor_y = anchor_y;
 	ef.f_opacityOff = opacity_off;
 	
-	ef.f_abc = $gameTemp.drill_PFIE_getParabolicThree( 0,-1, dtime*0.8,overflow_scale, dtime,0 );
+	ef.f_abc = $gameTemp.drill_PFIE_Math2D_getParabolicThree( 0,-1, dtime*0.8,overflow_scale, dtime,0 );
 	
 }
 //==============================
@@ -1244,7 +1244,7 @@ Game_Picture.prototype.drill_PFIE_updateShowingEnlargeSpring = function() {
 		ef.scale_y = ef.scale_x;
 		
 		// > 锚点锁定
-		var fix_point = $gameTemp.drill_PFIE_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, ef.f_anchor_x, ef.f_anchor_y, ef.real_width,ef.real_height, ef.rotation, ef.scale_x+1, ef.scale_y+1 );
+		var fix_point = $gameTemp.drill_PFIE_Math2D_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, ef.f_anchor_x, ef.f_anchor_y, ef.real_width,ef.real_height, ef.rotation, ef.scale_x+1, ef.scale_y+1 );
 		ef.x = fix_point.x;
 		ef.y = fix_point.y;
 		

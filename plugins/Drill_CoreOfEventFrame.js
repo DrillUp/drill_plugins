@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        行走图 - 行走图优化核心
+ * @plugindesc [v1.1]        行走图 - 行走图优化核心
  * @author Drill_up
  * 
  * 
@@ -62,6 +62,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 添加了部分脚本的规范。
  * 
  */
  
@@ -532,6 +534,49 @@ Sprite_Character.prototype.setupBalloon = function(){
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
+// * 行走图贴图（贴图）（底层） - A贴图属性
+//==============================
+//（无）
+//==============================
+// * 行走图贴图（贴图）（底层） - B贴图矩形 - 设置位置
+//==============================
+Sprite_Character.prototype.move = function( x, y ){
+	Sprite.prototype.move.call( this, x, y );
+};
+//==============================
+// * 行走图贴图（贴图）（底层） - B贴图矩形 - 矩形设置 基函数
+//==============================
+Sprite_Character.prototype.setFrame = function( x, y, width, height ){
+	Sprite.prototype.setFrame.call( this, x, y, width, height );
+};
+//==============================
+// * 行走图贴图（贴图）（底层） - B贴图矩形 - 矩形设置 基函数
+//==============================
+Sprite_Character.prototype._isInBitmapRect = function( x, y, w, h ){
+	return Sprite.prototype._isInBitmapRect.call( this, x, y, w, h );
+};
+//==============================
+// * 行走图贴图（贴图）（底层） - C贴图资源 - 回调函数 贴图资源 读取完毕时
+//==============================
+Sprite_Character.prototype._onBitmapLoad = function( bitmapLoaded ){
+	Sprite.prototype._onBitmapLoad.call( this, bitmapLoaded );
+};
+//==============================
+// * 行走图贴图（贴图）（底层） - C贴图资源 - 刷新框架
+//==============================
+Sprite_Character.prototype._refresh = function() {
+	Sprite.prototype._refresh.call(this);
+};
+//==============================
+// * 行走图贴图（贴图）（底层） - D调色板
+//==============================
+//（暂不考虑）
+//==============================
+// * 行走图贴图（贴图）（底层） - E渲染器
+//==============================
+//（暂不考虑）
+
+//==============================
 // * 行走图贴图（贴图基类） - 初始化
 //==============================
 //Sprite_Character.prototype.initialize = function() {
@@ -578,18 +623,6 @@ Sprite_Character.prototype.startAnimation = function( animation, mirror, delay )
 //==============================
 Sprite_Character.prototype.isAnimationPlaying = function() {
     return Sprite_Base.prototype.isAnimationPlaying.call(this);
-};
-//==============================
-// * 行走图贴图（贴图） - 
-//==============================
-Sprite_Character.prototype._refresh = function() {
-	Sprite.prototype._refresh.call(this);
-};
-//==============================
-// * 行走图贴图（贴图） - 
-//==============================
-Sprite_Character.prototype._onBitmapLoad = function( bitmapLoaded ){
-	Sprite.prototype._onBitmapLoad.call( this, bitmapLoaded );
 };
 
 

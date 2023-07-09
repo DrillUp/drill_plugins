@@ -1,84 +1,54 @@
 //=============================================================================
-// Drill_LayerCircle.js
+// Drill_HtmlDynamicSnapshotCircle.js
 //=============================================================================
 
 /*:
- * @plugindesc [v2.0]        地图 - 多层地图魔法圈
+ * @plugindesc [v1.0]        游戏窗体 - 天窗层的多层魔法圈
  * @author Drill_up
  * 
  * @Drill_LE_param "魔法圈层-%d"
  * @Drill_LE_parentKey "---魔法圈层组%d至%d---"
- * @Drill_LE_var "DrillUp.g_LCi_layers_length"
+ * @Drill_LE_var "DrillUp.g_HDSC_layers_length"
  * 
  * 
  * @help 
  * =============================================================================
- * +++ Drill_LayerCircle +++
+ * +++ Drill_HtmlDynamicSnapshotCircle +++
  * 作者：Drill_up
  * 如果你有兴趣，也可以来看看更多我写的drill插件哦ヽ(*。>Д<)o゜
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
- * 你可以在地图界面中放置一个或者多个魔法圈。
- * ★★必须放在 mog多层天气效果 插件的后面★★
+ * 你可以在天窗层放置一个或者多个魔法圈。
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
  * 该插件 不能 单独使用。
  * 插件也可以被下列插件扩展，实现特殊功能效果。
  * 基于：
- *   - Drill_CoreOfBallistics      系统-弹道核心★★v2.2及以上★★
- * 可被扩展：
- *   - Drill_LayerDynamicMaskA     地图-地图动态遮罩板A
- *   - Drill_LayerDynamicMaskB     地图-地图动态遮罩板B
- *     魔法圈可添加动态遮罩，实现玩家通过 透视镜 看到局部图像的功能。
+ *   - Drill_CoreOfDynamicSnapshot    游戏窗体-动态快照核心
+ *   - Drill_CoreOfBallistics         系统-弹道核心★★v2.2及以上★★
  *
  * -----------------------------------------------------------------------------
  * ----设定注意事项
- * 1.插件的作用域：地图界面。
- *   可以在地图的五个层级放多层不同的魔法圈。
- * 2.该插件可以装饰地图的各种层级。要了解更详细的组合方法，
- *   去看看 "17.主菜单 > 多层组合装饰（界面装饰）.docx"。
- * 3.该插件的指令较多且使用频繁，建议使用小工具：插件信息查看器。
- *   在开启游戏编辑器时，可以并行使用读取器复制指令。
- * 地图绑定：
- *   (1.每个配置绑定到一个指定的地图，可以多个配置绑定到同一个地图。
- *      注意配置中"所属地图"参数，"所属地图"要与你的地图id相对应。
- *   (2.留意游戏编辑器下方的状态栏，地图id、坐标、缩放比例、事件id
- *      都有信息显示。
- * 地图层级：
- *   (1.你可以将贴图放置在地图的五种层级中，分别为：
- *      下层、中层、上层、图片层、最顶层
- *   (2.地图层级之间的关系为：
- *      地图远景 《 下层 《 图块层 《 中层 《 事件/玩家层 《 上层
- *      《 图片对象层 《 图片层 《 对话框集合 《 最顶层
- *   (3.处于最顶层，可以把地图界面最高层的对话框、窗口也给挡住。
- *   (4.处于同一 地图层级 时，将根据 图片层级 再先后排序。
- * 位移比：
- *   (1.根据物理相对运动知识，近大远小，近快远慢的原则。要让魔法圈看
- *      起来真的"远"，那需要设置位移比接近1.00，越接近1.00越远。
- *   (2.需要注意的是，地图远景和镜头位移比固定是0.00，所以地图远景
- *      每次调整都感觉不像远景，你需要换掉适合的含位移比的图层。
- *   (3.注意，位移比是根据 镜头 移动而移动，不是根据玩家移动而移动。
- *   (4.去看看最新版本的 文档图解 介绍，
- *      这里是看起来简单但是实际做起来非常复杂的坑。
+ * 1.插件的作用域：地图界面、战斗界面、菜单界面。
+ *   作用于渲染器。
+ * 2.更多详细内容，去看看文档 "1.系统 > 大家族-屏幕快照.docx"。
  * 细节：
- *   (1.插件指令操作的变化结果，是永久性的。
- *   (2.操作隐藏的魔法圈 或者 操作其他地图的魔法圈，插件指令都会有效。
- *      注意，插件指令变化的是增量，增加用正数，减少用负数。
- *   (3.将魔法圈放置在界面正中心方法：
- *      平移：（408,312） 这时候，17,13图块是正中心
- *      位移图块偏移 = 实际图块位置 - 中心图块/2
- *      例如放在图块x66位置，66 - 17/2 = 57.5‬，57.5‬为设置的图块偏移。
+ *   (1.天窗层是在整个游戏画面之上的特殊层级，比最顶层还高，
+ *      只有天窗层才能使用动态快照效果。
+ *   (2.游戏中所有的画面都会被动态快照实时播放，
+ *      但不包括天窗层的贴图，以及动态快照自己。
+ * 细节：
+ *   (1.默认情况下 所有魔法圈 都是隐藏的，需要插件指令手动显示。
+ *      另外，如果开了存储功能，插件指令操作的变化结果是永久性的。
  * 设计：
- *   (1.魔法圈的贴图能够设置：混合模式2乘积。
- *      此设置与 纯色滤镜 的底层结构完全一致。
- *      你可以在地图中添加旋转的红色图片，模拟探照灯红滤镜效果；
- *      也可以配置五颜六色的光点资源，模拟跳舞厅旋转的霓虹光。
- *
+ *   (1.你可以设计一个游戏水印，由于魔法圈在天窗层，所有界面中
+ *      都可以看到这个魔法圈做成的游戏水印。
+ * 
  * -----------------------------------------------------------------------------
  * ----关联文件
- * 资源路径：img/Map__layer （Map后面有两个下划线）
- * 先确保项目img文件夹下是否有Map__layer文件夹！
+ * 资源路径：img/Special__layer （Special后面有两个下划线）
+ * 先确保项目img文件夹下是否有Special__layer文件夹！
  * 要查看所有关联资源文件的插件，可以去看看"插件清单.xlsx"。
  * 如果没有，需要自己建立。需要配置资源文件：
  *
@@ -87,36 +57,40 @@
  * 魔法圈3 资源-魔法圈
  * ……
  *
- * 所有素材都放在Map__layer文件夹下。
+ * 所有素材都放在Special__layer文件夹下。
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定
- * 你可以通过插件指令手动修改地图魔法圈的各个属性：
+ * 你可以通过插件指令手动修改天窗层魔法圈的各个属性：
  * 
- * 插件指令：>地图魔法圈 : 魔法圈[11] : 显示
- * 插件指令：>地图魔法圈 : 魔法圈变量[21] : 显示
- * 插件指令：>地图魔法圈 : 批量魔法圈[7,8] : 显示
- * 插件指令：>地图魔法圈 : 批量魔法圈变量[21,22] : 显示
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 显示
+ * 插件指令：>天窗层魔法圈 : 魔法圈变量[21] : 显示
+ * 插件指令：>天窗层魔法圈 : 批量魔法圈[7,8] : 显示
+ * 插件指令：>天窗层魔法圈 : 批量魔法圈变量[21,22] : 显示
+ * 插件指令：>天窗层魔法圈 : 全部魔法圈 : 显示
  * 
- * 插件指令：>地图魔法圈 : 魔法圈[11] : 显示
- * 插件指令：>地图魔法圈 : 魔法圈[11] : 隐藏
- * 插件指令：>地图魔法圈 : 魔法圈[11] : 暂停
- * 插件指令：>地图魔法圈 : 魔法圈[11] : 继续
- * 插件指令：>地图魔法圈 : 魔法圈[11] : 修改单属性 : 混合模式[0]
- * 插件指令：>地图魔法圈 : 魔法圈[11] : 修改单属性 : 透明度[255] : 时间[60]
- * 插件指令：>地图魔法圈 : 魔法圈[11] : 修改单属性 : 透明度变量[21] : 时间[60]
- * 插件指令：>地图魔法圈 : 魔法圈[11] : 修改单属性 : 旋转[90] : 时间[60]
- * 插件指令：>地图魔法圈 : 魔法圈[11] : 修改单属性 : 旋转变量[21] : 时间[60]
- * 插件指令：>地图魔法圈 : 魔法圈[11] : 修改单属性 : 转速[10.0] : 时间[60]
- * 插件指令：>地图魔法圈 : 魔法圈[11] : 修改单属性 : 转速变量[21] : 时间[60]
- * 插件指令：>地图魔法圈 : 魔法圈[11] : 修改单属性 : 缩放X[1.2] : 时间[60]
- * 插件指令：>地图魔法圈 : 魔法圈[11] : 修改单属性 : 缩放Y[1.2] : 时间[60]
- * 插件指令：>地图魔法圈 : 魔法圈[11] : 修改单属性 : 斜切X[0.2] : 时间[60]
- * 插件指令：>地图魔法圈 : 魔法圈[11] : 修改单属性 : 斜切Y[0.2] : 时间[60]
- * 插件指令：>地图魔法圈 : 魔法圈[11] : 立即还原所有单属性
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 显示
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 隐藏
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 显示(延迟) : 延迟时间[20]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 隐藏(延迟) : 延迟时间[20]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 暂停
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 继续
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 修改单属性 : 混合模式[0]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 修改单属性 : 透明度[255] : 时间[60]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 修改单属性 : 透明度变量[21] : 时间[60]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 修改单属性 : 旋转[90] : 时间[60]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 修改单属性 : 旋转变量[21] : 时间[60]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 修改单属性 : 转速[10.0] : 时间[60]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 修改单属性 : 转速变量[21] : 时间[60]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 修改单属性 : 缩放X[1.2] : 时间[60]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 修改单属性 : 缩放Y[1.2] : 时间[60]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 修改单属性 : 斜切X[0.2] : 时间[60]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 修改单属性 : 斜切Y[0.2] : 时间[60]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 立即还原所有单属性
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 延迟还原所有单属性 : 延迟时间[20]
  * 
  * 1.前半部分（魔法圈变量[21]）和 后半部分（显示）
- *   的参数可以随意组合。一共有4*16种组合方式。
+ *   的参数可以随意组合。一共有5*16种组合方式。
  * 2.注意，如果你想永久保持插件指令的改变结果，则需要开启 参数存储 。
  *   参数存储默认关闭，即 插件指令 的所有改变在读取存档后都会复原。
  * 3."旋转"、"转速"的变化效果可以叠加。
@@ -128,16 +102,16 @@
  * ----可选设定 - 移动到
  * 你可以通过插件指令手动设置移动：
  * 
- * 插件指令：>地图魔法圈 : 魔法圈[11] : 移动到-匀速移动 : 位置[100,100] : 时间[60]
- * 插件指令：>地图魔法圈 : 魔法圈[11] : 移动到-匀速移动 : 位置变量[25,26] : 时间[60]
- * 插件指令：>地图魔法圈 : 魔法圈[11] : 移动到-弹性移动 : 位置[100,100] : 时间[60]
- * 插件指令：>地图魔法圈 : 魔法圈[11] : 移动到-弹性移动 : 位置变量[25,26] : 时间[60]
- * 插件指令：>地图魔法圈 : 魔法圈[11] : 移动到-增减速移动 : 位置[100,100] : 时间[60]
- * 插件指令：>地图魔法圈 : 魔法圈[11] : 移动到-增减速移动 : 位置变量[25,26] : 时间[60]
- * 插件指令：>地图魔法圈 : 魔法圈[11] : 移动到-立即归位
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 移动到-匀速移动 : 位置[100,100] : 时间[60]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 移动到-匀速移动 : 位置变量[25,26] : 时间[60]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 移动到-弹性移动 : 位置[100,100] : 时间[60]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 移动到-弹性移动 : 位置变量[25,26] : 时间[60]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 移动到-增减速移动 : 位置[100,100] : 时间[60]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 移动到-增减速移动 : 位置变量[25,26] : 时间[60]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 移动到-立即归位
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 移动到-延迟归位 : 延迟时间[20]
  * 
- * 1.移动的初始位置以显示在地图界面的具体位置为基准，在基准位置上再进行移动到。
- *   指令中不含相对移动，比如多次执行移动到[20,20]，贴图只会到达一个固定的位置。
+ * 1.指令中不含相对移动，比如多次执行移动到[20,20]，贴图只会到达一个固定的位置。
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -151,42 +125,23 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
  * 时间复杂度： o(n^2)*o(贴图处理) 每帧
- * 测试方法：   在地图中放置多个魔法圈，进行性能测试。
- * 测试结果：   200个事件的地图中，平均消耗为：【28.34ms】
- *              100个事件的地图中，平均消耗为：【17.61ms】
- *               50个事件的地图中，平均消耗为：【16.32ms】
+ * 测试方法1：  在地图中放置多个魔法圈，进行性能测试。
+ * 测试结果1：  200个事件的地图中，平均消耗为：【17.57ms】
+ *              100个事件的地图中，平均消耗为：【14.31ms】
+ *               50个事件的地图中，平均消耗为：【13.20ms】
+ * 测试方法2：  在不同的界面中，进行性能测试。
+ * 测试结果2：  战斗界面中，平均消耗为：【14.52ms】
+ *              菜单界面中，平均消耗为：【18.23ms】
  *
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
  *   测试结果并不是精确值，范围在给定值的10ms范围内波动。
  *   更多性能介绍，去看看 "0.性能测试报告 > 关于插件性能.docx"。
- * 2.从原理上来说，多层魔法圈只是固定放置的贴图，但由于事件数量会挤占
- *   部分计算资源，所以消耗会稍微增大一些。
+ * 2.魔法圈是一个简单贴图，只不过放在了天窗层而已，消耗并不大。
  *
  * -----------------------------------------------------------------------------
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
- * [v1.1]
- * 修改了插件关联的资源文件夹。
- * [v1.2]
- * 修改了插件内部结构。
- * [v1.3]
- * 修复了处于中层时，会和事件、图块相互闪烁的bug。
- * [v1.4]
- * 修复了非循环地图中，移动镜头时位移比没有效果的bug。
- * 修改了插件指令结构，旋转速度改为 角度/帧 。
- * [v1.5]
- * 修复了玩家移动时，出现1像素的轻微漂移的问题。
- * [v1.6]
- * 添加了 参数存储 功能开关，以及动态遮罩功能。
- * [v1.7]
- * 重新整理的图片层级的位移问题，修复了贴图在图片层位移比错位的问题。
- * [v1.8]
- * 优化了与地图活动镜头的兼容结构。
- * [v1.9]
- * 优化了旧存档的识别与兼容。
- * [v2.0]
- * 加强了插件结构，添加了修改单属性、移动到、自变化效果功能。
  * 
  * 
  * 
@@ -202,121 +157,121 @@
  *
  * @param 魔法圈层-1
  * @parent ---魔法圈层组 1至20---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-2
  * @parent ---魔法圈层组 1至20---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-3
  * @parent ---魔法圈层组 1至20---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-4
  * @parent ---魔法圈层组 1至20---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-5
  * @parent ---魔法圈层组 1至20---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-6
  * @parent ---魔法圈层组 1至20---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-7
  * @parent ---魔法圈层组 1至20---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-8
  * @parent ---魔法圈层组 1至20---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-9
  * @parent ---魔法圈层组 1至20---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-10
  * @parent ---魔法圈层组 1至20---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-11
  * @parent ---魔法圈层组 1至20---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-12
  * @parent ---魔法圈层组 1至20---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-13
  * @parent ---魔法圈层组 1至20---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-14
  * @parent ---魔法圈层组 1至20---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-15
  * @parent ---魔法圈层组 1至20---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-16
  * @parent ---魔法圈层组 1至20---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-17
  * @parent ---魔法圈层组 1至20---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-18
  * @parent ---魔法圈层组 1至20---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-19
  * @parent ---魔法圈层组 1至20---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-20
  * @parent ---魔法圈层组 1至20---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
@@ -325,121 +280,121 @@
  *
  * @param 魔法圈层-21
  * @parent ---魔法圈层组21至40---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-22
  * @parent ---魔法圈层组21至40---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-23
  * @parent ---魔法圈层组21至40---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-24
  * @parent ---魔法圈层组21至40---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-25
  * @parent ---魔法圈层组21至40---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-26
  * @parent ---魔法圈层组21至40---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-27
  * @parent ---魔法圈层组21至40---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-28
  * @parent ---魔法圈层组21至40---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-29
  * @parent ---魔法圈层组21至40---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-30
  * @parent ---魔法圈层组21至40---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-31
  * @parent ---魔法圈层组21至40---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-32
  * @parent ---魔法圈层组21至40---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-33
  * @parent ---魔法圈层组21至40---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-34
  * @parent ---魔法圈层组21至40---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-35
  * @parent ---魔法圈层组21至40---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-36
  * @parent ---魔法圈层组21至40---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-37
  * @parent ---魔法圈层组21至40---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-38
  * @parent ---魔法圈层组21至40---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-39
  * @parent ---魔法圈层组21至40---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-40
  * @parent ---魔法圈层组21至40---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
@@ -448,121 +403,121 @@
  *
  * @param 魔法圈层-41
  * @parent ---魔法圈层组41至60---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-42
  * @parent ---魔法圈层组41至60---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-43
  * @parent ---魔法圈层组41至60---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-44
  * @parent ---魔法圈层组41至60---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-45
  * @parent ---魔法圈层组41至60---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-46
  * @parent ---魔法圈层组41至60---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-47
  * @parent ---魔法圈层组41至60---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-48
  * @parent ---魔法圈层组41至60---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-49
  * @parent ---魔法圈层组41至60---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-50
  * @parent ---魔法圈层组41至60---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-51
  * @parent ---魔法圈层组41至60---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-52
  * @parent ---魔法圈层组41至60---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-53
  * @parent ---魔法圈层组41至60---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-54
  * @parent ---魔法圈层组41至60---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-55
  * @parent ---魔法圈层组41至60---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-56
  * @parent ---魔法圈层组41至60---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-57
  * @parent ---魔法圈层组41至60---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-58
  * @parent ---魔法圈层组41至60---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-59
  * @parent ---魔法圈层组41至60---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-60
  * @parent ---魔法圈层组41至60---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
@@ -571,905 +526,141 @@
  *
  * @param 魔法圈层-61
  * @parent ---魔法圈层组61至80---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-62
  * @parent ---魔法圈层组61至80---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-63
  * @parent ---魔法圈层组61至80---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-64
  * @parent ---魔法圈层组61至80---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-65
  * @parent ---魔法圈层组61至80---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-66
  * @parent ---魔法圈层组61至80---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-67
  * @parent ---魔法圈层组61至80---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-68
  * @parent ---魔法圈层组61至80---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-69
  * @parent ---魔法圈层组61至80---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-70
  * @parent ---魔法圈层组61至80---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-71
  * @parent ---魔法圈层组61至80---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-72
  * @parent ---魔法圈层组61至80---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-73
  * @parent ---魔法圈层组61至80---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-74
  * @parent ---魔法圈层组61至80---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-75
  * @parent ---魔法圈层组61至80---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-76
  * @parent ---魔法圈层组61至80---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-77
  * @parent ---魔法圈层组61至80---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-78
  * @parent ---魔法圈层组61至80---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-79
  * @parent ---魔法圈层组61至80---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  * @param 魔法圈层-80
  * @parent ---魔法圈层组61至80---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param ---魔法圈层组81至100---
- * @default
- *
- * @param 魔法圈层-81
- * @parent ---魔法圈层组81至100---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-82
- * @parent ---魔法圈层组81至100---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-83
- * @parent ---魔法圈层组81至100---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-84
- * @parent ---魔法圈层组81至100---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-85
- * @parent ---魔法圈层组81至100---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-86
- * @parent ---魔法圈层组81至100---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-87
- * @parent ---魔法圈层组81至100---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-88
- * @parent ---魔法圈层组81至100---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-89
- * @parent ---魔法圈层组81至100---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-90
- * @parent ---魔法圈层组81至100---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-91
- * @parent ---魔法圈层组81至100---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-92
- * @parent ---魔法圈层组81至100---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-93
- * @parent ---魔法圈层组81至100---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-94
- * @parent ---魔法圈层组81至100---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-95
- * @parent ---魔法圈层组81至100---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-96
- * @parent ---魔法圈层组81至100---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-97
- * @parent ---魔法圈层组81至100---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-98
- * @parent ---魔法圈层组81至100---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-99
- * @parent ---魔法圈层组81至100---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-100
- * @parent ---魔法圈层组81至100---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param ---魔法圈层组101至120---
- * @default
- *
- * @param 魔法圈层-101
- * @parent ---魔法圈层组101至120---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-102
- * @parent ---魔法圈层组101至120---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-103
- * @parent ---魔法圈层组101至120---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-104
- * @parent ---魔法圈层组101至120---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-105
- * @parent ---魔法圈层组101至120---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-106
- * @parent ---魔法圈层组101至120---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-107
- * @parent ---魔法圈层组101至120---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-108
- * @parent ---魔法圈层组101至120---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-109
- * @parent ---魔法圈层组101至120---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-110
- * @parent ---魔法圈层组101至120---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-111
- * @parent ---魔法圈层组101至120---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-112
- * @parent ---魔法圈层组101至120---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-113
- * @parent ---魔法圈层组101至120---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-114
- * @parent ---魔法圈层组101至120---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-115
- * @parent ---魔法圈层组101至120---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-116
- * @parent ---魔法圈层组101至120---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-117
- * @parent ---魔法圈层组101至120---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-118
- * @parent ---魔法圈层组101至120---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-119
- * @parent ---魔法圈层组101至120---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-120
- * @parent ---魔法圈层组101至120---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param ---魔法圈层组121至140---
- * @default
- *
- * @param 魔法圈层-121
- * @parent ---魔法圈层组121至140---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-122
- * @parent ---魔法圈层组121至140---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-123
- * @parent ---魔法圈层组121至140---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-124
- * @parent ---魔法圈层组121至140---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-125
- * @parent ---魔法圈层组121至140---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-126
- * @parent ---魔法圈层组121至140---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-127
- * @parent ---魔法圈层组121至140---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-128
- * @parent ---魔法圈层组121至140---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-129
- * @parent ---魔法圈层组121至140---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-130
- * @parent ---魔法圈层组121至140---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-131
- * @parent ---魔法圈层组121至140---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-132
- * @parent ---魔法圈层组121至140---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-133
- * @parent ---魔法圈层组121至140---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-134
- * @parent ---魔法圈层组121至140---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-135
- * @parent ---魔法圈层组121至140---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-136
- * @parent ---魔法圈层组121至140---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-137
- * @parent ---魔法圈层组121至140---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-138
- * @parent ---魔法圈层组121至140---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-139
- * @parent ---魔法圈层组121至140---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-140
- * @parent ---魔法圈层组121至140---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param ---魔法圈层组141至160---
- * @default
- *
- * @param 魔法圈层-141
- * @parent ---魔法圈层组141至160---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-142
- * @parent ---魔法圈层组141至160---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-143
- * @parent ---魔法圈层组141至160---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-144
- * @parent ---魔法圈层组141至160---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-145
- * @parent ---魔法圈层组141至160---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-146
- * @parent ---魔法圈层组141至160---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-147
- * @parent ---魔法圈层组141至160---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-148
- * @parent ---魔法圈层组141至160---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-149
- * @parent ---魔法圈层组141至160---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-150
- * @parent ---魔法圈层组141至160---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-151
- * @parent ---魔法圈层组141至160---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-152
- * @parent ---魔法圈层组141至160---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-153
- * @parent ---魔法圈层组141至160---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-154
- * @parent ---魔法圈层组141至160---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-155
- * @parent ---魔法圈层组141至160---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-156
- * @parent ---魔法圈层组141至160---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-157
- * @parent ---魔法圈层组141至160---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-158
- * @parent ---魔法圈层组141至160---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-159
- * @parent ---魔法圈层组141至160---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-160
- * @parent ---魔法圈层组141至160---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param ---魔法圈层组161至180---
- * @default
- *
- * @param 魔法圈层-161
- * @parent ---魔法圈层组161至180---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-162
- * @parent ---魔法圈层组161至180---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-163
- * @parent ---魔法圈层组161至180---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-164
- * @parent ---魔法圈层组161至180---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-165
- * @parent ---魔法圈层组161至180---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-166
- * @parent ---魔法圈层组161至180---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-167
- * @parent ---魔法圈层组161至180---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-168
- * @parent ---魔法圈层组161至180---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-169
- * @parent ---魔法圈层组161至180---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-170
- * @parent ---魔法圈层组161至180---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-171
- * @parent ---魔法圈层组161至180---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-172
- * @parent ---魔法圈层组161至180---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-173
- * @parent ---魔法圈层组161至180---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-174
- * @parent ---魔法圈层组161至180---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-175
- * @parent ---魔法圈层组161至180---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-176
- * @parent ---魔法圈层组161至180---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-177
- * @parent ---魔法圈层组161至180---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-178
- * @parent ---魔法圈层组161至180---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-179
- * @parent ---魔法圈层组161至180---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-180
- * @parent ---魔法圈层组161至180---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param ---魔法圈层组181至200---
- * @default
- *
- * @param 魔法圈层-181
- * @parent ---魔法圈层组181至200---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-182
- * @parent ---魔法圈层组181至200---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-183
- * @parent ---魔法圈层组181至200---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-184
- * @parent ---魔法圈层组181至200---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-185
- * @parent ---魔法圈层组181至200---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-186
- * @parent ---魔法圈层组181至200---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-187
- * @parent ---魔法圈层组181至200---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-188
- * @parent ---魔法圈层组181至200---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-189
- * @parent ---魔法圈层组181至200---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-190
- * @parent ---魔法圈层组181至200---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-191
- * @parent ---魔法圈层组181至200---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-192
- * @parent ---魔法圈层组181至200---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-193
- * @parent ---魔法圈层组181至200---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-194
- * @parent ---魔法圈层组181至200---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-195
- * @parent ---魔法圈层组181至200---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-196
- * @parent ---魔法圈层组181至200---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-197
- * @parent ---魔法圈层组181至200---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-198
- * @parent ---魔法圈层组181至200---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-199
- * @parent ---魔法圈层组181至200---
- * @type struct<LCiMapCircle>
- * @desc 魔法圈的详细配置信息。
- * @default 
- *
- * @param 魔法圈层-200
- * @parent ---魔法圈层组181至200---
- * @type struct<LCiMapCircle>
+ * @type struct<HDSCCircle>
  * @desc 魔法圈的详细配置信息。
  * @default 
  *
  */
-/*~struct~LCiMapCircle:
+/*~struct~HDSCCircle:
  * 
  * @param 标签
  * @desc 只用于方便区分查看的标签，不作用在插件中。
- * @default ==新的地图魔法圈==
- * 
- * @param ---绑定---
- * @default 
- *
- * @param 是否作用到所有地图
- * @parent ---绑定---
- * @type boolean
- * @on 作用到所有
- * @off 作用于指定地图
- * @desc 你可以设置作用到所有地图。注意，设置后直接对所有地图有效，使用前一定要想好想清楚了。
- * @default false
- * 
- * @param 所属地图
- * @parent 是否作用到所有地图
- * @type number
- * @min 1
- * @desc 该魔法圈将放在指定对应的地图id中。
- * @default 1
+ * @default ==新的天窗层魔法圈==
  * 
  * 
  * @param ---贴图---
  * @default 
  *
- * @param 初始是否显示
- * @parent ---贴图---
- * @type boolean
- * @on 显示
- * @off 不显示
- * @desc true - 显示，false - 不显示
- * @default true
- *
  * @param 资源-魔法圈
  * @parent ---贴图---
  * @desc 魔法圈的图片资源。
- * @default (需配置)地图魔法圈
+ * @default (需配置)天窗层魔法圈
  * @require 1
- * @dir img/Map__layer/
+ * @dir img/Special__layer/
  * @type file
  *
  * @param 透明度
@@ -1514,61 +705,49 @@
  *
  * @param 平移-魔法圈 X
  * @parent ---贴图---
- * @desc x轴方向平移，单位像素。0为贴在最左边。这里用来表示进入地图时图片的初始位置。
+ * @desc x轴方向平移，单位像素。0为贴在最左边。
  * @default 0
  *
  * @param 平移-魔法圈 Y
  * @parent ---贴图---
- * @desc y轴方向平移，单位像素。0为贴在最上面。这里用来表示进入地图时图片的初始位置。
+ * @desc y轴方向平移，单位像素。0为贴在最上面。
  * @default 0
  *
  * @param 旋转速度
  * @parent ---贴图---
  * @desc 正数逆时针，负数顺时针，单位 角度/帧。(1秒60帧，360.0为一周)
  * @default 2.50
- * 
- * @param 位移比X
- * @parent ---贴图---
- * @desc 与玩家地图的镜头位置有关，设置1.00，魔法圈和镜头的位移一致。设置0.00则魔法圈不随镜头移动，紧贴地图。负数则反向移动。
- * @default 0.00
  *
- * @param 位移比Y
+ * @param 是否在地图界面中启用
  * @parent ---贴图---
- * @desc 与玩家地图的镜头位置有关，设置1.00，魔法圈和镜头的位移一致。设置0.00则魔法圈不随镜头移动，紧贴地图。负数则反向移动。
- * @default 0.00
+ * @type boolean
+ * @on 启用
+ * @off 关闭
+ * @desc true - 启用，false - 关闭。
+ * @default true
  *
- * @param 位移图块偏移 X
+ * @param 是否在战斗界面中启用
  * @parent ---贴图---
- * @desc 与位移比相关，图片的中心点所在的图块X偏移量。单位图块，可为小数。
- * @default 0
+ * @type boolean
+ * @on 启用
+ * @off 关闭
+ * @desc true - 启用，false - 关闭。
+ * @default true
  *
- * @param 位移图块偏移 Y
+ * @param 是否在菜单界面中启用
  * @parent ---贴图---
- * @desc 与位移比相关，图片的中心点所在的图块Y偏移量。单位图块，可为小数。
- * @default 0
- *
- * @param 地图层级
- * @parent ---贴图---
- * @type select
- * @option 下层
- * @value 下层
- * @option 中层
- * @value 中层
- * @option 上层
- * @value 上层
- * @option 图片层
- * @value 图片层
- * @option 最顶层
- * @value 最顶层
- * @desc 地图所在的层级位置，具体关系看看插件说明。
- * @default 中层
+ * @type boolean
+ * @on 启用
+ * @off 关闭
+ * @desc true - 启用，false - 关闭。
+ * @default true
  *
  * @param 图片层级
  * @parent ---贴图---
  * @type number
  * @min 0
- * @desc 魔法圈在同一个地图层，先后排序的位置，0表示最后面。
- * @default 4
+ * @desc 天窗层先后排序的位置，0表示最后面。
+ * @default 14
  * 
  * 
  * @param ---3d效果---
@@ -1700,36 +879,14 @@
  * @desc 缩放变化的比例幅度范围。
  * @default 0.2
  * 
- * 
- * @param ---动态遮罩---
- * @desc 
- * 
- * @param 是否启用地图动态遮罩
- * @parent ---动态遮罩---
- * @type boolean
- * @on 启用
- * @off 关闭
- * @desc 设置后，魔法圈会被 地图动态遮罩板 遮住，通过特定的 透视镜 才能看到该魔法圈的部分图像。
- * @default false
- *
- * @param 关联的动态遮罩板
- * @parent ---动态遮罩---
- * @type select
- * @option 动态遮罩板A
- * @value 动态遮罩板A
- * @option 动态遮罩板B
- * @value 动态遮罩板B
- * @desc 关联绑定的动态遮罩板。
- * @default 动态遮罩板A
- * 
  *
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		LCi（Layer_Circle）
-//		临时全局变量	DrillUp.g_LCi_xxx
-//		临时局部变量	this._drill_LCi_xxx
-//		存储数据变量	$gameSystem._drill_LCi_xxx
+//		插件简称		HDSC（Html_Dynamic_Snapshot_Circle）
+//		临时全局变量	DrillUp.g_HDSC_xxx
+//		临时局部变量	this._drill_HDSC_xxx
+//		存储数据变量	$gameSystem._drill_HDSC_xxx
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
@@ -1737,8 +894,8 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^2)*o(贴图处理) 每帧
-//		★性能测试因素	对话管理层
-//		★性能测试消耗	16.32ms  3.77ms（updateBase）
+//		★性能测试因素	特效管理层
+//		★性能测试消耗	13.2ms（Drill_HDSC_Sprite.update）
 //		★最坏情况		暂无
 //		★备注			暂无
 //		
@@ -1751,33 +908,18 @@
 //			->☆变量获取
 //			->☆插件指令
 //			->☆存储数据
-//			->☆地图层级
-//				->添加贴图到层级【标准函数】
-//				->去除贴图【标准函数】
-//				->图片层级排序【标准函数】
-//				->层级与镜头的位移【标准函数】
 //			
-//			->☆数据容器
-//				->匹配全地图数据时
-//				->匹配单地图数据时
-//				->不匹配时
 //			->☆贴图控制
-//				->控制器与镜头
-//					> 图块平移
-//					> 位移比
-//					> 循环积累值
-//				->动态遮罩
-//					->创建
-//					->延迟创建
+//				->跨多个界面控制
+//				->控制器
 //				->销毁
 //			
-//			->地图魔法圈控制器【Drill_LCi_Controller】
+//			->天窗层魔法圈控制器【Drill_HDSC_Controller】
 //				->A主体
 //				->B基本变化
-//				->C镜头参数
 //				->D指令叠加变化
 //				->E自变化效果
-//			->地图魔法圈贴图【Drill_LCi_Sprite】
+//			->天窗层魔法圈贴图【Drill_HDSC_Sprite】
 //				->A主体
 //				->B基本变化
 //				->C对象绑定
@@ -1786,24 +928,17 @@
 //
 //
 //		★家谱：
-//			无
+//			大家族-屏幕快照
 //		
 //		★插件私有类：
-//			* 地图魔法圈控制器【Drill_LCi_Controller】
-//			* 地图魔法圈贴图【Drill_LCi_Sprite】
+//			* 天窗层魔法圈控制器【Drill_HDSC_Controller】
+//			* 天窗层魔法圈贴图【Drill_HDSC_Sprite】
 //		
 //		★必要注意事项：
-//			1. 地图界面全层级关系：
-//				Spriteset： LowerLayer：	地图远景 < 下层 < 图块层 < 中层 < 事件/玩家层 < 鼠标目的地 < 上层 < 天气层
-//							UpperLayer：	< 图片对象层 < (时间框层) < (闪烁幕布层) < 图片层
-//											< MOG的ui层【_hudField】 < ui层【_drill_map_top_board】
-//				AllWindows：WindowLayer：	< 对话框集合 < 滚动文本画布 < 最顶层【_drill_SenceTopArea】
-//			2.使用插件指令变化时，changing将会作为一个变化容器，根据时间对 数据 进行改变。
-//			3.原理基于【定量】赋值，【你直接用_displayX就可以了】,增量赋值方法绕太多远路！
-//
+//			1. 
+//		
 //		★其它说明细节：
-//			1.位移图块偏移 X为小数，但是不明原因必须用【parseFloat】才能解析小数。
-//			  使用Number会变成NAN。
+//			1.
 //				
 //		★存在的问题：
 //			暂无
@@ -1816,33 +951,30 @@
 	// * 提示信息 - 参数
 	//==============================
 	var DrillUp = DrillUp || {}; 
-	DrillUp.g_LCi_PluginTip_curName = "Drill_LayerCircle.js 地图-多层地图魔法圈";
-	DrillUp.g_LCi_PluginTip_baseList = ["Drill_CoreOfBallistics.js 系统-弹道核心"];
+	DrillUp.g_HDSC_PluginTip_curName = "Drill_HtmlDynamicSnapshotCircle.js 游戏窗体-天窗层的多层魔法圈";
+	DrillUp.g_HDSC_PluginTip_baseList = [
+		"Drill_CoreOfDynamicSnapshot.js 游戏窗体-动态快照核心",
+		"Drill_CoreOfBallistics.js 系统-弹道核心"
+	];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
 	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
-	DrillUp.drill_LCi_getPluginTip_NoBasePlugin = function(){
-		if( DrillUp.g_LCi_PluginTip_baseList.length == 0 ){ return ""; }
-		var message = "【" + DrillUp.g_LCi_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
-		for(var i=0; i < DrillUp.g_LCi_PluginTip_baseList.length; i++){
+	DrillUp.drill_HDSC_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_HDSC_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_HDSC_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_HDSC_PluginTip_baseList.length; i++){
 			message += "\n- ";
-			message += DrillUp.g_LCi_PluginTip_baseList[i];
+			message += DrillUp.g_HDSC_PluginTip_baseList[i];
 		}
 		return message;
 	};
 	//==============================
 	// * 提示信息 - 报错 - 强制更新提示
 	//==============================
-	DrillUp.drill_LCi_getPluginTip_NeedUpdate_Camera = function(){
-		return "【" + DrillUp.g_LCi_PluginTip_curName + "】\n活动地图镜头插件版本过低，你需要更新 镜头插件 至少v2.2及以上版本。";
-	};
-	//==============================
-	// * 提示信息 - 报错 - 强制更新提示
-	//==============================
-	DrillUp.drill_LCi_getPluginTip_NeedUpdate_Ballistics = function(){
-		return "【" + DrillUp.g_LCi_PluginTip_curName + "】\n弹道核心插件版本过低，你需要更新 弹道核心 至少v2.2及以上版本。";
+	DrillUp.drill_HDSC_getPluginTip_NeedUpdate_Ballistics = function(){
+		return "【" + DrillUp.g_HDSC_PluginTip_curName + "】\n弹道核心插件版本过低，你需要更新 弹道核心 至少v2.2及以上版本。";
 	};
 	
 	
@@ -1850,36 +982,33 @@
 // ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
-　　Imported.Drill_LayerCircle = true;
+　　Imported.Drill_HtmlDynamicSnapshotCircle = true;
 　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_LayerCircle');
+    DrillUp.parameters = PluginManager.parameters('Drill_HtmlDynamicSnapshotCircle');
 	
 	//==============================
 	// * 变量获取 - 魔法圈
-	//				（~struct~LCiMapCircle）
+	//				（~struct~HDSCCircle）
 	//==============================
-	DrillUp.drill_LCi_circleInit = function( dataFrom ) {
+	DrillUp.drill_HDSC_circleInit = function( dataFrom ) {
 		var data = {};
 		
-		// > 绑定
-		data['mapToAll'] = String( dataFrom["是否作用到所有地图"] || "false") == "true";
-		data['map'] = Number( dataFrom["所属地图"] || 0);
-		
-		
 		// > 控制器
-		data['visible'] = String( dataFrom["初始是否显示"] || "true") == "true";
+		data['visible'] = false;
 		data['pause'] = false;
 		
 		// > 贴图
 		data['src_img'] = String( dataFrom["资源-魔法圈"] || "");
-		data['src_img_file'] = "img/Map__layer/";
+		data['src_img_file'] = "img/Special__layer/";
 		
 		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
 		data['tint'] = Number( dataFrom["图像-色调值"] || 0);
 		data['smooth'] = String( dataFrom["图像-模糊边缘"] || "false") == "true";
 		
-		data['layerIndex'] = String( dataFrom["地图层级"] || "下层");
-		data['zIndex'] = Number( dataFrom["图片层级"] || 0);
+		data['zIndex'] = Number( dataFrom["图片层级"] || 14);
+		data['map_enabled'] = String( dataFrom["是否在地图界面中启用"] || "true") == "true";
+		data['battle_enabled'] = String( dataFrom["是否在战斗界面中启用"] || "true") == "true";
+		data['menu_enabled'] = String( dataFrom["是否在菜单界面中启用"] || "true") == "true";
 		
 		// > A主体
 		data['x'] = Number( dataFrom["平移-魔法圈 X"] || 0);
@@ -1910,33 +1039,22 @@
 		data['effect_zoomSpeed'] = Number( dataFrom["缩放速度"] || 1.0);
 		data['effect_zoomRange'] = Number( dataFrom["缩放幅度范围"] || 0.2);
 		
-		
-		// > 位移比
-		data['XPer'] = Number( dataFrom["位移比X"] || 0);
-		data['YPer'] = Number( dataFrom["位移比Y"] || 0);
-		data['tile_x'] = parseFloat( dataFrom["位移图块偏移 X"] || 0);
-		data['tile_y'] = parseFloat( dataFrom["位移图块偏移 Y"] || 0);
-		
-		// > 动态遮罩
-		data['dynamicMask_enabled'] = String( dataFrom["是否启用地图动态遮罩"] || "false") == "true";
-		data['dynamicMask_bind'] = String( dataFrom["关联的动态遮罩板"] || "动态遮罩板A");
-		
 		return data;
 	}
 
 	/*-----------------杂项------------------*/
-	DrillUp.g_LCi_saveEnabled = String(DrillUp.parameters["是否开启参数存储"] || "false") == "true" ;
+	DrillUp.g_HDSC_saveEnabled = String(DrillUp.parameters["是否开启参数存储"] || "false") == "true" ;
 	
 	/*-----------------魔法圈------------------*/
-	DrillUp.g_LCi_layers_length = 200;
-	DrillUp.g_LCi_layers = [];
-	for (var i = 0; i < DrillUp.g_LCi_layers_length; i++) {
+	DrillUp.g_HDSC_layers_length = 80;
+	DrillUp.g_HDSC_layers = [];
+	for (var i = 0; i < DrillUp.g_HDSC_layers_length; i++) {
 		if( DrillUp.parameters["魔法圈层-" + String(i+1) ] != undefined &&
 			DrillUp.parameters["魔法圈层-" + String(i+1) ] != "" ){
 			var temp = JSON.parse(DrillUp.parameters["魔法圈层-" + String(i+1) ]);
-			DrillUp.g_LCi_layers[i] = DrillUp.drill_LCi_circleInit( temp );
+			DrillUp.g_HDSC_layers[i] = DrillUp.drill_HDSC_circleInit( temp );
 		}else{
-			DrillUp.g_LCi_layers[i] = null;		//（强制设为空值，节约存储资源）
+			DrillUp.g_HDSC_layers[i] = null;		//（强制设为空值，节约存储资源）
 		}
 	}
 	
@@ -1945,20 +1063,21 @@
 //=============================================================================
 // * >>>>基于插件检测>>>>
 //=============================================================================
-if( Imported.Drill_CoreOfBallistics ){
+if( Imported.Drill_CoreOfDynamicSnapshot &&
+	Imported.Drill_CoreOfBallistics ){
 	
 	if( typeof(Drill_COBa_ExtendTool) == "undefined" ){	//（弹道核心版本检测）
-		alert( DrillUp.drill_LCi_getPluginTip_NeedUpdate_Ballistics() );
+		alert( DrillUp.drill_HDSC_getPluginTip_NeedUpdate_Ballistics() );
 	}
 
 
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
-var _drill_LCi_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+var _drill_HDSC_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
-	_drill_LCi_pluginCommand.call(this, command, args);
-	if( command === ">地图魔法圈" ){ // >地图魔法圈 : 魔法圈[1] : 显示
+	_drill_HDSC_pluginCommand.call(this, command, args);
+	if( command === ">天窗层魔法圈" ){ // >天窗层魔法圈 : 魔法圈[1] : 显示
 	
 		/*-----------------对象组获取------------------*/
 		var controllers = null;
@@ -1971,7 +1090,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				var temp_arr = unit.split(/[,，]/);
 				for( var k=0; k < temp_arr.length; k++ ){
 					var controller_id = Number(temp_arr[k]);
-					var temp_controller = $gameSystem._drill_LCi_dataTank_curController[ controller_id -1 ];
+					var temp_controller = $gameSystem._drill_HDSC_controllerTank[ controller_id -1 ];
 					if( temp_controller == undefined ){ continue; }
 					controllers.push( temp_controller );
 				}
@@ -1983,7 +1102,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				var temp_arr = unit.split(/[,，]/);
 				for( var k=0; k < temp_arr.length; k++ ){
 					var controller_id = $gameVariables.value(Number(temp_arr[k]));
-					var temp_controller = $gameSystem._drill_LCi_dataTank_curController[ controller_id -1 ];
+					var temp_controller = $gameSystem._drill_HDSC_controllerTank[ controller_id -1 ];
 					if( temp_controller == undefined ){ continue; }
 					controllers.push( temp_controller );
 				}
@@ -1992,7 +1111,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				unit = unit.replace("魔法圈变量[","");
 				unit = unit.replace("]","");
 				var controller_id = $gameVariables.value(Number(unit));
-				var temp_controller = $gameSystem._drill_LCi_dataTank_curController[ controller_id -1 ];
+				var temp_controller = $gameSystem._drill_HDSC_controllerTank[ controller_id -1 ];
 				if( temp_controller == undefined ){ return; }
 				controllers = [ temp_controller ];
 			}
@@ -2000,9 +1119,17 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				unit = unit.replace("魔法圈[","");
 				unit = unit.replace("]","");
 				var controller_id = Number(unit);
-				var temp_controller = $gameSystem._drill_LCi_dataTank_curController[ controller_id -1 ];
+				var temp_controller = $gameSystem._drill_HDSC_controllerTank[ controller_id -1 ];
 				if( temp_controller == undefined ){ return; }
 				controllers = [ temp_controller ];
+			}
+			if( controllers == null && unit == "全部魔法圈" ){
+				controllers = [];
+				for( var k=0; k < $gameSystem._drill_HDSC_controllerTank.length; k++ ){
+					var temp_controller = $gameSystem._drill_HDSC_controllerTank[ k ];
+					if( temp_controller == undefined ){ continue; }
+					controllers.push( temp_controller );
+				}
 			}
 		}
 		if( controllers == null ){ return; }
@@ -2069,7 +1196,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				
 				if( temp1.indexOf("透明度[") != -1 ||
 					temp1.indexOf("透明度变量[") != -1 ){
-					var num_list = this.drill_LCi_getArgNumList(temp1);
+					var num_list = this.drill_HDSC_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_commandChange_setOpacity(
 							"匀速变化", num_list[0], Number(temp2)
@@ -2078,7 +1205,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				}
 				if( temp1.indexOf("旋转[") != -1 ||
 					temp1.indexOf("旋转变量[") != -1 ){
-					var num_list = this.drill_LCi_getArgNumList(temp1);
+					var num_list = this.drill_HDSC_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_commandChange_setRotate(
 							"匀速变化", num_list[0], Number(temp2)
@@ -2087,7 +1214,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				}
 				if( temp1.indexOf("转速[") != -1 ||
 					temp1.indexOf("转速变量[") != -1 ){
-					var num_list = this.drill_LCi_getArgNumList(temp1);
+					var num_list = this.drill_HDSC_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_commandChange_setRotateSpeed(
 							"匀速变化", num_list[0], Number(temp2)
@@ -2095,7 +1222,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					}
 				}
 				if( temp1.indexOf("缩放X[") != -1 ){
-					var num_list = this.drill_LCi_getArgNumList(temp1);
+					var num_list = this.drill_HDSC_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_commandChange_setScaleX(
 							"匀速变化", num_list[0], Number(temp2)
@@ -2103,7 +1230,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					}
 				}
 				if( temp1.indexOf("缩放Y[") != -1 ){
-					var num_list = this.drill_LCi_getArgNumList(temp1);
+					var num_list = this.drill_HDSC_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_commandChange_setScaleY(
 							"匀速变化", num_list[0], Number(temp2)
@@ -2111,7 +1238,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					}
 				}
 				if( temp1.indexOf("斜切X[") != -1 ){
-					var num_list = this.drill_LCi_getArgNumList(temp1);
+					var num_list = this.drill_HDSC_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_commandChange_setSkewX(
 							"匀速变化", num_list[0], Number(temp2)
@@ -2119,7 +1246,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					}
 				}
 				if( temp1.indexOf("斜切Y[") != -1 ){
-					var num_list = this.drill_LCi_getArgNumList(temp1);
+					var num_list = this.drill_HDSC_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_commandChange_setSkewY(
 							"匀速变化", num_list[0], Number(temp2)
@@ -2132,7 +1259,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp2 = temp2.replace("]","");
 				if( temp1.indexOf("位置[") != -1 ||
 					temp1.indexOf("位置变量[") != -1 ){
-					var num_list = this.drill_LCi_getArgNumList(temp1);
+					var num_list = this.drill_HDSC_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_commandChange_setMove(
 							"匀速变化", num_list[0], num_list[1], Number(temp2)
@@ -2145,7 +1272,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp2 = temp2.replace("]","");
 				if( temp1.indexOf("位置[") != -1 ||
 					temp1.indexOf("位置变量[") != -1 ){
-					var num_list = this.drill_LCi_getArgNumList(temp1);
+					var num_list = this.drill_HDSC_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_commandChange_setMove(
 							"弹性变化", num_list[0], num_list[1], Number(temp2)
@@ -2158,7 +1285,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp2 = temp2.replace("]","");
 				if( temp1.indexOf("位置[") != -1 ||
 					temp1.indexOf("位置变量[") != -1 ){
-					var num_list = this.drill_LCi_getArgNumList(temp1);
+					var num_list = this.drill_HDSC_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_commandChange_setMove(
 							"增减速变化", num_list[0], num_list[1], Number(temp2)
@@ -2177,7 +1304,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 //
 //			说明：	> 能获取到字符串中的数字，且包含 变量 转换情况。
 //==============================
-Game_Interpreter.prototype.drill_LCi_getArgNumList = function( arg_str ){
+Game_Interpreter.prototype.drill_HDSC_getArgNumList = function( arg_str ){
 	var arr = arg_str.match( /([^\[]+)\[([^\]]+)\]/ );
 	if( arr != undefined && arr.length >= 3 ){
 	// > 有方括号
@@ -2210,33 +1337,33 @@ Game_Interpreter.prototype.drill_LCi_getArgNumList = function( arg_str ){
 //          
 //			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
 //##############################
-//DrillUp.g_LCi_saveEnabled = true;
+//DrillUp.g_HDSC_saveEnabled = true;
 //##############################
 // * 存储数据 - 初始化
 //          
 //			说明：	> 下方为固定写法，不要动。
 //##############################
-var _drill_LCi_sys_initialize = Game_System.prototype.initialize;
+var _drill_HDSC_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-    _drill_LCi_sys_initialize.call(this);
-	this.drill_LCi_initSysData();
+    _drill_HDSC_sys_initialize.call(this);
+	this.drill_HDSC_initSysData();
 };
 //##############################
 // * 存储数据 - 载入存档
 //          
 //			说明：	> 下方为固定写法，不要动。
 //##############################
-var _drill_LCi_sys_extractSaveContents = DataManager.extractSaveContents;
+var _drill_HDSC_sys_extractSaveContents = DataManager.extractSaveContents;
 DataManager.extractSaveContents = function( contents ){
-	_drill_LCi_sys_extractSaveContents.call( this, contents );
+	_drill_HDSC_sys_extractSaveContents.call( this, contents );
 	
 	// > 参数存储 启用时（检查数据）
-	if( DrillUp.g_LCi_saveEnabled == true ){	
-		$gameSystem.drill_LCi_checkSysData();
+	if( DrillUp.g_HDSC_saveEnabled == true ){	
+		$gameSystem.drill_HDSC_checkSysData();
 		
 	// > 参数存储 关闭时（直接覆盖）
 	}else{
-		$gameSystem.drill_LCi_initSysData();
+		$gameSystem.drill_HDSC_initSysData();
 	}
 };
 //##############################
@@ -2247,8 +1374,8 @@ DataManager.extractSaveContents = function( contents ){
 //          
 //			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
 //##############################
-Game_System.prototype.drill_LCi_initSysData = function() {
-	this.drill_LCi_initSysData_Private();
+Game_System.prototype.drill_HDSC_initSysData = function() {
+	this.drill_HDSC_initSysData_Private();
 };
 //##############################
 // * 存储数据 - 载入存档时检查数据【标准函数】
@@ -2258,8 +1385,8 @@ Game_System.prototype.drill_LCi_initSysData = function() {
 //          
 //			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
 //##############################
-Game_System.prototype.drill_LCi_checkSysData = function() {
-	this.drill_LCi_checkSysData_Private();
+Game_System.prototype.drill_HDSC_checkSysData = function() {
+	this.drill_HDSC_checkSysData_Private();
 };
 //=============================================================================
 // ** 存储数据（接口实现）
@@ -2267,283 +1394,42 @@ Game_System.prototype.drill_LCi_checkSysData = function() {
 //==============================
 // * 存储数据 - 初始化数据（私有）
 //==============================
-Game_System.prototype.drill_LCi_initSysData_Private = function() {
+Game_System.prototype.drill_HDSC_initSysData_Private = function() {
 	
-	this._drill_LCi_dataTank_curController = [];	//当前地图容器（与 g_LCi_layers 依次对应，容器允许出现null值）
-	for(var i = 0; i < DrillUp.g_LCi_layers.length; i++){
-		var temp_data = DrillUp.g_LCi_layers[i];
+	this._drill_HDSC_controllerTank = [];	//当前容器（与 g_HDSC_layers 依次对应，容器允许出现null值）
+	for(var i = 0; i < DrillUp.g_HDSC_layers.length; i++){
+		var temp_data = DrillUp.g_HDSC_layers[i];
 		if( temp_data == undefined ){ continue; }
 		
-		// > 控制器 - 匹配全地图数据时（直接存储，每次地图刷新时，不刷新 全地图数据）
-		if( temp_data['mapToAll'] == true ){
-			var temp_controller = new Drill_LCi_Controller( temp_data );
-			this._drill_LCi_dataTank_curController[i] = temp_controller;
-		}
-		
-		// > 控制器 - 匹配单地图数据时
-		//	（见 drill_LCi_initMapdata ）
-		
-		// > 控制器 - 不匹配时
-		//	（见 drill_LCi_initMapdata ）
-	}
-	
-	// > 刷新当前地图【$gameSystem优先初始化】
-	if( $gameMap != undefined ){
-		$gameMap.drill_LCi_initMapdata();
+		var temp_controller = new Drill_HDSC_Controller( temp_data );
+		this._drill_HDSC_controllerTank[i] = temp_controller;
 	}
 };
 //==============================
 // * 存储数据 - 载入存档时检查数据（私有）
 //==============================
-Game_System.prototype.drill_LCi_checkSysData_Private = function() {
+Game_System.prototype.drill_HDSC_checkSysData_Private = function() {
 	
 	// > 旧存档数据自动补充
-	if( this._drill_LCi_dataTank_curController == undefined ){
-		this.drill_LCi_initSysData();
+	if( this._drill_HDSC_controllerTank == undefined ){
+		this.drill_HDSC_initSysData();
 	}
 	
 	// > 容器的 空数据 检查
-	for(var i = 0; i < DrillUp.g_LCi_layers.length; i++ ){
-		var temp_data = DrillUp.g_LCi_layers[i];
+	for(var i = 0; i < DrillUp.g_HDSC_layers.length; i++ ){
+		var temp_data = DrillUp.g_HDSC_layers[i];
+			
+		// > 未存储的，重新初始化
+		if( this._drill_HDSC_controllerTank[i] == undefined ){
+			var temp_controller = new Drill_HDSC_Controller( temp_data );
+			this._drill_HDSC_controllerTank[i] = temp_controller;
 		
-		
-		// > 控制器 - 匹配全地图数据时
-		if( temp_data != undefined &&
-			temp_data['mapToAll'] == true ){
-			
-			// > 未存储的，重新初始化
-			if( this._drill_LCi_dataTank_curController[i] == undefined ){
-				var temp_controller = new Drill_LCi_Controller( temp_data );
-				this._drill_LCi_dataTank_curController[i] = temp_controller;
-			
-			// > 已存储的，跳过
-			}else{
-				//（不操作）
-			}
-		}
-	}
-};
-
-
-//#############################################################################
-// ** 【标准模块】地图层级 ☆地图层级
-//#############################################################################
-//##############################
-// * 地图层级 - 添加贴图到层级【标准函数】
-//				
-//			参数：	> sprite 贴图        （添加的贴图对象）
-//					> layer_index 字符串 （添加到的层级名，下层/中层/上层/图片层/最顶层）
-//			返回：	> 无
-//          
-//			说明：	> 强行规范的接口，将指定贴图添加到目标层级中。
-//##############################
-Scene_Map.prototype.drill_LCi_layerAddSprite = function( sprite, layer_index ){
-	this.drill_LCi_layerAddSprite_Private( sprite, layer_index );
-}
-//##############################
-// * 地图层级 - 去除贴图【标准函数】
-//				
-//			参数：	> sprite 贴图（添加的贴图对象）
-//			返回：	> 无
-//          
-//			说明：	> 强行规范的接口，将指定贴图从地图层级中移除。
-//##############################
-Scene_Map.prototype.drill_LCi_layerRemoveSprite = function( sprite ){
-	//（不操作）
-}
-//##############################
-// * 地图层级 - 图片层级排序【标准函数】
-//				
-//			参数：	> 无
-//			返回：	> 无
-//          
-//			说明：	> 执行该函数后，地图层级的子贴图，按照zIndex属性来进行先后排序。值越大，越靠前。
-//##############################
-Scene_Map.prototype.drill_LCi_sortByZIndex = function () {
-    this.drill_LCi_sortByZIndex_Private();
-}
-//##############################
-// * 地图层级 - 层级与镜头的位移【标准函数】
-//				
-//			参数：	> x 数字              （x位置）
-//					> y 数字              （y位置）
-//					> layer 字符串        （层级，下层/中层/上层/图片层/最顶层）
-//					> option 动态参数对象 （计算时的必要数据）
-//			返回：	> pos 动态参数对象
-//                  > pos['x']
-//                  > pos['y']
-//          
-//			说明：	> 强行规范的接口，必须按照接口的结构来，把要考虑的问题全考虑清楚了再去实现。
-//##############################
-Scene_Map.prototype.drill_LCi_layerCameraMoving = function( x, y, layer, option ){
-	return this.drill_LCi_layerCameraMoving_Private( x, y, layer, option );
-}
-//=============================================================================
-// ** 地图层级（接口实现）
-//=============================================================================
-//==============================
-// * 地图层级 - 下层
-//==============================
-var _drill_LCi_map_createParallax = Spriteset_Map.prototype.createParallax;
-Spriteset_Map.prototype.createParallax = function() {
-	_drill_LCi_map_createParallax.call(this);		//地图远景 < 下层 < 图块层
-	if( !this._drill_mapDownArea ){
-		this._drill_mapDownArea = new Sprite();
-		this._baseSprite.addChild(this._drill_mapDownArea);	
-	}
-}
-//==============================
-// * 地图层级 - 中层
-//==============================
-var _drill_LCi_map_createTilemap = Spriteset_Map.prototype.createTilemap;
-Spriteset_Map.prototype.createTilemap = function() {
-	_drill_LCi_map_createTilemap.call(this);		//图块层 < 中层 < 事件/玩家层
-	if( !this._drill_mapCenterArea ){
-		this._drill_mapCenterArea = new Sprite();
-		this._drill_mapCenterArea.z = 0.60;
-		this._tilemap.addChild(this._drill_mapCenterArea);	
-	}
-}
-//==============================
-// * 地图层级 - 上层
-//==============================
-var _drill_LCi_map_createDestination = Spriteset_Map.prototype.createDestination;
-Spriteset_Map.prototype.createDestination = function() {
-	_drill_LCi_map_createDestination.call(this);	//鼠标目的地 < 上层 < 天气层
-	if( !this._drill_mapUpArea ){
-		this._drill_mapUpArea = new Sprite();
-		this._baseSprite.addChild(this._drill_mapUpArea);	
-	}
-}
-//==============================
-// * 地图层级 - 图片层
-//==============================
-var _drill_LCi_map_createPictures = Spriteset_Map.prototype.createPictures;
-Spriteset_Map.prototype.createPictures = function() {
-	_drill_LCi_map_createPictures.call(this);		//图片对象层 < 图片层 < 对话框集合
-	if( !this._drill_mapPicArea ){
-		this._drill_mapPicArea = new Sprite();
-		this.addChild(this._drill_mapPicArea);	
-	}
-}
-//==============================
-// * 地图层级 - 最顶层
-//==============================
-var _drill_LCi_map_createAllWindows = Scene_Map.prototype.createAllWindows;
-Scene_Map.prototype.createAllWindows = function() {
-	_drill_LCi_map_createAllWindows.call(this);	//对话框集合 < 最顶层
-	if( !this._drill_SenceTopArea ){
-		this._drill_SenceTopArea = new Sprite();
-		this.addChild(this._drill_SenceTopArea);	
-	}
-}
-//==============================
-// * 地图层级 - 图片层级排序（私有）
-//==============================
-Scene_Map.prototype.drill_LCi_sortByZIndex_Private = function() {
-	this._spriteset._drill_mapDownArea.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
-	this._spriteset._drill_mapCenterArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
-	this._spriteset._drill_mapUpArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
-	this._spriteset._drill_mapPicArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
-	this._drill_SenceTopArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
-};
-//==============================
-// * 地图层级 - 添加贴图到层级（私有）
-//==============================
-Scene_Map.prototype.drill_LCi_layerAddSprite_Private = function( sprite, layer_index ){
-	if( layer_index == "下层" ){
-		this._spriteset._drill_mapDownArea.addChild( sprite );
-	}
-	if( layer_index == "中层" ){
-		this._spriteset._drill_mapCenterArea.addChild( sprite );
-	}
-	if( layer_index == "上层" ){
-		this._spriteset._drill_mapUpArea.addChild( sprite );
-	}
-	if( layer_index == "图片层" ){
-		this._spriteset._drill_mapPicArea.addChild( sprite );
-	}
-	if( layer_index == "最顶层" ){
-		this._drill_SenceTopArea.addChild( sprite );
-	}
-}
-//==============================
-// * 地图层级 - 层级与镜头的位移（私有）
-//==============================
-Scene_Map.prototype.drill_LCi_layerCameraMoving_Private = function( xx, yy, layer, option ){
-	
-	// > 位移比
-	var x_per = option['XPer'];
-	var y_per = option['YPer'];
-	
-	xx -= option['tile_x'] * $gameMap.tileWidth() * x_per;
-	yy -= option['tile_y'] * $gameMap.tileHeight() * y_per;
-	//		（*0 表示紧贴地图；*1表示减回去了，紧贴镜头。）
-	
-	xx += option['cameraXAcc'] * x_per;
-	yy += option['cameraYAcc'] * y_per;
-	//		（*0 表示不跟镜头移动，紧贴地图；*1表示紧贴镜头。）
-	
-	
-	// > 地图参照 -> 地图参照
-	if( layer == "下层" || layer == "中层" || layer == "上层" ){
-		return {'x':xx, 'y':yy };
-	}
-	// > 地图参照 -> 镜头参照
-	if( layer == "图片层" || layer == "最顶层" ){
-		xx -= this._spriteset._baseSprite.x;	//（由于 Spriteset_Map 的 _baseSprite 坐标始终是(0,0)，所以两个参照没有区别。）
-		yy -= this._spriteset._baseSprite.y;
-		//xx -= this._tilemap.origin.x;			//（存在疑问。。。）
-		//yy -= this._tilemap.origin.y;
-		return {'x':xx, 'y':yy };
-	}
-	return {'x':xx, 'y':yy };
-}
-
-
-
-//=============================================================================
-// ** ☆数据容器
-//
-//			说明：	> 此模块管理 当前地图中的控制器。
-//					（插件完整的功能目录去看看：功能结构树）
-//=============================================================================
-//==============================
-// * 数据容器 - 初始化绑定
-//==============================
-var _drill_LCi_setup = Game_Map.prototype.setup;
-Game_Map.prototype.setup = function( mapId ){
-	_drill_LCi_setup.call( this, mapId );
-	this.drill_LCi_initMapdata();
-}
-//==============================
-// * 数据容器 - 初始化
-//==============================
-Game_Map.prototype.drill_LCi_initMapdata = function() {
-	
-	// > 刷新当前地图 控制器
-	for(var i = 0; i< DrillUp.g_LCi_layers.length ;i++){
-		var temp_data = DrillUp.g_LCi_layers[i];
-		if( temp_data == undefined ){
-			$gameSystem._drill_LCi_dataTank_curController[i] = null;
-			continue;
-		}
-		
-		// > 控制器 - 匹配全地图数据时
-		if( temp_data['mapToAll'] == true ){
-			//（不刷新数据）
-			
-		// > 控制器 - 匹配单地图数据时
-		}else if( temp_data['map'] == this._mapId ){
-			var temp_controller = new Drill_LCi_Controller( temp_data );
-			$gameSystem._drill_LCi_dataTank_curController[i] = temp_controller;	//（重刷数据）
-			
-		// > 控制器 - 不匹配时
+		// > 已存储的，跳过
 		}else{
-			$gameSystem._drill_LCi_dataTank_curController[i] = null;	//（某地图不含此贴图配置，则直接置空）
+			//（不操作）
 		}
 	}
-}
+};
 
 
 //=============================================================================
@@ -2555,192 +1441,193 @@ Game_Map.prototype.drill_LCi_initMapdata = function() {
 //==============================
 // * 贴图控制 - 容器初始化
 //==============================
-var _drill_LCi_temp_initialize2 = Game_Temp.prototype.initialize;
+var _drill_HDSC_temp_initialize2 = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {
-	_drill_LCi_temp_initialize2.call(this);
-	this._drill_LCi_spriteTank = [];			//贴图容器
+	_drill_HDSC_temp_initialize2.call(this);
+	this._drill_HDSC_spriteTank = [];			//贴图容器
+	Graphics.drill_CODS_overstoryLayerClear();	//清空 天窗层
 };
 //==============================
 // * 贴图控制 - 销毁时（地图界面）
 //==============================
-var _drill_LCi_smap_terminate = Scene_Map.prototype.terminate;
+var _drill_HDSC_smap_terminate = Scene_Map.prototype.terminate;
 Scene_Map.prototype.terminate = function() {
-	_drill_LCi_smap_terminate.call(this);
-	$gameTemp._drill_LCi_spriteTank = [];		//贴图容器
+	_drill_HDSC_smap_terminate.call(this);
+	$gameTemp._drill_HDSC_spriteTank = [];		//贴图容器
+	Graphics.drill_CODS_overstoryLayerClear();	//清空 天窗层
 };
 //==============================
 // * 贴图控制 - 帧刷新（地图界面）
 //==============================
-var _drill_LCi_smap_update = Scene_Map.prototype.update;
+var _drill_HDSC_smap_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {
-	_drill_LCi_smap_update.call(this);
-	this.drill_LCi_updateControllerCamera();	//帧刷新 - 控制器与镜头
-	this.drill_LCi_updateMask();				//帧刷新 - 动态遮罩
-	this.drill_LCi_updateDestroy();				//帧刷新 - 销毁
+	_drill_HDSC_smap_update.call(this);
+	this.drill_HDSC_updateController();		//帧刷新 - 控制器
+	this.drill_HDSC_updateDestroy();		//帧刷新 - 销毁
 };
 //==============================
 // * 贴图控制 - 创建时（地图界面）
 //==============================
-var _drill_LCi_smap_createAllWindows = Scene_Map.prototype.createAllWindows;
+var _drill_HDSC_smap_createAllWindows = Scene_Map.prototype.createAllWindows;
 Scene_Map.prototype.createAllWindows = function() {
-	_drill_LCi_smap_createAllWindows.call(this);
-	this.drill_LCi_create();					//创建
+	_drill_HDSC_smap_createAllWindows.call(this);
+	this.drill_HDSC_create();				//创建
 };
 //==============================
 // * 贴图控制 - 创建 
 //==============================
-Scene_Map.prototype.drill_LCi_create = function() {
-	$gameTemp._drill_LCi_spriteTank = [];			//贴图容器（不允许出现null值）
+Scene_Map.prototype.drill_HDSC_create = function() {
+	$gameTemp._drill_HDSC_spriteTank = [];			//贴图容器（不允许出现null值）
+	var cur_scene = SceneManager._scene;
 	
-	for(var i=0; i< $gameSystem._drill_LCi_dataTank_curController.length; i++){
-		var temp_controller = $gameSystem._drill_LCi_dataTank_curController[i];
+	for(var i=0; i< $gameSystem._drill_HDSC_controllerTank.length; i++){
+		var temp_controller = $gameSystem._drill_HDSC_controllerTank[i];
 		if( temp_controller == undefined ){ continue; }
 		var data = temp_controller._drill_data;
 		
+		// > 如果关闭，则不创建
+		if( cur_scene instanceof Scene_Map && data['map_enabled'] != true ){ continue; }
+		if( cur_scene instanceof Scene_Battle && data['battle_enabled'] != true ){ continue; }
+		if( cur_scene instanceof Scene_MenuBase && data['menu_enabled'] != true ){ continue; }
+		
 		
 		// > 创建贴图
-		var temp_sprite = new Drill_LCi_Sprite();
+		var temp_sprite = new Drill_HDSC_Sprite();
 		temp_sprite.drill_sprite_setController( temp_controller );
 		temp_sprite.drill_sprite_initChild();
 		
 		
-		// > 添加贴图到层级
-		$gameTemp._drill_LCi_spriteTank.push( temp_sprite );
-		this.drill_LCi_layerAddSprite( temp_sprite, data['layerIndex'] );
-		
-		// > 创建动态遮罩
-		if( data['visible'] == true ){
-			this.drill_LCi_createMaskSprite( temp_controller, temp_sprite );
-			temp_sprite['_mask_inited'] = true;
-			
-		// > 创建动态遮罩（延迟创建）
-		}else{
-			temp_sprite['_mask_inited'] = false;
-		}
+		// > 添加贴图到层级（天窗层）
+		$gameTemp._drill_HDSC_spriteTank.push( temp_sprite );
+		Graphics.drill_CODS_overstoryLayerAddSprite( temp_sprite );
 		
 	}
 	
-	// > 层级排序
-	this.drill_LCi_sortByZIndex();
+	// > 层级排序（天窗层）
+	Graphics.drill_CODS_sortByZIndex();
 }
 //==============================
-// * 贴图控制 - 帧刷新 控制器与镜头
+// * 贴图控制 - 帧刷新 控制器
 //==============================
-Scene_Map.prototype.drill_LCi_updateControllerCamera = function() {
-	for(var i = 0; i < $gameSystem._drill_LCi_dataTank_curController.length; i++ ){
-		var temp_controller = $gameSystem._drill_LCi_dataTank_curController[i];
+Scene_Map.prototype.drill_HDSC_updateController = function() {
+	for(var i = 0; i < $gameSystem._drill_HDSC_controllerTank.length; i++ ){
+		var temp_controller = $gameSystem._drill_HDSC_controllerTank[i];
 		if( temp_controller == undefined ){ continue; }
 		
 		// > 控制器 - 帧刷新
 		temp_controller.drill_controller_update();
 		
-		
-		// > 镜头位移结果（地图参照）
-		var s_data = temp_controller._drill_data;
-		var xx = 0;
-		var yy = 0;
-		var cameraXAcc = temp_controller.drill_controller_getCameraXAcc();
-		var cameraYAcc = temp_controller.drill_controller_getCameraYAcc();
-		
-		// > 镜头位移结果 - 图块平移
-		xx += s_data['tile_x'] * $gameMap.tileWidth();
-		yy += s_data['tile_y'] * $gameMap.tileHeight();
-		
-		// > 镜头位移结果 - 贴图归位
-		//		（保持与地图的初始点一致，位移主体为魔法圈）
-		//		（这里不能用adjust，因为如果你一直向前移动，贴图会越来越远）
-		xx -= cameraXAcc;
-		yy -= cameraYAcc;
-		
-		
-		// > 镜头位移结果 - 层级与镜头的位移
-		var option = {
-			"XPer": s_data['XPer'],
-			"YPer": s_data['YPer'],
-			"tile_x": s_data['tile_x'],
-			"tile_y": s_data['tile_y'],
-			"cameraXAcc": cameraXAcc,
-			"cameraYAcc": cameraYAcc,
-		};
-		var pos = this.drill_LCi_layerCameraMoving(xx, yy, s_data['layerIndex'], option );
-		xx = pos['x'];
-		yy = pos['y'];
-		
-		// > 镜头位移结果 - 镜头缩放与位移（此处是场景装饰，不需要考虑缩放）
-		//	（无）
-		
-		// > 镜头位移结果 - 赋值
-		//		（控制器位移与镜头位移 独立，这样在控制器暂停时，贴图也仍然能兼容镜头移动）
-		temp_controller._drill_cameraResultSpriteX = xx;
-		temp_controller._drill_cameraResultSpriteY = yy;
-	}
-}
-//==============================
-// * 贴图控制 - 动态遮罩 创建
-//==============================
-Scene_Map.prototype.drill_LCi_createMaskSprite = function( temp_controller, temp_sprite ){
-	var data = temp_controller._drill_data;
-	if( data['dynamicMask_enabled'] != true ){ return; }
-	
-	if( Imported.Drill_LayerDynamicMaskA && data['dynamicMask_bind'] == "动态遮罩板A" ){
-		var temp_mask = this.drill_LDMA_getMaskSprite();
-		temp_sprite.mask = temp_mask;
-		this._drill_SenceTopArea.addChild(temp_mask);
-	}
-	if( Imported.Drill_LayerDynamicMaskB && data['dynamicMask_bind'] == "动态遮罩板B" ){
-		var temp_mask = this.drill_LDMB_getMaskSprite();
-		temp_sprite.mask = temp_mask;
-		this._drill_SenceTopArea.addChild(temp_mask);
-	}
-}
-//==============================
-// * 贴图控制 - 动态遮罩 帧刷新
-//==============================
-Scene_Map.prototype.drill_LCi_updateMask = function() {
-	for(var i=0; i < $gameTemp._drill_LCi_spriteTank.length; i++){
-		var temp_sprite = $gameTemp._drill_LCi_spriteTank[i];
-		var temp_controller = temp_sprite._drill_controller;
-		if( temp_controller == undefined ){ continue; }
-		
-		// > 创建动态遮罩（延迟创建）
-		if( temp_sprite['_mask_inited'] == false && temp_controller._drill_data['visible'] == true ){
-			temp_sprite['_mask_inited'] = true;
-			this.drill_LCi_createMaskSprite( temp_controller, temp_sprite );
-		}
 	}
 }
 //==============================
 // * 贴图控制 - 帧刷新 销毁
 //==============================
-Scene_Map.prototype.drill_LCi_updateDestroy = function() {
+Scene_Map.prototype.drill_HDSC_updateDestroy = function() {
 	
 	// > 自动销毁 - 控制器
-	for(var i = $gameSystem._drill_LCi_dataTank_curController.length-1; i >= 0; i--){
-		var temp_controller = $gameSystem._drill_LCi_dataTank_curController[i];
+	for(var i = $gameSystem._drill_HDSC_controllerTank.length-1; i >= 0; i--){
+		var temp_controller = $gameSystem._drill_HDSC_controllerTank[i];
 		if( temp_controller == undefined ){ continue; }
 		if( temp_controller.drill_controller_isDead() ){
-			$gameSystem._drill_LCi_dataTank_curController.splice(i,1);
+			$gameSystem._drill_HDSC_controllerTank.splice(i,1);
 		}
 	}
 	
 	// > 自动销毁 - 贴图
-	for(var i = $gameTemp._drill_LCi_spriteTank.length-1; i >= 0; i--){
-		var temp_sprite = $gameTemp._drill_LCi_spriteTank[i];
+	for(var i = $gameTemp._drill_HDSC_spriteTank.length-1; i >= 0; i--){
+		var temp_sprite = $gameTemp._drill_HDSC_spriteTank[i];
 		if( temp_sprite.drill_sprite_isNeedDestroy() ){
-			this.drill_LCi_layerRemoveSprite( temp_sprite );	//（销毁贴图）
-			$gameTemp._drill_LCi_spriteTank.splice(i,1);
+			Graphics.drill_CODS_overstoryLayerRemoveSprite( temp_sprite );	//（销毁贴图）
+			$gameTemp._drill_HDSC_spriteTank.splice(i,1);
 			temp_sprite.drill_sprite_destroy();
 		}
 	}
 };
+//==============================
+// * 贴图控制 - 销毁时（战斗界面）
+//==============================
+var _drill_HDSC_sbattle_terminate = Scene_Battle.prototype.terminate;
+Scene_Battle.prototype.terminate = function() {
+	_drill_HDSC_sbattle_terminate.call(this);
+	$gameTemp._drill_HDSC_spriteTank = [];		//贴图容器
+	Graphics.drill_CODS_overstoryLayerClear();	//清空 天窗层
+};
+//==============================
+// * 贴图控制 - 帧刷新（战斗界面）
+//==============================
+var _drill_HDSC_sbattle_update = Scene_Battle.prototype.update;
+Scene_Battle.prototype.update = function() {
+	_drill_HDSC_sbattle_update.call(this);
+	this.drill_HDSC_updateController();		//帧刷新 - 控制器
+	this.drill_HDSC_updateDestroy();		//帧刷新 - 销毁
+};
+//==============================
+// * 贴图控制 - 创建时（战斗界面）
+//==============================
+var _drill_HDSC_sbattle_createAllWindows = Scene_Battle.prototype.createAllWindows;
+Scene_Battle.prototype.createAllWindows = function() {
+	_drill_HDSC_sbattle_createAllWindows.call(this);
+	this.drill_HDSC_create();
+};
+//==============================
+// * 贴图控制 - 创建 
+//==============================
+Scene_Battle.prototype.drill_HDSC_create = Scene_Map.prototype.drill_HDSC_create;
+//==============================
+// * 贴图控制 - 帧刷新 控制器
+//==============================
+Scene_Battle.prototype.drill_HDSC_updateController = Scene_Map.prototype.drill_HDSC_updateController;
+//==============================
+// * 贴图控制 - 帧刷新 销毁
+//==============================
+Scene_Battle.prototype.drill_HDSC_updateDestroy = Scene_Map.prototype.drill_HDSC_updateDestroy;
+
+//==============================
+// * 贴图控制 - 销毁时（菜单界面）
+//==============================
+var _drill_HDSC_smenu_terminate = Scene_MenuBase.prototype.terminate;
+Scene_MenuBase.prototype.terminate = function() {
+	_drill_HDSC_smenu_terminate.call(this);
+	$gameTemp._drill_HDSC_spriteTank = [];		//贴图容器
+	Graphics.drill_CODS_overstoryLayerClear();	//清空 天窗层
+};
+//==============================
+// * 贴图控制 - 帧刷新（菜单界面）
+//==============================
+var _drill_HDSC_smenu_update = Scene_MenuBase.prototype.update;
+Scene_MenuBase.prototype.update = function() {
+	_drill_HDSC_smenu_update.call(this);
+	this.drill_HDSC_updateController();		//帧刷新 - 控制器
+	this.drill_HDSC_updateDestroy();		//帧刷新 - 销毁
+};
+//==============================
+// * 贴图控制 - 创建时（菜单界面）
+//==============================
+var _drill_HDSC_smenu_createWindowLayer = Scene_MenuBase.prototype.createWindowLayer;
+Scene_MenuBase.prototype.createWindowLayer = function() {
+	_drill_HDSC_smenu_createWindowLayer.call(this);
+	this.drill_HDSC_create();
+};
+//==============================
+// * 贴图控制 - 创建 
+//==============================
+Scene_MenuBase.prototype.drill_HDSC_create = Scene_Map.prototype.drill_HDSC_create;
+//==============================
+// * 贴图控制 - 帧刷新 控制器
+//==============================
+Scene_MenuBase.prototype.drill_HDSC_updateController = Scene_Map.prototype.drill_HDSC_updateController;
+//==============================
+// * 贴图控制 - 帧刷新 销毁
+//==============================
+Scene_MenuBase.prototype.drill_HDSC_updateDestroy = Scene_Map.prototype.drill_HDSC_updateDestroy;
 
 
 
 //=============================================================================
-// ** 地图魔法圈控制器【Drill_LCi_Controller】
+// ** 天窗层魔法圈控制器【Drill_HDSC_Controller】
 // **		
-// **		作用域：	地图界面、战斗界面
-// **		主功能：	> 定义一个专门控制地图魔法圈的数据类。
+// **		作用域：	地图界面、战斗界面、菜单界面
+// **		主功能：	> 定义一个专门控制天窗层魔法圈的数据类。
 // **		子功能：	->控制器
 // **						->帧刷新
 // **						->重设数据
@@ -2751,7 +1638,6 @@ Scene_Map.prototype.drill_LCi_updateDestroy = function() {
 // **					->A主体
 // **						->3d效果
 // **					->B基本变化
-// **					->C镜头参数
 // **					->D指令叠加变化
 // **						> 主体贴图>移动到
 // **						> 主体贴图>透明度
@@ -2773,17 +1659,17 @@ Scene_Map.prototype.drill_LCi_updateDestroy = function() {
 //==============================
 // * 控制器 - 定义
 //==============================
-function Drill_LCi_Controller(){
+function Drill_HDSC_Controller(){
     this.initialize.apply(this, arguments);
 };
 //==============================
 // * 控制器 - 校验标记
 //==============================
-DrillUp.g_LCi_checkNaN = true;
+DrillUp.g_HDSC_checkNaN = true;
 //==============================
 // * 控制器 - 初始化
 //==============================
-Drill_LCi_Controller.prototype.initialize = function( data ){
+Drill_HDSC_Controller.prototype.initialize = function( data ){
 	this._drill_data = {};
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
     this.drill_controller_initData();										//初始化数据
@@ -2799,12 +1685,11 @@ Drill_LCi_Controller.prototype.initialize = function( data ){
 //			
 //			说明：	> 此函数必须在 帧刷新 中手动调用执行。
 //##############################
-Drill_LCi_Controller.prototype.drill_controller_update = function(){
+Drill_HDSC_Controller.prototype.drill_controller_update = function(){
 	if( this._drill_data['pause'] == true ){ return; }
 	this.drill_controller_updateAttr();					//帧刷新 - A主体
 	this.drill_controller_updateChange_Position();		//帧刷新 - B基本变化 - 平移
 	this.drill_controller_updateChange_Rotation();		//帧刷新 - B基本变化 - 旋转
-														//帧刷新 - C镜头参数（无）
 	this.drill_controller_updateCommandChange();		//帧刷新 - D指令叠加变化
 	this.drill_controller_updateEffect();				//帧刷新 - E自变化效果
 	this.drill_controller_updateCheckNaN();				//帧刷新 - A主体 - 校验值
@@ -2818,7 +1703,7 @@ Drill_LCi_Controller.prototype.drill_controller_update = function(){
 //			说明：	> 通过此函数，你不需要再重新创建一个数据对象，并且贴图能直接根据此数据来变化。
 //					> 参数对象中的参数【可以缺项】，只要的参数项不一样，就刷新；参数项一样，则不变化。
 //##############################
-Drill_LCi_Controller.prototype.drill_controller_resetData = function( data ){
+Drill_HDSC_Controller.prototype.drill_controller_resetData = function( data ){
 	this.drill_controller_resetData_Private( data );
 };
 //##############################
@@ -2829,7 +1714,7 @@ Drill_LCi_Controller.prototype.drill_controller_resetData = function( data ){
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。
 //##############################
-Drill_LCi_Controller.prototype.drill_controller_setVisible = function( visible ){
+Drill_HDSC_Controller.prototype.drill_controller_setVisible = function( visible ){
 	var data = this._drill_data;
 	data['visible'] = visible;
 };
@@ -2841,7 +1726,7 @@ Drill_LCi_Controller.prototype.drill_controller_setVisible = function( visible )
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。
 //##############################
-Drill_LCi_Controller.prototype.drill_controller_setPause = function( pause ){
+Drill_HDSC_Controller.prototype.drill_controller_setPause = function( pause ){
 	var data = this._drill_data;
 	data['pause'] = pause;
 };
@@ -2851,7 +1736,7 @@ Drill_LCi_Controller.prototype.drill_controller_setPause = function( pause ){
 //			参数：	> 无
 //			返回：	> 布尔
 //##############################
-Drill_LCi_Controller.prototype.drill_controller_destroy = function(){
+Drill_HDSC_Controller.prototype.drill_controller_destroy = function(){
 	this._drill_needDestroy = true;
 };
 //##############################
@@ -2860,7 +1745,7 @@ Drill_LCi_Controller.prototype.drill_controller_destroy = function(){
 //			参数：	> 无
 //			返回：	> 布尔
 //##############################
-Drill_LCi_Controller.prototype.drill_controller_isDead = function(){
+Drill_HDSC_Controller.prototype.drill_controller_isDead = function(){
 	return this._drill_needDestroy == true;
 };
 
@@ -2873,7 +1758,7 @@ Drill_LCi_Controller.prototype.drill_controller_isDead = function(){
 //			说明：	> data 动态参数对象（来自类初始化）
 //					  该对象包含 类所需的所有默认值。
 //##############################
-Drill_LCi_Controller.prototype.drill_controller_initData = function(){
+Drill_HDSC_Controller.prototype.drill_controller_initData = function(){
 	var data = this._drill_data;
 	
 	// > 控制器
@@ -2882,11 +1767,10 @@ Drill_LCi_Controller.prototype.drill_controller_initData = function(){
 	
 	// > 贴图
 	if( data['src_img'] == undefined ){ data['src_img'] = "" };										//贴图 - 资源
-	if( data['src_img_file'] == undefined ){ data['src_img_file'] = "img/Map__layer/" };			//贴图 - 文件夹
+	if( data['src_img_file'] == undefined ){ data['src_img_file'] = "img/Special__layer/" };		//贴图 - 文件夹
 	if( data['blendMode'] == undefined ){ data['blendMode'] = 0 };									//贴图 - 混合模式
 	if( data['tint'] == undefined ){ data['tint'] = 0 };											//贴图 - 图像-色调值
 	if( data['smooth'] == undefined ){ data['smooth'] = false };									//贴图 - 图像-模糊边缘
-	if( data['layerIndex'] == undefined ){ data['layerIndex'] = "上层" };							//贴图 - 地图层级
 	if( data['zIndex'] == undefined ){ data['zIndex'] = 0 };										//贴图 - 图片层级
 	
 	// > A主体
@@ -2902,9 +1786,7 @@ Drill_LCi_Controller.prototype.drill_controller_initData = function(){
 	
 	// > B基本变化
 	if( data['rotate'] == undefined ){ data['rotate'] = 0 };										//B基本变化 - 自旋转速度（单位角度）
-	if( data['opacity'] == undefined ){ data['opacity'] = 255 };									//B基本变化 - 透明度
-	
-	// > C镜头参数（无）
+	if( data['opacity'] == undefined ){ data['opacity'] = 255 };				
 	
 	// > D指令叠加变化（无）
 	
@@ -2914,10 +1796,9 @@ Drill_LCi_Controller.prototype.drill_controller_initData = function(){
 //==============================
 // * 初始化 - 初始化子功能
 //==============================
-Drill_LCi_Controller.prototype.drill_controller_initChild = function(){
+Drill_HDSC_Controller.prototype.drill_controller_initChild = function(){
 	this.drill_controller_initAttr();			//初始化子功能 - A主体
 	this.drill_controller_initChange();			//初始化子功能 - B基本变化
-	this.drill_controller_initCamera();			//初始化子功能 - C镜头参数
 	this.drill_controller_initCommandChange();	//初始化子功能 - D指令叠加变化
 	this.drill_controller_initEffect();			//初始化子功能 - E自变化效果
 }
@@ -2926,7 +1807,7 @@ Drill_LCi_Controller.prototype.drill_controller_initChild = function(){
 //
 //			说明：	data对象中的参数【可以缺项】。
 //==============================
-Drill_LCi_Controller.prototype.drill_controller_resetData_Private = function( data ){
+Drill_HDSC_Controller.prototype.drill_controller_resetData_Private = function( data ){
 	
 	// > 判断数据重复情况
 	if( this._drill_data != undefined ){
@@ -2960,7 +1841,7 @@ Drill_LCi_Controller.prototype.drill_controller_resetData_Private = function( da
 //==============================
 // * A主体 - 初始化子功能
 //==============================
-Drill_LCi_Controller.prototype.drill_controller_initAttr = function() {
+Drill_HDSC_Controller.prototype.drill_controller_initAttr = function() {
 	var data = this._drill_data;
 	
 	// > 常规
@@ -2970,7 +1851,7 @@ Drill_LCi_Controller.prototype.drill_controller_initAttr = function() {
 //==============================
 // * A主体 - 帧刷新
 //==============================
-Drill_LCi_Controller.prototype.drill_controller_updateAttr = function() {
+Drill_HDSC_Controller.prototype.drill_controller_updateAttr = function() {
 	var data = this._drill_data;
 	
 	// > 时间流逝
@@ -2979,31 +1860,31 @@ Drill_LCi_Controller.prototype.drill_controller_updateAttr = function() {
 //==============================
 // * A主体 - 帧刷新 - 校验值
 //==============================
-Drill_LCi_Controller.prototype.drill_controller_updateCheckNaN = function(){
+Drill_HDSC_Controller.prototype.drill_controller_updateCheckNaN = function(){
 	if( $gameTemp == undefined ){ return; }		//（测试版开启功能，发布版关闭功能）
 	if( $gameTemp.isPlaytest() != true ){ return; }
 	
 	// > 校验值
-	if( DrillUp.g_LCi_checkNaN == true ){
+	if( DrillUp.g_HDSC_checkNaN == true ){
 		if( isNaN( this._drill_x ) ){
-			DrillUp.g_LCi_checkNaN = false;
-			alert( DrillUp.drill_LCi_getPluginTip_ParamIsNaN( "_drill_x" ) );
+			DrillUp.g_HDSC_checkNaN = false;
+			alert( DrillUp.drill_HDSC_getPluginTip_ParamIsNaN( "_drill_x" ) );
 		}
 		if( isNaN( this._drill_y ) ){
-			DrillUp.g_LCi_checkNaN = false;
-			alert( DrillUp.drill_LCi_getPluginTip_ParamIsNaN( "_drill_y" ) );
+			DrillUp.g_HDSC_checkNaN = false;
+			alert( DrillUp.drill_HDSC_getPluginTip_ParamIsNaN( "_drill_y" ) );
 		}
 		if( isNaN( this._drill_opacity ) ){
-			DrillUp.g_LCi_checkNaN = false;
-			alert( DrillUp.drill_LCi_getPluginTip_ParamIsNaN( "_drill_opacity" ) );
+			DrillUp.g_HDSC_checkNaN = false;
+			alert( DrillUp.drill_HDSC_getPluginTip_ParamIsNaN( "_drill_opacity" ) );
 		}
 		if( isNaN( this._drill_scaleX ) ){
-			DrillUp.g_LCi_checkNaN = false;
-			alert( DrillUp.drill_LCi_getPluginTip_ParamIsNaN( "_drill_scaleX" ) );
+			DrillUp.g_HDSC_checkNaN = false;
+			alert( DrillUp.drill_HDSC_getPluginTip_ParamIsNaN( "_drill_scaleX" ) );
 		}
 		if( isNaN( this._drill_scaleY ) ){
-			DrillUp.g_LCi_checkNaN = false;
-			alert( DrillUp.drill_LCi_getPluginTip_ParamIsNaN( "_drill_scaleY" ) );
+			DrillUp.g_HDSC_checkNaN = false;
+			alert( DrillUp.drill_HDSC_getPluginTip_ParamIsNaN( "_drill_scaleY" ) );
 		}
 	}
 }
@@ -3011,7 +1892,7 @@ Drill_LCi_Controller.prototype.drill_controller_updateCheckNaN = function(){
 //==============================
 // * B基本变化 - 初始化子功能
 //==============================
-Drill_LCi_Controller.prototype.drill_controller_initChange = function() {
+Drill_HDSC_Controller.prototype.drill_controller_initChange = function() {
 	var data = this._drill_data;
 	
 	// > 贴图 - 位置
@@ -3040,7 +1921,7 @@ Drill_LCi_Controller.prototype.drill_controller_initChange = function() {
 //==============================
 // * B基本变化 - 帧刷新 位置
 //==============================
-Drill_LCi_Controller.prototype.drill_controller_updateChange_Position = function(){
+Drill_HDSC_Controller.prototype.drill_controller_updateChange_Position = function(){
 	var data = this._drill_data;
 	
 	// > 贴图 - 位置
@@ -3054,75 +1935,11 @@ Drill_LCi_Controller.prototype.drill_controller_updateChange_Position = function
 //==============================
 // * B基本变化 - 帧刷新 旋转
 //==============================
-Drill_LCi_Controller.prototype.drill_controller_updateChange_Rotation = function(){
+Drill_HDSC_Controller.prototype.drill_controller_updateChange_Rotation = function(){
 	var data = this._drill_data;
 	
 	// > 贴图 - 旋转（子贴图）
 	this._drill_childCircle_rotation += this._drill_childCircle_rotateSpeed;
-}
-
-
-//==============================
-// * C镜头参数 - 初始化子功能
-//==============================
-Drill_LCi_Controller.prototype.drill_controller_initCamera = function() {
-	var data = this._drill_data;
-	
-	//this._drill_cameraXAcc = 0;			//循环积累值（不存）
-	//this._drill_cameraYAcc = 0;
-	
-	this._drill_cameraResultSpriteX = 0;	//镜头位移结果
-	this._drill_cameraResultSpriteY = 0;
-}
-// > 强制更新提示 锁
-DrillUp.g_LCi_alert = true;
-//==============================
-// * C镜头参数 - 获取 循环积累值（开放函数）
-//
-//			说明：	> 此处直接调用函数获取值。参数不存，因为浪费 帧刷新 和 存储空间。
-//==============================
-Drill_LCi_Controller.prototype.drill_controller_getCameraXAcc = function(){
-	if( $gameMap == undefined ){ return 0; }	//【$gameSystem优先初始化】（注意此处，调用时 $gameMap和$dataMap 都可能未创建。）
-	if( $dataMap == undefined ){ return 0; }
-	
-	// > 循环积累值 【地图 - 活动地图镜头】
-	if( Imported.Drill_LayerCamera ){
-		
-		// > 强制更新提示
-		if( $gameSystem._drill_LCa_controller == undefined && DrillUp.g_LCi_alert == true ){ 
-			alert( DrillUp.drill_LCi_getPluginTip_NeedUpdate_Camera() );
-			DrillUp.g_LCi_alert = false;
-			return; 
-		}
-		
-		return $gameSystem._drill_LCa_controller._drill_cameraX_offsetAcc * $gameMap.tileWidth();
-	}else{
-		return $gameMap.displayX() * $gameMap.tileWidth();
-	}
-}
-//==============================
-// * C镜头参数 - 获取 循环积累值（开放函数）
-//
-//			说明：	> 此处直接调用函数获取值。参数不存，因为浪费 帧刷新 和 存储空间。
-//==============================
-Drill_LCi_Controller.prototype.drill_controller_getCameraYAcc = function(){
-	if( $gameMap == undefined ){ return 0; }	//【$gameSystem优先初始化】（注意此处，调用时 $gameMap和$dataMap 都可能未创建。）
-	if( $dataMap == undefined ){ return 0; }
-	
-	// > 循环积累值 【地图 - 活动地图镜头】
-	if( Imported.Drill_LayerCamera ){
-		
-		// > 强制更新提示
-		if( $gameSystem._drill_LCa_controller == undefined && DrillUp.g_LCi_alert == true ){ 
-			alert( DrillUp.drill_LCi_getPluginTip_NeedUpdate_Camera() );
-			DrillUp.g_LCi_alert = false;
-			return; 
-		}
-		
-		return $gameSystem._drill_LCa_controller._drill_cameraY_offsetAcc * $gameMap.tileHeight();
-	}else{
-		return $gameMap.displayY() * $gameMap.tileHeight();
-	}
 }
 
 
@@ -3132,7 +1949,7 @@ Drill_LCi_Controller.prototype.drill_controller_getCameraYAcc = function(){
 //			说明：	> 此处使用弹道核心提供的 弹道扩展工具-A变化叠加器 控制器部分。
 //					> 参数使用字符串进行控制，默认为 null 值。
 //==============================
-Drill_LCi_Controller.prototype.drill_controller_initCommandChange = function() {
+Drill_HDSC_Controller.prototype.drill_controller_initCommandChange = function() {
 	var data = this._drill_data;
 	
 	// > 控制器参数 - 移动到
@@ -3159,7 +1976,7 @@ Drill_LCi_Controller.prototype.drill_controller_initCommandChange = function() {
 //==============================
 // * D指令叠加变化 - 帧刷新
 //==============================
-Drill_LCi_Controller.prototype.drill_controller_updateCommandChange = function(){
+Drill_HDSC_Controller.prototype.drill_controller_updateCommandChange = function(){
 	var data = this._drill_data;
 	
 	// > 帧刷新 - 移动到（二维弹道）
@@ -3186,7 +2003,7 @@ Drill_LCi_Controller.prototype.drill_controller_updateCommandChange = function()
 //==============================
 // * D指令叠加变化 - 立即还原所有单属性
 //==============================
-Drill_LCi_Controller.prototype.drill_controller_commandChange_restoreAttr = function(){
+Drill_HDSC_Controller.prototype.drill_controller_commandChange_restoreAttr = function(){
 	
 	// > 控制器参数 - 透明度
 	this["_drill_command_opacity_data"] = null;
@@ -3209,13 +2026,13 @@ Drill_LCi_Controller.prototype.drill_controller_commandChange_restoreAttr = func
 //==============================
 // * D指令叠加变化 - 立即归位
 //==============================
-Drill_LCi_Controller.prototype.drill_controller_commandChange_restoreMove = function(){
+Drill_HDSC_Controller.prototype.drill_controller_commandChange_restoreMove = function(){
 	this["_drill_command_move_data"] = null;
 }
 //==============================
 // * D指令叠加变化 - 修改单属性 - 移动到
 //==============================
-Drill_LCi_Controller.prototype.drill_controller_commandChange_setMove = function( change_type, tar_valueA, tar_valueB, tar_time ){
+Drill_HDSC_Controller.prototype.drill_controller_commandChange_setMove = function( change_type, tar_valueA, tar_valueB, tar_time ){
 	var data = this._drill_data;
 	Drill_COBa_ExtendTool.drill_COBa_Planimetry_controller_setTarget(
 		this, "_drill_command_move_data", 0, 0,		//（调用时要给定 初始值，虽然初始值只在第一次调用指令时有效，但必须要给）
@@ -3225,7 +2042,7 @@ Drill_LCi_Controller.prototype.drill_controller_commandChange_setMove = function
 //==============================
 // * D指令叠加变化 - 修改单属性 - 透明度
 //==============================
-Drill_LCi_Controller.prototype.drill_controller_commandChange_setOpacity = function( change_type, tar_value, tar_time ){
+Drill_HDSC_Controller.prototype.drill_controller_commandChange_setOpacity = function( change_type, tar_value, tar_time ){
 	var data = this._drill_data;
 	Drill_COBa_ExtendTool.drill_COBa_Common_controller_setTarget(
 		this, "_drill_command_opacity_data", data['opacity'],	//（调用时要给定 初始值，虽然初始值只在第一次调用指令时有效，但必须要给）
@@ -3235,7 +2052,7 @@ Drill_LCi_Controller.prototype.drill_controller_commandChange_setOpacity = funct
 //==============================
 // * D指令叠加变化 - 修改单属性 - 旋转
 //==============================
-Drill_LCi_Controller.prototype.drill_controller_commandChange_setRotate = function( change_type, tar_value, tar_time ){
+Drill_HDSC_Controller.prototype.drill_controller_commandChange_setRotate = function( change_type, tar_value, tar_time ){
 	var data = this._drill_data;
 	Drill_COBa_ExtendTool.drill_COBa_Common_controller_setTarget(
 		this, "_drill_command_rotate_data", data['parentRotate'],	//（调用时要给定 初始值，虽然初始值只在第一次调用指令时有效，但必须要给）
@@ -3245,7 +2062,7 @@ Drill_LCi_Controller.prototype.drill_controller_commandChange_setRotate = functi
 //==============================
 // * D指令叠加变化 - 修改单属性 - 转速
 //==============================
-Drill_LCi_Controller.prototype.drill_controller_commandChange_setRotateSpeed = function( change_type, tar_value, tar_time ){
+Drill_HDSC_Controller.prototype.drill_controller_commandChange_setRotateSpeed = function( change_type, tar_value, tar_time ){
 	var data = this._drill_data;
 	Drill_COBa_ExtendTool.drill_COBa_Common_controller_setTarget(
 		this, "_drill_command_rotateSpeed_data", data['rotate'],	//（调用时要给定 初始值，虽然初始值只在第一次调用指令时有效，但必须要给）
@@ -3255,7 +2072,7 @@ Drill_LCi_Controller.prototype.drill_controller_commandChange_setRotateSpeed = f
 //==============================
 // * D指令叠加变化 - 修改单属性 - 缩放X
 //==============================
-Drill_LCi_Controller.prototype.drill_controller_commandChange_setScaleX = function( change_type, tar_value, tar_time ){
+Drill_HDSC_Controller.prototype.drill_controller_commandChange_setScaleX = function( change_type, tar_value, tar_time ){
 	var data = this._drill_data;
 	Drill_COBa_ExtendTool.drill_COBa_Common_controller_setTarget(
 		this, "_drill_command_scaleX_data", data['scale_x'],	//（调用时要给定 初始值，虽然初始值只在第一次调用指令时有效，但必须要给）
@@ -3265,7 +2082,7 @@ Drill_LCi_Controller.prototype.drill_controller_commandChange_setScaleX = functi
 //==============================
 // * D指令叠加变化 - 修改单属性 - 缩放Y
 //==============================
-Drill_LCi_Controller.prototype.drill_controller_commandChange_setScaleY = function( change_type, tar_value, tar_time ){
+Drill_HDSC_Controller.prototype.drill_controller_commandChange_setScaleY = function( change_type, tar_value, tar_time ){
 	var data = this._drill_data;
 	Drill_COBa_ExtendTool.drill_COBa_Common_controller_setTarget(
 		this, "_drill_command_scaleY_data", data['scale_y'],	//（调用时要给定 初始值，虽然初始值只在第一次调用指令时有效，但必须要给）
@@ -3275,7 +2092,7 @@ Drill_LCi_Controller.prototype.drill_controller_commandChange_setScaleY = functi
 //==============================
 // * D指令叠加变化 - 修改单属性 - 斜切X
 //==============================
-Drill_LCi_Controller.prototype.drill_controller_commandChange_setSkewX = function( change_type, tar_value, tar_time ){
+Drill_HDSC_Controller.prototype.drill_controller_commandChange_setSkewX = function( change_type, tar_value, tar_time ){
 	var data = this._drill_data;
 	Drill_COBa_ExtendTool.drill_COBa_Common_controller_setTarget(
 		this, "_drill_command_skewX_data", data['skew_x'],	//（调用时要给定 初始值，虽然初始值只在第一次调用指令时有效，但必须要给）
@@ -3285,7 +2102,7 @@ Drill_LCi_Controller.prototype.drill_controller_commandChange_setSkewX = functio
 //==============================
 // * D指令叠加变化 - 修改单属性 - 斜切Y
 //==============================
-Drill_LCi_Controller.prototype.drill_controller_commandChange_setSkewY = function( change_type, tar_value, tar_time ){
+Drill_HDSC_Controller.prototype.drill_controller_commandChange_setSkewY = function( change_type, tar_value, tar_time ){
 	var data = this._drill_data;
 	Drill_COBa_ExtendTool.drill_COBa_Common_controller_setTarget(
 		this, "_drill_command_skewY_data", data['skew_y'],	//（调用时要给定 初始值，虽然初始值只在第一次调用指令时有效，但必须要给）
@@ -3297,14 +2114,14 @@ Drill_LCi_Controller.prototype.drill_controller_commandChange_setSkewY = functio
 //==============================
 // * E自变化效果 - 初始化子功能
 //==============================
-Drill_LCi_Controller.prototype.drill_controller_initEffect = function() {
+Drill_HDSC_Controller.prototype.drill_controller_initEffect = function() {
 	var data = this._drill_data;
 	this._drill_curEffectTime = 0;
 }
 //==============================
 // * E自变化效果 - 帧刷新
 //==============================
-Drill_LCi_Controller.prototype.drill_controller_updateEffect = function(){
+Drill_HDSC_Controller.prototype.drill_controller_updateEffect = function(){
 	var data = this._drill_data;
 	this._drill_curEffectTime += 1;
 }
@@ -3312,9 +2129,9 @@ Drill_LCi_Controller.prototype.drill_controller_updateEffect = function(){
 
 
 //=============================================================================
-// ** 地图魔法圈贴图【Drill_LCi_Sprite】
+// ** 天窗层魔法圈贴图【Drill_HDSC_Sprite】
 // **
-// **		作用域：	地图界面
+// **		作用域：	地图界面、战斗界面、菜单界面
 // **		主功能：	> 定义一个魔法圈贴图。
 // **		子功能：	->贴图
 // **						->是否就绪
@@ -3354,22 +2171,22 @@ Drill_LCi_Controller.prototype.drill_controller_updateEffect = function(){
 //==============================
 // * 魔法圈贴图 - 定义
 //==============================
-function Drill_LCi_Sprite() {
+function Drill_HDSC_Sprite() {
     this.initialize.apply(this, arguments);
 };
-Drill_LCi_Sprite.prototype = Object.create(Sprite.prototype);
-Drill_LCi_Sprite.prototype.constructor = Drill_LCi_Sprite;
+Drill_HDSC_Sprite.prototype = Object.create(Sprite.prototype);
+Drill_HDSC_Sprite.prototype.constructor = Drill_HDSC_Sprite;
 //==============================
 // * 魔法圈贴图 - 初始化
 //==============================
-Drill_LCi_Sprite.prototype.initialize = function(){
+Drill_HDSC_Sprite.prototype.initialize = function(){
 	Sprite.prototype.initialize.call(this);
 	this.drill_sprite_initSelf();				//初始化自身
 };
 //==============================
 // * 魔法圈贴图 - 帧刷新
 //==============================
-Drill_LCi_Sprite.prototype.update = function() {
+Drill_HDSC_Sprite.prototype.update = function() {
 	if( this.drill_sprite_isReady() == false ){ return; }
 	if( this.drill_sprite_isOptimizationPassed() == false ){ return; }
 	Sprite.prototype.update.call(this);
@@ -3388,7 +2205,7 @@ Drill_LCi_Sprite.prototype.update = function() {
 //			
 //			说明：	> 由于贴图与数据分离，贴图必须依赖一个数据对象。
 //##############################
-Drill_LCi_Sprite.prototype.drill_sprite_setController = function( controller ){
+Drill_HDSC_Sprite.prototype.drill_sprite_setController = function( controller ){
 	this._drill_controller = controller;
 };
 //##############################
@@ -3399,7 +2216,7 @@ Drill_LCi_Sprite.prototype.drill_sprite_setController = function( controller ){
 //			
 //			说明：	> 需要设置 控制器 之后，才能进行初始化。
 //##############################
-Drill_LCi_Sprite.prototype.drill_sprite_initChild = function(){
+Drill_HDSC_Sprite.prototype.drill_sprite_initChild = function(){
 	this.drill_sprite_initAttr();				//初始化子功能 - A主体
 	this.drill_sprite_initChange();				//初始化子功能 - B基本变化
 												//初始化子功能 - C对象绑定（无）
@@ -3415,7 +2232,7 @@ Drill_LCi_Sprite.prototype.drill_sprite_initChild = function(){
 //			
 //			说明：	> 这里完全 不考虑 延迟加载问题。
 //##############################
-Drill_LCi_Sprite.prototype.drill_sprite_isReady = function(){
+Drill_HDSC_Sprite.prototype.drill_sprite_isReady = function(){
 	if( this._drill_controller == undefined ){ return false; }
     return true;
 };
@@ -3427,8 +2244,8 @@ Drill_LCi_Sprite.prototype.drill_sprite_isReady = function(){
 //			
 //			说明：	> 通过时，正常帧刷新；未通过时，不执行帧刷新。
 //##############################
-Drill_LCi_Sprite.prototype.drill_sprite_isOptimizationPassed = function(){
-    return this.drill_sprite_isOptimizationPassed_Private();
+Drill_HDSC_Sprite.prototype.drill_sprite_isOptimizationPassed = function(){
+    return true;
 };
 //##############################
 // * 魔法圈贴图 - 是否需要销毁【标准函数】
@@ -3438,7 +2255,7 @@ Drill_LCi_Sprite.prototype.drill_sprite_isOptimizationPassed = function(){
 //			
 //			说明：	> 此函数可用于监听 控制器数据 是否被销毁，数据销毁后，贴图可自动销毁。
 //##############################
-Drill_LCi_Sprite.prototype.drill_sprite_isNeedDestroy = function(){
+Drill_HDSC_Sprite.prototype.drill_sprite_isNeedDestroy = function(){
 	if( this._drill_controller == undefined ){ return false; }	//（未绑定时，不销毁）
 	if( this._drill_controller._drill_needDestroy == true ){ return true; }
     return false;
@@ -3451,21 +2268,21 @@ Drill_LCi_Sprite.prototype.drill_sprite_isNeedDestroy = function(){
 //			
 //			说明：	> 销毁不是必要的，但最好随时留意给 旧贴图 执行销毁函数。
 //##############################
-Drill_LCi_Sprite.prototype.drill_sprite_destroy = function(){
+Drill_HDSC_Sprite.prototype.drill_sprite_destroy = function(){
 	this.drill_sprite_destroyChild();			//销毁 - 销毁子功能
 	this.drill_sprite_destroySelf();			//销毁 - 销毁自身
 };
 //==============================
 // * 魔法圈贴图 - 贴图初始化（私有）
 //==============================
-Drill_LCi_Sprite.prototype.drill_sprite_initSelf = function(){
+Drill_HDSC_Sprite.prototype.drill_sprite_initSelf = function(){
 	this._drill_controller = null;				//控制器对象
 	this._drill_curSerial = -1;					//当前序列号
 };
 //==============================
 // * 魔法圈贴图 - 销毁子功能（私有）
 //==============================
-Drill_LCi_Sprite.prototype.drill_sprite_destroyChild = function(){
+Drill_HDSC_Sprite.prototype.drill_sprite_destroyChild = function(){
 	if( this._drill_controller == null ){ return; }
 	
 	// > 销毁 - A主体
@@ -3485,7 +2302,7 @@ Drill_LCi_Sprite.prototype.drill_sprite_destroyChild = function(){
 //==============================
 // * 魔法圈贴图 - 销毁自身（私有）
 //==============================
-Drill_LCi_Sprite.prototype.drill_sprite_destroySelf = function(){
+Drill_HDSC_Sprite.prototype.drill_sprite_destroySelf = function(){
 	this._drill_controller = null;				//控制器对象
 	this._drill_curSerial = -1;					//当前序列号
 };
@@ -3494,7 +2311,7 @@ Drill_LCi_Sprite.prototype.drill_sprite_destroySelf = function(){
 //==============================
 // * A主体 - 初始化子功能
 //==============================
-Drill_LCi_Sprite.prototype.drill_sprite_initAttr = function(){
+Drill_HDSC_Sprite.prototype.drill_sprite_initAttr = function(){
 	var data = this._drill_controller._drill_data;
 	
 	// > 属性初始化
@@ -3523,7 +2340,7 @@ Drill_LCi_Sprite.prototype.drill_sprite_initAttr = function(){
 //==============================
 // * A主体 - 帧刷新
 //==============================
-Drill_LCi_Sprite.prototype.drill_sprite_updateAttr = function() {
+Drill_HDSC_Sprite.prototype.drill_sprite_updateAttr = function() {
 	var data = this._drill_controller._drill_data;
 	
 	// > 贴图 - 贴图属性
@@ -3545,22 +2362,19 @@ Drill_LCi_Sprite.prototype.drill_sprite_updateAttr = function() {
 //==============================
 // * B基本变化 - 初始化子功能
 //==============================
-Drill_LCi_Sprite.prototype.drill_sprite_initChange = function(){
+Drill_HDSC_Sprite.prototype.drill_sprite_initChange = function(){
 	var data = this._drill_controller._drill_data;
 	//（无）
 }
 //==============================
 // * B基本变化 - 帧刷新
 //==============================
-Drill_LCi_Sprite.prototype.drill_sprite_updateChange = function() {
+Drill_HDSC_Sprite.prototype.drill_sprite_updateChange = function() {
 	var data = this._drill_controller._drill_data;
 	
 	// > 位置 - 层级位置修正
-	//		（镜头位移结果，见函数 drill_LCi_updateControllerCamera ）
 	var xx = this._drill_controller._drill_x;
 	var yy = this._drill_controller._drill_y;
-	xx += this._drill_controller._drill_cameraResultSpriteX;
-	yy += this._drill_controller._drill_cameraResultSpriteY;
 	this.x = xx;
 	this.y = yy;
 	
@@ -3585,7 +2399,7 @@ Drill_LCi_Sprite.prototype.drill_sprite_updateChange = function() {
 //			说明：	> 此处使用弹道核心提供的 弹道扩展工具-A变化叠加器 贴图部分。
 //					> 参数使用字符串进行控制，默认为 null 值。
 //==============================
-Drill_LCi_Sprite.prototype.drill_sprite_initCommandChange = function() {
+Drill_HDSC_Sprite.prototype.drill_sprite_initCommandChange = function() {
 	var data = this._drill_controller._drill_data;
 	
 	// > 贴图参数 - 移动到
@@ -3612,7 +2426,7 @@ Drill_LCi_Sprite.prototype.drill_sprite_initCommandChange = function() {
 //==============================
 // * D指令叠加变化 - 帧刷新
 //==============================
-Drill_LCi_Sprite.prototype.drill_sprite_updateCommandChange = function(){
+Drill_HDSC_Sprite.prototype.drill_sprite_updateCommandChange = function(){
 	var data = this._drill_controller._drill_data;
 	var controller = this._drill_controller;
 	
@@ -3721,14 +2535,14 @@ Drill_LCi_Sprite.prototype.drill_sprite_updateCommandChange = function(){
 //==============================
 // * E自变化效果 - 初始化子功能
 //==============================
-Drill_LCi_Sprite.prototype.drill_sprite_initEffect = function() {
+Drill_HDSC_Sprite.prototype.drill_sprite_initEffect = function() {
 	var data = this._drill_controller._drill_data;
 	//（无）
 }
 //==============================
 // * E自变化效果 - 帧刷新
 //==============================
-Drill_LCi_Sprite.prototype.drill_sprite_updateEffect = function(){
+Drill_HDSC_Sprite.prototype.drill_sprite_updateEffect = function(){
 	var data = this._drill_controller._drill_data;
 	var cur_time = this._drill_controller._drill_curEffectTime;
 	
@@ -3795,53 +2609,13 @@ Drill_LCi_Sprite.prototype.drill_sprite_updateEffect = function(){
 }
 
 
-//==============================
-// * 优化策略 - 判断通过（私有）
-//==============================
-Drill_LCi_Sprite.prototype.drill_sprite_isOptimizationPassed_Private = function(){
-	return true;
-}
-/*
-//// > 镜头范围外时，不工作
-//if( this.drill_LCi_posIsInCamera( this._character._realX, this._character._realY ) == false ){
-//	this.visible = false;
-//	return false;
-//}
-//return true;
-
-// > 强制更新提示 锁
-DrillUp.g_LCa_alert = true;
-//==============================
-// * 优化策略 - 判断贴图是否在镜头范围内
-//==============================
-Drill_LCi_Sprite.prototype.drill_LCi_posIsInCamera = function( realX, realY ){
-	var oww = Graphics.boxWidth  / $gameMap.tileWidth();
-	var ohh = Graphics.boxHeight / $gameMap.tileHeight();
-	var sww = oww;
-	var shh = ohh;
-	if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】镜头范围内+缩放
-		
-		// > 强制更新提示
-		if( $gameSystem._drill_LCa_controller == undefined && DrillUp.g_LCa_alert == true ){ 
-			alert( DrillUp.drill_LCi_getPluginTip_NeedUpdate_Camera() );
-			DrillUp.g_LCa_alert = false;
-		}
-		
-		sww = sww / $gameSystem._drill_LCa_controller._drill_scaleX;
-		shh = shh / $gameSystem._drill_LCa_controller._drill_scaleY;
-	}
-	return  Math.abs($gameMap.adjustX(realX + 0.5) - oww*0.5) <= sww*0.5 + 5.5 &&	//（镜头范围+5个图块边框区域） 
-			Math.abs($gameMap.adjustY(realY + 0.5) - ohh*0.5) <= shh*0.5 + 5.5 ;
-}
-*/
-
 
 //=============================================================================
 // * <<<<基于插件检测<<<<
 //=============================================================================
 }else{
-		Imported.Drill_LayerCircle = false;
-		var pluginTip = DrillUp.drill_LCi_getPluginTip_NoBasePlugin();
+		Imported.Drill_HtmlDynamicSnapshotCircle = false;
+		var pluginTip = DrillUp.drill_HDSC_getPluginTip_NoBasePlugin();
 		alert( pluginTip );
 }
 

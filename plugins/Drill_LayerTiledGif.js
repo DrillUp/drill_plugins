@@ -110,9 +110,10 @@
  * 插件指令：>地图平铺GIF : 平铺GIF[11] : 修改单属性 : 缩放Y[1.2] : 时间[60]
  * 插件指令：>地图平铺GIF : 平铺GIF[11] : 修改单属性 : 斜切X[0.2] : 时间[60]
  * 插件指令：>地图平铺GIF : 平铺GIF[11] : 修改单属性 : 斜切Y[0.2] : 时间[60]
+ * 插件指令：>地图平铺GIF : 平铺GIF[11] : 立即还原所有单属性
  * 
  * 1.前半部分（平铺GIF变量[21]）和 后半部分（显示）
- *   的参数可以随意组合。一共有4*15种组合方式。
+ *   的参数可以随意组合。一共有4*16种组合方式。
  * 2.注意，如果你想永久保持插件指令的改变结果，则需要开启 参数存储 。
  *   参数存储默认关闭，即 插件指令 的所有改变在读取存档后都会复原。
  * 3.插件指令的变化是永久性的。
@@ -130,6 +131,7 @@
  * 插件指令：>地图平铺GIF : 平铺GIF[11] : 移动到-弹性移动 : 位置变量[25,26] : 时间[60]
  * 插件指令：>地图平铺GIF : 平铺GIF[11] : 移动到-增减速移动 : 位置[100,100] : 时间[60]
  * 插件指令：>地图平铺GIF : 平铺GIF[11] : 移动到-增减速移动 : 位置变量[25,26] : 时间[60]
+ * 插件指令：>地图平铺GIF : 平铺GIF[11] : 移动到-立即归位
  * 
  * 1.移动的初始位置以显示在地图界面的具体位置为基准，在基准位置上再进行移动到。
  *   指令中不含相对移动，比如多次执行移动到[20,20]，贴图只会到达一个固定的位置。
@@ -1541,6 +1543,22 @@
  * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
  * @default 0
  *
+ * @param 图像-色调值
+ * @parent ---贴图---
+ * @type number
+ * @min 0
+ * @max 360
+ * @desc 资源图像的色调值。
+ * @default 0
+ *
+ * @param 图像-模糊边缘
+ * @parent ---贴图---
+ * @type boolean
+ * @on 模糊
+ * @off 关闭
+ * @desc 此参数为缩放设置，设置模糊后，缩放时可以模糊资源图像的边缘，防止出现像素锯齿。
+ * @default false
+ *
  * @param 平铺GIF-X速度
  * @parent ---贴图---
  * @desc 平铺GIF按x轴方向循环移动的速度。正数向左，负数向右。（可为小数）
@@ -1820,6 +1838,12 @@
 	DrillUp.drill_LTG_getPluginTip_NeedUpdate_Camera = function(){
 		return "【" + DrillUp.g_LTG_PluginTip_curName + "】\n活动地图镜头插件版本过低，你需要更新 镜头插件 至少v2.2及以上版本。";
 	};
+	//==============================
+	// * 提示信息 - 报错 - 强制更新提示
+	//==============================
+	DrillUp.drill_LTG_getPluginTip_NeedUpdate_Ballistics = function(){
+		return "【" + DrillUp.g_LTG_PluginTip_curName + "】\n弹道核心插件版本过低，你需要更新 弹道核心 至少v2.2及以上版本。";
+	};
 	
 	
 //=============================================================================
@@ -1910,7 +1934,8 @@
 	DrillUp.g_LTG_layers_length = 200;
 	DrillUp.g_LTG_layers = [];
 	for( var i = 0; i < DrillUp.g_LTG_layers_length; i++ ){
-		if( DrillUp.parameters["平铺GIF-" + String(i+1) ] != "" ){
+		if( DrillUp.parameters["平铺GIF-" + String(i+1) ] != undefined &&
+			DrillUp.parameters["平铺GIF-" + String(i+1) ] != "" ){
 			var temp = JSON.parse(DrillUp.parameters["平铺GIF-" + String(i+1) ]);
 			DrillUp.g_LTG_layers[i] = DrillUp.drill_LTG_backgroundInit( temp );
 		}else{
@@ -1924,6 +1949,10 @@
 // * >>>>基于插件检测>>>>
 //=============================================================================
 if( Imported.Drill_CoreOfBallistics ){
+	
+	if( typeof(Drill_COBa_ExtendTool) == "undefined" ){	//（弹道核心版本检测）
+		alert( DrillUp.drill_LTG_getPluginTip_NeedUpdate_Ballistics() );
+	}
 	
 	
 //=============================================================================
@@ -2043,6 +2072,19 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		}
 		
 		/*-----------------E指令叠加变化------------------*/
+		if( args.length == 4 ){
+			var type = String(args[3]);
+			if( type == "立即还原所有单属性" ){
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_commandChange_restoreAttr();
+				}
+			}
+			if( type == "移动到-立即归位" ){
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_commandChange_restoreMove();
+				}
+			}
+		}
 		if( args.length == 6 ){
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
@@ -2564,20 +2606,31 @@ Game_Temp.prototype.initialize = function() {
 	this._drill_LTG_spriteTank = [];				//贴图容器
 };
 //==============================
-// * 贴图控制 - 创建
+// * 贴图控制 - 销毁时（地图界面）
 //==============================
-var _drill_LTG_Scene_terminate = Scene_Map.prototype.terminate;
+var _drill_LTG_smap_terminate = Scene_Map.prototype.terminate;
 Scene_Map.prototype.terminate = function() {
-	_drill_LTG_Scene_terminate.call(this);
+	_drill_LTG_smap_terminate.call(this);
 	$gameTemp._drill_LTG_spriteTank = [];		//贴图容器
 };
 //==============================
-// * 贴图控制 - 创建时绑定
+// * 贴图控制 - 帧刷新（地图界面）
 //==============================
-var _drill_LTG_Scene_createAllWindows = Scene_Map.prototype.createAllWindows;
+var _drill_LTG_smap_update = Scene_Map.prototype.update;
+Scene_Map.prototype.update = function() {
+	_drill_LTG_smap_update.call(this);
+	this.drill_LTG_updateResizeRect();			//帧刷新 - 外包裹矩形
+	this.drill_LTG_updateControllerCamera();	//帧刷新 - 控制器与镜头
+	this.drill_LTG_updateMask();				//帧刷新 - 动态遮罩
+	this.drill_LTG_updateDestroy();				//帧刷新 - 销毁
+};
+//==============================
+// * 贴图控制 - 创建时（地图界面）
+//==============================
+var _drill_LTG_smap_createAllWindows = Scene_Map.prototype.createAllWindows;
 Scene_Map.prototype.createAllWindows = function() {
-	_drill_LTG_Scene_createAllWindows.call(this);
-	this.drill_LTG_create();
+	_drill_LTG_smap_createAllWindows.call(this);
+	this.drill_LTG_create();					//创建
 };
 //==============================
 // * 贴图控制 - 创建 
@@ -2614,17 +2667,6 @@ Scene_Map.prototype.drill_LTG_create = function() {
 	
 	// > 层级排序
 	this.drill_LTG_sortByZIndex();
-}
-//==============================
-// * 贴图控制 - 帧刷新（地图界面）
-//==============================
-var _drill_LTG_smap_update = Scene_Map.prototype.update;
-Scene_Map.prototype.update = function() {
-	_drill_LTG_smap_update.call(this);
-	this.drill_LTG_updateResizeRect();			//帧刷新 - 外包裹矩形
-	this.drill_LTG_updateControllerCamera();	//帧刷新 - 控制器与镜头
-	this.drill_LTG_updateMask();				//帧刷新 - 动态遮罩
-	this.drill_LTG_updateDestroy();				//帧刷新 - 销毁
 }
 //==============================
 // * 贴图控制 - 帧刷新 外包裹矩形
@@ -3358,6 +3400,38 @@ Drill_LTG_Controller.prototype.drill_controller_updateCommandChange = function()
 	Drill_COBa_ExtendTool.drill_COBa_Common_controller_update( this, "_drill_command_skewY_data" );
 }
 //==============================
+// * E指令叠加变化 - 立即还原所有单属性
+//==============================
+Drill_LTG_Controller.prototype.drill_controller_commandChange_restoreAttr = function(){
+	
+	// > 控制器参数 - 透明度
+	this["_drill_command_opacity_data"] = null;
+	
+	// > 控制器参数 - 移动速度X
+	this["_drill_command_speedX_data"] = null;
+	// > 控制器参数 - 移动速度Y
+	this["_drill_command_speedY_data"] = null;
+	
+	// > 控制器参数 - 旋转
+	this["_drill_command_rotate_data"] = null;
+	
+	// > 控制器参数 - 缩放X
+	this["_drill_command_scaleX_data"] = null;
+	// > 控制器参数 - 缩放Y
+	this["_drill_command_scaleY_data"] = null;
+	
+	// > 控制器参数 - 斜切X
+	this["_drill_command_skewX_data"] = null;
+	// > 控制器参数 - 斜切Y
+	this["_drill_command_skewY_data"] = null;
+}
+//==============================
+// * E指令叠加变化 - 立即归位
+//==============================
+Drill_LTG_Controller.prototype.drill_controller_commandChange_restoreMove = function(){
+	this["_drill_command_move_data"] = null;
+}
+//==============================
 // * E指令叠加变化 - 修改单属性 - 移动到
 //==============================
 Drill_LTG_Controller.prototype.drill_controller_commandChange_setMove = function( change_type, tar_valueA, tar_valueB, tar_time ){
@@ -3481,7 +3555,6 @@ Drill_LTG_Controller.prototype.drill_controller_updateEffect = function(){
 // **						->层级位置修正
 // **					->C对象绑定
 // **						->设置控制器
-// **						->设置个体贴图
 // **						->贴图初始化（手动）
 // **					->D播放GIF
 // **					->E指令叠加变化
@@ -3499,13 +3572,13 @@ Drill_LTG_Controller.prototype.drill_controller_updateEffect = function(){
 // **						> 主体贴图>闪烁效果
 // **						> 主体贴图>缩放效果
 // **
-// **		说明：	> 你必须在创建贴图后，手动初始化。（还需要先设置 控制器和个体贴图 ）
+// **		说明：	> 你必须在创建贴图后，手动初始化。（还需要先设置 控制器 ）
 // **
-// **		代码：	> 范围 - 该类显示单独的界面装饰。
-// **				> 结构 - [合并/ ●分离 /混乱] 贴图与数据合并。
+// **		代码：	> 范围 - 该类显示单独的贴图。
+// **				> 结构 - [合并/ ●分离 /混乱] 使用 控制器-贴图 结构。
 // **				> 数量 - [单个/ ●多个] 
-// **				> 创建 - [ ●一次性 /自延迟/外部延迟] 先创建控制器，在 _spriteset 创建后，再创建此贴图。
-// **				> 销毁 - [不考虑/自销毁/ ●外部销毁 ] 
+// **				> 创建 - [ ●一次性 /自延迟/外部延迟] 先创建控制器，再创建此贴图，通过 C对象绑定 进行连接。
+// **				> 销毁 - [不考虑/自销毁/ ●外部销毁 ] 通过 贴图控制 模块来销毁。
 // **				> 样式 - [ ●不可修改 /自变化/外部变化] 
 //=============================================================================
 //==============================
@@ -3555,7 +3628,7 @@ Drill_LTG_Sprite.prototype.drill_sprite_setController = function( controller ){
 //			参数：	> 无
 //			返回：	> 无
 //			
-//			说明：	> 需要设置 控制器和个体贴图 之后，才能进行初始化。
+//			说明：	> 需要设置 控制器 之后，才能进行初始化。
 //##############################
 Drill_LTG_Sprite.prototype.drill_sprite_initChild = function(){
 	this.drill_sprite_initAttr();				//初始化子功能 - A主体
@@ -3825,6 +3898,8 @@ Drill_LTG_Sprite.prototype.drill_sprite_updateCommandChange = function(){
 	// > 移动速度X - 控制器赋值（覆盖）
 	if( controller[CDataName] != undefined ){
 		controller._drill_selfXSpeed = controller[CDataName]['cur_value'];
+	}else{
+		controller._drill_selfXSpeed = data['speedX'];	//（没有数据时，赋值为 初始值）
 	}
 	
 	// > 移动速度Y - 帧刷新
@@ -3835,6 +3910,8 @@ Drill_LTG_Sprite.prototype.drill_sprite_updateCommandChange = function(){
 	// > 移动速度Y - 控制器赋值（覆盖）
 	if( controller[CDataName] != undefined ){
 		controller._drill_selfYSpeed = controller[CDataName]['cur_value'];
+	}else{
+		controller._drill_selfYSpeed = data['speedY'];	//（没有数据时，赋值为 初始值）
 	}
 	
 	
@@ -3846,6 +3923,8 @@ Drill_LTG_Sprite.prototype.drill_sprite_updateCommandChange = function(){
 	// > 旋转 - 控制器赋值
 	if( controller[CDataName] != undefined ){
 		controller._drill_rotation += controller[CDataName]['cur_value'];	//（整体再旋转角度）
+	}else{
+		controller._drill_rotation = 0;	//（没有数据时，赋值为 初始值）
 	}
 	
 	
@@ -3857,6 +3936,8 @@ Drill_LTG_Sprite.prototype.drill_sprite_updateCommandChange = function(){
 	// > 缩放X - 控制器赋值（覆盖）
 	if( controller[CDataName] != undefined ){
 		controller._drill_scaleX = controller[CDataName]['cur_value'];
+	}else{
+		controller._drill_scaleX = 1;	//（没有数据时，赋值为 初始值）
 	}
 	
 	
@@ -3868,6 +3949,8 @@ Drill_LTG_Sprite.prototype.drill_sprite_updateCommandChange = function(){
 	// > 缩放Y - 控制器赋值（覆盖）
 	if( controller[CDataName] != undefined ){
 		controller._drill_scaleY = controller[CDataName]['cur_value'];
+	}else{
+		controller._drill_scaleY = 1;	//（没有数据时，赋值为 初始值）
 	}
 	
 	
@@ -3879,6 +3962,8 @@ Drill_LTG_Sprite.prototype.drill_sprite_updateCommandChange = function(){
 	// > 斜切X - 控制器赋值（覆盖）
 	if( controller[CDataName] != undefined ){
 		controller._drill_skewX = controller[CDataName]['cur_value'];
+	}else{
+		controller._drill_skewX = 0;	//（没有数据时，赋值为 初始值）
 	}
 	
 	
@@ -3890,6 +3975,8 @@ Drill_LTG_Sprite.prototype.drill_sprite_updateCommandChange = function(){
 	// > 斜切Y - 控制器赋值（覆盖）
 	if( controller[CDataName] != undefined ){
 		controller._drill_skewY = controller[CDataName]['cur_value'];
+	}else{
+		controller._drill_skewY = 0;	//（没有数据时，赋值为 初始值）
 	}
 }
 

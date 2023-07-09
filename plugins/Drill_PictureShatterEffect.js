@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.5]        图片 - 方块粉碎效果
+ * @plugindesc [v1.6]        图片 - 方块粉碎效果
  * @author Drill_up
  * 
  *
@@ -104,6 +104,8 @@
  * 大幅度优化了结构，支持了 暂停播放和继续播放 功能。
  * [v1.5]
  * 优化了旧存档的识别与兼容。
+ * [v1.6]
+ * 兼容了与静态快照结合使用的功能。
  * 
  * 
  * @param 默认图片碎片消失方式
@@ -141,10 +143,14 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			图片方块粉碎：
-//				->图片贴图
-//					->获取 - 容器指针【标准函数】
-//					->获取 - 根据图片ID【标准函数】
+//			->☆提示信息
+//			->☆变量获取
+//			->☆插件指令
+//			->☆存储数据
+//			->☆图片贴图
+//			
+//			->☆图片控制
+//			->☆图片贴图控制
 //				->粉碎配置
 //					->绑定控制器
 //					->绑定贴图
@@ -172,7 +178,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -203,7 +209,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_PictureShatterEffect = true;
@@ -222,7 +228,7 @@ if( Imported.Drill_CoreOfShatterEffect ){
 	
 
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _Drill_PSE_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
@@ -313,7 +319,7 @@ Game_Screen.prototype.drill_PSE_isPictureExist = function( pic_id ){
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -395,7 +401,7 @@ Game_System.prototype.drill_PSE_checkSysData_Private = function() {
 
 
 //#############################################################################
-// ** 【标准模块】图片贴图
+// ** 【标准模块】图片贴图 ☆图片贴图
 //#############################################################################
 //##############################
 // * 图片贴图 - 获取 - 容器指针【标准函数】
@@ -404,6 +410,7 @@ Game_System.prototype.drill_PSE_checkSysData_Private = function() {
 //			返回：	> 贴图数组       （图片贴图）
 //          
 //			说明：	> 此函数直接返回容器对象。
+//					> 注意，被转移到 图片层、最顶层 的图片，不在此容器内。
 //##############################
 Game_Temp.prototype.drill_PSE_getPictureSpriteTank = function(){
 	return this.drill_PSE_getPictureSpriteTank_Private();
@@ -416,6 +423,8 @@ Game_Temp.prototype.drill_PSE_getPictureSpriteTank = function(){
 //          
 //			说明：	> 图片id和图片贴图一一对应。
 //					> 此函数只读，且不缓存任何对象，直接读取容器数据。
+//					> 注意，图片数据类 与 图片贴图 为 多对一，图片数据类在战斗界面和地图界面分两类，而图片贴图不分。
+//					> 此函数能获取到被转移到 图片层、最顶层 的图片。
 //##############################
 Game_Temp.prototype.drill_PSE_getPictureSpriteByPictureId = function( picture_id ){
 	return this.drill_PSE_getPictureSpriteByPictureId_Private( picture_id );
@@ -433,27 +442,80 @@ Game_Temp.prototype.drill_PSE_getPictureSpriteTank_Private = function(){
 	return SceneManager._scene._spriteset._pictureContainer.children;
 };
 //==============================
+// * 图片贴图容器 - 获取 - 最顶层容器（私有）
+//==============================
+Game_Temp.prototype.drill_PSE_getPictureSpriteTank_SenceTopArea = function(){
+	if( SceneManager._scene == undefined ){ return null; }
+	if( SceneManager._scene._drill_SenceTopArea == undefined ){ return null; }
+	return SceneManager._scene._drill_SenceTopArea.children;
+};
+//==============================
+// * 图片贴图容器 - 获取 - 图片层容器（私有）
+//==============================
+Game_Temp.prototype.drill_PSE_getPictureSpriteTank_PicArea = function(){
+	if( SceneManager._scene == undefined ){ return null; }
+	if( SceneManager._scene instanceof Scene_Battle ){
+		if( SceneManager._scene._spriteset == undefined ){ return null; }
+		if( SceneManager._scene._spriteset._drill_battlePicArea == undefined ){ return null; }
+		return SceneManager._scene._spriteset._drill_battlePicArea.children;
+	}
+	if( SceneManager._scene instanceof Scene_Map ){
+		if( SceneManager._scene._spriteset == undefined ){ return null; }
+		if( SceneManager._scene._spriteset._drill_mapPicArea == undefined ){ return null; }
+		return SceneManager._scene._spriteset._drill_mapPicArea.children;
+	}
+	return null;
+};
+//==============================
 // * 图片贴图容器 - 获取 - 根据图片ID（私有）
 //==============================
 Game_Temp.prototype.drill_PSE_getPictureSpriteByPictureId_Private = function( picture_id ){
+	
+	// > 图片对象层 的图片贴图
 	var sprite_list = this.drill_PSE_getPictureSpriteTank_Private();
 	if( sprite_list == undefined ){ return null; }
 	for(var i=0; i < sprite_list.length; i++){
 		var sprite = sprite_list[i];
-		if( sprite instanceof Sprite_Picture == false ){ continue; }
-		if( sprite._pictureId == picture_id ){
-			return sprite;
+		if( sprite instanceof Sprite_Picture ){
+			if( sprite._pictureId == picture_id ){
+				return sprite;
+			}
+		}
+	}
+	
+	// > 最顶层 的图片贴图
+	var sprite_list = this.drill_PSE_getPictureSpriteTank_SenceTopArea();
+	if( sprite_list == undefined ){ return null; }
+	for(var i=0; i < sprite_list.length; i++){
+		var sprite = sprite_list[i];
+		if( sprite instanceof Sprite_Picture ){
+			if( sprite._pictureId == picture_id ){
+				return sprite;
+			}
+		}
+	}
+	
+	// > 图片层 的图片贴图
+	var sprite_list = this.drill_PSE_getPictureSpriteTank_PicArea();
+	if( sprite_list == undefined ){ return null; }
+	for(var i=0; i < sprite_list.length; i++){
+		var sprite = sprite_list[i];
+		if( sprite instanceof Sprite_Picture ){
+			if( sprite._pictureId == picture_id ){
+				return sprite;
+			}
 		}
 	}
 	return null;
 };
 
 
+
 //=============================================================================
-// ** 图片对象
+// ** ☆图片控制（还需与核心一起改进）
 //=============================================================================
 //==============================
-// * 图片 - 初始化
+// * 图片控制 - 初始化
 //==============================
 var _drill_PSE_data_initialize = Game_Picture.prototype.initialize;
 Game_Picture.prototype.initialize = function(){
@@ -461,7 +523,7 @@ Game_Picture.prototype.initialize = function(){
 	this._drill_PSE_controller = null;		//（默认为空）
 };
 //==============================
-// * 图片 - 帧刷新
+// * 图片控制 - 帧刷新
 //==============================
 var _drill_PSE_data_update = Game_Picture.prototype.update;
 Game_Picture.prototype.update = function(){
@@ -470,13 +532,33 @@ Game_Picture.prototype.update = function(){
 		this._drill_PSE_controller.drill_COSE_update();
 	}
 };
+//==============================
+// * 图片控制 - 显示图片（对应函数showPicture）
+//==============================
+var _drill_PSE_p_show = Game_Picture.prototype.show;
+Game_Picture.prototype.show = function( name, origin, x, y, scaleX, scaleY, opacity, blendMode ){
+	_drill_PSE_p_show.call( this, name, origin, x, y, scaleX, scaleY, opacity, blendMode );
+	if( this._drill_PSE_controller != null ){
+		this._drill_PSE_controller.drill_COSE_restoreShatter();		//（立即复原）
+	}
+}
+//==============================
+// * 图片控制 - 消除图片（对应函数erasePicture）
+//==============================
+var _drill_PSE_p_erase = Game_Picture.prototype.erase;
+Game_Picture.prototype.erase = function(){
+	_drill_PSE_p_erase.call( this );
+	if( this._drill_PSE_controller != null ){
+		this._drill_PSE_controller.drill_COSE_restoreShatter();		//（立即复原）
+	}
+}
 
 
 //=============================================================================
-// ** 贴图
+// ** ☆图片贴图控制（还需与核心一起改进）
 //=============================================================================
 //==============================
-// * 贴图框架 - 初始化
+// * 图片贴图控制 - 初始化
 //==============================
 var _drill_PSE_sp_initialize = Sprite_Picture.prototype.initialize;
 Sprite_Picture.prototype.initialize = function( pictureId ){
@@ -496,7 +578,7 @@ Sprite_Picture.prototype.initialize = function( pictureId ){
 	}
 }
 //==============================
-// * 贴图 - 帧刷新
+// * 图片贴图控制 - 帧刷新
 //==============================
 var _drill_PSE_pic_update = Sprite_Picture.prototype.update;
 Sprite_Picture.prototype.update = function() {	
@@ -507,11 +589,19 @@ Sprite_Picture.prototype.update = function() {
 	// > 帧刷新
 	_drill_PSE_pic_update.call(this);
 	
-	if( !this.picture() ){ return; }
 	if( !this.bitmap ){ return; }
 	if( !this.bitmap.isReady() ){ return; }
 	if( this._drill_PSE_sprite == undefined ){ return; }
-		
+	
+	
+	// > 图片被消除时
+	if( this.picture() == undefined ){
+		this._drill_PSE_sprite.drill_COSE_destroy();
+		this._drill_PSE_sprite = null;
+		this._refresh();	//（还原父贴图）
+		return;
+	}
+	
 	// > 粉碎播放时，隐藏父贴图
 	if( this._drill_PSE_sprite.drill_COSE_canParentVisible() == false ){
 		this.texture.frame = Rectangle.emptyRectangle;
@@ -526,13 +616,15 @@ Sprite_Picture.prototype.update = function() {
 	}
 };
 //==============================
-// * 贴图 - 创建控制器
+// * 图片贴图控制 - 创建控制器
 //==============================
 Sprite_Picture.prototype.drill_PSE_createController = function( shatter_id ){
 	var picture = this.picture();
 	if( picture == undefined ){ return; }
 	if( this.bitmap == undefined ){ return; }
 	if( this.bitmap.isReady() == false ){ return; }
+	
+	this.drill_PSE_updateBitmapFrame();
 	
 	// > 参数准备
 	var data = {
@@ -545,17 +637,17 @@ Sprite_Picture.prototype.drill_PSE_createController = function( shatter_id ){
 		"shatter_hasParent": true,										//父贴图标记
 	};
 	
-	// > 特殊情况设置
-	var name = this.drill_PSE_getSrcName();
-	if( name == "" ){			//（名称为空时，按照指定资源名为空来算）
-		data["src_mode"] = "指定资源名";
+	// > 资源名称 区分
+	var name = this.drill_PSE_getBitmapSrcName();
+	if( name == "" ){					//（资源名称 为空时，表示关闭控制）
+		data["src_mode"] = "关闭资源控制";
 		data["src_img"] = "";
-		data["src_file"] = "img/pictures/";
-	}else if( name == picture._name ){	//（名称一致时，表示有资源）
+		data["src_file"] = "";
+	}else if( name == picture._name ){	//（资源名称 一致时，表示有资源）
 		data["src_mode"] = "指定资源名";
 		data["src_img"] = name;
 		data["src_file"] = "img/pictures/";
-	}else{								//（名称不一致，表示资源关闭）
+	}else{								//（资源名称 不一致，表示关闭控制）
 		data["src_mode"] = "关闭资源控制";
 		data["src_img"] = "";
 		data["src_file"] = "";
@@ -571,12 +663,17 @@ Sprite_Picture.prototype.drill_PSE_createController = function( shatter_id ){
 		picture._drill_PSE_controller.drill_COSE_resetData( data );
 	}
 	
+	// > 截图资源对象情况（只能直接控制贴图，不能从数据层面上去改）
+	if( data["src_mode"] == "关闭资源控制" ){
+		this._drill_PSE_sprite.drill_COSE_setUncontroledBitmap( this.bitmap );
+	}
+	
 	return picture._drill_PSE_controller;
 };
 //==============================
-// * 贴图 - 获取资源名称
+// * 图片贴图控制 - 获取资源名称
 //==============================
-Sprite_Picture.prototype.drill_PSE_getSrcName = function(){
+Sprite_Picture.prototype.drill_PSE_getBitmapSrcName = function(){
 	if( this.bitmap == undefined ){ return ""; }
 	var path_str = this.bitmap._url;
 	path_str = path_str.replace(".png","");
@@ -586,7 +683,7 @@ Sprite_Picture.prototype.drill_PSE_getSrcName = function(){
 
 
 //=============================================================================
-// ** 贴图框架
+// ** 贴图框架（还需与核心一起改进）
 //=============================================================================
 //==============================
 // * 贴图框架 - 初始化

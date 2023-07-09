@@ -239,6 +239,366 @@
  * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
  * 
+ * @param 颜色-21
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-22
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-23
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-24
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-25
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-26
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-27
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-28
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-29
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-30
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-31
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-32
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-33
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-34
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-35
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-36
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-37
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-38
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-39
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-40
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-41
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-42
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-43
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-44
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-45
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-46
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-47
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-48
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-49
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-50
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-51
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-52
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-53
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-54
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-55
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-56
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-57
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-58
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-59
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-60
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-61
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-62
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-63
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-64
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-65
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-66
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-67
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-68
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-69
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-70
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-71
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-72
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-73
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-74
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-75
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-76
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-77
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-78
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-79
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default 
+ * 
+ * @param 颜色-80
+ * @parent ---描边颜色---
+ * @type struct<CommonColor>
+ * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
+ * @default
+ * 
  */
 /*~struct~CommonColor:
  * 
@@ -386,11 +746,11 @@
 	DrillUp.g_DCOB_fontEdgeThickness = Number(DrillUp.parameters["默认描边厚度(全局)"] || 4); 
 	
 	/*-----------------描边颜色------------------*/
-	DrillUp.g_DCOB_color_list_length = 20;
+	DrillUp.g_DCOB_color_list_length = 80;
 	DrillUp.g_DCOB_color_list = [];
 	for( var i = 0; i < DrillUp.g_DCOB_color_list_length; i++ ){
-		if( DrillUp.parameters['颜色-' + String(i+1) ] != "" &&
-			DrillUp.parameters['颜色-' + String(i+1) ] != undefined ){
+		if( DrillUp.parameters['颜色-' + String(i+1) ] != undefined &&
+			DrillUp.parameters['颜色-' + String(i+1) ] != "" ){
 			var data = JSON.parse(DrillUp.parameters['颜色-' + String(i+1) ]);
 			DrillUp.g_DCOB_color_list[i] = DrillUp.drill_DCOB_initCommonColor( data );
 		}else{

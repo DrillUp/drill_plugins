@@ -2623,7 +2623,7 @@ Drill_BCa_Controller.prototype.drill_BCa_updateCameraPos_Children = function(){
 	var rect_height = Graphics.boxHeight;
 	
 	// > 镜头变化时的矩阵偏移量（正向变换）
-	var point_a = $gameTemp.drill_BCa_getPointWithTransform( 
+	var point_a = $gameTemp.drill_BCa_Math2D_getPointWithTransform( 
 						rect_width, rect_height,
 						Graphics.boxWidth*0.5, Graphics.boxHeight*0.5,
 						this._drill_rotation /180*Math.PI, 
@@ -2635,7 +2635,7 @@ Drill_BCa_Controller.prototype.drill_BCa_updateCameraPos_Children = function(){
 	oy -= rect_height;
 			
 	// > 逆向变换
-	var point_b = $gameTemp.drill_BCa_getPointWithTransformInversed( 
+	var point_b = $gameTemp.drill_BCa_Math2D_getPointWithTransformInversed( 
 						ox, oy,
 						Graphics.boxWidth*0.5, Graphics.boxHeight*0.5,
 						this._drill_rotation /180*Math.PI, 
@@ -2666,7 +2666,7 @@ Drill_BCa_Controller.prototype.drill_BCa_updateCameraPos_Children = function(){
 Drill_BCa_Controller.prototype.drill_BCa_getCameraPos_OuterSprite_Private = function( cur_x, cur_y ){
 	
 	// > 直接执行一次正向变换即可
-	var outer_point = $gameTemp.drill_BCa_getPointWithTransform( 
+	var outer_point = $gameTemp.drill_BCa_Math2D_getPointWithTransform( 
 							cur_x, cur_y,
 							Graphics.boxWidth*0.5, Graphics.boxHeight*0.5,
 							this._drill_rotation /180*Math.PI, 
@@ -2689,7 +2689,7 @@ Drill_BCa_Controller.prototype.drill_BCa_getPos_OuterToChildren_Private = functi
 	var rect_height = Graphics.boxHeight*1.5;
 	
 	// > 镜头变化时的矩阵偏移量（正向变换）
-	var point_a = $gameTemp.drill_BCa_getPointWithTransform( 
+	var point_a = $gameTemp.drill_BCa_Math2D_getPointWithTransform( 
 						rect_width, rect_height,
 						Graphics.boxWidth*0.5, Graphics.boxHeight*0.5,
 						this._drill_rotation /180*Math.PI, 
@@ -2701,7 +2701,7 @@ Drill_BCa_Controller.prototype.drill_BCa_getPos_OuterToChildren_Private = functi
 	yy -= rect_height;
 	
 	// > 逆向变换
-	var point_b = $gameTemp.drill_BCa_getPointWithTransformInversed( 
+	var point_b = $gameTemp.drill_BCa_Math2D_getPointWithTransformInversed( 
 						xx, yy,
 						Graphics.boxWidth*0.5, Graphics.boxHeight*0.5,
 						this._drill_rotation /180*Math.PI, 
@@ -2728,7 +2728,7 @@ Drill_BCa_Controller.prototype.drill_BCa_getPos_ChildrenToOuter_Private = functi
 	var yy = y;
 	
 	// > 直接执行一次正向变换即可
-	var outer_point = $gameTemp.drill_BCa_getPointWithTransform( 
+	var outer_point = $gameTemp.drill_BCa_Math2D_getPointWithTransform( 
 							xx, yy,
 							Graphics.boxWidth*0.5, Graphics.boxHeight*0.5,
 							this._drill_rotation /180*Math.PI, 
@@ -3300,7 +3300,7 @@ Drill_BCa_Controller.prototype.drill_updatePosition = function(){
 		//（不操作）
 	}else{
 		// > 锚点(0.5,0.5)锁定
-		var fix_point = $gameTemp.drill_BCa_getFixPointInAnchor( 
+		var fix_point = $gameTemp.drill_BCa_Math2D_getFixPointInAnchor( 
 							0.0, 0.0, 
 							0.5, 0.5, 
 							Graphics.boxWidth, Graphics.boxHeight,
@@ -3347,7 +3347,7 @@ Drill_BCa_Controller.prototype.drill_updateCheckNaN = function(){
 	}
 }
 //=============================================================================
-// * 数学 - 锁定锚点
+// * 数学工具 - 锁定锚点
 //			
 //			参数：	> org_anchor_x 数字    （原贴图锚点X）
 //					> org_anchor_y 数字    （原贴图锚点Y）
@@ -3362,7 +3362,7 @@ Drill_BCa_Controller.prototype.drill_updateCheckNaN = function(){
 //			说明：	修正 旋转+缩放 的坐标，使其看起来像是在绕着 新的锚点 变换。
 //					旋转值和缩放值可为负数。
 //=============================================================================
-Game_Temp.prototype.drill_BCa_getFixPointInAnchor = function( 
+Game_Temp.prototype.drill_BCa_Math2D_getFixPointInAnchor = function( 
 					org_anchor_x,org_anchor_y,			//原贴图锚点 
 					target_anchor_x,target_anchor_y, 	//新的锚点 
 					width, height,						//贴图高宽
@@ -3398,7 +3398,7 @@ Game_Temp.prototype.drill_BCa_getFixPointInAnchor = function(
 	return { "x":xx, "y":yy };
 }
 //=============================================================================
-// * 数学 - 矩阵点的变换
+// * 数学工具 - 矩阵点的变换
 //			
 //			参数：	> cur_x,cur_y 数字       （需要变换的点）
 //					> center_x,center_y 数字 （矩形中心点）
@@ -3409,7 +3409,7 @@ Game_Temp.prototype.drill_BCa_getFixPointInAnchor = function(
 //			说明：	矩阵内或矩阵外一个点，能够根据矩阵的 旋转+缩放 一并变换。
 //					旋转值和缩放值可为负数。
 //=============================================================================
-Game_Temp.prototype.drill_BCa_getPointWithTransform = function( 
+Game_Temp.prototype.drill_BCa_Math2D_getPointWithTransform = function( 
 					cur_x,cur_y,						//需要变换的点 
 					center_x,center_y, 					//矩形中心点 
 					rotation, scale_x, scale_y  ){		//变换的值（旋转+缩放）
@@ -3443,7 +3443,7 @@ Game_Temp.prototype.drill_BCa_getPointWithTransform = function(
 	return { "x":xx, "y":yy };
 }
 //=============================================================================
-// * 数学 - 矩阵点的变换（逆向）
+// * 数学工具 - 矩阵点的变换（逆向）
 //			
 //			参数：	> cur_x,cur_y 数字       （变换后的坐标）
 //					> center_x,center_y 数字 （矩形中心点）
@@ -3453,7 +3453,7 @@ Game_Temp.prototype.drill_BCa_getPointWithTransform = function(
 //			
 //			说明：	同样的函数，能够将正向函数的结果值，扳回成正向函数的最初值。
 //=============================================================================
-Game_Temp.prototype.drill_BCa_getPointWithTransformInversed = function( 
+Game_Temp.prototype.drill_BCa_Math2D_getPointWithTransformInversed = function( 
 					cur_x,cur_y,						//需要变换的点 
 					center_x,center_y, 					//矩形中心点 
 					rotation, scale_x, scale_y  ){		//变换的值（旋转+缩放）

@@ -551,11 +551,11 @@ Drill_COBa_Manager.drill_COBa_convertPointListToString = function( point_list ){
 //			
 //			说明：	> 如果随机种子为 1至100，那么你将得到线性均匀分布的随机值。不是乱序随机。
 //##############################
-DrillUp.drill_COBa_getRandomInSeed = function( seed ){
-	return Drill_COBa_Manager.drill_COBa_getRandomInSeed( seed );
+DrillUp.drill_COBa_Math1D_getRandomInSeed = function( seed ){
+	return Drill_COBa_Manager.drill_COBa_Math1D_getRandomInSeed( seed );
 };
-Drill_COBa_Manager.drill_COBa_getRandomInSeed = function( seed ){
-	return this.drill_COBa_getRandomInSeed_Private( seed );
+Drill_COBa_Manager.drill_COBa_Math1D_getRandomInSeed = function( seed ){
+	return this.drill_COBa_Math1D_getRandomInSeed_Private( seed );
 };
 //##############################
 // * 弹道工具 - 生成随机数（迭代）【标准函数】
@@ -566,11 +566,11 @@ Drill_COBa_Manager.drill_COBa_getRandomInSeed = function( seed ){
 //			
 //			说明：	> 经过迭代后，能够得到乱序的随机数。
 //##############################
-DrillUp.drill_COBa_getRandomInIteration = function( org_ran, iteration ){
-	return Drill_COBa_Manager.drill_COBa_getRandomInIteration( org_ran, iteration );
+DrillUp.drill_COBa_Math1D_getRandomInIteration = function( org_ran, iteration ){
+	return Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration( org_ran, iteration );
 };
-Drill_COBa_Manager.drill_COBa_getRandomInIteration = function( org_ran, iteration ){
-	return this.drill_COBa_getRandomInIteration_Private( org_ran, iteration );
+Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration = function( org_ran, iteration ){
+	return this.drill_COBa_Math1D_getRandomInIteration_Private( org_ran, iteration );
 };
 
 
@@ -696,18 +696,18 @@ Drill_COBa_Manager.drill_COBa_convertPointListToString_Private = function( point
 	return str;
 };
 //==============================
-// * A工具函数 - 生成随机数（随机种子）（私有）
+// * A工具函数 - 数学工具 - 生成随机数（随机种子）（私有）
 //==============================
-Drill_COBa_Manager.drill_COBa_getRandomInSeed_Private = function( seed ){
+Drill_COBa_Manager.drill_COBa_Math1D_getRandomInSeed_Private = function( seed ){
 	var new_ran = ( seed * 9301 + 49297 ) % 233280;
 	new_ran = new_ran / 233280.0;
 	return new_ran;
 };
 //==============================
-// * A工具函数 - 生成随机数（迭代）（私有）
+// * A工具函数 - 数学工具 - 生成随机数（迭代）（私有）
 //==============================
-Drill_COBa_Manager.drill_COBa_getRandomInIteration_Private = function( org_ran, iteration ){
-	var prime = this.drill_COBa_primeList[ iteration % this.drill_COBa_primeList.length ];
+Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration_Private = function( org_ran, iteration ){
+	var prime = this.drill_COBa_Math1D_primeList[ iteration % this.drill_COBa_Math1D_primeList.length ];
 	var temp_ran = ( (org_ran + iteration) * 9301 + 49297 ) % 233280;
 	temp_ran = temp_ran / prime;
 	var new_ran = (temp_ran + org_ran * iteration * prime) %1;
@@ -716,9 +716,9 @@ Drill_COBa_Manager.drill_COBa_getRandomInIteration_Private = function( org_ran, 
 	//return new_ran %1;
 };
 //==============================
-// * A工具函数 - 数学 - 质数表（1000以内）
+// * A工具函数 - 数学工具 - 质数表（1000以内）
 //==============================
-Drill_COBa_Manager.drill_COBa_primeList = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,
+Drill_COBa_Manager.drill_COBa_Math1D_primeList = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,
 	73,79,83,89,97,101,103,107,109,113,127,131,137,139,149,151,157,163,167,173,179,181,
 	191,193,197,199,211,223,227,229,233,239,241,251,257,263,269,271,277,281,283,293,307,
 	311,313,317,331,337,347,349,353,359,367,373,379,383,389,397,401,409,419,421,431,433,
@@ -884,7 +884,7 @@ Drill_COBa_Manager.drill_COBa_preBallisticsCommon = function( obj_data, obj_inde
 		obj_data['_drill_COBa_common'].push( orgCommon );
 		
 		// > 随机值（来自随机因子）
-		var randomValue = Drill_COBa_Manager.drill_COBa_getRandomInIteration( data['randomFactor'], obj_index );	//随机因子
+		var randomValue = Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration( data['randomFactor'], obj_index );	//随机因子
 		var randomValue_i = 1;
 		if( data['randomIterationList'] != undefined ){
 			if( data['randomIterationList'][ obj_index ] != undefined ){
@@ -893,7 +893,7 @@ Drill_COBa_Manager.drill_COBa_preBallisticsCommon = function( obj_data, obj_inde
 				randomValue_i = data['randomIterationList'][0];
 			}
 		}
-		randomValue = Drill_COBa_Manager.drill_COBa_getRandomInIteration( randomValue, data['commonNum']*randomValue_i +obj_index );
+		randomValue = Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration( randomValue, data['commonNum']*randomValue_i +obj_index );
 		
 		// > 变量定义（写这里是为优化性能，减少反复创建次数）
 		var p = {};				//参数容器
@@ -1289,7 +1289,7 @@ Drill_COBa_Manager.drill_COBa_preBallisticsPlanimetry = function( obj_data, obj_
 		obj_data['_drill_COBa_y'].push( orgY );
 		
 		// > 随机值（方向随机因子）
-		var randomDirValue = Drill_COBa_Manager.drill_COBa_getRandomInIteration( data['polarDirRandomFactor'], obj_index +12345 );
+		var randomDirValue = Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration( data['polarDirRandomFactor'], obj_index +12345 );
 		var randomDirValue_i = 1;
 		if( data['polarDirRandomIterationList'] != undefined ){
 			if( data['polarDirRandomIterationList'][ obj_index ] != undefined ){
@@ -1298,10 +1298,10 @@ Drill_COBa_Manager.drill_COBa_preBallisticsPlanimetry = function( obj_data, obj_
 				randomDirValue_i = data['polarDirRandomIterationList'][0];
 			}
 		}
-		randomDirValue = Drill_COBa_Manager.drill_COBa_getRandomInIteration( randomDirValue, data['planimetryNum']*randomDirValue_i +obj_index +12345 );
+		randomDirValue = Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration( randomDirValue, data['planimetryNum']*randomDirValue_i +obj_index +12345 );
 		
 		// > 随机值（速度随机因子）
-		var randomSpeed = Drill_COBa_Manager.drill_COBa_getRandomInIteration( data['polarSpeedRandomFactor'], obj_index +23456 );
+		var randomSpeed = Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration( data['polarSpeedRandomFactor'], obj_index +23456 );
 		var randomSpeed_i = 1;
 		if( data['polarSpeedRandomIterationList'] != undefined ){
 			if( data['polarSpeedRandomIterationList'][ obj_index ] != undefined ){
@@ -1310,7 +1310,7 @@ Drill_COBa_Manager.drill_COBa_preBallisticsPlanimetry = function( obj_data, obj_
 				randomSpeed_i = data['polarSpeedRandomIterationList'][0];
 			}
 		}
-		randomSpeed = Drill_COBa_Manager.drill_COBa_getRandomInIteration( randomSpeed, data['planimetryNum']*randomSpeed_i +obj_index +23456 );
+		randomSpeed = Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration( randomSpeed, data['planimetryNum']*randomSpeed_i +obj_index +23456 );
 		
 		// > 变量定义（写这里是为优化性能，减少反复创建次数）
 		var p = {};				//参数容器
@@ -1409,7 +1409,7 @@ Drill_COBa_Manager.drill_COBa_preBallisticsPlanimetry = function( obj_data, obj_
 		obj_data['_drill_COBa_y'].push( orgY );
 		
 		// > 随机值（X随机因子）
-		var x_randomSpeed = Drill_COBa_Manager.drill_COBa_getRandomInIteration( data['cartXSpeedRandomFactor'], obj_index +34567 );
+		var x_randomSpeed = Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration( data['cartXSpeedRandomFactor'], obj_index +34567 );
 		var x_randomSpeed_i = 1;
 		if( data['cartXSpeedRandomIterationList'] != undefined ){
 			if( data['cartXSpeedRandomIterationList'][ obj_index ] != undefined ){
@@ -1418,10 +1418,10 @@ Drill_COBa_Manager.drill_COBa_preBallisticsPlanimetry = function( obj_data, obj_
 				x_randomSpeed_i = data['cartXSpeedRandomIterationList'][0];
 			}
 		}
-		x_randomSpeed = Drill_COBa_Manager.drill_COBa_getRandomInIteration( x_randomSpeed, data['planimetryNum']*x_randomSpeed_i +obj_index +34567 );
+		x_randomSpeed = Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration( x_randomSpeed, data['planimetryNum']*x_randomSpeed_i +obj_index +34567 );
 		
 		// > 随机值（Y随机因子）
-		var y_randomSpeed = Drill_COBa_Manager.drill_COBa_getRandomInIteration( data['cartYSpeedRandomFactor'], obj_index +45678 );
+		var y_randomSpeed = Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration( data['cartYSpeedRandomFactor'], obj_index +45678 );
 		var y_randomSpeed_i = 1;
 		if( data['cartYSpeedRandomIterationList'] != undefined ){
 			if( data['cartYSpeedRandomIterationList'][ obj_index ] != undefined ){
@@ -1430,7 +1430,7 @@ Drill_COBa_Manager.drill_COBa_preBallisticsPlanimetry = function( obj_data, obj_
 				y_randomSpeed_i = data['cartYSpeedRandomIterationList'][0];
 			}
 		}
-		y_randomSpeed = Drill_COBa_Manager.drill_COBa_getRandomInIteration( y_randomSpeed, data['planimetryNum']*y_randomSpeed_i +obj_index +45678 );
+		y_randomSpeed = Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration( y_randomSpeed, data['planimetryNum']*y_randomSpeed_i +obj_index +45678 );
 		
 		// > 变量定义（写这里是为优化性能，减少反复创建次数）
 		var p = {};				//参数容器
@@ -1527,7 +1527,7 @@ Drill_COBa_Manager.drill_COBa_preBallisticsPlanimetry = function( obj_data, obj_
 		obj_data['_drill_COBa_y'].push( orgY );
 		
 		// > 随机值（随机因子）
-		var track_randomSpeed = Drill_COBa_Manager.drill_COBa_getRandomInIteration( data['trackSpeedRandomFactor'], obj_index +56789 );
+		var track_randomSpeed = Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration( data['trackSpeedRandomFactor'], obj_index +56789 );
 		var track_randomSpeed_i = 1;
 		if( data['trackSpeedRandomIterationList'] != undefined ){
 			if( data['trackSpeedRandomIterationList'][ obj_index ] != undefined ){
@@ -1536,7 +1536,7 @@ Drill_COBa_Manager.drill_COBa_preBallisticsPlanimetry = function( obj_data, obj_
 				track_randomSpeed_i = data['trackSpeedRandomIterationList'][0];
 			}
 		}
-		track_randomSpeed = Drill_COBa_Manager.drill_COBa_getRandomInIteration( track_randomSpeed, data['planimetryNum']*track_randomSpeed_i +obj_index +56789 );
+		track_randomSpeed = Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration( track_randomSpeed, data['planimetryNum']*track_randomSpeed_i +obj_index +56789 );
 		
 		// > 轨道点初始化
 		if( data['trackPointTank'].length < 2 ){	//（至少要两个点才能计算）

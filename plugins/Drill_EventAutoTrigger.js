@@ -188,243 +188,367 @@
  * @type struct<ATriArea>
  * @desc 自定义玩家自动触发的设置。
  * @default {"标签":"==与玩家距离1==","初始是否开启":"true","触发关键字":"与玩家距离1","区域模式":"形状区域","形状区域":"菱形区域","形状区域范围":"1","自定义区域编号":"1","是否开启筛选器":"false","筛选器编号":"1"}
- *
+ * 
  * @param 玩家触发-2
  * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default {"标签":"==与玩家距离2==","初始是否开启":"true","触发关键字":"与玩家距离2","区域模式":"形状区域","形状区域":"菱形区域","形状区域范围":"2","自定义区域编号":"1","是否开启筛选器":"false","筛选器编号":"1"}
- *
+ * 
  * @param 玩家触发-3
  * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default {"标签":"==与玩家距离3==","初始是否开启":"true","触发关键字":"与玩家距离3","区域模式":"形状区域","形状区域":"菱形区域","形状区域范围":"3","自定义区域编号":"1","是否开启筛选器":"false","筛选器编号":"1"}
- *
+ * 
  * @param 玩家触发-4
  * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default {"标签":"==与玩家距离4==","初始是否开启":"true","触发关键字":"与玩家距离4","区域模式":"形状区域","形状区域":"菱形区域","形状区域范围":"4","自定义区域编号":"1","是否开启筛选器":"false","筛选器编号":"1"}
- *
+ * 
  * @param 玩家触发-5
  * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default {"标签":"==与玩家距离5==","初始是否开启":"true","触发关键字":"与玩家距离5","区域模式":"形状区域","形状区域":"菱形区域","形状区域范围":"5","自定义区域编号":"1","是否开启筛选器":"false","筛选器编号":"1"}
- *
+ * 
  * @param 玩家触发-6
  * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default {"标签":"==与玩家距离6==","初始是否开启":"true","触发关键字":"与玩家距离6","区域模式":"形状区域","形状区域":"菱形区域","形状区域范围":"6","自定义区域编号":"1","是否开启筛选器":"false","筛选器编号":"1"}
- *
+ * 
  * @param 玩家触发-7
  * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default {"标签":"==与玩家距离7==","初始是否开启":"true","触发关键字":"与玩家距离7","区域模式":"形状区域","形状区域":"菱形区域","形状区域范围":"7","自定义区域编号":"1","是否开启筛选器":"false","筛选器编号":"1"}
- *
+ * 
  * @param 玩家触发-8
  * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default {"标签":"==与玩家距离8==","初始是否开启":"true","触发关键字":"与玩家距离8","区域模式":"形状区域","形状区域":"菱形区域","形状区域范围":"8","自定义区域编号":"1","是否开启筛选器":"false","筛选器编号":"1"}
- *
+ * 
  * @param 玩家触发-9
  * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default 
- *
+ * 
  * @param 玩家触发-10
  * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default 
- *
+ * 
  * @param 玩家触发-11
  * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default 
- *
+ * 
  * @param 玩家触发-12
  * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default 
- *
+ * 
  * @param 玩家触发-13
  * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default 
- *
+ * 
  * @param 玩家触发-14
  * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default 
- *
+ * 
  * @param 玩家触发-15
  * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default 
- *
+ * 
  * @param 玩家触发-16
  * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default 
- *
+ * 
  * @param 玩家触发-17
  * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default 
- *
+ * 
  * @param 玩家触发-18
  * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default 
- *
+ * 
  * @param 玩家触发-19
  * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default 
- *
+ * 
  * @param 玩家触发-20
  * @parent ---玩家触发组 1至20---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default 
  * 
  * @param ---玩家触发组21至40---
  * @desc 
- *
+ * 
  * @param 玩家触发-21
  * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default 
- *
+ * 
  * @param 玩家触发-22
  * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default 
- *
+ * 
  * @param 玩家触发-23
  * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default 
- *
+ * 
  * @param 玩家触发-24
  * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default 
- *
+ * 
  * @param 玩家触发-25
  * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default 
- *
+ * 
  * @param 玩家触发-26
  * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default 
- *
+ * 
  * @param 玩家触发-27
  * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default 
- *
+ * 
  * @param 玩家触发-28
  * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default 
- *
+ * 
  * @param 玩家触发-29
  * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default 
- *
+ * 
  * @param 玩家触发-30
  * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default 
- *
+ * 
  * @param 玩家触发-31
  * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default 
- *
+ * 
  * @param 玩家触发-32
  * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default 
- *
+ * 
  * @param 玩家触发-33
  * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default 
- *
+ * 
  * @param 玩家触发-34
  * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default 
- *
+ * 
  * @param 玩家触发-35
  * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default 
- *
+ * 
  * @param 玩家触发-36
  * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default 
- *
+ * 
  * @param 玩家触发-37
  * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default 
- *
+ * 
  * @param 玩家触发-38
  * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default 
- *
+ * 
  * @param 玩家触发-39
  * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default 
- *
+ * 
  * @param 玩家触发-40
  * @parent ---玩家触发组21至40---
  * @type struct<ATriArea>
- * @desc 自定义触发事件的区域范围。
+ * @desc 自定义玩家自动触发的设置。
  * @default 
+ * 
+ * @param ---玩家触发组41至60---
+ * @desc 
+ * 
+ * @param 玩家触发-41
+ * @parent ---玩家触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 自定义玩家自动触发的设置。
+ * @default 
+ * 
+ * @param 玩家触发-42
+ * @parent ---玩家触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 自定义玩家自动触发的设置。
+ * @default 
+ * 
+ * @param 玩家触发-43
+ * @parent ---玩家触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 自定义玩家自动触发的设置。
+ * @default 
+ * 
+ * @param 玩家触发-44
+ * @parent ---玩家触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 自定义玩家自动触发的设置。
+ * @default 
+ * 
+ * @param 玩家触发-45
+ * @parent ---玩家触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 自定义玩家自动触发的设置。
+ * @default 
+ * 
+ * @param 玩家触发-46
+ * @parent ---玩家触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 自定义玩家自动触发的设置。
+ * @default 
+ * 
+ * @param 玩家触发-47
+ * @parent ---玩家触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 自定义玩家自动触发的设置。
+ * @default 
+ * 
+ * @param 玩家触发-48
+ * @parent ---玩家触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 自定义玩家自动触发的设置。
+ * @default 
+ * 
+ * @param 玩家触发-49
+ * @parent ---玩家触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 自定义玩家自动触发的设置。
+ * @default 
+ * 
+ * @param 玩家触发-50
+ * @parent ---玩家触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 自定义玩家自动触发的设置。
+ * @default 
+ * 
+ * @param 玩家触发-51
+ * @parent ---玩家触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 自定义玩家自动触发的设置。
+ * @default 
+ * 
+ * @param 玩家触发-52
+ * @parent ---玩家触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 自定义玩家自动触发的设置。
+ * @default 
+ * 
+ * @param 玩家触发-53
+ * @parent ---玩家触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 自定义玩家自动触发的设置。
+ * @default 
+ * 
+ * @param 玩家触发-54
+ * @parent ---玩家触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 自定义玩家自动触发的设置。
+ * @default 
+ * 
+ * @param 玩家触发-55
+ * @parent ---玩家触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 自定义玩家自动触发的设置。
+ * @default 
+ * 
+ * @param 玩家触发-56
+ * @parent ---玩家触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 自定义玩家自动触发的设置。
+ * @default 
+ * 
+ * @param 玩家触发-57
+ * @parent ---玩家触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 自定义玩家自动触发的设置。
+ * @default 
+ * 
+ * @param 玩家触发-58
+ * @parent ---玩家触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 自定义玩家自动触发的设置。
+ * @default 
+ * 
+ * @param 玩家触发-59
+ * @parent ---玩家触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 自定义玩家自动触发的设置。
+ * @default 
+ * 
+ * @param 玩家触发-60
+ * @parent ---玩家触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 自定义玩家自动触发的设置。
+ * @default
+ * 
  */
 /*~struct~ATriArea:
  * 
@@ -699,7 +823,7 @@
 	DrillUp.g_EAT_fix = String(DrillUp.parameters['是否修正区域判定'] || "true") === "true";//几乎没有不修正的需求，所以直接修正
 	
 	/*-----------------玩家触发组------------------*/
-	DrillUp.g_EAT_area_length = 40;
+	DrillUp.g_EAT_area_length = 60;
 	DrillUp.g_EAT_area = [];
 	for( var i = 0; i < DrillUp.g_EAT_area_length; i++ ){
 		if( DrillUp.parameters["玩家触发-" + String(i+1) ] != "" &&

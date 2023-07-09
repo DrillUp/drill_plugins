@@ -173,97 +173,216 @@
  * @type struct<DrillDOpStyle>
  * @desc 对话框相关窗口的变形样式配置。
  * @default {"标签":"==自由的小对话框==","---窗口---":"","位置X模式":"使用自定义值","平移-自定义值 X":"0","位置Y模式":"使用自定义值","平移-自定义值 Y":"0","宽度模式":"与最长文本宽度一致","宽度自定义值":"816","高度模式":"自适应1至4行数的高度","默认自定义行数":"4","高度自定义值":"192","---其它---":"","字体大小":"28"}
- *
+ * 
  * @param 变形样式-6
  * @parent ---变形样式集---
  * @type struct<DrillDOpStyle>
  * @desc 对话框相关窗口的变形样式配置。
  * @default 
- *
+ * 
  * @param 变形样式-7
  * @parent ---变形样式集---
  * @type struct<DrillDOpStyle>
  * @desc 对话框相关窗口的变形样式配置。
  * @default 
- *
+ * 
  * @param 变形样式-8
  * @parent ---变形样式集---
  * @type struct<DrillDOpStyle>
  * @desc 对话框相关窗口的变形样式配置。
  * @default 
- *
+ * 
  * @param 变形样式-9
  * @parent ---变形样式集---
  * @type struct<DrillDOpStyle>
  * @desc 对话框相关窗口的变形样式配置。
  * @default 
- *
+ * 
  * @param 变形样式-10
  * @parent ---变形样式集---
  * @type struct<DrillDOpStyle>
  * @desc 对话框相关窗口的变形样式配置。
  * @default 
- *
+ * 
  * @param 变形样式-11
  * @parent ---变形样式集---
  * @type struct<DrillDOpStyle>
  * @desc 对话框相关窗口的变形样式配置。
  * @default 
- *
+ * 
  * @param 变形样式-12
  * @parent ---变形样式集---
  * @type struct<DrillDOpStyle>
  * @desc 对话框相关窗口的变形样式配置。
  * @default 
- *
+ * 
  * @param 变形样式-13
  * @parent ---变形样式集---
  * @type struct<DrillDOpStyle>
  * @desc 对话框相关窗口的变形样式配置。
  * @default 
- *
+ * 
  * @param 变形样式-14
  * @parent ---变形样式集---
  * @type struct<DrillDOpStyle>
  * @desc 对话框相关窗口的变形样式配置。
  * @default 
- *
+ * 
  * @param 变形样式-15
  * @parent ---变形样式集---
  * @type struct<DrillDOpStyle>
  * @desc 对话框相关窗口的变形样式配置。
  * @default 
- *
+ * 
  * @param 变形样式-16
  * @parent ---变形样式集---
  * @type struct<DrillDOpStyle>
  * @desc 对话框相关窗口的变形样式配置。
  * @default 
- *
+ * 
  * @param 变形样式-17
  * @parent ---变形样式集---
  * @type struct<DrillDOpStyle>
  * @desc 对话框相关窗口的变形样式配置。
  * @default 
- *
+ * 
  * @param 变形样式-18
  * @parent ---变形样式集---
  * @type struct<DrillDOpStyle>
  * @desc 对话框相关窗口的变形样式配置。
  * @default 
- *
+ * 
  * @param 变形样式-19
  * @parent ---变形样式集---
  * @type struct<DrillDOpStyle>
  * @desc 对话框相关窗口的变形样式配置。
  * @default 
- *
+ * 
  * @param 变形样式-20
  * @parent ---变形样式集---
  * @type struct<DrillDOpStyle>
  * @desc 对话框相关窗口的变形样式配置。
  * @default 
  * 
+ * @param 变形样式-21
+ * @parent ---变形样式集---
+ * @type struct<DrillDOpStyle>
+ * @desc 对话框相关窗口的变形样式配置。
+ * @default 
+ * 
+ * @param 变形样式-22
+ * @parent ---变形样式集---
+ * @type struct<DrillDOpStyle>
+ * @desc 对话框相关窗口的变形样式配置。
+ * @default 
+ * 
+ * @param 变形样式-23
+ * @parent ---变形样式集---
+ * @type struct<DrillDOpStyle>
+ * @desc 对话框相关窗口的变形样式配置。
+ * @default 
+ * 
+ * @param 变形样式-24
+ * @parent ---变形样式集---
+ * @type struct<DrillDOpStyle>
+ * @desc 对话框相关窗口的变形样式配置。
+ * @default 
+ * 
+ * @param 变形样式-25
+ * @parent ---变形样式集---
+ * @type struct<DrillDOpStyle>
+ * @desc 对话框相关窗口的变形样式配置。
+ * @default 
+ * 
+ * @param 变形样式-26
+ * @parent ---变形样式集---
+ * @type struct<DrillDOpStyle>
+ * @desc 对话框相关窗口的变形样式配置。
+ * @default 
+ * 
+ * @param 变形样式-27
+ * @parent ---变形样式集---
+ * @type struct<DrillDOpStyle>
+ * @desc 对话框相关窗口的变形样式配置。
+ * @default 
+ * 
+ * @param 变形样式-28
+ * @parent ---变形样式集---
+ * @type struct<DrillDOpStyle>
+ * @desc 对话框相关窗口的变形样式配置。
+ * @default 
+ * 
+ * @param 变形样式-29
+ * @parent ---变形样式集---
+ * @type struct<DrillDOpStyle>
+ * @desc 对话框相关窗口的变形样式配置。
+ * @default 
+ * 
+ * @param 变形样式-30
+ * @parent ---变形样式集---
+ * @type struct<DrillDOpStyle>
+ * @desc 对话框相关窗口的变形样式配置。
+ * @default 
+ * 
+ * @param 变形样式-31
+ * @parent ---变形样式集---
+ * @type struct<DrillDOpStyle>
+ * @desc 对话框相关窗口的变形样式配置。
+ * @default 
+ * 
+ * @param 变形样式-32
+ * @parent ---变形样式集---
+ * @type struct<DrillDOpStyle>
+ * @desc 对话框相关窗口的变形样式配置。
+ * @default 
+ * 
+ * @param 变形样式-33
+ * @parent ---变形样式集---
+ * @type struct<DrillDOpStyle>
+ * @desc 对话框相关窗口的变形样式配置。
+ * @default 
+ * 
+ * @param 变形样式-34
+ * @parent ---变形样式集---
+ * @type struct<DrillDOpStyle>
+ * @desc 对话框相关窗口的变形样式配置。
+ * @default 
+ * 
+ * @param 变形样式-35
+ * @parent ---变形样式集---
+ * @type struct<DrillDOpStyle>
+ * @desc 对话框相关窗口的变形样式配置。
+ * @default 
+ * 
+ * @param 变形样式-36
+ * @parent ---变形样式集---
+ * @type struct<DrillDOpStyle>
+ * @desc 对话框相关窗口的变形样式配置。
+ * @default 
+ * 
+ * @param 变形样式-37
+ * @parent ---变形样式集---
+ * @type struct<DrillDOpStyle>
+ * @desc 对话框相关窗口的变形样式配置。
+ * @default 
+ * 
+ * @param 变形样式-38
+ * @parent ---变形样式集---
+ * @type struct<DrillDOpStyle>
+ * @desc 对话框相关窗口的变形样式配置。
+ * @default 
+ * 
+ * @param 变形样式-39
+ * @parent ---变形样式集---
+ * @type struct<DrillDOpStyle>
+ * @desc 对话框相关窗口的变形样式配置。
+ * @default 
+ * 
+ * @param 变形样式-40
+ * @parent ---变形样式集---
+ * @type struct<DrillDOpStyle>
+ * @desc 对话框相关窗口的变形样式配置。
+ * @default
  * 
  */
 /*~struct~DrillDOpStyle:
@@ -492,7 +611,7 @@
 	DrillUp.g_DOp_defaultStyleId = Number(DrillUp.parameters["默认变形样式"] || 1);
 	
 	/*-----------------样式集------------------*/
-	DrillUp.g_DOp_list_length = 20;
+	DrillUp.g_DOp_list_length = 40;
 	DrillUp.g_DOp_list = [];
 	for( var i = 0; i < DrillUp.g_DOp_list_length; i++ ){
 		if( DrillUp.parameters["变形样式-" + String(i+1) ] != undefined &&

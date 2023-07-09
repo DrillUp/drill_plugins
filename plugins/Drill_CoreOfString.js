@@ -1454,8 +1454,8 @@
 	DrillUp.g_COSt_list_length = 200;
 	DrillUp.g_COSt_list = [];
 	for( var i = 0; i < DrillUp.g_COSt_list_length ; i++ ){
-		if( DrillUp.parameters['字符串-' + String(i+1) ] != "" &&
-			DrillUp.parameters['字符串-' + String(i+1) ] != undefined ){
+		if( DrillUp.parameters['字符串-' + String(i+1) ] != undefined &&
+			DrillUp.parameters['字符串-' + String(i+1) ] != "" ){
 			var temp = JSON.parse( DrillUp.parameters['字符串-' + String(i+1)] || {} );
 			DrillUp.g_COSt_list[i] = DrillUp.drill_COSt_initString( temp );
 		}else{

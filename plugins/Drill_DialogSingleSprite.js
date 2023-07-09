@@ -117,7 +117,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-2
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -125,7 +125,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-3
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -133,7 +133,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-4
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -141,7 +141,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-5
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -149,7 +149,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-6
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -157,7 +157,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-7
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -165,7 +165,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-8
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -173,7 +173,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-9
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -181,7 +181,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-10
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -189,7 +189,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-11
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -197,7 +197,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-12
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -205,7 +205,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-13
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -213,7 +213,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-14
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -221,7 +221,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-15
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -229,7 +229,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-16
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -237,7 +237,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-17
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -245,7 +245,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-18
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -253,7 +253,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-19
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -261,7 +261,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-20
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -269,7 +269,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-21
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -277,7 +277,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-22
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -285,7 +285,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-23
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -293,7 +293,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-24
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -301,7 +301,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-25
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -309,7 +309,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-26
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -317,7 +317,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-27
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -325,7 +325,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-28
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -333,7 +333,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-29
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -341,7 +341,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-30
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -349,7 +349,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-31
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -357,7 +357,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-32
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -365,7 +365,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-33
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -373,7 +373,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-34
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -381,7 +381,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-35
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -389,7 +389,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-36
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -397,7 +397,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-37
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -405,7 +405,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-38
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -413,7 +413,7 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-39
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
@@ -421,8 +421,328 @@
  * @require 1
  * @dir img/Special__dialogPic/
  * @type file
- *
+ * 
  * @param 对话图-40
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-41
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-42
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-43
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-44
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-45
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-46
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-47
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-48
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-49
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-50
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-51
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-52
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-53
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-54
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-55
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-56
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-57
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-58
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-59
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-60
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-61
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-62
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-63
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-64
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-65
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-66
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-67
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-68
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-69
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-70
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-71
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-72
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-73
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-74
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-75
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-76
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-77
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-78
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-79
+ * @parent ----对话图组----
+ * @desc 对话图的图片资源。
+ * @default 
+ * @require 1
+ * @dir img/Special__dialogPic/
+ * @type file
+ * 
+ * @param 对话图-80
  * @parent ----对话图组----
  * @desc 对话图的图片资源。
  * @default 
@@ -505,7 +825,7 @@
 	DrillUp.g_DSS_fadeTime = Number(DrillUp.parameters["贴图显现时间"] || 20);	
 	
 	/*-----------------对话图------------------*/
-	DrillUp.g_DSS_pics_length = 40;
+	DrillUp.g_DSS_pics_length = 80;
 	DrillUp.g_DSS_pics = [];
 	for( var i = 0; i < DrillUp.g_DSS_pics_length; i++ ){
 		DrillUp.g_DSS_pics[i] = String(DrillUp.parameters["对话图-" + String(i+1) ] || "");

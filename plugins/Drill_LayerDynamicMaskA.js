@@ -1811,8 +1811,8 @@
 	DrillUp.g_LDMA_childData_length = 200;
 	DrillUp.g_LDMA_childData = [];	
 	for (var i = 0; i < DrillUp.g_LDMA_childData_length; i++) {
-		if( DrillUp.parameters["透视镜样式-" + String(i+1) ] != "" &&
-			DrillUp.parameters["透视镜样式-" + String(i+1) ] != undefined ){
+		if( DrillUp.parameters["透视镜样式-" + String(i+1) ] != undefined &&
+			DrillUp.parameters["透视镜样式-" + String(i+1) ] != "" ){
 			var data = JSON.parse(DrillUp.parameters["透视镜样式-" + String(i+1) ]);
 			DrillUp.g_LDMA_childData[i] = DrillUp.drill_LDMA_childSpriteInit( data );
 		}else{

@@ -1638,7 +1638,7 @@ Drill_TPa_Controller.prototype.drill_controller_isParticleDead = function( i ){
 //==============================
 // * E粒子重设 - 执行重设 - 位置
 //
-//			说明：	> 由于当前插件为 个体装饰，因此起始点为 一个圆内随机出现 。
+//			说明：	> 因此起始点为 一个矩形内随机出现 。
 //==============================	
 Drill_TPa_Controller.prototype.drill_controller_resetParticles_Position = function( i ){
 	Drill_COPa_Controller.prototype.drill_controller_resetParticles_Position.call( this, i );
@@ -1714,13 +1714,13 @@ Drill_TPa_Controller.prototype.drill_controller_resetParticles_Position = functi
 // **					->H贴图高宽
 // **					->I粒子生命周期
 // **
-// **		说明：	> 你必须在创建贴图后，手动初始化。（还需要先设置 控制器和个体贴图 ）
+// **		说明：	> 你必须在创建贴图后，手动初始化。（还需要先设置 控制器 ）
 // **
-// **		代码：	> 范围 - 该类显示单独的动画装饰。
-// **				> 结构 - [合并/ ●分离 /混乱] 贴图与数据分离。
+// **		代码：	> 范围 - 该类显示单独的贴图。
+// **				> 结构 - [合并/ ●分离 /混乱] 使用 控制器-贴图 结构。
 // **				> 数量 - [单个/ ●多个] 
-// **				> 创建 - [ ●一次性 /自延迟/外部延迟] 先创建控制器，在 _spriteset 创建后，再创建此贴图。
-// **				> 销毁 - [不考虑/自销毁/ ●外部销毁 ] 
+// **				> 创建 - [ ●一次性 /自延迟/外部延迟] 先创建控制器，再创建此贴图，通过 C对象绑定 进行连接。
+// **				> 销毁 - [不考虑/自销毁/ ●外部销毁 ] 通过 贴图控制 模块来销毁。
 // **				> 样式 - [ ●不可修改 /自变化/外部变化] 
 //=============================================================================
 //==============================
@@ -1761,7 +1761,7 @@ Drill_TPa_Sprite.prototype.drill_sprite_setController = function( controller ){
 //			参数：	> 无
 //			返回：	> 无
 //			
-//			说明：	> 需要设置 控制器和个体贴图 之后，才能进行手动初始化。
+//			说明：	> 需要设置 控制器 之后，才能进行手动初始化。
 //##############################
 Drill_TPa_Sprite.prototype.drill_sprite_initChild = function(){
     Drill_COPa_Sprite.prototype.drill_sprite_initChild.call( this );

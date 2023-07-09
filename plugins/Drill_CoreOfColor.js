@@ -1617,7 +1617,8 @@
 	DrillUp.g_COC_color_list_length = 99;
 	DrillUp.g_COC_color_list = [];
 	for (var i = 0; i < DrillUp.g_COC_color_list_length; i++) {
-		if( DrillUp.parameters['颜色-' + String(i+1) ] != "" ){
+		if( DrillUp.parameters['颜色-' + String(i+1) ] != undefined &&
+			DrillUp.parameters['颜色-' + String(i+1) ] != "" ){
 			var data = JSON.parse(DrillUp.parameters['颜色-' + String(i+1) ]);
 			DrillUp.g_COC_color_list[i] = DrillUp.drill_COC_initCommonColor( data );
 		}else{
@@ -1629,7 +1630,8 @@
 	DrillUp.g_COC_seniorColor_list_length = 99;
 	DrillUp.g_COC_seniorColor_list = [];
 	for (var i = 0; i < DrillUp.g_COC_seniorColor_list_length; i++) {
-		if( DrillUp.parameters['高级颜色-' + String(i+1) ] != "" ){
+		if( DrillUp.parameters['高级颜色-' + String(i+1) ] != undefined &&
+			DrillUp.parameters['高级颜色-' + String(i+1) ] != "" ){
 			var data = JSON.parse(DrillUp.parameters['高级颜色-' + String(i+1) ]);
 			DrillUp.g_COC_seniorColor_list[i] = DrillUp.drill_COC_initSeniorColor( data );
 		}else{

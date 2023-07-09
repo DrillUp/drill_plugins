@@ -174,10 +174,7 @@
  * 优化了旧存档的识别与兼容。
  * [v1.5]
  * 添加了漂浮文字外框设置色调的功能。
- *
- *
- *
- *
+ * 
  * @param ---样式组 1至20---
  * @default 
  * 
@@ -301,6 +298,128 @@
  * @desc 漂浮文字的样式配置，本质上漂浮文字是一个窗口。
  * @default 
  * 
+ * @param ---样式组21至40---
+ * @default 
+ * 
+ * @param 永久漂浮样式-21
+ * @parent ---样式组21至40---
+ * @type struct<DrillGFPTStyle>
+ * @desc 漂浮文字的样式配置，本质上漂浮文字是一个窗口。
+ * @default 
+ * 
+ * @param 永久漂浮样式-22
+ * @parent ---样式组21至40---
+ * @type struct<DrillGFPTStyle>
+ * @desc 漂浮文字的样式配置，本质上漂浮文字是一个窗口。
+ * @default 
+ * 
+ * @param 永久漂浮样式-23
+ * @parent ---样式组21至40---
+ * @type struct<DrillGFPTStyle>
+ * @desc 漂浮文字的样式配置，本质上漂浮文字是一个窗口。
+ * @default 
+ * 
+ * @param 永久漂浮样式-24
+ * @parent ---样式组21至40---
+ * @type struct<DrillGFPTStyle>
+ * @desc 漂浮文字的样式配置，本质上漂浮文字是一个窗口。
+ * @default 
+ * 
+ * @param 永久漂浮样式-25
+ * @parent ---样式组21至40---
+ * @type struct<DrillGFPTStyle>
+ * @desc 漂浮文字的样式配置，本质上漂浮文字是一个窗口。
+ * @default 
+ * 
+ * @param 永久漂浮样式-26
+ * @parent ---样式组21至40---
+ * @type struct<DrillGFPTStyle>
+ * @desc 漂浮文字的样式配置，本质上漂浮文字是一个窗口。
+ * @default 
+ * 
+ * @param 永久漂浮样式-27
+ * @parent ---样式组21至40---
+ * @type struct<DrillGFPTStyle>
+ * @desc 漂浮文字的样式配置，本质上漂浮文字是一个窗口。
+ * @default 
+ * 
+ * @param 永久漂浮样式-28
+ * @parent ---样式组21至40---
+ * @type struct<DrillGFPTStyle>
+ * @desc 漂浮文字的样式配置，本质上漂浮文字是一个窗口。
+ * @default 
+ * 
+ * @param 永久漂浮样式-29
+ * @parent ---样式组21至40---
+ * @type struct<DrillGFPTStyle>
+ * @desc 漂浮文字的样式配置，本质上漂浮文字是一个窗口。
+ * @default 
+ * 
+ * @param 永久漂浮样式-30
+ * @parent ---样式组21至40---
+ * @type struct<DrillGFPTStyle>
+ * @desc 漂浮文字的样式配置，本质上漂浮文字是一个窗口。
+ * @default 
+ * 
+ * @param 永久漂浮样式-31
+ * @parent ---样式组21至40---
+ * @type struct<DrillGFPTStyle>
+ * @desc 漂浮文字的样式配置，本质上漂浮文字是一个窗口。
+ * @default 
+ * 
+ * @param 永久漂浮样式-32
+ * @parent ---样式组21至40---
+ * @type struct<DrillGFPTStyle>
+ * @desc 漂浮文字的样式配置，本质上漂浮文字是一个窗口。
+ * @default 
+ * 
+ * @param 永久漂浮样式-33
+ * @parent ---样式组21至40---
+ * @type struct<DrillGFPTStyle>
+ * @desc 漂浮文字的样式配置，本质上漂浮文字是一个窗口。
+ * @default 
+ * 
+ * @param 永久漂浮样式-34
+ * @parent ---样式组21至40---
+ * @type struct<DrillGFPTStyle>
+ * @desc 漂浮文字的样式配置，本质上漂浮文字是一个窗口。
+ * @default 
+ * 
+ * @param 永久漂浮样式-35
+ * @parent ---样式组21至40---
+ * @type struct<DrillGFPTStyle>
+ * @desc 漂浮文字的样式配置，本质上漂浮文字是一个窗口。
+ * @default 
+ * 
+ * @param 永久漂浮样式-36
+ * @parent ---样式组21至40---
+ * @type struct<DrillGFPTStyle>
+ * @desc 漂浮文字的样式配置，本质上漂浮文字是一个窗口。
+ * @default 
+ * 
+ * @param 永久漂浮样式-37
+ * @parent ---样式组21至40---
+ * @type struct<DrillGFPTStyle>
+ * @desc 漂浮文字的样式配置，本质上漂浮文字是一个窗口。
+ * @default 
+ * 
+ * @param 永久漂浮样式-38
+ * @parent ---样式组21至40---
+ * @type struct<DrillGFPTStyle>
+ * @desc 漂浮文字的样式配置，本质上漂浮文字是一个窗口。
+ * @default 
+ * 
+ * @param 永久漂浮样式-39
+ * @parent ---样式组21至40---
+ * @type struct<DrillGFPTStyle>
+ * @desc 漂浮文字的样式配置，本质上漂浮文字是一个窗口。
+ * @default 
+ * 
+ * @param 永久漂浮样式-40
+ * @parent ---样式组21至40---
+ * @type struct<DrillGFPTStyle>
+ * @desc 漂浮文字的样式配置，本质上漂浮文字是一个窗口。
+ * @default
  * 
  */
 /*~struct~DrillGFPTStyle:
@@ -678,7 +797,7 @@
 	
 	
 	/*-----------------永久漂浮样式集合------------------*/
-	DrillUp.g_GFPT_style_length = 20;
+	DrillUp.g_GFPT_style_length = 40;
 	DrillUp.g_GFPT_style = [];
 	for( var i = 0; i < DrillUp.g_GFPT_style_length; i++ ){
 		if( DrillUp.parameters["永久漂浮样式-" + String(i+1) ] != undefined &&

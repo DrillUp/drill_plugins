@@ -39,6 +39,8 @@
  * 细节：
  *   (1.注意，对话框皮肤会根据窗口大小自适应美化，
  *      插件本身 并不影响 对话框实际大小。
+ *   (2.如果你的对话框类型为"暗淡"、"透明"，则对话框不会被装饰。
+ *      只有类型为"窗口"，才会被换皮肤。
  * 子窗口：
  *   (1.对话框有很多子窗口，这些窗口都属于对话框使用。
  *        对话框金钱窗口
@@ -186,115 +188,234 @@
  * @type struct<DrillDSkStyle>
  * @desc 对话框相关窗口的皮肤样式配置。
  * @default 
- *
+ * 
  * @param 皮肤样式-3
  * @parent ---皮肤样式集---
  * @type struct<DrillDSkStyle>
  * @desc 对话框相关窗口的皮肤样式配置。
  * @default 
- *
+ * 
  * @param 皮肤样式-4
  * @parent ---皮肤样式集---
  * @type struct<DrillDSkStyle>
  * @desc 对话框相关窗口的皮肤样式配置。
  * @default 
- *
+ * 
  * @param 皮肤样式-5
  * @parent ---皮肤样式集---
  * @type struct<DrillDSkStyle>
  * @desc 对话框相关窗口的皮肤样式配置。
  * @default 
- *
+ * 
  * @param 皮肤样式-6
  * @parent ---皮肤样式集---
  * @type struct<DrillDSkStyle>
  * @desc 对话框相关窗口的皮肤样式配置。
  * @default 
- *
+ * 
  * @param 皮肤样式-7
  * @parent ---皮肤样式集---
  * @type struct<DrillDSkStyle>
  * @desc 对话框相关窗口的皮肤样式配置。
  * @default 
- *
+ * 
  * @param 皮肤样式-8
  * @parent ---皮肤样式集---
  * @type struct<DrillDSkStyle>
  * @desc 对话框相关窗口的皮肤样式配置。
  * @default 
- *
+ * 
  * @param 皮肤样式-9
  * @parent ---皮肤样式集---
  * @type struct<DrillDSkStyle>
  * @desc 对话框相关窗口的皮肤样式配置。
  * @default 
- *
+ * 
  * @param 皮肤样式-10
  * @parent ---皮肤样式集---
  * @type struct<DrillDSkStyle>
  * @desc 对话框相关窗口的皮肤样式配置。
  * @default 
- *
+ * 
  * @param 皮肤样式-11
  * @parent ---皮肤样式集---
  * @type struct<DrillDSkStyle>
  * @desc 对话框相关窗口的皮肤样式配置。
  * @default 
- *
+ * 
  * @param 皮肤样式-12
  * @parent ---皮肤样式集---
  * @type struct<DrillDSkStyle>
  * @desc 对话框相关窗口的皮肤样式配置。
  * @default 
- *
+ * 
  * @param 皮肤样式-13
  * @parent ---皮肤样式集---
  * @type struct<DrillDSkStyle>
  * @desc 对话框相关窗口的皮肤样式配置。
  * @default 
- *
+ * 
  * @param 皮肤样式-14
  * @parent ---皮肤样式集---
  * @type struct<DrillDSkStyle>
  * @desc 对话框相关窗口的皮肤样式配置。
  * @default 
- *
+ * 
  * @param 皮肤样式-15
  * @parent ---皮肤样式集---
  * @type struct<DrillDSkStyle>
  * @desc 对话框相关窗口的皮肤样式配置。
  * @default 
- *
+ * 
  * @param 皮肤样式-16
  * @parent ---皮肤样式集---
  * @type struct<DrillDSkStyle>
  * @desc 对话框相关窗口的皮肤样式配置。
  * @default 
- *
+ * 
  * @param 皮肤样式-17
  * @parent ---皮肤样式集---
  * @type struct<DrillDSkStyle>
  * @desc 对话框相关窗口的皮肤样式配置。
  * @default 
- *
+ * 
  * @param 皮肤样式-18
  * @parent ---皮肤样式集---
  * @type struct<DrillDSkStyle>
  * @desc 对话框相关窗口的皮肤样式配置。
  * @default 
- *
+ * 
  * @param 皮肤样式-19
  * @parent ---皮肤样式集---
  * @type struct<DrillDSkStyle>
  * @desc 对话框相关窗口的皮肤样式配置。
  * @default 
- *
+ * 
  * @param 皮肤样式-20
  * @parent ---皮肤样式集---
  * @type struct<DrillDSkStyle>
  * @desc 对话框相关窗口的皮肤样式配置。
  * @default 
  * 
+ * @param 皮肤样式-21
+ * @parent ---皮肤样式集---
+ * @type struct<DrillDSkStyle>
+ * @desc 对话框相关窗口的皮肤样式配置。
+ * @default 
+ * 
+ * @param 皮肤样式-22
+ * @parent ---皮肤样式集---
+ * @type struct<DrillDSkStyle>
+ * @desc 对话框相关窗口的皮肤样式配置。
+ * @default 
+ * 
+ * @param 皮肤样式-23
+ * @parent ---皮肤样式集---
+ * @type struct<DrillDSkStyle>
+ * @desc 对话框相关窗口的皮肤样式配置。
+ * @default 
+ * 
+ * @param 皮肤样式-24
+ * @parent ---皮肤样式集---
+ * @type struct<DrillDSkStyle>
+ * @desc 对话框相关窗口的皮肤样式配置。
+ * @default 
+ * 
+ * @param 皮肤样式-25
+ * @parent ---皮肤样式集---
+ * @type struct<DrillDSkStyle>
+ * @desc 对话框相关窗口的皮肤样式配置。
+ * @default 
+ * 
+ * @param 皮肤样式-26
+ * @parent ---皮肤样式集---
+ * @type struct<DrillDSkStyle>
+ * @desc 对话框相关窗口的皮肤样式配置。
+ * @default 
+ * 
+ * @param 皮肤样式-27
+ * @parent ---皮肤样式集---
+ * @type struct<DrillDSkStyle>
+ * @desc 对话框相关窗口的皮肤样式配置。
+ * @default 
+ * 
+ * @param 皮肤样式-28
+ * @parent ---皮肤样式集---
+ * @type struct<DrillDSkStyle>
+ * @desc 对话框相关窗口的皮肤样式配置。
+ * @default 
+ * 
+ * @param 皮肤样式-29
+ * @parent ---皮肤样式集---
+ * @type struct<DrillDSkStyle>
+ * @desc 对话框相关窗口的皮肤样式配置。
+ * @default 
+ * 
+ * @param 皮肤样式-30
+ * @parent ---皮肤样式集---
+ * @type struct<DrillDSkStyle>
+ * @desc 对话框相关窗口的皮肤样式配置。
+ * @default 
+ * 
+ * @param 皮肤样式-31
+ * @parent ---皮肤样式集---
+ * @type struct<DrillDSkStyle>
+ * @desc 对话框相关窗口的皮肤样式配置。
+ * @default 
+ * 
+ * @param 皮肤样式-32
+ * @parent ---皮肤样式集---
+ * @type struct<DrillDSkStyle>
+ * @desc 对话框相关窗口的皮肤样式配置。
+ * @default 
+ * 
+ * @param 皮肤样式-33
+ * @parent ---皮肤样式集---
+ * @type struct<DrillDSkStyle>
+ * @desc 对话框相关窗口的皮肤样式配置。
+ * @default 
+ * 
+ * @param 皮肤样式-34
+ * @parent ---皮肤样式集---
+ * @type struct<DrillDSkStyle>
+ * @desc 对话框相关窗口的皮肤样式配置。
+ * @default 
+ * 
+ * @param 皮肤样式-35
+ * @parent ---皮肤样式集---
+ * @type struct<DrillDSkStyle>
+ * @desc 对话框相关窗口的皮肤样式配置。
+ * @default 
+ * 
+ * @param 皮肤样式-36
+ * @parent ---皮肤样式集---
+ * @type struct<DrillDSkStyle>
+ * @desc 对话框相关窗口的皮肤样式配置。
+ * @default 
+ * 
+ * @param 皮肤样式-37
+ * @parent ---皮肤样式集---
+ * @type struct<DrillDSkStyle>
+ * @desc 对话框相关窗口的皮肤样式配置。
+ * @default 
+ * 
+ * @param 皮肤样式-38
+ * @parent ---皮肤样式集---
+ * @type struct<DrillDSkStyle>
+ * @desc 对话框相关窗口的皮肤样式配置。
+ * @default 
+ * 
+ * @param 皮肤样式-39
+ * @parent ---皮肤样式集---
+ * @type struct<DrillDSkStyle>
+ * @desc 对话框相关窗口的皮肤样式配置。
+ * @default 
+ * 
+ * @param 皮肤样式-40
+ * @parent ---皮肤样式集---
+ * @type struct<DrillDSkStyle>
+ * @desc 对话框相关窗口的皮肤样式配置。
+ * @default
  * 
  */
 /*~struct~DrillDSkStyle:
@@ -719,7 +840,7 @@
 	DrillUp.g_DSk_nameStyleId = Number(DrillUp.parameters["默认样式-对话框姓名框窗口"] || 1); 
 	
 	/*-----------------样式集------------------*/
-	DrillUp.g_DSk_list_length = 20;
+	DrillUp.g_DSk_list_length = 40;
 	DrillUp.g_DSk_list = [];
 	for( var i = 0; i < DrillUp.g_DSk_list_length; i++ ){
 		if( DrillUp.parameters["皮肤样式-" + String(i+1) ] != undefined &&

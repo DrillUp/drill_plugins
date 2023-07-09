@@ -1986,7 +1986,7 @@ Drill_COGM_MeterSprite.prototype.drill_delayingInitAttr = function() {
 	var data = this._drill_data;
 	var ww = this.drill_levelWidth();
 	var hh = this.drill_levelHeight();
-	var point = $gameTemp.drill_COGM_getFixPointInAnchor(
+	var point = $gameTemp.drill_COGM_Math2D_getFixPointInAnchor(
 					0.0, 0.0,
 					data['anchor_x'], data['anchor_y'],
 					ww, hh,
@@ -2927,7 +2927,7 @@ Drill_COGM_MeterSprite.prototype.drill_updateFilling = function() {
 	}
 }
 //=============================================================================
-// * 数学 - 锁定锚点
+// * 数学工具 - 锁定锚点
 //			
 //			参数：	> org_anchor_x 数字    （原贴图锚点X）
 //					> org_anchor_y 数字    （原贴图锚点Y）
@@ -2942,7 +2942,7 @@ Drill_COGM_MeterSprite.prototype.drill_updateFilling = function() {
 //			说明：	修正 旋转+缩放 的坐标，使其看起来像是在绕着 新的锚点 变换。
 //					旋转值和缩放值可为负数。
 //=============================================================================
-Game_Temp.prototype.drill_COGM_getFixPointInAnchor = function( 
+Game_Temp.prototype.drill_COGM_Math2D_getFixPointInAnchor = function( 
 					org_anchor_x,org_anchor_y,			//原贴图中心锚点 
 					target_anchor_x,target_anchor_y, 	//新的中心锚点 
 					width, height,						//贴图高宽

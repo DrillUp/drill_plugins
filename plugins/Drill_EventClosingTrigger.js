@@ -181,115 +181,115 @@
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default {"标签":"==事件前1格==","初始是否开启":"true","触发关键字":"事件前1格","区域模式":"自定义区域","形状区域":"方形区域","形状区域范围":"1","自定义区域编号":"11","区域触发锁":"只玩家才能触发","是否开启筛选器":"false","筛选器编号":"1"}
- *
+ * 
  * @param 事件触发-2
  * @parent ---事件触发组 1至20---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default {"标签":"==事件前2格==","初始是否开启":"true","触发关键字":"事件前2格","区域模式":"自定义区域","形状区域":"方形区域","形状区域范围":"1","自定义区域编号":"12","区域触发锁":"只玩家才能触发","是否开启筛选器":"false","筛选器编号":"1"}
- *
+ * 
  * @param 事件触发-3
  * @parent ---事件触发组 1至20---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default {"标签":"==事件前3格==","初始是否开启":"true","触发关键字":"事件前3格","区域模式":"自定义区域","形状区域":"方形区域","形状区域范围":"1","自定义区域编号":"13","区域触发锁":"只玩家才能触发","是否开启筛选器":"false","筛选器编号":"1"}
- *
+ * 
  * @param 事件触发-4
  * @parent ---事件触发组 1至20---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default {"标签":"==事件前4格==","初始是否开启":"true","触发关键字":"事件前4格","区域模式":"自定义区域","形状区域":"方形区域","形状区域范围":"1","自定义区域编号":"14","区域触发锁":"只玩家才能触发","是否开启筛选器":"false","筛选器编号":"1"}
- *
+ * 
  * @param 事件触发-5
  * @parent ---事件触发组 1至20---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default {"标签":"==事件前5格==","初始是否开启":"true","触发关键字":"事件前5格","区域模式":"自定义区域","形状区域":"方形区域","形状区域范围":"1","自定义区域编号":"15","区域触发锁":"只玩家才能触发","是否开启筛选器":"false","筛选器编号":"1"}
- *
+ * 
  * @param 事件触发-6
  * @parent ---事件触发组 1至20---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default {"标签":"==事件小扇形==","初始是否开启":"true","触发关键字":"事件小扇形","区域模式":"自定义区域","形状区域":"方形区域","形状区域范围":"1","自定义区域编号":"2","区域触发锁":"只玩家才能触发","是否开启筛选器":"false","筛选器编号":"1"}
- *
+ * 
  * @param 事件触发-7
  * @parent ---事件触发组 1至20---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default 
- *
+ * 
  * @param 事件触发-8
  * @parent ---事件触发组 1至20---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default 
- *
+ * 
  * @param 事件触发-9
  * @parent ---事件触发组 1至20---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default 
- *
+ * 
  * @param 事件触发-10
  * @parent ---事件触发组 1至20---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default 
- *
+ * 
  * @param 事件触发-11
  * @parent ---事件触发组 1至20---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default 
- *
+ * 
  * @param 事件触发-12
  * @parent ---事件触发组 1至20---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default 
- *
+ * 
  * @param 事件触发-13
  * @parent ---事件触发组 1至20---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default 
- *
+ * 
  * @param 事件触发-14
  * @parent ---事件触发组 1至20---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default 
- *
+ * 
  * @param 事件触发-15
  * @parent ---事件触发组 1至20---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default 
- *
+ * 
  * @param 事件触发-16
  * @parent ---事件触发组 1至20---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default 
- *
+ * 
  * @param 事件触发-17
  * @parent ---事件触发组 1至20---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default 
- *
+ * 
  * @param 事件触发-18
  * @parent ---事件触发组 1至20---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default 
- *
+ * 
  * @param 事件触发-19
  * @parent ---事件触发组 1至20---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default 
- *
+ * 
  * @param 事件触发-20
  * @parent ---事件触发组 1至20---
  * @type struct<ATriArea>
@@ -298,126 +298,250 @@
  * 
  * @param ---事件触发组21至40---
  * @desc 
- *
+ * 
  * @param 事件触发-21
  * @parent ---事件触发组21至40---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default 
- *
+ * 
  * @param 事件触发-22
  * @parent ---事件触发组21至40---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default 
- *
+ * 
  * @param 事件触发-23
  * @parent ---事件触发组21至40---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default 
- *
+ * 
  * @param 事件触发-24
  * @parent ---事件触发组21至40---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default 
- *
+ * 
  * @param 事件触发-25
  * @parent ---事件触发组21至40---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default 
- *
+ * 
  * @param 事件触发-26
  * @parent ---事件触发组21至40---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default 
- *
+ * 
  * @param 事件触发-27
  * @parent ---事件触发组21至40---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default 
- *
+ * 
  * @param 事件触发-28
  * @parent ---事件触发组21至40---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default 
- *
+ * 
  * @param 事件触发-29
  * @parent ---事件触发组21至40---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default 
- *
+ * 
  * @param 事件触发-30
  * @parent ---事件触发组21至40---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default 
- *
+ * 
  * @param 事件触发-31
  * @parent ---事件触发组21至40---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default 
- *
+ * 
  * @param 事件触发-32
  * @parent ---事件触发组21至40---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default 
- *
+ * 
  * @param 事件触发-33
  * @parent ---事件触发组21至40---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default 
- *
+ * 
  * @param 事件触发-34
  * @parent ---事件触发组21至40---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default 
- *
+ * 
  * @param 事件触发-35
  * @parent ---事件触发组21至40---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default 
- *
+ * 
  * @param 事件触发-36
  * @parent ---事件触发组21至40---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default 
- *
+ * 
  * @param 事件触发-37
  * @parent ---事件触发组21至40---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default 
- *
+ * 
  * @param 事件触发-38
  * @parent ---事件触发组21至40---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default 
- *
+ * 
  * @param 事件触发-39
  * @parent ---事件触发组21至40---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default 
- *
+ * 
  * @param 事件触发-40
  * @parent ---事件触发组21至40---
  * @type struct<ATriArea>
  * @desc 编辑事件的接近触发设置。
  * @default 
+ * 
+ * @param ---事件触发组41至60---
+ * @desc 
+ * 
+ * @param 事件触发-41
+ * @parent ---事件触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 编辑事件的接近触发设置。
+ * @default 
+ * 
+ * @param 事件触发-42
+ * @parent ---事件触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 编辑事件的接近触发设置。
+ * @default 
+ * 
+ * @param 事件触发-43
+ * @parent ---事件触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 编辑事件的接近触发设置。
+ * @default 
+ * 
+ * @param 事件触发-44
+ * @parent ---事件触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 编辑事件的接近触发设置。
+ * @default 
+ * 
+ * @param 事件触发-45
+ * @parent ---事件触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 编辑事件的接近触发设置。
+ * @default 
+ * 
+ * @param 事件触发-46
+ * @parent ---事件触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 编辑事件的接近触发设置。
+ * @default 
+ * 
+ * @param 事件触发-47
+ * @parent ---事件触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 编辑事件的接近触发设置。
+ * @default 
+ * 
+ * @param 事件触发-48
+ * @parent ---事件触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 编辑事件的接近触发设置。
+ * @default 
+ * 
+ * @param 事件触发-49
+ * @parent ---事件触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 编辑事件的接近触发设置。
+ * @default 
+ * 
+ * @param 事件触发-50
+ * @parent ---事件触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 编辑事件的接近触发设置。
+ * @default 
+ * 
+ * @param 事件触发-51
+ * @parent ---事件触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 编辑事件的接近触发设置。
+ * @default 
+ * 
+ * @param 事件触发-52
+ * @parent ---事件触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 编辑事件的接近触发设置。
+ * @default 
+ * 
+ * @param 事件触发-53
+ * @parent ---事件触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 编辑事件的接近触发设置。
+ * @default 
+ * 
+ * @param 事件触发-54
+ * @parent ---事件触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 编辑事件的接近触发设置。
+ * @default 
+ * 
+ * @param 事件触发-55
+ * @parent ---事件触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 编辑事件的接近触发设置。
+ * @default 
+ * 
+ * @param 事件触发-56
+ * @parent ---事件触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 编辑事件的接近触发设置。
+ * @default 
+ * 
+ * @param 事件触发-57
+ * @parent ---事件触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 编辑事件的接近触发设置。
+ * @default 
+ * 
+ * @param 事件触发-58
+ * @parent ---事件触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 编辑事件的接近触发设置。
+ * @default 
+ * 
+ * @param 事件触发-59
+ * @parent ---事件触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 编辑事件的接近触发设置。
+ * @default 
+ * 
+ * @param 事件触发-60
+ * @parent ---事件触发组41至60---
+ * @type struct<ATriArea>
+ * @desc 编辑事件的接近触发设置。
+ * @default
+ * 
  */
 /*~struct~ATriArea:
  * 
@@ -667,7 +791,7 @@
 	DrillUp.g_ECT_fix = String(DrillUp.parameters['是否修正区域判定'] || "true") === "true";//几乎没有不修正的需求，所以直接修正
 	
 	/*-----------------事件触发组------------------*/
-	DrillUp.g_ECT_area_length = 40;
+	DrillUp.g_ECT_area_length = 60;
 	DrillUp.g_ECT_area = [];
 	for( var i = 0; i < DrillUp.g_ECT_area_length; i++ ){
 		if( DrillUp.parameters["事件触发-" + String(i+1) ] != "" &&

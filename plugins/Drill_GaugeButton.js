@@ -120,10 +120,6 @@
  * [v1.2]
  * 优化了旧存档的识别与兼容。
  * 
- *
- *
- *
- * 
  * @param ----按钮集----
  * @default 
  * 
@@ -247,6 +243,245 @@
  * @desc 按钮的详细配置信息。
  * @default 
  * 
+ * @param 按钮-21
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-22
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-23
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-24
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-25
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-26
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-27
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-28
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-29
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-30
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-31
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-32
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-33
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-34
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-35
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-36
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-37
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-38
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-39
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-40
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-41
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-42
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-43
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-44
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-45
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-46
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-47
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-48
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-49
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-50
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-51
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-52
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-53
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-54
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-55
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-56
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-57
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-58
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-59
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 按钮-60
+ * @parent ----按钮集----
+ * @type struct<DrillGBuBtn>
+ * @desc 按钮的详细配置信息。
+ * @default
  * 
  */
 /*~struct~DrillGBuBtn:
@@ -592,7 +827,7 @@
 	}
 	
 	/*-----------------按钮集------------------*/
-	DrillUp.g_GBu_button_length = 20;
+	DrillUp.g_GBu_button_length = 60;
 	DrillUp.g_GBu_button = [];
 	for (var i = 0; i < DrillUp.g_GBu_button_length; i++) {
 		if( DrillUp.parameters["按钮-" + String(i+1) ] != undefined &&

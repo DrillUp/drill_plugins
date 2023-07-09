@@ -37,6 +37,8 @@
  *   (1.装饰图可以添加多个，并绑定到指定的 对话框皮肤样式 中。
  *      当对话框皮肤样式设置后，相应的 装饰图 都会一并显现。
  *   (2.装饰图的 层级 固定在对话框边框层的上面，对话框内容层的下面。
+ *   (3.如果你的对话框类型为"暗淡"、"透明"，则对话框不会被装饰。
+ *      只有类型为"窗口"，才会被换皮肤。
  * 设计：
  *   (1.你可以直接画一张完整的对话框图片，然后用该插件绑定到对话框
  *      皮肤中。不过你需要留意对话框、选择框可能会改变高宽的情况。
@@ -106,115 +108,234 @@
  * @type struct<DrillDSDStyle>
  * @desc 对话框相关窗口的装饰图配置。
  * @default 
- *
+ * 
  * @param 装饰图-3
  * @parent ---装饰图集---
  * @type struct<DrillDSDStyle>
  * @desc 对话框相关窗口的装饰图配置。
  * @default 
- *
+ * 
  * @param 装饰图-4
  * @parent ---装饰图集---
  * @type struct<DrillDSDStyle>
  * @desc 对话框相关窗口的装饰图配置。
  * @default 
- *
+ * 
  * @param 装饰图-5
  * @parent ---装饰图集---
  * @type struct<DrillDSDStyle>
  * @desc 对话框相关窗口的装饰图配置。
  * @default 
- *
+ * 
  * @param 装饰图-6
  * @parent ---装饰图集---
  * @type struct<DrillDSDStyle>
  * @desc 对话框相关窗口的装饰图配置。
  * @default 
- *
+ * 
  * @param 装饰图-7
  * @parent ---装饰图集---
  * @type struct<DrillDSDStyle>
  * @desc 对话框相关窗口的装饰图配置。
  * @default 
- *
+ * 
  * @param 装饰图-8
  * @parent ---装饰图集---
  * @type struct<DrillDSDStyle>
  * @desc 对话框相关窗口的装饰图配置。
  * @default 
- *
+ * 
  * @param 装饰图-9
  * @parent ---装饰图集---
  * @type struct<DrillDSDStyle>
  * @desc 对话框相关窗口的装饰图配置。
  * @default 
- *
+ * 
  * @param 装饰图-10
  * @parent ---装饰图集---
  * @type struct<DrillDSDStyle>
  * @desc 对话框相关窗口的装饰图配置。
  * @default 
- *
+ * 
  * @param 装饰图-11
  * @parent ---装饰图集---
  * @type struct<DrillDSDStyle>
  * @desc 对话框相关窗口的装饰图配置。
  * @default 
- *
+ * 
  * @param 装饰图-12
  * @parent ---装饰图集---
  * @type struct<DrillDSDStyle>
  * @desc 对话框相关窗口的装饰图配置。
  * @default 
- *
+ * 
  * @param 装饰图-13
  * @parent ---装饰图集---
  * @type struct<DrillDSDStyle>
  * @desc 对话框相关窗口的装饰图配置。
  * @default 
- *
+ * 
  * @param 装饰图-14
  * @parent ---装饰图集---
  * @type struct<DrillDSDStyle>
  * @desc 对话框相关窗口的装饰图配置。
  * @default 
- *
+ * 
  * @param 装饰图-15
  * @parent ---装饰图集---
  * @type struct<DrillDSDStyle>
  * @desc 对话框相关窗口的装饰图配置。
  * @default 
- *
+ * 
  * @param 装饰图-16
  * @parent ---装饰图集---
  * @type struct<DrillDSDStyle>
  * @desc 对话框相关窗口的装饰图配置。
  * @default 
- *
+ * 
  * @param 装饰图-17
  * @parent ---装饰图集---
  * @type struct<DrillDSDStyle>
  * @desc 对话框相关窗口的装饰图配置。
  * @default 
- *
+ * 
  * @param 装饰图-18
  * @parent ---装饰图集---
  * @type struct<DrillDSDStyle>
  * @desc 对话框相关窗口的装饰图配置。
  * @default 
- *
+ * 
  * @param 装饰图-19
  * @parent ---装饰图集---
  * @type struct<DrillDSDStyle>
  * @desc 对话框相关窗口的装饰图配置。
  * @default 
- *
+ * 
  * @param 装饰图-20
  * @parent ---装饰图集---
  * @type struct<DrillDSDStyle>
  * @desc 对话框相关窗口的装饰图配置。
  * @default 
  * 
+ * @param 装饰图-21
+ * @parent ---装饰图集---
+ * @type struct<DrillDSDStyle>
+ * @desc 对话框相关窗口的装饰图配置。
+ * @default 
+ * 
+ * @param 装饰图-22
+ * @parent ---装饰图集---
+ * @type struct<DrillDSDStyle>
+ * @desc 对话框相关窗口的装饰图配置。
+ * @default 
+ * 
+ * @param 装饰图-23
+ * @parent ---装饰图集---
+ * @type struct<DrillDSDStyle>
+ * @desc 对话框相关窗口的装饰图配置。
+ * @default 
+ * 
+ * @param 装饰图-24
+ * @parent ---装饰图集---
+ * @type struct<DrillDSDStyle>
+ * @desc 对话框相关窗口的装饰图配置。
+ * @default 
+ * 
+ * @param 装饰图-25
+ * @parent ---装饰图集---
+ * @type struct<DrillDSDStyle>
+ * @desc 对话框相关窗口的装饰图配置。
+ * @default 
+ * 
+ * @param 装饰图-26
+ * @parent ---装饰图集---
+ * @type struct<DrillDSDStyle>
+ * @desc 对话框相关窗口的装饰图配置。
+ * @default 
+ * 
+ * @param 装饰图-27
+ * @parent ---装饰图集---
+ * @type struct<DrillDSDStyle>
+ * @desc 对话框相关窗口的装饰图配置。
+ * @default 
+ * 
+ * @param 装饰图-28
+ * @parent ---装饰图集---
+ * @type struct<DrillDSDStyle>
+ * @desc 对话框相关窗口的装饰图配置。
+ * @default 
+ * 
+ * @param 装饰图-29
+ * @parent ---装饰图集---
+ * @type struct<DrillDSDStyle>
+ * @desc 对话框相关窗口的装饰图配置。
+ * @default 
+ * 
+ * @param 装饰图-30
+ * @parent ---装饰图集---
+ * @type struct<DrillDSDStyle>
+ * @desc 对话框相关窗口的装饰图配置。
+ * @default 
+ * 
+ * @param 装饰图-31
+ * @parent ---装饰图集---
+ * @type struct<DrillDSDStyle>
+ * @desc 对话框相关窗口的装饰图配置。
+ * @default 
+ * 
+ * @param 装饰图-32
+ * @parent ---装饰图集---
+ * @type struct<DrillDSDStyle>
+ * @desc 对话框相关窗口的装饰图配置。
+ * @default 
+ * 
+ * @param 装饰图-33
+ * @parent ---装饰图集---
+ * @type struct<DrillDSDStyle>
+ * @desc 对话框相关窗口的装饰图配置。
+ * @default 
+ * 
+ * @param 装饰图-34
+ * @parent ---装饰图集---
+ * @type struct<DrillDSDStyle>
+ * @desc 对话框相关窗口的装饰图配置。
+ * @default 
+ * 
+ * @param 装饰图-35
+ * @parent ---装饰图集---
+ * @type struct<DrillDSDStyle>
+ * @desc 对话框相关窗口的装饰图配置。
+ * @default 
+ * 
+ * @param 装饰图-36
+ * @parent ---装饰图集---
+ * @type struct<DrillDSDStyle>
+ * @desc 对话框相关窗口的装饰图配置。
+ * @default 
+ * 
+ * @param 装饰图-37
+ * @parent ---装饰图集---
+ * @type struct<DrillDSDStyle>
+ * @desc 对话框相关窗口的装饰图配置。
+ * @default 
+ * 
+ * @param 装饰图-38
+ * @parent ---装饰图集---
+ * @type struct<DrillDSDStyle>
+ * @desc 对话框相关窗口的装饰图配置。
+ * @default 
+ * 
+ * @param 装饰图-39
+ * @parent ---装饰图集---
+ * @type struct<DrillDSDStyle>
+ * @desc 对话框相关窗口的装饰图配置。
+ * @default 
+ * 
+ * @param 装饰图-40
+ * @parent ---装饰图集---
+ * @type struct<DrillDSDStyle>
+ * @desc 对话框相关窗口的装饰图配置。
+ * @default
  * 
  */
 /*~struct~DrillDSDStyle:
@@ -422,7 +543,7 @@
 	}
 	
 	/*-----------------样式集------------------*/
-	DrillUp.g_DSD_list_length = 20;
+	DrillUp.g_DSD_list_length = 40;
 	DrillUp.g_DSD_list = [];
 	for( var i = 0; i < DrillUp.g_DSD_list_length; i++ ){
 		if( DrillUp.parameters["装饰图-" + String(i+1) ] != undefined &&

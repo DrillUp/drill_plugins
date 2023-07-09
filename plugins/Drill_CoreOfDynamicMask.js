@@ -1565,7 +1565,7 @@ Drill_CODM_PerspectiveSprite.prototype.drill_CODM_updateRotation = function() {
 		}
 	}
 	if( mode == "始终朝向鼠标位置" ){
-		var angle = $gameTemp.drill_CODM_getPointToPointDegree( this.x,this.y, _drill_mouse_x,_drill_mouse_y );
+		var angle = $gameTemp.drill_CODM_Math2D_getPointToPointDegree( this.x,this.y, _drill_mouse_x,_drill_mouse_y );
 		this.rotation = (angle + 270) /180*Math.PI;
 	}
 	
@@ -1631,7 +1631,7 @@ Game_Temp.prototype.drill_CODM_isAnticlockwise = function( a,b ) {
 	}
 }
 //==============================
-// * 数学 - 计算点A朝向点B的角度
+// * 数学工具 - 计算点A朝向点B的角度
 //			
 //			参数：	> x1,y1 数字（点A）
 //					> x2,y2 数字（点B）
@@ -1639,7 +1639,7 @@ Game_Temp.prototype.drill_CODM_isAnticlockwise = function( a,b ) {
 //			
 //			说明：	0度朝右，90度朝下，180度朝左，270度朝上。
 //==============================
-Game_Temp.prototype.drill_CODM_getPointToPointDegree = function( x1,y1,x2,y2 ){
+Game_Temp.prototype.drill_CODM_Math2D_getPointToPointDegree = function( x1,y1,x2,y2 ){
 	var degree = 0;
 	
 	// > arctan不能为0情况

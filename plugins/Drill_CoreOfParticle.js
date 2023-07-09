@@ -865,23 +865,23 @@ Drill_COPa_Controller.prototype.drill_controller_initRandom = function() {
 //					> 迭代次数值若相同，则获取到相同的随机数。
 //==============================
 Drill_COPa_Controller.prototype.drill_controller_curRandom = function( iteration ){
-	return this.drill_controller_getRandomInIteration( this._drill_randomFactor_parListOfRan, iteration );
+	return this.drill_controller_Math1D_getRandomInIteration( this._drill_randomFactor_parListOfRan, iteration );
 };
 //==============================
-// * C随机因子 - 数学 - 生成随机数（随机种子）
+// * C随机因子 - 数学工具 - 生成随机数（随机种子）
 //			
 //			参数：	> seed 数字	（正整数）
 //			返回：	> 数字 		（0~1随机数）
 //			
 //			说明：	> 如果随机种子为 1至100，那么你将得到线性均匀分布的随机值。不是乱序随机。
 //==============================
-Drill_COPa_Controller.prototype.drill_controller_getRandomInSeed = function( seed ){
+Drill_COPa_Controller.prototype.drill_controller_Math1D_getRandomInSeed = function( seed ){
 	var new_ran = ( seed * 9301 + 49297 ) % 233280;
 	new_ran = new_ran / 233280.0;
 	return new_ran;
 };
 //==============================
-// * C随机因子 - 数学 - 生成随机数（迭代）
+// * C随机因子 - 数学工具 - 生成随机数（迭代）
 //			
 //			参数：	> org_ran 数字   （0~1原随机数）
 //					> iteration 数字 （正整数，迭代次数）
@@ -889,17 +889,17 @@ Drill_COPa_Controller.prototype.drill_controller_getRandomInSeed = function( see
 //			
 //			说明：	> 经过迭代后，能够得到乱序的随机数。
 //==============================
-Drill_COPa_Controller.prototype.drill_controller_getRandomInIteration = function( org_ran, iteration ){
-	var prime = DrillUp.drill_COPa_primeList[ iteration % DrillUp.drill_COPa_primeList.length ];
+Drill_COPa_Controller.prototype.drill_controller_Math1D_getRandomInIteration = function( org_ran, iteration ){
+	var prime = DrillUp.drill_COPa_Math1D_primeList[ iteration % DrillUp.drill_COPa_Math1D_primeList.length ];
 	var temp_ran = ( (org_ran + iteration) * 9301 + 49297 ) % 233280;
 	temp_ran = temp_ran / prime;
 	var new_ran = (temp_ran + org_ran * iteration * prime) %1;
 	return new_ran;
 };
 //==============================
-// * C随机因子 - 数学 - 质数表（1000以内）
+// * C随机因子 - 数学工具 - 质数表（1000以内）
 //==============================
-DrillUp.drill_COPa_primeList = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,
+DrillUp.drill_COPa_Math1D_primeList = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,
 	73,79,83,89,97,101,103,107,109,113,127,131,137,139,149,151,157,163,167,173,179,181,
 	191,193,197,199,211,223,227,229,233,239,241,251,257,263,269,271,277,281,283,293,307,
 	311,313,317,331,337,347,349,353,359,367,373,379,383,389,397,401,409,419,421,431,433,
@@ -1887,7 +1887,7 @@ DrillUp.drill_COPa_getBallisticsMoveDegree = function( COBa_x, COBa_y, time, is_
 			next_x = COBa_x[ COBa_x.length -1 ];
 			next_y = COBa_y[ COBa_y.length -1 ];
 		}
-		return this.drill_COPa_getPointToPointDegree( cur_x, cur_y, next_x, next_y );
+		return this.drill_COPa_Math2D_getPointToPointDegree( cur_x, cur_y, next_x, next_y );
 	}else{
 		var cur_x = COBa_x[ time ];
 		var cur_y = COBa_y[ time ];
@@ -1901,11 +1901,11 @@ DrillUp.drill_COPa_getBallisticsMoveDegree = function( COBa_x, COBa_y, time, is_
 			next_x = COBa_x[ 0 ];
 			next_y = COBa_y[ 0 ];
 		}
-		return this.drill_COPa_getPointToPointDegree( cur_x, cur_y, next_x, next_y );
+		return this.drill_COPa_Math2D_getPointToPointDegree( cur_x, cur_y, next_x, next_y );
 	}
 };
 //==============================
-// * G直线拖尾贴图 - 数学 - 计算点A朝向点B的角度
+// * G直线拖尾贴图 - 数学工具 - 计算点A朝向点B的角度
 //			
 //			参数：	> x1,y1 数字（点A）
 //					> x2,y2 数字（点B）
@@ -1913,7 +1913,7 @@ DrillUp.drill_COPa_getBallisticsMoveDegree = function( COBa_x, COBa_y, time, is_
 //			
 //			说明：	0度朝右，90度朝下，180度朝左，270度朝上。
 //==============================
-DrillUp.drill_COPa_getPointToPointDegree = function( x1,y1,x2,y2 ){
+DrillUp.drill_COPa_Math2D_getPointToPointDegree = function( x1,y1,x2,y2 ){
 	var degree = 0;
 	
 	// > arctan不能为0情况

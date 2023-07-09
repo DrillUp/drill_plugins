@@ -240,60 +240,121 @@
  * @type struct<BlackBackground>
  * @desc 黑边背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 黑边背景-2
  * @parent ---黑边背景组---
  * @type struct<BlackBackground>
  * @desc 黑边背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 黑边背景-3
  * @parent ---黑边背景组---
  * @type struct<BlackBackground>
  * @desc 黑边背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 黑边背景-4
  * @parent ---黑边背景组---
  * @type struct<BlackBackground>
  * @desc 黑边背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 黑边背景-5
  * @parent ---黑边背景组---
  * @type struct<BlackBackground>
  * @desc 黑边背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 黑边背景-6
  * @parent ---黑边背景组---
  * @type struct<BlackBackground>
  * @desc 黑边背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 黑边背景-7
  * @parent ---黑边背景组---
  * @type struct<BlackBackground>
  * @desc 黑边背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 黑边背景-8
  * @parent ---黑边背景组---
  * @type struct<BlackBackground>
  * @desc 黑边背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 黑边背景-9
  * @parent ---黑边背景组---
  * @type struct<BlackBackground>
  * @desc 黑边背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 黑边背景-10
  * @parent ---黑边背景组---
  * @type struct<BlackBackground>
  * @desc 黑边背景的详细配置信息。
  * @default 
+ * 
+ * @param 黑边背景-11
+ * @parent ---黑边背景组---
+ * @type struct<BlackBackground>
+ * @desc 黑边背景的详细配置信息。
+ * @default 
+ * 
+ * @param 黑边背景-12
+ * @parent ---黑边背景组---
+ * @type struct<BlackBackground>
+ * @desc 黑边背景的详细配置信息。
+ * @default 
+ * 
+ * @param 黑边背景-13
+ * @parent ---黑边背景组---
+ * @type struct<BlackBackground>
+ * @desc 黑边背景的详细配置信息。
+ * @default 
+ * 
+ * @param 黑边背景-14
+ * @parent ---黑边背景组---
+ * @type struct<BlackBackground>
+ * @desc 黑边背景的详细配置信息。
+ * @default 
+ * 
+ * @param 黑边背景-15
+ * @parent ---黑边背景组---
+ * @type struct<BlackBackground>
+ * @desc 黑边背景的详细配置信息。
+ * @default 
+ * 
+ * @param 黑边背景-16
+ * @parent ---黑边背景组---
+ * @type struct<BlackBackground>
+ * @desc 黑边背景的详细配置信息。
+ * @default 
+ * 
+ * @param 黑边背景-17
+ * @parent ---黑边背景组---
+ * @type struct<BlackBackground>
+ * @desc 黑边背景的详细配置信息。
+ * @default 
+ * 
+ * @param 黑边背景-18
+ * @parent ---黑边背景组---
+ * @type struct<BlackBackground>
+ * @desc 黑边背景的详细配置信息。
+ * @default 
+ * 
+ * @param 黑边背景-19
+ * @parent ---黑边背景组---
+ * @type struct<BlackBackground>
+ * @desc 黑边背景的详细配置信息。
+ * @default 
+ * 
+ * @param 黑边背景-20
+ * @parent ---黑边背景组---
+ * @type struct<BlackBackground>
+ * @desc 黑边背景的详细配置信息。
+ * @default
+ * 
  */
 /*~struct~BlackBackground:
  * 
@@ -455,10 +516,11 @@
 	DrillUp.g_HB_weltImg_backImg = JSON.parse(DrillUp.parameters["资源-备用替换图像"] || [] );
 	
 	/*----------------黑边背景---------------*/
-	DrillUp.g_HB_background_list_length = 10;
+	DrillUp.g_HB_background_list_length = 20;
 	DrillUp.g_HB_background_list = [];
 	for (var i = 0; i < DrillUp.g_HB_background_list_length; i++) {
-		if( DrillUp.parameters['黑边背景-' + String(i+1) ] != "" ){
+		if( DrillUp.parameters['黑边背景-' + String(i+1) ] != undefined &&
+			DrillUp.parameters['黑边背景-' + String(i+1) ] != "" ){
 			var data = JSON.parse(DrillUp.parameters['黑边背景-' + String(i+1) ]);
 			DrillUp.g_HB_background_list[i] = DrillUp.drill_HB_initBlackBackground( data );
 			DrillUp.g_HB_background_list[i]['inited'] = true;

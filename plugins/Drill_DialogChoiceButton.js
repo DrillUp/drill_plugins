@@ -180,6 +180,305 @@
  * @desc 对话选项样式的详细配置信息。
  * @default 
  * 
+ * @param 对话选项样式-11
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-12
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-13
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-14
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-15
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-16
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-17
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-18
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-19
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-20
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-21
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-22
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-23
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-24
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-25
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-26
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-27
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-28
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-29
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-30
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-31
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-32
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-33
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-34
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-35
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-36
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-37
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-38
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-39
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-40
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-41
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-42
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-43
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-44
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-45
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-46
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-47
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-48
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-49
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-50
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-51
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-52
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-53
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-54
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-55
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-56
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-57
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-58
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-59
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default 
+ * 
+ * @param 对话选项样式-60
+ * @parent ----对话选项样式集合----
+ * @type struct<DrillDCBStyle>
+ * @desc 对话选项样式的详细配置信息。
+ * @default
  * 
  */
 /*~struct~DrillDCBStyle:
@@ -385,7 +684,7 @@
 	DrillUp.g_DCB_defaultStyle = Number(DrillUp.parameters["对话选项默认样式"] || 1); 
 	
 	/*-----------------对话选项样式集合------------------*/
-	DrillUp.g_DCB_data_length = 10;
+	DrillUp.g_DCB_data_length = 60;
 	DrillUp.g_DCB_data = [];
 	for( var i = 0; i < DrillUp.g_DCB_data_length; i++ ){
 		if( DrillUp.parameters["对话选项样式-" + String(i+1) ] != undefined &&

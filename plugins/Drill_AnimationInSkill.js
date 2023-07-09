@@ -113,7 +113,9 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			并行动画绑定于状态：
+//			->☆提示信息
+//			->☆变量获取
+//			->☆技能注释
 //				->战斗不阻塞设置
 //				->并行播放
 //				->施法者与目标
@@ -138,7 +140,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -163,7 +165,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_AnimationInSkill = true;
@@ -179,29 +181,23 @@ if( Imported.Drill_AnimationInParallel ){
 	
 	
 //=============================================================================
-// ** 注释初始化
+// ** ☆技能注释
 //=============================================================================
 //==============================
-// * 玩家选定了一个技能时
+// * 技能注释 - 作用时绑定
 //==============================
-/* Game_Action包含了 Game_Item 用于存储技能、物品的数据
-Game_Action.prototype.setSkill = function(skillId) {	//（该函数为玩家选定了一个技能时的时机）
-    this._item.setObject($dataSkills[skillId]);
-	if( skillId == 25){
-		this.subject().startAnimation( 143, false,0);
-	}
-};*/
-
-//==============================
-// * 技能开始作用时
-//==============================
-var _drill_AISk_apply = Game_Action.prototype.apply;
-Game_Action.prototype.apply = function(target) {
-	_drill_AISk_apply.call(this,target);
-	this.drill_AISk_setParallelAnimation(target);
+var _drill_AISk_actionApply = Game_Action.prototype.apply;
+Game_Action.prototype.apply = function( target ){
+	_drill_AISk_actionApply.call( this, target );
+	this.drill_AISk_setParallelAnimation( target );
 }
-Game_Action.prototype.drill_AISk_setParallelAnimation = function(target) {
-	var is_consecutive = true;		//判断当前攻击是否连续
+//==============================
+// * 技能注释 - 作用时
+//==============================
+Game_Action.prototype.drill_AISk_setParallelAnimation = function( target ){
+	
+	// > 当前攻击是否连续
+	var is_consecutive = true;
 	if(this._drill_AISk_last_target == undefined){
 		this._drill_AISk_last_target = target;
 		is_consecutive = false;
@@ -211,47 +207,63 @@ Game_Action.prototype.drill_AISk_setParallelAnimation = function(target) {
 		is_consecutive = false;
 	}
 	
+	// > 注释来源（技能/物品技能）
 	var note = "";
 	if( this.isSkill() ){ note = String($dataSkills[this._item.itemId()].note); }
 	if( this.isItem() ){ note = String($dataItems[this._item.itemId()].note); }
-			
-	var types = (note.match( /<技能并行动画:([^<>]*?)>/g )) || [];
-	for(var r = 0;r< types.length; r++){
-		var l = (types[r].match( /<技能并行动画:([^<>]*?)>/ )) || [];
-		//alert(l);		//正则，g搜索每行符合列，然后在每个符合字符串中抽取出 数字。
-
-		var args = String(l[1]).split(':');
-		if( args.length >= 2 ){
-			if(args[0]){ var a_id = Number(args[0]);}
-			if(args[1]){ var type = String(args[1]);}
-			if(args[2]){ var temp1 = String(args[2]);}
-			if ( type == "施法者"){
-				if ( temp1 == "连续"){
-					this.drill_AISk_startParallelAnimation( this.subject(), a_id, note);
-				}
-				if ( temp1 == "一次" && is_consecutive == false){
-					this.drill_AISk_startParallelAnimation( this.subject(), a_id, note);
-				}
-			}
-			if ( type == "目标"){
-				if( target.isAlive() ){ 	//死亡后不播放动画
-					if ( temp1 == "连续"){
-						this.drill_AISk_startParallelAnimation( target, a_id, note);
+	var row_list = note.split(/[\n\r ]+/);
+	
+	// > 技能注释解析
+	for( var i=0; i < row_list.length; i++ ){
+		var row = row_list[i];
+		row = row.replace(/\>$/,"");	//（去掉末尾的>）
+		var args = note.split(/[:：]/);
+		var command = args.shift();
+		if( command == "<技能并行动画" ){
+			if( args.length >= 2 ){
+				if( args[0] ){ var a_id = String(args[0]); }
+				if( args[1] ){ var type = String(args[1]); }
+				if( args[2] ){ var temp1 = String(args[2]); }
+				if( type == "施法者" ){
+					if( temp1 == "连续" ){
+						this.drill_AISk_startParallelAnimation( this.subject(), Number(a_id), note);
 					}
-					if ( temp1 == "一次" && is_consecutive == false){
-						this.drill_AISk_startParallelAnimation( target, a_id, note);
+					if( temp1 == "一次" && is_consecutive == false ){
+						this.drill_AISk_startParallelAnimation( this.subject(), Number(a_id), note);
+					}
+				}
+				if( type == "目标" ){
+					if( target.isAlive() ){ 	//（死亡后不播放动画）
+						if( temp1 == "连续" ){
+							this.drill_AISk_startParallelAnimation( target, Number(a_id), note);
+						}
+						if( temp1 == "一次" && is_consecutive == false ){
+							this.drill_AISk_startParallelAnimation( target, Number(a_id), note);
+						}
 					}
 				}
 			}
 		}
 	}
-}
+};
 //==============================
 // * 播放动画（用于其它插件扩展）
 //==============================
 Game_Action.prototype.drill_AISk_startParallelAnimation = function( battler , a_id , note ) {
 	battler.drill_AIP_startParallelAnimation( a_id, false, 0 );
 }
+/* 
+//==============================
+// * 玩家选定了一个技能时
+//==============================
+Game_Action包含了 Game_Item 用于存储技能、物品的数据
+Game_Action.prototype.setSkill = function(skillId) {	//（该函数为玩家选定了一个技能时的时机）
+    this._item.setObject($dataSkills[skillId]);
+	if( skillId == 25){
+		this.subject().startAnimation( 143, false,0);
+	}
+};
+*/
 
 
 //=============================================================================

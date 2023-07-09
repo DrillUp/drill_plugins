@@ -268,8 +268,16 @@
  * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
  * @default 0
  *
- * @param 地图UI基准
+ * @param 是否在地图界面中启用
  * @parent ---贴图---
+ * @type boolean
+ * @on 启用
+ * @off 关闭
+ * @desc true - 启用，false - 关闭。
+ * @default true
+ *
+ * @param 地图UI基准
+ * @parent 是否在地图界面中启用
  * @type select
  * @option 相对于地图
  * @value 相对于地图
@@ -279,7 +287,7 @@
  * @default 相对于地图
  *
  * @param 地图层级
- * @parent ---贴图---
+ * @parent 是否在地图界面中启用
  * @type select
  * @option 图片层
  * @value 图片层
@@ -289,14 +297,22 @@
  * @default 图片层
  *
  * @param 地图图片层级
- * @parent ---贴图---
+ * @parent 是否在地图界面中启用
  * @type number
  * @min 0
  * @desc 粒子在同一个地图层级时，先后排序的位置，0表示最后面。
  * @default 4
  *
- * @param 战斗层级
+ * @param 是否在战斗界面中启用
  * @parent ---贴图---
+ * @type boolean
+ * @on 启用
+ * @off 关闭
+ * @desc true - 启用，false - 关闭。
+ * @default true
+ *
+ * @param 战斗层级
+ * @parent 是否在战斗界面中启用
  * @type select
  * @option 图片层
  * @value 图片层
@@ -306,14 +322,22 @@
  * @default 图片层
  *
  * @param 战斗图片层级
- * @parent ---贴图---
+ * @parent 是否在战斗界面中启用
  * @type number
  * @min 0
  * @desc 粒子在同一个战斗层级时，先后排序的位置，0表示最后面。
  * @default 4
  *
- * @param 菜单层级
+ * @param 是否在菜单界面中启用
  * @parent ---贴图---
+ * @type boolean
+ * @on 启用
+ * @off 关闭
+ * @desc true - 启用，false - 关闭。
+ * @default true
+ *
+ * @param 菜单层级
+ * @parent 是否在菜单界面中启用
  * @type select
  * @option 菜单后面层
  * @value 菜单后面层
@@ -323,7 +347,7 @@
  * @default 菜单前面层
  *
  * @param 菜单图片层级
- * @parent ---贴图---
+ * @parent 是否在菜单界面中启用
  * @type number
  * @min 0
  * @desc 粒子在同一个菜单层级时，先后排序的位置，0表示最后面。
@@ -674,11 +698,14 @@
 		data['y'] = Number( dataFrom["平移-粒子 Y"] || 0);
 		data['opacity'] = 255;
 		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
+		data['map_enabled'] = String( dataFrom["是否在地图界面中启用"] || "true") == "true";
 		data['map_benchmark'] = String( dataFrom["地图UI基准"] || "相对于镜头");
 		data['map_layerIndex'] = String( dataFrom["地图层级"] || "图片层");
 		data['map_zIndex'] = Number( dataFrom["地图图片层级"] || 4);
+		data['battle_enabled'] = String( dataFrom["是否在战斗界面中启用"] || "true") == "true";
 		data['battle_layerIndex'] = String( dataFrom["战斗层级"] || "图片层");
 		data['battle_zIndex'] = Number( dataFrom["战斗图片层级"] || 4);
+		data['menu_enabled'] = String( dataFrom["是否在菜单界面中启用"] || "true") == "true";
 		data['menu_layerIndex'] = String( dataFrom["菜单层级"] || "菜单前面层");
 		data['menu_zIndex'] = Number( dataFrom["菜单图片层级"] || 4);
 		
@@ -1495,6 +1522,7 @@ Scene_Map.prototype.update = function() {
 // * 贴图控制 - 帧刷新 鼠标变化（地图界面）
 //==============================
 Scene_Map.prototype.drill_MSPa_updateMouse = function() {
+	var cur_scene = SceneManager._scene;
 	
 	// > 鼠标 - 捕获
 	var cur_mouse_x = _drill_mouse_x;
@@ -1520,14 +1548,21 @@ Scene_Map.prototype.drill_MSPa_updateMouse = function() {
 	// > 控制器变化
 	for(var i = 0; i < $gameSystem._drill_MSPa_controllerTank.length; i++ ){
 		var controller = $gameSystem._drill_MSPa_controllerTank[i];
-		if( controller._drill_data['enabled'] != true ){ continue; }
+		var data = controller._drill_data;
+		if( data['enabled'] != true ){ continue; }
+		
+		// > 如果关闭，则不创建
+		if( cur_scene instanceof Scene_Map && data['map_enabled'] != true ){ continue; }
+		if( cur_scene instanceof Scene_Battle && data['battle_enabled'] != true ){ continue; }
+		if( cur_scene instanceof Scene_MenuBase && data['menu_enabled'] != true ){ continue; }
+		
 		
 		// > 粒子产生最小间隔时间
 		controller._drill_MSPa_delay += 1;
 		if( controller._drill_MSPa_delay % controller._drill_data['mouse_interval'] != 0 ){ return; }
 		
 		// > 鼠标划动最大距离
-		
+		//...
 		
 		var dead_index = controller.drill_controller_getOneDeadParticleIndex();
 		if( dead_index == -1 ){ return; }
@@ -1785,7 +1820,7 @@ Drill_MSPa_Controller.prototype.drill_controller_updateReset = function() {
 //==============================
 // * E粒子重设 - 执行重设 - 位置
 //
-//			说明：	> 由于当前插件为 个体装饰，因此起始点为 一个圆内随机出现 。
+//			说明：	> 起始点为 一个圆内随机出现 。
 //==============================	
 Drill_MSPa_Controller.prototype.drill_controller_resetParticles_Position = function( i ){
 	Drill_COPa_Controller.prototype.drill_controller_resetParticles_Position.call( this, i );
@@ -1832,13 +1867,13 @@ Drill_MSPa_Controller.prototype.drill_controller_resetParticles_Position = funct
 // **					->H贴图高宽
 // **					->I粒子生命周期
 // **
-// **		说明：	> 你必须在创建贴图后，手动初始化。（还需要先设置 控制器和个体贴图 ）
+// **		说明：	> 你必须在创建贴图后，手动初始化。（还需要先设置 控制器 ）
 // **
-// **		代码：	> 范围 - 该类显示单独的鼠标粒子效果。
-// **				> 结构 - [合并/ ●分离 /混乱] 贴图与数据分离。
+// **		代码：	> 范围 - 该类显示单独的贴图。
+// **				> 结构 - [合并/ ●分离 /混乱] 使用 控制器-贴图 结构。
 // **				> 数量 - [单个/ ●多个] 
-// **				> 创建 - [ ●一次性 /自延迟/外部延迟] 先创建控制器，在 _spriteset 创建后，再创建此贴图。
-// **				> 销毁 - [不考虑/自销毁/ ●外部销毁 ] 
+// **				> 创建 - [ ●一次性 /自延迟/外部延迟] 先创建控制器，再创建此贴图，通过 C对象绑定 进行连接。
+// **				> 销毁 - [不考虑/自销毁/ ●外部销毁 ] 通过 贴图控制 模块来销毁。
 // **				> 样式 - [ ●不可修改 /自变化/外部变化] 
 //=============================================================================
 //==============================
@@ -1879,7 +1914,7 @@ Drill_MSPa_Sprite.prototype.drill_sprite_setController = function( controller ){
 //			参数：	> 无
 //			返回：	> 无
 //			
-//			说明：	> 需要设置 控制器和个体贴图 之后，才能进行手动初始化。
+//			说明：	> 需要设置 控制器 之后，才能进行手动初始化。
 //##############################
 Drill_MSPa_Sprite.prototype.drill_sprite_initChild = function(){
     Drill_COPa_Sprite.prototype.drill_sprite_initChild.call( this );

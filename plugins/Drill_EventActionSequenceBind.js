@@ -90,130 +90,251 @@
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
  * 
- * 
- * 
  * @param ---全绑定 1至20---
- * @default
- *
+ * @default 
+ * 
  * @param 全绑定-1
  * @parent ---全绑定 1至20---
  * @type struct<DrilEASBBind>
  * @desc 全绑定的详细配置信息。
  * @default 
- *
+ * 
  * @param 全绑定-2
  * @parent ---全绑定 1至20---
  * @type struct<DrilEASBBind>
  * @desc 全绑定的详细配置信息。
  * @default 
- *
+ * 
  * @param 全绑定-3
  * @parent ---全绑定 1至20---
  * @type struct<DrilEASBBind>
  * @desc 全绑定的详细配置信息。
  * @default 
- *
+ * 
  * @param 全绑定-4
  * @parent ---全绑定 1至20---
  * @type struct<DrilEASBBind>
  * @desc 全绑定的详细配置信息。
  * @default 
- *
+ * 
  * @param 全绑定-5
  * @parent ---全绑定 1至20---
  * @type struct<DrilEASBBind>
  * @desc 全绑定的详细配置信息。
  * @default 
- *
+ * 
  * @param 全绑定-6
  * @parent ---全绑定 1至20---
  * @type struct<DrilEASBBind>
  * @desc 全绑定的详细配置信息。
  * @default 
- *
+ * 
  * @param 全绑定-7
  * @parent ---全绑定 1至20---
  * @type struct<DrilEASBBind>
  * @desc 全绑定的详细配置信息。
  * @default 
- *
+ * 
  * @param 全绑定-8
  * @parent ---全绑定 1至20---
  * @type struct<DrilEASBBind>
  * @desc 全绑定的详细配置信息。
  * @default 
- *
+ * 
  * @param 全绑定-9
  * @parent ---全绑定 1至20---
  * @type struct<DrilEASBBind>
  * @desc 全绑定的详细配置信息。
  * @default 
- *
+ * 
  * @param 全绑定-10
  * @parent ---全绑定 1至20---
  * @type struct<DrilEASBBind>
  * @desc 全绑定的详细配置信息。
  * @default 
- *
+ * 
  * @param 全绑定-11
  * @parent ---全绑定 1至20---
  * @type struct<DrilEASBBind>
  * @desc 全绑定的详细配置信息。
  * @default 
- *
+ * 
  * @param 全绑定-12
  * @parent ---全绑定 1至20---
  * @type struct<DrilEASBBind>
  * @desc 全绑定的详细配置信息。
  * @default 
- *
+ * 
  * @param 全绑定-13
  * @parent ---全绑定 1至20---
  * @type struct<DrilEASBBind>
  * @desc 全绑定的详细配置信息。
  * @default 
- *
+ * 
  * @param 全绑定-14
  * @parent ---全绑定 1至20---
  * @type struct<DrilEASBBind>
  * @desc 全绑定的详细配置信息。
  * @default 
- *
+ * 
  * @param 全绑定-15
  * @parent ---全绑定 1至20---
  * @type struct<DrilEASBBind>
  * @desc 全绑定的详细配置信息。
  * @default 
- *
+ * 
  * @param 全绑定-16
  * @parent ---全绑定 1至20---
  * @type struct<DrilEASBBind>
  * @desc 全绑定的详细配置信息。
  * @default 
- *
+ * 
  * @param 全绑定-17
  * @parent ---全绑定 1至20---
  * @type struct<DrilEASBBind>
  * @desc 全绑定的详细配置信息。
  * @default 
- *
+ * 
  * @param 全绑定-18
  * @parent ---全绑定 1至20---
  * @type struct<DrilEASBBind>
  * @desc 全绑定的详细配置信息。
  * @default 
- *
+ * 
  * @param 全绑定-19
  * @parent ---全绑定 1至20---
  * @type struct<DrilEASBBind>
  * @desc 全绑定的详细配置信息。
  * @default 
- *
+ * 
  * @param 全绑定-20
  * @parent ---全绑定 1至20---
  * @type struct<DrilEASBBind>
  * @desc 全绑定的详细配置信息。
  * @default 
+ * 
+ * @param ---全绑定21至40---
+ * @default 
+ * 
+ * @param 全绑定-21
+ * @parent ---全绑定21至40---
+ * @type struct<DrilEASBBind>
+ * @desc 全绑定的详细配置信息。
+ * @default 
+ * 
+ * @param 全绑定-22
+ * @parent ---全绑定21至40---
+ * @type struct<DrilEASBBind>
+ * @desc 全绑定的详细配置信息。
+ * @default 
+ * 
+ * @param 全绑定-23
+ * @parent ---全绑定21至40---
+ * @type struct<DrilEASBBind>
+ * @desc 全绑定的详细配置信息。
+ * @default 
+ * 
+ * @param 全绑定-24
+ * @parent ---全绑定21至40---
+ * @type struct<DrilEASBBind>
+ * @desc 全绑定的详细配置信息。
+ * @default 
+ * 
+ * @param 全绑定-25
+ * @parent ---全绑定21至40---
+ * @type struct<DrilEASBBind>
+ * @desc 全绑定的详细配置信息。
+ * @default 
+ * 
+ * @param 全绑定-26
+ * @parent ---全绑定21至40---
+ * @type struct<DrilEASBBind>
+ * @desc 全绑定的详细配置信息。
+ * @default 
+ * 
+ * @param 全绑定-27
+ * @parent ---全绑定21至40---
+ * @type struct<DrilEASBBind>
+ * @desc 全绑定的详细配置信息。
+ * @default 
+ * 
+ * @param 全绑定-28
+ * @parent ---全绑定21至40---
+ * @type struct<DrilEASBBind>
+ * @desc 全绑定的详细配置信息。
+ * @default 
+ * 
+ * @param 全绑定-29
+ * @parent ---全绑定21至40---
+ * @type struct<DrilEASBBind>
+ * @desc 全绑定的详细配置信息。
+ * @default 
+ * 
+ * @param 全绑定-30
+ * @parent ---全绑定21至40---
+ * @type struct<DrilEASBBind>
+ * @desc 全绑定的详细配置信息。
+ * @default 
+ * 
+ * @param 全绑定-31
+ * @parent ---全绑定21至40---
+ * @type struct<DrilEASBBind>
+ * @desc 全绑定的详细配置信息。
+ * @default 
+ * 
+ * @param 全绑定-32
+ * @parent ---全绑定21至40---
+ * @type struct<DrilEASBBind>
+ * @desc 全绑定的详细配置信息。
+ * @default 
+ * 
+ * @param 全绑定-33
+ * @parent ---全绑定21至40---
+ * @type struct<DrilEASBBind>
+ * @desc 全绑定的详细配置信息。
+ * @default 
+ * 
+ * @param 全绑定-34
+ * @parent ---全绑定21至40---
+ * @type struct<DrilEASBBind>
+ * @desc 全绑定的详细配置信息。
+ * @default 
+ * 
+ * @param 全绑定-35
+ * @parent ---全绑定21至40---
+ * @type struct<DrilEASBBind>
+ * @desc 全绑定的详细配置信息。
+ * @default 
+ * 
+ * @param 全绑定-36
+ * @parent ---全绑定21至40---
+ * @type struct<DrilEASBBind>
+ * @desc 全绑定的详细配置信息。
+ * @default 
+ * 
+ * @param 全绑定-37
+ * @parent ---全绑定21至40---
+ * @type struct<DrilEASBBind>
+ * @desc 全绑定的详细配置信息。
+ * @default 
+ * 
+ * @param 全绑定-38
+ * @parent ---全绑定21至40---
+ * @type struct<DrilEASBBind>
+ * @desc 全绑定的详细配置信息。
+ * @default 
+ * 
+ * @param 全绑定-39
+ * @parent ---全绑定21至40---
+ * @type struct<DrilEASBBind>
+ * @desc 全绑定的详细配置信息。
+ * @default 
+ * 
+ * @param 全绑定-40
+ * @parent ---全绑定21至40---
+ * @type struct<DrilEASBBind>
+ * @desc 全绑定的详细配置信息。
+ * @default
  * 
  */
 /*~struct~DrilEASBBind:
@@ -385,7 +506,7 @@
 	}
 	
 	/*-----------------杂项------------------*/
-	DrillUp.g_EASB_list_length = 20;
+	DrillUp.g_EASB_list_length = 40;
 	DrillUp.g_EASB_list = [];
 	for( var i = 0; i < DrillUp.g_EASB_list_length; i++ ){
 		if( DrillUp.parameters["全绑定-" + String(i+1) ] != undefined &&

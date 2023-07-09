@@ -1276,6 +1276,8 @@
 //					->按钮贴图
 //			
 //			->文本贴图【Drill_COSB_WindowSprite】
+//				->A主体
+//				->B窗口内容
 //			
 //			
 //		★家谱：
@@ -2530,7 +2532,7 @@ Drill_COSB_LayerSprite.prototype.drill_updateName = function() {
 	
 	// > 选项名
 	var result_str = this.drill_window_getOptionText( this._drill_name_curIndex );
-	this._drill_name_window.setText( result_str );
+	this._drill_name_window.drill_setMessage( result_str );
 	
 	// > 轨迹重置
 	this._drill_name_sprite._drill_foldTime = 0;
@@ -3485,7 +3487,7 @@ Drill_COSB_LayerSprite.prototype.drill_updateButtonRefresh = function() {
 		// > 重刷 - 按钮名称
 		if( temp_data['btn_nameEnable'] == true ){
 			var str = this.drill_window_getOptionText( real_index );
-			temp_sprite._drill_COSB_btnNameWindow.setText( str );
+			temp_sprite._drill_COSB_btnNameWindow.drill_setMessage( str );
 		}
 		
 		// > 重刷 - 按钮贴图
@@ -3506,6 +3508,13 @@ Drill_COSB_LayerSprite.prototype.drill_updateButtonRefresh = function() {
 // **
 // **		作用域：	地图界面、战斗界面、菜单界面
 // **		主功能：	> 定义一个窗口贴图来显示自定义文本，支持多行文本。
+// **		子功能：	->窗口
+// **						x->是否就绪
+// **						x->优化策略
+// **						x->销毁
+// **					->A主体
+// **						->中心锚点
+// **					->B窗口内容
 // **
 // **		说明：	> 底层就是一个窗口，支持 窗口字符 的全部功能。
 //=============================================================================
@@ -3531,58 +3540,108 @@ Drill_COSB_WindowSprite.prototype.initialize = function( data ){
 //==============================
 Drill_COSB_WindowSprite.prototype.update = function() {
 	Window_Base.prototype.update.call(this);
-	this.drill_COSB_updateText();		//帧刷新 - 文本变化
+	this.drill_updateAttr();			//帧刷新 - A主体
+	this.drill_updateMessage();			//帧刷新 - B窗口内容
 }
 //==============================
-// * 文本贴图 - 属性
+// * 文本贴图 - 窗口属性
 //==============================
-Drill_COSB_WindowSprite.prototype.standardFontSize = function(){ return this._drill_data['fontsize'] || 28; };
-Drill_COSB_WindowSprite.prototype.standardPadding = function(){ return 6; };
-//==============================
-// * 文本贴图 - 接口（内部单次调用）
-//
-//			说明：	名称块根据 窗口选项 的文本定死了结构，仅 Drill_COSB_LayerSprite 调用，不对外开放。
-//==============================
-Drill_COSB_WindowSprite.prototype.setText = function( text ){
-	if( text == undefined ){ return; }
-	if( this._drill_curText == text ){ return; }
-    this._drill_curText = text;
-	this._drill_needRefresh = true;
-};
-
+Drill_COSB_WindowSprite.prototype.standardPadding = function(){ return 6; };										//窗口内边距
+Drill_COSB_WindowSprite.prototype.standardFontSize = function(){ return this._drill_data['fontsize'] || 28; };		//窗口字体大小
 //==============================
 // * 文本贴图 - 初始化数据
 //==============================
 Drill_COSB_WindowSprite.prototype.drill_initData = function() {
 	var data = this._drill_data;
 	
-	// > 默认值
-	if( data['text'] == undefined ){ data['text'] = "" };			//（初始的text是空字符串，需要等父类调用接口刷新）
-	if( data['fontsize'] == undefined ){ data['fontsize'] = 28 };					
+	// > A主体
+	if( data['fontsize'] == undefined ){ data['fontsize'] = 28 };
 	if( data['anchorType'] == undefined ){ data['anchorType'] = "正中心" };	
-	if( data['widthType'] == undefined ){ data['widthType'] = "与最长文本宽度一致" };	
-	if( data['widthValue'] == undefined ){ data['widthValue'] = 816 };								
+	
+	// > B窗口内容
+	if( data['text'] == undefined ){ data['text'] = "" };			//（初始的text是空字符串，需要等父类调用接口刷新）
+	if( data['widthType'] == undefined ){ data['widthType'] = "与最长文本宽度一致" };
+	if( data['widthValue'] == undefined ){ data['widthValue'] = 816 };
 }
 //==============================
 // * 文本贴图 - 初始化对象
 //==============================
 Drill_COSB_WindowSprite.prototype.drill_initSprite = function() {
+	this.drill_initAttr();				//初始化对象 - A主体
+	this.drill_initMessage();			//初始化对象 - B窗口内容
+};
+
+//==============================
+// * A主体 - 初始化对象
+//==============================
+Drill_COSB_WindowSprite.prototype.drill_initAttr = function() {
 	var data = this._drill_data;
 	
-	// > 私有对象初始化
-	this._drill_textWidth = 0;
-	this._drill_textHeight = 0;
-	this._drill_needRefresh = true;
-	this._drill_curText = "";
+	// > 私有属性初始化
+	this._drill_textWidth = 0;			//文本宽度
+	this._drill_textHeight = 0;			//文本高度
+	this._drill_width = 0;				//窗口宽度
+	this._drill_height = 0;				//窗口高度
+	this._drill_curTime = 0;			//当前生命周期
 	
-	// > 主体属性
-	this.opacity = 0;
-	this.contents.opacity = 255;
+	this.contentsOpacity = 255;			//文本域 透明度
+	this.opacity = 0;					//背景容器层 透明度
+	
+	// > 中心锚点
+	this._drill_anchor_x = 0;			//中心锚点x
+	this._drill_anchor_y = 0;			//中心锚点y
+	if( data['anchorType'] == "左上角" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 0.0; }
+	if( data['anchorType'] == "右上角" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 0.0; }
+	if( data['anchorType'] == "左下角" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 1.0; }
+	if( data['anchorType'] == "右下角" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 1.0; }
+	if( data['anchorType'] == "正上方" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 0.0; }
+	if( data['anchorType'] == "正下方" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 1.0; }
+	if( data['anchorType'] == "正左方" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 0.5; }
+	if( data['anchorType'] == "正右方" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 0.5; }
+	if( data['anchorType'] == "正中心" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 0.5; }
+}
+//==============================
+// * A主体 - 帧刷新
+//==============================
+Drill_COSB_WindowSprite.prototype.drill_updateAttr = function() {
+	var data = this._drill_data;
+	
+	// > 主体 时间流逝
+	this._drill_curTime += 1
+	
+	// > 位置
+	var xx = data['x'];
+	var yy = data['y'];
+	xx -= this._drill_width;
+	yy -= this._drill_height;
+	xx += this._drill_width * this._drill_anchor_x;
+	yy += this._drill_height * this._drill_anchor_y;
+	this.x = xx ;
+	this.y = yy ;
+}
+
+//==============================
+// * B窗口内容 - 初始化对象
+//==============================
+Drill_COSB_WindowSprite.prototype.drill_initMessage = function(){
+	this._drill_curText = "";
+	this._drill_needRefresh = true;
+}
+//==============================
+// * B窗口内容 - 设置文本（内部单次调用）
+//
+//			说明：	> 名称块根据 窗口选项 的文本定死了结构，仅 Drill_COSB_LayerSprite 调用，不对外开放。
+//==============================
+Drill_COSB_WindowSprite.prototype.drill_setMessage = function( text ){
+	if( text == undefined ){ return; }
+	if( this._drill_curText == text ){ return; }
+    this._drill_curText = text;
+	this._drill_needRefresh = true;
 };
 //==============================
-// * 文本贴图 - 帧刷新文本变化
+// * B窗口内容 - 帧刷新
 //==============================
-Drill_COSB_WindowSprite.prototype.drill_COSB_updateText = function() {
+Drill_COSB_WindowSprite.prototype.drill_updateMessage = function() {
 	if( this._drill_needRefresh == false ){ return; }
 	this._drill_needRefresh = false;
 	var data = this._drill_data;
@@ -3594,85 +3653,52 @@ Drill_COSB_WindowSprite.prototype.drill_COSB_updateText = function() {
 	}
 	var temp_textTank = temp_text.split(/\\n|\n/g);
 	
-	// > 确定宽高（窗口辅助核心的 标准函数 ）
-	this.drill_COWA_calculateHeightAndWidth( temp_textTank );
-	this._drill_textWidth = 0;
-	this._drill_textHeight = 0;
-	for( var i=0; i < this.drill_COWA_widthList.length; i++ ){	//（取最大宽度）
-		if( this._drill_textWidth < this.drill_COWA_widthList[i] ){
-			this._drill_textWidth = this.drill_COWA_widthList[i];
-		}
-	}
-	for( var i=0; i < this.drill_COWA_heightList.length; i++ ){	//（高度累加）
-		this._drill_textHeight += this.drill_COWA_heightList[i];
-	}
+	// > 刷新内容
+	this.drill_refreshMessage( temp_textTank );
+}
+//==============================
+// * B窗口内容 - 刷新内容
+//==============================
+Drill_COSB_WindowSprite.prototype.drill_refreshMessage = function( context_list ){
+	if( context_list.length == 0 ){ return; }
+	var data = this._drill_data;
+	
+	
+	// > 窗口高宽 - 计算（文本域自适应）
+	var options = {};
+	options['autoLineheight'] = true;
+	this.drill_COWA_calculateHeightAndWidth( context_list, options );		//（窗口辅助核心）
+	
+	// > 窗口高宽 - 赋值
+	var ww = 0;
+	var hh = 0;
+	for( var i=0; i < this.drill_COWA_widthList.length; i++ ){ if( ww < this.drill_COWA_widthList[i] ){ ww = this.drill_COWA_widthList[i]; } }
+	for( var i=0; i < this.drill_COWA_heightList.length; i++ ){ hh += this.drill_COWA_heightList[i]; }
+	
 	if( data['widthType'] == "使用自定义值" ){	//（固定宽度情况）
-		this._drill_textWidth = data['widthValue'];
+		ww = data['widthValue'];
 	}
-	this.width = this._drill_textWidth + this.standardPadding() * 2;		// 窗口宽度
-	this.height = this._drill_textHeight + this.standardPadding() * 2 + 6;	// 窗口高度（高一点，防止文字被切割）
+	this._drill_textWidth = ww;		//文本宽度
+	this._drill_textHeight = hh;    //文本高度
+	
+	ww += this.standardPadding() * 2;
+	hh += this.standardPadding() * 2;
+	this._drill_width = ww;
+	this._drill_height = hh;
+	this.width = this._drill_width;
+	this.height = this._drill_height;
+	
 	
 	// > 重建bitmap
 	this.contents.clear();
 	this.createContents();
 	
-	// > 绘制内容（窗口辅助核心的 标准函数 ）
-	var options = {};
+	// > 绘制内容
 	options['x'] = 0;
 	options['y'] = 0;
 	options['width'] = this._drill_textWidth;
-	options['autoLineheight'] = true;
-	this.drill_COWA_drawTextListEx( temp_textTank, options );
-	
-	// > 对齐方式
-	var xx = data['x'];
-	var yy = data['y'];
-	var ww = this.width;
-	var hh = this.height;
-	xx -= ww;
-	yy -= hh;
-	
-	if( data['anchorType'] == "左上角" ){
-		xx += ww;
-		yy += hh;
-	}
-	if( data['anchorType'] == "右上角" ){
-		xx += 0;
-		yy += hh;
-	}
-	if( data['anchorType'] == "左下角" ){
-		xx += ww;
-		yy += 0;
-	}
-	if( data['anchorType'] == "右下角" ){
-		xx += 0;
-		yy += 0;
-	}
-	if( data['anchorType'] == "正中心" ){
-		xx += ww * 0.5;
-		yy += hh * 0.5;
-	}
-	if( data['anchorType'] == "正上方" ){
-		xx += ww * 0.5;
-		yy += hh;
-	}
-	if( data['anchorType'] == "正下方" ){
-		xx += ww * 0.5;
-		yy += 0;
-	}
-	if( data['anchorType'] == "正左方" ){
-		xx += ww;
-		yy += hh * 0.5;
-	}
-	if( data['anchorType'] == "正右方" ){
-		xx += 0;
-		yy += hh * 0.5;
-	}
-	
-	this.x = xx ;
-	this.y = yy ;
+	this.drill_COWA_drawTextListEx( context_list, options );
 }
-
 
 
 //=============================================================================

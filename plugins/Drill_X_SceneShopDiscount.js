@@ -652,7 +652,7 @@
  */
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		XSSD（Scene_Gallery_A）
+//		插件简称		XSSD（X_Scene_Shop_Discount）
 //		临时全局变量	DrillUp.g_XSSD_xxx
 //		临时局部变量	this._drill_xxx
 //		存储数据变量	无
@@ -664,7 +664,7 @@
 //		★工作类型		持续执行
 //		★时间复杂度		o(n)*o(贴图处理) 每帧
 //		★性能测试因素	商店界面
-//		★性能测试消耗	6.35ms（drill_updateChecks函数）  5.08ms（Drill_XSSD_Window.prototype.update函数）
+//		★性能测试消耗	6.35ms（drill_updateChecks函数） 5.08ms（Drill_XSSD_Window.prototype.update函数）
 //		★最坏情况		无
 //		★备注			无
 //		
@@ -673,23 +673,35 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			商店节假日的折扣：
-//				->折扣倍率
-//				->装饰
-//					->商店界面
-//					->限量商店界面
-//				->折扣标识
-//					->无折扣时的图章
-//					->有折扣时的图章
-//					->鼠标接近显示信息窗口
-//				->折扣时机
-//					->时间条件
-//					->开关条件
-//				->折扣信息框【Drill_XSSD_Window】
-//					->A主体
-//					->B窗口位置
-//					->C窗口皮肤
-//					->D窗口内容
+//			->☆提示信息
+//			->☆变量获取
+//			->☆插件指令
+//			->☆存储数据
+//			->☆菜单层级
+//			
+//			->☆贴图创建标记
+//				->全自定义商店 帧刷新
+//			->☆贴图控制
+//				->数据容器
+//				->创建
+//					->折扣标识
+//						->无折扣时的图章
+//						->有折扣时的图章
+//					->折扣条件
+//						->时间条件
+//						->开关条件
+//						->变量条件
+//				->帧刷新
+//					->刷新图标鼠标监听
+//			->☆折扣倍率
+//				->商店界面 折扣
+//				->限量商店界面 折扣
+//			
+//			->折扣信息框【Drill_XSSD_Window】
+//				->A主体
+//				->B位置跟随
+//				->C窗口皮肤
+//				->D窗口内容
 //		
 //		
 //		★家谱：
@@ -710,7 +722,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -738,7 +750,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_X_SceneShopDiscount = true;
@@ -849,15 +861,7 @@ if( Imported.Drill_CoreOfInput &&
 	
 	
 //=============================================================================
-// ** 资源文件夹
-//=============================================================================
-ImageManager.load_MenuShopDiscount = function(filename) {
-    return this.loadBitmap('img/Menu__shopDiscount/', filename, 0, true);
-};
-
-
-//=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _drill_XSSD_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
@@ -912,7 +916,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -1015,44 +1019,101 @@ Game_System.prototype.drill_XSSD_checkSysData_Private = function() {
 };
 
 
+//#############################################################################
+// ** 【标准模块】菜单层级 ☆菜单层级
+//#############################################################################
+//##############################
+// * 菜单层级 - 添加贴图到层级【标准函数】
+//				
+//			参数：	> sprite 贴图        （添加的贴图对象）
+//					> layer_index 字符串 （添加到的层级名，菜单后面层/菜单前面层）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图添加到目标层级中。
+//##############################
+Scene_MenuBase.prototype.drill_XSSD_layerAddSprite = function( sprite, layer_index ){
+    this.drill_XSSD_layerAddSprite_Private(sprite, layer_index);
+}
+//##############################
+// * 菜单层级 - 去除贴图【标准函数】
+//				
+//			参数：	> sprite 贴图（添加的贴图对象）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图从地图层级中移除。
+//##############################
+Scene_MenuBase.prototype.drill_XSSD_layerRemoveSprite = function( sprite ){
+	//（不操作）
+}
+//##############################
+// * 菜单层级 - 图片层级排序【标准函数】
+//				
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 执行该函数后，地图层级的子贴图，按照zIndex属性来进行先后排序。值越大，越靠前。
+//##############################
+Scene_MenuBase.prototype.drill_XSSD_sortByZIndex = function () {
+    this.drill_XSSD_sortByZIndex_Private();
+}
 //=============================================================================
-// * 临时数据
+// ** 菜单层级（接口实现）
 //=============================================================================
-var _drill_XSSD_temp_initialize = Game_Temp.prototype.initialize;
-Game_Temp.prototype.initialize = function() {	
-	_drill_XSSD_temp_initialize.call(this);
+//==============================
+// * 菜单层级 - 最顶层
+//==============================
+var _drill_XSSD_menuLayer_update = Scene_MenuBase.prototype.update;
+Scene_MenuBase.prototype.update = function() {
+	_drill_XSSD_menuLayer_update.call(this);
 	
-	this._drill_XSSD_dataTank = [];			//临时折扣数据容器（菜单界面用）
+	if(!this._backgroundSprite ){		//菜单后面层（防止覆写报错）
+		this._backgroundSprite = new Sprite();
+	}
+	if(!this._foregroundSprite ){		//菜单前面层
+		this._foregroundSprite = new Sprite();
+		this.addChild(this._foregroundSprite);	
+	}
+}
+//==============================
+// * 菜单层级 - 图片层级排序（私有）
+//==============================
+Scene_MenuBase.prototype.drill_XSSD_sortByZIndex_Private = function() {
+   this._backgroundSprite.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
+   this._foregroundSprite.children.sort(function(a, b){return a.zIndex-b.zIndex});
+};
+//==============================
+// * 菜单层级 - 添加贴图到层级（私有）
+//==============================
+Scene_MenuBase.prototype.drill_XSSD_layerAddSprite_Private = function( sprite, layer_index ){
+	if( layer_index == "菜单后面层" || layer_index === 0 ){
+		this._backgroundSprite.addChild( sprite );
+	}
+	if( layer_index == "菜单前面层" || layer_index === 1 ){
+		this._foregroundSprite.addChild( sprite );
+	}
 };
 
 
+
 //=============================================================================
-// ** 菜单界面
+// ** ☆贴图创建标记
+//			
+//			说明：	> 此模块专门对 菜单面板 进行 创建标记，确保只创建一次。
+//					  注意，该功能在所有菜单面板中都会执行。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// ** 菜单 - 初始化
+// * 贴图创建标记 - 初始化
 //==============================
 var _drill_XSSD_initialize = Scene_MenuBase.prototype.initialize;
 Scene_MenuBase.prototype.initialize = function() {
 	_drill_XSSD_initialize.call(this);
-	
    	this._drill_XSSD_spriteTank = [];
    	this._drill_XSSD_spriteBackTank = [];
-	SceneManager._drill_XSSD_created = false;	
-	
-	// > 折扣数据初始化
-	$gameTemp._drill_XSSD_dataTank = [];
-	for( var i = 0; i < $gameSystem._drill_XSSD_list.length; i++ ){
-		var temp_data = $gameSystem._drill_XSSD_list[i];
-		if( temp_data == undefined ){ continue; }
-		if( this.drill_XSSD_isEnableDiscount( temp_data ) != true ){ continue; }
-		
-		$gameTemp._drill_XSSD_dataTank[i] = JSON.parse(JSON.stringify( temp_data ));	//深拷贝数据（杜绝引用造成的修改）
-		//（未通过的数据，容器中都为null值）
-	};
-};
+	SceneManager._drill_XSSD_created = false;
+}
 //==============================
-// ** 菜单 - 退出界面
+// * 贴图创建标记 - 退出界面
 //==============================
 var _drill_XSSD_terminate = Scene_MenuBase.prototype.terminate;
 Scene_MenuBase.prototype.terminate = function() {
@@ -1060,14 +1121,7 @@ Scene_MenuBase.prototype.terminate = function() {
 	SceneManager._drill_XSSD_created = false;
 };
 //==============================
-// ** 菜单 - 层级排序
-//==============================
-Scene_MenuBase.prototype.drill_XSSD_sortByZIndex = function() {
-   this._backgroundSprite.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
-   this._foregroundSprite.children.sort(function(a, b){return a.zIndex-b.zIndex});
-};
-//==============================
-// * 菜单 - 帧刷新
+// * 贴图创建标记 - 帧刷新
 //==============================
 var _drill_XSSD_update = Scene_MenuBase.prototype.update;
 Scene_MenuBase.prototype.update = function() {
@@ -1085,10 +1139,10 @@ Scene_MenuBase.prototype.update = function() {
 	}
 };
 //==============================
-// * 全自定义商店 - 帧刷新
+// * 贴图创建标记 - 全自定义商店 - 帧刷新
 //				
-//			说明：	注意，由于 Scene_Shop商店场景 的 update函数 并没有被明确定义成函数，
-//					因此 该插件后继承 Scene_MenuBase 的帧刷新函数，不会被 商店场景 的帧刷新执行到。
+//			说明：	> 注意，由于 Scene_Shop商店场景 的 update函数 并没有被明确定义成函数，
+//					  因此 该插件后继承 Scene_MenuBase 的帧刷新函数，不会被 商店场景 的帧刷新执行到。
 //==============================
 var _drill_XSSD_shop_update = Scene_Shop.prototype.update;
 Scene_Shop.prototype.update = function() {
@@ -1108,92 +1162,41 @@ Scene_Shop.prototype.update = function() {
 
 
 //=============================================================================
-// ** 折扣贴图
+// ** ☆贴图控制
+//			
+//			说明：	> 此模块专门对 贴图 进行 创建、帧刷新、数据绑定。不考虑销毁情况。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 折扣贴图 - 创建
+// * 贴图控制 - 数据容器 - 初始化
 //==============================
-Scene_MenuBase.prototype.drill_XSSD_create = function() {	
-	SceneManager._drill_XSSD_created = true;
-	
-	if(!this._drill_XSSD_spriteTank){	//防止覆写报错 - 贴图初始化
-		this._drill_XSSD_spriteTank = [];	
-		this._drill_XSSD_spriteBackTank = [];	
-	}
-	if(!this._backgroundSprite ){		//防止覆写报错 - 菜单后面层
-		this._backgroundSprite = new Sprite();
-	}
-	
-	// > 菜单前面层
-	if(!this._foregroundSprite ){
-		this._foregroundSprite = new Sprite();
-		this.addChild(this._foregroundSprite);
-	}
-	
-	// > 配置的折扣贴图
-	for( var i = 0; i < $gameTemp._drill_XSSD_dataTank.length; i++ ){
-		var temp_sprite_data = $gameTemp._drill_XSSD_dataTank[i];
-		if( temp_sprite_data == undefined ){ continue; }
-			
-		// > 折扣贴图
-		var temp_sprite = new Sprite();
-		temp_sprite.visible = false;
-		temp_sprite.anchor.x = 0.5;
-		temp_sprite.anchor.y = 0.5;
-		temp_sprite.x = temp_sprite_data['x'];
-		temp_sprite.y = temp_sprite_data['y'];
-		temp_sprite.zIndex = temp_sprite_data['zIndex'];
-		temp_sprite['data_ptr'] = temp_sprite_data;		//（暂存贴图指向的数据）
-		var temp_sprite_back = new Sprite();
-		temp_sprite_back.visible = false;
-		temp_sprite_back.bitmap = ImageManager.load_MenuShopDiscount( temp_sprite_data['src_circle'] );
-		temp_sprite_back.anchor.x = 0.5;
-		temp_sprite_back.anchor.y = 0.5;
-		temp_sprite_back.x = temp_sprite_data['x'];
-		temp_sprite_back.y = temp_sprite_data['y'];
-		temp_sprite_back.zIndex = temp_sprite_data['zIndex'];
-		
-		// > 折扣条件设置
-		var is_fit = this.drill_XSSD_isDiscountFit( temp_sprite_data );
-		temp_sprite_data['is_fit'] = is_fit;		//满足情况标记
-		if( is_fit ){
-			temp_sprite.visible = true;
-			temp_sprite_back.visible = true;
-			temp_sprite.bitmap = ImageManager.load_MenuShopDiscount( temp_sprite_data['src_img'] );
-		}else{
-			temp_sprite.visible = true;
-			temp_sprite_back.visible = false;
-			temp_sprite.bitmap = ImageManager.load_MenuShopDiscount( temp_sprite_data['src_imgInactive'] );
-		}
-		
-		// > 添加到图层
-		this._drill_XSSD_spriteTank.push(temp_sprite);
-		this._drill_XSSD_spriteBackTank.push(temp_sprite_back);
-		if( temp_sprite_data['menu_index'] == "菜单前面层" ){
-			this._foregroundSprite.addChild(temp_sprite_back);
-			this._foregroundSprite.addChild(temp_sprite);
-		}else{
-			this._backgroundSprite.addChild(temp_sprite_back);
-			this._backgroundSprite.addChild(temp_sprite);
-		}
-	}
-	
-	// > 配置的折扣信息框（只有一个）
-	if(!this._drill_XSSD_window ){
-		this._drill_XSSD_window = new Drill_XSSD_Window();
-		
-		this._drill_XSSD_window.zIndex = DrillUp.g_XSSD_zIndex;
-		if( DrillUp.g_XSSD_layer == "菜单前面层" ){
-			this._foregroundSprite.addChild( this._drill_XSSD_window );
-		}else{
-			this._backgroundSprite.addChild( this._drill_XSSD_window );
-		}
-	}
-	
-	this.drill_XSSD_sortByZIndex();
+var _drill_XSSD_temp_initialize = Game_Temp.prototype.initialize;
+Game_Temp.prototype.initialize = function() {	
+	_drill_XSSD_temp_initialize.call(this);
+	this._drill_XSSD_dataTank = [];			//临时折扣数据容器（菜单界面用）
 };
 //==============================
-// * 折扣贴图 - 判断折扣是否可用
+// * 贴图控制 - 数据容器 - 面板初始化
+//
+//			说明：	> 进入到面板时，将折扣数据进行一次赋值。
+//==============================
+var _drill_XSSD_initialize2 = Scene_MenuBase.prototype.initialize;
+Scene_MenuBase.prototype.initialize = function() {
+	_drill_XSSD_initialize2.call(this);
+	
+	// > 折扣数据初始化
+	$gameTemp._drill_XSSD_dataTank = [];
+	for( var i = 0; i < $gameSystem._drill_XSSD_list.length; i++ ){
+		var temp_data = $gameSystem._drill_XSSD_list[i];
+		if( temp_data == undefined ){ continue; }
+		if( this.drill_XSSD_isEnableDiscount( temp_data ) != true ){ continue; }
+		
+		$gameTemp._drill_XSSD_dataTank[i] = JSON.parse(JSON.stringify( temp_data ));	//深拷贝数据（杜绝引用造成的修改）
+		//（未通过的数据，容器中都为null值）
+	};
+};
+//==============================
+// * 贴图控制 - 数据容器 - 判断折扣是否可用
 //==============================
 Scene_MenuBase.prototype.drill_XSSD_isEnableDiscount = function( data ){
 	
@@ -1218,9 +1221,75 @@ Scene_MenuBase.prototype.drill_XSSD_isEnableDiscount = function( data ){
 	return false;
 };
 //==============================
-// * 折扣贴图 - 判断是否满足折扣条件
+// * 贴图控制 - 创建
+//==============================
+Scene_MenuBase.prototype.drill_XSSD_create = function() {	
+	SceneManager._drill_XSSD_created = true;
+	
+	if(!this._drill_XSSD_spriteTank){	//防止覆写报错 - 贴图初始化
+		this._drill_XSSD_spriteTank = [];	
+		this._drill_XSSD_spriteBackTank = [];	
+	}
+	
+	// > 配置的折扣贴图
+	for( var i = 0; i < $gameTemp._drill_XSSD_dataTank.length; i++ ){
+		var temp_sprite_data = $gameTemp._drill_XSSD_dataTank[i];
+		if( temp_sprite_data == undefined ){ continue; }
+			
+		// > 折扣贴图
+		var temp_sprite = new Sprite();
+		temp_sprite.visible = false;
+		temp_sprite.anchor.x = 0.5;
+		temp_sprite.anchor.y = 0.5;
+		temp_sprite.x = temp_sprite_data['x'];
+		temp_sprite.y = temp_sprite_data['y'];
+		temp_sprite.zIndex = temp_sprite_data['zIndex'];
+		temp_sprite['data_ptr'] = temp_sprite_data;		//（暂存贴图指向的数据）
+		var temp_sprite_back = new Sprite();
+		temp_sprite_back.visible = false;
+		temp_sprite_back.bitmap = ImageManager.loadBitmap( "img/Menu__shopDiscount/", temp_sprite_data['src_circle'], 0, true );
+		temp_sprite_back.anchor.x = 0.5;
+		temp_sprite_back.anchor.y = 0.5;
+		temp_sprite_back.x = temp_sprite_data['x'];
+		temp_sprite_back.y = temp_sprite_data['y'];
+		temp_sprite_back.zIndex = temp_sprite_data['zIndex'];
+		
+		// > 折扣条件设置
+		var is_fit = this.drill_XSSD_isDiscountFit( temp_sprite_data );
+		temp_sprite_data['is_fit'] = is_fit;		//满足情况标记
+		if( is_fit ){
+			temp_sprite.visible = true;
+			temp_sprite_back.visible = true;
+			temp_sprite.bitmap = ImageManager.loadBitmap( "img/Menu__shopDiscount/", temp_sprite_data['src_img'], 0, true );
+		}else{
+			temp_sprite.visible = true;
+			temp_sprite_back.visible = false;
+			temp_sprite.bitmap = ImageManager.loadBitmap( "img/Menu__shopDiscount/", temp_sprite_data['src_imgInactive'], 0, true );
+		}
+		
+		// > 添加到图层
+		this._drill_XSSD_spriteTank.push(temp_sprite);
+		this._drill_XSSD_spriteBackTank.push(temp_sprite_back);
+		this.drill_XSSD_layerAddSprite( temp_sprite, temp_sprite_data['menu_index'] );
+		this.drill_XSSD_layerAddSprite( temp_sprite_back, temp_sprite_data['menu_index'] );
+	}
+	
+	// > 配置的折扣信息框（只有一个）
+	if(!this._drill_XSSD_window ){
+		this._drill_XSSD_window = new Drill_XSSD_Window();
+		
+		this._drill_XSSD_window.zIndex = DrillUp.g_XSSD_zIndex;
+		this.drill_XSSD_layerAddSprite( this._drill_XSSD_window, DrillUp.g_XSSD_layer );
+	}
+	
+	this.drill_XSSD_sortByZIndex();
+};
+//==============================
+// * 贴图控制 - 创建 - 折扣条件
 //==============================
 Scene_MenuBase.prototype.drill_XSSD_isDiscountFit = function( data ){
+	
+	// > 条件 - 时间条件
 	if( data['condition_type'] == "真实时间" ){
 		var date = new Date();
 		if( data['condition_week'] == "星期一" && date.getDay() != 1 ){ return false; }
@@ -1248,7 +1317,7 @@ Scene_MenuBase.prototype.drill_XSSD_isDiscountFit = function( data ){
 		if( data['condition_dayEnabled'] == true && $gameSystem.day() != data['condition_day'] ){ return false; }
 	}
 	
-	// > 开关条件
+	// > 条件 - 开关条件
 	if( data['condition_switchEnabled'] == true ){	
 		if( $gameSwitches.value( data['condition_switch'] ) == true ){
 			//（不操作）
@@ -1264,7 +1333,7 @@ Scene_MenuBase.prototype.drill_XSSD_isDiscountFit = function( data ){
 		}
 	}
 	
-	// > 变量条件
+	// > 条件 - 变量条件
 	if( data['condition_variableEnabled'] == true ){	
 		if( data['condition_variableOp'] == "大于等于" ){
 			if( $gameVariables.value( data['condition_variable'] ) >= data['condition_variableOpValue'] ){
@@ -1290,7 +1359,7 @@ Scene_MenuBase.prototype.drill_XSSD_isDiscountFit = function( data ){
 	return true;
 };
 //==============================
-// * 折扣贴图 - 帧刷新
+// * 贴图控制 - 帧刷新
 //==============================
 Scene_MenuBase.prototype.drill_XSSD_update = function() {
 	
@@ -1323,7 +1392,10 @@ Scene_MenuBase.prototype.drill_XSSD_update = function() {
 
 
 //=============================================================================
-// ** 折扣倍率
+// ** ☆折扣倍率
+//			
+//			说明：	> 此模块对 价格 进行 倍率修改。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 全自定义商店 - 购买价格（继承叠加）
@@ -1409,7 +1481,7 @@ Drill_SLS_GoodsButtonWindow.prototype.drill_SLS_price = function() {
 // **						x->优化策略
 // **						x->销毁
 // **					->A主体
-// **					->B窗口位置
+// **					->B位置跟随
 // **						> 锁定位置
 // **						> 跟随鼠标位置
 // **						> 鼠标移走则重刷
@@ -1440,8 +1512,6 @@ Drill_XSSD_Window.prototype.constructor = Drill_XSSD_Window;
 // * 折扣信息框 - 初始化
 //==============================
 Drill_XSSD_Window.prototype.initialize = function(){
-	this._drill_data = {};
-	
     Window_Base.prototype.initialize.call(this, 0, 0, 0, 0);
 	
 	this.drill_initData();				//初始化数据
@@ -1453,7 +1523,7 @@ Drill_XSSD_Window.prototype.initialize = function(){
 Drill_XSSD_Window.prototype.update = function() {
 	Window_Base.prototype.update.call(this);
 										//帧刷新 - A主体（无）
-	this.drill_updatePosition();		//帧刷新 - B窗口位置
+	this.drill_updatePosition();		//帧刷新 - B位置跟随
 	this.drill_updateSkin();			//帧刷新 - C窗口皮肤
 	this.drill_updateChecks();			//帧刷新 - D窗口内容
 };
@@ -1474,16 +1544,16 @@ Drill_XSSD_Window.prototype.drill_initData = function() {
 //==============================
 Drill_XSSD_Window.prototype.drill_initSprite = function() {
 	this.drill_initAttr();				//初始化对象 - A主体
-										//初始化对象 - B窗口位置（无）
+	this.drill_initPosition();			//初始化对象 - B位置跟随
 	this.drill_initSkin();				//初始化对象 - C窗口皮肤
 	this.drill_initMessage();			//初始化对象 - D窗口内容
 };
+
 
 //==============================
 // * A主体 - 初始化对象
 //==============================
 Drill_XSSD_Window.prototype.drill_initAttr = function() {
-	var data = this._drill_data;
 	
 	// > 私有变量初始化
 	this._drill_width = 0;
@@ -1491,8 +1561,15 @@ Drill_XSSD_Window.prototype.drill_initAttr = function() {
 	this._drill_visible = false;
 };
 
+
 //==============================
-// * B窗口位置 - 帧刷新
+// * B位置跟随 - 初始化对象
+//==============================
+Drill_XSSD_Window.prototype.drill_initPosition = function() {
+	//（无）
+};
+//==============================
+// * B位置跟随 - 帧刷新
 //==============================
 Drill_XSSD_Window.prototype.drill_updatePosition = function() {
 	
@@ -1516,6 +1593,7 @@ Drill_XSSD_Window.prototype.drill_updatePosition = function() {
 	this.y = cal_y;
 }
 
+
 //==============================
 // * C窗口皮肤 - 初始化对象
 //==============================
@@ -1525,7 +1603,7 @@ Drill_XSSD_Window.prototype.drill_initSkin = function() {
 	this._drill_skin_defaultSkin = this.windowskin;
 	
 	// > 布局模式
-	var data = this._drill_data;
+	var data = {};
 	data['window_type'] = DrillUp.g_XSSD_layout_type;
 	data['window_opacity'] = DrillUp.g_XSSD_layout_opacity;
 	data['window_sys_src'] = DrillUp.g_XSSD_layout_sys_src;
@@ -1723,8 +1801,6 @@ Drill_XSSD_Window.prototype.updateTone = function() {
 // * D窗口内容 - 初始化对象
 //==============================
 Drill_XSSD_Window.prototype.drill_initMessage = function() {
-	var data = this._drill_data;
-	
 	this._drill_check_tank = [];
 }
 //==============================
@@ -1735,6 +1811,8 @@ Drill_XSSD_Window.prototype.drill_initMessage = function() {
 //					c['w']: 触发范围宽
 //					c['h']: 触发范围高
 //					c['str']: 文本
+//			说明：	> 保留此函数的结构，不考虑强制转为 实体类 的格式。
+//					（只有这一个插件使用此结构，给以后代码作为可参考对象）
 //==============================
 Drill_XSSD_Window.prototype.drill_pushChecks = function( c ){
 	if( this._drill_check_tank.length < 1000){	//防止卡顿造成的过度积压
@@ -1814,14 +1892,12 @@ Drill_XSSD_Window.prototype.drill_checkCondition = function( check ){
 // * D窗口内容 - 刷新内容
 //==============================
 Drill_XSSD_Window.prototype.drill_refreshMessage = function( context_list ){
-	var data = this._drill_data;
 	if( context_list.length == 0 ){ return; }
 	
 	
 	// > 窗口高宽 - 计算（文本域自适应）
 	var options = {};
 	options['autoLineheight'] = true;
-	options['lineheight'] = data['window_lineheight'];
 	this.drill_COWA_calculateHeightAndWidth( context_list, options );		//（窗口辅助核心）
 	// > 窗口高宽 - 赋值
 	var ww = 0;

@@ -109,6 +109,7 @@
  * 插件指令：>地图粒子 : 粒子[2] : 修改单属性 : 旋转变量[21] : 时间[60]
  * 插件指令：>地图粒子 : 粒子[2] : 修改单属性 : 缩放X[1.2] : 时间[60]
  * 插件指令：>地图粒子 : 粒子[2] : 修改单属性 : 缩放Y[1.2] : 时间[60]
+ * 插件指令：>地图粒子 : 粒子[2] : 立即还原所有单属性
  * 
  * 1.前半部分（粒子变量[21]）和 后半部分（显示）
  *   的参数可以随意组合。一共有4*11种组合方式。
@@ -131,6 +132,7 @@
  * 插件指令：>地图粒子 : 粒子[11] : 移动到-弹性移动 : 位置变量[25,26] : 时间[60]
  * 插件指令：>地图粒子 : 粒子[11] : 移动到-增减速移动 : 位置[100,100] : 时间[60]
  * 插件指令：>地图粒子 : 粒子[11] : 移动到-增减速移动 : 位置变量[25,26] : 时间[60]
+ * 插件指令：>地图粒子 : 粒子[11] : 移动到-立即归位
  * 
  * 1.移动的初始位置以显示在地图界面的具体位置为基准，在基准位置上再进行移动到。
  *   指令中不含相对移动，比如多次执行移动到[20,20]，贴图只会到达一个固定的位置。
@@ -1921,6 +1923,12 @@
 	DrillUp.drill_LPa_getPluginTip_NeedUpdate_Camera = function(){
 		return "【" + DrillUp.g_LPa_PluginTip_curName + "】\n活动地图镜头插件版本过低，你需要更新 镜头插件 至少v2.2及以上版本。";
 	};
+	//==============================
+	// * 提示信息 - 报错 - 强制更新提示
+	//==============================
+	DrillUp.drill_LPa_getPluginTip_NeedUpdate_Ballistics = function(){
+		return "【" + DrillUp.g_LPa_PluginTip_curName + "】\n弹道核心插件版本过低，你需要更新 弹道核心 至少v2.2及以上版本。";
+	};
 	
 	
 //=============================================================================
@@ -2040,6 +2048,10 @@
 if( Imported.Drill_CoreOfParticle &&
 	Imported.Drill_CoreOfBallistics ){
 	
+	if( typeof(Drill_COBa_ExtendTool) == "undefined" ){	//（弹道核心版本检测）
+		alert( DrillUp.drill_LPa_getPluginTip_NeedUpdate_Ballistics() );
+	}
+	
 	
 //=============================================================================
 // ** ☆插件指令
@@ -2122,6 +2134,19 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		}
 		
 		/*-----------------2B指令叠加变化------------------*/
+		if( args.length == 4 ){
+			var type = String(args[3]);
+			if( type == "立即还原所有单属性" ){
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_commandChange_restoreAttr();
+				}
+			}
+			if( type == "移动到-立即归位" ){
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_commandChange_restoreMove();
+				}
+			}
+		}
 		if( args.length == 6 ){
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
@@ -2619,20 +2644,30 @@ Game_Temp.prototype.initialize = function() {
 	this._drill_LPa_spriteTank = [];			//贴图容器
 };
 //==============================
-// * 贴图控制 - 创建
+// * 贴图控制 - 销毁时（地图界面）
 //==============================
-var _drill_LPa_Scene_terminate = Scene_Map.prototype.terminate;
+var _drill_LPa_smap_terminate = Scene_Map.prototype.terminate;
 Scene_Map.prototype.terminate = function() {
-	_drill_LPa_Scene_terminate.call(this);
+	_drill_LPa_smap_terminate.call(this);
 	$gameTemp._drill_LPa_spriteTank = [];		//贴图容器
 };
 //==============================
-// * 贴图控制 - 创建时绑定
+// * 贴图控制 - 帧刷新（地图界面）
 //==============================
-var _drill_LPa_Scene_createAllWindows = Scene_Map.prototype.createAllWindows;
+var _drill_LPa_smap_update = Scene_Map.prototype.update;
+Scene_Map.prototype.update = function() {
+	_drill_LPa_smap_update.call(this);
+	this.drill_LPa_updateControllerCamera();	//帧刷新 - 控制器与镜头
+	this.drill_LPa_updateMask();				//帧刷新 - 动态遮罩
+	this.drill_LPa_updateDestroy();				//帧刷新 - 销毁
+};
+//==============================
+// * 贴图控制 - 创建时（地图界面）
+//==============================
+var _drill_LPa_smap_createAllWindows = Scene_Map.prototype.createAllWindows;
 Scene_Map.prototype.createAllWindows = function() {
-	_drill_LPa_Scene_createAllWindows.call(this);
-	this.drill_LPa_create();
+	_drill_LPa_smap_createAllWindows.call(this);
+	this.drill_LPa_create();					//创建
 };
 //==============================
 // * 贴图控制 - 创建 
@@ -2692,16 +2727,6 @@ Scene_Map.prototype.drill_LPa_create = function() {
 		
 	// > 层级排序
 	this.drill_LPa_sortByZIndex();
-}
-//==============================
-// * 贴图控制 - 帧刷新（地图界面）
-//==============================
-var _drill_LPa_smap_update = Scene_Map.prototype.update;
-Scene_Map.prototype.update = function() {
-	_drill_LPa_smap_update.call(this);
-	this.drill_LPa_updateControllerCamera();	//帧刷新 - 控制器与镜头
-	this.drill_LPa_updateMask();				//帧刷新 - 动态遮罩
-	this.drill_LPa_updateDestroy();				//帧刷新 - 销毁
 }
 //==============================
 // * 贴图控制 - 帧刷新 控制器与镜头
@@ -3028,7 +3053,7 @@ Drill_LPa_Controller.prototype.drill_controller_isParticleDead = function( i ){
 //==============================
 // * E粒子重设 - 执行重设 - 位置
 //
-//			说明：	> 由于当前插件为 个体装饰，因此起始点为 一个圆内随机出现 。
+//			说明：	> 起始点为 一个矩形内随机出现 。
 //==============================	
 Drill_LPa_Controller.prototype.drill_controller_resetParticles_Position = function( i ){
 	Drill_COPa_Controller.prototype.drill_controller_resetParticles_Position.call( this, i );
@@ -3200,6 +3225,28 @@ Drill_LPa_Controller.prototype.drill_controller_updateCommandChange = function()
 	
 }
 //==============================
+// * 2B指令叠加变化 - 立即还原所有单属性
+//==============================
+Drill_LPa_Controller.prototype.drill_controller_commandChange_restoreAttr = function(){
+	
+	// > 控制器参数 - 透明度
+	this["_drill_command_opacity_data"] = null;
+	
+	// > 控制器参数 - 旋转
+	this["_drill_command_rotate_data"] = null;
+	
+	// > 控制器参数 - 缩放X
+	this["_drill_command_scaleX_data"] = null;
+	// > 控制器参数 - 缩放Y
+	this["_drill_command_scaleY_data"] = null;
+}
+//==============================
+// * 2B指令叠加变化 - 立即归位
+//==============================
+Drill_LPa_Controller.prototype.drill_controller_commandChange_restoreMove = function(){
+	this["_drill_command_move_data"] = null;
+}
+//==============================
 // * 2B指令叠加变化 - 修改单属性 - 移动到
 //==============================
 Drill_LPa_Controller.prototype.drill_controller_commandChange_setMove = function( change_type, tar_valueA, tar_valueB, tar_time ){
@@ -3279,13 +3326,13 @@ Drill_LPa_Controller.prototype.drill_controller_commandChange_setScaleY = functi
 // **						> 粒子贴图组>缩放X
 // **						> 粒子贴图组>缩放Y
 // **
-// **		说明：	> 你必须在创建贴图后，手动初始化。（还需要先设置 控制器和个体贴图 ）
+// **		说明：	> 你必须在创建贴图后，手动初始化。（还需要先设置 控制器 ）
 // **
-// **		代码：	> 范围 - 该类显示单独的动画装饰。
-// **				> 结构 - [合并/ ●分离 /混乱] 贴图与数据分离。
+// **		代码：	> 范围 - 该类显示单独的贴图。
+// **				> 结构 - [合并/ ●分离 /混乱] 使用 控制器-贴图 结构。
 // **				> 数量 - [单个/ ●多个] 
-// **				> 创建 - [ ●一次性 /自延迟/外部延迟] 先创建控制器，在 _spriteset 创建后，再创建此贴图。
-// **				> 销毁 - [不考虑/自销毁/ ●外部销毁 ] 
+// **				> 创建 - [ ●一次性 /自延迟/外部延迟] 先创建控制器，再创建此贴图，通过 C对象绑定 进行连接。
+// **				> 销毁 - [不考虑/自销毁/ ●外部销毁 ] 通过 贴图控制 模块来销毁。
 // **				> 样式 - [ ●不可修改 /自变化/外部变化] 
 //=============================================================================
 //==============================
@@ -3329,7 +3376,7 @@ Drill_LPa_Sprite.prototype.drill_sprite_setController = function( controller ){
 //			参数：	> 无
 //			返回：	> 无
 //			
-//			说明：	> 需要设置 控制器和个体贴图 之后，才能进行手动初始化。
+//			说明：	> 需要设置 控制器 之后，才能进行手动初始化。
 //##############################
 Drill_LPa_Sprite.prototype.drill_sprite_initChild = function(){
     Drill_COPa_Sprite.prototype.drill_sprite_initChild.call( this );

@@ -2084,7 +2084,7 @@ Game_Interpreter.prototype.pluginCommand = function( command, args ){
 					for( var k=0; k < pics.length; k++ ){
 						var tarX = Number(temp_arr[0]);
 						var tarY = Number(temp_arr[1]);
-						var point = $gameTemp.drill_PSh_getFixPointInAnchor(
+						var point = $gameTemp.drill_PSh_Math2D_getFixPointInAnchor(
 										pics[k]._anchorX, pics[k]._anchorY,
 										tarX, tarY,
 										pics[k]._drill_width, pics[k]._drill_height,
@@ -3060,7 +3060,7 @@ Sprite_Picture.prototype.updateOrigin = function() {
 };
 
 //=============================================================================
-// * 数学 - 锁定锚点
+// * 数学工具 - 锁定锚点
 //			
 //			参数：	> org_anchor_x 数字    （原贴图锚点X）
 //					> org_anchor_y 数字    （原贴图锚点Y）
@@ -3075,7 +3075,7 @@ Sprite_Picture.prototype.updateOrigin = function() {
 //			说明：	修正 旋转+缩放 的坐标，使其看起来像是在绕着 新的锚点 变换。
 //					旋转值和缩放值可为负数。
 //=============================================================================
-Game_Temp.prototype.drill_PSh_getFixPointInAnchor = function( 
+Game_Temp.prototype.drill_PSh_Math2D_getFixPointInAnchor = function( 
 					org_anchor_x,org_anchor_y,			//原贴图中心锚点 
 					target_anchor_x,target_anchor_y, 	//新的中心锚点 
 					width, height,						//贴图高宽

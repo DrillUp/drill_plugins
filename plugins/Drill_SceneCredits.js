@@ -666,8 +666,8 @@
 	DrillUp.g_SCr_list_length = 40;
 	DrillUp.g_SCr_list = [];
 	for (var i = 0; i < DrillUp.g_SCr_list_length; i++) {
-		if( DrillUp.parameters['阶段-' + String(i+1) ] != "" &&
-			DrillUp.parameters['阶段-' + String(i+1) ] != undefined ){
+		if( DrillUp.parameters['阶段-' + String(i+1) ] != undefined &&
+			DrillUp.parameters['阶段-' + String(i+1) ] != "" ){
 			DrillUp.g_SCr_list[i] = JSON.parse(DrillUp.parameters['阶段-' + String(i+1) ]);
 			DrillUp.g_SCr_list[i]['height'] = Number(DrillUp.g_SCr_list[i]["阶段高度"] || 0);
 			DrillUp.g_SCr_list[i]['speed'] = Number(DrillUp.g_SCr_list[i]["阶段滚动速度"] || 1.5);

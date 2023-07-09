@@ -108,11 +108,9 @@
  * [v1.3]
  * 修复了部分情况下无法显示图片的问题。
  * 
- * 
- * 
  * @param ---字符图组 1至20---
  * @default 
- *
+ * 
  * @param 字符图-1
  * @parent ---字符图组 1至20---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -120,7 +118,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-2
  * @parent ---字符图组 1至20---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -128,7 +126,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-3
  * @parent ---字符图组 1至20---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -136,7 +134,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-4
  * @parent ---字符图组 1至20---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -144,7 +142,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-5
  * @parent ---字符图组 1至20---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -152,7 +150,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-6
  * @parent ---字符图组 1至20---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -160,7 +158,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-7
  * @parent ---字符图组 1至20---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -168,7 +166,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-8
  * @parent ---字符图组 1至20---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -176,7 +174,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-9
  * @parent ---字符图组 1至20---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -184,7 +182,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-10
  * @parent ---字符图组 1至20---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -192,7 +190,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-11
  * @parent ---字符图组 1至20---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -200,7 +198,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-12
  * @parent ---字符图组 1至20---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -208,7 +206,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-13
  * @parent ---字符图组 1至20---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -216,7 +214,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-14
  * @parent ---字符图组 1至20---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -224,7 +222,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-15
  * @parent ---字符图组 1至20---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -232,7 +230,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-16
  * @parent ---字符图组 1至20---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -240,7 +238,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-17
  * @parent ---字符图组 1至20---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -248,7 +246,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-18
  * @parent ---字符图组 1至20---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -256,7 +254,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-19
  * @parent ---字符图组 1至20---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -264,7 +262,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-20
  * @parent ---字符图组 1至20---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -272,10 +270,10 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param ---字符图组21至40---
  * @default 
- *
+ * 
  * @param 字符图-21
  * @parent ---字符图组21至40---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -283,7 +281,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-22
  * @parent ---字符图组21至40---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -291,7 +289,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-23
  * @parent ---字符图组21至40---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -299,7 +297,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-24
  * @parent ---字符图组21至40---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -307,7 +305,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-25
  * @parent ---字符图组21至40---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -315,7 +313,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-26
  * @parent ---字符图组21至40---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -323,7 +321,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-27
  * @parent ---字符图组21至40---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -331,7 +329,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-28
  * @parent ---字符图组21至40---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -339,7 +337,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-29
  * @parent ---字符图组21至40---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -347,7 +345,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-30
  * @parent ---字符图组21至40---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -355,7 +353,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-31
  * @parent ---字符图组21至40---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -363,7 +361,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-32
  * @parent ---字符图组21至40---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -371,7 +369,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-33
  * @parent ---字符图组21至40---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -379,7 +377,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-34
  * @parent ---字符图组21至40---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -387,7 +385,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-35
  * @parent ---字符图组21至40---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -395,7 +393,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-36
  * @parent ---字符图组21至40---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -403,7 +401,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-37
  * @parent ---字符图组21至40---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -411,7 +409,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-38
  * @parent ---字符图组21至40---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -419,7 +417,7 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-39
  * @parent ---字符图组21至40---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
@@ -427,9 +425,1313 @@
  * @require 1
  * @dir img/Menu__textBigImg/
  * @type file
- *
+ * 
  * @param 字符图-40
  * @parent ---字符图组21至40---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param ---字符图组41至60---
+ * @default 
+ * 
+ * @param 字符图-41
+ * @parent ---字符图组41至60---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-42
+ * @parent ---字符图组41至60---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-43
+ * @parent ---字符图组41至60---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-44
+ * @parent ---字符图组41至60---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-45
+ * @parent ---字符图组41至60---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-46
+ * @parent ---字符图组41至60---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-47
+ * @parent ---字符图组41至60---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-48
+ * @parent ---字符图组41至60---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-49
+ * @parent ---字符图组41至60---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-50
+ * @parent ---字符图组41至60---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-51
+ * @parent ---字符图组41至60---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-52
+ * @parent ---字符图组41至60---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-53
+ * @parent ---字符图组41至60---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-54
+ * @parent ---字符图组41至60---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-55
+ * @parent ---字符图组41至60---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-56
+ * @parent ---字符图组41至60---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-57
+ * @parent ---字符图组41至60---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-58
+ * @parent ---字符图组41至60---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-59
+ * @parent ---字符图组41至60---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-60
+ * @parent ---字符图组41至60---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param ---字符图组61至80---
+ * @default 
+ * 
+ * @param 字符图-61
+ * @parent ---字符图组61至80---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-62
+ * @parent ---字符图组61至80---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-63
+ * @parent ---字符图组61至80---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-64
+ * @parent ---字符图组61至80---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-65
+ * @parent ---字符图组61至80---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-66
+ * @parent ---字符图组61至80---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-67
+ * @parent ---字符图组61至80---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-68
+ * @parent ---字符图组61至80---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-69
+ * @parent ---字符图组61至80---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-70
+ * @parent ---字符图组61至80---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-71
+ * @parent ---字符图组61至80---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-72
+ * @parent ---字符图组61至80---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-73
+ * @parent ---字符图组61至80---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-74
+ * @parent ---字符图组61至80---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-75
+ * @parent ---字符图组61至80---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-76
+ * @parent ---字符图组61至80---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-77
+ * @parent ---字符图组61至80---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-78
+ * @parent ---字符图组61至80---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-79
+ * @parent ---字符图组61至80---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-80
+ * @parent ---字符图组61至80---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param ---字符图组81至100---
+ * @default 
+ * 
+ * @param 字符图-81
+ * @parent ---字符图组81至100---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-82
+ * @parent ---字符图组81至100---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-83
+ * @parent ---字符图组81至100---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-84
+ * @parent ---字符图组81至100---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-85
+ * @parent ---字符图组81至100---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-86
+ * @parent ---字符图组81至100---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-87
+ * @parent ---字符图组81至100---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-88
+ * @parent ---字符图组81至100---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-89
+ * @parent ---字符图组81至100---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-90
+ * @parent ---字符图组81至100---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-91
+ * @parent ---字符图组81至100---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-92
+ * @parent ---字符图组81至100---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-93
+ * @parent ---字符图组81至100---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-94
+ * @parent ---字符图组81至100---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-95
+ * @parent ---字符图组81至100---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-96
+ * @parent ---字符图组81至100---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-97
+ * @parent ---字符图组81至100---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-98
+ * @parent ---字符图组81至100---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-99
+ * @parent ---字符图组81至100---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-100
+ * @parent ---字符图组81至100---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param ---字符图组101至120---
+ * @default 
+ * 
+ * @param 字符图-101
+ * @parent ---字符图组101至120---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-102
+ * @parent ---字符图组101至120---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-103
+ * @parent ---字符图组101至120---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-104
+ * @parent ---字符图组101至120---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-105
+ * @parent ---字符图组101至120---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-106
+ * @parent ---字符图组101至120---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-107
+ * @parent ---字符图组101至120---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-108
+ * @parent ---字符图组101至120---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-109
+ * @parent ---字符图组101至120---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-110
+ * @parent ---字符图组101至120---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-111
+ * @parent ---字符图组101至120---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-112
+ * @parent ---字符图组101至120---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-113
+ * @parent ---字符图组101至120---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-114
+ * @parent ---字符图组101至120---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-115
+ * @parent ---字符图组101至120---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-116
+ * @parent ---字符图组101至120---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-117
+ * @parent ---字符图组101至120---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-118
+ * @parent ---字符图组101至120---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-119
+ * @parent ---字符图组101至120---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-120
+ * @parent ---字符图组101至120---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param ---字符图组121至140---
+ * @default 
+ * 
+ * @param 字符图-121
+ * @parent ---字符图组121至140---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-122
+ * @parent ---字符图组121至140---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-123
+ * @parent ---字符图组121至140---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-124
+ * @parent ---字符图组121至140---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-125
+ * @parent ---字符图组121至140---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-126
+ * @parent ---字符图组121至140---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-127
+ * @parent ---字符图组121至140---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-128
+ * @parent ---字符图组121至140---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-129
+ * @parent ---字符图组121至140---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-130
+ * @parent ---字符图组121至140---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-131
+ * @parent ---字符图组121至140---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-132
+ * @parent ---字符图组121至140---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-133
+ * @parent ---字符图组121至140---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-134
+ * @parent ---字符图组121至140---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-135
+ * @parent ---字符图组121至140---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-136
+ * @parent ---字符图组121至140---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-137
+ * @parent ---字符图组121至140---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-138
+ * @parent ---字符图组121至140---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-139
+ * @parent ---字符图组121至140---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-140
+ * @parent ---字符图组121至140---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param ---字符图组141至160---
+ * @default 
+ * 
+ * @param 字符图-141
+ * @parent ---字符图组141至160---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-142
+ * @parent ---字符图组141至160---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-143
+ * @parent ---字符图组141至160---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-144
+ * @parent ---字符图组141至160---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-145
+ * @parent ---字符图组141至160---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-146
+ * @parent ---字符图组141至160---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-147
+ * @parent ---字符图组141至160---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-148
+ * @parent ---字符图组141至160---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-149
+ * @parent ---字符图组141至160---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-150
+ * @parent ---字符图组141至160---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-151
+ * @parent ---字符图组141至160---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-152
+ * @parent ---字符图组141至160---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-153
+ * @parent ---字符图组141至160---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-154
+ * @parent ---字符图组141至160---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-155
+ * @parent ---字符图组141至160---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-156
+ * @parent ---字符图组141至160---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-157
+ * @parent ---字符图组141至160---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-158
+ * @parent ---字符图组141至160---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-159
+ * @parent ---字符图组141至160---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-160
+ * @parent ---字符图组141至160---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param ---字符图组161至180---
+ * @default 
+ * 
+ * @param 字符图-161
+ * @parent ---字符图组161至180---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-162
+ * @parent ---字符图组161至180---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-163
+ * @parent ---字符图组161至180---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-164
+ * @parent ---字符图组161至180---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-165
+ * @parent ---字符图组161至180---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-166
+ * @parent ---字符图组161至180---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-167
+ * @parent ---字符图组161至180---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-168
+ * @parent ---字符图组161至180---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-169
+ * @parent ---字符图组161至180---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-170
+ * @parent ---字符图组161至180---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-171
+ * @parent ---字符图组161至180---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-172
+ * @parent ---字符图组161至180---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-173
+ * @parent ---字符图组161至180---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-174
+ * @parent ---字符图组161至180---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-175
+ * @parent ---字符图组161至180---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-176
+ * @parent ---字符图组161至180---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-177
+ * @parent ---字符图组161至180---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-178
+ * @parent ---字符图组161至180---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-179
+ * @parent ---字符图组161至180---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-180
+ * @parent ---字符图组161至180---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param ---字符图组181至200---
+ * @default 
+ * 
+ * @param 字符图-181
+ * @parent ---字符图组181至200---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-182
+ * @parent ---字符图组181至200---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-183
+ * @parent ---字符图组181至200---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-184
+ * @parent ---字符图组181至200---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-185
+ * @parent ---字符图组181至200---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-186
+ * @parent ---字符图组181至200---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-187
+ * @parent ---字符图组181至200---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-188
+ * @parent ---字符图组181至200---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-189
+ * @parent ---字符图组181至200---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-190
+ * @parent ---字符图组181至200---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-191
+ * @parent ---字符图组181至200---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-192
+ * @parent ---字符图组181至200---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-193
+ * @parent ---字符图组181至200---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-194
+ * @parent ---字符图组181至200---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-195
+ * @parent ---字符图组181至200---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-196
+ * @parent ---字符图组181至200---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-197
+ * @parent ---字符图组181至200---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-198
+ * @parent ---字符图组181至200---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-199
+ * @parent ---字符图组181至200---
+ * @desc 使用字符时，该图片将会被绘制到指定文本域中。
+ * @default 
+ * @require 1
+ * @dir img/Menu__textBigImg/
+ * @type file
+ * 
+ * @param 字符图-200
+ * @parent ---字符图组181至200---
  * @desc 使用字符时，该图片将会被绘制到指定文本域中。
  * @default 
  * @require 1
@@ -525,7 +1827,7 @@
     DrillUp.parameters = PluginManager.parameters('Drill_DialogTextBigImage');
 	
 	/*------------------字符图-------------------*/
-	DrillUp.g_DTBI_list_length = 40;
+	DrillUp.g_DTBI_list_length = 200;
 	DrillUp.g_DTBI_list = [];
 	for( var i = 0; i < DrillUp.g_DTBI_list_length; i++ ){
 		DrillUp.g_DTBI_list[i] = String(DrillUp.parameters['字符图-' + String(i+1) ] || "");

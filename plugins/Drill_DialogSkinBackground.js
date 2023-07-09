@@ -38,6 +38,8 @@
  *   (1.背景可以添加多个，并绑定到指定的 对话框皮肤样式 中。
  *      当对话框皮肤样式设置后，相应的 背景 都会一并显现。
  *   (2.背景的 层级 固定在对话框边框层的下面，对话框默认背景层的上面。
+ *   (3.如果你的对话框类型为"暗淡"、"透明"，则对话框不会被装饰。
+ *      只有类型为"窗口"，才会被换皮肤。
  * 动态遮罩：
  *   (1.你可以给对话框背景添加动态遮罩，鼠标接触后，有不同的遮罩显现效果。
  *      白色为可见，黑色为不可见。
@@ -112,115 +114,234 @@
  * @type struct<DrillDSBStyle>
  * @desc 对话框相关窗口的背景配置。
  * @default 
- *
+ * 
  * @param 背景层-3
  * @parent ---背景集---
  * @type struct<DrillDSBStyle>
  * @desc 对话框相关窗口的背景配置。
  * @default 
- *
+ * 
  * @param 背景层-4
  * @parent ---背景集---
  * @type struct<DrillDSBStyle>
  * @desc 对话框相关窗口的背景配置。
  * @default 
- *
+ * 
  * @param 背景层-5
  * @parent ---背景集---
  * @type struct<DrillDSBStyle>
  * @desc 对话框相关窗口的背景配置。
  * @default 
- *
+ * 
  * @param 背景层-6
  * @parent ---背景集---
  * @type struct<DrillDSBStyle>
  * @desc 对话框相关窗口的背景配置。
  * @default 
- *
+ * 
  * @param 背景层-7
  * @parent ---背景集---
  * @type struct<DrillDSBStyle>
  * @desc 对话框相关窗口的背景配置。
  * @default 
- *
+ * 
  * @param 背景层-8
  * @parent ---背景集---
  * @type struct<DrillDSBStyle>
  * @desc 对话框相关窗口的背景配置。
  * @default 
- *
+ * 
  * @param 背景层-9
  * @parent ---背景集---
  * @type struct<DrillDSBStyle>
  * @desc 对话框相关窗口的背景配置。
  * @default 
- *
+ * 
  * @param 背景层-10
  * @parent ---背景集---
  * @type struct<DrillDSBStyle>
  * @desc 对话框相关窗口的背景配置。
  * @default 
- *
+ * 
  * @param 背景层-11
  * @parent ---背景集---
  * @type struct<DrillDSBStyle>
  * @desc 对话框相关窗口的背景配置。
  * @default 
- *
+ * 
  * @param 背景层-12
  * @parent ---背景集---
  * @type struct<DrillDSBStyle>
  * @desc 对话框相关窗口的背景配置。
  * @default 
- *
+ * 
  * @param 背景层-13
  * @parent ---背景集---
  * @type struct<DrillDSBStyle>
  * @desc 对话框相关窗口的背景配置。
  * @default 
- *
+ * 
  * @param 背景层-14
  * @parent ---背景集---
  * @type struct<DrillDSBStyle>
  * @desc 对话框相关窗口的背景配置。
  * @default 
- *
+ * 
  * @param 背景层-15
  * @parent ---背景集---
  * @type struct<DrillDSBStyle>
  * @desc 对话框相关窗口的背景配置。
  * @default 
- *
+ * 
  * @param 背景层-16
  * @parent ---背景集---
  * @type struct<DrillDSBStyle>
  * @desc 对话框相关窗口的背景配置。
  * @default 
- *
+ * 
  * @param 背景层-17
  * @parent ---背景集---
  * @type struct<DrillDSBStyle>
  * @desc 对话框相关窗口的背景配置。
  * @default 
- *
+ * 
  * @param 背景层-18
  * @parent ---背景集---
  * @type struct<DrillDSBStyle>
  * @desc 对话框相关窗口的背景配置。
  * @default 
- *
+ * 
  * @param 背景层-19
  * @parent ---背景集---
  * @type struct<DrillDSBStyle>
  * @desc 对话框相关窗口的背景配置。
  * @default 
- *
+ * 
  * @param 背景层-20
  * @parent ---背景集---
  * @type struct<DrillDSBStyle>
  * @desc 对话框相关窗口的背景配置。
  * @default 
  * 
+ * @param 背景层-21
+ * @parent ---背景集---
+ * @type struct<DrillDSBStyle>
+ * @desc 对话框相关窗口的背景配置。
+ * @default 
+ * 
+ * @param 背景层-22
+ * @parent ---背景集---
+ * @type struct<DrillDSBStyle>
+ * @desc 对话框相关窗口的背景配置。
+ * @default 
+ * 
+ * @param 背景层-23
+ * @parent ---背景集---
+ * @type struct<DrillDSBStyle>
+ * @desc 对话框相关窗口的背景配置。
+ * @default 
+ * 
+ * @param 背景层-24
+ * @parent ---背景集---
+ * @type struct<DrillDSBStyle>
+ * @desc 对话框相关窗口的背景配置。
+ * @default 
+ * 
+ * @param 背景层-25
+ * @parent ---背景集---
+ * @type struct<DrillDSBStyle>
+ * @desc 对话框相关窗口的背景配置。
+ * @default 
+ * 
+ * @param 背景层-26
+ * @parent ---背景集---
+ * @type struct<DrillDSBStyle>
+ * @desc 对话框相关窗口的背景配置。
+ * @default 
+ * 
+ * @param 背景层-27
+ * @parent ---背景集---
+ * @type struct<DrillDSBStyle>
+ * @desc 对话框相关窗口的背景配置。
+ * @default 
+ * 
+ * @param 背景层-28
+ * @parent ---背景集---
+ * @type struct<DrillDSBStyle>
+ * @desc 对话框相关窗口的背景配置。
+ * @default 
+ * 
+ * @param 背景层-29
+ * @parent ---背景集---
+ * @type struct<DrillDSBStyle>
+ * @desc 对话框相关窗口的背景配置。
+ * @default 
+ * 
+ * @param 背景层-30
+ * @parent ---背景集---
+ * @type struct<DrillDSBStyle>
+ * @desc 对话框相关窗口的背景配置。
+ * @default 
+ * 
+ * @param 背景层-31
+ * @parent ---背景集---
+ * @type struct<DrillDSBStyle>
+ * @desc 对话框相关窗口的背景配置。
+ * @default 
+ * 
+ * @param 背景层-32
+ * @parent ---背景集---
+ * @type struct<DrillDSBStyle>
+ * @desc 对话框相关窗口的背景配置。
+ * @default 
+ * 
+ * @param 背景层-33
+ * @parent ---背景集---
+ * @type struct<DrillDSBStyle>
+ * @desc 对话框相关窗口的背景配置。
+ * @default 
+ * 
+ * @param 背景层-34
+ * @parent ---背景集---
+ * @type struct<DrillDSBStyle>
+ * @desc 对话框相关窗口的背景配置。
+ * @default 
+ * 
+ * @param 背景层-35
+ * @parent ---背景集---
+ * @type struct<DrillDSBStyle>
+ * @desc 对话框相关窗口的背景配置。
+ * @default 
+ * 
+ * @param 背景层-36
+ * @parent ---背景集---
+ * @type struct<DrillDSBStyle>
+ * @desc 对话框相关窗口的背景配置。
+ * @default 
+ * 
+ * @param 背景层-37
+ * @parent ---背景集---
+ * @type struct<DrillDSBStyle>
+ * @desc 对话框相关窗口的背景配置。
+ * @default 
+ * 
+ * @param 背景层-38
+ * @parent ---背景集---
+ * @type struct<DrillDSBStyle>
+ * @desc 对话框相关窗口的背景配置。
+ * @default 
+ * 
+ * @param 背景层-39
+ * @parent ---背景集---
+ * @type struct<DrillDSBStyle>
+ * @desc 对话框相关窗口的背景配置。
+ * @default 
+ * 
+ * @param 背景层-40
+ * @parent ---背景集---
+ * @type struct<DrillDSBStyle>
+ * @desc 对话框相关窗口的背景配置。
+ * @default
  * 
  */
 /*~struct~DrillDSBStyle:
@@ -458,7 +579,7 @@
 	}
 	
 	/*-----------------样式集------------------*/
-	DrillUp.g_DSB_list_length = 20;
+	DrillUp.g_DSB_list_length = 40;
 	DrillUp.g_DSB_list = [];
 	for( var i = 0; i < DrillUp.g_DSB_list_length; i++ ){
 		if( DrillUp.parameters["背景层-" + String(i+1) ] != undefined &&
