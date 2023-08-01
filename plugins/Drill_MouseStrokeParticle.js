@@ -607,10 +607,13 @@
 //				->刷新统计（地图界面）
 //				->刷新统计（战斗界面）
 //				->刷新统计（菜单界面）
-//			->☆贴图控制
+//			->☆控制器与贴图
 //				->帧刷新（地图界面）
 //				->帧刷新（战斗界面）
 //				->帧刷新（菜单界面）
+//				->手动产生 粒子
+//				->控制器帧刷新
+//				x->销毁
 //			
 //			->鼠标划过粒子控制器【Drill_MSPa_Controller】
 //				->双层效果（此功能关闭）
@@ -1239,7 +1242,7 @@ Scene_Battle.prototype.drill_MSPa_layerAddSprite_Private = function( sprite, lay
 //##############################
 Scene_MenuBase.prototype.drill_MSPa_layerAddSprite = function( sprite, layer_index ){
     this.drill_MSPa_layerAddSprite_Private(sprite, layer_index);
-}
+};
 //##############################
 // * 菜单层级 - 去除贴图【标准函数】
 //				
@@ -1249,8 +1252,8 @@ Scene_MenuBase.prototype.drill_MSPa_layerAddSprite = function( sprite, layer_ind
 //			说明：	> 强行规范的接口，将指定贴图从菜单层级中移除。
 //##############################
 Scene_MenuBase.prototype.drill_MSPa_layerRemoveSprite = function( sprite ){
-	//（不操作）
-}
+	this.drill_MSPa_layerRemoveSprite_Private( sprite );
+};
 //##############################
 // * 菜单层级 - 图片层级排序【标准函数】
 //				
@@ -1261,7 +1264,7 @@ Scene_MenuBase.prototype.drill_MSPa_layerRemoveSprite = function( sprite ){
 //##############################
 Scene_MenuBase.prototype.drill_MSPa_sortByZIndex = function () {
     this.drill_MSPa_sortByZIndex_Private();
-}
+};
 //=============================================================================
 // ** 菜单层级（接口实现）
 //=============================================================================
@@ -1279,7 +1282,7 @@ Scene_MenuBase.prototype.update = function() {
 		this._foregroundSprite = new Sprite();
 		this.addChild(this._foregroundSprite);	
 	}
-}
+};
 //==============================
 // * 菜单层级 - 图片层级排序（私有）
 //==============================
@@ -1288,13 +1291,24 @@ Scene_MenuBase.prototype.drill_MSPa_sortByZIndex_Private = function() {
    this._foregroundSprite.children.sort(function(a, b){return a.zIndex-b.zIndex});
 };
 //==============================
+// * 菜单层级 - 去除贴图（私有）
+//==============================
+Scene_MenuBase.prototype.drill_MSPa_layerRemoveSprite_Private = function( sprite ){
+	this._backgroundSprite.removeChild( sprite );
+	this._foregroundSprite.removeChild( sprite );
+};
+//==============================
 // * 菜单层级 - 添加贴图到层级（私有）
+//
+//			说明：	> 此处兼容了 战斗界面、地图界面 的层级名词。
 //==============================
 Scene_MenuBase.prototype.drill_MSPa_layerAddSprite_Private = function( sprite, layer_index ){
-	if( layer_index == "菜单后面层" || layer_index === 0 ){
+	if( layer_index == "菜单后面层" || layer_index === 0 || 
+		layer_index == "下层" || layer_index == "中层" || layer_index == "上层"){
 		this._backgroundSprite.addChild( sprite );
 	}
-	if( layer_index == "菜单前面层" || layer_index === 1 ){
+	if( layer_index == "菜单前面层" || layer_index === 1 || 
+		layer_index == "图片层" || layer_index == "最顶层" ){
 		this._foregroundSprite.addChild( sprite );
 	}
 };
@@ -1504,13 +1518,13 @@ Scene_MenuBase.prototype.drill_MSPa_removeSprite = Scene_Map.prototype.drill_MSP
 
 
 //=============================================================================
-// ** ☆贴图控制
+// ** ☆控制器与贴图
 //
 //			说明：	> 此模块专门管理 贴图 的创建与销毁。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 贴图控制 - 帧刷新（地图界面）
+// * 控制器与贴图 - 帧刷新（地图界面）
 //==============================
 var _drill_MSPa_smap_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {
@@ -1519,7 +1533,7 @@ Scene_Map.prototype.update = function() {
 	this.drill_MSPa_updateController();			//帧刷新 - 控制器
 };
 //==============================
-// * 贴图控制 - 帧刷新 鼠标变化（地图界面）
+// * 控制器与贴图 - 帧刷新 鼠标变化（地图界面）
 //==============================
 Scene_Map.prototype.drill_MSPa_updateMouse = function() {
 	var cur_scene = SceneManager._scene;
@@ -1580,11 +1594,11 @@ Scene_Map.prototype.drill_MSPa_updateMouse = function() {
 	this._drill_MSPa_lastMouseY = cur_mouse_y;
 };
 //==============================
-// * 贴图控制 - 帧刷新 控制器（地图界面）
+// * 控制器与贴图 - 帧刷新 控制器（地图界面）
 //==============================
 Scene_Map.prototype.drill_MSPa_updateController = function() {
 	
-	// > 帧刷新 - 控制器
+	// > 控制器帧刷新
 	for(var i = $gameSystem._drill_MSPa_controllerTank.length-1; i >= 0; i--){
 		var temp_controller = $gameSystem._drill_MSPa_controllerTank[i];
 		temp_controller.drill_controller_update();
@@ -1592,7 +1606,7 @@ Scene_Map.prototype.drill_MSPa_updateController = function() {
 };
 
 //==============================
-// * 贴图控制 - 帧刷新（战斗界面）
+// * 控制器与贴图 - 帧刷新（战斗界面）
 //==============================
 var _drill_MSPa_sbattle_update = Scene_Battle.prototype.update;
 Scene_Battle.prototype.update = function() {
@@ -1601,16 +1615,16 @@ Scene_Battle.prototype.update = function() {
 	this.drill_MSPa_updateController();			//帧刷新 - 控制器
 }
 //==============================
-// * 贴图控制 - 帧刷新 鼠标变化（战斗界面）
+// * 控制器与贴图 - 帧刷新 鼠标变化（战斗界面）
 //==============================
 Scene_Battle.prototype.drill_MSPa_updateMouse = Scene_Map.prototype.drill_MSPa_updateMouse;
 //==============================
-// * 贴图控制 - 帧刷新 控制器（战斗界面）
+// * 控制器与贴图 - 帧刷新 控制器（战斗界面）
 //==============================
 Scene_Battle.prototype.drill_MSPa_updateController = Scene_Map.prototype.drill_MSPa_updateController;
 
 //==============================
-// * 贴图控制 - 帧刷新（菜单界面）
+// * 控制器与贴图 - 帧刷新（菜单界面）
 //==============================
 var _drill_MSPa_smenu_update = Scene_MenuBase.prototype.update;
 Scene_MenuBase.prototype.update = function() {
@@ -1619,11 +1633,11 @@ Scene_MenuBase.prototype.update = function() {
 	this.drill_MSPa_updateController();			//帧刷新 - 控制器
 }
 //==============================
-// * 贴图控制 - 帧刷新 鼠标变化（菜单界面）
+// * 控制器与贴图 - 帧刷新 鼠标变化（菜单界面）
 //==============================
 Scene_MenuBase.prototype.drill_MSPa_updateMouse = Scene_Map.prototype.drill_MSPa_updateMouse;
 //==============================
-// * 贴图控制 - 帧刷新 控制器（菜单界面）
+// * 控制器与贴图 - 帧刷新 控制器（菜单界面）
 //==============================
 Scene_MenuBase.prototype.drill_MSPa_updateController = Scene_Map.prototype.drill_MSPa_updateController;
 
@@ -1873,7 +1887,7 @@ Drill_MSPa_Controller.prototype.drill_controller_resetParticles_Position = funct
 // **				> 结构 - [合并/ ●分离 /混乱] 使用 控制器-贴图 结构。
 // **				> 数量 - [单个/ ●多个] 
 // **				> 创建 - [ ●一次性 /自延迟/外部延迟] 先创建控制器，再创建此贴图，通过 C对象绑定 进行连接。
-// **				> 销毁 - [不考虑/自销毁/ ●外部销毁 ] 通过 贴图控制 模块来销毁。
+// **				> 销毁 - [不考虑/自销毁/ ●外部销毁 ] 通过 控制器与贴图 模块来销毁。
 // **				> 样式 - [ ●不可修改 /自变化/外部变化] 
 //=============================================================================
 //==============================

@@ -116,9 +116,10 @@
 //			->☆提示信息
 //			->☆变量获取
 //			->☆技能注释
-//				->战斗不阻塞设置
-//				->并行播放
 //				->施法者与目标
+//			
+//			->☆技能控制
+//				->播放并行动画
 //			
 //			
 //		★家谱：
@@ -193,6 +194,8 @@ Game_Action.prototype.apply = function( target ){
 }
 //==============================
 // * 技能注释 - 作用时
+//
+//			说明：	> 由于技能是一个临时对象，因此只能实时解析并使用。
 //==============================
 Game_Action.prototype.drill_AISk_setParallelAnimation = function( target ){
 	
@@ -214,16 +217,17 @@ Game_Action.prototype.drill_AISk_setParallelAnimation = function( target ){
 	var row_list = note.split(/[\n\r ]+/);
 	
 	// > 技能注释解析
-	for( var i=0; i < row_list.length; i++ ){
-		var row = row_list[i];
+	for(var r = 0; r < row_list.length; r++ ){
+		var row = row_list[r];
 		row = row.replace(/\>$/,"");	//（去掉末尾的>）
-		var args = note.split(/[:：]/);
+		var args = row.split(/[:：]/);
 		var command = args.shift();
 		if( command == "<技能并行动画" ){
+			
 			if( args.length >= 2 ){
-				if( args[0] ){ var a_id = String(args[0]); }
-				if( args[1] ){ var type = String(args[1]); }
-				if( args[2] ){ var temp1 = String(args[2]); }
+				if( args[0] != undefined ){ var a_id = String(args[0]); }
+				if( args[1] != undefined ){ var type = String(args[1]); }
+				if( args[2] != undefined ){ var temp1 = String(args[2]); }
 				if( type == "施法者" ){
 					if( temp1 == "连续" ){
 						this.drill_AISk_startParallelAnimation( this.subject(), Number(a_id), note);
@@ -246,15 +250,27 @@ Game_Action.prototype.drill_AISk_setParallelAnimation = function( target ){
 		}
 	}
 };
+
+
+//=============================================================================
+// ** ☆技能控制
+//
+//			说明：	> 此模块专门管理 技能与动画播放 。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
 //==============================
-// * 播放动画（用于其它插件扩展）
+// * 技能控制 - 播放并行动画（继承接口）
+//
+//			说明：	> 目前被 Drill_AnimationSkillSettings 动画-技能动画设置 插件继承使用。
 //==============================
 Game_Action.prototype.drill_AISk_startParallelAnimation = function( battler , a_id , note ) {
+	
+	// > 播放并行动画（来自基于的插件 Drill_AnimationInParallel 动画-并行战斗动画 ）
 	battler.drill_AIP_startParallelAnimation( a_id, false, 0 );
 }
 /* 
 //==============================
-// * 玩家选定了一个技能时
+// * 技能控制 - 玩家选定了一个技能时
 //==============================
 Game_Action包含了 Game_Item 用于存储技能、物品的数据
 Game_Action.prototype.setSkill = function(skillId) {	//（该函数为玩家选定了一个技能时的时机）

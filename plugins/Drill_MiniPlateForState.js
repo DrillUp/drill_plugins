@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.5]        鼠标 - 状态和buff说明窗口
+ * @plugindesc [v2.6]        鼠标 - 状态和buff说明窗口
  * @author Drill_up
  * 
  * @Drill_LE_param "状态-%d"
@@ -53,6 +53,8 @@
  *      你可以设置最初不了解状态时使用模糊说明，达到一定剧情后，用详细说明。
  *   (2.如果说明中没有任何字符，将不显示这个状态的说明内容。
  *      并视作为没有该状态。
+ *   (3.你可以使用表达式 "<当前图标>" 来表示"\i[]"的图标，
+ *      省去找图标编号的麻烦。
  * 文本：
  *   (1.你可以附加一定的宽度高度来适应被遮住的文字，但是不要加太多。
  *   (2.配置后，你会发现"\"字符变得超级多，这是rmmv多次转义的结果，属正常现象。
@@ -156,6 +158,8 @@
  * [v2.5]
  * 优化了内部结构，改进了鼠标触发以及刷新范围。
  * 修复了鼠标一直停留时不会刷新新加入的buff信息的bug。
+ * [v2.6]
+ * 添加了 <当前图标> 的表达式，省去找图标编号的麻烦。
  * 
  * 
  * 
@@ -392,98 +396,98 @@
  * @parent ---buff组---
  * @type note[]
  * @desc rmmv固定的强化buff的说明注释。序号对应强化的等级。
- * @default ["\"\\\\i[32]：暂时性生命\\\\c[17] +25%\\\\c[0]。\"","\"\\\\i[40]：暂时性生命\\\\c[17] +50%\\\\c[0]。\""]
- *
+ * @default ["\"<当前图标>：暂时性生命\\\\c[17] +25%\\\\c[0]。\"","\"<当前图标>：暂时性生命\\\\c[17] +50%\\\\c[0]。\""]
+ * 
  * @param 强化-魔法
  * @parent ---buff组---
  * @type note[]
  * @desc rmmv固定的强化buff的说明注释。序号对应强化的等级。
- * @default ["\"\\\\i[33]：暂时性魔法\\\\c[17] +25%\\\\c[0]。\"","\"\\\\i[41]：暂时性魔法\\\\c[17] +50%\\\\c[0]。\""]
- *
+ * @default ["\"<当前图标>：暂时性魔法\\\\c[17] +25%\\\\c[0]。\"","\"<当前图标>：暂时性魔法\\\\c[17] +50%\\\\c[0]。\""]
+ * 
  * @param 强化-攻击力
  * @parent ---buff组---
  * @type note[]
  * @desc rmmv固定的强化buff的说明注释。序号对应强化的等级。
- * @default ["\"\\\\i[34]：暂时性物理攻击\\\\c[17] +25%\\\\c[0]。\"","\"\\\\i[42]：暂时性物理攻击\\\\c[17] +50%\\\\c[0]。\""]
- *
+ * @default ["\"<当前图标>：暂时性物理攻击\\\\c[17] +25%\\\\c[0]。\"","\"<当前图标>：暂时性物理攻击\\\\c[17] +50%\\\\c[0]。\""]
+ * 
  * @param 强化-防御力
  * @parent ---buff组---
  * @type note[]
  * @desc rmmv固定的强化buff的说明注释。序号对应强化的等级。
- * @default ["\"\\\\i[35]：暂时性物理防御\\\\c[17] +25%\\\\c[0]。\"","\"\\\\i[43]：暂时性物理防御\\\\c[17] +50%\\\\c[0]。\""]
- *
+ * @default ["\"<当前图标>：暂时性物理防御\\\\c[17] +25%\\\\c[0]。\"","\"<当前图标>：暂时性物理防御\\\\c[17] +50%\\\\c[0]。\""]
+ * 
  * @param 强化-魔法攻击
  * @parent ---buff组---
  * @type note[]
  * @desc rmmv固定的强化buff的说明注释。序号对应强化的等级。
- * @default ["\"\\\\i[36]：暂时性魔法攻击\\\\c[17] +25%\\\\c[0]。\"","\"\\\\i[44]：暂时性魔法攻击\\\\c[17] +50%\\\\c[0]。\""]
- *
+ * @default ["\"<当前图标>：暂时性魔法攻击\\\\c[17] +25%\\\\c[0]。\"","\"<当前图标>：暂时性魔法攻击\\\\c[17] +50%\\\\c[0]。\""]
+ * 
  * @param 强化-魔法防御
  * @parent ---buff组---
  * @type note[]
  * @desc rmmv固定的强化buff的说明注释。序号对应强化的等级。
- * @default ["\"\\\\i[37]：暂时性魔法防御\\\\c[17] +25%\\\\c[0]。\"","\"\\\\i[45]：暂时性魔法防御\\\\c[17] +50%\\\\c[0]。\""]
- *
+ * @default ["\"<当前图标>：暂时性魔法防御\\\\c[17] +25%\\\\c[0]。\"","\"<当前图标>：暂时性魔法防御\\\\c[17] +50%\\\\c[0]。\""]
+ * 
  * @param 强化-敏捷
  * @parent ---buff组---
  * @type note[]
  * @desc rmmv固定的强化buff的说明注释。序号对应强化的等级。
- * @default ["\"\\\\i[38]：暂时性敏捷\\\\c[17] +25%\\\\c[0]。\"","\"\\\\i[46]：暂时性敏捷\\\\c[17] +50%\\\\c[0]。\""]
- *
+ * @default ["\"<当前图标>：暂时性敏捷\\\\c[17] +25%\\\\c[0]。\"","\"<当前图标>：暂时性敏捷\\\\c[17] +50%\\\\c[0]。\""]
+ * 
  * @param 强化-幸运
  * @parent ---buff组---
  * @type note[]
  * @desc rmmv固定的强化buff的说明注释。序号对应强化的等级。
- * @default ["\"\\\\i[39]：暂时性幸运\\\\c[17] +25%\\\\c[0]。\"","\"\\\\i[47]：暂时性幸运\\\\c[17] +50%\\\\c[0]。\""]
- *
+ * @default ["\"<当前图标>：暂时性幸运\\\\c[17] +25%\\\\c[0]。\"","\"<当前图标>：暂时性幸运\\\\c[17] +50%\\\\c[0]。\""]
+ * 
  * @param 弱化-生命
  * @parent ---buff组---
  * @type note[]
  * @desc rmmv固定的弱化buff的说明注释。序号对应弱化的等级。
- * @default ["\"\\\\i[48]：暂时性生命\\\\c[18] -25%\\\\c[0]。\"","\"\\\\i[56]：暂时性生命\\\\c[18] -50%\\\\c[0]。\""]
- *
+ * @default ["\"<当前图标>：暂时性生命\\\\c[18] -25%\\\\c[0]。\"","\"<当前图标>：暂时性生命\\\\c[18] -50%\\\\c[0]。\""]
+ * 
  * @param 弱化-魔法
  * @parent ---buff组---
  * @type note[]
  * @desc rmmv固定的弱化buff的说明注释。序号对应弱化的等级。
- * @default ["\"\\\\i[49]：暂时性魔法\\\\c[18] -25%\\\\c[0]。\"","\"\\\\i[57]：暂时性魔法\\\\c[18] -50%\\\\c[0]。\""]
- *
+ * @default ["\"<当前图标>：暂时性魔法\\\\c[18] -25%\\\\c[0]。\"","\"<当前图标>：暂时性魔法\\\\c[18] -50%\\\\c[0]。\""]
+ * 
  * @param 弱化-攻击力
  * @parent ---buff组---
  * @type note[]
  * @desc rmmv固定的弱化buff的说明注释。序号对应弱化的等级。
- * @default ["\"\\\\i[50]：暂时性物理攻击\\\\c[18] -25%\\\\c[0]。\"","\"\\\\i[58]：暂时性物理攻击\\\\c[18] -50%\\\\c[0]。\""]
- *
+ * @default ["\"<当前图标>：暂时性物理攻击\\\\c[18] -25%\\\\c[0]。\"","\"<当前图标>：暂时性物理攻击\\\\c[18] -50%\\\\c[0]。\""]
+ * 
  * @param 弱化-防御力
  * @parent ---buff组---
  * @type note[]
  * @desc rmmv固定的弱化buff的说明注释。序号对应弱化的等级。
- * @default ["\"\\\\i[51]：暂时性物理防御\\\\c[18] -25%\\\\c[0]。\"","\"\\\\i[59]：暂时性物理防御\\\\c[18] -50%\\\\c[0]。\""]
- *
+ * @default ["\"<当前图标>：暂时性物理防御\\\\c[18] -25%\\\\c[0]。\"","\"<当前图标>：暂时性物理防御\\\\c[18] -50%\\\\c[0]。\""]
+ * 
  * @param 弱化-魔法攻击
  * @parent ---buff组---
  * @type note[]
  * @desc rmmv固定的弱化buff的说明注释。序号对应弱化的等级。
- * @default ["\"\\\\i[52]：暂时性魔法攻击\\\\c[18] -25%\\\\c[0]。\"","\"\\\\i[60]：暂时性魔法攻击\\\\c[18] -50%\\\\c[0]。\""]
- *
+ * @default ["\"<当前图标>：暂时性魔法攻击\\\\c[18] -25%\\\\c[0]。\"","\"<当前图标>：暂时性魔法攻击\\\\c[18] -50%\\\\c[0]。\""]
+ * 
  * @param 弱化-魔法防御
  * @parent ---buff组---
  * @type note[]
  * @desc rmmv固定的弱化buff的说明注释。序号对应弱化的等级。
- * @default ["\"\\\\i[53]：暂时性魔法防御\\\\c[18] -25%\\\\c[0]。\"","\"\\\\i[61]：暂时性魔法防御\\\\c[18] -50%\\\\c[0]。\""]
- *
+ * @default ["\"<当前图标>：暂时性魔法防御\\\\c[18] -25%\\\\c[0]。\"","\"<当前图标>：暂时性魔法防御\\\\c[18] -50%\\\\c[0]。\""]
+ * 
  * @param 弱化-敏捷
  * @parent ---buff组---
  * @type note[]
  * @desc rmmv固定的弱化buff的说明注释。序号对应弱化的等级。
- * @default ["\"\\\\i[54]：暂时性敏捷\\\\c[18] -25%\\\\c[0]。\"","\"\\\\i[62]：暂时性敏捷\\\\c[18] -50%\\\\c[0]。\""]
- *
+ * @default ["\"<当前图标>：暂时性敏捷\\\\c[18] -25%\\\\c[0]。\"","\"<当前图标>：暂时性敏捷\\\\c[18] -50%\\\\c[0]。\""]
+ * 
  * @param 弱化-幸运
  * @parent ---buff组---
  * @type note[]
  * @desc rmmv固定的弱化buff的说明注释。序号对应弱化的等级。
- * @default ["\"\\\\i[55]：暂时性幸运\\\\c[18] -25%\\\\c[0]。\"","\"\\\\i[63]：暂时性幸运\\\\c[18] -50%\\\\c[0]。\""]
- *
+ * @default ["\"<当前图标>：暂时性幸运\\\\c[18] -25%\\\\c[0]。\"","\"<当前图标>：暂时性幸运\\\\c[18] -50%\\\\c[0]。\""]
+ * 
  *
  * @param ---状态组 1至20---
  * @default 
@@ -492,20 +496,20 @@
  * @parent ---状态组 1至20---
  * @type struct<MiniPlateForState>
  * @desc 添加状态的内容，当前配置的编号，对应数据库中的状态id。
- * @default {"标签":"==战斗不能==","是否初始使用详细说明":"true","模糊说明":"\"\\\\i[1]：该单位已在战斗中阵亡。\"","详细说明":"\"\\\\i[1]：该单位已在战斗中阵亡。\""}
- *
+ * @default {"标签":"==战斗不能==","是否初始使用详细说明":"true","模糊说明":"\"<当前图标>：该单位已在战斗中阵亡。\"","详细说明":"\"<当前图标>：该单位已在战斗中阵亡。\""}
+ * 
  * @param 状态-2
  * @parent ---状态组 1至20---
  * @type struct<MiniPlateForState>
  * @desc 添加状态的内容，当前配置的编号，对应数据库中的状态id。
- * @default {"标签":"==防御==","是否初始使用详细说明":"true","模糊说明":"\"\\\\i[81]：该单位进入防御状态。\"","详细说明":"\"\\\\i[81]：防御\\\\c[204]x120%\\\\c[0]。受到的任何伤害减半。\""}
- *
+ * @default {"标签":"==防御==","是否初始使用详细说明":"true","模糊说明":"\"<当前图标>：该单位进入防御状态。\"","详细说明":"\"<当前图标>：防御\\\\c[204]x120%\\\\c[0]。受到的任何伤害减半。\""}
+ * 
  * @param 状态-3
  * @parent ---状态组 1至20---
  * @type struct<MiniPlateForState>
  * @desc 添加状态的内容，当前配置的编号，对应数据库中的状态id。
  * @default {"标签":"==不死身==","是否初始使用详细说明":"true","模糊说明":"\"\"","详细说明":"\"\""}
- *
+ * 
  * @param 状态-4
  * @parent ---状态组 1至20---
  * @type struct<MiniPlateForState>
@@ -994,12 +998,12 @@
  * 
  * @param 模糊说明
  * @type note
- * @desc 该状态的模糊说明内容。空字段表示不显示该状态的说明。
+ * @desc 该状态的模糊说明内容。空字段表示不显示该状态的说明。你可以使用表达式 "<当前图标>" 来表示"\i[]"的图标字符。
  * @default "未知的状态"
  * 
  * @param 详细说明
  * @type note
- * @desc 该状态的详细说明内容。空字段表示不显示该状态的说明。
+ * @desc 该状态的详细说明内容。空字段表示不显示该状态的说明。你可以使用表达式 "<当前图标>" 来表示"\i[]"的图标字符。
  * @default "没有描述"
  *
  */
@@ -1786,11 +1790,17 @@ Sprite_Enemy.prototype.updateStateSprite = function() {
 	hh = Sprite_StateIcon._iconHeight;
 	
 	// > 实体类设置
+	var battler = this._stateIconSprite._battler;
 	var bean = this._drill_MPFS_bean;
 	bean.drill_bean_setPosition( xx, yy );
 	bean.drill_bean_resetFrame( 0, 0, ww, hh );
-	bean.drill_bean_setStateAndBuff( this._stateIconSprite._battler._states, this._battler._buffs );
+	bean.drill_bean_setStateAndBuff( battler._states, battler._buffs );
 	bean.drill_bean_setLayer( "上层" );
+	
+	if( Imported.YEP_AutoPassiveStates ){
+		var state_list = battler.passiveStatesRaw().concat( battler._states );
+		bean.drill_bean_setStateAndBuff( state_list, battler._buffs );
+	}
 };
 //==============================
 // * 实体类绑定 - 角色贴图（战斗界面）
@@ -1832,11 +1842,23 @@ Sprite_Actor.prototype.update = function() {
 	bean.drill_bean_setPosition( xx, yy );
 	bean.drill_bean_resetFrame( 0, 0, ww, hh );
 	if( this._stateIconSprite ){
-		bean.drill_bean_setStateAndBuff( this._stateIconSprite._battler._states, this._battler._buffs );
+		var battler = this._stateIconSprite._battler;
+		bean.drill_bean_setStateAndBuff( battler._states, battler._buffs );
 		bean.drill_bean_setLayer( "上层" );
+		
+		if( Imported.YEP_AutoPassiveStates ){
+			var state_list = battler.passiveStatesRaw().concat( battler._states );
+			bean.drill_bean_setStateAndBuff( state_list, battler._buffs );
+		}
 	}else{
-		bean.drill_bean_setStateAndBuff( this._battler._states, this._battler._buffs );
+		var battler = this._battler;
+		bean.drill_bean_setStateAndBuff( battler._states, battler._buffs );
 		bean.drill_bean_setLayer( "上层" );
+		
+		if( Imported.YEP_AutoPassiveStates ){
+			var state_list = battler.passiveStatesRaw().concat( battler._states );
+			bean.drill_bean_setStateAndBuff( state_list, battler._buffs );
+		}
 	}
 };
 //==============================
@@ -1893,11 +1915,17 @@ if( Imported.MOG_BattleHud ){
 		}
 		
 		// > 实体类设置
+		var battler = this._battler;
 		var bean = this._drill_MPFS_bean;
 		bean.drill_bean_setPosition( xx, yy );
 		bean.drill_bean_resetFrame( 0, 0, ww, hh );
-		bean.drill_bean_setStateAndBuff( this._battler._states, this._battler._buffs );
+		bean.drill_bean_setStateAndBuff( battler._states, battler._buffs );
 		bean.drill_bean_setLayer( "图片层" );
+		
+		if( Imported.YEP_AutoPassiveStates ){
+			var state_list = battler.passiveStatesRaw().concat( battler._states );
+			bean.drill_bean_setStateAndBuff( state_list, battler._buffs );
+		}
 	}
 }
 //==============================
@@ -1929,12 +1957,18 @@ if( Imported.MOG_ActorHud ){
 		hh = Window_Base._iconHeight;
 		
 		// > 实体类设置
+		var battler = this._battler;
 		var bean = this._drill_MPFS_bean;
 		bean.drill_bean_setVisible( this.opacity > 0 );	//（该框根据透明度来控制是否显示）
 		bean.drill_bean_setPosition( xx, yy );
 		bean.drill_bean_resetFrame( 0, 0, ww, hh );
-		bean.drill_bean_setStateAndBuff( this._battler._states, this._battler._buffs );
+		bean.drill_bean_setStateAndBuff( battler._states, battler._buffs );
 		bean.drill_bean_setLayer( "图片层" );
+		
+		if( Imported.YEP_AutoPassiveStates ){
+			var state_list = battler.passiveStatesRaw().concat( battler._states );
+			bean.drill_bean_setStateAndBuff( state_list, battler._buffs );
+		}
 	}
 }
 //==============================
@@ -2001,12 +2035,18 @@ if( Imported.Drill_GaugeForBoss ){
 		yy -= ih/2;
 		
 		// > 实体类设置
+		var battler = this._drill_enemy;
 		var bean = this._drill_MPFS_bean;
 		bean.drill_bean_setVisible( this.visible );
 		bean.drill_bean_setPosition( xx, yy );
 		bean.drill_bean_resetFrame( 0, 0, ww, hh );
-		bean.drill_bean_setStateAndBuff( this._drill_enemy._states, this._drill_enemy._buffs );
+		bean.drill_bean_setStateAndBuff( battler._states, battler._buffs );
 		bean.drill_bean_setLayer( data_b['layerIndex_battle'] );	//（boss框的层级）
+		
+		if( Imported.YEP_AutoPassiveStates ){
+			var state_list = battler.passiveStatesRaw().concat( battler._states );
+			bean.drill_bean_setStateAndBuff( state_list, battler._buffs );
+		}
 	}
 }
 
@@ -2081,8 +2121,8 @@ Drill_MPFS_Bean.prototype.drill_bean_resetFrame = function( frameX, frameY, fram
 //##############################
 // * 实体类 - 设置状态和buff【开放函数】
 //			
-//			参数：	> state_list 字符串列表
-//					> buff_list 字符串列表
+//			参数：	> state_list 数字列表
+//					> buff_list 数字列表
 //			返回：	> 无
 //##############################
 Drill_MPFS_Bean.prototype.drill_bean_setStateAndBuff = function( state_list, buff_list ){
@@ -2743,16 +2783,19 @@ Drill_MPFS_Window.prototype.drill_updateMessage = function(){
 	var context_list = [];
 	for(var i=0; i < bean['_drill_state_list'].length; i++ ){
 		var index = bean['_drill_state_list'][i]-1;
+		var icon_index = $dataStates[ index+1 ].iconIndex;
 		var enabled = $gameSystem._drill_MPFS_enables[index];
 		if( enabled ){
-			var temp = $gameSystem._drill_MPFS_x_context[index];		//详细说明
-			if( temp && temp.length != 0 ){
-				context_list.push(temp);
+			var temp_str = $gameSystem._drill_MPFS_x_context[index];		//详细说明
+			if( temp_str && temp_str.length != 0 ){
+				temp_str =  temp_str.replace("<当前图标>","\\i["+icon_index+"]");
+				context_list.push(temp_str);
 			}
 		}else{
-			var temp = $gameSystem._drill_MPFS_m_context[index];		//模糊说明
-			if( temp && temp.length != 0 ){
-				context_list.push(temp);
+			var temp_str = $gameSystem._drill_MPFS_m_context[index];		//模糊说明
+			if( temp_str && temp_str.length != 0 ){
+				temp_str =  temp_str.replace("<当前图标>","\\i["+icon_index+"]");
+				context_list.push(temp_str);
 			}
 		}
 	}
@@ -2760,10 +2803,16 @@ Drill_MPFS_Window.prototype.drill_updateMessage = function(){
 	for( var i=0; i< bean['_drill_buff_list'].length; i++ ){
 		var level = bean['_drill_buff_list'][i];
 		if( level > 0 ){		//强化buff
-			context_list.push( DrillUp.g_MPFS_buff[i][ level-1 ] );
+			var icon_index = this.buffIconIndex( level, i );
+			var temp_str = DrillUp.g_MPFS_buff[i][ level-1 ];
+			temp_str = temp_str.replace("<当前图标>","\\i["+icon_index+"]");
+			context_list.push( temp_str );
 		}
 		if( level < 0 ){		//弱化buff
-			context_list.push( DrillUp.g_MPFS_debuff[i][ Math.abs(level)-1 ] );
+			var icon_index = this.buffIconIndex( level, i );
+			var temp_str = DrillUp.g_MPFS_debuff[i][ Math.abs(level)-1 ];
+			temp_str = temp_str.replace("<当前图标>","\\i["+icon_index+"]");
+			context_list.push( temp_str );
 		}
 	}
 	
@@ -2778,6 +2827,20 @@ Drill_MPFS_Window.prototype.drill_updateMessage = function(){
 	this.drill_refreshMessage( context_list );
 	this._drill_showDelay = 1;	//（延迟1帧再显示，防止看到内容和高宽的变化）
 }
+//==============================
+// * E窗口内容 - 获取 指定阶段的buff图标（索引号）
+//
+//			说明：	> 此函数复刻自 Game_BattlerBase.prototype.buffIconIndex 。
+//==============================
+Drill_MPFS_Window.prototype.buffIconIndex = function( buffLevel, paramId ){
+    if( buffLevel > 0 ){
+        return Game_BattlerBase.ICON_BUFF_START + (buffLevel - 1) * 8 + paramId;
+    }else if( buffLevel < 0 ){
+        return Game_BattlerBase.ICON_DEBUFF_START + (-buffLevel - 1) * 8 + paramId;
+    }else{
+        return 0;
+    }
+};
 //==============================
 // * E窗口内容 - 判断状态与buff变化
 //==============================

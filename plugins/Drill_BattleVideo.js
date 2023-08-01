@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.9]        战斗 - 多层战斗视频
+ * @plugindesc [v2.0]        战斗 - 多层战斗视频
  * @author Drill_up
  * 
  * @Drill_LE_param "视频-%d"
@@ -29,11 +29,12 @@
  * 1.插件的作用域：战斗界面。
  *   可以放置在战斗中的四个层级中。
  * 2.更多组合可以去看看 "17.主菜单 > 多层组合装饰（界面装饰）.docx"。
+ *   还有 "17.主菜单 > 多层组合装饰（界面装饰-战斗界面）.docx"。
  * 视频：
  *   (1.视频动画只支持 .webm(pc端) 和 .mp4(手机端) 格式的视频。
  *   (2.视频与GIF区别在于清晰度和声音。
  *      如果你有条件制作GIF，建议使用GIF而不是视频。
- *   (3.循环播放时，视频的末尾可能会闪一下黑色背景。属于正常情况。
+ *   (3.循环播放时，视频的末尾可能会闪一下黑屏。属于正常情况。
  *   (4.视频是一个比较复杂的文件结构，需要通过环境内置的解析器来解析，
  *      低版本的node.js由于环境缺陷，运行两个以上视频会非常卡，高配电
  *      脑也卡到4帧，而火狐浏览器、高版本的js环境不存在该问题。
@@ -81,7 +82,7 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
  * 时间复杂度： o(n)+o(视频图像处理) 每帧
- * 测试方法：   在战斗中开启视频背景。
+ * 测试方法：   在战斗中开启视频。
  * 测试结果：   战斗界面估算平均消耗为：【265.46ms】
  *
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
@@ -112,6 +113,8 @@
  * 优化了战斗层级结构。
  * [v1.9]
  * 优化了旧存档的识别与兼容。
+ * [v2.0]
+ * 整理分类了内部功能。
  * 
  *
  * @param ---视频组---
@@ -421,10 +424,15 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			视频动画背景：
-//				->显示隐藏
-//				->播放视频
-//				->视频贴图
+//			->☆提示信息
+//			->☆变量获取
+//			->☆插件指令
+//			->☆存储数据
+//			->☆战斗层级
+//
+//			->☆音量控制
+//			->☆贴图控制
+//			->视频贴图【Drill_BVi_VideoSprite】
 //
 //
 //		★家谱：
@@ -446,7 +454,7 @@
 //			  
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -457,7 +465,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_BattleVideo = true;
@@ -516,7 +524,7 @@
 
 	
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _drill_BVi_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
@@ -536,7 +544,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -612,22 +620,11 @@ Game_System.prototype.drill_BVi_checkSysData_Private = function() {
 	if( this._drill_BVi_id_list == undefined ){
 		this.drill_BVi_initSysData();
 	}
-	
 };
 
 
-//=============================================================================
-// ** 临时数据初始化
-//=============================================================================
-var _drill_BVi_temp_initialize = Game_Temp.prototype.initialize;
-Game_Temp.prototype.initialize = function() {
-	_drill_BVi_temp_initialize.call(this);
-	this._drill_BVi_sprites = [];
-}
-
-
 //#############################################################################
-// ** 【标准模块】战斗层级
+// ** 【标准模块】战斗层级 ☆战斗层级
 //#############################################################################
 //##############################
 // * 战斗层级 - 添加贴图到层级【标准函数】
@@ -756,17 +753,66 @@ Scene_Battle.prototype.drill_BVi_layerAddSprite_Private = function( sprite, laye
 	}
 }
 
+
 //=============================================================================
-// ** 视频
+// ** ☆音量控制
+//
+//			说明：	> 此模块专门管理 视频音量比 控制。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 创建视频
+// * 音量控制 - 控制音量比例
+//==============================
+var _drill_BVi_setMasterVolume = WebAudio.setMasterVolume;
+WebAudio.setMasterVolume = function( value ){
+	for( var i = 0; i < $gameTemp._drill_BVi_sprites.length; i++) {
+		var sprite = $gameTemp._drill_BVi_sprites[i];
+		if( sprite ){
+			sprite._drill_src.volume = sprite._drill_data['volume'] * value;
+			if( sprite._drill_data['showDebug'] ){ console.log('战斗视频-设置音量: ', value); }
+		}
+	}
+	return _drill_BVi_setMasterVolume(value);
+}
+
+
+//=============================================================================
+// ** ☆贴图控制
+//
+//			说明：	> 此模块专门管理 贴图 的创建与销毁。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 贴图控制 - 初始化
+//==============================
+var _drill_BVi_temp_initialize = Game_Temp.prototype.initialize;
+Game_Temp.prototype.initialize = function() {
+	_drill_BVi_temp_initialize.call(this);
+	this._drill_BVi_sprites = [];
+}
+//==============================
+// * 贴图控制 - 销毁时
+//==============================
+var _drill_BVi_terminate = Scene_Battle.prototype.terminate;
+Scene_Battle.prototype.terminate = function() {
+	_drill_BVi_terminate.call(this);			//设置需要下次重新创建
+	for(var i=0; i < $gameTemp._drill_BVi_sprites.length; i++){
+		var sprite = $gameTemp._drill_BVi_sprites[i];
+		sprite.drill_BVi_destroy();
+	}
+	$gameTemp._drill_BVi_sprites = [];
+};
+//==============================
+// * 贴图控制 - 界面创建时
 //==============================
 var _drill_BVi_createDisplayObjects = Scene_Battle.prototype.createDisplayObjects;
 Scene_Battle.prototype.createDisplayObjects = function() {
     _drill_BVi_createDisplayObjects.call(this);
 	this.drill_BVi_create();
 }
+//==============================
+// * 贴图控制 - 界面创建
+//==============================
 Scene_Battle.prototype.drill_BVi_create = function() {    
 	if( $gameSystem._drill_BVi_id_list.length == 0 ){ return; }
 	
@@ -813,33 +859,6 @@ Scene_Battle.prototype.drill_BVi_create = function() {
 	// > 层级排序
 	this.drill_BVi_sortByZIndex();
 };
-//==============================
-// ** 战斗 - 退出界面
-//==============================
-var _drill_BVi_terminate = Scene_Battle.prototype.terminate;
-Scene_Battle.prototype.terminate = function() {
-	_drill_BVi_terminate.call(this);			//设置需要下次重新创建
-	for(var i=0; i < $gameTemp._drill_BVi_sprites.length; i++){
-		var sprite = $gameTemp._drill_BVi_sprites[i];
-		sprite.drill_BVi_destroy();
-	}
-	$gameTemp._drill_BVi_sprites = [];
-};
-
-//==============================
-// ** 音量 - 控制比例
-//==============================
-var _drill_BVi_setMasterVolume = WebAudio.setMasterVolume;
-WebAudio.setMasterVolume = function(value) {
-	for( var i = 0; i < $gameTemp._drill_BVi_sprites.length; i++) {
-		var sprite = $gameTemp._drill_BVi_sprites[i];
-		if( sprite ){
-			sprite._drill_src.volume = sprite._drill_data['volume'] * value;
-			if( sprite._drill_data['showDebug'] ){ console.log('战斗视频-设置音量: ', value); }
-		}
-	}
-	return _drill_BVi_setMasterVolume(value);
-}
 
 
 //=============================================================================

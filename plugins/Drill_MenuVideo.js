@@ -30,6 +30,7 @@
  *   可以放置在菜单前面层或者菜单后面层。
  * 2.该插件可以装饰其他菜单插件。要了解更详细的组合方法，
  *   去看看 "17.主菜单 > 多层组合装饰（界面装饰）.docx"。
+ *   还有 "17.主菜单 > 多层组合装饰（界面装饰-菜单界面）.docx"。
  * 关键字：
  *   (1.插件通过关键字识别菜单，并对指定菜单进行装饰。
  *      具体去看看 "17.主菜单 > 菜单关键字.docx"。
@@ -39,7 +40,7 @@
  *   (1.视频动画只支持 .webm(pc端) 和 .mp4(手机端) 格式的视频。
  *   (2.视频与GIF区别在于清晰度和声音。
  *      如果你有条件制作GIF，建议使用GIF而不是视频。
- *   (3.循环播放时，视频的末尾可能会闪一下黑色背景。属于正常情况。
+ *   (3.循环播放时，视频的末尾可能会闪一下黑屏。属于正常情况。
  *   (4.视频是一个比较复杂的文件结构，需要通过环境内置的解析器来解析，
  *      低版本的node.js由于环境缺陷，运行两个以上视频会非常卡，高配电
  *      脑也卡到4帧，而火狐浏览器、高版本的js环境不存在该问题。
@@ -64,7 +65,7 @@
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定
- * 你可以通过插件指令控制菜单背景的显示情况：
+ * 你可以通过插件指令控制视频的显示情况：
  * 
  * 插件指令：>菜单视频 : 视频[3] : 显示
  * 插件指令：>菜单视频 : 视频[4] : 隐藏
@@ -84,7 +85,7 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
  * 时间复杂度： o(n)+o(视频图像处理) 每帧
- * 测试方法：   在菜单中开启视频背景。
+ * 测试方法：   在菜单中开启视频。
  * 测试结果：   菜单界面估算平均消耗为：【265.46ms】
  *
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
@@ -458,10 +459,16 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			视频动画背景：
-//				->显示隐藏
-//				->播放视频
-//				->视频贴图
+//			->☆提示信息
+//			->☆变量获取
+//			->☆插件指令
+//			->☆存储数据
+//			->☆菜单层级
+//
+//			->☆贴图创建标记
+//			->☆音量控制
+//			->☆贴图控制
+//			->视频贴图【Drill_TVi_VideoSprite】
 //
 //
 //		★家谱：
@@ -483,7 +490,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -494,7 +501,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_MenuVideo = true;
@@ -552,7 +559,7 @@
 	
 	
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _drill_MVi_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
@@ -578,7 +585,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -681,18 +688,8 @@ Game_System.prototype.drill_MVi_checkSysData_Private = function() {
 };
 
 
-//=============================================================================
-// * 临时变量初始化
-//=============================================================================
-var _drill_MVi_temp_initialize = Game_Temp.prototype.initialize;
-Game_Temp.prototype.initialize = function() {
-	_drill_MVi_temp_initialize.call(this);
-	this._drill_MVi_sprites = [];
-}
-
-
 //#############################################################################
-// ** 【标准模块】菜单层级
+// ** 【标准模块】菜单层级 ☆菜单层级
 //#############################################################################
 //##############################
 // * 菜单层级 - 添加贴图到层级【标准函数】
@@ -705,7 +702,7 @@ Game_Temp.prototype.initialize = function() {
 //##############################
 Scene_MenuBase.prototype.drill_MVi_layerAddSprite = function( sprite, layer_index ){
     this.drill_MVi_layerAddSprite_Private(sprite, layer_index);
-}
+};
 //##############################
 // * 菜单层级 - 去除贴图【标准函数】
 //				
@@ -715,8 +712,8 @@ Scene_MenuBase.prototype.drill_MVi_layerAddSprite = function( sprite, layer_inde
 //			说明：	> 强行规范的接口，将指定贴图从菜单层级中移除。
 //##############################
 Scene_MenuBase.prototype.drill_MVi_layerRemoveSprite = function( sprite ){
-	//（不操作）
-}
+	this.drill_MVi_layerRemoveSprite_Private( sprite );
+};
 //##############################
 // * 菜单层级 - 图片层级排序【标准函数】
 //				
@@ -727,7 +724,7 @@ Scene_MenuBase.prototype.drill_MVi_layerRemoveSprite = function( sprite ){
 //##############################
 Scene_MenuBase.prototype.drill_MVi_sortByZIndex = function () {
     this.drill_MVi_sortByZIndex_Private();
-}
+};
 //=============================================================================
 // ** 菜单层级（接口实现）
 //=============================================================================
@@ -745,7 +742,7 @@ Scene_MenuBase.prototype.update = function() {
 		this._foregroundSprite = new Sprite();
 		this.addChild(this._foregroundSprite);	
 	}
-}
+};
 //==============================
 // * 菜单层级 - 图片层级排序（私有）
 //==============================
@@ -754,22 +751,38 @@ Scene_MenuBase.prototype.drill_MVi_sortByZIndex_Private = function() {
    this._foregroundSprite.children.sort(function(a, b){return a.zIndex-b.zIndex});
 };
 //==============================
+// * 菜单层级 - 去除贴图（私有）
+//==============================
+Scene_MenuBase.prototype.drill_MVi_layerRemoveSprite_Private = function( sprite ){
+	this._backgroundSprite.removeChild( sprite );
+	this._foregroundSprite.removeChild( sprite );
+};
+//==============================
 // * 菜单层级 - 添加贴图到层级（私有）
+//
+//			说明：	> 此处兼容了 战斗界面、地图界面 的层级名词。
 //==============================
 Scene_MenuBase.prototype.drill_MVi_layerAddSprite_Private = function( sprite, layer_index ){
-	if( layer_index == "菜单后面层" || layer_index === 0 ){
+	if( layer_index == "菜单后面层" || layer_index === 0 || 
+		layer_index == "下层" || layer_index == "中层" || layer_index == "上层"){
 		this._backgroundSprite.addChild( sprite );
 	}
-	if( layer_index == "菜单前面层" || layer_index === 1 ){
+	if( layer_index == "菜单前面层" || layer_index === 1 || 
+		layer_index == "图片层" || layer_index == "最顶层" ){
 		this._foregroundSprite.addChild( sprite );
 	}
 };
 
+
 //=============================================================================
-// ** 菜单
+// ** ☆贴图创建标记
+//			
+//			说明：	> 此模块专门对 菜单面板 进行 创建标记，确保只创建一次。
+//					  注意，该功能在所有菜单面板中都会执行。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// ** 菜单 - 创建背景
+// * 贴图创建标记 - 初始化
 //==============================
 var _drill_MVi_createBackground = Scene_MenuBase.prototype.createBackground;
 Scene_MenuBase.prototype.createBackground = function() {
@@ -782,12 +795,74 @@ Scene_MenuBase.prototype.createBackground = function() {
 	_drill_MVi_createBackground.call(this);
 };
 //==============================
-// ** 菜单 - 退出界面
+// * 贴图创建标记 - 退出界面
 //==============================
 var _drill_MVi_terminate = Scene_MenuBase.prototype.terminate;
 Scene_MenuBase.prototype.terminate = function() {
-	_drill_MVi_terminate.call(this);			//设置需要下次重新创建
+	_drill_MVi_terminate.call(this);			//（下次进入界面需重新创建）
 	SceneManager._drill_MVi_created = false;
+};
+//==============================
+// * 贴图创建标记 - 帧刷新
+//==============================
+var _drill_MVi_update = Scene_MenuBase.prototype.update;
+Scene_MenuBase.prototype.update = function() {
+	_drill_MVi_update.call(this);
+	
+	// > 要求载入完毕后 创建
+	if( SceneManager.isCurrentSceneStarted() &&
+		SceneManager._drill_MVi_created != true ){
+		this.drill_MVi_create();
+	}
+	// > 帧刷新
+	if( SceneManager._drill_MVi_created == true ){
+		this.drill_MVi_update();
+	};
+};
+
+
+//=============================================================================
+// ** ☆音量控制
+//
+//			说明：	> 此模块专门管理 视频音量比 控制。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 音量控制 - 控制音量比例
+//==============================
+var _drill_MVi_setMasterVolume = WebAudio.setMasterVolume;
+WebAudio.setMasterVolume = function(value) {
+	for( var i = 0; i < $gameTemp._drill_MVi_sprites.length; i++) {
+		var sprite = $gameTemp._drill_MVi_sprites[i];
+		if( sprite ){
+			sprite._drill_src.volume = sprite._drill_data['volume'] * value;
+			if( sprite._drill_data['showDebug'] ){ console.log('菜单视频-设置音量: ', value); }
+		}
+	}
+	return _drill_MVi_setMasterVolume(value);
+}
+
+
+//=============================================================================
+// ** ☆贴图控制
+//
+//			说明：	> 此模块专门管理 贴图 的创建与销毁。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 贴图控制 - 初始化
+//==============================
+var _drill_MVi_temp_initialize = Game_Temp.prototype.initialize;
+Game_Temp.prototype.initialize = function() {
+	_drill_MVi_temp_initialize.call(this);
+	this._drill_MVi_sprites = [];
+}
+//==============================
+// * 贴图控制 - 销毁时
+//==============================
+var _drill_MVi_terminate2 = Scene_MenuBase.prototype.terminate;
+Scene_MenuBase.prototype.terminate = function() {
+	_drill_MVi_terminate2.call(this);			//设置需要下次重新创建
 	for(var i=0; i < $gameTemp._drill_MVi_sprites.length; i++){
 		var sprite = $gameTemp._drill_MVi_sprites[i];
 		sprite.drill_MVi_destroy();
@@ -795,31 +870,16 @@ Scene_MenuBase.prototype.terminate = function() {
 	$gameTemp._drill_MVi_sprites = [];
 };
 //==============================
-// * 菜单 - 帧刷新
-//==============================
-var _drill_MVi_update = Scene_MenuBase.prototype.update;
-Scene_MenuBase.prototype.update = function() {
-	_drill_MVi_update.call(this);
-	
-	if( SceneManager.isCurrentSceneStarted() && !SceneManager._drill_MVi_created ) {
-		this.drill_MVi_create();				//创建，进入界面后只执行一次
-	}
-	if( SceneManager._drill_MVi_created ){
-		this.drill_MVi_update();
-	};
-};
-
-//=============================================================================
-// ** 视频
-//=============================================================================
-//==============================
-// ** 创建视频
+// * 贴图控制 - 界面创建时
 //==============================
 var _drill_MVi_createDisplayObjects = Scene_MenuBase.prototype.createDisplayObjects;
 Scene_MenuBase.prototype.createDisplayObjects = function() {
     _drill_MVi_createDisplayObjects.call(this);
 	this.drill_MVi_create();
 }
+//==============================
+// * 贴图控制 - 界面创建
+//==============================
 Scene_MenuBase.prototype.drill_MVi_create = function() {    
 	SceneManager._drill_MVi_created = true;
 	
@@ -879,7 +939,7 @@ Scene_MenuBase.prototype.drill_MVi_create = function() {
 	this.drill_MVi_sortByZIndex();
 };
 //==============================
-// * 视频 - 检查位置
+// * 贴图控制 - 检查位置
 //==============================
 Scene_MenuBase.prototype.drill_MVi_checkKeyword = function( temp_sprite_data ){
 	
@@ -925,28 +985,12 @@ Scene_MenuBase.prototype.drill_MVi_checkKeyword = function( temp_sprite_data ){
 	}
 	return false;
 };
-
 //==============================
-// * 视频 - 帧刷新
+// * 贴图控制 - 帧刷新
 //==============================
 Scene_MenuBase.prototype.drill_MVi_update = function() {
 	//暂无
 };
-
-//==============================
-// ** 特殊 - 控制音量比例
-//==============================
-var _drill_MVi_setMasterVolume = WebAudio.setMasterVolume;
-WebAudio.setMasterVolume = function(value) {
-	for( var i = 0; i < $gameTemp._drill_MVi_sprites.length; i++) {
-		var sprite = $gameTemp._drill_MVi_sprites[i];
-		if( sprite ){
-			sprite._drill_src.volume = sprite._drill_data['volume'] * value;
-			if( sprite._drill_data['showDebug'] ){ console.log('菜单视频-设置音量: ', value); }
-		}
-	}
-	return _drill_MVi_setMasterVolume(value);
-}
 
 
 //=============================================================================

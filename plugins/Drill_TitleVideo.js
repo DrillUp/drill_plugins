@@ -34,6 +34,7 @@
  *   只作用于标题界面。
  * 2.要了解更详细的组合方法，
  *   去看看 "17.主菜单 > 多层组合装饰（界面装饰）.docx"。
+ *   还有 "17.主菜单 > 多层组合装饰（界面装饰-菜单界面）.docx"。
  * 全局存储：
  *   (1.该插件控制的显示/隐藏数据将存储在全局文件中。
  *      如果游戏中修改了显示/隐藏，则永久有效，不保存也有效。
@@ -44,7 +45,7 @@
  *   (1.视频动画只支持 .webm(pc端) 和 .mp4(手机端) 格式的视频。
  *   (2.视频与GIF区别在于清晰度和声音。
  *      如果你有条件制作GIF，建议使用GIF而不是视频。
- *   (3.循环播放时，视频的末尾可能会闪一下黑色背景。属于正常情况。
+ *   (3.循环播放时，视频的末尾可能会闪一下黑屏。属于正常情况。
  *   (4.视频是一个比较复杂的文件结构，需要通过环境内置的解析器来解析，
  *      低版本的nwjs由于环境缺陷，运行两个以上视频会非常卡，高配电
  *      脑也卡到4帧，而火狐浏览器、高版本的js环境不存在该问题。
@@ -55,7 +56,7 @@
  * 层级:
  *   (1.标题设置中有 菜单层级 和 图片层级。
  *      菜单层级分 菜单前面层和菜单后面层 ，对应 标题窗口元素 的前面和后面。
- *      相同 菜单层级 下，背景、魔法圈、gif都根据 图片层级 先后排序。
+ *      相同 菜单层级 下，各个菜单多层装饰插件都根据 图片层级 先后排序。
  *
  * -----------------------------------------------------------------------------
  * ----关联文件
@@ -73,7 +74,7 @@
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定
- * 你可以通过插件指令控制标题背景的显示情况：
+ * 你可以通过插件指令控制视频的显示情况：
  * 
  * 插件指令：>标题视频 : 视频[3] : 显示
  * 插件指令：>标题视频 : 视频[4] : 隐藏
@@ -95,7 +96,7 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
  * 时间复杂度： o(n)+o(视频图像处理) 每帧
- * 测试方法：   在标题中开启视频背景。
+ * 测试方法：   在标题中开启视频。
  * 测试结果：   菜单界面中，标题估算平均消耗为：【265.46ms】
  *
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
@@ -441,10 +442,15 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			视频动画背景：
-//				->显示隐藏
-//				->播放视频
-//				->视频贴图
+//			->☆提示信息
+//			->☆变量获取
+//			->☆全局存储
+//			->☆插件指令
+//
+//			->☆贴图创建标记
+//			->☆音量控制
+//			->☆贴图控制
+//			->视频贴图【Drill_TVi_VideoSprite】
 //
 //
 //		★家谱：
@@ -466,7 +472,7 @@
 //			  
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -491,7 +497,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_TitleVideo = true;
@@ -554,9 +560,46 @@
 //=============================================================================
 if( Imported.Drill_CoreOfGlobalSave ){
 
+	
+//=============================================================================
+// ** ☆插件指令
+//=============================================================================
+var _drill_TVi_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+Game_Interpreter.prototype.pluginCommand = function(command, args) {
+	_drill_TVi_pluginCommand.call(this, command, args);
+	if( command === ">标题视频" ){
+		if(args.length == 4){
+			var temp1 = String(args[1]);
+			var type = String(args[3]);
+			var b_id = -1;
+			temp1 = temp1.replace("视频[","");
+			temp1 = temp1.replace("]","");
+			b_id = Number(temp1) - 1;
+			
+			if( b_id >= 0 && type === "显示" ){
+				DrillUp.global_TVi_visibleTank[b_id] = true;
+				StorageManager.drill_TVi_saveData();
+			}
+			if( b_id >= 0 && type === "隐藏" ){
+				DrillUp.global_TVi_visibleTank[b_id] = false;
+				StorageManager.drill_TVi_saveData();
+			}
+		}
+		if(args.length == 2){
+			var type = String(args[1]);
+			if( type === "隐藏全部" ){
+				for(var i=0; i<DrillUp.global_TVi_visibleTank.length; i++){
+					DrillUp.global_TVi_visibleTank[i] = false;
+				}
+				StorageManager.drill_TVi_saveData();
+			}
+		}
+	}
+};
+
 
 //=============================================================================
-// ** 全局存储
+// ** ☆全局存储
 //=============================================================================
 //==============================
 // * 全局 - 检查数据 - 显示情况
@@ -602,59 +645,17 @@ StorageManager.drill_TVi_saveData = function(){
 	data["global_visibleTank"] = DrillUp.global_TVi_visibleTank;
 	this.drill_COGS_saveData( file_id, "TVi", data );
 };
-	
-//=============================================================================
-// * 插件指令
-//=============================================================================
-var _drill_TVi_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
-	_drill_TVi_pluginCommand.call(this, command, args);
-	if (command === ">标题视频") {
-		if(args.length == 4){
-			var temp1 = String(args[1]);
-			var type = String(args[3]);
-			var b_id = -1;
-			temp1 = temp1.replace("视频[","");
-			temp1 = temp1.replace("]","");
-			b_id = Number(temp1) - 1;
-			
-			if( b_id >= 0 && type === "显示" ){
-				DrillUp.global_TVi_visibleTank[b_id] = true;
-				StorageManager.drill_TVi_saveData();
-			}
-			if( b_id >= 0 && type === "隐藏" ){
-				DrillUp.global_TVi_visibleTank[b_id] = false;
-				StorageManager.drill_TVi_saveData();
-			}
-		}
-		if(args.length == 2){
-			var type = String(args[1]);
-			if( type === "隐藏全部" ){
-				for(var i=0; i<DrillUp.global_TVi_visibleTank.length; i++){
-					DrillUp.global_TVi_visibleTank[i] = false;
-				}
-				StorageManager.drill_TVi_saveData();
-			}
-		}
-	}
-};
 
 
 //=============================================================================
-// ** 临时变量初始化
-//=============================================================================
-var _drill_TVi_temp_initialize = Game_Temp.prototype.initialize;
-Game_Temp.prototype.initialize = function() {
-	_drill_TVi_temp_initialize.call(this);
-	this._drill_TVi_sprites = [];
-};
-
-
-//=============================================================================
-// ** 菜单
+// ** ☆贴图创建标记
+//			
+//			说明：	> 此模块专门对 菜单面板 进行 创建标记，确保只创建一次。
+//					  注意，该功能在所有菜单面板中都会执行。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// ** 菜单 - 创建背景
+// * 贴图创建标记 - 初始化
 //==============================
 var _drill_TVi_createBackground = Scene_Title.prototype.createBackground;
 Scene_Title.prototype.createBackground = function() {
@@ -671,12 +672,74 @@ Scene_Title.prototype.createBackground = function() {
 	}
 };
 //==============================
-// ** 菜单 - 退出界面
+// * 贴图创建标记 - 退出界面
 //==============================
 var _drill_TVi_terminate = Scene_Title.prototype.terminate;
 Scene_Title.prototype.terminate = function() {
-	_drill_TVi_terminate.call(this);			//设置需要下次重新创建
+	_drill_TVi_terminate.call(this);			//（下次进入界面需重新创建）
 	SceneManager._drill_TVi_created = false;
+};
+//==============================
+// * 贴图创建标记 - 帧刷新
+//==============================
+var _drill_TVi_update = Scene_Title.prototype.update;
+Scene_Title.prototype.update = function() {
+	_drill_TVi_update.call(this);
+	
+	// > 要求载入完毕后 创建
+	if( SceneManager.isCurrentSceneStarted() &&
+		SceneManager._drill_TVi_created != true ){
+		this.drill_TVi_create();
+	}
+	// > 帧刷新
+	if( SceneManager._drill_TVi_created == true ){
+		this.drill_TVi_update();
+	};
+};
+
+
+//=============================================================================
+// ** ☆音量控制
+//
+//			说明：	> 此模块专门管理 视频音量比 控制。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 音量控制 - 控制音量比例
+//==============================
+var _drill_TVi_setMasterVolume = WebAudio.setMasterVolume;
+WebAudio.setMasterVolume = function(value) {
+	for( var i = 0; i < $gameTemp._drill_TVi_sprites.length; i++) {
+		var sprite = $gameTemp._drill_TVi_sprites[i];
+		if( sprite ){
+			sprite._drill_src.volume = sprite._drill_data['volume'] * value;
+			if( sprite._drill_data['showDebug'] ){ console.log('标题视频-设置音量: ', value); }
+		}
+	}
+	return _drill_TVi_setMasterVolume(value);
+}
+
+
+//=============================================================================
+// ** ☆贴图控制
+//
+//			说明：	> 此模块专门管理 贴图 的创建与销毁。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 贴图控制 - 初始化
+//==============================
+var _drill_TVi_temp_initialize = Game_Temp.prototype.initialize;
+Game_Temp.prototype.initialize = function() {
+	_drill_TVi_temp_initialize.call(this);
+	this._drill_TVi_sprites = [];
+};
+//==============================
+// * 贴图控制 - 退出界面
+//==============================
+var _drill_TVi_terminate2 = Scene_Title.prototype.terminate;
+Scene_Title.prototype.terminate = function() {
+	_drill_TVi_terminate2.call(this);			//设置需要下次重新创建
 	for(var i=0; i < $gameTemp._drill_TVi_sprites.length; i++){
 		var sprite = $gameTemp._drill_TVi_sprites[i];
 		sprite.drill_TVi_destroy();
@@ -684,38 +747,16 @@ Scene_Title.prototype.terminate = function() {
 	$gameTemp._drill_TVi_sprites = [];
 };
 //==============================
-// ** 菜单 - 层级排序
-//==============================
-Scene_Title.prototype.drill_TVi_sortByZIndex = function() {
-   this._backgroundSprite.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
-   this._foregroundSprite.children.sort(function(a, b){return a.zIndex-b.zIndex});
-};
-//==============================
-// * 菜单 - 帧刷新
-//==============================
-var _drill_TVi_update = Scene_Title.prototype.update;
-Scene_Title.prototype.update = function() {
-	_drill_TVi_update.call(this);
-	
-	if( SceneManager.isCurrentSceneStarted() && !SceneManager._drill_TVi_created ) {
-		this.drill_TVi_create();				//创建，进入界面后只执行一次
-	}
-	if( SceneManager._drill_TVi_created ){
-		this.drill_TVi_update();
-	};
-};
-
-//=============================================================================
-// ** 视频
-//=============================================================================
-//==============================
-// ** 创建视频
+// * 贴图控制 - 界面创建时
 //==============================
 var _drill_TVi_createDisplayObjects = Scene_Title.prototype.createDisplayObjects;
 Scene_Title.prototype.createDisplayObjects = function() {
     _drill_TVi_createDisplayObjects.call(this);
 	this.drill_TVi_create();
 }
+//==============================
+// * 贴图控制 - 界面创建
+//==============================
 Scene_Title.prototype.drill_TVi_create = function() {    
 	SceneManager._drill_TVi_created = true;
 	
@@ -784,26 +825,18 @@ Scene_Title.prototype.drill_TVi_create = function() {
 	this.drill_TVi_sortByZIndex();
 };
 //==============================
-// * 视频 - 帧刷新
+// * 贴图控制 - 帧刷新
 //==============================
 Scene_Title.prototype.drill_TVi_update = function() {
 	//暂无
 };
-
 //==============================
-// ** 特殊 - 控制音量比例
+// * 贴图控制 - 层级排序（标题）
 //==============================
-var _drill_TVi_setMasterVolume = WebAudio.setMasterVolume;
-WebAudio.setMasterVolume = function(value) {
-	for( var i = 0; i < $gameTemp._drill_TVi_sprites.length; i++) {
-		var sprite = $gameTemp._drill_TVi_sprites[i];
-		if( sprite ){
-			sprite._drill_src.volume = sprite._drill_data['volume'] * value;
-			if( sprite._drill_data['showDebug'] ){ console.log('标题视频-设置音量: ', value); }
-		}
-	}
-	return _drill_TVi_setMasterVolume(value);
-}
+Scene_Title.prototype.drill_TVi_sortByZIndex = function() {
+   this._backgroundSprite.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
+   this._foregroundSprite.children.sort(function(a, b){return a.zIndex-b.zIndex});
+};
 
 
 //=============================================================================

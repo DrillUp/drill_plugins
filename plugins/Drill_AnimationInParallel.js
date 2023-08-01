@@ -117,10 +117,20 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			并行动画：
+//			->☆提示信息
+//			->☆变量获取
+//			->☆插件指令
+//			
+//			->☆贴图控制（动画装饰）
+//				->指定角色 - 全部装饰立即消失
+//				->指定敌人 - 全部装饰立即消失
+//				->指定角色 - 指定动画ID的装饰立即消失
+//				->指定敌人 - 指定动画ID的装饰立即消失
+//			->☆动画控制
+//				->保持播放状态
+//			->☆战斗动画
 //				->战斗不阻塞设置
 //				->并行播放
-//				->插件指令
 //			
 //			
 //		★家谱：
@@ -160,7 +170,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -171,7 +181,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_AnimationInParallel = true;
@@ -180,7 +190,7 @@
 
 
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _drill_AIP_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
@@ -335,11 +345,15 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 }
 
+
 //=============================================================================
-// ** 动画装饰贴图控制
+// ** ☆贴图控制（动画装饰）
+//
+//			说明：	> 此模块专门对 动画装饰贴图 进行操作。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 控制 - 指定角色 - 全部装饰立即消失（接口）
+// * 贴图控制 - 指定角色 - 全部装饰立即消失（开放函数）
 //==============================
 Game_Temp.prototype.drill_AIP_setAllAnimDeath_Actor = function( actor_obj ){
 	
@@ -365,7 +379,7 @@ Game_Temp.prototype.drill_AIP_setAllAnimDeath_Actor = function( actor_obj ){
 	}
 }
 //==============================
-// * 控制 - 指定敌人 - 全部装饰立即消失（接口）
+// * 贴图控制 - 指定敌人 - 全部装饰立即消失（开放函数）
 //==============================
 Game_Temp.prototype.drill_AIP_setAllAnimDeath_Enemy = function( enemy_obj ){
 
@@ -391,7 +405,7 @@ Game_Temp.prototype.drill_AIP_setAllAnimDeath_Enemy = function( enemy_obj ){
 	}
 }
 //==============================
-// * 控制 - 指定角色 - 指定动画ID的装饰立即消失（接口）
+// * 贴图控制 - 指定角色 - 指定动画ID的装饰立即消失（开放函数）
 //==============================
 Game_Temp.prototype.drill_AIP_setAnimDeathByAnimId_Actor = function( actor_obj, anim_id ){
 
@@ -421,7 +435,7 @@ Game_Temp.prototype.drill_AIP_setAnimDeathByAnimId_Actor = function( actor_obj, 
 	}
 }
 //==============================
-// * 控制 - 指定敌人 - 指定动画ID的装饰立即消失（接口）
+// * 贴图控制 - 指定敌人 - 指定动画ID的装饰立即消失（开放函数）
 //==============================
 Game_Temp.prototype.drill_AIP_setAnimDeathByAnimId_Enemy = function( enemy_obj, anim_id ){
 
@@ -451,11 +465,15 @@ Game_Temp.prototype.drill_AIP_setAnimDeathByAnimId_Enemy = function( enemy_obj, 
 	}
 }
 
+
 //=============================================================================
-// ** 动画
+// ** ☆动画控制
+//
+//			说明：	> 此模块专门对 动画 进行功能管理。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 动画 - 初始化
+// * 动画控制 - 初始化
 //==============================
 var _drill_AIP_initMembers = Sprite_Animation.prototype.initMembers;
 Sprite_Animation.prototype.initMembers = function() {
@@ -463,7 +481,9 @@ Sprite_Animation.prototype.initMembers = function() {
 	this._drill_AIP_isParallel = false;
 };
 //==============================
-// * 动画 - 播放情况（覆写）
+// * 动画控制 - 播放情况（覆写）
+//
+//			说明：	> 并行动画未结束时，个体贴图 仍然保持播放状态。
 //==============================
 Sprite_Base.prototype.isAnimationPlaying = function() {
 	var len = 0;
@@ -474,14 +494,20 @@ Sprite_Base.prototype.isAnimationPlaying = function() {
 	}
     return len > 0;
 };
+
 	
 //=============================================================================
-// ** 战斗动画
+// ** ☆战斗动画
+//
+//			说明：	> 此模块专门管理 战斗界面的动画 。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 战斗动画 - 添加并行动画（接口）
+// * 战斗动画 - 播放并行动画（开放函数）
+//
+//			说明：	> 此处参照 Game_Battler.prototype.startAnimation，并添加了并行标记参数。
 //==============================
-Game_Battler.prototype.drill_AIP_startParallelAnimation = function(animationId, mirror, delay) {
+Game_Battler.prototype.drill_AIP_startParallelAnimation = function( animationId, mirror, delay ){
     var data = { animationId: animationId, mirror: mirror, delay: delay , drill_AIP_parallel: true};
     this._animations.push(data);
 };
@@ -517,7 +543,7 @@ Sprite_Battler.prototype.setupAnimation = function() {
 //==============================
 // * 战斗动画 - 默认标记
 //	
-//			说明：	设置动画的下一层，这里用来修复特殊情况，【默认未知的动画，直接并行】）
+//			说明：	> 设置动画的下一层，这里用来修复特殊情况，【默认未知的动画，直接并行】
 //==============================
 var _drill_AIP_startAnimation = Sprite_Battler.prototype.startAnimation;
 Sprite_Battler.prototype.startAnimation = function(animation, mirror, delay) {

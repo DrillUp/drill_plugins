@@ -90,6 +90,7 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 改进了扩展关系。
+ * 
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -114,11 +115,15 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			随机朝向与位移：
+//			->☆提示信息
+//			->☆变量获取
+//			
+//			（此处考虑如何将功能分离）
+//			原生技能与动画 数据传输核
 //				->原生技能与动画 的数据连接
 //				->技能与并行动画 的数据连接
 //				->旋转、偏移
-//
+//			
 //
 //		★家谱：
 //			无
@@ -144,7 +149,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -155,7 +160,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_AnimationSkillSettings = true;
@@ -165,7 +170,7 @@
 
 
 //=============================================================================
-// * 	原生技能与动画 数据传输核
+// ** 	原生技能与动画 数据传输核
 //
 //		功能：		将Game_Action中的数据（技能/物品），传输到动画贴图中。
 //		可选项：	无
@@ -264,12 +269,12 @@ Window_BattleLog.prototype.performAction = function(subject, action) {
 	for(var i=0; i< note_list.length; i++){
 		var re_filter = /<技能动画设置:([^<>]*?)>/; 
 		var commands = (note_list[i].match(re_filter)) || [];
-		if(commands != "" && commands != [] ){
+		if( commands != "" && commands != [] ){
 			var args = commands[1].split(':');
 			if( args.length == 2 ){
 				var type = String(args[0]);
 				var type2 = String(args[1]);
-				if(type == "朝向"){
+				if( type == "朝向" ){
 					temp_data._drill_ASS.rotateType = type2;
 				}
 			}
@@ -277,16 +282,16 @@ Window_BattleLog.prototype.performAction = function(subject, action) {
 				var type = String(args[0]);
 				var type2 = String(args[1]);
 				var temp1 = Number(args[2]);
-				if(type == "朝向"){
+				if( type == "朝向" ){
 					temp_data._drill_ASS.rotateType = type2;
 					temp_data._drill_ASS.rotateData1 = temp1;
 				}
-				if(type == "位移"){
+				if( type == "位移" ){
 					temp_data._drill_ASS.moveType = type2;
 					temp_data._drill_ASS.moveData1 = temp1;
 					temp_data._drill_ASS.moveData2 = temp1;
 				}
-				if(type == "大小"){
+				if( type == "大小" ){
 					temp_data._drill_ASS.resizeType = type2;
 					temp_data._drill_ASS.resizeData1 = temp1;
 					temp_data._drill_ASS.resizeData2 = temp1;
@@ -297,12 +302,12 @@ Window_BattleLog.prototype.performAction = function(subject, action) {
 				var type2 = String(args[1]);
 				var temp1 = Number(args[2]);
 				var temp2 = Number(args[3]);
-				if(type == "位移"){
+				if( type == "位移" ){
 					temp_data._drill_ASS.moveType = type2;
 					temp_data._drill_ASS.moveData1 = temp1;
 					temp_data._drill_ASS.moveData2 = temp2;
 				}
-				if(type == "大小"){
+				if( type == "大小" ){
 					temp_data._drill_ASS.resizeType = type2;
 					temp_data._drill_ASS.resizeData1 = temp1;
 					temp_data._drill_ASS.resizeData2 = temp2;

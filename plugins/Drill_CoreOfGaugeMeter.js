@@ -1359,7 +1359,8 @@
 		
 		// > 游标
 		data['vernier_enable'] = String( dataFrom["是否启用游标"] || "false") === "true";
-		if( dataFrom["资源-游标"] != undefined && dataFrom["资源-游标"] != "" ){
+		if( dataFrom["资源-游标"] != undefined &&
+			dataFrom["资源-游标"] != "" ){
 			data['vernier_src'] = JSON.parse( dataFrom["资源-游标"] );
 		}else{
 			data['vernier_src'] = [];

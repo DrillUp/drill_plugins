@@ -31,6 +31,7 @@
  *   可以放置在菜单前面层或者菜单后面层。
  * 2.该插件可以装饰其他菜单插件。要了解更详细的组合方法，
  *   去看看 "17.主菜单 > 多层组合装饰（界面装饰）.docx"。
+ *   还有 "17.主菜单 > 多层组合装饰（界面装饰-菜单界面）.docx"。
  * 关键字：
  *   (1.插件通过关键字识别菜单，并对指定菜单进行装饰。
  *      具体去看看 "17.主菜单 > 菜单关键字.docx"。
@@ -1058,7 +1059,7 @@ Game_System.prototype.drill_MTG_checkSysData_Private = function() {
 
 
 //#############################################################################
-// ** 【标准模块】菜单层级
+// ** 【标准模块】菜单层级 ☆菜单层级
 //#############################################################################
 //##############################
 // * 菜单层级 - 添加贴图到层级【标准函数】
@@ -1071,7 +1072,7 @@ Game_System.prototype.drill_MTG_checkSysData_Private = function() {
 //##############################
 Scene_MenuBase.prototype.drill_MTG_layerAddSprite = function( sprite, layer_index ){
     this.drill_MTG_layerAddSprite_Private(sprite, layer_index);
-}
+};
 //##############################
 // * 菜单层级 - 去除贴图【标准函数】
 //				
@@ -1081,8 +1082,8 @@ Scene_MenuBase.prototype.drill_MTG_layerAddSprite = function( sprite, layer_inde
 //			说明：	> 强行规范的接口，将指定贴图从菜单层级中移除。
 //##############################
 Scene_MenuBase.prototype.drill_MTG_layerRemoveSprite = function( sprite ){
-	//（不操作）
-}
+	this.drill_MTG_layerRemoveSprite_Private( sprite );
+};
 //##############################
 // * 菜单层级 - 图片层级排序【标准函数】
 //				
@@ -1093,7 +1094,7 @@ Scene_MenuBase.prototype.drill_MTG_layerRemoveSprite = function( sprite ){
 //##############################
 Scene_MenuBase.prototype.drill_MTG_sortByZIndex = function () {
     this.drill_MTG_sortByZIndex_Private();
-}
+};
 //=============================================================================
 // ** 菜单层级（接口实现）
 //=============================================================================
@@ -1111,7 +1112,7 @@ Scene_MenuBase.prototype.update = function() {
 		this._foregroundSprite = new Sprite();
 		this.addChild(this._foregroundSprite);	
 	}
-}
+};
 //==============================
 // * 菜单层级 - 图片层级排序（私有）
 //==============================
@@ -1120,16 +1121,28 @@ Scene_MenuBase.prototype.drill_MTG_sortByZIndex_Private = function() {
    this._foregroundSprite.children.sort(function(a, b){return a.zIndex-b.zIndex});
 };
 //==============================
+// * 菜单层级 - 去除贴图（私有）
+//==============================
+Scene_MenuBase.prototype.drill_MTG_layerRemoveSprite_Private = function( sprite ){
+	this._backgroundSprite.removeChild( sprite );
+	this._foregroundSprite.removeChild( sprite );
+};
+//==============================
 // * 菜单层级 - 添加贴图到层级（私有）
+//
+//			说明：	> 此处兼容了 战斗界面、地图界面 的层级名词。
 //==============================
 Scene_MenuBase.prototype.drill_MTG_layerAddSprite_Private = function( sprite, layer_index ){
-	if( layer_index == "菜单后面层" || layer_index === 0 ){
+	if( layer_index == "菜单后面层" || layer_index === 0 || 
+		layer_index == "下层" || layer_index == "中层" || layer_index == "上层"){
 		this._backgroundSprite.addChild( sprite );
 	}
-	if( layer_index == "菜单前面层" || layer_index === 1 ){
+	if( layer_index == "菜单前面层" || layer_index === 1 || 
+		layer_index == "图片层" || layer_index == "最顶层" ){
 		this._foregroundSprite.addChild( sprite );
 	}
 };
+
 
 //=============================================================================
 // ** 菜单界面

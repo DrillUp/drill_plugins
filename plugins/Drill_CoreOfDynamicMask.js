@@ -1637,7 +1637,8 @@ Game_Temp.prototype.drill_CODM_isAnticlockwise = function( a,b ) {
 //					> x2,y2 数字（点B）
 //			返回：	> 数字      （角度，0 至 360 之间）
 //			
-//			说明：	0度朝右，90度朝下，180度朝左，270度朝上。
+//			说明：	> 0度朝右，90度朝下，180度朝左，270度朝上。
+//					> 若两点重合，返回 270 。
 //==============================
 Game_Temp.prototype.drill_CODM_Math2D_getPointToPointDegree = function( x1,y1,x2,y2 ){
 	var degree = 0;

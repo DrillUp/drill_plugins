@@ -493,6 +493,8 @@ Game_Action.prototype.apply = function( target ){
 }
 //==============================
 // * 技能注释 - 作用时
+//
+//			说明：	> 由于技能是一个临时对象，因此只能实时解析并使用。
 //==============================
 Game_Action.prototype.drill_ASSE_actionApply = function( target ){
 	
@@ -1016,17 +1018,17 @@ Game_System.prototype.drill_ASSE_checkSysData_Private = function() {
 //==============================
 // * 控制器创建 - 界面创建时（地图界面）
 //==============================
-var _drill_ASSE_smap_createAllWindows = Scene_Map.prototype.createAllWindows;
+var _drill_ASSE_mapCreate_createAllWindows = Scene_Map.prototype.createAllWindows;
 Scene_Map.prototype.createAllWindows = function() {
-	_drill_ASSE_smap_createAllWindows.call(this);
+	_drill_ASSE_mapCreate_createAllWindows.call(this);
 	this.drill_ASSE_sceneCreate();
 };
 //==============================
 // * 控制器创建 - 帧刷新（地图界面）
 //==============================
-var _drill_ASSE_smap_update = Scene_Map.prototype.update;
+var _drill_ASSE_mapCreate_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {
-	_drill_ASSE_smap_update.call(this);
+	_drill_ASSE_mapCreate_update.call(this);
 	this.drill_ASSE_updateCreateOnce();			//帧刷新 - 单次创建
 	this.drill_ASSE_updateCreateConstant();		//帧刷新 - 连续创建
 };
@@ -1069,20 +1071,19 @@ Scene_Map.prototype.drill_ASSE_sceneCreate = function() {
 //==============================
 Scene_Map.prototype.drill_ASSE_updateCreateOnce = function() {
 	if( $gameTemp._Drill_ASSE_createOne == undefined ){ return; }
-	
 	var data = $gameTemp._Drill_ASSE_createOne;
-	this.drill_ASSE_createOne( data['style'] -1 );
-	
 	$gameTemp._Drill_ASSE_createOne = null;
+	
+	this.drill_ASSE_createOne( data['style'] -1 );
 };
 //==============================
 // * 控制器创建 - 帧刷新 连续创建（地图界面）
 //==============================
 Scene_Map.prototype.drill_ASSE_updateCreateConstant = function() {
 	if( $gameSystem._drill_ASSE_creatingFlow == undefined ){ return; }
+	var data = $gameSystem._drill_ASSE_creatingFlow;
 	
 	// > 帧刷新
-	var data = $gameSystem._drill_ASSE_creatingFlow;
 	if( data['curTime'] % data['interval'] == 0 ){
 		var time = Math.floor( data['curTime'] / data['interval'] );
 		var seq_index = Math.floor( time % data['seq'].length );
@@ -1128,17 +1129,17 @@ Scene_Map.prototype.drill_ASSE_createOne = function( style_id ){
 //==============================
 // * 控制器创建 - 界面创建时（战斗界面）
 //==============================
-var _drill_ASSE_sbattle_createAllWindows = Scene_Battle.prototype.createAllWindows;
+var _drill_ASSE_battleCreate_createAllWindows = Scene_Battle.prototype.createAllWindows;
 Scene_Battle.prototype.createAllWindows = function() {
-	_drill_ASSE_sbattle_createAllWindows.call(this);
+	_drill_ASSE_battleCreate_createAllWindows.call(this);
 	this.drill_ASSE_sceneCreate();
 };
 //==============================
 // * 控制器创建 - 帧刷新（战斗界面）
 //==============================
-var _drill_ASSE_sbattle_update = Scene_Battle.prototype.update;
+var _drill_ASSE_battleCreate_update = Scene_Battle.prototype.update;
 Scene_Battle.prototype.update = function() {
-	_drill_ASSE_sbattle_update.call(this);
+	_drill_ASSE_battleCreate_update.call(this);
 	this.drill_ASSE_updateCreateOnce();			//帧刷新 - 单次创建
 	this.drill_ASSE_updateCreateConstant();		//帧刷新 - 连续创建
 };
@@ -1186,9 +1187,9 @@ Scene_Map.prototype.terminate = function() {
 //==============================
 // * 贴图控制 - 帧刷新（地图界面）
 //==============================
-var _drill_ASSE_smap_update2 = Scene_Map.prototype.update;
+var _drill_ASSE_smap_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {
-	_drill_ASSE_smap_update2.call(this);
+	_drill_ASSE_smap_update.call(this);
 	this.drill_ASSE_updateController();			//帧刷新 - 控制器
 	this.drill_ASSE_updateDestroy();			//帧刷新 - 销毁
 };
@@ -1240,9 +1241,9 @@ Scene_Battle.prototype.terminate = function() {
 //==============================
 // * 贴图控制 - 帧刷新（战斗界面）
 //==============================
-var _drill_ASSE_sbattle_update2 = Scene_Battle.prototype.update;
+var _drill_ASSE_sbattle_update = Scene_Battle.prototype.update;
 Scene_Battle.prototype.update = function() {
-	_drill_ASSE_sbattle_update2.call(this);
+	_drill_ASSE_sbattle_update.call(this);
 	this.drill_ASSE_updateController();			//帧刷新 - 控制器
 	this.drill_ASSE_updateDestroy();			//帧刷新 - 销毁
 };

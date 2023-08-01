@@ -1759,9 +1759,8 @@ Spriteset_Map.prototype.drill_LCa_updateCameraControl = function(){
 // **						->缩放后的X 转 镜头的X【标准函数】
 // **						->缩放后的Y 转 镜头的Y【标准函数】
 // **					->H整体平移
-// **						->整体平移
-// **							->游戏坐标X 转 html坐标X 控制
-// **							->游戏坐标Y 转 html坐标Y 控制
+// **						->游戏坐标X 转 html坐标X 控制
+// **						->游戏坐标Y 转 html坐标Y 控制
 // **						x->摇晃的镜头？（不稳定的xy平移）
 // **					->I滚动地图
 // **					->J数学工具
@@ -2535,7 +2534,7 @@ Drill_LCa_Controller.prototype.drill_updatePosition = function(){
 	this._drill_y += this._drill_globalOffsetY;
 }
 //==============================
-// * A主体 - 帧刷新 - 校验值
+// * A主体 - 帧刷新 校验值
 //==============================
 Drill_LCa_Controller.prototype.drill_updateCheckNaN = function(){
 	if( $gameTemp == undefined ){ return; }		//（测试版开启功能，发布版关闭功能）
@@ -3653,8 +3652,8 @@ Drill_LCa_Controller.prototype.drill_controller_initGlobalOffset = function(){
 	this._drill_globalOffsetY = 0;					//H整体平移 - Y
 	this._drill_globalOffset_curTime = 0;			//H整体平移 - 当前时间
 	this._drill_globalOffset_tarTime = 0;			//H整体平移 - 目标时间
-	this._drill_globalOffset_ballisticsX = null;	//H整体平移 - 弹道
-	this._drill_globalOffset_ballisticsY = null;	//H整体平移 - 弹道
+	this._drill_globalOffset_ballisticsX = null;	//H整体平移 - 弹道X
+	this._drill_globalOffset_ballisticsY = null;	//H整体平移 - 弹道Y
 }
 //==============================
 // * H整体平移 - 修改整体平移（私有）

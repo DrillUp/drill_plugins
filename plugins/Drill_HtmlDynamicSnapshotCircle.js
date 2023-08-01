@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        游戏窗体 - 天窗层的多层魔法圈
+ * @plugindesc [v1.1]        游戏窗体 - 天窗层的多层魔法圈
  * @author Drill_up
  * 
  * @Drill_LE_param "魔法圈层-%d"
@@ -60,8 +60,8 @@
  * 所有素材都放在Special__layer文件夹下。
  * 
  * -----------------------------------------------------------------------------
- * ----可选设定
- * 你可以通过插件指令手动修改天窗层魔法圈的各个属性：
+ * ----可选设定 - 修改单属性
+ * 你可以通过插件指令手动修改各个属性：
  * 
  * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 显示
  * 插件指令：>天窗层魔法圈 : 魔法圈变量[21] : 显示
@@ -71,11 +71,10 @@
  * 
  * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 显示
  * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 隐藏
- * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 显示(延迟) : 延迟时间[20]
- * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 隐藏(延迟) : 延迟时间[20]
  * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 暂停
  * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 继续
- * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 修改单属性 : 混合模式[0]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 切换混合模式[0]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 切换图片层级[10]
  * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 修改单属性 : 透明度[255] : 时间[60]
  * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 修改单属性 : 透明度变量[21] : 时间[60]
  * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 修改单属性 : 旋转[90] : 时间[60]
@@ -87,7 +86,6 @@
  * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 修改单属性 : 斜切X[0.2] : 时间[60]
  * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 修改单属性 : 斜切Y[0.2] : 时间[60]
  * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 立即还原所有单属性
- * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 延迟还原所有单属性 : 延迟时间[20]
  * 
  * 1.前半部分（魔法圈变量[21]）和 后半部分（显示）
  *   的参数可以随意组合。一共有5*16种组合方式。
@@ -96,7 +94,6 @@
  * 3."旋转"、"转速"的变化效果可以叠加。
  * 4.插件指令的变化是永久性的。
  *   修改后的变化能与 配置的自变化效果 叠加，但是实际效果一般都不太好。
- * 5.由于底层变化较大，插件不再支持以前版本的旧指令。
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 移动到
@@ -109,9 +106,60 @@
  * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 移动到-增减速移动 : 位置[100,100] : 时间[60]
  * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 移动到-增减速移动 : 位置变量[25,26] : 时间[60]
  * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 移动到-立即归位
- * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 移动到-延迟归位 : 延迟时间[20]
  * 
- * 1.指令中不含相对移动，比如多次执行移动到[20,20]，贴图只会到达一个固定的位置。
+ * 1.前半部分（魔法圈[11]）和 后半部分（移动到-匀速移动 : 位置[100,100] : 时间[60]）
+ *   的参数可以随意组合。一共有4*7种组合方式。
+ * 2.指令中不含相对移动，比如多次执行移动到[20,20]，贴图只会到达一个固定的位置。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 延迟修改单属性
+ * 上述的插件指令中，部分插件指令可以延迟执行：
+ * 
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 隐藏(延迟) : 延迟执行时间[20]
+ * 插件指令：>天窗层魔法圈 : 魔法圈变量[21] : 隐藏(延迟) : 延迟执行时间[20]
+ * 插件指令：>天窗层魔法圈 : 批量魔法圈[7,8] : 隐藏(延迟) : 延迟执行时间[20]
+ * 插件指令：>天窗层魔法圈 : 批量魔法圈变量[21,22] : 隐藏(延迟) : 延迟执行时间[20]
+ * 插件指令：>天窗层魔法圈 : 全部魔法圈 : 隐藏(延迟) : 延迟执行时间[20]
+ * 
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 显示(延迟) : 延迟执行时间[20]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 隐藏(延迟) : 延迟执行时间[20]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 暂停(延迟) : 延迟执行时间[20]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 继续(延迟) : 延迟执行时间[20]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 修改单属性(延迟) : 透明度[255] : 时间[60] : 延迟执行时间[20]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 修改单属性(延迟) : 透明度变量[21] : 时间[60] : 延迟执行时间[20]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 修改单属性(延迟) : 旋转[90] : 时间[60] : 延迟执行时间[20]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 修改单属性(延迟) : 旋转变量[21] : 时间[60] : 延迟执行时间[20]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 修改单属性(延迟) : 转速[10.0] : 时间[60] : 延迟执行时间[20]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 修改单属性(延迟) : 转速变量[21] : 时间[60] : 延迟执行时间[20]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 修改单属性(延迟) : 缩放X[1.2] : 时间[60] : 延迟执行时间[20]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 修改单属性(延迟) : 缩放Y[1.2] : 时间[60] : 延迟执行时间[20]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 修改单属性(延迟) : 斜切X[0.2] : 时间[60] : 延迟执行时间[20]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 修改单属性(延迟) : 斜切Y[0.2] : 时间[60] : 延迟执行时间[20]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 还原所有单属性(延迟) : 延迟执行时间[20]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 立即取消全部延迟指令
+ * 
+ * 1.前半部分（魔法圈[11]）和 后半部分（隐藏(延迟) : 延迟执行时间[20]）
+ *   的参数可以随意组合。一共有4*16种组合方式。
+ * 2.设置延迟指令后，指令会被暂存到延迟队列中，等待延迟时间结束之后，执行指令。
+ *   "立即取消全部延迟指令"可以清空排在队列中的所有延迟指令。
+ * 3.此功能可以简化 并行事件 的设计，你可以在串行事件中执行延迟，延迟后并行变化贴图。
+ * 4.注意，该插件能在 菜单界面 中工作，也就是说，延迟的指令在菜单界面也有效。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 延迟移动到
+ * 上述的插件指令中，移动到的插件指令也可以延迟执行：
+ * 
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 移动到(延迟)-匀速移动 : 位置[100,100] : 时间[60] : 延迟执行时间[20]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 移动到(延迟)-匀速移动 : 位置变量[25,26] : 时间[60] : 延迟执行时间[20]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 移动到(延迟)-弹性移动 : 位置[100,100] : 时间[60] : 延迟执行时间[20]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 移动到(延迟)-弹性移动 : 位置变量[25,26] : 时间[60] : 延迟执行时间[20]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 移动到(延迟)-增减速移动 : 位置[100,100] : 时间[60] : 延迟执行时间[20]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 移动到(延迟)-增减速移动 : 位置变量[25,26] : 时间[60] : 延迟执行时间[20]
+ * 插件指令：>天窗层魔法圈 : 魔法圈[11] : 移动到(延迟)-延迟归位 : 延迟执行时间[20]
+ * 
+ * 1.前半部分（魔法圈[11]）和 后半部分（移动到(延迟)-匀速移动 : 位置[100,100] : 时间[60] : 延迟执行时间[20]）
+ *   的参数可以随意组合。一共有4*7种组合方式。
+ * 2.注意，该插件能在 菜单界面 中工作，也就是说，延迟的指令在菜单界面也有效。
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -142,6 +190,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 添加了延迟指令功能。
  * 
  * 
  * 
@@ -909,22 +959,25 @@
 //			->☆插件指令
 //			->☆存储数据
 //			
-//			->☆贴图控制
+//			->☆控制器与贴图
 //				->跨多个界面控制
-//				->控制器
+//				->界面创建
+//				->控制器帧刷新
 //				->销毁
 //			
 //			->天窗层魔法圈控制器【Drill_HDSC_Controller】
 //				->A主体
 //				->B基本变化
 //				->D指令叠加变化
-//				->E自变化效果
+//				->E延迟指令
+//				->F自变化效果
 //			->天窗层魔法圈贴图【Drill_HDSC_Sprite】
 //				->A主体
 //				->B基本变化
 //				->C对象绑定
 //				->D指令叠加变化
-//				->E自变化效果
+//				->E延迟指令
+//				->F自变化效果
 //
 //
 //		★家谱：
@@ -1025,7 +1078,7 @@
 		data['rotate'] = Number( dataFrom["旋转速度"] || 0.0);
 		data['opacity'] = Number( dataFrom["透明度"] || 255);
 		
-		// > E自变化效果
+		// > F自变化效果
 		data['effect_float'] = String( dataFrom["浮动效果"] || "关闭");
 		data['effect_floatSpeed'] = Number( dataFrom["浮动速度"] || 1.0);
 		data['effect_floatRange'] = Number( dataFrom["浮动偏移量"] || 15);
@@ -1157,6 +1210,20 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					controllers[k].drill_controller_setPause( false );
 				}
 			}
+			if( type.indexOf("切换混合模式[") != -1 ){
+				type = type.replace("切换混合模式[","");
+				type = type.replace("]","");
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setBlendMode( Number(type) );
+				}
+			}
+			if( type.indexOf("切换图片层级[") != -1 ){
+				type = type.replace("切换图片层级[","");
+				type = type.replace("]","");
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setZIndex( Number(type) );
+				}
+			}
 		}
 		
 		/*-----------------D指令叠加变化------------------*/
@@ -1170,19 +1237,6 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( type == "移动到-立即归位" ){
 				for( var k=0; k < controllers.length; k++ ){
 					controllers[k].drill_controller_commandChange_restoreMove();
-				}
-			}
-		}
-		if( args.length == 6 ){
-			var type = String(args[3]);
-			var temp1 = String(args[5]);
-			if( type == "修改单属性" ){
-				if( temp1.indexOf("混合模式[") != -1 ){
-					temp1 = temp1.replace("混合模式[","");
-					temp1 = temp1.replace("]","");
-					for( var k=0; k < controllers.length; k++ ){
-						controllers[k]._drill_data['blendMode'] = Number(temp1);
-					}
 				}
 			}
 		}
@@ -1289,6 +1343,211 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_commandChange_setMove(
 							"增减速变化", num_list[0], num_list[1], Number(temp2)
+						);
+					}
+				}
+			}
+		}
+		
+		/*-----------------E延迟指令------------------*/
+		if( args.length == 4 ){
+			var type = String(args[3]);
+			if( type == "立即取消全部延迟指令" ){
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_clearDelayingCommand();
+				}
+			}
+		}
+		if( args.length == 6 ){
+			var type = String(args[3]);
+			var delay_time = String(args[5]);
+			if( type == "显示(延迟)" ){
+				delay_time = delay_time.replace("延迟执行时间[","");
+				delay_time = delay_time.replace("]","");
+				delay_time = Number( delay_time );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setDelayingCommand(
+						"drill_controller_setVisible", [true], delay_time
+					);
+				}
+			}
+			if( type == "隐藏(延迟)" ){
+				delay_time = delay_time.replace("延迟执行时间[","");
+				delay_time = delay_time.replace("]","");
+				delay_time = Number( delay_time );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setDelayingCommand(
+						"drill_controller_setVisible", [false], delay_time
+					);
+				}
+			}
+			if( type == "暂停(延迟)" ){
+				delay_time = delay_time.replace("延迟执行时间[","");
+				delay_time = delay_time.replace("]","");
+				delay_time = Number( delay_time );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setDelayingCommand(
+						"drill_controller_setPause", [true], delay_time
+					);
+				}
+			}
+			if( type == "继续(延迟)" ){
+				delay_time = delay_time.replace("延迟执行时间[","");
+				delay_time = delay_time.replace("]","");
+				delay_time = Number( delay_time );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setDelayingCommand(
+						"drill_controller_setPause", [false], delay_time
+					);
+				}
+			}
+			if( type == "还原所有单属性(延迟)" ){
+				delay_time = delay_time.replace("延迟执行时间[","");
+				delay_time = delay_time.replace("]","");
+				delay_time = Number( delay_time );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setDelayingCommand(
+						"drill_controller_commandChange_restoreAttr", [], delay_time
+					);
+				}
+			}
+			if( type == "移动到(延迟)-延迟归位" ){
+				delay_time = delay_time.replace("延迟执行时间[","");
+				delay_time = delay_time.replace("]","");
+				delay_time = Number( delay_time );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setDelayingCommand(
+						"drill_controller_commandChange_restoreMove", [], delay_time
+					);
+				}
+			}
+		}
+		if( args.length == 10 ){
+			var type = String(args[3]);
+			var temp1 = String(args[5]);
+			var temp2 = String(args[7]);
+			var delay_time = String(args[9]);
+			if( type == "修改单属性(延迟)" ){
+				temp2 = temp2.replace("时间[","");
+				temp2 = temp2.replace("]","");
+				delay_time = delay_time.replace("延迟执行时间[","");
+				delay_time = delay_time.replace("]","");
+				delay_time = Number( delay_time );
+				
+				if( temp1.indexOf("透明度[") != -1 ||
+					temp1.indexOf("透明度变量[") != -1 ){
+					var num_list = this.drill_HDSC_getArgNumList(temp1);
+					for( var k=0; k < controllers.length; k++ ){
+						controllers[k].drill_controller_setDelayingCommand(
+							"drill_controller_commandChange_setOpacity", 
+							[ "匀速变化", num_list[0], Number(temp2) ], delay_time
+						);
+					}
+				}
+				if( temp1.indexOf("旋转[") != -1 ||
+					temp1.indexOf("旋转变量[") != -1 ){
+					var num_list = this.drill_HDSC_getArgNumList(temp1);
+					for( var k=0; k < controllers.length; k++ ){
+						controllers[k].drill_controller_setDelayingCommand(
+							"drill_controller_commandChange_setRotate",
+							[ "匀速变化", num_list[0], Number(temp2) ], delay_time
+						);
+					}
+				}
+				if( temp1.indexOf("转速[") != -1 ||
+					temp1.indexOf("转速变量[") != -1 ){
+					var num_list = this.drill_HDSC_getArgNumList(temp1);
+					for( var k=0; k < controllers.length; k++ ){
+						controllers[k].drill_controller_setDelayingCommand(
+							"drill_controller_commandChange_setRotateSpeed",
+							["匀速变化", num_list[0], Number(temp2) ], delay_time
+						);
+					}
+				}
+				if( temp1.indexOf("缩放X[") != -1 ){
+					var num_list = this.drill_HDSC_getArgNumList(temp1);
+					for( var k=0; k < controllers.length; k++ ){
+						controllers[k].drill_controller_setDelayingCommand(
+							"drill_controller_commandChange_setScaleX",
+							[ "匀速变化", num_list[0], Number(temp2) ], delay_time
+						);
+					}
+				}
+				if( temp1.indexOf("缩放Y[") != -1 ){
+					var num_list = this.drill_HDSC_getArgNumList(temp1);
+					for( var k=0; k < controllers.length; k++ ){
+						controllers[k].drill_controller_setDelayingCommand(
+							"drill_controller_commandChange_setScaleY",
+							[ "匀速变化", num_list[0], Number(temp2) ], delay_time
+						);
+					}
+				}
+				if( temp1.indexOf("斜切X[") != -1 ){
+					var num_list = this.drill_HDSC_getArgNumList(temp1);
+					for( var k=0; k < controllers.length; k++ ){
+						controllers[k].drill_controller_setDelayingCommand(
+							"drill_controller_commandChange_setSkewX",
+							[ "匀速变化", num_list[0], Number(temp2) ], delay_time
+						);
+					}
+				}
+				if( temp1.indexOf("斜切Y[") != -1 ){
+					var num_list = this.drill_HDSC_getArgNumList(temp1);
+					for( var k=0; k < controllers.length; k++ ){
+						controllers[k].drill_controller_setDelayingCommand(
+							"drill_controller_commandChange_setSkewY",
+							[ "匀速变化", num_list[0], Number(temp2) ], delay_time
+						);
+					}
+				}
+			}
+			if( type == "移动到(延迟)-匀速移动" ){
+				temp2 = temp2.replace("时间[","");
+				temp2 = temp2.replace("]","");
+				delay_time = delay_time.replace("延迟执行时间[","");
+				delay_time = delay_time.replace("]","");
+				delay_time = Number( delay_time );
+				if( temp1.indexOf("位置[") != -1 ||
+					temp1.indexOf("位置变量[") != -1 ){
+					var num_list = this.drill_HDSC_getArgNumList(temp1);
+					for( var k=0; k < controllers.length; k++ ){
+						controllers[k].drill_controller_setDelayingCommand(
+							"drill_controller_commandChange_setMove",
+							[ "匀速变化", num_list[0], num_list[1], Number(temp2) ], delay_time
+						);
+					}
+				}
+			}
+			if( type == "移动到(延迟)-弹性移动" ){
+				temp2 = temp2.replace("时间[","");
+				temp2 = temp2.replace("]","");
+				delay_time = delay_time.replace("延迟执行时间[","");
+				delay_time = delay_time.replace("]","");
+				delay_time = Number( delay_time );
+				if( temp1.indexOf("位置[") != -1 ||
+					temp1.indexOf("位置变量[") != -1 ){
+					var num_list = this.drill_HDSC_getArgNumList(temp1);
+					for( var k=0; k < controllers.length; k++ ){
+						controllers[k].drill_controller_setDelayingCommand(
+							"drill_controller_commandChange_setMove",
+							[ "弹性变化", num_list[0], num_list[1], Number(temp2) ], delay_time
+						);
+					}
+				}
+			}
+			if( type == "移动到(延迟)-增减速移动" ){
+				temp2 = temp2.replace("时间[","");
+				temp2 = temp2.replace("]","");
+				delay_time = delay_time.replace("延迟执行时间[","");
+				delay_time = delay_time.replace("]","");
+				delay_time = Number( delay_time );
+				if( temp1.indexOf("位置[") != -1 ||
+					temp1.indexOf("位置变量[") != -1 ){
+					var num_list = this.drill_HDSC_getArgNumList(temp1);
+					for( var k=0; k < controllers.length; k++ ){
+						controllers[k].drill_controller_setDelayingCommand(
+							"drill_controller_commandChange_setMove",
+							[ "增减速变化", num_list[0], num_list[1], Number(temp2) ], delay_time
 						);
 					}
 				}
@@ -1433,13 +1692,13 @@ Game_System.prototype.drill_HDSC_checkSysData_Private = function() {
 
 
 //=============================================================================
-// ** ☆贴图控制
+// ** ☆控制器与贴图
 //
 //			说明：	> 此模块专门管理 贴图 的创建与销毁。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 贴图控制 - 容器初始化
+// * 控制器与贴图 - 容器初始化
 //==============================
 var _drill_HDSC_temp_initialize2 = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {
@@ -1448,7 +1707,7 @@ Game_Temp.prototype.initialize = function() {
 	Graphics.drill_CODS_overstoryLayerClear();	//清空 天窗层
 };
 //==============================
-// * 贴图控制 - 销毁时（地图界面）
+// * 控制器与贴图 - 销毁时（地图界面）
 //==============================
 var _drill_HDSC_smap_terminate = Scene_Map.prototype.terminate;
 Scene_Map.prototype.terminate = function() {
@@ -1457,7 +1716,7 @@ Scene_Map.prototype.terminate = function() {
 	Graphics.drill_CODS_overstoryLayerClear();	//清空 天窗层
 };
 //==============================
-// * 贴图控制 - 帧刷新（地图界面）
+// * 控制器与贴图 - 帧刷新（地图界面）
 //==============================
 var _drill_HDSC_smap_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {
@@ -1466,7 +1725,7 @@ Scene_Map.prototype.update = function() {
 	this.drill_HDSC_updateDestroy();		//帧刷新 - 销毁
 };
 //==============================
-// * 贴图控制 - 创建时（地图界面）
+// * 控制器与贴图 - 界面创建时（地图界面）
 //==============================
 var _drill_HDSC_smap_createAllWindows = Scene_Map.prototype.createAllWindows;
 Scene_Map.prototype.createAllWindows = function() {
@@ -1474,7 +1733,7 @@ Scene_Map.prototype.createAllWindows = function() {
 	this.drill_HDSC_create();				//创建
 };
 //==============================
-// * 贴图控制 - 创建 
+// * 控制器与贴图 - 界面创建 （地图界面）
 //==============================
 Scene_Map.prototype.drill_HDSC_create = function() {
 	$gameTemp._drill_HDSC_spriteTank = [];			//贴图容器（不允许出现null值）
@@ -1507,20 +1766,48 @@ Scene_Map.prototype.drill_HDSC_create = function() {
 	Graphics.drill_CODS_sortByZIndex();
 }
 //==============================
-// * 贴图控制 - 帧刷新 控制器
+// * 控制器与贴图 - 帧刷新 控制器（地图界面）
 //==============================
 Scene_Map.prototype.drill_HDSC_updateController = function() {
 	for(var i = 0; i < $gameSystem._drill_HDSC_controllerTank.length; i++ ){
 		var temp_controller = $gameSystem._drill_HDSC_controllerTank[i];
 		if( temp_controller == undefined ){ continue; }
 		
-		// > 控制器 - 帧刷新
+		// > 控制器帧刷新
 		temp_controller.drill_controller_update();
+	}
+	
+	// > 主体属性变化
+	var has_layerChange = false;
+	for(var i = 0; i < $gameTemp._drill_HDSC_spriteTank.length; i++){
+		var temp_sprite = $gameTemp._drill_HDSC_spriteTank[i];
+		if( temp_sprite == undefined ){ continue; }
+		var temp_controller = temp_sprite._drill_controller;
+		if( temp_controller == undefined ){ continue; }
+		var temp_data = temp_controller._drill_data;
 		
+		// > 混合模式
+		if( temp_sprite.blendMode != temp_data['blendMode'] ){
+			temp_sprite.blendMode =  temp_data['blendMode'];
+			temp_sprite._drill_layerSprite.blendMode = temp_data['blendMode'];
+			temp_sprite._drill_childCircleSprite.blendMode = temp_data['blendMode'];
+		}
+		// > 天窗层层级（无）
+		
+		// > 图片层级
+		if( temp_sprite.zIndex != temp_data['zIndex'] ){
+			temp_sprite.zIndex =  temp_data['zIndex'];
+			has_layerChange = true;
+		}
+	};
+	
+	// > 层级排序（天窗层）
+	if( has_layerChange == true ){
+		Graphics.drill_CODS_sortByZIndex();
 	}
 }
 //==============================
-// * 贴图控制 - 帧刷新 销毁
+// * 控制器与贴图 - 帧刷新 销毁（地图界面）
 //==============================
 Scene_Map.prototype.drill_HDSC_updateDestroy = function() {
 	
@@ -1543,8 +1830,9 @@ Scene_Map.prototype.drill_HDSC_updateDestroy = function() {
 		}
 	}
 };
+
 //==============================
-// * 贴图控制 - 销毁时（战斗界面）
+// * 控制器与贴图 - 销毁时（战斗界面）
 //==============================
 var _drill_HDSC_sbattle_terminate = Scene_Battle.prototype.terminate;
 Scene_Battle.prototype.terminate = function() {
@@ -1553,7 +1841,7 @@ Scene_Battle.prototype.terminate = function() {
 	Graphics.drill_CODS_overstoryLayerClear();	//清空 天窗层
 };
 //==============================
-// * 贴图控制 - 帧刷新（战斗界面）
+// * 控制器与贴图 - 帧刷新（战斗界面）
 //==============================
 var _drill_HDSC_sbattle_update = Scene_Battle.prototype.update;
 Scene_Battle.prototype.update = function() {
@@ -1562,7 +1850,7 @@ Scene_Battle.prototype.update = function() {
 	this.drill_HDSC_updateDestroy();		//帧刷新 - 销毁
 };
 //==============================
-// * 贴图控制 - 创建时（战斗界面）
+// * 控制器与贴图 - 界面创建时（战斗界面）
 //==============================
 var _drill_HDSC_sbattle_createAllWindows = Scene_Battle.prototype.createAllWindows;
 Scene_Battle.prototype.createAllWindows = function() {
@@ -1570,20 +1858,20 @@ Scene_Battle.prototype.createAllWindows = function() {
 	this.drill_HDSC_create();
 };
 //==============================
-// * 贴图控制 - 创建 
+// * 控制器与贴图 - 界面创建 （战斗界面）
 //==============================
 Scene_Battle.prototype.drill_HDSC_create = Scene_Map.prototype.drill_HDSC_create;
 //==============================
-// * 贴图控制 - 帧刷新 控制器
+// * 控制器与贴图 - 帧刷新 控制器（战斗界面）
 //==============================
 Scene_Battle.prototype.drill_HDSC_updateController = Scene_Map.prototype.drill_HDSC_updateController;
 //==============================
-// * 贴图控制 - 帧刷新 销毁
+// * 控制器与贴图 - 帧刷新 销毁（战斗界面）
 //==============================
 Scene_Battle.prototype.drill_HDSC_updateDestroy = Scene_Map.prototype.drill_HDSC_updateDestroy;
 
 //==============================
-// * 贴图控制 - 销毁时（菜单界面）
+// * 控制器与贴图 - 销毁时（菜单界面）
 //==============================
 var _drill_HDSC_smenu_terminate = Scene_MenuBase.prototype.terminate;
 Scene_MenuBase.prototype.terminate = function() {
@@ -1592,7 +1880,7 @@ Scene_MenuBase.prototype.terminate = function() {
 	Graphics.drill_CODS_overstoryLayerClear();	//清空 天窗层
 };
 //==============================
-// * 贴图控制 - 帧刷新（菜单界面）
+// * 控制器与贴图 - 帧刷新（菜单界面）
 //==============================
 var _drill_HDSC_smenu_update = Scene_MenuBase.prototype.update;
 Scene_MenuBase.prototype.update = function() {
@@ -1601,7 +1889,7 @@ Scene_MenuBase.prototype.update = function() {
 	this.drill_HDSC_updateDestroy();		//帧刷新 - 销毁
 };
 //==============================
-// * 贴图控制 - 创建时（菜单界面）
+// * 控制器与贴图 - 界面创建时（菜单界面）
 //==============================
 var _drill_HDSC_smenu_createWindowLayer = Scene_MenuBase.prototype.createWindowLayer;
 Scene_MenuBase.prototype.createWindowLayer = function() {
@@ -1609,15 +1897,15 @@ Scene_MenuBase.prototype.createWindowLayer = function() {
 	this.drill_HDSC_create();
 };
 //==============================
-// * 贴图控制 - 创建 
+// * 控制器与贴图 - 界面创建 （菜单界面）
 //==============================
 Scene_MenuBase.prototype.drill_HDSC_create = Scene_Map.prototype.drill_HDSC_create;
 //==============================
-// * 贴图控制 - 帧刷新 控制器
+// * 控制器与贴图 - 帧刷新 控制器（菜单界面）
 //==============================
 Scene_MenuBase.prototype.drill_HDSC_updateController = Scene_Map.prototype.drill_HDSC_updateController;
 //==============================
-// * 贴图控制 - 帧刷新 销毁
+// * 控制器与贴图 - 帧刷新 销毁（菜单界面）
 //==============================
 Scene_MenuBase.prototype.drill_HDSC_updateDestroy = Scene_Map.prototype.drill_HDSC_updateDestroy;
 
@@ -1647,7 +1935,8 @@ Scene_MenuBase.prototype.drill_HDSC_updateDestroy = Scene_Map.prototype.drill_HD
 // **						> 魔法圈层>缩放Y
 // **						> 魔法圈层>斜切X
 // **						> 魔法圈层>斜切Y
-// **					->E自变化效果
+// **					->E延迟指令
+// **					->F自变化效果
 // **						> 主体贴图>浮动效果
 // **						> 主体贴图>闪烁效果
 // **						> 主体贴图>摇晃效果
@@ -1691,7 +1980,8 @@ Drill_HDSC_Controller.prototype.drill_controller_update = function(){
 	this.drill_controller_updateChange_Position();		//帧刷新 - B基本变化 - 平移
 	this.drill_controller_updateChange_Rotation();		//帧刷新 - B基本变化 - 旋转
 	this.drill_controller_updateCommandChange();		//帧刷新 - D指令叠加变化
-	this.drill_controller_updateEffect();				//帧刷新 - E自变化效果
+	this.drill_controller_updateDelayingCommand();		//帧刷新 - E延迟指令
+	this.drill_controller_updateEffect();				//帧刷新 - F自变化效果
 	this.drill_controller_updateCheckNaN();				//帧刷新 - A主体 - 校验值
 }
 //##############################
@@ -1750,6 +2040,27 @@ Drill_HDSC_Controller.prototype.drill_controller_isDead = function(){
 };
 
 //##############################
+// * 控制器 - 切换混合模式【标准函数】
+//
+//			参数：	> blendMode 数字
+//			返回：	> 无
+//##############################
+Drill_HDSC_Controller.prototype.drill_controller_setBlendMode = function( blendMode ){
+	var data = this._drill_data;
+	data['blendMode'] = blendMode;
+};
+//##############################
+// * 控制器 - 切换图片层级【标准函数】
+//
+//			参数：	> zIndex 数字
+//			返回：	> 无
+//##############################
+Drill_HDSC_Controller.prototype.drill_controller_setZIndex = function( zIndex ){
+	var data = this._drill_data;
+	data['zIndex'] = zIndex;
+};
+
+//##############################
 // * 控制器 - 初始化数据【标准默认值】
 //
 //			参数：	> 无
@@ -1790,17 +2101,20 @@ Drill_HDSC_Controller.prototype.drill_controller_initData = function(){
 	
 	// > D指令叠加变化（无）
 	
-	// > E自变化效果
+	// > E延迟指令（无）
+	
+	// > F自变化效果
 	//	（见 变量获取）
 }
 //==============================
 // * 初始化 - 初始化子功能
 //==============================
 Drill_HDSC_Controller.prototype.drill_controller_initChild = function(){
-	this.drill_controller_initAttr();			//初始化子功能 - A主体
-	this.drill_controller_initChange();			//初始化子功能 - B基本变化
-	this.drill_controller_initCommandChange();	//初始化子功能 - D指令叠加变化
-	this.drill_controller_initEffect();			//初始化子功能 - E自变化效果
+	this.drill_controller_initAttr();				//初始化子功能 - A主体
+	this.drill_controller_initChange();				//初始化子功能 - B基本变化
+	this.drill_controller_initCommandChange();		//初始化子功能 - D指令叠加变化
+	this.drill_controller_initDelayingCommand();	//初始化子功能 - E延迟指令
+	this.drill_controller_initEffect();				//初始化子功能 - F自变化效果
 }
 //==============================
 // * 控制器 - 重设数据（私有）
@@ -2112,14 +2426,114 @@ Drill_HDSC_Controller.prototype.drill_controller_commandChange_setSkewY = functi
 
 
 //==============================
-// * E自变化效果 - 初始化子功能
+// * E延迟指令 - 初始化子功能
+//==============================
+Drill_HDSC_Controller.prototype.drill_controller_initDelayingCommand = function() {
+	var data = this._drill_data;
+	this._drill_curDelayingCommandTank = [];
+}
+//==============================
+// * E延迟指令 - 帧刷新
+//==============================
+Drill_HDSC_Controller.prototype.drill_controller_updateDelayingCommand = function(){
+	var data = this._drill_data;
+	if( this._drill_curDelayingCommandTank.length == 0 ){ return; }
+	
+	// > 帧刷新 延迟指令
+	for(var i = 0; i < this._drill_curDelayingCommandTank.length; i++ ){
+		var dc_data = this._drill_curDelayingCommandTank[i];
+		
+		// > 时间-1
+		dc_data['left_time'] -= 1;
+		
+		// > 执行延迟指令
+		if( dc_data['left_time'] < 0 ){
+			var method = dc_data['method'];
+			var paramList = dc_data['paramList'];
+			
+			if( method == "drill_controller_setVisible" ){
+				this.drill_controller_setVisible( paramList[0] );
+			}else if( method == "drill_controller_setPause" ){
+				this.drill_controller_setPause( paramList[0] );
+			
+			}else if( method == "drill_controller_commandChange_setOpacity" ){
+				this.drill_controller_commandChange_setOpacity( paramList[0], paramList[1], paramList[2] );
+			}else if( method == "drill_controller_commandChange_setRotate" ){
+				this.drill_controller_commandChange_setRotate( paramList[0], paramList[1], paramList[2] );
+			}else if( method == "drill_controller_commandChange_setRotateSpeed" ){
+				this.drill_controller_commandChange_setRotateSpeed( paramList[0], paramList[1], paramList[2] );
+				
+			}else if( method == "drill_controller_commandChange_setScaleX" ){
+				this.drill_controller_commandChange_setScaleX( paramList[0], paramList[1], paramList[2] );
+			}else if( method == "drill_controller_commandChange_setScaleY" ){
+				this.drill_controller_commandChange_setScaleY( paramList[0], paramList[1], paramList[2] );
+			}else if( method == "drill_controller_commandChange_setSkewX" ){
+				this.drill_controller_commandChange_setSkewX( paramList[0], paramList[1], paramList[2] );
+			}else if( method == "drill_controller_commandChange_setSkewY" ){
+				this.drill_controller_commandChange_setSkewY( paramList[0], paramList[1], paramList[2] );
+			}else if( method == "drill_controller_commandChange_restoreAttr" ){
+				this.drill_controller_commandChange_restoreAttr();
+			
+			}else if( method == "drill_controller_commandChange_setMove" ){
+				this.drill_controller_commandChange_setMove( paramList[0], paramList[1], paramList[2], paramList[3] );
+			}else if( method == "drill_controller_commandChange_restoreMove" ){
+				this.drill_controller_commandChange_restoreMove();
+			}
+		}
+	}
+	
+	// > 销毁 延迟指令
+	for(var i = this._drill_curDelayingCommandTank.length-1; i >= 0; i-- ){
+		var dc_data = this._drill_curDelayingCommandTank[i];
+		if( dc_data['left_time'] < 0 ){
+			this._drill_curDelayingCommandTank.splice( i, 1 );
+		}
+	}
+}
+//==============================
+// * E延迟指令 - 设置指令（开放函数）
+//==============================
+Drill_HDSC_Controller.prototype.drill_controller_setDelayingCommand = function( method, paramList, delay_time ){
+	if( method != "drill_controller_setVisible" &&
+		method != "drill_controller_setPause" &&
+		
+		method != "drill_controller_commandChange_setOpacity" &&
+		method != "drill_controller_commandChange_setRotate" &&
+		method != "drill_controller_commandChange_setRotateSpeed" &&
+		
+		method != "drill_controller_commandChange_setScaleX" &&
+		method != "drill_controller_commandChange_setScaleY" &&
+		method != "drill_controller_commandChange_setSkewX" &&
+		method != "drill_controller_commandChange_setSkewY" &&
+		method != "drill_controller_commandChange_restoreAttr" &&
+		
+		method != "drill_controller_commandChange_setMove" &&
+		method != "drill_controller_commandChange_restoreMove"
+	){ return; }
+	
+	var dc_data = {};
+	dc_data['method'] = method;
+	dc_data['paramList'] = paramList;
+	dc_data['left_time'] = delay_time;
+	this._drill_curDelayingCommandTank.push( dc_data );
+}
+//==============================
+// * E延迟指令 - 清空全部（开放函数）
+//==============================
+Drill_HDSC_Controller.prototype.drill_controller_clearDelayingCommand = function(){
+	this._drill_curDelayingCommandTank = [];
+}
+
+
+//==============================
+// * F自变化效果 - 初始化子功能
 //==============================
 Drill_HDSC_Controller.prototype.drill_controller_initEffect = function() {
 	var data = this._drill_data;
 	this._drill_curEffectTime = 0;
 }
 //==============================
-// * E自变化效果 - 帧刷新
+// * F自变化效果 - 帧刷新
 //==============================
 Drill_HDSC_Controller.prototype.drill_controller_updateEffect = function(){
 	var data = this._drill_data;
@@ -2153,7 +2567,8 @@ Drill_HDSC_Controller.prototype.drill_controller_updateEffect = function(){
 // **						> 魔法圈层>缩放Y
 // **						> 魔法圈层>斜切X
 // **						> 魔法圈层>斜切Y
-// **					->E自变化效果
+// **					->E延迟指令
+// **					->F自变化效果
 // **						> 主体贴图>浮动效果
 // **						> 主体贴图>闪烁效果
 // **						> 主体贴图>摇晃效果
@@ -2165,7 +2580,7 @@ Drill_HDSC_Controller.prototype.drill_controller_updateEffect = function(){
 // **				> 结构 - [合并/ ●分离 /混乱] 使用 控制器-贴图 结构。
 // **				> 数量 - [单个/ ●多个] 
 // **				> 创建 - [ ●一次性 /自延迟/外部延迟] 先创建控制器，再创建此贴图，通过 C对象绑定 进行连接。
-// **				> 销毁 - [不考虑/自销毁/ ●外部销毁 ] 通过 贴图控制 模块来销毁。
+// **				> 销毁 - [不考虑/自销毁/ ●外部销毁 ] 通过 控制器与贴图 模块来销毁。
 // **				> 样式 - [ ●不可修改 /自变化/外部变化] 
 //=============================================================================
 //==============================
@@ -2194,7 +2609,8 @@ Drill_HDSC_Sprite.prototype.update = function() {
 	this.drill_sprite_updateChange();				//帧刷新 - B基本变化
 													//帧刷新 - C对象绑定（无）
 	this.drill_sprite_updateCommandChange();		//帧刷新 - D指令叠加变化
-	this.drill_sprite_updateEffect();				//帧刷新 - E自变化效果
+													//帧刷新 - E延迟指令（无）
+	this.drill_sprite_updateEffect();				//帧刷新 - F自变化效果
 }
 
 //##############################
@@ -2221,7 +2637,8 @@ Drill_HDSC_Sprite.prototype.drill_sprite_initChild = function(){
 	this.drill_sprite_initChange();				//初始化子功能 - B基本变化
 												//初始化子功能 - C对象绑定（无）
 	this.drill_sprite_initCommandChange();		//初始化子功能 - D指令叠加变化
-	this.drill_sprite_initEffect();				//初始化子功能 - E自变化效果
+	this.drill_sprite_initDelayingCommand();	//初始化子功能 - E延迟指令
+	this.drill_sprite_initEffect();				//初始化子功能 - F自变化效果
 };
 
 //##############################
@@ -2325,6 +2742,7 @@ Drill_HDSC_Sprite.prototype.drill_sprite_initAttr = function(){
 	var temp_sprite = new Sprite(); 
 	temp_sprite.anchor.x = 0.5;
 	temp_sprite.anchor.y = 0.5;
+	temp_sprite.blendMode = data['blendMode'];
 	temp_sprite.bitmap = ImageManager.loadBitmap( data['src_img_file'], data['src_img'], data['tint'], data['smooth'] );
 	this._drill_childCircleSprite = temp_sprite;
 	
@@ -2332,6 +2750,7 @@ Drill_HDSC_Sprite.prototype.drill_sprite_initAttr = function(){
 	var temp_layer = new Sprite();		//魔法圈样式两层容器
 	temp_layer.anchor.x = 0.5;
 	temp_layer.anchor.y = 0.5;
+	temp_layer.blendMode = data['blendMode'];
 	this._drill_layerSprite = temp_layer;
 	
 	this._drill_layerSprite.addChild( this._drill_childCircleSprite );
@@ -2349,7 +2768,6 @@ Drill_HDSC_Sprite.prototype.drill_sprite_updateAttr = function() {
 	this.opacity = this._drill_controller._drill_opacity;
 	this.rotation = this._drill_controller._drill_rotation *Math.PI/180;	//（整体再旋转角度)
 	this.visible = data['visible'];
-	this.blendMode = data['blendMode'];
 	
 	// > 贴图 - 层级属性
 	this._drill_layerSprite.scale.x  = this._drill_controller._drill_layer_scaleX;
@@ -2533,14 +2951,22 @@ Drill_HDSC_Sprite.prototype.drill_sprite_updateCommandChange = function(){
 
 
 //==============================
-// * E自变化效果 - 初始化子功能
+// * E延迟指令 - 初始化子功能
+//==============================
+Drill_HDSC_Sprite.prototype.drill_sprite_initDelayingCommand = function() {
+	//（无）
+}
+
+
+//==============================
+// * F自变化效果 - 初始化子功能
 //==============================
 Drill_HDSC_Sprite.prototype.drill_sprite_initEffect = function() {
 	var data = this._drill_controller._drill_data;
 	//（无）
 }
 //==============================
-// * E自变化效果 - 帧刷新
+// * F自变化效果 - 帧刷新
 //==============================
 Drill_HDSC_Sprite.prototype.drill_sprite_updateEffect = function(){
 	var data = this._drill_controller._drill_data;

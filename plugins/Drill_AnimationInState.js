@@ -135,6 +135,7 @@
  * 优化了注释部分细节。
  * [v1.4]
  * 修改了插件内部的对应关系。
+ * 
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -159,10 +160,16 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			并行动画绑定于状态：
-//				->战斗不阻塞设置
-//				->并行播放
-//				->攻击者与被攻击者 状态
+//			->☆提示信息
+//			->☆变量获取
+//			
+//			->☆动画绑定时机
+//				->状态附加时
+//				->状态持续时（一回合结束）
+//				->状态移除时
+//				->状态全部清空时
+//				->攻击执行时
+//					->攻击者与被攻击者 状态
 //			
 //			
 //		★家谱：
@@ -185,7 +192,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -210,7 +217,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆变量获取
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_AnimationInState = true;
@@ -226,53 +233,35 @@ if( Imported.Drill_AnimationInParallel ){
 	
 	
 //=============================================================================
-// ** 动画绑定时机
+// ** ☆动画绑定时机
+//
+//			说明：	> 此模块专门管理 动画绑定的时机，并播放 并行动画。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 动画初始化 - 附加
+// * 动画绑定时机 - 状态附加时
 //==============================
 var _drill_AISt_addNewState = Game_Battler.prototype.addNewState;
-Game_Battler.prototype.addNewState = function(stateId) {
-    _drill_AISt_addNewState.call(this,stateId);
-	//附加重复的状态不播放动画
+Game_Battler.prototype.addNewState = function( stateId ){
+    _drill_AISt_addNewState.call( this,stateId );
+	//（附加重复的状态不播放动画）
 	
+	// > 注释来源
 	var note = String($dataStates[stateId].note);
-	var types = (note.match( /<状态并行动画:([^<>]*?)>/g )) || [];
-	for(var r = 0;r< types.length; r++){
-		var l = (types[r].match( /<状态并行动画:([^<>]*?)>/ )) || [];
-		//alert(l);		//正则，g搜索每行符合列，然后在每个符合字符串中抽取出 数字。
-		
-		var args = String(l[1]).split(':');
-		if( args.length >= 1 ){
-			if(args[0]){ var a_id = Number(args[0]);}
-			if(args[1]){ var type = String(args[1]);}
-			if ( type == "附加时"){
-				this.drill_AIP_startParallelAnimation( a_id, false,0);
-			}
-		}
-	}
-};
-
-//==============================
-// * 动画初始化 - 持续
-//==============================
-var _drill_AISt_updateStateTurns = Game_BattlerBase.prototype.updateStateTurns;
-Game_BattlerBase.prototype.updateStateTurns = function() {
-    _drill_AISt_updateStateTurns.call(this);
-
-	for(var i = 0; i< this._states.length ;i++){
-		var stateId = this._states[i];
-		var note = String($dataStates[stateId].note);
-		var types = (note.match( /<状态并行动画:([^<>]*?)>/g )) || [];
-		for(var r = 0;r< types.length; r++){
-			var l = (types[r].match( /<状态并行动画:([^<>]*?)>/ )) || [];
-			//alert(l);		//正则，g搜索每行符合列，然后在每个符合字符串中抽取出 数字。
+	var row_list = note.split(/[\n\r ]+/);
+	
+	// > 状态注释解析
+	for(var r = 0; r < row_list.length; r++ ){
+		var row = row_list[r];
+		row = row.replace(/\>$/,"");	//（去掉末尾的>）
+		var args = row.split(/[:：]/);
+		var command = args.shift();
+		if( command == "<状态并行动画" ){
 			
-			var args = String(l[1]).split(':');
 			if( args.length >= 1 ){
 				if(args[0]){ var a_id = Number(args[0]);}
 				if(args[1]){ var type = String(args[1]);}
-				if ( type == "持续时"){
+				if ( type == "附加时"){
 					this.drill_AIP_startParallelAnimation( a_id, false,0);
 				}
 			}
@@ -281,41 +270,81 @@ Game_BattlerBase.prototype.updateStateTurns = function() {
 };
 
 //==============================
-// * 动画初始化 - 移除（用删除更好一些）
+// * 动画绑定时机 - 状态持续时（一回合结束）
 //==============================
+var _drill_AISt_updateStateTurns = Game_BattlerBase.prototype.updateStateTurns;
+Game_BattlerBase.prototype.updateStateTurns = function() {
+    _drill_AISt_updateStateTurns.call(this);
+
+	for(var i = 0; i< this._states.length ;i++){
+		var stateId = this._states[i];
+		
+		// > 注释来源
+		var note = String($dataStates[stateId].note);
+		var row_list = note.split(/[\n\r ]+/);
+
+		// > 状态注释解析
+		for(var r = 0; r < row_list.length; r++ ){
+			var row = row_list[r];
+			row = row.replace(/\>$/,"");	//（去掉末尾的>）
+			var args = row.split(/[:：]/);
+			var command = args.shift();
+			if( command == "<状态并行动画" ){
+				
+				if( args.length >= 1 ){
+					if(args[0]){ var a_id = Number(args[0]);}
+					if(args[1]){ var type = String(args[1]);}
+					if ( type == "持续时"){
+						this.drill_AIP_startParallelAnimation( a_id, false,0);
+					}
+				}
+			}
+		}
+	}
+};
+
 /*
+//==============================
+// * 动画绑定时机 - 状态移除时（用后者更好一些）
+//==============================
 var _drill_AISt_removeState = Game_Battler.prototype.removeState;
 Game_Battler.prototype.removeState = function(stateId) {
     _drill_AISt_removeState.call(this,stateId);
-};*/
-
+};
+*/
 //==============================
-// * 动画初始化 - 删除
+// * 动画绑定时机 - 状态移除时
 //==============================
 var _drill_AISt_eraseState = Game_BattlerBase.prototype.eraseState;
-Game_BattlerBase.prototype.eraseState = function(stateId) {
+Game_BattlerBase.prototype.eraseState = function( stateId ){
 	
+	// > 注释来源
 	var note = String($dataStates[stateId].note);
-	var types = (note.match( /<状态并行动画:([^<>]*?)>/g )) || [];
-	for(var r = 0;r< types.length; r++){
-		var l = (types[r].match( /<状态并行动画:([^<>]*?)>/ )) || [];
-		//alert(l);		//正则，g搜索每行符合列，然后在每个符合字符串中抽取出 数字。
-		
-		var args = String(l[1]).split(':');
-		if( args.length >= 1 ){
-			if(args[0]){ var a_id = Number(args[0]);}
-			if(args[1]){ var type = String(args[1]);}
-			if(args[2]){ var temp1 = String(args[2]);}
-			if( type == "解除时" ){
-				this.drill_AIP_startParallelAnimation( a_id, false,0);
-			}
-			if( type == "附加时" && temp1 == "解除后消失" ){
-				
-				if( this instanceof Game_Actor ){	//（并行战斗动画 的接口）
-					$gameTemp.drill_AIP_setAnimDeathByAnimId_Actor( this, a_id );
+	var row_list = note.split(/[\n\r ]+/);
+
+	// > 状态注释解析
+	for(var r = 0; r < row_list.length; r++ ){
+		var row = row_list[r];
+		row = row.replace(/\>$/,"");	//（去掉末尾的>）
+		var args = row.split(/[:：]/);
+		var command = args.shift();
+		if( command == "<状态并行动画" ){
+			
+			if( args.length >= 1 ){
+				if(args[0]){ var a_id = Number(args[0]);}
+				if(args[1]){ var type = String(args[1]);}
+				if(args[2]){ var temp1 = String(args[2]);}
+				if( type == "解除时" ){
+					this.drill_AIP_startParallelAnimation( a_id, false,0);
 				}
-				if( this instanceof Game_Enemy ){
-					$gameTemp.drill_AIP_setAnimDeathByAnimId_Enemy( this, a_id );
+				if( type == "附加时" && temp1 == "解除后消失" ){
+					
+					if( this instanceof Game_Actor ){	//（并行战斗动画 的接口）
+						$gameTemp.drill_AIP_setAnimDeathByAnimId_Actor( this, a_id );
+					}
+					if( this instanceof Game_Enemy ){
+						$gameTemp.drill_AIP_setAnimDeathByAnimId_Enemy( this, a_id );
+					}
 				}
 			}
 		}
@@ -324,7 +353,7 @@ Game_BattlerBase.prototype.eraseState = function(stateId) {
 };
 
 //==============================
-// * 动画初始化 - 解除（全部清空）
+// * 动画绑定时机 - 状态全部清空时
 //==============================
 var _drill_AISt_clearStates = Game_BattlerBase.prototype.clearStates;
 Game_BattlerBase.prototype.clearStates = function() {
@@ -339,7 +368,10 @@ Game_BattlerBase.prototype.clearStates = function() {
 };
 
 //==============================
-// * 动画初始化 - 命中、躲避
+// * 动画绑定时机 - 攻击执行时
+//
+//			说明：	> 攻击执行时，实时检查状态，确定是否要播放动画。
+//					> 需要考虑 命中、躲避 情况。
 //==============================
 var _drill_AISt_apply = Game_Action.prototype.apply;
 Game_Action.prototype.apply = function(target) {
@@ -350,57 +382,65 @@ Game_Action.prototype.apply = function(target) {
 	//----被攻击
 	var states = target.states();
 	for(var i = 0;i< states.length; i++){
-		var note = String(states[i].note);
-		var types = (note.match( /<状态并行动画:([^<>]*?)>/g )) || [];
-		for(var r = 0;r< types.length; r++){
-			var l = (types[r].match( /<状态并行动画:([^<>]*?)>/ )) || [];
-			//alert(l);		//正则，g搜索每行符合列，然后在每个符合字符串中抽取出 数字。
+		var data_state = states[i];
+		
+		// > 注释来源
+		var note = String( data_state.note );
+		var row_list = note.split(/[\n\r ]+/);
 
-			var args = String(l[1]).split(':');
-			if( args.length >= 2 ){
-				if(args[0]){ var a_id = Number(args[0]);}
-				if(args[1]){ var type = String(args[1]);}
-				if(args[2]){ var temp1 = String(args[2]);}
-				if(args[3]){ var temp2 = String(args[3]);}
-				if(args[4]){ var temp3 = String(args[4]);}
-				if(args[5]){ var temp4 = String(args[5]);}
-				if ( type == "被攻击命中时"){
-					var damage_type = this.item().damage.type ;
-					var damage_attr = this.item().damage.elementId ;
-					if (result.isHit() && damage_type > 0 ) {
-						var is_actived = false;
-						if( temp3 == "属性类型" ){
-							if ( damage_type == 1 && temp2 == "HP伤害" && Number(temp4) == damage_attr ){ is_actived = true; }
-							if ( damage_type == 2 && temp2 == "MP伤害" && Number(temp4) == damage_attr ){ is_actived = true; }
-							if ( damage_type == 3 && temp2 == "HP恢复" && Number(temp4) == damage_attr ){ is_actived = true; }
-							if ( damage_type == 4 && temp2 == "MP恢复" && Number(temp4) == damage_attr ){ is_actived = true; }
-							if ( damage_type == 5 && temp2 == "HP吸收" && Number(temp4) == damage_attr ){ is_actived = true; }
-							if ( damage_type == 6 && temp2 == "MP吸收" && Number(temp4) == damage_attr ){ is_actived = true; }
-						}else{
-							if ( damage_type == 1 && temp2 == "HP伤害"){ is_actived = true; }
-							if ( damage_type == 2 && temp2 == "MP伤害"){ is_actived = true; }
-							if ( damage_type == 3 && temp2 == "HP恢复"){ is_actived = true; }
-							if ( damage_type == 4 && temp2 == "MP恢复"){ is_actived = true; }
-							if ( damage_type == 5 && temp2 == "HP吸收"){ is_actived = true; }
-							if ( damage_type == 6 && temp2 == "MP吸收"){ is_actived = true; }
+		// > 状态注释解析
+		for(var r = 0; r < row_list.length; r++ ){
+			var row = row_list[r];
+			row = row.replace(/\>$/,"");	//（去掉末尾的>）
+			var args = row.split(/[:：]/);
+			var command = args.shift();
+			if( command == "<状态并行动画" ){
+			
+				if( args.length >= 2 ){
+					if(args[0]){ var a_id = Number(args[0]);}
+					if(args[1]){ var type = String(args[1]);}
+					if(args[2]){ var temp1 = String(args[2]);}
+					if(args[3]){ var temp2 = String(args[3]);}
+					if(args[4]){ var temp3 = String(args[4]);}
+					if(args[5]){ var temp4 = String(args[5]);}
+					if ( type == "被攻击命中时"){
+						var damage_type = this.item().damage.type ;
+						var damage_attr = this.item().damage.elementId ;
+						if (result.isHit() && damage_type > 0 ) {
+							var is_actived = false;
+							if( temp3 == "属性类型" ){
+								if ( damage_type == 1 && temp2 == "HP伤害" && Number(temp4) == damage_attr ){ is_actived = true; }
+								if ( damage_type == 2 && temp2 == "MP伤害" && Number(temp4) == damage_attr ){ is_actived = true; }
+								if ( damage_type == 3 && temp2 == "HP恢复" && Number(temp4) == damage_attr ){ is_actived = true; }
+								if ( damage_type == 4 && temp2 == "MP恢复" && Number(temp4) == damage_attr ){ is_actived = true; }
+								if ( damage_type == 5 && temp2 == "HP吸收" && Number(temp4) == damage_attr ){ is_actived = true; }
+								if ( damage_type == 6 && temp2 == "MP吸收" && Number(temp4) == damage_attr ){ is_actived = true; }
+							}else{
+								if ( damage_type == 1 && temp2 == "HP伤害"){ is_actived = true; }
+								if ( damage_type == 2 && temp2 == "MP伤害"){ is_actived = true; }
+								if ( damage_type == 3 && temp2 == "HP恢复"){ is_actived = true; }
+								if ( damage_type == 4 && temp2 == "MP恢复"){ is_actived = true; }
+								if ( damage_type == 5 && temp2 == "HP吸收"){ is_actived = true; }
+								if ( damage_type == 6 && temp2 == "MP吸收"){ is_actived = true; }
+							}
+							if(is_actived){
+								if ( temp1 == "攻击者"){
+									this.subject().drill_AIP_startParallelAnimation( a_id, false,0);
+								}
+								if ( temp1 == "自己" ){
+									target.drill_AIP_startParallelAnimation( a_id, false,0);
+								}
+							}
 						}
-						if(is_actived){
+					}
+					if ( type == "被攻击躲避时"){
+						if ( !result.isHit() && this.item().damage.type > 0 ) {
 							if ( temp1 == "攻击者"){
 								this.subject().drill_AIP_startParallelAnimation( a_id, false,0);
 							}
 							if ( temp1 == "自己" ){
 								target.drill_AIP_startParallelAnimation( a_id, false,0);
 							}
-						}
-					}
-				}
-				if ( type == "被攻击躲避时"){
-					if ( !result.isHit() && this.item().damage.type > 0 ) {
-						if ( temp1 == "攻击者"){
-							this.subject().drill_AIP_startParallelAnimation( a_id, false,0);
-						}
-						if ( temp1 == "自己" ){
-							target.drill_AIP_startParallelAnimation( a_id, false,0);
 						}
 					}
 				}
@@ -411,57 +451,65 @@ Game_Action.prototype.apply = function(target) {
 	//----主动攻击
 	states = this.subject().states();
 	for(var i = 0;i< states.length; i++){
-		var note = String(states[i].note);
-		var types = (note.match( /<状态并行动画:([^<>]*?)>/g )) || [];
-		for(var r = 0;r< types.length; r++){
-			var l = (types[r].match( /<状态并行动画:([^<>]*?)>/ )) || [];
-			//alert(l);		//正则，g搜索每行符合列，然后在每个符合字符串中抽取出 数字。
+		var data_state = states[i];
+		
+		// > 注释来源
+		var note = String( data_state.note );
+		var row_list = note.split(/[\n\r ]+/);
 
-			var args = String(l[1]).split(':');
-			if( args.length >= 2 ){
-				if(args[0]){ var a_id = Number(args[0]);}
-				if(args[1]){ var type = String(args[1]);}
-				if(args[2]){ var temp1 = String(args[2]);}
-				if(args[3]){ var temp2 = String(args[3]);}
-				if(args[4]){ var temp3 = String(args[4]);}
-				if(args[5]){ var temp4 = String(args[5]);}
-				if ( type == "主动攻击命中时"){
-					var damage_type = this.item().damage.type ;
-					var damage_attr = this.item().damage.elementId ;
-					if (result.isHit() && damage_type > 0 ) {
-						var is_actived = false;
-						if( temp3 == "属性类型" ){
-							if ( damage_type == 1 && temp2 == "HP伤害" && Number(temp4) == damage_attr ){ is_actived = true; }
-							if ( damage_type == 2 && temp2 == "MP伤害" && Number(temp4) == damage_attr ){ is_actived = true; }
-							if ( damage_type == 3 && temp2 == "HP恢复" && Number(temp4) == damage_attr ){ is_actived = true; }
-							if ( damage_type == 4 && temp2 == "MP恢复" && Number(temp4) == damage_attr ){ is_actived = true; }
-							if ( damage_type == 5 && temp2 == "HP吸收" && Number(temp4) == damage_attr ){ is_actived = true; }
-							if ( damage_type == 6 && temp2 == "MP吸收" && Number(temp4) == damage_attr ){ is_actived = true; }
-						}else{
-							if ( damage_type == 1 && temp2 == "HP伤害"){ is_actived = true; }
-							if ( damage_type == 2 && temp2 == "MP伤害"){ is_actived = true; }
-							if ( damage_type == 3 && temp2 == "HP恢复"){ is_actived = true; }
-							if ( damage_type == 4 && temp2 == "MP恢复"){ is_actived = true; }
-							if ( damage_type == 5 && temp2 == "HP吸收"){ is_actived = true; }
-							if ( damage_type == 6 && temp2 == "MP吸收"){ is_actived = true; }
+		// > 状态注释解析
+		for(var r = 0; r < row_list.length; r++ ){
+			var row = row_list[r];
+			row = row.replace(/\>$/,"");	//（去掉末尾的>）
+			var args = row.split(/[:：]/);
+			var command = args.shift();
+			if( command == "<状态并行动画" ){
+				
+				if( args.length >= 2 ){
+					if(args[0]){ var a_id = Number(args[0]);}
+					if(args[1]){ var type = String(args[1]);}
+					if(args[2]){ var temp1 = String(args[2]);}
+					if(args[3]){ var temp2 = String(args[3]);}
+					if(args[4]){ var temp3 = String(args[4]);}
+					if(args[5]){ var temp4 = String(args[5]);}
+					if ( type == "主动攻击命中时"){
+						var damage_type = this.item().damage.type ;
+						var damage_attr = this.item().damage.elementId ;
+						if (result.isHit() && damage_type > 0 ) {
+							var is_actived = false;
+							if( temp3 == "属性类型" ){
+								if ( damage_type == 1 && temp2 == "HP伤害" && Number(temp4) == damage_attr ){ is_actived = true; }
+								if ( damage_type == 2 && temp2 == "MP伤害" && Number(temp4) == damage_attr ){ is_actived = true; }
+								if ( damage_type == 3 && temp2 == "HP恢复" && Number(temp4) == damage_attr ){ is_actived = true; }
+								if ( damage_type == 4 && temp2 == "MP恢复" && Number(temp4) == damage_attr ){ is_actived = true; }
+								if ( damage_type == 5 && temp2 == "HP吸收" && Number(temp4) == damage_attr ){ is_actived = true; }
+								if ( damage_type == 6 && temp2 == "MP吸收" && Number(temp4) == damage_attr ){ is_actived = true; }
+							}else{
+								if ( damage_type == 1 && temp2 == "HP伤害"){ is_actived = true; }
+								if ( damage_type == 2 && temp2 == "MP伤害"){ is_actived = true; }
+								if ( damage_type == 3 && temp2 == "HP恢复"){ is_actived = true; }
+								if ( damage_type == 4 && temp2 == "MP恢复"){ is_actived = true; }
+								if ( damage_type == 5 && temp2 == "HP吸收"){ is_actived = true; }
+								if ( damage_type == 6 && temp2 == "MP吸收"){ is_actived = true; }
+							}
+							if(is_actived){
+								if ( temp1 == "自己"){
+									this.subject().drill_AIP_startParallelAnimation( a_id, false,0);
+								}
+								if ( temp1 == "目标" ){
+									target.drill_AIP_startParallelAnimation( a_id, false,0);
+								}
+							}
 						}
-						if(is_actived){
+					}
+					if ( type == "主动攻击躲避时"){
+						if ( !result.isHit() && this.item().damage.type > 0 ) {
 							if ( temp1 == "自己"){
 								this.subject().drill_AIP_startParallelAnimation( a_id, false,0);
 							}
 							if ( temp1 == "目标" ){
 								target.drill_AIP_startParallelAnimation( a_id, false,0);
 							}
-						}
-					}
-				}
-				if ( type == "主动攻击躲避时"){
-					if ( !result.isHit() && this.item().damage.type > 0 ) {
-						if ( temp1 == "自己"){
-							this.subject().drill_AIP_startParallelAnimation( a_id, false,0);
-						}
-						if ( temp1 == "目标" ){
-							target.drill_AIP_startParallelAnimation( a_id, false,0);
 						}
 					}
 				}

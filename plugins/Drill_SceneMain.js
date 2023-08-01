@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.6]        面板 - 全自定义主菜单面板
+ * @plugindesc [v1.7]        面板 - 全自定义主菜单面板
  * @author Drill_up
  * 
  * @Drill_LE_param "角色固定框样式-%d"
@@ -231,6 +231,8 @@
  * 添加了角色框 职业、昵称 的显示功能。
  * [v1.6]
  * 修复了 主菜单插件单独 使用时，会影响物品界面使用物品时选择人物的窗口挤占高度的bug。
+ * [v1.7]
+ * 修复了开启参数条游标时出错的bug。
  * 
  * 
  * @param ----杂项----
@@ -2919,11 +2921,11 @@
 		var data = {};
 		
 		// > 主体
+		data['x'] = Number( dataFrom["平移-参数条 X"] || 0 );
+		data['y'] = Number( dataFrom["平移-参数条 Y"] || 0 );
 		//		data['anchor_x']（关闭）
 		//		data['anchor_y']（关闭）
 		//		data['visible']（后面函数赋值）
-		data['x'] = Number( dataFrom["平移-参数条 X"] || 0 );
-		data['y'] = Number( dataFrom["平移-参数条 Y"] || 0 );
 		data['rotation'] = Number( dataFrom["整体旋转角度"] || 0 );
 		data['meter_src'] = String( dataFrom["资源-参数条"] || "" );
 		data['meter_src_file'] = "img/Menu__main/";
@@ -2935,6 +2937,10 @@
 		data['level_isLoop'] = true;
 		data['shorten_mode'] = "瞬间缩短";
 		data['shorten_speed'] = 2.5;
+		data['shorten_ratio'] = 10;
+		data['lengthen_mode'] = "瞬间伸长";
+		data['lengthen_speed'] = 2.5;
+		data['lengthen_ratio'] = 10;
 		data['flow_enable'] = String( dataFrom["是否使用流动效果"] || "true") === "true";
 		data['flow_dir'] = String( dataFrom["流动方向"] || "从右往左");
 		data['flow_speed'] = Number( dataFrom["流动速度"] || 1.0 );
@@ -2942,8 +2948,10 @@
 		data['flow_levelLength'] = Number( dataFrom["段长度"] || 0 );
 		
 		// > 凹槽条（关闭）
+		data['leak_enable'] = false;
 		
 		// > 弹出条（关闭）
+		data['spring_enable'] = false;
 		
 		// > 粒子
 		data['par_enable'] = String( dataFrom["是否启用粒子效果"] || "true") === "true";
@@ -2957,12 +2965,13 @@
 		
 		// > 游标
 		data['vernier_enable'] = String( dataFrom["是否启用游标"] || "false") === "true";
-		if( dataFrom["资源-游标"] != undefined && dataFrom["资源-游标"] != "" ){
+		if( dataFrom["资源-游标"] != undefined &&
+			dataFrom["资源-游标"] != "" ){
 			data['vernier_src'] = JSON.parse( dataFrom["资源-游标"] );
 		}else{
 			data['vernier_src'] = [];
 		}
-		data['vernier_src'] = "img/Menu__main/";
+		data['vernier_src_file'] = "img/Menu__main/";
 		data['vernier_gif_interval'] = Number( dataFrom["动画帧间隔"] || 0);
 		data['vernier_gif_backrun'] = String( dataFrom["是否倒放"] || "true") === "true";
 		data['vernier_x'] = Number( dataFrom["偏移-游标 X"] || 0);

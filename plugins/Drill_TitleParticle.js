@@ -35,6 +35,7 @@
  *   只作用于标题界面。
  * 2.要了解更详细的组合方法，
  *   去看看 "17.主菜单 > 多层组合装饰（界面装饰）.docx"。
+ *   还有 "17.主菜单 > 多层组合装饰（界面装饰-菜单界面）.docx"。
  * 全局存储：
  *   (1.该插件控制的显示/隐藏数据将存储在全局文件中。
  *      如果游戏中修改了显示/隐藏，则永久有效，不保存也有效。
@@ -970,7 +971,7 @@
 //			->☆变量获取
 //			->☆插件指令
 //			->☆全局存储
-//			->☆菜单层级
+//			->☆标题层级
 //			
 //			->☆资源预加载
 //			->☆贴图控制
@@ -1226,10 +1227,10 @@ StorageManager.drill_TPa_saveData = function(){
 
 
 //#############################################################################
-// ** 【标准模块】菜单层级 ☆菜单层级
+// ** 【标准模块】标题层级 ☆标题层级
 //#############################################################################
 //##############################
-// * 菜单层级 - 添加贴图到层级【标准函数】
+// * 标题层级 - 添加贴图到层级【标准函数】
 //				
 //			参数：	> sprite 贴图        （添加的贴图对象）
 //					> layer_index 字符串 （添加到的层级名，菜单后面层/菜单前面层）
@@ -1239,34 +1240,34 @@ StorageManager.drill_TPa_saveData = function(){
 //##############################
 Scene_Title.prototype.drill_TPa_layerAddSprite = function( sprite, layer_index ){
     this.drill_TPa_layerAddSprite_Private(sprite, layer_index);
-}
+};
 //##############################
-// * 菜单层级 - 去除贴图【标准函数】
+// * 标题层级 - 去除贴图【标准函数】
 //				
 //			参数：	> sprite 贴图（添加的贴图对象）
 //			返回：	> 无
 //          
-//			说明：	> 强行规范的接口，将指定贴图从地图层级中移除。
+//			说明：	> 强行规范的接口，将指定贴图从标题层级中移除。
 //##############################
 Scene_Title.prototype.drill_TPa_layerRemoveSprite = function( sprite ){
-	//（不操作）
-}
+	this.drill_TPa_layerRemoveSprite_Private( sprite );
+};
 //##############################
-// * 菜单层级 - 图片层级排序【标准函数】
+// * 标题层级 - 图片层级排序【标准函数】
 //				
 //			参数：	> 无
 //			返回：	> 无
 //          
-//			说明：	> 执行该函数后，地图层级的子贴图，按照zIndex属性来进行先后排序。值越大，越靠前。
+//			说明：	> 执行该函数后，标题层级的子贴图，按照zIndex属性来进行先后排序。值越大，越靠前。
 //##############################
 Scene_Title.prototype.drill_TPa_sortByZIndex = function () {
     this.drill_TPa_sortByZIndex_Private();
-}
+};
 //=============================================================================
-// ** 菜单层级（接口实现）
+// ** 标题层级（接口实现）
 //=============================================================================
 //==============================
-// * 菜单层级 - 最顶层
+// * 标题层级 - 最顶层
 //==============================
 var _drill_TPa_menuLayer_update = Scene_Title.prototype.update;
 Scene_Title.prototype.update = function() {
@@ -1279,22 +1280,33 @@ Scene_Title.prototype.update = function() {
 		this._foregroundSprite = new Sprite();
 		this.addChild(this._foregroundSprite);	
 	}
-}
+};
 //==============================
-// * 菜单层级 - 图片层级排序（私有）
+// * 标题层级 - 图片层级排序（私有）
 //==============================
 Scene_Title.prototype.drill_TPa_sortByZIndex_Private = function() {
    this._backgroundSprite.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
    this._foregroundSprite.children.sort(function(a, b){return a.zIndex-b.zIndex});
 };
 //==============================
-// * 菜单层级 - 添加贴图到层级（私有）
+// * 标题层级 - 去除贴图（私有）
+//==============================
+Scene_Title.prototype.drill_TPa_layerRemoveSprite_Private = function( sprite ){
+	this._backgroundSprite.removeChild( sprite );
+	this._foregroundSprite.removeChild( sprite );
+};
+//==============================
+// * 标题层级 - 添加贴图到层级（私有）
+//
+//			说明：	> 此处兼容了 战斗界面、地图界面 的层级名词。
 //==============================
 Scene_Title.prototype.drill_TPa_layerAddSprite_Private = function( sprite, layer_index ){
-	if( layer_index == "菜单后面层" || layer_index === 0 ){
+	if( layer_index == "菜单后面层" || layer_index === 0 || 
+		layer_index == "下层" || layer_index == "中层" || layer_index == "上层"){
 		this._backgroundSprite.addChild( sprite );
 	}
-	if( layer_index == "菜单前面层" || layer_index === 1 ){
+	if( layer_index == "菜单前面层" || layer_index === 1 || 
+		layer_index == "图片层" || layer_index == "最顶层" ){
 		this._foregroundSprite.addChild( sprite );
 	}
 };

@@ -2893,7 +2893,7 @@ Scene_Map.prototype.drill_ASu_updateInScene = function() {
 	};
 	
 	
-	// > 控制器刷新（需要放后面，与层级变化错开1帧）
+	// > 控制器帧刷新（需要放后面，与层级变化错开1帧）
 	for(var i = 0; i < $gameTemp._drill_ASu_controllerTank.length; i++){
 		var temp_controller = $gameTemp._drill_ASu_controllerTank[i];
 		temp_controller.drill_controller_update();

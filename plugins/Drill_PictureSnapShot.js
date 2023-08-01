@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        图片 - 临时屏幕快照
+ * @plugindesc [v1.2]        图片 - 临时屏幕快照
  * @author Drill_up
  * 
  * 
@@ -27,6 +27,8 @@
  * 2.更多详细内容，去看看文档 "1.系统 > 大家族-屏幕快照.docx"。
  * 细节：
  *   (1.屏幕快照都是临时的，且只能作为临时贴图使用，无法保存到存档中。
+ *   (2."保存到文件"插件指令，可以将当前屏幕截图保存到指定文件夹中。
+ *      但注意只在PC端有效。
  * 设计：
  *   (1.你可以将 屏幕快照 和 图片滤镜 结合使用，制作出一闪的效果。
  *      在地图和战斗中都可以做，可以去 特效管理层 看看快照效果。
@@ -47,6 +49,16 @@
  * 
  * 1.你需要先建立屏幕截图，再将临时快照赋值给 图片对象。
  * 2.注意，屏幕快照都是临时的，且只能作为临时贴图使用，无法保存到存档中。
+ *
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 保存文件
+ * 你可以通过下面插件指令来实现当前屏幕快照的保存：
+ * 
+ * 插件指令：>图片临时屏幕快照 : 临时快照 : 建立屏幕截图
+ * 插件指令：>图片临时屏幕快照 : 临时快照 : 保存到文件
+ * 插件指令：>图片临时屏幕快照 : 打开保存的文件路径
+ * 
+ * 1.注意，此插件指令只在PC端有效。
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -76,6 +88,59 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 改进了静态快照的内部结构。
+ * [v1.2]
+ * 添加了保存快照文件的功能。
+ * 
+ * 
+ * 
+ * @param 存储快照文件设置
+ * @desc 使用插件指令"保存到文件"时，快照文件的设置。
+ * @type struct<DrillFile>
+ * @default {"文件夹路径":"游戏截图/","文件名":"截图","文件名是否包含日期":"true","文件名是否包含时分秒":"true","文件类型":"png","图像质量":"90"}
+ * 
+ */
+/*~struct~DrillFile:
+ * 
+ * @param 文件夹路径
+ * @desc 格式为"aaa/bbb/"，文件夹不存在时会自动创建，创建在游戏根目录下。
+ * @default 游戏截图/
+ * 
+ * @param 文件名
+ * @desc 执行截图保存后的文件名。
+ * @default 截图
+ *
+ * @param 文件名是否包含日期
+ * @parent 文件名
+ * @type boolean
+ * @on 包含
+ * @off 不包含
+ * @desc true - 包含，false - 不包含
+ * @default true
+ *
+ * @param 文件名是否包含时分秒
+ * @parent 文件名
+ * @type boolean
+ * @on 包含
+ * @off 不包含
+ * @desc true - 包含，false - 不包含
+ * @default true
+ * 
+ * @param 文件类型
+ * @type select
+ * @option png
+ * @value png
+ * @option jpg
+ * @value jpg
+ * @desc 存储的文件类型。
+ * @default png
+ * 
+ * @param 图像质量
+ * @parent 文件类型
+ * @type number
+ * @min 1
+ * @max 100
+ * @desc 文件类型为jpg时有效，可设置1-100的图像质量设置。（png是固定100的图像质量）
+ * @default 90
  * 
  */
  
@@ -114,6 +179,8 @@
 //				->显示图片
 //				->消除图片
 //				->贴图 绑定快照
+//			
+//			->☆保存快照文件
 //
 //
 //		★家谱：
@@ -157,8 +224,36 @@
 	var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_PictureSnapShot');
 	
+	
+	//==============================
+	// * 变量获取 - 文件路径
+	//				（~struct~DrillFile）
+	//==============================
+	DrillUp.drill_PSS_initFile = function( dataFrom ){
+		var data = {};
+		
+		data['url_path'] = String( dataFrom["文件夹路径"] || "snapshot/");
+		
+		data['file_name'] = String( dataFrom["文件名"] || "游戏截图");
+		data['file_name_with_date'] = String( dataFrom["文件名是否包含日期"] || "true") == "true";
+		data['file_name_with_time'] = String( dataFrom["文件名是否包含时分秒"] || "true") == "true";
+		
+		data['file_type'] = String( dataFrom["文件类型"] || "png");
+		data['image_quality'] = Number( dataFrom["图像质量"] || 90);
+		
+		return data;
+	}
 
-
+	/*-----------------杂项------------------*/
+	if( DrillUp.parameters["存储快照文件设置"] != undefined &&
+		DrillUp.parameters["存储快照文件设置"] != "" ){
+		var data = JSON.parse( DrillUp.parameters["存储快照文件设置"] );
+		DrillUp.g_PSS_fileSettings = DrillUp.drill_PSS_initFile( data );
+	}else{
+		DrillUp.g_PSS_fileSettings = DrillUp.drill_PSS_initFile( {} );
+	}
+	
+	
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
@@ -175,8 +270,18 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				if( type == "建立屏幕截图" ){
 					$gameTemp.drill_PSS_createSnapshot();
 				}
+				if( type == "保存到文件" ){
+					$gameTemp.drill_PSS_saveSnapshot();
+				}
 				return;
 			}
+		}
+		if( args.length == 2 ){
+			var type = String(args[1]);
+			if( type == "打开保存的文件路径" ){
+				$gameTemp.drill_PSS_openUrl();
+			}
+			return;
 		}
 		
 			
@@ -510,4 +615,127 @@ Sprite_Picture.prototype.drill_PSS_setSnapshot = function( snapshot_id ){
 	if( bitmap == undefined ){ return; }
 	this.bitmap = bitmap;
 }
+
+
+//=============================================================================
+// ** ☆保存快照文件
+//
+//			说明：	> 此模块提供 保存 静态快照文件 功能。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 保存快照文件 - 保存到文件
+//==============================
+Game_Temp.prototype.drill_PSS_saveSnapshot = function() {
+    
+	// > 资源对象
+	var bitmap = this.drill_PSS_getLastSnapshot();
+	if( bitmap == null ){ return; }
+	
+	// > 名称设置
+	var settings = DrillUp.g_PSS_fileSettings;
+	var file_name = settings['file_name'];
+	if( settings['file_name_with_date'] == true ){
+		file_name += " ";
+		file_name += new Date().drill_PSS_getDateTextByFormat("yyyy年MM月dd日");
+	}
+	if( settings['file_name_with_time'] == true ){
+		file_name += " ";
+		file_name += new Date().drill_PSS_getDateTextByFormat("HH时mm分ss秒");
+	}
+	
+	// > 执行保存
+	this.drill_PSS_saveBitmap( bitmap, settings['url_path'], file_name, settings['file_type'], settings['image_quality'] );
+};
+//==============================
+// * 保存快照文件 - 时间格式化（真实时间）
+//==============================
+Date.prototype.drill_PSS_getDateTextByFormat = function( fmt ){
+	var o = {
+		"M+": this.getMonth() + 1,						//月份 
+		"d+": this.getDate(),							//日 
+		"H+": this.getHours(),							//小时 
+		"m+": this.getMinutes(),						//分 
+		"s+": this.getSeconds(),						//秒 
+		"q+": Math.floor((this.getMonth() + 3) / 3),	//季度 
+		"S":  this.getMilliseconds()					//毫秒 
+	};
+	if( /(y+)/.test(fmt) ){
+		fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+	}
+	for( var k in o ){
+		if( new RegExp("(" + k + ")").test(fmt) ){
+			fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+		}
+	}
+	return fmt;
+}
+//==============================
+// * 保存快照文件 - 执行保存
+//
+//			参数：	> bitmap        资源对象
+//					> url_path      文件夹路径（"snapshot/"）
+//					> file_name     文件名
+//					> file_type     文件类型（"png"或"jpg"）
+//					> image_quality 图片质量（0~100，只jpg时有效）
+//==============================
+Game_Temp.prototype.drill_PSS_saveBitmap = function( bitmap, url_path, file_name, file_type, image_quality ){
+	if( file_type != "png" && file_type != "jpg" ){ return; }
+	
+	// > 图片质量（只jpg时有效）
+	image_quality = Math.min( image_quality, 100 ) * 0.01;
+	
+	// > 获取数据
+	var data = bitmap.canvas.toDataURL( file_type, image_quality );
+	
+	// > 去掉数据头
+	if( file_type == "png" ){
+		data = data.replace( /^data:image\/png;base64,/, "" );
+	}
+	if( file_type == "jpg" ){
+		data = data.replace( /^data:image\/jpeg;base64,/, "" );
+	}
+	
+	// > 路径解析
+	var fs = require('fs');
+	var fileRoot = this.drill_PSS_parentDirectoryPath();
+	var dirPath = fileRoot + url_path;
+	
+	// > 文件夹路径自动创建
+	if(!fs.existsSync(dirPath) ){
+		fs.mkdirSync(dirPath);
+	}
+	
+	// > 如果已存在，则数字加1再存
+	var filePath = fileRoot + url_path + file_name + "." + file_type;
+	for( var i=2; i < 100; i++ ){
+		if( fs.existsSync(filePath) == true ){
+			filePath = fileRoot + url_path + file_name + " " + String(i) + "." + file_type;
+			continue;
+		}
+		break;
+	}
+	
+	// > 写入文件
+	fs.writeFileSync( filePath, data, 'base64' );
+}
+//==============================
+// * 保存快照文件 - 获取目录
+//==============================
+Game_Temp.prototype.drill_PSS_parentDirectoryPath = function() {
+    var path = require('path');
+    var base = path.dirname(process.mainModule.filename);
+    return path.join(base, '/');
+};
+//==============================
+// * 保存快照文件 - 打开保存的文件路径
+//==============================
+Game_Temp.prototype.drill_PSS_openUrl = function() {
+	var fileRoot = this.drill_PSS_parentDirectoryPath();
+	var filePath = fileRoot + DrillUp.g_PSS_fileSettings['url_path'];
+	
+    var path = require('path');
+	var exec = require('child_process').exec;
+	exec('explorer ' + path.resolve(filePath) );
+};
 
