@@ -103,7 +103,7 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(n)*o(移动路线) 每帧
-//		★性能测试因素	地图管理层跑步
+//		★性能测试因素	地图管理层
 //		★性能测试消耗	与不开该插件估算得出
 //		★最坏情况		无	
 //		★备注			暂无
@@ -118,6 +118,9 @@
 //				->性能测试（结果找不准）
 //
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -147,7 +150,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_EventKeepMoving = true;
@@ -168,10 +171,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	if( command === ">镜头外事件保持移动" ){
 		if(args.length == 2){				//>镜头外事件保持移动 : 关闭
 			var type = String(args[1]);
-			if( type == "开启" ){
+			if( type == "启用" || type == "开启" || type == "打开" || type == "启动" ){
 				$gameSystem._drill_EKM_enable = true;
 			}
-			if( type == "关闭" ){
+			if( type == "关闭" || type == "禁用" ){
 				$gameSystem._drill_EKM_enable = false;
 			}
 		}
@@ -282,10 +285,10 @@ Game_Map.prototype.drill_EKM_setupMapNote = function() {
 				var temp1 = String(args[0]);
 				var temp2 = String(args[1]);
 				if( temp1 == "临时锁定"){
-					if( temp2 == "开启"){
+					if( temp2 == "启用" || temp2 == "开启" || temp2 == "打开" || temp2 == "启动" ){
 						this._drill_EKM_enableMoving = true;
 					}
-					if( temp2 == "关闭"){
+					if( temp2 == "关闭" || temp2 == "禁用" ){
 						this._drill_EKM_enableMoving = false;
 					}
 				}

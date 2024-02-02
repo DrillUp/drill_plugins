@@ -421,7 +421,7 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
 //			->☆插件指令
 //			->☆存储数据
 //			->☆单位贴图
@@ -480,6 +480,9 @@
 //			
 //			
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -549,7 +552,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_BattleCamera = true;
@@ -609,10 +612,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args ){
 		/*-----------------镜头控制器------------------*/
 		if( args.length == 2 ){
 			var type = String(args[1]);
-			if( type == "开启" ){
+			if( type == "启用" || type == "开启" || type == "打开" || type == "启动" ){
 				$gameSystem.drill_BCa_setEnable( true );
 			}
-			if( type == "关闭" ){
+			if( type == "关闭" || type == "禁用" ){
 				$gameSystem.drill_BCa_setEnable( false );
 			}
 			if( type == "暂停镜头运行" ){
@@ -678,10 +681,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args ){
 			var type = String(args[1]);
 			var temp1 = String(args[3]);
 			if( type == "观光模式-键盘操作" ){
-				if( temp1 == "启用" ){
+				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
 					$gameSystem._drill_BCa_controller._drill_data['touristKeyboardEnabled'] = true;
 				}
-				if( temp1 == "关闭" ){
+				if( temp1 == "关闭" || temp1 == "禁用" ){
 					$gameSystem._drill_BCa_controller._drill_data['touristKeyboardEnabled'] = false;
 				}
 				if( temp1 == "恢复默认" ){
@@ -689,10 +692,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args ){
 				}
 			}
 			if( type == "观光模式-鼠标操作" ){
-				if( temp1 == "启用" ){
+				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
 					$gameSystem._drill_BCa_controller._drill_data['touristMouseEnabled'] = true;
 				}
-				if( temp1 == "关闭" ){
+				if( temp1 == "关闭" || temp1 == "禁用" ){
 					$gameSystem._drill_BCa_controller._drill_data['touristMouseEnabled'] = false;
 				}
 				if( temp1 == "恢复默认" ){
@@ -890,10 +893,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args ){
 			var type = String(args[1]);
 			var temp1 = String(args[3]);
 			if( type == "边缘遮挡层" ){
-				if( temp1 == "开启" ){
+				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
 					$gameSystem._drill_BCa_controller.drill_BCa_setGlobalBarrierLayerEnabled( true );
 				}
-				if( temp1 == "关闭" ){
+				if( temp1 == "关闭" || temp1 == "禁用" ){
 					$gameSystem._drill_BCa_controller.drill_BCa_setGlobalBarrierLayerEnabled( false );
 				}
 			}
@@ -2618,7 +2621,7 @@ Drill_BCa_Controller.prototype.drill_updateTouristMode_Mouse = function(){
 	// > 鼠标控制关闭情况
 	if( data['touristMouseEnabled'] == false ){ return; }
 	
-	// > 鼠标位置刷新
+	// > 鼠标位置刷新（包含出界情况）
 	var mouse_pos = TouchInput.drill_COI_getMousePos_WithOutside();
 	this._drill_tourist_mouseX = mouse_pos.x;
 	this._drill_tourist_mouseY = mouse_pos.y;

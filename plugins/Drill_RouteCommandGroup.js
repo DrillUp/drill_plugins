@@ -14,7 +14,7 @@
  * 如果你有兴趣，也可以来看看我的mog中文全翻译插件哦ヽ(*。>Д<)o゜
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
- * 该插件提供一系列方便的路线指令。
+ * 该插件提供一系列方便的移动路线指令。
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
@@ -36,9 +36,7 @@
  *      进入下一条指令。功能与"无法移动时跳过指令"相似，但是这里的
  *      指令不会产生过多的等待时间。
  * 旧版本：
- *   (1.旧版本的 移动路线核心 是包含指令集和路线记忆的各项功能的。
- *      新版本考虑到 插件性能优化 因素，所以将上述两大功能分离成了两个插件。
- *   (2.注意，部分旧版本的移动路线指令被修改为新的格式，
+ *   (1.注意，部分旧版本的移动路线指令被修改为新的格式，
  *      比如 "上移10步" 被改为 ">指令集:上移:步数[n]" 。
  *      请用新的格式来写移动路线，因为旧的格式会增加性能消耗负担。
  * 设计：
@@ -49,7 +47,7 @@
  *   (2.">指令集:接近(只横向):玩家"可以用于设计专门挡玩家路的事件。
  *      这样玩家必须跑的更快，或者使用跳跃，才能通过那个事件。
  *   (3.">指令集:接近:鼠标"可以用于设计被鼠标控制的事件。
- *      比如可以拖拽的事件，详细可以参考 鼠标管理层 的可拖拽小爱丽丝。
+ *      比如可以拖拽的事件，详细可以参考 鼠标管理层示例 的可拖拽小爱丽丝。
  * 
  * -----------------------------------------------------------------------------
  * ----激活条件
@@ -127,20 +125,23 @@
  * 你可以设置事件之间保持某个距离值。
  * 
  * 移动路线指令：>指令集:接近:玩家
- * 移动路线指令：>指令集:接近:鼠标
- * 移动路线指令：>指令集:接近:事件[10]
- * 移动路线指令：>指令集:接近:事件变量[10]
- * 移动路线指令：>指令集:接近:位置[30,32]
- * 移动路线指令：>指令集:接近:位置变量[25,26]
- * 
- * 移动路线指令：>指令集:接近:玩家
  * 移动路线指令：>指令集:接近(只横向):玩家
  * 移动路线指令：>指令集:接近(只纵向):玩家
  * 移动路线指令：>指令集:远离:玩家
  * 移动路线指令：>指令集:远离(只横向):玩家
  * 移动路线指令：>指令集:远离(只纵向):玩家
  * 
- * 1.只横向/只纵向一般用于不封路却专门拦住玩家的事件。
+ * 移动路线指令：>指令集:接近:玩家
+ * 移动路线指令：>指令集:接近:鼠标
+ * 移动路线指令：>指令集:接近:事件[10]
+ * 移动路线指令：>指令集:接近:事件变量[10]
+ * 移动路线指令：>指令集:接近:位置[30,32]
+ * 移动路线指令：>指令集:接近:位置变量[25,26]
+ * 
+ * 1.前半部分（接近(只横向)）和 后半部分（玩家）
+ *   的参数可以随意组合。一共有6*6种组合方式。
+ *   比如可以组合为指令：">指令集:远离(只纵向):事件[10]"。
+ * 2.只横向/只纵向一般用于不封路却专门拦住玩家的事件。
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 保持距离
@@ -197,7 +198,7 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
  * 时间复杂度： o(n)*o(事件移动路线) 每帧
- * 测试方法：   去物体管理层、地理管理层、镜像管理层跑一圈测试就可以了。
+ * 测试方法：   去鼠标管理层进行性能测试。
  * 测试结果：   200个事件的地图中，平均消耗为：【26.25ms】
  *              100个事件的地图中，平均消耗为：【14.14ms】
  *               50个事件的地图中，平均消耗为：【11.29ms】
@@ -263,19 +264,29 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			移动路线指令集：
-//				->遇障碍结束
-//				->接近/远离
-//					->玩家、事件、位置
-//					->鼠标
-//					->只横向/只纵向
+//			->☆提示信息
+//			->☆静态数据
+//			->☆移动路线指令
+//				->指令执行阶段
+//				->脚本转义阶段
+//
+//			->☆常规指令
 //				->随机移动
 //					->只横向/只纵向
-//				->保持距离
-//					->玩家、事件、位置
-//					->鼠标
+//			->☆遇障碍结束
+//			->☆接近/远离
+//				->玩家、事件、位置
+//				->鼠标
+//				->只横向/只纵向
+//			->☆保持距离
+//				->玩家、事件、位置
+//				->鼠标
+//
 //
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -293,7 +304,7 @@
 //		
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -318,7 +329,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_RouteCommandGroup = true;
@@ -338,8 +349,11 @@ if( Imported.Drill_CoreOfMoveRoute ){
 
 
 //=============================================================================
-// * 指令执行阶段 - 执行指令（继承接口）
+// ** ☆移动路线指令
 //=============================================================================
+//==============================
+// * 移动路线指令 - 指令执行阶段（继承接口）
+//==============================
 var _drill_RCG_routeCommand = Game_Character.prototype.drill_COMR_routeCommand;
 Game_Character.prototype.drill_COMR_routeCommand = function(command, args){
 	_drill_RCG_routeCommand.call( this, command, args );
@@ -513,13 +527,13 @@ Game_Character.prototype.drill_COMR_routeCommand = function(command, args){
 					temp1 = temp1.replace("事件[","");
 					temp1 = temp1.replace("]","");
 					temp1 = Number(temp1);
-					this.moveAwayCharacter( $gameMap.event(temp1) ); 
+					this.moveAwayFromCharacter( $gameMap.event(temp1) ); 
 				}
 				else if( temp1.indexOf("事件变量[") != -1 ){
 					temp1 = temp1.replace("事件变量[","");
 					temp1 = temp1.replace("]","");
 					temp1 = $gameVariables.value( Number(temp1) );
-					this.moveAwayCharacter( $gameMap.event(temp1) ); 
+					this.moveAwayFromCharacter( $gameMap.event(temp1) ); 
 				}
 				else if( temp1.indexOf("位置[") != -1 ){
 					temp1 = temp1.replace("位置[","");
@@ -529,7 +543,7 @@ Game_Character.prototype.drill_COMR_routeCommand = function(command, args){
 						var pos = {};
 						pos['x'] = Number(temp1[0]);
 						pos['y'] = Number(temp1[1]);
-						this.moveAwayCharacter( pos ); 
+						this.moveAwayFromCharacter( pos ); 
 					}
 				}
 				else if( temp1.indexOf("位置变量[") != -1 ){
@@ -540,11 +554,11 @@ Game_Character.prototype.drill_COMR_routeCommand = function(command, args){
 						var pos = {};
 						pos['x'] = $gameVariables.value( Number(temp1[0]) );
 						pos['y'] = $gameVariables.value( Number(temp1[1]) );
-						this.moveAwayCharacter( pos ); 
+						this.moveAwayFromCharacter( pos ); 
 					}
 				}
 				else if( temp1 == "玩家" ){
-					this.moveAwayCharacter( $gamePlayer ); 
+					this.moveAwayFromCharacter( $gamePlayer ); 
 				}
 				else if( temp1 == "鼠标" ){
 					this.drill_RCG_moveAwayMouse(); 
@@ -719,11 +733,9 @@ Game_Character.prototype.drill_COMR_routeCommand = function(command, args){
 		this.drill_RCG_moveAwayMouse();
 	}
 }
-
-
-//=============================================================================
-// * 脚本转义阶段 - 执行转义（继承接口）
-//=============================================================================
+//==============================
+// * 移动路线指令 - 脚本转义阶段（继承接口）
+//==============================
 var _drill_RCG_routeTransform = Game_Character.prototype.drill_COMR_routeTransform;
 Game_Character.prototype.drill_COMR_routeTransform = function( command, args ){
 	_drill_RCG_routeTransform.call( this, command, args );
@@ -834,7 +846,86 @@ Game_Character.prototype.drill_COMR_routeTransform = function( command, args ){
 
 
 //=============================================================================
-// * 遇障碍结束
+// ** ☆常规指令
+//
+//			说明：	> 该模块专门管理 移动路线 的常规指令功能。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 常规指令 - 随机移动 - 只横向
+//==============================
+Game_Character.prototype.drill_RCG_moveRandom_X = function( ){
+    var d = 4 + Math.randomInt(2) * 2;
+    if (this.canPass(this.x, this.y, d) ){
+        this.moveStraight(d);
+    }
+};
+//==============================
+// * 常规指令 - 随机移动 - 只纵向
+//==============================
+Game_Character.prototype.drill_RCG_moveRandom_Y = function( ){
+    var d = 2 + Math.randomInt(2) * 6;
+    if (this.canPass(this.x, this.y, d) ){
+        this.moveStraight(d);
+    }
+};
+//==============================
+// * 常规指令 - 鼠标 - 获取点
+//==============================
+Game_Character.prototype.drill_RCG_getMousePoint = function( ){
+	
+	// > 鼠标坐标
+	var mouse_x = _drill_mouse_x;
+	var mouse_y = _drill_mouse_y;
+	
+	// > 镜头缩放【地图 - 活动地图镜头】
+	if( Imported.Drill_LayerCamera ){	//（事件处于 下层、中层、上层 之间）
+		mouse_x = $gameSystem.drill_LCa_cameraToMapX( _drill_mouse_x );	
+		mouse_y = $gameSystem.drill_LCa_cameraToMapY( _drill_mouse_y );	
+	}
+	
+	// > 坐标转换
+	var m = {}
+	m.x = Math.floor( $gameMap._displayX + mouse_x / $gameMap.tileWidth() );
+	m.y = Math.floor( $gameMap._displayY + mouse_y / $gameMap.tileHeight() );
+	
+	return m;
+}
+//==============================
+// * 常规指令 - 鼠标 - 获取鼠标位置（输入设备核心的片段）
+//==============================
+if( typeof(_drill_mouse_getCurPos) == "undefined" ){	//防止重复定义
+
+	var _drill_mouse_getCurPos = TouchInput._onMouseMove;
+	var _drill_mouse_x = 0;
+	var _drill_mouse_y = 0;
+	TouchInput._onMouseMove = function(event ){		//鼠标位置
+		_drill_mouse_getCurPos.call(this,event);
+		
+        _drill_mouse_x = Graphics.pageToCanvasX(event.pageX);
+        _drill_mouse_y = Graphics.pageToCanvasY(event.pageY);
+	};
+}
+if( typeof(_drill_touchPad_getCurPos) == "undefined" ){	//防止重复定义
+	
+	var _drill_touchPad_getCurPos = TouchInput._onTouchMove;
+	TouchInput._onTouchMove = function(event ){
+		_drill_touchPad_getCurPos.call(this,event);	//触屏位置
+			
+		if(event.changedTouches && event.changedTouches[0]){
+			var touch = event.changedTouches[0];
+			_drill_mouse_x = Graphics.pageToCanvasX(touch.pageX);
+			_drill_mouse_y = Graphics.pageToCanvasY(touch.pageY);
+		}
+	};
+}
+
+
+//=============================================================================
+// ** ☆遇障碍结束
+//
+//			说明：	> 该模块专门管理 移动路线-遇障碍结束 的指令功能。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 遇障碍结束 - 直线移动
@@ -885,10 +976,13 @@ Game_Character.prototype.drill_RCG_moveRandom_skip = function(){
 
 
 //=============================================================================
-// * 接近/远离
+// ** ☆接近/远离
+//
+//			说明：	> 该模块专门管理 移动路线-接近/移动路线-远离 的指令功能。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 路线动作 - 接近物体（修正）
+// * 接近/远离 - 接近物体（修正）
 //==============================
 var _drill_RCG_moveTowardCharacter = Game_Character.prototype.moveTowardCharacter;
 Game_Character.prototype.moveTowardCharacter = function( character ){
@@ -924,7 +1018,7 @@ Game_Character.prototype.moveTowardCharacter = function( character ){
 	_drill_RCG_moveTowardCharacter.call(this,character);
 }
 //==============================
-// * 路线动作 - 接近物体 - 只横向
+// * 接近/远离 - 接近物体 - 只横向
 //==============================
 Game_Character.prototype.drill_RCG_moveTowardCharacter_X = function(character ){
     var sx = this.deltaXFrom(character.x);
@@ -935,7 +1029,7 @@ Game_Character.prototype.drill_RCG_moveTowardCharacter_X = function(character ){
 	}
 };
 //==============================
-// * 路线动作 - 接近物体 - 只纵向
+// * 接近/远离 - 接近物体 - 只纵向
 //==============================
 Game_Character.prototype.drill_RCG_moveTowardCharacter_Y = function(character ){
     var sy = this.deltaYFrom(character.y);
@@ -946,21 +1040,21 @@ Game_Character.prototype.drill_RCG_moveTowardCharacter_Y = function(character ){
 	}
 }
 //==============================
-// * 路线动作 - 接近鼠标
+// * 接近/远离 - 接近鼠标
 //==============================
 Game_Character.prototype.drill_RCG_moveTowardMouse = function( ){
 	var m = this.drill_RCG_getMousePoint();
 	this.moveTowardCharacter(m);
 }
 //==============================
-// * 路线动作 - 接近鼠标 - 只横向
+// * 接近/远离 - 接近鼠标 - 只横向
 //==============================
 Game_Character.prototype.drill_RCG_moveTowardMouse_X = function( ){
 	var m = this.drill_RCG_getMousePoint();
 	this.drill_RCG_moveTowardCharacter_X(m);
 }
 //==============================
-// * 路线动作 - 接近鼠标 - 只纵向
+// * 接近/远离 - 接近鼠标 - 只纵向
 //==============================
 Game_Character.prototype.drill_RCG_moveTowardMouse_Y = function( ){
 	var m = this.drill_RCG_getMousePoint();
@@ -968,7 +1062,7 @@ Game_Character.prototype.drill_RCG_moveTowardMouse_Y = function( ){
 }
 
 //==============================
-// * 路线动作 - 远离物体（修正）
+// * 接近/远离 - 远离物体（修正）
 //==============================
 var _drill_RCG_moveAwayFromCharacter = Game_Character.prototype.moveAwayFromCharacter;
 Game_Character.prototype.moveAwayFromCharacter = function(character ){
@@ -1000,63 +1094,47 @@ Game_Character.prototype.moveAwayFromCharacter = function(character ){
 	_drill_RCG_moveAwayFromCharacter.call(this,character);
 }
 //==============================
-// * 路线动作 - 远离物体 - 只横向
+// * 接近/远离 - 远离物体 - 只横向
 //==============================
 Game_Character.prototype.drill_RCG_moveAwayCharacter_X = function(character ){
     var sx = this.deltaXFrom(character.x);
 	this.moveStraight(sx > 0 ? 6 : 4);
 };
 //==============================
-// * 路线动作 - 远离物体 - 只纵向
+// * 接近/远离 - 远离物体 - 只纵向
 //==============================
 Game_Character.prototype.drill_RCG_moveAwayCharacter_Y = function(character ){
     var sy = this.deltaYFrom(character.y);
 	this.moveStraight(sy > 0 ? 2 : 8);
 }
 //==============================
-// * 路线动作 - 远离鼠标
+// * 接近/远离 - 远离鼠标
 //==============================
 Game_Character.prototype.drill_RCG_moveAwayMouse = function( ){
 	var m = this.drill_RCG_getMousePoint();
 	this.moveAwayFromCharacter(m);
 }
 //==============================
-// * 路线动作 - 远离鼠标 - 只横向
+// * 接近/远离 - 远离鼠标 - 只横向
 //==============================
 Game_Character.prototype.drill_RCG_moveAwayMouse_X = function( ){
 	var m = this.drill_RCG_getMousePoint();
 	this.drill_RCG_moveAwayCharacter_X(m);
 }
 //==============================
-// * 路线动作 - 远离鼠标 - 只纵向
+// * 接近/远离 - 远离鼠标 - 只纵向
 //==============================
 Game_Character.prototype.drill_RCG_moveAwayMouse_Y = function( ){
 	var m = this.drill_RCG_getMousePoint();
 	this.drill_RCG_moveAwayCharacter_Y(m);
 }
 
-//==============================
-// * 路线动作 - 随机移动 - 只横向
-//==============================
-Game_Character.prototype.drill_RCG_moveRandom_X = function( ){
-    var d = 4 + Math.randomInt(2) * 2;
-    if (this.canPass(this.x, this.y, d) ){
-        this.moveStraight(d);
-    }
-};
-//==============================
-// * 路线动作 - 随机移动 - 只纵向
-//==============================
-Game_Character.prototype.drill_RCG_moveRandom_Y = function( ){
-    var d = 2 + Math.randomInt(2) * 6;
-    if (this.canPass(this.x, this.y, d) ){
-        this.moveStraight(d);
-    }
-};
-
 
 //=============================================================================
-// ** 保持距离
+// ** ☆保持距离
+//
+//			说明：	> 该模块专门管理 移动路线-保持距离 的指令功能。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 保持距离 - 物体保持距离
@@ -1085,57 +1163,6 @@ Game_Character.prototype.drill_RCG_mouseKeepDistance = function( distance ){
 	this.drill_RCG_keepDistance(m,distance);
 }
 
-
-//=============================================================================
-// ** 鼠标 - 获取点
-//=============================================================================
-Game_Character.prototype.drill_RCG_getMousePoint = function( ){
-	
-	// > 鼠标坐标
-	var mouse_x = _drill_mouse_x;
-	var mouse_y = _drill_mouse_y;
-	
-	// > 镜头缩放【地图 - 活动地图镜头】
-	if( Imported.Drill_LayerCamera ){	//（事件处于 下层、中层、上层 之间）
-		mouse_x = $gameSystem.drill_LCa_cameraToMapX( _drill_mouse_x );	
-		mouse_y = $gameSystem.drill_LCa_cameraToMapY( _drill_mouse_y );	
-	}
-	
-	// > 坐标转换
-	var m = {}
-	m.x = Math.floor( $gameMap._displayX + mouse_x / $gameMap.tileWidth() );
-	m.y = Math.floor( $gameMap._displayY + mouse_y / $gameMap.tileHeight() );
-	
-	return m;
-}
-//=============================================================================
-// ** 鼠标 - 获取鼠标位置（输入设备核心的片段）
-//=============================================================================
-if( typeof(_drill_mouse_getCurPos) == "undefined" ){	//防止重复定义
-
-	var _drill_mouse_getCurPos = TouchInput._onMouseMove;
-	var _drill_mouse_x = 0;
-	var _drill_mouse_y = 0;
-	TouchInput._onMouseMove = function(event ){		//鼠标位置
-		_drill_mouse_getCurPos.call(this,event);
-		
-        _drill_mouse_x = Graphics.pageToCanvasX(event.pageX);
-        _drill_mouse_y = Graphics.pageToCanvasY(event.pageY);
-	};
-}
-if( typeof(_drill_touchPad_getCurPos) == "undefined" ){	//防止重复定义
-	
-	var _drill_touchPad_getCurPos = TouchInput._onTouchMove;
-	TouchInput._onTouchMove = function(event ){
-		_drill_touchPad_getCurPos.call(this,event);	//触屏位置
-			
-		if(event.changedTouches && event.changedTouches[0]){
-			var touch = event.changedTouches[0];
-			_drill_mouse_x = Graphics.pageToCanvasX(touch.pageX);
-			_drill_mouse_y = Graphics.pageToCanvasY(touch.pageY);
-		}
-	};
-}
 
 
 //=============================================================================

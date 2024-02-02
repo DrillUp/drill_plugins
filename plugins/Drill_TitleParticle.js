@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.9]        标题 - 多层标题粒子
+ * @plugindesc [v2.0]        标题 - 多层标题粒子
  * @author Drill_up
  * 
  * @Drill_LE_param "粒子-%d"
@@ -33,7 +33,8 @@
  * ----设定注意事项
  * 1.插件的作用域：菜单界面。
  *   只作用于标题界面。
- * 2.要了解更详细的组合方法，
+ * 2.更多详细的内容，去看看 "1.系统 > 大家族-粒子效果.docx"。
+ * 3.要了解更详细的组合方法，
  *   去看看 "17.主菜单 > 多层组合装饰（界面装饰）.docx"。
  *   还有 "17.主菜单 > 多层组合装饰（界面装饰-菜单界面）.docx"。
  * 全局存储：
@@ -42,6 +43,13 @@
  *   (2.更多详细介绍，去看看 "21.管理器 > 关于全局存储.docx"。
  *   (3.留意全局存储的机制，开游戏就生效。
  *      如果你遇到了图片设置后不显示/不变化的问题，要注意清除全部存档。
+ * 预加载：
+ *   (1.该插件默认对所有资源预加载，也就是说开游戏时就加载资源。
+ *      但注意，如果你一开始游戏就进入标题界面，那么这段加载的时间就不够了。
+ *   (2.如果你配置的资源数量极其庞大（比如100多张资源），那么系统加载资源会
+ *      消耗很多时间。由于加载是并行的，所以加载期间，资源图片会延迟显示。
+ *   (3.若出现了资源延迟显示的情况，建议配置 启动界面 先加载单张图片，让玩
+ *      家先看2秒的logo，延长预加载的时间。
  * 层级:
  *   (1.标题设置中有 菜单层级 和 图片层级。
  *      菜单层级分 菜单前面层和菜单后面层 ，对应 标题窗口元素 的前面和后面。
@@ -118,6 +126,8 @@
  * 加强了粒子效果的配置，包括添加双层粒子效果。
  * [v1.9]
  * 结合粒子核心，加强了粒子相关功能。
+ * [v2.0]
+ * 添加了粒子 彩虹化 功能。
  *
  *
  * @param 全局存储的文件路径
@@ -941,6 +951,58 @@
  * @require 1
  * @dir img/titles1/
  * @type file
+ * 
+ * 
+ * @param ---彩虹化---
+ * @desc 
+ *
+ * @param 是否开启彩虹化-粒子
+ * @parent ---彩虹化---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭，冒出的每个粒子都会根据彩虹进行染色变化。
+ * @default false
+ *
+ * @param 是否开启彩虹化-第二层粒子
+ * @parent ---彩虹化---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭，冒出的每个第二层粒子都会根据彩虹进行染色变化。
+ * @default false
+ *
+ * @param 是否开启彩虹化-直线拖尾
+ * @parent ---彩虹化---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭，冒出的每个粒子的拖尾都会根据彩虹进行染色变化。
+ * @default false
+ * 
+ * @param 彩虹化色彩数量
+ * @parent ---彩虹化---
+ * @type number
+ * @min 1
+ * @max 360
+ * @desc 彩虹化色彩的数量，最大值为360。
+ * @default 20
+ *
+ * @param 彩虹化是否锁定色调值
+ * @parent ---彩虹化---
+ * @type boolean
+ * @on 锁定
+ * @off 关闭
+ * @desc true - 锁定，false - 关闭，彩虹变化将按照 色调值列表 进行依次染色，具体可以看看文档。
+ * @default false
+ * 
+ * @param 锁定的色调值列表
+ * @parent 彩虹化是否锁定色调值
+ * @type number[]
+ * @min 0
+ * @max 360
+ * @desc 彩虹变化将按照 色调值列表 进行依次染色，具体可以看看文档。
+ * @default []
  *
  */
 
@@ -968,12 +1030,12 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
 //			->☆插件指令
 //			->☆全局存储
 //			->☆标题层级
+//			->☆预加载（标题）
 //			
-//			->☆资源预加载
 //			->☆贴图控制
 //				->不考虑销毁情况
 //			
@@ -984,6 +1046,9 @@
 //		
 //		★家谱：
 //			大家族-粒子效果
+//		
+//		★脚本文档：
+//			1.系统 > 大家族-粒子效果（脚本）.docx
 //		
 //		★插件私有类：
 //			* 粒子控制器【Drill_TPa_Controller】
@@ -1034,7 +1099,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_TitleParticle = true;
@@ -1042,7 +1107,7 @@
 	DrillUp.parameters = PluginManager.parameters('Drill_TitleParticle');
 	
 	//==============================
-	// * 变量获取 - 粒子
+	// * 静态数据 - 粒子
 	//				（~struct~TitleParticle）
 	//==============================
 	DrillUp.drill_TPa_particleInit = function( dataFrom ) {
@@ -1106,6 +1171,19 @@
 		data['trailing_centerAnchor'] = String( dataFrom["是否固定拖尾在粒子中心"] || "false") == "true";
 		data['trailing_src_img'] = String( dataFrom["资源-直线拖尾"] || "");
 		data['trailing_src_img_file'] = "img/titles1/";
+		
+		// > 彩虹化
+		data['rainbow_enable'] = String( dataFrom["是否开启彩虹化-粒子"] || "false") == "true";
+		data['rainbow_enableSecond'] = String( dataFrom["是否开启彩虹化-第二层粒子"] || "false") == "true";
+		data['rainbow_enableTrailing'] = String( dataFrom["是否开启彩虹化-直线拖尾"] || "false") == "true";
+		data['rainbow_num'] = Number( dataFrom["彩虹化色彩数量"] || 20);
+		data['rainbow_lockTint'] = String( dataFrom["彩虹化是否锁定色调值"] || "false") == "true";
+		if( dataFrom["锁定的色调值列表"] != undefined &&
+			dataFrom["锁定的色调值列表"] != "" ){
+			data['rainbow_tintList'] = JSON.parse( dataFrom["锁定的色调值列表"] || [] );
+		}else{
+			data['rainbow_tintList'] = [];
+		}
 		
 		return data;
 	}
@@ -1312,16 +1390,18 @@ Scene_Title.prototype.drill_TPa_layerAddSprite_Private = function( sprite, layer
 };
 
 
-
 //=============================================================================
-// ** ☆资源预加载
+// ** ☆预加载（标题）
+//
+//			说明：	> 进入标题界面前，对标题资源进行一次性全部加载。但此资源可以被删除。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 资源预加载 - 初始化
+// * 预加载 - 初始化
 //==============================
-var _drill_TPa_temp_initialize = Game_Temp.prototype.initialize;
+var _drill_TPa_preload_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {
-	_drill_TPa_temp_initialize.call(this);
+	_drill_TPa_preload_initialize.call(this);
 	
     this._drill_TPa_preloadTank = [];			//bitmap容器
 	for (var i = 0; i < DrillUp.g_TPa_list.length; i++) {

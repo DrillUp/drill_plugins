@@ -31,7 +31,7 @@
  *      但注意只在PC端有效。
  * 设计：
  *   (1.你可以将 屏幕快照 和 图片滤镜 结合使用，制作出一闪的效果。
- *      在地图和战斗中都可以做，可以去 特效管理层 看看快照效果。
+ *      在地图和战斗中都可以做，可以去 特效管理层示例 看看快照效果。
  *
  * -----------------------------------------------------------------------------
  * ----激活条件
@@ -72,7 +72,7 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   单次执行
  * 时间复杂度： o(n^2)
- * 测试方法：   在不同的界面中，进行快照性能测试。
+ * 测试方法：   在特效管理层中，进行快照性能测试。
  * 测试结果：   战斗界面中，平均消耗为：【46.15ms】
  *              地图界面中，平均消耗为：【51.80ms】
  *
@@ -96,14 +96,14 @@
  * @param 存储快照文件设置
  * @desc 使用插件指令"保存到文件"时，快照文件的设置。
  * @type struct<DrillFile>
- * @default {"文件夹路径":"游戏截图/","文件名":"截图","文件名是否包含日期":"true","文件名是否包含时分秒":"true","文件类型":"png","图像质量":"90"}
+ * @default {"文件夹路径":"save/游戏截图/","文件名":"截图","文件名是否包含日期":"true","文件名是否包含时分秒":"true","文件类型":"png","图像质量":"90"}
  * 
  */
 /*~struct~DrillFile:
  * 
  * @param 文件夹路径
  * @desc 格式为"aaa/bbb/"，文件夹不存在时会自动创建，创建在游戏根目录下。
- * @default 游戏截图/
+ * @default save/游戏截图/
  * 
  * @param 文件名
  * @desc 执行截图保存后的文件名。
@@ -156,7 +156,7 @@
 //
 //		★工作类型		单次执行
 //		★时间复杂度		o(n^2)
-//		★性能测试因素	UI管理层
+//		★性能测试因素	特效管理层
 //		★性能测试消耗	51.8ms（Game_Temp.drill_PSS_createSnapshot）
 //		★最坏情况		指令被频繁调用，不断地执行截屏操作。
 //		★备注			截屏本身的操作，执行一次都很费消耗。
@@ -167,7 +167,7 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
 //			->☆插件指令
 //			->☆图片贴图
 //				>图片对象层 的图片贴图
@@ -185,6 +185,9 @@
 //
 //		★家谱：
 //			大家族-屏幕快照
+//		
+//		★脚本文档：
+//			无
 //		
 //		★插件私有类：
 //			无
@@ -217,7 +220,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 	var Imported = Imported || {};
 	Imported.Drill_PictureSnapShot = true;
@@ -226,13 +229,13 @@
 	
 	
 	//==============================
-	// * 变量获取 - 文件路径
+	// * 静态数据 - 文件路径
 	//				（~struct~DrillFile）
 	//==============================
 	DrillUp.drill_PSS_initFile = function( dataFrom ){
 		var data = {};
 		
-		data['url_path'] = String( dataFrom["文件夹路径"] || "snapshot/");
+		data['url_path'] = String( dataFrom["文件夹路径"] || "save/游戏截图/");		//【生成文件】
 		
 		data['file_name'] = String( dataFrom["文件名"] || "游戏截图");
 		data['file_name_with_date'] = String( dataFrom["文件名是否包含日期"] || "true") == "true";
@@ -558,12 +561,24 @@ Game_Picture.prototype.show = function( name, origin, x, y, scaleX, scaleY, opac
 	this._drill_PSS_snapShotId = -1;		//（标记解除）
 }
 //==============================
-// * 图片控制 - 消除图片（对应函数erasePicture）
+// * 图片控制 - 消除图片
 //==============================
 var _drill_PSS_p_erase = Game_Picture.prototype.erase;
 Game_Picture.prototype.erase = function(){
 	_drill_PSS_p_erase.call( this );
 	this._drill_PSS_snapShotId = -1;		//（标记解除）
+}
+//==============================
+// * 图片控制 - 消除图片（command235）
+//==============================
+var _drill_PSS_p_erasePicture = Game_Screen.prototype.erasePicture;
+Game_Screen.prototype.erasePicture = function( pictureId ){
+    var realPictureId = this.realPictureId(pictureId);
+	var picture = this._pictures[realPictureId];
+	if( picture != undefined ){
+		picture._drill_PSS_snapShotId = -1;	//（标记解除）
+	}
+	_drill_PSS_p_erasePicture.call( this, pictureId );
 }
 //==============================
 // * 图片控制 - 贴图 初始化
@@ -590,7 +605,7 @@ Sprite_Picture.prototype.updateBitmap = function() {
 		this._drill_PSS_sp_curSnapshotId = picture._drill_PSS_snapShotId;
 		this.drill_PSS_setSnapshot( picture._drill_PSS_snapShotId );	//（ID不一致时，赋值）
 		
-	// > 无数据时【图片数据根除时】
+	// > 无数据时『图片数据根除时』
 	}else{
 		if( this._drill_PSS_sp_curSnapshotId != -1 ){	//（恢复图像）
 			this.drill_PSS_setSnapshot( -1 );
@@ -701,7 +716,7 @@ Game_Temp.prototype.drill_PSS_saveBitmap = function( bitmap, url_path, file_name
 	var fileRoot = this.drill_PSS_parentDirectoryPath();
 	var dirPath = fileRoot + url_path;
 	
-	// > 文件夹路径自动创建
+	// > 文件夹路径自动创建【生成文件夹】
 	if(!fs.existsSync(dirPath) ){
 		fs.mkdirSync(dirPath);
 	}

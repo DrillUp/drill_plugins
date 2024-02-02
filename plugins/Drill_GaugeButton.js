@@ -100,7 +100,7 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
  * 时间复杂度： o(n^2)*o(贴图处理) 每帧
- * 测试方法：   去物体管理层、地理管理层、初始点跑一圈测试就可以了。
+ * 测试方法：   去各个管理层跑一圈测试就可以了。
  * 测试结果：   200个事件的地图中，平均消耗为：【21.29ms】
  *              100个事件的地图中，平均消耗为：【20.52ms】
  *               50个事件的地图中，平均消耗为：【18.28ms】
@@ -701,7 +701,7 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^2)*o(贴图处理)  每帧
-//		★性能测试因素	地图初始点
+//		★性能测试因素	各个管理层
 //		★性能测试消耗	18.28ms
 //		★最坏情况		暂无
 //		★备注			暂无
@@ -726,6 +726,9 @@
 //		
 //		
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -778,7 +781,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_GaugeButton = true;
@@ -787,20 +790,24 @@
 	
 	
 	//==============================
-	// * 变量获取 - 按钮参数（必须写在前面）
+	// * 静态数据 - 按钮参数
 	//				（~struct~DrillGBuBtn）
 	//==============================
 	DrillUp.drill_GBu_initParam = function( dataFrom ) {
 		var data = {};
+		
 		// > 贴图
 		data['visible'] = String( dataFrom["是否显示按钮"] || "false") === "true";	
 		data['status'] = String( dataFrom["按钮初始状态"] || "激活");
+		
 		data['commonEventId'] = Number( dataFrom["执行的公共事件"] || 0);
 		data['pipeType'] = String( dataFrom["公共事件执行方式"] || "并行");
+		
 		data['x'] = Number( dataFrom["平移-按钮 X"] || 0);
 		data['y'] = Number( dataFrom["平移-按钮 Y"] || 0);
 		data['layer_index'] = String( dataFrom["地图层级"] || "图片层");
 		data['zIndex'] = Number( dataFrom["图片层级"] || 0);
+		
 		// > 激活状态
 		if( dataFrom["资源-激活图片"] != undefined &&
 			dataFrom["资源-激活图片"] != "" ){
@@ -816,6 +823,7 @@
 		data['hover_lightOpacity'] = Number( dataFrom["高亮透明度"] || 255);
 		data['press_mode'] = String( dataFrom["按下效果"] || "关闭效果");
 		data['press_src_img'] = String( dataFrom["资源-按下图片"] || "");
+		
 		// > 封印状态
 		data['lock_src'] = String( dataFrom["资源-封印图片"] || "");
 		data['lockHover_mode'] = String( dataFrom["封印时高亮效果"] || "关闭效果");
@@ -1315,7 +1323,7 @@ Scene_Map.prototype.drill_GBu_isHoverInTank = function( index ){
 // ** 按钮操作
 //=============================================================================
 //==============================
-// ** 操作 - 监听
+// * 操作 - 监听
 //==============================
 Scene_Map.prototype.drill_GBu_updatePlayerInput = function() {
 	
@@ -1351,22 +1359,35 @@ Scene_Map.prototype.drill_GBu_updatePlayerInput = function() {
 				}
 				
 				if( data['status'] == "激活" ){
-					// > 执行公共事件
-					//$gameTemp.reserveCommonEvent( data['commonEventId'] );
 					SoundManager.playOk();
-					var e_data = {
-						'type':"公共事件",
-						'pipeType': data['pipeType'],
-						'commonEventId': data['commonEventId'],
-					};
-					$gameMap.drill_LCT_addPipeEvent( e_data );
+					this.drill_GBu_doCommonEvent( data );
 					break;
 				}
 			}
 		}
 	}
-	
 }
+//==============================
+// * 操作 - 『执行公共事件』（地图界面）
+//==============================
+Scene_Map.prototype.drill_GBu_doCommonEvent = function( data ){
+	
+	// > 插件【地图-多线程】
+	if( Imported.Drill_LayerCommandThread ){
+		var e_data = {
+			'type':"公共事件",
+			'pipeType': data['pipeType'],
+			'commonEventId': data['commonEventId'],
+		};
+		$gameMap.drill_LCT_addPipeEvent( e_data );
+		
+	// > 默认执行
+	}else{
+		$gameTemp.reserveCommonEvent( data['commonEventId'] );
+	}
+}
+
+
 
 
 //=============================================================================

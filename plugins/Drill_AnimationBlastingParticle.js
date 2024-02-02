@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        动画 - 粒子小爆炸
+ * @plugindesc [v1.2]        动画 - 粒子小爆炸
  * @author Drill_up
  * 
  * @Drill_LE_param "粒子样式-%d"
@@ -117,6 +117,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 强化了粒子核心底层，并进行兼容适配。
+ * [v1.2]
+ * 添加了粒子 彩虹化 功能。
  *
  *
  * @param ---粒子样式组 1至20---
@@ -1646,6 +1648,58 @@
  * @require 1
  * @dir img/Special__anim/
  * @type file
+ * 
+ * 
+ * @param ---彩虹化---
+ * @desc 
+ *
+ * @param 是否开启彩虹化-粒子
+ * @parent ---彩虹化---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭，冒出的每个粒子都会根据彩虹进行染色变化。
+ * @default false
+ *
+ * @param 是否开启彩虹化-第二层粒子
+ * @parent ---彩虹化---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭，冒出的每个第二层粒子都会根据彩虹进行染色变化。
+ * @default false
+ *
+ * @param 是否开启彩虹化-直线拖尾
+ * @parent ---彩虹化---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭，冒出的每个粒子的拖尾都会根据彩虹进行染色变化。
+ * @default false
+ * 
+ * @param 彩虹化色彩数量
+ * @parent ---彩虹化---
+ * @type number
+ * @min 1
+ * @max 360
+ * @desc 彩虹化色彩的数量，最大值为360。
+ * @default 20
+ *
+ * @param 彩虹化是否锁定色调值
+ * @parent ---彩虹化---
+ * @type boolean
+ * @on 锁定
+ * @off 关闭
+ * @desc true - 锁定，false - 关闭，彩虹变化将按照 色调值列表 进行依次染色，具体可以看看文档。
+ * @default false
+ * 
+ * @param 锁定的色调值列表
+ * @parent 彩虹化是否锁定色调值
+ * @type number[]
+ * @min 0
+ * @max 360
+ * @desc 彩虹变化将按照 色调值列表 进行依次染色，具体可以看看文档。
+ * @default []
  *
  */
  
@@ -1661,7 +1715,7 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^3)*o(贴图处理) 每帧
-//		★性能测试因素	物体管理层、战斗界面
+//		★性能测试因素	个体装饰管理层、战斗界面
 //		★性能测试消耗	43.7ms（update）52.9ms（drill_updateParticle）
 //		★最坏情况		大量小爆炸被同时播放。
 //		★备注			无
@@ -1672,7 +1726,7 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
 //			->☆插件指令
 //			->☆单位贴图
 //			->☆物体贴图
@@ -1691,6 +1745,9 @@
 //			
 //		★家谱：
 //			大家族-粒子效果
+//		
+//		★脚本文档：
+//			1.系统 > 大家族-粒子效果（脚本）.docx
 //		
 //		★插件私有类：
 //			* 小爆炸粒子控制器【Drill_ABPa_Controller】
@@ -1743,7 +1800,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_AnimationBlastingParticle = true;
@@ -1751,7 +1808,7 @@
 	DrillUp.parameters = PluginManager.parameters('Drill_AnimationBlastingParticle');
 	
 	//==============================
-	// * 变量获取 - 粒子样式
+	// * 静态数据 - 粒子样式
 	//				（~struct~ABPaStyle）
 	//==============================
 	DrillUp.drill_ABPa_styleInit = function( dataFrom ){
@@ -1811,6 +1868,19 @@
 		data['trailing_centerAnchor'] = String( dataFrom["是否固定拖尾在粒子中心"] || "false") == "true";
 		data['trailing_src_img'] = String( dataFrom["资源-直线拖尾"] || "");
 		data['trailing_src_img_file'] = "img/Special__anim/";
+		
+		// > 彩虹化
+		data['rainbow_enable'] = String( dataFrom["是否开启彩虹化-粒子"] || "false") == "true";
+		data['rainbow_enableSecond'] = String( dataFrom["是否开启彩虹化-第二层粒子"] || "false") == "true";
+		data['rainbow_enableTrailing'] = String( dataFrom["是否开启彩虹化-直线拖尾"] || "false") == "true";
+		data['rainbow_num'] = Number( dataFrom["彩虹化色彩数量"] || 20);
+		data['rainbow_lockTint'] = String( dataFrom["彩虹化是否锁定色调值"] || "false") == "true";
+		if( dataFrom["锁定的色调值列表"] != undefined &&
+			dataFrom["锁定的色调值列表"] != "" ){
+			data['rainbow_tintList'] = JSON.parse( dataFrom["锁定的色调值列表"] || [] );
+		}else{
+			data['rainbow_tintList'] = [];
+		}
 		
 		return data;
 	}

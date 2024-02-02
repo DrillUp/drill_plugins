@@ -460,7 +460,7 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
 //			->☆插件指令
 //			->☆存储数据
 //			->☆菜单层级
@@ -472,6 +472,9 @@
 //
 //
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -501,7 +504,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_MenuVideo = true;
@@ -509,7 +512,7 @@
 	DrillUp.parameters = PluginManager.parameters('Drill_MenuVideo');
 
 	//==============================
-	// * 变量获取 - 视频
+	// * 静态数据 - 视频
 	//				（~struct~MenuVideo）
 	//==============================
 	DrillUp.drill_MVi_videoInit = function( dataFrom ) {
@@ -1115,6 +1118,9 @@ Drill_MVi_VideoSprite.prototype.drill_MVi_videoInit = function() {
 	this._drill_src.addEventListener('timeupdate', this.drill_MVi_videoUpdated.bind(this) );
 	this._drill_src.addEventListener('ended', this.drill_MVi_videoEnded.bind(this) );
 	this._drill_src.addEventListener('error', this.drill_MVi_videoError.bind(this) );
+	if( this._drill_src.played.length ){
+		this._drill_src.play();
+	}
 	
 }
 //==============================
@@ -1161,7 +1167,7 @@ Drill_MVi_VideoSprite.prototype.drill_MVi_videoUpdated = function() {
 	var data = this._drill_data;
 	if( data['showDebug'] ){ console.log('视频刷新帧:', this._drill_src['currentTime']); }
 	
-	if( this._drill_src['currentTime'] >= this._drill_loopEnd ){
+	if( this._drill_src['currentTime'] >= this._drill_loopEnd -1 ){	//（这里要提前1帧）
 		if( data['showDebug'] ){
 			console.log('菜单视频-播放回到位置:', this._drill_loopStart );
 		}

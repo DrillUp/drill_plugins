@@ -416,6 +416,9 @@
 //		★家谱：
 //			无
 //		
+//		★脚本文档：
+//			无
+//		
 //		★插件私有类：
 //			* 滚动条贴图【Drill_MSB_Sprite】
 //		
@@ -445,7 +448,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_MenuScrollBar = true;
@@ -453,7 +456,7 @@
 	DrillUp.parameters = PluginManager.parameters('Drill_MenuScrollBar');
 
 	//==============================
-	// * 变量获取 - 样式
+	// * 静态数据 - 样式
 	//				（~struct~DrillMSBStyle）
 	//==============================
 	DrillUp.drill_MSB_initStyle = function( dataFrom ) {

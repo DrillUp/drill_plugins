@@ -78,7 +78,7 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
  * 时间复杂度： o(n^2) 每帧
- * 测试方法：   在遇敌管理层进行测试。
+ * 测试方法：   在各个管理层进行测试。
  * 测试结果：   地图界面中，平均消耗为：【7.37ms】
  * 
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
@@ -310,7 +310,7 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^2) 每帧
-//		★性能测试因素	UI管理层
+//		★性能测试因素	各个管理层
 //		★性能测试消耗	7.37ms
 //		★最坏情况		暂无
 //		★备注			由于实时批量判断物品，消耗能找到。
@@ -324,6 +324,9 @@
 //				->物品数量变化
 //
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -365,7 +368,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_PlayerItemCollectTiming = true;
@@ -374,7 +377,7 @@
 	
 	
 	//==============================
-	// * 变量获取 - 积累触发
+	// * 静态数据 - 积累触发
 	//				（~struct~PICTTrigger）
 	//==============================
 	DrillUp.drill_PICT_triggerInit = function( dataFrom ){
@@ -627,16 +630,32 @@ Scene_Map.prototype.drill_PICT_updateCommonEvent = function() {
 		if( pass == false ){ continue; }
 		
 		// > 执行公共事件
-		var e_data = {
-			'type':"公共事件",
-			'pipeType': temp_data['pipeType'],
-			'commonEventId': temp_data['commonEventId'],
-		};
-		$gameMap.drill_LCT_addPipeEvent( e_data );
+		this.drill_PICT_doCommonEvent( temp_data['pipeType'], temp_data['commonEventId'], "" );
+		
 		temp_data['activeCount'] += 1;
 		break;
 	}
 		
+};
+//==============================
+// * 物品监听 - 『执行公共事件』（地图界面）
+//==============================
+Scene_Map.prototype.drill_PICT_doCommonEvent = function( pipeType, commonEventId, callBack_str ){
+	
+	// > 插件【地图-多线程】
+	if( Imported.Drill_LayerCommandThread ){
+		var e_data = {
+			'type':"公共事件",
+			'pipeType': pipeType,
+			'commonEventId': commonEventId,
+			'callBack_str':callBack_str,
+		};
+		$gameMap.drill_LCT_addPipeEvent( e_data );
+		
+	// > 默认执行
+	}else{
+		$gameTemp.reserveCommonEvent( commonEventId );
+	}
 };
 
 

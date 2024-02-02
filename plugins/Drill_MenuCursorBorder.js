@@ -417,6 +417,9 @@
 //		★家谱：
 //			无
 //		
+//		★脚本文档：
+//			无
+//		
 //		★插件私有类：
 //			* 选项边框贴图【Drill_MCB_Sprite】
 //		
@@ -443,7 +446,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_MenuCursorBorder = true;
@@ -451,7 +454,7 @@
 	DrillUp.parameters = PluginManager.parameters('Drill_MenuCursorBorder');
 
 	//==============================
-	// * 变量获取 - 样式
+	// * 静态数据 - 样式
 	//				（~struct~DrillMCBStyle）
 	//==============================
 	DrillUp.drill_MCB_initStyle = function( dataFrom ) {

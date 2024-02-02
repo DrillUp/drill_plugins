@@ -116,7 +116,7 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
  * 时间复杂度： o(n)*o(贴图处理) 每帧
- * 测试方法：   放置10个动作变化的图片，在不同的地图中测试。
+ * 测试方法：   图片管理层放置10个动作变化的图片，在不同的地图中测试。
  * 测试结果：   战斗界面中，平均消耗为：【24.26ms】
  *              200个事件的地图中，平均消耗为：【38.35ms】
  *              100个事件的地图中，平均消耗为：【27.23ms】
@@ -167,7 +167,7 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(n)*o(贴图处理) 每帧
-//		★性能测试因素	对话管理层
+//		★性能测试因素	图片管理层
 //		★性能测试消耗	24.94ms 23.34ms（sprite_picture.update）
 //		★最坏情况		地图放了大量图片，并且所有图片都在持续变化。
 //		★备注			要说图片贴图和事件贴图哪个消耗大，真无法确定。
@@ -191,6 +191,9 @@
 //					->数学锚点变换问题
 //
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -231,7 +234,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 	var Imported = Imported || {};
 	Imported.Drill_PictureFadeInEffect = true;
@@ -257,10 +260,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var temp1 = String(args[3]);
 			var temp2 = String(args[5]);
 			if( unit == "图片" && temp1 == "透明度检查" ){
-				if( temp2 == "开启" ){
+				if( temp2 == "启用" || temp2 == "开启" || temp2 == "打开" || temp2 == "启动" ){
 					$gameSystem._drill_PFIE_opacityCheck_pic = true;
 				}
-				if( temp2 == "关闭" ){
+				if( temp2 == "关闭" || temp2 == "禁用" ){
 					$gameSystem._drill_PFIE_opacityCheck_pic = false;
 				}
 			}
@@ -368,10 +371,6 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( type == "直接显现" ){
 				temp1 = temp1.replace("时间[","");
 				temp1 = temp1.replace("]","");
-				temp2 = temp2.replace("缓冲时间[","");
-				temp2 = temp2.replace("]","");
-				temp3 = temp3.replace("高度[","");
-				temp3 = temp3.replace("]","");
 				if( pics != null){
 					for( var k=0; k < pics.length; k++ ){
 						pics[k].drill_PFIE_playShowingAppear( Number(temp1) );

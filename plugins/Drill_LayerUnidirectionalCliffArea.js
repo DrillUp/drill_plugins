@@ -156,7 +156,7 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
 //			->☆插件指令
 //			->☆存储数据
 //			
@@ -174,7 +174,9 @@
 //			->☆斜坡值
 //				> 第1位 斜坡类型
 //			->☆DEBUG单向斜坡值
-//				->显示/隐藏当前镜头的图块单向斜坡值
+//				->显示/隐藏单向斜坡值
+//				->开启/关闭斜坡边缘修正
+//				->开启/关闭斜坡阻塞
 //			->稀疏矩阵【Drill_LUCA_SparseMatrix】
 //			
 //			->☆行走图高度
@@ -208,6 +210,10 @@
 //		★家谱：
 //			无
 //		
+//		★脚本文档：
+//			26.图块 > 阶梯图块阻塞原理.png
+//			26.图块 > 阶梯行走图高度原理.png
+//		
 //		★插件私有类：
 //			无
 //		
@@ -234,7 +240,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_LayerUnidirectionalCliffArea = true;
@@ -304,10 +310,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		
 		if(args.length == 2){
 			var temp1 = String(args[1]);
-			if( temp1 == "DEBUG-显示当前镜头的图块单向斜坡值" ){
+			if( temp1 == "DEBUG-显示单向斜坡值" ){
 				$gameTemp._drill_LUCA_debug_showUCliffId = true;
 			}
-			if( temp1 == "DEBUG-隐藏当前镜头的图块单向斜坡值" ){
+			if( temp1 == "DEBUG-隐藏单向斜坡值" ){
 				$gameTemp._drill_LUCA_debug_clearUCliffId = true;
 			}
 			if( temp1 == "DEBUG-关闭斜坡边缘修正" ){

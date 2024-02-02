@@ -1303,6 +1303,9 @@
 //		★家谱：
 //			无
 //		
+//		★脚本文档：
+//			无
+//		
 //		★插件私有类：
 //			* 金钱窗口【Drill_SSh_GoldWindow】
 //			* 出售类型窗口【Drill_SSh_SellCategoryWindow】
@@ -1367,7 +1370,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_SceneShop = true;
@@ -1376,7 +1379,7 @@
 
 	
 	//==============================
-	// * 变量获取 - 指针与边框
+	// * 静态数据 - 指针与边框
 	//				（~struct~DrillCursor）
 	//==============================
 	DrillUp.drill_SSh_initMenuCursor = function( dataFrom ) {
@@ -1674,7 +1677,7 @@
 	
 	
 	//==============================
-	// * 变量获取 - 服务员行为
+	// * 静态数据 - 服务员行为
 	//				（~struct~DrillSShWaitressAct）
 	//==============================
 	DrillUp.drill_SSh_convertWaitressAct = function( dataFrom ) {		//服务员行为数据转换
@@ -1691,7 +1694,7 @@
 		return data;
 	}
 	//==============================
-	// * 变量获取 - 服务员
+	// * 静态数据 - 服务员
 	//				（~struct~DrillSShWaitress）
 	//==============================
 	DrillUp.drill_SSh_convertWaitress = function( dataFrom ) {

@@ -57,6 +57,9 @@
  *   (1.额定值可以根据当前数值达到某些条件时，直接改变显示的符号的信息。
  *   (2.你可以配置与基本符号不同的额定符号，达到额定条件后，相关基本符号
  *      可以转变为额定符号。
+ * 预加载：
+ *   (1.插件中的资源会被反复使用，所以插件默认所有资源都预加载，
+ *      预加载相关介绍可以去看看"1.系统 > 关于预加载.docx"。
  * 设计：
  *   (1.额定值、时间单位 都是参数数字中的一项配置属性，因此对所有子插件通用。
  *      你完全可以脑洞大开，把角色的生命值 用 时间格式 展现出来。
@@ -89,7 +92,7 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
  * 时间复杂度： o(n^3)*o(参数数字数)*o(贴图处理) 每帧
- * 测试方法：   主要基于该核心的子插件来判断。
+ * 测试方法：   参数可视化管理层、战斗界面 测试性能消耗。
  * 测试结果：   地图界面，平均消耗为：【30.04ms】
  *              战斗界面，平均消耗为：【21.33ms】
  * 测试方法2：  主菜单界面中显示4个角色固定框x5的参数数字。
@@ -751,7 +754,7 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^3)*o(参数数字数)*o(贴图处理) 每帧
-//		★性能测试因素	可视化管理层、战斗界面
+//		★性能测试因素	参数可视化管理层、战斗界面
 //		★性能测试消耗	21.33ms 30.04ms（菜单界面 37.62ms）
 //		★最坏情况		暂无
 //		★备注			参数数字消耗比我预想要小的多，与gif的消耗居然差不多。
@@ -768,10 +771,8 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
-//			
-//			->☆临时变量初始化
-//				->资源提前预加载
+//			->☆静态数据
+//			->☆预加载
 //			
 //			->参数数字【Drill_COGN_NumberSprite】
 //				->标准模块
@@ -793,6 +794,9 @@
 //			
 //			
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -848,7 +852,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_CoreOfGaugeNumber = true;
@@ -857,7 +861,7 @@
 	
 	
 	//==============================
-	// * 变量获取 - 数字样式
+	// * 静态数据 - 数字样式
 	//				（~struct~GaugeNumber）
 	//
 	//			说明：	函数未定义白色括号中的参数，需要子插件定义。若不定义则为默认值。
@@ -949,30 +953,30 @@
 	
 	
 //=============================================================================
-// ** ☆临时变量初始化
+// ** ☆预加载
 //
 //			说明：	> 用过的bitmap，全部标记不删除，防止刷菜单时重建导致浪费资源。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 if( DrillUp.g_COGN_preloadEnabled == true ){
 	//==============================
-	// * 临时变量 - 初始化
+	// * 预加载 - 初始化
 	//==============================
-	var _drill_COGN_temp_initialize = Game_Temp.prototype.initialize;
+	var _drill_COGN_preload_initialize = Game_Temp.prototype.initialize;
 	Game_Temp.prototype.initialize = function() {
-		_drill_COGN_temp_initialize.call(this);
+		_drill_COGN_preload_initialize.call(this);
 		this.drill_COGN_preloadInit();
 	}
 	//==============================
-	// * 临时变量 - 预加载 版本校验
+	// * 预加载 - 版本校验
 	//==============================
 	if( Utils.generateRuntimeId == undefined ){
 		alert( DrillUp.drill_COGN_getPluginTip_LowVersion() );
 	}
 	//==============================
-	// * 临时变量 - 资源提前预加载
+	// * 预加载 - 资源提前预加载
 	//
-	//			说明：	遍历全部资源，提前预加载标记过的资源。
+	//			说明：	> 遍历全部资源，提前预加载标记过的资源。
 	//==============================
 	Game_Temp.prototype.drill_COGN_preloadInit = function() {
 		this._drill_COGN_cacheId = Utils.generateRuntimeId();	//资源缓存id
@@ -984,19 +988,19 @@ if( DrillUp.g_COGN_preloadEnabled == true ){
 			
 			// > B符号
 			this._drill_COGN_preloadTank.push( 
-				ImageManager.reserveBitmap( temp_data['symbol_src_file'], temp_data['symbol_src'], 0, true ) 
+				ImageManager.reserveBitmap( temp_data['symbol_src_file'], temp_data['symbol_src'], 0, true, this._drill_COGN_cacheId ) 
 			);
 			this._drill_COGN_preloadTank.push( 
-				ImageManager.reserveBitmap( temp_data['symbolEx_src_file'], temp_data['symbolEx_src'], 0, true ) 
+				ImageManager.reserveBitmap( temp_data['symbolEx_src_file'], temp_data['symbolEx_src'], 0, true, this._drill_COGN_cacheId ) 
 			);
 			
 			// > G额定值
 			if( temp_data['specified_enable'] == true ){
 				this._drill_COGN_preloadTank.push( 
-					ImageManager.reserveBitmap( temp_data['specified_symbol_src_file'], temp_data['specified_symbol_src'], 0, true ) 
+					ImageManager.reserveBitmap( temp_data['specified_symbol_src_file'], temp_data['specified_symbol_src'], 0, true, this._drill_COGN_cacheId ) 
 				);
 				this._drill_COGN_preloadTank.push( 
-					ImageManager.reserveBitmap( temp_data['specified_symbolEx_src_file'], temp_data['specified_symbolEx_src'], 0, true ) 
+					ImageManager.reserveBitmap( temp_data['specified_symbolEx_src_file'], temp_data['specified_symbolEx_src'], 0, true, this._drill_COGN_cacheId ) 
 				);
 			}
 			

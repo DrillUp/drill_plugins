@@ -859,6 +859,9 @@
 //		★家谱：
 //			无
 //			
+//		★脚本文档：
+//			无
+//		
 //		★插件私有类：
 //			* 单角色肖像【Drill_AP_Sprite】
 //			
@@ -903,7 +906,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_ActorPortraiture = true;
@@ -1282,7 +1285,7 @@ Spriteset_Battle.prototype.drill_AP_clearTank = function(){
 // ** 单角色肖像【Drill_AP_Sprite】
 //
 //			参数：	data.actor_id			//角色id
-//					data.condition_list		//条件/GIF贴图列表（见全局变量获取的结构）
+//					data.condition_list		//条件/GIF贴图列表（见全局静态数据的结构）
 //			说明：	1.准备好数据，new即可。
 //					2.实时调用函数.active()和.deactive()改变图像显示/隐藏。
 //					3.调用函数.force(1)和.clearForce()锁定解锁条件。

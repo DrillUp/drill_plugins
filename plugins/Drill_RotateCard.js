@@ -616,6 +616,9 @@
 //		★家谱：
 //			无
 //		
+//		★脚本文档：
+//			无
+//		
 //		★插件私有类：
 //			* 卡片贴图【Drill_RCardSprite】
 //		
@@ -641,7 +644,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 	var Imported = Imported || {};
 	Imported.Drill_RotateCard = true;
@@ -649,7 +652,7 @@
 	DrillUp.parameters = PluginManager.parameters('Drill_RotateCard');
 	
 	//==============================
-	// * 变量获取 - 卡片设置
+	// * 静态数据 - 卡片设置
 	//				（~struct~RotateCardSet）
 	//==============================
 	DrillUp.drill_RCard_initRotateCardSet = function( dataFrom ) {

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        鼠标 - 划过时粒子效果
+ * @plugindesc [v1.1]        鼠标 - 划过时粒子效果
  * @author Drill_up
  * 
  * @Drill_LE_param "粒子样式-%d"
@@ -31,6 +31,7 @@
  * ----设定注意事项
  * 1.插件的作用域：地图界面、战斗界面、菜单界面。
  *   作用于界面的各图层。
+ * 2.更多详细的内容，去看看 "1.系统 > 大家族-粒子效果.docx"。
  * 细节：
  *   (1.由于鼠标划过的粒子同时跨 地图界面、战斗界面、菜单界面，
  *      并且切换界面时，粒子的位置还能保持一致，因此容易产生三种
@@ -73,7 +74,7 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
  * 时间复杂度： o(n^3)*o(贴图处理) 每帧
- * 测试方法：   在地图界面中测试鼠标划过效果。
+ * 测试方法：   在各个管理层中测试鼠标划过效果。
  * 测试结果：   200个事件的地图中，平均消耗为：【33.47ms】
  *              100个事件的地图中，平均消耗为：【19.90ms】
  *               50个事件的地图中，平均消耗为：【15.21ms】
@@ -91,6 +92,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 添加了粒子 彩虹化 功能。
  *
  *
  * @param ---粒子样式组---
@@ -563,7 +566,59 @@
  * @require 1
  * @dir img/Special__anim/
  * @type file
+ * 
+ * 
+ * @param ---彩虹化---
+ * @desc 
  *
+ * @param 是否开启彩虹化-粒子
+ * @parent ---彩虹化---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭，冒出的每个粒子都会根据彩虹进行染色变化。
+ * @default false
+ *
+ * @param 是否开启彩虹化-第二层粒子
+ * @parent ---彩虹化---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭，冒出的每个第二层粒子都会根据彩虹进行染色变化。
+ * @default false
+ *
+ * @param 是否开启彩虹化-直线拖尾
+ * @parent ---彩虹化---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭，冒出的每个粒子的拖尾都会根据彩虹进行染色变化。
+ * @default false
+ * 
+ * @param 彩虹化色彩数量
+ * @parent ---彩虹化---
+ * @type number
+ * @min 1
+ * @max 360
+ * @desc 彩虹化色彩的数量，最大值为360。
+ * @default 20
+ *
+ * @param 彩虹化是否锁定色调值
+ * @parent ---彩虹化---
+ * @type boolean
+ * @on 锁定
+ * @off 关闭
+ * @desc true - 锁定，false - 关闭，彩虹变化将按照 色调值列表 进行依次染色，具体可以看看文档。
+ * @default false
+ * 
+ * @param 锁定的色调值列表
+ * @parent 彩虹化是否锁定色调值
+ * @type number[]
+ * @min 0
+ * @max 360
+ * @desc 彩虹变化将按照 色调值列表 进行依次染色，具体可以看看文档。
+ * @default []
+ * 
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -578,7 +633,7 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^3)*o(贴图处理) 每帧
-//		★性能测试因素	物体管理层、战斗界面
+//		★性能测试因素	各个管理层、战斗界面
 //		★性能测试消耗	27.4ms（drill_sprite_refreshBallistics）20.5ms（drill_sprite_updateTransform_Position）
 //						19.9ms（drill_sprite_refreshBallistics）16.5ms（drill_sprite_updateTransform_Position）
 //		★最坏情况		暂无
@@ -590,7 +645,7 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
 //			->☆插件指令
 //			->☆存储数据
 //			->☆地图层级
@@ -623,6 +678,9 @@
 //			
 //		★家谱：
 //			大家族-粒子效果
+//		
+//		★脚本文档：
+//			1.系统 > 大家族-粒子效果（脚本）.docx
 //		
 //		★插件私有类：
 //			* 鼠标划过粒子控制器【Drill_MSPa_Controller】
@@ -675,7 +733,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_MouseStrokeParticle = true;
@@ -683,7 +741,7 @@
 	DrillUp.parameters = PluginManager.parameters('Drill_MouseStrokeParticle');
 	
 	//==============================
-	// * 变量获取 - 粒子样式
+	// * 静态数据 - 粒子样式
 	//				（~struct~MSPaStyle）
 	//==============================
 	DrillUp.drill_MSPa_styleInit = function( dataFrom ){
@@ -757,6 +815,19 @@
 		data['trailing_src_img'] = String( dataFrom["资源-直线拖尾"] || "");
 		data['trailing_src_img_file'] = "img/Special__anim/";
 		
+		// > 彩虹化
+		data['rainbow_enable'] = String( dataFrom["是否开启彩虹化-粒子"] || "false") == "true";
+		data['rainbow_enableSecond'] = String( dataFrom["是否开启彩虹化-第二层粒子"] || "false") == "true";
+		data['rainbow_enableTrailing'] = String( dataFrom["是否开启彩虹化-直线拖尾"] || "false") == "true";
+		data['rainbow_num'] = Number( dataFrom["彩虹化色彩数量"] || 20);
+		data['rainbow_lockTint'] = String( dataFrom["彩虹化是否锁定色调值"] || "false") == "true";
+		if( dataFrom["锁定的色调值列表"] != undefined &&
+			dataFrom["锁定的色调值列表"] != "" ){
+			data['rainbow_tintList'] = JSON.parse( dataFrom["锁定的色调值列表"] || [] );
+		}else{
+			data['rainbow_tintList'] = [];
+		}
+		
 		return data;
 	}
 	
@@ -800,11 +871,11 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp1 = Number(temp1) -1;
 				var controller = $gameSystem._drill_MSPa_controllerTank[ temp1 ];
 				if( controller == undefined ){ return; }
-				if( type == "启用" ){
+				if( type == "启用" || type == "开启" || type == "打开" || type == "启动" ){
 					controller._drill_data['enabled'] = true;
 					$gameTemp._drill_MSPa_needRestatistics = true;
 				}
-				if( type == "关闭" ){
+				if( type == "关闭" || type == "禁用" ){
 					controller._drill_data['enabled'] = false;
 					$gameTemp._drill_MSPa_needRestatistics = true;
 				}
@@ -896,7 +967,7 @@ Game_System.prototype.drill_MSPa_initSysData_Private = function() {
 	for(var i = 0; i < DrillUp.g_MSPa_style.length; i++ ){
 		var temp_data = DrillUp.g_MSPa_style[i];
 		if( temp_data == undefined ){ continue; }
-		var temp_controller = new Drill_MSPa_Controller( temp_data );	//【$gameSystem优先初始化】
+		var temp_controller = new Drill_MSPa_Controller( temp_data );	//『$gameSystem优先初始化』
 		this._drill_MSPa_controllerTank.push( temp_controller );
 	}
 };

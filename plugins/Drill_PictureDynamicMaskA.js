@@ -55,6 +55,9 @@
  *   (2.玩家、鼠标、事件、图片 可以绑定多个 高级透视镜。
  *   (3.高级透视镜能够跨 地图 存在，并且能跨越 地图界面和战斗界面。
  *      如果暂时不用，要记得关闭，避免透视镜长期滞留。
+ * 预加载：
+ *   (1.插件中的资源会被反复使用，所以插件默认所有资源都预加载，
+ *      预加载相关介绍可以去看看"1.系统 > 关于预加载.docx"。
  * 设计：
  *   (1.你可以用 图片和透视镜 组合，制作动画特效、雕花等效果。
  * 
@@ -171,7 +174,7 @@
  * 1."高级透视镜变量[21]"均能适配可选设定中
  *   "高级透视镜[2]"的 绑定、移动、变化 等的用法。
  * 2."编号[100-200]"指从id为100至200的范围中，找出一个未创建的编号。
- * 3.使用变量获取一个未使用的自动编号，然后创建 高级透视镜，
+ * 3.使用静态数据一个未使用的自动编号，然后创建 高级透视镜，
  *   创建后设置该 高级透视镜 的生命，实现时效结束后自动清除。
  *   通过上述流程，可以使得 永久有效的高级透视镜 变成临时的照明功能。
  * 4.由于生命结束后自动销毁，下一次获取自动编号时，
@@ -235,7 +238,7 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
  * 时间复杂度： o(n^2)*o(贴图处理)*o(遮罩渲染) 每帧
- * 测试方法：   给相关10个图片添加透视镜，并进行性能测试。
+ * 测试方法：   图片管理层给相关10个图片添加透视镜，并进行性能测试。
  * 测试结果：   200个事件的地图中，平均消耗为：【66.17ms】
  *              100个事件的地图中，平均消耗为：【43.46ms】
  *               50个事件的地图中，平均消耗为：【26.57ms】
@@ -1655,11 +1658,10 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^2)*o(贴图处理)*o(遮罩渲染) 每帧
-//		★性能测试因素	特效管理层
+//		★性能测试因素	图片管理层
 //		★性能测试消耗	26.57ms（Game_CharacterBase.prototype.update）
 //		★最坏情况		无
-//		★备注			特效管理层中，能稳定在9帧的状态（与遮罩管理层一样。）
-//						这里同时开了很多高级透视镜，消耗相较比起来有上升，但是不多。
+//		★备注			暂无
 //		
 //		★优化记录		暂无
 //
@@ -1680,12 +1682,14 @@
 //					->贴图 添加/删除
 //					->贴图 帧刷新
 //				->优化
-//					->资源预加载
 //					->图片未显示时不开遮罩
 //
 //
 //		★家谱：
 //			大家族-动态遮罩
+//		
+//		★脚本文档：
+//			无
 //		
 //		★插件私有类：
 //			无
@@ -1768,7 +1772,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_PictureDynamicMaskA = true;
@@ -1777,7 +1781,7 @@
 
 
 	//==============================
-	// * 变量获取 - 透视镜样式
+	// * 静态数据 - 透视镜样式
 	//				（~struct~PDMAChildSprite）
 	//==============================
 	DrillUp.drill_PDMA_childSpriteInit = function( dataFrom ){
@@ -2016,7 +2020,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 							$gameMap.drill_PDMA_addSimplePerspect_characterId( ch_id, Number(temp2)-1 );
 						}
 					}
-					if( temp2 == "清除" || temp2 == "关闭" ){
+					if( temp2 == "清除" || temp2 == "关闭" || temp2 == "禁用" ){
 						for( var j=0; j < chars.length; j++ ){
 							var ch_id = chars[j];
 							$gameMap.drill_PDMA_removeSimplePerspect_characterId( ch_id );
@@ -2032,7 +2036,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 						temp2 = Number(temp2);
 						$gameMap.drill_PDMA_addSimplePerspect_mouse( Number(temp2)-1 );
 					}
-					if( temp2 == "清除" || temp2 == "关闭" ){
+					if( temp2 == "清除" || temp2 == "关闭" || temp2 == "禁用" ){
 						$gameMap.drill_PDMA_removeSimplePerspect_mouse();
 					}
 				}
@@ -2048,7 +2052,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 							$gameMap.drill_PDMA_addSimplePerspect_picId( pic_id, Number(temp2)-1 );
 						}
 					}
-					if( temp2 == "清除" || temp2 == "关闭" ){
+					if( temp2 == "清除" || temp2 == "关闭" || temp2 == "禁用" ){
 						for( var j=0; j < pics.length; j++ ){
 							var pic_id = pics[j];
 							$gameMap.drill_PDMA_removeSimplePerspect_picId( pic_id );
@@ -2400,34 +2404,49 @@ Game_Screen.prototype.drill_PDMA_isPictureExist = function( pic_id ){
 };
 
 
+
 //=============================================================================
-// ** 资源预加载
+// ** ☆预加载
+//
+//			说明：	> 用过的bitmap，全部标记不删除，防止刷菜单时重建导致浪费资源。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
-//==============================
-// * 临时变量 - 预加载 版本校验
-//==============================
-if( Utils.generateRuntimeId == undefined ){
-	alert( DrillUp.drill_PDMA_getPluginTip_LowVersion() );
-}
-//==============================
-// * 临时变量 - 资源预加载
-//==============================
-var _drill_PDMA_temp_preload = Game_Temp.prototype.initialize;
-Game_Temp.prototype.initialize = function() {
-	_drill_PDMA_temp_preload.call(this);
-	
-	this._drill_PDMA_cacheId = Utils.generateRuntimeId();	//资源缓存id
-    this._drill_PDMA_preloadTank = [];						//bitmap容器
-	for( var i = 0; i < DrillUp.g_PDMA_childData.length; i++ ){
-		var temp_data = DrillUp.g_PDMA_childData[i];
-		if( temp_data == undefined ){ continue; }
-		
-		for( var j = 0; j < temp_data['gif_src'].length; j++ ){
-			var temp_bitmap = ImageManager.reserveBitmap( temp_data['gif_src_file'], temp_data['gif_src'][j], 0, true, this._drill_PDMA_cacheId );
-			this._drill_PDMA_preloadTank.push( temp_bitmap );
+DrillUp.g_PDMA_preloadEnabled = true;		//（预加载开关）
+if( DrillUp.g_PDMA_preloadEnabled == true ){
+	//==============================
+	// * 预加载 - 初始化
+	//==============================
+	var _drill_PDMA_preload_initialize = Game_Temp.prototype.initialize;
+	Game_Temp.prototype.initialize = function() {
+		_drill_PDMA_preload_initialize.call(this);
+		this.drill_PDMA_preloadInit();
+	}
+	//==============================
+	// * 预加载 - 版本校验
+	//==============================
+	if( Utils.generateRuntimeId == undefined ){
+		alert( DrillUp.drill_PDMA_getPluginTip_LowVersion() );
+	}
+	//==============================
+	// * 预加载 - 执行资源预加载
+	//
+	//			说明：	> 遍历全部资源，提前预加载标记过的资源。
+	//==============================
+	Game_Temp.prototype.drill_PDMA_preloadInit = function() {
+		this._drill_PDMA_cacheId = Utils.generateRuntimeId();	//资源缓存id
+		this._drill_PDMA_preloadTank = [];						//bitmap容器
+		for( var i = 0; i < DrillUp.g_PDMA_childData.length; i++ ){
+			var temp_data = DrillUp.g_PDMA_childData[i];
+			if( temp_data == undefined ){ continue; }
+			
+			for( var j = 0; j < temp_data['gif_src'].length; j++ ){
+				var temp_bitmap = ImageManager.reserveBitmap( temp_data['gif_src_file'], temp_data['gif_src'][j], 0, true, this._drill_PDMA_cacheId );
+				this._drill_PDMA_preloadTank.push( temp_bitmap );
+			}
 		}
 	}
 }
+
 
 
 //=============================================================================
@@ -2457,7 +2476,7 @@ Game_Event.prototype.drill_PDMA_setup = function() {
 							temp1 = temp1.replace("]","");
 							$gameMap.drill_PDMA_addSimplePerspect_characterId( this._eventId, Number(temp1)-1 );
 						}
-						if( temp1 == "清除" || temp1 == "关闭" ){
+						if( temp1 == "清除" || temp1 == "关闭" || temp1 == "禁用" ){
 							$gameMap.drill_PDMA_removeSimplePerspect_characterId( this._eventId );
 						}
 					}

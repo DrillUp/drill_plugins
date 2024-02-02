@@ -60,6 +60,9 @@
  *   (2.玩家、鼠标、事件、图片 可以绑定多个 高级透视镜。
  *   (3.高级透视镜能够跨 地图 存在，并且能跨越 地图界面和战斗界面。
  *      如果暂时不用，要记得关闭，避免透视镜长期滞留。
+ * 预加载：
+ *   (1.插件中的资源会被反复使用，所以插件默认所有资源都预加载，
+ *      预加载相关介绍可以去看看"1.系统 > 关于预加载.docx"。
  * 设计：
  *   (1.你可以用事件注释快速添加简单透视镜，使得事件所在的地方能够显示
  *      部分背景图像。
@@ -164,7 +167,7 @@
  * 1."高级透视镜变量[21]"均能适配可选设定中
  *   "高级透视镜[2]"的 绑定、移动、变化 等的用法。
  * 2."编号[100-200]"指从id为100至200的范围中，找出一个未创建的编号。
- * 3.使用变量获取一个未使用的自动编号，然后创建 高级透视镜，
+ * 3.使用静态数据一个未使用的自动编号，然后创建 高级透视镜，
  *   创建后设置该 高级透视镜 的生命，实现时效结束后自动清除。
  *   通过上述流程，可以使得 永久有效的高级透视镜 变成临时的照明功能。
  * 4.由于生命结束后自动销毁，下一次获取自动编号时，
@@ -1670,12 +1673,14 @@
 //					->贴图 添加/删除
 //					->贴图 帧刷新
 //				->优化
-//					->资源预加载
 //					->地图装饰未显示时不开遮罩
 //
 //
 //		★家谱：
 //			大家族-动态遮罩
+//		
+//		★脚本文档：
+//			无
 //		
 //		★插件私有类：
 //			无
@@ -1699,7 +1704,7 @@
 //			简单透视镜和高级透视镜功能一模一样，只是插件指令不同。
 //				
 //		★存在的问题：
-//			1.如果在故事管理层进去之后立即返回，进入的地图时会闪一下遮罩。
+//			1.如果在 故事创作区 进去之后立即返回，进入的地图时会闪一下遮罩。
 //			  可能是插件指令控制同一个透视镜的问题，并且可以确定不是 遮罩 没及时创建的问题。
 //
 
@@ -1759,7 +1764,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_LayerDynamicMaskB = true;
@@ -1768,7 +1773,7 @@
 
 
 	//==============================
-	// * 变量获取 - 透视镜
+	// * 静态数据 - 透视镜
 	//				（~struct~LDMBChildSprite）
 	//==============================
 	DrillUp.drill_LDMB_childSpriteInit = function( dataFrom ){
@@ -1946,7 +1951,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 							$gameMap.drill_LDMB_addSimplePerspect_characterId( ch_id, Number(temp2)-1 );
 						}
 					}
-					if( temp2 == "清除" || temp2 == "关闭" ){
+					if( temp2 == "清除" || temp2 == "关闭" || temp2 == "禁用" ){
 						for( var j=0; j < chars.length; j++ ){
 							var ch_id = chars[j];
 							$gameMap.drill_LDMB_removeSimplePerspect_characterId( ch_id );
@@ -1962,7 +1967,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 						temp2 = Number(temp2);
 						$gameMap.drill_LDMB_addSimplePerspect_mouse( Number(temp2)-1 );
 					}
-					if( temp2 == "清除" || temp2 == "关闭" ){
+					if( temp2 == "清除" || temp2 == "关闭" || temp2 == "禁用" ){
 						$gameMap.drill_LDMB_removeSimplePerspect_mouse();
 					}
 				}
@@ -1978,7 +1983,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 							$gameMap.drill_LDMB_addSimplePerspect_picId( pic_id, Number(temp2)-1 );
 						}
 					}
-					if( temp2 == "清除" || temp2 == "关闭" ){
+					if( temp2 == "清除" || temp2 == "关闭" || temp2 == "禁用" ){
 						for( var j=0; j < pics.length; j++ ){
 							var pic_id = pics[j];
 							$gameMap.drill_LDMB_removeSimplePerspect_picId( pic_id );
@@ -2331,33 +2336,47 @@ Game_Screen.prototype.drill_LDMB_isPictureExist = function( pic_id ){
 
 
 //=============================================================================
-// ** 资源预加载
+// ** ☆预加载
+//
+//			说明：	> 用过的bitmap，全部标记不删除，防止刷菜单时重建导致浪费资源。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
-//==============================
-// * 临时变量 - 预加载 版本校验
-//==============================
-if( Utils.generateRuntimeId == undefined ){
-	alert( DrillUp.drill_LDMB_getPluginTip_LowVersion() );
-}
-//==============================
-// * 临时变量 - 资源预加载
-//==============================
-var _drill_LDMB_temp_preload = Game_Temp.prototype.initialize;
-Game_Temp.prototype.initialize = function() {
-	_drill_LDMB_temp_preload.call(this);
-	
-	this._drill_LDMB_cacheId = Utils.generateRuntimeId();	//资源缓存id
-    this._drill_LDMB_preloadTank = [];						//bitmap容器
-	for( var i = 0; i < DrillUp.g_LDMB_childData.length; i++ ){
-		var temp_data = DrillUp.g_LDMB_childData[i];
-		if( temp_data == undefined ){ continue; }
-		
-		for( var j = 0; j < temp_data['gif_src'].length; j++ ){
-			var temp_bitmap = ImageManager.reserveBitmap( temp_data['gif_src_file'], temp_data['gif_src'][j], 0, true, this._drill_LDMB_cacheId );
-			this._drill_LDMB_preloadTank.push( temp_bitmap );
+DrillUp.g_LDMB_preloadEnabled = true;		//（预加载开关）
+if( DrillUp.g_LDMB_preloadEnabled == true ){
+	//==============================
+	// * 预加载 - 初始化
+	//==============================
+	var _drill_LDMB_preload_initialize = Game_Temp.prototype.initialize;
+	Game_Temp.prototype.initialize = function() {
+		_drill_LDMB_preload_initialize.call(this);
+		this.drill_LDMB_preloadInit();
+	}
+	//==============================
+	// * 预加载 - 版本校验
+	//==============================
+	if( Utils.generateRuntimeId == undefined ){
+		alert( DrillUp.drill_LDMB_getPluginTip_LowVersion() );
+	}
+	//==============================
+	// * 预加载 - 执行资源预加载
+	//
+	//			说明：	> 遍历全部资源，提前预加载标记过的资源。
+	//==============================
+	Game_Temp.prototype.drill_LDMB_preloadInit = function() {
+		this._drill_LDMB_cacheId = Utils.generateRuntimeId();	//资源缓存id
+		this._drill_LDMB_preloadTank = [];						//bitmap容器
+		for( var i = 0; i < DrillUp.g_LDMB_childData.length; i++ ){
+			var temp_data = DrillUp.g_LDMB_childData[i];
+			if( temp_data == undefined ){ continue; }
+			
+			for( var j = 0; j < temp_data['gif_src'].length; j++ ){
+				var temp_bitmap = ImageManager.reserveBitmap( temp_data['gif_src_file'], temp_data['gif_src'][j], 0, true, this._drill_LDMB_cacheId );
+				this._drill_LDMB_preloadTank.push( temp_bitmap );
+			}
 		}
 	}
 }
+
 
 //=============================================================================
 // ** 事件
@@ -2386,7 +2405,7 @@ Game_Event.prototype.drill_LDMB_setup = function() {
 							temp1 = temp1.replace("]","");
 							$gameMap.drill_LDMB_addSimplePerspect_characterId( this._eventId, Number(temp1)-1 );
 						}
-						if( temp1 == "清除" || temp1 == "关闭" ){
+						if( temp1 == "清除" || temp1 == "关闭" || temp1 == "禁用" ){
 							$gameMap.drill_LDMB_removeSimplePerspect_characterId( this._eventId );
 						}
 					}

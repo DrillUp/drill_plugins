@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        体积 - 事件穿透关系
+ * @plugindesc [v1.5]        体积 - 事件穿透关系
  * @author Drill_up
  * 
  * 
@@ -14,8 +14,7 @@
  * 如果你有兴趣，也可以来看看更多我写的drill插件哦ヽ(*。>Д<)o゜
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
- * 使得具有相同 穿透标签 的事件之间能相互穿透。
- * ★★尽量放在 物体 插件的靠后位置★★
+ * 使得具有相同 穿透标签 的物体之间能相互穿透。
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
@@ -26,17 +25,15 @@
  * 1.插件的作用域：地图界面。
  *   作用于事件、玩家。
  * 默认的穿透：
- *   (1.直接勾选事件穿透，则无视所有直接穿透，不存在任何筛选穿透关系。
- *      并且事件可以在地图任何角落行走/漂浮，无视图块的通行情况。
+ *   (1.若勾选事件的穿透配置，则该事件会对所有物体都穿透，
+ *      不存在任何有筛选的穿透关系，且该事件还无视图块的通行情况，
+ *      可以在地图任何角落行走/漂浮。
  * 事件穿透：
  *   (1.事件可以拥有多个不同的穿透标签。
  *   (2.如果你想做事件A能穿透B和C，但是BC之间并不能穿透的效果。
  *      那么你需要设置AB为一个标签，AC为另一个标签。
- *   (3.该插件放在任意位置都不会出bug，只是如果它放在跳跃插件的后面时，
- *      跳跃插件就不知道事件之间存在的穿透关系，而识别为障碍物，所以该
- *      插件最好尽量往前面放。
  * 设计：
- *   (1.你可以根据穿透关系，可以设置敌人不能穿过的墙 或 玩家不能进入
+ *   (1.你可以根据穿透关系，可以设计敌人不能穿过的墙 或 玩家不能进入
  *      的NPC区域。例如，小爱丽丝具备标签："穿透板子"，而玩家不具备。
  *      这样，玩家就会被板子挡住去路，而小爱丽丝不会。
  * 
@@ -45,30 +42,30 @@
  * 如果你需要设置事件的被触发条件，使用下面事件注释：
  * （注意，冒号左右有空格）
  * 
- * 事件注释：=>事件穿透关系 : 穿透标签 : 炸弹人-角色
- * 事件注释：=>事件穿透关系 : 穿透标签 : 穿透玩家
+ * 事件注释：=>事件穿透关系 : 绑定穿透标签 : 标签[炸弹人-角色]
+ * 事件注释：=>事件穿透关系 : 绑定穿透标签 : 标签[穿透玩家]
  * 
  * 1.其中"炸弹人-角色"与"穿透玩家"是完全可以自定义的条件关键字。
- * 2.设置后，如果事件的关键字与其他事件或者玩家的标签对应上，将会相互
- *   穿透。
- *
+ *   添加标签后，具有相同标签的物体之间相互可以穿透。
+ * 
  * -----------------------------------------------------------------------------
  * ----可选设定
  * 你可以通过插件指令设置这些穿透标签：
  * （注意，冒号左右有空格）
- *
- * 插件指令：>事件穿透关系 : 玩家 : 添加标签 : 炸弹人-角色
- * 插件指令：>事件穿透关系 : 玩家 : 去除标签 : 炸弹人-角色
- * 插件指令：>事件穿透关系 : 本事件 : 添加标签 : 炸弹人-角色
- * 插件指令：>事件穿透关系 : 本事件 : 去除标签 : 炸弹人-角色
- * 插件指令：>事件穿透关系 : 事件[10] : 添加标签 : 炸弹人-角色
- * 插件指令：>事件穿透关系 : 事件[10] : 去除标签 : 炸弹人-角色
- * 插件指令：>事件穿透关系 : 事件变量[10] : 添加标签 : 炸弹人-角色
- * 插件指令：>事件穿透关系 : 事件变量[10] : 去除标签 : 炸弹人-角色
- *
- * 1.你可以指定某个事件"事件[n]"，或者变量对应的事件id号"事件变量[n]"。
- * 2.玩家添加了炸弹人标签后，表示进入了整个"炸弹人-角色"群体，它们两两
- *   之间全都可以穿透。
+ * 
+ * 插件指令：>事件穿透关系 : 玩家 : 添加标签 : 标签[炸弹人-角色]
+ * 插件指令：>事件穿透关系 : 本事件 : 添加标签 : 标签[炸弹人-角色]
+ * 插件指令：>事件穿透关系 : 事件[10] : 添加标签 : 标签[炸弹人-角色]
+ * 插件指令：>事件穿透关系 : 事件变量[21] : 添加标签 : 标签[炸弹人-角色]
+ * 插件指令：>事件穿透关系 : 批量事件[10,11] : 添加标签 : 标签[炸弹人-角色]
+ * 插件指令：>事件穿透关系 : 批量事件变量[21,22] : 添加标签 : 标签[炸弹人-角色]
+ * 
+ * 插件指令：>事件穿透关系 : 本事件 : 添加标签 : 标签[炸弹人-角色]
+ * 插件指令：>事件穿透关系 : 本事件 : 去除标签 : 标签[炸弹人-角色]
+ * 
+ * 1.插件指令前面部分（本事件）和后面设置（添加标签 : 标签[炸弹人-角色]）可以随意组合。
+ *   一共有6*2种组合方式。
+ * 1.添加标签后，具有相同标签的物体之间相互可以穿透。
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -105,6 +102,8 @@
  * 优化了穿透数据判定关系。
  * [v1.4]
  * 修改了插件分类。
+ * [v1.5]
+ * 优化了内部结构。
  * 
  * 
  * 
@@ -112,13 +111,14 @@
  * @type text[]
  * @desc 玩家具有的穿透标签。
  * @default ["炸弹人-角色","穿透玩家"]
+ * 
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 //		插件简称		ETh （Event_Through）
 //		临时全局变量	DrillUp.g_ETh_xxx
 //		临时局部变量	this._drill_ETh_xxxx
-//		存储数据变量	【无】玩家穿透存在$gamePlayer中
+//		存储数据变量	无
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
@@ -136,12 +136,26 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			事件穿透关系：
-//				->穿透标签
-//				->事件之间穿透
-//				->事件与玩家穿透
+//			->☆提示信息
+//			->☆静态数据
+//			->☆插件指令
+//			->☆事件注释
+//			->☆原型链规范（isCollided）
+//
+//			->☆物体的属性
+//			->☆穿透判断
+//				->穿透判断（物体基类） - 物体碰撞（与事件）
+//				->穿透判断（物体基类） - 物体碰撞（与载具）
+//				->穿透判断（物体基类） - 物体碰撞（与玩家）
+//				->穿透判断（事件） - 物体碰撞（与事件）
+//				->穿透判断（事件） - 物体碰撞（与载具）
+//				->穿透判断（事件） - 物体碰撞（与玩家）
+//
 //
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -150,11 +164,11 @@
 //		★必要注意事项：
 //			1.碰撞关系见：Game_CharacterBase.prototype.canPass
 //			2.旧版本错误判定：eventsXyNt + isNormalPriority 【穿透性 + 优先级 同时满足】才阻塞。 
-//			  修正版本后判定：pos + drill_ETh_canThroughTagList 【指定位置 + 含同类穿透】才穿透。
+//			  修正版本后判定：pos + drill_ETh_canThroughTagList 【指定位置 + 含同类标签】才穿透。
 //			  注意，只判断穿透情况，让穿透就穿透（返回false），其他情况【不要覆盖】了。
 //		
 //		★其它说明细节：
-//			1.关于同类穿透：事件判定比较绕，因为专门区分了 事件、玩家、载具 的关系，以及地图本身的穿透性问题。
+//			1.关于同类标签：事件判定比较绕，因为专门区分了 事件、玩家、载具 的关系，以及地图本身的穿透性问题。
 //			  原理为：eventsXyNt + isNormalPriority 根据 穿透性 + 优先级 二者进行判断。
 //		 	  二者都为true，才算作这个事件阻挡了你，不可通行。
 //			    Game_CharacterBase.prototype.isCollidedWithCharacters
@@ -175,7 +189,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -192,7 +206,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_EventThrough = true;
@@ -210,54 +224,100 @@
 	
 	
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _drill_ETh_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_ETh_pluginCommand.call(this, command, args);
 	if( command === ">事件穿透关系" ){
-		if(args.length == 6){
-			var temp1 = String(args[1]);
+		
+		/*-----------------对象组获取------------------*/
+		var c_chars = null;			//（事件+玩家）
+		if( args.length >= 2 ){
+			var unit = String(args[1]);
+			if( c_chars == null && unit == "玩家" ){
+				c_chars = [ $gamePlayer ];
+			}
+			if( c_chars == null && unit == "领队" ){
+				c_chars = [ $gamePlayer ];
+			}
+			if( c_chars == null && unit == "本事件" ){
+				var e = $gameMap.event( this._eventId );
+				c_chars = [ e ];
+			}
+			if( c_chars == null && unit.indexOf("批量事件[") != -1 ){
+				unit = unit.replace("批量事件[","");
+				unit = unit.replace("]","");
+				c_chars = [];
+				var temp_arr = unit.split(/[,，]/);
+				for( var k=0; k < temp_arr.length; k++ ){
+					var e_id = Number(temp_arr[k]);
+					if( $gameMap.drill_ETh_isEventExist( e_id ) == false ){ continue; }
+					var e = $gameMap.event( e_id );
+					c_chars.push( e );
+				}
+			}
+			if( c_chars == null && unit.indexOf("批量事件变量[") != -1 ){
+				unit = unit.replace("批量事件变量[","");
+				unit = unit.replace("]","");
+				c_chars = [];
+				var temp_arr = unit.split(/[,，]/);
+				for( var k=0; k < temp_arr.length; k++ ){
+					var e_id = $gameVariables.value(Number(temp_arr[k]));
+					if( $gameMap.drill_ETh_isEventExist( e_id ) == false ){ continue; }
+					var e = $gameMap.event( e_id );
+					c_chars.push( e );
+				}
+			}
+			if( c_chars == null && unit.indexOf("事件变量[") != -1 ){
+				unit = unit.replace("事件变量[","");
+				unit = unit.replace("]","");
+				var e_id = $gameVariables.value(Number(unit));
+				if( $gameMap.drill_ETh_isEventExist( e_id ) == false ){ return; }
+				var e = $gameMap.event( e_id );
+				c_chars = [ e ];
+			}
+			if( c_chars == null && unit.indexOf("事件[") != -1 ){
+				unit = unit.replace("事件[","");
+				unit = unit.replace("]","");
+				var e_id = Number(unit);
+				if( $gameMap.drill_ETh_isEventExist( e_id ) == false ){ return; }
+				var e = $gameMap.event( e_id );
+				c_chars = [ e ];
+			}
+			if( c_chars == null ){	//（单个数字的事件id）
+				var e_id = Number(unit);
+				var e = $gameMap.event( e_id );
+				if( e == undefined ){ return; }
+				c_chars = [ e ];
+			}
+		}
+		if( c_chars == null ){ return };
+		
+		/*-----------------设置标签------------------*/
+		if( args.length == 6 ){
 			var type = String(args[3]);
 			var temp3 = String(args[5]);
+			temp3 = temp3.replace("标签[","");
+			temp3 = temp3.replace("]","");
 			
-			if( temp1 == "玩家" && type == "添加标签" ){
-				$gamePlayer._drill_ETh_char[temp3] = true;
+			if( type == "添加标签" ){
+				for(var i = 0; i < c_chars.length; i++ ){
+					var ch = c_chars[i];
+					ch.drill_ETh_addTag( temp3 );
+				}
 			}
-			if( temp1 == "玩家" && type == "去除标签" ){
-				delete $gamePlayer._drill_ETh_char[temp3];
+			if( type == "去除标签" ){
+				for(var i = 0; i < c_chars.length; i++ ){
+					var ch = c_chars[i];
+					ch.drill_ETh_removeTag( temp3 );
+				}
 			}
-			
-			if( temp1 == "本事件" ){
-				var e_id = this._eventId;
-			}
-			if( temp1.indexOf("事件[") != -1 ){
-				temp1 = temp1.replace("事件[","");
-				temp1 = temp1.replace("]","");
-				var e_id = Number(temp1);
-			}
-			if( temp1.indexOf("事件变量[") != -1 ){
-				temp1 = temp1.replace("事件变量[","");
-				temp1 = temp1.replace("]","");
-				var e_id = $gameVariables.value(Number(temp1));
-			}
-			if( e_id == undefined ){		//兼容旧版本设置
-				var e_id = Number(temp1);
-			}
-			if( e_id && type == "添加标签" ){
-				if( $gameMap.drill_ETh_isEventExist( e_id ) == false ){ return; }
-				$gameMap.event(e_id)._drill_ETh_char[temp3] = true;
-			}
-			if( e_id && type == "去除标签" ){
-				if( $gameMap.drill_ETh_isEventExist( e_id ) == false ){ return; }
-				delete $gameMap.event(e_id)._drill_ETh_char[temp3];
-			}
-			
 		}
 	}
 };
 //==============================
-// ** 插件指令 - 事件检查
+// * 插件指令 - 事件检查
 //==============================
 Game_Map.prototype.drill_ETh_isEventExist = function( e_id ){
 	if( e_id == 0 ){ return false; }
@@ -272,78 +332,337 @@ Game_Map.prototype.drill_ETh_isEventExist = function( e_id ){
 
 
 //=============================================================================
-// ** 事件
+// ** ☆事件注释
 //=============================================================================
 //==============================
-// * 事件 - 注释初始化
+// * 事件注释 - 第一页标记
 //==============================
-var _drill_ETh_setupPage = Game_Event.prototype.setupPage;
-Game_Event.prototype.setupPage = function() {
-	_drill_ETh_setupPage.call(this);
-    this.drill_ETh_setupThough();
+var _drill_ETh_event_initMembers = Game_Event.prototype.initMembers;
+Game_Event.prototype.initMembers = function() {
+	_drill_ETh_event_initMembers.call(this);
+	this._drill_ETh_isFirstBirth = true;
 };
-Game_Event.prototype.drill_ETh_setupThough = function() {
-	//this._drill_ETh_char = {};	（不刷新穿透设置）
-	if( !this._erased && this.page() ){ this.list().forEach(function(l) {
+//==============================
+// * 事件注释 - 第一页绑定
+//==============================
+var _drill_ETh_event_setupPage = Game_Event.prototype.setupPage;
+Game_Event.prototype.setupPage = function() {
+	_drill_ETh_event_setupPage.call(this);
+    this.drill_ETh_setupEvent();
+};
+//==============================
+// * 事件注释 - 初始化绑定
+//==============================
+Game_Event.prototype.drill_ETh_setupEvent = function() {	
+	
+	// > 第一次出生，强制读取第一页注释（防止离开地图后，回来，开关失效）
+	if( !this._erased && this.event() && this.event().pages[0] && this._drill_ETh_isFirstBirth == true ){ 
+		this._drill_ETh_isFirstBirth = undefined;		//『节约临时参数存储空间』
+		this.drill_ETh_readPage( this.event().pages[0].list );
+	}
+	
+	// > 读取当前页注释
+	if( !this._erased && this.page() ){ 
+		this.drill_ETh_readPage( this.list() );
+	}
+}
+//==============================
+// * 事件注释 - 初始化
+//==============================
+Game_Event.prototype.drill_ETh_readPage = function( page_list ){
+	page_list.forEach( function( l ){
 		if( l.code === 108 ){
-			var args = l.parameters[0].split(' ');
+			var l_str = l.parameters[0];
+			var args = l_str.split(' ');
 			var command = args.shift();
 			if( command == "=>事件穿透关系" ){	//=>事件穿透关系 : 穿透标签 : 炸弹人
-				if(args.length >= 4){
-					if(args[1]){ var type = String(args[1]); }
-					if(args[3]){ var temp1 = String(args[3]); }
-					if(args[5]){ var temp2 = String(args[5]); }
-					if( type == "穿透标签" ){
-						this._drill_ETh_char[temp1] = true;
+				if( args.length >= 4 ){
+					var type = String(args[1]);
+					var temp1 = String(args[3]);
+					temp1 = temp1.replace("标签[","");
+					temp1 = temp1.replace("]","");
+					if( type == "穿透标签" || type == "绑定穿透标签" ){
+						this.drill_ETh_addTag( temp1 );
 					}
 				}
 			};
 		};
-	}, this);};
+	}, this);
 };
 
+
 //=============================================================================
-// * 物体（ 事件、玩家 的父类 ）
+// ** ☆原型链规范（isCollided）
+//
+//			说明：	> 此处专门补上缺失的原型链，未缺失的则注释掉。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 物体 - 初始化
+// * 物体基类 - E可通行 - 判断 - 物体碰撞
+//
+//			说明：	> 碰撞返回true，没碰撞返回flase。
+//==============================
+//Game_CharacterBase.prototype.isCollidedWithCharacters = function( x, y ){
+//    return this.isCollidedWithEvents(x, y) || this.isCollidedWithVehicles(x, y);
+//};
+//==============================
+// * 物体基类 - E可通行 - 判断 - 物体碰撞（与事件）
+//==============================
+//Game_CharacterBase.prototype.isCollidedWithEvents = function( x, y ){
+//    var events = $gameMap.eventsXyNt(x, y);
+//    return events.some(function( event ){
+//        return event.isNormalPriority();
+//    });
+//};
+//==============================
+// * 物体基类 - E可通行 - 判断 - 物体碰撞（与载具）
+//==============================
+//Game_CharacterBase.prototype.isCollidedWithVehicles = function( x, y ){
+//    return $gameMap.boat().posNt(x, y) || $gameMap.ship().posNt(x, y);
+//};
+//==============================
+// * 物体基类 - E可通行 - 判断 - 物体碰撞（与玩家）
+//==============================
+// （无）
+
+//==============================
+// * 物体 - E可通行 - 判断 - 物体碰撞
+//
+//			说明：	> 碰撞返回true，没碰撞返回flase。
+//==============================
+Game_Character.prototype.isCollidedWithCharacters = function( x, y ){
+    return Game_CharacterBase.prototype.isCollidedWithCharacters.call( this, x, y );
+};
+//==============================
+// * 物体 - E可通行 - 判断 - 物体碰撞（与事件）
+//==============================
+Game_Character.prototype.isCollidedWithEvents = function( x, y ){
+    return Game_CharacterBase.prototype.isCollidedWithEvents.call( this, x, y );
+};
+//==============================
+// * 物体 - E可通行 - 判断 - 物体碰撞（与载具）
+//==============================
+Game_Character.prototype.isCollidedWithVehicles = function( x, y ){
+    return Game_CharacterBase.prototype.isCollidedWithVehicles.call( this, x, y );
+};
+//==============================
+// * 物体 - E可通行 - 判断 - 物体碰撞（与玩家）
+//==============================
+// （无）
+
+//==============================
+// * 玩家 - E可通行 - 判断 - 物体碰撞
+//
+//			说明：	> 碰撞返回true，没碰撞返回flase。
+//==============================
+Game_Player.prototype.isCollidedWithCharacters = function( x, y ){
+    return Game_Character.prototype.isCollidedWithCharacters.call( this, x, y );
+};
+//==============================
+// * 玩家 - E可通行 - 判断 - 物体碰撞（与事件）
+//==============================
+Game_Player.prototype.isCollidedWithEvents = function( x, y ){
+    return Game_Character.prototype.isCollidedWithEvents.call( this, x, y );
+};
+//==============================
+// * 玩家 - E可通行 - 判断 - 物体碰撞（与载具）
+//==============================
+Game_Player.prototype.isCollidedWithVehicles = function( x, y ){
+    return Game_Character.prototype.isCollidedWithVehicles.call( this, x, y );
+};
+//==============================
+// * 玩家 - E可通行 - 判断 - 物体碰撞（与玩家）
+//==============================
+// （无）
+
+//==============================
+// * 玩家队员 - E可通行 - 判断 - 物体碰撞
+//
+//			说明：	> 碰撞返回true，没碰撞返回flase。
+//==============================
+Game_Follower.prototype.isCollidedWithCharacters = function( x, y ){
+    return Game_Character.prototype.isCollidedWithCharacters.call( this, x, y );
+};
+//==============================
+// * 玩家队员 - E可通行 - 判断 - 物体碰撞（与事件）
+//==============================
+Game_Follower.prototype.isCollidedWithEvents = function( x, y ){
+    return Game_Character.prototype.isCollidedWithEvents.call( this, x, y );
+};
+//==============================
+// * 玩家队员 - E可通行 - 判断 - 物体碰撞（与载具）
+//==============================
+Game_Follower.prototype.isCollidedWithVehicles = function( x, y ){
+    return Game_Character.prototype.isCollidedWithVehicles.call( this, x, y );
+};
+//==============================
+// * 玩家队员 - E可通行 - 判断 - 物体碰撞（与玩家）
+//==============================
+// （无）
+
+//==============================
+// * 事件 - E可通行 - 判断 - 物体碰撞
+//
+//			说明：	> 碰撞返回true，没碰撞返回flase。
+//==============================
+//Game_Event.prototype.isCollidedWithCharacters = function( x, y ){
+//    return (Game_Character.prototype.isCollidedWithCharacters.call(this, x, y) ||
+//            this.isCollidedWithPlayerCharacters(x, y));
+//};
+//==============================
+// * 事件 - E可通行 - 判断 - 物体碰撞（与事件）
+//==============================
+//Game_Event.prototype.isCollidedWithEvents = function( x, y ){
+//    var events = $gameMap.eventsXyNt(x, y);
+//    return events.length > 0;
+//};
+//==============================
+// * 事件 - E可通行 - 判断 - 物体碰撞（与载具）
+//==============================
+Game_Event.prototype.isCollidedWithVehicles = function( x, y ){
+    return Game_Character.prototype.isCollidedWithVehicles.call( this, x, y );
+};
+//==============================
+// * 事件 - E可通行 - 判断 - 物体碰撞（与玩家）
+//==============================
+//Game_Event.prototype.isCollidedWithPlayerCharacters = function( x, y ){
+//    return this.isNormalPriority() && $gamePlayer.isCollided(x, y);
+//};
+
+
+
+//=============================================================================
+// ** ☆物体的属性
+//
+//			说明：	> 此模块专门定义 物体的属性 。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 物体的属性 - 初始化
 //==============================
 var _drill_ETh_c_initMembers = Game_CharacterBase.prototype.initMembers;
 Game_CharacterBase.prototype.initMembers = function() {
 	_drill_ETh_c_initMembers.call(this);
+	this._drill_ETh_char = undefined;
+}
+//==============================
+// * 物体的属性 - 初始化
+//
+//			说明：	> 这里的数据都要初始化才能用。『节约事件数据存储空间』
+//==============================
+Game_CharacterBase.prototype.drill_ETh_checkData = function(){
+	if( this._drill_ETh_char != undefined ){ return; }
 	this._drill_ETh_char = {};
 }
 //==============================
-// * 物体 - 同类穿透
+// * 物体的属性 - 标签
 //==============================
-Game_CharacterBase.prototype.drill_ETh_hasThroughTag = function() {
-	if( !this._drill_ETh_char ){ return false }
-	for(var i in this._drill_ETh_char ){ return true; }
+Game_CharacterBase.prototype.drill_ETh_hasAnyTag = function(){
+	if( this._drill_ETh_char == undefined ){ return false }
+	var keys = Object.keys( this._drill_ETh_char );
+	if( keys.length > 0 ){ return true; }
 	return false;
 }
 //==============================
-// * 物体 - 同类穿透判断（单标签）
-//
-//			说明：	含标签返回true，不含返回false。
+// * 物体的属性 - 标签 - 获取单个
 //==============================
-Game_CharacterBase.prototype.drill_ETh_canThroughTag = function(tag) {
-	return this._drill_ETh_char[tag] === true ;
+Game_CharacterBase.prototype.drill_ETh_hasTag = function( tag ){
+	if( this._drill_ETh_char == undefined ){ return false; }
+	return this._drill_ETh_char[ tag ] == true;
 }
 //==============================
-// * 物体 - 同类穿透判断（标签列表）
-//
-//			说明：	含任一标签返回true，不含返回false。
+// * 物体的属性 - 标签 - 获取列表
 //==============================
-Game_CharacterBase.prototype.drill_ETh_canThroughTagList = function(tag_list) {
-	for(var i=0; i< tag_list.length; i++){
-		if( this._drill_ETh_char[tag_list[i]] === true ){
+Game_CharacterBase.prototype.drill_ETh_getTagList = function(){
+	if( this._drill_ETh_char == undefined ){ return []; }
+	return Object.keys( this._drill_ETh_char );
+}
+//==============================
+// * 物体的属性 - 标签 - 添加单个
+//==============================
+Game_CharacterBase.prototype.drill_ETh_addTag = function( tag ){
+	this.drill_ETh_checkData();
+	this._drill_ETh_char[tag] = true;
+}
+//==============================
+// * 物体的属性 - 标签 - 添加多个
+//==============================
+Game_CharacterBase.prototype.drill_ETh_addTagList = function( tag_list ){
+	this.drill_ETh_checkData();
+	for(var i = 0; i < tag_list.length; i++){
+		this._drill_ETh_char[ tag_list[i] ] = true;
+	}
+}
+//==============================
+// * 物体的属性 - 标签 - 删除
+//==============================
+Game_CharacterBase.prototype.drill_ETh_removeTag = function( tag ){
+	this.drill_ETh_checkData();
+	this._drill_ETh_char[tag] = undefined;
+	delete this._drill_ETh_char[tag];
+}
+//==============================
+// * 物体的属性 - 玩家初始化 
+//==============================
+var _drill_ETh_p_initialize = Game_Player.prototype.initialize;
+Game_Player.prototype.initialize = function() {
+	_drill_ETh_p_initialize.call(this);
+	
+	// > 玩家标签初始化
+	this.drill_ETh_addTagList( DrillUp.g_ETh_player_tags );
+	//alert(JSON.stringify(this._drill_ETh_char));
+}
+
+
+//=============================================================================
+// ** ☆穿透判断
+//
+//			说明：	> 此模块专门根据 穿透情况 进行控制。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 穿透判断 - 同类标签判断（单个标签）
+//
+//			说明：	> 含标签返回true，不含返回false。
+//==============================
+Game_CharacterBase.prototype.drill_ETh_canThroughTag = function( tag ){
+	return this.drill_ETh_hasTag( tag );
+}
+//==============================
+// * 穿透判断 - 同类标签判断（多个标签）
+//
+//			说明：	> 含列表中任一标签返回true，全不含返回false。
+//==============================
+Game_CharacterBase.prototype.drill_ETh_canThroughTagList = function( tag_list ){
+	for(var i=0; i < tag_list.length; i++){
+		if( this.drill_ETh_hasTag( tag_list[i] ) == true ){
 			return true;
 		}
 	}
 	return false;
 }
 //==============================
-// * 物体 - 获取事件 - 不可通行 + 玩家同级 + 不含同类穿透（单标签）
+// * 穿透判断 - 同类标签判断（指定位置的全部事件）
+//
+//			说明：	> 指定位置的阻塞事件，全部含同类标签返回true，只要有一个不含返回false。
+//==============================
+Game_CharacterBase.prototype.drill_ETh_canThroughEventsInPos = function( x, y ){
+	
+	var events = $gameMap.eventsXyNt(x, y);		//（事件列表 比较）
+	for(var i = 0; i < events.length; i++ ){
+		var temp_event = events[i];
+		if( temp_event == undefined ){ continue; }
+		if( temp_event._erased == true ){ continue; }
+		
+		var tag_list = temp_event.drill_ETh_getTagList();
+		if( this.drill_ETh_canThroughTagList( tag_list ) == false ){
+			return false;	//（同位置的事件里面，只要有一个事件阻塞，就无法穿透）
+		}
+	}
+	return true;
+}
+//==============================
+// * 穿透判断 - 获取事件 - 不可通行 + 与人物相同 + 不含同类标签（单个标签）
 //==============================
 Game_Map.prototype.drill_ETh_eventsXyNtEx1 = function( x, y, tag ){
     return this.events().filter(function(event) {
@@ -351,66 +670,112 @@ Game_Map.prototype.drill_ETh_eventsXyNtEx1 = function( x, y, tag ){
     });
 };
 //==============================
-// * 物体 - 获取事件 - 不可通行 + 玩家同级 + 不含同类穿透（标签列表）
+// * 穿透判断 - 获取事件 - 不可通行 + 与人物相同 + 不含同类标签（多个标签）
 //==============================
 Game_Map.prototype.drill_ETh_eventsXyNtEx2 = function( x, y, tag_list ){
     return this.events().filter(function(event) {
         return event.posNt(x, y) && !event.drill_ETh_canThroughTagList(tag_list) && event.isNormalPriority() ;
     });
 };
+
+
 //==============================
-// * 物体 - 获取事件 - 指定位置 + 含同类穿透（标签列表）
+// * 穿透判断 - 最后继承
 //==============================
-Game_Map.prototype.drill_ETh_eventsXyTag = function( x, y, tag_list ){
-    return this.events().filter(function(event) {
-        return event.pos(x, y) && event.drill_ETh_canThroughTagList(tag_list) == true ;
-    });
-};
-//==============================
-// * 物体 - 同类穿透判定
-//
-//			说明：	注意，只判断穿透情况，让穿透就穿透（返回false），其他情况【不要覆盖】了。
-//					（旧版本直接return，把 制动开关的阻塞 的功能给覆盖了。）
-//==============================
-var _drill_ETh_isCollidedWithCharacters = Game_CharacterBase.prototype.isCollidedWithCharacters;
-Game_CharacterBase.prototype.isCollidedWithCharacters = function(x, y) {
-    if( this.drill_ETh_hasThroughTag() ){
-		var block_chars = $gameMap.drill_ETh_eventsXyTag(x, y, Object.keys(this._drill_ETh_char) );
-		if( block_chars.length > 0 ){
-			return false;
+var _drill_ETh_scene_initialize = SceneManager.initialize;
+SceneManager.initialize = function() {
+	_drill_ETh_scene_initialize.call(this);		//（此方法放到最后再继承）
+	
+	//==============================
+	// * 穿透判断（物体基类） - 物体碰撞（与事件）『体积的阻塞与穿透』
+	//
+	//			说明：	> 只判断是否穿透，若穿透就返回false，注意其他判断返回值情况【不要覆盖】了。
+	//==============================
+	var _drill_ETh_isCollidedWithEvents = Game_CharacterBase.prototype.isCollidedWithEvents;
+	Game_CharacterBase.prototype.isCollidedWithEvents = function( x, y ){
+		
+		if( this.drill_ETh_hasAnyTag() ){
+			var canThough = this.drill_ETh_canThroughEventsInPos( x, y );	//（事件 比较）
+			if( canThough == true ){
+				return false;
+			}
 		}
-    }
-	return _drill_ETh_isCollidedWithCharacters.call(this, x, y );
-};
-
-
-//=============================================================================
-// ** 玩家
-//=============================================================================
-//==============================
-// * 玩家 - 初始化 
-//==============================
-var _drill_ETh_p_initialize = Game_Player.prototype.initialize;
-Game_Player.prototype.initialize = function() {
-	_drill_ETh_p_initialize.call(this);
-	for(var i =0; i< DrillUp.g_ETh_player_tags.length ;i++){
-		this._drill_ETh_char[ DrillUp.g_ETh_player_tags[i] ] = true;
-	}
-	//alert(JSON.stringify(this._drill_ETh_char));
+		
+		// > 原函数
+		return _drill_ETh_isCollidedWithEvents.call( this, x, y );
+	};
+	//==============================
+	// * 穿透判断（物体基类） - 物体碰撞（与载具）『体积的阻塞与穿透』
+	//
+	//			说明：	> 只判断是否穿透，若穿透就返回false，注意其他判断返回值情况【不要覆盖】了。
+	//==============================
+	var _drill_ETh_isCollidedWithVehicles = Game_CharacterBase.prototype.isCollidedWithVehicles;
+	Game_CharacterBase.prototype.isCollidedWithVehicles = function( x, y ){
+		
+		if( this.drill_ETh_hasAnyTag() ){
+			if( $gameMap.boat().posNt(x, y) == true ){	//（小船 比较）
+				var tagList_boat = $gameMap.boat().drill_ETh_getTagList();
+				if( this.drill_ETh_canThroughTagList( tagList_boat ) == true ){
+					return false;
+				}
+			}
+			if( $gameMap.ship().posNt(x, y) == true ){	//（大船 比较）
+				var tagList_ship = $gameMap.ship().drill_ETh_getTagList();
+				if( this.drill_ETh_canThroughTagList( tagList_ship ) == true ){
+					return false;
+				}
+			}
+		}
+		
+		// > 原函数
+		return _drill_ETh_isCollidedWithVehicles.call( this, x, y );
+	};
+	//==============================
+	// * 穿透判断（物体基类） - 物体碰撞（与玩家）『体积的阻塞与穿透』
+	//==============================
+	// （无）
+	
+	//==============================
+	// * 穿透判断（事件） - 物体碰撞（与事件）『体积的阻塞与穿透』
+	//
+	//			说明：	> 只判断是否穿透，若穿透就返回false，注意其他判断返回值情况【不要覆盖】了。
+	//==============================
+	var _drill_ETh_isCollidedWithEvents2 = Game_Event.prototype.isCollidedWithEvents;
+	Game_Event.prototype.isCollidedWithEvents = function( x, y ){
+		
+		if( this.drill_ETh_hasAnyTag() ){
+			var canThough = this.drill_ETh_canThroughEventsInPos( x, y );	//（事件 比较）
+			if( canThough == true ){
+				return false;
+			}
+		}
+		
+		// > 原函数
+		return _drill_ETh_isCollidedWithEvents2.call( this, x, y );
+	};
+	//==============================
+	// * 穿透判断（事件） - 物体碰撞（与载具）『体积的阻塞与穿透』
+	//==============================
+	// （无）
+	//==============================
+	// * 穿透判断（事件） - 物体碰撞（与玩家）『体积的阻塞与穿透』
+	//
+	//			说明：	> 只判断是否穿透，若穿透就返回false，注意其他判断返回值情况【不要覆盖】了。
+	//==============================
+	var _drill_ETh_isCollidedWithPlayerCharacters = Game_Event.prototype.isCollidedWithPlayerCharacters;
+	Game_Event.prototype.isCollidedWithPlayerCharacters = function( x, y ){
+		
+		if( this.drill_ETh_hasAnyTag() ){
+			if( $gamePlayer.isCollided(x, y) ){			//（玩家 比较）
+				var tagList_player = $gamePlayer.drill_ETh_getTagList();
+				if( this.drill_ETh_canThroughTagList( tagList_player ) == true ){
+					return false;
+				}
+			}
+		}
+		
+		// > 原函数
+		return _drill_ETh_isCollidedWithPlayerCharacters.call(this,x,y);
+	};
 }
-//==============================
-// * 事件 对 玩家 同类穿透判定
-//
-//			说明：	注意，只判断穿透情况，让穿透就穿透（碰撞返回false），其他情况【不要覆盖】了。
-//==============================
-var _drill_ETh_isCollidedWithPlayerCharacters = Game_Event.prototype.isCollidedWithPlayerCharacters;
-Game_Event.prototype.isCollidedWithPlayerCharacters = function( x, y ){
-    if( this.drill_ETh_hasThroughTag() ){
-		if( $gamePlayer.isCollided(x, y) && 	//（与玩家碰撞时，有任何的标签符合，则穿透）
-			this.drill_ETh_canThroughTagList( Object.keys($gamePlayer._drill_ETh_char) ) == true ){
-			return false;
-		}
-	}
-	return _drill_ETh_isCollidedWithPlayerCharacters.call(this,x,y);
-};
 

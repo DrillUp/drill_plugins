@@ -477,7 +477,7 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^2)*o(选项窗口数)*o(贴图处理) 每帧
-//		★性能测试因素	对话管理层
+//		★性能测试因素	对话框管理层
 //		★性能测试消耗	7.51ms（drill_DSB_updatePosition）
 //		★最坏情况		对话框填充了大量背景。（不过好像也问题不大）
 //		★备注			暂无
@@ -498,6 +498,9 @@
 //
 //		★家谱：
 //			大家族-动态遮罩
+//		
+//		★脚本文档：
+//			无
 //		
 //		★插件私有类：
 //			* 对话框背景【Drill_DSB_DecorationBackground】
@@ -541,7 +544,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_DialogSkinBackground = true;
@@ -549,7 +552,7 @@
 	DrillUp.parameters = PluginManager.parameters('Drill_DialogSkinBackground');
 
 	//==============================
-	// * 变量获取 - 样式
+	// * 静态数据 - 样式
 	//				（~struct~DrillDSBStyle）
 	//==============================
 	DrillUp.drill_DSB_initStyle = function( dataFrom ) {

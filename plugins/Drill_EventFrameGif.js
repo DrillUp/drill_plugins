@@ -1545,7 +1545,7 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
 //			->☆插件指令
 //			->☆事件注释
 //			->☆个体层级
@@ -1584,6 +1584,9 @@
 //		
 //		
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -1637,7 +1640,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_EventFrameGif = true;
@@ -1647,7 +1650,7 @@
 	
 	
 	//==============================
-	// * 变量获取 - GIF样式
+	// * 静态数据 - GIF样式
 	//				（~struct~EFGiStyle）
 	//==============================
 	DrillUp.drill_EFGi_styleInit = function( dataFrom ){
@@ -2130,7 +2133,7 @@ Game_Map.prototype.drill_EFGi_updateRestatistics = function() {
 //==============================
 var _drill_EFGi_c_initMembers = Game_CharacterBase.prototype.initMembers;
 Game_CharacterBase.prototype.initMembers = function(){
-	this._drill_EFGi_controllerTank = null;
+	this._drill_EFGi_controllerTank = undefined;
 	_drill_EFGi_c_initMembers.call( this );
 }
 //==============================
@@ -2170,7 +2173,7 @@ Game_CharacterBase.prototype.drill_EFGi_removeControllerAll = function(){
 	for( var i=0; i < this._drill_EFGi_controllerTank.length; i++ ){
 		this.drill_EFGi_removeController( i );
 	}
-	this._drill_EFGi_controllerTank = null;
+	this._drill_EFGi_controllerTank = undefined;
 }
 //==============================
 // * 物体绑定 - 帧刷新
@@ -2201,7 +2204,7 @@ Game_CharacterBase.prototype.update = function(){
 		}
 	}
 	if( is_all_empty == true ){
-		this._drill_EFGi_controllerTank = null;
+		this._drill_EFGi_controllerTank = undefined;
 	}
 }
 //==============================

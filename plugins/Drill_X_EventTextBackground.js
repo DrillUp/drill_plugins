@@ -41,7 +41,7 @@
  * 设计：
  *   (1.你可以单独设置事件的漂浮背景，设置文字为看不见的中文空格。
  *      并且，漂浮背景可以是GIF，可以作为头顶的广告牌用。
- *      （示例在 对话管理层 中被作为五毛特效展示。）
+ *      （在 图片管理层示例 中被作为五毛特效展示。）
  * 
  * -----------------------------------------------------------------------------
  * ----激活条件
@@ -1426,7 +1426,7 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
 //			->☆插件指令
 //			->☆事件注释
 //
@@ -1436,6 +1436,9 @@
 //
 //
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -1485,7 +1488,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_X_EventTextBackground = true;
@@ -1494,7 +1497,7 @@
 	
 	
 	//==============================
-	// * 变量获取 - 背景样式
+	// * 静态数据 - 背景样式
 	//				（~struct~EventTextGIF）
 	//==============================
 	DrillUp.drill_XETB_initEventTextGIF = function( dataFrom ) {
@@ -1611,7 +1614,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 };
 //==============================
-// ** 插件指令 - 事件检查
+// * 插件指令 - 事件检查
 //==============================
 Game_Map.prototype.drill_XETB_isEventExist = function( e_id ){
 	if( e_id == 0 ){ return false; }
@@ -1716,10 +1719,10 @@ Drill_ET_Controller.prototype.drill_controller_initData = function(){
 	_drill_XETB_ET_c_initData.call(this);
 	var data = this._drill_data;
 	
-	// > 背景
-	if( data['background_id'] == undefined ){ data['background_id'] = -1 };		//背景ID
-	if( data['background_x'] == undefined ){ data['background_x'] = 0 };		//背景偏移x
-	if( data['background_y'] == undefined ){ data['background_y'] = 0 };		//背景偏移y
+	// > 背景（这里的参数都节约一点，默认都 undefined ）『节约事件数据存储空间』
+	if( data['background_id'] == undefined ){ data['background_id'] = undefined };	//背景ID（数字）
+	if( data['background_x'] == undefined ){ data['background_x'] = undefined };	//背景偏移x（数字）
+	if( data['background_y'] == undefined ){ data['background_y'] = undefined };	//背景偏移y（数字）
 }
 //==============================
 // * 控制器 - 初始化子功能（继承）
@@ -1739,25 +1742,47 @@ var _drill_XETB_ET_c_update = Drill_ET_Controller.prototype.drill_controller_upd
 Drill_ET_Controller.prototype.drill_controller_update = function(){
 	_drill_XETB_ET_c_update.call(this);
 	var data = this._drill_data;
-	if( data['background_id'] == -1 ){ return; }
+	if( data['background_id'] == undefined ){ return; }
 	
 	// > 时间+1
 	this._drill_XETB_curTime += 1;
 }
 //==============================
-// * 控制器 - 背景 - 设置偏移（开放函数）
+// * 控制器 - 背景 - 设置背景ID（开放函数）
 //==============================
 Drill_ET_Controller.prototype.drill_XETB_setBackgroundId = function( id ){
 	var data = this._drill_data;
-	data['background_id'] = id;
+	if( id >= 0 ){
+		data['background_id'] = id;
+	}else{
+		data['background_id'] = undefined; 
+	}
 }
 //==============================
 // * 控制器 - 背景 - 设置偏移（开放函数）
 //==============================
 Drill_ET_Controller.prototype.drill_XETB_setOffset = function( x, y ){
 	var data = this._drill_data;
-	data['background_x'] = x;
-	data['background_y'] = y;
+	if( x == 0 && y == 0 ){
+		data['background_x'] = undefined;
+		data['background_y'] = undefined;
+	}else{
+		data['background_x'] = x;
+		data['background_y'] = y;
+	}
+}
+//==============================
+// * 控制器 - 背景 - 获取偏移（开放函数）
+//
+//			说明：	> 函数返回值为数字，不存在空值情况。
+//==============================
+Drill_ET_Controller.prototype.drill_XETT_getData_background_x = function(){
+	if( this._drill_data['background_x'] === undefined ){ return 0; }
+	return this._drill_data['background_x'];
+}
+Drill_ET_Controller.prototype.drill_XETT_getData_background_y = function(){
+	if( this._drill_data['background_y'] === undefined ){ return 0; }
+	return this._drill_data['background_y'];
 }
 
 
@@ -1777,7 +1802,7 @@ Drill_ET_WindowSprite.prototype.drill_sprite_initChild = function(){
 	
 	// > 背景贴图
 	this._drill_XETB_curBackground = null;		//当前背景
-	this._drill_XETB_curIndex = -1;				//当前背景样式
+	this._drill_XETB_curIndex = undefined;		//当前背景样式
 };
 //==============================
 // * 文字贴图 - 销毁子功能（继承）
@@ -1816,7 +1841,7 @@ Drill_ET_WindowSprite.prototype.drill_XETB_updateRebuild = function() {
 	
 	// > 背景样式不一样时，切换背景
 	if( this._drill_XETB_curIndex != d_data['background_id'] ){
-		this._drill_XETB_curIndex = d_data['background_id'];
+		this._drill_XETB_curIndex =  d_data['background_id'];
 		this.drill_XETB_rebuildBackground();
 	}
 }
@@ -1831,7 +1856,7 @@ Drill_ET_WindowSprite.prototype.drill_XETB_rebuildBackground = function() {
 		this._drill_XETB_layer.removeChild(this._drill_XETB_curBackground);
 		this._drill_XETB_curBackground = null;
 	}
-	if( index == -1 ){ return; }
+	if( index == undefined ){ return; }
 	
 	// > 资源初始化
 	var s_data = DrillUp.g_XETB_list[ index ];
@@ -1859,7 +1884,7 @@ Drill_ET_WindowSprite.prototype.drill_XETB_rebuildBackground = function() {
 //==============================
 Drill_ET_WindowSprite.prototype.drill_XETB_updateGIF = function() {
 	var index = this._drill_XETB_curIndex;
-	if( index == -1 ){ return; }
+	if( index == undefined ){ return; }
 	var s_data = DrillUp.g_XETB_list[ index ];
 	
 	// > 播放GIF
@@ -1881,8 +1906,8 @@ Drill_ET_WindowSprite.prototype.drill_XETB_updatePosition = function() {
 	// > 位置
 	var xx = 0;
 	var yy = 0;
-	xx += d_data['background_x'];
-	yy += d_data['background_y'];
+	xx += this._drill_controller.drill_XETT_getData_background_x();
+	yy += this._drill_controller.drill_XETT_getData_background_y();
 	xx += this.width/2;		//（窗口位置居中）
 	yy += this.height/2;
 	this._drill_XETB_curBackground.x = xx;

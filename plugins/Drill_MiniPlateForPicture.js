@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.5]        鼠标 - 图片说明窗口
+ * @plugindesc [v1.6]        鼠标 - 图片说明窗口
  * @author Drill_up
  * 
  * @Drill_LE_param "皮肤样式-%d"
@@ -136,6 +136,8 @@
  * 优化了旧存档的识别与兼容。
  * [v1.5]
  * 优化了内部结构，改进了鼠标触发以及刷新范围。
+ * [v1.6]
+ * 修复了图片清除后，仍然存在绑定的bug。
  * 
  * 
  * 
@@ -966,7 +968,7 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^2)+o(贴图处理) 每帧
-//		★性能测试因素	对话管理层
+//		★性能测试因素	悬浮窗口管理层
 //		★性能测试消耗	11.24ms（drill_updatePosition函数）
 //						15.3ms（drill_updateMessage）10.2ms（drill_updatePosition）
 //		★最坏情况		暂无
@@ -983,7 +985,7 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
 //			->☆插件指令
 //			->☆存储数据
 //			->☆战斗层级
@@ -997,6 +999,7 @@
 //				->图片层级排序【标准函数】
 //				x->层级与镜头的位移【标准函数】
 //			
+//			->☆图片控制
 //			->☆实体类容器
 //				->地图界面的图片
 //				->战斗界面的图片
@@ -1025,6 +1028,9 @@
 //				
 //		★家谱：
 //			无
+//		
+//		★脚本文档：
+//			14.鼠标 > 关于鼠标悬浮窗口（脚本）.docx
 //		
 //		★插件私有类：
 //			* 图片说明窗口 实体类【Drill_MPFP_Bean】
@@ -1075,7 +1081,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_MiniPlateForPicture = true;
@@ -1093,7 +1099,7 @@
 	
 	
 	//==============================
-	// * 变量获取 - 皮肤样式
+	// * 静态数据 - 皮肤样式
 	//				（~struct~DrillMPFPStyle）
 	//==============================
 	DrillUp.drill_MPFP_initStyle = function( dataFrom ){
@@ -1143,7 +1149,7 @@
 	
 	
 	//==============================
-	// * 变量获取 - 图片内容
+	// * 静态数据 - 图片内容
 	//				（~struct~DrillMPFPBind）
 	//==============================
 	DrillUp.drill_MPFP_initBind = function( dataFrom ){
@@ -1574,6 +1580,37 @@ Scene_Map.prototype.drill_MPFP_layerAddSprite_Private = function( sprite, layer_
 };
 
 
+//=============================================================================
+// ** ☆图片控制
+//
+//			说明：	> 此模块考虑 手动控制 图片显示/隐藏 指令。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 图片控制 - 显示图片（对应函数showPicture）
+//==============================
+var _drill_MPFP_p_show = Game_Picture.prototype.show;
+Game_Picture.prototype.show = function( name, origin, x, y, scaleX, scaleY, opacity, blendMode ){
+	_drill_MPFP_p_show.call( this, name, origin, x, y, scaleX, scaleY, opacity, blendMode );
+	//（无，通过插件指令 绑定图片内容）
+}
+//==============================
+// * 图片控制 - 消除图片
+//==============================
+var _drill_MPFP_p_erase = Game_Picture.prototype.erase;
+Game_Picture.prototype.erase = function(){
+	_drill_MPFP_p_erase.call( this );
+	$gameTemp._drill_MPFP_needRestatistics = true;	//刷新统计
+}
+//==============================
+// * 图片控制 - 消除图片（command235）
+//==============================
+var _drill_MPFP_p_erasePicture = Game_Screen.prototype.erasePicture;
+Game_Screen.prototype.erasePicture = function( pictureId ){
+	_drill_MPFP_p_erasePicture.call( this, pictureId );
+	$gameTemp._drill_MPFP_needRestatistics = true;	//刷新统计
+}
+
 
 //=============================================================================
 // ** ☆实体类容器
@@ -1629,7 +1666,7 @@ Game_Screen.prototype.update = function(){
 // * 容器 - 帧刷新 - 刷新统计
 //==============================
 Game_Screen.prototype.drill_MPFP_updateRestatistics = function() {
-	if( !$gameTemp._drill_MPFP_needRestatistics ){ return }
+	if( $gameTemp._drill_MPFP_needRestatistics != true ){ return }
 	$gameTemp._drill_MPFP_needRestatistics = false;
 	
 	$gameTemp._drill_MPFP_beanTank = [];		//实体类容器

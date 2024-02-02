@@ -1301,7 +1301,7 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
 //			x->☆全局存储
 //			->☆存储数据
 //			->☆插件指令
@@ -1312,12 +1312,15 @@
 //			
 //			->信息面板K【Scene_Drill_SSpK】
 //				->公共事件触发
-//				->☆原型链规范
+//				->☆原型链规范（Scene_Drill_SSpK）
 //			->选项窗口【Drill_SSpK_SelectWindow】
 //			->显示窗口【Drill_SSpK_DescWindow】
 //
 //
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -1374,7 +1377,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_SceneSelfplateK = true;
@@ -1383,7 +1386,7 @@
 	
 	
 	//==============================
-	// * 变量获取 - 指针与边框
+	// * 静态数据 - 指针与边框
 	//				（~struct~DrillCursor）
 	//==============================
 	DrillUp.drill_SSpK_initMenuCursor = function( dataFrom ) {
@@ -1403,7 +1406,7 @@
 		return data;
 	}
 	//==============================
-	// * 变量获取 - 选项窗口参数
+	// * 静态数据 - 选项窗口参数
 	//				（~struct~DrillSelectWindow）
 	//==============================
 	DrillUp.drill_SSpK_initCommandWindow = function( dataFrom ) {
@@ -1448,7 +1451,7 @@
 		return data;
 	}
 	//==============================
-	// * 变量获取 - 选项按钮组
+	// * 静态数据 - 选项按钮组
 	//				（~struct~DrillCommandButton）
 	//==============================
 	DrillUp.drill_SSpK_initCommandButton = function( dataFrom ) {
@@ -1470,7 +1473,7 @@
 		return data;
 	}
 	//==============================
-	// * 变量获取 - 内容
+	// * 静态数据 - 内容
 	//				（~struct~DrillSSpK）
 	//==============================
 	DrillUp.drill_SSpK_initContext = function( dataFrom ) {
@@ -2125,29 +2128,43 @@ Scene_Drill_SSpK.prototype.drill_processOk = function() {
 	
 	// > 执行公共事件（切出当前所有菜单Scene）
 	if( temp_context['commonEventEnable'] ){
-		if( Imported.Drill_LayerCommandThread ){
-			if(SceneManager._stack.length > 0){ SceneManager.pop(); }	
-			if(SceneManager._stack.length > 0){ SceneManager.pop(); }	
-			if(SceneManager._stack.length > 0){ SceneManager.pop(); }	
-			//$gameTemp.reserveCommonEvent( temp_context['commonEventId'] );
-			
-			var common_id = temp_context['commonEventId'];
-			if( common_id == 0 ){ 
-				common_id = $gameVariables.value( temp_context['commonEventVarId'] );
-			}
-			
-			SoundManager.playOk();
-			var e_data = {
-				'type':"公共事件",
-				'pipeType': temp_context['pipeType'],
-				'commonEventId': common_id,
-			};
-			$gameMap.drill_LCT_addPipeEvent( e_data );
-		}else{
-			alert( DrillUp.drill_SSpK_getPluginTip_NoSupportPlugin( temp_context['name'] ) );
+		
+		var common_id = temp_context['commonEventId'];
+		if( common_id == 0 ){ 
+			common_id = $gameVariables.value( temp_context['commonEventVarId'] );
 		}
+		
+		SoundManager.playOk();
+		this.drill_SSpK_doCommonEvent( temp_context['name'], temp_context['pipeType'], common_id, "" );
+		
 	}else{
 		this._window_select.activate(); return; 
+	}
+};
+//==============================
+// * 信息面板L流程 - 『执行公共事件』（地图界面）
+//==============================
+Scene_Drill_SSpK.prototype.drill_SSpK_doCommonEvent = function( btn_name, pipeType, commonEventId, callBack_str ){
+	
+	// > 插件【地图-多线程】
+	if( Imported.Drill_LayerCommandThread ){
+		
+		// > 跳出界面
+		if(SceneManager._stack.length > 0){ SceneManager.pop(); }
+		if(SceneManager._stack.length > 0){ SceneManager.pop(); }
+		if(SceneManager._stack.length > 0){ SceneManager.pop(); }
+		
+		var e_data = {
+			'type': "公共事件",
+			'pipeType': pipeType,
+			'commonEventId': commonEventId,
+			'callBack_str': callBack_str,
+		};
+		$gameMap.drill_LCT_addPipeEvent( e_data );
+		
+	// > 未配置插件 提示
+	}else{
+		alert( DrillUp.drill_SSpK_getPluginTip_NoSupportPlugin( btn_name ) );
 	}
 };
 
@@ -2185,7 +2202,7 @@ Scene_Drill_SSpK.prototype.drill_updateIndex = function() {
 
 
 //=============================================================================
-// ** ☆原型链规范
+// ** ☆原型链规范（Scene_Drill_SSpK）
 //
 //			说明：	> 此处专门补上缺失的原型链，未缺失的则注释掉。
 //					（插件完整的功能目录去看看：功能结构树）

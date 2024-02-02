@@ -505,7 +505,7 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
 //			->☆插件指令
 //			->☆存储数据
 //			->☆地图层级
@@ -543,6 +543,9 @@
 //
 //
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -599,7 +602,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_MenuCursor = true;
@@ -607,7 +610,7 @@
     DrillUp.parameters = PluginManager.parameters('Drill_MenuCursor');
 
 	//==============================
-	// * 变量获取 - 样式
+	// * 静态数据 - 样式
 	//				（~struct~DrillMCuStyle）
 	//==============================
 	DrillUp.drill_MCu_initStyle = function( dataFrom ) {
@@ -1943,7 +1946,7 @@ Drill_MCu_Controller.prototype.drill_controller_initData = function(){
 	if( data['gif_initFrame'] == undefined ){ data['gif_initFrame'] = 0 };							//D播放GIF - 锁定帧数
 	
 	// > E自变化效果
-	//	（见 变量获取）
+	//	（见 静态数据）
 }
 //==============================
 // * 初始化 - 初始化子功能

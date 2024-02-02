@@ -726,6 +726,9 @@
 //		★家谱：
 //			无
 //		
+//		★脚本文档：
+//			无
+//		
 //		★插件私有类：
 //			无
 //		
@@ -801,7 +804,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_TitleScene = true;
@@ -810,7 +813,7 @@
 	
 	
 	//==============================
-	// * 变量获取 - 标题选项 - 标题选项按钮组（必须写在前面）
+	// * 静态数据 - 标题选项 - 标题选项按钮组（必须写在前面）
 	//				（~struct~DrillTScCommandButton）
 	//==============================
 	DrillUp.drill_TSc_initCommandButton = function( dataFrom ) {
@@ -862,7 +865,7 @@
 	}
 	
 	//==============================
-	// * 变量获取 - 标题选项 - 标题选项窗口（必须写在前面）
+	// * 静态数据 - 标题选项 - 标题选项窗口（必须写在前面）
 	//				（~struct~DrillTScCommandWindow）
 	//==============================
 	DrillUp.drill_TSc_initCommandWindow = function( dataFrom ) {
@@ -934,7 +937,7 @@
 		DrillUp.parameters["标题选项窗口"] != "" &&
 		DrillUp.parameters["标题选项窗口"] != "{}" ){
 		var data = JSON.parse( DrillUp.parameters["标题选项窗口"] );
-		DrillUp.drill_TSc_initCommandWindow( data ); // 直接执行变量获取
+		DrillUp.drill_TSc_initCommandWindow( data ); // 直接执行静态数据
 	}else{
 		if( DrillUp.g_TSc_command_mode == "窗口模式" ){
 			alert( DrillUp.drill_TSc_getPluginTip_NoSupportData_window() );
@@ -979,7 +982,7 @@ if( Imported.Drill_CoreOfGlobalSave &&
 
 
 //=============================================================================
-// ** ☆原型链规范
+// ** ☆原型链规范（Scene_Title）
 //
 //			说明：	> 此处专门补上缺失的原型链，未缺失的则注释掉。
 //					（插件完整的功能目录去看看：功能结构树）

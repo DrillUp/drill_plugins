@@ -146,7 +146,7 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
  * 时间复杂度： o(n^2) 每帧
- * 测试方法：   在对话管理层，放置5张图片和5个槽，测试。
+ * 测试方法：   在图片管理层，放置5张图片和5个槽，测试。
  * 测试结果：   200个事件的地图中，平均消耗为：【13.37ms】
  *              100个事件的地图中，平均消耗为：【13.42ms】
  *               50个事件的地图中，平均消耗为：【12.20ms】
@@ -218,7 +218,7 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^2)  每帧
-//		★性能测试因素	对话管理层
+//		★性能测试因素	图片管理层
 //		★性能测试消耗	13.42ms、12.20ms（Sprite_Picture的update）6.10ms（updateAdsorptionCheck）
 //						24.94ms（updateAdsorptionCheck，添加了 最大吸附数量 之后+优化）
 //		★最坏情况		暂无
@@ -263,6 +263,9 @@
 //			
 //			
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -320,7 +323,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_PictureAdsorptionSlot = true;
@@ -682,12 +685,24 @@ Game_Picture.prototype.drill_PAS_clearAdsorb = function() {
 	
 }
 //==============================
-// * 图片 - 图片移除时
+// * 图片 - 消除图片
 //==============================
 var _drill_PAS_pic_erase = Game_Picture.prototype.erase;
 Game_Picture.prototype.erase = function() {
 	_drill_PAS_pic_erase.call(this);
 	this.drill_PAS_clearAdsorb();
+}
+//==============================
+// * 图片 - 消除图片（command235）
+//==============================
+var _drill_PAS_pic_erasePicture = Game_Screen.prototype.erasePicture;
+Game_Screen.prototype.erasePicture = function( pictureId ){
+    var realPictureId = this.realPictureId(pictureId);
+	var picture = this._pictures[realPictureId];
+	if( picture != undefined ){
+		picture.drill_PAS_clearAdsorb();
+	}
+	_drill_PAS_pic_erasePicture.call( this, pictureId );
 }
 //==============================
 // * 图片 - 帧刷新

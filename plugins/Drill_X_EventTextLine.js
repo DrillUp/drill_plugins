@@ -93,7 +93,7 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   单次执行
  * 时间复杂度： o(n^2) 每帧
- * 测试方法：   20个事件，添加批注线，分别放置测试。
+ * 测试方法：   各个管理层20个事件，添加批注线，分别放置测试。
  * 测试结果：   200个事件的地图中，消耗为：【6.09ms】
  *              100个事件的地图中，消耗为：【5.81ms】
  *               50个事件的地图中，消耗为：【5ms以下】
@@ -146,7 +146,7 @@
 //
 //		★工作类型		单次执行
 //		★时间复杂度		o(n^2) 每帧
-//		★性能测试因素	窗口字符管理层
+//		★性能测试因素	各个管理层
 //		★性能测试消耗	4.86ms（update）5.81ms（drill_XETL_updateLineRefresh）
 //		★最坏情况		暂无
 //		★备注			暂无
@@ -157,7 +157,7 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
 //			->☆插件指令
 //			->☆事件注释
 //
@@ -168,6 +168,9 @@
 //
 //
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -215,7 +218,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_X_EventTextLine = true;
@@ -419,19 +422,24 @@ Drill_ET_Controller.prototype.drill_controller_initData = function(){
 	_drill_XETL_ET_c_initData.call(this);
 	var data = this._drill_data;
 	
-	// > 批注线
-	if( data['line_enable'] == undefined ){ data['line_enable'] = false };
-	if( data['line_thickness'] == undefined ){ data['line_thickness'] = DrillUp.g_XETL_thickness };
-	if( data['line_color'] == undefined ){ data['line_color'] = DrillUp.g_XETL_color };
-	if( data['line_mode'] == undefined ){ data['line_mode'] = DrillUp.g_XETL_mode };
+	// > 批注线（这里的参数都节约一点，默认都 undefined ）『节约事件数据存储空间』
+	if( data['line_enable'] == undefined ){ data['line_enable'] = undefined };			//批注线开关（布尔）
+	if( data['line_thickness'] == undefined ){ data['line_thickness'] = undefined };	//批注线厚度（数字）
+	if( data['line_color'] == undefined ){ data['line_color'] = undefined };			//批注线颜色（字符串）
+	if( data['line_mode'] == undefined ){ data['line_mode'] = undefined };				//批注线连接位置（字符串）
 }
 //==============================
 // * 控制器 - 批注线 - 设置可用（开放函数）
 //==============================
 Drill_ET_Controller.prototype.drill_XETL_setEnabled = function( enable ){
 	var data = this._drill_data;
-	data['line_enable'] = enable;
+	if( enable == true ){
+		data['line_enable'] = true;
+	}else{
+		data['line_enable'] = undefined;
+	}
 }
+
 //==============================
 // * 控制器 - 批注线 - 设置厚度（开放函数）
 //==============================
@@ -440,6 +448,16 @@ Drill_ET_Controller.prototype.drill_XETL_setThickness = function( thickness ){
 	data['line_thickness'] = thickness;
 }
 //==============================
+// * 控制器 - 批注线 - 获取厚度（开放函数）
+//
+//			说明：	> 函数返回值为数字，不存在空值情况。
+//==============================
+Drill_ET_Controller.prototype.drill_XETL_getData_line_thickness = function(){
+	if( this._drill_data['line_thickness'] === undefined ){ return DrillUp.g_XETL_thickness; }
+	return this._drill_data['line_thickness'];
+}
+
+//==============================
 // * 控制器 - 批注线 - 设置颜色（开放函数）
 //==============================
 Drill_ET_Controller.prototype.drill_XETL_setColor = function( color ){
@@ -447,11 +465,30 @@ Drill_ET_Controller.prototype.drill_XETL_setColor = function( color ){
 	data['line_color'] = color;
 }
 //==============================
+// * 控制器 - 批注线 - 获取颜色（开放函数）
+//
+//			说明：	> 函数返回值为字符串，不存在空值情况。
+//==============================
+Drill_ET_Controller.prototype.drill_XETL_getData_line_color = function(){
+	if( this._drill_data['line_color'] === undefined ){ return DrillUp.g_XETL_color; }
+	return this._drill_data['line_color'];
+}
+
+//==============================
 // * 控制器 - 批注线 - 设置连接位置（开放函数）
 //==============================
 Drill_ET_Controller.prototype.drill_XETL_setLineMode = function( mode ){
 	var data = this._drill_data;
 	data['line_mode'] = mode;
+}
+//==============================
+// * 控制器 - 批注线 - 获取连接位置（开放函数）
+//
+//			说明：	> 函数返回值为字符串，不存在空值情况。
+//==============================
+Drill_ET_Controller.prototype.drill_XETL_getData_line_mode = function(){
+	if( this._drill_data['line_mode'] === undefined ){ return DrillUp.g_XETL_mode; }
+	return this._drill_data['line_mode'];
 }
 
 
@@ -504,7 +541,7 @@ Drill_ET_WindowSprite.prototype.update = function() {
 //==============================
 Drill_ET_WindowSprite.prototype.drill_XETL_updateSpriteRebuild = function() {
 	var d_data = this._drill_controller._drill_data;
-	if( d_data['line_enable'] == false ){
+	if( d_data['line_enable'] != true ){
 		
 		// > 关闭时，隐藏贴图
 		if( this._drill_XETL_curSprite != undefined ){
@@ -578,18 +615,23 @@ Drill_ET_WindowSprite.prototype.drill_XETL_updateLineRefresh = function() {
 		yOffset = this._drill_XETL_lastOffsetY;
 	}
 	
+	// > 参数准备
+	var line_mode = this._drill_controller.drill_XETL_getData_line_mode();
+	var line_thickness = this._drill_controller.drill_XETL_getData_line_thickness();
+	var line_color = this._drill_controller.drill_XETL_getData_line_color();
+	
 	// > 连接位置
 	var xConnect = 0;
 	var yConnect = 0;
-	if( d_data['line_mode'] == "最左" ){
+	if( line_mode == "最左" ){
 		xConnect = 0;
 		yConnect = this.height;
 	}
-	if( d_data['line_mode'] == "居中" ){
+	if( line_mode == "居中" ){
 		xConnect = this.width*0.5;
 		yConnect = this.height;
 	}
-	if( d_data['line_mode'] == "最右" ){
+	if( line_mode == "最右" ){
 		xConnect = this.width;
 		yConnect = this.height;
 	}
@@ -597,7 +639,7 @@ Drill_ET_WindowSprite.prototype.drill_XETL_updateLineRefresh = function() {
 	// > 文本横线
 	var start_x = xOffset + 0;
 	var start_y = yOffset + this.height;
-	temp_bitmap.drill_XETL_drawLine( start_x, start_y, start_x + this.width, start_y, d_data['line_thickness'], d_data['line_color'] );
+	temp_bitmap.drill_XETL_drawLine( start_x, start_y, start_x + this.width, start_y, line_thickness, line_color );
 	
 	// > 连接线
 	var start_x = xOffset + xConnect;
@@ -616,7 +658,7 @@ Drill_ET_WindowSprite.prototype.drill_XETL_updateLineRefresh = function() {
 		end_x += this.width*1.0;
 		end_y += this.height*0.5;
 	}
-	temp_bitmap.drill_XETL_drawLine( start_x, start_y, end_x, end_y, d_data['line_thickness'], d_data['line_color'] );
+	temp_bitmap.drill_XETL_drawLine( start_x, start_y, end_x, end_y, line_thickness, line_color );
 	
 	// > 设置画布
 	this._drill_XETL_curSprite.bitmap = temp_bitmap;

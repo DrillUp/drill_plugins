@@ -1704,7 +1704,7 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
 //			->☆插件指令
 //			->☆存储数据
 //			->☆地图层级
@@ -1726,6 +1726,9 @@
 //
 //		★家谱：
 //			无
+//		
+//		★脚本文档：
+//			17.主菜单 > 多层组合装饰（界面装饰-地图界面）（脚本）.docx
 //		
 //		★插件私有类：
 //			* 雨滴贴图【Drill_LPR_RaindropSprite】
@@ -1764,7 +1767,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_LayerParticleRain = true;
@@ -1772,7 +1775,7 @@
     DrillUp.parameters = PluginManager.parameters('Drill_LayerParticleRain');
 
 	//==============================
-	// * 变量获取 - 粒子
+	// * 静态数据 - 粒子
 	//				（~struct~LPRMapRain）
 	//==============================
 	DrillUp.drill_LPR_rainInit = function( dataFrom ) {
@@ -2022,7 +2025,7 @@ Game_System.prototype.drill_LPR_initSysData_Private = function() {
 		}
 	}
 	
-	// > 刷新当前地图【$gameSystem优先初始化】
+	// > 刷新当前地图『$gameSystem优先初始化』
 	if( $gameMap != undefined ){
 		$gameMap.drill_LPR_initMapdata();
 	}

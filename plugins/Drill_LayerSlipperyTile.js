@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        图块 - 物体滑行
+ * @plugindesc [v1.4]        图块 - 物体滑行
  * @author Drill_up
  * 
  * 
@@ -19,6 +19,9 @@
  * -----------------------------------------------------------------------------
  * ----插件扩展
  * 该插件可以单独使用。
+ * 可作用于：
+ *   - Drill_EventActionSequenceAutomation   行走图-GIF动画序列全标签播放
+ *     如果你使用了动画序列，可以自定义"滑行"和"滑行静止"的动画。
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -35,11 +38,16 @@
  *   (1.玩家可以举着花盆滑行。
  *   (2.玩家可以在滑行时跳跃。
  *   (3.玩家可以在滑行时改变移动速度。
- * 注意事项：
- *   (1.滑行时，大部分移动路线指令是被阻塞的，包含 移动和转向 指令。
+ * 行走图：
+ *   (1.默认行走图会选择播放 移动动画的第3帧（踏出一只脚）。
+ *   (2.如果你使用了动画序列，你可以自定义"滑行"和"滑行静止"的动画。
+ *      这两个动画可以是动态的，比如小爱丽丝站不稳/打滑的动作。
+ *      详细内容去看看："7.行走图 > 关于行走图GIF动画序列.docx"
+ * 移动路线：
+ *   (1.滑行时，大部分移动路线指令是被暂停的，包含 移动和转向 指令。
  *      如果滑行时需要强制转向，需要使用 插件指令或转向毯。
  *     （事件指令的转向会让角色暂停滑行，如果玩家一直按住方向键，会无视强制转向。）
- *   (2.注意，移动路线的 脚本 也是被阻塞的，只有滑行结束后才会执行。
+ *   (2.注意，移动路线的 脚本 也是被暂停的，只有滑行结束后才会执行。
  * 转向毯：
  *   (1.由于事件指令无法实现手动控制 事件与事件 的触发关系，
  *      所以插件专门提供了 物体滑行转向毯 的功能，
@@ -61,20 +69,10 @@
  * 
  * 插件指令：>物体滑行 : 玩家 : 开启滑行
  * 插件指令：>物体滑行 : 玩家 : 关闭滑行
- * 插件指令：>物体滑行 : 玩家 : 转向上方
- * 插件指令：>物体滑行 : 玩家 : 转向下方
- * 插件指令：>物体滑行 : 玩家 : 转向左方
- * 插件指令：>物体滑行 : 玩家 : 转向右方
- * 插件指令：>物体滑行 : 玩家 : 转向左上方
- * 插件指令：>物体滑行 : 玩家 : 转向左下方
- * 插件指令：>物体滑行 : 玩家 : 转向右上方
- * 插件指令：>物体滑行 : 玩家 : 转向右下方
  * 
  * 1.前半部分（玩家）和 后半部分（开启滑行）的参数可以随意组合。
- *   一共有4*10种组合方式。
- * 2."关闭滑行"后，玩家或事件在光滑图块上行走时，将不会处于滑行状态。
- * 3."转向上方"是指物体处于滑行状态时，控制其立即转向别的方向滑行。
- *   如果没有处于滑行状态，则插件指令没有效果。
+ *   一共有4*2种组合方式。
+ * 2."关闭滑行"后，玩家/事件在光滑图块上行走时，将不会处于滑行状态。
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 图块注释
@@ -104,7 +102,30 @@
  *   另外，转向毯事件本身也是可以滑行的，前提是自己主动移动。
  * 
  * -----------------------------------------------------------------------------
- * ----可选设定 - 滑行数据
+ * ----可选设定 - 强制转向
+ * 你可以使用下面插件指令：
+ * 
+ * 插件指令：>物体滑行 : 玩家 : 转向上方
+ * 插件指令：>物体滑行 : 本事件 : 转向上方
+ * 插件指令：>物体滑行 : 事件[10] : 转向上方
+ * 插件指令：>物体滑行 : 事件变量[21] : 转向上方
+ * 
+ * 插件指令：>物体滑行 : 玩家 : 转向上方
+ * 插件指令：>物体滑行 : 玩家 : 转向下方
+ * 插件指令：>物体滑行 : 玩家 : 转向左方
+ * 插件指令：>物体滑行 : 玩家 : 转向右方
+ * 插件指令：>物体滑行 : 玩家 : 转向左上方
+ * 插件指令：>物体滑行 : 玩家 : 转向左下方
+ * 插件指令：>物体滑行 : 玩家 : 转向右上方
+ * 插件指令：>物体滑行 : 玩家 : 转向右下方
+ * 
+ * 1.前半部分（玩家）和 后半部分（开启滑行）的参数可以随意组合。
+ *   一共有4*8种组合方式。
+ * 2."转向上方"是指玩家/事件处于滑行状态时，控制其立即转向别的方向滑行。
+ *   如果没有处于滑行状态，则插件指令没有效果。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 获取数据
  * 你可以通过插件指令获取到 滑行过程 相关的数据。
  * 
  * 插件指令：>物体滑行 : 事件[21] : 获取上一次滑行位置 : 变量[25,26]
@@ -124,7 +145,7 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
  * 时间复杂度： o(n^2)*o(移动路线) 每帧
- * 测试方法：   去物体管理层、地图管理层、鼠标管理层转一圈测试就可以了。
+ * 测试方法：   去图块管理层进行性能测试。
  * 测试结果：   200个事件的地图中，消耗为：【86.45ms】
  *              100个事件的地图中，消耗为：【50.08ms】
  *               50个事件的地图中，消耗为：【37.56ms】
@@ -148,6 +169,8 @@
  * 修改了插件的类型。优化了内部算法细节。
  * [v1.3]
  * 修改了插件分类。
+ * [v1.4]
+ * 优化了内部结构。
  * 
  * 
  * 
@@ -157,6 +180,13 @@
  * @off 不修正
  * @desc 修正后，超过一半的身体处于光滑地面时，则算作该物体处于光滑地面中。
  * @default true
+ * 
+ * @param 光滑地面区域列表
+ * @type number[]
+ * @min 0
+ * @max 255
+ * @desc 填入R区域的ID，地图中设置的R区域将会变为光滑区域。
+ * @default []
  * 
  * @param 滑行动作帧
  * @type number
@@ -177,13 +207,6 @@
  * @min 1
  * @desc 滑行时会改变到指定速度，填入1-6，4为标准速度。
  * @default 4
- * 
- * @param 光滑地面区域列表
- * @type number[]
- * @min 0
- * @max 255
- * @desc 填入R区域的ID，地图中设置的R区域将会变为光滑区域。
- * @default []
  * 
  * @param 斜向滑行是否穿透两边阻碍
  * @type boolean
@@ -207,7 +230,7 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^2)*o(移动路线) 每帧
-//		★性能测试因素	物体管理层
+//		★性能测试因素	图块管理层
 //		★性能测试消耗	50.08ms（drill_LST_isSlippery函数） 37.56ms（drill_LST_isOnSlipperyFloor函数） 150.81ms 120.52ms（200事件中）
 //		★最坏情况		暂无
 //		★备注			这里很难确定是不是光滑运算的问题，在光滑图块关卡中200事件，帧数保持在 6 帧左右。（Drill_EventContinuedEffect 有 508.46ms）
@@ -215,28 +238,57 @@
 //		★优化记录
 //			2022-6-26优化
 //				将 drill_LST_isOnSlipperyFloor 变成单个状态位的函数。防止多次被调用时消耗大量性能。
+//			2023-9-1优化
+//				去掉了状态位设置，改成了 图块矩阵 的模式，直接获取图块值。
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			事件滑行：
-//				->光滑地面
-//				->物体滑行
-//					->玩家滑行
-//					->事件滑行
-//					->无法转向
-//					->只禁用部分移动路线
-//					->滑行前位置记录
-//				->物体滑行转向毯
-//					->转向毯属性
-//					->转向毯容器
-//				->设计
-//					->跳跃滑行情况
-//				->性能优化
-//					->没有冰面区域，不工作
+//			->☆提示信息
+//			->☆静态数据
+//			->☆插件指令
+//			->☆图块注释
+//			->☆事件注释
+//				->转向毯
+//			
+//			->☆光滑地面图块矩阵
+//				->全图是否有光滑地面（开放函数）
+//				->是否为光滑地面区域（开放函数）
+//			->☆DEBUG光滑地面值
+//				->显示/隐藏光滑地面值
+//			->稀疏矩阵【Drill_LST_SparseMatrix】
+//			
+//			->☆行走图帧控制
+//			
+//			->☆物体滑行控制
+//				->捕获属性
+//					->滑行状态
+//					->滑行方向
+//					->滑行前位置X
+//					->滑行前位置Y
+//				->是否在光滑地面上
+//				->滑行控制
+//					->事件 帧刷新
+//					->玩家 帧刷新
+//					->开始滑行前位置记录
+//				->物体约束
+//					->关闭鼠标目的地
+//					->关闭按键控制（无法转向）
+//					->速度控制
+//					->禁止奔跑
 //				x->滑行掉入深渊后回到滑行前位置
+//			->☆可通行控制
+//				->斜向穿透
+//			->☆移动路线暂停
+//			
+//			->☆转向毯容器
+//			->☆转向毯
+//		
 //		
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -248,9 +300,9 @@
 //				另外，帧刷新判断时，最好每次变化直接【刷新统计】。
 //
 //		★其它说明细节：
-//			1.这里我没有注意到 滑行过程 中执行移动路线的可能性。
+//			1.2023/4/24 这里我没有注意到 滑行过程 中需要暂停移动路线的情况。
 //			  由于移动过程中，移动路线时阻塞的，而一直滑行不经过移动路线的话，是一直阻塞的。
-//			  这里我强制写了个执行移动路线的功能。
+//			  这里我强制写了个暂停移动路线的功能。
 //			  不知道会不会对后期有什么特殊影响。（在滑行时，isMoving的时候，可以执行部分指令）
 //
 //		★存在的问题：
@@ -258,7 +310,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -275,7 +327,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_LayerSlipperyTile = true;
@@ -285,10 +337,6 @@
 	
 	/*-----------------杂项------------------*/
 	DrillUp.g_LST_fix = String(DrillUp.parameters["是否修正区域判定"] || "true") === "true";
-	DrillUp.g_LST_act = Number(DrillUp.parameters["滑行动作帧"] || 2);
-	DrillUp.g_LST_speedLock = String(DrillUp.parameters["是否锁定滑行速度"] || "false") === "true";
-	DrillUp.g_LST_speed = Number(DrillUp.parameters["滑行速度"] || 4);
-	DrillUp.g_LST_diagonallyThrough = String(DrillUp.parameters["斜向滑行是否穿透两边阻碍"] || "true") == "true";
 	if( DrillUp.parameters["光滑地面区域列表"] != undefined &&
 		DrillUp.parameters["光滑地面区域列表"] != "" ){
 		DrillUp.g_LST_regionTank = JSON.parse( DrillUp.parameters["光滑地面区域列表"] || [] );
@@ -296,9 +344,16 @@
 		DrillUp.g_LST_regionTank = [];
 	}
 	
+	DrillUp.g_LST_act = Number(DrillUp.parameters["滑行动作帧"] || 2);
+	
+	DrillUp.g_LST_speedLock = String(DrillUp.parameters["是否锁定滑行速度"] || "false") === "true";
+	DrillUp.g_LST_speed = Number(DrillUp.parameters["滑行速度"] || 4);
+	
+	DrillUp.g_LST_diagonallyThrough = String(DrillUp.parameters["斜向滑行是否穿透两边阻碍"] || "true") == "true";
+	
 	
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
 //==============================
 // * 插件指令 - 指令
@@ -307,6 +362,17 @@ var _drill_LST_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_LST_pluginCommand.call(this, command, args);
 	if( command === ">物体滑行" ){
+		
+		/*-----------------DEBUG------------------*/
+		if( args.length == 2 ){
+			var temp1 = String(args[1]);
+			if( temp1 == "DEBUG-显示光滑地面值" ){	//（对象组获取 有个 return，所以要放前面）
+				$gameTemp._drill_LST_debug_showSlipperyId = true;
+			}
+			if( temp1 == "DEBUG-隐藏光滑地面值" ){
+				$gameTemp._drill_LST_debug_clearSlipperyId = true;
+			}
+		}
 		
 		/*-----------------对象组获取------------------*/
 		var chars = null;
@@ -339,19 +405,20 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		}
 		if( chars == null ){ return; }
 		
-		/*-----------------转向------------------*/
+		/*-----------------事件滑行------------------*/
 		if( args.length == 4 ){
 			var type = String(args[3]);
-			if( type === "开启滑行" ){
+			if( type === "启用滑行" || type === "开启滑行" || type === "打开滑行" || type === "启动滑行" ){
 				for( var k=0; k < chars.length; k++ ){
 					chars[k]['_drill_LST_enable'] = true;
 				}
 			}
-			if( type === "关闭滑行" ){
+			if( type === "关闭滑行" || type === "禁用滑行" ){
 				for( var k=0; k < chars.length; k++ ){
 					chars[k]['_drill_LST_enable'] = false;
 				}
 			}
+			
 			if( type === "转向上方" ){
 				for( var k=0; k < chars.length; k++ ){
 					chars[k]['_drill_LST_slidingDirection'] = 8;
@@ -411,7 +478,6 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				$gameSwitches.setValue( Number(temp1), chars[0].drill_LST_isOnSlipperyFloor() );
 			}
 		}
-		
 	}
 };
 //==============================
@@ -428,32 +494,33 @@ Game_Map.prototype.drill_LST_isEventExist = function( e_id ){
 	return true;
 };
 
+
 //=============================================================================
-// ** 光滑地面
+// ** ☆图块注释
 //=============================================================================
 //==============================
-// * 数据管理器 - 数据载入完成时
+// * 图块注释 - 初始化绑定
 //==============================
 var _drill_LST_isDatabaseLoaded = DataManager.isDatabaseLoaded;
 DataManager.isDatabaseLoaded = function(){
 	var success = _drill_LST_isDatabaseLoaded.call( this );
 	if( success ){
-		if( this._drill_LST_readFinished == undefined ){
-			this._drill_LST_readFinished = true;
+		if( this._drill_LST_readTilesetsFinished == undefined ){
+			this._drill_LST_readTilesetsFinished = true;
 			this.drill_LST_readTilesets();
 		}
 	}
 	return success;
 }
 //==============================
-// * 数据管理器 - 读取图块注释
+// * 图块注释 - 初始化
 //==============================
 DataManager.drill_LST_readTilesets = function(){
 	for( var n = 1; n < $dataTilesets.length; n++ ){
 		var data_tileset = $dataTilesets[n];
 		var note_list = data_tileset.note.split(/[\r\n]+/);
 		
-		// > 初始化数据
+		// > 光滑地面 图块注释标记
 		data_tileset['_drill_LST_slipTileTag'] = [];
 		
 		// > 注释解析
@@ -475,67 +542,392 @@ DataManager.drill_LST_readTilesets = function(){
 		}
 	}
 }
-//==============================
-// * 光滑地面 - 判断
-//==============================
-Game_Map.prototype.drill_LST_isSlippery = function( x, y ){
-    if( $gameParty.inBattle() == true ){ return false; }
-    if( this.tileset() == undefined ){ return false; }
-    if( this.isValid(x, y) == false ){ return false; }
-	
-	// > 光滑 R图块 标记
-	var regionId = this.regionId( x, y )
-	if( DrillUp.g_LST_regionTank.contains( String(regionId) ) ){
-		return true;
-	}
-	
-	// > 光滑 图块注释 标记
-	var tagId = this.terrainTag( x, y );
-	var slip_tags = this.tileset()['_drill_LST_slipTileTag'];
-	if( slip_tags == undefined ){ return false; }
-	if( slip_tags.contains(tagId) ){
-		return true;
-	}
-	
-	return false;
-};
-//==============================
-// * 地图 - 判断图块可通行情况（isPassable需要指定方向是否可通行，这里任意一个方向可通行则返回true）
-//==============================
-Game_Map.prototype.drill_LST_isAnyPassable = function( x, y ){
-	return this.isPassable(x, y, 2)||this.isPassable(x, y, 4)||this.isPassable(x, y, 6)||this.isPassable(x, y, 8);
-};
 
 
 //=============================================================================
-// ** 性能优化（没有冰面区域，不工作）
+// ** ☆事件注释
 //=============================================================================
 //==============================
-// * 性能优化 - 冰面区域标记
+// * 事件注释 - 第一页标记
 //==============================
-var _drill_LST_setup = Game_Map.prototype.setup;
-Game_Map.prototype.setup = function( mapId ){
-	_drill_LST_setup.call( this, mapId );
+var _drill_LST_e_initMembers = Game_Event.prototype.initMembers;
+Game_Event.prototype.initMembers = function() {
+	_drill_LST_e_initMembers.call(this);
+	this._drill_LST_isFirstBirth = true;
+};
+//==============================
+// * 事件注释 - 第一页绑定
+//==============================
+var _drill_LST_setupPage = Game_Event.prototype.setupPage;
+Game_Event.prototype.setupPage = function() {
+	_drill_LST_setupPage.call(this);
+    this.drill_LST_setupBlanket();
+};
+//==============================
+// * 事件注释 - 初始化绑定
+//==============================
+Game_Event.prototype.drill_LST_setupBlanket = function() {
 	
-	this._drill_LST_hasAnyStairTile = this.drill_LST_checkAnyStairTile();
+	// > 第一次出生，强制读取第一页注释（防止离开地图后，回来，开关失效）
+	if( !this._erased && this.event() && this.event().pages[0] && this._drill_LST_isFirstBirth == true ){ 
+		this._drill_LST_isFirstBirth = undefined;		//『节约临时参数存储空间』
+		this.drill_LST_readPage( this.event().pages[0].list );
+	}
+	
+	// > 读取当前页注释
+	if( !this._erased && this.page() ){ 
+		this.drill_LST_readPage( this.list() );
+	}
 }
 //==============================
-// * 性能优化 - 冰面阶梯区域
+// * 事件注释 - 初始化
 //==============================
-Game_Map.prototype.drill_LST_checkAnyStairTile = function(){
+Game_Event.prototype.drill_LST_readPage = function( page_list ){	
+	page_list.forEach( function(l) {
+		if( l.code === 108 ){
+			var l_str = l.parameters[0];
+			var args = l_str.split(' ');
+			var command = args.shift();
+			
+			/*-----------------事件注释 - 转向毯------------------*/
+			if( command == "=>物体滑行转向毯" ){
+				if( args.length == 2 ){		//=>物体滑行转向毯 : 转向上方
+					var temp1 = String(args[1]);
+					if( temp1 == "转向上方" ){
+						this['_drill_LST_blanketDir'] = 8;
+					}
+					if( temp1 == "转向下方" ){
+						this['_drill_LST_blanketDir'] = 2;
+					}
+					if( temp1 == "转向左方" ){
+						this['_drill_LST_blanketDir'] = 4;
+					}
+					if( temp1 == "转向右方" ){
+						this['_drill_LST_blanketDir'] = 6;
+					}
+					if( temp1 == "转向左上方" ){
+						this['_drill_LST_blanketDir'] = 48;
+					}
+					if( temp1 == "转向左下方" ){
+						this['_drill_LST_blanketDir'] = 42;
+					}
+					if( temp1 == "转向右上方" ){
+						this['_drill_LST_blanketDir'] = 68;
+					}
+					if( temp1 == "转向右下方" ){
+						this['_drill_LST_blanketDir'] = 62;
+					}
+				}
+			};
+		};
+	}, this);
+};
+
+
+
+//=============================================================================
+// ** ☆光滑地面图块矩阵
+//
+//			说明：	> 此模块用于对所有 光滑地面 图块进行初始赋值（通过数字位代号）。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 光滑地面 - 全图是否有光滑地面（开放函数）
+//==============================
+Game_Map.prototype.drill_LST_noSlippery = function(){
+	return this._drill_LST_sparseMatrix.drill_isEmptyMatrix();
+}
+//==============================
+// * 光滑地面 - 是否为光滑地面区域（开放函数）
+//==============================
+Game_Map.prototype.drill_LST_isSlippery = function( x, y ){
+	if( this.drill_LST_getSlipperyId( x, y ) == undefined ){
+		return false;
+	}else{
+		return true;
+	}
+}
+//==============================
+// * 光滑地面 - 初始化绑定
+//==============================
+var _drill_LST_map_setup = Game_Map.prototype.setup;
+Game_Map.prototype.setup = function( mapId ){
+	_drill_LST_map_setup.call( this, mapId );
+	this.drill_LST_refreshSlipperyId();
+}
+//==============================
+// * 光滑地面 - 初始化
+//
+//			说明：	> 直接给所有图块赋值，获取到值后立刻能知道光滑地面的特殊属性。
+//					  null为非光滑地面区域，非null为光滑地面区域。
+//==============================
+Game_Map.prototype.drill_LST_refreshSlipperyId = function(){
+	
+	// > 创建矩阵
+	this._drill_LST_sparseMatrix = new Drill_LST_SparseMatrix();
+	
+	// > 图块错误，不赋值
+	if( this.tileset() == undefined ){ return; }
+	var tileset = this.tileset();
+	
+	// > 全图块遍历
 	for( var x=0; x < this.width(); x++ ){
 		for( var y=0; y < this.height(); y++ ){
-			if( this.drill_LST_isSlippery( x, y ) ){
-				return true;
+			var value = null;
+			
+			// > 已赋值的光滑地面区域，跳过
+			if( this.drill_LST_isSlippery( x, y ) ){ continue; }
+			
+			
+			// > 光滑地面 R图块 标记
+			var regionId = this.regionId( x, y )
+			if( DrillUp.g_LST_regionTank.contains( String(regionId) ) ){
+				value = 1;
+			}
+			
+			// > 光滑地面 图块注释标记
+			var tagId = this.terrainTag( x, y );
+			var slip_tags = tileset['_drill_LST_slipTileTag'];
+			if( slip_tags != undefined && 
+				slip_tags.contains(tagId) ){
+				value = 1;
+			}
+			
+			// > 光滑地面 赋值
+			if( value == null ){ continue; }
+			this._drill_LST_sparseMatrix.drill_setValue( x, y, value );
+		}
+	}
+	
+}
+//==============================
+// * 光滑地面 - 获取光滑地面值（私有）
+//==============================
+Game_Map.prototype.drill_LST_getSlipperyId = function( x, y ){
+	return this._drill_LST_sparseMatrix.drill_getValue( x, y );
+}
+
+
+//=============================================================================
+// ** ☆DEBUG光滑地面值
+//
+//			说明：	> 此模块用于DEBUG显示图块以及光滑地面值。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * DEBUG - 帧刷新绑定
+//==============================
+var _drill_LST_debug_update = Scene_Map.prototype.update;
+Scene_Map.prototype.update = function() {
+	_drill_LST_debug_update.call(this);
+	this.drill_LST_updateDebugCreateSprite();
+	this.drill_LST_updateDebugSprite();
+}
+//==============================
+// * DEBUG - 帧刷新
+//==============================
+Scene_Map.prototype.drill_LST_updateDebugCreateSprite = function() {
+	
+	// > DEBUG显示 光滑地面值
+	if( $gameTemp._drill_LST_debug_showSlipperyId == true ){
+		$gameTemp._drill_LST_debug_showSlipperyId = false;
+		
+		// > 清除旧贴图
+		this.removeChild( $gameTemp._drill_LST_debug_sprite );
+		$gameTemp._drill_LST_debug_sprite = null;
+		
+		var tw = $gameMap.tileWidth();
+		var th = $gameMap.tileHeight();
+		
+		var temp_bitmap = new Bitmap( Graphics.boxWidth +tw*2, Graphics.boxHeight +th*2 );
+		var temp_sprite = new Sprite();
+		temp_sprite.bitmap = temp_bitmap;
+		temp_sprite._drill_curTime = 0;
+		
+		this.addChild( temp_sprite );
+		$gameTemp._drill_LST_debug_sprite = temp_sprite;
+	}
+	// > DEBUG隐藏 光滑地面值
+	if( $gameTemp._drill_LST_debug_clearSlipperyId == true ){
+		$gameTemp._drill_LST_debug_clearSlipperyId = false;
+		this.removeChild( $gameTemp._drill_LST_debug_sprite );
+		$gameTemp._drill_LST_debug_sprite = null;
+	}
+}
+//==============================
+// * DEBUG - 帧刷新
+//==============================
+Scene_Map.prototype.drill_LST_updateDebugSprite = function() {
+	if( $gameTemp._drill_LST_debug_sprite == null ){ return; }
+	var temp_sprite = $gameTemp._drill_LST_debug_sprite;
+	var temp_bitmap = temp_sprite.bitmap;
+	var tw = $gameMap.tileWidth();
+	var th = $gameMap.tileHeight();
+	
+	// > 计时器
+	temp_sprite._drill_curTime += 1;
+	if( temp_sprite._drill_curTime % 2 == 0 ){ return; }	//减少绘制次数
+	
+	// > DEBUG贴图的位置
+	var diff_x = Math.floor($gameMap._displayX) - $gameMap._displayX;
+	var diff_y = Math.floor($gameMap._displayY) - $gameMap._displayY;
+	temp_sprite.x = diff_x *tw;
+	temp_sprite.y = diff_y *th;
+	
+	// > DEBUG画布绘制
+	var display_x = Math.floor($gameMap._displayX);
+	var display_y = Math.floor($gameMap._displayY);
+	temp_bitmap.clear();
+	
+	var rect_w = Math.ceil( Graphics.boxWidth/tw ) +2;
+	var rect_h = Math.ceil( Graphics.boxHeight/th ) +2;
+	for( var i=0; i < rect_w; i++ ){
+		for( var j=0; j < rect_h; j++ ){
+			var xx = display_x + i;
+			var yy = display_y + j;
+			if( $gameMap.drill_LST_isSlippery( xx, yy ) ){
+				
+				// > DEBUG图块绘制
+				temp_bitmap.fillRect( i*tw, j*th, tw, th, "#ffffff" );	//边框
+				temp_bitmap.clearRect( i*tw +2, j*th +2, tw -4, th -4 );
+				temp_bitmap.paintOpacity = 100;							//背景颜色
+				temp_bitmap.fillRect( i*tw, j*th, tw, th, "#ff00ff" );
+				
+				temp_bitmap.paintOpacity = 255;							//光滑地面值
+				temp_bitmap.drawText(
+					String( $gameMap.drill_LST_getSlipperyId( xx, yy ) ),
+					i*tw, j*th + (xx%2) *th*0.5,
+					tw, th*0.5, "center"
+				);
 			}
 		}
 	}
-	return false;
 }
 
 
 //=============================================================================
-// ** 物体滑行属性
+// ** 稀疏矩阵【Drill_LST_SparseMatrix】
+// **		
+// **		作用域：	地图界面
+// **		主功能：	> 定义一个稀疏矩阵的数据类。
+// **					> 此矩阵适用于 存在大量零值null值 的情况。
+// **		子功能：	->稀疏矩阵
+// **						->设置值（开放函数）
+// **						->获取值（开放函数）
+// **						->删除值（开放函数）
+// **						->矩阵是否为空（开放函数）
+// **		
+// **		说明：	> 该类可存储在 $gameMap 中。
+//=============================================================================
+//==============================
+// * 稀疏矩阵 - 定义
+//==============================
+function Drill_LST_SparseMatrix(){
+    this.initialize.apply(this, arguments);
+};
+//==============================
+// * 稀疏矩阵 - 初始化
+//==============================
+Drill_LST_SparseMatrix.prototype.initialize = function(){
+	this._drill_matrix = [];
+};
+//==============================
+// * 稀疏矩阵 - 设置值（开放函数）
+//==============================
+Drill_LST_SparseMatrix.prototype.drill_setValue = function( x, y, value ){
+	
+	// > 非空情况
+	if( value != undefined ){
+		if( this._drill_matrix[x] == undefined ){
+			this._drill_matrix[x] = [];
+		}
+		this._drill_matrix[x][y] = value;
+		
+	// > 空情况（删除）
+	}else{
+		
+		// > 空数组，不操作
+		if( this._drill_matrix[x] == undefined ){ return; }
+		
+		// > 具体值，置空
+		this._drill_matrix[x][y] = value;
+		
+		// > 判断数组是否已经全空
+		if( this.drill_isEmptyArray( this._drill_matrix[x] ) == true ){
+			this._drill_matrix[x] = null;
+		}
+	}
+};
+//==============================
+// * 稀疏矩阵 - 获取值（开放函数）
+//==============================
+Drill_LST_SparseMatrix.prototype.drill_getValue = function( x, y ){
+	if( this._drill_matrix[x] == undefined ){ return null; }
+	return this._drill_matrix[x][y];
+};
+//==============================
+// * 稀疏矩阵 - 删除值（开放函数）
+//==============================
+Drill_LST_SparseMatrix.prototype.drill_removeValue = function( x, y, value ){
+	this.drill_setValue( x, y, null );
+};
+//==============================
+// * 稀疏矩阵 - 矩阵是否为空（开放函数）
+//==============================
+Drill_LST_SparseMatrix.prototype.drill_isEmptyMatrix = function(){
+	
+	// > 长度为零，必然空
+	if( this._drill_matrix.length == 0 ){ return true; }
+	
+	// > 找到非空对象
+	for( var i = this._drill_matrix.length-1; i >= 0; i-- ){	//（倒序遍历，更早跳出循环）
+		if( this._drill_matrix[i] == null ){ continue; }
+		return false;
+	}
+	return true;
+};
+//==============================
+// * 稀疏矩阵 - 数组是否为空（私有）
+//==============================
+Drill_LST_SparseMatrix.prototype.drill_isEmptyArray = function( arr ){
+	for( var i = arr.length-1; i >= 0; i-- ){	//（倒序遍历，更早跳出循环）
+		if( arr[i] == null ){ continue; }
+		return false;
+	}
+	return true;
+};
+
+
+//=============================================================================
+// ** ☆行走图帧控制
+//
+//			说明：	> 此模块专门控制 行走图 以及贴图。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 行走图帧控制 - 滑行动作帧
+//==============================
+var _drill_LST_pattern = Game_CharacterBase.prototype.pattern;
+Game_CharacterBase.prototype.pattern = function() {
+	
+	// > 固定帧数
+	if( this.hasStepAnime() == false && this.drill_LST_isOnSlipperyFloor() ){
+		return DrillUp.g_LST_act;
+	}
+	
+	// > 动画序列
+	//	（动画序列的帧不通过此函数执行，见 Drill_EventActionSequenceAutomation 的 drill_EASA_setAnnotation 注解函数）
+	
+	// > 原函数
+	return _drill_LST_pattern.call(this);
+}
+
+
+//=============================================================================
+// ** ☆物体滑行控制
+//
+//			说明：	> 此模块专门控制 物体滑行 相关功能。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 物体 - 初始化
@@ -543,76 +935,25 @@ Game_Map.prototype.drill_LST_checkAnyStairTile = function(){
 var _drill_LST_initialize = Game_CharacterBase.prototype.initialize;
 Game_CharacterBase.prototype.initialize = function(){
 	_drill_LST_initialize.call(this);
-	this['_drill_LST_enable'] = true;				//滑行可用情况
-	this['_drill_LST_isSliding'] = false;			//滑行状态判断
-	this['_drill_LST_isOnSlipperyFloor'] = false;	//滑行位置判断
+	
+	// > 自定义属性
+	this['_drill_LST_enable'] = true;				//滑行开关
+	
+	// > 捕获属性
+	this['_drill_LST_isSliding'] = false;			//滑行状态
 	this['_drill_LST_slidingDirection'] = 0;		//滑行方向
 	this['_drill_LST_lastX'] = 0;					//滑行前位置X
 	this['_drill_LST_lastY'] = 0;					//滑行前位置Y
 }
 //==============================
-// * 物体 - 访问器
+// * 物体 - 捕获 滑行状态
+//
+//			说明：	> 此属性在帧刷新中根据情况赋值，随时变化 滑行状态 。
 //==============================
 Game_CharacterBase.prototype.drill_LST_isSliding = function(){ return this['_drill_LST_isSliding'] == true; }
-Game_CharacterBase.prototype.drill_LST_isOnSlipperyFloor = function(){ return this['_drill_LST_isOnSlipperyFloor'] == true; }
 Game_CharacterBase.prototype.drill_LST_setSlide = function( b ){ this['_drill_LST_isSliding'] = b; }
 //==============================
-// * 物体 - 获取光滑地面的判断
-//==============================
-Game_CharacterBase.prototype.drill_LST_checkSlipperyFloor = function(){
-	
-	// > 性能优化
-	if( $gameMap._drill_LST_hasAnyStairTile == false ){ return false; }
-	
-	// > 判断
-	if( DrillUp.g_LST_fix  ){	// （区域判定修正）
-		return $gameMap.drill_LST_isSlippery( Math.floor(this._realX + 0.5), Math.floor(this._realY + 0.5) );
-	}else{
-		return $gameMap.drill_LST_isSlippery( this._x, this._y );
-	}
-}
-//==============================
-// * 物体 - 滑行动作帧
-//==============================
-var _drill_LST_pattern = Game_CharacterBase.prototype.pattern;
-Game_CharacterBase.prototype.pattern = function() {
-	if( this.hasStepAnime() == false && this.drill_LST_isOnSlipperyFloor() ){
-		return DrillUp.g_LST_act;
-	}
-	return _drill_LST_pattern.call(this);
-}
-//==============================
-// * 物体 - 滑行速度
-//==============================
-var _drill_LST_realMoveSpeed = Game_CharacterBase.prototype.realMoveSpeed;
-Game_CharacterBase.prototype.realMoveSpeed = function() {
-	if( DrillUp.g_LST_speedLock && this.drill_LST_isOnSlipperyFloor() ){
-		return DrillUp.g_LST_speed;
-	}
-	return _drill_LST_realMoveSpeed.call(this);
-}
-//==============================
-// * 物体 - 光滑地面上禁止奔跑
-//==============================
-var _drill_LST_c_isDashing = Game_CharacterBase.prototype.isDashing;
-Game_CharacterBase.prototype.isDashing = function() {
-	var is_dashing = _drill_LST_c_isDashing.call(this);		//（先判断，尽可能不要先执行 drill_LST_isOnSlipperyFloor，费性能）
-	if( is_dashing == false ){ return false; }
-	if( this.drill_LST_isOnSlipperyFloor() ){ return false; }
-	return is_dashing;
-}
-//==============================
-// * 玩家 - 光滑地面上禁止奔跑
-//==============================
-var _drill_LST_p_isDashing = Game_Player.prototype.isDashing;
-Game_Player.prototype.isDashing = function() {
-	var is_dashing = _drill_LST_p_isDashing.call(this);
-	if( is_dashing == false ){ return false; }
-	if( this.drill_LST_isOnSlipperyFloor() ){ return false; }
-	return is_dashing;
-}
-//==============================
-// * 物体 - 滑行方向捕获
+// * 物体 - 捕获 滑行方向（正向）
 //==============================
 var _drill_LST_moveStraight = Game_CharacterBase.prototype.moveStraight;
 Game_CharacterBase.prototype.moveStraight = function( d ){
@@ -620,41 +961,52 @@ Game_CharacterBase.prototype.moveStraight = function( d ){
 	this['_drill_LST_slidingDirection'] = d;
 }
 //==============================
-// * 物体 - 滑行方向捕获
+// * 物体 - 捕获 滑行方向（斜向）
 //==============================
 var _drill_LST_moveDiagonally = Game_CharacterBase.prototype.moveDiagonally;
 Game_CharacterBase.prototype.moveDiagonally = function( horz, vert ){
 	_drill_LST_moveDiagonally.call( this, horz, vert );
 	this['_drill_LST_slidingDirection'] = horz*10 + vert;
 }
-
-
-//=============================================================================
-// ** 物体滑行
-//=============================================================================
 //==============================
-// * 物体 - 穿透判断斜向可通行区域
+// * 物体 - 是否在光滑地面上
+//
+//			说明：	> 此处直接判断，直接在 图块矩阵 上获取值，暂时不考虑中转存一个麻烦的状态位。
 //==============================
-var _drill_LST_canPassDiagonally =  Game_CharacterBase.prototype.canPassDiagonally;
-Game_CharacterBase.prototype.canPassDiagonally = function( x, y, horz, vert ){
+Game_CharacterBase.prototype.drill_LST_isOnSlipperyFloor = function(){
 	
-	// > 滑行中时穿透斜向阻碍
-	if( DrillUp.g_LST_diagonallyThrough == true &&
-		this.drill_LST_isSliding() && 
-		this.drill_LST_isOnSlipperyFloor() ){
-		var x2 = $gameMap.roundXWithDirection(x, horz);
-		var y2 = $gameMap.roundYWithDirection(y, vert);
-		return $gameMap.drill_LST_isAnyPassable(x2, y2);
-		
-	// > 正常斜向判断
+	// > 没有光滑地面，不工作
+	if( $gameMap.drill_LST_noSlippery() ){ return false; }
+	
+	// > 区域判定修正
+	if( DrillUp.g_LST_fix == true ){
+		return $gameMap.drill_LST_isSlippery( Math.floor(this._realX + 0.5), Math.floor(this._realY + 0.5) );
 	}else{
-		return _drill_LST_canPassDiagonally.call(this,x, y, horz, vert);
+		return $gameMap.drill_LST_isSlippery( this._x, this._y );
 	}
+}
+
+//==============================
+// * 滑行控制 - 事件 帧刷新
+//==============================
+var _drill_LST_e_update = Game_Event.prototype.update;
+Game_Event.prototype.update = function(){
+	_drill_LST_e_update.call(this);
+    this.drill_LST_updateSlippery();		//帧刷新 - 滑行控制
 };
 //==============================
-// * 物体 - 滑行帧刷新
+// * 滑行控制 - 玩家 帧刷新
+//==============================
+var _drill_LST_p_update = Game_Player.prototype.update;
+Game_Player.prototype.update = function( sceneActive ){
+	_drill_LST_p_update.call(this,sceneActive);
+    this.drill_LST_updatePlayerSlippery();	//帧刷新 - 玩家控制
+    this.drill_LST_updateSlippery();		//帧刷新 - 滑行控制
+};
+//==============================
+// * 滑行控制 - 帧刷新
 //
-//			说明：	该刷新由子类选择调用，并不直接嵌套到update帧刷新中。
+//			说明：	> 该刷新由子类选择调用，并不直接嵌套到update帧刷新中。
 //==============================
 Game_CharacterBase.prototype.drill_LST_updateSlippery = function() {
 	
@@ -682,7 +1034,7 @@ Game_CharacterBase.prototype.drill_LST_updateSlippery = function() {
 			
 			// > 若移动成功，则继续滑行
 			if( this.isMovementSucceeded() ){
-				if( this.drill_LST_isSliding() == false ){	//（开始滑行时，记录位置）
+				if( this.drill_LST_isSliding() == false ){	//（开始滑行前位置记录）
 					this['_drill_LST_lastX'] = this._x;	
 					this['_drill_LST_lastY'] = this._y;	
 				}
@@ -718,27 +1070,8 @@ Game_CharacterBase.prototype.drill_LST_updateSlippery = function() {
 		this.drill_LST_setSlide( false );
 	}
 };
-
 //==============================
-// * 事件 - 帧刷新
-//==============================
-var _drill_LST_e_update = Game_Event.prototype.update;
-Game_Event.prototype.update = function(){
-	_drill_LST_e_update.call(this);
-    this.drill_LST_updateBlanket();			//转向毯帧刷新
-    this.drill_LST_updateSlippery();		//滑行帧刷新
-};
-
-//==============================
-// * 玩家 - 帧刷新
-//==============================
-var _drill_LST_p_update = Game_Player.prototype.update;
-Game_Player.prototype.update = function( sceneActive ){
-	_drill_LST_p_update.call(this,sceneActive);
-    this.drill_LST_updatePlayerSlippery();
-};
-//==============================
-// * 玩家 - 刷新滑行
+// * 滑行控制 - 帧刷新 玩家控制
 //==============================
 Game_Player.prototype.drill_LST_updatePlayerSlippery = function() {
 	
@@ -746,38 +1079,110 @@ Game_Player.prototype.drill_LST_updatePlayerSlippery = function() {
 	//if( $gameMap.isEventRunning() ){ return; }
 	
 	// > 关闭鼠标目的地
-    if( this.drill_LST_isOnSlipperyFloor() && this.isMoving() == false ){
+    if( this.isMoving() == false && this.drill_LST_isOnSlipperyFloor() ){
 		$gameTemp.clearDestination();	//（目的地长期滞留时，防止玩家滑行结束后立即反方向滑行）
 	}
-	
-    this.drill_LST_updateBlanket();			//转向毯帧刷新
-	this.drill_LST_updateSlippery();		//滑行帧刷新
 };
+
 //==============================
-// * 玩家 - 滑行时不可控制
+// * 物体约束 - 关闭按键控制
 //==============================
 var _drill_LST_p_moveByInput = Game_Player.prototype.moveByInput;
 Game_Player.prototype.moveByInput = function() {
-	if( this.drill_LST_isSliding() ){	
-		return;
-    }
+	
+	// > 滑行时关闭输入
+	if( this.drill_LST_isSliding() ){ return; }
+	
+	// > 原函数
 	_drill_LST_p_moveByInput.call(this);
+};
+//==============================
+// * 物体约束 - 速度控制
+//==============================
+var _drill_LST_realMoveSpeed = Game_CharacterBase.prototype.realMoveSpeed;
+Game_CharacterBase.prototype.realMoveSpeed = function() {
+	
+	// > 固定速度滑行
+	if( DrillUp.g_LST_speedLock == true && this.drill_LST_isOnSlipperyFloor() ){
+		return DrillUp.g_LST_speed;
+	}
+	
+	// > 原函数
+	return _drill_LST_realMoveSpeed.call(this);
+}
+//==============================
+// * 物体约束 - 禁止奔跑
+//==============================
+var _drill_LST_c_isDashing = Game_CharacterBase.prototype.isDashing;
+Game_CharacterBase.prototype.isDashing = function() {
+	var is_dashing = _drill_LST_c_isDashing.call(this);		//（先判断，尽可能不要先执行 drill_LST_isOnSlipperyFloor，费性能）
+	if( is_dashing == false ){ return false; }
+	if( this.drill_LST_isOnSlipperyFloor() ){ return false; }
+	return is_dashing;
+}
+//==============================
+// * 物体约束 - 禁止奔跑（玩家）
+//==============================
+var _drill_LST_p_isDashing = Game_Player.prototype.isDashing;
+Game_Player.prototype.isDashing = function() {
+	var is_dashing = _drill_LST_p_isDashing.call(this);
+	if( is_dashing == false ){ return false; }
+	if( this.drill_LST_isOnSlipperyFloor() ){ return false; }
+	return is_dashing;
+}
+
+
+//=============================================================================
+// ** ☆可通行控制
+//
+//			说明：	> 此模块专门控制物体在图块的阻塞情况。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 斜向穿透 - 判断斜向可通行区域
+//==============================
+var _drill_LST_canPassDiagonally = Game_CharacterBase.prototype.canPassDiagonally;
+Game_CharacterBase.prototype.canPassDiagonally = function( x, y, horz, vert ){
+	
+	// > 滑行中时穿透斜向阻碍
+	if( DrillUp.g_LST_diagonallyThrough == true &&
+		this.drill_LST_isSliding() && 
+		this.drill_LST_isOnSlipperyFloor() ){
+		var x2 = $gameMap.roundXWithDirection(x, horz);
+		var y2 = $gameMap.roundYWithDirection(y, vert);
+		return $gameMap.drill_LST_isAnyPassable(x2, y2);
+		
+	// > 正常斜向判断
+	}else{
+		return _drill_LST_canPassDiagonally.call(this,x, y, horz, vert);
+	}
+};
+//==============================
+// * 斜向穿透 - 判断图块可通行情况
+//
+//			说明：	> isPassable需要指定方向是否可通行，这里任意一个方向可通行则返回true。
+//==============================
+Game_Map.prototype.drill_LST_isAnyPassable = function( x, y ){
+	return this.isPassable(x, y, 2)||this.isPassable(x, y, 4)||this.isPassable(x, y, 6)||this.isPassable(x, y, 8);
 };
 
 
 //=============================================================================
-// ** 移动路线阻塞
+// ** ☆移动路线暂停
+//
+//			说明：	> 此模块专门控制物体的 移动路线 ，在光滑地面上滑行时，物体的移动路线暂停。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 移动路线 - 初始化
+// * 移动路线暂停 - 初始化
 //==============================
 var _drill_LST_mr_initialize = Game_Character.prototype.initialize;
 Game_Character.prototype.initialize = function() {
 	_drill_LST_mr_initialize.call(this);
-	this['_drill_LST_moveRouteBlock'] = false;		//移动路线阻塞 标记
+	this['_drill_LST_moveRoutePause'] = false;		//移动路线暂停 标记
 };
 //==============================
-// * 移动路线 - 帧刷新
+// * 移动路线暂停 - 帧刷新
 //==============================
 var _drill_LST_mr_update = Game_CharacterBase.prototype.update;
 Game_CharacterBase.prototype.update = function(){
@@ -789,160 +1194,100 @@ Game_CharacterBase.prototype.update = function(){
 			this.updateRoutineMove();
 		}
 	}
-	
-	// > 性能优化 - 用状态位获取 光滑地面的判断
-	this['_drill_LST_isOnSlipperyFloor'] = this.drill_LST_checkSlipperyFloor();
 }
 //==============================
-// * 移动路线 - 路线帧刷新
+// * 移动路线暂停 - 暂停条件
+//
+//			说明：	> 下列常量中，执行任意一个，都会被暂停。
+//					> 这样是为了实现：
+//					  小爱丽丝按移动路线走，此时踩到了光滑地面，此时她无法控制转向/移动，
+//					  并且移动路线暂停，离开光滑地面后，继续刚才的移动路线。
+//					> 移动路线的脚本，不需要暂停，因此你需要继承此函数，进行自定义情况标记。
 //==============================
-var _drill_LST_mr_updateRoutineMove = Game_Character.prototype.updateRoutineMove;
-Game_Character.prototype.updateRoutineMove = function(){
-	
-	// > 离开光滑地面，取消阻塞
-	if( this.drill_LST_isSliding() == false ){	
-		this['_drill_LST_moveRouteBlock'] = false;
-    }
-	
-	// > 阻塞
-	if( this['_drill_LST_moveRouteBlock'] == true ){ return; }
-	
-	_drill_LST_mr_updateRoutineMove.call(this);
-};
+Game_Character.prototype.drill_LST_moveRouteNeedPause = function( code ){
+	var gc = Game_Character;
+	if( code == gc.ROUTE_MOVE_DOWN      ){ return true; }  //向下移动
+	if( code == gc.ROUTE_MOVE_LEFT      ){ return true; }  //向左移动
+	if( code == gc.ROUTE_MOVE_RIGHT     ){ return true; }  //向右移动
+	if( code == gc.ROUTE_MOVE_UP        ){ return true; }  //向上移动
+	if( code == gc.ROUTE_MOVE_LOWER_L   ){ return true; }  //向左下移动
+	if( code == gc.ROUTE_MOVE_LOWER_R   ){ return true; }  //向右下移动
+	if( code == gc.ROUTE_MOVE_UPPER_L   ){ return true; }  //向左上移动
+	if( code == gc.ROUTE_MOVE_UPPER_R   ){ return true; }  //向右上移动
+	if( code == gc.ROUTE_MOVE_RANDOM    ){ return true; }  //随机移动
+	if( code == gc.ROUTE_MOVE_TOWARD    ){ return true; }  //接近玩家
+	if( code == gc.ROUTE_MOVE_AWAY      ){ return true; }  //远离玩家
+	if( code == gc.ROUTE_MOVE_FORWARD   ){ return true; }  //前进一步
+	if( code == gc.ROUTE_MOVE_BACKWARD  ){ return true; }  //后退一步
+	if( code == gc.ROUTE_TURN_DOWN      ){ return true; }  //朝向下方
+	if( code == gc.ROUTE_TURN_LEFT      ){ return true; }  //朝向左方
+	if( code == gc.ROUTE_TURN_RIGHT     ){ return true; }  //朝向右方
+	if( code == gc.ROUTE_TURN_UP        ){ return true; }  //朝向上方
+	if( code == gc.ROUTE_TURN_90D_R     ){ return true; }  //右转90°
+	if( code == gc.ROUTE_TURN_90D_L     ){ return true; }  //左转90°
+	if( code == gc.ROUTE_TURN_180D      ){ return true; }  //后转180°
+	if( code == gc.ROUTE_TURN_90D_R_L   ){ return true; }  //向左或向右转90°
+	if( code == gc.ROUTE_TURN_RANDOM    ){ return true; }  //随机转向
+	if( code == gc.ROUTE_TURN_TOWARD    ){ return true; }  //朝向玩家
+	if( code == gc.ROUTE_TURN_AWAY      ){ return true; }  //背向玩家
+	if( code == gc.ROUTE_SCRIPT         ){ return true; }  //脚本...
+	return false;
+}
 //==============================
-// * 移动路线 - 执行单条移动路线
+// * 移动路线暂停 - 执行单条移动路线
 //==============================
 var _drill_LST_mr_processMoveCommand = Game_Character.prototype.processMoveCommand;
 Game_Character.prototype.processMoveCommand = function( command ){
 	
-	// > 阻塞标记识别
+	// > 根据暂停条件，设置暂停
 	if( this.drill_LST_isSliding() == true ){
-		var gc = Game_Character;
-		switch( command.code ){
-			case gc.ROUTE_MOVE_DOWN:			//向下移动
-			case gc.ROUTE_MOVE_LEFT:			//向左移动
-			case gc.ROUTE_MOVE_RIGHT:			//向右移动
-			case gc.ROUTE_MOVE_UP:				//向上移动
-			case gc.ROUTE_MOVE_LOWER_L:			//向左下移动
-			case gc.ROUTE_MOVE_LOWER_R:			//向右下移动
-			case gc.ROUTE_MOVE_UPPER_L:			//向左上移动
-			case gc.ROUTE_MOVE_UPPER_R:			//向右上移动
-			case gc.ROUTE_MOVE_RANDOM:			//随机移动
-			case gc.ROUTE_MOVE_TOWARD:			//接近玩家
-			case gc.ROUTE_MOVE_AWAY:			//远离玩家
-			case gc.ROUTE_MOVE_FORWARD:			//前进一步
-			case gc.ROUTE_MOVE_BACKWARD:		//后退一步
-			case gc.ROUTE_TURN_DOWN:			//朝向下方
-			case gc.ROUTE_TURN_LEFT:			//朝向左方
-			case gc.ROUTE_TURN_RIGHT:			//朝向右方
-			case gc.ROUTE_TURN_UP:				//朝向上方
-			case gc.ROUTE_TURN_90D_R:			//右转90°
-			case gc.ROUTE_TURN_90D_L:			//左转90°
-			case gc.ROUTE_TURN_180D:			//后转180°
-			case gc.ROUTE_TURN_90D_R_L:			//向左或向右转90°
-			case gc.ROUTE_TURN_RANDOM:			//随机转向
-			case gc.ROUTE_TURN_TOWARD:			//朝向玩家
-			case gc.ROUTE_TURN_AWAY:			//背向玩家
-			case gc.ROUTE_SCRIPT:				//脚本...
-				this['_drill_LST_moveRouteBlock'] = true;
-				break;
+		if( this.drill_LST_moveRouteNeedPause( command.code ) == true ){
+			this['_drill_LST_moveRoutePause'] = true;
 		}
 	}
 	
-	// > 阻塞
-	if( this['_drill_LST_moveRouteBlock'] == true ){ return; }
+	// > 暂停中
+	if( this['_drill_LST_moveRoutePause'] == true ){ return; }
 	
 	_drill_LST_mr_processMoveCommand.call( this, command );
 };
 //==============================
-// * 移动路线 - 移动路线索引+1
+// * 移动路线暂停 - 帧刷新 移动路线
+//==============================
+var _drill_LST_mr_updateRoutineMove = Game_Character.prototype.updateRoutineMove;
+Game_Character.prototype.updateRoutineMove = function(){
+	
+	// > 离开光滑地面后，取消暂停
+	if( this.drill_LST_isSliding() == false ){	
+		this['_drill_LST_moveRoutePause'] = false;
+    }
+	
+	// > 暂停中
+	if( this['_drill_LST_moveRoutePause'] == true ){ return; }
+	
+	// > 原函数
+	_drill_LST_mr_updateRoutineMove.call(this);
+};
+//==============================
+// * 移动路线暂停 - 移动路线索引+1
 //==============================
 var _drill_LST_mr_advanceMoveRouteIndex = Game_Character.prototype.advanceMoveRouteIndex;
 Game_Character.prototype.advanceMoveRouteIndex = function(){
-	if( this['_drill_LST_moveRouteBlock'] == true ){ return; }	//（阻塞）
+	
+	// > 暂停中
+	if( this['_drill_LST_moveRoutePause'] == true ){ return; }
+	
+	// > 原函数
 	_drill_LST_mr_advanceMoveRouteIndex.call( this );
 };
 
 
+
 //=============================================================================
-// ** 物体滑行转向毯
-//=============================================================================
-//==============================
-// * 转向毯 - 初始化
-//==============================
-var _drill_LST_c_initialize = Game_Character.prototype.initialize;
-Game_Character.prototype.initialize = function() {
-	_drill_LST_c_initialize.call(this);
-	this['_drill_LST_blanketDir'] = 0;		//转向毯属性
-};
-//==============================
-// * 转向毯 - 注释初始化
-//==============================
-var _drill_LST_e_initMembers = Game_Event.prototype.initMembers;
-Game_Event.prototype.initMembers = function() {
-	_drill_LST_e_initMembers.call(this);
-	this._drill_LST_isFirstBirth = true;
-};
-var _drill_LST_setupPage = Game_Event.prototype.setupPage;
-Game_Event.prototype.setupPage = function() {
-	_drill_LST_setupPage.call(this);
-    this.drill_LST_setupBlanket();
-};
-Game_Event.prototype.drill_LST_setupBlanket = function() {
-	
-	// > 第一次出生，强制读取第一页注释（防止离开地图后，回来，开关失效）
-	if( !this._erased && this.event() && this.event().pages[0] && this._drill_LST_isFirstBirth ){ 
-		this._drill_LST_isFirstBirth = false;
-		this.drill_LST_readPage( this.event().pages[0].list );
-	}
-	
-	// > 读取当前页注释
-	if( !this._erased && this.page() ){ 
-		this.drill_LST_readPage( this.list() );
-	}
-}
-//==============================
-// * 转向毯 - 读取注释
-//==============================
-Game_Event.prototype.drill_LST_readPage = function( page_list ) {		
-	page_list.forEach( function(l) {
-		if( l.code === 108 ){
-			var args = l.parameters[0].split(' ');
-			var command = args.shift();
-			if( command == "=>物体滑行转向毯" ){
-				if( args.length == 2 ){		//=>物体滑行转向毯 : 转向上方
-					var temp1 = String(args[1]);
-					if( temp1 == "转向上方" ){
-						this['_drill_LST_blanketDir'] = 8;
-					}
-					if( temp1 == "转向下方" ){
-						this['_drill_LST_blanketDir'] = 2;
-					}
-					if( temp1 == "转向左方" ){
-						this['_drill_LST_blanketDir'] = 4;
-					}
-					if( temp1 == "转向右方" ){
-						this['_drill_LST_blanketDir'] = 6;
-					}
-					if( temp1 == "转向左上方" ){
-						this['_drill_LST_blanketDir'] = 48;
-					}
-					if( temp1 == "转向左下方" ){
-						this['_drill_LST_blanketDir'] = 42;
-					}
-					if( temp1 == "转向右上方" ){
-						this['_drill_LST_blanketDir'] = 68;
-					}
-					if( temp1 == "转向右下方" ){
-						this['_drill_LST_blanketDir'] = 62;
-					}
-				}
-			};
-		};
-	}, this);
-};
-//=============================================================================
-// ** 转向毯容器
+// ** ☆转向毯容器
+//
+//			说明：	> 此模块专门管理 转向毯容器 。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 容器 - 初始化
@@ -971,9 +1316,8 @@ Spriteset_Map.prototype.createCharacters = function() {
 	$gameTemp._drill_LST_needRestatistics = true;
 	_drill_LST_smap_createCharacters.call(this);
 }
-
 //==============================
-// ** 容器 - 帧刷新
+// * 容器 - 帧刷新
 //==============================
 var _drill_LST_map_update = Game_Map.prototype.update;
 Game_Map.prototype.update = function(sceneActive) {
@@ -981,7 +1325,7 @@ Game_Map.prototype.update = function(sceneActive) {
 	this.drill_LST_updateRestatistics();
 };
 //==============================
-// ** 帧刷新 - 刷新统计
+// * 容器 - 刷新统计
 //==============================
 Game_Map.prototype.drill_LST_updateRestatistics = function() {
 	if( !$gameTemp._drill_LST_needRestatistics ){ return }
@@ -997,10 +1341,41 @@ Game_Map.prototype.drill_LST_updateRestatistics = function() {
 	}
 }
 
-//==============================
-// * 物体 - 转向毯帧刷新
+
+//=============================================================================
+// ** ☆转向毯
 //
-//			说明：	该刷新由子类选择调用，并不直接嵌套到update帧刷新中。
+//			说明：	> 此模块专门控制 转向毯 的功能。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 转向毯 - 初始化
+//==============================
+var _drill_LST_c_initialize = Game_Character.prototype.initialize;
+Game_Character.prototype.initialize = function() {
+	_drill_LST_c_initialize.call(this);
+	this['_drill_LST_blanketDir'] = 0;		//转向毯属性（事件注释 赋值）
+};
+//==============================
+// * 转向毯 - 事件 帧刷新
+//==============================
+var _drill_LST_blanket_e_update = Game_Event.prototype.update;
+Game_Event.prototype.update = function(){
+    this.drill_LST_updateBlanket();		//转向毯帧刷新（优先执行）
+	_drill_LST_blanket_e_update.call( this );
+};
+//==============================
+// * 转向毯 - 玩家 帧刷新
+//==============================
+var _drill_LST_blanket_p_update = Game_Player.prototype.update;
+Game_Player.prototype.update = function( sceneActive ){
+    this.drill_LST_updateBlanket();		//转向毯帧刷新（优先执行）
+	_drill_LST_blanket_p_update.call( this, sceneActive );
+};
+//==============================
+// * 转向毯 - 帧刷新
+//
+//			说明：	> 该刷新由子类选择调用，并不直接嵌套到update帧刷新中。
 //==============================
 Game_CharacterBase.prototype.drill_LST_updateBlanket = function() {
 	

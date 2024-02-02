@@ -53,7 +53,10 @@
  *      会被切割。
  *   (2.在游戏启动5秒前后，窗口需要加载并初始化全部窗口字符图。
  *      如果这时候立即使用窗口字符，插件可能会反应不过来。
- *      因为图片未加载结束，所以可能会出现偶尔的绘制失败情况。     
+ *      因为图片未加载结束，所以可能会出现偶尔的绘制失败情况。
+ * 预加载：
+ *   (1.插件中的资源会被反复使用，所以插件默认所有资源都预加载，
+ *      预加载相关介绍可以去看看"1.系统 > 关于预加载.docx"。
  * 设计：
  *   (1.该插件可以和 字符串核心 结合使用。
  *      因为字符串核心可以通过插件指令或者玩家手动编辑修改。
@@ -72,7 +75,7 @@
  * 2."\dimg[1:位置[10,-10]]"字符会把编号为1的图片绘制到当前光标
  *   偏移到 x 10像素 y -10像素 的位置。
  * 3.后绘制的图片，能够遮挡先绘制的文字或图片。但不包括 字符块 。
- *   详细可以去看看对话管理层 阅后即焚 的效果。
+ *   详细可以去看看 窗口字符管理层示例 阅后即焚 的效果。
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -86,9 +89,9 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   单次执行
  * 时间复杂度： o(n)
- * 测试方法：   在不同界面进行测试。
- * 测试结果：   战斗界面中，平均消耗为：【5ms以下】
- *              地图界面中，平均消耗为：【5ms以下】
+ * 测试方法：   窗口字符管理层以及在战斗界面和菜单界面进行测试。
+ * 测试结果：   地图界面中，平均消耗为：【5ms以下】
+ *              战斗界面中，平均消耗为：【5ms以下】
  *              菜单界面中，平均消耗为：【5ms以下】
  *
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
@@ -107,6 +110,8 @@
  * 修改了插件的分类。
  * [v1.3]
  * 修复了部分情况下无法显示图片的问题。
+ * 
+ * 
  * 
  * @param ---字符图组 1至20---
  * @default 
@@ -1752,7 +1757,7 @@
 //
 //		★工作类型		单次执行
 //		★时间复杂度		o(n)
-//		★性能测试因素	对话管理层
+//		★性能测试因素	窗口字符管理层
 //		★性能测试消耗	1.20ms（所有插件最小值）
 //		★最坏情况		暂无
 //		★备注			在反复测试刷选项窗口时，帧数会降低到22帧，但是只是添加了渲染render的负担，过一下就好了。
@@ -1763,15 +1768,18 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
+//			->☆预加载
+//			->☆窗口字符解析
 //			
-//			->☆临时变量初始化
-//				->预加载
 //			->☆字符图
 //				->绘制大图片
 //		
 //		
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -1819,7 +1827,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_DialogTextBigImage = true;
@@ -1841,31 +1849,31 @@ if( Imported.Drill_CoreOfWindowCharacter ){
 	
 	
 //=============================================================================
-// ** ☆临时变量初始化
+// ** ☆预加载
 //
 //			说明：	> 用过的bitmap，全部标记不删除，防止刷菜单时重建导致浪费资源。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
-DrillUp.g_DTBI_preloadEnabled = true;		//（强制预加载）
+DrillUp.g_DTBI_preloadEnabled = true;		//（预加载开关）
 if( DrillUp.g_DTBI_preloadEnabled == true ){
 	//==============================
-	// * 临时变量 - 初始化
+	// * 预加载 - 初始化
 	//==============================
-	var _drill_DTBI_temp_initialize = Game_Temp.prototype.initialize;
+	var _drill_DTBI_preload_initialize = Game_Temp.prototype.initialize;
 	Game_Temp.prototype.initialize = function() {
-		_drill_DTBI_temp_initialize.call(this);
+		_drill_DTBI_preload_initialize.call(this);
 		this.drill_DTBI_preloadInit();
 	}
 	//==============================
-	// * 临时变量 - 预加载 版本校验
+	// * 预加载 - 版本校验
 	//==============================
 	if( Utils.generateRuntimeId == undefined ){
 		alert( DrillUp.drill_DTBI_getPluginTip_LowVersion() );
 	}
 	//==============================
-	// * 临时变量 - 资源提前预加载
+	// * 预加载 - 执行资源预加载
 	//
-	//			说明：	遍历全部资源，提前预加载标记过的资源。
+	//			说明：	> 遍历全部资源，提前预加载标记过的资源。
 	//==============================
 	Game_Temp.prototype.drill_DTBI_preloadInit = function() {
 		this._drill_DTBI_cacheId = Utils.generateRuntimeId();	//资源缓存id
@@ -1875,7 +1883,7 @@ if( DrillUp.g_DTBI_preloadEnabled == true ){
 			if( temp_data == undefined ){ continue; }
 			
 			this._drill_DTBI_preloadTank.push( 
-				ImageManager.reserveBitmap( "img/Menu__textBigImg/", temp_data, 0, true ) 
+				ImageManager.reserveBitmap( "img/Menu__textBigImg/", temp_data, 0, true, this._drill_DTBI_cacheId ) 
 			);
 		}
 	}
@@ -1883,17 +1891,14 @@ if( DrillUp.g_DTBI_preloadEnabled == true ){
 
 
 //=============================================================================
-// ** ☆字符图
-//			
-//			说明：	> 此模块对 效果字符 进行转义，并绘制大图片。
-//					（插件完整的功能目录去看看：功能结构树）
+// ** ☆窗口字符解析
 //=============================================================================
 //==============================
-// * 字符图 - 效果字符转义
+// * 窗口字符解析 - 效果字符 组合符（继承）
 //==============================
-var _drill_DTBI_processNewEffectChar_Combined = Window_Base.prototype.drill_COWC_processNewEffectChar_Combined;
+var _drill_DTBI_COWC_processNewEffectChar_Combined = Window_Base.prototype.drill_COWC_processNewEffectChar_Combined;
 Window_Base.prototype.drill_COWC_processNewEffectChar_Combined = function( matched_index, matched_str, command, args ){
-	_drill_DTBI_processNewEffectChar_Combined.call( this, matched_index, matched_str, command, args );
+	_drill_DTBI_COWC_processNewEffectChar_Combined.call( this, matched_index, matched_str, command, args );
 	if( command == "dimg" ){
 		
 		if( args.length == 1 ){
@@ -1918,6 +1923,14 @@ Window_Base.prototype.drill_COWC_processNewEffectChar_Combined = function( match
 		
 	}
 };
+
+
+//=============================================================================
+// ** ☆字符图
+//			
+//			说明：	> 此模块对 效果字符 进行转义，并绘制大图片。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
 //==============================
 // * 字符图 - 绘制大图片
 //==============================

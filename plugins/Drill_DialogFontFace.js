@@ -33,6 +33,9 @@
  *   (1.你需要去看文档，来配置fonts文件夹下面的字体。
  *      才能保证字体能正常加载到游戏中并使用。
  *   (2.你也可以填系统自带的"SimHei"黑体，"SimSun"宋体。
+ * 预加载：
+ *   (1.插件中的资源会被反复使用，所以插件默认所有资源都预加载，
+ *      预加载相关介绍可以去看看"1.系统 > 关于预加载.docx"。
  * 
  * -----------------------------------------------------------------------------
  * ----激活条件
@@ -96,8 +99,8 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(n)
-//		★性能测试因素	对话管理层
-//		★性能测试消耗	太小，未找到
+//		★性能测试因素	随意跑一圈
+//		★性能测试消耗	（太小，未找到）
 //		★最坏情况		暂无
 //		★备注			暂无
 //		
@@ -106,12 +109,18 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			字体管理：
-//				->覆写默认类型
-//				->修改字体的窗口字符
+//			->☆提示信息
+//			->☆静态数据
+//			->☆预加载（字体）
+//			->☆窗口字符解析
 //			
-//
+//			->☆窗口控制
+//			
+//			
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -128,7 +137,7 @@
 //	
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -161,7 +170,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_DialogFontFace = true;
@@ -184,63 +193,82 @@
 //=============================================================================
 if( Imported.Drill_CoreOfWindowCharacter ){
 	
-	
-//=============================================================================
-// ** 启动时校验
-//=============================================================================
-var _drill_DFF_scene_initialize = SceneManager.initialize;
-SceneManager.initialize = function() {
-	_drill_DFF_scene_initialize.call(this);
-	
-	if( Imported.YEP_MessageCore ){
-		alert( DrillUp.drill_DFF_getPluginTip_CompatibilityYEP() );
-	}
-};
+	//==============================
+	// * 启动时 检测兼容性
+	//==============================
+	var _drill_DFF_scene_initialize = SceneManager.initialize;
+	SceneManager.initialize = function() {
+		_drill_DFF_scene_initialize.call(this);
+		
+		if( Imported.YEP_MessageCore ){
+			alert( DrillUp.drill_DFF_getPluginTip_CompatibilityYEP() );
+		}
+	};
+
 
 //=============================================================================
-// ** 字体类型
+// ** ☆预加载（字体）
+//
+//			说明：	> 此处专门执行字体的预加载。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 字体 - 预加载字体
+// * 预加载 - 执行字体预加载
+//
+//			说明：	> 函数 _createFontLoader 本质上是创建一个div对象，然后绑定字体样式。
+//					  由于绑定的样式需要显示，所以字体才会被加载进来。
 //==============================
 var _drill_DFF__createGameFontLoader = Graphics._createGameFontLoader;
 Graphics._createGameFontLoader = function(){
 	_drill_DFF__createGameFontLoader.call( this );
-	for(var i=0; i < DrillUp.g_DFF_preload.length; i++ ){
+	for(var i = 0; i < DrillUp.g_DFF_preload.length; i++ ){
 		var font_name = DrillUp.g_DFF_preload[i];
 		if( font_name == "GameFont" ){ continue; }
 		this._createFontLoader( font_name );
 	}
 }
+
+
+//=============================================================================
+// ** ☆窗口字符解析
+//=============================================================================
 //==============================
-// * 窗口基类 - 字体类型（覆写）
+// * 窗口字符解析 - 效果字符 组合符（继承）
 //==============================
-Window_Base.prototype.standardFontFace = function(){
-	return DrillUp.g_DFF_fontFace;
-};
-//==============================
-// * 字体 - 效果字符转换 - 组合符（继承）
-//==============================
-var _drill_DFF_processNewEffectChar_Combined = Window_Base.prototype.drill_COWC_processNewEffectChar_Combined;
+var _drill_DFF_COWC_processNewEffectChar_Combined = Window_Base.prototype.drill_COWC_processNewEffectChar_Combined;
 Window_Base.prototype.drill_COWC_processNewEffectChar_Combined = function( matched_index, matched_str, command, args ){
-	_drill_DFF_processNewEffectChar_Combined.call( this, matched_index, matched_str, command, args );
-	
-	// > 字体类型（\FN）
-	if( command.toUpperCase() == "FN" ){
+	_drill_DFF_COWC_processNewEffectChar_Combined.call( this, matched_index, matched_str, command, args );
+	if( command.toUpperCase() == "FN" ){	//（\fn和\FN 都可以）
+		
 		if( args.length == 1 ){
 			this.contents.fontFace = String(args[0]);
 			this.drill_COWC_charSubmit_Effect(0,0);
 		}
+		
 	}
 }
 //==============================
-// * 字体 - 画笔同步（继承）
+// * 窗口字符解析 - 画笔同步（继承）
 //==============================
-var _drill_COWC_DFF_drawSynchronization = Window_Base.prototype.drill_COWC_drawSynchronization;
+var _drill_DFF_COWC_drawSynchronization = Window_Base.prototype.drill_COWC_drawSynchronization;
 Window_Base.prototype.drill_COWC_drawSynchronization = function( bitmap_from, bitmap_to ){
-	_drill_COWC_DFF_drawSynchronization.call( this, bitmap_from, bitmap_to );
+	_drill_DFF_COWC_drawSynchronization.call( this, bitmap_from, bitmap_to );
 	bitmap_to.fontFace = bitmap_from.fontFace;
 }
+
+
+//=============================================================================
+// ** ☆窗口控制
+//
+//			说明：	> 此处专门窗口相关控制操作。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 窗口控制 - 默认字体类型（覆写）
+//==============================
+Window_Base.prototype.standardFontFace = function(){
+	return DrillUp.g_DFF_fontFace;
+};
 
 
 //=============================================================================

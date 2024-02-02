@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        物体触发 - 固定区域 & 事件接近 & 条件触发
+ * @plugindesc [v1.2]        物体触发 - 固定区域 & 事件接近 & 条件触发
  * @author Drill_up
  * 
  * @Drill_LE_param "事件触发-%d"
@@ -32,7 +32,8 @@
  * ----设定注意事项
  * 1.插件的作用域：地图界面。
  *   只作用于事件。
- * 2.更多相关内容，去看看 "9.物体触发 > 关于事件接近触发.docx"。
+ * 2.你需要先了解基础知识 "8.物体 > 触发的本质.docx"。
+ *   更多相关内容，去看看 "9.物体触发 > 关于事件接近触发.docx"。
  *   触发区域相关，去看看 "9.物体触发 > 关于物体触发-固定区域.docx"。
  * 传感器：
  *   (1.接近触发被划分为传感器类。
@@ -141,6 +142,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 优化了旧存档的识别与兼容。
+ * [v1.2]
+ * 修复了在特定位置搜索视野范围时会报错的bug。
  * 
  * 
  * 
@@ -640,7 +643,7 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(nlogn)+o(n^2)	每帧	【棋盘算法】
-//		★性能测试因素1	对话管理层，6个有棋盘且挤在附近的事件
+//		★性能测试因素1	对话框管理层，6个有棋盘且挤在附近的事件
 //		★性能测试消耗1	24.21ms（drill_ECT_updateEventTrigger）
 //		★性能测试因素2	遇敌管理层，12个有棋盘的事件
 //		★性能测试消耗2	23.15ms（drill_ECT_updateEventTrigger）30.46ms（drill_ECT_getEventsInRange）
@@ -688,6 +691,9 @@
 //					->记录事件
 //			
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -748,7 +754,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_EventClosingTrigger = true;
@@ -757,7 +763,7 @@
 	
 	
 	//==============================
-	// * 变量获取 - 事件触发
+	// * 静态数据 - 事件触发
 	//				（~struct~ATriArea）
 	//==============================
 	DrillUp.drill_ECT_areaInit = function( dataFrom ){
@@ -976,8 +982,8 @@ Game_Event.prototype.setupPage = function() {
 Game_Event.prototype.drill_ECT_setupPage = function() {
 	
 	// > 第一次出生，强制读取第一页注释（防止离开地图后，回来，开关失效）
-	if( !this._erased && this.event() && this.event().pages[0] && this._drill_ECT_isFirstBirth ){ 
-		this._drill_ECT_isFirstBirth = false;
+	if( !this._erased && this.event() && this.event().pages[0] && this._drill_ECT_isFirstBirth == true ){ 
+		this._drill_ECT_isFirstBirth = undefined;		//『节约临时参数存储空间』
 		this.drill_ECT_readPage( this.event().pages[0].list );
 	}
 	
@@ -1506,6 +1512,7 @@ Game_Map.prototype.drill_ECT_getEventsInRange = function( c_x, c_y, max_x_count,
 	var temp_high = this._drill_ECT_x_events.length-1;
 	for(var k = 0; k < 10; k++){
 		var mid = Math.floor( (temp_low+temp_high)/2 );
+		if( mid < 0 ){ mid = 0; }
 		if( temp_low >= temp_high ){	//（两指针贴合后，得到结果）
 			i_low = temp_high;
 			break; 
@@ -1521,6 +1528,7 @@ Game_Map.prototype.drill_ECT_getEventsInRange = function( c_x, c_y, max_x_count,
 	var temp_high = this._drill_ECT_x_events.length-1;
 	for(var k = 0; k < 10; k++){
 		var mid = Math.floor( (temp_low+temp_high)/2 );
+		if( mid < 0 ){ mid = 0; }
 		if( temp_low >= temp_high ){	//（两指针贴合后，得到结果）
 			i_high = temp_low;
 			break; 
@@ -1549,6 +1557,7 @@ Game_Map.prototype.drill_ECT_getEventsInRange = function( c_x, c_y, max_x_count,
 	var temp_high = this._drill_ECT_y_events.length-1;
 	for(var k = 0; k < 10; k++){
 		var mid = Math.floor( (temp_low+temp_high)/2 );
+		if( mid < 0 ){ mid = 0; }
 		if( temp_low >= temp_high ){	//（两指针贴合后，得到结果）
 			j_low = temp_high;
 			break; 
@@ -1564,6 +1573,7 @@ Game_Map.prototype.drill_ECT_getEventsInRange = function( c_x, c_y, max_x_count,
 	var temp_high = this._drill_ECT_y_events.length-1;
 	for(var k = 0; k < 10; k++){
 		var mid = Math.floor( (temp_low+temp_high)/2 );
+		if( mid < 0 ){ mid = 0; }
 		if( temp_low >= temp_high ){	//（两指针贴合后，得到结果）
 			j_high = temp_low;
 			break; 

@@ -540,7 +540,7 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
 //			->☆插件指令
 //				->简单指令
 //				->高级指令
@@ -580,6 +580,9 @@
 //		★家谱：
 //			大家族-漂浮文字
 //			
+//		★脚本文档：
+//			13.UI > 大家族-漂浮文字（脚本）.docx
+//		
 //		★插件私有类：
 //			* 地图临时 漂浮文字窗口【Drill_GFVB_Window】
 //			
@@ -648,7 +651,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_GaugeFloatingVideoBarrage = true;
@@ -657,7 +660,7 @@
 	
 	
 	//==============================
-	// * 变量获取 - 视频弹幕样式
+	// * 静态数据 - 视频弹幕样式
 	//				（~struct~DrillGFVBStyle）
 	//==============================
 	DrillUp.drill_GFVB_initContext = function( dataFrom ) {
@@ -1145,7 +1148,7 @@ Scene_Map.prototype.terminate = function() {
 	$gameTemp._drill_GFVB_commandSeq = [];			//漂浮文字容器
 };
 //==============================
-// * 临时对象 - 简单指令
+// * 『临时对象』 - 简单指令
 //==============================
 Game_Temp.prototype.drill_GFVB_createSimple = function( param_type, text, style_id, param_sustainTime ){
 	if( style_id == undefined ){ style_id = DrillUp.g_GFVB_simple_defaultStyleId -1; }
@@ -1176,7 +1179,7 @@ Game_Temp.prototype.drill_GFVB_createSimple = function( param_type, text, style_
 	this._drill_GFVB_commandSeq.push( data );
 };
 //==============================
-// * 临时对象 - 高级指令 初始化
+// * 『临时对象』 - 高级指令 初始化
 //==============================
 Game_Temp.prototype.drill_GFVB_setBuffer = function( style_id ){
 	
@@ -1192,7 +1195,7 @@ Game_Temp.prototype.drill_GFVB_setBuffer = function( style_id ){
 	this._drill_GFVB_commandBuffer = data;
 };
 //==============================
-// * 临时对象 - 高级指令 创建
+// * 『临时对象』 - 高级指令 创建
 //==============================
 Game_Temp.prototype.drill_GFVB_createByBuffer = function( param_type, param_sustainTime ){
 	var data = this._drill_GFVB_commandBuffer;

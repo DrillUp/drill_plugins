@@ -39,7 +39,8 @@
  * 1.插件的作用域：地图界面。
  * 2.如果想了解镜头更多的内容，去看看 "6.地图 > 关于地图活动镜头.docx"。
  * 整体平移：
- *   (1.整体平移是对镜头整个对象进行平移。
+ *   (1.整体平移是指镜头控制的所有图层都平移一段距离。
+ *      镜头控制的图层包含 上层、中层、下层，但不含 图片层和最顶层。
  *      注意，平移后，必须要想办法用菜单或图片遮挡住平移漏出的部分，
  *      不然镜头的其他渲染结构会因为整体平移而被看到。
  * 镜头移动：
@@ -128,6 +129,7 @@
  * 插件指令：>地图镜头 : 固定看向 : 本事件
  * 插件指令：>地图镜头 : 固定看向 : 事件[13]
  * 插件指令：>地图镜头 : 固定看向 : 事件变量[13]
+ * 插件指令：>地图镜头 : 固定看向 : 多个事件的中心[13,14]
  * 插件指令：>地图镜头 : 固定看向 : 玩家位置
  * 插件指令：>地图镜头 : 固定看向 : 位置[20,20]
  * 插件指令：>地图镜头 : 固定看向 : 位置变量[21,22]
@@ -143,6 +145,9 @@
  * 4.如果上述的两种插件指令如果同时使用，那么锁定镜头优先。
  * 5.如果你不想出现镜头移动到目标的过程，你可以在设置看向位置后，
  *   执行"立刻看向目标位置"。
+ * 6.如果你不想看某个事件，而让另一个事件拉扯过远，
+ *   可以用"多个事件的中心"来看向。
+ *   但注意，事件如果距离太远，两边的事件都会看不见。
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 镜头缩放/旋转
@@ -252,7 +257,7 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
  * 时间复杂度： o(n^2) 每帧
- * 测试方法：   去物体管理层、地理管理层、镜像管理层跑一圈测试。
+ * 测试方法：   去各个管理层跑一圈测试。
  * 测试结果：   200个事件的地图中，消耗为：【18.74ms】
  *              100个事件的地图中，消耗为：【14.84ms】
  *               50个事件的地图中，消耗为：【12.37ms】
@@ -467,7 +472,7 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^2) 每帧
-//		★性能测试因素	镜像管理层
+//		★性能测试因素	各个管理层
 //		★性能测试消耗	18.74ms 23.85ms
 //		★最坏情况		暂无
 //		★备注			消耗虽然很小，但是总能找到。移动镜头、翻转镜头没有明显的消耗。
@@ -478,7 +483,7 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
 //			->☆管辖权
 //			->☆插件指令
 //			->☆存储数据
@@ -493,7 +498,17 @@
 //			->镜头控制器【Drill_LCa_Controller】
 //				->A主体
 //				->B镜头架（单位图块）
+//					->设置宽度【标准函数】
+//					->设置高度【标准函数】
+//					->镜头的矩形范围【标准函数】
+//					->镜头架的矩形范围【标准函数】
 //				->C镜头基点
+//					->获取镜头变换位置（子贴图用）【标准函数】
+//					->获取镜头变换位置（外部贴图用）【标准函数】
+//					->地图落点 转换（外部贴图 -> 子贴图）【标准函数】
+//					->地图落点 转换（子贴图 -> 外部贴图）【标准函数】
+//					->获取地图鼠标落点（子贴图用）【标准函数】
+//					->获取地图鼠标落点（外部贴图用）【标准函数】
 //				->D自动模式
 //				->E观光模式
 //				->F固定看向
@@ -540,6 +555,9 @@
 //
 //
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -621,7 +639,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_LayerCamera = true;
@@ -905,10 +923,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		/*-----------------镜头控制器------------------*/
 		if( args.length == 2 ){
 			var type = String(args[1]);
-			if( type == "开启" ){
+			if( type == "启用" || type == "开启" || type == "打开" || type == "启动" ){
 				$gameSystem.drill_LCa_setEnable( true );
 			}
-			if( type == "关闭" ){
+			if( type == "关闭" || type == "禁用" ){
 				$gameSystem.drill_LCa_setEnable( false );
 			}
 			if( type == "暂停镜头运行" || type == "锁定镜头" ){
@@ -964,10 +982,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var type = String(args[1]);
 			var temp1 = String(args[3]);
 			if( type == "观光模式-键盘操作" ){
-				if( temp1 == "启用" ){
+				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
 					$gameSystem._drill_LCa_controller._drill_data['touristKeyboardEnabled'] = true;
 				}
-				if( temp1 == "关闭" ){
+				if( temp1 == "关闭" || temp1 == "禁用" ){
 					$gameSystem._drill_LCa_controller._drill_data['touristKeyboardEnabled'] = false;
 				}
 				if( temp1 == "恢复默认" ){
@@ -975,10 +993,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				}
 			}
 			if( type == "观光模式-鼠标操作" ){
-				if( temp1 == "启用" ){
+				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
 					$gameSystem._drill_LCa_controller._drill_data['touristMouseEnabled'] = true;
 				}
-				if( temp1 == "关闭" ){
+				if( temp1 == "关闭" || temp1 == "禁用" ){
 					$gameSystem._drill_LCa_controller._drill_data['touristMouseEnabled'] = false;
 				}
 				if( temp1 == "恢复默认" ){
@@ -1030,6 +1048,18 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					var e_id = $gameVariables.value(Number(unit));
 					if( $gameMap.drill_LCa_isEventExist( e_id ) == false ){ return; }
 					$gameSystem.drill_LCa_setLockEvent( e_id );
+				}
+				if( unit.indexOf("多个事件的中心[") != -1 ){
+					unit = unit.replace("多个事件的中心[","");
+					unit = unit.replace("]","");
+					var e_list = [];
+					var str_list = unit.split(/[,，]/);
+					for(var i = 0; i < str_list.length; i++ ){
+						var e_id = Number(str_list[i]);
+						if( $gameMap.drill_LCa_isEventExist( e_id ) == false ){ continue; }
+						e_list.push(e_id);
+					}
+					$gameSystem.drill_LCa_setLockEventList( e_list );
 				}
 				if( unit.indexOf("位置[") != -1 ){
 					unit = unit.replace("位置[","");
@@ -1164,10 +1194,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var type = String(args[1]);
 			var temp1 = String(args[3]);
 			if( type == "边缘遮挡层" ){
-				if( temp1 == "开启" ){
+				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
 					$gameSystem._drill_LCa_controller.drill_LCa_setGlobalBarrierLayerEnabled( true );
 				}
-				if( temp1 == "关闭" ){
+				if( temp1 == "关闭" || temp1 == "禁用" ){
 					$gameSystem._drill_LCa_controller.drill_LCa_setGlobalBarrierLayerEnabled( false );
 				}
 			}
@@ -1533,6 +1563,12 @@ Game_System.prototype.drill_LCa_setLockEvent = function( event_id ){
 	this._drill_LCa_controller.drill_LCa_setLockEvent( event_id );
 }
 //==============================
+// * F固定看向 - 固定多个事件的中心【标准函数】
+//==============================
+Game_System.prototype.drill_LCa_setLockEventList = function( event_id ){
+	this._drill_LCa_controller.drill_LCa_setLockEventList( event_id );
+}
+//==============================
 // * F固定看向 - 解除固定看向【标准函数】
 //==============================
 Game_System.prototype.drill_LCa_setUnlock = function(){
@@ -1872,7 +1908,7 @@ Drill_LCa_Controller.prototype.drill_LCa_restore = function(){
 //			说明：	> 可放在帧刷新函数中实时调用。
 //##############################
 Drill_LCa_Controller.prototype.drill_LCa_isEnable = function(){
-	if( $gameMap == undefined ){ return false; }	//【$gameSystem优先初始化】
+	if( $gameMap == undefined ){ return false; }	//『$gameSystem优先初始化』
 	if( $dataMap == undefined ){ return false; }
 	return this._drill_data['enable'];
 };
@@ -1962,7 +1998,7 @@ Drill_LCa_Controller.prototype.drill_LCa_getScaleYValue = function(){
 //##############################
 // * B镜头架 - 设置宽度【标准函数】
 //
-//			参数：	> width 数字
+//			参数：	> width 数字（单位图块）
 //			返回：	> 无
 //##############################
 Drill_LCa_Controller.prototype.drill_LCa_setCameraHolderWidth = function( width ){
@@ -1973,7 +2009,7 @@ Drill_LCa_Controller.prototype.drill_LCa_setCameraHolderWidth = function( width 
 //##############################
 // * B镜头架 - 设置高度【标准函数】
 //
-//			参数：	> height 数字
+//			参数：	> height 数字（单位图块）
 //			返回：	> 无
 //##############################
 Drill_LCa_Controller.prototype.drill_LCa_setCameraHolderHeight = function( height ){
@@ -2169,6 +2205,15 @@ Drill_LCa_Controller.prototype.drill_LCa_setLockPosition = function( x, y ){
 //##############################
 Drill_LCa_Controller.prototype.drill_LCa_setLockEvent = function( event_id ){
 	this.drill_LCa_setLockEvent_Private( event_id );
+}
+//##############################
+// * F固定看向 - 固定多个事件的中心【标准函数】
+//
+//			参数：	> event_id_list 数字列表
+//			返回：	> 无
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_setLockEventList = function( event_id_list ){
+	this.drill_LCa_setLockEventList_Private( event_id_list );
 }
 //##############################
 // * F固定看向 - 解除固定看向【标准函数】
@@ -2575,7 +2620,7 @@ Drill_LCa_Controller.prototype.drill_controller_initHolder = function(){
 //==============================
 // * B镜头架 - 刷新范围
 //
-//			说明：	> 此函数不能放在初始化中执行，因为那个时候 $gameMap 还没创建。【$gameSystem优先初始化】
+//			说明：	> 此函数不能放在初始化中执行，因为那个时候 $gameMap 还没创建。『$gameSystem优先初始化』
 //==============================
 Drill_LCa_Controller.prototype.drill_LCa_refreshHolder = function(){
 	var holder_rect = this.drill_LCa_getCameraHolderRect();
@@ -2942,8 +2987,15 @@ Drill_LCa_Controller.prototype.drill_getAutoPosition = function(){
 			tar_y = this._drill_lockPos_y;
 		}
 		if( this._drill_lockPos_type == "事件" ){
-			tar_x = $gameMap.event( this._drill_lockPos_eventId )._realX;
-			tar_y = $gameMap.event( this._drill_lockPos_eventId )._realY;
+			tar_x = 0;
+			tar_y = 0;
+			for(var i = 0; i < this._drill_lockPos_eventIdList.length; i++ ){
+				var e_id = this._drill_lockPos_eventIdList[i];
+				tar_x += $gameMap.event( e_id )._realX;
+				tar_y += $gameMap.event( e_id )._realY;
+			}
+			tar_x = tar_x / this._drill_lockPos_eventIdList.length;
+			tar_y = tar_y / this._drill_lockPos_eventIdList.length;
 		}
 		
 	}
@@ -3235,8 +3287,15 @@ Drill_LCa_Controller.prototype.drill_updateTouristMode = function(){
 			yy = this._drill_lockPos_y;
 		}
 		if( this._drill_lockPos_type == "事件" ){
-			xx = $gameMap.event( this._drill_lockPos_eventId )._realX;
-			yy = $gameMap.event( this._drill_lockPos_eventId )._realY;
+			xx = 0;
+			yy = 0;
+			for(var i = 0; i < this._drill_lockPos_eventIdList.length; i++ ){
+				var e_id = this._drill_lockPos_eventIdList[i];
+				xx += $gameMap.event( e_id )._realX;
+				yy += $gameMap.event( e_id )._realY;
+			}
+			xx = xx / this._drill_lockPos_eventIdList.length;
+			yy = yy / this._drill_lockPos_eventIdList.length;
 		}
 		var oww = Graphics.boxWidth  / this.tileWidth();
 		var ohh = Graphics.boxHeight / this.tileHeight();
@@ -3348,7 +3407,7 @@ Drill_LCa_Controller.prototype.drill_updateTouristMode_Mouse = function(){
 	// > 鼠标控制关闭情况
 	if( data['touristMouseEnabled'] == false ){ return; }
 	
-	// > 鼠标位置刷新
+	// > 鼠标位置刷新（包含出界情况）
 	var mouse_pos = TouchInput.drill_COI_getMousePos_WithOutside();
 	this._drill_tourist_mouseX = mouse_pos.x;
 	this._drill_tourist_mouseY = mouse_pos.y;
@@ -3456,7 +3515,7 @@ Drill_LCa_Controller.prototype.drill_controller_initLock = function(){
 	this._drill_lockPos_type = "";			//F固定看向 - 看向类型（位置/事件）
 	this._drill_lockPos_x = 0;				//F固定看向 - 位置x
 	this._drill_lockPos_y = 0;				//F固定看向 - 位置y
-	this._drill_lockPos_eventId = 0;		//F固定看向 - 事件ID
+	this._drill_lockPos_eventIdList = [];	//F固定看向 - 事件ID列表
 };
 //==============================
 // * F固定看向 - 固定看向位置（私有）
@@ -3477,9 +3536,21 @@ Drill_LCa_Controller.prototype.drill_LCa_setLockEvent_Private = function( event_
     if( this.drill_LCa_isEnable() == false ){ return; }
 	var data = this._drill_data;
 	
-	this._drill_lockPos = true;				//F固定看向 - 开关
-	this._drill_lockPos_type = "事件";		//F固定看向 - 类型
-	this._drill_lockPos_eventId = event_id;	//F固定看向 - 事件id
+	this._drill_lockPos = true;							//F固定看向 - 开关
+	this._drill_lockPos_type = "事件";					//F固定看向 - 类型
+	this._drill_lockPos_eventIdList = [];				//F固定看向 - 事件ID列表
+	this._drill_lockPos_eventIdList.push( event_id );
+};
+//==============================
+// * F固定看向 - 固定看向多个事件的中心（私有）
+//==============================
+Drill_LCa_Controller.prototype.drill_LCa_setLockEventList_Private = function( event_id_list ){
+    if( this.drill_LCa_isEnable() == false ){ return; }
+	var data = this._drill_data;
+	
+	this._drill_lockPos = true;							//F固定看向 - 开关
+	this._drill_lockPos_type = "事件";					//F固定看向 - 类型
+	this._drill_lockPos_eventIdList = event_id_list;	//F固定看向 - 事件ID列表
 };
 //==============================
 // * F固定看向 - 解除固定看向（私有）

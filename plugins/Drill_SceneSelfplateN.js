@@ -1365,7 +1365,7 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
 //			->☆全局存储
 //			->☆存储数据
 //			->☆插件指令
@@ -1377,12 +1377,15 @@
 //			->信息面板N【Scene_Drill_SSpN】
 //				->详细窗口（x4）
 //				->描述图片（x4）
-//				->☆原型链规范
+//				->☆原型链规范（Scene_Drill_SSpN）
 //			->选项窗口【Drill_SSpN_SelectWindow】
 //			->显示窗口【Drill_SSpN_DescWindow】
 //			
 //			
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -1433,7 +1436,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_SceneSelfplateN = true;
@@ -1442,7 +1445,7 @@
 	
 	
 	//==============================
-	// * 变量获取 - 指针与边框
+	// * 静态数据 - 指针与边框
 	//				（~struct~DrillCursor）
 	//==============================
 	DrillUp.drill_SSpN_initMenuCursor = function( dataFrom ) {
@@ -1462,7 +1465,7 @@
 		return data;
 	}
 	//==============================
-	// * 变量获取 - 选项窗口参数
+	// * 静态数据 - 选项窗口参数
 	//				（~struct~DrillSelectWindow）
 	//==============================
 	DrillUp.drill_SSpN_initCommandWindow = function( dataFrom ) {
@@ -1507,7 +1510,7 @@
 		return data;
 	}
 	//==============================
-	// * 变量获取 - 选项按钮组
+	// * 静态数据 - 选项按钮组
 	//				（~struct~DrillCommandButton）
 	//==============================
 	DrillUp.drill_SSpN_initCommandButton = function( dataFrom ) {
@@ -1529,7 +1532,7 @@
 		return data;
 	}
 	//==============================
-	// * 变量获取 - 描述窗口参数
+	// * 静态数据 - 描述窗口参数
 	//				（~struct~DrillDescWindow）
 	//==============================
 	DrillUp.drill_SSpN_initDescWindow = function( dataFrom ) {
@@ -1566,7 +1569,7 @@
 		return data;
 	}
 	//==============================
-	// * 变量获取 - 描述图参数
+	// * 静态数据 - 描述图参数
 	//				（~struct~DrillDescPic）
 	//==============================
 	DrillUp.drill_SSpN_initDescPic = function( dataFrom ) {
@@ -1592,7 +1595,7 @@
 		return data;
 	}
 	//==============================
-	// * 变量获取 - 内容
+	// * 静态数据 - 内容
 	//				（~struct~DrillSSpN）
 	//==============================
 	DrillUp.drill_SSpN_initContext = function( dataFrom ) {
@@ -2503,7 +2506,7 @@ Scene_Drill_SSpN.prototype.drill_updateIndex = function() {
 
 
 //=============================================================================
-// ** ☆原型链规范
+// ** ☆原型链规范（Scene_Drill_SSpN）
 //
 //			说明：	> 此处专门补上缺失的原型链，未缺失的则注释掉。
 //					（插件完整的功能目录去看看：功能结构树）

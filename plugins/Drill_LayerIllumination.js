@@ -200,7 +200,7 @@
  * 1."高级照明变量[21]"均能适配可选设定中
  *   "高级照明[2]"的 绑定、移动、变化 等的用法。
  * 2."编号[100-200]"指从id为100至200的范围中，找出一个未创建的编号。
- * 3.使用变量获取一个未使用的自动编号，然后创建 高级照明，
+ * 3.使用静态数据一个未使用的自动编号，然后创建 高级照明，
  *   创建后设置该 高级照明 的生命，实现时效结束后自动清除。
  *   通过上述流程，可以使得 永久有效的高级照明 变成临时的照明功能。
  * 4.由于生命结束后自动销毁，下一次获取自动编号时，
@@ -1753,7 +1753,7 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^2)*o(贴图处理)*o(遮罩渲染) 每帧
-//		★性能测试因素	光源管理层，乱跑
+//		★性能测试因素	光源管理层
 //		★性能测试消耗	138.23ms
 //		★最坏情况		无
 //		★备注			无
@@ -1776,6 +1776,9 @@
 //		
 //		★家谱：
 //			大家族-动态遮罩
+//		
+//		★脚本文档：
+//			无
 //		
 //		★插件私有类：
 //			* 遮罩渲染器【Drill_LIl_Renderer】
@@ -1883,7 +1886,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_LayerIllumination = true;
@@ -1891,7 +1894,7 @@
     DrillUp.parameters = PluginManager.parameters('Drill_LayerIllumination');
 
 	//==============================
-	// * 变量获取 - 光源
+	// * 静态数据 - 光源
 	//				（~struct~LIlLight）
 	//==============================
 	DrillUp.drill_LIl_initLight = function( dataFrom ) {
@@ -2936,13 +2939,13 @@ Game_Map.prototype.drill_LIl_setupIllumination = function() {
 				var temp1 = String(args[0]);
 				var temp2 = String(args[1]);
 				if( temp1 == "临时锁定"){
-					if( temp2 == "关闭"){
-						this._drill_LIl_lock['enableLocked'] = true;
-						this._drill_LIl_lock['enable'] = false;
-					}
-					if( temp2 == "开启"){
+					if( temp2 == "启用" || temp2 == "开启" || temp2 == "打开" || temp2 == "启动" ){
 						this._drill_LIl_lock['enableLocked'] = true;
 						this._drill_LIl_lock['enable'] = true;
+					}
+					if( temp2 == "关闭" || temp2 == "禁用" ){
+						this._drill_LIl_lock['enableLocked'] = true;
+						this._drill_LIl_lock['enable'] = false;
 					}
 				}
 			}

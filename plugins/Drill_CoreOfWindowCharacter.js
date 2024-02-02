@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.8]        窗口字符 - 窗口字符核心
+ * @plugindesc [v1.9]        窗口字符 - 窗口字符核心
  * @author Drill_up
  * 
  * 
@@ -59,11 +59,9 @@
  *      表达式 > 指代字符 > 效果字符 > 消息输入字符
  *   (2.该插件是后期许多子插件使用 窗口字符 的基础核心，覆盖了很多底层。
  *      不建议使用其它操作 窗口字符 相关的插件，可能会产生冲突。
- * 快进键：
- *   (1.该插件支持快进键的设置，按快进键时，能够快速跳过对话框中的对话。
  * 设计：
  *   (1.窗口字符核心提供了非常多的指代字符和效果字符。
- *      详细介绍可以去 对话管理层 看看围成一圈的小爱丽丝的对话演示。
+ *      详细介绍可以去 窗口字符管理层示例 看看。
  *   (2.一般的窗口字符中可以嵌套指代字符，比如"\c[\v[21]]"。
  *      这是因为 指代字符\v[21] 会先转成数字，再进行\c[]的效果。
  *      但是注意，效果字符一般都不能嵌套。
@@ -202,15 +200,6 @@
  *   如果你需要在自动换行基础上强制换行，添加<br>即可。
  * 
  * -----------------------------------------------------------------------------
- * ----可选设定 - 快进键
- * 你可以使用下列插件指令：
- * 
- * 插件指令：>窗口字符核心 : 启用快进键
- * 插件指令：>窗口字符核心 : 关闭快进键
- * 
- * 1.快进键按下后，对话框的文本显示速度转为瞬间显示，能够跳过非常多的文本剧情。
- * 
- * -----------------------------------------------------------------------------
  * ----插件性能
  * 测试仪器：   4G 内存，Intel Core i5-2520M CPU 2.5GHz 处理器
  *              Intel(R) HD Graphics 3000 集显 的垃圾笔记本
@@ -254,31 +243,8 @@
  * [v1.8]
  * 修复了自动换行时，第一行多出一个字的bug。
  * 修复了行高和字体大小计算时的误差bug。
- * 
- * 
- * 
- * @param ---消息快进---
- * @desc 
- *
- * @param 初始是否启用快进键
- * @parent ---消息快进---
- * @type boolean
- * @on 启用
- * @off 关闭
- * @desc 启用 - true，关闭 - false。
- * @default true
- *
- * @param 快进键
- * @parent ---消息快进---
- * @type select
- * @option 基本键-加速键
- * @value shift
- * @option 基本键-上一页
- * @value pageup
- * @option 基本键-下一页
- * @value pagedown
- * @desc 按住快进键，可以快速跳过对话框中的非常多的文字信息。（键位修改可以去看看插件 键盘-键盘手柄按键修改器）
- * @default pagedown
+ * [v1.9]
+ * 分离了 对话加速键 的功能。
  * 
  */
  
@@ -294,7 +260,7 @@
 //
 //		★工作类型		单次执行
 //		★时间复杂度		o(n)
-//		★性能测试因素	对话管理层
+//		★性能测试因素	地图界面
 //		★性能测试消耗	4.94ms（drawTextEx） 2.40ms（没有插件使用时）
 //		★最坏情况		暂无
 //		★备注			在反复测试刷选项窗口时，帧数会降低到22帧，但是只是添加了渲染render的负担，过一下就好了。
@@ -305,9 +271,7 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
-//			->☆存储数据
-//			->☆插件指令
+//			->☆静态数据
 //			
 //			->☆管辖权
 //			->☆核心漏洞修复
@@ -394,12 +358,12 @@
 //				->计算文本宽度前/推进字符时/计算文本宽度后
 //				->执行换行
 //					->自动换行计算
-//			->☆消息快进按键
-//				->按键监听
-//				->跳过 等待按键输入字符 的功能
 //
 //
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -407,7 +371,6 @@
 //			
 //		★核心说明：
 //			1.核心中含有 标准接口/标准函数 ，这是其它子插件的底座，无论核心内容怎么变，标准接口一定不能动。
-//			2.消息快进 是一个附属的小功能，不具备标准接口。
 //		
 //		★必要注意事项：
 //			1.窗口字符的绘制流程如下：
@@ -457,18 +420,14 @@
 	};
 	
 	
+	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_CoreOfWindowCharacter = true;
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_CoreOfWindowCharacter');
-	
-	
-	/*-----------------杂项------------------*/
-	DrillUp.g_COWC_fastForwardEnabled = String(DrillUp.parameters["初始是否启用快进键"] || "true") == "true"; 
-	DrillUp.g_COWC_fastForwardKey = String(DrillUp.parameters["快进键"] || "pagedown"); 
 	
 	
 	
@@ -703,7 +662,7 @@ Window_Message.prototype.updateMessage = function(){
 //==============================
 Window_Message.prototype.drill_COWC_canBreakProcess = function(){
 	
-	// > 瞬间显示时，跳出
+	// > 瞬间显示/瞬间显示当前行 时，跳出（此参数为 Window_Message 的内部参数）
 	if( this._showFast == false && this._lineShowFast == false ){ return true; }
 	
 	// > 等待输入时，跳出
@@ -715,110 +674,6 @@ Window_Message.prototype.drill_COWC_canBreakProcess = function(){
 	return false;
 };
 
-
-
-//#############################################################################
-// ** 【标准模块】存储数据 ☆存储数据
-//#############################################################################
-//##############################
-// * 存储数据 - 参数存储 开关
-//          
-//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
-//##############################
-DrillUp.g_COWC_saveEnabled = true;
-//##############################
-// * 存储数据 - 初始化
-//          
-//			说明：	> 下方为固定写法，不要动。
-//##############################
-var _drill_COWC_sys_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function() {
-    _drill_COWC_sys_initialize.call(this);
-	this.drill_COWC_initSysData();
-};
-//##############################
-// * 存储数据 - 载入存档
-//          
-//			说明：	> 下方为固定写法，不要动。
-//##############################
-var _drill_COWC_sys_extractSaveContents = DataManager.extractSaveContents;
-DataManager.extractSaveContents = function( contents ){
-	_drill_COWC_sys_extractSaveContents.call( this, contents );
-	
-	// > 参数存储 启用时（检查数据）
-	if( DrillUp.g_COWC_saveEnabled == true ){	
-		$gameSystem.drill_COWC_checkSysData();
-		
-	// > 参数存储 关闭时（直接覆盖）
-	}else{
-		$gameSystem.drill_COWC_initSysData();
-	}
-};
-//##############################
-// * 存储数据 - 初始化数据【标准函数】
-//			
-//			参数：	> 无
-//			返回：	> 无
-//          
-//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
-//##############################
-Game_System.prototype.drill_COWC_initSysData = function() {
-	this.drill_COWC_initSysData_Private();
-};
-//##############################
-// * 存储数据 - 载入存档时检查数据【标准函数】
-//			
-//			参数：	> 无
-//			返回：	> 无
-//          
-//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
-//##############################
-Game_System.prototype.drill_COWC_checkSysData = function() {
-	this.drill_COWC_checkSysData_Private();
-};
-//=============================================================================
-// ** 存储数据（接口实现）
-//=============================================================================
-//==============================
-// * 存储数据 - 初始化数据（私有）
-//==============================
-Game_System.prototype.drill_COWC_initSysData_Private = function() {
-
-	this._drill_COWC_fastForwardEnabled = DrillUp.g_COWC_fastForwardEnabled;	//消息快进 - 功能开关
-	this._drill_COWC_fastForwardKey = DrillUp.g_COWC_fastForwardKey;			//消息快进 - 快进键
-};
-//==============================
-// * 存储数据 - 载入存档时检查数据（私有）
-//==============================
-Game_System.prototype.drill_COWC_checkSysData_Private = function() {
-	
-	// > 旧存档数据自动补充
-	if( this._drill_COWC_fastForwardKey == undefined ){
-		this.drill_COWC_initSysData();
-	}
-
-};
-
-    
-//=============================================================================
-// ** ☆插件指令
-//=============================================================================
-var _drill_COWC_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function( command, args ){
-    _drill_COWC_pluginCommand.call(this, command, args);
-    if( command === ">窗口字符核心" ){    //>窗口字符核心 : 启用快进键
-		
-        if( args.length == 2 ){
-            var type = String(args[1]);
-            if( type == "启用快进键" ){
-                $gameSystem._drill_COWC_fastForwardEnabled = true;
-            }
-            if( type == "关闭快进键" ){
-                $gameSystem._drill_COWC_fastForwardEnabled = false;
-            }
-        }
-    }
-}
 
 
 //#############################################################################
@@ -2707,75 +2562,6 @@ Window_Base.prototype.drill_COWC_setWordWrap_Private = function( text, max_width
 }
 
 
-//=============================================================================
-// ** ☆消息快进按键
-//
-//			说明：	> 玩家在对话框按快进键时，消息快进的功能。（包含 存储数据、插件指令 的功能）
-//					（插件完整的功能目录去看看：功能结构树）
-//=============================================================================
-//=============================
-// * 消息快进 - 按键监听
-//=============================
-Window_Message.prototype.drill_COWC_isFastForward = function() {
-	if( $gameSystem._drill_COWC_fastForwardEnabled != true ){
-		return false;
-	}
-	return Input.isPressed( $gameSystem._drill_COWC_fastForwardKey );
-}
-//=============================
-// * 消息快进 - 帧刷新输入
-//=============================
-var _drill_COWC_msg_updateInput = Window_Message.prototype.updateInput;
-Window_Message.prototype.updateInput = function() {
-    if( this.pause && this.drill_COWC_isFastForward() ){
-		if( !this._textState ){
-			this.pause = false;
-			this.terminateMessage();
-		}
-    }
-	return _drill_COWC_msg_updateInput.call(this);
-}
-//=============================
-// * 消息快进 - 强制快速显示
-//=============================
-var _drill_COWC_msg_updateShowFast = Window_Message.prototype.updateShowFast;
-Window_Message.prototype.updateShowFast = function() {
-    if( this.drill_COWC_isFastForward() ){
-		this._showFast = true;
-	}
-	_drill_COWC_msg_updateShowFast.call(this);
-}
-//=============================
-// * 消息快进 - 禁止等待
-//=============================
-var _drill_COWC_msg_updateWait = Window_Message.prototype.updateWait;
-Window_Message.prototype.updateWait = function() {
-    if( this.drill_COWC_isFastForward() ){
-		return false;
-	}
-	return _drill_COWC_msg_updateWait.call(this);
-}
-//=============================
-// * 消息快进 - 等待时间归零
-//=============================
-var _drill_COWC_msg_startWait = Window_Message.prototype.startWait;
-Window_Message.prototype.startWait = function( count ){
-	_drill_COWC_msg_startWait.call( this, count );
-    if( this.drill_COWC_isFastForward() ){
-		this._waitCount = 0;
-	}
-}
-//=============================
-// * 消息快进 - 跳过 等待按键输入字符 的功能
-//=============================
-var _drill_COWC_msg_processEscapeCharacter = Window_Message.prototype.processEscapeCharacter;
-Window_Message.prototype.processEscapeCharacter = function( code, textState ){
-	if( code == "!" && this.drill_COWC_isFastForward() ){
-		this.startPause();
-		return;
-	}
-	_drill_COWC_msg_processEscapeCharacter.call( this, code, textState );
-}
 
 
 //=============================================================================

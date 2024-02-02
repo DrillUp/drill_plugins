@@ -154,7 +154,7 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
 //			->☆插件指令
 //			->☆事件注释
 //			->☆存储数据
@@ -166,6 +166,9 @@
 //				->玩家在事件前面不透明
 //
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -205,7 +208,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_EventAutoTransparent = true;
@@ -272,12 +275,12 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		/*-----------------指令------------------*/
 		if( e_ids != null && args.length == 4 ){
 			var type = String(args[3]);
-			if( type == "开启" ){
+			if( type == "启用" || type == "开启" || type == "打开" || type == "启动" ){
 				for( var k=0; k < e_ids.length; k++ ){
 					$gameSystem.drill_EATran_pushId( e_ids[k] );
 				}
 			}
-			if( type == "关闭" ){
+			if( type == "关闭" || type == "禁用" ){
 				for( var k=0; k < e_ids.length; k++ ){
 					$gameSystem.drill_EATran_removeId( e_ids[k] );
 				}
@@ -332,10 +335,10 @@ Game_Event.prototype.drill_EATran_setupPage = function() {
 			if( command == "=>玩家接近自动透明化" ){	//=>玩家接近自动透明化 : 开启
 				if(args.length == 2){
 					var type = String(args[1]);
-					if( type == "开启" ){
+					if( type == "启用" || type == "开启" || type == "打开" || type == "启动" ){
 						$gameSystem.drill_EATran_pushId( Number(this._eventId) );
 					}
-					if( type == "关闭" ){
+					if( type == "关闭" || type == "禁用" ){
 						$gameSystem.drill_EATran_removeId( Number(this._eventId) );
 					}
 				}

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.5]        键盘 - 秘籍输入器
+ * @plugindesc [v1.6]        键盘 - 秘籍输入器
  * @author Drill_up
  * 
  * @Drill_LE_param "秘籍-%d"
@@ -35,18 +35,20 @@
  * ----设定注意事项
  * 1.插件的作用域：地图界面、战斗界面。
  *   秘籍输入只在 地图、战斗 有效。
+ * 2.你需要了解基本的按键定义，去看看 "1.系统 > 关于输入设备核心.docx"。
  * 按键监听：
  *   (1.对鼠标、键盘、手柄有效。触屏不支持。
- *   (2.鼠标滚轮的上下滚动不计算在序列内。
- *   (3.注意秘籍的键盘按键，不要出现菜单键。
- *      进入菜单返回地图后，按键会被重新统计。
+ *   (2.插件只匹配 键盘/手柄 物理按键 ，逻辑按键不支持。
+ *      并且插件不识别 鼠标滚轮的上下滚动按键 的情况。
+ *   (3.注意，秘籍的键盘/手柄按键不要出现 菜单键 对应的物理按键。
+ *      因为进入菜单返回地图后，按键会被重新统计。
  * 公共事件：
  *   (1.地图公共事件的执行可通过 地图-多线程 插件来控制。
  *      可选择串行与并行，具体看看 "31.公共事件 > 关于公共事件与并行.docx"。
  *   (2.战斗界面中，公共事件只能串行执行，当弹出战斗选择窗口时，
  *      指令都不能立即生效。
- *   (3.注意，对话框事件指令 是特殊的指令体，只要执行对话框，就会强
- *      制串行，阻塞其他所有事件的线程。
+ *   (3.注意，对话框事件指令 是特殊的指令体，只要执行对话框，就会强制串行，
+ *      阻塞其他所有事件的线程。
  * 设计：
  *   (1.秘籍输入器默认是用于方便后台测试时，
  *      立即获取游戏中的金钱和道具、开启剧情支线等功能。
@@ -59,9 +61,9 @@
  * 你可以通过插件指令手动控制秘籍的开关：
  * （冒号两边都有一个空格）
  * 
- * 插件指令：>开启秘籍 : 1
- * 插件指令：>关闭秘籍 : 1
- *
+ * 插件指令：>开启秘籍 : 秘籍[1]
+ * 插件指令：>关闭秘籍 : 秘籍[1]
+ * 
  * -----------------------------------------------------------------------------
  * ----插件性能
  * 测试仪器：   4G 内存，Intel Core i5-2520M CPU 2.5GHz 处理器
@@ -96,6 +98,8 @@
  * 修改了插件分类。
  * [v1.5]
  * 优化了旧存档的识别与兼容。
+ * [v1.6]
+ * 优化了内部结构。
  * 
  * 
  * 
@@ -402,7 +406,7 @@
  * @param 键盘触发顺序
  * @parent 是否启用键盘触发
  * @type text[]
- * @desc 键盘按键的顺序设置，填入数字、字母、"上"、"下"、"左"、"右"、"空格"等。
+ * @desc 键盘按键（物理按键）的顺序设置，如数字、字母、"上"、"下"、"左"、"右"、"空格"等。
  * @default []
  *
  * @param 是否启用手柄触发
@@ -435,7 +439,7 @@
  * @value 左
  * @option 右
  * @value 右
- * @desc 手柄触发的顺序设置，指定顺序流程完成，即触发公共事件。建议设置的顺序数量超过10。
+ * @desc 手柄按键（物理按键）的顺序设置，指定顺序流程完成，即触发公共事件。建议设置的顺序数量超过10。
  * @default []
  *
  */
@@ -455,37 +459,48 @@
 //		★性能测试因素	无
 //		★性能测试消耗	无
 //		★最坏情况		无
-//		★备注			该插件主要消耗部分见 Drill_CoreOfOperate 。
+//		★备注			该插件主要消耗部分见 Drill_CoreOfInput 。
 //		
 //		★优化记录		暂无
 //		
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			秘籍输入器：
-//				->鼠标按键
-//				->手柄按键
-//				->键盘按键
+//			->☆提示信息
+//			->☆静态数据
+//			->☆插件指令
+//			->☆存储数据
+//
+//			->☆秘籍控制
+//				->帧刷新绑定（地图界面）
+//				->帧刷新绑定（战斗界面）
+//				->鼠标监听
+//				->键盘监听（只物理按键）
+//				->手柄监听（只物理按键）
+//
 //
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
 //			无
 //		
 //		★必要注意事项：
-//			1.插件使用了两个核 鼠标按键核心、键盘按键核心 。 
-//			  手柄暂未定为 核心。因为可能存在多个手柄连接情况，这里只考虑一个手柄情况。
+//			1.该插件只考虑 物理按键，逻辑按键不支持。
+//			  目前不考虑多个手柄连接情况，这里只考虑一个手柄情况。
 //
 //		★其它说明细节：
-//			1.实时监听条件，分别绑定在 scene_battle 和 scene_map 中。
-//
+//			无
+//		
 //		★存在的问题：
-//			1.按键核 与 键盘改键设置 的按键范围不一样。
+//			无
 //		
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -510,7 +525,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆静态数据
 //=============================================================================
 	var Imported = Imported || {};
 	Imported.Drill_SecretCode = true;
@@ -519,14 +534,17 @@
 	
 	
 	//==============================
-	// * 变量获取 - 指针与边框
+	// * 静态数据 - 秘籍触发
 	//				（~struct~DrillSCo）
 	//==============================
 	DrillUp.drill_SCo_initDrillSCo = function( dataFrom ){
 		var data = {};
+		
 		data['enable'] = String( dataFrom["初始是否开启"] || "true") == "true";
 		data['commonEventId'] = Number( dataFrom["执行的公共事件"] || 0);
 		data['pipeType'] = String( dataFrom["公共事件执行方式"] || "串行");
+		
+		data['mouse_cur'] = 0;
 		data['mouse_enable'] = String( dataFrom["是否启用鼠标触发"] || "false") == "true";
 		if( dataFrom["鼠标触发顺序"] != undefined &&
 			dataFrom["鼠标触发顺序"] != "" ){
@@ -534,6 +552,8 @@
 		}else{
 			data['mouse_seq'] = [];
 		}
+		
+		data['key_cur'] = 0;
 		data['key_enable'] = String( dataFrom["是否启用键盘触发"] || "false") == "true";
 		if( dataFrom["键盘触发顺序"] != undefined &&
 			dataFrom["键盘触发顺序"] != "" ){
@@ -541,6 +561,8 @@
 		}else{
 			data['key_seq'] = [];
 		}
+		
+		data['pad_cur'] = 0;
 		data['pad_enable'] = String( dataFrom["是否启用手柄触发"] || "false") == "true";
 		if( dataFrom["手柄触发顺序"] != undefined &&
 			dataFrom["手柄触发顺序"] != "" ){
@@ -548,9 +570,7 @@
 		}else{
 			data['pad_seq'] = [];
 		}
-		data['mouse_cur'] = 0;
-		data['key_cur'] = 0;
-		data['pad_cur'] = 0;
+		
 		return data;
 	}
 	
@@ -566,6 +586,7 @@
 			DrillUp.g_SCo_list[i] = null;
 		}
 	}
+	
 
 //=============================================================================
 // * >>>>基于插件检测>>>>
@@ -574,14 +595,17 @@ if( Imported.Drill_CoreOfInput ){
 	
 	
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _drill_SCo_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_SCo_pluginCommand.call(this, command, args);
 	if( command === ">开启秘籍" ){
 		if( args.length == 2 ){
-			var temp1 = Number(args[1]) - 1;
+			var temp1 = String(args[1]);
+			temp1 = temp1.replace("秘籍[","");
+			temp1 = temp1.replace("]","");
+			temp1 = Number(temp1) - 1;
 			var data = $gameSystem._drill_SCo_list[temp1];
 			if( data == undefined ){ return; }
 			data['enable'] = true;
@@ -589,7 +613,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	};
 	if( command === ">关闭秘籍" ){
 		if( args.length == 2 ){
-			var temp1 = Number(args[1]) - 1;
+			var temp1 = String(args[1]);
+			temp1 = temp1.replace("秘籍[","");
+			temp1 = temp1.replace("]","");
+			temp1 = Number(temp1) - 1;
 			var data = $gameSystem._drill_SCo_list[temp1];
 			if( data == undefined ){ return; }
 			data['enable'] = false;
@@ -599,7 +626,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -702,11 +729,15 @@ Game_System.prototype.drill_SCo_checkSysData_Private = function() {
 };
 
 
+
 //=============================================================================
-// ** 地图界面
+// ** ☆秘籍控制
+//
+//			说明：	> 此模块专门控制 秘籍的序列，序列满后执行公共事件。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 帧刷新
+// * 秘籍控制 - 帧刷新绑定（地图界面）
 //==============================
 var _drill_SCo_m_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {
@@ -716,7 +747,7 @@ Scene_Map.prototype.update = function() {
 	}
 }
 //==============================
-// * 帧刷新 - 输入监听
+// * 秘籍控制 - 帧刷新（地图界面）
 //==============================
 Scene_Map.prototype.drill_SCo_updateInput = function() {
 	for(var i=0; i<$gameSystem._drill_SCo_list.length; i++){
@@ -737,12 +768,13 @@ Scene_Map.prototype.drill_SCo_updateInput = function() {
 			if( this.drill_SCo_isAnyOnMouse() ){
 				var seq = data['mouse_seq'][ Math.floor(data['mouse_cur']) ];
 				if( this.drill_SCo_isOnMouse( seq ) ){
-					data['mouse_cur'] += 1;
+					data['mouse_cur'] += 1;	//（符合则索引+1，不符合则归零）
 				}else{
 					data['mouse_cur'] = 0;
 				}
 			}
 		}
+		
 		// > 键盘监听
 		if( data['key_enable'] == true ){
 			if( data['key_seq'].length == 0 ){ continue; }
@@ -755,13 +787,14 @@ Scene_Map.prototype.drill_SCo_updateInput = function() {
 			// > 序列+1
 			if( Input.drill_isAnyKeyReleased() ){
 				var seq = data['key_seq'][ Math.floor(data['key_cur']) ];
-				if( Input.drill_isKeyReleased( String(seq).toLowerCase() ) ){
-					data['key_cur'] += 1;
+				if( Input.drill_isKeyReleased( String(seq).toLowerCase() ) ){	//（物理按键监听）
+					data['key_cur'] += 1;	//（符合则索引+1，不符合则归零）
 				}else{
 					data['key_cur'] = 0;
 				}
 			}
 		}
+		
 		// > 手柄监听
 		if( data['pad_enable'] == true ){
 			if( data['pad_seq'].length == 0 ){ continue; }
@@ -774,8 +807,8 @@ Scene_Map.prototype.drill_SCo_updateInput = function() {
 			// > 序列+1
 			if( Input.drill_isAnyPadReleased() ){
 				var seq = data['pad_seq'][ Math.floor(data['pad_cur']) ];
-				if( Input.drill_isPadReleased( String(seq).toUpperCase() ) ){
-					data['pad_cur'] += 1;
+				if( Input.drill_isPadReleased( String(seq).toUpperCase() ) ){	//（物理按键监听）
+					data['pad_cur'] += 1;	//（符合则索引+1，不符合则归零）
 				}else{
 					data['pad_cur'] = 0;
 				}
@@ -785,41 +818,39 @@ Scene_Map.prototype.drill_SCo_updateInput = function() {
 	}
 }
 //==============================
-// * 帧刷新 - 执行公共事件
+// * 秘籍控制 - 『执行公共事件』（地图界面）
 //==============================
 Scene_Map.prototype.drill_SCo_doCommonEvent = function( data ){
-	// > 战斗界面的公共事件
-	if( SceneManager._scene.constructor.name === "Scene_Battle" ){
+	
+	// > 插件【地图-多线程】
+	if( Imported.Drill_LayerCommandThread ){
+		var e_data = {
+			'type':"公共事件",
+			'pipeType': data['pipeType'],
+			'commonEventId': data['commonEventId'],
+		};
+		$gameMap.drill_LCT_addPipeEvent( e_data );
+		
+	// > 默认执行
+	}else{
 		$gameTemp.reserveCommonEvent( data['commonEventId'] );
-	}
-	// > 地图界面的公共事件
-	if( SceneManager._scene.constructor.name === "Scene_Map" ){
-		if( Imported.Drill_LayerCommandThread ){
-			var e_data = {
-				'type':"公共事件",
-				'pipeType': data['pipeType'],
-				'commonEventId': data['commonEventId'],
-			};
-			$gameMap.drill_LCT_addPipeEvent( e_data );
-		}else{
-			$gameTemp.reserveCommonEvent( data['commonEventId'] );
-		}
 	}
 }
 //==============================
-// * 帧刷新 - 鼠标按下监听
+// * 秘籍控制 - 鼠标 - 按下监听
+//
+//			说明：	> 鼠标滚轮是持续性动作，这里不算记录，否则 上滚 + 上滚 无法识别。
 //==============================
 Scene_Map.prototype.drill_SCo_isAnyOnMouse = function() {
 	if( TouchInput.drill_isLeftReleased() ){ return true };
 	if( TouchInput.drill_isRightReleased() ){ return true };
 	if( TouchInput.drill_isMiddleReleased() ){ return true };
-	//鼠标滚轮是持续性动作，这里不能记录，否则 上滚 + 上滚 无法识别。
 	return false;	
 };
 //==============================
-// * 帧刷新 - 鼠标按下类型监听
+// * 秘籍控制 - 鼠标 - 按下类型监听
 //==============================
-Scene_Map.prototype.drill_SCo_isOnMouse = function( type ) {
+Scene_Map.prototype.drill_SCo_isOnMouse = function( type ){
 	if( type == "左键释放[一帧]" ){
 		if( TouchInput.drill_isLeftReleased() ){ return true };
 	}else if( type == "右键释放[一帧]" ){
@@ -830,11 +861,9 @@ Scene_Map.prototype.drill_SCo_isOnMouse = function( type ) {
 	return false;	
 };
 
-//=============================================================================
-// ** 战斗界面
-//=============================================================================
+
 //==============================
-// * 帧刷新
+// * 秘籍控制 - 帧刷新绑定（战斗界面）
 //==============================
 var _drill_SCo_b_update = Scene_Battle.prototype.update;
 Scene_Battle.prototype.update = function() {
@@ -844,19 +873,23 @@ Scene_Battle.prototype.update = function() {
 	}
 }
 //==============================
-// * 帧刷新 - 输入监听
+// * 秘籍控制 - 帧刷新（战斗界面）
 //==============================
 Scene_Battle.prototype.drill_SCo_updateInput = Scene_Map.prototype.drill_SCo_updateInput;
 //==============================
-// * 帧刷新 - 执行公共事件
+// * 秘籍控制 - 『执行公共事件』（战斗界面）
 //==============================
-Scene_Battle.prototype.drill_SCo_doCommonEvent = Scene_Map.prototype.drill_SCo_doCommonEvent;
+Scene_Battle.prototype.drill_SCo_doCommonEvent = function( data ){
+	
+	// > 默认执行
+	$gameTemp.reserveCommonEvent( data['commonEventId'] );
+}
 //==============================
-// * 帧刷新 - 鼠标按下监听
+// * 秘籍控制 - 鼠标 - 按下监听
 //==============================
 Scene_Battle.prototype.drill_SCo_isAnyOnMouse = Scene_Map.prototype.drill_SCo_isAnyOnMouse;
 //==============================
-// * 帧刷新 - 鼠标按下类型监听
+// * 秘籍控制 - 鼠标 - 按下类型监听
 //==============================
 Scene_Battle.prototype.drill_SCo_isOnMouse = Scene_Map.prototype.drill_SCo_isOnMouse;
 

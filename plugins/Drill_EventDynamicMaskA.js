@@ -177,7 +177,7 @@
  * 1."高级透视镜变量[21]"均能适配可选设定中
  *   "高级透视镜[2]"的 绑定、移动、变化 等的用法。
  * 2."编号[100-200]"指从id为100至200的范围中，找出一个未创建的编号。
- * 3.使用变量获取一个未使用的自动编号，然后创建 高级透视镜，
+ * 3.使用静态数据一个未使用的自动编号，然后创建 高级透视镜，
  *   创建后设置该 高级透视镜 的生命，实现时效结束后自动清除。
  *   通过上述流程，可以使得 永久有效的高级透视镜 变成临时的照明功能。
  * 4.由于生命结束后自动销毁，下一次获取自动编号时，
@@ -1677,12 +1677,14 @@
 //					->贴图 添加/删除
 //					->贴图 帧刷新
 //				->优化
-//					x->资源预加载
 //					->事件未显示时不开遮罩
 //		
 //		
 //		★家谱：
 //			大家族-动态遮罩
+//		
+//		★脚本文档：
+//			无
 //		
 //		★插件私有类：
 //			无
@@ -1759,7 +1761,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_EventDynamicMaskA = true;
@@ -1768,7 +1770,7 @@
 
 
 	//==============================
-	// * 变量获取 - 透视镜
+	// * 静态数据 - 透视镜
 	//				（~struct~EDMAChildSprite）
 	//==============================
 	DrillUp.drill_EDMA_childSpriteInit = function( dataFrom ){
@@ -2023,7 +2025,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 							$gameMap.drill_EDMA_addSimplePerspect_characterId( ch_id, Number(temp2)-1 );
 						}
 					}
-					if( temp2 == "清除" || temp2 == "关闭" ){
+					if( temp2 == "清除" || temp2 == "关闭" || temp2 == "禁用" ){
 						for( var j=0; j < chars.length; j++ ){
 							var ch_id = chars[j];
 							$gameMap.drill_EDMA_removeSimplePerspect_characterId( ch_id );
@@ -2039,7 +2041,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 						temp2 = Number(temp2);
 						$gameMap.drill_EDMA_addSimplePerspect_mouse( Number(temp2)-1 );
 					}
-					if( temp2 == "清除" || temp2 == "关闭" ){
+					if( temp2 == "清除" || temp2 == "关闭" || temp2 == "禁用" ){
 						$gameMap.drill_EDMA_removeSimplePerspect_mouse();
 					}
 				}
@@ -2055,7 +2057,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 							$gameMap.drill_EDMA_addSimplePerspect_picId( pic_id, Number(temp2)-1 );
 						}
 					}
-					if( temp2 == "清除" || temp2 == "关闭" ){
+					if( temp2 == "清除" || temp2 == "关闭" || temp2 == "禁用" ){
 						for( var j=0; j < pics.length; j++ ){
 							var pic_id = pics[j];
 							$gameMap.drill_EDMA_removeSimplePerspect_picId( pic_id );
@@ -2407,7 +2409,7 @@ Game_Screen.prototype.drill_EDMA_isPictureExist = function( pic_id ){
 };
 
 
-//（这里不考虑 资源预加载，事件贴图本身开关就有延迟）
+//（这里不考虑资源的 预加载，事件贴图本身开关就有延迟）
 
 
 //=============================================================================
@@ -2446,7 +2448,7 @@ Game_Event.prototype.drill_EDMA_setup = function() {
 							temp1 = temp1.replace("]","");
 							$gameMap.drill_EDMA_addSimplePerspect_characterId( this._eventId, Number(temp1)-1 );
 						}
-						if( temp1 == "清除" || temp1 == "关闭" ){
+						if( temp1 == "清除" || temp1 == "关闭" || temp1 == "禁用" ){
 							$gameMap.drill_EDMA_removeSimplePerspect_characterId( this._eventId );
 						}
 					}

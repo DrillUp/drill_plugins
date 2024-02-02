@@ -60,6 +60,9 @@
  *   (3.边角可以根据资源划分成4等分，
  *      分别放在窗口的 左上、右上、左下、右下 位置。
  *   (4.详细内容去看看文档的图解。
+ * 预加载：
+ *   (1.插件中的资源会被反复使用，所以插件默认所有资源都预加载，
+ *      预加载相关介绍可以去看看"1.系统 > 关于预加载.docx"。
  * 设计：
  *   (1.你可以将对话框的 边框边角 做成动态的GIF。
  *      也可以配置多个对话框皮肤，在不同的剧情中切换。
@@ -690,7 +693,7 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^3)*o(贴图处理) 每帧
-//		★性能测试因素	对话管理层
+//		★性能测试因素	对话框管理层
 //		★性能测试消耗	31.29ms（Drill_DSk_BorderSprite.prototype.update） 17.52ms（drill_DSk_getStyle）
 //		★最坏情况		暂无（由于对话框数量有限，不能增加更多性能消耗）
 //		★备注			这里的消耗比我想象的要高。
@@ -730,6 +733,9 @@
 //		★家谱：
 //			无
 //		
+//		★脚本文档：
+//			无
+//		
 //		★插件私有类：
 //			* 对话框边贴图【Drill_DSk_BorderSprite】
 //		
@@ -763,7 +769,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_DialogSkin = true;
@@ -771,7 +777,7 @@
 	DrillUp.parameters = PluginManager.parameters('Drill_DialogSkin');
 
 	//==============================
-	// * 变量获取 - 样式
+	// * 静态数据 - 样式
 	//				（~struct~DrillDSkStyle）
 	//==============================
 	DrillUp.drill_DSk_initStyle = function( dataFrom ) {
@@ -1022,36 +1028,49 @@ Game_System.prototype.drill_DSk_getStyle = function( tag ){
 
 
 //=============================================================================
-// * 资源预加载
+// ** ☆预加载
+//
+//			说明：	> 用过的bitmap，全部标记不删除，防止刷菜单时重建导致浪费资源。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
-//==============================
-// * 临时变量 - 预加载 版本校验
-//==============================
-if( Utils.generateRuntimeId == undefined ){
-	alert( DrillUp.drill_DSk_getPluginTip_LowVersion() );
-}
-//==============================
-// * 临时变量 - 资源预加载
-//==============================
-var _drill_DSk_temp_initialize = Game_Temp.prototype.initialize;
-Game_Temp.prototype.initialize = function(){
-    _drill_DSk_temp_initialize.call(this);
-	
-	// > 皮肤预加载
-	this._drill_DSk_cacheId = Utils.generateRuntimeId();	//资源缓存id
-	this._drill_DSk_skin = [];
-	for(var i=0; i < DrillUp.g_DSk_list.length; i++ ){
-		var temp_data = DrillUp.g_DSk_list[i];
-		if( temp_data['window_type'] == "自定义窗口皮肤" && temp_data['window_sys_src'] != "" ){
-			var bitmap = ImageManager.reserveBitmap( "img/Menu__ui_message/", temp_data['window_sys_src'], 0, true, this._drill_DSk_cacheId );
-			this._drill_DSk_skin.push( bitmap );
-		}
-		if( temp_data['window_type'] == "自定义背景图片" && temp_data['window_pic_src'] != "" ){
-			var bitmap = ImageManager.reserveBitmap( "img/Menu__ui_message/", temp_data['window_pic_src'], 0, true, this._drill_DSk_cacheId );
-			this._drill_DSk_skin.push( bitmap );
+DrillUp.g_DSk_preloadEnabled = true;		//（预加载开关）
+if( DrillUp.g_DSk_preloadEnabled == true ){
+	//==============================
+	// * 预加载 - 初始化
+	//==============================
+	var _drill_DSk_preload_initialize = Game_Temp.prototype.initialize;
+	Game_Temp.prototype.initialize = function() {
+		_drill_DSk_preload_initialize.call(this);
+		this.drill_DSk_preloadInit();
+	}
+	//==============================
+	// * 预加载 - 版本校验
+	//==============================
+	if( Utils.generateRuntimeId == undefined ){
+		alert( DrillUp.drill_DSk_getPluginTip_LowVersion() );
+	}
+	//==============================
+	// * 预加载 - 执行资源预加载
+	//
+	//			说明：	> 遍历全部资源，提前预加载标记过的资源。
+	//==============================
+	Game_Temp.prototype.drill_DSk_preloadInit = function() {
+		this._drill_DSk_cacheId = Utils.generateRuntimeId();	//资源缓存id
+		this._drill_DSk_preloadTank = [];
+		for(var i=0; i < DrillUp.g_DSk_list.length; i++ ){
+			var temp_data = DrillUp.g_DSk_list[i];
+			if( temp_data['window_type'] == "自定义窗口皮肤" && temp_data['window_sys_src'] != "" ){
+				var bitmap = ImageManager.reserveBitmap( "img/Menu__ui_message/", temp_data['window_sys_src'], 0, true, this._drill_DSk_cacheId );
+				this._drill_DSk_preloadTank.push( bitmap );
+			}
+			if( temp_data['window_type'] == "自定义背景图片" && temp_data['window_pic_src'] != "" ){
+				var bitmap = ImageManager.reserveBitmap( "img/Menu__ui_message/", temp_data['window_pic_src'], 0, true, this._drill_DSk_cacheId );
+				this._drill_DSk_preloadTank.push( bitmap );
+			}
 		}
 	}
 }
+
 
 
 //=============================================================================

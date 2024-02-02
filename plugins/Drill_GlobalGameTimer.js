@@ -343,6 +343,9 @@
 //		★家谱：
 //			无
 //		
+//		★脚本文档：
+//			无
+//		
 //		★插件私有类：
 //			无
 //		
@@ -376,7 +379,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_GlobalGameTimer = true;
@@ -384,7 +387,7 @@
     DrillUp.parameters = PluginManager.parameters('Drill_GlobalGameTimer');
 	
 	//==============================
-	// * 变量获取 - 定时开关
+	// * 静态数据 - 定时开关
 	//				（~struct~TimingSwitch）
 	//==============================
 	DrillUp.drill_GGT_initTimingSwitch = function( dataFrom ) {
@@ -699,8 +702,8 @@ StorageManager.drill_GGT_saveToLocalFile = function( json_str ){
 	// > 加密
 	var data = LZString.compressToBase64( json_str );
 	
-	// > 文件夹路径自动创建
-	if (!fs.existsSync(dirPath)) {
+	// > 文件夹路径自动创建【生成文件夹】
+	if(!fs.existsSync(dirPath) ){
 		fs.mkdirSync(dirPath);
 	}
 	
@@ -726,7 +729,7 @@ StorageManager.drill_GGT_loadFromLocalFile = function(){
 // * 文件 - 文件路径
 //==============================
 StorageManager.drill_GGT_localFilePath = function(){
-    return this.localFileDirectoryPath() + "drill_timer.rpgsave";
+    return this.localFileDirectoryPath() + "drill_timer.rpgsave";	//【生成文件】
 };
 //==============================
 // * 网页 - 存储

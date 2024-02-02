@@ -1451,6 +1451,9 @@
 //		★家谱：
 //			无
 //		
+//		★脚本文档：
+//			无
+//		
 //		★插件私有类：
 //			* 变量数组【Game_NumberArray】
 //		
@@ -1501,7 +1504,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_CoreOfNumberArray = true;
@@ -1509,7 +1512,7 @@
     DrillUp.parameters = PluginManager.parameters('Drill_CoreOfNumberArray');
 	
 	//==============================
-	// * 变量获取 - 变量数组
+	// * 静态数据 - 变量数组
 	//				(~struct~DrillNATank)
 	//==============================
 	DrillUp.drill_CONA_initNATank = function( dataFrom ){

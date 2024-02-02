@@ -45,6 +45,13 @@
  *   (1.标题设置中有 菜单层级 和 图片层级。
  *      菜单层级分 菜单前面层和菜单后面层 ，对应 标题窗口元素 的前面和后面。
  *      相同 菜单层级 下，背景、魔法圈、gif都根据 图片层级 先后排序。
+ * 预加载：
+ *   (1.该插件默认对所有资源预加载，也就是说开游戏时就加载资源。
+ *      但注意，如果你一开始游戏就进入标题界面，那么这段加载的时间就不够了。
+ *   (2.如果你配置的资源数量极其庞大（比如100多张资源），那么系统加载资源会
+ *      消耗很多时间。由于加载是并行的，所以加载期间，资源图片会延迟显示。
+ *   (3.若出现了资源延迟显示的情况，建议配置 启动界面 先加载单张图片，让玩
+ *      家先看2秒的logo，延长预加载的时间。
  * 细节：
  *   (1.由于菜单界面不能执行插件指令，
  *      所以这里的平铺GIF并不能实现转场动画效果。
@@ -804,6 +811,9 @@
 //		★家谱：
 //			无
 //		
+//		★脚本文档：
+//			无
+//		
 //		★插件私有类：
 //			无
 //		
@@ -847,7 +857,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_TitleTiledGif = true;
@@ -855,7 +865,7 @@
 	DrillUp.parameters = PluginManager.parameters('Drill_TitleTiledGif');
 	
 	//==============================
-	// * 变量获取 - 平铺GIF
+	// * 静态数据 - 平铺GIF
 	//				（~struct~TitleTiledGIF）
 	//==============================
 	DrillUp.drill_TTG_tiledGifInit = function( dataFrom ) {
@@ -1004,14 +1014,17 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 
 
 //=============================================================================
-// ** 资源预加载
+// ** ☆预加载（标题）
+//
+//			说明：	> 进入标题界面前，对标题资源进行一次性全部加载。但此资源可以被删除。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// ** 资源预加载 - 初始化
+// * 预加载 - 初始化
 //==============================
-var _drill_TTG_temp_initialize = Game_Temp.prototype.initialize;
+var _drill_TTG_preload_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {
-	_drill_TTG_temp_initialize.call(this);
+	_drill_TTG_preload_initialize.call(this);
 	
     this._drill_TTG_preloadTank = [];			//bitmap容器
 	for (var i = 0; i < DrillUp.g_TTG_list.length; i++) {

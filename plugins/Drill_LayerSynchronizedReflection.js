@@ -70,7 +70,7 @@
  *      以此看起来像是在镜子中一样。
  * 设计：
  *   (1.你可以直接画一张大的镜面图，用于特殊的解谜，将密码写在镜面上。
- *   (2.你可以像镜像管理层那样画一个大镜子，镜子的反射可以不一致。
+ *   (2.你可以像 镜像管理层示例 那样画一个大镜子，镜子的反射可以不一致。
  *      镜子里的敌人向你的镜像发动攻击命中后，你会受到实质的伤害。
  *
  * -----------------------------------------------------------------------------
@@ -199,7 +199,7 @@
  * 工作类型：   持续执行
  * 时间复杂度： o(n)*o(贴图处理) 每帧
  * 测试方法：   开启地图的同步镜像开关，设置图块。
- *              去物体管理层、地理管理层、镜像管理层跑一圈测试就可以了。
+ *              去镜像管理层跑一圈测试就可以了。
  * 测试结果：   200个事件的地图中，平均消耗为：【107.95ms】
  *              100个事件的地图中，平均消耗为：【74.94ms】
  *               50个事件的地图中，平均消耗为：【52.21ms】
@@ -850,6 +850,9 @@
 //		★家谱：
 //			无
 //		
+//		★脚本文档：
+//			无
+//		
 //		★插件私有类：
 //			* 镜像贴图【Drill_Sprite_LSR】
 //			* 地图图块遮罩【Drill_Sprite_LSR_Mask】
@@ -909,7 +912,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_LayerSynchronizedReflection = true;
@@ -987,10 +990,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				return;
 			}
 			if( temp1 == "毛玻璃效果" ){ 
-				if( temp2 == "启用" || temp2 === "开启" ){
+				if( temp2 == "启用" || temp2 == "开启" || temp2 == "打开" || temp2 == "启动" ){
 					$gameMap._drill_LSR_blurEnable = true;
 				}
-				if( temp2 == "禁用" || temp2 === "关闭" ){
+				if( temp2 == "关闭" || temp2 == "禁用" ){
 					$gameMap._drill_LSR_blurEnable = false;
 				}
 				return;
@@ -1253,10 +1256,10 @@ Game_Map.prototype.drill_LSR_setupReflection = function() {
 		if( text_[0] === "=>图块同步镜像" ){
 			if( text_.length == 2 ){
 				var temp1 = String(text_[1]);
-				if( temp1 === "启用" || temp1 === "开启" ){
+				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
 					this._drill_LSR_enable = true;
 				}
-				if( temp1 === "禁用" || temp1 === "关闭" ){
+				if( temp1 == "关闭" || temp1 == "禁用" ){
 					this._drill_LSR_enable = false;
 				}
 			}
@@ -1270,10 +1273,10 @@ Game_Map.prototype.drill_LSR_setupReflection = function() {
 					$gameSystem._drill_LSR_tileEdge = Number(temp2 || 0);
 				}
 				if( temp1 === "毛玻璃效果" ){
-					if( temp1 === "启用" || temp1 === "开启" ){
+					if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
 						this._drill_LSR_blurEnable = true;
 					}
-					if( temp1 === "禁用" || temp1 === "关闭" ){
+					if( temp1 == "关闭" || temp1 == "禁用" ){
 						this._drill_LSR_blurEnable = false;
 					}
 				}

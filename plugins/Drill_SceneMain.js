@@ -2605,6 +2605,9 @@
 //		★家谱：
 //			无
 //		
+//		★脚本文档：
+//			无
+//		
 //		★插件私有类：
 //			* 角色固定框【Drill_SMa_ActorSprite】
 //			* 对象界面【Scene_Drill_SMa_Formation】
@@ -2684,7 +2687,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_SceneMain = true;
@@ -2711,7 +2714,7 @@
 	//			~struct~DrillActorGroupMoving:		角色固定框组设置 > 固定框组移动动画
 		
 	//==============================
-	// * 变量获取 - 金钱显示 - 金钱窗口参数（必须写在前面）
+	// * 静态数据 - 金钱显示 - 金钱窗口参数（必须写在前面）
 	//				（~struct~DrillSMaGoldWindow）
 	//==============================
 	DrillUp.drill_SMa_initGoldWindow = function( dataFrom ) {
@@ -2745,7 +2748,7 @@
 		return data;
 	}
 	//==============================
-	// * 变量获取 - 金钱显示 - 金钱数字参数（必须写在前面）
+	// * 静态数据 - 金钱显示 - 金钱数字参数（必须写在前面）
 	//				（~struct~DrillSMaGoldNumber）
 	//==============================
 	DrillUp.drill_SMa_initGoldNumber = function( dataFrom ) {
@@ -2759,7 +2762,7 @@
 	}
 	
 	//==============================
-	// * 变量获取 - 指针与边框
+	// * 静态数据 - 指针与边框
 	//				（~struct~DrillCursor）
 	//==============================
 	DrillUp.drill_SMa_initMenuCursor = function( dataFrom ) {
@@ -2779,7 +2782,7 @@
 		return data;
 	}
 	//==============================
-	// * 变量获取 - 菜单选项 - 菜单选项窗口参数（必须写在前面）
+	// * 静态数据 - 菜单选项 - 菜单选项窗口参数（必须写在前面）
 	//				（~struct~DrillSMaCommandWindow）
 	//==============================
 	DrillUp.drill_SMa_initCommandWindow = function( dataFrom ) {
@@ -2822,7 +2825,7 @@
 		return data;
 	}
 	//==============================
-	// * 变量获取 - 菜单选项 - 菜单选项按钮组（必须写在前面）
+	// * 静态数据 - 菜单选项 - 菜单选项按钮组（必须写在前面）
 	//				（~struct~DrillSMaCommandButton）
 	//==============================
 	DrillUp.drill_SMa_initCommandButton = function( dataFrom ) {
@@ -2881,7 +2884,7 @@
 	
 	
 	//==============================
-	// * 变量获取 - 角色头像 - 角色头像按钮组（必须写在前面）
+	// * 静态数据 - 角色头像 - 角色头像按钮组（必须写在前面）
 	//				（~struct~DrillSMaActorButton）
 	//==============================
 	DrillUp.drill_SMa_initActorAvatarButton = function( dataFrom ) {
@@ -2914,7 +2917,7 @@
 	
 	
 	//==============================
-	// * 变量获取 - 角色固定框样式 - 参数条
+	// * 静态数据 - 角色固定框样式 - 参数条
 	//				（~struct~DrillActorMeter）
 	//==============================
 	DrillUp.drill_SMa_initActorBoardMeter = function( dataFrom ) {
@@ -2989,7 +2992,7 @@
 		return data;
 	}
 	//==============================
-	// * 变量获取 - 角色固定框样式 - 参数数字
+	// * 静态数据 - 角色固定框样式 - 参数数字
 	//				（~struct~DrillActorNumber）
 	//==============================
 	DrillUp.drill_SMa_initActorBoardNumber = function( dataFrom ) {
@@ -3036,7 +3039,7 @@
 		return data;
 	}
 	//==============================
-	// * 变量获取 - 角色固定框样式
+	// * 静态数据 - 角色固定框样式
 	//				（~struct~DrillSMaActorBoardStyle）
 	//==============================
 	DrillUp.drill_SMa_initActorBoardStyle = function( dataFrom ) {
@@ -3152,7 +3155,7 @@
 		return data;
 	}
 	//==============================
-	// * 变量获取 - 角色框设置
+	// * 静态数据 - 角色框设置
 	//				（~struct~DrillSMaActorBoardBind）
 	//==============================
 	DrillUp.drill_SMa_initActorBoardBind = function( dataFrom ) {
@@ -3183,7 +3186,7 @@
 		return data;
 	}
 	//==============================
-	// * 变量获取 - 角色固定框组设置
+	// * 静态数据 - 角色固定框组设置
 	//				（~struct~DrillSMaActorBoardArrange）
 	//==============================
 	DrillUp.drill_SMa_initActorBoardArrange = function( dataFrom ) {

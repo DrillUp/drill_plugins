@@ -126,7 +126,7 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
  * 时间复杂度： o(n^3)*o(贴图处理) 每帧
- * 测试方法：   开启时间计时器，并进行测试。
+ * 测试方法：   UI管理层开启时间计时器，并进行测试。
  * 测试结果：   地图界面中，平均消耗为：【34.38ms】
  *              战斗界面中，平均消耗为：【26.28ms】
  * 
@@ -419,6 +419,9 @@
 //		★家谱：
 //			无
 //		
+//		★脚本文档：
+//			无
+//		
 //		★插件私有类：
 //			* 时间计时器【Drill_GTH_TimerSprite】
 //		
@@ -462,7 +465,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_GaugeTimerHud = true;
@@ -471,7 +474,7 @@
 	
 	
 	//==============================
-	// * 变量获取 - 计时框样式
+	// * 静态数据 - 计时框样式
 	//				（~struct~DrillGTHStyle）
 	//==============================
 	DrillUp.drill_GTH_initParam = function( dataFrom ) {
@@ -589,10 +592,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			}
 			
 			if( type == "到零后保持框显示" ){
-				if( temp1 == "开启" ){
+				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
 					$gameSystem._drill_GTH_keepShowing = true;
 				}
-				if( temp1 == "关闭" ){
+				if( temp1 == "关闭" || temp1 == "禁用" ){
 					$gameSystem._drill_GTH_keepShowing = false;
 				}
 			}

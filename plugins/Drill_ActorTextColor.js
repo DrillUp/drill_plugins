@@ -165,7 +165,7 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
 //			->☆插件指令
 //			->☆存储数据
 //			->☆颜色数据
@@ -186,6 +186,9 @@
 //		
 //		
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -236,7 +239,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_ActorTextColor = true;
@@ -639,7 +642,7 @@ Window_Base.prototype.actorName = function( n ){
 	return result;
 };
 //==============================
-// * 指代字符 - 队伍成员名字（\p[1]）
+// * 指代字符 - 角色队伍成员名字（\p[1]）
 //==============================
 var _drill_ATC_window_partyMemberName = Window_Base.prototype.partyMemberName;
 Window_Base.prototype.partyMemberName = function( n ){
@@ -671,7 +674,7 @@ Window_Base.prototype.drill_COWC_actorNickname = function( n ){
 	return result;
 };
 //==============================
-// * 指代字符 - 队伍成员昵称（\pn[1]）
+// * 指代字符 - 角色队伍成员昵称（\pn[1]）
 //==============================
 var _drill_ATC_COWC_partyNickname = Window_Base.prototype.drill_COWC_partyNickname;
 Window_Base.prototype.drill_COWC_partyNickname = function( n ){

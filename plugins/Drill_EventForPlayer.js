@@ -81,7 +81,7 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
  * 时间复杂度： o(n^2) 每帧
- * 测试方法：   绑定了5个事件后，在地图之间来回穿梭。
+ * 测试方法：   绑定了5个事件后，在物体管理层和其他管理层穿梭之间来回穿梭。
  * 测试结果：   地图界面中，消耗为：【5ms以下】
  * 
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
@@ -138,6 +138,9 @@
 //		★家谱：
 //			无
 //		
+//		★脚本文档：
+//			无
+//		
 //		★插件私有类：
 //			无
 //		
@@ -161,7 +164,10 @@
 	//==============================
 	var DrillUp = DrillUp || {}; 
 	DrillUp.g_EFP_PluginTip_curName = "Drill_EventForPlayer.js 物体管理-玩家的事件";
-	DrillUp.g_EFP_PluginTip_baseList = ["Drill_EventDuplicator.js 物体管理-事件复制器"];
+	DrillUp.g_EFP_PluginTip_baseList = [
+		"Drill_EventSelfSwitch.js 物体-独立开关",
+		"Drill_EventDuplicator.js 物体管理-事件复制器"
+	];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
@@ -202,7 +208,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_EventForPlayer = true;
@@ -214,7 +220,8 @@
 //=============================================================================
 // * >>>>基于插件检测>>>>
 //=============================================================================
-if( Imported.Drill_EventDuplicator ){
+if( Imported.Drill_EventSelfSwitch &&
+	Imported.Drill_EventDuplicator ){
 	
 	
 //=============================================================================
@@ -251,12 +258,12 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp1 = temp1.replace("]","");
 				
 				if( temp2 == "事件贴图与玩家同步" ){
-					if( temp3 == "开启" ){
+					if( temp3 == "启用" || temp3 == "开启" || temp3 == "打开" || temp3 == "启动" ){
 						var data = $gameSystem.drill_EFP_getBindByName( temp1 );
 						data['spriteSynchronized'] = true;
 						$gameSystem.drill_EFP_setBindByName( data['eventName'], data );
 					}
-					if( temp3 == "关闭" ){
+					if( temp3 == "关闭" || temp3 == "禁用" ){
 						var data = $gameSystem.drill_EFP_getBindByName( temp1 );
 						data['spriteSynchronized'] = false;
 						$gameSystem.drill_EFP_setBindByName( data['eventName'], data );
@@ -635,14 +642,14 @@ Game_Map.prototype.drill_EFP_getCurMapEventByName = function( eventName ) {
 //==============================
 // * 独立开关 - 赋值捕获
 //==============================
-var _drill_EFP_switch_setValue = Game_SelfSwitches.prototype.setValue;
-Game_SelfSwitches.prototype.setValue = function( key, value ){
-	_drill_EFP_switch_setValue.call( this, key, value );
+var _drill_EFP_switch_valueChanged = Game_SelfSwitches.prototype.drill_ESS_valueChanged;
+Game_SelfSwitches.prototype.drill_ESS_valueChanged = function( key, value ){
+	_drill_EFP_switch_valueChanged.call( this, key, value );
 	
 	//（key的结构：[this._mapId, this._eventId, 'A' ]）
-	if($gameMap._mapId === key[0]){
+	if( $gameMap._mapId === key[0] ){
 		
-		for(var i=0; i < $gameMap._drill_EFP_eventTank.length; i++ ){
+		for(var i = 0; i < $gameMap._drill_EFP_eventTank.length; i++ ){
 			var p_event = $gameMap._drill_EFP_eventTank[i];
 			if( p_event != null && Number(key[1]) == Number(p_event._eventId) ){
 				

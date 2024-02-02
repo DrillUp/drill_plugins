@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        鼠标 - 目的地指向标
+ * @plugindesc [v1.4]        鼠标 - 目的地指向标
  * @author Drill_up
  * 
  * @Drill_LE_param "指向标-%d"
@@ -23,6 +23,9 @@
  * -----------------------------------------------------------------------------
  * ----插件扩展
  * 该插件可以单独使用。
+ * 可作用于：
+ *   - Drill_PlayerAllowEventMove    互动-允许操作事件移动
+ *     如果不允许操作玩家移动，那么指向标使用操作事件的位置作为起点。
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -64,8 +67,8 @@
  * 
  * 插件指令：>目的地指向标 : 显示
  * 插件指令：>目的地指向标 : 隐藏
- * 插件指令：>目的地指向标 : 切换样式 : 0
- * 插件指令：>目的地指向标 : 切换样式 : 1
+ * 插件指令：>目的地指向标 : 切换样式 : 样式[0]
+ * 插件指令：>目的地指向标 : 切换样式 : 样式[1]
  * 
  * 1.数字表示对应配置的指向标编号。
  *   0表示默认的指向标(闪烁白矩形)。
@@ -102,9 +105,11 @@
  * 修改了插件的 旋转单位 为角度。
  * [v1.3]
  * 优化了旧存档的识别与兼容。
+ * [v1.4]
+ * 优化了内部结构，并且兼容了 玩家控制事件时 鼠标指针的对象指向。
  * 
  * 
- *
+ * 
  * @param 是否初始显示
  * @type boolean
  * @on 显示
@@ -188,6 +193,7 @@
  * @desc 只用于方便区分查看的标签，不作用在插件中。
  * @default ==新的指向标样式==
  * 
+ * 
  * @param ---贴图---
  * @default 
  *
@@ -256,6 +262,7 @@
  * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
  * @default 0
  * 
+ * 
  * @param ---效果---
  * @default 
  *
@@ -264,7 +271,7 @@
  * @type boolean
  * @on 使用
  * @off 不使用
- * @desc true - 使用，false - 不使用，指向标会从玩家的位置出发，跑到目标位置。
+ * @desc true - 使用，false - 不使用，平滑运动指 目的地指向标 会从玩家的位置出发，跑到目标位置。
  * @default true
  *
  * @param 是否使用淡出效果
@@ -343,7 +350,7 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(n)*o(贴图处理) 每帧
-//		★性能测试因素	乱跑
+//		★性能测试因素	各个管理层
 //		★性能测试消耗	1.22ms（全图只有这一个sprite）
 //		★最坏情况		无
 //		★备注			无
@@ -354,15 +361,23 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			目的地指向标：
-//				->目的地获取
-//				->样式gif
-//				->缩放效果/闪烁效果
-//				->平滑移动
-//				->淡出效果
+//			->☆提示信息
+//			->☆静态数据
+//			->☆插件指令
+//			->☆存储数据
+//
+//			->☆贴图控制
+//			->目的地贴图【Drill_MDe_DestSprite】
+//				->A主体
+//				->B播放GIF
+//				->C自变化效果
+//				->D淡入淡出
 //
 //
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -379,7 +394,7 @@
 //		
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -390,7 +405,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_MouseDestination = true;
@@ -399,29 +414,35 @@
 	
 	
 	//==============================
-	// * 变量获取 - 鼠标指向标
+	// * 静态数据 - 鼠标指向标
 	//				（~struct~DrillMDeSprite）
 	//==============================
 	DrillUp.drill_MDe_initDestData = function( dataFrom ) {
 		var data = {};
+		
+		// > 贴图
 		if( dataFrom["资源-指向标GIF"] != undefined &&
 			dataFrom["资源-指向标GIF"] != "" ){
 			data['src_img'] = JSON.parse( dataFrom["资源-指向标GIF"] || [] );
 		}else{
 			data['src_img'] = [];
 		}
+		data['src_img_file'] = "img/Map__ui_mouse/";
 		data['src_img_shadow'] = String( dataFrom["资源-指向标阴影"] || "");
 		data['interval'] = Number( dataFrom["帧间隔"] || 4 );
 		data['back_run'] = String( dataFrom["是否倒放"] || "false") === "true";
+		
+		// > A主体
 		data['x'] = Number( dataFrom["偏移-指向标 X"] || 0 );
 		data['y'] = Number( dataFrom["偏移-指向标 Y"] || 0 );
 		data['opacity'] = Number( dataFrom["透明度"] || 255 );
 		data['blendMode'] = Number( dataFrom["混合模式"] || 0 );
-		data['src_bitmaps'] = [];
-		
 		data['movement_enable'] = String( dataFrom["是否使用平滑运动"] || "true") === "true";
-		data['fade_enable'] = String( dataFrom["是否使用淡出效果"] || "true") === "true";
+		
+		// > B播放GIF
 		data['rotate'] = Number( dataFrom["旋转速度"] || 0 );
+		
+		// > C自变化效果
 		data['zoom_enable'] = String( dataFrom["是否使用缩放效果"] || "false") === "true";
 		data['zoom_range'] = Number( dataFrom["缩放幅度"] || 0.08 );
 		data['zoom_speed'] = Number( dataFrom["缩放速度"] || 5.5 );
@@ -430,6 +451,9 @@
 		data['float_enable'] = String( dataFrom["是否使用漂浮效果"] || "true") === "true";
 		data['float_range'] = Number( dataFrom["漂浮幅度"] || 6 );
 		data['float_speed'] = Number( dataFrom["漂浮速度"] || 12.5 );
+		
+		// > D淡入淡出
+		data['fade_enable'] = String( dataFrom["是否使用淡出效果"] || "true") === "true";
 		
 		return data;
 	}
@@ -449,16 +473,10 @@
 			DrillUp.g_MDe_list[i] = null;
 		}
 	}
-
+	
+	
 //=============================================================================
-// ** 资源文件夹
-//=============================================================================
-ImageManager.load_MapUiMouse = function(filename) {
-    return this.loadBitmap('img/Map__ui_mouse/', filename, 0, true);
-};
-
-//=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _drill_MDe_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
@@ -478,6 +496,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var type = String(args[1]);
 			var temp1 = String(args[3]);
 			if( type == "切换样式"){
+				temp1 = temp1.replace("样式[","");
+				temp1 = temp1.replace("]","");
 				$gameSystem._drill_MDe_tarStyle = Number(temp1);
 			}
 		}
@@ -486,7 +506,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -565,15 +585,17 @@ Game_System.prototype.drill_MDe_checkSysData_Private = function() {
 	if( this._drill_MDe_tarStyle == undefined ){
 		this.drill_MDe_initSysData();
 	}
-	
 };
 
 
 //=============================================================================
-// ** 图层
+// ** ☆贴图控制
+//
+//			说明：	> 此模块专门管理 贴图 的创建与销毁。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 图层 - 创建目的地
+// * 贴图控制 - 图层 - 创建目的地
 //==============================
 var _drill_MDe_createDestination = Spriteset_Map.prototype.createDestination;
 Spriteset_Map.prototype.createDestination = function() {
@@ -581,7 +603,12 @@ Spriteset_Map.prototype.createDestination = function() {
 	this.drill_MDe_createDestination();
 };
 Spriteset_Map.prototype.drill_MDe_createDestination = function() {
-	if( this._destinationSprite ){this._tilemap.removeChild( this._destinationSprite ); }		//优化（重复创建需要去掉原来的）
+	
+	// > 销毁旧贴图
+	if( this._destinationSprite != undefined ){
+		this._tilemap.removeChild( this._destinationSprite );
+	}
+	
 	$gameSystem._drill_MDe_curStyle = $gameSystem._drill_MDe_tarStyle;
 	if( $gameSystem._drill_MDe_curStyle == 0 ){
 		// > 默认样式
@@ -596,7 +623,7 @@ Spriteset_Map.prototype.drill_MDe_createDestination = function() {
 	}
 }
 //==============================
-// * 图层 - 刷新重建
+// * 贴图控制 - 帧刷新 重建
 //==============================
 var _drill_MDe_update = Spriteset_Map.prototype.update;
 Spriteset_Map.prototype.update = function() {
@@ -607,28 +634,34 @@ Spriteset_Map.prototype.update = function() {
 		$gameSystem._drill_MDe_tarStyle != 0){
 		this.drill_MDe_createDestination();
 	}
-	if( $gameSystem._drill_MDe_curStyle != 0 &&
-		$gameSystem._drill_MDe_tarStyle == 0){
-		this.drill_MDe_createDestination();
-	}
 	$gameSystem._drill_MDe_curStyle = $gameSystem._drill_MDe_tarStyle;
 	
 	// > 显示控制
-	if( this._destinationSprite && $gameSystem._drill_MDe_visible == false){
+	if( this._destinationSprite && $gameSystem._drill_MDe_visible == false ){
 		this._destinationSprite.visible = false;
 	}
 }
 
 
+
 //=============================================================================
 // ** 目的地贴图【Drill_MDe_DestSprite】
-//
-// 			代码：	> 范围 - 仅用于可视化。
-//					> 结构 - [ ●合并 /分离/混乱] 贴图与数据合并。
-//					> 数量 - [ ●单个 /多个] 
-//					> 创建 - [ ●一次性 /自延迟/外部延迟] 
-//					> 销毁 - [ ●不考虑 /自销毁/外部销毁] 
-//					> 样式 - [不可修改/ ●自变化 /外部变化] 样式在贴图帧刷新中自变化。
+// **		
+// **		作用域：	地图界面、战斗界面
+// **		主功能：	> 定义一个 鼠标目的地 的贴图。
+// **		子功能：	->贴图
+// **					->A主体
+// **						->层级
+// **					->B播放GIF
+// **					->C自变化效果
+// **					->D淡入淡出
+// **
+// **		代码：	> 范围 - 仅用于可视化。
+// **				> 结构 - [ ●合并 /分离/混乱] 贴图与数据合并。
+// **				> 数量 - [ ●单个 /多个] 
+// **				> 创建 - [ ●一次性 /自延迟/外部延迟] 
+// **				> 销毁 - [ ●不考虑 /自销毁/外部销毁] 
+// **				> 样式 - [不可修改/ ●自变化 /外部变化] 样式在贴图帧刷新中自变化。
 //=============================================================================
 //==============================
 // * 贴图 - 定义
@@ -643,14 +676,197 @@ Drill_MDe_DestSprite.prototype.constructor = Drill_MDe_DestSprite;
 //==============================
 Drill_MDe_DestSprite.prototype.initialize = function() {
 	Sprite_Base.prototype.initialize.call(this);
+	this._drill_data = null;					//样式数据
+	this._drill_curStyle = -1;					//当前样式
+	this.drill_sprite_initSelf();				//初始化自身
+	this.drill_sprite_initChild();				//初始化子功能
+};
+//##############################
+// * 贴图 - 帧刷新【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//##############################
+Drill_MDe_DestSprite.prototype.update = function() {
+	this.drill_sprite_updateAttr_Style();			//帧刷新 - A主体 - 样式
 	
-	// > 私有属性初始化
+	if( this.drill_sprite_isReady() == false ){ return; }
+	if( this.drill_sprite_isOptimizationPassed() == false ){ return; }
+	Sprite_Base.prototype.update.call(this);
+	if( this.visible == false ){ return false; }	//（未显示，则不刷新）
+	
+	this.drill_sprite_updateAttr_Position();		//帧刷新 - A主体 - 位置
+	this.drill_sprite_updateGif();					//帧刷新 - B播放GIF
+	this.drill_sprite_updateEffect();				//帧刷新 - C自变化效果
+	this.drill_sprite_updateFade();					//帧刷新 - D淡入淡出
+};
+//##############################
+// * 贴图 - 是否就绪【标准函数】
+//
+//			参数：	> 无
+//			返回：	> visible 布尔
+//			
+//			说明：	> 可放在帧刷新函数中实时调用。
+//##############################
+Drill_MDe_DestSprite.prototype.drill_sprite_isReady = function(){
+	if( this._drill_data == null ){ return false; }		//未载入，不刷新
+	return true;
+}
+//##############################
+// * 贴图 - 优化策略【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 布尔（是否通过）
+//			
+//			说明：	> 通过时，正常帧刷新；未通过时，不执行帧刷新。
+//##############################
+Drill_MDe_DestSprite.prototype.drill_sprite_isOptimizationPassed = function(){
+    return true;	//（暂无策略）
+};
+//##############################
+// * 贴图 - 销毁【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 无
+//			
+//			说明：	> 如果需要重建时。
+//##############################
+Drill_MDe_DestSprite.prototype.drill_sprite_destroy = function(){
+	this.drill_sprite_destroyChild();
+	this.drill_sprite_destroySelf();
+};
+//##############################
+// * 贴图 - 初始化数据【标准默认值】
+//
+//			参数：	> 无
+//			返回：	> 无
+//			
+//			说明：	> data 动态参数对象（来自类初始化）
+//					  该对象包含 类所需的所有默认值。
+//					> 其中 DrillUp.drill_MDe_initStyle 提供了部分数据库设置的样式数据，
+//					  样式数据中注释的部分，仍然需要子插件根据自身情况来进行赋值。
+//##############################
+Drill_MDe_DestSprite.prototype.drill_sprite_initData = function() {
+	var data = this._drill_data;
+	
+	// > 贴图
+	if( data['src_img'] == undefined ){ data['src_img'] = [] };
+	if( data['src_img_file'] == undefined ){ data['src_img_file'] = "img/Map__ui_mouse/" };
+	if( data['src_img_shadow'] == undefined ){ data['src_img_shadow'] = "" };
+	if( data['interval'] == undefined ){ data['interval'] = 4 };
+	if( data['back_run'] == undefined ){ data['back_run'] = false };
+	
+	// > A主体
+	if( data['x'] == undefined ){ data['x'] = 0 };										//A主体 - 平移x
+	if( data['y'] == undefined ){ data['y'] = 0 };										//A主体 - 平移y
+	if( data['opacity'] == undefined ){ data['opacity'] = 255 };						//A主体 - 透明度
+	if( data['blendMode'] == undefined ){ data['blendMode'] = 0 };						//A主体 - 混合模式
+	if( data['movement_enable'] == undefined ){ data['movement_enable'] = true };		//A主体 - 是否使用平滑运动
+	
+	// > B播放GIF
+	if( data['rotate'] == undefined ){ data['rotate'] = 0 };							//B播放GIF - 旋转速度
+	
+	// > C自变化效果
+	if( data['zoom_enable'] == undefined ){ data['zoom_enable'] = false };
+	if( data['zoom_range'] == undefined ){ data['zoom_range'] = 0.08 };
+	if( data['zoom_speed'] == undefined ){ data['zoom_speed'] = 5.5 };
+	if( data['flicker_enable'] == undefined ){ data['flicker_enable'] = false };
+	if( data['flicker_speed'] == undefined ){ data['flicker_speed'] = 7.0 };
+	if( data['float_enable'] == undefined ){ data['float_enable'] = true };
+	if( data['float_range'] == undefined ){ data['float_range'] = 6 };
+	if( data['float_speed'] == undefined ){ data['float_speed'] = 12.5 };
+	
+	// > D淡入淡出
+	if( data['fade_enable'] == undefined ){ data['fade_enable'] = true };
+};
+//==============================
+// * 贴图 - 初始化自身（私有）
+//==============================
+Drill_MDe_DestSprite.prototype.drill_sprite_initSelf = function(){
+	this._drill_curSerial = -1;				//当前序列号（由于没有控制器，所以保持-1值）
+};
+//==============================
+// * 贴图 - 初始化子功能（私有）
+//==============================
+Drill_MDe_DestSprite.prototype.drill_sprite_initChild = function() {
+	this.drill_sprite_initAttr();			//初始化对象 - A主体
+	this.drill_sprite_initGif();			//初始化对象 - B播放GIF
+	this.drill_sprite_initEffect();			//初始化对象 - C自变化效果
+	this.drill_sprite_initFade();			//初始化对象 - D淡入淡出
+};
+//==============================
+// * 贴图 - 销毁子功能（私有）
+//==============================
+Drill_MDe_DestSprite.prototype.drill_sprite_destroyChild = function(){
+	this.visible = false;
+	
+	// > 销毁 - A主体
+	this.removeChild( this._drill_MDe_sprite );
+	this.removeChild( this._drill_MDe_shadow );
+	this._drill_MDe_sprite = null;
+	this._drill_MDe_shadow = null;
+};
+//==============================
+// * 贴图 - 销毁自身（私有）
+//==============================
+Drill_MDe_DestSprite.prototype.drill_sprite_destroySelf = function() {
+	this._drill_curSerial = -1;				//当前序列号
+};
+//==============================
+// * 贴图 - 重设数据（私有）
+//==============================
+Drill_MDe_DestSprite.prototype.drill_sprite_resetData = function( data ){
+	this._drill_data = data;
+	
+	// > 初始化数据
+	this.drill_sprite_initData();
+	
+	// > 销毁旧贴图
+	this.drill_sprite_destroy();
+	
+	// > 建立贴图
+	this._drill_gif_bitmapList = [];
+	var temp_sprite = new Sprite();
+	for(var j = 0; j < data['src_img'].length ; j++){
+		var bitmap = ImageManager.loadBitmap( data['src_img_file'], data['src_img'][j], 0, true);
+		this._drill_gif_bitmapList.push( bitmap );
+	}
+	temp_sprite.bitmap = this._drill_gif_bitmapList[0];
+	temp_sprite.anchor.x = 0.5;
+	temp_sprite.anchor.y = 0.5;
+	temp_sprite.x = data['x'];
+	temp_sprite.y = data['y'];
+	temp_sprite.opacity = data['opacity'];
+	temp_sprite.blendMode = data['blendMode'];
+	this._drill_MDe_sprite = temp_sprite;
+	
+	// > 建立阴影
+	var temp_shadow = new Sprite();
+	temp_shadow.bitmap = ImageManager.loadBitmap( data['src_img_file'], data['src_img_shadow'], 0, true);
+	temp_shadow.anchor.x = 0.5;
+	temp_shadow.anchor.y = 0.5;
+	temp_shadow.x = data['x'];
+	temp_shadow.y = data['y'];
+	temp_shadow.opacity = data['opacity'];
+	temp_shadow.blendMode = data['blendMode'];
+	this._drill_MDe_shadow = temp_shadow
+	
+	// > 注意先添加阴影
+	this.addChild(temp_shadow);
+	this.addChild(temp_sprite);
+};
+
+
+//==============================
+// * A主体 - 初始化对象
+//==============================
+Drill_MDe_DestSprite.prototype.drill_sprite_initAttr = function() {
+	
+	// > 属性初始化
 	this.anchor.x = 0.5;				//中心锚点
 	this.anchor.y = 0.5;				//
-	this._drill_time = 0;				//持续时间
-	this._drill_data = null;			//样式数据
-	this._drill_curStyle = -1;			//当前样式
 	
+	// > 移动数据
 	this._drill_destX = 0;				//移动 - 缓存坐标x
 	this._drill_destY = 0;				//移动 - 缓存坐标y
 	this._drill_curX = 0;				//移动 - 平滑运动 - 当前坐标x
@@ -661,76 +877,29 @@ Drill_MDe_DestSprite.prototype.initialize = function() {
 	this._drill_MDe_shadow = null;		//指针阴影
 };
 //==============================
-// * 贴图 - 帧刷新
+// * A主体 - 帧刷新 样式
 //==============================
-Drill_MDe_DestSprite.prototype.update = function() {
-	Sprite_Base.prototype.update.call(this);
-	this._drill_time += 1;
+Drill_MDe_DestSprite.prototype.drill_sprite_updateAttr_Style = function() {
 	
-	if( this._drill_curStyle != $gameSystem._drill_MDe_curStyle ){	//重刷结构
-		this._drill_curStyle = $gameSystem._drill_MDe_curStyle;
-		this.drill_MDe_refreshAll();
+	// > 重设数据
+	if( this._drill_curStyle != $gameSystem._drill_MDe_curStyle ){
+		this._drill_curStyle =  $gameSystem._drill_MDe_curStyle;
+		
+		// > 重设数据 - 获取指定样式的数据
+		var new_data = JSON.parse(JSON.stringify( DrillUp.g_MDe_list[ $gameSystem._drill_MDe_curStyle - 1 ] ));
+		this.drill_sprite_resetData( new_data );
 	}
-	if( this.visible == false ){ return; }			//未显示，不刷新
-	if( this._drill_data == null ){ return; }		//未载入，不刷新
-	
-	this.drill_MDe_updatePosition();				//位置
-	this.drill_MDe_updateGif();						//播放gif
-	this.drill_MDe_updateEffects();					//效果控制
-	this.drill_MDe_updateFade();					//淡出效果
 };
 //==============================
-// * 帧刷新 - 重刷结构
+// * A主体 - 帧刷新 位置
 //==============================
-Drill_MDe_DestSprite.prototype.drill_MDe_refreshAll = function() {
-	
-	// > 载入data
-	var temp = DrillUp.g_MDe_list[ this._drill_curStyle - 1 ];
-	if( !temp ){ return; }
-	this._drill_data = JSON.parse(JSON.stringify( temp ));
-	
-	// > 建立sprite
-	var temp_sprite = new Sprite();
-	var temp_sprite_data = this._drill_data;
-	for(var j = 0; j < temp_sprite_data['src_img'].length ; j++){
-		temp_sprite_data['src_bitmaps'].push(ImageManager.load_MapUiMouse(temp_sprite_data['src_img'][j]));
-	}
-	temp_sprite.bitmap = temp_sprite_data['src_bitmaps'][0];
-	temp_sprite.anchor.x = 0.5;
-	temp_sprite.anchor.y = 0.5;
-	temp_sprite.x = temp_sprite_data['x'];
-	temp_sprite.y = temp_sprite_data['y'];
-	temp_sprite.opacity = temp_sprite_data['opacity'];
-	temp_sprite.blendMode = temp_sprite_data['blendMode'];
-	
-	// > 建立阴影
-	var temp_shadow = new Sprite();
-	temp_shadow.bitmap = ImageManager.load_MapUiMouse(temp_sprite_data['src_img_shadow']);
-	temp_shadow.anchor.x = 0.5;
-	temp_shadow.anchor.y = 0.5;
-	temp_shadow.x = temp_sprite_data['x'];
-	temp_shadow.y = temp_sprite_data['y'];
-	temp_shadow.opacity = temp_sprite_data['opacity'];
-	temp_shadow.blendMode = temp_sprite_data['blendMode'];
-	
-	// > 重添sprite
-	if( this._drill_MDe_sprite ){this.removeChild( this._drill_MDe_sprite ); }
-	if( this._drill_MDe_shadow ){this.removeChild( this._drill_MDe_shadow ); }
-	this._drill_MDe_sprite = temp_sprite;
-	this._drill_MDe_shadow = temp_shadow
-	this.addChild(temp_shadow);
-	this.addChild(temp_sprite);
-}
-//==============================
-// * 帧刷新 - 位置
-//==============================
-Drill_MDe_DestSprite.prototype.drill_MDe_updatePosition = function() {
+Drill_MDe_DestSprite.prototype.drill_sprite_updateAttr_Position = function() {
 	var data = this._drill_data;
     var tileWidth = $gameMap.tileWidth();
     var tileHeight = $gameMap.tileHeight();
 	
+	// > 不移动（直接出现在目的地）
 	if( data['movement_enable'] != true ){
-		// > 不移动
 		if( $gameTemp.destinationX() != null &&
 			$gameTemp.destinationY() != null ){
 			this._drill_destX = $gameTemp.destinationX();
@@ -740,8 +909,21 @@ Drill_MDe_DestSprite.prototype.drill_MDe_updatePosition = function() {
 		var yy = ($gameMap.adjustY(this._drill_destY) + 0.5) * tileHeight;
 		this.x = xx;
 		this.y = yy;
-	}else{	
-		// > 平滑运动
+		
+	// > 平滑运动（从玩家位置跑到目的地）
+	}else{
+		var start_x = $gamePlayer.x;
+		var start_y = $gamePlayer.y;
+		
+		// > 【互动 - 允许操作事件移动】如果不允许操作玩家移动，那么指向标使用操作事件的位置作为起点。
+		if( Imported.Drill_PlayerAllowEventMove ){
+			var event = $gameTemp.drill_PAlEM_getOneMouseControledEvent();
+			if( event != undefined ){
+				start_x = event.x;
+				start_y = event.y;
+			}
+		}
+		
 		if( $gameTemp.destinationX() != null &&
 			$gameTemp.destinationY() != null ){
 			if( this._drill_destX != $gameTemp.destinationX() ||
@@ -749,13 +931,13 @@ Drill_MDe_DestSprite.prototype.drill_MDe_updatePosition = function() {
 				// > 目标变化
 				if( data['fade_enable'] == true ){
 					if( this.opacity <= 0 ){
-						this._drill_curX = $gamePlayer.x;
-						this._drill_curY = $gamePlayer.y;
+						this._drill_curX = start_x;
+						this._drill_curY = start_y;
 					}
 				}else{
 					if( this.visible == false ){
-						this._drill_curX = $gamePlayer.x;
-						this._drill_curY = $gamePlayer.y;
+						this._drill_curX = start_x;
+						this._drill_curY = start_y;
 					}
 				}
 			}
@@ -775,42 +957,57 @@ Drill_MDe_DestSprite.prototype.drill_MDe_updatePosition = function() {
 		this.y = yy;
 	}
 };
+
 //==============================
-// * 帧刷新 - 播放gif
+// * B播放GIF - 初始化对象
 //==============================
-Drill_MDe_DestSprite.prototype.drill_MDe_updateGif = function() {
-	if(!this._drill_data ){ return; }
-	if(!this._drill_MDe_sprite ){ return; }
+Drill_MDe_DestSprite.prototype.drill_sprite_initGif = function() {
+	this._drill_gif_Time = 0;
+};
+//==============================
+// * B播放GIF - 帧刷新
+//==============================
+Drill_MDe_DestSprite.prototype.drill_sprite_updateGif = function() {
+	if( this._drill_MDe_sprite == undefined ){ return; }
+	var data = this._drill_data;
 	
-	var t_gif = this._drill_MDe_sprite;
-	var t_gif_data = this._drill_data;
+	// > 时间流逝
+	this._drill_gif_Time += 1;
 	
 	// > 播放gif
-	var inter = this._drill_time ;
-	inter = inter / t_gif_data['interval'];
-	inter = inter % t_gif_data['src_bitmaps'].length;
-	if(t_gif_data['back_run']){
-		inter = t_gif_data['src_bitmaps'].length - 1 - inter;
+	var inter = this._drill_gif_Time;
+	inter = inter / data['interval'];
+	inter = inter % this._drill_gif_bitmapList.length;
+	if( data['back_run'] == true ){
+		inter = this._drill_gif_bitmapList.length - 1 - inter;
 	}
 	inter = Math.floor(inter);
-	t_gif.bitmap = t_gif_data['src_bitmaps'][inter];
+	this._drill_MDe_sprite.bitmap = this._drill_gif_bitmapList[inter];
 	
 	// > 自旋转
-	t_gif.rotation += t_gif_data['rotate'] /180*Math.PI;
-	
+	this._drill_MDe_sprite.rotation += data['rotate'] /180*Math.PI;
+}
+
+//==============================
+// * C自变化效果 - 初始化对象
+//==============================
+Drill_MDe_DestSprite.prototype.drill_sprite_initEffect = function() {
+	this._drill_effect_time = 0;
 }
 //==============================
-// * 帧刷新 - 效果控制
+// * C自变化效果 - 帧刷新
 //==============================
-Drill_MDe_DestSprite.prototype.drill_MDe_updateEffects = function() {
-	if(!this._drill_data ){ return; }
+Drill_MDe_DestSprite.prototype.drill_sprite_updateEffect = function() {
 	var data = this._drill_data;
+	
+	// > 时间流逝
+	this._drill_effect_time += 1;
 	
 	// > 缩放效果
 	if( data['zoom_enable'] == true ){
 		var zoom_range = data['zoom_range'];
 		var zoom_speed = data['zoom_speed'];
-		var scale_value = 1 + zoom_range * Math.cos( this._drill_time*zoom_speed /180*Math.PI );
+		var scale_value = 1 + zoom_range * Math.cos( this._drill_effect_time*zoom_speed /180*Math.PI );
 		this.scale.x = scale_value;
 		this.scale.y = scale_value;
 	}
@@ -818,22 +1015,27 @@ Drill_MDe_DestSprite.prototype.drill_MDe_updateEffects = function() {
 	// > 闪烁效果
 	if( data['flicker_enable'] == true && this._drill_MDe_sprite ){
 		var flicker_speed = data['flicker_speed'];
-		this._drill_MDe_sprite.opacity = data['opacity']/2 + data['opacity']/2 * Math.cos( this._drill_time*flicker_speed /180*Math.PI );
+		this._drill_MDe_sprite.opacity = data['opacity']/2 + data['opacity']/2 * Math.cos( this._drill_effect_time*flicker_speed /180*Math.PI );
 	}
 	
 	// > 漂浮效果
 	if( data['float_enable'] == true && this._drill_MDe_sprite ){
 		var float_range = data['float_range'];
 		var float_speed = data['float_speed'];
-		this._drill_MDe_sprite.y = data['y'] + float_range * Math.sin( this._drill_time*float_speed /180*Math.PI );
+		this._drill_MDe_sprite.y = data['y'] + float_range * Math.sin( this._drill_effect_time*float_speed /180*Math.PI );
 	}
 }
 
 //==============================
-// * 帧刷新 - 淡出效果
+// * D淡入淡出 - 初始化对象
 //==============================
-Drill_MDe_DestSprite.prototype.drill_MDe_updateFade = function() {
-	if(!this._drill_data ){ return; }
+Drill_MDe_DestSprite.prototype.drill_sprite_initFade = function() {
+	//（暂无）
+}
+//==============================
+// * D淡入淡出 - 帧刷新
+//==============================
+Drill_MDe_DestSprite.prototype.drill_sprite_updateFade = function() {
 	var data = this._drill_data;
 	
 	if( data['fade_enable'] == true ){

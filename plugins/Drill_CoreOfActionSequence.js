@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.5]        系统 - GIF动画序列核心
+ * @plugindesc [v1.7]        系统 - GIF动画序列核心
  * @author Drill_up
  * 
  * @Drill_LE_param "动画序列-%d"
@@ -54,6 +54,16 @@
  *      状态节点是指 角色持续执行复杂嵌套的状态元结构。
  *   (3.动画序列可以对各种情况作出不同gif动作，
  *      具体可以去看看相关 子插件 的动画序列动作的说明。
+ * 小工具：
+ *   (1.防止你看不见：
+ *      使用小工具 GIF动画序列编辑器 能全面编辑复杂的动画序列。
+ *      使用小工具 GIF动画序列编辑器 能全面编辑复杂的动画序列。
+ *      使用小工具 GIF动画序列编辑器 能全面编辑复杂的动画序列。
+ *   (2.小工具能导入 行走图、序列大图、GIF文件 等资源，
+ *      然后小工具能将配置转移到插件 GIF动画序列核心 中。
+ * 预加载：
+ *   (1.插件中可自定义指定资源是否预加载，
+ *      预加载相关介绍可以去看看"1.系统 > 关于预加载.docx"。
  * 
  * -----------------------------------------------------------------------------
  * ----关联文件
@@ -128,262 +138,386 @@
  * 优化了 单独播放动作元后，进入空状态元时，动作元图像不消失的bug。
  * [v1.5]
  * 大幅度优化改进了底层，添加了 状态节点 功能，能支持更复杂的动画序列设计。
+ * [v1.6]
+ * 进一步优化了动画序列底层。
+ * [v1.7]
+ * 优化了动画序列存储底层，子插件功能需要全部同步更新。
  * 
- * 
- *
  * @param ---动画序列 1至20---
  * @default
- *
+ * 
  * @param 动画序列-1
  * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-2
  * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-3
  * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-4
  * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-5
  * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-6
  * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-7
  * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-8
  * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-9
  * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-10
  * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-11
  * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-12
  * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-13
  * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-14
  * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-15
  * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-16
  * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-17
  * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-18
  * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-19
  * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-20
  * @parent ---动画序列 1至20---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param ---动画序列21至40---
  * @default
- *
+ * 
  * @param 动画序列-21
  * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-22
  * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-23
  * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-24
  * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-25
  * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-26
  * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-27
  * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-28
  * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-29
  * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-30
  * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-31
  * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-32
  * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-33
  * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-34
  * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-35
  * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-36
  * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-37
  * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-38
  * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-39
  * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
- *
+ * 
  * @param 动画序列-40
  * @parent ---动画序列21至40---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
  * @default 
  * 
+ * @param ---动画序列41至60---
+ * @default
+ * 
+ * @param 动画序列-41
+ * @parent ---动画序列41至60---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-42
+ * @parent ---动画序列41至60---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-43
+ * @parent ---动画序列41至60---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-44
+ * @parent ---动画序列41至60---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-45
+ * @parent ---动画序列41至60---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-46
+ * @parent ---动画序列41至60---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-47
+ * @parent ---动画序列41至60---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-48
+ * @parent ---动画序列41至60---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-49
+ * @parent ---动画序列41至60---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-50
+ * @parent ---动画序列41至60---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-51
+ * @parent ---动画序列41至60---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-52
+ * @parent ---动画序列41至60---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-53
+ * @parent ---动画序列41至60---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-54
+ * @parent ---动画序列41至60---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-55
+ * @parent ---动画序列41至60---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-56
+ * @parent ---动画序列41至60---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-57
+ * @parent ---动画序列41至60---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-58
+ * @parent ---动画序列41至60---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-59
+ * @parent ---动画序列41至60---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-60
+ * @parent ---动画序列41至60---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default
  * 
  */
 /*~struct~DrillCOASSequence:
  * 
  * @param 标签
- * @desc 只用于方便区分查看的标签，不作用在插件中。
- * @default ==新的动画序列==
+ * @desc 动画序列的标签名称。
+ * @default 新的动画序列
  * 
  * @param 默认的状态元集合
  * @type text[]
@@ -938,7 +1072,7 @@
  * @type boolean
  * @on 开启
  * @off 关闭
- * @desc true - 开启，false - 关闭
+ * @desc true - 开启，false - 关闭，预加载详细介绍可见："1.系统 > 关于预加载.docx"。
  * @default false
  *
  * @param 图像-色调值
@@ -1091,7 +1225,7 @@
  * @type boolean
  * @on 开启
  * @off 关闭
- * @desc true - 开启，false - 关闭
+ * @desc true - 开启，false - 关闭，预加载详细介绍可见："1.系统 > 关于预加载.docx"。
  * @default false
  *
  * @param 图像-色调值
@@ -1130,31 +1264,69 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(n)*o(贴图处理) 每帧
-//		★性能测试因素	地图界面的小爱丽丝全绑定
-//		★性能测试消耗	25.7ms（Drill_COAS_SpriteDecorator.prototype.update）40.4ms（Drill_COAS_SpriteDecorator.prototype.isReady）
+//		★性能测试因素	动画序列管理层
+//		★性能测试消耗	以前的：25.7ms（Drill_COAS_SpriteDecorator.drill_spriteMain_update）40.4ms（Drill_COAS_SpriteDecorator.drill_spriteMain_isReady）
+//						2024/1/22：动画序列管理层80事件 677.8ms（Drill_COAS_SpriteDecorator.drill_spriteMain_update）体积管理层70事件 244.8ms（Drill_COAS_SpriteDecorator.update）
 //		★最坏情况		无
-//		★备注			主要消耗来源于图片资源加载，正常并不消耗。
+//		★备注			主要消耗来源于图片资源加载，正常情况下消耗可能会乱指向。
 //		
 //		★优化记录		暂无
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			动画序列核心：
-//				->数据访问器
-//					->动画序列
-//					->状态元
-//					->状态节点
-//					->动作元
-//				->数据校验器
+//			->☆提示信息
+//			->☆静态数据
+//				->☆静态数据校验器
 //					->空检查
 //					->嵌套检查
-//				->动画序列核心DEBUG
+//				->☆静态数据访问器
+//					> 动画序列
+//					> 状态元
+//					> 状态节点
+//					> 动作元
+//			->☆插件指令
+//			->☆预加载
+//			
+//			->☆核心漏洞修复
+//			
+//			->状态元 控制器【Drill_COAS_StateController】
+//				->A主体
+//				->B输出数据
+//				->C播放GIF
+//				->D变速播放
+//			->状态节点 控制器【Drill_COAS_StateNodeController】
+//				->A主体
+//				->B输出数据
+//				->C节点
+//				->D子节点
+//			->动作元 控制器【Drill_COAS_ActController】
+//				->A主体
+//				->B输出数据
+//				->C播放GIF
+//				->D变速播放
+//			
+//			->动画序列 主控制器【Drill_COAS_MainController】
+//				->A主体
+//				->B输出数据
+//				->C管理状态元
+//				->D管理状态节点
+//				->E管理动作元
+//				->F管理装饰器
+//				->G变速播放
+//			->动画序列对象 装饰器【Drill_COAS_SpriteDecorator】
+//				->A主体
+//				->B父操作
+//			
+//			->动画序列Debug窗口【Drill_COAS_DebugWindow】
 //		
 //		
 //		★家谱：
 //			大家族-GIF动画序列
 //			核心
+//		
+//		★脚本文档：
+//			1.系统 > 大家族-GIF动画序列（脚本）.docx
 //		
 //		★插件私有类：
 //			* 状态元 控制器【Drill_COAS_StateController】
@@ -1162,6 +1334,7 @@
 //			* 动作元 控制器【Drill_COAS_ActController】
 //			* 动画序列 主控制器【Drill_COAS_MainController】
 //			* 动画序列对象 装饰器【Drill_COAS_SpriteDecorator】
+//			* 动画序列Debug窗口【Drill_COAS_DebugWindow】
 //		
 //		★核心说明：
 //			1.整个核心只提供了两个分离的类，数据 和 对象。
@@ -1169,24 +1342,25 @@
 //		
 //		★必要注意事项：
 //			1.如果只在一个 简单贴图 里面使用，直接new，然后手动update即可。
-//				this._Drill_xxx_data = new Drill_COAS_MainController( DrillUp.g_COAS_list[ 0 ] );
+//				this._Drill_xxx_data = new Drill_COAS_MainController( 0 );	//（注意id为静态数据的索引号）
 //				this._Drill_xxx_decorator = new Drill_COAS_SpriteDecorator( this, this._Drill_xxx_data );
 //				this._Drill_xxx_data.update();
 //				this._Drill_xxx_decorator.update();
 //			  但是如果你需要将 二者分离，且 数据 能保存，则：
-//				见插件 Drill_PictureActionSequence 。
-//			2.如果要对data进行相关操作，可见标注"（接口）"的函数。
+//				见插件 Drill_PictureActionSequence 或 Drill_EventActionSequence。
 //			
 //		★其它说明细节：
 //			1. 2022/11/13：原插件只有状态元和动作元，后来引入了状态节点的结构。
 //				插件的底层变化特别大，但实际使用时，变化不大。
+//			2. 2023/9/5：最后我还是来了一遍大更新。不过也就只是给功能分类，不影响主体功能。弄了一整天。
+//			3. 2024/1/23：为了优化存储空间，所有 data 变成了函数获取。
 //				
 //		★存在的问题：
 //			暂无
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -1199,6 +1373,18 @@
 	//==============================
 	DrillUp.drill_COAS_getPluginTip_NotArray = function( arr ){
 		return "【" + DrillUp.g_COAS_PluginTip_curName + "】\n接口调用错误，数组接口获取到了 非数组 参数："+arr+"。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 动画序列 - 不是id值（initialize）
+	//==============================
+	DrillUp.drill_COAS_getPluginTip_Sequence_NotId = function( class_name ){
+		return "【" + DrillUp.g_COAS_PluginTip_curName + "】\n错误，动画序列 类对象 "+class_name+" 在initialize初始化时，获取到了非数字参数，初始化失败。\n建议更新全部动画序列相关插件。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 动画序列 - 不是id值（resetData）
+	//==============================
+	DrillUp.drill_COAS_getPluginTip_Sequence_NotId2 = function( class_name ){
+		return "【" + DrillUp.g_COAS_PluginTip_curName + "】\n错误，动画序列 类对象 "+class_name+" 在resetData重置数据时，获取到了非数字参数，初始化失败。\n建议更新全部动画序列相关插件。";
 	};
 	//==============================
 	// * 提示信息 - 报错 - 动画序列 - 没有状态元
@@ -1240,7 +1426,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_CoreOfActionSequence = true;
@@ -1249,13 +1435,13 @@
 	
 	
 	//==============================
-	// * 变量获取 - 状态元
+	// * 静态数据 - 状态元
 	//				（~struct~DrillCOASState）
 	//==============================
 	DrillUp.drill_COAS_initState = function( dataFrom ){
 		var data = {};
 		
-		// > 常规
+		// > A主体
 		data['name'] = String( dataFrom["状态元名称"] || "");
 		if( dataFrom["状态元标签"] != "" &&
 			dataFrom["状态元标签"] != undefined ){
@@ -1267,7 +1453,19 @@
 		data['proportion'] = Number( dataFrom["状态元权重"] || 40);
 		data['canBeInterrupted'] = String( dataFrom["可被动作元打断"] || "false") == "true";
 		
-		// > GIF
+		// > A主体 - 杂项
+		var temp = String( dataFrom["备注"] || "" );
+		if( temp[0] == "\"" ){
+			temp = temp.substring(1,temp.length-1);
+			temp = temp.replace(/\\\\/g,"\\");
+		}
+		data['note'] = temp;
+		
+		// > B输出数据
+		data['tint'] = Number( dataFrom["图像-色调值"] || 0);
+		data['smooth'] = String( dataFrom["图像-模糊边缘"] || "false") == "true";
+	
+		// > C播放GIF
 		if( dataFrom["资源-状态元"] != "" &&
 			dataFrom["资源-状态元"] != undefined ){
 			data['gif_src'] = JSON.parse( dataFrom["资源-状态元"] );
@@ -1285,32 +1483,20 @@
 		data['gif_back_run'] = String( dataFrom["是否倒放"] || "false") == "true";
 		data['gif_preload'] = String( dataFrom["是否预加载"] || "false") == "true";
 		
-		// > 声音
+		// > D声音
 		//data['se_src'] = String( dataFrom["声音-声音资源"] || "");
 		//data['se_delay'] = Number( dataFrom["声音-播放延迟"] || 0);
-		
-		// > 图像
-		data['tint'] = Number( dataFrom["图像-色调值"] || 0);
-		data['smooth'] = String( dataFrom["图像-模糊边缘"] || "false") == "true";
-		
-		// > 杂项
-		var temp = String( dataFrom["备注"] || "" );
-		if( temp[0] == "\"" ){
-			temp = temp.substring(1,temp.length-1);
-			temp = temp.replace(/\\\\/g,"\\");
-		}
-		data['note'] = temp;
 		
 		return data;
 	}
 	//==============================
-	// * 变量获取 - 状态节点
+	// * 静态数据 - 状态节点
 	//				（~struct~DrillCOASStateNode）
 	//==============================
 	DrillUp.drill_COAS_initStateNode = function( dataFrom ){
 		var data = {};
 		
-		// > 常规
+		// > A主体
 		data['name'] = String( dataFrom["节点名称"] || "");
 		if( dataFrom["节点标签"] != "" &&
 			dataFrom["节点标签"] != undefined ){
@@ -1322,7 +1508,15 @@
 		data['proportion'] = Number( dataFrom["节点权重"] || 40);
 		data['canBeInterrupted'] = String( dataFrom["可被动作元打断"] || "false") == "true";
 		
-		// > 播放列表
+		// > A主体 - 杂项
+		var temp = String( dataFrom["备注"] || "" );
+		if( temp[0] == "\"" ){
+			temp = temp.substring(1,temp.length-1);
+			temp = temp.replace(/\\\\/g,"\\");
+		}
+		data['note'] = temp;
+		
+		// > C节点
 		data['play_type'] = String( dataFrom["播放方式"] || "随机播放状态元");
 		if( dataFrom["随机播放状态元"] != "" &&
 			dataFrom["随机播放状态元"] != undefined ){
@@ -1350,24 +1544,16 @@
 		}
 		data['play_randomMax'] = Number( dataFrom["随机播放的次数上限"] || 5);
 		
-		// > 杂项
-		var temp = String( dataFrom["备注"] || "" );
-		if( temp[0] == "\"" ){
-			temp = temp.substring(1,temp.length-1);
-			temp = temp.replace(/\\\\/g,"\\");
-		}
-		data['note'] = temp;
-		
 		return data;
 	}
 	//==============================
-	// * 变量获取 - 动作元
+	// * 静态数据 - 动作元
 	//				（~struct~DrillCOASAct）
 	//==============================
 	DrillUp.drill_COAS_initAct = function( dataFrom ){
 		var data = {};
 		
-		// > 常规
+		// > A主体
 		data['name'] = String( dataFrom["动作元名称"] || "");
 		if( dataFrom["动作元标签"] != "" &&
 			dataFrom["动作元标签"] != undefined ){
@@ -1377,7 +1563,19 @@
 		}
 		data['priority'] = Number( dataFrom["动作元优先级"] || 20);
 		
-		// > GIF
+		// > A主体 - 杂项
+		var temp = String( dataFrom["备注"] || "" );
+		if( temp[0] == "\"" ){
+			temp = temp.substring(1,temp.length-1);
+			temp = temp.replace(/\\\\/g,"\\");
+		}
+		data['note'] = temp;
+		
+		// > B输出数据
+		data['tint'] = Number( dataFrom["图像-色调值"] || 0);
+		data['smooth'] = String( dataFrom["图像-模糊边缘"] || "false") == "true";
+		
+		// > C播放GIF
 		if( dataFrom["资源-动作元"] != "" &&
 			dataFrom["资源-动作元"] != undefined ){
 			data['gif_src'] = JSON.parse( dataFrom["资源-动作元"] );
@@ -1395,22 +1593,10 @@
 		data['gif_back_run'] = String( dataFrom["是否倒放"] || "false") == "true";
 		data['gif_preload'] = String( dataFrom["是否预加载"] || "false") == "true";
 		
-		// > 图像
-		data['tint'] = Number( dataFrom["图像-色调值"] || 0);
-		data['smooth'] = String( dataFrom["图像-模糊边缘"] || "false") == "true";
-		
-		// > 杂项
-		var temp = String( dataFrom["备注"] || "" );
-		if( temp[0] == "\"" ){
-			temp = temp.substring(1,temp.length-1);
-			temp = temp.replace(/\\\\/g,"\\");
-		}
-		data['note'] = temp;
-		
 		return data;
 	}
 	//==============================
-	// * 变量获取 - 动画序列
+	// * 静态数据 - 动画序列
 	//				（~struct~DrillCOASSequence）
 	//==============================
 	DrillUp.g_COAS_stateList_length = 30;
@@ -1419,7 +1605,38 @@
 	DrillUp.drill_COAS_initSequence = function( dataFrom ){
 		var data = {};
 		
-		// > 容器 - 默认的状态元集合
+		// > A主体
+		data['name'] = String( dataFrom["标签"] || "" );
+		
+		// > C管理状态元 - 状态元容器
+		data['state_tank'] = [];
+		for (var j = 0; j < DrillUp.g_COAS_stateList_length; j++) {
+			if( dataFrom["状态元-" + String(j+1) ] != undefined &&
+				dataFrom["状态元-" + String(j+1) ] != "" ){
+				var state = JSON.parse( dataFrom["状态元-" + String(j+1)] );
+				data['state_tank'][j] = DrillUp.drill_COAS_initState( state );
+				data['state_tank'][j]['id'] = j;
+			}else{
+				data['state_tank'][j] = DrillUp.drill_COAS_initState( {} );
+				data['state_tank'][j]['id'] = j;
+			}
+		}
+		
+		// > D管理状态节点 - 状态节点容器
+		data['stateNode_tank'] = [];
+		for (var j = 0; j < DrillUp.g_COAS_stateNodeList_length; j++) {
+			if( dataFrom["状态节点-" + String(j+1) ] != undefined &&
+				dataFrom["状态节点-" + String(j+1) ] != "" ){
+				var state = JSON.parse( dataFrom["状态节点-" + String(j+1)] );
+				data['stateNode_tank'][j] = DrillUp.drill_COAS_initStateNode( state );
+				data['stateNode_tank'][j]['id'] = j;
+			}else{
+				data['stateNode_tank'][j] = DrillUp.drill_COAS_initStateNode( {} );
+				data['stateNode_tank'][j]['id'] = j;
+			}
+		}
+		
+		// > D管理状态节点 - 默认的状态元集合
 		data['state_default_randomSeq'] = [];
 		if( dataFrom["默认的状态元集合"] != "" &&
 			dataFrom["默认的状态元集合"] != undefined ){
@@ -1428,39 +1645,30 @@
 			data['state_default_randomSeq'] = [];
 		}
 		
-		// > 容器 - 状态元
-		data['state_tank'] = [];
-		for (var j = 0; j < DrillUp.g_COAS_stateList_length; j++) {
-			if( dataFrom["状态元-" + String(j+1) ] != undefined &&
-				dataFrom["状态元-" + String(j+1) ] != "" ){
-				var state = JSON.parse( dataFrom["状态元-" + String(j+1)] );
-				data['state_tank'][j] = DrillUp.drill_COAS_initState( state );
-			}else{
-				data['state_tank'][j] = DrillUp.drill_COAS_initState( {} );
-			}
-		}
+		// > D管理状态节点 - 默认的状态元集合（放在最后一个）
+		var default_nodeData = DrillUp.drill_COAS_initStateNode( {} );
+		default_nodeData['id'] = data['stateNode_tank'].length;
+		default_nodeData['name'] = "默认的状态元集合";
+		default_nodeData['priority'] = 0;
+		default_nodeData['proportion'] = 40;
+		default_nodeData['canBeInterrupted'] = true;
+		default_nodeData['play_type'] = "随机播放状态元";
+		default_nodeData['play_randomStateSeq'] = data['state_default_randomSeq'];
+		default_nodeData['play_randomMax'] = 5;
+		data['stateNode_tank'].push( default_nodeData );
 		
-		// > 容器 - 状态节点
-		data['stateNode_tank'] = [];
-		for (var j = 0; j < DrillUp.g_COAS_stateNodeList_length; j++) {
-			if( dataFrom["状态节点-" + String(j+1) ] != undefined &&
-				dataFrom["状态节点-" + String(j+1) ] != "" ){
-				var state = JSON.parse( dataFrom["状态节点-" + String(j+1)] );
-				data['stateNode_tank'][j] = DrillUp.drill_COAS_initStateNode( state );
-			}else{
-				data['stateNode_tank'][j] = DrillUp.drill_COAS_initStateNode( {} );
-			}
-		}
 		
-		// > 容器 - 动作元
+		// > E管理动作元 - 动作元容器
 		data['act_tank'] = [];
 		for (var j = 0; j < DrillUp.g_COAS_actList_length; j++) {
 			if( dataFrom["动作元-" + String(j+1) ] != undefined &&
 				dataFrom["动作元-" + String(j+1) ] != "" ){
 				var act = JSON.parse( dataFrom["动作元-" + String(j+1)] );
 				data['act_tank'][j] = DrillUp.drill_COAS_initAct( act );
+				data['act_tank'][j]['id'] = j;
 			}else{
 				data['act_tank'][j] = DrillUp.drill_COAS_initAct( {} );
+				data['act_tank'][j]['id'] = j;
 			}
 		}
 		
@@ -1469,9 +1677,9 @@
 	
 	
 	/*-----------------杂项------------------*/
-	DrillUp.g_COAS_list_length = 40;
+	DrillUp.g_COAS_list_length = 60;
 	DrillUp.g_COAS_list = [];
-	for (var i = 0; i < DrillUp.g_COAS_list_length; i++) {
+	for( var i = 0; i < DrillUp.g_COAS_list_length; i++ ){
 		if( DrillUp.parameters["动画序列-" + String(i+1) ] != undefined &&
 			DrillUp.parameters["动画序列-" + String(i+1) ] != "" ){
 			var sequence = JSON.parse(DrillUp.parameters["动画序列-" + String(i+1) ]);
@@ -1487,91 +1695,14 @@
 	
 	
 	//=============================================================================
-	// ** 数据访问器
+	// ** ☆静态数据校验器
+	//
+	//			说明：	> 此模块提供 动画序列、状态节点 的校验函数。
+	//					  此模块只在载入插件时执行一次，见函数 "静态数据校验器 - 执行校验"。
+	//					（插件完整的功能目录去看看：功能结构树）
 	//=============================================================================
 	//==============================
-	// * 数据访问器 - 获取 - 动画序列
-	//==============================
-	DrillUp.drill_COAS_getSequenceData = function( sequence_id ){
-		if( sequence_id < 0 ){ return null; }
-		if( sequence_id >= DrillUp.g_COAS_list.length ){ return null; }
-		return DrillUp.g_COAS_list[ sequence_id ];
-	};
-	//==============================
-	// * 数据访问器 - 获取 - 状态元
-	//==============================
-	DrillUp.drill_COAS_getStateData = function( sequence_id, state_name ){
-		if( state_name == "" ){ return null; }
-		var sequence_data = DrillUp.drill_COAS_getSequenceData( sequence_id );
-		if( sequence_data == undefined ){ return null; }
-		for(var i=0; i < sequence_data['state_tank'].length; i++ ){
-			var data = sequence_data['state_tank'][i];
-			if( data['name'] == state_name ){
-				return data;
-			}
-		}
-		return null;
-	};
-	//==============================
-	// * 数据访问器 - 获取 - 状态节点
-	//==============================
-	DrillUp.drill_COAS_getStateNodeData = function( sequence_id, stateNode_name ){
-		if( stateNode_name == "" ){ return null; }
-		var sequence_data = DrillUp.drill_COAS_getSequenceData( sequence_id );
-		if( sequence_data == undefined ){ return null; }
-		for(var i=0; i < sequence_data['stateNode_tank'].length; i++ ){
-			var data = sequence_data['stateNode_tank'][i];
-			if( data['name'] == stateNode_name ){
-				return data;
-			}
-		}
-		return null;
-	};
-	//==============================
-	// * 数据访问器 - 获取 - 动作元
-	//==============================
-	DrillUp.drill_COAS_getActData = function( sequence_id, act_name ){
-		if( act_name == "" ){ return null; }
-		var sequence_data = DrillUp.drill_COAS_getSequenceData( sequence_id );
-		if( sequence_data == undefined ){ return null; }
-		for(var i=0; i < sequence_data['act_tank'].length; i++ ){
-			var data = sequence_data['act_tank'][i];
-			if( data['name'] == act_name ){
-				return data;
-			}
-		}
-		return null;
-	};
-	//==============================
-	// * 数据访问器 - 是否存在 状态元
-	//==============================
-	DrillUp.drill_COAS_hasState = function( sequence_id, state_name ){
-		var data = DrillUp.drill_COAS_getStateData( sequence_id, state_name );
-		if( data == undefined ){ return false; }
-		return true;
-	};
-	//==============================
-	// * 数据访问器 - 是否存在 状态节点
-	//==============================
-	DrillUp.drill_COAS_hasStateNode = function( sequence_id, stateNode_name ){
-		var data = DrillUp.drill_COAS_getStateNodeData( sequence_id, stateNode_name );
-		if( data == undefined ){ return false; }
-		return true;
-	};
-	//==============================
-	// * 数据访问器 - 是否存在 动作元
-	//==============================
-	DrillUp.drill_COAS_hasAct = function( sequence_id, act_name ){
-		var data = DrillUp.drill_COAS_getActData( sequence_id, act_name );
-		if( data == undefined ){ return false; }
-		return true;
-	};
-
-	//=============================================================================
-	// ** 数据校验器
-	//=============================================================================
-	//==============================
-	// * 数据校验器 - 检查 动画序列
+	// * 静态数据校验器 - 检查 动画序列
 	//==============================
 	DrillUp.g_drill_COAS_stateMiss_list = [];
 	DrillUp.g_drill_COAS_stateNodeMiss_list = [];
@@ -1601,7 +1732,7 @@
 		}
 	}
 	//==============================
-	// * 数据校验器 - 子节点空检查 状态节点
+	// * 静态数据校验器 - 子节点空检查 状态节点
 	//==============================
 	DrillUp.drill_COAS_checkStateNodeMiss = function( sequence_data, stateNode_data ){
 		if( sequence_data == undefined ){ return; }
@@ -1611,7 +1742,7 @@
 		if( stateNode_data['play_type'] == "随机播放状态元" ){
 			for(var i=0; i < stateNode_data['play_randomStateSeq'].length; i++ ){
 				var state_name = stateNode_data['play_randomStateSeq'][i];
-				if( DrillUp.drill_COAS_hasState( sequence_data['id'], state_name ) == false ){
+				if( DrillUp.drill_COAS_hasStateName( sequence_data['id'], state_name ) == false ){
 					if( DrillUp.g_drill_COAS_stateMiss_list.contains( state_name ) == false ){
 						DrillUp.g_drill_COAS_stateMiss_list.push( state_name );
 					}
@@ -1621,7 +1752,7 @@
 		if( stateNode_data['play_type'] == "顺序播放状态元" ){
 			for(var i=0; i < stateNode_data['play_plainStateSeq'].length; i++ ){
 				var state_name = stateNode_data['play_plainStateSeq'][i];
-				if( DrillUp.drill_COAS_hasState( sequence_data['id'], state_name ) == false ){
+				if( DrillUp.drill_COAS_hasStateName( sequence_data['id'], state_name ) == false ){
 					if( DrillUp.g_drill_COAS_stateMiss_list.contains( state_name ) == false ){
 						DrillUp.g_drill_COAS_stateMiss_list.push( state_name );
 					}
@@ -1633,7 +1764,7 @@
 		if( stateNode_data['play_type'] == "随机播放嵌套集合" ){
 			for(var i=0; i < stateNode_data['play_randomNodeSeq'].length; i++ ){
 				var node_name = stateNode_data['play_randomNodeSeq'][i];
-				if( DrillUp.drill_COAS_hasStateNode( sequence_data['id'], node_name ) == false ){
+				if( DrillUp.drill_COAS_hasStateNodeName( sequence_data['id'], node_name ) == false ){
 					if( DrillUp.g_drill_COAS_stateNodeMiss_list.contains( node_name ) == false ){
 						DrillUp.g_drill_COAS_stateNodeMiss_list.push( node_name );
 					}
@@ -1643,7 +1774,7 @@
 		if( stateNode_data['play_type'] == "顺序播放嵌套集合" ){
 			for(var i=0; i < stateNode_data['play_plainNodeSeq'].length; i++ ){
 				var node_name = stateNode_data['play_plainNodeSeq'][i];
-				if( DrillUp.drill_COAS_hasStateNode( sequence_data['id'], node_name ) == false ){
+				if( DrillUp.drill_COAS_hasStateNodeName( sequence_data['id'], node_name ) == false ){
 					if( DrillUp.g_drill_COAS_stateNodeMiss_list.contains( node_name ) == false ){
 						DrillUp.g_drill_COAS_stateNodeMiss_list.push( node_name );
 					}
@@ -1652,9 +1783,9 @@
 		}
 	}
 	//==============================
-	// * 数据校验器 - 数据空检查 状态节点
+	// * 静态数据校验器 - 数据空检查 状态节点（未使用）
 	//
-	//			说明：	配置为空则返回false。
+	//			说明：	> 配置为空则返回false。此处未被使用，但在c++工具中有对应功能函数。
 	//==============================
 	DrillUp.drill_COAS_checkStateNodeIsEmpty = function( stateNode_data ){
 		if( stateNode_data == undefined ){ return true; }
@@ -1685,7 +1816,7 @@
 		return true;
 	}
 	//==============================
-	// * 数据校验器 - 嵌套检查 状态节点
+	// * 静态数据校验器 - 嵌套检查 状态节点
 	//==============================
 	DrillUp.drill_COAS_checkStateNodeRecursion = function( sequence_data, stateNode_data, layer ){
 		if( sequence_data == undefined ){ return; }
@@ -1707,7 +1838,7 @@
 					alert( DrillUp.drill_COAS_getPluginTip_StateNode_SelfConnect( node_name ) );
 					return;
 				}
-				var next_node = DrillUp.drill_COAS_getStateNodeData( sequence_data, node_name );
+				var next_node = DrillUp.drill_COAS_getStateNodeData_ByName( sequence_data, node_name );
 				DrillUp.drill_COAS_checkStateNodeRecursion( sequence_data, next_node, layer+1 );
 			}
 		}
@@ -1718,22 +1849,373 @@
 					alert( DrillUp.drill_COAS_getPluginTip_StateNode_SelfConnect( node_name ) );
 					return;
 				}
-				var next_node = DrillUp.drill_COAS_getStateNodeData( sequence_data, node_name );
+				var next_node = DrillUp.drill_COAS_getStateNodeData_ByName( sequence_data, node_name );
 				DrillUp.drill_COAS_checkStateNodeRecursion( sequence_data, next_node, layer+1 );
 			}
 		}
 	};
 	//==============================
-	// * 数据校验器 - 执行校验
+	// * 静态数据校验器 - 执行校验
+	//
+	//			说明：	> 插件载入时，对所有 动画序列 进行一次校验检查。
 	//==============================
-	for(var i = 0; i < DrillUp.g_COAS_list.length; i++ ){
-		var sequence_data = DrillUp.g_COAS_list[i];
-		DrillUp.drill_COAS_checkSequenceData( sequence_data );
+	var _drill_COAS_scene_initialize = SceneManager.initialize;
+	SceneManager.initialize = function() {
+		_drill_COAS_scene_initialize.call(this);
+		for(var i = 0; i < DrillUp.g_COAS_list.length; i++ ){
+			var sequence_data = DrillUp.g_COAS_list[i];
+			DrillUp.drill_COAS_checkSequenceData( sequence_data );
+		};
+	}
+	
+	
+	//=============================================================================
+	// ** ☆静态数据访问器
+	//
+	//			说明：	> 此模块提供 动画序列、状态元、状态节点、动作元 的获取函数。
+	//					（插件完整的功能目录去看看：功能结构树）
+	//=============================================================================
+	//==============================
+	// * 静态数据访问器 - 动画序列 - 设置（根据ID）
+	//==============================
+	//DrillUp.drill_COAS_setSequenceData_ById = function( sequence_id, sequence_data ){ }
+	//==============================
+	// * 静态数据访问器 - 动画序列 - 设置（根据名称）
+	//==============================
+	//DrillUp.drill_COAS_setSequenceData_ByName = function( sequence_name, sequence_data ){ }
+	//==============================
+	// * 静态数据访问器 - 动画序列 - 获取列表
+	//
+	//			说明：	> 返回值 为 静态数据列表的指针。
+	//==============================
+	DrillUp.drill_COAS_getSequenceData_List = function(){
+		return DrillUp.g_COAS_list;
+	};
+	//==============================
+	// * 静态数据访问器 - 动画序列 - 获取（根据ID）
+	//
+	//			说明：	> 返回值 为 静态数据的指针。
+	//					> ID值即列表索引值，从0开始计数。
+	//==============================
+	DrillUp.drill_COAS_getSequenceData_ById = function( sequence_id ){
+		if( sequence_id < 0 ){ return null; }
+		if( sequence_id >= DrillUp.g_COAS_list.length ){ return null; }
+		return DrillUp.g_COAS_list[ sequence_id ];
+	};
+	//==============================
+	// * 静态数据访问器 - 动画序列 - 获取（根据名称）
+	//
+	//			说明：	> 返回值 为 静态数据的指针。
+	//==============================
+	DrillUp.drill_COAS_getSequenceData_ByName = function( sequence_name ){
+		if( sequence_name == "" ){ return null; }
+		for(var i=0; i < DrillUp.g_COAS_list.length; i++ ){
+			var data = DrillUp.g_COAS_list[i];
+			if( data['name'] == sequence_name ){
+				return data;
+			}
+		}
+		return null;
+	};
+	//==============================
+	// * 静态数据访问器 - 动画序列 - 获取全部ID
+	//
+	//			说明：	> 返回值 为 数字列表。ID值即列表索引值，空数据不会返回ID值。
+	//==============================
+	DrillUp.drill_COAS_getSequenceData_AllId = function(){
+		var result_list = [];
+		for(var i=0; i < DrillUp.g_COAS_list.length; i++ ){
+			var data = DrillUp.g_COAS_list[i];
+			if( data['name'] == "" ){ continue; }
+			result_list.push( data['id'] );
+		}
+		return result_list;
+	};
+	//==============================
+	// * 静态数据访问器 - 动画序列 - 获取全部名称
+	//
+	//			说明：	> 返回值 为 字符串列表。不含空字符串。
+	//==============================
+	DrillUp.drill_COAS_getSequenceData_AllName = function(){
+		var result_list = [];
+		for(var i=0; i < DrillUp.g_COAS_list.length; i++ ){
+			var data = DrillUp.g_COAS_list[i];
+			if( data['name'] == "" ){ continue; }
+			result_list.push( data['name'] );
+		}
+		return result_list;
+	};
+	
+	//==============================
+	// * 静态数据访问器 - 状态元 - 设置（根据ID）
+	//==============================
+	//DrillUp.drill_COAS_setStateData_ById = function( sequence_id, state_id, state_data ){ }
+	//==============================
+	// * 静态数据访问器 - 状态元 - 设置（根据名称）
+	//==============================
+	//DrillUp.drill_COAS_setStateData_ByName = function( sequence_id, state_name, state_data ){ }
+	//==============================
+	// * 静态数据访问器 - 状态元 - 获取列表
+	//
+	//			说明：	> 返回值 为 静态数据列表的指针。
+	//==============================
+	DrillUp.drill_COAS_getStateData_List = function( sequence_id ){
+		var sequence_data = DrillUp.g_COAS_list[ sequence_id ];
+		if( sequence_data == undefined ){ return null; }
+		return sequence_data['state_tank'];
+	};
+	//==============================
+	// * 静态数据访问器 - 状态元 - 获取（根据ID）
+	//
+	//			说明：	> 返回值 为 静态数据的指针。
+	//					> ID值即列表索引值，从0开始计数。
+	//==============================
+	DrillUp.drill_COAS_getStateData_ById = function( sequence_id, state_id ){
+		var sequence_data = DrillUp.g_COAS_list[ sequence_id ];
+		if( sequence_data == undefined ){ return null; }
+		var data = sequence_data['state_tank'][ state_id ];
+		if( data == undefined ){ return null; }
+		return data;
+	};
+	//==============================
+	// * 静态数据访问器 - 状态元 - 获取（根据名称）
+	//
+	//			说明：	> 返回值 为 静态数据的指针。
+	//==============================
+	DrillUp.drill_COAS_getStateData_ByName = function( sequence_id, state_name ){
+		if( state_name == "" ){ return null; }
+		var sequence_data = DrillUp.drill_COAS_getSequenceData_ById( sequence_id );
+		if( sequence_data == undefined ){ return null; }
+		for(var i=0; i < sequence_data['state_tank'].length; i++ ){
+			var data = sequence_data['state_tank'][i];
+			if( data['name'] == state_name ){
+				return data;
+			}
+		}
+		return null;
+	};
+	//==============================
+	// * 静态数据访问器 - 状态元 - 获取全部ID
+	//
+	//			说明：	> 返回值 为 数字列表。ID值即列表索引值，空数据不会返回ID值。
+	//==============================
+	DrillUp.drill_COAS_getStateData_AllId = function( sequence_id ){
+		var data_list = this.drill_COAS_getStateData_List( sequence_id );
+		var result_list = [];
+		for(var i=0; i < data_list.length; i++ ){
+			var data = data_list[i];
+			if( data['name'] == "" ){ continue; }
+			result_list.push( data['id'] );
+		}
+		return result_list;
+	};
+	//==============================
+	// * 静态数据访问器 - 状态元 - 获取全部名称
+	//
+	//			说明：	> 返回值 为 字符串列表。不含空字符串。
+	//==============================
+	DrillUp.drill_COAS_getStateData_AllName = function( sequence_id ){
+		var data_list = this.drill_COAS_getStateData_List( sequence_id );
+		var result_list = [];
+		for(var i=0; i < data_list.length; i++ ){
+			var data = data_list[i];
+			if( data['name'] == "" ){ continue; }
+			result_list.push( data['name'] );
+		}
+		return result_list;
+	};
+	
+	//==============================
+	// * 静态数据访问器 - 状态节点 - 设置（根据ID）
+	//==============================
+	//DrillUp.drill_COAS_setStateNodeData_ById = function( sequence_id, stateNode_id, stateNode_data ){ }
+	//==============================
+	// * 静态数据访问器 - 状态节点 - 设置（根据名称）
+	//==============================
+	//DrillUp.drill_COAS_setStateNodeData_ByName = function( sequence_id, stateNode_name, stateNode_data ){ }
+	//==============================
+	// * 静态数据访问器 - 状态节点 - 获取列表
+	//
+	//			说明：	> 返回值 为 静态数据列表的指针。
+	//==============================
+	DrillUp.drill_COAS_getStateNodeData_List = function( sequence_id ){
+		var sequence_data = DrillUp.g_COAS_list[ sequence_id ];
+		if( sequence_data == undefined ){ return null; }
+		return sequence_data['stateNode_tank'];
+	};
+	//==============================
+	// * 静态数据访问器 - 状态节点 - 获取（根据ID）
+	//
+	//			说明：	> 返回值 为 静态数据的指针。
+	//					> ID值即列表索引值，从0开始计数。
+	//==============================
+	DrillUp.drill_COAS_getStateNodeData_ById = function( sequence_id, stateNode_id ){
+		var sequence_data = DrillUp.g_COAS_list[ sequence_id ];
+		if( sequence_data == undefined ){ return null; }
+		var data = sequence_data['stateNode_tank'][ stateNode_id ];
+		if( data == undefined ){ return null; }
+		return data;
+	};
+	//==============================
+	// * 静态数据访问器 - 状态节点 - 获取（根据名称）
+	//
+	//			说明：	> 返回值 为 静态数据的指针。
+	//==============================
+	DrillUp.drill_COAS_getStateNodeData_ByName = function( sequence_id, stateNode_name ){
+		if( stateNode_name == "" ){ return null; }
+		var sequence_data = DrillUp.drill_COAS_getSequenceData_ById( sequence_id );
+		if( sequence_data == undefined ){ return null; }
+		for(var i=0; i < sequence_data['stateNode_tank'].length; i++ ){
+			var data = sequence_data['stateNode_tank'][i];
+			if( data['name'] == stateNode_name ){
+				return data;
+			}
+		}
+		return null;
+	};
+	//==============================
+	// * 静态数据访问器 - 状态节点 - 获取全部ID
+	//
+	//			说明：	> 返回值 为 数字列表。ID值即列表索引值，空数据不会返回ID值。
+	//==============================
+	DrillUp.drill_COAS_getStateNodeData_AllId = function( sequence_id ){
+		var data_list = this.drill_COAS_getStateNodeData_List( sequence_id );
+		var result_list = [];
+		for(var i=0; i < data_list.length; i++ ){
+			var data = data_list[i];
+			if( data['name'] == "" ){ continue; }
+			result_list.push( data['id'] );
+		}
+		return result_list;
+	};
+	//==============================
+	// * 静态数据访问器 - 状态节点 - 获取全部名称
+	//
+	//			说明：	> 返回值 为 字符串列表。不含空字符串。
+	//==============================
+	DrillUp.drill_COAS_getStateNodeData_AllName = function( sequence_id ){
+		var data_list = this.drill_COAS_getStateNodeData_List( sequence_id );
+		var result_list = [];
+		for(var i=0; i < data_list.length; i++ ){
+			var data = data_list[i];
+			if( data['name'] == "" ){ continue; }
+			result_list.push( data['name'] );
+		}
+		return result_list;
+	};
+	
+	//==============================
+	// * 静态数据访问器 - 动作元 - 设置（根据ID）
+	//==============================
+	//DrillUp.drill_COAS_setActData_ById = function( sequence_id, act_id, act_data ){ }
+	//==============================
+	// * 静态数据访问器 - 动作元 - 设置（根据名称）
+	//==============================
+	//DrillUp.drill_COAS_setActData_ByName = function( sequence_id, act_name, act_data ){ }
+	//==============================
+	// * 静态数据访问器 - 动作元 - 获取列表
+	//
+	//			说明：	> 返回值 为 静态数据列表的指针。
+	//==============================
+	DrillUp.drill_COAS_getActData_List = function( sequence_id ){
+		var sequence_data = DrillUp.g_COAS_list[ sequence_id ];
+		if( sequence_data == undefined ){ return null; }
+		return sequence_data['act_tank'];
+	};
+	//==============================
+	// * 静态数据访问器 - 动作元 - 获取（根据ID）
+	//
+	//			说明：	> ID值即列表索引值，从0开始计数。
+	//==============================
+	DrillUp.drill_COAS_getActData_ById = function( sequence_id, act_id ){
+		var sequence_data = DrillUp.g_COAS_list[ sequence_id ];
+		if( sequence_data == undefined ){ return null; }
+		var data = sequence_data['act_tank'][ act_id ];
+		if( data == undefined ){ return null; }
+		return data;
+	};
+	//==============================
+	// * 静态数据访问器 - 动作元 - 获取（根据名称）
+	//==============================
+	DrillUp.drill_COAS_getActData_ByName = function( sequence_id, act_name ){
+		if( act_name == "" ){ return null; }
+		var sequence_data = DrillUp.drill_COAS_getSequenceData_ById( sequence_id );
+		if( sequence_data == undefined ){ return null; }
+		for(var i=0; i < sequence_data['act_tank'].length; i++ ){
+			var data = sequence_data['act_tank'][i];
+			if( data['name'] == act_name ){
+				return data;
+			}
+		}
+		return null;
+	};
+	//==============================
+	// * 静态数据访问器 - 动作元 - 获取全部ID
+	//
+	//			说明：	> 返回值 为 数字列表。ID值即列表索引值，空数据不会返回ID值。
+	//==============================
+	DrillUp.drill_COAS_getActData_AllId = function( sequence_id ){
+		var data_list = this.drill_COAS_getActData_List( sequence_id );
+		var result_list = [];
+		for(var i=0; i < data_list.length; i++ ){
+			var data = data_list[i];
+			if( data['name'] == "" ){ continue; }
+			result_list.push( data['id'] );
+		}
+		return result_list;
+	};
+	//==============================
+	// * 静态数据访问器 - 动作元 - 获取全部名称
+	//
+	//			说明：	> 返回值 为 字符串列表。不含空字符串。
+	//==============================
+	DrillUp.drill_COAS_getActData_AllName = function( sequence_id ){
+		var data_list = this.drill_COAS_getActData_List( sequence_id );
+		var result_list = [];
+		for(var i=0; i < data_list.length; i++ ){
+			var data = data_list[i];
+			if( data['name'] == "" ){ continue; }
+			result_list.push( data['name'] );
+		}
+		return result_list;
+	};
+	
+	//==============================
+	// * 静态数据访问器 - 是否存在 动画序列名称
+	//==============================
+	DrillUp.drill_COAS_hasSequenceName = function( sequence_name ){
+		var data = DrillUp.drill_COAS_getSequenceData_ByName( sequence_name );
+		if( data == undefined ){ return false; }
+		return true;
+	};
+	//==============================
+	// * 静态数据访问器 - 是否存在 状态元名称
+	//==============================
+	DrillUp.drill_COAS_hasStateName = function( sequence_id, state_name ){
+		var data = DrillUp.drill_COAS_getStateData_ByName( sequence_id, state_name );
+		if( data == undefined ){ return false; }
+		return true;
+	};
+	//==============================
+	// * 静态数据访问器 - 是否存在 状态节点名称
+	//==============================
+	DrillUp.drill_COAS_hasStateNodeName = function( sequence_id, stateNode_name ){
+		var data = DrillUp.drill_COAS_getStateNodeData_ByName( sequence_id, stateNode_name );
+		if( data == undefined ){ return false; }
+		return true;
+	};
+	//==============================
+	// * 静态数据访问器 - 是否存在 动作元名称
+	//==============================
+	DrillUp.drill_COAS_hasActName = function( sequence_id, act_name ){
+		var data = DrillUp.drill_COAS_getActData_ByName( sequence_id, act_name );
+		if( data == undefined ){ return false; }
+		return true;
 	};
 
 	
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _Drill_COAS_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
@@ -1751,7 +2233,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					if( spriteset == undefined ){ return; }
 					if( spriteset._drill_COAS_debugWindow == undefined ){
 						var temp_window = new Drill_COAS_DebugWindow();
-						temp_window.drill_COAS_setMainController( main_controller );
+						temp_window.drill_window_setMainController( main_controller );
 						spriteset.addChild( temp_window );
 						spriteset._drill_COAS_debugWindow = temp_window;
 					}
@@ -1765,29 +2247,29 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					}
 				}
 				if( temp2 == "显示当前状态元名称" ){
-					var name = main_controller.drill_COAS_getCurStateName();
+					var name = main_controller.drill_controllerMain_Node_getCurStateName();
 					alert( name );
 				}
 				if( temp2 == "显示当前状态元名称（全路径）" ){
-					var name = main_controller.drill_COAS_getCurStateName_AllRoot();
+					var name = main_controller.drill_controllerMain_Node_getCurStateName_AllRoot();
 					alert( name );
 				}
 				if( temp2 == "显示全部状态元名称" ){
-					var name_list = main_controller.drill_COAS_getStateData_AllName();
+					var name_list = main_controller.drill_controllerMain_getStateData_AllName();
 					alert( JSON.stringify(name_list) );
 				}
 				if( temp2 == "显示全部状态节点名称" ){
-					var name_list = main_controller.drill_COAS_getStateNodeData_AllName();
+					var name_list = main_controller.drill_controllerMain_getNodeData_AllName();
 					alert( JSON.stringify(name_list) );
 				}
 				if( temp2 == "显示全部动作元名称" ){
-					var name_list = main_controller.drill_COAS_getActData_AllName();
+					var name_list = main_controller.drill_controllerMain_getActData_AllName();
 					alert( JSON.stringify(name_list) );
 				}
 				if( temp2.indexOf("显示符合注解的状态元名[") != -1 ){
 					temp2 = temp2.replace("显示符合注解的状态元名[","");
 					temp2 = temp2.replace("]","");
-					//main_controller.drill_COAS_setSimpleStateNodeByAnnotation( temp2 );
+					//main_controller.drill_controllerMain_setSimpleStateNodeByAnnotation( temp2 );
 					//var seq = main_controller.drill_COAS_getCurrentStateSeqName();
 					//alert( JSON.stringify(seq) );
 				}
@@ -1798,27 +2280,30 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 
 
 //=============================================================================
-// ** 临时变量初始化
+// ** ☆预加载
+//
+//			说明：	> 对指定资源贴图标记不删除，可以防止重建导致的浪费资源，以及资源显示时闪烁问题。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 临时变量 - 初始化
+// * 预加载 - 初始化
 //==============================
-var _drill_COAS_temp_initialize = Game_Temp.prototype.initialize;
+var _drill_COAS_preload_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {
-    _drill_COAS_temp_initialize.call(this);
+    _drill_COAS_preload_initialize.call(this);
 	this._drill_COAS_lastCreatedMainController = null;		//（上一个创建的动画序列）
 	this.drill_COAS_preloadInit();
 }
 //==============================
-// * 临时变量 - 预加载 版本校验
+// * 预加载 - 版本校验
 //==============================
 if( Utils.generateRuntimeId == undefined ){
 	alert( DrillUp.drill_COAS_getPluginTip_LowVersion() );
 }
 //==============================
-// * 临时变量 - 资源提前预加载
+// * 预加载 - 执行资源预加载
 //
-//			说明：	遍历全部资源，提前预加载标记过的资源。
+//			说明：	> 遍历全部资源，提前预加载标记过的资源。
 //==============================
 Game_Temp.prototype.drill_COAS_preloadInit = function() {
 	this._drill_COAS_cacheId = Utils.generateRuntimeId();	//资源缓存id
@@ -1860,6 +2345,20 @@ Game_Temp.prototype.drill_COAS_preloadInit = function() {
 }
 
 
+//=============================================================================
+// ** ☆核心漏洞修复
+//=============================================================================
+//==============================
+// * 核心漏洞修复 - 屏蔽根据版本重刷地图
+//
+//			说明：	> 此功能会刷掉旧存档的存储数据，因为版本不一样会强制重进地图。
+//					  而这样做只是 刷新旧存档的当前地图而已，没任何好处。
+//==============================
+Scene_Load.prototype.reloadMapIfUpdated = function() {
+	// （禁止重刷）
+};
+
+
 
 //=============================================================================
 // ** 状态元 控制器【Drill_COAS_StateController】
@@ -1867,21 +2366,29 @@ Game_Temp.prototype.drill_COAS_preloadInit = function() {
 // **		作用域：	地图界面、战斗界面、菜单界面
 // ** 		主功能：	> 定义一个专门控制 状态元 的数据类。
 // **					> 该类可被存到存档中。
-// ** 		子功能：	->帧刷新
-// **					->重设数据
-// **						->序列号
-// **					->输出数据
-// **						> 当前的对象名
+// ** 		子功能：	->控制器
+// **						->帧刷新
+// **						->空的静态数据
+// **						->获取静态数据
+// **						->重设数据
+// **							->序列号
+// **					->A主体
+// **						->获取名称
+// **						->获取优先级
+// **						->可被动作元打断
+// **					->B输出数据
+// **						> 当前的资源名
 // **						> 当前的路径
 // **						> 当前的色调
 // **						> 当前的模糊
-// **					->节点
-// **						->当前状态元名称
-// **						->当前状态元优先级
-// **						->是否结束播放
-// **					->GIF
-// **						->播放（增量刷新）
+// **					->C播放GIF
+// **						->帧刷新（增量刷新）
 // **						->帧间隔列表
+// **						->播放
+// **							->是否结束播放
+// **							->重置播放
+// **							->设置指定帧
+// **					->D变速播放
 // **		
 // **		说明：	> 该类的update函数需要手动调用。
 // **				> 【该类在c++工具中存在 复刻类 ，修改后注意同步复刻 】
@@ -1895,13 +2402,22 @@ function Drill_COAS_StateController() {
 //==============================
 // * 状态元 - 初始化
 //==============================
-Drill_COAS_StateController.prototype.initialize = function( data ){
-	this._drill_data = {};
+Drill_COAS_StateController.prototype.initialize = function( sequenceData_id, stateData_id ){
+	
+	// > 参数检查
+	if( typeof sequenceData_id != "number" ||
+		typeof stateData_id != "number" ){
+		alert( DrillUp.drill_COAS_getPluginTip_Sequence_NotId("Drill_COAS_StateController") );
+		throw Error( DrillUp.drill_COAS_getPluginTip_Sequence_NotId("Drill_COAS_StateController") );
+		return;
+	}
+	
+	this._drill_sequenceData_id = sequenceData_id;
+	this._drill_stateData_id = stateData_id;
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
-    this.drill_initData_State();											//初始化数据
-    this.drill_initPrivateData_State();										//私有数据初始化
-	if( data == undefined ){ data = {}; }
-    this.drill_COAS_resetData_State( data );
+    this.drill_controllerState_initData();									//初始化数据
+    this.drill_controllerState_initChild();									//初始化子功能
+    this.drill_controllerState_resetData( sequenceData_id, stateData_id );
 };
 //##############################
 // * 状态元 - 帧刷新【标准函数】
@@ -1911,250 +2427,329 @@ Drill_COAS_StateController.prototype.initialize = function( data ){
 //			
 //			说明：	> 此函数必须在 帧刷新 中手动调用执行。
 //##############################
-Drill_COAS_StateController.prototype.drill_COAS_update = function(){
-	this._drill_curTime += 1;			//帧刷新 - 时间流逝
-	this.drill_COAS_updateState();		//帧刷新 - 状态元
+Drill_COAS_StateController.prototype.drill_controllerState_update = function(){
+	this.drill_controllerState_updateAttr();		//帧刷新 - A主体
+													//帧刷新 - B输出数据（无）
+	this.drill_controllerState_updateGIF();			//帧刷新 - C播放GIF
 };
 //##############################
 // * 状态元 - 重设数据【标准函数】
 //			
-//			参数：	> data 动态参数对象
+//			参数：	> sequenceData_id 数字
+//					> stateData_id 数字
 //			返回：	> 无
 //			
-//			说明：	> 通过此函数，你不需要再重新创建一个数据对象，并且贴图能直接根据此数据来变化。
-//					> 参数对象中的参数【可以缺项】，只要的参数项不一样，就刷新；参数项一样，则不变化。
+//			说明：	> 此操作将重连 id对应的静态数据，并且当前控制器的所有数据都会被重置。
 //##############################
-Drill_COAS_StateController.prototype.drill_COAS_resetData_State = function( data ){
-	this.drill_COAS_resetData_State_Private( data );
+Drill_COAS_StateController.prototype.drill_controllerState_resetData = function( sequenceData_id, stateData_id ){
+	this.drill_controllerState_resetData_Private( sequenceData_id, stateData_id );
 };
 //##############################
-// * 状态元 - 输出数据 - 当前的对象名【开放函数】
+// * 状态元 - 空的静态数据
+//			
+//			说明：	> 空数据会在initData时会进行默认值初始化，在其他地方只读。
+//##############################
+Drill_COAS_StateController.emptyData = {};
+//##############################
+// * 状态元 - 获取静态数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 对象指针
+//			
+//			说明：	> 由于数据量巨大，不要存储到存档中，也不要直接挂载到Controller身上。
+//					> 静态数据会在initData时会进行默认值初始化，在其他地方只读。
+//					> 【此函数不含遍历，而是直接获取值，可以放在帧刷新中使用】
+//##############################
+Drill_COAS_StateController.prototype.drill_data = function(){
+	var data = DrillUp.drill_COAS_getStateData_ById( this._drill_sequenceData_id, this._drill_stateData_id );
+	if( data == undefined ){ return Drill_COAS_StateController.emptyData; }
+	return data;
+};
+
+//##############################
+// * 状态元 - A主体 - 获取名称【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 字符串
 //##############################
-Drill_COAS_StateController.prototype.drill_COAS_curBitmapName = function(){
+Drill_COAS_StateController.prototype.drill_controllerState_getName = function(){
+	return this.drill_data()['name'];
+};
+//##############################
+// * 状态元 - A主体 - 获取优先级【开放函数】
+//			
+//			参数：	> 无
+//			返回：	> 数字
+//##############################
+Drill_COAS_StateController.prototype.drill_controllerState_getPriority = function(){
+	return this.drill_data()['priority'];
+};
+//##############################
+// * 状态元 - A主体 - 可被动作元打断【开放函数】
+//			
+//			参数：	> 无
+//			返回：	> 布尔
+//##############################
+Drill_COAS_StateController.prototype.drill_controllerState_canBeInterrupted = function(){
+	return this.drill_data()['canBeInterrupted'];
+};
+
+//##############################
+// * 状态元 - B输出数据 - 当前的资源名【开放函数】
+//			
+//			参数：	> 无
+//			返回：	> 字符串
+//##############################
+Drill_COAS_StateController.prototype.drill_controllerState_curBitmapName = function(){
 	return this._drill_curBitmapName;
 };
 //##############################
-// * 状态元 - 输出数据 - 当前的路径【开放函数】
+// * 状态元 - B输出数据 - 当前的路径【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 字符串
 //##############################
-Drill_COAS_StateController.prototype.drill_COAS_curBitmapPath = function(){
-	return this._drill_curBitmapPath;
+Drill_COAS_StateController.prototype.drill_controllerState_curBitmapPath = function(){
+	return this.drill_data()['gif_src_file'];
 };
 //##############################
-// * 状态元 - 输出数据 - 当前的色调【开放函数】
+// * 状态元 - B输出数据 - 当前的色调【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 数字
 //##############################
-Drill_COAS_StateController.prototype.drill_COAS_curBitmapTint = function(){
-	return this._drill_curBitmapTint;
+Drill_COAS_StateController.prototype.drill_controllerState_curBitmapTint = function(){
+	return this.drill_data()['tint'];
 };
 //##############################
-// * 状态元 - 输出数据 - 当前的模糊【开放函数】
+// * 状态元 - B输出数据 - 当前的模糊【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 布尔
 //##############################
-Drill_COAS_StateController.prototype.drill_COAS_curBitmapSmooth = function(){
-	return this._drill_curBitmapSmooth;
+Drill_COAS_StateController.prototype.drill_controllerState_curBitmapSmooth = function(){
+	return this.drill_data()['smooth'];
 };
+
 //##############################
-// * 状态元 - 节点 - 当前状态元名称【开放函数】
-//			
-//			参数：	> 无
-//			返回：	> 字符串
-//##############################
-Drill_COAS_StateController.prototype.drill_COAS_getCurStateName = function(){
-	return this._drill_data['name'];
-};
-//##############################
-// * 状态元 - 节点 - 当前状态元优先级【开放函数】
-//			
-//			参数：	> 无
-//			返回：	> 数字
-//##############################
-Drill_COAS_StateController.prototype.drill_COAS_getCurStatePriority = function(){
-	return this._drill_data['priority'];
-};
-//##############################
-// * 状态元 - 节点 - 可被动作元打断【开放函数】
-//			
-//			参数：	> 无
-//			返回：	> 数字
-//##############################
-Drill_COAS_StateController.prototype.drill_COAS_canBeInterrupted = function(){
-	return this._drill_data['canBeInterrupted'];
-};
-//##############################
-// * 状态元 - 节点 - 是否结束播放【开放函数】
+// * 状态元 - C播放GIF - 是否结束播放【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 布尔
 //##############################
-Drill_COAS_StateController.prototype.drill_COAS_isStateEnd = function(){
+Drill_COAS_StateController.prototype.drill_controllerState_isEnd = function(){
 	return this._drill_curIndex >= this._drill_tarIndex;
 };
+//##############################
+// * 状态元 - C播放GIF - 重置播放【开放函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//
+//			说明：	> 重置播放即恢复到第1帧的图像。
+//##############################
+Drill_COAS_StateController.prototype.drill_controllerState_resetTimer = function(){
+	this.drill_controllerState_setCurIndex_Private( 0 );
+};
+//##############################
+// * 状态元 - C播放GIF - 设置指定帧【开放函数】
+//			
+//			参数：	> index 数字
+//			返回：	> 无
+//
+//			说明：	> 如果要固定帧，需要先暂停，再设置。
+//##############################
+Drill_COAS_StateController.prototype.drill_controllerState_setCurIndex = function( index ){
+	this.drill_controllerState_setCurIndex_Private( index );
+};
+
 //##############################
 // * 状态元 - 初始化数据【标准默认值】
 //
 //			参数：	> 无
 //			返回：	> 无
 //			
-//			说明：	> data 动态参数对象（来自类初始化）
-//					  该对象包含 类所需的所有默认值。
+//			说明：	> 该对象初始化 静态数据，提供所需的所有默认值。
 //##############################
-Drill_COAS_StateController.prototype.drill_initData_State = function() {
-	var data = this._drill_data;
+Drill_COAS_StateController.prototype.drill_controllerState_initData = function() {
+	var data = this.drill_data();		//（此处会修改到 静态数据 的指针值）
 	
-	// > 常规
-	if( data['name'] == undefined ){ data['name'] = "" };										//状态元名称
-	if( data['tag_tank'] == undefined ){ data['tag_tank'] = [] };								//状态元标签
-	if( data['priority'] == undefined ){ data['priority'] = 0 };								//状态元优先级
-	if( data['proportion'] == undefined ){ data['proportion'] = 40 };							//状态元权重
-	if( data['canBeInterrupted'] == undefined ){ data['canBeInterrupted'] = false };			//可被动作元打断
+	// > A主体
+	if( data['name'] == undefined ){ data['name'] = "" };										//A主体 - 名称
+	if( data['tag_tank'] == undefined ){ data['tag_tank'] = [] };								//A主体 - 标签
+	if( data['priority'] == undefined ){ data['priority'] = 0 };								//A主体 - 优先级
+	if( data['proportion'] == undefined ){ data['proportion'] = 40 };							//A主体 - 权重
+	if( data['canBeInterrupted'] == undefined ){ data['canBeInterrupted'] = false };			//A主体 - 可被动作元打断
+	if( data['note'] == undefined ){ data['note'] = "" };										//A主体 - 备注
 	
-	// > GIF
-	if( data['gif_src'] == undefined ){ data['gif_src'] = [] };									//GIF - 资源
-	if( data['gif_src_file'] == undefined ){ data['gif_src_file'] = "img/Special__actionSeq/"};	//GIF - 资源文件夹
-	if( data['gif_intervalTank'] == undefined ){ data['gif_intervalTank'] = [] };				//GIF - 帧间隔-明细表
-	if( data['gif_interval'] == undefined ){ data['gif_interval'] = 4 };						//GIF - 帧间隔
-	if( data['gif_back_run'] == undefined ){ data['gif_back_run'] = false };					//GIF - 是否倒放
-	if( data['gif_preload'] == undefined ){ data['gif_preload'] = false };						//GIF - 是否预加载
+	// > B输出数据
+	if( data['tint'] == undefined ){ data['tint'] = 0 };										//B输出数据 - 色调值
+	if( data['smooth'] == undefined ){ data['smooth'] = false };								//B输出数据 - 模糊边缘
 	
-	// > 声音（这部分可以单独分离出插件）
-	//if( data['se_src'] == undefined ){ data['se_src'] = "" };									//声音 - 声音资源
-	//if( data['se_delay'] == undefined ){ data['se_delay'] = 0 };								//声音 - 播放延迟
+	// > C播放GIF
+	if( data['gif_src'] == undefined ){ data['gif_src'] = [] };									//C播放GIF - 资源
+	if( data['gif_src_file'] == undefined ){ data['gif_src_file'] = "img/Special__actionSeq/"};	//C播放GIF - 资源文件夹
+	if( data['gif_intervalTank'] == undefined ){ data['gif_intervalTank'] = [] };				//C播放GIF - 帧间隔-明细表
+	if( data['gif_interval'] == undefined ){ data['gif_interval'] = 4 };						//C播放GIF - 帧间隔
+	if( data['gif_back_run'] == undefined ){ data['gif_back_run'] = false };					//C播放GIF - 是否倒放
+	if( data['gif_preload'] == undefined ){ data['gif_preload'] = false };						//C播放GIF - 是否预加载
 	
-	// > 图像
-	if( data['tint'] == undefined ){ data['tint'] = 0 };										//图像 - 色调值
-	if( data['smooth'] == undefined ){ data['smooth'] = false };								//图像 - 模糊边缘
+	// > D变速播放（无）
 	
-	// > 杂项
-	if( data['note'] == undefined ){ data['note'] = "" };										//杂项 - 备注
+	// > E声音（后续考虑，这部分可以单独分离出插件）
+	//if( data['se_src'] == undefined ){ data['se_src'] = "" };									//D声音 - 声音资源
+	//if( data['se_delay'] == undefined ){ data['se_delay'] = 0 };								//D声音 - 播放延迟
 	
-	//this._drill_data = data;	//（c++中，注意此处的指针，需要重新赋值）
+	
+	//（c++中注意此处，data是堆栈对象而非指针，需要重新赋值）
 };
 //==============================
-// * 状态元 - 私有数据初始化
+// * 状态元 - 初始化子功能
 //==============================
-Drill_COAS_StateController.prototype.drill_initPrivateData_State = function() {
-	var data = this._drill_data;
-	
-	// > 常规
-	this._drill_curTime = 0;								//常规 - 当前时间
-	this._drill_needDestroy = false;						//常规 - 销毁
-	
-	// > 播放时间重置
-	this.drill_COAS_resetTimer(data);
-	
-	// > GIF - 帧间隔列表 计算
-	this._drill_curIntervalTank = [];
-	for( var i=0; i < data['gif_src'].length; i++ ){
-		var interval = data['gif_interval'];
-		if( i < data['gif_intervalTank'].length ){
-			interval = Number(data['gif_intervalTank'][i]);
-		}
-		this._drill_curIntervalTank.push( Number(interval) );
-	}
+Drill_COAS_StateController.prototype.drill_controllerState_initChild = function() {
+	this.drill_controllerState_initAttr();			//初始化子功能 - A主体
+	this.drill_controllerState_initBitmapParam();	//初始化子功能 - B输出数据
+	this.drill_controllerState_initGIF();			//初始化子功能 - C播放GIF
+	this.drill_controllerState_initSpeed();			//初始化子功能 - D变速播放
 };
 //==============================
 // * 状态元 - 重设数据（私有）
-//
-//			说明：	data对象中的参数【可以缺项】。
 //==============================
-Drill_COAS_StateController.prototype.drill_COAS_resetData_State_Private = function( data ){
+Drill_COAS_StateController.prototype.drill_controllerState_resetData_Private = function( sequenceData_id, stateData_id ){
 	
-	// > 播放时间重置
-	this.drill_COAS_resetTimer(data);
+	// > 参数检查
+	if( typeof sequenceData_id != "number" ||
+		typeof stateData_id != "number" ){
+		alert( DrillUp.drill_COAS_getPluginTip_Sequence_NotId2("Drill_COAS_StateController") );
+		throw Error( DrillUp.drill_COAS_getPluginTip_Sequence_NotId2("Drill_COAS_StateController") );
+		return;
+	}
 	
-	// > 判断数据重复情况
-	if( this._drill_data != undefined ){
-		var keys = Object.keys( data );
-		var is_same = true;
-		for( var i=0; i < keys.length; i++ ){
-			var key = keys[i];
-			if( this._drill_data[key] != data[key] ){
-				is_same = false;
-			}
-		}
-		if( is_same == true ){ return; }
-	}
-	// > 补充未设置的数据
-	var keys = Object.keys( this._drill_data );
-	for( var i=0; i < keys.length; i++ ){
-		var key = keys[i];
-		if( data[key] == undefined ){
-			data[key] = this._drill_data[key];
-		}
-	}
+	// > C播放GIF - 重置播放
+	this.drill_controllerState_setCurIndex_Private( 0 );
 	
 	// > 执行重置
-	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
+	this._drill_sequenceData_id = sequenceData_id;
+	this._drill_stateData_id = stateData_id;
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
-    this.drill_initData_State();											//初始化数据
-    this.drill_initPrivateData_State();										//私有数据初始化
+    this.drill_controllerState_initData();									//初始化数据
+    this.drill_controllerState_initChild();									//初始化子功能
 };
+
+
 //==============================
-// * 状态元 - 播放时间重置
-//
-//			说明：	特殊重置项，将播放时间置零。
+// * A主体 - 初始化子功能
 //==============================
-Drill_COAS_StateController.prototype.drill_COAS_resetTimer = function( data ){
-	if( data == undefined ){ data = this._drill_data; }
+Drill_COAS_StateController.prototype.drill_controllerState_initAttr = function() {
+	this._drill_curTime = 0;				//A主体 - 当前时间（暂未用到）
+	this._drill_needDestroy = false;		//A主体 - 销毁（暂未用到）
+}
+//==============================
+// * A主体 - 帧刷新
+//==============================
+Drill_COAS_StateController.prototype.drill_controllerState_updateAttr = function() {
 	
-	// > GIF - 输出数据
-	this._drill_curBitmapName = "";							//输出数据 - 当前的对象名
-	this._drill_curBitmapPath = data['gif_src_file'] || "";	//输出数据 - 当前的路径
-	this._drill_curBitmapTint = data['tint'] || 0;			//输出数据 - 当前的色调
-	this._drill_curBitmapSmooth = data['smooth'] || false;	//输出数据 - 当前的模糊
+	// > 时间流逝
+	this._drill_curTime += 1;
+}
+
+//==============================
+// * B输出数据 - 初始化子功能
+//==============================
+Drill_COAS_StateController.prototype.drill_controllerState_initBitmapParam = function() {
+	this._drill_curBitmapName = "";			//B输出数据 - 当前的资源名
+											//B输出数据 - 当前的路径（从数据中直接获取）
+											//B输出数据 - 当前的色调（从数据中直接获取）
+											//B输出数据 - 当前的模糊（从数据中直接获取）
+}
+
+//==============================
+// * C播放GIF - 初始化子功能
+//==============================
+Drill_COAS_StateController.prototype.drill_controllerState_initGIF = function() {
+	var data = this.drill_data();
 	
-	// > GIF - 播放
-	this._drill_curTickTime = 0;							//播放 - 当前累计时间
-	this._drill_curIndex = 0;								//播放 - 当前索引
-	this._drill_tarIndex = 0;								//播放 - 索引结束位置
+	// > 播放参数
+	this._drill_curTickTime = 0;			//播放参数 - 当前累计时间
+	this._drill_curIndex = 0;				//播放参数 - 当前索引
+	this._drill_tarIndex = 0;				//播放参数 - 索引结束位置
 	if( data['gif_src'] != undefined ){
 		this._drill_tarIndex = data['gif_src'].length;
 	}
+}
+//==============================
+// * C播放GIF - 获取帧间隔 长度
+//==============================
+Drill_COAS_StateController.prototype.drill_controllerState_getIntervalLength = function(){
+	return this.drill_data()['gif_src'].length;
+}
+//==============================
+// * C播放GIF - 获取帧间隔 根据索引
+//
+//			说明：	> 此函数不含遍历，而是直接获取值，可以放在帧刷新中使用。
+//==============================
+Drill_COAS_StateController.prototype.drill_controllerState_getIntervalByIndex = function( index ){
+	var data = this.drill_data();
+	if( index < 0 ){ return Number(data['gif_interval']); }		//（帧间隔列表越界，则用默认帧间隔）
+	if( index >= data['gif_intervalTank'].length ){ return Number(data['gif_interval']); }
+	return Number(data['gif_intervalTank'][ index ]);
+}
+//==============================
+// * C播放GIF - 设置指定帧
+//==============================
+Drill_COAS_StateController.prototype.drill_controllerState_setCurIndex_Private = function( index ){
+	if( index >= this._drill_tarIndex ){
+		index = this._drill_tarIndex -1;
+	}
+	
+	// > B输出数据 - 重设对象名
+	this._drill_curBitmapName = "";
+	
+	// > 播放参数
+	this._drill_curTickTime = 0;			//播放参数 - 当前累计时间
+	this._drill_curIndex = index;			//播放参数 - 当前索引
 };
 //==============================
-// * 状态元 - 帧刷新状态元
+// * C播放GIF - 帧刷新（状态元）
 //
-//			说明：	此处的 curIndex 为增量刷新，不是定量刷新。
+//			说明：	> 此处的 _drill_curIndex 为增量刷新，不是定量刷新。
 //==============================
-Drill_COAS_StateController.prototype.drill_COAS_updateState = function(){
-	var data = this._drill_data;	
+Drill_COAS_StateController.prototype.drill_controllerState_updateGIF = function(){
+	var data = this.drill_data();	
 	
 	// > 当前索引
+	var interval_length = this.drill_controllerState_getIntervalLength();
+	if( interval_length == 0 ){ return; }
 	var cur_index = this._drill_curIndex;
 	if( data['gif_back_run'] == true ){		//（倒放情况）
-		cur_index = this._drill_curIntervalTank.length-1 -this._drill_curIndex;
+		cur_index = interval_length-1 -this._drill_curIndex;
 	}
 	if( cur_index < 0 ){ cur_index = 0; }	//【状态元 播放完毕后，保持在最后一帧，等待 状态节点 控制新的一轮。】
-	if( cur_index >= this._drill_curIntervalTank.length ){ cur_index = this._drill_curIntervalTank.length-1; }
-	if (this._drill_curIntervalTank.length == 0){ return; }
+	if( cur_index >= interval_length ){ cur_index = interval_length-1; }
 	
 	// > 帧间隔列表
 	var cur_time = this._drill_curTickTime;
-	var tar_time = this._drill_curIntervalTank[ cur_index ];
+	var tar_time = this.drill_controllerState_getIntervalByIndex( cur_index );
 	if( cur_time >= tar_time ){
 		// > 当前索引+1
 		this._drill_curIndex += 1;		//（达到帧间隔后，索引+1）
 		this._drill_curTickTime = 0;
 	}
 	
-	// > 输出数据
+	// > B输出数据 - 记录对象名
 	this._drill_curBitmapName = data['gif_src'][ cur_index ];
-	this._drill_curBitmapPath = data['gif_src_file'];
-	this._drill_curBitmapTint = data['tint'];
-	this._drill_curBitmapSmooth = data['smooth'];
 	
-	// > 当前累计时间+1
-	this._drill_curTickTime += 1;
+	// > 当前累计时间+1 （D变速播放）
+	this._drill_curTickTime += this._drill_curSpeed;
+};
+
+//==============================
+// * D变速播放 - 初始化子功能
+//
+//			说明：	> 最快速度也只能是每帧都播放一张图片，不会跳帧播放。
+//==============================
+Drill_COAS_StateController.prototype.drill_controllerState_initSpeed = function() {
+	this._drill_curSpeed = 1;
 };
 
 
@@ -2164,23 +2759,37 @@ Drill_COAS_StateController.prototype.drill_COAS_updateState = function(){
 // **		作用域：	地图界面、战斗界面、菜单界面
 // ** 		主功能：	> 定义一个专门控制状态节点的数据类。
 // **					> 该类可被存到存档中。
-// ** 		子功能：	->帧刷新
-// **					->重设数据
-// **						->序列号
-// **					->输出数据
-// **						> 当前的对象名（子节点的）
-// **						> 当前的路径（子节点的）
-// **						> 当前的色调（子节点的）
-// **						> 当前的模糊（子节点的）
-// **					->节点
-// **						->父数据id
-// **						->当前层数
+// ** 		子功能：	->控制器
+// **						->帧刷新
+// **						->空的静态数据
+// **						->获取静态数据
+// **						->重设数据
+// **							->序列号
+// **					->A主体
 // **						->当前是否为 状态元类型
 // **						->当前是否为 集合类型
 // **						->当前是否为 随机播放
 // **						->当前是否为 顺序播放
-// **					->子节点
+// **						->当前优先级
+// **						->可被动作元打断
+// **					->B输出数据
+// **						> 当前的资源名（子节点的）
+// **						> 当前的路径（子节点的）
+// **						> 当前的色调（子节点的）
+// **						> 当前的模糊（子节点的）
+// **					->C节点
+// **						->播放
+// **							->是否结束播放
+// **							->重置播放
+// **							->设置指定节点/状态元索引
+// **						->父数据id
+// **						->当前层数
+// **						->播放简单状态元集合
+// **					->D子节点
 // **						->刷新子节点
+// **						->获取当前状态元对象
+// **						->获取当前状态元名称
+// **						->获取当前状态元名称（全路径）
 // **		
 // **		说明：	> 该类的update函数需要手动调用。
 // **				> 【该类在c++工具中存在 复刻类 ，修改后注意同步复刻 】
@@ -2194,13 +2803,22 @@ function Drill_COAS_StateNodeController() {
 //==============================
 // * 状态节点 - 初始化
 //==============================
-Drill_COAS_StateNodeController.prototype.initialize = function( data ){
-	this._drill_data = {};
+Drill_COAS_StateNodeController.prototype.initialize = function( sequenceData_id, stateNodeData_id ){
+	
+	// > 参数检查
+	if( typeof sequenceData_id != "number" ||
+		typeof stateNodeData_id != "number" ){
+		alert( DrillUp.drill_COAS_getPluginTip_Sequence_NotId("Drill_COAS_StateNodeController") );
+		throw Error( DrillUp.drill_COAS_getPluginTip_Sequence_NotId("Drill_COAS_StateNodeController") );
+		return;
+	}
+	
+	this._drill_sequenceData_id = sequenceData_id;
+	this._drill_stateNodeData_id = stateNodeData_id;
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
-    this.drill_initData_Node();												//初始化数据
-    this.drill_initPrivateData_Node();										//私有数据初始化
-	if( data == undefined ){ data = {}; }
-    this.drill_COAS_resetData_Node( data );
+    this.drill_controllerNode_initData();									//初始化数据
+    this.drill_controllerNode_initChild();									//初始化子功能
+    this.drill_controllerNode_resetData( sequenceData_id, stateNodeData_id );
 };
 //##############################
 // * 状态节点 - 帧刷新【标准函数】
@@ -2210,472 +2828,599 @@ Drill_COAS_StateNodeController.prototype.initialize = function( data ){
 //			
 //			说明：	> 此函数必须在 帧刷新 中手动调用执行。
 //##############################
-Drill_COAS_StateNodeController.prototype.drill_COAS_update = function(){
-	this._drill_curTime += 1;			//帧刷新 - 时间流逝
-	this.drill_COAS_updateNode();		//帧刷新 - 集合
+Drill_COAS_StateNodeController.prototype.drill_controllerNode_update = function(){
+	this.drill_controllerNode_updateAttr();			//帧刷新 - A主体
+													//帧刷新 - B输出数据（无）
+	this.drill_controllerNode_updateNode();			//帧刷新 - C节点
+													//帧刷新 - D子节点（无）
 };
 //##############################
 // * 状态节点 - 重设数据【标准函数】
 //			
-//			参数：	> data 动态参数对象
+//			参数：	> sequenceData_id 数字
+//					> stateNodeData_id 数字
 //			返回：	> 无
 //			
-//			说明：	> 通过此函数，你不需要再重新创建一个数据对象，并且贴图能直接根据此数据来变化。
-//					> 参数对象中的参数【可以缺项】，只要的参数项不一样，就刷新；参数项一样，则不变化。
+//			说明：	> 此操作将重连 id对应的静态数据，并且当前控制器的所有数据都会被重置。
 //					> 【重设数据 不会 重建节点】
 //##############################
-Drill_COAS_StateNodeController.prototype.drill_COAS_resetData_Node = function( data ){
-	this.drill_COAS_resetData_Node_Private( data );
+Drill_COAS_StateNodeController.prototype.drill_controllerNode_resetData = function( sequenceData_id, stateNodeData_id ){
+	this.drill_controllerNode_resetData_Private( sequenceData_id, stateNodeData_id );
 };
 //##############################
-// * 状态节点 - 数据 - 当前的对象名【开放函数】
+// * 状态节点 - 空的静态数据
+//			
+//			说明：	> 空数据会在initData时会进行默认值初始化，在其他地方只读。
+//##############################
+Drill_COAS_StateNodeController.emptyData = {};
+//##############################
+// * 状态节点 - 获取静态数据【标准函数】
 //			
 //			参数：	> 无
-//			返回：	> 字符串
+//			返回：	> 对象指针
+//			
+//			说明：	> 由于数据量巨大，不要存储到存档中，也不要直接挂载到Controller身上。
+//					> 静态数据会在initData时会进行默认值初始化，在其他地方只读。
+//					> 【此函数不含遍历，而是直接获取值，可以放在帧刷新中使用】
 //##############################
-Drill_COAS_StateNodeController.prototype.drill_COAS_curBitmapName = function(){
-	if( this.drill_COAS_isTypeState() ){
-		return this._drill_curState.drill_COAS_curBitmapName();
-	}
-	if( this.drill_COAS_isTypeNode() ){
-		return this._drill_curNode.drill_COAS_curBitmapName();
-	}
-	return "";
+Drill_COAS_StateNodeController.prototype.drill_data = function(){
+	var data = DrillUp.drill_COAS_getStateNodeData_ById( this._drill_sequenceData_id, this._drill_stateNodeData_id );
+	if( data == undefined ){ return Drill_COAS_StateNodeController.emptyData; }
+	return data;
 };
+
 //##############################
-// * 状态节点 - 数据 - 当前的路径【开放函数】
+// * 状态节点 - A主体 - 当前是否为 状态元类型【开放函数】
 //			
 //			参数：	> 无
-//			返回：	> 字符串
+//			返回：	> 布尔
 //##############################
-Drill_COAS_StateNodeController.prototype.drill_COAS_curBitmapPath = function(){
-	if( this.drill_COAS_isTypeState() ){
-		return this._drill_curState.drill_COAS_curBitmapPath();
-	}
-	if( this.drill_COAS_isTypeNode() ){
-		return this._drill_curNode.drill_COAS_curBitmapPath();
-	}
-	return "";
+Drill_COAS_StateNodeController.prototype.drill_controllerNode_isTypeState = function(){
+	if( this._drill_curState == null ){ return false; }
+	return this._drill_play_type == "随机播放状态元" || 
+		this._drill_play_type == "顺序播放状态元";
 };
 //##############################
-// * 状态节点 - 数据 - 当前的色调【开放函数】
+// * 状态节点 - A主体 - 当前是否为 集合类型【开放函数】
+//			
+//			参数：	> 无
+//			返回：	> 布尔
+//##############################
+Drill_COAS_StateNodeController.prototype.drill_controllerNode_isTypeNode = function(){
+	if( this._drill_curNode == null ){ return false; }
+	return this._drill_play_type == "随机播放嵌套集合" || 
+		this._drill_play_type == "顺序播放嵌套集合";
+};
+//##############################
+// * 状态节点 - A主体 - 当前是否为 随机播放【开放函数】
+//			
+//			参数：	> 无
+//			返回：	> 布尔
+//##############################
+Drill_COAS_StateNodeController.prototype.drill_controllerNode_isRandomPlay = function(){
+	return this._drill_play_type == "随机播放状态元" || 
+		this._drill_play_type == "随机播放嵌套集合";
+};
+//##############################
+// * 状态节点 - A主体 - 当前是否为 顺序播放【开放函数】
+//			
+//			参数：	> 无
+//			返回：	> 布尔
+//##############################
+Drill_COAS_StateNodeController.prototype.drill_controllerNode_isPlainPlay = function(){
+	return this._drill_play_type == "顺序播放状态元" || 
+		this._drill_play_type == "顺序播放嵌套集合";
+};
+//##############################
+// * 状态节点 - A主体 - 当前优先级【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 数字
 //##############################
-Drill_COAS_StateNodeController.prototype.drill_COAS_curBitmapTint = function(){
-	if( this.drill_COAS_isTypeState() ){
-		return this._drill_curState.drill_COAS_curBitmapTint();
+Drill_COAS_StateNodeController.prototype.drill_controllerNode_getPriority = function(){
+	var priority = this.drill_data()['priority'];
+	if( this.drill_controllerNode_isTypeState() ){
+		return Math.max( priority, this._drill_curState.drill_controllerState_getPriority() );
 	}
-	if( this.drill_COAS_isTypeNode() ){
-		return this._drill_curNode.drill_COAS_curBitmapTint();
+	if( this.drill_controllerNode_isTypeNode() ){
+		return Math.max( priority, this._drill_curNode.drill_controllerNode_getPriority() );
+	}
+	return priority;
+};
+//##############################
+// * 状态节点 - A主体 - 可被动作元打断【开放函数】
+//			
+//			参数：	> 无
+//			返回：	> 布尔
+//##############################
+Drill_COAS_StateNodeController.prototype.drill_controllerNode_canBeInterrupted = function(){
+	if( this.drill_data()['canBeInterrupted'] == true ){ return true; }
+	if( this.drill_controllerNode_isTypeState() ){
+		return this._drill_curState.drill_controllerState_canBeInterrupted();
+	}
+	if( this.drill_controllerNode_isTypeNode() ){
+		return this._drill_curNode.drill_controllerNode_canBeInterrupted();
+	}
+	return false;
+};
+
+//##############################
+// * 状态节点 - B输出数据 - 当前的资源名【开放函数】
+//			
+//			参数：	> 无
+//			返回：	> 字符串
+//##############################
+Drill_COAS_StateNodeController.prototype.drill_controllerNode_curBitmapName = function(){
+	if( this.drill_controllerNode_isTypeState() ){
+		return this._drill_curState.drill_controllerState_curBitmapName();
+	}
+	if( this.drill_controllerNode_isTypeNode() ){
+		return this._drill_curNode.drill_controllerNode_curBitmapName();
+	}
+	return "";
+};
+//##############################
+// * 状态节点 - B输出数据 - 当前的路径【开放函数】
+//			
+//			参数：	> 无
+//			返回：	> 字符串
+//##############################
+Drill_COAS_StateNodeController.prototype.drill_controllerNode_curBitmapPath = function(){
+	if( this.drill_controllerNode_isTypeState() ){
+		return this._drill_curState.drill_controllerState_curBitmapPath();
+	}
+	if( this.drill_controllerNode_isTypeNode() ){
+		return this._drill_curNode.drill_controllerNode_curBitmapPath();
+	}
+	return "";
+};
+//##############################
+// * 状态节点 - B输出数据 - 当前的色调【开放函数】
+//			
+//			参数：	> 无
+//			返回：	> 数字
+//##############################
+Drill_COAS_StateNodeController.prototype.drill_controllerNode_curBitmapTint = function(){
+	if( this.drill_controllerNode_isTypeState() ){
+		return this._drill_curState.drill_controllerState_curBitmapTint();
+	}
+	if( this.drill_controllerNode_isTypeNode() ){
+		return this._drill_curNode.drill_controllerNode_curBitmapTint();
 	}
 	return 0;
 };
 //##############################
-// * 状态节点 - 数据 - 当前的模糊【开放函数】
+// * 状态节点 - B输出数据 - 当前的模糊【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 布尔
 //##############################
-Drill_COAS_StateNodeController.prototype.drill_COAS_curBitmapSmooth = function(){
-	if( this.drill_COAS_isTypeState() ){
-		return this._drill_curState.drill_COAS_curBitmapSmooth();
+Drill_COAS_StateNodeController.prototype.drill_controllerNode_curBitmapSmooth = function(){
+	if( this.drill_controllerNode_isTypeState() ){
+		return this._drill_curState.drill_controllerState_curBitmapSmooth();
 	}
-	if( this.drill_COAS_isTypeNode() ){
-		return this._drill_curNode.drill_COAS_curBitmapSmooth();
+	if( this.drill_controllerNode_isTypeNode() ){
+		return this._drill_curNode.drill_controllerNode_curBitmapSmooth();
 	}
 	return false;
 };
+
 //##############################
-// * 状态节点 - 节点 - 当前是否为 状态元类型【开放函数】
+// * 状态节点 - C节点 - 是否结束播放【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 布尔
 //##############################
-Drill_COAS_StateNodeController.prototype.drill_COAS_isTypeState = function(){
-	if( this._drill_curState == null ){ return false; }
-	return this._drill_data['play_type'] == "随机播放状态元" || 
-		this._drill_data['play_type'] == "顺序播放状态元";
+Drill_COAS_StateNodeController.prototype.drill_controllerNode_isEnd = function(){
+	return this._drill_curIndex >= this._drill_tarIndex;
 };
 //##############################
-// * 状态节点 - 节点 - 当前是否为 集合类型【开放函数】
+// * 状态节点 - C节点 - 重置播放【开放函数】
 //			
 //			参数：	> 无
-//			返回：	> 布尔
-//##############################
-Drill_COAS_StateNodeController.prototype.drill_COAS_isTypeNode = function(){
-	if( this._drill_curNode == null ){ return false; }
-	return this._drill_data['play_type'] == "随机播放嵌套集合" || 
-		this._drill_data['play_type'] == "顺序播放嵌套集合";
-};
-//##############################
-// * 状态节点 - 节点 - 当前是否为 随机播放【开放函数】
-//			
-//			参数：	> 无
-//			返回：	> 布尔
-//##############################
-Drill_COAS_StateNodeController.prototype.drill_COAS_isRandomPlay = function(){
-	return this._drill_data['play_type'] == "随机播放状态元" || 
-		this._drill_data['play_type'] == "随机播放嵌套集合";
-};
-//##############################
-// * 状态节点 - 节点 - 当前是否为 顺序播放【开放函数】
-//			
-//			参数：	> 无
-//			返回：	> 布尔
-//##############################
-Drill_COAS_StateNodeController.prototype.drill_COAS_isPlainPlay = function(){
-	return this._drill_data['play_type'] == "顺序播放状态元" || 
-		this._drill_data['play_type'] == "顺序播放嵌套集合";
-};
-//##############################
-// * 状态节点 - 节点 - 设置父数据id【开放函数】
-//			
-//			参数：	> data_id 数字
 //			返回：	> 无
-//			
-//			说明：	> 创建此控制器时，必须绑定父数据id（动画序列数据）。
+//
+//			说明：	> 重置播放即恢复到第1帧的节点/状态元索引。
+//					> 仅限当前节点，不会影响到子节点。
 //##############################
-Drill_COAS_StateNodeController.prototype.drill_COAS_setParentDataId = function( data_id ){
-	this._drill_parentDataId = data_id;
+Drill_COAS_StateNodeController.prototype.drill_controllerNode_resetTimer = function(){
+	this.drill_controllerNode_setCurIndex_Private( 0 );
 };
 //##############################
-// * 状态节点 - 节点 - 设置当前层数【开放函数】
+// * 状态节点 - C节点 - 设置指定节点/状态元索引【开放函数】
+//			
+//			参数：	> index 数字
+//			返回：	> 无
+//
+//			说明：	> 如果要固定帧，不要用该接口，去控制 状态元。
+//					> 仅限当前节点，不会影响到子节点。
+//##############################
+Drill_COAS_StateNodeController.prototype.drill_controllerNode_setCurIndex = function( index ){
+	this.drill_controllerNode_setCurIndex_Private( index );
+};
+//##############################
+// * 状态节点 - C节点 - 设置当前层数【开放函数】
 //			
 //			参数：	> layer 数字
 //			返回：	> 无
 //			
 //			说明：	> 创建此控制器时，必须赋值层数，用于嵌套校验。
 //##############################
-Drill_COAS_StateNodeController.prototype.drill_COAS_setLayer = function( layer ){
+Drill_COAS_StateNodeController.prototype.drill_controllerNode_setLayer = function( layer ){
 	this._drill_curLayer = layer;
 };
 //##############################
-// * 状态节点 - 节点 - 是否结束播放【开放函数】
-//			
-//			参数：	> 无
-//			返回：	> 布尔
-//##############################
-Drill_COAS_StateNodeController.prototype.drill_COAS_isNodeEnd = function(){
-	return this._drill_curIndex >= this._drill_tarIndex;
-};
-//##############################
-// * 状态节点 - 节点 - 当前状态元优先级【开放函数】
-//			
-//			参数：	> 无
-//			返回：	> 数字
-//##############################
-Drill_COAS_StateNodeController.prototype.drill_COAS_getCurStatePriority = function(){
-	var priority = this._drill_data['priority'];
-	if( this.drill_COAS_isTypeState() ){
-		return Math.max( priority, this._drill_curState.drill_COAS_getCurStatePriority() );
-	}
-	if( this.drill_COAS_isTypeNode() ){
-		return Math.max( priority, this._drill_curNode.drill_COAS_getCurStatePriority() );
-	}
-	return priority;
-};
-//##############################
-// * 状态节点 - 节点 - 可被动作元打断【开放函数】
-//			
-//			参数：	> 无
-//			返回：	> 布尔
-//##############################
-Drill_COAS_StateNodeController.prototype.drill_COAS_canBeInterrupted = function(){
-	if( this._drill_data['canBeInterrupted'] == true ){ return true; }
-	if( this.drill_COAS_isTypeState() ){
-		return this._drill_curState.drill_COAS_canBeInterrupted();
-	}
-	if( this.drill_COAS_isTypeNode() ){
-		return this._drill_curNode.drill_COAS_canBeInterrupted();
-	}
-	return false;
-};
-//##############################
-// * 状态节点 - 子节点 - 刷新子节点【开放函数】
-//			
-//			参数：	> 无
-//			返回：	> 无
-//
-//			说明：	重刷 当前集合的子节点 以及所有子节点集合的内容。
-//##############################
-Drill_COAS_StateNodeController.prototype.drill_COAS_refreshNext = function(){
-	this.drill_COAS_refreshNext_Private();
-};
-//##############################
-// * 状态节点 - 子节点 - 获取当前状态元名称【开放函数】
-//			
-//			参数：	> 无
-//			返回：	> 字符串
-//
-//			说明：	获取到最底层 正在播放 的状态元名称。
-//##############################
-Drill_COAS_StateNodeController.prototype.drill_COAS_getCurStateName = function(){
-	if( this.drill_COAS_isTypeState() ){
-		return this._drill_curState.drill_COAS_getCurStateName();
-	}
-	if( this.drill_COAS_isTypeNode() ){
-		return this._drill_curNode.drill_COAS_getCurStateName();
-	}
-	return "";
-};
-//##############################
-// * 状态节点 - 子节点 - 获取当前状态元名称（全路径）【开放函数】
-//			
-//			参数：	> 无
-//			返回：	> 字符串
-//
-//			说明：	逐步获取节点名称，直到最底层 正在播放 的状态元名称。
-//##############################
-Drill_COAS_StateNodeController.prototype.drill_COAS_getCurStateName_AllRoot = function(){
-	var data = this._drill_data;
-	if( this.drill_COAS_isTypeState() ){
-		var context = data['name'];
-		if( this.drill_COAS_isPlainPlay() ){
-			context += "(";
-			context +=  this._drill_curIndex+1;
-			context += "/";
-			context +=  this._drill_tarIndex;
-			context += ")";
-		}
-		context += " > ";
-		context += this._drill_curState.drill_COAS_getCurStateName();
-		return context;
-	}
-	if( this.drill_COAS_isTypeNode() ){
-		var context = data['name'];
-		if( this.drill_COAS_isPlainPlay() ){
-			context += "(";
-			context +=  this._drill_curIndex+1;
-			context += "/";
-			context +=  this._drill_tarIndex;
-			context += ")";
-		}
-		context += " > ";
-		context += this._drill_curNode.drill_COAS_getCurStateName_AllRoot();
-		return context;
-	}
-	return "";
-};
-//##############################
-// * 状态节点 - 操作 - 播放简单状态元集合【开放函数】
+// * 状态节点 - C节点 - 播放简单状态元集合【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 布尔
 //##############################
 Drill_COAS_StateNodeController.prototype.drill_COAS_setNewStateNameList = function( state_nameList ){
-	if (state_nameList.length == 0){ return; }
-	var data = this._drill_data;
-	data['play_type'] = "随机播放状态元";
-	data['play_randomStateSeq'] = state_nameList;
-	//this._drill_data = data;	//（c++中，注意此处的指针，需要重新赋值）
-	this.drill_COAS_refreshNext();
+	if( state_nameList.length == 0 ){ return; }
+	
+	this._drill_play_type = "随机播放状态元";
+	this._drill_play_randomStateSeq = state_nameList;
+	
+	this.drill_controllerNode_refreshNext();
 };
+
+//##############################
+// * 状态节点 - D子节点 - 刷新子节点【开放函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//
+//			说明：	> 重刷 当前集合的子节点 以及所有子节点集合的内容。
+//##############################
+Drill_COAS_StateNodeController.prototype.drill_controllerNode_refreshNext = function(){
+	this.drill_controllerNode_refreshNext_Private();
+};
+//##############################
+// * 状态节点 - D子节点 - 获取当前状态元对象【开放函数】
+//			
+//			参数：	> 无
+//			返回：	> 控制器对象
+//
+//			说明：	> 获取到节点叶子 正在播放 的状态元对象。
+//##############################
+Drill_COAS_StateNodeController.prototype.drill_controllerNode_getState = function(){
+	if( this.drill_controllerNode_isTypeState() ){
+		return this._drill_curState;
+	}
+	if( this.drill_controllerNode_isTypeNode() ){
+		return this._drill_curNode.drill_controllerNode_getState();
+	}
+	return null;
+};
+//##############################
+// * 状态节点 - D子节点 - 获取当前状态元名称【开放函数】
+//			
+//			参数：	> 无
+//			返回：	> 字符串
+//
+//			说明：	> 获取到节点叶子 正在播放 的状态元名称。
+//##############################
+Drill_COAS_StateNodeController.prototype.drill_controllerNode_getStateName = function(){
+	if( this.drill_controllerNode_isTypeState() ){
+		return this._drill_curState.drill_controllerState_getName();
+	}
+	if( this.drill_controllerNode_isTypeNode() ){
+		return this._drill_curNode.drill_controllerNode_getStateName();
+	}
+	return "";
+};
+//##############################
+// * 状态节点 - D子节点 - 获取当前状态元名称（全路径）【开放函数】
+//			
+//			参数：	> 无
+//			返回：	> 字符串
+//
+//			说明：	> 逐步获取节点名称，直到最底层 正在播放 的状态元名称。
+//##############################
+Drill_COAS_StateNodeController.prototype.drill_controllerNode_getStateName_AllRoot = function(){
+	var data = this.drill_data();
+	if( this.drill_controllerNode_isTypeState() ){
+		var context = data['name'];
+		if( this.drill_controllerNode_isPlainPlay() ){
+			context += "(";
+			context +=  this._drill_curIndex+1;
+			context += "/";
+			context +=  this._drill_tarIndex;
+			context += ")";
+		}
+		context += " > ";
+		context += this._drill_curState.drill_controllerState_getName();
+		return context;
+	}
+	if( this.drill_controllerNode_isTypeNode() ){
+		var context = data['name'];
+		if( this.drill_controllerNode_isPlainPlay() ){
+			context += "(";
+			context +=  this._drill_curIndex+1;
+			context += "/";
+			context +=  this._drill_tarIndex;
+			context += ")";
+		}
+		context += " > ";
+		context += this._drill_curNode.drill_controllerNode_getStateName_AllRoot();
+		return context;
+	}
+	return "";
+};
+
 //##############################
 // * 状态节点 - 初始化数据【标准默认值】
 //
 //			参数：	> 无
 //			返回：	> 无
 //			
-//			说明：	> data 动态参数对象（来自类初始化）
-//					  该对象包含 类所需的所有默认值。
+//			说明：	> 该对象初始化 静态数据，提供所需的所有默认值。
 //##############################
-Drill_COAS_StateNodeController.prototype.drill_initData_Node = function() {
-	var data = this._drill_data;
+Drill_COAS_StateNodeController.prototype.drill_controllerNode_initData = function() {
+	var data = this.drill_data();		//（此处会修改到 静态数据 的指针值）
 	
-	// > 常规
-	if( data['name'] == undefined ){ data['name'] = "" };								//节点名称
-	if( data['tag_tank'] == undefined ){ data['tag_tank'] = [] };						//节点标签
-	if( data['priority'] == undefined ){ data['priority'] = 0 };						//节点优先级
-	if( data['proportion'] == undefined ){ data['proportion'] = 40 };					//节点权重
-	if( data['canBeInterrupted'] == undefined ){ data['canBeInterrupted'] = false };	//可被动作元打断
+	// > A主体
+	if( data['name'] == undefined ){ data['name'] = "" };								//A主体 - 名称
+	if( data['tag_tank'] == undefined ){ data['tag_tank'] = [] };						//A主体 - 标签
+	if( data['priority'] == undefined ){ data['priority'] = 0 };						//A主体 - 优先级
+	if( data['proportion'] == undefined ){ data['proportion'] = 40 };					//A主体 - 权重
+	if( data['canBeInterrupted'] == undefined ){ data['canBeInterrupted'] = false };	//A主体 - 可被动作元打断
+	if( data['note'] == undefined ){ data['note'] = "" };								//A主体 - 备注
 	
-	// > 播放列表
-	if( data['play_type'] == undefined ){ data['play_type'] = "随机播放状态元" };		//播放列表 - 播放方式
-	if( data['play_randomStateSeq'] == undefined ){ data['play_randomStateSeq'] = [] };	//播放列表 - 随机播放状态元
-	if( data['play_plainStateSeq'] == undefined ){ data['play_plainStateSeq'] = [] };	//播放列表 - 顺序播放状态元
-	if( data['play_randomNodeSeq'] == undefined ){ data['play_randomNodeSeq'] = [] };	//播放列表 - 随机播放嵌套集合
-	if( data['play_plainNodeSeq'] == undefined ){ data['play_plainNodeSeq'] = [] };		//播放列表 - 顺序播放嵌套集合
-	if( data['play_randomMax'] == undefined ){ data['play_randomMax'] = 5 };			//播放列表 - 随机播放的次数上限
+	// > B输出数据（无）
 	
-	// > 杂项
-	if( data['note'] == undefined ){ data['note'] = "" };								//杂项 - 备注
+	// > C节点
+	if( data['play_type'] == undefined ){ data['play_type'] = "随机播放状态元" };		//C节点 - 播放方式
+	if( data['play_randomStateSeq'] == undefined ){ data['play_randomStateSeq'] = [] };	//C节点 - 随机播放状态元
+	if( data['play_plainStateSeq'] == undefined ){ data['play_plainStateSeq'] = [] };	//C节点 - 顺序播放状态元
+	if( data['play_randomNodeSeq'] == undefined ){ data['play_randomNodeSeq'] = [] };	//C节点 - 随机播放嵌套集合
+	if( data['play_plainNodeSeq'] == undefined ){ data['play_plainNodeSeq'] = [] };		//C节点 - 顺序播放嵌套集合
+	if( data['play_randomMax'] == undefined ){ data['play_randomMax'] = 5 };			//C节点 - 随机播放的次数上限
 	
-	//this._drill_data = data;	//（c++中，注意此处的指针，需要重新赋值）
+	// > D子节点（无）
+	
+	
+	//（c++中注意此处，data是堆栈对象而非指针，需要重新赋值）
 }
 //==============================
-// * 状态节点 - 私有数据初始化
+// * 状态节点 - 初始化子功能
 //==============================
-Drill_COAS_StateNodeController.prototype.drill_initPrivateData_Node = function() {
-	var data = this._drill_data;
-	
-	// > 常规
-	this._drill_curTime = 0;					//常规 - 当前时间
-	this._drill_needDestroy = false;			//常规 - 销毁
-	
-	// > 节点
-	this._drill_parentDataId = -1;				//节点 - 父数据ID
-	this._drill_curLayer = 0;					//节点 - 当前层数
-	
-	// > 集合对象初始化
-	//this._drill_curState = null;	//（不要置空，后续可能还会再次使用）
-	//this._drill_curNode = null;
-	
-	// > 播放时间重置
-	this.drill_COAS_resetTimer(data);
+Drill_COAS_StateNodeController.prototype.drill_controllerNode_initChild = function() {
+	this.drill_controllerNode_initAttr();			//初始化子功能 - A主体
+	this.drill_controllerNode_initBitmapParam();	//初始化子功能 - B输出数据
+	this.drill_controllerNode_initNode();			//初始化子功能 - C节点
+	this.drill_controllerNode_initNext();			//初始化子功能 - D子节点
 }
 //==============================
 // * 状态节点 - 重设数据（私有）
-//
-//			说明：	data对象中的参数【可以缺项】。
 //==============================
-Drill_COAS_StateNodeController.prototype.drill_COAS_resetData_Node_Private = function( data ){
+Drill_COAS_StateNodeController.prototype.drill_controllerNode_resetData_Private = function( sequenceData_id, stateNodeData_id ){
 	
-	// > 播放时间重置
-	this.drill_COAS_resetTimer(data);
+	// > 参数检查
+	if( typeof sequenceData_id != "number" ||
+		typeof stateNodeData_id != "number" ){
+		alert( DrillUp.drill_COAS_getPluginTip_Sequence_NotId2("Drill_COAS_StateNodeController") );
+		throw Error( DrillUp.drill_COAS_getPluginTip_Sequence_NotId2("Drill_COAS_StateNodeController") );
+		return;
+	}
 	
-	// > 判断数据重复情况
-	if( this._drill_data != undefined ){
-		var keys = Object.keys( data );
-		var is_same = true;
-		for( var i=0; i < keys.length; i++ ){
-			var key = keys[i];
-			if( this._drill_data[key] != data[key] ){
-				is_same = false;
-			}
-		}
-		if( is_same == true ){ return; }
-	}
-	// > 补充未设置的数据
-	var keys = Object.keys( this._drill_data );
-	for( var i=0; i < keys.length; i++ ){
-		var key = keys[i];
-		if( data[key] == undefined ){
-			data[key] = this._drill_data[key];
-		}
-	}
+	// > C节点 - 重置播放
+	this.drill_controllerNode_setCurIndex_Private( 0 );
 	
 	// > 执行重置
-	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
+	this._drill_sequenceData_id = sequenceData_id;
+	this._drill_stateNodeData_id = stateNodeData_id;
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
-    this.drill_initData_Node();												//初始化数据
-    this.drill_initPrivateData_Node();										//私有数据初始化
+    this.drill_controllerNode_initData();									//初始化数据
+    this.drill_controllerNode_initChild();									//初始化子功能
+}
+
+
+//==============================
+// * A主体 - 初始化子功能
+//==============================
+Drill_COAS_StateNodeController.prototype.drill_controllerNode_initAttr = function() {
+	this._drill_curTime = 0;				//A主体 - 当前时间（暂未用到）
+	this._drill_needDestroy = false;		//A主体 - 销毁（暂未用到）
 }
 //==============================
-// * 状态节点 - 播放时间重置
-//
-//			说明：	特殊重置项，将播放时间置零。
+// * A主体 - 帧刷新
 //==============================
-Drill_COAS_StateNodeController.prototype.drill_COAS_resetTimer = function( data ){
-	if( data == undefined ){ data = this._drill_data; }
+Drill_COAS_StateNodeController.prototype.drill_controllerNode_updateAttr = function() {
 	
-	// > 播放
-	this._drill_curIndex = 0;					//播放 - 当前索引
-	this._drill_tarIndex = 0;					//播放 - 索引结束位置
+	// > 时间流逝
+	this._drill_curTime += 1;
+}
+
+//==============================
+// * B输出数据 - 初始化子功能
+//==============================
+Drill_COAS_StateNodeController.prototype.drill_controllerNode_initBitmapParam = function() {
+											//B输出数据 - 当前的资源名（通过函数获取）
+											//B输出数据 - 当前的路径（通过函数获取）
+											//B输出数据 - 当前的色调（通过函数获取）
+											//B输出数据 - 当前的模糊（通过函数获取）
+}
+
+//==============================
+// * C节点 - 初始化子功能
+//==============================
+Drill_COAS_StateNodeController.prototype.drill_controllerNode_initNode = function() {
+	var data = this.drill_data();
+	
+	// > 数据赋值
+	this._drill_play_type = data['play_type'];
+	this._drill_play_randomStateSeq = JSON.parse(JSON.stringify( data['play_randomStateSeq'] ));
+	this._drill_play_plainStateSeq = JSON.parse(JSON.stringify( data['play_plainStateSeq'] ));
+	this._drill_play_randomNodeSeq = JSON.parse(JSON.stringify( data['play_randomNodeSeq'] ));
+	this._drill_play_plainNodeSeq = JSON.parse(JSON.stringify( data['play_plainNodeSeq'] ));
+	this._drill_play_randomMax = data['play_randomMax'] || 5;
+	
+	this._drill_curLayer = 0;					//C节点 - 当前层数
+	
+	this._drill_curIndex = 0;					//C节点 - 播放 - 当前索引
+	this._drill_tarIndex = 0;					//C节点 - 播放 - 索引结束位置
 	
 	// > 播放 - 索引结束位置
-	if( data['play_type'] == "随机播放状态元" ){
-		this._drill_tarIndex = data['play_randomMax'] || 5;	//（随机播放的次数上限）
+	if( this._drill_play_type == "随机播放状态元" ){
+		this._drill_tarIndex = this._drill_play_randomMax;	//（随机播放的次数上限）
 	}
-	if( data['play_type'] == "顺序播放状态元" ){
-		this._drill_tarIndex = data['play_plainStateSeq'].length || 0;
+	if( this._drill_play_type == "顺序播放状态元" ){
+		this._drill_tarIndex = this._drill_play_plainStateSeq.length;
 	}
-	if( data['play_type'] == "随机播放嵌套集合" ){
-		this._drill_tarIndex = data['play_randomMax'] || 5;	//（随机播放的次数上限）
+	if( this._drill_play_type == "随机播放嵌套集合" ){
+		this._drill_tarIndex = this._drill_play_randomMax;	//（随机播放的次数上限）
 	}
-	if( data['play_type'] == "顺序播放嵌套集合" ){
-		this._drill_tarIndex = data['play_plainNodeSeq'].length || 0;
+	if( this._drill_play_type == "顺序播放嵌套集合" ){
+		this._drill_tarIndex = this._drill_play_plainNodeSeq.length;
 	}
 }
 //==============================
-// * 状态节点 - 子节点 - 刷新子节点
+// * C节点 - 设置指定节点/状态元索引
+//==============================
+Drill_COAS_StateNodeController.prototype.drill_controllerNode_setCurIndex_Private = function( index ){
+	if( index >= this._drill_tarIndex ){
+		index = this._drill_tarIndex -1;
+	}
+	
+	// > 播放参数
+	this._drill_curIndex = index;			//播放参数 - 当前索引
+}
+//==============================
+// * C节点 - 帧刷新（状态节点）
+//
+//			说明：	> 此处的 _drill_curIndex 为增量刷新，不是定量刷新。
+//==============================
+Drill_COAS_StateNodeController.prototype.drill_controllerNode_updateNode = function(){
+	var data = this.drill_data();
+	
+	// > 帧刷新 状态元类型
+	if( this.drill_controllerNode_isTypeState() ){
+		this._drill_curState.drill_controllerState_update();
+		
+		// > 等待子节点 播放结束
+		if( this._drill_curState.drill_controllerState_isEnd() == true ){
+			this._drill_curIndex += 1;		//（结束后，索引+1）
+			if( this.drill_controllerNode_isEnd() == false ){
+				this.drill_controllerNode_refreshNext();
+			}
+		}
+	}
+	
+	// > 帧刷新 状态节点类型
+	if( this.drill_controllerNode_isTypeNode() ){
+		this._drill_curNode.drill_controllerNode_update();
+		
+		// > 等待子节点 播放结束
+		if( this._drill_curNode.drill_controllerNode_isEnd() == true ){
+			this._drill_curIndex += 1;		//（结束后，索引+1）
+			if( this.drill_controllerNode_isEnd() == false ){
+				this.drill_controllerNode_refreshNext();
+			}
+		}
+	}
+};
+
+//==============================
+// * D子节点 - 初始化子功能
+//==============================
+Drill_COAS_StateNodeController.prototype.drill_controllerNode_initNext = function() {
+	
+	// > 集合对象初始化
+	//this._drill_curState = null;	//（此处不要置空，重设数据时可能还会再次使用）
+	//this._drill_curNode = null;
+}
+//==============================
+// * D子节点 - 刷新子节点
 //
 //			说明：	重刷 当前集合的子节点 以及所有子节点集合的内容。
 //					（因为所有子节点 执行 resetData ）
 //==============================
-Drill_COAS_StateNodeController.prototype.drill_COAS_refreshNext_Private = function(){
-	var data = this._drill_data;
+Drill_COAS_StateNodeController.prototype.drill_controllerNode_refreshNext_Private = function(){
+	var data = this.drill_data();
+	var parent_id = this._drill_sequenceData_id;
 	
 	// > 结束播放后，停止刷新子节点
-	if( this.drill_COAS_isNodeEnd() ){ return; }
+	if( this.drill_controllerNode_isEnd() ){ return; }
 	
-	if( data['play_type'] == "随机播放状态元" ){
+	if( this._drill_play_type == "随机播放状态元" ){
 		
 		// > 准备数据
 		var data_list = [];
-		for( var i=0; i < data['play_randomStateSeq'].length; i++ ){
-			var state_data = DrillUp.drill_COAS_getStateData( this._drill_parentDataId, data['play_randomStateSeq'][i] );
+		for( var i=0; i < this._drill_play_randomStateSeq.length; i++ ){
+			var state_data = DrillUp.drill_COAS_getStateData_ByName( parent_id, this._drill_play_randomStateSeq[i] );
 			if( state_data == undefined ){ continue; }
 			data_list.push( state_data );
 		}
 		
 		// > 随机抽取数据
-		var next_data = this.drill_COAS_rollObjData( data_list );
+		var next_data = this.drill_controllerNode_nextRollObjData( data_list );
 		if( next_data == undefined ){	//（空数据时直接报错提示）
-			alert( DrillUp.drill_COAS_getPluginTip_StateNode_RollError( data['name'], data['play_type'], data['play_randomStateSeq'] ) );
-			data['play_type'] = ""; 
+			alert( DrillUp.drill_COAS_getPluginTip_StateNode_RollError( data['name'], this._drill_play_type, this._drill_play_randomStateSeq ) );
+			this._drill_play_type = ""; 
 			return;
 		}
 		
 		// > 刷新状态元
-		this.drill_COAS_refreshNextState( next_data );
+		this.drill_controllerNode_refreshNextState( parent_id, next_data['id'] );
 	}
-	if( data['play_type'] == "顺序播放状态元" ){
+	else if( this._drill_play_type == "顺序播放状态元" ){
 		
 		// > 顺序抽取数据
-		var next_name = data['play_plainStateSeq'][ this._drill_curIndex ];
-		var next_data = DrillUp.drill_COAS_getStateData( this._drill_parentDataId, next_name );
+		var next_name = this._drill_play_plainStateSeq[ this._drill_curIndex ];
+		var next_data = DrillUp.drill_COAS_getStateData_ByName( parent_id, next_name );
 		if( next_data == undefined ){	//（空数据时直接报错提示）
-			alert( DrillUp.drill_COAS_getPluginTip_StateNode_RollError( data['name'], data['play_type'], data['play_randomStateSeq'] ) );
-			data['play_type'] = ""; 
+			alert( DrillUp.drill_COAS_getPluginTip_StateNode_RollError( data['name'], this._drill_play_type, this._drill_play_plainStateSeq ) );
+			this._drill_play_type = ""; 
 			return;
 		}
 		
 		// > 刷新状态元
-		this.drill_COAS_refreshNextState( next_data );
+		this.drill_controllerNode_refreshNextState( parent_id, next_data['id'] );
 	}
 	
-	if( data['play_type'] == "随机播放嵌套集合" ){
+	else if( this._drill_play_type == "随机播放嵌套集合" ){
 		
 		// > 准备数据
 		var data_list = [];
-		for( var i=0; i < data['play_randomNodeSeq'].length; i++ ){
-			var node_data = DrillUp.drill_COAS_getStateNodeData( this._drill_parentDataId, data['play_randomNodeSeq'][i] );
+		for( var i=0; i < this._drill_play_randomNodeSeq.length; i++ ){
+			var node_data = DrillUp.drill_COAS_getStateNodeData_ByName( parent_id, this._drill_play_randomNodeSeq[i] );
 			if( node_data == undefined ){ continue; }
 			data_list.push( node_data );
 		}
 		
 		// > 随机抽取数据
-		var next_data = this.drill_COAS_rollObjData( data_list );
+		var next_data = this.drill_controllerNode_nextRollObjData( data_list );
 		if( next_data == undefined ){	//（空数据时直接报错提示）
-			alert( DrillUp.drill_COAS_getPluginTip_StateNode_RollError( data['name'], data['play_type'], data['play_randomStateSeq'] ) );
-			data['play_type'] = ""; 
+			alert( DrillUp.drill_COAS_getPluginTip_StateNode_RollError( data['name'], this._drill_play_type, this._drill_play_randomNodeSeq ) );
+			this._drill_play_type = ""; 
 			return;
 		}
 		
 		// > 刷新状态节点
-		this.drill_COAS_refreshNextNode( next_data );
+		this.drill_controllerNode_refreshNextNode( parent_id, next_data['id'] );
 	}
-	if( data['play_type'] == "顺序播放嵌套集合" ){
+	else if( this._drill_play_type == "顺序播放嵌套集合" ){
 		
 		// > 顺序抽取数据
-		var next_name = data['play_plainNodeSeq'][ this._drill_curIndex ];
-		var next_data = DrillUp.drill_COAS_getStateNodeData( this._drill_parentDataId, next_name );
+		var next_name = this._drill_play_plainNodeSeq[ this._drill_curIndex ];
+		var next_data = DrillUp.drill_COAS_getStateNodeData_ByName( parent_id, next_name );
 		if( next_data == undefined ){	//（空数据时直接报错提示）
-			alert( DrillUp.drill_COAS_getPluginTip_StateNode_RollError( data['name'], data['play_type'], data['play_randomStateSeq'] ) );
-			data['play_type'] = ""; 
+			alert( DrillUp.drill_COAS_getPluginTip_StateNode_RollError( data['name'], this._drill_play_type, this._drill_play_plainNodeSeq ) );
+			this._drill_play_type = ""; 
 			return;
 		}
 		
 		// > 刷新状态节点
-		this.drill_COAS_refreshNextNode( next_data );
+		this.drill_controllerNode_refreshNextNode( parent_id, next_data['id'] );
 	}
 }
 //==============================
-// * 状态节点 - 子节点 - 根据权重随机抽取
+// * D子节点 - 刷新子节点 - 根据权重随机抽取
+//
+//			说明：	> 传入静态数据列表，返回一个静态数据的指针。
 //==============================
-Drill_COAS_StateNodeController.prototype.drill_COAS_rollObjData = function( objData_list ){
+Drill_COAS_StateNodeController.prototype.drill_controllerNode_nextRollObjData = function( objData_list ){
 	if( objData_list == undefined ){ return null; }
 	if( objData_list.length == 0 ){ return null; }
 	if( objData_list.length == 1 ){ return objData_list[0]; }
@@ -2704,78 +3449,49 @@ Drill_COAS_StateNodeController.prototype.drill_COAS_rollObjData = function( objD
 	return result_data;
 }
 //==============================
-// * 状态节点 - 子节点 - 重设数据 状态元
+// * D子节点 - 刷新子节点 - 重设数据 状态元
 //==============================
-Drill_COAS_StateNodeController.prototype.drill_COAS_refreshNextState = function( next_data ){
+Drill_COAS_StateNodeController.prototype.drill_controllerNode_refreshNextState = function( sequenceData_id, next_stateData_id ){
 	
 	// > 创建状态元
 	if( this._drill_curState == undefined ){
-		this._drill_curState = new Drill_COAS_StateController( next_data );
+		this._drill_curState = new Drill_COAS_StateController( sequenceData_id, next_stateData_id );
 	}
 	
 	// > 重设数据
-	this._drill_curState.drill_COAS_resetData_State( next_data );
-	this._drill_curState.drill_COAS_update();	//（设置数据后，立即强制刷新）
+	this._drill_curState.drill_controllerState_resetData( sequenceData_id, next_stateData_id );
+	this._drill_curState.drill_controllerState_update();	//（设置数据后，立即强制刷新）
+	
+	// > 置空（重设数据后，不要同时存两组对象，节约存储空间）
+	this._drill_curNode = null;
 }
 //==============================
-// * 状态节点 - 子节点 - 重设数据 状态节点
+// * D子节点 - 刷新子节点 - 重设数据 状态节点
 //==============================
-Drill_COAS_StateNodeController.prototype.drill_COAS_refreshNextNode = function( next_data ){
+Drill_COAS_StateNodeController.prototype.drill_controllerNode_refreshNextNode = function( sequenceData_id, next_nodeData_id ){
 	
 	// > 检查层级
 	var next_layer = this._drill_curLayer + 1;
 	if( next_layer >= 20 ){		//（层级溢出，则跳出）
 		this._drill_curNode = null;
-		alert( DrillUp.drill_COAS_getPluginTip_StateNode_DeadLoop( next_data['name'] ) );
+		alert( DrillUp.drill_COAS_getPluginTip_StateNode_DeadLoop( this.drill_data()['name'] ) );
 		return;
 	}
 	
 	// > 创建状态节点
 	if( this._drill_curNode == undefined ){
-		this._drill_curNode = new Drill_COAS_StateNodeController( next_data );
+		this._drill_curNode = new Drill_COAS_StateNodeController( sequenceData_id, next_nodeData_id );
 	}
 	
 	// > 重设数据
-	this._drill_curNode.drill_COAS_resetData_Node( next_data );
-	this._drill_curNode.drill_COAS_setParentDataId( this._drill_parentDataId );
-	this._drill_curNode.drill_COAS_setLayer( next_layer );
-	this._drill_curNode.drill_COAS_refreshNext();
-	this._drill_curNode.drill_COAS_update();	//（设置数据后，立即强制刷新）
+	this._drill_curNode.drill_controllerNode_resetData( sequenceData_id, next_nodeData_id );
+	this._drill_curNode.drill_controllerNode_setLayer( next_layer );
+	this._drill_curNode.drill_controllerNode_refreshNext();
+	this._drill_curNode.drill_controllerNode_update();	//（设置数据后，立即强制刷新）
+	
+	// > 置空（重设数据后，不要同时存两组对象，节约存储空间）
+	this._drill_curState = null;
 }
-//==============================
-// * 状态节点 - 帧刷新
-//
-//			说明：	此处的index为增量刷新，不是定量刷新。
-//==============================
-Drill_COAS_StateNodeController.prototype.drill_COAS_updateNode = function(){
-	var data = this._drill_data;	
-	
-	// > 帧刷新 状态元类型
-	if( this.drill_COAS_isTypeState() ){
-		this._drill_curState.drill_COAS_update();
-		
-		// > 等待子节点 播放结束
-		if( this._drill_curState.drill_COAS_isStateEnd() == true ){
-			this._drill_curIndex += 1;		//（结束后，索引+1）
-			if( this.drill_COAS_isNodeEnd() == false ){
-				this.drill_COAS_refreshNext();
-			}
-		}
-	}
-	
-	// > 帧刷新 状态节点类型
-	if( this.drill_COAS_isTypeNode() ){
-		this._drill_curNode.drill_COAS_update();
-		
-		// > 等待子节点 播放结束
-		if( this._drill_curNode.drill_COAS_isNodeEnd() == true ){
-			this._drill_curIndex += 1;		//（结束后，索引+1）
-			if( this.drill_COAS_isNodeEnd() == false ){
-				this.drill_COAS_refreshNext();
-			}
-		}
-	}
-};
 
 
 //=============================================================================
@@ -2784,19 +3500,28 @@ Drill_COAS_StateNodeController.prototype.drill_COAS_updateNode = function(){
 // **		作用域：	地图界面、战斗界面、菜单界面
 // ** 		主功能：	> 定义一个专门控制 动作元 的数据类。
 // **					> 该类可被存到存档中。
-// ** 		子功能：	->帧刷新
-// **					->重设数据
-// **						->序列号
-// **					->输出数据
-// **						> 当前的对象名
+// ** 		子功能：	->控制器
+// **						->帧刷新
+// **						->空的静态数据
+// **						->获取静态数据
+// **						->重设数据
+// **							->序列号
+// **					->A主体
+// **						->获取名称
+// **						->获取优先级
+// **					->B输出数据
+// **						> 当前的资源名
 // **						> 当前的路径
 // **						> 当前的色调
 // **						> 当前的模糊
-// **					->节点
-// **						->是否结束播放
-// **					->GIF
-// **						->播放（增量刷新）
+// **					->C播放GIF
+// **						->帧刷新（增量刷新）
 // **						->帧间隔列表
+// **						->播放
+// **							->是否结束播放
+// **							->重置播放
+// **							->设置指定帧
+// **					->D变速播放
 // **		
 // **		说明：	> 该类的update函数需要手动调用。
 // **				> 【该类在c++工具中存在 复刻类 ，修改后注意同步复刻 】
@@ -2810,13 +3535,22 @@ function Drill_COAS_ActController() {
 //==============================
 // * 动作元 - 初始化
 //==============================
-Drill_COAS_ActController.prototype.initialize = function( data ){
-	this._drill_data = {};
+Drill_COAS_ActController.prototype.initialize = function( sequenceData_id, actData_id ){
+	
+	// > 参数检查
+	if( typeof sequenceData_id != "number" ||
+		typeof actData_id != "number" ){
+		alert( DrillUp.drill_COAS_getPluginTip_Sequence_NotId("Drill_COAS_ActController") );
+		throw Error( DrillUp.drill_COAS_getPluginTip_Sequence_NotId("Drill_COAS_ActController") );
+		return;
+	}
+	
+	this._drill_sequenceData_id = sequenceData_id;
+	this._drill_actData_id = actData_id;
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
-    this.drill_initData_Act();												//初始化数据
-    this.drill_initPrivateData_Act();										//私有数据初始化
-	if( data == undefined ){ data = {}; }
-    this.drill_COAS_resetData_Act( data );
+    this.drill_controllerAct_initData();									//初始化数据
+    this.drill_controllerAct_initChild();									//初始化子功能
+    this.drill_controllerAct_resetData( sequenceData_id, actData_id );
 };
 //##############################
 // * 动作元 - 帧刷新【标准函数】
@@ -2826,218 +3560,317 @@ Drill_COAS_ActController.prototype.initialize = function( data ){
 //			
 //			说明：	> 此函数必须在 帧刷新 中手动调用执行。
 //##############################
-Drill_COAS_ActController.prototype.drill_COAS_update = function(){
-	this._drill_curTime += 1;			//帧刷新 - 时间流逝
-	this.drill_COAS_updateAct();		//帧刷新 - 动作元
+Drill_COAS_ActController.prototype.drill_controllerAct_update = function(){
+	this.drill_controllerAct_updateAttr();		//帧刷新 - A主体
+												//帧刷新 - B输出数据（无）
+	this.drill_controllerAct_updateGIF();		//帧刷新 - C播放GIF
+												//帧刷新 - D变速播放（无）
 };
 //##############################
 // * 动作元 - 重设数据【标准函数】
 //			
-//			参数：	> data 动态参数对象
+//			参数：	> sequenceData_id 数字
+//					> actData_id 数字
 //			返回：	> 无
 //			
-//			说明：	> 通过此函数，你不需要再重新创建一个数据对象，并且贴图能直接根据此数据来变化。
-//					> 参数对象中的参数【可以缺项】，只要的参数项不一样，就刷新；参数项一样，则不变化。
+//			说明：	> 此操作将重连 id对应的静态数据，并且当前控制器的所有数据都会被重置。
 //##############################
-Drill_COAS_ActController.prototype.drill_COAS_resetData_Act = function( data ){
-	this.drill_COAS_resetData_Act_Private( data );
+Drill_COAS_ActController.prototype.drill_controllerAct_resetData = function( sequenceData_id, actData_id ){
+	this.drill_controllerAct_resetData_Private( sequenceData_id, actData_id );
 };
 //##############################
-// * 动作元 - 输出数据 - 当前的对象名【开放函数】
+// * 动作元 - 空的静态数据
+//			
+//			说明：	> 空数据会在initData时会进行默认值初始化，在其他地方只读。
+//##############################
+Drill_COAS_ActController.emptyData = {};
+//##############################
+// * 动作元 - 获取静态数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 对象指针
+//			
+//			说明：	> 由于数据量巨大，不要存储到存档中，也不要直接挂载到Controller身上。
+//					> 静态数据会在initData时会进行默认值初始化，在其他地方只读。
+//					> 【此函数不含遍历，而是直接获取值，可以放在帧刷新中使用】
+//##############################
+Drill_COAS_ActController.prototype.drill_data = function(){
+	var data = DrillUp.drill_COAS_getActData_ById( this._drill_sequenceData_id, this._drill_actData_id );
+	if( data == undefined ){ return Drill_COAS_ActController.emptyData; }
+	return data;
+};
+
+//##############################
+// * 动作元 - A主体 - 获取名称【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 字符串
 //##############################
-Drill_COAS_ActController.prototype.drill_COAS_curBitmapName = function(){
-	return this._drill_curBitmapName;
+Drill_COAS_ActController.prototype.drill_controllerAct_getName = function(){
+	return this.drill_data()['name'];
 };
 //##############################
-// * 动作元 - 输出数据 - 当前的路径【开放函数】
-//			
-//			参数：	> 无
-//			返回：	> 字符串
-//##############################
-Drill_COAS_ActController.prototype.drill_COAS_curBitmapPath = function(){
-	return this._drill_curBitmapPath;
-};
-//##############################
-// * 动作元 - 输出数据 - 当前的色调【开放函数】
+// * 动作元 - A主体 - 获取优先级【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 数字
 //##############################
-Drill_COAS_ActController.prototype.drill_COAS_curBitmapTint = function(){
-	return this._drill_curBitmapTint;
+Drill_COAS_ActController.prototype.drill_controllerAct_getPriority = function(){
+	return this.drill_data()['priority'];
+};
+
+//##############################
+// * 动作元 - B输出数据 - 当前的资源名【开放函数】
+//			
+//			参数：	> 无
+//			返回：	> 字符串
+//##############################
+Drill_COAS_ActController.prototype.drill_controllerAct_curBitmapName = function(){
+	return this._drill_curBitmapName;
 };
 //##############################
-// * 动作元 - 输出数据 - 当前的模糊【开放函数】
+// * 动作元 - B输出数据 - 当前的路径【开放函数】
+//			
+//			参数：	> 无
+//			返回：	> 字符串
+//##############################
+Drill_COAS_ActController.prototype.drill_controllerAct_curBitmapPath = function(){
+	return this.drill_data()['gif_src_file'];
+};
+//##############################
+// * 动作元 - B输出数据 - 当前的色调【开放函数】
+//			
+//			参数：	> 无
+//			返回：	> 数字
+//##############################
+Drill_COAS_ActController.prototype.drill_controllerAct_curBitmapTint = function(){
+	return this.drill_data()['tint'];
+};
+//##############################
+// * 动作元 - B输出数据 - 当前的模糊【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 布尔
 //##############################
-Drill_COAS_ActController.prototype.drill_COAS_curBitmapSmooth = function(){
-	return this._drill_curBitmapSmooth;
+Drill_COAS_ActController.prototype.drill_controllerAct_curBitmapSmooth = function(){
+	return this.drill_data()['smooth'];
 };
+
 //##############################
-// * 动作元 - 节点 - 是否结束播放【开放函数】
+// * 动作元 - C播放GIF - 是否结束播放【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 布尔
 //##############################
-Drill_COAS_ActController.prototype.drill_COAS_isActEnd = function(){
+Drill_COAS_ActController.prototype.drill_controllerAct_isEnd = function(){
 	return this._drill_curIndex >= this._drill_tarIndex;
 };
+//##############################
+// * 动作元 - C播放GIF - 重置播放【开放函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//
+//			说明：	> 重置播放即恢复到第1帧的图像。
+//##############################
+Drill_COAS_ActController.prototype.drill_controllerAct_resetTimer = function(){
+	this.drill_controllerAct_setCurIndex_Private( 0 );
+};
+//##############################
+// * 动作元 - C播放GIF - 设置指定帧【开放函数】
+//			
+//			参数：	> index 数字
+//			返回：	> 无
+//
+//			说明：	> 如果要固定帧，需要先暂停，再设置。
+//##############################
+Drill_COAS_ActController.prototype.drill_controllerAct_setCurIndex = function( index ){
+	this.drill_controllerAct_setCurIndex_Private( index );
+};
+
 //##############################
 // * 动作元 - 初始化数据【标准默认值】
 //
 //			参数：	> 无
 //			返回：	> 无
 //			
-//			说明：	> data 动态参数对象（来自类初始化）
-//					  该对象包含 类所需的所有默认值。
+//			说明：	> 该对象初始化 静态数据，提供所需的所有默认值。
 //##############################
-Drill_COAS_ActController.prototype.drill_initData_Act = function() {
-	var data = this._drill_data;
+Drill_COAS_ActController.prototype.drill_controllerAct_initData = function() {
+	var data = this.drill_data();		//（此处会修改到 静态数据 的指针值）
 	
-	// > 常规
-	if( data['name'] == undefined ){ data['name'] = "" };										//动作元名称
-	if( data['tag_tank'] == undefined ){ data['tag_tank'] = [] };								//动作元标签
-	if( data['priority'] == undefined ){ data['priority'] = 0 };								//动作元优先级
+	// > A主体
+	if( data['name'] == undefined ){ data['name'] = "" };										//A主体 - 名称
+	if( data['tag_tank'] == undefined ){ data['tag_tank'] = [] };								//A主体 - 标签
+	if( data['priority'] == undefined ){ data['priority'] = 0 };								//A主体 - 优先级
+	if( data['note'] == undefined ){ data['note'] = "" };										//A主体 - 备注
 	
-	// > GIF
-	if( data['gif_src'] == undefined ){ data['gif_src'] = [] };									//GIF - 资源
-	if( data['gif_src_file'] == undefined ){ data['gif_src_file'] = "img/Special__actionSeq/"};	//GIF - 资源文件夹
-	if( data['gif_intervalTank'] == undefined ){ data['gif_intervalTank'] = [] };				//GIF - 帧间隔-明细表
-	if( data['gif_interval'] == undefined ){ data['gif_interval'] = 4 };						//GIF - 帧间隔
-	if( data['gif_back_run'] == undefined ){ data['gif_back_run'] = false };					//GIF - 是否倒放
-	if( data['gif_preload'] == undefined ){ data['gif_preload'] = false };						//GIF - 是否预加载
+	// > B输出数据
+	if( data['tint'] == undefined ){ data['tint'] = 0 };										//B输出数据 - 色调值
+	if( data['smooth'] == undefined ){ data['smooth'] = false };								//B输出数据 - 模糊边缘
 	
-	// > 图像
-	if( data['tint'] == undefined ){ data['tint'] = 0 };										//图像 - 色调值
-	if( data['smooth'] == undefined ){ data['smooth'] = false };								//图像 - 模糊边缘
+	// > C播放GIF
+	if( data['gif_src'] == undefined ){ data['gif_src'] = [] };									//C播放GIF - 资源
+	if( data['gif_src_file'] == undefined ){ data['gif_src_file'] = "img/Special__actionSeq/"};	//C播放GIF - 资源文件夹
+	if( data['gif_intervalTank'] == undefined ){ data['gif_intervalTank'] = [] };				//C播放GIF - 帧间隔-明细表
+	if( data['gif_interval'] == undefined ){ data['gif_interval'] = 4 };						//C播放GIF - 帧间隔
+	if( data['gif_back_run'] == undefined ){ data['gif_back_run'] = false };					//C播放GIF - 是否倒放
+	if( data['gif_preload'] == undefined ){ data['gif_preload'] = false };						//C播放GIF - 是否预加载
 	
-	// > 杂项
-	if( data['note'] == undefined ){ data['note'] = "" };										//杂项 - 备注
+	// > D变速播放（无）
 	
-	//this._drill_data = data;	//（c++中，注意此处的指针，需要重新赋值）
+	
+	//（c++中注意此处，data是堆栈对象而非指针，需要重新赋值）
 };
 //==============================
-// * 动作元 - 私有数据初始化
+// * 动作元 - 初始化子功能
 //==============================
-Drill_COAS_ActController.prototype.drill_initPrivateData_Act = function() {
-	var data = this._drill_data;
-	
-	// > 常规
-	this._drill_curTime = 0;								//常规 - 当前时间
-	this._drill_needDestroy = false;						//常规 - 销毁
-	
-	// > 播放时间重置
-	this.drill_COAS_resetTimer(data);
-	
-	// > GIF - 帧间隔列表 计算
-	this._drill_curIntervalTank = [];
-	for( var i=0; i < data['gif_src'].length; i++ ){
-		var interval = data['gif_interval'];
-		if( i < data['gif_intervalTank'].length ){
-			interval = Number(data['gif_intervalTank'][i]);
-		}
-		this._drill_curIntervalTank.push( Number(interval) );
-	}
+Drill_COAS_ActController.prototype.drill_controllerAct_initChild = function() {
+	this.drill_controllerAct_initAttr();			//初始化子功能 - A主体
+	this.drill_controllerAct_initBitmapParam();		//初始化子功能 - B输出数据
+	this.drill_controllerAct_initGIF();				//初始化子功能 - C播放GIF
+	this.drill_controllerAct_initSpeed();			//初始化子功能 - D变速播放
 };
 //==============================
 // * 动作元 - 重设数据（私有）
-//
-//			说明：	data对象中的参数【可以缺项】。
 //==============================
-Drill_COAS_ActController.prototype.drill_COAS_resetData_Act_Private = function( data ){
+Drill_COAS_ActController.prototype.drill_controllerAct_resetData_Private = function( sequenceData_id, actData_id ){
 	
-	// > 播放时间重置
-	this.drill_COAS_resetTimer(data);
+	// > 参数检查
+	if( typeof sequenceData_id != "number" ||
+		typeof actData_id != "number" ){
+		alert( DrillUp.drill_COAS_getPluginTip_Sequence_NotId2("Drill_COAS_ActController") );
+		throw Error( DrillUp.drill_COAS_getPluginTip_Sequence_NotId2("Drill_COAS_ActController") );
+		return;
+	}
 	
-	// > 判断数据重复情况
-	if( this._drill_data != undefined ){
-		var keys = Object.keys( data );
-		var is_same = true;
-		for( var i=0; i < keys.length; i++ ){
-			var key = keys[i];
-			if( this._drill_data[key] != data[key] ){
-				is_same = false;
-			}
-		}
-		if( is_same == true ){ return; }
-	}
-	// > 补充未设置的数据
-	var keys = Object.keys( this._drill_data );
-	for( var i=0; i < keys.length; i++ ){
-		var key = keys[i];
-		if( data[key] == undefined ){
-			data[key] = this._drill_data[key];
-		}
-	}
+	// > C播放GIF - 重置播放
+	this.drill_controllerAct_setCurIndex_Private( 0 );
 	
 	// > 执行重置
-	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
+	this._drill_sequenceData_id = sequenceData_id;
+	this._drill_actData_id = actData_id;
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
-    this.drill_initData_Act();												//初始化数据
-    this.drill_initPrivateData_Act();										//私有数据初始化
+    this.drill_controllerAct_initData();									//初始化数据
+    this.drill_controllerAct_initChild();									//初始化子功能
 };
+
+
 //==============================
-// * 动作元 - 播放时间重置
-//
-//			说明：	特殊重置项，将播放时间置零。
+// * A主体 - 初始化子功能
 //==============================
-Drill_COAS_ActController.prototype.drill_COAS_resetTimer = function( data ){
-	if( data == undefined ){ data = this._drill_data; }
+Drill_COAS_ActController.prototype.drill_controllerAct_initAttr = function() {
+	this._drill_curTime = 0;				//A主体 - 当前时间（暂未用到）
+	this._drill_needDestroy = false;		//A主体 - 销毁（暂未用到）
+}
+//==============================
+// * A主体 - 帧刷新
+//==============================
+Drill_COAS_ActController.prototype.drill_controllerAct_updateAttr = function() {
 	
-	// > GIF - 输出数据
-	this._drill_curBitmapName = "";							//输出数据 - 当前的对象名
-	this._drill_curBitmapPath = data['gif_src_file'] || "";	//输出数据 - 当前的路径
-	this._drill_curBitmapTint = data['tint'] || 0;			//输出数据 - 当前的色调
-	this._drill_curBitmapSmooth = data['smooth'] || false;	//输出数据 - 当前的模糊
+	// > 时间流逝
+	this._drill_curTime += 1;
+}
+
+//==============================
+// * B输出数据 - 初始化子功能
+//==============================
+Drill_COAS_ActController.prototype.drill_controllerAct_initBitmapParam = function() {
+	this._drill_curBitmapName = "";			//B输出数据 - 当前的资源名
+											//B输出数据 - 当前的路径（从数据中直接获取）
+											//B输出数据 - 当前的色调（从数据中直接获取）
+											//B输出数据 - 当前的模糊（从数据中直接获取）
+}
+
+//==============================
+// * C播放GIF - 初始化子功能
+//==============================
+Drill_COAS_ActController.prototype.drill_controllerAct_initGIF = function() {
+	var data = this.drill_data();
 	
-	// > GIF - 播放
-	this._drill_curTickTime = 0;							//播放 - 当前累计时间
-	this._drill_curIndex = 0;								//播放 - 当前索引
-	this._drill_tarIndex = 0;								//播放 - 索引结束位置
+	// > 播放参数
+	this._drill_curTickTime = 0;			//播放参数 - 当前累计时间
+	this._drill_curIndex = 0;				//播放参数 - 当前索引
+	this._drill_tarIndex = 0;				//播放参数 - 索引结束位置
 	if( data['gif_src'] != undefined ){
 		this._drill_tarIndex = data['gif_src'].length;
 	}
 }
 //==============================
-// * 动作元 - 帧刷新动作元
-//
-//			说明：	此处的 curIndex 为增量刷新，不是定量刷新。
+// * C播放GIF - 获取帧间隔 长度
 //==============================
-Drill_COAS_ActController.prototype.drill_COAS_updateAct = function(){
-	var data = this._drill_data;	
+Drill_COAS_ActController.prototype.drill_controllerAct_getIntervalLength = function(){
+	return this.drill_data()['gif_src'].length;
+}
+//==============================
+// * C播放GIF - 获取帧间隔 根据索引
+//
+//			说明：	> 此函数不含遍历，而是直接获取值，可以放在帧刷新中使用。
+//==============================
+Drill_COAS_ActController.prototype.drill_controllerAct_getIntervalByIndex = function( index ){
+	var data = this.drill_data();
+	if( index < 0 ){ return Number(data['gif_interval']); }		//（帧间隔列表越界，则用默认帧间隔）
+	if( index >= data['gif_intervalTank'].length ){ return Number(data['gif_interval']); }
+	return Number(data['gif_intervalTank'][ index ]);
+}
+//==============================
+// * C播放GIF - 设置指定帧
+//==============================
+Drill_COAS_ActController.prototype.drill_controllerAct_setCurIndex_Private = function( index ){
+	if( index >= this._drill_tarIndex ){
+		index = this._drill_tarIndex -1;
+	}
+	
+	// > B输出数据 - 重设对象名
+	this._drill_curBitmapName = "";
+	
+	// > 播放参数
+	this._drill_curTickTime = 0;			//播放参数 - 当前累计时间
+	this._drill_curIndex = index;			//播放参数 - 当前索引
+};
+//==============================
+// * C播放GIF - 帧刷新（动作元）
+//
+//			说明：	> 此处的 _drill_curIndex 为增量刷新，不是定量刷新。
+//==============================
+Drill_COAS_ActController.prototype.drill_controllerAct_updateGIF = function(){
+	var data = this.drill_data();	
 	
 	// > 当前索引
+	var interval_length = this.drill_controllerAct_getIntervalLength();
+	if( interval_length == 0 ){ return; }
 	var cur_index = this._drill_curIndex;
 	if( data['gif_back_run'] == true ){		//（倒放情况）
-		cur_index = this._drill_curIntervalTank.length-1 -this._drill_curIndex;
+		cur_index = interval_length-1 -this._drill_curIndex;
 	}
-	if( cur_index < 0 ){ cur_index = 0; }	//【状态元 播放完毕后，保持在最后一帧。】
-	if( cur_index >= this._drill_curIntervalTank.length ){ cur_index = this._drill_curIntervalTank.length-1; }
-	if (this._drill_curIntervalTank.length == 0){ return; }
+	if( cur_index < 0 ){ cur_index = 0; }	//【动作元 播放完毕后，保持在最后一帧。】
+	if( cur_index >= interval_length ){ cur_index = interval_length-1; }
 	
 	// > 帧间隔列表
 	var cur_time = this._drill_curTickTime;
-	var tar_time = this._drill_curIntervalTank[ cur_index ];
+	var tar_time = this.drill_controllerAct_getIntervalByIndex( cur_index );
 	if( cur_time >= tar_time ){
 		// > 当前索引+1
 		this._drill_curIndex += 1;		//（达到帧间隔后，索引+1）
 		this._drill_curTickTime = 0;
 	}
 	
-	// > 输出数据
+	// > B输出数据 - 记录对象名
 	this._drill_curBitmapName = data['gif_src'][ cur_index ];
-	this._drill_curBitmapPath = data['gif_src_file'];
-	this._drill_curBitmapTint = data['tint'];
-	this._drill_curBitmapSmooth = data['smooth'];
 	
-	// > 当前累计时间+1
-	this._drill_curTickTime += 1;
+	// > 当前累计时间+1 （D变速播放）
+	this._drill_curTickTime += this._drill_curSpeed;
 };
+
+//==============================
+// * D变速播放 - 初始化子功能
+//
+//			说明：	> 最快速度也只能是每帧都播放一张图片，不会跳帧播放。
+//==============================
+Drill_COAS_ActController.prototype.drill_controllerAct_initSpeed = function() {
+	this._drill_curSpeed = 1;
+};
+
 
 
 //=============================================================================
@@ -3051,23 +3884,43 @@ Drill_COAS_ActController.prototype.drill_COAS_updateAct = function(){
 // **		作用域：	地图界面、战斗界面、菜单界面
 // ** 		主功能：	> 定义一个专门控制动画序列的数据类。
 // **					> 该类可被存到存档中。
-// ** 		子功能：	->帧刷新
+// ** 		子功能：	->控制器
+// **						->帧刷新
+// **						->空的静态数据
+// **						->获取静态数据
 // **						->显示/隐藏
 // **						->暂停/继续
 // **						->销毁
-// **					->重设数据
-// **						->序列号
-// **					->动画序列-状态元
-// **						->获取数据
-// **					->动画序列-状态节点
-// **						->获取数据
-// **						->播放默认的状态元集合
-// **						->播放状态节点
-// **						->播放简单状态元集合
-// **					->动画序列-动作元
-// **						->获取数据
-// **						->播放动作元
-// **						->立刻终止动作
+// **						->重设数据
+// **							->序列号
+// **					->A主体
+// **					->B输出数据
+// **					->C管理状态元
+// **						->获取数据 - 全部
+// **						->获取数据 - 根据名称
+// **						->获取数据 - 全部名称
+// **					->D管理状态节点
+// **						->获取数据 - 全部
+// **						->获取数据 - 根据名称
+// **						->获取数据 - 全部名称
+// **						->获取当前状态元名称
+// **						->获取当前状态元名称（全路径）
+// **						->获取当前优先级
+// **						->操作 - 播放默认的状态元集合
+// **						->操作 - 播放状态节点
+// **						->操作 - 播放简单状态元集合
+// **						->操作 - 播放状态元/状态节点 根据标签
+// **					->E管理动作元
+// **						->获取数据 - 全部
+// **						->获取数据 - 根据名称
+// **						->获取数据 - 全部名称
+// **						->获取当前动作元名称
+// **						->操作 - 播放动作元
+// **						->操作 - 立刻终止动作
+// **						->操作 - 是否正在播放动作元
+// **					->F管理装饰器
+// **						->是否刷新框架
+// **					->G变速播放
 // **		
 // **		说明：	> 该类的update函数需要手动调用。
 // **				> 你可以重设数据，也可以随时new新的Drill_COAS_MainController，但是要注意销毁装饰器对象。
@@ -3082,13 +3935,20 @@ function Drill_COAS_MainController() {
 //==============================
 // * 动画序列 - 初始化
 //==============================
-Drill_COAS_MainController.prototype.initialize = function( data ){
-	this._drill_data = {};
+Drill_COAS_MainController.prototype.initialize = function( sequenceData_id ){
+	
+	// > 参数检查
+	if( typeof sequenceData_id != "number" ){
+		alert( DrillUp.drill_COAS_getPluginTip_Sequence_NotId("Drill_COAS_MainController") );
+		throw Error( DrillUp.drill_COAS_getPluginTip_Sequence_NotId("Drill_COAS_MainController") );
+		return;
+	}
+	
+	this._drill_sequenceData_id = sequenceData_id;
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
-    this.drill_initData_Main();												//初始化数据
-    this.drill_initPrivateData_Main();										//私有数据初始化
-	if( data == undefined ){ data = {}; }
-    this.drill_COAS_resetData_Main( data );
+    this.drill_controllerMain_initData();									//初始化数据
+    this.drill_controllerMain_initChild();									//初始化子功能
+    this.drill_controllerMain_resetData( sequenceData_id );
 	$gameTemp._drill_COAS_lastCreatedMainController = this;					//（记录上一个动画序列）
 };
 //##############################
@@ -3099,12 +3959,17 @@ Drill_COAS_MainController.prototype.initialize = function( data ){
 //			
 //			说明：	> 此函数必须在 帧刷新 中手动调用执行。
 //##############################
-Drill_COAS_MainController.prototype.update = function(){ this.drill_COAS_update(); };
-Drill_COAS_MainController.prototype.drill_COAS_update = function(){
-	if( this._drill_data['pause'] == true ){ return; }
-	this._drill_curTime += 1;			//帧刷新 - 时间流逝
-	this.drill_COAS_updateStateNode();	//帧刷新 - 状态节点
-	this.drill_COAS_updateAct();		//帧刷新 - 动作元
+Drill_COAS_MainController.prototype.update = function(){ this.drill_controllerMain_update(); };
+Drill_COAS_MainController.prototype.drill_COAS_update = function(){ this.drill_controllerMain_update(); };
+Drill_COAS_MainController.prototype.drill_controllerMain_update = function(){
+	if( this._drill_pause == true ){ return; }
+	this.drill_controllerMain_updateSpeed();			//帧刷新 - G变速播放
+	this.drill_controllerMain_updateAttr();				//帧刷新 - A主体
+														//帧刷新 - B输出数据（无）
+														//帧刷新 - C管理状态元（无）
+	this.drill_controllerMain_updateStateAndNode();		//帧刷新 - D管理状态节点
+	this.drill_controllerMain_updateAct();				//帧刷新 - E管理动作元
+														//帧刷新 - F管理装饰器（无）
 };
 //##############################
 // * 动画序列 - 重设数据【标准函数】
@@ -3112,12 +3977,33 @@ Drill_COAS_MainController.prototype.drill_COAS_update = function(){
 //			参数：	> data 动态参数对象
 //			返回：	> 无
 //			
-//			说明：	> 通过此函数，你不需要再重新创建一个数据对象，并且贴图能直接根据此数据来变化。
-//					> 参数对象中的参数【可以缺项】，只要的参数项不一样，就刷新；参数项一样，则不变化。
+//			说明：	> 此操作将重连 id对应的静态数据，并且当前控制器的所有数据都会被重置。
 //##############################
-Drill_COAS_MainController.prototype.drill_COAS_resetData_Main = function( data ){
-	this.drill_COAS_resetData_Main_Private( data );
+Drill_COAS_MainController.prototype.drill_controllerMain_resetData = function( sequenceData_id ){
+	this.drill_controllerMain_resetData_Private( sequenceData_id );
 };
+//##############################
+// * 动画序列 - 空的静态数据
+//			
+//			说明：	> 空数据会在initData时会进行默认值初始化，在其他地方只读。
+//##############################
+Drill_COAS_MainController.emptyData = {};
+//##############################
+// * 动画序列 - 获取静态数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 对象指针
+//			
+//			说明：	> 由于数据量巨大，不要存储到存档中，也不要直接挂载到Controller身上。
+//					> 静态数据会在initData时会进行默认值初始化，在其他地方只读。
+//					> 【此函数不含遍历，而是直接获取值，可以放在帧刷新中使用】
+//##############################
+Drill_COAS_MainController.prototype.drill_data = function(){
+	var sequenceData = DrillUp.g_COAS_list[ this._drill_sequenceData_id ];
+	if( sequenceData == undefined ){ return Drill_COAS_MainController.emptyData; }
+	return sequenceData;
+};
+
 //##############################
 // * 动画序列 - 显示/隐藏【标准函数】
 //
@@ -3126,9 +4012,8 @@ Drill_COAS_MainController.prototype.drill_COAS_resetData_Main = function( data )
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。
 //##############################
-Drill_COAS_MainController.prototype.drill_COAS_setVisible = function( visible ){
-	var data = this._drill_data;
-	data['visible'] = visible;
+Drill_COAS_MainController.prototype.drill_controllerMain_setVisible = function( visible ){
+	this._drill_visible = visible;
 };
 //##############################
 // * 动画序列 - 暂停/继续【标准函数】
@@ -3138,9 +4023,8 @@ Drill_COAS_MainController.prototype.drill_COAS_setVisible = function( visible ){
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。
 //##############################
-Drill_COAS_MainController.prototype.drill_COAS_setPause = function( pause ){
-	var data = this._drill_data;
-	data['pause'] = pause;
+Drill_COAS_MainController.prototype.drill_controllerMain_setPause = function( pause ){
+	this._drill_pause = pause;
 };
 //##############################
 // * 动画序列 - 设置销毁【标准函数】
@@ -3148,205 +4032,267 @@ Drill_COAS_MainController.prototype.drill_COAS_setPause = function( pause ){
 //			参数：	> 无
 //			返回：	> 布尔
 //##############################
-Drill_COAS_MainController.prototype.drill_COAS_destroy = function(){
+Drill_COAS_MainController.prototype.drill_COAS_destroy = function(){ this.drill_controllerMain_destroy(); };
+Drill_COAS_MainController.prototype.drill_controllerMain_destroy = function(){
 	this._drill_needDestroy = true;
-};
-//##############################
-// * 动画序列 - 刷新/不刷新框架【标准函数】
-//
-//			参数：	> enable 布尔
-//			返回：	> 无
-//##############################
-Drill_COAS_MainController.prototype.drill_COAS_setBitmapRefreshFrame = function( enabled ){
-	var data = this._drill_data;
-	data['bitmapRefreshFrame'] = enabled;
 };
 
 //##############################
-// * 动画序列-状态元 - 获取数据 - 全部【开放函数】
+// * C管理状态元 - 获取数据 - 全部【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 数据对象列表
+//			
+//			说明：	> 动画序列中，没有状态元对象，因此这里只提供获取状态元数据。
+//					> 如果要获取状态元对象，见函数 drill_controllerMain_Node_getCurState 。
 //##############################
-Drill_COAS_MainController.prototype.drill_COAS_getStateData_All = function(){
-	return this.drill_COAS_getStateData_All_Private();
+Drill_COAS_MainController.prototype.drill_controllerMain_getStateData_All = function(){
+	return this.drill_controllerMain_getStateData_All_Private();
 };
 //##############################
-// * 动画序列-状态元 - 获取数据 - 根据名称【开放函数】
+// * C管理状态元 - 获取数据 - 根据名称【开放函数】
 //			
 //			参数：	> state_name 字符串
 //			返回：	> 数据对象
 //##############################
-Drill_COAS_MainController.prototype.drill_COAS_getStateData_ByName = function( state_name ){
-	return this.drill_COAS_getStateData_ByName_Private( state_name );
+Drill_COAS_MainController.prototype.drill_controllerMain_getStateData_ByName = function( state_name ){
+	return this.drill_controllerMain_getStateData_ByName_Private( state_name );
 };
 //##############################
-// * 动画序列-状态元 - 获取数据 - 全部名称【开放函数】
+// * C管理状态元 - 获取数据 - 全部名称【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 字符串列表
 //##############################
-Drill_COAS_MainController.prototype.drill_COAS_getStateData_AllName = function(){
-	return this.drill_COAS_getStateData_AllName_Private();
+Drill_COAS_MainController.prototype.drill_controllerMain_getStateData_AllName = function(){
+	return this.drill_controllerMain_getStateData_AllName_Private();
 };
 
 //##############################
-// * 动画序列-状态节点 - 获取数据 - 全部【开放函数】
+// * D管理状态节点 - 获取数据 - 全部【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 数据对象列表
 //##############################
-Drill_COAS_MainController.prototype.drill_COAS_getStateNodeData_All = function(){
-	return this.drill_COAS_getStateNodeData_All_Private();
+Drill_COAS_MainController.prototype.drill_controllerMain_getNodeData_All = function(){
+	return this.drill_controllerMain_getNodeData_All_Private();
 };
 //##############################
-// * 动画序列-状态节点 - 获取数据 - 根据名称【开放函数】
+// * D管理状态节点 - 获取数据 - 根据名称【开放函数】
 //			
 //			参数：	> stateNode_name 字符串
 //			返回：	> 数据对象
 //##############################
-Drill_COAS_MainController.prototype.drill_COAS_getStateNodeData_ByName = function( stateNode_name ){
-	return this.drill_COAS_getStateNodeData_ByName_Private( stateNode_name );
+Drill_COAS_MainController.prototype.drill_controllerMain_getNodeData_ByName = function( stateNode_name ){
+	return this.drill_controllerMain_getNodeData_ByName_Private( stateNode_name );
 };
 //##############################
-// * 动画序列-状态节点 - 获取数据 - 全部名称【开放函数】
+// * D管理状态节点 - 获取数据 - 全部名称【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 字符串列表
 //##############################
-Drill_COAS_MainController.prototype.drill_COAS_getStateNodeData_AllName = function(){
-	return this.drill_COAS_getStateNodeData_AllName_Private();
+Drill_COAS_MainController.prototype.drill_controllerMain_getNodeData_AllName = function(){
+	return this.drill_controllerMain_getNodeData_AllName_Private();
 };
 //##############################
-// * 动画序列-状态节点 - 操作 - 获取当前状态元名称【开放函数】
+// * D管理状态节点 - 获取当前状态元对象【开放函数】
+//			
+//			参数：	> 无
+//			返回：	> 控制器对象
+//
+//			说明：	> 获取到节点叶子 正在播放 的状态元对象。
+//##############################
+Drill_COAS_MainController.prototype.drill_controllerMain_Node_getCurState = function(){
+	return this.drill_controllerMain_Node_getCurState_Private();
+};
+//##############################
+// * D管理状态节点 - 获取当前状态元名称【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 字符串
+//
+//			说明：	> 获取到节点叶子 正在播放 的状态元名称。
 //##############################
-Drill_COAS_MainController.prototype.drill_COAS_getCurStateName = function(){
-	return this.drill_COAS_getCurStateName_Private();
+Drill_COAS_MainController.prototype.drill_controllerMain_Node_getCurStateName = function(){
+	return this.drill_controllerMain_Node_getCurStateName_Private();
 };
 //##############################
-// * 动画序列-状态节点 - 操作 - 获取当前状态元名称（全路径）【开放函数】
+// * D管理状态节点 - 获取当前状态元名称（全路径）【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 字符串
+//
+//			说明：	> 逐步获取节点名称，直到节点叶子 正在播放 的状态元名称。
 //##############################
-Drill_COAS_MainController.prototype.drill_COAS_getCurStateName_AllRoot = function(){
-	return this.drill_COAS_getCurStateName_AllRoot_Private();
+Drill_COAS_MainController.prototype.drill_controllerMain_Node_getCurStateName_AllRoot = function(){
+	return this.drill_controllerMain_Node_getCurStateName_AllRoot_Private();
 };
 //##############################
-// * 动画序列-状态节点 - 操作 - 获取当前状态元优先级【开放函数】
+// * D管理状态节点 - 获取当前优先级【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 数字
+//
+//			说明：	> 获取到节点叶子 正在播放 的状态元优先级。
 //##############################
-Drill_COAS_MainController.prototype.drill_COAS_getCurStatePriority = function(){
-	return this.drill_COAS_getCurStatePriority_Private();
+Drill_COAS_MainController.prototype.drill_controllerMain_Node_getCurPriority = function(){
+	return this.drill_controllerMain_Node_getCurPriority_Private();
 };
 //##############################
-// * 动画序列-状态节点 - 操作 - 播放默认的状态元集合【开放函数】
+// * D管理状态节点 - 操作 - 播放默认的状态元集合【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
 //			
-//			说明：	> 此函数执行一次就重置一次，不能 放帧刷新里面反复执行。
+//			说明：	> 此函数执行会重置一次当前状态节点，不能 放帧刷新里面反复执行。
 //##############################
-Drill_COAS_MainController.prototype.drill_COAS_setStateNodeDefault = function(){
-	this.drill_COAS_setStateNode("默认的状态元集合");
+Drill_COAS_MainController.prototype.drill_COAS_setStateNodeDefault = function(){ this.drill_controllerMain_setStateNodeDefault(); }
+Drill_COAS_MainController.prototype.drill_controllerMain_setStateNodeDefault = function(){
+	this.drill_controllerMain_setStateNode("默认的状态元集合");
 };
 //##############################
-// * 动画序列-状态节点 - 操作 - 播放状态节点【开放函数】
+// * D管理状态节点 - 操作 - 播放状态节点【开放函数】
 //			
 //			参数：	> node_name 字符串
 //			返回：	> 无
 //			
-//			说明：	> 此函数执行一次就重置一次，不能 放帧刷新里面反复执行。
+//			说明：	> 此函数执行会重置一次当前状态节点，不能 放帧刷新里面反复执行。
 //					> 输入空名称时/无对应名称时 无效。
 //##############################
-Drill_COAS_MainController.prototype.drill_COAS_setStateNode = function( node_name ){
-	this.drill_COAS_setStateNode_Private( node_name );
+Drill_COAS_MainController.prototype.drill_COAS_setStateNode = function( node_name ){ this.drill_controllerMain_setStateNode( node_name ); }
+Drill_COAS_MainController.prototype.drill_controllerMain_setStateNode = function( node_name ){
+	this.drill_controllerMain_setStateNode_Private( node_name );
 };
 //##############################
-// * 动画序列-状态节点 - 操作 - 播放简单状态元集合【开放函数】
+// * D管理状态节点 - 操作 - 播放简单状态元集合【开放函数】
 //			
 //			参数：	> state_nameList 字符串列表
 //			返回：	> 无
 //			
 //			说明：	> 设置简单的状态节点，只需要状态元的 名称列表，即可随机播放状态元。
-//					> 此函数执行一次就重置一次，不能 放帧刷新里面反复执行。
+//					> 此函数执行会重置一次当前状态节点，不能 放帧刷新里面反复执行。
 //					> 输入空名称时/无对应名称时 无效。
 //##############################
-Drill_COAS_MainController.prototype.drill_COAS_setSimpleStateNode = function( state_nameList ){
-	this.drill_COAS_setSimpleStateNode_Private( state_nameList );
+Drill_COAS_MainController.prototype.drill_COAS_setSimpleStateNode = function( state_nameList ){ this.drill_controllerMain_setSimpleStateNode( state_nameList ); }
+Drill_COAS_MainController.prototype.drill_controllerMain_setSimpleStateNode = function( state_nameList ){
+	this.drill_controllerMain_setSimpleStateNode_Private( state_nameList );
 };
 //##############################
-// * 动画序列-状态节点 - 操作 - 播放状态元/状态节点 根据标签【开放函数】
+// * D管理状态节点 - 操作 - 播放状态元/状态节点 根据标签【开放函数】
 //			
 //			参数：	> annotation 字符串
 //			返回：	> 无
 //			
 //			说明：	> 找到一个满足标签的状态元/状态节点，并播放。
 //					  播放成功返回true；若任何条件都不满足，则返回false。
-//					> 此函数执行一次就重置一次，不能 放帧刷新里面反复执行。
+//					> 此函数执行会重置一次当前状态节点，不能 放帧刷新里面反复执行。
 //##############################
-Drill_COAS_MainController.prototype.drill_COAS_setAnnotation = function( annotation ){
-	return this.drill_COAS_setAnnotation_Private( annotation );
+Drill_COAS_MainController.prototype.drill_COAS_setAnnotation = function( annotation ){ return this.drill_controllerMain_setAnnotation( annotation ); }
+Drill_COAS_MainController.prototype.drill_controllerMain_setAnnotation = function( annotation ){
+	return this.drill_controllerMain_setAnnotation_Private( annotation );
 };
 
 //##############################
-// * 动画序列-动作元 - 获取数据 - 全部【开放函数】
+// * E管理动作元 - 获取数据 - 全部【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 数据对象列表
 //##############################
-Drill_COAS_MainController.prototype.drill_COAS_getActData_All = function(){
-	return this.drill_COAS_getActData_All_Private();
+Drill_COAS_MainController.prototype.drill_controllerMain_getActData_All = function(){
+	return this.drill_controllerMain_getActData_All_Private();
 };
 //##############################
-// * 动画序列-动作元 - 获取数据 - 根据名称【开放函数】
+// * E管理动作元 - 获取数据 - 根据名称【开放函数】
 //			
 //			参数：	> act_name 字符串
 //			返回：	> 数据对象
 //##############################
-Drill_COAS_MainController.prototype.drill_COAS_getActData_ByName = function( act_name ){
-	return this.drill_COAS_getActData_ByName_Private( act_name );
+Drill_COAS_MainController.prototype.drill_controllerMain_getActData_ByName = function( act_name ){
+	return this.drill_controllerMain_getActData_ByName_Private( act_name );
 };
 //##############################
-// * 动画序列-动作元 - 获取数据 - 全部名称【开放函数】
+// * E管理动作元 - 获取数据 - 全部名称【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 字符串列表
 //##############################
-Drill_COAS_MainController.prototype.drill_COAS_getActData_AllName = function(){
-	return this.drill_COAS_getActData_AllName_Private();
+Drill_COAS_MainController.prototype.drill_controllerMain_getActData_AllName = function(){
+	return this.drill_controllerMain_getActData_AllName_Private();
 };
 //##############################
-// * 动画序列-动作元 - 操作 - 获取当前动作元名称【开放函数】
+// * E管理动作元 - 获取当前动作元对象【开放函数】
+//			
+//			参数：	> 无
+//			返回：	> 控制器对象
+//##############################
+Drill_COAS_MainController.prototype.drill_controllerMain_Act_getCurAct = function(){
+	return this.drill_controllerMain_Act_getCurAct_Private();
+};
+//##############################
+// * E管理动作元 - 获取当前动作元名称【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 字符串
 //##############################
-Drill_COAS_MainController.prototype.drill_COAS_getCurActName = function(){
-	return this.drill_COAS_getCurActName_Private();
+Drill_COAS_MainController.prototype.drill_controllerMain_Act_getCurName = function(){
+	return this.drill_controllerMain_Act_getCurName_Private();
 };
 //##############################
-// * 动画序列-动作元 - 操作 - 播放动作元【开放函数】
+// * E管理动作元 - 操作 - 播放动作元【开放函数】
 //			
 //			参数：	> act_name 字符串
 //			返回：	> 无
 //##############################
-Drill_COAS_MainController.prototype.drill_COAS_setAct = function( act_name ){
-	this.drill_COAS_setAct_Private( act_name );
+Drill_COAS_MainController.prototype.drill_COAS_setAct = function( act_name ){ this.drill_controllerMain_Act_setAct( act_name ); }
+Drill_COAS_MainController.prototype.drill_controllerMain_Act_setAct = function( act_name ){
+	this.drill_controllerMain_Act_setAct_Private( act_name );
 };
 //##############################
-// * 动画序列-动作元 - 操作 - 立刻终止动作【开放函数】
+// * E管理动作元 - 操作 - 立刻终止动作【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
 //##############################
-Drill_COAS_MainController.prototype.drill_COAS_stopAct = function(){
-	this.drill_COAS_stopAct_Private();
+Drill_COAS_MainController.prototype.drill_COAS_stopAct = function(){ this.drill_controllerMain_Act_stopAct(); }
+Drill_COAS_MainController.prototype.drill_controllerMain_Act_stopAct = function(){
+	this.drill_controllerMain_Act_stopAct_Private();
+};
+//##############################
+// * E管理动作元 - 操作 - 是否正在播放动作元【开放函数】
+//			
+//			参数：	> 无
+//			返回：	> 布尔
+//##############################
+Drill_COAS_MainController.prototype.drill_COAS_isPlayingAct = function(){ return this.drill_controllerMain_Act_isPlayingAct(); }
+Drill_COAS_MainController.prototype.drill_controllerMain_Act_isPlayingAct = function(){
+	return this.drill_controllerMain_Act_isPlayingAct_Private();
+};
+
+//##############################
+// * F管理装饰器 - 是否刷新框架【标准函数】
+//
+//			参数：	> enable 布尔
+//			返回：	> 无
+//
+//			说明：	> 切换bitmap时，默认会刷新框架，这时候会出现闪框架的问题。
+//##############################
+Drill_COAS_MainController.prototype.drill_COAS_setBitmapRefreshFrame = function( enabled ){ this.drill_controllerMain_setBitmapRefreshFrame( enabled ); }
+Drill_COAS_MainController.prototype.drill_controllerMain_setBitmapRefreshFrame = function( enabled ){
+	this._drill_bitmapRefreshFrame = enabled;
+};
+
+//##############################
+// * G变速播放 - 设置速度【开放函数】
+//			
+//			参数：	> speed 速度
+//			返回：	> 无
+//
+//			说明：	> 此函数由子插件内部控制调用，能在帧刷新中实时赋值。
+//##############################
+Drill_COAS_MainController.prototype.drill_COAS_setCurSpeed = function( speed ){ this.drill_controllerMain_setCurSpeed( speed ); }
+Drill_COAS_MainController.prototype.drill_controllerMain_setCurSpeed = function( speed ){
+	this._drill_curSpeed = speed;
 };
 
 //##############################
@@ -3355,113 +4301,79 @@ Drill_COAS_MainController.prototype.drill_COAS_stopAct = function(){
 //			参数：	> 无
 //			返回：	> 无
 //			
-//			说明：	> data 动态参数对象（来自类初始化）
-//					  该对象包含 类所需的所有默认值。
+//			说明：	> 该对象初始化 静态数据，提供所需的所有默认值。
 //##############################
-Drill_COAS_MainController.prototype.drill_initData_Main = function() {
-	var data = this._drill_data;
+Drill_COAS_MainController.prototype.drill_controllerMain_initData = function() {
+	var data = this.drill_data();		//（此处会修改到 静态数据 的指针值）
 	
-	// > 常规
-	if( data['id'] == undefined ){ data['id'] = -1 };											//标识
-	if( data['visible'] == undefined ){ data['visible'] = true };								//显示情况
-	if( data['pause'] == undefined ){ data['pause'] = false };									//暂停情况
+	// > A主体（无）
 	
-	// > 容器
-	if( data['state_tank'] == undefined ){ data['state_tank']=[] };								//容器 - 状态元
-	if( data['stateNode_tank'] == undefined ){ data['stateNode_tank']=[] };						//容器 - 状态节点
-	if( data['act_tank'] == undefined ){ data['act_tank']=[] };									//容器 - 动作元
-	if( data['state_default_randomSeq'] == undefined ){ data['state_default_randomSeq']=[] };	//默认的状态元集合
+	// > B输出数据（无）
 	
-	// > 子插件用参数
-	if( data['waitForPreload'] == undefined ){ data['waitForPreload'] = true };					//加载等待
-	if( data['bitmapRefreshFrame'] == undefined ){ data['bitmapRefreshFrame'] = true };			//bitmap刷新框架开关
+	// > C管理状态元
+	if( data['state_tank'] == undefined ){ data['state_tank']=[] };								//C管理状态元 - 容器
 	
-	//this._drill_data = data;	//（c++中，注意此处的指针，需要重新赋值）
+	// > D管理状态节点
+	if( data['stateNode_tank'] == undefined ){ data['stateNode_tank']=[] };						//D管理状态节点 - 容器
+	if( data['state_default_randomSeq'] == undefined ){ data['state_default_randomSeq']=[] };	//D管理状态节点 - 默认的状态元集合
+	
+	// > E管理动作元
+	if( data['act_tank'] == undefined ){ data['act_tank']=[] };									//E管理动作元 - 容器
+	
+	// > F管理装饰器（无）
+	
+	// > G变速播放（无）
+	
+	
+	//（c++中注意此处，data是堆栈对象而非指针，需要重新赋值）
 };
 //==============================
-// * 动画序列 - 私有数据初始化
+// * 动画序列 - 初始化子功能
 //==============================
-Drill_COAS_MainController.prototype.drill_initPrivateData_Main = function() {
-	var data = this._drill_data;
-	
-	// > 常规
-	this._drill_curTime = 0;										//常规 - 当前时间
-	this._drill_needDestroy = false;								//常规 - 销毁
-	this._drill_checkArrayEnabled = true;							//常规 - 校验数据是否为数组
-	
-	// > GIF - 输出数据
-	this._drill_curBitmapName = "";									//输出数据 - 当前的对象名
-	this._drill_curBitmapPath = "";									//输出数据 - 当前的路径
-	this._drill_curBitmapTint = 0;									//输出数据 - 当前的色调
-	this._drill_curBitmapSmooth = false;							//输出数据 - 当前的模糊
-	
-	
-	// > 默认的状态元集合
-	var node_data = {};
-	node_data['name'] = "默认的状态元集合";
-	node_data['priority'] = 0;
-	node_data['proportion'] = 40;
-	node_data['play_type'] = "随机播放状态元";
-	node_data['play_randomStateSeq'] = data['state_default_randomSeq'];
-	node_data['play_randomMax'] = 5;
-	node_data['note'] = "";
-	data['stateNode_tank'].push( node_data );
-	//this._drill_data = data;	//（c++中，注意此处的指针，需要重新赋值）
-	
-	// > 状态节点
-	//this._drill_node_curName = "";	//（立刻变化，没有缓冲设置）
-	this._drill_node_curSerial = -1;
-	this._drill_node_curController = new Drill_COAS_StateNodeController( node_data );
-	this._drill_node_curController.drill_COAS_setParentDataId( data['id'] );
-	this._drill_node_curController.drill_COAS_setLayer( 0 );
-	
-	// > 动作元
-	this._drill_act_curName = "";
-	this._drill_act_curSerial = -1;									
-	this._drill_act_curController = new Drill_COAS_ActController();
-	this._drill_act_interrupt = false;
-	
-	// > 数据量查看
-	//alert( JSON.stringify( this ) );
+Drill_COAS_MainController.prototype.drill_controllerMain_initChild = function() {
+	this.drill_controllerMain_initAttr();			//初始化子功能 - A主体
+	this.drill_controllerMain_initBitmapParam();	//初始化子功能 - B输出数据
+	this.drill_controllerMain_initState();			//初始化子功能 - C管理状态元
+	this.drill_controllerMain_initNode();			//初始化子功能 - D管理状态节点
+	this.drill_controllerMain_initAct();			//初始化子功能 - E管理动作元
+	this.drill_controllerMain_initDecorator();		//初始化子功能 - F管理装饰器
+	this.drill_controllerMain_initSpeed();			//初始化子功能 - G变速播放
 };
 //==============================
 // * 动画序列 - 重设数据（私有）
-//
-//			说明：	data对象中的参数【可以缺项】。
 //==============================
-Drill_COAS_MainController.prototype.drill_COAS_resetData_Main_Private = function( data ){
+Drill_COAS_MainController.prototype.drill_controllerMain_resetData_Private = function( sequenceData_id ){
 	
-	// > 判断数据重复情况
-	if( this._drill_data != undefined ){
-		var keys = Object.keys( data );
-		var is_same = true;
-		for( var i=0; i < keys.length; i++ ){
-			var key = keys[i];
-			if( this._drill_data[key] != data[key] ){
-				is_same = false;
-			}
-		}
-		if( is_same == true ){ return; }
-	}
-	// > 补充未设置的数据
-	var keys = Object.keys( this._drill_data );
-	for( var i=0; i < keys.length; i++ ){
-		var key = keys[i];
-		if( data[key] == undefined ){
-			data[key] = this._drill_data[key];
-		}
+	// > 参数检查
+	if( typeof sequenceData_id != "number" ){
+		alert( DrillUp.drill_COAS_getPluginTip_Sequence_NotId2("Drill_COAS_MainController") );
+		throw Error( DrillUp.drill_COAS_getPluginTip_Sequence_NotId2("Drill_COAS_MainController") );
+		return;
 	}
 	
 	// > 执行重置
-	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
+	this._drill_sequenceData_id = sequenceData_id;
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
-    this.drill_initData_Main();												//初始化数据
-    this.drill_initPrivateData_Main();										//私有数据初始化
+    this.drill_controllerMain_initData();									//初始化数据
+    this.drill_controllerMain_initChild();									//初始化子功能
 };
+
+
 //==============================
-// * 动画序列 - 校验数据是否为数组
+// * A主体 - 初始化子功能
 //==============================
-Drill_COAS_MainController.prototype.drill_COAS_checkArray = function( arr ){
+Drill_COAS_MainController.prototype.drill_controllerMain_initAttr = function() {
+	this._drill_visible = true;						//A主体 - 显示/隐藏
+	this._drill_pause = false;						//A主体 - 暂停/继续
+	
+	this._drill_curTime = 0;						//A主体 - 当前时间
+	this._drill_needDestroy = false;				//A主体 - 销毁
+	this._drill_checkArrayEnabled = true;			//A主体 - 校验数据是否为数组
+}
+//==============================
+// * A主体 - 校验数据是否为数组
+//==============================
+Drill_COAS_MainController.prototype.drill_controllerMain_checkArray = function( arr ){
 	if( this._drill_checkArrayEnabled != true ){ return; }
 		
 	if( Array.isArray( arr ) ){
@@ -3472,22 +4384,47 @@ Drill_COAS_MainController.prototype.drill_COAS_checkArray = function( arr ){
 		this._drill_checkArrayEnabled = false;
 	}	
 };
+//==============================
+// * A主体 - 帧刷新
+//==============================
+Drill_COAS_MainController.prototype.drill_controllerMain_updateAttr = function() {
+	
+	// > 时间流逝
+	this._drill_curTime += 1;
+}
 
 
 //==============================
-// * 动画序列-状态元 - 获取数据 - 全部（私有）
+// * B输出数据 - 初始化子功能
+//==============================
+Drill_COAS_MainController.prototype.drill_controllerMain_initBitmapParam = function() {
+	this._drill_curBitmapName = "";					//B输出数据 - 当前的资源名
+	this._drill_curBitmapPath = "";					//B输出数据 - 当前的路径
+	this._drill_curBitmapTint = 0;					//B输出数据 - 当前的色调
+	this._drill_curBitmapSmooth = false;			//B输出数据 - 当前的模糊
+}
+
+
+//==============================
+// * C管理状态元 - 初始化子功能
+//==============================
+Drill_COAS_MainController.prototype.drill_controllerMain_initState = function() {
+	//（无）
+}
+//==============================
+// * C管理状态元 - 获取数据 - 全部（私有）
 //
-//			说明：	当前动画序列中操作的 状态元 数据。
+//			说明：	> 当前动画序列中操作的 状态元 数据。
 //==============================
-Drill_COAS_MainController.prototype.drill_COAS_getStateData_All_Private = function(){
-	return this._drill_data['state_tank'];
+Drill_COAS_MainController.prototype.drill_controllerMain_getStateData_All_Private = function(){
+	return this.drill_data()['state_tank'];
 };
 //==============================
-// * 动画序列-状态元 - 获取数据 - 根据名称（私有）
+// * C管理状态元 - 获取数据 - 根据名称（私有）
 //==============================
-Drill_COAS_MainController.prototype.drill_COAS_getStateData_ByName_Private = function( state_name ){
+Drill_COAS_MainController.prototype.drill_controllerMain_getStateData_ByName_Private = function( state_name ){
 	if( state_name == "" ){ return null; }
-	var data = this._drill_data;	
+	var data = this.drill_data();	
 	for( var i=0; i < data['state_tank'].length; i++ ){
 		var data_state = data['state_tank'][i];
 		if( data_state['name'] == state_name ){
@@ -3497,10 +4434,10 @@ Drill_COAS_MainController.prototype.drill_COAS_getStateData_ByName_Private = fun
 	return null;
 };
 //==============================
-// * 动画序列-状态元 - 获取数据 - 全部名称（私有）
+// * C管理状态元 - 获取数据 - 全部名称（私有）
 //==============================
-Drill_COAS_MainController.prototype.drill_COAS_getStateData_AllName_Private = function(){
-	var data = this._drill_data;
+Drill_COAS_MainController.prototype.drill_controllerMain_getStateData_AllName_Private = function(){
+	var data = this.drill_data();
 	var result_list = [];	
 	for( var i=0; i < data['state_tank'].length; i++ ){
 		var data_state = data['state_tank'][i];
@@ -3513,19 +4450,74 @@ Drill_COAS_MainController.prototype.drill_COAS_getStateData_AllName_Private = fu
 
 
 //==============================
-// * 动画序列-状态节点 - 获取数据 - 全部（私有）
-//
-//			说明：	当前动画序列中操作的 状态节点 数据。
+// * D管理状态节点 - 初始化子功能
 //==============================
-Drill_COAS_MainController.prototype.drill_COAS_getStateNodeData_All_Private = function(){
-	return this._drill_data['stateNode_tank'];
+Drill_COAS_MainController.prototype.drill_controllerMain_initNode = function() {
+	var data = this.drill_data();
+	
+	// > 默认的状态元集合（放在最后一个）
+	var node_id = data['stateNode_tank'].length -1;
+	
+	// > 状态节点
+	//this._drill_node_curName = "";	//（立刻变化，没有缓冲设置）
+	this._drill_node_curSerial = -1;
+	this._drill_node_curController = new Drill_COAS_StateNodeController( this._drill_sequenceData_id, node_id );
+	this._drill_node_curController.drill_controllerNode_setLayer( 0 );
+	
+	// > 数据量查看
+	//alert( JSON.stringify( this ) );
+}
+//==============================
+// * D管理状态节点 - 帧刷新
+//==============================
+Drill_COAS_MainController.prototype.drill_controllerMain_updateStateAndNode = function() {
+	if( this.drill_controllerMain_Act_isPlayingAct() == true ){ return; }		//动作播放时，不操作
+	
+	// > 动作元打断
+	if( this._drill_act_interrupt == true ){
+		this._drill_act_interrupt = false;
+		if( this._drill_node_curController.drill_controllerNode_canBeInterrupted() ){
+			this._drill_node_curController.drill_controllerNode_resetTimer();
+			this._drill_node_curController.drill_controllerNode_refreshNext();
+		}
+	}
+	
+	// > 状态节点 数据刷新情况
+	if( this._drill_node_curSerial != this._drill_node_curController._drill_controllerSerial ){
+		this._drill_node_curController.drill_controllerNode_resetTimer();
+		this._drill_node_curController.drill_controllerNode_refreshNext();
+		this._drill_node_curSerial = this._drill_node_curController._drill_controllerSerial;
+	}
+	
+	// > 状态节点 播放完毕情况
+	if( this._drill_node_curController.drill_controllerNode_isEnd() == true ){
+		this._drill_node_curController.drill_controllerNode_resetTimer();
+		this._drill_node_curController.drill_controllerNode_refreshNext();
+	}
+	
+	// > 状态节点 - 帧刷新
+	this._drill_node_curController.drill_controllerNode_update();
+	
+	// > 状态节点 - B输出数据
+	this._drill_curBitmapName = this._drill_node_curController.drill_controllerNode_curBitmapName();
+	this._drill_curBitmapPath = this._drill_node_curController.drill_controllerNode_curBitmapPath();
+	this._drill_curBitmapTint = this._drill_node_curController.drill_controllerNode_curBitmapTint();
+	this._drill_curBitmapSmooth = this._drill_node_curController.drill_controllerNode_curBitmapSmooth();
 };
 //==============================
-// * 动画序列-状态节点 - 获取数据 - 根据名称（私有）
+// * D管理状态节点 - 获取数据 - 全部（私有）
+//
+//			说明：	> 当前动画序列中操作的 状态节点 数据。
 //==============================
-Drill_COAS_MainController.prototype.drill_COAS_getStateNodeData_ByName_Private = function( stateNode_name ){
+Drill_COAS_MainController.prototype.drill_controllerMain_getNodeData_All_Private = function(){
+	return this.drill_data()['stateNode_tank'];
+};
+//==============================
+// * D管理状态节点 - 获取数据 - 根据名称（私有）
+//==============================
+Drill_COAS_MainController.prototype.drill_controllerMain_getNodeData_ByName_Private = function( stateNode_name ){
 	if( stateNode_name == "" ){ return null; }
-	var data = this._drill_data;	
+	var data = this.drill_data();	
 	for( var i=0; i < data['stateNode_tank'].length; i++ ){
 		var data_node = data['stateNode_tank'][i];
 		if( data_node['name'] == stateNode_name ){
@@ -3535,10 +4527,10 @@ Drill_COAS_MainController.prototype.drill_COAS_getStateNodeData_ByName_Private =
 	return null;
 };
 //==============================
-// * 动画序列-状态节点 - 获取数据 - 全部名称（私有）
+// * D管理状态节点 - 获取数据 - 全部名称（私有）
 //==============================
-Drill_COAS_MainController.prototype.drill_COAS_getStateNodeData_AllName_Private = function(){
-	var data = this._drill_data;
+Drill_COAS_MainController.prototype.drill_controllerMain_getNodeData_AllName_Private = function(){
+	var data = this.drill_data();
 	var result_list = [];	
 	for( var i=0; i < data['stateNode_tank'].length; i++ ){
 		var data_node = data['stateNode_tank'][i];
@@ -3549,100 +4541,72 @@ Drill_COAS_MainController.prototype.drill_COAS_getStateNodeData_AllName_Private 
 	return result_list;
 };
 //==============================
-// * 动画序列-状态节点 - 帧刷新
+// * D管理状态节点 - 获取当前状态元对象（私有）
 //==============================
-Drill_COAS_MainController.prototype.drill_COAS_updateStateNode = function() {
-	if( this.drill_COAS_isPlayingAct() == true ){ return; }		//动作播放时，不操作
-	
-	// > 动作元打断
-	if( this._drill_act_interrupt == true ){
-		this._drill_act_interrupt = false;
-		if( this._drill_node_curController.drill_COAS_canBeInterrupted() ){
-			this._drill_node_curController.drill_COAS_resetTimer();
-			this._drill_node_curController.drill_COAS_refreshNext();
-		}
-	}
-	
-	// > 状态节点 数据刷新情况
-	if( this._drill_node_curSerial != this._drill_node_curController._drill_controllerSerial ){
-		this._drill_node_curController.drill_COAS_resetTimer();
-		this._drill_node_curController.drill_COAS_refreshNext();
-		this._drill_node_curSerial = this._drill_node_curController._drill_controllerSerial;
-	}
-	
-	// > 状态节点 播放完毕情况
-	if( this._drill_node_curController.drill_COAS_isNodeEnd() == true ){
-		this._drill_node_curController.drill_COAS_resetTimer();
-		this._drill_node_curController.drill_COAS_refreshNext();
-	}
-	
-	// > 状态节点 帧刷新
-	this._drill_node_curController.drill_COAS_update();
-	this._drill_curBitmapName = this._drill_node_curController.drill_COAS_curBitmapName();
-	this._drill_curBitmapPath = this._drill_node_curController.drill_COAS_curBitmapPath();
-	this._drill_curBitmapTint = this._drill_node_curController.drill_COAS_curBitmapTint();
-	this._drill_curBitmapSmooth = this._drill_node_curController.drill_COAS_curBitmapSmooth();
+Drill_COAS_MainController.prototype.drill_controllerMain_Node_getCurState_Private = function(){
+	return this._drill_node_curController.drill_controllerNode_getState();
 };
 //==============================
-// * 动画序列-状态节点 - 操作 - 获取当前状态元名称（私有）
+// * D管理状态节点 - 获取当前状态元名称（私有）
 //==============================
-Drill_COAS_MainController.prototype.drill_COAS_getCurStateName_Private = function(){
-	return this._drill_node_curController.drill_COAS_getCurStateName();
+Drill_COAS_MainController.prototype.drill_controllerMain_Node_getCurStateName_Private = function(){
+	return this._drill_node_curController.drill_controllerNode_getStateName();
 };
 //==============================
-// * 动画序列-状态节点 - 操作 - 获取当前状态元名称（全路径）（私有）
+// * D管理状态节点 - 获取当前状态元名称（全路径）（私有）
 //==============================
-Drill_COAS_MainController.prototype.drill_COAS_getCurStateName_AllRoot_Private = function(){
-	return this._drill_node_curController.drill_COAS_getCurStateName_AllRoot();
+Drill_COAS_MainController.prototype.drill_controllerMain_Node_getCurStateName_AllRoot_Private = function(){
+	return this._drill_node_curController.drill_controllerNode_getStateName_AllRoot();
 };
 //==============================
-// * 动画序列-状态节点 - 操作 - 获取当前状态元优先级（私有）
+// * D管理状态节点 - 获取当前优先级（私有）
 //==============================
-Drill_COAS_MainController.prototype.drill_COAS_getCurStatePriority_Private = function(){
-	return this._drill_node_curController.drill_COAS_getCurStatePriority();
+Drill_COAS_MainController.prototype.drill_controllerMain_Node_getCurPriority_Private = function(){
+	return this._drill_node_curController.drill_controllerNode_getPriority();
 };
 //==============================
-// * 动画序列-状态节点 - 操作 - 播放状态节点（私有）
+// * D管理状态节点 - 操作 - 播放状态节点（私有）
 //==============================
-Drill_COAS_MainController.prototype.drill_COAS_setStateNode_Private = function( node_name ){
-	var data = this._drill_data;
-	var node_data = this.drill_COAS_getStateNodeData_ByName( node_name );
+Drill_COAS_MainController.prototype.drill_controllerMain_setStateNode_Private = function( node_name ){
+	var node_data = this.drill_controllerMain_getNodeData_ByName( node_name );
 	if( node_data == null ){ return; }
-	this._drill_node_curController.drill_COAS_resetData_Node( node_data );		//集合 - 重设数据
-	this._drill_node_curController.drill_COAS_setParentDataId( data['id'] );	//集合 - 设置父数据id
-	this._drill_node_curController.drill_COAS_setLayer( 0 );					//集合 - 设置当前层数
-	this._drill_node_curController.drill_COAS_refreshNext();					//集合 - 刷新子节点
+	this._drill_node_curController.drill_controllerNode_resetData( this._drill_sequenceData_id, node_data['id'] );//集合 - 重设数据
+	this._drill_node_curController.drill_controllerNode_setLayer( 0 );									//集合 - 设置当前层数
+	this._drill_node_curController.drill_controllerNode_refreshNext();									//集合 - 刷新子节点
 };
 //==============================
-// * 动画序列-状态节点 - 操作 - 播放简单状态元集合（私有）
+// * D管理状态节点 - 操作 - 播放简单状态元集合（私有）
 //==============================
-Drill_COAS_MainController.prototype.drill_COAS_setSimpleStateNode_Private = function( state_nameList ){
-	this.drill_COAS_checkArray( state_nameList );
+Drill_COAS_MainController.prototype.drill_controllerMain_setSimpleStateNode_Private = function( state_nameList ){
+	this.drill_controllerMain_checkArray( state_nameList );
 	this._drill_node_curController.drill_COAS_setNewStateNameList( state_nameList );
 };
 //==============================
-// * 动画序列-状态节点 - 操作 - 播放状态元/状态节点 根据标签（私有）
+// * D管理状态节点 - 操作 - 播放状态元/状态节点 根据标签（私有）
+//
+//			说明：	> 播放不成功时(没有标签)，返回false。
+//					> 该核心只提供 播放函数，标签分类/标签顺序/标签复合处理 等操作全部由 子插件 自己管理，可见 Drill_EventActionSequenceAutomation 。
 //==============================
-Drill_COAS_MainController.prototype.drill_COAS_setAnnotation_Private = function( annotation ){
+Drill_COAS_MainController.prototype.drill_controllerMain_setAnnotation_Private = function( annotation ){
 	
 	// > 状态节点 播放
-	var stateNodeData_list = this.drill_COAS_getStateNodeData_All();
+	var stateNodeData_list = this.drill_controllerMain_getNodeData_All();
 	for( var i=0; i < stateNodeData_list.length; i++ ){
 		var stateNodeData = stateNodeData_list[i];
 		if( stateNodeData['tag_tank'].contains( annotation ) ){
-			this.drill_COAS_setStateNode( stateNodeData['name'] );
+			this.drill_controllerMain_setStateNode( stateNodeData['name'] );
 			return true;
 		}
 	}
 	
 	// > 状态元 播放
-	var stateData_list = this.drill_COAS_getStateData_All();
+	var stateData_list = this.drill_controllerMain_getStateData_All();
 	for( var i=0; i < stateData_list.length; i++ ){
 		var stateData = stateData_list[i];
 		if( stateData['tag_tank'].contains( annotation ) ){
 			var name_list = [];
 			name_list.push( stateData['name'] );
-			this.drill_COAS_setSimpleStateNode( name_list );
+			this.drill_controllerMain_setSimpleStateNode( name_list );
 			return true;
 		}
 	}
@@ -3650,17 +4614,17 @@ Drill_COAS_MainController.prototype.drill_COAS_setAnnotation_Private = function(
 	return false;
 };
 //==============================
-// * 动画序列-状态节点 - 操作 - 播放状态元 根据标签列表（私有）
+// * D管理状态节点 - 操作 - 只播放状态元 根据标签列表（旧）
 //
-//			说明：	此函数是根据 标签列表，找到 状态元列表，然后播放，结构太复杂，暂时弃用。
+//			说明：	> 此函数是根据 标签列表，找到 状态元列表，然后播放。暂时弃用。
 //==============================
 /*
-Drill_COAS_MainController.prototype.drill_COAS_setAnnotationList_Private = function( annotation_list ){
+Drill_COAS_MainController.prototype.drill_controllerMain_setAnnotationList = function( annotation_list ){
 	
 	// > 找到符合注解数量最多的状态元名
 	var max_fit_count = 0;			//（最大符合数量）
 	var fit_seq = [];				//（最大符合的索引列表）
-	var stateData_list = this.drill_COAS_getStateData_All_Private();
+	var stateData_list = this.drill_controllerMain_getStateData_All_Private();
 	for( var i=0; i < stateData_list.length; i++ ){
 		var stateData = stateData_list[i];
 		var tag_tank = stateData['tag_tank'];
@@ -3708,26 +4672,70 @@ Drill_COAS_MainController.prototype.drill_COAS_setAnnotationList_Private = funct
 	}
 	
 	// > 播放简单状态元集合
-	this.drill_COAS_setSimpleStateNode_Private( stateName_list );
+	this.drill_controllerMain_setSimpleStateNode_Private( stateName_list );
 	return true;
 };
 */
 
 
 //==============================
-// * 动画序列-动作元 - 获取数据 - 全部（私有）
+// * E管理动作元 - 初始化子功能
+//==============================
+Drill_COAS_MainController.prototype.drill_controllerMain_initAct = function() {
+	
+	// > 动作元
+	this._drill_act_curName = "";
+	this._drill_act_curSerial = -1;
+	this._drill_act_curController = new Drill_COAS_ActController( this._drill_sequenceData_id, -1 );
+	this._drill_act_interrupt = false;
+}
+//==============================
+// * E管理动作元 - 帧刷新
+//==============================
+Drill_COAS_MainController.prototype.drill_controllerMain_updateAct = function() {
+	if( this.drill_controllerMain_Act_isPlayingAct() == false ){ return; }	//动作未播放时，不操作
+	
+	// > 动作元打断 锁
+	this._drill_act_interrupt = true;
+	
+	// > 动作元 数据刷新情况
+	if( this._drill_act_curSerial != this._drill_act_curController._drill_controllerSerial ){
+		var data_act = this.drill_controllerMain_getActData_ByName( this._drill_act_curName );
+		if( data_act != undefined ){
+			this._drill_act_curController.drill_controllerAct_resetData( this._drill_sequenceData_id, data_act['id'] );
+		}
+		this._drill_act_curSerial = this._drill_act_curController._drill_controllerSerial;
+	}
+	
+	// > 动作元 播放完毕情况
+	if( this._drill_act_curController.drill_controllerAct_isEnd() == true ){
+		this._drill_act_curName = "";
+		this._drill_act_curSerial = -1;
+	}
+	
+	// > 动作元 - 帧刷新
+	this._drill_act_curController.drill_controllerAct_update();
+	
+	// > 动作元 - B输出数据
+	this._drill_curBitmapName = this._drill_act_curController.drill_controllerAct_curBitmapName();
+	this._drill_curBitmapPath = this._drill_act_curController.drill_controllerAct_curBitmapPath();
+	this._drill_curBitmapTint = this._drill_act_curController.drill_controllerAct_curBitmapTint();
+	this._drill_curBitmapSmooth = this._drill_act_curController.drill_controllerAct_curBitmapSmooth();
+};
+//==============================
+// * E管理动作元 - 获取数据 - 全部（私有）
 //
 //			说明：	当前动画序列中操作的 动作元 数据。
 //==============================
-Drill_COAS_MainController.prototype.drill_COAS_getActData_All_Private = function(){
-	return this._drill_data['act_tank'];
+Drill_COAS_MainController.prototype.drill_controllerMain_getActData_All_Private = function(){
+	return this.drill_data()['act_tank'];
 };
 //==============================
-// * 动画序列-动作元 - 获取数据 - 根据名称（私有）
+// * E管理动作元 - 获取数据 - 根据名称（私有）
 //==============================
-Drill_COAS_MainController.prototype.drill_COAS_getActData_ByName_Private = function( act_name ){
+Drill_COAS_MainController.prototype.drill_controllerMain_getActData_ByName_Private = function( act_name ){
 	if( act_name == "" ){ return null; }
-	var data = this._drill_data;	
+	var data = this.drill_data();	
 	for( var i=0; i < data['act_tank'].length; i++ ){
 		var data_act = data['act_tank'][i];
 		if( data_act['name'] == act_name ){
@@ -3737,10 +4745,10 @@ Drill_COAS_MainController.prototype.drill_COAS_getActData_ByName_Private = funct
 	return null;
 };
 //==============================
-// * 动画序列-动作元 - 获取数据 - 全部名称（私有）
+// * E管理动作元 - 获取数据 - 全部名称（私有）
 //==============================
-Drill_COAS_MainController.prototype.drill_COAS_getActData_AllName_Private = function(){
-	var data = this._drill_data;
+Drill_COAS_MainController.prototype.drill_controllerMain_getActData_AllName_Private = function(){
+	var data = this.drill_data();
 	var result_list = [];	
 	for( var i=0; i < data['act_tank'].length; i++ ){
 		var data_act = data['act_tank'][i];
@@ -3751,58 +4759,28 @@ Drill_COAS_MainController.prototype.drill_COAS_getActData_AllName_Private = func
 	return result_list;
 };
 //==============================
-// * 动画序列-动作元 - 帧刷新
+// * E管理动作元 - 获取当前动作元对象（私有）
 //==============================
-Drill_COAS_MainController.prototype.drill_COAS_updateAct = function() {
-	if( this.drill_COAS_isPlayingAct() == false ){ return; }	//动作未播放时，不操作
-	
-	// > 动作元打断 锁
-	this._drill_act_interrupt = true;
-	
-	// > 动作元 数据刷新情况
-	if( this._drill_act_curSerial != this._drill_act_curController._drill_controllerSerial ){
-		var data_act = this.drill_COAS_getActData_ByName( this._drill_act_curName );
-		if( data_act != undefined ){
-			this._drill_act_curController.drill_COAS_resetData_Act( data_act );
-		}
-		this._drill_act_curSerial = this._drill_act_curController._drill_controllerSerial;
-	}
-	
-	// > 动作元 播放完毕情况
-	if( this._drill_act_curController.drill_COAS_isActEnd() == true ){
-		this._drill_act_curName = "";
-		this._drill_act_curSerial = -1;
-	}
-	
-	// > 动作元 帧刷新
-	this._drill_act_curController.drill_COAS_update();
-	this._drill_curBitmapName = this._drill_act_curController.drill_COAS_curBitmapName();
-	this._drill_curBitmapPath = this._drill_act_curController.drill_COAS_curBitmapPath();
-	this._drill_curBitmapTint = this._drill_act_curController.drill_COAS_curBitmapTint();
-	this._drill_curBitmapSmooth = this._drill_act_curController.drill_COAS_curBitmapSmooth();
+Drill_COAS_MainController.prototype.drill_controllerMain_Act_getCurAct_Private = function(){
+	return this._drill_act_curController;
 };
 //==============================
-// * 动画序列-动作元 - 判断播放
+// * E管理动作元 - 获取当前动作元名称（私有）
 //==============================
-Drill_COAS_MainController.prototype.drill_COAS_isPlayingAct = function(){
-	return this._drill_act_curName != "";
-};
-//==============================
-// * 动画序列-动作元 - 操作 - 获取当前动作元名称（私有）
-//==============================
-Drill_COAS_MainController.prototype.drill_COAS_getCurActName_Private = function(){
+Drill_COAS_MainController.prototype.drill_controllerMain_Act_getCurName_Private = function(){
 	return this._drill_act_curName;
 };
 //==============================
-// * 动画序列-动作元 - 操作 - 播放动作元（私有）
+// * E管理动作元 - 操作 - 播放动作元（私有）
 //==============================
-Drill_COAS_MainController.prototype.drill_COAS_setAct_Private = function( act_name ){
+Drill_COAS_MainController.prototype.drill_controllerMain_Act_setAct_Private = function( act_name ){
 	if( this._drill_act_curName === act_name ){ return; }
 	
 	// > 检查高优先级状态元
 	if( this._drill_act_curName == "" ){
-		var data_act = this.drill_COAS_getActData_ByName( act_name );
-		var state_priority = this.drill_COAS_getCurStatePriority();
+		var data_act = this.drill_controllerMain_getActData_ByName( act_name );
+		if( data_act == null ){ return; }
+		var state_priority = this.drill_controllerMain_Node_getCurPriority();
 		if( state_priority > data_act['priority'] ){	//（同级的动作元可以覆盖状态元）
 			return;
 		}
@@ -3810,8 +4788,8 @@ Drill_COAS_MainController.prototype.drill_COAS_setAct_Private = function( act_na
 		
 	// > 动作正在播放时
 	if( this._drill_act_curName != "" ){
-		var data_act = this.drill_COAS_getActData_ByName( act_name );
-		var cur_act = this.drill_COAS_getActData_ByName( this._drill_act_curName );
+		var data_act = this.drill_controllerMain_getActData_ByName( act_name );
+		var cur_act = this.drill_controllerMain_getActData_ByName( this._drill_act_curName );
 		
 		if( cur_act['priority'] >= data_act['priority'] ){	//（只能覆盖小的优先级，不包括同级）
 			return;
@@ -3821,11 +4799,49 @@ Drill_COAS_MainController.prototype.drill_COAS_setAct_Private = function( act_na
 	this._drill_act_curName = act_name;
 };
 //==============================
-// * 动画序列-动作元 - 操作 - 立刻终止动作（私有）
+// * E管理动作元 - 操作 - 立刻终止动作（私有）
 //==============================
-Drill_COAS_MainController.prototype.drill_COAS_stopAct_Private = function(){
+Drill_COAS_MainController.prototype.drill_controllerMain_Act_stopAct_Private = function(){
 	this._drill_act_curName = "";
 	this._drill_act_curSerial = -1;
+};
+//==============================
+// * E管理动作元 - 操作 - 是否正在播放动作元（私有）
+//==============================
+Drill_COAS_MainController.prototype.drill_controllerMain_Act_isPlayingAct_Private = function(){
+	return this._drill_act_curName != "";
+};
+
+
+//==============================
+// * F管理装饰器 - 初始化子功能
+//==============================
+Drill_COAS_MainController.prototype.drill_controllerMain_initDecorator = function() {
+	this._drill_waitForPreload = true;				//F管理装饰器 - 加载等待
+	this._drill_bitmapRefreshFrame = true;			//F管理装饰器 - bitmap刷新框架开关
+};
+
+
+//==============================
+// * G变速播放 - 初始化子功能
+//==============================
+Drill_COAS_MainController.prototype.drill_controllerMain_initSpeed = function() {
+	this._drill_curSpeed = 1;
+};
+//==============================
+// * G变速播放 - 帧刷新
+//==============================
+Drill_COAS_MainController.prototype.drill_controllerMain_updateSpeed = function() {
+	
+	var state = this.drill_controllerMain_Node_getCurState_Private();
+	if( state != undefined ){
+		state._drill_curSpeed = this._drill_curSpeed;
+	}
+	
+	var act = this._drill_act_curController;
+	if( act != undefined ){
+		act._drill_curSpeed = this._drill_curSpeed;
+	}
 };
 
 
@@ -3836,17 +4852,20 @@ Drill_COAS_MainController.prototype.drill_COAS_stopAct_Private = function(){
 // **		作用域：	地图界面、战斗界面、菜单界面
 // ** 		主功能：	> 定义一个专门控制动画序列的数据类。
 // **					> 该类可被存到存档中。
-// ** 		子功能：	->帧刷新
-// **						->显示/隐藏
+// ** 		子功能：	->装饰器
+// **						->帧刷新
 // **						->是否就绪
 // **						->优化策略
 // **						->销毁
-// **					->父操作
+// **					->A主体
+// **					->B父操作
 // **						->添加父类
 // **						->去除父类
 // **						->外部资源重置
-// **						->设置资源对象
-// **						->还原资源对象
+// **						->帧刷新
+// **							->设置资源对象
+// **							->还原资源对象
+// **							->禁止刷新框架
 // **				
 // **		说明：	> 操作父对象的bitmap。能够切换单个，还可以切换多个父类的bitmap。
 // **				> 该类的update函数需要在父贴图中手动调用。
@@ -3862,12 +4881,14 @@ function Drill_COAS_SpriteDecorator() {
 // * 装饰器 - 初始化
 //==============================
 Drill_COAS_SpriteDecorator.prototype.initialize = function( parent, main_controller ){
-	this._drill_parents = [];								//操作的父对象
+	
+	this._drill_parents = [];								//B父操作 - 操作的父对象
 	this._drill_parents.push( parent );						//
-	this._drill_parentBitmapTank = [];						//操作的bitmap
+	this._drill_parentBitmapTank = [];						//B父操作 - 操作的bitmap
 	this._drill_parentBitmapTank.push( parent.bitmap );		//
-	this._drill_controller = main_controller;				//控制该对象的数据类
-	this.drill_initSprite();								//对象初始化
+	
+	this._drill_controller = main_controller;				//控制器
+	this.drill_spriteMain_initChild();						//初始化子功能
 };
 //##############################
 // * 装饰器 - 帧刷新【标准函数】
@@ -3877,34 +4898,37 @@ Drill_COAS_SpriteDecorator.prototype.initialize = function( parent, main_control
 //			
 //			说明：	> 此函数必须在父类中手动调用 帧刷新 执行。
 //##############################
-Drill_COAS_SpriteDecorator.prototype.update = function(){ this.drill_COAS_update(); }
-Drill_COAS_SpriteDecorator.prototype.drill_COAS_update = function(){
-	if( this.drill_COAS_isReady() == false ){ return; }
-	if( this.drill_COAS_isOptimizationPassed() == false ){ return; }
-	this.drill_COAS_updateParentBitmap();		//帧刷新 - 父对象
+Drill_COAS_SpriteDecorator.prototype.update = function(){ this.drill_spriteMain_update(); }
+Drill_COAS_SpriteDecorator.prototype.drill_COAS_update = function(){ this.drill_spriteMain_update(); }
+Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_update = function(){
+	if( this.drill_spriteMain_isReady() == false ){ return; }
+	if( this.drill_spriteMain_isOptimizationPassed() == false ){ return; }
+														//帧刷新 - A主体（无）
+	this.drill_spriteMain_updateParentBitmap();			//帧刷新 - B父对象
 };
+
 //##############################
-// * 装饰器 - 父操作 - 添加父类【开放函数】
+// * B父操作 - 添加父类【开放函数】
 //			
 //			参数：	> parent 父类对象
 //			返回：	> 无
 //			
 //			说明：	> 可以多次调用，设置多个父对象。
 //##############################
-Drill_COAS_SpriteDecorator.prototype.drill_COAS_addParent = function( parent ){
-	this.drill_COAS_addParent_Private( parent );
+Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_addParent = function( parent ){
+	this.drill_spriteMain_addParent_Private( parent );
 };
 //##############################
-// * 装饰器 - 父操作 - 去除父类【开放函数】
+// * B父操作 - 去除父类【开放函数】
 //			
 //			参数：	> parent 父类对象
 //			返回：	> 无
 //##############################
-Drill_COAS_SpriteDecorator.prototype.drill_COAS_removeParent = function( parent ){
-	this.drill_COAS_removeParent_Private( parent );
+Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_removeParent = function( parent ){
+	this.drill_spriteMain_removeParent_Private( parent );
 };
 //##############################
-// * 装饰器 - 父操作 - 外部资源重置【开放函数】
+// * B父操作 - 外部资源重置【开放函数】
 //			
 //			参数：	> parent 父类对象
 //					> bitmap 资源对象
@@ -3912,9 +4936,11 @@ Drill_COAS_SpriteDecorator.prototype.drill_COAS_removeParent = function( parent 
 //			
 //			说明：	> 部分插件可能会对父类单图的bitmap做修改，子插件需要确保关闭动画序列后，单图能还原。
 //##############################
-Drill_COAS_SpriteDecorator.prototype.drill_COAS_parentBitmapChanged = function( parent, bitmap ){
-	this.drill_COAS_parentBitmapChanged_Private( parent, bitmap );
+Drill_COAS_SpriteDecorator.prototype.drill_COAS_parentBitmapChanged = function( parent, bitmap ){ this.drill_spriteMain_parentBitmapChanged( parent, bitmap ); }
+Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_parentBitmapChanged = function( parent, bitmap ){
+	this.drill_spriteMain_parentBitmapChanged_Private( parent, bitmap );
 };
+
 //##############################
 // * 装饰器 - 是否就绪【标准函数】
 //			
@@ -3923,9 +4949,10 @@ Drill_COAS_SpriteDecorator.prototype.drill_COAS_parentBitmapChanged = function( 
 //			
 //			说明：	> 这里需要 考虑 延迟加载问题。
 //##############################
-Drill_COAS_SpriteDecorator.prototype.drill_COAS_isReady = function(){
+Drill_COAS_SpriteDecorator.prototype.drill_COAS_isReady = function(){ return this.drill_spriteMain_isReady(); }
+Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_isReady = function(){
 	if( this._drill_controller == undefined ){ return false; }
-	if( this.drill_COAS_isAllBitmapReady() == false ){ return false; }
+	if( this.drill_spriteMain_isAllBitmapReady() == false ){ return false; }
     return true;
 };
 //##############################
@@ -3936,8 +4963,9 @@ Drill_COAS_SpriteDecorator.prototype.drill_COAS_isReady = function(){
 //			
 //			说明：	> 通过时，正常帧刷新；未通过时，不执行帧刷新。
 //##############################
-Drill_COAS_SpriteDecorator.prototype.drill_COAS_isOptimizationPassed = function(){
-    return true;
+Drill_COAS_SpriteDecorator.prototype.drill_COAS_isOptimizationPassed = function(){ return this.drill_spriteMain_isOptimizationPassed(); }
+Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_isOptimizationPassed = function(){
+    return true;	//（此部分交给子插件来考虑，可以继承子类覆写，也可以直接选择不执行 drill_spriteMain_update ）
 };
 //##############################
 // * 装饰器 - 是否需要销毁【标准函数】
@@ -3947,7 +4975,8 @@ Drill_COAS_SpriteDecorator.prototype.drill_COAS_isOptimizationPassed = function(
 //			
 //			说明：	> 此函数可用于监听 控制器数据 是否被销毁，数据销毁后，贴图可自动销毁。
 //##############################
-Drill_COAS_SpriteDecorator.prototype.drill_COAS_isNeedDestroy = function(){
+Drill_COAS_SpriteDecorator.prototype.drill_COAS_isNeedDestroy = function(){ return this.drill_spriteMain_isNeedDestroy(); }
+Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_isNeedDestroy = function(){
 	if( this._drill_controller == undefined ){ return false; }	//（未绑定时，不销毁）
 	if( this._drill_controller._drill_needDestroy == true ){ return true; }
     return false;
@@ -3960,15 +4989,40 @@ Drill_COAS_SpriteDecorator.prototype.drill_COAS_isNeedDestroy = function(){
 //			
 //			说明：	> 销毁不是必要的，但最好随时留意给 旧贴图 执行销毁函数。
 //##############################
-Drill_COAS_SpriteDecorator.prototype.drill_COAS_destroy = function(){
-	this.drill_COAS_destroy_Private();
+Drill_COAS_SpriteDecorator.prototype.drill_COAS_destroy = function(){ this.drill_spriteMain_destroy(); }
+Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_destroy = function(){
+	this.drill_spriteMain_destroy_Private();
 };
 //==============================
-// * 装饰器 - 对象初始化
+// * 装饰器 - 初始化子功能
 //==============================
-Drill_COAS_SpriteDecorator.prototype.drill_initSprite = function() {
+Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_initChild = function() {
 	if( this._drill_controller == null ){ return; }
-	var data = this._drill_controller._drill_data;	
+	this.drill_spriteMain_initAttr();				//初始化子功能 - A主体
+	this.drill_spriteMain_initParent();				//初始化子功能 - B父操作
+};
+//==============================
+// * 装饰器 - 销毁（私有）
+//==============================
+Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_destroy_Private = function(){
+	
+	// > 还原资源对象
+	this.drill_spriteMain_resetParentBitmap();
+	
+	// > 清除数据
+	this._drill_controller = null;
+	this._drill_parents = [];
+	this._drill_parentBitmapTank = [];
+};
+
+
+//==============================
+// * A主体 - 初始化子功能
+//
+//			说明：	> 注意，此加载有 加载等待 的标记，并不是必须的。
+//==============================
+Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_initAttr = function(){
+	var data = this._drill_controller.drill_data();
 	
 	// > 私有变量初始化
 	this._drill_COAS_stateBitmap = [];
@@ -3995,32 +5049,18 @@ Drill_COAS_SpriteDecorator.prototype.drill_initSprite = function() {
 	// > 测试图片
 	//if( data['state_tank'].length > 0 &&
 	//	data['state_tank'][0]['gif_src_bitmap'].length > 0 ){
-	//	this.drill_COAS_setParentBitmap( data['state_tank'][0]['gif_src_bitmap'][0] );
+	//	this.drill_spriteMain_setParentBitmap( data['state_tank'][0]['gif_src_bitmap'][0] );
 	//}
-};
+}
 //==============================
-// * 装饰器 - 销毁（私有）
-//==============================
-Drill_COAS_SpriteDecorator.prototype.drill_COAS_destroy_Private = function(){
-	
-	// > 还原资源对象
-	this.drill_COAS_resetParentBitmap();
-	
-	// > 清除数据
-	this._drill_controller = null;
-	this._drill_parents = [];
-	this._drill_parentBitmapTank = [];
-};
-//==============================
-// * 装饰器 - 判断图片加载情况
+// * A主体 - 判断图片加载情况
 //
-//			说明：	注意，此加载有 加载等待 的标记，并不是必须的。
+//			说明：	> 注意，此加载有 加载等待 的标记，并不是必须的。
 //==============================
-Drill_COAS_SpriteDecorator.prototype.drill_COAS_isAllBitmapReady = function(){
+Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_isAllBitmapReady = function(){
 	
 	// > 加载等待 标记
-	var data = this._drill_controller._drill_data;	
-	if( data['waitForPreload'] == false ){ return; }
+	if( this._drill_controller._drill_waitForPreload == false ){ return; }
 	
 	// > 加载判断 - 状态元资源
 	for(var i = 0; i < this._drill_COAS_stateBitmap.length ; i++){
@@ -4039,17 +5079,87 @@ Drill_COAS_SpriteDecorator.prototype.drill_COAS_isAllBitmapReady = function(){
 	return true;
 };
 
+
 //==============================
-// * 装饰器-父操作 - 添加父类（私有）
+// * B父操作 - 初始化子功能
+//
+//			说明：	> 注意，此加载有 加载等待 的标记，并不是必须的。
 //==============================
-Drill_COAS_SpriteDecorator.prototype.drill_COAS_addParent_Private = function( parent ){
+Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_initParent = function(){
+	//（提前到 initialize 函数执行）
+}
+//==============================
+// * B父操作 - 帧刷新
+//==============================
+Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_updateParentBitmap = function(){
+	
+	// > 设置资源对象
+	if( this._drill_controller._drill_visible == true ){
+		var temp_bitmap = ImageManager.loadBitmap( 
+								this._drill_controller._drill_curBitmapPath, 
+								this._drill_controller._drill_curBitmapName, 
+								this._drill_controller._drill_curBitmapTint, 
+								this._drill_controller._drill_curBitmapSmooth );
+		this.drill_spriteMain_setParentBitmap( temp_bitmap );
+		
+	// > 还原资源对象
+	}else{
+		this.drill_spriteMain_resetParentBitmap();
+	}
+};
+//==============================
+// * B父操作 - 帧刷新 - 设置资源对象
+//==============================
+Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_setParentBitmap = function( bitmap ){
+	var bitmapRefreshFrame = this._drill_controller._drill_bitmapRefreshFrame;
+	for(var i=0; i < this._drill_parents.length; i++ ){
+		var temp_parent = this._drill_parents[i];
+		if( temp_parent == undefined ){ continue; }		//（如果父贴图被销毁，则跳过设置）
+		
+		// > 禁止刷新框架
+		if( bitmapRefreshFrame == false ){
+			temp_parent._Drill_COAS_noRefreshFrame = true;	
+		}
+		
+		temp_parent.bitmap = bitmap;
+		
+		if( bitmapRefreshFrame == false ){
+			temp_parent._Drill_COAS_noRefreshFrame = false;
+		}
+	}
+};
+//==============================
+// * B父操作 - 帧刷新 - 还原资源对象
+//==============================
+Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_resetParentBitmap = function(){
+	var bitmapRefreshFrame = this._drill_controller._drill_bitmapRefreshFrame;
+	for(var i = 0; i < this._drill_parents.length; i++ ){
+		var temp_parent = this._drill_parents[i];
+		if( temp_parent == undefined ){ continue; }		//（如果父贴图被销毁，则跳过还原）
+		
+		// > 禁止刷新框架
+		if( bitmapRefreshFrame == false ){
+			temp_parent._Drill_COAS_noRefreshFrame = true;	
+		}
+		
+		temp_parent.bitmap = this._drill_parentBitmapTank[i];
+		
+		if( bitmapRefreshFrame == false ){
+			temp_parent._Drill_COAS_noRefreshFrame = false;
+		}
+	}
+};
+//==============================
+// * B父操作 - 添加父类（私有）
+//==============================
+Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_addParent_Private = function( parent ){
 	this._drill_parents.push( parent );
 	this._drill_parentBitmapTank.push( parent.bitmap );
 };
 //==============================
-// * 装饰器-父操作 - 去除父类（私有）
+// * B父操作 - 去除父类（私有）
 //==============================
-Drill_COAS_SpriteDecorator.prototype.drill_COAS_removeParent_Private = function( parent ){
+Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_removeParent_Private = function( parent ){
 	for( var i=this._drill_parents.length-1; i >= 0; i-- ){
 		if( this._drill_parents[i] == parent ){
 			this._drill_parents.splice(i,1);
@@ -4059,11 +5169,11 @@ Drill_COAS_SpriteDecorator.prototype.drill_COAS_removeParent_Private = function(
 	}
 };
 //==============================
-// * 装饰器-父操作 - 外部资源重置（私有）
+// * B父操作 - 外部资源重置（私有）
 //
 //			说明：	部分插件可能会对父类单图的bitmap做修改，子插件需要确保关闭动画序列后，单图能还原。
 //==============================
-Drill_COAS_SpriteDecorator.prototype.drill_COAS_parentBitmapChanged_Private = function( parent, bitmap ){
+Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_parentBitmapChanged_Private = function( parent, bitmap ){
 	for( var i=0; i < this._drill_parents.length; i++ ){
 		if( this._drill_parents[i] == parent ){
 			this._drill_parentBitmapTank[i] = bitmap;
@@ -4072,69 +5182,9 @@ Drill_COAS_SpriteDecorator.prototype.drill_COAS_parentBitmapChanged_Private = fu
 	}
 };
 //==============================
-// * 装饰器-父操作 - 帧刷新
-//==============================
-Drill_COAS_SpriteDecorator.prototype.drill_COAS_updateParentBitmap = function(){
-	var data = this._drill_controller._drill_data;
-	
-	// > 设置资源对象
-	if( data['visible'] == true ){
-		var temp_bitmap = ImageManager.loadBitmap( 
-								this._drill_controller._drill_curBitmapPath, 
-								this._drill_controller._drill_curBitmapName, 
-								this._drill_controller._drill_curBitmapTint, 
-								this._drill_controller._drill_curBitmapSmooth );
-		this.drill_COAS_setParentBitmap( temp_bitmap );
-		
-	// > 还原资源对象
-	}else{
-		this.drill_COAS_resetParentBitmap();
-	}
-};
-//==============================
-// * 装饰器-父操作 - 设置资源对象
-//==============================
-Drill_COAS_SpriteDecorator.prototype.drill_COAS_setParentBitmap = function( bitmap ){
-	var data = this._drill_controller._drill_data;
-	for(var i=0; i < this._drill_parents.length; i++ ){
-		var temp_parent = this._drill_parents[i];
-		
-		// > 禁止刷新框架
-		if( data['bitmapRefreshFrame'] == false ){
-			temp_parent._Drill_COAS_noRefreshFrame = true;	
-		}
-		
-		temp_parent.bitmap = bitmap;
-		
-		if( data['bitmapRefreshFrame'] == false ){
-			temp_parent._Drill_COAS_noRefreshFrame = false;
-		}
-	}
-};
-//==============================
-// * 装饰器-父操作 - 还原资源对象
-//==============================
-Drill_COAS_SpriteDecorator.prototype.drill_COAS_resetParentBitmap = function(){
-	var data = this._drill_controller._drill_data;
-	for(var i = 0; i < this._drill_parents.length; i++ ){
-		var temp_parent = this._drill_parents[i];
-		
-		// > 禁止刷新框架
-		if( data['bitmapRefreshFrame'] == false ){
-			temp_parent._Drill_COAS_noRefreshFrame = true;	
-		}
-		
-		temp_parent.bitmap = this._drill_parentBitmapTank[i];
-		
-		if( data['bitmapRefreshFrame'] == false ){
-			temp_parent._Drill_COAS_noRefreshFrame = false;
-		}
-	}
-};
-//==============================
-// * 装饰器-父操作 - 禁止刷新框架控制
+// * B父操作 - 禁止刷新框架控制
 //
-//			说明：	切换bitmap时，默认会刷新框架，这时候会出现闪框架的问题。
+//			说明：	> 切换bitmap时，默认会刷新框架，这时候会出现闪框架的问题。
 //==============================
 var _drill_COAS__onBitmapLoad = Sprite.prototype._onBitmapLoad;
 Sprite.prototype._onBitmapLoad = function( bitmapLoaded ){
@@ -4169,14 +5219,14 @@ Drill_COAS_DebugWindow.prototype.constructor = Drill_COAS_DebugWindow;
 //==============================
 Drill_COAS_DebugWindow.prototype.initialize = function(){
     Window_Base.prototype.initialize.call(this, 8, 8, 800, 160);	//（固定矩形范围）
-	this.drill_initPrivateData();		//初始化数据
+	this.drill_window_initChild();		//初始化子功能
 };
 //==============================
 // * Debug窗口 - 帧刷新
 //==============================
 Drill_COAS_DebugWindow.prototype.update = function() {
 	Window_Base.prototype.update.call(this);
-	this.drill_updateContext();			//帧刷新 - 内容
+	this.drill_window_updateContext();	//帧刷新 - 内容
 };
 //==============================
 // * Debug窗口 - 窗口属性
@@ -4186,13 +5236,13 @@ Drill_COAS_DebugWindow.prototype.standardFontSize = function(){ return 16; };
 //==============================
 // * Debug窗口 - 设置控制器（开放函数）
 //==============================
-Drill_COAS_DebugWindow.prototype.drill_COAS_setMainController = function( controller ){
+Drill_COAS_DebugWindow.prototype.drill_window_setMainController = function( controller ){
 	this._drill_mainController = controller;
 };
 //==============================
-// * Debug窗口 - 初始化数据
+// * Debug窗口 - 初始化子功能
 //==============================
-Drill_COAS_DebugWindow.prototype.drill_initPrivateData = function() {
+Drill_COAS_DebugWindow.prototype.drill_window_initChild = function() {
 	
 	// > 控制器对象
 	this._drill_mainController = null;
@@ -4210,15 +5260,15 @@ Drill_COAS_DebugWindow.prototype.drill_initPrivateData = function() {
 //==============================
 // * Debug窗口 - 帧刷新内容
 //==============================
-Drill_COAS_DebugWindow.prototype.drill_updateContext = function() {
+Drill_COAS_DebugWindow.prototype.drill_window_updateContext = function() {
 	if( this._drill_mainController == undefined ){ return; }
 	
 	// > 内容设置
 	var context = "";
-	context += "\\c[24]动画序列id：\\c[0]" + (this._drill_mainController._drill_data['id']+1) + "\n";
-	context += "\\c[24]当前状态元：\\c[0]" + this._drill_mainController.drill_COAS_getCurStateName() + "\n";
-	context += "\\c[24]当前动作元：\\c[0]" + this._drill_mainController.drill_COAS_getCurActName() + "\n";
-	context += "\\c[24]当前状态节点全路径：\\c[0]\n" + this._drill_mainController.drill_COAS_getCurStateName_AllRoot() + "\n";
+	context += "\\c[24]动画序列id：\\c[0]" + (this._drill_mainController._drill_sequenceData_id+1) + "\n";
+	context += "\\c[24]当前状态元：\\c[0]" + this._drill_mainController.drill_controllerMain_Node_getCurStateName() + "\n";
+	context += "\\c[24]当前动作元：\\c[0]" + this._drill_mainController.drill_controllerMain_Act_getCurName() + "\n";
+	context += "\\c[24]当前状态节点全路径：\\c[0]\n" + this._drill_mainController.drill_controllerMain_Node_getCurStateName_AllRoot() + "\n";
 	
 	// > 内容校验
 	if( this._drill_lastContext == context ){ return; }
@@ -4233,21 +5283,10 @@ Drill_COAS_DebugWindow.prototype.drill_updateContext = function() {
 			'align':"左对齐",
 		};
 		this.drill_COWA_drawTextListEx( context_list, options);
+	}else{
+		this.drawText("缺少核心插件，无法显示文本。", 2, 2, this.width, 'left');
+		this.drawText("需要 Drill_CoreOfWindowAuxiliary 窗口辅助核心。", 2, 22, this.width, 'left');
 	}
-};
-
-
-//=============================================================================
-// ** 核心漏洞修复
-//=============================================================================
-//==============================
-// * 核心漏洞修复 - 屏蔽根据版本重刷地图
-//
-//			说明：	此功能会刷掉旧存档的存储数据，因为版本不一样会强制重进地图。
-//					而这样做只是 刷新旧存档的当前地图而已，没任何好处。
-//==============================
-Scene_Load.prototype.reloadMapIfUpdated = function() {
-	// （禁止重刷）
 };
 
 

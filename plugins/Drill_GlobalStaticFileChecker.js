@@ -106,7 +106,7 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
 //			
 //			->☆校验器
 //				->库检测
@@ -115,6 +115,9 @@
 //		
 //		
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -142,7 +145,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_GlobalStaticFileChecker = true;
@@ -158,7 +161,7 @@
 	
 	/*-----------------秘钥列表------------------*/
     DrillUp.g_GSFC_data = [
-		"N4IgZglgNgpg+lCBnALiAXAbVAaxgTwxABMBmAdnLADYBOWgQwCMKAmB86pgBgA4YAxmAHkALAEZxtAUya8QAGhAAHBigAWRYmoYB6AIICUAewBOSAHQArJMYB2IAL4BdJXkLoQ41qVEBWaicgA=",
+		"N4IgZglgNgpg+lCBnALiAXAbVAaxgTwxAGYBDGADmOIAZSwAmARhoDYATAY1YE4wLGrGJwBGMHgFZirGhJAAaEAAdSKABZF2q0gHoAgpxQB7AE5IAdACskRgHYgAvgF1FeQuhBMGxACwTWjkA===",
 	];
 	
 	

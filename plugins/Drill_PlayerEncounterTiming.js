@@ -319,7 +319,7 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(n)
-//		★性能测试因素	对话管理层
+//		★性能测试因素	遇敌管理层
 //		★性能测试消耗	（太小，没有找到）
 //		★最坏情况		暂无
 //		★备注			暂无
@@ -335,6 +335,9 @@
 //				->遇敌后触发
 //
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -376,7 +379,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_PlayerEncounterTiming = true;
@@ -385,7 +388,7 @@
 	
 	
 	//==============================
-	// * 变量获取 - 遇敌触发
+	// * 静态数据 - 遇敌触发
 	//				（~struct~PETTrigger）
 	//==============================
 	DrillUp.drill_PET_triggerInit = function( dataFrom ){
@@ -700,16 +703,31 @@ Scene_Map.prototype.drill_PET_updateCommonEventBefore = function() {
 		$gamePlayer._drill_PET_isCommonEventBlock = true;
 		
 		// > 执行公共事件
-		var e_data = {
-			'type':"公共事件",
-			'pipeType': temp_data['pipeType'],
-			'commonEventId': temp_data['commonEventId'],
-			'callBack_str':"this.drill_PET_commandEnd();",
-		};
-		$gameMap.drill_LCT_addPipeEvent( e_data );
+		this.drill_PET_doCommonEvent( temp_data['pipeType'], temp_data['commonEventId'], "this.drill_PET_commandEnd();" );
+		
 		temp_data['activeCount'] += 1;
 	}
 		
+};
+//==============================
+// * 操作 - 『执行公共事件』（地图界面）
+//==============================
+Scene_Map.prototype.drill_PET_doCommonEvent = function( pipeType, commonEventId, callBack_str ){
+	
+	// > 插件【地图-多线程】
+	if( Imported.Drill_LayerCommandThread ){
+		var e_data = {
+			'type':"公共事件",
+			'pipeType': pipeType,
+			'commonEventId': commonEventId,
+			'callBack_str':callBack_str,
+		};
+		$gameMap.drill_LCT_addPipeEvent( e_data );
+		
+	// > 默认执行
+	}else{
+		$gameTemp.reserveCommonEvent( commonEventId );
+	}
 };
 //==============================
 // * 遇敌前 - 公共事件 释放阻塞
@@ -767,12 +785,8 @@ Scene_Map.prototype.drill_PET_updateCommonEventAfter = function() {
 		
 		
 		// > 执行公共事件
-		var e_data = {
-			'type':"公共事件",
-			'pipeType': temp_data['pipeType'],
-			'commonEventId': temp_data['commonEventId'],
-		};
-		$gameMap.drill_LCT_addPipeEvent( e_data );
+		this.drill_PET_doCommonEvent( temp_data['pipeType'], temp_data['commonEventId'], "" );
+		
 		temp_data['activeCount'] += 1;
 	}
 };

@@ -74,7 +74,7 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
  * 时间复杂度： o(n^2)*o(贴图处理) 每帧
- * 测试方法：   在各个管理层中添加图片并播放粉碎效果。
+ * 测试方法：   在图片管理层中添加图片并播放粉碎效果。
  * 测试结果：   200个事件的图片中，平均消耗为：【60.12ms】
  *              100个事件的图片中，平均消耗为：【56.49ms】
  *               50个事件的图片中，平均消耗为：【48.16ms】
@@ -133,7 +133,7 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^2)*o(贴图处理) 每帧
-//		★性能测试因素	对话管理层看粉碎效果
+//		★性能测试因素	图片管理层看粉碎效果
 //		★性能测试消耗	80.12ms  45.16ms
 //		★最坏情况		粉碎分割的数量特别多。
 //		★备注			单张图片似乎和事件贴图消耗差不多，造成的差距可能是测的时候不稳定。
@@ -144,7 +144,7 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
 //			->☆插件指令
 //			->☆存储数据
 //			->☆图片贴图
@@ -159,6 +159,9 @@
 //
 //		★家谱：
 //			大家族-方块粉碎
+//		
+//		★脚本文档：
+//			无
 //		
 //		★插件私有类：
 //			无
@@ -209,7 +212,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_PictureShatterEffect = true;
@@ -543,7 +546,7 @@ Game_Picture.prototype.show = function( name, origin, x, y, scaleX, scaleY, opac
 	}
 }
 //==============================
-// * 图片控制 - 消除图片（对应函数erasePicture）
+// * 图片控制 - 消除图片
 //==============================
 var _drill_PSE_p_erase = Game_Picture.prototype.erase;
 Game_Picture.prototype.erase = function(){
@@ -551,6 +554,20 @@ Game_Picture.prototype.erase = function(){
 	if( this._drill_PSE_controller != null ){
 		this._drill_PSE_controller.drill_COSE_restoreShatter();		//（立即复原）
 	}
+}
+//==============================
+// * 图片控制 - 消除图片（command235）
+//==============================
+var _drill_PSE_p_erasePicture = Game_Screen.prototype.erasePicture;
+Game_Screen.prototype.erasePicture = function( pictureId ){
+    var realPictureId = this.realPictureId(pictureId);
+	var picture = this._pictures[realPictureId];
+	if( picture != undefined ){
+		if( picture._drill_PSE_controller != null ){
+			picture._drill_PSE_controller.drill_COSE_restoreShatter();		//（立即复原）
+		}
+	}
+	_drill_PSE_p_erasePicture.call( this, pictureId );
 }
 
 

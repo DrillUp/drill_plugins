@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        管理器 - 全局存储核心
+ * @plugindesc [v1.2]        管理器 - 全局存储核心
  * @author Drill_up
  * 
  * @Drill_LE_param "文件路径-%d"
@@ -34,11 +34,18 @@
  * ----设定注意事项
  * 1.插件的作用域：战斗界面、地图界面、菜单界面。
  *   作用于需要全局存储的数据。
+ * 2.更多详细介绍，去看看 "21.管理器 > 关于全局存储.docx"。
  * 全局存储：
  *   (1.你可以完全自定义 文件名、文件路径、文件后缀，
  *      将指定的 全局数据 存储到玩家电脑中特殊的位置。
  *   (2.如果 配置的文件 创建失败，系统则会默认将数据存储在
  *      游戏根目录的save文件夹，文件名为：drill_globalDefault.rpgsave
+ *   (3.全局存储轮询时间，即插件检查各变量变化的间隔时间，
+ *      即使间隔设为1也问题不大(每1帧都检查一次)，因为轮询消耗本来就低。
+ *      之所以加此参数，在于轮询发现变量变化后，全局存储会立即存储所有
+ *      全局变量，单次存储的消耗较大。这时候如果事件指令也在执行其他内容，
+ *      二者的内容在同一帧中执行，可能会造成比较明显的卡顿。
+ *      所以设置间隔，能错开全局变量和事件指令执行的时机。
  * 设计：
  *   (1.你可以将一些变量数据偷偷存在玩家的C盘目录，作为meta-game用。
  *      确定了存放位置之后就不要改了，以免多次更新时，玩家电脑里产生
@@ -74,6 +81,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 修改了插件分类。
+ * [v1.2]
+ * 修复了未配置路径时，存储失败的bug。
  * 
  * 
  * 
@@ -81,7 +90,7 @@
  * @type number
  * @min 5
  * @max 120
- * @desc 全局存储检查变量的间隔。
+ * @desc 插件检查各变量变化的间隔时间，单位帧。（1秒60帧）
  * @default 10
  *
  * @param ---文件路径---
@@ -91,7 +100,7 @@
  * @parent ---文件路径---
  * @type struct<DrillFile>
  * @desc 指定全局数据所存储或载入的文件路径设置。
- * @default 
+ * @default {"标签":"--标准路径--","文件名":"drill_global","文件后缀":"rpgsave","文件夹根目录":"当前游戏根目录","文件夹路径":"save/"}
  *
  * @param 文件路径-2
  * @parent ---文件路径---
@@ -167,7 +176,7 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		COGS（Core_Of_Dynamic_Mask）
+//		插件简称		COGS（Core_Of_Global_Save）
 //		临时全局变量	DrillUp.g_COGS_xxx
 //		临时局部变量	this._drill_COGS_xxx
 //		存储数据变量	无
@@ -188,12 +197,21 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			全局存储核心：
-//				->存储数据
-//				->存储管理器
+//			->☆提示信息
+//			->☆静态数据
+//
+//			->☆全局存储
+//				->存储（开放函数）
+//				->载入（开放函数）
+//			->☆存储管理器
+//				->执行全局存储（开放函数）
+//				->执行全局读取（开放函数）
 //
 //
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -213,7 +231,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -221,10 +239,16 @@
 	var DrillUp = DrillUp || {}; 
 	DrillUp.g_COGS_PluginTip_curName = "Drill_CoreOfGlobalSave.js 管理器-全局存储核心";
 	DrillUp.g_COGS_PluginTip_baseList = [];
+	//==============================
+	// * 提示信息 - 找不到存储路径
+	//==============================
+	DrillUp.drill_COGS_getPluginTip_SaveUrlNotFind = function( file_id ){
+		return "【" + DrillUp.g_COGS_PluginTip_curName + "】\n找不到存储路径，请检查 全局存储核心 中 文件路径-"+file_id+" 是否配置。";
+	};
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_CoreOfGlobalSave = true;
@@ -233,12 +257,12 @@
 
 
 	//==============================
-	// * 变量获取 - 文件路径
+	// * 静态数据 - 文件路径
 	//				（~struct~DrillFile）
 	//==============================
 	DrillUp.drill_COGS_initFile = function( dataFrom ){
 		var data = {};
-		data['name'] = String( dataFrom["文件名"] || "drill_global");
+		data['name'] = String( dataFrom["文件名"] || "drill_global");	//【生成文件】
 		data['suffix'] = String( dataFrom["文件后缀"] || "rpgsave");
 		data['url_type'] = String( dataFrom["文件夹根目录"] || "当前游戏根目录");
 		data['url_path'] = String( dataFrom["文件夹路径"] || "save/");
@@ -251,8 +275,6 @@
 	/*-----------------文件路径------------------*/
 	DrillUp.g_COGS_fileSet_list_length = 8;
 	DrillUp.g_COGS_fileSet_list = [];
-	DrillUp.g_COGS_fileSet_list[0] = DrillUp.drill_COGS_initFile( {} );		//（强制默认值）
-	DrillUp.g_COGS_fileSet_list[0]['name'] = "drill_globalDefault"
 	for( var i = 1; i <= DrillUp.g_COGS_fileSet_list_length; i++ ){
 		if( DrillUp.parameters['文件路径-' + String(i) ] != "" &&
 			DrillUp.parameters['文件路径-' + String(i) ] != undefined ){
@@ -263,27 +285,56 @@
 		}
 	};
 	
+	//==============================
+	// * 静态数据 - 默认值
+	//==============================
+	DrillUp.g_COGS_fileSet_list[0] = DrillUp.drill_COGS_initFile( {} );
+	DrillUp.g_COGS_fileSet_list[0]['name'] = "drill_globalDefault";
+	//==============================
+	// * 静态数据 - 判断数据
+	//==============================
+	DrillUp.drill_COGS_hasFileSet = function( file_id ){
+		var file_set = DrillUp.g_COGS_fileSet_list[ file_id ];
+		if( file_set == undefined ){ return false; }
+		return true;
+	};
+	//==============================
+	// * 静态数据 - 获取数据
+	//==============================
+	DrillUp.drill_COGS_getFileSet = function( file_id ){
+		var file_set = DrillUp.g_COGS_fileSet_list[ file_id ];
+		if( file_set == undefined ){ return DrillUp.g_COGS_fileSet_list[0]; }
+		return file_set;
+	};
 	
-
+	
+	
 //=============================================================================
-// ** 存储数据
+// ** ☆全局存储
+//			
+//			说明：	> 此模块专门管理 全局存储 的存储、载入功能。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 存储数据 - 定义
+// * 全局存储 - 定义
 //==============================
 	DrillUp.g_COGS_fileDataTank = [];		//存储数据（与文件路径一一对应）
 	DrillUp.g_COGS_fileIdSeq = [];			//存储的ID队列
 	DrillUp.g_COGS_time = 0;				//存储时间
 //==============================
-// * 存储数据 - 存储（接口）
+// * 全局存储 - 存储（开放函数）
 //
-//			参数：	file_id 文件路径id，param_name 参数名（通常用插件简称），param_data：参数数据
+//			参数：	> file_id 数字           （文件路径id）
+//					> param_name 字符串      （存储名，通常用插件简称）
+//					> param_data 动态参数对象 （存储的数据）
+//			返回：	> 无
 //==============================
 StorageManager.drill_COGS_saveData = function( file_id, param_name, param_data ){
-	var file_set = DrillUp.g_COGS_fileSet_list[ file_id ];
-	if( file_set == undefined ){ 
-		file_set = DrillUp.g_COGS_fileSet_list[0];
-		file_id = 0;	//（找不到对象，则用默认路径）
+	
+	// > 找不到对象，则用默认路径
+	if( DrillUp.drill_COGS_hasFileSet( file_id ) == false ){ 
+		alert( DrillUp.drill_COGS_getPluginTip_SaveUrlNotFind( file_id ) );
+		file_id = 0;
 	}
 	
 	// > 存储数据
@@ -298,9 +349,11 @@ StorageManager.drill_COGS_saveData = function( file_id, param_name, param_data )
 	}
 };
 //==============================
-// * 存储数据 - 载入（接口）
+// * 全局存储 - 载入（开放函数）
 //
-//			参数：	file_id 文件路径id，param_name 参数名（通常用插件简称）
+//			参数：	> file_id 数字            （文件路径id）
+//					> param_name 字符串       （存储名，通常用插件简称）
+//			返回：	> 动态参数对象
 //==============================
 StorageManager.drill_COGS_loadData = function( file_id, param_name ){
 	
@@ -319,7 +372,7 @@ StorageManager.drill_COGS_loadData = function( file_id, param_name ){
 };
 
 //==============================
-// * 存储数据 - 延迟存储
+// * 全局存储 - 帧刷新 延迟存储
 //==============================
 var _drill_COGS_update = SceneManager.updateScene;
 SceneManager.updateScene = function() {
@@ -343,16 +396,19 @@ SceneManager.updateScene = function() {
 
 
 //=============================================================================
-// ** 存储管理器
+// ** ☆存储管理器
+//			
+//			说明：	> 此模块专门管理 存储流程、读取流程 的功能。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 存储管理器 - 存储流程
+// * 存储管理器 - 执行全局存储（开放函数）
 //
-//			参数：	file_id 文件路径id，param_name 参数名（通常用插件简称），param_data：参数数据。
+//			参数：	> file_id 数字     （文件路径id）
+//			返回：	> 无
 //==============================
 StorageManager.drill_COGS_saveFile = function( file_id ){
-	var file_set = DrillUp.g_COGS_fileSet_list[ file_id ];		//文件路径
-	if( file_set == undefined ){ return; }
+	var file_set = DrillUp.drill_COGS_getFileSet( file_id );	//文件路径
 	var file_data = DrillUp.g_COGS_fileDataTank[ file_id ];		//文件存储数据
 	if( file_data == undefined ){ return; }
 	
@@ -366,11 +422,13 @@ StorageManager.drill_COGS_saveFile = function( file_id ){
     }
 };
 //==============================
-// * 存储管理器 - 读取流程
+// * 存储管理器 - 执行全局读取（开放函数）
+//
+//			参数：	> file_id 数字     （文件路径id）
+//			返回：	> 无
 //==============================
 StorageManager.drill_COGS_loadFile = function( file_id ){
-	var file_set = DrillUp.g_COGS_fileSet_list[ file_id ];		//文件路径
-	if( file_set == undefined ){ return {}; }
+	var file_set = DrillUp.drill_COGS_getFileSet( file_id );	//文件路径
 	
 	// > 本地文件模式
     if( this.isLocalMode() ){
@@ -389,7 +447,7 @@ StorageManager.drill_COGS_loadFile = function( file_id ){
 //==============================
 // * 文件 - 存储
 //
-//			说明：	传入的数据为字符串。
+//			说明：	> 传入的数据为加密字符串。
 //==============================
 StorageManager.drill_COGS_saveToLocalFile = function( file_set, json_str ){
 	var fs = require('fs');
@@ -405,8 +463,8 @@ StorageManager.drill_COGS_saveToLocalFile = function( file_set, json_str ){
 	// > 加密
 	var data = LZString.compressToBase64( json_str );
 	
-	// > 文件夹路径自动创建
-	if (!fs.existsSync(dirPath)) {
+	// > 文件夹路径自动创建【生成文件夹】
+	if(!fs.existsSync(dirPath) ){
 		fs.mkdirSync(dirPath);
 	}
 	
@@ -416,7 +474,7 @@ StorageManager.drill_COGS_saveToLocalFile = function( file_set, json_str ){
 //==============================
 // * 文件 - 读取
 //
-//			说明：	返回的数据为字符串。
+//			说明：	> 返回的数据为解密字符串。
 //==============================
 StorageManager.drill_COGS_loadFromLocalFile = function( file_set ){
 	var fs = require('fs');
@@ -437,7 +495,7 @@ StorageManager.drill_COGS_loadFromLocalFile = function( file_set ){
 	return LZString.decompressFromBase64(data);	//（返回字符串）
 };
 //==============================
-// * 文件 - 根目录
+// * 文件 - 获取根目录
 //==============================
 StorageManager.drill_COGS_parentDirectoryPath = function() {
     var path = require('path');

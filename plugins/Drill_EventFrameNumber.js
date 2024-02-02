@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.9]        行走图 - 多帧行走图
+ * @plugindesc [v2.0]        行走图 - 多帧行走图
  * @author Drill_up
  * 
  * 
@@ -223,7 +223,7 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
  * 时间复杂度： o(n^2) 每帧
- * 测试方法：   去物体管理层、地理管理层、镜像管理层跑一圈测试就可以了。
+ * 测试方法：   去行走图管理层跑一圈测试就可以了。
  * 测试结果：   200个事件的地图中，平均消耗为：【114.60ms】
  *              100个事件的地图中，平均消耗为：【59.70ms】
  *               50个事件的地图中，平均消耗为：【29.10ms】
@@ -257,6 +257,8 @@
  * 修复了玩家设置后反复在2-4帧重复的bug。
  * [v1.9]
  * 修复了原地踏步失效的bug。
+ * [v2.0]
+ * 优化了存储空间占用。
  * 
  * 
  * @param 是否修正多帧连贯性
@@ -285,10 +287,10 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^2) 每帧
-//		★性能测试因素	各管理层
+//		★性能测试因素	行走图管理层
 //		★性能测试消耗	200个事件：114.6ms（drill_EFN_updateInter_Formula）59.7ms（drill_EFN_updateState）35.6ms（drill_EFN_updateLoop）
 //						50个事件：29.1ms（drill_EFN_updateInter_Formula）24.7ms（drill_EFN_updateState）1.1ms（drill_EFN_updateLoop）
-//		★最坏情况		所有事件都在变速度，并且都在乱跑。
+//		★最坏情况		暂无
 //		★备注			暂无
 //		
 //		★优化记录		暂无
@@ -297,7 +299,7 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
 //			->☆插件指令
 //			->☆事件注释
 //			->☆角色注释
@@ -307,6 +309,8 @@
 //				->B帧间隔器
 //				->C帧播放器
 //			->☆控制器绑定
+//				->初始化检查
+//				->是否启用多帧控制
 //				->控制器 帧刷新
 //				->控制器 赋值
 //					> _originalPattern 初始帧
@@ -321,10 +325,14 @@
 //				> maxPattern()
 //				> pattern()
 //				> drill_COEF_updateValue_PatternWidth()
+//
 //			->☆随机初始帧
 //
 //
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -393,7 +401,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_EventFrameNumber = true;
@@ -506,11 +514,13 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( type == "解除固定帧" || type == "解除锁定帧" ){
 				if( e_chars != null){
 					for( var k=0; k < e_chars.length; k++ ){
+						e_chars[k].drill_EFN_checkController();
 						e_chars[k]._drill_EFN_controller.drill_EFN_clearLockPattern();
 					}
 				}
 				if( p_chars != null){
 					for( var k=0; k < p_chars.length; k++ ){
+						p_chars[k].drill_EFN_checkController();
 						p_chars[k]._drill_EFN_controller.drill_EFN_clearLockPattern();
 					}
 				}
@@ -524,11 +534,13 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( type == "帧数" ){
 				if( e_chars != null){
 					for( var k=0; k < e_chars.length; k++ ){
+						e_chars[k].drill_EFN_checkController();
 						e_chars[k]._drill_EFN_controller.drill_EFN_setMaxPattern( Number(temp2) );
 					}
 				}
 				if( p_chars != null){
 					for( var k=0; k < p_chars.length; k++ ){
+						p_chars[k].drill_EFN_checkController();
 						p_chars[k]._drill_EFN_controller.drill_EFN_setMaxPattern( Number(temp2) );
 					}
 				}
@@ -536,11 +548,13 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( type == "初始帧" ){
 				if( e_chars != null){
 					for( var k=0; k < e_chars.length; k++ ){
+						e_chars[k].drill_EFN_checkController();
 						e_chars[k]._drill_EFN_controller.drill_EFN_setOrgPattern( Number(temp2)-1 );
 					}
 				}
 				if( p_chars != null){
 					for( var k=0; k < p_chars.length; k++ ){
+						p_chars[k].drill_EFN_checkController();
 						p_chars[k]._drill_EFN_controller.drill_EFN_setOrgPattern( Number(temp2)-1 );
 					}
 				}
@@ -548,11 +562,13 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( type == "固定帧" || type == "锁定帧" ){
 				if( e_chars != null){
 					for( var k=0; k < e_chars.length; k++ ){
+						e_chars[k].drill_EFN_checkController();
 						e_chars[k]._drill_EFN_controller.drill_EFN_setLockPattern( Number(temp2)-1 );
 					}
 				}
 				if( p_chars != null){
 					for( var k=0; k < p_chars.length; k++ ){
+						p_chars[k].drill_EFN_checkController();
 						p_chars[k]._drill_EFN_controller.drill_EFN_setLockPattern( Number(temp2)-1 );
 					}
 				}
@@ -560,11 +576,13 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( type == "动画帧间隔" ){
 				if( e_chars != null){
 					for( var k=0; k < e_chars.length; k++ ){
+						e_chars[k].drill_EFN_checkController();
 						e_chars[k]._drill_EFN_controller.drill_EFN_setInterFormula( String(temp2) );
 					}
 				}
 				if( p_chars != null){
 					for( var k=0; k < p_chars.length; k++ ){
+						p_chars[k].drill_EFN_checkController();
 						p_chars[k]._drill_EFN_controller.drill_EFN_setInterFormula( String(temp2) );
 					}
 				}
@@ -584,11 +602,13 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					
 				if( e_chars != null){
 					for( var k=0; k < e_chars.length; k++ ){
+						e_chars[k].drill_EFN_checkController();
 						e_chars[k]._drill_EFN_controller.drill_EFN_setLoopType( loop_type,loop_seq );
 					}
 				}
 				if( p_chars != null){
 					for( var k=0; k < p_chars.length; k++ ){
+						p_chars[k].drill_EFN_checkController();
 						p_chars[k]._drill_EFN_controller.drill_EFN_setLoopType( loop_type,loop_seq );
 					}
 				}
@@ -631,14 +651,17 @@ Game_Event.prototype.drill_EFN_setupPageSettings = function() {
     var image = page.image;
 	if( image == undefined ){ return; }
 	
-	// > 记录初始帧
-	this._drill_EFN_controller.drill_EFN_setOrgPattern( Number(image.pattern) );
 	
-	
-	// > 事件变化时，强制重新刷一次状态检查
-	//		（2023-5-18 此处能解决 初始帧为0或2 且 勾选原地踏步 的情况下，切换事件页会导致 不再原地踏步 的问题。）
-	//		（常规情况下，切换事件页不会修改 A状态规划器的当前状态 _drill_state_cur，但由于出现了 不再原地踏步问题，只能强制刷新一次状态检查了）
-	this._drill_EFN_controller._Drill_EFN_lastState = "";
+	if( this._drill_EFN_controller != undefined ){
+		
+		// > 记录初始帧
+		this._drill_EFN_controller.drill_EFN_setOrgPattern( Number(image.pattern) );
+		
+		// > 事件变化时，强制重新刷一次状态检查
+		//		（2023-5-18 此处能解决 初始帧为0或2 且 勾选原地踏步 的情况下，切换事件页会导致 不再原地踏步 的问题。）
+		//		（常规情况下，切换事件页不会修改 A状态规划器的当前状态 _drill_state_cur，但由于出现了 不再原地踏步问题，只能强制刷新一次状态检查了）
+		this._drill_EFN_controller._Drill_EFN_lastState = "";
+	}
 	
 	
 	// > 排除图块行走图情况
@@ -653,12 +676,15 @@ Game_Event.prototype.drill_EFN_setupPageSettings = function() {
 				if( args.length == 2 ){
 					var type = String(args[1]);
 					if( type == "解除固定帧"){
+						this.drill_EFN_checkController();
 						this._drill_EFN_controller.drill_EFN_clearLockPattern();
 					}
 					if( type == "移动时排除初始帧的播放"){
+						this.drill_EFN_checkController();
 						this._drill_EFN_controller.drill_EFN_setLoopExcludeOrg( true );
 					}
 					if( type == "移动时恢复初始帧的播放"){
+						this.drill_EFN_checkController();
 						this._drill_EFN_controller.drill_EFN_setLoopExcludeOrg( false );
 					}
 				}
@@ -666,15 +692,19 @@ Game_Event.prototype.drill_EFN_setupPageSettings = function() {
 					var type = String(args[1]);
 					var temp2 = String(args[3]);
 					if( type == "帧数"){
+						this.drill_EFN_checkController();
 						this._drill_EFN_controller.drill_EFN_setMaxPattern( Number(temp2) );
 					}
 					if( type == "初始帧"){
+						this.drill_EFN_checkController();
 						this._drill_EFN_controller.drill_EFN_setOrgPattern( Number(temp2)-1 );
 					}
 					if( type == "固定帧"){
+						this.drill_EFN_checkController();
 						this._drill_EFN_controller.drill_EFN_setLockPattern( Number(temp2)-1 );
 					}
 					if( type == "动画帧间隔"){
+						this.drill_EFN_checkController();
 						this._drill_EFN_controller.drill_EFN_setInterFormula( String(temp2) );
 					}
 					if( type == "设置循环"){
@@ -689,6 +719,7 @@ Game_Event.prototype.drill_EFN_setupPageSettings = function() {
 						}else{
 							loop_type = String(temp2);
 						}
+						this.drill_EFN_checkController();
 						this._drill_EFN_controller.drill_EFN_setLoopType( loop_type,loop_seq );
 					}
 				}
@@ -712,7 +743,7 @@ Game_Player.prototype.refresh = function(){
 	this.drill_EFN_setupNote( note );
 }
 //==============================
-// * 角色注释 - 队伍成员初始化
+// * 角色注释 - 玩家队员初始化
 //==============================
 var _drill_EFN_follower_refresh = Game_Follower.prototype.refresh;
 Game_Follower.prototype.refresh = function(){
@@ -728,6 +759,7 @@ Game_Follower.prototype.refresh = function(){
 Game_CharacterBase.prototype.drill_EFN_setupNote = function( note ){
 	
 	// > 重设数据
+	this.drill_EFN_checkController();
 	this._drill_EFN_controller.drill_EFN_resetData( DrillUp.g_EFN_controllerData );
 	
 	// > 角色注释
@@ -1158,7 +1190,7 @@ Drill_EFN_Controller.prototype.drill_EFN_updateState = function( character ){
 	}
 	
 	
-	// > 【行走图状态变化锁】
+	// > 『行走图状态变化锁』
 	//		（当玩家/事件持续移动时，每经过一个图块时，都会出现1帧的静止问题，变化锁用于解决此问题）
 	if( this._Drill_EFN_lastState == this._drill_state_cur ){
 		this._Drill_EFN_lastChangeDelay = 3;		//（状态变化后，需要至少持续3帧）
@@ -1463,10 +1495,34 @@ Drill_EFN_Controller.prototype.drill_EFN_getLoopSeq_Continuity = function(){
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
+// * 控制器绑定 - 初始化
+//==============================
+var _drill_EFN_c_initMembers = Game_CharacterBase.prototype.initMembers;
+Game_CharacterBase.prototype.initMembers = function() {
+	_drill_EFN_c_initMembers.call(this);
+	this._drill_EFN_controller = undefined;
+};
+//==============================
+// * 控制器绑定 - 初始化检查
+//
+//			说明：	> 这里的数据都要用到时才初始化。『节约事件数据存储空间』
+//==============================
+Game_CharacterBase.prototype.drill_EFN_checkController = function(){
+	if( this._drill_EFN_controller != undefined ){ return; }
+	this._drill_EFN_controller = new Drill_EFN_Controller( DrillUp.g_EFN_controllerData );
+};
+//==============================
+// * 控制器绑定 - 是否启用多帧控制
+//==============================
+Game_CharacterBase.prototype.drill_EFN_isEnabled = function(){
+	if( this._drill_EFN_controller == undefined ){ return false; }
+	return this._drill_EFN_controller.drill_EFN_isEnable();
+};
+//==============================
 // * 控制器绑定 - 数据
 //==============================
 DrillUp.g_EFN_controllerData = {
-	'enable':true,
+	'enable':true,		//（初始化时，立即启用）
 	'pause':false,
 	'orgPattern':this._originalPattern,
 	'maxPattern':3,
@@ -1479,16 +1535,6 @@ DrillUp.g_EFN_controllerData = {
 	'loop_type':"左右往返",
 	'loop_seq':[],
 	'loop_excludeOrg':false,
-}
-//==============================
-// * 控制器绑定 - 物体初始化
-//==============================
-var _drill_EFN_c_initMembers = Game_CharacterBase.prototype.initMembers;
-Game_CharacterBase.prototype.initMembers = function() {
-	_drill_EFN_c_initMembers.call(this);
-	
-	this._drill_EFN_controller = new Drill_EFN_Controller( DrillUp.g_EFN_controllerData );
-	this._drill_EFN_isEnabled = this._drill_EFN_controller.drill_EFN_isEnable();
 };
 //==============================
 // * 控制器绑定 - 帧刷新（半覆写）
@@ -1496,9 +1542,7 @@ Game_CharacterBase.prototype.initMembers = function() {
 var _drill_EFN_c_updateAnimation = Game_CharacterBase.prototype.updateAnimation;
 Game_CharacterBase.prototype.updateAnimation = function() {
 	
-	// > 控制器 标记
-	this._drill_EFN_isEnabled = this._drill_EFN_controller.drill_EFN_isEnable();
-	if( this._drill_EFN_isEnabled == true ){
+	if( this.drill_EFN_isEnabled() == true ){
 		
 		// > 控制器 帧刷新
 		this._drill_EFN_controller.drill_EFN_update( this );
@@ -1525,17 +1569,18 @@ Game_CharacterBase.prototype.updateAnimation = function() {
 //==============================
 var _drill_EFN_c_updateAnimationCount = Game_CharacterBase.prototype.updateAnimationCount;
 Game_CharacterBase.prototype.updateAnimationCount = function() {
-	if( this._drill_EFN_isEnabled == true ){ return };		//（过滤原函数）
+	if( this.drill_EFN_isEnabled() == true ){ return };		//（过滤原函数）
 	_drill_EFN_c_updateAnimationCount.call(this);
-}
+};
 //==============================
 // * 控制器绑定 - 推进（非帧）（半覆写）
 //==============================
 var _drill_EFN_c_updatePattern = Game_CharacterBase.prototype.updatePattern;
 Game_CharacterBase.prototype.updatePattern = function() {
-	if( this._drill_EFN_isEnabled == true ){ return };		//（过滤原函数）
+	if( this.drill_EFN_isEnabled() == true ){ return };		//（过滤原函数）
 	_drill_EFN_c_updatePattern.call(this);
-}
+};
+
 
 //=============================================================================
 // ** ☆控制器的动画帧
@@ -1548,7 +1593,7 @@ Game_CharacterBase.prototype.updatePattern = function() {
 //==============================
 var _drill_EFN_c_setPattern = Game_CharacterBase.prototype.setPattern;
 Game_CharacterBase.prototype.setPattern = function( pattern ){
-	if( this._drill_EFN_isEnabled == true ){
+	if( this.drill_EFN_isEnabled() == true ){
 		this._drill_EFN_controller.drill_EFN_setPattern( pattern );
 		return;
 	}
@@ -1559,7 +1604,7 @@ Game_CharacterBase.prototype.setPattern = function( pattern ){
 //==============================
 var _drill_EFN_c_animationWait = Game_CharacterBase.prototype.animationWait;
 Game_CharacterBase.prototype.animationWait = function() {
-	if( this._drill_EFN_isEnabled == true ){ return this._drill_EFN_controller.drill_EFN_animationWait(); }
+	if( this.drill_EFN_isEnabled() == true ){ return this._drill_EFN_controller.drill_EFN_animationWait(); }
 	return _drill_EFN_c_animationWait.call(this);
 };
 //==============================
@@ -1567,7 +1612,7 @@ Game_CharacterBase.prototype.animationWait = function() {
 //==============================
 var _drill_EFN_c_maxPattern = Game_CharacterBase.prototype.maxPattern;
 Game_CharacterBase.prototype.maxPattern = function() {
-	if( this._drill_EFN_isEnabled == true ){ return this._drill_EFN_controller.drill_EFN_maxPattern(); }
+	if( this.drill_EFN_isEnabled() == true ){ return this._drill_EFN_controller.drill_EFN_maxPattern(); }
 	return _drill_EFN_c_maxPattern.call(this);
 };
 //==============================
@@ -1575,7 +1620,7 @@ Game_CharacterBase.prototype.maxPattern = function() {
 //==============================
 var _drill_EFN_c_pattern = Game_CharacterBase.prototype.pattern;
 Game_CharacterBase.prototype.pattern = function() {
-	if( this._drill_EFN_isEnabled == true ){ return this._drill_EFN_controller.drill_EFN_pattern(); }
+	if( this.drill_EFN_isEnabled() == true ){ return this._drill_EFN_controller.drill_EFN_pattern(); }
 	return _drill_EFN_c_pattern.call(this);
 };
 //==============================

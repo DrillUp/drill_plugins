@@ -167,7 +167,7 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
  * 时间复杂度： o(n)*o(贴图处理) 每帧
- * 测试方法：   去物体管理层、地理管理层、镜像管理层跑一圈测试就可以了。
+ * 测试方法：   去各个管理层跑一圈测试就可以了。
  * 测试结果：   200个事件的地图中，平均消耗为：【109.03ms】
  *              100个事件的地图中，平均消耗为：【71.19ms】
  *               50个事件的地图中，平均消耗为：【42.32ms】
@@ -770,7 +770,7 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(n)*o(贴图处理) 每帧
-//		★性能测试因素	物体管理层200事件 跑一圈
+//		★性能测试因素	各个管理层跑一圈
 //		★性能测试消耗	高峰期：434.65ms（不优化） 	169.54ms（离开镜头优化）
 //						低谷期：60.25ms（不优化）	18.70ms（离开镜头优化）
 //		★最坏情况		只要镜像多，就是最坏情况。
@@ -798,6 +798,9 @@
 //
 //
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -857,7 +860,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_LayerReverseReflection = true;
@@ -923,10 +926,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var temp2 = String(args[3]);
 			
 			if( temp1 == "毛玻璃效果" ){ 
-				if( temp2 == "启用" ){
+				if( temp2 == "启用" || temp2 == "开启" || temp2 == "打开" || temp2 == "启动" ){
 					$gameMap._drill_LRR_blurEnable = true;
 				}
-				if( temp2 == "禁用" ){
+				if( temp2 == "关闭" || temp2 == "禁用" ){
 					$gameMap._drill_LRR_blurEnable = false;
 				}
 				return;
@@ -1100,10 +1103,10 @@ Game_Map.prototype.drill_LRR_setupReflection = function() {
 		if( text_[0] === "=>图块倒影镜像" ){
 			if( text_.length == 2 ){
 				var temp1 = String(text_[1]);
-				if( temp1 === "启用"){
+				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
 					this._drill_LRR_enable = true;
 				}
-				if( temp1 === "禁用"){
+				if( temp1 == "关闭" || temp1 == "禁用" ){
 					this._drill_LRR_enable = false;
 				}
 			}
@@ -1111,10 +1114,10 @@ Game_Map.prototype.drill_LRR_setupReflection = function() {
 				var temp1 = String(text_[1]);
 				var temp2 = String(text_[2]);
 				if( temp1 === "毛玻璃效果"){
-					if( temp1 === "启用"){
+					if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
 						this._drill_LRR_blurEnable = true;
 					}
-					if( temp1 === "禁用"){
+					if( temp1 == "关闭" || temp1 == "禁用" ){
 						this._drill_LRR_blurEnable = false;
 					}
 				}

@@ -120,11 +120,21 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			战斗事件扩展：
-//				->战斗开始时执行
-//				->战斗结束时执行
+//			->☆提示信息
+//			->☆静态数据
+//			->☆插件指令
+//			->☆存储数据
+//
+//			->☆公共事件控制
+//			->☆时机控制
+//				->战斗开始时
+//				->战斗结束时
+//
 //
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -141,7 +151,7 @@
 //		
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -152,7 +162,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_BattleEventExtend = true;
@@ -165,14 +175,14 @@
 
 
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _drill_BEE_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_BEE_pluginCommand.call(this, command, args);
 	if( command === ">战斗时公共事件" && command === ">战斗事件扩展" ){
 		
-		if(args.length == 6){
+		if( args.length == 6 ){
 			var type = String(args[1]);
 			var temp1 = String(args[3]);
 			if( type == "切换不执行" ){
@@ -184,7 +194,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				}
 			}
 		}
-		if(args.length == 6){
+		if( args.length == 6 ){
 			var type = String(args[1]);
 			var temp1 = String(args[3]);
 			var temp2 = String(args[5]);
@@ -210,7 +220,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -292,10 +302,13 @@ Game_System.prototype.drill_BEE_checkSysData_Private = function() {
 
 
 //=============================================================================
-// ** 敌群
+// ** ☆公共事件控制
+//
+//			说明：	> 此模块专门控制 公共事件 执行。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 敌群 - 事件页数据
+// * 公共事件控制 - 事件页数据
 //==============================
 Game_Troop.prototype.drill_BEE_getPageData = function( commonEventId ){
 	var data = {
@@ -322,30 +335,24 @@ Game_Troop.prototype.drill_BEE_getPageData = function( commonEventId ){
 	return data;
 }
 //==============================
-// * 敌群 - 设置战斗开始时执行
+// * 公共事件控制 - 『执行公共事件』（战斗界面）
 //==============================
-Game_Troop.prototype.drill_BEE_setupStart = function() {
-	var id = $gameSystem._drill_BEE_commentEventId_start;
-	if( id <= 0 ){ return; }
-	var page = this.drill_BEE_getPageData( id );
-    this._interpreter.setup(page.list);
-}
-//==============================
-// * 敌群 - 设置战斗结束时执行
-//==============================
-Game_Troop.prototype.drill_BEE_setupEnd = function() {
-	var id = $gameSystem._drill_BEE_commentEventId_end;
-	if( id <= 0 ){ return; }
-	var page = this.drill_BEE_getPageData( id );
+Game_Troop.prototype.drill_BEE_doCommonEvent = function( commonEventId ){
+	
+	// > 直接塞入 解释器（串行）
+	var page = this.drill_BEE_getPageData( commonEventId );
     this._interpreter.setup(page.list);
 }
 
 
 //=============================================================================
-// ** 战斗管理器
+// ** ☆时机控制
+//
+//			说明：	> 此模块专门控制 执行的时机。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 战斗管理器 - 初始化
+// * 时机控制 - 初始化
 //==============================
 var _drill_BEE_setup = BattleManager.setup;
 BattleManager.setup = function( troopId, canEscape, canLose ){
@@ -353,27 +360,36 @@ BattleManager.setup = function( troopId, canEscape, canLose ){
 	this._drill_BEE_needStartExecute = true;	//起始执行
 	this._drill_BEE_needEndExecute = true;		//结束执行
 }
-
 //==============================
-// * 战斗管理器 - 帧刷新
+// * 时机控制 - 帧刷新
 //==============================
 var _drill_BEE_updateEventMain = BattleManager.updateEventMain;
 BattleManager.updateEventMain = function() {
 	
-	// > 在update前，硬插入公共事件集
+	// > 战斗开始时
 	if( this._drill_BEE_needStartExecute == true ){
 		this._drill_BEE_needStartExecute = false;
-		$gameTroop.drill_BEE_setupStart();
+		
+		var id = $gameSystem._drill_BEE_commentEventId_start;
+		if( id > 0 ){
+			$gameTroop.drill_BEE_doCommonEvent( id );
+		}
 	}
+	
+	// > 战斗结束时
 	if( this._drill_BEE_needEndExecute == true && this.drill_BEE_checkBattleEnd() ){
 		this._drill_BEE_needEndExecute = false;
-		$gameTroop.drill_BEE_setupEnd();	//（在update前执行时间，可以拦截战斗结束执行函数）
+		
+		var id = $gameSystem._drill_BEE_commentEventId_end;
+		if( id > 0 ){
+			$gameTroop.drill_BEE_doCommonEvent( id );	//（在update前执行时间，可以拦截战斗结束执行函数）
+		}
 	}
 	
 	return _drill_BEE_updateEventMain.call( this );
 }
 //==============================
-// * 战斗管理器 - 检查战斗结束（只监听）
+// * 时机控制 - 检查战斗结束（只监听）
 //==============================
 BattleManager.drill_BEE_checkBattleEnd = function() {
     if( this._phase ){

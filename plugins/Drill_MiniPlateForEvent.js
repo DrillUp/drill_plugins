@@ -504,7 +504,7 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
 //			->☆插件指令
 //			->☆存储数据
 //			->☆地图层级
@@ -544,6 +544,9 @@
 //				
 //		★家谱：
 //			无
+//		
+//		★脚本文档：
+//			14.鼠标 > 关于鼠标悬浮窗口（脚本）.docx
 //		
 //		★插件私有类：
 //			* 事件说明窗口 实体类【Drill_MPFE_Bean】
@@ -621,7 +624,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_MiniPlateForEvent = true;
@@ -630,7 +633,7 @@
 	
 	
 	//==============================
-	// * 变量获取 - 皮肤样式
+	// * 静态数据 - 皮肤样式
 	//				（~struct~DrillMPFEStyle）
 	//==============================
 	DrillUp.drill_MPFE_initStyle = function( dataFrom ){
@@ -1170,7 +1173,7 @@ Game_Event.prototype.erase = function() {
 //==============================
 Game_Event.prototype.drill_MPFE_destroyBean = function() {	
 	if( this._drill_MPFE_bean != undefined ){
-		this._drill_MPFE_bean = null;
+		this._drill_MPFE_bean = undefined;
 		$gameTemp._drill_MPFE_needRestatistics = true;	//（销毁后重新统计）
 	}
 };

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.3]        UI - 物品+技能文本颜色
+ * @plugindesc [v2.4]        UI - 物品+技能文本颜色
  * @author Drill_up
  * 
  * 
@@ -175,6 +175,8 @@
  * 添加了 窗口字符 的变色兼容功能。
  * [v2.3]
  * 优化了yep物品核心的兼容。
+ * [v2.4]
+ * 修复插件指令无效的bug。
  * 
  * 
  * @param MOG-技能浮动框是否变色
@@ -209,7 +211,7 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
 //			->☆插件指令
 //			->☆存储数据
 //			
@@ -231,6 +233,9 @@
 //				->绑定 - mog道具浮动框（覆写）
 //		
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -284,7 +289,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_ItemTextColor = true;
@@ -312,14 +317,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		
 		if(args.length == 6){
 			var type = String(args[3]);
-			if( type == "物品普通" || type == "道具普通" ||
-				type == "物品高级" || type == "道具高级" || 
-				type == "武器普通" || 
-				type == "武器高级" || 
-				type == "护甲普通" || type == "防具普通" || 
-				type == "护甲高级" || type == "防具高级" || 
-				type == "技能普通" || 
-				type == "技能高级" ){
+			if( type.contains("普通") || type.contains("高级") ){
 			
 				/*-----------------对象获取------------------*/
 				var temp1 = String(args[1]);
@@ -358,18 +356,19 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp2 = String(temp2);
 				}
 				
-				/*-----------------转换------------------*/
+				/*-----------------转换 物品------------------*/
 				if( type == "物品普通" || type == "道具普通" ){
-					if( temp2.slice(0,1) === "#" ){
+					if( temp2.slice(0,1) === "#" ){				//（temp2为颜色字符串如"#FFFFFF"，则直接赋值颜色）
 						$gameSystem._drill_ITC_colorCode_Item[temp1] = temp2;
-					}else{
+					}else{										//（temp2为颜色数字如"1"，则赋值对应的普通颜色）
 						$gameSystem._drill_ITC_colorCode_Item[temp1] = String(DrillUp.drill_COC_getColor( Number(temp2)-1 ));
 					}
 				}
-				if( type == "物品高级" || type == "道具高级" ){
+				if( type == "物品高级" || type == "道具高级" ){	//（temp2为颜色数字如"1"，则赋值对应的高级颜色）
 					$gameSystem._drill_ITC_colorCode_Item[temp1] = String(DrillUp.drill_COC_getSeniorColor( Number(temp2) -1 ));
 				}
 				
+				/*-----------------转换 武器------------------*/
 				if( type == "武器普通" ){
 					if( temp2.slice(0,1) === "#" ){
 						$gameSystem._drill_ITC_colorCode_Weapon[temp1] = temp2;
@@ -381,6 +380,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					$gameSystem._drill_ITC_colorCode_Weapon[temp1] = String(DrillUp.drill_COC_getSeniorColor( Number(temp2) -1 ));
 				}
 				
+				/*-----------------转换 护甲------------------*/
 				if( type == "护甲普通" || type == "防具普通" ){
 					if( temp2.slice(0,1) === "#" ){
 						$gameSystem._drill_ITC_colorCode_Armor[temp1] = temp2;
@@ -392,6 +392,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					$gameSystem._drill_ITC_colorCode_Armor[temp1] = String(DrillUp.drill_COC_getSeniorColor( Number(temp2) -1 ));
 				}
 				
+				/*-----------------转换 技能------------------*/
 				if( type == "技能普通" ){
 					if( temp2.slice(0,1) === "#" ){
 						$gameSystem._drill_ITC_colorCode_Skill[temp1] = temp2;
@@ -797,6 +798,7 @@ Game_Temp.prototype.initialize = function() {
 Game_Temp.prototype.drill_ITC_getColorCode_Item = function( i ){
 	
 	// > 兼容 - Yep物品核心
+	if( $dataItems[i] == undefined ){ return ""; }
 	if( $dataItems[i].baseItemId != undefined ){ i = $dataItems[i].baseItemId; }
 	
 	// > 若存储变量有值，就用存储变量的
@@ -817,6 +819,7 @@ Game_Temp.prototype.drill_ITC_getColorCode_Item = function( i ){
 Game_Temp.prototype.drill_ITC_getColorCode_Weapon = function( i ){
 	
 	// > 兼容 - Yep物品核心
+	if( $dataWeapons[i] == undefined ){ return ""; }
 	if( $dataWeapons[i].baseItemId != undefined ){ i = $dataWeapons[i].baseItemId; }
 	
 	// > 若存储变量有值，就用存储变量的
@@ -837,12 +840,13 @@ Game_Temp.prototype.drill_ITC_getColorCode_Weapon = function( i ){
 Game_Temp.prototype.drill_ITC_getColorCode_Armor = function( i ){
 	
 	// > 兼容 - Yep物品核心
+	if( $dataArmors[i] == undefined ){ return ""; }
 	if( $dataArmors[i].baseItemId != undefined ){ i = $dataArmors[i].baseItemId; }
 	
 	// > 若存储变量有值，就用存储变量的
 	if( $gameSystem._drill_ITC_colorCode_Armor[i] != undefined &&
 		$gameSystem._drill_ITC_colorCode_Armor[i] != "" ){
-		result = $gameSystem._drill_ITC_colorCode_Armor[i];
+		return $gameSystem._drill_ITC_colorCode_Armor[i];
 	}
 	var data = this._drill_ITC_armorData[i];
 	if( data == undefined ){ return ""; }
@@ -859,7 +863,7 @@ Game_Temp.prototype.drill_ITC_getColorCode_Skill = function( i ){
 	// > 若存储变量有值，就用存储变量的
 	if( $gameSystem._drill_ITC_colorCode_Skill[i] != undefined &&
 		$gameSystem._drill_ITC_colorCode_Skill[i] != "" ){
-		result = $gameSystem._drill_ITC_colorCode_Skill[i];
+		return $gameSystem._drill_ITC_colorCode_Skill[i];
 	}
 	var data = this._drill_ITC_skillData[i];
 	if( data == undefined ){ return ""; }

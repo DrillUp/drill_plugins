@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        行走图 - GIF动画序列全绑定
+ * @plugindesc [v1.2]        行走图 - GIF动画序列全绑定
  * @author Drill_up
  * 
  * @Drill_LE_param "全绑定-%d"
@@ -26,7 +26,7 @@
  * 必须基于核心插件才能运行。
  * 基于：
  *   - Drill_EventActionSequence             行走图-GIF动画序列★★v1.2及以上★★
- *   - Drill_EventActionSequenceAutomation   行走图-GIF动画序列全自动播放★★v1.1及以上★★
+ *   - Drill_EventActionSequenceAutomation   行走图-GIF动画序列全标签播放★★v1.1及以上★★
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -37,9 +37,16 @@
  *   (1.全绑定 意思为 行走图资源与动画序列 一对一。
  *      如果你切换事件页，资源变化，那么动画序列也相应变化。
  *      如果事件页配置了空资源，那么动画序列则关闭。
+ * 小工具：
+ *   (1.防止你看不见：
+ *      使用小工具 GIF动画序列编辑器 能全面编辑复杂的动画序列。
+ *      使用小工具 GIF动画序列编辑器 能全面编辑复杂的动画序列。
+ *      使用小工具 GIF动画序列编辑器 能全面编辑复杂的动画序列。
+ *   (2.小工具能导入 行走图、序列大图、GIF文件 等资源，
+ *      然后小工具能将配置转移到插件 GIF动画序列核心 中。
  * 设计：
  *   (1.示例中 全绑定 将 小爱丽丝长发动画序列 和 行走图资源"$小爱丽丝_长"
- *      进行了关联。那么，只要配置了资源"$小爱丽丝_长"，就等同于全自动播放
+ *      进行了关联。那么，只要配置了资源"$小爱丽丝_长"，就等同于全标签播放
  *      了小爱丽丝长发的动画序列。如果你设计的是一个换装游戏，那么可以弄
  *      两套不同服装的 动画序列 和 行走图资源，并设置两套绑定。这样，游戏中
  *      只要切换了行走图资源，就等同于切换了 动画序列 。
@@ -53,6 +60,8 @@
  * 
  * 1.注意，这里的插件指令操作的是 全绑定 的开关。
  *   开关 全绑定 后，符合条件的 行走图，才会变化，而不是所有行走图都变化。
+ * 2.如果行走图同时被 全绑定和行走图动画序列的事件注释 控制改变动画序列，
+ *   则按 全绑定 的设置来，全绑定的优先级高。
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 地图开关
@@ -75,7 +84,7 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
  * 时间复杂度： o(n^2) 每帧
- * 测试方法：   在对话管理层设置10个事件，加载小爱丽丝动画序列。
+ * 测试方法：   在动画序列管理层设置10个事件，加载小爱丽丝动画序列。
  * 测试结果：   200个事件的地图中，平均消耗为：【6.19ms】
  *              100个事件的地图中，平均消耗为：【5.90ms】
  *               50个事件的地图中，平均消耗为：【5ms以下】
@@ -89,6 +98,12 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 进一步优化了动画序列底层，该插件重新兼容。
+ * [v1.2]
+ * 优化了动画序列存储底层。
+ * 
+ * 
  * 
  * @param ---全绑定 1至20---
  * @default 
@@ -378,20 +393,24 @@
  * @desc 如果为空，则表示播放 默认的状态元集合 。
  * @default 
  *
- * @param 是否含四方向
+ * @param 行走图动画序列类型
  * @parent ---动画序列---
- * @type boolean
- * @on 含四方向
- * @off 不含
- * @desc 可以模糊GIF图像的边缘，防止出现像素锯齿。
- * @default true
+ * @type select
+ * @option 站桩动画序列
+ * @value 站桩动画序列
+ * @option 四方向动画序列
+ * @value 四方向动画序列
+ * @option 二方向动画序列
+ * @value 二方向动画序列
+ * @desc 绑定的行走图动画序列的类型。
+ * @default 四方向动画序列
  *
- * @param 是否开启全自动播放
+ * @param 是否开启全标签播放
  * @parent ---动画序列---
  * @type boolean
  * @on 开启
  * @off 关闭
- * @desc 可以模糊GIF图像的边缘，防止出现像素锯齿。
+ * @desc 绑定的动画序列是否开启全标签播放。
  * @default true
  *
  */
@@ -408,7 +427,7 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^2) 每帧
-//		★性能测试因素	对话管理层
+//		★性能测试因素	动画序列管理层
 //		★性能测试消耗	5.9ms（Game_CharacterBase.drill_EASB_openActionSequenceByName） 1.8ms（Game_CharacterBase.drill_EASB_closeActionSequence）
 //		★最坏情况		无
 //		★备注			无
@@ -418,21 +437,34 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			行走图动画序列全绑定：
-//				->全绑定
-//					->初始播放的状态节点
-//					->是否含四方向
-//					->是否开启全自动播放
+//			->☆提示信息
+//			->☆静态数据
+//			->☆插件指令
+//			->☆存储数据
+//			->☆地图备注
+//			
+//			->☆动画序列操作
+//				->全事件 创建动画序列（根据资源名称）
+//				->全事件 销毁动画序列（根据资源名称）
+//				->创建动画序列（根据资源名称）
+//				->销毁动画序列（根据资源名称）
+//				->创建动画序列（基函数）
+//				->销毁动画序列（基函数）
+//			->☆物体绑定
+//				->标记 _characterName 参数
 //
 //
 //		★家谱：
 //			大家族-GIF动画序列
 //		
+//		★脚本文档：
+//			无
+//		
 //		★插件私有类：
 //			无
 //		
 //		★必要注意事项：
-//			1.
+//			1.该插件只执行 创建/销毁 动画序列，自动播放、四方向，都不是该插件该管的事情，该插件只提供开关。
 //
 //		★其它说明细节：
 //			暂无
@@ -442,7 +474,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -451,7 +483,7 @@
 	DrillUp.g_EASB_PluginTip_curName = "Drill_EventActionSequenceBind.js 行走图-GIF动画序列全绑定";
 	DrillUp.g_EASB_PluginTip_baseList = [
 		"Drill_EventActionSequence.js 行走图-GIF动画序列",
-		"Drill_EventActionSequenceAutomation.js 行走图-GIF动画序列全自动播放"
+		"Drill_EventActionSequenceAutomation.js 行走图-GIF动画序列全标签播放"
 	];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
@@ -476,7 +508,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_EventActionSequenceBind = true;
@@ -485,7 +517,7 @@
 	
 
 	//==============================
-	// * 变量获取 - 全绑定
+	// * 静态数据 - 全绑定
 	//				（~struct~DrilEASBBind）
 	//==============================
 	DrillUp.drill_EASB_initBind = function( dataFrom ){
@@ -499,8 +531,8 @@
 		
 		// > 动画序列
 		data['defaultNode'] = String( dataFrom["初始播放的状态节点"] || "");
-		data['enabled_4dir'] = String( dataFrom["是否含四方向"] || "true") == "true";
-		data['enabled_automation'] = String( dataFrom["是否开启全自动播放"] || "true") == "true";
+		data['sequenceType'] = String( dataFrom["行走图动画序列类型"] || "四方向动画序列");
+		data['enabled_automation'] = String( dataFrom["是否开启全标签播放"] || "true") == "true";
 		
 		return data;
 	}
@@ -527,11 +559,11 @@ if( Imported.Drill_EventActionSequence &&
 	
 
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
-var _Drill_EASB_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+var _drill_EASB_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
-	_Drill_EASB_pluginCommand.call(this, command, args);
+	_drill_EASB_pluginCommand.call(this, command, args);
 	if( command === ">行走图动画序列全绑定" ){ 
 		
 		if( args.length == 4 ){
@@ -568,7 +600,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -672,14 +704,20 @@ Game_System.prototype.drill_EASB_checkSysData_Private = function() {
 
 
 //=============================================================================
-// ** 地图
+// ** ☆地图备注
 //=============================================================================
 //==============================
-// * 地图 - 初始化
+// * 地图备注 - 初始化绑定
 //==============================
 var _drill_EASB_map_setup = Game_Map.prototype.setup;
 Game_Map.prototype.setup = function( mapId ){
 	_drill_EASB_map_setup.call(this, mapId);
+	this.drill_EASB_setupMapNote();
+};
+//==============================
+// * 地图备注 - 初始化
+//==============================
+Game_Map.prototype.drill_EASB_setupMapNote = function() {
 	
 	// > 绑定开关
 	this._drill_EASB_bindEnable = true;
@@ -690,18 +728,27 @@ Game_Map.prototype.setup = function( mapId ){
 		if( command == "=>行走图动画序列全绑定" ){
 			if(args.length == 1){
 				var temp1 = String(args[0]);
-				if( temp1 == "启用" ){
+				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
 					this._drill_EASB_bindEnable = true;
 				}
-				if( temp1 == "禁用" ){
+				if( temp1 == "关闭" || temp1 == "禁用" ){
 					this._drill_EASB_bindEnable = false;
 				}
 			}
 		}
 	},this);
 };
+
+
+//=============================================================================
+// ** ☆动画序列操作
+//
+//			说明：	> 该模块提供 动画序列操作函数。
+//					> 该插件只执行 创建/销毁 动画序列，自动播放、四方向，都不是该插件该管的事情，该插件只提供开关。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
 //==============================
-// * 地图 - 全事件 创建动画序列（根据资源名称）
+// * 动画序列操作 - 地图 - 全事件 创建动画序列（根据资源名称）
 //==============================
 Game_Map.prototype.drill_EASB_allEvent_openActionSequenceByName = function( src_name ){
 	
@@ -712,11 +759,11 @@ Game_Map.prototype.drill_EASB_allEvent_openActionSequenceByName = function( src_
 		if( ev._erased == true ){ continue; }
 		
 		// > 延迟1帧，让其手动刷新
-		ev._Drill_EASB_lastName = "";
+		ev._drill_EASB_lastName = "";
 	}
 };
 //==============================
-// * 地图 - 全事件 销毁动画序列（根据资源名称）
+// * 动画序列操作 - 地图 - 全事件 销毁动画序列（根据资源名称）
 //==============================
 Game_Map.prototype.drill_EASB_allEvent_closeActionSequenceByName = function( src_name ){
 	
@@ -728,90 +775,10 @@ Game_Map.prototype.drill_EASB_allEvent_closeActionSequenceByName = function( src
 		ev.drill_EASB_closeActionSequenceByName( src_name );
 	}
 };
-
-
-//=============================================================================
-// ** 物体
-//=============================================================================
 //==============================
-// * 物体 - 初始化
-//==============================
-var _Drill_EASB_c_initialize = Game_CharacterBase.prototype.initialize;
-Game_CharacterBase.prototype.initialize = function() {
-	_Drill_EASB_c_initialize.call(this);
-	this._Drill_EASB_lastName = "";			//上一个资源名称
-	this._Drill_EASB_binded = false;		//绑定标记
-}
-//==============================
-// * 物体 - 帧刷新
-//==============================
-var _Drill_EASB_c_update = Game_CharacterBase.prototype.update;
-Game_CharacterBase.prototype.update = function() {
-	_Drill_EASB_c_update.call(this);
-	if( this instanceof Game_Character == false ){ return; }
-	
-	// > 检查 - 地图开关关闭
-	if( $gameMap._drill_EASB_bindEnable == false ){
-		this.drill_EASB_closeActionSequence();
-		return;
-	}
-	
-	// > 检查 - 镜头范围外，不工作
-	if( this.drill_EASB_posIsInCamera( this._realX, this._realY ) == false ){
-		this.drill_EASB_closeActionSequence();
-		return;
-	}
-	
-	
-	// > 资源名称 变化时（这里用于批量修改的变化，但是执行后会慢1帧才能显示图片）
-	if( this._Drill_EASB_lastName != this._characterName ){
-		this._Drill_EASB_lastName = this._characterName;
-		
-		// > 创建动画序列（根据资源名称）
-		this.drill_EASB_openActionSequenceByName( this._Drill_EASB_lastName );
-	}
-}
-//==============================
-// * 变量实时修改捕获
+// * 动画序列操作 - 物体 - 创建动画序列（根据资源名称）
 //
-//			说明：	【慢1帧闪烁优化】在改变 _characterName 后，可以立即同步 _Drill_EASB_lastName 。
-//==============================
-Object.defineProperty(Game_CharacterBase.prototype, '_characterName', {
-    get: function(){
-        return this.__drill_EASB_characterName;
-    },
-    set: function( value ){
-		this.__drill_EASB_characterName = value;
-		if( this._Drill_EASB_lastName != value ){
-			this._Drill_EASB_lastName = value;
-			
-			// > 创建动画序列（根据资源名称）
-			this.drill_EASB_openActionSequenceByName( this._Drill_EASB_lastName );
-		}
-    },
-    configurable: true
-});
-
-//==============================
-// * 优化策略 - 判断贴图是否在镜头范围内
-//==============================
-Game_CharacterBase.prototype.drill_EASB_posIsInCamera = function( realX, realY ){
-	var oww = Graphics.boxWidth  / $gameMap.tileWidth();
-	var ohh = Graphics.boxHeight / $gameMap.tileHeight();
-	var sww = oww;
-	var shh = ohh;
-	if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】镜头范围内+缩放
-		sww = sww / $gameSystem._drill_LCa_controller._drill_scaleX;
-		shh = shh / $gameSystem._drill_LCa_controller._drill_scaleY;
-	}
-	return  Math.abs($gameMap.adjustX(realX + 0.5) - oww*0.5) <= sww*0.5 + 5.5 &&	//（镜头范围+5个图块边框区域） 
-			Math.abs($gameMap.adjustY(realY + 0.5) - ohh*0.5) <= shh*0.5 + 5.5 ;
-}
-
-//==============================
-// * 物体 - 创建动画序列（根据资源名称）
-//
-//			说明：	根据资源名称，创建该事件的动画序列。注意不要放在帧刷新中反复执行。
+//			说明：	> 根据资源名称，创建该事件的动画序列。注意不要放在帧刷新中反复执行。
 //==============================
 Game_CharacterBase.prototype.drill_EASB_openActionSequenceByName = function( src_name ){
 	
@@ -839,38 +806,9 @@ Game_CharacterBase.prototype.drill_EASB_openActionSequenceByName = function( src
 	this.drill_EASB_closeActionSequence();
 }
 //==============================
-// * 物体 - 创建动画序列（基函数）
-//==============================
-Game_CharacterBase.prototype.drill_EASB_openActionSequence = function( data ){
-	
-	// > 创建动画序列(四方向)
-	if( data['enabled_4dir'] == true ){
-		this.drill_EASe_setActionSequenceWith4Direction( data['bind_seqId']-1 );
-		
-	// > 创建动画序列
-	}else{
-		this.drill_EASe_setActionSequence( data['bind_seqId']-1 );
-	}
-	
-	// > 初始播放的状态节点
-	if( data['defaultNode'] != "" ){
-		this.drill_EASe_setStateNode( data['defaultNode'] );
-	}
-	
-	// > 全自动播放【行走图 - GIF动画序列全自动播放】
-	if( data['enabled_automation'] == true ){
-		this._Drill_EASA_enabled = true;
-		this._Drill_EASA_lastAnnotation = "";
-	}
-	
-	// > 资源绑定 标记
-	this._Drill_EASe_controller._Drill_EASB_curSrcName = data['bind_src'];
-	this._Drill_EASB_binded = true;
-}
-//==============================
-// * 物体 - 销毁动画序列（根据资源名称）
+// * 动画序列操作 - 物体 - 销毁动画序列（根据资源名称）
 //
-//			说明：	根据资源名称，销毁该事件的动画序列。注意不要放在帧刷新中反复执行。
+//			说明：	> 根据资源名称，销毁该事件的动画序列。注意不要放在帧刷新中反复执行。
 //==============================
 Game_CharacterBase.prototype.drill_EASB_closeActionSequenceByName = function( src_name ){
 	
@@ -881,25 +819,163 @@ Game_CharacterBase.prototype.drill_EASB_closeActionSequenceByName = function( sr
 	}
 	
 	// > 对应名称的 销毁
-	if( this._Drill_EASe_controller == undefined ){ return; }
-	if( this._Drill_EASe_controller._Drill_EASB_curSrcName != src_name ){ return; }
+	if( this._drill_EASe_controller == undefined ){ return; }
+	if( this._drill_EASe_controller._drill_EASB_curSrcName != src_name ){ return; }
 	this.drill_EASB_closeActionSequence();
 }
 //==============================
-// * 物体 - 销毁动画序列（基函数）
+// * 动画序列操作 - 物体 - 创建动画序列（基函数）
+//
+//			说明：	> 输入参数来自该插件的 DrillUp.g_EASB_list 。
+//==============================
+Game_CharacterBase.prototype.drill_EASB_openActionSequence = function( data ){
+	
+	// > 创建动画序列
+	if( data['sequenceType'] == "四方向动画序列" ){
+		this.drill_EASe_setActionSequence( data['bind_seqId']-1, "4dir" );
+	}else if( data['sequenceType'] == "二方向动画序列" ){
+		this.drill_EASe_setActionSequence( data['bind_seqId']-1, "2dir" );
+	}else{
+		this.drill_EASe_setActionSequence( data['bind_seqId']-1, "stand" );
+	}
+	
+	// > 初始播放的状态节点
+	if( data['defaultNode'] != "" ){
+		this.drill_EASe_setStateNode( data['defaultNode'] );
+	}
+	
+	// > 开启 全标签播放【行走图 - GIF动画序列全标签播放】
+	if( data['enabled_automation'] == true ){
+		this.drill_EASA_setEnabled( true );
+	}
+	
+	// > 资源绑定 标记
+	this._drill_EASe_controller._drill_EASB_curSrcName = data['bind_src'];
+	this._drill_EASB_binded = true;
+}
+//==============================
+// * 动画序列操作 - 物体 - 销毁动画序列（基函数）
 //==============================
 Game_CharacterBase.prototype.drill_EASB_closeActionSequence = function(){
-	
-	// > 绑定标记（该插件只能 销毁 插件自己创建的动画序列）
-	if( this._Drill_EASB_binded == false ){ return; }
-	this._Drill_EASB_binded = false;
+	if( this._drill_EASB_binded == false ){ return; }	//（检查绑定标记，该插件只能 销毁 插件自己创建的动画序列）
+	this._drill_EASB_binded = false;					//清空 绑定标记
+	this._drill_EASB_lastName = "";						//清空 上一个资源名称
 	
 	// > 执行销毁
-	if( this._Drill_EASe_controller == undefined ){ return; }
-	this.drill_EASe_removeActionSequence();
-	this._Drill_EASA_enabled = false;
-	this._Drill_EASB_lastName = "";
+	if( this._drill_EASe_controller != undefined ){
+		this.drill_EASe_removeActionSequence();
+	}
+	
+	// > 关闭 全标签播放【行走图 - GIF动画序列全标签播放】
+	this.drill_EASA_setEnabled( false );
 }
+
+
+
+//=============================================================================
+// ** ☆物体绑定
+//
+//			说明：	> 此模块在 物体切换资源时，根据情况执行 动画序列操作 。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 物体绑定 - 初始化
+//==============================
+var _drill_EASB_c_initialize = Game_CharacterBase.prototype.initialize;
+Game_CharacterBase.prototype.initialize = function() {
+	//（『不考虑节约存储空间』，因为 __drill_EASB_characterName 没法优化）
+	
+	this._drill_EASB_binded = false;						//绑定标记
+	this._drill_EASB_lastName = "";							//上一个资源名称
+	//this._drill_EASe_controller._drill_EASB_curSrcName;	//绑定的资源名称（控制器中标记）
+	
+	// > 原函数
+	_drill_EASB_c_initialize.call(this);
+}
+//==============================
+// * 物体绑定 - 帧刷新
+//==============================
+var _drill_EASB_c_update = Game_CharacterBase.prototype.update;
+Game_CharacterBase.prototype.update = function() {
+	_drill_EASB_c_update.call(this);
+	if( this instanceof Game_Character == false ){ return; }
+	
+	// > 检查 - 地图开关关闭
+	if( $gameMap._drill_EASB_bindEnable == false ){
+		this.drill_EASB_closeActionSequence();
+		return;
+	}
+	
+	// > 检查 - 镜头范围外，不工作（优化策略）
+	if( this.drill_EASB_posIsInCamera( this._realX, this._realY ) == false ){
+		this.drill_EASB_closeActionSequence();
+		return;
+	}
+	
+	
+	// > 检查 - 资源名称 变化时（这里用于批量修改的变化，但是执行后会慢1帧才能显示图片）
+	if( this._drill_EASB_lastName != this._characterName ){
+		this._drill_EASB_lastName = this._characterName;
+		
+		// > 创建动画序列（根据资源名称）
+		this.drill_EASB_openActionSequenceByName( this._drill_EASB_lastName );
+	}
+}
+//==============================
+// * 物体绑定 - 检查 - 判断贴图是否在镜头范围内
+//==============================
+Game_CharacterBase.prototype.drill_EASB_posIsInCamera = function( realX, realY ){
+	var oww = Graphics.boxWidth  / $gameMap.tileWidth();
+	var ohh = Graphics.boxHeight / $gameMap.tileHeight();
+	var sww = oww;
+	var shh = ohh;
+	if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】镜头范围内+缩放
+		sww = sww / $gameSystem._drill_LCa_controller._drill_scaleX;
+		shh = shh / $gameSystem._drill_LCa_controller._drill_scaleY;
+	}
+	return  Math.abs($gameMap.adjustX(realX + 0.5) - oww*0.5) <= sww*0.5 + 5.5 &&	//（镜头范围+5个图块边框区域） 
+			Math.abs($gameMap.adjustY(realY + 0.5) - ohh*0.5) <= shh*0.5 + 5.5 ;
+}
+//==============================
+// * 物体绑定 - 检查 - 资源名称 变化时
+//
+//			说明：	> 【慢1帧闪烁优化】在改变 _characterName 后，可以立即同步 _drill_EASB_lastName 。
+//==============================
+Object.defineProperty(Game_CharacterBase.prototype, '_characterName', {
+    get: function(){
+        return this.__drill_EASB_characterName;
+    },
+    set: function( value ){
+		this.__drill_EASB_characterName = value;
+		if( this._drill_EASB_lastName != value ){
+			this._drill_EASB_lastName = value;
+			
+			// > 创建动画序列（根据资源名称）
+			this.drill_EASB_openActionSequenceByName( this._drill_EASB_lastName );
+		}
+    },
+    configurable: true
+});
+
+//==============================
+// * 物体绑定 - 覆盖注释
+//
+//			说明：	> 全绑定的优先级比 事件注释 的高，若已绑定，则直接跳出注释设置。
+//					  因为全绑定的执行是瞬间的，_characterName 变化就立即执行。
+//==============================
+var _drill_EASB_EASe_setupPage = Game_Event.prototype.drill_EASe_setupPage;
+Game_Event.prototype.drill_EASe_setupPage = function() {
+	if( this._drill_EASB_binded == true ){ return; }	//（若已绑定资源，则跳过 创建动画序列 的注释）
+	_drill_EASB_EASe_setupPage.call(this);
+};
+//==============================
+// * 物体绑定 - 覆盖注释
+//==============================
+var _drill_EASB_EASA_setupPage = Game_Event.prototype.drill_EASA_setupPage;
+Game_Event.prototype.drill_EASA_setupPage = function() {
+	if( this._drill_EASB_binded == true ){ return; }	//（若已绑定资源，则跳过 全标签播放 的注释）
+	_drill_EASB_EASA_setupPage.call(this);
+};
 
 
 

@@ -958,6 +958,9 @@
 //		★家谱：
 //			无
 //		
+//		★脚本文档：
+//			无
+//		
 //		★插件私有类：
 //			无
 //		
@@ -988,7 +991,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_MenuBackground = true;
@@ -996,7 +999,7 @@
 	DrillUp.parameters = PluginManager.parameters('Drill_MenuBackground');
 	
 	//==============================
-	// * 变量获取 - 默认背景
+	// * 静态数据 - 默认背景
 	//				（~struct~MenuBackgroundDefault）
 	//==============================
 	DrillUp.drill_MBa_backgroundDefaultInit = function( dataFrom ) {
@@ -1025,7 +1028,7 @@
 		return data;
 	}
 	//==============================
-	// * 变量获取 - 背景
+	// * 静态数据 - 背景
 	//				（~struct~MenuBackground）
 	//==============================
 	DrillUp.drill_MBa_backgroundInit = function( dataFrom ) {

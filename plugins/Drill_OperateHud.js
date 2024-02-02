@@ -126,7 +126,7 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
  * 时间复杂度： o(n)*o(贴图处理) 每帧
- * 测试方法：   去物体管理层、地理管理层、镜像管理层跑一圈测试就可以了。
+ * 测试方法：   去鼠标管理层跑一圈测试就可以了。
  * 测试结果：   200个事件的地图中，平均消耗为：【8.21ms】
  *              100个事件的地图中，平均消耗为：【7.32ms】
  *               50个事件的地图中，平均消耗为：【5.15ms】
@@ -687,7 +687,7 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(n)*o(贴图处理) 每帧
-//		★性能测试因素	不停地操作点出面板
+//		★性能测试因素	鼠标管理层不停地操作点出面板
 //		★性能测试消耗	5.15ms
 //		★最坏情况		暂无，消耗太少，无论怎么点，消耗都上不去。
 //		★备注			无
@@ -715,6 +715,9 @@
 //
 //		★家谱：
 //			无
+//		
+//		★脚本文档：
+//			1.系统 > 关于输入设备核心（脚本）.docx
 //		
 //		★插件私有类：
 //			* 面板【Drill_Operate_Hud】
@@ -775,7 +778,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_OperateHud = true;
@@ -849,8 +852,10 @@
 			DrillUp.parameters["自定义按钮-" + String(i+1) ] != "" ){
 			DrillUp.g_OH_self_list[i] = JSON.parse(DrillUp.parameters["自定义按钮-" + String(i+1) ]);
 			DrillUp.g_OH_self_list[i]['status'] = String(DrillUp.g_OH_self_list[i]["按钮初始状态"] || "禁用");
+			
 			DrillUp.g_OH_self_list[i]['commonevents'] = Number(DrillUp.g_OH_self_list[i]["执行的公共事件"] || 0);
 			DrillUp.g_OH_self_list[i]['pipeType'] = String(DrillUp.g_OH_self_list[i]["公共事件执行方式"] || "并行");
+			
 			DrillUp.g_OH_self_list[i]['closeHud'] = String(DrillUp.g_OH_self_list[i]["执行后是否收起面板"] || "true") === "true";
 			DrillUp.g_OH_self_list[i]['btn_src'] = String(DrillUp.g_OH_self_list[i]["资源-自定义按钮"] || "");
 			DrillUp.g_OH_self_list[i]['btn_src_lock'] = String(DrillUp.g_OH_self_list[i]["资源-自定义按钮-封印"] || "");
@@ -889,10 +894,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		/*-----------------开关------------------*/
 		if(args.length == 2){				//>鼠标操作面板 : 开启
 			var type = String(args[1]);
-			if( type == "开启" ){
+			if( type == "启用" || type == "开启" || type == "打开" || type == "启动" ){
 				$gameSystem._drill_OH_enable = true;
 			}
-			if( type == "关闭" ){
+			if( type == "关闭" || type == "禁用" ){
 				$gameSystem._drill_OH_enable = false;
 			}
 		}
@@ -2037,6 +2042,7 @@ Drill_Operate_Hud.prototype.drill_triggerPlayerInput = function() {
 		if( sprite == null ){ continue; }
 		
 		if( this._drill_OH_hoveringOne == sprite ){
+			
 			// > 执行公共事件时，被封印，但是鼠标没离开按钮情况
 			if( status == "禁用" || status == "封印" ){ 
 				this._drill_OH_hoveringOne.opacity = DrillUp.g_OH_btn_opacity; 
@@ -2045,14 +2051,8 @@ Drill_Operate_Hud.prototype.drill_triggerPlayerInput = function() {
 			}
 			
 			// > 执行公共事件
-			//$gameTemp.reserveCommonEvent( data['commonevents'] );
+			this.drill_OH_doCommonEvent( data );
 			SoundManager.playOk();
-			var temp_data = {
-				'type':"公共事件",
-				'pipeType': data['pipeType'],
-				'commonEventId': data['commonevents'],
-			};
-			$gameMap.drill_LCT_addPipeEvent( temp_data );
 			
 			if( sprite['closeHud'] ){
 				this._drill_OH_board_blocking = false;
@@ -2060,6 +2060,26 @@ Drill_Operate_Hud.prototype.drill_triggerPlayerInput = function() {
 		}
 	}
 }
+//==============================
+// * 操作 - 『执行公共事件』（地图界面）
+//==============================
+Drill_Operate_Hud.prototype.drill_OH_doCommonEvent = function( data ){
+	
+	// > 插件【地图-多线程】
+	if( Imported.Drill_LayerCommandThread ){
+		var e_data = {
+			'type':"公共事件",
+			'pipeType': data['pipeType'],
+			'commonEventId': data['commonevents'],
+		};
+		$gameMap.drill_LCT_addPipeEvent( e_data );
+		
+	// > 默认执行
+	}else{
+		$gameTemp.reserveCommonEvent( data['commonevents'] );
+	}
+}
+
 
 //==============================
 // ** 举起花盆的鼠标支持

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.6]        地图 - 多层地图粒子
+ * @plugindesc [v1.7]        地图 - 多层地图粒子
  * @author Drill_up
  * 
  * @Drill_LE_param "粒子层-%d"
@@ -37,10 +37,11 @@
  * ----设定注意事项
  * 1.插件的作用域：地图界面。
  *   可以在地图的五个层级放多层不同的粒子。
- * 2.该插件可以装饰地图的各种层级。要了解更详细的组合方法，
+ * 2.更多详细的内容，去看看 "1.系统 > 大家族-粒子效果.docx"。
+ * 3.该插件可以装饰地图的各种层级。要了解更详细的组合方法，
  *   去看看 "17.主菜单 > 多层组合装饰（界面装饰）.docx"。
  *   还有 "17.主菜单 > 多层组合装饰（界面装饰-地图界面）.docx"。
- * 3.该插件的指令较多且使用频繁，建议使用小工具：插件信息查看器。
+ * 4.该插件的指令较多且使用频繁，建议使用小工具：插件信息查看器。
  *   在开启游戏编辑器时，可以并行使用读取器复制指令。
  * 地图绑定：
  *   (1.每个配置绑定到一个指定的地图，可以多个配置绑定到同一个地图。
@@ -70,6 +71,9 @@
  *   (1.插件指令操作的变化结果，是永久性的。
  *   (2.操作隐藏的粒子 或者 操作其他地图的粒子，插件指令都会有效。
  *      注意，插件指令变化的是增量，增加用正数，减少用负数。
+ * 预加载：
+ *   (1.插件中可自定义指定资源是否预加载，
+ *      预加载相关介绍可以去看看"1.系统 > 关于预加载.docx"。
  * 设计：
  *   (1.你可以通过插件指令手动修改透明度，来设计某些区域的实时粒子效果，
  *      比如进入浴室后，显现热气气泡；进入草丛，显现萤火虫光粒。
@@ -228,6 +232,8 @@
  * 加强了插件结构，添加了修改单属性、移动到功能。
  * [v1.6]
  * 添加了延迟指令功能。
+ * [v1.7]
+ * 添加了粒子 彩虹化 功能。
  * 
  * 
  * 
@@ -1520,6 +1526,14 @@
  * @desc 0为完全透明，255为完全不透明。
  * @default 255
  *
+ * @param 是否预加载
+ * @parent ---贴图---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭，预加载详细介绍可见："1.系统 > 关于预加载.docx"。
+ * @default false
+ *
  * @param 混合模式
  * @parent ---贴图---
  * @type select
@@ -1838,6 +1852,58 @@
  * @type file
  * 
  * 
+ * @param ---彩虹化---
+ * @desc 
+ *
+ * @param 是否开启彩虹化-粒子
+ * @parent ---彩虹化---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭，冒出的每个粒子都会根据彩虹进行染色变化。
+ * @default false
+ *
+ * @param 是否开启彩虹化-第二层粒子
+ * @parent ---彩虹化---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭，冒出的每个第二层粒子都会根据彩虹进行染色变化。
+ * @default false
+ *
+ * @param 是否开启彩虹化-直线拖尾
+ * @parent ---彩虹化---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭，冒出的每个粒子的拖尾都会根据彩虹进行染色变化。
+ * @default false
+ * 
+ * @param 彩虹化色彩数量
+ * @parent ---彩虹化---
+ * @type number
+ * @min 1
+ * @max 360
+ * @desc 彩虹化色彩的数量，最大值为360。
+ * @default 20
+ *
+ * @param 彩虹化是否锁定色调值
+ * @parent ---彩虹化---
+ * @type boolean
+ * @on 锁定
+ * @off 关闭
+ * @desc true - 锁定，false - 关闭，彩虹变化将按照 色调值列表 进行依次染色，具体可以看看文档。
+ * @default false
+ * 
+ * @param 锁定的色调值列表
+ * @parent 彩虹化是否锁定色调值
+ * @type number[]
+ * @min 0
+ * @max 360
+ * @desc 彩虹变化将按照 色调值列表 进行依次染色，具体可以看看文档。
+ * @default []
+ * 
+ * 
  * @param ---动态遮罩---
  * @desc 
  *
@@ -1886,8 +1952,9 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
 //			->☆插件指令
+//			->☆预加载
 //			->☆存储数据
 //			->☆地图层级
 //				->添加贴图到层级【标准函数】
@@ -1925,6 +1992,10 @@
 //			
 //		★家谱：
 //			大家族-粒子效果
+//		
+//		★脚本文档：
+//			1.系统 > 大家族-粒子效果（脚本）.docx
+//			17.主菜单 > 多层组合装饰（界面装饰-地图界面）（脚本）.docx
 //		
 //		★插件私有类：
 //			* 粒子控制器【Drill_LPa_Controller】
@@ -1986,7 +2057,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_LayerParticle = true;
@@ -1994,7 +2065,7 @@
     DrillUp.parameters = PluginManager.parameters('Drill_LayerParticle');
 
 	//==============================
-	// * 变量获取 - 粒子样式
+	// * 静态数据 - 粒子样式
 	//				（~struct~LPaMapParticle）
 	//==============================
 	DrillUp.drill_LPa_initParticle = function( dataFrom ) {
@@ -2012,6 +2083,7 @@
 		// > 贴图
 		data['src_img'] = String( dataFrom["资源-粒子"] || "");
 		data['src_img_file'] = "img/Map__layer/";
+		data['preload'] = String( dataFrom["是否预加载"] || "false") == "true";
 		data['x'] = 0;		//（控制器位置与镜头位置吻合）
 		data['y'] = 0;
 		data['opacity'] = Number( dataFrom["透明度"] || 255);
@@ -2064,6 +2136,19 @@
 		data['trailing_src_img'] = String( dataFrom["资源-直线拖尾"] || "");
 		data['trailing_src_img_file'] = "img/Map__layer/";
 		
+		// > 彩虹化
+		data['rainbow_enable'] = String( dataFrom["是否开启彩虹化-粒子"] || "false") == "true";
+		data['rainbow_enableSecond'] = String( dataFrom["是否开启彩虹化-第二层粒子"] || "false") == "true";
+		data['rainbow_enableTrailing'] = String( dataFrom["是否开启彩虹化-直线拖尾"] || "false") == "true";
+		data['rainbow_num'] = Number( dataFrom["彩虹化色彩数量"] || 20);
+		data['rainbow_lockTint'] = String( dataFrom["彩虹化是否锁定色调值"] || "false") == "true";
+		if( dataFrom["锁定的色调值列表"] != undefined &&
+			dataFrom["锁定的色调值列表"] != "" ){
+			data['rainbow_tintList'] = JSON.parse( dataFrom["锁定的色调值列表"] || [] );
+		}else{
+			data['rainbow_tintList'] = [];
+		}
+		
 		
 		// > 位移比
 		data['XPer'] = Number( dataFrom["位移比X"] || 0);
@@ -2090,7 +2175,7 @@
 			var temp = JSON.parse(DrillUp.parameters["粒子层-" + String(i+1) ]);
 			DrillUp.g_LPa_layers[i] = DrillUp.drill_LPa_initParticle( temp );
 		}else{
-			DrillUp.g_LPa_layers[i] = null;		//（强制设为空值，节约存储资源）
+			DrillUp.g_LPa_layers[i] = undefined;		//（强制设为空值，节约存储资源）
 		}
 	}
 	
@@ -2517,6 +2602,52 @@ Game_Interpreter.prototype.drill_LPa_getArgNumList = function( arg_str ){
 };
 
 
+//=============================================================================
+// ** ☆预加载
+//
+//			说明：	> 对指定资源贴图标记不删除，可以防止重建导致的浪费资源，以及资源显示时闪烁问题。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 预加载 - 初始化
+//==============================
+var _drill_LPa_preload_initialize = Game_Temp.prototype.initialize;
+Game_Temp.prototype.initialize = function() {
+	_drill_LPa_preload_initialize.call(this);
+	this.drill_LPa_preloadInit();
+}
+//==============================
+// * 预加载 - 版本校验
+//==============================
+if( Utils.generateRuntimeId == undefined ){
+	alert( DrillUp.drill_LPa_getPluginTip_LowVersion() );
+}
+//==============================
+// * 预加载 - 执行资源预加载
+//
+//			说明：	> 遍历全部资源，提前预加载标记过的资源。
+//==============================
+Game_Temp.prototype.drill_LPa_preloadInit = function() {
+	this._drill_LPa_cacheId = Utils.generateRuntimeId();	//资源缓存id
+	this._drill_LPa_preloadTank = [];						//bitmap容器
+	for( var i = 0; i < DrillUp.g_LPa_layers.length; i++ ){
+		var temp_data = DrillUp.g_LPa_layers[i];
+		if( temp_data == undefined ){ continue; }
+		if( temp_data['preload'] != true ){ continue; }
+		
+		this._drill_LPa_preloadTank.push( 
+			ImageManager.reserveBitmap( temp_data['src_img_file'], temp_data['src_img'], 0, true, this._drill_LPa_cacheId ) 
+		);
+		this._drill_LPa_preloadTank.push( 
+			ImageManager.reserveBitmap( temp_data['src_img_file'], temp_data['second_src_img'], 0, true, this._drill_LPa_cacheId ) 
+		);
+		this._drill_LPa_preloadTank.push( 
+			ImageManager.reserveBitmap( temp_data['trailing_src_img_file'], temp_data['trailing_src_img'], 0, true, this._drill_LPa_cacheId ) 
+		);
+	}
+}
+
+
 //#############################################################################
 // ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
@@ -2602,7 +2733,7 @@ Game_System.prototype.drill_LPa_initSysData_Private = function() {
 		//	（见 drill_LPa_initMapdata ）
 	}
 	
-	// > 刷新当前地图【$gameSystem优先初始化】
+	// > 刷新当前地图『$gameSystem优先初始化』
 	if( $gameMap != undefined ){
 		$gameMap.drill_LPa_initMapdata();
 	}
@@ -3170,10 +3301,11 @@ Drill_LPa_Controller.prototype.initialize = function( data ){
 //			说明：	> 此函数必须在 帧刷新 中手动调用执行。
 //##############################
 Drill_LPa_Controller.prototype.drill_controller_update = function(){
+	this.drill_controller_updateDelayingCommandImportant();		//帧刷新 - 2C延迟指令 - 时间流逝
     Drill_COPa_Controller.prototype.drill_controller_update.call( this );
-														//帧刷新 - 2A镜头参数
-	this.drill_controller_updateCommandChange();		//帧刷新 - 2B指令叠加变化
-	this.drill_controller_updateDelayingCommand();		//帧刷新 - 2C延迟指令
+																//帧刷新 - 2A镜头参数
+	this.drill_controller_updateCommandChange();				//帧刷新 - 2B指令叠加变化
+	this.drill_controller_updateDelayingCommand();				//帧刷新 - 2C延迟指令 - 执行延迟指令
 }
 //##############################
 // * 控制器 - 重设数据【标准函数】
@@ -3405,7 +3537,7 @@ Drill_LPa_Controller.prototype.drill_controller_resetParticles_Position = functi
 		yy = radius * Math.sin( angle *Math.PI/180 );
 	}
 	
-	// > 要把当前镜头位置考虑进去【$gameSystem优先初始化】（注意此处，调用时 $gameMap和$dataMap 都可能未创建。）
+	// > 要把当前镜头位置考虑进去『$gameSystem优先初始化』（注意此处，调用时 $gameMap和$dataMap 都可能未创建。）
 	if( $gameMap != undefined && $dataMap != undefined ){
 		xx += $gameMap.adjustX(0) * $gameMap.tileWidth();
 		yy += $gameMap.adjustY(0) * $gameMap.tileHeight();
@@ -3446,7 +3578,7 @@ DrillUp.g_LPa_alert = true;
 //			说明：	> 此处直接调用函数获取值。参数不存，因为浪费 帧刷新 和 存储空间。
 //==============================
 Drill_LPa_Controller.prototype.drill_controller_getCameraXAcc = function(){
-	if( $gameMap == undefined ){ return 0; }	//【$gameSystem优先初始化】（注意此处，调用时 $gameMap和$dataMap 都可能未创建。）
+	if( $gameMap == undefined ){ return 0; }	//『$gameSystem优先初始化』（注意此处，调用时 $gameMap和$dataMap 都可能未创建。）
 	if( $dataMap == undefined ){ return 0; }
 	
 	// > 循环积累值 【地图 - 活动地图镜头】
@@ -3470,7 +3602,7 @@ Drill_LPa_Controller.prototype.drill_controller_getCameraXAcc = function(){
 //			说明：	> 此处直接调用函数获取值。参数不存，因为浪费 帧刷新 和 存储空间。
 //==============================
 Drill_LPa_Controller.prototype.drill_controller_getCameraYAcc = function(){
-	if( $gameMap == undefined ){ return 0; }	//【$gameSystem优先初始化】（注意此处，调用时 $gameMap和$dataMap 都可能未创建。）
+	if( $gameMap == undefined ){ return 0; }	//『$gameSystem优先初始化』（注意此处，调用时 $gameMap和$dataMap 都可能未创建。）
 	if( $dataMap == undefined ){ return 0; }
 	
 	// > 循环积累值 【地图 - 活动地图镜头】
@@ -3500,18 +3632,18 @@ Drill_LPa_Controller.prototype.drill_controller_initCommandChange = function() {
 	var data = this._drill_data;
 	
 	// > 控制器参数 - 移动到
-	this["_drill_command_move_data"] = null;
+	this["_drill_command_move_data"] = undefined;
 	
 	// > 控制器参数 - 透明度
-	this["_drill_command_opacity_data"] = null;
+	this["_drill_command_opacity_data"] = undefined;
 	
 	// > 控制器参数 - 旋转
-	this["_drill_command_rotate_data"] = null;
+	this["_drill_command_rotate_data"] = undefined;
 	
 	// > 控制器参数 - 缩放X
-	this["_drill_command_scaleX_data"] = null;
+	this["_drill_command_scaleX_data"] = undefined;
 	// > 控制器参数 - 缩放Y
-	this["_drill_command_scaleY_data"] = null;
+	this["_drill_command_scaleY_data"] = undefined;
 	
 }
 //==============================
@@ -3541,21 +3673,21 @@ Drill_LPa_Controller.prototype.drill_controller_updateCommandChange = function()
 Drill_LPa_Controller.prototype.drill_controller_commandChange_restoreAttr = function(){
 	
 	// > 控制器参数 - 透明度
-	this["_drill_command_opacity_data"] = null;
+	this["_drill_command_opacity_data"] = undefined;
 	
 	// > 控制器参数 - 旋转
-	this["_drill_command_rotate_data"] = null;
+	this["_drill_command_rotate_data"] = undefined;
 	
 	// > 控制器参数 - 缩放X
-	this["_drill_command_scaleX_data"] = null;
+	this["_drill_command_scaleX_data"] = undefined;
 	// > 控制器参数 - 缩放Y
-	this["_drill_command_scaleY_data"] = null;
+	this["_drill_command_scaleY_data"] = undefined;
 }
 //==============================
 // * 2B指令叠加变化 - 立即归位
 //==============================
 Drill_LPa_Controller.prototype.drill_controller_commandChange_restoreMove = function(){
-	this["_drill_command_move_data"] = null;
+	this["_drill_command_move_data"] = undefined;
 }
 //==============================
 // * 2B指令叠加变化 - 修改单属性 - 移动到
@@ -3617,28 +3749,51 @@ Drill_LPa_Controller.prototype.drill_controller_initDelayingCommand = function()
 	this._drill_curDelayingCommandTank = [];
 }
 //==============================
-// * 2C延迟指令 - 帧刷新
+// * 2C延迟指令 - 帧刷新 - 时间流逝
+//
+//			说明：	> 此处的时间流逝不会因为 暂停 而停止流逝。
 //==============================
-Drill_LPa_Controller.prototype.drill_controller_updateDelayingCommand = function(){
+Drill_LPa_Controller.prototype.drill_controller_updateDelayingCommandImportant = function(){
 	var data = this._drill_data;
 	if( this._drill_curDelayingCommandTank.length == 0 ){ return; }
 	
-	// > 帧刷新 延迟指令
+	// > 帧刷新 时间流逝
 	for(var i = 0; i < this._drill_curDelayingCommandTank.length; i++ ){
 		var dc_data = this._drill_curDelayingCommandTank[i];
 		
 		// > 时间-1
 		dc_data['left_time'] -= 1;
 		
-		// > 执行延迟指令
+	}
+	
+	// > 执行延迟指令（暂停/继续）
+	for(var i = 0; i < this._drill_curDelayingCommandTank.length; i++ ){
+		var dc_data = this._drill_curDelayingCommandTank[i];
+		if( dc_data['left_time'] < 0 ){
+			var method = dc_data['method'];
+			var paramList = dc_data['paramList'];
+			if( method == "drill_controller_setPause" ){
+				this.drill_controller_setPause( paramList[0] );
+			}
+		}
+	}
+}
+//==============================
+// * 2C延迟指令 - 帧刷新 - 执行延迟指令
+//==============================
+Drill_LPa_Controller.prototype.drill_controller_updateDelayingCommand = function(){
+	var data = this._drill_data;
+	if( this._drill_curDelayingCommandTank.length == 0 ){ return; }
+	
+	// > 执行延迟指令
+	for(var i = 0; i < this._drill_curDelayingCommandTank.length; i++ ){
+		var dc_data = this._drill_curDelayingCommandTank[i];
 		if( dc_data['left_time'] < 0 ){
 			var method = dc_data['method'];
 			var paramList = dc_data['paramList'];
 			
 			if( method == "drill_controller_setVisible" ){
 				this.drill_controller_setVisible( paramList[0] );
-			}else if( method == "drill_controller_setPause" ){
-				this.drill_controller_setPause( paramList[0] );
 			
 			}else if( method == "drill_controller_commandChange_setOpacity" ){
 				this.drill_controller_commandChange_setOpacity( paramList[0], paramList[1], paramList[2] );
@@ -3660,7 +3815,7 @@ Drill_LPa_Controller.prototype.drill_controller_updateDelayingCommand = function
 		}
 	}
 	
-	// > 销毁 延迟指令
+	// > 销毁延迟指令
 	for(var i = this._drill_curDelayingCommandTank.length-1; i >= 0; i-- ){
 		var dc_data = this._drill_curDelayingCommandTank[i];
 		if( dc_data['left_time'] < 0 ){
@@ -3977,18 +4132,18 @@ Drill_LPa_Sprite.prototype.drill_sprite_initCommandChange = function() {
 	var data = this._drill_controller._drill_data;
 	
 	// > 贴图参数 - 移动到
-	this["_drill_command_move_spriteData"] = null;
+	this["_drill_command_move_spriteData"] = undefined;
 	
 	// > 贴图参数 - 透明度
-	this["_drill_command_opacity_spriteData"] = null;
+	this["_drill_command_opacity_spriteData"] = undefined;
 	
 	// > 贴图参数 - 旋转
-	this["_drill_command_rotate_spriteData"] = null;
+	this["_drill_command_rotate_spriteData"] = undefined;
 	
 	// > 贴图参数 - 缩放X
-	this["_drill_command_scaleX_spriteData"] = null;
+	this["_drill_command_scaleX_spriteData"] = undefined;
 	// > 贴图参数 - 缩放Y
-	this["_drill_command_scaleY_spriteData"] = null;
+	this["_drill_command_scaleY_spriteData"] = undefined;
 }
 //==============================
 // * 2B指令叠加变化 - 帧刷新

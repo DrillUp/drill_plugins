@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.3]        行走图 - 事件漂浮文字
+ * @plugindesc [v2.4]        行走图 - 事件漂浮文字
  * @author Drill_up
  * 
  * 
@@ -23,11 +23,11 @@
  * 基于：
  *   - Drill_CoreOfWindowAuxiliary 系统-窗口辅助核心★★v1.9及以上★★
  * 可被扩展：
- *   - Drill_CoreOfColor           窗口字符-颜色核心
+ *   - Drill_CoreOfColor             窗口字符-颜色核心
  *     该插件能给事件漂浮文字设置自定义颜色和高级渐变色。
- *   - Drill_X_EventTextFilter     行走图-事件漂浮文字的滤镜效果[扩展]
+ *   - Drill_X_EventTextFilter       行走图-事件漂浮文字的滤镜效果[扩展]
  *     该插件能给事件的漂浮文字添加滤镜效果。
- *   - Drill_X_EventTextBackground 行走图-事件漂浮文字的背景[扩展]
+ *   - Drill_X_EventTextBackground   行走图-事件漂浮文字的背景[扩展]
  *     该插件能给事件的漂浮文字添加背景。
  *
  * -----------------------------------------------------------------------------
@@ -129,8 +129,12 @@
  * 事件注释：=>事件漂浮文字 : 轮播文本 : 修改轮播间隔[30]
  * 事件注释：=>事件漂浮文字 : 轮播文本 : 轮播模式[单次]
  * 事件注释：=>事件漂浮文字 : 轮播文本 : 轮播模式[循环]
+ * 事件注释：=>事件漂浮文字 : 轮播文本 : 轮播模式[随机]
  * 
  * 1.通过"=:"来设置多行的轮播文本，轮播文本数量不限，设置十几行也可以。
+ * 2.注意，每次轮播时，漂浮文字会被重新构建，
+ *   如果轮播的事件多，且轮播间隔太频繁，会造成较大性能消耗。
+ *   建议镜头内的轮播的事件小于20个，轮播间隔大于3帧。
  *
  * -----------------------------------------------------------------------------
  * ----可选设定 - 轮播插件指令
@@ -164,7 +168,7 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
  * 时间复杂度： o(n)*o(贴图处理) 每帧
- * 测试方法：   去物体管理层、地理管理层、鼠标管理层转一圈测试就可以了。
+ * 测试方法：   去各个管理层跑一圈进行性能测试。
  * 测试结果：   200个事件的地图中，消耗为：【32.48ms】
  *              100个事件的地图中，消耗为：【21.73ms】
  *               50个事件的地图中，消耗为：【10.55ms】
@@ -205,6 +209,8 @@
  * 添加了优化策略，减少性能消耗。
  * [v2.3]
  * 整理了内部模块结构，修复了开关关闭事件时事件漂浮文字不消失的bug。
+ * [v2.4]
+ * 添加了随机轮播的功能。
  * 
  * 
  * 
@@ -264,7 +270,7 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(n)*o(贴图处理)	每帧
-//		★性能测试因素	乱跑
+//		★性能测试因素	各个管理层跑一圈
 //		★性能测试消耗	全创建（44.70ms） 自动创建（10.55ms）
 //		★最坏情况		镜头内出现大量含有窗口的事件，并且随时都在更换文字。
 //		★备注			1.我不太相信这个消耗那么少，很可能计算量都转移到了贴图处理上。
@@ -278,7 +284,7 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
 //			->☆插件指令
 //			->☆事件注释
 //			->☆事件贴图
@@ -304,6 +310,9 @@
 //
 //		★家谱：
 //			大家族-漂浮文字
+//		
+//		★脚本文档：
+//			13.UI > 大家族-漂浮文字（脚本）.docx
 //		
 //		★插件私有类：
 //			* 漂浮文字控制器【Drill_ET_Controller】
@@ -380,7 +389,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_EventText = true;
@@ -511,7 +520,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				if( $gameMap.drill_ET_isEventExist( e_id ) == false ){ return; }
 				var e = $gameMap.event(e_id);
 				e.drill_ET_createController();
-				e._drill_ET_controller._drill_data['loop_textTank'].push( temp4 );
+				e._drill_ET_controller.drill_ET_addLoopText( temp4 );
 			}
 		}
 		if( e_id != null && args.length == 6 ){
@@ -553,7 +562,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 };
 //==============================
-// ** 插件指令 - 事件检查
+// * 插件指令 - 事件检查
 //==============================
 Game_Map.prototype.drill_ET_isEventExist = function( e_id ){
 	if( e_id == 0 ){ return false; }
@@ -584,7 +593,7 @@ Game_Event.prototype.setupPageSettings = function() {
 Game_Event.prototype.drill_ET_setupPageSettings = function() {
 	
 	// > 默认情况下，归位并置空
-	if( this._drill_ET_controller != null ){
+	if( this._drill_ET_controller != undefined ){
 		this._drill_ET_controller.drill_ET_setText( "" );
 		this._drill_ET_controller.drill_ET_setOffset( 0,0 );
 		this._drill_ET_controller.drill_ET_setLoopEnabled( false );
@@ -750,7 +759,7 @@ Game_Event.prototype.clearPageSettings = function() {
 	_drill_ET_c_clearPageSettings.call(this);
 	
 	// > 归位并置空
-	if( this._drill_ET_controller != null ){
+	if( this._drill_ET_controller != undefined ){
 		this._drill_ET_controller.drill_ET_setText( "" );
 		this._drill_ET_controller.drill_ET_setOffset( 0,0 );
 		this._drill_ET_controller.drill_ET_setLoopEnabled( false );
@@ -1162,18 +1171,18 @@ Game_Temp.prototype.drill_ET_getSpriteByEvent = function( ev ){
 //==============================
 var _drill_ET_c_initialize = Game_Event.prototype.initialize;
 Game_Event.prototype.initialize = function( mapId, eventId ){
-	this._drill_ET_controller = null;
+	this._drill_ET_controller = undefined;		//（要放前面，不然会盖掉子类的设置）
 	_drill_ET_c_initialize.call( this, mapId, eventId );
 }
 //==============================
 // * 控制器 - 创建
 //
-//			说明：	> 需要通过事件注释或插件指令创建，不会自发创建。
+//			说明：	> 需要通过事件注释或插件指令创建，不会自发创建。『节约事件数据存储空间』
 //==============================
 Game_Event.prototype.drill_ET_createController = function(){
 	
 	// > 已存在，跳过
-	if( this._drill_ET_controller != null ){ return; }
+	if( this._drill_ET_controller != undefined ){ return; }
 	
 	// > 创建控制器
 	var data = {
@@ -1184,10 +1193,6 @@ Game_Event.prototype.drill_ET_createController = function(){
 		"y":0,
 		"align":DrillUp.g_ET_align,
 		"frameVisible":DrillUp.g_ET_frameVisible,
-		
-		"loop_enabled":false,
-		"loop_textTank":[],
-		"loop_interval":DrillUp.g_ET_loopInterval,
 	}
 	this._drill_ET_controller = new Drill_ET_Controller( data );
 	
@@ -1200,7 +1205,7 @@ Game_Event.prototype.drill_ET_createController = function(){
 var _drill_ET_c_update = Game_Event.prototype.update;
 Game_Event.prototype.update = function(){
 	_drill_ET_c_update.call(this);
-	if( this._drill_ET_controller != null ){
+	if( this._drill_ET_controller != undefined ){
 		this._drill_ET_controller.drill_controller_update();
 	}
 }
@@ -1366,7 +1371,11 @@ Drill_ET_Controller.prototype.drill_ET_forceRefresh = function(){
 //##############################
 Drill_ET_Controller.prototype.drill_ET_setLoopEnabled = function( enabled ){
 	var data = this._drill_data;
-	data['loop_enabled'] = enabled;
+	if( enabled == true ){
+		data['loop_enabled'] = true;
+	}else{
+		data['loop_enabled'] = undefined;
+	}
 }
 //##############################
 // * C轮播 - 设置轮播文本【开放函数】
@@ -1376,12 +1385,29 @@ Drill_ET_Controller.prototype.drill_ET_setLoopEnabled = function( enabled ){
 //##############################
 Drill_ET_Controller.prototype.drill_ET_setLoopText = function( text_list ){
 	var data = this._drill_data;
-	data['loop_textTank'] = text_list;
 	if( text_list.length == 0 ){	//（空文本时，不播放）
-		data['loop_enabled'] = false;
+		data['loop_enabled'] = undefined;
+		data['loop_textTank'] = undefined;
+		this._drill_curLoopTime = 0;
+		this._drill_curLoopPos = 0;
+		return;
 	}
+	data['loop_textTank'] = text_list;
 	this._drill_curLoopTime = 0;
 	this._drill_curLoopPos = 0;
+};
+//##############################
+// * C轮播 - 添加轮播文本【开放函数】
+//
+//			参数：	> text 字符串
+//			返回：	> 无
+//##############################
+Drill_ET_Controller.prototype.drill_ET_addLoopText = function( text ){
+	var data = this._drill_data;
+	if( data['loop_textTank'] == undefined ){
+		data['loop_textTank'] = [];
+	}
+	data['loop_textTank'].push( text );
 };
 //##############################
 // * C轮播 - 设置轮播间隔【开放函数】
@@ -1396,7 +1422,7 @@ Drill_ET_Controller.prototype.drill_ET_setLoopInterval = function( loop_interval
 //##############################
 // * C轮播 - 设置轮播模式【开放函数】
 //
-//			参数：	> loop_mode 字符串（循环/单次）
+//			参数：	> loop_mode 字符串（单次/循环/随机）
 //			返回：	> 无
 //##############################
 Drill_ET_Controller.prototype.drill_ET_setLoopMode = function( loop_mode ){
@@ -1432,11 +1458,11 @@ Drill_ET_Controller.prototype.drill_controller_initData = function(){
 	// > B窗口内容
 	//	（无）
 	
-	// > C轮播
-	if( data['loop_enabled'] == undefined ){ data['loop_enabled'] = false };	//轮播 - 开关（继续/暂停）
-	if( data['loop_textTank'] == undefined ){ data['loop_textTank'] = [] };		//轮播 - 文本列表
-	if( data['loop_interval'] == undefined ){ data['loop_interval'] = 4 };		//轮播 - 轮播间隔
-	if( data['loop_mode'] == undefined ){ data['loop_mode'] = "循环" };			//轮播 - 轮播模式
+	// > C轮播（这里的参数都节约一点，默认都 undefined ）『节约事件数据存储空间』
+	if( data['loop_enabled'] == undefined ){ data['loop_enabled'] = undefined };	//轮播 - 开关（布尔，继续/暂停）
+	if( data['loop_textTank'] == undefined ){ data['loop_textTank'] = undefined };	//轮播 - 文本列表（字符串列表）
+	if( data['loop_interval'] == undefined ){ data['loop_interval'] = undefined };	//轮播 - 轮播间隔（数字）
+	if( data['loop_mode'] == undefined ){ data['loop_mode'] = undefined };			//轮播 - 轮播模式（字符串）
 }
 //==============================
 // * 控制器 - 初始化子功能
@@ -1590,26 +1616,65 @@ Drill_ET_Controller.prototype.drill_controller_updateLoop = function(){
 	if( data['loop_enabled'] != true ){ return; }
 	var ev = $gameMap.event( data['eventId'] );
 	if( ev == undefined ){ return; }
-		
+	
+	// > 控制器隐藏时，关闭轮播（对照函数 drill_controller_updateAttr_Visible ）
+	if( data['visible'] == false ){ return; }
+	
+	// > 事件被删除时，关闭轮播
+	if( ev._erased == true ){ return; }
+	
+	// > 事件透明时，关闭轮播
+	if( ev._transparent == true ){ return; }
+	
+	
+	// > 参数准备
+	var loop_textTank = this.drill_controller_getData_loop_textTank();
+	var loop_interval = this.drill_controller_getData_loop_interval();
+	var loop_mode = this.drill_controller_getData_loop_mode();
+	
 	// > 时间+1
 	this._drill_curLoopTime += 1;
 	
 	// > 执行轮播
-	if( this._drill_curLoopTime % data['loop_interval'] == 0 ){
+	if( this._drill_curLoopTime % loop_interval == 0 ){
 		
 		// > 循环
-		var index = this._drill_curLoopPos % data['loop_textTank'].length;
+		var index = this._drill_curLoopPos % loop_textTank.length;
 		// > 单次
-		if( data['loop_mode'] == "单次" &&
-			this._drill_curLoopPos >= data['loop_textTank'].length ){
-			index = data['loop_textTank'].length-1;
+		if( loop_mode == "单次" &&
+			this._drill_curLoopPos >= loop_textTank.length ){
+			index = loop_textTank.length-1;
 		}
-		this._drill_curText = data['loop_textTank'][ index ];
+		// > 随机
+		if( loop_mode == "随机" ){
+			index = Math.floor( Math.random()*loop_textTank.length );
+		}
+		this._drill_curText = loop_textTank[ index ];
 		this._drill_curLoopPos += 1;
 		this.drill_ET_forceRefresh();		//（轮播时强制刷新）
 	}
 }
-
+//==============================
+// * C轮播 - 获取 文本列表
+//==============================
+Drill_ET_Controller.prototype.drill_controller_getData_loop_textTank = function() {
+	if( this._drill_data['loop_textTank'] === undefined ){ return []; }
+	return this._drill_data['loop_textTank'];
+}
+//==============================
+// * C轮播 - 获取 轮播间隔
+//==============================
+Drill_ET_Controller.prototype.drill_controller_getData_loop_interval = function() {
+	if( this._drill_data['loop_interval'] === undefined ){ return DrillUp.g_ET_loopInterval; }
+	return this._drill_data['loop_interval'];
+}
+//==============================
+// * C轮播 - 获取 轮播模式
+//==============================
+Drill_ET_Controller.prototype.drill_controller_getData_loop_mode = function() {
+	if( this._drill_data['loop_mode'] === undefined ){ return "循环"; }
+	return this._drill_data['loop_mode'];
+}
 
 
 //=============================================================================
@@ -1760,7 +1825,6 @@ Drill_ET_WindowSprite.prototype.drill_sprite_initSelf = function(){
 Drill_ET_WindowSprite.prototype.drill_sprite_destroyChild = function(){
 	
 	// > 测试
-	// （可以去 物体管理层，试试三种删除事件的方法，看看此贴图被删除的提示信息。）
 	//alert( "漂浮文字贴图跟随事件"+this._drill_event._eventId+"一并被删除。" );
 	
 	// > 销毁 - A主体

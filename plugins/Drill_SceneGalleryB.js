@@ -1431,7 +1431,7 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
 //			->☆全局存储
 //			->☆存储数据
 //			->☆插件指令
@@ -1464,7 +1464,7 @@
 //					->帮助图
 //					->原图查看器窗口
 //				->原图全部全加载
-//				->☆原型链规范
+//				->☆原型链规范（Scene_Drill_SGaB）
 //			->选项窗口【Drill_SGaB_SelectWindow】
 //			->显示窗口【Drill_SGaB_DescWindow】
 //			->完成度窗口【Drill_SGaB_CompletionWindow】
@@ -1472,6 +1472,9 @@
 //				
 //			
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -1525,7 +1528,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_SceneGalleryB = true;
@@ -1534,27 +1537,32 @@
 	
 	
 	//==============================
-	// * 变量获取 - 指针与边框
+	// * 静态数据 - 指针与边框
 	//				（~struct~DrillCursor）
 	//==============================
 	DrillUp.drill_SGaB_initMenuCursor = function( dataFrom ) {
 		var data = {};
+		
 		data['mog_enabled'] = String( dataFrom["是否启用mog菜单指针"] || "true") == "true";
 		data['mog_borderEnabled'] = String( dataFrom["是否启用mog菜单边框"] || "true") == "true";
+		
 		data['MCu_enabled'] = String( dataFrom["是否启用菜单指针"] || "true") == "true";
 		data['MCu_lock'] = String( dataFrom["是否锁定菜单指针样式"] || "false") == "true";
 		data['MCu_style'] = Number( dataFrom["锁定的菜单指针样式"] || 1);
+		
 		data['MCB_rectEnabled'] = String( dataFrom["是否启用闪烁白矩形"] || "true") == "true";
 		data['MCB_enabled'] = String( dataFrom["是否启用菜单边框"] || "true") == "true";
 		data['MCB_lock'] = String( dataFrom["是否锁定菜单边框样式"] || "false") == "true";
 		data['MCB_style'] = Number( dataFrom["锁定的菜单边框样式"] || 1);
+		
 		data['MSB_enabled'] = String( dataFrom["是否启用滚动条"] || "true") == "true";
 		data['MSB_lock'] = String( dataFrom["是否锁定滚动条样式"] || "false") == "true";
 		data['MSB_style'] = Number( dataFrom["锁定的滚动条样式"] || 1);
+		
 		return data;
 	}
 	//==============================
-	// * 变量获取 - 移动动画
+	// * 静态数据 - 移动动画
 	//				（~struct~DrillWindowMoving）
 	//==============================
 	DrillUp.drill_SGaB_initWindowMoving = function( dataFrom ) {
@@ -1570,7 +1578,7 @@
 		return data;
 	}
 	//==============================
-	// * 变量获取 - 布局
+	// * 静态数据 - 布局
 	//				（~struct~DrillWindowLayout）
 	//==============================
 	DrillUp.drill_SGaB_initWindowLayout = function( dataFrom ) {
@@ -1583,7 +1591,7 @@
 		return data;
 	}
 	//==============================
-	// * 变量获取 - 选项窗口参数
+	// * 静态数据 - 选项窗口参数
 	//				（~struct~DrillSelectWindow）
 	//==============================
 	DrillUp.drill_SGaB_initCommandWindow = function( dataFrom ) {
@@ -1626,7 +1634,7 @@
 		return data;
 	}
 	//==============================
-	// * 变量获取 - 选项按钮组
+	// * 静态数据 - 选项按钮组
 	//				（~struct~DrillCommandButton）
 	//==============================
 	DrillUp.drill_SGaB_initCommandButton = function( dataFrom ) {
@@ -1648,7 +1656,7 @@
 		return data;
 	}
 	//==============================
-	// * 变量获取 - 内容
+	// * 静态数据 - 内容
 	//				（~struct~DrillSGaB）
 	//==============================
 	DrillUp.drill_SGaB_initContext = function( dataFrom ) {
@@ -2896,7 +2904,7 @@ Scene_Drill_SGaB.prototype.drill_updateSinglePictureMode = function() {
 
 
 //=============================================================================
-// ** ☆原型链规范
+// ** ☆原型链规范（Scene_Drill_SGaB）
 //
 //			说明：	> 此处专门补上缺失的原型链，未缺失的则注释掉。
 //					（插件完整的功能目录去看看：功能结构树）

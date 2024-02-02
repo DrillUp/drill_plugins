@@ -26,8 +26,6 @@
  *   - Drill_EventThrough        体积-事件穿透关系
  *     通过该插件，才能进行物体整体移动。
  * 可被扩展：
- *   - Drill_MouseTriggerEvent   鼠标-鼠标触发事件★★v1.2以上★★
- *     通过鼠标触发插件，能对事件整体进行触发。
  *   - Drill_MoveSpeed           物体-移动速度★★v1.3以上★★
  *     通过移动速度插件，精确的速度也能够统一。
  * 
@@ -56,13 +54,10 @@
  *   (2.注意要关闭事件"固定朝向"的设置。
  *   (3.添加标签后，事件会立即统一朝向，不会存在相同朝向标签的事件会出现
  *      朝向不同的情况。
- * 触发一体化：
- *   (1.独立开关开启时，统一开启/关闭所有同标签事件的开关。
- *   (2.通过鼠标触发插件，能对相同标签的全部事件整体进行触发。
  * 设计：
- *   (1.你可以使用 移动一体化和触发一体化 来设计占多格图块的大方块。
- *      体积大的方块会承受多次攻击，具体去 物体触发管理层 看看。
- *   (2.地图管理层右侧有 速度统一 的事件示例，左右两侧有两个方块。
+ *   (1.你可以使用 移动一体化 来设计占多格图块的大方块。
+ *      体积大的方块会承受多次攻击，具体去 物体触发管理层示例 看看。
+ *   (2.地图管理层示例 右侧有 速度统一 的事件，左右两侧有两个方块。
  *      玩家开启后，方块和玩家合并，变成了3格图块的大物体，可用来设计华容
  *      道谜题。也可以将方块作为玩家装载的两门大炮，大炮持续发射弹丸，可
  *      用来炸碎石头。
@@ -74,12 +69,11 @@
  * 
  * 事件注释：=>事件一体化 : 移动标签 : 大箱子_移动_A
  * 事件注释：=>事件一体化 : 朝向标签 : 朝向_A
- * 事件注释：=>事件一体化 : 触发标签 : 触发_A
  * 事件注释：=>事件一体化 : 开启速度统一
  *
  * 1.标签后面可以是任意自定义的字符串，但是字符串不能出现空格。
  * 2.可以将多个事件组合成一个大体积的箱子。（朝向固定+移动+触发一体化）
- *   或者一个大队伍的小爱丽丝。（移动+朝向一体化）
+ *   或者一个大整体的小爱丽丝。（移动+朝向一体化）
  * 3.整体速度以走动中的"动力源"的速度为准。多个动力源时，不管速度谁快
  *   谁慢，全部按照正在走的那个事件/玩家的速度来走。
  * 
@@ -94,7 +88,6 @@
  * 
  * 插件指令：>事件一体化 : 本事件 : 设置移动标签 : 大箱子_移动_A
  * 插件指令：>事件一体化 : 本事件 : 设置朝向标签 : 大箱子_朝向_A
- * 插件指令：>事件一体化 : 本事件 : 设置触发标签 : 大箱子_触发_A
  * 插件指令：>事件一体化 : 本事件 : 去除移动标签
  * 插件指令：>事件一体化 : 本事件 : 去除朝向标签
  * 插件指令：>事件一体化 : 本事件 : 去除触发标签
@@ -215,6 +208,9 @@
 //		★家谱：
 //			无
 //		
+//		★脚本文档：
+//			无
+//		
 //		★插件私有类：
 //			无
 //		
@@ -238,11 +234,6 @@
 //			2.关于容器增量：
 //				如果使用增加/去除 这种增量性质的容器，会造成 $gamePlayer与事件放在同一个容器时，【二者难以区分直接紊乱】。
 //				所以每次变化还不如直接重刷容器。
-//			3.考虑到标签的问题，这里强制每个事件只能设置一个标签，原先的多标签被弃用：
-//					//this._drill_EU['trigger'] = {};
-//					//this._drill_EU['trigger'].enabled = false;
-//					//this._drill_EU['trigger'].tags = {};
-//				原因是：当标签绑定在玩家身上时，发现两个标签使得玩家一次移动变成了两次。（如果继续深入下去，程序会极其复杂）
 //				
 //		★存在的问题：
 //			1.该插件没有通过events获取sprites的方法。也无法展开这个方面。（目前使用缓冲池解决）
@@ -258,7 +249,10 @@
 	//==============================
 	var DrillUp = DrillUp || {}; 
 	DrillUp.g_EU_PluginTip_curName = "Drill_EventUnification.js 体积-事件一体化";
-	DrillUp.g_EU_PluginTip_baseList = ["Drill_EventThrough.js 体积-事件穿透关系"];
+	DrillUp.g_EU_PluginTip_baseList = [
+		"Drill_EventSelfSwitch.js 物体-独立开关",
+		"Drill_EventThrough.js 体积-事件穿透关系"
+	];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
@@ -282,7 +276,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_EventUnification = true;
@@ -299,7 +293,8 @@
 //=============================================================================
 // * >>>>基于插件检测>>>>
 //=============================================================================
-if( Imported.Drill_EventThrough ){
+if( Imported.Drill_EventSelfSwitch &&
+	Imported.Drill_EventThrough ){
 	
 	
 //=============================================================================
@@ -347,10 +342,6 @@ Game_Interpreter.prototype.pluginCommand = function(command, args ){
 				e._drill_EU['rotateNeedInit'] = true;
 				$gameTemp._drill_EU_needRestatistics = true;
 			}
-			if( e && type == "设置触发标签" ){
-				e._drill_EU['trigger'] = temp1;
-				$gameTemp._drill_EU_needRestatistics = true;
-			}
 		}
 		if(args.length == 4){
 			var type = String(args[3]);
@@ -361,10 +352,6 @@ Game_Interpreter.prototype.pluginCommand = function(command, args ){
 			}
 			if( e && type == "去除朝向标签" ){
 				e._drill_EU['rotate'] = "" ;
-				$gameTemp._drill_EU_needRestatistics = true;
-			}
-			if( e && type == "去除触发标签" ){
-				e._drill_EU['trigger'] = "" ;
 				$gameTemp._drill_EU_needRestatistics = true;
 			}
 			if( e && type == "开启速度统一" ){
@@ -444,7 +431,6 @@ Game_Player.prototype.initMembers = function(){
 	_drill_EU_p_initMembers.call(this);
 	this._drill_EU['move'] = DrillUp.g_EU_move;				//移动标签
 	this._drill_EU['rotate'] = DrillUp.g_EU_rotate;			//朝向标签
-	this._drill_EU['speed'] = DrillUp.g_EU_speed;			//触发标签
 	this._drill_EU['rotateNeedInit'] = false;				//朝向初始化标记
 	if( this.drill_EU_hasMoveTag() ){
 		this._drill_ETh_char[ "_drill_EU_"+this._drill_EU['move'] ] = true;		//穿透标签
@@ -463,7 +449,6 @@ Game_CharacterBase.prototype.initMembers = function(){
 	this._drill_EU = {};
 	this._drill_EU['move'] = "";				//移动标签
 	this._drill_EU['rotate'] = "";				//朝向标签
-	this._drill_EU['trigger'] = "";				//触发标签
 	this._drill_EU['speed'] = false;			//速度统一标记
 	this._drill_EU['rotateNeedInit'] = false;	//朝向初始化标记
 	this._drill_EU_orgSpeed = null;
@@ -481,12 +466,6 @@ Game_CharacterBase.prototype.drill_EU_hasMoveTag = function(){
 Game_CharacterBase.prototype.drill_EU_hasRotateTag = function(){
 	return this._drill_EU['rotate'] !== "";
 }
-//==============================
-// * 物体 - 是否含有标签 - 触发
-//==============================
-Game_CharacterBase.prototype.drill_EU_hasTriggerTag = function(){
-	return this._drill_EU['trigger'] !== "";
-}
 
 //=============================================================================
 // ** 容器
@@ -499,7 +478,6 @@ Game_Temp.prototype.initialize = function(){
 	_drill_EU_temp_initialize.call(this);
 	this._drill_EU_map_move = {};
 	this._drill_EU_map_rotate = {};
-	this._drill_EU_map_trigger = {};
 	this._drill_EU_needRestatistics = true;
 };
 //==============================
@@ -509,7 +487,6 @@ var _drill_EU_gmap_setup = Game_Map.prototype.setup;
 Game_Map.prototype.setup = function(mapId ){
 	$gameTemp._drill_EU_map_move = {};
 	$gameTemp._drill_EU_map_rotate = {};
-	$gameTemp._drill_EU_map_trigger = {};
 	$gameTemp._drill_EU_needRestatistics = true;
 	_drill_EU_gmap_setup.call(this,mapId);
 }
@@ -540,7 +517,6 @@ Game_Map.prototype.drill_EU_updateRestatistics = function(){
 	events.push( $gamePlayer );
 	$gameTemp._drill_EU_map_move = {};
 	$gameTemp._drill_EU_map_rotate = {};
-	$gameTemp._drill_EU_map_trigger = {};
 	for (var i = 0; i < events.length; i++ ){  
 		var temp_event = events[i];
 		
@@ -565,14 +541,6 @@ Game_Map.prototype.drill_EU_updateRestatistics = function(){
 				temp_event.setDirection( temp_event.direction() );
 			}
 		}
-		
-		// > 触发标签 - 统计
-		if( temp_event.drill_EU_hasTriggerTag() ){
-			if( !$gameTemp._drill_EU_map_trigger[ temp_event._drill_EU['trigger'] ] ){
-				$gameTemp._drill_EU_map_trigger[ temp_event._drill_EU['trigger'] ] = [];
-			}
-			$gameTemp._drill_EU_map_trigger[ temp_event._drill_EU['trigger'] ].push(temp_event);
-		}
 	}
 }
 //==============================
@@ -588,13 +556,6 @@ Game_Temp.prototype.drill_EU_getEventsByMoveTag = function(e_tag ){
 Game_Temp.prototype.drill_EU_getEventsByRotateTag = function(e_tag ){
 	if( !this._drill_EU_map_rotate[e_tag] ){ return []; }
 	return this._drill_EU_map_rotate[e_tag];
-};
-//==============================
-// * 容器 - 根据标签获取 - 触发
-//==============================
-Game_Temp.prototype.drill_EU_getEventsByTriggerTag = function(e_tag ){
-	if( !this._drill_EU_map_trigger[e_tag] ){ return []; }
-	return this._drill_EU_map_trigger[e_tag];
 };
 
 
@@ -626,10 +587,6 @@ Game_Event.prototype.drill_EU_setupTags = function(){
 					if( type == "朝向标签" ){
 						this._drill_EU['rotate'] = temp1;
 						this._drill_EU['rotateNeedInit'] = true;			
-						$gameTemp._drill_EU_needRestatistics = true;
-					}
-					if( type == "触发标签" ){
-						this._drill_EU['trigger'] = temp1;
 						$gameTemp._drill_EU_needRestatistics = true;
 					}
 				}
@@ -878,34 +835,6 @@ Game_Map.prototype.drill_EU_setDirectionByRotateTag = function( d, e_tag  ){
 		e.resetStopCount();
 	}
 }
-
-
-//=============================================================================
-// ** 触发一体化
-//=============================================================================
-//==============================
-// * 独立开关触发设置
-//==============================
-var _drill_EU_setValue = Game_SelfSwitches.prototype.setValue;
-Game_SelfSwitches.prototype.setValue = function( key, value ){
-	
-	if( $gameMap._mapId === key[0] ){
-		var e = $gameMap.event(key[1]);
-		if( e && e.drill_EU_hasTriggerTag() ){
-			var ev_list = $gameTemp.drill_EU_getEventsByTriggerTag( e._drill_EU['trigger'] );		//触发时，所有相同标签的事件同时触发
-			for(var i=0; i < ev_list.length; i++){
-				var e_key = [ key[0], ev_list[i]._eventId, key[2] ];
-				if( value ){ 
-					this._data[e_key] = true;
-				} else {
-					delete this._data[e_key];
-				}
-			}
-		}
-	}
-	_drill_EU_setValue.call(this, key, value);
-	
-};
 
 
 //=============================================================================

@@ -62,7 +62,7 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
  * 时间复杂度： o(n^2) 每帧
- * 测试方法：   在遇敌管理层进行测试。
+ * 测试方法：   在公共事件管理层进行测试。
  * 测试结果：   地图界面中，平均消耗为：【5ms以下】
  * 
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
@@ -302,7 +302,7 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(n)
-//		★性能测试因素	对话管理层
+//		★性能测试因素	公共事件管理层
 //		★性能测试消耗	（太小，没有找到）
 //		★最坏情况		暂无
 //		★备注			暂无
@@ -316,6 +316,9 @@
 //				->脚下区域记录
 //
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -357,7 +360,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_PlayerRegionTiming = true;
@@ -366,7 +369,7 @@
 	
 	
 	//==============================
-	// * 变量获取 - 区域触发
+	// * 静态数据 - 区域触发
 	//				（~struct~PRTTrigger）
 	//==============================
 	DrillUp.drill_PRT_triggerInit = function( dataFrom ){
@@ -599,12 +602,7 @@ Game_Player.prototype.drill_PRT_updateCommonEvent = function() {
 				temp_data['regionIdTank'].contains( this._drill_PRT_lastFloor ) == false ){
 				
 				// > 执行公共事件
-				var e_data = {
-					'type':"公共事件",
-					'pipeType': temp_data['pipeType'],
-					'commonEventId': temp_data['commonEventId'],
-				};
-				$gameMap.drill_LCT_addPipeEvent( e_data );
+				this.drill_PRT_doCommonEvent( temp_data['pipeType'], temp_data['commonEventId'], "" );
 			}
 		}
 		if( temp_data['triggerMode'] == "离开区域时触发" ){
@@ -612,18 +610,33 @@ Game_Player.prototype.drill_PRT_updateCommonEvent = function() {
 				temp_data['regionIdTank'].contains( this._drill_PRT_lastFloor ) == true ){
 					
 				// > 执行公共事件
-				var e_data = {
-					'type':"公共事件",
-					'pipeType': temp_data['pipeType'],
-					'commonEventId': temp_data['commonEventId'],
-				};
-				$gameMap.drill_LCT_addPipeEvent( e_data );
+				this.drill_PRT_doCommonEvent( temp_data['pipeType'], temp_data['commonEventId'], "" );
 			}
 		}
 		temp_data['activeCount'] += 1;
 	}
 	
 	this._drill_PRT_lastFloor = r_id;
+};
+//==============================
+// * 区域触发 - 『执行公共事件』（地图界面）
+//==============================
+Game_Player.prototype.drill_PRT_doCommonEvent = function( pipeType, commonEventId, callBack_str ){
+	
+	// > 插件【地图-多线程】
+	if( Imported.Drill_LayerCommandThread ){
+		var e_data = {
+			'type':"公共事件",
+			'pipeType': pipeType,
+			'commonEventId': commonEventId,
+			'callBack_str':callBack_str,
+		};
+		$gameMap.drill_LCT_addPipeEvent( e_data );
+		
+	// > 默认执行
+	}else{
+		$gameTemp.reserveCommonEvent( commonEventId );
+	}
 };
 
 

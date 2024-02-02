@@ -471,6 +471,9 @@
 //		★家谱：
 //			无
 //		
+//		★脚本文档：
+//			无
+//		
 //		★插件私有类：
 //			无
 //		
@@ -509,7 +512,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_WindowMenuButton = true;
@@ -539,7 +542,7 @@
     DrillUp.g_WMB_btn_gameEnd_zIndex = Number(DrillUp.parameters['游戏结束按钮优先级'] || 1) ;
 	
 	//==============================
-	// * 变量获取 - 菜单按钮
+	// * 静态数据 - 菜单按钮
 	//				（~struct~MenuBtn）
 	//==============================
 	DrillUp.drill_WMB_initMenuBtn = function( dataFrom ){
@@ -874,25 +877,39 @@ Scene_Menu.prototype.drill_WMB_methodCall = function( symbol ) {
 			
 			// > 执行公共事件（切出当前所有菜单Scene）
 			if( temp_btn['commonEventEnable'] ){
-				if( Imported.Drill_LayerCommandThread ){	//【Drill_LayerCommandThread  地图 - 多线程】
-					if(SceneManager._stack.length > 0){ SceneManager.pop(); }	
-					if(SceneManager._stack.length > 0){ SceneManager.pop(); }	
-					if(SceneManager._stack.length > 0){ SceneManager.pop(); }	
-					//$gameTemp.reserveCommonEvent( temp_btn['commonEventId'] );
-					SoundManager.playOk();
-					var e_data = {
-						'type':"公共事件",
-						'pipeType': temp_btn['pipeType'],
-						'commonEventId': temp_btn['commonEventId'],
-					};
-					$gameMap.drill_LCT_addPipeEvent( e_data );
-				}else{
-					alert( DrillUp.drill_WMB_getPluginTip_NoSupportPlugin( temp_btn['btn_name'] ) );
-				}
+				
+				SoundManager.playOk();
+				this.drill_WMB_doCommonEvent( temp_btn['btn_name'], temp_btn['pipeType'], temp_btn['commonEventId'], "" );
 			}
 		}
 	}
 }
+//==============================
+// * 自定义按钮 - 『执行公共事件』（地图界面）
+//==============================
+Scene_Menu.prototype.drill_WMB_doCommonEvent = function( btn_name, pipeType, commonEventId, callBack_str ){
+	
+	// > 插件【地图-多线程】
+	if( Imported.Drill_LayerCommandThread ){
+		
+		// > 跳出界面
+		if(SceneManager._stack.length > 0){ SceneManager.pop(); }
+		if(SceneManager._stack.length > 0){ SceneManager.pop(); }
+		if(SceneManager._stack.length > 0){ SceneManager.pop(); }
+		
+		var e_data = {
+			'type': "公共事件",
+			'pipeType': pipeType,
+			'commonEventId': commonEventId,
+			'callBack_str': callBack_str,
+		};
+		$gameMap.drill_LCT_addPipeEvent( e_data );
+		
+	// > 未配置插件 提示
+	}else{
+		alert( DrillUp.drill_WMB_getPluginTip_NoSupportPlugin( btn_name ) );
+	}
+};
 //==============================
 // * 自定义按钮 - 额外添加显示的按钮
 //==============================

@@ -157,6 +157,9 @@
 //		★家谱：
 //			无
 //		
+//		★脚本文档：
+//			无
+//		
 //		★插件私有类：
 //			无
 //		
@@ -189,7 +192,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_EventPositionRecorder = true;
@@ -537,8 +540,8 @@ Game_Event.prototype.setupPage = function() {
 Game_Event.prototype.drill_EPR_setupPressSwitch = function() {
 	
 	// > 第一次出生，强制读取第一页注释（防止离开地图后，回来，开关失效）
-	if( !this._erased && this.event() && this.event().pages[0] && this._drill_EPR_isFirstBirth ){ 
-		this._drill_EPR_isFirstBirth = false;
+	if( !this._erased && this.event() && this.event().pages[0] && this._drill_EPR_isFirstBirth == true ){ 
+		this._drill_EPR_isFirstBirth = undefined;		//『节约临时参数存储空间』
 		this.drill_EPR_readPage( this.event().pages[0].list );
 	}
 	

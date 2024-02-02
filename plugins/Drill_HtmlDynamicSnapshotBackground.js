@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        游戏窗体 - 天窗层的多层背景
+ * @plugindesc [v1.2]        游戏窗体 - 天窗层的多层背景
  * @author Drill_up
  * 
  * @Drill_LE_param "背景层-%d"
@@ -38,9 +38,11 @@
  *      只有天窗层才能使用动态快照效果。
  *   (2.游戏中所有的画面都会被动态快照实时播放，
  *      但不包括天窗层的贴图，以及动态快照自己。
- * 细节：
- *   (1.默认情况下 所有背景 都是隐藏的，需要插件指令手动显示。
+ *   (3.默认情况下 所有背景 都是隐藏的，需要插件指令手动显示。
  *      另外，如果开了存储功能，插件指令操作的变化结果是永久性的。
+ * 预加载：
+ *   (1.插件中可自定义指定资源是否预加载，
+ *      预加载相关介绍可以去看看"1.系统 > 关于预加载.docx"。
  * 
  * -----------------------------------------------------------------------------
  * ----关联文件
@@ -719,6 +721,11 @@
  * @parent ---贴图---
  * @desc y轴方向平移，正数向上，负数向下，单位像素。0为贴在最上面。
  * @default 0
+ * 
+ * @param 平铺的旋转角度
+ * @parent ---贴图---
+ * @desc 平铺图形的旋转角度。
+ * @default 0.0
  *
  * @param 透明度
  * @parent ---贴图---
@@ -727,6 +734,14 @@
  * @max 255
  * @desc 0为完全透明，255为完全不透明。
  * @default 255
+ *
+ * @param 是否预加载
+ * @parent ---贴图---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭，预加载详细介绍可见："1.系统 > 关于预加载.docx"。
+ * @default false
  *
  * @param 混合模式
  * @parent ---贴图---
@@ -906,8 +921,9 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
 //			->☆插件指令
+//			->☆预加载
 //			->☆存储数据
 //			
 //			->☆控制器与贴图
@@ -933,6 +949,9 @@
 //
 //		★家谱：
 //			大家族-屏幕快照
+//		
+//		★脚本文档：
+//			22.游戏窗体 > 动态快照-天窗层（脚本）.docx
 //		
 //		★插件私有类：
 //			* 天窗层背景控制器【Drill_HDSB_Controller】
@@ -983,7 +1002,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_HtmlDynamicSnapshotBackground = true;
@@ -991,7 +1010,7 @@
     DrillUp.parameters = PluginManager.parameters('Drill_HtmlDynamicSnapshotBackground');
 
 	//==============================
-	// * 变量获取 - 背景
+	// * 静态数据 - 背景
 	//				（~struct~HDSBBackground）
 	//==============================
 	DrillUp.drill_HDSB_backgroundInit = function( dataFrom ) {
@@ -1004,6 +1023,7 @@
 		// > 贴图
 		data['src_img'] = String( dataFrom["资源-背景"] || "");
 		data['src_img_file'] = "img/Special__layer/";
+		data['preload'] = String( dataFrom["是否预加载"] || "false") == "true";
 		
 		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
 		data['tint'] = Number( dataFrom["图像-色调值"] || 0);
@@ -1017,6 +1037,7 @@
 		// > A主体
 		data['x'] = Number( dataFrom["平移-背景 X"] || 0);
 		data['y'] = Number( dataFrom["平移-背景 Y"] || 0);
+		data['parentRotate'] = Number( dataFrom["平铺的旋转角度"] || 0.0);
 		
 		// > B基本变化
 		data['opacity'] = Number( dataFrom["透明度"] || 255);
@@ -1049,7 +1070,7 @@
 			var temp = JSON.parse(DrillUp.parameters["背景层-" + String(i+1) ]);
 			DrillUp.g_HDSB_layers[i] = DrillUp.drill_HDSB_backgroundInit( temp );
 		}else{
-			DrillUp.g_HDSB_layers[i] = null;		//（强制设为空值，节约存储资源）
+			DrillUp.g_HDSB_layers[i] = undefined;		//（强制设为空值，节约存储资源）
 		}
 	}
 	
@@ -1546,6 +1567,46 @@ Game_Interpreter.prototype.drill_HDSB_getArgNumList = function( arg_str ){
 };
 
 
+//=============================================================================
+// ** ☆预加载
+//
+//			说明：	> 对指定资源贴图标记不删除，可以防止重建导致的浪费资源，以及资源显示时闪烁问题。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 预加载 - 初始化
+//==============================
+var _drill_HDSB_preload_initialize = Game_Temp.prototype.initialize;
+Game_Temp.prototype.initialize = function() {
+	_drill_HDSB_preload_initialize.call(this);
+	this.drill_HDSB_preloadInit();
+}
+//==============================
+// * 预加载 - 版本校验
+//==============================
+if( Utils.generateRuntimeId == undefined ){
+	alert( DrillUp.drill_HDSB_getPluginTip_LowVersion() );
+}
+//==============================
+// * 预加载 - 执行资源预加载
+//
+//			说明：	> 遍历全部资源，提前预加载标记过的资源。
+//==============================
+Game_Temp.prototype.drill_HDSB_preloadInit = function() {
+	this._drill_HDSB_cacheId = Utils.generateRuntimeId();	//资源缓存id
+	this._drill_HDSB_preloadTank = [];						//bitmap容器
+	for( var i = 0; i < DrillUp.g_HDSB_layers.length; i++ ){
+		var temp_data = DrillUp.g_HDSB_layers[i];
+		if( temp_data == undefined ){ continue; }
+		if( temp_data['preload'] != true ){ continue; }
+		
+		this._drill_HDSB_preloadTank.push( 
+			ImageManager.reserveBitmap( temp_data['src_img_file'], temp_data['src_img'], temp_data['tint'], temp_data['smooth'], this._drill_HDSB_cacheId ) 
+		);
+	}
+}
+
+
 //#############################################################################
 // ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
@@ -1882,7 +1943,6 @@ Scene_MenuBase.prototype.drill_HDSB_updateDestroy = Scene_Map.prototype.drill_HD
 // **						->暂停/继续
 // **						->销毁
 // **					->A主体
-// **						->3d效果
 // **					->B基本变化
 // **					->D指令叠加变化
 // **						> 主体贴图>移动到
@@ -1933,13 +1993,16 @@ Drill_HDSB_Controller.prototype.initialize = function( data ){
 //			说明：	> 此函数必须在 帧刷新 中手动调用执行。
 //##############################
 Drill_HDSB_Controller.prototype.drill_controller_update = function(){
+	this.drill_controller_updateDelayingCommandImportant();		//帧刷新 - E延迟指令 - 时间流逝
 	if( this._drill_data['pause'] == true ){ return; }
-	this.drill_controller_updateAttr();					//帧刷新 - A主体
-	this.drill_controller_updateChange_Position();		//帧刷新 - B基本变化 - 平移
-	this.drill_controller_updateCommandChange();		//帧刷新 - D指令叠加变化
-	this.drill_controller_updateDelayingCommand();		//帧刷新 - E延迟指令
-	this.drill_controller_updateEffect();				//帧刷新 - F自变化效果
-	this.drill_controller_updateCheckNaN();				//帧刷新 - A主体 - 校验值
+	this.drill_controller_updateAttr();							//帧刷新 - A主体
+	this.drill_controller_updateChange_Position();				//帧刷新 - B基本变化 - 平移
+	this.drill_controller_updateChange_Rotation();				//帧刷新 - B基本变化 - 旋转
+	this.drill_controller_updateChange_MoveRange();				//帧刷新 - B基本变化 - 平铺范围
+	this.drill_controller_updateCommandChange();				//帧刷新 - D指令叠加变化
+	this.drill_controller_updateDelayingCommand();				//帧刷新 - E延迟指令 - 执行延迟指令
+	this.drill_controller_updateEffect();						//帧刷新 - F自变化效果
+	this.drill_controller_updateCheckNaN();						//帧刷新 - A主体 - 校验值
 }
 //##############################
 // * 控制器 - 重设数据【标准函数】
@@ -2044,6 +2107,7 @@ Drill_HDSB_Controller.prototype.drill_controller_initData = function(){
 	// > A主体
 	if( data['x'] == undefined ){ data['x'] = 0 };													//A主体 - 平移X
 	if( data['y'] == undefined ){ data['y'] = 0 };													//A主体 - 平移Y
+	if( data['parentRotate'] == undefined ){ data['parentRotate'] = 0 };							//A主体 - 平铺的旋转角度
 	
 	// > B基本变化
 	if( data['opacity'] == undefined ){ data['opacity'] = 255 };									//B基本变化 - 透明度
@@ -2055,7 +2119,7 @@ Drill_HDSB_Controller.prototype.drill_controller_initData = function(){
 	// > E延迟指令（无）
 	
 	// > F自变化效果
-	//	（见 变量获取）
+	//	（见 静态数据）
 }
 //==============================
 // * 初始化 - 初始化子功能
@@ -2178,7 +2242,14 @@ Drill_HDSB_Controller.prototype.drill_controller_initChange = function() {
 	this._drill_skewY = 0;
 	
 	// > 贴图 - 旋转
-	this._drill_rotation = 0;
+	this._drill_rotation = data['parentRotate'];	//（平铺的旋转角度）
+	this._drill_rotationChange = 0;
+	
+	// > 贴图 - 平铺范围
+	this._drill_move_x = 0;
+	this._drill_move_y = 0;
+	this._drill_move_w = Graphics.boxWidth;
+	this._drill_move_h = Graphics.boxHeight;
 }
 //==============================
 // * B基本变化 - 帧刷新 位置
@@ -2201,6 +2272,104 @@ Drill_HDSB_Controller.prototype.drill_controller_updateChange_Position = functio
 	this._drill_x = xx;
 	this._drill_y = yy;
 }
+//==============================
+// * B基本变化 - 帧刷新 旋转
+//==============================
+Drill_HDSB_Controller.prototype.drill_controller_updateChange_Rotation = function(){
+	var data = this._drill_data;
+	
+	// > 贴图 - 旋转
+	this._drill_rotation = data['parentRotate'];
+	this._drill_rotation += this._drill_rotationChange;
+}
+//==============================
+// * B基本变化 - 帧刷新 平铺范围
+//==============================
+Drill_HDSB_Controller.prototype.drill_controller_updateChange_MoveRange = function(){
+	if( this._drill_rotation == 0 && 
+		this._drill_scaleX == 1 && 
+		this._drill_scaleY == 1 ){ return; }
+		
+	// > 平铺背景有旋转角度时，直接按最大的来（矩形的对角线长度*根号2）
+	var d_len = Math.sqrt( (Graphics.boxWidth*Graphics.boxWidth + Graphics.boxHeight*Graphics.boxHeight)*2 )
+	var border_w = (d_len - Graphics.boxWidth) *0.5;
+	var border_h = (d_len - Graphics.boxHeight)*0.5;
+	
+	this._drill_move_x = -1 * border_w;
+	this._drill_move_y = -1 * border_h;
+	this._drill_move_w = Graphics.boxWidth  + border_w*2;	//（宽度就是 d_len）
+	this._drill_move_h = Graphics.boxHeight + border_h*2;	//（高度就是 d_len）
+	
+	// > 默认矩形测试
+	//this._drill_move_x = 0;
+	//this._drill_move_y = 0;
+	//this._drill_move_w = Graphics.boxWidth;
+	//this._drill_move_h = Graphics.boxHeight;
+	
+	// > 锁定锚点
+	var point = $gameTemp.drill_HDSB_Math2D_getFixPointInAnchor(
+		0, 0,
+		0.5, 0.5,
+		this._drill_move_w, this._drill_move_h,
+		this._drill_rotation *Math.PI/180,
+		this._drill_scaleX,
+		this._drill_scaleY
+	);
+	
+	this._drill_move_x += point.x;
+	this._drill_move_y += point.y;
+}
+//==============================
+// * B基本变化 - 锁定锚点
+//			
+//			参数：	> org_anchor_x 数字    （原贴图锚点X）
+//					> org_anchor_y 数字    （原贴图锚点Y）
+//					> target_anchor_x 数字 （新的锚点X）
+//					> target_anchor_y 数字 （新的锚点Y）
+//					> width 数字           （贴图宽度）
+//					> height 数字          （贴图高度）
+//					> rotation 数字        （旋转度数，弧度）
+//					> scale_x,scale_y 数字 （缩放比例XY，默认1.00）
+//			返回：	> { x:0, y:0 }         （偏移的坐标）
+//			
+//			说明：	修正 旋转+缩放 的坐标，使其看起来像是在绕着 新的锚点 变换。
+//					旋转值和缩放值可为负数。
+//==============================
+Game_Temp.prototype.drill_HDSB_Math2D_getFixPointInAnchor = function( 
+					org_anchor_x,org_anchor_y,			//原贴图锚点 
+					target_anchor_x,target_anchor_y, 	//新的锚点 
+					width, height,						//贴图高宽
+					rotation, scale_x, scale_y  ){		//变换的值（旋转+缩放）
+	
+	var ww = width * ( target_anchor_x - org_anchor_x );
+	var hh = height * ( target_anchor_y - org_anchor_y );
+	var xx = 0;
+	var yy = 0;
+	if( ww == 0 && hh == 0 ){ return { "x":0, "y":0 }; }
+	if( ww == 0 ){ ww = 0.0001; }
+	
+	// > 先缩放
+	var sww = ww*scale_x;
+	var shh = hh*scale_y;
+	
+	// > 后旋转
+	var r = Math.sqrt( Math.pow(sww,2) + Math.pow(shh,2) );
+	var p_degree = Math.atan(shh/sww);	
+	p_degree = Math.PI - p_degree;
+	if( sww < 0 ){
+		p_degree = Math.PI + p_degree;
+	}
+	
+	// > 变换的偏移量
+	xx += r*Math.cos( rotation - p_degree );		//圆公式 (x-a)²+(y-b)²=r²
+	yy += r*Math.sin( rotation - p_degree );		//圆极坐标 x=ρcosθ,y=ρsinθ
+	
+	// > 锚点偏移量
+	xx += ww;
+	yy += hh;
+	
+	return { "x":xx, "y":yy };
+};
 
 
 //==============================
@@ -2213,28 +2382,28 @@ Drill_HDSB_Controller.prototype.drill_controller_initCommandChange = function() 
 	var data = this._drill_data;
 	
 	// > 控制器参数 - 移动到
-	this["_drill_command_move_data"] = null;
+	this["_drill_command_move_data"] = undefined;
 	
 	// > 控制器参数 - 透明度
-	this["_drill_command_opacity_data"] = null;
+	this["_drill_command_opacity_data"] = undefined;
 	
 	// > 控制器参数 - 移动速度X
-	this["_drill_command_speedX_data"] = null;
+	this["_drill_command_speedX_data"] = undefined;
 	// > 控制器参数 - 移动速度Y
-	this["_drill_command_speedY_data"] = null;
+	this["_drill_command_speedY_data"] = undefined;
 	
 	// > 控制器参数 - 旋转
-	this["_drill_command_rotate_data"] = null;
+	this["_drill_command_rotate_data"] = undefined;
 	
 	// > 控制器参数 - 缩放X
-	this["_drill_command_scaleX_data"] = null;
+	this["_drill_command_scaleX_data"] = undefined;
 	// > 控制器参数 - 缩放Y
-	this["_drill_command_scaleY_data"] = null;
+	this["_drill_command_scaleY_data"] = undefined;
 	
 	// > 控制器参数 - 斜切X
-	this["_drill_command_skewX_data"] = null;
+	this["_drill_command_skewX_data"] = undefined;
 	// > 控制器参数 - 斜切Y
-	this["_drill_command_skewY_data"] = null;
+	this["_drill_command_skewY_data"] = undefined;
 }
 //==============================
 // * D指令叠加变化 - 帧刷新
@@ -2272,31 +2441,31 @@ Drill_HDSB_Controller.prototype.drill_controller_updateCommandChange = function(
 Drill_HDSB_Controller.prototype.drill_controller_commandChange_restoreAttr = function(){
 	
 	// > 控制器参数 - 透明度
-	this["_drill_command_opacity_data"] = null;
+	this["_drill_command_opacity_data"] = undefined;
 	
 	// > 控制器参数 - 移动速度X
-	this["_drill_command_speedX_data"] = null;
+	this["_drill_command_speedX_data"] = undefined;
 	// > 控制器参数 - 移动速度Y
-	this["_drill_command_speedY_data"] = null;
+	this["_drill_command_speedY_data"] = undefined;
 	
 	// > 控制器参数 - 旋转
-	this["_drill_command_rotate_data"] = null;
+	this["_drill_command_rotate_data"] = undefined;
 	
 	// > 控制器参数 - 缩放X
-	this["_drill_command_scaleX_data"] = null;
+	this["_drill_command_scaleX_data"] = undefined;
 	// > 控制器参数 - 缩放Y
-	this["_drill_command_scaleY_data"] = null;
+	this["_drill_command_scaleY_data"] = undefined;
 	
 	// > 控制器参数 - 斜切X
-	this["_drill_command_skewX_data"] = null;
+	this["_drill_command_skewX_data"] = undefined;
 	// > 控制器参数 - 斜切Y
-	this["_drill_command_skewY_data"] = null;
+	this["_drill_command_skewY_data"] = undefined;
 }
 //==============================
 // * D指令叠加变化 - 立即归位
 //==============================
 Drill_HDSB_Controller.prototype.drill_controller_commandChange_restoreMove = function(){
-	this["_drill_command_move_data"] = null;
+	this["_drill_command_move_data"] = undefined;
 }
 //==============================
 // * D指令叠加变化 - 修改单属性 - 移动到
@@ -2398,28 +2567,51 @@ Drill_HDSB_Controller.prototype.drill_controller_initDelayingCommand = function(
 	this._drill_curDelayingCommandTank = [];
 }
 //==============================
-// * E延迟指令 - 帧刷新
+// * E延迟指令 - 帧刷新 - 时间流逝
+//
+//			说明：	> 此处的时间流逝不会因为 暂停 而停止流逝。
 //==============================
-Drill_HDSB_Controller.prototype.drill_controller_updateDelayingCommand = function(){
+Drill_HDSB_Controller.prototype.drill_controller_updateDelayingCommandImportant = function(){
 	var data = this._drill_data;
 	if( this._drill_curDelayingCommandTank.length == 0 ){ return; }
 	
-	// > 帧刷新 延迟指令
+	// > 帧刷新 时间流逝
 	for(var i = 0; i < this._drill_curDelayingCommandTank.length; i++ ){
 		var dc_data = this._drill_curDelayingCommandTank[i];
 		
 		// > 时间-1
 		dc_data['left_time'] -= 1;
 		
-		// > 执行延迟指令
+	}
+	
+	// > 执行延迟指令（暂停/继续）
+	for(var i = 0; i < this._drill_curDelayingCommandTank.length; i++ ){
+		var dc_data = this._drill_curDelayingCommandTank[i];
+		if( dc_data['left_time'] < 0 ){
+			var method = dc_data['method'];
+			var paramList = dc_data['paramList'];
+			if( method == "drill_controller_setPause" ){
+				this.drill_controller_setPause( paramList[0] );
+			}
+		}
+	}
+}
+//==============================
+// * E延迟指令 - 帧刷新 - 执行延迟指令
+//==============================
+Drill_HDSB_Controller.prototype.drill_controller_updateDelayingCommand = function(){
+	var data = this._drill_data;
+	if( this._drill_curDelayingCommandTank.length == 0 ){ return; }
+	
+	// > 执行延迟指令
+	for(var i = 0; i < this._drill_curDelayingCommandTank.length; i++ ){
+		var dc_data = this._drill_curDelayingCommandTank[i];
 		if( dc_data['left_time'] < 0 ){
 			var method = dc_data['method'];
 			var paramList = dc_data['paramList'];
 			
 			if( method == "drill_controller_setVisible" ){
 				this.drill_controller_setVisible( paramList[0] );
-			}else if( method == "drill_controller_setPause" ){
-				this.drill_controller_setPause( paramList[0] );
 			
 			}else if( method == "drill_controller_commandChange_setOpacity" ){
 				this.drill_controller_commandChange_setOpacity( paramList[0], paramList[1], paramList[2] );
@@ -2449,7 +2641,7 @@ Drill_HDSB_Controller.prototype.drill_controller_updateDelayingCommand = functio
 		}
 	}
 	
-	// > 销毁 延迟指令
+	// > 销毁延迟指令
 	for(var i = this._drill_curDelayingCommandTank.length-1; i >= 0; i-- ){
 		var dc_data = this._drill_curDelayingCommandTank[i];
 		if( dc_data['left_time'] < 0 ){
@@ -2715,6 +2907,12 @@ Drill_HDSB_Sprite.prototype.drill_sprite_initAttr = function(){
 	temp_layer.blendMode = data['blendMode'];
 	this._drill_layerSprite = temp_layer;
 	
+	// > 平铺范围（平铺的旋转角度用）
+	this._drill_spriteMove_x = 0;
+	this._drill_spriteMove_y = 0;
+	this._drill_spriteMove_w = Graphics.boxWidth;
+	this._drill_spriteMove_h = Graphics.boxHeight;
+	
 	this.addChild( this._drill_layerSprite );
 }
 //==============================
@@ -2731,8 +2929,26 @@ Drill_HDSB_Sprite.prototype.drill_sprite_updateAttr = function() {
 	this.opacity = this._drill_controller._drill_opacity;
 	this.visible = data['visible'];
 	
-	//（背景旋转的中心锚点在左上角）
-	this.rotation = this._drill_controller._drill_rotation *Math.PI/180;
+	// > 贴图 - 旋转（平铺贴图）（背景旋转的中心锚点在左上角）
+	this._drill_layerSprite.rotation = this._drill_controller._drill_rotation *Math.PI/180;
+	
+	// > 贴图 - 平铺范围（平铺贴图）（平铺的旋转角度）
+	if( this._drill_spriteMove_x != this._drill_controller._drill_move_x ||
+		this._drill_spriteMove_y != this._drill_controller._drill_move_y ||
+		this._drill_spriteMove_w != this._drill_controller._drill_move_w ||
+		this._drill_spriteMove_h != this._drill_controller._drill_move_h ){
+		this._drill_spriteMove_x = this._drill_controller._drill_move_x;
+		this._drill_spriteMove_y = this._drill_controller._drill_move_y;
+		this._drill_spriteMove_w = this._drill_controller._drill_move_w;
+		this._drill_spriteMove_h = this._drill_controller._drill_move_h;
+		
+		this._drill_layerSprite.move(
+			this._drill_spriteMove_x,
+			this._drill_spriteMove_y,
+			this._drill_spriteMove_w,
+			this._drill_spriteMove_h
+		);
+	}
 }
 
 
@@ -2779,28 +2995,28 @@ Drill_HDSB_Sprite.prototype.drill_sprite_initCommandChange = function() {
 	var data = this._drill_controller._drill_data;
 	
 	// > 贴图参数 - 移动到
-	this["_drill_command_move_spriteData"] = null;
+	this["_drill_command_move_spriteData"] = undefined;
 	
 	// > 贴图参数 - 透明度
-	this["_drill_command_opacity_spriteData"] = null;
+	this["_drill_command_opacity_spriteData"] = undefined;
 	
 	// > 贴图参数 - 移动速度X
-	this["_drill_command_speedX_spriteData"] = null;
+	this["_drill_command_speedX_spriteData"] = undefined;
 	// > 贴图参数 - 移动速度Y
-	this["_drill_command_speedY_spriteData"] = null;
+	this["_drill_command_speedY_spriteData"] = undefined;
 	
 	// > 贴图参数 - 旋转
-	this["_drill_command_rotate_spriteData"] = null;
+	this["_drill_command_rotate_spriteData"] = undefined;
 	
 	// > 贴图参数 - 缩放X
-	this["_drill_command_scaleX_spriteData"] = null;
+	this["_drill_command_scaleX_spriteData"] = undefined;
 	// > 贴图参数 - 缩放Y
-	this["_drill_command_scaleY_spriteData"] = null;
+	this["_drill_command_scaleY_spriteData"] = undefined;
 	
 	// > 贴图参数 - 斜切X
-	this["_drill_command_skewX_spriteData"] = null;
+	this["_drill_command_skewX_spriteData"] = undefined;
 	// > 贴图参数 - 斜切Y
-	this["_drill_command_skewY_spriteData"] = null;
+	this["_drill_command_skewY_spriteData"] = undefined;
 }
 //==============================
 // * D指令叠加变化 - 帧刷新
@@ -2864,9 +3080,9 @@ Drill_HDSB_Sprite.prototype.drill_sprite_updateCommandChange = function(){
 	
 	// > 旋转 - 控制器赋值
 	if( controller[CDataName] != undefined ){
-		controller._drill_rotation = controller[CDataName]['cur_value'];	//（整体再旋转角度）
+		controller._drill_rotationChange = controller[CDataName]['cur_value'];	//（平铺的旋转角度）
 	}else{
-		controller._drill_rotation = 0;	//（没有数据时，赋值为 初始值）
+		controller._drill_rotationChange = 0;	//（没有数据时，赋值为 初始值）
 	}
 	
 	

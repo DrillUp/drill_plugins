@@ -907,6 +907,9 @@
 //		★家谱：
 //			无
 //		
+//		★脚本文档：
+//			无
+//		
 //		★插件私有类：
 //			无
 //		
@@ -956,7 +959,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_MenuBackButton = true;
@@ -965,7 +968,7 @@
 	
 	
 	//==============================
-	// * 变量获取 - 默认返回按钮
+	// * 静态数据 - 默认返回按钮
 	//				（~struct~BackButtonDefault）
 	//==============================
 	DrillUp.drill_MBB_initBackButtonDefault = function( dataFrom ) {
@@ -986,7 +989,7 @@
 		return data;
 	};
 	//==============================
-	// * 变量获取 - 返回按钮
+	// * 静态数据 - 返回按钮
 	//				（~struct~BackButton）
 	//==============================
 	DrillUp.drill_MBB_initBackButton = function( dataFrom ) {
@@ -1007,7 +1010,7 @@
 		return data;
 	};
 	//==============================
-	// * 变量获取 - 移动动画
+	// * 静态数据 - 移动动画
 	//				（~struct~DrillWindowMoving）
 	//==============================
 	DrillUp.drill_MBB_initWindowMoving = function( dataFrom ) {
@@ -1023,7 +1026,7 @@
 		return data;
 	};
 	//==============================
-	// * 变量获取 - 返回按钮样式
+	// * 静态数据 - 返回按钮样式
 	//				（~struct~BackButtonStyle）
 	//==============================
 	DrillUp.drill_MBB_initBackButtonStyle = function( dataFrom ) {

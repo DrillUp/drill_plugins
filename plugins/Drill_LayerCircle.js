@@ -70,6 +70,9 @@
  *      平移：（408,312） 这时候，17,13图块是正中心
  *      位移图块偏移 = 实际图块位置 - 中心图块/2
  *      例如放在图块x66位置，66 - 17/2 = 57.5‬，57.5‬为设置的图块偏移。
+ * 预加载：
+ *   (1.插件中可自定义指定资源是否预加载，
+ *      预加载相关介绍可以去看看"1.系统 > 关于预加载.docx"。
  * 设计：
  *   (1.魔法圈的贴图能够设置：混合模式2乘积。
  *      此设置与 纯色滤镜 的底层结构完全一致。
@@ -203,7 +206,7 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
  * 时间复杂度： o(n^2)*o(贴图处理) 每帧
- * 测试方法：   在地图中放置多个魔法圈，进行性能测试。
+ * 测试方法：   在地图管理层中放置多个魔法圈，进行性能测试。
  * 测试结果：   200个事件的地图中，平均消耗为：【28.34ms】
  *              100个事件的地图中，平均消耗为：【17.61ms】
  *               50个事件的地图中，平均消耗为：【16.32ms】
@@ -1534,6 +1537,14 @@
  * @desc 0为完全透明，255为完全不透明。
  * @default 255
  *
+ * @param 是否预加载
+ * @parent ---贴图---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭，预加载详细介绍可见："1.系统 > 关于预加载.docx"。
+ * @default false
+ *
  * @param 混合模式
  * @parent ---贴图---
  * @type select
@@ -1791,7 +1802,7 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^2)*o(贴图处理) 每帧
-//		★性能测试因素	对话管理层
+//		★性能测试因素	地图管理层
 //		★性能测试消耗	16.32ms  3.77ms（updateBase）
 //		★最坏情况		暂无
 //		★备注			暂无
@@ -1802,8 +1813,9 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
 //			->☆插件指令
+//			->☆预加载
 //			->☆存储数据
 //			->☆地图层级
 //				->添加贴图到层级【标准函数】
@@ -1845,6 +1857,9 @@
 //
 //		★家谱：
 //			无
+//		
+//		★脚本文档：
+//			17.主菜单 > 多层组合装饰（界面装饰-地图界面）（脚本）.docx
 //		
 //		★插件私有类：
 //			* 地图魔法圈控制器【Drill_LCi_Controller】
@@ -1905,7 +1920,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_LayerCircle = true;
@@ -1913,7 +1928,7 @@
     DrillUp.parameters = PluginManager.parameters('Drill_LayerCircle');
 	
 	//==============================
-	// * 变量获取 - 魔法圈
+	// * 静态数据 - 魔法圈
 	//				（~struct~LCiMapCircle）
 	//==============================
 	DrillUp.drill_LCi_circleInit = function( dataFrom ) {
@@ -1931,6 +1946,7 @@
 		// > 贴图
 		data['src_img'] = String( dataFrom["资源-魔法圈"] || "");
 		data['src_img_file'] = "img/Map__layer/";
+		data['preload'] = String( dataFrom["是否预加载"] || "false") == "true";
 		
 		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
 		data['tint'] = Number( dataFrom["图像-色调值"] || 0);
@@ -1994,7 +2010,7 @@
 			var temp = JSON.parse(DrillUp.parameters["魔法圈层-" + String(i+1) ]);
 			DrillUp.g_LCi_layers[i] = DrillUp.drill_LCi_circleInit( temp );
 		}else{
-			DrillUp.g_LCi_layers[i] = null;		//（强制设为空值，节约存储资源）
+			DrillUp.g_LCi_layers[i] = undefined;		//（强制设为空值，节约存储资源）
 		}
 	}
 	
@@ -2473,6 +2489,46 @@ Game_Interpreter.prototype.drill_LCi_getArgNumList = function( arg_str ){
 };
 
 
+//=============================================================================
+// ** ☆预加载
+//
+//			说明：	> 对指定资源贴图标记不删除，可以防止重建导致的浪费资源，以及资源显示时闪烁问题。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 预加载 - 初始化
+//==============================
+var _drill_LCi_preload_initialize = Game_Temp.prototype.initialize;
+Game_Temp.prototype.initialize = function() {
+	_drill_LCi_preload_initialize.call(this);
+	this.drill_LCi_preloadInit();
+}
+//==============================
+// * 预加载 - 版本校验
+//==============================
+if( Utils.generateRuntimeId == undefined ){
+	alert( DrillUp.drill_LCi_getPluginTip_LowVersion() );
+}
+//==============================
+// * 预加载 - 执行资源预加载
+//
+//			说明：	> 遍历全部资源，提前预加载标记过的资源。
+//==============================
+Game_Temp.prototype.drill_LCi_preloadInit = function() {
+	this._drill_LCi_cacheId = Utils.generateRuntimeId();	//资源缓存id
+	this._drill_LCi_preloadTank = [];						//bitmap容器
+	for( var i = 0; i < DrillUp.g_LCi_layers.length; i++ ){
+		var temp_data = DrillUp.g_LCi_layers[i];
+		if( temp_data == undefined ){ continue; }
+		if( temp_data['preload'] != true ){ continue; }
+		
+		this._drill_LCi_preloadTank.push( 
+			ImageManager.reserveBitmap( temp_data['src_img_file'], temp_data['src_img'], temp_data['tint'], temp_data['smooth'], this._drill_LCi_cacheId ) 
+		);
+	}
+}
+
+
 //#############################################################################
 // ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
@@ -2558,7 +2614,7 @@ Game_System.prototype.drill_LCi_initSysData_Private = function() {
 		//	（见 drill_LCi_initMapdata ）
 	}
 	
-	// > 刷新当前地图【$gameSystem优先初始化】
+	// > 刷新当前地图『$gameSystem优先初始化』
 	if( $gameMap != undefined ){
 		$gameMap.drill_LCi_initMapdata();
 	}
@@ -3109,15 +3165,16 @@ Drill_LCi_Controller.prototype.initialize = function( data ){
 //			说明：	> 此函数必须在 帧刷新 中手动调用执行。
 //##############################
 Drill_LCi_Controller.prototype.drill_controller_update = function(){
+	this.drill_controller_updateDelayingCommandImportant();		//帧刷新 - E延迟指令 - 时间流逝
 	if( this._drill_data['pause'] == true ){ return; }
-	this.drill_controller_updateAttr();					//帧刷新 - A主体
-	this.drill_controller_updateChange_Position();		//帧刷新 - B基本变化 - 平移
-	this.drill_controller_updateChange_Rotation();		//帧刷新 - B基本变化 - 旋转
-														//帧刷新 - C镜头参数（无）
-	this.drill_controller_updateCommandChange();		//帧刷新 - D指令叠加变化
-	this.drill_controller_updateDelayingCommand();		//帧刷新 - E延迟指令
-	this.drill_controller_updateEffect();				//帧刷新 - F自变化效果
-	this.drill_controller_updateCheckNaN();				//帧刷新 - A主体 - 校验值
+	this.drill_controller_updateAttr();							//帧刷新 - A主体
+	this.drill_controller_updateChange_Position();				//帧刷新 - B基本变化 - 平移
+	this.drill_controller_updateChange_Rotation();				//帧刷新 - B基本变化 - 旋转
+																//帧刷新 - C镜头参数（无）
+	this.drill_controller_updateCommandChange();				//帧刷新 - D指令叠加变化
+	this.drill_controller_updateDelayingCommand();				//帧刷新 - E延迟指令 - 执行延迟指令
+	this.drill_controller_updateEffect();						//帧刷新 - F自变化效果
+	this.drill_controller_updateCheckNaN();						//帧刷新 - A主体 - 校验值
 }
 //##############################
 // * 控制器 - 重设数据【标准函数】
@@ -3252,7 +3309,7 @@ Drill_LCi_Controller.prototype.drill_controller_initData = function(){
 	// > E延迟指令（无）
 	
 	// > F自变化效果
-	//	（见 变量获取）
+	//	（见 静态数据）
 }
 //==============================
 // * 初始化 - 初始化子功能
@@ -3426,7 +3483,7 @@ DrillUp.g_LCi_alert = true;
 //			说明：	> 此处直接调用函数获取值。参数不存，因为浪费 帧刷新 和 存储空间。
 //==============================
 Drill_LCi_Controller.prototype.drill_controller_getCameraXAcc = function(){
-	if( $gameMap == undefined ){ return 0; }	//【$gameSystem优先初始化】（注意此处，调用时 $gameMap和$dataMap 都可能未创建。）
+	if( $gameMap == undefined ){ return 0; }	//『$gameSystem优先初始化』（注意此处，调用时 $gameMap和$dataMap 都可能未创建。）
 	if( $dataMap == undefined ){ return 0; }
 	
 	// > 循环积累值 【地图 - 活动地图镜头】
@@ -3450,7 +3507,7 @@ Drill_LCi_Controller.prototype.drill_controller_getCameraXAcc = function(){
 //			说明：	> 此处直接调用函数获取值。参数不存，因为浪费 帧刷新 和 存储空间。
 //==============================
 Drill_LCi_Controller.prototype.drill_controller_getCameraYAcc = function(){
-	if( $gameMap == undefined ){ return 0; }	//【$gameSystem优先初始化】（注意此处，调用时 $gameMap和$dataMap 都可能未创建。）
+	if( $gameMap == undefined ){ return 0; }	//『$gameSystem优先初始化』（注意此处，调用时 $gameMap和$dataMap 都可能未创建。）
 	if( $dataMap == undefined ){ return 0; }
 	
 	// > 循环积累值 【地图 - 活动地图镜头】
@@ -3480,25 +3537,25 @@ Drill_LCi_Controller.prototype.drill_controller_initCommandChange = function() {
 	var data = this._drill_data;
 	
 	// > 控制器参数 - 移动到
-	this["_drill_command_move_data"] = null;
+	this["_drill_command_move_data"] = undefined;
 	
 	// > 控制器参数 - 透明度
-	this["_drill_command_opacity_data"] = null;
+	this["_drill_command_opacity_data"] = undefined;
 	
 	// > 控制器参数 - 旋转
-	this["_drill_command_rotate_data"] = null;
+	this["_drill_command_rotate_data"] = undefined;
 	// > 控制器参数 - 转速
-	this["_drill_command_rotateSpeed_data"] = null;
+	this["_drill_command_rotateSpeed_data"] = undefined;
 	
 	// > 控制器参数 - 缩放X
-	this["_drill_command_scaleX_data"] = null;
+	this["_drill_command_scaleX_data"] = undefined;
 	// > 控制器参数 - 缩放Y
-	this["_drill_command_scaleY_data"] = null;
+	this["_drill_command_scaleY_data"] = undefined;
 	
 	// > 控制器参数 - 斜切X
-	this["_drill_command_skewX_data"] = null;
+	this["_drill_command_skewX_data"] = undefined;
 	// > 控制器参数 - 斜切Y
-	this["_drill_command_skewY_data"] = null;
+	this["_drill_command_skewY_data"] = undefined;
 }
 //==============================
 // * D指令叠加变化 - 帧刷新
@@ -3533,28 +3590,28 @@ Drill_LCi_Controller.prototype.drill_controller_updateCommandChange = function()
 Drill_LCi_Controller.prototype.drill_controller_commandChange_restoreAttr = function(){
 	
 	// > 控制器参数 - 透明度
-	this["_drill_command_opacity_data"] = null;
+	this["_drill_command_opacity_data"] = undefined;
 	
 	// > 控制器参数 - 旋转
-	this["_drill_command_rotate_data"] = null;
+	this["_drill_command_rotate_data"] = undefined;
 	// > 控制器参数 - 转速
-	this["_drill_command_rotateSpeed_data"] = null;
+	this["_drill_command_rotateSpeed_data"] = undefined;
 	
 	// > 控制器参数 - 缩放X
-	this["_drill_command_scaleX_data"] = null;
+	this["_drill_command_scaleX_data"] = undefined;
 	// > 控制器参数 - 缩放Y
-	this["_drill_command_scaleY_data"] = null;
+	this["_drill_command_scaleY_data"] = undefined;
 	
 	// > 控制器参数 - 斜切X
-	this["_drill_command_skewX_data"] = null;
+	this["_drill_command_skewX_data"] = undefined;
 	// > 控制器参数 - 斜切Y
-	this["_drill_command_skewY_data"] = null;
+	this["_drill_command_skewY_data"] = undefined;
 }
 //==============================
 // * D指令叠加变化 - 立即归位
 //==============================
 Drill_LCi_Controller.prototype.drill_controller_commandChange_restoreMove = function(){
-	this["_drill_command_move_data"] = null;
+	this["_drill_command_move_data"] = undefined;
 }
 //==============================
 // * D指令叠加变化 - 修改单属性 - 移动到
@@ -3646,28 +3703,51 @@ Drill_LCi_Controller.prototype.drill_controller_initDelayingCommand = function()
 	this._drill_curDelayingCommandTank = [];
 }
 //==============================
-// * E延迟指令 - 帧刷新
+// * E延迟指令 - 帧刷新 - 时间流逝
+//
+//			说明：	> 此处的时间流逝不会因为 暂停 而停止流逝。
 //==============================
-Drill_LCi_Controller.prototype.drill_controller_updateDelayingCommand = function(){
+Drill_LCi_Controller.prototype.drill_controller_updateDelayingCommandImportant = function(){
 	var data = this._drill_data;
 	if( this._drill_curDelayingCommandTank.length == 0 ){ return; }
 	
-	// > 帧刷新 延迟指令
+	// > 帧刷新 时间流逝
 	for(var i = 0; i < this._drill_curDelayingCommandTank.length; i++ ){
 		var dc_data = this._drill_curDelayingCommandTank[i];
 		
 		// > 时间-1
 		dc_data['left_time'] -= 1;
 		
-		// > 执行延迟指令
+	}
+	
+	// > 执行延迟指令（暂停/继续）
+	for(var i = 0; i < this._drill_curDelayingCommandTank.length; i++ ){
+		var dc_data = this._drill_curDelayingCommandTank[i];
+		if( dc_data['left_time'] < 0 ){
+			var method = dc_data['method'];
+			var paramList = dc_data['paramList'];
+			if( method == "drill_controller_setPause" ){
+				this.drill_controller_setPause( paramList[0] );
+			}
+		}
+	}
+}
+//==============================
+// * E延迟指令 - 帧刷新 - 执行延迟指令
+//==============================
+Drill_LCi_Controller.prototype.drill_controller_updateDelayingCommand = function(){
+	var data = this._drill_data;
+	if( this._drill_curDelayingCommandTank.length == 0 ){ return; }
+	
+	// > 执行延迟指令
+	for(var i = 0; i < this._drill_curDelayingCommandTank.length; i++ ){
+		var dc_data = this._drill_curDelayingCommandTank[i];
 		if( dc_data['left_time'] < 0 ){
 			var method = dc_data['method'];
 			var paramList = dc_data['paramList'];
 			
 			if( method == "drill_controller_setVisible" ){
 				this.drill_controller_setVisible( paramList[0] );
-			}else if( method == "drill_controller_setPause" ){
-				this.drill_controller_setPause( paramList[0] );
 			
 			}else if( method == "drill_controller_commandChange_setOpacity" ){
 				this.drill_controller_commandChange_setOpacity( paramList[0], paramList[1], paramList[2] );
@@ -3695,7 +3775,7 @@ Drill_LCi_Controller.prototype.drill_controller_updateDelayingCommand = function
 		}
 	}
 	
-	// > 销毁 延迟指令
+	// > 销毁延迟指令
 	for(var i = this._drill_curDelayingCommandTank.length-1; i >= 0; i-- ){
 		var dc_data = this._drill_curDelayingCommandTank[i];
 		if( dc_data['left_time'] < 0 ){
@@ -4038,25 +4118,25 @@ Drill_LCi_Sprite.prototype.drill_sprite_initCommandChange = function() {
 	var data = this._drill_controller._drill_data;
 	
 	// > 贴图参数 - 移动到
-	this["_drill_command_move_spriteData"] = null;
+	this["_drill_command_move_spriteData"] = undefined;
 	
 	// > 贴图参数 - 透明度
-	this["_drill_command_opacity_spriteData"] = null;
+	this["_drill_command_opacity_spriteData"] = undefined;
 	
 	// > 贴图参数 - 旋转
-	this["_drill_command_rotate_spriteData"] = null;
+	this["_drill_command_rotate_spriteData"] = undefined;
 	// > 贴图参数 - 转速
-	this["_drill_command_rotateSpeed_spriteData"] = null;
+	this["_drill_command_rotateSpeed_spriteData"] = undefined;
 	
 	// > 贴图参数 - 缩放X
-	this["_drill_command_scaleX_spriteData"] = null;
+	this["_drill_command_scaleX_spriteData"] = undefined;
 	// > 贴图参数 - 缩放Y
-	this["_drill_command_scaleY_spriteData"] = null;
+	this["_drill_command_scaleY_spriteData"] = undefined;
 	
 	// > 贴图参数 - 斜切X
-	this["_drill_command_skewX_spriteData"] = null;
+	this["_drill_command_skewX_spriteData"] = undefined;
 	// > 贴图参数 - 斜切Y
-	this["_drill_command_skewY_spriteData"] = null;
+	this["_drill_command_skewY_spriteData"] = undefined;
 }
 //==============================
 // * D指令叠加变化 - 帧刷新

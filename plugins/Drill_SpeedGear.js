@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.5]        管理器 - 变速齿轮
+ * @plugindesc [v1.6]        管理器 - 变速齿轮
  * @author Drill_up
  * 
  * 
@@ -19,11 +19,22 @@
  * -----------------------------------------------------------------------------
  * ----插件扩展
  * 该插件可以单独使用。
+ * 你也可以对下列插件有选择地添加，实现特定功能。
+ * 可被扩展：
+ *   - Drill_OperateKeys       键盘-键盘手柄按键修改器★★v1.9及以上★★
+ *     通过按键修改器，能实现测试时 alt键 按下就加速的功能。
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：地图界面、战斗界面、菜单界面。
  *   作用于整个游戏。
+ * 加速键：
+ *   (1.插件中有各种各样的加速键设置，详细可以去看看文档：
+ *      "1.系统 > 关于输入设备核心.docx" 的 所有加速键 章节。
+ *   (2.如果你只是用于游戏测试的临时加速，可以按Alt键进行加速。
+ *      但注意，需要 键盘-键盘手柄按键修改器 插件。
+ *   (3.你可以了解基本的按键定义，去看看 "1.系统 > 关于输入设备核心.docx"。
+ *      全部按键关系，可以去看看章节 按键关系表 。
  * 设计：
  *   (1.变速齿轮比较适用于某些慢镜头的剧情特写，
  *      或者被加速的鬼畜战斗。
@@ -70,13 +81,21 @@
  * 修改了插件分类。
  * [v1.5]
  * 优化了旧存档的识别与兼容。
+ * [v1.6]
+ * 添加了 游戏测试时 按键加速的功能。
  * 
- *
+ * 
+ * 
+ * @param ---齿轮速度---
+ * @default 
+ * 
  * @param 初始齿轮速度
+ * @parent ---齿轮速度---
  * @desc 设置初始游戏的速度。1.00为100%的游戏速度，正常速度。
  * @default 1.00
- *
+ * 
  * @param 是否绑定齿轮到变量
+ * @parent ---齿轮速度---
  * @type boolean
  * @on 绑定
  * @off 不绑定
@@ -88,8 +107,30 @@
  * @type variable
  * @desc 变量的值为百分比速度，100表示100%游戏速度。如果变量的值小于20，则默认算作20%的速度。
  * @default 0
+ * 
+ * 
+ * @param ---游戏加速键---
+ * @default 
+ * 
+ * @param 加速键按下时速度
+ * @parent ---游戏加速键---
+ * @desc 游戏测试时，按下Alt加速键时的速度。2.50为250%的游戏速度。
+ * @default 2.50
+ * 
+ * @param 加速键是否在发布版中启用
+ * @parent ---游戏加速键---
+ * @type boolean
+ * @on 启用
+ * @off 关闭
+ * @desc true - 测试版和发布版都有效，false - 只测试版有效。
+ * @default false
+ * 
+ * 
+ * @param ---声音变速---
+ * @default 
  *
  * @param 声音是否变速
+ * @parent ---声音变速---
  * @type boolean
  * @on 变速
  * @off 不变速
@@ -97,9 +138,10 @@
  * @default true
  *
  * @param 声音变速同步率
- * @parent 声音是否变速
+ * @parent ---声音变速---
  * @desc 声音播放速度与图像播放速度的同步率，建议设置0.4以下，同步率太高的声音会非常难听。
  * @default 0.25
+ * 
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -124,13 +166,23 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			变速齿轮：
-//				->游戏变速
-//				->声音变速
+//			->☆提示信息
+//			->☆静态数据
+//			->☆插件指令
+//			->☆存储数据
+//
+//			->☆游戏速度控制
+//				->绑定变量变化
+//				->游戏加速键
+//			->☆游戏声音控制
 //				->确保变调时保留当前正在播放的声音
+//
 //
 //		★家谱：
 //			无
+//		
+//		★脚本文档：
+//			1.系统 > 关于输入设备核心（脚本）.docx
 //		
 //		★插件私有类：
 //			无
@@ -146,7 +198,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -157,7 +209,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_SpeedGear = true;
@@ -166,15 +218,19 @@
 	
 	
 	/*-----------------杂项------------------*/
-	DrillUp.g_SG_speed = Number(DrillUp.parameters['初始齿轮速度'] || 1.00);	
+	DrillUp.g_SG_speed = Number(DrillUp.parameters['初始齿轮速度'] || 1.00);
 	DrillUp.g_SG_var_bind = String(DrillUp.parameters['是否绑定齿轮到变量'] || "true") === "true";	
-	DrillUp.g_SG_var = Number(DrillUp.parameters['绑定的变量'] || 0);	
+	DrillUp.g_SG_var = Number(DrillUp.parameters['绑定的变量'] || 0);
+	
+	DrillUp.g_SG_keySpeed = Number(DrillUp.parameters['加速键按下时速度'] || 2.50);
+	DrillUp.g_SG_keyPublishEnabled = String(DrillUp.parameters['加速键是否在发布版中启用'] || "false") === "true";	
+	
 	DrillUp.g_SG_sound_bind = String(DrillUp.parameters['声音是否变速'] || "true") === "true";	
 	DrillUp.g_SG_sound = Number(DrillUp.parameters['声音变速同步率'] || 0.25);	
 
 
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _drill_SG_pluginCommand = Game_Interpreter.prototype.pluginCommand
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
@@ -190,7 +246,6 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( type == "改速度" || type == "修改速度" ){
 				if( DrillUp.g_SG_var_bind == false ){
 					$gameSystem._drill_SG_speed = Math.max( Number(temp1), 0.05 );
-					SceneManager._deltaTime = 1/60.0 / $gameSystem._drill_SG_speed;
 					AudioManager.drill_SG_refreshPitch();
 				}
 			}
@@ -206,7 +261,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -272,13 +327,10 @@ Game_System.prototype.drill_SG_checkSysData = function() {
 //==============================
 Game_System.prototype.drill_SG_initSysData_Private = function() {
 	
-	this._drill_SG_speed = Math.max(DrillUp.g_SG_speed,0.05);
 	this._drill_SG_var = DrillUp.g_SG_var;
-	this._drill_SG_var_cur_value = 0;
-	this._drill_SG_sound = DrillUp.g_SG_sound;
+	this._drill_SG_speed = Math.max(DrillUp.g_SG_speed,0.05);
 	
-	// > 修改速度
-    SceneManager._deltaTime = 1/60.0 / this._drill_SG_speed;
+	this._drill_SG_sound = DrillUp.g_SG_sound;
 };
 //==============================
 // * 存储数据 - 载入存档时检查数据（私有）
@@ -294,42 +346,80 @@ Game_System.prototype.drill_SG_checkSysData_Private = function() {
 
 
 //=============================================================================
-// ** 速度变化
+// ** ☆游戏速度控制
+//
+//			说明：	> 此模块专门控制 游戏速度。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 速度 - 绑定变量（地图界面）
+// * 速度 - 帧刷新绑定
 //==============================
 var _drill_SG_Map_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {
-	$gameSystem.drill_SG_variable();
+	this.drill_SG_updateSpeed();
     _drill_SG_Map_update.call(this);
 };
 //==============================
-// * 速度 - 绑定变量（战斗界面）
+// * 速度 - 帧刷新（地图界面）
+//==============================
+Scene_Map.prototype.drill_SG_updateSpeed = function() {
+	var d_time = 1.0/60.0;
+	var d_speed = 1;
+	
+	// > 绑定变量变化
+	if( DrillUp.g_SG_var_bind == true ){
+		var temp_value = $gameVariables.value( $gameSystem._drill_SG_var );
+		if( temp_value < 20 ){ temp_value = 20 };
+		
+		if( this._drill_SG_lastValue != temp_value ){	//变化锁（对变量值进行缓冲，不需要任何时候都变化速度和声音）
+			this._drill_SG_lastValue =  temp_value;
+			
+			// > 速度变化
+			$gameSystem._drill_SG_speed = temp_value / 100;
+			
+			// > 声音变速
+			AudioManager.drill_SG_refreshPitch();
+		}
+		d_speed = $gameSystem._drill_SG_speed;
+	}
+	
+	// > 游戏加速键【键盘 - 键盘手柄按键修改器】
+	if( Imported.Drill_OperateKeys &&
+		$gameTemp.drill_OKe_isSpeedGearPressed() ){
+		
+		if( DrillUp.g_SG_keyPublishEnabled == true ){
+			d_speed = DrillUp.g_SG_keySpeed;
+		}
+		if( DrillUp.g_SG_keyPublishEnabled == false &&
+			$gameTemp.isPlaytest() == true ){	//（只测试版有效）
+			d_speed = DrillUp.g_SG_keySpeed;
+		}
+	}
+
+	// > 赋值
+	d_time = d_time / d_speed;
+	SceneManager._deltaTime = d_time;
+};
+//==============================
+// * 速度 - 帧刷新绑定
 //==============================
 var _drill_SG_Battle_update = Scene_Battle.prototype.update
 Scene_Battle.prototype.update = function() {
-	$gameSystem.drill_SG_variable();
+	this.drill_SG_updateSpeed();
     _drill_SG_Battle_update.call(this);
 };
 //==============================
-// * 速度 - 执行变化
+// * 速度 - 帧刷新（战斗界面）
 //==============================
-Game_System.prototype.drill_SG_variable = function() {
-	if( DrillUp.g_SG_var_bind == true ){
-		var temp = $gameVariables.value(this._drill_SG_var);
-		if( temp < 20 ){ temp = 20};
-		if( this._drill_SG_var_cur_value != temp ){		//对变量值进行缓冲，不需要任何时候都变化速度和声音
-			this._drill_SG_var_cur_value = temp;
-			this._drill_SG_speed = temp / 100;
-			SceneManager._deltaTime = 1/60.0 / this._drill_SG_speed;
-			AudioManager.drill_SG_refreshPitch();
-		}
-	}
-};
+Scene_Battle.prototype.drill_SG_updateSpeed = Scene_Map.prototype.drill_SG_updateSpeed;
+
+
 
 //=============================================================================
-// ** 声音变化
+// ** ☆游戏声音控制
+//
+//			说明：	> 此模块专门控制 游戏声音。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 声音 - 变调捕获（覆写）

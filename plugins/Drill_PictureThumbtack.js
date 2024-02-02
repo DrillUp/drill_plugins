@@ -83,7 +83,7 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
  * 时间复杂度： o(n^2) 每帧
- * 测试方法：   在对话管理层设置5张图片，分别钉在不同图片上。
+ * 测试方法：   在图片管理层设置5张图片，分别钉在不同图片上。
  * 测试结果：   200个事件的地图中，平均消耗为：【11.36ms】
  *              100个事件的地图中，平均消耗为：【9.72ms】
  *               50个事件的地图中，平均消耗为：【6.83ms】
@@ -117,7 +117,7 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^2) 每帧
-//		★性能测试因素	对话管理层
+//		★性能测试因素	图片管理层
 //		★性能测试消耗	9.72ms
 //		★最坏情况		暂无
 //		★备注			暂无
@@ -134,6 +134,9 @@
 //				->战斗角色图钉
 //
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -173,7 +176,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_PictureThumbtack = true;
@@ -677,13 +680,24 @@ Game_Picture.prototype.update = function() {
 	this.drill_PTh_updatePicPos();			//刷新图片位置
 }
 //==============================
-// * 图片 - 销毁
+// * 图片 - 消除图片
 //==============================
 var _Drill_PTh_c_erase = Game_Picture.prototype.erase;
 Game_Picture.prototype.erase = function() {
-	_Drill_PTh_c_erase.call(this);	
-	
-	this._Drill_PTh_enabled = false;	
+	_Drill_PTh_c_erase.call(this);
+	this._Drill_PTh_enabled = false;
+}
+//==============================
+// * 图片 - 消除图片（command235）
+//==============================
+var _drill_PTh_p_erasePicture = Game_Screen.prototype.erasePicture;
+Game_Screen.prototype.erasePicture = function( pictureId ){
+    var realPictureId = this.realPictureId(pictureId);
+	var picture = this._pictures[realPictureId];
+	if( picture != undefined ){
+		picture._Drill_PTh_enabled = false;
+	}
+	_drill_PTh_p_erasePicture.call( this, pictureId );
 }
 
 //==============================

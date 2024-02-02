@@ -86,6 +86,9 @@
  *   (1.加满动画 是指参数条从无到有的一个动画过程。
  *   (2.部分子插件会屏蔽此功能，比如时间条，时间条是持续减少/增加的，
  *      不需要加满动画。
+ * 预加载：
+ *   (1.插件中的资源会被反复使用，所以插件默认所有资源都预加载，
+ *      预加载相关介绍可以去看看"1.系统 > 关于预加载.docx"。
  *
  * -----------------------------------------------------------------------------
  * ----关联文件
@@ -116,7 +119,7 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
  * 时间复杂度： o(n^4)*o(参数条数)*o(贴图处理) 每帧
- * 测试方法：   主要基于该核心的子插件来判断。
+ * 测试方法：   参数可视化管理层、战斗界面 测试性能消耗。
  * 测试结果：   地图界面，平均消耗为：【52.86ms】
  *              战斗界面，平均消耗为：【43.67ms】
  * 测试方法2：  主菜单界面中显示4个角色固定框x4的参数条。
@@ -1110,10 +1113,10 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^4)*o(参数条数)*o(贴图处理) 每帧
-//		★性能测试因素	可视化管理层、战斗界面
+//		★性能测试因素	参数可视化管理层、战斗界面
 //		★性能测试消耗	22.52ms （菜单界面 38.83ms）
 //		★最坏情况		大量弹出条滥用
-//		★备注			可视化管理层平均fps14，同时开6个参数条，帧数无明显下降，大概fps12。
+//		★备注			平均fps14，同时开6个参数条，帧数无明显下降，大概fps12。
 //						只有缓冲时间条+弹出条时，fps直接降到1。
 //		
 //		★优化记录
@@ -1124,10 +1127,9 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
+//			->☆预加载
 //			
-//			->☆临时变量初始化
-//				->资源提前预加载
 //			->参数条【Drill_COGM_MeterSprite】
 //				->标准模块
 //					->显示/隐藏【标准函数】
@@ -1150,6 +1152,9 @@
 //			
 //			
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -1217,7 +1222,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_CoreOfGaugeMeter = true;
@@ -1226,7 +1231,7 @@
 	
 	
 	//==============================
-	// * 变量获取 - 弹出条弹道样式
+	// * 静态数据 - 弹出条弹道样式
 	//				（~struct~DrillCOGMBallistics）
 	//
 	//			说明：	函数未定义白色括号中的参数，为默认值。
@@ -1294,7 +1299,7 @@
 	}
 	
 	//==============================
-	// * 变量获取 - 参数条样式
+	// * 静态数据 - 参数条样式
 	//				（~struct~GaugeMeter）
 	//
 	//				说明：函数未定义白色括号中的参数，需要子插件定义。若不定义则为默认值。
@@ -1422,30 +1427,30 @@ if( Imported.Drill_CoreOfBallistics ){
 	
 	
 //=============================================================================
-// ** ☆临时变量初始化
+// ** ☆预加载
 //
 //			说明：	> 用过的bitmap，全部标记不删除，防止刷菜单时重建导致浪费资源。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 if( DrillUp.g_COGM_preloadEnabled == true ){
 	//==============================
-	// * 临时变量 - 初始化
+	// * 预加载 - 初始化
 	//==============================
-	var _drill_COGM_temp_initialize = Game_Temp.prototype.initialize;
+	var _drill_COGM_preload_initialize = Game_Temp.prototype.initialize;
 	Game_Temp.prototype.initialize = function() {
-		_drill_COGM_temp_initialize.call(this);
+		_drill_COGM_preload_initialize.call(this);
 		this.drill_COGM_preloadInit();
 	}
 	//==============================
-	// * 临时变量 - 预加载 版本校验
+	// * 预加载 - 版本校验
 	//==============================
 	if( Utils.generateRuntimeId == undefined ){
 		alert( DrillUp.drill_COGM_getPluginTip_LowVersion() );
 	}
 	//==============================
-	// * 临时变量 - 资源提前预加载
+	// * 预加载 - 执行资源预加载
 	//
-	//			说明：	遍历全部资源，提前预加载标记过的资源。
+	//			说明：	> 遍历全部资源，提前预加载标记过的资源。
 	//==============================
 	Game_Temp.prototype.drill_COGM_preloadInit = function() {
 		this._drill_COGM_cacheId = Utils.generateRuntimeId();	//资源缓存id
@@ -1456,28 +1461,28 @@ if( DrillUp.g_COGM_preloadEnabled == true ){
 			if( temp_data['meter_src'] == undefined ){ continue; }
 			
 			this._drill_COGM_preloadTank.push( 
-				ImageManager.reserveBitmap( temp_data['meter_src_file'], temp_data['meter_src'], 0, true ) 
+				ImageManager.reserveBitmap( temp_data['meter_src_file'], temp_data['meter_src'], 0, true, this._drill_COGM_cacheId ) 
 			);
 			this._drill_COGM_preloadTank.push( 
-				ImageManager.reserveBitmap( temp_data['meter_src_file'], temp_data['meter_src_mask'], 0, true ) 
+				ImageManager.reserveBitmap( temp_data['meter_src_file'], temp_data['meter_src_mask'], 0, true, this._drill_COGM_cacheId ) 
 			);
 			
 			if( temp_data['leak_enable'] == true ){
 				this._drill_COGM_preloadTank.push( 
-					ImageManager.reserveBitmap( temp_data['leak_src_file'], temp_data['leak_src'], 0, true ) 
+					ImageManager.reserveBitmap( temp_data['leak_src_file'], temp_data['leak_src'], 0, true, this._drill_COGM_cacheId ) 
 				);
 			}
 			
 			if( temp_data['par_enable'] == true ){
 				this._drill_COGM_preloadTank.push( 
-					ImageManager.reserveBitmap( temp_data['par_src_file'], temp_data['par_src'], 0, true ) 
+					ImageManager.reserveBitmap( temp_data['par_src_file'], temp_data['par_src'], 0, true, this._drill_COGM_cacheId ) 
 				);
 			}
 			
 			if( temp_data['vernier_enable'] == true ){
 				for(var j=0; j < temp_data['vernier_src'].length; j++){
 					this._drill_COGM_preloadTank.push( 
-						ImageManager.reserveBitmap( temp_data['vernier_src_file'], temp_data['vernier_src'][j], 0, true ) 
+						ImageManager.reserveBitmap( temp_data['vernier_src_file'], temp_data['vernier_src'][j], 0, true, this._drill_COGM_cacheId ) 
 					);
 				}
 			}

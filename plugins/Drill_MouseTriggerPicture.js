@@ -110,7 +110,7 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
  * 时间复杂度： o(n^2)  每帧
- * 测试方法：   在对话管理层进行图片鼠标触发测试。
+ * 测试方法：   在图片管理层进行图片鼠标触发测试。
  * 测试结果：   200个事件的地图中，平均消耗为：【10.31ms】
  *              100个事件的地图中，平均消耗为：【9.15ms】
  *               50个事件的地图中，平均消耗为：【6.58ms】
@@ -146,7 +146,7 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^2)  每帧
-//		★性能测试因素	对话管理层
+//		★性能测试因素	图片管理层
 //		★性能测试消耗	6.58ms（Scene_Map.update）
 //		★最坏情况		暂无
 //		★备注			能够稳定在10帧左右，去掉图片后，15帧左右。
@@ -161,6 +161,9 @@
 //				->触发记录
 //
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -211,7 +214,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_MouseTriggerPicture = true;
@@ -689,7 +692,7 @@ Game_Picture.prototype.drill_MTP_init = function(){
 	this._drill_MTP['isMouseInRange'] = false;		//鼠标进入图片范围
 }
 //==============================
-// * 图片 - 图片移除时
+// * 图片 - 消除图片
 //==============================
 var _drill_MTP_pic_erase = Game_Picture.prototype.erase;
 Game_Picture.prototype.erase = function() {
@@ -698,14 +701,14 @@ Game_Picture.prototype.erase = function() {
 	$gameTemp._drill_MTP_needRestatistics = true;	//图片消除后，强制刷新
 }
 //==============================
-// * 图片操作 - 消除图片（command235）
+// * 图片 - 消除图片（command235）
 //==============================
 var _drill_MTP_pic_erasePicture = Game_Screen.prototype.erasePicture;
 Game_Screen.prototype.erasePicture = function( pictureId ){
-    var pic_id = this.realPictureId(pictureId);
-    var pic = this._pictures[pic_id];
-	if( pic != undefined ){
-		pic.drill_MTP_init();					//参数清空
+    var realPictureId = this.realPictureId(pictureId);
+	var picture = this._pictures[realPictureId];
+	if( picture != undefined ){
+		picture.drill_MTP_init();					//参数清空
 	}
 	
 	_drill_MTP_pic_erasePicture.call( this, pictureId );
@@ -750,18 +753,21 @@ Game_Picture.prototype.drill_MTP_getCommonIdByTriggerType = function( typeName )
 	return -1;
 }
 
+
 //=============================================================================
-// ** 公共事件
+// ** 公共事件控制
 //=============================================================================
 //==============================
-// ** 公共事件 - 地图界面执行
+// * 公共事件控制 - 『执行公共事件』（地图界面）
 //==============================
-Scene_Map.prototype.drill_MTP_executeCommonEvent = function( commonId ) {
+Scene_Map.prototype.drill_MTP_executeCommonEvent = function( commonId ){
 	
+	// > 记录触发位置
 	$gameSystem._drill_MTP_lastX = _drill_mouse_x;
 	$gameSystem._drill_MTP_lastY = _drill_mouse_y;
 	$gameSystem._drill_MTP_lastCommonId = commonId;
 	
+	// > 插件【地图-多线程】
 	var e_data = {
 		'type':"公共事件",
 		'pipeType': "并行",
@@ -770,23 +776,17 @@ Scene_Map.prototype.drill_MTP_executeCommonEvent = function( commonId ) {
 	$gameMap.drill_LCT_addPipeEvent( e_data );
 }
 //==============================
-// ** 公共事件 - 战斗界面执行
+// * 公共事件控制 - 『执行公共事件』（战斗界面）
 //==============================
-Scene_Battle.prototype.drill_MTP_executeCommonEvent = function( commonId ) {
+Scene_Battle.prototype.drill_MTP_executeCommonEvent = function( commonId ){
 	
+	// > 记录触发位置
 	$gameSystem._drill_MTP_lastX = _drill_mouse_x;
 	$gameSystem._drill_MTP_lastY = _drill_mouse_y;
 	$gameSystem._drill_MTP_lastCommonId = commonId;
 	
-	//...
-	var e_data = {
-		'type':"公共事件",
-		'pipeType': "串行",
-		'commonEventId': commonId,
-	};
-	
+	// > 默认执行
 	$gameTemp.reserveCommonEvent( commonId );
-	
 }
 
 

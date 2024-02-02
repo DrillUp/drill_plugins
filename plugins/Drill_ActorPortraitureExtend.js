@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.5]        战斗UI - 高级角色肖像
+ * @plugindesc [v1.7]        战斗UI - 高级角色肖像
  * @author Drill_up
  * 
  * @Drill_LE_param "角色肖像-%d"
@@ -47,6 +47,13 @@
  * 触发时机：
  *   (1.触发时机与事件页的功能相似，
  *      如果触发同时满足多个触发时机，则序号大的触发时机优先。
+ * 小工具：
+ *   (1.防止你看不见：
+ *      使用小工具 GIF动画序列编辑器 能全面编辑复杂的动画序列。
+ *      使用小工具 GIF动画序列编辑器 能全面编辑复杂的动画序列。
+ *      使用小工具 GIF动画序列编辑器 能全面编辑复杂的动画序列。
+ *   (2.小工具能导入 行走图、序列大图、GIF文件 等资源，
+ *      然后小工具能将配置转移到插件 GIF动画序列核心 中。
  * 设计：
  *   (1.该插件的上限比较高，但是同时复杂度也变大了，设计时最好参考
  *      "5.战斗UI > 关于高级角色肖像.docx"文档进行步骤配置。
@@ -90,6 +97,10 @@
  * 在触发条件中添加了 状态条件，可以设置指定状态下的角色肖像。
  * [v1.5]
  * 较大幅度更新了 动画序列底层，该插件重新兼容。
+ * [v1.6]
+ * 进一步优化了动画序列底层，该插件重新兼容。
+ * [v1.7]
+ * 优化了动画序列存储底层。
  * 
  * 
  *
@@ -966,21 +977,34 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			角色肖像：
-//				->条件
-//					->根据生命/魔法值切换
-//					->角色肖像插件指令
-//				->角色肖像
-//					->前视图gif
-//					->背景图gif
-//					->前视图呼吸效果
-//					->支持滤镜
-//					->长期保持显示状态
-//					->前视图的滤镜扩展	x
+//			->☆提示信息
+//			->☆静态数据
+//			->☆插件指令
+//			->☆战斗层级
+//			
+//			->☆贴图控制
+//				->创建 角色层（固定在上层）
+//				->肖像容器
+//			->角色肖像【Drill_APEx_Sprite】
+//				->A主体
+//				->B前视图的动画序列
+//				->C背景图的动画序列
+//				->D触发条件
+//				->E显现与消失
+//				->F自变化效果
+//			
+//			->☆触发条件标记（D触发条件 相关）
+//				->技能捕获
+//				->状态条件
+//			->☆选中角色控制（E显现与消失 相关）
+//				->肖像显示条件
 //		
 //		
 //		★家谱：
 //			大家族-GIF动画序列
+//		
+//		★脚本文档：
+//			1.系统 > 大家族-GIF动画序列（脚本）.docx
 //		
 //		★插件私有类：
 //			* 角色肖像【Drill_APEx_Sprite】
@@ -990,14 +1014,14 @@
 //			2.触发时机 与事件页的功能相似，序号大的触发时机优先。
 //
 //		★其它说明细节：
-//			暂无
+//			1. 2023/9/6 给插件进行了详细功能标准化划分。
 //			
 //		★存在的问题：
 //			暂无
 //			
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -1028,7 +1052,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_ActorPortraitureExtend = true;
@@ -1036,11 +1060,12 @@
 	DrillUp.parameters = PluginManager.parameters('Drill_ActorPortraitureExtend');
 
 	//==============================
-	// * 变量获取 - 触发时机
+	// * 静态数据 - 触发时机
 	//				（~struct~ActorPortraitureCondition）
 	//==============================
 	DrillUp.drill_APEx_initCondition = function( dataFrom ) {
 		var data = {};
+		
 		// > 触发条件
 		data['hp_enable'] = String( dataFrom["是否添加生命条件"] || "true") == "true";
 		data['hp_top'] = Number( dataFrom["条件-生命百分比上限"] || 0);
@@ -1066,8 +1091,10 @@
 		}else{
 			data['battleState_idList'] = [];
 		}
+		
 		// > 触发条件(一帧)
 		data['action_type'] = String( dataFrom["触发条件(一帧)"] || "" );
+		
 		// > 触发动作
 		data['trigger_p_state_enable'] = String( dataFrom["前视图-是否播放状态节点"] || "false") == "true";
 		data['trigger_p_state_node'] = String( dataFrom["前视图-播放状态节点"] || "");
@@ -1079,29 +1106,24 @@
 		//data['trigger_b_state_default'] = String( dataFrom["背景图-是否恢复为默认集合"] || "false") == "true";		// （此编辑项去掉，严重影响配置时的理解）
 		data['trigger_b_act_enable'] = String( dataFrom["背景图-是否播放一次动作"] || "false") == "true";
 		data['trigger_b_act'] = String( dataFrom["背景图-播放的动作名"] || "");
+		
 		return data;
 	}
 
 	//==============================
-	// * 变量获取 - 角色肖像
+	// * 静态数据 - 角色肖像
 	//				（~struct~ActorPortraiture）
 	//==============================
 	DrillUp.drill_APEx_initPortraiture = function( dataFrom ) {
 		var data = {};
-		// > 动画序列
+		
+		// > B前视图的动画序列
 		data['p_actionSeq'] = Number( dataFrom["前视图GIF动作序列"] || 0);
+		
+		// > C背景图的动画序列
 		data['b_actionSeq'] = Number( dataFrom["背景图GIF动作序列"] || 0);
-		// > 呼吸效果
-		data['breath'] = String( dataFrom["是否使用呼吸效果"] || "false") == "true";
-		data['breath_period'] = Number( dataFrom["呼吸周期"] || 70);
-		data['breath_spread'] = Number( dataFrom["呼吸幅度"] || 3);
-		data['breath_type'] = String( dataFrom["呼吸类型"] || '上下缩放');
-		// > 漂浮效果		
-		data['float'] = String( dataFrom["是否使用漂浮效果"] || "false") == "true";
-		data['float_speed'] = Number( dataFrom["漂浮速度"] || 1.5);
-		data['float_spread'] = Number( dataFrom["漂浮幅度"] || 10);
-		data['float_type'] = String( dataFrom["漂浮类型"] || '上下漂浮');
-		// > 触发时机
+		
+		// > D触发条件 - 触发时机容器
 		data['condition_list'] = [];
 		for (var j = 0; j < DrillUp.g_APEx_condition_list_length; j++) {
 			if( dataFrom['触发时机-' + String(j+1) ] != "" &&
@@ -1112,10 +1134,23 @@
 				data['condition_list'].push( DrillUp.drill_APEx_initCondition( {} ) );
 			}
 		}
+		
+		// > F自变化效果 - 呼吸效果
+		data['breath'] = String( dataFrom["是否使用呼吸效果"] || "false") == "true";
+		data['breath_period'] = Number( dataFrom["呼吸周期"] || 70);
+		data['breath_spread'] = Number( dataFrom["呼吸幅度"] || 3);
+		data['breath_type'] = String( dataFrom["呼吸类型"] || '上下缩放');
+		
+		// > F自变化效果 - 漂浮效果		
+		data['float'] = String( dataFrom["是否使用漂浮效果"] || "false") == "true";
+		data['float_speed'] = Number( dataFrom["漂浮速度"] || 1.5);
+		data['float_spread'] = Number( dataFrom["漂浮幅度"] || 10);
+		data['float_type'] = String( dataFrom["漂浮类型"] || '上下漂浮');
+		
 		return data;
 	}
 	
-	/*-----------------默认位置------------------*/
+	/*-----------------常规------------------*/
 	DrillUp.g_APEx_layer = Number(DrillUp.parameters["图片层级"] || 100); 
 	DrillUp.g_APEx_p_x = Number(DrillUp.parameters["平移-前视图 X"] || 335);
 	DrillUp.g_APEx_p_y = Number(DrillUp.parameters["平移-前视图 Y"] || -20);
@@ -1133,9 +1168,10 @@
 	DrillUp.g_APEx_list_length = 60;
 	DrillUp.g_APEx_condition_list_length = 8;
 	DrillUp.g_APEx_list = [];
-	for (var i = 0; i < DrillUp.g_APEx_list_length; i++) {
-		if( DrillUp.parameters['角色肖像-' + String(i+1) ] != "" ){
-			var temp = JSON.parse(DrillUp.parameters['角色肖像-' + String(i+1) ]);
+	for( var i = 0; i < DrillUp.g_APEx_list_length; i++ ){
+		if( DrillUp.parameters["角色肖像-" + String(i+1) ] != undefined &&
+			DrillUp.parameters["角色肖像-" + String(i+1) ] != "" ){
+			var temp = JSON.parse(DrillUp.parameters["角色肖像-" + String(i+1) ]);
 			DrillUp.g_APEx_list[i] = DrillUp.drill_APEx_initPortraiture( temp );
 			DrillUp.g_APEx_list[i]['actor_id'] = i+1;		//（角色肖像与角色id一一对应）
 		}else{
@@ -1150,23 +1186,24 @@
 if( Imported.Drill_CoreOfActionSequence ){
 	
 	
-//=============================================================================
+//==============================
 // * 强制更新要求
-//=============================================================================
-if( DrillUp.drill_COAS_getSequenceData == undefined ){
+//==============================
+if( DrillUp.drill_COAS_getSequenceData_ById == undefined ){
 	alert( DrillUp.drill_APEx_getPluginTip_NeedUpdate_actionSeq() );
 };
 	
 	
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _drill_APEx_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_APEx_pluginCommand.call(this, command, args);
-	if( command === ">角色肖像" ){	// >角色肖像 : 我方 : 1 : 强制处于条件 : 1
+	if( command === ">角色肖像" ){
 		
-		if(args.length == 8){
+		/*
+		if( args.length == 8 ){		// >角色肖像 : 我方 : 1 : 强制处于条件 : 1
 			var group = String(args[1]);
 			var temp1 = Number(args[3]);
 			var type = String(args[5]);
@@ -1185,7 +1222,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				}
 			}
 		}
-		if(args.length == 6){
+		if( args.length == 6 ){
 			var group = String(args[1]);
 			var temp1 = Number(args[3]);
 			var type = String(args[5]);
@@ -1203,12 +1240,13 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				}
 			}
 		}
+		*/
 	}
 };
 
 
 //#############################################################################
-// ** 【标准模块】战斗层级
+// ** 【标准模块】战斗层级 ☆战斗层级
 //#############################################################################
 //##############################
 // * 战斗层级 - 添加贴图到层级【标准函数】
@@ -1295,28 +1333,22 @@ Spriteset_Battle.prototype.drill_APEx_layerAddSprite_Private = function( sprite,
 
 
 //=============================================================================
-// ** 战斗层 绘制
+// ** ☆贴图控制
+//
+//			说明：	> 此模块控制 贴图的创建、角色肖像容器的管理。
+//					> 这里的贴图容器是在Spriteset_Battle自身上的，销毁时不需要考虑残留问题。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 战斗层 - 初始化
-//==============================
-var _drill_APEx_s_initialize = Spriteset_Battle.prototype.initialize;
-Spriteset_Battle.prototype.initialize = function() {
-	_drill_APEx_s_initialize.call(this);
-	
-	this._drill_APEx_spriteTank = [];			//角色贴图容器
-	this._drill_APEx_needRefresh = true;		//角色贴图容器刷新标记
-}
-//==============================
-// * 战斗层 - 创建
+// * 贴图控制 - 创建绑定
 //==============================
 var _drill_APEx_s_createLowerLayer = Spriteset_Battle.prototype.createLowerLayer;
 Spriteset_Battle.prototype.createLowerLayer = function() {
 	_drill_APEx_s_createLowerLayer.call(this);
-	this.drill_APEx_createLayer();		//创建角色层
+	this.drill_APEx_createLayer();
 }
 //==============================
-// * 创建 - 角色层
+// * 贴图控制 - 创建
 //==============================
 Spriteset_Battle.prototype.drill_APEx_createLayer = function() {
 	
@@ -1333,61 +1365,25 @@ Spriteset_Battle.prototype.drill_APEx_createLayer = function() {
 }
 
 //==============================
-// * 战斗 - 帧刷新
+// * 肖像容器 - 初始化
 //==============================
-var _drill_APEx_s_update = Scene_Battle.prototype.update;
-Scene_Battle.prototype.update = function() {
-	_drill_APEx_s_update.call(this);
-	
-	this._spriteset.drill_APEx_updateTankCheck();			//容器-检查刷新条件
-	this._spriteset.drill_APEx_refreshTankIfNeed();			//容器-帧刷新
-	
-	this.drill_APEx_updateActorActive();		//判断当前选中角色
-};
-//==============================
-// * 帧刷新 - 判断当前选中角色
-//==============================
-Scene_Battle.prototype.drill_APEx_updateActorActive = function() {
-	if( this._spriteset == undefined ){ return; }
-	if( this._spriteset._drill_APEx_spriteTank == undefined ){ return; }
-	
-	// > 激活当前选中的肖像
-	var cur_Actor = BattleManager.actor();			
-	for(var i=0; i < this._spriteset._drill_APEx_spriteTank.length; i++){
-		var temp_sprite = this._spriteset._drill_APEx_spriteTank[i];
-		if( temp_sprite == null ){ continue; }
-		
-		// > 显示的条件
-		if( this.drill_APEx_isActorVisible() == true &&		//（肖像显示条件）
-			cur_Actor != undefined &&						//（指定的贴图与角色id对应上）
-			temp_sprite._drill_actor_id == cur_Actor.actorId() ){
-			temp_sprite.drill_APEx_active();
-			
-		// > 不满足条件则隐藏
-		}else{
-			temp_sprite.drill_APEx_deactive();
-		}
-	}
-};
-//==============================
-// * 帧刷新 - 肖像显示条件
-//==============================
-Scene_Battle.prototype.drill_APEx_isActorVisible = function() {
-	if( DrillUp.g_APEx_noDeactive == true ){ return true; }			//（强制永久保持）
-	if( BattleManager.isInputting() == false ){ return false; }					//不是选择指令阶段时，隐藏
-	if( this._enemyWindow.active ){ return false; }								//选择敌人时隐藏
-	if( this._partyCommandWindow.active ){ return false; }						//选择队伍指令时隐藏
-	if( $gameSystem.isSideView() && this._actorWindow.active ){ return false; }	//选择角色时，SV模式隐藏，第一人称不需要隐藏
-	return true;
+var _drill_APEx_s_initialize = Spriteset_Battle.prototype.initialize;
+Spriteset_Battle.prototype.initialize = function() {
+	_drill_APEx_s_initialize.call(this);
+	this._drill_APEx_spriteTank = [];			//（角色肖像容器）
+	this._drill_APEx_needRefresh = true;		//（角色肖像容器重刷标记）
 }
-
-//=============================================================================
-// ** 角色贴图容器
-//
-//			说明：	该容器是在Spriteset_Battle自身上的，销毁时不需要考虑残留问题。
-//=============================================================================
 //==============================
-// * 容器 - 检查刷新条件
+// * 肖像容器 - 帧刷新
+//==============================
+var _drill_APEx_sp_update = Scene_Battle.prototype.update;
+Scene_Battle.prototype.update = function() {
+	_drill_APEx_sp_update.call(this);
+	this._spriteset.drill_APEx_updateTankCheck();		//帧刷新 - 检查重刷条件
+	this._spriteset.drill_APEx_refreshTankIfNeed();		//帧刷新 - 重刷容器
+};
+//==============================
+// * 肖像容器 - 帧刷新 - 检查重刷条件
 //==============================
 Spriteset_Battle.prototype.drill_APEx_updateTankCheck = function() {
 	if( !this._drill_APEx_spriteTank ){ return; }
@@ -1399,7 +1395,7 @@ Spriteset_Battle.prototype.drill_APEx_updateTankCheck = function() {
 	}
 }
 //==============================
-// * 容器 - 帧刷新
+// * 肖像容器 - 帧刷新 - 重刷容器
 //==============================
 Spriteset_Battle.prototype.drill_APEx_refreshTankIfNeed = function(){
 	if( this._drill_APEx_needRefresh != true ){ return; }
@@ -1408,16 +1404,18 @@ Spriteset_Battle.prototype.drill_APEx_refreshTankIfNeed = function(){
 	// > 清空容器
 	this.drill_APEx_clearTank();
 	
-	// > 建立角色贴图
+	// > 建立角色肖像
 	var members = $gameParty.members();
 	for(var i=0; i < members.length; i++){
 		var actor = members[i];
 		var actor_id = actor.actorId();
 		
-		// > 根据数据建立sprite
+		// > 创建贴图
 		var temp_sprite = null;
 		var temp_data = DrillUp.g_APEx_list[ actor_id-1 ];
-		if( temp_data['actor_id'] != undefined ){	//（过滤未配置的角色肖像）
+		if( temp_data != undefined &&
+			temp_data['actor_id'] != undefined ){	//（过滤未配置的角色肖像）
+			
 			temp_sprite = new Drill_APEx_Sprite( temp_data );
 			this._drill_APEx_actorLayer.addChild(temp_sprite);
 		}
@@ -1425,7 +1423,7 @@ Spriteset_Battle.prototype.drill_APEx_refreshTankIfNeed = function(){
 	}
 };
 //==============================
-// * 容器 - 清空
+// * 肖像容器 - 清空
 //==============================
 Spriteset_Battle.prototype.drill_APEx_clearTank = function(){
 	for( var i = this._drill_APEx_spriteTank.length-1; i >= 0; i-- ){
@@ -1437,20 +1435,45 @@ Spriteset_Battle.prototype.drill_APEx_clearTank = function(){
 };
 
 
+
 //=============================================================================
 // ** 角色肖像【Drill_APEx_Sprite】
-//
-//			参数：	data.actor_id			//角色id
-//					data.condition_list		//条件/GIF贴图列表（见全局变量获取的结构）
-//			说明：	1.准备好数据，new即可。
-//					2.实时调用函数.drill_APEx_active()和.drill_APEx_deactive()改变图像显示/隐藏。
-//
-// 			代码：	> 范围 - 该类显示单独的角色肖像。
-//					> 结构 - [ ●合并 /分离/混乱] 贴图与数据合并。
-//					> 数量 - [单个/ ●多个] 
-//					> 创建 - [ ●一次性 /自延迟/外部延迟] 
-//					> 销毁 - [不考虑/自销毁/ ●外部销毁 ] 
-//					> 样式 - [ ●不可修改 /自变化/外部变化] 
+// **		
+// **		作用域：	战斗界面
+// ** 		主功能：	> 定义一个专门控制角色肖像的贴图。
+// ** 		子功能：	->贴图
+// **						->帧刷新
+// **						->是否就绪
+// **						->优化策略
+// **						x->销毁
+// **					->A主体
+// **						->角色绑定
+// **						->前视图贴图
+// **						->背景图贴图
+// **						->固定帧初始值
+// **					->B前视图的动画序列
+// **					->C背景图的动画序列
+// **					->D触发条件
+// **						->生命条件
+// **						->魔法条件
+// **						->怒气条件
+// **						->开关条件
+// **						->变量条件
+// **						->状态条件
+// **						->触发条件(一帧)
+// **					->E显现与消失
+// **						->激活
+// **						->取消激活
+// **					->F自变化效果
+// **				
+// **		说明：	> 可以实时调用函数.drill_APEx_active()和.drill_APEx_deactive()改变图像显示/隐藏。
+// **				
+// **		代码：	> 范围 - 该类显示单独的角色肖像。
+// **				> 结构 - [ ●合并 /分离/混乱] 贴图与数据合并。
+// **				> 数量 - [单个/ ●多个] 
+// **				> 创建 - [ ●一次性 /自延迟/外部延迟] 
+// **				> 销毁 - [不考虑/自销毁/ ●外部销毁 ] 
+// **				> 样式 - [ ●不可修改 /自变化/外部变化] 
 //=============================================================================
 //==============================
 // * 角色肖像 - 定义
@@ -1463,28 +1486,125 @@ Drill_APEx_Sprite.prototype.constructor = Drill_APEx_Sprite;
 //==============================
 // * 角色肖像 - 初始化
 //==============================
-Drill_APEx_Sprite.prototype.initialize = function( data ) {
+Drill_APEx_Sprite.prototype.initialize = function( data ){
     Sprite.prototype.initialize.call(this);
 	this._drill_data = JSON.parse(JSON.stringify( data ));
-	this._drill_actor = $gameActors.actor( data['actor_id'] );
-	this._drill_actor_id = data['actor_id'];
-	this._drill_conditions = data['condition_list'];
-	//alert(JSON.stringify(data));
-	
-	// > 私有变量初始化
-	this._drill_force_condition = [];	//强制的状态序列
-	this._drill_isActived = false;		//激活状态
-	
-	this.drill_APEx_initSprite();		//创建前景背景
+	this.drill_sprite_initData();		//初始化数据
+	this.drill_sprite_initChild();		//初始化子功能
 };
+//==============================
+// * 角色肖像 - 帧刷新
+//==============================
+Drill_APEx_Sprite.prototype.update = function() {
+	if( this.drill_sprite_isReady() == false ){ return; }
+	if( this.drill_sprite_isOptimizationPassed() == false ){ return; }
+	Sprite.prototype.update.call(this);
+	
+	this.drill_sprite_updateAttr();					//帧刷新 - A主体 - 固定帧初始值
+	this.drill_sprite_updatePController();			//帧刷新 - B前视图的动画序列
+	this.drill_sprite_updateBController();			//帧刷新 - C背景图的动画序列
+	this.drill_sprite_updateCondition();			//帧刷新 - D触发条件
+	this.drill_sprite_updateShowAndHide();			//帧刷新 - E显现与消失
+	this.drill_sprite_updateEffect();				//帧刷新 - F自变化效果
+}
 
+//##############################
+// * E显现与消失 - 激活
+//			
+//			参数：	> 无
+//			返回：	> 无
+//##############################
+Drill_APEx_Sprite.prototype.drill_APEx_active = function(){
+	this._drill_isActived = true; 
+}
+//##############################
+// * E显现与消失 - 取消激活
+//			
+//			参数：	> 无
+//			返回：	> 无
+//##############################
+Drill_APEx_Sprite.prototype.drill_APEx_deactive = function(){
+	this._drill_isActived = false;
+}
+
+//##############################
+// * 角色肖像 - 是否就绪【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 布尔（是否显示）
+//			
+//			说明：	> 这里完全 不考虑 延迟加载问题。
+//##############################
+Drill_APEx_Sprite.prototype.drill_sprite_isReady = function(){
+	if( this._drill_actor == undefined ){ return false; }
+    return true;
+};
+//##############################
+// * 角色肖像 - 优化策略【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 布尔（是否通过）
+//			
+//			说明：	> 通过时，正常帧刷新；未通过时，不执行帧刷新。
+//##############################
+Drill_APEx_Sprite.prototype.drill_sprite_isOptimizationPassed = function(){
+    return true;
+};
+//##############################
+// * 角色肖像 - 销毁【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//			
+//			说明：	> 销毁不是必要的，但最好随时留意给 旧贴图 执行销毁函数。
+//##############################
+Drill_APEx_Sprite.prototype.drill_sprite_destroy = function(){
+	//（暂无）
+};
 //==============================
-// * 初始化 - 创建前景背景
+// * 角色肖像 - 初始化数据
 //==============================
-Drill_APEx_Sprite.prototype.drill_APEx_initSprite = function() {
+Drill_APEx_Sprite.prototype.drill_sprite_initData = function() {
 	var data = this._drill_data;
 	
-	// > 前视图
+	// > A主体
+	if( data['actor_id'] == undefined ){ data['actor_id'] = 0 };
+	
+	// > B前视图的动画序列
+	if( data['p_actionSeq'] == undefined ){ data['p_actionSeq'] = 0 };
+	
+	// > C背景图的动画序列
+	if( data['b_actionSeq'] == undefined ){ data['b_actionSeq'] = 0 };
+	
+	// > D触发条件
+	if( data['condition_list'] == undefined ){ data['condition_list'] = [] };
+	
+};
+//==============================
+// * 角色肖像 - 初始化子功能
+//==============================
+Drill_APEx_Sprite.prototype.drill_sprite_initChild = function() {
+	this.drill_sprite_initAttr();				//初始化子功能 - A主体
+	this.drill_sprite_initPController();		//初始化子功能 - B前视图的动画序列
+	this.drill_sprite_initBController();		//初始化子功能 - C背景图的动画序列
+	this.drill_sprite_initCondition();			//初始化子功能 - D触发条件
+	this.drill_sprite_initShowAndHide();		//初始化子功能 - E显现与消失
+	this.drill_sprite_initEffect();				//初始化子功能 - F自变化效果
+};
+
+
+//==============================
+// * A主体 - 初始化子功能
+//==============================
+Drill_APEx_Sprite.prototype.drill_sprite_initAttr = function() {
+	var data = this._drill_data;
+	
+	// > 角色绑定
+	this._drill_actor = $gameActors.actor( data['actor_id'] );
+	this._drill_actor_id = data['actor_id'];
+	//alert(JSON.stringify(data));
+	
+	// > 前视图贴图
 	this._drill_p_sprite = new Sprite();
 	this._drill_p_sprite.anchor.x = 0.5;
 	this._drill_p_sprite.anchor.y = 1;
@@ -1495,12 +1615,8 @@ Drill_APEx_Sprite.prototype.drill_APEx_initSprite = function() {
 	this._drill_p_sprite._breath = Math.random() * 10;
 	this._drill_p_sprite._breath_dir = Math.floor(Math.random() * 2);
 	this._drill_p_sprite._f_time = 0;
-	var seq_data = DrillUp.drill_COAS_getSequenceData( data['p_actionSeq']-1 );
-	if( seq_data == null ){ seq_data = {}; }
-	this._drill_p_controller = new Drill_COAS_MainController( seq_data );
-	this._drill_p_decorator = new Drill_COAS_SpriteDecorator( this._drill_p_sprite, this._drill_p_controller );
 	
-	// > 背景图
+	// > 背景图贴图
 	this._drill_b_sprite = new Sprite();
 	this._drill_b_sprite.anchor.x = 1;
 	this._drill_b_sprite.anchor.y = 1;
@@ -1508,49 +1624,25 @@ Drill_APEx_Sprite.prototype.drill_APEx_initSprite = function() {
 	this._drill_b_sprite.y = Graphics.boxHeight - DrillUp.g_APEx_b_y - DrillUp.g_APEx_b_silde_y;
 	this._drill_b_sprite.opacity = 0;
 	this._drill_b_sprite._move = 0;
-	var seq_data = DrillUp.drill_COAS_getSequenceData( data['b_actionSeq']-1 );
-	if( seq_data == null ){ seq_data = {}; }
-	this._drill_b_controller = new Drill_COAS_MainController( seq_data );
-	this._drill_b_decorator = new Drill_COAS_SpriteDecorator( this._drill_b_sprite, this._drill_b_controller );
 	
-	this.addChild(this._drill_b_sprite);	//背景图在后面
+	this.addChild(this._drill_b_sprite);	//（背景图在后面）
 	this.addChild(this._drill_p_sprite);
 }
 //==============================
-// * 角色肖像 - 显示
+// * A主体 - 帧刷新 - 固定帧初始值
+//
+//			说明：	> 此处定量赋值，后面功能可根据定量值进行加减。
 //==============================
-Drill_APEx_Sprite.prototype.drill_APEx_active = function(){ this._drill_isActived = true; }
-//==============================
-// * 角色肖像 - 隐藏
-//==============================
-Drill_APEx_Sprite.prototype.drill_APEx_deactive = function(){ this._drill_isActived = false; }
-
-//==============================
-// * 角色肖像 - 帧刷新
-//==============================
-Drill_APEx_Sprite.prototype.update = function() {
-	Sprite.prototype.update.call(this);
-	if(!this._drill_actor ){ return; }
+Drill_APEx_Sprite.prototype.drill_sprite_updateAttr = function() {
 	
-	this.drill_APEx_updateOrg();			//固定帧初始值
-	this.drill_APEx_updateCondition();		//条件刷新
-	this.drill_APEx_updatePosition();		//位置与显示
-	this.drill_APEx_updateGIF();			//动画序列刷新
-	this.drill_APEx_updateEffects();		//效果刷新
-}
-//==============================
-// * 帧刷新 - 固定帧初始值
-//==============================
-Drill_APEx_Sprite.prototype.drill_APEx_updateOrg = function() {
-	
-	// > 前视图
+	// > 前视图贴图
 	this._drill_p_sprite.x = Graphics.boxWidth - DrillUp.g_APEx_p_x - DrillUp.g_APEx_p_silde_x;
 	this._drill_p_sprite.y = Graphics.boxHeight - DrillUp.g_APEx_p_y - DrillUp.g_APEx_p_silde_y;
 	this._drill_p_sprite.rotation = 0;
 	this._drill_p_sprite.scale.x = 1;
 	this._drill_p_sprite.scale.y = 1;
 	
-	// > 背景图
+	// > 背景图贴图
 	this._drill_b_sprite.x = Graphics.boxWidth - DrillUp.g_APEx_b_x - DrillUp.g_APEx_b_silde_x;
 	this._drill_b_sprite.y = Graphics.boxHeight - DrillUp.g_APEx_b_y - DrillUp.g_APEx_b_silde_y;
 	this._drill_b_sprite.rotation = 0;
@@ -1558,11 +1650,126 @@ Drill_APEx_Sprite.prototype.drill_APEx_updateOrg = function() {
 	this._drill_b_sprite.scale.y = 1;
 }
 
+
 //==============================
-// * 帧刷新 - 条件刷新
+// * B前视图的动画序列 - 初始化子功能
 //==============================
-Drill_APEx_Sprite.prototype.drill_APEx_updateCondition = function() {
+Drill_APEx_Sprite.prototype.drill_sprite_initPController = function() {
+	var data = this._drill_data;
+	this._drill_p_controller = new Drill_COAS_MainController( data['p_actionSeq']-1 );
+	this._drill_p_decorator = new Drill_COAS_SpriteDecorator( this._drill_p_sprite, this._drill_p_controller );
+}
+//==============================
+// * B前视图的动画序列 - 帧刷新
+//==============================
+Drill_APEx_Sprite.prototype.drill_sprite_updatePController = function() {
 	
+	this._drill_p_controller.drill_COAS_update();		//（COAS核心控制刷新bitmap部分）
+	this._drill_p_decorator.drill_COAS_update();
+}
+//==============================
+// * B前视图的动画序列 - 播放默认的状态元集合（开放函数）
+//==============================
+Drill_APEx_Sprite.prototype.drill_APEx_p_setStateNodeDefault = function(){
+	this.drill_APEx_p_setStateNode( "默认的状态元集合" );
+}
+//==============================
+// * B前视图的动画序列 - 播放状态节点（开放函数）
+//			
+//			说明：	> 父函数执行一次就重置一次，父函数不能 放帧刷新里面反复执行。
+//					> 输入空名称时/无对应名称时 无效。
+//==============================
+Drill_APEx_Sprite.prototype.drill_APEx_p_setStateNode = function( node_name ){
+	
+	// > 去重处理
+	if( this._drill_APEx_p_lastName == node_name ){ return; }
+	this._drill_APEx_p_lastName = node_name;
+	
+	this._drill_p_controller.drill_COAS_setStateNode( node_name );
+}
+//==============================
+// * B前视图的动画序列 - 播放简单状态元集合（开放函数）
+//==============================
+//	（暂时不考虑用这个函数）
+//==============================
+// * B前视图的动画序列 - 播放动作元（开放函数）
+//==============================
+Drill_APEx_Sprite.prototype.drill_APEx_p_setAct = function( act_name ){
+	this._drill_p_controller.drill_COAS_setAct( act_name );
+}
+//==============================
+// * B前视图的动画序列 - 立刻终止动作（开放函数）
+//==============================
+Drill_APEx_Sprite.prototype.drill_APEx_p_stopAct = function(){
+	this._drill_p_controller.drill_COAS_stopAct();
+}
+
+
+//==============================
+// * C背景图的动画序列 - 初始化子功能
+//==============================
+Drill_APEx_Sprite.prototype.drill_sprite_initBController = function() {
+	var data = this._drill_data;
+	this._drill_b_controller = new Drill_COAS_MainController( data['b_actionSeq']-1 );
+	this._drill_b_decorator = new Drill_COAS_SpriteDecorator( this._drill_b_sprite, this._drill_b_controller );
+}
+//==============================
+// * C背景图的动画序列 - 帧刷新
+//==============================
+Drill_APEx_Sprite.prototype.drill_sprite_updateBController = function() {
+	
+	this._drill_b_controller.drill_COAS_update();
+	this._drill_b_decorator.drill_COAS_update();
+}
+//==============================
+// * C背景图的动画序列 - 播放默认的状态元集合（开放函数）
+//==============================
+Drill_APEx_Sprite.prototype.drill_APEx_b_setStateNodeDefault = function(){
+	this.drill_APEx_b_setStateNode( "默认的状态元集合" );
+}
+//==============================
+// * C背景图的动画序列 - 播放状态节点（开放函数）
+//			
+//			说明：	> 父函数执行一次就重置一次，父函数不能 放帧刷新里面反复执行。
+//					> 输入空名称时/无对应名称时 无效。
+//==============================
+Drill_APEx_Sprite.prototype.drill_APEx_b_setStateNode = function( node_name ){
+	
+	// > 去重处理
+	if( this._drill_APEx_b_lastName == node_name ){ return; }
+	this._drill_APEx_b_lastName = node_name;
+	
+	this._drill_b_controller.drill_COAS_setStateNode( node_name );
+}
+//==============================
+// * C背景图的动画序列 - 播放简单状态元集合（开放函数）
+//==============================
+//	（暂时不考虑用这个函数）
+//==============================
+// * C背景图的动画序列 - 设置动作元（开放函数）
+//==============================
+Drill_APEx_Sprite.prototype.drill_APEx_b_setAct = function( act_name ){
+	this._drill_b_controller.drill_COAS_setAct( act_name );
+}
+//==============================
+// * C背景图的动画序列 - 立刻终止动作（开放函数）
+//==============================
+Drill_APEx_Sprite.prototype.drill_APEx_b_stopAct = function(){
+	this._drill_b_controller.drill_COAS_stopAct();
+}
+
+
+//==============================
+// * D触发条件 - 初始化子功能
+//==============================
+Drill_APEx_Sprite.prototype.drill_sprite_initCondition = function() {
+	var data = this._drill_data;
+	this._drill_conditions = data['condition_list'];	//触发时机容器
+}
+//==============================
+// * D触发条件 - 帧刷新
+//==============================
+Drill_APEx_Sprite.prototype.drill_sprite_updateCondition = function() {
 	var battler = this._drill_actor;
 	for(var i=this._drill_conditions.length-1; i >= 0 ; i--){
 		var condition = this._drill_conditions[i];
@@ -1663,7 +1870,7 @@ Drill_APEx_Sprite.prototype.drill_APEx_updateCondition = function() {
 		}
 		
 		
-		// > 前视图-切换状态元
+		// > 执行 - 前视图-切换状态元
 		if( condition['trigger_p_state_enable'] == true ){
 			if( condition['trigger_p_state_default'] == true ){
 				this.drill_APEx_p_setStateNodeDefault();
@@ -1671,11 +1878,11 @@ Drill_APEx_Sprite.prototype.drill_APEx_updateCondition = function() {
 				this.drill_APEx_p_setStateNode( condition['trigger_p_state_node'] );
 			}
 		}
-		// > 前视图-播放动作
+		// > 执行 - 前视图-播放动作
 		if( condition['trigger_p_act_enable'] == true ){
 			this.drill_APEx_p_setAct( condition['trigger_p_act'] );
 		}
-		// > 背景图-切换状态元
+		// > 执行 - 背景图-切换状态元
 		if( condition['trigger_b_state_enable'] == true ){
 			if( condition['trigger_b_state_default'] == true ){
 				this.drill_APEx_b_setStateNodeDefault();
@@ -1683,22 +1890,28 @@ Drill_APEx_Sprite.prototype.drill_APEx_updateCondition = function() {
 				this.drill_APEx_b_setStateNode( condition['trigger_b_state_node'] );
 			}
 		}
-		// > 背景图-播放动作
+		// > 执行 - 背景图-播放动作
 		if( condition['trigger_b_act_enable'] == true ){
 			this.drill_APEx_b_setAct( condition['trigger_b_act'] );
 		}
 		
 		break;
 	}
-	
 }
 
+
 //==============================
-// * 帧刷新 - 位置与显示
+// * E显现与消失 - 初始化子功能
 //==============================
-Drill_APEx_Sprite.prototype.drill_APEx_updatePosition = function() {
+Drill_APEx_Sprite.prototype.drill_sprite_initShowAndHide = function() {
+	this._drill_isActived = false;		//激活状态
+}
+//==============================
+// * E显现与消失 - 帧刷新
+//==============================
+Drill_APEx_Sprite.prototype.drill_sprite_updateShowAndHide = function() {
 	
-	// > 修正镜头
+	// > 战斗镜头修正
 	if( Imported.Drill_BattleCamera ){		//（固定处于上层，在图层内）
 		var camera_pos = $gameSystem._drill_BCa_controller.drill_BCa_getCameraPos_Children();
 		this._drill_p_sprite.x -= camera_pos.x;
@@ -1707,7 +1920,7 @@ Drill_APEx_Sprite.prototype.drill_APEx_updatePosition = function() {
 		this._drill_b_sprite.y -= camera_pos.y;
 	}
 	
-	// > 前视图显示/隐藏
+	// > 前视图贴图 透明度（显示/隐藏）
 	if( this._drill_isActived == true ){
 		this._drill_p_sprite._move ++;
 		if( this._drill_p_sprite._move > DrillUp.g_APEx_p_silde_time  ){
@@ -1721,11 +1934,12 @@ Drill_APEx_Sprite.prototype.drill_APEx_updatePosition = function() {
 	}
 	this._drill_p_sprite.opacity = 255 / DrillUp.g_APEx_p_silde_time * this._drill_p_sprite._move;
 	
-	// > 前视图位置
+	// > 前视图贴图 位置
 	this._drill_p_sprite.x += Math.floor( DrillUp.g_APEx_p_silde_x / DrillUp.g_APEx_p_silde_time * this._drill_p_sprite._move );
 	this._drill_p_sprite.y += Math.floor( DrillUp.g_APEx_p_silde_y / DrillUp.g_APEx_p_silde_time * this._drill_p_sprite._move );
 	
-	// > 背景图显示/隐藏
+	
+	// > 背景图贴图 透明度（显示/隐藏）
 	if( this._drill_isActived == true ){
 		this._drill_b_sprite._move ++;
 		if( this._drill_b_sprite._move > DrillUp.g_APEx_b_silde_time  ){
@@ -1739,31 +1953,26 @@ Drill_APEx_Sprite.prototype.drill_APEx_updatePosition = function() {
 	}
 	this._drill_b_sprite.opacity = 255 / DrillUp.g_APEx_b_silde_time * this._drill_b_sprite._move;
 	
-	// > 背景图位置
+	// > 背景图贴图 位置
 	this._drill_b_sprite.x += Math.floor( DrillUp.g_APEx_b_silde_x / DrillUp.g_APEx_b_silde_time * this._drill_b_sprite._move + 10 ); //（+10震动时防止过界）
 	this._drill_b_sprite.y += Math.floor( DrillUp.g_APEx_b_silde_y / DrillUp.g_APEx_b_silde_time * this._drill_b_sprite._move );
 }
 
-//==============================
-// * 帧刷新 - 动画序列刷新
-//==============================
-Drill_APEx_Sprite.prototype.drill_APEx_updateGIF = function() {
-	
-	this._drill_p_controller.update();		//（COAS核心控制刷新bitmap部分）
-	this._drill_p_decorator.update();
-	
-	this._drill_b_controller.update();
-	this._drill_b_decorator.update();
-}
 
 //==============================
-// * 帧刷新 - 效果刷新
+// * F自变化效果 - 初始化子功能
 //==============================
-Drill_APEx_Sprite.prototype.drill_APEx_updateEffects = function() {
+Drill_APEx_Sprite.prototype.drill_sprite_initEffect = function() {
+	//（无）
+}
+//==============================
+// * F自变化效果 - 帧刷新
+//==============================
+Drill_APEx_Sprite.prototype.drill_sprite_updateEffect = function() {
 	var temp_data = this._drill_data;
 	var temp_sprite = this._drill_p_sprite;
 	
-	// > 呼吸效果
+	// > 呼吸效果（前视图贴图）
 	if( temp_data['breath'] == true ){
 		if( temp_sprite._breath_dir == 0 ){
 			temp_sprite._breath += 2.1;
@@ -1785,7 +1994,7 @@ Drill_APEx_Sprite.prototype.drill_APEx_updateEffects = function() {
 		}
 	}
 	
-	// > 漂浮效果
+	// > 漂浮效果（前视图贴图）
 	if( temp_data['float'] == true ){
 		temp_sprite._f_time += temp_data['float_speed'];
 		if(temp_sprite._f_time > 360){ temp_sprite._f_time -= 360; }
@@ -1799,84 +2008,13 @@ Drill_APEx_Sprite.prototype.drill_APEx_updateEffects = function() {
 	}
 }
 
-//==============================
-// * 动画序列-前视图 - 播放默认的状态元集合（开放函数）
-//==============================
-Drill_APEx_Sprite.prototype.drill_APEx_p_setStateNodeDefault = function(){
-	this.drill_APEx_p_setStateNode( "默认的状态元集合" );
-}
-//==============================
-// * 动画序列-前视图 - 播放状态节点（开放函数）
-//			
-//			说明：	> 父函数执行一次就重置一次，父函数不能 放帧刷新里面反复执行。
-//					> 输入空名称时/无对应名称时 无效。
-//==============================
-Drill_APEx_Sprite.prototype.drill_APEx_p_setStateNode = function( node_name ){
-	
-	// > 去重处理
-	if( this._drill_APEx_p_lastName == node_name ){ return; }
-	this._drill_APEx_p_lastName = node_name;
-	
-	this._drill_p_controller.drill_COAS_setStateNode( node_name );
-}
-//==============================
-// * 动画序列-前视图 - 播放简单状态元集合（开放函数）
-//==============================
-//	（暂时不考虑用这个函数，不写了）
-//==============================
-// * 动画序列-前视图 - 播放动作元（开放函数）
-//==============================
-Drill_APEx_Sprite.prototype.drill_APEx_p_setAct = function( act_name ){
-	this._drill_p_controller.drill_COAS_setAct( act_name );
-}
-//==============================
-// * 动画序列-前视图 - 立刻终止动作（开放函数）
-//==============================
-Drill_APEx_Sprite.prototype.drill_APEx_p_stopAct = function(){
-	this._drill_p_controller.drill_COAS_stopAct();
-}
-
-//==============================
-// * 动画序列-背景图 - 播放默认的状态元集合（开放函数）
-//==============================
-Drill_APEx_Sprite.prototype.drill_APEx_b_setStateNodeDefault = function(){
-	this.drill_APEx_b_setStateNode( "默认的状态元集合" );
-}
-//==============================
-// * 动画序列-背景图 - 播放状态节点（开放函数）
-//			
-//			说明：	> 父函数执行一次就重置一次，父函数不能 放帧刷新里面反复执行。
-//					> 输入空名称时/无对应名称时 无效。
-//==============================
-Drill_APEx_Sprite.prototype.drill_APEx_b_setStateNode = function( node_name ){
-	
-	// > 去重处理
-	if( this._drill_APEx_b_lastName == node_name ){ return; }
-	this._drill_APEx_b_lastName = node_name;
-	
-	this._drill_b_controller.drill_COAS_setStateNode( node_name );
-}
-//==============================
-// * 动画序列-背景图 - 播放简单状态元集合（开放函数）
-//==============================
-//	（暂时不考虑用这个函数，不写了）
-//==============================
-// * 动画序列-背景图 - 设置动作元（开放函数）
-//==============================
-Drill_APEx_Sprite.prototype.drill_APEx_b_setAct = function( act_name ){
-	this._drill_b_controller.drill_COAS_setAct( act_name );
-}
-//==============================
-// * 动画序列-背景图 - 立刻终止动作（开放函数）
-//==============================
-Drill_APEx_Sprite.prototype.drill_APEx_b_stopAct = function(){
-	this._drill_b_controller.drill_COAS_stopAct();
-}
-
 
 
 //=============================================================================
-// ** 技能捕获容器
+// ** ☆触发条件标记（D触发条件 相关）
+//
+//			说明：	> 此模块辅助 角色肖像 所需的条件数据。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 技能捕获 - 执行捕获
@@ -1884,31 +2022,29 @@ Drill_APEx_Sprite.prototype.drill_APEx_b_stopAct = function(){
 var _drill_APEx_apply = Game_Action.prototype.apply;
 Game_Action.prototype.apply = function(target) {
 	_drill_APEx_apply.call(this,target);
-	
 	$gameTemp.drill_APEx_pushActionCatch( this.subject(), target, this.item() );
 }
 //==============================
-// * 容器 - 初始化
+// * 技能捕获 - 容器 - 初始化
 //==============================
 var _drill_APEx_temp_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {
     _drill_APEx_temp_initialize.call(this);
-	
 	this._drill_APEx_actionTank = {};
 }
 //==============================
-// * 容器 - 战斗开始时，清空
+// * 技能捕获 - 容器 - 战斗开始时
 //==============================
 var _drill_APEx_manager_initMembers = BattleManager.initMembers;
 BattleManager.initMembers = function() {
     _drill_APEx_manager_initMembers.call(this);
-	
 	$gameTemp._drill_APEx_actionTank = {};
 }
 //==============================
-// * 容器 - 加入一次攻击的技能对象
+// * 技能捕获 - 容器 - 加入一次攻击的技能对象
 //
-//			参数：	攻击者，被攻击者，技能数据
+//			参数：	> 攻击者，被攻击者，技能数据
+//			说明：	> 此功能对应 D触发条件 中的 触发条件(一帧) 。
 //==============================
 Game_Temp.prototype.drill_APEx_pushActionCatch = function( attacker, target, skill_item ){
 	
@@ -1954,10 +2090,11 @@ Game_Temp.prototype.drill_APEx_pushActionCatch = function( attacker, target, ski
 		}
 		this._drill_APEx_actionTank[ actor_id ] = action_type;
 	}
-	
 }
 //==============================
-// * 状态 - 判断 - 是否含列表中任一状态
+// * 状态条件 - 是否含列表中任一状态
+//
+//			说明：	> 此功能对应 D触发条件 中的 状态条件 。
 //==============================
 Game_BattlerBase.prototype.drill_APEx_isAnyStateAffected = function( state_list ){
 	for(var i = 0; i < state_list.length; i++ ){
@@ -1968,6 +2105,58 @@ Game_BattlerBase.prototype.drill_APEx_isAnyStateAffected = function( state_list 
 	}
     return false;
 };
+
+
+//=============================================================================
+// ** ☆选中角色控制（E显现与消失 相关）
+//
+//			说明：	> 此模块遍历 角色肖像容器，根据选中情况控制贴图显现/消失。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 选中角色控制 - 帧刷新
+//==============================
+var _drill_APEx_s_update = Scene_Battle.prototype.update;
+Scene_Battle.prototype.update = function() {
+	_drill_APEx_s_update.call(this);
+	this.drill_APEx_updateActorActive();	//帧刷新 - 当前选中角色
+};
+//==============================
+// * 选中角色控制 - 帧刷新 - 当前选中角色
+//==============================
+Scene_Battle.prototype.drill_APEx_updateActorActive = function() {
+	if( this._spriteset == undefined ){ return; }
+	if( this._spriteset._drill_APEx_spriteTank == undefined ){ return; }
+	var cur_Actor = BattleManager.actor();
+	
+	// > 角色肖像容器 遍历
+	for(var i=0; i < this._spriteset._drill_APEx_spriteTank.length; i++){
+		var temp_sprite = this._spriteset._drill_APEx_spriteTank[i];
+		if( temp_sprite == null ){ continue; }
+		
+		// > 显示的条件
+		if( this.drill_APEx_isActorVisible() == true &&		//（肖像显示条件）
+			cur_Actor != undefined &&						//（指定的贴图与角色id对应上）
+			temp_sprite._drill_actor_id == cur_Actor.actorId() ){
+			temp_sprite.drill_APEx_active();
+			
+		// > 不满足条件，则隐藏
+		}else{
+			temp_sprite.drill_APEx_deactive();
+		}
+	}
+};
+//==============================
+// * 选中角色控制 - 帧刷新 - 肖像显示条件
+//==============================
+Scene_Battle.prototype.drill_APEx_isActorVisible = function() {
+	if( DrillUp.g_APEx_noDeactive == true ){ return true; }			//（强制永久保持）
+	if( BattleManager.isInputting() == false ){ return false; }					//不是选择指令阶段时，隐藏
+	if( this._enemyWindow.active ){ return false; }								//选择敌人时隐藏
+	if( this._partyCommandWindow.active ){ return false; }						//选择队伍指令时隐藏
+	if( $gameSystem.isSideView() && this._actorWindow.active ){ return false; }	//选择角色时，SV模式隐藏，第一人称不需要隐藏
+	return true;
+}
 
 
 //=============================================================================

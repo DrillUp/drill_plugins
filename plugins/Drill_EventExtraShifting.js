@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        行走图 - 额外位置偏移量
+ * @plugindesc [v1.3]        行走图 - 额外位置偏移量
  * @author Drill_up
  *
  *
@@ -110,6 +110,8 @@
  * 修复了插件指令控制偏移出错的bug。
  * [v1.2]
  * 添加了 移动路线指令 功能。
+ * [v1.3]
+ * 优化了插件内部结构。
  *
  */
 
@@ -135,15 +137,23 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			额外位置偏移量：
-//				->事件指令
-//				->插件指令
-//					->微移移动
-//				->移动路线指令
-//					->移动时才偏移
+//			->☆提示信息
+//			->☆静态数据
+//			->☆插件指令
+//			->☆事件注释
+//			->☆移动路线指令
+//
+//			->☆物体的属性
+//			->☆偏移控制
+//				->移动时才偏移
+//			->☆偏移兼容设置
 //				->偏移不影响倒影镜像
 //
+//
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -160,7 +170,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -177,7 +187,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_EventExtraShifting = true;
@@ -186,7 +196,7 @@
 	
 	
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _drill_EES_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
@@ -282,39 +292,39 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				if( temp1.length >= 2 ){
 					if( e_chars != null){
 						for( var k=0; k < e_chars.length; k++ ){
-							e_chars[k].drill_EES_setShifting( Number(temp1[0]), Number(temp1[1]), temp2 );
+							e_chars[k].drill_EES_setShiftingChange( Number(temp1[0]), Number(temp1[1]), temp2 );
 						}
 					}
 					if( p_chars != null){
 						for( var k=0; k < p_chars.length; k++ ){
-							p_chars[k].drill_EES_setShifting( Number(temp1[0]), Number(temp1[1]), temp2 );
+							p_chars[k].drill_EES_setShiftingChange( Number(temp1[0]), Number(temp1[1]), temp2 );
 						}
 					}
 				}
 				
 			}
 			if( temp1 == "条件-移动时才偏移" ){
-				if( temp2 == "开启" ){
+				if( temp2 == "启用" || temp2 == "开启" || temp2 == "打开" || temp2 == "启动" ){
 					if( e_chars != null){
 						for( var k=0; k < e_chars.length; k++ ){
-							e_chars[k].drill_EES_setMovingConditionEnabled( true );
+							e_chars[k].drill_EES_setOnlyChangeOnMoving( true );
 						}
 					}
 					if( p_chars != null){
 						for( var k=0; k < p_chars.length; k++ ){
-							p_chars[k].drill_EES_setMovingConditionEnabled( true );
+							p_chars[k].drill_EES_setOnlyChangeOnMoving( true );
 						}
 					}
 				}
-				if( temp2 == "关闭" ){
+				if( temp2 == "关闭" || temp2 == "禁用" ){
 					if( e_chars != null){
 						for( var k=0; k < e_chars.length; k++ ){
-							e_chars[k].drill_EES_setMovingConditionEnabled( false );
+							e_chars[k].drill_EES_setOnlyChangeOnMoving( false );
 						}
 					}
 					if( p_chars != null){
 						for( var k=0; k < p_chars.length; k++ ){
-							p_chars[k].drill_EES_setMovingConditionEnabled( false );
+							p_chars[k].drill_EES_setOnlyChangeOnMoving( false );
 						}
 					}
 				}
@@ -323,7 +333,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 };
 //==============================
-// ** 插件指令 - 事件检查
+// * 插件指令 - 事件检查
 //==============================
 Game_Map.prototype.drill_EES_isEventExist = function( e_id ){
 	if( e_id == 0 ){ return false; }
@@ -338,13 +348,19 @@ Game_Map.prototype.drill_EES_isEventExist = function( e_id ){
 
 
 //=============================================================================
-// * 注释初始化
+// ** ☆事件注释
 //=============================================================================
+//==============================
+// * 事件注释 - 初始化绑定
+//==============================
 var _drill_EES_event_setupPage = Game_Event.prototype.setupPage;
 Game_Event.prototype.setupPage = function() {
 	_drill_EES_event_setupPage.call(this);
     this.drill_EES_setupPage();
 };
+//==============================
+// * 事件注释 - 初始化
+//==============================
 Game_Event.prototype.drill_EES_setupPage = function() {
 	if( !this._erased && this.page() ){ this.list().forEach(function( l ){
 		if( l.code === 108 ){
@@ -358,10 +374,7 @@ Game_Event.prototype.drill_EES_setupPage = function() {
 						temp1 = temp1.replace("]","");
 						temp1 = temp1.split(/[,，]/);
 						if( temp1.length >= 2 ){
-							this._drill_EES_x = Number(temp1[0]);
-							this._drill_EES_y = Number(temp1[1]);
-							this._drill_EES_change['org_x'] = Number(temp1[0]);
-							this._drill_EES_change['org_y'] = Number(temp1[1]);
+							this.drill_EES_setShiftingImmediately( Number(temp1[0]), Number(temp1[1]) );
 						}
 					}
 				}
@@ -372,13 +385,19 @@ Game_Event.prototype.drill_EES_setupPage = function() {
 
 
 //=============================================================================
-// * 移动路线指令
+// ** ☆移动路线指令
 //=============================================================================
+//==============================
+// * 移动路线指令 - 最后继承
+//==============================
 var _drill_EES_scene_initialize = SceneManager.initialize;
 SceneManager.initialize = function() {
 	_drill_EES_scene_initialize.call(this);		//（此方法放到最后再继承）
 	if( Imported.Drill_CoreOfMoveRoute ){
 		
+		//==============================
+		// * 移动路线指令 - 指令执行阶段（继承接口）
+		//==============================
 		var _drill_EES_routeCommand = Game_Character.prototype.drill_COMR_routeCommand;
 		Game_Character.prototype.drill_COMR_routeCommand = function(command, args){
 			_drill_EES_routeCommand.call( this, command, args );
@@ -395,16 +414,16 @@ SceneManager.initialize = function() {
 						temp2 = temp2.replace("]","");
 						temp2 = Number(temp2);
 						if( temp1.length >= 2 ){
-							this.drill_EES_setShifting( Number(temp1[0]), Number(temp1[1]), temp2 );
+							this.drill_EES_setShiftingChange( Number(temp1[0]), Number(temp1[1]), temp2 );
 						}
 						
 					}
 					if( temp1 == "条件-移动时才偏移" ){
-						if( temp2 == "开启" ){
-							this.drill_EES_setMovingConditionEnabled( true );
+						if( temp2 == "启用" || temp2 == "开启" || temp2 == "打开" || temp2 == "启动" ){
+							this.drill_EES_setOnlyChangeOnMoving( true );
 						}
-						if( temp2 == "关闭" ){
-							this.drill_EES_setMovingConditionEnabled( false );
+						if( temp2 == "关闭" || temp2 == "禁用" ){
+							this.drill_EES_setOnlyChangeOnMoving( false );
 						}
 					}
 				}	
@@ -416,108 +435,184 @@ SceneManager.initialize = function() {
 
 
 //=============================================================================
-// ** 物体属性
+// ** ☆物体的属性
+//
+//			说明：	> 此模块专门定义 物体的属性 。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 物体 - 初始化
+// * 物体的属性 - 初始化
 //==============================
-var _drill_EES_initialize = Game_CharacterBase.prototype.initialize;
-Game_CharacterBase.prototype.initialize = function(){
+var _drill_EES_initialize = Game_Character.prototype.initialize;
+Game_Character.prototype.initialize = function(){
 	_drill_EES_initialize.call(this);
-	
-	this._drill_EES_x = 0;			//当前偏移坐标X
-	this._drill_EES_y = 0;			//当前偏移坐标Y
-	
-	this._drill_EES_change = {};						//变化容器
-	this._drill_EES_change['org_x'] = 0;				//原位置x
-	this._drill_EES_change['org_y'] = 0;				//原位置y
-	this._drill_EES_change['x_speed'] = 0;				//速度x
-	this._drill_EES_change['y_speed'] = 0;				//速度y
-	this._drill_EES_change['cur_time'] = 0;				//当前时间
-	this._drill_EES_change['tar_time'] = 0;				//移动时长
-	this._drill_EES_change['condition_moving'] = false;	//条件 - 必须移动时
+	this._drill_EES_data = undefined;
 }
 //==============================
-// * 物体 - 相对镜头所在位置Y（像素单位）
+// * 物体的属性 - 初始化
+//
+//			说明：	> 这里的数据要用时才初始化。『节约事件数据存储空间』
+//==============================
+Game_CharacterBase.prototype.drill_EES_checkData = function(){
+	if( this._drill_EES_data != undefined ){ return; }
+	this._drill_EES_data = {};
+	this._drill_EES_data['x'] = 0;							//当前偏移坐标X
+	this._drill_EES_data['y'] = 0;							//当前偏移坐标Y
+	this._drill_EES_data['change'] = undefined;				//变化容器
+	this._drill_EES_data['onlyChangeOnMoving'] = undefined;	//必须移动时才变化
+}
+//==============================
+// * 物体的属性 - 初始化 变化容器
+//==============================
+Game_CharacterBase.prototype.drill_EES_checkChangeData = function(){
+	this.drill_EES_checkData();
+	if( this._drill_EES_data['change'] != undefined ){ return; }
+	this._drill_EES_data['change'] = {};
+	this._drill_EES_data['change']['org_x'] = 0;				//原位置x
+	this._drill_EES_data['change']['org_y'] = 0;				//原位置y
+	this._drill_EES_data['change']['x_speed'] = 0;				//速度x
+	this._drill_EES_data['change']['y_speed'] = 0;				//速度y
+	this._drill_EES_data['change']['cur_time'] = 0;				//当前时间
+	this._drill_EES_data['change']['tar_time'] = 0;				//移动时长
+}
+//==============================
+// * 物体的属性 - 获取偏移坐标X（开放函数）
+//==============================
+Game_CharacterBase.prototype.drill_EES_getX = function(){
+	if( this._drill_EES_data == undefined ){ return 0; }
+	return this._drill_EES_data['x'];
+}
+//==============================
+// * 物体的属性 - 获取偏移坐标Y（开放函数）
+//==============================
+Game_CharacterBase.prototype.drill_EES_getY = function(){
+	if( this._drill_EES_data == undefined ){ return 0; }
+	return this._drill_EES_data['y'];
+}
+
+//==============================
+// * 物体的属性 - 设置偏移 - 瞬间（开放函数）
+//==============================
+Game_CharacterBase.prototype.drill_EES_setShiftingImmediately = function( x_offset, y_offset ){
+	this.drill_EES_checkData();
+	this._drill_EES_data['x'] = x_offset;
+	this._drill_EES_data['y'] = y_offset;
+	this._drill_EES_data['change'] = undefined;		//（直接删除变化过程数据）
+}
+//==============================
+// * 物体的属性 - 设置偏移 - 时间变化（开放函数）
+//==============================
+Game_CharacterBase.prototype.drill_EES_setShiftingChange = function( x_offset, y_offset, time ){
+	this.drill_EES_checkData();
+	var dx = x_offset - this._drill_EES_data['x'];
+	var dy = y_offset - this._drill_EES_data['y'];
+	
+	// > 若时间小于1，则瞬间偏移
+	if( time <= 1 ){
+		this.drill_EES_setShiftingImmediately( x_offset, y_offset );
+		return;
+	}
+	// > 若距离小于1像素，则瞬间偏移
+	if( Math.abs(dx) < 1 && Math.abs(dy) < 1 ){
+		this.drill_EES_setShiftingImmediately( x_offset, y_offset );
+		return;
+	}
+	
+	// > 初始化 变化容器
+	this.drill_EES_checkChangeData();
+	this._drill_EES_data['change']['org_x'] = this._drill_EES_data['x'];
+	this._drill_EES_data['change']['org_y'] = this._drill_EES_data['y'];
+	this._drill_EES_data['change']['x_speed'] = dx/time;	
+	this._drill_EES_data['change']['y_speed'] = dy/time;	
+	this._drill_EES_data['change']['cur_time'] = 0;			
+	this._drill_EES_data['change']['tar_time'] = time;		
+}
+//==============================
+// * 物体的属性 - 设置移动条件（开放函数）
+//==============================
+Game_CharacterBase.prototype.drill_EES_setOnlyChangeOnMoving = function( enabled ){
+	this.drill_EES_checkData();
+	if( enabled ){
+		this._drill_EES_data['onlyChangeOnMoving'] = true;
+	}else{
+		this._drill_EES_data['onlyChangeOnMoving'] = undefined;
+	}
+}
+
+
+//=============================================================================
+// ** ☆偏移控制
+//
+//			说明：	> 此模块专门定义 偏移控制 。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 偏移控制 - 相对镜头所在位置Y（像素单位）
 //==============================
 var _drill_EES_screenX = Game_CharacterBase.prototype.screenX;
 Game_CharacterBase.prototype.screenX = function(){
 	var xx = _drill_EES_screenX.call( this );
-	return xx + this._drill_EES_x;
+	return xx + this.drill_EES_getX();
 }
 //==============================
-// * 物体 - 相对镜头所在位置Y（像素单位）
+// * 偏移控制 - 相对镜头所在位置Y（像素单位）
 //==============================
 var _drill_EES_screenY = Game_CharacterBase.prototype.screenY;
 Game_CharacterBase.prototype.screenY = function(){
 	var yy = _drill_EES_screenY.call( this );
-	return yy + this._drill_EES_y;
-}
-
-//==============================
-// * 物体 - 设置偏移（接口）
-//==============================
-Game_CharacterBase.prototype.drill_EES_setShifting = function( x_offset, y_offset, time ){
-	if( time < 1 ){ time = 1; }
-	var dx = x_offset - this._drill_EES_x;
-	var dy = y_offset - this._drill_EES_y;
-	
-	this._drill_EES_change['org_x'] = this._drill_EES_x;	
-	this._drill_EES_change['org_y'] = this._drill_EES_y;	
-	this._drill_EES_change['x_speed'] = dx/time;	
-	this._drill_EES_change['y_speed'] = dy/time;	
-	this._drill_EES_change['cur_time'] = 0;			
-	this._drill_EES_change['tar_time'] = time;		
+	return yy + this.drill_EES_getY();
 }
 //==============================
-// * 物体 - 设置移动条件（接口）
-//==============================
-Game_CharacterBase.prototype.drill_EES_setMovingConditionEnabled = function( b ){
-	this._drill_EES_change['condition_moving'] = b;		
-}
-
-//==============================
-// * 物体 - 帧刷新
+// * 偏移控制 - 帧刷新绑定
 //==============================
 var _drill_EES_update = Game_CharacterBase.prototype.update;
 Game_CharacterBase.prototype.update = function(){
 	_drill_EES_update.call( this );
 	this.drill_updateShifting();
 }
+//==============================
+// * 偏移控制 - 帧刷新
+//==============================
 Game_CharacterBase.prototype.drill_updateShifting = function(){
-	var data = this._drill_EES_change;
+	var data = this._drill_EES_data;
+	if( data == undefined ){ return; }
+	var changeData = this._drill_EES_data['change'];
+	if( changeData == undefined ){ return; }
 	
-	// > 条件 移动时才偏移
-	if( data['condition_moving'] == true ){
+	// > 设置-必须移动时才变化时
+	if( data['onlyChangeOnMoving'] == true ){
 		if( this.isMoving() ){
-			data['cur_time'] += 1;
-			if( data['cur_time'] > data['tar_time'] ){
-				data['cur_time'] = data['tar_time'];
+			changeData['cur_time'] += 1;
+			if( changeData['cur_time'] > changeData['tar_time'] ){
+				changeData['cur_time'] = changeData['tar_time'];
 			}
 		}else{
 			//（不满足条件时，不偏移）
 		}
 		
-	// > 关闭条件
+	// > 设置-默认
 	}else{
-		data['cur_time'] += 1;
-		if( data['cur_time'] > data['tar_time'] ){
-			data['cur_time'] = data['tar_time'];
+		changeData['cur_time'] += 1;
+		if( changeData['cur_time'] > changeData['tar_time'] ){
+			changeData['cur_time'] = changeData['tar_time'];
 		}
 	}
 	
-	this._drill_EES_x = data['org_x'] + data['x_speed'] * data['cur_time'];
-	this._drill_EES_y = data['org_y'] + data['y_speed'] * data['cur_time'];
+	data['x'] = changeData['org_x'] + changeData['x_speed'] * changeData['cur_time'];
+	data['y'] = changeData['org_y'] + changeData['y_speed'] * changeData['cur_time'];
 }
 
 
 //=============================================================================
-// ** 插件扩展
+// ** ☆偏移兼容设置
+//
+//			说明：	> 此模块专门控制 偏移与其他插件兼容 的设置。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 物体 - 偏移补正值X
+// * 偏移兼容设置 - 偏移补正值X
 //
-//			说明：	此函数用于 镜像、黑影 的位置偏移补正值。
+//			说明：	> 此函数用于 镜像、黑影 的位置偏移补正值。
 //==============================
 var _drill_EES_reverseOffsetX = Game_CharacterBase.prototype.drill_reverseOffsetX;
 Game_CharacterBase.prototype.drill_reverseOffsetX = function(){
@@ -525,12 +620,12 @@ Game_CharacterBase.prototype.drill_reverseOffsetX = function(){
 	if( _drill_EES_reverseOffsetX != undefined ){		//（函数继承捕获，如果此插件放在 倒影插件 前面，则创建该函数，否则直接继承）
 		xx = _drill_EES_reverseOffsetX.call( this );
 	}
-	return xx + this._drill_EES_x;
+	return xx + this.drill_EES_getX();
 }
 //==============================
-// * 物体 - 偏移补正值Y
+// * 偏移兼容设置 - 偏移补正值Y
 //
-//			说明：	此函数用于 镜像、黑影 的位置偏移补正值。
+//			说明：	> 此函数用于 镜像、黑影 的位置偏移补正值。
 //==============================
 var _drill_EES_reverseOffsetY = Game_CharacterBase.prototype.drill_reverseOffsetY;
 Game_CharacterBase.prototype.drill_reverseOffsetY = function(){
@@ -538,7 +633,7 @@ Game_CharacterBase.prototype.drill_reverseOffsetY = function(){
 	if( _drill_EES_reverseOffsetY != undefined ){
 		yy = _drill_EES_reverseOffsetY.call( this );
 	}
-	return yy + this._drill_EES_y;
+	return yy + this.drill_EES_getY();
 }
 
 

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        公共事件 - 时间计时器到零时
+ * @plugindesc [v1.2]        公共事件 - 时间计时器到零时
  * @author Drill_up
  * 
  * 
@@ -60,6 +60,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 修改了插件分类。
+ * [v1.2]
+ * 修复了地图界面到零时出错的bug。
  * 
  *
  * 
@@ -134,10 +136,18 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			时间计时器到零时公共事件：
-//				->判定执行
+//			->☆提示信息
+//			->☆静态数据
+//
+//			->☆计时器绑定
+//				->地图界面情况
+//				->战斗界面情况
+//
 //
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -154,7 +164,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -179,7 +189,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_PlayerTimerTiming = true;
@@ -195,6 +205,7 @@
 	DrillUp.g_PTT_map_commonEventId = Number(DrillUp.parameters["地图的公共事件"] || 0); 
 
 
+
 //=============================================================================
 // * >>>>基于插件检测>>>>
 //=============================================================================
@@ -202,10 +213,13 @@ if( Imported.Drill_LayerCommandThread ){
 
 
 //=============================================================================
-// ** 时间计时器 绑定
+// ** ☆计时器绑定
+//
+//			说明：	> 此模块专门控制 计时器 执行公共事件的时机。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 计时器 - 归零时操作（覆写）
+// * 计时器绑定 - 归零时操作（覆写）
 //==============================
 Game_Timer.prototype.onExpire = function(){
 	
@@ -214,12 +228,7 @@ Game_Timer.prototype.onExpire = function(){
 		DrillUp.g_PTT_map_commonEventId > 0 ){
 		
 		// > 执行公共事件
-		var e_data = {
-			'type':"公共事件",
-			'pipeType': DrillUp.g_PTT_map_pipeType,
-			'commonEventId': DrillUp.g_PTT_map_commonEventId,
-		};
-		$gameMap.drill_PTT_addPipeEvent( e_data );
+		this.drill_PTT_doCommonEvent_Map( DrillUp.g_PTT_map_pipeType, DrillUp.g_PTT_map_commonEventId, "" );
 	}
 	
 	// > 战斗界面情况
@@ -230,19 +239,42 @@ Game_Timer.prototype.onExpire = function(){
 			BattleManager.abort();
 		}else{
 		
-			// > 执行公共事件（直接并行）
-			var e_data = {
-				'type':"公共事件",
-				'pipeType': DrillUp.g_PTT_battle_pipeType,
-				'commonEventId': DrillUp.g_PTT_battle_commonEventId,
-			};
-			var e_list = [
-				{"code":117,"indent":0,"parameters":[ commonEventId ]},
-				{"code":0,"indent":0,"parameters":[]}
-			];
-			$gameTroop._interpreter.setup(e_list);
+			// > 执行公共事件
+			this.drill_PTT_doCommonEvent_Battle( DrillUp.g_PTT_battle_pipeType, DrillUp.g_PTT_battle_commonEventId );
 		}
 	}
+}
+//==============================
+// * 计时器绑定 - 『执行公共事件』（地图界面）
+//==============================
+Game_Timer.prototype.drill_PTT_doCommonEvent_Map = function( pipeType, commonEventId, callBack_str ){
+	
+	// > 插件【地图-多线程】
+	if( Imported.Drill_LayerCommandThread ){
+		var e_data = {
+			'type':"公共事件",
+			'pipeType': pipeType,
+			'commonEventId': commonEventId,
+			'callBack_str':callBack_str,
+		};
+		$gameMap.drill_LCT_addPipeEvent( e_data );
+		
+	// > 默认执行
+	}else{
+		$gameTemp.reserveCommonEvent( commonEventId );
+	}
+};
+//==============================
+// * 计时器绑定 - 『执行公共事件』（战斗界面）
+//==============================
+Game_Timer.prototype.drill_PTT_doCommonEvent_Battle = function( pipeType, commonEventId ){
+	
+	// > 直接塞入 解释器（串行）
+	var e_list = [
+		{"code":117,"indent":0,"parameters":[ commonEventId ]},
+		{"code":0,"indent":0,"parameters":[]}
+	];
+    $gameTroop._interpreter.setup(e_list);
 }
 
 

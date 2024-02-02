@@ -82,7 +82,7 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   单次执行
  * 时间复杂度： o(n)
- * 测试方法：   在特效管理层，批量对10个图片，进行图标切换。
+ * 测试方法：   在图片管理层，批量对10个图片，进行图标切换。
  * 测试结果：   200个事件的地图中，平均消耗为：【5ms以下】
  *              100个事件的地图中，平均消耗为：【5ms以下】
  *               50个事件的地图中，平均消耗为：【5ms以下】
@@ -112,7 +112,7 @@
 //
 //		★工作类型		单次执行
 //		★时间复杂度		o(n)
-//		★性能测试因素	特效管理层
+//		★性能测试因素	图片管理层
 //		★性能测试消耗	未找到
 //		★最坏情况		暂无
 //		★备注			暂无
@@ -127,6 +127,9 @@
 //				->物品、武器、护甲、技能 四大分类
 //
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -160,7 +163,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_PictureIcon = true;
@@ -598,7 +601,7 @@ Sprite_Picture.prototype.update = function() {
 };
 
 //==============================
-// * 图片操作 - 显示图片（对应函数showPicture）
+// * 图片控制 - 显示图片（对应函数showPicture）
 //==============================
 var _drill_PIc_p_show = Game_Picture.prototype.show;
 Game_Picture.prototype.show = function( name, origin, x, y, scaleX, scaleY, opacity, blendMode ){
@@ -606,12 +609,24 @@ Game_Picture.prototype.show = function( name, origin, x, y, scaleX, scaleY, opac
 	this._drill_PIc_iconId = -1;		//（标记解除）
 }
 //==============================
-// * 图片操作 - 消除图片（对应函数erasePicture）
+// * 图片控制 - 消除图片
 //==============================
 var _drill_PIc_p_erase = Game_Picture.prototype.erase;
 Game_Picture.prototype.erase = function(){
 	_drill_PIc_p_erase.call( this );
 	this._drill_PIc_iconId = -1;		//（标记解除）
+}
+//==============================
+// * 图片控制 - 消除图片（command235）
+//==============================
+var _drill_PIc_p_erasePicture = Game_Screen.prototype.erasePicture;
+Game_Screen.prototype.erasePicture = function( pictureId ){
+    var realPictureId = this.realPictureId(pictureId);
+	var picture = this._pictures[realPictureId];
+	if( picture != undefined ){
+		picture._drill_PIc_iconId = -1;	//（标记解除）
+	}
+	_drill_PIc_p_erasePicture.call( this, pictureId );
 }
 
 //=============================================================================

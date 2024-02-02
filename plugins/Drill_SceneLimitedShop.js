@@ -1439,6 +1439,9 @@
 //		★家谱：
 //			无
 //		
+//		★脚本文档：
+//			无
+//		
 //		★插件私有类：
 //			* 限量商店【Scene_Drill_SLS】
 //			* 商品窗口【Drill_SLS_GoodsWindow】
@@ -1516,7 +1519,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_SceneLimitedShop = true;
@@ -1525,7 +1528,7 @@
 
 
 	//==============================
-	// * 变量获取 - 指针与边框
+	// * 静态数据 - 指针与边框
 	//				（~struct~DrillCursor）
 	//==============================
 	DrillUp.drill_SLS_initMenuCursor = function( dataFrom ) {
@@ -1727,7 +1730,7 @@
 	
 	
 	//==============================
-	// * 变量获取 - 限量商店
+	// * 静态数据 - 限量商店
 	//				（~struct~DrillSLSshop）
 	//==============================
 	DrillUp.drill_SLS_initShopData = function( dataFrom ) {
@@ -1785,7 +1788,7 @@
 	};
 	
 	//==============================
-	// * 变量获取 - 服务员行为
+	// * 静态数据 - 服务员行为
 	//				（~struct~DrillSLSWaitressAct）
 	//==============================
 	DrillUp.drill_SLS_convertWaitressAct = function( dataFrom ) {		//服务员行为数据转换
@@ -1802,7 +1805,7 @@
 		return data;
 	}
 	//==============================
-	// * 变量获取 - 服务员
+	// * 静态数据 - 服务员
 	//				（~struct~DrillSShWaitress）
 	//==============================
 	DrillUp.drill_SLS_convertWaitress = function( dataFrom ) {
@@ -1917,7 +1920,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		if(args.length == 4){
 			var temp1 = String(args[1]);
 			var type = String(args[3]);
-			if( type == "打开" ){			//打开
+			if( type == "打开" ){		//（打开面板）
 				temp1 = temp1.replace("限量商店[","");
 				temp1 = temp1.replace("]","");
 				temp1 = Number(temp1) - 1;
@@ -2676,7 +2679,7 @@ Scene_Drill_SLS.prototype.drill_SLS_buyOneItem = function() {
 
 
 //=============================================================================
-// ** ☆原型链规范
+// ** ☆原型链规范（Scene_Drill_SLS）
 //
 //			说明：	> 此处专门补上缺失的原型链，未缺失的则注释掉。
 //					（插件完整的功能目录去看看：功能结构树）

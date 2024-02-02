@@ -296,6 +296,9 @@
 //		★家谱：
 //			无
 //		
+//		★脚本文档：
+//			无
+//		
 //		★插件私有类：
 //			无
 //		
@@ -336,7 +339,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_VoiceInMessageCharacter = true;
@@ -345,7 +348,7 @@
 	
 	
 	//==============================
-	// * 变量获取 - 声音
+	// * 静态数据 - 声音
 	//				（~struct~VIMCSound）
 	//==============================
 	DrillUp.drill_VIMC_initSound = function( dataFrom ){
@@ -516,7 +519,7 @@ Window_Base.prototype.drill_COWC_processNewEffectChar_Combined = function( match
 	if( command == "dVIMC" ){
 		if( args.length == 1 ){
 			var temp1 = String(args[0]);
-			if( temp1 == "关闭" ){
+			if( temp1 == "关闭" || temp1 == "禁用" ){
 				$gameSystem._drill_VIMC_curMessageSound = 0;
 			}else if( temp1 == "默认" ){
 				$gameSystem._drill_VIMC_curMessageSound = DrillUp.g_VIMC_default;

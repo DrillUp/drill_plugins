@@ -442,6 +442,9 @@
 //		★家谱：
 //			无
 //		
+//		★脚本文档：
+//			无
+//		
 //		★插件私有类：
 //			无
 //		
@@ -478,7 +481,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_WindowSkillElement = true;
@@ -487,18 +490,21 @@
 
 
 	//==============================
-	// * 变量获取 - 指针与边框
+	// * 静态数据 - 指针与边框
 	//				（~struct~DrillCursor）
 	//==============================
 	DrillUp.drill_WSE_initMenuCursor = function( dataFrom ){
 		var data = {};
+		
 		data['MCu_enabled'] = String( dataFrom["是否启用菜单指针"] || "true") == "true";
 		data['MCu_lock'] = String( dataFrom["是否锁定菜单指针样式"] || "false") == "true";
 		data['MCu_style'] = Number( dataFrom["锁定的菜单指针样式"] || 1);
+		
 		data['MCB_rectEnabled'] = String( dataFrom["是否启用闪烁白矩形"] || "true") == "true";
 		data['MCB_enabled'] = String( dataFrom["是否启用菜单边框"] || "true") == "true";
 		data['MCB_lock'] = String( dataFrom["是否锁定菜单边框样式"] || "false") == "true";
 		data['MCB_style'] = Number( dataFrom["锁定的菜单边框样式"] || 1);
+		
 		data['MSB_enabled'] = String( dataFrom["是否启用滚动条"] || "true") == "true";
 		data['MSB_lock'] = String( dataFrom["是否锁定滚动条样式"] || "false") == "true";
 		data['MSB_style'] = Number( dataFrom["锁定的滚动条样式"] || 1);

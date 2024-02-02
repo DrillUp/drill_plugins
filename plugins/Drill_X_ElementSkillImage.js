@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        控件 - 技能块元素的背景图片[扩展]
+ * @plugindesc [v1.4]        控件 - 技能块元素的背景图片[扩展]
  * @author Drill_up
  * 
  * 
@@ -23,7 +23,7 @@
  * 作用于：
  *   - Drill_WindowSkillElement    主菜单-技能窗口块元素
  *     可以给目标插件中的块元素提供多背景支持，不同的技能设置更多不同背景。
- *
+ * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：菜单界面。
@@ -31,14 +31,6 @@
  * 2.你可以按照技能卡片的类型设置类型背景。
  * 3.你也可以像物品图片一样，整个技能就是一张高清卡片。
  *  （那样你每个技能都需要一个背景，并且在技能里加注释。）
- *
- * -----------------------------------------------------------------------------
- * ----激活条件
- * 在要修改指定技能的背景中，在技能中添加注释即可：
- *
- * 技能注释：<技能背景:1>
- *
- * 1.技能背景的数字1对应你配置中的第1个技能背景。
  * 
  * -----------------------------------------------------------------------------
  * ----关联文件
@@ -46,11 +38,19 @@
  * 先确保项目img文件夹下是否有Menu__ui_skillElement文件夹！
  * 要查看所有关联资源文件的插件，可以去看看"插件清单.xlsx"。
  * 如果没有，需要自己建立。需要配置资源文件：
- *
+ * 
  * 资源-技能背景1
  * 资源-技能背景2
  * 资源-技能背景3
  * ……
+ * 
+ * -----------------------------------------------------------------------------
+ * ----激活条件
+ * 在要修改指定技能的背景中，在技能中添加注释即可：
+ * 
+ * 技能注释：<技能背景:1>
+ * 
+ * 1.技能背景的数字1对应你配置中的第1个技能背景。
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -83,6 +83,8 @@
  * 修改了插件关联的资源文件夹。
  * [v1.3]
  * 修改了内部结构。
+ * [v1.4]
+ * 修复了插件背景没有效果的bug。
  *
  *
  * 
@@ -1738,10 +1740,10 @@
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 //		插件简称		XESI（X_Element_Skill_Image）
 //		临时全局变量	DrillUp.g_XESI_xxx
-//		临时局部变量	$gameTemp._drill_XESI_ex_backs
+//		临时局部变量	无
 //		存储数据变量	无
 //		全局存储变量	无
-//		覆盖重写方法	无（自己的插件方法半重写）
+//		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
 //
@@ -1757,10 +1759,20 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			技能图片扩展：
-//				->修改背景
+//			->☆提示信息
+//			->☆静态数据
+//			->☆预加载
+//
+//			->☆块元素（继承）
+//				->绘制背景
+//				->绘制图标
+//			->☆插件兼容
+//
 //
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -1779,7 +1791,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -1801,10 +1813,16 @@
 		}
 		return message;
 	};
+	//==============================
+	// * 提示信息 - 报错 - 底层版本过低
+	//==============================
+	DrillUp.drill_XESI_getPluginTip_LowVersion = function(){
+		return "【" + DrillUp.g_XESI_PluginTip_curName + "】\n游戏底层版本过低，插件基本功能无法执行。\n你可以去看\"rmmv软件版本（必看）.docx\"中的 \"旧工程升级至1.6版本\" 章节，来升级你的游戏底层版本。";
+	};
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_X_ElementSkillImage = true;
@@ -1817,7 +1835,7 @@
 	/*-----------------技能背景------------------*/
 	DrillUp.g_XESI_back_list_length = 200;
 	DrillUp.g_XESI_back_list = [];
-	for (var i = 0; i < DrillUp.g_XESI_back_list_length ; i++ ) {
+	for( var i = 0; i < DrillUp.g_XESI_back_list_length; i++ ){
 		DrillUp.g_XESI_back_list[i] = String( DrillUp.parameters['资源-技能背景' + String(i+1) ] || "" );
 	};
 	
@@ -1825,50 +1843,117 @@
 //=============================================================================
 // * >>>>基于插件检测>>>>
 //=============================================================================
-if( Imported.Drill_WindowSkillElement && ImageManager.load_MenuSkillElement !== undefined ){
+if( Imported.Drill_WindowSkillElement ){
 	
+	
+//=============================================================================
+// ** ☆预加载
+//
+//			说明：	> 对指定资源贴图标记不删除，可以防止重建导致的浪费资源，以及资源显示时闪烁问题。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 预加载 - 初始化
+//==============================
+var _drill_XESI_preload_initialize = Game_Temp.prototype.initialize;
+Game_Temp.prototype.initialize = function() {
+    _drill_XESI_preload_initialize.call(this);
+	this.drill_XESI_preloadInit();
+}
+//==============================
+// * 预加载 - 版本校验
+//==============================
+if( Utils.generateRuntimeId == undefined ){
+	alert( DrillUp.drill_XESI_getPluginTip_LowVersion() );
+}
+//==============================
+// * 预加载 - 执行资源预加载
+//
+//			说明：	> 遍历全部资源，提前预加载标记过的资源。
+//==============================
+Game_Temp.prototype.drill_XESI_preloadInit = function() {
+	this._drill_XESI_cacheId = Utils.generateRuntimeId();	//资源缓存id
+    this._drill_XESI_preloadTank = [];						//bitmap容器
+	for( var i = 0; i < DrillUp.g_XESI_back_list.length; i++ ){
+		var temp_str = DrillUp.g_XESI_back_list[i];
+		if( temp_str == undefined ){ continue; }
+		if( temp_str == "" ){ continue; }
+		var bitmap = ImageManager.reserveBitmap( "img/Menu__ui_skillElement/", temp_str, 0, true, this._drill_XESI_cacheId );
+		this._drill_XESI_preloadTank[i] = bitmap;
+	}
+}
+
 
 //=============================================================================
-// ** 绘制背景
+// ** ☆块元素（继承）
+//
+//			说明：	> 该模块继承 技能窗口块元素 插件，修改其中的内容。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
+//==============================
+// * 块元素 - 绘制背景
+//
+//			说明：	> 绘制背景时，直接从技能对象里面拿注释，判断是否有技能背景设置。
+//==============================
+var _drill_XESI_s_drawBackground = Window_SkillList.prototype.drill_WSE_s_drawBackground;
 Window_SkillList.prototype.drill_WSE_s_drawBackground = function( cur_bitmap, skill ){
 	
-	var note = String(skill.note);
-	var re_back = /<技能背景:([^<>]*?)>/; 				//正则获取（返回数组，第二个为匹配内容）
-	var back = (note.match(re_back)) || [];
-	if( back != "" && back != [] && $gameTemp._drill_XESI_ex_backs != null ){
-		var back_id = Number(back[1]) -1;
-		var back_x = 0;
-		var back_y = 0;
-		var back_w = $gameTemp._drill_XESI_ex_backs[back_id].width;
-		var back_h = $gameTemp._drill_XESI_ex_backs[back_id].height;
-		cur_bitmap.blt( $gameTemp._drill_XESI_ex_backs[back_id],  back_x, back_y, back_w, back_h,  0,0, back_w, back_h);
-	}else{
-		var back_x = 0;
-		var back_y = 0;
-		var back_w = this._drill_WSE_bitmapBackground.width;
-		var back_h = this._drill_WSE_bitmapBackground.height;
-		cur_bitmap.blt( this._drill_WSE_bitmapBackground,  back_x, back_y, back_w, back_h,  0,0, back_w, back_h);
+	// > 注释来源（技能）
+	var note = skill.note;
+	var row_list = note.split(/[\n\r ]+/);
+	
+	// > 技能注释解析
+	for(var r = 0; r < row_list.length; r++ ){
+		var row = row_list[r];
+		row = row.replace(/\>$/,"");	//（去掉末尾的>）
+		var args = row.split(/[:：]/);
+		var command = args.shift();
+		if( command == "<技能背景" ){
+			if( args.length == 1 ){
+				
+				// > 绘制背景
+				var back_id = Number(args[0]) -1;
+				var back_bitmap = $gameTemp._drill_XESI_preloadTank[ back_id ];
+				if( back_bitmap != null ){	//（直接拿预加载里的bitmap）
+					var back_x = 0;
+					var back_y = 0;
+					var back_w = back_bitmap.width;
+					var back_h = back_bitmap.height;
+					cur_bitmap.blt( back_bitmap, back_x, back_y, back_w, back_h,  0,0, back_w, back_h);
+					return;					//（成功绘制则跳出 原函数的绘制）
+				}
+			}
+		}
 	}
 	
+	// > 原函数
+	_drill_XESI_s_drawBackground.call( this, cur_bitmap, skill );
 }
-//=============================================================================
-// ** 绘制图标
-//=============================================================================
+//==============================
+// * 块元素 - 绘制图标
+//==============================
 var _drill_XESI_s_drawIcon = Window_SkillList.prototype.drill_WSE_s_drawIcon;
 Window_SkillList.prototype.drill_WSE_s_drawIcon = function( cur_bitmap, skill ){
 	if( DrillUp.g_XESI_hide_icon ){
 		
 	}else{
-		_drill_XESI_s_drawIcon.call(this,cur_bitmap, skill);
+		_drill_XESI_s_drawIcon.call( this, cur_bitmap, skill );
 	}
 }
 
 
 //=============================================================================
-// * mog技能界面 - 塞入drill作用方法
+// * ☆插件兼容
+//
+//			说明：	> 该模块专门用于兼容外部插件。
+//					> 注意，该插件继承的函数，需要重新执行 塞入作用方法，确保方法是最新的函数。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 if( Imported.MOG_SceneSkill ){
+	
+	//==============================
+	// * mog技能界面 - 塞入drill作用方法
+	//==============================
 	Window_SkillListM.prototype.drill_WSE_s_drawBackground = Window_SkillList.prototype.drill_WSE_s_drawBackground;
 	Window_SkillListM.prototype.drill_WSE_s_drawIcon = Window_SkillList.prototype.drill_WSE_s_drawIcon;
 }

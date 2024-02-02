@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.8]        主菜单 - 多层菜单粒子
+ * @plugindesc [v1.9]        主菜单 - 多层菜单粒子
  * @author Drill_up
  * 
  * @Drill_LE_param "粒子-%d"
@@ -31,7 +31,8 @@
  * ----设定注意事项
  * 1.插件的作用域：菜单界面。
  *   可以放置在菜单前面层或者菜单后面层。
- * 2.该插件可以装饰其他菜单插件。要了解更详细的组合方法，
+ * 2.更多详细的内容，去看看 "1.系统 > 大家族-粒子效果.docx"。
+ * 3.该插件可以装饰其他菜单插件。要了解更详细的组合方法，
  *   去看看 "17.主菜单 > 多层组合装饰（界面装饰）.docx"。
  *   还有 "17.主菜单 > 多层组合装饰（界面装饰-菜单界面）.docx"。
  * 关键字：
@@ -121,6 +122,8 @@
  * 优化了旧存档的识别与兼容。
  * [v1.8]
  * 结合粒子核心，加强了粒子相关功能。
+ * [v1.9]
+ * 添加了粒子 彩虹化 功能。
  *
  *
  *
@@ -987,6 +990,58 @@
  * @dir img/Menu__layer/
  * @type file
  * 
+ * 
+ * @param ---彩虹化---
+ * @desc 
+ *
+ * @param 是否开启彩虹化-粒子
+ * @parent ---彩虹化---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭，冒出的每个粒子都会根据彩虹进行染色变化。
+ * @default false
+ *
+ * @param 是否开启彩虹化-第二层粒子
+ * @parent ---彩虹化---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭，冒出的每个第二层粒子都会根据彩虹进行染色变化。
+ * @default false
+ *
+ * @param 是否开启彩虹化-直线拖尾
+ * @parent ---彩虹化---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭，冒出的每个粒子的拖尾都会根据彩虹进行染色变化。
+ * @default false
+ * 
+ * @param 彩虹化色彩数量
+ * @parent ---彩虹化---
+ * @type number
+ * @min 1
+ * @max 360
+ * @desc 彩虹化色彩的数量，最大值为360。
+ * @default 20
+ *
+ * @param 彩虹化是否锁定色调值
+ * @parent ---彩虹化---
+ * @type boolean
+ * @on 锁定
+ * @off 关闭
+ * @desc true - 锁定，false - 关闭，彩虹变化将按照 色调值列表 进行依次染色，具体可以看看文档。
+ * @default false
+ * 
+ * @param 锁定的色调值列表
+ * @parent 彩虹化是否锁定色调值
+ * @type number[]
+ * @min 0
+ * @max 360
+ * @desc 彩虹变化将按照 色调值列表 进行依次染色，具体可以看看文档。
+ * @default []
+ * 
  */
 /*~struct~MenuParticleDefault:
  * 
@@ -1322,7 +1377,7 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
 //			->☆插件指令
 //			->☆存储数据
 //			->☆菜单层级
@@ -1338,6 +1393,9 @@
 //
 //		★家谱：
 //			大家族-粒子效果
+//		
+//		★脚本文档：
+//			1.系统 > 大家族-粒子效果（脚本）.docx
 //		
 //		★插件私有类：
 //			* 粒子控制器【Drill_MPa_Controller】
@@ -1387,7 +1445,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_MenuParticle = true;
@@ -1395,7 +1453,7 @@
 	DrillUp.parameters = PluginManager.parameters('Drill_MenuParticle');
 	
 	//==============================
-	// * 变量获取 - 默认粒子
+	// * 静态数据 - 默认粒子
 	//				（~struct~MenuParticleDefault）
 	//==============================
 	DrillUp.drill_MPa_particleDefaultInit = function( dataFrom ) {
@@ -1460,10 +1518,23 @@
 		data['trailing_src_img'] = String( dataFrom["资源-直线拖尾"] || "");
 		data['trailing_src_img_file'] = "img/Menu__layer/";
 		
+		// > 彩虹化
+		data['rainbow_enable'] = String( dataFrom["是否开启彩虹化-粒子"] || "false") == "true";
+		data['rainbow_enableSecond'] = String( dataFrom["是否开启彩虹化-第二层粒子"] || "false") == "true";
+		data['rainbow_enableTrailing'] = String( dataFrom["是否开启彩虹化-直线拖尾"] || "false") == "true";
+		data['rainbow_num'] = Number( dataFrom["彩虹化色彩数量"] || 20);
+		data['rainbow_lockTint'] = String( dataFrom["彩虹化是否锁定色调值"] || "false") == "true";
+		if( dataFrom["锁定的色调值列表"] != undefined &&
+			dataFrom["锁定的色调值列表"] != "" ){
+			data['rainbow_tintList'] = JSON.parse( dataFrom["锁定的色调值列表"] || [] );
+		}else{
+			data['rainbow_tintList'] = [];
+		}
+		
 		return data;
 	}
 	//==============================
-	// * 变量获取 - 粒子
+	// * 静态数据 - 粒子
 	//				（~struct~MenuParticle）
 	//==============================
 	DrillUp.drill_MPa_particleInit = function( dataFrom ) {

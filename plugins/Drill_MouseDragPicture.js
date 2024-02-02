@@ -111,7 +111,7 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
  * 时间复杂度： o(n^3) 每帧
- * 测试方法：   在对话管理层放置多张图片，进行多张拖拽。
+ * 测试方法：   在图片管理层放置多张图片，进行多张拖拽。
  * 测试结果：   200个事件的地图中，平均消耗为：【24.15ms】
  *              100个事件的地图中，平均消耗为：【21.46ms】
  *               50个事件的地图中，平均消耗为：【17.08ms】
@@ -188,7 +188,7 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^3)  每帧
-//		★性能测试因素	对话管理层
+//		★性能测试因素	图片管理层
 //		★性能测试消耗	17.08ms（Sprite_Picture的update） 
 //		★最坏情况		暂无
 //		★备注			能够稳定在10帧左右，去掉图片后，15帧左右。
@@ -204,6 +204,9 @@
 //				->每次只能拖移一张图片
 //
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -254,7 +257,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_MouseDragPicture = true;
@@ -413,8 +416,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				$gameSystem._drill_MDP_dragMode = type;
 			}
 			if( pic_str == "拖拽时自动置顶图片" ){
-				if( type == "开启" ){ $gameSystem._drill_MDP_dragAutoTop = true; }
-				if( type == "关闭" ){ $gameSystem._drill_MDP_dragAutoTop = false; }
+				if( type == "启用" || type == "开启" || type == "打开" || type == "启动" ){ $gameSystem._drill_MDP_dragAutoTop = true; }
+				if( type == "关闭" || type == "禁用" ){ $gameSystem._drill_MDP_dragAutoTop = false; }
 			}
 		}
 	};
@@ -776,13 +779,26 @@ Game_Picture.prototype.drill_MDP_clearDrag = function() {
 	$gameTemp._drill_MTP_needRefresh = true;	//图片消除后，强制刷新
 }
 //==============================
-// * 图片 - 图片移除时
+// * 图片 - 消除图片
 //==============================
 var _drill_MDP_pic_erase = Game_Picture.prototype.erase;
 Game_Picture.prototype.erase = function() {
 	_drill_MDP_pic_erase.call(this);
 	this.drill_MDP_clearDrag();
 }
+//==============================
+// * 图片 - 消除图片（command235）
+//==============================
+var _drill_MDP_p_erasePicture = Game_Screen.prototype.erasePicture;
+Game_Screen.prototype.erasePicture = function( pictureId ){
+    var realPictureId = this.realPictureId(pictureId);
+	var picture = this._pictures[realPictureId];
+	if( picture != undefined ){
+		picture.drill_MDP_clearDrag();
+	}
+	_drill_MDP_p_erasePicture.call( this, pictureId );
+}
+
 //==============================
 // * 图片 - 帧刷新
 //==============================

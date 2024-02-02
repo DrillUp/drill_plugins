@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        游戏窗体 - 动态快照次元斩
+ * @plugindesc [v1.1]        游戏窗体 - 动态快照次元斩
  * @author Drill_up
  * 
  * @Drill_LE_param "次元斩样式-%d"
@@ -38,6 +38,9 @@
  *      只有天窗层才能使用动态快照效果。
  *   (2.游戏中所有的画面都会被动态快照实时播放，
  *      但不包括天窗层的贴图，以及动态快照自己。
+ * 预加载：
+ *   (1.插件中可自定义指定资源是否预加载，
+ *      预加载相关介绍可以去看看"1.系统 > 关于预加载.docx"。
  * 设计：
  *   (1.该插件省去了一个个动态快照配遮罩的麻烦，通过插件指令快速创建
  *      次元斩切割一刀所对应的贴图，多次执行还能反复切割画面。
@@ -369,6 +372,14 @@
  * @min 1
  * @desc 刀光快速切割时的移动时长。
  * @default 20
+ *
+ * @param 是否预加载
+ * @parent ---动画---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭，预加载详细介绍可见："1.系统 > 关于预加载.docx"。
+ * @default false
  * 
  */
  
@@ -396,8 +407,9 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
 //			->☆插件指令
+//			->☆预加载
 //			->☆存储数据
 //			
 //			->☆切割计算
@@ -452,6 +464,9 @@
 //		★家谱：
 //			大家族-屏幕快照
 //		
+//		★脚本文档：
+//			22.游戏窗体 > 动态快照-天窗层（脚本）.docx
+//		
 //		★插件私有类：
 //			* 动态快照控制器【Drill_HDSSW_Controller】
 //			* 动态快照贴图【Drill_HDSSW_Sprite】
@@ -503,7 +518,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_HtmlDynamicSnapshotSpaceWrench = true;
@@ -511,7 +526,7 @@
     DrillUp.parameters = PluginManager.parameters('Drill_HtmlDynamicSnapshotSpaceWrench');
 	
 	//==============================
-	// * 变量获取 - 动态快照
+	// * 静态数据 - 动态快照
 	//				（~struct~HDSSWCircle）
 	//==============================
 	DrillUp.drill_HDSSW_circleInit = function( dataFrom ) {
@@ -529,6 +544,7 @@
 		
 		// > A主体
 		data['opacity'] = Number( dataFrom["透明度"] || 255);
+		data['preload'] = String( dataFrom["是否预加载"] || "false") == "true";
 		
 		// > B基本变化
 		data['min_scale'] = Number( dataFrom["最小缩放值"] || 1.04);
@@ -624,6 +640,53 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		
 	}
 };
+
+
+//=============================================================================
+// ** ☆预加载
+//
+//			说明：	> 对指定资源贴图标记不删除，可以防止重建导致的浪费资源，以及资源显示时闪烁问题。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 预加载 - 初始化
+//==============================
+var _drill_HDSSW_preload_initialize = Game_Temp.prototype.initialize;
+Game_Temp.prototype.initialize = function() {
+	_drill_HDSSW_preload_initialize.call(this);
+	this.drill_HDSSW_preloadInit();
+}
+//==============================
+// * 预加载 - 版本校验
+//==============================
+if( Utils.generateRuntimeId == undefined ){
+	alert( DrillUp.drill_HDSSW_getPluginTip_LowVersion() );
+}
+//==============================
+// * 预加载 - 执行资源预加载
+//
+//			说明：	> 遍历全部资源，提前预加载标记过的资源。
+//==============================
+Game_Temp.prototype.drill_HDSSW_preloadInit = function() {
+	this._drill_HDSSW_cacheId = Utils.generateRuntimeId();	//资源缓存id
+	this._drill_HDSSW_preloadTank = [];						//bitmap容器
+	for( var i = 0; i < DrillUp.g_HDSSW_style.length; i++ ){
+		var temp_data = DrillUp.g_HDSSW_style[i];
+		if( temp_data == undefined ){ continue; }
+		if( temp_data['preload'] != true ){ continue; }
+		
+		this._drill_HDSSW_preloadTank.push( 
+			ImageManager.reserveBitmap( "img/Special__layer/", temp_data['background_img_src'], 0, true, this._drill_HDSSW_cacheId ) 
+		);
+		this._drill_HDSSW_preloadTank.push( 
+			ImageManager.reserveBitmap( "img/Special__layer/", temp_data['flicker_img_src'], 0, true, this._drill_HDSSW_cacheId ) 
+		);
+		
+		this._drill_HDSSW_preloadTank.push( 
+			ImageManager.reserveBitmap( "img/Special__layer/", temp_data['knife_img_src'], 0, true, this._drill_HDSSW_cacheId ) 
+		);
+	}
+}
 
 
 //#############################################################################

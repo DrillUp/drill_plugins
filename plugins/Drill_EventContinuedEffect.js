@@ -219,7 +219,7 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
  * 时间复杂度： o(n)*o(镜像)*o(贴图处理) 每帧
- * 测试方法：   放置10个持续动作变化的事件，在事件数量不同的地图中测。
+ * 测试方法：   行走图管理层放置10个持续动作变化的事件测试。
  * 测试结果：   200个事件的地图中，平均消耗为：【85.19ms】
  *              100个事件的地图中，平均消耗为：【47.93ms】
  *               50个事件的地图中，平均消耗为：【38.16ms】
@@ -266,7 +266,7 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(n)*o(镜像)*o(贴图处理) 每帧
-//		★性能测试因素	地图管理层 125事件
+//		★性能测试因素	行走图管理层
 //		★性能测试消耗	39.91ms（Sprite_Character.update）
 //		★最坏情况		所有事件都在执行动作。
 //		★备注			从原理上看，变化并没有那么复杂，只是图像一直在变。
@@ -296,6 +296,9 @@
 //					->结构优化（换成Game_Character）
 //
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -357,7 +360,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_EventContinuedEffect = true;
@@ -454,17 +457,29 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			}
 		}
 		// > 透明度检查
-		if( p_chars != null && $gamePlayer.opacity() == 0 ){
-			p_chars = null;
+		if( p_chars != null ){
+			if( $gamePlayer.opacity() == 0 ){
+				p_chars = null;
+			}
 		}
 		if( e_chars != null ){
 			var temp_tank = [];
 			for( var k=0; k < e_chars.length; k++ ){
-				if( e_chars[k].opacity() != 0 ){
-					temp_tank.push( e_chars[k] );
+				var e = e_chars[k];
+				if( e == undefined ){
+					alert("【" + DrillUp.g_ECE_PluginTip_curName + "】\n错误，获取到非法指令：" + command + " " + args.join(" ") );
+				}
+				if( e.opacity == undefined ){
+					alert("【" + DrillUp.g_ECE_PluginTip_curName + "】\n错误，获取到非法物体，信息ID：" + e._eventId + "，位置：" + e._x + ","+ e._y );
+				}
+				if( e.opacity() != 0 ){
+					temp_tank.push( e );
 				}
 			}
 			e_chars = temp_tank;
+			if( e_chars.length == 0 ){
+				e_chars = null;
+			}
 		}
 		
 		// > 未获取到对象，直接跳过
@@ -1462,8 +1477,8 @@ Game_Event.prototype.setupPage = function() {
 Game_Event.prototype.drill_ECE_setupEffect = function() {	
 	
 	// > 第一次出生，强制读取第一页注释（防止离开地图后，回来，开关失效）
-	if( !this._erased && this.event() && this.event().pages[0] && this._drill_ECE_isFirstBirth ){ 
-		this._drill_ECE_isFirstBirth = false;
+	if( !this._erased && this.event() && this.event().pages[0] && this._drill_ECE_isFirstBirth == true ){ 
+		this._drill_ECE_isFirstBirth = undefined;		//『节约临时参数存储空间』
 		this.drill_ECE_readPage( this.event().pages[0].list );
 	}
 	

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        系统 - 粒子核心
+ * @plugindesc [v1.1]        系统 - 粒子核心
  * @author Drill_up
  * 
  * @Drill_LE_param "粒子样式-%d"
@@ -72,6 +72,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 添加了粒子 彩虹化 功能。
  *
  */
  
@@ -99,7 +101,7 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
 //		
 //			->粒子控制器【Drill_COPa_Controller】
 //			->粒子贴图【Drill_COPa_Sprite】
@@ -109,6 +111,9 @@
 //		★家谱：
 //			大家族-粒子效果
 //			核心
+//		
+//		★脚本文档：
+//			1.系统 > 大家族-粒子效果（脚本）.docx
 //		
 //		★插件私有类：
 //			* 粒子控制器【Drill_COPa_Controller】
@@ -166,7 +171,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_CoreOfParticle = true;
@@ -175,7 +180,7 @@
 	
 	
 	//==============================
-	// * 变量获取 - 粒子样式
+	// * 静态数据 - 粒子样式
 	//
 	//			说明：	此函数并未使用，只作为 子插件 的参考样式来使用。
 	//==============================
@@ -252,6 +257,19 @@
 		data['trailing_src_img'] = String( dataFrom["资源-直线拖尾"] || "");
 		data['trailing_src_img_file'] = "img/System/";
 		
+		// > 彩虹化
+		data['rainbow_enable'] = String( dataFrom["是否开启彩虹化-粒子"] || "false") == "true";
+		data['rainbow_enableSecond'] = String( dataFrom["是否开启彩虹化-第二层粒子"] || "false") == "true";
+		data['rainbow_enableTrailing'] = String( dataFrom["是否开启彩虹化-直线拖尾"] || "false") == "true";
+		data['rainbow_num'] = Number( dataFrom["彩虹化色彩数量"] || 20);
+		data['rainbow_lockTint'] = String( dataFrom["彩虹化是否锁定色调值"] || "false") == "true";
+		if( dataFrom["锁定的色调值列表"] != undefined &&
+			dataFrom["锁定的色调值列表"] != "" ){
+			data['rainbow_tintList'] = JSON.parse( dataFrom["锁定的色调值列表"] || [] );
+		}else{
+			data['rainbow_tintList'] = [];
+		}
+		
 		return data;
 	}
 	
@@ -302,6 +320,7 @@ if( Imported.Drill_CoreOfBallistics ){
 // **						> 依次产生
 // **						> 跳过产生过程
 // **						> 手动产生
+// **					->J彩虹化
 // **		
 // **		说明：	> 核心与所有子插件功能介绍去看看："1.系统 > 大家族-粒子效果（脚本）.docx"
 // **				> 该类可与 Game_CharacterBase 一并存储在 $gameMap 中。
@@ -351,6 +370,7 @@ Drill_COPa_Controller.prototype.drill_controller_update = function(){
 												//帧刷新 - G直线拖尾贴图（无）
 												//帧刷新 - H贴图高宽（无）
 	this.drill_controller_updateLife();			//帧刷新 - I粒子生命周期
+												//帧刷新 - J彩虹化
 }
 //##############################
 // * 控制器 - 重设数据【标准函数】
@@ -510,7 +530,16 @@ Drill_COPa_Controller.prototype.drill_controller_initData = function(){
 	
 	
 	// > I粒子生命周期
-	if( data['par_lifeType'] == undefined ){ data['par_lifeType'] = "跳过产生过程" };						//I粒子生命周期 - 生命类型
+	if( data['par_lifeType'] == undefined ){ data['par_lifeType'] = "跳过产生过程" };					//I粒子生命周期 - 生命类型
+	
+	// > J彩虹化
+	if( data['rainbow_enable'] == undefined ){ data['rainbow_enable'] = false };						//J彩虹化 - 是否开启彩虹化-粒子
+	if( data['rainbow_enableSecond'] == undefined ){ data['rainbow_enableSecond'] = false };			//J彩虹化 - 是否开启彩虹化-第二层粒子
+	if( data['rainbow_enableTrailing'] == undefined ){ data['rainbow_enableTrailing'] = false };		//J彩虹化 - 是否开启彩虹化-直线拖尾
+	if( data['rainbow_num'] == undefined ){ data['rainbow_num'] = 20 };									//J彩虹化 - 彩虹化色彩数量
+	if( data['rainbow_lockTint'] == undefined ){ data['rainbow_lockTint'] = false };					//J彩虹化 - 彩虹化是否锁定色调值
+	if( data['rainbow_tintList'] == undefined ){ data['rainbow_tintList'] = [] };						//J彩虹化 - 锁定的色调值列表
+	
 }
 //==============================
 // * 控制器 - 初始化子功能
@@ -526,6 +555,7 @@ Drill_COPa_Controller.prototype.drill_controller_initChild = function(){
 	this.drill_controller_initTrailing();		//初始化子功能 - G直线拖尾贴图
 	this.drill_controller_initBitmapAttr();		//初始化子功能 - H贴图高宽
 	this.drill_controller_initLife();			//初始化子功能 - I粒子生命周期
+	this.drill_controller_initRainbow();		//初始化子功能 - J彩虹化
 	this.drill_controller_initBallistics();		//初始化子功能 - B粒子群弹道（放最后，因为需要使用 E粒子重设 的 迭代次数 参数）
 }
 //==============================
@@ -1251,6 +1281,14 @@ Drill_COPa_Controller.prototype.drill_controller_getOneDeadParticleIndex = funct
 };
 
 
+//==============================
+// * J彩虹化 - 初始化子功能
+//==============================
+Drill_COPa_Controller.prototype.drill_controller_initRainbow = function() {
+	// （无）
+}
+
+
 
 //=============================================================================
 // ** 粒子贴图【Drill_COPa_Sprite】
@@ -1282,6 +1320,7 @@ Drill_COPa_Controller.prototype.drill_controller_getOneDeadParticleIndex = funct
 // **					->G直线拖尾贴图
 // **					->H贴图高宽
 // **					->I粒子生命周期
+// **					->J彩虹化
 // **
 // **		说明：	> 核心与所有子插件功能介绍去看看："1.系统 > 大家族-粒子效果（脚本）.docx"
 // **				> 你必须在创建贴图后，手动初始化。（还需要先设置 控制器 ）
@@ -1325,6 +1364,7 @@ Drill_COPa_Sprite.prototype.update = function() {
 	this.drill_sprite_updateTrailing();			//帧刷新 - G直线拖尾贴图
 	this.drill_sprite_updateBitmapAttr();		//帧刷新 - H贴图高宽
 												//帧刷新 - I粒子生命周期（无）
+												//帧刷新 - J彩虹化（无）
 };
 
 //##############################
@@ -1356,6 +1396,7 @@ Drill_COPa_Sprite.prototype.drill_sprite_initChild = function(){
 	this.drill_sprite_initSecond();				//初始化子功能 - F双层效果
 	this.drill_sprite_initBitmapAttr();			//初始化子功能 - H贴图高宽
 	this.drill_sprite_initLife();				//初始化子功能 - I粒子生命周期
+	this.drill_sprite_initRainbow();			//初始化子功能 - J彩虹化
 };
 
 //##############################
@@ -1456,6 +1497,9 @@ Drill_COPa_Sprite.prototype.drill_sprite_destroyChild = function(){
 	//	（无）
 	
 	// > 销毁 - I粒子生命周期
+	//	（无）
+	
+	// > 销毁 - J彩虹化
 	//	（无）
 };
 //==============================
@@ -1615,6 +1659,8 @@ Drill_COPa_Sprite.prototype.drill_sprite_initTransform = function() {
 }
 //==============================
 // * D粒子变化 - 创建粒子
+//
+//			说明：	> 此处创建的粒子，是第一次初始化的粒子，后续还会被重刷。
 //==============================
 Drill_COPa_Sprite.prototype.drill_sprite_createTransformParticle = function() {
 	var data = this._drill_controller._drill_data;
@@ -1784,6 +1830,9 @@ Drill_COPa_Sprite.prototype.drill_sprite_updateReset = function() {
 			
 			// > 粒子 重新推演弹道
 			this.drill_sprite_refreshBallistics( i );
+	
+			// > J彩虹化 - 刷新资源色调
+			this.drill_sprite_refreshRainBow( i );
 		}
 	}
 }
@@ -1813,7 +1862,7 @@ Drill_COPa_Sprite.prototype.drill_sprite_initTrailing = function() {
 	}
 }
 //==============================
-// * G直线拖尾贴图 - 创建粒子
+// * G直线拖尾贴图 - 创建拖尾
 //==============================
 Drill_COPa_Sprite.prototype.drill_sprite_createTrailingSprite = function() {
 	var data = this._drill_controller._drill_data;
@@ -1995,6 +2044,55 @@ Drill_COPa_Sprite.prototype.drill_sprite_initLife = function() {
 }
 
 
+//==============================
+// * J彩虹化 - 初始化子功能
+//==============================
+Drill_COPa_Sprite.prototype.drill_sprite_initRainbow = function() {
+	var data = this._drill_controller._drill_data;
+	
+	// > 彩虹化初始化
+	this._drill_rainBow_count = 0;
+	this._drill_rainBow_tintTank = [];
+	
+	// > 刷新资源色调
+	for( var i = 0; i < data['par_count']; i++ ){
+		this.drill_sprite_refreshRainBow( i );
+	}
+}
+//==============================
+// * J彩虹化 - 刷新资源色调
+//==============================
+Drill_COPa_Sprite.prototype.drill_sprite_refreshRainBow = function( i ){
+	var data = this._drill_controller._drill_data;
+	
+	// > 计算色调
+	var cur_tint = data['tint'];
+	if( data['rainbow_lockTint'] == true && data['rainbow_tintList'].length > 0 ){
+		var tint_index = Math.floor( this._drill_rainBow_count % data['rainbow_tintList'].length );
+		cur_tint += data['rainbow_tintList'][ tint_index ];
+	}else{
+		var inter = 360 / data['rainbow_num'];
+		cur_tint += Math.floor( this._drill_rainBow_count * inter );
+	}
+	cur_tint = cur_tint%360;
+	this._drill_rainBow_count += 1;
+	this._drill_rainBow_tintTank[i] = cur_tint;
+	
+	// > J彩虹化 - 粒子
+	if( data['rainbow_enable'] == true &&
+		this._drill_COPa_parSpriteTank != undefined ){
+		var cur_tint = this._drill_rainBow_tintTank[i];
+		this._drill_COPa_parSpriteTank[i].bitmap = ImageManager.loadBitmap( data['src_img_file'], data['src_img'], cur_tint, data['smooth'] );
+	}
+	
+	// > J彩虹化 - 直线拖尾
+	if( data['rainbow_enableTrailing'] == true &&
+		this._drill_COPa_trailingSpriteTank != undefined ){
+		var cur_tint = this._drill_rainBow_tintTank[i];
+		this._drill_COPa_trailingSpriteTank[i].bitmap = ImageManager.loadBitmap( data['trailing_src_img_file'], data['trailing_src_img'], cur_tint, data['smooth'] );
+	}
+}
+
 
 
 //=============================================================================
@@ -2021,6 +2119,7 @@ Drill_COPa_Sprite.prototype.drill_sprite_initLife = function() {
 // **					->G直线拖尾贴图（无）
 // **					->H贴图高宽（无）
 // **					->I粒子生命周期（无）
+// **					->J彩虹化
 // **
 // **		说明：	> 核心与所有子插件功能介绍去看看："1.系统 > 大家族-粒子效果（脚本）.docx"
 // **				> 第二层粒子贴图会比粒子贴图 优先 执行update，所以需要考虑【慢1帧弹道】问题。
@@ -2058,6 +2157,7 @@ Drill_COPa_SecSprite.prototype.update = function() {
 												//帧刷新 - G直线拖尾贴图（无）
 												//帧刷新 - H贴图高宽（无）
 												//帧刷新 - I粒子生命周期（无）
+												//帧刷新 - J彩虹化（无）
 };
 //##############################
 // * 第二层粒子 - 是否就绪【标准函数】
@@ -2142,6 +2242,7 @@ Drill_COPa_SecSprite.prototype.drill_spriteSec_initChild = function(){
 	this.drill_spriteSec_initTrailing();			//初始化子功能 - G直线拖尾贴图
 	this.drill_spriteSec_initBitmapAttr();			//初始化子功能 - H贴图高宽
 	this.drill_spriteSec_initLife();				//初始化子功能 - I粒子生命周期
+	this.drill_spriteSec_initRainbow();				//初始化子功能 - J彩虹化
 };
 //==============================
 // * 第二层粒子 - 销毁子功能
@@ -2177,6 +2278,9 @@ Drill_COPa_SecSprite.prototype.drill_spriteSec_destroyChild = function(){
 	//	（无）
 	
 	// > 销毁 - I粒子生命周期
+	//	（无）
+	
+	// > 销毁 - J彩虹化
 	//	（无）
 };
 //==============================
@@ -2237,7 +2341,7 @@ Drill_COPa_SecSprite.prototype.drill_spriteSec_initTransform = function() {
 	
 	// > 粒子贴图容器
 	this._drill_COPa_parSecSpriteTank = [];
-	for( var j = 0; j < p_data['par_count'] ; j++ ){	
+	for( var j = 0; j < p_data['par_count'] ; j++ ){
 		var temp_sprite = new Sprite();
 		temp_sprite.bitmap = ImageManager.loadBitmap( p_data['src_img_file'], p_data['second_src_img'], p_data['tint'], p_data['smooth'] );
 		temp_sprite.anchor.x = 0.5;
@@ -2279,6 +2383,9 @@ Drill_COPa_SecSprite.prototype.drill_spriteSec_updateTransform = function(){
 		this.drill_spriteSec_updateTransform_Opacity( i, time );
 		this.drill_spriteSec_updateTransform_Scale( i, time );
 		this.drill_spriteSec_updateTransform_Rotation( i, time );
+		
+		// > J彩虹化 - 帧刷新 资源色调
+		this.drill_spriteSec_updateRainBow_Tint( i );
 		
 		// > 粒子 赋值
 		par_sprite.x = this._drill_parSec_x;
@@ -2386,6 +2493,41 @@ Drill_COPa_SecSprite.prototype.drill_spriteSec_initBitmapAttr = function() {
 Drill_COPa_SecSprite.prototype.drill_spriteSec_initLife = function() {
 	//（无）
 };
+
+
+//==============================
+// * J彩虹化（第二层） - 初始化子功能
+//==============================
+Drill_COPa_SecSprite.prototype.drill_spriteSec_initRainbow = function() {
+	
+	// > 彩虹化初始化
+	this._drill_rainBow_lastTintTank = [];
+	
+	// > 刷新资源色调值
+	var tint_tank = this._drill_parentSprite._drill_rainBow_tintTank;
+	for( var i=0; i < tint_tank.length; i++ ){
+		this._drill_rainBow_lastTintTank[i] = tint_tank[i];
+	}
+};
+//==============================
+// * J彩虹化 - 帧刷新 资源色调
+//==============================
+Drill_COPa_SecSprite.prototype.drill_spriteSec_updateRainBow_Tint = function( i ){
+	var p_data = this._drill_controller._drill_data;
+	
+	// > J彩虹化 - 第二层粒子
+	if( p_data['rainbow_enableSecond'] == true &&
+		this._drill_COPa_parSecSpriteTank != undefined ){
+			
+		var cur_tint = this._drill_parentSprite._drill_rainBow_tintTank[i];
+		if( this._drill_rainBow_lastTintTank[i] != cur_tint ){	//（色调值变化时，同步资源色调）
+			this._drill_rainBow_lastTintTank[i] = cur_tint;
+			
+			this._drill_COPa_parSecSpriteTank[i].bitmap = ImageManager.loadBitmap( p_data['src_img_file'], p_data['second_src_img'], cur_tint, p_data['smooth'] );
+		}
+	}
+	
+}
 
 
 

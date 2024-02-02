@@ -878,6 +878,9 @@
 //		★家谱：
 //			无
 //		
+//		★脚本文档：
+//			无
+//		
 //		★插件私有类：
 //			无
 //		
@@ -921,7 +924,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** 静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_TitleGif = true;
@@ -930,7 +933,7 @@
 	DrillUp.parameters = PluginManager.parameters('Drill_TitleGif');
 	
 	//==============================
-	// * 变量获取 - GIF
+	// * 静态数据 - GIF
 	//				（~struct~TitleGIF）
 	//==============================
 	DrillUp.drill_TGi_gifInit = function( dataFrom ) {
@@ -1097,14 +1100,17 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 
 
 //=============================================================================
-// ** 资源预加载
+// ** ☆预加载（标题）
+//
+//			说明：	> 进入标题界面前，对标题资源进行一次性全部加载。但此资源可以被删除。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// ** 资源预加载 - 初始化
+// * 预加载 - 初始化
 //==============================
-var _drill_TGi_temp_initialize = Game_Temp.prototype.initialize;
+var _drill_TGi_preload_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {
-	_drill_TGi_temp_initialize.call(this);
+	_drill_TGi_preload_initialize.call(this);
 	
     this._drill_TGi_preloadTank = [];			//bitmap容器
 	for (var i = 0; i < DrillUp.g_TGi_list.length; i++) {

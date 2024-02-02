@@ -60,7 +60,7 @@
  *              120.00ms以上      （高消耗）
  * 工作类型：   持续执行
  * 时间复杂度： o(n)*o(事件移动路线) 每帧
- * 测试方法：   去物体管理层、地理管理层、镜像管理层跑一圈测试就可以了。
+ * 测试方法：   去移动路线管理层进行性能测试。
  * 测试结果：   200个事件的地图中，平均消耗为：【5ms以下】
  *              100个事件的地图中，平均消耗为：【5ms以下】
  *               50个事件的地图中，平均消耗为：【5ms以下】
@@ -91,7 +91,7 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(n)*o(事件移动路线) 每帧
-//		★性能测试因素	物体管理层
+//		★性能测试因素	移动路线管理层
 //		★性能测试消耗	太小，未找到
 //		★最坏情况		无
 //		★备注			无
@@ -101,11 +101,21 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			移动路线指令集：
-//				->遇障碍结束
-//				->接近/远离
-//		
+//			->☆提示信息
+//			->☆静态数据
+//			->☆移动路线指令
+//			
+//			->☆贴墙指令
+//				->贴右墙移动
+//				->贴左墙移动
+//				->贴右墙移动(含斜向)
+//				->贴左墙移动(含斜向)
+//			
+//			
 //		★家谱：
+//			无
+//		
+//		★脚本文档：
 //			无
 //		
 //		★插件私有类：
@@ -122,7 +132,7 @@
 //		
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -147,7 +157,7 @@
 	
 	
 //=============================================================================
-// ** 变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_RouteAlongTheWall = true;
@@ -162,8 +172,11 @@ if( Imported.Drill_CoreOfMoveRoute ){
 
 
 //=============================================================================
-// * 指令执行阶段 - 执行指令（继承接口）
+// ** ☆移动路线指令
 //=============================================================================
+//==============================
+// * 移动路线指令 - 指令执行阶段（继承接口）
+//==============================
 var _drill_RATW_routeCommand = Game_Character.prototype.drill_COMR_routeCommand;
 Game_Character.prototype.drill_COMR_routeCommand = function(command, args){
 	_drill_RATW_routeCommand.call( this, command, args );
@@ -191,10 +204,13 @@ Game_Character.prototype.drill_COMR_routeCommand = function(command, args){
 
 
 //=============================================================================
-// ** 贴墙判断
+// ** ☆贴墙指令
+//
+//			说明：	> 该模块专门管理 贴墙指令 的指令功能。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 贴墙判断 - 贴右墙移动
+// * 贴墙指令 - 贴右墙移动
 //==============================
 Game_Character.prototype.drill_RATW_moveAlongTheRightWall = function(){
 	var d = this.direction();
@@ -227,7 +243,7 @@ Game_Character.prototype.drill_RATW_moveAlongTheRightWall = function(){
 	}
 };
 //==============================
-// * 贴墙判断 - 贴左墙移动
+// * 贴墙指令 - 贴左墙移动
 //==============================
 Game_Character.prototype.drill_RATW_moveAlongTheLeftWall = function(){
 	var d = this.direction();
@@ -260,7 +276,7 @@ Game_Character.prototype.drill_RATW_moveAlongTheLeftWall = function(){
 	}
 };
 //==============================
-// * 贴墙判断 - 贴右墙移动
+// * 贴墙指令 - 贴右墙移动(含斜向)
 //==============================
 Game_Character.prototype.drill_RATW_moveAlongTheRightWall_Diagonally = function(){
 	var d = this.direction();
@@ -321,7 +337,7 @@ Game_Character.prototype.drill_RATW_moveAlongTheRightWall_Diagonally = function(
 	}
 };
 //==============================
-// * 贴墙判断 - 贴左墙移动
+// * 贴墙指令 - 贴左墙移动(含斜向)
 //==============================
 Game_Character.prototype.drill_RATW_moveAlongTheLeftWall_Diagonally = function(){
 	var d = this.direction();
@@ -382,21 +398,21 @@ Game_Character.prototype.drill_RATW_moveAlongTheLeftWall_Diagonally = function()
 	}
 };
 //==============================
-// * 判断条件 - 方向可通行
+// * 贴墙指令 - 指定方向是否可通行
 //==============================
 Game_Character.prototype.drill_RATW_canPass = function( x, y, d ){
 	return this.canPass( x, y, d );
 };
 //==============================
-// * 移动 - 直线移动
+// * 贴墙指令 - 执行直线移动
 //==============================
 Game_Character.prototype.drill_RATW_moveStraight = function( d ){
 	this.moveStraight(d);
 };
 //==============================
-// * 移动 - 斜向移动
+// * 贴墙指令 - 执行斜向移动
 //
-//			说明：	参数为任意两个方向，只要方向不是相反方向即可。
+//			说明：	> 参数为任意两个方向，只要方向不是相反方向即可。
 //==============================
 Game_Character.prototype.drill_RATW_moveDiagonally = function( d1, d2 ){
 	if( d1 == 2 && d2 == 8 ){ return; }
@@ -411,7 +427,7 @@ Game_Character.prototype.drill_RATW_moveDiagonally = function( d1, d2 ){
 	}
 };
 //==============================
-// * 方向 - 获取右转90°的方向
+// * 贴墙指令 - 获取右转90°的方向
 //==============================
 Game_Character.prototype.drill_RATW_getDirectionRight90 = function( d ){
 	if( d == 2 ){ return 4; }
@@ -421,7 +437,7 @@ Game_Character.prototype.drill_RATW_getDirectionRight90 = function( d ){
 	return d;
 };
 //==============================
-// * 方向 - 获取左转90°的方向
+// * 贴墙指令 - 获取左转90°的方向
 //==============================
 Game_Character.prototype.drill_RATW_getDirectionLeft90 = function( d ){
 	if( d == 2 ){ return 6; }

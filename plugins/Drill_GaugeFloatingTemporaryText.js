@@ -1001,7 +1001,7 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
 //			->☆插件指令
 //				->简单指令
 //				->高级指令
@@ -1027,6 +1027,9 @@
 //			
 //		★家谱：
 //			大家族-漂浮文字
+//		
+//		★脚本文档：
+//			13.UI > 大家族-漂浮文字（脚本）.docx
 //		
 //		★插件私有类：
 //			* 地图临时 漂浮文字窗口【Drill_GFTT_Window】
@@ -1094,7 +1097,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_GaugeFloatingTemporaryText = true;
@@ -1103,7 +1106,7 @@
 	
 	
 	//==============================
-	// * 变量获取 - 临时漂浮样式
+	// * 静态数据 - 临时漂浮样式
 	//				（~struct~DrillGFTTStyle）
 	//==============================
 	DrillUp.drill_GFTT_initContext = function( dataFrom ) {
@@ -1148,7 +1151,7 @@
 		return data;
 	}
 	//==============================
-	// * 变量获取 - 弹道样式
+	// * 静态数据 - 弹道样式
 	//				（~struct~DrillGFTTBallistic）
 	//==============================
 	DrillUp.drill_GFTT_initBallistics = function( dataFrom ) {
@@ -1896,7 +1899,7 @@ Scene_Map.prototype.terminate = function() {
 	$gameTemp._drill_GFTT_commandSeq = [];			//漂浮文字容器
 };
 //==============================
-// * 临时对象 - 简单指令
+// * 『临时对象』 - 简单指令
 //==============================
 Game_Temp.prototype.drill_GFTT_createSimple = function( pos, text, style_id, ballistics_id, sustain_time ){
 	if( style_id == undefined ){ style_id = DrillUp.g_GFTT_simple_defaultStyleId -1; }
@@ -1926,7 +1929,7 @@ Game_Temp.prototype.drill_GFTT_createSimple = function( pos, text, style_id, bal
 	this._drill_GFTT_commandSeq.push( data );
 };
 //==============================
-// * 临时对象 - 高级指令 初始化
+// * 『临时对象』 - 高级指令 初始化
 //==============================
 Game_Temp.prototype.drill_GFTT_setBuffer = function( style_id, ballistics_id ){
 	
@@ -1942,7 +1945,7 @@ Game_Temp.prototype.drill_GFTT_setBuffer = function( style_id, ballistics_id ){
 	this._drill_GFTT_commandBuffer = data;
 };
 //==============================
-// * 临时对象 - 高级指令 创建
+// * 『临时对象』 - 高级指令 创建
 //==============================
 Game_Temp.prototype.drill_GFTT_createByBuffer = function( pos, time ){
 	var data = this._drill_GFTT_commandBuffer;

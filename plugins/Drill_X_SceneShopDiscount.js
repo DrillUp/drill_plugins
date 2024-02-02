@@ -674,7 +674,7 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
 //			->☆插件指令
 //			->☆存储数据
 //			->☆菜单层级
@@ -706,6 +706,9 @@
 //		
 //		★家谱：
 //			无
+//		
+//		★脚本文档：
+//			14.鼠标 > 关于鼠标悬浮窗口（脚本）.docx
 //		
 //		★插件私有类：
 //			* 折扣信息框【Drill_XSSD_Window】
@@ -750,7 +753,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_X_SceneShopDiscount = true;
@@ -759,7 +762,7 @@
 	
 	
 	//==============================
-	// * 变量获取 - 折扣设置
+	// * 静态数据 - 折扣设置
 	//				（~struct~DrillShopDiscount）
 	//==============================
 	DrillUp.drill_XSSD_initShopDiscount = function( dataFrom ) {
@@ -878,25 +881,29 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp1 = temp1.replace("]","");
 				temp1 = Number(temp1) -1;
 				
-				if( type == "应用到全自定义商店界面" && temp2 == "开启" ){
-					var data = $gameSystem._drill_XSSD_list[ temp1 ];
-					if( data == undefined ){ return; }
-					data['shopEnabled'] = true;
+				if( type == "应用到全自定义商店界面" ){
+					if( temp2 == "启用" || temp2 == "开启" || temp2 == "打开" || temp2 == "启动" ){
+						var data = $gameSystem._drill_XSSD_list[ temp1 ];
+						if( data == undefined ){ return; }
+						data['shopEnabled'] = true;
+					}
+					if( temp2 == "关闭" || temp2 == "禁用" ){
+						var data = $gameSystem._drill_XSSD_list[ temp1 ];
+						if( data == undefined ){ return; }
+						data['shopEnabled'] = false;
+					}
 				}
-				if( type == "应用到全自定义商店界面" && temp2 == "关闭" ){
-					var data = $gameSystem._drill_XSSD_list[ temp1 ];
-					if( data == undefined ){ return; }
-					data['shopEnabled'] = false;
-				}
-				if( type == "应用到限量商店界面" && temp2 == "开启" ){
-					var data = $gameSystem._drill_XSSD_list[ temp1 ];
-					if( data == undefined ){ return; }
-					data['limitShopEnabled'] = true;
-				}
-				if( type == "应用到限量商店界面" && temp2 == "关闭" ){
-					var data = $gameSystem._drill_XSSD_list[ temp1 ];
-					if( data == undefined ){ return; }
-					data['limitShopEnabled'] = false;
+				if( type == "应用到限量商店界面" ){
+					if( temp2 == "启用" || temp2 == "开启" || temp2 == "打开" || temp2 == "启动" ){
+						var data = $gameSystem._drill_XSSD_list[ temp1 ];
+						if( data == undefined ){ return; }
+						data['limitShopEnabled'] = true;
+					}
+					if( temp2 == "关闭" || temp2 == "禁用" ){
+						var data = $gameSystem._drill_XSSD_list[ temp1 ];
+						if( data == undefined ){ return; }
+						data['limitShopEnabled'] = false;
+					}
 				}
 				if( type == "修改指定限量商店可用" && temp2.indexOf("限量商店[") != -1 ){
 					temp2 = temp2.replace("限量商店[","");

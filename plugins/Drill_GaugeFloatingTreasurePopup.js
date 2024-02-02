@@ -639,7 +639,7 @@
 //
 //		★功能结构树：
 //			->☆提示信息
-//			->☆变量获取
+//			->☆静态数据
 //			->☆插件指令
 //			->☆地图层级
 //				->添加贴图到层级【标准函数】
@@ -674,6 +674,9 @@
 //		★家谱：
 //			大家族-漂浮文字
 //			
+//		★脚本文档：
+//			13.UI > 大家族-漂浮文字（脚本）.docx
+//		
 //		★插件私有类：
 //			* 地图临时 漂浮文字窗口【Drill_GFTP_Window】
 //			
@@ -725,7 +728,7 @@
 	
 	
 //=============================================================================
-// ** ☆变量获取
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_GaugeFloatingTreasurePopup = true;
@@ -734,7 +737,7 @@
 	
 	
 	//==============================
-	// * 变量获取 - 物品信息样式
+	// * 静态数据 - 物品信息样式
 	//				（~struct~DrillGFTPStyle）
 	//==============================
 	DrillUp.drill_GFTP_initContext = function( dataFrom ) {
@@ -833,10 +836,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		/*-----------------开关------------------*/
 		if( args.length == 2 ){
 			var type = String(args[1]);
-			if( type == "启用" || type == "打开" || type == "开启" ){
+			if( type == "启用" || type == "开启" || type == "打开" || type == "启动" ){
 				$gameSystem._drill_GFTP_enabled = true;
 			}
-			if( type == "禁用" || type == "关闭" ){
+			if( type == "关闭" || type == "禁用" ){
 				$gameSystem._drill_GFTP_enabled = false;
 			}
 			if( type == "立刻清除全部信息" ){
@@ -1481,6 +1484,7 @@ Game_Interpreter.prototype.drill_GFTP_getEventPos = function() {
 	var tw = $gameMap.tileWidth();
 	var th = $gameMap.tileHeight();
 	var e = $gameMap.event( this._eventId );
+	if( e == undefined ){ e = $gamePlayer; }	//（若没有事件则设置 玩家位置）
 	var e_pos = [ e._realX, e._realY ];
 	
 	// > 偶数图块交叉
@@ -1523,7 +1527,7 @@ Game_Temp.prototype.drill_GFTP_createText = function( pos, text ){
 	data['s_data'] = JSON.parse(JSON.stringify( DrillUp.g_GFTP_style[ $gameSystem._drill_GFTP_styleId -1 ] ));
 	data['b_data'] = {};
 	
-	// > 临时对象设置
+	// > 临时参数设置
 	data['param_x'] = pos[0];
 	data['param_y'] = pos[1];
 	
