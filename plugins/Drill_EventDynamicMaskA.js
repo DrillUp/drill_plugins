@@ -3009,7 +3009,7 @@ Scene_Map.prototype.drill_EDMA_updateCharacterSprite = function(){
 		// > 数据变化时，只执行一次遮罩切换
 		if( ch._drill_EDMA_maskBind == "行走图动态遮罩板A" ){
 			temp_sprite._drill_EDMA_maskSprite = this.drill_EDMA_getMaskSprite();
-			temp_sprite.mask = temp_sprite._drill_EDMA_maskSprite;
+			temp_sprite.mask = temp_sprite._drill_EDMA_maskSprite;		//『遮罩赋值』
 		}
 		if( ch._drill_EDMA_maskBind == null ){
 			temp_sprite.mask = null;

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.9]        鼠标 - 事件说明窗口
+ * @plugindesc [v2.0]        鼠标 - 事件说明窗口
  * @author Drill_up
  * 
  * @Drill_LE_param "皮肤样式-%d"
@@ -160,6 +160,8 @@
  * 优化了旧存档的识别与兼容。
  * [v1.9]
  * 优化了内部结构，改进了鼠标触发以及刷新范围。
+ * [v2.0]
+ * 修复了无法设置 左上角锚点 的bug。
  * 
  * 
  * 
@@ -1001,6 +1003,8 @@ Scene_Map.prototype.drill_MPFE_sortByZIndex_Private = function() {
 //=============================================================================
 //==============================
 // * 事件注释 - 初始化绑定
+//
+//			说明：	> 注释与当前事件页有关，不一定跨事件页。
 //==============================
 var _drill_MPFE_setupPageSettings = Game_Event.prototype.setupPageSettings;
 Game_Event.prototype.setupPageSettings = function() {
@@ -1499,13 +1503,18 @@ Drill_MPFE_Window.prototype.drill_initData = function() {
 }
 //==============================
 // * 事件说明窗口 - 初始化对象
+//
+//			说明：	> 此函数只在初始化时执行一次，重设数据 被分到各个子功能里面执行。
 //==============================
 Drill_MPFE_Window.prototype.drill_initSprite = function() {
-	this.drill_initBean();				//初始化对象 - B实体类交互（最先执行）
-	this.drill_initSkin();				//初始化对象 - D窗口皮肤（需要在 主体 前面执行）
 	this.drill_initAttr();				//初始化对象 - A主体
+	this.drill_initBean();				//初始化对象 - B实体类交互
 	this.drill_initPosition();			//初始化对象 - C位置跟随
+	this.drill_initSkin();				//初始化对象 - D窗口皮肤
 	this.drill_initMessage();			//初始化对象 - E窗口内容
+	
+	// > 重设样式（默认样式）
+	this.drill_refreshStyle( DrillUp.g_MPFE_defaultStyle );
 }
 
 
@@ -1518,9 +1527,6 @@ Drill_MPFE_Window.prototype.drill_initAttr = function() {
 	this._drill_width = 0;				//窗口宽度
 	this._drill_height = 0;				//窗口高度
 	this._drill_showDelay = 0;			//显示延迟
-	
-	// > 重设样式（默认样式）
-	this.drill_refreshStyle( DrillUp.g_MPFE_defaultStyle );
 }
 //==============================
 // * A主体 - 帧刷新 样式
@@ -1572,8 +1578,12 @@ Drill_MPFE_Window.prototype.drill_refreshStyle = function( style_id ){
 	this._drill_curLayer = this._drill_curData['layer_index'];
 	this.zIndex = this._drill_curData['zIndex'];
 	
+	// > 重设数据（C位置跟随）
+	this.drill_resetData_Position( this._drill_curData );
 	// > 重设数据（D窗口皮肤）
-	this.drill_resetSkinData( this._drill_curData );
+	this.drill_resetData_Skin( this._drill_curData );
+	// > 重设数据（E窗口内容）
+	this.drill_resetData_Message( this._drill_curData );
 }
 
 
@@ -1656,23 +1666,24 @@ Drill_MPFE_Window.prototype.drill_isMouseControl = function( bean ){
 
 //==============================
 // * C位置跟随 - 初始化
-//
-//			说明：	> this._drill_curData在 A主体 中进行了初始化，可以直接使用。
 //==============================
 Drill_MPFE_Window.prototype.drill_initPosition = function() {
-	
-	// > 中心锚点
-	this._drill_anchor_x = 0;			//中心锚点x
-	this._drill_anchor_y = 0;			//中心锚点y
-	if( this._drill_curData['anchor'] == "左上角" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 0.0; }
-	if( this._drill_curData['anchor'] == "右上角" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 0.0; }
-	if( this._drill_curData['anchor'] == "左下角" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 1.0; }
-	if( this._drill_curData['anchor'] == "右下角" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 1.0; }
-	if( this._drill_curData['anchor'] == "正上方" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 0.0; }
-	if( this._drill_curData['anchor'] == "正下方" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 1.0; }
-	if( this._drill_curData['anchor'] == "正左方" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 0.5; }
-	if( this._drill_curData['anchor'] == "正右方" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 0.5; }
-	if( this._drill_curData['anchor'] == "正中心" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 0.5; }
+	this._drill_anchor_x = 0;		//中心锚点x
+	this._drill_anchor_y = 0;		//中心锚点y
+}
+//==============================
+// * C位置跟随 - 重设数据
+//==============================
+Drill_MPFE_Window.prototype.drill_resetData_Position = function( data ) {
+	if( data['anchor'] == "左上角" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 0.0; }
+	if( data['anchor'] == "右上角" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 0.0; }
+	if( data['anchor'] == "左下角" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 1.0; }
+	if( data['anchor'] == "右下角" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 1.0; }
+	if( data['anchor'] == "正上方" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 0.0; }
+	if( data['anchor'] == "正下方" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 1.0; }
+	if( data['anchor'] == "正左方" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 0.5; }
+	if( data['anchor'] == "正右方" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 0.5; }
+	if( data['anchor'] == "正中心" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 0.5; }
 }
 //==============================
 // * C位置跟随 - 帧刷新
@@ -1745,7 +1756,7 @@ Drill_MPFE_Window.prototype.drill_initSkin = function() {
 //
 //			说明：	> 样式切换时重设，data对象中的参数【可以缺项】。
 //==============================
-Drill_MPFE_Window.prototype.drill_resetSkinData = function( data ){
+Drill_MPFE_Window.prototype.drill_resetData_Skin = function( data ){
 	
 	// > 默认值
 	if( data['window_type'] == undefined ){ data['window_type'] = "默认窗口皮肤" };		//布局模式（默认窗口皮肤/自定义窗口皮肤/自定义背景图片/黑底背景）
@@ -1936,6 +1947,21 @@ Drill_MPFE_Window.prototype.drill_initMessage = function() {
 	// > 窗口内容刷新
 	this.createContents();
     this.contents.clear();
+}
+//==============================
+// * E窗口内容 - 重设数据
+//==============================
+Drill_MPFE_Window.prototype.drill_resetData_Message = function( data ){
+	
+	// > 内容刷新标记
+	this._drill_curContextSerial = -1;
+	
+	// > 窗口内容刷新
+	this.createContents();
+    this.contents.clear();
+	
+	// > 帧刷新一次
+	this.drill_updateMessage();
 }
 //==============================
 // * E窗口内容 - 帧刷新

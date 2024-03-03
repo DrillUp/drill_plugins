@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.3]        行走图 - 图块倒影镜像
+ * @plugindesc [v2.4]        行走图 - 图块倒影镜像
  * @author Drill_up
  * 
  * @Drill_LE_param "地图镜面-%d"
@@ -209,7 +209,9 @@
  * 兼容了 事件彻底删除时，也包括删除镜像的功能。
  * [v2.3]
  * 调整了与行走图优化核心的兼容结构，减少性能消耗。
- *
+ * [v2.4]
+ * 改进了内部结构，添加了关闭遮罩底层的支持。
+ * 
  * 
  * 
  * @param 所有地图是否默认启用镜像
@@ -783,20 +785,30 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			图块倒影镜像：
+//			->☆提示信息
+//			->☆静态数据
+//			->☆插件指令
+//			->☆事件注释
+//			->☆地图备注
 //				->镜面
-//					->地图图块遮罩
+//			
+//			->☆物体的属性
 //				->镜像
-//					->显示隐藏
-//					->镜像载入
+//					> 是否反射
+//					> 是否镜像同步
+//					> 偏移补正值
 //					->镜像跳跃、动作效果（继承）
-//					->透明同步
-//				->优化
-//					->镜头外的镜像隐藏
-//					x->镜像滤镜（消耗太大）
-//					x->镜像粉碎（需要额外控制作用）
-//
-//
+//			->☆贴图控制
+//				->遮罩底层开关
+//				->镜头外的镜像隐藏
+//				x->镜像滤镜（消耗太大）
+//				x->镜像粉碎（需要额外控制作用）
+//			->☆毛玻璃效果
+//			
+//			镜像贴图【Drill_Sprite_LRR】
+//			地图图块遮罩【Drill_Sprite_LRR_Mask】
+//			
+//			
 //		★家谱：
 //			无
 //		
@@ -814,7 +826,7 @@
 //				//==============================
 //				Game_Temp.prototype.drill_XXX_isReflectionSprite = function( sprite ){
 //					if( Imported.Drill_LayerReverseReflection      && sprite instanceof Drill_Sprite_LRR ){ return true; }
-//					if( Imported.Drill_LayerSynchronizedReflection && sprite instanceof Drill_Sprite_LRR ){ return true; }
+//					if( Imported.Drill_LayerSynchronizedReflection && sprite instanceof Drill_Sprite_LSR ){ return true; }
 //					return false;
 //				}
 //
@@ -829,7 +841,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -860,7 +872,7 @@
 	
 	
 //=============================================================================
-// ** 静态数据
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_LayerReverseReflection = true;
@@ -904,16 +916,9 @@
 //=============================================================================
 if( Imported.Drill_CoreOfEventFrame ){
 	
-	
-//=============================================================================
-// ** 资源文件夹
-//=============================================================================
-ImageManager.load_MapReflection = function(filename) {
-    return this.loadBitmap('img/Map__reflection/', filename, 0, true);
-};
 
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _Drill_LRR_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
@@ -998,7 +1003,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var type = String(args[3]);
 			if( type == "不反射镜像" ){
 				for( var i=0; i < chars.length; i++ ){
-					chars[i]._drill_LRR_isReflect = false;
+					chars[i]._drill_LRR_isReflect = undefined;
 				}
 			}
 			if( type == "开启反射镜像" ){
@@ -1008,7 +1013,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			}
 			if( type == "关闭镜像透明同步" ){
 				for( var i=0; i < chars.length; i++ ){
-					chars[i]._drill_LRR_isOpacitySync = false;
+					chars[i]._drill_LRR_isOpacitySync = undefined;
 				}
 			}
 			if( type == "开启镜像透明同步" ){
@@ -1020,7 +1025,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 };
 //==============================
-// ** 插件指令 - 事件检查
+// * 插件指令 - 事件检查
 //==============================
 Game_Map.prototype.drill_LRR_isEventExist = function( e_id ){
 	if( e_id == 0 ){ return false; }
@@ -1035,23 +1040,28 @@ Game_Map.prototype.drill_LRR_isEventExist = function( e_id ){
 
 
 //=============================================================================
-// ** 事件
+// ** ☆事件注释
 //=============================================================================
 //==============================
-// * 事件 - 注释设置
+// * 事件注释 - 初始化绑定
+//
+//			说明：	> 注释与当前事件页有关，不一定跨事件页。
 //==============================
 var _drill_LRR_setupPage = Game_Event.prototype.setupPage;
 Game_Event.prototype.setupPage = function() {
 	_drill_LRR_setupPage.call(this);
     this.drill_LRR_e_setupReflect();
 };
+//==============================
+// * 事件注释 - 初始化
+//==============================
 Game_Event.prototype.drill_LRR_e_setupReflect = function() {
 	
 	// > 事件备注
 	var meta_data = this.event().meta;
 	if( meta_data != undefined ){
 		if( meta_data['不反射镜像'] == true ){
-			this._drill_LRR_isReflect = false;
+			this._drill_LRR_isReflect = undefined;
 		}
 	}
 	
@@ -1064,13 +1074,13 @@ Game_Event.prototype.drill_LRR_e_setupReflect = function() {
 				if(args.length == 2){
 					if(args[1]){ var type = String(args[1]); }
 					if( type == "不反射镜像" ){
-						this._drill_LRR_isReflect = false;
+						this._drill_LRR_isReflect = undefined;
 					}
 					if( type == "开启反射镜像" ){
 						this._drill_LRR_isReflect = true;
 					}
 					if( type == "关闭镜像透明同步" ){
-						this._drill_LRR_isOpacitySync = false;
+						this._drill_LRR_isOpacitySync = undefined;
 					}
 					if( type == "开启镜像透明同步" ){
 						this._drill_LRR_isOpacitySync = true;
@@ -1081,14 +1091,21 @@ Game_Event.prototype.drill_LRR_e_setupReflect = function() {
 	}, this);};
 };
 
+
 //=============================================================================
-// ** 地图备注
+// ** ☆地图备注
 //=============================================================================
+//==============================
+// * 地图备注 - 初始化绑定
+//==============================
 var _drill_LRR_map_setup = Game_Map.prototype.setup;
 Game_Map.prototype.setup = function(mapId) {
 	_drill_LRR_map_setup.call(this, mapId);
 	this.drill_LRR_setupReflection();
 };
+//==============================
+// * 地图备注 - 初始化
+//==============================
 Game_Map.prototype.drill_LRR_setupReflection = function() {
 	
 	// > 启用标记 初始化
@@ -1099,10 +1116,11 @@ Game_Map.prototype.drill_LRR_setupReflection = function() {
 	DrillUp.g_LRR_reflectionMap = "" ;
 
 	$dataMap.note.split(/[\r\n]+/).forEach(function(note) {
-		var text_ = note.split(':');
-		if( text_[0] === "=>图块倒影镜像" ){
-			if( text_.length == 2 ){
-				var temp1 = String(text_[1]);
+		var args = note.split(':');
+		var command = args.shift();
+		if( command == "=>图块倒影镜像" ){
+			if( args.length == 1 ){
+				var temp1 = String(args[0]);
 				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
 					this._drill_LRR_enable = true;
 				}
@@ -1110,9 +1128,9 @@ Game_Map.prototype.drill_LRR_setupReflection = function() {
 					this._drill_LRR_enable = false;
 				}
 			}
-			if( text_.length == 3 ){
-				var temp1 = String(text_[1]);
-				var temp2 = String(text_[2]);
+			if( args.length == 2 ){
+				var temp1 = String(args[0]);
+				var temp2 = String(args[1]);
 				if( temp1 === "毛玻璃效果"){
 					if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
 						this._drill_LRR_blurEnable = true;
@@ -1123,58 +1141,62 @@ Game_Map.prototype.drill_LRR_setupReflection = function() {
 				}
 			}
 		}
-		if( text_[0] === "=>镜面" || text_[0] === "=>图块倒影镜面" ){
-			if( text_.length == 2 ){
-				var temp1 = String(text_[1]);
+		if( command == "=>镜面" || command == "=>图块倒影镜面" ){
+			if( args.length == 1 ){
+				var temp1 = String(args[0]);
 				if( temp1.indexOf("镜面[") != -1 ){
 					temp1 = temp1.replace("镜面[","");
 					temp1 = temp1.replace("]","");
 					DrillUp.g_LRR_reflectionMap = DrillUp.g_LRR_mirror[ Number(temp1)-1 ];
 				}else{
-					DrillUp.g_LRR_reflectionMap = text_[1] || "";
+					DrillUp.g_LRR_reflectionMap = temp1 || "";
 				}
 			}
 		}
 		
 		/*-----------------旧备注------------------*/
-		if( text_[0] === "=>启用图块倒影镜像"){
+		if( command == "=>启用图块倒影镜像"){
 			this._drill_LRR_enable = true;
 		}
-		if( text_[0] === "=>禁用图块倒影镜像"){
+		if( command == "=>禁用图块倒影镜像"){
 			this._drill_LRR_enable = false;
 		}
 	},this);
 };
 
 
+
 //=============================================================================
-// ** 物体
+// ** ☆物体的属性
+//
+//			说明：	> 此模块专门定义 物体的属性。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 物体 - 初始化
+// * 物体的属性 - 初始化
 //==============================
 var _drill_LRR_initMembers = Game_CharacterBase.prototype.initMembers;
 Game_CharacterBase.prototype.initMembers = function() {
     _drill_LRR_initMembers.call(this);
-	this._drill_LRR_isReflect = true;		//反射标记
-	this._drill_LRR_isOpacitySync = true;	//镜像同步标记
+	this._drill_LRR_isReflect = true;			//反射标记
+	this._drill_LRR_isOpacitySync = true;		//镜像同步标记
 };
 //==============================
-// * 获取 - 是否反射
+// * 物体的属性 - 是否反射
 //==============================
 Game_CharacterBase.prototype.drill_LRR_isReflect = function() {
-	return this._drill_LRR_isReflect;
+	return this._drill_LRR_isReflect == true;
 };
 //==============================
-// * 获取 - 是否镜像同步
+// * 物体的属性 - 是否镜像同步
 //==============================
 Game_CharacterBase.prototype.drill_LRR_isOpacitySync = function() {
-	return this._drill_LRR_isOpacitySync;
+	return this._drill_LRR_isOpacitySync == true;
 };
 //==============================
-// * 物体 - 偏移补正值X（继承接口）
+// * 物体的属性 - 偏移补正值X（继承接口）
 //
-//			说明：	此函数用于 镜像、黑影 的位置偏移补正值。可被其他插件继承累加。
+//			说明：	> 此函数用于 镜像、黑影 的位置偏移补正值。可被其他插件继承累加。
 //==============================
 var _drill_LRR_reverseOffsetX = Game_CharacterBase.prototype.drill_reverseOffsetX;
 Game_CharacterBase.prototype.drill_reverseOffsetX = function(){
@@ -1185,9 +1207,9 @@ Game_CharacterBase.prototype.drill_reverseOffsetX = function(){
 	return xx;
 }
 //==============================
-// * 物体 - 偏移补正值Y（继承接口）
+// * 物体的属性 - 偏移补正值Y（继承接口）
 //
-//			说明：	此函数用于 镜像、黑影 的位置偏移补正值。可被其他插件继承累加。
+//			说明：	> 此函数用于 镜像、黑影 的位置偏移补正值。可被其他插件继承累加。
 //==============================
 var _drill_LRR_reverseOffsetY = Game_CharacterBase.prototype.drill_reverseOffsetY;
 Game_CharacterBase.prototype.drill_reverseOffsetY = function(){
@@ -1200,10 +1222,13 @@ Game_CharacterBase.prototype.drill_reverseOffsetY = function(){
 
 
 //=============================================================================
-// ** 地图图层
+// ** ☆贴图控制
+//
+//			说明：	> 此模块专门控制 贴图 的创建与销毁。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 地图图层 - 创建
+// * 贴图控制 - 创建图层时
 //==============================
 var _drill_LRR_createTilemap = Spriteset_Map.prototype.createTilemap;
 Spriteset_Map.prototype.createTilemap = function() {
@@ -1211,17 +1236,22 @@ Spriteset_Map.prototype.createTilemap = function() {
 	this.drill_LRR_createReflect();
 };
 //==============================
-// * 创建 - 建立镜像（Tilemap层）
+// * 贴图控制 - 创建镜像（Tilemap层）
 //==============================
 Spriteset_Map.prototype.drill_LRR_createReflect = function() {
-	if($gameMap._drill_LRR_enable != true){ return; }
+	if( $gameMap._drill_LRR_enable != true ){ return; }
 	
-	// > 建立贴图
+	// > 遮罩底层开关【系统 - rmmv核心漏洞修复】
+	//		（手动设置为false关闭，才不执行）
+	if( $gameSystem._drill_RCF_maskEnabled == false ){ return; }
+	
+	
+	// > 建立贴图（原代容器 的镜像）
 	this._drill_LRR_sprites = [];
-	$gameMap.events().forEach(function(event) {					//事件
+	$gameMap.events().forEach(function(event) {							//事件
 		this._drill_LRR_sprites.push(new Drill_Sprite_LRR(event));
 	}, this);
-	$gamePlayer.followers().reverseEach(function(follower) {	//跟随队员
+	$gamePlayer.followers().reverseEach(function(follower) {			//跟随队员
 		this._drill_LRR_sprites.push(new Drill_Sprite_LRR(follower));
 	}, this);
 	this._drill_LRR_sprites.push(new Drill_Sprite_LRR($gamePlayer));	//玩家
@@ -1233,7 +1263,7 @@ Spriteset_Map.prototype.drill_LRR_createReflect = function() {
 		this._drill_LRR_layer.addChild(this._drill_LRR_sprites[i]);
 	}
 	this._drill_LRR_layer.addChild(this._drill_LRR_layer_mask);		//遮罩原型（如果不addchild，Sprite是不会update的）
-	this._drill_LRR_layer.mask = this._drill_LRR_layer_mask;		//遮罩
+	this._drill_LRR_layer.mask = this._drill_LRR_layer_mask;		//『遮罩赋值』
 	this._drill_LRR_layer.z = 0.50;									//_tilemap z轴：1.事件下方 3.事件相同 5.事件上方 6.影子 7.气泡 8.动画层 9.鼠标目的地
 																	//_tilemap再下面就是父类图块自身了，再下面是Parallax
 	
@@ -1254,7 +1284,7 @@ Spriteset_Map.prototype.drill_LRR_createReflect = function() {
 	this._tilemap.addChild(this._drill_LRR_layer);
 };
 //==============================
-// * 地图图层 - 确认物体数量
+// * 贴图控制 - 确认物体数量
 //==============================
 var _drill_LRR_createCharacters = Spriteset_Map.prototype.createCharacters;
 Spriteset_Map.prototype.createCharacters = function() {
@@ -1262,7 +1292,7 @@ Spriteset_Map.prototype.createCharacters = function() {
 	this._drill_LRR_CharSpriteLen = this._characterSprites.length;	//>记录物体数量
 };
 //==============================
-// * 地图图层 - 帧刷新
+// * 贴图控制 - 帧刷新
 //==============================
 var _drill_LRR_update = Spriteset_Map.prototype.update;
 Spriteset_Map.prototype.update = function() {
@@ -1271,14 +1301,21 @@ Spriteset_Map.prototype.update = function() {
 	this.drill_LRR_updateBlurFilter();			//帧刷新 - 毛玻璃效果控制
 }
 //==============================
-// * 帧刷新 - 新事件的镜像
+// * 贴图控制 - 帧刷新 - 新事件的镜像
 //==============================
 Spriteset_Map.prototype.drill_LRR_updateNewEventReflect = function() {
-	if($gameMap._drill_LRR_enable != true){ return; }
+	if( $gameMap._drill_LRR_enable != true ){ return; }
 	
+	// > 遮罩底层开关【系统 - rmmv核心漏洞修复】
+	//		（手动设置为false关闭，才不执行）
+	if( $gameSystem._drill_RCF_maskEnabled == false ){ return; }
+	
+	
+	// > 建立贴图（子代容器 的镜像）
 	if( this._characterSprites.length > this._drill_LRR_CharSpriteLen){
-		for(var i = this._drill_LRR_CharSpriteLen; i<this._characterSprites.length; i++ ){
-			var temp_sprite = new Drill_Sprite_LRR(this._characterSprites[i]._character);
+		for(var i = this._drill_LRR_CharSpriteLen; i < this._characterSprites.length; i++ ){
+			var temp_character = this._characterSprites[i]._character;
+			var temp_sprite = new Drill_Sprite_LRR(temp_character);
 			this._drill_LRR_sprites.push(temp_sprite);
 			this._drill_LRR_layer.addChild(temp_sprite);
 		}
@@ -1286,7 +1323,9 @@ Spriteset_Map.prototype.drill_LRR_updateNewEventReflect = function() {
 	}
 }
 //==============================
-// * 镜像 - 删除镜像（接口）
+// * 贴图控制 - 删除镜像（开放函数）
+//
+//			说明：	> 该函数在 事件管理核心插件 中，删除事件时会被调用到。
 //==============================
 Spriteset_Map.prototype.drill_LRR_deleteEventReflect = function( e_id ){
 	if( this._drill_LRR_sprites == undefined ){ return; }	//（如果地图禁用镜像，连此数组都不会存在）
@@ -1309,11 +1348,33 @@ Spriteset_Map.prototype.drill_LRR_deleteEventReflect = function( e_id ){
 	}
 }
 
+
 //=============================================================================
-// ** 毛玻璃效果
+// ** ☆毛玻璃效果
+//
+//			说明：	> 此模块专门控制 毛玻璃效果 。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 帧刷新 - 毛玻璃效果控制
+// * 毛玻璃效果 - 获取 模糊滤镜
+//==============================
+Spriteset_Map.prototype.drill_LRR_getBlurFilter = function() {
+	
+	// > 已创建滤镜，直接返回
+	if( this._drill_LRR_blurFilter != undefined ){
+		return this._drill_LRR_blurFilter;
+	}
+	
+	// > 滤镜为空，执行创建
+	var temp_filter = new PIXI.filters.BlurFilter();
+	temp_filter.blur = DrillUp.g_LRR_blurValue;
+	temp_filter.quality = 1;
+	this._drill_LRR_blurFilter = temp_filter;
+	
+	return this._drill_LRR_blurFilter;
+}
+//==============================
+// * 毛玻璃效果 - 帧刷新
 //==============================
 Spriteset_Map.prototype.drill_LRR_updateBlurFilter = function() {
 	if( this._drill_LRR_layer == undefined ){ return; }
@@ -1330,31 +1391,19 @@ Spriteset_Map.prototype.drill_LRR_updateBlurFilter = function() {
 		this._drill_LRR_layer.filters = [ this._drill_LRR_cf ];
 	}
 }
-//==============================
-// * 地图图层 - 获取模糊滤镜
-//==============================
-Spriteset_Map.prototype.drill_LRR_getBlurFilter = function() {
-	
-	// > 有则直接返回
-	if( this._drill_LRR_blurFilter ){
-		return this._drill_LRR_blurFilter;
-	}
-	
-	// > 没有则创建
-	var bf = new PIXI.filters.BlurFilter();
-	bf.blur = DrillUp.g_LRR_blurValue;
-	bf.quality = 1;
-	this._drill_LRR_blurFilter = bf;
-	return bf;
-}
 
 
 //=============================================================================
 // ** 镜像贴图【Drill_Sprite_LRR】
-//
-//			主功能：	作为镜像的贴图。
-//			说明：		此贴图继承于 Sprite_Character 事件贴图，
-//						后面装饰事件贴图的所有插件，都要考虑可能对镜像造成的影响。
+// **
+// **		作用域：	地图界面
+// **		主功能：	> 定义一个物体镜像的贴图。
+// **		子功能：	->贴图
+// **						->继承于 Sprite_Character 事件贴图
+// **						->兼容设置
+// **
+// **		说明：		> 后面装饰事件贴图的所有插件，都要考虑可能对镜像造成的影响。
+// **		代码：		> 该贴图用法特殊，不遵循常规贴图规则。
 //=============================================================================
 //==============================
 // * 镜像贴图 - 定义
@@ -1481,10 +1530,14 @@ SceneManager.initialize = function() {
 
 //=============================================================================
 // ** 地图图块遮罩【Drill_Sprite_LRR_Mask】
-//
-//			主功能：	充当所有镜像的底层镜面。
-//			说明：		由于是mask，所以只能用sprite类对象。
-// 			代码：		该贴图用法特殊，不遵循一般规则。
+// **
+// **		作用域：	地图界面
+// **		主功能：	> 定义一个镜面，作为所有镜像的动态遮罩板。
+// **		子功能：	->贴图
+// **						->图块自适应镜面
+// **
+// **		说明：		> 由于是mask，所以只能用sprite类对象。
+// **		代码：		> 该贴图用法特殊，不遵循常规贴图规则。
 //=============================================================================
 //==============================
 // * 地图图块遮罩 - 定义
@@ -1514,7 +1567,7 @@ Drill_Sprite_LRR_Mask.prototype.drill_LRR_drawBitmap = function() {
 	
 	// > 配置的镜面
 	if( DrillUp.g_LRR_reflectionMap != "" ){
-		this._drill_src_bitmap = ImageManager.load_MapReflection(DrillUp.g_LRR_reflectionMap);
+		this._drill_src_bitmap = ImageManager.loadBitmap( "img/Map__reflection/", DrillUp.g_LRR_reflectionMap, 0, true);
 		return;
 	}
 	

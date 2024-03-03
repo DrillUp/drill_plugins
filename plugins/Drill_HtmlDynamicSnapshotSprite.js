@@ -2826,7 +2826,8 @@ Drill_HDSS_Sprite.prototype.drill_sprite_initAttr = function(){
 	if( data['src_img_mask'] != "" ){
 		var temp_mask = new Sprite(); 
 		temp_mask.bitmap = ImageManager.loadBitmap( data['src_img_file'], data['src_img_mask'], 0, true );
-		this._drill_layerSprite.mask = temp_mask;
+		this._drill_layerSprite.addChild(temp_mask);
+		this._drill_layerSprite.mask = temp_mask;		//『遮罩赋值』
 	}
 	
 	this._drill_layerSprite.addChild( this._drill_childCircleSprite );

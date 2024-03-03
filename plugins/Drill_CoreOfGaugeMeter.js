@@ -2910,8 +2910,8 @@ Drill_COGM_MeterSprite.prototype.drill_delayingInitFilling = function() {
 	filling_data['delay'] = data['filling_delay'];
 	
 	var temp_mask = new Drill_COGM_MeterSpriteMask( filling_data );
-	this.mask = temp_mask;
 	this.addChild(temp_mask);
+	this.mask = temp_mask;		//『遮罩赋值』
 	this._drill_filling_mask = temp_mask;
 }
 //==============================

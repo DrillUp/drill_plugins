@@ -3075,7 +3075,7 @@ Scene_Base.prototype.drill_PDMB_updatePictureSprite = function(){
 		// > 数据变化时，只执行一次遮罩切换
 		if( picture._drill_PDMB_maskBind == "图片动态遮罩板B" ){
 			temp_sprite._drill_PDMB_maskSprite = this.drill_PDMB_getMaskSprite();
-			temp_sprite.mask = temp_sprite._drill_PDMB_maskSprite;
+			temp_sprite.mask = temp_sprite._drill_PDMB_maskSprite;		//『遮罩赋值』
 		}
 		if( picture._drill_PDMB_maskBind == null ){
 			temp_sprite.mask = null;

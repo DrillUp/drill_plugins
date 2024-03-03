@@ -1614,6 +1614,8 @@ Drill_XSSD_Window.prototype.drill_updatePosition = function() {
 
 //==============================
 // * C窗口皮肤 - 初始化对象
+//
+//			说明：	> 此函数只在初始化时执行一次，不要执行多了。
 //==============================
 Drill_XSSD_Window.prototype.drill_initSkin = function() {
 	
@@ -1628,14 +1630,14 @@ Drill_XSSD_Window.prototype.drill_initSkin = function() {
 	data['window_pic_src'] = DrillUp.g_XSSD_layout_pic_src;
 	data['window_pic_x'] = DrillUp.g_XSSD_layout_pic_x;
 	data['window_pic_y'] = DrillUp.g_XSSD_layout_pic_y;
-	this.drill_resetSkinData( data );
+	this.drill_resetData_Skin( data );
 }
 //==============================
 // * C窗口皮肤 - 重设数据
 //
-//			说明：	data对象中的参数【可以缺项】。
+//			说明：	> data对象中的参数【可以缺项】。
 //==============================
-Drill_XSSD_Window.prototype.drill_resetSkinData = function( data ){
+Drill_XSSD_Window.prototype.drill_resetData_Skin = function( data ){
 	
 	// > 默认值
 	if( data['window_type'] == undefined ){ data['window_type'] = "默认窗口皮肤" };		//布局模式（默认窗口皮肤/自定义窗口皮肤/自定义背景图片/黑底背景）

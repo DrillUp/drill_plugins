@@ -794,6 +794,12 @@
 		return "【" + DrillUp.g_TSc_PluginTip_curName + "】\n你未配置 按钮组核心样式 "+ style_id +" 参数，请及时配置。";
 	};
 	//==============================
+	// * 提示信息 - 报错 - 缺少配置
+	//==============================
+	DrillUp.drill_TSc_getPluginTip_NoSupportData_src = function(){
+		return "【" + DrillUp.g_TSc_PluginTip_curName + "】\n你未配置 标题选项按钮组 > 默认按钮贴图列表，需要至少一个默认按钮贴图（全透明的图片也行）。因为鼠标需要依据此贴图的大小作为接触范围来切换选项。";
+	};
+	//==============================
 	// * 提示信息 - 报错 - 兼容冲突
 	//==============================
 	DrillUp.drill_TSc_getPluginTip_CompatibilityOther = function(){
@@ -856,6 +862,12 @@
 			data['btn_src_default_tank'] = JSON.parse( dataFrom["默认按钮贴图列表"] );
 		}else{
 			data['btn_src_default_tank'] = [];
+		}
+		
+		// > 按钮组校验
+		if( DrillUp.g_TSc_command_mode == "按钮组模式" &&
+			data['btn_src_default_tank'].length == 0 ){
+			alert( DrillUp.drill_TSc_getPluginTip_NoSupportData_src() );
 		}
 		
 		data['active_enableMouseOk'] = true;	//（鼠标ok点击 开启）

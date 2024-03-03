@@ -3920,23 +3920,23 @@ Drill_ACi_Sprite.prototype.drill_sprite_updateHalf = function() {
 		
 		// > 创建遮罩
 		if( this._drill_ACi_maskSprite == undefined ){
-			var temp_sprite = new Sprite();
-			temp_sprite.bitmap = new Bitmap( bitmap.width, Math.ceil(bitmap.height*0.5) );
-			temp_sprite.bitmap.fillAll("#ffffff");
+			var temp_mask = new Sprite();
+			temp_mask.bitmap = new Bitmap( bitmap.width, Math.ceil(bitmap.height*0.5) );
+			temp_mask.bitmap.fillAll("#ffffff");
 			
 			// > 半图层 - 原贴图 的遮罩
-			temp_sprite.anchor.x = 0.5;
-			temp_sprite.anchor.y = 0;
+			temp_mask.anchor.x = 0.5;
+			temp_mask.anchor.y = 0;
 			
 			// > 半图层 - 另一半贴图 的遮罩
 			if( this._drill_ACi_isOtherHalf == true ){
-				temp_sprite.anchor.x = 0.5;
-				temp_sprite.anchor.y = 1;
+				temp_mask.anchor.x = 0.5;
+				temp_mask.anchor.y = 1;
 			}
 			
-			this._drill_layerSprite.addChild( temp_sprite );
-			this._drill_layerSprite.mask = temp_sprite;
-			this._drill_ACi_maskSprite = temp_sprite;
+			this._drill_layerSprite.addChild( temp_mask );
+			this._drill_layerSprite.mask = temp_mask;		//『遮罩赋值』
+			this._drill_ACi_maskSprite = temp_mask;
 		}
 	}
 }

@@ -1970,7 +1970,7 @@ Scene_MenuBase.prototype.drill_MPa_create = function() {
 				if( temp_data['src_img_mask'] != "" ){
 					var temp_mask = new Sprite(ImageManager.loadBitmap( temp_data['src_img_file'], temp_data['src_img_mask'], 0, true ));
 					temp_secSprite.addChild(temp_mask);
-					temp_secSprite.mask = temp_mask;
+					temp_secSprite.mask = temp_mask;		//『遮罩赋值』
 				}
 			}
 			
@@ -1982,7 +1982,7 @@ Scene_MenuBase.prototype.drill_MPa_create = function() {
 			if( temp_data['src_img_mask'] != "" ){
 				var temp_mask = new Sprite( ImageManager.loadBitmap( temp_data['src_img_file'], temp_data['src_img_mask'], 0, true ) );
 				temp_sprite.addChild(temp_mask);
-				temp_sprite.mask = temp_mask;
+				temp_sprite.mask = temp_mask;		//『遮罩赋值』
 			}
 			
 		}
@@ -2017,7 +2017,7 @@ Scene_MenuBase.prototype.drill_MPa_create = function() {
 			if( temp_data['src_img_mask'] != "" ){
 				var temp_mask = new Sprite(ImageManager.loadBitmap( temp_data['src_img_file'], temp_data['src_img_mask'], 0, true ));
 				temp_secSprite.addChild(temp_mask);
-				temp_secSprite.mask = temp_mask;
+				temp_secSprite.mask = temp_mask;		//『遮罩赋值』
 			}
 		}
 		
@@ -2029,7 +2029,7 @@ Scene_MenuBase.prototype.drill_MPa_create = function() {
 		if( temp_data['src_img_mask'] != "" ){
 			var temp_mask = new Sprite( ImageManager.loadBitmap( temp_data['src_img_file'], temp_data['src_img_mask'], 0, true ) );
 			temp_sprite.addChild(temp_mask);
-			temp_sprite.mask = temp_mask;
+			temp_sprite.mask = temp_mask;		//『遮罩赋值』
 		}
 		
 	}

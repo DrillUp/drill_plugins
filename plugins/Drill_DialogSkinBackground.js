@@ -976,12 +976,13 @@ Drill_DSB_DecorationBackground.prototype.drill_DSB_updateSpriteInit = function()
 	if( data['mask_mode'] == "关闭" ){ return; }
 	
 	// > 动态遮罩贴图（直接游戏大小，这样就不需要改变遮罩大小了）
-	this._drill_mask = new Drill_CODM_MaskSprite( Graphics.boxWidth, Graphics.boxHeight );
+	var temp_mask = new Drill_CODM_MaskSprite( Graphics.boxWidth, Graphics.boxHeight );
 	if( data['mask_mode'] == "开启反向遮罩" ){
-		this._drill_mask.drill_CODM_setConvert( true );
+		temp_mask.drill_CODM_setConvert( true );
 	}
-	this.addChild( this._drill_mask );
-	this.mask = this._drill_mask;
+	this.addChild( temp_mask );
+	this.mask = temp_mask;			//『遮罩赋值』
+	this._drill_mask = temp_mask;
 	
 	// > 鼠标透视镜
 	var temp_sprite = new Sprite();
@@ -990,6 +991,7 @@ Drill_DSB_DecorationBackground.prototype.drill_DSB_updateSpriteInit = function()
 	temp_sprite.y = -1 * Graphics.boxHeight;
 	temp_sprite.anchor.x = 0.5;
 	temp_sprite.anchor.y = 0.5;
+	
 	this._drill_mouseSprite = temp_sprite;
 	this._drill_mask.drill_CODM_addMaskChild( temp_sprite );
 }

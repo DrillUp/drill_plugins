@@ -271,7 +271,7 @@
 //		★工作类型		持续执行
 //		★时间复杂度		o(n)*o(贴图处理)	每帧
 //		★性能测试因素	各个管理层跑一圈
-//		★性能测试消耗	全创建（44.70ms） 自动创建（10.55ms）
+//		★性能测试消耗	24.5ms（drill_controller_update）
 //		★最坏情况		镜头内出现大量含有窗口的事件，并且随时都在更换文字。
 //		★备注			1.我不太相信这个消耗那么少，很可能计算量都转移到了贴图处理上。
 //						2.不确定是否优化成功了，不过消耗量的确是降了。
@@ -581,6 +581,8 @@ Game_Map.prototype.drill_ET_isEventExist = function( e_id ){
 //=============================================================================
 //==============================
 // * 事件注释 - 初始化绑定
+//
+//			说明：	> 注释与当前事件页有关，不一定跨事件页。
 //==============================
 var _drill_ET_c_setupPageSettings = Game_Event.prototype.setupPageSettings;
 Game_Event.prototype.setupPageSettings = function() {
@@ -1535,21 +1537,25 @@ Drill_ET_Controller.prototype.drill_controller_updateAttr_Visible = function(){
 	// > 控制器隐藏
 	if( data['visible'] == false ){
 		this._drill_visible = false;
+		return;
 	}
 	
 	// > 事件被删除时
 	if( ev._erased == true ){
 		this._drill_visible = false;
+		return;
 	}
 	
 	// > 事件透明时
 	if( ev._transparent == true ){
 		this._drill_visible = false;
+		return;
 	}
 	
 	// > B窗口内容 - 空文本时
 	if( this._drill_curText == "" ){
 		this._drill_visible = false;
+		return;
 	}
 	
 	this._drill_visible = true;

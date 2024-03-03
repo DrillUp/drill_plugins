@@ -855,8 +855,8 @@ Scene_Map.prototype.drill_CODM_updateDebugCreate = function() {
 	// > 贴图1
 	var layer_sprite_1 = new Sprite();
 	layer_sprite_1.bitmap = ImageManager.loadBattleback1("草地");
-	layer_sprite_1.mask = temp_mask_1;
 	layer_sprite_1.addChild( temp_mask_1 );
+	layer_sprite_1.mask = temp_mask_1;		//『遮罩赋值』
 	this.addChild(layer_sprite_1);
 	this._drill_CODM_layerSprite_1 = layer_sprite_1;
 	
@@ -868,8 +868,8 @@ Scene_Map.prototype.drill_CODM_updateDebugCreate = function() {
 	// > 贴图2
 	var layer_sprite_2 = new Sprite();
 	layer_sprite_2.bitmap = ImageManager.loadBattleback1("雪地");
-	layer_sprite_2.mask = temp_mask_2;
 	layer_sprite_2.addChild( temp_mask_2 );
+	layer_sprite_2.mask = temp_mask_2;		//『遮罩赋值』
 	this.addChild(layer_sprite_2);
 	this._drill_CODM_layerSprite_2 = layer_sprite_2;
 	
@@ -1985,10 +1985,12 @@ Drill_CODM_PerspectiveMarkerContainer.prototype.drill_CODM_getEmptyId = function
 // ** ☆核心漏洞修复
 //=============================================================================
 //==============================
-// * 核心漏洞修复 - 屏蔽根据版本重刷地图
+// * 核心漏洞修复 - 『屏蔽根据版本重刷地图』
 //
-//			说明：	此功能会刷掉旧存档的存储数据，因为版本不一样会强制重进地图。
-//					而这样做只是 刷新旧存档的当前地图而已，没任何好处。
+//			说明：	> 此功能会刷掉旧存档的存储数据，因为版本不一样会强制重进地图。
+//					  而这样做只是 刷新旧存档的当前地图而已，没任何好处。
+//					> 屏蔽后会有一些小bug（如在编辑器删除事件后读取旧存档会报错），
+//					  这些bug统一在 存档管理器插件 中修复。
 //==============================
 Scene_Load.prototype.reloadMapIfUpdated = function() {
 	// （禁止重刷）

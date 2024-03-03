@@ -1192,7 +1192,7 @@ Scene_MenuBase.prototype.drill_MCi_create = function() {
 			if( temp_sprite_data['src_img_mask'] != "" ){
 				var temp_mask = new Sprite( ImageManager.loadBitmap( temp_sprite_data['src_img_file'], temp_sprite_data['src_img_mask'], 0, true ));
 				temp_layer.addChild(temp_mask);
-				temp_layer.mask = temp_mask;
+				temp_layer.mask = temp_mask;		//『遮罩赋值』
 			}
 			
 			this.drill_MCi_layerAddSprite( temp_layer, temp_sprite_data['menu_index'] );

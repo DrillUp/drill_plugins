@@ -1219,7 +1219,7 @@ Sprite.prototype.drill_COF_initRainbowBoardInit = function() {
 	temp_mask.setBlendColor([255, 255, 255, 255]);
 	temp_sprite._drill_mask = temp_mask;
 	temp_sprite.addChild(temp_mask); 
-	temp_sprite.mask = temp_mask;
+	temp_sprite.mask = temp_mask;		//『遮罩赋值』
 	
 	// > 滤镜板初始化
 	rB.inited = true;

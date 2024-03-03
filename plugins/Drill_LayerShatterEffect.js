@@ -784,7 +784,9 @@ Scene_Map.prototype.createAllWindows = function() {
 var _drill_LSE_sTank_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {
 	_drill_LSE_sTank_update.call(this);
-	$gameTemp._drill_LSE_controller.drill_COSE_update();			//（不要忘了，数据必须手动帧刷新）
+	if( $gameTemp._drill_LSE_controller != undefined ){
+		$gameTemp._drill_LSE_controller.drill_COSE_update();			//（不要忘了，数据必须手动帧刷新）
+	}
 };
 //==============================
 // * 粉碎贴图 - 销毁
@@ -792,8 +794,10 @@ Scene_Map.prototype.update = function() {
 var _drill_LSE_sTank_terminate = Scene_Map.prototype.terminate;
 Scene_Map.prototype.terminate = function() {
 	_drill_LSE_sTank_terminate.call(this);
-	$gameTemp._drill_LSE_controlled_sprite.drill_COSE_destroy();
-	$gameTemp._drill_LSE_controlled_sprite = null;
+	if( $gameTemp._drill_LSE_controlled_sprite != undefined ){
+		$gameTemp._drill_LSE_controlled_sprite.drill_COSE_destroy();
+		$gameTemp._drill_LSE_controlled_sprite = null;
+	}
 	$gameTemp._drill_LSE_controller = null;
 };
 

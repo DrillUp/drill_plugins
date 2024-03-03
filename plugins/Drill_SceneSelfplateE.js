@@ -887,9 +887,8 @@ Scene_Drill_SSpE.prototype.drill_createLayout = function() {
 Scene_Drill_SSpE.prototype.drill_createContextMask = function() {
 	this._drill_contextMask = new Sprite( ImageManager.load_MenuSelfDef(DrillUp.g_SSpE_contextMask) );
 	this._drill_contextMask_needResize = true;
-	this._drill_contextMask_resized = false;
 	this._drill_field.addChild(this._drill_contextMask);	
-	this._drill_field.mask = this._drill_contextMask;	
+	this._drill_field.mask = this._drill_contextMask;			//『遮罩赋值』
 };
 //==============================
 // * 创建 - 建立滚轴

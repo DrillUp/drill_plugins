@@ -95,7 +95,6 @@
  * 插件指令：>动画序列核心DEBUG : 上一个创建的动画序列 : 显示全部状态元名称
  * 插件指令：>动画序列核心DEBUG : 上一个创建的动画序列 : 显示全部状态节点名称
  * 插件指令：>动画序列核心DEBUG : 上一个创建的动画序列 : 显示全部动作元名称
- * 插件指令：>动画序列核心DEBUG : 上一个创建的动画序列 : 显示符合注解的状态元名[@向上移动]
  * 
  * 1.注意，这里是动画核心，单独使用没有效果。插件指令只是辅助调试用。
  *   你需要去 子插件 看具体功能。
@@ -2266,13 +2265,6 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					var name_list = main_controller.drill_controllerMain_getActData_AllName();
 					alert( JSON.stringify(name_list) );
 				}
-				if( temp2.indexOf("显示符合注解的状态元名[") != -1 ){
-					temp2 = temp2.replace("显示符合注解的状态元名[","");
-					temp2 = temp2.replace("]","");
-					//main_controller.drill_controllerMain_setSimpleStateNodeByAnnotation( temp2 );
-					//var seq = main_controller.drill_COAS_getCurrentStateSeqName();
-					//alert( JSON.stringify(seq) );
-				}
 			}
 		}
 	}
@@ -2349,10 +2341,12 @@ Game_Temp.prototype.drill_COAS_preloadInit = function() {
 // ** ☆核心漏洞修复
 //=============================================================================
 //==============================
-// * 核心漏洞修复 - 屏蔽根据版本重刷地图
+// * 核心漏洞修复 - 『屏蔽根据版本重刷地图』
 //
 //			说明：	> 此功能会刷掉旧存档的存储数据，因为版本不一样会强制重进地图。
 //					  而这样做只是 刷新旧存档的当前地图而已，没任何好处。
+//					> 屏蔽后会有一些小bug（如在编辑器删除事件后读取旧存档会报错），
+//					  这些bug统一在 存档管理器插件 中修复。
 //==============================
 Scene_Load.prototype.reloadMapIfUpdated = function() {
 	// （禁止重刷）

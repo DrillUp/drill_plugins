@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        管理器 - 存档管理器
+ * @plugindesc [v1.4]        管理器 - 存档管理器
  * @author Drill_up
  * 
  * 
@@ -32,6 +32,9 @@
  *      所以这里统一为：保存存档，载入存档。
  *   (2.你可以使用插件指令手动保存、载入。
  *      并且可以获取当前存档ID以及存档数量。
+ * 存档问题修复：
+ *   (1.该插件修复了 在编辑器中删除事件后读取旧存档出错 的bug。
+ *      添加该插件即可修复。
  * 设计：
  *   (1.由于该插件提供立即保存、立即载入功能，
  *      你可以手动设计游戏中特殊战斗失败后，自动回档重来的功能。
@@ -119,6 +122,8 @@
  * 修改了插件分类。
  * [v1.3]
  * 添加了删除存档功能。
+ * [v1.4]
+ * 修复了 在编辑器中删除事件后读取旧存档出错 的bug。
  * 
  * 
  * 
@@ -159,11 +164,18 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			存档管理器：
-//				->手动存档
-//				->自动存档
-//				->存档校验
-//		
+//			->☆提示信息
+//			->☆静态数据
+//			->☆插件指令
+//
+//			->☆存档管理器
+//			->☆核心漏洞修复
+//
+//			->☆自动存档
+//			->☆旧存档校验
+//			->☆存档转移校验
+//			
+//			
 //		★家谱：
 //			无
 //		
@@ -184,7 +196,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -195,7 +207,7 @@
 	
 	
 //=============================================================================
-// ** 静态数据
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_GlobalStorageManager = true;
@@ -209,11 +221,8 @@
 	
 	
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
-//==============================
-// * 插件指令 - 指令
-//==============================
 var _drill_GSM_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_GSM_pluginCommand.call(this, command, args);
@@ -296,8 +305,12 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 }
 
+
 //=============================================================================
-// ** 存档管理器
+// ** ☆存档管理器
+//
+//			说明：	> 此模块专门控制 存档 的保存与载入。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 存档管理器 - 执行保存
@@ -313,8 +326,12 @@ DataManager.drill_GSM_doSave = function( save_file_id ){
 DataManager.drill_GSM_doLoad = function( save_file_id ){
 	var success = DataManager.loadGame( save_file_id );
 	if( success ){
-        $gamePlayer.reserveTransfer($gameMap.mapId(), $gamePlayer.x, $gamePlayer.y);
-        $gamePlayer.requestMapReload();
+        
+		$gamePlayer.reserveTransfer($gameMap.mapId(), $gamePlayer.x, $gamePlayer.y);
+        //$gamePlayer.requestMapReload();	//（相同的地图载入，不要重刷）
+		
+		// > 标记
+		$gameTemp._drill_GSM_isInLoadScene = true;
 	}
 	return success;
 }
@@ -328,7 +345,55 @@ DataManager.drill_GSM_doDelete = function( save_file_id ){
 
 
 //=============================================================================
-// ** 自动存档
+// ** ☆核心漏洞修复
+//
+//			说明：	> 此模块专门修复 存档 的bug。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 核心漏洞修复 - 最后继承
+//==============================
+var _drill_GSM_scene_initialize = SceneManager.initialize;
+SceneManager.initialize = function() {
+	_drill_GSM_scene_initialize.call(this);
+	
+	//==============================
+	// * 核心漏洞修复 - 标记
+	//==============================
+	Scene_Load.prototype.reloadMapIfUpdated = function() {
+		$gameTemp._drill_GSM_isInLoadScene = true;
+	};
+};
+//==============================
+// * 核心漏洞修复 - 读取地图后操作
+//==============================
+var _drill_GSM_onMapLoaded = Scene_Map.prototype.onMapLoaded;
+Scene_Map.prototype.onMapLoaded = function() {
+	
+	// > 检查空事件
+	if( $gameTemp._drill_GSM_isInLoadScene == true ){
+		$gameTemp._drill_GSM_isInLoadScene = undefined;
+		
+		for(var i = 0; i < $gameMap._events.length; i++){
+			var e = $gameMap._events[i];
+			if( e == undefined ){ continue; }
+			if( e.event() == undefined ){
+				$gameMap._events[ i ] = null;	//（由于此处直接与事件数据交互，贴图还没被创建，所以不走 事件管理核心 的销毁流程）
+			}
+		}
+	}
+	
+	// > 原函数
+	_drill_GSM_onMapLoaded.call(this);
+};
+
+
+
+//=============================================================================
+// ** ☆自动存档
+//
+//			说明：	> 此模块提供 自动存档 的功能。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 自动存档 - 场所移动时
@@ -337,21 +402,26 @@ var _drill_GSM_command201 = Game_Interpreter.prototype.command201;
 Game_Interpreter.prototype.command201 = function() {
 	_drill_GSM_command201.call(this);
 	
-	if( $gamePlayer.isTransferring() && DrillUp.g_GSM_autoTransferSave == true ){
-		DataManager.drill_GSM_doSave( DrillUp.g_GSM_autoSaveSlot );
+	if( DrillUp.g_GSM_autoTransferSave == true ){
+		if( $gamePlayer.isTransferring() ){
+			DataManager.drill_GSM_doSave( DrillUp.g_GSM_autoSaveSlot );
+		}
 	}
 };
 
 
 //=============================================================================
-// ** 旧存档识别
+// ** ☆旧存档校验
+//
+//			说明：	> 此模块提供 旧存档校验 的功能。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 校验 - 参数标记
+// * 旧存档校验 - 参数
 //==============================
 DrillUp.g_GSM_isOldSave = false;
 //==============================
-// * 新游戏 - 容器初始化
+// * 旧存档校验 - 初始化（新游戏时）
 //==============================
 var _drill_GSM_createGameObjects2 = DataManager.createGameObjects;
 DataManager.createGameObjects = function() {
@@ -359,7 +429,7 @@ DataManager.createGameObjects = function() {
 	DrillUp.g_GSM_isOldSave = false;		//（刷新标记）
 }
 //==============================
-// * 存档文件 - 保存存档 - 数据获取
+// * 旧存档校验 - 保存存档时 - 数据获取
 //==============================
 var _drill_GSM_makeSaveContents2 = DataManager.makeSaveContents;
 DataManager.makeSaveContents = function() {
@@ -368,7 +438,7 @@ DataManager.makeSaveContents = function() {
     return contents;
 };
 //==============================
-// * 存档文件 - 载入存档 - 数据赋值
+// * 旧存档校验 - 载入存档时 - 数据赋值
 //==============================
 var _drill_GSM_extractSaveContents2 = DataManager.extractSaveContents;
 DataManager.extractSaveContents = function( contents ){
@@ -388,14 +458,17 @@ DataManager.extractSaveContents = function( contents ){
 
 
 //=============================================================================
-// ** 存档转移校验
+// ** ☆存档转移校验
+//
+//			说明：	> 此模块提供 存档转移校验 的功能。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 校验 - 参数标记
+// * 存档转移校验 - 参数
 //==============================
 DrillUp.g_GSM_isSameSave = true;
 //==============================
-// * 新游戏 - 容器初始化
+// * 存档转移校验 - 初始化（新游戏时）
 //==============================
 var _drill_GSM_createGameObjects = DataManager.createGameObjects;
 DataManager.createGameObjects = function() {
@@ -403,7 +476,7 @@ DataManager.createGameObjects = function() {
 	DrillUp.g_GSM_isSameSave = true;		//（刷新标记）
 }
 //==============================
-// * 存档文件 - 保存存档 - 数据获取
+// * 存档转移校验 - 保存存档时 - 数据获取
 //==============================
 var _drill_GSM_makeSaveContents = DataManager.makeSaveContents;
 DataManager.makeSaveContents = function() {
@@ -417,18 +490,18 @@ DataManager.makeSaveContents = function() {
     return contents;
 };
 //==============================
-// * 存档文件 - 载入存档 - 数据赋值
+// * 存档转移校验 - 载入存档时 - 数据赋值
 //==============================
 var _drill_GSM_extractSaveContents = DataManager.extractSaveContents;
 DataManager.extractSaveContents = function( contents ){
 	_drill_GSM_extractSaveContents.call( this, contents );
 	
-	// > 比较存档
+	// > 比对存档信息
 	var info = contents._drill_GSM_checkInfo;
 	DrillUp.g_GSM_isSameSave = (info == DataManager.drill_GSM_getInfoData() );
 };
 //==============================
-// * 存档文件 - 获取字符串信息
+// * 存档转移校验 - 获取字符串信息
 //==============================
 DataManager.drill_GSM_getInfoData = function(){
 	

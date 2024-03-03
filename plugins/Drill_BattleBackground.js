@@ -4460,6 +4460,13 @@ Drill_BBa_Sprite.prototype.drill_sprite_updateAttr = function() {
 			this._drill_spriteMove_h
 		);
 	}
+	
+	// > 基于资源切割的框架移动
+	//var hh = this._drill_layerSprite.bitmap.height;
+	//if( hh > 0 ){
+	//	var xx = 100 * Math.sin( this._drill_controller._drill_curTime/2 *Math.PI/180 );
+	//	this._drill_layerSprite.setFrame(xx,0,140,hh);
+	//}
 }
 
 

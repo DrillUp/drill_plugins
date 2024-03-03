@@ -1529,14 +1529,14 @@
  * @parent ---动画过程---
  * @type number
  * @min 0
- * @desc 环绕球将延迟一段时间显现，单位帧。
+ * @desc 粒子将延迟一段时间显现，单位帧。
  * @default 0
  *
  * @param 出现时长
  * @parent ---动画过程---
  * @type number
  * @min 0
- * @desc 环绕球显现的时间，单位帧。
+ * @desc 粒子显现的时间，单位帧。
  * @default 60
  *
  * @param 出现模式
@@ -1554,7 +1554,7 @@
  * @value 普通淡入显现
  * @option 自定义
  * @value 自定义
- * @desc 环绕球显现的模式方法。
+ * @desc 粒子显现的模式方法。
  * @default 横向显现
  *
  * @param 出现-自定义缩放 X
@@ -1579,7 +1579,7 @@
  * @parent ---动画过程---
  * @type number
  * @min 0
- * @desc 环绕球持续的时间，单位帧。
+ * @desc 粒子持续的时间，单位帧。
  * @default 220
  *
  * @param 持续模式
@@ -1614,7 +1614,7 @@
  * @parent ---动画过程---
  * @type number
  * @min 0
- * @desc 环绕球消失的时间。
+ * @desc 粒子消失的时间。
  * @default 30
  *
  * @param 消失模式
@@ -1632,7 +1632,7 @@
  * @value 普通淡出消失
  * @option 自定义
  * @value 自定义
- * @desc 环绕球消失的模式方法。
+ * @desc 粒子消失的模式方法。
  * @default 普通淡出消失
  *
  * @param 消失-自定义缩放 X

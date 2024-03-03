@@ -402,6 +402,8 @@ Game_Map.prototype.drill_XETF_isEventExist = function( e_id ){
 //=============================================================================
 //==============================
 // * 事件注释 - 初始化绑定
+//
+//			说明：	> 注释与当前事件页有关，不一定跨事件页。
 //==============================
 var _drill_XETF_c_setupPage = Game_Event.prototype.setupPage;
 Game_Event.prototype.setupPage = function() {

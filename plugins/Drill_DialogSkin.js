@@ -1104,7 +1104,7 @@ Window_Message.prototype.setBackgroundType = function( type ){
 	
     if( type === 0 ){	// 窗口 类型
 		var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
-		this.drill_DSk_resetSkinData( data );	//刷新窗口皮肤
+		this.drill_DSk_resetData_Skin( data );	//刷新窗口皮肤
 		this.drill_DSk_resetBorder();			//刷新边框皮肤
 	}
 }
@@ -1161,7 +1161,7 @@ Window_Base.prototype.drill_DSk_resetBorder = function(){
 //==============================
 // * 窗口皮肤 - 初始化
 //
-//			说明：	此函数只在初始化时执行一次，不要执行多了。
+//			说明：	> 此函数只在初始化时执行一次，不要执行多了。
 //==============================
 Window_Base.prototype.drill_DSk_initSkin = function() {
 	
@@ -1171,14 +1171,14 @@ Window_Base.prototype.drill_DSk_initSkin = function() {
 	// > 重设数据
 	if( this._drill_DSk_tag == undefined ){ return; }
 	var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
-	this.drill_DSk_resetSkinData( data );
+	this.drill_DSk_resetData_Skin( data );
 }
 //==============================
 // * 窗口皮肤 - 重设数据
 //
-//			说明：	data对象中的参数【可以缺项】。
+//			说明：	> data对象中的参数【可以缺项】。
 //==============================
-Window_Base.prototype.drill_DSk_resetSkinData = function( data ){
+Window_Base.prototype.drill_DSk_resetData_Skin = function( data ){
 	
 	// > 默认值
 	if( data['window_type'] == undefined ){ data['window_type'] = "默认窗口皮肤" };		//布局模式（默认窗口皮肤/自定义窗口皮肤/自定义背景图片/黑底背景）
@@ -1365,7 +1365,7 @@ Window_Gold.prototype.open = function() {
 	
 	if( this._drill_DSk_tag != undefined ){
 		var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
-		this.drill_DSk_resetSkinData( data );	//刷新窗口皮肤
+		this.drill_DSk_resetData_Skin( data );	//刷新窗口皮肤
 		this.drill_DSk_resetBorder();			//刷新边框皮肤
 	}
 }
@@ -1395,7 +1395,7 @@ var _drill_DSk_ChoiceList_start = Window_ChoiceList.prototype.start;
 Window_ChoiceList.prototype.start = function() {
 	_drill_DSk_ChoiceList_start.call(this);
 	var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
-	this.drill_DSk_resetSkinData( data );	//刷新窗口皮肤
+	this.drill_DSk_resetData_Skin( data );	//刷新窗口皮肤
 	this.drill_DSk_resetBorder();			//刷新边框皮肤
 }
 //==============================
@@ -1424,7 +1424,7 @@ var _drill_DSk_NumberInput_start = Window_NumberInput.prototype.start;
 Window_NumberInput.prototype.start = function() {
 	_drill_DSk_NumberInput_start.call(this);
 	var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
-	this.drill_DSk_resetSkinData( data );	//刷新窗口皮肤
+	this.drill_DSk_resetData_Skin( data );	//刷新窗口皮肤
 	this.drill_DSk_resetBorder();			//刷新边框皮肤
 }
 //==============================
@@ -1453,7 +1453,7 @@ var _drill_DSk_EventItem_start = Window_EventItem.prototype.start;
 Window_EventItem.prototype.start = function() {
 	_drill_DSk_EventItem_start.call(this);
 	var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
-	this.drill_DSk_resetSkinData( data );	//刷新窗口皮肤
+	this.drill_DSk_resetData_Skin( data );	//刷新窗口皮肤
 	this.drill_DSk_resetBorder();			//刷新边框皮肤
 }
 //==============================
@@ -1485,7 +1485,7 @@ if( Imported.Drill_DialogNameBox ){
 	var _drill_DSk_DNB_setData = Drill_DNB_NameBoxWindow.prototype.drill_setData;
 	Drill_DNB_NameBoxWindow.prototype.drill_setData = function( text, position_type ){
 		var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
-		this.drill_DSk_resetSkinData( data );	//刷新窗口皮肤
+		this.drill_DSk_resetData_Skin( data );	//刷新窗口皮肤
 		this.drill_DSk_resetBorder();			//刷新边框皮肤
 		return _drill_DSk_DNB_setData.call( this, text, position_type );
 	}
@@ -1518,7 +1518,7 @@ if( Imported.YEP_MessageCore ){
 	var _drill_DSk_yep_NameBox_refresh = Window_NameBox.prototype.refresh;
 	Window_NameBox.prototype.refresh = function( text, position ){
 		var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
-		this.drill_DSk_resetSkinData( data );	//刷新窗口皮肤
+		this.drill_DSk_resetData_Skin( data );	//刷新窗口皮肤
 		this.drill_DSk_resetBorder();			//刷新边框皮肤
 		return _drill_DSk_yep_NameBox_refresh.call( this,text,position );
 	}

@@ -560,6 +560,8 @@ Game_System.prototype.drill_XETT_checkSysData_Private = function() {
 //=============================================================================
 //==============================
 // * 事件注释 - 初始化绑定
+//
+//			说明：	> 注释与当前事件页有关，不一定跨事件页。
 //==============================
 var _drill_XETT_c_setupPageSettings = Game_Event.prototype.setupPageSettings;
 Game_Event.prototype.setupPageSettings = function() {

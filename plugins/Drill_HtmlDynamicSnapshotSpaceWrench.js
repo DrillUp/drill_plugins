@@ -67,13 +67,16 @@
  * 你可以通过插件指令手动修改天窗层动态快照的各个属性：
  * 
  * 插件指令：>动态快照次元斩 : 执行切割 : 样式[1] : 线段[100,100,200,200]
+ * 插件指令：>动态快照次元斩 : 执行切割 : 样式[1] : 线段变量[21,22,23,24]
  * 插件指令：>动态快照次元斩 : 执行切割 : 样式[1] : 随机线段
  * 插件指令：>动态快照次元斩 : 立即清除全部碎片
  * 
  * 1."线段"的四个参数分别指 x1,y1 和 x2,y2 两个点组成的线段，
  *   插件会将此线段进行数学换算，变成一条按照线段方向切过去的次元斩。
  *   x1,y1 为起点，x2,y2 为终点。
- * 2.注意，根据实际测试，切割超过16个以上(5刀左右)的碎片，会变得非常卡顿。
+ * 2."线段变量[21,22,23,24]"是指线段的 x1为 变量21的值，y1为 变量22的值，
+ *    x2为 变量23的值，y2为 变量24的值。
+ * 3.注意，根据实际测试，切割超过16个以上(5刀左右)的碎片，会变得非常卡顿。
  *   建议设计时，使用固定线段进行切割，并尽可能减少交叉切割造成大量碎片。
  * 
  * -----------------------------------------------------------------------------
@@ -106,6 +109,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 添加了插件指令"线段变量"的设置。
  * 
  * 
  * 
@@ -611,8 +616,6 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( type == "执行切割" ){
 				temp1 = temp1.replace("样式[","");
 				temp1 = temp1.replace("]","");
-				temp2 = temp2.replace("线段[","");
-				temp2 = temp2.replace("]","");
 				
 				if( temp2 == "随机线段" ){
 					var data = {};
@@ -624,16 +627,35 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					$gameTemp._drill_HDSSW_createCut = data;
 					return;
 				}
-				
-				var arr = temp2.split(/[,，]/);
-				if( arr.length >= 4 ){
-					var data = {};
-					data['style_id'] = Number(temp1) -1;
-					data['x1'] = Number(arr[0]);
-					data['y1'] = Number(arr[1]);
-					data['x2'] = Number(arr[2]);
-					data['y2'] = Number(arr[3]);
-					$gameTemp._drill_HDSSW_createCut = data;
+				if( temp2.indexOf("线段变量[") != -1 ){
+					temp2 = temp2.replace("线段变量[","");
+					temp2 = temp2.replace("]","");
+					var arr = temp2.split(/[,，]/);
+					if( arr.length >= 4 ){
+						var data = {};
+						data['style_id'] = Number(temp1) -1;
+						data['x1'] = $gameVariables.value( Number(arr[0]) );
+						data['y1'] = $gameVariables.value( Number(arr[1]) );
+						data['x2'] = $gameVariables.value( Number(arr[2]) );
+						data['y2'] = $gameVariables.value( Number(arr[3]) );
+						$gameTemp._drill_HDSSW_createCut = data;
+					}
+					return;
+				}
+				if( temp2.indexOf("线段[") != -1 ){
+					temp2 = temp2.replace("线段[","");
+					temp2 = temp2.replace("]","");
+					var arr = temp2.split(/[,，]/);
+					if( arr.length >= 4 ){
+						var data = {};
+						data['style_id'] = Number(temp1) -1;
+						data['x1'] = Number(arr[0]);
+						data['y1'] = Number(arr[1]);
+						data['x2'] = Number(arr[2]);
+						data['y2'] = Number(arr[3]);
+						$gameTemp._drill_HDSSW_createCut = data;
+					}
+					return;
 				}
 			}
 		}
@@ -1930,7 +1952,7 @@ Drill_HDSSW_Sprite.prototype.drill_sprite_updateMask = function(){
 	this.drill_sprite_drawMaskConvex( bitmap, convex_points );
 	
 	this._drill_maskSprite.bitmap = bitmap;
-	this._drill_layerSprite.mask = this._drill_maskSprite;
+	this._drill_layerSprite.mask = this._drill_maskSprite;		//『遮罩赋值』
 }
 //==============================
 // * 2A遮罩管理 - 绘制遮罩

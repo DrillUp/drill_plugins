@@ -1115,7 +1115,7 @@ Scene_Title.prototype.drill_TBa_create = function() {
 		if( temp_sprite_data['src_img_mask'] != "" ){
 			var temp_mask = new Sprite( ImageManager.loadBitmap( temp_sprite_data['src_img_file'], temp_sprite_data['src_img_mask'], 0, true ) );
 			temp_layer.addChild(temp_mask);
-			temp_layer.mask = temp_mask;
+			temp_layer.mask = temp_mask;		//『遮罩赋值』
 		}
 		
 		if( temp_sprite_data['menu_index'] == 0 ){

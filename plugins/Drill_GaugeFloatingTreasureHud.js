@@ -2337,6 +2337,8 @@ Drill_GFTH_Window.prototype.drill_updateBallistics = function() {
 
 //==============================
 // * C窗口皮肤 - 初始化对象
+//
+//			说明：	> 此函数只在初始化时执行一次，不要执行多了。
 //==============================
 Drill_GFTH_Window.prototype.drill_initSkin = function() {
 	
@@ -2345,14 +2347,14 @@ Drill_GFTH_Window.prototype.drill_initSkin = function() {
 	
 	// > 布局模式
 	var s_data = this._drill_data['s_data'];
-	this.drill_resetSkinData( s_data );
+	this.drill_resetData_Skin( s_data );
 }
 //==============================
 // * C窗口皮肤 - 重设数据
 //
-//			说明：	data对象中的参数【可以缺项】。
+//			说明：	> data对象中的参数【可以缺项】。
 //==============================
-Drill_GFTH_Window.prototype.drill_resetSkinData = function( data ){
+Drill_GFTH_Window.prototype.drill_resetData_Skin = function( data ){
 	
 	// > 默认值
 	if( data['window_type'] == undefined ){ data['window_type'] = "默认窗口皮肤" };		//布局模式（默认窗口皮肤/自定义窗口皮肤/自定义背景图片/黑底背景）

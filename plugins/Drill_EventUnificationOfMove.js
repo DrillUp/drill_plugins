@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        体积 - 一体化 & 移动
+ * @plugindesc [v1.1]        体积 - 一体化 & 移动
  * @author Drill_up
  * 
  * 
@@ -72,7 +72,7 @@
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定
- * 玩家和事件可以通过插件指令设置移动、朝向一体化：
+ * 玩家和事件可以通过插件指令设置移动一体化：
  *
  * 插件指令：>一体化&移动 : 玩家 : 绑定标签 : 标签[大箱子_移动_A]
  * 插件指令：>一体化&移动 : 本事件 : 绑定标签 : 标签[大箱子_移动_A]
@@ -123,6 +123,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 修复了该插件限制玩家移动速度的bug。
  * 
  * 
  * 
@@ -169,7 +171,17 @@
 //			->☆事件注释
 //
 //			->☆物体的属性
-//			->☆一体化朝向容器
+//				->标签
+//					->刷新穿透标签
+//				->速度统一
+//					->设置开关
+//					->获取ID（根据物体）
+//					->获取物体（根据ID）
+//					->保存速度
+//					->还原速度
+//					->修改为指定物体的速度
+//			->☆一体化移动容器
+//
 //			->☆一体化移动控制
 //				->直线移动
 //				->直线整体移动
@@ -496,14 +508,15 @@ Game_Character.prototype.initialize = function(){
 //
 //			说明：	> 这里的数据都要初始化才能用。『节约事件数据存储空间』
 //==============================
-Game_Character.prototype.drill_EUOM_checkKeyData = function(){
+Game_CharacterBase.prototype.drill_EUOM_checkKeyData = function(){
 	if( this._drill_EUOM_keyData != undefined ){ return; }
 	this._drill_EUOM_keyData = {};
-	this._drill_EUOM_keyData['tag'] = "";		//标签（只能绑定一个，因为一个和多个标签，朝向结果都是相同的）
+	this._drill_EUOM_keyData['tag'] = "";		//标签（只能绑定一个，因为一个和多个标签的效果相同）
 	
-	this._drill_EUOM_keyData['keepSameSpeed'] = false;			//速度统一 - 开关
-	this._drill_EUOM_keyData['orgSpeed'] = undefined;			//速度统一 - 记录速度
-	this._drill_EUOM_keyData['unifyingEventId'] = undefined;	//速度统一 - 记录动力源ID
+	this._drill_EUOM_keyData['keepSameSpeed'] = undefined;			//速度统一 - 开关（布尔）
+	this._drill_EUOM_keyData['orgSpeed'] = undefined;				//速度统一 - 保存的速度（数字）
+	this._drill_EUOM_keyData['orgASpeed'] = undefined;				//速度统一 - 保存的精确速度（数字）
+	this._drill_EUOM_keyData['unifyingCharacterId'] = undefined;	//速度统一 - 保存的动力源ID（数字）
 }
 //==============================
 // * 物体的属性 - 标签
@@ -516,6 +529,7 @@ Game_Character.prototype.drill_EUOM_hasTag = function(){
 //==============================
 Game_Character.prototype.drill_EUOM_getTag = function(){
 	if( this._drill_EUOM_keyData == undefined ){ return ""; }
+	if( this._drill_EUOM_keyData['tag'] == undefined ){ return ""; }
 	return this._drill_EUOM_keyData['tag'];
 }
 //==============================
@@ -538,31 +552,24 @@ Game_Character.prototype.drill_EUOM_clearTag = function(){
 	this._drill_EUOM_keyData['tag'] = "";
 }
 //==============================
-// * 物体的属性 - 刷新 穿透标签
-//
-//			说明：	> 此处设置来自插件：Drill_EventThrough 体积-事件穿透关系
+// * 物体的属性 - 标签 - 刷新穿透标签
 //==============================
 Game_Character.prototype.drill_EUOM_ETh_setNewTag = function( new_tag ){
+	
+	// > 穿透标签 - 【体积-事件穿透关系】
 	this.drill_ETh_checkData();
 	
-	// > 去除旧标签
+	// > 穿透标签 - 去除旧标签
 	var org_tag = this.drill_EUOM_getTag();
 	this.drill_ETh_removeTag( "_drill_EUOM_" + org_tag );
 	
-	// > 设置新标签
+	// > 穿透标签 - 设置新标签
 	if( new_tag != "" ){
 		this.drill_ETh_addTag( "_drill_EUOM_" + new_tag );
 	}
 }
 //==============================
-// * 物体的属性 - 设置 速度统一
-//==============================
-Game_Character.prototype.drill_EUOM_setKeepSameSpeed = function( enabled ){
-	this.drill_EUOM_checkKeyData();
-	this._drill_EUOM_keyData['keepSameSpeed'] = enabled;
-}
-//==============================
-// * 物体的属性 - 玩家初始化
+// * 物体的属性 - 标签 - 玩家初始化
 //==============================
 var _drill_EUOM_p_initMembers = Game_Player.prototype.initMembers;
 Game_Player.prototype.initMembers = function(){
@@ -573,11 +580,106 @@ Game_Player.prototype.initMembers = function(){
 	$gameTemp._drill_EUOM_needRestatistics = true;
 }
 
+//==============================
+// * 物体的属性 - 速度统一 - 设置开关
+//==============================
+Game_Character.prototype.drill_EUOM_setKeepSameSpeed = function( enabled ){
+	this.drill_EUOM_checkKeyData();
+	this._drill_EUOM_keyData['keepSameSpeed'] = enabled;
+}
+//==============================
+// * 物体的属性 - 速度统一 - 获取ID（根据物体）
+//==============================
+Game_Map.prototype.drill_EUOM_getIdByCharacter = function( character ){
+	
+	// > 玩家 为-2
+	if( character == $gamePlayer ){ return -2; }
+	
+	// > 事件 为事件id
+	if( character instanceof Game_Event ){ return character._eventId; }
+	
+	return undefined;
+};
+//==============================
+// * 物体的属性 - 速度统一 - 获取物体（根据ID）
+//==============================
+Game_Map.prototype.drill_EUOM_getCharacterById = function( id ){
+	
+	// > 玩家 为-2
+	if( id == -2 ){ return $gamePlayer; }
+	
+	// > 事件 为事件id
+	if( id >= 0 ){ return $gameMap.event( id ); }
+	
+	return undefined;
+};
+//==============================
+// * 物体的属性 - 速度统一 - 保存速度
+//
+//			说明：	> 该函数可在帧刷新中执行，只有在 undefined 的情况时才能保存。
+//==============================
+Game_CharacterBase.prototype.drill_EUOM_saveOrgSpeed = function( unifying_ch_id ){
+	this.drill_EUOM_checkKeyData();
+	
+	if( this._drill_EUOM_keyData['unifyingCharacterId'] == undefined ){
+		this._drill_EUOM_keyData['unifyingCharacterId'] = unifying_ch_id;
+	}
+	// > 保存速度【物体-移动速度】
+	if( Imported.Drill_MoveSpeed ){
+		if( this._drill_EUOM_keyData['orgASpeed'] == undefined ){
+			this._drill_EUOM_keyData['orgASpeed'] = this.drill_MS_getASpeed();
+		}
+	}else{
+		if( this._drill_EUOM_keyData['orgSpeed'] == undefined ){
+			this._drill_EUOM_keyData['orgSpeed'] = this._moveSpeed;
+		}
+	}
+}
+//==============================
+// * 物体的属性 - 速度统一 - 还原速度
+//
+//			说明：	> 该函数可在帧刷新中执行，只有在 非空 的情况时才能还原。
+//==============================
+Game_CharacterBase.prototype.drill_EUOM_restoreOrgSpeed = function(){
+	this.drill_EUOM_checkKeyData();
+	
+	if( this._drill_EUOM_keyData['unifyingCharacterId'] != undefined ){
+		this._drill_EUOM_keyData['unifyingCharacterId'] =  undefined;
+	}
+	// > 还原速度【物体-移动速度】
+	if( Imported.Drill_MoveSpeed ){
+		if( this._drill_EUOM_keyData['orgASpeed'] != undefined ){
+			this.drill_MS_setASpeed( this._drill_EUOM_keyData['orgASpeed'] );
+			this._drill_EUOM_keyData['orgASpeed'] =  undefined;
+		}
+	}else{
+		if( this._drill_EUOM_keyData['orgSpeed'] != undefined ){
+			this._moveSpeed = this._drill_EUOM_keyData['orgSpeed'];
+			this._drill_EUOM_keyData['orgSpeed'] =  undefined;
+		}
+	}
+}
+//==============================
+// * 物体的属性 - 速度统一 - 修改为指定物体的速度
+//==============================
+Game_CharacterBase.prototype.drill_EUOM_setSpeedFromCharacter = function( tar_ch ){
+	
+	// > 自身不需要
+	if( this == tar_ch ){ return; }
+	
+	// > 修改速度【物体-移动速度】
+	if( Imported.Drill_MoveSpeed ){
+		this.drill_MS_setASpeed( tar_ch.drill_MS_getRealASpeed() );
+	}else{
+		this._moveSpeed = tar_ch._moveSpeed;
+	}
+}
+
 
 //=============================================================================
-// ** ☆一体化朝向容器
+// ** ☆一体化移动容器
 //
-//			说明：	> 此模块专门定义 一体化朝向 的容器。
+//			说明：	> 此模块专门定义 一体化移动 的容器。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
@@ -671,10 +773,12 @@ Game_Temp.prototype.drill_EUOM_getCharacterListByTag = function( tag ){
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 物体 - 直线移动
+// * 物体 - 直线移动（半覆写）
 //==============================
 var _drill_EUOM_moveStraight = Game_CharacterBase.prototype.moveStraight;
 Game_CharacterBase.prototype.moveStraight = function( d ){
+	
+	// > 判定 - 是否有标签
 	var tag = this.drill_EUOM_getTag();
 	if( tag == "" ){
 		
@@ -683,96 +787,98 @@ Game_CharacterBase.prototype.moveStraight = function( d ){
 		return;
 	}
 	
+	// > 判定 - 是否组内只有一个对象
+	var ch_list = $gameTemp.drill_EUOM_getCharacterListByTag( tag );	//（含玩家）
+	if( ch_list.length <= 1 ){
+		
+		// > 原函数
+		_drill_EUOM_moveStraight.call( this, d );
+		return;
+	}
+	
 	// > 直线整体移动
-	var unifyingEventId = $gameMap.drill_EUOM_getIdByCharacter( this );
-	$gameMap.drill_EUOM_moveStraight_ByTag( d, tag, unifyingEventId );
+	//		（当前物体+标签内所有物体，遍历控制移动）
+	var unifying_ch_id = $gameMap.drill_EUOM_getIdByCharacter( this );
+	$gameMap.drill_EUOM_moveStraight_ByTag( d, ch_list, unifying_ch_id );
 	this.setDirection(d);
 };
 //==============================
 // * 地图 - 直线整体移动
 //==============================
-Game_Map.prototype.drill_EUOM_moveStraight_ByTag = function( d, tag, unifyingEventId ){
-	var ev_list = $gameTemp.drill_EUOM_getCharacterListByTag( tag );	//（含玩家）
-	
-	//if( tag == "玩家_移动一体化" ){
-	//	alert( ev_list.length );
-	//}
+Game_Map.prototype.drill_EUOM_moveStraight_ByTag = function( d, ch_list, unifying_ch_id ){
 	
 	// > 整体是否可移动
 	var can_pass = true;
-	for(var j = 0; j < ev_list.length; j++){
-		var e = ev_list[j];
-		if( !e.canPass(e._x, e._y, d) ){
+	for(var j = 0; j < ch_list.length; j++){
+		var ch = ch_list[j];
+		if( ch.canPass( ch._x, ch._y, d ) == false ){
 			can_pass = false;
 		}
 	}
 	
 	// > 整体执行移动
-	for(var j = 0; j < ev_list.length; j++){
-		var e = ev_list[j];
-		e.setMovementSuccess(can_pass);
+	for(var j = 0; j < ch_list.length; j++){
+		var ch = ch_list[j];
+		ch.setMovementSuccess(can_pass);
 		
-		// > 速度统一 - 记录速度
-		if( e._drill_EUOM_keyData['orgSpeed'] == undefined ){
-			e._drill_EUOM_keyData['orgSpeed'] = {
-				"moveSpeed": e._moveSpeed,
-				"accurateSpeed": e._drill_MS_ASpeed
-			};
-		}
+		// > 速度统一 - 保存速度
+		ch.drill_EUOM_saveOrgSpeed( unifying_ch_id );
 		
-		// > 速度统一 - 记录动力源ID（可为undefined）
-		e._drill_EUOM_keyData['unifyingEventId'] = unifyingEventId;
 		
-		// > 移动
+		// > 执行移动
 		if( can_pass ){
 			
-			//e._x = $gameMap.roundXWithDirection(e._x, d);		//取消自动锁定位置，因为进入循环地图，角色会到处飞
-			//e._y = $gameMap.roundYWithDirection(e._y, d);
-			//e._realX = $gameMap.xWithDirection(e._x, e.reverseDir(d));	//取消位置修正，被拖动的物体会根据当前位置滑行
-			//e._realY = $gameMap.yWithDirection(e._y, e.reverseDir(d));
+			//ch._x = $gameMap.roundXWithDirection(ch._x, d);		//取消自动锁定位置，因为进入循环地图，角色会到处飞
+			//ch._y = $gameMap.roundYWithDirection(ch._y, d);
+			//ch._realX = $gameMap.xWithDirection(ch._x, ch.reverseDir(d));	//取消位置修正，被拖动的物体会根据当前位置滑行
+			//ch._realY = $gameMap.yWithDirection(ch._y, ch.reverseDir(d));
 			if( this.isLoopHorizontal() ){			
-				e._x = $gameMap.xWithDirection(e._x, d);
-				if( e._x >= this.width() ){		//（这里的功能是把round函数的条件拆解出来单独处理）
-					e._x -= this.width();
-					e._realX -= this.width();
+				ch._x = $gameMap.xWithDirection(ch._x, d);
+				if( ch._x >= this.width() ){		//（这里的功能是把round函数的条件拆解出来单独处理）
+					ch._x -= this.width();
+					ch._realX -= this.width();
 				}
-				if( e._x < 0 ){
-					e._x += this.width();
-					e._realX += this.width();
+				if( ch._x < 0 ){
+					ch._x += this.width();
+					ch._realX += this.width();
 				}
 			}else{
-				e._x = $gameMap.roundXWithDirection(e._x, d);
+				ch._x = $gameMap.roundXWithDirection(ch._x, d);
 			}
 			if( this.isLoopVertical() ){
-				e._y = $gameMap.yWithDirection(e._y, d);
-				if( e._y >= this.height() ){
-					e._y -= this.height();
-					e._realY -= this.height();
+				ch._y = $gameMap.yWithDirection(ch._y, d);
+				if( ch._y >= this.height() ){
+					ch._y -= this.height();
+					ch._realY -= this.height();
 				}
-				if( e._y < 0 ){
-					e._y += this.height();
-					e._realY += this.height();
+				if( ch._y < 0 ){
+					ch._y += this.height();
+					ch._realY += this.height();
 				}
 			}else{
-				e._y = $gameMap.roundYWithDirection(e._y, d);
+				ch._y = $gameMap.roundYWithDirection(ch._y, d);
 			}
 			
 			// > 速度统一 - 当前帧等待
 			this._drill_EUOM_movingWaitOneF = true;
 			
-			e.increaseSteps();
+			ch.increaseSteps();
+			
+		// > 不能移动时
 		}else{
-			e.checkEventTriggerTouchFront(d);
+			ch.checkEventTriggerTouchFront(d);
 		}
 		
 	}
 };
 
 //==============================
-// * 物体 - 斜向移动
+// * 物体 - 斜向移动（半覆写）
 //==============================
 var _drill_EUOM_moveDiagonally = Game_CharacterBase.prototype.moveDiagonally;
 Game_CharacterBase.prototype.moveDiagonally = function( horz, vert ){
+	
+	// > 判定 - 是否有标签
 	var tag = this.drill_EUOM_getTag();
 	if( tag == "" ){
 		
@@ -781,81 +887,87 @@ Game_CharacterBase.prototype.moveDiagonally = function( horz, vert ){
 		return;
 	}
 	
-	// > 斜向整体移动
-	var unifyingEventId = $gameMap.drill_EUOM_getIdByCharacter( this );
-	$gameMap.drill_EUOM_moveDiagonally_ByTag( horz, vert, tag, unifyingEventId );
+	// > 判定 - 是否组内只有一个对象
+	var ch_list = $gameTemp.drill_EUOM_getCharacterListByTag( tag );	//（含玩家）
+	if( ch_list.length <= 1 ){
+		
+		// > 原函数
+		_drill_EUOM_moveDiagonally.call( this, horz, vert );
+		return;
+	}
+	
+	// > 直线整体移动
+	//		（当前物体+标签内所有物体，遍历控制移动）
+	var unifying_ch_id = $gameMap.drill_EUOM_getIdByCharacter( this );
+	$gameMap.drill_EUOM_moveDiagonally_ByTag( horz, vert, ch_list, unifying_ch_id );
 	if( this._direction === this.reverseDir(horz) ){ this.setDirection(horz); }
 	if( this._direction === this.reverseDir(vert) ){ this.setDirection(vert); }
 };
 //==============================
 // * 地图 - 斜向整体移动
 //==============================
-Game_Map.prototype.drill_EUOM_moveDiagonally_ByTag = function( horz, vert, e_tag, unifyingEventId ){
-	var ev_list = $gameTemp.drill_EUOM_getCharacterListByTag( tag );	//（含玩家）
+Game_Map.prototype.drill_EUOM_moveDiagonally_ByTag = function( horz, vert, ch_list, unifying_ch_id ){
 	
 	// > 整体是否可移动
 	var can_pass = true;
-	for(var j = 0; j < ev_list.length; j++){
-		var e = ev_list[j];
-		if( !e.canPassDiagonally(e._x, e._y, horz, vert) ){
+	for(var j = 0; j < ch_list.length; j++){
+		var ch = ch_list[j];
+		if( ch.canPassDiagonally( ch._x, ch._y, horz, vert ) == false ){
 			can_pass = false;
 		}
 	}
 	
 	// > 整体执行移动
-	for(var j = 0; j < ev_list.length; j++){
-		var e = ev_list[j];
-		e.setMovementSuccess(can_pass);
+	for(var j = 0; j < ch_list.length; j++){
+		var ch = ch_list[j];
+		ch.setMovementSuccess(can_pass);
 		
-		// > 速度统一 - 记录速度
-		if( e._drill_EUOM_keyData['orgSpeed'] == undefined ){
-			e._drill_EUOM_keyData['orgSpeed'] = {
-				"moveSpeed": e._moveSpeed,
-				"accurateSpeed": e._drill_MS_ASpeed
-			};
-		}
+		// > 速度统一 - 保存速度
+		ch.drill_EUOM_saveOrgSpeed( unifying_ch_id );
 		
-		// > 速度统一 - 记录动力源ID（可为undefined）
-		e._drill_EUOM_keyData['unifyingEventId'] = unifyingEventId;
 		
-		// > 移动
+		// > 执行移动
 		if( can_pass ){
 			
-			//e._x = $gameMap.roundXWithDirection(e._x, horz);
-			//e._y = $gameMap.roundYWithDirection(e._y, vert);
-			//e._realX = $gameMap.xWithDirection(e._x, e.reverseDir(horz));
-			//e._realY = $gameMap.yWithDirection(e._y, e.reverseDir(vert));
+			//ch._x = $gameMap.roundXWithDirection(ch._x, horz);
+			//ch._y = $gameMap.roundYWithDirection(ch._y, vert);
+			//ch._realX = $gameMap.xWithDirection(ch._x, ch.reverseDir(horz));
+			//ch._realY = $gameMap.yWithDirection(ch._y, ch.reverseDir(vert));
 			if( this.isLoopHorizontal() ){
-				e._x = $gameMap.xWithDirection(e._x, horz);
-				if( e._x >= this.width() ){		//（这里的功能是把round函数的条件拆解出来单独处理）
-					e._x -= this.width();
-					e._realX -= this.width();
+				ch._x = $gameMap.xWithDirection(ch._x, horz);
+				if( ch._x >= this.width() ){		//（这里的功能是把round函数的条件拆解出来单独处理）
+					ch._x -= this.width();
+					ch._realX -= this.width();
 				}
-				if( e._x < 0 ){
-					e._x += this.width();
-					e._realX += this.width();
+				if( ch._x < 0 ){
+					ch._x += this.width();
+					ch._realX += this.width();
 				}
 			}else{
-				e._x = $gameMap.roundXWithDirection(e._x, horz);
+				ch._x = $gameMap.roundXWithDirection(ch._x, horz);
 			}
 			if( this.isLoopVertical() ){
-				e._y = $gameMap.yWithDirection(e._y, vert);
-				if( e._y >= this.height() ){
-					e._y -= this.height();
-					e._realY -= this.height();
+				ch._y = $gameMap.yWithDirection(ch._y, vert);
+				if( ch._y >= this.height() ){
+					ch._y -= this.height();
+					ch._realY -= this.height();
 				}
-				if( e._y < 0 ){
-					e._y += this.height();
-					e._realY += this.height();
+				if( ch._y < 0 ){
+					ch._y += this.height();
+					ch._realY += this.height();
 				}
 			}else{
-				e._y = $gameMap.roundYWithDirection(e._y, vert);
+				ch._y = $gameMap.roundYWithDirection(ch._y, vert);
 			}
 			
 			// > 速度统一 - 当前帧等待
 			$gameMap._drill_EUOM_movingWaitOneF = true;
 			
-			e.increaseSteps();
+			ch.increaseSteps();
+			
+		// > 不能移动时
+		}else{
+			//（不操作）
 		}
 	}
 };
@@ -868,32 +980,6 @@ Game_Map.prototype.drill_EUOM_moveDiagonally_ByTag = function( horz, vert, e_tag
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 速度统一 - 获取ID（根据物体）
-//
-//			说明：	> 该函数若转换失败，则返回 undefined。若为玩家返回-2。
-//==============================
-Game_Map.prototype.drill_EUOM_getIdByCharacter = function( character ){
-	if( character == $gamePlayer ){
-		return -2;
-	}
-	if( character instanceof Game_Event ){
-		return character._eventId;
-	}
-	return undefined;
-};
-//==============================
-// * 速度统一 - 获取物体（根据ID）
-//==============================
-Game_Map.prototype.drill_EUOM_getCharacterById = function( id ){
-	if( id == -2 ){
-		return $gamePlayer;
-	}
-	if( id >= 0 ){
-		return $gameMap.event( id );
-	}
-	return undefined;
-};
-//==============================
 // * 速度统一 - 当前帧等待
 //==============================
 var _drill_EUOM_m_updateEvents = Game_Map.prototype.updateEvents;
@@ -903,6 +989,8 @@ Game_Map.prototype.updateEvents = function(){
 	if( this._drill_EUOM_movingWaitOneF == true ){
 		this._drill_EUOM_movingWaitOneF = false;
 	}
+	
+	// > 原函数
     _drill_EUOM_m_updateEvents.call(this);
 };
 //==============================
@@ -919,19 +1007,14 @@ Game_CharacterBase.prototype.updateMove = function(){
 			return;
 		}
 		
-		// > 速度改变
-		var unifyingEventId = this._drill_EUOM_keyData['unifyingEventId'];
-		if( unifyingEventId != undefined ){
-			var u_c = $gameMap.drill_EUOM_getCharacterById( unifyingEventId );
-			if( u_c != this &&
-				u_c._drill_EUOM_keyData['keepSameSpeed'] == true ){
+		// > 修改速度
+		var u_c_id = this._drill_EUOM_keyData['unifyingCharacterId'];
+		if( u_c_id != undefined ){
+			
+			var u_c = $gameMap.drill_EUOM_getCharacterById( u_c_id );
+			if( u_c._drill_EUOM_keyData['keepSameSpeed'] == true ){
 				
-				// > 改变速度
-				this._moveSpeed = u_c._moveSpeed;
-				// > 【物体-移动速度】
-				if( Imported.Drill_MoveSpeed ){
-					this._drill_MS_ASpeed = u_c.drill_MS_getRealASpeed();
-				}
+				this.drill_EUOM_setSpeedFromCharacter( u_c );
 			}
 		}
 	}
@@ -949,22 +1032,14 @@ Game_CharacterBase.prototype.updateMove = function(){
 	};
 */
 //==============================
-// * 速度统一 - 速度恢复
+// * 速度统一 - 还原速度
 //==============================
 var _drill_EUOM_updateStop = Game_CharacterBase.prototype.updateStop;
 Game_CharacterBase.prototype.updateStop = function(){
 	_drill_EUOM_updateStop.call(this);
 	
 	if( this._drill_EUOM_keyData == undefined ){ return; }
-	var unifyingEventId = this._drill_EUOM_keyData['unifyingEventId'];
-	if( unifyingEventId != undefined ){
-		
-		this._moveSpeed = this._drill_EUOM_keyData['orgSpeed']['moveSpeed'];
-		this._drill_MS_ASpeed = this._drill_EUOM_keyData['orgSpeed']['accurateSpeed'];
-		
-		this._drill_EUOM_keyData['orgSpeed'] = undefined;
-		this._drill_EUOM_keyData['unifyingEventId'] = undefined;
-	}
+	this.drill_EUOM_restoreOrgSpeed();		//（只要暂停，就立即 还原速度）
 }
 
 

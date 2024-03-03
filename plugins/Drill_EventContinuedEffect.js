@@ -389,6 +389,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var unit = String(args[1]);
 			if( e_chars == null && unit == "本事件" ){
 				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; }	//（并行删除事件可能会造成 解释器指令还在 但事件没了，这里直接跳出）
 				e_chars = [ e ];
 			}
 			if( e_chars == null && unit.indexOf("批量事件[") != -1 ){
@@ -466,12 +467,6 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var temp_tank = [];
 			for( var k=0; k < e_chars.length; k++ ){
 				var e = e_chars[k];
-				if( e == undefined ){
-					alert("【" + DrillUp.g_ECE_PluginTip_curName + "】\n错误，获取到非法指令：" + command + " " + args.join(" ") );
-				}
-				if( e.opacity == undefined ){
-					alert("【" + DrillUp.g_ECE_PluginTip_curName + "】\n错误，获取到非法物体，信息ID：" + e._eventId + "，位置：" + e._x + ","+ e._y );
-				}
 				if( e.opacity() != 0 ){
 					temp_tank.push( e );
 				}

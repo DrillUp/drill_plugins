@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.0]        行走图 - 多帧行走图
+ * @plugindesc [v2.1]        行走图 - 多帧行走图
  * @author Drill_up
  * 
  * 
@@ -71,27 +71,37 @@
  * 
  * 事件注释：=>多帧行走图 : 帧数 : 5
  * 事件注释：=>多帧行走图 : 初始帧 : 2
- * 事件注释：=>多帧行走图 : 动画帧间隔 : 9
- * 事件注释：=>多帧行走图 : 动画帧间隔 : 6+(7-speed)*3
  * 事件注释：=>多帧行走图 : 移动时排除初始帧的播放
  * 事件注释：=>多帧行走图 : 移动时恢复初始帧的播放
+ * 事件注释：=>多帧行走图 : 动画帧间隔 : 9
+ * 事件注释：=>多帧行走图 : 动画帧间隔 : 6+(7-speed)*3
+ * 事件注释：=>多帧行走图 : 动画帧间隔(奔跑时) : 9
+ * 事件注释：=>多帧行走图 : 动画帧间隔(奔跑时) : 6+(7-speed)*3
  *
  * 角色注释：<多帧行走图:帧数:5>
  * 角色注释：<多帧行走图:初始帧:2>
- * 角色注释：<多帧行走图:动画帧间隔:9>
- * 角色注释：<多帧行走图:动画帧间隔:6+(7-speed)*3>
  * 角色注释：<多帧行走图:移动时排除初始帧的播放>
  * 角色注释：<多帧行走图:移动时恢复初始帧的播放>
+ * 角色注释：<多帧行走图:动画帧间隔:9>
+ * 角色注释：<多帧行走图:动画帧间隔:6+(7-speed)*3>
+ * 角色注释：<多帧行走图:动画帧间隔(奔跑时):9>
+ * 角色注释：<多帧行走图:动画帧间隔(奔跑时):6+(7-speed)*3>
  * 
  * 1.行走图有三个基本属性：
- *   帧数（默认3）、初始帧（默认2）、动画帧间隔（默认6+(7-speed)*3 ）
+ *     帧数（默认3）
+ *     初始帧（默认2）
+ *     动画帧间隔（默认"6+(7-speed)*3" ）
  *   具体可以去看看 "7.行走图 > 关于多帧行走图.docx"。
  * 2.玩家或者事件停止移动时，会恢复到初始帧的图片状态。
- * 3.移动的默认公式是 6+(7-speed)*3 ，成反比形式。
+ * 3.注意，只有"动画帧间隔"能设置公式。
+ *   默认情况下，动画帧间隔 和 动画帧间隔(奔跑时) 都为："6+(7-speed)*3"，
+ *   即玩家改变速度，就能根据速度决定 行走图播放 的快慢。
+ *   当然，你也可以固定播放速度。
+ * 4.默认公式是 6+(7-speed)*3 ，成反比形式。
  *   速度最慢的1，代入公式，帧间隔为 24 。（相当于半秒换一帧）
  *   速度最快的6，代入公式，帧间隔为 9 。
  *   也就是说，速度越快，帧间隔越短，动画播放速度也越快。
- * 4.speed的值为 1,2,3,4,5,6 使用公式后，系统会自动计算，
+ * 5.speed的值为 1,2,3,4,5,6 使用公式后，系统会自动计算，
  *   得出相应的间隔。
  * 
  * -----------------------------------------------------------------------------
@@ -111,11 +121,16 @@
  * 插件指令：>多帧行走图 : 事件[10] : 帧数 : 5
  * 插件指令：>多帧行走图 : 事件[10] : 初始帧 : 2
  * 插件指令：>多帧行走图 : 事件[10] : 动画帧间隔 : 9
+ * 插件指令：>多帧行走图 : 事件[10] : 动画帧间隔 : 6+(7-speed)*3
+ * 插件指令：>多帧行走图 : 事件[10] : 动画帧间隔(奔跑时) : 9
+ * 插件指令：>多帧行走图 : 事件[10] : 动画帧间隔(奔跑时) : 6+(7-speed)*3
  * 
  * 1.前面部分（本事件）和后面设置（帧数 : 5）可以随意组合。
  *   一共有9*3种组合方式。
  * 2.玩家插件指令设置后，永久有效，必须手动解锁才可以恢复原样。
  *   事件插件指令设置后，只在本地图有效，离开地图失效。
+ * 3.注意，只有"动画帧间隔"能设置公式。
+ *   事件虽然可以设置"动画帧间隔(奔跑时)"，但事件并不能奔跑，所以没有效果。
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 固定帧
@@ -259,6 +274,8 @@
  * 修复了原地踏步失效的bug。
  * [v2.0]
  * 优化了存储空间占用。
+ * [v2.1]
+ * 添加了 动画帧间隔(奔跑时) 的功能。
  * 
  * 
  * @param 是否修正多帧连贯性
@@ -305,9 +322,10 @@
 //			->☆角色注释
 //
 //			->多帧行走图 控制器【Drill_EFN_Controller】
-//				->A状态规划器
-//				->B帧间隔器
-//				->C帧播放器
+//				->A主体
+//				->B状态规划器
+//				->C帧间隔器
+//				->D帧播放器
 //			->☆控制器绑定
 //				->初始化检查
 //				->是否启用多帧控制
@@ -587,6 +605,20 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					}
 				}
 			}
+			if( type == "动画帧间隔(奔跑时)" ){
+				if( e_chars != null){
+					for( var k=0; k < e_chars.length; k++ ){
+						e_chars[k].drill_EFN_checkController();
+						e_chars[k]._drill_EFN_controller.drill_EFN_setInterDashingFormula( String(temp2) );
+					}
+				}
+				if( p_chars != null){
+					for( var k=0; k < p_chars.length; k++ ){
+						p_chars[k].drill_EFN_checkController();
+						p_chars[k]._drill_EFN_controller.drill_EFN_setInterDashingFormula( String(temp2) );
+					}
+				}
+			}
 			if( type == "设置循环" ){
 				var loop_type = "";
 				var loop_seq = [];
@@ -636,6 +668,8 @@ Game_Map.prototype.drill_EFN_isEventExist = function( e_id ){
 //=============================================================================
 //==============================
 // * 事件注释 - 初始化绑定
+//
+//			说明：	> 注释与当前事件页有关，不一定跨事件页。
 //==============================
 var _drill_EFN_c_setupPageSettings = Game_Event.prototype.setupPageSettings;
 Game_Event.prototype.setupPageSettings = function() {
@@ -659,8 +693,8 @@ Game_Event.prototype.drill_EFN_setupPageSettings = function() {
 		
 		// > 事件变化时，强制重新刷一次状态检查
 		//		（2023-5-18 此处能解决 初始帧为0或2 且 勾选原地踏步 的情况下，切换事件页会导致 不再原地踏步 的问题。）
-		//		（常规情况下，切换事件页不会修改 A状态规划器的当前状态 _drill_state_cur，但由于出现了 不再原地踏步问题，只能强制刷新一次状态检查了）
-		this._drill_EFN_controller._Drill_EFN_lastState = "";
+		//		（常规情况下，切换事件页不会修改 B状态规划器的当前状态 cur_state，但由于出现了 不再原地踏步问题，只能强制刷新一次状态检查了）
+		this._drill_EFN_controller._drill_EFN_lastState = "";
 	}
 	
 	
@@ -706,6 +740,10 @@ Game_Event.prototype.drill_EFN_setupPageSettings = function() {
 					if( type == "动画帧间隔"){
 						this.drill_EFN_checkController();
 						this._drill_EFN_controller.drill_EFN_setInterFormula( String(temp2) );
+					}
+					if( type == "动画帧间隔(奔跑时)"){
+						this.drill_EFN_checkController();
+						this._drill_EFN_controller.drill_EFN_setInterDashingFormula( String(temp2) );
 					}
 					if( type == "设置循环"){
 						var loop_type = "";
@@ -760,7 +798,7 @@ Game_CharacterBase.prototype.drill_EFN_setupNote = function( note ){
 	
 	// > 重设数据
 	this.drill_EFN_checkController();
-	this._drill_EFN_controller.drill_EFN_resetData( DrillUp.g_EFN_controllerData );
+	this._drill_EFN_controller.drill_controller_resetData( DrillUp.g_EFN_controllerData );
 	
 	// > 角色注释
 	var types = (note.match( /<多帧行走图:([^<>]*?)>/g )) || [];
@@ -796,6 +834,9 @@ Game_CharacterBase.prototype.drill_EFN_setupNote = function( note ){
 			if( type == "动画帧间隔"){
 				this._drill_EFN_controller.drill_EFN_setInterFormula( String(temp2) );
 			}
+			if( type == "动画帧间隔(奔跑时)"){
+				this._drill_EFN_controller.drill_EFN_setInterDashingFormula( String(temp2) );
+			}
 			if( type == "设置循环"){
 				var loop_type = "";
 				var loop_seq = [];
@@ -825,19 +866,20 @@ Game_CharacterBase.prototype.drill_EFN_setupNote = function( note ){
 // **						->启用/关闭
 // **						->暂停/继续
 // **						->重设数据
+// **					->A主体
 // **						> 初始帧
 // **						> 帧数
 // **						> 固定帧
-// **					->A状态规划器
+// **					->B状态规划器
 // **						> 踏步动画
 // **						> 停止状态
 // **							> 停止状态的连贯性
 // **						> 移动状态
 // **						> 跳跃状态
-// **					->B帧间隔器
+// **					->C帧间隔器
 // **						->公式
 // **						->计数器
-// **					->C帧播放器
+// **					->D帧播放器
 // **						->循环播放
 // **						->排除初始帧
 // **						->获取序列
@@ -856,10 +898,10 @@ function Drill_EFN_Controller(){
 Drill_EFN_Controller.prototype.initialize = function( data ){
 	this._drill_data = {};
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
-    this.drill_initData();													//初始化数据
-    this.drill_initPrivateData();											//私有数据初始化
+    this.drill_controller_initData();										//初始化数据
+    this.drill_controller_initChild();										//私有数据初始化
 	if( data == undefined ){ data = {}; }
-    this.drill_EFN_resetData( data );
+    this.drill_controller_resetData( data );
 }
 //##############################
 // * 控制器 - 帧刷新【标准函数】
@@ -871,11 +913,11 @@ Drill_EFN_Controller.prototype.initialize = function( data ){
 //##############################
 Drill_EFN_Controller.prototype.drill_EFN_update = function( character ){
 	if( this._drill_data['pause'] == true ){ return; }
-	this._drill_curTime += 1;							//帧刷新 - 时间流逝
-	this.drill_EFN_updateState( character );			//帧刷新 - A状态规划器
-	this.drill_EFN_updateInter_Formula( character );	//帧刷新 - B帧间隔器 - 公式
-	this.drill_EFN_updateInter_Tick( character );		//帧刷新 - B帧间隔器 - 计数器
-	this.drill_EFN_updateLoop();						//帧刷新 - C帧播放器
+	this.drill_EFN_updateAttr();						//帧刷新 - A主体
+	this.drill_EFN_updateState( character );			//帧刷新 - B状态规划器
+	this.drill_EFN_updateInter_Formula( character );	//帧刷新 - C帧间隔器 - 公式
+	this.drill_EFN_updateInter_Tick( character );		//帧刷新 - C帧间隔器 - 计数器
+	this.drill_EFN_updateLoop();						//帧刷新 - D帧播放器
 }
 //##############################
 // * 控制器 - 重设数据【标准函数】
@@ -886,8 +928,8 @@ Drill_EFN_Controller.prototype.drill_EFN_update = function( character ){
 //			说明：	> 通过此函数，你不需要再重新创建一个数据对象，并且贴图能直接根据此数据来变化。
 //					> 参数对象中的参数【可以缺项】，只要的参数项不一样，就刷新；参数项一样，则不变化。
 //##############################
-Drill_EFN_Controller.prototype.drill_EFN_resetData = function( data ){
-	this.drill_EFN_resetData_Private( data );
+Drill_EFN_Controller.prototype.drill_controller_resetData = function( data ){
+	this.drill_controller_resetData_Private( data );
 };
 //##############################
 // * 控制器 - 启用/关闭【标准函数】
@@ -924,7 +966,7 @@ Drill_EFN_Controller.prototype.drill_EFN_setPause = function( pause ){
 };
 
 //##############################
-// * 控制器 - 动画帧 - 设置当前帧【开放函数】
+// * 控制器 - A主体 - 设置当前帧【开放函数】
 //
 //			参数：	> pattern 数字
 //			返回：	> 无
@@ -933,7 +975,7 @@ Drill_EFN_Controller.prototype.drill_EFN_setPattern = function( pattern ){
 	this._drill_loop_curSeq = [ pattern ];
 };
 //##############################
-// * 控制器 - 动画帧 - 获取当前帧数【开放函数】
+// * 控制器 - A主体 - 获取当前帧数【开放函数】
 //
 //			参数：	> 无
 //			返回：	> 数字
@@ -942,7 +984,7 @@ Drill_EFN_Controller.prototype.drill_EFN_pattern = function(){
 	return this._drill_loop_curPattern;
 };
 //##############################
-// * 控制器 - 动画帧 - 设置初始帧【开放函数】
+// * 控制器 - A主体 - 设置初始帧【开放函数】
 //
 //			参数：	> orgPattern 数字
 //			返回：	> 无
@@ -955,7 +997,7 @@ Drill_EFN_Controller.prototype.drill_EFN_setOrgPattern = function( orgPattern ){
 	this.drill_EFN_refreshLoop();
 };
 //##############################
-// * 控制器 - 动画帧 - 获取初始帧【开放函数】
+// * 控制器 - A主体 - 获取初始帧【开放函数】
 //
 //			参数：	> 无
 //			返回：	> 数字
@@ -964,7 +1006,7 @@ Drill_EFN_Controller.prototype.drill_EFN_orgPattern = function(){
 	return this._drill_data['orgPattern'];
 };
 //##############################
-// * 控制器 - 动画帧 - 设置最大帧数【开放函数】
+// * 控制器 - A主体 - 设置最大帧数【开放函数】
 //
 //			参数：	> maxPattern 数字
 //			返回：	> 无
@@ -977,7 +1019,7 @@ Drill_EFN_Controller.prototype.drill_EFN_setMaxPattern = function( maxPattern ){
 	this.drill_EFN_refreshLoop();
 };
 //##############################
-// * 控制器 - 动画帧 - 获取最大帧数【开放函数】
+// * 控制器 - A主体 - 获取最大帧数【开放函数】
 //
 //			参数：	> 无
 //			返回：	> 数字
@@ -986,7 +1028,7 @@ Drill_EFN_Controller.prototype.drill_EFN_maxPattern = function(){
 	return this._drill_data['maxPattern'];
 };
 //##############################
-// * 控制器 - 动画帧 - 获取当前计数器【开放函数】
+// * 控制器 - A主体 - 获取当前计数器【开放函数】
 //
 //			参数：	> 无
 //			返回：	> 数字
@@ -997,7 +1039,7 @@ Drill_EFN_Controller.prototype.drill_EFN_animationCount = function(){
 	return 0;
 };
 //##############################
-// * 控制器 - 动画帧 - 获取间隔【开放函数】
+// * 控制器 - A主体 - 获取间隔【开放函数】
 //
 //			参数：	> 无
 //			返回：	> 数字
@@ -1008,7 +1050,7 @@ Drill_EFN_Controller.prototype.drill_EFN_animationWait = function(){
 	return this._drill_inter_cur;
 };
 //##############################
-// * 控制器 - 动画帧 - 设置固定帧【开放函数】
+// * 控制器 - A主体 - 设置固定帧【开放函数】
 //
 //			参数：	> pattern 数字
 //			返回：	> 无
@@ -1018,7 +1060,7 @@ Drill_EFN_Controller.prototype.drill_EFN_setLockPattern = function( pattern ){
 	data['lockPattern'] = pattern;
 };
 //##############################
-// * 控制器 - 动画帧 - 解除固定帧【开放函数】
+// * 控制器 - A主体 - 解除固定帧【开放函数】
 //
 //			参数：	> 无
 //			返回：	> 无
@@ -1029,7 +1071,7 @@ Drill_EFN_Controller.prototype.drill_EFN_clearLockPattern = function(){
 };
 
 //##############################
-// * 控制器 - B帧间隔器 - 设置帧间隔【开放函数】
+// * 控制器 - C帧间隔器 - 设置帧间隔【开放函数】
 //
 //			参数：	> interFormula 字符串
 //			返回：	> 无
@@ -1039,17 +1081,27 @@ Drill_EFN_Controller.prototype.drill_EFN_setInterFormula = function( interFormul
 	data['interFormula'] = interFormula;
 };
 //##############################
-// * 控制器 - C帧播放器 - 重刷序列【开放函数】
+// * 控制器 - C帧间隔器 - 设置帧间隔【开放函数】
+//
+//			参数：	> interDashingFormula 字符串
+//			返回：	> 无
+//##############################
+Drill_EFN_Controller.prototype.drill_EFN_setInterDashingFormula = function( interDashingFormula ){
+	var data = this._drill_data;
+	data['interDashingFormula'] = interDashingFormula;
+};
+
+//##############################
+// * 控制器 - D帧播放器 - 重刷序列【开放函数】
 //
 //			参数：	> 无
 //			返回：	> 无
 //##############################
 Drill_EFN_Controller.prototype.drill_EFN_refreshLoop = function(){
 	this.drill_EFN_refreshStateSeq();
-	this._drill_state_cur = "";
 };
 //##############################
-// * 控制器 - C帧播放器 - 设置循环【开放函数】
+// * 控制器 - D帧播放器 - 设置循环【开放函数】
 //
 //			参数：	> loopType 字符串
 //					> seq 数字数组
@@ -1062,7 +1114,7 @@ Drill_EFN_Controller.prototype.drill_EFN_setLoopType = function( loopType, seq )
 	this.drill_EFN_refreshLoop();
 };
 //##############################
-// * 控制器 - C帧播放器 - 设置排除帧【开放函数】
+// * 控制器 - D帧播放器 - 设置排除帧【开放函数】
 //
 //			参数：	> enable 布尔
 //			返回：	> 无
@@ -1082,56 +1134,45 @@ Drill_EFN_Controller.prototype.drill_EFN_setLoopExcludeOrg = function( enable ){
 //			说明：	> data 动态参数对象（来自类初始化）
 //					  该对象包含 类所需的所有默认值。
 //##############################
-Drill_EFN_Controller.prototype.drill_initData = function(){
+Drill_EFN_Controller.prototype.drill_controller_initData = function(){
 	var data = this._drill_data;
 	
-	// > 动画帧
-	if( data['enable'] == undefined ){ data['enable'] = true };						//显示情况
-	if( data['pause'] == undefined ){ data['pause'] = false };						//暂停情况
-	if( data['orgPattern'] == undefined ){ data['orgPattern'] = 1 };				//初始帧
-	if( data['maxPattern'] == undefined ){ data['maxPattern'] = 3 };				//帧数
-	if( data['lockPattern'] == undefined ){ data['lockPattern'] = -1 };				//固定帧
+	// > 控制器
+	if( data['enable'] == undefined ){ data['enable'] = true };							//显示情况
+	if( data['pause'] == undefined ){ data['pause'] = false };							//暂停情况
 	
-	// > A状态规划器
-	if( data['continuityEnabled'] == undefined ){ data['continuityEnabled'] = false };//A状态规划器 - 连贯性
+	// > A主体
+	if( data['orgPattern'] == undefined ){ data['orgPattern'] = 1 };					//初始帧
+	if( data['maxPattern'] == undefined ){ data['maxPattern'] = 3 };					//帧数
+	if( data['lockPattern'] == undefined ){ data['lockPattern'] = -1 };					//固定帧
 	
-	// > B帧间隔器
-	if( data['interFormula'] == undefined ){ data['interFormula'] = "" };			//B帧间隔器 - 帧间隔公式
+	// > B状态规划器
+	if( data['continuityEnabled'] == undefined ){ data['continuityEnabled'] = false };	//B状态规划器 - 连贯性
 	
-	// > C帧播放器
-	if( data['loop_type'] == undefined ){ data['loop_type'] = "左右往返" };			//C帧播放器 - 类型
-	if( data['loop_seq'] == undefined ){ data['loop_seq'] = [] };					//C帧播放器 - 自定义序列
-	if( data['loop_excludeOrg'] == undefined ){ data['loop_excludeOrg'] = false };	//C帧播放器 - 排除初始帧
+	// > C帧间隔器
+	if( data['interFormula'] == undefined ){ data['interFormula'] = "" };				//C帧间隔器 - 动画帧间隔
+	if( data['interDashingFormula'] == undefined ){ data['interDashingFormula'] = "" };	//C帧间隔器 - 动画帧间隔(奔跑时)
+	
+	// > D帧播放器
+	if( data['loop_type'] == undefined ){ data['loop_type'] = "左右往返" };				//D帧播放器 - 类型
+	if( data['loop_seq'] == undefined ){ data['loop_seq'] = [] };						//D帧播放器 - 自定义序列
+	if( data['loop_excludeOrg'] == undefined ){ data['loop_excludeOrg'] = false };		//D帧播放器 - 排除初始帧
 }
 //==============================
-// * 控制器 - 私有数据初始化
+// * 控制器 - 初始化子功能
 //==============================
-Drill_EFN_Controller.prototype.drill_initPrivateData = function(){
-	var data = this._drill_data;
-	
-	this._drill_curTime = 0;									//动画帧 - 当前时间
-	this._drill_curTick = 0;									//动画帧 - 当前计数器值
-	this._drill_compatible = false;								//动画帧 - 计数器兼容值
-	
-	this._drill_state_cur = "";									//A状态规划器 - 当前状态
-	this.drill_EFN_refreshStateSeq();							//A状态规划器 - 重刷序列
-	this._Drill_EFN_lastChangeDelay = 0;						//A状态规划器 - 变化锁
-	this._Drill_EFN_lastState = "";								//A状态规划器 - 上一次的状态
-	
-	this._drill_inter_cur = 4;									//B帧间隔器 - 当前间隔
-	this._drill_inter_curFormula = "";							//B帧间隔器 - 当前公式
-	this._drill_inter_curRealSpeed = 0;							//B帧间隔器 - 当前移动速度
-	
-	this._drill_loop_curSeq = [1];								//C帧播放器 - 当前序列
-	this._drill_loop_curPattern = 0;							//C帧播放器 - 当前帧数
-	this._drill_loop_isEndStop = false;							//C帧播放器 - 序列只播放一次
+Drill_EFN_Controller.prototype.drill_controller_initChild = function(){
+	this.drill_controller_initAttr();			//初始化子功能 - A主体
+	this.drill_controller_initState();			//初始化子功能 - B状态规划器
+	this.drill_controller_initInter();			//初始化子功能 - C帧间隔器
+	this.drill_controller_initLoop();			//初始化子功能 - D帧播放器
 }
 //==============================
 // * 控制器 - 重设数据（私有）
 //
 //			说明：	data对象中的参数【可以缺项】。
 //==============================
-Drill_EFN_Controller.prototype.drill_EFN_resetData_Private = function( data ){
+Drill_EFN_Controller.prototype.drill_controller_resetData_Private = function( data ){
 	
 	// > 判断数据重复情况
 	if( this._drill_data != undefined ){
@@ -1157,72 +1198,92 @@ Drill_EFN_Controller.prototype.drill_EFN_resetData_Private = function( data ){
 	// > 执行重置
 	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
-    this.drill_initData();													//初始化数据
-    this.drill_initPrivateData();											//私有数据初始化
+    this.drill_controller_initData();										//初始化数据
+    this.drill_controller_initChild();										//私有数据初始化
 }
 
 //==============================
-// * A状态规划器 - 帧刷新
+// * A主体 - 初始化子功能
+//==============================
+Drill_EFN_Controller.prototype.drill_controller_initAttr = function(){
+	this._drill_curTime = 0;					//A主体 - 当前时间
+	this._drill_curTick = 0;					//A主体 - 当前计数器值
+	this._drill_compatible = false;				//A主体 - 计数器兼容值
+}
+//==============================
+// * A主体 - 帧刷新
+//==============================
+Drill_EFN_Controller.prototype.drill_EFN_updateAttr = function(){
+	this._drill_curTime += 1;
+}
+
+//==============================
+// * B状态规划器 - 初始化子功能
+//==============================
+Drill_EFN_Controller.prototype.drill_controller_initState = function(){
+	this.drill_EFN_refreshStateSeq();			//B状态规划器 - 重刷序列
+	this._drill_EFN_lastChangeDelay = 0;		//B状态规划器 - 变化锁
+	this._drill_EFN_lastState = "";				//B状态规划器 - 上一次的状态
+}
+//==============================
+// * B状态规划器 - 帧刷新
 //
-//			说明：	用于 规划状态机，使用哪种序列来播放。类似于状态元和动作元机制。
+//			说明：	> 用于 规划状态机，使用哪种序列来播放。类似于插件 Drill_EventActionSequenceAutomation 。
 //==============================
 Drill_EFN_Controller.prototype.drill_EFN_updateState = function( character ){
-	var data = this._drill_data;
+	var cur_state = "";
 	
 	// > 踏步动画
 	if( character.hasStepAnime() == true ){
-		this._drill_state_cur = "踏步动画";
-	}
+		cur_state = "踏步动画";
 	
 	// > 静止状态
-	else if( character.isStopping() ){
-		this._drill_state_cur = "静止状态";
-	}
+	}else if( character.isStopping() ){
+		cur_state = "静止状态";
 	
 	// > 跳跃状态
-	else if( character.isJumping() ){
-		this._drill_state_cur = "跳跃状态";
-	}
+	}else if( character.isJumping() ){
+		cur_state = "跳跃状态";
 	
 	// > 移动状态
-	else if( character.isMoving() ){
-		this._drill_state_cur = "移动状态";
+	}else if( character.isMoving() ){
+		cur_state = "移动状态";
 	}
 	
 	
 	// > 『行走图状态变化锁』
 	//		（当玩家/事件持续移动时，每经过一个图块时，都会出现1帧的静止问题，变化锁用于解决此问题）
-	if( this._Drill_EFN_lastState == this._drill_state_cur ){
-		this._Drill_EFN_lastChangeDelay = 3;		//（状态变化后，需要至少持续3帧）
+	if( this._drill_EFN_lastState == cur_state ){
+		this._drill_EFN_lastChangeDelay = 3;		//（状态变化后，需要至少持续3帧）
 		return;
 	}
-	this._Drill_EFN_lastChangeDelay -= 1;
-	if( this._Drill_EFN_lastChangeDelay >= 0 ){ return; }
-	this._Drill_EFN_lastState = this._drill_state_cur;
+	this._drill_EFN_lastChangeDelay -= 1;
+	if( this._drill_EFN_lastChangeDelay >= 0 ){ return; }
+	this._drill_EFN_lastState = cur_state;
 	
 	
 	// > 设置序列 踏步动画
-	if( this._drill_state_cur == "踏步动画" ){
+	if( cur_state == "踏步动画" ){
 		this.drill_EFN_setState_StepAnime( character );
 	}
 	
 	// > 设置序列 静止状态
-	if( this._drill_state_cur == "静止状态" ){
+	if( cur_state == "静止状态" ){
 		this.drill_EFN_setState_Stop( character );
 	}
 	
 	// > 设置序列 跳跃状态
-	if( this._drill_state_cur == "跳跃状态" ){
+	if( cur_state == "跳跃状态" ){
 		this.drill_EFN_setState_Jumping( character );
 	}
 	
 	// > 设置序列 移动状态
-	if( this._drill_state_cur == "移动状态" ){
+	if( cur_state == "移动状态" ){
 		this.drill_EFN_setState_Moving( character );
 	}
 }
 //==============================
-// * A状态规划器 - 设置序列 踏步动画
+// * B状态规划器 - 设置序列 - 踏步动画
 //==============================
 Drill_EFN_Controller.prototype.drill_EFN_setState_StepAnime = function( character ){
 	this._drill_loop_curSeq = this._drill_state_seqStepAnime;	//（播放永久移动动画）
@@ -1230,7 +1291,7 @@ Drill_EFN_Controller.prototype.drill_EFN_setState_StepAnime = function( characte
 	this._drill_curTick = 0;
 }
 //==============================
-// * A状态规划器 - 设置序列 停止状态
+// * B状态规划器 - 设置序列 - 停止状态
 //==============================
 Drill_EFN_Controller.prototype.drill_EFN_setState_Stop = function( character ){
 	var data = this._drill_data;
@@ -1245,7 +1306,7 @@ Drill_EFN_Controller.prototype.drill_EFN_setState_Stop = function( character ){
 	}
 }
 //==============================
-// * A状态规划器 - 设置序列 跳跃状态
+// * B状态规划器 - 设置序列 - 跳跃状态
 //==============================
 Drill_EFN_Controller.prototype.drill_EFN_setState_Jumping = function( character ){
 	this._drill_loop_curSeq = this._drill_state_seqJump;
@@ -1253,7 +1314,7 @@ Drill_EFN_Controller.prototype.drill_EFN_setState_Jumping = function( character 
 	this._drill_curTick = 0;
 }
 //==============================
-// * A状态规划器 - 设置序列 移动状态
+// * B状态规划器 - 设置序列 - 移动状态
 //==============================
 Drill_EFN_Controller.prototype.drill_EFN_setState_Moving = function( character ){
 	this._drill_loop_curSeq = this._drill_state_seqMove;
@@ -1261,47 +1322,67 @@ Drill_EFN_Controller.prototype.drill_EFN_setState_Moving = function( character )
 	this._drill_curTick = 0;
 }
 //==============================
-// * A状态规划器 - 重刷序列
+// * B状态规划器 - 重刷序列
 //==============================
 Drill_EFN_Controller.prototype.drill_EFN_refreshStateSeq = function(){
 	var data = this._drill_data;
 	var orgPattern = data['orgPattern'];
 	
-	this._drill_state_seqStepAnime = this.drill_EFN_getLoopSeq_Moving();	//A状态规划器 - 踏步动画的序列
-	this._drill_state_seqStop = [ orgPattern ];								//A状态规划器 - 停止的序列
-	this._drill_state_seqMove = this.drill_EFN_getLoopSeq_Moving();			//A状态规划器 - 移动的序列
-	this._drill_state_seqJump = [ orgPattern ];								//A状态规划器 - 跳跃的序列
+	this._drill_state_seqStepAnime = this.drill_EFN_getLoopSeq_Moving();	//B状态规划器 - 踏步动画的序列
+	this._drill_state_seqStop = [ orgPattern ];								//B状态规划器 - 停止的序列
+	this._drill_state_seqMove = this.drill_EFN_getLoopSeq_Moving();			//B状态规划器 - 移动的序列
+	this._drill_state_seqJump = [ orgPattern ];								//B状态规划器 - 跳跃的序列
 }
 	
 
 //==============================
-// * B帧间隔器 - 帧刷新 - 公式
+// * C帧间隔器 - 初始化子功能
+//==============================
+Drill_EFN_Controller.prototype.drill_controller_initInter = function(){
+	this._drill_inter_cur = 4;					//C帧间隔器 - 当前间隔
+	this._drill_inter_lastFormula = "";			//C帧间隔器 - 当前公式
+	this._drill_inter_lastSpeed = 0;			//C帧间隔器 - 当前移动速度
+}
+//==============================
+// * C帧间隔器 - 帧刷新 - 公式
 //
-//			说明：	B帧间隔器 只做帧间隔的适配，确保稳定的帧间隔值，以及计数器+1。
+//			说明：	> C帧间隔器 只做帧间隔的适配，确保稳定的帧间隔值，以及计数器+1。
 //==============================
 Drill_EFN_Controller.prototype.drill_EFN_updateInter_Formula = function( character ){
 	var data = this._drill_data;
 	
 	// > 默认公式
 	//		（1速度24帧，2速度21帧，3速度18帧，6速度9帧）
-	if( data['interFormula'] == "" ){
-		data['interFormula'] = "(9 - character.realMoveSpeed()) *3";
+	var cur_formula = "(9 - character.realMoveSpeed()) *3";
+	
+	// > 设置的公式
+	if( data['interFormula'] != undefined &&
+		data['interFormula'] != "" ){
+		cur_formula = data['interFormula'];
+	}
+	
+	// > 设置的公式（奔跑时）
+	if( character.isDashing() ){
+		if( data['interDashingFormula'] != undefined &&
+			data['interDashingFormula'] != "" ){
+			cur_formula = data['interDashingFormula'];
+		}
 	}
 	
 	// > 公式转数字
 	var cur_speed = character.realMoveSpeed();
 	var speed = cur_speed;
-	if( this._drill_inter_curFormula != data['interFormula'] ||
-		this._drill_inter_curRealSpeed != cur_speed ){
-		this._drill_inter_curFormula =  data['interFormula'];
-		this._drill_inter_curRealSpeed =  cur_speed;
+	if( this._drill_inter_lastFormula != cur_formula ||
+		this._drill_inter_lastSpeed   != cur_speed ){
+		this._drill_inter_lastFormula =  cur_formula;
+		this._drill_inter_lastSpeed   =  cur_speed;
 		
-		this._drill_inter_cur = Math.floor( Number( eval(data['interFormula']) ) );
+		this._drill_inter_cur = Math.floor( Number( eval(cur_formula) ) );
 		//（优化：速度如果变化，才求解一次公式，而不是每次都求解公式）
 	}
 }
 //==============================
-// * B帧间隔器 - 帧刷新 - 计数器
+// * C帧间隔器 - 帧刷新 - 计数器
 //==============================
 Drill_EFN_Controller.prototype.drill_EFN_updateInter_Tick = function( character ){
 	
@@ -1327,9 +1408,17 @@ Drill_EFN_Controller.prototype.drill_EFN_updateInter_Tick = function( character 
 }
 
 //==============================
-// * C帧播放器 - 帧刷新
+// * D帧播放器 - 初始化子功能
+//==============================
+Drill_EFN_Controller.prototype.drill_controller_initLoop = function(){
+	this._drill_loop_curSeq = [1];				//D帧播放器 - 当前序列
+	this._drill_loop_curPattern = 0;			//D帧播放器 - 当前帧数
+	this._drill_loop_isEndStop = false;			//D帧播放器 - 序列只播放一次
+}
+//==============================
+// * D帧播放器 - 帧刷新
 //
-//			说明：	C帧播放器 只根据当前序列，进行帧播放。
+//			说明：	D帧播放器 只根据当前序列，进行帧播放。
 //==============================
 Drill_EFN_Controller.prototype.drill_EFN_updateLoop = function() {
 	var data = this._drill_data;
@@ -1357,7 +1446,7 @@ Drill_EFN_Controller.prototype.drill_EFN_updateLoop = function() {
 	}
 }
 //==============================
-// * C帧播放器 - 获取序列 - 移动状态
+// * D帧播放器 - 获取序列 - 移动状态
 //==============================
 Drill_EFN_Controller.prototype.drill_EFN_getLoopSeq_Moving = function(){
 	var data = this._drill_data;
@@ -1423,7 +1512,7 @@ Drill_EFN_Controller.prototype.drill_EFN_getLoopSeq_Moving = function(){
 	return cur_seq;
 }
 //==============================
-// * C帧播放器 - 获取序列 - 停止状态的连贯性
+// * D帧播放器 - 获取序列 - 停止状态的连贯性
 //
 //			说明：	> 这里不要去考虑自定义序列的情况。
 //					> 因为你没法控制 1,2,3,4,5,4,3,2,1 这种数组的帧连贯恢复问题。
@@ -1522,19 +1611,24 @@ Game_CharacterBase.prototype.drill_EFN_isEnabled = function(){
 // * 控制器绑定 - 数据
 //==============================
 DrillUp.g_EFN_controllerData = {
+	
+	// > 动画帧
 	'enable':true,		//（初始化时，立即启用）
 	'pause':false,
+	
+	// > A主体
 	'orgPattern':this._originalPattern,
 	'maxPattern':3,
 	'lockPattern':-1,
 	
+	// > B状态规划器
 	'continuityEnabled':DrillUp.g_EFN_continuityEnabled,
 	
-	'interFormula':"",
+	// > C帧间隔器
+	//	（不设置）
 	
-	'loop_type':"左右往返",
-	'loop_seq':[],
-	'loop_excludeOrg':false,
+	// > D帧播放器
+	//	（不设置）
 };
 //==============================
 // * 控制器绑定 - 帧刷新（半覆写）

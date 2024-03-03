@@ -1099,7 +1099,7 @@ Drill_MVi_VideoSprite.prototype.drill_MVi_spriteInit = function() {
 		temp_mask.anchor.x = 0.5;
 		temp_mask.anchor.y = 0.5;
 		this.addChild(temp_mask);
-		this.mask = temp_mask;
+		this.mask = temp_mask;		//『遮罩赋值』
 	}*/		//无法使用遮罩
 }
 //==============================

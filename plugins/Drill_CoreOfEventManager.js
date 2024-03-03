@@ -683,17 +683,22 @@ Game_Map.prototype.setup = function( mapId ){
 var _drill_COEM_o_event = Game_Event.prototype.event;
 Game_Event.prototype.event = function() {
 	
+	// > 原函数	（放前面，原代容器优先）
+	//			（因为 编辑器中添加事件，然后读取旧存档，会出现事件数据重合情况）
+	var data = _drill_COEM_o_event.call(this);
+	if( data != undefined ){ return data; }
+	
 	// > 子代事件 的 事件数据
 	if( $gameMap.drill_COEM_offspring_isOffspringEvent(this._eventId) == true ){
 		var e_tank = $gameMap._drill_COEM_offspringDataTank;
-		for(var i = 0; i< e_tank.length; i++){
+		for(var i = 0; i < e_tank.length; i++){
 			if( e_tank[i]['id'] == this._eventId ){
 				return e_tank[i];
 			}
 		}
 	}
-	// > 原函数
-	return _drill_COEM_o_event.call(this);
+	
+	return null;
 };
 
 //==============================
@@ -1088,10 +1093,12 @@ Game_Map.prototype.drill_COEM_getAvailableEventTank_Copyed_Private = function(){
 // ** ☆核心漏洞修复
 //=============================================================================
 //==============================
-// * 核心漏洞修复 - 屏蔽根据版本重刷地图
+// * 核心漏洞修复 - 『屏蔽根据版本重刷地图』
 //
-//			说明：	此功能会刷掉旧存档的存储数据，因为版本不一样会强制重进地图。
-//					而这样做只是 刷新旧存档的当前地图而已，没任何好处。
+//			说明：	> 此功能会刷掉旧存档的存储数据，因为版本不一样会强制重进地图。
+//					  而这样做只是 刷新旧存档的当前地图而已，没任何好处。
+//					> 屏蔽后会有一些小bug（如在编辑器删除事件后读取旧存档会报错），
+//					  这些bug统一在 存档管理器插件 中修复。
 //==============================
 Scene_Load.prototype.reloadMapIfUpdated = function() {
 	// （禁止重刷）

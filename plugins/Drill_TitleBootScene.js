@@ -537,7 +537,9 @@
 	// * 提示信息 - 报错 - 外部插件冲突
 	//==============================
 	DrillUp.drill_TBS_getPluginTip_Conflict = function(){
-		return "【" + DrillUp.g_TBS_PluginTip_curName + "】\n检测到 MadeWithMv.js 插件，请将该插件关闭。\n该插件的功能就是在启动界面显示图像，但是由于插件修改了内部结构，使得启动界面插件无法运行。";
+		return "【" + DrillUp.g_TBS_PluginTip_curName + "】\n检测到 MadeWithMv.js 插件，请将该插件关闭。\n"+
+			"该插件的功能就是在启动界面显示图像，但是由于插件修改了内部结构，使得启动界面插件无法运行。\n"+
+			"若你仍然想要MadeWithMv插件的显示logo图像功能，你可以在启动界面插件中，添加单图实现。";
 	};
 	
 	

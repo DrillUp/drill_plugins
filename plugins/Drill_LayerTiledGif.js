@@ -3230,13 +3230,13 @@ Scene_Map.prototype.drill_LTG_createMaskSprite = function( temp_controller, temp
 	
 	if( Imported.Drill_LayerDynamicMaskA && data['dynamicMask_bind'] == "动态遮罩板A" ){
 		var temp_mask = this.drill_LDMA_getMaskSprite();
-		temp_sprite.mask = temp_mask;
 		this._drill_SenceTopArea.addChild(temp_mask);
+		temp_sprite.mask = temp_mask;		//『遮罩赋值』
 	}
 	if( Imported.Drill_LayerDynamicMaskB && data['dynamicMask_bind'] == "动态遮罩板B" ){
 		var temp_mask = this.drill_LDMB_getMaskSprite();
-		temp_sprite.mask = temp_mask;
 		this._drill_SenceTopArea.addChild(temp_mask);
+		temp_sprite.mask = temp_mask;		//『遮罩赋值』
 	}
 }
 //==============================

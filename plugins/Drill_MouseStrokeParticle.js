@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        鼠标 - 划过时粒子效果
+ * @plugindesc [v1.2]        鼠标 - 划过时粒子效果
  * @author Drill_up
  * 
  * @Drill_LE_param "粒子样式-%d"
@@ -94,6 +94,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 添加了粒子 彩虹化 功能。
+ * [v1.2]
+ * 修复了 鼠标划动最大距离 设置无效的bug。
  *
  *
  * @param ---粒子样式组---
@@ -1642,12 +1644,21 @@ Scene_Map.prototype.drill_MSPa_updateMouse = function() {
 		if( cur_scene instanceof Scene_MenuBase && data['menu_enabled'] != true ){ continue; }
 		
 		
-		// > 粒子产生最小间隔时间
+		// > 记录 - 粒子产生最小间隔时间
 		controller._drill_MSPa_delay += 1;
-		if( controller._drill_MSPa_delay % controller._drill_data['mouse_interval'] != 0 ){ return; }
 		
-		// > 鼠标划动最大距离
-		//...
+		// > 记录 - 鼠标划动最大距离
+		controller._drill_MSPa_distance += Math.abs( diff_x );	//（距离直接相加，不取实际距离了，浪费计算量）
+		controller._drill_MSPa_distance += Math.abs( diff_y );
+		
+		
+		// > 条件 - 粒子产生最小间隔时间
+		if( controller._drill_MSPa_delay % controller._drill_data['mouse_interval'] != 0 ){ continue; }
+		
+		// > 条件 - 鼠标划动最大距离
+		if( controller._drill_MSPa_distance < controller._drill_data['mouse_maxDistance'] ){ continue; }
+		controller._drill_MSPa_distance = 0;
+		
 		
 		var dead_index = controller.drill_controller_getOneDeadParticleIndex();
 		if( dead_index == -1 ){ return; }
@@ -1869,6 +1880,7 @@ Drill_MSPa_Controller.prototype.drill_controller_initAttr = function() {
 	
 	// > 粒子产生最小间隔时间 计数器
 	this._drill_MSPa_delay = 0;
+	this._drill_MSPa_distance = 0;
 }
 //==============================
 // * B粒子群弹道 - 初始化子功能

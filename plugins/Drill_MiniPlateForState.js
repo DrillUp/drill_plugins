@@ -2286,14 +2286,41 @@ Drill_MPFS_Window.prototype.drill_initData = function() {
 	//（暂无 默认值）
 }
 //==============================
-// * 图片说明窗口 - 初始化数据
+// * 说明窗口 - 初始化数据
+//
+//			说明：	> 此函数只在初始化时执行一次，重设数据 被分到各个子功能里面执行。
 //==============================
 Drill_MPFS_Window.prototype.drill_initSprite = function() {
-	this.drill_initBean();				//初始化对象 - B实体类交互（最先执行）
 	this.drill_initAttr();				//初始化对象 - A主体
+	this.drill_initBean();				//初始化对象 - B实体类交互
 	this.drill_initPosition();			//初始化对象 - C位置跟随
 	this.drill_initSkin();				//初始化对象 - D窗口皮肤
 	this.drill_initMessage();			//初始化对象 - E窗口内容
+	
+	
+	// > 重设数据
+	//		（ 状态和buff说明窗口 没有样式切换，所以重设数据只在这里执行一次）
+	var data = {};
+	
+	data['anchor'] = DrillUp.g_MPFS_anchor;
+	
+	data['window_type'] = DrillUp.g_MPFS_layout_type;
+	data['window_opacity'] = DrillUp.g_MPFS_layout_opacity;
+	data['window_sys_src'] =  DrillUp.g_MPFS_layout_sys_src;
+	data['window_pic_src'] =  DrillUp.g_MPFS_layout_pic_src;
+	data['window_pic_x'] = DrillUp.g_MPFS_layout_pic_x;
+	data['window_pic_y'] = DrillUp.g_MPFS_layout_pic_y;
+	data['window_tone_lock'] = DrillUp.g_MPFS_tone_lock;
+	data['window_tone_r'] = DrillUp.g_MPFS_tone_r;
+	data['window_tone_g'] = DrillUp.g_MPFS_tone_g;
+	data['window_tone_b'] = DrillUp.g_MPFS_tone_b;
+	
+	// > 重设数据（C位置跟随）
+	this.drill_resetData_Position( data );
+	// > 重设数据（D窗口皮肤）
+	this.drill_resetData_Skin( data );
+	// > 重设数据（E窗口内容）
+	this.drill_resetData_Message( data );
 };
 
 
@@ -2429,23 +2456,24 @@ Drill_MPFS_Window.prototype.drill_isMouseControl = function( bean ){
 
 //==============================
 // * C位置跟随 - 初始化
-//
-//			说明：	> this._drill_curData在 A主体 中进行了初始化，可以直接使用。
 //==============================
 Drill_MPFS_Window.prototype.drill_initPosition = function() {
-	
-	// > 中心锚点
-	this._drill_anchor_x = 0;			//中心锚点x
-	this._drill_anchor_y = 0;			//中心锚点y
-	if( DrillUp.g_MPFS_anchor == "左上角" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 0.0; }
-	if( DrillUp.g_MPFS_anchor == "右上角" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 0.0; }
-	if( DrillUp.g_MPFS_anchor == "左下角" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 1.0; }
-	if( DrillUp.g_MPFS_anchor == "右下角" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 1.0; }
-	if( DrillUp.g_MPFS_anchor == "正上方" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 0.0; }
-	if( DrillUp.g_MPFS_anchor == "正下方" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 1.0; }
-	if( DrillUp.g_MPFS_anchor == "正左方" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 0.5; }
-	if( DrillUp.g_MPFS_anchor == "正右方" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 0.5; }
-	if( DrillUp.g_MPFS_anchor == "正中心" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 0.5; }
+	this._drill_anchor_x = 0;		//中心锚点x
+	this._drill_anchor_y = 0;		//中心锚点y
+}
+//==============================
+// * C位置跟随 - 重设数据
+//==============================
+Drill_MPFS_Window.prototype.drill_resetData_Position = function( data ) {
+	if( data['anchor'] == "左上角" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 0.0; }
+	if( data['anchor'] == "右上角" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 0.0; }
+	if( data['anchor'] == "左下角" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 1.0; }
+	if( data['anchor'] == "右下角" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 1.0; }
+	if( data['anchor'] == "正上方" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 0.0; }
+	if( data['anchor'] == "正下方" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 1.0; }
+	if( data['anchor'] == "正左方" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 0.5; }
+	if( data['anchor'] == "正右方" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 0.5; }
+	if( data['anchor'] == "正中心" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 0.5; }
 }
 //==============================
 // * C位置跟随 - 帧刷新
@@ -2531,27 +2559,13 @@ Drill_MPFS_Window.prototype.drill_initSkin = function() {
 	
 	// > 皮肤资源
 	this._drill_skin_defaultSkin = this.windowskin;
-	
-	// > 布局模式
-	var data = {};
-	data['window_type'] = DrillUp.g_MPFS_layout_type;
-	data['window_opacity'] = DrillUp.g_MPFS_layout_opacity;
-	data['window_sys_src'] =  DrillUp.g_MPFS_layout_sys_src;
-	data['window_pic_src'] =  DrillUp.g_MPFS_layout_pic_src;
-	data['window_pic_x'] = DrillUp.g_MPFS_layout_pic_x;
-	data['window_pic_y'] = DrillUp.g_MPFS_layout_pic_y;
-	data['window_tone_lock'] = DrillUp.g_MPFS_tone_lock;
-	data['window_tone_r'] = DrillUp.g_MPFS_tone_r;
-	data['window_tone_g'] = DrillUp.g_MPFS_tone_g;
-	data['window_tone_b'] = DrillUp.g_MPFS_tone_b;
-	this.drill_resetSkinData( data );
 }
 //==============================
 // * D窗口皮肤 - 重设数据
 //
 //			说明：	> 样式切换时重设，data对象中的参数【可以缺项】。
 //==============================
-Drill_MPFS_Window.prototype.drill_resetSkinData = function( data ){
+Drill_MPFS_Window.prototype.drill_resetData_Skin = function( data ){
 	
 	// > 默认值
 	if( data['window_type'] == undefined ){ data['window_type'] = "默认窗口皮肤" };		//布局模式（默认窗口皮肤/自定义窗口皮肤/自定义背景图片/黑底背景）
@@ -2745,6 +2759,19 @@ Drill_MPFS_Window.prototype.drill_initMessage = function() {
 	this._drill_text_default = DrillUp.g_MPFS_default_text;
 	this._drill_text_default = this._drill_text_default.substring(1,this._drill_text_default.length-1);
 	this.drill_COWA_drawTextEx( this._drill_text_default, {"x":0,"y":0} );
+}
+//==============================
+// * E窗口内容 - 重设数据
+//==============================
+Drill_MPFS_Window.prototype.drill_resetData_Message = function( data ){
+	
+	// > 标记初始化
+	this._drill_lastStateList = [];			//状态标记
+	this._drill_lastStateTypeList = [];		//状态类型标记
+	this._drill_lastBuffList = [];			//buff标记
+	
+	// > 帧刷新一次
+	this.drill_updateMessage();
 }
 //==============================
 // * E窗口内容 - 帧刷新
