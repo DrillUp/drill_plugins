@@ -324,7 +324,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			
 			var e_ids = null;
 			if( e_ids == null && unit == "玩家" ){
-				e_ids = [ -2 ];
+				e_ids = [ -2 ];		//『玩家id』
 			}
 			if( e_ids == null && unit == "本事件" ){
 				e_ids = [ this._eventId ];
@@ -577,7 +577,7 @@ Game_Character.prototype.processMoveCommand = function(command) {
 	if( this instanceof Game_Player ){
 		switch (command.code) {
 			case Game_Character.ROUTE_PLAY_SE:
-				$gameTemp._drill_ESo_event = -2;
+				$gameTemp._drill_ESo_event = -2;	//『玩家id』
 		}
 	}
 	_drill_ESo_processMoveCommand.call( this, command );
@@ -593,7 +593,7 @@ Sprite_Base.prototype.startAnimation = function(animation, mirror, delay) {
 		var sprite = this._animationSprites[ this._animationSprites.length-1 ];
 		sprite._drill_ESo_event = this._character._eventId;
 		if( this._character instanceof Game_Player ){
-			sprite._drill_ESo_event = -2;
+			sprite._drill_ESo_event = -2;	//『玩家id』
 		}
 	}
 }
@@ -620,7 +620,8 @@ var _drill_ESo_createBuffer = AudioManager.createBuffer;
 AudioManager.createBuffer = function(folder, name){
 	var buffer = _drill_ESo_createBuffer.call(this, folder, name);
 	if( folder == 'se' && $gameTemp ){
-		if( $gameTemp._drill_ESo_event > 0 || $gameTemp._drill_ESo_event == -2 ){
+		if( $gameTemp._drill_ESo_event > 0 || 
+			$gameTemp._drill_ESo_event == -2 ){		//『玩家id』
 			buffer._drill_ESo_b_event = $gameTemp._drill_ESo_event;			//绑定的事件
 			buffer._drill_ESo_b_isOff = $gameTemp._drill_ESo_isOff;			//距离化关闭状态
 			buffer._drill_ESo_b_volume = buffer.volume;						//原音量
@@ -668,7 +669,7 @@ AudioManager.drill_ESo_getPlayerSounds = function() {
 	var buffers = this._seBuffers;
 	for( var i=0; i < buffers.length; i++ ){
 		var buffer = buffers[i];
-		if( buffer._drill_ESo_b_event == -2 ){
+		if( buffer._drill_ESo_b_event == -2 ){	//『玩家id』
 			result.push( buffer );
 		}
 	}
@@ -682,7 +683,7 @@ AudioManager.drill_ESo_getPlayerSounds = function() {
 // * 接口 - 播放玩家声音
 //==============================
 AudioManager.drill_ESo_playPlayerSe = function(se) {
-	$gameTemp._drill_ESo_event = -2;
+	$gameTemp._drill_ESo_event = -2;		//『玩家id』
 	$gameTemp._drill_ESo_isOff = false;		//强制距离化
 	this.playSe(se);
 }
@@ -770,7 +771,7 @@ Game_Map.prototype.drill_ESo_updateSoundInterrupt = function() {
 	for( var i=0; i < $gameTemp._drill_ESo_needInterruptEventIds.length; i++ ){
 		var e_id = $gameTemp._drill_ESo_needInterruptEventIds[i];
 		var buffers = [];
-		if( e_id == -2 ){
+		if( e_id == -2 ){	//『玩家id』
 			buffers = AudioManager.drill_ESo_getPlayerSounds();			//玩家的声音
 		}else{
 			buffers = AudioManager.drill_ESo_getEventSoundsById(e_id);	//事件的声音
@@ -786,7 +787,7 @@ Game_Map.prototype.drill_ESo_updateSoundInterrupt = function() {
 	for( var i=0; i < $gameTemp._drill_ESo_needFadeEventIds.length; i++ ){
 		var e_id = $gameTemp._drill_ESo_needFadeEventIds[i];
 		var buffers = [];
-		if( e_id == -2 ){
+		if( e_id == -2 ){	//『玩家id』
 			buffers = AudioManager.drill_ESo_getPlayerSounds();			//玩家的声音
 		}else{
 			buffers = AudioManager.drill_ESo_getEventSoundsById(e_id);	//事件的声音

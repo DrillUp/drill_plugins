@@ -1368,8 +1368,8 @@ Bitmap.prototype._drawTextOutline = function( text, tx, ty, maxWidth ){
 		}
 		
 		// > 绘制渐变文字
-		var context = this._context;
-		var grad = context.createLinearGradient( x_0,y_0, x_1,y_1 );
+		var painter = this._context;
+		var grad = painter.createLinearGradient( x_0,y_0, x_1,y_1 );
 		for(var i = 1; i < color_strList.length; i += 2 ){
 			var pos = String( color_strList[i] );
 			var color = String( color_strList[i+1] );
@@ -1377,12 +1377,15 @@ Bitmap.prototype._drawTextOutline = function( text, tx, ty, maxWidth ){
 			if( color == "" ){ break; }
 			grad.addColorStop( pos, color );
 		}
-		context.save();
-		context.strokeStyle = grad;
-		context.lineWidth = 3;
-		context.lineJoin = 'round';
-		context.strokeText(text, tx, ty, maxWidth);
-		context.restore();
+		painter.save();								//（a.存储上一个画笔状态）
+		
+		painter.strokeStyle = grad;					//（b.设置样式）
+		painter.lineWidth = 3;
+		painter.lineJoin = 'round';
+		
+		painter.strokeText(text, tx, ty, maxWidth);	//（c.路径填充/描边，strokeText）
+		
+		painter.restore();							//（d.回滚上一个画笔状态）
 		this._setDirty();
 		
 		

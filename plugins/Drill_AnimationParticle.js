@@ -3175,7 +3175,7 @@ Scene_Map.prototype.drill_APa_updateInScene = function() {
 	// > 控制器帧刷新（需要放后面，与层级变化错开1帧）
 	for(var i = 0; i < $gameTemp._drill_APa_controllerTank.length; i++){
 		var temp_controller = $gameTemp._drill_APa_controllerTank[i];
-		temp_controller.drill_controller_update();
+		temp_controller.drill_controller_update();		//含『装饰延时销毁』的帧刷新
 	};
 	
 	
@@ -3566,7 +3566,7 @@ Drill_APa_Controller.prototype.drill_APa_setState_Private = function( state ){
 	if( state == "销毁" ){
 		this._drill_curTime = data['delay'] + data['birth'] + data['sustain'] + data['death'];
 		this._drill_curState = state;
-		this.drill_controller_destroyWithDelay();	//（延时销毁）
+		this.drill_controller_destroyWithDelay();	//『装饰延时销毁』
 	}
 }
 //==============================
@@ -3586,7 +3586,7 @@ Drill_APa_Controller.prototype.drill_APa_updateState = function(){
 		this._drill_curState = "消失";
 	}else{
 		this._drill_curState = "销毁";
-		this.drill_controller_destroyWithDelay();	//（延时销毁）
+		this.drill_controller_destroyWithDelay();	//『装饰延时销毁』
 	}
 	
 	// > 缩放与旋转

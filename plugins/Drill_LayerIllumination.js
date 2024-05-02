@@ -2053,7 +2053,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					chars = [ e_id ];
 				}
 				if( chars == null && obj_str == "玩家" ){
-					chars = [ -2 ];
+					chars = [ -2 ];		//『玩家id』
 				}
 			}
 		}
@@ -2206,7 +2206,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( type == "绑定到" ){
 				
 				if( obj_str == "玩家" ){
-					marker.drill_setBindingCharacterId( -2 );
+					marker.drill_setBindingCharacterId( -2 );	//『玩家id』
 					return;
 				}
 				if( obj_str == "本事件" ){
@@ -2437,7 +2437,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				
 				// > 绑定对象
 				if( temp3 == "玩家" ){
-					marker_lim.drill_setBindingCharacterId( -2 );
+					marker_lim.drill_setBindingCharacterId( -2 );	//『玩家id』
 				}
 				if( temp3 == "本事件" ){
 					marker_lim.drill_setBindingCharacterId( this._eventId );
@@ -3354,7 +3354,7 @@ Game_Map.prototype.drill_LIl_addSimplePerspect_characterId = function( character
 	if( this._drill_LIl_commandLock[character_id] >= 50 ){
 		this._drill_LIl_commandLock[character_id] = -1000;
 		var ch_str = "事件["+character_id+"]";
-		if( character_id == -2 ){ ch_str = "玩家"; }
+		if( character_id == -2 ){ ch_str = "玩家"; }		//『玩家id』
 		alert( DrillUp.drill_LIl_getPluginTip_Overdrive( ch_str ) );
 		return;
 	}

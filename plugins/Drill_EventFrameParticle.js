@@ -2485,11 +2485,13 @@ Game_Map.prototype.drill_controller_updateRestatistics = function() {
 	if( $gameTemp._drill_EFPa_needRestatistics != true ){ return }
 	$gameTemp._drill_EFPa_needRestatistics = false;
 	
-	$gameTemp._drill_EFPa_characterTank = [];
-	var events = this.events();
-	for( var i = 0; i < events.length; i++ ){
-		var temp_event = events[i];
-		if( temp_event == undefined ){ continue; }
+	$gameTemp._drill_EFPa_characterTank = [];			//容器中的物体，只增不减，除非清零
+	var event_list = this._events;
+	for(var i = 0; i < event_list.length; i++ ){  
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
+		
 		if( temp_event._drill_EFPa_controllerTank == undefined ){ continue; }
 		if( temp_event._drill_EFPa_controllerTank.length == 0 ){ continue; }
 		$gameTemp._drill_EFPa_characterTank.push(temp_event);
@@ -2542,7 +2544,7 @@ Game_CharacterBase.prototype.drill_EFPa_removeController = function( slot_id ){
 	if( this._drill_EFPa_controllerTank == undefined ){ return; }
 	if( this._drill_EFPa_controllerTank[ slot_id ] == undefined ){ return; }
 	
-	// > 延时销毁
+	// > 『装饰延时销毁』
 	//	（不能直接销毁替换，需要转移到另一个容器中，让其自己销毁）
 	var controller = this._drill_EFPa_controllerTank[ slot_id ];
 	controller.drill_controller_destroyWithDelay();		
@@ -2558,7 +2560,7 @@ Game_CharacterBase.prototype.drill_EFPa_removeController = function( slot_id ){
 //==============================
 Game_CharacterBase.prototype.drill_EFPa_removeControllerAll = function(){
 	if( this._drill_EFPa_controllerTank == undefined ){ return; }
-	for( var i=0; i < this._drill_EFPa_controllerTank.length; i++ ){
+	for(var i = 0; i < this._drill_EFPa_controllerTank.length; i++ ){
 		this.drill_EFPa_removeController( i );
 	}
 	this._drill_EFPa_controllerTank = undefined;
@@ -2643,14 +2645,14 @@ Game_CharacterBase.prototype.drill_EFPa_updateControllerDying = function(){
 	if( this._drill_EFPa_controllerDyingTank == undefined ){ return; }
 	if( this._drill_EFPa_controllerDyingTank.length == 0 ){ return; }
 	
-	// > 控制器 - 帧刷新（延时销毁）
+	// > 控制器 - 帧刷新『装饰延时销毁』
 	for( var i=0; i < this._drill_EFPa_controllerDyingTank.length; i++ ){
 		var controller = this._drill_EFPa_controllerDyingTank[i];
 		if( controller == undefined ){ continue; }
 		controller.drill_controller_update();
 	}
 	
-	// > 自动销毁 - 控制器（延时销毁）
+	// > 自动销毁 - 控制器『装饰延时销毁』
 	var is_all_empty = true;
 	for( var i=0; i < this._drill_EFPa_controllerDyingTank.length; i++ ){
 		var controller = this._drill_EFPa_controllerDyingTank[i];
@@ -2675,7 +2677,7 @@ Game_Event.prototype.erase = function(){
 	for( var i=0; i < this._drill_EFPa_controllerTank.length; i++ ){
 		var controller = this._drill_EFPa_controllerTank[i];
 		if( controller == undefined ){ continue; }
-		controller.drill_controller_destroyWithDelay();		//（延时销毁）
+		controller.drill_controller_destroyWithDelay();		//『装饰延时销毁』
 	}
 }
 

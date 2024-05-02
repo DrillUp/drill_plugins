@@ -781,7 +781,7 @@ Window_Selectable.prototype.setHelpWindowItem = function(item) {
 		if( DataManager.isArmor( temp_item )){ temp_item = $dataArmors[ temp_item.baseItemId ]; }
 		if( DataManager.isSkill( temp_item )){ temp_item = $dataSkills[ temp_item.baseItemId ]; }
 	}
-			
+	
 	this.drill_setRotateCard( temp_item );
 };
 //=============================

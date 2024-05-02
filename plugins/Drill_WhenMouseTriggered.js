@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        公共事件 - 鼠标触发公共事件
+ * @plugindesc [v1.1]        公共事件 - 鼠标触发公共事件
  * @author Drill_up
  * 
  * @Drill_LE_param "物理按键绑定-%d"
@@ -25,9 +25,10 @@
  * 该插件 不能 单独使用。
  * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfInput          系统-输入设备核心
+ *   - Drill_CoreOfInput           系统-输入设备核心
  * 可被扩展：
- *   - Drill_LayerCommandThread   地图-多线程
+ *   - Drill_LayerCommandThread    地图-多线程
+ *   - Drill_BattleCommandThread   战斗-多线程
  *     多线程插件可以使得 公共事件执行 串行/并行 操作。
  * 
  * -----------------------------------------------------------------------------
@@ -50,6 +51,11 @@
  *       Num0 Num1 Num2 Num3 Num4 Num5 Num6 Num7 Num8 Num9
  *       Num* Num+ Num- Num. Num/ NumEnter
  *   (4.注意，如果你想配置鼠标的 空格，那么要填"空格"，而不是" "。
+ * 公共事件：
+ *   (1.该插件在 地图界面/战斗界面 都可以设置 串行/并行。
+ *      具体看看 "31.公共事件 > 关于公共事件与并行.docx"。
+ *   (2.注意，事件指令"显示文字"、"显示选项"等对话框功能 是特殊的指令体，
+ *      只要执行对话框，就会被强制串行，阻塞其他所有事件的线程。
  * 细节：
  *   (1.设置物理按键绑定时，需要避免与已有的功能重叠。
  *      建议设计游戏时列一个物理按键分配表。
@@ -98,6 +104,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 添加了 战斗多线程 的支持。
  * 
  * 
  * 
@@ -401,7 +409,7 @@
  * @value 串行
  * @option 并行
  * @value 并行
- * @desc 公共事件的执行方式。战斗界面中没有并行，只能串行。
+ * @desc 公共事件的执行方式。地图界面/战斗界面 都可以设置 串行/并行。
  * @default 串行
  *
  */
@@ -747,8 +755,19 @@ Scene_Map.prototype.drill_WMT_updateCommonEvent = function() {
 //==============================
 Scene_Battle.prototype.drill_WMT_doCommonEvent = function( data ){
 	
+	// > 插件【战斗-多线程】
+	if( Imported.Drill_BattleCommandThread ){
+		var e_data = {
+			'type':"公共事件",
+			'pipeType': data['pipeType'],
+			'commonEventId': data['commonEventId'],
+		};
+		$gameTroop.drill_BCT_addPipeEvent( e_data );
+		
 	// > 默认执行
-	$gameTemp.reserveCommonEvent( data['commonEventId'] );
+	}else{
+		$gameTemp.reserveCommonEvent( data['commonEventId'] );
+	}
 }
 //==============================
 // * 公共事件控制 - 帧刷新绑定（战斗界面）

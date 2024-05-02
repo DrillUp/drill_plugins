@@ -478,9 +478,10 @@ Game_Character.prototype.initialize = function(){
 	_drill_EMS_key_initialize.call(this);
 }
 //==============================
-// * 物体的属性 - 初始化
+// * 物体的属性 - 初始化 数据
 //
 //			说明：	> 这里的数据都要初始化才能用。『节约事件数据存储空间』
+//					> 层面关键字为：keyData，一对一。
 //==============================
 Game_Character.prototype.drill_EMS_checkKeyData = function(){
 	if( this._drill_EMS_keyData != undefined ){ return; }
@@ -555,9 +556,10 @@ Game_Character.prototype.initialize = function(){
 	_drill_EMS_switch_initialize.call(this);
 }
 //==============================
-// * 开关的属性 - 初始化
+// * 开关的属性 - 初始化 数据
 //
 //			说明：	> 这里的数据都要初始化才能用。『节约事件数据存储空间』
+//					> 层面关键字为：switchData，一对一。
 //==============================
 Game_Character.prototype.drill_EMS_checkSwitchData = function(){	
 	if( this._drill_EMS_switchData != undefined ){ return; }
@@ -565,9 +567,10 @@ Game_Character.prototype.drill_EMS_checkSwitchData = function(){
 	this._drill_EMS_switchData['switch'] = {};		//锁列表
 }
 //==============================
-// * 开关的属性 - 初始化独立开关
+// * 开关的属性 - 初始化 独立开关容器
 //
 //			说明：	> 注意，多个注释能触发多个独立开关。
+//					> 层面关键字为：['switch']，一对多。
 //==============================
 Game_Character.prototype.drill_EMS_checkSwitchData_Switch = function( switch_str ){
 	this.drill_EMS_checkSwitchData()
@@ -720,11 +723,12 @@ Game_Map.prototype.drill_EMS_updateRestatistics_key = function(){
 	$gameTemp._drill_EMS_needRestatistics_key = false;
 	
 	$gameTemp._drill_EMS_keyTank = [];			//钥匙容器
-	var events = this.events();
-	for( var i = 0; i < events.length; i++ ){
-		var temp_event = events[i];
-		if( temp_event == undefined ){ continue; }
-		if( temp_event._erased == true ){ continue; }
+	var event_list = this._events;
+	for(var i = 0; i < event_list.length; i++ ){
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
+		
 		if( temp_event.drill_EMS_hasAnyKey() ){
 			$gameTemp._drill_EMS_keyTank.push(temp_event);
 		}
@@ -743,11 +747,12 @@ Game_Map.prototype.drill_EMS_updateRestatistics_switch = function(){
 	$gameTemp._drill_EMS_needRestatistics_switch = false;
 	
 	$gameTemp._drill_EMS_switchTank = [];		//锁容器（开关容器）
-	var events = this.events();
-	for( var i = 0; i < events.length; i++ ){
-		var temp_event = events[i];
-		if( temp_event == undefined ){ continue; }
-		if( temp_event._erased == true ){ continue; }
+	var event_list = this._events;
+	for(var i = 0; i < event_list.length; i++ ){
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
+		
 		if( temp_event.drill_EMS_hasAnySwitch() ){
 			$gameTemp._drill_EMS_switchTank.push(temp_event);
 		}
@@ -822,9 +827,11 @@ Game_Map.prototype.drill_EMS_refreshSwitch = function() {
 	for( var i = 0; i < $gameTemp._drill_EMS_switchTank.length; i++ ){
 		var temp_switchEv = $gameTemp._drill_EMS_switchTank[i];
 		
-		// > 计数开关 - 获取独立开关列表
+		// > 数据 - switchData层面（与事件一对一）
 		var switch_list = temp_switchEv.drill_EMS_getSwitchList();
 		if( switch_list.length == 0 ){ continue; }
+		
+		// > 数据 - ['switch']层面（与事件一对多）
 		for(var j = 0; j < switch_list.length; j++ ){
 			var cur_switch = switch_list[j];
 			

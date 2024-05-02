@@ -857,8 +857,8 @@
 		data['src_img'] = String( dataFrom["资源-背景"] || "");
 		data['src_img_mask'] = String( dataFrom["资源-背景遮罩"] || "");
 		data['src_img_file'] = "img/titles1/";
-		data['x'] = Number( dataFrom["平移-GIF X"] || 0);
-		data['y'] = Number( dataFrom["平移-GIF Y"] || 0);
+		data['x'] = Number( dataFrom["平移-背景 X"] || 0);
+		data['y'] = Number( dataFrom["平移-背景 Y"] || 0);
 		data['opacity'] = Number( dataFrom["透明度"] || 255);
 		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
 		data['x_speed'] = Number( dataFrom["背景X速度"] || 0.0);

@@ -1913,7 +1913,7 @@ Window_SkillList.prototype.drill_WSE_s_drawBackground = function( cur_bitmap, sk
 				
 				// > 绘制背景
 				var back_id = Number(args[0]) -1;
-				var back_bitmap = $gameTemp._drill_XESI_preloadTank[ back_id ];
+				var back_bitmap = $gameTemp._drill_XESI_preloadTank[ back_id ];		//『预加载直接赋值』
 				if( back_bitmap != null ){	//（直接拿预加载里的bitmap）
 					var back_x = 0;
 					var back_y = 0;

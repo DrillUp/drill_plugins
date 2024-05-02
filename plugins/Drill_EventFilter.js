@@ -704,7 +704,7 @@ Sprite_Character.prototype.drill_EvF_updateCharacterFilter = function() {
 	
 	//>指令延迟
 	character._drill_EvF.curTime ++;
-	if( character._drill_EvF.curTime % 5 != 0 ){ return }
+	if( character._drill_EvF.curTime % 5 != 0 ){ return }	//『减帧』
 	
 	//>初始化
 	if( character_sprite.drill_COF_isInited() == false ){

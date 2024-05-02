@@ -514,7 +514,7 @@ Window_Base.prototype.drill_COWA_getTextHeight_Private = function( text ){
 };
 
 //==============================
-// * 扩展文本 - 拦截
+// * 扩展文本 - 最后继承
 //
 //			说明：	对于一些继承了并且抢先执行 processEscapeCharacter 函数的插件，最好加上 不准套娃 标记。（现在已经不需要了，因为直接最后继承）
 //==============================

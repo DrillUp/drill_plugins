@@ -531,7 +531,7 @@ Game_Map.prototype.drill_EFP_updateBindRealTime = function(){
 // * 帧刷新 - 延迟创建事件
 //==============================
 Game_Map.prototype.drill_EFP_updateCreate = function(){
-	if( this._drill_EFP_time % 10 != 0 ){ return; }		//延迟10帧创建
+	if( this._drill_EFP_time % 10 != 0 ){ return; }		//『减帧』延迟10帧创建
 	
 	for( var i=0; i < this._drill_EFP_dataTank.length; i++ ){
 		var cur_bind = this._drill_EFP_dataTank[i];
@@ -625,12 +625,15 @@ Game_Map.prototype.drill_EFP_getTarMapEventDataByName = function( mapId, eventNa
 //==============================
 // * 地图 - 获取本地图的事件对象（根据事件名）
 //==============================
-Game_Map.prototype.drill_EFP_getCurMapEventByName = function( eventName ) {
-	var events = this.events();
-	for(var i = 0; i < events.length; i++ ){
-		var e = events[i];
-		if( e.event().name == String(eventName) ){
-			return e;
+Game_Map.prototype.drill_EFP_getCurMapEventByName = function( eventName ){
+	var event_list = this._events;
+	for(var i = 0; i < event_list.length; i++ ){  
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
+		
+		if( temp_event.event().name == String(eventName) ){
+			return temp_event;
 		}
 	}
 	return null;

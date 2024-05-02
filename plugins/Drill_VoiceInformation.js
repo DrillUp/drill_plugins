@@ -104,7 +104,7 @@
 //			->☆静态数据
 //			->☆插件指令
 //			
-//			->☆声音容器
+//			->☆声音加载容器
 //			->☆等待控制
 //			
 //			
@@ -172,7 +172,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					// > 执行等待
 					this._drill_VI_waitFolder = audio_folder;
 					this._drill_VI_waitName = audio_name;
-					this.setWaitMode("_drill_VI_waitLoading");
+					this.setWaitMode("_drill_VI_waitLoading");		//『强制等待』
 				}
 			}
 		}
@@ -206,48 +206,52 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 
 
 //=============================================================================
-// ** ☆声音容器
+// ** ☆声音加载容器
+//
+//			说明：	> 此模块专门定义 声音加载容器。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 声音容器 - 初始化
+// * 声音加载容器 - 初始化
 //==============================
 var _drill_VI_temp_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function(){	
 	_drill_VI_temp_initialize.call(this);
-	this._drill_VI_audioTank = {};				//声音容器
+	this._drill_VI_audioTank = {};				//声音加载容器
 	this._drill_VI_audioTank["bgm"] = {};
 	this._drill_VI_audioTank["bgs"] = {};
 	this._drill_VI_audioTank["me"] = {};
 	this._drill_VI_audioTank["se"] = {};
 };
 //==============================
-// * 声音容器 - 加入容器（加载资源）
+// * 声音加载容器 - 加入容器
 //
-//			说明：	注意，folder必须小写（bgm/bgs/me/se）。
+//			说明：	> folder必须小写（bgm/bgs/me/se）。
 //==============================
 Game_Temp.prototype.drill_VI_pushAudio = function( folder, audio_name ){	
 	var buffer = AudioManager.createBuffer( folder, audio_name );
 	this._drill_VI_audioTank[ folder ][ audio_name ] = buffer;
 };
 //==============================
-// * 声音容器 - 获取已加载对象
-//
-//			说明：	若未加载则返回null。
-//==============================
-Game_Temp.prototype.drill_VI_getAudio = function( folder, audio_name ){	
-	if( this.drill_VI_isAudioLoaded( folder, audio_name ) == false ){ return null; }
-	return this._drill_VI_audioTank[ folder ][ audio_name ];
-};
-//==============================
-// * 声音容器 - 是否加载
+// * 声音加载容器 - 是否有对象（开放函数）
 //==============================
 Game_Temp.prototype.drill_VI_hasAudio = function( folder, audio_name ){	
 	var buffer = this._drill_VI_audioTank[ folder ][ audio_name ];
 	if( buffer == undefined ){ return false; }
 	return true;
 };
+
 //==============================
-// * 声音容器 - 是否加载完成
+// * 声音加载容器 - 获取已加载对象（开放函数）
+//
+//			说明：	> 若未加载则返回null。
+//==============================
+Game_Temp.prototype.drill_VI_getAudio = function( folder, audio_name ){	
+	if( this.drill_VI_isAudioLoaded( folder, audio_name ) == false ){ return null; }
+	return this._drill_VI_audioTank[ folder ][ audio_name ];
+};
+//==============================
+// * 声音加载容器 - 是否加载完成（开放函数）
 //==============================
 Game_Temp.prototype.drill_VI_isAudioLoaded = function( folder, audio_name ){	
 	var buffer = this._drill_VI_audioTank[ folder ][ audio_name ];
@@ -261,9 +265,9 @@ Game_Temp.prototype.drill_VI_isAudioLoaded = function( folder, audio_name ){
 	}
 };
 //==============================
-// * 声音 - 完成加载时
+// * 声音加载容器 - 完成加载时
 //
-//			说明：	此函数在声音加载完成时会调用一次。
+//			说明：	> 此函数在声音加载完成时会调用一次。
 //==============================
 var _drill_VI__onLoad = WebAudio.prototype._onLoad;
 WebAudio.prototype._onLoad = function(){
@@ -274,22 +278,29 @@ WebAudio.prototype._onLoad = function(){
 
 //=============================================================================
 // ** ☆等待控制
+//
+//			说明：	> 此模块专门定义 等待类型。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 等待控制 - 不限时类型等待
+// * 等待控制 - 自定义等待类型
 //==============================
 var _drill_VI_updateWaitMode = Game_Interpreter.prototype.updateWaitMode;
 Game_Interpreter.prototype.updateWaitMode = function(){
-	if( this._waitMode == "_drill_VI_waitLoading" ){
-		if( this._drill_VI_waitFolder != undefined &&		//有名称，且未加载完成，则等待
+	
+	// > 等待类型
+	if( this._waitMode == "_drill_VI_waitLoading" ){		//『强制等待』有资源名称且未加载完成，则持续等待
+		if( this._drill_VI_waitFolder != undefined &&
 			this._drill_VI_waitFolder != "" &&
 			this._drill_VI_waitName != undefined &&
 			this._drill_VI_waitName != "" &&
 			$gameTemp.drill_VI_isAudioLoaded( this._drill_VI_waitFolder, this._drill_VI_waitName ) == false ){
-			return true;
+			return true;	//（返回true表示要等待）
 		}
 	}
+	
+	// > 原函数
 	return _drill_VI_updateWaitMode.call(this);
-}
+};
 
 

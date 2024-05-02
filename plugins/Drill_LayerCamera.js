@@ -484,9 +484,12 @@
 //		★功能结构树：
 //			->☆提示信息
 //			->☆静态数据
-//			->☆管辖权
 //			->☆插件指令
 //			->☆存储数据
+//
+//			->☆管辖权 - 镜头
+//			->☆管辖权 - 镜头滚动
+//			->☆管辖函数覆写
 //
 //			->☆镜头控制器函数
 //			->☆镜头控制
@@ -688,28 +691,28 @@ if( Imported.Drill_CoreOfBallistics &&
 	
 	
 //=============================================================================
-// ** ☆管辖权
+// ** ☆管辖权 - 镜头
 //
 //			说明：	> 管辖权 即对 原函数 进行 修改、覆写、继承、控制子插件继承 等的权利。
 //					> 用于后期脱离 原游戏框架 且仍保持兼容性 的标记。
 //=============================================================================
 /*
 //==============================
-// * 地图『活动地图镜头』 - 基本属性 - 图块 - 屏幕宽度（图块单位）
+// * A基本属性『地图-活动地图镜头』 - 图块 - 屏幕宽度（图块单位）
 //==============================
 Game_Map.prototype.screenTileX = function(){ return Graphics.width / this.tileWidth(); };
 //==============================
-// * 地图『活动地图镜头』 - 基本属性 - 图块 - 屏幕高度（图块单位）
+// * A基本属性『地图-活动地图镜头』 - 图块 - 屏幕高度（图块单位）
 //==============================
 Game_Map.prototype.screenTileY = function(){ return Graphics.height / this.tileHeight(); };
 
 //==============================
-// * 镜头『活动地图镜头』 - 访问器（图块单位）
+// * E镜头『地图-活动地图镜头』 - 访问器（图块单位）
 //==============================
 Game_Map.prototype.displayX = function(){ return this._displayX; };
 Game_Map.prototype.displayY = function(){ return this._displayY; };
 //==============================
-// * 镜头『活动地图镜头』 - 设置镜头位置
+// * E镜头『地图-活动地图镜头』 - 设置镜头位置
 //
 //			说明：	> 所有脚本中，控制 _displayX 和 _displayY 的只有两个地方。
 //					  一个是该函数，强制设置固定的位置。
@@ -734,8 +737,19 @@ Game_Map.prototype.setDisplayPos = function( x, y ){
         this._parallaxY = this._displayY;
     }
 };
+*/
+
+//=============================================================================
+// ** ☆管辖权 - 镜头滚动
+//
+//			说明：	> 管辖权 即对 原函数 进行 修改、覆写、继承、控制子插件继承 等的权利。
+//					> 用于后期脱离 原游戏框架 且仍保持兼容性 的标记。
+//=============================================================================
+/*
 //==============================
-// * 镜头滚动『活动地图镜头』 - 设置滚动
+// * F镜头滚动『地图-活动地图镜头』 - 载入初始化
+//
+//			说明：	> 只在 载入地图时 执行一次。
 //==============================
 Game_Map.prototype.setupScroll = function(){
     this._scrollDirection = 2;
@@ -743,7 +757,7 @@ Game_Map.prototype.setupScroll = function(){
     this._scrollSpeed = 4;
 };
 //==============================
-// * 镜头滚动『活动地图镜头』 - 开始滚动（command204）
+// * F镜头滚动『地图-活动地图镜头』 - 开始滚动（command204）
 //==============================
 Game_Map.prototype.startScroll = function( direction, distance, speed ){
     this._scrollDirection = direction;
@@ -751,15 +765,15 @@ Game_Map.prototype.startScroll = function( direction, distance, speed ){
     this._scrollSpeed = speed;
 };
 //==============================
-// * 镜头滚动『活动地图镜头』 - 判断滚动状态
+// * F镜头滚动『地图-活动地图镜头』 - 判断滚动状态
 //==============================
 Game_Map.prototype.isScrolling = function(){ return this._scrollRest > 0; };
 //==============================
-// * 镜头滚动『活动地图镜头』 - 滚动距离
+// * F镜头滚动『地图-活动地图镜头』 - 滚动距离
 //==============================
 Game_Map.prototype.scrollDistance = function(){ return Math.pow(2, this._scrollSpeed) / 256; };
 //==============================
-// * 镜头滚动『活动地图镜头』 - 帧刷新
+// * F镜头滚动『地图-活动地图镜头』 - 帧刷新
 //
 //			应用：	调用了 .scrollDown、.scrollLeft、.scrollRight、.scrollUp 函数。
 //			说明：	> 注意，地图镜头受两个地方控制，这里为其中一个，事件指令的作用。
@@ -781,7 +795,7 @@ Game_Map.prototype.updateScroll = function(){
     }
 };
 //==============================
-// * 镜头滚动『活动地图镜头』 - 执行滚动（帧刷新）
+// * F镜头滚动『地图-活动地图镜头』 - 执行滚动（帧刷新）
 //==============================
 Game_Map.prototype.doScroll = function( direction, distance ){
     switch( direction ){
@@ -800,7 +814,7 @@ Game_Map.prototype.doScroll = function( direction, distance ){
     }
 };
 //==============================
-// * 镜头滚动『活动地图镜头』 - 向下滚动
+// * F镜头滚动『地图-活动地图镜头』 - 向下滚动
 //
 //			应用：	> 被函数 Game_Player.prototype.updateScroll 调用（注意）
 //					> 被函数 Game_Map.prototype.updateScroll 调用
@@ -820,7 +834,7 @@ Game_Map.prototype.scrollDown = function( distance ){
     }
 };
 //==============================
-// * 镜头滚动『活动地图镜头』 - 向左滚动
+// * F镜头滚动『地图-活动地图镜头』 - 向左滚动
 //
 //			应用：	> 被函数 Game_Player.prototype.updateScroll 调用（注意）
 //					> 被函数 Game_Map.prototype.updateScroll 调用
@@ -839,7 +853,7 @@ Game_Map.prototype.scrollLeft = function( distance ){
     }
 };
 //==============================
-// * 镜头滚动『活动地图镜头』 - 向右滚动
+// * F镜头滚动『地图-活动地图镜头』 - 向右滚动
 //
 //			应用：	> 被函数 Game_Player.prototype.updateScroll 调用（注意）
 //					> 被函数 Game_Map.prototype.updateScroll 调用
@@ -859,7 +873,7 @@ Game_Map.prototype.scrollRight = function( distance ){
     }
 };
 //==============================
-// * 镜头滚动『活动地图镜头』 - 向上滚动
+// * F镜头滚动『地图-活动地图镜头』 - 向上滚动
 //
 //			应用：	> 被函数 Game_Player.prototype.updateScroll 调用（注意）
 //					> 被函数 Game_Map.prototype.updateScroll 调用
@@ -879,7 +893,7 @@ Game_Map.prototype.scrollUp = function( distance ){
 };
 
 //==============================
-// * 玩家『活动地图镜头』 - 帧刷新 镜头位置
+// * 玩家『地图-活动地图镜头』 - 帧刷新 镜头滚动
 //
 //			应用：	调用了 .scrollDown、.scrollLeft、.scrollRight、.scrollUp 函数。
 //			说明：	> 注意，地图镜头受两个地方控制，这里为其中一个，玩家移动的影响。
@@ -910,6 +924,20 @@ Game_Player.prototype.updateScroll = function( lastScrolledX, lastScrolledY ){
     }
 };
 */
+
+
+//=============================================================================
+// ** ☆管辖函数覆写
+//
+//			说明：	> 此模块 覆写函数，防止其它插件对函数覆写后，影响功能。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 管辖函数覆写『地图-活动地图镜头』 - 访问器（图块单位）
+//==============================
+Game_Map.prototype.displayX = function(){ return this._displayX; };
+Game_Map.prototype.displayY = function(){ return this._displayY; };
+
 
 
 //=============================================================================
@@ -3933,45 +3961,54 @@ Drill_LCa_Controller.prototype.drill_controller_initMath = function(){
 //					> height 数字          （贴图高度）
 //					> rotation 数字        （旋转度数，弧度）
 //					> scale_x,scale_y 数字 （缩放比例XY，默认1.00）
+//					> skew_x,skew_y 数字   （斜切比例XY，默认0.00）
 //			返回：	> { x:0, y:0 }         （偏移的坐标）
 //			
-//			说明：	修正 旋转+缩放 的坐标，使其看起来像是在绕着 新的锚点 变换。
-//					旋转值和缩放值可为负数。
+//			说明：	> 修正 旋转+缩放+斜切 的坐标，使其看起来像是在绕着 新的锚点 变换。
+//					  旋转+缩放+斜切 可为负数。
 //==============================
 Game_Temp.prototype.drill_LCa_Math2D_getFixPointInAnchor = function( 
 					org_anchor_x,org_anchor_y,			//原贴图锚点 
 					target_anchor_x,target_anchor_y, 	//新的锚点 
 					width, height,						//贴图高宽
-					rotation, scale_x, scale_y  ){		//变换的值（旋转+缩放）
+					rotation,							//变换的值（旋转）
+					scale_x, scale_y,					//变换的值（缩放）
+					skew_x, skew_y  ){					//变换的值（斜切）
 	
-	var ww = width * ( target_anchor_x - org_anchor_x );
-	var hh = height * ( target_anchor_y - org_anchor_y );
-	var xx = 0;
-	var yy = 0;
-	if( ww == 0 && hh == 0){ return { "x":0, "y":0 }; }
-	if( ww == 0 ){ ww = 0.0001; }
+	if( scale_x == undefined ){ scale_x = 1; }
+	if( scale_y == undefined ){ scale_y = 1; }
+	if( skew_x == undefined ){ skew_x = 0; }
+	if( skew_y == undefined ){ skew_y = 0; }
 	
-	// > 先缩放
-	var sww = ww*scale_x;
-	var shh = hh*scale_y;
+	// > 参数准备 （来自 Pixi.Transform）
+    var _cx = 1; // cos rotation + skewY;
+    var _sx = 0; // sin rotation + skewY;
+    var _cy = 0; // cos rotation + Math.PI/2 - skewX;
+    var _sy = 1; // sin rotation + Math.PI/2 - skewX;
 	
-	// > 后旋转
-	var r = Math.sqrt( Math.pow(sww,2) + Math.pow(shh,2) );
-	var p_degree = Math.atan(shh/sww);	
-	p_degree = Math.PI - p_degree;
-	if( sww < 0 ){
-		p_degree = Math.PI + p_degree;
-	}
+	// > 旋转+斜切 （来自 Pixi.Transform.prototype.updateSkew）
+    _cx = Math.cos( rotation + skew_y );
+    _sx = Math.sin( rotation + skew_y );
+    _cy = -Math.sin( rotation - skew_x ); // cos, added PI/2
+    _sy = Math.cos( rotation - skew_x ); // sin, added PI/2
 	
-	// > 变换的偏移量
-	xx += r*Math.cos( rotation - p_degree );		//圆公式 (x-a)²+(y-b)²=r²
-	yy += r*Math.sin( rotation - p_degree );		//圆极坐标 x=ρcosθ,y=ρsinθ
+	// > 缩放 （来自 Pixi.Transform.prototype.updateLocalTransform）
+    var a = _cx * scale_x;
+    var b = _sx * scale_x;
+    var c = _cy * scale_y;
+    var d = _sy * scale_y;
 	
-	// > 锚点偏移量
-	xx += ww;
-	yy += hh;
+	// > 将参数应用到坐标
+	var cur_x = width  * target_anchor_x;
+	var cur_y = height * target_anchor_y;
+	var center_x = width  * org_anchor_x;
+	var center_y = height * org_anchor_y;
+	var dx = (center_x - cur_x);
+	var dy = (center_y - cur_y);
+    var tar_x = cur_x + (dx * a + dy * c) - center_x;
+    var tar_y = cur_y + (dx * b + dy * d) - center_y;
 	
-	return { "x":xx, "y":yy };
+	return { "x":tar_x, "y":tar_y };
 }
 //==============================
 // * J数学工具 - 矩阵点的变换
@@ -4765,10 +4802,13 @@ Game_Map.prototype.drill_LCa_updateRestatistics = function() {
 	if( !$gameTemp._drill_LCa_needRestatistics ){ return }
 	$gameTemp._drill_LCa_needRestatistics = false;
 	
-	var events = this.events();
 	$gameTemp._drill_LCa_wallEvents = [];
-	for( var i = 0; i < events.length; i++ ){ 
-		var temp_event = events[i];
+	var event_list = this._events;
+	for(var i = 0; i < event_list.length; i++ ){
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
+		
 		if( temp_event._drill_LCa_wall != null && 
 			temp_event._drill_LCa_wall.length != 0){
 			$gameTemp._drill_LCa_wallEvents.push(temp_event);

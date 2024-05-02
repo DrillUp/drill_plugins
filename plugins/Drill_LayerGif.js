@@ -2928,6 +2928,24 @@ Scene_Map.prototype.createAllWindows = function() {
 	}
 }
 //==============================
+// * 地图层级 - 参数定义
+//
+//			说明：	> 所有drill插件的贴图都用唯一参数：zIndex（可为小数、负数），其它插件没有此参数定义。
+//==============================
+if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义）
+	var _drill_sprite_zIndex = true;
+	Object.defineProperty( Sprite.prototype, 'zIndex', {
+		set: function( value ){
+			this.__drill_zIndex = value;
+		},
+		get: function(){
+			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			return this.__drill_zIndex;
+		},
+		configurable: true
+	});
+};
+//==============================
 // * 地图层级 - 图片层级排序（私有）
 //==============================
 Scene_Map.prototype.drill_LGi_sortByZIndex_Private = function () {
@@ -3447,6 +3465,7 @@ Drill_LGi_Controller.prototype.drill_controller_GIF_setFrame = function( cur_fra
 	// > 刷新索引
 	var inter = this._drill_GIF_time;
 	inter = inter / data['interval'];
+	inter = Math.floor(inter);
 	inter = inter % data['src_img_gif'].length;
 	if( data['back_run'] == true ){
 		inter = data['src_img_gif'].length - 1 - inter;
@@ -3785,6 +3804,7 @@ Drill_LGi_Controller.prototype.drill_controller_updateGIF = function(){
 		// > 播放GIF
 		var inter = this._drill_GIF_time;
 		inter = inter / data['interval'];
+		inter = Math.floor(inter);
 		inter = inter % data['src_img_gif'].length;
 		if( this._drill_GIF_onceType == "backRun" ){
 			inter = data['src_img_gif'].length - 1 - inter;
@@ -3809,6 +3829,7 @@ Drill_LGi_Controller.prototype.drill_controller_updateGIF = function(){
 	// > 播放GIF
 	var inter = this._drill_GIF_time;
 	inter = inter / data['interval'];
+	inter = Math.floor(inter);
 	inter = inter % data['src_img_gif'].length;
 	if( data['back_run'] == true ){
 		inter = data['src_img_gif'].length - 1 - inter;

@@ -122,6 +122,7 @@
 //		
 //		★核心说明：
 //			1.核心与所有子插件功能介绍去看看："1.系统 > 大家族-粒子效果（脚本）.docx"
+//			2.核心针对全局，而不是特定场景，因此只能提供类的框架定义，无法提供数据容器。
 //		
 //		★必要注意事项：
 //			暂无
@@ -429,7 +430,7 @@ Drill_COPa_Controller.prototype.drill_controller_isDead = function(){
 	return this._drill_needDestroy == true;
 };
 //##############################
-// * 控制器 - 设置延时销毁【标准函数】
+// * 控制器 - 设置延时销毁【标准函数】『装饰延时销毁』
 //
 //			参数：	> 无
 //			返回：	> 无
@@ -1211,7 +1212,7 @@ Drill_COPa_Controller.prototype.drill_controller_updateLife = function(){
 	if( data['par_lifeType'] == "同时产生(一次性)" ||
 		this._drill_isDelayingDestroy == true ){
 		if( this.drill_controller_isParticleAllDead() == true ){
-			this.drill_controller_destroy();				//（执行销毁）
+			this.drill_controller_destroy();				//（执行销毁）『装饰延时销毁』
 		}
 	}
 	

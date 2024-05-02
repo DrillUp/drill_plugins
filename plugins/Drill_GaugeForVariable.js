@@ -1694,7 +1694,7 @@ Game_System.prototype.drill_GFV_initSysData_Private = function() {
 	for(var i = 0; i < DrillUp.g_GFV_bind.length; i++ ){
 		var temp_data = JSON.parse(JSON.stringify( DrillUp.g_GFV_bind[i] ));
 		if( temp_data == undefined ){ continue; }
-		this._drill_GFV_bindTank.push( temp_data );
+		this._drill_GFV_bindTank[i] = temp_data;
 	}
 };
 //==============================
@@ -1821,6 +1821,24 @@ Scene_Map.prototype.createAllWindows = function() {
 		this.addChild(this._drill_SenceTopArea);	
 	}
 }
+//==============================
+// * 地图层级 - 参数定义
+//
+//			说明：	> 所有drill插件的贴图都用唯一参数：zIndex（可为小数、负数），其它插件没有此参数定义。
+//==============================
+if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义）
+	var _drill_sprite_zIndex = true;
+	Object.defineProperty( Sprite.prototype, 'zIndex', {
+		set: function( value ){
+			this.__drill_zIndex = value;
+		},
+		get: function(){
+			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			return this.__drill_zIndex;
+		},
+		configurable: true
+	});
+};
 //==============================
 // * 地图层级 - 图片层级排序（私有）
 //==============================
@@ -2103,6 +2121,24 @@ Scene_Battle.prototype.createAllWindows = function() {
 		this.addChild(this._drill_SenceTopArea);	
 	}
 }
+//==============================
+// * 战斗层级 - 参数定义
+//
+//			说明：	> 所有drill插件的贴图都用唯一参数：zIndex（可为小数、负数），其它插件没有此参数定义。
+//==============================
+if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义）
+	var _drill_sprite_zIndex = true;
+	Object.defineProperty( Sprite.prototype, 'zIndex', {
+		set: function( value ){
+			this.__drill_zIndex = value;
+		},
+		get: function(){
+			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			return this.__drill_zIndex;
+		},
+		configurable: true
+	});
+};
 //==============================
 // * 战斗层级 - 图片层级排序（私有）
 //==============================

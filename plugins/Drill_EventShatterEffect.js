@@ -303,11 +303,13 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				e_ids = [ Number(unit) ];
 			}
 			if( e_ids == null && unit == "全图事件" ){
-				var all_e = $gameMap._events;
 				e_ids = [];
-				for( var i=0; i < all_e.length; i++ ){
-					if( !all_e[i] ){ continue; }
-					e_ids.push( all_e[i]._eventId );
+				var event_list = $gameMap._events;
+				for(var i = 0; i < event_list.length; i++ ){
+					var temp_event = event_list[i];
+					if( temp_event == null ){ continue; }
+					if( temp_event._erased == true ){ continue; }	//『有效事件』
+					e_ids.push( temp_event._eventId );
 				}
 			}
 			
@@ -514,6 +516,9 @@ Game_Temp.prototype.drill_ESE_getCharacterSpriteByEventId = function( event_id )
 //=============================================================================
 //==============================
 // * 事件贴图容器 - 获取 - 根据事件ID（私有）
+//          
+//			说明：	> 贴图容器 _characterSprites，存放全部物体贴图，不含镜像贴图。
+//					  这只是一个贴图容器，即使贴图在其他层级，也不影响容器获取到贴图。（更多细节去看 脚本文档说明）
 //==============================
 Game_Temp.prototype.drill_ESE_getCharacterSpriteTank_Private = function(){
 	if( SceneManager._scene == undefined ){ return null; }
@@ -528,8 +533,7 @@ Game_Temp.prototype.drill_ESE_getCharacterSpriteByEventId_Private = function( ev
 	if( sprite_list == undefined ){ return null; }
 	for(var i=0; i < sprite_list.length; i++){
 		var sprite = sprite_list[i];
-		if( sprite._character == undefined ){ continue; }				//（判断 _character 就可以，不需要检验 Sprite_Character 了）
-		if( this.drill_ESE_isReflectionSprite( sprite ) ){ continue; }	//（镜像跳过）
+		if( sprite._character == undefined ){ continue; }		//（判断 _character 就可以，不需要检验 Sprite_Character）
 		if( sprite._character._eventId == event_id ){
 			return sprite;
 		}

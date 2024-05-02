@@ -411,7 +411,7 @@ Drill_CODM_MaskStage.prototype.drill_stage_updateAttr = function(){
 	// > fps控制（低帧优化）（别优化了，反而会出现贴图不刷新的问题）
 	//var fps = 1000 / Graphics._fpsMeter.duration;
 	//if( fps < 10 ){
-	//	if( this._drill_curTime % 3 != 0 ){
+	//	if( this._drill_curTime % 3 != 0 ){		//『减帧』
 	//		this._drill_blockEnabled = true;	//（低帧数时，减少刷新次数）
 	//	}else{
 	//		this._drill_blockEnabled = false;
@@ -1153,7 +1153,7 @@ Drill_CODM_PerspectiveMarker.prototype.drill_updatePosition = function(){
 	// > 位置 - 事件
 	if( this._drill_bindingCharacterId != -1 ){
 		var character = null;
-		if( this._drill_bindingCharacterId == -2 ){
+		if( this._drill_bindingCharacterId == -2 ){	//『玩家id』
 			character = $gamePlayer;
 		}else{
 			character = $gameMap.event( this._drill_bindingCharacterId );
@@ -1190,15 +1190,13 @@ Drill_CODM_PerspectiveMarker.prototype.drill_updatePosition = function(){
 	if( this._drill_bindingPictureId != -1 ){
 		var pic = $gameScreen.picture( this._drill_bindingPictureId );
 		if( pic == undefined ){ return; }
+		
+		// > 【图片 - 图片优化核心】『图片数据最终变换值』
 		xx = pic.x();
 		yy = pic.y();
-		if( Imported.Drill_MouseDragPicture ){		//（鼠标-可拖拽的图片）
-			xx += pic.drill_MDP_getDraggingXOffset();
-			yy += pic.drill_MDP_getDraggingYOffset();
-		}
-		if( Imported.Drill_PictureAdsorptionSlot ){	//（鼠标-图片吸附槽）
-			xx += pic.drill_PAS_getAdsorbXOffset();
-			yy += pic.drill_PAS_getAdsorbYOffset();
+		if( Imported.Drill_CoreOfPicture == true ){
+			xx = pic.drill_COPi_finalTransform_x();
+			yy = pic.drill_COPi_finalTransform_y();
 		}
 	}
 	
@@ -1578,12 +1576,13 @@ Drill_CODM_PerspectiveSprite.prototype.drill_CODM_updateRotation = function() {
 //==============================
 Drill_CODM_PerspectiveSprite.prototype.drill_getCurRotation = function() {
 	var ch = null;
-	if( this._drill_marker._drill_bindingCharacterId == -2 ){
+	if( this._drill_marker._drill_bindingCharacterId == -2 ){	//『玩家id』
 		ch = $gamePlayer;
 	}else{
 		ch = $gameMap._events[ this._drill_marker._drill_bindingCharacterId ];
+		if( ch == null ){ return 0; }
+		if( ch._erased == true ){ return 0; }	//『有效事件』
 	}
-	if( ch == undefined ){ return 0; }
 	
 	if( ch.direction() === 2 ){	//下
 		return 0;

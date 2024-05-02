@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        行走图 - 额外位置偏移量
+ * @plugindesc [v1.4]        行走图 - 额外位置偏移量
  * @author Drill_up
  *
  *
@@ -112,6 +112,8 @@
  * 添加了 移动路线指令 功能。
  * [v1.3]
  * 优化了插件内部结构。
+ * [v1.4]
+ * 兼容了碰撞体位置叠加的功能。
  *
  */
 
@@ -146,8 +148,9 @@
 //			->☆物体的属性
 //			->☆偏移控制
 //				->移动时才偏移
-//			->☆偏移兼容设置
-//				->偏移不影响倒影镜像
+//			->☆数据最终变换值
+//				->不影响倒影镜像
+//				->影响同步镜像
 //
 //
 //		★家谱：
@@ -183,6 +186,12 @@
 	//==============================
 	DrillUp.drill_EES_getPluginTip_EventNotFind = function( e_id ){
 		return "【" + DrillUp.g_EES_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 强制更新提示
+	//==============================
+	DrillUp.drill_EES_getPluginTip_NeedUpdate_COEF = function(){
+		return "【" + DrillUp.g_EES_PluginTip_curName + "】\n行走图优化核心插件版本过低，你需要更新 核心插件 至少v1.2及以上版本。";
 	};
 	
 	
@@ -549,22 +558,6 @@ Game_CharacterBase.prototype.drill_EES_setOnlyChangeOnMoving = function( enabled
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 偏移控制 - 相对镜头所在位置Y（像素单位）
-//==============================
-var _drill_EES_screenX = Game_CharacterBase.prototype.screenX;
-Game_CharacterBase.prototype.screenX = function(){
-	var xx = _drill_EES_screenX.call( this );
-	return xx + this.drill_EES_getX();
-}
-//==============================
-// * 偏移控制 - 相对镜头所在位置Y（像素单位）
-//==============================
-var _drill_EES_screenY = Game_CharacterBase.prototype.screenY;
-Game_CharacterBase.prototype.screenY = function(){
-	var yy = _drill_EES_screenY.call( this );
-	return yy + this.drill_EES_getY();
-}
-//==============================
 // * 偏移控制 - 帧刷新绑定
 //==============================
 var _drill_EES_update = Game_CharacterBase.prototype.update;
@@ -606,36 +599,87 @@ Game_CharacterBase.prototype.drill_updateShifting = function(){
 
 
 //=============================================================================
-// ** ☆偏移兼容设置
+// ** ☆数据最终变换值
 //
 //			说明：	> 此模块专门控制 偏移与其他插件兼容 的设置。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
-//==============================
-// * 偏移兼容设置 - 偏移补正值X
-//
-//			说明：	> 此函数用于 镜像、黑影 的位置偏移补正值。
-//==============================
-var _drill_EES_reverseOffsetX = Game_CharacterBase.prototype.drill_reverseOffsetX;
-Game_CharacterBase.prototype.drill_reverseOffsetX = function(){
-	var xx = 0;
-	if( _drill_EES_reverseOffsetX != undefined ){		//（函数继承捕获，如果此插件放在 倒影插件 前面，则创建该函数，否则直接继承）
-		xx = _drill_EES_reverseOffsetX.call( this );
+if( Imported.Drill_CoreOfEventFrame ){
+	
+	// > 强制更新提示
+	if( Game_CharacterBase.prototype.drill_COEF_acc_LRR_x == undefined ){
+		alert( DrillUp.drill_EES_getPluginTip_NeedUpdate_COEF() );
 	}
-	return xx + this.drill_EES_getX();
-}
-//==============================
-// * 偏移兼容设置 - 偏移补正值Y
-//
-//			说明：	> 此函数用于 镜像、黑影 的位置偏移补正值。
-//==============================
-var _drill_EES_reverseOffsetY = Game_CharacterBase.prototype.drill_reverseOffsetY;
-Game_CharacterBase.prototype.drill_reverseOffsetY = function(){
-	var yy = 0;
-	if( _drill_EES_reverseOffsetY != undefined ){
-		yy = _drill_EES_reverseOffsetY.call( this );
+	
+	//==============================
+	// * 数据最终变换值 - 累积位置X
+	//==============================
+	var _drill_EES_COEF_finalTransform_x = Game_CharacterBase.prototype.drill_COEF_acc_x;
+	Game_CharacterBase.prototype.drill_COEF_acc_x = function(){
+		var xx = _drill_EES_COEF_finalTransform_x.call( this );
+		return xx + this.drill_EES_getX();
 	}
-	return yy + this.drill_EES_getY();
+	//==============================
+	// * 数据最终变换值 - 累积位置Y
+	//==============================
+	var _drill_EES_COEF_finalTransform_y = Game_CharacterBase.prototype.drill_COEF_acc_y;
+	Game_CharacterBase.prototype.drill_COEF_acc_y = function(){
+		var yy = _drill_EES_COEF_finalTransform_y.call( this );
+		return yy + this.drill_EES_getY();
+	}
+	//==============================
+	// * 数据最终变换值 - 累积位置X - 倒影镜像用
+	//==============================
+	var _drill_EES_COEF_final_LRR_x = Game_CharacterBase.prototype.drill_COEF_acc_LRR_x;
+	Game_CharacterBase.prototype.drill_COEF_acc_LRR_x = function(){
+		var xx = _drill_EES_COEF_final_LRR_x.call( this );
+		return xx + this.drill_EES_getX();
+	}
+	//==============================
+	// * 数据最终变换值 - 累积位置Y - 倒影镜像用
+	//==============================
+	var _drill_EES_COEF_final_LRR_y = Game_CharacterBase.prototype.drill_COEF_acc_LRR_y;
+	Game_CharacterBase.prototype.drill_COEF_acc_LRR_y = function(){
+		var yy = _drill_EES_COEF_final_LRR_y.call( this );
+		return yy + this.drill_EES_getY();
+	}
+	//==============================
+	// * 数据最终变换值 - 累积位置X - 同步镜像用
+	//==============================
+	var _drill_EES_COEF_acc_LSR_x = Game_CharacterBase.prototype.drill_COEF_acc_LSR_x;
+	Game_CharacterBase.prototype.drill_COEF_acc_LSR_x = function(){
+		var xx = _drill_EES_COEF_acc_LSR_x.call( this );
+		return xx + this.drill_EES_getX();
+	}
+	//==============================
+	// * 数据最终变换值 - 累积位置Y - 同步镜像用
+	//==============================
+	var _drill_EES_COEF_acc_LSR_y = Game_CharacterBase.prototype.drill_COEF_acc_LSR_y;
+	Game_CharacterBase.prototype.drill_COEF_acc_LSR_y = function(){
+		var yy = _drill_EES_COEF_acc_LSR_y.call( this );
+		return yy - this.drill_EES_getY();	//（注意此处是相反偏移）
+	}
+	
+}else{
+	//==============================
+	// * 数据最终变换值 - 相对镜头所在位置X
+	//
+	//			说明：	> 如果没加 行走图优化核心，就继承screenX。
+	//==============================
+	var _drill_EES_screenX = Game_CharacterBase.prototype.screenX;
+	Game_CharacterBase.prototype.screenX = function(){
+		var xx = _drill_EES_screenX.call( this );
+		return xx + this.drill_EES_getX();
+	}
+	//==============================
+	// * 数据最终变换值 - 相对镜头所在位置Y
+	//
+	//			说明：	> 如果没加 行走图优化核心，就继承screenY。
+	//==============================
+	var _drill_EES_screenY = Game_CharacterBase.prototype.screenY;
+	Game_CharacterBase.prototype.screenY = function(){
+		var yy = _drill_EES_screenY.call( this );
+		return yy + this.drill_EES_getY();
+	}
 }
-
 

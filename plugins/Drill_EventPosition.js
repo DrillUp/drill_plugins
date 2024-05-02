@@ -47,6 +47,9 @@
  *      获取随机坐标指令，不过只能获取到一个，局限性比较大。
  * 设计：
  *   (1.你可以使用 立即归位 指令，将所有事件立即归位。常用于重置关卡。
+ *   (2.位置与位移插件怎么跨地图移动？都跨地图了，直接用场所移动指令啊。
+ *      如果是相对坐标的跨地图，可以用变量记录位置然后计算到跨地图的位置实现。
+ *      另外，事件无法离开当前地图。进入新地图，只能通过创建新事件实现。
  * 
  * -----------------------------------------------------------------------------
  * ----激活条件 - 立即归位：
@@ -304,11 +307,13 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				e_ids = [ Number(unit) ];
 			}
 			if( e_ids == null && unit == "全图事件" ){
-				var all_e = $gameMap._events;
 				e_ids = [];
-				for( var i=0; i < all_e.length; i++ ){
-					if( !all_e[i] ){ continue; }
-					e_ids.push( all_e[i]._eventId );
+				var event_list = $gameMap._events;
+				for(var i = 0; i < event_list.length; i++ ){
+					var temp_event = event_list[i];
+					if( temp_event == null ){ continue; }
+					if( temp_event._erased == true ){ continue; }	//『有效事件』
+					e_ids.push( temp_event._eventId );
 				}
 			}
 			
@@ -870,9 +875,9 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				
 				if( x1 != undefined && y1 != undefined ){
 					var e_id = -1;
-					var events = $gameMap.eventsXy(x1,y1);
-					if( events.length != 0 ){
-						var e = events[0];
+					var event_list = $gameMap.eventsXy(x1,y1);
+					if( event_list.length != 0 ){
+						var e = event_list[0];
 						if( e._erased == true ){	//移除的事件不算
 							e_id = -1;
 						}else{
@@ -880,7 +885,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 						}
 					}
 					if( e_id == -1 && x1 == $gamePlayer._x && y1 == $gamePlayer._y ){
-						e_id = -2;
+						e_id = -2;	//『玩家id』
 					}
 					$gameVariables.setValue( Number(temp1) , e_id );
 				}

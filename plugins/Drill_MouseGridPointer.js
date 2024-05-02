@@ -947,6 +947,7 @@ Drill_MGP_GridSprite.prototype.drill_sprite_updateGif = function() {
 	// > 播放gif
 	var inter = this._drill_gif_Time;
 	inter = inter / data['interval'];
+	inter = Math.floor(inter);
 	inter = inter % this._drill_gif_bitmapList.length;
 	if( data['back_run'] == true ){
 		inter = this._drill_gif_bitmapList.length - 1 - inter;

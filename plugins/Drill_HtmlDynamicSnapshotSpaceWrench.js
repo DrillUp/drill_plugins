@@ -606,7 +606,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var type = String(args[1]);
 			if( type == "立即清除全部碎片" ){
 				$gameSystem.drill_HDSSW_clearAll();
-				this.wait(1);	//（强制等待1帧，确保全部清空）
+				this.wait(1);	//（『强制等待』1帧，确保全部清空）
 			}
 		}
 		if( args.length == 6 ){

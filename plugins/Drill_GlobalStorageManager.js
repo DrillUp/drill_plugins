@@ -376,7 +376,7 @@ Scene_Map.prototype.onMapLoaded = function() {
 		
 		for(var i = 0; i < $gameMap._events.length; i++){
 			var e = $gameMap._events[i];
-			if( e == undefined ){ continue; }
+			if( e == undefined ){ continue; }	//『非空事件』（此处不考虑 _erased 的情况）
 			if( e.event() == undefined ){
 				$gameMap._events[ i ] = null;	//（由于此处直接与事件数据交互，贴图还没被创建，所以不走 事件管理核心 的销毁流程）
 			}

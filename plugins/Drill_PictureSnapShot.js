@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        图片 - 临时屏幕快照
+ * @plugindesc [v1.3]        图片 - 临时屏幕快照
  * @author Drill_up
  * 
  * 
@@ -35,7 +35,7 @@
  *
  * -----------------------------------------------------------------------------
  * ----激活条件
- * 你需要通过下面插件指令来执行图片快捷操作：
+ * 你需要通过下面插件指令来执行截图：
  * 
  * 插件指令：>图片临时屏幕快照 : 临时快照 : 建立屏幕截图
  * 插件指令：>图片临时屏幕快照 : 图片[1] : 设为临时快照
@@ -90,6 +90,8 @@
  * 改进了静态快照的内部结构。
  * [v1.2]
  * 添加了保存快照文件的功能。
+ * [v1.3]
+ * 优化了内部结构。
  * 
  * 
  * 
@@ -174,11 +176,12 @@
 //				>最顶层 的图片贴图
 //				>图片层 的图片贴图
 //			
-//			->☆静态快照容器
-//			->☆图片控制
+//			->☆图片的属性
 //				->显示图片
 //				->消除图片
-//				->贴图 绑定快照
+//				->消除图片（command235）
+//			->☆图片控制
+//			->☆静态快照容器
 //			
 //			->☆保存快照文件
 //
@@ -187,7 +190,7 @@
 //			大家族-屏幕快照
 //		
 //		★脚本文档：
-//			无
+//			16.图片 > 图片资源切换脚本说明.docx
 //		
 //		★插件私有类：
 //			无
@@ -287,7 +290,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			return;
 		}
 		
-			
+		
 		/*-----------------对象组获取------------------*/
 		var pics = null;			// 图片对象组
 		var pic_ids = null;			// 图片ID组（图片对象本身没有id值）
@@ -329,7 +332,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				var p = $gameScreen.picture( pic_id );
 				pics = [ p ];
 				pic_ids = [];
-					pic_ids.push( pic_id );
+				pic_ids.push( pic_id );
 			}
 			else if( pics == null && unit.indexOf("图片[") != -1 ){
 				unit = unit.replace("图片[","");
@@ -339,7 +342,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				var p = $gameScreen.picture( pic_id );
 				pics = [ p ];
 				pic_ids = [];
-					pic_ids.push( pic_id );
+				pic_ids.push( pic_id );
 			}
 		}
 		
@@ -349,25 +352,25 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( type == "设为临时快照" ){
 				for( var i = 0; i < pics.length; i++ ){
 					
-					// > 贴图直接赋值
+					// > 贴图赋值
 					var picture_sprite = $gameTemp.drill_PSS_getPictureSpriteByPictureId( pic_ids[i] );
 					if( picture_sprite == undefined ){ continue; }
-					picture_sprite.drill_PSS_setSnapshot( $gameTemp.drill_PSS_getLastSnapshotId() );
+					picture_sprite.drill_PSS_setBitmapSnapshot( $gameTemp.drill_PSS_getLastSnapshotId() );
 					
-					// > 图片赋值
-					pics[i]._drill_PSS_snapShotId = $gameTemp.drill_PSS_getLastSnapshotId();
+					// > 数据赋值
+					pics[i].drill_PSS_setDataSnapShotId( $gameTemp.drill_PSS_getLastSnapshotId() );
 				}
 			}
 			if( type == "去除快照" ){
 				for( var i = 0; i < pics.length; i++ ){
 					
-					// > 贴图直接赋值
+					// > 贴图赋值
 					var picture_sprite = $gameTemp.drill_PSS_getPictureSpriteByPictureId( pic_ids[i] );
 					if( picture_sprite == undefined ){ continue; }
-					picture_sprite.drill_PSS_setSnapshot( -1 );
+					picture_sprite.drill_PSS_removeBitmapSnapshot();
 					
-					// > 图片赋值
-					pics[i]._drill_PSS_snapShotId = -1;
+					// > 数据赋值
+					pics[i].drill_PSS_removeData();
 				}
 			}
 		}
@@ -391,6 +394,17 @@ Game_Screen.prototype.drill_PSS_isPictureExist = function( pic_id ){
 //#############################################################################
 // ** 【标准模块】图片贴图 ☆图片贴图
 //#############################################################################
+//##############################
+// * 图片贴图 - 获取 - 全部图片贴图【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 贴图数组       （图片贴图）
+//          
+//			说明：	> 此函数返回所有图片贴图，包括被转移到 图片层、最顶层 的图片。
+//##############################
+Game_Temp.prototype.drill_PSS_getAllPictureSprite = function(){
+	return this.drill_PSS_getAllPictureSprite_Private();
+}
 //##############################
 // * 图片贴图 - 获取 - 容器指针【标准函数】
 //			
@@ -442,7 +456,7 @@ Game_Temp.prototype.drill_PSS_getPictureSpriteTank_SenceTopArea = function(){
 //==============================
 Game_Temp.prototype.drill_PSS_getPictureSpriteTank_PicArea = function(){
 	if( SceneManager._scene == undefined ){ return null; }
-	if( SceneManager._scene instanceof Scene_Battle ){
+	if( SceneManager._scene instanceof Scene_Battle ){		//『图片与多场景』
 		if( SceneManager._scene._spriteset == undefined ){ return null; }
 		if( SceneManager._scene._spriteset._drill_battlePicArea == undefined ){ return null; }
 		return SceneManager._scene._spriteset._drill_battlePicArea.children;
@@ -455,42 +469,85 @@ Game_Temp.prototype.drill_PSS_getPictureSpriteTank_PicArea = function(){
 	return null;
 };
 //==============================
-// * 图片贴图容器 - 获取 - 根据图片ID（私有）
+// * 图片贴图容器 - 获取 - 全部图片贴图（私有）
 //==============================
-Game_Temp.prototype.drill_PSS_getPictureSpriteByPictureId_Private = function( picture_id ){
+Game_Temp.prototype.drill_PSS_getAllPictureSprite_Private = function(){
+	var result_list = [];
 	
 	// > 图片对象层 的图片贴图
 	var sprite_list = this.drill_PSS_getPictureSpriteTank_Private();
-	if( sprite_list == undefined ){ return null; }
-	for(var i=0; i < sprite_list.length; i++){
-		var sprite = sprite_list[i];
-		if( sprite instanceof Sprite_Picture ){
-			if( sprite._pictureId == picture_id ){
-				return sprite;
+	if( sprite_list != undefined ){
+		for(var i=0; i < sprite_list.length; i++){
+			var sprite = sprite_list[i];
+			if( sprite instanceof Sprite_Picture ){
+				result_list.push( sprite );
 			}
 		}
 	}
 	
 	// > 最顶层 的图片贴图
 	var sprite_list = this.drill_PSS_getPictureSpriteTank_SenceTopArea();
-	if( sprite_list == undefined ){ return null; }
-	for(var i=0; i < sprite_list.length; i++){
-		var sprite = sprite_list[i];
-		if( sprite instanceof Sprite_Picture ){
-			if( sprite._pictureId == picture_id ){
-				return sprite;
+	if( sprite_list != undefined ){
+		for(var i=0; i < sprite_list.length; i++){
+			var sprite = sprite_list[i];
+			if( sprite instanceof Sprite_Picture ){
+				result_list.push( sprite );
 			}
 		}
 	}
 	
 	// > 图片层 的图片贴图
 	var sprite_list = this.drill_PSS_getPictureSpriteTank_PicArea();
-	if( sprite_list == undefined ){ return null; }
-	for(var i=0; i < sprite_list.length; i++){
-		var sprite = sprite_list[i];
-		if( sprite instanceof Sprite_Picture ){
-			if( sprite._pictureId == picture_id ){
-				return sprite;
+	if( sprite_list != undefined ){
+		for(var i=0; i < sprite_list.length; i++){
+			var sprite = sprite_list[i];
+			if( sprite instanceof Sprite_Picture ){
+				result_list.push( sprite );
+			}
+		}
+	}
+	return result_list;
+};
+//==============================
+// * 图片贴图容器 - 获取 - 根据图片ID（私有）
+//==============================
+Game_Temp.prototype.drill_PSS_getPictureSpriteByPictureId_Private = function( picture_id ){
+	
+	// > 图片对象层 的图片贴图
+	var sprite_list = this.drill_PSS_getPictureSpriteTank_Private();
+	if( sprite_list != undefined ){
+		for(var i=0; i < sprite_list.length; i++){
+			var sprite = sprite_list[i];
+			if( sprite instanceof Sprite_Picture ){
+				if( sprite._pictureId == picture_id ){
+					return sprite;
+				}
+			}
+		}
+	}
+	
+	// > 最顶层 的图片贴图
+	var sprite_list = this.drill_PSS_getPictureSpriteTank_SenceTopArea();
+	if( sprite_list != undefined ){
+		for(var i=0; i < sprite_list.length; i++){
+			var sprite = sprite_list[i];
+			if( sprite instanceof Sprite_Picture ){
+				if( sprite._pictureId == picture_id ){
+					return sprite;
+				}
+			}
+		}
+	}
+	
+	// > 图片层 的图片贴图
+	var sprite_list = this.drill_PSS_getPictureSpriteTank_PicArea();
+	if( sprite_list != undefined ){
+		for(var i=0; i < sprite_list.length; i++){
+			var sprite = sprite_list[i];
+			if( sprite instanceof Sprite_Picture ){
+				if( sprite._pictureId == picture_id ){
+					return sprite;
+				}
 			}
 		}
 	}
@@ -500,93 +557,95 @@ Game_Temp.prototype.drill_PSS_getPictureSpriteByPictureId_Private = function( pi
 
 
 //=============================================================================
-// ** ☆静态快照容器
+// ** ☆图片的属性
 //
-//			说明：	> 此模块提供 静态快照 的创建。
+//			说明：	> 此模块专门定义 图片的属性。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 静态快照容器 - 初始化
+// * 图片的属性 - 初始化
 //==============================
-var _drill_PSS_temp_initialize = Game_Temp.prototype.initialize;
-Game_Temp.prototype.initialize = function() {
-    _drill_PSS_temp_initialize.call(this);
-	this._drill_PSS_curId = -1;				//静态快照 计数器
-	this._drill_PSS_snapShotTank = [];		//静态快照 贴图容器
+var _drill_PSS_p_initialize = Game_Picture.prototype.initialize;
+Game_Picture.prototype.initialize = function() {
+	this._drill_PSS_snapShotId = undefined;			//（要放前面，不然会盖掉子类的设置）
+	_drill_PSS_p_initialize.call(this);
 }
 //==============================
-// * 静态快照容器 - 创建快照
-//
-//			说明：	> 每创建一次，计数器都+1，确保设置的都为当前创建的静态快照，且不影响旧快照图像。
+// * 图片的属性 - 删除数据
 //==============================
-Game_Temp.prototype.drill_PSS_createSnapshot = function() {
-	this._drill_PSS_curId += 1;
-	this._drill_PSS_snapShotTank.push( SceneManager.snap() );	//（bitmap对象，可以跨越地图界面、战斗界面和菜单界面）
+Game_Picture.prototype.drill_PSS_removeData = function(){
+	this._drill_PSS_snapShotId = undefined;
 }
 //==============================
-// * 静态快照容器 - 获取创建的快照
+// * 图片的属性 - 设置静态快照ID
 //==============================
-Game_Temp.prototype.drill_PSS_getLastSnapshot = function() {
-	if( this._drill_PSS_curId == -1 ){ return null; }
-	return this._drill_PSS_snapShotTank[ this._drill_PSS_curId ];
+Game_Picture.prototype.drill_PSS_setDataSnapShotId = function( snapShot_id ){
+	this._drill_PSS_snapShotId = snapShot_id;
 }
 //==============================
-// * 静态快照容器 - 获取创建的快照ID
-//==============================
-Game_Temp.prototype.drill_PSS_getLastSnapshotId = function() {
-	return this._drill_PSS_curId;
-}
-
-
-//=============================================================================
-// ** ☆图片控制
-//
-//			说明：	> 此模块将 静态快照与图片贴图 进行绑定。
-//					（插件完整的功能目录去看看：功能结构树）
-//=============================================================================
-//==============================
-// * 图片控制 - 初始化基本信息
-//==============================
-var _drill_PSS_p_initBasic = Game_Picture.prototype.initBasic;
-Game_Picture.prototype.initBasic = function() {
-	_drill_PSS_p_initBasic.call(this);
-	this._drill_PSS_snapShotId = -1;		//截图标记
-}
-//==============================
-// * 图片控制 - 显示图片（对应函数showPicture）
+// * 图片的属性 - 显示图片（对应函数showPicture）
 //==============================
 var _drill_PSS_p_show = Game_Picture.prototype.show;
 Game_Picture.prototype.show = function( name, origin, x, y, scaleX, scaleY, opacity, blendMode ){
 	_drill_PSS_p_show.call( this, name, origin, x, y, scaleX, scaleY, opacity, blendMode );
-	this._drill_PSS_snapShotId = -1;		//（标记解除）
+	this.drill_PSS_removeData();			//（删除数据）
 }
 //==============================
-// * 图片控制 - 消除图片
+// * 图片的属性 - 消除图片
 //==============================
 var _drill_PSS_p_erase = Game_Picture.prototype.erase;
 Game_Picture.prototype.erase = function(){
 	_drill_PSS_p_erase.call( this );
-	this._drill_PSS_snapShotId = -1;		//（标记解除）
+	this.drill_PSS_removeData();			//（删除数据）
 }
 //==============================
-// * 图片控制 - 消除图片（command235）
+// * 图片的属性 - 消除图片（command235）
 //==============================
 var _drill_PSS_p_erasePicture = Game_Screen.prototype.erasePicture;
 Game_Screen.prototype.erasePicture = function( pictureId ){
     var realPictureId = this.realPictureId(pictureId);
 	var picture = this._pictures[realPictureId];
 	if( picture != undefined ){
-		picture._drill_PSS_snapShotId = -1;	//（标记解除）
+		picture.drill_PSS_removeData();		//（删除数据）
 	}
 	_drill_PSS_p_erasePicture.call( this, pictureId );
 }
+
+
+//=============================================================================
+// ** ☆图片控制
+//
+//			说明：	> 此模块专门管理 静态快照 变化。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
 //==============================
 // * 图片控制 - 贴图 初始化
 //==============================
 var _drill_PSS_sp_initialize = Sprite_Picture.prototype.initialize;
 Sprite_Picture.prototype.initialize = function( pictureId ){
+	this._drill_PSS_sp_lastSnapshotId = undefined;		//（要放前面，不然会盖掉子类的设置）
 	_drill_PSS_sp_initialize.call( this, pictureId );
-	this._drill_PSS_sp_curSnapshotId = -1;
+}
+//==============================
+// * 图片控制 - 贴图 设置快照
+//
+//			说明：	> 由于一帧内 先刷新 图片的属性，后刷新 贴图的属性。
+//					  所以修改图片的属性后，不能立即操作贴图bitmap。『图片bitmap切换慢一帧』
+//					> 如果急用，外部函数需要考虑同时 数据赋值+贴图赋值。
+//					  （一种急用的情况：设置快照 执行后，就立即执行粉碎效果。）
+//==============================
+Sprite_Picture.prototype.drill_PSS_setBitmapSnapshot = function( snapshot_id ){
+	this._drill_PSS_sp_lastSnapshotId = snapshot_id;	//（需要赋值，外部函数设置快照后，帧刷新中就不会重复设置了）
+	var bitmap = $gameTemp._drill_PSS_curBitmapTank[ snapshot_id ];
+	if( bitmap == undefined ){ return; }
+	this.bitmap = bitmap;
+}
+//==============================
+// * 图片控制 - 贴图 去除快照
+//==============================
+Sprite_Picture.prototype.drill_PSS_removeBitmapSnapshot = function(){
+	this._pictureName = '';
+	this.bitmap = null;
 }
 //==============================
 // * 图片控制 - 贴图 帧刷新
@@ -596,40 +655,70 @@ Sprite_Picture.prototype.initialize = function( pictureId ){
 var _drill_PSS_sp_updateBitmap = Sprite_Picture.prototype.updateBitmap;
 Sprite_Picture.prototype.updateBitmap = function() {
 	_drill_PSS_sp_updateBitmap.call(this);
-	
-	// > 有数据时
     var picture = this.picture();
     if( picture ){
 		
-		if( this._drill_PSS_sp_curSnapshotId == picture._drill_PSS_snapShotId ){ return; }
-		this._drill_PSS_sp_curSnapshotId = picture._drill_PSS_snapShotId;
-		this.drill_PSS_setSnapshot( picture._drill_PSS_snapShotId );	//（ID不一致时，赋值）
+		if( this._drill_PSS_sp_lastSnapshotId == picture._drill_PSS_snapShotId ){ return; }
+		this._drill_PSS_sp_lastSnapshotId = picture._drill_PSS_snapShotId;
+		
+		// > 去除快照
+		if( this._drill_PSS_sp_lastSnapshotId == undefined ){
+			this.drill_PSS_removeBitmapSnapshot();
+			
+		// > 设置快照
+		}else{
+			this.drill_PSS_setBitmapSnapshot( picture._drill_PSS_snapShotId );
+		}
 		
 	// > 无数据时『图片数据根除时』
 	}else{
-		if( this._drill_PSS_sp_curSnapshotId != -1 ){	//（恢复图像）
-			this.drill_PSS_setSnapshot( -1 );
+		if( this._drill_PSS_sp_lastSnapshotId != undefined ){
+			this._drill_PSS_sp_lastSnapshotId = undefined;
+			this.drill_PSS_removeBitmapSnapshot();
 		}
 	}
 };
+
+
+//=============================================================================
+// ** ☆静态快照容器
+//
+//			说明：	> 此模块提供 静态快照 的创建。
+//					> 暂时不考虑销毁Bitmap情况，因为本身贴图占内存就小。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
 //==============================
-// * 图片控制 - 贴图 绑定快照
+// * 静态快照容器 - 初始化
 //==============================
-Sprite_Picture.prototype.drill_PSS_setSnapshot = function( snapshot_id ){
-	this._drill_PSS_sp_curSnapshotId = snapshot_id;
-	
-	// > 恢复原图像
-	if( snapshot_id == -1 ){
-		this._pictureName = '';
-		this.bitmap = null;
-		return;
-	}
-	
-	// > 设置静态快照
-	var bitmap = $gameTemp._drill_PSS_snapShotTank[ snapshot_id ];
-	if( bitmap == undefined ){ return; }
-	this.bitmap = bitmap;
+var _drill_PSS_temp_initialize = Game_Temp.prototype.initialize;
+Game_Temp.prototype.initialize = function() {
+    _drill_PSS_temp_initialize.call(this);
+	this._drill_PSS_curBitmapId = -1;			//静态快照 计数器
+	this._drill_PSS_curBitmapTank = [];			//静态快照 贴图容器
 }
+//==============================
+// * 静态快照容器 - 创建快照
+//
+//			说明：	> 每创建一次，计数器都+1，确保设置的都为当前创建的静态快照，且不影响旧快照图像。
+//==============================
+Game_Temp.prototype.drill_PSS_createSnapshot = function() {
+	this._drill_PSS_curBitmapId += 1;
+	this._drill_PSS_curBitmapTank.push( SceneManager.snap() );	//（bitmap对象，可以跨越地图界面、战斗界面和菜单界面）
+}
+//==============================
+// * 静态快照容器 - 获取 创建的快照
+//==============================
+Game_Temp.prototype.drill_PSS_getLastSnapshot = function() {
+	if( this._drill_PSS_curBitmapId == -1 ){ return null; }
+	return this._drill_PSS_curBitmapTank[ this._drill_PSS_curBitmapId ];
+}
+//==============================
+// * 静态快照容器 - 获取 创建的快照ID
+//==============================
+Game_Temp.prototype.drill_PSS_getLastSnapshotId = function() {
+	return this._drill_PSS_curBitmapId;
+}
+
 
 
 //=============================================================================

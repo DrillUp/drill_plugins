@@ -745,7 +745,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( temp1 == "绑定于物体" ){
 				var e_id = null;
 				if( temp2 == "玩家" ){
-					e_id = -2;
+					e_id = -2;		//『玩家id』
 				}
 				if( temp2 == "本事件" ){
 					e_id = this._eventId;
@@ -955,7 +955,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 //==============================
 Game_Map.prototype.drill_GOBTB_isEventExist = function( e_id ){
 	if( e_id == 0 ){ return false; }
-	if( e_id == -2 ){ return true; }	//玩家
+	if( e_id == -2 ){ return true; }	//『玩家id』
 	
 	var e = this.event( e_id );
 	if( e == undefined ){
@@ -1400,7 +1400,7 @@ Drill_GOBTB_TimeBarSprite.prototype.drill_GOBTB_updatePos = function() {
 		this.x = org_x + ev.screenX();
 		this.y = org_y + ev.screenY();
 		
-	}else if( data['bind_eventId'] == -2 ){
+	}else if( data['bind_eventId'] == -2 ){		//『玩家id』
 		var org_x = data['x'] ;
 		var org_y = data['y'] - 48 ;
 		this.x = org_x + $gamePlayer.screenX();

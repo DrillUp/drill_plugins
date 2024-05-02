@@ -1888,7 +1888,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				chars = [ e_id ];
 			}
 			if( chars == null && obj_str == "玩家" ){
-				chars = [ -2 ];
+				chars = [ -2 ];		//『玩家id』
 			}
 			
 			// > 鼠标
@@ -2103,7 +2103,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( type == "绑定到" ){
 				
 				if( obj_str == "玩家" ){
-					marker.drill_setBindingCharacterId( -2 );
+					marker.drill_setBindingCharacterId( -2 );	//『玩家id』
 					return;
 				}
 				if( obj_str == "本事件" ){
@@ -2178,8 +2178,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					pos = [ $gameVariables.value(Number(temp1[0])), 
 							$gameVariables.value(Number(temp1[1])) ];
 					var m_data = {
-						"x": data['x'] + Number(pos[0]),
-						"y": data['y'] + Number(pos[1]),
+						"x": marker.drill_getBallisticsX() + Number(pos[0]),
+						"y": marker.drill_getBallisticsY() + Number(pos[1]),
 						"time":temp2,
 						"type":type,
 					}
@@ -2192,8 +2192,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					pos = [ Number(temp1[0]), 
 							Number(temp1[1]) ];
 					var m_data = {
-						"x": data['x'] + Number(pos[0]),
-						"y": data['y'] + Number(pos[1]),
+						"x": marker.drill_getBallisticsX() + Number(pos[0]),
+						"y": marker.drill_getBallisticsY() + Number(pos[1]),
 						"time":temp2,
 						"type":type,
 					}

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        图片 - 图标图片
+ * @plugindesc [v1.1]        图片 - 图标图片
  * @author Drill_up
  * 
  * 
@@ -29,9 +29,10 @@
  *      护甲=防具，物品=道具，这两个名词是同一个意思，指令写防具、道具都有效。
  *      另外，没有下列名词：装备/装甲/装束 。
  * 图标：
- *   (1.图标在游戏中即时生成，不需要图片资源。
- *   (2.插件的使用面比较窄，只能画固定图标给图片。
+ *   (1.图标在游戏中即时生成，不需要设置图片资源。
+ *   (2.该插件只能画固定图标给图片，应用范围比较窄。
  *   (3.默认的图标大小为 32x32 。
+ *      设置的像素缩放 与 图片本身的缩放功能 为乘积叠加。
  * 设计：
  *   (1.你可以将图标中的 药水、元素、矿石 快速转成图片作为可拖拽物。
  *      没必要专门去画一个图标作为图片来使用，通过该插件可以节省许多
@@ -39,7 +40,7 @@
  * 
  * -----------------------------------------------------------------------------
  * ----激活条件
- * 你可以通过设置事件注释，将目标注释变成图标：
+ * 你可以通过设置插件指令，将目标图片变成图标：
  * （注意，冒号左右都有一个空格）
  * 
  * 插件指令：>图标图片 : 图片[1] : 设置图标 : 图标[1] : 像素缩放[1.0]
@@ -68,6 +69,7 @@
  * 2."像素缩放"指在保留像素锯齿的情况下，进行缩放。
  *   由于图标很小，所以适合像素放大，
  *   注意放大比例要为1.5、2.0 这种0.5倍数的放大，非倍数的比例不好看。
+ *   设置的像素缩放 与 图片本身的缩放功能 为乘积叠加。
  * 3."物品名[南瓜]"表示 图片 使用指定物品的图标。
  * 
  * -----------------------------------------------------------------------------
@@ -98,6 +100,9 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 优化了内部结构。
+ * 
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -122,15 +127,28 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			图标图片：
-//				->覆盖图片的bitmap
+//			->☆提示信息
+//			->☆静态数据
+//			->☆插件指令
 //				->物品、武器、护甲、技能 四大分类
+//			->☆图片贴图
+//				>图片对象层 的图片贴图
+//				>最顶层 的图片贴图
+//				>图片层 的图片贴图
+//
+//			->☆图片的属性
+//				->显示图片
+//				->消除图片
+//				->消除图片（command235）
+//			->☆图片控制
+//			->☆图标容器
+//
 //
 //		★家谱：
 //			无
 //		
 //		★脚本文档：
-//			无
+//			16.图片 > 图片资源切换脚本说明.docx
 //		
 //		★插件私有类：
 //			无
@@ -146,7 +164,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -163,7 +181,7 @@
 	
 	
 //=============================================================================
-// ** 静态数据
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_PictureIcon = true;
@@ -172,7 +190,7 @@
 	
 	
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _drill_PIc_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
@@ -181,30 +199,35 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		
 		/*-----------------对象组获取------------------*/
 		var pics = null;			// 图片对象组
+		var pic_ids = null;			// 图片ID组（图片对象本身没有id值）
 		if( args.length >= 2 ){
 			var unit = String(args[1]);
 			if( pics == null && unit.indexOf("批量图片[") != -1 ){
 				unit = unit.replace("批量图片[","");
 				unit = unit.replace("]","");
 				pics = [];
+				pic_ids = [];
 				var temp_arr = unit.split(/[,，]/);
 				for( var k=0; k < temp_arr.length; k++ ){
 					var pic_id = Number(temp_arr[k]);
 					if( $gameScreen.drill_PIc_isPictureExist( pic_id ) == false ){ continue; }
 					var p = $gameScreen.picture( pic_id );
 					pics.push( p );
+					pic_ids.push( pic_id );
 				}
 			}
 			else if( pics == null && unit.indexOf("批量图片变量[") != -1 ){
 				unit = unit.replace("批量图片变量[","");
 				unit = unit.replace("]","");
 				pics = [];
+				pic_ids = [];
 				var temp_arr = unit.split(/[,，]/);
 				for( var k=0; k < temp_arr.length; k++ ){
 					var pic_id = $gameVariables.value(Number(temp_arr[k]));
 					if( $gameScreen.drill_PIc_isPictureExist( pic_id ) == false ){ continue; }
 					var p = $gameScreen.picture( pic_id );
 					pics.push( p );
+					pic_ids.push( pic_id );
 				}
 			}
 			else if( pics == null && unit.indexOf("图片变量[") != -1 ){
@@ -214,6 +237,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				if( $gameScreen.drill_PIc_isPictureExist( pic_id ) == false ){ return; }
 				var p = $gameScreen.picture( pic_id );
 				pics = [ p ];
+				pic_ids = [];
+					pic_ids.push( pic_id );
 			}
 			else if( pics == null && unit.indexOf("图片[") != -1 ){
 				unit = unit.replace("图片[","");
@@ -222,6 +247,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				if( $gameScreen.drill_PIc_isPictureExist( pic_id ) == false ){ return; }
 				var p = $gameScreen.picture( pic_id );
 				pics = [ p ];
+				pic_ids = [];
+					pic_ids.push( pic_id );
 			}
 		}
 		
@@ -240,13 +267,17 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp1 = temp1.replace("]","");
 					
 					// > 建立bitmap
-					var icon_i = Number(temp1);
-					$gameTemp._drill_PIc_curId += 1;
-					$gameTemp._drill_PIc_iconTank.push( ImageManager.drill_PIc_drawIconBitmap( icon_i, Number(temp2) ) );
-					
-					// > 绑定图标
+					var icon_index = Number(temp1);
+					var iconBitmap_id = $gameTemp.drill_PIc_createIconBitmapByIconIndex( icon_index, Number(temp2) );
 					for( var i = 0; i < pics.length; i++ ){
-						pics[i]._drill_PIc_iconId = $gameTemp._drill_PIc_curId;
+						
+						// > 贴图赋值
+						var picture_sprite = $gameTemp.drill_PIc_getPictureSpriteByPictureId( pic_ids[i] );
+						if( picture_sprite == undefined ){ continue; }
+						picture_sprite.drill_PIc_setBitmapIcon( iconBitmap_id );
+						
+						// > 数据赋值
+						pics[i].drill_PIc_setDataIconId( iconBitmap_id );
 					}
 					
 				}else if( temp1.indexOf("图标变量[") != -1 ){
@@ -254,13 +285,17 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp1 = temp1.replace("]","");
 					
 					// > 建立bitmap
-					var icon_i = $gameVariables.value( Number(temp1) );
-					$gameTemp._drill_PIc_curId += 1;
-					$gameTemp._drill_PIc_iconTank.push( ImageManager.drill_PIc_drawIconBitmap( icon_i, Number(temp2) ) );
-					
-					// > 绑定图标
+					var icon_index = $gameVariables.value( Number(temp1) );
+					var iconBitmap_id = $gameTemp.drill_PIc_createIconBitmapByIconIndex( icon_index, Number(temp2) );
 					for( var i = 0; i < pics.length; i++ ){
-						pics[i]._drill_PIc_iconId = $gameTemp._drill_PIc_curId;
+						
+						// > 贴图赋值
+						var picture_sprite = $gameTemp.drill_PIc_getPictureSpriteByPictureId( pic_ids[i] );
+						if( picture_sprite == undefined ){ continue; }
+						picture_sprite.drill_PIc_setBitmapIcon( iconBitmap_id );
+						
+						// > 数据赋值
+						pics[i].drill_PIc_setDataIconId( iconBitmap_id );
 					}
 				}
 			}
@@ -273,16 +308,20 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp1 = temp1.replace("]","");
 					
 					// > 建立bitmap
-					var icon_i = 0;
+					var icon_index = 0;
 					if( $dataItems[Number(temp1)] != null ){
-						icon_i = $dataItems[Number(temp1)].iconIndex;
+						icon_index = $dataItems[Number(temp1)].iconIndex;
 					}
-					$gameTemp._drill_PIc_curId += 1;
-					$gameTemp._drill_PIc_iconTank.push( ImageManager.drill_PIc_drawIconBitmap( icon_i, Number(temp2) ) );
-					
-					// > 绑定图标
+					var iconBitmap_id = $gameTemp.drill_PIc_createIconBitmapByIconIndex( icon_index, Number(temp2) );
 					for( var i = 0; i < pics.length; i++ ){
-						pics[i]._drill_PIc_iconId = $gameTemp._drill_PIc_curId;
+						
+						// > 贴图赋值
+						var picture_sprite = $gameTemp.drill_PIc_getPictureSpriteByPictureId( pic_ids[i] );
+						if( picture_sprite == undefined ){ continue; }
+						picture_sprite.drill_PIc_setBitmapIcon( iconBitmap_id );
+						
+						// > 数据赋值
+						pics[i].drill_PIc_setDataIconId( iconBitmap_id );
 					}
 					
 				}else if( temp1.indexOf("物品变量[") != -1 ||
@@ -292,16 +331,20 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp1 = temp1.replace("]","");
 					
 					// > 建立bitmap
-					var icon_i = 0;
+					var icon_index = 0;
 					if( $dataItems[ $gameVariables.value(Number(temp1)) ] != null ){
-						icon_i = $dataItems[$gameVariables.value(Number(temp1))].iconIndex;
+						icon_index = $dataItems[$gameVariables.value(Number(temp1))].iconIndex;
 					}
-					$gameTemp._drill_PIc_curId += 1;
-					$gameTemp._drill_PIc_iconTank.push( ImageManager.drill_PIc_drawIconBitmap( icon_i, Number(temp2) ) );
-					
-					// > 绑定图标
+					var iconBitmap_id = $gameTemp.drill_PIc_createIconBitmapByIconIndex( icon_index, Number(temp2) );
 					for( var i = 0; i < pics.length; i++ ){
-						pics[i]._drill_PIc_iconId = $gameTemp._drill_PIc_curId;
+						
+						// > 贴图赋值
+						var picture_sprite = $gameTemp.drill_PIc_getPictureSpriteByPictureId( pic_ids[i] );
+						if( picture_sprite == undefined ){ continue; }
+						picture_sprite.drill_PIc_setBitmapIcon( iconBitmap_id );
+						
+						// > 数据赋值
+						pics[i].drill_PIc_setDataIconId( iconBitmap_id );
 					}
 					
 				}else if( temp1.indexOf("物品名[") != -1 ||
@@ -311,20 +354,24 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp1 = temp1.replace("]","");
 					
 					// > 建立bitmap
-					var icon_i = 0;
+					var icon_index = 0;
 					for( var i = 0; i < $dataItems.length; i++ ){
 						if( $dataItems[i] == null ){continue;}
 						if( $dataItems[i].name == temp1 ){			//（根据名称搜索）
-							icon_i = $dataItems[i].iconIndex;
+							icon_index = $dataItems[i].iconIndex;
 							break;
 						}
 					}
-					$gameTemp._drill_PIc_curId += 1;
-					$gameTemp._drill_PIc_iconTank.push( ImageManager.drill_PIc_drawIconBitmap( icon_i, Number(temp2) ) );
-					
-					// > 绑定图标
+					var iconBitmap_id = $gameTemp.drill_PIc_createIconBitmapByIconIndex( icon_index, Number(temp2) );
 					for( var i = 0; i < pics.length; i++ ){
-						pics[i]._drill_PIc_iconId = $gameTemp._drill_PIc_curId;
+						
+						// > 贴图赋值
+						var picture_sprite = $gameTemp.drill_PIc_getPictureSpriteByPictureId( pic_ids[i] );
+						if( picture_sprite == undefined ){ continue; }
+						picture_sprite.drill_PIc_setBitmapIcon( iconBitmap_id );
+						
+						// > 数据赋值
+						pics[i].drill_PIc_setDataIconId( iconBitmap_id );
 					}
 				}
 			}
@@ -335,16 +382,20 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp1 = temp1.replace("]","");
 				
 					// > 建立bitmap
-					var icon_i = 0;
+					var icon_index = 0;
 					if( $dataWeapons[Number(temp1)] != null ){
-						icon_i = $dataWeapons[Number(temp1)].iconIndex;
+						icon_index = $dataWeapons[Number(temp1)].iconIndex;
 					}
-					$gameTemp._drill_PIc_curId += 1;
-					$gameTemp._drill_PIc_iconTank.push( ImageManager.drill_PIc_drawIconBitmap( icon_i, Number(temp2) ) );
-					
-					// > 绑定图标
+					var iconBitmap_id = $gameTemp.drill_PIc_createIconBitmapByIconIndex( icon_index, Number(temp2) );
 					for( var i = 0; i < pics.length; i++ ){
-						pics[i]._drill_PIc_iconId = $gameTemp._drill_PIc_curId;
+						
+						// > 贴图赋值
+						var picture_sprite = $gameTemp.drill_PIc_getPictureSpriteByPictureId( pic_ids[i] );
+						if( picture_sprite == undefined ){ continue; }
+						picture_sprite.drill_PIc_setBitmapIcon( iconBitmap_id );
+						
+						// > 数据赋值
+						pics[i].drill_PIc_setDataIconId( iconBitmap_id );
 					}
 					
 				}else if( temp1.indexOf("武器变量[") != -1 ){
@@ -352,16 +403,20 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp1 = temp1.replace("]","");
 					
 					// > 建立bitmap
-					var icon_i = 0;
+					var icon_index = 0;
 					if( $dataWeapons[ $gameVariables.value(Number(temp1)) ] != null ){
-						icon_i = $dataWeapons[$gameVariables.value(Number(temp1))].iconIndex;
+						icon_index = $dataWeapons[$gameVariables.value(Number(temp1))].iconIndex;
 					}
-					$gameTemp._drill_PIc_curId += 1;
-					$gameTemp._drill_PIc_iconTank.push( ImageManager.drill_PIc_drawIconBitmap( icon_i, Number(temp2) ) );
-					
-					// > 绑定图标
+					var iconBitmap_id = $gameTemp.drill_PIc_createIconBitmapByIconIndex( icon_index, Number(temp2) );
 					for( var i = 0; i < pics.length; i++ ){
-						pics[i]._drill_PIc_iconId = $gameTemp._drill_PIc_curId;
+						
+						// > 贴图赋值
+						var picture_sprite = $gameTemp.drill_PIc_getPictureSpriteByPictureId( pic_ids[i] );
+						if( picture_sprite == undefined ){ continue; }
+						picture_sprite.drill_PIc_setBitmapIcon( iconBitmap_id );
+						
+						// > 数据赋值
+						pics[i].drill_PIc_setDataIconId( iconBitmap_id );
 					}
 					
 				}else if( temp1.indexOf("武器名[") != -1 ){
@@ -369,20 +424,24 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp1 = temp1.replace("]","");
 					
 					// > 建立bitmap
-					var icon_i = 0;
+					var icon_index = 0;
 					for( var i = 0; i < $dataWeapons.length; i++ ){
 						if( $dataWeapons[i] == null ){continue;}
 						if( $dataWeapons[i].name == temp1 ){			//（根据名称搜索）
-							icon_i = $dataWeapons[i].iconIndex;
+							icon_index = $dataWeapons[i].iconIndex;
 							break;
 						}
 					}
-					$gameTemp._drill_PIc_curId += 1;
-					$gameTemp._drill_PIc_iconTank.push( ImageManager.drill_PIc_drawIconBitmap( icon_i, Number(temp2) ) );
-					
-					// > 绑定图标
+					var iconBitmap_id = $gameTemp.drill_PIc_createIconBitmapByIconIndex( icon_index, Number(temp2) );
 					for( var i = 0; i < pics.length; i++ ){
-						pics[i]._drill_PIc_iconId = $gameTemp._drill_PIc_curId;
+						
+						// > 贴图赋值
+						var picture_sprite = $gameTemp.drill_PIc_getPictureSpriteByPictureId( pic_ids[i] );
+						if( picture_sprite == undefined ){ continue; }
+						picture_sprite.drill_PIc_setBitmapIcon( iconBitmap_id );
+						
+						// > 数据赋值
+						pics[i].drill_PIc_setDataIconId( iconBitmap_id );
 					}
 				}
 			}
@@ -395,16 +454,20 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp1 = temp1.replace("]","");
 				
 					// > 建立bitmap
-					var icon_i = 0;
+					var icon_index = 0;
 					if( $dataArmors[Number(temp1)] != null ){
-						icon_i = $dataArmors[Number(temp1)].iconIndex;
+						icon_index = $dataArmors[Number(temp1)].iconIndex;
 					}
-					$gameTemp._drill_PIc_curId += 1;
-					$gameTemp._drill_PIc_iconTank.push( ImageManager.drill_PIc_drawIconBitmap( icon_i, Number(temp2) ) );
-					
-					// > 绑定图标
+					var iconBitmap_id = $gameTemp.drill_PIc_createIconBitmapByIconIndex( icon_index, Number(temp2) );
 					for( var i = 0; i < pics.length; i++ ){
-						pics[i]._drill_PIc_iconId = $gameTemp._drill_PIc_curId;
+						
+						// > 贴图赋值
+						var picture_sprite = $gameTemp.drill_PIc_getPictureSpriteByPictureId( pic_ids[i] );
+						if( picture_sprite == undefined ){ continue; }
+						picture_sprite.drill_PIc_setBitmapIcon( iconBitmap_id );
+						
+						// > 数据赋值
+						pics[i].drill_PIc_setDataIconId( iconBitmap_id );
 					}
 					
 				}else if( temp1.indexOf("护甲变量[") != -1 ||
@@ -414,16 +477,20 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp1 = temp1.replace("]","");
 					
 					// > 建立bitmap
-					var icon_i = 0;
+					var icon_index = 0;
 					if( $dataArmors[ $gameVariables.value(Number(temp1)) ] != null ){
-						icon_i = $dataArmors[$gameVariables.value(Number(temp1))].iconIndex;
+						icon_index = $dataArmors[$gameVariables.value(Number(temp1))].iconIndex;
 					}
-					$gameTemp._drill_PIc_curId += 1;
-					$gameTemp._drill_PIc_iconTank.push( ImageManager.drill_PIc_drawIconBitmap( icon_i, Number(temp2) ) );
-					
-					// > 绑定图标
+					var iconBitmap_id = $gameTemp.drill_PIc_createIconBitmapByIconIndex( icon_index, Number(temp2) );
 					for( var i = 0; i < pics.length; i++ ){
-						pics[i]._drill_PIc_iconId = $gameTemp._drill_PIc_curId;
+						
+						// > 贴图赋值
+						var picture_sprite = $gameTemp.drill_PIc_getPictureSpriteByPictureId( pic_ids[i] );
+						if( picture_sprite == undefined ){ continue; }
+						picture_sprite.drill_PIc_setBitmapIcon( iconBitmap_id );
+						
+						// > 数据赋值
+						pics[i].drill_PIc_setDataIconId( iconBitmap_id );
 					}
 					
 				}else if( temp1.indexOf("护甲名[") != -1 ||
@@ -433,20 +500,24 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp1 = temp1.replace("]","");
 					
 					// > 建立bitmap
-					var icon_i = 0;
+					var icon_index = 0;
 					for( var i = 0; i < $dataArmors.length; i++ ){
 						if( $dataArmors[i] == null ){continue;}
 						if( $dataArmors[i].name == temp1 ){			//（根据名称搜索）
-							icon_i = $dataArmors[i].iconIndex;
+							icon_index = $dataArmors[i].iconIndex;
 							break;
 						}
 					}
-					$gameTemp._drill_PIc_curId += 1;
-					$gameTemp._drill_PIc_iconTank.push( ImageManager.drill_PIc_drawIconBitmap( icon_i, Number(temp2) ) );
-					
-					// > 绑定图标
+					var iconBitmap_id = $gameTemp.drill_PIc_createIconBitmapByIconIndex( icon_index, Number(temp2) );
 					for( var i = 0; i < pics.length; i++ ){
-						pics[i]._drill_PIc_iconId = $gameTemp._drill_PIc_curId;
+						
+						// > 贴图赋值
+						var picture_sprite = $gameTemp.drill_PIc_getPictureSpriteByPictureId( pic_ids[i] );
+						if( picture_sprite == undefined ){ continue; }
+						picture_sprite.drill_PIc_setBitmapIcon( iconBitmap_id );
+						
+						// > 数据赋值
+						pics[i].drill_PIc_setDataIconId( iconBitmap_id );
 					}
 				}
 			}
@@ -457,16 +528,20 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp1 = temp1.replace("]","");
 				
 					// > 建立bitmap
-					var icon_i = 0;
+					var icon_index = 0;
 					if( $dataSkills[Number(temp1)] != null ){
-						icon_i = $dataSkills[Number(temp1)].iconIndex;
+						icon_index = $dataSkills[Number(temp1)].iconIndex;
 					}
-					$gameTemp._drill_PIc_curId += 1;
-					$gameTemp._drill_PIc_iconTank.push( ImageManager.drill_PIc_drawIconBitmap( icon_i, Number(temp2) ) );
-					
-					// > 绑定图标
+					var iconBitmap_id = $gameTemp.drill_PIc_createIconBitmapByIconIndex( icon_index, Number(temp2) );
 					for( var i = 0; i < pics.length; i++ ){
-						pics[i]._drill_PIc_iconId = $gameTemp._drill_PIc_curId;
+						
+						// > 贴图赋值
+						var picture_sprite = $gameTemp.drill_PIc_getPictureSpriteByPictureId( pic_ids[i] );
+						if( picture_sprite == undefined ){ continue; }
+						picture_sprite.drill_PIc_setBitmapIcon( iconBitmap_id );
+						
+						// > 数据赋值
+						pics[i].drill_PIc_setDataIconId( iconBitmap_id );
 					}
 					
 				}else if( temp1.indexOf("技能变量[") != -1 ){
@@ -474,16 +549,20 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp1 = temp1.replace("]","");
 					
 					// > 建立bitmap
-					var icon_i = 0;
+					var icon_index = 0;
 					if( $dataSkills[ $gameVariables.value(Number(temp1)) ] != null ){
-						icon_i = $dataSkills[$gameVariables.value(Number(temp1))].iconIndex;
+						icon_index = $dataSkills[$gameVariables.value(Number(temp1))].iconIndex;
 					}
-					$gameTemp._drill_PIc_curId += 1;
-					$gameTemp._drill_PIc_iconTank.push( ImageManager.drill_PIc_drawIconBitmap( icon_i, Number(temp2) ) );
-					
-					// > 绑定图标
+					var iconBitmap_id = $gameTemp.drill_PIc_createIconBitmapByIconIndex( icon_index, Number(temp2) );
 					for( var i = 0; i < pics.length; i++ ){
-						pics[i]._drill_PIc_iconId = $gameTemp._drill_PIc_curId;
+						
+						// > 贴图赋值
+						var picture_sprite = $gameTemp.drill_PIc_getPictureSpriteByPictureId( pic_ids[i] );
+						if( picture_sprite == undefined ){ continue; }
+						picture_sprite.drill_PIc_setBitmapIcon( iconBitmap_id );
+						
+						// > 数据赋值
+						pics[i].drill_PIc_setDataIconId( iconBitmap_id );
 					}
 					
 				}else if( temp1.indexOf("技能名[") != -1 ){
@@ -491,20 +570,24 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp1 = temp1.replace("]","");
 					
 					// > 建立bitmap
-					var icon_i = 0;
+					var icon_index = 0;
 					for( var i = 0; i < $dataSkills.length; i++ ){
 						if( $dataSkills[i] == null ){continue;}
 						if( $dataSkills[i].name == temp1 ){			//（根据名称搜索）
-							icon_i = $dataSkills[i].iconIndex;
+							icon_index = $dataSkills[i].iconIndex;
 							break;
 						}
 					}
-					$gameTemp._drill_PIc_curId += 1;
-					$gameTemp._drill_PIc_iconTank.push( ImageManager.drill_PIc_drawIconBitmap( icon_i, Number(temp2) ) );
-					
-					// > 绑定图标
+					var iconBitmap_id = $gameTemp.drill_PIc_createIconBitmapByIconIndex( icon_index, Number(temp2) );
 					for( var i = 0; i < pics.length; i++ ){
-						pics[i]._drill_PIc_iconId = $gameTemp._drill_PIc_curId;
+						
+						// > 贴图赋值
+						var picture_sprite = $gameTemp.drill_PIc_getPictureSpriteByPictureId( pic_ids[i] );
+						if( picture_sprite == undefined ){ continue; }
+						picture_sprite.drill_PIc_setBitmapIcon( iconBitmap_id );
+						
+						// > 数据赋值
+						pics[i].drill_PIc_setDataIconId( iconBitmap_id );
 					}
 				}
 			}
@@ -513,14 +596,14 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var type = String(args[3]);
 			if( type == "去除图标" ){
 				for( var i = 0; i < pics.length; i++ ){
-					pics[i]._drill_PIc_iconId = -1;
+					pics[i].drill_PIc_removeData();
 				}
 			}
 		}
 	}
 };
 //==============================
-// ** 插件指令 - 图片检查
+// * 插件指令 - 图片检查
 //==============================
 Game_Screen.prototype.drill_PIc_isPictureExist = function( pic_id ){
 	if( pic_id == 0 ){ return false; }
@@ -533,39 +616,265 @@ Game_Screen.prototype.drill_PIc_isPictureExist = function( pic_id ){
 	return true;
 };
 
-//=============================================================================
-// ** 临时变量
-//=============================================================================
-var _drill_PIc_temp_initialize = Game_Temp.prototype.initialize;
-Game_Temp.prototype.initialize = function() {
-    _drill_PIc_temp_initialize.call(this);
-	
-	this._drill_PIc_curId = -1;
-	this._drill_PIc_iconTank = [];
+
+//#############################################################################
+// ** 【标准模块】图片贴图 ☆图片贴图
+//#############################################################################
+//##############################
+// * 图片贴图 - 获取 - 全部图片贴图【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 贴图数组       （图片贴图）
+//          
+//			说明：	> 此函数返回所有图片贴图，包括被转移到 图片层、最顶层 的图片。
+//##############################
+Game_Temp.prototype.drill_PIc_getAllPictureSprite = function(){
+	return this.drill_PIc_getAllPictureSprite_Private();
 }
+//##############################
+// * 图片贴图 - 获取 - 容器指针【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 贴图数组       （图片贴图）
+//          
+//			说明：	> 此函数直接返回容器对象。
+//					> 注意，被转移到 图片层、最顶层 的图片，不在此容器内。
+//##############################
+Game_Temp.prototype.drill_PIc_getPictureSpriteTank = function(){
+	return this.drill_PIc_getPictureSpriteTank_Private();
+}
+//##############################
+// * 图片贴图 - 获取 - 根据图片ID【标准函数】
+//			
+//			参数：	> picture_id 数字（图片ID）
+//			返回：	> 贴图对象       （图片贴图）
+//          
+//			说明：	> 图片id和图片贴图一一对应。
+//					> 此函数只读，且不缓存任何对象，直接读取容器数据。
+//					> 注意，图片数据类 与 图片贴图 为 多对一，图片数据类在战斗界面和地图界面分两类，而图片贴图不分。
+//					> 此函数能获取到被转移到 图片层、最顶层 的图片。
+//##############################
+Game_Temp.prototype.drill_PIc_getPictureSpriteByPictureId = function( picture_id ){
+	return this.drill_PIc_getPictureSpriteByPictureId_Private( picture_id );
+}
+//=============================================================================
+// ** 图片贴图（接口实现）
+//=============================================================================
+//==============================
+// * 图片贴图容器 - 获取 - 容器（私有）
+//==============================
+Game_Temp.prototype.drill_PIc_getPictureSpriteTank_Private = function(){
+	if( SceneManager._scene == undefined ){ return null; }
+	if( SceneManager._scene._spriteset == undefined ){ return null; }
+	if( SceneManager._scene._spriteset._pictureContainer == undefined ){ return null; }
+	return SceneManager._scene._spriteset._pictureContainer.children;
+};
+//==============================
+// * 图片贴图容器 - 获取 - 最顶层容器（私有）
+//==============================
+Game_Temp.prototype.drill_PIc_getPictureSpriteTank_SenceTopArea = function(){
+	if( SceneManager._scene == undefined ){ return null; }
+	if( SceneManager._scene._drill_SenceTopArea == undefined ){ return null; }
+	return SceneManager._scene._drill_SenceTopArea.children;
+};
+//==============================
+// * 图片贴图容器 - 获取 - 图片层容器（私有）
+//==============================
+Game_Temp.prototype.drill_PIc_getPictureSpriteTank_PicArea = function(){
+	if( SceneManager._scene == undefined ){ return null; }
+	if( SceneManager._scene instanceof Scene_Battle ){		//『图片与多场景』
+		if( SceneManager._scene._spriteset == undefined ){ return null; }
+		if( SceneManager._scene._spriteset._drill_battlePicArea == undefined ){ return null; }
+		return SceneManager._scene._spriteset._drill_battlePicArea.children;
+	}
+	if( SceneManager._scene instanceof Scene_Map ){
+		if( SceneManager._scene._spriteset == undefined ){ return null; }
+		if( SceneManager._scene._spriteset._drill_mapPicArea == undefined ){ return null; }
+		return SceneManager._scene._spriteset._drill_mapPicArea.children;
+	}
+	return null;
+};
+//==============================
+// * 图片贴图容器 - 获取 - 全部图片贴图（私有）
+//==============================
+Game_Temp.prototype.drill_PIc_getAllPictureSprite_Private = function(){
+	var result_list = [];
+	
+	// > 图片对象层 的图片贴图
+	var sprite_list = this.drill_PIc_getPictureSpriteTank_Private();
+	if( sprite_list != undefined ){
+		for(var i=0; i < sprite_list.length; i++){
+			var sprite = sprite_list[i];
+			if( sprite instanceof Sprite_Picture ){
+				result_list.push( sprite );
+			}
+		}
+	}
+	
+	// > 最顶层 的图片贴图
+	var sprite_list = this.drill_PIc_getPictureSpriteTank_SenceTopArea();
+	if( sprite_list != undefined ){
+		for(var i=0; i < sprite_list.length; i++){
+			var sprite = sprite_list[i];
+			if( sprite instanceof Sprite_Picture ){
+				result_list.push( sprite );
+			}
+		}
+	}
+	
+	// > 图片层 的图片贴图
+	var sprite_list = this.drill_PIc_getPictureSpriteTank_PicArea();
+	if( sprite_list != undefined ){
+		for(var i=0; i < sprite_list.length; i++){
+			var sprite = sprite_list[i];
+			if( sprite instanceof Sprite_Picture ){
+				result_list.push( sprite );
+			}
+		}
+	}
+	return result_list;
+};
+//==============================
+// * 图片贴图容器 - 获取 - 根据图片ID（私有）
+//==============================
+Game_Temp.prototype.drill_PIc_getPictureSpriteByPictureId_Private = function( picture_id ){
+	
+	// > 图片对象层 的图片贴图
+	var sprite_list = this.drill_PIc_getPictureSpriteTank_Private();
+	if( sprite_list != undefined ){
+		for(var i=0; i < sprite_list.length; i++){
+			var sprite = sprite_list[i];
+			if( sprite instanceof Sprite_Picture ){
+				if( sprite._pictureId == picture_id ){
+					return sprite;
+				}
+			}
+		}
+	}
+	
+	// > 最顶层 的图片贴图
+	var sprite_list = this.drill_PIc_getPictureSpriteTank_SenceTopArea();
+	if( sprite_list != undefined ){
+		for(var i=0; i < sprite_list.length; i++){
+			var sprite = sprite_list[i];
+			if( sprite instanceof Sprite_Picture ){
+				if( sprite._pictureId == picture_id ){
+					return sprite;
+				}
+			}
+		}
+	}
+	
+	// > 图片层 的图片贴图
+	var sprite_list = this.drill_PIc_getPictureSpriteTank_PicArea();
+	if( sprite_list != undefined ){
+		for(var i=0; i < sprite_list.length; i++){
+			var sprite = sprite_list[i];
+			if( sprite instanceof Sprite_Picture ){
+				if( sprite._pictureId == picture_id ){
+					return sprite;
+				}
+			}
+		}
+	}
+	return null;
+};
+
+
 
 //=============================================================================
-// ** 图片
+// ** ☆图片的属性
+//
+//			说明：	> 此模块专门定义 图片的属性。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 图片数据 - 初始化基本信息
+// * 图片的属性 - 初始化
 //==============================
-var _drill_PIc_p_initBasic = Game_Picture.prototype.initBasic;
-Game_Picture.prototype.initBasic = function() {
-	_drill_PIc_p_initBasic.call(this);
-	
-	this._drill_PIc_iconId = -1;		//图标标记
+var _drill_PIc_p_initialize = Game_Picture.prototype.initialize;
+Game_Picture.prototype.initialize = function() {
+	this._drill_PIc_iconId = undefined;			//（要放前面，不然会盖掉子类的设置）
+	_drill_PIc_p_initialize.call(this);
 }
 //==============================
-// * 图片贴图 - 初始化
+// * 图片的属性 - 删除数据
+//==============================
+Game_Picture.prototype.drill_PIc_removeData = function(){
+	this._drill_PIc_iconId = undefined;
+}
+//==============================
+// * 图片的属性 - 设置图标ID
+//==============================
+Game_Picture.prototype.drill_PIc_setDataIconId = function( iconBitmap_id ){
+	this._drill_PIc_iconId = iconBitmap_id;
+}
+//==============================
+// * 图片的属性 - 显示图片（对应函数showPicture）
+//==============================
+var _drill_PIc_p_show = Game_Picture.prototype.show;
+Game_Picture.prototype.show = function( name, origin, x, y, scaleX, scaleY, opacity, blendMode ){
+	_drill_PIc_p_show.call( this, name, origin, x, y, scaleX, scaleY, opacity, blendMode );
+	this.drill_PIc_removeData();			//（删除数据）
+}
+//==============================
+// * 图片的属性 - 消除图片
+//==============================
+var _drill_PIc_p_erase = Game_Picture.prototype.erase;
+Game_Picture.prototype.erase = function(){
+	_drill_PIc_p_erase.call( this );
+	this.drill_PIc_removeData();			//（删除数据）
+}
+//==============================
+// * 图片的属性 - 消除图片（command235）
+//==============================
+var _drill_PIc_p_erasePicture = Game_Screen.prototype.erasePicture;
+Game_Screen.prototype.erasePicture = function( pictureId ){
+    var realPictureId = this.realPictureId(pictureId);
+	var picture = this._pictures[realPictureId];
+	if( picture != undefined ){
+		picture.drill_PIc_removeData();		//（删除数据）
+	}
+	_drill_PIc_p_erasePicture.call( this, pictureId );
+}
+
+
+//=============================================================================
+// ** ☆图片控制
+//
+//			说明：	> 此模块专门管理 图片 的图标变化。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 图片控制 - 贴图 初始化
 //==============================
 var _drill_PIc_sp_initialize = Sprite_Picture.prototype.initialize;
 Sprite_Picture.prototype.initialize = function( pictureId ){
+	this._drill_PIc_sp_lastIconId = undefined;		//（要放前面，不然会盖掉子类的设置）
 	_drill_PIc_sp_initialize.call( this, pictureId );
-	this._drill_PIc_p_id = -1;
 }
 //==============================
-// * 图片贴图 - 绑定图标
+// * 图片控制 - 贴图 设置图标
+//
+//			说明：	> 由于一帧内 先刷新 图片的属性，后刷新 贴图的属性。
+//					  所以修改图片的属性后，不能立即操作贴图bitmap。『图片bitmap切换慢一帧』
+//					> 如果急用，外部函数需要考虑同时 数据赋值+贴图赋值。
+//					  （一种急用的情况：设置图标 执行后，就立即执行粉碎效果。）
+//==============================
+Sprite_Picture.prototype.drill_PIc_setBitmapIcon = function( icon_id ){
+	this._drill_PIc_sp_lastIconId = icon_id;		//（需要赋值，外部函数设置快照后，帧刷新中就不会重复设置了）
+	var bitmap = $gameTemp.drill_PIc_getIconBitmapById( icon_id );
+	if( bitmap == undefined ){ return; }
+	this.bitmap = bitmap;
+}
+//==============================
+// * 图片控制 - 贴图 去除图标
+//==============================
+Sprite_Picture.prototype.drill_PIc_removeBitmapIcon = function(){
+	this._pictureName = '';
+	this.bitmap = null;
+}
+//==============================
+// * 图片控制 - 贴图 帧刷新
 //==============================
 var _drill_PIc_sp_update = Sprite_Picture.prototype.update;
 Sprite_Picture.prototype.update = function() {
@@ -573,68 +882,66 @@ Sprite_Picture.prototype.update = function() {
     var picture = this.picture();
     if( picture ){
 		
-		// > 跳过赋值
-		if( this._drill_PIc_p_id == picture._drill_PIc_iconId ){ return; }
-		this._drill_PIc_p_id = picture._drill_PIc_iconId;
+		if( this._drill_PIc_sp_lastIconId == picture._drill_PIc_iconId ){ return; }
+		this._drill_PIc_sp_lastIconId = picture._drill_PIc_iconId;
 		
-		// > 恢复图像
-		if( this._drill_PIc_p_id == -1 ){
-			this._pictureName = '';
-			this.bitmap = null;
+		// > 去除图标
+		if( this._drill_PIc_sp_lastIconId == undefined ){
+			this.drill_PIc_removeBitmapIcon();
 			
-		// > 变为图标
+		// > 设置图标
 		}else{
-			var bitmap = $gameTemp._drill_PIc_iconTank[ this._drill_PIc_p_id ];
-			if( bitmap == undefined ){ return; }
-			this.bitmap = bitmap;
+			this.drill_PIc_setBitmapIcon( picture._drill_PIc_iconId );
 		}
 		
+	// > 无数据时『图片数据根除时』
 	}else{
-		
-		// > 直接被断开 贴图数据 时，恢复图像
-		if( this._drill_PIc_p_id != -1 ){
-			this._drill_PIc_p_id = -1;
-			this._pictureName = '';
-			this.bitmap = null;
+		if( this._drill_PIc_sp_lastIconId != undefined ){
+			this._drill_PIc_sp_lastIconId = undefined;
+			this.drill_PIc_removeBitmapIcon();
 		}
 	}
 };
 
-//==============================
-// * 图片控制 - 显示图片（对应函数showPicture）
-//==============================
-var _drill_PIc_p_show = Game_Picture.prototype.show;
-Game_Picture.prototype.show = function( name, origin, x, y, scaleX, scaleY, opacity, blendMode ){
-	_drill_PIc_p_show.call( this, name, origin, x, y, scaleX, scaleY, opacity, blendMode );
-	this._drill_PIc_iconId = -1;		//（标记解除）
-}
-//==============================
-// * 图片控制 - 消除图片
-//==============================
-var _drill_PIc_p_erase = Game_Picture.prototype.erase;
-Game_Picture.prototype.erase = function(){
-	_drill_PIc_p_erase.call( this );
-	this._drill_PIc_iconId = -1;		//（标记解除）
-}
-//==============================
-// * 图片控制 - 消除图片（command235）
-//==============================
-var _drill_PIc_p_erasePicture = Game_Screen.prototype.erasePicture;
-Game_Screen.prototype.erasePicture = function( pictureId ){
-    var realPictureId = this.realPictureId(pictureId);
-	var picture = this._pictures[realPictureId];
-	if( picture != undefined ){
-		picture._drill_PIc_iconId = -1;	//（标记解除）
-	}
-	_drill_PIc_p_erasePicture.call( this, pictureId );
-}
 
 //=============================================================================
-// ** 创建bitmap对象
+// ** ☆图标容器
+//
+//			说明：	> 此模块专门管理 图标 的创建。
+//					> 暂时不考虑销毁Bitmap情况，因为本身图标占内存就小。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
+//==============================
+// * 图标容器 - 初始化 容器
+//==============================
+var _drill_PIc_temp_initialize = Game_Temp.prototype.initialize;
+Game_Temp.prototype.initialize = function() {
+    _drill_PIc_temp_initialize.call(this);
+	this._drill_PIc_curBitmapId = -1;			//图标 计数器
+	this._drill_PIc_curBitmapTank = [];			//图标 贴图容器
+}
+//==============================
+// * 图标容器 - 创建图标
+//==============================
+Game_Temp.prototype.drill_PIc_createIconBitmapByIconIndex = function( icon_index, icon_size ){
+	
+	// > 计数器+1
+	this._drill_PIc_curBitmapId += 1;
+	var iconBitmap_id = this._drill_PIc_curBitmapId;
+	
+	// > 创建图标Bitmap
+	var bitmap = ImageManager.drill_PIc_drawIconBitmap( icon_index, icon_size );
+	this._drill_PIc_curBitmapTank[ iconBitmap_id ] = bitmap;
+	
+	return iconBitmap_id;
+}
+//==============================
+// * 图标容器 - 创建图标Bitmap
+//==============================
 ImageManager.drill_PIc_drawIconBitmap = function( icon_index, icon_size ){
 	if( icon_size == undefined ){ icon_size = 1; }
 	if( icon_index == 0 ){ return new Bitmap(); }
+	
 	var pw = Window_Base._iconWidth ;
 	var ph = Window_Base._iconHeight ;
 	var cur_bitmap = new Bitmap( pw*icon_size , ph*icon_size );
@@ -649,5 +956,11 @@ ImageManager.drill_PIc_drawIconBitmap = function( icon_index, icon_size ){
 	
     return cur_bitmap;
 };
+//==============================
+// * 图标容器 - 获取 图标
+//==============================
+Game_Temp.prototype.drill_PIc_getIconBitmapById = function( iconBitmap_id ){
+	return this._drill_PIc_curBitmapTank[ iconBitmap_id ];
+}
 
 

@@ -3346,6 +3346,7 @@ Drill_AGi_Controller.prototype.drill_controller_updateGIF = function(){
 	// > 播放GIF
 	var inter = this._drill_GIF_time;
 	inter = inter / data['interval'];
+	inter = Math.floor(inter);
 	inter = inter % data['src_img_gif'].length;
 	if( data['back_run'] == true ){
 		inter = data['src_img_gif'].length - 1 - inter;

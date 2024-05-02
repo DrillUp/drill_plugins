@@ -593,7 +593,7 @@ Game_Character.prototype.drill_EUOM_setKeepSameSpeed = function( enabled ){
 Game_Map.prototype.drill_EUOM_getIdByCharacter = function( character ){
 	
 	// > 玩家 为-2
-	if( character == $gamePlayer ){ return -2; }
+	if( character == $gamePlayer ){ return -2; }	//『玩家id』
 	
 	// > 事件 为事件id
 	if( character instanceof Game_Event ){ return character._eventId; }
@@ -606,7 +606,7 @@ Game_Map.prototype.drill_EUOM_getIdByCharacter = function( character ){
 Game_Map.prototype.drill_EUOM_getCharacterById = function( id ){
 	
 	// > 玩家 为-2
-	if( id == -2 ){ return $gamePlayer; }
+	if( id == -2 ){ return $gamePlayer; }	//『玩家id』
 	
 	// > 事件 为事件id
 	if( id >= 0 ){ return $gameMap.event( id ); }
@@ -731,12 +731,18 @@ Game_Map.prototype.drill_EUOM_updateRestatistics = function(){
 	$gameTemp._drill_EUOM_needRestatistics = false;
 	
 	$gameTemp._drill_EUOM_keyMap = {};
-	var ch_list = this.events();
-	ch_list.push( $gamePlayer );		//（包含玩家）
-	for( var i = 0; i < ch_list.length; i++ ){
-		var temp_ch = ch_list[i];
-		if( temp_ch == undefined ){ continue; }
-		if( temp_ch._erased == true ){ continue; }
+	var character_list = [];
+	var event_list = this._events;
+	for(var i = 0; i < event_list.length; i++ ){
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
+		character_list.push( temp_event );
+	}
+	
+	character_list.push( $gamePlayer );
+	for (var i = 0; i < character_list.length; i++) {  
+		var temp_ch = character_list[i];
 		
 		var tag = temp_ch.drill_EUOM_getTag();
 		if( tag == "" ){ continue; }
@@ -789,7 +795,7 @@ Game_CharacterBase.prototype.moveStraight = function( d ){
 	
 	// > 判定 - 是否组内只有一个对象
 	var ch_list = $gameTemp.drill_EUOM_getCharacterListByTag( tag );	//（含玩家）
-	if( ch_list.length <= 1 ){
+	if( ch_list.length == 1 ){	//（要排除 == 0 的情况，不然加载地图时小爱丽丝就移动会错位）
 		
 		// > 原函数
 		_drill_EUOM_moveStraight.call( this, d );
@@ -889,7 +895,7 @@ Game_CharacterBase.prototype.moveDiagonally = function( horz, vert ){
 	
 	// > 判定 - 是否组内只有一个对象
 	var ch_list = $gameTemp.drill_EUOM_getCharacterListByTag( tag );	//（含玩家）
-	if( ch_list.length <= 1 ){
+	if( ch_list.length == 1 ){	//（要排除 == 0 的情况，不然加载地图时小爱丽丝就移动会错位）
 		
 		// > 原函数
 		_drill_EUOM_moveDiagonally.call( this, horz, vert );
@@ -982,8 +988,8 @@ Game_Map.prototype.drill_EUOM_moveDiagonally_ByTag = function( horz, vert, ch_li
 //==============================
 // * 速度统一 - 当前帧等待
 //==============================
-var _drill_EUOM_m_updateEvents = Game_Map.prototype.updateEvents;
-Game_Map.prototype.updateEvents = function(){
+var _drill_EUOM_m_update = Game_Map.prototype.update;
+Game_Map.prototype.update = function( sceneActive ){
 	
 	// > 等待1帧
 	if( this._drill_EUOM_movingWaitOneF == true ){
@@ -991,7 +997,7 @@ Game_Map.prototype.updateEvents = function(){
 	}
 	
 	// > 原函数
-    _drill_EUOM_m_updateEvents.call(this);
+    _drill_EUOM_m_update.call( this, sceneActive );
 };
 //==============================
 // * 速度统一 - 帧同步移动

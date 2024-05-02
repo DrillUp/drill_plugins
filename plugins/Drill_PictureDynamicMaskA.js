@@ -1957,7 +1957,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				chars = [ e_id ];
 			}
 			if( chars == null && obj_str == "玩家" ){
-				chars = [ -2 ];
+				chars = [ -2 ];		//『玩家id』
 			}
 			
 			// > 鼠标
@@ -2172,7 +2172,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( type == "绑定到" ){
 				
 				if( obj_str == "玩家" ){
-					marker.drill_setBindingCharacterId( -2 );
+					marker.drill_setBindingCharacterId( -2 );	//『玩家id』
 					return;
 				}
 				if( obj_str == "本事件" ){
@@ -2247,8 +2247,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					pos = [ $gameVariables.value(Number(temp1[0])), 
 							$gameVariables.value(Number(temp1[1])) ];
 					var m_data = {
-						"x": data['x'] + Number(pos[0]),
-						"y": data['y'] + Number(pos[1]),
+						"x": marker.drill_getBallisticsX() + Number(pos[0]),
+						"y": marker.drill_getBallisticsY() + Number(pos[1]),
 						"time":temp2,
 						"type":type,
 					}
@@ -2261,8 +2261,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					pos = [ Number(temp1[0]), 
 							Number(temp1[1]) ];
 					var m_data = {
-						"x": data['x'] + Number(pos[0]),
-						"y": data['y'] + Number(pos[1]),
+						"x": marker.drill_getBallisticsX() + Number(pos[0]),
+						"y": marker.drill_getBallisticsY() + Number(pos[1]),
 						"time":temp2,
 						"type":type,
 					}
@@ -2950,7 +2950,7 @@ Scene_Base.prototype.drill_PDMA_setMaskOpened = function( b ){
 //
 //=============================================================================
 //==============================
-// * 地图界面 - 创建
+// * 地图界面 - 创建『图片与多场景』
 //==============================
 var _drill_PDMA_mapScene_initialize = Scene_Map.prototype.initialize;
 Scene_Map.prototype.initialize = function() {
@@ -2991,7 +2991,7 @@ DrillUp.g_PDMA_debugUpdate_map = true;
 //
 //=============================================================================
 //==============================
-// * 战斗界面 - 创建
+// * 战斗界面 - 创建『图片与多场景』
 //==============================
 var _drill_PDMA_battleScene_initialize = Scene_Battle.prototype.initialize;
 Scene_Battle.prototype.initialize = function() {
@@ -3083,7 +3083,7 @@ Scene_Base.prototype.drill_PDMA_updatePictureSprite = function(){
 	}
 }
 //==============================
-// * 地图界面 - 帧刷新绑定
+// * 地图界面 - 帧刷新绑定『图片与多场景』
 //==============================
 var _drill_PDMA_mapScene_update2 = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {	
@@ -3091,7 +3091,7 @@ Scene_Map.prototype.update = function() {
 	this.drill_PDMA_updatePictureSprite();
 }
 //==============================
-// * 战斗界面 - 帧刷新绑定
+// * 战斗界面 - 帧刷新绑定『图片与多场景』
 //==============================
 var _drill_PDMA_battleScene_update2 = Scene_Battle.prototype.update;
 Scene_Battle.prototype.update = function() {	

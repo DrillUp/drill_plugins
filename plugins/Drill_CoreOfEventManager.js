@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        物体管理 - 事件管理核心
+ * @plugindesc [v1.1]        物体管理 - 事件管理核心
  * @author Drill_up
  * 
  * 
@@ -80,11 +80,14 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 优化了刷菜单时已销毁事件不创建贴图的设置。
+ * 新创建的事件兼容了行走图优化核心的堆叠级定义。
  * 
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		COEM （Core_Of_Event_Manager）
+//		插件简称		COEM（Core_Of_Event_Manager）
 //		临时全局变量	无
 //		临时局部变量	无
 //		存储数据变量	$gameSystem._drill_COEM_xxxx
@@ -109,6 +112,9 @@
 //			->☆静态数据
 //			->☆插件指令
 //			
+//			->☆管辖权
+//			->☆管辖函数覆写
+//			
 //			->☆原代容器 标准模块
 //				->创建事件【标准函数】
 //				->删除事件【标准函数】
@@ -129,9 +135,6 @@
 //				->提前加载资源【标准函数】
 //				->地图资源是否存在【标准函数】
 //			->☆事件常用函数 标准模块
-//				->全部事件【标准函数】
-//				->有效事件容器指针【标准函数】
-//				->有效事件容器备份【标准函数】
 //				->删除全部独立开关【标准函数】
 //				
 //			->☆原代容器
@@ -148,8 +151,15 @@
 //			->☆删除流程
 //				->删除事件
 //				->删除全部独立开关
-//			->☆核心功能扩展
-//				->有效事件容器
+//			
+//			->☆有效事件容器 标准模块
+//				->获取事件容器指针【标准函数】
+//				->获取事件容器备份【标准函数】
+//				->是否为有效事件【标准函数】
+//				->获取有效事件容器指针【标准函数】
+//				->获取有效事件容器备份【标准函数】
+//			->☆有效事件容器（实现）
+//			
 //			->☆核心漏洞修复
 //			
 //			
@@ -194,6 +204,12 @@
 	//==============================
 	DrillUp.drill_COEM_getPluginTip_LowVersion = function(){
 		return "【" + DrillUp.g_COEM_PluginTip_curName + "】\n检测到你的rmmv工程版本太低，事件管理核心无法使用。\n会报ResourceHandler资源指针错误。\n你可以使用\"rmmv软件版本.docx\"中的升级工程的方法来升级你的工程。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 强制更新提示
+	//==============================
+	DrillUp.drill_COEM_getPluginTip_NeedUpdate_COEF = function(){
+		return "【" + DrillUp.g_COEM_PluginTip_curName + "】\n行走图优化核心插件版本过低，你需要更新 核心插件 至少v1.2及以上版本。";
 	};
 	//==============================
 	// * 提示信息 - 报错 - 找不到事件
@@ -304,7 +320,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 };
 //==============================
-// ** 插件指令 - 事件检查
+// * 插件指令 - 事件检查
 //==============================
 Game_Map.prototype.drill_COEM_isEventExist = function( e_id ){
 	if( e_id == 0 ){ return false; }
@@ -316,6 +332,113 @@ Game_Map.prototype.drill_COEM_isEventExist = function( e_id ){
 	}
 	return true;
 };
+
+
+//=============================================================================
+// ** ☆管辖权
+//
+//			说明：	> 管辖权 即对 原函数 进行 修改、覆写、继承、控制子插件继承 等的权利。
+//					> 用于后期脱离 原游戏框架 且仍保持兼容性 的标记。
+//=============================================================================
+/*
+//==============================
+// * C事件容器『物体管理-事件管理核心』 - 载入初始化
+//
+//			说明：	> 只在 载入地图时 执行一次。
+//==============================
+Game_Map.prototype.setupEvents = function(){
+	
+	// > 创建事件（根据地图数据库）
+    this._events = [];
+    for( var i = 0; i < $dataMap.events.length; i++ ){
+        if( $dataMap.events[i] ){
+            this._events[i] = new Game_Event(this._mapId, i);
+        }
+    }
+	// > 创建公共事件（根据公共事件数据库）
+    this._commonEvents = this.parallelCommonEvents().map(function( commonEvent ){
+        return new Game_CommonEvent(commonEvent.id);
+    });
+	
+	// > 刷新 图块行走图 事件
+    this.refreshTileEvents();
+};
+//==============================
+// * C事件容器『物体管理-事件管理核心』 - 移除事件（根据id，command214）
+//==============================
+Game_Map.prototype.eraseEvent = function( eventId ){
+    this._events[eventId].erase();
+};
+//==============================
+// * C事件容器『物体管理-事件管理核心』 - 帧刷新
+//==============================
+Game_Map.prototype.updateEvents = function(){
+    this.events().forEach(function( event ){
+        event.update();
+    });
+    this._commonEvents.forEach(function( event ){
+        event.update();
+    });
+};
+//==============================
+// * C事件容器『物体管理-事件管理核心』 - 获取 - 全部事件
+//==============================
+Game_Map.prototype.events = function(){
+    return this._events.filter(function( event ){
+        return !!event;
+    });
+};
+//==============================
+// * C事件容器『物体管理-事件管理核心』 - 获取 - 事件（根据id）
+//==============================
+Game_Map.prototype.event = function( eventId ){
+    return this._events[eventId];
+};
+*/
+
+
+//=============================================================================
+// ** ☆管辖函数覆写
+//
+//			说明：	> 此模块 覆写函数，防止其它插件对函数覆写后，影响功能。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 管辖函数覆写『物体管理-事件管理核心』 - C事件容器 - 帧刷新（覆写）
+//
+//			说明：	> 注意，此函数覆写的位置较晚，其它插件继承时注意避开。
+//==============================
+Game_Map.prototype.updateEvents = function() {
+	
+	// > 非空事件 帧刷新
+	//		（之所以选择 非空事件 而不是 有效事件，是因为要考虑 『装饰延时销毁』 的情况）
+	//var event_list = this.drill_COEM_getAvailableEventTank_Pointer();
+	var event_list = this.drill_COEM_getEventTank_Pointer();
+	for(var i = 0; i < event_list.length; i++ ){
+		var temp_event = event_list[i];
+		if( temp_event != undefined ){
+			temp_event.update();
+		}
+	}
+	
+	// > 公共事件 帧刷新
+	var common_list = this._commonEvents;
+	for(var i = 0; i < common_list.length; i++ ){
+		var common = common_list[i];
+		if( common != undefined ){
+			common.update();
+		}
+	}
+};
+//==============================
+// * 管辖函数覆写『物体管理-事件管理核心』 - C事件容器 - 获取全部事件（覆写）
+//
+//			说明：	> 此函数强制 返回 有效事件容器备份。
+//==============================
+Game_Map.prototype.events = function(){
+	return this.drill_COEM_getAvailableEventTank_Copyed();	//『有效事件容器』
+};
+
 	
 	
 //#############################################################################
@@ -517,43 +640,6 @@ Game_Temp.prototype.drill_COEM_isMapExist = function( map_id ){
 //#############################################################################
 // ** 【标准模块】事件常用函数 ☆事件常用函数
 //#############################################################################
-//##############################
-// * 事件 - 获取全部事件【标准函数】
-//				
-//			参数：	> 
-//			返回：	> 事件对象      （新事件对象）
-//          
-//			说明：	> 即 原代容器+子代容器 的所有事件。
-//##############################
-Game_Map.prototype.drill_COEM_getAllEvent = function(){
-	return this._events;
-};
-//##############################
-// * 事件 - 获取有效事件容器指针【标准函数】
-//			
-//			参数：	无
-//			返回：	> 有效容器指针
-//			
-//			说明：	> 返回的是一个指针，使用时必须 只读 。
-//					> 有效事件指 非空、未被清除 的事件。
-//					> 固定区域下，统一用该接口来获取 有效事件 。
-//##############################
-Game_Map.prototype.drill_COEM_getAvailableEventTank_Pointer = function(){
-	return this.drill_COEM_getAvailableEventTank_Pointer_Private();
-}
-//##############################
-// * 事件 - 获取有效事件容器备份【标准函数】
-//			
-//			参数：	无
-//			返回：	> 有效容器指针
-//			
-//			说明：	> 返回一个新数组，可以对数组随意操作。
-//					> 有效事件指 非空、未被清除 的事件。
-//					> 固定区域下，统一用该接口来获取 有效事件 。
-//##############################
-Game_Map.prototype.drill_COEM_getAvailableEventTank_Copyed = function(){
-	return this.drill_COEM_getAvailableEventTank_Copyed_Private();
-}
 //##############################
 // * 事件 - 删除全部独立开关【标准函数】
 //				
@@ -797,8 +883,8 @@ Spriteset_Map.prototype.drill_COEM_offspring_createSprite = function( character 
 	
 	var temp_sprite = new Sprite_Character( character );
 	temp_sprite.update();
-	this._tilemap.addChild( temp_sprite );
-	this._characterSprites[len] = temp_sprite;
+	this._tilemap.addChild( temp_sprite );		//（层级，添加到 物体原层级，自动根据z和zIndex排序）
+	this._characterSprites[len] = temp_sprite;	//（层级，添加到 物体贴图容器，即使贴图在其他层级，也不影响此容器）
 	
 	return temp_sprite;
 };
@@ -882,10 +968,11 @@ Game_Map.prototype.drill_COEM_deleteEvent_Private = function( e_id ){
 	//		（由于其他子插件大量存储事件对象的指针，无法彻底删除，此设置暂时为权宜之计）
 	tar_event.erase();
 	
-	// > 删除镜像贴图
+	// > 删除镜像贴图【行走图 - 图块倒影镜像】
 	if( Imported.Drill_LayerReverseReflection ){
 		spriteSet.drill_LRR_deleteEventReflect( e_id );
 	}
+	// > 删除镜像贴图【行走图 - 图块同步镜像】
 	if( Imported.Drill_LayerSynchronizedReflection ){
 		spriteSet.drill_LSR_deleteEventReflect( e_id );
 	}
@@ -898,9 +985,9 @@ Game_Map.prototype.drill_COEM_deleteEvent_Private = function( e_id ){
 			
 			// > 去除贴图
 			temp_sprite._character = null;
-			spriteSet._tilemap.removeChild( temp_sprite );
+			temp_sprite.parent.removeChild( temp_sprite );	//（层级，找父类删除此贴图，因为贴图可能在别的层级）
 			
-			// > 断开关联
+			// > 断开容器关联
 			spriteSet._characterSprites.splice( i, 1 );
 			
 			// > 上一个子代事件贴图
@@ -966,127 +1053,204 @@ Game_SelfSwitches.prototype.drill_COEM_deleteEventKeys_Private = function( map_i
 		delete this._data[ del_keys[i] ];
 	}
 };
-
-
-//=============================================================================
-// ** ☆核心功能扩展 - 有效事件容器
+//==============================
+// * 删除流程 - 强制更新提示
 //
-//			说明：	有效事件指：非空、未被清除 的事件。
-//					注意，容器的序号不与id对应。
+//			说明：	> 这里的 创建贴图/删除贴图，要适配 行走图优化核心 的层级定义。（在该插件搜索"层级"）
+//==============================
+if( Imported.Drill_CoreOfEventFrame ){
+	
+	// > 强制更新提示
+	if( Game_Temp.prototype.drill_COEF_whenRefreshLayer == undefined ){
+		alert( DrillUp.drill_COEM_getPluginTip_NeedUpdate_COEF() );
+	}
+}
+
+
+
+//#############################################################################
+// ** 【标准模块】有效事件容器 ☆有效事件容器 『有效事件容器』
+//#############################################################################
+//##############################
+// * 有效事件容器 - 获取事件容器指针【标准函数】
+//			
+//			参数：	无
+//			返回：	> 对象  （容器指针）
+//          
+//			说明：	> 返回一个指针，使用时必须 只读 。
+//##############################
+Game_Map.prototype.drill_COEM_getEventTank_Pointer = function(){
+	return this._events;
+};
+//##############################
+// * 有效事件容器 - 获取事件容器备份【标准函数】
+//			
+//			参数：	无
+//			返回：	> 对象  （备份的容器）
+//			
+//			说明：	> 返回一个新数组，可以对数组随意操作。
+//##############################
+Game_Map.prototype.drill_COEM_getEventTank_Copyed = function(){
+	var result_list = [];
+	for(var i = 0; i < this._events.length; i++ ){
+		result_list.push( this._events[i] );
+	}
+	return result_list;
+};
+//##############################
+// * 有效事件容器 - 是否为有效事件【标准函数】
+//			
+//			参数：	> temp_event 对象
+//			返回：	> 布尔
+//##############################
+Game_Map.prototype.drill_COEM_isAvailableEvent = function( temp_event ){
+	this.drill_COEM_checkAvailableEventTank();
+	return this._drill_COEM_availableEventTank.indexOf( temp_event ) >= 0;
+};
+//##############################
+// * 有效事件容器 - 获取有效事件容器指针【标准函数】
+//			
+//			参数：	无
+//			返回：	> 指针  （容器指针）
+//			
+//			说明：	> 返回一个指针，使用时必须 只读 。
+//					> 有效事件指 非空、未被清除 的事件。
+//					> 注意，容器的序号不与事件id依次对应。
+//##############################
+Game_Map.prototype.drill_COEM_getAvailableEventTank_Pointer = function(){
+	this.drill_COEM_checkAvailableEventTank();
+	return this._drill_COEM_availableEventTank;
+};
+//##############################
+// * 有效事件容器 - 获取有效事件容器备份【标准函数】
+//			
+//			参数：	无
+//			返回：	> 对象  （备份的容器）
+//			
+//			说明：	> 返回一个新数组，可以对数组随意操作。
+//					> 有效事件指 非空、未被清除 的事件。
+//					> 注意，容器的序号不与事件id依次对应。
+//##############################
+Game_Map.prototype.drill_COEM_getAvailableEventTank_Copyed = function(){
+	this.drill_COEM_checkAvailableEventTank();
+	var result_list = [];
+	for(var i = 0; i < this._drill_COEM_availableEventTank.length; i++ ){
+		result_list.push( this._drill_COEM_availableEventTank[i] );
+	}
+	return result_list;
+};
+
+
+//=============================================================================
+// ** ☆有效事件容器（实现）
+//
+//			说明：	> 此模块专门管理 有效事件容器 。
+//					> 有效事件指 非空、未被清除 的事件。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 容器 - 校验值
+// * 有效事件容器 - 初始化
 //==============================
-DrillUp.g_COEM_checkATank = true;
-//==============================
-// * 容器 - 初始化
-//==============================
-var _drill_COEM_aTank_initialize = Game_Map.prototype.initialize;
+var _drill_COEM_available_initialize = Game_Map.prototype.initialize;
 Game_Map.prototype.initialize = function(){
-	_drill_COEM_aTank_initialize.call(this);
-	this._drill_COEM_availableTank = [];	//有效事件容器
-	this._drill_COEM_countPrivate = 0;		//容器监听数量标记（私有参数）
+	_drill_COEM_available_initialize.call(this);
+	this._drill_COEM_availableEventTank = [];		//有效事件容器
+	this._drill_COEM_availableEventCounter = 0;		//容器监听数量标记（私有参数）
 }
 //==============================
-// * 容器 - 切换地图时
+// * 有效事件容器 - 切换地图时
 //==============================
-var _drill_COEM_aTank_setup = Game_Map.prototype.setup;
+var _drill_COEM_available_setup = Game_Map.prototype.setup;
 Game_Map.prototype.setup = function( mapId ){
-	this._drill_COEM_availableTank = [];	//有效事件容器
-	this._drill_COEM_countPrivate = 0;		//容器监听数量标记（私有参数）
+	this._drill_COEM_availableEventTank = [];		//有效事件容器
+	this._drill_COEM_availableEventCounter = 0;		//容器监听数量标记（私有参数）
 	
 	// > 原函数
-	_drill_COEM_aTank_setup.call( this, mapId );
+	_drill_COEM_available_setup.call( this, mapId );
 	
 	// > 强制刷新容器
-	this.drill_COEM_updateTank();			//帧刷新 - 容器变化监听
-	this.drill_COEM_updateEvents();			//帧刷新 - 容器内事件检查
+	this.drill_COEM_updateAvailableEventChanged();	//帧刷新 - 容器变化监听
+	this.drill_COEM_updateAvailableEventRemove();	//帧刷新 - 容器内事件排除
 }
 //==============================
-// * 容器 - 帧刷新
+// * 有效事件容器 - 帧刷新
 //==============================
-var _drill_COEM_aTank_update = Game_Map.prototype.update;
+var _drill_COEM_available_update = Game_Map.prototype.update;
 Game_Map.prototype.update = function( sceneActive ){
-	_drill_COEM_aTank_update.call(this,sceneActive);
-	this.drill_COEM_updateTank();			//帧刷新 - 容器变化监听
-	this.drill_COEM_updateEvents();			//帧刷新 - 容器内事件检查
-	this.drill_COEM_updateCheck();			//帧刷新 - 校验值
+	_drill_COEM_available_update.call(this,sceneActive);
+	this.drill_COEM_updateAvailableEventChanged();	//帧刷新 - 容器变化监听
+	this.drill_COEM_updateAvailableEventRemove();	//帧刷新 - 容器内事件排除
+	this.drill_COEM_updateAvailableEventCheck();	//帧刷新 - 校验值
 };
 //==============================
-// * 帧刷新 - 容器变化监听
+// * 有效事件容器 - 帧刷新 - 容器变化监听
 //==============================
-Game_Map.prototype.drill_COEM_updateTank = function(){
+Game_Map.prototype.drill_COEM_updateAvailableEventChanged = function(){
 	
 	// > 等于时（跳过）
-	if( this._drill_COEM_countPrivate == this._events.length ){ return; }
+	if( this._drill_COEM_availableEventCounter == this._events.length ){ return; }
 	
 	// > 小于时（新的事件加入容器）
-	if( this._drill_COEM_countPrivate < this._events.length ){
-		for( var i = this._drill_COEM_countPrivate; i < this._events.length; i++ ){
-			this._drill_COEM_availableTank.push( this._events[i] );
+	if( this._drill_COEM_availableEventCounter < this._events.length ){
+		for( var i = this._drill_COEM_availableEventCounter; i < this._events.length; i++ ){
+			this._drill_COEM_availableEventTank.push( this._events[i] );
 		}
-		this._drill_COEM_countPrivate = this._events.length;
+		this._drill_COEM_availableEventCounter = this._events.length;
 	}
 	
 	// > 大于时（异常情况，事件容器常规情况只增不减）
-	if( this._drill_COEM_countPrivate > this._events.length ){
-		this._drill_COEM_availableTank = [];
+	if( this._drill_COEM_availableEventCounter > this._events.length ){
+		this._drill_COEM_availableEventTank = [];
 		for( var i = 0; i < this._events.length; i++ ){
-			this._drill_COEM_availableTank.push( this._events[i] );
+			this._drill_COEM_availableEventTank.push( this._events[i] );
 		}
-		this._drill_COEM_countPrivate = this._events.length;
+		this._drill_COEM_availableEventCounter = this._events.length;
 	}
 };
 //==============================
-// * 帧刷新 - 容器内事件检查
+// * 有效事件容器 - 帧刷新 - 容器内事件排除
 //==============================
-Game_Map.prototype.drill_COEM_updateEvents = function(){
-	for( var i = this._drill_COEM_availableTank.length-1; i >= 0; i-- ){
-		var ev = this._drill_COEM_availableTank[i];
+Game_Map.prototype.drill_COEM_updateAvailableEventRemove = function(){
+	for( var i = this._drill_COEM_availableEventTank.length-1; i >= 0; i-- ){
+		var ev = this._drill_COEM_availableEventTank[i];
 		if( ev == undefined ){		//（空事件排除）
-			this._drill_COEM_availableTank.splice( i, 1 );
+			this._drill_COEM_availableEventTank.splice( i, 1 );
 			continue;
 		}
 		if( ev._erased == true ){	//（清除的事件排除）
-			this._drill_COEM_availableTank.splice( i, 1 );
+			this._drill_COEM_availableEventTank.splice( i, 1 );
 			continue;
 		}
 	}
 };
 //==============================
-// * 帧刷新 - 校验值
+// * 有效事件容器 - 校验值参数
 //==============================
-Game_Map.prototype.drill_COEM_updateCheck = function(){
-	
-	// > 校验值
-	if( DrillUp.g_COEM_checkATank == true ){
-		if( this._drill_COEM_availableTank.length > this._drill_COEM_countPrivate ){
-			DrillUp.g_COEM_checkATank = false;
+DrillUp.g_COEM_availableEventTank = true;
+//==============================
+// * 有效事件容器 - 帧刷新 - 校验值
+//==============================
+Game_Map.prototype.drill_COEM_updateAvailableEventCheck = function(){
+	if( DrillUp.g_COEM_availableEventTank == true ){
+		if( this._drill_COEM_availableEventTank.length > this._drill_COEM_availableEventCounter ){
+			DrillUp.g_COEM_availableEventTank = false;
 			alert( DrillUp.drill_COEM_getPluginTip_CopyEventNum() );
 		}
 	}
 };
 //==============================
-// * 容器 - 获取有效事件容器 指针（私有）
-//
-//			说明：	返回的是容器指针，注意确保对容器只读，对事件随意操作。
-//					容器中所有事件非空。
+// * 有效事件容器 - 数据容器校验
 //==============================
-Game_Map.prototype.drill_COEM_getAvailableEventTank_Pointer_Private = function(){
-	return this._drill_COEM_availableTank;
-}
-//==============================
-// * 容器 - 获取有效事件容器 备份容器（私有）
-//
-//			说明：	返回的是一个新数组，可以对该数组随意操作。
-//==============================
-Game_Map.prototype.drill_COEM_getAvailableEventTank_Copyed_Private = function(){
-	var result = [];
-	for( var i = 0; i < this._drill_COEM_availableTank.length; i++ ){
-		result.push( this._drill_COEM_availableTank[i] );
+Game_Map.prototype.drill_COEM_checkAvailableEventTank = function(){	
+	if( this._drill_COEM_availableEventTank == undefined ){
+		
+		// > 程序能进入到这里，说明 插件刚加入+读取旧存档 的情况
+		this._drill_COEM_availableEventTank = [];
+		this._drill_COEM_availableEventCounter = 0;
+		this.drill_COEM_updateAvailableEventChanged();
+		this.drill_COEM_updateAvailableEventRemove();
 	}
-	return result;
-}
+};
 
 
 //=============================================================================

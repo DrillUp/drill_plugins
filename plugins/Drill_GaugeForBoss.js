@@ -1230,21 +1230,21 @@
  *
  * @param 生命条的段上限
  * @parent ---段上限---
- * @desc 作用于生命条。根据该BOSS的当前生命值，分配到 单段生命条 中显示。
+ * @desc 敌人500生命，就写500。如果要两罐血条，就写250。三罐血条，就写133。详细定义去看文档。
  * @type number
  * @min 1
  * @default 500
  *
  * @param 魔法条的段上限
  * @parent ---段上限---
- * @desc 作用于魔法条。根据该BOSS的当前魔法值，分配到 单段魔法条 中显示。
+ * @desc 敌人200魔法，就写200。如果要两罐魔条，就写100。详细定义去看文档。
  * @type number
  * @min 1
  * @default 200
  *
  * @param 怒气条的段上限
  * @parent ---段上限---
- * @desc 作用于怒气条。根据该BOSS的最大怒气值，分配到 单段怒气条 中显示。
+ * @desc 敌人100怒气，就写100。如果要两罐怒气，就写50。详细定义去看文档。
  * @type number
  * @min 1
  * @default 100
@@ -2040,7 +2040,7 @@ Game_System.prototype.drill_GFB_initSysData_Private = function() {
 	for(var i = 0; i < DrillUp.g_GFB_bind.length; i++ ){
 		var temp_data = JSON.parse(JSON.stringify( DrillUp.g_GFB_bind[i] ));
 		if( temp_data == undefined ){ continue; }
-		this._drill_GFB_bindTank.push( temp_data );
+		this._drill_GFB_bindTank[i] = temp_data;
 	}
 };
 //==============================
@@ -2175,6 +2175,24 @@ Scene_Battle.prototype.createAllWindows = function() {
 		this.addChild(this._drill_SenceTopArea);	
 	}
 }
+//==============================
+// * 战斗层级 - 参数定义
+//
+//			说明：	> 所有drill插件的贴图都用唯一参数：zIndex（可为小数、负数），其它插件没有此参数定义。
+//==============================
+if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义）
+	var _drill_sprite_zIndex = true;
+	Object.defineProperty( Sprite.prototype, 'zIndex', {
+		set: function( value ){
+			this.__drill_zIndex = value;
+		},
+		get: function(){
+			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			return this.__drill_zIndex;
+		},
+		configurable: true
+	});
+};
 //==============================
 // * 战斗层级 - 图片层级排序（私有）
 //==============================

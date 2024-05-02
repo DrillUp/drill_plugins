@@ -1674,45 +1674,54 @@ Game_Event.prototype.drill_ECE_readPage = function( page_list ){
 //					> height 数字          （贴图高度）
 //					> rotation 数字        （旋转度数，弧度）
 //					> scale_x,scale_y 数字 （缩放比例XY，默认1.00）
+//					> skew_x,skew_y 数字   （斜切比例XY，默认0.00）
 //			返回：	> { x:0, y:0 }         （偏移的坐标）
 //			
-//			说明：	修正 旋转+缩放 的坐标，使其看起来像是在绕着 新的锚点 变换。
-//					旋转值和缩放值可为负数。
+//			说明：	> 修正 旋转+缩放+斜切 的坐标，使其看起来像是在绕着 新的锚点 变换。
+//					  旋转+缩放+斜切 可为负数。
 //=============================================================================
 Game_Temp.prototype.drill_ECE_Math2D_getFixPointInAnchor = function( 
-					org_anchor_x,org_anchor_y,			//原贴图中心锚点 
-					target_anchor_x,target_anchor_y, 	//新的中心锚点 
+					org_anchor_x,org_anchor_y,			//原贴图锚点 
+					target_anchor_x,target_anchor_y, 	//新的锚点 
 					width, height,						//贴图高宽
-					rotation, scale_x, scale_y ) {		//变换的值（旋转+缩放）
+					rotation,							//变换的值（旋转）
+					scale_x, scale_y,					//变换的值（缩放）
+					skew_x, skew_y  ){					//变换的值（斜切）
 	
-	var ww = width * ( target_anchor_x - org_anchor_x );
-	var hh = height * ( target_anchor_y - org_anchor_y );
-	var xx = 0;
-	var yy = 0;
-	if( ww == 0 && hh == 0){ return { "x":0, "y":0 }; }
-	if( ww == 0 ){ ww = 0.0001; }
+	if( scale_x == undefined ){ scale_x = 1; }
+	if( scale_y == undefined ){ scale_y = 1; }
+	if( skew_x == undefined ){ skew_x = 0; }
+	if( skew_y == undefined ){ skew_y = 0; }
 	
-	// > 先缩放
-	var sww = ww*scale_x;
-	var shh = hh*scale_y;
+	// > 参数准备 （来自 Pixi.Transform）
+    var _cx = 1; // cos rotation + skewY;
+    var _sx = 0; // sin rotation + skewY;
+    var _cy = 0; // cos rotation + Math.PI/2 - skewX;
+    var _sy = 1; // sin rotation + Math.PI/2 - skewX;
 	
-	// > 后旋转
-	var r = Math.sqrt( Math.pow(sww,2) + Math.pow(shh,2) );
-	var p_degree = Math.atan(shh/sww);	
-	p_degree = Math.PI - p_degree;
-	if( sww < 0 ){
-		p_degree = Math.PI + p_degree;
-	}
+	// > 旋转+斜切 （来自 Pixi.Transform.prototype.updateSkew）
+    _cx = Math.cos( rotation + skew_y );
+    _sx = Math.sin( rotation + skew_y );
+    _cy = -Math.sin( rotation - skew_x ); // cos, added PI/2
+    _sy = Math.cos( rotation - skew_x ); // sin, added PI/2
 	
-	// > 变换的偏移量
-	xx += r*Math.cos( rotation - p_degree);		//圆公式 (x-a)²+(y-b)²=r²
-	yy += r*Math.sin( rotation - p_degree);		//圆极坐标 x=ρcosθ,y=ρsinθ
+	// > 缩放 （来自 Pixi.Transform.prototype.updateLocalTransform）
+    var a = _cx * scale_x;
+    var b = _sx * scale_x;
+    var c = _cy * scale_y;
+    var d = _sy * scale_y;
 	
-	// > 锚点偏移量
-	xx += ww;
-	yy += hh;
+	// > 将参数应用到坐标
+	var cur_x = width  * target_anchor_x;
+	var cur_y = height * target_anchor_y;
+	var center_x = width  * org_anchor_x;
+	var center_y = height * org_anchor_y;
+	var dx = (center_x - cur_x);
+	var dy = (center_y - cur_y);
+    var tar_x = cur_x + (dx * a + dy * c) - center_x;
+    var tar_y = cur_y + (dx * b + dy * d) - center_y;
 	
-	return { "x":xx, "y":yy };
+	return { "x":tar_x, "y":tar_y };
 }
 //=============================================================================
 // * 数学工具 - 抛物线三点式

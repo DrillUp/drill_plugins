@@ -1033,39 +1033,6 @@
 	}
 	
 
-//#############################################################################
-// ** 【标准模块】有效事件容器
-//#############################################################################
-//##############################
-// * 有效事件容器 - 获取指针【标准函数】
-//			
-//			参数：	无
-//			返回：	> 有效容器指针
-//			
-//			说明：	> 返回的是一个指针，使用时必须 只读 。
-//					> 有效事件指 非空、未被清除 的事件。
-//					> 固定区域下，统一用该接口来获取 有效事件 。
-//##############################
-Game_Map.prototype.drill_COFA_getAvailableEventTank = function(){
-	return this.drill_COFA_getAvailableEventTank_Pointer_Private();
-}
-Game_Map.prototype.drill_COFA_getAvailableEventTank_Pointer = function(){
-	return this.drill_COFA_getAvailableEventTank_Pointer_Private();
-}
-//##############################
-// * 有效事件容器 - 获取备份容器【标准函数】
-//			
-//			参数：	无
-//			返回：	> 有效容器指针
-//			
-//			说明：	> 返回一个新数组，可以对数组随意操作。
-//					> 有效事件指 非空、未被清除 的事件。
-//					> 固定区域下，统一用该接口来获取 有效事件 。
-//##############################
-Game_Map.prototype.drill_COFA_getAvailableEventTank_Copyed = function(){
-	return this.drill_COFA_getAvailableEventTank_Copyed_Private();
-}
-
 	
 //#############################################################################
 // ** 【标准模块】固定形状
@@ -1796,107 +1763,191 @@ Game_Map.prototype.drill_COFA_getCustomPointsByOnlyPositionWithCondition_Private
 }
 
 
+
+//#############################################################################
+// ** 【标准模块】有效事件容器 ☆有效事件容器 『有效事件容器』
+//#############################################################################
+//##############################
+// * 有效事件容器 - 获取事件容器指针【标准函数】
+//			
+//			参数：	无
+//			返回：	> 对象  （容器指针）
+//          
+//			说明：	> 返回一个指针，使用时必须 只读 。
+//##############################
+Game_Map.prototype.drill_COFA_getEventTank_Pointer = function(){
+	return this._events;
+};
+//##############################
+// * 有效事件容器 - 获取事件容器备份【标准函数】
+//			
+//			参数：	无
+//			返回：	> 对象  （备份的容器）
+//			
+//			说明：	> 返回一个新数组，可以对数组随意操作。
+//##############################
+Game_Map.prototype.drill_COFA_getEventTank_Copyed = function(){
+	var result_list = [];
+	for(var i = 0; i < this._events.length; i++ ){
+		result_list.push( this._events[i] );
+	}
+	return result_list;
+};
+//##############################
+// * 有效事件容器 - 是否为有效事件【标准函数】
+//			
+//			参数：	> temp_event 对象
+//			返回：	> 布尔
+//##############################
+Game_Map.prototype.drill_COFA_isAvailableEvent = function( temp_event ){
+	this.drill_COFA_checkAvailableEventTank();
+	return this._drill_COFA_availableEventTank.indexOf( temp_event ) >= 0;
+};
+//##############################
+// * 有效事件容器 - 获取有效事件容器指针【标准函数】
+//			
+//			参数：	无
+//			返回：	> 指针  （容器指针）
+//			
+//			说明：	> 返回一个指针，使用时必须 只读 。
+//					> 有效事件指 非空、未被清除 的事件。
+//					> 注意，容器的序号不与事件id依次对应。
+//##############################
+Game_Map.prototype.drill_COFA_getAvailableEventTank_Pointer = function(){
+	this.drill_COFA_checkAvailableEventTank();
+	return this._drill_COFA_availableEventTank;
+};
+//##############################
+// * 有效事件容器 - 获取有效事件容器备份【标准函数】
+//			
+//			参数：	无
+//			返回：	> 对象  （备份的容器）
+//			
+//			说明：	> 返回一个新数组，可以对数组随意操作。
+//					> 有效事件指 非空、未被清除 的事件。
+//					> 注意，容器的序号不与事件id依次对应。
+//##############################
+Game_Map.prototype.drill_COFA_getAvailableEventTank_Copyed = function(){
+	this.drill_COFA_checkAvailableEventTank();
+	var result_list = [];
+	for(var i = 0; i < this._drill_COFA_availableEventTank.length; i++ ){
+		result_list.push( this._drill_COFA_availableEventTank[i] );
+	}
+	return result_list;
+};
+
+
 //=============================================================================
-// ** 核心功能扩展 - 有效事件容器
+// ** ☆有效事件容器（实现）
 //
-//			说明：	有效事件指：非空、未被清除 的事件。
-//					注意，容器的序号不与id对应。
+//			说明：	> 此模块专门管理 有效事件容器 。
+//					> 有效事件指 非空、未被清除 的事件。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 容器 - 初始化
+// * 有效事件容器 - 初始化
 //==============================
-var _drill_COFA_initialize = Game_Map.prototype.initialize;
+var _drill_COFA_available_initialize = Game_Map.prototype.initialize;
 Game_Map.prototype.initialize = function(){
-	_drill_COFA_initialize.call(this);
-	this._drill_COFA_tank = [];				//有效事件容器
-	this._drill_COFA_countPrivate = 0;		//容器监听数量标记（私有参数）
+	_drill_COFA_available_initialize.call(this);
+	this._drill_COFA_availableEventTank = [];		//有效事件容器
+	this._drill_COFA_availableEventCounter = 0;		//容器监听数量标记（私有参数）
 }
 //==============================
-// * 容器 - 切换地图时
+// * 有效事件容器 - 切换地图时
 //==============================
-var _drill_COFA_setup = Game_Map.prototype.setup;
+var _drill_COFA_available_setup = Game_Map.prototype.setup;
 Game_Map.prototype.setup = function( mapId ){
-	this._drill_COFA_tank = [];				//有效事件容器
-	this._drill_COFA_countPrivate = 0;		//容器监听数量标记（私有参数）
+	this._drill_COFA_availableEventTank = [];		//有效事件容器
+	this._drill_COFA_availableEventCounter = 0;		//容器监听数量标记（私有参数）
 	
 	// > 原函数
-	_drill_COFA_setup.call( this, mapId );
+	_drill_COFA_available_setup.call( this, mapId );
 	
 	// > 强制刷新容器
-	this.drill_COFA_updateTank();			//帧刷新 - 容器变化监听
-	this.drill_COFA_updateEvents();			//帧刷新 - 容器内事件检查
+	this.drill_COFA_updateAvailableEventChanged();	//帧刷新 - 容器变化监听
+	this.drill_COFA_updateAvailableEventRemove();	//帧刷新 - 容器内事件排除
 }
 //==============================
-// * 容器 - 帧刷新
+// * 有效事件容器 - 帧刷新
 //==============================
-var _drill_COFA_update = Game_Map.prototype.update;
+var _drill_COFA_available_update = Game_Map.prototype.update;
 Game_Map.prototype.update = function( sceneActive ){
-	_drill_COFA_update.call(this,sceneActive);
-	this.drill_COFA_updateTank();			//帧刷新 - 容器变化监听
-	this.drill_COFA_updateEvents();			//帧刷新 - 容器内事件检查
+	_drill_COFA_available_update.call(this,sceneActive);
+	this.drill_COFA_updateAvailableEventChanged();	//帧刷新 - 容器变化监听
+	this.drill_COFA_updateAvailableEventRemove();	//帧刷新 - 容器内事件排除
+	this.drill_COFA_updateAvailableEventCheck();	//帧刷新 - 校验值
 };
 //==============================
-// * 帧刷新 - 容器变化监听
+// * 有效事件容器 - 帧刷新 - 容器变化监听
 //==============================
-Game_Map.prototype.drill_COFA_updateTank = function(){
+Game_Map.prototype.drill_COFA_updateAvailableEventChanged = function(){
 	
 	// > 等于时（跳过）
-	if( this._drill_COFA_countPrivate == this._events.length ){ return; }
+	if( this._drill_COFA_availableEventCounter == this._events.length ){ return; }
 	
 	// > 小于时（新的事件加入容器）
-	if( this._drill_COFA_countPrivate < this._events.length ){
-		for( var i = this._drill_COFA_countPrivate; i < this._events.length; i++ ){
-			this._drill_COFA_tank.push( this._events[i] );
+	if( this._drill_COFA_availableEventCounter < this._events.length ){
+		for( var i = this._drill_COFA_availableEventCounter; i < this._events.length; i++ ){
+			this._drill_COFA_availableEventTank.push( this._events[i] );
 		}
-		this._drill_COFA_countPrivate = this._events.length;
+		this._drill_COFA_availableEventCounter = this._events.length;
 	}
 	
 	// > 大于时（异常情况，事件容器常规情况只增不减）
-	if( this._drill_COFA_countPrivate > this._events.length ){
-		this._drill_COFA_tank = [];
+	if( this._drill_COFA_availableEventCounter > this._events.length ){
+		this._drill_COFA_availableEventTank = [];
 		for( var i = 0; i < this._events.length; i++ ){
-			this._drill_COFA_tank.push( this._events[i] );
+			this._drill_COFA_availableEventTank.push( this._events[i] );
 		}
-		this._drill_COFA_countPrivate = this._events.length;
+		this._drill_COFA_availableEventCounter = this._events.length;
 	}
 };
 //==============================
-// * 帧刷新 - 容器内事件检查
+// * 有效事件容器 - 帧刷新 - 容器内事件排除
 //==============================
-Game_Map.prototype.drill_COFA_updateEvents = function(){
-	for( var i = this._drill_COFA_tank.length-1; i >= 0; i-- ){
-		var ev = this._drill_COFA_tank[i];
+Game_Map.prototype.drill_COFA_updateAvailableEventRemove = function(){
+	for( var i = this._drill_COFA_availableEventTank.length-1; i >= 0; i-- ){
+		var ev = this._drill_COFA_availableEventTank[i];
 		if( ev == undefined ){		//（空事件排除）
-			this._drill_COFA_tank.splice( i, 1 );
+			this._drill_COFA_availableEventTank.splice( i, 1 );
 			continue;
 		}
 		if( ev._erased == true ){	//（清除的事件排除）
-			this._drill_COFA_tank.splice( i, 1 );
+			this._drill_COFA_availableEventTank.splice( i, 1 );
 			continue;
 		}
 	}
 };
 //==============================
-// * 容器 - 获取有效事件容器 指针（私有）
-//
-//			说明：	返回的是容器指针，注意确保对容器只读，对事件随意操作。
-//					容器中所有事件非空。
+// * 有效事件容器 - 校验值参数
 //==============================
-Game_Map.prototype.drill_COFA_getAvailableEventTank_Pointer_Private = function(){
-	return this._drill_COFA_tank;
-}
+DrillUp.g_COFA_availableEventTank = true;
 //==============================
-// * 容器 - 获取有效事件容器 备份容器（私有）
-//
-//			说明：	返回的是一个新数组，可以对该数组随意操作。
+// * 有效事件容器 - 帧刷新 - 校验值
 //==============================
-Game_Map.prototype.drill_COFA_getAvailableEventTank_Copyed_Private = function(){
-	var result = [];
-	for( var i = 0; i < this._drill_COFA_tank.length; i++ ){
-		result.push( this._drill_COFA_tank[i] );
+Game_Map.prototype.drill_COFA_updateAvailableEventCheck = function(){
+	if( DrillUp.g_COFA_availableEventTank == true ){
+		if( this._drill_COFA_availableEventTank.length > this._drill_COFA_availableEventCounter ){
+			DrillUp.g_COFA_availableEventTank = false;
+			alert( DrillUp.drill_COFA_getPluginTip_CopyEventNum() );
+		}
 	}
-	return result;
-}
+};
+//==============================
+// * 有效事件容器 - 数据容器校验
+//==============================
+Game_Map.prototype.drill_COFA_checkAvailableEventTank = function(){	
+	if( this._drill_COFA_availableEventTank == undefined ){
+		
+		// > 程序能进入到这里，说明 插件刚加入+读取旧存档 的情况
+		this._drill_COFA_availableEventTank = [];
+		this._drill_COFA_availableEventCounter = 0;
+		this.drill_COFA_updateAvailableEventChanged();
+		this.drill_COFA_updateAvailableEventRemove();
+	}
+};
+
 
 
 //=============================================================================
@@ -1906,7 +1957,7 @@ Game_Map.prototype.drill_COFA_getAvailableEventTank_Copyed_Private = function(){
 // * 核心漏洞修复 - 图块容错捕获
 //==============================
 var _drill_COFA_map_setup = Game_Map.prototype.setup;	
-Game_Map.prototype.setup = function(mapId) {
+Game_Map.prototype.setup = function( mapId ){
 	this.tileEvents = [];					//去除空指针的问题
 	_drill_COFA_map_setup.call(this,mapId);
 }
@@ -1929,6 +1980,7 @@ Game_Map.prototype.tileEventsXy = function(x, y) {
 Scene_Load.prototype.reloadMapIfUpdated = function() {
 	// （禁止重刷）
 };
+
 
 
 //=============================================================================

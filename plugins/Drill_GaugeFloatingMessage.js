@@ -926,6 +926,24 @@ Scene_Map.prototype.createAllWindows = function() {
 	}
 }
 //==============================
+// * 地图层级 - 参数定义
+//
+//			说明：	> 所有drill插件的贴图都用唯一参数：zIndex（可为小数、负数），其它插件没有此参数定义。
+//==============================
+if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义）
+	var _drill_sprite_zIndex = true;
+	Object.defineProperty( Sprite.prototype, 'zIndex', {
+		set: function( value ){
+			this.__drill_zIndex = value;
+		},
+		get: function(){
+			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			return this.__drill_zIndex;
+		},
+		configurable: true
+	});
+};
+//==============================
 // * 地图层级 - 图片层级排序（私有）
 //==============================
 Scene_Map.prototype.drill_GFM_sortByZIndex_Private = function(){

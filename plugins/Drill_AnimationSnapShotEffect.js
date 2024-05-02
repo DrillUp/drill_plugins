@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        动画 - 屏幕快照的眩晕效果
+ * @plugindesc [v1.1]        动画 - 屏幕快照的眩晕效果
  * @author Drill_up
  * 
  * @Drill_LE_param "眩晕样式-%d"
@@ -81,6 +81,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 修复了单独使用此插件时，会出错的bug。
  * 
  * 
  * 
@@ -648,6 +650,24 @@ Scene_Map.prototype.createAllWindows = function() {
 	}
 }
 //==============================
+// * 地图层级 - 参数定义
+//
+//			说明：	> 所有drill插件的贴图都用唯一参数：zIndex（可为小数、负数），其它插件没有此参数定义。
+//==============================
+if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义）
+	var _drill_sprite_zIndex = true;
+	Object.defineProperty( Sprite.prototype, 'zIndex', {
+		set: function( value ){
+			this.__drill_zIndex = value;
+		},
+		get: function(){
+			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			return this.__drill_zIndex;
+		},
+		configurable: true
+	});
+};
+//==============================
 // * 地图层级 - 图片层级排序（私有）
 //==============================
 Scene_Map.prototype.drill_ASSE_sortByZIndex_Private = function(){
@@ -834,6 +854,24 @@ Scene_Battle.prototype.createAllWindows = function() {
 		this.addChild(this._drill_SenceTopArea);	
 	}
 }
+//==============================
+// * 战斗层级 - 参数定义
+//
+//			说明：	> 所有drill插件的贴图都用唯一参数：zIndex（可为小数、负数），其它插件没有此参数定义。
+//==============================
+if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义）
+	var _drill_sprite_zIndex = true;
+	Object.defineProperty( Sprite.prototype, 'zIndex', {
+		set: function( value ){
+			this.__drill_zIndex = value;
+		},
+		get: function(){
+			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			return this.__drill_zIndex;
+		},
+		configurable: true
+	});
+};
 //==============================
 // * 战斗层级 - 图片层级排序（私有）
 //==============================
@@ -1117,11 +1155,11 @@ Scene_Map.prototype.drill_ASSE_createOne = function( style_id ){
 	
 	// > 图片层级
 	if( SceneManager._scene instanceof Scene_Map ){
-		temp_sprite.zIndex = data['map_zIndex'];
+		temp_sprite.zIndex = temp_data['map_zIndex'];
 		this.drill_ASSE_layerAddSprite( temp_sprite, temp_data['map_layer'] );
 	}
 	if( SceneManager._scene instanceof Scene_Battle ){
-		temp_sprite.zIndex = data['battle_zIndex'];
+		temp_sprite.zIndex = temp_data['battle_zIndex'];
 		this.drill_ASSE_layerAddSprite( temp_sprite, temp_data['battle_layer'] );
 	}
 	

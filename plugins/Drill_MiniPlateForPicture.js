@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.7]        鼠标 - 图片说明窗口
+ * @plugindesc [v1.8]        鼠标 - 图片说明窗口
  * @author Drill_up
  * 
  * @Drill_LE_param "皮肤样式-%d"
@@ -140,6 +140,8 @@
  * 修复了图片清除后，仍然存在绑定的bug。
  * [v1.7]
  * 修复了无法设置 左上角锚点 的bug。
+ * [v1.8]
+ * 添加了 图片的碰撞体 的支持。
  * 
  * 
  * 
@@ -1213,6 +1215,11 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				if( picture._drill_MPFP_bean == undefined ){
 					picture._drill_MPFP_bean = new Drill_MPFP_Bean();
 					$gameTemp._drill_MPFP_needRestatistics = true;
+					
+					if( Imported.Drill_CoreOfPictureWithMouse ){
+						// > 【图片 - 图片与鼠标控制核心】执行绑定
+						picture.drill_COPWM_checkData();
+					}
 				}
 				
 				if( temp2.indexOf("绑定图片内容[") != -1 ){
@@ -1462,6 +1469,24 @@ Scene_Battle.prototype.createAllWindows = function() {
 	}
 }
 //==============================
+// * 战斗层级 - 参数定义
+//
+//			说明：	> 所有drill插件的贴图都用唯一参数：zIndex（可为小数、负数），其它插件没有此参数定义。
+//==============================
+if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义）
+	var _drill_sprite_zIndex = true;
+	Object.defineProperty( Sprite.prototype, 'zIndex', {
+		set: function( value ){
+			this.__drill_zIndex = value;
+		},
+		get: function(){
+			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			return this.__drill_zIndex;
+		},
+		configurable: true
+	});
+};
+//==============================
 // * 战斗层级 - 图片层级排序（私有）
 //==============================
 Scene_Battle.prototype.drill_MPFP_sortByZIndex_Private = function() {
@@ -1558,6 +1583,24 @@ Scene_Map.prototype.createAllWindows = function() {
 		this.addChild(this._drill_SenceTopArea);	
 	}
 }
+//==============================
+// * 地图层级 - 参数定义
+//
+//			说明：	> 所有drill插件的贴图都用唯一参数：zIndex（可为小数、负数），其它插件没有此参数定义。
+//==============================
+if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义）
+	var _drill_sprite_zIndex = true;
+	Object.defineProperty( Sprite.prototype, 'zIndex', {
+		set: function( value ){
+			this.__drill_zIndex = value;
+		},
+		get: function(){
+			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			return this.__drill_zIndex;
+		},
+		configurable: true
+	});
+};
 //==============================
 // * 地图层级 - 图片层级排序（私有）
 //==============================
@@ -1673,14 +1716,14 @@ Game_Screen.prototype.drill_MPFP_updateRestatistics = function() {
 	
 	$gameTemp._drill_MPFP_beanTank = [];		//实体类容器
 	
-	var i = 0;									//地图界面的图片
-	var pic_len = this.maxPictures();
+	// > 图片遍历『图片与多场景』
+	var i_offset = 0;							//地图界面的图片
+	var pic_length = this.maxPictures();
 	if( $gameParty.inBattle() == true ){		//战斗界面的图片
-		i = pic_len;
-		pic_len = pic_len*2;
+		i_offset = pic_length;
 	}
-	for( ; i < pic_len; i++ ){
-		var picture = this._pictures[i];
+	for(var i = 0; i < pic_length; i++ ){
+		var picture = this._pictures[ i + i_offset ];
 		if( picture == undefined ){ continue; }
 		if( picture._drill_MPFP_bean != undefined ){
 			$gameTemp._drill_MPFP_beanTank.push( picture._drill_MPFP_bean );
@@ -1706,6 +1749,7 @@ Sprite_Picture.prototype.update = function() {
 	if( picture._drill_MPFP_bean == undefined ){ return; }
 	
 	this.drill_MPFP_updatePosition();		//帧刷新 - 刷新位置
+	this.drill_MPFP__refreshFrame();		//帧刷新 - 刷新框架
 };
 //==============================
 // * 实体类赋值 - 帧刷新 - 刷新位置
@@ -1714,10 +1758,20 @@ Sprite_Picture.prototype.drill_MPFP_updatePosition = function() {
 	var picture = this.picture();
 	var bean = picture._drill_MPFP_bean;
 	
+	// > 【图片 - 图片优化核心】『图片数据最终变换值』
+	var xx = this.x;
+	var yy = this.y;
+	if( Imported.Drill_CoreOfPicture == true ){
+		xx = picture.drill_COPi_finalTransform_x();
+		yy = picture.drill_COPi_finalTransform_y();
+	}
+	
 	var ww = bean._drill_frameW;
 	var hh = bean._drill_frameH;
-	var xx = this.x - ww*this.anchor.x;		//（注意图片 持续动作 时，xy乱晃）
-	var yy = this.y - hh*this.anchor.y;
+	xx = xx - ww*this.anchor.x;		//（注意图片 持续动作 时，xy乱晃）
+	yy = yy - hh*this.anchor.y;
+	
+	bean.drill_bean_setPictureId( this._pictureId );
 	bean.drill_bean_setPosition( xx, yy );
 };
 //==============================
@@ -1734,9 +1788,17 @@ SceneManager.initialize = function() {
 	//
 	//			说明：	> 此处 非帧刷新，而是在 贴图底层 发生刷新改变时，才变化值。
 	//==============================
-	var _Drill_MPFP_s__refresh = Sprite_Picture.prototype._refresh;
+	var _drill_MPFP_s__refresh = Sprite_Picture.prototype._refresh;
 	Sprite_Picture.prototype._refresh = function(){
-		_Drill_MPFP_s__refresh.call( this );
+		_drill_MPFP_s__refresh.call( this );
+		this.drill_MPFP__refreshFrame();
+	}
+	//==============================
+	// * 实体类赋值 - 刷新框架
+	//
+	//			说明：	> 由于Bean会被随时销毁，所以该函数要在帧刷新中执行。
+	//==============================
+	Sprite_Picture.prototype.drill_MPFP__refreshFrame = function(){
 		var picture = this.picture();
 		if( picture == undefined ){ return; }
 		if( picture._drill_MPFP_bean == undefined ){ return; }
@@ -1799,6 +1861,15 @@ Drill_MPFP_Bean.prototype.initialize = function(){
 //##############################
 Drill_MPFP_Bean.prototype.drill_bean_setVisible = function( visible ){
 	this._drill_visible = visible;
+};
+//##############################
+// * 实体类 - 设置绑定的图片id【开放函数】
+//			
+//			参数：	> picture_id 数字
+//			返回：	> 无
+//##############################
+Drill_MPFP_Bean.prototype.drill_bean_setPictureId = function( picture_id ){
+	this._drill_pictureId = picture_id;
 };
 //##############################
 // * 实体类 - 设置位置【开放函数】
@@ -1875,6 +1946,8 @@ Drill_MPFP_Bean.prototype.drill_bean_setSkinStyle = function( styleMode, styleLo
 Drill_MPFP_Bean.prototype.drill_bean_initData = function(){
 	
 	this._drill_visible = true;				//实体类 - 可见
+	
+	this._drill_pictureId = 0;				//实体类 - 事件id
 	
 	this._drill_x = 0;						//实体类 - 位置X
 	this._drill_y = 0;						//实体类 - 位置Y
@@ -2181,6 +2254,29 @@ Drill_MPFP_Window.prototype.drill_updateBean = function() {
 Drill_MPFP_Window.prototype.drill_isInFrame = function( bean ){
 	if( bean['_drill_visible'] == false ){ return false; }
 	
+	//（如果有碰撞体，直接用碰撞体的判定）
+	//		> 检查鼠标是否在该实体类的范围内。『鼠标落点与实体类范围』
+	//			镜头与层级 - 无需支持
+	//			中心锚点   - 已支持（图片-碰撞体 支持）
+	//			特殊变换   - 已支持（图片-碰撞体 支持，缩放+斜切+旋转）
+	//			触屏响应   - 暂不明确
+	if( Imported.Drill_CoreOfPictureWithMouse ){
+		
+		// > 【图片 - 图片与鼠标控制核心】执行绑定
+		var picture = $gameScreen.picture( bean['_drill_pictureId'] );
+		if( picture == undefined ){ return false; }
+		return picture.drill_COPWM_isOnHover();
+	}
+	
+	
+	//（如果没有，用该插件自带的判定）
+	//		> 检查鼠标是否在该实体类的范围内。『鼠标落点与实体类范围』
+	//			镜头与层级 - 无需支持
+	//			中心锚点   - 已支持（见函数 drill_MPFP_updatePosition ）
+	//			特殊变换   - 不能支持
+	//			触屏响应   - 暂不明确
+	
+	// > 判定 - 鼠标位置
 	var _x = _drill_mouse_x;
 	var _y = _drill_mouse_y;
 	if( bean['_drill_mouseType'] == "触屏按下[持续]" ){
@@ -2188,9 +2284,10 @@ Drill_MPFP_Window.prototype.drill_isInFrame = function( bean ){
 		_y = TouchInput.y;
 	}
 	
-	// > 镜头说明
+	// > 判定 - 镜头与层级
 	//	（这是图片的层级，图片处于 图片层、最顶层）
 	
+	// > 判定 - 触发范围
 	if( _x > bean['_drill_x'] + bean['_drill_frameW'] ){ return false; }
 	if( _x < bean['_drill_x'] + 0 ){ return false; }
 	if( _y > bean['_drill_y'] + bean['_drill_frameH'] ){ return false; }

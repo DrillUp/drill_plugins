@@ -406,18 +406,16 @@ Game_Interpreter.prototype.drill_JSp_oldCommand = function( command, args ){
 		}
 	};
 	if( event_id > 0 ){
-		$gameMap.events().forEach(function(event) {
-			if (event.eventId() === event_id) {
-				event._drill_JSp['enabled'] = true;
-				event._drill_JSp['height'] = h;
-				event._drill_JSp['time'] = t;
-				event._drill_JSp['speed'] = s;
-			};
-		}, this);	
+		if( $gameMap.drill_JSp_isEventExist( event_id ) == false ){ return; }
+		var e = $gameMap.event( event_id );
+		e._drill_JSp['enabled'] = true;
+		e._drill_JSp['height'] = h;
+		e._drill_JSp['time'] = t;
+		e._drill_JSp['speed'] = s;
 	};
 };
 //==============================
-// ** 插件指令 - 事件检查
+// * 插件指令 - 事件检查
 //==============================
 Game_Map.prototype.drill_JSp_isEventExist = function( e_id ){
 	if( e_id == 0 ){ return false; }

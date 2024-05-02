@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        图块 - 单向斜坡区域
+ * @plugindesc [v1.1]        图块 - 单向斜坡区域
  * @author Drill_up
  * 
  * 
@@ -67,6 +67,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 兼容了碰撞体位置叠加的功能。
  * 
  *
  * @param 单向斜坡高度
@@ -190,6 +192,7 @@
 //				->条件
 //					->没有斜坡区域，跳出
 //					->飞行物体，跳出
+//			->☆数据最终变换值
 //
 //			->☆可通行控制
 //				->条件
@@ -237,6 +240,12 @@
 	var DrillUp = DrillUp || {}; 
 	DrillUp.g_LUCA_PluginTip_curName = "Drill_LayerUnidirectionalCliffArea.js 图块-侧边单向斜坡区域";
 	DrillUp.g_LUCA_PluginTip_baseList = [];
+	//==============================
+	// * 提示信息 - 报错 - 强制更新提示
+	//==============================
+	DrillUp.drill_LUCA_getPluginTip_NeedUpdate_COEF = function(){
+		return "【" + DrillUp.g_LUCA_PluginTip_curName + "】\n行走图优化核心插件版本过低，你需要更新 核心插件 至少v1.2及以上版本。";
+	};
 	
 	
 //=============================================================================
@@ -648,7 +657,7 @@ Scene_Map.prototype.drill_LUCA_updateDebugSprite = function() {
 	
 	// > 计时器
 	temp_sprite._drill_curTime += 1;
-	if( temp_sprite._drill_curTime % 2 == 0 ){ return; }	//减少绘制次数
+	if( temp_sprite._drill_curTime % 2 == 0 ){ return; }	//『Debug减帧』减少绘制次数
 	
 	// > DEBUG贴图的位置
 	var diff_x = Math.floor($gameMap._displayX) - $gameMap._displayX;
@@ -795,12 +804,12 @@ Game_CharacterBase.prototype.initialize = function(){
 	this._drill_LUCA_height = 0;					//高度值
 }
 //==============================
-// * 行走图高度 - 相对镜头所在位置Y（像素单位）
+// * 行走图高度 - 获取
+//
+//			说明：	> 高度值是正数。
 //==============================
-var _drill_LUCA_screenY = Game_CharacterBase.prototype.screenY;
-Game_CharacterBase.prototype.screenY = function(){
-	var yy = _drill_LUCA_screenY.call( this );	//（在这里叠加 计算后的斜坡高度）
-	return yy - Math.round( this._drill_LUCA_height );
+Game_CharacterBase.prototype.drill_LUCA_getHeight = function(){
+	return this._drill_LUCA_height;
 }
 //==============================
 // * 行走图高度 - 是否在斜坡区域（开放函数）
@@ -1032,6 +1041,92 @@ Game_Map.prototype.drill_LUCA_Math3D_getPointOnPlane_FindZ = function( x1,y1,z1,
 	if( c == 0 ){ return 0; }
     var z = (0 - a*x - b*y - d) / c;
 	return z;
+}
+
+
+//=============================================================================
+// ** ☆数据最终变换值
+//
+//			说明：	> 此模块专门控制 偏移与其他插件兼容 的设置。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+if( Imported.Drill_CoreOfEventFrame ){
+	
+	// > 强制更新提示
+	if( Game_CharacterBase.prototype.drill_COEF_acc_LRR_x == undefined ){
+		alert( DrillUp.drill_LUCA_getPluginTip_NeedUpdate_COEF() );
+	}
+	
+	//==============================
+	// * 数据最终变换值 - 累积位置X（不影响）
+	//==============================
+	//var _drill_LUCA_COEF_finalTransform_x = Game_CharacterBase.prototype.drill_COEF_acc_x;
+	//Game_CharacterBase.prototype.drill_COEF_acc_x = function(){
+	//	var xx = _drill_LUCA_COEF_finalTransform_x.call( this );
+	//	return xx;
+	//}
+	//==============================
+	// * 数据最终变换值 - 累积位置Y
+	//==============================
+	var _drill_LUCA_COEF_finalTransform_y = Game_CharacterBase.prototype.drill_COEF_acc_y;
+	Game_CharacterBase.prototype.drill_COEF_acc_y = function(){
+		var yy = _drill_LUCA_COEF_finalTransform_y.call( this );
+		return yy - this.drill_LUCA_getHeight();
+	}
+	//==============================
+	// * 数据最终变换值 - 累积位置X - 倒影镜像用（不影响）
+	//==============================
+	//var _drill_LUCA_COEF_final_LRR_x = Game_CharacterBase.prototype.drill_COEF_acc_LRR_x;
+	//Game_CharacterBase.prototype.drill_COEF_acc_LRR_x = function(){
+	//	var xx = _drill_LUCA_COEF_final_LRR_x.call( this );
+	//	return xx;
+	//}
+	//==============================
+	// * 数据最终变换值 - 累积位置Y - 倒影镜像用
+	//==============================
+	var _drill_LUCA_COEF_final_LRR_y = Game_CharacterBase.prototype.drill_COEF_acc_LRR_y;
+	Game_CharacterBase.prototype.drill_COEF_acc_LRR_y = function(){
+		var yy = _drill_LUCA_COEF_final_LRR_y.call( this );
+		return yy + this.drill_LUCA_getHeight();
+	}
+	//==============================
+	// * 数据最终变换值 - 累积位置X - 同步镜像用（不影响）
+	//==============================
+	//var _drill_LUCA_COEF_acc_LSR_x = Game_CharacterBase.prototype.drill_COEF_acc_LSR_x;
+	//Game_CharacterBase.prototype.drill_COEF_acc_LSR_x = function(){
+	//	var xx = _drill_LUCA_COEF_acc_LSR_x.call( this );
+	//	return xx;
+	//}
+	//==============================
+	// * 数据最终变换值 - 累积位置Y - 同步镜像用
+	//==============================
+	var _drill_LUCA_COEF_acc_LSR_y = Game_CharacterBase.prototype.drill_COEF_acc_LSR_y;
+	Game_CharacterBase.prototype.drill_COEF_acc_LSR_y = function(){
+		var yy = _drill_LUCA_COEF_acc_LSR_y.call( this );
+		return yy + this.drill_LUCA_getHeight();
+	}
+	
+}else{
+	//==============================
+	// * 数据最终变换值 - 相对镜头所在位置X（不影响）
+	//
+	//			说明：	> 如果没加 行走图优化核心，就继承screenX。
+	//==============================
+	//var _drill_LUCA_screenX = Game_CharacterBase.prototype.screenX;
+	//Game_CharacterBase.prototype.screenX = function(){
+	//	var xx = _drill_LUCA_screenX.call( this );
+	//	return xx;
+	//}
+	//==============================
+	// * 数据最终变换值 - 相对镜头所在位置Y
+	//
+	//			说明：	> 如果没加 行走图优化核心，就继承screenY。
+	//==============================
+	var _drill_LUCA_screenY = Game_CharacterBase.prototype.screenY;
+	Game_CharacterBase.prototype.screenY = function(){
+		var yy = _drill_LUCA_screenY.call( this );
+		return yy - this.drill_LUCA_getHeight();
+	}
 }
 
 

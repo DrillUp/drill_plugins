@@ -1,19 +1,19 @@
 //=============================================================================
-// Drill_PlayerItemCollectTiming.js
+// Drill_WhenItemCollected.js
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        公共事件 - 物品积累时
+ * @plugindesc [v1.3]        公共事件 - 物品积累时
  * @author Drill_up
  * 
  * @Drill_LE_param "积累触发-%d"
  * @Drill_LE_parentKey "---积累触发组%d至%d---"
- * @Drill_LE_var "DrillUp.g_PICT_trigger_length"
+ * @Drill_LE_var "DrillUp.g_WIC_trigger_length"
  * 
- *
+ * 
  * @help
  * =============================================================================
- * +++ Drill_PlayerItemCollectTiming +++
+ * +++ Drill_WhenItemCollected +++
  * 作者：Drill_up
  * 如果你有兴趣，也可以来看看更多我写的drill插件哦ヽ(*。>Д<)o゜
  * https://rpg.blue/thread-409713-1-1.html
@@ -32,10 +32,12 @@
  * 1.插件的作用域：地图界面
  *   只作用于玩家。
  * 2.详细介绍可以去看看："31.公共事件 > 关于时机设置公共事件.docx"
- * 执行时机：
- *   (1.只有物品数量变化时，才会执行公共事件。
- *   (2.如果你在战斗界面或菜单界面消耗物品到一定数量后，
- *      回到地图界面时，才会激活公共事件，且只激活一次。
+ * 公共事件：
+ *   (1.该插件只在 地图界面 可以设置 串行/并行。
+ *      具体看看 "31.公共事件 > 关于公共事件与并行.docx"。
+ *   (2.只有物品数量变化时，才会执行公共事件。
+ *   (3.如果你在战斗界面或菜单界面消耗物品到一定数量后，
+ *      需要回到地图界面才能激活公共事件，且只激活一次。
  * 设计思路提示：
  *   (1.你可以不通过此插件，来设计出相似的功能。
  *      比如某物品第一次获得时，执行公共事件，然后关闭此公共事件。
@@ -48,7 +50,7 @@
  *      比如告知玩家还剩3个，还剩2个，还剩1个。
  * 
  * -----------------------------------------------------------------------------
- * ----可选设定
+ * ----可选设定 - 触发开关
  * 你可以通过插件指令手动控制触发的开关：
  * 
  * 插件指令：>物品积累公共事件 : 开启触发 : 积累触发[1]
@@ -58,13 +60,15 @@
  *   关闭只会影响下一次 数量变化 的判定。
  * 
  * -----------------------------------------------------------------------------
- * ----可选设定
- * 你可以通过插件指令手动控制触发的开关：
+ * ----可选设定 - 获取数量
+ * 你可以通过插件指令手动获取数量：
  * 
- * 插件指令：>物品积累公共事件 : 积累触发[1] : 物品数量 : 给予值 : 变量[21]
+ * 插件指令：>物品积累公共事件 : 积累触发[1] : 背包数量 : 给予值 : 变量[21]
+ * 插件指令：>物品积累公共事件 : 积累触发[1] : 积累数量 : 给予值 : 变量[21]
+ * 插件指令：>物品积累公共事件 : 积累触发[1] : 积累数量 : 归零值
  * 
- * 1.你可以直接使用事件指令获取到物品数量。
- *   也可以使用该插件，获取到积累触发对应的物品数量。
+ * 1.你可以直接使用事件指令获取到 对应的 背包数量、积累数量。
+ *   也可以使用该插件，让积累数量重新被统计。
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -95,6 +99,8 @@
  * 修改了插件分类。
  * [v1.2]
  * 优化了旧存档的识别与兼容。
+ * [v1.3]
+ * 修改了文件名。添加了 积累数量 的控制功能。
  *
  *
  * 
@@ -103,126 +109,126 @@
  * 
  * @param 积累触发-1
  * @parent ---积累触发组 1至20---
- * @type struct<PICTTrigger>
+ * @type struct<WICTrigger>
  * @desc 自定义玩家自动触发的设置。
  * @default 
  * 
  * @param 积累触发-2
  * @parent ---积累触发组 1至20---
- * @type struct<PICTTrigger>
+ * @type struct<WICTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  * 
  * @param 积累触发-3
  * @parent ---积累触发组 1至20---
- * @type struct<PICTTrigger>
+ * @type struct<WICTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  * 
  * @param 积累触发-4
  * @parent ---积累触发组 1至20---
- * @type struct<PICTTrigger>
+ * @type struct<WICTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  * 
  * @param 积累触发-5
  * @parent ---积累触发组 1至20---
- * @type struct<PICTTrigger>
+ * @type struct<WICTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  * 
  * @param 积累触发-6
  * @parent ---积累触发组 1至20---
- * @type struct<PICTTrigger>
+ * @type struct<WICTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  * 
  * @param 积累触发-7
  * @parent ---积累触发组 1至20---
- * @type struct<PICTTrigger>
+ * @type struct<WICTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  * 
  * @param 积累触发-8
  * @parent ---积累触发组 1至20---
- * @type struct<PICTTrigger>
+ * @type struct<WICTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  * 
  * @param 积累触发-9
  * @parent ---积累触发组 1至20---
- * @type struct<PICTTrigger>
+ * @type struct<WICTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 积累触发-10
  * @parent ---积累触发组 1至20---
- * @type struct<PICTTrigger>
+ * @type struct<WICTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 积累触发-11
  * @parent ---积累触发组 1至20---
- * @type struct<PICTTrigger>
+ * @type struct<WICTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 积累触发-12
  * @parent ---积累触发组 1至20---
- * @type struct<PICTTrigger>
+ * @type struct<WICTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 积累触发-13
  * @parent ---积累触发组 1至20---
- * @type struct<PICTTrigger>
+ * @type struct<WICTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 积累触发-14
  * @parent ---积累触发组 1至20---
- * @type struct<PICTTrigger>
+ * @type struct<WICTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 积累触发-15
  * @parent ---积累触发组 1至20---
- * @type struct<PICTTrigger>
+ * @type struct<WICTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 积累触发-16
  * @parent ---积累触发组 1至20---
- * @type struct<PICTTrigger>
+ * @type struct<WICTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 积累触发-17
  * @parent ---积累触发组 1至20---
- * @type struct<PICTTrigger>
+ * @type struct<WICTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 积累触发-18
  * @parent ---积累触发组 1至20---
- * @type struct<PICTTrigger>
+ * @type struct<WICTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 积累触发-19
  * @parent ---积累触发组 1至20---
- * @type struct<PICTTrigger>
+ * @type struct<WICTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 积累触发-20
  * @parent ---积累触发组 1至20---
- * @type struct<PICTTrigger>
+ * @type struct<WICTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  * 
  */
-/*~struct~PICTTrigger:
+/*~struct~WICTrigger:
  * 
  * @param 标签
  * @desc 只用于方便区分查看的标签，不作用在插件中。
@@ -299,8 +305,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		PICT（Player_ItemCollect_Timing）
-//		临时全局变量	DrillUp.g_PICT_xxx
+//		插件简称		WIC（When_Item_Collected）
+//		临时全局变量	DrillUp.g_WIC_xxx
 //		临时局部变量	无
 //		存储数据变量	无
 //		全局存储变量	无
@@ -320,8 +326,14 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			物品积累公共事件：
+//			->☆提示信息
+//			->☆静态数据
+//			->☆插件指令
+//			->☆存储数据
+//
+//			->☆物品监听
 //				->物品数量变化
+//
 //
 //		★家谱：
 //			无
@@ -334,7 +346,7 @@
 //		
 //		★必要注意事项：
 //			暂无
-//
+//		
 //		★其它说明细节：
 //			暂无
 //			
@@ -343,44 +355,44 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
 	//==============================
 	var DrillUp = DrillUp || {}; 
-	DrillUp.g_PICT_PluginTip_curName = "Drill_PlayerItemCollectTiming.js 公共事件-物品积累时";
-	DrillUp.g_PICT_PluginTip_baseList = ["Drill_LayerCommandThread.js 地图-多线程"];
+	DrillUp.g_WIC_PluginTip_curName = "Drill_WhenItemCollected.js 公共事件-物品积累时";
+	DrillUp.g_WIC_PluginTip_baseList = ["Drill_LayerCommandThread.js 地图-多线程"];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
 	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
-	DrillUp.drill_PICT_getPluginTip_NoBasePlugin = function(){
-		if( DrillUp.g_PICT_PluginTip_baseList.length == 0 ){ return ""; }
-		var message = "【" + DrillUp.g_PICT_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
-		for(var i=0; i < DrillUp.g_PICT_PluginTip_baseList.length; i++){
+	DrillUp.drill_WIC_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_WIC_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_WIC_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_WIC_PluginTip_baseList.length; i++){
 			message += "\n- ";
-			message += DrillUp.g_PICT_PluginTip_baseList[i];
+			message += DrillUp.g_WIC_PluginTip_baseList[i];
 		}
 		return message;
 	};
 	
 	
 //=============================================================================
-// ** 静态数据
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
-　　Imported.Drill_PlayerItemCollectTiming = true;
+　　Imported.Drill_WhenItemCollected = true;
 　　var DrillUp = DrillUp || {}; 
-	DrillUp.parameters = PluginManager.parameters('Drill_PlayerItemCollectTiming');
+	DrillUp.parameters = PluginManager.parameters('Drill_WhenItemCollected');
 	
 	
 	//==============================
 	// * 静态数据 - 积累触发
-	//				（~struct~PICTTrigger）
+	//				（~struct~WICTrigger）
 	//==============================
-	DrillUp.drill_PICT_triggerInit = function( dataFrom ){
+	DrillUp.drill_WIC_triggerInit = function( dataFrom ){
 		var data = {};
 		
 		// > 开关
@@ -401,15 +413,15 @@
 	
 	
 	/*-----------------积累触发组------------------*/
-	DrillUp.g_PICT_trigger_length = 20;
-	DrillUp.g_PICT_trigger = [];
-	for( var i = 0; i < DrillUp.g_PICT_trigger_length; i++ ){
+	DrillUp.g_WIC_trigger_length = 20;
+	DrillUp.g_WIC_trigger = [];
+	for( var i = 0; i < DrillUp.g_WIC_trigger_length; i++ ){
 		if( DrillUp.parameters["积累触发-" + String(i+1) ] != "" &&
 			DrillUp.parameters["积累触发-" + String(i+1) ] != undefined ){
 			var data = JSON.parse(DrillUp.parameters["积累触发-" + String(i+1) ]);
-			DrillUp.g_PICT_trigger[i] = DrillUp.drill_PICT_triggerInit( data );
+			DrillUp.g_WIC_trigger[i] = DrillUp.drill_WIC_triggerInit( data );
 		}else{
-			DrillUp.g_PICT_trigger[i] = null;
+			DrillUp.g_WIC_trigger[i] = null;
 		}
 	}
 
@@ -421,12 +433,14 @@ if( Imported.Drill_LayerCommandThread ){
 	
 	
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
-var _drill_PICT_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+var _drill_WIC_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
-	_drill_PICT_pluginCommand.call(this, command, args);
+	_drill_WIC_pluginCommand.call(this, command, args);
 	if( command === ">物品积累公共事件" ){
+		
+		/*-----------------触发开关------------------*/
 		if(args.length == 4){
 			var type = String(args[1]);
 			var temp1 = String(args[3]);
@@ -434,37 +448,64 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp1 = temp1.replace("积累触发[","");
 				temp1 = temp1.replace("]","");
 				temp1 = Number(temp1) -1;
-				$gameSystem._drill_PICT_dataTank[ temp1 ]['enable'] = true;
+				$gameSystem._drill_WIC_dataTank[ temp1 ]['enable'] = true;
 			}
 			if( type == "关闭触发" ){	
 				temp1 = temp1.replace("积累触发[","");
 				temp1 = temp1.replace("]","");
 				temp1 = Number(temp1) -1;
-				$gameSystem._drill_PICT_dataTank[ temp1 ]['enable'] = false;
+				$gameSystem._drill_WIC_dataTank[ temp1 ]['enable'] = false;
 			}
 		}
+		
+		/*-----------------数量控制------------------*/
 		if(args.length == 8){
 			var temp1 = String(args[1]);
 			var temp2 = String(args[3]);
 			var temp3 = String(args[5]);
 			var temp4 = String(args[7]);
-			if( temp2 == "物品数量" && temp3 == "给予值" ){	
+			if( temp2 == "背包数量" && temp3 == "给予值" ){	
 				temp1 = temp1.replace("积累触发[","");
 				temp1 = temp1.replace("]","");
 				temp1 = Number(temp1) -1;
 				temp4 = temp4.replace("变量[","");
 				temp4 = temp4.replace("]","");
 				temp4 = Number(temp4);
+				if( $gameSystem._drill_WIC_dataTank[ temp1 ] == undefined ){ return; }
 				
-				var item_id = $gameSystem._drill_PICT_dataTank[ temp1 ]['itemId'];
+				var item_id = $gameSystem._drill_WIC_dataTank[ temp1 ]['itemId'];
 				var item = $dataItems[ item_id ];
 				var item_container = $gameParty.itemContainer(item);
 				if( item_container == undefined ){
 					$gameVariables.setValue( temp4, 0 );
 				}
 				var item_count = item_container[ item_id ];
-				
 				$gameVariables.setValue( temp4, item_count );
+			}
+			if( temp2 == "积累数量" && temp3 == "给予值" ){	
+				temp1 = temp1.replace("积累触发[","");
+				temp1 = temp1.replace("]","");
+				temp1 = Number(temp1) -1;
+				temp4 = temp4.replace("变量[","");
+				temp4 = temp4.replace("]","");
+				temp4 = Number(temp4);
+				if( $gameSystem._drill_WIC_dataTank[ temp1 ] == undefined ){ return; }
+				
+				var item_count = $gameSystem._drill_WIC_dataTank[ temp1 ]['curItemCount'];
+				$gameVariables.setValue( temp4, item_count );
+			}
+		}
+		if(args.length == 6){
+			var temp1 = String(args[1]);
+			var temp2 = String(args[3]);
+			var temp3 = String(args[5]);
+			if( temp2 == "积累数量" && temp3 == "归零值" ){	
+				temp1 = temp1.replace("积累触发[","");
+				temp1 = temp1.replace("]","");
+				temp1 = Number(temp1) -1;
+				if( $gameSystem._drill_WIC_dataTank[ temp1 ] == undefined ){ return; }
+				
+				$gameSystem._drill_WIC_dataTank[ temp1 ]['curItemCount'] = 0;
 			}
 		}
 	}
@@ -472,40 +513,40 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
 //          
 //			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
 //##############################
-DrillUp.g_PICT_saveEnabled = true;
+DrillUp.g_WIC_saveEnabled = true;
 //##############################
 // * 存储数据 - 初始化
 //          
 //			说明：	> 下方为固定写法，不要动。
 //##############################
-var _drill_PICT_sys_initialize = Game_System.prototype.initialize;
+var _drill_WIC_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-    _drill_PICT_sys_initialize.call(this);
-	this.drill_PICT_initSysData();
+    _drill_WIC_sys_initialize.call(this);
+	this.drill_WIC_initSysData();
 };
 //##############################
 // * 存储数据 - 载入存档
 //          
 //			说明：	> 下方为固定写法，不要动。
 //##############################
-var _drill_PICT_sys_extractSaveContents = DataManager.extractSaveContents;
+var _drill_WIC_sys_extractSaveContents = DataManager.extractSaveContents;
 DataManager.extractSaveContents = function( contents ){
-	_drill_PICT_sys_extractSaveContents.call( this, contents );
+	_drill_WIC_sys_extractSaveContents.call( this, contents );
 	
 	// > 参数存储 启用时（检查数据）
-	if( DrillUp.g_PICT_saveEnabled == true ){	
-		$gameSystem.drill_PICT_checkSysData();
+	if( DrillUp.g_WIC_saveEnabled == true ){	
+		$gameSystem.drill_WIC_checkSysData();
 		
 	// > 参数存储 关闭时（直接覆盖）
 	}else{
-		$gameSystem.drill_PICT_initSysData();
+		$gameSystem.drill_WIC_initSysData();
 	}
 };
 //##############################
@@ -516,8 +557,8 @@ DataManager.extractSaveContents = function( contents ){
 //          
 //			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
 //##############################
-Game_System.prototype.drill_PICT_initSysData = function() {
-	this.drill_PICT_initSysData_Private();
+Game_System.prototype.drill_WIC_initSysData = function() {
+	this.drill_WIC_initSysData_Private();
 };
 //##############################
 // * 存储数据 - 载入存档时检查数据【标准函数】
@@ -527,8 +568,8 @@ Game_System.prototype.drill_PICT_initSysData = function() {
 //          
 //			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
 //##############################
-Game_System.prototype.drill_PICT_checkSysData = function() {
-	this.drill_PICT_checkSysData_Private();
+Game_System.prototype.drill_WIC_checkSysData = function() {
+	this.drill_WIC_checkSysData_Private();
 };
 //=============================================================================
 // ** 存储数据（接口实现）
@@ -536,39 +577,41 @@ Game_System.prototype.drill_PICT_checkSysData = function() {
 //==============================
 // * 存储数据 - 初始化数据（私有）
 //==============================
-Game_System.prototype.drill_PICT_initSysData_Private = function() {
+Game_System.prototype.drill_WIC_initSysData_Private = function() {
 	
-	this._drill_PICT_dataTank = [];
-	for(var i=0; i < DrillUp.g_PICT_trigger.length; i++){
-		var temp_data = DrillUp.g_PICT_trigger[i];
+	this._drill_WIC_dataTank = [];
+	for(var i=0; i < DrillUp.g_WIC_trigger.length; i++){
+		var temp_data = DrillUp.g_WIC_trigger[i];
 		if( temp_data == undefined ){ continue; }
-		this._drill_PICT_dataTank[i] = JSON.parse(JSON.stringify( temp_data ));
-		this._drill_PICT_dataTank[i]['lastItemCount'] = 0;
-		this._drill_PICT_dataTank[i]['activeCount'] = 0;
+		this._drill_WIC_dataTank[i] = JSON.parse(JSON.stringify( temp_data ));
+		this._drill_WIC_dataTank[i]['lastItemCount'] = 0;
+		this._drill_WIC_dataTank[i]['curItemCount'] = 0;
+		this._drill_WIC_dataTank[i]['activedOnce'] = false;
 	}
 };
 //==============================
 // * 存储数据 - 载入存档时检查数据（私有）
 //==============================
-Game_System.prototype.drill_PICT_checkSysData_Private = function() {
+Game_System.prototype.drill_WIC_checkSysData_Private = function() {
 	
 	// > 旧存档数据自动补充
-	if( this._drill_PICT_dataTank == undefined ){
-		this.drill_PICT_initSysData();
+	if( this._drill_WIC_dataTank == undefined ){
+		this.drill_WIC_initSysData();
 	}
 	
 	// > 绑定数据容器
-	for(var i = 0; i < DrillUp.g_PICT_trigger.length; i++ ){
-		var temp_data = DrillUp.g_PICT_trigger[i];
+	for(var i = 0; i < DrillUp.g_WIC_trigger.length; i++ ){
+		var temp_data = DrillUp.g_WIC_trigger[i];
 		
 		// > 已配置（undefined表示未配置的空数据）
 		if( temp_data != undefined ){
 			
 			// > 未存储的，重新初始化
-			if( this._drill_PICT_dataTank[i] == undefined ){
-				this._drill_PICT_dataTank[i] = JSON.parse(JSON.stringify( temp_data ));
-				this._drill_PICT_dataTank[i]['lastItemCount'] = 0;
-				this._drill_PICT_dataTank[i]['activeCount'] = 0;
+			if( this._drill_WIC_dataTank[i] == undefined ){
+				this._drill_WIC_dataTank[i] = JSON.parse(JSON.stringify( temp_data ));
+				this._drill_WIC_dataTank[i]['lastItemCount'] = 0;
+				this._drill_WIC_dataTank[i]['curItemCount'] = 0;
+				this._drill_WIC_dataTank[i]['activedOnce'] = false;
 			
 			// > 已存储的，跳过
 			}else{
@@ -578,47 +621,61 @@ Game_System.prototype.drill_PICT_checkSysData_Private = function() {
 	}
 }
 
+
 //=============================================================================
-// ** 物品监听
+// ** ☆物品监听
 //
-//			说明：	当没有阻塞事件运行时，激活监听。
+//			说明：	> 此模块专门监听 物品数量 。
+//					> 没有阻塞事件运行时，激活监听。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 物品监听 - 帧刷新
 //==============================
-var _drill_PICT_update = Scene_Map.prototype.update;
+var _drill_WIC_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {
-	_drill_PICT_update.call( this );
-	this.drill_PICT_updateCommonEvent();
+	_drill_WIC_update.call( this );
+	this.drill_WIC_updateCommonEvent();
 };
 //==============================
 // * 物品监听 - 公共事件设置
 //==============================
-Scene_Map.prototype.drill_PICT_updateCommonEvent = function() {
+Scene_Map.prototype.drill_WIC_updateCommonEvent = function() {
 	
 	// > 阻塞时，不执行
 	if( $gameMap.isEventRunning() == true ){ return; }
 	
-	for(var i = 0; i < $gameSystem._drill_PICT_dataTank.length; i++){
-		var temp_data = $gameSystem._drill_PICT_dataTank[i];
+	for(var i = 0; i < $gameSystem._drill_WIC_dataTank.length; i++){
+		var temp_data = $gameSystem._drill_WIC_dataTank[i];
 		if( temp_data == undefined ){ continue; }
-		if( temp_data['enable'] == false ){ continue; }
-		
-		// > 条件 - 限制触发最多一次
-		if( temp_data['onlyOnce'] == true &&
-			temp_data['activeCount'] > 0 ){
-			continue;
-		}
 		
 		// > 物品数量
 		var item = $dataItems[ temp_data['itemId'] ];
 		var item_container = $gameParty.itemContainer(item);
 		if( item_container == undefined ){ continue; }
 		var item_count = item_container[ temp_data['itemId'] ];
+		if( item_count == undefined ){ continue; }
 		
-		// > 条件 - 数量变化监听
+		// > 数量变化监听
+		//			（地图界面实时监听，如果数量减少/增加，都会被监听到）
+		//			（此判定也有意外情况：事件指令阻塞执行时+1然后-1；商店里买了在卖；战斗时用了再重新获取，只要数量没变，就不会被触发）
+		//			（但是考虑到性能节约，所以继续用这种判定好了）
 		if( temp_data['lastItemCount'] == item_count ){ continue; }
+		var count = item_count - temp_data['lastItemCount'];
+		if( count > 0 ){
+			temp_data['curItemCount'] += count;		//（积累数量）
+		}
 		temp_data['lastItemCount'] = item_count;
+		
+		
+		// > 条件 - 触发关闭时
+		if( temp_data['enable'] == false ){ continue; }
+		
+		// > 条件 - 限制触发最多一次
+		if( temp_data['onlyOnce'] == true &&
+			temp_data['activedOnce'] == true ){
+			continue;
+		}
 		
 		// > 条件 - 变化
 		var pass = false;
@@ -629,10 +686,11 @@ Scene_Map.prototype.drill_PICT_updateCommonEvent = function() {
 		if( temp_data['itemOperator'] == "等于" && item_count == temp_data['itemValue'] ){ pass = true; }
 		if( pass == false ){ continue; }
 		
-		// > 执行公共事件
-		this.drill_PICT_doCommonEvent( temp_data['pipeType'], temp_data['commonEventId'], "" );
+		// > 限制标记
+		temp_data['activedOnce'] = true;
 		
-		temp_data['activeCount'] += 1;
+		// > 执行公共事件
+		this.drill_WIC_doCommonEvent( temp_data['pipeType'], temp_data['commonEventId'], "" );
 		break;
 	}
 		
@@ -640,7 +698,7 @@ Scene_Map.prototype.drill_PICT_updateCommonEvent = function() {
 //==============================
 // * 物品监听 - 『执行公共事件』（地图界面）
 //==============================
-Scene_Map.prototype.drill_PICT_doCommonEvent = function( pipeType, commonEventId, callBack_str ){
+Scene_Map.prototype.drill_WIC_doCommonEvent = function( pipeType, commonEventId, callBack_str ){
 	
 	// > 插件【地图-多线程】
 	if( Imported.Drill_LayerCommandThread ){
@@ -663,8 +721,8 @@ Scene_Map.prototype.drill_PICT_doCommonEvent = function( pipeType, commonEventId
 // * <<<<基于插件检测<<<<
 //=============================================================================
 }else{
-		Imported.Drill_PlayerItemCollectTiming = false;
-		var pluginTip = DrillUp.drill_PICT_getPluginTip_NoBasePlugin();
+		Imported.Drill_WhenItemCollected = false;
+		var pluginTip = DrillUp.drill_WIC_getPluginTip_NoBasePlugin();
 		alert( pluginTip );
 }
 

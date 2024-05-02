@@ -202,7 +202,7 @@ Graphics.startLoading = function() {
 Graphics._paintUpperCanvas = function() {
     this._clearUpperCanvas();
     if( this._loadingImage && this._loadingCount >= DrillUp.g_HLT_delay ){
-        var context = this._upperCanvas.getContext('2d');	//（获取画笔）
+        var painter = this._upperCanvas.getContext('2d');	//（获取画笔）
 		var ww = this._loadingImage.width;
 		var hh = this._loadingImage.height;
 		
@@ -215,10 +215,14 @@ Graphics._paintUpperCanvas = function() {
         var px = (this._width - ww) / 2;
         var py = (this._height - sh) / 2;
         var alpha = ((this._loadingCount - DrillUp.g_HLT_delay) / DrillUp.g_HLT_showingTime).clamp(0, 1);
-        context.save();
-        context.globalAlpha = alpha;
-        context.drawImage(this._loadingImage, sx, sy, sw, sh, px, py, pw, ph );
-        context.restore();
+		
+		painter.save();															//（a.存储上一个画笔状态）
+        
+		painter.globalAlpha = alpha;											//（b.设置样式）
+        
+		painter.drawImage(this._loadingImage, sx, sy, sw, sh, px, py, pw, ph );	//（c.路径填充/描边，drawImage）
+        
+		painter.restore();														//（d.回滚上一个画笔状态）
 		
 		// > 当前帧+1
 		if( (this._loadingCount - DrillUp.g_HLT_delay) % DrillUp.g_HLT_gifInterval == 0 ){

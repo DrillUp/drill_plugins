@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        键盘 - 键盘手柄触发公共事件
+ * @plugindesc [v1.1]        键盘 - 键盘手柄触发公共事件
  * @author Drill_up
  * 
  * @Drill_LE_param "按键绑定-%d"
@@ -25,9 +25,10 @@
  * 该插件 不能 单独使用。
  * 必须基于下面插件才能运行。
  * 基于：
- *   - Drill_OperateKeys          键盘-键盘手柄按键修改器
+ *   - Drill_OperateKeys           键盘-键盘手柄按键修改器
  * 被扩展：
- *   - Drill_LayerCommandThread   地图-多线程
+ *   - Drill_LayerCommandThread    地图-多线程
+ *   - Drill_BattleCommandThread   战斗-多线程
  *     多线程插件可以使得秘籍的公共事件执行 串行/并行 操作。
  * 
  * -----------------------------------------------------------------------------
@@ -382,7 +383,7 @@
  * @value 串行
  * @option 并行
  * @value 并行
- * @desc 公共事件的执行方式。战斗界面中没有并行，只能串行。
+ * @desc 公共事件的执行方式。地图界面/战斗界面 都可以设置 串行/并行。
  * @default 串行
  *
  *
@@ -915,8 +916,19 @@ Scene_Map.prototype.drill_OKCE_updateCommonEvent = function() {
 //==============================
 Scene_Battle.prototype.drill_OKCE_doCommonEvent = function( data ){
 	
+	// > 插件【战斗-多线程】
+	if( Imported.Drill_BattleCommandThread ){
+		var e_data = {
+			'type':"公共事件",
+			'pipeType': data['pipeType'],
+			'commonEventId': data['commonEventId'],
+		};
+		$gameTroop.drill_BCT_addPipeEvent( e_data );
+		
 	// > 默认执行
-	$gameTemp.reserveCommonEvent( data['commonEventId'] );
+	}else{
+		$gameTemp.reserveCommonEvent( data['commonEventId'] );
+	}
 }
 //==============================
 // * 公共事件控制 - 帧刷新绑定（战斗界面）

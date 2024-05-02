@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.1]        战斗 - 多层战斗GIF
+ * @plugindesc [v2.2]        战斗 - 多层战斗GIF
  * @author Drill_up
  * 
  * @Drill_LE_param "GIF样式-%d"
@@ -247,9 +247,7 @@
  * 工作类型：   持续执行
  * 时间复杂度： o(n^2)*o(贴图处理) 每帧
  * 测试方法：   在战斗中放置多个GIF，进行性能测试。
- * 测试结果：   200个事件的战斗中，平均消耗为：【31.67ms】
- *              100个事件的战斗中，平均消耗为：【22.19ms】
- *               50个事件的战斗中，平均消耗为：【20.08ms】
+ * 测试结果：   战斗界面中，平均消耗为：【20.08ms】
  *
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
  *   测试结果并不是精确值，范围在给定值的10ms范围内波动。
@@ -281,6 +279,10 @@
  * 整理了延迟插件指令的功能。
  * [v2.0]
  * 大幅度优化了底层结构，加强了插件的功能。
+ * [v2.1]
+ * 修改了插件与屏幕快照的兼容性。
+ * [v2.2]
+ * 修复了延迟指令报错的bug。
  * 
  * 
  * 
@@ -2023,7 +2025,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	/*-----------------多插件的指令------------------*/
 	if( command === ">清空全部战斗装饰部件" ){
 		$gameSystem.drill_BGi_removeControllerAll();
-		this.wait(1);	//（强制等待1帧，确保全部清空）
+		this.wait(1);	//（『强制等待』1帧，确保全部清空）
 	}
 	if( command === ">战斗GIF" ){
 		
@@ -2057,7 +2059,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var type = String(args[1]);
 			if( type == "删除全部" ){
 				$gameSystem.drill_BGi_removeControllerAll();
-				this.wait(1);	//（强制等待1帧，确保全部清空）
+				this.wait(1);	//（『强制等待』1帧，确保全部清空）
 			}
 		}
 		
@@ -2608,7 +2610,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			delay_time = delay_time.replace("延迟执行时间[","");
 			delay_time = delay_time.replace("]","");
 			delay_time = Number( delay_time );
-			var num_list = this.drill_BTG_getArgNumList( temp1 );
+			var num_list = this.drill_BGi_getArgNumList( temp1 );
 			
 			if( type == "设置帧(延迟)" || type == "设置当前帧(延迟)" ){
 				for( var k=0; k < controllers.length; k++ ){
@@ -2999,6 +3001,24 @@ Scene_Battle.prototype.createAllWindows = function() {
 		this.addChild(this._drill_SenceTopArea);	
 	}
 }
+//==============================
+// * 战斗层级 - 参数定义
+//
+//			说明：	> 所有drill插件的贴图都用唯一参数：zIndex（可为小数、负数），其它插件没有此参数定义。
+//==============================
+if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义）
+	var _drill_sprite_zIndex = true;
+	Object.defineProperty( Sprite.prototype, 'zIndex', {
+		set: function( value ){
+			this.__drill_zIndex = value;
+		},
+		get: function(){
+			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			return this.__drill_zIndex;
+		},
+		configurable: true
+	});
+};
 //==============================
 // * 战斗层级 - 图片层级排序（私有）
 //==============================
@@ -3466,6 +3486,7 @@ Drill_BGi_Controller.prototype.drill_controller_GIF_setFrame = function( cur_fra
 	// > 刷新索引
 	var inter = this._drill_GIF_time;
 	inter = inter / data['interval'];
+	inter = Math.floor(inter);
 	inter = inter % data['src_img_gif'].length;
 	if( data['back_run'] == true ){
 		inter = data['src_img_gif'].length - 1 - inter;
@@ -3753,6 +3774,7 @@ Drill_BGi_Controller.prototype.drill_controller_updateGIF = function(){
 		// > 播放GIF
 		var inter = this._drill_GIF_time;
 		inter = inter / data['interval'];
+		inter = Math.floor(inter);
 		inter = inter % data['src_img_gif'].length;
 		if( this._drill_GIF_onceType == "backRun" ){
 			inter = data['src_img_gif'].length - 1 - inter;
@@ -3777,6 +3799,7 @@ Drill_BGi_Controller.prototype.drill_controller_updateGIF = function(){
 	// > 播放GIF
 	var inter = this._drill_GIF_time;
 	inter = inter / data['interval'];
+	inter = Math.floor(inter);
 	inter = inter % data['src_img_gif'].length;
 	if( data['back_run'] == true ){
 		inter = data['src_img_gif'].length - 1 - inter;

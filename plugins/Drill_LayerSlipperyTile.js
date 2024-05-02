@@ -766,7 +766,7 @@ Scene_Map.prototype.drill_LST_updateDebugSprite = function() {
 	
 	// > 计时器
 	temp_sprite._drill_curTime += 1;
-	if( temp_sprite._drill_curTime % 2 == 0 ){ return; }	//减少绘制次数
+	if( temp_sprite._drill_curTime % 2 == 0 ){ return; }	//『Debug减帧』减少绘制次数
 	
 	// > DEBUG贴图的位置
 	var diff_x = Math.floor($gameMap._displayX) - $gameMap._displayX;
@@ -1332,9 +1332,12 @@ Game_Map.prototype.drill_LST_updateRestatistics = function() {
 	$gameTemp._drill_LST_needRestatistics = false;
 	
 	$gameTemp._drill_LST_blanketTank = [];
-	var events = this.events();
-	for( var i = 0; i < events.length; i++ ){  
-		var temp_event = events[i];
+	var event_list = this._events;
+	for(var i = 0; i < event_list.length; i++ ){
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
+		
 		if( temp_event['_drill_LST_blanketDir'] > 0 ){		//捕获转向毯
 			$gameTemp._drill_LST_blanketTank.push( temp_event );
 		}

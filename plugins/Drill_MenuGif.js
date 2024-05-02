@@ -693,6 +693,14 @@
  * @desc true - 倒放，false - 不倒放
  * @default false
  *
+ * @param 是否预加载
+ * @parent ---贴图---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭，预加载详细介绍可见："1.系统 > 关于预加载.docx"。
+ * @default false
+ *
  * @param 平移-GIF X
  * @parent ---贴图---
  * @desc x轴方向平移，单位像素。0为圈的圆心贴在最左边。
@@ -947,34 +955,45 @@
 		data['menu'] = String( dataFrom["所属菜单"] || "");
 		data['menu_key'] = String( dataFrom["自定义关键字"] || "");
 		
-		// > 贴图
+		
+		// > 控制器
 		data['visible'] = String( dataFrom["初始是否显示"] || "false") == "true";
+		data['pause'] = false;
+		
+		// > 贴图
 		if( dataFrom["资源-GIF"] != "" &&
 			dataFrom["资源-GIF"] != undefined ){
-			data['src_img'] = JSON.parse( dataFrom["资源-GIF"] );
+			data['src_img_gif'] = JSON.parse( dataFrom["资源-GIF"] );
 		}else{
-			data['src_img'] = [];
+			data['src_img_gif'] = [];
 		}
 		data['src_img_file'] = "img/Menu__layer_gif/";
 		data['src_bitmaps'] = [];
 		data['src_img_mask'] = String( dataFrom["资源-GIF遮罩"] || "");
 		data['interval'] = Number( dataFrom["帧间隔"] || 4);
 		data['back_run'] = String( dataFrom["是否倒放"] || "false") == "true";
-		data['x'] = Number( dataFrom["平移-GIF X"] || 0);
-		data['y'] = Number( dataFrom["平移-GIF Y"] || 0);
-		data['opacity'] = Number( dataFrom["透明度"] || 255);
+		data['preload'] = String( dataFrom["是否预加载"] || "false") == "true";
+		
 		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
 		data['tint'] = Number( dataFrom["图像-色调值"] || 0);
 		data['smooth'] = String( dataFrom["图像-模糊边缘"] || "false") == "true";
-		data['rotate'] = Number( dataFrom["旋转速度"] || 0.0);
+		
 		data['menu_index'] = Number( dataFrom["菜单层级"] || 0);
 		data['zIndex'] = Number( dataFrom["图片层级"] || 0);
 		
-		// > 3d效果
+		// > A主体
+		data['x'] = Number( dataFrom["平移-GIF X"] || 0);
+		data['y'] = Number( dataFrom["平移-GIF Y"] || 0);
+		
+		// > A主体 - 3d效果
 		data['scale_x'] = Number( dataFrom["缩放 X"] || 1.0);
 		data['scale_y'] = Number( dataFrom["缩放 Y"] || 1.0);
 		data['skew_x'] = Number( dataFrom["斜切 X"] || 0);
 		data['skew_y'] = Number( dataFrom["斜切 Y"] || 0);
+		
+		// > B基本变化
+		data['rotate'] = Number( dataFrom["旋转速度"] || 0.0);
+		data['opacity'] = Number( dataFrom["透明度"] || 255);
 		
 		// > 呼吸效果
 		data['breath'] = String( dataFrom["是否使用呼吸效果"] || "false") == "true";
@@ -1037,6 +1056,48 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		}
 	}
 };
+
+
+//=============================================================================
+// ** ☆预加载
+//
+//			说明：	> 对指定资源贴图标记不删除，可以防止重建导致的浪费资源，以及资源显示时闪烁问题。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 预加载 - 初始化
+//==============================
+var _drill_MGi_preload_initialize = Game_Temp.prototype.initialize;
+Game_Temp.prototype.initialize = function() {
+	_drill_MGi_preload_initialize.call(this);
+	this.drill_MGi_preloadInit();
+}
+//==============================
+// * 预加载 - 版本校验
+//==============================
+if( Utils.generateRuntimeId == undefined ){
+	alert( DrillUp.drill_MGi_getPluginTip_LowVersion() );
+}
+//==============================
+// * 预加载 - 执行资源预加载
+//
+//			说明：	> 遍历全部资源，提前预加载标记过的资源。
+//==============================
+Game_Temp.prototype.drill_MGi_preloadInit = function() {
+	this._drill_MGi_cacheId = Utils.generateRuntimeId();	//资源缓存id
+	this._drill_MGi_preloadTank = [];						//bitmap容器
+	for( var i = 0; i < DrillUp.g_MGi_list.length; i++ ){
+		var temp_data = DrillUp.g_MGi_list[i];
+		if( temp_data == undefined ){ continue; }
+		if( temp_data['preload'] != true ){ continue; }
+		
+		for(var k=0; k < temp_data['src_img_gif'].length; k++){
+			this._drill_MGi_preloadTank.push( 
+				ImageManager.reserveBitmap( temp_data['src_img_file'], temp_data['src_img_gif'][k], temp_data['tint'], temp_data['smooth'], this._drill_MGi_cacheId ) 
+			);
+		}
+	}
+}
 
 
 //#############################################################################
@@ -1201,6 +1262,24 @@ Scene_MenuBase.prototype.update = function() {
 	}
 };
 //==============================
+// * 菜单层级 - 参数定义
+//
+//			说明：	> 所有drill插件的贴图都用唯一参数：zIndex（可为小数、负数），其它插件没有此参数定义。
+//==============================
+if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义）
+	var _drill_sprite_zIndex = true;
+	Object.defineProperty( Sprite.prototype, 'zIndex', {
+		set: function( value ){
+			this.__drill_zIndex = value;
+		},
+		get: function(){
+			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			return this.__drill_zIndex;
+		},
+		configurable: true
+	});
+};
+//==============================
 // * 菜单层级 - 图片层级排序（私有）
 //==============================
 Scene_MenuBase.prototype.drill_MGi_sortByZIndex_Private = function() {
@@ -1297,8 +1376,8 @@ Scene_MenuBase.prototype.drill_MGi_create = function() {
 			
 			// > GIF贴图
 			var temp_sprite_data = JSON.parse(JSON.stringify( temp_data ));	//深拷贝数据（杜绝引用造成的修改）
-			for(var j = 0; j < temp_sprite_data['src_img'].length ; j++){
-				temp_sprite_data['src_bitmaps'].push( ImageManager.loadBitmap( temp_sprite_data['src_img_file'], temp_sprite_data['src_img'][j], temp_sprite_data['tint'], temp_sprite_data['smooth'] ));
+			for(var j = 0; j < temp_sprite_data['src_img_gif'].length ; j++){
+				temp_sprite_data['src_bitmaps'].push( ImageManager.loadBitmap( temp_sprite_data['src_img_file'], temp_sprite_data['src_img_gif'][j], temp_sprite_data['tint'], temp_sprite_data['smooth'] ));
 			}
 			var temp_sprite = new Sprite();
 			temp_sprite.bitmap = temp_sprite_data['src_bitmaps'][0];

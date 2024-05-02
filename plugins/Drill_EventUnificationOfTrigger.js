@@ -505,11 +505,11 @@ Game_Map.prototype.drill_EUOT_updateRestatistics = function(){
 	$gameTemp._drill_EUOT_needRestatistics = false;
 	
 	$gameTemp._drill_EUOT_keyMap = {};
-	var events = this.events();
-	for( var i = 0; i < events.length; i++ ){
-		var temp_event = events[i];
-		if( temp_event == undefined ){ continue; }
-		if( temp_event._erased == true ){ continue; }
+	var event_list = this._events;
+	for(var i = 0; i < event_list.length; i++ ){
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
 		
 		var tag = temp_event.drill_EUOT_getTag();
 		if( tag == "" ){ continue; }
@@ -609,7 +609,7 @@ Game_Map.prototype.drill_EUOT_refreshSwitch = function(){
 				var temp_event = event_list[j];
 				if( temp_event == temp_switch ){ continue; }
 				
-				temp_event.drill_EMoHS_checkSwitchData();	//（Bean是一个对象类）
+				temp_event.drill_EMoHS_checkSwitchData();	//（Bean是一个对象类，不能直接复制指针）
 				temp_event._drill_EMoHS_switchData['switch'] = JSON.parse(JSON.stringify( temp_switch._drill_EMoHS_switchData['switch'] ));
 			}
 			

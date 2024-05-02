@@ -726,11 +726,14 @@ Game_Map.prototype.drill_ELT_recordPoint = function( area, start_x, start_y ) {
 //==============================
 // * 主动触发 - 触发区域（实际区域[{x:21,y:31,block:true},{x:22,y:32,block:true}]，条件）
 //==============================
-Game_Map.prototype.drill_ELT_triggerArea = function( area, tag ) {
+Game_Map.prototype.drill_ELT_triggerArea = function( area, tag ){
 	
-	var events = this.events();
-	for (var i = 0; i < events.length; i++) {  
-		var temp_event = events[i];
+	var event_list = this._events;
+	for(var i = 0; i < event_list.length; i++ ){
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
+		
 		for (var j = 0; j < area.length ; j++) {    	//事件朝向与范围有关系
 			var temp_point = area[j];
 		

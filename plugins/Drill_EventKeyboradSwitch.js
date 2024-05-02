@@ -749,9 +749,10 @@ Game_Character.prototype.initialize = function(){
 	this._drill_EKbS_switchData = undefined;
 }
 //==============================
-// * 开关的属性 - 初始化
+// * 开关的属性 - 初始化 数据
 //
 //			说明：	> 这里的数据都要初始化才能用。『节约事件数据存储空间』
+//					> 层面关键字为：switchData，一对一。
 //==============================
 Game_Character.prototype.drill_EKbS_checkSwitchData = function(){	
 	if( this._drill_EKbS_switchData != undefined ){ return; }
@@ -759,9 +760,10 @@ Game_Character.prototype.drill_EKbS_checkSwitchData = function(){
 	this._drill_EKbS_switchData['switch'] = {};					//独立开关容器
 }
 //==============================
-// * 开关的属性 - 初始化独立开关
+// * 开关的属性 - 初始化 独立开关容器
 //
 //			说明：	> 注意，键盘响应开关能控制多个独立开关。
+//					> 层面关键字为：['switch']，一对多。
 //==============================
 Game_Character.prototype.drill_EKbS_checkSwitchData_Switch = function( switch_str ){
 	this.drill_EKbS_checkSwitchData()
@@ -914,11 +916,12 @@ Game_Map.prototype.drill_EKbS_updateRestatistics = function(){
 	$gameTemp._drill_EKbS_needRestatistics = false;
 	
 	$gameTemp._drill_EKbS_switchTank = [];
-	var events = this.events();
-	for( var i = 0; i < events.length; i++ ){
-		var temp_event = events[i];
-		if( temp_event == undefined ){ continue; }
-		if( temp_event._erased == true ){ continue; }
+	var event_list = this._events;
+	for(var i = 0; i < event_list.length; i++ ){
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
+		
 		if( temp_event.drill_EKbS_hasAnySwitch() ){
 			$gameTemp._drill_EKbS_switchTank.push(temp_event);
 		}
@@ -978,10 +981,11 @@ Game_Map.prototype.drill_EKbS_updateSwitch = function(){
 	for( var i = 0; i < $gameTemp._drill_EKbS_switchTank.length; i++ ){
 		var temp_switchEv = $gameTemp._drill_EKbS_switchTank[i];
 		
-		//	键盘响应开关 - 获取独立开关列表
+		// > 数据 - switchData层面（与事件一对一）
 		var switch_list = temp_switchEv.drill_EKbS_getSwitchList();
 		if( switch_list.length == 0 ){ continue; }
 		
+		// > 数据 - ['switch']层面（与事件一对多）
 		for(var j = 0; j < switch_list.length; j++ ){
 			var cur_switch = switch_list[j];
 			var cur_keyboardKey = temp_switchEv._drill_EKbS_switchData['switch'][cur_switch]['keyboardKey'];

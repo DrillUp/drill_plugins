@@ -753,13 +753,14 @@ Game_Map.prototype.drill_EASB_setupMapNote = function() {
 Game_Map.prototype.drill_EASB_allEvent_openActionSequenceByName = function( src_name ){
 	
 	// > 强制执行 创建
-	for( var i=0; i < this._events.length; i++ ){
-		var ev = this._events[i];
-		if( ev == undefined ){ continue; }
-		if( ev._erased == true ){ continue; }
+	var event_list = this._events;
+	for(var i = 0; i < event_list.length; i++ ){
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
 		
 		// > 延迟1帧，让其手动刷新
-		ev._drill_EASB_lastName = "";
+		temp_event._drill_EASB_lastName = "";
 	}
 };
 //==============================
@@ -768,11 +769,13 @@ Game_Map.prototype.drill_EASB_allEvent_openActionSequenceByName = function( src_
 Game_Map.prototype.drill_EASB_allEvent_closeActionSequenceByName = function( src_name ){
 	
 	// > 强制执行 销毁
-	for( var i=0; i < this._events.length; i++ ){
-		var ev = this._events[i];
-		if( ev == undefined ){ continue; }
-		if( ev._erased == true ){ continue; }
-		ev.drill_EASB_closeActionSequenceByName( src_name );
+	var event_list = this._events;
+	for(var i = 0; i < event_list.length; i++ ){
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
+		
+		temp_event.drill_EASB_closeActionSequenceByName( src_name );
 	}
 };
 //==============================

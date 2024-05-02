@@ -934,15 +934,20 @@ Game_Interpreter.prototype.drill_EIG_oldCommand = function(command, args){
 			
 		}
 		if( temp_need_generate ){	//生成新事件
-			$gameMap.events().forEach(function(event){
-				if (event.eventId() === this._eventId){	//当前执行插件指令的 事件id
-					temp_event_data['org_x'] = event._x;
-					temp_event_data['org_y'] = event._y;
+			
+			var event_list = $gameMap._events;
+			for(var i = 0; i < event_list.length; i++ ){
+				var org_event = event_list[i];
+				if( org_event == null ){ continue; }			//『非空事件』（此处不考虑 _erased 的情况）
+				
+				if( org_event.eventId() === this._eventId ){	//当前执行插件指令的 事件id
+					temp_event_data['org_x'] = org_event._x;
+					temp_event_data['org_y'] = org_event._y;
 					if( temp_event_data['tar_type'] != "指定位置"){
-						var av_list = $gameMap.drill_EIG_getAvailablePosList(event._x,event._y,temp_event_data['range'],temp_event_data['tar_type']);
+						var av_list = $gameMap.drill_EIG_getAvailablePosList(org_event._x,org_event._y,temp_event_data['range'],temp_event_data['tar_type']);
 						var ran = av_list[ Math.floor( Math.random()*av_list.length ) ];
-						temp_event_data['tar_x'] = ran['x']-event._x;
-						temp_event_data['tar_y'] = ran['y']-event._y;
+						temp_event_data['tar_x'] = ran['x']-org_event._x;
+						temp_event_data['tar_y'] = ran['y']-org_event._y;
 					}
 					
 					var new_event_data = $gameMap.drill_EIG_createEventDataTemplate( temp_event_data );
@@ -953,14 +958,13 @@ Game_Interpreter.prototype.drill_EIG_oldCommand = function(command, args){
 						new_event.locate(temp_event_data['tar_x'],temp_event_data['tar_y']);
 					}
 					//new_event.start();
-					//alert($gameMap._events.length);
 				};
-			}, this);	
+			}
 		}
 	};
 };
 //==============================
-// ** 插件指令 - 事件检查
+// * 插件指令 - 事件检查
 //==============================
 Game_Map.prototype.drill_EIG_isEventExist = function( e_id ){
 	if( e_id == 0 ){ return false; }

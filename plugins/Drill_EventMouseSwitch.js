@@ -1012,9 +1012,10 @@ Game_Character.prototype.initialize = function(){
 	_drill_EMoS_switch_initialize.call(this);
 }
 //==============================
-// * 开关的属性 - 初始化
+// * 开关的属性 - 初始化 数据
 //
 //			说明：	> 这里的数据都要初始化才能用。『节约事件数据存储空间』
+//					> 层面关键字为：switchData，一对一。
 //==============================
 Game_Character.prototype.drill_EMoS_checkSwitchData = function(){	
 	if( this._drill_EMoS_switchData != undefined ){ return; }
@@ -1022,21 +1023,17 @@ Game_Character.prototype.drill_EMoS_checkSwitchData = function(){
 	this._drill_EMoS_switchData['switch'] = {};					//独立开关容器
 }
 //==============================
-// * 开关的属性 - 初始化独立开关
+// * 开关的属性 - 初始化 独立开关容器
 //
 //			说明：	> 注意，鼠标响应开关能控制多个独立开关。
+//					> 层面关键字为：['switch']，一对多。
 //==============================
 Game_Character.prototype.drill_EMoS_checkSwitchData_Switch = function( switch_str ){
 	this.drill_EMoS_checkSwitchData()
 	if( this._drill_EMoS_switchData['switch'][switch_str] != undefined ){ return; }
 	var switch_data = {};
 	
-	switch_data['mouseType'] = 1;				//鼠标触发类型（使用数字表示类型，能减轻if判定消耗）
-												//		（ 1:左键按下[持续]， 2:右键按下[持续]， 3:滚轮按下[持续]）
-												//		（11:左键按下[一帧]，12:右键按下[一帧]，13:滚轮按下[一帧]）
-												//		（21:左键释放[一帧]，22:右键释放[一帧]，23:滚轮释放[一帧]）
-												//		（31:左键双击[一帧]，32:右键双击[一帧]，33:滚轮双击[一帧]，34:滚轮上滚，35:滚轮下滚）
-												//		（）
+	switch_data['mouseType'] = 1;				//鼠标触发类型（使用数字表示类型，能减轻if判定消耗，见 drill_EMoS_setMouseType ）
 	
 	switch_data['triggeredOn'] = false;			//按下时开启（持续触发用）
 	switch_data['notTriggeredOff'] = false;		//没按下时关闭（持续触发用）
@@ -1245,11 +1242,12 @@ Game_Map.prototype.drill_EMoS_updateRestatistics = function(){
 	$gameTemp._drill_EMoS_needRestatistics = false;
 	
 	$gameTemp._drill_EMoS_switchTank = [];
-	var events = this.events();
-	for( var i = 0; i < events.length; i++ ){
-		var temp_event = events[i];
-		if( temp_event == undefined ){ continue; }
-		if( temp_event._erased == true ){ continue; }
+	var event_list = this._events;
+	for(var i = 0; i < event_list.length; i++ ){
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
+		
 		if( temp_event.drill_EMoS_hasAnySwitch() ){
 			$gameTemp._drill_EMoS_switchTank.push(temp_event);
 		}
@@ -1309,10 +1307,11 @@ Game_Map.prototype.drill_EMoS_updateSwitch = function(){
 	for( var i = 0; i < $gameTemp._drill_EMoS_switchTank.length; i++ ){
 		var temp_switchEv = $gameTemp._drill_EMoS_switchTank[i];
 		
-		//	鼠标响应开关 - 获取独立开关列表
+		// > 数据 - switchData层面（与事件一对一）
 		var switch_list = temp_switchEv.drill_EMoS_getSwitchList();
 		if( switch_list.length == 0 ){ continue; }
 		
+		// > 数据 - ['switch']层面（与事件一对多）
 		for(var j = 0; j < switch_list.length; j++ ){
 			var cur_switch = switch_list[j];
 			var cur_mouseType = temp_switchEv._drill_EMoS_switchData['switch'][cur_switch]['mouseType'];

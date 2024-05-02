@@ -348,11 +348,13 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				e_chars = [ e ];
 			}
 			if( e_chars == null && unit == "全图事件" ){
-				var all_e = $gameMap._events;
 				e_chars = [];
-				for( var i=0; i < all_e.length; i++ ){
-					if( all_e[i] == undefined ){ continue; }
-					e_chars.push( all_e[i] );
+				var event_list = $gameMap._events;
+				for(var i = 0; i < event_list.length; i++ ){
+					var temp_event = event_list[i];
+					if( temp_event == null ){ continue; }
+					if( temp_event._erased == true ){ continue; }	//『有效事件』
+					e_chars.push( temp_event );
 				}
 			}
 		}

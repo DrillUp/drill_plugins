@@ -1,19 +1,19 @@
 //=============================================================================
-// Drill_PlayerEncounterTiming.js
+// Drill_WhenEncounterTroop.js
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        公共事件 - 遇敌时
+ * @plugindesc [v1.4]        公共事件 - 遇敌时
  * @author Drill_up
  * 
  * @Drill_LE_param "遇敌触发-%d"
  * @Drill_LE_parentKey "---遇敌触发组%d至%d---"
- * @Drill_LE_var "DrillUp.g_PET_trigger_length"
+ * @Drill_LE_var "DrillUp.g_WET_trigger_length"
  * 
  *
  * @help
  * =============================================================================
- * +++ Drill_PlayerEncounterTiming +++
+ * +++ Drill_WhenEncounterTroop +++
  * 作者：Drill_up
  * 如果你有兴趣，也可以来看看更多我写的drill插件哦ヽ(*。>Д<)o゜
  * https://rpg.blue/thread-409713-1-1.html
@@ -32,8 +32,10 @@
  * 1.插件的作用域：地图界面
  *   只作用于玩家。
  * 2.详细介绍可以去看看："31.公共事件 > 关于时机设置公共事件.docx"
- * 执行时机：
- *   (1.如果你添加了玩家 遇敌前 执行公共事件。
+ * 公共事件：
+ *   (1.该插件只在 地图界面 可以设置 串行/并行。
+ *      具体看看 "31.公共事件 > 关于公共事件与并行.docx"。
+ *   (2.如果你添加了玩家 遇敌前 执行公共事件。
  *      那么玩家会在触发遇敌前，先执行公共事件，再执行遇敌战斗。
  * 设计：
  *   (1.多层战斗背景必须要提前用插件指令设置好，
@@ -89,6 +91,8 @@
  * 修改了插件分类。
  * [v1.3]
  * 优化了旧存档的识别与兼容。
+ * [v1.4]
+ * 修改了文件名。
  * 
  *
  *
@@ -98,126 +102,126 @@
  * 
  * @param 遇敌触发-1
  * @parent ---遇敌触发组 1至20---
- * @type struct<PETTrigger>
+ * @type struct<WETTrigger>
  * @desc 自定义玩家自动触发的设置。
  * @default 
  * 
  * @param 遇敌触发-2
  * @parent ---遇敌触发组 1至20---
- * @type struct<PETTrigger>
+ * @type struct<WETTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  * 
  * @param 遇敌触发-3
  * @parent ---遇敌触发组 1至20---
- * @type struct<PETTrigger>
+ * @type struct<WETTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  * 
  * @param 遇敌触发-4
  * @parent ---遇敌触发组 1至20---
- * @type struct<PETTrigger>
+ * @type struct<WETTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  * 
  * @param 遇敌触发-5
  * @parent ---遇敌触发组 1至20---
- * @type struct<PETTrigger>
+ * @type struct<WETTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  * 
  * @param 遇敌触发-6
  * @parent ---遇敌触发组 1至20---
- * @type struct<PETTrigger>
+ * @type struct<WETTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  * 
  * @param 遇敌触发-7
  * @parent ---遇敌触发组 1至20---
- * @type struct<PETTrigger>
+ * @type struct<WETTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  * 
  * @param 遇敌触发-8
  * @parent ---遇敌触发组 1至20---
- * @type struct<PETTrigger>
+ * @type struct<WETTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  * 
  * @param 遇敌触发-9
  * @parent ---遇敌触发组 1至20---
- * @type struct<PETTrigger>
+ * @type struct<WETTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 遇敌触发-10
  * @parent ---遇敌触发组 1至20---
- * @type struct<PETTrigger>
+ * @type struct<WETTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 遇敌触发-11
  * @parent ---遇敌触发组 1至20---
- * @type struct<PETTrigger>
+ * @type struct<WETTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 遇敌触发-12
  * @parent ---遇敌触发组 1至20---
- * @type struct<PETTrigger>
+ * @type struct<WETTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 遇敌触发-13
  * @parent ---遇敌触发组 1至20---
- * @type struct<PETTrigger>
+ * @type struct<WETTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 遇敌触发-14
  * @parent ---遇敌触发组 1至20---
- * @type struct<PETTrigger>
+ * @type struct<WETTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 遇敌触发-15
  * @parent ---遇敌触发组 1至20---
- * @type struct<PETTrigger>
+ * @type struct<WETTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 遇敌触发-16
  * @parent ---遇敌触发组 1至20---
- * @type struct<PETTrigger>
+ * @type struct<WETTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 遇敌触发-17
  * @parent ---遇敌触发组 1至20---
- * @type struct<PETTrigger>
+ * @type struct<WETTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 遇敌触发-18
  * @parent ---遇敌触发组 1至20---
- * @type struct<PETTrigger>
+ * @type struct<WETTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 遇敌触发-19
  * @parent ---遇敌触发组 1至20---
- * @type struct<PETTrigger>
+ * @type struct<WETTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 遇敌触发-20
  * @parent ---遇敌触发组 1至20---
- * @type struct<PETTrigger>
+ * @type struct<WETTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  * 
  */
-/*~struct~PETTrigger:
+/*~struct~WETTrigger:
  * 
  * @param 标签
  * @desc 只用于方便区分查看的标签，不作用在插件中。
@@ -308,7 +312,7 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		PET（Player_Encounter_Timing）
+//		插件简称		WET（When_Encounter_Troop）
 //		临时全局变量	无
 //		临时局部变量	无
 //		存储数据变量	无
@@ -329,10 +333,16 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			遇敌时公共事件：
+//			->☆提示信息
+//			->☆静态数据
+//			->☆插件指令
+//			->☆存储数据
+//
+//			->☆区域监听
 //				->遇敌前触发
 //					->获取遇敌前，敌群id
 //				->遇敌后触发
+//
 //
 //		★家谱：
 //			无
@@ -354,44 +364,44 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
 	//==============================
 	var DrillUp = DrillUp || {}; 
-	DrillUp.g_PET_PluginTip_curName = "Drill_PlayerEncounterTiming.js 公共事件-遇敌时";
-	DrillUp.g_PET_PluginTip_baseList = ["Drill_LayerCommandThread.js 地图-多线程"];
+	DrillUp.g_WET_PluginTip_curName = "Drill_WhenEncounterTroop.js 公共事件-遇敌时";
+	DrillUp.g_WET_PluginTip_baseList = ["Drill_LayerCommandThread.js 地图-多线程"];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
 	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
-	DrillUp.drill_PET_getPluginTip_NoBasePlugin = function(){
-		if( DrillUp.g_PET_PluginTip_baseList.length == 0 ){ return ""; }
-		var message = "【" + DrillUp.g_PET_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
-		for(var i=0; i < DrillUp.g_PET_PluginTip_baseList.length; i++){
+	DrillUp.drill_WET_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_WET_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_WET_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_WET_PluginTip_baseList.length; i++){
 			message += "\n- ";
-			message += DrillUp.g_PET_PluginTip_baseList[i];
+			message += DrillUp.g_WET_PluginTip_baseList[i];
 		}
 		return message;
 	};
 	
 	
 //=============================================================================
-// ** 静态数据
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
-　　Imported.Drill_PlayerEncounterTiming = true;
+　　Imported.Drill_WhenEncounterTroop = true;
 　　var DrillUp = DrillUp || {}; 
-	DrillUp.parameters = PluginManager.parameters('Drill_PlayerEncounterTiming');
+	DrillUp.parameters = PluginManager.parameters('Drill_WhenEncounterTroop');
 	
 	
 	//==============================
 	// * 静态数据 - 遇敌触发
-	//				（~struct~PETTrigger）
+	//				（~struct~WETTrigger）
 	//==============================
-	DrillUp.drill_PET_triggerInit = function( dataFrom ){
+	DrillUp.drill_WET_triggerInit = function( dataFrom ){
 		var data = {};
 		
 		// > 开关
@@ -414,15 +424,15 @@
 	
 	
 	/*-----------------遇敌触发组------------------*/
-	DrillUp.g_PET_trigger_length = 20;
-	DrillUp.g_PET_trigger = [];
-	for( var i = 0; i < DrillUp.g_PET_trigger_length; i++ ){
+	DrillUp.g_WET_trigger_length = 20;
+	DrillUp.g_WET_trigger = [];
+	for( var i = 0; i < DrillUp.g_WET_trigger_length; i++ ){
 		if( DrillUp.parameters["遇敌触发-" + String(i+1) ] != "" &&
 			DrillUp.parameters["遇敌触发-" + String(i+1) ] != undefined ){
 			var data = JSON.parse(DrillUp.parameters["遇敌触发-" + String(i+1) ]);
-			DrillUp.g_PET_trigger[i] = DrillUp.drill_PET_triggerInit( data );
+			DrillUp.g_WET_trigger[i] = DrillUp.drill_WET_triggerInit( data );
 		}else{
-			DrillUp.g_PET_trigger[i] = null;
+			DrillUp.g_WET_trigger[i] = null;
 		}
 	}
 
@@ -434,11 +444,11 @@ if( Imported.Drill_LayerCommandThread ){
 	
 	
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
-var _drill_PET_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+var _drill_WET_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
-	_drill_PET_pluginCommand.call(this, command, args);
+	_drill_WET_pluginCommand.call(this, command, args);
 	if( command === ">遇敌时公共事件" ){
 		if(args.length == 4){
 			var type = String(args[1]);
@@ -447,13 +457,13 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp1 = temp1.replace("遇敌触发[","");
 				temp1 = temp1.replace("]","");
 				temp1 = Number(temp1) -1;
-				$gameSystem._drill_PET_dataTank[ temp1 ]['enable'] = true;
+				$gameSystem._drill_WET_dataTank[ temp1 ]['enable'] = true;
 			}
 			if( type == "关闭触发" ){	
 				temp1 = temp1.replace("遇敌触发[","");
 				temp1 = temp1.replace("]","");
 				temp1 = Number(temp1) -1;
-				$gameSystem._drill_PET_dataTank[ temp1 ]['enable'] = false;
+				$gameSystem._drill_WET_dataTank[ temp1 ]['enable'] = false;
 			}
 		}
 		if(args.length == 6){
@@ -464,7 +474,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp2 = temp2.replace("变量[","");
 				temp2 = temp2.replace("]","");
 				temp2 = Number(temp2);
-				$gameVariables.setValue( temp2, $gamePlayer._drill_PET_curTroopId );
+				$gameVariables.setValue( temp2, $gamePlayer._drill_WET_curTroopId );
 			}
 		}
 	}
@@ -472,40 +482,40 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
 //          
 //			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
 //##############################
-DrillUp.g_PET_saveEnabled = true;
+DrillUp.g_WET_saveEnabled = true;
 //##############################
 // * 存储数据 - 初始化
 //          
 //			说明：	> 下方为固定写法，不要动。
 //##############################
-var _drill_PET_sys_initialize = Game_System.prototype.initialize;
+var _drill_WET_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-    _drill_PET_sys_initialize.call(this);
-	this.drill_PET_initSysData();
+    _drill_WET_sys_initialize.call(this);
+	this.drill_WET_initSysData();
 };
 //##############################
 // * 存储数据 - 载入存档
 //          
 //			说明：	> 下方为固定写法，不要动。
 //##############################
-var _drill_PET_sys_extractSaveContents = DataManager.extractSaveContents;
+var _drill_WET_sys_extractSaveContents = DataManager.extractSaveContents;
 DataManager.extractSaveContents = function( contents ){
-	_drill_PET_sys_extractSaveContents.call( this, contents );
+	_drill_WET_sys_extractSaveContents.call( this, contents );
 	
 	// > 参数存储 启用时（检查数据）
-	if( DrillUp.g_PET_saveEnabled == true ){	
-		$gameSystem.drill_PET_checkSysData();
+	if( DrillUp.g_WET_saveEnabled == true ){	
+		$gameSystem.drill_WET_checkSysData();
 		
 	// > 参数存储 关闭时（直接覆盖）
 	}else{
-		$gameSystem.drill_PET_initSysData();
+		$gameSystem.drill_WET_initSysData();
 	}
 };
 //##############################
@@ -516,8 +526,8 @@ DataManager.extractSaveContents = function( contents ){
 //          
 //			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
 //##############################
-Game_System.prototype.drill_PET_initSysData = function() {
-	this.drill_PET_initSysData_Private();
+Game_System.prototype.drill_WET_initSysData = function() {
+	this.drill_WET_initSysData_Private();
 };
 //##############################
 // * 存储数据 - 载入存档时检查数据【标准函数】
@@ -527,8 +537,8 @@ Game_System.prototype.drill_PET_initSysData = function() {
 //          
 //			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
 //##############################
-Game_System.prototype.drill_PET_checkSysData = function() {
-	this.drill_PET_checkSysData_Private();
+Game_System.prototype.drill_WET_checkSysData = function() {
+	this.drill_WET_checkSysData_Private();
 };
 //=============================================================================
 // ** 存储数据（接口实现）
@@ -536,37 +546,37 @@ Game_System.prototype.drill_PET_checkSysData = function() {
 //==============================
 // * 存储数据 - 初始化数据（私有）
 //==============================
-Game_System.prototype.drill_PET_initSysData_Private = function() {
+Game_System.prototype.drill_WET_initSysData_Private = function() {
 	
-	this._drill_PET_dataTank = [];
-	for(var i=0; i < DrillUp.g_PET_trigger.length; i++){
-		var temp_data = DrillUp.g_PET_trigger[i];
+	this._drill_WET_dataTank = [];
+	for(var i=0; i < DrillUp.g_WET_trigger.length; i++){
+		var temp_data = DrillUp.g_WET_trigger[i];
 		if( temp_data == undefined ){ continue; }
-		this._drill_PET_dataTank[i] = JSON.parse(JSON.stringify( temp_data ));
-		this._drill_PET_dataTank[i]['activeCount'] = 0;
+		this._drill_WET_dataTank[i] = JSON.parse(JSON.stringify( temp_data ));
+		this._drill_WET_dataTank[i]['activeCount'] = 0;
 	}
 };
 //==============================
 // * 存储数据 - 载入存档时检查数据（私有）
 //==============================
-Game_System.prototype.drill_PET_checkSysData_Private = function() {
+Game_System.prototype.drill_WET_checkSysData_Private = function() {
 	
 	// > 旧存档数据自动补充
-	if( this._drill_PET_dataTank == undefined ){
-		this.drill_PET_initSysData();
+	if( this._drill_WET_dataTank == undefined ){
+		this.drill_WET_initSysData();
 	}
 	
 	// > 容器的 空数据 检查
-	for(var i = 0; i < DrillUp.g_PET_trigger.length; i++ ){
-		var temp_data = DrillUp.g_PET_trigger[i];
+	for(var i = 0; i < DrillUp.g_WET_trigger.length; i++ ){
+		var temp_data = DrillUp.g_WET_trigger[i];
 		
 		// > 已配置（undefined表示未配置的空数据）
 		if( temp_data != undefined ){
 			
 			// > 未存储的，重新初始化
-			if( this._drill_PET_dataTank[i] == undefined ){
-				this._drill_PET_dataTank[i] = JSON.parse(JSON.stringify( temp_data ));
-				this._drill_PET_dataTank[i]['activeCount'] = 0;
+			if( this._drill_WET_dataTank[i] == undefined ){
+				this._drill_WET_dataTank[i] = JSON.parse(JSON.stringify( temp_data ));
+				this._drill_WET_dataTank[i]['activeCount'] = 0;
 			
 			// > 已存储的，跳过
 			}else{
@@ -576,37 +586,39 @@ Game_System.prototype.drill_PET_checkSysData_Private = function() {
 	}
 }
 
+
 //=============================================================================
-// ** 玩家遇敌
+// ** ☆区域监听
 //
-//			说明：	当没有阻塞事件运行时，且 $gamePlayer._encounterCount <= 0 时，激活遇敌。
+//			说明：	> 当没有阻塞事件运行时，且 $gamePlayer._encounterCount <= 0 时，激活遇敌。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 玩家 - 触发遇敌
+// * 区域监听 - 玩家触发遇敌
 //==============================
-var _drill_PET_updateEncounter = Scene_Map.prototype.updateEncounter;
+var _drill_WET_updateEncounter = Scene_Map.prototype.updateEncounter;
 Scene_Map.prototype.updateEncounter = function() {
 	
 	// > 遇敌前 - 捕获标记
-	this.drill_PET_updateEncounterBefore();
+	this.drill_WET_updateEncounterBefore();
 	
 	// > 遇敌前 - 公共事件设置
-	this.drill_PET_updateCommonEventBefore();
+	this.drill_WET_updateCommonEventBefore();
 	
 	// > 遇敌前 - 公共事件阻塞
-	if( $gamePlayer._drill_PET_isEncountering == true &&
-		$gamePlayer._drill_PET_isCommonEventBlock == true ){
+	if( $gamePlayer._drill_WET_isEncountering == true &&
+		$gamePlayer._drill_WET_isCommonEventBlock == true ){
 		return;
 	}
 	
 	// > 原函数
-	_drill_PET_updateEncounter.call( this );
+	_drill_WET_updateEncounter.call( this );
 	
 	// > 遇敌后 - 公共事件设置
-	this.drill_PET_updateCommonEventAfter();
+	this.drill_WET_updateCommonEventAfter();
 	
 	// > 遇敌后 - 清除标记
-	this.drill_PET_updateEncounterAfter();
+	this.drill_WET_updateEncounterAfter();
 	
 };
 //==============================
@@ -614,15 +626,15 @@ Scene_Map.prototype.updateEncounter = function() {
 //
 //			说明：	判定与 Game_Player.prototype.executeEncounter 一致。
 //==============================
-Scene_Map.prototype.drill_PET_updateEncounterBefore = function() {
+Scene_Map.prototype.drill_WET_updateEncounterBefore = function() {
 	if( !$gameMap.isEventRunning() && $gamePlayer._encounterCount <= 0 ){
 		
 		var troopId = $gamePlayer.makeEncounterTroopId();
 		if( $dataTroops[troopId] ){
 			
 			// > 已遇敌标记
-			$gamePlayer._drill_PET_isEncountering = true;
-			$gamePlayer._drill_PET_curTroopId = troopId;
+			$gamePlayer._drill_WET_isEncountering = true;
+			$gamePlayer._drill_WET_curTroopId = troopId;
 			
 		}else{
 			//（不操作）
@@ -634,38 +646,38 @@ Scene_Map.prototype.drill_PET_updateEncounterBefore = function() {
 //==============================
 // * 遇敌后 - 清除标记
 //==============================
-Scene_Map.prototype.drill_PET_updateEncounterAfter = function() {
-	$gamePlayer._drill_PET_isEncountering = false;		//（遇敌标记）
-	$gamePlayer._drill_PET_isBeforeRunning = false;		//单次执行锁
-	$gamePlayer._drill_PET_isAfterRunning = false;		//单次执行锁
+Scene_Map.prototype.drill_WET_updateEncounterAfter = function() {
+	$gamePlayer._drill_WET_isEncountering = false;		//（遇敌标记）
+	$gamePlayer._drill_WET_isBeforeRunning = false;		//单次执行锁
+	$gamePlayer._drill_WET_isAfterRunning = false;		//单次执行锁
 };
 //==============================
 // * 遇敌前 - 固定敌群ID
 //==============================
-var _drill_PET_makeEncounterTroopId = Game_Player.prototype.makeEncounterTroopId;
+var _drill_WET_makeEncounterTroopId = Game_Player.prototype.makeEncounterTroopId;
 Game_Player.prototype.makeEncounterTroopId = function(){
-	if( this._drill_PET_isEncountering == true ){
-		return this._drill_PET_curTroopId;
+	if( this._drill_WET_isEncountering == true ){
+		return this._drill_WET_curTroopId;
 	}
-	return _drill_PET_makeEncounterTroopId.call( this );
+	return _drill_WET_makeEncounterTroopId.call( this );
 }
 
 //==============================
 // * 遇敌前 - 公共事件设置
 //==============================
-Scene_Map.prototype.drill_PET_updateCommonEventBefore = function() {
-	if( $gamePlayer._drill_PET_isEncountering != true ){ return; }
+Scene_Map.prototype.drill_WET_updateCommonEventBefore = function() {
+	if( $gamePlayer._drill_WET_isEncountering != true ){ return; }
 	
 	// > 单次执行锁（确保只在遇敌时执行一次）
-	if( $gamePlayer._drill_PET_isBeforeRunning == true ){ return; }
-	$gamePlayer._drill_PET_isBeforeRunning = true;
+	if( $gamePlayer._drill_WET_isBeforeRunning == true ){ return; }
+	$gamePlayer._drill_WET_isBeforeRunning = true;
 	
 	
 	// > R图块
 	var r_id = $gameMap.regionId( $gamePlayer.x, $gamePlayer.y );
 
-	for(var i = 0; i < $gameSystem._drill_PET_dataTank.length; i++){
-		var temp_data = $gameSystem._drill_PET_dataTank[i];
+	for(var i = 0; i < $gameSystem._drill_WET_dataTank.length; i++){
+		var temp_data = $gameSystem._drill_WET_dataTank[i];
 		if( temp_data == undefined ){ continue; }
 		if( temp_data['enable'] == false ){ continue; }
 		
@@ -700,10 +712,10 @@ Scene_Map.prototype.drill_PET_updateCommonEventBefore = function() {
 		
 		
 		// > 阻塞遇敌（等公共事件执行完了，才继续）
-		$gamePlayer._drill_PET_isCommonEventBlock = true;
+		$gamePlayer._drill_WET_isCommonEventBlock = true;
 		
 		// > 执行公共事件
-		this.drill_PET_doCommonEvent( temp_data['pipeType'], temp_data['commonEventId'], "this.drill_PET_commandEnd();" );
+		this.drill_WET_doCommonEvent( temp_data['pipeType'], temp_data['commonEventId'], "this.drill_WET_commandEnd();" );
 		
 		temp_data['activeCount'] += 1;
 	}
@@ -712,7 +724,7 @@ Scene_Map.prototype.drill_PET_updateCommonEventBefore = function() {
 //==============================
 // * 操作 - 『执行公共事件』（地图界面）
 //==============================
-Scene_Map.prototype.drill_PET_doCommonEvent = function( pipeType, commonEventId, callBack_str ){
+Scene_Map.prototype.drill_WET_doCommonEvent = function( pipeType, commonEventId, callBack_str ){
 	
 	// > 插件【地图-多线程】
 	if( Imported.Drill_LayerCommandThread ){
@@ -732,25 +744,25 @@ Scene_Map.prototype.drill_PET_doCommonEvent = function( pipeType, commonEventId,
 //==============================
 // * 遇敌前 - 公共事件 释放阻塞
 //==============================
-Game_Interpreter.prototype.drill_PET_commandEnd = function(){
-	$gamePlayer._drill_PET_isCommonEventBlock = false;
+Game_Interpreter.prototype.drill_WET_commandEnd = function(){
+	$gamePlayer._drill_WET_isCommonEventBlock = false;
 }
 //==============================
 // * 遇敌触发 - 遇敌后帧刷新
 //==============================
-Scene_Map.prototype.drill_PET_updateCommonEventAfter = function() {
-	if( $gamePlayer._drill_PET_isEncountering != true ){ return; }
+Scene_Map.prototype.drill_WET_updateCommonEventAfter = function() {
+	if( $gamePlayer._drill_WET_isEncountering != true ){ return; }
 	
 	// > 单次执行锁（确保只在遇敌时执行一次）
-	if( $gamePlayer._drill_PET_isAfterRunning == true ){ return; }
-	$gamePlayer._drill_PET_isAfterRunning = true;
+	if( $gamePlayer._drill_WET_isAfterRunning == true ){ return; }
+	$gamePlayer._drill_WET_isAfterRunning = true;
 	
 	
 	// > R图块
 	var r_id = $gameMap.regionId( $gamePlayer.x, $gamePlayer.y );
 
-	for(var i = 0; i < $gameSystem._drill_PET_dataTank.length; i++){
-		var temp_data = $gameSystem._drill_PET_dataTank[i];
+	for(var i = 0; i < $gameSystem._drill_WET_dataTank.length; i++){
+		var temp_data = $gameSystem._drill_WET_dataTank[i];
 		if( temp_data == undefined ){ continue; }
 		if( temp_data['enable'] == false ){ continue; }
 		
@@ -785,7 +797,7 @@ Scene_Map.prototype.drill_PET_updateCommonEventAfter = function() {
 		
 		
 		// > 执行公共事件
-		this.drill_PET_doCommonEvent( temp_data['pipeType'], temp_data['commonEventId'], "" );
+		this.drill_WET_doCommonEvent( temp_data['pipeType'], temp_data['commonEventId'], "" );
 		
 		temp_data['activeCount'] += 1;
 	}
@@ -796,8 +808,8 @@ Scene_Map.prototype.drill_PET_updateCommonEventAfter = function() {
 // * <<<<基于插件检测<<<<
 //=============================================================================
 }else{
-		Imported.Drill_PlayerEncounterTiming = false;
-		var pluginTip = DrillUp.drill_PET_getPluginTip_NoBasePlugin();
+		Imported.Drill_WhenEncounterTroop = false;
+		var pluginTip = DrillUp.drill_WET_getPluginTip_NoBasePlugin();
 		alert( pluginTip );
 }
 

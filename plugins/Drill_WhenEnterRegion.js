@@ -1,19 +1,19 @@
 //=============================================================================
-// Drill_PlayerRegionTiming.js
+// Drill_WhenEnterRegion.js
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        公共事件 - 出入区域时
+ * @plugindesc [v1.4]        公共事件 - 出入区域时
  * @author Drill_up
  * 
  * @Drill_LE_param "区域触发-%d"
  * @Drill_LE_parentKey "---区域触发组%d至%d---"
- * @Drill_LE_var "DrillUp.g_PRT_trigger_length"
+ * @Drill_LE_var "DrillUp.g_WER_trigger_length"
  * 
  *
  * @help
  * =============================================================================
- * +++ Drill_PlayerRegionTiming +++
+ * +++ Drill_WhenEnterRegion +++
  * 作者：Drill_up
  * 如果你有兴趣，也可以来看看更多我写的drill插件哦ヽ(*。>Д<)o゜
  * https://rpg.blue/thread-409713-1-1.html
@@ -32,9 +32,11 @@
  * 1.插件的作用域：地图界面
  *   只作用于玩家。
  * 2.详细介绍可以去看看："31.公共事件 > 关于时机设置公共事件.docx"
- * 执行时机：
- *   (1.如果玩家在区域交界处反复出入，则会反复触发并执行公共事件。
- *   (2.触发中的 区域组，表示多个不同区域形成一个整体。
+ * 公共事件：
+ *   (1.该插件只在 地图界面 可以设置 串行/并行。
+ *      具体看看 "31.公共事件 > 关于公共事件与并行.docx"。
+ *   (2.如果玩家在区域交界处反复出入，则会反复触发并执行公共事件。
+ *   (3.触发中的 区域组，表示多个不同区域形成一个整体。
  *      进入/离开 这个整体才会触发，整体内部移动不会触发。
  * 设计：
  *   (1.通过设置公共事件，你可以对玩家进入区域/离开区域时，
@@ -80,6 +82,8 @@
  * 修改了插件分类。
  * [v1.3]
  * 优化了旧存档的识别与兼容。
+ * [v1.4]
+ * 修改了文件名。
  * 
  *
  *
@@ -89,126 +93,126 @@
  * 
  * @param 区域触发-1
  * @parent ---区域触发组 1至20---
- * @type struct<PRTTrigger>
+ * @type struct<WERTrigger>
  * @desc 自定义玩家自动触发的设置。
  * @default 
  * 
  * @param 区域触发-2
  * @parent ---区域触发组 1至20---
- * @type struct<PRTTrigger>
+ * @type struct<WERTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  * 
  * @param 区域触发-3
  * @parent ---区域触发组 1至20---
- * @type struct<PRTTrigger>
+ * @type struct<WERTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  * 
  * @param 区域触发-4
  * @parent ---区域触发组 1至20---
- * @type struct<PRTTrigger>
+ * @type struct<WERTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  * 
  * @param 区域触发-5
  * @parent ---区域触发组 1至20---
- * @type struct<PRTTrigger>
+ * @type struct<WERTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  * 
  * @param 区域触发-6
  * @parent ---区域触发组 1至20---
- * @type struct<PRTTrigger>
+ * @type struct<WERTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  * 
  * @param 区域触发-7
  * @parent ---区域触发组 1至20---
- * @type struct<PRTTrigger>
+ * @type struct<WERTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  * 
  * @param 区域触发-8
  * @parent ---区域触发组 1至20---
- * @type struct<PRTTrigger>
+ * @type struct<WERTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  * 
  * @param 区域触发-9
  * @parent ---区域触发组 1至20---
- * @type struct<PRTTrigger>
+ * @type struct<WERTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 区域触发-10
  * @parent ---区域触发组 1至20---
- * @type struct<PRTTrigger>
+ * @type struct<WERTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 区域触发-11
  * @parent ---区域触发组 1至20---
- * @type struct<PRTTrigger>
+ * @type struct<WERTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 区域触发-12
  * @parent ---区域触发组 1至20---
- * @type struct<PRTTrigger>
+ * @type struct<WERTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 区域触发-13
  * @parent ---区域触发组 1至20---
- * @type struct<PRTTrigger>
+ * @type struct<WERTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 区域触发-14
  * @parent ---区域触发组 1至20---
- * @type struct<PRTTrigger>
+ * @type struct<WERTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 区域触发-15
  * @parent ---区域触发组 1至20---
- * @type struct<PRTTrigger>
+ * @type struct<WERTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 区域触发-16
  * @parent ---区域触发组 1至20---
- * @type struct<PRTTrigger>
+ * @type struct<WERTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 区域触发-17
  * @parent ---区域触发组 1至20---
- * @type struct<PRTTrigger>
+ * @type struct<WERTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 区域触发-18
  * @parent ---区域触发组 1至20---
- * @type struct<PRTTrigger>
+ * @type struct<WERTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 区域触发-19
  * @parent ---区域触发组 1至20---
- * @type struct<PRTTrigger>
+ * @type struct<WERTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  *
  * @param 区域触发-20
  * @parent ---区域触发组 1至20---
- * @type struct<PRTTrigger>
+ * @type struct<WERTrigger>
  * @desc 自定义触发事件的区域范围。
  * @default 
  * 
  */
-/*~struct~PRTTrigger:
+/*~struct~WERTrigger:
  * 
  * @param 标签
  * @desc 只用于方便区分查看的标签，不作用在插件中。
@@ -291,7 +295,7 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		PRT（Player_Region_Timing）
+//		插件简称		WER（When_Enter_Region）
 //		临时全局变量	无
 //		临时局部变量	无
 //		存储数据变量	无
@@ -312,8 +316,14 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			出入区域公共事件：
+//			->☆提示信息
+//			->☆静态数据
+//			->☆插件指令
+//			->☆存储数据
+//
+//			->☆区域监听
 //				->脚下区域记录
+//
 //
 //		★家谱：
 //			无
@@ -335,44 +345,44 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
 	//==============================
 	var DrillUp = DrillUp || {}; 
-	DrillUp.g_PRT_PluginTip_curName = "Drill_PlayerRegionTiming.js 公共事件-出入区域时";
-	DrillUp.g_PRT_PluginTip_baseList = ["Drill_LayerCommandThread.js 地图-多线程"];
+	DrillUp.g_WER_PluginTip_curName = "Drill_WhenEnterRegion.js 公共事件-出入区域时";
+	DrillUp.g_WER_PluginTip_baseList = ["Drill_LayerCommandThread.js 地图-多线程"];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
 	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
-	DrillUp.drill_PRT_getPluginTip_NoBasePlugin = function(){
-		if( DrillUp.g_PRT_PluginTip_baseList.length == 0 ){ return ""; }
-		var message = "【" + DrillUp.g_PRT_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
-		for(var i=0; i < DrillUp.g_PRT_PluginTip_baseList.length; i++){
+	DrillUp.drill_WER_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_WER_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_WER_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_WER_PluginTip_baseList.length; i++){
 			message += "\n- ";
-			message += DrillUp.g_PRT_PluginTip_baseList[i];
+			message += DrillUp.g_WER_PluginTip_baseList[i];
 		}
 		return message;
 	};
 	
 	
 //=============================================================================
-// ** 静态数据
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
-　　Imported.Drill_PlayerRegionTiming = true;
+　　Imported.Drill_WhenEnterRegion = true;
 　　var DrillUp = DrillUp || {}; 
-	DrillUp.parameters = PluginManager.parameters('Drill_PlayerRegionTiming');
+	DrillUp.parameters = PluginManager.parameters('Drill_WhenEnterRegion');
 	
 	
 	//==============================
 	// * 静态数据 - 区域触发
-	//				（~struct~PRTTrigger）
+	//				（~struct~WERTrigger）
 	//==============================
-	DrillUp.drill_PRT_triggerInit = function( dataFrom ){
+	DrillUp.drill_WER_triggerInit = function( dataFrom ){
 		var data = {};
 		
 		// > 开关
@@ -400,15 +410,15 @@
 	
 	
 	/*-----------------区域触发组------------------*/
-	DrillUp.g_PRT_trigger_length = 20;
-	DrillUp.g_PRT_trigger = [];
-	for( var i = 0; i < DrillUp.g_PRT_trigger_length; i++ ){
+	DrillUp.g_WER_trigger_length = 20;
+	DrillUp.g_WER_trigger = [];
+	for( var i = 0; i < DrillUp.g_WER_trigger_length; i++ ){
 		if( DrillUp.parameters["区域触发-" + String(i+1) ] != "" &&
 			DrillUp.parameters["区域触发-" + String(i+1) ] != undefined ){
 			var data = JSON.parse(DrillUp.parameters["区域触发-" + String(i+1) ]);
-			DrillUp.g_PRT_trigger[i] = DrillUp.drill_PRT_triggerInit( data );
+			DrillUp.g_WER_trigger[i] = DrillUp.drill_WER_triggerInit( data );
 		}else{
-			DrillUp.g_PRT_trigger[i] = null;
+			DrillUp.g_WER_trigger[i] = null;
 		}
 	}
 
@@ -420,11 +430,11 @@ if( Imported.Drill_LayerCommandThread ){
 	
 	
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
-var _drill_PRT_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+var _drill_WER_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
-	_drill_PRT_pluginCommand.call(this, command, args);
+	_drill_WER_pluginCommand.call(this, command, args);
 	if( command === ">出入区域公共事件" ){
 		if(args.length == 4){
 			var type = String(args[1]);
@@ -433,13 +443,13 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp1 = temp1.replace("区域触发[","");
 				temp1 = temp1.replace("]","");
 				temp1 = Number(temp1) -1;
-				$gameSystem._drill_PRT_dataTank[ temp1 ]['enable'] = true;
+				$gameSystem._drill_WER_dataTank[ temp1 ]['enable'] = true;
 			}
 			if( type == "关闭触发" ){	
 				temp1 = temp1.replace("区域触发[","");
 				temp1 = temp1.replace("]","");
 				temp1 = Number(temp1) -1;
-				$gameSystem._drill_PRT_dataTank[ temp1 ]['enable'] = false;
+				$gameSystem._drill_WER_dataTank[ temp1 ]['enable'] = false;
 			}
 		}
 	}
@@ -447,40 +457,40 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
 //          
 //			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
 //##############################
-DrillUp.g_PRT_saveEnabled = true;
+DrillUp.g_WER_saveEnabled = true;
 //##############################
 // * 存储数据 - 初始化
 //          
 //			说明：	> 下方为固定写法，不要动。
 //##############################
-var _drill_PRT_sys_initialize = Game_System.prototype.initialize;
+var _drill_WER_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-    _drill_PRT_sys_initialize.call(this);
-	this.drill_PRT_initSysData();
+    _drill_WER_sys_initialize.call(this);
+	this.drill_WER_initSysData();
 };
 //##############################
 // * 存储数据 - 载入存档
 //          
 //			说明：	> 下方为固定写法，不要动。
 //##############################
-var _drill_PRT_sys_extractSaveContents = DataManager.extractSaveContents;
+var _drill_WER_sys_extractSaveContents = DataManager.extractSaveContents;
 DataManager.extractSaveContents = function( contents ){
-	_drill_PRT_sys_extractSaveContents.call( this, contents );
+	_drill_WER_sys_extractSaveContents.call( this, contents );
 	
 	// > 参数存储 启用时（检查数据）
-	if( DrillUp.g_PRT_saveEnabled == true ){	
-		$gameSystem.drill_PRT_checkSysData();
+	if( DrillUp.g_WER_saveEnabled == true ){	
+		$gameSystem.drill_WER_checkSysData();
 		
 	// > 参数存储 关闭时（直接覆盖）
 	}else{
-		$gameSystem.drill_PRT_initSysData();
+		$gameSystem.drill_WER_initSysData();
 	}
 };
 //##############################
@@ -491,8 +501,8 @@ DataManager.extractSaveContents = function( contents ){
 //          
 //			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
 //##############################
-Game_System.prototype.drill_PRT_initSysData = function() {
-	this.drill_PRT_initSysData_Private();
+Game_System.prototype.drill_WER_initSysData = function() {
+	this.drill_WER_initSysData_Private();
 };
 //##############################
 // * 存储数据 - 载入存档时检查数据【标准函数】
@@ -502,8 +512,8 @@ Game_System.prototype.drill_PRT_initSysData = function() {
 //          
 //			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
 //##############################
-Game_System.prototype.drill_PRT_checkSysData = function() {
-	this.drill_PRT_checkSysData_Private();
+Game_System.prototype.drill_WER_checkSysData = function() {
+	this.drill_WER_checkSysData_Private();
 };
 //=============================================================================
 // ** 存储数据（接口实现）
@@ -511,37 +521,37 @@ Game_System.prototype.drill_PRT_checkSysData = function() {
 //==============================
 // * 存储数据 - 初始化数据（私有）
 //==============================
-Game_System.prototype.drill_PRT_initSysData_Private = function() {
+Game_System.prototype.drill_WER_initSysData_Private = function() {
 	
-	this._drill_PRT_dataTank = [];
-	for(var i=0; i < DrillUp.g_PRT_trigger.length; i++){
-		var temp_data = DrillUp.g_PRT_trigger[i];
+	this._drill_WER_dataTank = [];
+	for(var i=0; i < DrillUp.g_WER_trigger.length; i++){
+		var temp_data = DrillUp.g_WER_trigger[i];
 		if( temp_data == undefined ){ continue; }
-		this._drill_PRT_dataTank[i] = JSON.parse(JSON.stringify( temp_data ));
-		this._drill_PRT_dataTank[i]['activeCount'] = 0;
+		this._drill_WER_dataTank[i] = JSON.parse(JSON.stringify( temp_data ));
+		this._drill_WER_dataTank[i]['activeCount'] = 0;
 	}
 };
 //==============================
 // * 存储数据 - 载入存档时检查数据（私有）
 //==============================
-Game_System.prototype.drill_PRT_checkSysData_Private = function() {
+Game_System.prototype.drill_WER_checkSysData_Private = function() {
 	
 	// > 旧存档数据自动补充
-	if( this._drill_PRT_dataTank == undefined ){
-		this.drill_PRT_initSysData();
+	if( this._drill_WER_dataTank == undefined ){
+		this.drill_WER_initSysData();
 	}
 	
 	// > 绑定数据容器
-	for(var i = 0; i < DrillUp.g_PRT_trigger.length; i++ ){
-		var temp_data = DrillUp.g_PRT_trigger[i];
+	for(var i = 0; i < DrillUp.g_WER_trigger.length; i++ ){
+		var temp_data = DrillUp.g_WER_trigger[i];
 		
 		// > 已配置（undefined表示未配置的空数据）
 		if( temp_data != undefined ){
 			
 			// > 未存储的，重新初始化
-			if( this._drill_PRT_dataTank[i] == undefined ){
-				this._drill_PRT_dataTank[i] = JSON.parse(JSON.stringify( temp_data ));
-				this._drill_PRT_dataTank[i]['activeCount'] = 0;
+			if( this._drill_WER_dataTank[i] == undefined ){
+				this._drill_WER_dataTank[i] = JSON.parse(JSON.stringify( temp_data ));
+				this._drill_WER_dataTank[i]['activeCount'] = 0;
 			
 			// > 已存储的，跳过
 			}else{
@@ -551,33 +561,37 @@ Game_System.prototype.drill_PRT_checkSysData_Private = function() {
 	}
 }
 
+
 //=============================================================================
-// ** 玩家记录
+// ** ☆区域监听
+//
+//			说明：	> 此模块专门监听 玩家脚下区域 。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 存储数据 - 初始化
+// * 区域监听 - 初始化
 //==============================
-var _drill_PRT_player_initMembers = Game_Player.prototype.initMembers;
+var _drill_WER_player_initMembers = Game_Player.prototype.initMembers;
 Game_Player.prototype.initMembers = function(){
-	_drill_PRT_player_initMembers.call(this);
-	this._drill_PRT_lastFloor = -1;
+	_drill_WER_player_initMembers.call(this);
+	this._drill_WER_lastFloor = -1;
 };
 //==============================
-// * 区域触发 - 帧刷新
+// * 区域监听 - 帧刷新
 //==============================
-var _drill_PRT_player_update = Game_Player.prototype.update;
+var _drill_WER_player_update = Game_Player.prototype.update;
 Game_Player.prototype.update = function( sceneActive ){
-	_drill_PRT_player_update.call( this, sceneActive );
-	this.drill_PRT_updateCommonEvent();
+	_drill_WER_player_update.call( this, sceneActive );
+	this.drill_WER_updateCommonEvent();
 };
-Game_Player.prototype.drill_PRT_updateCommonEvent = function() {
+Game_Player.prototype.drill_WER_updateCommonEvent = function() {
 	
 	// > R图块
 	var r_id = $gameMap.regionId( this.x, this.y );
-	if( r_id == this._drill_PRT_lastFloor ){ return; }	//（区域未改变，则跳过）
+	if( r_id == this._drill_WER_lastFloor ){ return; }	//（区域未改变，则跳过）
 	
-	for(var i = 0; i < $gameSystem._drill_PRT_dataTank.length; i++){
-		var temp_data = $gameSystem._drill_PRT_dataTank[i];
+	for(var i = 0; i < $gameSystem._drill_WER_dataTank.length; i++){
+		var temp_data = $gameSystem._drill_WER_dataTank[i];
 		if( temp_data == undefined ){ continue; }
 		if( temp_data['enable'] == false ){ continue; }
 		
@@ -599,29 +613,29 @@ Game_Player.prototype.drill_PRT_updateCommonEvent = function() {
 		
 		if( temp_data['triggerMode'] == "进入区域时触发" ){
 			if( temp_data['regionIdTank'].contains( r_id ) == true &&
-				temp_data['regionIdTank'].contains( this._drill_PRT_lastFloor ) == false ){
+				temp_data['regionIdTank'].contains( this._drill_WER_lastFloor ) == false ){
 				
 				// > 执行公共事件
-				this.drill_PRT_doCommonEvent( temp_data['pipeType'], temp_data['commonEventId'], "" );
+				this.drill_WER_doCommonEvent( temp_data['pipeType'], temp_data['commonEventId'], "" );
 			}
 		}
 		if( temp_data['triggerMode'] == "离开区域时触发" ){
 			if( temp_data['regionIdTank'].contains( r_id ) == false &&
-				temp_data['regionIdTank'].contains( this._drill_PRT_lastFloor ) == true ){
+				temp_data['regionIdTank'].contains( this._drill_WER_lastFloor ) == true ){
 					
 				// > 执行公共事件
-				this.drill_PRT_doCommonEvent( temp_data['pipeType'], temp_data['commonEventId'], "" );
+				this.drill_WER_doCommonEvent( temp_data['pipeType'], temp_data['commonEventId'], "" );
 			}
 		}
 		temp_data['activeCount'] += 1;
 	}
 	
-	this._drill_PRT_lastFloor = r_id;
+	this._drill_WER_lastFloor = r_id;
 };
 //==============================
-// * 区域触发 - 『执行公共事件』（地图界面）
+// * 区域监听 - 『执行公共事件』（地图界面）
 //==============================
-Game_Player.prototype.drill_PRT_doCommonEvent = function( pipeType, commonEventId, callBack_str ){
+Game_Player.prototype.drill_WER_doCommonEvent = function( pipeType, commonEventId, callBack_str ){
 	
 	// > 插件【地图-多线程】
 	if( Imported.Drill_LayerCommandThread ){
@@ -644,8 +658,8 @@ Game_Player.prototype.drill_PRT_doCommonEvent = function( pipeType, commonEventI
 // * <<<<基于插件检测<<<<
 //=============================================================================
 }else{
-		Imported.Drill_PlayerRegionTiming = false;
-		var pluginTip = DrillUp.drill_PRT_getPluginTip_NoBasePlugin();
+		Imported.Drill_WhenEnterRegion = false;
+		var pluginTip = DrillUp.drill_WER_getPluginTip_NoBasePlugin();
 		alert( pluginTip );
 }
 

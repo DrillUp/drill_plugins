@@ -1122,21 +1122,31 @@ Game_Map.prototype.drill_BoC_updateRestatistics_Group = function() {
 	if( !$gameTemp._drill_BoC_needRestatistics_Group ){ return }
 	$gameTemp._drill_BoC_needRestatistics_Group = false;
 	
-	var events = this.events()
-	events.push($gamePlayer);
 	$gameTemp._drill_BoC_group_custom = [];
 	$gameTemp._drill_BoC_group_destructible = [];
 	$gameTemp._drill_BoC_group_hostile = [];
-	for (var i = 0; i < events.length; i++) {  
-		var temp_event = events[i];
-		if( temp_event._drill_BoC.group['character'].indexOf("忽视单位") !== -1 ){
+	
+	var character_list = [];
+	var event_list = this._events;
+	for(var i = 0; i < event_list.length; i++ ){
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
+		character_list.push( temp_event );
+	}
+	
+	character_list.push( $gamePlayer );
+	for (var i = 0; i < character_list.length; i++) {  
+		var temp_ch = character_list[i];
+		
+		if( temp_ch._drill_BoC.group['character'].indexOf("忽视单位") !== -1 ){
 			//不记录
-		}else if( temp_event._drill_BoC.group['character'].indexOf("仇恨单位") !== -1 ){
-			$gameTemp._drill_BoC_group_hostile.push(temp_event);
-		}else if( temp_event._drill_BoC.group['character'].indexOf("可炸物") !== -1 ){
-			$gameTemp._drill_BoC_group_destructible.push(temp_event);
+		}else if( temp_ch._drill_BoC.group['character'].indexOf("仇恨单位") !== -1 ){
+			$gameTemp._drill_BoC_group_hostile.push( temp_ch );
+		}else if( temp_ch._drill_BoC.group['character'].indexOf("可炸物") !== -1 ){
+			$gameTemp._drill_BoC_group_destructible.push( temp_ch );
 		}else {
-			$gameTemp._drill_BoC_group_custom.push(temp_event);
+			$gameTemp._drill_BoC_group_custom.push( temp_ch );
 		}
 	}
 }
@@ -1155,12 +1165,15 @@ Game_Map.prototype.drill_BoC_updateRestatistics_Bombs = function() {
 	if( !$gameTemp._drill_BoC_needRestatistics_Bombs ){ return }
 	$gameTemp._drill_BoC_needRestatistics_Bombs = false;
 	
-	var events = this.events();
+	// > 未被清除的炸弹
 	$gameTemp._drill_BoC_bombs = [];
-	for (var i = 0; i < events.length; i++) {  		//未被清除的炸弹
-		var temp_event = events[i];
-		if( temp_event._drill_BoC.bomb['isBomb'] == true && 
-			temp_event._erased == false ){
+	var event_list = this._events;
+	for(var i = 0; i < event_list.length; i++ ){
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
+		
+		if( temp_event._drill_BoC.bomb['isBomb'] == true ){
 			$gameTemp._drill_BoC_bombs.push(temp_event);
 		}
 	}
@@ -1296,9 +1309,16 @@ Game_Map.prototype.drill_BoC_updateBombTime = function() {
 // * 炸弹 - 是否可放置
 //==============================
 Game_Map.prototype.drill_BoC_isBombCanPut = function( x, y ) {
-	if( !this.isPassable(x, y, 2) && !this.isPassable(x, y, 4) && !this.isPassable(x, y, 6) && !this.isPassable(x, y, 8) ){ return false; }	//完全不可通行
-	if( this.drill_ETh_eventsXyNtEx2(x, y, ['炸弹人-角色']).length > 0 ){ return false; }		//含有阻塞事件
-	if( DrillUp.g_BoC_bombForbiddenArea.contains($gameMap.regionId(x, y)) ){ return false; }	//禁止炸弹区
+	
+	// > 不可通行时，不可放置
+	if( !this.isPassable(x, y, 2) && !this.isPassable(x, y, 4) && !this.isPassable(x, y, 6) && !this.isPassable(x, y, 8) ){ return false; }
+	
+	// > 含有阻塞事件
+	if( this.drill_ETh_eventsXyNtEx2(x, y, ['炸弹人-角色']).length > 0 ){ return false; }
+	
+	// > 禁止炸弹区
+	if( DrillUp.g_BoC_bombForbiddenArea.contains($gameMap.regionId(x, y)) ){ return false; }
+	
 	return true;
 }
 //==============================

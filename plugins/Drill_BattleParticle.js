@@ -2096,7 +2096,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	/*-----------------多插件的指令------------------*/
 	if( command === ">清空全部战斗装饰部件" ){
 		$gameSystem.drill_BPa_removeControllerAll();
-		this.wait(1);	//（强制等待1帧，确保全部清空）
+		this.wait(1);	//（『强制等待』1帧，确保全部清空）
 	}
 	if( command === ">战斗粒子" ){
 		
@@ -2130,7 +2130,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var type = String(args[1]);
 			if( type == "删除全部" ){
 				$gameSystem.drill_BPa_removeControllerAll();
-				this.wait(1);	//（强制等待1帧，确保全部清空）
+				this.wait(1);	//（『强制等待』1帧，确保全部清空）
 			}
 		}
 		
@@ -2840,6 +2840,24 @@ Scene_Battle.prototype.createAllWindows = function() {
 		this.addChild(this._drill_SenceTopArea);	
 	}
 }
+//==============================
+// * 战斗层级 - 参数定义
+//
+//			说明：	> 所有drill插件的贴图都用唯一参数：zIndex（可为小数、负数），其它插件没有此参数定义。
+//==============================
+if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义）
+	var _drill_sprite_zIndex = true;
+	Object.defineProperty( Sprite.prototype, 'zIndex', {
+		set: function( value ){
+			this.__drill_zIndex = value;
+		},
+		get: function(){
+			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			return this.__drill_zIndex;
+		},
+		configurable: true
+	});
+};
 //==============================
 // * 战斗层级 - 图片层级排序（私有）
 //==============================

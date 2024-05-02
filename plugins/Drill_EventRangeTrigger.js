@@ -646,9 +646,12 @@ Game_Map.prototype.drill_ERT_triggerSelfArea = function( e_id, self_id, tag ) {
 //==============================
 Game_Map.prototype.drill_ERT_triggerArea = function( area, tag ) {
 	
-	var events = this.events();
-	for (var i = 0; i < events.length; i++) {  
-		var temp_event = events[i];
+	var event_list = this._events;
+	for(var i = 0; i < event_list.length; i++ ){
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
+		
 		for (var j = 0; j < area.length ; j++) {    	//事件朝向与范围有关系
 			var temp_point = area[j];
 		

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.7]        系统 - GIF动画序列核心
+ * @plugindesc [v1.8]        系统 - GIF动画序列核心
  * @author Drill_up
  * 
  * @Drill_LE_param "动画序列-%d"
@@ -141,6 +141,8 @@
  * 进一步优化了动画序列底层。
  * [v1.7]
  * 优化了动画序列存储底层，子插件功能需要全部同步更新。
+ * [v1.8]
+ * 完善了贴图创建细节，确保设置动画序列后能立即显示预加载的图片。
  * 
  * @param ---动画序列 1至20---
  * @default
@@ -1353,6 +1355,7 @@
 //				插件的底层变化特别大，但实际使用时，变化不大。
 //			2. 2023/9/5：最后我还是来了一遍大更新。不过也就只是给功能分类，不影响主体功能。弄了一整天。
 //			3. 2024/1/23：为了优化存储空间，所有 data 变成了函数获取。
+//			4. 2024/3/24：预加载的图片能在创建 装饰器后 立即显示，见：drill_spriteMain_initParent。
 //				
 //		★存在的问题：
 //			暂无
@@ -3943,6 +3946,8 @@ Drill_COAS_MainController.prototype.initialize = function( sequenceData_id ){
     this.drill_controllerMain_initData();									//初始化数据
     this.drill_controllerMain_initChild();									//初始化子功能
     this.drill_controllerMain_resetData( sequenceData_id );
+	
+    this.drill_controllerMain_update();										//（创建后需要帧刷新一次，确保 _drill_curBitmapName 不为空字符串）
 	$gameTemp._drill_COAS_lastCreatedMainController = this;					//（记录上一个动画序列）
 };
 //##############################
@@ -4853,15 +4858,15 @@ Drill_COAS_MainController.prototype.drill_controllerMain_updateSpeed = function(
 // **						->销毁
 // **					->A主体
 // **					->B父操作
-// **						->添加父类
-// **						->去除父类
+// **						->添加父贴图
+// **						->去除父贴图
 // **						->外部资源重置
 // **						->帧刷新
 // **							->设置资源对象
 // **							->还原资源对象
 // **							->禁止刷新框架
 // **				
-// **		说明：	> 操作父对象的bitmap。能够切换单个，还可以切换多个父类的bitmap。
+// **		说明：	> 操作父贴图的bitmap。可以控制多个父贴图的bitmap切换。
 // **				> 该类的update函数需要在父贴图中手动调用。
 // **				> 需要执行销毁函数。
 //=============================================================================
@@ -4874,12 +4879,12 @@ function Drill_COAS_SpriteDecorator() {
 //==============================
 // * 装饰器 - 初始化
 //==============================
-Drill_COAS_SpriteDecorator.prototype.initialize = function( parent, main_controller ){
+Drill_COAS_SpriteDecorator.prototype.initialize = function( parentSprite, main_controller ){
 	
-	this._drill_parents = [];								//B父操作 - 操作的父对象
-	this._drill_parents.push( parent );						//
-	this._drill_parentBitmapTank = [];						//B父操作 - 操作的bitmap
-	this._drill_parentBitmapTank.push( parent.bitmap );		//
+	this._drill_parentSpriteTank = [];							//B父操作 - 操作的父贴图
+	this._drill_parentSpriteTank.push( parentSprite );			//
+	this._drill_parentBitmapTank = [];							//B父操作 - 操作的bitmap
+	this._drill_parentBitmapTank.push( parentSprite.bitmap );	//
 	
 	this._drill_controller = main_controller;				//控制器
 	this.drill_spriteMain_initChild();						//初始化子功能
@@ -4890,7 +4895,7 @@ Drill_COAS_SpriteDecorator.prototype.initialize = function( parent, main_control
 //			参数：	> 无
 //			返回：	> 无
 //			
-//			说明：	> 此函数必须在父类中手动调用 帧刷新 执行。
+//			说明：	> 此函数必须在父贴图中手动调用 帧刷新 执行。
 //##############################
 Drill_COAS_SpriteDecorator.prototype.update = function(){ this.drill_spriteMain_update(); }
 Drill_COAS_SpriteDecorator.prototype.drill_COAS_update = function(){ this.drill_spriteMain_update(); }
@@ -4898,41 +4903,43 @@ Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_update = function(){
 	if( this.drill_spriteMain_isReady() == false ){ return; }
 	if( this.drill_spriteMain_isOptimizationPassed() == false ){ return; }
 														//帧刷新 - A主体（无）
-	this.drill_spriteMain_updateParentBitmap();			//帧刷新 - B父对象
+	this.drill_spriteMain_updateParentBitmap();			//帧刷新 - B父贴图
 };
 
 //##############################
-// * B父操作 - 添加父类【开放函数】
+// * B父操作 - 添加父贴图【开放函数】
 //			
-//			参数：	> parent 父类对象
+//			参数：	> parentSprite 父贴图
 //			返回：	> 无
 //			
-//			说明：	> 可以多次调用，设置多个父对象。
+//			说明：	> 可以控制多个父贴图的bitmap切换。
+//					> 虽然叫"父贴图"，但实际上是 操作器和被操作的多个贴图 关系。
 //##############################
-Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_addParent = function( parent ){
-	this.drill_spriteMain_addParent_Private( parent );
+Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_addParent = function( parentSprite ){
+	this.drill_spriteMain_addParent_Private( parentSprite );
 };
 //##############################
-// * B父操作 - 去除父类【开放函数】
+// * B父操作 - 去除父贴图【开放函数】
 //			
-//			参数：	> parent 父类对象
+//			参数：	> parentSprite 父贴图
 //			返回：	> 无
 //##############################
-Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_removeParent = function( parent ){
-	this.drill_spriteMain_removeParent_Private( parent );
+Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_removeParent = function( parentSprite ){
+	this.drill_spriteMain_removeParent_Private( parentSprite );
 };
 //##############################
 // * B父操作 - 外部资源重置【开放函数】
 //			
-//			参数：	> parent 父类对象
+//			参数：	> parentSprite 父贴图
 //					> bitmap 资源对象
 //			返回：	> 无
 //			
-//			说明：	> 部分插件可能会对父类单图的bitmap做修改，子插件需要确保关闭动画序列后，单图能还原。
+//			说明：	> 其它插件可能会对父贴图单图的bitmap做修改，这里需要一起被修改。
+//					> 确保关闭动画序列后，单图能还原。
 //##############################
-Drill_COAS_SpriteDecorator.prototype.drill_COAS_parentBitmapChanged = function( parent, bitmap ){ this.drill_spriteMain_parentBitmapChanged( parent, bitmap ); }
-Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_parentBitmapChanged = function( parent, bitmap ){
-	this.drill_spriteMain_parentBitmapChanged_Private( parent, bitmap );
+Drill_COAS_SpriteDecorator.prototype.drill_COAS_parentBitmapChanged = function( parentSprite, bitmap ){ this.drill_spriteMain_parentBitmapChanged( parentSprite, bitmap ); }
+Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_parentBitmapChanged = function( parentSprite, bitmap ){
+	this.drill_spriteMain_parentBitmapChanged_Private( parentSprite, bitmap );
 };
 
 //##############################
@@ -5005,7 +5012,7 @@ Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_destroy_Private = function
 	
 	// > 清除数据
 	this._drill_controller = null;
-	this._drill_parents = [];
+	this._drill_parentSpriteTank = [];
 	this._drill_parentBitmapTank = [];
 };
 
@@ -5076,11 +5083,12 @@ Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_isAllBitmapReady = functio
 
 //==============================
 // * B父操作 - 初始化子功能
-//
-//			说明：	> 注意，此加载有 加载等待 的标记，并不是必须的。
 //==============================
 Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_initParent = function(){
-	//（提前到 initialize 函数执行）
+	//（部分操作提前到 initialize 函数执行）
+	
+	// > 初始化时，强制刷新，确保bitmap已被赋值
+	this.drill_spriteMain_updateParentBitmap();
 }
 //==============================
 // * B父操作 - 帧刷新
@@ -5106,8 +5114,8 @@ Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_updateParentBitmap = funct
 //==============================
 Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_setParentBitmap = function( bitmap ){
 	var bitmapRefreshFrame = this._drill_controller._drill_bitmapRefreshFrame;
-	for(var i=0; i < this._drill_parents.length; i++ ){
-		var temp_parent = this._drill_parents[i];
+	for(var i=0; i < this._drill_parentSpriteTank.length; i++ ){
+		var temp_parent = this._drill_parentSpriteTank[i];
 		if( temp_parent == undefined ){ continue; }		//（如果父贴图被销毁，则跳过设置）
 		
 		// > 禁止刷新框架
@@ -5127,8 +5135,8 @@ Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_setParentBitmap = function
 //==============================
 Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_resetParentBitmap = function(){
 	var bitmapRefreshFrame = this._drill_controller._drill_bitmapRefreshFrame;
-	for(var i = 0; i < this._drill_parents.length; i++ ){
-		var temp_parent = this._drill_parents[i];
+	for(var i = 0; i < this._drill_parentSpriteTank.length; i++ ){
+		var temp_parent = this._drill_parentSpriteTank[i];
 		if( temp_parent == undefined ){ continue; }		//（如果父贴图被销毁，则跳过还原）
 		
 		// > 禁止刷新框架
@@ -5144,19 +5152,19 @@ Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_resetParentBitmap = functi
 	}
 };
 //==============================
-// * B父操作 - 添加父类（私有）
+// * B父操作 - 添加父贴图（私有）
 //==============================
-Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_addParent_Private = function( parent ){
-	this._drill_parents.push( parent );
-	this._drill_parentBitmapTank.push( parent.bitmap );
+Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_addParent_Private = function( parentSprite ){
+	this._drill_parentSpriteTank.push( parentSprite );
+	this._drill_parentBitmapTank.push( parentSprite.bitmap );
 };
 //==============================
-// * B父操作 - 去除父类（私有）
+// * B父操作 - 去除父贴图（私有）
 //==============================
-Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_removeParent_Private = function( parent ){
-	for( var i=this._drill_parents.length-1; i >= 0; i-- ){
-		if( this._drill_parents[i] == parent ){
-			this._drill_parents.splice(i,1);
+Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_removeParent_Private = function( parentSprite ){
+	for( var i=this._drill_parentSpriteTank.length-1; i >= 0; i-- ){
+		if( this._drill_parentSpriteTank[i] == parentSprite ){
+			this._drill_parentSpriteTank.splice(i,1);
 			this._drill_parentBitmapTank.splice(i,1);
 			break;
 		}
@@ -5165,11 +5173,12 @@ Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_removeParent_Private = fun
 //==============================
 // * B父操作 - 外部资源重置（私有）
 //
-//			说明：	部分插件可能会对父类单图的bitmap做修改，子插件需要确保关闭动画序列后，单图能还原。
+//			说明：	> 其它插件可能会对父贴图单图的bitmap做修改，这里需要一起被修改。
+//					> 确保关闭动画序列后，单图能还原。
 //==============================
-Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_parentBitmapChanged_Private = function( parent, bitmap ){
-	for( var i=0; i < this._drill_parents.length; i++ ){
-		if( this._drill_parents[i] == parent ){
+Drill_COAS_SpriteDecorator.prototype.drill_spriteMain_parentBitmapChanged_Private = function( parentSprite, bitmap ){
+	for( var i=0; i < this._drill_parentSpriteTank.length; i++ ){
+		if( this._drill_parentSpriteTank[i] == parentSprite ){
 			this._drill_parentBitmapTank[i] = bitmap;
 			break;
 		}
@@ -5244,7 +5253,7 @@ Drill_COAS_DebugWindow.prototype.drill_window_initChild = function() {
 	// > 上一次内容
 	this._drill_lastContext = "";
 	
-	// > 图片层级
+	// > 图片层级/堆叠级
 	this.zIndex = 999;
 	
 	// > 窗口内容刷新

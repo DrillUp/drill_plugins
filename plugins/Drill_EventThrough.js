@@ -140,6 +140,7 @@
 //			->☆静态数据
 //			->☆插件指令
 //			->☆事件注释
+//
 //			->☆原型链规范（isCollided）
 //
 //			->☆物体的属性
@@ -389,6 +390,7 @@ Game_Event.prototype.drill_ETh_readPage = function( page_list ){
 		};
 	}, this);
 };
+
 
 
 //=============================================================================
@@ -648,34 +650,53 @@ Game_CharacterBase.prototype.drill_ETh_canThroughTagList = function( tag_list ){
 //==============================
 Game_CharacterBase.prototype.drill_ETh_canThroughEventsInPos = function( x, y ){
 	
-	var events = $gameMap.eventsXyNt(x, y);		//（事件列表 比较）
-	for(var i = 0; i < events.length; i++ ){
-		var temp_event = events[i];
-		if( temp_event == undefined ){ continue; }
-		if( temp_event._erased == true ){ continue; }
+	var event_list = $gameMap._events;
+	for(var i = 0; i < event_list.length; i++ ){
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
 		
+		// > 当前物体 不在该位置，跳出
+		if( temp_event.pos(x, y) == false ){ continue; }
+		
+		// > 当前物体 能被穿透，跳出
+		if( temp_event.isThrough() == true ){ continue; }
+		
+		// > 当前物体 能被穿透（穿透标签），跳出
 		var tag_list = temp_event.drill_ETh_getTagList();
-		if( this.drill_ETh_canThroughTagList( tag_list ) == false ){
-			return false;	//（同位置的事件里面，只要有一个事件阻塞，就无法穿透）
-		}
+		if( this.drill_ETh_canThroughTagList( tag_list ) == true ){ continue; }
+		
+		return false;
 	}
 	return true;
-}
-//==============================
-// * 穿透判断 - 获取事件 - 不可通行 + 与人物相同 + 不含同类标签（单个标签）
-//==============================
-Game_Map.prototype.drill_ETh_eventsXyNtEx1 = function( x, y, tag ){
-    return this.events().filter(function(event) {
-        return event.posNt(x, y) && !event.drill_ETh_canThroughTag(tag) && event.isNormalPriority() ;
-    });
 };
 //==============================
 // * 穿透判断 - 获取事件 - 不可通行 + 与人物相同 + 不含同类标签（多个标签）
 //==============================
 Game_Map.prototype.drill_ETh_eventsXyNtEx2 = function( x, y, tag_list ){
-    return this.events().filter(function(event) {
-        return event.posNt(x, y) && !event.drill_ETh_canThroughTagList(tag_list) && event.isNormalPriority() ;
-    });
+	
+	var result_list = [];
+	var event_list = this._events;
+	for(var i = 0; i < event_list.length; i++ ){
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
+		
+		// > 当前物体 不在该位置，跳出
+		if( temp_event.pos(x, y) == false ){ continue; }
+		
+		// > 当前物体 能被穿透，跳出
+		if( temp_event.isThrough() == true ){ continue; }
+		
+		// > 当前物体 能被穿透（穿透标签），跳出
+		if( temp_event.drill_ETh_canThroughTagList( tag_list ) == true ){ continue; }
+		
+		// > 当前物体 不存在"与人物相同"碰撞，跳出
+		if( temp_event.isNormalPriority() == false ){ continue; }
+		
+		result_list.push( temp_event );
+	}
+	return result_list;
 };
 
 

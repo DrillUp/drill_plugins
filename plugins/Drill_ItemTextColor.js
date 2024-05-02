@@ -1099,7 +1099,7 @@ if(Imported.MOG_BattleResult ){
 		_drill_ITC_mog_BattleResult_addIcon.call(this,sprite,data);
 		var name_sprite = sprite.children[sprite.children.length-1];		//获取上一个添加的child
 		if( name_sprite ){
-			name_sprite.bitmap = new Bitmap(160,32);
+			name_sprite.bitmap.clear();		//（清空画布，重新绘制文本）
 			
 			if( DataManager.isItem(data) ){
 				var item__id = data.id;

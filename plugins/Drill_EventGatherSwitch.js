@@ -172,10 +172,13 @@
  * ----可选设定 - 其他设置
  * 你可以修改聚焦开关的一些全局设置。
  * 
+ * 插件指令：>聚集开关 : 是否优化每帧计算量 : 开启
+ * 插件指令：>聚集开关 : 是否优化每帧计算量 : 关闭
  * 插件指令：>聚集开关 : 修改触发延迟时间 : 时间[2]
  * 
  * 1."触发延迟时间"可以设为0，表示聚集接触后立即触发。
  *   这个值与实际设计的游戏机制密切相关，不能乱设置，具体需要去看看文档说明。
+ * 2."是否优化每帧计算量"默认开启，但在 解谜中
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 旧指令
@@ -251,9 +254,12 @@
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^4) 每帧
 //		★性能测试因素	机关管理层、消除砖块关卡
-//		★性能测试消耗	2023-12-9（每1帧计算一次）：
+//		★性能测试消耗	2023/12/9（每1帧计算一次）：
 //							机关管理层：45.3ms（drill_EGS_updatePositionTank）
 //							消除砖块关卡：149.0ms（drill_EGS_updateSwitch）153.5ms（drill_EGS_getAllEventsNearBy）172.3ms（drill_EGS_updatePositionTank）
+//						2024/5/2：
+//							机关管理层：28.8ms（开优化，drill_EGS_updatePositionTank）
+//							加了个"优化每帧计算量"功能，但后来发现 消除砖块关卡 不能开这个优化，所以感觉这个优化没用。
 //		★最坏情况		暂无
 //		★备注			这个插件最能提现其消耗程度的，就在关卡 设计-消除砖块，用垃圾本跑一次就能知道情况了。
 //						最初版本帧数为2-3帧，现在优化到了5-6帧，详情去看脚本文档的记录。
@@ -377,6 +383,14 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp1 = temp1.replace("]","");
 				temp1 = Number(temp1);
 				$gameSystem._drill_EGS_delayTime = temp1;
+			}
+			if( type == "是否优化每帧计算量"){
+				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
+					$gameSystem._drill_EGS_reduceUpdate = true;
+				}
+				if( temp1 == "关闭" || temp1 == "禁用" ){
+					$gameSystem._drill_EGS_reduceUpdate = false;
+				}
 			}
 		}
 		
@@ -543,7 +557,8 @@ Game_System.prototype.drill_EGS_checkSysData = function() {
 //==============================
 Game_System.prototype.drill_EGS_initSysData_Private = function() {
 	
-	this._drill_EGS_delayTime = DrillUp.g_EGS_delayTime;	//触发延迟时间
+	this._drill_EGS_reduceUpdate = DrillUp.g_EGS_reduceUpdate;	//是否优化每帧计算量
+	this._drill_EGS_delayTime = DrillUp.g_EGS_delayTime;		//触发延迟时间
 };
 //==============================
 // * 存储数据 - 载入存档时检查数据（私有）
@@ -785,9 +800,10 @@ Game_Character.prototype.initialize = function(){
 	_drill_EGS_key_initialize.call(this);
 }
 //==============================
-// * 物体的属性 - 初始化
+// * 物体的属性 - 初始化 数据
 //
 //			说明：	> 这里的数据都要初始化才能用。『节约事件数据存储空间』
+//					> 层面关键字为：keyData，一对一。
 //==============================
 Game_Character.prototype.drill_EGS_checkKeyData = function(){
 	if( this._drill_EGS_keyData != undefined ){ return; }
@@ -870,9 +886,10 @@ Game_Character.prototype.initialize = function(){
 	this._drill_EGS_switchData = undefined;
 }
 //==============================
-// * 开关的属性 - 初始化
+// * 开关的属性 - 初始化 数据
 //
 //			说明：	> 这里的数据都要初始化才能用。『节约事件数据存储空间』
+//					> 层面关键字为：switchData，一对一。
 //==============================
 Game_Character.prototype.drill_EGS_checkSwitchData = function(){	
 	if( this._drill_EGS_switchData != undefined ){ return; }
@@ -880,9 +897,10 @@ Game_Character.prototype.drill_EGS_checkSwitchData = function(){
 	this._drill_EGS_switchData['switch'] = {};
 }
 //==============================
-// * 开关的属性 - 初始化独立开关
+// * 开关的属性 - 初始化 独立开关容器
 //
 //			说明：	> 注意，多个注释能触发多个独立开关。
+//					> 层面关键字为：['switch']，一对多。
 //==============================
 Game_Character.prototype.drill_EGS_checkSwitchData_Switch = function( switch_str ){
 	this.drill_EGS_checkSwitchData()
@@ -1039,11 +1057,12 @@ Game_Map.prototype.drill_EGS_updateRestatistics_key = function(){
 	$gameTemp._drill_EGS_needRestatistics_key = false;
 	
 	$gameTemp._drill_EGS_keyTank = [];			//钥匙容器
-	var events = this.events();
-	for( var i = 0; i < events.length; i++ ){
-		var temp_event = events[i];
-		if( temp_event == undefined ){ continue; }
-		if( temp_event._erased == true ){ continue; }
+	var event_list = this._events;
+	for(var i = 0; i < event_list.length; i++ ){
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
+		
 		if( temp_event.drill_EGS_hasAnyKey() ){
 			$gameTemp._drill_EGS_keyTank.push(temp_event);
 		}
@@ -1062,11 +1081,12 @@ Game_Map.prototype.drill_EGS_updateRestatistics_switch = function(){
 	$gameTemp._drill_EGS_needRestatistics_switch = false;
 	
 	$gameTemp._drill_EGS_switchTank = [];		//锁容器（开关容器）
-	var events = this.events();
-	for( var i = 0; i < events.length; i++ ){
-		var temp_event = events[i];
-		if( temp_event == undefined ){ continue; }
-		if( temp_event._erased == true ){ continue; }
+	var event_list = this._events;
+	for(var i = 0; i < event_list.length; i++ ){
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
+		
 		if( temp_event.drill_EGS_hasAnySwitch() ){
 			$gameTemp._drill_EGS_switchTank.push(temp_event);
 		}
@@ -1115,8 +1135,8 @@ Game_Map.prototype.drill_EGS_isOptimizationPassed = function(){
 		return false;
 	}
 	
-	// > 优化每帧计算量 - 每2帧才计算一次
-	if( DrillUp.g_EGS_reduceUpdate == true ){
+	// > 优化每帧计算量 - 每2帧才计算一次『减帧』
+	if( $gameSystem._drill_EGS_reduceUpdate == true ){
 		$gameTemp._drill_EGS_curTime += 1;
 		if( $gameTemp._drill_EGS_curTime % 2 == 1 ){
 			return false;
@@ -1153,14 +1173,12 @@ Game_Map.prototype.drill_EGS_updatePositionTank = function(){
 	// > 物体坐标 - 玩家
 	character_list.unshift($gamePlayer);
 	
-	for( var i = 0; i < character_list.length; i++ ){
+	for(var i = 0; i < character_list.length; i++ ){
 		var character = character_list[i];
 		var slot_id = this.drill_EGS_getSlotId( character );
 		
-		// > 排除 空事件
-		if( character == undefined ){ continue; }
-		// > 排除 删除的事件
-		if( character._erased == true ){ continue; }
+		if( character == null ){ continue; }
+		if( character._erased == true ){ continue; }	//『有效事件』
 		
 		if( $gameTemp._drill_EGS_positionTank[slot_id] == undefined ){
 			$gameTemp._drill_EGS_positionTank[slot_id] = [];
@@ -1340,7 +1358,7 @@ Game_Map.prototype.drill_EGS_updateKey = function() {
 		if( temp_keyEv._drill_EGS_keyData == undefined ){ continue; }
 		
 		// > 聚集钥匙 - 延迟触发时间
-		if( DrillUp.g_EGS_reduceUpdate == true ){
+		if( $gameSystem._drill_EGS_reduceUpdate == true ){
 			temp_keyEv._drill_EGS_keyData['curDelayTime'] += 2;
 		}else{
 			temp_keyEv._drill_EGS_keyData['curDelayTime'] += 1;
@@ -1364,9 +1382,11 @@ Game_Map.prototype.drill_EGS_updateSwitch = function() {
 	for( var i = 0; i < $gameTemp._drill_EGS_switchTank.length; i++ ){
 		var temp_switchEv = $gameTemp._drill_EGS_switchTank[i];
 		
-		// > 聚集开关 - 获取独立开关列表
+		// > 数据 - switchData层面（与事件一对一）
 		var switch_list = temp_switchEv.drill_EGS_getSwitchList();
 		if( switch_list.length == 0 ){ continue; }
+		
+		// > 数据 - ['switch']层面（与事件一对多）
 		for(var j = 0; j < switch_list.length; j++ ){
 			var cur_switch = switch_list[j];
 			

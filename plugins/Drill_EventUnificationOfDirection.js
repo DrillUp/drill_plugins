@@ -529,12 +529,18 @@ Game_Map.prototype.drill_EUOD_updateRestatistics = function(){
 	$gameTemp._drill_EUOD_needRestatistics = false;
 	
 	$gameTemp._drill_EUOD_keyMap = {};
-	var ch_list = this.events();
-	ch_list.push( $gamePlayer );		//（包含玩家）
-	for( var i = 0; i < ch_list.length; i++ ){
-		var temp_ch = ch_list[i];
-		if( temp_ch == undefined ){ continue; }
-		if( temp_ch._erased == true ){ continue; }
+	var character_list = [];
+	var event_list = this._events;
+	for(var i = 0; i < event_list.length; i++ ){
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
+		character_list.push( temp_event );
+	}
+	
+	character_list.push( $gamePlayer );
+	for (var i = 0; i < character_list.length; i++) {  
+		var temp_ch = character_list[i];
 		
 		var tag = temp_ch.drill_EUOD_getTag();
 		if( tag == "" ){ continue; }

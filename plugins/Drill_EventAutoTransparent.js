@@ -524,10 +524,12 @@ Scene_Map.prototype.drill_EATran_refreshArray = function() {
 		var temp_obj = $gameTemp._drill_EATran_sprites[i];		//鼠标贴图（临时）
 		if( temp_obj == undefined ){
 			
-			var char_sprites = this._spriteset._characterSprites;	//从地图贴图找起 >> 找到含event的Sprite_Character >> 存入触发集合
+			// > 行走图贴图遍历
+			//		（从地图贴图找起 >> 找到行走图贴图容器 >> 含event的贴图 >> 存入触发集合）
+			//		（_characterSprites 中不含镜像，不需要加判定）
+			var char_sprites = this._spriteset._characterSprites;
 			for(var j=0; j< char_sprites.length; j++){
 				var temp_sprite = char_sprites[j];
-				if( $gameTemp.drill_EATran_isReflectionSprite( temp_sprite ) ){ continue; }	//（跳过镜像情况）
 				var temp_character = temp_sprite._character;
 				if( temp_character != undefined && 
 					temp_character instanceof Game_Event && 
@@ -546,14 +548,6 @@ Scene_Map.prototype.drill_EATran_refreshArray = function() {
 			$gameTemp._drill_EATran_player_sprite = temp_sprite;
 		}
 	}
-}
-//==============================
-// * 容器 - 优化 - 检查镜像情况
-//==============================
-Game_Temp.prototype.drill_EATran_isReflectionSprite = function( sprite ){
-	if( Imported.Drill_LayerReverseReflection      && sprite instanceof Drill_Sprite_LRR ){ return true; }
-	if( Imported.Drill_LayerSynchronizedReflection && sprite instanceof Drill_Sprite_LSR ){ return true; }
-	return false;
 }
 
 
@@ -626,7 +620,7 @@ Scene_Map.prototype.drill_EATran_isBitmapReady = function( sprite ) {
 //==============================
 // * 贴图变化 - 是否相互碰撞
 //==============================
-Scene_Map.prototype.drill_EATran_isCovered = function( sprite_A , sprite_B ) {
+Scene_Map.prototype.drill_EATran_isCovered = function( sprite_A , sprite_B ){
 	
 	var cw1 = sprite_A.patternWidth();
 	var ch1 = sprite_A.patternHeight();

@@ -2074,10 +2074,12 @@ Game_Map.prototype.drill_EFCi_updateRestatistics = function() {
 	$gameTemp._drill_EFCi_needRestatistics = false;
 	
 	$gameTemp._drill_EFCi_characterTank = [];		//容器中的物体，只增不减，除非清零
-	var events = this.events();
-	for( var i = 0; i < events.length; i++ ){
-		var temp_event = events[i];
-		if( temp_event == undefined ){ continue; }
+	var event_list = this._events;
+	for(var i = 0; i < event_list.length; i++ ){  
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
+		
 		if( temp_event._drill_EFCi_controllerTank == undefined ){ continue; }
 		if( temp_event._drill_EFCi_controllerTank.length == 0 ){ continue; }
 		$gameTemp._drill_EFCi_characterTank.push(temp_event);

@@ -1133,6 +1133,12 @@
 		}
 		return message;
 	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到Buff对应消息
+	//==============================
+	DrillUp.drill_MPFS_getPluginTip_BuffNotFind = function( buff_name, level ){
+		return "【" + DrillUp.g_MPFS_PluginTip_curName + "】\n找不到Buff对应消息，当前"+buff_name+"叠加到了"+level+"，请检查一下Buff组配置中是否有对应的信息。";
+	};
 	
 	
 //=============================================================================
@@ -1573,6 +1579,24 @@ Scene_Battle.prototype.createAllWindows = function() {
 	}
 };
 //==============================
+// * 战斗层级 - 参数定义
+//
+//			说明：	> 所有drill插件的贴图都用唯一参数：zIndex（可为小数、负数），其它插件没有此参数定义。
+//==============================
+if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义）
+	var _drill_sprite_zIndex = true;
+	Object.defineProperty( Sprite.prototype, 'zIndex', {
+		set: function( value ){
+			this.__drill_zIndex = value;
+		},
+		get: function(){
+			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			return this.__drill_zIndex;
+		},
+		configurable: true
+	});
+};
+//==============================
 // * 战斗层级 - 图片层级排序（私有）
 //==============================
 Scene_Battle.prototype.drill_MPFS_sortByZIndex_Private = function() {
@@ -1685,6 +1709,24 @@ Scene_Map.prototype.createAllWindows = function() {
 		this.addChild(this._drill_SenceTopArea);	
 	}
 }
+//==============================
+// * 地图层级 - 参数定义
+//
+//			说明：	> 所有drill插件的贴图都用唯一参数：zIndex（可为小数、负数），其它插件没有此参数定义。
+//==============================
+if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义）
+	var _drill_sprite_zIndex = true;
+	Object.defineProperty( Sprite.prototype, 'zIndex', {
+		set: function( value ){
+			this.__drill_zIndex = value;
+		},
+		get: function(){
+			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			return this.__drill_zIndex;
+		},
+		configurable: true
+	});
+};
 //==============================
 // * 地图层级 - 图片层级排序（私有）
 //==============================
@@ -2388,10 +2430,18 @@ Drill_MPFS_Window.prototype.drill_updateBean = function() {
 }
 //==============================
 // * B实体类交互 - 条件 - 触发范围
+//
+//			参数：	> bean 实体类对象
+//			说明：	> 检查鼠标是否在该实体类的范围内。『鼠标落点与实体类范围』
+//						镜头与层级 - 已支持
+//						中心锚点   - 已支持（但注意 drill_bean_setPosition 的第n个图标偏移）
+//						特殊变换   - 暂不明确
+//						触屏响应   - 暂不明确
 //==============================
 Drill_MPFS_Window.prototype.drill_isInFrame = function( bean ){
 	if( bean['_drill_visible'] == false ){ return false; }
 	
+	// > 判定 - 鼠标位置
 	var _x = _drill_mouse_x;
 	var _y = _drill_mouse_y;
 	if( $gameSystem._drill_MPFS_mouseType == "触屏按下[持续]" ){
@@ -2399,8 +2449,8 @@ Drill_MPFS_Window.prototype.drill_isInFrame = function( bean ){
 		_y = TouchInput.y;
 	}
 	
-	// 【战斗 - 活动战斗镜头】战斗鼠标落点
-	//  （注意，这里是 战斗鼠标落点 与 矩形范围的图层 偏移关系 ）
+	// > 判定 - 镜头与层级【战斗 - 活动战斗镜头】战斗鼠标落点
+	// 	 			（注意，这里是 战斗鼠标落点 与 矩形范围的图层 偏移关系 ）
 	if( Imported.Drill_BattleCamera ){
 		if( this._drill_curScene == "Scene_Battle" ){
 			var layer = bean['_drill_layer'];
@@ -2415,8 +2465,8 @@ Drill_MPFS_Window.prototype.drill_isInFrame = function( bean ){
 		}
 	}
 	
-	// 【地图 - 活动地图镜头】地图鼠标落点
-	//  （注意，这里是 地图鼠标落点 与 矩形范围的图层 偏移关系 ）
+	// > 判定 - 镜头与层级【地图 - 活动地图镜头】地图鼠标落点
+	//  			（注意，这里是 地图鼠标落点 与 矩形范围的图层 偏移关系 ）
 	if( Imported.Drill_LayerCamera ){
 		if( this._drill_curScene == "Scene_Map" ){
 			var layer = bean['_drill_layer'];
@@ -2431,6 +2481,7 @@ Drill_MPFS_Window.prototype.drill_isInFrame = function( bean ){
 		}
 	}
 	
+	// > 判定 - 触发范围
 	if( _x > bean['_drill_x'] + bean['_drill_frameW'] ){ return false; }
 	if( _x < bean['_drill_x'] + 0 ){ return false; }
 	if( _y > bean['_drill_y'] + bean['_drill_frameH'] ){ return false; }
@@ -2774,6 +2825,10 @@ Drill_MPFS_Window.prototype.drill_resetData_Message = function( data ){
 	this.drill_updateMessage();
 }
 //==============================
+// * E窗口内容 - 消息只提示一次
+//==============================
+DrillUp.g_MPFS_buffMessageNotFind = true;
+//==============================
 // * E窗口内容 - 帧刷新
 //==============================
 Drill_MPFS_Window.prototype.drill_updateMessage = function(){
@@ -2835,14 +2890,28 @@ Drill_MPFS_Window.prototype.drill_updateMessage = function(){
 		if( level > 0 ){		//强化buff
 			var icon_index = this.buffIconIndex( level, i );
 			var temp_str = DrillUp.g_MPFS_buff[i][ level-1 ];
-			temp_str = temp_str.replace("<当前图标>","\\i["+icon_index+"]");
-			context_list.push( temp_str );
+			if( temp_str && temp_str.length != 0 ){
+				temp_str = temp_str.replace("<当前图标>","\\i["+icon_index+"]");
+				context_list.push( temp_str );
+			}else{
+				if( DrillUp.g_MPFS_buffMessageNotFind == true ){
+					DrillUp.g_MPFS_buffMessageNotFind = false;
+					alert( DrillUp.drill_MPFS_getPluginTip_BuffNotFind("强化Buff",level) );
+				}
+			}
 		}
 		if( level < 0 ){		//弱化buff
 			var icon_index = this.buffIconIndex( level, i );
 			var temp_str = DrillUp.g_MPFS_debuff[i][ Math.abs(level)-1 ];
-			temp_str = temp_str.replace("<当前图标>","\\i["+icon_index+"]");
-			context_list.push( temp_str );
+			if( temp_str && temp_str.length != 0 ){
+				temp_str = temp_str.replace("<当前图标>","\\i["+icon_index+"]");
+				context_list.push( temp_str );
+			}else{
+				if( DrillUp.g_MPFS_buffMessageNotFind == true ){
+					DrillUp.g_MPFS_buffMessageNotFind = false;
+					alert( DrillUp.drill_MPFS_getPluginTip_BuffNotFind("弱化Buff",Math.abs(level)) );
+				}
+			}
 		}
 	}
 	

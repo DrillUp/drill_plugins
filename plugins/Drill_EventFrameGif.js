@@ -2113,10 +2113,12 @@ Game_Map.prototype.drill_EFGi_updateRestatistics = function() {
 	$gameTemp._drill_EFGi_needRestatistics = false;
 	
 	$gameTemp._drill_EFGi_characterTank = [];		//容器中的物体，只增不减，除非清零
-	var events = this.events();
-	for( var i = 0; i < events.length; i++ ){
-		var temp_event = events[i];
-		if( temp_event == undefined ){ continue; }
+	var event_list = this._events;
+	for(var i = 0; i < event_list.length; i++ ){  
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
+		
 		if( temp_event._drill_EFGi_controllerTank == undefined ){ continue; }
 		if( temp_event._drill_EFGi_controllerTank.length == 0 ){ continue; }
 		$gameTemp._drill_EFGi_characterTank.push(temp_event);
@@ -2682,6 +2684,7 @@ Drill_EFGi_Controller.prototype.drill_controller_updateGIF = function(){
 	// > 播放GIF
 	var inter = this._drill_GIF_time;
 	inter = inter / data['interval'];
+	inter = Math.floor(inter);
 	inter = inter % data['src_img_gif'].length;
 	if( data['back_run'] == true ){
 		inter = data['src_img_gif'].length - 1 - inter;

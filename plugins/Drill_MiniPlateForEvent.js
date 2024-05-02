@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.0]        鼠标 - 事件说明窗口
+ * @plugindesc [v2.1]        鼠标 - 事件说明窗口
  * @author Drill_up
  * 
  * @Drill_LE_param "皮肤样式-%d"
@@ -162,6 +162,8 @@
  * 优化了内部结构，改进了鼠标触发以及刷新范围。
  * [v2.0]
  * 修复了无法设置 左上角锚点 的bug。
+ * [v2.1]
+ * 添加了 行走图的碰撞体 的支持。
  * 
  * 
  * 
@@ -750,9 +752,9 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				var e = $gameMap.event( e_id );
 				char_list = [ e ];
 			}
-			if( char_list == null && unit == "玩家" ){
-				char_list = [ $gamePlayer ];
-			}
+			//if( char_list == null && unit == "玩家" ){	//（玩家不允许绑定）
+			//	char_list = [ $gamePlayer ];
+			//}
 		}
 		
 		/*-----------------对象操作------------------*/
@@ -989,6 +991,24 @@ Scene_Map.prototype.drill_MPFE_layerAddSprite_Private = function( sprite, layer_
 	}
 };
 //==============================
+// * 地图层级 - 参数定义
+//
+//			说明：	> 所有drill插件的贴图都用唯一参数：zIndex（可为小数、负数），其它插件没有此参数定义。
+//==============================
+if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义）
+	var _drill_sprite_zIndex = true;
+	Object.defineProperty( Sprite.prototype, 'zIndex', {
+		set: function( value ){
+			this.__drill_zIndex = value;
+		},
+		get: function(){
+			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			return this.__drill_zIndex;
+		},
+		configurable: true
+	});
+};
+//==============================
 // * 地图层级 - 图片层级排序（私有）
 //==============================
 Scene_Map.prototype.drill_MPFE_sortByZIndex_Private = function() {
@@ -1042,6 +1062,11 @@ Game_Event.prototype.drill_MPFE_setupPageSettings = function() {
 					if( this._drill_MPFE_bean == undefined ){
 						this._drill_MPFE_bean = new Drill_MPFE_Bean();
 						$gameTemp._drill_MPFE_needRestatistics = true;
+						
+						if( Imported.Drill_CoreOfEventFrameWithMouse ){
+							// > 【行走图 - 行走图与鼠标控制核心】执行绑定
+							this.drill_COEFWM_checkData();
+						}
 					}
 					
 					/*-----------------多行注释------------------*/
@@ -1156,9 +1181,12 @@ Game_Map.prototype.drill_MPFE_updateRestatistics = function() {
 	
 	$gameTemp._drill_MPFE_beanTank = [];		//实体类容器
 	
-	var events = this.events();
-	for( var i = 0; i < events.length; i++ ){
-		var temp_event = events[i];
+	var event_list = this._events;
+	for(var i = 0; i < event_list.length; i++ ){
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
+		
 		if( temp_event._drill_MPFE_bean != undefined ){
 			$gameTemp._drill_MPFE_beanTank.push( temp_event._drill_MPFE_bean );
 		}
@@ -1213,14 +1241,20 @@ Sprite_Character.prototype.update = function() {
 // * 实体类赋值 - 帧刷新 - 刷新位置
 //==============================
 Sprite_Character.prototype.drill_MPFE_updatePosition = function() {
-	var bean = this._character._drill_MPFE_bean;
+	var ch = this._character;
+	var bean = ch._drill_MPFE_bean;
+	
+	//var xx = this.x;
+	//var yy = this.y;
+	var xx = ch.screenX();			//（这里已经包含 行走图的 数据最终变换值 了）
+	var yy = ch.screenY();
+	
 	var ww = bean._drill_frameW;
 	var hh = bean._drill_frameH;
+	xx = xx - ww*this.anchor.x;		//（注意行走图 持续动作 时，xy乱晃）
+	yy = yy - hh*this.anchor.y;
 	
-	//var xx = this.x - ww*this.anchor.x;	//（注意行走图 持续动作 时，xy乱晃）
-	//var yy = this.y - hh*this.anchor.y;
-	var xx = this._character.screenX() - ww*this.anchor.x;
-	var yy = this._character.screenY() - hh*this.anchor.y;
+	bean.drill_bean_setEventId( ch._eventId );
 	bean.drill_bean_setPosition( xx, yy );
 };
 //==============================
@@ -1296,6 +1330,15 @@ Drill_MPFE_Bean.prototype.drill_bean_setVisible = function( visible ){
 	this._drill_visible = visible;
 };
 //##############################
+// * 实体类 - 设置绑定的事件id【开放函数】
+//			
+//			参数：	> event_id 数字
+//			返回：	> 无
+//##############################
+Drill_MPFE_Bean.prototype.drill_bean_setEventId = function( event_id ){
+	this._drill_eventId = event_id;
+};
+//##############################
 // * 实体类 - 设置位置【开放函数】
 //			
 //			参数：	> x 数字
@@ -1365,6 +1408,8 @@ Drill_MPFE_Bean.prototype.drill_bean_setMouseType = function( mouseType ){
 Drill_MPFE_Bean.prototype.drill_bean_initData = function(){
 	
 	this._drill_visible = true;				//实体类 - 可见
+	
+	this._drill_eventId = 0;				//实体类 - 事件id
 	
 	this._drill_x = 0;						//实体类 - 位置X
 	this._drill_y = 0;						//实体类 - 位置Y
@@ -1620,6 +1665,28 @@ Drill_MPFE_Window.prototype.drill_updateBean = function() {
 Drill_MPFE_Window.prototype.drill_isInFrame = function( bean ){
 	if( bean['_drill_visible'] == false ){ return false; }
 	
+	//（如果有碰撞体，直接用碰撞体的判定）
+	//		> 检查鼠标是否在该实体类的范围内。『鼠标落点与实体类范围』
+	//			镜头与层级 - 已支持
+	//			中心锚点   - 已支持（行走图-碰撞体 支持）
+	//			特殊变换   - 已支持（行走图-碰撞体 支持，缩放+斜切+旋转）
+	//			触屏响应   - 暂不明确
+	if( Imported.Drill_CoreOfEventFrameWithMouse ){
+		
+		// > 【行走图 - 行走图与鼠标控制核心】鼠标是否正在悬停+一体化情况
+		var ev = $gameMap.event( bean['_drill_eventId'] );
+		return ev.drill_COEFWM_isOnHoverWithUnification();
+	}
+	
+	
+	//（如果没有，用该插件自带的判定）
+	//		> 检查鼠标是否在该实体类的范围内。『鼠标落点与实体类范围』
+	//			镜头与层级 - 已支持
+	//			中心锚点   - 已支持（见函数 drill_MPFE_updatePosition ）
+	//			特殊变换   - 不能支持
+	//			触屏响应   - 暂不明确
+	
+	// > 判定 - 鼠标位置
 	var _x = _drill_mouse_x;
 	var _y = _drill_mouse_y;
 	if( bean['_drill_mouseType'] == "触屏按下[持续]" ){
@@ -1627,6 +1694,7 @@ Drill_MPFE_Window.prototype.drill_isInFrame = function( bean ){
 		_y = TouchInput.y;
 	}
 	
+	// > 判定 - 镜头与层级
 	if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】地图鼠标落点
 										//		（注意，这里是 地图鼠标落点 与 矩形范围的图层 偏移关系 ）
 		if( SceneManager._scene instanceof Scene_Map ){
@@ -1641,6 +1709,7 @@ Drill_MPFE_Window.prototype.drill_isInFrame = function( bean ){
 		}
 	}
 	
+	// > 判定 - 触发范围
 	if( _x > bean['_drill_x'] + bean['_drill_frameW'] ){ return false; }
 	if( _x < bean['_drill_x'] + 0 ){ return false; }
 	if( _y > bean['_drill_y'] + bean['_drill_frameH'] ){ return false; }

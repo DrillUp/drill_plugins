@@ -1128,7 +1128,7 @@ Game_Interpreter.prototype.command101 = function() {
 				break;
 		}
 		this._index++;
-		this.setWaitMode('message');
+		this.setWaitMode('message');		//『强制等待』
 	}
 	return false;
 };

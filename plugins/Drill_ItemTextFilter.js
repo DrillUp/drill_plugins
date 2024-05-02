@@ -502,42 +502,71 @@ Bitmap.prototype.clearRect = function(x, y, width, height) {
 // ** 滤镜创建
 //=============================================================================
 //=============================
-// * 创建 - 绘制标识
+// * 创建 - 物品绘制标记
 //=============================
 var _drill_ITFi_drawItemName = Window_Base.prototype.drawItemName;
-Window_Base.prototype.drawItemName = function(item, x, y, width) {
+Window_Base.prototype.drawItemName = function( item, x, y, width ){
 	
+	// > 标记物品
 	this._drill_ITFi_isDrawingItemName = true;
 	this._drill_ITFi_curItem = item;
-	_drill_ITFi_drawItemName.call(this, item, x, y, width);
-	this._drill_ITFi_isDrawingItemName = false;
 	
+	// > 原函数
+	_drill_ITFi_drawItemName.call(this, item, x, y, width);
+	
+	// > 解除标记
+	this._drill_ITFi_isDrawingItemName = false;
+	this._drill_ITFi_curItem = null;
 }
 //=============================
-// * 创建 - 根据标识修改成 文本块
+// * 创建 - 绑定文本块
 //=============================
 var _drill_ITFi_drawText = Window_Base.prototype.drawText;
-Window_Base.prototype.drawText = function( text, x, y, maxWidth, align ) {
+Window_Base.prototype.drawText = function( text, x, y, maxWidth, align ){
+	
+	// > 创建文本块（所有绘制物品的文本都转成贴图）
 	if( this._drill_ITFi_isDrawingItemName == true ){
 		this.drill_ITFi_drawItemSpriteText( text, x, y, maxWidth, align );
-		return ;		//所有绘制物品的文本都转成sprite
+		return;
 	}
+	
+	// > 原函数
 	_drill_ITFi_drawText.call(this, text, x, y, maxWidth, align);
 }
-Window_Base.prototype.drill_ITFi_drawItemSpriteText = function(text, x, y, maxWidth, align) {
+//=============================
+// * 创建 - 创建文本块
+//=============================
+Window_Base.prototype.drill_ITFi_drawItemSpriteText = function( text, x, y, maxWidth, align ){
 	var item = this._drill_ITFi_curItem;
-	var temp_sprite = new Sprite();
 	
-	temp_sprite.bitmap = new Bitmap(maxWidth, this.lineHeight());
+	// > 计算范围
+	var xx = x;
+	var yy = y;
+	var ww = maxWidth;
+	var hh = this.lineHeight();
+	
+	// > 不在绘制范围，跳出
+	if( xx    >= this.width  ){ return; }
+	if( xx+ww <= 0           ){ return; }
+	if( yy    >= this.height ){ return; }
+	if( yy+hh <= 0           ){ return; }
+	
+	// > 两个矩形相交算法
+	// ...
+	
+	// > 创建贴图
+	var temp_sprite = new Sprite();
+	temp_sprite.bitmap = new Bitmap( ww, hh );
 	temp_sprite.bitmap.textColor = this.contents.textColor;
 	temp_sprite.bitmap.paintOpacity = this.contents.paintOpacity;
 	temp_sprite.bitmap.fontSize = this.contents.fontSize;
-	temp_sprite.bitmap.drawText(item.name, 0, 0, maxWidth, this.lineHeight() );
+	temp_sprite.bitmap.drawText( item.name, 0, 0, ww, hh );
 	temp_sprite.x = 0 ;
 	temp_sprite.y = 0 ;
 	temp_sprite.x += x;
 	temp_sprite.y += y;
-	// >物品数据初始化
+	
+	// > 物品数据初始化
 	temp_sprite._drill_ITFi_itemId = item.id;
     if (DataManager.isSkill(item)) {
 		temp_sprite._drill_ITFi_itemType = '技能';

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        物体 - 鼠标悬停响应开关
+ * @plugindesc [v1.1]        物体 - 鼠标悬停响应开关
  * @author Drill_up
  * 
  * 
@@ -21,19 +21,16 @@
  * 该插件 不能 单独使用。
  * 必须基于核心插件才能运行。并且可以与其他插件扩展。
  * 基于：
- *   - Drill_CoreOfInput        系统-输入设备核心
+ *   - Drill_CoreOfInput                  系统-输入设备核心
+ *   - Drill_CoreOfEventFrameWithMouse    行走图-行走图与鼠标控制核心
  *     通过该核心才能进行鼠标控制操作。
- * 可作用于：
- *   - Drill_EventUnificationOfTrigger   体积-一体化&触发
- *     使得一体化的事件，能够整体触发悬停等功能。
- *   - Drill_LayerCamera        地图-活动地图镜头★★v1.9以上★★
- *     目标插件控制镜头放大缩小时，鼠标也能正常触发事件。
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：地图界面
  *   只作用于事件，单独对鼠标有效。
  * 2.你需要先了解基础知识 "8.物体 > 触发的本质.docx"。
+ *   悬停的支持来自核心，可以看看 "7.行走图 > 关于行走图与鼠标控制核心.docx"。
  * 传感器：
  *   (1.该插件被划分为传感器类。
  *      传感器即遇到某些情况就会自动触发的事件。
@@ -42,6 +39,10 @@
  *      详细介绍去看看 "8.物体 > 大家族-开关.docx"。
  * 细节：
  *   (1.鼠标触发范围为事件行走图大小。空的行走图则表示没有触发范围。
+ *      事件必须设置行走图，鼠标触发才能生效。
+ *      事件必须设置行走图，鼠标触发才能生效。
+ *      事件必须设置行走图，鼠标触发才能生效。
+ *      重要的事情说三遍，大部分群友总是犯低级错误，快去好好看文档。
  *      触发范围具体介绍可以去看看 "7.行走图 > 关于行走图与图块.docx"。
  *   (2.如果你设置了"悬停"+"不在悬停区域时"，一定要确保事件页两边都配
  *      置了行走图，不然触发范围不停地 行走图 -> 空行走图 来回切换。
@@ -304,7 +305,7 @@
 //		★性能测试因素	鼠标乱晃
 //		★性能测试消耗	132.9ms（drill_EMoHS_updateSwitch）
 //		★最坏情况		存在大批触发的事件，并且玩家的鼠标乱晃。
-//		★备注			历史版本插件优化了很多次，但貌似都只是把工作量转移到其他地方，这次干脆写回原来标准的格式，重新考虑优化。
+//		★备注			历史版本插件优化了很多次，都只是把工作量转移到其他地方，这次工作量已全部交给核心管了。
 //		
 //		★优化记录
 //			x第一次优化：
@@ -319,9 +320,11 @@
 //				先后判定关系分为： ON类型/OFF类型 > 鼠标操作类型 > 鼠标范围 > 是否为一体化事件 > 触发开关
 //			x第五次优化：
 //				针对根据事件获取贴图，这里用【缓冲池】方法，防止多次重复筛选取贴图。
-//			第六次优化：
+//			x第六次优化：
 //				这次直接用 实体类 的结构来控制。
 //				由于修改了更标准的底层结构。前面的优化【全部作废】。
+//			第七次优化：
+//				实体类+碰撞体的结构，转移到 行走图与鼠标控制核心，这样既能debug，也能给其他插件共用。
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
@@ -335,13 +338,8 @@
 //			->☆开关的属性
 //			->☆鼠标悬停响应开关容器
 //			
-//			->☆实体类容器
-//			->☆实体类赋值
-//			->鼠标悬停响应开关 实体类【Drill_EMoHS_Bean】
-//			
 //			->☆开关控制
 //				->是否在 实体类 范围内
-//				->一体化&触发
 //			
 //			
 //		★家谱：
@@ -354,18 +352,10 @@
 //			无
 //		
 //		★必要注意事项：
-//			1.插件触发与行走图完全相关，行走图不变，触发也会更新。
-//			2.注意，【数据和贴图不是同步的】
-//				数据在切换地图时会刷新，而贴图，只要切菜单就会刷新。所以需要考虑贴图刷新的时机。
-//			3.【needRestatistics说明】，该插件 数据 在$gameSystem中，与 贴图 在$gameTemp中。
-//			4.【serial说明】这里的插件，数据和贴图 不同步，所以实际操作起来非常复杂，以前优化过很多次。
-//			  不确定是否需要使用 序列号 来进行排布，这里只暂时标记一下。
+//			1.该插件的悬停判定来自于核心，搜索 COEFWM 就能找到。
 //
 //		★其它说明细节：
-//			1.根据事件的贴图，进行条件插入。
-//			  实时判断条件，来确定独立开关是否被激活。
-//			2.帧刷新时，从最高层的Scene_Map开始，遍历每个sprite，来找条件，每个sprite都是鼠标监听条件。
-//			  Scene_Map.prototype.update 有疑问，不确定每次地图刷新，update会进行几次。这里用updateScene。
+//			1.该插件原本写了一大堆的注释和说明，全都来自于如何判定鼠标悬停，使用核心后就全部不需要了。
 //
 //		★存在的问题：
 //			1.当鼠标靠近时，开启了独立开关，然后保存，读档，所有跨事件页的事件会保持停滞的锁死状态。
@@ -381,7 +371,10 @@
 	//==============================
 	var DrillUp = DrillUp || {}; 
 	DrillUp.g_EMoHS_PluginTip_curName = "Drill_EventMouseHoverSwitch.js 物体-鼠标悬停响应开关";
-	DrillUp.g_EMoHS_PluginTip_baseList = ["Drill_CoreOfInput.js 系统-输入设备核心"];
+	DrillUp.g_EMoHS_PluginTip_baseList = [
+		"Drill_CoreOfInput.js 系统-输入设备核心",
+		"Drill_CoreOfEventFrameWithMouse.js 行走图-行走图与鼠标控制核心"
+	];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
@@ -427,7 +420,8 @@
 //=============================================================================
 // * >>>>基于插件检测>>>>
 //=============================================================================
-if( Imported.Drill_CoreOfInput ){
+if( Imported.Drill_CoreOfInput &&
+	Imported.Drill_CoreOfEventFrameWithMouse ){
 	
 
 //=============================================================================
@@ -1149,34 +1143,33 @@ Game_Character.prototype.initialize = function(){
 	_drill_EMoHS_switch_initialize.call(this);
 }
 //==============================
-// * 开关的属性 - 初始化
+// * 开关的属性 - 初始化 数据
 //
 //			说明：	> 这里的数据都要初始化才能用。『节约事件数据存储空间』
+//					> 层面关键字为：switchData，一对一。
 //==============================
 Game_Character.prototype.drill_EMoHS_checkSwitchData = function(){	
+	
+	// > 【行走图 - 行走图与鼠标控制核心】执行绑定
+	this.drill_COEFWM_checkData();
+	
 	if( this._drill_EMoHS_switchData != undefined ){ return; }
 	this._drill_EMoHS_switchData = {};
-	this._drill_EMoHS_switchData['bean'] = new Drill_EMoHS_Bean();	//实体类（实体类与开关 一对一）
-	this._drill_EMoHS_switchData['lastIsHoverBean'] = false;		//悬停标记
+	this._drill_EMoHS_switchData['lastIsHover'] = false;		//悬停标记
 	this._drill_EMoHS_switchData['switch'] = {};					//独立开关容器
 }
 //==============================
-// * 开关的属性 - 初始化独立开关
+// * 开关的属性 - 初始化 独立开关容器
 //
 //			说明：	> 注意，鼠标悬停响应开关能控制多个独立开关。
+//					> 层面关键字为：['switch']，一对多。
 //==============================
 Game_Character.prototype.drill_EMoHS_checkSwitchData_Switch = function( switch_str ){
 	this.drill_EMoHS_checkSwitchData()
 	if( this._drill_EMoHS_switchData['switch'][switch_str] != undefined ){ return; }
 	var switch_data = {};
 	
-	switch_data['mouseType'] = 0;				//鼠标触发类型（使用数字表示类型，能减轻if判定消耗）
-												//		（0:悬停，18:悬停[一帧]，19:离开悬停[一帧]）
-												//		（ 1:悬停左键按下[持续]， 2:悬停右键按下[持续]， 3:悬停滚轮按下[持续]， 9:悬停左键或右键按下[持续]）
-												//		（11:悬停左键按下[一帧]，12:悬停右键按下[一帧]，13:悬停滚轮按下[一帧]）
-												//		（21:悬停左键释放[一帧]，22:悬停右键释放[一帧]，23:悬停滚轮释放[一帧]）
-												//		（31:悬停左键双击[一帧]，32:悬停右键双击[一帧]，33:悬停滚轮双击[一帧]，34:悬停滚轮上滚，35:悬停滚轮下滚）
-												//		（）
+	switch_data['mouseType'] = 0;				//鼠标触发类型（使用数字表示类型，能减轻if判定消耗，见 drill_EMoHS_setMouseType ）
 	
 	switch_data['triggeredOn'] = false;			//悬停时/按下时开启（持续触发用）
 	switch_data['notTriggeredOff'] = false;		//未悬停时/没按下时关闭（持续触发用）
@@ -1250,10 +1243,10 @@ Game_Character.prototype.drill_EMoHS_setSwitch_NotTriggeredOn = function( switch
 //==============================
 // * 开关的属性 - 触发设置 - 开关赋值
 //==============================
-Game_Character.prototype.drill_EMoHS_setSwitch_OnceValue = function( switch_str, value ){
+Game_Character.prototype.drill_EMoHS_setSwitch_OnceValue = function( switch_str, enabled ){
 	this.drill_EMoHS_checkSwitchData();
 	this.drill_EMoHS_checkSwitchData_Switch( switch_str );
-	this._drill_EMoHS_switchData['switch'][switch_str]['onceValue'] = value;
+	this._drill_EMoHS_switchData['switch'][switch_str]['onceValue'] = enabled;
 }
 //==============================
 // * 开关的属性 - 设置鼠标触发类型
@@ -1395,11 +1388,12 @@ Game_Map.prototype.drill_EMoHS_updateRestatistics = function(){
 	$gameTemp._drill_EMoHS_needRestatistics = false;
 	
 	$gameTemp._drill_EMoHS_switchTank = [];
-	var events = this.events();
-	for( var i = 0; i < events.length; i++ ){
-		var temp_event = events[i];
-		if( temp_event == undefined ){ continue; }
-		if( temp_event._erased == true ){ continue; }
+	var event_list = this._events;
+	for(var i = 0; i < event_list.length; i++ ){
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
+		
 		if( temp_event.drill_EMoHS_hasAnySwitch() ){
 			$gameTemp._drill_EMoHS_switchTank.push(temp_event);
 		}
@@ -1414,171 +1408,6 @@ Game_Event.prototype.erase = function() {
 	if( this.drill_EMoHS_hasAnySwitch() ){
 		$gameTemp._drill_EMoHS_needRestatistics = true;
 	}
-};
-
-
-
-//=============================================================================
-// ** ☆实体类容器
-//			
-//			说明：	> 此模块专门对实体类进行 捕获、销毁 。
-//					（插件完整的功能目录去看看：功能结构树）
-//=============================================================================
-//	（不需要，鼠标悬停响应开关容器 与 实体类容器 一对一，直接用前者的容器即可）
-
-
-//=============================================================================
-// ** ☆实体类赋值
-//			
-//			说明：	> 此模块专门 对实体类进行 赋值。
-//					（插件完整的功能目录去看看：功能结构树）
-//=============================================================================
-//==============================
-// * 实体类赋值 - 检查镜像情况
-//==============================
-Game_Temp.prototype.drill_EMoHS_isReflectionSprite = function( sprite ){
-	if( Imported.Drill_LayerReverseReflection      && sprite instanceof Drill_Sprite_LRR ){ return true; }
-	if( Imported.Drill_LayerSynchronizedReflection && sprite instanceof Drill_Sprite_LSR ){ return true; }
-	return false;
-};
-//==============================
-// * 实体类赋值 - 帧刷新
-//==============================
-var _Drill_EMoHS_s_update = Sprite_Character.prototype.update;
-Sprite_Character.prototype.update = function() {
-	_Drill_EMoHS_s_update.call(this);
-	if( this._character == undefined ){ return; }
-	if( this._character._drill_EMoHS_switchData == undefined ){ return; }
-	if( $gameTemp.drill_EMoHS_isReflectionSprite(this) ){ return; }	//（镜像跳过）
-	
-	this.drill_EMoHS_updatePosition();		//帧刷新 - 刷新位置
-};
-//==============================
-// * 实体类赋值 - 帧刷新 - 刷新位置
-//==============================
-Sprite_Character.prototype.drill_EMoHS_updatePosition = function() {
-	var bean = this._character._drill_EMoHS_switchData['bean'];
-	var ww = bean._drill_frameW;
-	var hh = bean._drill_frameH;
-	
-	//var xx = this.x - ww*this.anchor.x;	//（注意行走图 持续动作 时，xy乱晃）
-	//var yy = this.y - hh*this.anchor.y;
-	var xx = this._character.screenX() - ww*this.anchor.x;
-	var yy = this._character.screenY() - hh*this.anchor.y;
-	bean.drill_bean_setPosition( xx, yy );
-};
-//==============================
-// * 实体类赋值 - 刷新框架【贴图框架值_realFrame】
-//
-//			说明：	> 此处 非帧刷新，而是在 贴图底层 发生刷新改变时，才变化值。
-//==============================
-var _Drill_EMoHS_s__refresh = Sprite_Character.prototype._refresh;
-Sprite_Character.prototype._refresh = function(){
-	_Drill_EMoHS_s__refresh.call( this );
-	if( this._character == undefined ){ return; }
-	if( this._character._drill_EMoHS_switchData == undefined ){ return; }
-	if( $gameTemp.drill_EMoHS_isReflectionSprite(this) ){ return; }	//（镜像跳过）
-	
-	//if( this.visible == false ){ return; }
-	//if( this.opacity == 0 ){ return; }
-	
-	// > 条件 - 未读取时不赋值
-	if( this.bitmap == undefined ){ return; }
-	if( this.bitmap.isReady() == false ){ return; }
-	
-	// > 条件 - 不接受宽度为0的标记
-	if( this._realFrame.width == 0 ){ return; }
-	if( this._realFrame.height == 0 ){ return; }
-	
-	// > 刷新框架
-	this._character._drill_EMoHS_switchData['bean'].drill_bean_resetFrame(
-		this._realFrame.x,
-		this._realFrame.y,
-		this._realFrame.width,
-		this._realFrame.height 
-	);
-};
-
-
-//=============================================================================
-// ** 鼠标悬停响应开关 实体类【Drill_EMoHS_Bean】
-// **		
-// **		作用域：	地图界面
-// **		主功能：	> 定义一个专门的实体类数据类。
-// **		子功能：	->无帧刷新
-// **					->重设数据
-// **						->序列号
-// **					->被动赋值（Sprite_Character）
-// **						> 可见
-// **						> 位置
-// **						> 贴图框架值
-// **		
-// **		说明：	> 该类可与 Game_CharacterBase 一并存储在 $gameMap 中。
-// **				> 该类没有帧刷新，只能通过函数被动赋值。
-//=============================================================================
-//==============================
-// * 实体类 - 定义
-//==============================
-function Drill_EMoHS_Bean(){
-    this.initialize.apply(this, arguments);
-};
-//==============================
-// * 实体类 - 初始化
-//==============================
-Drill_EMoHS_Bean.prototype.initialize = function(){
-	this._drill_beanSerial = new Date().getTime() + Math.random();		//（生成一个不重复的序列号）
-    this.drill_bean_initData();											//私有数据初始化
-};
-//##############################
-// * 实体类 - 显示/隐藏【开放函数】
-//			
-//			参数：	> visible 布尔
-//			返回：	> 无
-//##############################
-Drill_EMoHS_Bean.prototype.drill_bean_setVisible = function( visible ){
-	this._drill_visible = visible;
-};
-//##############################
-// * 实体类 - 设置位置【开放函数】
-//			
-//			参数：	> x 数字
-//					> y 数字
-//			返回：	> 无
-//			
-//			说明：	> 实体类只记录一个坐标和一个框架范围。需要考虑锚点的影响。
-//##############################
-Drill_EMoHS_Bean.prototype.drill_bean_setPosition = function( x, y ){
-	this._drill_x = x;
-	this._drill_y = y;
-};
-//##############################
-// * 实体类 - 设置框架【开放函数】
-//			
-//			参数：	> frameX,frameY,frameW,frameH 矩形对象
-//			返回：	> 无
-//			
-//			说明：	> 被动赋值，见 刷新框架 函数。
-//##############################
-Drill_EMoHS_Bean.prototype.drill_bean_resetFrame = function( frameX, frameY, frameW, frameH ){
-	this._drill_frameX = frameX;
-	this._drill_frameY = frameY;
-	this._drill_frameW = frameW;
-	this._drill_frameH = frameH;
-};
-//==============================
-// * 实体类 - 私有数据初始化
-//==============================
-Drill_EMoHS_Bean.prototype.drill_bean_initData = function(){
-	
-	this._drill_visible = true;				//实体类 - 可见
-	
-	this._drill_x = 0;						//实体类 - 位置X
-	this._drill_y = 0;						//实体类 - 位置Y
-	
-	this._drill_frameX = 0;					//实体类 - 框架X
-	this._drill_frameY = 0;					//实体类 - 框架Y
-	this._drill_frameW = 0;					//实体类 - 框架宽度
-	this._drill_frameH = 0;					//实体类 - 框架高度
 };
 
 
@@ -1610,73 +1439,6 @@ Game_Map.prototype.drill_EMoHS_isOptimizationPassed = function(){
 	return true;
 }
 //==============================
-// * 开关控制 - 是否在 实体类 范围内
-//==============================
-Game_Character.prototype.drill_EMoHS_isOnHoverBean = function(){
-	
-	// > 【一体化&触发】
-	if( Imported.Drill_EventUnificationOfTrigger ){
-		var tag = this.drill_EUOT_getTag();
-		if( tag == "" ){
-			
-			// > 是否悬停在当前开关
-			var bean = this._drill_EMoHS_switchData['bean'];
-			return this.drill_EMoHS_isOnHoverTargetBean( bean );
-			
-		}else{
-			
-			// > 是否悬停在任意一个开关上
-			var ev_list = $gameTemp.drill_EUOT_getEventListByTag( tag );
-			for(var i = 0; i < ev_list.length; i++){
-				var e = ev_list[i];
-				var bean = e._drill_EMoHS_switchData['bean'];
-				var is_onHoverBean = this.drill_EMoHS_isOnHoverTargetBean( bean );
-				if( is_onHoverBean == true ){ return true; }
-			}
-			return false;
-			
-		}
-	}else{
-		
-		// > 是否悬停在当前开关
-		var bean = this._drill_EMoHS_switchData['bean'];
-		return this.drill_EMoHS_isOnHoverTargetBean( bean );
-	}
-}
-//==============================
-// * 开关控制 - 是否在 实体类 范围内
-//==============================
-Game_Character.prototype.drill_EMoHS_isOnHoverTargetBean = function( bean ){
-	if( bean['_drill_visible'] == false ){ return false; }
-	
-	var _x = _drill_mouse_x;
-	var _y = _drill_mouse_y;
-	//if( bean[''] == "触屏按下[持续]" ){
-	//	_x = TouchInput.x;
-	//	_y = TouchInput.y;
-	//}
-	
-	if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】地图鼠标落点
-										//		（注意，这里是 地图鼠标落点 与 矩形范围的图层 偏移关系 ）
-		if( SceneManager._scene instanceof Scene_Map ){
-			
-			// > 下层/中层/上层（这是事件的层级，事件处于 下层、中层、上层）
-			var convert_pos = $gameSystem._drill_LCa_controller.drill_LCa_getPos_OuterToChildren( _x, _y );
-			_x = convert_pos.x;
-			_y = convert_pos.y;
-			
-			// > 图片层/最顶层
-			//（不考虑，因此也不写if判断了）
-		}
-	}
-	
-	if( _x > bean['_drill_x'] + bean['_drill_frameW'] ){ return false; }
-	if( _x < bean['_drill_x'] + 0 ){ return false; }
-	if( _y > bean['_drill_y'] + bean['_drill_frameH'] ){ return false; }
-	if( _y < bean['_drill_y'] + 0 ){ return false; }
-	return true;
-}
-//==============================
 // * 开关控制 - 帧刷新
 //==============================
 Game_Map.prototype.drill_EMoHS_updateSwitch = function(){
@@ -1691,13 +1453,15 @@ Game_Map.prototype.drill_EMoHS_updateSwitch = function(){
 	for( var i = 0; i < $gameTemp._drill_EMoHS_switchTank.length; i++ ){
 		var temp_switchEv = $gameTemp._drill_EMoHS_switchTank[i];
 		
-		//	鼠标悬停响应开关 - 获取独立开关列表
+		// > 数据 - switchData层面（与事件一对一）
 		var switch_list = temp_switchEv.drill_EMoHS_getSwitchList();
 		if( switch_list.length == 0 ){ continue; }
 		
-		var is_onHoverBean = temp_switchEv.drill_EMoHS_isOnHoverBean();	//（提前判定，不要放入子循环里面）
-		var last_isHoverBean = temp_switchEv._drill_EMoHS_switchData['lastIsHoverBean'];
+		// > 【行走图 - 行走图与鼠标控制核心】鼠标是否正在悬停+一体化情况（提前判定，不要放入子循环里面）
+		var is_onHover = temp_switchEv.drill_COEFWM_isOnHoverWithUnification();
+		var last_isHover = temp_switchEv._drill_EMoHS_switchData['lastIsHover'];
 		
+		// > 数据 - ['switch']层面（与事件一对多）
 		for(var j = 0; j < switch_list.length; j++ ){
 			var cur_switch = switch_list[j];
 			var cur_mouseType = temp_switchEv._drill_EMoHS_switchData['switch'][cur_switch]['mouseType'];
@@ -1705,7 +1469,7 @@ Game_Map.prototype.drill_EMoHS_updateSwitch = function(){
 			
 				// > 触发（持续）
 				var isTriggered = false;
-				if( is_onHoverBean == true ){
+				if( is_onHover == true ){
 					if( cur_mouseType == 0 ){
 						isTriggered = true;		//悬停
 					}
@@ -1764,8 +1528,8 @@ Game_Map.prototype.drill_EMoHS_updateSwitch = function(){
 			}else{
 				
 				// > 触发（单次）
-				if( is_onHoverBean == true ){
-					var canSetValue = false;
+				var canSetValue = false;
+				if( is_onHover == true ){
 					
 					if( cur_mouseType == 11 && TouchInput.drill_isLeftTriggerd() ){
 						canSetValue = true;		//悬停左键按下[一帧]
@@ -1815,29 +1579,19 @@ Game_Map.prototype.drill_EMoHS_updateSwitch = function(){
 						(TouchInput.drill_isLeftDoubled() || TouchInput.drill_isRightDoubled()) ){
 						canSetValue = true;		//悬停左键或右键双击[一帧]
 					}
-					
-					// > 触发（单次） - 赋值一次
-					if( canSetValue ){
-						var cur_value = temp_switchEv._drill_EMoHS_switchData['switch'][cur_switch]['onceValue'];
-						this.drill_EMoHS_setValue(
-							temp_switchEv._eventId, 
-							cur_switch, 
-							cur_value
-						);
-					}
 				}
 				
 				// > 触发（单次） - 悬停[一帧]
-				if( cur_mouseType == 18 && is_onHoverBean == true && last_isHoverBean == false ){
-					var cur_value = temp_switchEv._drill_EMoHS_switchData['switch'][cur_switch]['onceValue'];
-					this.drill_EMoHS_setValue(
-						temp_switchEv._eventId, 
-						cur_switch, 
-						cur_value
-					);
+				if( cur_mouseType == 18 && is_onHover == true && last_isHover == false ){
+					canSetValue = true;
 				}
 				// > 触发（单次） - 不在悬停区域时[一帧]
-				if( cur_mouseType == 19 && is_onHoverBean == false && last_isHoverBean == true ){
+				if( cur_mouseType == 19 && is_onHover == false && last_isHover == true ){
+					canSetValue = true;
+				}
+				
+				// > 触发（单次） - 赋值一次
+				if( canSetValue ){
 					var cur_value = temp_switchEv._drill_EMoHS_switchData['switch'][cur_switch]['onceValue'];
 					this.drill_EMoHS_setValue(
 						temp_switchEv._eventId, 
@@ -1848,8 +1602,8 @@ Game_Map.prototype.drill_EMoHS_updateSwitch = function(){
 			}
 		}
 		
-		// > 记录 悬停标记
-		temp_switchEv._drill_EMoHS_switchData['lastIsHoverBean'] = is_onHoverBean;
+		// > 数据 - switchData层面（记录 悬停标记）
+		temp_switchEv._drill_EMoHS_switchData['lastIsHover'] = is_onHover;
 	}
 };
 //==============================
@@ -1861,252 +1615,6 @@ Game_Map.prototype.drill_EMoHS_setValue = function( event_id, switch_str, enable
 	$gameSelfSwitches.setValue( s_key, enabled );
 };
 
-
-
-
-/* 旧代码（来自 鼠标响应开关）
-//=============================================================================
-// ** 地图界面（Scene_Map）
-//=============================================================================
-//==============================
-// * 帧刷新
-//==============================
-var _drill_EMoHS_smap_update = Scene_Map.prototype.update;
-Scene_Map.prototype.update = function(){ 	
-	_drill_EMoHS_smap_update.call(this);
-	if( this.isActive() ){
-		this.drill_EMoHS_refreshArray();
-		this.drill_EMoHS_updateTrigger();
-	}
-}
-//==============================
-// * 帧刷新 - 容器触发集合
-//==============================
-Scene_Map.prototype.drill_EMoHS_refreshArray = function(){ 
-	//	$gameSystem._drill_EMoHS_data：动态变化的触发条件
-	//	this._spriteset._characterSprites：只增不减的数组（这个数组其实一开始就不应该在每帧里面遍历）
-	
-	for( var i = 0; i < $gameSystem._drill_EMoHS_data.length; i++ ){
-		var temp_data = $gameSystem._drill_EMoHS_data[i];		//鼠标数据（存储）
-		var temp_obj = $gameTemp._drill_EMoHS_sprites[i];		//鼠标贴图（临时）
-		if( !temp_obj ){
-			
-			var char_sprites = this._spriteset._characterSprites;	//从地图贴图找起 >> 找到含event的Sprite_Character >> 存入触发集合
-			for(var j=0; j< char_sprites.length; j++){
-				var temp_sprite = char_sprites[j];
-				if( $gameTemp.drill_EMoHS_isReflectionSprite(temp_sprite) ){ continue; }	//（跳过镜像情况）
-				var temp_character = temp_sprite._character;
-				if( temp_character && temp_character instanceof Game_Event && temp_character._eventId == temp_data._event_id ){
-					$gameTemp._drill_EMoHS_sprites[i] = temp_sprite;
-				}
-			}
-		}
-	}
-}
-//==============================
-// * 帧刷新 - 鼠标触发
-//==============================
-Scene_Map.prototype.drill_EMoHS_updateTrigger = function(){ 
-	
-	for(var i=0; i< $gameSystem._drill_EMoHS_data.length; i++){			//根据触发集合，遍历触发
-		var temp_sprite = $gameTemp._drill_EMoHS_sprites[i];
-		var temp_data = $gameSystem._drill_EMoHS_data[i];
-		if( this.drill_EMoHS_isBitmapReady(temp_sprite) ){
-			
-			// > 鼠标ON触发
-			if( this.drill_EMoHS_isOnMouse( temp_data._type, temp_sprite ) ){
-				var key = [ $gameMap._mapId, temp_data._event_id, temp_data._switch ];
-				if( $gameSelfSwitches.value(key) !== true){
-					$gameSelfSwitches.drill_setValueWithOutChange(key,true);
-					$gameSelfSwitches.onChange();
-				}
-			}
-			
-			// > 鼠标OFF触发
-			if( this.drill_EMoHS_isOnOFFMouse( temp_data._type, temp_sprite ) ){
-				var key = [ $gameMap._mapId, temp_data._event_id, temp_data._switch ];
-				if( $gameSelfSwitches.value(key) !== false){
-					$gameSelfSwitches.drill_setValueWithOutChange(key,false);
-					$gameSelfSwitches.onChange();
-				}
-			}
-			
-			//【注意，这里是并列结构，根据 temp_data._type 分门别类进行触发判定。】
-		}
-	}
-};
-//==============================
-// * 判定 - 鼠标ON触发
-//==============================
-Scene_Map.prototype.drill_EMoHS_isOnMouse = function( type, sprite ){ 
-	if( type == "左键按下[持续]" ){
-		if( TouchInput.drill_isLeftPressed() && this.drill_EMoHS_isOnMouseHover(sprite) ){ return true};
-	}else if( type == "左键按下[一帧]" ){
-		if( TouchInput.drill_isLeftTriggerd() && this.drill_EMoHS_isOnMouseHover(sprite) ){ return true};
-	}else if( type == "左键释放[一帧]" ){
-		if( TouchInput.drill_isLeftReleased() && this.drill_EMoHS_isOnMouseHover(sprite) ){ return true};
-	}else if( type == "左键双击[一帧]" ){
-		if( TouchInput.drill_isLeftDoubled() && this.drill_EMoHS_isOnMouseHover(sprite) ){ return true};
-		
-	}else if( type == "右键按下[持续]" ){
-		if( TouchInput.drill_isRightPressed() && this.drill_EMoHS_isOnMouseHover(sprite) ){ return true};
-	}else if( type == "右键按下[一帧]" ){
-		if( TouchInput.drill_isRightTriggerd() && this.drill_EMoHS_isOnMouseHover(sprite) ){ return true};
-	}else if( type == "右键释放[一帧]" ){
-		if( TouchInput.drill_isRightReleased() && this.drill_EMoHS_isOnMouseHover(sprite) ){ return true};
-	}else if( type == "右键双击[一帧]" ){
-		if( TouchInput.drill_isRightDoubled() && this.drill_EMoHS_isOnMouseHover(sprite) ){ return true};
-		
-	}else if( type == "滚轮按下[持续]" ){
-		if( TouchInput.drill_isMiddlePressed() && this.drill_EMoHS_isOnMouseHover(sprite) ){ return true};
-	}else if( type == "滚轮按下[一帧]" ){
-		if( TouchInput.drill_isMiddleTriggerd() && this.drill_EMoHS_isOnMouseHover(sprite) ){ return true};
-	}else if( type == "滚轮释放[一帧]" ){
-		if( TouchInput.drill_isMiddleReleased() && this.drill_EMoHS_isOnMouseHover(sprite) ){ return true};
-	}else if( type == "滚轮双击[一帧]" ){
-		if( TouchInput.drill_isMiddleDoubled() && this.drill_EMoHS_isOnMouseHover(sprite) ){ return true};
-		
-	}else if( type == "滚轮上滚" ){
-		if( TouchInput.drill_isWheelUp() && this.drill_EMoHS_isOnMouseHover(sprite) ){return true;}
-	}else if( type == "滚轮下滚" ){
-		if( TouchInput.drill_isWheelDown() && this.drill_EMoHS_isOnMouseHover(sprite) ){return true;}
-	}else if( type == "悬停且离开时OFF" ){
-		if( this.drill_EMoHS_isOnMouseHover(sprite) ){return true;}
-	}else if( type == "悬停" ){
-		if( this.drill_EMoHS_isOnMouseHover(sprite) ){return true;}
-	}
-	return false;	
-};
-//==============================
-// * 判定 - 鼠标OFF触发
-//==============================
-Scene_Map.prototype.drill_EMoHS_isOnOFFMouse = function( type, sprite ){ 
-	if( type == "任何位置左键释放[一帧]" ){
-		if( TouchInput.drill_isLeftReleased() ){ return true; }
-	}else if( type == "任何位置右键释放[一帧]" ){
-		if( TouchInput.drill_isRightReleased() ){ return true; }
-	}else if( type == "任何位置滚轮释放[一帧]" ){
-		if( TouchInput.drill_isMiddleReleased() ){ return true; }
-	}else if( type == "悬停且离开时OFF" ){
-		if( !this.drill_EMoHS_isOnMouseHover(sprite) ){return true; }
-	}else if( type == "不在悬停区域时" ){
-		if( !this.drill_EMoHS_isOnMouseHover(sprite) ){return true; }
-	}
-	return false;	
-}
-//==============================
-// * 判定 - 鼠标触发所处范围
-//==============================
-Scene_Map.prototype.drill_EMoHS_isOnMouseHover = function( sprite ){ 
-	if( this.drill_EMoHS_isUnificationSprite(sprite) ){
-		//一体化事件
-		var sprite_list = this.drill_EMoHS_getUnificationSprites( sprite );
-		return this.drill_EMoHS_isOnRangeList( sprite_list );
-	}else{
-		//单独事件
-		return this.drill_EMoHS_isOnRange( sprite );
-	}
-};
-*/
-
-/*
-var _drill_EMoHS_temp_initialize = Game_Temp.prototype.initialize;
-Game_Temp.prototype.initialize = function(){ 	
-	_drill_EMoHS_temp_initialize.call(this);
-	this._drill_EMoHS_sprites = [];				//缓冲池 - 鼠标贴图
-	this._drill_EMoHS_EU_cacheSprites = {};		//缓冲池 - 一体化贴图集合
-	this._drill_EMoHS_EU_cacheListener = {};		//缓冲池 - 一体化事件监听
-};
-//==============================
-// * 一体化 - 判断是否为一体化事件
-//==============================
-Scene_Map.prototype.drill_EMoHS_isUnificationSprite = function( sprite ){ 
-	if( !Imported.Drill_EventUnification ){ return false;}
-	if( !sprite._character ){ return false;}
-	if( !sprite._character.drill_EU_hasTriggerTag() ){ return false;}
-	return true;
-}
-//==============================
-// * 一体化 - 根据单个贴图获取到关联的贴图(乱序)
-//==============================
-Scene_Map.prototype.drill_EMoHS_getUnificationSprites = function( sprite ){ 
-	var tag = sprite._character._drill_EU.trigger;
-	var sprite_list = [];
-	var sprites = this.drill_EMoHS_getSpritesByTag(tag);	//触发时，所有相同标签的事件同时触发
-	sprite_list = sprite_list.concat(sprites);
-	return sprite_list;
-}
-//==============================
-// * 一体化 - 根据标签获取到对应贴图(乱序)
-//==============================
-Scene_Map.prototype.drill_EMoHS_getSpritesByTag = function( t_key ){ 
-	var ev_list = $gameTemp.drill_EU_getEventsByTriggerTag( t_key );
-	if(	$gameTemp._drill_EMoHS_EU_cacheSprites[t_key] &&
-		$gameTemp._drill_EMoHS_EU_cacheListener[t_key] === ev_list.length ){
-		return $gameTemp._drill_EMoHS_EU_cacheSprites[t_key];		//缓冲池中有，且event没有变化，就直接返回
-	}
-		
-	var result = [];
-	for(var i=0; i< this._spriteset._characterSprites.length; i++){		//如果没有，则新组装
-		var temp_sprite = this._spriteset._characterSprites[i];
-		if( temp_sprite &&
-			temp_sprite._character &&
-			ev_list.indexOf(temp_sprite._character) != -1 ){
-			result.push(temp_sprite);
-		}
-	}
-	$gameTemp._drill_EMoHS_EU_cacheSprites[t_key] = result;
-	$gameTemp._drill_EMoHS_EU_cacheListener[t_key] = result.length;
-	return result;
-};
-*/
-
-/*
-// > 强制更新提示 锁
-DrillUp.g_LCa_alert = true;
-//==============================
-// * 贴图判定 - 是否处在范围
-//==============================
-Scene_Map.prototype.drill_EMoHS_isOnRange = function( sprite ){ 
-	var cw = sprite.patternWidth();
-	var ch = sprite.patternHeight();
-	var cx = sprite.x;
-	var cy = sprite.y;
-	var _x = _drill_mouse_x;
-	var _y = _drill_mouse_y;
-	if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】地图鼠标落点
-		
-		// > 强制更新提示
-		if( $gameSystem._drill_LCa_controller == undefined && DrillUp.g_LCa_alert == true ){ 
-			alert( DrillUp.drill_EMoHS_getPluginTip_NeedUpdate_Camera() );
-			DrillUp.g_LCa_alert = false;
-			return; 
-		}
-		
-		// > 下层/中层/上层（这是事件的层级，事件处于 下层、中层、上层）
-		var mouse_pos = $gameSystem._drill_LCa_controller.drill_LCa_getMousePos_OnChildren();
-		_x = mouse_pos.x;
-		_y = mouse_pos.y;
-			
-		// > 图片层/最顶层
-		//（不考虑，因此也不写if判断了）
-	}
-	if( _x <  cx + 0  - cw*sprite.anchor.x ){ return false };
-	if( _x >= cx + cw - cw*sprite.anchor.x ){ return false };
-	if( _y <  cy + 0  - ch*sprite.anchor.y ){ return false };
-	if( _y >= cy + ch - ch*sprite.anchor.y ){ return false };
-	return true;	
-};
-//==============================
-// * 贴图判定 - 是否处在范围集合中
-//==============================
-Scene_Map.prototype.drill_EMoHS_isOnRangeList = function( sprite_list ){ 
-	for(var i=0; i < sprite_list.length; i++){
-		if( this.drill_EMoHS_isOnRange( sprite_list[i] ) ){ return true; }
-	}
-	return false;
-}
-*/
 
 
 //=============================================================================

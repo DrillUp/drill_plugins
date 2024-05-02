@@ -858,7 +858,7 @@ Game_Interpreter.prototype.pluginCommand = function( command, args ){
 				temp1 = temp1.replace("]","");
 				$gameMessage.newPage();
 				$gameMessage.add("_drill_DSS_picIndex" + temp1);
-				this.setWaitMode('message');
+				this.setWaitMode('message');		//『强制等待』
 			}
 		}
 	}

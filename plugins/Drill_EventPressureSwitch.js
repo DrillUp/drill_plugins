@@ -659,9 +659,10 @@ Game_Character.prototype.initialize = function(){
 	this._drill_EPS_pressureData = undefined;
 }
 //==============================
-// * 物体的属性 - 初始化
+// * 物体的属性 - 初始化 数据
 //
 //			说明：	> 这里的数据都要初始化才能用。『节约事件数据存储空间』
+//					> 层面关键字为：pressureData，一对一。
 //==============================
 Game_Character.prototype.drill_EPS_checkPressureData = function(){
 	if( this._drill_EPS_pressureData != undefined ){ return; }
@@ -743,9 +744,10 @@ Game_Character.prototype.initialize = function(){
 	_drill_EPS_switch_initialize.call(this);
 }
 //==============================
-// * 开关的属性 - 初始化
+// * 开关的属性 - 初始化 数据
 //
 //			说明：	> 这里的数据都要初始化才能用。『节约事件数据存储空间』
+//					> 层面关键字为：switchData，一对一。
 //==============================
 Game_Character.prototype.drill_EPS_checkSwitchData = function(){	
 	if( this._drill_EPS_switchData != undefined ){ return; }
@@ -754,9 +756,10 @@ Game_Character.prototype.drill_EPS_checkSwitchData = function(){
 	this._drill_EPS_switchData['switch'] = {};				//独立开关容器
 }
 //==============================
-// * 开关的属性 - 初始化独立开关
+// * 开关的属性 - 初始化 独立开关容器
 //
 //			说明：	> 注意，重力开关能控制多个独立开关。
+//					> 层面关键字为：['switch']，一对多。
 //==============================
 Game_Character.prototype.drill_EPS_checkSwitchData_Switch = function( switch_str ){
 	this.drill_EPS_checkSwitchData()
@@ -947,11 +950,12 @@ Game_Map.prototype.drill_EPS_updateRestatistics = function(){
 	$gameTemp._drill_EPS_needRestatistics = false;
 	
 	$gameTemp._drill_EPS_switchTank = [];		//重力开关容器
-	var events = this.events();
-	for( var i = 0; i < events.length; i++ ){
-		var temp_event = events[i];
-		if( temp_event == undefined ){ continue; }
-		if( temp_event._erased == true ){ continue; }
+	var event_list = this._events;
+	for(var i = 0; i < event_list.length; i++ ){
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
+		
 		if( temp_event.drill_EPS_hasAnySwitch() ){
 			$gameTemp._drill_EPS_switchTank.push(temp_event);
 		}
@@ -1044,16 +1048,19 @@ Game_Map.prototype.drill_EPS_updatePositionTank = function(){
 		
 	// > 没加核心那只能手动筛选了
 	}else{
-		var character_list = this.events();
-		character_list.unshift($gamePlayer);
+		var character_list = [];
+		var event_list = this._events;
+		for(var i = 0; i < event_list.length; i++ ){
+			var temp_event = event_list[i];
+			if( temp_event == null ){ continue; }
+			if( temp_event._erased == true ){ continue; }	//『有效事件』
+			character_list.push( temp_event );
+		}
+		
+		character_list.unshift( $gamePlayer );
 		for( var i = 0; i < character_list.length; i++ ){
 			var character = character_list[i];
 			var slot_id = this.drill_EPS_getSlotId( character );
-			
-			// > 排除 空事件
-			if( character == undefined ){ continue; }
-			// > 排除 删除的事件
-			if( character._erased == true ){ continue; }
 			
 			if( $gameTemp._drill_EPS_positionTank[slot_id] == undefined ){
 				$gameTemp._drill_EPS_positionTank[slot_id] = [];
@@ -1135,13 +1142,14 @@ Game_Map.prototype.drill_EPS_updateSwitch = function(){
 		var temp_switchEv = $gameTemp._drill_EPS_switchTank[i];
 		var slot_id = this.drill_EPS_getSlotId( temp_switchEv );
 		
-		//	重力开关 - 获取重力开关上的物体
-		var ch_list = $gameTemp._drill_EPS_positionTank[slot_id];
+		// > 数据 - switchData层面（与事件一对一）
+		var ch_list = $gameTemp._drill_EPS_positionTank[slot_id];	//（重力开关上的物体）
 		if( ch_list == undefined ){ continue; }
 		
-		//	重力开关 - 获取独立开关列表
 		var switch_list = temp_switchEv.drill_EPS_getSwitchList();
 		if( switch_list.length == 0 ){ continue; }
+		
+		// > 数据 - ['switch']层面（与事件一对多）
 		for(var j = 0; j < switch_list.length; j++ ){
 			var cur_switch = switch_list[j];
 			
@@ -1158,7 +1166,7 @@ Game_Map.prototype.drill_EPS_updateSwitch = function(){
 				
 					// > 标记 上一个踩住时的事件ID
 					if( ch == $gamePlayer ){
-						temp_switchEv._drill_EPS_switchData['lastEventId'] = -2;
+						temp_switchEv._drill_EPS_switchData['lastEventId'] = -2;	//『玩家id』
 					}else{
 						temp_switchEv._drill_EPS_switchData['lastEventId'] = ch._eventId;
 					}

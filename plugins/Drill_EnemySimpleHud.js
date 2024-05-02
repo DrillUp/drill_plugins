@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.5]        战斗UI - 简单生命框
+ * @plugindesc [v1.6]        战斗UI - 简单生命框
  * @author Drill_up
  * 
  * @Drill_LE_param "生命框-%d"
@@ -181,6 +181,8 @@
  * 优化了旧存档的识别与兼容。
  * [v1.5]
  * 大幅度优化了内部结构。
+ * [v1.6]
+ * 修复了默认生命框设置无效的bug。
  *
  * 
  * 
@@ -1101,6 +1103,24 @@ Scene_Battle.prototype.createAllWindows = function() {
 	}
 }
 //==============================
+// * 战斗层级 - 参数定义
+//
+//			说明：	> 所有drill插件的贴图都用唯一参数：zIndex（可为小数、负数），其它插件没有此参数定义。
+//==============================
+if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义）
+	var _drill_sprite_zIndex = true;
+	Object.defineProperty( Sprite.prototype, 'zIndex', {
+		set: function( value ){
+			this.__drill_zIndex = value;
+		},
+		get: function(){
+			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			return this.__drill_zIndex;
+		},
+		configurable: true
+	});
+};
+//==============================
 // * 战斗层级 - 图片层级排序（私有）
 //==============================
 Scene_Battle.prototype.drill_ESH_sortByZIndex_Private = function() {
@@ -1635,8 +1655,8 @@ Drill_ESH_Bean.prototype.drill_ESH_isLongTimeShowing = function(){
 //==============================
 Drill_ESH_Bean.prototype.drill_initPrivateData = function(){
 	
-	this._drill_visible = true;				//实体类 - 可见
-	this._drill_styleId = -1;				//实体类 - 样式ID
+	this._drill_visible = true;									//实体类 - 可见
+	this._drill_styleId = $gameSystem._drill_ESH_defaultIndex;	//实体类 - 样式ID
 	
 	this._drill_actorId = -1;				//实体类 - 单位 - 角色ID
 	this._drill_actorIndex = -1;			//实体类 - 单位 - 我方索引

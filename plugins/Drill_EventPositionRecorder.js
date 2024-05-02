@@ -327,7 +327,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				e_chars = [ e ];
 			}
 			if( e_chars == null && unit == "全图事件" ){
-				e_chars = $gameMap.events();
+				e_chars = $gameMap.events();	//『非空事件』
 			}
 			if( e_chars == null && unit.indexOf("批量事件[") != -1 ){
 				unit = unit.replace("批量事件[","");
@@ -600,11 +600,12 @@ Game_Map.prototype.drill_EPR_saveMapPos = function( mapId ){
 	
 	// > 事件位置存储
 	var posTank = [];
-	var event_tank = this.events();
+	var event_tank = this._events;
 	if( event_tank == undefined ){ return; }
 	for(var i = 0; i < event_tank.length; i++){
 		var e = event_tank[i];
-		if( e == undefined ){ continue; }
+		if( e == undefined ){ continue; }	//『非空事件』（此处不考虑 _erased 的情况）
+		
 		if( e._drill_EPR_remainEnable != true ){ continue; }
 		var pos = {};
 		pos['x'] = e.x;

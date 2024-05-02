@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        图片 - GIF动画序列
+ * @plugindesc [v1.5]        图片 - GIF动画序列
  * @author Drill_up
  * 
  * 
@@ -55,12 +55,17 @@
  * 
  * 插件指令：>图片动画序列 : 图片[1] : 创建动画序列 : 动画序列[1]
  * 插件指令：>图片动画序列 : 图片[1] : 销毁动画序列
+ * 插件指令：>图片动画序列 : 图片[1] : 等待动画序列加载完成
  * 
  * 1.前半部分（图片[1]）和 后半部分（创建动画序列 : 动画序列[1]）
  *   的参数可以随意组合。一共有4*2种组合方式。
  * 2.注意，动画序列可以重复创建，但是不能放入到并行事件中反复执行。
  *   这样会导致动画序列永远在创建，且保持在第一帧的播放状态，还会不停地闪。
- *
+ * 3."等待动画序列加载完成"可以确保动画序列完成加载后再操作。
+ *   比如 动画序列+粉碎效果，使用此指令能避免粉碎效果找不到图片而报错。
+ *   如果动画序列设置了预加载，则此指令会等待0帧。
+ *   如果动画序列未设置预加载，则此指令会等待1帧以上，具体由图片量和加载速度决定。
+ * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 播放
  * 你需要通过下面插件指令来操作动画序列：
@@ -119,6 +124,8 @@
  * 进一步优化了动画序列底层，该插件重新兼容。
  * [v1.4]
  * 优化了动画序列存储底层。
+ * [v1.5]
+ * 优化了内部结构。添加了 等待动画序列加载完成 功能。
  * 
  */
  
@@ -147,15 +154,21 @@
 //			->☆提示信息
 //			->☆静态数据
 //			->☆插件指令
+//			->☆图片贴图
+//				>图片对象层 的图片贴图
+//				>最顶层 的图片贴图
+//				>图片层 的图片贴图
 //			
-//			->☆图片控制
-//				->绑定
+//			->☆等待控制
+//			
+//			->☆图片的属性
+//				->数据
 //					> 初始化
 //					> 帧刷新
 //					> 消除图片
 //					> 消除图片（command235）
-//				->创建 动画序列控制器
-//				->销毁 动画序列控制器
+//					->创建 动画序列控制器
+//					->销毁 动画序列控制器
 //				->播放
 //					> 播放默认的状态元集合（开放函数）
 //					> 播放简单状态元集合（开放函数）
@@ -165,7 +178,7 @@
 //			->☆图片贴图控制
 //				->创建 动画序列贴图
 //				->销毁 动画序列贴图
-//				->贴图指令
+//				->贴图销毁标记
 //				->获取bitmap资源对象
 //
 //
@@ -174,6 +187,7 @@
 //		
 //		★脚本文档：
 //			1.系统 > 大家族-GIF动画序列（脚本）.docx
+//			16.图片 > 图片资源切换脚本说明.docx
 //		
 //		★插件私有类：
 //			无
@@ -258,62 +272,61 @@ var _drill_PASe_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_PASe_pluginCommand.call(this, command, args);
 	if( command === ">图片动画序列" ){ 
-	
+		
 		/*-----------------对象组获取------------------*/
 		var pics = null;			// 图片对象组
+		var pic_ids = null;			// 图片ID组（图片对象本身没有id值）
 		if( args.length >= 2 ){
 			var unit = String(args[1]);
 			if( pics == null && unit.indexOf("批量图片[") != -1 ){
 				unit = unit.replace("批量图片[","");
 				unit = unit.replace("]","");
 				pics = [];
+				pic_ids = [];
 				var temp_arr = unit.split(/[,，]/);
 				for( var k=0; k < temp_arr.length; k++ ){
 					var pic_id = Number(temp_arr[k]);
 					if( $gameScreen.drill_PASe_isPictureExist( pic_id ) == false ){ continue; }
 					var p = $gameScreen.picture( pic_id );
 					pics.push( p );
+					pic_ids.push( pic_id );
 				}
 			}
-			if( pics == null && unit.indexOf("批量图片变量[") != -1 ){
+			else if( pics == null && unit.indexOf("批量图片变量[") != -1 ){
 				unit = unit.replace("批量图片变量[","");
 				unit = unit.replace("]","");
 				pics = [];
+				pic_ids = [];
 				var temp_arr = unit.split(/[,，]/);
 				for( var k=0; k < temp_arr.length; k++ ){
 					var pic_id = $gameVariables.value(Number(temp_arr[k]));
 					if( $gameScreen.drill_PASe_isPictureExist( pic_id ) == false ){ continue; }
-					var pic = $gameScreen.picture( pic_id );
-					pics.push( pic );
+					var p = $gameScreen.picture( pic_id );
+					pics.push( p );
+					pic_ids.push( pic_id );
 				}
 			}
-			if( pics == null && unit.indexOf("图片变量[") != -1 ){
+			else if( pics == null && unit.indexOf("图片变量[") != -1 ){
 				unit = unit.replace("图片变量[","");
 				unit = unit.replace("]","");
 				var pic_id = $gameVariables.value(Number(unit));
 				if( $gameScreen.drill_PASe_isPictureExist( pic_id ) == false ){ return; }
 				var p = $gameScreen.picture( pic_id );
 				pics = [ p ];
+				pic_ids = [];
+				pic_ids.push( pic_id );
 			}
-			if( pics == null && unit.indexOf("图片[") != -1 ){
+			else if( pics == null && unit.indexOf("图片[") != -1 ){
 				unit = unit.replace("图片[","");
 				unit = unit.replace("]","");
 				var pic_id = Number(unit);
 				if( $gameScreen.drill_PASe_isPictureExist( pic_id ) == false ){ return; }
 				var p = $gameScreen.picture( pic_id );
 				pics = [ p ];
+				pic_ids = [];
+				pic_ids.push( pic_id );
 			}
 		}
-		// > 透明度检查（不要检查）
-		//if( pics != null ){
-		//	var temp_tank = [];
-		//	for( var k=0; k < pics.length; k++ ){
-		//		if( pics[k].opacity() != 0 ){
-		//			temp_tank.push( pics[k] );
-		//		}
-		//	}
-		//	pics = temp_tank;
-		//}
 
 		
 		/*-----------------销毁动画序列------------------*/
@@ -326,6 +339,12 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					}
 				}
 			}
+			if( type == "等待动画序列加载完成" ){
+				if( pic_ids != null){
+					this.drill_PASe_setWait_PicIdList( pic_ids );
+					this.setWaitMode("_drill_PASe_waitLoading");	//『强制等待』
+				}
+			}
 		}
 		/*-----------------创建动画序列------------------*/
 		if( args.length == 6 ){
@@ -335,8 +354,15 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp1 = temp1.replace("动画序列[","");
 				temp1 = temp1.replace("]","");
 				if( pics != null ){
-					for( var k=0; k < pics.length; k++ ){
-						pics[k].drill_PASe_setActionSequence( Number(temp1)-1 );
+					for(var i = 0; i < pics.length; i++ ){
+						
+						// > 数据赋值
+						pics[i].drill_PASe_setActionSequence( Number(temp1)-1 );
+						
+						// > 贴图赋值
+						var picture_sprite = $gameTemp.drill_PASe_getPictureSpriteByPictureId( pic_ids[i] );
+						if( picture_sprite == undefined ){ continue; }
+						picture_sprite.drill_PASe_createDecorator();
 					}
 				}
 			}
@@ -409,30 +435,235 @@ Game_Screen.prototype.drill_PASe_isPictureExist = function( pic_id ){
 };
 
 
+//#############################################################################
+// ** 【标准模块】图片贴图 ☆图片贴图
+//#############################################################################
+//##############################
+// * 图片贴图 - 获取 - 全部图片贴图【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 贴图数组       （图片贴图）
+//          
+//			说明：	> 此函数返回所有图片贴图，包括被转移到 图片层、最顶层 的图片。
+//##############################
+Game_Temp.prototype.drill_PASe_getAllPictureSprite = function(){
+	return this.drill_PASe_getAllPictureSprite_Private();
+}
+//##############################
+// * 图片贴图 - 获取 - 容器指针【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 贴图数组       （图片贴图）
+//          
+//			说明：	> 此函数直接返回容器对象。
+//					> 注意，被转移到 图片层、最顶层 的图片，不在此容器内。
+//##############################
+Game_Temp.prototype.drill_PASe_getPictureSpriteTank = function(){
+	return this.drill_PASe_getPictureSpriteTank_Private();
+}
+//##############################
+// * 图片贴图 - 获取 - 根据图片ID【标准函数】
+//			
+//			参数：	> picture_id 数字（图片ID）
+//			返回：	> 贴图对象       （图片贴图）
+//          
+//			说明：	> 图片id和图片贴图一一对应。
+//					> 此函数只读，且不缓存任何对象，直接读取容器数据。
+//					> 注意，图片数据类 与 图片贴图 为 多对一，图片数据类在战斗界面和地图界面分两类，而图片贴图不分。
+//					> 此函数能获取到被转移到 图片层、最顶层 的图片。
+//##############################
+Game_Temp.prototype.drill_PASe_getPictureSpriteByPictureId = function( picture_id ){
+	return this.drill_PASe_getPictureSpriteByPictureId_Private( picture_id );
+}
+//=============================================================================
+// ** 图片贴图（接口实现）
+//=============================================================================
+//==============================
+// * 图片贴图容器 - 获取 - 容器（私有）
+//==============================
+Game_Temp.prototype.drill_PASe_getPictureSpriteTank_Private = function(){
+	if( SceneManager._scene == undefined ){ return null; }
+	if( SceneManager._scene._spriteset == undefined ){ return null; }
+	if( SceneManager._scene._spriteset._pictureContainer == undefined ){ return null; }
+	return SceneManager._scene._spriteset._pictureContainer.children;
+};
+//==============================
+// * 图片贴图容器 - 获取 - 最顶层容器（私有）
+//==============================
+Game_Temp.prototype.drill_PASe_getPictureSpriteTank_SenceTopArea = function(){
+	if( SceneManager._scene == undefined ){ return null; }
+	if( SceneManager._scene._drill_SenceTopArea == undefined ){ return null; }
+	return SceneManager._scene._drill_SenceTopArea.children;
+};
+//==============================
+// * 图片贴图容器 - 获取 - 图片层容器（私有）
+//==============================
+Game_Temp.prototype.drill_PASe_getPictureSpriteTank_PicArea = function(){
+	if( SceneManager._scene == undefined ){ return null; }
+	if( SceneManager._scene instanceof Scene_Battle ){		//『图片与多场景』
+		if( SceneManager._scene._spriteset == undefined ){ return null; }
+		if( SceneManager._scene._spriteset._drill_battlePicArea == undefined ){ return null; }
+		return SceneManager._scene._spriteset._drill_battlePicArea.children;
+	}
+	if( SceneManager._scene instanceof Scene_Map ){
+		if( SceneManager._scene._spriteset == undefined ){ return null; }
+		if( SceneManager._scene._spriteset._drill_mapPicArea == undefined ){ return null; }
+		return SceneManager._scene._spriteset._drill_mapPicArea.children;
+	}
+	return null;
+};
+//==============================
+// * 图片贴图容器 - 获取 - 全部图片贴图（私有）
+//==============================
+Game_Temp.prototype.drill_PASe_getAllPictureSprite_Private = function(){
+	var result_list = [];
+	
+	// > 图片对象层 的图片贴图
+	var sprite_list = this.drill_PASe_getPictureSpriteTank_Private();
+	if( sprite_list != undefined ){
+		for(var i=0; i < sprite_list.length; i++){
+			var sprite = sprite_list[i];
+			if( sprite instanceof Sprite_Picture ){
+				result_list.push( sprite );
+			}
+		}
+	}
+	
+	// > 最顶层 的图片贴图
+	var sprite_list = this.drill_PASe_getPictureSpriteTank_SenceTopArea();
+	if( sprite_list != undefined ){
+		for(var i=0; i < sprite_list.length; i++){
+			var sprite = sprite_list[i];
+			if( sprite instanceof Sprite_Picture ){
+				result_list.push( sprite );
+			}
+		}
+	}
+	
+	// > 图片层 的图片贴图
+	var sprite_list = this.drill_PASe_getPictureSpriteTank_PicArea();
+	if( sprite_list != undefined ){
+		for(var i=0; i < sprite_list.length; i++){
+			var sprite = sprite_list[i];
+			if( sprite instanceof Sprite_Picture ){
+				result_list.push( sprite );
+			}
+		}
+	}
+	return result_list;
+};
+//==============================
+// * 图片贴图容器 - 获取 - 根据图片ID（私有）
+//==============================
+Game_Temp.prototype.drill_PASe_getPictureSpriteByPictureId_Private = function( picture_id ){
+	
+	// > 图片对象层 的图片贴图
+	var sprite_list = this.drill_PASe_getPictureSpriteTank_Private();
+	if( sprite_list != undefined ){
+		for(var i=0; i < sprite_list.length; i++){
+			var sprite = sprite_list[i];
+			if( sprite instanceof Sprite_Picture ){
+				if( sprite._pictureId == picture_id ){
+					return sprite;
+				}
+			}
+		}
+	}
+	
+	// > 最顶层 的图片贴图
+	var sprite_list = this.drill_PASe_getPictureSpriteTank_SenceTopArea();
+	if( sprite_list != undefined ){
+		for(var i=0; i < sprite_list.length; i++){
+			var sprite = sprite_list[i];
+			if( sprite instanceof Sprite_Picture ){
+				if( sprite._pictureId == picture_id ){
+					return sprite;
+				}
+			}
+		}
+	}
+	
+	// > 图片层 的图片贴图
+	var sprite_list = this.drill_PASe_getPictureSpriteTank_PicArea();
+	if( sprite_list != undefined ){
+		for(var i=0; i < sprite_list.length; i++){
+			var sprite = sprite_list[i];
+			if( sprite instanceof Sprite_Picture ){
+				if( sprite._pictureId == picture_id ){
+					return sprite;
+				}
+			}
+		}
+	}
+	return null;
+};
+
+
 
 //=============================================================================
-// ** ☆图片控制
+// ** ☆等待控制
 //
-//			说明：	> 此模块专门控制 动画序列控制器 绑定到图片数据。
+//			说明：	> 此模块专门定义 等待类型。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 图片 - 初始化
+// * 等待控制 - 设置监听列表
+//==============================
+Game_Interpreter.prototype.drill_PASe_setWait_PicIdList = function( picId_list ){
+	this._drill_PASe_waitPicIdList = picId_list;
+};
+//==============================
+// * 等待控制 - 自定义等待类型
+//==============================
+var _drill_PASe_updateWaitMode = Game_Interpreter.prototype.updateWaitMode;
+Game_Interpreter.prototype.updateWaitMode = function(){
+	
+	// > 等待类型
+	if( this._waitMode == "_drill_PASe_waitLoading" ){		//『强制等待』指定的图片任何一个未加载，则持续等待
+		if( this._drill_PASe_waitPicIdList != undefined ){
+			
+			for(var i = 0; i < this._drill_PASe_waitPicIdList.length; i++ ){
+				var pic_id = this._drill_PASe_waitPicIdList[i];
+				
+				var picture_sprite = $gameTemp.drill_PASe_getPictureSpriteByPictureId( pic_id );
+				if( picture_sprite == undefined ){ continue; }
+				
+				if( picture_sprite._drill_PASe_decorator.drill_spriteMain_isReady() == false ){
+					return true;	//（返回true表示要等待）
+				}
+			}
+		}
+	}
+	
+	// > 原函数
+	return _drill_PASe_updateWaitMode.call(this);
+};
+
+
+
+//=============================================================================
+// ** ☆图片的属性
+//
+//			说明：	> 此模块专门定义 图片的属性。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 图片的属性 - 初始化
 //
 //			说明：	> 图片数据 存放于 Game_Screen 的 _pictures 参数中，非长期存在，且随时会被移除。
 //==============================
-var _drill_PASe_c_initialize = Game_Picture.prototype.initialize;
+var _drill_PASe_p_initialize = Game_Picture.prototype.initialize;
 Game_Picture.prototype.initialize = function() {
-	_drill_PASe_c_initialize.call(this);
 	this._drill_PASe_controller = undefined;				//动画序列控制器（对象）
 	this._drill_PASe_keepDecoratorNull = undefined;			//贴图销毁标记（布尔）
+	_drill_PASe_p_initialize.call(this);
 }
 //==============================
-// * 图片 - 帧刷新
+// * 图片的属性 - 帧刷新
 //==============================
-var _drill_PASe_c_update = Game_Picture.prototype.update;
+var _drill_PASe_p_update = Game_Picture.prototype.update;
 Game_Picture.prototype.update = function() {
-	_drill_PASe_c_update.call(this);	
+	_drill_PASe_p_update.call(this);	
 	
 	// > 帧刷新控制器
 	if( this._drill_PASe_controller != undefined ){
@@ -440,32 +671,9 @@ Game_Picture.prototype.update = function() {
 	}
 }
 //==============================
-// * 图片 - 消除图片
-//==============================
-//var _drill_PASe_c_erase = Game_Picture.prototype.erase;
-//Game_Picture.prototype.erase = function() {
-//	_drill_PASe_c_erase.call(this);	
-//	//（不操作）
-//	//（见Sprite_Picture.prototype.update，贴图在找不到数据时，会立即销毁贴图）
-//}
-//==============================
-// * 图片 - 消除图片（command235）
-//==============================
-//var _drill_PASe_p_erasePicture = Game_Screen.prototype.erasePicture;
-//Game_Screen.prototype.erasePicture = function( pictureId ){
-//    var realPictureId = this.realPictureId(pictureId);
-//	var picture = this._pictures[realPictureId];
-//	if( picture != undefined ){
-//		//（不操作）
-//		//（见Sprite_Picture.prototype.update，贴图在找不到数据时，会立即销毁贴图）
-//	}
-//	_drill_PASe_p_erasePicture.call( this, pictureId );
-//}
-
-//==============================
-// * 图片 - 创建 动画序列控制器
+// * 图片的属性 - 创建 动画序列控制器
 //
-//			说明：	> 动画序列可以重复创建。
+//			说明：	> 此函数可以重复执行，表示重复创建动画序列。
 //==============================
 Game_Picture.prototype.drill_PASe_setActionSequence = function( as_id ){
 	if( this._drill_PASe_controller == undefined ){
@@ -476,12 +684,35 @@ Game_Picture.prototype.drill_PASe_setActionSequence = function( as_id ){
 	this._drill_PASe_keepDecoratorNull = undefined;
 }
 //==============================
-// * 图片 - 销毁 动画序列控制器
+// * 图片的属性 - 销毁 动画序列控制器
 //==============================
 Game_Picture.prototype.drill_PASe_removeActionSequence = function(){
 	this._drill_PASe_controller = undefined;
 	this._drill_PASe_keepDecoratorNull = true;
 }
+//==============================
+// * 图片的属性 - 消除图片
+//==============================
+//var _drill_PASe_p_erase = Game_Picture.prototype.erase;
+//Game_Picture.prototype.erase = function() {
+//	_drill_PASe_p_erase.call(this);	
+//	//	（不操作）
+//	//	（见Sprite_Picture.prototype.update，贴图在找不到数据时，会立即销毁贴图）
+//}
+//==============================
+// * 图片的属性 - 消除图片（command235）
+//==============================
+//var _drill_PASe_p_erasePicture = Game_Screen.prototype.erasePicture;
+//Game_Screen.prototype.erasePicture = function( pictureId ){
+//	var realPictureId = this.realPictureId(pictureId);
+//	var picture = this._pictures[realPictureId];
+//	if( picture != undefined ){
+//		//	（不操作）
+//		//	（见Sprite_Picture.prototype.update，贴图在找不到数据时，会立即销毁贴图）
+//	}
+//	_drill_PASe_p_erasePicture.call( this, pictureId );
+//}
+
 
 //==============================
 // * 播放 - 播放默认的状态元集合（开放函数）
@@ -534,14 +765,18 @@ Game_Picture.prototype.drill_PASe_stopAct = function(){
 //==============================
 var _drill_PASe_sp_initialize = Sprite_Picture.prototype.initialize;
 Sprite_Picture.prototype.initialize = function( pictureId ){
-    _drill_PASe_sp_initialize.call( this,pictureId );
 	this._drill_PASe_decorator = null;					//动画序列 贴图
 	this._drill_PASe_decoratorCreateSerial = -1;		//动画序列 贴图序列号
+    _drill_PASe_sp_initialize.call( this,pictureId );
 }
 //==============================
 // * 图片贴图 - 创建 动画序列贴图
 //
 //			说明：	> 此函数可以在帧刷新中反复执行。只在 空贴图 的时候才创建。
+//					> 由于一帧内 先刷新 图片的属性，后刷新 贴图的属性。
+//					  所以修改图片的属性后，不能立即操作贴图bitmap。『图片bitmap切换慢一帧』
+//					> 如果急用，外部函数需要考虑同时 数据赋值+贴图赋值。
+//					  （一种急用的情况：动画序列 执行后，就立即执行粉碎效果。）
 //==============================
 Sprite_Picture.prototype.drill_PASe_createDecorator = function(){
 	var picture = this.picture();
@@ -550,6 +785,8 @@ Sprite_Picture.prototype.drill_PASe_createDecorator = function(){
 	if( this._drill_PASe_decorator == null ){
 		this._drill_PASe_decorator = new Drill_COAS_SpriteDecorator( this, picture._drill_PASe_controller );
 	}
+	//	（这里的 decorator 对于该插件来说，就是一个bitmap赋值过程，创建了即认定为bitmap已创建）
+	//	（至于 decorator 和 controller 是如何初始化并实现bitmap赋值，此插件不管）
 }
 //==============================
 // * 图片贴图 - 销毁 动画序列贴图
@@ -563,7 +800,7 @@ Sprite_Picture.prototype.drill_PASe_destroyDecorator = function(){
 	}
 }
 //==============================
-// * 图片贴图 - 帧刷新绑定
+// * 图片贴图 - 帧刷新
 //==============================
 var _drill_PASe_sp_update = Sprite_Picture.prototype.update;
 Sprite_Picture.prototype.update = function() {
@@ -603,13 +840,15 @@ Sprite_Picture.prototype.drill_PASe_updateDecoratorCreate = function() {
 //==============================
 Sprite_Picture.prototype.drill_PASe_updateDecoratorDestroy = function() {
 	var picture = this.picture();
-	if( picture == undefined ){
-		this.drill_PASe_destroyDecorator();		//（找不到数据时，立即销毁）
-		return;
-	}
+	if( picture ){
+		
+		// > 贴图销毁标记（数据存在时，仍然销毁贴图）
+		if( picture._drill_PASe_keepDecoratorNull == true ){
+			this.drill_PASe_destroyDecorator();
+		}
 	
-	// > 贴图销毁标记（数据存在时，仍然销毁贴图）
-	if( picture._drill_PASe_keepDecoratorNull == true ){
+	// > 无数据时『图片数据根除时』
+	}else{
 		this.drill_PASe_destroyDecorator();
 	}
 }

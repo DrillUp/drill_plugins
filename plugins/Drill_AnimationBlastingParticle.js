@@ -67,7 +67,7 @@
  *
  * 1.粒子小爆炸动画是临时效果，播放完毕后自动销毁。
  * 2.小爆炸绑定于地图物体，物体移动时，爆炸效果会跟随一并移动。
- *
+ * 
  * -----------------------------------------------------------------------------
  * ----激活条件 - 战斗单位
  * 你需要通过插件指令控制粒子小爆炸在战斗界面的效果：
@@ -1964,11 +1964,11 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			}
 			if( charSprite_list == null && (unit == "玩家" || unit == "玩家领队") ){
 				charSprite_list = [];
-				charSprite_list.push( $gameTemp.drill_ABPa_getCharacterSpriteByFollowerIndex( 0 ) );
+				charSprite_list.push( $gameTemp.drill_ABPa_getCharacterSpriteByFollowerIndex( -2 ) );  //『玩家id』
 			}
 			if( charSprite_list == null && unit == "玩家全员" ){
 				charSprite_list = [];
-				charSprite_list.push( $gameTemp.drill_ABPa_getCharacterSpriteByFollowerIndex( 0 ) );
+				charSprite_list.push( $gameTemp.drill_ABPa_getCharacterSpriteByFollowerIndex( -2 ) );  //『玩家id』
 				for(var i=0; i < $gamePlayer.followers().visibleFollowers().length; i++ ){
 					charSprite_list.push( $gameTemp.drill_ABPa_getCharacterSpriteByFollowerIndex( i+1 ) );
 				}
@@ -2259,7 +2259,7 @@ Game_Temp.prototype.drill_ABPa_getActorSpriteByActorId_Private = function( actor
 //			参数：	> 无
 //			返回：	> 贴图数组     （物体贴图）
 //          
-//			说明：	> 此函数直接返回容器对象。
+//			说明：	> 此函数直接返回容器对象。不含镜像。
 //##############################
 Game_Temp.prototype.drill_ABPa_getCharacterSpriteTank = function(){
 	return this.drill_ABPa_getCharacterSpriteTank_Private();
@@ -2270,7 +2270,7 @@ Game_Temp.prototype.drill_ABPa_getCharacterSpriteTank = function(){
 //			参数：	> event_id 数字（事件ID）
 //			返回：	> 贴图对象     （事件贴图）
 //          
-//			说明：	> 事件id和物体贴图一一对应。（不含镜像）
+//			说明：	> 事件id和物体贴图一一对应。不含镜像。
 //					> 此函数只读，且不缓存任何对象，直接读取容器数据。
 //##############################
 Game_Temp.prototype.drill_ABPa_getCharacterSpriteByEventId = function( event_id ){
@@ -2282,7 +2282,7 @@ Game_Temp.prototype.drill_ABPa_getCharacterSpriteByEventId = function( event_id 
 //			参数：	> follower_index 数字（玩家队员索引）
 //			返回：	> 贴图对象           （玩家队员贴图）
 //          
-//			说明：	> 0表示玩家，1表示第一个跟随者。（不含镜像）
+//			说明：	> -2表示玩家，1表示第一个跟随者。不含镜像。
 //					> 此函数只读，且不缓存任何对象，直接读取容器数据。
 //##############################
 Game_Temp.prototype.drill_ABPa_getCharacterSpriteByFollowerIndex = function( follower_index ){
@@ -2292,7 +2292,10 @@ Game_Temp.prototype.drill_ABPa_getCharacterSpriteByFollowerIndex = function( fol
 // ** 物体贴图（接口实现）
 //=============================================================================
 //==============================
-// * 物体贴图容器 - 获取 - 根据事件ID（私有）
+// * 物体贴图容器 - 获取 - 容器指针（私有）
+//          
+//			说明：	> 贴图容器 _characterSprites，存放全部物体贴图，不含镜像贴图。
+//					  这只是一个贴图容器，即使贴图在其他层级，也不影响容器获取到贴图。（更多细节去看 脚本文档说明）
 //==============================
 Game_Temp.prototype.drill_ABPa_getCharacterSpriteTank_Private = function(){
 	if( SceneManager._scene == undefined ){ return null; }
@@ -2307,8 +2310,7 @@ Game_Temp.prototype.drill_ABPa_getCharacterSpriteByEventId_Private = function( e
 	if( sprite_list == undefined ){ return null; }
 	for(var i=0; i < sprite_list.length; i++){
 		var sprite = sprite_list[i];
-		if( sprite._character == undefined ){ continue; }				//（判断 _character 就可以，不需要检验 Sprite_Character 了）
-		if( this.drill_ABPa_isReflectionSprite( sprite ) ){ continue; }	//（镜像跳过）
+		if( sprite._character == undefined ){ continue; }		//（判断 _character 就可以，不需要检验 Sprite_Character）
 		if( sprite._character._eventId == event_id ){
 			return sprite;
 		}
@@ -2323,9 +2325,9 @@ Game_Temp.prototype.drill_ABPa_getCharacterSpriteByFollowerIndex_Private = funct
 	if( sprite_list == undefined ){ return null; }
 	for(var i=0; i < sprite_list.length; i++){
 		var sprite = sprite_list[i];
-		if( sprite._character == undefined ){ continue; }				//（判断 _character 就可以，不需要检验 Sprite_Character 了）
-		if( this.drill_ABPa_isReflectionSprite( sprite ) ){ continue; }	//（镜像跳过）
-		if( follower_index == 0 && sprite._character == $gamePlayer ){
+		if( sprite._character == undefined ){ continue; }	//（判断 _character 就可以，不需要检验 Sprite_Character）
+		if( follower_index == -2 &&   //『玩家id』
+			sprite._character == $gamePlayer ){
 			return sprite;
 		}
 		if( sprite._character._memberIndex == follower_index &&
@@ -2335,14 +2337,6 @@ Game_Temp.prototype.drill_ABPa_getCharacterSpriteByFollowerIndex_Private = funct
 	}
 	return null;
 };
-//==============================
-// * 物体贴图容器 - 优化 - 检查镜像情况
-//==============================
-Game_Temp.prototype.drill_ABPa_isReflectionSprite = function( sprite ){
-	if( Imported.Drill_LayerReverseReflection      && sprite instanceof Drill_Sprite_LRR ){ return true; }
-	if( Imported.Drill_LayerSynchronizedReflection && sprite instanceof Drill_Sprite_LSR ){ return true; }
-	return false;
-}
 
 
 //#############################################################################
@@ -2436,7 +2430,7 @@ Spriteset_Map.prototype.createCharacters = function() {
 	
 	if( this._drill_animPBackArea == undefined ){		//父贴图后面层
 		this._drill_animPBackArea = new Sprite();
-		this._drill_animPBackArea.z = 0.85;				//（在中层上面，事件后面）
+		this._drill_animPBackArea.z = 0.75;				//（在中层上面，事件后面）
 		this._tilemap.addChild(this._drill_animPBackArea);
 	}
 	

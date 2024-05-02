@@ -401,7 +401,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 }
 //==============================
-// ** 插件指令 - 事件检查
+// * 插件指令 - 事件检查
 //==============================
 Game_Map.prototype.drill_COET_isEventExist = function( e_id ){
 	if( e_id == 0 ){ return false; }
@@ -413,6 +413,7 @@ Game_Map.prototype.drill_COET_isEventExist = function( e_id ){
 	}
 	return true;
 };
+
 
 //=============================================================================
 // * 注释绑定
@@ -506,53 +507,69 @@ Game_Event.prototype.drill_COET_removeAllTag = function() {
 //==============================
 // * 直接操作 - 获取事件（接口，根据单标签）
 //==============================
-Game_Map.prototype.drill_COET_getEventsByTag_direct = function( tag ) {
-	var result = [];
-	var events = this.events();
-	for (var i = 0; i < events.length ; i++) {
-		if( events[i].drill_COET_hasTag(tag) ){
-			result.push(events[i]);
+Game_Map.prototype.drill_COET_getEventsByTag_direct = function( tag ){
+	var result_list = [];
+	var event_list = this._events;
+	for(var i = 0; i < event_list.length; i++ ){
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
+		
+		if( temp_event.drill_COET_hasTag(tag) ){
+			result_list.push( temp_event );
 		}
 	}
-	return result;
+	return result_list;
 }
 //==============================
 // * 直接操作 - 获取事件（接口，根据多个标签）
 //==============================
-Game_Map.prototype.drill_COET_getEventsByTaglist_direct = function( tag_list ) {
-	var result = [];
-	var events = this.events();
-	for (var i = 0; i < events.length ; i++) {
-		if( events[i].drill_COET_hasAnyTag(tag_list) ){
-			result.push(events[i]);
+Game_Map.prototype.drill_COET_getEventsByTaglist_direct = function( tag_list ){
+	var result_list = [];
+	var event_list = this._events;
+	for(var i = 0; i < event_list.length; i++ ){
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
+		
+		if( temp_event.drill_COET_hasAnyTag(tag_list) ){
+			result_list.push( temp_event );
 		}
 	}
-	return result;
+	return result_list;
 }
 //==============================
 // * 直接操作 - 获取事件（接口，根据事件名）
 //==============================
-Game_Map.prototype.drill_COET_getEventsByName_direct = function( name ) {
-	var result = [];
-	var events = this.events();
-	for (var i = 0; i < events.length ; i++) {
-		if( events[i].event().name == name ){
-			result.push(events[i]);
+Game_Map.prototype.drill_COET_getEventsByName_direct = function( name ){
+	var result_list = [];
+	var event_list = this._events;
+	for(var i = 0; i < event_list.length; i++ ){
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
+		
+		if( temp_event.event().name == name ){
+			result_list.push( temp_event );
 		}
 	}
-	return result;
+	return result_list;
 }
 //==============================
 // * 筛选器 - 筛选事件（根据多个标签）
 //==============================
 Game_Map.prototype.drill_COET_selectEventsByTaglist = function( event_list, tag_list ){
-	var result = [];
-	for (var i = 0; i < event_list.length ; i++) {
-		if( event_list[i].drill_COET_hasAnyTag(tag_list) ){
-			result.push(event_list[i]);
+	var result_list = [];
+	for(var i = 0; i < event_list.length; i++ ){
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
+		
+		if( temp_event.drill_COET_hasAnyTag(tag_list) ){
+			result_list.push( temp_event );
 		}
 	}
-	return result;
+	return result_list;
 }
 
 
@@ -637,9 +654,12 @@ Game_Map.prototype.drill_COET_updateRestatistics = function() {
 	$gameTemp._drill_COET_needRestatistics = false;
 	
 	$gameTemp._drill_COET_eventTank = {};
-	var events = this.events();
-	for(var i = 0; i < events.length; i++ ){  
-		var temp_event = events[i];
+	var event_list = this._events;
+	for(var i = 0; i < event_list.length; i++ ){  
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
+		
 		for(var j = 0; j < temp_event._drill_COET_tag.length; j++ ){  
 			var temp_tag = temp_event._drill_COET_tag[j];
 			

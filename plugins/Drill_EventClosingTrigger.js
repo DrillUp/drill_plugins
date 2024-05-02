@@ -1423,9 +1423,12 @@ Game_Map.prototype.drill_ECT_updateRestatistics = function() {
 	
 	// > 统计棋盘事件
 	$gameTemp._drill_ECT_bindTank = [];
-	var events = this.events();
-	for( var i = 0; i < events.length; i++ ){  
-		var temp_event = events[i];
+	var event_list = this._events;
+	for(var i = 0; i < event_list.length; i++ ){  
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
+		
 		if( temp_event.drill_ECT_hasCheckerboard() == true ){
 			$gameTemp._drill_ECT_bindTank.push(temp_event);
 		}
@@ -2151,6 +2154,24 @@ Spriteset_Map.prototype.createDestination = function() {
 		this._baseSprite.addChild(this._drill_mapUpArea);	
 	}
 }
+//==============================
+// * 地图层级 - 参数定义
+//
+//			说明：	> 所有drill插件的贴图都用唯一参数：zIndex（可为小数、负数），其它插件没有此参数定义。
+//==============================
+if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义）
+	var _drill_sprite_zIndex = true;
+	Object.defineProperty( Sprite.prototype, 'zIndex', {
+		set: function( value ){
+			this.__drill_zIndex = value;
+		},
+		get: function(){
+			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			return this.__drill_zIndex;
+		},
+		configurable: true
+	});
+};
 //==============================
 // * 地图层级 - 图片层级排序（私有）
 //==============================

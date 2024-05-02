@@ -245,9 +245,7 @@
  * 工作类型：   持续执行
  * 时间复杂度： o(n^2)*o(贴图处理) 每帧
  * 测试方法：   在战斗中放置多个魔法圈，进行性能测试。
- * 测试结果：   200个事件的战斗中，平均消耗为：【28.34ms】
- *              100个事件的战斗中，平均消耗为：【17.61ms】
- *               50个事件的战斗中，平均消耗为：【16.32ms】
+ * 测试结果：   战斗界面中，平均消耗为：【16.32ms】
  *
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
  *   测试结果并不是精确值，范围在给定值的10ms范围内波动。
@@ -279,6 +277,8 @@
  * 整理了延迟插件指令的功能。
  * [v2.0]
  * 大幅度优化了底层结构，加强了插件的功能。
+ * [v2.1]
+ * 修改了插件与屏幕快照的兼容性。
  * 
  * 
  * 
@@ -1975,7 +1975,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	/*-----------------多插件的指令------------------*/
 	if( command === ">清空全部战斗装饰部件" ){
 		$gameSystem.drill_BCi_removeControllerAll();
-		this.wait(1);	//（强制等待1帧，确保全部清空）
+		this.wait(1);	//（『强制等待』1帧，确保全部清空）
 	}
 	if( command === ">战斗魔法圈" ){
 		
@@ -2009,7 +2009,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var type = String(args[1]);
 			if( type == "删除全部" ){
 				$gameSystem.drill_BCi_removeControllerAll();
-				this.wait(1);	//（强制等待1帧，确保全部清空）
+				this.wait(1);	//（『强制等待』1帧，确保全部清空）
 			}
 		}
 		
@@ -2875,6 +2875,24 @@ Scene_Battle.prototype.createAllWindows = function() {
 		this.addChild(this._drill_SenceTopArea);	
 	}
 }
+//==============================
+// * 战斗层级 - 参数定义
+//
+//			说明：	> 所有drill插件的贴图都用唯一参数：zIndex（可为小数、负数），其它插件没有此参数定义。
+//==============================
+if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义）
+	var _drill_sprite_zIndex = true;
+	Object.defineProperty( Sprite.prototype, 'zIndex', {
+		set: function( value ){
+			this.__drill_zIndex = value;
+		},
+		get: function(){
+			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			return this.__drill_zIndex;
+		},
+		configurable: true
+	});
+};
 //==============================
 // * 战斗层级 - 图片层级排序（私有）
 //==============================

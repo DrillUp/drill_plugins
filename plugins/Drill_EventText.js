@@ -800,6 +800,9 @@ Game_Temp.prototype.drill_ET_getCharacterSpriteByEventId = function( event_id ){
 //=============================================================================
 //==============================
 // * 事件贴图容器 - 获取 - 根据事件ID（私有）
+//          
+//			说明：	> 贴图容器 _characterSprites，存放全部物体贴图，不含镜像贴图。
+//					  这只是一个贴图容器，即使贴图在其他层级，也不影响容器获取到贴图。（更多细节去看 脚本文档说明）
 //==============================
 Game_Temp.prototype.drill_ET_getCharacterSpriteTank_Private = function(){
 	if( SceneManager._scene == undefined ){ return null; }
@@ -814,22 +817,13 @@ Game_Temp.prototype.drill_ET_getCharacterSpriteByEventId_Private = function( eve
 	if( sprite_list == undefined ){ return null; }
 	for(var i=0; i < sprite_list.length; i++){
 		var sprite = sprite_list[i];
-		if( sprite._character == undefined ){ continue; }				//（判断 _character 就可以，不需要检验 Sprite_Character 了）
-		if( this.drill_ET_isReflectionSprite( sprite ) ){ continue; }	//（镜像跳过）
+		if( sprite._character == undefined ){ continue; }		//（判断 _character 就可以，不需要检验 Sprite_Character）
 		if( sprite._character._eventId == event_id ){
 			return sprite;
 		}
 	}
 	return null;
 };
-//==============================
-// * 事件贴图容器 - 检查镜像情况
-//==============================
-Game_Temp.prototype.drill_ET_isReflectionSprite = function( sprite ){
-	if( Imported.Drill_LayerReverseReflection      && sprite instanceof Drill_Sprite_LRR ){ return true; }
-	if( Imported.Drill_LayerSynchronizedReflection && sprite instanceof Drill_Sprite_LSR ){ return true; }
-	return false;
-}
 
 
 //#############################################################################
@@ -928,6 +922,24 @@ Scene_Map.prototype.createAllWindows = function() {
 		this.addChild(this._drill_SenceTopArea);	
 	}
 }
+//==============================
+// * 地图层级 - 参数定义
+//
+//			说明：	> 所有drill插件的贴图都用唯一参数：zIndex（可为小数、负数），其它插件没有此参数定义。
+//==============================
+if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义）
+	var _drill_sprite_zIndex = true;
+	Object.defineProperty( Sprite.prototype, 'zIndex', {
+		set: function( value ){
+			this.__drill_zIndex = value;
+		},
+		get: function(){
+			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			return this.__drill_zIndex;
+		},
+		configurable: true
+	});
+};
 //==============================
 // * 地图层级 - 图片层级排序（私有）
 //==============================
@@ -1032,10 +1044,12 @@ Game_Map.prototype.drill_ET_updateRestatistics = function() {
 	$gameTemp._drill_ET_needRestatistics = false;
 	
 	$gameTemp._drill_ET_textEvents = [];	//（容器中的事件，只增不减，除非清零）
-	var events = this.events();
-	for( var i = 0; i < events.length; i++ ){
-		var temp_event = events[i];
-		if( temp_event == undefined ){ continue; }
+	var event_list = this._events;
+	for(var i = 0; i < event_list.length; i++ ){
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
+		
 		if( temp_event._drill_ET_controller == undefined ){ continue; }
 		$gameTemp._drill_ET_textEvents.push(temp_event);
 	}

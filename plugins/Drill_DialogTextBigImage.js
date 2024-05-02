@@ -1935,7 +1935,7 @@ Window_Base.prototype.drill_COWC_processNewEffectChar_Combined = function( match
 // * 字符图 - 绘制大图片
 //==============================
 Window_Base.prototype.drill_DTBI_drawImg = function( imgIndex, x, y ){
-    var bitmap = $gameTemp._drill_DTBI_preloadTank[ imgIndex-1 ];	//（直接从 预加载容器 中取出并绘制）
+    var bitmap = $gameTemp._drill_DTBI_preloadTank[ imgIndex-1 ];	//（『预加载直接赋值』直接从 预加载容器 中取出并绘制）
 	if( bitmap && bitmap.isReady() ){
 		var pw = bitmap.width;
 		var ph = bitmap.height;

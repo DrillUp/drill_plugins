@@ -27,7 +27,6 @@
  *   - Drill_MiniPlateForEvent   鼠标-事件说明窗口
  *   - Drill_MiniPlateForState   鼠标-状态和buff说明窗口
  *   - Drill_MouseTriggerEvent   鼠标-鼠标触发事件
- *   - Drill_MouseTriggerPicture 鼠标-鼠标触发图片
  *   ……
  * 
  * -----------------------------------------------------------------------------

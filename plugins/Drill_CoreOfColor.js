@@ -2044,26 +2044,43 @@ Bitmap.prototype.drill_COC__drawSeniorTextBody = function( text, tx, ty, maxWidt
 	}
 	
 	// > 绘制渐变文字
-	var context = this._context;
-	var grad = context.createLinearGradient( x_0, y_0, x_1, y_1 );
+	var painter = this._context;
+	var grad = painter.createLinearGradient( x_0, y_0, x_1, y_1 );
 	for( var i = 0; i < stop_valueList.length; i++ ){
 		grad.addColorStop( parseFloat(stop_valueList[i]), String(stop_colorList[i]) );
 	}
-	context.fillStyle = grad;
-	context.fillText(text, tx, ty, maxWidth);
+    painter.save();								//（a.存储上一个画笔状态）
+	
+	painter.fillStyle = grad;					//（b.设置样式）
+	
+	painter.fillText(text, tx, ty, maxWidth);	//（c.路径填充/描边，fillRect）
+	
+    painter.restore();							//（d.回滚上一个画笔状态）
+	
 	
 	// > DEBUG
 	if( DrillUp.g_COC_debugMode == true ){
 		
 		// > DEBUG - 渐变矩阵范围
-		context.strokeStyle = "#ffff00";
-		context.lineWidth = 2;
-		context.strokeRect( tx, ty-height, width, height);
-
+		painter.save();										//（a.存储上一个画笔状态）
+		
+		painter.strokeStyle = "#ffff00";					//（b.设置样式）
+		painter.lineWidth = 2;
+		
+		painter.strokeRect( tx, ty-height, width, height);	//（c.路径填充/描边，strokeRect）
+	
+		painter.restore();									//（d.回滚上一个画笔状态）
+		
+		
 		// > DEBUG - 中心点
-		context.fillStyle = "#ff0000";
-		context.fillRect( midPoint.x -2, midPoint.y -2, 4, 4 );
-		context.restore();
+		painter.save();											//（a.存储上一个画笔状态）
+		
+		painter.fillStyle = "#ff0000";							//（b.设置样式）
+		
+		painter.fillRect( midPoint.x -2, midPoint.y -2, 4, 4 );	//（c.路径填充/描边，fillRect）
+		
+		painter.restore();										//（d.回滚上一个画笔状态）
+		
 		
 		// > DEBUG - 特殊偏移设置
 		if( Utils.isNwjs() && this['drill_elements_drawText'] == true ){
@@ -2074,10 +2091,14 @@ Bitmap.prototype.drill_COC__drawSeniorTextBody = function( text, tx, ty, maxWidt
 		}
 		
 		// > DEBUG - 渐变点
-		context.fillStyle = "#ff00ff";
-		context.fillRect( x_0 -2, y_0 -2, 4, 4);
-		context.fillRect( x_1 -2, y_1 -2, 4, 4);
-		context.restore();
+		painter.save();								//（a.存储上一个画笔状态）
+		
+		painter.fillStyle = "#ff00ff";				//（b.设置样式）
+		
+		painter.fillRect( x_0 -2, y_0 -2, 4, 4);	//（c.路径填充/描边，fillRect）
+		painter.fillRect( x_1 -2, y_1 -2, 4, 4);
+		
+		painter.restore();							//（d.回滚上一个画笔状态）
 	}
 };
 

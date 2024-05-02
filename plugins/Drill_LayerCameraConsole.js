@@ -521,6 +521,7 @@ Drill_LCC_MouseBorderSprite.prototype.drill_LCC_updateGif = function() {
 	var inter = this._drill_time;
 	if( direction == 2 || direction == 4 || direction == 6 || direction == 8 ){
 		inter = inter / data['interval'];
+		inter = Math.floor(inter);
 		inter = inter % this._drill_bitmapTank_8.length;
 		if( data['back_run'] ){
 			inter = this._drill_bitmapTank_8.length - 1 - inter;
@@ -531,6 +532,7 @@ Drill_LCC_MouseBorderSprite.prototype.drill_LCC_updateGif = function() {
 	// > 播放GIF - 左上方
 	if( direction == 1 || direction == 3 || direction == 7 || direction == 9 ){
 		inter = inter / data['interval'];
+		inter = Math.floor(inter);
 		inter = inter % this._drill_bitmapTank_7.length;
 		if( data['back_run'] ){
 			inter = this._drill_bitmapTank_7.length - 1 - inter;

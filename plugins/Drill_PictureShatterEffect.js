@@ -407,6 +407,17 @@ Game_System.prototype.drill_PSE_checkSysData_Private = function() {
 // ** 【标准模块】图片贴图 ☆图片贴图
 //#############################################################################
 //##############################
+// * 图片贴图 - 获取 - 全部图片贴图【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 贴图数组       （图片贴图）
+//          
+//			说明：	> 此函数返回所有图片贴图，包括被转移到 图片层、最顶层 的图片。
+//##############################
+Game_Temp.prototype.drill_PSE_getAllPictureSprite = function(){
+	return this.drill_PSE_getAllPictureSprite_Private();
+}
+//##############################
 // * 图片贴图 - 获取 - 容器指针【标准函数】
 //			
 //			参数：	> 无
@@ -457,7 +468,7 @@ Game_Temp.prototype.drill_PSE_getPictureSpriteTank_SenceTopArea = function(){
 //==============================
 Game_Temp.prototype.drill_PSE_getPictureSpriteTank_PicArea = function(){
 	if( SceneManager._scene == undefined ){ return null; }
-	if( SceneManager._scene instanceof Scene_Battle ){
+	if( SceneManager._scene instanceof Scene_Battle ){		//『图片与多场景』
 		if( SceneManager._scene._spriteset == undefined ){ return null; }
 		if( SceneManager._scene._spriteset._drill_battlePicArea == undefined ){ return null; }
 		return SceneManager._scene._spriteset._drill_battlePicArea.children;
@@ -470,42 +481,85 @@ Game_Temp.prototype.drill_PSE_getPictureSpriteTank_PicArea = function(){
 	return null;
 };
 //==============================
-// * 图片贴图容器 - 获取 - 根据图片ID（私有）
+// * 图片贴图容器 - 获取 - 全部图片贴图（私有）
 //==============================
-Game_Temp.prototype.drill_PSE_getPictureSpriteByPictureId_Private = function( picture_id ){
+Game_Temp.prototype.drill_PSE_getAllPictureSprite_Private = function(){
+	var result_list = [];
 	
 	// > 图片对象层 的图片贴图
 	var sprite_list = this.drill_PSE_getPictureSpriteTank_Private();
-	if( sprite_list == undefined ){ return null; }
-	for(var i=0; i < sprite_list.length; i++){
-		var sprite = sprite_list[i];
-		if( sprite instanceof Sprite_Picture ){
-			if( sprite._pictureId == picture_id ){
-				return sprite;
+	if( sprite_list != undefined ){
+		for(var i=0; i < sprite_list.length; i++){
+			var sprite = sprite_list[i];
+			if( sprite instanceof Sprite_Picture ){
+				result_list.push( sprite );
 			}
 		}
 	}
 	
 	// > 最顶层 的图片贴图
 	var sprite_list = this.drill_PSE_getPictureSpriteTank_SenceTopArea();
-	if( sprite_list == undefined ){ return null; }
-	for(var i=0; i < sprite_list.length; i++){
-		var sprite = sprite_list[i];
-		if( sprite instanceof Sprite_Picture ){
-			if( sprite._pictureId == picture_id ){
-				return sprite;
+	if( sprite_list != undefined ){
+		for(var i=0; i < sprite_list.length; i++){
+			var sprite = sprite_list[i];
+			if( sprite instanceof Sprite_Picture ){
+				result_list.push( sprite );
 			}
 		}
 	}
 	
 	// > 图片层 的图片贴图
 	var sprite_list = this.drill_PSE_getPictureSpriteTank_PicArea();
-	if( sprite_list == undefined ){ return null; }
-	for(var i=0; i < sprite_list.length; i++){
-		var sprite = sprite_list[i];
-		if( sprite instanceof Sprite_Picture ){
-			if( sprite._pictureId == picture_id ){
-				return sprite;
+	if( sprite_list != undefined ){
+		for(var i=0; i < sprite_list.length; i++){
+			var sprite = sprite_list[i];
+			if( sprite instanceof Sprite_Picture ){
+				result_list.push( sprite );
+			}
+		}
+	}
+	return result_list;
+};
+//==============================
+// * 图片贴图容器 - 获取 - 根据图片ID（私有）
+//==============================
+Game_Temp.prototype.drill_PSE_getPictureSpriteByPictureId_Private = function( picture_id ){
+	
+	// > 图片对象层 的图片贴图
+	var sprite_list = this.drill_PSE_getPictureSpriteTank_Private();
+	if( sprite_list != undefined ){
+		for(var i=0; i < sprite_list.length; i++){
+			var sprite = sprite_list[i];
+			if( sprite instanceof Sprite_Picture ){
+				if( sprite._pictureId == picture_id ){
+					return sprite;
+				}
+			}
+		}
+	}
+	
+	// > 最顶层 的图片贴图
+	var sprite_list = this.drill_PSE_getPictureSpriteTank_SenceTopArea();
+	if( sprite_list != undefined ){
+		for(var i=0; i < sprite_list.length; i++){
+			var sprite = sprite_list[i];
+			if( sprite instanceof Sprite_Picture ){
+				if( sprite._pictureId == picture_id ){
+					return sprite;
+				}
+			}
+		}
+	}
+	
+	// > 图片层 的图片贴图
+	var sprite_list = this.drill_PSE_getPictureSpriteTank_PicArea();
+	if( sprite_list != undefined ){
+		for(var i=0; i < sprite_list.length; i++){
+			var sprite = sprite_list[i];
+			if( sprite instanceof Sprite_Picture ){
+				if( sprite._pictureId == picture_id ){
+					return sprite;
+				}
 			}
 		}
 	}

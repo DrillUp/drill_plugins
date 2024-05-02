@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.0]        互动 - 举起花盆能力
+ * @plugindesc [v2.1]        互动 - 举起花盆能力
  * @author Drill_up
  * 
  * 
@@ -188,6 +188,8 @@
  * 优化了花盆的镜像部分内容。
  * [v2.0]
  * 优化了旧存档的识别与兼容。
+ * [v2.1]
+ * 兼容了最新的镜像设置和行走图优化核心堆叠级设置。
  * 
  * 
  * 
@@ -314,6 +316,18 @@
 	var DrillUp = DrillUp || {}; 
 	DrillUp.g_PT_PluginTip_curName = "Drill_PickThrow.js 互动-举起花盆能力";
 	DrillUp.g_PT_PluginTip_baseList = [];
+	//==============================
+	// * 提示信息 - 报错 - 强制更新提示
+	//==============================
+	DrillUp.drill_PT_getPluginTip_NeedUpdate_COEF = function(){
+		return "【" + DrillUp.g_PT_PluginTip_curName + "】\n行走图优化核心插件版本过低，你需要更新 核心插件 至少v1.2及以上版本。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到事件
+	//==============================
+	DrillUp.drill_PT_getPluginTip_EventNotFind = function( e_id ){
+		return "【" + DrillUp.g_PT_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
+	};
 	
 	
 //=============================================================================
@@ -349,7 +363,8 @@ var _drill_PT_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args){ 
 	_drill_PT_pluginCommand.call(this, command, args);
 	if( command === ">举起花盆" ){
-		if(args.length >= 2){
+		
+		if( args.length >= 2 ){
 			var type = String(args[1]);
 			if(args[3]){ var temp1 = args[3]; }
 			if(args[5]){ var temp2 = args[5]; }
@@ -365,19 +380,16 @@ Game_Interpreter.prototype.pluginCommand = function(command, args){
 			if( type == "投掷功能关闭" ){
 				$gameSystem._drill_PT_can_throw = false;
 			}
+			
 			if( type == "强制举起事件" ){
 				if( String(temp1) == "本事件" ){
-					$gameMap.events().forEach(function(event){ 
-						if( event.eventId() === this._eventId){ 
-							event.drill_doPick();
-						};
-					}, this);	
+					var e = $gameMap.event( this._eventId );
+					e.drill_doPick();
 				}else{
-					$gameMap.events().forEach(function(event){ 
-						if( event.eventId() === Number(temp1)){ 
-							event.drill_doPick();
-						};
-					}, this);	
+					var e_id = Number(temp1)
+					if( $gameMap.drill_PT_isEventExist( e_id ) == false ){ return; }
+					var e = $gameMap.event( e_id );
+					e.drill_doPick();
 				}
 			}
 			if( type == "强制销毁运输的事件" ){
@@ -395,6 +407,19 @@ Game_Interpreter.prototype.pluginCommand = function(command, args){
 			}
 		}
 	}
+};
+//==============================
+// * 插件指令 - 事件检查
+//==============================
+Game_Map.prototype.drill_PT_isEventExist = function( e_id ){
+	if( e_id == 0 ){ return false; }
+	
+	var e = this.event( e_id );
+	if( e == undefined ){
+		alert( DrillUp.drill_PT_getPluginTip_EventNotFind( e_id ) );
+		return false;
+	}
+	return true;
 };
 
 
@@ -479,7 +504,6 @@ Game_System.prototype.drill_PT_checkSysData_Private = function() {
 	if( this._drill_PT_can_pick == undefined ){
 		this.drill_PT_initSysData();
 	}
-	
 };
 
 
@@ -499,14 +523,6 @@ Game_Map.prototype.update = function(sceneActive){
 //=============================================================================
 // * 优化
 //=============================================================================
-//==============================
-// * 优化 - 检查镜像情况
-//==============================
-Game_Temp.prototype.drill_PT_isReflectionSprite = function( sprite ){
-	if( Imported.Drill_LayerReverseReflection      && sprite instanceof Drill_Sprite_LRR ){ return true; }
-	if( Imported.Drill_LayerSynchronizedReflection && sprite instanceof Drill_Sprite_LSR ){ return true; }
-	return false;
-}
 //==============================
 // * 优化 - 开关赋值时不刷新地图
 //==============================
@@ -811,13 +827,17 @@ Game_Player.prototype.drill_PT_clearLifting = function(){
 // * 运输 - 获取正在运输的事件
 //==============================
 Game_Player.prototype.drill_PT_getLiftingEvent = function(){ 
-	var events = $gameMap.events();
-	for (var i = 0; i < events.length; i++){   
-		var temp_event = events[i];
-		if(  temp_event._drill_PT_is_being_lift != undefined && temp_event._drill_PT_is_being_lift == true ){ 
+	var event_list = $gameMap._events;
+	for(var i = 0; i < event_list.length; i++ ){
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
+		
+		if( temp_event._drill_PT_is_being_lift != undefined && 
+			temp_event._drill_PT_is_being_lift == true ){ 
 			return temp_event;
 		};
-    } 
+	};
 	return null;
 };
 //==============================
@@ -856,99 +876,158 @@ Game_Character.prototype.drill_PT_updateLifting = function(){
 		this._direction = $gamePlayer._direction;	
 	}
 };
-
 //==============================
-// * 运输 - 被举起物z轴控制（与玩家贴图的先后顺序）
+// * 运输 - 高度值
+//
+//			说明：	> 高度值是正数。
 //==============================
-var _drill_PT_pSprite_updatePosition = Sprite_Character.prototype.updatePosition;
-Sprite_Character.prototype.updatePosition = function(){ 
-	
-	// > 镜像情况时，直接跳过
-	if( $gameTemp.drill_PT_isReflectionSprite(this) ){
-		_drill_PT_pSprite_updatePosition.call(this);	//（镜像插件中自己单独控制z轴关系）
-		return;
-	}
-	
-	// > 事件被举起时位置
-	if( this._character != undefined &&
-		this._character instanceof Game_Event ){
-			
-		if( this._character._drill_PT_is_being_lift && this._character._drill_PT_pick_wait == 0 ){ 
-			this.drill_PT_updateLiftingObjSprite();
-			return;
-		};
-		
-		_drill_PT_pSprite_updatePosition.call(this);
-		
-		if( this._character._drill_PT_pick_wait > 0 ){ this.z = $gamePlayer.screenZ() + 0.05};	//（注意，只 +0.05 高度层级）
-		if( this._character._drill_PT_throw_wait > 0 ){this.z = $gamePlayer.screenZ() + 0.05};
-		return;
-	}
-	
-	// > 执行原函数
-	_drill_PT_pSprite_updatePosition.call(this);
-};
-//==============================
-// * 运输 - 对象显示Y值
-//==============================
-var _drill_PT_c_screenY = Game_CharacterBase.prototype.screenY;
-Game_CharacterBase.prototype.screenY = function(){
-	
-	// > 【图块-侧边阶梯区域】修正
-	if( Imported.Drill_LayerStairArea ){
-		if( this._drill_PT_is_being_lift == true ){
-			this._drill_LSA_height = $gamePlayer._drill_LSA_height * 2;		//（由于阶梯是完全相反的Y轴补正，所以阶梯初始高度x2）
-		}
-	}
-	
-	// > 原函数
-	var yy = _drill_PT_c_screenY.call( this );
+Game_CharacterBase.prototype.drill_PT_getHeight = function(){
 	
 	// > 只有事件才能被举起
 	if( this instanceof Game_Event != true ){
-		return yy;
+		return 0;
 	}
 	
-	// > 高度补正
+	// > 高度值
+	var yy = 0;
 	if( this._drill_PT_is_being_lift == true || 
 		this._drill_PT_throw_wait > 0 ){
 		
-		// > 玩家Y轴产生的补正高度
-		yy -= $gamePlayer.drill_PT_fixY();	//（插件补正）
-		//yy -= $gamePlayer.shiftY();		//（6像素补正）
-		yy -= $gamePlayer.jumpHeight();		//（跳跃高度补正）
+		// > 玩家跳跃高度
+		yy += $gamePlayer.jumpHeight();
+		
+		// > 斜坡上的高度【图块 - 侧边阶梯区域】
+		if( $gamePlayer._drill_LSA_height != undefined ){
+			yy += $gamePlayer._drill_LSA_height;
+		}
+		
+		// > 斜坡上的高度【图块 - 单向斜坡区域】
+		if( $gamePlayer._drill_LUCA_height != undefined ){
+			yy += $gamePlayer._drill_LUCA_height;
+		}
 		
 		// > 运输花盆的高度
-		yy -= DrillUp.g_PT_liftingHeight;
+		yy += DrillUp.g_PT_liftingHeight;
 		
 		// > 额外插件指令的高度
 		if( this._drill_PT_lifting_height != undefined){
-			yy -= this._drill_PT_lifting_height;
+			yy += this._drill_PT_lifting_height;
 		}
 	}
 	return yy;
 }
-//==============================
-// * 运输 - 刷新被举起物位置帧
-//==============================
-Sprite_Character.prototype.drill_PT_updateLiftingObjSprite = function(){ 
-	if( this._character instanceof Game_Event ){
-		this.x = this._character.screenX();
-		this.y = this._character.screenY();
-		this.z = $gamePlayer.screenZ() + 0.05;	
-	}
-};
-//==============================
-// * 物体 - 插件补正高度
+
+
+//=============================================================================
+// ** ☆数据最终变换值
 //
-//			说明：	org_screenY是原函数screenY的公式。
-//					此函数返回 其他插件多次继承screenY 而造成的高度差。
-//==============================
-Game_CharacterBase.prototype.drill_PT_fixY = function(){
-    var th = $gameMap.tileHeight();
-	var org_screenY = Math.round(this.scrolledY() * th + th - this.shiftY() - this.jumpHeight());
-    return this.screenY() - org_screenY;
-};
+//			说明：	> 此模块专门控制 偏移与其他插件兼容 的设置。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+if( Imported.Drill_CoreOfEventFrame ){
+	
+	// > 强制更新提示
+	if( Game_CharacterBase.prototype.drill_COEF_acc_LRR_x == undefined ){
+		alert( DrillUp.drill_PT_getPluginTip_NeedUpdate_COEF() );
+	}
+	
+	//==============================
+	// * 数据最终变换值 - 累积位置X（不影响）
+	//==============================
+	//var _drill_PT_COEF_finalTransform_x = Game_CharacterBase.prototype.drill_COEF_acc_x;
+	//Game_CharacterBase.prototype.drill_COEF_acc_x = function(){
+	//	var xx = _drill_PT_COEF_finalTransform_x.call( this );
+	//	return xx;
+	//}
+	//==============================
+	// * 数据最终变换值 - 累积位置Y
+	//==============================
+	var _drill_PT_COEF_finalTransform_y = Game_CharacterBase.prototype.drill_COEF_acc_y;
+	Game_CharacterBase.prototype.drill_COEF_acc_y = function(){
+		var yy = _drill_PT_COEF_finalTransform_y.call( this );
+		return yy - this.drill_PT_getHeight();
+	}
+	//==============================
+	// * 数据最终变换值 - 累积位置X - 倒影镜像用（不影响）
+	//==============================
+	//var _drill_PT_COEF_final_LRR_x = Game_CharacterBase.prototype.drill_COEF_acc_LRR_x;
+	//Game_CharacterBase.prototype.drill_COEF_acc_LRR_x = function(){
+	//	var xx = _drill_PT_COEF_final_LRR_x.call( this );
+	//	return xx;
+	//}
+	//==============================
+	// * 数据最终变换值 - 累积位置Y - 倒影镜像用
+	//==============================
+	var _drill_PT_COEF_final_LRR_y = Game_CharacterBase.prototype.drill_COEF_acc_LRR_y;
+	Game_CharacterBase.prototype.drill_COEF_acc_LRR_y = function(){
+		var yy = _drill_PT_COEF_final_LRR_y.call( this );
+		return yy + this.drill_PT_getHeight();
+	}
+	//==============================
+	// * 数据最终变换值 - 累积位置X - 同步镜像用（不影响）
+	//==============================
+	//var _drill_PT_COEF_acc_LSR_x = Game_CharacterBase.prototype.drill_COEF_acc_LSR_x;
+	//Game_CharacterBase.prototype.drill_COEF_acc_LSR_x = function(){
+	//	var xx = _drill_PT_COEF_acc_LSR_x.call( this );
+	//	return xx;
+	//}
+	//==============================
+	// * 数据最终变换值 - 累积位置Y - 同步镜像用
+	//==============================
+	var _drill_PT_COEF_acc_LSR_y = Game_CharacterBase.prototype.drill_COEF_acc_LSR_y;
+	Game_CharacterBase.prototype.drill_COEF_acc_LSR_y = function(){
+		var yy = _drill_PT_COEF_acc_LSR_y.call( this );
+		return yy - this.drill_PT_getHeight();
+	}
+	
+}else{
+	//==============================
+	// * 数据最终变换值 - 相对镜头所在位置X（不影响）
+	//
+	//			说明：	> 如果没加 行走图优化核心，就继承screenX。
+	//==============================
+	//var _drill_PT_screenX = Game_CharacterBase.prototype.screenX;
+	//Game_CharacterBase.prototype.screenX = function(){
+	//	var xx = _drill_PT_screenX.call( this );
+	//	return xx;
+	//}
+	//==============================
+	// * 数据最终变换值 - 相对镜头所在位置Y
+	//
+	//			说明：	> 如果没加 行走图优化核心，就继承screenY。
+	//==============================
+	var _drill_PT_screenY = Game_CharacterBase.prototype.screenY;
+	Game_CharacterBase.prototype.screenY = function(){
+		var yy = _drill_PT_screenY.call( this );
+		return yy - this.drill_PT_getHeight();
+	}
+}
+
+
+//=============================================================================
+// ** ☆堆叠级修改
+//
+//			说明：	> 此模块专门控制 堆叠级 的设置。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+if( Imported.Drill_CoreOfEventFrame ){
+	
+	//==============================
+	// * 运输 - 帧刷新堆叠级时（继承）
+	//==============================
+	var _drill_PT_COEF_whenRefreshZIndex_updateCharacter = Game_Temp.prototype.drill_COEF_whenRefreshZIndex_updateCharacter;
+	Game_Temp.prototype.drill_COEF_whenRefreshZIndex_updateCharacter = function( temp_characterSprite ){
+		_drill_PT_COEF_whenRefreshZIndex_updateCharacter.call( this, temp_characterSprite );
+		
+		var character = temp_characterSprite._character;
+		if( character == undefined ){ return; }
+		
+		// > 运输时，提高堆叠级
+		if( character._drill_PT_is_being_lift == true ){
+			temp_characterSprite.zIndex += $gameMap.tileHeight();	//（提升一个图块高度即可）
+		}
+	}
+}
 
 
 //=============================================================================
@@ -1014,12 +1093,17 @@ Game_Player.prototype.drill_canThrow_Conditional = function(){
 //==============================
 // * 投掷 - 执行操作
 //==============================
-Game_Player.prototype.drill_doThrow = function(){ 
-	$gameMap.events().forEach(function(event){ 
-		if( event._drill_PT_is_being_lift && !event._erased){ 		//找到被举起标记的对象，执行投掷
-			this.drill_PT_eventBeingThrow(event);	
+Game_Player.prototype.drill_doThrow = function(){
+	var event_list = $gameMap._events;
+	for(var i = 0; i < event_list.length; i++ ){
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
+	
+		if( temp_event._drill_PT_is_being_lift ){ 		//找到被举起标记的对象，执行投掷
+			this.drill_PT_eventBeingThrow( temp_event );	
 		};
-    }, this);
+	}
 };
 
 //==============================

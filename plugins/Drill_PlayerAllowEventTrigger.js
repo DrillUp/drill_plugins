@@ -444,11 +444,11 @@ Game_Map.prototype.drill_PAlET_updateRestatistics = function() {
 	
 	$gameTemp._drill_PAlET_eventTank = [];
 	
-	var events = this.events();
-	for( var i = 0; i < events.length; i++ ){
-		var temp_event = events[i];
-		if( temp_event == undefined ){ continue; }
-		if( temp_event._erased == true ){ continue; }
+	var event_list = this._events;
+	for(var i = 0; i < event_list.length; i++ ){
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
 		
 		// > 统计 被控制事件
 		if( temp_event.drill_PAlET_isBeingControled() == true ){

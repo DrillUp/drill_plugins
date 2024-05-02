@@ -3377,24 +3377,30 @@ Drill_COSB_LayerSprite.prototype.drill_createDebugArrange = function() {
 	if( temp_data['arrange_mode'] == "环形排列" ){
 		var r = temp_data['arrange_radius'];
 		temp_bitmap = new Bitmap( r*2, r*2 );
+		
 		// > 圆心
 		temp_bitmap.drawCircle(r,r,4,"#ffff00");
+		
 		// > 圆弧
-		var context = temp_bitmap._context;
-		context.save();
-		context.beginPath();
-		context.arc( r, r, r, 0, Math.PI * 2, false);
-		context.strokeStyle = "#ff0000";
-		context.stroke();
-		context.closePath();
-		context.restore();
+		var painter = temp_bitmap._context;
+		painter.save();							//（a.存储上一个画笔状态）
+		
+		painter.strokeStyle = "#ff0000";		//（b.设置样式）
+		
+		painter.beginPath();					//（c.路径填充/描边，注意 beginPath + stroke）
+		painter.arc( r, r, r, 0, Math.PI * 2, false);
+		painter.stroke();
+		
+		painter.restore();						//（d.回滚上一个画笔状态）
 		temp_bitmap._setDirty();
+		
 		// > 起始角
 		var temp_spriteStart = new Sprite();
 		temp_spriteStart.bitmap = new Bitmap( r,2 );
 		temp_spriteStart.bitmap.fillAll("#ffff00");
 		temp_spriteStart.rotation = temp_data['arrange_angleStart'] / 180.0 * Math.PI;
 		temp_sprite.addChild(temp_spriteStart);
+		
 		// > 终止角
 		var temp_spriteEnd = new Sprite();
 		temp_spriteEnd.bitmap = new Bitmap( r,2 );
@@ -3402,6 +3408,7 @@ Drill_COSB_LayerSprite.prototype.drill_createDebugArrange = function() {
 		temp_spriteEnd.y = -2;
 		temp_spriteEnd.rotation = temp_data['arrange_angleEnd'] / 180.0 * Math.PI;
 		temp_sprite.addChild(temp_spriteEnd);
+		
 		// > 按钮组原点
 		temp_bitmap.drawCircle(r,r,2,"#ff00ff");
 		temp_sprite.anchor.x = 0.5;

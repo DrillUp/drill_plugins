@@ -641,7 +641,7 @@ Drill_ET_WindowSprite.prototype.drill_XETL_updateLineRefresh = function() {
 	// > 文本横线
 	var start_x = xOffset + 0;
 	var start_y = yOffset + this.height;
-	temp_bitmap.drill_XETL_drawLine( start_x, start_y, start_x + this.width, start_y, line_thickness, line_color );
+	temp_bitmap.drill_XETL_drawLine( start_x, start_y, start_x + this.width, start_y, line_color, line_thickness, "round" );
 	
 	// > 连接线
 	var start_x = xOffset + xConnect;
@@ -660,29 +660,33 @@ Drill_ET_WindowSprite.prototype.drill_XETL_updateLineRefresh = function() {
 		end_x += this.width*1.0;
 		end_y += this.height*0.5;
 	}
-	temp_bitmap.drill_XETL_drawLine( start_x, start_y, end_x, end_y, line_thickness, line_color );
+	temp_bitmap.drill_XETL_drawLine( start_x, start_y, end_x, end_y, line_color, line_thickness, "round" );
 	
 	// > 设置画布
 	this._drill_XETL_curSprite.bitmap = temp_bitmap;
 }
 //==============================
-// * 文字贴图 - 绘制线段
+// * 文字贴图 - 几何绘制 - 画线（单条）
+//			
+//			参数：	> color 字符串    （颜色）
+//					> lineWidth 数字  （线宽）
+//					> lineCap 字符串  （末端，包含butt/round/square 无末端/圆末端/方末端，默认butt）
+//			说明：	> 该函数不会对参数进行任何校验，绘制前一定要确保参数完整。
 //==============================
-Bitmap.prototype.drill_XETL_drawLine = function( x1, y1, x2, y2, width, color ){
-    var context = this._context;
-    context.save();
+Bitmap.prototype.drill_XETL_drawLine = function( x1,y1, x2,y2, color, lineWidth, lineCap ){
+    var painter = this._context;
+    painter.save();							//（a.存储上一个画笔状态）
 	
-	// > 线段属性
-    context.strokeStyle = color;
-    context.lineWidth = width;
-    context.lineJoin = 'round';
+    painter.strokeStyle = color;			//（b.设置样式）
+	painter.lineWidth = lineWidth;
+	painter.lineCap = lineCap;
 	
-	// > 画线
-    context.moveTo( x1, y1 );
-    context.lineTo( x2, y2 );
-    context.stroke();
+    painter.beginPath();					//（c.路径填充/描边，注意 beginPath + stroke）
+	painter.moveTo(x1,y1);
+	painter.lineTo(x2,y2);
+	painter.stroke();
 	
-    context.restore();
+    painter.restore();						//（d.回滚上一个画笔状态）
     this._setDirty();
 };
 

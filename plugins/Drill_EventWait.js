@@ -146,12 +146,12 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				if( temp1.indexOf("时间[") != -1 ){
 					temp1 = temp1.replace("时间[","");
 					temp1 = temp1.replace("]","");
-					this.wait( Number(temp1) );
+					this.wait( Number(temp1) );							//『强制等待』指定时间
 				}
 				if( temp1.indexOf("时间变量[") != -1 ){
 					temp1 = temp1.replace("时间变量[","");
 					temp1 = temp1.replace("]","");
-					this.wait( $gameVariables.value( Number(temp1) ) );
+					this.wait( $gameVariables.value( Number(temp1) ) );	//『强制等待』变量时间
 				}
 			}
 		}

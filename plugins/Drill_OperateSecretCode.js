@@ -1,19 +1,19 @@
 //=============================================================================
-// Drill_SecretCode.js
+// Drill_OperateSecretCode.js
 //=============================================================================
 
 /*:
- * @plugindesc [v1.7]        键盘 - 秘籍输入器
+ * @plugindesc [v1.8]        键盘 - 秘籍输入器
  * @author Drill_up
  * 
  * @Drill_LE_param "秘籍-%d"
  * @Drill_LE_parentKey "---秘籍组%d至%d---"
- * @Drill_LE_var "DrillUp.g_SCo_list_length"
+ * @Drill_LE_var "DrillUp.g_OSCo_list_length"
  * 
  * 
  * @help  
  * =============================================================================
- * +++ Drill_SecretCode +++
+ * +++ Drill_OperateSecretCode +++
  * 作者：Drill_up
  * 如果你有兴趣，也可以来看看更多我写的drill插件哦ヽ(*。>Д<)o゜
  * https://rpg.blue/thread-409713-1-1.html
@@ -26,9 +26,10 @@
  * 该插件 不能 单独使用。
  * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfInput          系统-输入设备核心
+ *   - Drill_CoreOfInput           系统-输入设备核心
  * 被扩展：
- *   - Drill_LayerCommandThread   地图-多线程
+ *   - Drill_LayerCommandThread    地图-多线程
+ *   - Drill_BattleCommandThread   战斗-多线程
  *     多线程插件可以使得秘籍的公共事件执行 串行/并行 操作。
  * 
  * -----------------------------------------------------------------------------
@@ -69,12 +70,10 @@
  *      鼠标滚轮的 上滚和下滚 只在特殊情况下能支持，需要看具体应用场景。
  *      此处插件不识别 鼠标滚轮的上下滚动 的情况。
  * 公共事件：
- *   (1.地图公共事件的执行可通过 地图-多线程 插件来控制。
- *      可选择串行与并行，具体看看 "31.公共事件 > 关于公共事件与并行.docx"。
- *   (2.战斗界面中，公共事件只能串行执行，当弹出战斗选择窗口时，
- *      指令都不能立即生效。
- *   (3.注意，事件指令"显示文字"、"显示选项"等对话框功能 是特殊的指令体，
- *      只要执行对话框，就会强制串行，阻塞其他所有事件的线程。
+ *   (1.该插件在 地图界面/战斗界面 都可以设置 串行/并行。
+ *      具体看看 "31.公共事件 > 关于公共事件与并行.docx"。
+ *   (2.注意，事件指令"显示文字"、"显示选项"等对话框功能 是特殊的指令体，
+ *      只要执行对话框，就会被强制串行，阻塞其他所有事件的线程。
  * 设计：
  *   (1.秘籍输入器默认是用于方便后台测试时，
  *      立即获取游戏中的金钱和道具、开启剧情支线等功能。
@@ -128,6 +127,8 @@
  * 优化了内部结构。
  * [v1.7]
  * 兼容了手柄 右摇杆 的物理按键。
+ * [v1.8]
+ * 修改了文件名称，添加了 战斗多线程 的支持。
  * 
  * 
  * 
@@ -136,121 +137,121 @@
  *
  * @param 秘籍-1
  * @parent ---秘籍组 1至20---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-2
  * @parent ---秘籍组 1至20---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-3
  * @parent ---秘籍组 1至20---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-4
  * @parent ---秘籍组 1至20---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-5
  * @parent ---秘籍组 1至20---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-6
  * @parent ---秘籍组 1至20---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-7
  * @parent ---秘籍组 1至20---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-8
  * @parent ---秘籍组 1至20---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-9
  * @parent ---秘籍组 1至20---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-10
  * @parent ---秘籍组 1至20---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-11
  * @parent ---秘籍组 1至20---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-12
  * @parent ---秘籍组 1至20---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-13
  * @parent ---秘籍组 1至20---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-14
  * @parent ---秘籍组 1至20---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-15
  * @parent ---秘籍组 1至20---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-16
  * @parent ---秘籍组 1至20---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-17
  * @parent ---秘籍组 1至20---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-18
  * @parent ---秘籍组 1至20---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-19
  * @parent ---秘籍组 1至20---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-20
  * @parent ---秘籍组 1至20---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
@@ -259,126 +260,126 @@
  *
  * @param 秘籍-21
  * @parent ---秘籍组21至40---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-22
  * @parent ---秘籍组21至40---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-23
  * @parent ---秘籍组21至40---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-24
  * @parent ---秘籍组21至40---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-25
  * @parent ---秘籍组21至40---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-26
  * @parent ---秘籍组21至40---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-27
  * @parent ---秘籍组21至40---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-28
  * @parent ---秘籍组21至40---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-29
  * @parent ---秘籍组21至40---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-30
  * @parent ---秘籍组21至40---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-31
  * @parent ---秘籍组21至40---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-32
  * @parent ---秘籍组21至40---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-33
  * @parent ---秘籍组21至40---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-34
  * @parent ---秘籍组21至40---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-35
  * @parent ---秘籍组21至40---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-36
  * @parent ---秘籍组21至40---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-37
  * @parent ---秘籍组21至40---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-38
  * @parent ---秘籍组21至40---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-39
  * @parent ---秘籍组21至40---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  * @param 秘籍-40
  * @parent ---秘籍组21至40---
- * @type struct<DrillSCo>
+ * @type struct<DrillOSCo>
  * @desc 秘籍绑定的配置信息。
  * @default 
  *
  */
-/*~struct~DrillSCo:
+/*~struct~DrillOSCo:
  * 
  * @param 标签
  * @desc 只用于方便区分查看的标签，不作用在插件中。
@@ -402,7 +403,7 @@
  * @value 串行
  * @option 并行
  * @value 并行
- * @desc 公共事件的执行方式。战斗界面中没有并行，只能串行。
+ * @desc 公共事件的执行方式。地图界面/战斗界面 都可以设置 串行/并行。
  * @default 串行
  *
  * @param 是否启用鼠标触发
@@ -497,10 +498,10 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称：		SCo (Secret_Code)
-//		临时全局变量	DrillUp.g_SCo_xxx
+//		插件简称：		OSCo (Secret_Code)
+//		临时全局变量	DrillUp.g_OSCo_xxx
 //		临时局部变量	无
-//		存储数据变量	$gameSystem._drill_SCo_xxx
+//		存储数据变量	$gameSystem._drill_OSCo_xxx
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
@@ -558,19 +559,19 @@
 	// * 提示信息 - 参数
 	//==============================
 	var DrillUp = DrillUp || {}; 
-	DrillUp.g_SCo_PluginTip_curName = "Drill_SecretCode.js 键盘-秘籍输入器";
-	DrillUp.g_SCo_PluginTip_baseList = ["Drill_CoreOfInput.js 系统-输入设备核心"];
+	DrillUp.g_OSCo_PluginTip_curName = "Drill_OperateSecretCode.js 键盘-秘籍输入器";
+	DrillUp.g_OSCo_PluginTip_baseList = ["Drill_CoreOfInput.js 系统-输入设备核心"];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
 	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
-	DrillUp.drill_SCo_getPluginTip_NoBasePlugin = function(){
-		if( DrillUp.g_SCo_PluginTip_baseList.length == 0 ){ return ""; }
-		var message = "【" + DrillUp.g_SCo_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
-		for(var i=0; i < DrillUp.g_SCo_PluginTip_baseList.length; i++){
+	DrillUp.drill_OSCo_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_OSCo_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_OSCo_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_OSCo_PluginTip_baseList.length; i++){
 			message += "\n- ";
-			message += DrillUp.g_SCo_PluginTip_baseList[i];
+			message += DrillUp.g_OSCo_PluginTip_baseList[i];
 		}
 		return message;
 	};
@@ -580,16 +581,16 @@
 // ** ☆静态数据
 //=============================================================================
 	var Imported = Imported || {};
-	Imported.Drill_SecretCode = true;
+	Imported.Drill_OperateSecretCode = true;
 	var DrillUp = DrillUp || {}; 
-	DrillUp.parameters = PluginManager.parameters('Drill_SecretCode');
+	DrillUp.parameters = PluginManager.parameters('Drill_OperateSecretCode');
 	
 	
 	//==============================
 	// * 静态数据 - 秘籍触发
-	//				（~struct~DrillSCo）
+	//				（~struct~DrillOSCo）
 	//==============================
-	DrillUp.drill_SCo_initDrillSCo = function( dataFrom ){
+	DrillUp.drill_OSCo_initDrillOSCo = function( dataFrom ){
 		var data = {};
 		
 		data['enable'] = String( dataFrom["初始是否开启"] || "true") == "true";
@@ -627,15 +628,15 @@
 	}
 	
 	/*-----------------秘籍------------------*/
-	DrillUp.g_SCo_list_length = 40;
-	DrillUp.g_SCo_list = [];
-	for (var i = 0; i < DrillUp.g_SCo_list_length; i++) {
+	DrillUp.g_OSCo_list_length = 40;
+	DrillUp.g_OSCo_list = [];
+	for (var i = 0; i < DrillUp.g_OSCo_list_length; i++) {
 		if( DrillUp.parameters["秘籍-" + String(i+1) ] != undefined &&
 			DrillUp.parameters["秘籍-" + String(i+1) ] != "" ){
 			var data = JSON.parse(DrillUp.parameters["秘籍-" + String(i+1) ]);
-			DrillUp.g_SCo_list[i] = DrillUp.drill_SCo_initDrillSCo( data );
+			DrillUp.g_OSCo_list[i] = DrillUp.drill_OSCo_initDrillOSCo( data );
 		}else{
-			DrillUp.g_SCo_list[i] = null;
+			DrillUp.g_OSCo_list[i] = null;
 		}
 	}
 	
@@ -649,16 +650,16 @@ if( Imported.Drill_CoreOfInput ){
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
-var _drill_SCo_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+var _drill_OSCo_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
-	_drill_SCo_pluginCommand.call(this, command, args);
+	_drill_OSCo_pluginCommand.call(this, command, args);
 	if( command === ">开启秘籍" ){
 		if( args.length == 2 ){
 			var temp1 = String(args[1]);
 			temp1 = temp1.replace("秘籍[","");
 			temp1 = temp1.replace("]","");
 			temp1 = Number(temp1) - 1;
-			var data = $gameSystem._drill_SCo_list[temp1];
+			var data = $gameSystem._drill_OSCo_list[temp1];
 			if( data == undefined ){ return; }
 			data['enable'] = true;
 		}
@@ -669,7 +670,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			temp1 = temp1.replace("秘籍[","");
 			temp1 = temp1.replace("]","");
 			temp1 = Number(temp1) - 1;
-			var data = $gameSystem._drill_SCo_list[temp1];
+			var data = $gameSystem._drill_OSCo_list[temp1];
 			if( data == undefined ){ return; }
 			data['enable'] = false;
 		}
@@ -685,33 +686,33 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 //          
 //			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
 //##############################
-DrillUp.g_SCo_saveEnabled = true;
+DrillUp.g_OSCo_saveEnabled = true;
 //##############################
 // * 存储数据 - 初始化
 //          
 //			说明：	> 下方为固定写法，不要动。
 //##############################
-var _drill_SCo_sys_initialize = Game_System.prototype.initialize;
+var _drill_OSCo_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-    _drill_SCo_sys_initialize.call(this);
-	this.drill_SCo_initSysData();
+    _drill_OSCo_sys_initialize.call(this);
+	this.drill_OSCo_initSysData();
 };
 //##############################
 // * 存储数据 - 载入存档
 //          
 //			说明：	> 下方为固定写法，不要动。
 //##############################
-var _drill_SCo_sys_extractSaveContents = DataManager.extractSaveContents;
+var _drill_OSCo_sys_extractSaveContents = DataManager.extractSaveContents;
 DataManager.extractSaveContents = function( contents ){
-	_drill_SCo_sys_extractSaveContents.call( this, contents );
+	_drill_OSCo_sys_extractSaveContents.call( this, contents );
 	
 	// > 参数存储 启用时（检查数据）
-	if( DrillUp.g_SCo_saveEnabled == true ){	
-		$gameSystem.drill_SCo_checkSysData();
+	if( DrillUp.g_OSCo_saveEnabled == true ){	
+		$gameSystem.drill_OSCo_checkSysData();
 		
 	// > 参数存储 关闭时（直接覆盖）
 	}else{
-		$gameSystem.drill_SCo_initSysData();
+		$gameSystem.drill_OSCo_initSysData();
 	}
 };
 //##############################
@@ -722,8 +723,8 @@ DataManager.extractSaveContents = function( contents ){
 //          
 //			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
 //##############################
-Game_System.prototype.drill_SCo_initSysData = function() {
-	this.drill_SCo_initSysData_Private();
+Game_System.prototype.drill_OSCo_initSysData = function() {
+	this.drill_OSCo_initSysData_Private();
 };
 //##############################
 // * 存储数据 - 载入存档时检查数据【标准函数】
@@ -733,8 +734,8 @@ Game_System.prototype.drill_SCo_initSysData = function() {
 //          
 //			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
 //##############################
-Game_System.prototype.drill_SCo_checkSysData = function() {
-	this.drill_SCo_checkSysData_Private();
+Game_System.prototype.drill_OSCo_checkSysData = function() {
+	this.drill_OSCo_checkSysData_Private();
 };
 //=============================================================================
 // ** 存储数据（接口实现）
@@ -742,35 +743,35 @@ Game_System.prototype.drill_SCo_checkSysData = function() {
 //==============================
 // * 存储数据 - 初始化数据（私有）
 //==============================
-Game_System.prototype.drill_SCo_initSysData_Private = function() {
+Game_System.prototype.drill_OSCo_initSysData_Private = function() {
 	
-	this._drill_SCo_list = [];
-	for(var i=0; i < DrillUp.g_SCo_list.length; i++){
-		var temp_data = DrillUp.g_SCo_list[i];
+	this._drill_OSCo_list = [];
+	for(var i=0; i < DrillUp.g_OSCo_list.length; i++){
+		var temp_data = DrillUp.g_OSCo_list[i];
 		if( temp_data == undefined ){ continue; }
-		this._drill_SCo_list[i] = JSON.parse(JSON.stringify( temp_data ));
+		this._drill_OSCo_list[i] = JSON.parse(JSON.stringify( temp_data ));
 	}
 };
 //==============================
 // * 存储数据 - 载入存档时检查数据（私有）
 //==============================
-Game_System.prototype.drill_SCo_checkSysData_Private = function() {
+Game_System.prototype.drill_OSCo_checkSysData_Private = function() {
 	
 	// > 旧存档数据自动补充
-	if( this._drill_SCo_list == undefined ){
-		this.drill_SCo_initSysData();
+	if( this._drill_OSCo_list == undefined ){
+		this.drill_OSCo_initSysData();
 	}
 	
 	// > 绑定数据容器
-	for(var i = 0; i < DrillUp.g_SCo_list.length; i++ ){
-		var temp_data = DrillUp.g_SCo_list[i];
+	for(var i = 0; i < DrillUp.g_OSCo_list.length; i++ ){
+		var temp_data = DrillUp.g_OSCo_list[i];
 		
 		// > 已配置（undefined表示未配置的空数据）
 		if( temp_data != undefined ){
 			
 			// > 未存储的，重新初始化
-			if( this._drill_SCo_list[i] == undefined ){
-				this._drill_SCo_list[i] = JSON.parse(JSON.stringify( temp_data ));
+			if( this._drill_OSCo_list[i] == undefined ){
+				this._drill_OSCo_list[i] = JSON.parse(JSON.stringify( temp_data ));
 			
 			// > 已存储的，跳过
 			}else{
@@ -791,19 +792,19 @@ Game_System.prototype.drill_SCo_checkSysData_Private = function() {
 //==============================
 // * 秘籍控制 - 帧刷新绑定（地图界面）
 //==============================
-var _drill_SCo_m_update = Scene_Map.prototype.update;
+var _drill_OSCo_m_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {
-	_drill_SCo_m_update.call(this);
+	_drill_OSCo_m_update.call(this);
 	if( this.isActive() ){
-		this.drill_SCo_updateInput();
+		this.drill_OSCo_updateInput();
 	}
 }
 //==============================
 // * 秘籍控制 - 帧刷新（地图界面）
 //==============================
-Scene_Map.prototype.drill_SCo_updateInput = function() {
-	for(var i=0; i<$gameSystem._drill_SCo_list.length; i++){
-		var data = $gameSystem._drill_SCo_list[i];
+Scene_Map.prototype.drill_OSCo_updateInput = function() {
+	for(var i=0; i<$gameSystem._drill_OSCo_list.length; i++){
+		var data = $gameSystem._drill_OSCo_list[i];
 		if( data == undefined ){ continue; }
 		if( data['enable'] == false ){ continue; }
 		
@@ -812,14 +813,14 @@ Scene_Map.prototype.drill_SCo_updateInput = function() {
 			if( data['mouse_seq'].length == 0 ){ continue; }
 			// > 序列完成
 			if( data['mouse_cur'] >= data['mouse_seq'].length ){
-				this.drill_SCo_doCommonEvent( data );
+				this.drill_OSCo_doCommonEvent( data );
 				data['mouse_cur'] = 0;
 				continue;
 			}
 			// > 序列+1
-			if( this.drill_SCo_isAnyOnMouse() ){
+			if( this.drill_OSCo_isAnyOnMouse() ){
 				var seq = data['mouse_seq'][ Math.floor(data['mouse_cur']) ];
-				if( this.drill_SCo_isOnMouse( seq ) ){
+				if( this.drill_OSCo_isOnMouse( seq ) ){
 					data['mouse_cur'] += 1;	//（符合则索引+1，不符合则归零）
 				}else{
 					data['mouse_cur'] = 0;
@@ -832,7 +833,7 @@ Scene_Map.prototype.drill_SCo_updateInput = function() {
 			if( data['key_seq'].length == 0 ){ continue; }
 			// > 序列完成
 			if( data['key_cur'] >= data['key_seq'].length ){
-				this.drill_SCo_doCommonEvent( data );
+				this.drill_OSCo_doCommonEvent( data );
 				data['key_cur'] = 0;
 				continue;
 			}
@@ -852,7 +853,7 @@ Scene_Map.prototype.drill_SCo_updateInput = function() {
 			if( data['pad_seq'].length == 0 ){ continue; }
 			// > 序列完成
 			if( data['pad_cur'] >= data['pad_seq'].length ){
-				this.drill_SCo_doCommonEvent( data );
+				this.drill_OSCo_doCommonEvent( data );
 				data['pad_cur'] = 0;
 				continue;
 			}
@@ -872,7 +873,7 @@ Scene_Map.prototype.drill_SCo_updateInput = function() {
 //==============================
 // * 秘籍控制 - 『执行公共事件』（地图界面）
 //==============================
-Scene_Map.prototype.drill_SCo_doCommonEvent = function( data ){
+Scene_Map.prototype.drill_OSCo_doCommonEvent = function( data ){
 	
 	// > 插件【地图-多线程】
 	if( Imported.Drill_LayerCommandThread ){
@@ -893,7 +894,7 @@ Scene_Map.prototype.drill_SCo_doCommonEvent = function( data ){
 //
 //			说明：	> 鼠标滚轮是持续性动作，这里不算记录，否则 上滚 + 上滚 无法识别。
 //==============================
-Scene_Map.prototype.drill_SCo_isAnyOnMouse = function() {
+Scene_Map.prototype.drill_OSCo_isAnyOnMouse = function() {
 	if( TouchInput.drill_isLeftReleased() ){ return true };
 	if( TouchInput.drill_isRightReleased() ){ return true };
 	if( TouchInput.drill_isMiddleReleased() ){ return true };
@@ -902,7 +903,7 @@ Scene_Map.prototype.drill_SCo_isAnyOnMouse = function() {
 //==============================
 // * 秘籍控制 - 鼠标 - 按下类型监听
 //==============================
-Scene_Map.prototype.drill_SCo_isOnMouse = function( type ){
+Scene_Map.prototype.drill_OSCo_isOnMouse = function( type ){
 	if( type == "左键释放[一帧]" ){
 		if( TouchInput.drill_isLeftReleased() ){ return true };
 	}else if( type == "右键释放[一帧]" ){
@@ -917,33 +918,44 @@ Scene_Map.prototype.drill_SCo_isOnMouse = function( type ){
 //==============================
 // * 秘籍控制 - 帧刷新绑定（战斗界面）
 //==============================
-var _drill_SCo_b_update = Scene_Battle.prototype.update;
+var _drill_OSCo_b_update = Scene_Battle.prototype.update;
 Scene_Battle.prototype.update = function() {
-	_drill_SCo_b_update.call(this);
+	_drill_OSCo_b_update.call(this);
 	if( this.isActive() ){
-		this.drill_SCo_updateInput();
+		this.drill_OSCo_updateInput();
 	}
 }
 //==============================
 // * 秘籍控制 - 帧刷新（战斗界面）
 //==============================
-Scene_Battle.prototype.drill_SCo_updateInput = Scene_Map.prototype.drill_SCo_updateInput;
+Scene_Battle.prototype.drill_OSCo_updateInput = Scene_Map.prototype.drill_OSCo_updateInput;
 //==============================
 // * 秘籍控制 - 『执行公共事件』（战斗界面）
 //==============================
-Scene_Battle.prototype.drill_SCo_doCommonEvent = function( data ){
+Scene_Battle.prototype.drill_OSCo_doCommonEvent = function( data ){
 	
+	// > 插件【战斗-多线程】
+	if( Imported.Drill_BattleCommandThread ){
+		var e_data = {
+			'type':"公共事件",
+			'pipeType': data['pipeType'],
+			'commonEventId': data['commonEventId'],
+		};
+		$gameTroop.drill_BCT_addPipeEvent( e_data );
+		
 	// > 默认执行
-	$gameTemp.reserveCommonEvent( data['commonEventId'] );
+	}else{
+		$gameTemp.reserveCommonEvent( data['commonEventId'] );
+	}
 }
 //==============================
 // * 秘籍控制 - 鼠标 - 按下监听
 //==============================
-Scene_Battle.prototype.drill_SCo_isAnyOnMouse = Scene_Map.prototype.drill_SCo_isAnyOnMouse;
+Scene_Battle.prototype.drill_OSCo_isAnyOnMouse = Scene_Map.prototype.drill_OSCo_isAnyOnMouse;
 //==============================
 // * 秘籍控制 - 鼠标 - 按下类型监听
 //==============================
-Scene_Battle.prototype.drill_SCo_isOnMouse = Scene_Map.prototype.drill_SCo_isOnMouse;
+Scene_Battle.prototype.drill_OSCo_isOnMouse = Scene_Map.prototype.drill_OSCo_isOnMouse;
 
 
 
@@ -951,8 +963,8 @@ Scene_Battle.prototype.drill_SCo_isOnMouse = Scene_Map.prototype.drill_SCo_isOnM
 // * <<<<基于插件检测<<<<
 //=============================================================================
 }else{
-		Imported.Drill_SecretCode = false;
-		var pluginTip = DrillUp.drill_SCo_getPluginTip_NoBasePlugin();
+		Imported.Drill_OperateSecretCode = false;
+		var pluginTip = DrillUp.drill_OSCo_getPluginTip_NoBasePlugin();
 		alert( pluginTip );
 }
 

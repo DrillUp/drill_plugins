@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        鼠标 - 地图按钮集
+ * @plugindesc [v1.3]        鼠标 - 地图按钮集
  * @author Drill_up
  * 
  * @Drill_LE_param "按钮-%d"
@@ -119,6 +119,8 @@
  * 优化了内部结构，修复了镜头缩放时按钮被缩小的bug。
  * [v1.2]
  * 优化了旧存档的识别与兼容。
+ * [v1.3]
+ * 修复了 图片切换 功能无效的bug。
  * 
  * @param ----按钮集----
  * @default 
@@ -817,10 +819,12 @@
 		}
 		data['gif_interval'] = Number( dataFrom["帧间隔"] || 0);
 		data['gif_back_run'] = String( dataFrom["是否倒放"] || "true") === "true";	
+		
 		data['hover_mode'] = String( dataFrom["高亮效果"] || "关闭效果");
 		data['hover_src_img'] = String( dataFrom["资源-高亮图片"] || "");
 		data['hover_opacity'] = Number( dataFrom["未高亮透明度"] || 160);
 		data['hover_lightOpacity'] = Number( dataFrom["高亮透明度"] || 255);
+		
 		data['press_mode'] = String( dataFrom["按下效果"] || "关闭效果");
 		data['press_src_img'] = String( dataFrom["资源-按下图片"] || "");
 		
@@ -1098,6 +1102,24 @@ Scene_Map.prototype.createAllWindows = function() {
 		this.addChild(this._drill_SenceTopArea);	
 	}
 }
+//==============================
+// * 地图层级 - 参数定义
+//
+//			说明：	> 所有drill插件的贴图都用唯一参数：zIndex（可为小数、负数），其它插件没有此参数定义。
+//==============================
+if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义）
+	var _drill_sprite_zIndex = true;
+	Object.defineProperty( Sprite.prototype, 'zIndex', {
+		set: function( value ){
+			this.__drill_zIndex = value;
+		},
+		get: function(){
+			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			return this.__drill_zIndex;
+		},
+		configurable: true
+	});
+};
 //==============================
 // * 地图层级 - 图片层级排序（私有）
 //==============================
@@ -1567,16 +1589,19 @@ Drill_GBu_ButtonSprite.prototype.drill_updateBitmap = function() {
 	if( this.visible != this._drill_visible ){
 		this.visible = this._drill_visible;		
 	}
-	// > 激活
+	
+	// > 激活时
 	if( this._drill_status == "激活" ){
+		var is_bitmapSet = false;
 		
-		// > 高亮bitmap
+		// > 激活时 - 高亮效果
 		if( this._drill_isHovering == true ){
 			if( data['hover_mode'] == "关闭效果" ){
 				// （不操作）
 			}
 			if( data['hover_mode'] == "图片切换" ){
-				this.bitmap = bitmapObj['bitmap_hover'];		
+				this.bitmap = bitmapObj['bitmap_hover'];
+				is_bitmapSet = true;
 			}
 			if( data['hover_mode'] == "图片叠加" ){
 				this._drill_GBu_additionSprite.bitmap = bitmapObj['bitmap_hover'];	
@@ -1599,13 +1624,14 @@ Drill_GBu_ButtonSprite.prototype.drill_updateBitmap = function() {
 			}
 		}
 		
-		// > 按下bitmap
+		// > 激活时 - 按下效果
 		if( this._drill_isPressing == true ){
 			if( data['press_mode'] == "关闭效果" ){
 				// （不操作）
 			}
 			if( data['press_mode'] == "图片切换" ){
 				this.bitmap = bitmapObj['bitmap_press'];
+				is_bitmapSet = true;
 			}
 			if( data['press_mode'] == "图片叠加" ){
 				this._drill_GBu_additionSprite.bitmap = bitmapObj['bitmap_press'];	
@@ -1613,27 +1639,31 @@ Drill_GBu_ButtonSprite.prototype.drill_updateBitmap = function() {
 			return;
 		}
 		
-		// > 播放GIF
-		var inter = this._drill_cur_time ;
-		inter = inter / data['gif_interval'];
-		inter = inter % bitmapObj['bitmap_gif'].length;
-		if( data['gif_back_run'] ){
-			inter = bitmapObj['bitmap_gif'].length - 1 - inter;
+		// > 激活时 - 激活图片（播放GIF）
+		if( is_bitmapSet == false ){
+			var inter = this._drill_cur_time ;
+			inter = inter / data['gif_interval'];
+			inter = inter % bitmapObj['bitmap_gif'].length;
+			if( data['gif_back_run'] ){
+				inter = bitmapObj['bitmap_gif'].length - 1 - inter;
+			}
+			inter = Math.floor(inter);
+			this.bitmap = bitmapObj['bitmap_gif'][inter];
 		}
-		inter = Math.floor(inter);
-		this.bitmap = bitmapObj['bitmap_gif'][inter];
 	}
 	
-	// > 封印
+	// > 封印时
 	if( this._drill_status == "封印" ){	
+		var is_bitmapSet = false;
 		
-		// > 封印高亮bitmap
+		// > 封印时 - 高亮效果
 		if( this._drill_isHovering == true ){
 			if( data['lockHover_mode'] == "关闭效果" ){
 				// （不操作）
 			}
 			if( data['lockHover_mode'] == "图片切换" ){
-				this.bitmap = bitmapObj['bitmap_lockHover'];		
+				this.bitmap = bitmapObj['bitmap_lockHover'];
+				is_bitmapSet = true;
 			}
 			if( data['lockHover_mode'] == "图片叠加" ){
 				this._drill_GBu_additionSprite.bitmap = bitmapObj['bitmap_lockHover'];	
@@ -1656,8 +1686,13 @@ Drill_GBu_ButtonSprite.prototype.drill_updateBitmap = function() {
 			}
 		}
 	
-		// > 封印bitmap
-		this.bitmap = bitmapObj['bitmap_lock'];		
+		// > 封印时 - 高亮效果
+		//	（无）
+		
+		// > 封印时 - 封印图片
+		if( is_bitmapSet == false ){
+			this.bitmap = bitmapObj['bitmap_lock'];
+		}
 	}
 }
 //==============================

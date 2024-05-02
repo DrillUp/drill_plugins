@@ -1307,6 +1307,24 @@ Scene_Battle.prototype.createAllWindows = function() {
 	}
 }
 //==============================
+// * 战斗层级 - 参数定义
+//
+//			说明：	> 所有drill插件的贴图都用唯一参数：zIndex（可为小数、负数），其它插件没有此参数定义。
+//==============================
+if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义）
+	var _drill_sprite_zIndex = true;
+	Object.defineProperty( Sprite.prototype, 'zIndex', {
+		set: function( value ){
+			this.__drill_zIndex = value;
+		},
+		get: function(){
+			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			return this.__drill_zIndex;
+		},
+		configurable: true
+	});
+};
+//==============================
 // * 战斗层级 - 图片层级排序（私有）
 //==============================
 Scene_Battle.prototype.drill_MPFC_sortByZIndex_Private = function() {
@@ -1373,6 +1391,24 @@ Scene_Map.prototype.createAllWindows = function() {
 		this.addChild(this._drill_SenceTopArea);	
 	}
 }
+//==============================
+// * 地图层级 - 参数定义
+//
+//			说明：	> 所有drill插件的贴图都用唯一参数：zIndex（可为小数、负数），其它插件没有此参数定义。
+//==============================
+if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义）
+	var _drill_sprite_zIndex = true;
+	Object.defineProperty( Sprite.prototype, 'zIndex', {
+		set: function( value ){
+			this.__drill_zIndex = value;
+		},
+		get: function(){
+			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			return this.__drill_zIndex;
+		},
+		configurable: true
+	});
+};
 //==============================
 // * 地图层级 - 图片层级排序（私有）
 //==============================
@@ -1443,6 +1479,24 @@ Scene_MenuBase.prototype.update = function() {
 		this._foregroundSprite = new Sprite();
 		this.addChild(this._foregroundSprite);	
 	}
+};
+//==============================
+// * 菜单层级 - 参数定义
+//
+//			说明：	> 所有drill插件的贴图都用唯一参数：zIndex（可为小数、负数），其它插件没有此参数定义。
+//==============================
+if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义）
+	var _drill_sprite_zIndex = true;
+	Object.defineProperty( Sprite.prototype, 'zIndex', {
+		set: function( value ){
+			this.__drill_zIndex = value;
+		},
+		get: function(){
+			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			return this.__drill_zIndex;
+		},
+		configurable: true
+	});
 };
 //==============================
 // * 菜单层级 - 图片层级排序（私有）
@@ -2092,10 +2146,18 @@ Drill_MPFC_Window.prototype.drill_updateBean = function() {
 }
 //==============================
 // * B实体类交互 - 条件 - 触发范围
+//
+//			参数：	> bean 实体类对象
+//			说明：	> 检查鼠标是否在该实体类的范围内。『鼠标落点与实体类范围』
+//						镜头与层级 - 无需支持
+//						中心锚点   - 已支持（见函数 drill_MPFC_updateSprite ）
+//						特殊变换   - 暂不明确
+//						触屏响应   - 暂不明确
 //==============================
 Drill_MPFC_Window.prototype.drill_isInFrame = function( bean ){
 	if( bean['_drill_visible'] == false ){ return false; }
 	
+	// > 判定 - 鼠标位置
 	var _x = _drill_mouse_x;
 	var _y = _drill_mouse_y;
 	if( bean['_drill_mouseType'] == "触屏按下[持续]" ){
@@ -2103,8 +2165,10 @@ Drill_MPFC_Window.prototype.drill_isInFrame = function( bean ){
 		_y = TouchInput.y;
 	}
 	
-	// （最顶层，不考虑 地图鼠标落点 ）
+	// > 判定 - 镜头与层级
+	//	（最顶层，不考虑 地图鼠标落点 ）
 	
+	// > 判定 - 触发范围
 	if( _x > bean['_drill_x'] + bean['_drill_frameW'] ){ return false; }
 	if( _x < bean['_drill_x'] + 0 ){ return false; }
 	if( _y > bean['_drill_y'] + bean['_drill_frameH'] ){ return false; }

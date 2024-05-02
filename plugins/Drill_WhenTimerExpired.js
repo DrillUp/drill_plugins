@@ -1,15 +1,15 @@
 //=============================================================================
-// Drill_PlayerTimerTiming.js
+// Drill_WhenTimerExpired.js
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        公共事件 - 时间计时器到零时
+ * @plugindesc [v1.3]        公共事件 - 时间计时器到零时
  * @author Drill_up
  * 
  * 
  * @help  
  * =============================================================================
- * +++ Drill_PlayerTimerTiming +++
+ * +++ Drill_WhenTimerExpired +++
  * 作者：Drill_up
  * 如果你有兴趣，也可以来看看更多我写的drill插件哦ヽ(*。>Д<)o゜
  * https://rpg.blue/thread-409713-1-1.html
@@ -21,7 +21,8 @@
  * 该插件 不能 单独使用。
  * 必须基于多线程插件才能运行。
  * 基于：
- *   - Drill_LayerCommandThread     地图-多线程★★v1.2及以上★★
+ *   - Drill_LayerCommandThread      地图-多线程
+ *   - Drill_BattleCommandThread     战斗-多线程
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -32,6 +33,11 @@
  *   (1.默认的计时器，在地图中使用只会跑一个时间，没其他效果。
  *      在战斗中使用，归零后会立即判定游戏失败。
  *   (2.你可以通过此插件来修改公共事件执行，自定义到零后的操作。
+ * 公共事件：
+ *   (1.该插件在 地图界面/战斗界面 都可以设置 串行/并行。
+ *      具体看看 "31.公共事件 > 关于公共事件与并行.docx"。
+ *   (2.注意，事件指令"显示文字"、"显示选项"等对话框功能 是特殊的指令体，
+ *      只要执行对话框，就会被强制串行，阻塞其他所有事件的线程。
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -62,6 +68,8 @@
  * 修改了插件分类。
  * [v1.2]
  * 修复了地图界面到零时出错的bug。
+ * [v1.3]
+ * 修改了文件名，添加了战斗多线程的支持。
  * 
  *
  * 
@@ -83,6 +91,8 @@
  * @type select
  * @option 串行
  * @value 串行
+ * @option 并行
+ * @value 并行
  * @desc 公共事件的执行方式。
  * @default 串行
  * 
@@ -115,8 +125,8 @@
  */
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		PTT (Player_Timer_Timing)
-//		临时全局变量	DrillUp.g_PTT_xxx
+//		插件简称		WTE (When_Timer_Expired)
+//		临时全局变量	DrillUp.g_WTE_xxx
 //		临时局部变量	无
 //		存储数据变量	无
 //		全局存储变量	无
@@ -170,19 +180,22 @@
 	// * 提示信息 - 参数
 	//==============================
 	var DrillUp = DrillUp || {}; 
-	DrillUp.g_PTT_PluginTip_curName = "Drill_PlayerTimerTiming.js 公共事件-时间计时器到零时";
-	DrillUp.g_PTT_PluginTip_baseList = ["Drill_LayerCommandThread.js 地图-多线程"];
+	DrillUp.g_WTE_PluginTip_curName = "Drill_WhenTimerExpired.js 公共事件-时间计时器到零时";
+	DrillUp.g_WTE_PluginTip_baseList = [
+		"Drill_LayerCommandThread.js 地图-多线程",
+		"Drill_BattleCommandThread.js 战斗-多线程"
+	];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
 	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
-	DrillUp.drill_PTT_getPluginTip_NoBasePlugin = function(){
-		if( DrillUp.g_PTT_PluginTip_baseList.length == 0 ){ return ""; }
-		var message = "【" + DrillUp.g_PTT_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
-		for(var i=0; i < DrillUp.g_PTT_PluginTip_baseList.length; i++){
+	DrillUp.drill_WTE_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_WTE_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_WTE_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_WTE_PluginTip_baseList.length; i++){
 			message += "\n- ";
-			message += DrillUp.g_PTT_PluginTip_baseList[i];
+			message += DrillUp.g_WTE_PluginTip_baseList[i];
 		}
 		return message;
 	};
@@ -192,24 +205,25 @@
 // ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
-　　Imported.Drill_PlayerTimerTiming = true;
+　　Imported.Drill_WhenTimerExpired = true;
 　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_PlayerTimerTiming');
+    DrillUp.parameters = PluginManager.parameters('Drill_WhenTimerExpired');
 	
 	
 	/*-----------------杂项------------------*/
-	DrillUp.g_PTT_battle_mode = String(DrillUp.parameters["战斗界面到零时执行"] || "游戏失败");
-	DrillUp.g_PTT_battle_pipeType = String(DrillUp.parameters["战斗公共事件执行方式"] || "串行");
-	DrillUp.g_PTT_battle_commonEventId = Number(DrillUp.parameters["战斗的公共事件"] || 0); 
-	DrillUp.g_PTT_map_pipeType = String(DrillUp.parameters["地图公共事件执行方式"] || "串行");
-	DrillUp.g_PTT_map_commonEventId = Number(DrillUp.parameters["地图的公共事件"] || 0); 
+	DrillUp.g_WTE_battle_mode = String(DrillUp.parameters["战斗界面到零时执行"] || "游戏失败");
+	DrillUp.g_WTE_battle_pipeType = String(DrillUp.parameters["战斗公共事件执行方式"] || "串行");
+	DrillUp.g_WTE_battle_commonEventId = Number(DrillUp.parameters["战斗的公共事件"] || 0); 
+	DrillUp.g_WTE_map_pipeType = String(DrillUp.parameters["地图公共事件执行方式"] || "串行");
+	DrillUp.g_WTE_map_commonEventId = Number(DrillUp.parameters["地图的公共事件"] || 0); 
 
 
 
 //=============================================================================
 // * >>>>基于插件检测>>>>
 //=============================================================================
-if( Imported.Drill_LayerCommandThread ){
+if( Imported.Drill_LayerCommandThread &&
+	Imported.Drill_BattleCommandThread ){
 
 
 //=============================================================================
@@ -225,29 +239,29 @@ Game_Timer.prototype.onExpire = function(){
 	
 	// > 地图界面情况
 	if( SceneManager._scene instanceof Scene_Map &&
-		DrillUp.g_PTT_map_commonEventId > 0 ){
+		DrillUp.g_WTE_map_commonEventId > 0 ){
 		
 		// > 执行公共事件
-		this.drill_PTT_doCommonEvent_Map( DrillUp.g_PTT_map_pipeType, DrillUp.g_PTT_map_commonEventId, "" );
+		this.drill_WTE_doCommonEvent_Map( DrillUp.g_WTE_map_pipeType, DrillUp.g_WTE_map_commonEventId, "" );
 	}
 	
 	// > 战斗界面情况
 	if( SceneManager._scene instanceof Scene_Battle &&
-		DrillUp.g_PTT_battle_commonEventId > 0  ){
+		DrillUp.g_WTE_battle_commonEventId > 0  ){
 		
-		if( DrillUp.g_PTT_battle_mode == "游戏失败" ){
+		if( DrillUp.g_WTE_battle_mode == "游戏失败" ){
 			BattleManager.abort();
 		}else{
 		
 			// > 执行公共事件
-			this.drill_PTT_doCommonEvent_Battle( DrillUp.g_PTT_battle_pipeType, DrillUp.g_PTT_battle_commonEventId );
+			this.drill_WTE_doCommonEvent_Battle( DrillUp.g_WTE_battle_pipeType, DrillUp.g_WTE_battle_commonEventId, "" );
 		}
 	}
 }
 //==============================
 // * 计时器绑定 - 『执行公共事件』（地图界面）
 //==============================
-Game_Timer.prototype.drill_PTT_doCommonEvent_Map = function( pipeType, commonEventId, callBack_str ){
+Game_Timer.prototype.drill_WTE_doCommonEvent_Map = function( pipeType, commonEventId, callBack_str ){
 	
 	// > 插件【地图-多线程】
 	if( Imported.Drill_LayerCommandThread ){
@@ -267,14 +281,26 @@ Game_Timer.prototype.drill_PTT_doCommonEvent_Map = function( pipeType, commonEve
 //==============================
 // * 计时器绑定 - 『执行公共事件』（战斗界面）
 //==============================
-Game_Timer.prototype.drill_PTT_doCommonEvent_Battle = function( pipeType, commonEventId ){
+Game_Timer.prototype.drill_WTE_doCommonEvent_Battle = function( pipeType, commonEventId, callBack_str ){
 	
-	// > 直接塞入 解释器（串行）
-	var e_list = [
-		{"code":117,"indent":0,"parameters":[ commonEventId ]},
-		{"code":0,"indent":0,"parameters":[]}
-	];
-    $gameTroop._interpreter.setup(e_list);
+	// > 插件【战斗-多线程】
+	if( Imported.Drill_BattleCommandThread ){
+		var e_data = {
+			'type':"公共事件",
+			'pipeType': pipeType,
+			'commonEventId': commonEventId,
+			'callBack_str':callBack_str,
+		};
+		$gameTroop.drill_BCT_addPipeEvent( e_data );
+		
+	// > 默认执行（直接塞入）
+	}else{
+		var e_list = [
+			{"code":117,"indent":0,"parameters":[ commonEventId ]},
+			{"code":0,"indent":0,"parameters":[]}
+		];
+		$gameTroop._interpreter.setup(e_list);
+	}
 }
 
 
@@ -282,8 +308,8 @@ Game_Timer.prototype.drill_PTT_doCommonEvent_Battle = function( pipeType, common
 // * <<<<基于插件检测<<<<
 //=============================================================================
 }else{
-		Imported.Drill_PlayerTimerTiming = false;
-		var pluginTip = DrillUp.drill_PTT_getPluginTip_NoBasePlugin();
+		Imported.Drill_WhenTimerExpired = false;
+		var pluginTip = DrillUp.drill_WTE_getPluginTip_NoBasePlugin();
 		alert( pluginTip );
 }
 

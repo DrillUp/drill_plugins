@@ -195,14 +195,16 @@
 //				->检查 - 控制器为空
 //				->检查 - 镜头范围外
 //				->注解
-//					> <行走图-静止>
-//					> <行走图-移动>
-//					> <行走图-奔跑>
-//					> <行走图-跳跃>
-//					> <行走图-滑行>
-//					> <行走图-滑行静止>
-//					> <行走图-被举起>
-//					> <行走图-举花盆>
+//					->常规
+//						> <行走图-静止>
+//						> <行走图-移动>
+//						> <行走图-奔跑>
+//						> <行走图-跳跃>
+//					->插件
+//						> <行走图-滑行>
+//						> <行走图-滑行静止>
+//						> <行走图-被举起>
+//						> <行走图-举花盆>
 //			->☆播放（继承）
 //				> 播放默认的状态元集合
 //				> 播放简单状态元集合
@@ -654,7 +656,8 @@ Game_CharacterBase.prototype.update = function(){
 	
 	// > 注解 - 第一层 - 常规
 	}else if( this.isMoving() ){
-		if( this.isDashing() ){
+		if( this.isDashing() || 
+			(this instanceof Game_Follower && $gamePlayer.isDashing()) ){
 			cur_annotation = "<行走图-奔跑>";
 		}else{
 			cur_annotation = "<行走图-移动>";
@@ -885,7 +888,7 @@ Game_Character.prototype.drill_EASA_speed_refresh = function( annotation ){
 		}else if( moveSpeed == 5 ){
 			this._drill_EASe_controller.drill_controllerMain_setCurSpeed( 1.5 );
 		}else if( moveSpeed == 6 ){
-			this._drill_EASe_controller.drill_controllerMain_setCurSpeed( 2 );
+			this._drill_EASe_controller.drill_controllerMain_setCurSpeed( 2.5 );
 		}else{
 			this._drill_EASe_controller.drill_controllerMain_setCurSpeed( 1 );
 		}
