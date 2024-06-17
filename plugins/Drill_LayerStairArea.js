@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.5]        图块 - 侧边阶梯区域
+ * @plugindesc [v1.6]        图块 - 侧边阶梯区域
  * @author Drill_up
  * 
  * 
@@ -94,6 +94,8 @@
  * 修复了鼠标点击某些位置时，玩家死循环移动问题。
  * [v1.5]
  * 兼容了碰撞体位置叠加的功能。
+ * [v1.6]
+ * 修复了物体朝上朝下却左右走楼梯的bug。
  * 
  * 
  * 
@@ -130,15 +132,11 @@
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^3)*o(图块特征获取) 每帧
 //		★性能测试因素	阶梯管理层
-//		★性能测试消耗	旧版本：
-//							49.07ms（drill_LSA_updateStairHeight） 14.72ms（drill_LSA_isStairRL）
-//						2023-6-23优化：
-//							28.8ms（drill_LSA_updateStairHeight）43.0ms（drill_LSA_getStairHeight）6.6ms（没事件踩在阶梯上，drill_LSA_getStairHeight）
+//		★性能测试消耗	2023-6-23：
+//							》28.8ms（drill_LSA_updateStairHeight）43.0ms（drill_LSA_getStairHeight）6.6ms（没事件踩在阶梯上，drill_LSA_getStairHeight）
 //		★最坏情况		事件越多，情况越坏。
-//		★备注			旧版本：
-//							这里的消耗量与Drill_LayerSlipperyTile光滑地面的计算量相当。帧数一直维持在9帧左右。
-//						2023-6-23：
-//							改成稀疏矩阵取点后，似乎消耗并没下降多少，事件对图块的判定联系还是太多了。
+//		★备注			2023-6-23：
+//							》改成稀疏矩阵取点后，似乎消耗并没下降多少，事件对图块的判定联系还是太多了。
 //		
 //		★优化记录		2023-6-23：
 //							这次把插件大部分重写了，将写死的图块移动分成：
@@ -217,6 +215,7 @@
 //					->没有阶梯区域，跳出
 //					->飞行物体，跳出
 //				->对角移动
+//					->强制左右朝向移动
 //					->阶梯▂▅▇ - 穿透斜向阻碍
 //					->阶梯▇▅▂ - 穿透斜向阻碍
 //				->自动寻迹（鼠标用）
@@ -249,7 +248,8 @@
 //			  物体的本身不在阶梯区域，而右下角是 从右往左的阶梯区域 时，右移和右下角移动 是相等的。
 //
 //		★存在的问题：
-//			暂无
+//			1.问题：画了1阶的多个连接的▇▅▂楼梯后，上下移动会出现玩家一个凸起的抖动。（2024-5-30）
+//			  解决：【已解决】，问题出现在 "阶梯边缘修正 - ▇▅▂连接的边缘"，原因是if的返回函数写反了。
 //
 
 //=============================================================================
@@ -1108,21 +1108,23 @@ Game_Map.prototype.drill_LSA_getStairHeight = function( realX, realY ){
 		//		（右边缘）p1 - p2
 		//		　　　　　|     |
 		//		　　　　　p3 - p4（左边缘）
-		if( (this.drill_LSA_isStairRL( x1, y1 ) == true && this.drill_LSA_isStairSideRight( x1, y1 )) &&
-			(this.drill_LSA_isStairRL( x4, y4 ) == true && this.drill_LSA_isStairSideLeft( x4, y4 )) ){
+		if( this.drill_LSA_isStairRL( x1, y1 ) == true && 
+			this.drill_LSA_isStairRL( x4, y4 ) == true && 
+			this.drill_LSA_isStairSideRight( x1, y1 ) && 
+			this.drill_LSA_isStairSideLeft(  x4, y4 ) ){
 			
 			var diff_x = realX - Math.floor( realX );
 			var diff_y = realY - Math.floor( realY );
 			// > p1-p2-p4 和 p1-p3-p4 三角划分（◺◹ 反向）
-			if( diff_x <= diff_y ){		//（注意公式分割线）
-				return this.drill_LSA_Math3D_getPointOnPlane_FindZ( x1,y1,z1, x2,y2,z2, x4,y4,z4, realX, realY );
-			}else{
+			//		（注意，之前此处if的返回函数写反了，才导致左右移动没问题，上下移动出现凸起的抖动）
+			if( diff_x <= diff_y ){
 				return this.drill_LSA_Math3D_getPointOnPlane_FindZ( x1,y1,z1, x3,y3,z3, x4,y4,z4, realX, realY );
+			}else{
+				return this.drill_LSA_Math3D_getPointOnPlane_FindZ( x1,y1,z1, x2,y2,z2, x4,y4,z4, realX, realY );
 			}
 		}
 		
 	}
-	
 	
 	// > 普通图块/阶梯常规图块 - p1-p2-p3 和 p2-p3-p4 三角划分（◸◿）
 	//		（注意，如果 p1-p2-p3 位置等高(▇▅▂的情况)，则没有斜坡移动）
@@ -1187,7 +1189,7 @@ Game_Map.prototype.drill_LSA_Math3D_getPointOnPlane_FindZ = function( x1,y1,z1, 
 
 
 //=============================================================================
-// ** ☆数据最终变换值
+// ** ☆数据最终变换值『物体数据最终变换值』
 //
 //			说明：	> 此模块专门控制 偏移与其他插件兼容 的设置。
 //					（插件完整的功能目录去看看：功能结构树）
@@ -1550,12 +1552,9 @@ Game_CharacterBase.prototype.drill_LST_moveDiagonally = function( horz, vert ){
         this._realY = $gameMap.yWithDirection(this._y, this.reverseDir(vert));
         this.increaseSteps();
     }
-    if( this._direction === this.reverseDir(horz) ){
-        this.setDirection(horz);
-    }
-    if( this._direction === this.reverseDir(vert) ){	//（去掉对角移动时纵向朝向）
-        this.setDirection(vert);
-    }
+	
+	// > 只要是对角移动，就只能朝向左右
+	this.setDirection(horz);								//（强制左右朝向移动）
 };
 //==============================
 // * 移动控制 - 对角移动 玩家（复刻）
@@ -1565,6 +1564,22 @@ Game_Player.prototype.drill_LST_moveDiagonally = function( horz, vert ){
         this._followers.updateMove();
     }
     Game_Character.prototype.drill_LST_moveDiagonally.call(this, horz, vert);
+};
+//==============================
+// * 移动控制 - 对角移动 玩家队员（复刻）
+//==============================
+var _drill_LSA_f_moveDiagonally = Game_Follower.prototype.moveDiagonally;
+Game_Follower.prototype.moveDiagonally = function( horz, vert ){
+	
+	// > 只要有一个站在阶梯上，就按左右对角移动
+	if( $gameMap.drill_LSA_isStair( this.x, this.y ) ||
+		$gameMap.drill_LSA_isStair( $gamePlayer.x, $gamePlayer.y ) ){
+		this.drill_LST_moveDiagonally( horz, vert );		//（强制左右朝向移动）
+		return;
+	}
+	
+	// > 原函数
+	_drill_LSA_f_moveDiagonally.call( this, horz, vert );
 };
 //==============================
 // * 移动控制 - 对角移动 - 穿透斜向可通行区域

@@ -1416,7 +1416,7 @@
 //		★工作类型		持续执行
 //		★时间复杂度		o(n)*o(贴图处理)	每帧
 //		★性能测试因素	乱跑
-//		★性能测试消耗	10.55ms ~ 6.22ms
+//		★性能测试消耗	
 //		★最坏情况		所有事件都有背景设置。
 //		★备注			不确定实际的消耗量，还要看贴图的大小和数量，但是小图肯定不担心。
 //		
@@ -1552,60 +1552,60 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_XETB_pluginCommand.call(this, command, args);
 	if( command === ">事件漂浮背景" ){ 	//	>事件漂浮背景 : 本事件 : 设置背景 : 2
 		
-		/*-----------------对象组获取------------------*/
-		var e_id = null;
+		/*-----------------单事件获取------------------*/
+		var ev = null;
 		if( args.length >= 2 ){
-			var temp1 = String(args[1]);
-			if( temp1 == "本事件" ){
-				var e_id = this._eventId;
+			var unit = String(args[1]);
+			if( ev == null && unit == "本事件" ){
+				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
+				ev = e;
 			}
-			if( temp1.indexOf("事件[") != -1 ){
-				temp1 = temp1.replace("事件[","");
-				temp1 = temp1.replace("]","");
-				var e_id = Number(temp1);
+			if( ev == null && unit.indexOf("事件[") != -1 ){
+				unit = unit.replace("事件[","");
+				unit = unit.replace("]","");
+				var e_id = Number(unit);
+				if( $gameMap.drill_XETB_isEventExist( e_id ) == false ){ return; }
+				var e = $gameMap.event( e_id );
+				ev = e;
 			}
-			if( temp1.indexOf("事件变量[") != -1 ){
-				temp1 = temp1.replace("事件变量[","");
-				temp1 = temp1.replace("]","");
-				var e_id = $gameVariables.value(Number(temp1));
+			if( ev == null && unit.indexOf("事件变量[") != -1 ){
+				unit = unit.replace("事件变量[","");
+				unit = unit.replace("]","");
+				var e_id = $gameVariables.value(Number(unit));
+				if( $gameMap.drill_XETB_isEventExist( e_id ) == false ){ return; }
+				var e = $gameMap.event( e_id );
+				ev = e;
 			}
 		}
 		
 		/*-----------------指令设置------------------*/
-		if( e_id != null && args.length == 6 ){
+		if( ev != null && args.length == 6 ){
 			var type = String(args[3]);
 			var temp3 = String(args[5]);
 			if( type == "设置背景" ){
-				if( $gameMap.drill_XETB_isEventExist( e_id ) == false ){ return; }
-				var e = $gameMap.event(e_id);
-				e.drill_ET_createController();
-				e._drill_ET_controller.drill_XETB_setBackgroundId( Number(temp3)-1 );
+				ev.drill_ET_createController();
+				ev._drill_ET_controller.drill_XETB_setBackgroundId( Number(temp3)-1 );
 			}
 		}
 		if( args.length == 4 ){
 			var type = String(args[3]);
 			if( type == "去掉背景" ){
-				if( $gameMap.drill_XETB_isEventExist( e_id ) == false ){ return; }
-				var e = $gameMap.event(e_id);
-				e.drill_ET_createController();
-				e._drill_ET_controller.drill_XETB_setBackgroundId( -1 );
+				ev.drill_ET_createController();
+				ev._drill_ET_controller.drill_XETB_setBackgroundId( -1 );
 			}
 		}
-		if( e_id != null && args.length == 8 ){
+		if( ev != null && args.length == 8 ){
 			var type = String(args[3]);
 			var temp3 = String(args[5]);
 			var temp4 = String(args[7]);
 			if( type == "背景偏移" ){
-				if( $gameMap.drill_XETB_isEventExist( e_id ) == false ){ return; }
-				var e = $gameMap.event(e_id);
-				e.drill_ET_createController();
-				e._drill_ET_controller.drill_XETB_setOffset( Number(temp3),Number(temp4) );
+				ev.drill_ET_createController();
+				ev._drill_ET_controller.drill_XETB_setOffset( Number(temp3),Number(temp4) );
 			}
 			if( type == "背景偏移(变量)" ){
-				if( $gameMap.drill_XETB_isEventExist( e_id ) == false ){ return; }
-				var e = $gameMap.event(e_id);
-				e.drill_ET_createController();
-				e._drill_ET_controller.drill_XETB_setOffset( 
+				ev.drill_ET_createController();
+				ev._drill_ET_controller.drill_XETB_setOffset( 
 					$gameVariables.value(Number(temp3)),
 					$gameVariables.value(Number(temp4)) 
 				);

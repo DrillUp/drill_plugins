@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        行走图 - 事件漂浮文字自动显现[扩展]
+ * @plugindesc [v1.4]        行走图 - 事件漂浮文字自动显现[扩展]
  * @author Drill_up
  * 
  * 
@@ -144,6 +144,8 @@
  * 整理了内部模块结构。
  * [v1.3]
  * 添加了触发范围的事件注释设置。
+ * [v1.4]
+ * 修复了显示框架时，框架不会播放透明动画的bug。
  * 
  * 
  *
@@ -338,60 +340,58 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_XETT_pluginCommand.call(this, command, args);
 	if( command === ">事件漂浮文字自动显现" ){
 		
-		/*-----------------对象组获取------------------*/
-		var e_id = null;
+		/*-----------------单事件获取------------------*/
+		var ev = null;
 		if( args.length >= 2 ){
-			var temp1 = String(args[1]);
-			if( temp1 == "本事件" ){
-				var e_id = this._eventId;
+			var unit = String(args[1]);
+			if( ev == null && unit == "本事件" ){
+				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
+				ev = e;
 			}
-			if( temp1.indexOf("事件[") != -1 ){
-				temp1 = temp1.replace("事件[","");
-				temp1 = temp1.replace("]","");
-				var e_id = Number(temp1);
+			if( ev == null && unit.indexOf("事件[") != -1 ){
+				unit = unit.replace("事件[","");
+				unit = unit.replace("]","");
+				var e_id = Number(unit);
+				if( $gameMap.drill_XETT_isEventExist( e_id ) == false ){ return; }
+				var e = $gameMap.event( e_id );
+				ev = e;
 			}
-			if( temp1.indexOf("事件变量[") != -1 ){
-				temp1 = temp1.replace("事件变量[","");
-				temp1 = temp1.replace("]","");
-				var e_id = $gameVariables.value(Number(temp1));
+			if( ev == null && unit.indexOf("事件变量[") != -1 ){
+				unit = unit.replace("事件变量[","");
+				unit = unit.replace("]","");
+				var e_id = $gameVariables.value(Number(unit));
+				if( $gameMap.drill_XETT_isEventExist( e_id ) == false ){ return; }
+				var e = $gameMap.event( e_id );
+				ev = e;
 			}
 		}
 		
 		/*-----------------指令设置------------------*/
-		if( e_id != null && args.length == 4 ){
+		if( ev != null && args.length == 4 ){
 			var type = String(args[3]);
 			if( type == "启用" || type == "开启" || type == "打开" || type == "启动" ){
-				if( $gameMap.drill_XETT_isEventExist( e_id ) == false ){ return; }
-				var e = $gameMap.event(e_id);
-				e.drill_ET_createController();
-				e._drill_ET_controller.drill_XETT_setEnabled( true );
+				ev.drill_ET_createController();
+				ev._drill_ET_controller.drill_XETT_setEnabled( true );
 			}
 			if( type == "关闭" || type == "禁用" ){
-				if( $gameMap.drill_XETT_isEventExist( e_id ) == false ){ return; }
-				var e = $gameMap.event(e_id);
-				e.drill_ET_createController();
-				e._drill_ET_controller.drill_XETT_setEnabled( false );
+				ev.drill_ET_createController();
+				ev._drill_ET_controller.drill_XETT_setEnabled( false );
 			}
 			if( type == "强制显现" ){
-				if( $gameMap.drill_XETT_isEventExist( e_id ) == false ){ return; }
-				var e = $gameMap.event(e_id);
-				e.drill_ET_createController();
-				e._drill_ET_controller.drill_XETT_setForceActived( true );
+				ev.drill_ET_createController();
+				ev._drill_ET_controller.drill_XETT_setForceActived( true );
 			}
 			if( type == "取消强制显现" ){
-				if( $gameMap.drill_XETT_isEventExist( e_id ) == false ){ return; }
-				var e = $gameMap.event(e_id);
-				e.drill_ET_createController();
-				e._drill_ET_controller.drill_XETT_setForceActived( false );
+				ev.drill_ET_createController();
+				ev._drill_ET_controller.drill_XETT_setForceActived( false );
 			}
 		}
-		if( e_id != null && args.length == 6 ){
+		if( ev != null && args.length == 6 ){
 			var type = String(args[1]);
 			var temp1 = String(args[3]);
 			var temp2 = String(args[5]);
 			if( type == "漂浮文字" ){
-				if( $gameMap.drill_XETT_isEventExist( e_id ) == false ){ return; }
-				var e = $gameMap.event(e_id);
 				if( temp1.indexOf("持续时长[") != -1 ){
 					temp1 = temp1.replace("持续时长[","");
 					temp1 = temp1.replace("]","");
@@ -399,13 +399,11 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp2 = temp2.replace("延迟时间[","");
 					temp2 = temp2.replace("]","");
 					temp2 = Number(temp2);
-					e.drill_ET_createController();
-					e._drill_ET_controller.drill_XETT_setTextAnimTime( temp1, temp2 );
+					ev.drill_ET_createController();
+					ev._drill_ET_controller.drill_XETT_setTextAnimTime( temp1, temp2 );
 				}
 			}
 			if( type == "批注线" ){
-				if( $gameMap.drill_XETT_isEventExist( e_id ) == false ){ return; }
-				var e = $gameMap.event(e_id);
 				if( temp1.indexOf("持续时长[") != -1 ){
 					temp1 = temp1.replace("持续时长[","");
 					temp1 = temp1.replace("]","");
@@ -413,17 +411,15 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp2 = temp2.replace("延迟时间[","");
 					temp2 = temp2.replace("]","");
 					temp2 = Number(temp2);
-					e.drill_ET_createController();
-					e._drill_ET_controller.drill_XETT_setLineAnimTime( temp1, temp2 );
+					ev.drill_ET_createController();
+					ev._drill_ET_controller.drill_XETT_setLineAnimTime( temp1, temp2 );
 				}
 				if( temp1 == "修改变化模式" ){
-					e.drill_ET_createController();
-					e._drill_ET_controller.drill_XETT_setLineAnimMode( temp2 );
+					ev.drill_ET_createController();
+					ev._drill_ET_controller.drill_XETT_setLineAnimMode( temp2 );
 				}
 			}
 			if( type == "背景" ){
-				if( $gameMap.drill_XETT_isEventExist( e_id ) == false ){ return; }
-				var e = $gameMap.event(e_id);
 				if( temp1.indexOf("持续时长[") != -1 ){
 					temp1 = temp1.replace("持续时长[","");
 					temp1 = temp1.replace("]","");
@@ -431,12 +427,12 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp2 = temp2.replace("延迟时间[","");
 					temp2 = temp2.replace("]","");
 					temp2 = Number(temp2);
-					e.drill_ET_createController();
-					e._drill_ET_controller.drill_XETT_setBackgroundAnimTime( temp1, temp2 );
+					ev.drill_ET_createController();
+					ev._drill_ET_controller.drill_XETT_setBackgroundAnimTime( temp1, temp2 );
 				}
 				if( temp1 == "修改变化模式" ){
-					e.drill_ET_createController();
-					e._drill_ET_controller.drill_XETT_setBackgroundAnimMode( temp2 );
+					ev.drill_ET_createController();
+					ev._drill_ET_controller.drill_XETT_setBackgroundAnimMode( temp2 );
 				}
 			}
 		}
@@ -928,8 +924,12 @@ Drill_ET_WindowSprite.prototype.drill_XETT_updateChange = function() {
 	if( time < 0 ){ time = 0; }
 	this.contentsOpacity = this._drill_controller._drill_textOpacity * time / animText_time;	//（文本域 透明度）
 	
-	// > 背景容器层 透明度（不变）
-	//this.opacity = this._drill_controller._drill_frameOpacity;
+	// > 背景容器层 透明度
+	if( d_data['frameVisible'] == true ){
+		this.opacity = this._drill_controller._drill_frameOpacity * time / animText_time;	
+	}else{
+		this.opacity = this._drill_controller._drill_frameOpacity;
+	}
 	
 	// > 批注线透明度【注意XETL】
 	if( this._drill_XETL_curSprite ){

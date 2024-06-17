@@ -353,6 +353,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var unit = String(args[1]);
 			if( e_chars == null && unit == "本事件" ){
 				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
 				e_chars = [ e ];
 			}
 			if( e_chars == null && unit.indexOf("批量事件[") != -1 ){
@@ -821,6 +822,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if(args[7]){ var height = Number(args[7]); }
 			if( temp1 == '本事件' ){
 				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
 				if( e.opacity() == 255 && $gameSystem._drill_EFIE_opacityCheck_event){
 					return;
 				}

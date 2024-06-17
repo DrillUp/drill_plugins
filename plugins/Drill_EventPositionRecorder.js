@@ -224,6 +224,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 						}
 						else if( temp1 == "本事件" ){
 							var e = $gameMap.event( this._eventId );
+							if( e == undefined ){ return; } //『防止并行删除事件出错』
 							$gameSystem.drill_EPR_savePosition( tag, e.x, e.y );
 						}
 						else if( temp1.indexOf("事件变量[") != -1 ){
@@ -324,6 +325,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var unit = String(args[1]);
 			if( e_chars == null && unit == "本事件" ){
 				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
 				e_chars = [ e ];
 			}
 			if( e_chars == null && unit == "全图事件" ){

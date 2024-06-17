@@ -428,9 +428,12 @@
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^2) 每帧
 //		★性能测试因素	动画序列管理层
-//		★性能测试消耗	5.9ms（Game_CharacterBase.drill_EASB_openActionSequenceByName） 1.8ms（Game_CharacterBase.drill_EASB_closeActionSequence）
+//		★性能测试消耗	2024/1/22：
+//							》5.9ms（Game_CharacterBase.drill_EASB_openActionSequenceByName） 1.8ms（Game_CharacterBase.drill_EASB_closeActionSequence）
+//						2024/6/15：
+//							》12.7ms（drill_EASB_closeActionSequence）7.7ms（drill_EASB_posIsInCamera）
 //		★最坏情况		无
-//		★备注			无
+//		★备注			之前事件少，所以测出的消耗较低，现在数量非常多，大概50个小爱丽丝，消耗就多了。
 //		
 //		★优化记录		暂无
 //
@@ -942,7 +945,7 @@ Game_CharacterBase.prototype.drill_EASB_posIsInCamera = function( realX, realY )
 //==============================
 // * 物体绑定 - 检查 - 资源名称 变化时
 //
-//			说明：	> 【慢1帧闪烁优化】在改变 _characterName 后，可以立即同步 _drill_EASB_lastName 。
+//			说明：	> 『行走图资源切换慢一帧』在改变 _characterName 后，可以立即同步 _drill_EASB_lastName 。
 //==============================
 Object.defineProperty(Game_CharacterBase.prototype, '_characterName', {
     get: function(){

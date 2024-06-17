@@ -21,7 +21,7 @@
  * 该插件 不能 单独使用。
  * 由于插件改变了默认固定战斗镜头的规则，对所有战斗UI相关插件有影响。
  * 基于：
- *   - Drill_CoreOfBallistics        系统-弹道核心★★v1.9及以上★★
+ *   - Drill_CoreOfBallistics        数学模型-弹道核心★★v1.9及以上★★
  *   - Drill_CoreOfInput             系统-输入设备核心★★v1.6及以上★★
  * 被扩展：
  *   - Drill_EnemySimpleHud          战斗UI-简单生命框
@@ -411,7 +411,8 @@
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^3) 每帧
 //		★性能测试因素	战斗界面
-//		★性能测试消耗	12.69ms（drill_BCa_lockAnchor） 6.26ms（Spriteset_Battle.prototype.update）
+//		★性能测试消耗	2024/5/10：
+//							》12.69ms（drill_BCa_lockAnchor） 6.26ms（Spriteset_Battle.prototype.update）
 //		★最坏情况		无
 //		★备注			无
 //		
@@ -503,12 +504,11 @@
 //				
 //			
 //		★其它说明细节：
-//			暂无
+//			1.战斗背景、战斗魔法圈、角色肖像 处于 图片层或最顶层时，暂不设置 旋转与缩放 同步。
 //
 //		★存在的问题：
-//			1.插件没有完全脱离mog的影子，内部有已经套牢并且无法改名的变量名。（外部插件都与此插件关联引用）
-//			2.细节：战斗界面旋转20度，只有测试黄线的偏移位置不对。（已解决，偏移需要逆向变换）
-//			3.细节：战斗背景、战斗魔法圈、角色肖像 处于 图片层或最顶层时，暂不设置 旋转与缩放 同步。
+//			1.问题：战斗界面旋转20度，只有测试黄线的偏移位置不对。
+//			  解决：【已解决】，偏移需要逆向变换。
 //			
 
 //=============================================================================
@@ -520,7 +520,7 @@
 	var DrillUp = DrillUp || {}; 
 	DrillUp.g_BCa_PluginTip_curName = "Drill_BattleCamera.js 战斗-活动战斗镜头";
 	DrillUp.g_BCa_PluginTip_baseList = [
-		"Drill_CoreOfBallistics.js 系统-弹道核心",
+		"Drill_CoreOfBallistics.js 数学模型-弹道核心",
 		"Drill_CoreOfInput.js 系统-输入设备核心"
 	];
 	//==============================

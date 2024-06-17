@@ -103,7 +103,7 @@
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 获取属性
- * 你需要通过插件指令来获取图片的属性值：
+ * 你可以通过插件指令来获取图片的属性值：
  * 
  * 插件指令：>图片快捷变换操作 : 图片[1] : 获取属性 : 位置X : 变量[21]
  * 插件指令：>图片快捷变换操作 : 图片变量[21] : 获取属性 : 位置X : 变量[21]
@@ -112,40 +112,51 @@
  * 插件指令：>图片快捷变换操作 : 图片[1] : 获取属性 : 位置Y : 变量[21]
  * 插件指令：>图片快捷变换操作 : 图片[1] : 获取属性 : 透明度 : 变量[21]
  * 插件指令：>图片快捷变换操作 : 图片[1] : 获取属性 : 旋转 : 变量[21]
- * 插件指令：>图片快捷变换操作 : 图片[1] : 获取属性 : 缩放X : 变量[21]
- * 插件指令：>图片快捷变换操作 : 图片[1] : 获取属性 : 缩放Y : 变量[21]
- * 插件指令：>图片快捷变换操作 : 图片[1] : 获取属性 : 斜切X : 变量[21]
- * 插件指令：>图片快捷变换操作 : 图片[1] : 获取属性 : 斜切Y : 变量[21]
+ * 插件指令：>图片快捷变换操作 : 图片[1] : 获取属性 : 缩放X : 变量%[21]
+ * 插件指令：>图片快捷变换操作 : 图片[1] : 获取属性 : 缩放Y : 变量%[21]
+ * 插件指令：>图片快捷变换操作 : 图片[1] : 获取属性 : 斜切X : 变量%[21]
+ * 插件指令：>图片快捷变换操作 : 图片[1] : 获取属性 : 斜切Y : 变量%[21]
  * 
  * 1.前半部分（图片[1]）和 后半部分（获取属性 : 位置X : 变量[21]）
  *   的参数可以随意组合。一共有2*8种组合方式。
- * 2.由于变量只能存整数，所以获取属性时，会乘以100倍。
- *   比如缩放值为1.2时，静态数据到： 1.2 * 100 = 120。
+ * 2."变量%["表示该变量获取到属性时，会乘以100倍。因为变量只能存整数。
+ *   比如缩放值为1.2时，则获取到： 1.2 * 100 = 120。
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 移动到
  * 你需要通过下面插件指令来执行图片操作：
  * 
- * 插件指令：>图片快捷变换操作 : 图片[1] : 弹性移动到 : 位置[100,100] : 时间[60]
- * 插件指令：>图片快捷变换操作 : 图片变量[21] : 弹性移动到 : 位置[100,100] : 时间[60]
- * 插件指令：>图片快捷变换操作 : 批量图片[4,5] : 弹性移动到 : 位置[100,100] : 时间[60]
- * 插件指令：>图片快捷变换操作 : 批量图片变量[21,22] : 弹性移动到 : 位置[100,100] : 时间[60]
+ * 插件指令：>图片快捷变换操作 : 图片[1] : 移动到-弹性移动 : 位置[100,100] : 时间[60]
+ * 插件指令：>图片快捷变换操作 : 图片变量[21] : 移动到-弹性移动 : 位置[100,100] : 时间[60]
+ * 插件指令：>图片快捷变换操作 : 批量图片[4,5] : 移动到-弹性移动 : 位置[100,100] : 时间[60]
+ * 插件指令：>图片快捷变换操作 : 批量图片变量[21,22] : 移动到-弹性移动 : 位置[100,100] : 时间[60]
  * 
- * 插件指令：>图片快捷变换操作 : 图片[1] : 弹性移动到 : 位置[100,100] : 时间[60]
- * 插件指令：>图片快捷变换操作 : 图片[1] : 弹性移动到 : 位置变量[25,26] : 时间[60]
- * 插件指令：>图片快捷变换操作 : 图片[1] : 弹性移动到 : 相对位置[-10,-10] : 时间[60]
- * 插件指令：>图片快捷变换操作 : 图片[1] : 弹性移动到 : 相对位置变量[25,26] : 时间[60]
- * 插件指令：>图片快捷变换操作 : 图片[1] : 增减速移动到 : 位置[100,100] : 时间[60]
- * 插件指令：>图片快捷变换操作 : 图片[1] : 增减速移动到 : 位置变量[25,26] : 时间[60]
- * 插件指令：>图片快捷变换操作 : 图片[1] : 增减速移动到 : 相对位置[-10,-10] : 时间[60]
- * 插件指令：>图片快捷变换操作 : 图片[1] : 增减速移动到 : 相对位置变量[25,26] : 时间[60]
+ * 插件指令：>图片快捷变换操作 : 图片[1] : 移动到-匀速移动 : 位置[100,100] : 时间[60]
+ * 插件指令：>图片快捷变换操作 : 图片[1] : 移动到-匀速移动 : 位置变量[25,26] : 时间[60]
+ * 插件指令：>图片快捷变换操作 : 图片[1] : 移动到-匀速移动 : 相对位置[-10,-10] : 时间[60]
+ * 插件指令：>图片快捷变换操作 : 图片[1] : 移动到-匀速移动 : 相对位置变量[25,26] : 时间[60]
+ * 插件指令：>图片快捷变换操作 : 图片[1] : 移动到-弹性移动 : 位置[100,100] : 时间[60]
+ * 插件指令：>图片快捷变换操作 : 图片[1] : 移动到-弹性移动 : 位置变量[25,26] : 时间[60]
+ * 插件指令：>图片快捷变换操作 : 图片[1] : 移动到-弹性移动 : 相对位置[-10,-10] : 时间[60]
+ * 插件指令：>图片快捷变换操作 : 图片[1] : 移动到-弹性移动 : 相对位置变量[25,26] : 时间[60]
+ * 插件指令：>图片快捷变换操作 : 图片[1] : 移动到-增减速移动 : 位置[100,100] : 时间[60]
+ * 插件指令：>图片快捷变换操作 : 图片[1] : 移动到-增减速移动 : 位置变量[25,26] : 时间[60]
+ * 插件指令：>图片快捷变换操作 : 图片[1] : 移动到-增减速移动 : 相对位置[-10,-10] : 时间[60]
+ * 插件指令：>图片快捷变换操作 : 图片[1] : 移动到-增减速移动 : 相对位置变量[25,26] : 时间[60]
  * 
- * 1.前半部分（图片[1]）和 后半部分（弹性移动到）的参数
- *   可以随意组合。一共有4*14种组合方式。
+ * 1.前半部分（图片[1]）和 后半部分（移动到-弹性移动）的参数
+ *   可以随意组合。一共有4*12种组合方式。
+ * 2.旧版本的指令"匀速移动到"、"弹性移动到"、"增减速移动到"也可以用。
+ *   意思与"移动到-匀速移动"、"移动到-弹性移动"、"移动到-增减速移动"一样。
+ * 
+ * 以下是旧版本的指令，也可以用：
+ * 插件指令(旧)：>图片快捷变换操作 : 图片[1] : 匀速移动到 : 位置[100,100] : 时间[60]
+ * 插件指令(旧)：>图片快捷变换操作 : 图片[1] : 弹性移动到 : 位置[100,100] : 时间[60]
+ * 插件指令(旧)：>图片快捷变换操作 : 图片[1] : 增减速移动到 : 位置[100,100] : 时间[60]
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 修改中心锚点
- * 你需要通过下面插件指令来执行图片操作：
+ * 你可以通过插件指令手动修改中心锚点：
  * 
  * 插件指令：>图片快捷变换操作 : 图片[1] : 修改中心锚点 : 锚点[0.5,1.0]
  * 插件指令：>图片快捷变换操作 : 图片变量[21] : 修改中心锚点 : 锚点[0.5,1.0]
@@ -159,7 +170,8 @@
  *   可以随意组合。一共有4*2种组合方式。
  * 2.修改中心锚点时，如果图片还未加载出来，直接执行修改指令即可，
  *   如果图片已加载出来了，建议设置"保持位置"。
- * 3.注意，中心锚点在图片创建后，修改一次就不要动了。
+ * 3.注意，由于中心锚点会影响缩放、旋转效果，
+ *   最好在图片创建后，修改一次中心锚点，就不要再动了。
  *   不要在 图片进行任何变换 的时候，同时执行 "修改中心锚点(保持位置)"。
  *   容易引起坐标计算错位。
  * 
@@ -1868,13 +1880,14 @@
 //			->☆静态数据
 //			->☆插件指令
 //			
-//			->☆插件指令容器
-//				->基础属性
-//					>  图片资源名
+//			->☆叠加变化容器
+//				->基础特性
+//					>  资源名
+//					x> 可见
 //					>  混合模式
 //					x> 层级
 //					x> 堆叠级
-//				->变换属性
+//				->变换特性『变换特性-单贴图』
 //					> 锚点X
 //					> 锚点Y
 //					> 位置X
@@ -1905,7 +1918,7 @@
 //			无
 //
 //		★其它说明细节：
-//			无
+//			暂无
 //
 //		★存在的问题：
 //			暂无
@@ -2029,14 +2042,14 @@ Game_Interpreter.prototype.pluginCommand = function( command, args ){
 		}
 		
 		/*-----------------修改中心锚点------------------*/
-		if( args.length == 6 ){
+		if( pics != null && args.length == 6 ){
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
 			if( type == "修改中心锚点" ){
 				temp1 = temp1.replace("锚点[","");
 				temp1 = temp1.replace("]","");
 				var temp_arr = temp1.split(/[,，]/);
-				if( pics != null && temp_arr.length > 1 ){
+				if( temp_arr.length >= 2 ){
 					for( var k=0; k < pics.length; k++ ){	//（直接用 图片优化核心 提供的函数）
 						pics[k].drill_COPi_setAnchor( Number(temp_arr[0]), Number(temp_arr[1]) );
 					}
@@ -2046,7 +2059,7 @@ Game_Interpreter.prototype.pluginCommand = function( command, args ){
 				temp1 = temp1.replace("锚点[","");
 				temp1 = temp1.replace("]","");
 				var temp_arr = temp1.split(/[,，]/);
-				if( pics != null && temp_arr.length > 1 ){
+				if( temp_arr.length >= 2 ){
 					for( var k=0; k < pics.length; k++ ){	//（直接用 图片优化核心 提供的函数）
 						pics[k].drill_COPi_setAnchorWithKeepPosition( Number(temp_arr[0]), Number(temp_arr[1]) );
 					}
@@ -2054,90 +2067,33 @@ Game_Interpreter.prototype.pluginCommand = function( command, args ){
 			}
 		}
 		
-		/*-----------------弹性移动到------------------*/
-		if( args.length == 8 ){
+		/*-----------------移动到------------------*/
+		if( pics != null && args.length == 8 ){
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
 			var temp2 = String(args[7]);
-			if( type == "弹性移动到" ){
-				temp2 = temp2.replace("时间[","");
-				temp2 = temp2.replace("]","");
-				if( temp1.indexOf("相对位置变量[") != -1  ){
-					temp1 = temp1.replace("相对位置变量[","");
-					temp1 = temp1.replace("]","");
-					var temp_arr = temp1.split(/[,，]/);
-					if( pics != null && temp_arr.length > 1 ){
-						for( var k=0; k < pics.length; k++ ){
-							var data = {
-								"type":"relativeElasticMove",
-								"valueX":$gameVariables.value( Number(temp_arr[0]) ),
-								"valueY":$gameVariables.value( Number(temp_arr[1]) ),
-								"time":Number(temp2),
-							}
-							pics[k]._drill_PSh_commandChangeTank.push(data);
-						}
-					}
-				}
-				else if( temp1.indexOf("相对位置[") != -1  ){
-					temp1 = temp1.replace("相对位置[","");
-					temp1 = temp1.replace("]","");
-					var temp_arr = temp1.split(/[,，]/);
-					if( pics != null && temp_arr.length > 1 ){
-						for( var k=0; k < pics.length; k++ ){
-							var data = {
-								"type":"relativeElasticMove",
-								"valueX":Number(temp_arr[0]),
-								"valueY":Number(temp_arr[1]),
-								"time":Number(temp2),
-							}
-							pics[k]._drill_PSh_commandChangeTank.push(data);
-						}
-					}
-				}
-				else if( temp1.indexOf("位置变量[") != -1  ){
-					temp1 = temp1.replace("位置变量[","");
-					temp1 = temp1.replace("]","");
-					var temp_arr = temp1.split(/[,，]/);
-					if( pics != null && temp_arr.length > 1 ){
-						for( var k=0; k < pics.length; k++ ){
-							var data = {
-								"type":"elasticMove",
-								"valueX":$gameVariables.value( Number(temp_arr[0]) ) - pics[k]._x,
-								"valueY":$gameVariables.value( Number(temp_arr[1]) ) - pics[k]._y,
-								"time":Number(temp2),
-							}
-							pics[k]._drill_PSh_commandChangeTank.push(data);
-						}
-					}
-				}
-				else if( temp1.indexOf("位置[") != -1  ){
-					temp1 = temp1.replace("位置[","");
-					temp1 = temp1.replace("]","");
-					var temp_arr = temp1.split(/[,，]/);
-					if( pics != null && temp_arr.length > 1 ){
-						for( var k=0; k < pics.length; k++ ){
-							var data = {
-								"type":"elasticMove",
-								"valueX":Number(temp_arr[0]) - pics[k]._x,
-								"valueY":Number(temp_arr[1]) - pics[k]._y,
-								"time":Number(temp2),
-							}
-							pics[k]._drill_PSh_commandChangeTank.push(data);
-						}
-					}
-				}
+			
+			var type_str = null;
+			if( type == "移动到-匀速移动" || type == "匀速移动到" ){
+				type_str = "uniformMove";
 			}
-			if( type == "增减速移动到" ){
+			if( type == "移动到-弹性移动" || type == "弹性移动到" ){
+				type_str = "elasticMove";
+			}
+			if( type == "移动到-增减速移动" || type == "增减速移动到" ){
+				type_str = "smoothMove";
+			}
+			if( type_str != null ){
 				temp2 = temp2.replace("时间[","");
 				temp2 = temp2.replace("]","");
 				if( temp1.indexOf("相对位置变量[") != -1  ){
 					temp1 = temp1.replace("相对位置变量[","");
 					temp1 = temp1.replace("]","");
 					var temp_arr = temp1.split(/[,，]/);
-					if( pics != null && temp_arr.length > 1 ){
+					if( temp_arr.length > 1 ){
 						for( var k=0; k < pics.length; k++ ){
 							var data = {
-								"type":"relativeSmoothMove",
+								"type":type_str,
 								"valueX":$gameVariables.value( Number(temp_arr[0]) ),
 								"valueY":$gameVariables.value( Number(temp_arr[1]) ),
 								"time":Number(temp2),
@@ -2152,10 +2108,10 @@ Game_Interpreter.prototype.pluginCommand = function( command, args ){
 					temp1 = temp1.replace("相对位置[","");
 					temp1 = temp1.replace("]","");
 					var temp_arr = temp1.split(/[,，]/);
-					if( pics != null && temp_arr.length > 1 ){
+					if( temp_arr.length > 1 ){
 						for( var k=0; k < pics.length; k++ ){
 							var data = {
-								"type":"relativeSmoothMove",
+								"type":type_str,
 								"valueX":Number(temp_arr[0]),
 								"valueY":Number(temp_arr[1]),
 								"time":Number(temp2),
@@ -2170,10 +2126,10 @@ Game_Interpreter.prototype.pluginCommand = function( command, args ){
 					temp1 = temp1.replace("位置变量[","");
 					temp1 = temp1.replace("]","");
 					var temp_arr = temp1.split(/[,，]/);
-					if( pics != null && temp_arr.length > 1 ){
+					if( temp_arr.length > 1 ){
 						for( var k=0; k < pics.length; k++ ){
 							var data = {
-								"type":"smoothMove",
+								"type":type_str,
 								"valueX":$gameVariables.value( Number(temp_arr[0]) ) - pics[k]._x,
 								"valueY":$gameVariables.value( Number(temp_arr[1]) ) - pics[k]._y,
 								"time":Number(temp2),
@@ -2188,10 +2144,10 @@ Game_Interpreter.prototype.pluginCommand = function( command, args ){
 					temp1 = temp1.replace("位置[","");
 					temp1 = temp1.replace("]","");
 					var temp_arr = temp1.split(/[,，]/);
-					if( pics != null && temp_arr.length > 1 ){
+					if( temp_arr.length > 1 ){
 						for( var k=0; k < pics.length; k++ ){
 							var data = {
-								"type":"smoothMove",
+								"type":type_str,
 								"valueX":Number(temp_arr[0]) - pics[k]._x,
 								"valueY":Number(temp_arr[1]) - pics[k]._y,
 								"time":Number(temp2),
@@ -2206,55 +2162,49 @@ Game_Interpreter.prototype.pluginCommand = function( command, args ){
 		}	
 		
 		/*-----------------单属性操作------------------*/
-		if( args.length == 6 ){
+		if( pics != null && args.length == 6 ){
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
 			if( type == "修改单属性" ){
 				if( temp1.indexOf("混合模式[") != -1  ){
 					temp1 = temp1.replace("混合模式[","");
 					temp1 = temp1.replace("]","");
-					if( pics != null ){
-						for( var k=0; k < pics.length; k++ ){
-							var data = {
-								"type":"blendMode",
-								"value":Number(temp1),
-								"time":1,
-							}
-							pics[k]._drill_PSh_commandChangeTank.push(data);
+					for( var k=0; k < pics.length; k++ ){
+						var data = {
+							"type":"blendMode",
+							"value":Number(temp1),
+							"time":1,
 						}
+						pics[k]._drill_PSh_commandChangeTank.push(data);
 					}
 				}
 				if( temp1.indexOf("预加载资源[") != -1  ){
 					temp1 = temp1.replace("预加载资源[","");
 					temp1 = temp1.replace("]","");
-					if( pics != null ){
-						for( var k=0; k < pics.length; k++ ){
-							var data = {
-								"type":"preload",
-								"value":Number(temp1) - 1,
-								"time":1,
-							}
-							pics[k]._drill_PSh_commandChangeTank.push(data);
+					for( var k=0; k < pics.length; k++ ){
+						var data = {
+							"type":"preload",
+							"value":Number(temp1) - 1,
+							"time":1,
 						}
+						pics[k]._drill_PSh_commandChangeTank.push(data);
 					}
 				}
 				if( temp1.indexOf("预加载资源变量[") != -1  ){
 					temp1 = temp1.replace("预加载资源变量[","");
 					temp1 = temp1.replace("]","");
-					if( pics != null ){
-						for( var k=0; k < pics.length; k++ ){
-							var data = {
-								"type":"preload",
-								"value":$gameVariables.value(Number(temp1)) - 1,
-								"time":1,
-							}
-							pics[k]._drill_PSh_commandChangeTank.push(data);
+					for( var k=0; k < pics.length; k++ ){
+						var data = {
+							"type":"preload",
+							"value":$gameVariables.value(Number(temp1)) - 1,
+							"time":1,
 						}
+						pics[k]._drill_PSh_commandChangeTank.push(data);
 					}
 				}
 			}
 		}	
-		if( args.length == 8 ){
+		if( pics != null && args.length == 8 ){
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
 			var temp2 = String(args[7]);
@@ -2264,277 +2214,230 @@ Game_Interpreter.prototype.pluginCommand = function( command, args ){
 				if( temp1.indexOf("相对位置X[") != -1  ){
 					temp1 = temp1.replace("相对位置X[","");
 					temp1 = temp1.replace("]","");
-					if( pics != null ){
-						for( var k=0; k < pics.length; k++ ){
-							var data = {
-								"type":"relativePosX",
-								"value":Number(temp1) ,
-								"time":Number(temp2),
-							}
-							pics[k]._drill_PSh_commandChangeTank.push(data);
+					for( var k=0; k < pics.length; k++ ){
+						var data = {
+							"type":"relativePosX",
+							"value":Number(temp1) ,
+							"time":Number(temp2),
 						}
+						pics[k]._drill_PSh_commandChangeTank.push(data);
 					}
 				}
 				else if( temp1.indexOf("相对位置Y[") != -1  ){
 					temp1 = temp1.replace("相对位置Y[","");
 					temp1 = temp1.replace("]","");
-					if( pics != null ){
-						for( var k=0; k < pics.length; k++ ){
-							var data = {
-								"type":"relativePosY",
-								"value":Number(temp1) ,
-								"time":Number(temp2),
-							}
-							pics[k]._drill_PSh_commandChangeTank.push(data);
+					for( var k=0; k < pics.length; k++ ){
+						var data = {
+							"type":"relativePosY",
+							"value":Number(temp1) ,
+							"time":Number(temp2),
 						}
+						pics[k]._drill_PSh_commandChangeTank.push(data);
 					}
 				}
 				else if( temp1.indexOf("位置X[") != -1  ){
 					temp1 = temp1.replace("位置X[","");
 					temp1 = temp1.replace("]","");
-					if( pics != null ){
-						for( var k=0; k < pics.length; k++ ){
-							var data = {
-								"type":"posX",
-								"value":Number(temp1) - pics[k]._x,
-								"time":Number(temp2),
-							}
-							pics[k]._drill_PSh_commandChangeTank.push(data);
+					for( var k=0; k < pics.length; k++ ){
+						var data = {
+							"type":"posX",
+							"value":Number(temp1) - pics[k]._x,
+							"time":Number(temp2),
 						}
+						pics[k]._drill_PSh_commandChangeTank.push(data);
 					}
 				}
 				else if( temp1.indexOf("位置Y[") != -1  ){
 					temp1 = temp1.replace("位置Y[","");
 					temp1 = temp1.replace("]","");
-					if( pics != null ){
-						for( var k=0; k < pics.length; k++ ){
-							var data = {
-								"type":"posY",
-								"value":Number(temp1) - pics[k]._y,
-								"time":Number(temp2),
-							}
-							pics[k]._drill_PSh_commandChangeTank.push(data);
+					for( var k=0; k < pics.length; k++ ){
+						var data = {
+							"type":"posY",
+							"value":Number(temp1) - pics[k]._y,
+							"time":Number(temp2),
 						}
+						pics[k]._drill_PSh_commandChangeTank.push(data);
 					}
 				}
 				else if( temp1.indexOf("相对透明度[") != -1  ){
 					temp1 = temp1.replace("相对透明度[","");
 					temp1 = temp1.replace("]","");
-					if( pics != null ){
-						for( var k=0; k < pics.length; k++ ){
-							var data = {
-								"type":"relativeOpacity",
-								"value":Number(temp1),
-								"time":Number(temp2),
-							}
-							pics[k]._drill_PSh_commandChangeTank.push(data);
+					for( var k=0; k < pics.length; k++ ){
+						var data = {
+							"type":"relativeOpacity",
+							"value":Number(temp1),
+							"time":Number(temp2),
 						}
+						pics[k]._drill_PSh_commandChangeTank.push(data);
 					}
 				}
 				else if( temp1.indexOf("透明度[") != -1  ){
 					temp1 = temp1.replace("透明度[","");
 					temp1 = temp1.replace("]","");
-					if( pics != null ){
-						for( var k=0; k < pics.length; k++ ){
-							var data = {
-								"type":"opacity",
-								"value":Number(temp1) - pics[k]._opacity,
-								"time":Number(temp2),
-							}
-							pics[k]._drill_PSh_commandChangeTank.push(data);
+					for( var k=0; k < pics.length; k++ ){
+						var data = {
+							"type":"opacity",
+							"value":Number(temp1) - pics[k]._opacity,
+							"time":Number(temp2),
 						}
+						pics[k]._drill_PSh_commandChangeTank.push(data);
 					}
 				}
 				else if( temp1.indexOf("相对旋转[") != -1  ){
 					temp1 = temp1.replace("相对旋转[","");
 					temp1 = temp1.replace("]","");
-					if( pics != null ){
-						for( var k=0; k < pics.length; k++ ){
-							var data = {
-								"type":"relativeAngle",
-								"value":Number(temp1),
-								"time":Number(temp2),
-							}
-							pics[k]._drill_PSh_commandChangeTank.push(data);
+					for( var k=0; k < pics.length; k++ ){
+						var data = {
+							"type":"relativeAngle",
+							"value":Number(temp1),
+							"time":Number(temp2),
 						}
+						pics[k]._drill_PSh_commandChangeTank.push(data);
 					}
 				}
 				else if( temp1.indexOf("旋转[") != -1  ){
 					temp1 = temp1.replace("旋转[","");
 					temp1 = temp1.replace("]","");
-					if( pics != null ){
-						for( var k=0; k < pics.length; k++ ){
-							var data = {
-								"type":"angle",
-								"value":Number(temp1) - pics[k]._angle,
-								"time":Number(temp2),
-							}
-							pics[k]._drill_PSh_commandChangeTank.push(data);
+					for( var k=0; k < pics.length; k++ ){
+						var data = {
+							"type":"angle",
+							"value":Number(temp1) - pics[k]._angle,
+							"time":Number(temp2),
 						}
+						pics[k]._drill_PSh_commandChangeTank.push(data);
 					}
 				}
 				else if( temp1.indexOf("相对缩放X[") != -1  ){
 					temp1 = temp1.replace("相对缩放X[","");
 					temp1 = temp1.replace("]","");
-					if( pics != null ){
-						for( var k=0; k < pics.length; k++ ){
-							var data = {
-								"type":"relativeScaleX",
-								"value":Number(temp1)*100,
-								"time":Number(temp2),
-							}
-							pics[k]._drill_PSh_commandChangeTank.push(data);
+					for( var k=0; k < pics.length; k++ ){
+						var data = {
+							"type":"relativeScaleX",
+							"value":Number(temp1)*100,
+							"time":Number(temp2),
 						}
+						pics[k]._drill_PSh_commandChangeTank.push(data);
 					}
 				}
 				else if( temp1.indexOf("缩放X[") != -1  ){
 					temp1 = temp1.replace("缩放X[","");
 					temp1 = temp1.replace("]","");
-					if( pics != null ){
-						for( var k=0; k < pics.length; k++ ){
-							var data = {
-								"type":"scaleX",
-								"value":Number(temp1)*100 - pics[k]._scaleX,
-								"time":Number(temp2),
-							}
-							pics[k]._drill_PSh_commandChangeTank.push(data);
+					for( var k=0; k < pics.length; k++ ){
+						var data = {
+							"type":"scaleX",
+							"value":Number(temp1)*100 - pics[k]._scaleX,
+							"time":Number(temp2),
 						}
+						pics[k]._drill_PSh_commandChangeTank.push(data);
 					}
 				}
 				else if( temp1.indexOf("相对缩放Y[") != -1  ){
 					temp1 = temp1.replace("相对缩放Y[","");
 					temp1 = temp1.replace("]","");
-					if( pics != null ){
-						for( var k=0; k < pics.length; k++ ){
-							var data = {
-								"type":"relativeScaleY",
-								"value":Number(temp1)*100,
-								"time":Number(temp2),
-							}
-							pics[k]._drill_PSh_commandChangeTank.push(data);
+					for( var k=0; k < pics.length; k++ ){
+						var data = {
+							"type":"relativeScaleY",
+							"value":Number(temp1)*100,
+							"time":Number(temp2),
 						}
+						pics[k]._drill_PSh_commandChangeTank.push(data);
 					}
 				}
 				else if( temp1.indexOf("缩放Y[") != -1  ){
 					temp1 = temp1.replace("缩放Y[","");
 					temp1 = temp1.replace("]","");
-					if( pics != null ){
-						for( var k=0; k < pics.length; k++ ){
-							var data = {
-								"type":"scaleY",
-								"value":Number(temp1)*100 - pics[k]._scaleY,
-								"time":Number(temp2),
-							}
-							pics[k]._drill_PSh_commandChangeTank.push(data);
+					for( var k=0; k < pics.length; k++ ){
+						var data = {
+							"type":"scaleY",
+							"value":Number(temp1)*100 - pics[k]._scaleY,
+							"time":Number(temp2),
 						}
+						pics[k]._drill_PSh_commandChangeTank.push(data);
 					}
 				}
 				else if( temp1.indexOf("相对斜切X[") != -1  ){
 					temp1 = temp1.replace("相对斜切X[","");
 					temp1 = temp1.replace("]","");
-					if( pics != null ){
-						for( var k=0; k < pics.length; k++ ){
-							var data = {
-								"type":"relativeSkewX",
-								"value":Number(temp1)*100,
-								"time":Number(temp2),
-							}
-							pics[k]._drill_PSh_commandChangeTank.push(data);
+					for( var k=0; k < pics.length; k++ ){
+						var data = {
+							"type":"relativeSkewX",
+							"value":Number(temp1)*100,
+							"time":Number(temp2),
 						}
+						pics[k]._drill_PSh_commandChangeTank.push(data);
 					}
 				}
 				else if( temp1.indexOf("斜切X[") != -1  ){
 					temp1 = temp1.replace("斜切X[","");
 					temp1 = temp1.replace("]","");
-					if( pics != null ){
-						for( var k=0; k < pics.length; k++ ){
-							var data = {
-								"type":"skewX",
-								"value":Number(temp1)*100 - pics[k]._drill_skewX,
-								"time":Number(temp2),
-							}
-							pics[k]._drill_PSh_commandChangeTank.push(data);
+					for( var k=0; k < pics.length; k++ ){
+						var data = {
+							"type":"skewX",
+							"value":Number(temp1)*100 - pics[k]._drill_skewX,
+							"time":Number(temp2),
 						}
+						pics[k]._drill_PSh_commandChangeTank.push(data);
 					}
 				}
 				else if( temp1.indexOf("相对斜切Y[") != -1  ){
 					temp1 = temp1.replace("相对斜切Y[","");
 					temp1 = temp1.replace("]","");
-					if( pics != null ){
-						for( var k=0; k < pics.length; k++ ){
-							var data = {
-								"type":"relativeSkewY",
-								"value":Number(temp1)*100 ,
-								"time":Number(temp2),
-							}
-							pics[k]._drill_PSh_commandChangeTank.push(data);
+					for( var k=0; k < pics.length; k++ ){
+						var data = {
+							"type":"relativeSkewY",
+							"value":Number(temp1)*100 ,
+							"time":Number(temp2),
 						}
+						pics[k]._drill_PSh_commandChangeTank.push(data);
 					}
 				}
 				else if( temp1.indexOf("斜切Y[") != -1  ){
 					temp1 = temp1.replace("斜切Y[","");
 					temp1 = temp1.replace("]","");
-					if( pics != null ){
-						for( var k=0; k < pics.length; k++ ){
-							var data = {
-								"type":"skewY",
-								"value":Number(temp1)*100 - pics[k]._drill_skewY,
-								"time":Number(temp2),
-							}
-							pics[k]._drill_PSh_commandChangeTank.push(data);
+					for( var k=0; k < pics.length; k++ ){
+						var data = {
+							"type":"skewY",
+							"value":Number(temp1)*100 - pics[k]._drill_skewY,
+							"time":Number(temp2),
 						}
+						pics[k]._drill_PSh_commandChangeTank.push(data);
 					}
 				}
 			}
 		}	
 	
 		/*-----------------获取属性------------------*/
-		if( args.length == 8 ){
+		if( pics != null && args.length == 8 ){
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
 			var temp2 = String(args[7]);
 			if( type == "获取属性" ){
 				temp2 = temp2.replace("变量[","");
+				temp2 = temp2.replace("变量%[","");	//（直接从图片数据中拿值，所以%只是区分哪些乘了100倍而已）
 				temp2 = temp2.replace("]","");
 				if( temp1 == "位置X" ){
-					if( pics != null ){
-						$gameVariables.setValue( Number(temp2), pics[0]._x );
-					}
+					$gameVariables.setValue( Number(temp2), pics[0]._x );
 				}
 				if( temp1 == "位置Y" ){
-					if( pics != null ){
-						$gameVariables.setValue( Number(temp2), pics[0]._y );
-					}
+					$gameVariables.setValue( Number(temp2), pics[0]._y );
 				}
 				if( temp1 == "透明度" ){
-					if( pics != null ){
-						$gameVariables.setValue( Number(temp2), pics[0]._opacity );
-					}
+					$gameVariables.setValue( Number(temp2), pics[0]._opacity );
 				}
 				if( temp1 == "旋转" ){
-					if( pics != null ){
-						$gameVariables.setValue( Number(temp2), pics[0]._angle );
-					}
+					$gameVariables.setValue( Number(temp2), pics[0]._angle );
 				}
 				if( temp1 == "缩放X" ){
-					if( pics != null ){
-						$gameVariables.setValue( Number(temp2), pics[0]._scaleX );
-					}
+					$gameVariables.setValue( Number(temp2), pics[0]._scaleX );
 				}
 				if( temp1 == "缩放Y" ){
-					if( pics != null ){
-						$gameVariables.setValue( Number(temp2), pics[0]._scaleY );
-					}
+					$gameVariables.setValue( Number(temp2), pics[0]._scaleY );
 				}
 				if( temp1 == "斜切X" ){
-					if( pics != null ){
-						$gameVariables.setValue( Number(temp2), pics[0]._drill_skewX );
-					}
+					$gameVariables.setValue( Number(temp2), pics[0]._drill_skewX );
 				}
 				if( temp1 == "斜切Y" ){
-					if( pics != null ){
-						$gameVariables.setValue( Number(temp2), pics[0]._drill_skewY );
-					}
+					$gameVariables.setValue( Number(temp2), pics[0]._drill_skewY );
 				}
 			}
 		}
@@ -2698,8 +2601,13 @@ Game_Picture.prototype.drill_PSh_updateCommandChange_ExecuteOne = function( comm
 		this._drill_skewY += command["value"]/command["time"];
 	}
 	
-	// > 弹性移动到
-	if( command["type"] == "relativeElasticMove" || command["type"] == "elasticMove" ){
+	// > 移动到-匀速移动
+	if( command["type"] == "uniformMove" ){
+		this._x += command["valueX"] / command["time"];
+		this._y += command["valueY"] / command["time"];
+	}
+	// > 移动到-弹性移动
+	if( command["type"] == "elasticMove" ){
 		var time = command["cur_time"];
 		var time_last = command["cur_time"]-1;	//上一帧时间
 		
@@ -2713,8 +2621,8 @@ Game_Picture.prototype.drill_PSh_updateCommandChange_ExecuteOne = function( comm
 		var diff_y2 = ya*command["time"]*time - ya * time_last * time_last /2;
 		this._y -= diff_y1 - diff_y2;
 	}
-	// > 增减速移动到
-	if( command["type"] == "relativeSmoothMove" || command["type"] == "smoothMove" ){
+	// > 移动到-增减速移动
+	if( command["type"] == "smoothMove" ){
 		var time = command["cur_time"] -1;
 		
 		var xa = 4*command["valueX"] / command["time"] / command["time"];

@@ -2030,6 +2030,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var unit = String(args[1]);
 			if( char_list == null && unit == "本事件" ){
 				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
 				char_list = [ e ];
 			}
 			if( char_list == null && unit.indexOf("批量事件[") != -1 ){
@@ -3050,8 +3051,8 @@ Drill_EFPa_Controller.prototype.drill_controller_resetParticles_Position = funct
 // **					->A主体
 // **						->层级位置修正
 // **					->B粒子群弹道
-// **						->预推演（坐标）
-// **						->预推演（透明度）
+// **						->推演赋值（坐标）
+// **						->推演赋值（透明度）
 // **					->C对象绑定
 // **						->设置控制器
 // **						->设置个体贴图

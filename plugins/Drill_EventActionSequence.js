@@ -165,9 +165,13 @@
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^2)*o(贴图处理) 每帧
 //		★性能测试因素	动画序列管理层
-//		★性能测试消耗	12.29ms, 18.78ms（drill_EASe_isPlaying 执行）
+//		★性能测试消耗	2024/1/22：
+//							》12.29ms、18.78ms（drill_EASe_isPlaying）
+//						2024/6/15：
+//							》124.0ms、53.1ms（drill_EASe_updateDecorator）11.1ms、6.1ms（drill_EASe_updateDecoratorCreate）5.1ms（drill_EASe_updateDecoratorDestroy）
+//							》这次测试的消耗，核心插件反而不多，可能有很大一部分转移到这里了。
 //		★最坏情况		所有事件都用动画序列。（其实也不坏…）
-//		★备注			暂无
+//		★备注			以前测的时候小爱丽丝不多，现在小爱丽丝同屏都至少有10个，所以消耗很大。
 //		
 //		★优化记录		暂无
 //
@@ -324,6 +328,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var unit = String(args[1]);
 			if( e_chars == null && unit == "本事件" ){
 				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
 				e_chars = [ e ];
 			}
 			if( e_chars == null && unit.indexOf("批量事件[") != -1 ){
@@ -806,7 +811,7 @@ Sprite_Character.prototype.update = function() {
 	this.drill_EASe_updateDecoratorCreate();		//帧刷新 - 创建贴图
 	this.drill_EASe_updateDecoratorDestroy();		//帧刷新 - 销毁贴图
 	this.drill_EASe_updateDecorator();				//帧刷新 - 贴图
-													//【慢1帧闪烁优化】：注意，必须优先判定 decorator 创建/销毁，不然会慢1帧，导致闪图。
+													//『行走图资源切换慢一帧』：注意，必须优先判定 decorator 创建/销毁，不然会慢1帧，导致闪图。
 	
 	// > 原函数
 	_drill_EASe_sp_update.call(this);

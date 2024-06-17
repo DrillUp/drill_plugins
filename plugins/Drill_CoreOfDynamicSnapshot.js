@@ -21,7 +21,7 @@
  * 该插件为基础核心，单独使用没有效果。
  * 插件基于弹道核心，可以作用于所有需要用到动态快照的子插件。
  * 基于：
- *   - Drill_CoreOfBallistics       系统-弹道核心★★v1.8及以上★★
+ *   - Drill_CoreOfBallistics       数学模型-弹道核心★★v1.8及以上★★
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -132,7 +132,7 @@
 	//==============================
 	var DrillUp = DrillUp || {}; 
 	DrillUp.g_CODS_PluginTip_curName = "Drill_CoreOfDynamicSnapshot.js 系统-动态快照核心";
-	DrillUp.g_CODS_PluginTip_baseList = ["Drill_CoreOfBallistics.js 系统-弹道核心"];
+	DrillUp.g_CODS_PluginTip_baseList = ["Drill_CoreOfBallistics.js 数学模型-弹道核心"];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			

@@ -394,8 +394,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				_y = $gamePlayer._y;
 			}
 			if( unit == "本事件" ){
-				var e_id = this._eventId;
-				var e = $gameMap.event( e_id );
+				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
 				_x = e._x;
 				_y = e._y;
 			}

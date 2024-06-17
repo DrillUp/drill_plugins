@@ -148,7 +148,7 @@
 //		插件简称		MS（Move_Speed）
 //		临时全局变量	DrillUp.g_MS_xxx
 //		临时局部变量	this._drill_MS_xxx
-//		存储数据变量	$gameSystem._drill_xxx
+//		存储数据变量	无
 //		全局存储变量	无
 //		覆盖重写方法	Game_CharacterBase.prototype.updateMove
 //						Game_CharacterBase.prototype.distancePerFrame
@@ -200,8 +200,9 @@
 //			  如果按照事件多偏移出的位置来算，会有转身差，这让排队的小爱丽丝会走的难看。
 //
 //		★存在的问题：
-//			1.即使关闭此插件，玩家和跟随队员仍然会轻微颤抖。 2021/6
-//			  这种不平滑的感觉个人而言非常难受。以后专研透了，需要好好修复一下。（已修复，是事件移动一体化 造成的变速bug）
+//			1.问题：即使关闭此插件，玩家和跟随队员仍然会轻微颤抖。 （2021/6）
+//					这种不平滑的感觉个人而言非常难受。以后专研透了，需要好好修复一下。
+//			  解决：【已解决】，是事件移动一体化 造成的变速bug。
 //
 
 //=============================================================================
@@ -272,6 +273,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			}
 			if( chars == null && unit == "本事件" ){
 				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
 				chars = [ e ];
 			}
 			if( chars == null && unit.indexOf("批量事件[") != -1 ){

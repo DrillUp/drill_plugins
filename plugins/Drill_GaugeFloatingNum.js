@@ -25,7 +25,7 @@
  * 该插件 不能 单独使用。
  * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfBallistics       系统-弹道核心★★v1.7及以上★★
+ *   - Drill_CoreOfBallistics       数学模型-弹道核心★★v1.7及以上★★
  *   - Drill_CoreOfGaugeNumber      系统-参数数字核心★★v1.2及以上★★
  * 可作用于：
  *   - Drill_X_GaugeForFloorDamage  图块-地形伤害漂浮数字[扩展]
@@ -51,7 +51,7 @@
  *        轨道锚点模式  √
  *        两点式        x  (不适合)
  *   (2.单个漂浮数字的轨迹完全可以通过弹道设置进行设计。
- *      具体配置方式可以看看 "1.系统 > 关于弹道.docx"。
+ *      具体配置方式可以看看 "32.数学模型 > 关于弹道.docx"。
  * 参数数字：
  *   (1.参数值：　取决于插件指令的值。
  *      旋转：　　可自定义。
@@ -607,7 +607,7 @@
  * @param 路程计算公式
  * @parent 速度类型
  * @type note
- * @desc 漂浮数字的路程计算公式。可使用 变量和常量 来设计公式，具体看看文档 "1.系统 > 关于弹道.docx"介绍。
+ * @desc 漂浮数字的路程计算公式。可使用 变量和常量 来设计公式，具体看看文档 "32.数学模型 > 关于弹道.docx"介绍。
  * @default "return 0.0"
  * 
  * @param 方向类型
@@ -642,7 +642,7 @@
  * @param 方向计算公式
  * @parent 方向类型
  * @type note
- * @desc 类型为"方向计算公式"时。可使用 变量和常量 来设计公式，具体看看文档 "1.系统 > 关于弹道.docx"介绍。
+ * @desc 类型为"方向计算公式"时。可使用 变量和常量 来设计公式，具体看看文档 "32.数学模型 > 关于弹道.docx"介绍。
  * @default "return 0.0"
  * 
  * 
@@ -698,7 +698,7 @@
  * @param X轴路程计算公式
  * @parent X轴速度类型
  * @type note
- * @desc 漂浮数字的路程计算公式。可使用 变量和常量 来设计公式，具体看看文档 "1.系统 > 关于弹道.docx"介绍。
+ * @desc 漂浮数字的路程计算公式。可使用 变量和常量 来设计公式，具体看看文档 "32.数学模型 > 关于弹道.docx"介绍。
  * @default "return 0.0"
  *
  * @param Y轴速度类型
@@ -745,7 +745,7 @@
  * @param Y轴路程计算公式
  * @parent Y轴速度类型
  * @type note
- * @desc 漂浮数字的路程计算公式。可使用 变量和常量 来设计公式，具体看看文档 "1.系统 > 关于弹道.docx"介绍。
+ * @desc 漂浮数字的路程计算公式。可使用 变量和常量 来设计公式，具体看看文档 "32.数学模型 > 关于弹道.docx"介绍。
  * @default "return 0.0"
  * 
  * 
@@ -806,7 +806,7 @@
  * @param 轨道路程计算公式
  * @parent 轨道速度类型
  * @type note
- * @desc 子弹的路程计算公式。可使用 变量和常量 来设计公式，具体看看文档 "1.系统 > 关于弹道.docx"介绍。
+ * @desc 子弹的路程计算公式。可使用 变量和常量 来设计公式，具体看看文档 "32.数学模型 > 关于弹道.docx"介绍。
  * @default "return 0.0"
  * 
  * 
@@ -892,7 +892,7 @@
 	var DrillUp = DrillUp || {}; 
 	DrillUp.g_GFN_PluginTip_curName = "Drill_GaugeFloatingNum.js 地图UI-临时漂浮参数数字";
 	DrillUp.g_GFN_PluginTip_baseList = [
-		"Drill_CoreOfBallistics.js 系统-弹道核心",
+		"Drill_CoreOfBallistics.js 数学模型-弹道核心",
 		"Drill_CoreOfGaugeNumber.js 系统-参数数字核心"
 	];
 	//==============================
@@ -1135,6 +1135,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				}
 				else if( temp1 == "位置-本事件" || temp1 == "本事件" ){
 					var e = $gameMap.event( this._eventId );
+					if( e == undefined ){ return; } //『防止并行删除事件出错』
 					var e_pos = [ e._realX, e._realY ];
 					pos = [ Math.round( $gameMap.adjustX( e_pos[0] ) * tw + tw*0.5 ), 
 							Math.round( $gameMap.adjustY( e_pos[1] ) * th + th*0.5 ) ];
@@ -1347,6 +1348,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				}
 				else if( temp1 == "位置-本事件" || temp1 == "本事件" ){
 					var e = $gameMap.event( this._eventId );
+					if( e == undefined ){ return; } //『防止并行删除事件出错』
 					var e_pos = [ e._realX, e._realY ];
 					pos = [ Math.round( $gameMap.adjustX( e_pos[0] ) * tw + tw*0.5 ), 
 							Math.round( $gameMap.adjustY( e_pos[1] ) * th + th*0.5 ) ];
@@ -1448,6 +1450,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				e_pos = [ e._realX, e._realY ];
 			}else if( pos_str == "本事件" ){
 				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
 				e_pos = [ e._realX, e._realY ];
 			}else if( pos_str == "玩家" ){
 				e_pos = [ $gamePlayer._realX, $gamePlayer._realY ];

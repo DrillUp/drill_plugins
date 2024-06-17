@@ -1266,8 +1266,12 @@
 //		★工作类型		持续执行
 //		★时间复杂度		o(n)*o(贴图处理) 每帧
 //		★性能测试因素	动画序列管理层
-//		★性能测试消耗	以前的：25.7ms（Drill_COAS_SpriteDecorator.drill_spriteMain_update）40.4ms（Drill_COAS_SpriteDecorator.drill_spriteMain_isReady）
-//						2024/1/22：动画序列管理层80事件 677.8ms（Drill_COAS_SpriteDecorator.drill_spriteMain_update）体积管理层70事件 244.8ms（Drill_COAS_SpriteDecorator.update）
+//		★性能测试消耗	2024/1/22：
+//							》动画序列管理层80事件：677.8ms（Drill_COAS_SpriteDecorator.drill_spriteMain_update）
+//							》体积管理层70事件：244.8ms（Drill_COAS_SpriteDecorator.update）
+//						2024/6/15：
+//							》动画序列管理层80事件：34.9ms（Drill_COAS_SpriteDecorator.drill_spriteMain_update）5.8ms（Drill_COAS_MainController.update）
+//							》这次测试的消耗可能被转移到了 行走图-GIF动画序列 插件中。
 //		★最坏情况		无
 //		★备注			主要消耗来源于图片资源加载，正常情况下消耗可能会乱指向。
 //		

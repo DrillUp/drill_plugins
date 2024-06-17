@@ -25,7 +25,7 @@
  * 该插件 不能 单独使用。
  * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfBallistics       系统-弹道核心★★v2.1及以上★★
+ *   - Drill_CoreOfBallistics       数学模型-弹道核心★★v2.1及以上★★
  *   - Drill_CoreOfWindowAuxiliary  系统-窗口辅助核心
  *   - Drill_AssetsOfCurrency       管理器-货币素材库
  * 
@@ -701,7 +701,7 @@
 	var DrillUp = DrillUp || {}; 
 	DrillUp.g_GFTP_PluginTip_curName = "Drill_GaugeFloatingTreasurePopup.js 地图UI-临时漂浮物品信息";
 	DrillUp.g_GFTP_PluginTip_baseList = [
-		"Drill_CoreOfBallistics.js 系统-弹道核心",
+		"Drill_CoreOfBallistics.js 数学模型-弹道核心",
 		"Drill_CoreOfWindowAuxiliary.js 系统-窗口辅助核心",
 		"Drill_AssetsOfCurrency.js 管理器-货币素材库"
 	];
@@ -2219,7 +2219,7 @@ Drill_GFTP_Window.prototype.drill_refreshBallistics = function( b_data ){
 	var org_x = b_data['orgX'];
 	var org_y = b_data['orgY'];
 	$gameTemp.drill_COBa_setBallisticsMove( b_data );					//移动弹道 - 初始化数据
-	$gameTemp.drill_COBa_preBallisticsMove( this, 0, org_x, org_y );	//移动弹道 - 预推演
+	$gameTemp.drill_COBa_preBallisticsMove( this, 0, org_x, org_y );	//移动弹道 - 推演赋值
 	
 	
 	// > 透明度弹道
@@ -2295,7 +2295,7 @@ Drill_GFTP_Window.prototype.drill_refreshBallistics = function( b_data ){
 	}
 	
 	$gameTemp.drill_COBa_setBallisticsOpacity( o_data );				//透明度弹道 - 初始化数据
-	$gameTemp.drill_COBa_preBallisticsOpacity( this, 0, org_opacity );	//透明度弹道 - 预推演
+	$gameTemp.drill_COBa_preBallisticsOpacity( this, 0, org_opacity );	//透明度弹道 - 推演赋值
 }
 //==============================
 // * B窗口弹道 - 帧刷新 透明度

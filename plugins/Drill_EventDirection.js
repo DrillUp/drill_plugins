@@ -276,11 +276,11 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		if( args.length >= 2 ){
 			var unit = String(args[1]);
 			if( c_chars == null && unit == "玩家" ){
-				var e = $gameMap.event( this._eventId );
 				c_chars = [ $gamePlayer ];
 			}
 			if( c_chars == null && unit == "本事件" ){
 				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
 				c_chars = [ e ];
 			}
 			if( c_chars == null && unit.indexOf("批量事件[") != -1 ){

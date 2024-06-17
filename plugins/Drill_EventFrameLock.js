@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        行走图 - 锁定帧
+ * @plugindesc [v1.5]        行走图 - 锁定帧
  * @author Drill_up
  * 
  * 
@@ -165,6 +165,8 @@
  * 优化了插件指令细节。
  * [v1.4]
  * 优化了内部结构，减少性能消耗。
+ * [v1.5]
+ * 改进了结构。
  * 
  */
  
@@ -181,8 +183,10 @@
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^2) 每帧
 //		★性能测试因素	行走图管理层、华容道设计
-//		★性能测试消耗	优化核心加入前：81.7ms（drill_EFL_updateFrame）
-//						优化核心加入后：34.9ms（drill_EFL_updateFrame）
+//		★性能测试消耗	2024/1/22：
+//							》34.9ms（drill_EFL_updateFrame）
+//						2024/6/15：
+//							》17.2ms（drill_EFL_updateAnimFrame）5.1ms（drill_EFL_isLockEnabled）1.8ms（drill_EFL_isAnimEnabled）
 //		★最坏情况		无
 //		★备注			暂无
 //		
@@ -191,10 +195,18 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			锁定帧：
-//				->锁定帧/解锁帧
+//			->☆提示信息
+//			->☆静态数据
+//			->☆插件指令
 //				->播放序列（从左往右、自定义）
 //				->暂停/继续播放	
+//			->☆事件注释
+//			
+//			->☆物体的属性
+//				->锁定为 初始帧
+//				->锁定为 动画帧
+//			->☆动画帧控制
+//			->☆锁定控制
 //
 //
 //		★家谱：
@@ -210,15 +222,14 @@
 //			暂无
 //			
 //		★其它说明细节：
-//			1.索引位置characterIndex()嵌入在物体中，贴图获取不到。
-//			  所以这里不考虑索引的复杂情况。（索引会关联到单个人物，8个人物，多帧行走图等复杂情况。）
+//			暂无
 //
 //		★存在的问题：
 //			暂无
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -249,7 +260,7 @@
 	
 	
 //=============================================================================
-// ** 静态数据
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_EventFrameLock = true;
@@ -261,80 +272,10 @@
 // * >>>>基于插件检测>>>>
 //=============================================================================
 if( Imported.Drill_CoreOfEventFrame ){
-	
-	
-//=============================================================================
-// * 事件注释初始化
-//=============================================================================
-var _drill_EFL_c_setupPageSettings = Game_Event.prototype.setupPageSettings;
-Game_Event.prototype.setupPageSettings = function() {
-	_drill_EFL_c_setupPageSettings.call(this);
-	
-	// > 初始化
-	if( this._drill_EFL_anim == undefined ){
-		this._drill_EFL_anim = {};
-		this._drill_EFL_anim['enabled'] = false;
-	}
-	
-	// > 注释设置
-	var page = this.page();
-    if( page ){
-		this.list().forEach( function(l){	//将页面注释转成插件指令格式
-			if( l.code === 108 ){
-				var args = l.parameters[0].split(' ');
-				var command = args.shift();
-				if( command == "=>行走图锁定帧" ){
-					if( args.length == 2 ){
-						var type = String(args[1]);
-						if( type == "锁定" ){
-							this._drill_EFL_lockEnabled = true;
-						}
-						if( type == "解锁" ){
-							this._drill_EFL_lockEnabled = false;
-						}
-					}
-					if( args.length == 6 ){
-						var type = String(args[1]);
-						var temp1 = String(args[3]);
-						var temp2 = String(args[5]);
-						if( type == "锁定帧动画" ){
-							var temp_seq = [];
-							if( temp1 == "从左往右" || temp1 == "从左往右" ){
-								temp_seq = [1,2,3,4,5,6,7,8,9,10,11,12];
-							}else if( temp1 == "从右往左" || temp1 == "从右往左"){
-								temp_seq = [12,11,10,9,8,7,6,5,4,3,2,1];
-							}else{
-								temp1 = temp1.replace("帧序列[","");
-								temp1 = temp1.replace("]","");
-								temp_seq = temp1.split(/[,，]/);
-							}
-							temp2 = temp2.replace("帧间隔[","");
-							temp2 = temp2.replace("]","");
-							this._drill_EFL_anim = {};
-							this._drill_EFL_anim['enabled'] = true;
-							this._drill_EFL_anim['paused'] = false;
-							this._drill_EFL_anim['inter'] = Number(temp2);
-							this._drill_EFL_anim['seq'] = temp_seq;
-							this._drill_EFL_anim['cur_patternX'] = 0;
-							this._drill_EFL_anim['cur_patternY'] = 0;
-						}
-					}
-					if( args.length == 4 ){
-						var type = String(args[1]);
-						var temp1 = String(args[3]);
-						if( type == "锁定帧动画" && temp1 == "解锁" ){
-							this._drill_EFL_anim['enabled'] = false;
-						}
-					}
-				};  
-			};
-		}, this);
-    }
-};
 
 
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _drill_EFL_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
@@ -342,104 +283,99 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	if( command === ">行走图锁定帧" ){
 		
 		/*-----------------对象组获取------------------*/
-		var e_ids = null;
+		var e_list = null;			// 事件对象组
 		if( args.length >= 2 ){
 			var unit = String(args[1]);
-			
-			if( e_ids == null && unit == "本事件" ){
-				e_ids = [];
-				e_ids.push( this._eventId );
+			if( e_list == null && unit == "本事件" ){
+				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
+				e_list = [ e ];
 			}
-			if( e_ids == null && unit.indexOf("批量事件[") != -1 ){
+			if( e_list == null && unit.indexOf("批量事件[") != -1 ){
 				unit = unit.replace("批量事件[","");
 				unit = unit.replace("]","");
+				e_list = [];
 				var temp_arr = unit.split(/[,，]/);
-				e_ids = [];
 				for( var k=0; k < temp_arr.length; k++ ){
-					e_ids.push( Number(temp_arr[j]) );
+					var e_id = Number(temp_arr[k]);
+					if( $gameMap.drill_EFL_isEventExist( e_id ) == false ){ continue; }
+					var e = $gameMap.event( e_id );
+					e_list.push( e );
 				}
 			}
-			if( e_ids == null && unit.indexOf("批量事件变量[") != -1 ){
+			if( e_list == null && unit.indexOf("批量事件变量[") != -1 ){
 				unit = unit.replace("批量事件变量[","");
 				unit = unit.replace("]","");
+				e_list = [];
 				var temp_arr = unit.split(/[,，]/);
-				e_ids = [];
 				for( var k=0; k < temp_arr.length; k++ ){
-					e_ids.push( $gameVariables.value(Number(temp_arr[k])) );
+					var e_id = $gameVariables.value(Number(temp_arr[k]));
+					if( $gameMap.drill_EFL_isEventExist( e_id ) == false ){ continue; }
+					var e = $gameMap.event( e_id );
+					e_list.push( e );
 				}
 			}
-			if( e_ids == null && unit.indexOf("事件[") != -1 ){
-				unit = unit.replace("事件[","");
-				unit = unit.replace("]","");
-				e_ids = [];
-				e_ids.push( Number(unit) );
-			}
-			if( e_ids == null && unit.indexOf("事件变量[") != -1 ){
+			if( e_list == null && unit.indexOf("事件变量[") != -1 ){
 				unit = unit.replace("事件变量[","");
 				unit = unit.replace("]","");
-				e_ids = [];
-				e_ids.push( $gameVariables.value(Number(unit)) );
+				var e_id = $gameVariables.value(Number(unit));
+				if( $gameMap.drill_EFL_isEventExist( e_id ) == false ){ return; }
+				var e = $gameMap.event( e_id );
+				e_list = [ e ];
 			}
-			if( e_ids == null ){ 	//>行走图锁定帧 : 10 : 锁定
-				var eid = parseInt( unit );
-				if( !isNaN(eid) ){
-					e_ids = [];
-					e_ids.push( eid );
-				}
+			if( e_list == null && unit.indexOf("事件[") != -1 ){
+				unit = unit.replace("事件[","");
+				unit = unit.replace("]","");
+				var e_id = Number(unit);
+				if( $gameMap.drill_EFL_isEventExist( e_id ) == false ){ return; }
+				var e = $gameMap.event( e_id );
+				e_list = [ e ];
 			}
 		}
 			
 		/*-----------------锁定/解锁------------------*/
-		if( e_ids != null && args.length == 4 ){
+		if( e_list != null && args.length == 4 ){
 			var type = String(args[3]);
 			if( type == "锁定" ){
-				for( var j=0; j < e_ids.length; j++ ){
-					var e_id = e_ids[j];
-					if( $gameMap.drill_EFL_isEventExist( e_id ) == false ){ continue; }
-					var e = $gameMap.event( e_id );
-					e._drill_EFL_lockEnabled = true;
+				for( var j=0; j < e_list.length; j++ ){
+					var e = e_list[j];
+					e.drill_EFL_setLockEnabled( true );
 				}
 			}
 			if( type == "解锁" ){
-				for( var j=0; j < e_ids.length; j++ ){
-					var e_id = e_ids[j];
-					if( $gameMap.drill_EFL_isEventExist( e_id ) == false ){ continue; }
-					var e = $gameMap.event( e_id );
-					e._drill_EFL_lockEnabled = false;
+				for( var j=0; j < e_list.length; j++ ){
+					var e = e_list[j];
+					e.drill_EFL_setLockEnabled( false );
 				}
 			}
 		}
 		
 		/*-----------------锁定帧动画------------------*/
-		if( e_ids != null && args.length == 6 ){
+		if( e_list != null && args.length == 6 ){
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
 			if( type == "锁定帧动画" ){
-				for( var j=0; j < e_ids.length; j++ ){
-					var e_id = e_ids[j];
-					if( $gameMap.drill_EFL_isEventExist( e_id ) == false ){ continue; }
-					var e = $gameMap.event( e_id );
+				for( var j=0; j < e_list.length; j++ ){
+					var e = e_list[j];
 					if( temp1 == "暂停" ){
-						e._drill_EFL_anim['paused'] = true;
+						e.drill_EFL_setPaused( true );
 					}
 					if( temp1 == "继续" ){
-						e._drill_EFL_anim['paused'] = false;
+						e.drill_EFL_setPaused( false );
 					}
 					if( temp1 == "解锁" ){
-						e._drill_EFL_anim['enabled'] = false;
+						e.drill_EFL_setAnimEnabled( false );
 					}
 				}
 			}
 		}
-		if( e_ids != null && args.length == 8 ){
+		if( e_list != null && args.length == 8 ){
 			var type = String(args[3]);
 			var temp2 = String(args[5]);
 			var temp3 = String(args[7]);
 			if( type == "锁定帧动画" ){
-				for( var j=0; j < e_ids.length; j++ ){
-					var e_id = e_ids[j];
-					if( $gameMap.drill_EFL_isEventExist( e_id ) == false ){ continue; }
-					var e = $gameMap.event( e_id );
+				for( var j=0; j < e_list.length; j++ ){
+					var e = e_list[j];
 					var temp_seq = [];
 					if( temp2 == "从左往右" ){
 						temp_seq = [1,2,3,4,5,6,7,8,9,10,11,12];
@@ -452,13 +388,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					}
 					temp3 = temp3.replace("帧间隔[","");
 					temp3 = temp3.replace("]","");
-					e._drill_EFL_anim = {};
-					e._drill_EFL_anim['enabled'] = true;
-					e._drill_EFL_anim['paused'] = false;
-					e._drill_EFL_anim['inter'] = Number(temp3);
-					e._drill_EFL_anim['seq'] = temp_seq;
-					e._drill_EFL_anim['cur_patternX'] = 0;
-					e._drill_EFL_anim['cur_patternY'] = 0;
+					
+					e.drill_EFL_setAnimEnabled( true );
+					e.drill_EFL_setAnimInter( Number(temp3) );
+					e.drill_EFL_setAnimSeq( temp_seq );
 				}
 			}
 		}
@@ -466,7 +399,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 };
 //==============================
-// ** 插件指令 - 事件检查
+// * 插件指令 - 事件检查
 //==============================
 Game_Map.prototype.drill_EFL_isEventExist = function( e_id ){
 	if( e_id == 0 ){ return false; }
@@ -481,122 +414,288 @@ Game_Map.prototype.drill_EFL_isEventExist = function( e_id ){
 
 
 //=============================================================================
-// * 物体贴图帧锁定
+// ** ☆事件注释
 //=============================================================================
 //==============================
-// * 物体贴图 - 单帧
+// * 事件注释 - 初始化绑定
+//
+//			说明：	> 注释与当前事件页有关，不一定跨事件页。
+//==============================
+var _drill_EFL_c_setupPageSettings = Game_Event.prototype.setupPageSettings;
+Game_Event.prototype.setupPageSettings = function() {
+	_drill_EFL_c_setupPageSettings.call(this);
+    this.drill_EFL_setupPageSettings();
+};
+//==============================
+// * 事件注释 - 初始化
+//==============================
+Game_Event.prototype.drill_EFL_setupPageSettings = function() {
+	
+	// > 事件页变化时，重置
+	if( this._drill_EFL_lockData != undefined ){
+		this._drill_EFL_lockData['lockEnabled'] = false;
+		this._drill_EFL_lockData['animEnabled'] = false;
+	}
+	
+	// > 注释设置
+	var page = this.page();
+	if( page == undefined ){ return; }
+	
+	var temp_list = this.list();
+	for(var k = 0; k < temp_list.length; k++ ){
+		var l = temp_list[k];
+		if( l.code === 108 ){
+			
+			/*-----------------标准注释------------------*/
+			var row = l.parameters[0];
+			var args = row.split(/[ ]+/);
+			var command = args.shift();
+			if( command == "=>行走图锁定帧" ){
+				if( args.length == 2 ){
+					var type = String(args[1]);
+					if( type == "锁定" ){
+						this.drill_EFL_setLockEnabled( true );
+					}
+					if( type == "解锁" ){
+						this.drill_EFL_setLockEnabled( false );
+					}
+				}
+				if( args.length == 6 ){
+					var type = String(args[1]);
+					var temp1 = String(args[3]);
+					var temp2 = String(args[5]);
+					if( type == "锁定帧动画" ){
+						var temp_seq = [];
+						if( temp1 == "从左往右" || temp1 == "从左往右" ){
+							temp_seq = [1,2,3,4,5,6,7,8,9,10,11,12];
+						}else if( temp1 == "从右往左" || temp1 == "从右往左"){
+							temp_seq = [12,11,10,9,8,7,6,5,4,3,2,1];
+						}else{
+							temp1 = temp1.replace("帧序列[","");
+							temp1 = temp1.replace("]","");
+							temp_seq = temp1.split(/[,，]/);
+						}
+						temp2 = temp2.replace("帧间隔[","");
+						temp2 = temp2.replace("]","");
+						
+						this.drill_EFL_setAnimEnabled( true );
+						this.drill_EFL_setAnimInter( Number(temp2) );
+						this.drill_EFL_setAnimSeq( temp_seq );
+					}
+				}
+				if( args.length == 4 ){
+					var type = String(args[1]);
+					var temp1 = String(args[3]);
+					if( type == "锁定帧动画" && temp1 == "解锁" ){
+						this.drill_EFL_setAnimEnabled( false );
+					}
+				}
+			}
+		};
+    };
+};
+
+
+//=============================================================================
+// ** ☆物体的属性
+//
+//			说明：	> 此模块专门定义 物体的属性 。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 物体的属性 - 初始化
+//==============================
+var _drill_EFL_key_initialize = Game_Character.prototype.initialize;
+Game_Character.prototype.initialize = function(){
+	this._drill_EFL_lockData = undefined;		//（要放前面，不然会盖掉子类如 Game_Player.prototype.initMembers 的设置）
+	_drill_EFL_key_initialize.call(this);
+}
+//==============================
+// * 物体的属性 - 初始化 数据
+//
+//			说明：	> 这里的数据都要初始化才能用。『节约事件数据存储空间』
+//==============================
+Game_Character.prototype.drill_EFL_checkLockData = function(){
+	if( this._drill_EFL_lockData != undefined ){ return; }
+	this._drill_EFL_lockData = {};
+	
+	this._drill_EFL_lockData['lockEnabled'] = false;	//锁定为 初始帧
+	
+	this._drill_EFL_lockData['animEnabled'] = false;	//锁定为 动画帧
+	this._drill_EFL_lockData['animPaused'] = false;
+	this._drill_EFL_lockData['animCurTime'] = 0;
+	this._drill_EFL_lockData['animInter'] = 4;
+	this._drill_EFL_lockData['animSeq'] = [];
+	this._drill_EFL_lockData['animPatternX'] = 0;
+	this._drill_EFL_lockData['animPatternY'] = 0;
+}
+
+//==============================
+// * 物体的属性 - 锁定为 初始帧 - 是否启用
+//==============================
+Game_Character.prototype.drill_EFL_isLockEnabled = function(){
+	if( this._drill_EFL_lockData == undefined ){ return false; }
+	return this._drill_EFL_lockData['lockEnabled'];
+}
+//==============================
+// * 物体的属性 - 锁定为 初始帧 - 设置
+//==============================
+Game_Character.prototype.drill_EFL_setLockEnabled = function( enabled ){
+	this.drill_EFL_checkLockData();
+	if( enabled == true ){
+		this._drill_EFL_lockData['lockEnabled'] = true;		//（初始帧和动画帧 只能同时开一个）
+		this._drill_EFL_lockData['animEnabled'] = false;
+	}else{
+		this._drill_EFL_lockData['lockEnabled'] = false;
+	}
+}
+
+//==============================
+// * 物体的属性 - 锁定为 动画帧 - 是否启用
+//==============================
+Game_Character.prototype.drill_EFL_isAnimEnabled = function(){
+	if( this._drill_EFL_lockData == undefined ){ return false; }
+	return this._drill_EFL_lockData['animEnabled'];
+}
+//==============================
+// * 物体的属性 - 锁定为 动画帧 - 设置
+//==============================
+Game_Character.prototype.drill_EFL_setAnimEnabled = function( enabled ){
+	this.drill_EFL_checkLockData();
+	if( enabled == true ){
+		this._drill_EFL_lockData['animEnabled'] = true;		//（初始帧和动画帧 只能同时开一个）
+		this._drill_EFL_lockData['lockEnabled'] = false;
+	}else{
+		this._drill_EFL_lockData['animEnabled'] = false;
+	}
+	
+	this._drill_EFL_lockData['animPaused'] = false;
+	this._drill_EFL_lockData['animCurTime'] = 0;
+}
+//==============================
+// * 物体的属性 - 动画帧 - 设置暂停
+//==============================
+Game_Character.prototype.drill_EFL_setPaused = function( enabled ){
+	this.drill_EFL_checkLockData();
+	this._drill_EFL_lockData['animPaused'] = enabled;
+}
+//==============================
+// * 物体的属性 - 动画帧 - 设置帧间隔
+//==============================
+Game_Character.prototype.drill_EFL_setAnimInter = function( inter ){
+	this.drill_EFL_checkLockData();
+	this._drill_EFL_lockData['animInter'] = inter;
+	this._drill_EFL_lockData['animCurTime'] = 0;
+}
+//==============================
+// * 物体的属性 - 动画帧 - 设置动画帧
+//
+//			说明：	> seq为数字数组，数字范围为 1~12 。
+//==============================
+Game_Character.prototype.drill_EFL_setAnimSeq = function( seq ){
+	this.drill_EFL_checkLockData();
+	this._drill_EFL_lockData['animSeq'] = seq;
+	this._drill_EFL_lockData['animCurTime'] = 0;
+}
+//==============================
+// * 物体的属性 - 动画帧 - 获取X
+//==============================
+Game_Character.prototype.drill_EFL_getAnimPatternX = function(){
+	if( this._drill_EFL_lockData == undefined ){ return 0; }
+	return this._drill_EFL_lockData['animPatternX'];
+}
+//==============================
+// * 物体的属性 - 动画帧 - 获取Y
+//==============================
+Game_Character.prototype.drill_EFL_getAnimPatternY = function(){
+	if( this._drill_EFL_lockData == undefined ){ return 0; }
+	return this._drill_EFL_lockData['animPatternY'];
+}
+
+
+//=============================================================================
+// ** ☆动画帧控制
+//
+//			说明：	> 此模块控制 动画帧 的帧刷新。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 动画帧控制 - 帧刷新
+//==============================
+var _drill_EFL_c_update = Game_CharacterBase.prototype.update;
+Game_CharacterBase.prototype.update = function() {
+	_drill_EFL_c_update.call(this);
+	this.drill_EFL_updateAnimFrame();
+};
+//==============================
+// * 动画帧控制 - 帧刷新 动画帧
+//==============================
+Game_Character.prototype.drill_EFL_updateAnimFrame = function() {
+	if( this.drill_EFL_isAnimEnabled() == false ){ return; }
+	
+	// > 时间+1
+	if( this._drill_EFL_lockData['animPaused'] == true ){
+		// （不操作）
+	}else{
+		this._drill_EFL_lockData['animCurTime'] += 1;
+	}
+	
+	// > 播放
+	var cur_time = this._drill_EFL_lockData['animCurTime'];
+	var cur_inter = this._drill_EFL_lockData['animInter'];
+	var cur_seq = this._drill_EFL_lockData['animSeq'];
+	var index = Math.floor(cur_time / cur_inter) % cur_seq.length;
+	var pattern = Number( cur_seq[index] ) -1;
+	
+	this._drill_EFL_lockData['animPatternX'] = Math.floor((pattern % 12) % 3);		//帧数值
+	this._drill_EFL_lockData['animPatternY'] = Math.floor((pattern % 12) / 3);		//朝向值
+}
+
+
+//=============================================================================
+// ** ☆锁定控制
+//
+//			说明：	> 此模块提供 锁定控制 。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 锁定控制 - 帧数值
 //==============================
 var _drill_EFL_COEF_updateValue_PatternX = Sprite_Character.prototype.drill_COEF_updateValue_PatternX;
 Sprite_Character.prototype.drill_COEF_updateValue_PatternX = function() {
 	_drill_EFL_COEF_updateValue_PatternX.call(this);
 	if( this._character == undefined ){ return; }
 	
-	// > 锁定初始帧
-	if( this._character._drill_EFL_lockEnabled == true ){
+	// > 锁定为 初始帧
+	if( this._character.drill_EFL_isLockEnabled() ){
 		this._drill_COEF_PatternX = this._character._originalPattern;
 		return;
 	}
 	
-	// > 锁定帧动画
-	var a_data = this._character._drill_EFL_anim;
-	if( a_data == undefined ){ return; }
-	if( a_data['enabled'] == true ){
-		this._drill_COEF_PatternX = a_data['cur_patternX'];
+	// > 锁定为 动画帧
+	if( this._character.drill_EFL_isAnimEnabled() ){
+		this._drill_COEF_PatternX = this._character.drill_EFL_getAnimPatternX();
 	}
 };
 //==============================
-// * 物体贴图 - 朝向
+// * 锁定控制 - 朝向值
 //==============================
 var _drill_EFL_COEF_updateValue_PatternY = Sprite_Character.prototype.drill_COEF_updateValue_PatternY;
 Sprite_Character.prototype.drill_COEF_updateValue_PatternY = function() {
     _drill_EFL_COEF_updateValue_PatternY.call(this);
 	if( this._character == undefined ){ return; }
 	
-	// > 锁定初始帧
-	if( this._character._drill_EFL_lockEnabled == true ){
+	// > 锁定为 初始帧
+	if( this._character.drill_EFL_isLockEnabled() ){
 		this._drill_COEF_PatternY = (this._character._originalDirection - 2) / 2;
 		return;
 	}
 	
-	// > 锁定帧动画
-	var a_data = this._character._drill_EFL_anim;
-	if( a_data == undefined ){ return; }
-	if( a_data['enabled'] == true ){
-		this._drill_COEF_PatternY = a_data['cur_patternY'];
+	// > 锁定为 动画帧
+	if( this._character.drill_EFL_isAnimEnabled() ){
+		this._drill_COEF_PatternY = this._character.drill_EFL_getAnimPatternY();
 	}
 };
-
-
-//=============================================================================
-// * 动画帧锁定
-//=============================================================================
-//==============================
-// * 动画帧锁定 - 初始化
-//==============================
-var _drill_EFL_c_initialize = Sprite_Character.prototype.initialize;
-Sprite_Character.prototype.initialize = function( character ){
-	_drill_EFL_c_initialize.call(this,character);
-	this._drill_EFL_animEnabled = false;		//锁定帧动画 开关
-	this._drill_EFL_animTime = 0;				//锁定帧动画 计时器
-};
-//==============================
-// * 动画帧锁定 - 帧刷新
-//==============================
-var _drill_EFL_c_update = Sprite_Character.prototype.update;
-Sprite_Character.prototype.update = function() {
-	
-	// > 帧刷新当前帧
-	this.drill_EFL_updateFrame();
-	
-	// > 原函数
-	_drill_EFL_c_update.call(this);
-};
-//==============================
-// * 动画帧锁定 - 帧刷新当前帧
-//==============================
-Sprite_Character.prototype.drill_EFL_updateFrame = function() {
-	if( this._character == undefined ){ return; }
-	
-	// > 开关获取
-	var a_data = this._character._drill_EFL_anim;
-	if( a_data == undefined ){ return; }
-	if( a_data['enabled'] == true ){
-		
-		// > 开启时第一帧
-		if( this._drill_EFL_animEnabled == false ){
-			this._drill_EFL_animEnabled = true;
-			
-			this._drill_EFL_animTime = 0;	//（时间置零）
-		}
-	}else{
-		
-		// > 关闭时第一帧
-		if( this._drill_EFL_animEnabled == true ){
-			this._drill_EFL_animEnabled = false;
-			// （暂无）
-		}
-	}
-	
-	// > 播放动画帧
-	if( this._drill_EFL_animEnabled == true ){
-		
-		// > 帧时间
-		if( a_data['paused'] != true ){
-			this._drill_EFL_animTime += 1;
-		
-		// > 帧时间暂停
-		}else{
-			// （无操作）
-		}
-		
-		// > 播放
-		var index = Math.floor(this._drill_EFL_animTime / a_data['inter']) % a_data['seq'].length;
-		var pattern = Number( a_data['seq'][index] ) - 1;
-		
-		a_data['cur_patternX'] = Math.floor((pattern % 12) % 3);		//单帧
-		a_data['cur_patternY'] = Math.floor((pattern % 12) / 3);		//朝向
-	}
-}
 
 
 //=============================================================================

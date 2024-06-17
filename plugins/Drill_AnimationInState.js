@@ -244,8 +244,8 @@ if( Imported.Drill_AnimationInParallel ){
 //==============================
 // * 动画绑定时机 - 状态附加时
 //==============================
-var _drill_AISt_addNewState = Game_Battler.prototype.addNewState;
-Game_Battler.prototype.addNewState = function( stateId ){
+var _drill_AISt_addNewState = Game_BattlerBase.prototype.addNewState;
+Game_BattlerBase.prototype.addNewState = function( stateId ){
     _drill_AISt_addNewState.call( this,stateId );
 	//（附加重复的状态不播放动画）
 	

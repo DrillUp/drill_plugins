@@ -345,7 +345,7 @@
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^4) + o(n^2)*o(图形处理)
 //		★性能测试因素	炸弹人管理层放150个事件
-//		★性能测试消耗	12.44ms ~ 20.27ms
+//		★性能测试消耗	12.44ms
 //		★最坏情况		放很多炸弹，炸弹的动画会极大影响性能。
 //		★备注			单纯放置炸弹并没有加大负荷，只是在爆炸时负荷超大。
 //		
@@ -433,9 +433,10 @@
 //				> AI识别禁止炸弹区，并且利用区域躲避。这个也需要高级AI。
 //		
 //		★存在的问题：
-//			1.小爱丽丝寻找目标时，靠近敌人时不识别堵路情况。
-//			  这样会出现两个对手在隔一个堵路时而相互观望的情况。（已解决）
-//			2.切换了地图后，炸弹放置就爆炸问题（事件复制器的坑，复制前需要清除独立开关。）
+//			1.问题：小爱丽丝寻找目标时，靠近敌人时不识别堵路情况。这样会出现两个对手在隔一个堵路时而相互观望的情况。
+//			  解决：【已解决】，不堵路了，添加了随机移动。
+//			2.问题：切换了地图后，炸弹放置就爆炸问题。
+//			  解决：【已解决】，事件复制器的坑，复制前需要清除独立开关。
 //
 
 //=============================================================================
@@ -556,6 +557,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( temp1 == "本事件" ){
 				var e_id = this._eventId;
 				character = $gameMap.event(e_id);
+				if( character == undefined ){ return; } //『防止并行删除事件出错』
 			}
 			if( temp1.indexOf("事件[") != -1 ){
 				temp1 = temp1.replace("事件[","");
@@ -590,6 +592,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( temp1 == "本事件" ){
 				var e_id = this._eventId;
 				character = $gameMap.event(e_id);
+				if( character == undefined ){ return; } //『防止并行删除事件出错』
 			}
 			if( temp1.indexOf("事件[") != -1 ){
 				temp1 = temp1.replace("事件[","");

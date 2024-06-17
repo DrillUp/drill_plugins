@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        图片 - 鼠标悬停触发图片
+ * @plugindesc [v1.5]        图片 - 鼠标悬停触发图片
  * @author Drill_up
  * 
  * 
@@ -78,6 +78,8 @@
  * 1.当前为单次触发，只在满足条件的那一帧执行一次开启/关闭。
  *   由于图片没有事件页机制，因此只支持单次触发，不支持持续触发。
  * 2.上述的指令互斥，每个绑定设置能绑定上述的一个类型。
+ * 3.删除图片后，所有图片的绑定会被解除，需要重新绑定。
+ *   切换地图不会影响绑定，切换战斗界面不会影响绑定。（但地图的图片在战斗界面不会显示）
  * 
  * -----------------------------------------------------------------------------
  * ----激活条件 - 变量值设置
@@ -96,7 +98,7 @@
  *   一共有2*2*16*2种组合方式。
  * 
  * -----------------------------------------------------------------------------
- * ----激活条件 - 查看与解除绑定
+ * ----激活条件 - 绑定设置
  * 你需要通过插件指令控制鼠标事件绑定：
  * 
  * 插件指令：>鼠标悬停触发图片 : 图片[1] : 绑定设置[1] : 绑定单次触发-悬停[一帧]时 : 执行公共事件[1]
@@ -108,6 +110,7 @@
  * 1.注意，如果直接执行了删除图片，则在删除后就已经"解除绑定"了。
  *   你如果不确定当前图片绑定了哪些公共事件，可以用指令"Debug显示当前全部绑定"。
  * 2.删除图片后，所有图片的绑定会被解除，需要重新绑定。
+ *   切换地图不会影响绑定，切换战斗界面不会影响绑定。（但地图的图片在战斗界面不会显示）
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 临时关闭开启绑定
@@ -127,6 +130,14 @@
  * 
  * 插件指令：>鼠标悬停触发图片 : 对话框弹出时保持触发
  * 插件指令：>鼠标悬停触发图片 : 对话框弹出时暂停触发
+ * 插件指令：>鼠标悬停触发图片 : 鼠标按下重合区域时 : 禁止触发
+ * 插件指令：>鼠标悬停触发图片 : 鼠标按下重合区域时 : 只触发最上面的
+ * 插件指令：>鼠标悬停触发图片 : 鼠标按下重合区域时 : 触发全部
+ * 
+ * 1."只触发最上面的"表示如果有多张图片重合，
+ *    且图片绑定了 按下[一帧]、释放[一帧]、双击[一帧] 的设置时，
+ *    只触发 最上面的图片 。
+ *    注意，该设置 不检查 悬停、离开悬停、滚轮上滚时、滚轮下滚时 的绑定。
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 获取触发记录
@@ -180,6 +191,8 @@
  * 大幅度改进了内部结构。
  * [v1.4]
  * 将插件改名，并接入了图片与鼠标控制核心支持结构。
+ * [v1.5]
+ * 添加了"鼠标按下重合区域时"的设置。
  * 
  * 
  * 
@@ -189,6 +202,17 @@
  * @off 暂停触发
  * @desc 对话框弹出时，通常会暂停鼠标的事件触发监听。你可以设置弹出后仍然保持触发。
  * @default true
+ *
+ * @param 鼠标按下重合区域时
+ * @type select
+ * @option 禁止触发
+ * @value 禁止触发
+ * @option 只触发最上面的
+ * @value 只触发最上面的
+ * @option 触发全部
+ * @value 触发全部
+ * @desc 如果有多张图片重合，且图片绑定了 按下[一帧]、释放[一帧]、双击[一帧] 的设置时，执行的判断逻辑。
+ * @default 只触发最上面的
  * 
  */
  
@@ -206,7 +230,8 @@
 //		★时间复杂度		o(n^2)  每帧
 //		★性能测试因素	图片管理层
 //		★性能测试消耗	2024/5/2：
-//							7.1ms（drill_PMHT_updateSwitch）4.8ms（战斗界面，drill_PMHT_updateSwitch）
+//							》地图界面：7.1ms（drill_PMHT_updateSwitch）
+//							》战斗界面：4.8ms（drill_PMHT_updateSwitch）
 //		★最坏情况		暂无
 //		★备注			核心功能应用到图片贴图上，不需要过多考虑优化问题。
 //		
@@ -233,13 +258,16 @@
 //					->设置鼠标触发类型
 //				->获取图片ID
 //				->显示全部绑定信息
-//			->☆绑定数据容器
+//			->☆图片容器
 //				->地图界面的图片
 //				->战斗界面的图片
 //			
 //			->☆图片触发控制
-//				->地图界面的图片
-//				->战斗界面的图片
+//				->根据 触发顺序 执行 帧刷新（大的优先）
+//				->触发结果
+//					->无触发时
+//					->有一个触发时
+//					->有多个触发时
 //			->☆公共事件控制
 //			
 //			->☆地图点击拦截
@@ -311,6 +339,7 @@
 	
 	/*-----------------杂项------------------*/
     DrillUp.g_PMHT_remainTrigger = String(DrillUp.parameters['对话框弹出时是否保持触发'] || "true") === "true";
+    DrillUp.g_PMHT_pressSingleTrigger = String(DrillUp.parameters['鼠标按下重合区域时'] || "只触发最上面的");
 	
 	
 	
@@ -526,6 +555,32 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			}
 		}
 		
+		/*-----------------触发设置------------------*/
+		if( args.length == 2 ){	
+			var type = String(args[1]);
+			if( type == "对话框弹出时保持触发" ){
+				$gameSystem._drill_PMHT_remainTrigger = true;
+			}
+			if( type == "对话框弹出时暂停触发" ){
+				$gameSystem._drill_PMHT_remainTrigger = false;
+			}
+		}
+		if( args.length == 4 ){	
+			var type = String(args[1]);
+			var temp2 = String(args[3]);
+			if( type == "鼠标按下重合区域时" ){
+				if( temp2 == "禁止触发" ){
+					$gameSystem._drill_PMHT_pressSingleTrigger = temp2;
+				}
+				if( temp2 == "只触发最上面的" ){
+					$gameSystem._drill_PMHT_pressSingleTrigger = temp2;
+				}
+				if( temp2 == "触发全部" ){
+					$gameSystem._drill_PMHT_pressSingleTrigger = temp2;
+				}
+			}
+		}
+		
 		/*-----------------获取触发记录------------------*/
 		if( args.length == 6 ){	
 			var type = String(args[1]);
@@ -638,7 +693,8 @@ Game_System.prototype.drill_PMHT_checkSysData = function() {
 //==============================
 Game_System.prototype.drill_PMHT_initSysData_Private = function() {
 	
-	this._drill_PMHT_remainTrigger = DrillUp.g_PMHT_remainTrigger;	//对话框弹出时是否保持触发
+	this._drill_PMHT_remainTrigger = DrillUp.g_PMHT_remainTrigger;				//对话框弹出时是否保持触发
+	this._drill_PMHT_pressSingleTrigger = DrillUp.g_PMHT_pressSingleTrigger;	//鼠标按下重合区域时
 	
 	this._drill_PMHT_lastX = 0;					//上一次触发的鼠标位置X
 	this._drill_PMHT_lastY = 0;					//上一次触发的鼠标位置Y
@@ -686,6 +742,15 @@ Game_Picture.prototype.drill_PMHT_checkSwitchData = function(){
 	
 	if( this._drill_PMHT_switchData != undefined ){ return; }
 	this._drill_PMHT_switchData = {};
+	
+	// > 数据 - 图片ID【图片-图片优化核心】
+	var pic_id = this.drill_COPi_getPictureId();
+	this._drill_PMHT_switchData['pic_id'] = pic_id;
+	
+	// > 数据 - 触发顺序
+	this._drill_PMHT_switchData['trigger_zIndex'] = pic_id;		//触发顺序
+	
+	// > 数据 - 绑定设置
 	this._drill_PMHT_switchData['lastIsHover'] = false;			//悬停标记
 	this._drill_PMHT_switchData['bindTank'] = [];				//绑定容器
 }
@@ -919,9 +984,9 @@ Game_Picture.prototype.drill_PMHT_getSwitchDataInfo = function(){
 
 
 //=============================================================================
-// ** ☆绑定数据容器
+// ** ☆图片容器
 //			
-//			说明：	> 此模块专门对 绑定数据 进行 捕获、销毁 。
+//			说明：	> 此模块专门对 绑定数据的图片 进行 捕获。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
@@ -930,7 +995,7 @@ Game_Picture.prototype.drill_PMHT_getSwitchDataInfo = function(){
 var _drill_PMHT_temp_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {	
 	_drill_PMHT_temp_initialize.call(this);
-	this._drill_PMHT_switchTank = [];			//实体类容器
+	this._drill_PMHT_pictureTank = [];			//实体类容器
 	this._drill_PMHT_needRestatistics = true;
 };
 //==============================
@@ -938,7 +1003,7 @@ Game_Temp.prototype.initialize = function() {
 //==============================
 var _drill_PMHT_gmap_setup = Game_Map.prototype.setup;
 Game_Map.prototype.setup = function( mapId ){
-	$gameTemp._drill_PMHT_switchTank = [];		//实体类容器
+	$gameTemp._drill_PMHT_pictureTank = [];		//实体类容器
 	$gameTemp._drill_PMHT_needRestatistics = true;
 	_drill_PMHT_gmap_setup.call(this,mapId);
 };
@@ -947,7 +1012,7 @@ Game_Map.prototype.setup = function( mapId ){
 //==============================
 var _drill_PMHT_sbase_createPictures = Spriteset_Base.prototype.createPictures;
 Spriteset_Base.prototype.createPictures = function() {
-	$gameTemp._drill_PMHT_switchTank = [];		//实体类容器
+	$gameTemp._drill_PMHT_pictureTank = [];		//实体类容器
 	$gameTemp._drill_PMHT_needRestatistics = true;
 	_drill_PMHT_sbase_createPictures.call(this);
 };
@@ -957,7 +1022,7 @@ Spriteset_Base.prototype.createPictures = function() {
 var _drill_PMHT_terminate = Scene_Battle.prototype.terminate;
 Scene_Battle.prototype.terminate = function() {
 	_drill_PMHT_terminate.call(this);
-	$gameTemp._drill_PMHT_switchTank = [];		//实体类容器
+	$gameTemp._drill_PMHT_pictureTank = [];		//实体类容器
 	$gameTemp._drill_PMHT_needRestatistics = true;
 };
 //==============================
@@ -975,7 +1040,7 @@ Game_Screen.prototype.drill_PMHT_updateRestatistics = function() {
 	if( $gameTemp._drill_PMHT_needRestatistics != true ){ return }
 	$gameTemp._drill_PMHT_needRestatistics = false;
 	
-	$gameTemp._drill_PMHT_switchTank = [];		//实体类容器
+	$gameTemp._drill_PMHT_pictureTank = [];		//实体类容器
 	
 	// > 图片遍历『图片与多场景』
 	var i_offset = 0;							//地图界面的图片
@@ -987,9 +1052,23 @@ Game_Screen.prototype.drill_PMHT_updateRestatistics = function() {
 		var picture = this._pictures[ i + i_offset ];
 		if( picture == undefined ){ continue; }
 		if( picture._drill_PMHT_switchData != undefined ){
-			$gameTemp._drill_PMHT_switchTank.push( picture._drill_PMHT_switchData );
+			$gameTemp._drill_PMHT_pictureTank.push( picture );
 		}
 	}
+	
+	// > 刷新统计 触发顺序
+	for(var i = 0; i < $gameTemp._drill_PMHT_pictureTank.length; i++ ){
+		var picture = $gameTemp._drill_PMHT_pictureTank[i];
+		picture._drill_PMHT_switchData['trigger_zIndex'] = picture._drill_PMHT_switchData['pic_id'];
+		
+		// > 堆叠级影响【图片 - 层级与堆叠级】
+		if( Imported.Drill_PictureLayerAndZIndex ){
+			if( this._drill_PLAZ_data != undefined ){
+				picture._drill_PMHT_switchData['trigger_zIndex'] = picture._drill_PLAZ_data['zIndex'];
+			}
+		}
+	}
+	$gameTemp._drill_PMHT_pictureTank.sort(function(a, b){return a._drill_PMHT_switchData['trigger_zIndex']-b._drill_PMHT_switchData['trigger_zIndex']});
 };
 
 
@@ -1007,7 +1086,7 @@ var _drill_PMHT_map_update2 = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function(){
 	_drill_PMHT_map_update2.call( this );
 	if( this.drill_PMHT_isOptimizationPassed() == false ){ return; }
-	this.drill_PMHT_updateSwitch();
+	this.drill_PMHT_updatePictureList();
 }
 //==============================
 // * 图片触发控制 - 帧刷新 - 优化策略
@@ -1015,7 +1094,7 @@ Scene_Map.prototype.update = function(){
 Scene_Map.prototype.drill_PMHT_isOptimizationPassed = function(){
 	
 	// > 地图中所有容器都为空时，不工作
-	if( $gameTemp._drill_PMHT_switchTank.length == 0 ){
+	if( $gameTemp._drill_PMHT_pictureTank.length == 0 ){
 		return false;
 	}
 	return true;
@@ -1023,7 +1102,7 @@ Scene_Map.prototype.drill_PMHT_isOptimizationPassed = function(){
 //==============================
 // * 图片触发控制 - 帧刷新
 //==============================
-Scene_Map.prototype.drill_PMHT_updateSwitch = function(){
+Scene_Map.prototype.drill_PMHT_updatePictureList = function(){
 	
 	// > 对话框弹出时是否保持触发
 	if( ($gameMessage.isBusy() || SceneManager._scene.isBusy()) &&
@@ -1031,127 +1110,236 @@ Scene_Map.prototype.drill_PMHT_updateSwitch = function(){
 		return;
 	}
 	
-	// > 图片遍历『图片与多场景』
-	var i_offset = 0;							//地图界面的图片
-	var pic_length = $gameScreen.maxPictures();
-	if( $gameParty.inBattle() == true ){		//战斗界面的图片
-		i_offset = pic_length;
+	// > 触发结果 - 容器
+	var triggerResult_list = [];
+	
+	
+	// > 根据 触发顺序 执行 帧刷新（大的优先）
+	for(var i = $gameTemp._drill_PMHT_pictureTank.length-1; i >=0; i-- ){
+		var picture = $gameTemp._drill_PMHT_pictureTank[i];
+		
+		// > 结果准备
+		var triggerResult = {};
+		triggerResult['result_enabled'] = false;	//确认是否执行
+		triggerResult['result_commonId'] = 0;		//执行的公共事件id
+		triggerResult['result_isPress'] = false;	//是否为鼠标按下
+		
+		triggerResult['result_lastX'] = 0;			//上一次触发的鼠标位置X
+		triggerResult['result_lastY'] = 0;			//上一次触发的鼠标位置Y
+		triggerResult['result_lastPicId'] = 0;		//上一次触发的图片ID
+		triggerResult['result_lastBindId'] = 0;		//上一次触发的公共事件ID
+		
+		// > 帧刷新图片
+		picture.drill_PMHT_updateSwitch( triggerResult );
+		
+		// > 结果收集
+		if( triggerResult['result_enabled'] == true ){	//（确认要执行触发的，收集起来）
+			triggerResult_list.push( triggerResult );
+		}
 	}
-	for(var i = 0; i < pic_length; i++ ){
-		var picture = $gameScreen._pictures[ i + i_offset ];
-		if( picture == undefined ){ continue; }
-		if( picture._drill_PMHT_switchData == undefined ){ continue; }
+	
+	
+	// > 触发结果 - 无触发时
+	if( triggerResult_list.length == 0 ){ return; }
+	
+	// > 触发结果 - 有一个触发时
+	if( triggerResult_list.length == 1 ){
+		this.drill_PMHT_executeResult( triggerResult_list[0] );	//（直接执行即可）
+		return;
+	}
+	
+	// > 触发结果 - 有多个触发时 - 禁止触发
+	if( $gameSystem._drill_PMHT_pressSingleTrigger == "禁止触发" ){
+		for(var i = 0; i < triggerResult_list.length; i++){
+			var triggerResult = triggerResult_list[i];
+			
+			// > 悬停、离开悬停、滚轮上滚时、滚轮下滚时，正常触发
+			if( triggerResult['result_isPress'] == false ){
+				this.drill_PMHT_executeResult( triggerResult );
+				continue;
+			}
+			
+			// > 按下[一帧]、释放[一帧]、双击[一帧]
+			//	（不操作）
+		}
+		return;
+	}
+	
+	// > 触发结果 - 有多个触发时 - 只触发最上面的
+	if( $gameSystem._drill_PMHT_pressSingleTrigger == "" ||
+		$gameSystem._drill_PMHT_pressSingleTrigger == "只触发最上面的" ){
 		
-		// > 数据 - switchData层面（与图片一对一）
-		var bindTank = picture._drill_PMHT_switchData['bindTank'];
-		if( bindTank.length == 0 ){ continue; }
-		
-		// > 【图片 - 图片与鼠标控制核心】鼠标是否正在悬停（提前判定，不要放入子循环里面）
-		var is_onHover = picture.drill_COPWM_isOnHover();
-		var last_isHover = picture._drill_PMHT_switchData['lastIsHover'];
-		
-		// > 【图片 - 可拖拽的图片】被拖拽时，强制判定为正在悬停『鼠标悬停图片慢一帧』
-		//		（打开 图片与鼠标控制核心 的debug悬停，然后拖拽一个图片不停地甩）
-		//		（能看见甩的时候会看见描边线会有几帧由绿色变成黄色，这是因为慢一帧所导致。这个时候不能判定为 鼠标离开悬停）
-		if( Imported.Drill_PictureDraggable == true ){
-			if( picture.drill_PDr_isDraging() == true ){
-				is_onHover = true;
+		var is_triggered = false;
+		for(var i = 0; i < triggerResult_list.length; i++){
+			var triggerResult = triggerResult_list[i];
+			
+			// > 悬停、离开悬停、滚轮上滚时、滚轮下滚时，正常触发
+			if( triggerResult['result_isPress'] == false ){
+				this.drill_PMHT_executeResult( triggerResult );
+				continue;
+			}
+			
+			// > 按下[一帧]、释放[一帧]、双击[一帧]
+			if( is_triggered == false ){
+				is_triggered = true;
+				this.drill_PMHT_executeResult( triggerResult );
 			}
 		}
+		return;
+	}
+	
+	// > 触发结果 - 有多个触发时 - 触发全部
+	if( $gameSystem._drill_PMHT_pressSingleTrigger == "触发全部" ){
+		for(var i = 0; i < triggerResult_list.length; i++){
+			var triggerResult = triggerResult_list[i];
+			this.drill_PMHT_executeResult( triggerResult );
+		}
+		return;
+	}
+}
+//==============================
+// * 图片触发控制 - 帧刷新图片
+//==============================
+Game_Picture.prototype.drill_PMHT_updateSwitch = function( triggerResult ){
+	if( this._drill_PMHT_switchData == undefined ){ return; }
+	
+	// > 数据 - switchData层面（与图片一对一）
+	var bindTank = this._drill_PMHT_switchData['bindTank'];
+	if( bindTank.length == 0 ){ return; }
+	
+	// > 【图片 - 图片与鼠标控制核心】鼠标是否正在悬停（提前判定，不要放入子循环里面）
+	var is_onHover = this.drill_COPWM_isOnHover();
+	var last_isHover = this._drill_PMHT_switchData['lastIsHover'];
+	
+	// > 【图片 - 可拖拽的图片】被拖拽时，强制判定为正在悬停『鼠标悬停图片慢一帧』
+	//		（打开 图片与鼠标控制核心 的debug悬停，然后拖拽一个图片不停地甩）
+	//		（能看见甩的时候会看见描边线会有几帧由绿色变成黄色，这是因为慢一帧所导致。这个时候不能判定为 鼠标离开悬停）
+	if( Imported.Drill_PictureDraggable == true ){
+		if( this.drill_PDr_isDraging() == true ){
+			is_onHover = true;
+		}
+	}
+	
+	// > 数据 - bindTank层面（与图片一对多）
+	for(var j = 0; j < bindTank.length; j++ ){
+		var bind_data = bindTank[j];
+		if( bind_data == undefined ){ continue; }
 		
-		// > 数据 - bindTank层面（与图片一对多）
-		for(var j = 0; j < bindTank.length; j++ ){
-			var bind_data = bindTank[j];
-			if( bind_data == undefined ){ continue; }
+		var cur_mouseType = bind_data['mouseType'];
+		if( cur_mouseType < 10 ){
+		
+			// > 触发（持续）
+			//	（无）
+		
+		}else{
 			
-			var cur_mouseType = bind_data['mouseType'];
-			if( cur_mouseType < 10 ){
-			
-				// > 触发（持续）
-				//	（无）
-			
-			}else{
+			// > 触发（单次）
+			var command_enabled = bind_data['enabled'];
+			var command_id = bind_data['onceValue'];
+			var canSetValue = false;
+			if( is_onHover == true ){
 				
-				// > 触发（单次）
-				var command_enabled = bind_data['enabled'];
-				var command_id = bind_data['onceValue'];
-				var canSetValue = false;
-				if( is_onHover == true ){
-					
-					if( cur_mouseType == 11 && TouchInput.drill_isLeftTriggerd() ){
-						canSetValue = true;		//悬停左键按下[一帧]
-					}
-					if( cur_mouseType == 12 && TouchInput.drill_isLeftReleased() ){
-						canSetValue = true;		//悬停左键释放[一帧]
-					}
-					if( cur_mouseType == 13 && TouchInput.drill_isLeftDoubled() ){
-						canSetValue = true;		//悬停左键双击[一帧]
-					}
-					
-					if( cur_mouseType == 21 && TouchInput.drill_isRightTriggerd() ){
-						canSetValue = true;		//悬停右键按下[一帧]
-					}
-					if( cur_mouseType == 22 && TouchInput.drill_isRightReleased() ){
-						canSetValue = true;		//悬停右键释放[一帧]
-					}
-					if( cur_mouseType == 23 && TouchInput.drill_isRightDoubled() ){
-						canSetValue = true;		//悬停右键双击[一帧]
-					}
-					
-					if( cur_mouseType == 31 && TouchInput.drill_isMiddleTriggerd() ){
-						canSetValue = true;		//悬停滚轮按下[一帧]
-					}
-					if( cur_mouseType == 32 && TouchInput.drill_isMiddleReleased() ){
-						canSetValue = true;		//悬停滚轮释放[一帧]
-					}
-					if( cur_mouseType == 33 && TouchInput.drill_isMiddleDoubled() ){
-						canSetValue = true;		//悬停滚轮双击[一帧]
-					}
-					if( cur_mouseType == 34 && TouchInput.drill_isWheelUp() ){
-						canSetValue = true;		//悬停滚轮上滚
-					}
-					if( cur_mouseType == 35 && TouchInput.drill_isWheelDown() ){
-						canSetValue = true;		//悬停滚轮下滚
-					}
-					
-					if( cur_mouseType == 91 && 
-						(TouchInput.drill_isLeftTriggerd() || TouchInput.drill_isRightTriggerd()) ){
-						canSetValue = true;		//悬停左键或右键按下[一帧]
-					}
-					if( cur_mouseType == 92 && 
-						(TouchInput.drill_isLeftReleased() || TouchInput.drill_isRightReleased()) ){
-						canSetValue = true;		//悬停左键或右键释放[一帧]
-					}
-					if( cur_mouseType == 93 && 
-						(TouchInput.drill_isLeftDoubled() || TouchInput.drill_isRightDoubled()) ){
-						canSetValue = true;		//悬停左键或右键双击[一帧]
-					}
+				if( cur_mouseType == 11 && TouchInput.drill_isLeftTriggerd() ){
+					canSetValue = true;		//悬停左键按下[一帧]
+					triggerResult['result_isPress'] = true;
+				}
+				if( cur_mouseType == 12 && TouchInput.drill_isLeftReleased() ){
+					canSetValue = true;		//悬停左键释放[一帧]
+					triggerResult['result_isPress'] = true;
+				}
+				if( cur_mouseType == 13 && TouchInput.drill_isLeftDoubled() ){
+					canSetValue = true;		//悬停左键双击[一帧]
+					triggerResult['result_isPress'] = true;
 				}
 				
-				// > 触发（单次） - 悬停[一帧]
-				if( cur_mouseType == 18 && is_onHover == true && last_isHover == false ){
-					canSetValue = true;
+				if( cur_mouseType == 21 && TouchInput.drill_isRightTriggerd() ){
+					canSetValue = true;		//悬停右键按下[一帧]
+					triggerResult['result_isPress'] = true;
 				}
-				// > 触发（单次） - 不在悬停区域时[一帧]
-				if( cur_mouseType == 19 && is_onHover == false && last_isHover == true ){
-					canSetValue = true;
+				if( cur_mouseType == 22 && TouchInput.drill_isRightReleased() ){
+					canSetValue = true;		//悬停右键释放[一帧]
+					triggerResult['result_isPress'] = true;
+				}
+				if( cur_mouseType == 23 && TouchInput.drill_isRightDoubled() ){
+					canSetValue = true;		//悬停右键双击[一帧]
+					triggerResult['result_isPress'] = true;
 				}
 				
-				// > 触发（单次） - 赋值一次
-				if( canSetValue == true && command_enabled == true ){
-					this.drill_PMHT_executeCommonEvent( command_id );
-					$gameSystem._drill_PMHT_lastX = _drill_mouse_x;
-					$gameSystem._drill_PMHT_lastY = _drill_mouse_y;
-					$gameSystem._drill_PMHT_lastPicId = $gameScreen.drill_PMHT_getPictureId( picture );
-					$gameSystem._drill_PMHT_lastBindId = j;
-					$gameSystem._drill_PMHT_lastCommonId = command_id;
+				if( cur_mouseType == 31 && TouchInput.drill_isMiddleTriggerd() ){
+					canSetValue = true;		//悬停滚轮按下[一帧]
+					triggerResult['result_isPress'] = true;
+				}
+				if( cur_mouseType == 32 && TouchInput.drill_isMiddleReleased() ){
+					canSetValue = true;		//悬停滚轮释放[一帧]
+					triggerResult['result_isPress'] = true;
+				}
+				if( cur_mouseType == 33 && TouchInput.drill_isMiddleDoubled() ){
+					canSetValue = true;		//悬停滚轮双击[一帧]
+					triggerResult['result_isPress'] = true;
+				}
+				if( cur_mouseType == 34 && TouchInput.drill_isWheelUp() ){
+					canSetValue = true;		//悬停滚轮上滚
+				}
+				if( cur_mouseType == 35 && TouchInput.drill_isWheelDown() ){
+					canSetValue = true;		//悬停滚轮下滚
+				}
+				
+				if( cur_mouseType == 91 && 
+					(TouchInput.drill_isLeftTriggerd() || TouchInput.drill_isRightTriggerd()) ){
+					canSetValue = true;		//悬停左键或右键按下[一帧]
+					triggerResult['result_isPress'] = true;
+				}
+				if( cur_mouseType == 92 && 
+					(TouchInput.drill_isLeftReleased() || TouchInput.drill_isRightReleased()) ){
+					canSetValue = true;		//悬停左键或右键释放[一帧]
+					triggerResult['result_isPress'] = true;
+				}
+				if( cur_mouseType == 93 && 
+					(TouchInput.drill_isLeftDoubled() || TouchInput.drill_isRightDoubled()) ){
+					canSetValue = true;		//悬停左键或右键双击[一帧]
+					triggerResult['result_isPress'] = true;
 				}
 			}
+			
+			// > 触发（单次） - 悬停[一帧]
+			if( cur_mouseType == 18 && is_onHover == true && last_isHover == false ){
+				canSetValue = true;
+			}
+			// > 触发（单次） - 不在悬停区域时[一帧]
+			if( cur_mouseType == 19 && is_onHover == false && last_isHover == true ){
+				canSetValue = true;
+			}
+			
+			// > 触发（单次） - 赋值一次
+			if( canSetValue == true && command_enabled == true ){
+				triggerResult['result_enabled'] = true;
+				triggerResult['result_commonId'] = command_id;
+				
+				triggerResult['result_lastX'] = _drill_mouse_x;
+				triggerResult['result_lastY'] = _drill_mouse_y;
+				triggerResult['result_lastPicId'] = this._drill_PMHT_switchData['pic_id'];
+				triggerResult['result_lastBindId'] = j;
+			}
 		}
-		
-		// > 数据 - switchData层面（记录 悬停标记）
-		picture._drill_PMHT_switchData['lastIsHover'] = is_onHover;
 	}
+	
+	// > 数据 - switchData层面（记录 悬停标记）
+	this._drill_PMHT_switchData['lastIsHover'] = is_onHover;
+};
+//==============================
+// * 图片触发控制 - 执行公共事件
+//==============================
+Scene_Map.prototype.drill_PMHT_executeResult = function( triggerResult ){
+	
+	// > 上一次触发的
+	$gameSystem._drill_PMHT_lastX = triggerResult['result_lastX'];
+	$gameSystem._drill_PMHT_lastY = triggerResult['result_lastY'];
+	$gameSystem._drill_PMHT_lastPicId = triggerResult['result_lastPicId'];
+	$gameSystem._drill_PMHT_lastBindId = triggerResult['result_lastBindId'];
+	$gameSystem._drill_PMHT_lastCommonId = triggerResult['result_commonId'];
+	
+	// > 执行公共事件
+	this.drill_PMHT_executeCommonEvent( triggerResult['result_commonId'] );
 };
 
 //==============================
@@ -1161,13 +1349,15 @@ var _drill_PMHT_battle_update2 = Scene_Battle.prototype.update;
 Scene_Battle.prototype.update = function(){
 	_drill_PMHT_battle_update2.call( this );
 	if( this.drill_PMHT_isOptimizationPassed() == false ){ return; }
-	this.drill_PMHT_updateSwitch();
+	this.drill_PMHT_updatePictureList();
 }
 //==============================
 // * 图片触发控制 - 函数赋值『图片与多场景』
 //==============================
 Scene_Battle.prototype.drill_PMHT_isOptimizationPassed = Scene_Map.prototype.drill_PMHT_isOptimizationPassed;
+Scene_Battle.prototype.drill_PMHT_updatePictureList = Scene_Map.prototype.drill_PMHT_updatePictureList;
 Scene_Battle.prototype.drill_PMHT_updateSwitch = Scene_Map.prototype.drill_PMHT_updateSwitch;
+Scene_Battle.prototype.drill_PMHT_executeResult = Scene_Map.prototype.drill_PMHT_executeResult;
 
 
 //=============================================================================
@@ -1232,10 +1422,11 @@ Scene_Map.prototype.processMapTouch = function() {
 // * 地图点击拦截 - 条件
 //==============================
 Scene_Map.prototype.drill_PMHT_hasAnyHovered = function() {	
-	for(var i = 0; i < $gameTemp._drill_PMHT_switchTank.length; i++){
-		var temp_data = $gameTemp._drill_PMHT_switchTank[i];
-		if( temp_data == undefined ){ continue; };
-		if( temp_data['lastIsHover'] == true ){
+	for(var i = 0; i < $gameTemp._drill_PMHT_pictureTank.length; i++){
+		var temp_picture = $gameTemp._drill_PMHT_pictureTank[i];
+		if( temp_picture == undefined ){ continue; };
+		if( temp_picture._drill_PMHT_switchData == undefined ){ continue; };
+		if( temp_picture._drill_PMHT_switchData['lastIsHover'] == true ){
 			return true;
 		}
 	}

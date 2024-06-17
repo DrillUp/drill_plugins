@@ -211,8 +211,8 @@
 //			1.移动一体化：拦截含有移动标签的事件，统一移动。需要确保只有一个动力源。
 //				
 //		★存在的问题：
-//			1.玩家与事件一体化移动 仍然存在一些细节问题，这里没有继续深入。
-//			  （已解决，是isMoving中断造成的bug）
+//			1.问题：玩家与事件一体化移动 仍然存在一些细节问题，这里没有继续深入。
+//			  解决：【已解决】，是isMoving中断造成的bug。
 //			
 
 //=============================================================================
@@ -296,6 +296,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args ){
 			}
 			if( c_chars == null && unit == "本事件" ){
 				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
 				c_chars = [ e ];
 			}
 			if( c_chars == null && unit.indexOf("批量事件[") != -1 ){

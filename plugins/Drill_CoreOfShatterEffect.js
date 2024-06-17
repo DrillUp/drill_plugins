@@ -26,7 +26,7 @@
  * 该插件为基础核心，单独使用没有效果。
  * 插件可以作用于各个粉碎效果子插件，但是要基于核心才能运行。
  * 基于：
- *   - Drill_CoreOfBallistics       系统-弹道核心★★v2.1及以上★★
+ *   - Drill_CoreOfBallistics       数学模型-弹道核心★★v2.1及以上★★
  * 作用于：
  *   - Drill_BattleShatterEffect    战斗-方块粉碎效果
  *   - Drill_LayerShatterEffect     地图-方块粉碎效果
@@ -47,7 +47,7 @@
  *        两点式        x  (不适合多碎片)
  *   (2.碎片的发射、扩散轨迹完全可以通过弹道设置进行设计。
  *      你还可以设置使用插件指令控制反向弹道。
- *      具体配置方式可以看看 "1.系统 > 关于弹道.docx"。
+ *      具体配置方式可以看看 "32.数学模型 > 关于弹道.docx"。
  * 碎片：
  *   (1.碎片的数量 = 切割矩阵列数 x 切割矩阵行数。
  *      数量太多可能会轻微影响性能。
@@ -618,7 +618,7 @@
  * @param 路程计算公式
  * @parent 速度类型
  * @type note
- * @desc 碎片的路程计算公式。可使用 变量和常量 来设计公式，具体看看文档 "1.系统 > 关于弹道.docx"介绍。
+ * @desc 碎片的路程计算公式。可使用 变量和常量 来设计公式，具体看看文档 "32.数学模型 > 关于弹道.docx"介绍。
  * @default "return 0.0"
  * 
  * @param 方向类型
@@ -659,7 +659,7 @@
  * @param 方向计算公式
  * @parent 方向类型
  * @type note
- * @desc 类型为"方向计算公式"时。可使用 变量和常量 来设计公式，具体看看文档 "1.系统 > 关于弹道.docx"介绍。
+ * @desc 类型为"方向计算公式"时。可使用 变量和常量 来设计公式，具体看看文档 "32.数学模型 > 关于弹道.docx"介绍。
  * @default "return 0.0"
  * 
  * @param ---直角坐标模式---
@@ -714,7 +714,7 @@
  * @param X轴路程计算公式
  * @parent X轴速度类型
  * @type note
- * @desc 碎片的路程计算公式。可使用 变量和常量 来设计公式，具体看看文档 "1.系统 > 关于弹道.docx"介绍。
+ * @desc 碎片的路程计算公式。可使用 变量和常量 来设计公式，具体看看文档 "32.数学模型 > 关于弹道.docx"介绍。
  * @default "return 0.0"
  *
  * @param Y轴速度类型
@@ -761,7 +761,7 @@
  * @param Y轴路程计算公式
  * @parent Y轴速度类型
  * @type note
- * @desc 碎片的路程计算公式。可使用 变量和常量 来设计公式，具体看看文档 "1.系统 > 关于弹道.docx"介绍。
+ * @desc 碎片的路程计算公式。可使用 变量和常量 来设计公式，具体看看文档 "32.数学模型 > 关于弹道.docx"介绍。
  * @default "return 0.0"
  * 
  * 
@@ -854,8 +854,9 @@
 //			1.整个核心提供 一个粉碎控制器数据对象 和 一个粉碎贴图。
 //		
 //		★存在的问题：
-//			1.参数过多，拆解极其麻烦。概念上，一直在纠结碎片行数列数是否要下发到子插件中设置。
-//			虽然这里完全封装成了一个单一函数接口。（2022/7/20 这里经过了完整重构，结构思路已经很清晰了）
+//			1.问题：参数过多，拆解极其麻烦。概念上，一直在纠结碎片行数列数是否要下发到子插件中设置。
+//					虽然这里完全封装成了一个单一函数接口。
+//			  解决：【已解决】，2022/7/20 这里经过了完整重构，结构思路已经很清晰了。
 //
 
 //=============================================================================
@@ -866,7 +867,7 @@
 	//==============================
 	var DrillUp = DrillUp || {}; 
 	DrillUp.g_COSE_PluginTip_curName = "Drill_CoreOfShatterEffect.js 系统-方块粉碎核心";
-	DrillUp.g_COSE_PluginTip_baseList = ["Drill_CoreOfBallistics.js 系统-弹道核心"];
+	DrillUp.g_COSE_PluginTip_baseList = ["Drill_CoreOfBallistics.js 数学模型-弹道核心"];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
@@ -1840,7 +1841,7 @@ Drill_COSE_LayerSprite.prototype.drill_rebuildBallistics = function(){
 	var rowNum = c_data._drill_spriteRowCount;
 	
 	var max_per = Math.floor( Math.abs( (Math.max( colNum,rowNum )-1) /2 ) );
-	Drill_COBa_Manager._drill_COBa_planimetryData = c_data._drill_COSE_ballistics_move;	//（存储的弹道数据，赋值后预推演）
+	Drill_COBa_Manager._drill_COBa_planimetryData = c_data._drill_COSE_ballistics_move;	//（存储的弹道数据，赋值后推演赋值）
 	Drill_COBa_Manager._drill_COBa_commonData = c_data._drill_COSE_ballistics_opacity;
 	//alert( JSON.stringify(  Drill_COBa_Manager._drill_COBa_planimetryData ) );
 	//alert( JSON.stringify(  Drill_COBa_Manager._drill_COBa_commonData ) );
@@ -1850,10 +1851,10 @@ Drill_COSE_LayerSprite.prototype.drill_rebuildBallistics = function(){
 			var temp_sprite = this._drill_spriteTank[ i*rowNum+j ];
 			if( temp_sprite == undefined ){ continue; }
 			
-			// > 碎片群弹道 - 预推演（坐标）
+			// > 碎片群弹道 - 推演赋值（坐标）
 			$gameTemp.drill_COBa_preBallisticsMove( temp_sprite, i*rowNum+j , temp_sprite._orgX, temp_sprite._orgY );
 			
-			// > 碎片群弹道 - 预推演（透明度）
+			// > 碎片群弹道 - 推演赋值（透明度）
 			$gameTemp.drill_COBa_preBallisticsOpacity( temp_sprite, i*rowNum+j , temp_sprite._orgOpacity );
 			
 			// > 变速矩阵

@@ -1716,7 +1716,8 @@
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^3)*o(贴图处理) 每帧
 //		★性能测试因素	个体装饰管理层、战斗界面
-//		★性能测试消耗	43.7ms（update）52.9ms（drill_updateParticle）
+//		★性能测试消耗	2024/5/10：
+//							》43.7ms（update）52.9ms（drill_updateParticle）
 //		★最坏情况		大量小爆炸被同时播放。
 //		★备注			无
 //		
@@ -1921,8 +1922,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		if( args.length >= 4 ){
 			var unit = String(args[3]);
 			if( charSprite_list == null && unit == "本事件" ){
+				var charSprite = $gameTemp.drill_ABPa_getCharacterSpriteByEventId( this._eventId );
+				if( charSprite == undefined ){ return; }	//『防止并行删除事件出错』
 				charSprite_list = [];
-				charSprite_list.push( $gameTemp.drill_ABPa_getCharacterSpriteByEventId( this._eventId ) );
+				charSprite_list.push( charSprite );
 			}
 			if( charSprite_list == null && unit.indexOf("批量事件[") != -1 ){
 				unit = unit.replace("批量事件[","");
@@ -2270,7 +2273,7 @@ Game_Temp.prototype.drill_ABPa_getCharacterSpriteTank = function(){
 //			参数：	> event_id 数字（事件ID）
 //			返回：	> 贴图对象     （事件贴图）
 //          
-//			说明：	> 事件id和物体贴图一一对应。不含镜像。
+//			说明：	> -2表示玩家，1表示第一个事件的贴图。不含镜像。
 //					> 此函数只读，且不缓存任何对象，直接读取容器数据。
 //##############################
 Game_Temp.prototype.drill_ABPa_getCharacterSpriteByEventId = function( event_id ){
@@ -2282,7 +2285,7 @@ Game_Temp.prototype.drill_ABPa_getCharacterSpriteByEventId = function( event_id 
 //			参数：	> follower_index 数字（玩家队员索引）
 //			返回：	> 贴图对象           （玩家队员贴图）
 //          
-//			说明：	> -2表示玩家，1表示第一个跟随者。不含镜像。
+//			说明：	> -2表示玩家，1表示第一个玩家队员的贴图。不含镜像。
 //					> 此函数只读，且不缓存任何对象，直接读取容器数据。
 //##############################
 Game_Temp.prototype.drill_ABPa_getCharacterSpriteByFollowerIndex = function( follower_index ){
@@ -2311,6 +2314,10 @@ Game_Temp.prototype.drill_ABPa_getCharacterSpriteByEventId_Private = function( e
 	for(var i=0; i < sprite_list.length; i++){
 		var sprite = sprite_list[i];
 		if( sprite._character == undefined ){ continue; }		//（判断 _character 就可以，不需要检验 Sprite_Character）
+		if( event_id == -2 &&   //『玩家id』
+			sprite._character == $gamePlayer ){
+			return sprite;
+		}
 		if( sprite._character._eventId == event_id ){
 			return sprite;
 		}

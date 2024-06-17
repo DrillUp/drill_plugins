@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        战斗 - 多线程
+ * @plugindesc [v1.1]        战斗 - 多线程
  * @author Drill_up
  * 
  * 
@@ -39,13 +39,24 @@
  * 
  * -----------------------------------------------------------------------------
  * ----激活条件
- * 你可以通过插件指令手动修改生成的一些基本设置。
+ * 你可以通过插件指令手动执行公共事件。
  * 
  * 插件指令：>战斗多线程 : 串行执行 : 公共事件[1]
  * 插件指令：>战斗多线程 : 并行执行 : 公共事件[1]
  * 
  * 1.注意，该插件指令只能在战斗界面中有效。
  * 2.不建议在公共事件中嵌套多个并行执行的插件指令。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 强制插入
+ * 你可以通过插件指令手动插入串行执行的指令。
+ * 
+ * 插件指令：>战斗多线程 : 强制插入串行执行 : 公共事件[1]
+ * 
+ * 1.注意，该插件指令只能在战斗界面中有效。
+ * 2.该指令可强制将公共事件插入到正在串行执行的指令集中。
+ *   如果在串行事件中执行，那么相当于指令 "流程控制 > 公共事件"，
+ *   如果在并行事件中执行，那么是立即暂停当前串行，去执行其它公共事件。
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 分支条件
@@ -83,6 +94,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 添加了强制插入串行执行的功能。
  * 
  */
  
@@ -100,7 +113,7 @@
 //		★时间复杂度		o(n^2) 每帧
 //		★性能测试因素	战斗界面
 //		★性能测试消耗	2024/5/2：
-//							62.6ms（drill_controller_updateParallel）
+//							》62.6ms（drill_controller_updateParallel）
 //		★最坏情况		大量事件并行
 //		★备注			由于添加了鼠标点击的小爆炸功能，性能消耗突然非常大。
 //		
@@ -219,6 +232,18 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				};
 				$gameTroop.drill_BCT_addPipeEvent( data );
 			}
+			
+			if( type == "强制插入串行执行" ){
+				temp1 = temp1.replace("公共事件[","");
+				temp1 = temp1.replace("]","");
+				var data = {
+					'type': "公共事件",
+					'pipeType': "串行",
+					'commonEventId': Number(temp1),
+					'callBack_str': "",
+				};
+				$gameMap.drill_BCT_forceInsertPipeEvent( data );
+			}
 		}
 	}
 }
@@ -255,10 +280,10 @@ Game_Interpreter.prototype.drill_COCB_conditionCommand = function(command, args)
 // * 多线程 - 添加公共事件【标准函数】
 //			
 //			参数：	> data 动态参数对象
-//					> data['type'] 字符串（填 公共事件 ，目前只有这一个选项）
-//					> data['pipeType'] 字符串（填 并行/串行 ）
-//					> data['commonEventId'] 数字（填 公共事件的id值）
-//					> data['callBack_str'] 字符串（脚本指令，公共事件执行完毕后，回调的字符串脚本）
+//					> data['type'] 字符串        （填 公共事件 ，目前只有这一个选项）
+//					> data['pipeType'] 字符串    （填 并行/串行 ）
+//					> data['commonEventId'] 数字 （填 公共事件的id值）
+//					> data['callBack_str'] 字符串（脚本指令，公共事件执行完毕前，执行的指令）
 //			返回：	无
 //			
 //			说明：	> 按照参数对象执行函数即可，只能在战斗界面执行。
@@ -266,6 +291,23 @@ Game_Interpreter.prototype.drill_COCB_conditionCommand = function(command, args)
 //##############################
 Game_Troop.prototype.drill_BCT_addPipeEvent = function( data ){
 	this.drill_BCT_addPipeEvent_private( data );
+}
+//##############################
+// * 多线程 - 强制插入串行公共事件【标准函数】
+//			
+//			参数：	> data 动态参数对象
+//					> data['type'] 字符串        （填 公共事件 ，目前只有这一个选项）
+//					> data['pipeType'] 字符串    （填 并行/串行，该参数在这里没用，会被强制串行）
+//					> data['commonEventId'] 数字 （填 公共事件的id值）
+//					> data['callBack_str'] 字符串（脚本指令，公共事件执行完毕前，执行的指令）
+//			返回：	无
+//			
+//			说明：	> 该函数可强制将公共事件插入到正在串行执行的指令集中。
+//					  插入位置为正在执行的指令的后一条，如果正在执行"战斗处理"，那么插入位置为战斗结束之后的位置。
+//##############################
+Game_Troop.prototype.drill_BCT_forceInsertPipeEvent = function( data ){
+	data['pipeType'] = "串行";
+	this.drill_BCT_forceInsertPipeEvent_private( data );
 }
 
 
@@ -310,6 +352,46 @@ Game_Troop.prototype.drill_BCT_addPipeEvent_private = function( data ){
 	// > 添加
 	var pipe_event = new Drill_BCT_GamePipeEvent( data );
 	this._drill_BCT_pipeEventTank.push( pipe_event );
+	
+	
+	// > 无返回值，类 Drill_BCT_GamePipeEvent 不要对外开放
+	//	（无）
+}
+//==============================
+// * 管道容器 - 强制插入串行公共事件（私有）
+//==============================
+Game_Troop.prototype.drill_BCT_forceInsertPipeEvent_private = function( data ){
+	
+	// > 校验
+    var commonEvent = $dataCommonEvents[ data['commonEventId'] ];
+    if( commonEvent == undefined ){
+		alert( DrillUp.drill_BCT_getPluginTip_ErrorDataNull( data['commonEventId'] ) );
+		return;
+    }else if( commonEvent.list.length == 0 ){
+		alert( DrillUp.drill_BCT_getPluginTip_ErrorDataEmpty( data['commonEventId'] ) );
+		return;
+	}
+	
+	// > 添加
+	var pipe_event = new Drill_BCT_GamePipeEvent( data );
+	this._drill_BCT_pipeEventTank.unshift( pipe_event );	//（从头部插入）
+	
+	
+	// > 插入串行 - 清理阻塞状态
+	var main_interpreter = this._interpreter;
+	pipe_event.drill_clearStartingFlag();
+		
+	// > 插入串行 - 没有串行执行时，执行串行
+    if( main_interpreter.isRunning() != true ){
+		this.setupBattleEvent();
+		
+	// > 插入串行 - 有串行执行时，作为 子事件指令 插入
+	}else{
+		main_interpreter.setupChild( pipe_event.drill_list(), 0 );		//（注意事件id为0）
+	}
+	
+	// > 插入串行 - 帧刷新
+	pipe_event.drill_controller_update();
 }
 
 
@@ -362,7 +444,7 @@ Game_Troop.prototype.setupBattleEvent = function() {
 				
 				// > 塞入指令
 				pipe_event.drill_clearStartingFlag();
-				this._interpreter.setup( pipe_event.drill_list() );
+				this._interpreter.setup( pipe_event.drill_list(), 0 );		//（注意事件id为0）
 				return;
 			}
 		}
@@ -467,7 +549,7 @@ Drill_BCT_GamePipeEvent.prototype.drill_controller_initData = function() {
 	if( data['type'] == undefined ){ data['type'] = "公共事件" };				//物体类型
 	if( data['pipeType'] == undefined ){ data['pipeType'] = "并行" };			//管道类型（串行/并行）
 	if( data['commonEventId'] == undefined ){ data['commonEventId'] = 0 };		//公共事件id
-	if( data['callBack_str'] == undefined ){ data['callBack_str'] = "" };		//回调函数（只并行有效）
+	if( data['callBack_str'] == undefined ){ data['callBack_str'] = "" };		//回调函数
 }
 //==============================
 // * 管道物体 - 初始化子功能

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.2]        系统 - 弹道核心
+ * @plugindesc [v2.3]        数学模型 - 弹道核心
  * @author Drill_up
  * 
  * 
@@ -30,7 +30,6 @@
  *   - Drill_GaugeForVariable        UI-高级变量固定框
  *   - Drill_GaugeFloatingNum        地图UI-漂浮参数数字
  *   - Drill_MenuCursor              主菜单-多样式菜单指针
- *   - Drill_PictureAdsorptionSlot   图片-图片吸附槽
  *   ……
  * 
  * -----------------------------------------------------------------------------
@@ -38,7 +37,7 @@
  * 1.插件的作用域：地图界面、战斗界面、菜单界面。
  *   作用于贴图。
  * 2.该插件的主要功能为数学计算，绘制二维曲线轨迹。
- *   可以去看看文档 "1.系统 > 关于弹道.docx"。
+ *   可以去看看文档 "32.数学模型 > 关于弹道.docx"。
  * 弹道：
  *   (1.子插件会根据自身特点，控制不同情况的弹道。
  *   (2.部分子插件配置项分为 极坐标模式 与 直角坐标模式。
@@ -102,7 +101,7 @@
  * [v2.1]
  * 优化了内部底层结构。
  * [v2.2]
- * 优化了部分参数设置，节省子插件存储空间。添加了 变化叠加器 功能。
+ * 优化了部分参数设置，节省子插件存储空间。添加了 叠加变化宏定义 功能。
  * 
  */
  
@@ -135,23 +134,23 @@
 //			->☆移动弹道
 //				->初始化数据【标准默认值】
 //				->获取弹道总时间【标准函数】
-//				->预推演【标准函数】
+//				->推演赋值【标准函数】
 //			->☆透明度弹道
 //				->初始化数据【标准默认值】
 //				->获取弹道总时间【标准函数】
-//				->预推演【标准函数】
+//				->推演赋值【标准函数】
 //			->☆缩放X弹道
 //				->初始化数据【标准默认值】
 //				->获取弹道总时间【标准函数】
-//				->预推演【标准函数】
+//				->推演赋值【标准函数】
 //			->☆缩放Y弹道
 //				->初始化数据【标准默认值】
 //				->获取弹道总时间【标准函数】
-//				->预推演【标准函数】
+//				->推演赋值【标准函数】
 //			->☆旋转角弹道
 //				->初始化数据【标准默认值】
 //				->获取弹道总时间【标准函数】
-//				->预推演【标准函数】
+//				->推演赋值【标准函数】
 //			
 //			->☆弹道工具
 //				->字符串 转 锚点列表【标准函数】
@@ -159,7 +158,7 @@
 //				->生成随机数（随机种子）【标准函数】
 //				->生成随机数（迭代）【标准函数】
 //			
-//			->弹道管理器【Drill_COBa_Manager】
+//			->弹道管理器（私有）【Drill_COBa_Manager】
 //				->A工具函数
 //				->B校验值
 //				->D一维弹道【common】
@@ -171,7 +170,9 @@
 //					->H4旋转角弹道
 //				->I二维弹道应用
 //					->I1移动弹道
+//			
 //			->弹道扩展工具【Drill_COBa_ExtendTool】
+//				->A叠加变化宏定义
 //		
 //		
 //		★家谱：
@@ -182,19 +183,20 @@
 //		
 //		★插件私有类：
 //			* 弹道管理器【Drill_COBa_Manager】
+//			* 弹道扩展工具【Drill_COBa_ExtendTool】
 //		
 //		★核心说明：
 //			1.整个核心提供多个可调用的函数接口。	
 //			2.用法：
 //					// > 移动
 //					$gameTemp.drill_COBa_setBallisticsMove( data );							//初始化
-//					$gameTemp.drill_COBa_preBallisticsMove( obj, index , orgX, orgY );		//推演赋值
+//					$gameTemp.drill_COBa_preBallisticsMove( obj, index , orgX, orgY );		//推演赋值（也叫 预推演，两词一样意思）
 //					// > 透明度
 //					$gameTemp.drill_COBa_setBallisticsOpacity( data );						//初始化
-//					$gameTemp.drill_COBa_preBallisticsOpacity( obj, index , orgOpacity );	//推演赋值
+//					$gameTemp.drill_COBa_preBallisticsOpacity( obj, index , orgOpacity );	//推演赋值（也叫 预推演，两词一样意思）
 //					// > 旋转
 //					$gameTemp.drill_COBa_setBallisticsRotate( data );						//初始化
-//					$gameTemp.drill_COBa_preBallisticsRotate( obj, index , orgRotate );		//推演赋值
+//					$gameTemp.drill_COBa_preBallisticsRotate( obj, index , orgRotate );		//推演赋值（也叫 预推演，两词一样意思）
 //	
 //			  【注意，初始化和推演函数不要隔得太远】因为有可能会被重叠推演盖掉。
 //			  obj用于放配置数据，执行完后，结果集会放到下面两个数组中：
@@ -203,8 +205,10 @@
 //			  obj可以是个对象，空数组也可以，只要能放结果就可以。
 //		
 //		★必要注意事项：
-//			1.插件提供数学计算，setBallistics初始化配置，preBallistics预推演数据。
-//			2.结合文档 "1.系统 > 关于弹道.docx" 来看脚本。
+//			1.插件提供数学计算，setBallistics初始化，preBallistics推演赋值。
+//			  推演赋值 也叫 预推演，两词一样意思。
+//			  预推演 的意思是指在 移动之前 进行弹道计算，才有"预"的意思。
+//			2.结合文档 "32.数学模型 > 关于弹道.docx" 来看脚本。
 //			
 //		★其它说明细节：
 //			1.随机因子是一个特殊的参数，作用是使得轨迹既有随机性，又不会在重新赋值时出现轨迹重置现象。
@@ -223,7 +227,7 @@
 	// * 提示信息 - 参数
 	//==============================
 	var DrillUp = DrillUp || {}; 
-	DrillUp.g_COBa_PluginTip_curName = "Drill_CoreOfBallistics.js 系统-弹道核心";
+	DrillUp.g_COBa_PluginTip_curName = "Drill_CoreOfBallistics.js 数学模型-弹道核心";
 	DrillUp.g_COBa_PluginTip_baseList = [];
 	//==============================
 	// * 提示信息 - 报错 - 参数错误
@@ -257,14 +261,14 @@
 // * 移动弹道 - 初始化数据【标准默认值】
 //			
 //			参数：	> data 动态参数对象								（准备的数据）
-//			返回：	> 动态参数对象									（预推演 用的数据）
-//					> Drill_COBa_Manager._drill_COBa_planimetryData	（预推演 用的数据）
+//			返回：	> 动态参数对象									（推演赋值 用的数据）
+//					> Drill_COBa_Manager._drill_COBa_planimetryData	（推演赋值 用的数据）
 //			
 //			功能：	> 纯数学计算。给传来的data进行初始赋值。
 //                  > 一次性执行：
-//						执行此函数后，立即执行 预推演，并且确保这两个接口在同一个函数内执行即可。
+//						执行此函数后，立即执行 推演赋值，并且确保这两个接口在同一个函数内执行即可。
 //					> 控制器-贴图执行：
-//						先将 返回的初始化数据 放控制器中存储，在到贴图中再进行预推演。
+//						先将 返回的初始化数据 放控制器中存储，在到贴图中再进行推演赋值。
 //						返回的数据参数进行了最大化的简略，存储消耗较低。
 //					
 //			说明：	> 动态参数对象 全部参数见 drill_COBa_setBallisticsMove_Private 。
@@ -286,7 +290,7 @@ Drill_COBa_Manager.drill_COBa_setBallisticsMove = function( data ){
 //					
 //			说明：	> 此函数必须在 初始化数据 之后调用。得到的值是【弹道数组的长度】，即弹道总时间。
 //					> 注意，'movementTime'不是总时间，还需要考虑延迟时间。
-//					> 此函数能在预推演前，得到数组长度。
+//					> 此函数能在推演赋值前，得到数组长度。
 //##############################
 Game_Temp.prototype.drill_COBa_getBallisticsMove_TotalTime = function(){
 	return Drill_COBa_Manager.drill_COBa_getBallisticsMove_TotalTime();
@@ -295,7 +299,7 @@ Drill_COBa_Manager.drill_COBa_getBallisticsMove_TotalTime = function(){
 	return this.drill_COBa_getBallisticsPlanimetry_TotalTime();
 }
 //##############################
-// * 移动弹道 - 预推演【标准函数】
+// * 移动弹道 - 推演赋值【标准函数】
 //			
 //			参数：	> obj_data 对象									（对象容器）
 //					> obj_index 数字								（对象编号）
@@ -329,8 +333,8 @@ Drill_COBa_Manager.drill_COBa_preBallisticsMove = function( obj_data, obj_index,
 // * 透明度弹道 - 初始化数据【标准默认值】
 //			
 //			参数：	> data 动态参数对象							（准备的数据）
-//			返回：	> 动态参数对象								（预推演 用的数据）
-//					> Drill_COBa_Manager._drill_COBa_commonData	（预推演 用的数据）
+//			返回：	> 动态参数对象								（推演赋值 用的数据）
+//					> Drill_COBa_Manager._drill_COBa_commonData	（推演赋值 用的数据）
 //			
 //			功能：	> 见 "移动弹道 - 初始化数据【标准默认值】"。
 //			说明：	> 动态参数对象 全部参数见 drill_COBa_setBallisticsOpacity_Private 。
@@ -354,7 +358,7 @@ Drill_COBa_Manager.drill_COBa_getBallisticsOpacity_TotalTime = function(){
 	return this.drill_COBa_getBallisticsCommon_TotalTime();
 }
 //##############################
-// * 透明度弹道 - 预推演【标准函数】
+// * 透明度弹道 - 推演赋值【标准函数】
 //			
 //			参数：	> obj_data 对象								（对象容器）
 //					> obj_index 数字							（对象编号）
@@ -377,8 +381,8 @@ Drill_COBa_Manager.drill_COBa_preBallisticsOpacity = function( obj_data, obj_ind
 // * 缩放X弹道 - 初始化数据【标准默认值】
 //			
 //			参数：	> data 动态参数对象							（准备的数据）
-//			返回：	> 动态参数对象								（预推演 用的数据）
-//					> Drill_COBa_Manager._drill_COBa_commonData	（预推演 用的数据）
+//			返回：	> 动态参数对象								（推演赋值 用的数据）
+//					> Drill_COBa_Manager._drill_COBa_commonData	（推演赋值 用的数据）
 //			
 //			功能：	> 见 "移动弹道 - 初始化数据【标准默认值】"。
 //			说明：	> 动态参数对象 全部参数见 drill_COBa_setBallisticsScaleX_Private 。
@@ -402,7 +406,7 @@ Drill_COBa_Manager.drill_COBa_getBallisticsScaleX_TotalTime = function(){
 	return this.drill_COBa_getBallisticsCommon_TotalTime();
 }
 //##############################
-// * 缩放X弹道 - 预推演【标准函数】
+// * 缩放X弹道 - 推演赋值【标准函数】
 //			
 //			参数：	> obj_data 对象								（对象容器）
 //					> obj_index 数字							（对象编号）
@@ -425,8 +429,8 @@ Drill_COBa_Manager.drill_COBa_preBallisticsScaleX = function( obj_data, obj_inde
 // * 缩放Y弹道 - 初始化数据【标准默认值】
 //			
 //			参数：	> data 动态参数对象							（准备的数据）
-//			返回：	> 动态参数对象								（预推演 用的数据）
-//					> Drill_COBa_Manager._drill_COBa_commonData	（预推演 用的数据）
+//			返回：	> 动态参数对象								（推演赋值 用的数据）
+//					> Drill_COBa_Manager._drill_COBa_commonData	（推演赋值 用的数据）
 //			
 //			功能：	> 见 "移动弹道 - 初始化数据【标准默认值】"。
 //			说明：	> 动态参数对象 全部参数见 drill_COBa_setBallisticsScaleY_Private 。
@@ -450,7 +454,7 @@ Drill_COBa_Manager.drill_COBa_getBallisticsScaleY_TotalTime = function(){
 	return this.drill_COBa_getBallisticsCommon_TotalTime();
 }
 //##############################
-// * 缩放Y弹道 - 预推演【标准函数】
+// * 缩放Y弹道 - 推演赋值【标准函数】
 //			
 //			参数：	> obj_data 对象								（对象容器）
 //					> obj_index 数字							（对象编号）
@@ -473,8 +477,8 @@ Drill_COBa_Manager.drill_COBa_preBallisticsScaleY = function( obj_data, obj_inde
 // * 旋转角弹道 - 初始化数据【标准默认值】
 //			
 //			参数：	> data 动态参数对象							（准备的数据）
-//			返回：	> 动态参数对象								（预推演 用的数据）
-//					> Drill_COBa_Manager._drill_COBa_commonData	（预推演 用的数据）
+//			返回：	> 动态参数对象								（推演赋值 用的数据）
+//					> Drill_COBa_Manager._drill_COBa_commonData	（推演赋值 用的数据）
 //			
 //			功能：	> 见 "移动弹道 - 初始化数据【标准默认值】"。
 //			说明：	> 动态参数对象 全部参数见 drill_COBa_setBallisticsRotate_Private 。
@@ -498,7 +502,7 @@ Drill_COBa_Manager.drill_COBa_getBallisticsRotate_TotalTime = function(){
 	return this.drill_COBa_getBallisticsCommon_TotalTime();
 }
 //##############################
-// * 旋转角弹道 - 预推演【标准函数】
+// * 旋转角弹道 - 推演赋值【标准函数】
 //			
 //			参数：	> obj_data 对象								（对象容器）
 //					> obj_index 数字							（对象编号）
@@ -513,6 +517,7 @@ Game_Temp.prototype.drill_COBa_preBallisticsRotate = function( obj_data, obj_ind
 Drill_COBa_Manager.drill_COBa_preBallisticsRotate = function( obj_data, obj_index, orgRotate ){
 	this.drill_COBa_preBallisticsRotate_Private( obj_data, obj_index, orgRotate );
 }
+
 
 
 //#############################################################################
@@ -579,7 +584,7 @@ Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration = function( org_ran, i
 
 
 //=============================================================================
-// ** 弹道管理器【Drill_COBa_Manager】
+// ** 弹道管理器（私有）【Drill_COBa_Manager】
 // **			
 // **		索引：	COBa（可从子插件搜索到函数、类用法）
 // **		来源：	独立数据
@@ -588,7 +593,7 @@ Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration = function( org_ran, i
 // **			
 // **		作用域：	地图界面、战斗界面、菜单界面
 // **		主功能：	> 定义一个静态类，用于弹道的纯数学计算。
-// **					> 具体功能见 "1.系统 > 关于弹道.docx"。
+// **					> 具体功能见 "32.数学模型 > 关于弹道.docx"。
 // **		子功能：	->A工具函数
 // **						->字符串 转 锚点列表
 // **						->锚点列表 转 字符串
@@ -653,7 +658,8 @@ Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration = function( org_ran, i
 // **					->I二维弹道应用
 // **						->I1移动弹道
 // **				
-// **		说明：	> 弹道管理器中不存储任何参数，如果需要存储，则执行 初始化、预推演 时提前取出。
+// **		说明：	> 该静态类中【不存储】任何参数。
+// **				> 如果子插件要存储弹道，可以只存参数配置，需要用时才执行 初始化和推演赋值；也可以存储 推演赋值 的结果。
 //=============================================================================
 //==============================
 // * 弹道管理器 - 定义
@@ -661,6 +667,7 @@ Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration = function( org_ran, i
 function Drill_COBa_Manager() {
     throw new Error("弹道管理器 Drill_COBa_Manager 是一个静态类，不需要实例化。");
 }
+
 //==============================
 // * A工具函数 - 字符串 转 锚点列表（私有）
 //==============================
@@ -761,7 +768,7 @@ Drill_COBa_Manager.drill_COBa_checkParamValue = function( p, result ){
 // * D一维弹道【common】
 //			
 //			说明：	> 此模块不对 子插件 开放，不建议直接使用该弹道中的参数。
-//					> 一维弹道走流程 初始化 > 预推演 之后，会赋值参数：_drill_COBa_common 。
+//					> 一维弹道走流程 初始化 > 推演赋值 之后，会赋值参数：_drill_COBa_common 。
 //=============================================================================
 //==============================
 // * D一维弹道 - 参数（私有）
@@ -836,7 +843,7 @@ Drill_COBa_Manager.drill_COBa_getBallisticsCommon_TotalTime = function(){
 	return result;
 }
 //==============================
-// * D一维弹道 - 预推演（私有）
+// * D一维弹道 - 推演赋值（私有）
 //==============================
 Drill_COBa_Manager.drill_COBa_preBallisticsCommon = function( obj_data, obj_index, orgCommon ){
 	var data = this._drill_COBa_commonData;
@@ -854,7 +861,7 @@ Drill_COBa_Manager.drill_COBa_preBallisticsCommon = function( obj_data, obj_inde
 	obj_data['_drill_COBa_common'] = [];
 	
 	
-	// > 预推演的obj
+	// > 推演赋值的obj
 	if( this._drill_COBa_commonObj == null ){
 		this._drill_COBa_commonObj = {};
 		obj = this._drill_COBa_commonObj;
@@ -1080,7 +1087,7 @@ Drill_COBa_Manager.drill_COBa_preBallisticsCommon = function( obj_data, obj_inde
 // * E二维弹道【planimetry】
 //			
 //			说明：	> 此模块不对 子插件 开放，不建议直接使用该弹道中的参数。
-//					> 二维弹道走流程 初始化 > 预推演 之后，会赋值参数：_drill_COBa_x、_drill_COBa_y 。
+//					> 二维弹道走流程 初始化 > 推演赋值 之后，会赋值参数：_drill_COBa_x、_drill_COBa_y 。
 //=============================================================================
 //==============================
 // * E二维弹道 - 参数（私有）
@@ -1220,7 +1227,7 @@ Drill_COBa_Manager.drill_COBa_getBallisticsPlanimetry_TotalTime = function(){
 	return result;
 }
 //==============================
-// * E二维弹道 - 预推演（私有）
+// * E二维弹道 - 推演赋值（私有）
 //==============================
 Drill_COBa_Manager.drill_COBa_preBallisticsPlanimetry = function( obj_data, obj_index, orgX, orgY ){
 	var data = this._drill_COBa_planimetryData;
@@ -1243,7 +1250,7 @@ Drill_COBa_Manager.drill_COBa_preBallisticsPlanimetry = function( obj_data, obj_
 	obj_data['_drill_COBa_y'] = [];
 	
 	
-	// > 预推演的obj
+	// > 推演赋值的obj
 	if( this._drill_COBa_planimetryObj == null ){
 		this._drill_COBa_planimetryObj = {};
 		obj = this._drill_COBa_planimetryObj;
@@ -1988,7 +1995,7 @@ Drill_COBa_Manager.drill_COBa_setBallisticsOpacity_Private = function( data ){
 	return this.drill_COBa_setBallisticsCommon( result );	
 }
 //==============================
-// * H1透明度弹道 - 预推演（私有）
+// * H1透明度弹道 - 推演赋值（私有）
 //==============================
 Drill_COBa_Manager.drill_COBa_preBallisticsOpacity_Private = function( obj_data, obj_index, orgOpacity ){
 	this.drill_COBa_preBallisticsCommon( obj_data, obj_index, orgOpacity );		//（按一维弹道规则推演）
@@ -2055,7 +2062,7 @@ Drill_COBa_Manager.drill_COBa_setBallisticsScaleX_Private = function( data ){
 	return this.drill_COBa_setBallisticsCommon( result );	
 }
 //==============================
-// * H2缩放X弹道 - 预推演（私有）
+// * H2缩放X弹道 - 推演赋值（私有）
 //==============================
 Drill_COBa_Manager.drill_COBa_preBallisticsScaleX_Private = function( obj_data, obj_index, orgScaleX ){
 	this.drill_COBa_preBallisticsCommon( obj_data, obj_index, orgScaleX );		//（按一维弹道规则推演）
@@ -2122,7 +2129,7 @@ Drill_COBa_Manager.drill_COBa_setBallisticsScaleY_Private = function( data ){
 	return this.drill_COBa_setBallisticsCommon( result );	
 }
 //==============================
-// * H3缩放Y弹道 - 预推演（私有）
+// * H3缩放Y弹道 - 推演赋值（私有）
 //==============================
 Drill_COBa_Manager.drill_COBa_preBallisticsScaleY_Private = function( obj_data, obj_index, orgScaleY ){
 	this.drill_COBa_preBallisticsCommon( obj_data, obj_index, orgScaleY );		//（按一维弹道规则推演）
@@ -2189,7 +2196,7 @@ Drill_COBa_Manager.drill_COBa_setBallisticsRotate_Private = function( data ){
 	return this.drill_COBa_setBallisticsCommon( result );	
 }
 //==============================
-// * H4旋转角弹道 - 预推演（私有）
+// * H4旋转角弹道 - 推演赋值（私有）
 //==============================
 Drill_COBa_Manager.drill_COBa_preBallisticsRotate_Private = function( obj_data, obj_index, orgRotate ){
 	this.drill_COBa_preBallisticsCommon( obj_data, obj_index, orgRotate );		//（按一维弹道规则推演）
@@ -2222,7 +2229,7 @@ Drill_COBa_Manager.drill_COBa_setBallisticsMove_Private = function( data ){
 	
 	//   ■ 极坐标（polar）		
 	if( result['movementMode'] == "极坐标模式" ){	//（这样写是为了减少参数数量，便于存储）
-		result['polarSpeedType'] = data['polarSpeedType'];							//极坐标 - 速度 - 类型
+		result['polarSpeedType'] = data['polarSpeedType'];							//极坐标 - 速度 - 类型（只初速度/初速度+波动量/……）
 		result['polarSpeedBase'] = data['polarSpeedBase'];      					//极坐标 - 速度 - 初速度
 		result['polarSpeedRandom'] = data['polarSpeedRandom'];  					//极坐标 - 速度 - 速度随机波动量
 		result['polarSpeedInc'] = data['polarSpeedInc'];        					//极坐标 - 速度 - 加速度
@@ -2238,14 +2245,14 @@ Drill_COBa_Manager.drill_COBa_setBallisticsMove_Private = function( data ){
 	//   ■ 直角坐标（cartesian）
 	else if( result['movementMode'] == "直角坐标模式" ){			
 		result['cartRotation'] = data['cartRotation'];								//直角坐标 - 整体坐标轴旋转角度
-		result['cartXSpeedType'] = data['cartXSpeedType'];							//直角坐标 - x - 类型	
+		result['cartXSpeedType'] = data['cartXSpeedType'];							//直角坐标 - x - 类型（只初速度/初速度+波动量/……）
 		result['cartXSpeedBase'] = data['cartXSpeedBase'];     						//直角坐标 - x - 初速度
 		result['cartXSpeedRandom'] = data['cartXSpeedRandom']; 						//直角坐标 - x - 速度随机波动量
 		result['cartXSpeedInc'] = data['cartXSpeedInc'];       						//直角坐标 - x - 加速度
 		result['cartXSpeedMax'] = data['cartXSpeedMax'];       						//直角坐标 - x - 最大速度
 		result['cartXSpeedMin'] = data['cartXSpeedMin'];       						//直角坐标 - x - 最小速度
 		result['cartXDistanceFormula'] = data['cartXDistanceFormula'];				//直角坐标 - x - 路程计算公式
-		result['cartYSpeedType'] = data['cartYSpeedType'];     						//直角坐标 - y - 类型
+		result['cartYSpeedType'] = data['cartYSpeedType'];     						//直角坐标 - y - 类型（只初速度/初速度+波动量/……）
 		result['cartYSpeedBase'] = data['cartYSpeedBase'];     						//直角坐标 - y - 初速度
 		result['cartYSpeedRandom'] = data['cartYSpeedRandom']; 						//直角坐标 - y - 速度随机波动量
 		result['cartYSpeedInc'] = data['cartYSpeedInc'];       						//直角坐标 - y - 加速度
@@ -2330,7 +2337,7 @@ Drill_COBa_Manager.drill_COBa_setBallisticsMove_Private = function( data ){
 	return this.drill_COBa_setBallisticsPlanimetry( result );
 }
 //==============================
-// * I1移动弹道 - 预推演（私有）
+// * I1移动弹道 - 推演赋值（私有）
 //==============================
 Drill_COBa_Manager.drill_COBa_preBallisticsMove_Private = function( obj_data, obj_index, orgX, orgY ){
 	this.drill_COBa_preBallisticsPlanimetry( obj_data, obj_index, orgX, orgY );		//（按一维弹道规则推演）
@@ -2351,9 +2358,9 @@ Drill_COBa_Manager.drill_COBa_preBallisticsMove_Private = function( obj_data, ob
 // **		应用：	> 子插件中搜索 索引即可找到。
 // **			
 // **		作用域：	地图界面、战斗界面、菜单界面
-// **		主功能：	> 定义一个静态类，用于弹道的纯数学计算。
-// **					> 具体功能见 "1.系统 > 关于弹道.docx"。
-// **		子功能：	->A变化叠加器
+// **		主功能：	> 定义一个静态类，用于子插件快速调用，减少冗余代码。
+// **					> 具体功能见 "32.数学模型 > 关于弹道.docx"。
+// **		子功能：	->A叠加变化宏定义
 // **						->一维弹道
 // **							->控制器 设置目标
 // **							->控制器 帧刷新
@@ -2363,7 +2370,7 @@ Drill_COBa_Manager.drill_COBa_preBallisticsMove_Private = function( obj_data, ob
 // **							->控制器 帧刷新
 // **							->贴图 帧刷新
 // **				
-// **		说明：	> 弹道管理器中不存储任何参数，如果需要存储，则执行 初始化、预推演 时提前取出。
+// **		说明：	> 该静态类中【不存储】任何参数。
 //=============================================================================
 //==============================
 // * 弹道扩展工具 - 定义
@@ -2373,7 +2380,7 @@ function Drill_COBa_ExtendTool() {
 }
 
 //=============================================================================
-// * A变化叠加器
+// * A叠加变化宏定义
 //
 //			说明：	> 通过 调用 设置目标，可以快速定义一个弹道，并执行弹道的变化。
 //					  定义的弹道能被一并保存，没有被定义时，不消耗存储和性能。
@@ -2389,7 +2396,7 @@ function Drill_COBa_ExtendTool() {
 //					> 用法可见 地图魔法圈 插件的 D指令叠加变化 子功能。
 //=============================================================================
 //==============================
-// * A变化叠加器（一维弹道） - 控制器 - 设置目标（开放函数）
+// * A叠加变化宏定义（一维弹道） - 控制器 - 设置目标（开放函数）
 //
 //			参数：	> controller 对象    （控制器对象）
 //					> CDataName 字符串   （控制器中的变量名，变量初始定义必须为null）
@@ -2420,7 +2427,7 @@ Drill_COBa_ExtendTool.drill_COBa_Common_controller_setTarget = function( control
 	controller[CDataName] = c_data;
 }
 //==============================
-// * A变化叠加器（一维弹道） - 控制器 - 帧刷新（开放函数）
+// * A叠加变化宏定义（一维弹道） - 控制器 - 帧刷新（开放函数）
 //
 //			参数：	> controller 对象  （控制器对象）
 //					> CDataName 字符串 （控制器中的变量名）
@@ -2432,7 +2439,7 @@ Drill_COBa_ExtendTool.drill_COBa_Common_controller_update = function( controller
 	controller[CDataName]['cur_time'] += 1;
 }
 //==============================
-// * A变化叠加器（一维弹道） - 贴图 - 帧刷新（开放函数）
+// * A叠加变化宏定义（一维弹道） - 贴图 - 帧刷新（开放函数）
 //
 //			参数：	> sprite 对象      （贴图对象）
 //					> SDataName 字符串 （贴图中的变量名，变量初始定义必须为null）
@@ -2456,7 +2463,7 @@ Drill_COBa_ExtendTool.drill_COBa_Common_sprite_update = function( sprite, SDataN
 	}
 	
 	// > 一维弹道 - 弹道推演
-	//			（在贴图中预推演，控制器只存 计时器 ）
+	//			（在贴图中 推演赋值，控制器只存 计时器 ）
 	if( s_data['serial'] != c_data['serial'] ){
 		s_data['serial'] =  c_data['serial'];
 		
@@ -2486,7 +2493,7 @@ Drill_COBa_ExtendTool.drill_COBa_Common_sprite_update = function( sprite, SDataN
 
 
 //==============================
-// * A变化叠加器（二维弹道） - 控制器 - 设置目标（开放函数）
+// * A叠加变化宏定义（二维弹道） - 控制器 - 设置目标（开放函数）
 //
 //			参数：	> controller 对象    （控制器对象）
 //					> CDataName 字符串   （控制器中的变量名，变量初始定义必须为null）
@@ -2521,7 +2528,7 @@ Drill_COBa_ExtendTool.drill_COBa_Planimetry_controller_setTarget = function( con
 	controller[CDataName] = c_data;
 }
 //==============================
-// * A变化叠加器（二维弹道） - 控制器 - 帧刷新（开放函数）
+// * A叠加变化宏定义（二维弹道） - 控制器 - 帧刷新（开放函数）
 //
 //			参数：	> controller 对象  （控制器对象）
 //					> CDataName 字符串 （控制器中的变量名）
@@ -2533,7 +2540,7 @@ Drill_COBa_ExtendTool.drill_COBa_Planimetry_controller_update = function( contro
 	controller[CDataName]['cur_time'] += 1;
 }
 //==============================
-// * A变化叠加器（二维弹道） - 帧刷新 - 二维弹道（开放函数）
+// * A叠加变化宏定义（二维弹道） - 帧刷新 - 二维弹道（开放函数）
 //
 //			参数：	> sprite 对象      （贴图对象）
 //					> SDataName 字符串 （贴图中的变量名，变量初始定义必须为null）
@@ -2559,7 +2566,7 @@ Drill_COBa_ExtendTool.drill_COBa_Planimetry_sprite_update = function( sprite, SD
 	}
 	
 	// > 二维弹道 - 弹道推演
-	//			（在贴图中预推演，控制器只存 计时器 ）
+	//			（在贴图中 推演赋值，控制器只存 计时器 ）
 	if( s_data['serial'] != c_data['serial'] ){
 		s_data['serial'] =  c_data['serial'];
 		

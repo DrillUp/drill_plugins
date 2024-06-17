@@ -26,7 +26,7 @@
  * 插件也可以被下列插件扩展，实现特殊功能效果。
  * 基于：
  *   - Drill_CoreOfDynamicSnapshot    游戏窗体-动态快照核心
- *   - Drill_CoreOfBallistics         系统-弹道核心★★v2.2及以上★★
+ *   - Drill_CoreOfBallistics         数学模型-弹道核心★★v2.2及以上★★
  *
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -485,7 +485,8 @@
 //			1.该插件用了大量数学工具，写函数时注意考虑 null 的情况。
 //				
 //		★存在的问题：
-//			1.见函数 drill_HDSSW_Math2D_getPointToPointDegree 的调用位置，可能存在精度偏差，造成旋转角度不对。
+//			1.问题：见函数 drill_HDSSW_Math2D_getPointToPointDegree 的调用位置，可能存在精度偏差，造成旋转角度不对。
+//			  解决：【未解决】
 //
 
 //=============================================================================
@@ -498,7 +499,7 @@
 	DrillUp.g_HDSSW_PluginTip_curName = "Drill_HtmlDynamicSnapshotSpaceWrench.js 游戏窗体-动态快照次元斩";
 	DrillUp.g_HDSSW_PluginTip_baseList = [
 		"Drill_CoreOfDynamicSnapshot.js 游戏窗体-动态快照核心",
-		"Drill_CoreOfBallistics.js 系统-弹道核心"
+		"Drill_CoreOfBallistics.js 数学模型-弹道核心"
 	];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件

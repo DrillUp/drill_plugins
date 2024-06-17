@@ -416,8 +416,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				var temp2 = String(args[7]);
 				if( args[9]!=undefined ){ var temp3 = String(args[9]); }
 				
-				if( $gameMap.drill_EvF_isEventExist( this._eventId ) == false ){ return; }
 				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
 				if( type == "纯色滤镜" ){
 					e._drill_EvF.openFilter = true;
 					e._drill_EvF.setPureLinear = [ String(temp1),Number(temp2),Number(temp3) ];

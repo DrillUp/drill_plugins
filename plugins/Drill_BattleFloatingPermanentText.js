@@ -25,7 +25,7 @@
  * 该插件 不能 单独使用。
  * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfBallistics       系统-弹道核心★★v2.1及以上★★
+ *   - Drill_CoreOfBallistics       数学模型-弹道核心★★v2.1及以上★★
  *   - Drill_CoreOfWindowAuxiliary  系统-窗口辅助核心
  * 可扩展：
  *   - Drill_CoreOfString           系统-字符串核心
@@ -110,7 +110,7 @@
  * 1.前半部分（匀速移动）和后半部分（相对位置[-100,0]）的参数可以随意组合。
  *   一共有5*4种组合方式。
  * 2.漂浮文字可以根据移动类型随意移动到指定位置，
- *   具体移动说明可以去看看 "1.系统 > 关于弹道.docx"。
+ *   具体移动说明可以去看看 "32.数学模型 > 关于弹道.docx"。
  * 
  * -----------------------------------------------------------------------------
  * ----激活条件 - 透明度变化
@@ -700,7 +700,7 @@
 	var DrillUp = DrillUp || {}; 
 	DrillUp.g_BFPT_PluginTip_curName = "Drill_BattleFloatingPermanentText.js 战斗UI-永久漂浮文字";
 	DrillUp.g_BFPT_PluginTip_baseList = [
-		"Drill_CoreOfBallistics.js 系统-弹道核心",
+		"Drill_CoreOfBallistics.js 数学模型-弹道核心",
 		"Drill_CoreOfWindowAuxiliary.js 系统-窗口辅助核心"
 	];
 	//==============================
@@ -853,7 +853,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var type = String(args[3]);
 			if( type == "修改样式属性-刷新内容文本" || type == "刷新内容文本" ){
 				if( $gameTemp._drill_BFPT_windowTank[ text_id ] != null ){
-					$gameTemp._drill_BFPT_windowTank[ text_id ].drill_refreshMessageFromData();
+					$gameTemp._drill_BFPT_windowTank[ text_id ].drill_initMessage();
 				}
 			}	
 		}
@@ -872,7 +872,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 						
 						data['context'] = temp1;
 						if( $gameTemp._drill_BFPT_windowTank[ text_id ] != null ){
-							$gameTemp._drill_BFPT_windowTank[ text_id ].drill_refreshMessageFromData();
+							$gameTemp._drill_BFPT_windowTank[ text_id ].drill_initMessage();
 						}
 					}else{
 						alert( DrillUp.drill_BFPT_getPluginTip_NoSupportPlugin() );
@@ -889,7 +889,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					}
 					data['context'] = data_str;
 					if( $gameTemp._drill_BFPT_windowTank[ text_id ] != null ){
-						$gameTemp._drill_BFPT_windowTank[ text_id ].drill_refreshMessageFromData();
+						$gameTemp._drill_BFPT_windowTank[ text_id ].drill_initMessage();
 					}
 				}
 			}

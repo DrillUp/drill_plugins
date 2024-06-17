@@ -1990,6 +1990,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				}
 				else if( temp1 == "位置-本事件" || temp1 == "本事件" ){
 					var e = $gameMap.event( this._eventId );
+					if( e == undefined ){ return; } //『防止并行删除事件出错』
 					var e_pos = [ e._realX, e._realY ];
 					pos = [ Math.round( $gameMap.adjustX( e_pos[0] ) * tw + tw*0.5 ), 
 							Math.round( $gameMap.adjustY( e_pos[1] ) * th + th*0.5 ) ];
@@ -2196,6 +2197,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				}
 				else if( temp1 == "位置-本事件" || temp1 == "本事件" ){
 					var e = $gameMap.event( this._eventId );
+					if( e == undefined ){ return; } //『防止并行删除事件出错』
 					var e_pos = [ e._realX, e._realY ];
 					pos = [ Math.round( $gameMap.adjustX( e_pos[0] ) * tw + tw*0.5 ), 
 							Math.round( $gameMap.adjustY( e_pos[1] ) * th + th*0.5 ) ];

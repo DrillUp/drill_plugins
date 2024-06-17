@@ -29,7 +29,7 @@
  * 该插件 不能 单独使用。
  * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfBallistics       系统-弹道核心★★v2.1及以上★★
+ *   - Drill_CoreOfBallistics       数学模型-弹道核心★★v2.1及以上★★
  *   - Drill_CoreOfWindowAuxiliary  系统-窗口辅助核心
  * 可扩展：
  *   - Drill_CoreOfString           系统-字符串核心
@@ -56,7 +56,7 @@
  *        轨道锚点模式  √
  *        两点式        x
  *   (2.单个漂浮文字的轨迹完全可以通过弹道设置进行设计。
- *      具体配置方式可以看看 "1.系统 > 关于弹道.docx"。
+ *      具体配置方式可以看看 "32.数学模型 > 关于弹道.docx"。
  * 设计：
  *   (1.你可以添加一些简单的字符串，用来表示 "生命+10" 这些漂浮文字。
  * 
@@ -773,7 +773,7 @@
  * @param 路程计算公式
  * @parent 速度类型
  * @type note
- * @desc 漂浮文字的路程计算公式。可使用 变量和常量 来设计公式，具体看看文档 "1.系统 > 关于弹道.docx"介绍。
+ * @desc 漂浮文字的路程计算公式。可使用 变量和常量 来设计公式，具体看看文档 "32.数学模型 > 关于弹道.docx"介绍。
  * @default "return 0.0"
  * 
  * @param 方向类型
@@ -808,7 +808,7 @@
  * @param 方向计算公式
  * @parent 方向类型
  * @type note
- * @desc 类型为"方向计算公式"时。可使用 变量和常量 来设计公式，具体看看文档 "1.系统 > 关于弹道.docx"介绍。
+ * @desc 类型为"方向计算公式"时。可使用 变量和常量 来设计公式，具体看看文档 "32.数学模型 > 关于弹道.docx"介绍。
  * @default "return 0.0"
  * 
  * @param ---直角坐标模式---
@@ -863,7 +863,7 @@
  * @param X轴路程计算公式
  * @parent X轴速度类型
  * @type note
- * @desc 漂浮文字的路程计算公式。可使用 变量和常量 来设计公式，具体看看文档 "1.系统 > 关于弹道.docx"介绍。
+ * @desc 漂浮文字的路程计算公式。可使用 变量和常量 来设计公式，具体看看文档 "32.数学模型 > 关于弹道.docx"介绍。
  * @default "return 0.0"
  *
  * @param Y轴速度类型
@@ -910,7 +910,7 @@
  * @param Y轴路程计算公式
  * @parent Y轴速度类型
  * @type note
- * @desc 漂浮文字的路程计算公式。可使用 变量和常量 来设计公式，具体看看文档 "1.系统 > 关于弹道.docx"介绍。
+ * @desc 漂浮文字的路程计算公式。可使用 变量和常量 来设计公式，具体看看文档 "32.数学模型 > 关于弹道.docx"介绍。
  * @default "return 0.0"
  * 
  * 
@@ -971,7 +971,7 @@
  * @param 轨道路程计算公式
  * @parent 轨道速度类型
  * @type note
- * @desc 子弹的路程计算公式。可使用 变量和常量 来设计公式，具体看看文档 "1.系统 > 关于弹道.docx"介绍。
+ * @desc 子弹的路程计算公式。可使用 变量和常量 来设计公式，具体看看文档 "32.数学模型 > 关于弹道.docx"介绍。
  * @default "return 0.0"
  * 
  * 
@@ -1053,7 +1053,7 @@
 	var DrillUp = DrillUp || {}; 
 	DrillUp.g_GFTT_PluginTip_curName = "Drill_GaugeFloatingTemporaryText.js 地图UI-临时漂浮文字";
 	DrillUp.g_GFTT_PluginTip_baseList = [
-		"Drill_CoreOfBallistics.js 系统-弹道核心",
+		"Drill_CoreOfBallistics.js 数学模型-弹道核心",
 		"Drill_CoreOfWindowAuxiliary.js 系统-窗口辅助核心"
 	];
 	//==============================
@@ -1304,6 +1304,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				}
 				else if( temp1 == "位置-本事件" || temp1 == "本事件" ){
 					var e = $gameMap.event( this._eventId );
+					if( e == undefined ){ return; } //『防止并行删除事件出错』
 					var e_pos = [ e._realX, e._realY ];
 					pos = [ Math.round( $gameMap.adjustX( e_pos[0] ) * tw + tw*0.5 ), 
 							Math.round( $gameMap.adjustY( e_pos[1] ) * th + th*0.5 ) ];
@@ -1597,6 +1598,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				}
 				else if( temp1 == "位置-本事件" || temp1 == "本事件" ){
 					var e = $gameMap.event( this._eventId );
+					if( e == undefined ){ return; } //『防止并行删除事件出错』
 					var e_pos = [ e._realX, e._realY ];
 					pos = [ Math.round( $gameMap.adjustX( e_pos[0] ) * tw + tw*0.5 ), 
 							Math.round( $gameMap.adjustY( e_pos[1] ) * th + th*0.5 ) ];
@@ -2420,7 +2422,7 @@ Drill_GFTT_Window.prototype.drill_refreshBallistics = function( b_data ){
 	var org_x = b_data['orgX'];
 	var org_y = b_data['orgY'];
 	$gameTemp.drill_COBa_setBallisticsMove( b_data );					//移动弹道 - 初始化数据
-	$gameTemp.drill_COBa_preBallisticsMove( this, 0, org_x, org_y );	//移动弹道 - 预推演
+	$gameTemp.drill_COBa_preBallisticsMove( this, 0, org_x, org_y );	//移动弹道 - 推演赋值
 	
 	
 	// > 透明度弹道
@@ -2496,7 +2498,7 @@ Drill_GFTT_Window.prototype.drill_refreshBallistics = function( b_data ){
 	}
 	
 	$gameTemp.drill_COBa_setBallisticsOpacity( o_data );				//透明度弹道 - 初始化数据
-	$gameTemp.drill_COBa_preBallisticsOpacity( this, 0, org_opacity );	//透明度弹道 - 预推演
+	$gameTemp.drill_COBa_preBallisticsOpacity( this, 0, org_opacity );	//透明度弹道 - 推演赋值
 }
 //==============================
 // * B窗口弹道 - 帧刷新 透明度

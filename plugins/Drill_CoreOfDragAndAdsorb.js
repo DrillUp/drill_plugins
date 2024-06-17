@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        系统 - 拖拽与吸附控制核心
+ * @plugindesc [v1.1]        数学模型 - 拖拽与吸附核心
  * @author Drill_up
  * 
  * 
@@ -21,7 +21,7 @@
  * 该插件 不能 单独使用。
  * 必须基于 弹道核心 插件。
  * 基于：
- *   - Drill_CoreOfBallistics     系统-弹道核心
+ *   - Drill_CoreOfBallistics     数学模型-弹道核心
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -78,7 +78,7 @@
 //		★时间复杂度		o(n^3)  每帧
 //		★性能测试因素	图片管理层
 //		★性能测试消耗	2024/5/2：
-//							2.5ms（drill_slot_update）5.2ms（drill_controllerAdsorb_update）0.9ms（drill_controllerDrag_update）
+//							》2.5ms（drill_slot_update）5.2ms（drill_controllerAdsorb_update）0.9ms（drill_controllerDrag_update）
 //		★最坏情况		暂无
 //		★备注			每帧的纯数据计算，不受贴图影响。
 //		
@@ -203,6 +203,8 @@
 //			->☆监听"拖走吸附"
 //				->开始拖拽时（继承）
 //				->结束拖拽时（继承）
+//			
+//			->☆DEBUG绘制
 //
 //
 //		★家谱：
@@ -222,6 +224,7 @@
 //		
 //		★必要注意事项：
 //			1.核心提供固定的数据工厂，通过工厂创建控制器并返回id。子插件需通过id获取到控制器指针。
+//			  工厂类必须是单例，去看脚本文档的 "为什么工厂类必须是单例" 章节。
 //			2.数据类的定义，都为正常的外键关系：
 //				拖拽数据工厂 生产 拖拽控制器 
 //				吸附数据工厂 生产 吸附控制器 
@@ -262,8 +265,8 @@
 	// * 提示信息 - 参数
 	//==============================
 	var DrillUp = DrillUp || {}; 
-	DrillUp.g_CODAA_PluginTip_curName = "Drill_CoreOfDragAndAdsorb.js 系统-拖拽与吸附控制核心";
-	DrillUp.g_CODAA_PluginTip_baseList = ["Drill_CoreOfBallistics.js 系统-弹道核心"];
+	DrillUp.g_CODAA_PluginTip_curName = "Drill_CoreOfDragAndAdsorb.js 数学模型-拖拽与吸附核心";
+	DrillUp.g_CODAA_PluginTip_baseList = ["Drill_CoreOfBallistics.js 数学模型-弹道核心"];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
@@ -1999,86 +2002,6 @@ Drill_CODAA_SlotController.prototype.drill_slot_isInEssentialRange = function( c
 	}
 	return false;
 };
-//==============================
-// * H必然吸附 - 绘制范围
-//==============================
-Drill_CODAA_SlotController.prototype.drill_slot_drawEssentialRange = function( temp_bitmap, fill_color, stroke_color ){
-	var data = this._drill_data;
-	if( data['essentialEnabled'] != true ){ return; }
-	
-	// > H必然吸附 - 绘制圆形
-	if( data['essentialType'] == 0 ){
-		temp_bitmap.drill_CODAA_drawCircle(
-			this.drill_slot_x(),
-			this.drill_slot_y(),
-			data['essentialRadius'],
-			fill_color,
-			stroke_color,
-			2
-		);
-	}
-	// > H必然吸附 - 绘制方形
-	if( data['essentialType'] == 1 ){
-		temp_bitmap.drill_CODAA_drawRect(
-			this.drill_slot_x() - data['essentialWidth']*0.5,
-			this.drill_slot_y() - data['essentialHeight']*0.5,
-			data['essentialWidth'],
-			data['essentialHeight'],
-			fill_color,
-			stroke_color,
-			2, "miter"
-		);
-	}
-};
-//==============================
-// * H必然吸附 - 绘制范围 - 填充+描边圆形
-//			
-//			参数：	> fill_color 字符串   （填充颜色）
-//					> stroke_color 字符串 （描边颜色）
-//					> lineWidth 数字      （线宽）
-//			说明：	> 圆形不需要考虑线的末端与斜角。
-//==============================
-Bitmap.prototype.drill_CODAA_drawCircle = function( x, y, radius, fill_color, stroke_color, lineWidth ){
-    var painter = this._context;
-    painter.save();							//（a.存储上一个画笔状态）
-	
-    painter.fillStyle = fill_color;			//（b.设置样式）
-    painter.strokeStyle = stroke_color;
-	painter.lineWidth = lineWidth;
-	
-    painter.beginPath();					//（c.路径填充/描边，注意 beginPath + fill + stroke）
-    painter.arc(x, y, radius, 0, Math.PI * 2, false);
-    painter.fill();
-    painter.stroke();
-	
-    painter.restore();						//（d.回滚上一个画笔状态）
-    this._setDirty();
-};
-//==============================
-// * H必然吸附 - 绘制范围 - 填充+描边矩形
-//			
-//			参数：	> x, y, width, height 矩形范围
-//					> fill_color 字符串   （填充颜色）
-//					> stroke_color 字符串 （描边颜色）
-//					> lineWidth 数字      （线宽）
-//					> lineJoin 字符串 （连接处，包含miter/round/bevel 尖角/圆角/斜角，默认miter）
-//			说明：	> 无。
-//==============================
-Bitmap.prototype.drill_CODAA_drawRect = function( x, y, width, height, fill_color, stroke_color, lineWidth, lineJoin ){
-    var painter = this._context;
-    painter.save();							//（a.存储上一个画笔状态）
-	
-    painter.fillStyle = fill_color;			//（b.设置样式）
-    painter.strokeStyle = stroke_color;
-	painter.lineWidth = lineWidth;
-	painter.lineJoin = lineJoin;
-	
-    painter.fillRect(x, y, width, height);	//（c.路径填充/描边，fillRect）
-    painter.strokeRect(x, y, width, height);
-	
-    painter.restore();						//（d.回滚上一个画笔状态）
-    this._setDirty();
-};
 
 //==============================
 // * I一般吸附 - 初始化子功能
@@ -2120,37 +2043,6 @@ Drill_CODAA_SlotController.prototype.drill_slot_isInCommonRange = function( cur_
 	}
 	return false;
 };
-//==============================
-// * I一般吸附 - 绘制范围
-//==============================
-Drill_CODAA_SlotController.prototype.drill_slot_drawCommonRange = function( temp_bitmap, fill_color, stroke_color ){
-	var data = this._drill_data;
-	if( data['commonEnabled'] != true ){ return; }
-	
-	// > I一般吸附 - 绘制圆形
-	if( data['commonType'] == 0 ){
-		temp_bitmap.drill_CODAA_drawCircle(
-			this.drill_slot_x(),
-			this.drill_slot_y(),
-			data['commonRadius'],
-			fill_color,
-			stroke_color,
-			2
-		);
-	}
-	// > I一般吸附 - 绘制方形
-	if( data['commonType'] == 1 ){
-		temp_bitmap.drill_CODAA_drawRect(
-			this.drill_slot_x() - data['commonWidth']*0.5,
-			this.drill_slot_y() - data['commonHeight']*0.5,
-			data['commonWidth'],
-			data['commonHeight'],
-			fill_color,
-			stroke_color,
-			2, "miter"
-		);
-	}
-};
 
 //==============================
 // * J交换吸附 - 初始化子功能
@@ -2191,37 +2083,6 @@ Drill_CODAA_SlotController.prototype.drill_slot_isInExchangeRange = function( cu
 		}
 	}
 	return false;
-};
-//==============================
-// * J交换吸附 - 绘制范围
-//==============================
-Drill_CODAA_SlotController.prototype.drill_slot_drawExchangeRange = function( temp_bitmap, fill_color, stroke_color ){
-	var data = this._drill_data;
-	if( data['exchangeEnabled'] != true ){ return; }
-	
-	// > J交换吸附 - 绘制圆形
-	if( data['exchangeType'] == 0 ){
-		temp_bitmap.drill_CODAA_drawCircle(
-			this.drill_slot_x(),
-			this.drill_slot_y(),
-			data['exchangeRadius'],
-			fill_color,
-			stroke_color,
-			2
-		);
-	}
-	// > J交换吸附 - 绘制方形
-	if( data['exchangeType'] == 1 ){
-		temp_bitmap.drill_CODAA_drawRect(
-			this.drill_slot_x() - data['exchangeWidth']*0.5,
-			this.drill_slot_y() - data['exchangeHeight']*0.5,
-			data['exchangeWidth'],
-			data['exchangeHeight'],
-			fill_color,
-			stroke_color,
-			2, "miter"
-		);
-	}
 };
 
 
@@ -3004,6 +2865,160 @@ Drill_CODAA_DragController.prototype.drill_controllerDrag_dragEnding = function(
 		adsorb_controller.drill_controllerAdsorb_setState1( slot_controller );
 	}
 }
+
+
+
+//=============================================================================
+// ** ☆DEBUG绘制
+//
+//			说明：	> 此模块提供 DEBUG绘制 的功能。
+//					> 由于此功能与贴图相关，所以单独拿出来。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * DEBUG绘制 - H必然吸附 - 吸附槽 绘制范围
+//==============================
+Drill_CODAA_SlotController.prototype.drill_slot_drawEssentialRange = function( temp_bitmap, fill_color, stroke_color ){
+	var data = this._drill_data;
+	if( data['essentialEnabled'] != true ){ return; }
+	
+	// > H必然吸附 - 绘制圆形
+	if( data['essentialType'] == 0 ){
+		temp_bitmap.drill_CODAA_drawCircle(
+			this.drill_slot_x(),
+			this.drill_slot_y(),
+			data['essentialRadius'],
+			fill_color,
+			stroke_color,
+			2
+		);
+	}
+	// > H必然吸附 - 绘制方形
+	if( data['essentialType'] == 1 ){
+		temp_bitmap.drill_CODAA_drawRect(
+			this.drill_slot_x() - data['essentialWidth']*0.5,
+			this.drill_slot_y() - data['essentialHeight']*0.5,
+			data['essentialWidth'],
+			data['essentialHeight'],
+			fill_color,
+			stroke_color,
+			2, "miter"
+		);
+	}
+};
+//==============================
+// * DEBUG绘制 - I一般吸附 - 吸附槽 绘制范围
+//==============================
+Drill_CODAA_SlotController.prototype.drill_slot_drawCommonRange = function( temp_bitmap, fill_color, stroke_color ){
+	var data = this._drill_data;
+	if( data['commonEnabled'] != true ){ return; }
+	
+	// > I一般吸附 - 绘制圆形
+	if( data['commonType'] == 0 ){
+		temp_bitmap.drill_CODAA_drawCircle(
+			this.drill_slot_x(),
+			this.drill_slot_y(),
+			data['commonRadius'],
+			fill_color,
+			stroke_color,
+			2
+		);
+	}
+	// > I一般吸附 - 绘制方形
+	if( data['commonType'] == 1 ){
+		temp_bitmap.drill_CODAA_drawRect(
+			this.drill_slot_x() - data['commonWidth']*0.5,
+			this.drill_slot_y() - data['commonHeight']*0.5,
+			data['commonWidth'],
+			data['commonHeight'],
+			fill_color,
+			stroke_color,
+			2, "miter"
+		);
+	}
+};
+//==============================
+// * DEBUG绘制 - J交换吸附 - 吸附槽 绘制范围
+//==============================
+Drill_CODAA_SlotController.prototype.drill_slot_drawExchangeRange = function( temp_bitmap, fill_color, stroke_color ){
+	var data = this._drill_data;
+	if( data['exchangeEnabled'] != true ){ return; }
+	
+	// > J交换吸附 - 绘制圆形
+	if( data['exchangeType'] == 0 ){
+		temp_bitmap.drill_CODAA_drawCircle(
+			this.drill_slot_x(),
+			this.drill_slot_y(),
+			data['exchangeRadius'],
+			fill_color,
+			stroke_color,
+			2
+		);
+	}
+	// > J交换吸附 - 绘制方形
+	if( data['exchangeType'] == 1 ){
+		temp_bitmap.drill_CODAA_drawRect(
+			this.drill_slot_x() - data['exchangeWidth']*0.5,
+			this.drill_slot_y() - data['exchangeHeight']*0.5,
+			data['exchangeWidth'],
+			data['exchangeHeight'],
+			fill_color,
+			stroke_color,
+			2, "miter"
+		);
+	}
+};
+
+//==============================
+// * DEBUG绘制 - 绘制范围 - 填充+描边圆形
+//			
+//			参数：	> fill_color 字符串   （填充颜色）
+//					> stroke_color 字符串 （描边颜色）
+//					> lineWidth 数字      （线宽）
+//			说明：	> 圆形不需要考虑线的末端与斜角。
+//==============================
+Bitmap.prototype.drill_CODAA_drawCircle = function( x, y, radius, fill_color, stroke_color, lineWidth ){
+    var painter = this._context;
+    painter.save();							//（a.存储上一个画笔状态）
+	
+    painter.fillStyle = fill_color;			//（b.设置样式）
+    painter.strokeStyle = stroke_color;
+	painter.lineWidth = lineWidth;
+	
+    painter.beginPath();					//（c.路径填充/描边，注意 beginPath + fill + stroke）
+    painter.arc(x, y, radius, 0, Math.PI * 2, false);
+    painter.fill();
+    painter.stroke();
+	
+    painter.restore();						//（d.回滚上一个画笔状态）
+    this._setDirty();
+};
+//==============================
+// * DEBUG绘制 - 绘制范围 - 填充+描边矩形
+//			
+//			参数：	> x, y, width, height 矩形范围
+//					> fill_color 字符串   （填充颜色）
+//					> stroke_color 字符串 （描边颜色）
+//					> lineWidth 数字      （线宽）
+//					> lineJoin 字符串 （连接处，包含miter/round/bevel 尖角/圆角/斜角，默认miter）
+//			说明：	> 无。
+//==============================
+Bitmap.prototype.drill_CODAA_drawRect = function( x, y, width, height, fill_color, stroke_color, lineWidth, lineJoin ){
+    var painter = this._context;
+    painter.save();							//（a.存储上一个画笔状态）
+	
+    painter.fillStyle = fill_color;			//（b.设置样式）
+    painter.strokeStyle = stroke_color;
+	painter.lineWidth = lineWidth;
+	painter.lineJoin = lineJoin;
+	
+    painter.fillRect(x, y, width, height);	//（c.路径填充/描边，fillRect）
+    painter.strokeRect(x, y, width, height);
+	
+    painter.restore();						//（d.回滚上一个画笔状态）
+    this._setDirty();
+};
+
 
 
 //=============================================================================

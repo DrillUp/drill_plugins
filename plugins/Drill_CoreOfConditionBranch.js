@@ -21,7 +21,10 @@
  * 该插件可以单独使用。
  * 该插件为基础核心，可以作用于下列插件。
  * 作用于：
- *   - Drill_EventSelfSwitch     物体-独立开关
+ *   - Drill_EventSelfSwitch                  物体-独立开关
+ *   - Drill_MouseConditionBranch             鼠标-鼠标的分支条件
+ *   - Drill_OperateKeyboradConditionBranch   键盘-键盘的分支条件
+ *   - Drill_OperatePadConditionBranch        键盘-手柄的分支条件
  *   ……
  * 
  * -----------------------------------------------------------------------------
@@ -118,7 +121,8 @@
 //		★工作类型		单次执行
 //		★时间复杂度		o(n)
 //		★性能测试因素	机关管理层
-//		★性能测试消耗	11.4ms（drill_COCB_conditionCommand）
+//		★性能测试消耗	2024/2/1：
+//							》11.4ms（drill_COCB_conditionCommand）
 //		★最坏情况		无
 //		★备注			
 //		

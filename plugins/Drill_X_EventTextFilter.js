@@ -176,7 +176,7 @@
 //		★工作类型		持续执行
 //		★时间复杂度		o(n)*o(贴图处理)*o(滤镜) 每帧
 //		★性能测试因素	各个管理层 放置大量波动滤镜的文字
-//		★性能测试消耗	35.31ms ~ 102.44ms
+//		★性能测试消耗	
 //		★最坏情况		地图存在大量带有滤镜文字的事件。
 //		★备注			其实我放了50个波动滤镜的事件，但是FPS从19到15，只降了4帧。
 //						（未使用模糊滤镜和噪点滤镜）
@@ -212,7 +212,8 @@
 //			1.继承于EventText，使用_drill_ET_spriteTank来控制滤镜变化。
 //				
 //		★存在的问题：
-//			1.不知道是不是一次性读取不到的问题，不停地刷菜单，有几率出现波动滤镜时出现全黑的bitmap情况。
+//			1.问题：不知道是不是一次性读取不到的问题，不停地刷菜单，有几率出现波动滤镜时出现全黑的bitmap情况。
+//			  解决：【未解决】
 //
 
 //=============================================================================
@@ -283,6 +284,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				if( args[9]!=undefined ){ var temp3 = Number(args[9]); }
 				
 				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
 				if( type == "纯色滤镜" ){
 					e._drill_XETF.openFilter = true;
 					e._drill_XETF.setPureLinear = [temp1,temp2,temp3];

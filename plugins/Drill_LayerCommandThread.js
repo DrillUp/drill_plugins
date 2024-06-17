@@ -42,13 +42,24 @@
  * 
  * -----------------------------------------------------------------------------
  * ----激活条件
- * 你可以通过插件指令手动修改生成的一些基本设置。
+ * 你可以通过插件指令手动执行公共事件。
  * 
  * 插件指令：>地图多线程 : 串行执行 : 公共事件[1]
  * 插件指令：>地图多线程 : 并行执行 : 公共事件[1]
  * 
  * 1.注意，该插件指令只能在地图界面中有效。
  * 2.不建议在公共事件中嵌套多个并行执行的插件指令。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 强制插入
+ * 你可以通过插件指令手动插入串行执行的指令。
+ * 
+ * 插件指令：>地图多线程 : 强制插入串行执行 : 公共事件[1]
+ * 
+ * 1.注意，该插件指令只能在战斗界面中有效。
+ * 2.该指令可强制将公共事件插入到正在串行执行的指令集中。
+ *   如果在串行事件中执行，那么相当于指令 "流程控制 > 公共事件"，
+ *   如果在并行事件中执行，那么是立即暂停当前串行，去执行其它公共事件。
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 分支条件
@@ -94,6 +105,8 @@
  * 优化了内部结构。
  * [v1.3]
  * 大幅度优化了内部结构。
+ * [v1.4]
+ * 添加了强制插入串行执行的功能。
  * 
  */
  
@@ -123,6 +136,7 @@
 //			->☆提示信息
 //			->☆静态数据
 //			->☆插件指令
+//			->☆分支指令
 //
 //			->☆多线程
 //				->添加公共事件【标准函数】
@@ -240,6 +254,18 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				};
 				$gameMap.drill_LCT_addPipeEvent( data );
 			}
+			
+			if( type == "强制插入串行执行" ){
+				temp1 = temp1.replace("公共事件[","");
+				temp1 = temp1.replace("]","");
+				var data = {
+					'type': "公共事件",
+					'pipeType': "串行",
+					'commonEventId': Number(temp1),
+					'callBack_str': "",
+				};
+				$gameMap.drill_LCT_forceInsertPipeEvent( data );
+			}
 		}
 	}
 }
@@ -252,7 +278,6 @@ var _drill_LCT_COCB_conditionCommand = Game_Interpreter.prototype.drill_COCB_con
 Game_Interpreter.prototype.drill_COCB_conditionCommand = function(command, args) {
 	_drill_LCT_COCB_conditionCommand.call(this, command, args);
 	if( command === ">地图多线程" ){
-		
 		if( args.length == 1 ){
 			var temp1 = String(args[0]);
 			if( temp1 == "处于地图界面时" ){
@@ -268,6 +293,7 @@ Game_Interpreter.prototype.drill_COCB_conditionCommand = function(command, args)
 };
 	
 	
+	
 //#############################################################################
 // ** 【标准模块】多线程 ☆多线程
 //#############################################################################
@@ -275,10 +301,10 @@ Game_Interpreter.prototype.drill_COCB_conditionCommand = function(command, args)
 // * 多线程 - 添加公共事件【标准函数】
 //			
 //			参数：	> data 动态参数对象
-//					> data['type'] 字符串（填 公共事件 ，目前只有这一个选项）
-//					> data['pipeType'] 字符串（填 并行/串行 ）
-//					> data['commonEventId'] 数字（填 公共事件的id值）
-//					> data['callBack_str'] 字符串（脚本指令，公共事件执行完毕后，回调的字符串脚本）
+//					> data['type'] 字符串        （填 公共事件 ，目前只有这一个选项）
+//					> data['pipeType'] 字符串    （填 并行/串行 ）
+//					> data['commonEventId'] 数字 （填 公共事件的id值）
+//					> data['callBack_str'] 字符串（脚本指令，公共事件执行完毕前，执行的指令）
 //			返回：	无
 //			
 //			说明：	> 按照参数对象执行函数即可，只能在地图界面执行。
@@ -286,6 +312,23 @@ Game_Interpreter.prototype.drill_COCB_conditionCommand = function(command, args)
 //##############################
 Game_Map.prototype.drill_LCT_addPipeEvent = function( data ){
 	this.drill_LCT_addPipeEvent_private( data );
+}
+//##############################
+// * 多线程 - 强制插入串行公共事件【标准函数】
+//			
+//			参数：	> data 动态参数对象
+//					> data['type'] 字符串        （填 公共事件 ，目前只有这一个选项）
+//					> data['pipeType'] 字符串    （填 并行/串行，该参数在这里没用，会被强制串行）
+//					> data['commonEventId'] 数字 （填 公共事件的id值）
+//					> data['callBack_str'] 字符串（脚本指令，公共事件执行完毕前，执行的指令）
+//			返回：	无
+//			
+//			说明：	> 该函数可强制将公共事件插入到正在串行执行的指令集中。
+//					  插入位置为正在执行的指令的后一条，如果正在执行"战斗处理"，那么插入位置为战斗结束之后的位置。
+//##############################
+Game_Map.prototype.drill_LCT_forceInsertPipeEvent = function( data ){
+	data['pipeType'] = "串行";
+	this.drill_LCT_forceInsertPipeEvent_private( data );
 }
 
 
@@ -330,6 +373,47 @@ Game_Map.prototype.drill_LCT_addPipeEvent_private = function( data ){
 	// > 添加
 	var pipe_event = new Drill_LCT_GamePipeEvent( data );
 	this._drill_LCT_pipeEventTank.push( pipe_event );
+	
+	
+	// > 无返回值，类 Drill_LCT_GamePipeEvent 不要对外开放
+	//	（无）
+}
+//==============================
+// * 管道容器 - 强制插入串行公共事件（私有）
+//==============================
+Game_Map.prototype.drill_LCT_forceInsertPipeEvent_private = function( data ){
+	
+	// > 校验
+    var commonEvent = $dataCommonEvents[ data['commonEventId'] ];
+    if( commonEvent == undefined ){
+		alert( DrillUp.drill_LCT_getPluginTip_ErrorDataNull( data['commonEventId'] ) );
+		return;
+    }else if( commonEvent.list.length == 0 ){
+		alert( DrillUp.drill_LCT_getPluginTip_ErrorDataEmpty( data['commonEventId'] ) );
+		return;
+	}
+	
+	// > 添加
+	var pipe_event = new Drill_LCT_GamePipeEvent( data );
+	this._drill_LCT_pipeEventTank.unshift( pipe_event );	//（从头部插入）
+	
+	
+	// > 插入串行 - 清理阻塞状态
+	var main_interpreter = this._interpreter;
+	pipe_event.drill_clearStartingFlag();
+		
+	// > 插入串行 - 没有串行执行时，执行串行
+	if( this.isEventRunning() == false ){
+		this.setupStartingMapEvent();
+		
+	// > 插入串行 - 有串行执行时，作为 子事件指令 插入
+	}else{
+		var eventId = main_interpreter.isOnCurrentMap() ? main_interpreter._eventId : 0;
+		main_interpreter.setupChild( pipe_event.drill_list(), eventId );
+	}
+	
+	// > 插入串行 - 帧刷新
+	pipe_event.drill_controller_update();
 }
 
 
@@ -507,7 +591,7 @@ Drill_LCT_GamePipeEvent.prototype.drill_controller_initData = function() {
 	if( data['type'] == undefined ){ data['type'] = "公共事件" };				//物体类型
 	if( data['pipeType'] == undefined ){ data['pipeType'] = "并行" };			//管道类型（串行/并行）
 	if( data['commonEventId'] == undefined ){ data['commonEventId'] = 0 };		//公共事件id
-	if( data['callBack_str'] == undefined ){ data['callBack_str'] = "" };		//回调函数（只并行有效）
+	if( data['callBack_str'] == undefined ){ data['callBack_str'] = "" };		//回调函数
 }
 //==============================
 // * 管道物体 - 初始化子功能

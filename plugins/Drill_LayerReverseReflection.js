@@ -849,8 +849,10 @@
 //			3,注意，事件的_transparent是与visible不一样的特殊控制变量。
 //
 //		★存在的问题：
-//			1.定义一个镜像后，事件的 动画贴图和气泡贴图 会被镜面遮挡。（已解决）
-//			2.进入循环地图边缘后，由于遮罩不是循环的，刷新位置后会出现镜像消失问题。
+//			1.问题：定义一个镜像后，事件的 动画贴图和气泡贴图 会被镜面遮挡。
+//			  解决：【已解决】，镜像和事件贴图分离成两类，分开存入容器。
+//			2.问题：进入循环地图边缘后，由于遮罩不是循环的，刷新位置后会出现镜像消失问题。
+//			  解决：【未解决】
 //
 
 //=============================================================================
@@ -960,6 +962,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var unit = String(args[1]);
 			if( chars == null && unit == "本事件" ){
 				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
 				chars = [ e ];
 			}
 			if( chars == null && unit.indexOf("批量事件[") != -1 ){
@@ -1792,7 +1795,7 @@ SceneManager.initialize = function() {
 		var screen_x = this.drill_screenX();
 		var screen_y = this.drill_screenY();
 		
-		// > 【行走图 - 行走图优化核心】数据最终变换值
+		// > 【行走图 - 行走图优化核心】『物体数据最终变换值』
 		screen_x += this._character.drill_COEF_acc_LRR_x();
 		screen_y += this._character.drill_COEF_acc_LRR_y();
 		

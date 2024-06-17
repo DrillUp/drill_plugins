@@ -305,7 +305,8 @@
 //				道具不能落入不可行走区域
 //
 //		★存在的问题：
-//			1.每多一条可选注释，插件就要多一个额外扩展。需要想办法优化。
+//			1.问题：每多一条可选注释，插件就要多一个额外扩展。需要想办法优化。
+//			  解决：【未解决】
 //
 
 //=============================================================================
@@ -614,9 +615,10 @@ Game_Interpreter.prototype.drill_EIG_command = function(command, args){
 						var y1 = $gamePlayer._realY;
 					}
 					if( pos == "本事件" ){
-						var e_id = this._eventId;
-						var x1 = $gameMap.event(e_id)._realX;
-						var y1 = $gameMap.event(e_id)._realY;
+						var e = $gameMap.event( this._eventId );
+						if( e == undefined ){ return; } //『防止并行删除事件出错』
+						var x1 = e._realX;
+						var y1 = e._realY;
 					}
 					if( pos.indexOf("事件[") != -1 ){
 						pos = pos.replace("事件[","");

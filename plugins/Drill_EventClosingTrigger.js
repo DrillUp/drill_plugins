@@ -643,10 +643,9 @@
 //
 //		★工作类型		持续执行
 //		★时间复杂度		o(nlogn)+o(n^2)	每帧	【棋盘算法】
-//		★性能测试因素1	对话框管理层，6个有棋盘且挤在附近的事件
-//		★性能测试消耗1	24.21ms（drill_ECT_updateEventTrigger）
-//		★性能测试因素2	遇敌管理层，12个有棋盘的事件
-//		★性能测试消耗2	23.15ms（drill_ECT_updateEventTrigger）30.46ms（drill_ECT_getEventsInRange）
+//		★性能测试因素	对话框管理层，6个有棋盘且挤在附近的事件、遇敌管理层，12个有棋盘的事件
+//		★性能测试消耗	24.21ms（drill_ECT_updateEventTrigger）
+//						23.15ms（drill_ECT_updateEventTrigger）30.46ms（drill_ECT_getEventsInRange）
 //		★最坏情况		设置了大量事件，并在棋盘范围内触发。
 //		★备注			高配本和低配本都能保持正常的低消耗。
 //		

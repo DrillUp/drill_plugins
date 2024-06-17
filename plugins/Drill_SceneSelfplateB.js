@@ -1037,7 +1037,7 @@
  * @value 增减速移动
  * @option 弹性移动
  * @value 弹性移动
- * @desc 移动类型基于 弹道核心-两点式 移动。更多内容可以去看看 "1.系统 > 关于弹道.docx"。
+ * @desc 移动类型基于 弹道核心-两点式 移动。更多内容可以去看看 "32.数学模型 > 关于弹道.docx"。
  * @default 匀速移动
  *
  * @param 移动时长
@@ -1227,7 +1227,7 @@
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 //		插件简称		SSpB（Scene_Selfplate_A）
 //		临时全局变量	DrillUp.g_SSpB_xxx
-//		临时局部变量	this._drill_xxx
+//		临时局部变量	this._drill_SSpB_xxx
 //		存储数据变量	$gameSystem._drill_SSpB_xxx
 //		全局存储变量	DrillUp.global_SSpB_xxx
 //		覆盖重写方法	无

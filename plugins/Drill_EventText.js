@@ -348,7 +348,8 @@
 //				这次应该是最后一遍大翻新了，所有功能已经切碎的相当完美了。
 //				
 //		★存在的问题：
-//			1.循环地图中，如果在地图边界徘徊，文字变化和滤镜会被累加。 （2021-7-5 此问题似乎已被解决，"创建新的漂浮文字"结构修改之后，问题似乎不见了）
+//			1.问题：循环地图中，如果在地图边界徘徊，文字变化和滤镜会被累加。
+//			  解决：【已解决】，2021-7-5 此问题似乎已被解决，"创建新的漂浮文字"结构修改之后，问题似乎不见了。
 //
 
 //=============================================================================
@@ -420,142 +421,130 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_ET_pluginCommand.call(this, command, args);
 	if( command === ">事件漂浮文字" ){
 		
-		/*-----------------单对象获取------------------*/
-		var e_id = null;
+		/*-----------------单事件获取------------------*/
+		var ev = null;
 		if( args.length >= 2 ){
-			var temp1 = String(args[1]);
-			if( temp1 == "本事件" ){
-				e_id = this._eventId;
+			var unit = String(args[1]);
+			if( ev == null && unit == "本事件" ){
+				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
+				ev = e;
 			}
-			if( temp1.indexOf("事件[") != -1 ){
-				temp1 = temp1.replace("事件[","");
-				temp1 = temp1.replace("]","");
-				e_id = Number(temp1);
+			if( ev == null && unit.indexOf("事件[") != -1 ){
+				unit = unit.replace("事件[","");
+				unit = unit.replace("]","");
+				var e_id = Number(unit);
+				if( $gameMap.drill_ET_isEventExist( e_id ) == false ){ return; }
+				var e = $gameMap.event( e_id );
+				ev = e;
 			}
-			if( temp1.indexOf("事件变量[") != -1 ){
-				temp1 = temp1.replace("事件变量[","");
-				temp1 = temp1.replace("]","");
-				e_id = $gameVariables.value(Number(temp1));
+			if( ev == null && unit.indexOf("事件变量[") != -1 ){
+				unit = unit.replace("事件变量[","");
+				unit = unit.replace("]","");
+				var e_id = $gameVariables.value(Number(unit));
+				if( $gameMap.drill_ET_isEventExist( e_id ) == false ){ return; }
+				var e = $gameMap.event( e_id );
+				ev = e;
 			}
 		}
 		
 		/*-----------------清空文本------------------*/
-		if( e_id != null && args.length == 4 ){
+		if( ev != null && args.length == 4 ){
 			var type = String(args[3]);
 			if( type == "清空文本" ){
-				if( $gameMap.drill_ET_isEventExist( e_id ) == false ){ return; }
-				var e = $gameMap.event(e_id);
-				e.drill_ET_createController();
-				e._drill_ET_controller.drill_ET_setText( "" );		//（清空文本同时关闭轮播）
-				e._drill_ET_controller.drill_ET_setLoopEnabled( false );
+				ev.drill_ET_createController();
+				ev._drill_ET_controller.drill_ET_setText( "" );		//（清空文本同时关闭轮播）
+				ev._drill_ET_controller.drill_ET_setLoopEnabled( false );
 			}
 			if( type == "强制刷新文本" ){
-				if( $gameMap.drill_ET_isEventExist( e_id ) == false ){ return; }
-				var e = $gameMap.event(e_id);
-				e.drill_ET_createController();
-				e._drill_ET_controller.drill_ET_forceRefresh();
+				ev.drill_ET_createController();
+				ev._drill_ET_controller.drill_ET_forceRefresh();
 			}
 		}
 				
 		/*-----------------修改文本------------------*/
-		if( e_id != null && args.length == 6 ){ 	//	>事件漂浮文字 : 本事件 : 修改文本 : 这是一串字符
+		if( ev != null && args.length == 6 ){ 	//	>事件漂浮文字 : 本事件 : 修改文本 : 这是一串字符
 			var type = String(args[3]);
 			var temp3 = String(args[5]);
 			if( type == "修改文本" ){
-				if( $gameMap.drill_ET_isEventExist( e_id ) == false ){ return; }
-				var e = $gameMap.event(e_id);
-				e.drill_ET_createController();
-				e._drill_ET_controller.drill_ET_setText( temp3 );
+				ev.drill_ET_createController();
+				ev._drill_ET_controller.drill_ET_setText( temp3 );
 			}
 			if( type == "外框" ){
 				if( temp3 == "显示" ){
-					if( $gameMap.drill_ET_isEventExist( e_id ) == false ){ return; }
-					var e = $gameMap.event(e_id);
-					e.drill_ET_createController();
-					e._drill_ET_controller.drill_ET_setFrameVisible( true );
+					ev.drill_ET_createController();
+					ev._drill_ET_controller.drill_ET_setFrameVisible( true );
 				}
 				if( temp3 == "隐藏" ){
-					if( $gameMap.drill_ET_isEventExist( e_id ) == false ){ return; }
-					var e = $gameMap.event(e_id);
-					e.drill_ET_createController();
-					e._drill_ET_controller.drill_ET_setFrameVisible( false );
+					ev.drill_ET_createController();
+					ev._drill_ET_controller.drill_ET_setFrameVisible( false );
 				}
 			}
 			if( type == "对齐方式" ){
 				if( temp3 == "左对齐" || temp3 == "居中" || temp3 == "右对齐" ){
-					if( $gameMap.drill_ET_isEventExist( e_id ) == false ){ return; }
-					var e = $gameMap.event(e_id);
-					e.drill_ET_createController();
-					e._drill_ET_controller.drill_ET_setAlign( temp3 );
+					ev.drill_ET_createController();
+					ev._drill_ET_controller.drill_ET_setAlign( temp3 );
 				}
 			}
 		}
 		
 		/*-----------------偏移------------------*/
-		if( e_id != null && args.length == 8 ){
+		if( ev != null && args.length == 8 ){
 			var type = String(args[3]);
 			var temp3 = String(args[5]);
 			var temp4 = String(args[7]);
 			if( type == "设置偏移" ){
-				if( $gameMap.drill_ET_isEventExist( e_id ) == false ){ return; }
-				var e = $gameMap.event(e_id);
-				e.drill_ET_createController();
-				e._drill_ET_controller.drill_ET_setOffset( Number(temp3),Number(temp4) );
+				ev.drill_ET_createController();
+				ev._drill_ET_controller.drill_ET_setOffset( Number(temp3),Number(temp4) );
 			}
 			if( type == "设置偏移(变量)" ){
-				if( $gameMap.drill_ET_isEventExist( e_id ) == false ){ return; }
-				var e = $gameMap.event(e_id);
-				e.drill_ET_createController();
-				e._drill_ET_controller.drill_ET_setOffset( $gameVariables.value(Number(temp3)), $gameVariables.value(Number(temp4)) );
+				ev.drill_ET_createController();
+				ev._drill_ET_controller.drill_ET_setOffset( $gameVariables.value(Number(temp3)), $gameVariables.value(Number(temp4)) );
 			}
 		}
 		
 		
 		/*-----------------轮播文本------------------*/
-		if( e_id != null && args.length == 8 ){
+		if( ev != null && args.length == 8 ){
 			var type = String(args[3]);
 			var temp3 = String(args[5]);
 			var temp4 = String(args[7]);
 			if( type == "轮播文本" && temp3 == "添加" ){
-				if( $gameMap.drill_ET_isEventExist( e_id ) == false ){ return; }
-				var e = $gameMap.event(e_id);
-				e.drill_ET_createController();
-				e._drill_ET_controller.drill_ET_addLoopText( temp4 );
+				ev.drill_ET_createController();
+				ev._drill_ET_controller.drill_ET_addLoopText( temp4 );
 			}
 		}
-		if( e_id != null && args.length == 6 ){
+		if( ev != null && args.length == 6 ){
 			var type = String(args[3]);
 			var temp3 = String(args[5]);
 			if( type == "轮播文本" ){
-				if( $gameMap.drill_ET_isEventExist( e_id ) == false ){ return; }
-				var e = $gameMap.event(e_id);
 				if( temp3 == "清空" ){
-					e.drill_ET_createController();
-					e._drill_ET_controller.drill_ET_setLoopText( [] );
+					ev.drill_ET_createController();
+					ev._drill_ET_controller.drill_ET_setLoopText( [] );
 				}
 				if( temp3 == "开始单次播放" ){
-					e.drill_ET_createController();
-					e._drill_ET_controller.drill_ET_setLoopMode( "单次" );
-					e._drill_ET_controller.drill_ET_setLoopEnabled( true );
+					ev.drill_ET_createController();
+					ev._drill_ET_controller.drill_ET_setLoopMode( "单次" );
+					ev._drill_ET_controller.drill_ET_setLoopEnabled( true );
 				}
 				if( temp3 == "开始循环播放" ){
-					e.drill_ET_createController();
-					e._drill_ET_controller.drill_ET_setLoopMode( "循环" );
-					e._drill_ET_controller.drill_ET_setLoopEnabled( true );
+					ev.drill_ET_createController();
+					ev._drill_ET_controller.drill_ET_setLoopMode( "循环" );
+					ev._drill_ET_controller.drill_ET_setLoopEnabled( true );
 				}
 				if( temp3 == "暂停播放" ){
-					e.drill_ET_createController();
-					e._drill_ET_controller.drill_ET_setLoopEnabled( false );
+					ev.drill_ET_createController();
+					ev._drill_ET_controller.drill_ET_setLoopEnabled( false );
 				}
 				if( temp3 == "继续播放" ){
-					e.drill_ET_createController();
-					e._drill_ET_controller.drill_ET_setLoopEnabled( true );
+					ev.drill_ET_createController();
+					ev._drill_ET_controller.drill_ET_setLoopEnabled( true );
 				}
 				if( temp3.indexOf("修改轮播间隔[") != -1 ){
 					temp3 = temp3.replace("修改轮播间隔[","");
 					temp3 = temp3.replace("]","");
-					e.drill_ET_createController();
-					e._drill_ET_controller.drill_ET_setLoopInterval( Number(temp3) );
+					ev.drill_ET_createController();
+					ev._drill_ET_controller.drill_ET_setLoopInterval( Number(temp3) );
 				}
 			}
 		}
@@ -1202,13 +1191,13 @@ Game_Event.prototype.drill_ET_createController = function(){
 	
 	// > 创建控制器
 	var data = {
-		"visible":true,
-		"eventId":this._eventId,
+		"visible": true,
+		"eventId": this._eventId,
 		
-		"x":0,
-		"y":0,
-		"align":DrillUp.g_ET_align,
-		"frameVisible":DrillUp.g_ET_frameVisible,
+		"x": 0,
+		"y": 0,
+		"align": DrillUp.g_ET_align,
+		"frameVisible": DrillUp.g_ET_frameVisible,
 	}
 	this._drill_ET_controller = new Drill_ET_Controller( data );
 	
@@ -1601,8 +1590,8 @@ Drill_ET_Controller.prototype.drill_controller_updateAttr_Opacity = function(){
 	
 	// > 透明度
 	var oo = Number( ev.opacity() );
-	this._drill_textOpacity = oo;			//文本透明度
-	if( data['frameVisible'] == true  ){	//框架透明度
+	this._drill_textOpacity = oo;			//文本域 透明度
+	if( data['frameVisible'] == true  ){	//背景容器层 透明度
 		this._drill_frameOpacity = oo;
 	}else{
 		this._drill_frameOpacity = 0;
@@ -1931,6 +1920,7 @@ Drill_ET_WindowSprite.prototype.drill_sprite_updateAttr_Position = function() {
 Drill_ET_WindowSprite.prototype.drill_sprite_updateAttr_Opacity = function() {
 	this.contentsOpacity = this._drill_controller._drill_textOpacity;		//文本域 透明度
 	this.opacity = this._drill_controller._drill_frameOpacity;				//背景容器层 透明度
+	//（此处会被 子插件函数 drill_XETT_updateChange 控制透明度）
 }
 
 

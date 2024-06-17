@@ -22,12 +22,11 @@
  * 该插件 不能 单独使用。
  * 由于插件改变了默认地图镜头的规则，对所有地图UI相关插件有影响。
  * 基于：
- *   - Drill_CoreOfBallistics        系统-弹道核心★★v1.9及以上★★
+ *   - Drill_CoreOfBallistics        数学模型-弹道核心★★v1.9及以上★★
  *   - Drill_CoreOfInput             系统-输入设备核心★★v1.6及以上★★
  * 被扩展：
  *   - Drill_CoreOfMoveRoute   移动路线-移动路线核心
  *   - Drill_EventSound        声音-事件的声音
- *   - Drill_MouseTriggerEvent 鼠标-鼠标触发事件★★v1.3及以上版本★★
  *   - Drill_MouseGridPointer  鼠标-网格指向标
  *   - Drill_MouseIllumination 鼠标-自定义照明效果
  *   - Drill_OperateHud        鼠标-鼠标辅助操作面板★★v1.6及以上版本★★
@@ -594,11 +593,14 @@
 //				由于直接触及到了最底层core，这里没有覆写，只是添加功能。
 //
 //		★存在的问题：
-//			1.翻转时，会看到图块的拼接过程。（2022/9/10 已解决，通过外包裹矩阵。）
-//			2.由于镜头平移关系，目前镜头设置偏移量非常麻烦，目前xy相关平移不考虑，以免平移非常难看。
-//			3.镜头最大的问题，在于圆心的问题。
-//			  只有单独的sprite才能设置圆心，tilemap和循环贴图都没有圆心。
-//			  旋转的时候问题也大，这相当于指数形式让公式越来越复杂（通过数学转换函数解决。）
+//			1.问题：翻转时，会看到图块的拼接过程。
+//			  解决：【已解决】，2022/9/10 已解决，通过外包裹矩阵。通过文档讲解也能给群友知识。
+//			2.问题：由于镜头平移关系，目前镜头设置偏移量非常麻烦，目前xy相关平移不考虑，以免平移非常难看。
+//			  解决：【未解决】
+//			3.问题：镜头最大的问题，在于圆心的问题。
+//					只有单独的sprite才能设置圆心，tilemap和循环贴图都没有圆心。
+//					旋转的时候问题也大，这相当于指数形式让公式越来越复杂（通过数学转换函数解决。）
+//			  解决：【未解决】
 //
 
 //=============================================================================
@@ -610,7 +612,7 @@
 	var DrillUp = DrillUp || {}; 
 	DrillUp.g_LCa_PluginTip_curName = "Drill_LayerCamera.js 地图-活动地图镜头";
 	DrillUp.g_LCa_PluginTip_baseList = [
-		"Drill_CoreOfBallistics.js 系统-弹道核心",
+		"Drill_CoreOfBallistics.js 数学模型-弹道核心",
 		"Drill_CoreOfInput.js 系统-输入设备核心"
 	];
 	//==============================
@@ -1057,7 +1059,6 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				var pos = null;
 				if( unit == "本事件" ){
 					var e_id = this._eventId;
-					if( $gameMap.drill_LCa_isEventExist( e_id ) == false ){ return; }
 					$gameSystem.drill_LCa_setLockEvent( e_id );
 				}
 				if( unit == "玩家位置" ){
@@ -3015,15 +3016,24 @@ Drill_LCa_Controller.prototype.drill_getAutoPosition = function(){
 			tar_y = this._drill_lockPos_y;
 		}
 		if( this._drill_lockPos_type == "事件" ){
-			tar_x = 0;
-			tar_y = 0;
-			for(var i = 0; i < this._drill_lockPos_eventIdList.length; i++ ){
+			var xxx = 0;
+			var yyy = 0;
+			for(var i = this._drill_lockPos_eventIdList.length-1; i >= 0; i-- ){
 				var e_id = this._drill_lockPos_eventIdList[i];
-				tar_x += $gameMap.event( e_id )._realX;
-				tar_y += $gameMap.event( e_id )._realY;
+				var e = $gameMap.event( e_id );
+				if( e == undefined ){	//（如果设置了多事件看向，而事件被销毁，则立即取消此事件的绑定）
+					this._drill_lockPos_eventIdList.splice(i,1);
+					continue;
+				}
+				xxx += e._realX;
+				yyy += e._realY;
 			}
-			tar_x = tar_x / this._drill_lockPos_eventIdList.length;
-			tar_y = tar_y / this._drill_lockPos_eventIdList.length;
+			if( this._drill_lockPos_eventIdList.length > 0 ){
+				xxx = xxx / this._drill_lockPos_eventIdList.length;
+				yyy = yyy / this._drill_lockPos_eventIdList.length;
+				tar_x = xxx;
+				tar_y = yyy;
+			}
 		}
 		
 	}
@@ -3315,15 +3325,24 @@ Drill_LCa_Controller.prototype.drill_updateTouristMode = function(){
 			yy = this._drill_lockPos_y;
 		}
 		if( this._drill_lockPos_type == "事件" ){
-			xx = 0;
-			yy = 0;
-			for(var i = 0; i < this._drill_lockPos_eventIdList.length; i++ ){
+			var xxx = 0;
+			var yyy = 0;
+			for(var i = this._drill_lockPos_eventIdList.length-1; i >= 0; i-- ){
 				var e_id = this._drill_lockPos_eventIdList[i];
-				xx += $gameMap.event( e_id )._realX;
-				yy += $gameMap.event( e_id )._realY;
+				var e = $gameMap.event( e_id );
+				if( e == undefined ){	//（如果设置了多事件看向，而事件被销毁，则立即取消此事件的绑定）
+					this._drill_lockPos_eventIdList.splice(i,1);
+					continue;
+				}
+				xxx += e._realX;
+				yyy += e._realY;
 			}
-			xx = xx / this._drill_lockPos_eventIdList.length;
-			yy = yy / this._drill_lockPos_eventIdList.length;
+			if( this._drill_lockPos_eventIdList.length > 0 ){
+				xxx = xxx / this._drill_lockPos_eventIdList.length;
+				yyy = yyy / this._drill_lockPos_eventIdList.length;
+				xx = xxx;
+				yy = yyy;
+			}
 		}
 		var oww = Graphics.boxWidth  / this.tileWidth();
 		var ohh = Graphics.boxHeight / this.tileHeight();

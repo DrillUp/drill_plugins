@@ -55,16 +55,16 @@
  * 如果你需要设置标签，使用下面事件注释或插件指令：
  * （注意，冒号左右有空格）
  * 
- * 事件注释：=>标签核心 : 添加标签 : 被动技_躲避斩击
+ * 事件注释：=>标签核心 : 添加标签 : 标签[被动技_躲避斩击]
  *
- * 插件指令：>标签核心 : 本事件 : 添加标签 : 被动技_躲避斩击
- * 插件指令：>标签核心 : 事件[10] : 添加标签 : 被动技_躲避斩击
- * 插件指令：>标签核心 : 事件变量[10] : 添加标签 : 被动技_躲避斩击
- * 插件指令：>标签核心 : 批量事件[10,11,12] : 添加标签 : 被动技_躲避斩击
- * 插件指令：>标签核心 : 批量事件变量[25,26] : 添加标签 : 被动技_躲避斩击
+ * 插件指令：>标签核心 : 本事件 : 添加标签 : 标签[被动技_躲避斩击]
+ * 插件指令：>标签核心 : 事件[10] : 添加标签 : 标签[被动技_躲避斩击]
+ * 插件指令：>标签核心 : 事件变量[10] : 添加标签 : 标签[被动技_躲避斩击]
+ * 插件指令：>标签核心 : 批量事件[10,11,12] : 添加标签 : 标签[被动技_躲避斩击]
+ * 插件指令：>标签核心 : 批量事件变量[25,26] : 添加标签 : 标签[被动技_躲避斩击]
  * 
- * 插件指令：>标签核心 : 本事件 : 添加标签 : 被动技_躲避斩击
- * 插件指令：>标签核心 : 本事件 : 去除标签 : 被动技_躲避斩击
+ * 插件指令：>标签核心 : 本事件 : 添加标签 : 标签[被动技_躲避斩击]
+ * 插件指令：>标签核心 : 本事件 : 去除标签 : 标签[被动技_躲避斩击]
  * 插件指令：>标签核心 : 本事件 : 去除全部标签
  * 
  * 1."被动技_躲避斩击"是可以完全自定义的字符串。
@@ -73,20 +73,20 @@
  *   你需要留意 标签 与 被触发条件 之间的关系。
  * 
  * -----------------------------------------------------------------------------
- * ----可选设定
+ * ----可选设定 - 获取事件id
  * 你可以根据事件名、标签来获取到事件的id：
  * 
- * 插件指令：>标签核心 : 获取事件id组 : 根据事件名 : 小爱丽丝 : 变量数组[3]
- * 插件指令：>标签核心 : 获取事件id组 : 根据事件名 : 小爱丽丝 : 变量数组[某数组]
- * 插件指令：>标签核心 : 获取事件id(最前) : 根据事件名 : 小爱丽丝 : 变量[21]
- * 插件指令：>标签核心 : 获取事件id(最后) : 根据事件名 : 小爱丽丝 : 变量[21]
- * 插件指令：>标签核心 : 获取事件id(随机) : 根据事件名 : 小爱丽丝 : 变量[21]
+ * 插件指令：>标签核心 : 获取事件id组 : 根据事件名 : 事件名[小爱丽丝] : 变量数组[3]
+ * 插件指令：>标签核心 : 获取事件id组 : 根据事件名 : 事件名[小爱丽丝] : 变量数组[某数组]
+ * 插件指令：>标签核心 : 获取事件id(最前) : 根据事件名 : 事件名[小爱丽丝] : 变量[21]
+ * 插件指令：>标签核心 : 获取事件id(最后) : 根据事件名 : 事件名[小爱丽丝] : 变量[21]
+ * 插件指令：>标签核心 : 获取事件id(随机) : 根据事件名 : 事件名[小爱丽丝] : 变量[21]
  * 
- * 插件指令：>标签核心 : 获取事件id组 : 根据标签 : 被动技_躲避斩击 : 变量数组[3]
- * 插件指令：>标签核心 : 获取事件id组 : 根据标签 : 被动技_躲避斩击 : 变量数组[某数组]
- * 插件指令：>标签核心 : 获取事件id(最前) : 根据标签 : 被动技_躲避斩击 : 变量[21]
- * 插件指令：>标签核心 : 获取事件id(最后) : 根据标签 : 被动技_躲避斩击 : 变量[21]
- * 插件指令：>标签核心 : 获取事件id(随机) : 根据标签 : 被动技_躲避斩击 : 变量[21]
+ * 插件指令：>标签核心 : 获取事件id组 : 根据标签 : 标签[被动技_躲避斩击] : 变量数组[3]
+ * 插件指令：>标签核心 : 获取事件id组 : 根据标签 : 标签[被动技_躲避斩击] : 变量数组[某数组]
+ * 插件指令：>标签核心 : 获取事件id(最前) : 根据标签 : 标签[被动技_躲避斩击] : 变量[21]
+ * 插件指令：>标签核心 : 获取事件id(最后) : 根据标签 : 标签[被动技_躲避斩击] : 变量[21]
+ * 插件指令：>标签核心 : 获取事件id(随机) : 根据标签 : 标签[被动技_躲避斩击] : 变量[21]
  *
  * 1.如果有多个事件名相同的的事件，或者标签相同的事件，
  *   "获取事件id(最前)" 获取到的是事件id最小的那个；
@@ -151,13 +151,20 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			事件标签核心：
-//				->设置标签
-//				->获取事件（根据标签）
-//				->获取事件（根据事件名）
-//				->获取方式
-//					->筛选法获取
-//					->容器法获取 x
+//			->☆提示信息
+//			->☆静态数据
+//			->☆插件指令
+//			->☆事件注释
+//			
+//			->☆物体的属性
+//			->☆获取器
+//				->获取事件列表 - 含指定标签（开放函数）
+//				->获取事件列表 - 含任一标签（开放函数）
+//				->获取事件列表 - 根据事件名（开放函数）
+//			->☆筛选器
+//			
+//			->☆核心漏洞修复
+//				
 //				
 //		★家谱：
 //			无
@@ -170,12 +177,10 @@
 //
 //		★核心说明：
 //			1.该插件准确地说，【不是一个标准的核心】。
-//			  没有对外接口。
+//			  没有完整的必要功能，子插件用法还没搭建起来。
 //		
 //		★必要注意事项：
-//			1.【该插件使用了事件容器】，必须考虑三种情况：初始化、切换地图时、切换贴图时，不然会出现指针错误！
-//				只要是装事件的容器，都需要考虑指针问题，不管是放在$gameMap还是$gameTemp中。
-//				另外，帧刷新判断时，最好每次变化直接【刷新统计】。
+//			暂无
 //
 //		★其它说明细节：
 //			1.这里只是提供了一系列"通过标签"快速筛选的功能和方法。
@@ -186,7 +191,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -217,7 +222,7 @@
 	
 	
 //=============================================================================
-// ** 静态数据
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_CoreOfEventTags = true;
@@ -232,7 +237,7 @@ if( Imported.Drill_CoreOfNumberArray ){
 	
 	
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _drill_COET_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
@@ -240,87 +245,97 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	if( command === ">标签核心" ){
 		
 		/*-----------------对象组获取------------------*/
-		var e_ids = null;
+		var e_list = null;
 		if( args.length >= 2 ){
 			var unit = String(args[1]);
-			if( unit == "本事件" ){
-				e_ids = [ this._eventId ];
+			if( e_list == null && unit == "本事件" ){
+				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
+				e_list = [ e ];
 			}
-			if( unit.indexOf("批量事件变量[") != -1 ){
-				unit = unit.replace("批量事件变量[","");
-				unit = unit.replace("]","");
-				e_ids = [];
-				var temp_arr = unit.split(/[,，]/);
-				for( var k=0; k < temp_arr.length; k++ ){
-					e_ids.push( $gameVariables.value(Number(temp_arr[k])) );
-				}
-			}
-			if( unit.indexOf("批量事件[") != -1 ){
+			if( e_list == null && unit.indexOf("批量事件[") != -1 ){
 				unit = unit.replace("批量事件[","");
 				unit = unit.replace("]","");
-				e_ids = [];
 				var temp_arr = unit.split(/[,，]/);
+				e_list = [];
 				for( var k=0; k < temp_arr.length; k++ ){
-					e_ids.push( Number(temp_arr[k]) );
+					var e_id = Number(temp_arr[k]);
+					if( $gameMap.drill_COET_isEventExist( e_id ) == false ){ continue; }
+					var e = $gameMap.event( e_id );
+					e_list.push( e );
 				}
 			}
-			if( unit.indexOf("事件变量[") != -1 ){
-				unit = unit.replace("事件变量[","");
+			if( e_list == null && unit.indexOf("批量事件变量[") != -1 ){
+				unit = unit.replace("批量事件变量[","");
 				unit = unit.replace("]","");
-				e_ids = [ $gameVariables.value(Number(unit)) ];
+				var temp_arr = unit.split(/[,，]/);
+				e_list = [];
+				for( var k=0; k < temp_arr.length; k++ ){
+					var e_id = $gameVariables.value(Number(temp_arr[k]));
+					if( $gameMap.drill_COET_isEventExist( e_id ) == false ){ continue; }
+					var e = $gameMap.event( e_id );
+					e_list.push( e );
+				}
 			}
-			if( unit.indexOf("事件[") != -1 ){
+			if( e_list == null && unit.indexOf("事件[") != -1 ){
 				unit = unit.replace("事件[","");
 				unit = unit.replace("]","");
-				e_ids = [ Number(unit) ];
+				var e_id = Number(unit);
+				if( $gameMap.drill_COET_isEventExist( e_id ) == false ){ return; }
+				var e = $gameMap.event( e_id );
+				e_list = [ e ];
+			}
+			if( e_list == null && unit.indexOf("事件变量[") != -1 ){
+				unit = unit.replace("事件变量[","");
+				unit = unit.replace("]","");
+				var e_id = $gameVariables.value(Number(unit));
+				if( $gameMap.drill_COET_isEventExist( e_id ) == false ){ return; }
+				var e = $gameMap.event( e_id );
+				e_list = [ e ];
 			}
 		}
 		
 		/*-----------------设置标签------------------*/
-		if( e_ids && args.length == 4 ){
-			var type = String(args[3]);
-			if( type == "去除全部标签" ){
-				for( var k=0; k < e_ids.length; k++ ){
-					var e_id = e_ids[k];
-					if( $gameMap.drill_COET_isEventExist( e_id ) == false ){ continue; }
-					var e = $gameMap.event( e_id );
-					e.drill_COET_removeAllTag();
-				}
-				$gameTemp._drill_COET_needRestatistics = true;
-			}
-		}
-		if( e_ids && args.length == 6 ){
+		if( e_list != null && args.length == 6 ){
 			var type = String(args[3]);
 			var temp2 = String(args[5]);
-			if( type == "去除标签" ){
-				for( var k=0; k < e_ids.length; k++ ){
-					var e_id = e_ids[k];
-					if( $gameMap.drill_COET_isEventExist( e_id ) == false ){ continue; }
-					var e = $gameMap.event( e_id );
-					e.drill_COET_removeTag(temp2);
-				}
-				$gameTemp._drill_COET_needRestatistics = true;
-			}
+			temp2 = temp2.replace("标签[","");
+			temp2 = temp2.replace("]","");
 			if( type == "添加标签" ){
-				for( var k=0; k < e_ids.length; k++ ){
-					var e_id = e_ids[k];
-					if( $gameMap.drill_COET_isEventExist( e_id ) == false ){ continue; }
-					var e = $gameMap.event( e_id );
+				for( var k=0; k < e_list.length; k++ ){
+					var e = e_list[k];
 					e.drill_COET_addTag(temp2);
 				}
-				$gameTemp._drill_COET_needRestatistics = true;
+			}
+			if( type == "去除标签" ){
+				for( var k=0; k < e_list.length; k++ ){
+					var e = e_list[k];
+					e.drill_COET_removeTag(temp2);
+				}
+			}
+		}
+		if( e_list != null && args.length == 4 ){
+			var type = String(args[3]);
+			if( type == "去除全部标签" ){
+				for( var k=0; k < e_list.length; k++ ){
+					var e = e_list[k];
+					e.drill_COET_removeAllTag();
+				}
 			}
 		}
 		
 		/*-----------------获取事件id------------------*/
-		if(args.length == 8){			//>标签核心 : 获取事件id : 根据事件名 : 小爱丽丝 : 变量[21]
+		if( args.length == 8 ){			//>标签核心 : 获取事件id : 根据事件名 : 小爱丽丝 : 变量[21]
 			var temp1 = String(args[1]);
 			var type = String(args[3]);
 			var temp2 = String(args[5]);
 			var temp3 = String(args[7]);
+			temp2 = temp2.replace("事件名[","");
+			temp2 = temp2.replace("标签[","");
+			temp2 = temp2.replace("]","");
 			
 			if( type == "根据事件名" ){
-				var events = $gameMap.drill_COET_getEventsByName_direct(temp2);
+				var events = $gameMap.drill_COET_getEventsByName( temp2 );
 				if( temp1 == "获取事件id组" ){
 					temp3 = temp3.replace("变量数组[","");
 					temp3 = temp3.replace("]","");
@@ -359,7 +374,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				}
 			}
 			if( type == "根据标签" ){
-				var events = $gameMap.drill_COET_getEventsByTag_container(temp2);
+				var events = $gameMap.drill_COET_getEventsByTag( temp2 );
 				if( temp1 == "获取事件id组" ){
 					temp3 = temp3.replace("变量数组[","");
 					temp3 = temp3.replace("]","");
@@ -416,43 +431,59 @@ Game_Map.prototype.drill_COET_isEventExist = function( e_id ){
 
 
 //=============================================================================
-// * 注释绑定
+// ** ☆事件注释
 //=============================================================================
 //==============================
-// * 注释绑定 - 初始化
+// * 事件注释 - 初始化绑定
+//
+//			说明：	> 注释与当前事件页有关，不一定跨事件页。
 //==============================
-var _drill_COET_event_setupPage = Game_Event.prototype.setupPage;
-Game_Event.prototype.setupPage = function() {
-	_drill_COET_event_setupPage.call(this);
-    this.drill_COET_setupPage();
+var _drill_COET_c_setupPageSettings = Game_Event.prototype.setupPageSettings;
+Game_Event.prototype.setupPageSettings = function() {
+	_drill_COET_c_setupPageSettings.call(this);
+    this.drill_COET_setupPageSettings();
 };
 //==============================
-// * 注释绑定 - 标记
+// * 事件注释 - 初始化
 //==============================
-Game_Event.prototype.drill_COET_setupPage = function() {
-	if (!this._erased && this.page()) {this.list().forEach(function(l) {
-		if (l.code === 108) {
-			var args = l.parameters[0].split(' ');
+Game_Event.prototype.drill_COET_setupPageSettings = function() {
+	var page = this.page();
+	if( page == undefined ){ return; }
+	
+	var temp_list = this.list();
+	for(var k = 0; k < temp_list.length; k++ ){
+		var l = temp_list[k];
+		if( l.code === 108 ){
+			
+			/*-----------------标准注释------------------*/
+			var row = l.parameters[0];
+			var args = row.split(/[ ]+/);
 			var command = args.shift();
-			if (command == "=>标签核心"){	//=>标签核心 : 添加标签 : 斩击躲避
-				if(args.length == 4){
+			if( command == "=>标签核心" ){	//=>标签核心 : 添加标签 : 标签[斩击躲避]
+				if( args.length == 4 ){
 					var temp1 = String(args[1]);
 					var temp2 = String(args[3]);
+					temp2 = temp2.replace("标签[","");
+					temp2 = temp2.replace("]","");
 					if( temp1 == "添加标签" ){
 						this.drill_COET_addTag(temp2);
 					}
 				}
-			};
+			}
 		};
-	}, this);};
+	};
 };	
 
 
+
 //=============================================================================
-// * 事件标签
+// ** ☆物体的属性
+//
+//			说明：	> 此模块专门定义 物体的属性 。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 事件标签 - 初始化
+// * 物体的属性 - 初始化
 //==============================
 var _drill_COET_e_initMembers = Game_Event.prototype.initMembers;
 Game_Event.prototype.initMembers = function() {
@@ -460,56 +491,58 @@ Game_Event.prototype.initMembers = function() {
 	_drill_COET_e_initMembers.call(this);
 }
 //==============================
-// * 事件标签 - 含指定标签
+// * 物体的属性 - 添加标签（开放函数）
 //==============================
-Game_Event.prototype.drill_COET_hasTag = function( tag ){
-	return this._drill_COET_tag.indexOf(tag) != -1 ;
+Game_Event.prototype.drill_COET_addTag = function( tag ){
+	if( this.drill_COET_hasTag(tag) == true ){ return; }
+	this._drill_COET_tag.push(tag);
 }
 //==============================
-// * 事件标签 - 含指定标签组任意一个
+// * 物体的属性 - 去除标签（开放函数）
 //==============================
-Game_Event.prototype.drill_COET_hasAnyTag = function( tag_list ) {
-	for(var i=0; i < tag_list.length; i++){
-		if( this.drill_COET_hasTag( tag_list[i] ) ){
+Game_Event.prototype.drill_COET_removeTag = function( tag ){
+	var index = this._drill_COET_tag.indexOf(tag);
+	if( index == -1 ){ return; }
+	this._drill_COET_tag.splice(index,1);
+}
+//==============================
+// * 物体的属性 - 去除全部标签（开放函数）
+//==============================
+Game_Event.prototype.drill_COET_removeAllTag = function() {
+	this._drill_COET_tag = [];
+}
+//==============================
+// * 物体的属性 - 是否含指定标签（开放函数）
+//==============================
+Game_Event.prototype.drill_COET_hasTag = function( tag ){
+	return this._drill_COET_tag.indexOf(tag) != -1;
+}
+//==============================
+// * 物体的属性 - 是否含任一标签（开放函数）
+//==============================
+Game_Event.prototype.drill_COET_hasAnyTag = function( tag_list ){
+	for(var i = 0; i < tag_list.length; i++){
+		var tag = tag_list[i];
+		if( this.drill_COET_hasTag(tag) == true ){
 			return true;
 		}
 	}
 	return false;
 }
-//==============================
-// * 事件标签 - 添加标签
-//==============================
-Game_Event.prototype.drill_COET_addTag = function( tag ){
-	if( this.drill_COET_hasTag(tag) == false ){
-		this._drill_COET_tag.push(tag);
-	}
-}
-//==============================
-// * 事件标签 - 去除标签
-//==============================
-Game_Event.prototype.drill_COET_removeTag = function( tag ){
-	if( this.drill_COET_hasTag(tag) == true ){
-		var index = this._drill_COET_tag.indexOf(tag);
-		this._drill_COET_tag.splice(index,1);
-	}
-}
-//==============================
-// * 事件标签 - 去除全部标签
-//==============================
-Game_Event.prototype.drill_COET_removeAllTag = function() {
-	this._drill_COET_tag = [];
-}
 
 
 //=============================================================================
-// * 直接操作
+// ** ☆获取器
+//
+//			说明：	> 此模块提供 获取函数 。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 直接操作 - 获取事件（接口，根据单标签）
+// * 获取器 - 获取事件列表 - 含指定标签（开放函数）
 //==============================
-Game_Map.prototype.drill_COET_getEventsByTag_direct = function( tag ){
+Game_Map.prototype.drill_COET_getEventsByTag = function( tag ){
 	var result_list = [];
-	var event_list = this._events;
+	var event_list = this._events;		//（全部事件遍历）
 	for(var i = 0; i < event_list.length; i++ ){
 		var temp_event = event_list[i];
 		if( temp_event == null ){ continue; }
@@ -522,11 +555,11 @@ Game_Map.prototype.drill_COET_getEventsByTag_direct = function( tag ){
 	return result_list;
 }
 //==============================
-// * 直接操作 - 获取事件（接口，根据多个标签）
+// * 获取器 - 获取事件列表 - 含任一标签（开放函数）
 //==============================
-Game_Map.prototype.drill_COET_getEventsByTaglist_direct = function( tag_list ){
+Game_Map.prototype.drill_COET_getEventsByTaglist = function( tag_list ){
 	var result_list = [];
-	var event_list = this._events;
+	var event_list = this._events;		//（全部事件遍历）
 	for(var i = 0; i < event_list.length; i++ ){
 		var temp_event = event_list[i];
 		if( temp_event == null ){ continue; }
@@ -539,11 +572,11 @@ Game_Map.prototype.drill_COET_getEventsByTaglist_direct = function( tag_list ){
 	return result_list;
 }
 //==============================
-// * 直接操作 - 获取事件（接口，根据事件名）
+// * 获取器 - 获取事件列表 - 根据事件名（开放函数）
 //==============================
-Game_Map.prototype.drill_COET_getEventsByName_direct = function( name ){
+Game_Map.prototype.drill_COET_getEventsByName = function( name ){
 	var result_list = [];
-	var event_list = this._events;
+	var event_list = this._events;		//（全部事件遍历）
 	for(var i = 0; i < event_list.length; i++ ){
 		var temp_event = event_list[i];
 		if( temp_event == null ){ continue; }
@@ -555,8 +588,16 @@ Game_Map.prototype.drill_COET_getEventsByName_direct = function( name ){
 	}
 	return result_list;
 }
+
+
+//=============================================================================
+// ** ☆筛选器
+//
+//			说明：	> 此模块提供 筛选器 相关函数。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
 //==============================
-// * 筛选器 - 筛选事件（根据多个标签）
+// * 筛选器 - 指定列表中 含任一标签
 //==============================
 Game_Map.prototype.drill_COET_selectEventsByTaglist = function( event_list, tag_list ){
 	var result_list = [];
@@ -573,107 +614,9 @@ Game_Map.prototype.drill_COET_selectEventsByTaglist = function( event_list, tag_
 }
 
 
-//=============================================================================
-// * 分类容器
-//=============================================================================
-//==============================
-// * 分类容器 - 获取事件（接口，根据单标签）
-//==============================
-Game_Map.prototype.drill_COET_getEventsByTag_container = function( tag ){
-	var result = $gameTemp._drill_COET_eventTank[tag];
-	if( result == undefined ){
-		return [];
-	}
-	return result;
-}
-//==============================
-// * 分类容器 - 获取事件（接口，根据多个标签）
-//
-//			说明：	注意，Set类是ES6的，ES5中没有。
-//==============================
-Game_Map.prototype.drill_COET_getEventsByTaglist_container = function( tag_list ){
-	var result = [];
-	for(var i=0; i < tag_list.length; i++ ){
-		var tag = tag_list[i];
-		result.concat( this.drill_COET_getEventsByTag_container(tag) );
-	}
-	
-	// > 去重
-	for(var i=0; i < result.length; i++){
-		for(var j= i+1; j < result.length; j++){
-			if( arr[i] == arr[j] ){
-				arr.splice(j,1);
-				j--;
-			}
-		}
-	}
-	
-	return result;
-}
-
-//==============================
-// * 容器 - 初始化
-//==============================
-var _drill_COET_temp_initialize = Game_Temp.prototype.initialize;
-Game_Temp.prototype.initialize = function() {	
-	_drill_COET_temp_initialize.call(this);
-	this._drill_COET_eventTank = {};			//分类容器
-	this._drill_COET_needRestatistics = true;
-};
-//==============================
-// * 容器 - 切换地图时
-//==============================
-var _drill_COET_gmap_setup = Game_Map.prototype.setup;
-Game_Map.prototype.setup = function( mapId ){
-	$gameTemp._drill_COET_eventTank = {};
-	$gameTemp._drill_COET_needRestatistics = true;
-	_drill_COET_gmap_setup.call(this,mapId);
-}
-//==============================
-// * 容器 - 切换贴图时（菜单界面刷新）
-//==============================
-var _drill_COET_smap_createCharacters = Spriteset_Map.prototype.createCharacters;
-Spriteset_Map.prototype.createCharacters = function() {
-	$gameTemp._drill_COET_eventTank = {};
-	$gameTemp._drill_COET_needRestatistics = true;
-	_drill_COET_smap_createCharacters.call(this);
-}
-//==============================
-// * 容器 - 帧刷新
-//==============================
-var _drill_COET_map_update = Game_Map.prototype.update;
-Game_Map.prototype.update = function( sceneActive ){
-	_drill_COET_map_update.call( this,sceneActive );
-	this.drill_COET_updateRestatistics();		//帧刷新 - 刷新统计
-};
-//==============================
-// * 容器 - 帧刷新 - 刷新统计
-//==============================
-Game_Map.prototype.drill_COET_updateRestatistics = function() {
-	if( !$gameTemp._drill_COET_needRestatistics ){ return }
-	$gameTemp._drill_COET_needRestatistics = false;
-	
-	$gameTemp._drill_COET_eventTank = {};
-	var event_list = this._events;
-	for(var i = 0; i < event_list.length; i++ ){  
-		var temp_event = event_list[i];
-		if( temp_event == null ){ continue; }
-		if( temp_event._erased == true ){ continue; }	//『有效事件』
-		
-		for(var j = 0; j < temp_event._drill_COET_tag.length; j++ ){  
-			var temp_tag = temp_event._drill_COET_tag[j];
-			
-			// > 每个tag放置该事件的指针
-			if( $gameTemp._drill_COET_eventTank[temp_tag] == undefined ){
-				$gameTemp._drill_COET_eventTank[temp_tag] = [];
-			}
-			$gameTemp._drill_COET_eventTank[temp_tag].push(temp_event);
-		}
-	}
-}
 
 //=============================================================================
-// ** 核心漏洞修复
+// ** ☆核心漏洞修复
 //=============================================================================
 //==============================
 // * 核心漏洞修复 - 『屏蔽根据版本重刷地图』

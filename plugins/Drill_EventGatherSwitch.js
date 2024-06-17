@@ -254,12 +254,13 @@
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^4) 每帧
 //		★性能测试因素	机关管理层、消除砖块关卡
-//		★性能测试消耗	2023/12/9（每1帧计算一次）：
-//							机关管理层：45.3ms（drill_EGS_updatePositionTank）
-//							消除砖块关卡：149.0ms（drill_EGS_updateSwitch）153.5ms（drill_EGS_getAllEventsNearBy）172.3ms（drill_EGS_updatePositionTank）
+//		★性能测试消耗	2023/12/9：
+//							》每1帧计算一次。
+//							》机关管理层：45.3ms（drill_EGS_updatePositionTank）
+//							》消除砖块关卡：149.0ms（drill_EGS_updateSwitch）153.5ms（drill_EGS_getAllEventsNearBy）172.3ms（drill_EGS_updatePositionTank）
 //						2024/5/2：
-//							机关管理层：28.8ms（开优化，drill_EGS_updatePositionTank）
-//							加了个"优化每帧计算量"功能，但后来发现 消除砖块关卡 不能开这个优化，所以感觉这个优化没用。
+//							》机关管理层：28.8ms（开优化，drill_EGS_updatePositionTank）
+//							》加了个"优化每帧计算量"功能，但后来发现 消除砖块关卡 不能开这个优化，所以感觉这个优化没用。
 //		★最坏情况		暂无
 //		★备注			这个插件最能提现其消耗程度的，就在关卡 设计-消除砖块，用垃圾本跑一次就能知道情况了。
 //						最初版本帧数为2-3帧，现在优化到了5-6帧，详情去看脚本文档的记录。
@@ -403,6 +404,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			}
 			if( c_chars == null && unit == "本事件" ){
 				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
 				c_chars = [ e ];
 			}
 			if( c_chars == null && unit.indexOf("批量事件[") != -1 ){

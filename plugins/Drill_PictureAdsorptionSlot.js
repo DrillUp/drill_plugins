@@ -640,7 +640,7 @@
 //		★时间复杂度		o(n^2)  每帧
 //		★性能测试因素	图片管理层
 //		★性能测试消耗	2024/5/2：
-//							12.3ms（drill_PAS_org_finalTransform_x）37.2ms（drill_PAS_updateAdsorb）
+//							》12.3ms（drill_PAS_org_finalTransform_x）37.2ms（drill_PAS_updateAdsorb）
 //		★最坏情况		暂无
 //		★备注			核心功能应用到图片贴图上，不需要过多考虑优化问题。
 //		
@@ -1734,7 +1734,7 @@ Game_Picture.prototype.drill_PAS_checkSwitchData = function(){
 	// > 数据 - 图片ID【图片-图片优化核心】
 	this._drill_PAS_switchData['pic_id'] = this.drill_COPi_getPictureId();
 	
-	// > 数据 - 吸附控制器ID【系统-拖拽与吸附控制核心】
+	// > 数据 - 吸附控制器ID【数学模型-拖拽与吸附核心】
 	var adsorb_factory = $gameSystem.drill_CODAA_adsorbFactory();
 	var product_id = adsorb_factory.drill_factoryAdsorb_create( "PAS" );	//（通过工厂创建控制器，并印上该插件的简称）
 	this._drill_PAS_switchData['adsorbController_id'] = product_id;
@@ -2244,7 +2244,7 @@ Scene_Map.prototype.drill_PAS_updateDrawBeanRangeBitmap = function() {
 		var color_line = "rgb(200,255,230)";
 		
 		// > 绘制 - 矩形中心点
-		var xx = picture.drill_COPi_finalTransform_x();  //【图片-图片优化核心】数据最终变换值
+		var xx = picture.drill_COPi_finalTransform_x();  //【图片-图片优化核心】『图片数据最终变换值』
 		var yy = picture.drill_COPi_finalTransform_y();
 		temp_bitmap.drawCircle( xx, yy, 11, color_line );
 		temp_bitmap.drawCircle( xx, yy, 5, "#ff0000" );

@@ -246,79 +246,79 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_XETL_pluginCommand.call(this, command, args);
 	if( command === ">事件漂浮文字批注线" ){
 		
-		/*-----------------对象组获取------------------*/
-		var e_id = null;
+		/*-----------------单事件获取------------------*/
+		var ev = null;
 		if( args.length >= 2 ){
-			var temp1 = String(args[1]);
-			if( temp1 == "本事件" ){
-				var e_id = this._eventId;
+			var unit = String(args[1]);
+			if( ev == null && unit == "本事件" ){
+				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
+				ev = e;
 			}
-			if( temp1.indexOf("事件[") != -1 ){
-				temp1 = temp1.replace("事件[","");
-				temp1 = temp1.replace("]","");
-				var e_id = Number(temp1);
+			if( ev == null && unit.indexOf("事件[") != -1 ){
+				unit = unit.replace("事件[","");
+				unit = unit.replace("]","");
+				var e_id = Number(unit);
+				if( $gameMap.drill_XETL_isEventExist( e_id ) == false ){ return; }
+				var e = $gameMap.event( e_id );
+				ev = e;
 			}
-			if( temp1.indexOf("事件变量[") != -1 ){
-				temp1 = temp1.replace("事件变量[","");
-				temp1 = temp1.replace("]","");
-				var e_id = $gameVariables.value(Number(temp1));
+			if( ev == null && unit.indexOf("事件变量[") != -1 ){
+				unit = unit.replace("事件变量[","");
+				unit = unit.replace("]","");
+				var e_id = $gameVariables.value(Number(unit));
+				if( $gameMap.drill_XETL_isEventExist( e_id ) == false ){ return; }
+				var e = $gameMap.event( e_id );
+				ev = e;
 			}
 		}
 		
 		/*-----------------指令设置------------------*/
-		if( e_id != null && args.length == 4 ){
+		if( ev != null && args.length == 4 ){
 			var type = String(args[3]);
 			if( type == "显示线" ){
-				if( $gameMap.drill_XETL_isEventExist( e_id ) == false ){ return; }
-				var e = $gameMap.event(e_id);
-				e.drill_ET_createController();
-				e._drill_ET_controller.drill_XETL_setEnabled( true );
+				ev.drill_ET_createController();
+				ev._drill_ET_controller.drill_XETL_setEnabled( true );
 			}
 			if( type == "隐藏线" ){
-				if( $gameMap.drill_XETL_isEventExist( e_id ) == false ){ return; }
-				var e = $gameMap.event(e_id);
-				e.drill_ET_createController();
-				e._drill_ET_controller.drill_XETL_setEnabled( false );
+				ev.drill_ET_createController();
+				ev._drill_ET_controller.drill_XETL_setEnabled( false );
 			}
 		}
-		if( e_id != null && args.length == 6 ){
+		if( ev != null && args.length == 6 ){
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
 			if( type == "属性设置" ){
-				if( $gameMap.drill_XETL_isEventExist( e_id ) == false ){ return; }
-				var e = $gameMap.event(e_id);
 				if( temp1.indexOf("线厚度[") != -1 ){
 					temp1 = temp1.replace("线厚度[","");
 					temp1 = temp1.replace("]","");
 					temp1 = Number(temp1);
-					e.drill_ET_createController();
-					e._drill_ET_controller.drill_XETL_setThickness( temp1 );
+					ev.drill_ET_createController();
+					ev._drill_ET_controller.drill_XETL_setThickness( temp1 );
 				}
 				if( temp1.indexOf("线颜色[") != -1 ){
 					temp1 = temp1.replace("线颜色[","");
 					temp1 = temp1.replace("]","");
-					e.drill_ET_createController();
-					e._drill_ET_controller.drill_XETL_setColor( temp1 );
+					ev.drill_ET_createController();
+					ev._drill_ET_controller.drill_XETL_setColor( temp1 );
 				}
 			}
 		}
-		if( e_id != null && args.length == 8 ){
+		if( ev != null && args.length == 8 ){
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
 			var temp2 = String(args[7]);
 			if( type == "属性设置" && temp1 == "连接位置" ){
 				if( temp2 == "最左" || temp2 == "居中" || temp2 == "最右" ){
-					if( $gameMap.drill_XETL_isEventExist( e_id ) == false ){ return; }
-					var e = $gameMap.event(e_id);
-					e.drill_ET_createController();
-					e._drill_ET_controller.drill_XETL_setLineMode( temp2 );
+					ev.drill_ET_createController();
+					ev._drill_ET_controller.drill_XETL_setLineMode( temp2 );
 				}
 			}
 		}
 	}
 };
 //==============================
-// ** 插件指令 - 事件检查
+// * 插件指令 - 事件检查
 //==============================
 Game_Map.prototype.drill_XETL_isEventExist = function( e_id ){
 	if( e_id == 0 ){ return false; }

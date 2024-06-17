@@ -384,6 +384,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args){
 			if( type == "强制举起事件" ){
 				if( String(temp1) == "本事件" ){
 					var e = $gameMap.event( this._eventId );
+					if( e == undefined ){ return; } //『防止并行删除事件出错』
 					e.drill_doPick();
 				}else{
 					var e_id = Number(temp1)
@@ -919,7 +920,7 @@ Game_CharacterBase.prototype.drill_PT_getHeight = function(){
 
 
 //=============================================================================
-// ** ☆数据最终变换值
+// ** ☆数据最终变换值『物体数据最终变换值』
 //
 //			说明：	> 此模块专门控制 偏移与其他插件兼容 的设置。
 //					（插件完整的功能目录去看看：功能结构树）

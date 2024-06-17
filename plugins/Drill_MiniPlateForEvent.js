@@ -488,9 +488,10 @@
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^2)+o(贴图处理) 每帧
 //		★性能测试因素	鼠标乱晃
-//		★性能测试消耗	旧消耗：30.09ms  39.97ms（update函数，在镜像Drill_Sprite_LRR中）
-//						2022-10-21消耗：23.7ms（drill_updateMessage）
-//						2023-06-15消耗：22.3ms（drill_updatePosition）17.4ms（update）0.6ms（drill_updateMessage）
+//		★性能测试消耗	2022-10-21：
+//							》23.7ms（drill_updateMessage）
+//						2023-06-15：
+//							》22.3ms（drill_updatePosition）17.4ms（update）0.6ms（drill_updateMessage）
 //		★最坏情况		当前视角，存在大批说明窗口的事件，并且玩家的鼠标乱晃。
 //						（该插件目前没有对最坏情况进行实测。）
 //		★备注			无
@@ -710,6 +711,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var unit = String(args[1]);
 			if( char_list == null && unit == "本事件" ){
 				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
 				char_list = [ e ];
 			}
 			if( char_list == null && unit.indexOf("批量事件[") != -1 ){
@@ -1246,7 +1248,7 @@ Sprite_Character.prototype.drill_MPFE_updatePosition = function() {
 	
 	//var xx = this.x;
 	//var yy = this.y;
-	var xx = ch.screenX();			//（这里已经包含 行走图的 数据最终变换值 了）
+	var xx = ch.screenX();			//（这里已经包含 行走图的『物体数据最终变换值』 了）
 	var yy = ch.screenY();
 	
 	var ww = bean._drill_frameW;
@@ -1258,7 +1260,7 @@ Sprite_Character.prototype.drill_MPFE_updatePosition = function() {
 	bean.drill_bean_setPosition( xx, yy );
 };
 //==============================
-// * 实体类赋值 - 刷新框架【贴图框架值_realFrame】
+// * 实体类赋值 - 刷新框架『贴图框架值』（_realFrame）
 //
 //			说明：	> 此处 非帧刷新，而是在 贴图底层 发生刷新改变时，才变化值。
 //==============================

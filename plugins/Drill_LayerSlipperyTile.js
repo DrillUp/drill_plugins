@@ -380,6 +380,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var unit = String(args[1]);
 			if( chars == null && unit == "本事件" ){
 				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
 				chars = [ e ];
 			}
 			if( chars == null && unit.indexOf("事件变量[") != -1 ){

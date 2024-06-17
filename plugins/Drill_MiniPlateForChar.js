@@ -1606,7 +1606,7 @@ Window_Base.prototype.drill_COWC_addSprite_Private = function( tar_sprite ){
 	// > 创建
 	var bind = DrillUp.g_MPFC_list[ $gameTemp._drill_MPFC_curContextId -1 ];
 	tar_sprite._drill_MPFC_bean = new Drill_MPFC_Bean();
-	tar_sprite._drill_MPFC_bean.drill_bean_resetFrame( 0,0,tar_sprite.bitmap.width,tar_sprite.bitmap.height );
+	tar_sprite._drill_MPFC_bean.drill_bean_resetFrame( 0,0,tar_sprite.bitmap.width,tar_sprite.bitmap.height );	//固定高宽『贴图框架值』
 	tar_sprite._drill_MPFC_bean.drill_bean_setContextList( bind['context'] );
 	tar_sprite._drill_MPFC_bean.drill_bean_setSkinStyle( bind['style_mode'], bind['style_lockedId'] );
 	

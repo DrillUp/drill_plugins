@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        面板 - 限量商店
+ * @plugindesc [v1.5]        面板 - 限量商店
  * @author Drill_up
  * 
  * @Drill_LE_param "限量商店-%d"
@@ -121,12 +121,15 @@
  * 2.面板打开时，游戏是暂停的，所以你不能在面板中实时变化某些数值。
  *
  * -----------------------------------------------------------------------------
- * ----可选设定 - 改变限量
+ * ----可选设定 - 改变限制数量
  * 你可以使用用下面的插件指令，修改上限：
  * （冒号两边都有一个空格）
  * 
- * 插件指令：>限量商店 : 限量商店[1] : 添加上限 : 商品[1] : 数量[+5]
- * 插件指令：>限量商店 : 限量商店[1] : 添加上限 : 商品[1] : 数量[-5]
+ * 插件指令：>限量商店 : 限量商店[1] : 商品[1] : 设置限制数量 : 数量[5]
+ * 插件指令：>限量商店 : 限量商店[1] : 商品[1] : 设置限制数量 : 数量变量[21]
+ * 插件指令：>限量商店 : 限量商店[1] : 商品[1] : 添加限制数量 : 数量[+5]
+ * 插件指令：>限量商店 : 限量商店[1] : 商品[1] : 添加限制数量 : 数量[-5]
+ * 插件指令：>限量商店 : 限量商店[1] : 商品[1] : 添加限制数量 : 数量变量[21]
  * 
  * 1."商品[1]"表示配置的第1个商品。
  * 2."数量[+5]"表示添加上限。"数量[-5]"表示减少上限。
@@ -134,17 +137,21 @@
  *   如果类型为背包限制，上限 表示最大购买量。
  *
  * -----------------------------------------------------------------------------
- * ----可选设定 - 库存信息获取
+ * ----可选设定 - 库存设置
  * 你可以使用用下面的插件指令，获取库存信息：
  * （冒号两边都有一个空格）
  * 
- * 插件指令：>限量商店 : 限量商店[1] : 获取剩余库存 : 商品[1] : 变量[21]
- * 插件指令：>限量商店 : 限量商店[1] : 获取库存限制量 : 商品[1] : 变量[21]
- * 插件指令：>限量商店 : 限量商店[1] : 是否卖完 : 商品[1] : 开关[21]
+ * 插件指令：>限量商店 : 限量商店[1] : 商品[1] : 重置库存
+ * 插件指令：>限量商店 : 限量商店[1] : 重置全部库存
+ * 
+ * 插件指令：>限量商店 : 限量商店[1] : 商品[1] : 获取剩余库存 : 变量[21]
+ * 插件指令：>限量商店 : 限量商店[1] : 商品[1] : 获取库存限制量 : 变量[21]
+ * 插件指令：>限量商店 : 限量商店[1] : 商品[1] : 是否卖完 : 开关[21]
  * 插件指令：>限量商店 : 限量商店[1] : 全部商品是否卖完 : 开关[21]
  * 
  * 1.上述指令仅限于 库存限制类型 的商店。
  *   使用插件指令时，注意一下商店的 限制类型。
+ * 2.注意，重置库存 不会改变限制数量，如果限制数量修改为6，重置后为0/6。
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 服务员
@@ -191,8 +198,11 @@
  * 添加了 空数据同步更新 的优化。
  * [v1.4]
  * 兼容 窗口辅助核心 2.0。
+ * [v1.5]
+ * 添加了 变量设置限制数量 的功能。
  * 
- *
+ * 
+ * 
  * @param ----杂项----
  * @default 
  *
@@ -1057,7 +1067,7 @@
  * @value 增减速移动
  * @option 弹性移动
  * @value 弹性移动
- * @desc 移动类型基于 弹道核心-两点式 移动。更多内容可以去看看 "1.系统 > 关于弹道.docx"。
+ * @desc 移动类型基于 弹道核心-两点式 移动。更多内容可以去看看 "32.数学模型 > 关于弹道.docx"。
  * @default 匀速移动
  *
  * @param 移动时长
@@ -1118,7 +1128,7 @@
  * @value 增减速移动
  * @option 弹性移动
  * @value 弹性移动
- * @desc 移动类型基于 弹道核心-两点式 移动。更多内容可以去看看 "1.系统 > 关于弹道.docx"。
+ * @desc 移动类型基于 弹道核心-两点式 移动。更多内容可以去看看 "32.数学模型 > 关于弹道.docx"。
  * @default 匀速移动
  *
  * @param 移动时长
@@ -1916,142 +1926,153 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_SLS_pluginCommand.call(this, command, args);
 	if( command === ">限量商店" ){
 		
+		/*-----------------对象组获取------------------*/
+		var shop_id = null;
+		if( args.length >= 2 ){
+			var unit = String(args[1]);
+			if( shop_id == null && unit.indexOf("限量商店[") != -1 ){
+				unit = unit.replace("限量商店[","");
+				unit = unit.replace("]","");
+				shop_id = Math.max( Number(unit)-1, 0 );
+			}
+		}
+		var shopItem_id = null;
+		if( args.length >= 4 ){
+			var unit = String(args[3]);
+			if( shopItem_id == null && unit.indexOf("商品[") != -1 ){
+				unit = unit.replace("商品[","");
+				unit = unit.replace("]","");
+				shopItem_id = Math.max( Number(unit)-1, 0 );
+			}
+		}
+		
 		/*-----------------打开------------------*/
-		if(args.length == 4){
-			var temp1 = String(args[1]);
+		if( shop_id != null && args.length == 4 ){
 			var type = String(args[3]);
-			if( type == "打开" ){		//（打开面板）
-				temp1 = temp1.replace("限量商店[","");
-				temp1 = temp1.replace("]","");
-				temp1 = Number(temp1) - 1;
-				$gameSystem._drill_SLS_shopIndex = temp1;
+			if( type == "打开" ){
+				$gameSystem._drill_SLS_shopIndex = shop_id;
 				SceneManager.push(Scene_Drill_SLS);
 			}
 		}
 		
-		/*-----------------添加上限------------------*/
-		if(args.length == 8){
-			var temp1 = String(args[1]);
-			var type = String(args[3]);
-			var temp2 = String(args[5]);
+		/*-----------------改变限制数量------------------*/
+		if( shop_id != null && shopItem_id != null && args.length == 8 ){
+			var type = String(args[5]);
 			var temp3 = String(args[7]);
-			if( type == "添加上限" ){
-				temp1 = temp1.replace("限量商店[","");
-				temp1 = temp1.replace("]","");
-				temp1 = Number(temp1) - 1;
-				temp2 = temp2.replace("商品[","");
-				temp2 = temp2.replace("]","");
-				temp2 = Number(temp2) - 1;
-				temp3 = temp3.replace("数量[","");
-				temp3 = temp3.replace("]","");
-				temp3 = Number(temp3);
-				var shop_item = $gameSystem.drill_SLS_getShopItemData_WithCheck( temp1, temp2 );
-				if( shop_item != null ){
-					shop_item['limit_num'] += temp3;
-					if( shop_item['limit_num'] < 0 ){
-						shop_item['limit_num'] = 0;
-					}
+			if( type == "设置限制数量" || type == "设置上限" ){
+				if( temp3.indexOf("数量变量[") != -1 ){
+					temp3 = temp3.replace("数量变量[","");
+					temp3 = temp3.replace("]","");
+					temp3 = $gameVariables.value( Number(temp3) );
+				}else{
+					temp3 = temp3.replace("数量[","");
+					temp3 = temp3.replace("]","");
+					temp3 = Number(temp3);
 				}
+				var shop_item = $gameSystem.drill_SLS_getShopItemData_WithCheck( shop_id, shopItem_id );
+				if( shop_item == undefined ){ return; }
+				shop_item['limit_num'] = temp3;
+				if( shop_item['limit_num'] < 0 ){ shop_item['limit_num'] = 0; }
+			}
+			if( type == "添加限制数量" || type == "添加上限" ){
+				if( temp3.indexOf("数量变量[") != -1 ){
+					temp3 = temp3.replace("数量变量[","");
+					temp3 = temp3.replace("]","");
+					temp3 = $gameVariables.value( Number(temp3) );
+				}else{
+					temp3 = temp3.replace("数量[","");
+					temp3 = temp3.replace("]","");
+					temp3 = Number(temp3);
+				}
+				var shop_item = $gameSystem.drill_SLS_getShopItemData_WithCheck( shop_id, shopItem_id );
+				if( shop_item == undefined ){ return; }
+				shop_item['limit_num'] += temp3;
+				if( shop_item['limit_num'] < 0 ){ shop_item['limit_num'] = 0; }
 			}
 		}
 		
-		/*-----------------库存信息获取------------------*/
-		if(args.length == 6){
-			var temp1 = String(args[1]);
-			var type = String(args[3]);
-			var temp2 = String(args[5]);
-			if( type == "全部商品是否卖完" ){
-				temp1 = temp1.replace("限量商店[","");
-				temp1 = temp1.replace("]","");
-				temp1 = Number(temp1) - 1;
-				temp2 = temp2.replace("开关[","");
-				temp2 = temp2.replace("]","");
-				temp2 = Number(temp2);
-				var b = $gameSystem.drill_SLS_isAllSoldOut( temp1 );
-				$gameSwitches.setValue( temp2, b );
+		/*-----------------库存设置------------------*/
+		if( shop_id != null && shopItem_id != null && args.length == 6 ){
+			var type = String(args[5]);
+			if( type == "重置库存" ){
+				var shop_item = $gameSystem.drill_SLS_getShopItemData_WithCheck( shop_id, shopItem_id );
+				if( shop_item == undefined ){ return; }
+				shop_item['limit_cur'] = 0;
 			}
 		}
-		if(args.length == 8){		//（这里没加 库存限制/背包限制 类型的识别）
-			var temp1 = String(args[1]);
+		if( shop_id != null && args.length == 4 ){
 			var type = String(args[3]);
-			var temp2 = String(args[5]);
+			if( type == "重置全部库存" ){
+				var shop = $gameSystem.drill_SLS_getShopData( shop_id );
+				if( shop == undefined ){ return; }
+				for(var i = 0; i < shop['list'].length; i++ ){
+					var shop_item = shop['list'][i];
+					if( shop_item == undefined ){ continue; }
+					shop_item['limit_cur'] = 0;
+				}
+			}
+		}
+		if( shop_id != null && shopItem_id != null && args.length == 8 ){	//（这里没加 库存限制/背包限制 类型的识别）
+			var type = String(args[5]);
 			var temp3 = String(args[7]);
 			if( type == "是否卖完" ){
-				temp1 = temp1.replace("限量商店[","");
-				temp1 = temp1.replace("]","");
-				temp1 = Number(temp1) - 1;
-				temp2 = temp2.replace("商品[","");
-				temp2 = temp2.replace("]","");
-				temp2 = Number(temp2) - 1;
 				temp3 = temp3.replace("开关[","");
 				temp3 = temp3.replace("]","");
 				temp3 = Number(temp3);
-				var shop_item = $gameSystem.drill_SLS_getShopItemData_WithCheck( temp1, temp2 );
-				if( shop_item != null ){
-					var b = (shop_item['limit_cur'] >= shop_item['limit_num']);
-					$gameSwitches.setValue( temp3, b );
-				}
+				var shop_item = $gameSystem.drill_SLS_getShopItemData_WithCheck( shop_id, shopItem_id );
+				if( shop_item == undefined ){ return; }
+				var b = (shop_item['limit_cur'] >= shop_item['limit_num']);
+				$gameSwitches.setValue( temp3, b );
 			}
 			if( type == "获取剩余库存" ){
-				temp1 = temp1.replace("限量商店[","");
-				temp1 = temp1.replace("]","");
-				temp1 = Number(temp1) - 1;
-				temp2 = temp2.replace("商品[","");
-				temp2 = temp2.replace("]","");
-				temp2 = Number(temp2) - 1;
 				temp3 = temp3.replace("变量[","");
 				temp3 = temp3.replace("]","");
 				temp3 = Number(temp3);
-				var shop_item = $gameSystem.drill_SLS_getShopItemData_WithCheck( temp1, temp2 );
-				if( shop_item != null ){
-					$gameVariables.setValue( temp3, shop_item['limit_num']-shop_item['limit_cur'] );
-				}
+				var shop_item = $gameSystem.drill_SLS_getShopItemData_WithCheck( shop_id, shopItem_id );
+				if( shop_item == undefined ){ return; }
+				$gameVariables.setValue( temp3, shop_item['limit_num']-shop_item['limit_cur'] );
 			}
 			if( type == "获取库存限制量" ){
-				temp1 = temp1.replace("限量商店[","");
-				temp1 = temp1.replace("]","");
-				temp1 = Number(temp1) - 1;
-				temp2 = temp2.replace("商品[","");
-				temp2 = temp2.replace("]","");
-				temp2 = Number(temp2) - 1;
 				temp3 = temp3.replace("变量[","");
 				temp3 = temp3.replace("]","");
 				temp3 = Number(temp3);
-				var shop_item = $gameSystem.drill_SLS_getShopItemData_WithCheck( temp1, temp2 );
-				if( shop_item != null ){
-					$gameVariables.setValue( temp3, shop_item['limit_num'] );
-				}
+				var shop_item = $gameSystem.drill_SLS_getShopItemData_WithCheck( shop_id, shopItem_id );
+				if( shop_item == undefined ){ return; }
+				$gameVariables.setValue( temp3, shop_item['limit_num'] );
+			}
+		}
+		if( shop_id != null && args.length == 6 ){
+			var type = String(args[3]);
+			var temp2 = String(args[5]);
+			if( type == "全部商品是否卖完" ){
+				temp2 = temp2.replace("开关[","");
+				temp2 = temp2.replace("]","");
+				temp2 = Number(temp2);
+				var b = $gameSystem.drill_SLS_isAllSoldOut( shop_id );
+				$gameSwitches.setValue( temp2, b );
 			}
 		}
 		
 		
 		/*-----------------服务员------------------*/
-		if(args.length == 6){
-			var temp1 = String(args[1]);
+		if( shop_id != null && args.length == 6 ){
 			var type = String(args[3]);
 			var temp2 = String(args[5]);
 			if( type == "切换服务员" ){
-				temp1 = temp1.replace("限量商店[","");
-				temp1 = temp1.replace("]","");
-				temp1 = Math.max( Number(temp1) - 1, 0 );
-				var shopData = $gameSystem._drill_SLS_shopDataList[ temp1 ];
+				var shopData = $gameSystem._drill_SLS_shopDataList[ shop_id ];
 				if( shopData == undefined ){
-					alert( DrillUp.drill_SLS_getPluginTip_DataNotFind(temp1+1) );
+					alert( DrillUp.drill_SLS_getPluginTip_DataNotFind(shop_id+1) );
 					return;
 				}
 				shopData['waitress_id'] = Math.max( Number(temp2), 1 );
 			}
 		}
-		if(args.length == 4){
-			var temp1 = String(args[1]);
+		if( shop_id != null && args.length == 4 ){
 			var type = String(args[3]);
 			if( type == "隐藏服务员" ){
-				temp1 = temp1.replace("限量商店[","");
-				temp1 = temp1.replace("]","");
-				temp1 = Math.max( Number(temp1) - 1, 0 );
-				var shopData = $gameSystem._drill_SLS_shopDataList[ temp1 ];
+				var shopData = $gameSystem._drill_SLS_shopDataList[ shop_id ];
 				if( shopData == undefined ){
-					alert( DrillUp.drill_SLS_getPluginTip_DataNotFind(temp1+1) );
+					alert( DrillUp.drill_SLS_getPluginTip_DataNotFind(shop_id+1) );
 					return;
 				}
 				shopData['waitress_id'] = 0;
@@ -2214,14 +2235,6 @@ Game_System.prototype.drill_SLS_isAllSoldOut = function( shop_index ){
 	return true;
 }
 
-//=============================================================================
-// * 临时数据
-//=============================================================================
-var _drill_SLS_temp_initialize = Game_Temp.prototype.initialize;
-Game_Temp.prototype.initialize = function() {	
-	_drill_SLS_temp_initialize.call(this);
-	this._drill_SLS_visibleList = [];			//可见的列表
-};
 
 
 //=============================================================================
@@ -2570,6 +2583,15 @@ Scene_Drill_SLS.prototype.drill_updateButtonTouch = function() {
 		}
 	}
 }
+
+//==============================
+// * 临时数据
+//==============================
+var _drill_SLS_temp_initialize = Game_Temp.prototype.initialize;
+Game_Temp.prototype.initialize = function() {	
+	_drill_SLS_temp_initialize.call(this);
+	this._drill_SLS_visibleList = [];			//可见的列表
+};
 
 //==============================
 // * 帧刷新 - 窗口选项刷新

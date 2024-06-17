@@ -345,6 +345,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			}
 			if( c_chars == null && unit == "本事件" ){
 				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
 				c_chars = [ e ];
 			}
 			if( c_chars == null && unit.indexOf("批量事件[") != -1 ){
@@ -388,7 +389,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				c_chars = [ e ];
 			}
 		}
-		if( c_chars == null ){ return }; 		
+		if( c_chars == null ){ return };
 		
 		
 		/*-----------------重力作用------------------*/	
@@ -655,8 +656,8 @@ Game_Event.prototype.drill_EPS_readPage = function( page_list ){
 //==============================
 var _drill_EPS_key_initialize = Game_Character.prototype.initialize;
 Game_Character.prototype.initialize = function(){
-	_drill_EPS_key_initialize.call(this);
 	this._drill_EPS_pressureData = undefined;
+	_drill_EPS_key_initialize.call(this);
 }
 //==============================
 // * 物体的属性 - 初始化 数据

@@ -177,6 +177,7 @@
  * 事件注释：=>多帧行走图 : 设置循环 : 从右往左循环
  * 事件注释：=>多帧行走图 : 设置循环 : 左右往返
  * 事件注释：=>多帧行走图 : 设置循环 : 1,2,3,2
+ * 事件注释：=>多帧行走图 : 恢复默认循环
  *
  * 角色注释：<多帧行走图:设置循环:从左往右循环>
  * 角色注释：<多帧行走图:设置循环:从右往左循环>
@@ -204,6 +205,7 @@
  * 插件指令：>多帧行走图 : 事件[10] : 设置循环 : 从右往左循环
  * 插件指令：>多帧行走图 : 事件[10] : 设置循环 : 左右往返
  * 插件指令：>多帧行走图 : 事件[10] : 设置循环 : 1,2,3,2
+ * 插件指令：>多帧行走图 : 事件[10] : 恢复默认循环
  * 
  * 1.前面部分（本事件）和后面设置（设置循环 : 从左往右循环）可以随意组合。
  *   一共有9*4种组合方式。
@@ -305,8 +307,11 @@
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^2) 每帧
 //		★性能测试因素	行走图管理层
-//		★性能测试消耗	200个事件：114.6ms（drill_EFN_updateInter_Formula）59.7ms（drill_EFN_updateState）35.6ms（drill_EFN_updateLoop）
-//						50个事件：29.1ms（drill_EFN_updateInter_Formula）24.7ms（drill_EFN_updateState）1.1ms（drill_EFN_updateLoop）
+//		★性能测试消耗	2024/1/22：
+//							》200个事件：114.6ms（drill_EFN_updateInter_Formula）59.7ms（drill_EFN_updateState）35.6ms（drill_EFN_updateLoop）
+//							》50个事件：29.1ms（drill_EFN_updateInter_Formula）24.7ms（drill_EFN_updateState）1.1ms（drill_EFN_updateLoop）
+//						2024/6/15：
+//							》动画序列管理层80事件：15.4ms（drill_EFN_updateInter_Formula）11.1ms（drill_EFN_updateState）4.9ms（drill_EFN_updateInter_Tick）21.7ms（drill_EFN_isEnabled）
 //		★最坏情况		暂无
 //		★备注			暂无
 //		
@@ -370,9 +375,11 @@
 //			  是因为状态切换太频繁，导致只有1帧在显示某个特定帧，所以看起来像虚影。
 //
 //		★存在的问题：
-//			1.插件指令临时修改玩家的帧时，人物换队伍后，没有对应。暂时未想到办法。
-//			2. 2023-5-18 bug：初始帧为0或2 且 勾选原地踏步 的情况下，切换事件页会导致 不再原地踏步 的问题。
-//			  此问题有解决方案，但是最好吧底层完全了解清楚为什么。
+//			1.问题：插件指令临时修改玩家的帧时，人物换队伍后，没有对应。暂时未想到办法。
+//			  解决：【未解决】
+//			2.问题：初始帧为0或2 且 勾选原地踏步 的情况下，切换事件页会导致 不再原地踏步 的问题。（2023-5-18）
+//					此问题有其它解决方案，但是最好吧底层完全了解清楚为什么。
+//			  解决：【已解决】，见"强制重新刷一次状态检查"。
 //
 
 //=============================================================================
@@ -455,6 +462,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var unit = String(args[1]);
 			if( e_chars == null && unit == "本事件" ){
 				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
 				e_chars = [ e ];
 			}
 			if( e_chars == null && unit.indexOf("批量事件[") != -1 ){
@@ -619,6 +627,28 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					}
 				}
 			}
+		}
+		/*-----------------行走循环播放------------------*/
+		if( args.length == 4 ){
+			var type = String(args[3]);
+			if( type == "恢复默认循环" ){
+				if( e_chars != null){
+					for( var k=0; k < e_chars.length; k++ ){
+						e_chars[k].drill_EFN_checkController();
+						e_chars[k]._drill_EFN_controller.drill_EFN_setLoopType( "左右往返", [] );
+					}
+				}
+				if( p_chars != null){
+					for( var k=0; k < p_chars.length; k++ ){
+						p_chars[k].drill_EFN_checkController();
+						p_chars[k]._drill_EFN_controller.drill_EFN_setLoopType( "左右往返", [] );
+					}
+				}
+			}
+		}
+		if( args.length == 6 ){
+			var type = String(args[3]);
+			var temp2 = String(args[5]);
 			if( type == "设置循环" ){
 				var loop_type = "";
 				var loop_seq = [];
@@ -631,7 +661,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				}else{
 					loop_type = String(temp2);
 				}
-					
+				
 				if( e_chars != null){
 					for( var k=0; k < e_chars.length; k++ ){
 						e_chars[k].drill_EFN_checkController();
@@ -745,6 +775,18 @@ Game_Event.prototype.drill_EFN_setupPageSettings = function() {
 						this.drill_EFN_checkController();
 						this._drill_EFN_controller.drill_EFN_setInterDashingFormula( String(temp2) );
 					}
+				}
+				
+				if( args.length == 2 ){
+					var type = String(args[1]);
+					if( type == "恢复默认循环" ){
+						this.drill_EFN_checkController();
+						this._drill_EFN_controller.drill_EFN_setLoopType( "左右往返", [] );
+					}
+				}
+				if( args.length == 4 ){
+					var type = String(args[1]);
+					var temp2 = String(args[3]);
 					if( type == "设置循环"){
 						var loop_type = "";
 						var loop_seq = [];

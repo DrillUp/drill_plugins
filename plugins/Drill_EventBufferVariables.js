@@ -140,7 +140,7 @@
 //			1.建立临时变量快速存储。
 //
 //		★存在的问题：
-//			暂无。
+//			暂无
 //		
 
 //=============================================================================
@@ -184,6 +184,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var unit = String(args[1]);
 			if( char_list == null && unit == "本事件" ){
 				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
 				char_list = [ e ];
 			}
 			if( char_list == null && unit.indexOf("批量事件[") != -1 ){

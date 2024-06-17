@@ -1733,7 +1733,8 @@
 //		★工作类型		持续执行
 //		★时间复杂度		o(n)
 //		★性能测试因素	个体装饰管理层、战斗界面
-//		★性能测试消耗	16.40ms（Game_Timer.prototype.update） 11.35ms（drill_updatePosition）
+//		★性能测试消耗	2024/5/10：
+//							》16.40ms（Game_Timer.prototype.update） 11.35ms（drill_updatePosition）
 //		★最坏情况		大量动画被同时播放。
 //		★备注			播放4个时，垃圾本的地图界面里面卡爆了，只有3帧（由于其他插件太多），
 //						但是在战斗界面中，动画持续播放时，能保持15帧（但是释法时，特别卡，应该是目标释法时变色的问题）。
@@ -1986,6 +1987,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var unit = String(args[3]);
 			if( char_list == null && unit == "本事件" ){
 				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
 				char_list = [ e ];
 			}
 			if( char_list == null && unit.indexOf("批量事件[") != -1 ){

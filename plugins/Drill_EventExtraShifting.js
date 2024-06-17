@@ -219,6 +219,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var unit = String(args[1]);
 			if( e_chars == null && unit == "本事件" ){
 				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
 				e_chars = [ e ];
 			}
 			if( e_chars == null && unit.indexOf("批量事件[") != -1 ){
@@ -599,7 +600,7 @@ Game_CharacterBase.prototype.drill_updateShifting = function(){
 
 
 //=============================================================================
-// ** ☆数据最终变换值
+// ** ☆数据最终变换值『物体数据最终变换值』
 //
 //			说明：	> 此模块专门控制 偏移与其他插件兼容 的设置。
 //					（插件完整的功能目录去看看：功能结构树）

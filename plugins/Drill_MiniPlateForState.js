@@ -1838,7 +1838,7 @@ Sprite_Enemy.prototype.updateStateSprite = function() {
 	var battler = this._stateIconSprite._battler;
 	var bean = this._drill_MPFS_bean;
 	bean.drill_bean_setPosition( xx, yy );
-	bean.drill_bean_resetFrame( 0, 0, ww, hh );
+	bean.drill_bean_resetFrame( 0, 0, ww, hh );		//固定高宽『贴图框架值』
 	bean.drill_bean_setStateAndBuff( battler._states, battler._buffs );
 	bean.drill_bean_setLayer( "上层" );
 	
@@ -1885,7 +1885,7 @@ Sprite_Actor.prototype.update = function() {
 	// > 实体类设置
 	var bean = this._drill_MPFS_bean;
 	bean.drill_bean_setPosition( xx, yy );
-	bean.drill_bean_resetFrame( 0, 0, ww, hh );
+	bean.drill_bean_resetFrame( 0, 0, ww, hh );		//固定高宽『贴图框架值』
 	if( this._stateIconSprite ){
 		var battler = this._stateIconSprite._battler;
 		bean.drill_bean_setStateAndBuff( battler._states, battler._buffs );
@@ -1963,7 +1963,7 @@ if( Imported.MOG_BattleHud ){
 		var battler = this._battler;
 		var bean = this._drill_MPFS_bean;
 		bean.drill_bean_setPosition( xx, yy );
-		bean.drill_bean_resetFrame( 0, 0, ww, hh );
+		bean.drill_bean_resetFrame( 0, 0, ww, hh );		//固定高宽『贴图框架值』
 		bean.drill_bean_setStateAndBuff( battler._states, battler._buffs );
 		bean.drill_bean_setLayer( "图片层" );
 		
@@ -2006,7 +2006,7 @@ if( Imported.MOG_ActorHud ){
 		var bean = this._drill_MPFS_bean;
 		bean.drill_bean_setVisible( this.opacity > 0 );	//（该框根据透明度来控制是否显示）
 		bean.drill_bean_setPosition( xx, yy );
-		bean.drill_bean_resetFrame( 0, 0, ww, hh );
+		bean.drill_bean_resetFrame( 0, 0, ww, hh );		//固定高宽『贴图框架值』
 		bean.drill_bean_setStateAndBuff( battler._states, battler._buffs );
 		bean.drill_bean_setLayer( "图片层" );
 		
@@ -2084,7 +2084,7 @@ if( Imported.Drill_GaugeForBoss ){
 		var bean = this._drill_MPFS_bean;
 		bean.drill_bean_setVisible( this.visible );
 		bean.drill_bean_setPosition( xx, yy );
-		bean.drill_bean_resetFrame( 0, 0, ww, hh );
+		bean.drill_bean_resetFrame( 0, 0, ww, hh );		//固定高宽『贴图框架值』
 		bean.drill_bean_setStateAndBuff( battler._states, battler._buffs );
 		bean.drill_bean_setLayer( data_b['layerIndex_battle'] );	//（boss框的层级）
 		
@@ -2737,7 +2737,9 @@ Drill_MPFS_Window.prototype.drill_resetData_Skin = function( data ){
 	this._drill_skinBackground.zIndex = 1;
 	this._windowBackSprite.zIndex = 2;
 	this._windowFrameSprite.zIndex = 3;
-	this._windowSpriteContainer.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
+	if( this._windowSpriteContainer.children != undefined ){
+		this._windowSpriteContainer.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
+	}
 }
 //==============================
 // * D窗口皮肤 - 帧刷新

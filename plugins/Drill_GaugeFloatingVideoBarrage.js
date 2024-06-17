@@ -25,7 +25,7 @@
  * 该插件 不能 单独使用。
  * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfBallistics       系统-弹道核心★★v2.1及以上★★
+ *   - Drill_CoreOfBallistics       数学模型-弹道核心★★v2.1及以上★★
  *   - Drill_CoreOfWindowAuxiliary  系统-窗口辅助核心
  * 可扩展：
  *   - Drill_CoreOfString           系统-字符串核心
@@ -129,7 +129,7 @@
  * ----可选设定 - 空格支持
  * 插件指令下面的写法也是有效的：
  * 
- * 插件指令：>地图临时漂浮视频弹幕 : 临时对象 : 修改样式属性-内容文本 : 文本[药水 + 1]
+ * 插件指令：>地图临时漂浮视频弹幕 : 临时对象 : 修改样式属性-内容文本 : 文本[面包 + 奶酪]
  * 
  * 1.你可以在该插件指令中的文本使用空格。注意只上述的 高级指令 有效，简单指令 不行。
  *   从原则上来说，脚本会将插件指令的空格分开，所以含空格的写法是不推荐的。
@@ -607,7 +607,7 @@
 	var DrillUp = DrillUp || {}; 
 	DrillUp.g_GFVB_PluginTip_curName = "Drill_GaugeFloatingVideoBarrage.js 地图UI-临时漂浮视频弹幕";
 	DrillUp.g_GFVB_PluginTip_baseList = [
-		"Drill_CoreOfBallistics.js 系统-弹道核心",
+		"Drill_CoreOfBallistics.js 数学模型-弹道核心",
 		"Drill_CoreOfWindowAuxiliary.js 系统-窗口辅助核心"
 	];
 	//==============================
@@ -2515,7 +2515,7 @@ Drill_GFVB_Window.prototype.drill_refreshBallistics = function( b_data ){
 	var org_x = b_data['orgX'];
 	var org_y = b_data['orgY'];
 	$gameTemp.drill_COBa_setBallisticsMove( b_data );					//移动弹道 - 初始化数据
-	$gameTemp.drill_COBa_preBallisticsMove( this, 0, org_x, org_y );	//移动弹道 - 预推演
+	$gameTemp.drill_COBa_preBallisticsMove( this, 0, org_x, org_y );	//移动弹道 - 推演赋值
 	
 	
 	// > 透明度弹道
@@ -2591,7 +2591,7 @@ Drill_GFVB_Window.prototype.drill_refreshBallistics = function( b_data ){
 	}
 	
 	$gameTemp.drill_COBa_setBallisticsOpacity( o_data );				//透明度弹道 - 初始化数据
-	$gameTemp.drill_COBa_preBallisticsOpacity( this, 0, org_opacity );	//透明度弹道 - 预推演
+	$gameTemp.drill_COBa_preBallisticsOpacity( this, 0, org_opacity );	//透明度弹道 - 推演赋值
 }
 //==============================
 // * B窗口弹道 - 帧刷新 透明度

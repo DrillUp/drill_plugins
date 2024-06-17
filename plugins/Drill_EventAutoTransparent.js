@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        行走图 - 玩家接近自动透明化
+ * @plugindesc [v1.5]        行走图 - 玩家接近自动透明化
  * @author Drill_up
  * 
  * 
@@ -112,6 +112,8 @@
  * 优化了旧存档的识别与兼容。
  * [v1.4]
  * 修复了部分情况下贴图解除绑定时会报错的bug。
+ * [v1.5]
+ * 优化了插件内部结构。
  * 
  * 
  * 
@@ -157,6 +159,7 @@
 //			->☆静态数据
 //			->☆插件指令
 //			->☆事件注释
+//			->☆物体贴图
 //			->☆存储数据
 //			
 //			->☆贴图容器
@@ -164,7 +167,8 @@
 //			->☆贴图变化
 //				->矩形碰撞
 //				->玩家在事件前面不透明
-//
+//		
+//		
 //		★家谱：
 //			无
 //		
@@ -175,13 +179,10 @@
 //			无
 //		
 //		★必要注意事项：
-//			1.该容器原理与 Drill_MouseTriggerEvent 鼠标触发事件 的容器相似。
-//			  目的是为了保持id与贴图一致性。实现贴图与事件绑定，贴图影响事件数据。
+//			1.为了保持id与贴图一致性。实现贴图与事件绑定，贴图影响事件数据。
 //				$gameSystem._drill_EATran_idTank = [];				//缓冲池 - 事件id
 //				$gameTemp._drill_EATran_sprites = [];				//缓冲池 - 事件贴图
 //			2.【needRestatistics说明】，该插件 数据 在$gameSystem中，与 贴图 在$gameTemp中。
-//			3.【serial说明】这里的插件，数据和贴图 不同步，所以实际操作起来非常复杂，以前优化过很多次。
-//			  不确定是否需要使用 序列号 来进行排布，这里只暂时标记一下。
 //
 //		★其它说明细节：
 //			1.该插件不受镜头缩放大小影响。因为是贴图之间对比碰撞面积。
@@ -230,68 +231,78 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	if( command === ">玩家接近自动透明化" ){
 		
 		/*-----------------对象组获取------------------*/
-		var e_ids = null;
+		var e_list = null;
 		if( args.length >= 2 ){
 			var unit = String(args[1]);
-			if( unit == "本事件" ){
-				e_ids = [ this._eventId ];
-			}else if( unit.indexOf("批量事件变量[") != -1 ){
+			if( e_list == null && unit == "本事件" ){
+				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
+				e_list = [ e ];
+			}
+			if( e_list == null && unit.indexOf("批量事件[") != -1 ){
+				unit = unit.replace("批量事件[","");
+				unit = unit.replace("]","");
+				var temp_arr = unit.split(/[,，]/);
+				e_list = [];
+				for( var k=0; k < temp_arr.length; k++ ){
+					var e_id = Number(temp_arr[k]);
+					if( $gameMap.drill_EATran_isEventExist( e_id ) == false ){ continue; }
+					var e = $gameMap.event( e_id );
+					e_list.push( e );
+				}
+			}
+			if( e_list == null && unit.indexOf("批量事件变量[") != -1 ){
 				unit = unit.replace("批量事件变量[","");
 				unit = unit.replace("]","");
-				e_ids = [];
 				var temp_arr = unit.split(/[,，]/);
+				e_list = [];
 				for( var k=0; k < temp_arr.length; k++ ){
 					var e_id = $gameVariables.value(Number(temp_arr[k]));
 					if( $gameMap.drill_EATran_isEventExist( e_id ) == false ){ continue; }
-					e_ids.push( e_id );
+					var e = $gameMap.event( e_id );
+					e_list.push( e );
 				}
-			}else if( unit.indexOf("批量事件[") != -1 ){
-				unit = unit.replace("批量事件[","");
-				unit = unit.replace("]","");
-				e_ids = [];
-				var temp_arr = unit.split(/[,，]/);
-				for(var k=0; k < temp_arr.length; k++ ){
-					var e_id = Number(temp_arr[k]);
-					if( $gameMap.drill_EATran_isEventExist( e_id ) == false ){ continue; }
-					e_ids.push( e_id );
-				}
-			}else if( unit.indexOf("事件变量[") != -1 ){
-				unit = unit.replace("事件变量[","");
-				unit = unit.replace("]","");
-				var e_id = $gameVariables.value(Number(unit));
-				if( $gameMap.drill_EATran_isEventExist( e_id ) ){
-					e_ids = [ e_id ];
-				}
-			}else if( unit.indexOf("事件[") != -1 ){
+			}
+			if( e_list == null && unit.indexOf("事件[") != -1 ){
 				unit = unit.replace("事件[","");
 				unit = unit.replace("]","");
 				var e_id = Number(unit);
-				if( $gameMap.drill_EATran_isEventExist( e_id ) ){
-					e_ids = [ e_id ];
-				}
+				if( $gameMap.drill_EATran_isEventExist( e_id ) == false ){ return; }
+				var e = $gameMap.event( e_id );
+				e_list = [ e ];
+			}
+			if( e_list == null && unit.indexOf("事件变量[") != -1 ){
+				unit = unit.replace("事件变量[","");
+				unit = unit.replace("]","");
+				var e_id = $gameVariables.value(Number(unit));
+				if( $gameMap.drill_EATran_isEventExist( e_id ) == false ){ return; }
+				var e = $gameMap.event( e_id );
+				e_list = [ e ];
 			}
 		}
 		
 		/*-----------------指令------------------*/
-		if( e_ids != null && args.length == 4 ){
+		if( e_list != null && args.length == 4 ){
 			var type = String(args[3]);
 			if( type == "启用" || type == "开启" || type == "打开" || type == "启动" ){
-				for( var k=0; k < e_ids.length; k++ ){
-					$gameSystem.drill_EATran_pushId( e_ids[k] );
+				for( var k=0; k < e_list.length; k++ ){
+					var e = e_list[k];
+					$gameSystem.drill_EATran_pushId( e._eventId );
 				}
 			}
 			if( type == "关闭" || type == "禁用" ){
-				for( var k=0; k < e_ids.length; k++ ){
-					$gameSystem.drill_EATran_removeId( e_ids[k] );
+				for( var k=0; k < e_list.length; k++ ){
+					var e = e_list[k];
+					$gameSystem.drill_EATran_removeId( e._eventId );
 				}
 			}
 		}
-		if( e_ids != null && args.length == 6 ){
+		if( e_list != null && args.length == 6 ){
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
 			if( type == "修改条件" ){
-				for( var k=0; k < e_ids.length; k++ ){
-					var e = $gameMap.event( e_ids[k] );
+				for( var k=0; k < e_list.length; k++ ){
+					var e = e_list[k];
 					e._drill_EATran_type = temp1;
 				}
 			}
@@ -321,18 +332,26 @@ Game_Map.prototype.drill_EATran_isEventExist = function( e_id ){
 //
 //			说明：	> 注释与当前事件页有关，不一定跨事件页。
 //==============================
-var _drill_EATran_event_setupPage = Game_Event.prototype.setupPage;
-Game_Event.prototype.setupPage = function() {
-	_drill_EATran_event_setupPage.call(this);
-    this.drill_EATran_setupPage();
+var _drill_EATran_c_setupPageSettings = Game_Event.prototype.setupPageSettings;
+Game_Event.prototype.setupPageSettings = function() {
+	_drill_EATran_c_setupPageSettings.call(this);
+    this.drill_EATran_setupPageSettings();
 };
 //==============================
 // * 事件注释 - 初始化
 //==============================
-Game_Event.prototype.drill_EATran_setupPage = function() {
-	if( !this._erased && this.page() ){ this.list().forEach(function( l ){
+Game_Event.prototype.drill_EATran_setupPageSettings = function() {
+	var page = this.page();
+	if( page == undefined ){ return; }
+	
+	var temp_list = this.list();
+	for(var k = 0; k < temp_list.length; k++ ){
+		var l = temp_list[k];
 		if( l.code === 108 ){
-			var args = l.parameters[0].split(' ');
+			
+			/*-----------------标准注释------------------*/
+			var row = l.parameters[0];
+			var args = row.split(/[ ]+/);	
 			var command = args.shift();
 			if( command == "=>玩家接近自动透明化" ){	//=>玩家接近自动透明化 : 开启
 				if(args.length == 2){
@@ -351,9 +370,102 @@ Game_Event.prototype.drill_EATran_setupPage = function() {
 						this._drill_EATran_type = temp1;
 					}
 				}
-			};
+			}
 		};
-	}, this);};
+	};
+};
+
+
+//#############################################################################
+// ** 【标准模块】物体贴图 ☆物体贴图
+//#############################################################################
+//##############################
+// * 物体贴图 - 获取 - 容器指针【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 贴图数组     （物体贴图）
+//          
+//			说明：	> 此函数直接返回容器对象。不含镜像。
+//##############################
+Game_Temp.prototype.drill_EATran_getCharacterSpriteTank = function(){
+	return this.drill_EATran_getCharacterSpriteTank_Private();
+}
+//##############################
+// * 物体贴图 - 获取 - 根据事件ID【标准函数】
+//			
+//			参数：	> event_id 数字（事件ID）
+//			返回：	> 贴图对象     （事件贴图）
+//          
+//			说明：	> -2表示玩家，1表示第一个事件的贴图。不含镜像。
+//					> 此函数只读，且不缓存任何对象，直接读取容器数据。
+//##############################
+Game_Temp.prototype.drill_EATran_getCharacterSpriteByEventId = function( event_id ){
+	return this.drill_EATran_getCharacterSpriteByEventId_Private( event_id );
+}
+//##############################
+// * 物体贴图 - 获取 - 根据玩家队员索引【标准函数】
+//			
+//			参数：	> follower_index 数字（玩家队员索引）
+//			返回：	> 贴图对象           （玩家队员贴图）
+//          
+//			说明：	> -2表示玩家，1表示第一个玩家队员的贴图。不含镜像。
+//					> 此函数只读，且不缓存任何对象，直接读取容器数据。
+//##############################
+Game_Temp.prototype.drill_EATran_getCharacterSpriteByFollowerIndex = function( follower_index ){
+	return this.drill_EATran_getCharacterSpriteByFollowerIndex_Private( follower_index );
+}
+//=============================================================================
+// ** 物体贴图（接口实现）
+//=============================================================================
+//==============================
+// * 物体贴图容器 - 获取 - 容器指针（私有）
+//          
+//			说明：	> 贴图容器 _characterSprites，存放全部物体贴图，不含镜像贴图。
+//					  这只是一个贴图容器，即使贴图在其他层级，也不影响容器获取到贴图。（更多细节去看 脚本文档说明）
+//==============================
+Game_Temp.prototype.drill_EATran_getCharacterSpriteTank_Private = function(){
+	if( SceneManager._scene == undefined ){ return null; }
+	if( SceneManager._scene._spriteset == undefined ){ return null; }
+	return SceneManager._scene._spriteset._characterSprites;
+};
+//==============================
+// * 物体贴图容器 - 获取 - 根据事件ID（私有）
+//==============================
+Game_Temp.prototype.drill_EATran_getCharacterSpriteByEventId_Private = function( event_id ){
+	var sprite_list = this.drill_EATran_getCharacterSpriteTank_Private();
+	if( sprite_list == undefined ){ return null; }
+	for(var i=0; i < sprite_list.length; i++){
+		var sprite = sprite_list[i];
+		if( sprite._character == undefined ){ continue; }	//（判断 _character 就可以，不需要检验 Sprite_Character）
+		if( event_id == -2 &&   //『玩家id』
+			sprite._character == $gamePlayer ){
+			return sprite;
+		}
+		if( sprite._character._eventId == event_id ){
+			return sprite;
+		}
+	}
+	return null;
+};
+//==============================
+// * 物体贴图容器 - 获取 - 根据玩家索引（私有）
+//==============================
+Game_Temp.prototype.drill_EATran_getCharacterSpriteByFollowerIndex_Private = function( follower_index ){
+	var sprite_list = this.drill_EATran_getCharacterSpriteTank_Private();
+	if( sprite_list == undefined ){ return null; }
+	for(var i=0; i < sprite_list.length; i++){
+		var sprite = sprite_list[i];
+		if( sprite._character == undefined ){ continue; }	//（判断 _character 就可以，不需要检验 Sprite_Character）
+		if( follower_index == -2 &&   //『玩家id』
+			sprite._character == $gamePlayer ){
+			return sprite;
+		}
+		if( sprite._character._memberIndex == follower_index &&
+			sprite._character.isVisible() ){
+			return sprite;
+		}
+	}
+	return null;
 };
 
 
@@ -443,19 +555,21 @@ Game_System.prototype.drill_EATran_checkSysData_Private = function() {
 //==============================
 // * 存储容器 - 添加
 //==============================
-Game_System.prototype.drill_EATran_pushId = function( id ) {	
-	for(var i=0; i< this._drill_EATran_idTank.length; i++){	//重复的不插入
-		if( this._drill_EATran_idTank[i] == id ){
-			return;
-		}
+Game_System.prototype.drill_EATran_pushId = function( id ){
+	
+	// > 重复的不插入
+	for(var i = 0; i < this._drill_EATran_idTank.length; i++){
+		if( this._drill_EATran_idTank[i] == id ){ return; }
 	}
 	this._drill_EATran_idTank.push( id );
+	
+	$gameTemp._drill_EATran_needRestatistics = true;
 };
 //==============================
 // * 存储容器 - 去除
 //==============================
 Game_System.prototype.drill_EATran_removeId = function( id ){
-	for(var i = this._drill_EATran_idTank.length-1; i>=0; i--){
+	for(var i = this._drill_EATran_idTank.length-1; i >= 0; i--){
 		if( this._drill_EATran_idTank[i] == id ){
 			
 			// > 透明度强制恢复
@@ -469,11 +583,12 @@ Game_System.prototype.drill_EATran_removeId = function( id ){
 			if( temp_sprite != undefined ){
 				temp_sprite.opacity = 255;
 			}
-			$gameTemp._drill_EATran_sprites.splice(i,1);
 			
+			$gameTemp._drill_EATran_sprites.splice(i,1);
 			this._drill_EATran_idTank.splice(i,1);
 		}
 	}
+	$gameTemp._drill_EATran_needRestatistics = true;
 };
 
 
@@ -489,17 +604,22 @@ Game_System.prototype.drill_EATran_removeId = function( id ){
 var _drill_EATran_temp_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {	
 	_drill_EATran_temp_initialize.call(this);
-	this._drill_EATran_sprites = [];				//缓冲池 - 事件贴图
-	this._drill_EATran_player_sprite = null;		//缓冲池 - 玩家贴图
+	this._drill_EATran_sprites = [];					//缓冲池 - 事件贴图
+	this._drill_EATran_player_sprite = null;			//缓冲池 - 玩家贴图
+	this._drill_EATran_needRestatistics = true;
 };
 //==============================
 // * 容器 - 切换地图时
 //==============================
 var _drill_EATran_gmap_setup = Game_Map.prototype.setup;
 Game_Map.prototype.setup = function(mapId) {
-	$gameSystem._drill_EATran_idTank = [];				//缓冲池 - 事件id
+	
+	// > 重设id容器
+	$gameSystem._drill_EATran_idTank = [];
+	
 	$gameTemp._drill_EATran_sprites = [];				//缓冲池 - 事件贴图
-														//（注意，要在事件注释的前面）
+	$gameTemp._drill_EATran_player_sprite = null;		//缓冲池 - 玩家贴图
+	$gameTemp._drill_EATran_needRestatistics = true;
 	_drill_EATran_gmap_setup.call(this,mapId);
 }
 //==============================
@@ -507,47 +627,34 @@ Game_Map.prototype.setup = function(mapId) {
 //==============================
 var _drill_EATran_smap_createCharacters = Spriteset_Map.prototype.createCharacters;
 Spriteset_Map.prototype.createCharacters = function() {
-	for( var i = 0; i < $gameSystem._drill_EATran_idTank.length; i++ ){
-		$gameTemp._drill_EATran_sprites[i] = null;
-	}
+	$gameTemp._drill_EATran_sprites = [];				//缓冲池 - 事件贴图
+	$gameTemp._drill_EATran_player_sprite = null;		//缓冲池 - 玩家贴图
+	$gameTemp._drill_EATran_needRestatistics = true;
 	_drill_EATran_smap_createCharacters.call(this);
 }
 //==============================
-// * 容器 - 帧刷新 贴图绑定
+// * 容器 - 帧刷新
 //==============================
-Scene_Map.prototype.drill_EATran_refreshArray = function() {
-	if( $gameSystem._drill_EATran_idTank.length == 0 ){ return; }
+var _drill_EATran_smap_update = Scene_Map.prototype.update;
+Scene_Map.prototype.update = function() {
+	_drill_EATran_smap_update.call(this);
+	this.drill_EATran_updateRestatistics();
+}
+//==============================
+// * 容器 - 帧刷新 刷新统计
+//==============================
+Scene_Map.prototype.drill_EATran_updateRestatistics = function() {
+	if( $gameTemp._drill_EATran_needRestatistics != true ){ return; }
+	$gameTemp._drill_EATran_needRestatistics = false;
 	
 	// > 事件的贴图绑定
 	for( var i = 0; i < $gameSystem._drill_EATran_idTank.length; i++ ){
 		var temp_id = $gameSystem._drill_EATran_idTank[i];		//鼠标数据（存储）
-		var temp_obj = $gameTemp._drill_EATran_sprites[i];		//鼠标贴图（临时）
-		if( temp_obj == undefined ){
-			
-			// > 行走图贴图遍历
-			//		（从地图贴图找起 >> 找到行走图贴图容器 >> 含event的贴图 >> 存入触发集合）
-			//		（_characterSprites 中不含镜像，不需要加判定）
-			var char_sprites = this._spriteset._characterSprites;
-			for(var j=0; j< char_sprites.length; j++){
-				var temp_sprite = char_sprites[j];
-				var temp_character = temp_sprite._character;
-				if( temp_character != undefined && 
-					temp_character instanceof Game_Event && 
-					temp_character._eventId == temp_id ){
-					$gameTemp._drill_EATran_sprites[i] = temp_sprite;
-				}
-			}
-		}
+		$gameTemp._drill_EATran_sprites[i] = $gameTemp.drill_EATran_getCharacterSpriteByEventId( temp_id );
 	}
+	
 	// > 玩家的贴图绑定
-	var char_sprites = this._spriteset._characterSprites;
-	for(var j=0; j< char_sprites.length; j++){
-		var temp_sprite = char_sprites[j];
-		var temp_character = temp_sprite._character;
-		if( temp_character && temp_character instanceof Game_Player ){
-			$gameTemp._drill_EATran_player_sprite = temp_sprite;
-		}
-	}
+	$gameTemp._drill_EATran_player_sprite = $gameTemp.drill_EATran_getCharacterSpriteByEventId( -2 );
 }
 
 
@@ -560,11 +667,10 @@ Scene_Map.prototype.drill_EATran_refreshArray = function() {
 //==============================
 // * 贴图变化 - 帧刷新
 //==============================
-var _drill_EATran_smap_update = Scene_Map.prototype.update;
+var _drill_EATran_smap_update2 = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {	
-	_drill_EATran_smap_update.call(this);
+	_drill_EATran_smap_update2.call(this);
 	if( this.isActive() ){
-		this.drill_EATran_refreshArray();			//帧刷新 - 贴图绑定
 		this.drill_EATran_updateTransparent();		//帧刷新 - 贴图变化
 	}
 }
@@ -574,22 +680,24 @@ Scene_Map.prototype.update = function() {
 Scene_Map.prototype.drill_EATran_updateTransparent = function() {
 	if( $gameSystem._drill_EATran_idTank.length == 0 ){ return; }
 	
-	for(var i=0; i< $gameSystem._drill_EATran_idTank.length; i++){			//根据触发集合，遍历触发
-		var temp_sprite = $gameTemp._drill_EATran_sprites[i];
+	for(var i = 0; i < $gameSystem._drill_EATran_idTank.length; i++){		//根据触发集合，遍历触发
 		var temp_id = $gameSystem._drill_EATran_idTank[i];
+		var temp_sprite = $gameTemp._drill_EATran_sprites[i];
+		if( temp_sprite == undefined ){ continue; }
 		var player_sprite = $gameTemp._drill_EATran_player_sprite;
-		if( this.drill_EATran_isBitmapReady( temp_sprite ) ){					//贴图已加载
-			
+		if( player_sprite == undefined ){ continue; }
+		
+		if( this.drill_EATran_isBitmapReady( temp_sprite ) ){				//贴图已加载
 			var e = $gameMap.event( temp_id );
 			if( e == undefined ){ continue; }
+			
 			var is_coverd = false;
 			if( e._drill_EATran_type == "只要接触就透明" ){
 				if( this.drill_EATran_isCovered( player_sprite,temp_sprite ) ){
 					is_coverd = true;
 				}
 			}else{
-				if( this.drill_EATran_isCovered( player_sprite,temp_sprite )	//与玩家贴图碰撞
-					&& e.y > $gamePlayer.y ){
+				if( this.drill_EATran_isCovered( player_sprite,temp_sprite ) && e.y > $gamePlayer.y ){
 					is_coverd = true;
 				}
 			}
@@ -609,10 +717,10 @@ Scene_Map.prototype.drill_EATran_updateTransparent = function() {
 //==============================
 // * 贴图变化 - 是否准备完毕
 //==============================
-Scene_Map.prototype.drill_EATran_isBitmapReady = function( sprite ) {
-	if( !sprite ){ return false };
-	if( !sprite.bitmap ){ return false };
-	if( !sprite.bitmap.isReady() ){ return false };
+Scene_Map.prototype.drill_EATran_isBitmapReady = function( sprite ){
+	if( sprite == undefined ){ return false };
+	if( sprite.bitmap == undefined ){ return false };
+	if( sprite.bitmap.isReady() == false ){ return false };
 	if( sprite.visible === false ){ return false };
 	if( sprite.opacity === 0 ){ return false };
 	return true;	

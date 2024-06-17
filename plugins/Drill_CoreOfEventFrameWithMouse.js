@@ -96,7 +96,7 @@
 //		★时间复杂度		o(n^2) 每帧
 //		★性能测试因素	行走图管理层
 //		★性能测试消耗	2024/5/2：
-//							0.2ms（drill_COEFWM_updateDrawBeanRangeSprite）
+//							》0.2ms（drill_COEFWM_updateDrawBeanRangeSprite）
 //		★最坏情况		暂无
 //		★备注			该核心就是为了把所有 鼠标悬停判定 都集中到一起，节省性能消耗。
 //		

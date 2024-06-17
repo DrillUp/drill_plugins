@@ -21,7 +21,7 @@
  * 该插件 不能 单独使用。
  * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfDragAndAdsorb        系统-拖拽与吸附控制核心
+ *   - Drill_CoreOfDragAndAdsorb        数学模型-拖拽与吸附核心
  *   - Drill_CoreOfPictureWithMouse     图片-图片与鼠标控制核心
  * 
  * -----------------------------------------------------------------------------
@@ -190,7 +190,7 @@
 //		★时间复杂度		o(n^3)  每帧
 //		★性能测试因素	图片管理层
 //		★性能测试消耗	2024/5/2：
-//							16.7ms（drill_PDr_updateDrag）
+//							》16.7ms（drill_PDr_updateDrag）
 //		★最坏情况		暂无
 //		★备注			核心功能应用到图片贴图上，不需要过多考虑优化问题。
 //		
@@ -274,7 +274,7 @@
 	var DrillUp = DrillUp || {}; 
 	DrillUp.g_PDr_PluginTip_curName = "Drill_PictureDraggable.js 图片-可拖拽的图片";
 	DrillUp.g_PDr_PluginTip_baseList = [
-		"Drill_CoreOfDragAndAdsorb.js 系统-拖拽与吸附控制核心",
+		"Drill_CoreOfDragAndAdsorb.js 数学模型-拖拽与吸附核心",
 		"Drill_CoreOfPictureWithMouse.js 图片-图片与鼠标控制核心"
 	];
 	//==============================
@@ -672,7 +672,7 @@ Game_Picture.prototype.drill_PDr_checkSwitchData = function(){
 	// > 数据 - 被拖拽顺序
 	this._drill_PDr_switchData['drag_zIndex'] = pic_id;
 	
-	// > 数据 - 拖拽控制器ID【系统-拖拽与吸附控制核心】
+	// > 数据 - 拖拽控制器ID【数学模型-拖拽与吸附核心】
 	var drag_factory = $gameSystem.drill_CODAA_dragFactory();
 	var product_id = drag_factory.drill_factoryDrag_create( "PDr" );	//（通过工厂创建控制器，并印上该插件的简称）
 	this._drill_PDr_switchData['dragController_id'] = product_id;

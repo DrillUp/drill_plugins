@@ -991,7 +991,6 @@
 		data['skew_x'] = Number( dataFrom["斜切 X"] || 0);
 		data['skew_y'] = Number( dataFrom["斜切 Y"] || 0);
 		
-		// > B基本变化
 		data['rotate'] = Number( dataFrom["旋转速度"] || 0.0);
 		data['opacity'] = Number( dataFrom["透明度"] || 255);
 		

@@ -416,7 +416,8 @@
 //		★工作类型		单次执行
 //		★时间复杂度		o(n)
 //		★性能测试因素	键盘管理层
-//		★性能测试消耗	4.0ms（drill_WKT_updateCommonEvent）
+//		★性能测试消耗	2024/5/2：
+//							》4.0ms（drill_WKT_updateCommonEvent）
 //		★最坏情况		暂无
 //		★备注			暂无
 //		

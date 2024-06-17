@@ -162,7 +162,7 @@
 //				原因是：当标签绑定在玩家身上时，发现两个标签使得玩家一次移动变成了两次。（如果继续深入下去，程序会极其复杂）
 //				
 //		★存在的问题：
-//			无
+//			暂无
 //			
 
 //=============================================================================
@@ -234,6 +234,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args ){
 			var unit = String(args[1]);
 			if( c_chars == null && unit == "本事件" ){
 				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
 				c_chars = [ e ];
 			}
 			if( c_chars == null && unit.indexOf("批量事件[") != -1 ){

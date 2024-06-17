@@ -93,20 +93,6 @@
  * @desc 消息框的透明度，0为完全透明,255为完全不透明。
  * @default 176
  *
- * @param 是否显示战斗开始对话
- * @type boolean
- * @on 显示
- * @off 不显示
- * @desc true - 显示，false - 不显示，xxxx出现的对话框。
- * @default true
- *
- * @param 是否显示先发制人对话
- * @type boolean
- * @on 显示
- * @off 不显示
- * @desc true - 显示，false - 不显示
- * @default true
- *
  * @param ----敌方----
  * @default
  *
@@ -440,7 +426,7 @@
 //		★工作类型		单次执行
 //		★时间复杂度		o(n)
 //		★性能测试因素	在战斗界面中测试
-//		★性能测试消耗	太小，没找到
+//		★性能测试消耗	
 //		★最坏情况		无
 //		★备注			无
 //		
@@ -537,9 +523,6 @@
 	DrillUp.g_WL_a_states_add = String(DrillUp.parameters['显示-我方遭到状态'] || "false") === "true";
 	DrillUp.g_WL_a_states_remove = String(DrillUp.parameters['显示-我方解除状态'] || "false") === "true";
 	DrillUp.g_WL_a_buffs = String(DrillUp.parameters['显示-我方强化弱化'] || "false") === "true";
-	
-	DrillUp.g_WL_battleStartMessage = String(DrillUp.parameters['是否显示战斗开始对话'] || "false") === "true";
-	DrillUp.g_WL_battlePreemptiveMessage = String(DrillUp.parameters['是否显示先发制人对话'] || "true") === "true";
 	
 	
 //==============================
@@ -1006,47 +989,10 @@ Window_BattleLog.prototype.displayBuffs = function( target, buffs, fmt ){
     }, this);
 };
 
-//==============================
-// * 战斗 - 初始战斗对话
-//==============================
-BattleManager.displayStartMessages = function(){
-    if( DrillUp.g_WL_battleStartMessage){
-		
-		if( Imported.Drill_EnemyTextColor ){	//【Drill_EnemyTextColor  UI - 敌人文本颜色】
-			$gameTroop.drill_WL_enemyColorNames().forEach(function(name){
-				$gameMessage.add(TextManager.emerge.format(name));
-			});
-		}else{
-			$gameTroop.enemyNames().forEach(function(name){
-				$gameMessage.add(TextManager.emerge.format(name));
-			});
-		}
-	};
-	if( DrillUp.g_WL_battlePreemptiveMessage){
-		if( this._preemptive){
-			$gameMessage.add(TextManager.preemptive.format($gameParty.name()));
-		} else if( this._surprise){
-			$gameMessage.add(TextManager.surprise.format($gameParty.name()));
-		}
-	};
-};
 
 //=============================================================================
 // ** 兼容 - 颜色核心
 //=============================================================================
-//==============================
-// * 敌人文本颜色 - 设置颜色
-//==============================
-Game_Troop.prototype.drill_WL_enemyColorNames = function(){
-    var names = [];
-    this.members().forEach(function(enemy){
-        var name = enemy.drill_WL_enemyColorName();
-		if( names.contains(name) == false ){
-			names.push(name);
-		}
-    });
-    return names;
-};
 //==============================
 // * 敌人文本颜色 - 设置单个敌人颜色
 //==============================
@@ -1062,7 +1008,6 @@ Game_Enemy.prototype.drill_WL_enemyColorName = function(){
 		return this.name();
 	}
 };
-
 //==============================
 // * 角色文本颜色 - 设置单个角色颜色
 //==============================

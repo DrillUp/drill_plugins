@@ -137,10 +137,11 @@
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^2) 每帧
 //		★性能测试因素	横版2D模仿
-//		★性能测试消耗	2024/5/2：（由于继承，消耗被转移到 行走图优化核心 中）
-//							28.8ms（drill_COEF_refreshSortValue）
-//		★最坏情况		无
-//		★备注			无
+//		★性能测试消耗	2024/5/2：
+//							》由于继承，消耗被转移到 行走图优化核心 中。
+//							》28.8ms（drill_COEF_refreshSortValue）
+//		★最坏情况		暂无
+//		★备注			暂无
 //		
 //		★优化记录		暂无
 //
@@ -241,8 +242,10 @@ Game_Interpreter.prototype.pluginCommand = function( command, args ){
 		if( args.length >= 2 ){
 			var unit = String(args[1]);
 			if( charSprite_list == null && unit == "本事件" ){
+				var charSprite = $gameTemp.drill_EFLAZ_getCharacterSpriteByEventId( this._eventId );
+				if( charSprite == undefined ){ return; }	//『防止并行删除事件出错』
 				charSprite_list = [];
-				charSprite_list.push( $gameTemp.drill_EFLAZ_getCharacterSpriteByEventId( this._eventId ) );
+				charSprite_list.push( charSprite );
 			}
 			if( charSprite_list == null && unit.indexOf("批量事件[") != -1 ){
 				unit = unit.replace("批量事件[","");
@@ -467,7 +470,7 @@ Game_Temp.prototype.drill_EFLAZ_getCharacterSpriteTank = function(){
 //			参数：	> event_id 数字（事件ID）
 //			返回：	> 贴图对象     （事件贴图）
 //          
-//			说明：	> 事件id和物体贴图一一对应。不含镜像。
+//			说明：	> -2表示玩家，1表示第一个事件的贴图。不含镜像。
 //					> 此函数只读，且不缓存任何对象，直接读取容器数据。
 //##############################
 Game_Temp.prototype.drill_EFLAZ_getCharacterSpriteByEventId = function( event_id ){
@@ -479,7 +482,7 @@ Game_Temp.prototype.drill_EFLAZ_getCharacterSpriteByEventId = function( event_id
 //			参数：	> follower_index 数字（玩家队员索引）
 //			返回：	> 贴图对象           （玩家队员贴图）
 //          
-//			说明：	> -2表示玩家，1表示第一个跟随者。不含镜像。
+//			说明：	> -2表示玩家，1表示第一个玩家队员的贴图。不含镜像。
 //					> 此函数只读，且不缓存任何对象，直接读取容器数据。
 //##############################
 Game_Temp.prototype.drill_EFLAZ_getCharacterSpriteByFollowerIndex = function( follower_index ){
@@ -508,6 +511,10 @@ Game_Temp.prototype.drill_EFLAZ_getCharacterSpriteByEventId_Private = function( 
 	for(var i=0; i < sprite_list.length; i++){
 		var sprite = sprite_list[i];
 		if( sprite._character == undefined ){ continue; }	//（判断 _character 就可以，不需要检验 Sprite_Character）
+		if( event_id == -2 &&   //『玩家id』
+			sprite._character == $gamePlayer ){
+			return sprite;
+		}
 		if( sprite._character._eventId == event_id ){
 			return sprite;
 		}

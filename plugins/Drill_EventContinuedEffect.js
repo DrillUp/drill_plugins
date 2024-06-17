@@ -389,7 +389,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var unit = String(args[1]);
 			if( e_chars == null && unit == "本事件" ){
 				var e = $gameMap.event( this._eventId );
-				if( e == undefined ){ return; }	//（并行删除事件可能会造成 解释器指令还在 但事件没了，这里直接跳出）
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
 				e_chars = [ e ];
 			}
 			if( e_chars == null && unit.indexOf("批量事件[") != -1 ){
@@ -1384,7 +1384,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			}
 		}
 	}
-	if (command === '>事件持续效果') { // >事件持续效果 : 本事件 : 标准闪烁 : 60 : 168
+	if( command === '>事件持续效果' ){ // >事件持续效果 : 本事件 : 标准闪烁 : 60 : 168
 		if(args.length >= 4){
 			var temp1 = String(args[1]);
 			var type = String(args[3]);
@@ -1393,6 +1393,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if(time == '无限时间'){ time = 60*60*60*24*100; }else{ time = Number(time); }
 			if( temp1 == '本事件' ){
 				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
 				if( e.opacity() == 0){ return; }
 				if( type == '终止持续效果' ){ e.drill_ECE_stopEffect(); }
 				if( type == '标准闪烁'){ e.drill_ECE_playSustainingFlicker(time,period); }

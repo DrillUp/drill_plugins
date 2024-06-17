@@ -1748,7 +1748,8 @@
 //		★工作类型		持续执行
 //		★时间复杂度		o(n)
 //		★性能测试因素	个体装饰管理层
-//		★性能测试消耗	13.82ms、8.83ms（Game_Timer.prototype.update）
+//		★性能测试消耗	2024/5/10：
+//							》13.82ms、8.83ms（Game_Timer.prototype.update）
 //		★最坏情况		大量动画被同时播放。
 //		★备注			无
 //		
@@ -2005,6 +2006,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var unit = String(args[3]);
 			if( char_list == null && unit == "本事件" ){
 				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
 				char_list = [ e ];
 			}
 			if( char_list == null && unit.indexOf("批量事件[") != -1 ){

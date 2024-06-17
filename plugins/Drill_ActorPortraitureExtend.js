@@ -968,7 +968,8 @@
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^3)*o(贴图处理) 每帧
 //		★性能测试因素	战斗界面
-//		★性能测试消耗	 25.87ms（drill_APEx_updatePosition） 19.71ms（drill_APEx_updateCondition） 17.25ms（update）
+//		★性能测试消耗	2024/4/6：
+//							》25.87ms（drill_APEx_updatePosition） 19.71ms（drill_APEx_updateCondition） 17.25ms（update）
 //		★最坏情况		配置了大量角色立绘，以及5-8个角色。
 //		★备注			角色数量能够使得角色立绘计算量倍增，注意。
 //		

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.7]        面板 - 全自定义主菜单面板
+ * @plugindesc [v1.8]        面板 - 全自定义主菜单面板
  * @author Drill_up
  * 
  * @Drill_LE_param "角色固定框样式-%d"
@@ -233,6 +233,8 @@
  * 修复了 主菜单插件单独 使用时，会影响物品界面使用物品时选择人物的窗口挤占高度的bug。
  * [v1.7]
  * 修复了开启参数条游标时出错的bug。
+ * [v1.8]
+ * 修复了 无角色时 显示不了空的角色框的bug。
  * 
  * 
  * @param ----杂项----
@@ -910,7 +912,7 @@
  * @value 增减速移动
  * @option 弹性移动
  * @value 弹性移动
- * @desc 移动类型基于 弹道核心-两点式 移动。更多内容可以去看看 "1.系统 > 关于弹道.docx"。
+ * @desc 移动类型基于 弹道核心-两点式 移动。更多内容可以去看看 "32.数学模型 > 关于弹道.docx"。
  * @default 匀速移动
  *
  * @param 移动时长
@@ -2457,7 +2459,7 @@
  * @value 增减速移动
  * @option 弹性移动
  * @value 弹性移动
- * @desc 移动类型基于 弹道核心-两点式 移动。更多内容可以去看看 "1.系统 > 关于弹道.docx"。
+ * @desc 移动类型基于 弹道核心-两点式 移动。更多内容可以去看看 "32.数学模型 > 关于弹道.docx"。
  * @default 匀速移动
  *
  * @param 移动时长
@@ -3194,8 +3196,8 @@
 		// > 主体
 		data['x'] = Number( dataFrom["平移-固定框组 X"] || 0 );
 		data['y'] = Number( dataFrom["平移-固定框组 Y"] || 0 );
-		data['picAll_scale_x'] = Number( dataFrom["角色前视图-整体缩放 X"] || 0 );
-		data['picAll_scale_y'] = Number( dataFrom["角色前视图-整体缩放 Y"] || 0 );
+		data['picAll_scale_x'] = Number( dataFrom["角色前视图-整体缩放 X"] || 1.0 );
+		data['picAll_scale_y'] = Number( dataFrom["角色前视图-整体缩放 Y"] || 1.0 );
 		data['visible_rowCount'] = Number( dataFrom["角色框数量上限"] || 4 );
 		data['visible_force'] = String( dataFrom["无角色时是否仍然显示框"] || "true") === "true";
 		if( dataFrom["无角色时设置"] != undefined &&
@@ -4034,12 +4036,16 @@ Scene_Menu.prototype.drill_SMa_createActorBoard = function() {
 	this._drill_SMa_actorSpriteTank = [];
 	this._drill_SMa_actorPositionTank = [];
 	var count = temp_data['visible_rowCount'];
-	if( count > $gameParty.members().length ){ count = $gameParty.members().length; }	//（如果比队伍人数还大，则按队伍人数来）
-	for( var i = 0; i < count; i++ ){
+	for( var i = 0; i < count; i++ ){		//（count可以比队伍人数还大）
 		
 		// > 固定框初始化
+		var temp_sprite;
 		var actor = $gameParty.members()[i];
-		var temp_sprite = new Drill_SMa_ActorSprite( actor, i );
+		if( actor == undefined ){
+			temp_sprite = new Drill_SMa_ActorSprite( null, i );
+		}else{
+			temp_sprite = new Drill_SMa_ActorSprite( actor, i );
+		}
 		temp_sprite['_org_visible'] = true;
 		if( temp_data['visible_force'] == false && i >= $gameParty.members().length ){
 			temp_sprite['_org_visible'] = false;
@@ -4273,7 +4279,8 @@ Drill_SMa_ActorSprite.prototype.initialize = function( actor, memberIndex ) {
     Sprite.prototype.initialize.call(this);
 	this._drill_actor = actor;		//角色可能为空
 	this._drill_memberIndex = memberIndex;
-	if( this._drill_actor ){
+	
+	if( this._drill_actor != undefined ){
 		var actorData = $gameSystem._drill_SMa_actorBindTank[ this._drill_actor.actorId()-1 ];
 		if( actorData != undefined ){
 			this._drill_data_bind = JSON.parse(JSON.stringify( actorData ));

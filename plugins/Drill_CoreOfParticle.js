@@ -25,7 +25,7 @@
  * 该插件为基础核心，单独使用没有效果。
  * 插件基于弹道核心，可以作用于所有需要用到粒子的子插件。
  * 基于：
- *   - Drill_CoreOfBallistics              系统-弹道核心★★v2.1及以上★★
+ *   - Drill_CoreOfBallistics              数学模型-弹道核心★★v2.1及以上★★
  * 可作用于：
  *   - Drill_AnimationParticle             动画 - 多层动画粒子
  *   - Drill_EventFrameParticle            行走图 - 多层行走图粒子
@@ -90,8 +90,9 @@
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^3)*o(贴图处理) 每帧
 //		★性能测试因素	地图界面、战斗界面、菜单界面
-//		★性能测试消耗	创建过程：   35.9ms（drill_spriteSec_initBallistics）13.3ms（drill_sprite_initTransform）
-//						帧刷新过程： 7.2ms（drill_sprite_updateAttr）25.7ms（drill_sprite_updateTransform）
+//		★性能测试消耗	2024/5/10：
+//							》创建过程：   35.9ms（drill_spriteSec_initBallistics）13.3ms（drill_sprite_initTransform）
+//							》帧刷新过程： 7.2ms（drill_sprite_updateAttr）25.7ms（drill_sprite_updateTransform）
 //		★最坏情况		大量粒子被同时创建并播放。
 //		★备注			从消耗情况上来看，创建比帧刷新稍微多一点，合理预创建一些粒子群，能优化一部分消耗。
 //		
@@ -131,7 +132,8 @@
 //			暂无
 //
 //		★存在的问题：
-//			1.粒子是半开放的继承结构，很多功能细节都需要子插件来实现，而这些功能在这里很难标注出来。
+//			1.问题：粒子是半开放的继承结构，很多功能细节都需要子插件来实现，而这些功能在这里很难标注出来。
+//			  解决：【已解决】，使用脚本文档，对所有插件进行专门区分介绍，这样至少看一眼文档，就能知道插件的特殊点。
 //
 
 //=============================================================================
@@ -142,7 +144,7 @@
 	//==============================
 	var DrillUp = DrillUp || {}; 
 	DrillUp.g_COPa_PluginTip_curName = "Drill_CoreOfParticle.js 系统-粒子核心";
-	DrillUp.g_COPa_PluginTip_baseList = ["Drill_CoreOfBallistics.js 系统-弹道核心"];
+	DrillUp.g_COPa_PluginTip_baseList = ["Drill_CoreOfBallistics.js 数学模型-弹道核心"];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
@@ -1304,8 +1306,8 @@ Drill_COPa_Controller.prototype.drill_controller_initRainbow = function() {
 // **					->A主体
 // **						->层级位置修正
 // **					->B粒子群弹道
-// **						->预推演（坐标）
-// **						->预推演（透明度）
+// **						->推演赋值（坐标）
+// **						->推演赋值（透明度）
 // **					->C对象绑定
 // **						->设置控制器
 // **						->设置个体贴图
@@ -1378,6 +1380,7 @@ Drill_COPa_Sprite.prototype.update = function() {
 //##############################
 Drill_COPa_Sprite.prototype.drill_sprite_setController = function( controller ){
 	this._drill_controller = controller;
+	this._drill_curSerial = controller._drill_controllerSerial;
 };
 //##############################
 // * C对象绑定 - 初始化子功能【开放函数】
@@ -1618,18 +1621,18 @@ Drill_COPa_Sprite.prototype.drill_sprite_initBallistics = function() {
 //==============================
 Drill_COPa_Sprite.prototype.drill_sprite_refreshBallistics = function( i ){
 	
-	// > 粒子群弹道 - 预推演（坐标）
+	// > 粒子群弹道 - 推演赋值（坐标）
 	var org_x = this._drill_controller._drill_parList_x[i];
 	var org_y = this._drill_controller._drill_parList_y[i];
-	Drill_COBa_Manager._drill_COBa_planimetryData = this._drill_controller._drill_ballistics_move;	//（存储的弹道数据，赋值后预推演）
+	Drill_COBa_Manager._drill_COBa_planimetryData = this._drill_controller._drill_ballistics_move;	//（存储的弹道数据，赋值后推演赋值）
 	$gameTemp.drill_COBa_preBallisticsMove( this, i, org_x, org_y );
 	this._drill_COPa_parBMoveX[i] = this._drill_COBa_x;
 	this._drill_COPa_parBMoveY[i] = this._drill_COBa_y;
 	this._drill_COBa_x = null;
 	this._drill_COBa_y = null;
 	
-	// > 粒子群弹道 - 预推演（透明度）
-	Drill_COBa_Manager._drill_COBa_commonData = this._drill_controller._drill_ballistics_opacity;	//（存储的弹道数据，赋值后预推演）
+	// > 粒子群弹道 - 推演赋值（透明度）
+	Drill_COBa_Manager._drill_COBa_commonData = this._drill_controller._drill_ballistics_opacity;	//（存储的弹道数据，赋值后推演赋值）
 	$gameTemp.drill_COBa_preBallisticsOpacity( this, i, 0 );
 	this._drill_COPa_parBOpacity[i] = this._drill_COBa_opacity;
 	this._drill_COBa_opacity = null;
@@ -2123,7 +2126,7 @@ Drill_COPa_Sprite.prototype.drill_sprite_refreshRainBow = function( i ){
 // **					->J彩虹化
 // **
 // **		说明：	> 核心与所有子插件功能介绍去看看："1.系统 > 大家族-粒子效果（脚本）.docx"
-// **				> 第二层粒子贴图会比粒子贴图 优先 执行update，所以需要考虑【慢1帧弹道】问题。
+// **				> 第二层粒子贴图会比粒子贴图 优先 执行update，所以需要考虑『粒子弹道慢一帧』问题。
 // **				  因此，第二层粒子与 父贴图 的 D粒子变化 保持一致。
 //=============================================================================
 //==============================

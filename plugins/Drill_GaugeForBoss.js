@@ -30,7 +30,7 @@
  * 该插件 不能 单独使用。
  * 必须基于核心插件才能运行。也可以与其它插件组合。
  * 基于：
- *   - Drill_CoreOfBallistics       系统-弹道核心
+ *   - Drill_CoreOfBallistics       数学模型-弹道核心
  *   - Drill_CoreOfGaugeMeter       系统-参数条核心★★v1.5及以上★★
  *   - Drill_CoreOfGaugeNumber      系统-参数数字核心★★v1.2及以上★★
  *     必须要有上述核心，才能配置完整的boss框。
@@ -1342,7 +1342,7 @@
  * @value 增减速移动
  * @option 弹性移动
  * @value 弹性移动
- * @desc 移动类型基于 弹道核心-两点式 移动。更多内容可以去看看 "1.系统 > 关于弹道.docx"。
+ * @desc 移动类型基于 弹道核心-两点式 移动。更多内容可以去看看 "32.数学模型 > 关于弹道.docx"。
  * @default 匀速移动
  *
  * @param 移动时长
@@ -1503,7 +1503,7 @@
 	var DrillUp = DrillUp || {}; 
 	DrillUp.g_GFB_PluginTip_curName = "Drill_GaugeForBoss.js UI-高级BOSS生命固定框";
 	DrillUp.g_GFB_PluginTip_baseList = [
-		"Drill_CoreOfBallistics.js 系统-弹道核心",
+		"Drill_CoreOfBallistics.js 数学模型-弹道核心",
 		"Drill_CoreOfGaugeMeter.js 系统-参数条核心",
 		"Drill_CoreOfGaugeNumber.js 系统-参数数字核心"
 	];
@@ -2561,7 +2561,7 @@ Drill_GFB_StyleSprite.prototype.drill_initData = function() {
 //==============================
 Drill_GFB_StyleSprite.prototype.drill_initSprite = function() {
 
-	this.drill_initPreMove();				//预推演初始移动动画
+	this.drill_initPreMove();				//推演赋值 初始移动动画
 	
 	this.drill_createBackground();			//创建背景
 	this.drill_createHPMeter();				//创建生命参数条
@@ -2580,7 +2580,7 @@ Drill_GFB_StyleSprite.prototype.drill_initSprite = function() {
 	this.drill_createTPLevelNumber();		//创建怒气段数
 };
 //==============================
-// * 预推演初始移动动画
+// * 推演赋值 初始移动动画
 //==============================
 Drill_GFB_StyleSprite.prototype.drill_initPreMove = function() {
 	var data_b = this._drill_data_bind;

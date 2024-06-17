@@ -1784,7 +1784,7 @@ SceneManager.initialize = function() {
 	_drill_MPFP_scene_initialize.call(this);
 	
 	//==============================
-	// * 实体类赋值 - 刷新框架【贴图框架值_realFrame】
+	// * 实体类赋值 - 刷新框架『贴图框架值』（_realFrame）
 	//
 	//			说明：	> 此处 非帧刷新，而是在 贴图底层 发生刷新改变时，才变化值。
 	//==============================

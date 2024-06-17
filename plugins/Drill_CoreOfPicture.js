@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        图片 - 图片优化核心
+ * @plugindesc [v1.1]        图片 - 图片优化核心
  * @author Drill_up
  * 
  * 
@@ -18,7 +18,7 @@
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该插件可以单独使用。
+ * 该插件 可以 单独使用。
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -66,6 +66,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 优化了碰撞体的功能细节。
  * 
  */
  
@@ -87,8 +89,8 @@
 //		★时间复杂度		o(n^2) 每帧
 //		★性能测试因素	图片管理层
 //		★性能测试消耗	2024/5/2：
-//							11.8ms（drill_COPi_updateCollisionPosition）10.6ms（drill_COPi_finalTransform_x）
-//							堆叠级相关消耗：3.6ms（drill_COPi_updateZIndex）
+//							》变换消耗：11.8ms（drill_COPi_updateCollisionPosition）10.6ms（drill_COPi_finalTransform_x）
+//							》堆叠级相关消耗：3.6ms（drill_COPi_updateZIndex）
 //		★最坏情况		暂无
 //		★备注			该插件直接管图片的全部功能，本身图片可控制的数量也不多，所以不担心消耗。
 //		
@@ -107,13 +109,14 @@
 //			->☆管辖权 - 图片贴图【全权接管 Sprite_Picture】
 //			->☆管辖函数覆写
 //			
-//			->☆数据最终变换值『变换的继承规范』
-//				->基础属性
-//					> 图片资源名
-//					> 混合模式
-//					> 层级
-//					> 堆叠级
-//				->变换属性
+//			->☆数据最终变换值『图片数据最终变换值』『变换特性的规范』
+//				->基础特性
+//					>  资源名
+//					x> 可见
+//					>  混合模式
+//					>  层级
+//					>  堆叠级
+//				->变换特性『变换特性-单贴图』
 //					x> 锚点X
 //					x> 锚点Y
 //					>  位置X
@@ -125,9 +128,9 @@
 //					>  斜切Y
 //					>  旋转
 //					>  转速
-//				->特殊属性
+//				->其它特性
 //					> 色调
-//			->☆固定帧初始值『变换的继承规范』
+//			->☆固定帧初始值
 //				->贴图帧刷新 位置（覆写）
 //					->位置X
 //					->位置Y
@@ -180,11 +183,16 @@
 //				->所有点是否在当前碰撞体内【标准函数】
 //				->获取当前碰撞体的全部顶点【标准函数】
 //			->☆碰撞体判定实现
-//				->获取矩形的四个顶点
+//				->点是否在当前碰撞体内
 //				->数学工具
-//					->矩阵点的变换/点A绕点B旋转缩放斜切
 //					->获取两点的叉乘/向量积
 //					->判断点是否在凸多边形内
+//			->☆碰撞体与点变换
+//				->获取矩形的四个顶点
+//				->某点经过碰撞体的正向变换
+//				->某点经过碰撞体的反向变换
+//				->数学工具
+//					->矩阵点的变换/点A绕点B旋转缩放斜切
 //			->☆DEBUG碰撞体范围
 //			
 //			
@@ -1005,11 +1013,11 @@ Game_Screen.prototype.updatePictures = function(){
 
 
 //=============================================================================
-// ** ☆数据最终变换值『变换的继承规范』
+// ** ☆数据最终变换值
 //			
 //			说明：	> 这些值用于贴图变换，由于 叠加的子插件 较多，所以这里统一函数。
-//					  注意，这里都是 变换属性 。
-//					> 锚点虽然算 变换属性，但是对贴图结构有非常大的影响，所以子插件不能乱改。
+//					  注意，这里都是 变换特性 。
+//					> 锚点虽然算 变换特性，但是对贴图结构有非常大的影响，所以子插件不能乱改。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //##############################
@@ -1087,7 +1095,7 @@ Game_Picture.prototype.drill_COPi_finalTransform_rotateSpeed = function(){
 
 
 //=============================================================================
-// ** ☆固定帧初始值『变换的继承规范』
+// ** ☆固定帧初始值『变换特性的规范』
 //			
 //			说明：	> 强制每帧都将 数据最终变换值 都赋值一次，用于实现贴图 定量变化，防止 增量变化。
 //					（插件完整的功能目录去看看：功能结构树）
@@ -1119,8 +1127,10 @@ Sprite_Picture.prototype.update = function() {
 //==============================
 Sprite_Picture.prototype.updatePosition = function(){
     var picture = this.picture();
-    this.x = Math.floor( picture.drill_COPi_finalTransform_x() );
-    this.y = Math.floor( picture.drill_COPi_finalTransform_y() );
+    //this.x = Math.floor( picture.drill_COPi_finalTransform_x() );	//（不要用floor，移动值难免会出现7.99999999的情况）
+    //this.y = Math.floor( picture.drill_COPi_finalTransform_y() );
+    this.x = Math.round( picture.drill_COPi_finalTransform_x() );
+    this.y = Math.round( picture.drill_COPi_finalTransform_y() );
 };
 //==============================
 // * 固定帧初始值 - 贴图帧刷新 缩放（覆写）
@@ -1509,6 +1519,14 @@ Game_Temp.prototype.drill_COPi_Math2D_getFixPointInAnchor = function(
 Game_Picture.prototype.drill_COPi_checkCollisionBean = function(){
 	if( this._drill_COPi_collisionBean != undefined ){ return; }
 	this._drill_COPi_collisionBean = new Drill_COPi_CollisionBean();
+	
+	// > 创建碰撞体之后，要立即 强制帧刷新，确保当前帧的数据瞬间同步
+	var temp_sprite = $gameTemp.drill_COPi_getPictureSpriteByPictureId( this.drill_COPi_getPictureId() );
+	if( temp_sprite != undefined ){
+		temp_sprite.drill_COPi_updateCollisionPosition();			//强制帧刷新 - 刷新位置
+		temp_sprite.drill_COPi_updateCollisionRefreshFrame();		//强制帧刷新 - 刷新框架
+	}
+	
 	this.drill_COPi_whenCheckedCollisionBean();
 }
 //##############################
@@ -1675,7 +1693,7 @@ Sprite_Picture.prototype.drill_COPi_updateCollisionRefreshFrame = function() {
 	}
 };
 //==============================
-// * 碰撞体赋值 - 刷新框架【贴图框架值_realFrame】
+// * 碰撞体赋值 - 刷新框架『贴图框架值』（_realFrame）
 //
 //			说明：	> 此处 非帧刷新，而是在 贴图底层 发生刷新改变时，才变化值。
 //==============================
@@ -1926,95 +1944,6 @@ Game_Picture.prototype.drill_COPi_isPointInCollisionBean_Private = function( x0,
 	return false;
 }
 //==============================
-// * 碰撞体判定实现 - 获取矩形的四个顶点
-//
-//			说明：	> 返回 缩放/旋转/斜切 变换后的四个顶点。如果为null表示无法获取。
-//==============================
-Game_Temp.prototype.drill_COPi_getRectPointByBean = function( bean ){
-	
-	// > 缩放/旋转值
-	var rotation = bean['_drill_rotate'];	//（弧度值）
-	var scale_x = bean['_drill_scale_x'];
-	var scale_y = bean['_drill_scale_y'];
-	var skew_x = bean['_drill_skew_x'];
-	var skew_y = bean['_drill_skew_y'];
-	
-	// > 矩形的四个点 + 执行缩放/旋转（顺时针顺序）
-	var ww = bean['_drill_frameW'];
-	var hh = bean['_drill_frameH'];
-	if( ww == 0 ){ return null; }
-	if( hh == 0 ){ return null; }
-	
-	var x0 = bean['_drill_x'];					//（矩形的中心点，就是xy位置）
-	var y0 = bean['_drill_y'];
-	var xx = x0 - ww * bean['_drill_anchor_x'];	//（矩形的左上角点）
-	var yy = y0 - hh * bean['_drill_anchor_y'];
-	var p1 = $gameTemp.drill_COPi_Math2D_getPointWithTransform( xx+0,  yy+0,  x0,y0, rotation,scale_x,scale_y,skew_x,skew_y );
-	var p2 = $gameTemp.drill_COPi_Math2D_getPointWithTransform( xx+ww, yy+0,  x0,y0, rotation,scale_x,scale_y,skew_x,skew_y );
-	var p3 = $gameTemp.drill_COPi_Math2D_getPointWithTransform( xx+ww, yy+hh, x0,y0, rotation,scale_x,scale_y,skew_x,skew_y );
-	var p4 = $gameTemp.drill_COPi_Math2D_getPointWithTransform( xx+0,  yy+hh, x0,y0, rotation,scale_x,scale_y,skew_x,skew_y );
-	
-	// > 顶点列表
-	var point_list = [];
-	point_list.push( p1 );
-	point_list.push( p2 );
-	point_list.push( p3 );
-	point_list.push( p4 );
-	return point_list;
-}
-
-//==============================
-// * 碰撞体判定实现 - 数学工具 - 矩阵点的变换/点A绕点B旋转缩放斜切
-//			
-//			参数：	> cur_x,cur_y 数字       （需要变换的点）
-//					> center_x,center_y 数字 （矩形中心点）
-//					> rotation 数字          （旋转度数，弧度）
-//					> scale_x,scale_y 数字   （缩放比例XY，默认1.00）
-//					> skew_x,skew_y 数字     （斜切比例XY，默认0.00）
-//			返回：	> { x:0, y:0 }           （变换后的坐标）
-//			
-//			说明：	> 矩阵内或矩阵外一个点，能够根据矩阵的 旋转+缩放+斜切 一并变换。
-//					  旋转+缩放+斜切 可为负数。
-//==============================
-Game_Temp.prototype.drill_COPi_Math2D_getPointWithTransform = function( 
-					cur_x,cur_y,						//需要变换的点 
-					center_x,center_y, 					//矩形中心点 
-					rotation,							//变换的值（旋转）
-					scale_x, scale_y,					//变换的值（缩放）
-					skew_x, skew_y  ){					//变换的值（斜切）
-	
-	if( scale_x == undefined ){ scale_x = 1; }
-	if( scale_y == undefined ){ scale_y = 1; }
-	if( skew_x == undefined ){ skew_x = 0; }
-	if( skew_y == undefined ){ skew_y = 0; }
-	
-	// > 参数准备 （来自 Pixi.Transform）
-    var _cx = 1; // cos rotation + skewY;
-    var _sx = 0; // sin rotation + skewY;
-    var _cy = 0; // cos rotation + Math.PI/2 - skewX;
-    var _sy = 1; // sin rotation + Math.PI/2 - skewX;
-	
-	// > 旋转+斜切 （来自 Pixi.Transform.prototype.updateSkew）
-    _cx = Math.cos( rotation + skew_y );
-    _sx = Math.sin( rotation + skew_y );
-    _cy = -Math.sin( rotation - skew_x ); // cos, added PI/2
-    _sy = Math.cos( rotation - skew_x ); // sin, added PI/2
-	
-	// > 缩放 （来自 Pixi.Transform.prototype.updateLocalTransform）
-    var a = _cx * scale_x;
-    var b = _sx * scale_x;
-    var c = _cy * scale_y;
-    var d = _sy * scale_y;
-	
-	// > 将参数应用到坐标
-	var dx = (cur_x - center_x);
-	var dy = (cur_y - center_y);
-    var tar_x = center_x + (dx * a + dy * c);
-    var tar_y = center_y + (dx * b + dy * d);
-	
-	return { "x":tar_x, "y":tar_y };
-}
-//==============================
 // * 碰撞体判定实现 - 数学工具 - 获取两点的叉乘/向量积
 //			
 //			参数：	> x1,y1 数字   （第1个点）
@@ -2072,6 +2001,187 @@ Game_Temp.prototype.drill_COPi_Math2D_isPointInConvexPolygon = function( x0,y0, 
 		}
 	}
 	return true;
+}
+
+
+//=============================================================================
+// ** ☆碰撞体与点变换
+//
+//			说明：	> 此模块管理 鼠标与实体类 的判定。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 碰撞体与点变换 - 获取矩形的四个顶点（开放函数）
+//
+//			说明：	> 返回 缩放/旋转/斜切 变换后的四个顶点。如果为null表示无法获取。
+//==============================
+Game_Temp.prototype.drill_COPi_getRectPointByBean = function( bean ){
+	
+	// > 缩放/旋转值
+	var rotation = bean['_drill_rotate'];	//（弧度值）
+	var scale_x = bean['_drill_scale_x'];
+	var scale_y = bean['_drill_scale_y'];
+	var skew_x = bean['_drill_skew_x'];
+	var skew_y = bean['_drill_skew_y'];
+	
+	// > 矩形的四个点 + 执行缩放/旋转（顺时针顺序）
+	var ww = bean['_drill_frameW'];
+	var hh = bean['_drill_frameH'];
+	if( ww == 0 ){ return null; }
+	if( hh == 0 ){ return null; }
+	
+	var x0 = bean['_drill_x'];					//（矩形的中心点，就是xy位置）
+	var y0 = bean['_drill_y'];
+	var xx = x0 - ww * bean['_drill_anchor_x'];	//（矩形的左上角点）
+	var yy = y0 - hh * bean['_drill_anchor_y'];
+	var p1 = $gameTemp.drill_COPi_Math2D_getPointWithTransform( xx+0,  yy+0,  x0,y0, rotation,scale_x,scale_y,skew_x,skew_y );
+	var p2 = $gameTemp.drill_COPi_Math2D_getPointWithTransform( xx+ww, yy+0,  x0,y0, rotation,scale_x,scale_y,skew_x,skew_y );
+	var p3 = $gameTemp.drill_COPi_Math2D_getPointWithTransform( xx+ww, yy+hh, x0,y0, rotation,scale_x,scale_y,skew_x,skew_y );
+	var p4 = $gameTemp.drill_COPi_Math2D_getPointWithTransform( xx+0,  yy+hh, x0,y0, rotation,scale_x,scale_y,skew_x,skew_y );
+	
+	// > 顶点列表
+	var point_list = [];
+	point_list.push( p1 );
+	point_list.push( p2 );
+	point_list.push( p3 );
+	point_list.push( p4 );
+	return point_list;
+}
+//==============================
+// * 碰撞体与点变换 - 某点经过碰撞体的正向变换（开放函数）
+//
+//			说明：	> 返回 缩放/旋转/斜切 变换后的顶点。如果为null表示无法获取。
+//==============================
+Game_Temp.prototype.drill_COPi_getPointByBeanTransform = function( x,y, bean ){
+	if( bean['_drill_frameW'] == 0 ){ return null; }
+	if( bean['_drill_frameH'] == 0 ){ return null; }
+	return $gameTemp.drill_COPi_Math2D_getPointWithTransform(
+			x,y,
+			bean['_drill_x'],bean['_drill_y'],	//（矩形的中心点，就是xy位置）
+			bean['_drill_rotate'],				//（弧度值）
+			bean['_drill_scale_x'],bean['_drill_scale_y'],
+			bean['_drill_skew_x'],bean['_drill_skew_y']
+		);
+}
+//==============================
+// * 碰撞体与点变换 - 某点经过碰撞体的反向变换（开放函数）
+//
+//			说明：	> 已知变换后的点，返回 缩放/旋转/斜切 变换前的点。如果为null表示无法获取。
+//==============================
+Game_Temp.prototype.drill_COPi_getPointByBeanTransformInversed = function( x,y, bean ){
+	if( bean['_drill_frameW'] == 0 ){ return null; }
+	if( bean['_drill_frameH'] == 0 ){ return null; }
+	return $gameTemp.drill_COPi_Math2D_getPointWithTransformInversed(
+			x,y,
+			bean['_drill_x'],bean['_drill_y'],	//（矩形的中心点，就是xy位置）
+			bean['_drill_rotate'],				//（弧度值）
+			bean['_drill_scale_x'],bean['_drill_scale_y'],
+			bean['_drill_skew_x'],bean['_drill_skew_y']
+		);
+}
+//==============================
+// * 碰撞体与点变换 - 数学工具 - 矩阵点的变换/点A绕点B旋转缩放斜切
+//			
+//			参数：	> cur_x,cur_y 数字       （需要变换的点）
+//					> center_x,center_y 数字 （矩形中心点）
+//					> rotation 数字          （旋转度数，弧度）
+//					> scale_x,scale_y 数字   （缩放比例XY，默认1.00）
+//					> skew_x,skew_y 数字     （斜切比例XY，默认0.00）
+//			返回：	> { x:0, y:0 }           （变换后的坐标）
+//			
+//			说明：	> 矩阵内或矩阵外一个点，能够根据矩阵的 旋转+缩放+斜切 一并变换。
+//					  旋转+缩放+斜切 可为负数。
+//==============================
+Game_Temp.prototype.drill_COPi_Math2D_getPointWithTransform = function( 
+					cur_x,cur_y,						//需要变换的点 
+					center_x,center_y, 					//矩形中心点 
+					rotation,							//变换的值（旋转）
+					scale_x, scale_y,					//变换的值（缩放）
+					skew_x, skew_y  ){					//变换的值（斜切）
+	
+	if( scale_x == undefined ){ scale_x = 1; }
+	if( scale_y == undefined ){ scale_y = 1; }
+	if( skew_x == undefined ){ skew_x = 0; }
+	if( skew_y == undefined ){ skew_y = 0; }
+	
+	// > 参数准备 （来自 Pixi.Transform）
+    var _cx = 1; // cos rotation + skewY;
+    var _sx = 0; // sin rotation + skewY;
+    var _cy = 0; // cos rotation + Math.PI/2 - skewX;
+    var _sy = 1; // sin rotation + Math.PI/2 - skewX;
+	
+	// > 旋转+斜切 （来自 Pixi.Transform.prototype.updateSkew）
+    _cx = Math.cos( rotation + skew_y );
+    _sx = Math.sin( rotation + skew_y );
+    _cy = -Math.sin( rotation - skew_x ); // cos, added PI/2
+    _sy = Math.cos( rotation - skew_x ); // sin, added PI/2
+	
+	// > 缩放 （来自 Pixi.Transform.prototype.updateLocalTransform）
+    var a = _cx * scale_x;
+    var b = _sx * scale_x;
+    var c = _cy * scale_y;
+    var d = _sy * scale_y;
+	
+	// > 将参数应用到坐标
+	var dx = (cur_x - center_x);
+	var dy = (cur_y - center_y);
+    var tar_x = center_x + (dx * a + dy * c);
+    var tar_y = center_y + (dx * b + dy * d);
+	
+	return { "x":tar_x, "y":tar_y };
+}
+//==============================
+// * 碰撞体与点变换 - 数学工具 - 矩阵点的变换（逆向）/点A绕点B旋转缩放斜切（逆向）
+//			
+//			参数：	> tar_x,tar_y 数字       （变换后的坐标）
+//					> center_x,center_y 数字 （矩形中心点）
+//					> rotation 数字          （旋转度数，弧度）
+//					> scale_x,scale_y 数字   （缩放比例XY，默认1.00）
+//					> skew_x,skew_y 数字     （斜切比例XY，默认0.00）
+//			返回：	> { x:0, y:0 }           （变换前的点）
+//			
+//			说明：	> 同样的函数，能够将正向函数的结果值，扳回成正向函数的最初值。
+//==============================
+Game_Temp.prototype.drill_COPi_Math2D_getPointWithTransformInversed = function( 
+					tar_x,tar_y,						//需要变换的点 
+					center_x,center_y, 					//矩形中心点 
+					rotation,							//变换的值（旋转）
+					scale_x, scale_y,					//变换的值（缩放）
+					skew_x, skew_y  ){					//变换的值（斜切）
+	
+	if( scale_x == undefined ){ scale_x = 1; }
+	if( scale_y == undefined ){ scale_y = 1; }
+	if( skew_x == undefined ){ skew_x = 0; }
+	if( skew_y == undefined ){ skew_y = 0; }
+	
+	// > 参数准备 （来自 Pixi.Transform）
+    var _cx = 1; // cos rotation + skewY;
+    var _sx = 0; // sin rotation + skewY;
+    var _cy = 0; // cos rotation + Math.PI/2 - skewX;
+    var _sy = 1; // sin rotation + Math.PI/2 - skewX;
+	
+	// > 旋转+斜切 （来自 Pixi.Transform.prototype.updateSkew）
+    _cx = Math.cos( rotation + skew_y );
+    _sx = Math.sin( rotation + skew_y );
+    _cy = -Math.sin( rotation - skew_x ); // cos, added PI/2
+    _sy = Math.cos( rotation - skew_x ); // sin, added PI/2
+	
+	// > 缩放 （来自 Pixi.Transform.prototype.updateLocalTransform）
+    var a = _cx * scale_x;
+    var b = _sx * scale_x;
+    var c = _cy * scale_y;
+    var d = _sy * scale_y;
+	
+	// > 逆向公式
+	var cur_y = (-tar_x*b +tar_y*a +center_x*b +center_y*(d*a - c*b - a)) / (d*a - c*b);
+	var cur_x;
+	if( Math.abs(a) > 0.01 ){	//（rotation为 0.5π/1.5π时，a无限接近0，所以换另一个公式）
+		cur_x = (-tar_x + center_x - center_x*a + cur_y*c - center_y*c )/(-a);
+	}else{
+		cur_x = (-tar_y + center_y - center_x*b + cur_y*d - center_y*d )/(-b);
+	}
+	
+	return { "x":cur_x, "y":cur_y };
 }
 
 

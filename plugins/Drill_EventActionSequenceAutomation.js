@@ -175,7 +175,10 @@
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^2) 每帧
 //		★性能测试因素	动画序列管理层
-//		★性能测试消耗	4.10ms
+//		★性能测试消耗	2024/1/22：
+//							》4.1ms（drill_EASA_setAnnotation）
+//						2024/6/15：
+//							》5.3ms（drill_EASA_setAnnotation）4.5ms（drill_EASA_posIsInCamera）
 //		★最坏情况		状态元的注解超级多。（不过目前算法并不会造成注解解析困难）
 //		★备注			暂无
 //		
@@ -302,6 +305,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var unit = String(args[1]);
 			if( e_chars == null && unit == "本事件" ){
 				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
 				e_chars = [ e ];
 			}
 			if( e_chars == null && unit.indexOf("批量事件[") != -1 ){

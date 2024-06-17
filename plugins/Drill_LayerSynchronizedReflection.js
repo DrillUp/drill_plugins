@@ -901,8 +901,7 @@
 //			3,注意，事件的_transparent是与visible不一样的特殊控制变量。
 //
 //		★存在的问题：
-//			1.定义一个镜像后，事件的 动画贴图和气泡贴图 会被镜面遮挡。（已解决）
-//			2.进入循环地图边缘后，由于遮罩不是循环的，刷新位置后会出现镜像消失问题。（已解决）
+//			暂无
 //		
 
 //=============================================================================
@@ -1024,6 +1023,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var unit = String(args[1]);
 			if( chars == null && unit == "本事件" ){
 				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
 				chars = [ e ];
 			}
 			if( chars == null && unit.indexOf("批量事件[") != -1 ){
@@ -1963,7 +1963,7 @@ SceneManager.initialize = function() {
 		// > 镜头像素位置
 		var screen_x = this.drill_screenX();
 		
-		// > 【行走图 - 行走图优化核心】数据最终变换值
+		// > 【行走图 - 行走图优化核心】『物体数据最终变换值』
 		screen_x += this._character.drill_COEF_acc_LSR_x();
 		
 		// > 同步镜像赋值
@@ -1998,7 +1998,7 @@ SceneManager.initialize = function() {
 		}
 		// > 偏移补正值 - 等距同步
 		if( $gameSystem._drill_LSR_mode == "等距同步" ){
-			screen_y += this._character.drill_COEF_acc_LSR_y();  //【行走图 - 行走图优化核心】数据最终变换值
+			screen_y += this._character.drill_COEF_acc_LSR_y();  //【行走图 - 行走图优化核心】『物体数据最终变换值』
 		}
 		
 		this.y = screen_y;

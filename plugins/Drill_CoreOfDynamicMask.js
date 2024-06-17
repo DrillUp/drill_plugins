@@ -21,7 +21,7 @@
  * 该插件为基础核心，单独使用没有效果。
  * 插件基于弹道核心，可以作用于所有需要用到动态遮罩的子插件。
  * 基于：
- *   - Drill_CoreOfBallistics       系统-弹道核心★★v1.8及以上★★
+ *   - Drill_CoreOfBallistics       数学模型-弹道核心★★v1.8及以上★★
  * 可作用于：
  *   - Drill_LayerDynamicMaskA      地图-地图动态遮罩板A
  *   - Drill_PictureDynamicMaskA    图片-图片动态遮罩板A
@@ -146,11 +146,11 @@
 //			暂无
 //				
 //		★存在的问题：
-//			1. 2021-10-30 使用新写的 遮罩渲染器【Drill_CODM_Renderer】进行 render渲染，没有任何效果。
-//			  而使用 Graphics._renderer进行 render，就有效。
-//			（pixi的底层render反复看了很多次，调用函数也换了很多种写法，但是自写的均无效。）
-//			（唯一找到两者的区别就是 Graphics._renderer 进行过 stage场景渲染； 而遮罩渲染器没有，是直接去进行 renderTexture 渲染。）
-//			（此问题搁置，因为继续探讨没有意义了，只要加了动态遮罩就一定费性能，换自写的并不能优化性能）
+//			1.问题：使用新写的 遮罩渲染器【Drill_CODM_Renderer】进行 render渲染，没有任何效果。
+//					而使用 Graphics._renderer进行 render，就有效。（2021-10-30）
+//			  解决：【不解决】，pixi的底层render反复看了很多次，调用函数也换了很多种写法，但是自写的均无效。
+//					唯一找到两者的区别就是 Graphics._renderer 进行过 stage场景渲染； 而遮罩渲染器没有，是直接去进行 renderTexture 渲染。
+//					此问题搁置，因为继续探讨没有意义了，只要加了动态遮罩就一定费性能，换自写的并不能优化性能。
 //
 
 //=============================================================================
@@ -161,7 +161,7 @@
 	//==============================
 	var DrillUp = DrillUp || {}; 
 	DrillUp.g_CODM_PluginTip_curName = "Drill_CoreOfDynamicMask.js 系统-动态遮罩核心";
-	DrillUp.g_CODM_PluginTip_baseList = ["Drill_CoreOfBallistics.js 系统-弹道核心"];
+	DrillUp.g_CODM_PluginTip_baseList = ["Drill_CoreOfBallistics.js 数学模型-弹道核心"];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			

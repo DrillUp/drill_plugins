@@ -119,9 +119,9 @@
 //		★时间复杂度		o(n)*o(贴图处理) 每帧
 //		★性能测试因素	各个管理层跑一圈
 //		★性能测试消耗	2024/5/2：
-//							200个事件：229.3ms（drill_COEF_updateValue_BlockX）191.2ms（drill_COEF_updateValue_PatternWidth）
-//							50个事件：24.5ms（drill_COEF_updateValue_BlockX）26.0ms（drill_COEF_updateValue_PatternWidth）
-//							堆叠级相关消耗：28.8ms（drill_COEF_refreshSortValue）
+//							》200个事件：229.3ms（drill_COEF_updateValue_BlockX）191.2ms（drill_COEF_updateValue_PatternWidth）
+//							》50个事件：24.5ms（drill_COEF_updateValue_BlockX）26.0ms（drill_COEF_updateValue_PatternWidth）
+//							》堆叠级相关消耗：28.8ms（drill_COEF_refreshSortValue）
 //		★最坏情况		暂无
 //		★备注			设置了 优化策略 之后，优化的是其他子插件的性能。
 //						当前插件的消耗并没有优化多少。
@@ -145,13 +145,14 @@
 //			->☆核心漏洞修复 - 行走图贴图
 //			->☆核心漏洞修复 - 初始帧
 //			
-//			->☆数据最终变换值『变换的继承规范』
-//				->基础属性
-//					> 物体资源名
-//					> 混合模式
-//					> 层级
-//					> 堆叠级
-//				->变换属性
+//			->☆数据最终变换值『物体数据最终变换值』『变换特性的规范』
+//				->基础特性
+//					>  资源名
+//					x> 可见
+//					>  混合模式
+//					>  层级
+//					>  堆叠级
+//				->变换特性『变换特性-单贴图』
 //					x> 锚点X
 //					x> 锚点Y
 //					>  位置X
@@ -163,7 +164,10 @@
 //					>  斜切Y
 //					>  旋转
 //					x> 转速
-//			->☆固定帧初始值『变换的继承规范』
+//				->其它特性
+//					>  累积位置X
+//					>  累积位置Y
+//			->☆固定帧初始值
 //				->贴图帧刷新 位置（覆写）
 //					->位置X
 //					->位置Y
@@ -465,7 +469,7 @@ Game_Temp.prototype.drill_COEF_getCharacterSpriteTank = function(){
 //			参数：	> event_id 数字（事件ID）
 //			返回：	> 贴图对象     （事件贴图）
 //          
-//			说明：	> 事件id和物体贴图一一对应。不含镜像。
+//			说明：	> -2表示玩家，1表示第一个事件的贴图。不含镜像。
 //					> 此函数只读，且不缓存任何对象，直接读取容器数据。
 //##############################
 Game_Temp.prototype.drill_COEF_getCharacterSpriteByEventId = function( event_id ){
@@ -477,7 +481,7 @@ Game_Temp.prototype.drill_COEF_getCharacterSpriteByEventId = function( event_id 
 //			参数：	> follower_index 数字（玩家队员索引）
 //			返回：	> 贴图对象           （玩家队员贴图）
 //          
-//			说明：	> -2表示玩家，1表示第一个跟随者。不含镜像。
+//			说明：	> -2表示玩家，1表示第一个玩家队员的贴图。不含镜像。
 //					> 此函数只读，且不缓存任何对象，直接读取容器数据。
 //##############################
 Game_Temp.prototype.drill_COEF_getCharacterSpriteByFollowerIndex = function( follower_index ){
@@ -506,6 +510,10 @@ Game_Temp.prototype.drill_COEF_getCharacterSpriteByEventId_Private = function( e
 	for(var i=0; i < sprite_list.length; i++){
 		var sprite = sprite_list[i];
 		if( sprite._character == undefined ){ continue; }		//（判断 _character 就可以，不需要检验 Sprite_Character）
+		if( event_id == -2 &&   //『玩家id』
+			sprite._character == $gamePlayer ){
+			return sprite;
+		}
 		if( sprite._character._eventId == event_id ){
 			return sprite;
 		}
@@ -1264,11 +1272,11 @@ Game_Follower.prototype.isOriginalPattern = function() {
 	
 
 //=============================================================================
-// ** ☆数据最终变换值『变换的继承规范』
+// ** ☆数据最终变换值
 //			
 //			说明：	> 这些值用于贴图变换，由于 叠加的子插件 较多，所以这里统一函数。
-//					  注意，这里都是 变换属性 。
-//					> 锚点虽然算 变换属性，但是对贴图结构有非常大的影响，所以子插件不能乱改。
+//					  注意，这里都是 变换特性 。
+//					> 锚点虽然算 变换特性，但是对贴图结构有非常大的影响，所以子插件不能乱改。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //##############################
@@ -1416,7 +1424,7 @@ SceneManager.requestUpdate = function() {
 
 
 //=============================================================================
-// ** ☆固定帧初始值『变换的继承规范』
+// ** ☆固定帧初始值『变换特性的规范』
 //			
 //			说明：	> 强制每帧都将 数据最终变换值 都赋值一次，用于实现贴图 定量变化，防止 增量变化。
 //					（插件完整的功能目录去看看：功能结构树）
@@ -1951,7 +1959,7 @@ Sprite_Character.prototype.drill_COEF_updateCollisionRefreshFrame = function() {
 	}
 };
 //==============================
-// * 碰撞体赋值 - 刷新框架【贴图框架值_realFrame】
+// * 碰撞体赋值 - 刷新框架『贴图框架值』（_realFrame）
 //
 //			说明：	> 此处 非帧刷新，而是在 贴图底层 发生刷新改变时，才变化值。
 //==============================

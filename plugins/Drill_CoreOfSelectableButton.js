@@ -26,7 +26,7 @@
  * 该插件 不能 单独使用。
  * 需要基于其他核心插件，才能运行，并作用于其他子插件。
  * 基于：
- *   - Drill_CoreOfBallistics       系统 - 弹道核心
+ *   - Drill_CoreOfBallistics       数学模型 - 弹道核心
  *   - Drill_CoreOfWindowAuxiliary  系统 - 窗口辅助核心★★v1.9及以上★★
  * 可作用于：
  *   - Drill_SceneMain              面板 - 全自定义主菜单面板
@@ -1140,7 +1140,7 @@
  * @value 增减速移动
  * @option 弹性移动
  * @value 弹性移动
- * @desc 移动类型基于 弹道核心-两点式 移动。更多内容可以去看看 "1.系统 > 关于弹道.docx"。
+ * @desc 移动类型基于 弹道核心-两点式 移动。更多内容可以去看看 "32.数学模型 > 关于弹道.docx"。
  * @default 匀速移动
  *
  * @param 移动时长
@@ -1176,7 +1176,7 @@
  * @value 增减速移动
  * @option 弹性移动
  * @value 弹性移动
- * @desc 移动类型基于 弹道核心-两点式 移动。更多内容可以去看看 "1.系统 > 关于弹道.docx"。
+ * @desc 移动类型基于 弹道核心-两点式 移动。更多内容可以去看看 "32.数学模型 > 关于弹道.docx"。
  * @default 匀速移动
  *
  * @param 移动时长
@@ -1314,7 +1314,7 @@
 	var DrillUp = DrillUp || {}; 
 	DrillUp.g_COSB_PluginTip_curName = "Drill_CoreOfSelectableButton.js 系统-按钮组核心";
 	DrillUp.g_COSB_PluginTip_baseList = [
-		"Drill_CoreOfBallistics.js 系统-弹道核心",
+		"Drill_CoreOfBallistics.js 数学模型-弹道核心",
 		"Drill_CoreOfWindowAuxiliary.js 系统-窗口辅助核心"
 	];
 	//==============================

@@ -148,10 +148,10 @@
 //				另外，帧刷新判断时，最好每次变化直接【刷新统计】。
 //
 //		★其它说明细节：
-//			无
+//			暂无
 //				
 //		★存在的问题：
-//			无
+//			暂无
 //			
 
 //=============================================================================
@@ -232,6 +232,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args ){
 			}
 			if( c_chars == null && unit == "本事件" ){
 				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
 				c_chars = [ e ];
 			}
 			if( c_chars == null && unit.indexOf("批量事件[") != -1 ){

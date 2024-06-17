@@ -46,7 +46,7 @@
  *   (2.你可以使用 高级渐变色+字体+窗口字符效果，组合出漂亮的艺术文字。
  * 
  * -----------------------------------------------------------------------------
- * ----可选设定 - 颜色窗口字符：
+ * ----可选设定 - 颜色窗口字符
  * 你可以使用窗口字符调整 自定义颜色：
  * 
  * 窗口字符：\c[101]
@@ -61,7 +61,7 @@
  *   "\c[201] - \c[299]"对应了 高级颜色1 至 高级颜色99。
  * 
  * -----------------------------------------------------------------------------
- * ----可选设定 - 普通颜色：
+ * ----可选设定 - 普通颜色
  * 你可以使用窗口字符设置 普通颜色：
  * 
  * 窗口字符：\cc[#ffffff]
@@ -76,7 +76,7 @@
  *    注意，当前行字数统计不含 效果字符、字符块 的数量。
  * 
  * -----------------------------------------------------------------------------
- * ----可选设定 - 颜色暂存：
+ * ----可选设定 - 颜色暂存
  * 你可以使用窗口字符暂存颜色：
  * 
  * 窗口字符：\csave
@@ -97,7 +97,7 @@
  * 2.注意，"文本色[0]" 与 "\c[0]" 意思一样。
  * 
  * -----------------------------------------------------------------------------
- * ----知识点 - 关于颜色：
+ * ----知识点 - 关于颜色
  * 默认配置有：
  *  #FF4444 赤     #FF784C 橙
  *  #FFFF40 黄     #80FF80 绿
@@ -1477,6 +1477,7 @@
 //			->☆颜色文本绘制
 //			->☆文本颜色绑定
 //			->☆逐个字符变色
+//			->☆颜色工具
 //		
 //		
 //		★家谱：
@@ -2175,8 +2176,8 @@ Window_Base.prototype.drill_COC_setColorLinearCode = function( color1, color2, c
 	if( char_num <= 1 ){ return; }
 	
 	// > 数据标记
-	var rgb1 = this.drill_COC_colorToRGB( color1 );
-	var rgb2 = this.drill_COC_colorToRGB( color2 );
+	var rgb1 = this.drill_COC_color_StringToRGB( color1 );
+	var rgb2 = this.drill_COC_color_StringToRGB( color2 );
 	var data = {};
 	data['cur_index'] = -1;
 	data['tar_index'] = char_num;
@@ -2213,23 +2214,117 @@ Window_Base.prototype.processNormalCharacter = function( textState ){
 		}
 	}
 }
+
+
+//=============================================================================
+// ** ☆颜色工具
+//
+//			说明：	> 此模块专门提供 颜色工具 函数。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
 //==============================
-// * 逐个变色 - 工具 - 颜色文本 转 RGB
+// * 颜色工具 - 字符串转RGB（开放函数）
+//			
+//			参数：	> color_string 字符串 （颜色）
+//			返回：	> 动态参数对象        （如 {"r":255,"g":255,"b":255} ）
+//			
+//			说明：	> 颜色的格式支持 十六进制表示法、RGB表示法 。
 //==============================
-Window_Base.prototype.drill_COC_colorToRGB = function( color ){
-	if( color.charAt(0) != "#" ){ return null; }
-	color = color.substring(1);
-	if( color.length == 3 ){ color = color[0]+color[0]+color[1]+color[1]+color[2]+color[2]; }
-	if( /^[0-9a-fA-F]{6}$/.test(color) ){
-		var data = {};
-		data['r'] = parseInt(color.substr(0,2), 16 );
-		data['g'] = parseInt(color.substr(2,2), 16 );
-		data['b'] = parseInt(color.substr(4,2), 16 );
-		return data;
+Game_Temp.prototype.drill_COC_color_StringToRGB = function( color_string ){
+	color_string = color_string.toLowerCase();
+	
+	// > 格式"#ffffff"情况
+	if( color_string.charAt(0) == "#" ){
+		color_string = color_string.substring(1);
+		
+		// > 格式"#fff"情况
+		if( color_string.length == 3 ){
+			color_string = color_string[0]+color_string[0] +color_string[1]+color_string[1] +color_string[2]+color_string[2];
+		}
+		if( /^[0-9a-f]{6}$/.test(color_string) ){
+			var color_obj = {};
+			color_obj['r'] = parseInt( color_string.substr(0,2), 16 );
+			color_obj['g'] = parseInt( color_string.substr(2,2), 16 );
+			color_obj['b'] = parseInt( color_string.substr(4,2), 16 );
+			return color_obj;
+		}
+	}
+	// > 格式"rgb(255,255,255)"情况
+	if( color_string.charAt(0) == "r" ){
+		color_string = color_string.replace( /[ rgba\(\)（）]/g, "" );
+		var str_list = color_string.split( /[,，]+/ );
+		if( str_list.length < 3 ){ return null; }
+		var color_obj = {};
+		color_obj['r'] = Number( str_list[0] );
+		color_obj['g'] = Number( str_list[1] );
+		color_obj['b'] = Number( str_list[2] );
+		return color_obj;
 	}
 	return null;
 }
-
+//==============================
+// * 颜色工具 - RGB转字符串（开放函数）
+//			
+//			参数：	> r,g,b 数字 （颜色）
+//			返回：	> 字符串     （如"rgb(255,255,255)"）
+//==============================
+Game_Temp.prototype.drill_COC_color_RGBToString = function( r, g, b ){
+	return "rgb(" + String(r) + "," + String(g) + "," + String(b) + ")";
+}
+//==============================
+// * 颜色工具 - 字符串转RGBA（开放函数）
+//			
+//			参数：	> color_string 字符串 （颜色）
+//			返回：	> 动态参数对象        （如 {"r":255,"g":255,"b":255,"a":1.0} ）
+//			
+//			说明：	> 颜色的格式支持 十六进制表示法、RGB表示法 。
+//					> 注意，a的取值为0~1。
+//==============================
+Game_Temp.prototype.drill_COC_color_StringToRGBA = function( color_string ){
+	color_string = color_string.toLowerCase();
+	
+	// > 格式"#ffffff"情况
+	if( color_string.charAt(0) == "#" ){
+		color_string = color_string.substring(1);
+		
+		// > 格式"#fff"情况
+		if( color_string.length == 3 ){
+			color_string = color_string[0]+color_string[0] +color_string[1]+color_string[1] +color_string[2]+color_string[2];
+		}
+		if( /^[0-9a-f]{6}$/.test(color_string) ){
+			var color_obj = {};
+			color_obj['r'] = parseInt( color_string.substr(0,2), 16 );
+			color_obj['g'] = parseInt( color_string.substr(2,2), 16 );
+			color_obj['b'] = parseInt( color_string.substr(4,2), 16 );
+			color_obj['a'] = 1;
+			return color_obj;
+		}
+	}
+	// > 格式"rgb(255,255,255,1.0)"情况
+	if( color_string.charAt(0) == "r" ){
+		color_string = color_string.replace( /[ rgba\(\)（）]/g, "" );
+		var str_list = color_string.split( /[,，]+/ );
+		if( str_list.length < 4 ){ return null; }
+		var color_obj = {};
+		color_obj['r'] = Number( str_list[0] );
+		color_obj['g'] = Number( str_list[1] );
+		color_obj['b'] = Number( str_list[2] );
+		color_obj['a'] = Number( str_list[3] );
+		return color_obj;
+	}
+	return null;
+}
+//==============================
+// * 颜色工具 - RGBA转字符串（开放函数）
+//			
+//			参数：	> r,g,b,a 数字 （颜色）
+//			返回：	> 字符串       （如"rgba(255,255,255,1.0)"）
+//			
+//			说明：	> 注意，a的取值为0~1。
+//==============================
+Game_Temp.prototype.drill_COC_color_RGBAToString = function( r, g, b, a ){
+	return "rgba(" + String(r) + "," + String(g) + "," + String(b) + "," + String(a) + ")";
+}
 
 
 //=============================================================================
