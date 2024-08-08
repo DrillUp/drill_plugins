@@ -128,7 +128,7 @@
  *   比如"计算距离 : 位置[11,12] : 位置[10,10]"算出来的距离为3。
  * 
  * -----------------------------------------------------------------------------
- * ----可选设定 - 获取值：
+ * ----可选设定 - 获取值
  * 你可以获取使用下面插件指令获取数据：
  * 
  * 插件指令：>位置与位移 : 变量[21] : 获取指定位置的事件ID : 位置[10,10]
@@ -875,18 +875,24 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				
 				if( x1 != undefined && y1 != undefined ){
 					var e_id = -1;
-					var event_list = $gameMap.eventsXy(x1,y1);
-					if( event_list.length != 0 ){
-						var e = event_list[0];
-						if( e._erased == true ){	//移除的事件不算
-							e_id = -1;
-						}else{
-							e_id = e.eventId()
-						}
-					}
+					
+					// > 优先匹配玩家id
 					if( e_id == -1 && x1 == $gamePlayer._x && y1 == $gamePlayer._y ){
 						e_id = -2;	//『玩家id』
 					}
+					
+					// > 然后匹配事件id
+					if( e_id == -1 ){
+						var event_list = $gameMap.eventsXy(x1,y1);
+						for(var i = 0; i < event_list.length; i++ ){
+							var temp_event = event_list[i];
+							if( temp_event == null ){ continue; }
+							if( temp_event._erased == true ){ continue; }	//『有效事件』
+							e_id = temp_event.eventId();
+							break;
+						}
+					}
+					
 					$gameVariables.setValue( Number(temp1) , e_id );
 				}
 			}

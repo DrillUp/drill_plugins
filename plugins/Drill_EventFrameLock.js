@@ -173,7 +173,7 @@
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 //		插件简称		EFL（Event_Frame_Lock）
 //		临时全局变量	无
-//		临时局部变量	this._drill_EFL_lockEnabled
+//		临时局部变量	无
 //		存储数据变量	无
 //		全局存储变量	无
 //		覆盖重写方法	无
@@ -433,7 +433,7 @@ Game_Event.prototype.drill_EFL_setupPageSettings = function() {
 	
 	// > 事件页变化时，重置
 	if( this._drill_EFL_lockData != undefined ){
-		this._drill_EFL_lockData['lockEnabled'] = false;
+		//this._drill_EFL_lockData['lockEnabled'] = false;	//（锁定设置 跨事件页）
 		this._drill_EFL_lockData['animEnabled'] = false;
 	}
 	

@@ -3,8 +3,12 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        行走图 - 事件漂浮文字自动显现[扩展]
+ * @plugindesc [v1.5]        行走图 - 事件漂浮文字自动显现[扩展]
  * @author Drill_up
+ * 
+ * @Drill_LE_param "声音集合-%d"
+ * @Drill_LE_parentKey "---声音组---"
+ * @Drill_LE_var "DrillUp.g_XETT_soundList_length"
  * 
  * 
  * @help  
@@ -113,6 +117,20 @@
  * 3."强制显现"是指通过插件指令，强制执行显现，不需要玩家接近激活。
  * 
  * -----------------------------------------------------------------------------
+ * ----可选设定 - 显现声音控制
+ * 你可以通过插件指令控制声音：
+ * 
+ * 插件指令：>事件漂浮文字自动显现 : 声音开关 : 开启
+ * 插件指令：>事件漂浮文字自动显现 : 声音开关 : 关闭
+ * 插件指令：>事件漂浮文字自动显现 : 设置随机播放集合 : 开启
+ * 插件指令：>事件漂浮文字自动显现 : 设置随机播放集合 : 关闭
+ * 插件指令：>事件漂浮文字自动显现 : 设置随机播放集合 : 恢复默认
+ * 插件指令：>事件漂浮文字自动显现 : 设置播放的集合 : 集合[1]
+ * 插件指令：>事件漂浮文字自动显现 : 设置播放的集合 : 默认集合
+ * 
+ * 1."集合[1]"表示对应声音集合配置1，修改后将使用该集合。
+ * 
+ * -----------------------------------------------------------------------------
  * ----插件性能
  * 测试仪器：   4G 内存，Intel Core i5-2520M CPU 2.5GHz 处理器
  *              Intel(R) HD Graphics 3000 集显 的垃圾笔记本
@@ -146,40 +164,55 @@
  * 添加了触发范围的事件注释设置。
  * [v1.4]
  * 修复了显示框架时，框架不会播放透明动画的bug。
+ * [v1.5]
+ * 添加了 漂浮文字、批注线、背景 显现时播放声音的功能。
  * 
  * 
+ * 
+ * @param ---显现范围---
+ * @default
  *
  * @param 自动显现范围
+ * @parent ---显现范围---
  * @type number
  * @min 1
  * @desc 事件进入玩家的方形区域内后，会自动显现事件漂浮文字。
  * @default 4
+ * 
+ * 
+ * @param ---显现时机---
+ * @default
  *
  * @param 漂浮文字-持续时长
+ * @parent ---显现时机---
  * @type number
  * @min 1
  * @desc 漂浮文字自动显现时，变化持续的时长。
  * @default 20
  *
  * @param 漂浮文字-延迟时间
+ * @parent ---显现时机---
  * @type number
  * @min 1
  * @desc 漂浮文字自动显现时，延迟变化时间。你可以让该部件延迟，等其他部件显示完毕后，在显示此部件。
  * @default 30
  *
  * @param 批注线-持续时长
+ * @parent ---显现时机---
  * @type number
  * @min 1
  * @desc 漂浮文字自动显现时，变化持续的时长。
  * @default 30
  *
  * @param 批注线-延迟时间
+ * @parent ---显现时机---
  * @type number
  * @min 1
  * @desc 漂浮文字自动显现时，延迟变化时间。你可以让该部件延迟，等其他部件显示完毕后，在显示此部件。
  * @default 0
  *
  * @param 批注线-变化模式
+ * @parent ---显现时机---
  * @type select
  * @option 透明度变化
  * @value 透明度变化
@@ -193,18 +226,21 @@
  * @default 遮罩变化-自动
  *
  * @param 背景-持续时长
+ * @parent ---显现时机---
  * @type number
  * @min 1
  * @desc 漂浮文字自动显现时，变化持续的时长。
  * @default 30
  *
  * @param 背景-延迟时间
+ * @parent ---显现时机---
  * @type number
  * @min 1
  * @desc 漂浮文字自动显现时，延迟变化时间。你可以让该部件延迟，等其他部件显示完毕后，在显示此部件。
  * @default 0
  *
  * @param 背景-变化模式
+ * @parent ---显现时机---
  * @type select
  * @option 透明度变化
  * @value 透明度变化
@@ -216,6 +252,138 @@
  * @value 遮罩变化-从左往右
  * @desc 该部件显现的变化模式，详细可以去看看文档说明。
  * @default 遮罩变化-自动
+ * 
+ * 
+ * @param ---声音控制---
+ * @default
+ * 
+ * @param 默认播放集合
+ * @parent ---声音控制---
+ * @type number
+ * @min 1
+ * @desc 默认播放的声音集合。
+ * @default 1
+ *
+ * @param 是否随机播放集合
+ * @parent ---声音控制---
+ * @type boolean
+ * @on 随机
+ * @off 关闭
+ * @desc true - 随机，false - 关闭
+ * @default true
+ * 
+ * @param ---声音组---
+ * @default
+ * 
+ * @param 声音集合-1
+ * @parent ---声音组---
+ * @type struct<XETTSoundGroup>
+ * @desc 声音集合的配置信息。
+ * @default 
+ * 
+ * @param 声音集合-2
+ * @parent ---声音组---
+ * @type struct<XETTSoundGroup>
+ * @desc 声音集合的配置信息。
+ * @default 
+ * 
+ * @param 声音集合-3
+ * @parent ---声音组---
+ * @type struct<XETTSoundGroup>
+ * @desc 声音集合的配置信息。
+ * @default 
+ * 
+ * @param 声音集合-4
+ * @parent ---声音组---
+ * @type struct<XETTSoundGroup>
+ * @desc 声音集合的配置信息。
+ * @default 
+ * 
+ * @param 声音集合-5
+ * @parent ---声音组---
+ * @type struct<XETTSoundGroup>
+ * @desc 声音集合的配置信息。
+ * @default 
+ * 
+ * @param 声音集合-6
+ * @parent ---声音组---
+ * @type struct<XETTSoundGroup>
+ * @desc 声音集合的配置信息。
+ * @default 
+ * 
+ * @param 声音集合-7
+ * @parent ---声音组---
+ * @type struct<XETTSoundGroup>
+ * @desc 声音集合的配置信息。
+ * @default 
+ * 
+ * @param 声音集合-8
+ * @parent ---声音组---
+ * @type struct<XETTSoundGroup>
+ * @desc 声音集合的配置信息。
+ * @default 
+ * 
+ * @param 声音集合-9
+ * @parent ---声音组---
+ * @type struct<XETTSoundGroup>
+ * @desc 声音集合的配置信息。
+ * @default 
+ * 
+ * @param 声音集合-10
+ * @parent ---声音组---
+ * @type struct<XETTSoundGroup>
+ * @desc 声音集合的配置信息。
+ * @default 
+ * 
+ */
+/*~struct~XETTSoundGroup:
+ * 
+ * @param 标签
+ * @desc 只用于方便区分查看的标签，不作用在插件中。
+ * @default ==新的声音集合==
+ *
+ * @param 声音-漂浮文字显现时
+ * @type struct<XETTSound>
+ * @desc 声音的详细配置信息。
+ * @default 
+ *
+ * @param 声音-批注线显现时
+ * @type struct<XETTSound>
+ * @desc 声音的详细配置信息。
+ * @default 
+ *
+ * @param 声音-背景显现时
+ * @type struct<XETTSound>
+ * @desc 声音的详细配置信息。
+ * @default 
+ * 
+ */
+/*~struct~XETTSound:
+ * 
+ * @param 资源-声音
+ * @desc 声音的资源文件。
+ * @default (需配置)默认声音
+ * @require 1
+ * @dir audio/se/
+ * @type file
+ * 
+ * @param 音量
+ * @type number
+ * @min 0
+ * @max 100
+ * @desc 声音的音量大小，范围为 0至100 。
+ * @default 80
+ * 
+ * @param 音调
+ * @type number
+ * @min 50
+ * @max 150
+ * @desc 声音的音调值，范围为 50至150 。
+ * @default 100
+ * 
+ * @param 声像
+ * @desc 声音的左右声像，范围为 -100至100 。
+ * @default 0
  * 
  */
  
@@ -253,6 +421,7 @@
 //					> 漂浮文字
 //					> 批注线
 //					> 背景
+//			->☆显现声音控制
 //
 //
 //		★家谱：
@@ -324,6 +493,64 @@
 	DrillUp.g_XETT_background_time = Number(DrillUp.parameters["背景-持续时长"] || 20 );
 	DrillUp.g_XETT_background_delay = Number(DrillUp.parameters["背景-延迟时间"] || 0 );
 	DrillUp.g_XETT_background_mode = String(DrillUp.parameters["背景-变化模式"] || "遮罩变化-自动" );
+	
+	
+	//==============================
+	// * 静态数据 - 声音集合
+	//				（~struct~XETTSoundGroup）
+	//==============================
+	DrillUp.drill_XETT_initSoundGroup = function( dataFrom ){
+		var data = {};
+		if( dataFrom["声音-漂浮文字显现时"] != "" &&
+			dataFrom["声音-漂浮文字显现时"] != undefined ){
+			var p_data = JSON.parse( dataFrom["声音-漂浮文字显现时"] );
+			data['se_text'] = DrillUp.drill_XETT_initSound( p_data );
+		}else{
+			data['se_text'] = DrillUp.drill_XETT_initSound( {} );
+		}
+		if( dataFrom["声音-批注线显现时"] != "" &&
+			dataFrom["声音-批注线显现时"] != undefined ){
+			var p_data = JSON.parse( dataFrom["声音-批注线显现时"] );
+			data['se_line'] = DrillUp.drill_XETT_initSound( p_data );
+		}else{
+			data['se_line'] = DrillUp.drill_XETT_initSound( {} );
+		}
+		if( dataFrom["声音-背景显现时"] != "" &&
+			dataFrom["声音-背景显现时"] != undefined ){
+			var p_data = JSON.parse( dataFrom["声音-背景显现时"] );
+			data['se_background'] = DrillUp.drill_XETT_initSound( p_data );
+		}else{
+			data['se_background'] = DrillUp.drill_XETT_initSound( {} );
+		}
+		return data;
+	}
+	//==============================
+	// * 静态数据 - 声音
+	//				（~struct~XETTSound）
+	//==============================
+	DrillUp.drill_XETT_initSound = function( dataFrom ){
+		var data = {};
+		data['name'] = String( dataFrom["资源-声音"] || "");	//『完整声音数据』
+		data['volume'] = Number( dataFrom["音量"] || 100);
+		data['pitch'] = Number( dataFrom["音调"] || 100);
+		data['pan'] = Number( dataFrom["声像"] || 0);
+		return data;
+	}
+	/*-----------------声音控制------------------*/
+	DrillUp.g_XETT_defaultSound = Number(DrillUp.parameters["默认播放集合"] || 1 );
+	DrillUp.g_XETT_randomSoundEnabled = String(DrillUp.parameters["是否随机播放集合"] || "true") == "true";
+	/*-----------------声音集合------------------*/
+	DrillUp.g_XETT_soundList_length = 10;
+	DrillUp.g_XETT_soundList = [];
+	for (var i = 0; i < DrillUp.g_XETT_soundList_length; i++) {
+		if( DrillUp.parameters["声音集合-" + String(i+1) ] != "" && 
+			DrillUp.parameters["声音集合-" + String(i+1) ] != undefined ){
+			var temp = JSON.parse(DrillUp.parameters["声音集合-" + String(i+1) ]);
+			DrillUp.g_XETT_soundList[i] = DrillUp.drill_XETT_initSoundGroup( temp );
+		}else{
+			DrillUp.g_XETT_soundList[i] = null;
+		}
+	}
 	
 	
 //=============================================================================
@@ -452,6 +679,41 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				}
 			}
 		}
+		
+		/*-----------------声音开关------------------*/
+		if( args.length == 4 ){
+			var type = String(args[1]);
+			var temp1 = String(args[3]);
+			if( type == "声音开关" ){
+				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
+					$gameSystem._drill_XETT_soundEnabled = true;
+				}
+				if( temp1 == "关闭" || temp1 == "禁用" ){
+					$gameSystem._drill_XETT_soundEnabled = false;
+				}
+			}
+			if( type == "设置随机播放集合" ){
+				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
+					$gameSystem._drill_XETT_randomSoundEnabled = true;
+				}
+				if( temp1 == "关闭" || temp1 == "禁用" ){
+					$gameSystem._drill_XETT_randomSoundEnabled = false;
+				}
+				if( temp1 == "恢复默认" ){
+					$gameSystem._drill_XETT_randomSoundEnabled = DrillUp.g_XETT_randomSoundEnabled;
+				}
+			}
+			if( type == "设置播放的集合" ){
+				if( temp1 == "默认集合" ){
+					$gameSystem._drill_XETT_curSoundIndex = DrillUp.g_XETT_defaultSound -1;
+				}
+				if( temp1.indexOf("集合[") != -1 ){
+					temp1 = temp1.replace("集合[","");
+					temp1 = temp1.replace("]","");
+					$gameSystem._drill_XETT_curSoundIndex = Number(temp1) -1;
+				}
+			}
+		}
 	}
 };
 //==============================
@@ -537,6 +799,10 @@ Game_System.prototype.drill_XETT_checkSysData = function() {
 Game_System.prototype.drill_XETT_initSysData_Private = function() {
 	
 	this._drill_XETT_triggerRange = DrillUp.g_XETT_triggerRange;	//自动显现范围
+	
+	this._drill_XETT_soundEnabled = true;										//声音开关
+	this._drill_XETT_curSoundIndex = DrillUp.g_XETT_defaultSound -1;			//默认播放集合
+	this._drill_XETT_randomSoundEnabled = DrillUp.g_XETT_randomSoundEnabled;	//是否随机播放集合
 };
 //==============================
 // * 存储数据 - 载入存档时检查数据（私有）
@@ -547,7 +813,19 @@ Game_System.prototype.drill_XETT_checkSysData_Private = function() {
 	if( this._drill_XETT_triggerRange == undefined ){
 		this.drill_XETT_initSysData();
 	}
-	
+};
+//==============================
+// * 存储数据 - 刷新播放集合（开放函数）
+//==============================
+Game_System.prototype.drill_XETT_getRandomSoundIndex = function() {
+	var index_tank = [];
+	for( var i = 0; i < DrillUp.g_XETT_soundList.length; i++ ){
+		if( DrillUp.g_XETT_soundList[i] != undefined ){
+			index_tank.push( i );
+		}
+	}
+	var random_i = Math.floor( Math.random() * index_tank.length );
+	return index_tank[random_i];
 };
 
 
@@ -870,6 +1148,7 @@ Drill_ET_WindowSprite.prototype.update = function() {
 	
 	this.drill_XETT_updateTime();			//帧刷新 - 时间流逝
 	this.drill_XETT_updateChange();			//帧刷新 - 变化过程
+	this.drill_XETT_updateSound();			//帧刷新 - 显示声音控制
 }
 //==============================
 // * 文字贴图 - 帧刷新 - 时间流逝
@@ -1010,6 +1289,58 @@ Drill_ET_WindowSprite.prototype.drill_XETT_canShow = function() {
 //=============================================================================
 Sprite.prototype.drill_XETT_setFrame = function( x, y, width, height ){
 	this.setFrame( Math.floor(x), Math.floor(y), Math.floor(width), Math.floor(height) );
+}
+
+
+//=============================================================================
+// ** ☆显现声音控制『音效模块』
+//
+//			说明：	> 此模块控制 显现声音 的播放。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 显现声音控制 - 帧刷新
+//==============================
+Drill_ET_WindowSprite.prototype.drill_XETT_updateSound = function() {
+	var se_played = false;		//（播放锁，防止同一帧播放多个音效）
+	var animText_delay = this._drill_controller.drill_XETT_getData_animText_delay();
+	var animLine_delay = this._drill_controller.drill_XETT_getData_animLine_delay();
+	var animBackground_delay = this._drill_controller.drill_XETT_getData_animBackground_delay();
+	
+	// > 只在显示时播放声音
+	var cur_time = this._drill_XETT_curTime;
+	if( this.drill_XETT_canShow() && cur_time > 0 ){
+		
+		// > 声音资源
+		var index = $gameSystem._drill_XETT_curSoundIndex;
+		if( $gameSystem._drill_XETT_randomSoundEnabled == true ){
+			index = $gameSystem.drill_XETT_getRandomSoundIndex();
+		}
+		var se_data = DrillUp.g_XETT_soundList[ index ];
+		if( se_data == undefined ){ return; }
+		
+		var time = cur_time - animText_delay;
+		if( time == 1 ){		//（监听时间1，排除时间0反复触发的情况）
+			if( se_played == false ){
+				se_played = true;
+				AudioManager.playSe( se_data['se_text'] );
+			}
+		}
+		var time = cur_time - animLine_delay;
+		if( time == 1 ){
+			if( se_played == false ){
+				se_played = true;
+				AudioManager.playSe( se_data['se_line'] );
+			}
+		}
+		var time = cur_time - animBackground_delay;
+		if( time == 1 ){
+			if( se_played == false ){
+				se_played = true;
+				AudioManager.playSe( se_data['se_background'] );
+			}
+		}
+	}
 }
 
 

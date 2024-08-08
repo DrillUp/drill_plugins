@@ -779,7 +779,9 @@ Game_Map.prototype.drill_ESo_updateSoundInterrupt = function() {
 		}
 		for( var j=0; j < buffers.length; j++ ){	
 			var buffer = buffers[j];
-			buffer.stop();
+			if( buffer.isPlaying() == true ){
+				buffer.stop();
+			}
 		}
 	}
 	$gameTemp._drill_ESo_needInterruptEventIds = [];
@@ -807,7 +809,9 @@ Game_Map.prototype.drill_ESo_updateSoundInterrupt = function() {
 		buffer._drill_ESo_b_time += 1;
 		buffer.volume = 1 - buffer._drill_ESo_b_volume * (buffer._drill_ESo_b_time / $gameSystem._drill_ESo_fadeTime);
 		if( buffer.volume <= 0 ){
-			buffer.stop();
+			if( buffer.isPlaying() == true ){
+				buffer.stop();
+			}
 			$gameTemp._drill_ESo_needFadeSounds.splice(j,1);
 		}
 	}

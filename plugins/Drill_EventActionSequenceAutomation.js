@@ -407,15 +407,9 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
 			if( type == "播放指定标签" ){
-				
 				for( var k=0; k < e_chars.length; k++ ){
 					e_chars[k].drill_EASA_setAnnotation( temp1 );
 				}
-				//if( temp1.indexOf("<行走图-") != -1 ){
-				//	for( var k=0; k < e_chars.length; k++ ){
-				//		e_chars[k].drill_EASA_setAnnotation( temp1 );
-				//	}
-				//}
 			}
 		}
 		

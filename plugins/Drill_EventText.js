@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.4]        行走图 - 事件漂浮文字
+ * @plugindesc [v2.5]        行走图 - 事件漂浮文字
  * @author Drill_up
  * 
  * 
@@ -25,6 +25,8 @@
  * 可被扩展：
  *   - Drill_CoreOfColor             窗口字符-颜色核心
  *     该插件能给事件漂浮文字设置自定义颜色和高级渐变色。
+ *   - Drill_CoreOfString            系统-字符串核心
+ *     通过字符串核心，你可以将漂浮文字修改为自定义字符串文本。
  *   - Drill_X_EventTextFilter       行走图-事件漂浮文字的滤镜效果[扩展]
  *     该插件能给事件的漂浮文字添加滤镜效果。
  *   - Drill_X_EventTextBackground   行走图-事件漂浮文字的背景[扩展]
@@ -103,6 +105,7 @@
  * 插件指令：>事件漂浮文字 : 事件变量[10] : 修改文本 : 这是一串修改的文字
  * 
  * 插件指令：>事件漂浮文字 : 本事件 : 修改文本 : 这是一串修改的文字
+ * 插件指令：>事件漂浮文字 : 本事件 : 修改文本 : 字符串[21]
  * 插件指令：>事件漂浮文字 : 本事件 : 清空文本
  * 插件指令：>事件漂浮文字 : 本事件 : 强制刷新文本
  * 插件指令：>事件漂浮文字 : 本事件 : 设置偏移 : 5 : -5
@@ -211,6 +214,8 @@
  * 整理了内部模块结构，修复了开关关闭事件时事件漂浮文字不消失的bug。
  * [v2.4]
  * 添加了随机轮播的功能。
+ * [v2.5]
+ * 添加了修改文本为字符串的功能。
  * 
  * 
  * 
@@ -468,7 +473,14 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var temp3 = String(args[5]);
 			if( type == "修改文本" ){
 				ev.drill_ET_createController();
-				ev._drill_ET_controller.drill_ET_setText( temp3 );
+				if( Imported.Drill_CoreOfString &&	//【系统 - 字符串核心】
+					temp3.indexOf("字符串[") != -1 ){
+					temp3 = temp3.replace("字符串[","");
+					temp3 = temp3.replace("]","");
+					ev._drill_ET_controller.drill_ET_setText( $gameStrings.value( Number(temp3) ) );
+				}else{
+					ev._drill_ET_controller.drill_ET_setText( temp3 );
+				}
 			}
 			if( type == "外框" ){
 				if( temp3 == "显示" ){

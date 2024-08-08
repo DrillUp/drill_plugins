@@ -1141,6 +1141,7 @@ Drill_EFN_Controller.prototype.drill_EFN_setInterDashingFormula = function( inte
 //##############################
 Drill_EFN_Controller.prototype.drill_EFN_refreshLoop = function(){
 	this.drill_EFN_refreshStateSeq();
+	this._drill_EFN_lastState = "";
 };
 //##############################
 // * 控制器 - D帧播放器 - 设置循环【开放函数】

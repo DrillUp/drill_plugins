@@ -657,18 +657,18 @@ Sprite_Character.prototype.initialize = function( character ){
 //==============================
 Sprite_Character.prototype.initMembers = function(){
 	
-	this.anchor.x = 0.5;			//中心锚点x（固定正下方）
-	this.anchor.y = 1;				//中心锚点y
+	this.anchor.x = 0.5;			//2A主体 - 中心锚点x（固定正下方）
+	this.anchor.y = 1;				//2A主体 - 中心锚点y
 	
 	this._character = null;			//绑定物体
 	
-	this._tilesetId = 0;			//D行走图 - 图块行走图 标记
-	this._isBigCharacter = false;	//D行走图 - 单行走图 标记（"$"）
+	this._tilesetId = 0;			//2C行走图 - 图块行走图 标记
+	this._isBigCharacter = false;	//2C行走图 - 单行走图 标记（"$"）
 	
-	this._upperBody = null;			//E灌木丛 - 上半层贴图
-	this._lowerBody = null;			//E灌木丛 - 下半层贴图
+	this._upperBody = null;			//2D灌木丛 - 上半层贴图
+	this._lowerBody = null;			//2D灌木丛 - 下半层贴图
 	
-	this._balloonDuration = 0;		//H气泡（没用的变量）
+	this._balloonDuration = 0;		//2E气泡（没用的变量）
 };
 //==============================
 // * 行走图贴图『行走图-行走图优化核心』 - 绑定物体
@@ -681,19 +681,20 @@ Sprite_Character.prototype.setCharacter = function( character ){
 //==============================
 Sprite_Character.prototype.update = function(){
 	Sprite_Base.prototype.update.call(this);
-	this.updateBitmap();		//帧刷新 - C资源
-	this.updateFrame();			//帧刷新 - D行走图
-								//帧刷新 - E灌木丛（无）
-	this.updatePosition();		//帧刷新 - F贴图属性 位置
-	this.updateAnimation();		//帧刷新 - B动画
-	this.updateBalloon();		//帧刷新 - H气泡
-	this.updateOther();			//帧刷新 - F贴图属性 其他属性
+	this.updateBitmap();			//帧刷新 - 2B资源
+	this.updateFrame();				//帧刷新 - 2C行走图
+									//帧刷新 - 2D灌木丛（无）
+	this.updatePosition();			//帧刷新 - 2A主体 - 位置
+	this.updateAnimation();			//帧刷新 - B动画
+	this.updateBalloon();			//帧刷新 - 2E气泡
+	this.updateOther();				//帧刷新 - 2A主体 - 其他属性
 };
 
 //==============================
-// * A显示属性『行走图-行走图优化核心』 - 显示属性（rmmv勾选 - 是否透明）
+// * A显示属性『行走图-行走图优化核心』 - 显示属性
 //
-//			说明：	> 注意，此函数从父类就在帧刷新中不断赋值visible。
+//			说明：	> 编辑器勾选-是否透明 和 人物透明指令command211 会影响贴图的显示。
+//					> 注意，此函数从父类就在帧刷新中不断赋值visible。
 //==============================
 Sprite_Character.prototype.updateVisibility = function(){
     Sprite_Base.prototype.updateVisibility.call(this);
@@ -706,6 +707,8 @@ Sprite_Character.prototype.updateVisibility = function(){
 // * B动画『行走图-行走图优化核心』 - 帧刷新
 //==============================
 Sprite_Character.prototype.updateAnimation = function(){
+	
+	// > 动画播放监听（只要动画id变化，就立刻播放）
     this.setupAnimation();
 	
 	// > 停止 B动画
@@ -713,7 +716,7 @@ Sprite_Character.prototype.updateAnimation = function(){
         this._character.endAnimation();
     }
 	
-	// > 停止 H气泡
+	// > 停止 2E气泡
     if( !this.isBalloonPlaying() ){
         this._character.endBalloon();
     }
@@ -730,23 +733,40 @@ Sprite_Character.prototype.setupAnimation = function(){
 };
 
 //==============================
-// * C资源『行走图-行走图优化核心』 - 帧刷新
+// * 2A主体『行走图-行走图优化核心』 - 帧刷新 位置
+//==============================
+Sprite_Character.prototype.updatePosition = function(){
+    this.x = this._character.screenX();
+    this.y = this._character.screenY();
+    this.z = this._character.screenZ();
+};
+//==============================
+// * 2A主体『行走图-行走图优化核心』 - 帧刷新 其他属性
+//==============================
+Sprite_Character.prototype.updateOther = function(){
+    this.opacity = this._character.opacity();			//2A主体 - 透明度
+    this.blendMode = this._character.blendMode();		//2A主体 - 混合模式
+    this._bushDepth = this._character.bushDepth();		//2D灌木丛 - 高度
+};
+
+//==============================
+// * 2B资源『行走图-行走图优化核心』 - 帧刷新
 //==============================
 Sprite_Character.prototype.updateBitmap = function(){
-    if( this.isImageChanged() ){
+    if( this.isImageChanged() ){		//判断资源变化
         this._tilesetId = $gameMap.tilesetId();
         this._tileId = this._character.tileId();
         this._characterName = this._character.characterName();
         this._characterIndex = this._character.characterIndex();
         if( this._tileId > 0 ){
-            this.setTileBitmap();
+            this.setTileBitmap();		//设置 图块行走图
         }else{
-            this.setCharacterBitmap();
+            this.setCharacterBitmap();	//设置 单行走图/八行走图
         }
     }
 };
 //==============================
-// * C资源『行走图-行走图优化核心』 - 判断资源变化
+// * 2B资源『行走图-行走图优化核心』 - 帧刷新 - 判断资源变化
 //==============================
 Sprite_Character.prototype.isImageChanged = function(){
     return (this._tilesetId !== $gameMap.tilesetId() ||
@@ -755,13 +775,13 @@ Sprite_Character.prototype.isImageChanged = function(){
             this._characterIndex !== this._character.characterIndex());
 };
 //==============================
-// * C资源『行走图-行走图优化核心』 - 设置 图块行走图
+// * 2B资源『行走图-行走图优化核心』 - 设置 图块行走图
 //==============================
 Sprite_Character.prototype.setTileBitmap = function(){
     this.bitmap = this.tilesetBitmap(this._tileId);
 };
 //==============================
-// * C资源『行走图-行走图优化核心』 - 设置 单行走图/八行走图
+// * 2B资源『行走图-行走图优化核心』 - 设置 单行走图/八行走图
 //==============================
 Sprite_Character.prototype.setCharacterBitmap = function(){
     this.bitmap = ImageManager.loadCharacter(this._characterName);
@@ -769,7 +789,7 @@ Sprite_Character.prototype.setCharacterBitmap = function(){
 };
 
 //==============================
-// * D行走图『行走图-行走图优化核心』 - 帧刷新
+// * 2C行走图『行走图-行走图优化核心』 - 帧刷新
 //==============================
 Sprite_Character.prototype.updateFrame = function(){
 	
@@ -783,19 +803,7 @@ Sprite_Character.prototype.updateFrame = function(){
 	}
 };
 //==============================
-// * D行走图『行走图-行走图优化核心』 - 图块行走图 - 访问器（这里有bug）
-//==============================
-Sprite_Character.prototype.isTile = function(){ return this._character.tileId > 0; };
-//==============================
-// * D行走图『行走图-行走图优化核心』 - 图块行走图 - 获取资源
-//==============================
-Sprite_Character.prototype.tilesetBitmap = function( tileId ){
-    var tileset = $gameMap.tileset();
-    var setNumber = 5 + Math.floor(tileId / 256);
-    return ImageManager.loadTileset(tileset.tilesetNames[setNumber]);
-};
-//==============================
-// * D行走图『行走图-行走图优化核心』 - 图块行走图 - 帧刷新
+// * 2C行走图『行走图-行走图优化核心』 - 图块行走图 - 帧刷新
 //==============================
 Sprite_Character.prototype.updateTileFrame = function(){
     var pw = this.patternWidth();
@@ -804,9 +812,21 @@ Sprite_Character.prototype.updateTileFrame = function(){
     var sy = Math.floor(this._tileId % 256 / 8) % 16 * ph;
     this.setFrame(sx, sy, pw, ph);
 };
+//==============================
+// * 2C行走图『行走图-行走图优化核心』 - 图块行走图 - 访问器（这里有bug）
+//==============================
+Sprite_Character.prototype.isTile = function(){ return this._character.tileId > 0; };
+//==============================
+// * 2C行走图『行走图-行走图优化核心』 - 图块行走图 - 获取资源图片
+//==============================
+Sprite_Character.prototype.tilesetBitmap = function( tileId ){
+    var tileset = $gameMap.tileset();
+    var setNumber = 5 + Math.floor(tileId / 256);
+    return ImageManager.loadTileset(tileset.tilesetNames[setNumber]);
+};
 
 //==============================
-// * D行走图『行走图-行走图优化核心』 - 单行走图/八行走图 - 帧刷新
+// * 2C行走图『行走图-行走图优化核心』 - 单行走图/八行走图 - 帧刷新
 //==============================
 Sprite_Character.prototype.updateCharacterFrame = function(){
     var pw = this.patternWidth();
@@ -814,7 +834,7 @@ Sprite_Character.prototype.updateCharacterFrame = function(){
     var sx = (this.characterBlockX() + this.characterPatternX()) * pw;
     var sy = (this.characterBlockY() + this.characterPatternY()) * ph;
 	
-	// > E灌木丛 情况
+	// > 2D灌木丛 情况
     this.updateHalfBodySprites();
     if( this._bushDepth > 0 ){
         var d = this._bushDepth;
@@ -828,7 +848,7 @@ Sprite_Character.prototype.updateCharacterFrame = function(){
     }
 };
 //==============================
-// * D行走图『行走图-行走图优化核心』 - 动画帧 - 帧数（横向）
+// * 2C行走图『行走图-行走图优化核心』 - 动画帧 - 帧数（横向）
 //==============================
 Sprite_Character.prototype.characterBlockX = function(){
 	
@@ -843,7 +863,7 @@ Sprite_Character.prototype.characterBlockX = function(){
     }
 };
 //==============================
-// * D行走图『行走图-行走图优化核心』 - 动画帧 - 帧数（纵向）
+// * 2C行走图『行走图-行走图优化核心』 - 动画帧 - 帧数（纵向）
 //==============================
 Sprite_Character.prototype.characterBlockY = function(){
 	
@@ -858,19 +878,19 @@ Sprite_Character.prototype.characterBlockY = function(){
     }
 };
 //==============================
-// * D行走图『行走图-行走图优化核心』 - 动画帧 - 所在列（横向）
+// * 2C行走图『行走图-行走图优化核心』 - 动画帧 - 所在列（横向）
 //==============================
 Sprite_Character.prototype.characterPatternX = function(){
     return this._character.pattern();
 };
 //==============================
-// * D行走图『行走图-行走图优化核心』 - 动画帧 - 所在行（纵向）
+// * 2C行走图『行走图-行走图优化核心』 - 动画帧 - 所在行（纵向）
 //==============================
 Sprite_Character.prototype.characterPatternY = function(){
     return (this._character.direction() - 2) / 2;
 };
 //==============================
-// * D行走图『行走图-行走图优化核心』 - 动画帧 - 宽度
+// * 2C行走图『行走图-行走图优化核心』 - 动画帧 - 宽度
 //==============================
 Sprite_Character.prototype.patternWidth = function(){
 	
@@ -888,7 +908,7 @@ Sprite_Character.prototype.patternWidth = function(){
     }
 };
 //==============================
-// * D行走图『行走图-行走图优化核心』 - 动画帧 - 高度
+// * 2C行走图『行走图-行走图优化核心』 - 动画帧 - 高度
 //==============================
 Sprite_Character.prototype.patternHeight = function(){
 	
@@ -907,7 +927,7 @@ Sprite_Character.prototype.patternHeight = function(){
 };
 
 //==============================
-// * E灌木丛『行走图-行走图优化核心』 - 创建切半透明图层
+// * 2D灌木丛『行走图-行走图优化核心』 - 创建切半透明图层
 //==============================
 Sprite_Character.prototype.createHalfBodySprites = function(){
     if( !this._upperBody ){
@@ -925,7 +945,7 @@ Sprite_Character.prototype.createHalfBodySprites = function(){
     }
 };
 //==============================
-// * E灌木丛『行走图-行走图优化核心』 - 帧刷新
+// * 2D灌木丛『行走图-行走图优化核心』 - 帧刷新
 //==============================
 Sprite_Character.prototype.updateHalfBodySprites = function(){
     if( this._bushDepth > 0 ){
@@ -946,28 +966,11 @@ Sprite_Character.prototype.updateHalfBodySprites = function(){
 };
 
 //==============================
-// * F贴图属性『行走图-行走图优化核心』 - 帧刷新 位置
-//==============================
-Sprite_Character.prototype.updatePosition = function(){
-    this.x = this._character.screenX();
-    this.y = this._character.screenY();
-    this.z = this._character.screenZ();
-};
-//==============================
-// * F贴图属性『行走图-行走图优化核心』 - 帧刷新
-//==============================
-Sprite_Character.prototype.updateOther = function(){
-    this.opacity = this._character.opacity();			//贴图属性 - 透明度
-    this.blendMode = this._character.blendMode();		//贴图属性 - 混合模式
-    this._bushDepth = this._character.bushDepth();		//贴图属性 - E灌木丛 高度
-};
-
-//==============================
-// * H气泡『行走图-行走图优化核心』 - 访问器
+// * 2E气泡『行走图-行走图优化核心』 - 访问器
 //==============================
 Sprite_Character.prototype.isBalloonPlaying = function(){ return !!this._balloonSprite; };
 //==============================
-// * H气泡『行走图-行走图优化核心』 - 播放气泡
+// * 2E气泡『行走图-行走图优化核心』 - 播放气泡
 //==============================
 Sprite_Character.prototype.startBalloon = function(){
     if( !this._balloonSprite ){
@@ -977,7 +980,7 @@ Sprite_Character.prototype.startBalloon = function(){
     this.parent.addChild(this._balloonSprite);
 };
 //==============================
-// * H气泡『行走图-行走图优化核心』 - 停止气泡
+// * 2E气泡『行走图-行走图优化核心』 - 停止气泡
 //==============================
 Sprite_Character.prototype.endBalloon = function(){
     if( this._balloonSprite ){
@@ -986,20 +989,27 @@ Sprite_Character.prototype.endBalloon = function(){
     }
 };
 //==============================
-// * H气泡『行走图-行走图优化核心』 - 帧刷新
+// * 2E气泡『行走图-行走图优化核心』 - 帧刷新
 //==============================
 Sprite_Character.prototype.updateBalloon = function(){
+	
+	// > 气泡播放监听（只要物体的气泡id变化，就立刻播放）
     this.setupBalloon();
+	
     if( this._balloonSprite ){
+		
+		// > 气泡位置
         this._balloonSprite.x = this.x;
         this._balloonSprite.y = this.y - this.height;
+		
+		// > 停止气泡（气泡贴图置空）
         if( !this._balloonSprite.isPlaying() ){
             this.endBalloon();
         }
     }
 };
 //==============================
-// * H气泡『行走图-行走图优化核心』 - 气泡播放监听
+// * 2E气泡『行走图-行走图优化核心』 - 气泡播放监听
 //==============================
 Sprite_Character.prototype.setupBalloon = function(){
     if( this._character.balloonId() > 0 ){
@@ -1148,7 +1158,7 @@ Sprite_Character.prototype.isAnimationPlaying = function() {
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * D行走图『行走图-行走图优化核心』 - 图块行走图 - 访问器（覆写）
+// * 2C行走图『行走图-行走图优化核心』 - 图块行走图 - 访问器
 //==============================
 Sprite_Character.prototype.isTile = function(){
 	return this._character._tileId > 0;

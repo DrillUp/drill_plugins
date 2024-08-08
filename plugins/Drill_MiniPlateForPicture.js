@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.8]        鼠标 - 图片说明窗口
+ * @plugindesc [v1.9]        鼠标 - 图片说明窗口
  * @author Drill_up
  * 
  * @Drill_LE_param "皮肤样式-%d"
@@ -142,6 +142,8 @@
  * 修复了无法设置 左上角锚点 的bug。
  * [v1.8]
  * 添加了 图片的碰撞体 的支持。
+ * [v1.9]
+ * 修复了使用自定义窗口皮肤时文字变黑的bug。
  * 
  * 
  * 
@@ -991,6 +993,7 @@
 //			->☆提示信息
 //			->☆静态数据
 //			->☆插件指令
+//			->☆预加载
 //			->☆存储数据
 //			->☆战斗层级
 //				->添加贴图到层级【标准函数】
@@ -1075,6 +1078,12 @@
 			message += DrillUp.g_MPFP_PluginTip_baseList[i];
 		}
 		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 底层版本过低
+	//==============================
+	DrillUp.drill_MPFP_getPluginTip_LowVersion = function(){
+		return "【" + DrillUp.g_MPFP_PluginTip_curName + "】\n游戏底层版本过低，插件基本功能无法执行。\n你可以去看\"rmmv软件版本（必看）.docx\"中的 \"旧工程升级至1.6版本\" 章节，来升级你的游戏底层版本。";
 	};
 	//==============================
 	// * 提示信息 - 报错 - 找不到图片
@@ -1308,6 +1317,53 @@ Game_Screen.prototype.drill_MPFP_isPictureExist = function( pic_id ){
 	}
 	return true;
 };
+
+
+//=============================================================================
+// ** ☆预加载
+//
+//			说明：	> 对指定资源贴图标记不删除，可以防止重建导致的浪费资源，以及资源显示时闪烁问题。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 预加载 - 初始化
+//==============================
+var _drill_MPFP_preload_initialize = Game_Temp.prototype.initialize;
+Game_Temp.prototype.initialize = function() {
+    _drill_MPFP_preload_initialize.call(this);
+	this.drill_MPFP_preloadInit();
+}
+//==============================
+// * 预加载 - 版本校验
+//==============================
+if( Utils.generateRuntimeId == undefined ){
+	alert( DrillUp.drill_MPFP_getPluginTip_LowVersion() );
+}
+//==============================
+// * 预加载 - 执行资源预加载
+//
+//			说明：	> 遍历全部资源，提前预加载标记过的资源。
+//==============================
+Game_Temp.prototype.drill_MPFP_preloadInit = function() {
+	this._drill_MPFP_cacheId = Utils.generateRuntimeId();	//资源缓存id
+    this._drill_MPFP_preloadTank = [];						//bitmap容器
+	for( var i = 0; i < DrillUp.g_MPFP_style_list.length; i++ ){
+		var temp_data = DrillUp.g_MPFP_style_list[i];
+		if( temp_data == undefined ){ continue; }
+		
+		// > 『窗口皮肤的预加载』
+		if( temp_data['window_type'] == "自定义窗口皮肤" ){
+			this._drill_MPFP_preloadTank.push( 
+				ImageManager.reserveBitmap( "img/system/", temp_data['window_sys_src'], 0, true, this._drill_MPFP_cacheId ) 
+			);
+		}
+		if( temp_data['window_type'] == "自定义背景图片" ){
+			this._drill_MPFP_preloadTank.push( 
+				ImageManager.reserveBitmap( "img/system/", temp_data['window_pic_src'], 0, true, this._drill_MPFP_cacheId ) 
+			);
+		}
+	}
+}
 
 
 //#############################################################################

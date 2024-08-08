@@ -30,7 +30,7 @@
  * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：战斗界面。
- *   可以在战斗的五个层级放多层不同的平铺GIF。
+ *   作用于战斗层级。
  * 2.该插件可以装饰战斗的各种层级。要了解更详细的组合方法，
  *   去看看 "17.主菜单 > 多层组合装饰（界面装饰）.docx"。
  *   还有 "17.主菜单 > 多层组合装饰（界面装饰-战斗界面）.docx"。
@@ -42,7 +42,7 @@
  *   (2.战斗层级之间的关系为：
  *      底图 《 战斗背景 《 下层 《 敌人/角色层 《 上层
  *      《 图片对象层 《 图片层 《 对话框集合 《 最顶层
- *   (3.最顶层可以把战斗界面最高层的对话框、窗口也给挡住。
+ *   (3.最顶层可以把战斗界面的对话框、窗口也给挡住。
  *   (4.处于同一 战斗层级 时，将根据 图片层级 再先后排序。
  * 位移比：
  *   (1.根据物理相对运动知识，近大远小，近快远慢的原则。要让平铺GIF看
@@ -1881,6 +1881,12 @@
 			message += DrillUp.g_BTG_PluginTip_baseList[i];
 		}
 		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 底层版本过低
+	//==============================
+	DrillUp.drill_BTG_getPluginTip_LowVersion = function(){
+		return "【" + DrillUp.g_BTG_PluginTip_curName + "】\n游戏底层版本过低，插件基本功能无法执行。\n你可以去看\"rmmv软件版本（必看）.docx\"中的 \"旧工程升级至1.6版本\" 章节，来升级你的游戏底层版本。";
 	};
 	//==============================
 	// * 提示信息 - 报错 - 强制更新提示
@@ -3723,25 +3729,21 @@ Drill_BTG_Controller.prototype.drill_controller_updateCheckNaN = function(){
 	
 	// > 校验值
 	if( DrillUp.g_BTG_checkNaN == true ){
-		if( isNaN( this._drill_change_x ) ){
+		if( isNaN( this.drill_controller_finalTransform_x() ) ){
 			DrillUp.g_BTG_checkNaN = false;
-			alert( DrillUp.drill_BTG_getPluginTip_ParamIsNaN( "_drill_change_x" ) );
+			alert( DrillUp.drill_BTG_getPluginTip_ParamIsNaN( "drill_controller_finalTransform_x" ) );
 		}
-		if( isNaN( this._drill_change_y ) ){
+		if( isNaN( this.drill_controller_finalTransform_y() ) ){
 			DrillUp.g_BTG_checkNaN = false;
-			alert( DrillUp.drill_BTG_getPluginTip_ParamIsNaN( "_drill_change_y" ) );
+			alert( DrillUp.drill_BTG_getPluginTip_ParamIsNaN( "drill_controller_finalTransform_y" ) );
 		}
-		if( isNaN( this._drill_change_opacity ) ){
+		if( isNaN( this.drill_controller_finalTransform_opacity() ) ){
 			DrillUp.g_BTG_checkNaN = false;
-			alert( DrillUp.drill_BTG_getPluginTip_ParamIsNaN( "_drill_change_opacity" ) );
+			alert( DrillUp.drill_BTG_getPluginTip_ParamIsNaN( "drill_controller_finalTransform_opacity" ) );
 		}
-		if( isNaN( this._drill_change_scaleX ) ){
+		if( isNaN( this.drill_controller_finalTransform_rotate() ) ){
 			DrillUp.g_BTG_checkNaN = false;
-			alert( DrillUp.drill_BTG_getPluginTip_ParamIsNaN( "_drill_change_scaleX" ) );
-		}
-		if( isNaN( this._drill_change_scaleY ) ){
-			DrillUp.g_BTG_checkNaN = false;
-			alert( DrillUp.drill_BTG_getPluginTip_ParamIsNaN( "_drill_change_scaleY" ) );
+			alert( DrillUp.drill_BTG_getPluginTip_ParamIsNaN( "drill_controller_finalTransform_rotate" ) );
 		}
 	}
 }

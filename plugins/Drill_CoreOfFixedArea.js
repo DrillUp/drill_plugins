@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.8]        物体触发 - 固定区域核心
+ * @plugindesc [v1.9]        物体触发 - 固定区域核心
  * @author Drill_up
  * 
  * @Drill_LE_param "自定义区域-%d"
@@ -34,7 +34,7 @@
  *   - Drill_EventRangeAnimation   物体触发-固定区域 & 播放并行动画
  *   - Drill_EventRandomPoint      物体触发-固定区域 & 随机点
  * 可被扩展：
- *   - Drill_CoreOfEventTags       物体管理-事件标签核心
+ *   - Drill_EventBufferTags       物体管理-事件的缓存标签
  *     通过该插件，事件的筛选器可以支持"必须含下列标签的事件"的捕获。
  * 
  * -----------------------------------------------------------------------------
@@ -105,6 +105,8 @@
  * 优化了事件容器结构。
  * [v1.8]
  * 大幅度优化了底层结构，并定义了标准接口。
+ * [v1.9]
+ * 兼容了 事件的缓存标签 功能。
  * 
  * 
  *
@@ -1531,12 +1533,12 @@ Game_Map.prototype.drill_COFA_isPointMatched_eventWithTag = function( point, has
 	// > 无事件，直接不符条件
 	if( event_list.length == 0 ){ return false; }
 	
-	// > 未导入插件，直接不符条件
-	if( Imported.Drill_CoreOfEventTags != true ){ return false; }
+	// > 【物体管理 - 事件的缓存标签】
+	if( Imported.Drill_EventBufferTags != true ){ return false; }
 	
 	if( hasTag == true ){
 		// > 当前 含标签事件，条件要 含标签事件
-		if( this.drill_COET_selectEventsByTaglist(event_list,tag_list).length > 0 ){
+		if( this.drill_EBT_selectEventsByTaglist(event_list,tag_list).length > 0 ){
 			return true;
 		// > 当前 不含标签事件，条件要 含标签事件，不符条件
 		}else{
@@ -1544,7 +1546,7 @@ Game_Map.prototype.drill_COFA_isPointMatched_eventWithTag = function( point, has
 		}
 	}else{
 		// > 当前 不含标签事件，条件要 不含标签事件
-		if( this.drill_COET_selectEventsByTaglist(event_list,tag_list).length == 0 ){
+		if( this.drill_EBT_selectEventsByTaglist(event_list,tag_list).length == 0 ){
 			return true;
 		// > 当前 含标签事件，条件要 不含标签事件，不符条件
 		}else{
@@ -1580,17 +1582,17 @@ Game_Map.prototype.drill_COFA_isPointMatched_eventWithoutTag = function( point, 
 	// > 无事件，直接不符条件
 	if( event_list.length == 0 ){ return false; }
 	
-	// > 未导入插件，直接不符条件
-	if( Imported.Drill_CoreOfEventTags != true ){ return false; }
+	// > 【物体管理 - 事件的缓存标签】
+	if( Imported.Drill_EventBufferTags != true ){ return false; }
 	
 	if( hasTag == true ){	//（与 筛选含标签事件的点 的相反）
-		if( this.drill_COET_selectEventsByTaglist(event_list,tag_list).length > 0 ){
+		if( this.drill_EBT_selectEventsByTaglist(event_list,tag_list).length > 0 ){
 			return false;
 		}else{
 			return true;
 		}
 	}else{
-		if( this.drill_COET_selectEventsByTaglist(event_list,tag_list).length == 0 ){
+		if( this.drill_EBT_selectEventsByTaglist(event_list,tag_list).length == 0 ){
 			return false;
 		}else{
 			return true;

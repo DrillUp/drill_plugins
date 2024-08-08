@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        主菜单 - 多样式菜单指针
+ * @plugindesc [v1.3]        主菜单 - 多样式菜单指针
  * @author Drill_up
  * 
  * @Drill_LE_param "菜单指针样式-%d"
@@ -106,6 +106,8 @@
  * 优化了旧存档的识别与兼容。
  * [v1.2]
  * 大幅度优化了内部结构。
+ * [v1.3]
+ * 修复了菜单指针在标题界面中不生效的bug。
  * 
  *
  *
@@ -518,13 +520,14 @@
 //				->是否启用指针
 //				->当前指针样式
 //			->☆窗口扩展
-//				->确认后等待指针播放动画完毕 ?
+//				?->确认后等待指针播放动画完毕
 //
 //			->☆实体类容器
 //			->☆实体类绑定
 //			->菜单指针 实体类【Drill_MCu_Bean】
 //
 //			->☆控制器与贴图
+//			->☆控制器与贴图（标题界面）
 //				->界面创建
 //				->控制器帧刷新
 //				->主体属性变化
@@ -1335,6 +1338,14 @@ Scene_MenuBase.prototype.terminate = function() {
 	_drill_MCu_sceneMenu_terminate2.call(this);
 	$gameTemp._drill_MCu_beanTank = [];		//实体类容器
 };
+//==============================
+// * 容器 - 界面销毁时（标题界面）
+//==============================
+var _drill_MCu_sceneTitle_terminate2 = Scene_Title.prototype.terminate;
+Scene_Title.prototype.terminate = function() {
+	_drill_MCu_sceneTitle_terminate2.call(this);
+	$gameTemp._drill_MCu_beanTank = [];		//实体类容器
+};
 
 
 //=============================================================================
@@ -1771,6 +1782,73 @@ Scene_MenuBase.prototype.drill_MCu_updateAttr = Scene_Map.prototype.drill_MCu_up
 // * 控制器与贴图 - 销毁（菜单界面）
 //==============================
 Scene_MenuBase.prototype.drill_MCu_updateDestroy = Scene_Map.prototype.drill_MCu_updateDestroy;
+
+
+//=============================================================================
+// ** ☆控制器与贴图（标题界面）
+//
+//			说明：	> 此模块管理 控制器与贴图 的创建与销毁。
+//					> 注意，标题界面不继承菜单界面，要单独支持。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 控制器与贴图 - 销毁时（标题界面）
+//==============================
+var _drill_MCu_sceneTitle_terminate = Scene_Title.prototype.terminate;
+Scene_Title.prototype.terminate = function() {
+	_drill_MCu_sceneTitle_terminate.call(this);
+	$gameTemp._drill_MCu_sprite = null;			//贴图容器
+};
+//==============================
+// * 控制器与贴图 - 帧刷新（标题界面）
+//==============================
+var _drill_MCu_sceneTitle_update = Scene_Title.prototype.update;
+Scene_Title.prototype.update = function() {
+	_drill_MCu_sceneTitle_update.call(this);
+	this.drill_MCu_updateCreate();				//帧刷新 - 标题界面创建
+	this.drill_MCu_updateController();			//帧刷新 - 控制器
+	this.drill_MCu_updateAttr();				//帧刷新 - 主体属性变化
+	this.drill_MCu_updateDestroy();				//帧刷新 - 销毁
+};
+//==============================
+// * 控制器与贴图 - 标题界面创建（标题界面）
+//==============================
+Scene_Title.prototype.drill_MCu_updateCreate = function() {
+	if( this._drill_MCu_title_sprite != undefined ){ return; }
+	
+	var temp_controller = $gameSystem._drill_MCu_controller;
+	if( temp_controller != undefined ){
+		var data = temp_controller._drill_data;
+		
+		// > 透明度强制归零
+		temp_controller._drill_opacity = 0;
+		temp_controller._drill_lastOpacity = -2000;
+		temp_controller._drill_opacityForce = true;
+		
+		// > 创建贴图
+		var temp_sprite = new Drill_MCu_Sprite();
+		temp_sprite.drill_sprite_setController( temp_controller );
+		temp_sprite.drill_sprite_initChild();
+		temp_sprite._drill_curSerial = temp_controller._drill_controllerSerial;
+		
+		// > 添加贴图
+		this._drill_MCu_title_sprite = temp_sprite;
+		$gameTemp._drill_MCu_sprite = temp_sprite;
+		this.addChild( temp_sprite );	//（直接添加，没有标题层级）
+	}
+};
+//==============================
+// * 控制器与贴图 - 控制器（标题界面）
+//==============================
+Scene_Title.prototype.drill_MCu_updateController = Scene_Map.prototype.drill_MCu_updateController;
+//==============================
+// * 控制器与贴图 - 主体属性变化（标题界面）
+//==============================
+Scene_Title.prototype.drill_MCu_updateAttr = Scene_Map.prototype.drill_MCu_updateAttr;
+//==============================
+// * 控制器与贴图 - 销毁（标题界面）
+//==============================
+Scene_Title.prototype.drill_MCu_updateDestroy = Scene_Map.prototype.drill_MCu_updateDestroy;
 
 
 
@@ -2266,6 +2344,12 @@ Drill_MCu_Controller.prototype.drill_controller_updateChange_Bean = function(){
 	if( tar_o == -2000 ){	//（透明度归零）
 		tar_o = 0;
 	}
+	
+	
+	//// > 测试用（强制在固定位置）
+	//tar_x = 400;
+	//tar_y = 100;
+	//tar_o = 255;
 	
 	
 	// > 目标位置

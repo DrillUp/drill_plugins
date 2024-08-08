@@ -224,7 +224,7 @@ Game_Temp.prototype.initialize = function(){
 	this._drill_VI_audioTank["se"] = {};
 };
 //==============================
-// * 声音加载容器 - 加入容器
+// * 声音加载容器 - 加入容器（开放函数）
 //
 //			说明：	> folder必须小写（bgm/bgs/me/se）。
 //==============================

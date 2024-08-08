@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.8]        面板 - 全自定义信息面板H
+ * @plugindesc [v1.9]        面板 - 全自定义信息面板H
  * @author Drill_up
  * 
  * @Drill_LE_param "内容-%d"
@@ -194,6 +194,8 @@
  * 优化了旧存档的识别与兼容。
  * [v1.8]
  * 优化了插件指令。
+ * [v1.9]
+ * 添加了 按钮声音设置。
  * 
  *
  * @param ----杂项----
@@ -292,14 +294,6 @@
  * @min 0
  * @desc 处于流程锁定的那一页，0表示最后一页。你可以设置只有某页才可以退出，后面的页反而不能退出。
  * @default 0
- * 
- * @param 翻页音效
- * @parent ----流程锁定----
- * @desc 投掷花盆时，播放的音效。
- * @default Book1
- * @require 1
- * @dir audio/se/
- * @type file
  *
  * @param 资源-结束按钮
  * @parent ----流程锁定----
@@ -318,6 +312,26 @@
  * @parent ----流程锁定----
  * @desc y轴方向平移，单位像素。0为箭头的中心贴在最上边。
  * @default 525
+ *
+ * @param 结束按钮是否使用默认音效
+ * @parent ----流程锁定----
+ * @type boolean
+ * @on 使用
+ * @off 不使用
+ * @desc true - 使用，false - 不使用，默认悬停无音效，点击时播放 系统选择 音效。
+ * @default true
+ *
+ * @param 结束按钮悬停音效
+ * @parent 结束按钮是否使用默认音效
+ * @type struct<SSpHSound>
+ * @desc 声音的详细配置信息。
+ * @default {"资源-声音":"(需配置)默认声音","音量":"80","音调":"100","声像":"0"}
+ *
+ * @param 结束按钮点击音效
+ * @parent 结束按钮是否使用默认音效
+ * @type struct<SSpHSound>
+ * @desc 声音的详细配置信息。
+ * @default {"资源-声音":"(需配置)默认声音","音量":"80","音调":"100","声像":"0"}
  * 
  * 
  * @param ----按键箭头----
@@ -433,6 +447,26 @@
  * @off 不使用
  * @desc true - 使用，false - 不使用，只对上下箭头有效，箭头会上下浮动。
  * @default true
+ *
+ * @param 箭头是否使用默认音效
+ * @parent ----按键箭头----
+ * @type boolean
+ * @on 使用
+ * @off 不使用
+ * @desc true - 使用，false - 不使用，默认悬停无音效，点击时播放 系统选择 音效。
+ * @default true
+ *
+ * @param 箭头悬停音效
+ * @parent 箭头是否使用默认音效
+ * @type struct<SSpHSound>
+ * @desc 声音的详细配置信息。
+ * @default {"资源-声音":"(需配置)默认声音","音量":"80","音调":"100","声像":"0"}
+ *
+ * @param 箭头点击音效
+ * @parent 箭头是否使用默认音效
+ * @type struct<SSpHSound>
+ * @desc 声音的详细配置信息。
+ * @default {"资源-声音":"(需配置)默认声音","音量":"80","音调":"100","声像":"0"}
  *
  *
  * @param ----选项窗口----
@@ -1385,6 +1419,34 @@
  * @default true
  *
  */
+/*~struct~SSpHSound:
+ * 
+ * @param 资源-声音
+ * @desc 声音的资源文件。
+ * @default (需配置)默认声音
+ * @require 1
+ * @dir audio/se/
+ * @type file
+ * 
+ * @param 音量
+ * @type number
+ * @min 0
+ * @max 100
+ * @desc 声音的音量大小，范围为 0至100 。
+ * @default 80
+ * 
+ * @param 音调
+ * @type number
+ * @min 50
+ * @max 150
+ * @desc 声音的音调值，范围为 50至150 。
+ * @default 100
+ * 
+ * @param 声像
+ * @desc 声音的左右声像，范围为 -100至100 。
+ * @default 0
+ * 
+ */
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 //		插件简称		SSpH（Scene_Selfplate_A）
@@ -1421,12 +1483,18 @@
 //			->信息面板H【Scene_Drill_SSpH】
 //				->☆原型链规范（Scene_Drill_SSpH）
 //				->☆箭头
+//					->帧刷新 贴图
+//					->帧刷新 点击
+//			
 //			->选项窗口【Drill_SSpH_SelectWindow】
 //			->显示窗口【Drill_SSpH_DescWindow】
 //
 //			->☆流程锁定
 //				->末尾选项
-//				->屏蔽返回按钮
+//				->返回按钮控制
+//				->结束按钮
+//			->☆按钮声音控制
+//				->箭头
 //				->结束按钮
 //
 //
@@ -1550,7 +1618,19 @@
 		
 		return data;
 	}
-
+	//==============================
+	// * 静态数据 - 声音
+	//				（~struct~SSpHSound）
+	//==============================
+	DrillUp.drill_SSpH_initSound = function( dataFrom ){
+		var data = {};
+		data['name'] = String( dataFrom["资源-声音"] || "");	//『完整声音数据』
+		data['volume'] = Number( dataFrom["音量"] || 100);
+		data['pitch'] = Number( dataFrom["音调"] || 100);
+		data['pan'] = Number( dataFrom["声像"] || 0);
+		return data;
+	}
+	
 	/*-----------------杂项------------------*/
     DrillUp.g_SSpH_layout = String(DrillUp.parameters['资源-整体布局'] || "");
 	DrillUp.g_SSpH_add_to_menu = String(DrillUp.parameters['是否添加到主菜单'] || "true") === "true";	
@@ -1576,15 +1656,44 @@
 	DrillUp.g_SSpH_arrow_zoom = String(DrillUp.parameters['是否使用缩放效果'] || "false") === "true";	
 	DrillUp.g_SSpH_arrow_flicker = String(DrillUp.parameters['是否使用闪烁效果'] || "false") === "true";	
 	DrillUp.g_SSpH_arrow_float_val = Number(DrillUp.parameters['浮动偏移量'] || 10);
-	DrillUp.g_SSpH_arrow_float_lr = String(DrillUp.parameters['是否使用左右浮动'] || "true") === "true";	
-	DrillUp.g_SSpH_arrow_float_ud = String(DrillUp.parameters['是否使用上下浮动'] || "true") === "true";	
+	DrillUp.g_SSpH_arrow_float_lr = String(DrillUp.parameters['是否使用左右浮动'] || "true") === "true";
+	DrillUp.g_SSpH_arrow_float_ud = String(DrillUp.parameters['是否使用上下浮动'] || "true") === "true";
+	DrillUp.g_SSpH_arrowClickDefaultEnabled = String(DrillUp.parameters['箭头是否使用默认音效'] || "true") === "true";
+	if( DrillUp.parameters['箭头悬停音效'] != "" && 
+		DrillUp.parameters['箭头悬停音效'] != undefined ){
+		var temp = JSON.parse(DrillUp.parameters['箭头悬停音效']);
+		DrillUp.g_SSpH_arrowHoverSound = DrillUp.drill_SSpH_initSound( temp );
+	}else{
+		DrillUp.g_SSpH_arrowHoverSound = null;
+	}
+	if( DrillUp.parameters['箭头点击音效'] != "" && 
+		DrillUp.parameters['箭头点击音效'] != undefined ){
+		var temp = JSON.parse(DrillUp.parameters['箭头点击音效']);
+		DrillUp.g_SSpH_arrowClickSound = DrillUp.drill_SSpH_initSound( temp );
+	}else{
+		DrillUp.g_SSpH_arrowClickSound = null;
+	}
 	
 	/*-----------------流程锁定------------------*/
 	DrillUp.g_SSpH_end_page = Number(DrillUp.parameters['末尾选项'] || DrillUp.parameters['末尾页'] || 0);
-	DrillUp.g_SSpH_end_se = String(DrillUp.parameters['翻页音效'] || "");	
 	DrillUp.g_SSpH_end_src = String(DrillUp.parameters['资源-结束按钮'] || "");
 	DrillUp.g_SSpH_end_x = Number(DrillUp.parameters['平移-结束按钮 X'] || 0);
 	DrillUp.g_SSpH_end_y = Number(DrillUp.parameters['平移-结束按钮 Y'] || 0);
+	DrillUp.g_SSpH_endClickDefaultEnabled = String(DrillUp.parameters['结束按钮是否使用默认音效'] || "true") === "true";
+	if( DrillUp.parameters['结束按钮悬停音效'] != "" && 
+		DrillUp.parameters['结束按钮悬停音效'] != undefined ){
+		var temp = JSON.parse(DrillUp.parameters['结束按钮悬停音效']);
+		DrillUp.g_SSpH_endHoverSound = DrillUp.drill_SSpH_initSound( temp );
+	}else{
+		DrillUp.g_SSpH_endHoverSound = null;
+	}
+	if( DrillUp.parameters['结束按钮点击音效'] != "" && 
+		DrillUp.parameters['结束按钮点击音效'] != undefined ){
+		var temp = JSON.parse(DrillUp.parameters['结束按钮点击音效']);
+		DrillUp.g_SSpH_endClickSound = DrillUp.drill_SSpH_initSound( temp );
+	}else{
+		DrillUp.g_SSpH_endClickSound = null;
+	}
 	
 	/*-----------------选项窗口------------------*/
 	DrillUp.g_SSpH_selWin_x = Number(DrillUp.parameters['选项窗口 X'] || 30);
@@ -2183,14 +2292,17 @@ Scene_Drill_SSpH.prototype.update = function() {
 	this.drill_updateDescPic();
 	this.drill_updateIndex();
 	
-	this.drill_updateArrow();
-	this.drill_updateEndButton();
-	this.drill_updateBackBtnControl();
+	this.drill_updateArrowHover();		//帧刷新 - 箭头高亮
+	this.drill_updateArrowSprite();		//帧刷新 - 箭头贴图
+	this.drill_updateArrowTouch();		//帧刷新 - 箭头点击
+	this.drill_updateArrowLastHover();	//帧刷新 - 箭头上一次高亮
 	
-    if (TouchInput.isTriggered()) {		//鼠标点击图片监听
-		this.drill_checkImgTouch();
-		this.drill_checkEndButtonTouch();
-	};
+	this.drill_updateEndBtnHover();		//帧刷新 - 结束按钮高亮
+	this.drill_updateEndBtnSprite();	//帧刷新 - 结束按钮贴图
+	this.drill_updateEndBtnTouch();		//帧刷新 - 结束按钮点击
+	this.drill_updateEndBtnLastHover();	//帧刷新 - 结束按钮上一次高亮
+	
+	this.drill_updateBackBtnControl();	//帧刷新 - 返回按钮控制
 }
 
 //==============================
@@ -2452,62 +2564,23 @@ Scene_Drill_SSpH.prototype.createHelpWindow = function() {
 };
 
 
-
-//==========================================================================================
+//=============================================================================
 // ** ☆箭头
-//==========================================================================================
+//
+//			说明：	> 此模块专门提供 箭头按钮功能。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
 //==============================
-// * 帧刷新 - 箭头 - 窗口点击事件
-//==============================
-Scene_Drill_SSpH.prototype.drill_checkImgTouch = function() {
-	
-	//图片 - 箭头
-	if (this.drill_isOnArrow( this._arrow_left) ) { this._window_select.cursorLeft(); SoundManager.drill_SSpH_playCursor();}
-	if (this.drill_isOnArrow( this._arrow_right) ) { this._window_select.cursorRight(); SoundManager.drill_SSpH_playCursor();}
-	if (this.drill_isOnArrow( this._arrow_up) ) { this._window_select.cursorUp();SoundManager.drill_SSpH_playCursor(); }
-	if (this.drill_isOnArrow( this._arrow_down) ) { this._window_select.cursorDown();SoundManager.drill_SSpH_playCursor(); }
-}
-//==============================
-// * 帧刷新 - 箭头 - 鼠标点击图片范围判断
-//==============================
-Scene_Drill_SSpH.prototype.drill_isOnArrow = function(sprite_arrow) {
-	if( sprite_arrow.bitmap == null ){ return false };
-	if(!sprite_arrow.bitmap.isReady() ){ return false };
-	if( sprite_arrow.visible === false ){ return false };
-	var pw = sprite_arrow.bitmap.width /2 + 20;
-	var ph = sprite_arrow.bitmap.height /2 + 20;
-	
-	 if (TouchInput.x < sprite_arrow._org_x - pw) {return false};
-	 if (TouchInput.x > sprite_arrow._org_x + pw) {return false};
-	 if (TouchInput.y < sprite_arrow._org_y - ph) {return false};
-	 if (TouchInput.y > sprite_arrow._org_y + ph) {return false};
-	 return true;	
-};
-//==============================
-// * 帧刷新 - 箭头 - 箭头高亮范围
-//==============================
-Scene_Drill_SSpH.prototype.drill_isOnHoverArrow = function(sprite_arrow) {
-	if( sprite_arrow.bitmap == null ){ return false };
-	if(!sprite_arrow.bitmap.isReady() ){ return false };
-	if( sprite_arrow.visible === false ){ return false };
-	var pw = sprite_arrow.bitmap.width /2 + 20;
-	var ph = sprite_arrow.bitmap.height /2 + 20;
-	
-	var _x = _drill_mouse_x;
-	var _y = _drill_mouse_y;
-	if ( _x < sprite_arrow._org_x - pw) {return false};
-	if ( _x > sprite_arrow._org_x + pw) {return false};
-	if ( _y < sprite_arrow._org_y - ph) {return false};
-	if ( _y > sprite_arrow._org_y + ph) {return false};
-	return true;	
-}
-
-//==============================
-// * 创建 - 箭头
+// * 箭头 - 创建
 //==============================
 Scene_Drill_SSpH.prototype.drill_createArrow = function() {
-	this._arrow_linear = 0;
-	this._arrow_dir = 1 / 12 ;
+	
+	// > 参数初始化
+	this._arrow_changeValue = 0;		//线性变化值
+	this._arrow_changeSpeed = 0.08;		//线性变化速度
+	this._arrow_hoverType = 0;			//高亮对象（0：无，4：左箭头，6：右箭头，8：上箭头，2：下箭头）
+	this._arrow_lastHoverType = 0;		//高亮对象（上一次的）
+	
 	this._arrow_left = new Sprite(ImageManager.load_MenuSelfDef(DrillUp.g_SSpH_arrowLeft));
 	this._arrow_right = new Sprite(ImageManager.load_MenuSelfDef(DrillUp.g_SSpH_arrowRight));
 	this._arrow_up = new Sprite(ImageManager.load_MenuSelfDef(DrillUp.g_SSpH_arrowUp));
@@ -2534,62 +2607,113 @@ Scene_Drill_SSpH.prototype.drill_createArrow = function() {
 	this._drill_field.addChild(this._arrow_down);	
 };
 //==============================
-// * 帧刷新 - 箭头
+// * 箭头 - 帧刷新 贴图
 //==============================
-Scene_Drill_SSpH.prototype.drill_updateArrow = function() {
-	//线性变化量
-	this._arrow_linear += this._arrow_dir;
-	if( this._arrow_linear > 1 ){
-		this._arrow_dir = -1 / 12 ;
-	}else if( this._arrow_linear < -1 ){
-		this._arrow_dir = 1 / 12 ;
+Scene_Drill_SSpH.prototype.drill_updateArrowSprite = function() {
+	this._arrow_left.opacity  = 180;
+	this._arrow_right.opacity = 180;
+	this._arrow_up.opacity    = 180;
+	this._arrow_down.opacity  = 180;
+	
+	// > 线性变化值
+	this._arrow_changeValue += this._arrow_changeSpeed;
+	if( this._arrow_changeValue > 1 ){
+		this._arrow_changeSpeed = -0.08;
+	}else if( this._arrow_changeValue < -1 ){
+		this._arrow_changeSpeed = 0.08;
 	}
-	//左右浮动
+	
+	// > 左右浮动
 	if( DrillUp.g_SSpH_arrow_float_lr ){
-		this._arrow_left.x = this._arrow_left._org_x + this._arrow_linear* DrillUp.g_SSpH_arrow_float_val ; 	
+		this._arrow_left.x = this._arrow_left._org_x + this._arrow_changeValue* DrillUp.g_SSpH_arrow_float_val ; 	
 		this._arrow_left.y = this._arrow_left._org_y ; 
-		this._arrow_right.x = this._arrow_right._org_x - this._arrow_linear* DrillUp.g_SSpH_arrow_float_val ; 
+		this._arrow_right.x = this._arrow_right._org_x - this._arrow_changeValue* DrillUp.g_SSpH_arrow_float_val ; 
 		this._arrow_right.y = this._arrow_right._org_y ;
 	}
-	//上下浮动
+	// > 上下浮动
 	if( DrillUp.g_SSpH_arrow_float_ud ){
 		this._arrow_up.x = this._arrow_up._org_x;
-		this._arrow_up.y = this._arrow_up._org_y + this._arrow_linear* DrillUp.g_SSpH_arrow_float_val ; 	
+		this._arrow_up.y = this._arrow_up._org_y + this._arrow_changeValue* DrillUp.g_SSpH_arrow_float_val ; 	
 		this._arrow_down.x = this._arrow_down._org_x;
-		this._arrow_down.y = this._arrow_down._org_y - this._arrow_linear* DrillUp.g_SSpH_arrow_float_val ; 	
+		this._arrow_down.y = this._arrow_down._org_y - this._arrow_changeValue* DrillUp.g_SSpH_arrow_float_val ; 	
 	}
-	//缩放
+	// > 缩放
 	if( DrillUp.g_SSpH_arrow_zoom ){
-		this._arrow_left.scale.x = 1 + this._arrow_linear * 0.3 ;
-		this._arrow_left.scale.y = 1 + this._arrow_linear * 0.3 ;
-		this._arrow_right.scale.x= 1 + this._arrow_linear * 0.3 ;
-		this._arrow_right.scale.y= 1 + this._arrow_linear * 0.3 ;
-		this._arrow_up.scale.x =   1 + this._arrow_linear * 0.3 ;
-		this._arrow_up.scale.y =   1 + this._arrow_linear * 0.3 ;
-		this._arrow_down.scale.x = 1 + this._arrow_linear * 0.3 ;
-		this._arrow_down.scale.y = 1 + this._arrow_linear * 0.3 ;
+		this._arrow_left.scale.x = 1 + this._arrow_changeValue * 0.3 ;
+		this._arrow_left.scale.y = 1 + this._arrow_changeValue * 0.3 ;
+		this._arrow_right.scale.x= 1 + this._arrow_changeValue * 0.3 ;
+		this._arrow_right.scale.y= 1 + this._arrow_changeValue * 0.3 ;
+		this._arrow_up.scale.x =   1 + this._arrow_changeValue * 0.3 ;
+		this._arrow_up.scale.y =   1 + this._arrow_changeValue * 0.3 ;
+		this._arrow_down.scale.x = 1 + this._arrow_changeValue * 0.3 ;
+		this._arrow_down.scale.y = 1 + this._arrow_changeValue * 0.3 ;
 	}
-	//闪烁
-	this._arrow_left.opacity = 180 ;
-	this._arrow_right.opacity= 180 ;
-	this._arrow_up.opacity =   180 ;
-	this._arrow_down.opacity = 180 ;
+	// > 闪烁
 	if( DrillUp.g_SSpH_arrow_flicker ){
-		this._arrow_left.opacity = 56+ this._arrow_linear * 200 ;
-		this._arrow_right.opacity= 56+ this._arrow_linear * 200 ;
-		this._arrow_up.opacity =   56+ this._arrow_linear * 200 ;
-		this._arrow_down.opacity = 56+ this._arrow_linear * 200 ;
+		this._arrow_left.opacity = 56 + this._arrow_changeValue * 200 ;
+		this._arrow_right.opacity= 56 + this._arrow_changeValue * 200 ;
+		this._arrow_up.opacity =   56 + this._arrow_changeValue * 200 ;
+		this._arrow_down.opacity = 56 + this._arrow_changeValue * 200 ;
 	}
-	if( this.drill_isOnHoverArrow(this._arrow_left) ){ this._arrow_left.opacity = 255; }
-	if( this.drill_isOnHoverArrow(this._arrow_right) ){ this._arrow_right.opacity = 255; }
-	if( this.drill_isOnHoverArrow(this._arrow_up) ){ this._arrow_up.opacity = 255; }
-	if( this.drill_isOnHoverArrow(this._arrow_down) ){ this._arrow_down.opacity = 255; }
+	
+	// > 高亮时，固定透明度
+	if( this._arrow_hoverType == 4 ){ this._arrow_left.opacity = 255; }
+	if( this._arrow_hoverType == 6 ){ this._arrow_right.opacity = 255; }
+	if( this._arrow_hoverType == 8 ){ this._arrow_up.opacity = 255; }
+	if( this._arrow_hoverType == 2 ){ this._arrow_down.opacity = 255; }
 }
 //==============================
-// * 信息面板H - 刷新箭头
+// * 箭头 - 帧刷新 点击
 //==============================
-Scene_Drill_SSpH.prototype.drill_refreshArrow = function(index) {
-	//箭头显示
+Scene_Drill_SSpH.prototype.drill_updateArrowTouch = function() {
+    if( TouchInput.isTriggered() ){
+		if( this._arrow_hoverType == 4 ){ this._window_select.cursorLeft();  SoundManager.drill_SSpH_playClick_Arrow(); }
+		if( this._arrow_hoverType == 6 ){ this._window_select.cursorRight(); SoundManager.drill_SSpH_playClick_Arrow(); }
+		if( this._arrow_hoverType == 8 ){ this._window_select.cursorUp();    SoundManager.drill_SSpH_playClick_Arrow(); }
+		if( this._arrow_hoverType == 2 ){ this._window_select.cursorDown();  SoundManager.drill_SSpH_playClick_Arrow(); }
+	}
+}
+//==============================
+// * 箭头 - 帧刷新 高亮
+//==============================
+Scene_Drill_SSpH.prototype.drill_updateArrowHover = function() {
+	var xx = _drill_mouse_x;
+	var yy = _drill_mouse_y;
+	var hoverType = 0;
+	if( this.drill_isOnHover(xx,yy,this._arrow_left)  ){ hoverType = 4; }
+	if( this.drill_isOnHover(xx,yy,this._arrow_right) ){ hoverType = 6; }
+	if( this.drill_isOnHover(xx,yy,this._arrow_up)    ){ hoverType = 8; }
+	if( this.drill_isOnHover(xx,yy,this._arrow_down)  ){ hoverType = 2; }
+	this._arrow_hoverType = hoverType;
+}
+//==============================
+// * 箭头 - 帧刷新 上一次高亮
+//==============================
+Scene_Drill_SSpH.prototype.drill_updateArrowLastHover = function() {
+	this._arrow_lastHoverType = this._arrow_hoverType;
+}
+//==============================
+// * 箭头 - 是否鼠标悬停
+//==============================
+Scene_Drill_SSpH.prototype.drill_isOnHover = function( x, y, temp_sprite ){
+	if( temp_sprite == undefined ){ return false };
+	if( temp_sprite.bitmap == undefined ){ return false };
+	if(!temp_sprite.bitmap.isReady() ){ return false };
+	if( temp_sprite.visible === false ){ return false };
+	
+	var pw = temp_sprite.bitmap.width  *0.5 + 20;
+	var ph = temp_sprite.bitmap.height *0.5 + 20;
+	if( x < temp_sprite._org_x - pw ){ return false };
+	if( x > temp_sprite._org_x + pw ){ return false };
+	if( y < temp_sprite._org_y - ph ){ return false };
+	if( y > temp_sprite._org_y + ph ){ return false };
+	return true;	
+};
+
+//==============================
+// * 箭头 - 窗口选项刷新 箭头显示
+//==============================
+Scene_Drill_SSpH.prototype.drill_refreshArrow = function( index ){
 	var l_visible = true;
 	var r_visible = true;
 	var u_visible = true;
@@ -2881,9 +3005,12 @@ Drill_SSpH_DescWindow.prototype.drill_refreshDesc = function( cur_index ) {
 }
 
 
-//==========================================================================================
+//=============================================================================
 // ** ☆流程锁定
-//==========================================================================================
+//
+//			说明：	> 此模块专门提供 流程锁定功能。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
 //==============================
 // * 流程锁定 - 判断 末尾选项
 //==============================
@@ -2906,7 +3033,7 @@ var _drill_SSpH_processCancel = Drill_SSpH_SelectWindow.prototype.processCancel;
 Drill_SSpH_SelectWindow.prototype.processCancel = function() {
 	if( !this.drill_isInEndPage() ){		//非末尾选项，只翻页
 		this.cursorRight();
-		SoundManager.drill_SSpH_playCursor();
+		SoundManager.drill_SSpH_playClick_Arrow();
 		return ;
 	}
 	_drill_SSpH_processCancel.call(this);
@@ -2915,22 +3042,22 @@ Drill_SSpH_SelectWindow.prototype.processCancel = function() {
 // * 流程锁定 - 按键
 //==============================
 Drill_SSpH_SelectWindow.prototype.processCursorMove = function() {
-	if (this.isCursorMovable()) {
+	if( this.isCursorMovable() ){
 		var lastIndex = this.index();
-		if (Input.isRepeated('down')) {
+		if( Input.isRepeated('down') ){
 			this.cursorDown(Input.isTriggered('down'));
 		}
-		if (Input.isRepeated('up')) {
+		if( Input.isRepeated('up') ){
 			this.cursorUp(Input.isTriggered('up'));
 		}
-		if (Input.isRepeated('right')) {
+		if( Input.isRepeated('right') ){
 			this.cursorRight(Input.isTriggered('right'));
 		}
-		if (Input.isRepeated('left')) {
+		if( Input.isRepeated('left') ){
 			this.cursorLeft(Input.isTriggered('left'));
 		}
-		if (this.index() !== lastIndex) {
-			SoundManager.drill_SSpH_playCursor();
+		if( this.index() !== lastIndex ){
+			SoundManager.drill_SSpH_playClick_Arrow();
 		}
 	}
 };
@@ -2956,7 +3083,7 @@ Scene_Drill_SSpH.prototype.drill_quit = function() {
 	this.popScene();
 }
 //==============================
-// * 流程锁定 - 捕获返回按钮
+// * 流程锁定 - 帧刷新 返回按钮控制
 //==============================
 Scene_Drill_SSpH.prototype.drill_updateBackBtnControl = function() { 
 	if( this._drill_MBB_sprites_layer == undefined ){ return; }
@@ -2966,30 +3093,26 @@ Scene_Drill_SSpH.prototype.drill_updateBackBtnControl = function() {
 		temp_layer.visible = this.drill_isInEndPage();
 	}
 }
-//==============================
-// * 流程锁定 - 翻页声音
-//==============================
-SoundManager.drill_SSpH_playCursor = function() {
-	var se = {};
-    se.name = DrillUp.g_SSpH_end_se;
-    se.pitch = 100;
-    se.volume = 100;
-	AudioManager.playStaticSe(se);
-}
 
 //==============================
 // * 流程锁定 - 结束按钮 - 创建
 //==============================
 Scene_Drill_SSpH.prototype.drill_createEndButton = function() {
+	
+	// > 参数初始化
+	this._end_isHover = false;			//是否高亮
+	this._end_isLastHover = false;		//是否高亮（上一次的）
+	
 	this._end_button = new Sprite(ImageManager.load_MenuSelfDef(DrillUp.g_SSpH_end_src));
 	this._end_button._org_x = DrillUp.g_SSpH_end_x ; 
 	this._end_button._org_y = DrillUp.g_SSpH_end_y ;
 	this._drill_field.addChild(this._end_button);	
 }
 //==============================
-// * 流程锁定 - 结束按钮 - 帧刷新
+// * 流程锁定 - 结束按钮 - 帧刷新 贴图
 //==============================
-Scene_Drill_SSpH.prototype.drill_updateEndButton = function() {
+Scene_Drill_SSpH.prototype.drill_updateEndBtnSprite = function() {
+	
 	// > 位置
 	this._end_button.x = this._end_button._org_x;
 	this._end_button.y = this._end_button._org_y;
@@ -2998,16 +3121,123 @@ Scene_Drill_SSpH.prototype.drill_updateEndButton = function() {
 	this._end_button.visible = this.drill_isInEndPage();
 	
 	// > 高亮
-	this._end_button.opacity = 180 ;
-	if( this.drill_isOnHoverArrow(this._end_button) ){ this._end_button.opacity = 255; }
+	this._end_button.opacity = 180;
+	if( this._end_isHover == true ){ this._end_button.opacity = 255; }
 }
 //==============================
-// * 流程锁定 - 结束按钮 - 帧刷新 - 箭头 窗口点击事件
+// * 流程锁定 - 结束按钮 - 帧刷新 点击
 //==============================
-Scene_Drill_SSpH.prototype.drill_checkEndButtonTouch = function() {
-	if (this.drill_isOnArrow( this._end_button ) ) {
+Scene_Drill_SSpH.prototype.drill_updateEndBtnTouch = function() {
+    if( TouchInput.isTriggered() ){
+		if( this._end_isHover == true ){
+			SoundManager.drill_SSpH_playClick_EndBtn();
+			this.popScene();
+		}
+	}
+}
+//==============================
+// * 流程锁定 - 结束按钮 - 帧刷新 高亮
+//==============================
+Scene_Drill_SSpH.prototype.drill_updateEndBtnHover = function() {
+	var xx = _drill_mouse_x;
+	var yy = _drill_mouse_y;
+	this._end_isHover = this.drill_isOnHover(xx,yy,this._end_button);
+}
+//==============================
+// * 流程锁定 - 结束按钮 - 帧刷新 上一次高亮
+//==============================
+Scene_Drill_SSpH.prototype.drill_updateEndBtnLastHover = function() {
+	this._end_isLastHover = this._end_isHover;
+}
+
+
+//=============================================================================
+// ** ☆按钮声音控制『音效模块』
+//
+//			说明：	> 此模块控制 按钮的声音。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 箭头 - 监听高亮声音
+//==============================
+var _drill_SSpH_drill_updateArrowHover = Scene_Drill_SSpH.prototype.drill_updateArrowHover;
+Scene_Drill_SSpH.prototype.drill_updateArrowHover = function() {
+	_drill_SSpH_drill_updateArrowHover.call(this);
+	
+	// > 切换高亮时
+	if( this._arrow_hoverType != this._arrow_lastHoverType ){
+		
+		// > 如果是失去高亮，则不播放
+		if( this._arrow_hoverType == 0 ){ return; }
+		
+		// > 播放声音
+		SoundManager.drill_SSpH_playHover_Arrow();
+	}
+}
+//==============================
+// * 箭头 - 高亮声音
+//==============================
+SoundManager.drill_SSpH_playHover_Arrow = function() {
+	if( DrillUp.g_SSpH_arrowClickDefaultEnabled == true ){
+		//（不操作）
+	}else{
+		if( DrillUp.g_SSpH_arrowHoverSound != null ){
+			AudioManager.playStaticSe( DrillUp.g_SSpH_arrowHoverSound );
+		}
+	}
+}
+//==============================
+// * 箭头 - 点击声音
+//==============================
+SoundManager.drill_SSpH_playClick_Arrow = function() {
+	if( DrillUp.g_SSpH_arrowClickDefaultEnabled == true ){
+		SoundManager.playCursor();
+	}else{
+		if( DrillUp.g_SSpH_arrowClickSound != null ){
+			AudioManager.playStaticSe( DrillUp.g_SSpH_arrowClickSound );
+		}
+	}
+}
+
+//==============================
+// * 结束按钮 - 监听高亮声音
+//==============================
+var _drill_SSpH_drill_updateEndBtnHover = Scene_Drill_SSpH.prototype.drill_updateEndBtnHover;
+Scene_Drill_SSpH.prototype.drill_updateEndBtnHover = function() {
+	_drill_SSpH_drill_updateEndBtnHover.call(this);
+	
+	// > 切换高亮时
+	if( this._end_isHover != this._end_isLastHover ){
+		
+		// > 如果是失去高亮，则不播放
+		if( this._end_isHover == false ){ return; }
+		
+		// > 播放声音
+		SoundManager.drill_SSpH_playHover_EndBtn();
+	}
+}
+//==============================
+// * 结束按钮 - 高亮声音
+//==============================
+SoundManager.drill_SSpH_playHover_EndBtn = function() {
+	if( DrillUp.g_SSpH_endClickDefaultEnabled == true ){
+		SoundManager.playCursor();
+	}else{
+		if( DrillUp.g_SSpH_endHoverSound != null ){
+			AudioManager.playStaticSe( DrillUp.g_SSpH_endHoverSound );
+		}
+	}
+}
+//==============================
+// * 结束按钮 - 点击声音
+//==============================
+SoundManager.drill_SSpH_playClick_EndBtn = function() {
+	if( DrillUp.g_SSpH_endClickDefaultEnabled == true ){
 		SoundManager.playOk();
-		this.popScene();
+	}else{
+		if( DrillUp.g_SSpH_endClickSound != null ){
+			AudioManager.playStaticSe( DrillUp.g_SSpH_endClickSound );
+		}
 	}
 }
 

@@ -147,7 +147,7 @@
  * 
  * @param 跳跃音效
  * @parent ---常规---
- * @desc 跳跃时，播放的音效。
+ * @desc 玩家跳跃时，播放的音效。
  * @require 1
  * @dir audio/se/
  * @type file

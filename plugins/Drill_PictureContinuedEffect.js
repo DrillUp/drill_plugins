@@ -328,16 +328,16 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				pics = [ p ];
 			}
 		}
-		// > 透明度检查
-		if( pics != null ){
-			var temp_tank = [];
-			for( var k=0; k < pics.length; k++ ){
-				if( pics[k].opacity() != 0 ){
-					temp_tank.push( pics[k] );
-				}
-			}
-			pics = temp_tank;
-		}
+		//// > 透明度检查
+		//if( pics != null ){
+		//	var temp_tank = [];
+		//	for( var k=0; k < pics.length; k++ ){
+		//		if( pics[k].opacity() != 0 ){
+		//			temp_tank.push( pics[k] );
+		//		}
+		//	}
+		//	pics = temp_tank;
+		//}
 		
 		// > 未获取到对象，直接跳过
 		if( pics == null ){ return; }
@@ -1566,8 +1566,8 @@ Game_Picture.prototype.drill_PCE_updateSustainingBreathing = function() {
 	
 	// > 锚点(0.5,1.0)锁定
 	var fix_point = $gameTemp.drill_PCE_Math2D_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, 0.5,1.0, ef.real_width,ef.real_height, ef.rotation, ef.scale_x+1, ef.scale_y+1 );
-	ef.x = fix_point.x;	
-	ef.y = fix_point.y;	
+	ef.x = Math.floor( fix_point.x );
+	ef.y = Math.floor( fix_point.y );
 	
 	// > 终止持续效果
 	if( ef.f_time >= ef.f_dTime ){

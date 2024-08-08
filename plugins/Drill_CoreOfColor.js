@@ -2176,8 +2176,8 @@ Window_Base.prototype.drill_COC_setColorLinearCode = function( color1, color2, c
 	if( char_num <= 1 ){ return; }
 	
 	// > 数据标记
-	var rgb1 = this.drill_COC_color_StringToRGB( color1 );
-	var rgb2 = this.drill_COC_color_StringToRGB( color2 );
+	var rgb1 = $gameTemp.drill_COC_color_StringToRGB( color1 );
+	var rgb2 = $gameTemp.drill_COC_color_StringToRGB( color2 );
 	var data = {};
 	data['cur_index'] = -1;
 	data['tar_index'] = char_num;

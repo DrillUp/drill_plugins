@@ -150,6 +150,14 @@
  * [v1.4]
  * 优化了动画序列存储底层。
  * 
+ * 
+ * @param DEBUG-是否提示动画序列未创建
+ * @type boolean
+ * @on 提示
+ * @off 关闭提示
+ * @desc true - 提示，false - 关闭提示。如果你知道存在此问题但不想弹出此提示，可在配置中关闭此提示。
+ * @default true
+ * 
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -275,6 +283,12 @@
 	DrillUp.drill_EASe_getPluginTip_ConflictMOG = function(){
 		return "【" + DrillUp.g_EASe_PluginTip_curName + "】\n 检测到冲突插件：MOG_CharPoses姿势插件，GIF动画序列已经实现了此插件的全部功能替代。可以去看看文档 7.行走图 > 关于行走图GIF动画序列.docx 的 行走图的姿势 章节。";
 	};
+	//==============================
+	// * 提示信息 - 报错 - 动画序列未创建
+	//==============================
+	DrillUp.drill_EASe_getPluginTip_NoActionSequence = function( e_id ){
+		return "【" + DrillUp.g_EASe_PluginTip_curName + "】\n插件指令错误，事件"+e_id+"的动画序列并没有创建，无法播放动画。\n（如果你知道存在此问题但不想弹出此提示，可在配置中关闭此提示）";
+	};
 	
 	
 //=============================================================================
@@ -285,6 +299,9 @@
 　　var DrillUp = DrillUp || {}; 
     DrillUp.parameters = PluginManager.parameters('Drill_EventActionSequence');
 	
+	
+	/*-----------------杂项------------------*/
+    DrillUp.g_EASe_TipEnabled_NoActionSequence = String(DrillUp.parameters["DEBUG-是否提示动画序列未创建"] || "true") === "true";
 	
 	
 //=============================================================================
@@ -727,6 +744,12 @@ Game_Character.prototype.drill_EASe_removeActionSequence = function(){
 //			说明：	> 此函数执行会重置一次当前状态节点，不能 放帧刷新里面反复执行。
 //==============================
 Game_Character.prototype.drill_EASe_setStateNodeDefault = function(){
+	if( this._drill_EASe_controller == undefined ){		//（动画序列校验）
+		if( DrillUp.g_EASe_TipEnabled_NoActionSequence == true ){
+			if( this._eventId != undefined ){ alert( DrillUp.drill_EASe_getPluginTip_NoActionSequence(this._eventId) ); }
+		}
+		return;
+	}
 	this._drill_EASe_controller.drill_COAS_setStateNodeDefault();
 }
 //==============================
@@ -736,6 +759,12 @@ Game_Character.prototype.drill_EASe_setStateNodeDefault = function(){
 //					> 输入空名称时/无对应名称时 无效。
 //==============================
 Game_Character.prototype.drill_EASe_setSimpleStateNode = function( state_nameList ){
+	if( this._drill_EASe_controller == undefined ){		//（动画序列校验）
+		if( DrillUp.g_EASe_TipEnabled_NoActionSequence == true ){
+			if( this._eventId != undefined ){ alert( DrillUp.drill_EASe_getPluginTip_NoActionSequence(this._eventId) ); }
+		}
+		return;
+	}
 	this._drill_EASe_controller.drill_COAS_setSimpleStateNode( state_nameList );
 }
 //==============================
@@ -745,18 +774,36 @@ Game_Character.prototype.drill_EASe_setSimpleStateNode = function( state_nameLis
 //					> 输入空名称时/无对应名称时 无效。
 //==============================
 Game_Character.prototype.drill_EASe_setStateNode = function( node_name ){
+	if( this._drill_EASe_controller == undefined ){		//（动画序列校验）
+		if( DrillUp.g_EASe_TipEnabled_NoActionSequence == true ){
+			if( this._eventId != undefined ){ alert( DrillUp.drill_EASe_getPluginTip_NoActionSequence(this._eventId) ); }
+		}
+		return;
+	}
 	this._drill_EASe_controller.drill_COAS_setStateNode( node_name );
 }
 //==============================
 // * 播放 - 播放动作元（开放函数）
 //==============================
 Game_Character.prototype.drill_EASe_setAct = function( act_name ){
+	if( this._drill_EASe_controller == undefined ){		//（动画序列校验）
+		if( DrillUp.g_EASe_TipEnabled_NoActionSequence == true ){
+			if( this._eventId != undefined ){ alert( DrillUp.drill_EASe_getPluginTip_NoActionSequence(this._eventId) ); }
+		}
+		return;
+	}
 	this._drill_EASe_controller.drill_COAS_setAct( act_name );
 }
 //==============================
 // * 播放 - 立即停止动作元（开放函数）
 //==============================
 Game_Character.prototype.drill_EASe_stopAct = function(){
+	if( this._drill_EASe_controller == undefined ){		//（动画序列校验）
+		if( DrillUp.g_EASe_TipEnabled_NoActionSequence == true ){
+			if( this._eventId != undefined ){ alert( DrillUp.drill_EASe_getPluginTip_NoActionSequence(this._eventId) ); }
+		}
+		return;
+	}
 	this._drill_EASe_controller.drill_COAS_stopAct();
 }
 

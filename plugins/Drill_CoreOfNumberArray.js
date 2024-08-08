@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        系统 - 变量数组核心
+ * @plugindesc [v1.3]        系统 - 变量数组核心
  * @author Drill_up
  * 
  * @Drill_LE_param "变量数组-%d"
@@ -28,7 +28,7 @@
  *   - Drill_CoreOfString          系统-字符串核心
  *     可以将数组信息，以字符串的形式赋值给指定的字符串。
  * 可被扩展：
- *   - Drill_CoreOfEventTags       物体管理-事件标签核心
+ *   - Drill_EventBufferTags       物体管理-事件的缓存标签
  *     通过该插件，可以从地图中获取 指定标签 的事件id组。
  * 
  * -----------------------------------------------------------------------------
@@ -39,8 +39,8 @@
  * 3.该插件的指令较多且使用频繁，建议使用小工具：插件信息查看器。
  *   在开启游戏编辑器时，可以并行使用读取器复制指令。
  * 细节：
- *   (1.变量数组 是一维数组，且只能装 整数数字 ，索引从1开始计数。
- *   (2.使用数组能够极大地减少部分开关的功能实现。
+ *   (1.变量数组 是一维数组，且只能装 整数数字（含负整数），索引从1开始计数。
+ *   (2.使用数组能够极大地节约变量、开关的功能实现。
  * 设计：
  *   (1.由于 变量 的数组经常不够用，所以这里使用变量数组，
  *      可以节省许多事件变量的操作指令。
@@ -53,7 +53,7 @@
  * 插件指令：>变量数组核心 : 数组[自定义容器名] : 获取值 : 索引[1] : 变量[21]
  * 
  * 插件指令：>变量数组核心 : 数组[4] : 获取值 : 索引[1] : 变量[21]
- * 插件指令：>变量数组核心 : 数组[4] : 获取值 : 索引变量[21] : 变量[21]
+ * 插件指令：>变量数组核心 : 数组[4] : 获取值 : 索引变量[22] : 变量[21]
  * 插件指令：>变量数组核心 : 数组[4] : 获取值 : 数组长度 : 变量[21]
  * 插件指令：>变量数组核心 : 数组[4] : 获取值 : 数组最大值 : 变量[21]
  * 插件指令：>变量数组核心 : 数组[4] : 获取值 : 数组最小值 : 变量[21]
@@ -127,6 +127,30 @@
  *   如果长度超出，则超出索引的不会被赋值。
  * 
  * -----------------------------------------------------------------------------
+ * ----可选设定 - 切换地图时自动清空
+ * 变量数组具备切换地图时自动清空的功能：
+ * 
+ * 插件指令：>变量数组核心 : 数组[4] : 切换地图时自动清空 : 开启
+ * 插件指令：>变量数组核心 : 数组[4] : 切换地图时自动清空 : 关闭
+ * 
+ * 1.所有数组默认为关闭，此功能在 物体管理 中比较常用。
+ *   因为事件离开地图后会全部销毁，这时候数组记录的事件id，也不需要了。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 同步删除
+ * 变量数组具备同步删除的功能：
+ * 
+ * 插件指令：>变量数组核心 : 绑定同步删除 : 数组[5]
+ * 插件指令：>变量数组核心 : 绑定同步删除 : 数组[自定义名]
+ * 插件指令：>变量数组核心 : 解除全部同步删除
+ * 
+ * 1."绑定同步删除"是指将多个数组绑定到一起，删除时影响所有绑定的数组。
+ *   指令执行一次就绑定一个数组，需要执行多次绑定多个数组，
+ *   注意，所有绑定的数组长度必须一致，才能同步删除。
+ * 2.该功能在文档中有图解，
+ *   可以去看看"1.系统 > 关于变量数组核心.docx"。
+ * 
+ * -----------------------------------------------------------------------------
  * ----可选设定 - 字符串相关
  * 你可以通过将数组转成字符串：
  * 
@@ -165,6 +189,8 @@
  * 添加了转字符串功能。
  * [v1.2]
  * 添加了 判断从小到大顺序 功能。
+ * [v1.3]
+ * 添加了 切换地图时自动清空、同步删除 功能。
  * 
  * 
  * 
@@ -1424,8 +1450,9 @@
 //
 //		★工作类型		单次执行
 //		★时间复杂度		o(n^2)
-//		★性能测试因素	设计-顺序记忆
-//		★性能测试消耗	（太小，没有找到）
+//		★性能测试因素	物体管理管理层
+//		★性能测试消耗	2024/8/8：
+//							》0.8ms（drill_CONA_getArrayIndex）
 //		★最坏情况		暂无
 //		★备注			暂无
 //		
@@ -1434,18 +1461,31 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			变量数组核心：
-//				->脚本提供
+//			->☆提示信息
+//			->☆静态数据
 //				->重名检查
-//				->插件指令
-//					->增删改查
-//					->复制数组
-//					->翻转数组
-//					->统计
-//						->中位数
-//						->平均数
-//					->筛选
-//						->删除条件值
+//			->☆插件指令
+//				->集群操作
+//					->获取值
+//					->修改值
+//					->删除值
+//						->按条件删除值
+//					->添加值
+//					->判断值
+//					->数组操作
+//						->复制数组
+//						->翻转数组
+//					->数组元素操作
+//				->同步删除
+//				->字符串相关
+//					->转为字符串
+//			->☆存储数据
+//
+//			->☆切换地图时自动清空
+//			->☆同步删除
+//			->☆数据管理器
+//				->脚本提供
+//			->变量数组【Game_NumberArray】
 //
 //
 //		★家谱：
@@ -1475,7 +1515,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -1486,8 +1526,8 @@
 	//==============================
 	// * 提示信息 - 报错 - 找不到数组
 	//==============================
-	DrillUp.drill_CONA_getPluginTip_DataNotFind = function( na_id ){
-		return "【" + DrillUp.g_CONA_PluginTip_curName + "】\n插件指令错误，数组["+na_id+"] 不存在，需要先创建再使用。";
+	DrillUp.drill_CONA_getPluginTip_DataNotFind = function( na_str ){
+		return "【" + DrillUp.g_CONA_PluginTip_curName + "】\n插件指令错误，数组["+na_str+"] 不存在，需要先创建再使用。";
 	};
 	//==============================
 	// * 提示信息 - 报错 - 重名数组
@@ -1501,10 +1541,16 @@
 	DrillUp.drill_CONA_getPluginTip_NoSupportPlugin = function(){
 		return "【" + DrillUp.g_CONA_PluginTip_curName + "】\n缺少 字符串核心 插件，插件指令执行失败。";
 	};
+	//==============================
+	// * 提示信息 - 报错 - 数组长度不一致
+	//==============================
+	DrillUp.drill_CONA_getPluginTip_LengthNotMatch = function( arr_index_list ){
+		return "【" + DrillUp.g_CONA_PluginTip_curName + "】\n无法执行同步删除，因为数组["+arr_index_list.join(",")+"]之间的长度不一致。";
+	};
 	
 	
 //=============================================================================
-// ** 静态数据
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_CoreOfNumberArray = true;
@@ -1563,169 +1609,71 @@
 	
 	
 //=============================================================================
-// * 全局管理器
-//=============================================================================
-//==============================
-// * 管理器 - 定义
-//==============================
-var $gameNumberArray    = null;
-//==============================
-// * 管理器 - 初始化
-//==============================
-var _drill_CONA_createGameObjects = DataManager.createGameObjects;
-DataManager.createGameObjects = function() {
-	_drill_CONA_createGameObjects.call( this );
-	$gameNumberArray    = new Game_NumberArray();
-};
-//==============================
-// * 管理器 - 保存数据
-//==============================
-var _drill_CONA_makeSaveContents = DataManager.makeSaveContents;
-DataManager.makeSaveContents = function() {
-	var contents = _drill_CONA_makeSaveContents.call( this );
-	contents.numberArray    = $gameNumberArray;
-	return contents;
-};
-//==============================
-// * 管理器 - 读取数据
-//==============================
-var _drill_CONA_extractSaveContents = DataManager.extractSaveContents;
-DataManager.extractSaveContents = function( contents ){
-	_drill_CONA_extractSaveContents.call( this,contents );
-	if( contents.numberArray != undefined ){
-		$gameNumberArray        = contents.numberArray;
-	}
-};
-	
-
-//=============================================================================
-// ** 变量数组【Game_NumberArray】
-//			
-//			实例：	$gameNumberArray
-//			索引：	无
-//			来源：	无（独立数据）
-//			应用：	> 事件指令
-//			
-//			功能：	> 提供基本的变量数组数据设置/获取功能。
-//					> 根据名称/根据索引 操作
-//
-//			说明：	this._data中存的不是单纯的数组，而是一个集群（含名称的数组）。
-//=============================================================================
-//==============================
-// * 变量数组 - 定义
-//==============================
-function Game_NumberArray() {
-    this.initialize.apply(this, arguments);
-}
-//==============================
-// * 变量数组 - 初始化
-//==============================
-Game_NumberArray.prototype.initialize = function() {
-    this.clear();
-    this.drill_CONA_init();
-};
-//==============================
-// * 变量数组 - 清理全部
-//==============================
-Game_NumberArray.prototype.clear = function(){ this._data = []; };
-//==============================
-// * 变量数组 - 数据初始化
-//==============================
-Game_NumberArray.prototype.drill_CONA_init = function(){
-	
-	// > 数组初始化
-	var data_tank = [];	
-	data_tank.push([]);		//（第0个为空变量数组）
-	for( var i = 0; i < DrillUp.g_CONA_list.length; i++ ){
-		var temp_arr = DrillUp.g_CONA_list[i]['context'];
-		data_tank.push(temp_arr);
-	}
-	this._data = data_tank;
-
-	// > 映射初始化
-	this._drill_keyMapping = {};
-	for( var i = 0; i < DrillUp.g_CONA_list.length; i++ ){
-		var temp_name = DrillUp.g_CONA_list[i]['name'];
-		this._drill_keyMapping[ temp_name ] = i+1;		//（索引位置）
-	}
-};
-//==============================
-// * 变量数组 - 获取数组（接口）
-//
-//			说明：	返回数字数组，na_id可以是数字，也可以是名称。
-//==============================
-Game_NumberArray.prototype.value = function( na_id ){
-	var index = this.drill_CONA_getArrayIndex( na_id );
-    return this._data[ index ] || [];
-};
-//==============================
-// * 变量数组 - 设置数组（接口）
-//
-//			说明：	返回数字数组，na_id可以是数字，也可以是名称。
-//==============================
-Game_NumberArray.prototype.setValue = function( na_id, value ){
-	if( Array.isArray( value ) == false ){ return; }
-
-	var index = this.drill_CONA_getArrayIndex( na_id );
-	if( index != -1 ){ 
-		this._data[ index ] = value;
-	}
-};
-//==============================
-// * 私有 - 获取索引位置（综合判断获取）
-//
-//			说明：	根据传来的na_id，返回数组的索引位置。
-//==============================
-Game_NumberArray.prototype.drill_CONA_getArrayIndex = function( na_id ){
-	if( na_id == undefined ){ return -1; }
-	if( na_id == "" ){ return -1; }
-	
-	// > 数字获取
-	if( typeof na_id === "number" ||
-	   (typeof na_id === "string" && /^\d+$/.test( na_id ) == true ) ){
-		var index = Number( na_id );
-		if( index > 0 ){ return index; }
-		return -1;
-	}
-	
-	// > 名称获取
-	if( typeof na_id === "string" && /^\d+$/.test( na_id ) != true ){
-		var index = this._drill_keyMapping[ na_id ];
-		if( index != undefined ){
-			return index;
-		}
-		return -1;
-	}
-	
-	return -1;
-};
-	
-//=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _drill_CONA_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	_drill_CONA_pluginCommand.call(this, command, args);
-	if( command === ">变量数组核心" ){		//>变量数组核心 : 变量数组[1] : 修改变量数组 : 某\c[2]变量数组
+	if( command === ">变量数组核心" ){
+		
+		/*-----------------同步删除------------------*/
+		if( args.length == 4 ){
+			var type = String(args[1]);
+			var temp1 = String(args[3]);
+			if( type == "绑定同步删除" ){	//（该插件指令要放前面，不然对象组获取会报错）
+				temp1 = temp1.replace("数组[","");
+				temp1 = temp1.replace("]","");
+				temp1 = $gameNumberArray.drill_CONA_getArrayIndex( temp1 );
+				if( temp1 == -1 ){
+					alert( DrillUp.drill_CONA_getPluginTip_DataNotFind( temp1 ) );
+					return;
+				}
+				$gameTemp._drill_CONA_deleteBind.push( temp1 );
+				return;
+			}
+		}
+		if( args.length == 2 ){
+			var type = String(args[1]);
+			if( type == "解除全部同步删除" ){
+				$gameTemp._drill_CONA_deleteBind = [];
+				return;
+			}
+		}
 		
 		/*-----------------对象组获取------------------*/
 		var arr_index = null;
-		if(args.length >= 2){
-			var na_id = String(args[1]);
-			na_id = na_id.replace("数组[","");
-			na_id = na_id.replace("]","");
-			arr_index = $gameNumberArray.drill_CONA_getArrayIndex( na_id );
+		if( args.length >= 2 ){
+			var na_str = String(args[1]);
+			na_str = na_str.replace("数组[","");
+			na_str = na_str.replace("]","");
+			
+			arr_index = $gameNumberArray.drill_CONA_getArrayIndex( na_str );
 			if( arr_index == -1 ){
-				
-				alert( DrillUp.drill_CONA_getPluginTip_DataNotFind( na_id ) );
+				alert( DrillUp.drill_CONA_getPluginTip_DataNotFind( na_str ) );
 				return;
 			}
 		}
 		var data_tank = $gameNumberArray._data;
 		if( data_tank[ arr_index ] == undefined ){ return; }
 		
+		
+		/*-----------------切换地图时自动清空------------------*/
+		if( args.length == 6 ){
+			var type = String(args[3]);
+			var temp1 = String(args[5]);
+			if( type == "切换地图时自动清空" ){
+				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
+					$gameSystem.drill_CONA_autoClear_add( arr_index );
+				}
+				if( temp1 == "关闭" || temp1 == "禁用" ){
+					$gameSystem.drill_CONA_autoClear_remove( arr_index );
+				}
+				return;
+			}
+		}
+		
 		/*-----------------集群操作 - 获取值------------------*/
-		if(args.length == 8){
+		if( args.length == 8 ){
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
 			var temp2 = String(args[7]);
@@ -1857,7 +1805,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		}
 		
 		/*-----------------集群操作 - 修改值------------------*/
-		if(args.length == 6){
+		if( args.length == 6 ){
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
 			
@@ -1887,7 +1835,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				}
 			}
 		}
-		if(args.length == 8){
+		if( args.length == 8 ){
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
 			var temp2 = String(args[7]);
@@ -1930,7 +1878,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		}
 			
 		/*-----------------集群操作 - 删除值------------------*/
-		if(args.length == 6){
+		if( args.length == 6 ){
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
 		
@@ -1939,6 +1887,9 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp1 = temp1.replace("]","");
 				temp1 = $gameVariables.value( Number(temp1) ) -1;  	//（注意索引-1）
 				data_tank[ arr_index ].splice( temp1, 1 );
+				
+				// > 同步删除
+				$gameTemp.drill_CONA_checkDelete( arr_index, temp1 );
 			}
 			
 			else if( type == "删除值" && temp1.indexOf("索引[") != -1 ){	
@@ -1946,6 +1897,9 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp1 = temp1.replace("]","");
 				temp1 = Number(temp1) -1; 		 	//（注意索引-1）
 				data_tank[ arr_index ].splice( temp1, 1 );
+				
+				// > 同步删除
+				$gameTemp.drill_CONA_checkDelete( arr_index, temp1 );
 			}
 			
 			else if( type == "删除值" && temp1.indexOf("大于[") != -1 ){	
@@ -1957,6 +1911,9 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					var v = data_tank[ arr_index ][i];
 					if( v > temp1 ){
 						data_tank[ arr_index ].splice(i,1);
+						
+						// > 同步删除
+						$gameTemp.drill_CONA_checkDelete( arr_index, i );
 					}
 				}
 			}
@@ -1970,6 +1927,9 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					var v = data_tank[ arr_index ][i];
 					if( v < temp1 ){
 						data_tank[ arr_index ].splice(i,1);
+						
+						// > 同步删除
+						$gameTemp.drill_CONA_checkDelete( arr_index, i );
 					}
 				}
 			}
@@ -1983,13 +1943,16 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					var v = data_tank[ arr_index ][i];
 					if( v == temp1 ){
 						data_tank[ arr_index ].splice(i,1);
+						
+						// > 同步删除
+						$gameTemp.drill_CONA_checkDelete( arr_index, i );
 					}
 				}
 			}
 		}
 			
 		/*-----------------集群操作 - 添加值------------------*/
-		if(args.length == 6){
+		if( args.length == 6 ){
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
 			
@@ -2009,7 +1972,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		}
 			
 		/*-----------------集群操作 - 判断值------------------*/
-		if(args.length == 8){
+		if( args.length == 8 ){
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
 			var temp2 = String(args[7]);
@@ -2119,7 +2082,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				$gameSwitches.setValue( temp2, result );
 			}
 		}
-		if(args.length == 10){
+		if( args.length == 10 ){
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
 			var temp2 = String(args[7]);
@@ -2181,7 +2144,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		
 		
 		/*-----------------集群操作 - 数组操作------------------*/
-		if(args.length == 6){
+		if( args.length == 6 ){
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
 			
@@ -2204,7 +2167,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			}
 			
 		}
-		if(args.length == 4){
+		if( args.length == 4 ){
 			var type = String(args[3]);
 			
 			if( type == "翻转数组" ){	
@@ -2219,13 +2182,14 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				data_tank[ arr_index ] = [];
 			}
 			
-			if( type == "DEBUG查看数组数据" ){	
-				alert( na_id + ":" + JSON.stringify(data_tank[ arr_index ]) );
+			if( type == "DEBUG查看数组数据" ){
+				alert( "【" + DrillUp.g_CONA_PluginTip_curName + "】\n" +
+					"数组[" + na_str + "]:" + JSON.stringify(data_tank[ arr_index ]) );
 			}
 		}
 		
-		/*-----------------集群操作 - 批量变量------------------*/
-		if(args.length == 6){
+		/*-----------------集群操作 - 数组元素操作------------------*/
+		if( args.length == 6 ){
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
 			
@@ -2263,7 +2227,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		
 		/*-----------------字符串相关------------------*/
 		if( Imported.Drill_CoreOfString ){
-			if(args.length == 6){
+			if( args.length == 6 ){
 				var type = String(args[3]);
 				var temp1 = String(args[5]);
 				
@@ -2309,4 +2273,317 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 };
 
+
+//#############################################################################
+// ** 【标准模块】存储数据 ☆存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_CONA_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_CONA_sys_initialize = Game_System.prototype.initialize;
+Game_System.prototype.initialize = function(){
+    _drill_CONA_sys_initialize.call(this);
+	this.drill_CONA_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_CONA_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_CONA_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_CONA_saveEnabled == true ){	
+		$gameSystem.drill_CONA_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_CONA_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_CONA_initSysData = function(){
+	this.drill_CONA_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_CONA_checkSysData = function(){
+	this.drill_CONA_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_CONA_initSysData_Private = function(){
+	
+    this._drill_CONA_autoClearTank = [];		//切换地图时自动清空
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_CONA_checkSysData_Private = function(){
+	
+	// > 旧存档数据自动补充
+	if( this._drill_CONA_autoClearTank == undefined ){
+		this.drill_CONA_initSysData();
+	}
+};
+
+
+
+//=============================================================================
+// ** ☆切换地图时自动清空
+//
+//			说明：	> 此模块专门定义 切换地图时自动清空 的功能。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 切换地图时自动清空 - 执行清空
+//==============================
+var _drill_CONA_autoClear_setup = Game_Map.prototype.setup;
+Game_Map.prototype.setup = function( mapId ){
+	_drill_CONA_autoClear_setup.call( this, mapId );
+	
+	for(var i = 0; i < $gameSystem._drill_CONA_autoClearTank.length; i++){
+		var arr_index = $gameSystem._drill_CONA_autoClearTank[i];
+		$gameNumberArray.setValue( arr_index, [] );
+		alert( arr_index );
+	}
+};
+//==============================
+// * 切换地图时自动清空 - 添加数组名
+//==============================
+Game_System.prototype.drill_CONA_autoClear_add = function( arr_index ){
+	if( this._drill_CONA_autoClearTank.contains( arr_index ) == true ){ return; }
+	this._drill_CONA_autoClearTank.push( arr_index );
+};
+//==============================
+// * 切换地图时自动清空 - 去除数组名
+//==============================
+Game_System.prototype.drill_CONA_autoClear_remove = function( arr_index ){
+	for(var i = this._drill_CONA_autoClearTank.length -1; i >= 0; i-- ){
+		var cur_index = this._drill_CONA_autoClearTank[i];
+		if( cur_index == arr_index ){
+			this._drill_CONA_autoClearTank.splice( i, 1 );
+		}
+	}
+};
+
+
+//=============================================================================
+// ** ☆同步删除
+//
+//			说明：	> 此模块专门定义 同步删除 的功能。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 同步删除 - 定义
+//==============================
+var _drill_CONA_delete_initialize = Game_Temp.prototype.initialize;
+Game_Temp.prototype.initialize = function(){
+	_drill_CONA_delete_initialize.call(this);
+	this._drill_CONA_deleteBind = [];	//（容器里只放索引值）
+}
+//==============================
+// * 同步删除 - 执行同步
+//==============================
+Game_Temp.prototype.drill_CONA_checkDelete = function( arr_index, i_index ){
+	if( $gameTemp._drill_CONA_deleteBind.length <= 1 ){ return; }		//（至少要绑定2个数组才能同步）
+	if( $gameTemp._drill_CONA_deleteBind.contains(arr_index) == false ){ return; }
+	
+	// > 检查数组长度
+	var pass = true;
+	var cur_len = $gameNumberArray._data[ arr_index ].length +1;		//（+1是因为进入此函数时，主数组已经删了一个对象了）
+	for(var i = 0; i < $gameTemp._drill_CONA_deleteBind.length; i++){
+		var cur_index = $gameTemp._drill_CONA_deleteBind[i];
+		if( cur_index == arr_index ){ continue; }	//（排除主数组）
+		
+		// > 主数组与其它数组依次比较
+		if( cur_len != $gameNumberArray._data[ cur_index ].length ){
+			pass = false;
+		}
+	}
+	if( pass == false ){
+		alert( DrillUp.drill_CONA_getPluginTip_LengthNotMatch( $gameTemp._drill_CONA_deleteBind ) );
+		return;
+	}
+	
+	// > 执行删除
+	for(var i = 0; i < $gameTemp._drill_CONA_deleteBind.length; i++){
+		var cur_index = $gameTemp._drill_CONA_deleteBind[i];
+		if( cur_index == arr_index ){ continue; }	//（排除主数组）
+		$gameNumberArray._data[ cur_index ].splice( i_index, 1 );
+	}
+}
+	
+	
+//=============================================================================
+// ** ☆数据管理器
+//
+//			说明：	> 此模块专门定义 变量数组 全局对象，可用于脚本功能。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 数据管理器 - 定义
+//==============================
+var $gameNumberArray    = null;
+//==============================
+// * 数据管理器 - 初始化
+//==============================
+var _drill_CONA_createGameObjects = DataManager.createGameObjects;
+DataManager.createGameObjects = function() {
+	_drill_CONA_createGameObjects.call( this );
+	$gameNumberArray    = new Game_NumberArray();
+};
+//==============================
+// * 数据管理器 - 保存数据
+//==============================
+var _drill_CONA_makeSaveContents = DataManager.makeSaveContents;
+DataManager.makeSaveContents = function() {
+	var contents = _drill_CONA_makeSaveContents.call( this );
+	contents.numberArray    = $gameNumberArray;
+	return contents;
+};
+//==============================
+// * 数据管理器 - 读取数据
+//==============================
+var _drill_CONA_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_CONA_extractSaveContents.call( this,contents );
+	if( contents.numberArray != undefined ){
+		$gameNumberArray        = contents.numberArray;
+	}
+};
+	
+
+//=============================================================================
+// ** 变量数组【Game_NumberArray】
+// **		
+// **		实例：	$gameNumberArray
+// **		索引：	无
+// **		来源：	无（独立数据）
+// **		应用：	> 事件指令
+// **		
+// **		作用域：	地图界面、战斗界面、菜单界面
+// **		主功能：	提供基本的变量数组数据设置/获取功能。
+// **					根据名称/根据索引 操作。
+// **		子功能：	
+// **					->获取数组（开放函数）
+// **					->设置数组（开放函数）
+// **
+// **		说明：	> this._data中存的不是单纯的数组，而是一个集群（含名称的数组）。
+//=============================================================================
+//==============================
+// * 变量数组 - 定义
+//==============================
+function Game_NumberArray() {
+    this.initialize.apply(this, arguments);
+}
+//==============================
+// * 变量数组 - 初始化
+//==============================
+Game_NumberArray.prototype.initialize = function() {
+    this.clear();
+    this.drill_CONA_init();
+};
+//==============================
+// * 变量数组 - 清理全部
+//==============================
+Game_NumberArray.prototype.clear = function(){ this._data = []; };
+//==============================
+// * 变量数组 - 数据初始化
+//==============================
+Game_NumberArray.prototype.drill_CONA_init = function(){
+	
+	// > 数组初始化
+	var data_tank = [];	
+	data_tank.push([]);		//（第0个为空变量数组）
+	for( var i = 0; i < DrillUp.g_CONA_list.length; i++ ){
+		var temp_arr = DrillUp.g_CONA_list[i]['context'];
+		data_tank.push(temp_arr);
+	}
+	this._data = data_tank;
+
+	// > 映射初始化
+	this._drill_keyMapping = {};
+	for( var i = 0; i < DrillUp.g_CONA_list.length; i++ ){
+		var temp_name = DrillUp.g_CONA_list[i]['name'];
+		this._drill_keyMapping[ temp_name ] = i+1;		//（索引位置）
+	}
+};
+//==============================
+// * 变量数组 - 获取数组（开放函数）
+//
+//			说明：	> 返回数字数组，na_str可以是数字，也可以是名称。
+//==============================
+Game_NumberArray.prototype.value = function( na_str ){
+	var index = this.drill_CONA_getArrayIndex( na_str );
+    return this._data[ index ] || [];
+};
+//==============================
+// * 变量数组 - 设置数组（开放函数）
+//
+//			说明：	> 返回数字数组，na_str可以是数字，也可以是名称。
+//==============================
+Game_NumberArray.prototype.setValue = function( na_str, value ){
+	if( Array.isArray( value ) == false ){ return; }
+
+	var index = this.drill_CONA_getArrayIndex( na_str );
+	if( index != -1 ){ 
+		this._data[ index ] = value;
+	}
+};
+//==============================
+// * 变量数组 - 获取索引位置（私有，主流程）
+//
+//			说明：	> 根据传来的na_str，返回数组的索引位置。
+//==============================
+Game_NumberArray.prototype.drill_CONA_getArrayIndex = function( na_str ){
+	if( na_str == undefined ){ return -1; }
+	if( na_str == "" ){ return -1; }
+	
+	// > 数字获取
+	if( typeof na_str === "number" ||
+	   (typeof na_str === "string" && /^\d+$/.test( na_str ) == true ) ){
+		var index = Number( na_str );
+		if( index > 0 ){ return index; }
+		return -1;
+	}
+	
+	// > 名称获取
+	if( typeof na_str === "string" && /^\d+$/.test( na_str ) != true ){
+		var index = this._drill_keyMapping[ na_str ];
+		if( index != undefined ){
+			return index;
+		}
+		return -1;
+	}
+	
+	return -1;
+};
 

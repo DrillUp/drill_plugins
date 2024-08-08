@@ -190,8 +190,16 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			活动地图镜头控制台：
-//				->边界移动指向标
+//			->☆提示信息
+//			->☆静态数据
+//			->☆插件指令
+//			->☆存储数据
+//			->☆地图层级
+//			
+//			->☆贴图控制
+//			->边界移动指向标 贴图【Drill_LCC_MouseBorderSprite】
+//				->A主体
+//				->B播放GIF
 //
 //
 //		★家谱：
@@ -214,7 +222,7 @@
 //		
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -239,7 +247,7 @@
 	
 	
 //=============================================================================
-// ** 静态数据
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_LayerCameraConsole = true;
@@ -287,7 +295,7 @@ if( Imported.Drill_LayerCamera ){
 	
 	
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _drill_LCC_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
@@ -297,7 +305,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -378,14 +386,96 @@ Game_System.prototype.drill_LCC_checkSysData_Private = function() {
 };
 
 
+//#############################################################################
+// ** 【标准模块】地图层级 ☆地图层级
+//#############################################################################
+//##############################
+// * 地图层级 - 添加贴图到层级【标准函数】
+//				
+//			参数：	> sprite 贴图        （添加的贴图对象）
+//					> layer_index 字符串 （添加到的层级名，下层/中层/上层/图片层/最顶层）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图添加到目标层级中。
+//##############################
+Scene_Map.prototype.drill_LCC_layerAddSprite = function( sprite, layer_index ){
+	this.drill_LCC_layerAddSprite_Private( sprite, layer_index );
+}
+//##############################
+// * 地图层级 - 去除贴图【标准函数】
+//				
+//			参数：	> sprite 贴图（添加的贴图对象）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图从地图层级中移除。
+//##############################
+Scene_Map.prototype.drill_LCC_layerRemoveSprite = function( sprite ){
+	//（不操作）
+}
+//##############################
+// * 地图层级 - 图片层级排序【标准函数】
+//				
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 执行该函数后，地图层级的子贴图，按照zIndex属性来进行先后排序。值越大，越靠前。
+//##############################
+Scene_Map.prototype.drill_LCC_sortByZIndex = function () {
+    this.drill_LCC_sortByZIndex_Private();
+}
 //=============================================================================
-// ** 图层
+// ** 地图层级（接口实现）
 //=============================================================================
+//==============================
+// * 地图层级 - 下层
+//==============================
+var _drill_LCC_map_createParallax = Spriteset_Map.prototype.createParallax;
+Spriteset_Map.prototype.createParallax = function(){
+	_drill_LCC_map_createParallax.call(this);		//地图远景 < 下层 < 图块层
+	if( !this._drill_mapDownArea ){
+		this._drill_mapDownArea = new Sprite();
+		this._baseSprite.addChild(this._drill_mapDownArea);	
+	}
+}
+//==============================
+// * 地图层级 - 中层
+//==============================
+var _drill_LCC_map_createTilemap = Spriteset_Map.prototype.createTilemap;
+Spriteset_Map.prototype.createTilemap = function(){
+	_drill_LCC_map_createTilemap.call(this);		//图块层 < 中层 < 事件/玩家层
+	if( !this._drill_mapCenterArea ){
+		this._drill_mapCenterArea = new Sprite();
+		this._drill_mapCenterArea.z = 0.60;
+		this._tilemap.addChild(this._drill_mapCenterArea);	
+	}
+}
+//==============================
+// * 地图层级 - 上层
+//==============================
+var _drill_LCC_map_createDestination = Spriteset_Map.prototype.createDestination;
+Spriteset_Map.prototype.createDestination = function(){
+	_drill_LCC_map_createDestination.call(this);	//鼠标目的地 < 上层 < 天气层
+	if( !this._drill_mapUpArea ){
+		this._drill_mapUpArea = new Sprite();
+		this._baseSprite.addChild(this._drill_mapUpArea);	
+	}
+}
+//==============================
+// * 地图层级 - 图片层
+//==============================
+var _drill_LCC_map_createPictures = Spriteset_Map.prototype.createPictures;
+Spriteset_Map.prototype.createPictures = function(){
+	_drill_LCC_map_createPictures.call(this);		//图片对象层 < 图片层 < 对话框集合
+	if( !this._drill_mapPicArea ){
+		this._drill_mapPicArea = new Sprite();
+		this.addChild(this._drill_mapPicArea);	
+	}
+}
 //==============================
 // * 地图层级 - 最顶层
 //==============================
 var _drill_LCC_map_createAllWindows = Scene_Map.prototype.createAllWindows;
-Scene_Map.prototype.createAllWindows = function() {
+Scene_Map.prototype.createAllWindows = function(){
 	_drill_LCC_map_createAllWindows.call(this);	//对话框集合 < 最顶层
 	if( !this._drill_SenceTopArea ){
 		this._drill_SenceTopArea = new Sprite();
@@ -393,16 +483,73 @@ Scene_Map.prototype.createAllWindows = function() {
 	}
 }
 //==============================
-// * 地图层级 - 帧刷新
+// * 地图层级 - 参数定义
+//
+//			说明：	> 所有drill插件的贴图都用唯一参数：zIndex（可为小数、负数），其它插件没有此参数定义。
+//==============================
+if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义）
+	var _drill_sprite_zIndex = true;
+	Object.defineProperty( Sprite.prototype, 'zIndex', {
+		set: function( value ){
+			this.__drill_zIndex = value;
+		},
+		get: function(){
+			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			return this.__drill_zIndex;
+		},
+		configurable: true
+	});
+};
+//==============================
+// * 地图层级 - 图片层级排序（私有）
+//==============================
+Scene_Map.prototype.drill_LCC_sortByZIndex_Private = function(){
+	this._spriteset._drill_mapDownArea.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
+	this._spriteset._drill_mapCenterArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
+	this._spriteset._drill_mapUpArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
+	this._spriteset._drill_mapPicArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
+	this._drill_SenceTopArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
+};
+//==============================
+// * 地图层级 - 添加贴图到层级（私有）
+//==============================
+Scene_Map.prototype.drill_LCC_layerAddSprite_Private = function( sprite, layer_index ){
+	if( layer_index == "下层" ){
+		this._spriteset._drill_mapDownArea.addChild( sprite );
+	}
+	if( layer_index == "中层" ){
+		this._spriteset._drill_mapCenterArea.addChild( sprite );
+	}
+	if( layer_index == "上层" ){
+		this._spriteset._drill_mapUpArea.addChild( sprite );
+	}
+	if( layer_index == "图片层" ){
+		this._spriteset._drill_mapPicArea.addChild( sprite );
+	}
+	if( layer_index == "最顶层" ){
+		this._drill_SenceTopArea.addChild( sprite );
+	}
+}
+
+
+
+//=============================================================================
+// ** ☆贴图控制
+//
+//			说明：	> 此模块管理 边界移动指向标的贴图 。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 贴图控制 - 帧刷新
 //==============================
 var _drill_LCC_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {	
 	_drill_LCC_update.call(this);
 	
-	// > 显示控制
+	// > 创建贴图
 	if( this._drill_LCC_MouseBorderSprite == undefined ){
 		var temp_sprite = new Drill_LCC_MouseBorderSprite( DrillUp.g_LCC_mouseBorder_data );
-		this._drill_SenceTopArea.addChild( temp_sprite );
+		this.drill_LCC_layerAddSprite( temp_sprite, "最顶层" );
 		this._drill_LCC_MouseBorderSprite = temp_sprite;
 	}
 }
@@ -410,18 +557,22 @@ Scene_Map.prototype.update = function() {
 
 //=============================================================================
 // ** 边界移动指向标 贴图【Drill_LCC_MouseBorderSprite】
-//			
-//			主功能：	> 定义一个显现 鼠标接近边界时 指向标贴图。
-//			子功能：	->播放GIF
-//						
-//			说明：	> 该贴图的中心锚点会根据情况变化。
-//
-// 			代码：	> 范围 - 仅用于可视化。
-//					> 结构 - [ ●合并 /分离/混乱] 贴图与数据合并。
-//					> 数量 - [ ●单个 /多个] 
-//					> 创建 - [ ●一次性 /自延迟/外部延迟] 
-//					> 销毁 - [ ●不考虑 /自销毁/外部销毁] 
-//					> 样式 - [不可修改/ ●自变化 /外部变化] 样式在贴图帧刷新中自变化。
+// **		
+// **		作用域：	地图界面
+// **		主功能：	> 定义一个 鼠标接近边界时 显示的指向标贴图。
+// **		子功能：	->贴图
+// **						->帧刷新
+// **					->A主体
+// **					->B播放GIF
+// **					
+// **		说明：	> 该贴图的中心锚点会根据情况变化。
+// **
+// **		代码：	> 范围 - 仅用于可视化。
+// **				> 结构 - [ ●合并 /分离/混乱] 贴图与数据合并。
+// **				> 数量 - [ ●单个 /多个] 
+// **				> 创建 - [ ●一次性 /自延迟/外部延迟] 
+// **				> 销毁 - [ ●不考虑 /自销毁/外部销毁] 
+// **				> 样式 - [不可修改/ ●自变化 /外部变化] 样式在贴图帧刷新中自变化。
 //=============================================================================
 //==============================
 // * 贴图 - 定义
@@ -436,58 +587,59 @@ Drill_LCC_MouseBorderSprite.prototype.constructor = Drill_LCC_MouseBorderSprite;
 //==============================
 Drill_LCC_MouseBorderSprite.prototype.initialize = function( data ){
 	Sprite_Base.prototype.initialize.call(this);
-	
-	// > 私有变量初始化
-	this._drill_time = 0;									//当前时间
-	this._drill_data = JSON.parse(JSON.stringify( data ));	//配置数据
-	
-	// > bitmap对象集
-	this._drill_bitmapTank_7 = [];
-	for(var j = 0; j < data['src_img_7'].length ; j++){
-		var temp_bitmap = ImageManager.loadBitmap( data['src_img_file'], data['src_img_7'][j], 0, true);
-		this._drill_bitmapTank_7.push(temp_bitmap);
-	}
-	this._drill_bitmapTank_8 = [];
-	for(var j = 0; j < data['src_img_8'].length ; j++){
-		var temp_bitmap = ImageManager.loadBitmap( data['src_img_file'], data['src_img_8'][j], 0, true);
-		this._drill_bitmapTank_8.push(temp_bitmap);
-	}
-	
-	// > 私有属性初始化
-	this.opacity = data['opacity'];
-	this.blendMode = data['blendMode'];
-	this.bitmap = null;
+	this._drill_data = JSON.parse(JSON.stringify( data ));	//深拷贝数据
+    this.drill_spriteBorder_initChild();					//初始化子功能
 };
 //==============================
 // * 贴图 - 帧刷新
 //==============================
 Drill_LCC_MouseBorderSprite.prototype.update = function() {
 	Sprite_Base.prototype.update.call(this);
-	this._drill_time += 1;
-	this.drill_LCC_updatePosition();	//帧刷新 - 位置
-	this.drill_LCC_updateVisible();		//帧刷新 - 可见
-	this.drill_LCC_updateGif();			//帧刷新 - 播放GIF
+	this.drill_spriteBorder_updateAttr();			//帧刷新 - A主体
+	this.drill_spriteBorder_updateAttr_Position();	//帧刷新 - A主体 - 位置
+	this.drill_spriteBorder_updateAttr_Rotation();	//帧刷新 - A主体 - 旋转
+	this.drill_spriteBorder_updateAttr_Visible();	//帧刷新 - A主体 - 可见
+	this.drill_spriteBorder_updateGIF();			//帧刷新 - B播放GIF
 };
 //==============================
-// * 帧刷新 - 可见
+// * 贴图 - 初始化子功能
 //==============================
-Drill_LCC_MouseBorderSprite.prototype.drill_LCC_updateVisible = function() {
+Drill_LCC_MouseBorderSprite.prototype.drill_spriteBorder_initChild = function(){
+	this.drill_spriteBorder_initAttr();				//初始化子功能 - A主体
+	this.drill_spriteBorder_initGIF();				//初始化子功能 - B播放GIF
+};
+
+//==============================
+// * A主体 - 初始化子功能
+//==============================
+Drill_LCC_MouseBorderSprite.prototype.drill_spriteBorder_initAttr = function(){
+	var data = this._drill_data;
 	
-	// > 鼠标处于正常位置时，不显示贴图
-	var direction = $gameSystem._drill_LCa_controller._drill_tourist_mouseDirection;
-	if( direction == 5 || direction == 0 ){
-		this.visible = false;
-		//document.body.style.cursor="auto";	//（隐藏鼠标）
-		return;
-	}
+	// > 常规
+	this._drill_curTime = 0;			//当前时间
+	this._drill_curDirection = 0;		//当前边界方向
+	this._drill_curMouseX = 0;			//当前鼠标位置X
+	this._drill_curMouseY = 0;			//当前鼠标位置Y
 	
-	this.visible = true;
-	//document.body.style.cursor="none";
+	// > 主体贴图
+	this.opacity = data['opacity'];
+	this.blendMode = data['blendMode'];
 };
 //==============================
-// * 帧刷新 - 位置
+// * A主体 - 帧刷新
 //==============================
-Drill_LCC_MouseBorderSprite.prototype.drill_LCC_updatePosition = function() {
+Drill_LCC_MouseBorderSprite.prototype.drill_spriteBorder_updateAttr = function() {
+	this._drill_curTime += 1;
+	
+	// > 地图镜头信息获取
+	this._drill_curDirection = $gameSystem._drill_LCa_controller._drill_tourist_mouseDirection;
+	this._drill_curMouseX = $gameSystem._drill_LCa_controller._drill_tourist_mouseX;
+	this._drill_curMouseY = $gameSystem._drill_LCa_controller._drill_tourist_mouseY;
+};
+//==============================
+// * A主体 - 帧刷新 位置
+//==============================
+Drill_LCC_MouseBorderSprite.prototype.drill_spriteBorder_updateAttr_Position = function() {
 	var data = this._drill_data;
     
 	// > 位置
@@ -495,8 +647,8 @@ Drill_LCC_MouseBorderSprite.prototype.drill_LCC_updatePosition = function() {
 	var yy = 0;
 	xx += data['x'];
 	yy += data['y'];
-	xx += $gameSystem._drill_LCa_controller._drill_tourist_mouseX;
-	yy += $gameSystem._drill_LCa_controller._drill_tourist_mouseY;
+	xx += this._drill_curMouseX;
+	yy += this._drill_curMouseY;
 	
 	// > 边界设置
 	if( xx < 0 ){ xx = 0; }
@@ -508,17 +660,109 @@ Drill_LCC_MouseBorderSprite.prototype.drill_LCC_updatePosition = function() {
 	this.y = yy;
 };
 //==============================
-// * 帧刷新 - 播放GIF
+// * A主体 - 帧刷新 旋转
 //==============================
-Drill_LCC_MouseBorderSprite.prototype.drill_LCC_updateGif = function() {
-	if( this.visible == false ){ return; }
+Drill_LCC_MouseBorderSprite.prototype.drill_spriteBorder_updateAttr_Rotation = function() {
+	var direction = this._drill_curDirection;
 	
-	// > 参数准备
+	// > 旋转 - 正上方
+	if( direction == 8 ){
+		this.anchor.x = 0.5;
+		this.anchor.y = 0;
+		this.rotation = 0;
+	}
+	// > 旋转 - 正右方
+	if( direction == 6 ){
+		this.anchor.x = 0.5;
+		this.anchor.y = 0;
+		this.rotation = Math.PI *0.5;
+	}
+	// > 旋转 - 正下方
+	if( direction == 2 ){
+		this.anchor.x = 0.5;
+		this.anchor.y = 0;
+		this.rotation = Math.PI *1.0;
+	}
+	// > 旋转 - 正左方
+	if( direction == 4 ){
+		this.anchor.x = 0.5;
+		this.anchor.y = 0;
+		this.rotation = Math.PI *1.5;
+	}
+	// > 旋转 - 左上方
+	if( direction == 7 ){
+		this.anchor.x = 0;
+		this.anchor.y = 0;
+		this.rotation = 0;
+	}
+	// > 旋转 - 右上方
+	if( direction == 9 ){
+		this.anchor.x = 0;
+		this.anchor.y = 0;
+		this.rotation = Math.PI *0.5;
+	}
+	// > 旋转 - 右下方
+	if( direction == 3 ){
+		this.anchor.x = 0;
+		this.anchor.y = 0;
+		this.rotation = Math.PI *1.0;
+	}
+	// > 旋转 - 左下方
+	if( direction == 1 ){
+		this.anchor.x = 0;
+		this.anchor.y = 0;
+		this.rotation = Math.PI *1.5;
+	}
+};
+//==============================
+// * A主体 - 帧刷新 可见
+//==============================
+Drill_LCC_MouseBorderSprite.prototype.drill_spriteBorder_updateAttr_Visible = function() {
+	var direction = this._drill_curDirection;
+	
+	// > 鼠标处于正常位置时，不显示贴图
+	if( direction == 5 || direction == 0 ){
+		this.visible = false;
+		//document.body.style.cursor="auto";	//（隐藏鼠标）
+		return;
+	}
+	
+	this.visible = true;
+	//document.body.style.cursor="none";
+};
+
+//==============================
+// * B播放GIF - 初始化子功能
+//==============================
+Drill_LCC_MouseBorderSprite.prototype.drill_spriteBorder_initGIF = function(){
 	var data = this._drill_data;
-	var direction = $gameSystem._drill_LCa_controller._drill_tourist_mouseDirection;
+	
+	// > 资源容器 - 正上方
+	this._drill_bitmapTank_8 = [];
+	for(var j = 0; j < data['src_img_8'].length ; j++){
+		var temp_bitmap = ImageManager.loadBitmap( data['src_img_file'], data['src_img_8'][j], 0, true);
+		this._drill_bitmapTank_8.push(temp_bitmap);
+	}
+	
+	// > 资源容器 - 左上方
+	this._drill_bitmapTank_7 = [];
+	for(var j = 0; j < data['src_img_7'].length ; j++){
+		var temp_bitmap = ImageManager.loadBitmap( data['src_img_file'], data['src_img_7'][j], 0, true);
+		this._drill_bitmapTank_7.push(temp_bitmap);
+	}
+	
+	this.bitmap = null;
+};
+//==============================
+// * B播放GIF - 帧刷新
+//==============================
+Drill_LCC_MouseBorderSprite.prototype.drill_spriteBorder_updateGIF = function() {
+	if( this.visible == false ){ return; }
+	var data = this._drill_data;
+	var inter = this._drill_curTime;
+	var direction = this._drill_curDirection;
 	
 	// > 播放GIF - 正上方
-	var inter = this._drill_time;
 	if( direction == 2 || direction == 4 || direction == 6 || direction == 8 ){
 		inter = inter / data['interval'];
 		inter = Math.floor(inter);
@@ -529,6 +773,7 @@ Drill_LCC_MouseBorderSprite.prototype.drill_LCC_updateGif = function() {
 		inter = Math.floor(inter);
 		this.bitmap = this._drill_bitmapTank_8[inter];
 	}
+	
 	// > 播放GIF - 左上方
 	if( direction == 1 || direction == 3 || direction == 7 || direction == 9 ){
 		inter = inter / data['interval'];
@@ -539,49 +784,6 @@ Drill_LCC_MouseBorderSprite.prototype.drill_LCC_updateGif = function() {
 		}
 		inter = Math.floor(inter);
 		this.bitmap = this._drill_bitmapTank_7[inter];
-	}
-	
-	// > 旋转角度 - 正上方
-	if( direction == 8 ){
-		this.anchor.x = 0.5;
-		this.anchor.y = 0;
-		this.rotation = 0;
-	}
-	if( direction == 6 ){
-		this.anchor.x = 0.5;
-		this.anchor.y = 0;
-		this.rotation = Math.PI *0.5;
-	}
-	if( direction == 2 ){
-		this.anchor.x = 0.5;
-		this.anchor.y = 0;
-		this.rotation = Math.PI *1.0;
-	}
-	if( direction == 4 ){
-		this.anchor.x = 0.5;
-		this.anchor.y = 0;
-		this.rotation = Math.PI *1.5;
-	}
-	// > 旋转角度 - 左上方
-	if( direction == 7 ){
-		this.anchor.x = 0;
-		this.anchor.y = 0;
-		this.rotation = 0;
-	}
-	if( direction == 9 ){
-		this.anchor.x = 0;
-		this.anchor.y = 0;
-		this.rotation = Math.PI *0.5;
-	}
-	if( direction == 3 ){
-		this.anchor.x = 0;
-		this.anchor.y = 0;
-		this.rotation = Math.PI *1.0;
-	}
-	if( direction == 1 ){
-		this.anchor.x = 0;
-		this.anchor.y = 0;
-		this.rotation = Math.PI *1.5;
 	}
 };
 

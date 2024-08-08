@@ -1116,6 +1116,12 @@
 		return message;
 	};
 	//==============================
+	// * 提示信息 - 报错 - 底层版本过低
+	//==============================
+	DrillUp.drill_HDSC_getPluginTip_LowVersion = function(){
+		return "【" + DrillUp.g_HDSC_PluginTip_curName + "】\n游戏底层版本过低，插件基本功能无法执行。\n你可以去看\"rmmv软件版本（必看）.docx\"中的 \"旧工程升级至1.6版本\" 章节，来升级你的游戏底层版本。";
+	};
+	//==============================
 	// * 提示信息 - 报错 - 强制更新提示
 	//==============================
 	DrillUp.drill_HDSC_getPluginTip_NeedUpdate_Ballistics = function(){
@@ -2424,25 +2430,21 @@ Drill_HDSC_Controller.prototype.drill_controller_updateCheckNaN = function(){
 	
 	// > 校验值
 	if( DrillUp.g_HDSC_checkNaN == true ){
-		if( isNaN( this._drill_change_x ) ){
+		if( isNaN( this.drill_controller_finalTransform_x() ) ){
 			DrillUp.g_HDSC_checkNaN = false;
-			alert( DrillUp.drill_HDSC_getPluginTip_ParamIsNaN( "_drill_change_x" ) );
+			alert( DrillUp.drill_HDSC_getPluginTip_ParamIsNaN( "drill_controller_finalTransform_x" ) );
 		}
-		if( isNaN( this._drill_change_y ) ){
+		if( isNaN( this.drill_controller_finalTransform_y() ) ){
 			DrillUp.g_HDSC_checkNaN = false;
-			alert( DrillUp.drill_HDSC_getPluginTip_ParamIsNaN( "_drill_change_y" ) );
+			alert( DrillUp.drill_HDSC_getPluginTip_ParamIsNaN( "drill_controller_finalTransform_y" ) );
 		}
-		if( isNaN( this._drill_change_opacity ) ){
+		if( isNaN( this.drill_controller_finalTransform_opacity() ) ){
 			DrillUp.g_HDSC_checkNaN = false;
-			alert( DrillUp.drill_HDSC_getPluginTip_ParamIsNaN( "_drill_change_opacity" ) );
+			alert( DrillUp.drill_HDSC_getPluginTip_ParamIsNaN( "drill_controller_finalTransform_opacity" ) );
 		}
-		if( isNaN( this._drill_change_scaleX ) ){
+		if( isNaN( this.drill_controller_finalTransform_rotate() ) ){
 			DrillUp.g_HDSC_checkNaN = false;
-			alert( DrillUp.drill_HDSC_getPluginTip_ParamIsNaN( "_drill_change_scaleX" ) );
-		}
-		if( isNaN( this._drill_change_scaleY ) ){
-			DrillUp.g_HDSC_checkNaN = false;
-			alert( DrillUp.drill_HDSC_getPluginTip_ParamIsNaN( "_drill_change_scaleY" ) );
+			alert( DrillUp.drill_HDSC_getPluginTip_ParamIsNaN( "drill_controller_finalTransform_rotate" ) );
 		}
 	}
 }

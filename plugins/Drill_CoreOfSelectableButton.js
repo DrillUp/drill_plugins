@@ -3622,10 +3622,8 @@ Drill_COSB_WindowSprite.prototype.drill_updateAttr = function() {
 	// > 位置
 	var xx = data['x'];
 	var yy = data['y'];
-	xx -= this._drill_width;
-	yy -= this._drill_height;
-	xx += this._drill_width * this._drill_anchor_x;
-	yy += this._drill_height * this._drill_anchor_y;
+	xx -= this._drill_width  * this._drill_anchor_x;	//（这里必须减去锚点偏移，暂时不明原因）
+	yy -= this._drill_height * this._drill_anchor_y;	//（实例见画廊A，正左方的锚点，要对应上）
 	this.x = xx ;
 	this.y = yy ;
 }

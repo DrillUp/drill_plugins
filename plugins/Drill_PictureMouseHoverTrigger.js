@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.5]        图片 - 鼠标悬停触发图片
+ * @plugindesc [v1.6]        图片 - 鼠标悬停触发图片
  * @author Drill_up
  * 
  * 
@@ -104,7 +104,6 @@
  * 插件指令：>鼠标悬停触发图片 : 图片[1] : 绑定设置[1] : 绑定单次触发-悬停[一帧]时 : 执行公共事件[1]
  * 插件指令：>鼠标悬停触发图片 : 图片[1] : 绑定设置[1] : 解除绑定
  * 插件指令：>鼠标悬停触发图片 : 图片[1] : 解除全部绑定设置
- * 
  * 插件指令：>鼠标悬停触发图片 : 图片[1] : Debug显示当前全部绑定
  * 
  * 1.注意，如果直接执行了删除图片，则在删除后就已经"解除绑定"了。
@@ -123,6 +122,29 @@
  * 
  * 1.你可以在公共事件中设置"关闭绑定"，防止 公共事件被连点后 造成重复触发的问题。
  *   详细内容可以去看看 "16.图片 > 关于图片与鼠标控制核心.docx"。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----激活条件 - 批量图片设置
+ * 如果有很多图片都需要同时控制，可以这样写：
+ * 
+ * 插件指令：>鼠标悬停触发图片 : 图片[1] : 绑定设置[1] : 绑定单次触发-悬停[一帧]时 : 执行公共事件[1]
+ * 插件指令：>鼠标悬停触发图片 : 图片变量[21] : 绑定设置[1] : 绑定单次触发-悬停[一帧]时 : 执行公共事件[1]
+ * 插件指令：>鼠标悬停触发图片 : 批量图片[4,5] : 绑定设置[1] : 绑定单次触发-悬停[一帧]时 : 执行公共事件[1]
+ * 插件指令：>鼠标悬停触发图片 : 批量图片变量[21,22] : 绑定设置[1] : 绑定单次触发-悬停[一帧]时 : 执行公共事件[1]
+ * 
+ * 插件指令：>鼠标悬停触发图片 : 图片[1] : 绑定设置[1] : 关闭绑定
+ * 插件指令：>鼠标悬停触发图片 : 图片变量[21] : 绑定设置[1] : 关闭绑定
+ * 插件指令：>鼠标悬停触发图片 : 批量图片[4,5] : 绑定设置[1] : 关闭绑定
+ * 插件指令：>鼠标悬停触发图片 : 批量图片变量[21,22] : 绑定设置[1] : 关闭绑定
+ * 
+ * 插件指令：>鼠标悬停触发图片 : 图片[1] : 关闭全部绑定
+ * 插件指令：>鼠标悬停触发图片 : 图片变量[21] : 关闭全部绑定
+ * 插件指令：>鼠标悬停触发图片 : 批量图片[4,5] : 关闭全部绑定
+ * 插件指令：>鼠标悬停触发图片 : 批量图片变量[21,22] : 关闭全部绑定
+ * 
+ * 1.注意，只有"批量图片[]"，没有"批量绑定设置[]"，
+ *   如果图片绑定了5个设置，那么就要写5条指令，不能通过批量一次性解决。
+ *   因为批量图片执行时，写"绑定设置[1]"只表示依次对每张图片的"绑定设置[1]"进行控制。
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 触发设置
@@ -193,6 +215,8 @@
  * 将插件改名，并接入了图片与鼠标控制核心支持结构。
  * [v1.5]
  * 添加了"鼠标按下重合区域时"的设置。
+ * [v1.6]
+ * 添加了"批量图片"的设置。
  * 
  * 
  * 
@@ -213,6 +237,13 @@
  * @value 触发全部
  * @desc 如果有多张图片重合，且图片绑定了 按下[一帧]、释放[一帧]、双击[一帧] 的设置时，执行的判断逻辑。
  * @default 只触发最上面的
+ * 
+ * @param DEBUG-是否提示找不到图片
+ * @type boolean
+ * @on 提示
+ * @off 关闭提示
+ * @desc true - 提示，false - 关闭提示。如果你知道存在此问题但不想弹出此提示，可在配置中关闭此提示。
+ * @default true
  * 
  */
  
@@ -324,7 +355,7 @@
 	// * 提示信息 - 报错 - 找不到图片
 	//==============================
 	DrillUp.drill_PMHT_getPluginTip_PictureNotFind = function( pic_id ){
-		return "【" + DrillUp.g_PMHT_PluginTip_curName + "】\n插件指令错误，id为"+pic_id+"的图片还没被创建。\n你可能需要将指令放在'显示图片'事件指令之后。";
+		return "【" + DrillUp.g_PMHT_PluginTip_curName + "】\n插件指令错误，id为"+pic_id+"的图片还没被创建。\n你可能需要将指令放在'显示图片'事件指令之后。\n（如果你知道存在此问题但不想弹出此提示，可在配置中关闭此提示）";
 	};
 	
 	
@@ -340,6 +371,7 @@
 	/*-----------------杂项------------------*/
     DrillUp.g_PMHT_remainTrigger = String(DrillUp.parameters['对话框弹出时是否保持触发'] || "true") === "true";
     DrillUp.g_PMHT_pressSingleTrigger = String(DrillUp.parameters['鼠标按下重合区域时'] || "只触发最上面的");
+    DrillUp.g_PMHT_TipEnabled_PictureNotFind = String(DrillUp.parameters['DEBUG-是否提示找不到图片'] || "true") === "true";
 	
 	
 	
@@ -360,22 +392,48 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	if( command === ">鼠标悬停触发图片" ){
 			
 		/*-----------------对象组获取------------------*/
-		var pic = null;
+		var pics = null;			// 图片对象组
 		if( args.length >= 2 ){
-			var pic_id = String(args[1]);
-			if( pic_id.indexOf("图片变量[") != -1 ){
-				pic_id = pic_id.replace("图片变量[","");
-				pic_id = pic_id.replace("]","");
-				pic_id = $gameVariables.value( Number(pic_id) );
-				if( $gameScreen.drill_PMHT_isPictureExist( pic_id ) == false ){ return; }
-				pic = $gameScreen.picture( pic_id );
+			var unit = String(args[1]);
+			if( pics == null && unit.indexOf("批量图片[") != -1 ){
+				unit = unit.replace("批量图片[","");
+				unit = unit.replace("]","");
+				pics = [];
+				var temp_arr = unit.split(/[,，]/);
+				for( var k=0; k < temp_arr.length; k++ ){
+					var pic_id = Number(temp_arr[k]);
+					if( $gameScreen.drill_PMHT_isPictureExist( pic_id ) == false ){ continue; }
+					var p = $gameScreen.picture( pic_id );
+					pics.push( p );
+				}
 			}
-			else if( pic_id.indexOf("图片[") != -1 ){
-				pic_id = pic_id.replace("图片[","");
-				pic_id = pic_id.replace("]","");
-				pic_id = Number(pic_id);
+			if( pics == null && unit.indexOf("批量图片变量[") != -1 ){
+				unit = unit.replace("批量图片变量[","");
+				unit = unit.replace("]","");
+				pics = [];
+				var temp_arr = unit.split(/[,，]/);
+				for( var k=0; k < temp_arr.length; k++ ){
+					var pic_id = $gameVariables.value(Number(temp_arr[k]));
+					if( $gameScreen.drill_PMHT_isPictureExist( pic_id ) == false ){ continue; }
+					var p = $gameScreen.picture( pic_id );
+					pics.push( p );
+				}
+			}
+			if( pics == null && unit.indexOf("图片变量[") != -1 ){
+				unit = unit.replace("图片变量[","");
+				unit = unit.replace("]","");
+				var pic_id = $gameVariables.value(Number(unit));
 				if( $gameScreen.drill_PMHT_isPictureExist( pic_id ) == false ){ return; }
-				pic = $gameScreen.picture( pic_id );
+				var p = $gameScreen.picture( pic_id );
+				pics = [ p ];
+			}
+			if( pics == null && unit.indexOf("图片[") != -1 ){
+				unit = unit.replace("图片[","");
+				unit = unit.replace("]","");
+				var pic_id = Number(unit);
+				if( $gameScreen.drill_PMHT_isPictureExist( pic_id ) == false ){ return; }
+				var p = $gameScreen.picture( pic_id );
+				pics = [ p ];
 			}
 		}
 		
@@ -399,7 +457,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var type = String(args[5]);
 			var temp4 = String(args[7]);
 			
-			if( pic != null && bind_id != null ){
+			if( pics != null && bind_id != null ){
 				if( temp4.indexOf("执行公共事件变量[") != -1 ){
 					temp4 = temp4.replace("执行公共事件变量[","");
 					temp4 = temp4.replace("]","");
@@ -414,91 +472,139 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 
 				// > 单次触发 - 悬停
 				if( type == "绑定单次触发-悬停[一帧]时" ){
-					pic.drill_PMHT_setMouseType( bind_id, "悬停[一帧]" );
-					pic.drill_PMHT_setSwitch_OnceValue( bind_id, value );
+					for(var i = 0; i < pics.length; i++){
+						var pic = pics[i];
+						pic.drill_PMHT_setMouseType( bind_id, "悬停[一帧]" );
+						pic.drill_PMHT_setSwitch_OnceValue( bind_id, value );
+					}
 					$gameTemp._drill_PMHT_needRestatistics = true;
 				}
 				if( type == "绑定单次触发-离开悬停[一帧]时" ){
-					pic.drill_PMHT_setMouseType( bind_id, "离开悬停[一帧]" );
-					pic.drill_PMHT_setSwitch_OnceValue( bind_id, value );
+					for(var i = 0; i < pics.length; i++){
+						var pic = pics[i];
+						pic.drill_PMHT_setMouseType( bind_id, "离开悬停[一帧]" );
+						pic.drill_PMHT_setSwitch_OnceValue( bind_id, value );
+					}
 					$gameTemp._drill_PMHT_needRestatistics = true;
 				}
 				
 				// > 单次触发 - 悬停左键按下
 				if( type == "绑定单次触发-悬停左键按下[一帧]时" ){
-					pic.drill_PMHT_setMouseType( bind_id, "悬停左键按下[一帧]" );
-					pic.drill_PMHT_setSwitch_OnceValue( bind_id, value );
+					for(var i = 0; i < pics.length; i++){
+						var pic = pics[i];
+						pic.drill_PMHT_setMouseType( bind_id, "悬停左键按下[一帧]" );
+						pic.drill_PMHT_setSwitch_OnceValue( bind_id, value );
+					}
 					$gameTemp._drill_PMHT_needRestatistics = true;
 				}
 				if( type == "绑定单次触发-悬停左键释放[一帧]时" ){
-					pic.drill_PMHT_setMouseType( bind_id, "悬停左键释放[一帧]" );
-					pic.drill_PMHT_setSwitch_OnceValue( bind_id, value );
+					for(var i = 0; i < pics.length; i++){
+						var pic = pics[i];
+						pic.drill_PMHT_setMouseType( bind_id, "悬停左键释放[一帧]" );
+						pic.drill_PMHT_setSwitch_OnceValue( bind_id, value );
+					}
 					$gameTemp._drill_PMHT_needRestatistics = true;
 				}
 				if( type == "绑定单次触发-悬停左键双击[一帧]时" ){
-					pic.drill_PMHT_setMouseType( bind_id, "悬停左键双击[一帧]" );
-					pic.drill_PMHT_setSwitch_OnceValue( bind_id, value );
+					for(var i = 0; i < pics.length; i++){
+						var pic = pics[i];
+						pic.drill_PMHT_setMouseType( bind_id, "悬停左键双击[一帧]" );
+						pic.drill_PMHT_setSwitch_OnceValue( bind_id, value );
+					}
 					$gameTemp._drill_PMHT_needRestatistics = true;
 				}
 				
 				// > 单次触发 - 悬停右键按下
 				if( type == "绑定单次触发-悬停右键按下[一帧]时" ){
-					pic.drill_PMHT_setMouseType( bind_id, "悬停右键按下[一帧]" );
-					pic.drill_PMHT_setSwitch_OnceValue( bind_id, value );
+					for(var i = 0; i < pics.length; i++){
+						var pic = pics[i];
+						pic.drill_PMHT_setMouseType( bind_id, "悬停右键按下[一帧]" );
+						pic.drill_PMHT_setSwitch_OnceValue( bind_id, value );
+					}
 					$gameTemp._drill_PMHT_needRestatistics = true;
 				}
 				if( type == "绑定单次触发-悬停右键释放[一帧]时" ){
-					pic.drill_PMHT_setMouseType( bind_id, "悬停右键释放[一帧]" );
-					pic.drill_PMHT_setSwitch_OnceValue( bind_id, value );
+					for(var i = 0; i < pics.length; i++){
+						var pic = pics[i];
+						pic.drill_PMHT_setMouseType( bind_id, "悬停右键释放[一帧]" );
+						pic.drill_PMHT_setSwitch_OnceValue( bind_id, value );
+					}
 					$gameTemp._drill_PMHT_needRestatistics = true;
 				}
 				if( type == "绑定单次触发-悬停右键双击[一帧]时" ){
-					pic.drill_PMHT_setMouseType( bind_id, "悬停右键双击[一帧]" );
-					pic.drill_PMHT_setSwitch_OnceValue( bind_id, value );
+					for(var i = 0; i < pics.length; i++){
+						var pic = pics[i];
+						pic.drill_PMHT_setMouseType( bind_id, "悬停右键双击[一帧]" );
+						pic.drill_PMHT_setSwitch_OnceValue( bind_id, value );
+					}
 					$gameTemp._drill_PMHT_needRestatistics = true;
 				}
 				
 				// > 单次触发 - 悬停滚轮按下
 				if( type == "绑定单次触发-悬停滚轮按下[一帧]时" ){
-					pic.drill_PMHT_setMouseType( bind_id, "悬停滚轮按下[一帧]" );
-					pic.drill_PMHT_setSwitch_OnceValue( bind_id, value );
+					for(var i = 0; i < pics.length; i++){
+						var pic = pics[i];
+						pic.drill_PMHT_setMouseType( bind_id, "悬停滚轮按下[一帧]" );
+						pic.drill_PMHT_setSwitch_OnceValue( bind_id, value );
+					}
 					$gameTemp._drill_PMHT_needRestatistics = true;
 				}
 				if( type == "绑定单次触发-悬停滚轮释放[一帧]时" ){
-					pic.drill_PMHT_setMouseType( bind_id, "悬停滚轮释放[一帧]" );
-					pic.drill_PMHT_setSwitch_OnceValue( bind_id, value );
+					for(var i = 0; i < pics.length; i++){
+						var pic = pics[i];
+						pic.drill_PMHT_setMouseType( bind_id, "悬停滚轮释放[一帧]" );
+						pic.drill_PMHT_setSwitch_OnceValue( bind_id, value );
+					}
 					$gameTemp._drill_PMHT_needRestatistics = true;
 				}
 				if( type == "绑定单次触发-悬停滚轮双击[一帧]时" ){
-					pic.drill_PMHT_setMouseType( bind_id, "悬停滚轮双击[一帧]" );
-					pic.drill_PMHT_setSwitch_OnceValue( bind_id, value );
+					for(var i = 0; i < pics.length; i++){
+						var pic = pics[i];
+						pic.drill_PMHT_setMouseType( bind_id, "悬停滚轮双击[一帧]" );
+						pic.drill_PMHT_setSwitch_OnceValue( bind_id, value );
+					}
 					$gameTemp._drill_PMHT_needRestatistics = true;
 				}
 				if( type == "绑定单次触发-悬停滚轮上滚时" ){
-					pic.drill_PMHT_setMouseType( bind_id, "悬停滚轮上滚" );
-					pic.drill_PMHT_setSwitch_OnceValue( bind_id, value );
+					for(var i = 0; i < pics.length; i++){
+						var pic = pics[i];
+						pic.drill_PMHT_setMouseType( bind_id, "悬停滚轮上滚" );
+						pic.drill_PMHT_setSwitch_OnceValue( bind_id, value );
+					}
 					$gameTemp._drill_PMHT_needRestatistics = true;
 				}
 				if( type == "绑定单次触发-悬停滚轮下滚时" ){
-					pic.drill_PMHT_setMouseType( bind_id, "悬停滚轮下滚" );
-					pic.drill_PMHT_setSwitch_OnceValue( bind_id, value );
+					for(var i = 0; i < pics.length; i++){
+						var pic = pics[i];
+						pic.drill_PMHT_setMouseType( bind_id, "悬停滚轮下滚" );
+						pic.drill_PMHT_setSwitch_OnceValue( bind_id, value );
+					}
 					$gameTemp._drill_PMHT_needRestatistics = true;
 				}
 				
 				// > 单次触发 - 悬停左键或右键按下
 				if( type == "绑定单次触发-悬停左键或右键按下[一帧]时" ){
-					pic.drill_PMHT_setMouseType( bind_id, "悬停左键或右键按下[一帧]" );
-					pic.drill_PMHT_setSwitch_OnceValue( bind_id, value );
+					for(var i = 0; i < pics.length; i++){
+						var pic = pics[i];
+						pic.drill_PMHT_setMouseType( bind_id, "悬停左键或右键按下[一帧]" );
+						pic.drill_PMHT_setSwitch_OnceValue( bind_id, value );
+					}
 					$gameTemp._drill_PMHT_needRestatistics = true;
 				}
 				if( type == "绑定单次触发-悬停左键或右键释放[一帧]时" ){
-					pic.drill_PMHT_setMouseType( bind_id, "悬停左键或右键释放[一帧]" );
-					pic.drill_PMHT_setSwitch_OnceValue( bind_id, value );
+					for(var i = 0; i < pics.length; i++){
+						var pic = pics[i];
+						pic.drill_PMHT_setMouseType( bind_id, "悬停左键或右键释放[一帧]" );
+						pic.drill_PMHT_setSwitch_OnceValue( bind_id, value );
+					}
 					$gameTemp._drill_PMHT_needRestatistics = true;
 				}
 				if( type == "绑定单次触发-悬停左键或右键双击[一帧]时" ){
-					pic.drill_PMHT_setMouseType( bind_id, "悬停左键或右键双击[一帧]" );
-					pic.drill_PMHT_setSwitch_OnceValue( bind_id, value );
+					for(var i = 0; i < pics.length; i++){
+						var pic = pics[i];
+						pic.drill_PMHT_setMouseType( bind_id, "悬停左键或右键双击[一帧]" );
+						pic.drill_PMHT_setSwitch_OnceValue( bind_id, value );
+					}
 					$gameTemp._drill_PMHT_needRestatistics = true;
 				}
 			}
@@ -507,21 +613,30 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		/*-----------------查看与解除绑定------------------*/
 		if( args.length == 6 ){
 			var type = String(args[5]);
-			if( pic != null && bind_id != null ){
+			if( pics != null && bind_id != null ){
 				if( type == "解除绑定" ){
-					pic.drill_PMHT_removeBind( bind_id );
+					for(var i = 0; i < pics.length; i++){
+						var pic = pics[i];
+						pic.drill_PMHT_removeBind( bind_id );
+					}
 					$gameTemp._drill_PMHT_needRestatistics = true;
 				}
 			}
 		}
 		if( args.length == 4 ){
 			var type = String(args[3]);
-			if( pic != null ){
+			if( pics != null ){
 				if( type == "Debug显示当前全部绑定" ){
-					alert( pic.drill_PMHT_getSwitchDataInfo() );
+					for(var i = 0; i < pics.length; i++){
+						var pic = pics[i];
+						alert( pic.drill_PMHT_getSwitchDataInfo() );
+					}
 				}
 				if( type == "解除全部绑定设置" ){
-					pic.drill_PMHT_clearBindList();
+					for(var i = 0; i < pics.length; i++){
+						var pic = pics[i];
+						pic.drill_PMHT_clearBindList();
+					}
 					$gameTemp._drill_PMHT_needRestatistics = true;
 				}
 			}
@@ -530,26 +645,38 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		/*-----------------临时关闭开启绑定------------------*/
 		if( args.length == 6 ){
 			var type = String(args[5]);
-			if( pic != null && bind_id != null ){
+			if( pics != null && bind_id != null ){
 				if( type == "关闭绑定" ){
-					pic.drill_PMHT_setSwitch_BindEnabled( bind_id, false );
+					for(var i = 0; i < pics.length; i++){
+						var pic = pics[i];
+						pic.drill_PMHT_setSwitch_BindEnabled( bind_id, false );
+					}
 					$gameTemp._drill_PMHT_needRestatistics = true;
 				}
 				if( type == "开启绑定" ){
-					pic.drill_PMHT_setSwitch_BindEnabled( bind_id, true );
+					for(var i = 0; i < pics.length; i++){
+						var pic = pics[i];
+						pic.drill_PMHT_setSwitch_BindEnabled( bind_id, true );
+					}
 					$gameTemp._drill_PMHT_needRestatistics = true;
 				}
 			}
 		}
 		if( args.length == 4 ){
 			var type = String(args[3]);
-			if( pic != null ){
+			if( pics != null ){
 				if( type == "关闭全部绑定" ){
-					pic.drill_PMHT_setSwitch_AllBindEnabled( false );
+					for(var i = 0; i < pics.length; i++){
+						var pic = pics[i];
+						pic.drill_PMHT_setSwitch_AllBindEnabled( false );
+					}
 					$gameTemp._drill_PMHT_needRestatistics = true;
 				}
 				if( type == "开启全部绑定" ){
-					pic.drill_PMHT_setSwitch_AllBindEnabled( true );
+					for(var i = 0; i < pics.length; i++){
+						var pic = pics[i];
+						pic.drill_PMHT_setSwitch_AllBindEnabled( true );
+					}
 					$gameTemp._drill_PMHT_needRestatistics = true;
 				}
 			}
@@ -619,7 +746,9 @@ Game_Screen.prototype.drill_PMHT_isPictureExist = function( pic_id ){
 	
 	var pic = this.picture( pic_id );
 	if( pic == undefined ){
-		alert( DrillUp.drill_PMHT_getPluginTip_PictureNotFind( pic_id ) );
+		if( DrillUp.g_PMHT_TipEnabled_PictureNotFind == true ){		//（提示信息开关）
+			alert( DrillUp.drill_PMHT_getPluginTip_PictureNotFind( pic_id ) );
+		}
 		return false;
 	}
 	return true;

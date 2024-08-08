@@ -933,6 +933,12 @@
 	var DrillUp = DrillUp || {}; 
 	DrillUp.g_MGi_PluginTip_curName = "Drill_MenuGif.js 主菜单-多层菜单GIF";
 	DrillUp.g_MGi_PluginTip_baseList = [];
+	//==============================
+	// * 提示信息 - 报错 - 底层版本过低
+	//==============================
+	DrillUp.drill_MGi_getPluginTip_LowVersion = function(){
+		return "【" + DrillUp.g_MGi_PluginTip_curName + "】\n游戏底层版本过低，插件基本功能无法执行。\n你可以去看\"rmmv软件版本（必看）.docx\"中的 \"旧工程升级至1.6版本\" 章节，来升级你的游戏底层版本。";
+	};
 	
 	
 //=============================================================================

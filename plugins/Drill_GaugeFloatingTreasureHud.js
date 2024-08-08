@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        地图UI - 临时漂浮物品框
+ * @plugindesc [v1.2]        地图UI - 临时漂浮物品框
  * @author Drill_up
  * 
  * @Drill_LE_param "物品框样式-%d"
@@ -111,6 +111,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 修复了该插件在战斗界面会报错的bug。
+ * [v1.2]
+ * 修复了使用自定义窗口皮肤时文字变黑的bug。
  *
  *
  *
@@ -665,6 +667,7 @@
 //			->☆提示信息
 //			->☆静态数据
 //			->☆插件指令
+//			->☆预加载
 //			->☆地图层级
 //				->添加贴图到层级【标准函数】
 //				->去除贴图【标准函数】
@@ -746,6 +749,12 @@
 			message += DrillUp.g_GFTH_PluginTip_baseList[i];
 		}
 		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 底层版本过低
+	//==============================
+	DrillUp.drill_GFTH_getPluginTip_LowVersion = function(){
+		return "【" + DrillUp.g_GFTH_PluginTip_curName + "】\n游戏底层版本过低，插件基本功能无法执行。\n你可以去看\"rmmv软件版本（必看）.docx\"中的 \"旧工程升级至1.6版本\" 章节，来升级你的游戏底层版本。";
 	};
 	//==============================
 	// * 提示信息 - 报错 - 缺少支持的插件
@@ -925,6 +934,53 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		}
 	};
 };
+
+
+//=============================================================================
+// ** ☆预加载
+//
+//			说明：	> 对指定资源贴图标记不删除，可以防止重建导致的浪费资源，以及资源显示时闪烁问题。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 预加载 - 初始化
+//==============================
+var _drill_GFTH_preload_initialize = Game_Temp.prototype.initialize;
+Game_Temp.prototype.initialize = function() {
+    _drill_GFTH_preload_initialize.call(this);
+	this.drill_GFTH_preloadInit();
+}
+//==============================
+// * 预加载 - 版本校验
+//==============================
+if( Utils.generateRuntimeId == undefined ){
+	alert( DrillUp.drill_GFTH_getPluginTip_LowVersion() );
+}
+//==============================
+// * 预加载 - 执行资源预加载
+//
+//			说明：	> 遍历全部资源，提前预加载标记过的资源。
+//==============================
+Game_Temp.prototype.drill_GFTH_preloadInit = function() {
+	this._drill_GFTH_cacheId = Utils.generateRuntimeId();	//资源缓存id
+    this._drill_GFTH_preloadTank = [];						//bitmap容器
+	for( var i = 0; i < DrillUp.g_GFTH_style.length; i++ ){
+		var temp_data = DrillUp.g_GFTH_style[i];
+		if( temp_data == undefined ){ continue; }
+		
+		// > 『窗口皮肤的预加载』
+		if( temp_data['window_type'] == "自定义窗口皮肤" ){
+			this._drill_GFTH_preloadTank.push( 
+				ImageManager.reserveBitmap( "img/system/", temp_data['window_sys_src'], 0, true, this._drill_GFTH_cacheId ) 
+			);
+		}
+		if( temp_data['window_type'] == "自定义背景图片" ){
+			this._drill_GFTH_preloadTank.push( 
+				ImageManager.reserveBitmap( "img/Map__ui/", temp_data['window_pic_src'], 0, true, this._drill_GFTH_cacheId ) 
+			);
+		}
+	}
+}
 
 
 

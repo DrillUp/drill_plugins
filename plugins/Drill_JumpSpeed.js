@@ -125,8 +125,8 @@
  * 
  * 
  * @param 资源-多次弹跳音效
- * @desc 配置多次弹跳时，中间过程接触地面将播放音效。
- * @default ["动作_弹跳_4"]
+ * @desc 多次弹跳时，中间过程接触地面将播放音效。
+ * @default ["物件_弹簧_2_[GA_FCS]"]
  * @require 1
  * @dir audio/se/
  * @type file[]

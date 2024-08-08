@@ -713,18 +713,28 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			地图按钮集：（鼠标+触屏）
-//				->地图点击拦截
-//				->激活状态
-//					->正常
-//					->高亮
-//					->按下
-//				->封印状态
+//			->☆提示信息
+//			->☆静态数据
+//			->☆插件指令
+//			->☆存储数据
+//			->☆地图层级
+//			
+//			->按钮控制器【Drill_GBu_ButtonController】
+//				->A实体类
+//				->B可用时
+//					> 正常
+//					> 高亮
+//					> 按下
+//				->C封印时
 //					->封印
 //					->高亮
-//				->功能按钮
+//				->D执行时
+//				->E自动释放标记
 //					->自定义公共事件
 //					->按钮移动
+//			->按钮贴图【Drill_GBu_ButtonSprite】
+//			
+//			->☆地图点击拦截
 //		
 //		
 //		★家谱：
@@ -734,7 +744,7 @@
 //			无
 //		
 //		★插件私有类：
-//			* 固定按钮【Drill_GBu_ButtonSprite】
+//			* 固定按钮贴图【Drill_GBu_ButtonSprite】
 //		
 //		★必要注意事项：
 //			1.插件的图片层级与多个插件共享。【必须自写 层级排序 函数】
@@ -749,7 +759,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -783,7 +793,7 @@
 	
 	
 //=============================================================================
-// ** 静态数据
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_GaugeButton = true;
@@ -859,15 +869,8 @@ if( Imported.Drill_CoreOfInput &&
 	Imported.Drill_LayerCommandThread ){
 	
 	
-	
 //=============================================================================
-// ** 资源文件夹
-//=============================================================================
-ImageManager.load_MapGaugeButton = function(filename) {
-    return this.loadBitmap('img/Map__ui_gaugeButton/', filename, 0, true);
-};
-//=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _drill_GBu_pluginCommand = Game_Interpreter.prototype.pluginCommand
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
@@ -913,7 +916,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -1016,32 +1019,8 @@ Game_System.prototype.drill_GBu_checkSysData_Private = function() {
 };
 
 
-//=============================================================================
-// ** 地图点击拦截
-//=============================================================================
-//==============================
-// * 拦截 - 点击监听
-//==============================
-var _drill_GBu_processMapTouch = Scene_Map.prototype.processMapTouch;
-Scene_Map.prototype.processMapTouch = function() {	
-	if( this.drill_GBu_isOnGaugeButton() ){ return; }	//ui按钮按下（阻止目的地+鼠标辅助面板）
-	_drill_GBu_processMapTouch.call(this);
-};
-//==============================
-// * 拦截 - 条件
-//==============================
-Scene_Map.prototype.drill_GBu_isOnGaugeButton = function() {	
-	for(var i=0; i < this._drill_GBu_spriteTank.length; i++){
-		if( this.drill_GBu_isHoverInTank( i ) ){
-			return true;
-		}
-	}
-	return false;	
-}
-
-
 //#############################################################################
-// ** 【标准模块】地图层级
+// ** 【标准模块】地图层级 ☆地图层级
 //#############################################################################
 //##############################
 // * 地图层级 - 添加贴图到层级【标准函数】
@@ -1138,6 +1117,8 @@ Scene_Map.prototype.drill_GBu_layerAddSprite_Private = function( sprite, layer_i
 		this._drill_SenceTopArea.addChild( sprite );
 	}
 }
+
+
 
 
 
@@ -1413,7 +1394,7 @@ Scene_Map.prototype.drill_GBu_doCommonEvent = function( data ){
 
 
 //=============================================================================
-// ** 固定按钮【Drill_GBu_ButtonSprite】
+// ** 固定按钮贴图【Drill_GBu_ButtonSprite】
 // 
 // 			说明：	这里将按钮的各个状态封装在一起。
 //					初始化设置资源后，调用接口状态切换，能够随时切换到指定的按钮状态。
@@ -1518,6 +1499,13 @@ Drill_GBu_ButtonSprite.prototype.drill_setHover = function( h ) {
 Drill_GBu_ButtonSprite.prototype.drill_setPress = function( p ) {
 	this._drill_isPressing = p;
 }
+
+//==============================
+// ** 资源文件夹
+//==============================
+ImageManager.load_MapGaugeButton = function(filename) {
+    return this.loadBitmap('img/Map__ui_gaugeButton/', filename, 0, true);
+};
 //==============================
 // * 创建 - bitmap容器
 //==============================
@@ -1734,6 +1722,31 @@ Drill_GBu_ButtonSprite.prototype.drill_getUIposY = function() {
 }
 
 
+//=============================================================================
+// ** ☆地图点击拦截
+//
+//			说明：	> 此模块专门管理 地图点击拦截，只要有鼠标悬停时，就阻止地图点击功能。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 地图点击拦截 - 点击监听
+//==============================
+var _drill_GBu_processMapTouch = Scene_Map.prototype.processMapTouch;
+Scene_Map.prototype.processMapTouch = function() {	
+	if( this.drill_GBu_isOnGaugeButton() ){ return; }	//ui按钮按下（阻止目的地+鼠标辅助面板）
+	_drill_GBu_processMapTouch.call(this);
+};
+//==============================
+// * 地图点击拦截 - 条件
+//==============================
+Scene_Map.prototype.drill_GBu_isOnGaugeButton = function() {	
+	for(var i = 0; i < this._drill_GBu_spriteTank.length; i++){
+		if( this.drill_GBu_isHoverInTank( i ) ){
+			return true;
+		}
+	}
+	return false;	
+};
 
 
 //=============================================================================

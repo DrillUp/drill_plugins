@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        物体管理 - 事件管理核心
+ * @plugindesc [v1.2]        物体管理 - 事件管理核心
  * @author Drill_up
  * 
  * 
@@ -28,6 +28,7 @@
  * ----设定注意事项
  * 1.插件的作用域：地图界面。
  *   只作用于事件。
+ * 2.详细内容去看看 "28.物体管理 > 关于事件管理核心.docx"。
  * 细节：
  *   (1.该核心提供基础的 创建、删除 功能。
  *      创建包括 直接生成事件、复制事件。
@@ -83,6 +84,8 @@
  * [v1.1]
  * 优化了刷菜单时已销毁事件不创建贴图的设置。
  * 新创建的事件兼容了行走图优化核心的堆叠级定义。
+ * [v1.2]
+ * 完善了地图加载的功能。
  * 
  */
  
@@ -90,7 +93,7 @@
 //		插件简称		COEM（Core_Of_Event_Manager）
 //		临时全局变量	无
 //		临时局部变量	无
-//		存储数据变量	$gameSystem._drill_COEM_xxxx
+//		存储数据变量	无
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
@@ -98,8 +101,9 @@
 //
 //		★工作类型		单次执行
 //		★时间复杂度		o(n)
-//		★性能测试因素	放置超级多的炸弹
-//		★性能测试消耗	28.05ms
+//		★性能测试因素	物体管理管理层
+//		★性能测试消耗	2024/8/8：
+//							》9.0ms（drill_COEM_updateAvailableEventRemove）27.3ms（drill_COEM_offspring_createEventByData_Private）
 //		★最坏情况		无	
 //		★备注			建立事件不消耗，消耗的是事件建立后的各种行为。
 //		
@@ -132,8 +136,9 @@
 //				->获取 - 上一个子代事件贴图【标准函数】
 //			->☆地图读取器 标准模块
 //				->获取资源【标准函数】
-//				->提前加载资源【标准函数】
-//				->地图资源是否存在【标准函数】
+//				->加载资源【标准函数】
+//				->资源是否已加载【标准函数】
+//				->资源是否存在【标准函数】
 //			->☆事件常用函数 标准模块
 //				->删除全部独立开关【标准函数】
 //				
@@ -204,7 +209,7 @@
 	// * 提示信息 - 报错 - 版本过低
 	//==============================
 	DrillUp.drill_COEM_getPluginTip_LowVersion = function(){
-		return "【" + DrillUp.g_COEM_PluginTip_curName + "】\n检测到你的rmmv工程版本太低，事件管理核心无法使用。\n会报ResourceHandler资源指针错误。\n你可以使用\"rmmv软件版本.docx\"中的升级工程的方法来升级你的工程。";
+		return "【" + DrillUp.g_COEM_PluginTip_curName + "】\n游戏底层版本过低，事件管理核心无法使用。\n会报ResourceHandler资源指针错误。\n你可以使用\"rmmv软件版本.docx\"中的升级工程的方法来升级你的工程。";
 	};
 	//==============================
 	// * 提示信息 - 报错 - 强制更新提示
@@ -602,18 +607,20 @@ Game_Map.prototype.drill_COEM_offspring_getLastCreatedSprite = function(){
 //#############################################################################
 //##############################
 // * 地图读取器 - 获取资源【标准函数】
-//				
+//			
 //			参数：	> map_id 数字  （指定地图的id）
 //			返回：	> 地图数据对象 （地图json数据）
+//					> null         （未加载时）
 //          
-//			说明：	> 注意，由于含异步请求，如果未提前加载，则不能立即返回数据。
+//			说明：	> 由于含异步请求，如果未提前加载，则返回空数据。
+//					> 如果是在插件指令中执行，你需要加 等待类型 的判定。
 //##############################
 DataManager.drill_COEM_getMapData = function( map_id ){
 	return this.drill_COEM_getMapData_Private( map_id );
 };
 //##############################
-// * 地图读取器 - 提前加载资源【标准函数】
-//				
+// * 地图读取器 - 加载资源【标准函数】
+//			
 //			参数：	> map_id 数字  （指定地图的id）
 //			返回：	> 无
 //          
@@ -623,18 +630,22 @@ DataManager.drill_COEM_loadMapData = function( map_id ){
 	this.drill_COEM_loadMapData_Private( map_id );
 };
 //##############################
-// * 地图读取器 - 地图资源是否存在【标准函数】
-//				
+// * 地图读取器 - 资源是否已加载【标准函数】
+//			
 //			参数：	> map_id 数字  （指定地图的id）
 //			返回：	> 布尔
-//          
-//			说明：	> 通过此函数来判断地图资源是否存在。
+//##############################
+DataManager.drill_COEM_isMapLoaded = function( map_id ){
+	return this.drill_COEM_isMapLoaded_Private( map_id );
+};
+//##############################
+// * 地图读取器 - 资源是否存在【标准函数】
+//			
+//			参数：	> map_id 数字  （指定地图的id）
+//			返回：	> 布尔
 //##############################
 DataManager.drill_COEM_isMapExist = function( map_id ){
 	return this.drill_COEM_isMapExist_Private( map_id );
-};
-Game_Temp.prototype.drill_COEM_isMapExist = function( map_id ){
-	return DataManager.drill_COEM_isMapExist_Private( map_id );
 };
 
 
@@ -912,7 +923,9 @@ Game_Map.prototype.drill_COEM_offspring_deleteEvent_Private = function( e_id ){
 // * 地图读取器 - 获取资源（私有）
 //==============================
 DataManager.drill_COEM_getMapData_Private = function( map_id ){
-	var map_data = window[ "_drill_mapData_"+map_id ];
+	var param_name = "_drill_mapData_" + map_id;
+	
+	var map_data = window[ param_name ];
 	if( map_data == undefined ){
 		DataManager.drill_COEM_loadMapData( map_id );
 		return null;
@@ -922,21 +935,33 @@ DataManager.drill_COEM_getMapData_Private = function( map_id ){
 }
 //==============================
 // * 地图读取器 - 加载资源（私有）
+//
+//			说明：	> 该函数复刻了 DataManager.loadMapData ，该函数与原函数相互独立。
 //==============================
 DataManager.drill_COEM_loadMapData_Private = function( map_id ){
+	var param_name = "_drill_mapData_" + map_id;
+	
+	// > 资源不存在，则跳出
 	if( this.drill_COEM_isMapExist( map_id ) == false ){ return; }
 	
 	// > 绑定加载数据
-	if( window[ "_drill_mapData_"+map_id ] == undefined ){
-		var filename = 'Map%1.json'.format(map_id.padZero(3));
-		var param_name = "_drill_mapData_" + map_id;
+	if( window[ param_name ] == undefined ){
+		var filename = "Map%1.json".format(map_id.padZero(3));
 		
-		ResourceHandler.createLoader('data/' + filename, this.loadDataFile.bind(this, param_name, filename));		//（this._mapLoader是一个完全没用的变量）
-		this.loadDataFile(param_name, filename);
+		ResourceHandler.createLoader( "data/" + filename, this.loadDataFile.bind(this, param_name, filename) );		//（this._mapLoader是一个完全没用的变量）
+		this.loadDataFile(param_name, filename);	//（将文件的json数据，传给指定的参数）
 	}
 };
 //==============================
-// * 地图读取器 - 地图资源是否存在（私有）
+// * 地图读取器 - 资源是否已加载（私有）
+//==============================
+DataManager.drill_COEM_isMapLoaded_Private = function( map_id ){
+	var param_name = "_drill_mapData_" + map_id;
+	if( window[ param_name ] == undefined ){ return false; }
+	return true;
+};
+//==============================
+// * 地图读取器 - 资源是否存在（私有）
 //==============================
 DataManager.drill_COEM_isMapExist_Private = function( map_id ){
 	for( var j=0; j < $dataMapInfos.length; j++ ){

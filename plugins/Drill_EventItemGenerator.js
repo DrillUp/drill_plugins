@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.8]        物体管理 - 可拾取物生成器
+ * @plugindesc [v1.9]        物体管理 - 可拾取物生成器
  * @author Drill_up
  * 
  * 
@@ -19,7 +19,7 @@
  * -----------------------------------------------------------------------------
  * ----插件扩展
  * 该插件 不能 单独使用。
- * 插件需要基于事件管理核心，如果有相关插件，还可以支持更多功能。
+ * 插件需要基于事件管理核心。如果还有扩展插件，可以支持更多功能。
  * 基于：
  *   - Drill_CoreOfEventManager  物体管理-事件管理核心
  *     生成的事件必须由事件管理核心来控制 创建、删除 流程。
@@ -41,22 +41,23 @@
  * ----设定注意事项
  * 1.插件的作用域：地图界面。
  *   只作用于事件。
+ * 2.详细内容去看看 "28.物体管理 > 关于事件管理核心.docx"。
  * 生成：
  *   (1.注意名词：物品/武器/护甲/技能
  *      护甲=防具，物品=道具，这两个名词是同一个意思，指令写防具、道具都有效。
  *      另外，没有下列名词：装备/装甲/装束 。
  *   (2.可拾取道具用 纯事件 也可以做，只是比较复杂。
- *      你可以去示例中 物体触发管理层示例 去看看道具生成方法。
+ *      你可以去示例中 物体管理管理层示例 去看看道具生成方法。
  *   (3.如果你没有导入 固定区域核心 则你无法使用"自定义区域"和"筛选器"功能。
- *      并且【默认只避开不可通行】图块。要了解更多物品落脚点的方法，
+ *      并且默认 "只避开不可通行" 图块。要了解更多物品落脚点的方法，
  *      去看看 "9.物体触发 > 关于物体触发-固定区域.docx"中的 筛选器 章节。
  *   (4.生成器生成的事件是临时的，捡起物品后 或 离开地图就会消失。
  * 选项配置：
  *   (1.你可以控制弹跳开启/关闭，以及控制弹跳的高度。
- *   (2.行走图默认使用图标行走图，你也可以设置成固定的资源中的行走图，
- *      金钱的图像不受控制，在配置的资源序列中随机抽取金币行走图。
- *   (3.配置随机的音效是拾取音效，生成物品的音效你应该直接在调用"生成"插件指
- *      令时播放。
+ *   (2.行走图默认使用图标行走图，你也可以设置成固定的资源中的行走图。
+ *      比如金钱的图像就不受控制，可以在配置的资源列表中随机抽取并作为金币行走图。
+ *   (3.此处配置的只有拾取音效，如果你想在生成物品时播放音效，
+ *      你应该直接在事件页中 执行"生成"插件指令的位置 写播放声音指令。
  * 设计：
  *   (1.你可以设计一个宝箱/花盆/可破坏物，打开/打碎后弹出大量可拾取的
  *      金钱或物品。
@@ -211,7 +212,8 @@
  * 修改了插件分类。
  * [v1.8]
  * 优化了旧存档的识别与兼容。
- * 
+ * [v1.9]
+ * 改进了内部结构。
  * 
  * 
  * @param 资源-金币行走图
@@ -273,15 +275,22 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			可拾取物生成器：
+//			->☆提示信息
+//			->☆静态数据
+//			->☆插件指令
+//			->☆存储数据
+//			
+//			->☆事件数据模板
+//				->默认值
+//				->位置设置
+//				->行走图设置
+//				->音效设置
+//				->跳跃设置
+//				->获得物品
+//				->删除管理
+//			->☆固定区域
 //				->随机位置
-//					->随机可通行位置
-//					->与固定区域核心交互
-//				->生成数据
-//					->弹跳效果
-//					->图标行走图
-//					->拾取声音
-//				->可拾取物生成器得分道具：变量[20] : +100		x（目前不考虑，因为变量行走图未定）
+//
 //
 //		★家谱：
 //			无
@@ -293,8 +302,7 @@
 //			无
 //		
 //		★必要注意事项：
-//			1.该插件有两个分离的操作，一个是在map里面添加event，另一个是在sprite里面添加贴图。
-//			  先有event然后sprite绑定event。
+//			无
 //
 //		★其它说明细节：
 //			1.先有事件数据，再通过事件数据new事件。
@@ -303,6 +311,10 @@
 //				随机行走图 + 下方触发 + 拾取声音 + 获得道具情况 + 获得金钱情况 + 拾取后消失
 //				跳跃速度 + 图标行走图 + mata标签（如果没有，镜面反射会不兼容）
 //				道具不能落入不可行走区域
+//			3.正在播放音乐：（2024/7/25）
+//				 ~《小爱丽丝捡金币》~
+//				 0:59 ━━━━●───── 2:02
+//				  ←   ❚❚   →   ■   ≡  
 //
 //		★存在的问题：
 //			1.问题：每多一条可选注释，插件就要多一个额外扩展。需要想办法优化。
@@ -310,7 +322,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -347,7 +359,7 @@
 	
 	
 //=============================================================================
-// ** 静态数据
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_EventItemGenerator = true;
@@ -383,12 +395,12 @@
 //=============================================================================
 if( Imported.Drill_CoreOfEventManager ){
 	
-
+	
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
 //==============================
-// * 插件指令 - 指令
+// * 插件指令 - 绑定
 //==============================
 var _drill_EIG_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args){
@@ -396,6 +408,9 @@ Game_Interpreter.prototype.pluginCommand = function(command, args){
 	this.drill_EIG_command(command, args);
 	this.drill_EIG_oldCommand(command, args);
 };
+//==============================
+// * 插件指令 - 指令
+//==============================
 Game_Interpreter.prototype.drill_EIG_command = function(command, args){
 	if( command === ">可拾取物生成器" ){
 		if( args.length >= 4 ){
@@ -661,12 +676,12 @@ Game_Interpreter.prototype.drill_EIG_command = function(command, args){
 					var temp_event_data = {};
 					temp_event_data['org_x'] = x1;
 					temp_event_data['org_y'] = y1;
-					temp_event_data['tar_x'] = 0;
-					temp_event_data['tar_y'] = 0;
 					temp_event_data['item_type'] = String(item_type);
 					temp_event_data['item_id'] = Number(item_id);
 					temp_event_data['item_num'] = Number(item_num);
 					temp_event_data['item_icon'] = Number(item_icon);
+					var tar_x = 0;
+					var tar_y = 0;
 					
 					// > 生成事件
 					var new_event_data = $gameMap.drill_EIG_createEventDataTemplate( temp_event_data );
@@ -685,22 +700,22 @@ Game_Interpreter.prototype.drill_EIG_command = function(command, args){
 						}
 						if( c_area.length == 0 ){ c_area.push({'x':x1,'y':y1 }) }
 						
-						var ran = c_area[ Math.floor( Math.random()*c_area.length ) ];
-						temp_event_data['tar_x'] = ran['x'] - x1;
-						temp_event_data['tar_y'] = ran['y'] - y1;
+						var random_point = c_area[ Math.floor( Math.random()*c_area.length ) ];
+						tar_x = random_point['x'] - x1;
+						tar_y = random_point['y'] - y1;
 						
-					}else{	//如果没有固定区域核心，使用自带的
+					}else{		//（如果没有核心，使用自带的）
 						var av_list = $gameMap.drill_EIG_getAvailablePosList( x1,y1, area_range,area_type );
-						var ran = av_list[ Math.floor( Math.random()*av_list.length ) ];
-						temp_event_data['tar_x'] = ran['x'] - x1;
-						temp_event_data['tar_y'] = ran['y'] - y1;
+						var random_point = av_list[ Math.floor( Math.random()*av_list.length ) ];
+						tar_x = random_point['x'] - x1;
+						tar_y = random_point['y'] - y1;
 					}
 					
 					// > 执行跳跃
 					if( $gameSystem._drill_EIG_need_jump ){
-						new_event.jump(temp_event_data['tar_x'],temp_event_data['tar_y']);
+						new_event.jump( tar_x, tar_y );
 					}else{
-						new_event.locate(temp_event_data['tar_x'],temp_event_data['tar_y']);
+						new_event.locate( tar_x, tar_y );
 					}
 					
 				}
@@ -801,8 +816,8 @@ Game_Interpreter.prototype.drill_EIG_oldCommand = function(command, args){
 		var temp_type = String(args[1]);
 		var temp_need_generate = false;
 		var temp_event_data = {};
-		temp_event_data['tar_x'] = 0;
-		temp_event_data['tar_y'] = 0;
+		var tar_x = 0;
+		var tar_y = 0;
 		
 		//>可拾取物生成器 : 弹跳开启
 		//>可拾取物生成器 : 弹跳开启 : 5 : 1.00
@@ -925,13 +940,13 @@ Game_Interpreter.prototype.drill_EIG_oldCommand = function(command, args){
 			}
 			if(area_type == "指定位置"){
 				temp_event_data['tar_type'] = "指定位置";
-				temp_event_data['tar_x'] = Number(args[9]);
-				temp_event_data['tar_y'] = Number(args[11]);
+				tar_x = Number(args[9]);
+				tar_y = Number(args[11]);
 			}
 			if(temp_event_data['tar_type'] == undefined){
 				temp_event_data['tar_type'] = "指定位置";
-				temp_event_data['tar_x'] = 0;
-				temp_event_data['tar_y'] = 0;
+				tar_x = 0;
+				tar_y = 0;
 			}
 			
 		}
@@ -945,21 +960,25 @@ Game_Interpreter.prototype.drill_EIG_oldCommand = function(command, args){
 				if( org_event.eventId() === this._eventId ){	//当前执行插件指令的 事件id
 					temp_event_data['org_x'] = org_event._x;
 					temp_event_data['org_y'] = org_event._y;
-					if( temp_event_data['tar_type'] != "指定位置"){
-						var av_list = $gameMap.drill_EIG_getAvailablePosList(org_event._x,org_event._y,temp_event_data['range'],temp_event_data['tar_type']);
-						var ran = av_list[ Math.floor( Math.random()*av_list.length ) ];
-						temp_event_data['tar_x'] = ran['x']-org_event._x;
-						temp_event_data['tar_y'] = ran['y']-org_event._y;
-					}
 					
+					// > 生成事件（旧）
 					var new_event_data = $gameMap.drill_EIG_createEventDataTemplate( temp_event_data );
 					var new_event = $gameMap.drill_COEM_offspring_createEventByData( new_event_data );
-					if($gameSystem._drill_EIG_need_jump){
-						new_event.jump(temp_event_data['tar_x'],temp_event_data['tar_y']);
-					}else{
-						new_event.locate(temp_event_data['tar_x'],temp_event_data['tar_y']);
+					
+					// > 跳跃目标（旧）
+					if( temp_event_data['tar_type'] != "指定位置"){
+						var av_list = $gameMap.drill_EIG_getAvailablePosList(org_event._x,org_event._y,temp_event_data['range'],temp_event_data['tar_type']);
+						var random_point = av_list[ Math.floor( Math.random()*av_list.length ) ];
+						tar_x = random_point['x'] - org_event._x;
+						tar_y = random_point['y'] - org_event._y;
 					}
-					//new_event.start();
+					
+					// > 执行跳跃（旧）
+					if( $gameSystem._drill_EIG_need_jump ){
+						new_event.jump( tar_x, tar_y );
+					}else{
+						new_event.locate( tar_x, tar_y );
+					}
 				};
 			}
 		}
@@ -979,9 +998,8 @@ Game_Map.prototype.drill_EIG_isEventExist = function( e_id ){
 	return true;
 };
 
-
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -1055,7 +1073,7 @@ Game_System.prototype.drill_EIG_initSysData_Private = function() {
 	this._drill_EIG_jump_level = 1;				//弹跳次数
 	this._drill_EIG_jump_levelSound = 0;		//弹跳声音
 	
-	this._drill_EIG_default_img_random = [0];	//随机图像
+	this._drill_EIG_default_img_random = [0];	//随机行走图
 	this._drill_EIG_default_se_random = [0];	//随机音效
 };
 //==============================
@@ -1067,24 +1085,123 @@ Game_System.prototype.drill_EIG_checkSysData_Private = function() {
 	if( this._drill_EIG_need_useIcon == undefined ){
 		this.drill_EIG_initSysData();
 	}
-	
 };
 
 
+
 //=============================================================================
-// ** 地图
+// ** ☆事件数据模板
+//			
+//			说明：	> 此模块提供 事件数据模板 ，并对模板进行数据添加处理。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 地图 - 生成物品事件模板数据
+// * 事件数据模板 - 生成物品事件模板数据
 //==============================
 Game_Map.prototype.drill_EIG_createEventDataTemplate = function( input_data ){
 	
-	// > 随机图像
+	// > 默认值
+	this.drill_EIG_initData( input_data );
+	
+	// > 模板
+	var new_event_data = {
+		"name":"可拾取物",
+		"note":"",
+		"meta":{},
+		"pages":[{
+			"conditions":{			//（事件页条件）
+				"actorId": 1,
+				"actorValid": false,
+				"itemId": 1,
+				"itemValid": false,
+				"selfSwitchCh": "A",
+				"selfSwitchValid": false,
+				"switch1Id": 1,
+				"switch1Valid": false,
+				"switch2Id": 1,
+				"switch2Valid": false,
+				"variableId": 1,
+				"variableValid": false,
+				"variableValue": 0
+			},
+			"image":{				//（行走图）
+				"tileId": 0,
+				"characterName": "",
+				"direction": 8,
+				"pattern": 1,
+				"characterIndex":0
+			},
+			"list":[				//（指令）
+			],
+			"moveFrequency":3,		//（自主移动）
+			"moveSpeed":3,
+			"moveType":0,
+			"moveRoute":{
+				"list":[{"code":0,"parameters":[]}],"repeat":true,"skippable":false,"wait":false
+			},
+			"priorityType":0,		//（优先级）
+			"trigger":1,			//（触发类型）
+			"stepAnime":true,		//（勾选）
+			"directionFix":false,
+			"through":true,
+			"walkAnime":false
+		}],
+		"x":0,
+		"y":0
+	};
+	
+	// > 位置设置
+	this.drill_EIG_setData_Position( new_event_data, input_data );
+	
+	// > 行走图设置
+	this.drill_EIG_setData_Image( new_event_data, input_data );
+	
+	// > 音效设置
+	this.drill_EIG_setData_SE( new_event_data, input_data );
+	
+	// > 跳跃设置
+	this.drill_EIG_setData_Jump( new_event_data, input_data );
+	
+	// > 获得物品
+	this.drill_EIG_setData_Item( new_event_data, input_data );
+	
+	// > 删除管理
+	this.drill_EIG_setData_Remove( new_event_data, input_data );
+	
+	return new_event_data;
+}
+//==============================
+// * 事件数据模板 - 默认值
+//==============================
+Game_Map.prototype.drill_EIG_initData = function( input_data ){
+	
+	if( input_data['org_x'] == undefined ){ input_data['org_x'] = 0 };
+	if( input_data['org_y'] == undefined ){ input_data['org_y'] = 0 };
+	
+	if( input_data['item_type'] == undefined ){ input_data['item_type'] = "" };
+	if( input_data['item_id']   == undefined ){ input_data['item_id'] = 0 };
+	if( input_data['item_num']  == undefined ){ input_data['item_num'] = 0 };
+	if( input_data['item_icon'] == undefined ){ input_data['item_icon'] = "" };
+	
+}
+//==============================
+// * 事件数据模板 - 位置设置
+//==============================
+Game_Map.prototype.drill_EIG_setData_Position = function( new_event_data, input_data ){
+	new_event_data["x"] = input_data['org_x'],
+	new_event_data["y"] = input_data['org_y']
+}
+//==============================
+// * 事件数据模板 - 行走图设置
+//==============================
+Game_Map.prototype.drill_EIG_setData_Image = function( new_event_data, input_data ){
+	
+	// > 随机行走图
 	var random_img = "";
 	var random_dir = 2;
 	if( input_data['item_type'] == "金钱" && 
-		DrillUp.g_EIG_goldPic.length > 0 ){		//（注意 金钱行走图 为空情况）
-		var index_img  = Math.floor( Math.random() * DrillUp.g_EIG_goldPic.length );
+		DrillUp.g_EIG_goldPic.length > 0 ){			//（注意 金钱行走图 为空情况）
+		var index_img =  Math.floor( Math.random() * DrillUp.g_EIG_goldPic.length );
 		random_img = DrillUp.g_EIG_goldPic[index_img];
 		random_dir = 2;
 		if( DrillUp.g_EIG_goldRandomDir ){ random_dir = 2 + Math.randomInt(4) * 2; }
@@ -1097,72 +1214,66 @@ Game_Map.prototype.drill_EIG_createEventDataTemplate = function( input_data ){
 		if( DrillUp.g_EIG_itemRandomDir ){ random_dir = 2 + Math.randomInt(4) * 2; }
 	}
 	
+	// > 行走图
+	new_event_data["pages"][0]["image"]["characterName"] = random_img;
+	new_event_data["pages"][0]["image"]["direction"] = random_dir;
+	new_event_data["pages"][0]["image"]["pattern"] = Math.floor(Math.random()*3);
+}
+//==============================
+// * 事件数据模板 - 音效设置『音效模块』
+//==============================
+Game_Map.prototype.drill_EIG_setData_SE = function( new_event_data, input_data ){
+	
 	// > 随机音效
-	var index_se = Number($gameSystem._drill_EIG_default_se_random[Math.floor(Math.random()*$gameSystem._drill_EIG_default_se_random.length)]);
-	var random_se = "";
+	var index_list = $gameSystem._drill_EIG_default_se_random;
+	var index_se = Number(index_list[ Math.floor(Math.random()*index_list.length) ]);
+	var se_name = "";
 	if( index_se >= 0 && DrillUp.g_EIG_se.length > 0 ){
-		index_se = Math.min( index_se ,DrillUp.g_EIG_se.length-1 );
-		random_se = DrillUp.g_EIG_se[index_se];
+		index_se = Math.min( index_se, DrillUp.g_EIG_se.length-1 );
+		se_name = DrillUp.g_EIG_se[index_se];
 	}
 	
-	// > 新建模板数据
-	var new_event_data = {
-		"name":"可拾取物",
-		"note":"",
-		"meta":{},	//镜像反射的查找meta的bug修复（其实一直不知道meta的作用）
-		"pages":[{
-			"conditions":{
-				"actorId":1,"actorValid":false,"itemId":1,"itemValid":false,"selfSwitchCh":"A","selfSwitchValid":false,"switch1Id":1,"switch1Valid":false,"switch2Id":1,"switch2Valid":false,"variableId":1,"variableValid":false,"variableValue":0
-			},
-			"directionFix":false,
-			"image":{
-				"tileId":0,
-				"characterName":random_img,
-				"direction": random_dir ,
-				"pattern": Math.floor(Math.random()*3),
-				"characterIndex":0
-			},
-			"list":[
-				{"code":250,"indent":0,"parameters":[{"name":random_se,"volume":74,"pitch":100,"pan":0}]},	//音效
-				{"code":108,"indent":0,"parameters":[	//【物体-跳跃速度】
-					"=>跳跃设置 : 高度["+ String($gameSystem._drill_EIG_jump_height) + "] : 速度[" +
-					  String($gameSystem._drill_EIG_jump_speed) +"]"
-				]},
-				{"code":108,"indent":0,"parameters":[
-					"=>跳跃设置 : 弹跳次数["+ String($gameSystem._drill_EIG_jump_level) + "] : 弹跳声音[" +
-					  String($gameSystem._drill_EIG_jump_levelSound) +"]"
-				]},
-				//{"code":126,"indent":0,"parameters":[1,0,0,1]},	//道具
-				//{"code":125,"indent":0,"parameters":[0,0,10]},	//金钱
-				//{"code":214,"indent":0,"parameters":[]},
-				//{"code":0,"indent":0,"parameters":[]}
-			],
-			"moveFrequency":3,
-			"moveRoute":{
-				"list":[{"code":0,"parameters":[]}],"repeat":true,"skippable":false,"wait":false
-			},
-			"moveSpeed":3,
-			"moveType":0,
-			"priorityType":0,
-			"stepAnime":true,
-			"through":true,
-			"trigger":1,
-			"walkAnime":false
-		}],
-		"x":input_data['org_x'],
-		"y":input_data['org_y']
-	};
+	// > 音效
+	var new_list = new_event_data["pages"][0]["list"];
+	new_list.push( {"code":250,"indent":0,"parameters":[{"name":se_name,"volume":74,"pitch":100,"pan":0}]} );
+}
+//==============================
+// * 事件数据模板 - 跳跃设置
+//==============================
+Game_Map.prototype.drill_EIG_setData_Jump = function( new_event_data, input_data ){
 	
-	// > 填入事件脚本
-	var new_list = new_event_data['pages'][0]['list'];
-	if( input_data['item_type'] != "金钱" && input_data['item_icon'] != undefined && $gameSystem._drill_EIG_need_useIcon ){
-		if( Imported.Drill_EventIcon ){	//【行走图-图标行走图】
-			var com1 = {"code":108,"indent":0,"parameters":["=>图标行走图 : 设置图标 : "+ input_data['item_icon'] ]} ;
-			new_list.push(com1);
-		}else{
-			alert( DrillUp.drill_EIG_getPluginTip_NoSupportPlugin() );
+	// > 【物体-跳跃速度】
+	var new_list = new_event_data["pages"][0]["list"];
+	new_list.push( 
+		{"code":108,"indent":0,"parameters":[
+			"=>跳跃设置 : 高度[" + String($gameSystem._drill_EIG_jump_height) + "] : 速度[" + String($gameSystem._drill_EIG_jump_speed) +"]"
+		]}
+	);
+	new_list.push( 
+		{"code":108,"indent":0,"parameters":[
+			"=>跳跃设置 : 弹跳次数[" + String($gameSystem._drill_EIG_jump_level) + "] : 弹跳声音[" + String($gameSystem._drill_EIG_jump_levelSound) +"]"
+		]}
+	);
+}
+//==============================
+// * 事件数据模板 - 获得物品
+//==============================
+Game_Map.prototype.drill_EIG_setData_Item = function( new_event_data, input_data ){
+	var new_list = new_event_data["pages"][0]["list"];
+	
+	// > 【行走图-图标行走图】
+	if( $gameSystem._drill_EIG_need_useIcon ){
+		if( input_data['item_type'] != "金钱" && input_data['item_icon'] != undefined ){
+			if( Imported.Drill_EventIcon ){
+				var com1 = {"code":108,"indent":0,"parameters":["=>图标行走图 : 设置图标 : " + input_data['item_icon'] ]} ;
+				new_list.push(com1);
+			}else{
+				alert( DrillUp.drill_EIG_getPluginTip_NoSupportPlugin() );
+			}
 		}
 	}
+	
+	// > 物品
 	if( input_data['item_type'] == "金钱" ){
 		var com2 = {"code":125,"indent":0,"parameters":[0,0,input_data['item_num']]} ;
 		new_list.push(com2);
@@ -1179,21 +1290,30 @@ Game_Map.prototype.drill_EIG_createEventDataTemplate = function( input_data ){
 		var com5 = {"code":128,"indent":0,"parameters":[input_data['item_id'],0,0,input_data['item_num'],false]} ;
 		new_list.push(com5);
 	}
+}
+//==============================
+// * 事件数据模板 - 删除管理
+//==============================
+Game_Map.prototype.drill_EIG_setData_Remove = function( new_event_data, input_data ){
+	var new_list = new_event_data["pages"][0]["list"];
+	
 	//new_list.push( {"code":214,"indent":0,"parameters":[]} );	//（暂时消除）
 	new_list.push( {"code":356,"indent":0,"parameters":[">事件管理核心 : 本事件 : 彻底删除"]} );
-	new_list.push( {"code":0,"indent":0,"parameters":[]} );
 	
-	
-	return new_event_data;
+	new_list.push( {"code":0,"indent":0,"parameters":[]} );		//（结束符）
 };
 
+
+
 //=============================================================================
-// ** 获取点（自带函数）
+// ** ☆固定区域（自带函数）
+//			
+//			说明：	> 此模块提供 固定区域内获取点 的函数。
+//					> 此模块为 临时自带 函数，如果有 固定区域核心，就用核心的函数。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 获取点 - 区域
-//
-//			说明：	该为临时自带用函数，默认使用 固定区域核心。
+// * 固定区域 - 获取点
 //==============================
 Game_Map.prototype.drill_EIG_getAvailablePosList = function( x, y, range, type ){
 	var available_list = [];
@@ -1246,7 +1366,7 @@ Game_Map.prototype.drill_EIG_getAvailablePosList = function( x, y, range, type )
 	return available_list;
 }
 //==============================
-// * 获取点 - 不可通行判断
+// * 固定区域 - 不可通行判断
 //==============================
 Game_Map.prototype.drill_EIG_isAnyPassable = function( x, y ){
 	return this.isPassable(x, y, 2)||this.isPassable(x, y, 4)||this.isPassable(x, y, 6)||this.isPassable(x, y, 8);

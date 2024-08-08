@@ -272,8 +272,7 @@
 if( Imported.Drill_EventUnification ){
 	alert( DrillUp.drill_EUOM_getPluginTip_ConflictOldName() );
 };
-if( Imported.Drill_EventSelfSwitch &&
-	Imported.Drill_EventThrough ){
+if( Imported.Drill_EventThrough ){
 	
 	
 //=============================================================================

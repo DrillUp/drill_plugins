@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        管理器 - 累计游戏计时器
+ * @plugindesc [v1.3]        管理器 - 累计游戏计时器
  * @author Drill_up
  * 
  * @Drill_LE_param "定时开关-%d"
@@ -130,6 +130,8 @@
  * 修复了时间过早出现的未定义bug，添加了 时间设置校验 。
  * [v1.2]
  * 修改了插件分类。
+ * [v1.3]
+ * 优化了内部结构。
  * 
  * 
  *
@@ -335,10 +337,20 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			游戏时间计时器：
-//				->全局存储
-//				->秒表计时器
+//			->☆提示信息
+//			->☆静态数据
+//			->☆插件指令
+//			
+//			->☆计时器
+//			->☆计时器容器
+//				->累计时间
+//				->电子秒表
+//			->☆计时器控制
+//				->累计时间
 //				->定时开关
+//			
+//			->☆存档管理器
+//
 //
 //		★家谱：
 //			无
@@ -362,7 +374,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -379,7 +391,7 @@
 	
 	
 //=============================================================================
-// ** 静态数据
+// ** ☆静态数据
 //=============================================================================
 　　var Imported = Imported || {};
 　　Imported.Drill_GlobalGameTimer = true;
@@ -425,8 +437,9 @@
 		}
 	}
 	
+	
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
 var _drill_GGT_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
@@ -443,28 +456,27 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp2 = temp2.replace("变量[","");
 					temp2 = temp2.replace("]","");
 					temp2 = Number(temp2);
-				
-					$gameVariables.setValue( temp2, DrillUp.g_GGT_data['curCount'] );
+					$gameVariables.setValue( temp2, DrillUp.drill_GGT_getCurCount() );
 				}
 				if( temp1 == "给予值(秒)" ){
 					temp2 = temp2.replace("变量[","");
 					temp2 = temp2.replace("]","");
 					temp2 = Number(temp2);
-					var sec = Math.floor( DrillUp.g_GGT_data['curCount'] / 60 ) % 60;
+					var sec = Math.floor( DrillUp.drill_GGT_getCurCount() / 60 ) % 60;
 					$gameVariables.setValue( temp2, sec );
 				}
 				if( temp1 == "给予值(分)" ){
 					temp2 = temp2.replace("变量[","");
 					temp2 = temp2.replace("]","");
 					temp2 = Number(temp2);
-					var min = Math.floor( DrillUp.g_GGT_data['curCount'] / 3600 ) % 60;
+					var min = Math.floor( DrillUp.drill_GGT_getCurCount() / 3600 ) % 60;
 					$gameVariables.setValue( temp2, min );
 				}
 				if( temp1 == "给予值(时)" ){
 					temp2 = temp2.replace("变量[","");
 					temp2 = temp2.replace("]","");
 					temp2 = Number(temp2);
-					var hour = Math.floor( DrillUp.g_GGT_data['curCount'] / 216000 );
+					var hour = Math.floor( DrillUp.drill_GGT_getCurCount() / 216000 );
 					$gameVariables.setValue( temp2, hour );
 				}
 			}
@@ -474,7 +486,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		if(args.length == 2){
 			var type = String(args[1]);
 			if( type == "计时器完全重置" ){
-				DrillUp.g_GGT_data['frameCount'] = 0;
+				DrillUp.drill_GGT_resetCount();
 			}
 		}
 		if(args.length == 6){
@@ -486,28 +498,27 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp2 = temp2.replace("变量[","");
 					temp2 = temp2.replace("]","");
 					temp2 = Number(temp2);
-				
-					$gameVariables.setValue( temp2, DrillUp.g_GGT_data['frameCount'] );
+					$gameVariables.setValue( temp2, DrillUp.drill_GGT_getAllCount() );
 				}
 				if( temp1 == "给予值(秒)" ){
 					temp2 = temp2.replace("变量[","");
 					temp2 = temp2.replace("]","");
 					temp2 = Number(temp2);
-					var sec = Math.floor( DrillUp.g_GGT_data['frameCount'] / 60 ) % 60;
+					var sec = Math.floor( DrillUp.drill_GGT_getAllCount() / 60 ) % 60;
 					$gameVariables.setValue( temp2, sec );
 				}
 				if( temp1 == "给予值(分)" ){
 					temp2 = temp2.replace("变量[","");
 					temp2 = temp2.replace("]","");
 					temp2 = Number(temp2);
-					var min = Math.floor( DrillUp.g_GGT_data['frameCount'] / 3600 ) % 60;
+					var min = Math.floor( DrillUp.drill_GGT_getAllCount() / 3600 ) % 60;
 					$gameVariables.setValue( temp2, min );
 				}
 				if( temp1 == "给予值(时)" ){
 					temp2 = temp2.replace("变量[","");
 					temp2 = temp2.replace("]","");
 					temp2 = Number(temp2);
-					var hour = Math.floor( DrillUp.g_GGT_data['frameCount'] / 216000 );
+					var hour = Math.floor( DrillUp.drill_GGT_getAllCount() / 216000 );
 					$gameVariables.setValue( temp2, hour );
 				}
 			}
@@ -517,7 +528,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		if(args.length == 2){
 			var type = String(args[1]);
 			if( type == "清除全部计次的时间" ){
-				DrillUp.g_GGT_data['tank'] = [];
+				DrillUp.drill_GGT_resetTank();
 			}
 		}
 		if(args.length == 4){
@@ -525,19 +536,13 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var temp1 = String(args[3]);
 			
 			if( type == "当前累计时间" && temp1 == "秒表计次" ){
-				
-				if( DrillUp.g_GGT_data['tank'].length < DrillUp.g_GGT_recordNum ){
-					DrillUp.g_GGT_data['tank'].push( DrillUp.g_GGT_data['curCount'] );
-				}
+				DrillUp.drill_GGT_addTimeToTank( DrillUp.drill_GGT_getCurCount() );
 			}
 			if( type == "全部累计时间" && temp1 == "秒表计次" ){
-				
-				if( DrillUp.g_GGT_data['tank'].length < DrillUp.g_GGT_recordNum ){
-					DrillUp.g_GGT_data['tank'].push( DrillUp.g_GGT_data['frameCount'] );
-				}
+				DrillUp.drill_GGT_addTimeToTank( DrillUp.drill_GGT_getAllCount() );
 			}
 			if( type == "修改计次上限" ){
-				DrillUp.g_GGT_recordNum = Number(temp1);
+				DrillUp.drill_GGT_setTankMax( Number(temp1) );
 			}
 		}
 		if(args.length == 6){
@@ -554,28 +559,27 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp3 = temp3.replace("变量[","");
 					temp3 = temp3.replace("]","");
 					temp3 = Number(temp3);
-				
-					$gameVariables.setValue( temp3, DrillUp.g_GGT_data['tank'][temp1] );
+					$gameVariables.setValue( temp3, DrillUp.drill_GGT_getTank()[temp1] );
 				}
 				if( temp2 == "给予值(秒)" ){
 					temp3 = temp3.replace("变量[","");
 					temp3 = temp3.replace("]","");
 					temp3 = Number(temp3);
-					var sec = Math.floor( DrillUp.g_GGT_data['tank'][temp1]  / 60 ) % 60;
+					var sec = Math.floor( DrillUp.drill_GGT_getTank()[temp1]  / 60 ) % 60;
 					$gameVariables.setValue( temp3, sec );
 				}
 				if( temp2 == "给予值(分)" ){
 					temp3 = temp3.replace("变量[","");
 					temp3 = temp3.replace("]","");
 					temp3 = Number(temp3);
-					var min = Math.floor( DrillUp.g_GGT_data['tank'][temp1]  / 3600 ) % 60;
+					var min = Math.floor( DrillUp.drill_GGT_getTank()[temp1]  / 3600 ) % 60;
 					$gameVariables.setValue( temp3, min );
 				}
 				if( temp2 == "给予值(时)" ){
 					temp3 = temp3.replace("变量[","");
 					temp3 = temp3.replace("]","");
 					temp3 = Number(temp3);
-					var hour = Math.floor( DrillUp.g_GGT_data['tank'][temp1]  / 216000 );
+					var hour = Math.floor( DrillUp.drill_GGT_getTank()[temp1]  / 216000 );
 					$gameVariables.setValue( temp3, hour );
 				}
 			}
@@ -584,75 +588,167 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	return true;
 };
 
+
+
 //=============================================================================
-// ** 计时器
+// ** ☆计时器容器
+//
+//			说明：	> 此模块提供对 计时器容器 的数据管理。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 计时器 - 定义
+// * 计时器容器 - 数据检查
+//
+//			说明：	> 由于数据全局有效，因此只要数据是空的，就说明是新开的游戏窗体。
 //==============================
-	DrillUp.g_GGT_data = {};				//（全局临时+带存储功能）
+DrillUp.drill_GGT_checkData = function(){
+	if( this.g_GGT_data != undefined ){ return; }
+	this.g_GGT_data = {};
+	this.g_GGT_data['frameCount'] = 0;			//累计时间 - 全部累计时间
+	this.g_GGT_data['curCount'] = 0;			//累计时间 - 当前累计时间
+	
+	this.g_GGT_data['tank'] = [];									//电子秒表 - 容器
+	this.g_GGT_data['tankMax'] = DrillUp.g_GGT_recordNum || 10;		//电子秒表 - 上限
+	
+	// > 载入数据
+	var temp_data = {};
+	var temp_data_str = StorageManager.drill_GGT_load();
+	if( temp_data_str != undefined && temp_data_str != "" ){
+		temp_data = JSON.parse( temp_data_str );
+	}
+	
+	// > 载入数据 - 依次载入
+	if( temp_data['frameCount'] != undefined ){ this.g_GGT_data['frameCount'] = temp_data['frameCount']; }
+	if( temp_data['tank'] != undefined ){ this.g_GGT_data['tank'] = temp_data['tank']; }
+	if( temp_data['tankMax'] != undefined ){ this.g_GGT_data['tankMax'] = temp_data['tankMax']; }
+}
 //==============================
-// * 计时器 - 帧刷新
+// * 计时器容器 - 累计时间 - 帧刷新
+//==============================
+DrillUp.drill_GGT_updateCount = function(){
+	this.drill_GGT_checkData();
+	this.g_GGT_data['frameCount'] += 1;
+	this.g_GGT_data['curCount'] += 1;
+}
+//==============================
+// * 计时器容器 - 累计时间 - 重置时间
+//==============================
+DrillUp.drill_GGT_resetCount = function(){
+	this.drill_GGT_checkData();
+	this.g_GGT_data['frameCount'] = 0;
+	this.g_GGT_data['curCount'] = 0;
+}
+//==============================
+// * 计时器容器 - 累计时间 - 获取 全部累计时间
+//==============================
+DrillUp.drill_GGT_getAllCount = function(){
+	this.drill_GGT_checkData();
+	return this.g_GGT_data['frameCount'];
+}
+//==============================
+// * 计时器容器 - 累计时间 - 获取 当前累计时间
+//==============================
+DrillUp.drill_GGT_getCurCount = function(){
+	this.drill_GGT_checkData();
+	return this.g_GGT_data['curCount'];
+}
+
+//==============================
+// * 计时器容器 - 电子秒表 - 重置
+//==============================
+DrillUp.drill_GGT_resetTank = function(){
+	this.drill_GGT_checkData();
+	this.g_GGT_data['tank'] = [];
+}
+//==============================
+// * 计时器容器 - 电子秒表 - 添加时间
+//==============================
+DrillUp.drill_GGT_addTimeToTank = function( time ){
+	this.drill_GGT_checkData();
+	if( this.g_GGT_data['tank'].length < this.g_GGT_data['tankMax'] ){
+		this.g_GGT_data['tank'].push( time );
+	}
+}
+//==============================
+// * 计时器容器 - 电子秒表 - 获取容器
+//==============================
+DrillUp.drill_GGT_getTank = function(){
+	this.drill_GGT_checkData();
+	return this.g_GGT_data['tank'];
+}
+//==============================
+// * 计时器容器 - 电子秒表 - 上限
+//==============================
+DrillUp.drill_GGT_setTankMax = function( max ){
+	this.drill_GGT_checkData();
+	this.g_GGT_data['tankMax'] = max;
+}
+
+
+//=============================================================================
+// ** ☆计时器控制
+//
+//			说明：	> 此模块提供对 计时器 各种操作的功能。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 计时器控制 - 帧刷新
 //==============================
 var _drill_GGT_updateScene = SceneManager.updateScene;
 SceneManager.updateScene = function(){
 	_drill_GGT_updateScene.call(this);
-	
-	// > 读取初始化
-	if( DrillUp.g_GGT_data['frameCount'] == null ){
-		
-		var data = StorageManager.drill_GGT_load();
-		if( data == "" ){
-			DrillUp.g_GGT_data = {};
-		}else{
-			DrillUp.g_GGT_data = JSON.parse( data );
-		}
-		DrillUp.g_GGT_data['frameCount'] = DrillUp.g_GGT_data['frameCount'] || 0;		//全部累计时间
-		DrillUp.g_GGT_data['curCount'] = 0;												//当前累计时间
-		DrillUp.g_GGT_data['tank'] = DrillUp.g_GGT_data['tank'] || [];					//计次容器
-	}
+	this.drill_GGT_updateSceneCount();		//帧刷新 - 累计时间
+	this.drill_GGT_updateSceneSwitch();		//帧刷新 - 定时开关
+}
+//==============================
+// * 计时器控制 - 帧刷新 - 累计时间
+//==============================
+SceneManager.drill_GGT_updateSceneCount = function(){
+	var all_count = DrillUp.drill_GGT_getAllCount();
+	var cur_count = DrillUp.drill_GGT_getCurCount();
 	
 	// > 帧数累计
-	DrillUp.g_GGT_data['frameCount'] += 1;
-	DrillUp.g_GGT_data['curCount'] += 1;
+	DrillUp.drill_GGT_updateCount();
 	
 	// > 每5秒记录自动存储一次（强制，防止玩家关闭后失效）
-	if( DrillUp.g_GGT_data['frameCount'] % 300 == 0 ){
+	if( all_count % 300 == 0 ){
 		StorageManager.drill_GGT_save();
 	}
+}
+//==============================
+// * 计时器控制 - 帧刷新 - 定时开关
+//==============================
+SceneManager.drill_GGT_updateSceneSwitch = function(){
+	if( $gameSwitches == undefined ){ return; }
+	var all_count = DrillUp.drill_GGT_getAllCount();
+	var cur_count = DrillUp.drill_GGT_getCurCount();
 	
-	
-	// > 定时开关
-	if( $gameSwitches != undefined ){
-		for( var i=0; i < DrillUp.g_GGT_list.length; i++ ){
-			var temp_data = DrillUp.g_GGT_list[i];
-			if( temp_data == undefined ){ continue; }
-			
-			if( temp_data['type'] == "当前累计时间达到条件时间后开启一次" ){
-				if( temp_data['trigger_switch'] != 0  && DrillUp.g_GGT_data['curCount'] == temp_data['condition_frame'] ){
+	for(var i = 0; i < DrillUp.g_GGT_list.length; i++ ){
+		var temp_data = DrillUp.g_GGT_list[i];
+		if( temp_data == undefined ){ continue; }
+		
+		if( temp_data['type'] == "当前累计时间达到条件时间后开启一次" ){
+			if( temp_data['trigger_switch'] != 0  && cur_count == temp_data['condition_frame'] ){
+				$gameSwitches.setValue( temp_data['trigger_switch'] , true );
+			}
+		}
+		if( temp_data['type'] == "当前累计时间大于条件时间后持续保持开启" ){
+			if( temp_data['trigger_switch'] != 0  && cur_count > temp_data['condition_frame'] ){
+				if( $gameSwitches._data[ temp_data['trigger_switch'] ] != true ){
 					$gameSwitches.setValue( temp_data['trigger_switch'] , true );
 				}
 			}
-			
-			if( temp_data['type'] == "当前累计时间大于条件时间后持续保持开启" ){
-				if( temp_data['trigger_switch'] != 0  && DrillUp.g_GGT_data['curCount'] > temp_data['condition_frame'] ){
-					if( $gameSwitches._data[ temp_data['trigger_switch'] ] != true ){
-						$gameSwitches.setValue( temp_data['trigger_switch'] , true );
-					}
-				}
+		}
+		
+		if( temp_data['type'] == "全部累计时间达到条件时间后开启一次" ){
+			if( temp_data['trigger_switch'] != 0  && all_count == temp_data['condition_frame'] ){
+				$gameSwitches.setValue( temp_data['trigger_switch'] , true );
 			}
-			
-			if( temp_data['type'] == "全部累计时间达到条件时间后开启一次" ){
-				if( temp_data['trigger_switch'] != 0  && DrillUp.g_GGT_data['frameCount'] == temp_data['condition_frame'] ){
+		}
+		if( temp_data['type'] == "全部累计时间大于条件时间后持续保持开启" ){
+			if( temp_data['trigger_switch'] != 0  && all_count > temp_data['condition_frame'] ){
+				if( $gameSwitches._data[ temp_data['trigger_switch'] ] != true ){
 					$gameSwitches.setValue( temp_data['trigger_switch'] , true );
-				}
-			}
-			
-			if( temp_data['type'] == "全部累计时间大于条件时间后持续保持开启" ){
-				if( temp_data['trigger_switch'] != 0  && DrillUp.g_GGT_data['frameCount'] > temp_data['condition_frame'] ){
-					if( $gameSwitches._data[ temp_data['trigger_switch'] ] != true ){
-						$gameSwitches.setValue( temp_data['trigger_switch'] , true );
-					}
 				}
 			}
 		}
@@ -661,38 +757,42 @@ SceneManager.updateScene = function(){
 
 
 //=============================================================================
-// ** 存储管理器
+// ** ☆存档管理器
+//
+//			说明：	> 此模块提供对 存档管理器 各种操作的功能。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 存储管理器 - 存储
+// * 存档管理器 - 保存（主流程）
 //==============================
 StorageManager.drill_GGT_save = function(){
 	
-	// > 本地文件模式
-    if (this.isLocalMode()) {
-        this.drill_GGT_saveToLocalFile( JSON.stringify( DrillUp.g_GGT_data ) );
-    
-	// > 本地网页模式
-	} else {
-        this.drill_GGT_saveToWebStorage( JSON.stringify( DrillUp.g_GGT_data ) );
-    }
+	// > B文件模式
+	if( this.isLocalMode() ){
+		this.drill_GGT_saveToLocalFile( JSON.stringify( DrillUp.g_GGT_data ) );
+	
+	// > C网页模式
+	}else{
+		this.drill_GGT_saveToWebStorage( JSON.stringify( DrillUp.g_GGT_data ) );
+	}
 };
 //==============================
-// * 存储管理器 - 读取
+// * 存档管理器 - 载入（主流程）
 //==============================
 StorageManager.drill_GGT_load = function(){
 	
-	// > 本地文件模式
-    if (this.isLocalMode()) {
-        return this.drill_GGT_loadFromLocalFile();
+	// > B文件模式
+	if( this.isLocalMode() ){
+		return this.drill_GGT_loadFromLocalFile();
 		
-	// > 本地网页模式
-    } else {
-        return this.drill_GGT_loadFromWebStorage();
-    }
+	// > C网页模式
+	}else{
+		return this.drill_GGT_loadFromWebStorage();
+	}
 };
+
 //==============================
-// * 文件 - 存储
+// * 存档管理器 - B文件模式 - 保存
 //==============================
 StorageManager.drill_GGT_saveToLocalFile = function( json_str ){
 	var fs = require('fs');
@@ -711,7 +811,7 @@ StorageManager.drill_GGT_saveToLocalFile = function( json_str ){
 	fs.writeFileSync(filePath, data);
 };
 //==============================
-// * 文件 - 读取
+// * 存档管理器 - B文件模式 - 载入
 //==============================
 StorageManager.drill_GGT_loadFromLocalFile = function(){
 	var fs = require('fs');
@@ -726,13 +826,14 @@ StorageManager.drill_GGT_loadFromLocalFile = function(){
 	return LZString.decompressFromBase64(data);	//（返回字符串）
 };
 //==============================
-// * 文件 - 文件路径
+// * 存档管理器 - B文件模式 - 文件路径
 //==============================
 StorageManager.drill_GGT_localFilePath = function(){
     return this.localFileDirectoryPath() + "drill_timer.rpgsave";	//【生成文件】
 };
+
 //==============================
-// * 网页 - 存储
+// * 存档管理器 - C网页模式 - 保存
 //==============================
 StorageManager.drill_GGT_saveToWebStorage = function( json_str ){
     var key = this.webStorageKey( "RPG drill_timer" );
@@ -740,7 +841,7 @@ StorageManager.drill_GGT_saveToWebStorage = function( json_str ){
     localStorage.setItem(key, data);
 };
 //==============================
-// * 网页 - 读取
+// * 存档管理器 - C网页模式 - 载入
 //==============================
 StorageManager.drill_GGT_loadFromWebStorage = function(){
     var key = this.webStorageKey( "RPG drill_timer" );
