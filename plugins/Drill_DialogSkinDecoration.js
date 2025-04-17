@@ -344,6 +344,7 @@
  * @desc 只用于方便区分查看的标签，不作用在插件中。
  * @default ==新的装饰图==
  * 
+ * 
  * @param ---绑定---
  * @default 
  * 
@@ -430,7 +431,6 @@
  * @desc 注意，图片层级仅限于多个装饰图之间进行先后排序。
  * @default 4
  * 
- * 
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -446,7 +446,7 @@
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^2)*o(选项窗口数)*o(贴图处理) 每帧
 //		★性能测试因素	对话框管理层
-//		★性能测试消耗	7.51ms（drill_DSD_updatePosition）
+//		★性能测试消耗	7.51ms（drill_sprite_updateAttr_Position）
 //		★最坏情况		对话框填充了大量装饰图。（不过好像也问题不大）
 //		★备注			暂无
 //		
@@ -455,13 +455,24 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			对话框装饰图：
-//				->绑定到皮肤
-//					->样式切换时重贴装饰图
-//				->同步
-//					->可见情况
-//					->播放GIF
-//					->窗口y缩放大小同步
+//			->☆提示信息
+//			->☆静态数据
+//			->☆插件指令
+//			->☆存储数据
+//			
+//			->☆对话框控制
+//				->创建装饰图（Window_Base）
+//				->刷新装饰图（Window_Base）
+//			->☆对话框子窗口控制
+//				->4A金钱窗口
+//				->4B选择项窗口
+//				->4C数字输入窗口
+//				->4D选择物品窗口
+//				x->4E姓名框窗口
+//			
+//			->对话框装饰图【Drill_DSD_DecorationSprite】
+//				->A主体
+//				->B播放GIF
 //
 //
 //		★家谱：
@@ -484,7 +495,7 @@
 //		
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -495,7 +506,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_DSD_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_DSD_PluginTip_baseList.length == 0 ){ return ""; }
@@ -509,11 +520,11 @@
 	
 	
 //=============================================================================
-// ** 静态数据
+// ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_DialogSkinDecoration = true;
-　　var DrillUp = DrillUp || {}; 
+	var Imported = Imported || {};
+	Imported.Drill_DialogSkinDecoration = true;
+	var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_DialogSkinDecoration');
 
 	//==============================
@@ -570,11 +581,20 @@ if( Imported.Drill_DialogSkin ){
 	
 
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_DSD_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_DSD_pluginCommand.call(this, command, args);
+	this.drill_DSD_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_DSD_pluginCommand = function( command, args ){
 	if( command === ">对话框装饰图" ){
 		
 		if(args.length == 4){
@@ -598,7 +618,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -699,36 +719,40 @@ Game_System.prototype.drill_DSD_checkSysData_Private = function() {
 };
 
 
+
 //=============================================================================
-// * 对话框
+// ** ☆对话框控制
+//
+//			说明：	> 该模块将对 对话框 进行专门管理。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 对话框 - 初始化
+// * 3A主体 - 初始化
 //==============================
 var _drill_DSD_initialize = Window_Message.prototype.initialize;
 Window_Message.prototype.initialize = function() {
 	_drill_DSD_initialize.call( this );
-
 	this.drill_DSD_createSprite();			//创建装饰图
 };
 //==============================
-// * 对话框 - 设置背景（非帧刷新，窗口/暗淡/透明）
+// * 3A主体 - 设置背景（非帧刷新，窗口/暗淡/透明）
 //
-//			说明：	窗口类型切换时，刷新装饰图的出现情况。
+//			说明：	> 窗口类型切换时，刷新装饰图的出现情况。
 //==============================
 var _drill_DSD_setBackgroundType = Window_Message.prototype.setBackgroundType;
 Window_Message.prototype.setBackgroundType = function( type ){
 	_drill_DSD_setBackgroundType.call( this,type );
 	
     if( type === 0 ){	// 窗口 类型
-		this.drill_DSD_refreshSprite();
+		this.drill_DSD_refreshSprite();		//刷新装饰图
 	}
 }
 
 //==============================
-// * 通用函数 - 创建装饰图层
+// * 对话框控制 - 创建装饰图（Window_Base）
 //==============================
-Window_Message.prototype.drill_DSD_createSprite = function() {
+Window_Base.prototype.drill_DSD_createSprite = function() {
+	if( this._drill_DSk_tag == undefined ){ return; }
 	
 	// > 装饰图层
 	this._drill_DSD_spriteLayer = new Sprite();
@@ -740,11 +764,12 @@ Window_Message.prototype.drill_DSD_createSprite = function() {
 	this._drill_DSD_curStyle = -1;
 };
 //==============================
-// * 通用函数 - 刷新装饰图
+// * 对话框控制 - 刷新装饰图（Window_Base）
 //
-//			说明：	每个窗口中都建立一个装饰图层，然后根据样式检查，删除全部装饰图，再重建并添加到图层。
+//			说明：	> 每个窗口中都建立一个装饰图层，然后根据样式检查，删除全部装饰图，再重建并添加到图层。
 //==============================
-Window_Message.prototype.drill_DSD_refreshSprite = function(){
+Window_Base.prototype.drill_DSD_refreshSprite = function(){
+	if( this._drill_DSk_tag == undefined ){ return; }
 	
 	// > 样式检查
 	var styleId = $gameSystem.drill_DSk_getStyleId( this._drill_DSk_tag );
@@ -772,44 +797,37 @@ Window_Message.prototype.drill_DSD_refreshSprite = function(){
 		}
 	}
 	
-	
 	// > 层级排序
 	this._drill_DSD_spriteLayer.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
 };
 
 
+
 //=============================================================================
-// * 对话框子窗口
+// ** ☆对话框子窗口控制
+//
+//			说明：	> 该模块将对 对话框的子窗口 进行专门管理。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 金钱窗口 - 初始化
+// * 4A金钱窗口 - 初始化
 //==============================
 var _drill_DSD_createSubWindows = Window_Message.prototype.createSubWindows;
 Window_Message.prototype.createSubWindows = function(){
 	_drill_DSD_createSubWindows.call( this );
-	this._goldWindow.drill_DSD_createSprite = this.drill_DSD_createSprite;		
-	this._goldWindow.drill_DSD_refreshSprite = this.drill_DSD_refreshSprite;	
-	
-	this._goldWindow.drill_DSD_createSprite();		//创建装饰图
+	this._goldWindow.drill_DSD_createSprite();
 }
 //==============================
-// * 金钱窗口 - 刷新
+// * 4A金钱窗口 - 刷新
 //==============================
 var _drill_DSD_Gold_open = Window_Gold.prototype.open;
 Window_Gold.prototype.open = function() {
 	_drill_DSD_Gold_open.call(this);
-	
-	if( this._drill_DSD_tag != undefined ){
-		this.drill_DSD_refreshSprite();
-	}
+	this.drill_DSD_refreshSprite();
 }
+
 //==============================
-// * 选择项窗口 - 相同函数
-//==============================
-Window_ChoiceList.prototype.drill_DSD_createSprite = Window_Message.prototype.drill_DSD_createSprite;
-Window_ChoiceList.prototype.drill_DSD_refreshSprite = Window_Message.prototype.drill_DSD_refreshSprite;
-//==============================
-// * 选择项窗口 - 初始化
+// * 4B选择项窗口 - 初始化
 //==============================
 var _drill_DSD_ChoiceList_initialize = Window_ChoiceList.prototype.initialize;
 Window_ChoiceList.prototype.initialize = function( messageWindow ){
@@ -817,20 +835,16 @@ Window_ChoiceList.prototype.initialize = function( messageWindow ){
 	this.drill_DSD_createSprite();
 }
 //==============================
-// * 选择项窗口 - 刷新
+// * 4B选择项窗口 - 刷新
 //==============================
 var _drill_DSD_ChoiceList_start = Window_ChoiceList.prototype.start;
 Window_ChoiceList.prototype.start = function() {
 	_drill_DSD_ChoiceList_start.call(this);
 	this.drill_DSD_refreshSprite();	
 }
+
 //==============================
-// * 数字输入窗口 - 相同函数
-//==============================
-Window_NumberInput.prototype.drill_DSD_createSprite = Window_Message.prototype.drill_DSD_createSprite;
-Window_NumberInput.prototype.drill_DSD_refreshSprite = Window_Message.prototype.drill_DSD_refreshSprite;
-//==============================
-// * 数字输入窗口 - 初始化
+// * 4C数字输入窗口 - 初始化
 //==============================
 var _drill_DSD_NumberInput_initialize = Window_NumberInput.prototype.initialize;
 Window_NumberInput.prototype.initialize = function( messageWindow ){
@@ -838,20 +852,16 @@ Window_NumberInput.prototype.initialize = function( messageWindow ){
 	this.drill_DSD_createSprite();
 }
 //==============================
-// * 数字输入窗口 - 刷新
+// * 4C数字输入窗口 - 刷新
 //==============================
 var _drill_DSD_NumberInput_start = Window_NumberInput.prototype.start;
 Window_NumberInput.prototype.start = function() {
 	_drill_DSD_NumberInput_start.call(this);
 	this.drill_DSD_refreshSprite();
 }
+
 //==============================
-// * 选择物品窗口 - 相同函数
-//==============================
-Window_EventItem.prototype.drill_DSD_createSprite = Window_Message.prototype.drill_DSD_createSprite;
-Window_EventItem.prototype.drill_DSD_refreshSprite = Window_Message.prototype.drill_DSD_refreshSprite;
-//==============================
-// * 选择物品窗口 - 初始化
+// * 4D选择物品窗口 - 初始化
 //==============================
 var _drill_DSD_EventItem_initialize = Window_EventItem.prototype.initialize;
 Window_EventItem.prototype.initialize = function( messageWindow ){
@@ -859,7 +869,7 @@ Window_EventItem.prototype.initialize = function( messageWindow ){
 	this.drill_DSD_createSprite();
 }
 //==============================
-// * 选择物品窗口 - 刷新
+// * 4D选择物品窗口 - 刷新
 //==============================
 var _drill_DSD_EventItem_start = Window_EventItem.prototype.start;
 Window_EventItem.prototype.start = function() {
@@ -871,16 +881,30 @@ Window_EventItem.prototype.start = function() {
 
 //=============================================================================
 // ** 对话框装饰图【Drill_DSD_DecorationSprite】
-//			
-// 			代码：	> 范围 - 该类额外显示单图的装饰。
-//					> 结构 - [ ●合并/分离/ 混乱 ] 数据与贴图合并。只有visible被控制。
-//					> 数量 - [单个/ ●多个 ] 
-//					> 创建 - [ ●一次性 /自延迟/外部延迟] 
-//					> 销毁 - [ ●不考虑 /自销毁/外部销毁] 
-//					> 样式 - [ ●不可修改 /自变化/外部变化] 
+// **		
+// **		作用域：	地图界面、战斗界面
+// **		主功能：	定义一个贴图。
+// **		子功能：	
+// **					->贴图『独立贴图』
+// **						x->显示贴图/隐藏贴图
+// **						x->是否就绪
+// **						x->优化策略
+// **						x->销毁
+// **						->初始化数据
+// **						->初始化对象
+// **					
+// **					->A主体
+// **					->B播放GIF
+// **
+// **		代码：	> 范围 - 该类额外显示单图的装饰。
+// **				> 结构 - [ ●合并/分离/ 混乱 ] 数据与贴图合并。只有visible被控制。
+// **				> 数量 - [单个/ ●多个 ] 
+// **				> 创建 - [ ●一次性 /自延迟/外部延迟] 
+// **				> 销毁 - [ ●不考虑 /自销毁/外部销毁] 
+// **				> 样式 - [ ●不可修改 /自变化/外部变化] 
 //=============================================================================
 //==============================
-// * 装饰图 - 定义
+// * 对话框装饰图 - 定义
 //==============================
 function Drill_DSD_DecorationSprite() {
 	this.initialize.apply(this, arguments);
@@ -888,48 +912,65 @@ function Drill_DSD_DecorationSprite() {
 Drill_DSD_DecorationSprite.prototype = Object.create(Sprite.prototype);
 Drill_DSD_DecorationSprite.prototype.constructor = Drill_DSD_DecorationSprite;
 //==============================
-// * 装饰图 - 初始化
+// * 对话框装饰图 - 初始化
 //==============================
 Drill_DSD_DecorationSprite.prototype.initialize = function( data, parent ){
 	Sprite.prototype.initialize.call(this);
 	this._drill_data = data;
 	this._drill_parent = parent;
 	
-	// > 资源读取
-	this._drill_bitmaps = [];
-	for(var j = 0; j < data['gif_src'].length ; j++){
-		var src_str = data['gif_src'][j];
-		var obj_bitmap = ImageManager.loadBitmap( data['gif_src_file'], src_str, 0, true);
-		this._drill_bitmaps.push( obj_bitmap );
-	};
-	this._drill_gifTime = 0;
-	
-	this.anchor.x = 0.5;
-	this.anchor.y = 0.5;
+	this.drill_initData();						//初始化数据
+	this.drill_initSprite();					//初始化对象
 };
 //==============================
-// * 装饰图 - 帧刷新
+// * 对话框装饰图 - 帧刷新
 //==============================
 Drill_DSD_DecorationSprite.prototype.update = function() {
 	Sprite.prototype.update.call(this);
 	
-	this.drill_DSD_updateVisible();			//帧刷新 - 可见情况
-	this.drill_DSD_updatePosition();		//帧刷新 - 位置
-	this.drill_DSD_updateGIF();				//帧刷新 - 播放GIF
+	this.drill_sprite_updateAttr();				//帧刷新 - A主体
+	this.drill_sprite_updateAttr_Position();	//帧刷新 - A主体 - 位置
+	this.drill_sprite_updateGIF();				//帧刷新 - 播放GIF
+};
+//==============================
+// * 对话框装饰图 - 初始化数据『独立贴图』
+//==============================
+Drill_DSD_DecorationSprite.prototype.drill_initData = function() {
+	//（暂无 默认值）
+};
+//==============================
+// * 对话框装饰图 - 初始化对象『独立贴图』
+//==============================
+Drill_DSD_DecorationSprite.prototype.drill_initSprite = function() {
+	this.drill_sprite_initAttr();				//子功能初始化 - A主体
+	this.drill_sprite_initGIF();				//子功能初始化 - B播放GIF
+};
+
+//==============================
+// * A主体 - 子功能初始化
+//==============================
+Drill_DSD_DecorationSprite.prototype.drill_sprite_initAttr = function() {
+	
+	// > 私有属性初始化
+	this.anchor.x = 0.5;
+	this.anchor.y = 0.5;
 }
 //==============================
-// * 帧刷新 - 可见情况
+// * A主体 - 帧刷新
 //==============================
-Drill_DSD_DecorationSprite.prototype.drill_DSD_updateVisible = function() {
+Drill_DSD_DecorationSprite.prototype.drill_sprite_updateAttr = function() {
 	var data = this._drill_data;
 	
+	// > 可见
 	this.visible = $gameSystem._drill_DSD_visibleTank[ data['id'] ];
-	this.scale.y = this._drill_parent._windowSpriteContainer.scale.y;	//（保持y缩放）
+	
+	// > 窗口开关动画
+	this.scale.y = this._drill_parent._windowSpriteContainer.scale.y;
 }
 //==============================
-// * 帧刷新 - 位置
+// * A主体 - 帧刷新 - 位置
 //==============================
-Drill_DSD_DecorationSprite.prototype.drill_DSD_updatePosition = function() {
+Drill_DSD_DecorationSprite.prototype.drill_sprite_updateAttr_Position = function() {
 	var data = this._drill_data;
 	
 	var xx = data['position_x'];
@@ -977,15 +1018,35 @@ Drill_DSD_DecorationSprite.prototype.drill_DSD_updatePosition = function() {
 	this.x = xx;
 	this.y = yy;
 }
+
 //==============================
-// * 帧刷新 - 播放GIF
+// * B播放GIF - 子功能初始化
 //==============================
-Drill_DSD_DecorationSprite.prototype.drill_DSD_updateGIF = function() {
+Drill_DSD_DecorationSprite.prototype.drill_sprite_initGIF = function() {
+	var data = this._drill_data;
+	
+	// > 资源读取
+	this._drill_bitmaps = [];
+	for(var j = 0; j < data['gif_src'].length ; j++){
+		var src_str = data['gif_src'][j];
+		var obj_bitmap = ImageManager.loadBitmap( data['gif_src_file'], src_str, 0, true);
+		this._drill_bitmaps.push( obj_bitmap );
+	};
+	
+	// > GIF时间
+	this._drill_gifTime = 0;
+}
+//==============================
+// * B播放GIF - 帧刷新
+//==============================
+Drill_DSD_DecorationSprite.prototype.drill_sprite_updateGIF = function() {
 	var data = this._drill_data;
 	if( this._drill_bitmaps.length == 0 ){ return; }
+	
+	// > GIF时间+1
 	this._drill_gifTime += 1;
 	
-	// > 播放gif
+	// > GIF播放
 	var inter = this._drill_gifTime;
 	inter = inter / data['gif_interval'];
 	inter = inter % this._drill_bitmaps.length;
@@ -994,7 +1055,6 @@ Drill_DSD_DecorationSprite.prototype.drill_DSD_updateGIF = function() {
 	}
 	inter = Math.floor(inter);
 	this.bitmap = this._drill_bitmaps[inter];
-	
 };
 
 

@@ -80,7 +80,7 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称：		RATW (Route_Along_The_Wall)
+//		插件简称		RATW (Route_Along_The_Wall)
 //		临时全局变量	DrillUp.g_RATW_xxx
 //		临时局部变量	无
 //		存储数据变量	无
@@ -143,7 +143,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_RATW_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_RATW_PluginTip_baseList.length == 0 ){ return ""; }
@@ -159,10 +159,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_RouteAlongTheWall = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_RouteAlongTheWall');
+	var Imported = Imported || {};
+	Imported.Drill_RouteAlongTheWall = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_RouteAlongTheWall');
 
 
 //=============================================================================

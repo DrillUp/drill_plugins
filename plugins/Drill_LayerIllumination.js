@@ -1836,7 +1836,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_LIl_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_LIl_PluginTip_baseList.length == 0 ){ return ""; }
@@ -1888,10 +1888,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_LayerIllumination = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_LayerIllumination');
+	var Imported = Imported || {};
+	Imported.Drill_LayerIllumination = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_LayerIllumination');
 
 	//==============================
 	// * 静态数据 - 光源
@@ -1960,11 +1960,20 @@ if( Imported.Drill_CoreOfDynamicMask ){
 
 
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_LIl_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_LIl_pluginCommand.call(this, command, args);
+	this.drill_LIl_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_LIl_pluginCommand = function( command, args ){
 	if( command === ">自定义照明" ){
 		
 		/*-----------------黑暗层------------------*/
@@ -2490,7 +2499,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 };
 //==============================
-// ** 插件指令 - 事件检查
+// * 插件指令 - 事件检查
 //==============================
 Game_Map.prototype.drill_LIl_isEventExist = function( e_id ){
 	if( e_id == 0 ){ return false; }
@@ -2503,7 +2512,7 @@ Game_Map.prototype.drill_LIl_isEventExist = function( e_id ){
 	return true;
 };
 //==============================
-// ** 插件指令 - 图片检查
+// * 插件指令 - 图片检查
 //==============================
 Game_Screen.prototype.drill_LIl_isPictureExist = function( pic_id ){
 	if( pic_id == 0 ){ return false; }
@@ -2744,28 +2753,28 @@ Graphics._updateAllElements = function() {
 
 //=============================================================================
 // ** 黑暗层贴图【Drill_LIl_MaskSprite】
-//			
-//			
-//			主功能：	定义一个贴图，能够容纳光源，并实现遮挡效果。
-//			子功能：	
-//						->渲染
-//							->低帧优化
-//							->遮罩高宽
-//							->渲染材质（PIXI.BaseTexture）
-//						->绘制层
-//							->场景容器
-//							->添加光源（可嵌套）
-//							->移除光源
-//							->贴图底色
-//
-//	 		代码：	> 范围 - 该类显示单独的黑暗层。
-//					> 结构 - [ ●合并 /分离/混乱] 数据与贴图合并。
-//					> 数量 - [ ●单个 /多个] 
-//					> 创建 - [ ●一次性 /自延迟/外部延迟] 
-//					> 销毁 - [ ●不考虑 /自销毁/外部销毁 ] 
-//					> 样式 - [不可修改/ ●自变化 /外部变化] 根据地图注释配置样式，创建后样式根据$gameSystem的部分参数变化。
-//					
-//			说明：	此功能可类比 Drill_CODM_MaskSprite 动态遮罩贴图。
+// **
+// **		作用域：	地图界面
+// **		主功能：	定义一个贴图，能够容纳光源，并实现遮挡效果。
+// **		子功能：	
+// **					->渲染
+// **						->低帧优化
+// **						->遮罩高宽
+// **						->渲染材质（PIXI.BaseTexture）
+// **					->绘制层
+// **						->场景容器
+// **						->添加光源（可嵌套）
+// **						->移除光源
+// **						->贴图底色
+// **
+// ** 		代码：	> 范围 - 该类显示单独的黑暗层。
+// **				> 结构 - [ ●合并 /分离/混乱] 数据与贴图合并。
+// **				> 数量 - [ ●单个 /多个] 
+// **				> 创建 - [ ●一次性 /自延迟/外部延迟] 
+// **				> 销毁 - [ ●不考虑 /自销毁/外部销毁 ] 
+// **				> 样式 - [不可修改/ ●自变化 /外部变化] 根据地图注释配置样式，创建后样式根据$gameSystem的部分参数变化。
+// **				
+// **		说明：	此功能可类比 Drill_CODM_MaskSprite 动态遮罩贴图。
 //=============================================================================
 //==============================
 // * 黑暗层贴图 - 定义
@@ -3299,16 +3308,17 @@ Game_System.prototype.drill_LIl_rotateTo = function( marker_id, o_data ){
 
 //=============================================================================
 // ** 物体照明容器
-//			
-//			主功能：	> 专门控制该插件 动态遮罩板 的 物体照明 的容器。
-//			子功能：	
-//						->物体照明（简单透视镜）
-//							> 绑定事件
-//							> 绑定鼠标
-//							> 绑定图片
-//						->高级照明（高级透视镜）
-//
-//			说明：	直接使用父类的容器【Drill_CODM_PerspectiveMarkerContainer】，添加数据。
+// **
+// **		作用域：	地图界面
+// **		主功能：	专门控制该插件 动态遮罩板 的 物体照明 的容器。
+// **		子功能：	
+// **					->物体照明（简单透视镜）
+// **						> 绑定事件
+// **						> 绑定鼠标
+// **						> 绑定图片
+// **					->高级照明（高级透视镜）
+// **
+// **		说明：	> 直接使用父类的容器【Drill_CODM_PerspectiveMarkerContainer】，添加数据。
 //=============================================================================
 //==============================
 // * 物体容器 - 地图初始化

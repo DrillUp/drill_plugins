@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.6]        地图UI - 永久漂浮文字
+ * @plugindesc [v1.7]        地图UI - 永久漂浮文字
  * @author Drill_up
  * 
  * @Drill_LE_param "永久漂浮样式-%d"
@@ -26,7 +26,7 @@
  * 必须基于核心插件才能运行。
  * 基于：
  *   - Drill_CoreOfBallistics       数学模型-弹道核心★★v2.1及以上★★
- *   - Drill_CoreOfWindowAuxiliary  系统-窗口辅助核心
+ *   - Drill_CoreOfWindowCharacter  窗口字符-窗口字符核心★★v2.0及以上★★
  * 可扩展：
  *   - Drill_CoreOfString           系统-字符串核心
  *     可以在漂浮文字中，绑定并显示自定义的字符串。
@@ -57,6 +57,11 @@
  *        轨道锚点模式  x
  *        两点式        √
  *   (2.永久漂浮文字移动时，必须设置移动到指定的点位置。
+ * 逐个绘制：
+ *   (1.该文本域 支持 消息输入字符。
+ *   (2.该文本域的绘制方式为 逐个绘制，即在一段时间内持续绘制文本。
+ *      持续绘制时如果重置文本，则会重新 逐个绘制 。
+ *   (3.该插件可以通过 配置样式 或 插件指令 来启用逐个绘制。
  * 设计：
  *   (1.由于这类漂浮文字是可以长期存在的对象，你可以设置成某种提示性标语。
  *      或者任务清单提示、无边框的属性参数面板等。
@@ -137,6 +142,36 @@
  * 2.建议使用 字符串 来控制，字符串不仅支持空格，还支持 换行符 。
  * 
  * -----------------------------------------------------------------------------
+ * ----可选设定 - 定时重绘
+ * 你可以通过插件指令，设置定时重绘：
+ * 
+ * 插件指令：>地图永久漂浮文字 : 漂浮文字[1] : 开启定时重绘
+ * 插件指令：>地图永久漂浮文字 : 漂浮文字[1] : 关闭定时重绘
+ * 插件指令：>地图永久漂浮文字 : 漂浮文字[1] : 设置定时重绘 : 间隔时间[60]
+ * 
+ * 1.定时重绘主要用于 指代字符、表达式 的实时变化，比如"\v[21]"变量。
+ *   注意，只有在不同的时间会变成其它文本的文本，才需要刷新。
+ *   普通文本没必要刷新。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 逐个绘制
+ * 你可以通过插件指令，设置定时重绘：
+ * （注意，冒号左右都有一个空格）
+ * 
+ * 插件指令：>地图永久漂浮文字 : 漂浮文字[1] : 启用逐个绘制
+ * 插件指令：>地图永久漂浮文字 : 漂浮文字[1] : 关闭逐个绘制
+ * 
+ * 插件指令：>地图永久漂浮文字 : 漂浮文字[1] : 修改逐个绘制设置 : 间隔时间[4]
+ * 插件指令：>地图永久漂浮文字 : 漂浮文字[1] : 重新逐个绘制
+ * 
+ * 1.显示图片后，需要手动"启用逐个绘制"。
+ *   删除图片会自动关闭逐个绘制。
+ *   注意，定时重绘 和 逐个绘制 功能相互不兼容，开启这个会自动关闭另一个功能。
+ * 2.插件指令最好先 "启用逐个绘制" 然后 "设置文本"，或者样式中直接开启。
+ *   因为"设置文本"默认一次性绘制，执行后瞬间就出来了，所以最好先 "启用逐个绘制"。
+ *   当然，你也可以把开启放后面，然后再执行一次 "重新逐个绘制"，也能实现一样的效果。
+ * 
+ * -----------------------------------------------------------------------------
  * ----插件性能
  * 测试仪器：   4G 内存，Intel Core i5-2520M CPU 2.5GHz 处理器
  *              Intel(R) HD Graphics 3000 集显 的垃圾笔记本
@@ -176,6 +211,17 @@
  * 添加了漂浮文字外框设置色调的功能。
  * [v1.6]
  * 修复了使用自定义窗口皮肤时文字变黑的bug。
+ * [v1.7]
+ * 更新并兼容了新的窗口字符底层。
+ * 
+ * 
+ * 
+ * @param DEBUG-是否提示找不到配置数据
+ * @type boolean
+ * @on 提示
+ * @off 关闭提示
+ * @desc true - 提示，false - 关闭提示。如果你知道存在此问题但不想弹出此提示，可在配置中关闭此提示。
+ * @default true
  * 
  * @param ---样式组 1至20---
  * @default 
@@ -598,21 +644,6 @@
  * @desc 窗口追随鼠标时，中心锚点的位置。
  * @default 左上角
  *
- * @param 窗口是否自适应行间距
- * @parent ---窗口属性---
- * @type boolean
- * @on 自适应
- * @off 固定行间距
- * @desc true - 自适应，false - 固定行间距
- * @default true
- *
- * @param 窗口固定行间距
- * @parent 窗口是否自适应行间距
- * @type number
- * @min 1
- * @desc 如果你取消了自适应行间距，这里将使得每行的文字的行间距都是固定值。（默认：36）
- * @default 24
- *
  * @param 窗口内边距
  * @parent ---窗口属性---
  * @type number
@@ -636,6 +667,44 @@
  * @parent ---窗口属性---
  * @desc 在当前自适应的基础上，再额外增加的高度。可为负数。
  * @default 0
+ * 
+ * 
+ * @param ---定时重绘---
+ * @default 
+ *
+ * @param 是否启用定时重绘
+ * @parent ---定时重绘---
+ * @type boolean
+ * @on 启用
+ * @off 关闭
+ * @desc true - 启用，false - 关闭。如果文本会实时变化，则需要开定时重绘。
+ * @default false
+ *
+ * @param 定时重绘间隔时间
+ * @parent ---定时重绘---
+ * @type number
+ * @min 1
+ * @desc 文本定时重绘的间隔时间，单位帧。（1秒60帧）
+ * @default 45
+ * 
+ * 
+ * @param ---逐个绘制---
+ * @default 
+ * 
+ * @param 是否启用逐个绘制
+ * @parent ---逐个绘制---
+ * @type boolean
+ * @on 启用
+ * @off 关闭
+ * @desc true - 启用，false - 关闭。逐个绘制启用后，文本中可以使用消息输入字符。
+ * @default false
+ * 
+ * @param 逐个绘制间隔时间
+ * @parent ---逐个绘制---
+ * @type number
+ * @min 1
+ * @desc 启用逐个绘制时，绘制的间隔时间，单位 帧/个。
+ * @default 4
  * 
  */
  
@@ -683,7 +752,9 @@
 //				->B窗口弹道
 //				->C窗口皮肤
 //				->D窗口内容
-//
+//					->定时重绘
+//					->逐个绘制
+//		
 //		
 //		★家谱：
 //			大家族-漂浮文字
@@ -696,7 +767,10 @@
 //		
 //		★必要注意事项：
 //			1.所有子插件功能介绍去看看："13.UI > 大家族-漂浮文字（脚本）.docx"。
-//	
+//			2.插件对比思路：
+//				将相似插件复制副本，然后副本的文本替换为：地图、Map、GFPT
+//				然后再将该插件与副本比较，除了注释、界面差异和镜头差异，大部分脚本都是一模一样的。
+//		
 //		★其它说明细节：
 //			暂无
 //
@@ -714,12 +788,12 @@
 	DrillUp.g_GFPT_PluginTip_curName = "Drill_GaugeFloatingPermanentText.js 地图UI-永久漂浮文字";
 	DrillUp.g_GFPT_PluginTip_baseList = [
 		"Drill_CoreOfBallistics.js 数学模型-弹道核心",
-		"Drill_CoreOfWindowAuxiliary.js 系统-窗口辅助核心"
+		"Drill_CoreOfWindowCharacter.js 窗口字符-窗口字符核心"
 	];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_GFPT_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_GFPT_PluginTip_baseList.length == 0 ){ return ""; }
@@ -746,19 +820,25 @@
 	// * 提示信息 - 报错 - 找不到配置数据
 	//==============================
 	DrillUp.drill_GFPT_getPluginTip_DataNotFind = function( text_id ){
-		return "【" + DrillUp.g_GFPT_PluginTip_curName + "】\n" +
+		return "【" + DrillUp.g_GFPT_PluginTip_curName + "】（此提示可在插件中关闭）\n" +   //『可关闭提示信息』
 				"插件指令错误，你需要先创建 漂浮文字["+text_id+"] 对象，再操作该对象。\n" + 
 				"比如：'>地图永久漂浮文字 : 漂浮文字["+text_id+"] : 创建 : 样式[样式id]' ";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 窗口字符底层校验
+	//==============================
+	DrillUp.drill_GFPT_getPluginTip_NeedUpdate_drawText = function(){
+		return "【" + DrillUp.g_GFPT_PluginTip_curName + "】\n检测到窗口字符核心版本过低。\n由于底层变化巨大，你需要更新 全部 窗口字符相关插件。\n去看看\"23.窗口字符 > 关于窗口字符底层全更新说明.docx\"进行更新。";
 	};
 	
 	
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_GaugeFloatingPermanentText = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_GaugeFloatingPermanentText');
+	var Imported = Imported || {};
+	Imported.Drill_GaugeFloatingPermanentText = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_GaugeFloatingPermanentText');
 	
 	
 	//==============================
@@ -798,15 +878,23 @@
 		
 		// > 窗口属性
 		data['window_anchor'] = String( dataFrom["窗口中心锚点"] || "左上角" );
-		data['window_autoLineheight'] = String(dataFrom["窗口是否自适应行间距"] || "true") === "true";	
-		data['window_lineheight'] = Number(dataFrom["窗口固定行间距"] || 28);
 		data['window_padding'] = Number( dataFrom["窗口内边距"] || 18);
 		data['window_fontsize'] = Number( dataFrom["窗口字体大小"] || 22);
 		data['window_ex_width'] = Number( dataFrom["窗口附加宽度"] || 0);
 		data['window_ex_height'] = Number( dataFrom["窗口附加高度"] || 0);
+		
+		// > 定时重绘
+		data['timedRedraw_enabled'] = String( dataFrom["是否启用定时重绘"] || "false") == "true";
+		data['timedRedraw_time'] = Number( dataFrom["定时重绘间隔时间"] || 45);
+		
+		// > 逐个绘制
+		data['timing_enabled'] = String( dataFrom["是否启用逐个绘制"] || "false") == "true";
+		data['timing_interval'] = Number( dataFrom["逐个绘制间隔时间"] || 4);
+		data['timing_needRedraw'] = undefined;
+		if( data['timing_enabled'] == true ){ data['timedRedraw_enabled'] = false; }	//（功能互斥）
+		
 		return data;
 	}
-	
 	
 	/*-----------------永久漂浮样式集合------------------*/
 	DrillUp.g_GFPT_style_length = 40;
@@ -822,23 +910,35 @@
 			DrillUp.g_GFPT_style[i]['inited'] = false;
 		}
 	}
-
-
-
+	
+	/*-----------------杂项------------------*/
+	DrillUp.g_GFPT_TipEnabled_DataNotFind = String(DrillUp.parameters["DEBUG-是否提示找不到配置数据"] || "true") === "true";
+	
+	
+	
 //=============================================================================
 // * >>>>基于插件检测>>>>
 //=============================================================================
 if( Imported.Drill_CoreOfBallistics &&
-	Imported.Drill_CoreOfWindowAuxiliary ){
+	Imported.Drill_CoreOfWindowCharacter ){
 	
 	
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_GFPT_pluginCommand = Game_Interpreter.prototype.pluginCommand
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_GFPT_pluginCommand.call(this, command, args);
-	if(command === ">地图永久漂浮文字"){
+	this.drill_GFPT_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_GFPT_pluginCommand = function( command, args ){
+	if( command === ">地图永久漂浮文字" ){
 		
 		/*-----------------对象获取------------------*/
 		var text_id = null;
@@ -1011,6 +1111,65 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				}
 			}
 		}
+		
+		/*-----------------定时重绘------------------*/
+		if( text_id != null && args.length == 4 ){	
+			var type = String(args[3]);
+			if( type == "开启定时重绘" ){
+				if( this.drill_GFPT_isDataExist( text_id ) == false ){ return; }
+				$gameSystem._drill_GFPT_dataTank[ text_id ]['timedRedraw_enabled'] = true;
+				$gameSystem._drill_GFPT_dataTank[ text_id ]['timing_enabled'] = false;		//（功能互斥）
+			}
+			if( type == "关闭定时重绘" ){
+				if( this.drill_GFPT_isDataExist( text_id ) == false ){ return; }
+				$gameSystem._drill_GFPT_dataTank[ text_id ]['timedRedraw_enabled'] = false;
+			}
+		}
+		if( text_id != null && args.length == 6 ){	
+			var type = String(args[3]);
+			var temp1 = String(args[5]);
+			if( type == "设置定时重绘" ){
+				if( this.drill_GFPT_isDataExist( text_id ) == false ){ return; }
+				if( temp1.indexOf("间隔时间[") != -1 ){
+					temp1 = temp1.replace("间隔时间[","");
+					temp1 = temp1.replace("]","");
+					$gameSystem._drill_GFPT_dataTank[ text_id ]['timedRedraw_time'] = Number(temp1);
+				}
+			}
+		}
+		
+		/*-----------------逐个绘制------------------*/
+		if( text_id != null && args.length == 4 ){
+			var type = String(args[3]);
+			if( type == "启用逐个绘制" ){
+				if( this.drill_GFPT_isDataExist( text_id ) == false ){ return; }
+				$gameSystem._drill_GFPT_dataTank[ text_id ]['timing_enabled'] = true;
+				$gameSystem._drill_GFPT_dataTank[ text_id ]['timedRedraw_enabled'] = false;	//（功能互斥）
+			}
+			if( type == "关闭逐个绘制" ){
+				if( this.drill_GFPT_isDataExist( text_id ) == false ){ return; }
+				$gameSystem._drill_GFPT_dataTank[ text_id ]['timing_enabled'] = false;
+			}
+		}
+		if( text_id != null && args.length == 6 ){
+			var type = String(args[3]);
+			var temp1 = String(args[5]);
+			if( type == "修改逐个绘制设置" ){
+				if( this.drill_GFPT_isDataExist( text_id ) == false ){ return; }
+				if( temp1.indexOf("间隔时间[") != -1 ){
+					temp1 = temp1.replace("间隔时间[","");
+					temp1 = temp1.replace("]","");
+					$gameSystem._drill_GFPT_dataTank[ text_id ]['timing_interval'] = Number(temp1);
+				}
+			}
+		}
+		if( text_id != null && args.length == 4 ){	
+			var type = String(args[3]);
+			if( type == "重新逐个绘制" ){
+				if( this.drill_GFPT_isDataExist( text_id ) == false ){ return; }
+				$gameSystem._drill_GFPT_dataTank[ text_id ]['timing_needRedraw'] = true;
+			}
+		}
 	};
 };
 //==============================
@@ -1022,7 +1181,9 @@ Game_Interpreter.prototype.drill_GFPT_isDataExist = function( text_id ){
 	}
 	var data = $gameSystem._drill_GFPT_dataTank[ Number(text_id) ];
 	if( data == undefined ){
-		alert( DrillUp.drill_GFPT_getPluginTip_DataNotFind( text_id ) );
+		if( DrillUp.g_GFPT_TipEnabled_DataNotFind == true ){  //『可关闭提示信息』
+			alert( DrillUp.drill_GFPT_getPluginTip_DataNotFind( text_id ) );
+		}
 		return false;
 	}
 	return true;
@@ -1607,8 +1768,6 @@ Scene_Map.prototype.drill_GFPT_updateDataMoving = function() {
 	for( var i = 0; i < $gameSystem._drill_GFPT_dataTank_moveBuffer.length; i++ ){
 		var m_data = $gameSystem._drill_GFPT_dataTank_moveBuffer[i];
 		if( m_data == undefined ){ continue; }
-		var data = $gameSystem._drill_GFPT_dataTank[i];
-		if( data == undefined ){ continue; }
 		
 		$gameSystem.drill_GFPT_moveTo( i, m_data );
 		$gameSystem._drill_GFPT_dataTank_moveBuffer[i] = null;
@@ -1651,17 +1810,17 @@ Scene_Map.prototype.drill_GFPT_updateDataOpacity = function() {
 //=============================================================================
 // ** 地图永久 漂浮文字窗口【Drill_GFPT_Window】
 // **		
-// **		索引：	无
-// **		来源：	继承于Window_Base
-// **		实例：	Scene_Map下的 _drill_GFPT_window 成员
-// **		应用：	暂无
-// **		
 // **		作用域：	地图界面
-// **		主功能：	定义一个面板，能随时改变内容和高宽，用于描述事件内置信息。
-// **		子功能：	->窗口
+// **		主功能：	定义一个窗口，能随时改变文本内容和高宽。
+// **		子功能：	
+// **					->窗口『独立贴图』
+// **						x->显示贴图/隐藏贴图
 // **						x->是否就绪
 // **						x->优化策略
 // **						x->销毁
+// **						->初始化数据
+// **						->初始化对象
+// **					
 // **					->A主体
 // **						->中心锚点
 // **						x->UI基准
@@ -1675,7 +1834,9 @@ Scene_Map.prototype.drill_GFPT_updateDataOpacity = function() {
 // **					->D窗口内容
 // **						->窗口字符
 // **						->文本域自适应
-// **			
+// **						->定时重绘
+// **						->逐个绘制
+// **					
 // **		说明：	> 该窗口在游戏中创建后永久存在，需要手动销毁。
 // **				> 窗口的结构从 Drill_MPFP_Window 借鉴来，但是除了贴图内容，其他部分变化非常大。
 //=============================================================================
@@ -1706,22 +1867,16 @@ Drill_GFPT_Window.prototype.update = function() {
 	this.drill_updateAttr();			//帧刷新 - A主体
 	this.drill_updateBallistics();		//帧刷新 - B窗口弹道
 	this.drill_updateSkin();			//帧刷新 - C窗口皮肤
-										//帧刷新 - D窗口内容（无）
+	this.drill_updateMessage();			//帧刷新 - D窗口内容
 }
 //==============================
-// * 漂浮文字窗口 - 窗口属性
-//==============================
-Drill_GFPT_Window.prototype.lineHeight = function(){ return this._drill_data['window_lineheight']; };			//窗口行间距
-Drill_GFPT_Window.prototype.standardPadding = function(){ return this._drill_data['window_padding']; };			//窗口内边距
-Drill_GFPT_Window.prototype.standardFontSize = function(){ return this._drill_data['window_fontsize']; };		//窗口字体大小
-//==============================
-// * 漂浮文字窗口 - 初始化数据
+// * 漂浮文字窗口 - 初始化数据『独立贴图』
 //==============================
 Drill_GFPT_Window.prototype.drill_initData = function() {
 	//（暂无 默认值）
 }
 //==============================
-// * 漂浮文字窗口 - 初始化对象
+// * 漂浮文字窗口 - 初始化对象『独立贴图』
 //==============================
 Drill_GFPT_Window.prototype.drill_initSprite = function() {
 	this.drill_initAttr();					//初始化对象 - A主体
@@ -1729,6 +1884,11 @@ Drill_GFPT_Window.prototype.drill_initSprite = function() {
 	this.drill_initSkin();					//初始化对象 - C窗口皮肤
 	this.drill_initMessage();				//初始化对象 - D窗口内容
 }
+//==============================
+// * 漂浮文字窗口 - 窗口属性
+//==============================
+Drill_GFPT_Window.prototype.standardPadding = function(){ return this._drill_data['window_padding']; };			//窗口内边距
+Drill_GFPT_Window.prototype.standardFontSize = function(){ return this._drill_data['window_fontsize']; };		//窗口字体大小
 
 
 //==============================
@@ -1743,22 +1903,22 @@ Drill_GFPT_Window.prototype.drill_initAttr = function() {
 	this.contentsOpacity = 0;			//文本域 透明度
 	this.opacity = 0;					//背景容器层 透明度
 	
-	this._drill_width = 0;				//窗口宽度
-	this._drill_height = 0;				//窗口高度
+	this._drill_windowWidth = 0;		//窗口宽度
+	this._drill_windowHeight = 0;		//窗口高度
 	this._drill_curTime = 0;			//当前生命周期（暂未用到）
 	
 	// > 中心锚点
-	this._drill_anchor_x = 0;			//中心锚点x
-	this._drill_anchor_y = 0;			//中心锚点y
-	if( data['window_anchor'] == "左上角" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 0.0; }
-	if( data['window_anchor'] == "右上角" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 0.0; }
-	if( data['window_anchor'] == "左下角" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 1.0; }
-	if( data['window_anchor'] == "右下角" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 1.0; }
-	if( data['window_anchor'] == "正上方" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 0.0; }
-	if( data['window_anchor'] == "正下方" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 1.0; }
-	if( data['window_anchor'] == "正左方" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 0.5; }
-	if( data['window_anchor'] == "正右方" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 0.5; }
-	if( data['window_anchor'] == "正中心" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 0.5; }
+	this._drill_windowAnchorX = 0;			//中心锚点x
+	this._drill_windowAnchorY = 0;			//中心锚点y
+	if( data['window_anchor'] == "左上角" ){ this._drill_windowAnchorX = 0.0; this._drill_windowAnchorY = 0.0; }
+	if( data['window_anchor'] == "右上角" ){ this._drill_windowAnchorX = 1.0; this._drill_windowAnchorY = 0.0; }
+	if( data['window_anchor'] == "左下角" ){ this._drill_windowAnchorX = 0.0; this._drill_windowAnchorY = 1.0; }
+	if( data['window_anchor'] == "右下角" ){ this._drill_windowAnchorX = 1.0; this._drill_windowAnchorY = 1.0; }
+	if( data['window_anchor'] == "正上方" ){ this._drill_windowAnchorX = 0.5; this._drill_windowAnchorY = 0.0; }
+	if( data['window_anchor'] == "正下方" ){ this._drill_windowAnchorX = 0.5; this._drill_windowAnchorY = 1.0; }
+	if( data['window_anchor'] == "正左方" ){ this._drill_windowAnchorX = 0.0; this._drill_windowAnchorY = 0.5; }
+	if( data['window_anchor'] == "正右方" ){ this._drill_windowAnchorX = 1.0; this._drill_windowAnchorY = 0.5; }
+	if( data['window_anchor'] == "正中心" ){ this._drill_windowAnchorX = 0.5; this._drill_windowAnchorY = 0.5; }
 
 	// > UI基准初始位置
 	//	（存储在Game_System中，见 _drill_orgPos_x ）
@@ -1790,8 +1950,8 @@ Drill_GFPT_Window.prototype.drill_updateBallistics = function() {
 	// > 位置 设置
 	var xx = data['x'];		//（坐标被外层 移动弹道 控制）
 	var yy = data['y'];
-	xx -= this._drill_width * this._drill_anchor_x;		//（锚点偏移）
-	yy -= this._drill_height * this._drill_anchor_y;
+	xx -= this._drill_windowWidth * this._drill_windowAnchorX;		//（锚点偏移）
+	yy -= this._drill_windowHeight * this._drill_windowAnchorY;
 	
 	// > 镜头缩放与位移
 	if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】UI缩放与位移
@@ -1823,7 +1983,7 @@ Drill_GFPT_Window.prototype.drill_updateBallistics = function() {
 
 
 //==============================
-// * C窗口皮肤 - 初始化对象
+// * C窗口皮肤 - 初始化对象『窗口皮肤』
 //
 //			说明：	> 此函数只在初始化时执行一次，不要执行多了。
 //==============================
@@ -1832,16 +1992,20 @@ Drill_GFPT_Window.prototype.drill_initSkin = function() {
 	// > 皮肤资源
 	this._drill_skin_defaultSkin = this.windowskin;
 	
-	// > 布局模式
+	// > 初始化皮肤样式『窗口皮肤』
 	var data = this._drill_data;
 	this.drill_resetData_Skin( data );
 }
 //==============================
-// * C窗口皮肤 - 重设数据
+// * C窗口皮肤 - 重设数据『窗口皮肤』
 //
 //			说明：	> data对象中的参数【可以缺项】。
 //==============================
 Drill_GFPT_Window.prototype.drill_resetData_Skin = function( data ){
+	
+	// > 插件自定义值『窗口皮肤』
+	var window_pic_file1 = "img/Map__ui/";
+	var window_pic_file2 = "img/system/";
 	
 	// > 默认值
 	if( data['window_type'] == undefined ){ data['window_type'] = "默认窗口皮肤" };		//布局模式（默认窗口皮肤/自定义窗口皮肤/自定义背景图片/黑底背景）
@@ -1864,7 +2028,7 @@ Drill_GFPT_Window.prototype.drill_resetData_Skin = function( data ){
 	this._drill_skinBackground_width = 0;
 	this._drill_skinBackground_height = 0;
 	if( data['window_type'] == "自定义背景图片" && data['window_pic_src'] != "" ){
-		this._drill_skin_pic_bitmap = ImageManager.loadBitmap( "img/Map__ui/", data['window_pic_src'], 0, true );
+		this._drill_skin_pic_bitmap = ImageManager.loadBitmap( window_pic_file1, data['window_pic_src'], 0, true );
 		this._drill_skin_pic_x = data['window_pic_x'];
 		this._drill_skin_pic_y = data['window_pic_y'];
 	}else{
@@ -1872,7 +2036,7 @@ Drill_GFPT_Window.prototype.drill_resetData_Skin = function( data ){
 	}
 	
 	if( data['window_type'] == "自定义窗口皮肤" && data['window_sys_src'] != "" ){
-		this._drill_skin_sys_bitmap = ImageManager.loadBitmap( "img/system/", data['window_sys_src'], 0, true );
+		this._drill_skin_sys_bitmap = ImageManager.loadBitmap( window_pic_file2, data['window_sys_src'], 0, true );
 	}else{
 		this._drill_skin_sys_bitmap = this._drill_skin_defaultSkin;
 	}
@@ -1933,7 +2097,7 @@ Drill_GFPT_Window.prototype.drill_resetData_Skin = function( data ){
 		//this.opacity = 255;											//背景容器层 透明度
 		this._windowBackSprite.opacity = 0;								//背景容器层 - 平铺贴图 透明度
 		this._windowFrameSprite.opacity = 0;							//背景容器层 - 框架贴图 透明度
-		this._drill_skinBackground.opacity = this._drill_skin_opacity;	//背景容器层 - 背景图片 透明度]
+		this._drill_skinBackground.opacity = this._drill_skin_opacity;	//背景容器层 - 背景图片 透明度
 		
 		// （背景图片布局）
 		this._drill_skinBackground.bitmap = this._drill_skin_pic_bitmap;
@@ -1965,51 +2129,52 @@ Drill_GFPT_Window.prototype.drill_resetData_Skin = function( data ){
 	this._windowSpriteContainer.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
 }
 //==============================
-// * C窗口皮肤 - 帧刷新
+// * C窗口皮肤 - 帧刷新『窗口皮肤』
 //==============================
 Drill_GFPT_Window.prototype.drill_updateSkin = function() {
+	this.drill_updateSkin_skinBackground();		//帧刷新 - 高宽变化
+												//帧刷新 - 透明度锁定（无）
+}
+//==============================
+// * C窗口皮肤 - 帧刷新 - 高宽变化『窗口皮肤』
+//==============================
+Drill_GFPT_Window.prototype.drill_updateSkin_skinBackground = function() {
+	if( this._drill_windowWidth == undefined ){ return; }
+	if( this._drill_windowHeight == undefined ){ return; }
 	
+	// > 高宽变化 - 锁
+	if( this._drill_skinBackground_width  == this._drill_windowWidth &&
+		this._drill_skinBackground_height == this._drill_windowHeight ){
+		return;
+	}
+	this._drill_skinBackground_width = this._drill_windowWidth;
+	this._drill_skinBackground_height = this._drill_windowHeight;
+	
+	// > 高宽变化 - 背景图片（重置中心锚点）
 	if( this._drill_skin_type == "自定义背景图片" || this._drill_skin_type == "图片窗口布局" ){
-		
-		// > 高宽改变锁
-		if( this._drill_skinBackground_width  == this._drill_width &&
-			this._drill_skinBackground_height == this._drill_height ){
-			return;
-		}
-		this._drill_skinBackground_width = this._drill_width;
-		this._drill_skinBackground_height = this._drill_height;
-		
-		// > 背景图片与中心锚点
 		var xx = this._drill_skin_pic_x;
 		var yy = this._drill_skin_pic_y;
-		xx += this._drill_width * this._drill_anchor_x;
-		yy += this._drill_height * this._drill_anchor_y;
+		var anchor_x = this._drill_windowAnchorX || 0;
+		var anchor_y = this._drill_windowAnchorY || 0;
+		xx += this._drill_windowWidth  * anchor_x;
+		yy += this._drill_windowHeight * anchor_y;
 		this._drill_skinBackground.x = xx;
 		this._drill_skinBackground.y = yy;
-		this._drill_skinBackground.anchor.x = this._drill_anchor_x;
-		this._drill_skinBackground.anchor.y = this._drill_anchor_y;
+		this._drill_skinBackground.anchor.x = anchor_x;
+		this._drill_skinBackground.anchor.y = anchor_y;
 	}
 	
+	// > 高宽变化 - 黑底背景（重建黑色画布）
 	if( this._drill_skin_type == "黑底背景" || this._drill_skin_type == "黑底布局" ){
-		
-		// > 高宽改变锁
-		if( this._drill_skinBackground_width  == this._drill_width &&
-			this._drill_skinBackground_height == this._drill_height ){
-			return;
-		}
-		this._drill_skinBackground_width = this._drill_width;
-		this._drill_skinBackground_height = this._drill_height;
-		
-		// > 改变时新建黑色画布
-		this._drill_skinBackground_BlackBitmap = new Bitmap(this._drill_width, this._drill_height);
-		this._drill_skinBackground_BlackBitmap.fillRect(0, 0 , this._drill_width, this._drill_height, "#000000");
+		this._drill_skinBackground_BlackBitmap = new Bitmap(this._drill_windowWidth, this._drill_windowHeight);
+		this._drill_skinBackground_BlackBitmap.fillRect(0, 0 , this._drill_windowWidth, this._drill_windowHeight, "#000000");
 		this._drill_skinBackground.bitmap = this._drill_skinBackground_BlackBitmap;
 	}
 }
 //==============================
-// * C窗口皮肤 - 帧刷新色调
+// * C窗口皮肤 - 帧刷新色调『窗口皮肤』
 //
-//			说明：	setTone可以反复调用赋值，有变化监听的锁。
+//			说明：	> setTone可以反复调用赋值，因为函数内有变化监听锁。
 //==============================
 var _drill_GFPT_updateTone = Drill_GFPT_Window.prototype.updateTone;
 Drill_GFPT_Window.prototype.updateTone = function() {
@@ -2025,41 +2190,132 @@ Drill_GFPT_Window.prototype.updateTone = function() {
 // * D窗口内容 - 初始化对象
 //==============================
 Drill_GFPT_Window.prototype.drill_initMessage = function(){
-	var context = this._drill_data['context'];
-	//（此处context不需要任何变化，\str和\v都有效）
+	this._drill_GFPT_curTime = 0;
 	
-	this.drill_refreshMessage( context.split("\n") );
+	var context = this._drill_data['context'];
+	this.drill_refreshMessage( context );
+}
+//==============================
+// * D窗口内容 - 帧刷新
+//==============================
+Drill_GFPT_Window.prototype.drill_updateMessage = function(){
+	
+	var data = this._drill_data;
+	if( data['timedRedraw_enabled'] == true ){
+		
+		// > 『定时重绘』 时间+1
+		this._drill_GFPT_curTime += 1;
+		
+		// > 『定时重绘』 执行
+		if( this._drill_GFPT_curTime % data['timedRedraw_time'] == 1 ){	//（不要在0值刷新，可能会浪费刷很多次）
+			var context = data['context'];
+			this.drill_refreshMessage( context );
+		}
+	}
+	if( data['timing_enabled'] == true ){
+		
+		// > 逐个绘制 - 重新逐个绘制
+		if( data['timing_needRedraw'] != undefined ){
+			data['timing_needRedraw'] = undefined;
+			var context = data['context'];
+			this.drill_refreshMessage( context );	//（刷新文本）
+		}
+		
+		// > 逐个绘制 - 『字符逐个绘制流程』 - 逐个绘制帧刷新【窗口字符 - 窗口字符核心】
+		if( this.contents != undefined ){
+			this.contents.drill_COWC_timing_updateTick();
+		}
+	}
 }
 //==============================
 // * D窗口内容 - 刷新内容
 //==============================
-Drill_GFPT_Window.prototype.drill_refreshMessage = function( context_list ){
-	var data = this._drill_data;
-	if( context_list.length == 0 ){ return; }
+Drill_GFPT_Window.prototype.drill_refreshMessage = function( context ){
+
+	// > 『字符贴图流程』 - 清空字符块贴图【窗口字符 - 窗口字符贴图核心】
+	if( Imported.Drill_CoreOfWindowCharacterSprite ){
+		this.drill_COWCSp_sprite_clearAllSprite();
+	}
 	
+	// > 参数准备 - 校验
+	var temp_bitmap = this.contents;
+	if( temp_bitmap == undefined ){ return; }
+	var org_text = context;
+	if( org_text == undefined ){ return; }
+	if( org_text == "" ){ return; }
 	
-	// > 窗口高宽 - 计算（文本域自适应）
+	// > 参数准备
 	var options = {};
-	options['autoLineheight'] = data['window_autoLineheight'];
-	options['lineheight'] = data['window_lineheight'];
-	this.drill_COWA_calculateHeightAndWidth( context_list, options );		//（窗口辅助核心）
-	// > 窗口高宽 - 赋值
-	var ww = 0;
-	var hh = 0;
-	for( var i=0; i < this.drill_COWA_widthList.length; i++ ){ if( ww < this.drill_COWA_widthList[i] ){ ww = this.drill_COWA_widthList[i]; } }
-	for( var i=0; i < this.drill_COWA_heightList.length; i++ ){ hh += this.drill_COWA_heightList[i]; }
-	ww += this.standardPadding() * 2;
+	options['infoParam'] = {};
+	options['infoParam']['x'] = 0;
+	options['infoParam']['y'] = 0;
+	options['infoParam']['canvasWidth']  = 100;	//（此参数暂时不用，先给个非零值）
+	options['infoParam']['canvasHeight'] = 100;
+	
+	// > 参数准备 - 自定义
+	options['blockParam'] = {};					//『清零字符默认间距』
+	options['blockParam']['paddingTop'] = 0;
+	options['rowParam'] = {};
+	options['rowParam']['lineHeight_upCorrection'] = 0;
+	
+	options['baseParam'] = {};
+	options['baseParam']['fontSize'] = this.standardFontSize();	//（使用当前窗口的字体大小）
+	
+	// > 参数准备 - 『字符主流程』 - 获取文本高宽【窗口字符 - 窗口字符核心】
+	var ww = this.drill_COWC_getOrgTextWidth( org_text, options );
+	var hh = this.drill_COWC_getOrgTextHeight( org_text, options );
+	ww = Math.ceil(ww);
+	hh = Math.ceil(hh);
+	options['infoParam']['canvasWidth']  = ww;
+	options['infoParam']['canvasHeight'] = hh;
+	
+	
+	// > 自适应 - 设置窗口高宽
+	ww += this.standardPadding() * 2;		//（使用当前窗口的内边距）
 	hh += this.standardPadding() * 2;
-	ww += data['window_ex_width'] || 0;		//（附加高宽）
-	hh += data['window_ex_height'] || 0;
-	this._drill_width = ww;
-	this._drill_height = hh;
-	this.width = this._drill_width;
-	this.height = this._drill_height;
+	this._drill_windowWidth = ww;
+	this._drill_windowHeight = hh;
+	this.width = this._drill_windowWidth;		//（窗口宽度）
+	this.height = this._drill_windowHeight;		//（窗口高度）
+	
+	// > 自适应 - 重建画布（自适应高宽需要重建）
+	this.createContents();
+	temp_bitmap = this.contents;			//（临时画布重新绑定）
 	
 	
-	// > 绘制内容
-	this.drill_COWA_drawTextListEx( context_list, options );
+	var data = this._drill_data;
+	if( data['timing_enabled'] != true ){
+		
+		// > 『字符主流程』 - DEBUG显示画布范围【窗口字符 - 窗口字符核心】
+		//temp_bitmap.drill_COWC_debug_drawRect();
+		
+		// > 『字符主流程』 - 绘制文本【窗口字符 - 窗口字符核心】
+		this.drill_COWC_drawText( org_text, options );
+		
+	}else{
+		
+		// > 『字符逐个绘制流程』 - 设置计时器间隔【窗口字符 - 窗口字符核心】
+		var interval = data['timing_interval'];
+		if( interval == undefined || interval < 1 ){
+			interval = 4;
+		}
+		temp_bitmap.drill_COWC_timing_setPerTick( interval );
+			
+		// > 『字符逐个绘制流程』 - 逐个绘制初始化【窗口字符 - 窗口字符核心】
+		temp_bitmap.drill_COWC_timing_initDrawText( org_text, options );
+		
+	}
+	
+	// > 『字符贴图流程』 - 刷新字符块贴图【窗口字符 - 窗口字符贴图核心】
+	if( Imported.Drill_CoreOfWindowCharacterSprite ){
+		this.drill_COWCSp_sprite_refreshAllSprite();
+	}
+}
+//==============================
+// * D窗口内容 - 刷新内容 - 窗口字符底层校验
+//==============================
+if( typeof(_drill_COWC_drawText_functionExist) == "undefined" ){
+	alert( DrillUp.drill_GFPT_getPluginTip_NeedUpdate_drawText() );
 }
 
 
@@ -2071,4 +2327,3 @@ Drill_GFPT_Window.prototype.drill_refreshMessage = function( context_list ){
 		var pluginTip = DrillUp.drill_GFPT_getPluginTip_NoBasePlugin();
 		alert( pluginTip );
 }
-

@@ -185,6 +185,18 @@
 //			2.如果你需要引用该插件来创建一个外部地图的事件，
 //			  那么必须先加载地图文本数据，再创建事件。（可参考 Drill_EventForPlayer ）
 //			3.【暂时消除事件】的事件无法还原。
+//			4.下图射出的子弹，以后是算作一个事件？还是说另写一个管理子弹的核心？头疼。子弹作为事件终究不合适。
+//				 ,--^----------,--------,-----,-------^--,
+//				 | ||||||||    `--------'      |         O
+//				 `+---------------------------^----------|
+//				   `\_,--------,_________________________|
+//				     / XXXXXX / |    /
+//				    / XXXXXX /  \   /
+//				   / XXXXXX /\_____/  
+//				  / XXXXXX /
+//				 / XXXXXX /
+//				(________/
+//				 `------'
 //			
 //		★其它说明细节：
 //			1.先有事件数据，再通过事件数据new事件。
@@ -246,10 +258,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_CoreOfEventManager = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_CoreOfEventManager');
+	var Imported = Imported || {};
+	Imported.Drill_CoreOfEventManager = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_CoreOfEventManager');
 	
 	
 //=============================================================================
@@ -266,9 +278,18 @@ if( !Utils.RPGMAKER_VERSION || Utils.RPGMAKER_VERSION < "1.5.0" ){
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_COEM_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_COEM_pluginCommand.call(this, command, args);
+	this.drill_COEM_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_COEM_pluginCommand = function( command, args ){
 	if( command === ">事件管理核心" ){
 		
 		/*-----------------对象组获取------------------*/

@@ -416,10 +416,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_MouseGridPointer = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_MouseGridPointer');
+	var Imported = Imported || {};
+	Imported.Drill_MouseGridPointer = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_MouseGridPointer');
 	
 	
 	//==============================
@@ -501,9 +501,18 @@
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_MGP_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_MGP_pluginCommand.call(this, command, args);
+	this.drill_MGP_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_MGP_pluginCommand = function( command, args ){
 	if( command === ">网格指向标" ){
 		
 		if( args.length == 2 ){
@@ -692,8 +701,9 @@ Spriteset_Map.prototype.drill_MGP_updateStyle = function() {
 // ** 网格指向标【Drill_MGP_GridSprite】
 // **		
 // **		作用域：	地图界面、战斗界面
-// **		主功能：	> 定义一个 网格指向标 的贴图。
-// **		子功能：	->贴图
+// **		主功能：	定义一个 网格指向标 的贴图。
+// **		子功能：	
+// **					->贴图
 // **					->A主体
 // **						->层级
 // **					->B播放GIF
@@ -785,8 +795,6 @@ Drill_MGP_GridSprite.prototype.drill_sprite_destroy = function(){
 //			
 //			说明：	> data 动态参数对象（来自类初始化）
 //					  该对象包含 类所需的所有默认值。
-//					> 其中 DrillUp.drill_MGP_initStyle 提供了部分数据库设置的样式数据，
-//					  样式数据中注释的部分，仍然需要子插件根据自身情况来进行赋值。
 //##############################
 Drill_MGP_GridSprite.prototype.drill_sprite_initData = function() {
 	var data = this._drill_data;

@@ -451,7 +451,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_GTH_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_GTH_PluginTip_baseList.length == 0 ){ return ""; }
@@ -467,10 +467,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_GaugeTimerHud = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_GaugeTimerHud');
+	var Imported = Imported || {};
+	Imported.Drill_GaugeTimerHud = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_GaugeTimerHud');
 	
 	
 	//==============================
@@ -540,14 +540,23 @@ if( Imported.Drill_CoreOfGaugeMeter &&
 	Imported.Drill_CoreOfGaugeNumber ){
 	
 	
-	
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_GTH_pluginCommand = Game_Interpreter.prototype.pluginCommand
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_GTH_pluginCommand.call(this, command, args);
+	this.drill_GTH_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_GTH_pluginCommand = function( command, args ){
 	if( command === ">时间计时器" ){
+		
 		if(args.length == 2){
 			var type = String(args[1]);
 			if( type == "停止计时" ){

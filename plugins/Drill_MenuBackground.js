@@ -993,9 +993,9 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_MenuBackground = true;
-　　var DrillUp = DrillUp || {}; 
+	var Imported = Imported || {};
+	Imported.Drill_MenuBackground = true;
+	var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_MenuBackground');
 	
 	//==============================
@@ -1092,13 +1092,21 @@
 	}
 	
 	
-	
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_MBa_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args){
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_MBa_pluginCommand.call(this, command, args);
+	this.drill_MBa_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_MBa_pluginCommand = function( command, args ){
 	if( command === ">菜单背景" ){
 		if(args.length == 4){
 			var temp1 = String(args[1]);

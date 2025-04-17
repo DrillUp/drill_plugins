@@ -226,7 +226,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_DSE_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_DSE_PluginTip_baseList.length == 0 ){ return ""; }
@@ -242,10 +242,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_DialogShatterEffect = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_DialogShatterEffect');
+	var Imported = Imported || {};
+	Imported.Drill_DialogShatterEffect = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_DialogShatterEffect');
 	
 	
 	/*-----------------杂项------------------*/
@@ -260,14 +260,20 @@ if( Imported.Drill_CoreOfShatterEffect ){
 	
 
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
 //==============================
-// * 插件指令 - 执行
+// * 插件指令 - 指令绑定
 //==============================
-var _Drill_DSE_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
-	_Drill_DSE_pluginCommand.call(this, command, args);	
+var _drill_DSE_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
+	_drill_DSE_pluginCommand.call(this, command, args);	
+	this.drill_DSE_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_DSE_pluginCommand = function( command, args ){
 	if( command === ">方块粉碎效果" ){	
 		var commandData = {};
 		commandData['command'] = command;
@@ -800,9 +806,9 @@ Window.prototype._updateContents = function() {
 		this._windowContentsSprite.texture.frame = Rectangle.emptyRectangle;
 		this._drill_DSE_frameIsEmpty = true;
 		
-		// > 【窗口字符 - 窗口字符核心】隐藏窗口字符块
-		if( Imported.Drill_CoreOfWindowCharacter ){				
-			var char_sprite_list = this.drill_COWC_getAllSprite();
+		// > 【窗口字符 - 窗口字符贴图核心】隐藏窗口字符块
+		if( Imported.Drill_CoreOfWindowCharacterSprite ){				
+			var char_sprite_list = this.drill_COWCSp_sprite_getAllSprite();
 			for(var i = 0; i < char_sprite_list.length; i++){
 				char_sprite_list[i].visible = false;
 			}

@@ -1751,7 +1751,7 @@
 //			->☆插件指令
 //				->简单指令
 //				->高级指令
-//			->☆单位贴图
+//			->☆场景容器之单位贴图
 //				->获取 - 敌人容器指针【标准函数】
 //				->获取 - 根据敌方索引【标准函数】
 //				->获取 - 根据敌人ID【标准函数】
@@ -1813,7 +1813,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_BFBPa_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_BFBPa_PluginTip_baseList.length == 0 ){ return ""; }
@@ -1823,6 +1823,12 @@
 			message += DrillUp.g_BFBPa_PluginTip_baseList[i];
 		}
 		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到样式
+	//==============================
+	DrillUp.drill_BFBPa_getPluginTip_StyleNotFind = function( style_id ){
+		return "【" + DrillUp.g_BFBPa_PluginTip_curName + "】\n对象创建失败，id为"+style_id+"的样式配置为空或不存在。";
 	};
 	//==============================
 	// * 提示信息 - 报错 - 临时对象 未初始化
@@ -1835,9 +1841,9 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_BattleFloatingBlastParticle = true;
-　　var DrillUp = DrillUp || {}; 
+	var Imported = Imported || {};
+	Imported.Drill_BattleFloatingBlastParticle = true;
+	var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_BattleFloatingBlastParticle');
 	
 	//==============================
@@ -1930,9 +1936,11 @@
 			DrillUp.parameters['粒子样式-' + String(i+1) ] != "" ){
 			var data = JSON.parse(DrillUp.parameters['粒子样式-' + String(i+1) ]);
 			DrillUp.g_BFBPa_style[i] = DrillUp.drill_BFBPa_styleInit( data );
+			DrillUp.g_BFBPa_style[i]['id'] = i+1;
 			DrillUp.g_BFBPa_style[i]['inited'] = true;
 		}else{
 			DrillUp.g_BFBPa_style[i] = DrillUp.drill_BFBPa_styleInit( {} );
+			DrillUp.g_BFBPa_style[i]['id'] = i+1;
 			DrillUp.g_BFBPa_style[i]['inited'] = false;
 		}
 	}
@@ -1948,9 +1956,18 @@ if( Imported.Drill_CoreOfParticle ){
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_BFBPa_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_BFBPa_pluginCommand.call(this, command, args);
+	this.drill_BFBPa_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_BFBPa_pluginCommand = function( command, args ){
 	if( command === ">战斗临时粒子小爆炸" ){
 		
 		
@@ -2222,10 +2239,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 
 
 //#############################################################################
-// ** 【标准模块】单位贴图 ☆单位贴图
+// ** 【标准模块】单位贴图容器 ☆场景容器之单位贴图
 //#############################################################################
 //##############################
-// * 单位贴图 - 获取 - 敌人容器指针【标准函数】
+// * 单位贴图容器 - 获取 - 敌人容器指针【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 贴图数组    （敌人贴图）
@@ -2236,7 +2253,7 @@ Game_Temp.prototype.drill_BFBPa_getEnemySpriteTank = function(){
 	return this.drill_BFBPa_getEnemySpriteTank_Private();
 }
 //##############################
-// * 单位贴图 - 获取 - 根据敌方索引【标准函数】
+// * 单位贴图容器 - 获取 - 根据敌方索引【标准函数】
 //				
 //			参数：	> index 数字 （敌方第n个位置，从0开始计数）
 //			返回：	> 贴图       （敌人贴图）
@@ -2247,7 +2264,7 @@ Game_Temp.prototype.drill_BFBPa_getEnemySpriteByIndex = function( index ){
 	return this.drill_BFBPa_getEnemySpriteByIndex_Private( index );
 }
 //##############################
-// * 单位贴图 - 获取 - 根据敌人ID【标准函数】
+// * 单位贴图容器 - 获取 - 根据敌人ID【标准函数】
 //				
 //			参数：	> enemy_id 数字（敌人ID）
 //			返回：	> 贴图数组     （敌人贴图数组）
@@ -2258,7 +2275,7 @@ Game_Temp.prototype.drill_BFBPa_getEnemySpriteByEnemyId = function( enemy_id ){
 	return this.drill_BFBPa_getEnemySpriteByEnemyId_Private( enemy_id );
 }
 //##############################
-// * 单位贴图 - 获取 - 角色容器指针【标准函数】
+// * 单位贴图容器 - 获取 - 角色容器指针【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 贴图数组   （角色贴图）
@@ -2269,7 +2286,7 @@ Game_Temp.prototype.drill_BFBPa_getActorSpriteTank = function(){
 	return this.drill_BFBPa_getActorSpriteTank_Private();
 }
 //##############################
-// * 单位贴图 - 获取 - 根据我方索引【标准函数】
+// * 单位贴图容器 - 获取 - 根据我方索引【标准函数】
 //				
 //			参数：	> index 数字 （我方第n个位置，从0开始计数）
 //			返回：	> 贴图       （角色贴图）
@@ -2280,7 +2297,7 @@ Game_Temp.prototype.drill_BFBPa_getActorSpriteByIndex = function( index ){
 	return this.drill_BFBPa_getActorSpriteByIndex_Private( index );
 }
 //##############################
-// * 单位贴图 - 获取 - 根据角色ID【标准函数】
+// * 单位贴图容器 - 获取 - 根据角色ID【标准函数】
 //				
 //			参数：	> actor_id 数字（角色ID）
 //			返回：	> sprite 贴图  （角色贴图）
@@ -2291,7 +2308,7 @@ Game_Temp.prototype.drill_BFBPa_getActorSpriteByActorId = function( actor_id ){
 	return this.drill_BFBPa_getActorSpriteByActorId_Private( actor_id );
 }
 //=============================================================================
-// ** 单位贴图（接口实现）
+// ** 场景容器之单位贴图（实现）
 //=============================================================================
 //==============================
 // * 单位贴图容器 - 获取 - 敌人容器指针（私有）
@@ -2780,11 +2797,22 @@ Scene_Battle.prototype.drill_BFBPa_updateWindowAddChild = function() {
 		var temp_data = $gameTemp._drill_BFBPa_commandSeq[i];
 		if( temp_data == undefined ){ continue; }
 		
-		// > 创建数据
-		var s_data = temp_data['s_data'];
-		s_data['param_x'] = temp_data['param_x'];
-		s_data['param_y'] = temp_data['param_y'];
-		var temp_controller = new Drill_BFBPa_Controller( s_data );
+		// > 『控制器与贴图的样式』 - 校验+提示信息
+		var cur_styleId   = temp_data['id'];
+		var cur_styleData = temp_data['s_data'];
+		if( cur_styleData == undefined || 
+			cur_styleData['inited'] == false ){
+			alert( DrillUp.drill_BFBPa_getPluginTip_StyleNotFind(cur_styleId) );
+			
+			// > 出栈
+			$gameTemp._drill_BFBPa_commandSeq.splice( i, 1 );
+			continue;
+		}
+		
+		// > 『控制器与贴图的样式』 - 创建控制器
+		cur_styleData['param_x'] = temp_data['param_x'];
+		cur_styleData['param_y'] = temp_data['param_y'];
+		var temp_controller = new Drill_BFBPa_Controller( cur_styleData );
 		$gameTemp._drill_BFBPa_controllerTank.push( temp_controller );
 		
 		// > 创建贴图
@@ -2801,13 +2829,13 @@ Scene_Battle.prototype.drill_BFBPa_updateWindowAddChild = function() {
 			
 			// > 双层效果 - 添加贴图到层级（先添加）
 			$gameTemp._drill_BFBPa_spriteTank.push( temp_secSprite );
-			this.drill_BFBPa_layerAddSprite( temp_secSprite, s_data['second_layerIndex'] );
+			this.drill_BFBPa_layerAddSprite( temp_secSprite, cur_styleData['second_layerIndex'] );
 		}
 		
 		
 		// > 添加贴图到层级
 		$gameTemp._drill_BFBPa_spriteTank.push( temp_sprite );
-		this.drill_BFBPa_layerAddSprite( temp_sprite, s_data['layerIndex'] );
+		this.drill_BFBPa_layerAddSprite( temp_sprite, cur_styleData['layerIndex'] );
 		
 		// > 层级排序
 		//（暂时不排了，浪费资源）
@@ -2881,14 +2909,16 @@ Scene_Battle.prototype.drill_BFBPa_updateDestroy = function() {
 // ** 小爆炸粒子控制器【Drill_BFBPa_Controller】
 // **		
 // **		作用域：	战斗界面
-// **		主功能：	> 定义一个专门控制动画粒子的数据类。
-// **		子功能：	->控制器
+// **		主功能：	定义一个专门控制动画粒子的数据类。
+// **		子功能：	
+// **					->控制器『控制器与贴图』
 // **						->帧刷新
 // **						->重设数据
 // **							->序列号
 // **						->显示/隐藏
 // **						->暂停/继续
 // **						->销毁
+// **					
 // **					->A主体
 // **					->B粒子群弹道
 // **					->C随机因子
@@ -2898,7 +2928,7 @@ Scene_Battle.prototype.drill_BFBPa_updateDestroy = function() {
 // **					->G直线拖尾贴图
 // **					->H贴图高宽
 // **					->I粒子生命周期
-// **		
+// **					
 // **		说明：	> 该类处于战斗界面，只一次性使用。
 //=============================================================================
 //==============================
@@ -2979,7 +3009,7 @@ Drill_BFBPa_Controller.prototype.drill_BFBPa_isDead = function(){
 	return Drill_COPa_Controller.prototype.drill_controller_isDead.call( this );
 };
 //##############################
-// * 控制器 - 初始化数据【标准默认值】
+// * 控制器 - 初始化数据『控制器与贴图』【标准默认值】
 //
 //			参数：	> 无
 //			返回：	> 无
@@ -3011,7 +3041,7 @@ Drill_BFBPa_Controller.prototype.drill_controller_initData = function(){
 	data['par_lifeType'] = "同时产生(一次性)";
 }
 //==============================
-// * 控制器 - 初始化子功能
+// * 控制器 - 初始化子功能『控制器与贴图』
 //==============================
 Drill_BFBPa_Controller.prototype.drill_controller_initChild = function(){
 	Drill_COPa_Controller.prototype.drill_controller_initChild.call( this );
@@ -3091,12 +3121,14 @@ Drill_BFBPa_Controller.prototype.drill_controller_resetParticles_Position = func
 // ** 小爆炸粒子贴图【Drill_BFBPa_Sprite】
 // **
 // **		作用域：	战斗界面
-// **		主功能：	> 定义一个粒子贴图。
-// **		子功能：	->贴图
+// **		主功能：	定义一个粒子贴图。
+// **		子功能：	
+// **					->贴图『控制器与贴图』
 // **						->是否就绪
 // **						->优化策略
 // **						->是否需要销毁
 // **						->销毁
+// **					
 // **					->A主体
 // **						->层级位置修正
 // **					->B粒子群弹道
@@ -3107,7 +3139,7 @@ Drill_BFBPa_Controller.prototype.drill_controller_resetParticles_Position = func
 // **					->G直线拖尾贴图
 // **					->H贴图高宽
 // **					->I粒子生命周期
-// **
+// **					
 // **		说明：	> 你必须在创建贴图后，手动初始化。（还需要先设置 控制器和个体贴图 ）
 // **
 // **		代码：	> 范围 - 该类显示单独的动画装饰。
@@ -3150,7 +3182,7 @@ Drill_BFBPa_Sprite.prototype.drill_sprite_setController = function( controller )
     Drill_COPa_Sprite.prototype.drill_sprite_setController.call( this, controller );
 };
 //##############################
-// * C对象绑定 - 初始化子功能【开放函数】
+// * C对象绑定 - 初始化子功能『控制器与贴图』【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -3206,19 +3238,19 @@ Drill_BFBPa_Sprite.prototype.drill_sprite_destroy = function(){
 	Drill_COPa_Sprite.prototype.drill_sprite_destroy.call( this );
 };
 //==============================
-// * 粒子贴图 - 初始化自身
+// * 粒子贴图 - 初始化自身『控制器与贴图』
 //==============================
 Drill_BFBPa_Sprite.prototype.drill_sprite_initSelf = function(){
     Drill_COPa_Sprite.prototype.drill_sprite_initSelf.call( this );
 };
 //==============================
-// * 粒子贴图 - 销毁子功能
+// * 粒子贴图 - 销毁子功能『控制器与贴图』
 //==============================
 Drill_BFBPa_Sprite.prototype.drill_sprite_destroyChild = function(){
     Drill_COPa_Sprite.prototype.drill_sprite_destroyChild.call( this );
 };
 //==============================
-// * 粒子贴图 - 销毁自身
+// * 粒子贴图 - 销毁自身『控制器与贴图』
 //==============================
 Drill_BFBPa_Sprite.prototype.drill_sprite_destroySelf = function(){
     Drill_COPa_Sprite.prototype.drill_sprite_destroySelf.call( this );
@@ -3305,12 +3337,14 @@ Drill_BFBPa_Sprite.prototype.drill_sprite_initReset = function() {
 // ** 小爆炸粒子贴图（第二层）【Drill_BFBPa_SecSprite】
 // **
 // **		作用域：	战斗界面
-// **		主功能：	> 定义一个 第二层粒子贴图 。
-// **		子功能：	->贴图
+// **		主功能：	定义一个 第二层粒子贴图 。
+// **		子功能：	
+// **					->贴图（第二层）『控制器与贴图』
 // **						->是否就绪
 // **						->优化策略
 // **						->是否需要销毁
 // **						->销毁
+// **					
 // **					->A主体
 // **					->B粒子群弹道（无）
 // **					->C对象绑定（无）
@@ -3320,7 +3354,7 @@ Drill_BFBPa_Sprite.prototype.drill_sprite_initReset = function() {
 // **					->G直线拖尾贴图（无）
 // **					->H贴图高宽（无）
 // **					->I粒子生命周期（无）
-// **
+// **					
 // **		说明：	> 第二层粒子与 父贴图 的 D粒子变化 保持一致。
 //=============================================================================
 //==============================
@@ -3388,25 +3422,25 @@ Drill_BFBPa_SecSprite.prototype.drill_spriteSec_destroy = function(){
     return Drill_COPa_SecSprite.prototype.drill_spriteSec_destroy.call(this);
 };
 //==============================
-// * 第二层粒子 - 初始化自身
-//==============================
-Drill_BFBPa_SecSprite.prototype.drill_spriteSec_initSelf = function( parentSprite ){
-	Drill_COPa_SecSprite.prototype.drill_spriteSec_initSelf.call( this, parentSprite );
-};
-//==============================
-// * 第二层粒子 - 初始化子功能
+// * 第二层粒子 - 初始化子功能『控制器与贴图』
 //==============================
 Drill_BFBPa_SecSprite.prototype.drill_spriteSec_initChild = function(){
 	Drill_COPa_SecSprite.prototype.drill_spriteSec_initChild.call( this );
 };
 //==============================
-// * 第二层粒子 - 销毁子功能
+// * 第二层粒子 - 初始化自身『控制器与贴图』
+//==============================
+Drill_BFBPa_SecSprite.prototype.drill_spriteSec_initSelf = function( parentSprite ){
+	Drill_COPa_SecSprite.prototype.drill_spriteSec_initSelf.call( this, parentSprite );
+};
+//==============================
+// * 第二层粒子 - 销毁子功能『控制器与贴图』
 //==============================
 Drill_BFBPa_SecSprite.prototype.drill_spriteSec_destroyChild = function(){
 	Drill_COPa_SecSprite.prototype.drill_spriteSec_destroyChild.call( this );
 };
 //==============================
-// * 第二层粒子 - 销毁自身
+// * 第二层粒子 - 销毁自身『控制器与贴图』
 //==============================
 Drill_BFBPa_SecSprite.prototype.drill_spriteSec_destroySelf = function(){
 	Drill_COPa_SecSprite.prototype.drill_spriteSec_destroySelf.call( this );

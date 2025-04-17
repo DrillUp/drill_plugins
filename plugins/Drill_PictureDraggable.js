@@ -280,7 +280,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_PDr_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_PDr_PluginTip_baseList.length == 0 ){ return ""; }
@@ -297,16 +297,21 @@
 	DrillUp.drill_PDr_getPluginTip_PictureNotFind = function( pic_id ){
 		return "【" + DrillUp.g_PDr_PluginTip_curName + "】\n插件指令错误，id为"+pic_id+"的图片还没被创建。\n你可能需要将指令放在'显示图片'事件指令之后。";
 	};
+	//==============================
+	// * 提示信息 - 报错 - 外部插件冲突（旧插件改名）
+	//==============================
+	DrillUp.drill_PDr_getPluginTip_ConflictOldName = function(){
+		return "【" + DrillUp.g_PDr_PluginTip_curName + "】\n注意，检测到重复的可拖拽的图片插件，请及时去掉旧插件 Drill_MouseDragPicture 。";
+	};
 	
 	
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_PictureDraggable = true;
-	Imported.Drill_MouseDragPicture = true;		//（旧名字）
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_PictureDraggable');
+	var Imported = Imported || {};
+	Imported.Drill_PictureDraggable = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_PictureDraggable');
 	
 	/*-----------------杂项------------------*/
 	DrillUp.g_PDr_dragableLeft = String(DrillUp.parameters['鼠标左键是否可拖拽'] || "true") === "true";
@@ -322,13 +327,33 @@
 if( Imported.Drill_CoreOfDragAndAdsorb &&
 	Imported.Drill_CoreOfPictureWithMouse ){
 	
+//==============================
+// * >>>>基于插件检测>>>> - 最后继承
+//==============================
+var _drill_PDr_scene_initialize = SceneManager.initialize;
+SceneManager.initialize = function() {
+	_drill_PDr_scene_initialize.call(this);
+	if( Imported.Drill_MouseDragPicture ){
+		alert( DrillUp.drill_PDr_getPluginTip_ConflictOldName() );
+	};
+}
+
 	
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_PDr_pluginCommand = Game_Interpreter.prototype.pluginCommand
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_PDr_pluginCommand.call(this, command, args);
+	this.drill_PDr_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_PDr_pluginCommand = function( command, args ){
 	if( command === ">鼠标拖拽图片" ){
 		
 		/*-----------------设置可拖拽------------------*/
@@ -487,6 +512,24 @@ Game_Screen.prototype.drill_PDr_isPictureExist = function( pic_id ){
 		return false;
 	}
 	return true;
+};
+//==============================
+// * 插件指令 - STG兼容『STG的插件指令』
+//==============================
+if( Imported.Drill_STG__objects ){
+	
+	//==============================
+	// * 插件指令 - STG指令绑定
+	//==============================
+	var _drill_STG_PDr_pluginCommand = Drill_STG_GameInterpreter.prototype.pluginCommand;
+	Drill_STG_GameInterpreter.prototype.pluginCommand = function( command, args ){
+		_drill_STG_PDr_pluginCommand.call(this, command, args);
+		this.drill_PDr_pluginCommand( command, args );
+	}
+	//==============================
+	// * 插件指令 - STG指令执行
+	//==============================
+	Drill_STG_GameInterpreter.prototype.drill_PDr_pluginCommand = Game_Interpreter.prototype.drill_PDr_pluginCommand;
 };
 
 
@@ -1040,7 +1083,6 @@ Scene_Map.prototype.drill_PDr_hasAnyHovered = function() {
 //=============================================================================
 }else{
 		Imported.Drill_PictureDraggable = false;
-		Imported.Drill_MouseDragPicture = false;		//（旧名字）
 		var pluginTip = DrillUp.drill_PDr_getPluginTip_NoBasePlugin();
 		alert( pluginTip );
 }

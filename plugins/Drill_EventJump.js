@@ -302,7 +302,7 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称：		EJu (Event_EJu)
+//		插件简称		EJu (Event_EJu)
 //		临时全局变量	无
 //		临时局部变量	this._drill_EJu_xxx
 //		存储数据变量	无
@@ -365,7 +365,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_EJu_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_EJu_PluginTip_baseList.length == 0 ){ return ""; }
@@ -393,10 +393,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_EventJump = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_EventJump');
+	var Imported = Imported || {};
+	Imported.Drill_EventJump = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_EventJump');
 	
 	
 	/*-----------------杂项------------------*/
@@ -467,10 +467,10 @@ if( Imported.Drill_CoreOfMoveRoute ){
 	
 
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
 //==============================
-// * 插件指令 - 指令
+// * 插件指令 - 指令绑定
 //==============================
 var _drill_EJu_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args){
@@ -853,7 +853,6 @@ Game_Interpreter.prototype.drill_EJu_commonJumpCommand = function( command, args
 		}
 	}
 }
-
 //==============================
 // * 插件指令 - 地形条件获取
 //==============================
@@ -931,7 +930,7 @@ Game_Interpreter.prototype.drill_EJu_tileCommand = function( command, args ){
 	}
 };
 //==============================
-// ** 插件指令 - 事件检查
+// * 插件指令 - 事件检查
 //==============================
 Game_Map.prototype.drill_EJu_isEventExist = function( e_id ){
 	if( e_id == 0 ){ return false; }

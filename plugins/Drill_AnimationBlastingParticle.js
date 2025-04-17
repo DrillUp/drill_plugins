@@ -1729,8 +1729,8 @@
 //			->☆提示信息
 //			->☆静态数据
 //			->☆插件指令
-//			->☆单位贴图
-//			->☆物体贴图
+//			->☆场景容器之单位贴图
+//			->☆场景容器之物体贴图
 //			->☆个体层级
 //				> 父贴图前面层（_drill_animPFrontArea）
 //				> 父贴图后面层（_drill_animPBackArea）
@@ -1781,7 +1781,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_ABPa_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_ABPa_PluginTip_baseList.length == 0 ){ return ""; }
@@ -1798,14 +1798,20 @@
 	DrillUp.drill_ABPa_getPluginTip_EventNotFind = function( e_id ){
 		return "【" + DrillUp.g_ABPa_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
 	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到样式
+	//==============================
+	DrillUp.drill_ABPa_getPluginTip_StyleNotFind = function( style_id ){
+		return "【" + DrillUp.g_ABPa_PluginTip_curName + "】\n对象创建失败，id为"+style_id+"的样式配置为空或不存在。";
+	};
 	
 	
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_AnimationBlastingParticle = true;
-　　var DrillUp = DrillUp || {}; 
+	var Imported = Imported || {};
+	Imported.Drill_AnimationBlastingParticle = true;
+	var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_AnimationBlastingParticle');
 	
 	//==============================
@@ -1912,9 +1918,18 @@ if( Imported.Drill_CoreOfParticle ){
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_ABPa_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_ABPa_pluginCommand.call(this, command, args);
+	this.drill_ABPa_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_ABPa_pluginCommand = function( command, args ){
 	if( command === ">动画粒子小爆炸" ){
 		
 		/*-----------------对象组获取 - 物体------------------*/
@@ -2099,10 +2114,10 @@ Game_Map.prototype.drill_ABPa_isEventExist = function( e_id ){
 
 
 //#############################################################################
-// ** 【标准模块】单位贴图 ☆单位贴图
+// ** 【标准模块】单位贴图容器 ☆场景容器之单位贴图
 //#############################################################################
 //##############################
-// * 单位贴图 - 获取 - 敌人容器指针【标准函数】
+// * 单位贴图容器 - 获取 - 敌人容器指针【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 贴图数组    （敌人贴图）
@@ -2113,7 +2128,7 @@ Game_Temp.prototype.drill_ABPa_getEnemySpriteTank = function(){
 	return this.drill_ABPa_getEnemySpriteTank_Private();
 }
 //##############################
-// * 单位贴图 - 获取 - 根据敌方索引【标准函数】
+// * 单位贴图容器 - 获取 - 根据敌方索引【标准函数】
 //				
 //			参数：	> index 数字 （敌方第n个位置，从0开始计数）
 //			返回：	> 贴图       （敌人贴图）
@@ -2124,7 +2139,7 @@ Game_Temp.prototype.drill_ABPa_getEnemySpriteByIndex = function( index ){
 	return this.drill_ABPa_getEnemySpriteByIndex_Private( index );
 }
 //##############################
-// * 单位贴图 - 获取 - 根据敌人ID【标准函数】
+// * 单位贴图容器 - 获取 - 根据敌人ID【标准函数】
 //				
 //			参数：	> enemy_id 数字（敌人ID）
 //			返回：	> 贴图数组     （敌人贴图数组）
@@ -2135,7 +2150,7 @@ Game_Temp.prototype.drill_ABPa_getEnemySpriteByEnemyId = function( enemy_id ){
 	return this.drill_ABPa_getEnemySpriteByEnemyId_Private( enemy_id );
 }
 //##############################
-// * 单位贴图 - 获取 - 角色容器指针【标准函数】
+// * 单位贴图容器 - 获取 - 角色容器指针【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 贴图数组   （角色贴图）
@@ -2146,7 +2161,7 @@ Game_Temp.prototype.drill_ABPa_getActorSpriteTank = function(){
 	return this.drill_ABPa_getActorSpriteTank_Private();
 }
 //##############################
-// * 单位贴图 - 获取 - 根据我方索引【标准函数】
+// * 单位贴图容器 - 获取 - 根据我方索引【标准函数】
 //				
 //			参数：	> index 数字 （我方第n个位置，从0开始计数）
 //			返回：	> 贴图       （角色贴图）
@@ -2157,7 +2172,7 @@ Game_Temp.prototype.drill_ABPa_getActorSpriteByIndex = function( index ){
 	return this.drill_ABPa_getActorSpriteByIndex_Private( index );
 }
 //##############################
-// * 单位贴图 - 获取 - 根据角色ID【标准函数】
+// * 单位贴图容器 - 获取 - 根据角色ID【标准函数】
 //				
 //			参数：	> actor_id 数字（角色ID）
 //			返回：	> sprite 贴图  （角色贴图）
@@ -2168,7 +2183,7 @@ Game_Temp.prototype.drill_ABPa_getActorSpriteByActorId = function( actor_id ){
 	return this.drill_ABPa_getActorSpriteByActorId_Private( actor_id );
 }
 //=============================================================================
-// ** 单位贴图（接口实现）
+// ** 场景容器之单位贴图（实现）
 //=============================================================================
 //==============================
 // * 单位贴图容器 - 获取 - 敌人容器指针（私有）
@@ -2254,10 +2269,10 @@ Game_Temp.prototype.drill_ABPa_getActorSpriteByActorId_Private = function( actor
 
 
 //#############################################################################
-// ** 【标准模块】物体贴图 ☆物体贴图
+// ** 【标准模块】物体贴图容器 ☆场景容器之物体贴图
 //#############################################################################
 //##############################
-// * 物体贴图 - 获取 - 容器指针【标准函数】
+// * 物体贴图容器 - 获取 - 容器指针【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 贴图数组     （物体贴图）
@@ -2268,7 +2283,7 @@ Game_Temp.prototype.drill_ABPa_getCharacterSpriteTank = function(){
 	return this.drill_ABPa_getCharacterSpriteTank_Private();
 }
 //##############################
-// * 物体贴图 - 获取 - 根据事件ID【标准函数】
+// * 物体贴图容器 - 获取 - 根据事件ID【标准函数】
 //			
 //			参数：	> event_id 数字（事件ID）
 //			返回：	> 贴图对象     （事件贴图）
@@ -2280,7 +2295,7 @@ Game_Temp.prototype.drill_ABPa_getCharacterSpriteByEventId = function( event_id 
 	return this.drill_ABPa_getCharacterSpriteByEventId_Private( event_id );
 }
 //##############################
-// * 物体贴图 - 获取 - 根据玩家队员索引【标准函数】
+// * 物体贴图容器 - 获取 - 根据玩家队员索引【标准函数】
 //			
 //			参数：	> follower_index 数字（玩家队员索引）
 //			返回：	> 贴图对象           （玩家队员贴图）
@@ -2292,7 +2307,7 @@ Game_Temp.prototype.drill_ABPa_getCharacterSpriteByFollowerIndex = function( fol
 	return this.drill_ABPa_getCharacterSpriteByFollowerIndex_Private( follower_index );
 }
 //=============================================================================
-// ** 物体贴图（接口实现）
+// ** 场景容器之物体贴图（实现）
 //=============================================================================
 //==============================
 // * 物体贴图容器 - 获取 - 容器指针（私有）
@@ -2529,14 +2544,22 @@ Game_Temp.prototype.initialize = function() {
 //==============================
 // * 贴图控制 - 创建数据/创建贴图
 //
-//			说明：	执行一次，则创建一次。
+//			说明：	> 执行一次，则创建一次。
 //==============================
 Game_Temp.prototype.drill_ABPa_createSprite = function( style_id, individual_sprite ){
 	if( $gameTemp._drill_spritesetCreated != true ){ return; }
-
-	// > 创建数据
-	var data =  DrillUp.g_ABPa_style[ style_id ];
-	var temp_controller = new Drill_ABPa_Controller( data );
+	
+	// > 『控制器与贴图的样式』 - 校验+提示信息
+	var cur_styleId   = style_id +1;
+	var cur_styleData = DrillUp.g_ABPa_style[ style_id ];
+	if( cur_styleData == undefined || 
+		cur_styleData['inited'] == false ){
+		alert( DrillUp.drill_ABPa_getPluginTip_StyleNotFind(cur_styleId) );
+		return;
+	}
+	
+	// > 『控制器与贴图的样式』 - 创建控制器
+	var temp_controller = new Drill_ABPa_Controller( cur_styleData );
 	this._drill_ABPa_controllerTank.push( temp_controller );
 	
 	// > 创建贴图
@@ -2615,14 +2638,16 @@ Scene_Battle.prototype.drill_ABPa_updateInScene = Scene_Map.prototype.drill_ABPa
 // ** 小爆炸粒子控制器【Drill_ABPa_Controller】
 // **		
 // **		作用域：	地图界面、战斗界面
-// **		主功能：	> 定义一个专门控制动画粒子的数据类。
-// **		子功能：	->控制器
+// **		主功能：	定义一个专门控制动画粒子的数据类。
+// **		子功能：	
+// **					->控制器『控制器与贴图』
 // **						->帧刷新
 // **						->重设数据
 // **							->序列号
 // **						->显示/隐藏
 // **						->暂停/继续
 // **						->销毁
+// **					
 // **					->A主体
 // **					->B粒子群弹道
 // **					->C随机因子
@@ -2632,7 +2657,7 @@ Scene_Battle.prototype.drill_ABPa_updateInScene = Scene_Map.prototype.drill_ABPa
 // **					->G直线拖尾贴图
 // **					->H贴图高宽
 // **					->I粒子生命周期
-// **		
+// **					
 // **		说明：	> 该类可与 Game_CharacterBase 一并存储在 $gameMap 中。
 //=============================================================================
 //==============================
@@ -2713,7 +2738,7 @@ Drill_ABPa_Controller.prototype.drill_ABPa_isDead = function(){
 	return Drill_COPa_Controller.prototype.drill_controller_isDead.call( this );
 };
 //##############################
-// * 控制器 - 初始化数据【标准默认值】
+// * 控制器 - 初始化数据『控制器与贴图』【标准默认值】
 //
 //			参数：	> 无
 //			返回：	> 无
@@ -2745,7 +2770,7 @@ Drill_ABPa_Controller.prototype.drill_controller_initData = function(){
 	data['par_lifeType'] = "同时产生(一次性)";
 }
 //==============================
-// * 控制器 - 初始化子功能
+// * 控制器 - 初始化子功能『控制器与贴图』
 //==============================
 Drill_ABPa_Controller.prototype.drill_controller_initChild = function(){
 	Drill_COPa_Controller.prototype.drill_controller_initChild.call( this );
@@ -2825,12 +2850,14 @@ Drill_ABPa_Controller.prototype.drill_controller_resetParticles_Position = funct
 // ** 小爆炸粒子贴图【Drill_ABPa_Sprite】
 // **
 // **		作用域：	地图界面、战斗界面
-// **		主功能：	> 定义一个粒子贴图。
-// **		子功能：	->贴图
+// **		主功能：	定义一个粒子贴图。
+// **		子功能：	
+// **					->贴图『控制器与贴图』
 // **						->是否就绪
 // **						->优化策略
 // **						->是否需要销毁
 // **						->销毁
+// **					
 // **					->A主体
 // **						->层级位置修正
 // **					->B粒子群弹道
@@ -2841,7 +2868,7 @@ Drill_ABPa_Controller.prototype.drill_controller_resetParticles_Position = funct
 // **					->G直线拖尾贴图
 // **					->H贴图高宽
 // **					->I粒子生命周期
-// **
+// **					
 // **		说明：	> 你必须在创建贴图后，手动初始化。（还需要先设置 控制器和个体贴图 ）
 // **
 // **		代码：	> 范围 - 该类显示单独的动画装饰。
@@ -2893,7 +2920,7 @@ Drill_ABPa_Sprite.prototype.drill_ABPa_setIndividualSprite = function( individua
 	this._drill_individualSprite = individual_sprite;
 };
 //##############################
-// * C对象绑定 - 初始化子功能【开放函数】
+// * C对象绑定 - 初始化子功能『控制器与贴图』【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -2950,20 +2977,20 @@ Drill_ABPa_Sprite.prototype.drill_sprite_destroy = function(){
 	Drill_COPa_Sprite.prototype.drill_sprite_destroy.call( this );
 };
 //==============================
-// * 粒子贴图 - 初始化自身
+// * 粒子贴图 - 初始化自身『控制器与贴图』
 //==============================
 Drill_ABPa_Sprite.prototype.drill_sprite_initSelf = function(){
     Drill_COPa_Sprite.prototype.drill_sprite_initSelf.call( this );
 	this._drill_individualSprite = null;		//个体贴图
 };
 //==============================
-// * 粒子贴图 - 销毁子功能
+// * 粒子贴图 - 销毁子功能『控制器与贴图』
 //==============================
 Drill_ABPa_Sprite.prototype.drill_sprite_destroyChild = function(){
     Drill_COPa_Sprite.prototype.drill_sprite_destroyChild.call( this );
 };
 //==============================
-// * 粒子贴图 - 销毁自身
+// * 粒子贴图 - 销毁自身『控制器与贴图』
 //==============================
 Drill_ABPa_Sprite.prototype.drill_sprite_destroySelf = function(){
     Drill_COPa_Sprite.prototype.drill_sprite_destroySelf.call( this );
@@ -3149,12 +3176,14 @@ Drill_ABPa_Sprite.prototype.drill_sprite_initReset = function() {
 // ** 小爆炸粒子贴图（第二层）【Drill_ABPa_SecSprite】
 // **
 // **		作用域：	地图界面、战斗界面
-// **		主功能：	> 定义一个 第二层粒子贴图 。
-// **		子功能：	->贴图
+// **		主功能：	定义一个 第二层粒子贴图 。
+// **		子功能：	
+// **					->贴图（第二层）『控制器与贴图』
 // **						->是否就绪
 // **						->优化策略
 // **						->是否需要销毁
 // **						->销毁
+// **					
 // **					->A主体
 // **					->B粒子群弹道（无）
 // **					->C对象绑定（无）
@@ -3164,7 +3193,7 @@ Drill_ABPa_Sprite.prototype.drill_sprite_initReset = function() {
 // **					->G直线拖尾贴图（无）
 // **					->H贴图高宽（无）
 // **					->I粒子生命周期（无）
-// **
+// **					
 // **		说明：	> 第二层粒子与 父贴图 的 D粒子变化 保持一致。
 //=============================================================================
 //==============================
@@ -3232,26 +3261,26 @@ Drill_ABPa_SecSprite.prototype.drill_spriteSec_destroy = function(){
     return Drill_COPa_SecSprite.prototype.drill_spriteSec_destroy.call(this);
 };
 //==============================
-// * 第二层粒子 - 初始化自身
+// * 第二层粒子 - 初始化子功能『控制器与贴图』
+//==============================
+Drill_ABPa_SecSprite.prototype.drill_spriteSec_initChild = function(){
+	Drill_COPa_SecSprite.prototype.drill_spriteSec_initChild.call( this );
+};
+//==============================
+// * 第二层粒子 - 初始化自身『控制器与贴图』
 //==============================
 Drill_ABPa_SecSprite.prototype.drill_spriteSec_initSelf = function( parentSprite ){
 	Drill_COPa_SecSprite.prototype.drill_spriteSec_initSelf.call( this, parentSprite );
 	this._drill_individualSprite = parentSprite._drill_individualSprite;	//个体贴图
 };
 //==============================
-// * 第二层粒子 - 初始化子功能
-//==============================
-Drill_ABPa_SecSprite.prototype.drill_spriteSec_initChild = function(){
-	Drill_COPa_SecSprite.prototype.drill_spriteSec_initChild.call( this );
-};
-//==============================
-// * 第二层粒子 - 销毁子功能
+// * 第二层粒子 - 销毁子功能『控制器与贴图』
 //==============================
 Drill_ABPa_SecSprite.prototype.drill_spriteSec_destroyChild = function(){
 	Drill_COPa_SecSprite.prototype.drill_spriteSec_destroyChild.call( this );
 };
 //==============================
-// * 第二层粒子 - 销毁自身
+// * 第二层粒子 - 销毁自身『控制器与贴图』
 //==============================
 Drill_ABPa_SecSprite.prototype.drill_spriteSec_destroySelf = function(){
 	Drill_COPa_SecSprite.prototype.drill_spriteSec_destroySelf.call( this );

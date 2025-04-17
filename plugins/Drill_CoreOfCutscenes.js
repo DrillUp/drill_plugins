@@ -94,11 +94,11 @@
 //			->☆存储数据
 //
 //			->☆管辖权
-//			->☆原型链规范 - 战斗场景
-//			->☆原型链规范 - 地图场景
-//			->☆原型链规范 - 菜单界面基类
-//			->☆原型链规范 - 项界面基类
-//			->☆原型链规范 - 存档界面基类
+//			->☆原型链规范 - 战斗场景（fade 淡出淡入）
+//			->☆原型链规范 - 地图场景（fade 淡出淡入）
+//			->☆原型链规范 - 菜单界面基类（fade 淡出淡入）
+//			->☆原型链规范 - 项界面基类（fade 淡出淡入）
+//			->☆原型链规范 - 存档界面基类（fade 淡出淡入）
 //
 //			->☆淡出淡入管理
 //				->配置初始化【标准接口】
@@ -147,18 +147,27 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_CoreOfCutscenes = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_CoreOfCutscenes');
+	var Imported = Imported || {};
+	Imported.Drill_CoreOfCutscenes = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_CoreOfCutscenes');
 	
 	
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_COCut_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_COCut_pluginCommand.call(this, command, args);
+	this.drill_COCut_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_COCut_pluginCommand = function( command, args ){
 	if( command === ">动画转场核心" ){
 		if( args.length == 4 ){
 			var type = String(args[1]);
@@ -342,7 +351,7 @@ Scene_Base.prototype.updateFade = function() {
 	
 	
 //=============================================================================
-// ** ☆原型链规范 - 战斗场景
+// ** ☆原型链规范 - 战斗场景（fade 淡出淡入）
 //
 //			说明：	> 此处专门补上缺失的原型链，未缺失的则注释掉。
 //					（插件完整的功能目录去看看：功能结构树）
@@ -392,7 +401,7 @@ Scene_Battle.prototype.updateFade = function() {
 
 
 //=============================================================================
-// ** ☆原型链规范 - 地图场景
+// ** ☆原型链规范 - 地图场景（fade 淡出淡入）
 //
 //			说明：	> 此处专门补上缺失的原型链，未缺失的则注释掉。
 //					（插件完整的功能目录去看看：功能结构树）
@@ -442,7 +451,7 @@ Scene_Map.prototype.updateFade = function() {
 
 
 //=============================================================================
-// ** ☆原型链规范 - 菜单界面基类
+// ** ☆原型链规范 - 菜单界面基类（fade 淡出淡入）
 //
 //			说明：	> 此处专门补上缺失的原型链，未缺失的则注释掉。
 //					（插件完整的功能目录去看看：功能结构树）
@@ -492,7 +501,7 @@ Scene_MenuBase.prototype.updateFade = function() {
 
 
 //=============================================================================
-// ** ☆原型链规范 - 项界面基类
+// ** ☆原型链规范 - 项界面基类（fade 淡出淡入）
 //
 //			说明：	> 此处专门补上缺失的原型链，未缺失的则注释掉。
 //					（插件完整的功能目录去看看：功能结构树）
@@ -542,7 +551,7 @@ Scene_ItemBase.prototype.updateFade = function() {
 
 
 //=============================================================================
-// ** ☆原型链规范 - 存档界面基类
+// ** ☆原型链规范 - 存档界面基类（fade 淡出淡入）
 //
 //			说明：	> 此处专门补上缺失的原型链，未缺失的则注释掉。
 //					（插件完整的功能目录去看看：功能结构树）

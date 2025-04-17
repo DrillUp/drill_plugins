@@ -378,7 +378,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_EMoHS_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_EMoHS_PluginTip_baseList.length == 0 ){ return ""; }
@@ -406,10 +406,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_EventMouseHoverSwitch = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_EventMouseHoverSwitch');
+	var Imported = Imported || {};
+	Imported.Drill_EventMouseHoverSwitch = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_EventMouseHoverSwitch');
 	
 	
 	/*-----------------杂项------------------*/
@@ -427,9 +427,18 @@ if( Imported.Drill_CoreOfInput &&
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_EMoHS_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args){ 
 	_drill_EMoHS_pluginCommand.call(this, command, args);
+	this.drill_EMoHS_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_EMoHS_pluginCommand = function( command, args ){
 	if( command === ">鼠标悬停响应开关" ){
 		
 		if( args.length == 2 ){

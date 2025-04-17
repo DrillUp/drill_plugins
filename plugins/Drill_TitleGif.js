@@ -910,7 +910,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_TGi_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_TGi_PluginTip_baseList.length == 0 ){ return ""; }
@@ -926,10 +926,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_TitleGif = true;
-　　Imported.Drill_TitleGIF = true;
-　　var DrillUp = DrillUp || {}; 
+	var Imported = Imported || {};
+	Imported.Drill_TitleGif = true;
+	Imported.Drill_TitleGIF = true;
+	var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_TitleGif');
 	
 	//==============================
@@ -1056,12 +1056,22 @@ StorageManager.drill_TGi_saveData = function(){
 	this.drill_COGS_saveData( file_id, "TGi", data );
 };
 
+
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_TGi_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_TGi_pluginCommand.call(this, command, args);
+	this.drill_TGi_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_TGi_pluginCommand = function( command, args ){
 	if( command === ">标题GIF" || command === ">标题gif" ){
 		if(args.length == 4){
 			var temp1 = String(args[1]);

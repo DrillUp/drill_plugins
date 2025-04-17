@@ -137,7 +137,7 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称：		COMR (Core_Of_Move_Route)
+//		插件简称		COMR (Core_Of_Move_Route)
 //		临时全局变量	DrillUp.g_COMR_xxx
 //		临时局部变量	无
 //		存储数据变量	无
@@ -248,10 +248,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_CoreOfMoveRoute = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_CoreOfMoveRoute');
+	var Imported = Imported || {};
+	Imported.Drill_CoreOfMoveRoute = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_CoreOfMoveRoute');
 	
 	
 	/*-----------------杂项------------------*/
@@ -261,9 +261,18 @@
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_COMR_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_COMR_pluginCommand.call(this, command, args);
+	this.drill_COMR_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_COMR_pluginCommand = function( command, args ){
 	if( command === ">移动路线核心" ){
 		
 		/*-----------------对象组获取------------------*/
@@ -722,7 +731,11 @@ Game_Character.prototype.processMoveCommand = function( command ){
 		}
 		
 		// > 阻止 "没有括号的函数"
-		if( temp_script.indexOf("=") == -1 && ( temp_script.indexOf("(") == -1 || temp_script.indexOf(")") == -1 ) ){
+		if( temp_script.indexOf("=") == -1 && 
+		    temp_script.indexOf(">") == -1 && 
+		    temp_script.indexOf("<") == -1 && 
+		    temp_script.indexOf(".") == -1 && 
+		   (temp_script.indexOf("(") == -1 || temp_script.indexOf(")") == -1) ){
 			DrillUp.drill_COMR_addScript( temp_script );
 			return; 
 		}

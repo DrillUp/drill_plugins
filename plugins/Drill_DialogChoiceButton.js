@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        对话框 - 对话选项按钮组
+ * @plugindesc [v1.3]        对话框 - 对话选项按钮组
  * @author Drill_up
  * 
  * @Drill_LE_param "对话选项样式-%d"
@@ -26,7 +26,7 @@
  * 该插件 不能 单独使用。
  * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfSelectableButton   系统-按钮组核心★★v1.6及以上★★
+ *   - Drill_CoreOfSelectableButton   系统-按钮组核心★★v1.8及以上★★
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -101,6 +101,8 @@
  * 优化了与地图活动镜头的变换关系。
  * [v1.2]
  * 优化了旧存档的识别与兼容。
+ * [v1.3]
+ * 翻新了对话框的内部结构。
  * 
  *
  * 
@@ -582,9 +584,26 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			对话选项按钮组：
-//				->结构
-//					->按钮组
+//			->☆提示信息
+//			->☆静态数据
+//			->☆插件指令
+//			->☆存储数据
+//			->☆地图层级
+//			->☆战斗层级
+//
+//			->☆对话框绑定
+//			->☆贴图控制（地图界面）
+//				->创建
+//				->对话选项样式变化
+//				->位置变化
+//			->☆贴图控制（战斗界面）
+//				->创建
+//				->对话选项样式变化
+//				->位置变化
+//
+//			->按钮组层【Drill_DCB_BtnLayerSprite】
+//				->A主体
+//				->B样式变化
 //
 //
 //		★家谱：
@@ -602,14 +621,14 @@
 //			3.为了保持贴图不会修改到数据，这里使用 _drill_DCB_serial 序列号 来进行同步。
 //
 //		★其它说明细节：
-//			1.
+//			暂无
 //
 //		★存在的问题：
 //			暂无
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -620,7 +639,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_DCB_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_DCB_PluginTip_baseList.length == 0 ){ return ""; }
@@ -634,12 +653,12 @@
 	
 	
 //=============================================================================
-// ** 静态数据
+// ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_DialogChoiceButton = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_DialogChoiceButton');
+	var Imported = Imported || {};
+	Imported.Drill_DialogChoiceButton = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_DialogChoiceButton');
 	
 	
 	//==============================
@@ -655,15 +674,17 @@
 		data['zIndex'] = Number( dataFrom["图片层级"] || 0);
 		
 		
-		// > 按钮组 - 主体
+		// > 按钮组 - A主体
 		data['style_id'] = Number( dataFrom["按钮组样式"] || 0);
 		data['x'] = Number( dataFrom["平移-按钮组 X"] || 0);
 		data['y'] = Number( dataFrom["平移-按钮组 Y"] || 0);
-		data['btn_constructor'] = "Window_Selectable";
+		
+		// > 按钮组 - B父窗口
 		//		（选择项有个很愚蠢的操作： this.addCommand(choices[i], 'choice'); ）
 		//		（6个选项，全是一样的关键字，而且这个窗口还按 Window_Command 来继承，没办法，就按数组一一对应吧）
+		data['btn_constructor'] = "Window_Selectable";
 		
-		// > 按钮组 - 按钮贴图
+		// > 按钮组 - B父窗口（资源）
 		data['btn_src_default'] = String( dataFrom["默认按钮贴图"] || "");
 		data['btn_src_file'] = "img/Menu__ui_messageBtn/";
 		if( dataFrom["按钮贴图序列"] != "" &&
@@ -674,7 +695,7 @@
 		}
 		data['btn_srcKeyword'] = [];
 		
-		// > 按钮组 - 激活
+		// > 按钮组 - F激活
 		data['active_enableMouseOk'] = true;	//（鼠标ok点击 开启）
 		data['active_hide'] = false;			//（激活后是否瞬间隐藏，克隆选中按钮用）
 		data['active_out'] = false;				//（激活后不出列）
@@ -709,11 +730,20 @@ if( Imported.Drill_CoreOfSelectableButton ){
 	
 	
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
-var _drill_DCB_pluginCommand = Game_Interpreter.prototype.pluginCommand
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
+var _drill_DCB_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_DCB_pluginCommand.call(this, command, args);
+	this.drill_DCB_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_DCB_pluginCommand = function( command, args ){
 	if( command === ">对话选项按钮组" ){
 		if(args.length == 2){
 			var type = String(args[1]);
@@ -736,7 +766,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -814,12 +844,11 @@ Game_System.prototype.drill_DCB_checkSysData_Private = function() {
 	if( this._drill_DCB_curStyle == undefined ){
 		this.drill_DCB_initSysData();
 	}
-	
 };
 
 
 //#############################################################################
-// ** 【标准模块】地图层级
+// ** 【标准模块】地图层级 ☆地图层级
 //#############################################################################
 //##############################
 // * 地图层级 - 添加贴图到层级【标准函数】
@@ -908,6 +937,20 @@ Scene_Map.prototype.createAllWindows = function() {
 	}
 }
 //==============================
+// * 地图层级 - 添加贴图到层级（私有）
+//==============================
+Scene_Map.prototype.drill_DCB_layerAddSprite_Private = function( sprite, layer_index ){
+	if( layer_index == "上层" ){
+		this._spriteset._drill_mapUpArea.addChild( sprite );
+	}
+	if( layer_index == "图片层" ){
+		this._spriteset._drill_mapPicArea.addChild( sprite );
+	}
+	if( layer_index == "最顶层" ){
+		this._drill_SenceTopArea.addChild( sprite );
+	}
+}
+//==============================
 // * 地图层级 - 参数定义
 //
 //			说明：	> 所有drill插件的贴图都用唯一参数：zIndex（可为小数、负数），其它插件没有此参数定义。
@@ -934,20 +977,6 @@ Scene_Map.prototype.drill_DCB_sortByZIndex_Private = function () {
 	this._drill_SenceTopArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
 };
 //==============================
-// * 地图层级 - 添加贴图到层级（私有）
-//==============================
-Scene_Map.prototype.drill_DCB_layerAddSprite_Private = function( sprite, layer_index ){
-	if( layer_index == "上层" ){
-		this._spriteset._drill_mapUpArea.addChild( sprite );
-	}
-	if( layer_index == "图片层" ){
-		this._spriteset._drill_mapPicArea.addChild( sprite );
-	}
-	if( layer_index == "最顶层" ){
-		this._drill_SenceTopArea.addChild( sprite );
-	}
-}
-//==============================
 // * 地图层级 - 层级与镜头的位移（私有）
 //==============================
 Scene_Map.prototype.drill_DCB_layerCameraMoving_Private = function( xx, yy, layer, option ){
@@ -965,91 +994,10 @@ Scene_Map.prototype.drill_DCB_layerCameraMoving_Private = function( xx, yy, laye
 	}
 	return {'x':xx, 'y':yy };
 }
-//=============================================================================
-// ** 地图界面
-//=============================================================================
-//==============================
-// * 地图 - 创建
-//==============================
-var _drill_DCB_layer_createAllWindows2 = Scene_Map.prototype.createAllWindows;
-Scene_Map.prototype.createAllWindows = function() {
-	_drill_DCB_layer_createAllWindows2.call(this);
-	
-	if( this._messageWindow == undefined ){ return; }
-	if( this._messageWindow._choiceWindow == undefined ){ return; }
-	
-	// > 创建贴图
-	var temp_sprite = new Drill_DCB_BtnLayerSprite( this._messageWindow._choiceWindow );
-	this._drill_DCB_sprite = temp_sprite;
-};
-//==============================
-// * 地图 - 帧刷新
-//==============================
-var _drill_DCB_map_updateMain = Scene_Map.prototype.updateMain;
-Scene_Map.prototype.updateMain = function() {	
-	_drill_DCB_map_updateMain.call(this);
-	
-	if( this._drill_DCB_sprite == undefined ){ return; }
-	
-	this.drill_DCB_updateLayer();		//帧刷新 - 对话选项样式变化
-	this.drill_DCB_updatePosition();	//帧刷新 - 位置变化
-};
-//==============================
-// * 帧刷新 - 对话选项样式变化
-//==============================
-Scene_Map.prototype.drill_DCB_updateLayer = function() {
-	var temp_sprite = this._drill_DCB_sprite;
-	var temp_data = DrillUp.g_DCB_data[ $gameSystem._drill_DCB_curStyle -1 ];
-	if( temp_data == undefined ){ return; }
-	if( temp_data['inited'] == false ){ return; }
-	if( temp_sprite._drill_curLayer == temp_data['map_layerIndex'] ){
-		return;
-	}
-	
-	temp_sprite._drill_curLayer = temp_data['map_layerIndex'];
-	temp_sprite.zIndex = temp_data['zIndex'];
-	
-	this.drill_DCB_layerAddSprite( temp_sprite, temp_data['map_layerIndex'] );
-	this.drill_DCB_sortByZIndex();
-};
-//==============================
-// * 帧刷新 - 位置变化
-//==============================
-Scene_Map.prototype.drill_DCB_updatePosition = function() {
-	var temp_sprite = this._drill_DCB_sprite;
-	var temp_data = temp_sprite._drill_data;
-	if( temp_data == null ){ return; }
-	
-	var xx = 0;
-	var yy = 0;
-	
-	// > 镜头缩放与位移
-	if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】UI缩放与位移
-		var layer = temp_data['map_layerIndex'];
-		if( layer == "下层" || layer == "中层" || layer == "上层" ){
-			temp_sprite.scale.x = 1.00 / $gameSystem.drill_LCa_curScaleX();
-			temp_sprite.scale.y = 1.00 / $gameSystem.drill_LCa_curScaleY();
-			//（暂不考虑缩放位移偏转）
-		}
-		if( layer == "图片层" || layer == "最顶层" ){
-			//（不需偏移）
-		}
-	}
-	
-	
-	// > 层级与镜头的位移（镜头参照）
-	var pos = this.drill_DCB_layerCameraMoving(xx, yy, temp_data['map_layerIndex'], {});
-	xx = pos['x'];
-	yy = pos['y'];
-	
-	
-	temp_sprite.x = xx;
-	temp_sprite.y = yy;
-};
 
 
 //#############################################################################
-// ** 【标准模块】战斗层级
+// ** 【标准模块】战斗层级 ☆战斗层级
 //#############################################################################
 //##############################
 // * 战斗层级 - 添加贴图到层级【标准函数】
@@ -1139,6 +1087,20 @@ Scene_Battle.prototype.createAllWindows = function() {
 	}
 }
 //==============================
+// * 战斗层级 - 添加贴图到层级（私有）
+//==============================
+Scene_Battle.prototype.drill_DCB_layerAddSprite_Private = function( sprite, layer_index ){
+	if( layer_index == "上层" ){
+		this._spriteset._drill_battleUpArea.addChild( sprite );
+	}
+	if( layer_index == "图片层" ){
+		this._spriteset._drill_battlePicArea.addChild( sprite );
+	}
+	if( layer_index == "最顶层" ){
+		this._drill_SenceTopArea.addChild( sprite );
+	}
+}
+//==============================
 // * 战斗层级 - 参数定义
 //
 //			说明：	> 所有drill插件的贴图都用唯一参数：zIndex（可为小数、负数），其它插件没有此参数定义。
@@ -1164,20 +1126,6 @@ Scene_Battle.prototype.drill_DCB_sortByZIndex_Private = function() {
 	this._spriteset._drill_battlePicArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
 	this._drill_SenceTopArea.children.sort(function(a, b){return a.zIndex-b.zIndex});
 };
-//==============================
-// * 战斗层级 - 添加贴图到层级（私有）
-//==============================
-Scene_Battle.prototype.drill_DCB_layerAddSprite_Private = function( sprite, layer_index ){
-	if( layer_index == "上层" ){
-		this._spriteset._drill_battleUpArea.addChild( sprite );
-	}
-	if( layer_index == "图片层" ){
-		this._spriteset._drill_battlePicArea.addChild( sprite );
-	}
-	if( layer_index == "最顶层" ){
-		this._drill_SenceTopArea.addChild( sprite );
-	}
-}
 //==============================
 // * 战斗层级 - 层级与镜头的位移（私有）
 //==============================
@@ -1207,109 +1155,256 @@ Scene_Battle.prototype.drill_DCB_layerCameraMoving_Private = function( xx, yy, l
 	}
 	return {'x':xx, 'y':yy };
 }
+
+
+
 //=============================================================================
-// ** 战斗界面
+// ** ☆对话框绑定
+//
+//			说明：	> 此模块专门管理 对话框 对象。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 地图 - 创建
+// * 对话框绑定 - 捕获刷新
 //==============================
-var _drill_DCB_battle_createAllWindows2 = Scene_Battle.prototype.createAllWindows;
-Scene_Battle.prototype.createAllWindows = function() {
-	_drill_DCB_battle_createAllWindows2.call(this);
+var _drill_DCB_start = Window_ChoiceList.prototype.start;
+Window_ChoiceList.prototype.start = function(){
 	
+	// > 可见控制
+	if( $gameSystem._drill_DCB_enable == true ){
+		this.visible = false;
+	}else{
+		this.visible = true;
+	}
+	
+	// > 生成一个不重复的序列号
+    this._drill_DCB_serial = new Date().getTime();
+	
+	// > 原函数
+    _drill_DCB_start.call( this );
+};
+//==============================
+// * 对话框绑定 - 捕获刷新
+//==============================
+//var _drill_DCB_doesContinue = Window_Message.prototype.doesContinue;
+//Window_Message.prototype.doesContinue = function(){
+//	
+//	if( $gameSystem._drill_DCB_enable == true &&
+//		this._choiceWindow.active == true ){
+//		return false;
+//	}
+//	
+//	// > 原函数
+//	return _drill_DCB_doesContinue.call(this);
+//};
+//==============================
+// * 对话框绑定 - 选择项窗口 - 捕获位置刷新
+//==============================
+//var _drill_DCB_c_updatePlacement = Window_ChoiceList.prototype.updatePlacement;
+//Window_ChoiceList.prototype.updatePlacement = function(){
+//	_drill_DCB_c_updatePlacement.call(this);
+//	
+//	if( $gameSystem._drill_DCB_enable == true ){
+//		this.y = Graphics.boxHeight * 2;
+//	}
+//}
+
+
+//=============================================================================
+// ** ☆贴图控制（地图界面）
+//
+//			说明：	> 此模块专门管理 贴图 对象。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 贴图控制（地图界面） - 创建
+//==============================
+var _drill_DCB_layer_createAllWindows2 = Scene_Map.prototype.createAllWindows;
+Scene_Map.prototype.createAllWindows = function() {
+	_drill_DCB_layer_createAllWindows2.call(this);
 	if( this._messageWindow == undefined ){ return; }
 	if( this._messageWindow._choiceWindow == undefined ){ return; }
 	
-	// > 创建贴图
+	// > 创建 按钮组贴图
 	var temp_sprite = new Drill_DCB_BtnLayerSprite( this._messageWindow._choiceWindow );
 	this._drill_DCB_sprite = temp_sprite;
 };
 //==============================
-// * 地图 - 帧刷新
+// * 贴图控制（地图界面） - 帧刷新
 //==============================
-var _drill_DCB_battle_update = Scene_Battle.prototype.update;
-Scene_Battle.prototype.update = function() {	
-	_drill_DCB_battle_update.call(this);
-	
-	if( this._drill_DCB_sprite == undefined ){ return; }
-	
-	this.drill_DCB_updateLayer();			//帧刷新 - 对话选项样式变化
-	this.drill_DCB_updatePosition();		//帧刷新 - 位置变化
+var _drill_DCB_map_updateMain = Scene_Map.prototype.updateMain;
+Scene_Map.prototype.updateMain = function() {	
+	_drill_DCB_map_updateMain.call(this);
+	this.drill_DCB_updateLayer();		//帧刷新 - 对话选项样式变化
+	this.drill_DCB_updatePosition();	//帧刷新 - 位置变化
 };
 //==============================
-// * 帧刷新 - 对话选项样式变化
+// * 贴图控制（地图界面） - 帧刷新 - 对话选项样式变化
 //==============================
-Scene_Battle.prototype.drill_DCB_updateLayer = function() {
+Scene_Map.prototype.drill_DCB_updateLayer = function() {
+	if( this._drill_DCB_sprite == undefined ){ return; }
 	var temp_sprite = this._drill_DCB_sprite;
+	
+	// > 获取样式
 	var temp_data = DrillUp.g_DCB_data[ $gameSystem._drill_DCB_curStyle -1 ];
 	if( temp_data == undefined ){ return; }
 	if( temp_data['inited'] == false ){ return; }
-	if( temp_sprite._drill_curLayer == temp_data['battle_layerIndex'] ){
-		return;
+	
+	// > 层级变化时
+	if( temp_sprite._drill_curLayer != temp_data['map_layerIndex'] ){
+		temp_sprite._drill_curLayer = temp_data['map_layerIndex'];
+		this.drill_DCB_layerAddSprite( temp_sprite, temp_data['map_layerIndex'] );
+		this.drill_DCB_sortByZIndex();
 	}
 	
-	temp_sprite._drill_curLayer = temp_data['battle_layerIndex'];
-	temp_sprite.zIndex = temp_data['zIndex'];
-	
-	this.drill_DCB_layerAddSprite( temp_sprite, temp_data['battle_layerIndex'] );
-	this.drill_DCB_sortByZIndex();
+	// > 堆叠级变化时
+	if( temp_sprite.zIndex != temp_data['zIndex'] ){
+		temp_sprite.zIndex = temp_data['zIndex'];
+		this.drill_DCB_sortByZIndex();
+	}
 };
 //==============================
-// * 帧刷新 - 位置变化
+// * 贴图控制（地图界面） - 帧刷新 - 位置变化
 //==============================
-Scene_Battle.prototype.drill_DCB_updatePosition = function() {
+Scene_Map.prototype.drill_DCB_updatePosition = function() {
+	if( this._drill_DCB_sprite == undefined ){ return; }
 	var temp_sprite = this._drill_DCB_sprite;
-	var temp_data = temp_sprite._drill_data;
+	
+	// > 获取样式
+	var temp_data = temp_sprite._drill_curData;
 	if( temp_data == null ){ return; }
 	
+	// > 位置
 	var xx = 0;
 	var yy = 0;
 	
+	// > 位置 - 镜头缩放与位移
+	if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】UI缩放与位移
+		var layer = temp_data['map_layerIndex'];
+		if( layer == "下层" || layer == "中层" || layer == "上层" ){
+			temp_sprite.scale.x = 1.00 / $gameSystem.drill_LCa_curScaleX();
+			temp_sprite.scale.y = 1.00 / $gameSystem.drill_LCa_curScaleY();
+			//（暂不考虑缩放位移偏转）
+		}
+		if( layer == "图片层" || layer == "最顶层" ){
+			//（不需偏移）
+		}
+	}
 	
-	// > 层级与镜头的位移（镜头参照）
-	var pos = this.drill_DCB_layerCameraMoving(xx, yy, temp_data['battle_layerIndex'], {});
+	// > 位置 - 层级与镜头的位移（镜头参照）
+	var pos = this.drill_DCB_layerCameraMoving(xx, yy, temp_data['map_layerIndex'], {});
 	xx = pos['x'];
 	yy = pos['y'];
 	
-	
+	// > 位置 - 赋值
 	temp_sprite.x = xx;
 	temp_sprite.y = yy;
 };
 
 
 //=============================================================================
-// ** 绑定
+// ** ☆贴图控制（战斗界面）
+//
+//			说明：	> 此模块专门管理 贴图 对象。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 对话框 - 捕获刷新
+// * 贴图控制（战斗界面） - 创建
 //==============================
-var _drill_DCB_start = Window_ChoiceList.prototype.start;
-Window_ChoiceList.prototype.start = function(){
-    _drill_DCB_start.call( this );
-    this._drill_DCB_serial = new Date().getTime();	//（生成一个不重复的序列号）
+var _drill_DCB_battle_createAllWindows2 = Scene_Battle.prototype.createAllWindows;
+Scene_Battle.prototype.createAllWindows = function() {
+	_drill_DCB_battle_createAllWindows2.call(this);
+	if( this._messageWindow == undefined ){ return; }
+	if( this._messageWindow._choiceWindow == undefined ){ return; }
+	
+	// > 创建 按钮组贴图
+	var temp_sprite = new Drill_DCB_BtnLayerSprite( this._messageWindow._choiceWindow );
+	this._drill_DCB_sprite = temp_sprite;
 };
 //==============================
-// * 子窗口 - 选择项窗口 - 捕获位置刷新
+// * 贴图控制（战斗界面） - 帧刷新
 //==============================
-var _drill_DCB_c_updatePlacement = Window_ChoiceList.prototype.updatePlacement;
-Window_ChoiceList.prototype.updatePlacement = function(){
-	_drill_DCB_c_updatePlacement.call(this);
+var _drill_DCB_battle_update = Scene_Battle.prototype.update;
+Scene_Battle.prototype.update = function() {	
+	_drill_DCB_battle_update.call(this);
+	this.drill_DCB_updateLayer();			//帧刷新 - 对话选项样式变化
+	this.drill_DCB_updatePosition();		//帧刷新 - 位置变化
+};
+//==============================
+// * 贴图控制（战斗界面） - 帧刷新 - 对话选项样式变化
+//==============================
+Scene_Battle.prototype.drill_DCB_updateLayer = function() {
+	if( this._drill_DCB_sprite == undefined ){ return; }
+	var temp_sprite = this._drill_DCB_sprite;
 	
-	if( $gameSystem._drill_DCB_enable == true ){
-		this.y = Graphics.boxHeight * 2;
+	// > 获取样式
+	var temp_data = DrillUp.g_DCB_data[ $gameSystem._drill_DCB_curStyle -1 ];
+	if( temp_data == undefined ){ return; }
+	if( temp_data['inited'] == false ){ return; }
+	
+	// > 层级变化时
+	if( temp_sprite._drill_curLayer != temp_data['battle_layerIndex'] ){
+		temp_sprite._drill_curLayer = temp_data['battle_layerIndex'];
+		this.drill_DCB_layerAddSprite( temp_sprite, temp_data['battle_layerIndex'] );
+		this.drill_DCB_sortByZIndex();
 	}
-}
+	
+	// > 堆叠级变化时
+	if( temp_sprite.zIndex != temp_data['zIndex'] ){
+		temp_sprite.zIndex = temp_data['zIndex'];
+		this.drill_DCB_sortByZIndex();
+	}
+};
+//==============================
+// * 贴图控制（战斗界面） - 帧刷新 - 位置变化
+//==============================
+Scene_Battle.prototype.drill_DCB_updatePosition = function() {
+	if( this._drill_DCB_sprite == undefined ){ return; }
+	var temp_sprite = this._drill_DCB_sprite;
+	
+	// > 获取样式
+	var temp_data = temp_sprite._drill_curData;
+	if( temp_data == null ){ return; }
+	
+	// > 位置
+	var xx = 0;
+	var yy = 0;
+	
+	// > 位置 - 层级与镜头的位移（镜头参照）
+	var pos = this.drill_DCB_layerCameraMoving(xx, yy, temp_data['battle_layerIndex'], {});
+	xx = pos['x'];
+	yy = pos['y'];
+	
+	// > 位置 - 赋值
+	temp_sprite.x = xx;
+	temp_sprite.y = yy;
+};
 
 
 //=============================================================================
 // ** 按钮组层【Drill_DCB_BtnLayerSprite】
-//
-//			代码：	> 范围 - 该类只对 选项按钮窗口 进行可视化。
-//					> 结构 - [ ●合并 /分离/混乱] 贴图与数据合并。
-//					> 数量 - [ ●单个 /多个] 
-//					> 创建 - [ ●一次性/ 自延迟/外部延迟] 
-//					> 销毁 - [ ●不考虑 /自销毁/外部销毁] 
-//					> 样式 - [不可修改/ ●自变化 /外部变化] 计时器样式修改后，贴图根据样式自动调整。
+// **		
+// **		作用域：	地图界面、战斗界面、菜单界面
+// **		主功能：	定义一个按钮组贴图。该类直连按钮组的一系列功能。
+// **		子功能：	
+// **					->贴图『独立贴图』
+// **						x->显示贴图/隐藏贴图
+// **						x->是否就绪
+// **						x->优化策略
+// **						->销毁
+// **						->初始化数据
+// **						->初始化对象
+// **					
+// **					->A主体
+// **					->B样式变化
+// **						->重建层级
+// **					
+// **		代码：	> 范围 - 该类只对 选项按钮窗口 进行可视化。
+// **				> 结构 - [ ●合并 /分离/混乱] 贴图与数据合并。
+// **				> 数量 - [ ●单个 /多个] 
+// **				> 创建 - [ ●一次性/ 自延迟/外部延迟] 
+// **				> 销毁 - [ ●不考虑 /自销毁/外部销毁] 
+// **				> 样式 - [不可修改/ ●自变化 /外部变化] 计时器样式修改后，贴图根据样式自动调整。
 //=============================================================================
 //==============================
 // * 按钮组层 - 定义
@@ -1324,15 +1419,10 @@ Drill_DCB_BtnLayerSprite.prototype.constructor = Drill_DCB_BtnLayerSprite;
 //==============================
 Drill_DCB_BtnLayerSprite.prototype.initialize = function( choiceWindow ){
 	Sprite.prototype.initialize.call(this);
-	this._drill_choiceWindow = choiceWindow;
+	this._drill_choiceWindow = choiceWindow;	//父窗口
 	
-	// > 私有属性初始化
-	this.anchor.x = 0.5;
-	this.anchor.y = 0.5;
-	this._drill_data = null;			//样式数据
-	this._drill_curStyle = -1;			//当前样式
-	this._drill_curSerial = -1;			//当前序列号
-	this._drill_curLayer = "";			//当前层级
+	this.drill_initData();						//初始化数据
+	this.drill_initSprite();					//初始化对象
 };
 //==============================
 // * 按钮组层 - 帧刷新
@@ -1340,17 +1430,100 @@ Drill_DCB_BtnLayerSprite.prototype.initialize = function( choiceWindow ){
 Drill_DCB_BtnLayerSprite.prototype.update = function() {
 	Sprite.prototype.update.call(this);
 	
-	this.drill_updateVisible();			//帧刷新可见
-	
-	if( $gameSystem._drill_DCB_enable != true ){ return; }
-	
-	this.drill_updateStyle();			//帧刷新样式
-	this.drill_updateRebuild();			//帧刷新重建监听
+	this.drill_sprite_updateAttr();			//帧刷新 - A主体
+	this.drill_sprite_updateStyle();		//帧刷新 - B样式变化 - 样式
+	this.drill_sprite_updateRebuild();		//帧刷新 - B样式变化 - 重建
+};
+//##############################
+// * 按钮组层 - 销毁【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 无
+//			
+//			说明：	> 需要重建时执行此函数即可。
+//##############################
+Drill_DCB_BtnLayerSprite.prototype.drill_DCB_destroy = function(){
+	this.drill_DCB_destroy_Private();
+};
+//##############################
+// * 按钮组层 - 初始化数据『独立贴图』【标准默认值】
+//
+//			参数：	> 无
+//			返回：	> 无
+//##############################
+Drill_DCB_BtnLayerSprite.prototype.drill_initData = function() {
+	//（暂无 默认值）
+};
+//##############################
+// * 按钮组层 - 初始化对象『独立贴图』【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 无
+//
+//			说明：	> 此函数只在初始化时执行一次。
+//##############################
+Drill_DCB_BtnLayerSprite.prototype.drill_initSprite = function() {
+	this.drill_sprite_initAttr();			//初始化对象 - A主体
+	this.drill_sprite_initStyle();			//初始化对象 - B样式变化
 };
 //==============================
-// * 帧刷新 - 样式
+// * 按钮组层 - 销毁（私有）
 //==============================
-Drill_DCB_BtnLayerSprite.prototype.drill_updateStyle = function() {
+Drill_DCB_BtnLayerSprite.prototype.drill_DCB_destroy_Private = function() {
+	
+	// > 销毁 - A主体（无）
+	
+	// > 销毁 - B样式变化
+	if( this._drill_layerSprite != undefined ){
+		this._drill_layerSprite.drill_COSB_destroy();
+		this.removeChild( this._drill_layerSprite );
+		this._drill_layerSprite = null;
+	}
+};
+
+//==============================
+// * A主体 - 初始化
+//==============================
+Drill_DCB_BtnLayerSprite.prototype.drill_sprite_initAttr = function() {
+	
+	// > 私有属性初始化
+	this.anchor.x = 0.5;
+	this.anchor.y = 0.5;
+};
+//==============================
+// * A主体 - 帧刷新
+//==============================
+Drill_DCB_BtnLayerSprite.prototype.drill_sprite_updateAttr = function() {
+	
+	// > 可见设置
+	if( this.visible != $gameSystem._drill_DCB_enable ){
+		this.visible = $gameSystem._drill_DCB_enable;
+	}
+	
+	// > 不可见时，销毁
+	if( $gameSystem._drill_DCB_enable == false ){
+		if( this._drill_layerSprite != undefined ){
+			this.drill_DCB_destroy();
+		}
+	}
+};
+
+//==============================
+// * B样式变化 - 初始化
+//==============================
+Drill_DCB_BtnLayerSprite.prototype.drill_sprite_initStyle = function() {
+	this._drill_curData = null;			//B样式变化 - 当前样式数据
+	this._drill_curStyle = -1;			//B样式变化 - 当前样式
+	this._drill_curSerial = -1;			//B样式变化 - 当前序列号
+	this._drill_curLayer = "";			//B样式变化 - 当前层级
+};
+//==============================
+// * B样式变化 - 帧刷新 样式
+//==============================
+Drill_DCB_BtnLayerSprite.prototype.drill_sprite_updateStyle = function() {
+	if( $gameSystem._drill_DCB_enable != true ){ return; }
+	
+	// > 变化锁 - 当前样式
 	if( this._drill_curStyle == $gameSystem._drill_DCB_curStyle ){ return; }
 	this._drill_curStyle = $gameSystem._drill_DCB_curStyle;
 	
@@ -1358,32 +1531,36 @@ Drill_DCB_BtnLayerSprite.prototype.drill_updateStyle = function() {
 	var temp_data = DrillUp.g_DCB_data[ this._drill_curStyle -1 ];
 	if( temp_data == undefined ){ return; }
 	if( temp_data['inited'] == false ){ return; }
-	this._drill_data = temp_data;
+	this._drill_curData = temp_data;
 	
-	// > 修改序列号
+	// > 修改 当前序列号
 	this._drill_curSerial = -1;
 };
 //==============================
-// * 帧刷新 - 重建监听
+// * B样式变化 - 帧刷新 重建
 //==============================
-Drill_DCB_BtnLayerSprite.prototype.drill_updateRebuild = function() {
+Drill_DCB_BtnLayerSprite.prototype.drill_sprite_updateRebuild = function() {
+	if( $gameSystem._drill_DCB_enable != true ){ return; }
+	
+	// > 变化锁 - 当前序列号
 	if( this._drill_curSerial == this._drill_choiceWindow._drill_DCB_serial ){ return; }
 	this._drill_curSerial = this._drill_choiceWindow._drill_DCB_serial;
 	
-	this.drill_rebuildLayer();			//重建层级
+	// > 重建层级
+	this.drill_sprite_rebuild();
 };
 //==============================
-// * 创建 - 重建层级
+// * B样式变化 - 重建层级
 //
-//			说明：	此重建过于频繁，会造成 较高 的性能消耗，后期最好改进这里的结构。
+//			说明：	> 此重建过于频繁，会造成 较高 的性能消耗，后期最好改进这里的结构。
 //==============================
-Drill_DCB_BtnLayerSprite.prototype.drill_rebuildLayer = function() {
-	var data = this._drill_data;
+Drill_DCB_BtnLayerSprite.prototype.drill_sprite_rebuild = function() {
 	
-	this.drill_destroyLayer();
+	// > 销毁
+	this.drill_DCB_destroy();
 	
 	// > 准备按钮组参数
-	var data_org = data;					//（该插件的设置）
+	var data_org = this._drill_curData;		//（该插件的设置）
 	var data_style = DrillUp.drill_COSB_getCopyedBtnData( data_org['style_id']-1 );	//深拷贝数据
 	var keys = Object.keys(data_org);
 	for(var i = 0; i < keys.length; i++){	//（传入值）
@@ -1394,37 +1571,8 @@ Drill_DCB_BtnLayerSprite.prototype.drill_rebuildLayer = function() {
 	// > 按钮组
 	var temp_sprite = new Drill_COSB_LayerSprite( data_style, this._drill_choiceWindow );
 	this.addChild(temp_sprite);
-	this._drill_layer_sprite = temp_sprite;
+	this._drill_layerSprite = temp_sprite;
 };
-//==============================
-// * 创建 - 重建层级
-//==============================
-Drill_DCB_BtnLayerSprite.prototype.drill_destroyLayer = function() {	
-	if( this._drill_layer_sprite == undefined ){ return; }
-	
-	// > 清理旧贴图
-	this._drill_layer_sprite.drill_COSB_destroy();
-	this.removeChild( this._drill_layer_sprite );
-	this._drill_layer_sprite = null;
-};
-//==============================
-// * 帧刷新 - 可见设置
-//==============================
-Drill_DCB_BtnLayerSprite.prototype.drill_updateVisible = function() {
-	
-	// > 可见设置
-	if( this.visible != $gameSystem._drill_DCB_enable ){
-		this.visible = $gameSystem._drill_DCB_enable;
-	}
-	
-	// > 不可见时，销毁
-	if( $gameSystem._drill_DCB_enable == false &&
-		this._drill_layer_sprite != undefined ){
-		this.drill_destroyLayer();
-	}
-};
-
-
 
 
 //=============================================================================

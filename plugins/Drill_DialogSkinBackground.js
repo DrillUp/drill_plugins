@@ -350,6 +350,7 @@
  * @desc 只用于方便区分查看的标签，不作用在插件中。
  * @default ==新的背景层==
  * 
+ * 
  * @param ---绑定---
  * @default 
  * 
@@ -462,7 +463,6 @@
  * @dir img/Menu__ui_message/
  * @type file
  * 
- * 
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -487,13 +487,24 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			对话框背景：
-//				->绑定到皮肤
-//					->样式切换时重贴背景
-//				->同步
-//					->可见情况
-//					->播放GIF
-//					->窗口y缩放大小同步
+//			->☆提示信息
+//			->☆静态数据
+//			->☆插件指令
+//			->☆存储数据
+//			
+//			->☆对话框控制
+//				->创建背景（Window_Base）
+//				->刷新背景（Window_Base）
+//			->☆对话框子窗口控制
+//				->4A金钱窗口
+//				->4B选择项窗口
+//				->4C数字输入窗口
+//				->4D选择物品窗口
+//				x->4E姓名框窗口
+//			
+//			->对话框背景【Drill_DSB_DecorationBackground】
+//				->A主体
+//				->B动态遮罩
 //
 //
 //		★家谱：
@@ -516,7 +527,7 @@
 //		
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -530,7 +541,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_DSB_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_DSB_PluginTip_baseList.length == 0 ){ return ""; }
@@ -544,11 +555,11 @@
 	
 	
 //=============================================================================
-// ** 静态数据
+// ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_DialogSkinBackground = true;
-　　var DrillUp = DrillUp || {}; 
+	var Imported = Imported || {};
+	Imported.Drill_DialogSkinBackground = true;
+	var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_DialogSkinBackground');
 
 	//==============================
@@ -596,7 +607,7 @@
 			DrillUp.g_DSB_list[i]['inited'] = false;
 		}
 	}
-
+	
 	
 	
 //=============================================================================
@@ -605,13 +616,22 @@
 if( Imported.Drill_CoreOfDynamicMask &&
 	Imported.Drill_DialogSkin ){
 	
-
+	
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_DSB_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_DSB_pluginCommand.call(this, command, args);
+	this.drill_DSB_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_DSB_pluginCommand = function( command, args ){
 	if( command === ">对话框背景" ){
 		
 		if(args.length == 4){
@@ -635,7 +655,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -736,36 +756,40 @@ Game_System.prototype.drill_DSB_checkSysData_Private = function() {
 };
 
 
+
 //=============================================================================
-// * 对话框
+// ** ☆对话框控制
+//
+//			说明：	> 该模块将对 对话框 进行专门管理。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 对话框 - 初始化
+// * 3A主体 - 初始化
 //==============================
 var _drill_DSB_wm_initialize = Window_Message.prototype.initialize;
 Window_Message.prototype.initialize = function() {
 	_drill_DSB_wm_initialize.call( this );
-
 	this.drill_DSB_createSprite();			//创建背景
 };
 //==============================
-// * 对话框 - 设置背景（非帧刷新，窗口/暗淡/透明）
+// * 3A主体 - 设置背景（非帧刷新，窗口/暗淡/透明）
 //
-//			说明：	窗口类型切换时，刷新背景的出现情况。
+//			说明：	> 窗口类型切换时，刷新背景的出现情况。
 //==============================
 var _drill_DSB_setBackgroundType = Window_Message.prototype.setBackgroundType;
 Window_Message.prototype.setBackgroundType = function( type ){
 	_drill_DSB_setBackgroundType.call( this,type );
 	
     if( type === 0 ){	// 窗口 类型
-		this.drill_DSB_refreshSprite();
+		this.drill_DSB_refreshSprite();		//刷新背景
 	}
 }
 
 //==============================
-// * 通用函数 - 创建背景
+// * 对话框控制 - 创建背景（Window_Base）
 //==============================
-Window_Message.prototype.drill_DSB_createSprite = function() {
+Window_Base.prototype.drill_DSB_createSprite = function() {
+	if( this._drill_DSk_tag == undefined ){ return; }
 	
 	// > 背景层
 	this._drill_DSB_spriteLayer = new Sprite();
@@ -777,11 +801,12 @@ Window_Message.prototype.drill_DSB_createSprite = function() {
 	this._drill_DSB_curStyle = -1;
 };
 //==============================
-// * 通用函数 - 刷新背景
+// * 对话框控制 - 刷新背景（Window_Base）
 //
-//			说明：	每个窗口中都建立一个装饰图层，然后根据样式检查，删除全部装饰图，再重建并添加到图层。
+//			说明：	> 每个窗口中都建立一个装饰图层，然后根据样式检查，删除全部装饰图，再重建并添加到图层。
 //==============================
-Window_Message.prototype.drill_DSB_refreshSprite = function(){
+Window_Base.prototype.drill_DSB_refreshSprite = function(){
+	if( this._drill_DSk_tag == undefined ){ return; }
 	
 	// > 样式检查
 	var styleId = $gameSystem.drill_DSk_getStyleId( this._drill_DSk_tag );
@@ -814,38 +839,32 @@ Window_Message.prototype.drill_DSB_refreshSprite = function(){
 };
 
 
+
 //=============================================================================
-// * 对话框子窗口
+// ** ☆对话框子窗口控制
+//
+//			说明：	> 该模块将对 对话框的子窗口 进行专门管理。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 金钱窗口 - 初始化
+// * 4A金钱窗口 - 初始化
 //==============================
 var _drill_DSB_createSubWindows = Window_Message.prototype.createSubWindows;
 Window_Message.prototype.createSubWindows = function(){
 	_drill_DSB_createSubWindows.call( this );
-	this._goldWindow.drill_DSB_createSprite = this.drill_DSB_createSprite;		
-	this._goldWindow.drill_DSB_refreshSprite = this.drill_DSB_refreshSprite;	
-	
-	this._goldWindow.drill_DSB_createSprite();		//创建背景
+	this._goldWindow.drill_DSB_createSprite();
 }
 //==============================
-// * 金钱窗口 - 刷新
+// * 4A金钱窗口 - 刷新
 //==============================
 var _drill_DSB_Gold_open = Window_Gold.prototype.open;
 Window_Gold.prototype.open = function() {
 	_drill_DSB_Gold_open.call(this);
-	
-	if( this._drill_DSB_tag != undefined ){
-		this.drill_DSB_refreshSprite();
-	}
+	this.drill_DSB_refreshSprite();
 }
+
 //==============================
-// * 选择项窗口 - 相同函数
-//==============================
-Window_ChoiceList.prototype.drill_DSB_createSprite = Window_Message.prototype.drill_DSB_createSprite;
-Window_ChoiceList.prototype.drill_DSB_refreshSprite = Window_Message.prototype.drill_DSB_refreshSprite;
-//==============================
-// * 选择项窗口 - 初始化
+// * 4B选择项窗口 - 初始化
 //==============================
 var _drill_DSB_ChoiceList_initialize = Window_ChoiceList.prototype.initialize;
 Window_ChoiceList.prototype.initialize = function( messageWindow ){
@@ -853,20 +872,16 @@ Window_ChoiceList.prototype.initialize = function( messageWindow ){
 	this.drill_DSB_createSprite();
 }
 //==============================
-// * 选择项窗口 - 刷新
+// * 4B选择项窗口 - 刷新
 //==============================
 var _drill_DSB_ChoiceList_start = Window_ChoiceList.prototype.start;
 Window_ChoiceList.prototype.start = function() {
 	_drill_DSB_ChoiceList_start.call(this);
 	this.drill_DSB_refreshSprite();	
 }
+
 //==============================
-// * 数字输入窗口 - 相同函数
-//==============================
-Window_NumberInput.prototype.drill_DSB_createSprite = Window_Message.prototype.drill_DSB_createSprite;
-Window_NumberInput.prototype.drill_DSB_refreshSprite = Window_Message.prototype.drill_DSB_refreshSprite;
-//==============================
-// * 数字输入窗口 - 初始化
+// * 4C数字输入窗口 - 初始化
 //==============================
 var _drill_DSB_NumberInput_initialize = Window_NumberInput.prototype.initialize;
 Window_NumberInput.prototype.initialize = function( messageWindow ){
@@ -874,20 +889,16 @@ Window_NumberInput.prototype.initialize = function( messageWindow ){
 	this.drill_DSB_createSprite();
 }
 //==============================
-// * 数字输入窗口 - 刷新
+// * 4C数字输入窗口 - 刷新
 //==============================
 var _drill_DSB_NumberInput_start = Window_NumberInput.prototype.start;
 Window_NumberInput.prototype.start = function() {
 	_drill_DSB_NumberInput_start.call(this);
 	this.drill_DSB_refreshSprite();
 }
+
 //==============================
-// * 选择物品窗口 - 相同函数
-//==============================
-Window_EventItem.prototype.drill_DSB_createSprite = Window_Message.prototype.drill_DSB_createSprite;
-Window_EventItem.prototype.drill_DSB_refreshSprite = Window_Message.prototype.drill_DSB_refreshSprite;
-//==============================
-// * 选择物品窗口 - 初始化
+// * 4D选择物品窗口 - 初始化
 //==============================
 var _drill_DSB_EventItem_initialize = Window_EventItem.prototype.initialize;
 Window_EventItem.prototype.initialize = function( messageWindow ){
@@ -895,7 +906,7 @@ Window_EventItem.prototype.initialize = function( messageWindow ){
 	this.drill_DSB_createSprite();
 }
 //==============================
-// * 选择物品窗口 - 刷新
+// * 4D选择物品窗口 - 刷新
 //==============================
 var _drill_DSB_EventItem_start = Window_EventItem.prototype.start;
 Window_EventItem.prototype.start = function() {
@@ -907,18 +918,32 @@ Window_EventItem.prototype.start = function() {
 
 //=============================================================================
 // ** 对话框背景【Drill_DSB_DecorationBackground】
-//
-//			说明：	每个背景都配有一个 动态遮罩贴图，可以用不同的鼠标指针资源改变不同的遮罩。
-//			
-// 			代码：	> 范围 - 该类额外显示平铺背景的装饰。
-//					> 结构 - [ ●合并/分离/ 混乱 ] 数据与贴图合并。只有visible被控制。
-//					> 数量 - [单个/ ●多个 ] 
-//					> 创建 - [一次性/ ●自延迟 /外部延迟] 鼠标透视镜需要延迟创建。
-//					> 销毁 - [ ●不考虑 /自销毁/外部销毁] 
-//					> 样式 - [ ●不可修改 /自变化/外部变化] 
+// **		
+// **		作用域：	地图界面、战斗界面
+// **		主功能：	定义一个平铺背景的贴图。
+// **		子功能：	
+// **					->贴图『独立贴图』
+// **						x->显示贴图/隐藏贴图
+// **						x->是否就绪
+// **						x->优化策略
+// **						x->销毁
+// **						->初始化数据
+// **						->初始化对象
+// **					
+// **					->A主体
+// **					->B动态遮罩
+// **
+// **		说明：	> 每个背景都配有一个 动态遮罩贴图，可以用不同的鼠标指针资源改变不同的遮罩。
+// **		
+// **		代码：	> 范围 - 该类额外显示平铺背景的装饰。
+// **				> 结构 - [ ●合并/分离/ 混乱 ] 数据与贴图合并。只有visible被控制。
+// **				> 数量 - [单个/ ●多个 ] 
+// **				> 创建 - [一次性/ ●自延迟 /外部延迟] 鼠标透视镜需要延迟创建。
+// **				> 销毁 - [ ●不考虑 /自销毁/外部销毁] 
+// **				> 样式 - [ ●不可修改 /自变化/外部变化] 
 //=============================================================================
 //==============================
-// * 背景 - 定义
+// * 对话框背景 - 定义
 //==============================
 function Drill_DSB_DecorationBackground() {
 	this.initialize.apply(this, arguments);
@@ -926,52 +951,106 @@ function Drill_DSB_DecorationBackground() {
 Drill_DSB_DecorationBackground.prototype = Object.create(TilingSprite.prototype);
 Drill_DSB_DecorationBackground.prototype.constructor = Drill_DSB_DecorationBackground;
 //==============================
-// * 背景 - 初始化
+// * 对话框背景 - 初始化
 //==============================
 Drill_DSB_DecorationBackground.prototype.initialize = function( data, parent ){
 	TilingSprite.prototype.initialize.call(this);
 	this._drill_data = data;
 	this._drill_parent = parent;
-	this._drill_inited = false;
+	
+	this.drill_initData();							//初始化数据
+	this.drill_initSprite();						//初始化对象
+};
+//==============================
+// * 对话框背景 - 帧刷新
+//==============================
+Drill_DSB_DecorationBackground.prototype.update = function() {
+	TilingSprite.prototype.update.call(this);
+	this.drill_sprite_updateAttr();					//帧刷新 - A主体
+	this.drill_sprite_updateAttr_Size();			//帧刷新 - A主体 - 高宽变化
+	this.drill_sprite_updateMask_MaskCreate();		//帧刷新 - B动态遮罩 - 贴图创建
+	this.drill_sprite_updateMask_MousePosition();	//帧刷新 - B动态遮罩 - 鼠标遮罩
+};
+//==============================
+// * 对话框背景 - 初始化数据『独立贴图』
+//==============================
+Drill_DSB_DecorationBackground.prototype.drill_initData = function() {
+	//（暂无 默认值）
+};
+//==============================
+// * 对话框背景 - 初始化对象『独立贴图』
+//==============================
+Drill_DSB_DecorationBackground.prototype.drill_initSprite = function() {
+	this.drill_sprite_initAttr();					//子功能初始化 - A主体
+	this.drill_sprite_initMask();					//子功能初始化 - B动态遮罩
+};
+
+//==============================
+// * A主体 - 子功能初始化
+//==============================
+Drill_DSB_DecorationBackground.prototype.drill_sprite_initAttr = function() {
+	var data = this._drill_data;
 	
 	this._drill_parent_width = 0;
 	this._drill_parent_height = 0;
 	
-	// > 贴图属性
+	// > 私有属性初始化
 	this.bitmap = ImageManager.loadBitmap( data['src_file'], data['src_img'], 0, true);
 	this.origin.x = data['x'];
 	this.origin.y = data['y'];
 	this.opacity = data['opacity'];
 	this.blendMode = data['blendMode'];
 	this.visible = false;
-};
-//==============================
-// * 背景 - 帧刷新
-//==============================
-Drill_DSB_DecorationBackground.prototype.update = function() {
-	TilingSprite.prototype.update.call(this);
-	
-	if( this.bitmap.isReady() == false ){ return; }
-	this.drill_DSB_updateVisible();				//帧刷新 - 可见情况
-	this.drill_DSB_updateSpriteInit();			//帧刷新 - 贴图创建
-	this.drill_DSB_updateSize();				//帧刷新 - 窗口大小变化
-	this.drill_DSB_updateMousePosition();		//帧刷新 - 鼠标遮罩
 }
 //==============================
-// * 帧刷新 - 可见情况
+// * A主体 - 帧刷新
 //==============================
-Drill_DSB_DecorationBackground.prototype.drill_DSB_updateVisible = function() {
+Drill_DSB_DecorationBackground.prototype.drill_sprite_updateAttr = function() {
 	var data = this._drill_data;
 	
+	// > 可见
 	this.visible = $gameSystem._drill_DSB_visibleTank[ data['id'] ];
+	
+	// > 窗口开关动画
 	this.scale.y = this._drill_parent._windowSpriteContainer.scale.y;	//（保持y缩放）
 }
 //==============================
-// * 帧刷新 - 贴图创建
+// * A主体 - 帧刷新 - 高宽变化
 //==============================
-Drill_DSB_DecorationBackground.prototype.drill_DSB_updateSpriteInit = function() {
-	if( this._drill_inited == true ){ return; }
-	this._drill_inited = true;
+Drill_DSB_DecorationBackground.prototype.drill_sprite_updateAttr_Size = function() {
+	
+	// > 高宽变化 锁
+	if( this._drill_parent_width  == this._drill_parent.width && 
+		this._drill_parent_height == this._drill_parent.height ){ return; }
+	this._drill_parent_width = this._drill_parent.width;
+	this._drill_parent_height = this._drill_parent.height;
+	
+	// > 高宽变化 - 背景
+	var data = this._drill_data;
+    var m = data['backInner'];
+    var w = this._drill_parent_width - m * 2;
+    var h = this._drill_parent_height - m * 2;
+	this.move(m, m, w, h);		//（填满窗口矩形）
+	
+	// > 高宽变化 - B动态遮罩
+	//	（不需要改变遮罩大小）
+}
+
+//==============================
+// * B动态遮罩 - 子功能初始化
+//==============================
+Drill_DSB_DecorationBackground.prototype.drill_sprite_initMask = function() {
+	this._drill_mask_inited = false;
+}
+//==============================
+// * B动态遮罩 - 帧刷新 - 贴图创建
+//==============================
+Drill_DSB_DecorationBackground.prototype.drill_sprite_updateMask_MaskCreate = function() {
+	if( this.bitmap.isReady() != true ){ return; }
+	
+	if( this._drill_mask_inited == true ){ return; }
+	this._drill_mask_inited = true;
+	
 	var data = this._drill_data;	
 	if( data['mask_mode'] == "关闭" ){ return; }
 	
@@ -991,32 +1070,13 @@ Drill_DSB_DecorationBackground.prototype.drill_DSB_updateSpriteInit = function()
 	temp_sprite.y = -1 * Graphics.boxHeight;
 	temp_sprite.anchor.x = 0.5;
 	temp_sprite.anchor.y = 0.5;
-	
 	this._drill_mouseSprite = temp_sprite;
 	this._drill_mask.drill_CODM_addMaskChild( temp_sprite );
 }
 //==============================
-// * 帧刷新 - 窗口大小变化
+// * B动态遮罩 - 帧刷新 - 鼠标遮罩
 //==============================
-Drill_DSB_DecorationBackground.prototype.drill_DSB_updateSize = function() {
-	if( this._drill_parent_width == this._drill_parent.width && 
-		this._drill_parent_height == this._drill_parent.height ){ return; }
-	this._drill_parent_width = this._drill_parent.width;
-	this._drill_parent_height = this._drill_parent.height;
-	var data = this._drill_data;
-	
-	// > 背景变化
-    var m = data['backInner'];
-    var w = this._drill_parent_width - m * 2;
-    var h = this._drill_parent_height - m * 2;
-	this.move(m, m, w, h);		//（填满窗口矩形）
-	
-	//（不需要改变遮罩大小）
-}
-//==============================
-// * 帧刷新 - 鼠标遮罩
-//==============================
-Drill_DSB_DecorationBackground.prototype.drill_DSB_updateMousePosition = function() {
+Drill_DSB_DecorationBackground.prototype.drill_sprite_updateMask_MousePosition = function() {
 	if( this._drill_mouseSprite == undefined ){ return; }
 	
 	var xx = _drill_mouse_x;
@@ -1026,10 +1086,9 @@ Drill_DSB_DecorationBackground.prototype.drill_DSB_updateMousePosition = functio
 	this._drill_mouseSprite.x = xx;
 	this._drill_mouseSprite.y = yy;
 }
-
-//=============================================================================
-// ** 获取鼠标位置（输入设备核心的片段）
-//=============================================================================
+//==============================
+// * B动态遮罩 - 获取鼠标位置（输入设备核心的片段）
+//==============================
 if( typeof(_drill_mouse_getCurPos) == "undefined" ){	//防止重复定义
 
 	var _drill_mouse_getCurPos = TouchInput._onMouseMove;

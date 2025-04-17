@@ -281,6 +281,21 @@
 //		★必要注意事项：
 //			1.与激光动画共用 激光区域核心 ，是个小核心。
 //			  由于这类核心标识性不足，与固定区域不能统一接口格式，所以内容比较零散。
+//			2.一只皮卡丘来催写插件了。
+//			  "都快2025年了，激光什么时候完成核心，以及示例文档啊？"
+//				           ,___        .-;'
+//				          `"-.`\_...._/`.`
+//				      ,       \        /
+//				   .-' ',     / ()   ()\
+//				  `'._   \   /     .    |
+//				      > .'  ;,    -'-  /
+//				     / <    .;,     __.;
+//				     '-.'-./  , \     , \
+//				        `>.|;, \_)     \_)
+//				         `-;      ,     /
+//				            \     /    <
+//				             '. <`'-,_)
+//				              '._) 
 //			
 //		★其它说明细节：
 //			1.该插件与其它事件触发插件功能相互有交叉，但并不干扰对方，是独立的。
@@ -310,21 +325,30 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_EventLaserTrigger = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_EventLaserTrigger');
+	var Imported = Imported || {};
+	Imported.Drill_EventLaserTrigger = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_EventLaserTrigger');
 
 	DrillUp.g_ELT_fix = String(DrillUp.parameters['是否修正区域判定'] || "true") === "true";	
 	DrillUp.g_ELT_diagonalThrough = String(DrillUp.parameters['斜向激光是否穿透两边阻碍'] || "true") === "true";	
 	
 	
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_ELT_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_ELT_pluginCommand.call(this, command, args);
+	this.drill_ELT_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_ELT_pluginCommand = function( command, args ){
 	if( command === ">主动触发" ){
 		
 		/*-----------------可变激光区域------------------*/
@@ -516,10 +540,9 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			}
 		}
 	}
-	
 };
 //==============================
-// ** 插件指令 - 事件检查
+// * 插件指令 - 事件检查
 //==============================
 Game_Map.prototype.drill_ELT_isEventExist = function( e_id ){
 	if( e_id == 0 ){ return false; }
@@ -531,6 +554,7 @@ Game_Map.prototype.drill_ELT_isEventExist = function( e_id ){
 	}
 	return true;
 };
+
 
 //=============================================================================
 // ** 事件

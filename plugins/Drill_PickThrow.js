@@ -333,10 +333,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_PickThrow = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_PickThrow');
+	var Imported = Imported || {};
+	Imported.Drill_PickThrow = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_PickThrow');
 	
 	
 	/*-----------------杂项------------------*/
@@ -357,11 +357,20 @@
 	
 	
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_PT_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args){ 
+Game_Interpreter.prototype.pluginCommand = function( command, args ){ 
 	_drill_PT_pluginCommand.call(this, command, args);
+	this.drill_PT_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_PT_pluginCommand = function( command, args ){
 	if( command === ">举起花盆" ){
 		
 		if( args.length >= 2 ){

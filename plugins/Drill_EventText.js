@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.5]        行走图 - 事件漂浮文字
+ * @plugindesc [v2.6]        行走图 - 事件漂浮文字
  * @author Drill_up
  * 
  * 
@@ -14,15 +14,14 @@
  * 如果你有兴趣，也可以来看看更多我写的drill插件哦ヽ(*。>Д<)o゜
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
- * 使得你可以设置一个一直跟随行走图的漂浮文字，并且支持特殊字符。
+ * 使得你可以设置一个一直跟随行走图的漂浮文字。
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该插件 不能 单独使用。
- * 必须基于核心插件才能运行。还可以被其他插件扩展使用。
- * 基于：
- *   - Drill_CoreOfWindowAuxiliary 系统-窗口辅助核心★★v1.9及以上★★
+ * 该插件可以单独使用。
  * 可被扩展：
+ *   - Drill_CoreOfWindowCharacter   窗口字符-窗口字符核心★★v2.0及以上★★
+ *     该插件能使得事件漂浮文字支持窗口字符。
  *   - Drill_CoreOfColor             窗口字符-颜色核心
  *     该插件能给事件漂浮文字设置自定义颜色和高级渐变色。
  *   - Drill_CoreOfString            系统-字符串核心
@@ -37,6 +36,10 @@
  * 1.插件的作用域：地图界面。
  *   只对事件有效，放置在 地图上层 。
  * 2.具体可以去看看 "7.行走图 > 关于事件漂浮文字.docx"。
+ * 单独使用：
+ *   (1.该插件就算没有 窗口字符核心，也能正常显示文本。
+ *      但是这样就不支持各种窗口字符了。
+ *   (2.之所以兼容单独使用，是因为小体量游戏不需要那么复杂的字符效果。
  * 漂浮文字：
  *   (1.你可以通过换事件页，来切换头顶的漂浮文字。
  *      你可以使用变量等特殊字符，但是变量的变动不会主动刷新漂浮文字。
@@ -216,6 +219,8 @@
  * 添加了随机轮播的功能。
  * [v2.5]
  * 添加了修改文本为字符串的功能。
+ * [v2.6]
+ * 更新并兼容了新的窗口字符底层。
  * 
  * 
  * 
@@ -224,7 +229,7 @@
  * @min 1
  * @desc 所有漂浮文字都放置在 地图上层 ， 且都处于该图片层级。
  * @default 100
- *
+ * 
  * @param 默认字体大小
  * @type number
  * @min 1
@@ -241,26 +246,27 @@
  * @value 右对齐
  * @desc 默认文本的对齐方式。
  * @default 居中
- *
+ * 
  * @param 默认是否显示外框
  * @type boolean
  * @on 显示
  * @off 不显示
  * @desc 显示漂浮文字的外框背景。
  * @default false
- *
+ * 
  * @param 内边距
  * @parent 默认是否显示外框
  * @type number
  * @min 1
  * @desc 漂浮文字框的内边距。
  * @default 4
- *
+ * 
  * @param 默认轮播间隔
  * @type number
  * @min 1
  * @desc 开启轮播文本时，默认轮播的间隔，单位帧。（1秒60帧）
  * @default 30
+ * 
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -292,7 +298,7 @@
 //			->☆静态数据
 //			->☆插件指令
 //			->☆事件注释
-//			->☆事件贴图
+//			->☆场景容器之物体贴图
 //			->☆地图层级
 //				->添加贴图到层级【标准函数】
 //				->去除贴图【标准函数】
@@ -324,31 +330,32 @@
 //			* 漂浮文字贴图【Drill_ET_WindowSprite】
 //		
 //		★必要注意事项：
-//			1.【该插件使用了事件容器】，必须考虑三种情况：初始化、切换地图时、切换贴图时，不然会出现指针错误！
-//				只要是装事件的容器，都需要考虑指针问题，不管是放在$gameMap还是$gameTemp中。
-//				另外，帧刷新判断时，最好每次变化直接【刷新统计】。
-//			2.事件容器每次都会重新统计，新事件加入时，【只要加了注释或者定义了插件指令，就能捕获到】，不要考虑太多，把自己绕晕。
-//			3.虽然该插件属于 大家族-漂浮文字，
+//			1.虽然该插件属于 大家族-漂浮文字，
 //			  但是由于该插件自成体系，有对应的扩展插件，因此与其它插件结构差异很大。
+//			2. 2024/10/3：这个插件最初只是为了实现头顶漂浮文字的小功能，
+//			  但后来想要的功能越来越多，反复加新功能，插件也从小船变成了大船，还安装了一大堆扩展设备。
+//				              +|+
+//				            ))_|    _|_
+//				               |     |
+//				           _∩_/ \    |
+//				          /□□□\__\__/_\
+//				____-∩___/    ★   √√√ |__
+//				\ Drill ~~~~~~~\_∠∠∠___\_.--.__
+//				 \_______________________________/
 //			
 //		★其它说明细节：
 //			1.window把一个子sprite的bitmap，强制称呼为contents。同时定义了contentsOpacity，区别于窗口本身的opacity。
 //				this.createContents();	实际为 new bitmap
 //				this.contents.clear();	实际为 bitmap 清除内容（长宽不变）
 //			  要重设bitmap，只能new bitmap，重新createContents()。
-//			2.经过优化，贴图用到的时候才new，但是由于_init写在object里面，在spriteset_map刷新的时候，object也要刷。
-//			  object在进入菜单后是不刷的，但是贴图会刷。
-//			3.完美获取字符宽度： drawTextEx()的返回值（这里的函数调了两次，第一次是为计算，第二次是为画）
-//			  完美获取字符高度： calcTextHeight()的返回值（必须组装临时textState使用）
-//			  由于需要边画边算，需要的东西缠绕在一起，所以只能跟着绕。
-//			4. 2020/8/15
+//			2. 2020/8/15
 //				重新整理了一下漂浮文字贴图的结构。
 //				整体结构为 事件容器 + 窗口绘制文字 ，虽然结构清晰简单，但是以前是在探索阶段，留下了不少代码旧坑。
 //				过去该插件bug修复的次数较多，其中有很多细微的关联，只要一去掉，就会丢失功能。不过这里都标注清楚了。
-//			5. 2022/7/23
+//			3. 2022/7/23
 //				该插件的结构已经相对完整的分离成了 贴图与数据 的结构。
 //				如果有什么想加的参数直接访问数据即可。出乎我意料的是，大幅度翻新之后，竟然没有什么bug和报错，最多也就漂浮文字不显示。
-//			5. 2023/5/23
+//			4. 2023/5/23
 //				三月四月研究出了9级插件探照灯，此插件的更细节功能需要进一步分类，于是又翻新了一遍。
 //				这次应该是最后一遍大翻新了，所有功能已经切碎的相当完美了。
 //				
@@ -365,11 +372,11 @@
 	//==============================
 	var DrillUp = DrillUp || {}; 
 	DrillUp.g_ET_PluginTip_curName = "Drill_EventText.js 行走图-事件漂浮文字";
-	DrillUp.g_ET_PluginTip_baseList = ["Drill_CoreOfWindowAuxiliary.js 系统-窗口辅助核心"];
+	DrillUp.g_ET_PluginTip_baseList = ["Drill_CoreOfWindowCharacter.js 窗口字符-窗口字符核心"];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_ET_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_ET_PluginTip_baseList.length == 0 ){ return ""; }
@@ -392,15 +399,21 @@
 	DrillUp.drill_ET_getPluginTip_NeedUpdate_Camera = function(){
 		return "【" + DrillUp.g_ET_PluginTip_curName + "】\n活动地图镜头插件版本过低，你需要更新 镜头插件 至少v2.2及以上版本。";
 	};
+	//==============================
+	// * 提示信息 - 报错 - 窗口字符底层校验
+	//==============================
+	DrillUp.drill_ET_getPluginTip_NeedUpdate_drawText = function(){
+		return "【" + DrillUp.g_ET_PluginTip_curName + "】\n检测到窗口字符核心版本过低。\n由于底层变化巨大，你需要更新 全部 窗口字符相关插件。\n去看看\"23.窗口字符 > 关于窗口字符底层全更新说明.docx\"进行更新。";
+	};
 	
 	
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_EventText = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_EventText');
+	var Imported = Imported || {};
+	Imported.Drill_EventText = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_EventText');
 	
 	
 	/*-----------------杂项------------------*/
@@ -412,18 +425,22 @@
 	DrillUp.g_ET_loopInterval = Number(DrillUp.parameters["默认轮播间隔"] || 30); 
 	
 	
-//=============================================================================
-// * >>>>基于插件检测>>>>
-//=============================================================================
-if( Imported.Drill_CoreOfWindowAuxiliary ){
-	
 	
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_ET_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_ET_pluginCommand.call(this, command, args);
+	this.drill_ET_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_ET_pluginCommand = function( command, args ){
 	if( command === ">事件漂浮文字" ){
 		
 		/*-----------------单事件获取------------------*/
@@ -771,36 +788,48 @@ Game_Event.prototype.clearPageSettings = function() {
 
 
 //#############################################################################
-// ** 【标准模块】事件贴图 ☆事件贴图
+// ** 【标准模块】物体贴图容器 ☆场景容器之物体贴图
 //#############################################################################
 //##############################
-// * 事件贴图 - 获取 - 容器指针【标准函数】
+// * 物体贴图容器 - 获取 - 容器指针【标准函数】
 //			
 //			参数：	> 无
-//			返回：	> 贴图数组     （事件贴图）
+//			返回：	> 贴图数组     （物体贴图）
 //          
-//			说明：	> 此函数直接返回容器对象。
+//			说明：	> 此函数直接返回容器对象。不含镜像。
 //##############################
 Game_Temp.prototype.drill_ET_getCharacterSpriteTank = function(){
 	return this.drill_ET_getCharacterSpriteTank_Private();
 }
 //##############################
-// * 事件贴图 - 获取 - 根据事件ID【标准函数】
+// * 物体贴图容器 - 获取 - 根据事件ID【标准函数】
 //			
 //			参数：	> event_id 数字（事件ID）
 //			返回：	> 贴图对象     （事件贴图）
 //          
-//			说明：	> 事件id和事件贴图一一对应。（不含镜像）
+//			说明：	> -2表示玩家，1表示第一个事件的贴图。不含镜像。
 //					> 此函数只读，且不缓存任何对象，直接读取容器数据。
 //##############################
 Game_Temp.prototype.drill_ET_getCharacterSpriteByEventId = function( event_id ){
 	return this.drill_ET_getCharacterSpriteByEventId_Private( event_id );
 }
+//##############################
+// * 物体贴图容器 - 获取 - 根据玩家队员索引【标准函数】
+//			
+//			参数：	> follower_index 数字（玩家队员索引）
+//			返回：	> 贴图对象           （玩家队员贴图）
+//          
+//			说明：	> -2表示玩家，1表示第一个玩家队员的贴图。不含镜像。
+//					> 此函数只读，且不缓存任何对象，直接读取容器数据。
+//##############################
+Game_Temp.prototype.drill_ET_getCharacterSpriteByFollowerIndex = function( follower_index ){
+	return this.drill_ET_getCharacterSpriteByFollowerIndex_Private( follower_index );
+}
 //=============================================================================
-// ** 事件贴图（接口实现）
+// ** 场景容器之物体贴图（实现）
 //=============================================================================
 //==============================
-// * 事件贴图容器 - 获取 - 根据事件ID（私有）
+// * 物体贴图容器 - 获取 - 容器指针（私有）
 //          
 //			说明：	> 贴图容器 _characterSprites，存放全部物体贴图，不含镜像贴图。
 //					  这只是一个贴图容器，即使贴图在其他层级，也不影响容器获取到贴图。（更多细节去看 脚本文档说明）
@@ -811,15 +840,39 @@ Game_Temp.prototype.drill_ET_getCharacterSpriteTank_Private = function(){
 	return SceneManager._scene._spriteset._characterSprites;
 };
 //==============================
-// * 事件贴图容器 - 获取 - 根据事件ID（私有）
+// * 物体贴图容器 - 获取 - 根据事件ID（私有）
 //==============================
 Game_Temp.prototype.drill_ET_getCharacterSpriteByEventId_Private = function( event_id ){
 	var sprite_list = this.drill_ET_getCharacterSpriteTank_Private();
 	if( sprite_list == undefined ){ return null; }
 	for(var i=0; i < sprite_list.length; i++){
 		var sprite = sprite_list[i];
-		if( sprite._character == undefined ){ continue; }		//（判断 _character 就可以，不需要检验 Sprite_Character）
+		if( sprite._character == undefined ){ continue; }	//（判断 _character 就可以，不需要检验 Sprite_Character）
+		if( event_id == -2 &&   //『玩家id』
+			sprite._character == $gamePlayer ){
+			return sprite;
+		}
 		if( sprite._character._eventId == event_id ){
+			return sprite;
+		}
+	}
+	return null;
+};
+//==============================
+// * 物体贴图容器 - 获取 - 根据玩家索引（私有）
+//==============================
+Game_Temp.prototype.drill_ET_getCharacterSpriteByFollowerIndex_Private = function( follower_index ){
+	var sprite_list = this.drill_ET_getCharacterSpriteTank_Private();
+	if( sprite_list == undefined ){ return null; }
+	for(var i=0; i < sprite_list.length; i++){
+		var sprite = sprite_list[i];
+		if( sprite._character == undefined ){ continue; }	//（判断 _character 就可以，不需要检验 Sprite_Character）
+		if( follower_index == -2 &&   //『玩家id』
+			sprite._character == $gamePlayer ){
+			return sprite;
+		}
+		if( sprite._character._memberIndex == follower_index &&
+			sprite._character.isVisible() ){
 			return sprite;
 		}
 	}
@@ -1233,12 +1286,14 @@ Game_Event.prototype.update = function(){
 // ** 漂浮文字控制器【Drill_ET_Controller】
 // **		
 // **		作用域：	地图界面
-// **		主功能：	> 定义一个专门控制漂浮文字的数据类。
-// **		子功能：	->控制器
+// **		主功能：	定义一个专门控制漂浮文字的数据类。
+// **		子功能：	
+// **					->控制器
 // **						->帧刷新
 // **						->显示/隐藏
 // **						x->暂停/继续
 // **						->重设数据
+// **					
 // **					->A主体
 // **						->可见
 // **						->位置
@@ -1463,7 +1518,7 @@ Drill_ET_Controller.prototype.drill_controller_initData = function(){
 	
 	// > 控制器
 	if( data['eventId'] == undefined ){ data['eventId'] = 0 };					//绑定的事件id
-	if( data['visible'] == undefined ){ data['visible'] = true };				//显示/隐藏						//控制器 - 显示情况
+	if( data['visible'] == undefined ){ data['visible'] = true };				//显示/隐藏
 	//if( data['pause'] == undefined ){ data['pause'] = false };				//暂停/继续
 	
 	// > A主体
@@ -1702,8 +1757,9 @@ Drill_ET_Controller.prototype.drill_controller_getData_loop_mode = function() {
 // ** 漂浮文字贴图【Drill_ET_WindowSprite】
 // **
 // **		作用域：	地图界面
-// **		主功能：	> 定义一个漂浮文字贴图，能够播放自定义文本。
-// **		子功能：	->窗口
+// **		主功能：	定义一个漂浮文字贴图，能够播放自定义文本。
+// **		子功能：	
+// **					->窗口
 // **						->帧刷新
 // **					->A主体
 // **					->B对象绑定
@@ -1883,6 +1939,24 @@ Drill_ET_WindowSprite.prototype.drill_sprite_initAttr = function() {
 //==============================
 Drill_ET_WindowSprite.prototype.standardFontSize = function(){ return DrillUp.g_ET_fontSize; };
 Drill_ET_WindowSprite.prototype.standardPadding = function(){ return DrillUp.g_ET_padding; };
+/*
+//==============================
+// * A主体 - 覆写函数 - 画布宽度
+//
+//			说明：	> 有其他插件会锁窗口的画布，但不知道是哪个插件，这里复刻一遍函数。
+//==============================
+Drill_ET_WindowSprite.prototype.contentsWidth = function(){
+    return this.width - this.standardPadding() * 2;
+};
+//==============================
+// * A主体 - 覆写函数 - 画布高度
+//
+//			说明：	> 有其他插件会锁窗口的画布，但不知道是哪个插件，这里复刻一遍函数。
+//==============================
+Drill_ET_WindowSprite.prototype.contentsHeight = function(){
+    return this.height - this.standardPadding() * 2;
+};
+*/
 //==============================
 // * A主体 - 帧刷新 - 可见
 //==============================
@@ -1949,8 +2023,8 @@ Drill_ET_WindowSprite.prototype.drill_sprite_initBind = function() {
 //==============================
 Drill_ET_WindowSprite.prototype.drill_sprite_initMessage = function() {
 	this._drill_refreshSerial = -1;			//刷新用序列号
-	this._drill_width = 0;					//窗口宽度
-	this._drill_height = 0;					//窗口高度
+	this._drill_windowWidth = 0;			//窗口宽度
+	this._drill_windowHeight = 0;			//窗口高度
 }
 //==============================
 // * C窗口内容 - 帧刷新
@@ -1966,47 +2040,151 @@ Drill_ET_WindowSprite.prototype.drill_sprite_updateMessage = function() {
 		return ;
 	}
 	
-	// > 文本转义
-	var context_list;
-	if( Imported.Drill_CoreOfString ){		//【系统 - 字符串核心】
-		context_list = DataManager.drill_COSt_replaceChar( cur_text ).split("\n");
-	}else{
-		context_list = cur_text.split("\n");
-	}
-	
 	// > 刷新内容
-	this.drill_refreshMessage( context_list );
+	this.drill_refreshMessage( cur_text );
 }
 //==============================
 // * C窗口内容 - 刷新内容
 //==============================
-Drill_ET_WindowSprite.prototype.drill_refreshMessage = function( context_list ){
-	if( context_list.length == 0 ){ return; }
+Drill_ET_WindowSprite.prototype.drill_refreshMessage = function( context ){
 	
+	// > 使用【窗口字符 - 窗口字符核心】时
+	if( Imported.Drill_CoreOfWindowCharacter ){
 	
-	// > 窗口高宽 - 计算
-	var options = {};
-	this.drill_COWA_calculateHeightAndWidth( context_list, options );		//（窗口辅助核心）
-	// > 窗口高宽 - 赋值
-	var ww = 0;
-	var hh = 0;
-	for( var i=0; i < this.drill_COWA_widthList.length; i++ ){ if( ww < this.drill_COWA_widthList[i] ){ ww = this.drill_COWA_widthList[i]; } }
-	for( var i=0; i < this.drill_COWA_heightList.length; i++ ){ hh += this.drill_COWA_heightList[i]; }
-	ww += this.standardPadding() * 2;
-	hh += this.standardPadding() * 2;
-	this._drill_width = ww;
-	this._drill_height = hh;
-	this.width = this._drill_width;			// 窗口宽度
-	this.height = this._drill_height;		// 窗口高度
-	
-	
-	// > 重建bitmap
-	this.contents.clear();
-	this.createContents();
-	
-	// > 绘制内容（窗口辅助核心的 标准函数 ）
-	this.drill_COWA_drawTextListEx( context_list, options );
+		// > 『字符贴图流程』 - 清空字符块贴图【窗口字符 - 窗口字符贴图核心】
+		if( Imported.Drill_CoreOfWindowCharacterSprite ){
+			this.drill_COWCSp_sprite_clearAllSprite();
+		}
+		
+		// > 参数准备 - 校验
+		var temp_bitmap = this.contents;
+		if( temp_bitmap == undefined ){ return; }
+		var org_text = context;
+		if( org_text == undefined ){ return; }
+		if( org_text == "" ){ return; }
+		
+		// > 参数准备
+		var options = {};
+		options['infoParam'] = {};
+		options['infoParam']['x'] = 0;
+		options['infoParam']['y'] = 0;
+		options['infoParam']['canvasWidth']  = 100;	//（此参数暂时不用，先给个非零值）
+		options['infoParam']['canvasHeight'] = 100;
+		
+		// > 参数准备 - 自定义
+		options['blockParam'] = {};					//『清零字符默认间距』
+		options['blockParam']['paddingTop'] = 0;
+		options['rowParam'] = {};
+		options['rowParam']['lineHeight_upCorrection'] = 0;
+		
+		options['baseParam'] = {};
+		options['baseParam']['fontSize'] = this.standardFontSize();	//（使用当前窗口的字体大小）
+		
+		// > 参数准备 - 『字符主流程』 - 获取文本高宽【窗口字符 - 窗口字符核心】
+		var ww = this.drill_COWC_getOrgTextWidth( org_text, options );
+		var hh = this.drill_COWC_getOrgTextHeight( org_text, options );
+		ww = Math.ceil(ww);
+		hh = Math.ceil(hh);
+		options['infoParam']['canvasWidth']  = ww;
+		options['infoParam']['canvasHeight'] = hh;
+		
+		
+		// > 自适应 - 设置窗口高宽
+		ww += this.standardPadding() * 2;		//（使用当前窗口的内边距）
+		hh += this.standardPadding() * 2;
+		this._drill_windowWidth = ww;
+		this._drill_windowHeight = hh;
+		this.width = this._drill_windowWidth;		//（窗口宽度）
+		this.height = this._drill_windowHeight;		//（窗口高度）
+		
+		// > 自适应 - 重建画布（自适应高宽需要重建）
+		this.createContents();
+		temp_bitmap = this.contents;			//（临时画布重新绑定）
+		
+		
+		// > 『字符主流程』 - DEBUG显示画布范围【窗口字符 - 窗口字符核心】
+		//temp_bitmap.drill_COWC_debug_drawRect();
+		
+		// > 『字符主流程』 - 绘制文本【窗口字符 - 窗口字符核心】
+		this.drill_COWC_drawText( org_text, options );
+		
+		// > 『字符贴图流程』 - 刷新字符块贴图【窗口字符 - 窗口字符贴图核心】
+		if( Imported.Drill_CoreOfWindowCharacterSprite ){
+			this.drill_COWCSp_sprite_refreshAllSprite();
+		}
+		
+		
+	// > 没有【窗口字符 - 窗口字符核心】时
+	}else{
+		
+		// > 参数准备 - 校验
+		var temp_bitmap = this.contents;
+		if( temp_bitmap == undefined ){ return; }
+		var org_text = context;
+		if( org_text == undefined ){ return; }
+		if( org_text == "" ){ return; }
+		
+		// > 自适应
+		var painter = temp_bitmap._context;
+		var org_ww = painter.measureText(org_text).width;	//（获取文本宽度）
+		var org_hh = this.standardFontSize() *1.10;			//『手算高度』
+		org_ww = Math.ceil(org_ww) +20;
+		org_hh = Math.ceil(org_hh) +10;
+		
+		// > 自适应 - 设置窗口高宽
+		var ww = org_ww;
+		var hh = org_hh;
+		ww += this.standardPadding() * 2;		//（使用当前窗口的内边距）
+		hh += this.standardPadding() * 2;
+		this._drill_windowWidth = ww;
+		this._drill_windowHeight = hh;
+		this.width = this._drill_windowWidth;		//（窗口宽度）
+		this.height = this._drill_windowHeight;		//（窗口高度）
+		
+		// > 自适应 - 重建画布（自适应高宽需要重建）
+		this.createContents();
+		temp_bitmap = this.contents;			//（临时画布重新绑定）
+		
+		// > 绘制文本
+		temp_bitmap.drawText( org_text, 0, 0, org_ww, org_hh, "center" );
+	}
 }
+//==============================
+// * C窗口内容 - 刷新内容 - 窗口字符底层校验
+//==============================
+if( Imported.Drill_CoreOfWindowCharacter ){
+	if( typeof(_drill_COWC_drawText_functionExist) == "undefined" ){
+		alert( DrillUp.drill_ET_getPluginTip_NeedUpdate_drawText() );
+	}
+}
+
+//==============================
+// * C窗口内容 - 『窗口字符的本事件』 - 获取（开放函数）
+//==============================
+Game_Temp.prototype.drill_ET_getEvnetId_InEventText = function(){
+	return this._drill_ET_curEventTextEventId;
+};
+//==============================
+// * C窗口内容 - 『窗口字符的本事件』 - 最后继承
+//==============================
+var _drill_ET_scene_initialize2 = SceneManager.initialize;
+SceneManager.initialize = function() {
+	_drill_ET_scene_initialize2.call(this);		//（此方法放到最后再继承）
+	
+	//==============================
+	// * C窗口内容 - 『窗口字符的本事件』 - 执行事件指令
+	//==============================
+	var _drill_ET_drill_refreshMessage = Drill_ET_WindowSprite.prototype.drill_refreshMessage;
+	Drill_ET_WindowSprite.prototype.drill_refreshMessage = function( context ){
+		$gameTemp._drill_ET_curEventTextEventId = this._drill_event._eventId;
+		
+		// > 原函数
+		_drill_ET_drill_refreshMessage.call( this, context );
+		
+		$gameTemp._drill_ET_curEventTextEventId = undefined;
+	};
+}
+
 
 //==============================
 // * 优化策略 - 判断通过（私有）
@@ -2049,15 +2227,5 @@ Drill_ET_WindowSprite.prototype.drill_ET_posIsInCamera = function( realX, realY 
 	}
 	return  Math.abs($gameMap.adjustX(realX + 0.5) - oww*0.5) <= sww*0.5 + 5.5 &&	//（镜头范围+5个图块边框区域） 
 			Math.abs($gameMap.adjustY(realY + 0.5) - ohh*0.5) <= shh*0.5 + 5.5 ;
-}
-
-
-//=============================================================================
-// * <<<<基于插件检测<<<<
-//=============================================================================
-}else{
-		Imported.Drill_EventText = false;
-		var pluginTip = DrillUp.drill_ET_getPluginTip_NoBasePlugin();
-		alert( pluginTip );
 }
 

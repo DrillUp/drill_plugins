@@ -514,10 +514,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_WindowMenuButton = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_WindowMenuButton');
+	var Imported = Imported || {};
+	Imported.Drill_WindowMenuButton = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_WindowMenuButton');
 	
 	/*-----------------杂项------------------*/
     DrillUp.g_WMB_debug = String(DrillUp.parameters['DEBUG-显示状态列表'] || "false") === "true";
@@ -575,11 +575,20 @@
 
 	
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_WMB_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_WMB_pluginCommand.call(this, command, args);
+	this.drill_WMB_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_WMB_pluginCommand = function( command, args ){
 	if( command === ">主菜单按钮" ){
 		
 		if(args.length == 4){

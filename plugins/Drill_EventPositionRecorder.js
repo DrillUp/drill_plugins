@@ -194,18 +194,27 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_EventPositionRecorder = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_EventPositionRecorder');
+	var Imported = Imported || {};
+	Imported.Drill_EventPositionRecorder = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_EventPositionRecorder');
 
 
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_EPR_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_EPR_pluginCommand.call(this, command, args);
+	this.drill_EPR_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_EPR_pluginCommand = function( command, args ){
 	if( command === ">位置存储器" ){
 		
 		/*-----------------位置槽------------------*/
@@ -392,7 +401,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 };
 //==============================
-// ** 插件指令 - 事件检查
+// * 插件指令 - 事件检查
 //==============================
 Game_Map.prototype.drill_EPR_isEventExist = function( e_id ){
 	if( e_id == 0 ){ return false; }

@@ -504,7 +504,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_HDSSW_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_HDSSW_PluginTip_baseList.length == 0 ){ return ""; }
@@ -514,6 +514,18 @@
 			message += DrillUp.g_HDSSW_PluginTip_baseList[i];
 		}
 		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到样式
+	//==============================
+	DrillUp.drill_HDSSW_getPluginTip_StyleNotFind = function( style_id ){
+		return "【" + DrillUp.g_HDSSW_PluginTip_curName + "】\n对象创建失败，id为"+style_id+"的样式配置为空或不存在。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - NaN校验值
+	//==============================
+	DrillUp.drill_HDSSW_getPluginTip_ParamIsNaN = function( param_name ){
+		return "【" + DrillUp.g_HDSSW_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
 	};
 	//==============================
 	// * 提示信息 - 报错 - 底层版本过低
@@ -532,10 +544,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_HtmlDynamicSnapshotSpaceWrench = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_HtmlDynamicSnapshotSpaceWrench');
+	var Imported = Imported || {};
+	Imported.Drill_HtmlDynamicSnapshotSpaceWrench = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_HtmlDynamicSnapshotSpaceWrench');
 	
 	//==============================
 	// * 静态数据 - 动态快照
@@ -588,7 +600,7 @@
 			var temp = JSON.parse(DrillUp.parameters["次元斩样式-" + String(i+1) ]);
 			DrillUp.g_HDSSW_style[i] = DrillUp.drill_HDSSW_circleInit( temp );
 		}else{
-			DrillUp.g_HDSSW_style[i] = DrillUp.drill_HDSSW_circleInit( {} );
+			DrillUp.g_HDSSW_style[i] = undefined;		//（设为空值，节约静态数据占用容量）
 		}
 	}
 	
@@ -604,9 +616,18 @@ if( Imported.Drill_CoreOfDynamicSnapshot &&
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_HDSSW_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_HDSSW_pluginCommand.call(this, command, args);
+	this.drill_HDSSW_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_HDSSW_pluginCommand = function( command, args ){
 	if( command === ">动态快照次元斩" ){
 		
 		if( args.length == 2 ){
@@ -1120,7 +1141,15 @@ Scene_Map.prototype.update = function() {
 Scene_Map.prototype.drill_HDSSW_executeCut = function( cur_cut ){
 	//alert( JSON.stringify( cur_cut ) );
 	
-	// > 控制器创建 - 第一刀
+	// > 『控制器与贴图的样式』 - 校验+提示信息
+	var cur_styleId   = cur_cut['style_id'] +1;
+	var cur_styleData = DrillUp.g_HDSSW_style[ cur_cut['style_id'] ];
+	if( cur_styleData == undefined ){
+		alert( DrillUp.drill_HDSSW_getPluginTip_StyleNotFind(cur_styleId) );
+		return;
+	}
+	
+	// > 『控制器与贴图的样式』 - 创建控制器 - 第一刀
 	var controller_add_list = [];
 	if( $gameSystem._drill_HDSSW_controllerTank.length == 0 ){
 		
@@ -1139,17 +1168,16 @@ Scene_Map.prototype.drill_HDSSW_executeCut = function( cur_cut ){
 		if( cut_data == null ){ return; }
 		
 		// > 创建 动态快照控制器
-		var temp_data = DrillUp.g_HDSSW_style[ cur_cut['style_id'] ];
-		var temp_controller = new Drill_HDSSW_Controller( temp_data );
+		var temp_controller = new Drill_HDSSW_Controller( cur_styleData );
 		temp_controller.drill_controller_setMaskConvex( cut_data['convexA_points'] );
 		controller_add_list.push( temp_controller );
 		
-		var temp_controller2 = new Drill_HDSSW_Controller( temp_data );
+		var temp_controller2 = new Drill_HDSSW_Controller( cur_styleData );
 		temp_controller2.drill_controller_setMaskConvex( cut_data['convexB_points'] );
 		controller_add_list.push( temp_controller2 );
 		
 		
-	// > 控制器创建 - 第N刀
+	// > 『控制器与贴图的样式』 - 创建控制器 - 第N刀
 	}else{
 		
 		// > 遍历切割
@@ -1164,8 +1192,7 @@ Scene_Map.prototype.drill_HDSSW_executeCut = function( cur_cut ){
 			controller.drill_controller_setMaskConvex( cut_data['convexA_points'] );
 			
 			// > 创建 动态快照控制器
-			var temp_data = DrillUp.g_HDSSW_style[ cur_cut['style_id'] ];
-			var temp_controller = new Drill_HDSSW_Controller( temp_data );
+			var temp_controller = new Drill_HDSSW_Controller( cur_styleData );
 			temp_controller.drill_controller_setMaskConvex( cut_data['convexB_points'] );
 			controller_add_list.push( temp_controller );
 			
@@ -1395,18 +1422,20 @@ Scene_MenuBase.prototype.drill_HDSSW_updateDestroy = Scene_Map.prototype.drill_H
 // ** 动态快照控制器【Drill_HDSSW_Controller】
 // **		
 // **		作用域：	地图界面、战斗界面、菜单界面
-// **		主功能：	> 定义一个专门控制天窗层动态快照的数据类。
-// **		子功能：	->动态快照控制器
+// **		主功能：	定义一个专门控制天窗层动态快照的数据类。
+// **		子功能：	
+// **					->控制器『控制器与贴图』
 // **						->帧刷新
 // **						->重设数据
 // **							->序列号
 // **						->显示/隐藏
 // **						->暂停/继续
 // **						->销毁
+// **					
 // **					->A主体
 // **					->B基本变化
 // **					->2A遮罩管理
-// **		
+// **					
 // **		说明：	> 该类可与 Game_CharacterBase 一并存储在 $gameMap 中。
 // **				> 注意，该类不能放 物体指针、贴图指针 。
 //=============================================================================
@@ -1502,7 +1531,7 @@ Drill_HDSSW_Controller.prototype.drill_controller_isDead = function(){
 };
 
 //##############################
-// * 动态快照控制器 - 初始化数据【标准默认值】
+// * 动态快照控制器 - 初始化数据『控制器与贴图』【标准默认值】
 //
 //			参数：	> 无
 //			返回：	> 无
@@ -1528,7 +1557,7 @@ Drill_HDSSW_Controller.prototype.drill_controller_initData = function(){
 	// > 2A遮罩管理（无）
 }
 //==============================
-// * 动态快照控制器 - 初始化子功能
+// * 动态快照控制器 - 初始化子功能『控制器与贴图』
 //==============================
 Drill_HDSSW_Controller.prototype.drill_controller_initChild = function(){
 	this.drill_controller_initAttr();			//初始化子功能 - A主体
@@ -1688,19 +1717,21 @@ Drill_HDSSW_Controller.prototype.drill_controller_setMaskConvex = function( conv
 // ** 动态快照贴图【Drill_HDSSW_Sprite】
 // **
 // **		作用域：	地图界面、战斗界面、菜单界面
-// **		主功能：	> 定义一个动态快照贴图。
-// **		子功能：	->动态快照贴图
+// **		主功能：	定义一个动态快照贴图。
+// **		子功能：	
+// **					->贴图『控制器与贴图』
 // **						->是否就绪
 // **						->优化策略
 // **						->是否需要销毁（未使用）
 // **						->销毁（手动）
+// **					
 // **					->A主体
 // **					->B基本变化
 // **					->C对象绑定
 // **						->设置控制器
 // **						->贴图初始化（手动）
 // **					->2A遮罩管理
-// **
+// **					
 // **		说明：	> 你必须在创建贴图后，手动初始化。（还需要先设置 控制器 ）
 // **
 // **		代码：	> 范围 - 该类显示单独的贴图。
@@ -1750,7 +1781,7 @@ Drill_HDSSW_Sprite.prototype.drill_sprite_setController = function( controller )
 	this._drill_controller = controller;
 };
 //##############################
-// * C对象绑定 - 贴图初始化【开放函数】
+// * C对象绑定 - 初始化子功能『控制器与贴图』【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -1817,14 +1848,14 @@ Drill_HDSSW_Sprite.prototype.drill_sprite_destroy = function(){
 	this.drill_sprite_destroySelf();			//销毁 - 销毁自身
 };
 //==============================
-// * 动态快照贴图 - 贴图初始化（私有）
+// * 动态快照贴图 - 初始化自身『控制器与贴图』
 //==============================
 Drill_HDSSW_Sprite.prototype.drill_sprite_initSelf = function(){
 	this._drill_controller = null;				//控制器对象
 	this._drill_curSerial = -1;					//当前序列号
 };
 //==============================
-// * 动态快照贴图 - 销毁子功能（私有）
+// * 动态快照贴图 - 销毁子功能『控制器与贴图』
 //==============================
 Drill_HDSSW_Sprite.prototype.drill_sprite_destroyChild = function(){
 	if( this._drill_controller == null ){ return; }
@@ -1844,7 +1875,7 @@ Drill_HDSSW_Sprite.prototype.drill_sprite_destroyChild = function(){
 	
 };
 //==============================
-// * 动态快照贴图 - 销毁自身（私有）
+// * 动态快照贴图 - 销毁自身『控制器与贴图』
 //==============================
 Drill_HDSSW_Sprite.prototype.drill_sprite_destroySelf = function(){
 	this._drill_controller = null;				//控制器对象
@@ -2328,22 +2359,29 @@ Scene_Map.prototype.drill_HDSSW_sceneCircleCreate = function() {
 //			说明：	> 在执行单次切割时，需要创建 控制器+贴图 。
 //==============================
 Scene_Map.prototype.drill_HDSSW_executeCircleCut = function( cur_cut ){
-	var temp_style = DrillUp.g_HDSSW_style[ cur_cut['style_id'] ];
+	
+	// > 『控制器与贴图的样式』 - 校验+提示信息
+	var cur_styleId   = cur_cut['style_id'] +1;
+	var cur_styleData = DrillUp.g_HDSSW_style[ cur_cut['style_id'] ];
+	if( cur_styleData == undefined ){
+		alert( DrillUp.drill_HDSSW_getPluginTip_StyleNotFind(cur_styleId) );
+		return;
+	}
 	
 	
-	// > 控制器创建 - 刀光 （只有这里创建对应的控制器）
+	// > 『控制器与贴图的样式』 - 创建控制器 - 刀光 （只有这里创建对应的控制器）
 	var controller_add_list = [];
 	var points = $gameTemp.drill_HDSSW_getCircleTwoPoint( cur_cut['x1'], cur_cut['y1'], cur_cut['x2'], cur_cut['y2'] );
 	if( points != null ){
 		var temp_data = {};
-		temp_data['zIndex'] = temp_style['zIndex'] +1;
-		temp_data['map_enabled'] = temp_style['map_enabled'];
-		temp_data['battle_enabled'] = temp_style['battle_enabled'];
-		temp_data['menu_enabled'] = temp_style['menu_enabled'];
+		temp_data['zIndex'] = cur_styleData['zIndex'] +1;
+		temp_data['map_enabled'] = cur_styleData['map_enabled'];
+		temp_data['battle_enabled'] = cur_styleData['battle_enabled'];
+		temp_data['menu_enabled'] = cur_styleData['menu_enabled'];
 		
-		temp_data['circle_img_src'] = temp_style['knife_img_src'];
+		temp_data['circle_img_src'] = cur_styleData['knife_img_src'];
 		
-		temp_data['opacity'] = temp_style['opacity'];
+		temp_data['opacity'] = cur_styleData['opacity'];
 		temp_data['rotate'] = $gameTemp.drill_HDSSW_Math2D_getPointToPointDegree( points[0]['x'],points[0]['y'], points[1]['x'],points[1]['y'] );
 		//temp_data['rotate'] = $gameTemp.drill_HDSSW_Math2D_getPointToPointDegree( cur_cut['x1'], cur_cut['y1'], cur_cut['x2'], cur_cut['y2'] );
 		//（两点被延长后，按常规来说，计算的角度不会出现偏差，但是这里有偏差，可能是精度问题，暂时不明原因）
@@ -2351,23 +2389,22 @@ Scene_Map.prototype.drill_HDSSW_executeCircleCut = function( cur_cut ){
 		//alert( JSON.stringify(points) );
 		
 		var temp_controller = new Drill_HDSSW_CircleController( temp_data );	//（切一刀只创建一个）
-		temp_controller.drill_controller_setKnifeMode( points[0], points[1], temp_style['move_time'] );
+		temp_controller.drill_controller_setKnifeMode( points[0], points[1], cur_styleData['move_time'] );
 		controller_add_list.push( temp_controller );
 	}
 	
-	
-	// > 控制器创建 - 切割白背景 （只有这里创建对应的控制器）
+	// > 『控制器与贴图的样式』 - 创建控制器 - 切割白背景 （只有这里创建对应的控制器）
 	if( $gameSystem._drill_HDSSW_backgroundController == undefined ){
 		var temp_data = {};
-		temp_data['zIndex'] = temp_style['zIndex'] -1;
-		temp_data['map_enabled'] = temp_style['map_enabled'];
-		temp_data['battle_enabled'] = temp_style['battle_enabled'];
-		temp_data['menu_enabled'] = temp_style['menu_enabled'];
+		temp_data['zIndex'] = cur_styleData['zIndex'] -1;
+		temp_data['map_enabled'] = cur_styleData['map_enabled'];
+		temp_data['battle_enabled'] = cur_styleData['battle_enabled'];
+		temp_data['menu_enabled'] = cur_styleData['menu_enabled'];
 		
-		temp_data['circle_img_src'] = temp_style['background_img_src'];
-		temp_data['flicker_time'] = temp_style['flicker_time'];
+		temp_data['circle_img_src'] = cur_styleData['background_img_src'];
+		temp_data['flicker_time'] = cur_styleData['flicker_time'];
 		
-		temp_data['opacity'] = temp_style['opacity'];
+		temp_data['opacity'] = cur_styleData['opacity'];
 		temp_data['rotate'] = 0;
 		
 		var temp_controller = new Drill_HDSSW_CircleController( temp_data );
@@ -2376,19 +2413,18 @@ Scene_Map.prototype.drill_HDSSW_executeCircleCut = function( cur_cut ){
 	}
 	$gameSystem._drill_HDSSW_backgroundController.drill_controller_setVisible( true );
 	
-	
-	// > 控制器创建 - 切割白闪烁 （只有这里创建对应的控制器）
+	// > 『控制器与贴图的样式』 - 创建控制器 - 切割白闪烁 （只有这里创建对应的控制器）
 	if( $gameSystem._drill_HDSSW_flickerController == undefined ){
 		var temp_data = {};
-		temp_data['zIndex'] = temp_style['zIndex'] +1;
-		temp_data['map_enabled'] = temp_style['map_enabled'];
-		temp_data['battle_enabled'] = temp_style['battle_enabled'];
-		temp_data['menu_enabled'] = temp_style['menu_enabled'];
+		temp_data['zIndex'] = cur_styleData['zIndex'] +1;
+		temp_data['map_enabled'] = cur_styleData['map_enabled'];
+		temp_data['battle_enabled'] = cur_styleData['battle_enabled'];
+		temp_data['menu_enabled'] = cur_styleData['menu_enabled'];
 		
-		temp_data['circle_img_src'] = temp_style['flicker_img_src'];
-		temp_data['flicker_time'] = temp_style['flicker_time'];
+		temp_data['circle_img_src'] = cur_styleData['flicker_img_src'];
+		temp_data['flicker_time'] = cur_styleData['flicker_time'];
 		
-		temp_data['opacity'] = temp_style['flicker_opacity'];
+		temp_data['opacity'] = cur_styleData['flicker_opacity'];
 		temp_data['rotate'] = 0;
 		
 		var temp_controller = new Drill_HDSSW_CircleController( temp_data );
@@ -2397,6 +2433,7 @@ Scene_Map.prototype.drill_HDSSW_executeCircleCut = function( cur_cut ){
 	}
 	$gameSystem._drill_HDSSW_flickerController.drill_controller_setVisible( true );
 	$gameSystem._drill_HDSSW_flickerController.drill_controller_playOnceFlicker();
+	
 	
 	// > 贴图创建 - 刀光
 	for( var i =0; i < controller_add_list.length; i++ ){
@@ -2673,19 +2710,21 @@ Scene_MenuBase.prototype.drill_HDSSW_updateCircleDestroy = Scene_Map.prototype.d
 // ** 魔法圈控制器【Drill_HDSSW_CircleController】
 // **		
 // **		作用域：	地图界面、战斗界面、菜单界面
-// **		主功能：	> 定义一个专门控制简单贴图的数据类。
-// **		子功能：	->魔法圈控制器
+// **		主功能：	定义一个专门控制简单贴图的数据类。
+// **		子功能：	
+// **					->控制器『控制器与贴图』
 // **						->帧刷新
 // **						->重设数据
 // **							->序列号
 // **						->显示/隐藏
 // **						->暂停/继续
 // **						->销毁
+// **					
 // **					->A主体
 // **					->B基本变化
 // **					->2A闪烁模式
 // **					->2B刀光模式
-// **		
+// **					
 // **		说明：	> 注意，该类不能放 物体指针、贴图指针 。
 //=============================================================================
 //==============================
@@ -2830,7 +2869,7 @@ Drill_HDSSW_CircleController.prototype.drill_controller_setKnifeMode = function(
 };
 
 //##############################
-// * 魔法圈控制器 - 初始化数据【标准默认值】
+// * 魔法圈控制器 - 初始化数据『控制器与贴图』【标准默认值】
 //
 //			参数：	> 无
 //			返回：	> 无
@@ -2855,7 +2894,7 @@ Drill_HDSSW_CircleController.prototype.drill_controller_initData = function(){
 	if( data['rotate'] == undefined ){ data['rotate'] = 0 };					//B基本变化 - 旋转角度
 }
 //==============================
-// * 魔法圈控制器 - 初始化子功能
+// * 魔法圈控制器 - 初始化子功能『控制器与贴图』
 //==============================
 Drill_HDSSW_CircleController.prototype.drill_controller_initChild = function(){
 	this.drill_controller_initAttr();			//初始化子功能 - A主体
@@ -3046,12 +3085,14 @@ Drill_HDSSW_CircleController.prototype.drill_controller_updateKnife = function()
 // ** 魔法圈贴图【Drill_HDSSW_CircleSprite】
 // **
 // **		作用域：	地图界面、战斗界面、菜单界面
-// **		主功能：	> 定义一个动态快照贴图。
-// **		子功能：	->贴图
+// **		主功能：	定义一个动态快照贴图。
+// **		子功能：	
+// **					->贴图『控制器与贴图』
 // **						->是否就绪
 // **						->优化策略
 // **						->是否需要销毁（未使用）
 // **						->销毁（手动）
+// **					
 // **					->A主体
 // **					->B基本变化
 // **					->C对象绑定
@@ -3059,7 +3100,7 @@ Drill_HDSSW_CircleController.prototype.drill_controller_updateKnife = function()
 // **						->贴图初始化（手动）
 // **					->2A闪烁模式
 // **					->2B刀光模式
-// **
+// **					
 // **		说明：	> 你必须在创建贴图后，手动初始化。（还需要先设置 控制器 ）
 // **
 // **		代码：	> 范围 - 该类显示单独的贴图。
@@ -3110,7 +3151,7 @@ Drill_HDSSW_CircleSprite.prototype.drill_sprite_setController = function( contro
 	this._drill_controller = controller;
 };
 //##############################
-// * C对象绑定 - 贴图初始化【开放函数】
+// * C对象绑定 - 初始化子功能『控制器与贴图』【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -3181,14 +3222,14 @@ Drill_HDSSW_CircleSprite.prototype.drill_sprite_destroy = function(){
 	this.drill_sprite_destroySelf();			//销毁 - 销毁自身
 };
 //==============================
-// * 魔法圈贴图 - 贴图初始化（私有）
+// * 魔法圈贴图 - 初始化自身『控制器与贴图』
 //==============================
 Drill_HDSSW_CircleSprite.prototype.drill_sprite_initSelf = function(){
 	this._drill_controller = null;				//控制器对象
 	this._drill_curSerial = -1;					//当前序列号
 };
 //==============================
-// * 魔法圈贴图 - 销毁子功能（私有）
+// * 魔法圈贴图 - 销毁子功能『控制器与贴图』
 //==============================
 Drill_HDSSW_CircleSprite.prototype.drill_sprite_destroyChild = function(){
 	if( this._drill_controller == null ){ return; }
@@ -3204,7 +3245,7 @@ Drill_HDSSW_CircleSprite.prototype.drill_sprite_destroyChild = function(){
 	
 };
 //==============================
-// * 魔法圈贴图 - 销毁自身（私有）
+// * 魔法圈贴图 - 销毁自身『控制器与贴图』
 //==============================
 Drill_HDSSW_CircleSprite.prototype.drill_sprite_destroySelf = function(){
 	this._drill_controller = null;				//控制器对象

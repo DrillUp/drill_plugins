@@ -944,10 +944,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_MenuGif = true;
-　　Imported.Drill_MenuGIF = true;
-　　var DrillUp = DrillUp || {}; 
+	var Imported = Imported || {};
+	Imported.Drill_MenuGif = true;
+	Imported.Drill_MenuGIF = true;
+	var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_MenuGif');
 	
 	//==============================
@@ -1032,12 +1032,22 @@
 	
 	
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_MGi_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_MGi_pluginCommand.call(this, command, args);
+	this.drill_MGi_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_MGi_pluginCommand = function( command, args ){
 	if( command === ">菜单GIF" || command === ">菜单gif" ){
+		
 		if(args.length == 4){
 			var temp1 = String(args[1]);
 			temp1 = temp1.replace("GIF[","");

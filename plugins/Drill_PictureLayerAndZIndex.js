@@ -159,7 +159,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_PLAZ_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_PLAZ_PluginTip_baseList.length == 0 ){ return ""; }
@@ -197,9 +197,18 @@ if( Imported.Drill_CoreOfPicture ){
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_PLAZ_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_PLAZ_pluginCommand.call( this, command, args );
+	this.drill_PLAZ_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_PLAZ_pluginCommand = function( command, args ){
 	if( command == ">图片的层级与堆叠级" ){ 
 		
 		/*-----------------对象组获取------------------*/
@@ -297,6 +306,24 @@ Game_Screen.prototype.drill_PLAZ_isPictureExist = function( pic_id ){
 		return false;
 	}
 	return true;
+};
+//==============================
+// * 插件指令 - STG兼容『STG的插件指令』
+//==============================
+if( Imported.Drill_STG__objects ){
+	
+	//==============================
+	// * 插件指令 - STG指令绑定
+	//==============================
+	var _drill_STG_PLAZ_pluginCommand = Drill_STG_GameInterpreter.prototype.pluginCommand;
+	Drill_STG_GameInterpreter.prototype.pluginCommand = function( command, args ){
+		_drill_STG_PLAZ_pluginCommand.call(this, command, args);
+		this.drill_PLAZ_pluginCommand( command, args );
+	}
+	//==============================
+	// * 插件指令 - STG指令执行
+	//==============================
+	Drill_STG_GameInterpreter.prototype.drill_PLAZ_pluginCommand = Game_Interpreter.prototype.drill_PLAZ_pluginCommand;
 };
 	
 	

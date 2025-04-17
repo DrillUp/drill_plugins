@@ -165,7 +165,7 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称：		EDi (Event_Direction)
+//		插件简称		EDi (Event_Direction)
 //		临时全局变量	无
 //		临时局部变量	this._drill_EDi_xxx
 //		存储数据变量	无
@@ -229,7 +229,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_EDi_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_EDi_PluginTip_baseList.length == 0 ){ return ""; }
@@ -251,10 +251,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_EventDirection = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_EventDirection');
+	var Imported = Imported || {};
+	Imported.Drill_EventDirection = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_EventDirection');
 	
 	
 //=============================================================================
@@ -264,11 +264,20 @@ if( Imported.Drill_CoreOfMoveRoute ){
 	
 
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_EDi_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_EDi_pluginCommand.call(this, command, args);
+	this.drill_EDi_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_EDi_pluginCommand = function( command, args ){
 	if( command === ">事件转向" ){
 		
 		/*-----------------对象组获取------------------*/
@@ -527,7 +536,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 }
 //==============================
-// ** 插件指令 - 事件检查
+// * 插件指令 - 事件检查
 //==============================
 Game_Map.prototype.drill_EDi_isEventExist = function( e_id ){
 	if( e_id == 0 ){ return false; }

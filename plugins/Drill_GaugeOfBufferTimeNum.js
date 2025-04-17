@@ -612,7 +612,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_GOBTN_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_GOBTN_PluginTip_baseList.length == 0 ){ return ""; }
@@ -634,10 +634,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_GaugeOfBufferTimeNum = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_GaugeOfBufferTimeNum');
+	var Imported = Imported || {};
+	Imported.Drill_GaugeOfBufferTimeNum = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_GaugeOfBufferTimeNum');
 	
 	
 	//==============================
@@ -693,12 +693,22 @@ ImageManager.load_SpecialBufferTimeNum = function(filename) {
     return this.loadBitmap('img/Special__bufferTimeNum/', filename, 0, true);
 };
 
+
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_GOBTN_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_GOBTN_pluginCommand.call(this, command, args);
+	this.drill_GOBTN_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_GOBTN_pluginCommand = function( command, args ){
 	if( command === ">缓冲时间数字" ){
 		
 		/*-----------------创建/删除------------------*/
@@ -949,7 +959,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 };
 //==============================
-// ** 插件指令 - 事件检查
+// * 插件指令 - 事件检查
 //==============================
 Game_Map.prototype.drill_GOBTN_isEventExist = function( e_id ){
 	if( e_id == 0 ){ return false; }
@@ -1304,7 +1314,7 @@ Drill_GOBTN_TimeNumSprite.prototype.drill_createNumber = function() {
 	var data = this._timeNum._drill_data;
 	
 	// > 参数数字 数据初始化
-	var temp_data = JSON.parse(JSON.stringify( DrillUp.g_COGN_list[ this._symbolId ] ));
+	var temp_data = DrillUp.drill_COGN_getCopyedData( this._symbolId );
 	temp_data['x'] = data['symbol_x'];					//x
 	temp_data['y'] = data['symbol_y'];					//y
 	

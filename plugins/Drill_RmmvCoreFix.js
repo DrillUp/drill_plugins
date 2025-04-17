@@ -97,7 +97,7 @@
  * 
  */
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称：		RCF (Rmmv_Core_Fix)
+//		插件简称		RCF (Rmmv_Core_Fix)
 //		临时全局变量	无
 //		临时局部变量	无
 //		存储数据变量	无
@@ -161,19 +161,28 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_RmmvCoreFix = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_RmmvCoreFix');
+	var Imported = Imported || {};
+	Imported.Drill_RmmvCoreFix = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_RmmvCoreFix');
 	
 	
 	
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_RCF_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args){ 
+Game_Interpreter.prototype.pluginCommand = function( command, args ){ 
 	_drill_RCF_pluginCommand.call(this, command, args);
+	this.drill_RCF_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_RCF_pluginCommand = function( command, args ){
 	if( command === ">rmmv核心漏洞修复" ){
 		
 		if( args.length == 4 ){

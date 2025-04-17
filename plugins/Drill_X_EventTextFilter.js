@@ -231,7 +231,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_XETF_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_XETF_PluginTip_baseList.length == 0 ){ return ""; }
@@ -253,10 +253,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_X_EventTextFilter = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_X_EventTextFilter');
+	var Imported = Imported || {};
+	Imported.Drill_X_EventTextFilter = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_X_EventTextFilter');
 	
 	
 	
@@ -270,9 +270,18 @@ if( Imported.Drill_CoreOfFilter &&
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_XETF_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_XETF_pluginCommand.call(this, command, args);
+	this.drill_XETF_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_XETF_pluginCommand = function( command, args ){
 	if( command === ">事件漂浮文字滤镜" ){
 		
 		if(args.length == 8 || args.length == 10){
@@ -385,7 +394,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 };
 //==============================
-// ** 插件指令 - 事件检查
+// * 插件指令 - 事件检查
 //==============================
 Game_Map.prototype.drill_XETF_isEventExist = function( e_id ){
 	if( e_id == 0 ){ return false; }

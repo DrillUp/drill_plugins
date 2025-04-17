@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.8]        系统 - GIF动画序列核心
+ * @plugindesc [v1.9]        系统 - GIF动画序列核心
  * @author Drill_up
  * 
  * @Drill_LE_param "动画序列-%d"
@@ -34,6 +34,7 @@
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
+ * 该插件可以单独使用。
  * 该插件为基础核心，单独使用没有效果。
  * 可作用于：
  *   - Drill_ActorPortraitureExtend   战斗UI-高级角色肖像
@@ -143,6 +144,8 @@
  * 优化了动画序列存储底层，子插件功能需要全部同步更新。
  * [v1.8]
  * 完善了贴图创建细节，确保设置动画序列后能立即显示预加载的图片。
+ * [v1.9]
+ * 更新并兼容了新的窗口字符底层。
  * 
  * @param ---动画序列 1至20---
  * @default
@@ -511,6 +514,129 @@
  * @parent ---动画序列41至60---
  * @type struct<DrillCOASSequence>
  * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param ---动画序列61至80---
+ * @default
+ * 
+ * @param 动画序列-61
+ * @parent ---动画序列61至80---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-62
+ * @parent ---动画序列61至80---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-63
+ * @parent ---动画序列61至80---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-64
+ * @parent ---动画序列61至80---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-65
+ * @parent ---动画序列61至80---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-66
+ * @parent ---动画序列61至80---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-67
+ * @parent ---动画序列61至80---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-68
+ * @parent ---动画序列61至80---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-69
+ * @parent ---动画序列61至80---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-70
+ * @parent ---动画序列61至80---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-71
+ * @parent ---动画序列61至80---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-72
+ * @parent ---动画序列61至80---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-73
+ * @parent ---动画序列61至80---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-74
+ * @parent ---动画序列61至80---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-75
+ * @parent ---动画序列61至80---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-76
+ * @parent ---动画序列61至80---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-77
+ * @parent ---动画序列61至80---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-78
+ * @parent ---动画序列61至80---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-79
+ * @parent ---动画序列61至80---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
+ * @default 
+ * 
+ * @param 动画序列-80
+ * @parent ---动画序列61至80---
+ * @type struct<DrillCOASSequence>
+ * @desc GIF动画序列的详细配置信息。
  * @default
  * 
  */
@@ -706,6 +832,126 @@
  * @parent ---状态元---
  * @type struct<DrillCOASState>
  * @desc 单个状态元的动画配置。
+ * @default 
+ * 
+ * @param 状态元-31
+ * @parent ---状态元---
+ * @type struct<DrillCOASState>
+ * @desc 单个状态元的动画配置。
+ * @default 
+ * 
+ * @param 状态元-32
+ * @parent ---状态元---
+ * @type struct<DrillCOASState>
+ * @desc 单个状态元的动画配置。
+ * @default 
+ * 
+ * @param 状态元-33
+ * @parent ---状态元---
+ * @type struct<DrillCOASState>
+ * @desc 单个状态元的动画配置。
+ * @default 
+ * 
+ * @param 状态元-34
+ * @parent ---状态元---
+ * @type struct<DrillCOASState>
+ * @desc 单个状态元的动画配置。
+ * @default 
+ * 
+ * @param 状态元-35
+ * @parent ---状态元---
+ * @type struct<DrillCOASState>
+ * @desc 单个状态元的动画配置。
+ * @default 
+ * 
+ * @param 状态元-36
+ * @parent ---状态元---
+ * @type struct<DrillCOASState>
+ * @desc 单个状态元的动画配置。
+ * @default 
+ * 
+ * @param 状态元-37
+ * @parent ---状态元---
+ * @type struct<DrillCOASState>
+ * @desc 单个状态元的动画配置。
+ * @default 
+ * 
+ * @param 状态元-38
+ * @parent ---状态元---
+ * @type struct<DrillCOASState>
+ * @desc 单个状态元的动画配置。
+ * @default 
+ * 
+ * @param 状态元-39
+ * @parent ---状态元---
+ * @type struct<DrillCOASState>
+ * @desc 单个状态元的动画配置。
+ * @default 
+ * 
+ * @param 状态元-40
+ * @parent ---状态元---
+ * @type struct<DrillCOASState>
+ * @desc 单个状态元的动画配置。
+ * @default 
+ * 
+ * @param 状态元-41
+ * @parent ---状态元---
+ * @type struct<DrillCOASState>
+ * @desc 单个状态元的动画配置。
+ * @default 
+ * 
+ * @param 状态元-42
+ * @parent ---状态元---
+ * @type struct<DrillCOASState>
+ * @desc 单个状态元的动画配置。
+ * @default 
+ * 
+ * @param 状态元-43
+ * @parent ---状态元---
+ * @type struct<DrillCOASState>
+ * @desc 单个状态元的动画配置。
+ * @default 
+ * 
+ * @param 状态元-44
+ * @parent ---状态元---
+ * @type struct<DrillCOASState>
+ * @desc 单个状态元的动画配置。
+ * @default 
+ * 
+ * @param 状态元-45
+ * @parent ---状态元---
+ * @type struct<DrillCOASState>
+ * @desc 单个状态元的动画配置。
+ * @default 
+ * 
+ * @param 状态元-46
+ * @parent ---状态元---
+ * @type struct<DrillCOASState>
+ * @desc 单个状态元的动画配置。
+ * @default 
+ * 
+ * @param 状态元-47
+ * @parent ---状态元---
+ * @type struct<DrillCOASState>
+ * @desc 单个状态元的动画配置。
+ * @default 
+ * 
+ * @param 状态元-48
+ * @parent ---状态元---
+ * @type struct<DrillCOASState>
+ * @desc 单个状态元的动画配置。
+ * @default 
+ * 
+ * @param 状态元-49
+ * @parent ---状态元---
+ * @type struct<DrillCOASState>
+ * @desc 单个状态元的动画配置。
+ * @default 
+ * 
+ * @param 状态元-50
+ * @parent ---状态元---
+ * @type struct<DrillCOASState>
+ * @desc 单个状态元的动画配置。
  * @default
  * 
  * @param ---状态节点---
@@ -886,6 +1132,126 @@
  * @default 
  * 
  * @param 状态节点-30
+ * @parent ---状态节点---
+ * @type struct<DrillCOASStateNode>
+ * @desc 单个状态节点的列表配置。
+ * @default 
+ * 
+ * @param 状态节点-31
+ * @parent ---状态节点---
+ * @type struct<DrillCOASStateNode>
+ * @desc 单个状态节点的列表配置。
+ * @default 
+ * 
+ * @param 状态节点-32
+ * @parent ---状态节点---
+ * @type struct<DrillCOASStateNode>
+ * @desc 单个状态节点的列表配置。
+ * @default 
+ * 
+ * @param 状态节点-33
+ * @parent ---状态节点---
+ * @type struct<DrillCOASStateNode>
+ * @desc 单个状态节点的列表配置。
+ * @default 
+ * 
+ * @param 状态节点-34
+ * @parent ---状态节点---
+ * @type struct<DrillCOASStateNode>
+ * @desc 单个状态节点的列表配置。
+ * @default 
+ * 
+ * @param 状态节点-35
+ * @parent ---状态节点---
+ * @type struct<DrillCOASStateNode>
+ * @desc 单个状态节点的列表配置。
+ * @default 
+ * 
+ * @param 状态节点-36
+ * @parent ---状态节点---
+ * @type struct<DrillCOASStateNode>
+ * @desc 单个状态节点的列表配置。
+ * @default 
+ * 
+ * @param 状态节点-37
+ * @parent ---状态节点---
+ * @type struct<DrillCOASStateNode>
+ * @desc 单个状态节点的列表配置。
+ * @default 
+ * 
+ * @param 状态节点-38
+ * @parent ---状态节点---
+ * @type struct<DrillCOASStateNode>
+ * @desc 单个状态节点的列表配置。
+ * @default 
+ * 
+ * @param 状态节点-39
+ * @parent ---状态节点---
+ * @type struct<DrillCOASStateNode>
+ * @desc 单个状态节点的列表配置。
+ * @default 
+ * 
+ * @param 状态节点-40
+ * @parent ---状态节点---
+ * @type struct<DrillCOASStateNode>
+ * @desc 单个状态节点的列表配置。
+ * @default 
+ * 
+ * @param 状态节点-41
+ * @parent ---状态节点---
+ * @type struct<DrillCOASStateNode>
+ * @desc 单个状态节点的列表配置。
+ * @default 
+ * 
+ * @param 状态节点-42
+ * @parent ---状态节点---
+ * @type struct<DrillCOASStateNode>
+ * @desc 单个状态节点的列表配置。
+ * @default 
+ * 
+ * @param 状态节点-43
+ * @parent ---状态节点---
+ * @type struct<DrillCOASStateNode>
+ * @desc 单个状态节点的列表配置。
+ * @default 
+ * 
+ * @param 状态节点-44
+ * @parent ---状态节点---
+ * @type struct<DrillCOASStateNode>
+ * @desc 单个状态节点的列表配置。
+ * @default 
+ * 
+ * @param 状态节点-45
+ * @parent ---状态节点---
+ * @type struct<DrillCOASStateNode>
+ * @desc 单个状态节点的列表配置。
+ * @default 
+ * 
+ * @param 状态节点-46
+ * @parent ---状态节点---
+ * @type struct<DrillCOASStateNode>
+ * @desc 单个状态节点的列表配置。
+ * @default 
+ * 
+ * @param 状态节点-47
+ * @parent ---状态节点---
+ * @type struct<DrillCOASStateNode>
+ * @desc 单个状态节点的列表配置。
+ * @default 
+ * 
+ * @param 状态节点-48
+ * @parent ---状态节点---
+ * @type struct<DrillCOASStateNode>
+ * @desc 单个状态节点的列表配置。
+ * @default 
+ * 
+ * @param 状态节点-49
+ * @parent ---状态节点---
+ * @type struct<DrillCOASStateNode>
+ * @desc 单个状态节点的列表配置。
+ * @default 
+ * 
+ * @param 状态节点-50
  * @parent ---状态节点---
  * @type struct<DrillCOASStateNode>
  * @desc 单个状态节点的列表配置。
@@ -1317,8 +1683,9 @@
 //				->C管理状态元
 //				->D管理状态节点
 //				->E管理动作元
-//				->F管理装饰器
-//				->G变速播放
+//				->F管理标签
+//				->G管理装饰器
+//				->H变速播放
 //			->动画序列对象 装饰器【Drill_COAS_SpriteDecorator】
 //				->A主体
 //				->B父操作
@@ -1344,6 +1711,17 @@
 //		★核心说明：
 //			1.整个核心只提供了两个分离的类，数据 和 对象。
 //			  具体见类的说明。
+//			2.只看这里的内容意义不大，快去看看文档、脚本文档。
+//				┏┳━━━━━━━━━━━━━┓
+//				┣┫█████████████┃
+//				┃┃████████┏━━┓█┃
+//				┣┫████████┃动┃█┃
+//				┃┃████████┃画┃█┃
+//				┣┫████████┃序┃█┃
+//				┃┃████████┃列┃█┃
+//				┣┫████████┗━━┛█┃
+//				┃┃█████████████┃
+//				┗┻━━━━━━━━━━━━━┛
 //		
 //		★必要注意事项：
 //			1.如果只在一个 简单贴图 里面使用，直接new，然后手动update即可。
@@ -1429,15 +1807,21 @@
 	DrillUp.drill_COAS_getPluginTip_LowVersion = function(){
 		return "【" + DrillUp.g_COAS_PluginTip_curName + "】\n游戏底层版本过低，插件基本功能无法执行。\n你可以去看\"rmmv软件版本（必看）.docx\"中的 \"旧工程升级至1.6版本\" 章节，来升级你的游戏底层版本。";
 	};
+	//==============================
+	// * 提示信息 - 报错 - 窗口字符底层校验
+	//==============================
+	DrillUp.drill_COAS_getPluginTip_NeedUpdate_drawText = function(){
+		return "【" + DrillUp.g_COAS_PluginTip_curName + "】\n检测到窗口字符核心版本过低。\n由于底层变化巨大，你需要更新 全部 窗口字符相关插件。\n去看看\"23.窗口字符 > 关于窗口字符底层全更新说明.docx\"进行更新。";
+	};
 	
 	
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_CoreOfActionSequence = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_CoreOfActionSequence');
+	var Imported = Imported || {};
+	Imported.Drill_CoreOfActionSequence = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_CoreOfActionSequence');
 	
 	
 	//==============================
@@ -1605,8 +1989,8 @@
 	// * 静态数据 - 动画序列
 	//				（~struct~DrillCOASSequence）
 	//==============================
-	DrillUp.g_COAS_stateList_length = 30;
-	DrillUp.g_COAS_stateNodeList_length = 30;
+	DrillUp.g_COAS_stateList_length = 50;
+	DrillUp.g_COAS_stateNodeList_length = 50;
 	DrillUp.g_COAS_actList_length = 20;
 	DrillUp.drill_COAS_initSequence = function( dataFrom ){
 		var data = {};
@@ -1683,7 +2067,7 @@
 	
 	
 	/*-----------------杂项------------------*/
-	DrillUp.g_COAS_list_length = 60;
+	DrillUp.g_COAS_list_length = 80;
 	DrillUp.g_COAS_list = [];
 	for( var i = 0; i < DrillUp.g_COAS_list_length; i++ ){
 		if( DrillUp.parameters["动画序列-" + String(i+1) ] != undefined &&
@@ -2223,9 +2607,18 @@
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
-var _Drill_COAS_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
-	_Drill_COAS_pluginCommand.call(this, command, args);
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
+var _drill_COAS_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
+	_drill_COAS_pluginCommand.call(this, command, args);
+	this.drill_COAS_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_COAS_pluginCommand = function( command, args ){
 	if( command === ">动画序列核心DEBUG" ){
 		
 		if( args.length == 4 ){
@@ -2365,14 +2758,14 @@ Scene_Load.prototype.reloadMapIfUpdated = function() {
 // ** 状态元 控制器【Drill_COAS_StateController】
 // **		
 // **		作用域：	地图界面、战斗界面、菜单界面
-// ** 		主功能：	> 定义一个专门控制 状态元 的数据类。
-// **					> 该类可被存到存档中。
-// ** 		子功能：	->控制器
+// ** 		主功能：	定义一个专门控制 状态元 的数据类。该类可被存到存档中。
+// ** 		子功能：	
+// **					->控制器
 // **						->帧刷新
-// **						->空的静态数据
-// **						->获取静态数据
 // **						->重设数据
 // **							->序列号
+// **						->空的静态数据
+// **						->获取静态数据
 // **					->A主体
 // **						->获取名称
 // **						->获取优先级
@@ -2758,14 +3151,14 @@ Drill_COAS_StateController.prototype.drill_controllerState_initSpeed = function(
 // ** 状态节点 控制器【Drill_COAS_StateNodeController】
 // **		
 // **		作用域：	地图界面、战斗界面、菜单界面
-// ** 		主功能：	> 定义一个专门控制状态节点的数据类。
-// **					> 该类可被存到存档中。
-// ** 		子功能：	->控制器
+// ** 		主功能：	定义一个专门控制状态节点的数据类。该类可被存到存档中。
+// ** 		子功能：	
+// **					->控制器
 // **						->帧刷新
-// **						->空的静态数据
-// **						->获取静态数据
 // **						->重设数据
 // **							->序列号
+// **						->空的静态数据
+// **						->获取静态数据
 // **					->A主体
 // **						->当前是否为 状态元类型
 // **						->当前是否为 集合类型
@@ -3053,8 +3446,8 @@ Drill_COAS_StateNodeController.prototype.drill_controllerNode_setLayer = functio
 //##############################
 // * 状态节点 - C节点 - 播放简单状态元集合【开放函数】
 //			
-//			参数：	> 无
-//			返回：	> 布尔
+//			参数：	> state_nameList 字符串列表
+//			返回：	> 无
 //##############################
 Drill_COAS_StateNodeController.prototype.drill_COAS_setNewStateNameList = function( state_nameList ){
 	if( state_nameList.length == 0 ){ return; }
@@ -3062,7 +3455,8 @@ Drill_COAS_StateNodeController.prototype.drill_COAS_setNewStateNameList = functi
 	this._drill_play_type = "随机播放状态元";
 	this._drill_play_randomStateSeq = state_nameList;
 	
-	this.drill_controllerNode_refreshNext();
+	this.drill_controllerNode_resetTimer();		//（重置播放）
+	this.drill_controllerNode_refreshNext();	//（刷新子节点）
 };
 
 //##############################
@@ -3499,14 +3893,14 @@ Drill_COAS_StateNodeController.prototype.drill_controllerNode_refreshNextNode = 
 // ** 动作元 控制器【Drill_COAS_ActController】
 // **		
 // **		作用域：	地图界面、战斗界面、菜单界面
-// ** 		主功能：	> 定义一个专门控制 动作元 的数据类。
-// **					> 该类可被存到存档中。
-// ** 		子功能：	->控制器
+// ** 		主功能：	定义一个专门控制 动作元 的数据类。该类可被存到存档中。
+// ** 		子功能：	
+// **					->控制器
 // **						->帧刷新
-// **						->空的静态数据
-// **						->获取静态数据
 // **						->重设数据
 // **							->序列号
+// **						->空的静态数据
+// **						->获取静态数据
 // **					->A主体
 // **						->获取名称
 // **						->获取优先级
@@ -3876,24 +4270,20 @@ Drill_COAS_ActController.prototype.drill_controllerAct_initSpeed = function() {
 
 //=============================================================================
 // ** 动画序列 主控制器【Drill_COAS_MainController】
-// **
-// **		索引：	COAS（可从子插件搜索到函数、类用法）
-// **		来源：	独立数据
-// **		实例：	> 
-// **		应用：	> 见 高级战斗肖像插件 函数
 // **		
 // **		作用域：	地图界面、战斗界面、菜单界面
-// ** 		主功能：	> 定义一个专门控制动画序列的数据类。
-// **					> 该类可被存到存档中。
-// ** 		子功能：	->控制器
+// ** 		主功能：	定义一个专门控制动画序列的数据类。该类可被存到存档中。
+// ** 		子功能：	
+// **					->控制器
 // **						->帧刷新
+// **						->重设数据
+// **							->序列号
 // **						->空的静态数据
 // **						->获取静态数据
 // **						->显示/隐藏
 // **						->暂停/继续
-// **						->销毁
-// **						->重设数据
-// **							->序列号
+// **						->设置销毁
+// **						x->是否销毁
 // **					->A主体
 // **					->B输出数据
 // **					->C管理状态元
@@ -3904,13 +4294,13 @@ Drill_COAS_ActController.prototype.drill_controllerAct_initSpeed = function() {
 // **						->获取数据 - 全部
 // **						->获取数据 - 根据名称
 // **						->获取数据 - 全部名称
+// **						->获取当前状态元对象
 // **						->获取当前状态元名称
 // **						->获取当前状态元名称（全路径）
 // **						->获取当前优先级
 // **						->操作 - 播放默认的状态元集合
 // **						->操作 - 播放状态节点
 // **						->操作 - 播放简单状态元集合
-// **						->操作 - 播放状态元/状态节点 根据标签
 // **					->E管理动作元
 // **						->获取数据 - 全部
 // **						->获取数据 - 根据名称
@@ -3919,9 +4309,17 @@ Drill_COAS_ActController.prototype.drill_controllerAct_initSpeed = function() {
 // **						->操作 - 播放动作元
 // **						->操作 - 立刻终止动作
 // **						->操作 - 是否正在播放动作元
-// **					->F管理装饰器
+// **					->F管理标签
+// **						->获取数据 - 是否含指定标签 - 状态元
+// **						->获取数据 - 是否含指定标签 - 状态节点
+// **						->获取数据 - 是否含指定标签 - 动作元
+// **						->操作 - 播放指定标签 - 状态元
+// **						->操作 - 播放指定标签 - 状态节点
+// **						->操作 - 播放指定标签 - 动作元
+// **						->操作 - 播放指定标签 - 状态元+状态节点+动作元
+// **					->G管理装饰器
 // **						->是否刷新框架
-// **					->G变速播放
+// **					->H变速播放
 // **		
 // **		说明：	> 该类的update函数需要手动调用。
 // **				> 你可以重设数据，也可以随时new新的Drill_COAS_MainController，但是要注意销毁装饰器对象。
@@ -3966,13 +4364,14 @@ Drill_COAS_MainController.prototype.update = function(){ this.drill_controllerMa
 Drill_COAS_MainController.prototype.drill_COAS_update = function(){ this.drill_controllerMain_update(); };
 Drill_COAS_MainController.prototype.drill_controllerMain_update = function(){
 	if( this._drill_pause == true ){ return; }
-	this.drill_controllerMain_updateSpeed();			//帧刷新 - G变速播放
+	this.drill_controllerMain_updateSpeed();			//帧刷新 - H变速播放
 	this.drill_controllerMain_updateAttr();				//帧刷新 - A主体
 														//帧刷新 - B输出数据（无）
 														//帧刷新 - C管理状态元（无）
 	this.drill_controllerMain_updateStateAndNode();		//帧刷新 - D管理状态节点
 	this.drill_controllerMain_updateAct();				//帧刷新 - E管理动作元
-														//帧刷新 - F管理装饰器（无）
+														//帧刷新 - F管理标签（无）
+														//帧刷新 - G管理装饰器（无）
 };
 //##############################
 // * 动画序列 - 重设数据【标准函数】
@@ -4181,20 +4580,6 @@ Drill_COAS_MainController.prototype.drill_COAS_setSimpleStateNode = function( st
 Drill_COAS_MainController.prototype.drill_controllerMain_setSimpleStateNode = function( state_nameList ){
 	this.drill_controllerMain_setSimpleStateNode_Private( state_nameList );
 };
-//##############################
-// * D管理状态节点 - 操作 - 播放状态元/状态节点 根据标签【开放函数】
-//			
-//			参数：	> annotation 字符串
-//			返回：	> 无
-//			
-//			说明：	> 找到一个满足标签的状态元/状态节点，并播放。
-//					  播放成功返回true；若任何条件都不满足，则返回false。
-//					> 此函数执行会重置一次当前状态节点，不能 放帧刷新里面反复执行。
-//##############################
-Drill_COAS_MainController.prototype.drill_COAS_setAnnotation = function( annotation ){ return this.drill_controllerMain_setAnnotation( annotation ); }
-Drill_COAS_MainController.prototype.drill_controllerMain_setAnnotation = function( annotation ){
-	return this.drill_controllerMain_setAnnotation_Private( annotation );
-};
 
 //##############################
 // * E管理动作元 - 获取数据 - 全部【开放函数】
@@ -4273,7 +4658,105 @@ Drill_COAS_MainController.prototype.drill_controllerMain_Act_isPlayingAct = func
 };
 
 //##############################
-// * F管理装饰器 - 是否刷新框架【标准函数】
+// * F管理标签 - 获取数据 - 是否含指定标签 - 状态元【开放函数】
+//			
+//			参数：	> annotation 字符串
+//			返回：	> 布尔
+//			
+//			说明：	> 找到一个满足标签的并播放。
+//					  播放成功返回true；若任何条件都不满足，则返回false。
+//					> 此函数执行会重置一次当前状态节点，不能 放帧刷新里面反复执行。
+//##############################
+Drill_COAS_MainController.prototype.drill_COAS_hasAnnotation_StateOnly = function( annotation ){ return this.drill_controllerMain_hasAnnotation_StateOnly( annotation ); }
+Drill_COAS_MainController.prototype.drill_controllerMain_hasAnnotation_StateOnly = function( annotation ){
+	return this.drill_controllerMain_hasAnnotation_StateOnly_Private( annotation );
+};
+//##############################
+// * F管理标签 - 获取数据 - 是否含指定标签 - 状态节点【开放函数】
+//			
+//			参数：	> annotation 字符串
+//			返回：	> 布尔
+//			
+//			说明：	> 找到一个满足标签的并播放。
+//					  播放成功返回true；若任何条件都不满足，则返回false。
+//					> 此函数执行会重置一次当前状态节点，不能 放帧刷新里面反复执行。
+//##############################
+Drill_COAS_MainController.prototype.drill_COAS_hasAnnotation_StateNodeOnly = function( annotation ){ return this.drill_controllerMain_hasAnnotation_StateNodeOnly( annotation ); }
+Drill_COAS_MainController.prototype.drill_controllerMain_hasAnnotation_StateNodeOnly = function( annotation ){
+	return this.drill_controllerMain_hasAnnotation_StateNodeOnly_Private( annotation );
+};
+//##############################
+// * F管理标签 - 获取数据 - 是否含指定标签 - 动作元【开放函数】
+//			
+//			参数：	> annotation 字符串
+//			返回：	> 布尔
+//			
+//			说明：	> 找到一个满足标签的并播放。
+//					  播放成功返回true；若任何条件都不满足，则返回false。
+//					> 此函数执行会重置一次当前状态节点，不能 放帧刷新里面反复执行。
+//##############################
+Drill_COAS_MainController.prototype.drill_COAS_hasAnnotation_ActOnly = function( annotation ){ return this.drill_controllerMain_hasAnnotation_ActOnly( annotation ); }
+Drill_COAS_MainController.prototype.drill_controllerMain_hasAnnotation_ActOnly = function( annotation ){
+	return this.drill_controllerMain_hasAnnotation_ActOnly_Private( annotation );
+};
+//##############################
+// * F管理标签 - 操作 - 播放指定标签 - 状态元【开放函数】
+//			
+//			参数：	> annotation 字符串
+//			返回：	> 布尔
+//			
+//			说明：	> 找到一个满足标签的并播放。
+//					  播放成功返回true；若任何条件都不满足，则返回false。
+//					> 此函数执行会重置一次当前状态节点，不能 放帧刷新里面反复执行。
+//##############################
+Drill_COAS_MainController.prototype.drill_COAS_setAnnotation_StateOnly = function( annotation ){ return this.drill_controllerMain_setAnnotation_StateOnly( annotation ); }
+Drill_COAS_MainController.prototype.drill_controllerMain_setAnnotation_StateOnly = function( annotation ){
+	return this.drill_controllerMain_setAnnotation_StateOnly_Private( annotation );
+};
+//##############################
+// * F管理标签 - 操作 - 播放指定标签 - 状态节点【开放函数】
+//			
+//			参数：	> annotation 字符串
+//			返回：	> 布尔
+//			
+//			说明：	> 找到一个满足标签的并播放。
+//					  播放成功返回true；若任何条件都不满足，则返回false。
+//					> 此函数执行会重置一次当前状态节点，不能 放帧刷新里面反复执行。
+//##############################
+Drill_COAS_MainController.prototype.drill_COAS_setAnnotation_StateNodeOnly = function( annotation ){ return this.drill_controllerMain_setAnnotation_StateNodeOnly( annotation ); }
+Drill_COAS_MainController.prototype.drill_controllerMain_setAnnotation_StateNodeOnly = function( annotation ){
+	return this.drill_controllerMain_setAnnotation_StateNodeOnly_Private( annotation );
+};
+//##############################
+// * F管理标签 - 操作 - 播放指定标签 - 动作元【开放函数】
+//			
+//			参数：	> annotation 字符串
+//			返回：	> 布尔
+//			
+//			说明：	> 找到一个满足标签的并播放。
+//					  播放成功返回true；若任何条件都不满足，则返回false。
+//##############################
+Drill_COAS_MainController.prototype.drill_COAS_setAnnotation_ActOnly = function( annotation ){ return this.drill_controllerMain_ActOnly_setAnnotation( annotation ); }
+Drill_COAS_MainController.prototype.drill_controllerMain_ActOnly_setAnnotation = function( annotation ){
+	return this.drill_controllerMain_setAnnotation_ActOnly_Private( annotation );
+};
+//##############################
+// * F管理标签 - 操作 - 播放指定标签 - 状态元+状态节点+动作元【开放函数】
+//			
+//			参数：	> annotation 字符串
+//			返回：	> 布尔
+//			
+//			说明：	> 找到一个满足标签的并播放。
+//					  播放成功返回true；若任何条件都不满足，则返回false。
+//					> 此函数执行会重置一次当前状态节点，不能 放帧刷新里面反复执行。
+//##############################
+Drill_COAS_MainController.prototype.drill_COAS_setAnnotation = function( annotation ){ return this.drill_controllerMain_setAnnotation( annotation ); }
+Drill_COAS_MainController.prototype.drill_controllerMain_setAnnotation = function( annotation ){
+	return this.drill_controllerMain_setAnnotation_Private( annotation );
+};
+
+//##############################
+// * G管理装饰器 - 是否刷新框架【标准函数】
 //
 //			参数：	> enable 布尔
 //			返回：	> 无
@@ -4286,7 +4769,7 @@ Drill_COAS_MainController.prototype.drill_controllerMain_setBitmapRefreshFrame =
 };
 
 //##############################
-// * G变速播放 - 设置速度【开放函数】
+// * H变速播放 - 设置速度【开放函数】
 //			
 //			参数：	> speed 速度
 //			返回：	> 无
@@ -4323,9 +4806,11 @@ Drill_COAS_MainController.prototype.drill_controllerMain_initData = function() {
 	// > E管理动作元
 	if( data['act_tank'] == undefined ){ data['act_tank']=[] };									//E管理动作元 - 容器
 	
-	// > F管理装饰器（无）
+	// > F管理标签（无）
 	
-	// > G变速播放（无）
+	// > G管理装饰器（无）
+	
+	// > H变速播放（无）
 	
 	
 	//（c++中注意此处，data是堆栈对象而非指针，需要重新赋值）
@@ -4339,8 +4824,9 @@ Drill_COAS_MainController.prototype.drill_controllerMain_initChild = function() 
 	this.drill_controllerMain_initState();			//初始化子功能 - C管理状态元
 	this.drill_controllerMain_initNode();			//初始化子功能 - D管理状态节点
 	this.drill_controllerMain_initAct();			//初始化子功能 - E管理动作元
-	this.drill_controllerMain_initDecorator();		//初始化子功能 - F管理装饰器
-	this.drill_controllerMain_initSpeed();			//初始化子功能 - G变速播放
+	this.drill_controllerMain_initAnnotation();		//初始化子功能 - F管理标签
+	this.drill_controllerMain_initDecorator();		//初始化子功能 - G管理装饰器
+	this.drill_controllerMain_initSpeed();			//初始化子功能 - H变速播放
 };
 //==============================
 // * 动画序列 - 重设数据（私有）
@@ -4573,9 +5059,12 @@ Drill_COAS_MainController.prototype.drill_controllerMain_Node_getCurPriority_Pri
 Drill_COAS_MainController.prototype.drill_controllerMain_setStateNode_Private = function( node_name ){
 	var node_data = this.drill_controllerMain_getNodeData_ByName( node_name );
 	if( node_data == null ){ return; }
-	this._drill_node_curController.drill_controllerNode_resetData( this._drill_sequenceData_id, node_data['id'] );//集合 - 重设数据
-	this._drill_node_curController.drill_controllerNode_setLayer( 0 );									//集合 - 设置当前层数
-	this._drill_node_curController.drill_controllerNode_refreshNext();									//集合 - 刷新子节点
+	
+	// > 重设数据
+	this._drill_node_curController.drill_controllerNode_resetData( this._drill_sequenceData_id, node_data['id'] );
+	this._drill_node_curController.drill_controllerNode_setLayer( 0 );
+	this._drill_node_curController.drill_controllerNode_refreshNext();
+	this._drill_node_curController.drill_controllerNode_update();	//（设置数据后，立即强制刷新）
 };
 //==============================
 // * D管理状态节点 - 操作 - 播放简单状态元集合（私有）
@@ -4584,101 +5073,6 @@ Drill_COAS_MainController.prototype.drill_controllerMain_setSimpleStateNode_Priv
 	this.drill_controllerMain_checkArray( state_nameList );
 	this._drill_node_curController.drill_COAS_setNewStateNameList( state_nameList );
 };
-//==============================
-// * D管理状态节点 - 操作 - 播放状态元/状态节点 根据标签（私有）
-//
-//			说明：	> 播放不成功时(没有标签)，返回false。
-//					> 该核心只提供 播放函数，标签分类/标签顺序/标签复合处理 等操作全部由 子插件 自己管理，可见 Drill_EventActionSequenceAutomation 。
-//==============================
-Drill_COAS_MainController.prototype.drill_controllerMain_setAnnotation_Private = function( annotation ){
-	
-	// > 状态节点 播放
-	var stateNodeData_list = this.drill_controllerMain_getNodeData_All();
-	for( var i=0; i < stateNodeData_list.length; i++ ){
-		var stateNodeData = stateNodeData_list[i];
-		if( stateNodeData['tag_tank'].contains( annotation ) ){
-			this.drill_controllerMain_setStateNode( stateNodeData['name'] );
-			return true;
-		}
-	}
-	
-	// > 状态元 播放
-	var stateData_list = this.drill_controllerMain_getStateData_All();
-	for( var i=0; i < stateData_list.length; i++ ){
-		var stateData = stateData_list[i];
-		if( stateData['tag_tank'].contains( annotation ) ){
-			var name_list = [];
-			name_list.push( stateData['name'] );
-			this.drill_controllerMain_setSimpleStateNode( name_list );
-			return true;
-		}
-	}
-	
-	return false;
-};
-//==============================
-// * D管理状态节点 - 操作 - 只播放状态元 根据标签列表（旧）
-//
-//			说明：	> 此函数是根据 标签列表，找到 状态元列表，然后播放。暂时弃用。
-//==============================
-/*
-Drill_COAS_MainController.prototype.drill_controllerMain_setAnnotationList = function( annotation_list ){
-	
-	// > 找到符合注解数量最多的状态元名
-	var max_fit_count = 0;			//（最大符合数量）
-	var fit_seq = [];				//（最大符合的索引列表）
-	var stateData_list = this.drill_controllerMain_getStateData_All_Private();
-	for( var i=0; i < stateData_list.length; i++ ){
-		var stateData = stateData_list[i];
-		var tag_tank = stateData['tag_tank'];
-		if( tag_tank.length == 0 ){ continue; }
-		
-		// > 记录注解符合数量
-		var fit_count = 0;
-		for(var j=0; j < annotation_list.length; j++){
-			var annotation = annotation_list[j];
-			if( tag_tank.contains(annotation) == true ){
-				fit_count += 1;
-			}
-		}
-		
-		// > 符合数量更大时，清空序列，重新添加
-		if( fit_count > max_fit_count ){
-			fit_seq = [];
-			max_fit_count = fit_count;
-			
-			var fit = {};
-			fit['index'] = i;
-			fit['count'] = fit_count;
-			fit['name'] = stateData['name'];
-			fit_seq.push( fit );
-		
-		// > 符合数量相等，累计
-		}else if( fit_count == max_fit_count ){
-			var fit = {};
-			fit['index'] = i;
-			fit['count'] = fit_count;
-			fit['name'] = stateData['name'];
-			fit_seq.push( fit );
-			
-		// > 符合数量少了，跳过
-		}else{
-			continue; 
-		}
-	}
-	if( fit_seq.length == 0 ){ return false; }
-	
-	// > 根据最大值的下标取出符合的名称
-	var stateName_list = [];
-	for( var i=0; i < fit_seq.length; i++ ){
-		stateName_list.push( fit_seq[i]['name'] );
-	}
-	
-	// > 播放简单状态元集合
-	this.drill_controllerMain_setSimpleStateNode_Private( stateName_list );
-	return true;
-};
-*/
 
 
 //==============================
@@ -4701,7 +5095,7 @@ Drill_COAS_MainController.prototype.drill_controllerMain_updateAct = function() 
 	// > 动作元打断 锁
 	this._drill_act_interrupt = true;
 	
-	// > 动作元 数据刷新情况
+	// > 动作元 重设数据
 	if( this._drill_act_curSerial != this._drill_act_curController._drill_controllerSerial ){
 		var data_act = this.drill_controllerMain_getActData_ByName( this._drill_act_curName );
 		if( data_act != undefined ){
@@ -4817,22 +5211,210 @@ Drill_COAS_MainController.prototype.drill_controllerMain_Act_isPlayingAct_Privat
 
 
 //==============================
-// * F管理装饰器 - 初始化子功能
+// * F管理标签 - 初始化子功能
+//==============================
+Drill_COAS_MainController.prototype.drill_controllerMain_initAnnotation = function() {
+	//（无）
+};
+//==============================
+// * F管理标签 - 获取数据 - 是否含指定标签 - 状态元（私有）
+//
+//			说明：	> 播放不成功时，表示没有标签，返回false。
+//==============================
+Drill_COAS_MainController.prototype.drill_controllerMain_hasAnnotation_StateOnly_Private = function( annotation ){
+	var stateData_list = this.drill_controllerMain_getStateData_All();
+	for( var i=0; i < stateData_list.length; i++ ){
+		var stateData = stateData_list[i];
+		if( stateData['tag_tank'].contains( annotation ) ){
+			return true;
+		}
+	}
+	return false;
+};
+//==============================
+// * F管理标签 - 获取数据 - 是否含指定标签 - 状态节点（私有）
+//
+//			说明：	> 播放不成功时，表示没有标签，返回false。
+//==============================
+Drill_COAS_MainController.prototype.drill_controllerMain_hasAnnotation_StateNodeOnly_Private = function( annotation ){
+	var stateNodeData_list = this.drill_controllerMain_getNodeData_All();
+	for( var i=0; i < stateNodeData_list.length; i++ ){
+		var stateNodeData = stateNodeData_list[i];
+		if( stateNodeData['tag_tank'].contains( annotation ) ){
+			return true;
+		}
+	}
+	return false;
+};
+//==============================
+// * F管理标签 - 获取数据 - 是否含指定标签 - 动作元（私有）
+//
+//			说明：	> 播放不成功时，表示没有标签，返回false。
+//==============================
+Drill_COAS_MainController.prototype.drill_controllerMain_hasAnnotation_ActOnly_Private = function( annotation ){
+	var actData_list = this.drill_controllerMain_getActData_All();
+	for( var i=0; i < actData_list.length; i++ ){
+		var actData = actData_list[i];
+		if( actData['tag_tank'].contains( annotation ) ){
+			return true;
+		}
+	}
+	return false;
+};
+//==============================
+// * F管理标签 - 操作 - 播放指定标签 - 状态元（私有）
+//
+//			说明：	> 播放不成功时，表示没有标签，返回false。
+//==============================
+Drill_COAS_MainController.prototype.drill_controllerMain_setAnnotation_StateOnly_Private = function( annotation ){
+	var stateData_list = this.drill_controllerMain_getStateData_All();
+	for( var i=0; i < stateData_list.length; i++ ){
+		var stateData = stateData_list[i];
+		if( stateData['tag_tank'].contains( annotation ) ){
+			var name_list = [];
+			name_list.push( stateData['name'] );
+			this.drill_controllerMain_setSimpleStateNode( name_list );			//（播放状态元）
+			return true;
+		}
+	}
+	return false;
+};
+//==============================
+// * F管理标签 - 操作 - 播放指定标签 - 状态节点（私有）
+//
+//			说明：	> 播放不成功时，表示没有标签，返回false。
+//==============================
+Drill_COAS_MainController.prototype.drill_controllerMain_setAnnotation_StateNodeOnly_Private = function( annotation ){
+	var stateNodeData_list = this.drill_controllerMain_getNodeData_All();
+	for( var i=0; i < stateNodeData_list.length; i++ ){
+		var stateNodeData = stateNodeData_list[i];
+		if( stateNodeData['tag_tank'].contains( annotation ) ){
+			this.drill_controllerMain_setStateNode( stateNodeData['name'] );	//（播放状态节点）
+			return true;
+		}
+	}
+	return false;
+};
+//==============================
+// * F管理标签 - 操作 - 播放指定标签 - 动作元（私有）
+//
+//			说明：	> 播放不成功时，表示没有标签，返回false。
+//==============================
+Drill_COAS_MainController.prototype.drill_controllerMain_setAnnotation_ActOnly_Private = function( annotation ){
+	var actData_list = this.drill_controllerMain_getActData_All();
+	for( var i=0; i < actData_list.length; i++ ){
+		var actData = actData_list[i];
+		if( actData['tag_tank'].contains( annotation ) ){
+			this.drill_controllerMain_Act_setAct( actData['name'] );			//（播放动作元）
+			return true;
+		}
+	}
+	return false;
+};
+//==============================
+// * F管理标签 - 操作 - 播放指定标签 - 状态元+状态节点+动作元（私有）
+//
+//			说明：	> 播放不成功时，表示没有标签，返回false。
+//					> 该核心只提供 播放函数，标签分类/标签顺序/标签复合处理 等操作全部由 子插件 自己管理，可见 Drill_EventActionSequenceAutomation 。
+//==============================
+Drill_COAS_MainController.prototype.drill_controllerMain_setAnnotation_Private = function( annotation ){
+	
+	// > 状态节点 播放
+	var success = this.drill_controllerMain_setAnnotation_StateNodeOnly_Private( annotation );
+	if( success == true ){ return true; }
+	
+	// > 状态元 播放
+	var success = this.drill_controllerMain_setAnnotation_StateOnly_Private( annotation );
+	if( success == true ){ return true; }
+	
+	// > 动作元 播放
+	var success = this.drill_controllerMain_setAnnotation_ActOnly_Private( annotation );
+	if( success == true ){ return true; }
+	
+	return false;
+};
+//==============================
+// * F管理标签 - 操作 - 只播放状态元 根据标签列表（旧）
+//
+//			说明：	> 此函数是根据 标签列表，找到 状态元列表，然后播放。暂时弃用。
+//==============================
+/*
+Drill_COAS_MainController.prototype.drill_controllerMain_setAnnotationList = function( annotation_list ){
+	
+	// > 找到符合注解数量最多的状态元名
+	var max_fit_count = 0;			//（最大符合数量）
+	var fit_seq = [];				//（最大符合的索引列表）
+	var stateData_list = this.drill_controllerMain_getStateData_All_Private();
+	for( var i=0; i < stateData_list.length; i++ ){
+		var stateData = stateData_list[i];
+		var tag_tank = stateData['tag_tank'];
+		if( tag_tank.length == 0 ){ continue; }
+		
+		// > 记录注解符合数量
+		var fit_count = 0;
+		for(var j=0; j < annotation_list.length; j++){
+			var annotation = annotation_list[j];
+			if( tag_tank.contains(annotation) == true ){
+				fit_count += 1;
+			}
+		}
+		
+		// > 符合数量更大时，清空序列，重新添加
+		if( fit_count > max_fit_count ){
+			fit_seq = [];
+			max_fit_count = fit_count;
+			
+			var fit = {};
+			fit['index'] = i;
+			fit['count'] = fit_count;
+			fit['name'] = stateData['name'];
+			fit_seq.push( fit );
+		
+		// > 符合数量相等，累计
+		}else if( fit_count == max_fit_count ){
+			var fit = {};
+			fit['index'] = i;
+			fit['count'] = fit_count;
+			fit['name'] = stateData['name'];
+			fit_seq.push( fit );
+			
+		// > 符合数量少了，跳过
+		}else{
+			continue; 
+		}
+	}
+	if( fit_seq.length == 0 ){ return false; }
+	
+	// > 根据最大值的下标取出符合的名称
+	var stateName_list = [];
+	for( var i=0; i < fit_seq.length; i++ ){
+		stateName_list.push( fit_seq[i]['name'] );
+	}
+	
+	// > 播放简单状态元集合
+	this.drill_controllerMain_setSimpleStateNode_Private( stateName_list );
+	return true;
+};
+*/
+
+
+//==============================
+// * G管理装饰器 - 初始化子功能
 //==============================
 Drill_COAS_MainController.prototype.drill_controllerMain_initDecorator = function() {
-	this._drill_waitForPreload = true;				//F管理装饰器 - 加载等待
-	this._drill_bitmapRefreshFrame = true;			//F管理装饰器 - bitmap刷新框架开关
+	this._drill_waitForPreload = true;				//G管理装饰器 - 加载等待
+	this._drill_bitmapRefreshFrame = true;			//G管理装饰器 - bitmap刷新框架开关
 };
 
 
 //==============================
-// * G变速播放 - 初始化子功能
+// * H变速播放 - 初始化子功能
 //==============================
 Drill_COAS_MainController.prototype.drill_controllerMain_initSpeed = function() {
 	this._drill_curSpeed = 1;
 };
 //==============================
-// * G变速播放 - 帧刷新
+// * H变速播放 - 帧刷新
 //==============================
 Drill_COAS_MainController.prototype.drill_controllerMain_updateSpeed = function() {
 	
@@ -4853,9 +5435,9 @@ Drill_COAS_MainController.prototype.drill_controllerMain_updateSpeed = function(
 // ** 动画序列对象 装饰器【Drill_COAS_SpriteDecorator】
 // **		
 // **		作用域：	地图界面、战斗界面、菜单界面
-// ** 		主功能：	> 定义一个专门控制动画序列的数据类。
-// **					> 该类可被存到存档中。
-// ** 		子功能：	->装饰器
+// ** 		主功能：	定义一个专门控制 动画序列对象 的贴图容器。
+// ** 		子功能：	
+// **					->装饰器
 // **						->帧刷新
 // **						->是否就绪
 // **						->优化策略
@@ -5205,13 +5787,14 @@ Sprite.prototype._onBitmapLoad = function( bitmapLoaded ){
 
 //=============================================================================
 // ** 动画序列Debug窗口【Drill_COAS_DebugWindow】
-//			
-//			作用域：	地图界面、战斗界面、菜单界面
-//			主功能：	定义一个窗口，用于描述 指定动画序列控制器 的内容信息。
-//			子功能：	->控制器绑定
-//						->内容显示
-//						
-//			说明：	> 临时的调试窗口。
+// **		
+// **		作用域：	地图界面、战斗界面、菜单界面
+// **		主功能：	定义一个窗口，用于描述 指定动画序列控制器 的内容信息。
+// **		子功能：	
+// **					->控制器绑定
+// **					->内容显示
+// **					
+// **		说明：	> 临时的调试窗口。
 //=============================================================================
 //==============================
 // * Debug窗口 - 定义
@@ -5238,7 +5821,6 @@ Drill_COAS_DebugWindow.prototype.update = function() {
 //==============================
 // * Debug窗口 - 窗口属性
 //==============================
-Drill_COAS_DebugWindow.prototype.lineHeight = function(){ return 18; };
 Drill_COAS_DebugWindow.prototype.standardFontSize = function(){ return 16; };
 //==============================
 // * Debug窗口 - 设置控制器（开放函数）
@@ -5282,18 +5864,41 @@ Drill_COAS_DebugWindow.prototype.drill_window_updateContext = function() {
 	this._drill_lastContext = context;
 	
 	// > 绘制设置
-	if( Imported.Drill_CoreOfWindowAuxiliary ){
-		var context_list = context.split("\n");
-		var options = {
-			'width':this.width,
-			'lineheight':18,
-			'align':"左对齐",
+	if( Imported.Drill_CoreOfWindowCharacter ){
+		
+		// > 窗口字符底层校验
+		if( typeof(_drill_COWC_drawText_functionExist) == "undefined" ){
+			alert( DrillUp.drill_COAS_getPluginTip_NeedUpdate_drawText() );
+			return;
 		};
-		this.drill_COWA_drawTextListEx( context_list, options);
+		
+		// > 参数准备
+		var options = {};
+		options['infoParam'] = {};
+		options['infoParam']['x'] = 0;
+		options['infoParam']['y'] = 0;
+		options['infoParam']['canvasWidth']  = this.width;
+		options['infoParam']['canvasHeight'] = this.height;
+		
+		// > 参数准备 - 自定义
+		options['blockParam'] = {};			//『清零字符默认间距』
+		options['blockParam']['paddingTop'] = 0;
+		options['rowParam'] = {};
+		options['rowParam']['lineHeight_upCorrection'] = 0;
+		
+		options['baseParam'] = {};
+		options['baseParam']['fontSize'] = this.standardFontSize();	//（使用当前窗口的字体大小）
+		
+		// > 清空画布（固定高宽只需要清空）
+		this.contents.clear();
+		
+		
+		// > 『字符主流程』 - 绘制文本【窗口字符 - 窗口字符核心】
+		this.drill_COWC_drawText( context, options );
+		
 	}else{
 		this.drawText("缺少核心插件，无法显示文本。", 2, 2, this.width, 'left');
-		this.drawText("需要 Drill_CoreOfWindowAuxiliary 窗口辅助核心。", 2, 22, this.width, 'left');
+		this.drawText("需要 Drill_CoreOfWindowCharacter 窗口字符-窗口字符核心★★v2.0及以上★★。", 2, 22, this.width, 'left');
 	}
 };
-
 

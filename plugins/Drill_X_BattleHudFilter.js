@@ -468,7 +468,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_XBHF_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_XBHF_PluginTip_baseList.length == 0 ){ return ""; }
@@ -484,10 +484,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_X_BattleHudFilter = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_X_BattleHudFilter');
+	var Imported = Imported || {};
+	Imported.Drill_X_BattleHudFilter = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_X_BattleHudFilter');
 	
 	DrillUp.g_XBHF_mog_hud = String(Moghunter.parameters['头像是否与敌人滤镜同步'] || "true") == "true";
 	DrillUp.g_XBHF_deathBlackWhite = String(Moghunter.parameters['角色死亡时是否加整体黑白滤镜'] || "true") == "true";

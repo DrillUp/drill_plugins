@@ -272,10 +272,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_LayerStairArea = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_LayerStairArea');
+	var Imported = Imported || {};
+	Imported.Drill_LayerStairArea = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_LayerStairArea');
 	
 	
 	/*-----------------杂项------------------*/	
@@ -296,9 +296,18 @@
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_LSA_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_LSA_pluginCommand.call(this, command, args);
+	this.drill_LSA_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_LSA_pluginCommand = function( command, args ){
 	if( command === ">侧边阶梯区域" ){
 		
 		if(args.length == 2){
@@ -749,15 +758,16 @@ Scene_Map.prototype.drill_LSA_updateDebugSprite = function() {
 // ** 稀疏矩阵【Drill_LSA_SparseMatrix】
 // **		
 // **		作用域：	地图界面
-// **		主功能：	> 定义一个稀疏矩阵的数据类。
-// **					> 此矩阵适用于 存在大量零值null值 的情况。
-// **		子功能：	->稀疏矩阵
+// **		主功能：	定义一个稀疏矩阵的数据类。
+// **		子功能：	
+// **					->稀疏矩阵
 // **						->设置值（开放函数）
 // **						->获取值（开放函数）
 // **						->删除值（开放函数）
 // **						->矩阵是否为空（开放函数）
 // **		
 // **		说明：	> 该类可存储在 $gameMap 中。
+// **				> 此矩阵适用于 存在大量零值null值 的情况。
 //=============================================================================
 //==============================
 // * 稀疏矩阵 - 定义

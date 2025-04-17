@@ -270,7 +270,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_CODAA_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_CODAA_PluginTip_baseList.length == 0 ){ return ""; }
@@ -286,10 +286,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_CoreOfDragAndAdsorb = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_CoreOfDragAndAdsorb');
+	var Imported = Imported || {};
+	Imported.Drill_CoreOfDragAndAdsorb = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_CoreOfDragAndAdsorb');
 
 
 //=============================================================================
@@ -410,8 +410,9 @@ Game_System.prototype.drill_CODAA_slotFactory = function() {
 // ** 拖拽控制器【Drill_CODAA_DragController】
 // **		
 // **		作用域：	地图界面、战斗界面、菜单界面
-// **		主功能：	> 定义一个 拖拽 数据类。
-// **		子功能：	->控制器
+// **		主功能：	定义一个 拖拽 数据类。
+// **		子功能：	
+// **					->控制器
 // **						->帧刷新
 // **					->A主体
 // **						->设置可拖拽
@@ -679,8 +680,9 @@ Drill_CODAA_DragController.prototype.drill_controllerDrag_clearDragPosition = fu
 // ** 拖拽数据工厂【Drill_CODAA_DragFactory】
 // **		
 // **		作用域：	地图界面、战斗界面、菜单界面
-// **		主功能：	> 定义一个 拖拽控制器 数据工厂。
-// **		子功能：	->数据工厂
+// **		主功能：	定义一个 拖拽控制器 数据工厂。
+// **		子功能：	
+// **					->数据工厂
 // **					->A容器
 // **						->创建 拖拽控制器
 // **						->删除 拖拽控制器
@@ -799,8 +801,9 @@ Drill_CODAA_DragFactory.prototype.drill_factoryDrag_getByDraging = function( plu
 // ** 吸附控制器【Drill_CODAA_AdsorbController】
 // **		
 // **		作用域：	地图界面、战斗界面、菜单界面
-// **		主功能：	> 定义一个 吸附 数据类。
-// **		子功能：	->控制器
+// **		主功能：	定义一个 吸附 数据类。
+// **		子功能：	
+// **					->控制器
 // **						->帧刷新
 // **					->A主体
 // **						->设置可吸附
@@ -1440,8 +1443,9 @@ Drill_CODAA_AdsorbController.prototype.drill_controllerAdsorb_updateAnim3 = func
 // ** 吸附数据工厂【Drill_CODAA_AdsorbFactory】
 // **		
 // **		作用域：	地图界面、战斗界面、菜单界面
-// **		主功能：	> 定义一个 吸附控制器 数据工厂。
-// **		子功能：	->数据工厂
+// **		主功能：	定义一个 吸附控制器 数据工厂。
+// **		子功能：	
+// **					->数据工厂
 // **					->A容器
 // **						->创建 吸附控制器
 // **						->删除 吸附控制器
@@ -1571,8 +1575,9 @@ Drill_CODAA_AdsorbFactory.prototype.drill_factoryAdsorb_getBySlotId = function( 
 // ** 吸附槽控制器【Drill_CODAA_SlotController】
 // **		
 // **		作用域：	地图界面、战斗界面、菜单界面
-// **		主功能：	> 定义一个吸附槽 数据类。
-// **		子功能：	->控制器
+// **		主功能：	定义一个吸附槽 数据类。
+// **		子功能：	
+// **					->控制器
 // **						->帧刷新
 // **					->A主体
 // **					->B槽吸附类型
@@ -2091,8 +2096,9 @@ Drill_CODAA_SlotController.prototype.drill_slot_isInExchangeRange = function( cu
 // ** 吸附槽数据工厂【Drill_CODAA_SlotFactory】
 // **		
 // **		作用域：	地图界面、战斗界面、菜单界面
-// **		主功能：	> 定义一个 吸附槽控制器 数据工厂。
-// **		子功能：	->数据工厂
+// **		主功能：	定义一个 吸附槽控制器 数据工厂。
+// **		子功能：	
+// **					->数据工厂
 // **					->A容器
 // **						->创建 吸附槽控制器
 // **						->删除 吸附槽控制器

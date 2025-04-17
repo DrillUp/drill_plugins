@@ -120,7 +120,7 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称：		PFM (Player_Follower_Manage)
+//		插件简称		PFM (Player_Follower_Manage)
 //		临时全局变量	DrillUp.g_PFM_xxx
 //		临时局部变量	无
 //		存储数据变量	无
@@ -184,10 +184,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_PlayerFollowerManage = true;
-　　var DrillUp = DrillUp || {};
-    DrillUp.parameters = PluginManager.parameters('Drill_PlayerFollowerManage');
+	var Imported = Imported || {};
+	Imported.Drill_PlayerFollowerManage = true;
+	var DrillUp = DrillUp || {};
+	DrillUp.parameters = PluginManager.parameters('Drill_PlayerFollowerManage');
 	
 	
 	/*-----------------杂项------------------*/
@@ -232,9 +232,18 @@ Game_Follower.prototype.chaseCharacter = function( character ){
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_PFM_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_PFM_pluginCommand.call(this, command, args);
+	this.drill_PFM_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_PFM_pluginCommand = function( command, args ){
 	if( command === ">玩家队员管理" ){
 		
 		/*-----------------事件指令------------------*/

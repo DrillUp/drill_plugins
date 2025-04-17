@@ -159,7 +159,7 @@
 //			->☆静态数据
 //			->☆插件指令
 //			->☆事件注释
-//			->☆物体贴图
+//			->☆场景容器之物体贴图
 //			->☆存储数据
 //			
 //			->☆贴图容器
@@ -211,10 +211,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_EventAutoTransparent = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_EventAutoTransparent');
+	var Imported = Imported || {};
+	Imported.Drill_EventAutoTransparent = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_EventAutoTransparent');
 	
 	
 	/*-----------------杂项------------------*/
@@ -225,9 +225,18 @@
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
-var _Drill_EATran_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
-	_Drill_EATran_pluginCommand.call(this, command, args);
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
+var _drill_EATran_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
+	_drill_EATran_pluginCommand.call(this, command, args);
+	this.drill_EATran_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_EATran_pluginCommand = function( command, args ){
 	if( command === ">玩家接近自动透明化" ){
 		
 		/*-----------------对象组获取------------------*/
@@ -377,10 +386,10 @@ Game_Event.prototype.drill_EATran_setupPageSettings = function() {
 
 
 //#############################################################################
-// ** 【标准模块】物体贴图 ☆物体贴图
+// ** 【标准模块】物体贴图容器 ☆场景容器之物体贴图
 //#############################################################################
 //##############################
-// * 物体贴图 - 获取 - 容器指针【标准函数】
+// * 物体贴图容器 - 获取 - 容器指针【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 贴图数组     （物体贴图）
@@ -391,7 +400,7 @@ Game_Temp.prototype.drill_EATran_getCharacterSpriteTank = function(){
 	return this.drill_EATran_getCharacterSpriteTank_Private();
 }
 //##############################
-// * 物体贴图 - 获取 - 根据事件ID【标准函数】
+// * 物体贴图容器 - 获取 - 根据事件ID【标准函数】
 //			
 //			参数：	> event_id 数字（事件ID）
 //			返回：	> 贴图对象     （事件贴图）
@@ -403,7 +412,7 @@ Game_Temp.prototype.drill_EATran_getCharacterSpriteByEventId = function( event_i
 	return this.drill_EATran_getCharacterSpriteByEventId_Private( event_id );
 }
 //##############################
-// * 物体贴图 - 获取 - 根据玩家队员索引【标准函数】
+// * 物体贴图容器 - 获取 - 根据玩家队员索引【标准函数】
 //			
 //			参数：	> follower_index 数字（玩家队员索引）
 //			返回：	> 贴图对象           （玩家队员贴图）
@@ -415,7 +424,7 @@ Game_Temp.prototype.drill_EATran_getCharacterSpriteByFollowerIndex = function( f
 	return this.drill_EATran_getCharacterSpriteByFollowerIndex_Private( follower_index );
 }
 //=============================================================================
-// ** 物体贴图（接口实现）
+// ** 场景容器之物体贴图（实现）
 //=============================================================================
 //==============================
 // * 物体贴图容器 - 获取 - 容器指针（私有）

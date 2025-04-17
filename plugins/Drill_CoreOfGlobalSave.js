@@ -250,10 +250,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_CoreOfGlobalSave = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_CoreOfGlobalSave');
+	var Imported = Imported || {};
+	Imported.Drill_CoreOfGlobalSave = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_CoreOfGlobalSave');
 
 
 	//==============================

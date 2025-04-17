@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        图片 - 图片与鼠标控制核心
+ * @plugindesc [v1.2]        图片 - 图片与鼠标控制核心
  * @author Drill_up
  * 
  * 
@@ -98,6 +98,16 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 添加了 像素判定 的功能。
+ * [v1.2]
+ * 修复了切换地图时悬停判定未刷新的bug。
+ * 
+ * 
+ * @param DEBUG-是否提示找不到图片
+ * @type boolean
+ * @on 提示
+ * @off 关闭提示
+ * @desc true - 提示，false - 关闭提示。如果你知道存在此问题但不想弹出此提示，可在配置中关闭此提示。
+ * @default true
  * 
  */
  
@@ -144,6 +154,7 @@
 //				->是否在 碰撞体 范围内
 //				->是否在 像素判定 范围内
 //			->☆优化控制
+//				->初始化8帧关闭悬停
 //				->同一贴图+同一帧中 被多次调用 优化
 //			
 //			->☆DEBUG悬停范围
@@ -186,7 +197,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_COPWM_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_COPWM_PluginTip_baseList.length == 0 ){ return ""; }
@@ -201,18 +212,22 @@
 	// * 提示信息 - 报错 - 找不到图片
 	//==============================
 	DrillUp.drill_COPWM_getPluginTip_PictureNotFind = function( pic_id ){
-		return "【" + DrillUp.g_COPWM_PluginTip_curName + "】\n插件指令错误，id为"+pic_id+"的图片还没被创建。\n你可能需要将指令放在'显示图片'事件指令之后。";
+		return "【" + DrillUp.g_COPWM_PluginTip_curName + "】（此提示可在插件中关闭）\n" + //『可关闭提示信息』
+				"插件指令错误，id为"+pic_id+"的图片还没被创建。\n你可能需要将指令放在'显示图片'事件指令之后。";
 	};
 	
 	
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_CoreOfPictureWithMouse = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_CoreOfPictureWithMouse');
+	var Imported = Imported || {};
+	Imported.Drill_CoreOfPictureWithMouse = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_CoreOfPictureWithMouse');
 	
+	
+	/*-----------------杂项------------------*/
+	DrillUp.g_COPWM_TipEnabled_PictureNotFind = String(DrillUp.parameters["DEBUG-是否提示找不到图片"] || "true") === "true";
 	
 	
 //=============================================================================
@@ -225,9 +240,18 @@ if( Imported.Drill_CoreOfInput &&
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_COPWM_pluginCommand = Game_Interpreter.prototype.pluginCommand
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_COPWM_pluginCommand.call(this, command, args);
+	this.drill_COPWM_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_COPWM_pluginCommand = function( command, args ){
 	if( command === ">图片与鼠标控制核心" ){
 		
 		/*-----------------DEBUG------------------*/
@@ -235,11 +259,11 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var temp1 = String(args[1]);
 			var temp2 = String(args[3]);
 			if( temp1 == "DEBUG碰撞体+悬停查看" ){
-				if( temp2 == "开启" ){
+				if( temp2 == "启用" || temp2 == "开启" || temp2 == "打开" || temp2 == "启动" ){
 					$gameSystem._drill_COPWM_DebugEnabled = true;
 					$gameSystem._drill_COPi_DebugEnabled = false;	//（【图片-图片优化核心】防止重叠显示）
 				}
-				if( temp2 == "关闭" ){
+				if( temp2 == "关闭" || temp2 == "禁用" ){
 					$gameSystem._drill_COPWM_DebugEnabled = false;
 				}
 			}
@@ -316,7 +340,9 @@ Game_Screen.prototype.drill_COPWM_isPictureExist = function( pic_id ){
 	
 	var pic = this.picture( pic_id );
 	if( pic == undefined ){
-		alert( DrillUp.drill_COPWM_getPluginTip_PictureNotFind( pic_id ) );
+		if( DrillUp.g_COPWM_TipEnabled_PictureNotFind == true ){	//『可关闭提示信息』
+			alert( DrillUp.drill_COPWM_getPluginTip_PictureNotFind( pic_id ) );
+		}
 		return false;
 	}
 	return true;
@@ -553,13 +579,18 @@ Game_Picture.prototype.drill_COPWM_isOnHover_Private = function(){
 Game_Picture.prototype.drill_COPWM_isOnHover_ByCollision = function(){
 	var mouseData = this._drill_COPWM_mouseData;
 	
+	// > 优化控制 - 初始化8帧关闭悬停
+	//		（防止渐变进入地图时，玩家的鼠标乱晃误点其它贴图）
+	//		（防止切换地图时，上一张地图的bean还未销毁，就触发了悬停判定）
+	if( $gameTemp._drill_COPWM_op_curTime < 8 ){ return false; }
+	
 	// > 优化控制
 	//		（如果此函数在 同一贴图+同一帧中 被多次调用）
 	//		（那么第一次调用 走正常流程，第二次调用 返回第一次的结果）
-	if( mouseData['op_time'] == $gameTemp._drill_COPWM_op_time ){
+	if( mouseData['op_time'] == $gameTemp._drill_COPWM_op_curTime ){
 		return mouseData['op_result'];
 	}
-	mouseData['op_time'] = $gameTemp._drill_COPWM_op_time;
+	mouseData['op_time'] = $gameTemp._drill_COPWM_op_curTime;
 	
 	
 	// > 判定 - 鼠标位置
@@ -593,11 +624,11 @@ Game_Picture.prototype.drill_COPWM_isOnHover_ByPixel = function(){
 	var is_hover = this.drill_COPWM_isOnHover_ByCollision();
 	if( is_hover == false ){ return false; }
 	
-	// > 优化控制
-	if( mouseData['op_pixelTime'] == $gameTemp._drill_COPWM_op_time ){
+	// > 优化控制（像素判定）
+	if( mouseData['op_pixelTime'] == $gameTemp._drill_COPWM_op_curTime ){
 		return mouseData['op_pixelResult'];
 	}
-	mouseData['op_pixelTime'] = $gameTemp._drill_COPWM_op_time;
+	mouseData['op_pixelTime'] = $gameTemp._drill_COPWM_op_curTime;
 	
 	// > 判定 - 鼠标位置
 	var _x = _drill_mouse_x;
@@ -639,7 +670,15 @@ Game_Picture.prototype.drill_COPWM_isOnHover_ByPixel = function(){
 var _drill_COPWM_optimization_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {	
 	_drill_COPWM_optimization_initialize.call(this);
-    this._drill_COPWM_op_time = 0;			//帧数标记
+    this._drill_COPWM_op_curTime = 0;		//当前帧数
+}
+//==============================
+// * 优化控制 - 初始化（地图界面）
+//==============================
+var _drill_COPWM_optimizationMap_initialize = Scene_Map.prototype.initialize;
+Scene_Map.prototype.initialize = function(){
+	_drill_COPWM_optimizationMap_initialize.call(this);
+    $gameTemp._drill_COPWM_op_curTime = 0;
 }
 //==============================
 // * 优化控制 - 帧刷新（地图界面）
@@ -647,7 +686,15 @@ Game_Temp.prototype.initialize = function() {
 var _drill_COPWM_optimizationMap_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {
     _drill_COPWM_optimizationMap_update.call(this);
-    $gameTemp._drill_COPWM_op_time += 1;
+    $gameTemp._drill_COPWM_op_curTime += 1;
+}
+//==============================
+// * 优化控制 - 初始化（战斗界面）
+//==============================
+var _drill_COPWM_optimizationBattle_initialize = Scene_Battle.prototype.initialize;
+Scene_Battle.prototype.initialize = function(){
+	_drill_COPWM_optimizationBattle_initialize.call(this);
+    $gameTemp._drill_COPWM_op_curTime = 0;
 }
 //==============================
 // * 优化控制 - 帧刷新（战斗界面）『图片与多场景』
@@ -655,7 +702,7 @@ Scene_Map.prototype.update = function() {
 var _drill_COPWM_optimizationBattle_update = Scene_Battle.prototype.update;
 Scene_Battle.prototype.update = function() {
     _drill_COPWM_optimizationBattle_update.call(this);
-    $gameTemp._drill_COPWM_op_time += 1;
+    $gameTemp._drill_COPWM_op_curTime += 1;
 }
 
 
@@ -685,6 +732,8 @@ Scene_Map.prototype.drill_COPWM_updateDrawBeanRangeSprite = function() {
 		
 		// > 销毁贴图
 		if( this._drill_COPWM_DebugSprite != undefined ){
+			this._drill_COPWM_DebugSprite.bitmap.clear();
+			this._drill_COPWM_DebugSprite.bitmap = null;
 			this.removeChild(this._drill_COPWM_DebugSprite);
 			this._drill_COPWM_DebugSprite = undefined;
 		}

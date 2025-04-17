@@ -18,12 +18,14 @@
  *
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该插件可以单独使用。
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。
+ * 基于：
+ *   - Drill_CoreOfConditionBranch   系统-分支条件核心
+ *     需要分支条件核心来设置E、F、G等的独立开关的判定。
  * 可被扩展：
  *   - Drill_EventDuplicator         物体管理-事件复制器
  *     复制的事件可以支持自定义E、F、G等的独立开关。
- *   - Drill_CoreOfConditionBranch   系统-分支条件核心
- *     分支条件可以支持自定义E、F、G等的独立开关的判定。
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -257,7 +259,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_ESS_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_ESS_PluginTip_baseList.length == 0 ){ return ""; }
@@ -279,10 +281,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_EventSelfSwitch = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_EventSelfSwitch');
+	var Imported = Imported || {};
+	Imported.Drill_EventSelfSwitch = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_EventSelfSwitch');
 
 
 //=============================================================================
@@ -294,9 +296,18 @@ if( Imported.Drill_CoreOfConditionBranch ){
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_ESS_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_ESS_pluginCommand.call(this, command, args);
+	this.drill_ESS_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_ESS_pluginCommand = function( command, args ){
 	if( command === ">独立开关" ){
 		
 		/*-----------------对象组获取------------------*/
@@ -367,20 +378,22 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			
 			if( temp2 == "启用" || temp2 == "开启" || temp2 == "打开" || temp2 == "启动" ){
 				if( e_chars != null){
-					for( var k=0; k < e_chars.length; k++ ){
-						if( !e_chars[k] ){ continue; }
-						var key = [this._mapId, e_chars[k]._eventId, temp1 ];
-						$gameSelfSwitches.setValue(key,true);
+					for( var k = 0; k < e_chars.length; k++ ){
+						var temp_event = e_chars[k];
+						var key = [this._mapId, temp_event._eventId, temp1 ];
+						$gameSelfSwitches.setValue( key, true );
 					}
+					return;
 				}
 			}
 			if( temp2 == "关闭" || temp2 == "禁用" ){
 				if( e_chars != null){
-					for( var k=0; k < e_chars.length; k++ ){
-						if( !e_chars[k] ){ continue; }
-						var key = [this._mapId, e_chars[k]._eventId, temp1 ];
-						$gameSelfSwitches.setValue(key,false);
+					for( var k = 0; k < e_chars.length; k++ ){
+						var temp_event = e_chars[k];
+						var key = [this._mapId, temp_event._eventId, temp1 ];
+						$gameSelfSwitches.setValue( key, false );
 					}
+					return;
 				}
 			}
 		}
@@ -396,18 +409,21 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				if( temp2 == "获取值" ){
 					if( e_chars != null){
 						for( var k=0; k < e_chars.length; k++ ){
-							if( !e_chars[k] ){ continue; }
-							var key = [this._mapId, e_chars[k]._eventId, temp1 ];
+							var temp_event = e_chars[k];
+							var key = [this._mapId, temp_event._eventId, temp1 ];
 							var value_ = $gameSwitches.value( Number(temp3) );
 							$gameSelfSwitches.setValue( key, value_ );
 						}
+						return;
 					}
 				}
 				if( temp2 == "给予值" ){		//独立开关和开关 多对一
 					if( e_chars != null){
-						var key = [this._mapId, e_chars[0]._eventId, temp1 ];
+						var temp_event = e_chars[0];
+						var key = [this._mapId, temp_event._eventId, temp1 ];
 						var value_ = $gameSelfSwitches.value(key);
-						$gameSwitches.setValue( Number(temp3), value_);
+						$gameSwitches.setValue( Number(temp3), value_ );
+						return;
 					}
 				}
 			}
@@ -422,11 +438,13 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var type = String(args[3]);
 			if( type == "启用" || type == "开启" || type == "打开" || type == "启动" ){
 				var key = [this._mapId, this._eventId, temp1 ];
-				$gameSelfSwitches.setValue(key,true);
+				$gameSelfSwitches.setValue( key, true );
+				return;
 			}
 			if( type == "关闭" || type == "禁用" ){
 				var key = [this._mapId, this._eventId, temp1 ];
-				$gameSelfSwitches.setValue(key,false);
+				$gameSelfSwitches.setValue( key, false );
+				return;
 			}
 		}
 		if( args.length == 6 ){
@@ -440,15 +458,18 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					var key = [this._mapId, this._eventId, temp1 ];
 					var value_ = $gameSwitches.value( Number(temp3) );
 					$gameSelfSwitches.setValue( key, value_ );
+					return;
 				}
 				if( type == "给予值" ){
 					var key = [this._mapId, this._eventId, temp1 ];
 					var value_ = $gameSelfSwitches.value(key);
 					$gameSwitches.setValue( Number(temp3), value_);
+					return;
 				}
 			}
 		}
 	}
+	
 	/*-----------------指定事件的独立开关（旧指令）------------------*/
 	if( command === ">指定事件的独立开关" ){
 		if( args.length == 6 ){
@@ -504,12 +525,12 @@ Game_Map.prototype.drill_ESS_isEventExist = function( e_id ){
 //==============================
 // * 插件指令 - 优化 - 独立开关赋值时不刷新地图
 //==============================
-Game_SelfSwitches.prototype.drill_setValueWithOutChange = function(key, value) {
-    if (value) {
-        this._data[key] = true;
-    } else {
-        delete this._data[key];
-    }
+Game_SelfSwitches.prototype.drill_setValueWithOutChange = function( key, value ){
+	if( value ){
+		this._data[key] = true;
+	}else{
+		delete this._data[key];
+	}
 };
 
 
@@ -673,6 +694,7 @@ var _drill_ESS_self_setValue = Game_SelfSwitches.prototype.setValue;
 Game_SelfSwitches.prototype.setValue = function( key, value ){
 	
 	// > 跳过重复值
+	//		（存储的值只有下面两个状态：true 和 undefined。原函数传参value为false时会执行 delete，从而变成 undefined 存储值）
 	if( value ){
 		if( this._data[key] == true ){ return; }
 	}else{

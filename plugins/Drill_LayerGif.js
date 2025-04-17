@@ -1992,7 +1992,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_LGi_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_LGi_PluginTip_baseList.length == 0 ){ return ""; }
@@ -2002,6 +2002,18 @@
 			message += DrillUp.g_LGi_PluginTip_baseList[i];
 		}
 		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到样式
+	//==============================
+	DrillUp.drill_LGi_getPluginTip_StyleNotFind = function( style_id ){
+		return "【" + DrillUp.g_LGi_PluginTip_curName + "】\n对象创建失败，id为"+style_id+"的样式配置为空或不存在。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - NaN校验值
+	//==============================
+	DrillUp.drill_LGi_getPluginTip_ParamIsNaN = function( param_name ){
+		return "【" + DrillUp.g_LGi_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
 	};
 	//==============================
 	// * 提示信息 - 报错 - 底层版本过低
@@ -2032,11 +2044,11 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_LayerGif = true;
-　　Imported.Drill_LayerGIF = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_LayerGif');
+	var Imported = Imported || {};
+	Imported.Drill_LayerGif = true;
+	Imported.Drill_LayerGIF = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_LayerGif');
 
 	//==============================
 	// * 静态数据 - GIF
@@ -2136,7 +2148,7 @@
 			var temp = JSON.parse(DrillUp.parameters["GIF层-" + String(i+1) ]);
 			DrillUp.g_LGi_layers[i] = DrillUp.drill_LGi_gifInit( temp );
 		}else{
-			DrillUp.g_LGi_layers[i] = undefined;		//（强制设为空值，节约存储资源）
+			DrillUp.g_LGi_layers[i] = undefined;		//（设为空值，节约静态数据占用容量）
 		}
 	}
 	
@@ -2155,9 +2167,18 @@ if( Imported.Drill_CoreOfBallistics ){
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_LGi_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_LGi_pluginCommand.call(this, command, args);
+	this.drill_LGi_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_LGi_pluginCommand = function( command, args ){
 	if( command === ">地图GIF" ){ // >地图GIF : GIF[1] : 显示
 		
 		/*-----------------对象组获取------------------*/
@@ -3396,14 +3417,16 @@ Scene_Map.prototype.drill_LGi_updateDestroy = function(){
 // ** 地图GIF控制器【Drill_LGi_Controller】
 // **		
 // **		作用域：	地图界面
-// **		主功能：	> 定义一个专门控制地图GIF的数据类。
-// **		子功能：	->控制器
+// **		主功能：	定义一个专门控制地图GIF的数据类。
+// **		子功能：	
+// **					->控制器『控制器与贴图』
 // **						->帧刷新
 // **						->重设数据
 // **							->序列号
 // **						->显示/隐藏
 // **						->暂停/继续
 // **						->销毁
+// **					
 // **					->A主体『界面装饰最终变换值』『变换特性的规范』
 // **						->基础特性
 // **							>  资源名
@@ -3446,7 +3469,7 @@ Scene_Map.prototype.drill_LGi_updateDestroy = function(){
 // **						> 主体贴图>闪烁效果
 // **						> 圈贴图>摇晃效果
 // **						> 层贴图>缩放效果
-// **		
+// **					
 // **		说明：	> 注意，该类不能放 物体指针、贴图指针 。
 //=============================================================================
 //==============================
@@ -3459,6 +3482,7 @@ function Drill_LGi_Controller(){
 // * 控制器 - 校验标记
 //==============================
 DrillUp.g_LGi_checkNaN = true;
+DrillUp.g_LGi_notFindStyleAlertOnce = true;
 //==============================
 // * 控制器 - 初始化
 //==============================
@@ -3630,7 +3654,7 @@ Drill_LGi_Controller.prototype.drill_controller_GIF_setOncePlay = function( once
 };
 
 //##############################
-// * 控制器 - 初始化数据【标准默认值】
+// * 控制器 - 初始化数据『控制器与贴图』【标准默认值】
 //
 //			参数：	> 无
 //			返回：	> 无
@@ -3710,7 +3734,7 @@ Drill_LGi_Controller.prototype.drill_controller_initData = function(){
 	if( data['effect_zoomRange'] == undefined ){ data['effect_zoomRange'] = 0.2 };					//H自变化效果 - 缩放幅度范围
 }
 //==============================
-// * 初始化 - 初始化子功能
+// * 控制器 - 初始化子功能『控制器与贴图』
 //==============================
 Drill_LGi_Controller.prototype.drill_controller_initChild = function(){
 	this.drill_controller_initAttr();				//初始化子功能 - A主体
@@ -3741,13 +3765,13 @@ Drill_LGi_Controller.prototype.drill_controller_resetData_Private = function( da
     this.drill_controller_initChild();										//初始化子功能
 }
 //##############################
-// * 控制器 - 空的静态数据
+// * 控制器 - 『控制器与贴图的样式』空的静态数据
 //			
 //			说明：	> 空数据会在initData时会进行默认值初始化，在其他地方只读。
 //##############################
 Drill_LGi_Controller.emptyData = {};
 //##############################
-// * 控制器 - 获取静态数据【标准函数】
+// * 控制器 - 『控制器与贴图的样式』获取静态数据【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 对象指针
@@ -3757,9 +3781,18 @@ Drill_LGi_Controller.emptyData = {};
 //					> 【此函数不含遍历，而是直接获取值，可以放在帧刷新中使用】
 //##############################
 Drill_LGi_Controller.prototype.drill_data = function(){
-	var data = DrillUp.g_LGi_layers[ this._drill_data_id ];
-	if( data == undefined ){ return Drill_LGi_Controller.emptyData; }
-	return data;
+	var cur_styleId   = this._drill_data_id +1;
+	var cur_styleData = DrillUp.g_LGi_layers[ this._drill_data_id ];
+	if( cur_styleData == undefined ){
+		
+		// > 『控制器与贴图的样式』 - 校验+提示信息（只执行一次）
+		if( DrillUp.g_LGi_notFindStyleAlertOnce == true ){
+			DrillUp.g_LGi_notFindStyleAlertOnce = false;
+			alert( DrillUp.drill_LGi_getPluginTip_StyleNotFind(cur_styleId) );
+		}
+		return Drill_LGi_Controller.emptyData;
+	}
+	return cur_styleData;
 };
 
 
@@ -4413,12 +4446,14 @@ Drill_LGi_Controller.prototype.drill_controller_updateEffect = function(){
 // ** 地图GIF贴图【Drill_LGi_Sprite】
 // **
 // **		作用域：	地图界面
-// **		主功能：	> 定义一个GIF贴图。
-// **		子功能：	->贴图
+// **		主功能：	定义一个GIF贴图。
+// **		子功能：	
+// **					->贴图『控制器与贴图』
 // **						->是否就绪
 // **						->优化策略
 // **						->是否需要销毁（未使用）
 // **						->销毁（手动）
+// **					
 // **					->A主体
 // **					->B变换特性
 // **					->C对象绑定
@@ -4428,7 +4463,7 @@ Drill_LGi_Controller.prototype.drill_controller_updateEffect = function(){
 // **					->F指令叠加变化-控制器用
 // **					->G延迟指令
 // **					->H自变化效果
-// **
+// **					
 // **		说明：	> 你必须在创建贴图后，手动初始化。（还需要先设置 控制器 ）
 // **
 // **		代码：	> 范围 - 该类显示单独的贴图。
@@ -4482,7 +4517,7 @@ Drill_LGi_Sprite.prototype.drill_sprite_setController = function( controller ){
 	this._drill_curSerial = controller._drill_controllerSerial;
 };
 //##############################
-// * C对象绑定 - 贴图初始化【开放函数】
+// * C对象绑定 - 初始化子功能『控制器与贴图』【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -4548,14 +4583,14 @@ Drill_LGi_Sprite.prototype.drill_sprite_destroy = function(){
 	this.drill_sprite_destroySelf();			//销毁 - 销毁自身
 };
 //==============================
-// * GIF贴图 - 贴图初始化（私有）
+// * GIF贴图 - 初始化自身『控制器与贴图』
 //==============================
 Drill_LGi_Sprite.prototype.drill_sprite_initSelf = function(){
 	this._drill_controller = null;				//控制器对象
 	this._drill_curSerial = -1;					//当前序列号
 };
 //==============================
-// * GIF贴图 - 销毁子功能（私有）
+// * GIF贴图 - 销毁子功能『控制器与贴图』
 //==============================
 Drill_LGi_Sprite.prototype.drill_sprite_destroyChild = function(){
 	if( this._drill_controller == null ){ return; }
@@ -4577,7 +4612,7 @@ Drill_LGi_Sprite.prototype.drill_sprite_destroyChild = function(){
 	//	（无）
 };
 //==============================
-// * GIF贴图 - 销毁自身（私有）
+// * GIF贴图 - 销毁自身『控制器与贴图』
 //==============================
 Drill_LGi_Sprite.prototype.drill_sprite_destroySelf = function(){
 	this._drill_controller = null;				//控制器对象

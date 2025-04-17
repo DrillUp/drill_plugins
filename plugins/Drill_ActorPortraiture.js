@@ -908,9 +908,9 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_ActorPortraiture = true;
-　　var DrillUp = DrillUp || {}; 
+	var Imported = Imported || {};
+	Imported.Drill_ActorPortraiture = true;
+	var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_ActorPortraiture');
 	
 	/*-----------------默认位置------------------*/
@@ -996,13 +996,22 @@ ImageManager.load_BattlePortraiture = function(filename) {
     return this.loadBitmap('img/Battle__portraiture/', filename, 0, true);
 };
 	
-//=============================================================================
-// * 插件指令
-//=============================================================================
-var _drill_AP_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
-	_drill_AP_pluginCommand.call(this, command, args);
 	
+//=============================================================================
+// ** ☆插件指令
+//=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
+var _drill_AP_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
+	_drill_AP_pluginCommand.call(this, command, args);
+	this.drill_AP_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_AP_pluginCommand = function( command, args ){
 	if (command === ">角色肖像") { // >角色肖像 : 我方 : 1 : 强制处于条件 : 1
 		if(args.length == 8){
 			var group = String(args[1]);

@@ -425,7 +425,7 @@
 //			->☆静态数据
 //			->☆插件指令
 //			->☆存储数据
-//			->☆单位贴图
+//			->☆场景容器之单位贴图
 //				->获取 - 敌人容器指针【标准函数】
 //				->获取 - 根据敌方索引【标准函数】
 //				->获取 - 根据敌人ID【标准函数】
@@ -526,7 +526,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_BCa_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_BCa_PluginTip_baseList.length == 0 ){ return ""; }
@@ -554,10 +554,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_BattleCamera = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_BattleCamera');
+	var Imported = Imported || {};
+	Imported.Drill_BattleCamera = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_BattleCamera');
 
 
 	/*-----------------常规------------------*/
@@ -603,10 +603,19 @@ if( Imported.Drill_CoreOfBallistics &&
 	
 //=============================================================================
 // ** ☆插件指令
-//=============================================================================	
-var _drill_BCa_pluginCommand = Game_Interpreter.prototype.pluginCommand
-Game_Interpreter.prototype.pluginCommand = function(command, args ){
+//=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
+var _drill_BCa_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_BCa_pluginCommand.call(this,command, args);
+	this.drill_BCa_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_BCa_pluginCommand = function( command, args ){
 	if( command === ">战斗镜头" ){
 		
 		/*-----------------镜头控制器------------------*/
@@ -1053,10 +1062,10 @@ Game_System.prototype.drill_BCa_checkSysData_Private = function() {
 
 
 //#############################################################################
-// ** 【标准模块】单位贴图 ☆单位贴图
+// ** 【标准模块】单位贴图容器 ☆场景容器之单位贴图
 //#############################################################################
 //##############################
-// * 单位贴图 - 获取 - 敌人容器指针【标准函数】
+// * 单位贴图容器 - 获取 - 敌人容器指针【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 贴图数组    （敌人贴图）
@@ -1067,7 +1076,7 @@ Game_Temp.prototype.drill_BCa_getEnemySpriteTank = function(){
 	return this.drill_BCa_getEnemySpriteTank_Private();
 }
 //##############################
-// * 单位贴图 - 获取 - 根据敌方索引【标准函数】
+// * 单位贴图容器 - 获取 - 根据敌方索引【标准函数】
 //				
 //			参数：	> index 数字 （敌方第n个位置，从0开始计数）
 //			返回：	> 贴图       （敌人贴图）
@@ -1078,7 +1087,7 @@ Game_Temp.prototype.drill_BCa_getEnemySpriteByIndex = function( index ){
 	return this.drill_BCa_getEnemySpriteByIndex_Private( index );
 }
 //##############################
-// * 单位贴图 - 获取 - 根据敌人ID【标准函数】
+// * 单位贴图容器 - 获取 - 根据敌人ID【标准函数】
 //				
 //			参数：	> enemy_id 数字（敌人ID）
 //			返回：	> 贴图数组     （敌人贴图数组）
@@ -1089,7 +1098,7 @@ Game_Temp.prototype.drill_BCa_getEnemySpriteByEnemyId = function( enemy_id ){
 	return this.drill_BCa_getEnemySpriteByEnemyId_Private( enemy_id );
 }
 //##############################
-// * 单位贴图 - 获取 - 角色容器指针【标准函数】
+// * 单位贴图容器 - 获取 - 角色容器指针【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 贴图数组   （角色贴图）
@@ -1100,7 +1109,7 @@ Game_Temp.prototype.drill_BCa_getActorSpriteTank = function(){
 	return this.drill_BCa_getActorSpriteTank_Private();
 }
 //##############################
-// * 单位贴图 - 获取 - 根据我方索引【标准函数】
+// * 单位贴图容器 - 获取 - 根据我方索引【标准函数】
 //				
 //			参数：	> index 数字 （我方第n个位置，从0开始计数）
 //			返回：	> 贴图       （角色贴图）
@@ -1111,7 +1120,7 @@ Game_Temp.prototype.drill_BCa_getActorSpriteByIndex = function( index ){
 	return this.drill_BCa_getActorSpriteByIndex_Private( index );
 }
 //##############################
-// * 单位贴图 - 获取 - 根据角色ID【标准函数】
+// * 单位贴图容器 - 获取 - 根据角色ID【标准函数】
 //				
 //			参数：	> actor_id 数字（角色ID）
 //			返回：	> sprite 贴图  （角色贴图）
@@ -1122,7 +1131,7 @@ Game_Temp.prototype.drill_BCa_getActorSpriteByActorId = function( actor_id ){
 	return this.drill_BCa_getActorSpriteByActorId_Private( actor_id );
 }
 //=============================================================================
-// ** 单位贴图（接口实现）
+// ** 场景容器之单位贴图（实现）
 //=============================================================================
 //==============================
 // * 单位贴图容器 - 获取 - 敌人容器指针（私有）
@@ -1480,15 +1489,11 @@ Spriteset_Battle.prototype.createBattleback = function(){
 
 //=============================================================================
 // ** 镜头控制器【Drill_BCa_Controller】
-// **			
-// **		索引：	BCa（可从子插件搜索到函数、类用法）
-// **		来源：	独立数据
-// **		实例：	> 见当前插件 _drill_BCa_sys_initialize 函数
-// **		应用：	> 见当前插件 drill_BCa_updateCameraControl 函数
 // **		
-// **		作用域：	地图界面、战斗界面、菜单界面
-// **		主功能：	> 定义一个专门控制镜头变化的数据类。
-// **		子功能：	->帧刷新
+// **		作用域：	战斗界面
+// **		主功能：	定义一个专门控制镜头变化的数据类。
+// **		子功能：	
+// **					->帧刷新
 // **						->启用/关闭
 // **						->暂停/继续
 // **						> 平移
@@ -4177,19 +4182,21 @@ if( DrillUp.g_BCa_debugEnabled == true ){
 
 //=============================================================================
 // ** 镜头对齐框 贴图【Drill_BCa_DebugSprite】
-//			
-//			主功能：	> 定义一个debug镜头对齐框贴图。
-//			子功能：	->自定义颜色
-//						->自定义边框
-//						
-//			说明：	> 该贴图的中心锚点均为左上角，对齐用。
-//					
-// 			代码：	> 范围 - 该类只根据点变化显示图块贴图。
-//					> 结构 - [ ●合并 /分离/混乱] 
-//					> 数量 - [单个/ ●多个 ] 
-//					> 创建 - [ ●一次性 /自延迟/外部延迟] 
-//					> 销毁 - [不考虑/自销毁/ ●外部销毁 ] 
-//					> 样式 - [ ●不可修改 /自变化/外部变化] 
+// **		
+// **		作用域：	战斗界面
+// **		主功能：	定义一个debug镜头对齐框贴图。
+// **		子功能：	
+// **					->自定义颜色
+// **					->自定义边框
+// **					
+// **		说明：	> 该贴图的中心锚点均为左上角，对齐用。
+// **				
+// **		代码：	> 范围 - 该类只根据点变化显示图块贴图。
+// **				> 结构 - [ ●合并 /分离/混乱] 
+// **				> 数量 - [单个/ ●多个 ] 
+// **				> 创建 - [ ●一次性 /自延迟/外部延迟] 
+// **				> 销毁 - [不考虑/自销毁/ ●外部销毁 ] 
+// **				> 样式 - [ ●不可修改 /自变化/外部变化] 
 //=============================================================================
 //==============================
 // * 对齐框贴图 - 定义

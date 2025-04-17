@@ -150,7 +150,7 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称：		HWT (Html_Window_Title)
+//		插件简称		HWT (Html_Window_Title)
 //		临时全局变量	无
 //		临时局部变量	无
 //		存储数据变量	无
@@ -213,7 +213,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_HWT_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_HWT_PluginTip_baseList.length == 0 ){ return ""; }
@@ -229,10 +229,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_HtmlWindowTitle = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_HtmlWindowTitle');
+	var Imported = Imported || {};
+	Imported.Drill_HtmlWindowTitle = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_HtmlWindowTitle');
 	
 	
 	/*-----------------杂项------------------*/
@@ -257,14 +257,20 @@ if( Imported.Drill_CoreOfGlobalSave ){
 	
 	
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
 //==============================
-// * 插件指令 - 指令
+// * 插件指令 - 指令绑定
 //==============================
 var _drill_HWT_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_HWT_pluginCommand.call(this, command, args);
+	this.drill_HWT_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_HWT_pluginCommand = function( command, args ){
 	if( command === ">游戏窗体标题" ){
 		
 		/*-----------------文本------------------*/
@@ -321,6 +327,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		
 	}
 }
+	
 	
 //=============================================================================
 // ** 全局存储

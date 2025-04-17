@@ -124,6 +124,18 @@
 //		★核心说明：
 //			1.核心与所有子插件功能介绍去看看："1.系统 > 大家族-粒子效果（脚本）.docx"
 //			2.核心针对全局，而不是特定场景，因此只能提供类的框架定义，无法提供数据容器。
+//			3.粒子的子插件就和下面的花束一样，百花齐放。但是派生的插件也太多了……
+//				           {@}
+//				        {@} * {@}
+//				     {@} * {@} * {@}
+//				  {@}* {@} * {@} * {@}
+//				   \ {@} * {@} * {@} /
+//				      \ \ \ l / / /
+//				       \\ \ Y / //
+//				         \\ l //
+//				          \\Y//
+//				           >=<
+//				          //*\\
 //		
 //		★必要注意事项：
 //			暂无
@@ -148,7 +160,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_COPa_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_COPa_PluginTip_baseList.length == 0 ){ return ""; }
@@ -176,16 +188,17 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_CoreOfParticle = true;
-　　var DrillUp = DrillUp || {}; 
+	var Imported = Imported || {};
+	Imported.Drill_CoreOfParticle = true;
+	var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_CoreOfParticle');
 	
 	
 	//==============================
 	// * 静态数据 - 粒子样式
 	//
-	//			说明：	此函数并未使用，只作为 子插件 的参考样式来使用。
+	//			说明：	> 此函数并未使用，只作为 子插件 的参考样式来使用。
+	//					> 『控制器与贴图的样式』 - 核心的参考样式
 	//==============================
 	DrillUp.drill_COPa_styleInit = function( dataFrom ){
 		var data = {};
@@ -288,14 +301,16 @@ if( Imported.Drill_CoreOfBallistics ){
 // ** 粒子控制器【Drill_COPa_Controller】
 // **		
 // **		作用域：	地图界面、战斗界面、菜单界面
-// **		主功能：	> 定义一个专门控制粒子的数据类。
-// **		子功能：	->控制器
+// **		主功能：	定义一个专门控制粒子的数据类。
+// **		子功能：	
+// **					->控制器『控制器与贴图』
 // **						->帧刷新
 // **						->重设数据
 // **							->序列号
 // **						->显示/隐藏
 // **						->暂停/继续
 // **						->销毁
+// **					
 // **					->A主体
 // **						->平移
 // **						->校验值
@@ -324,7 +339,7 @@ if( Imported.Drill_CoreOfBallistics ){
 // **						> 跳过产生过程
 // **						> 手动产生
 // **					->J彩虹化
-// **		
+// **					
 // **		说明：	> 核心与所有子插件功能介绍去看看："1.系统 > 大家族-粒子效果（脚本）.docx"
 // **				> 该类可与 Game_CharacterBase 一并存储在 $gameMap 中。
 // **				> 该类创建过程可参考子插件的写法：
@@ -444,7 +459,7 @@ Drill_COPa_Controller.prototype.drill_controller_destroyWithDelay = function(){
 	this._drill_isDelayingDestroy = true;
 };
 //##############################
-// * 控制器 - 初始化数据【标准默认值】
+// * 控制器 - 初始化数据『控制器与贴图』【标准默认值】
 //
 //			参数：	> 无
 //			返回：	> 无
@@ -545,7 +560,7 @@ Drill_COPa_Controller.prototype.drill_controller_initData = function(){
 	
 }
 //==============================
-// * 控制器 - 初始化子功能
+// * 控制器 - 初始化子功能『控制器与贴图』
 //			
 //			说明：	> 创建该类后直接初始化。
 //==============================
@@ -1297,12 +1312,14 @@ Drill_COPa_Controller.prototype.drill_controller_initRainbow = function() {
 // ** 粒子贴图【Drill_COPa_Sprite】
 // **
 // **		作用域：	地图界面、战斗界面、菜单界面
-// **		主功能：	> 定义一个粒子贴图。
-// **		子功能：	->贴图
+// **		主功能：	定义一个粒子贴图。
+// **		子功能：	
+// **					->贴图『控制器与贴图』
 // **						->是否就绪
 // **						->优化策略
 // **						->是否需要销毁
 // **						->销毁
+// **					
 // **					->A主体
 // **						->层级位置修正
 // **					->B粒子群弹道
@@ -1324,7 +1341,7 @@ Drill_COPa_Controller.prototype.drill_controller_initRainbow = function() {
 // **					->H贴图高宽
 // **					->I粒子生命周期
 // **					->J彩虹化
-// **
+// **					
 // **		说明：	> 核心与所有子插件功能介绍去看看："1.系统 > 大家族-粒子效果（脚本）.docx"
 // **				> 你必须在创建贴图后，手动初始化。（还需要先设置 控制器 ）
 // **
@@ -1383,7 +1400,7 @@ Drill_COPa_Sprite.prototype.drill_sprite_setController = function( controller ){
 	this._drill_curSerial = controller._drill_controllerSerial;
 };
 //##############################
-// * C对象绑定 - 初始化子功能【开放函数】
+// * C对象绑定 - 初始化子功能『控制器与贴图』【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -1452,14 +1469,14 @@ Drill_COPa_Sprite.prototype.drill_sprite_destroy = function(){
 	this.drill_sprite_destroySelf();			//销毁 - 销毁自身
 };
 //==============================
-// * 粒子贴图 - 初始化自身
+// * 粒子贴图 - 初始化自身『控制器与贴图』
 //==============================
 Drill_COPa_Sprite.prototype.drill_sprite_initSelf = function(){
 	this._drill_controller = null;				//控制器对象
 	this._drill_curSerial = -1;					//当前序列号
 };
 //==============================
-// * 粒子贴图 - 销毁子功能
+// * 粒子贴图 - 销毁子功能『控制器与贴图』
 //==============================
 Drill_COPa_Sprite.prototype.drill_sprite_destroyChild = function(){
 	if( this._drill_controller == null ){ return; }
@@ -1507,7 +1524,7 @@ Drill_COPa_Sprite.prototype.drill_sprite_destroyChild = function(){
 	//	（无）
 };
 //==============================
-// * 粒子贴图 - 销毁自身
+// * 粒子贴图 - 销毁自身『控制器与贴图』
 //==============================
 Drill_COPa_Sprite.prototype.drill_sprite_destroySelf = function(){
 	this._drill_controller = null;				//控制器对象
@@ -2103,12 +2120,14 @@ Drill_COPa_Sprite.prototype.drill_sprite_refreshRainBow = function( i ){
 // ** 粒子贴图（第二层）【Drill_COPa_SecSprite】
 // **
 // **		作用域：	地图界面、战斗界面、菜单界面
-// **		主功能：	> 定义一个 第二层粒子贴图 。
-// **		子功能：	->贴图
+// **		主功能：	定义一个 第二层粒子贴图 。
+// **		子功能：	
+// **					->贴图（第二层）『控制器与贴图』
 // **						->是否就绪
 // **						->优化策略
 // **						->是否需要销毁
 // **						->销毁
+// **					
 // **					->A主体
 // **					->B粒子群弹道（无）
 // **					->C对象绑定（无）
@@ -2124,7 +2143,7 @@ Drill_COPa_Sprite.prototype.drill_sprite_refreshRainBow = function( i ){
 // **					->H贴图高宽（无）
 // **					->I粒子生命周期（无）
 // **					->J彩虹化
-// **
+// **					
 // **		说明：	> 核心与所有子插件功能介绍去看看："1.系统 > 大家族-粒子效果（脚本）.docx"
 // **				> 第二层粒子贴图会比粒子贴图 优先 执行update，所以需要考虑『粒子弹道慢一帧』问题。
 // **				  因此，第二层粒子与 父贴图 的 D粒子变化 保持一致。
@@ -2224,15 +2243,7 @@ Drill_COPa_SecSprite.prototype.drill_spriteSec_destroy = function(){
 	this.drill_spriteSec_destroySelf();
 };
 //==============================
-// * 第二层粒子 - 初始化自身
-//==============================
-Drill_COPa_SecSprite.prototype.drill_spriteSec_initSelf = function( parentSprite ){
-	this._drill_parentSprite = parentSprite;								//父类对象
-	this._drill_controller = parentSprite._drill_controller;				//控制器对象
-	//this._drill_curSerial = -1;											//当前序列号（不使用）
-};
-//==============================
-// * 第二层粒子 - 初始化子功能
+// * 第二层粒子 - 初始化子功能『控制器与贴图』
 //			
 //			说明：	> 创建该类后直接初始化。
 //==============================
@@ -2249,7 +2260,15 @@ Drill_COPa_SecSprite.prototype.drill_spriteSec_initChild = function(){
 	this.drill_spriteSec_initRainbow();				//初始化子功能 - J彩虹化
 };
 //==============================
-// * 第二层粒子 - 销毁子功能
+// * 第二层粒子 - 初始化自身『控制器与贴图』
+//==============================
+Drill_COPa_SecSprite.prototype.drill_spriteSec_initSelf = function( parentSprite ){
+	this._drill_parentSprite = parentSprite;								//父类对象
+	this._drill_controller = parentSprite._drill_controller;				//控制器对象
+	//this._drill_curSerial = -1;											//当前序列号（不使用）
+};
+//==============================
+// * 第二层粒子 - 销毁子功能『控制器与贴图』
 //==============================
 Drill_COPa_SecSprite.prototype.drill_spriteSec_destroyChild = function(){
 	
@@ -2288,7 +2307,7 @@ Drill_COPa_SecSprite.prototype.drill_spriteSec_destroyChild = function(){
 	//	（无）
 };
 //==============================
-// * 第二层粒子 - 销毁自身
+// * 第二层粒子 - 销毁自身『控制器与贴图』
 //==============================
 Drill_COPa_SecSprite.prototype.drill_spriteSec_destroySelf = function(){
 	this._drill_parentSprite = null;			//父类对象

@@ -183,7 +183,7 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称：		EPo (Event_Position)
+//		插件简称		EPo (Event_Position)
 //		临时全局变量	无
 //		临时局部变量	this._drill_EPo_xxx
 //		存储数据变量	无
@@ -254,19 +254,28 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_EventPosition = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_EventPosition');
+	var Imported = Imported || {};
+	Imported.Drill_EventPosition = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_EventPosition');
 	
 	
 
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_EPo_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_EPo_pluginCommand.call(this, command, args);
+	this.drill_EPo_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_EPo_pluginCommand = function( command, args ){
 	if( command === ">位置与位移" ){
 		
 		/*-----------------立即归位------------------*/
@@ -953,6 +962,7 @@ Game_Map.prototype.drill_EPo_isEventExist = function( e_id ){
 	}
 	return true;
 };
+
 
 //=============================================================================
 // ** 玩家瞬移

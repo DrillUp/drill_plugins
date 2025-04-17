@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        UI - 物品+技能文本的滤镜效果
+ * @plugindesc [v1.2]        UI - 物品+技能文本的滤镜效果
  * @author Drill_up
  *
  * @help  
@@ -21,7 +21,8 @@
  * 该插件 不能 单独使用。
  * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfFilter      系统-滤镜核心
+ *   - Drill_CoreOfFilter            系统-滤镜核心
+ *   - Drill_CoreOfWindowCharacter   窗口字符-窗口字符核心★★v2.0及以上★★
  *     需要该核心才能添加滤镜效果。
  * 
  * -----------------------------------------------------------------------------
@@ -92,11 +93,13 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 修复了该插件浪费存储空间的bug。
+ * [v1.2]
+ * 更新并兼容了新的窗口字符底层。
  *
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称：		ITFi (Item_Text_Filter)
+//		插件简称		ITFi (Item_Text_Filter)
 //		临时全局变量	DrillUp.g_ITFi_xxx
 //		临时局部变量	$gameTemp._drill_ITFi_xxx
 //		存储数据变量	无
@@ -171,11 +174,14 @@
 	//==============================
 	var DrillUp = DrillUp || {}; 
 	DrillUp.g_ITFi_PluginTip_curName = "Drill_ItemTextFilter.js UI-物品+技能文本的滤镜效果";
-	DrillUp.g_ITFi_PluginTip_baseList = ["Drill_CoreOfFilter.js 系统-滤镜核心"];
+	DrillUp.g_ITFi_PluginTip_baseList = [
+		"Drill_CoreOfFilter.js 系统-滤镜核心",
+		"Drill_CoreOfWindowCharacter.js 窗口字符-窗口字符核心"
+	];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_ITFi_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_ITFi_PluginTip_baseList.length == 0 ){ return ""; }
@@ -186,22 +192,37 @@
 		}
 		return message;
 	};
+	//==============================
+	// * 提示信息 - 报错 - 窗口字符底层校验
+	//==============================
+	DrillUp.drill_ITFi_getPluginTip_NeedUpdate_drawText = function(){
+		return "【" + DrillUp.g_ITFi_PluginTip_curName + "】\n检测到窗口字符核心版本过低。\n由于底层变化巨大，你需要更新 全部 窗口字符相关插件。\n去看看\"23.窗口字符 > 关于窗口字符底层全更新说明.docx\"进行更新。";
+	};
 	
 	
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_ItemTextFilter = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_ItemTextFilter');
+	var Imported = Imported || {};
+	Imported.Drill_ItemTextFilter = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_ItemTextFilter');
 	
 	
 	
 //=============================================================================
 // * >>>>基于插件检测>>>>
 //=============================================================================
-if( Imported.Drill_CoreOfFilter ){
+if( Imported.Drill_CoreOfFilter &&
+	Imported.Drill_CoreOfWindowCharacter ){
+
+
+//==============================
+// * 基于插件检测 - 窗口字符底层校验
+//==============================
+if( typeof(_drill_COWC_drawText_functionExist) == "undefined" ){
+	alert( DrillUp.drill_ITFi_getPluginTip_NeedUpdate_drawText() );
+}
 
 
 //=============================================================================
@@ -521,8 +542,8 @@ Window_Base.prototype.drawItemName = function( item, x, y, width ){
 //=============================
 // * 创建 - 绑定文本块
 //=============================
-var _drill_ITFi_drawText = Window_Base.prototype.drawText;
-Window_Base.prototype.drawText = function( text, x, y, maxWidth, align ){
+var _drill_ITFi_COWC_org_drawText = Window_Base.prototype.drill_COWC_org_drawText;
+Window_Base.prototype.drill_COWC_org_drawText = function( text, x, y, maxWidth, align ){
 	
 	// > 创建文本块（所有绘制物品的文本都转成贴图）
 	if( this._drill_ITFi_isDrawingItemName == true ){
@@ -531,7 +552,7 @@ Window_Base.prototype.drawText = function( text, x, y, maxWidth, align ){
 	}
 	
 	// > 原函数
-	_drill_ITFi_drawText.call(this, text, x, y, maxWidth, align);
+	_drill_ITFi_COWC_org_drawText.call(this, text, x, y, maxWidth, align);
 }
 //=============================
 // * 创建 - 创建文本块

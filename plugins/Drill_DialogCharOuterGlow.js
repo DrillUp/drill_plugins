@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        窗口字符 - 外发光效果
+ * @plugindesc [v1.4]        窗口字符 - 外发光效果
  * @author Drill_up
  * 
  * @Drill_LE_param "颜色-%d"
@@ -18,71 +18,85 @@
  * 如果你有兴趣，也可以来看看更多我写的drill插件哦ヽ(*。>Д<)o゜
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
- * 使得你可以给窗口字符添加 外发光效果。
+ * 使得你可以设置窗口字符的 外发光效果。
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
  * 该插件 不能 单独使用。
  * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfWindowCharacter  窗口字符-窗口字符核心★★v1.3及以上★★
+ *   - Drill_CoreOfWindowCharacter   窗口字符-窗口字符核心★★v2.0及以上★★
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：地图界面、战斗界面、菜单界面。
  *   只作用于所有窗口字符。
  * 2.了解更多内容，可以去看看 "23.窗口字符 > 关于字符描边与外发光.docx"。
- * 发光效果：
- *   (1.使用描边的窗口字符包裹，可以实现字符的发光效果。
+ * 外发光效果：
+ *   (1.使用该插件的窗口字符，可以实现字符的外发光效果。
+ *      游戏初始设置中，所有文本没有任何外发光效果。
  * 设计：
- *   (1.你可以将描边效果与发光效果组合，来增强字符的边沿的亮度。
+ *   (1.你可以将描边效果与外发光效果组合，来增强字符的边沿的亮度。
  *      具体可以去示例中 窗口字符管理层示例 看看。
  *
  * -----------------------------------------------------------------------------
  * ----激活条件
  * 你需要使用下面的窗口字符来实现效果：
  * 
- * 窗口字符：\dDCOG[1]          之后的文字使用颜色1的外发光。
- * 窗口字符：\dDCOG[1:5:1:1]    之后的文字使用颜色1，厚度5，偏移(1,1)的外发光。
- * 窗口字符：\dDCOGr            之后的文字恢复外发光设置。
- * 窗口字符：\dDCOGoff          之后的文字关闭外发光效果。
+ * 窗口字符：\oo[on]            之后的文本开启外发光效果，简写形式。
+ * 窗口字符：\oo[off]           之后的文本关闭外发光效果，简写形式。
+ * 窗口字符：\og[1]             之后的文本使用颜色1的外发光，简写形式。
+ * 窗口字符：\os[5]             之后的文本改变外发光厚度5，简写形式。
+ * 窗口字符：\fr                全重置字符，重置之后文本所有设置，包括恢复默认外发光。
  * 
- * 窗口字符：\og[1]             与\dDCOG[1]一样，简写形式。
- * 窗口字符：\os[5]             之后的文字改变外发光厚度5，简写形式。
- * 窗口字符：\fr                重置之后文字所有设置。包括恢复外发光设置。
+ * 窗口字符：\dDCOG[on]         之后的文本开启外发光效果。
+ * 窗口字符：\dDCOG[off]        之后的文本关闭外发光效果。
+ * 窗口字符：\dDCOG[1]          之后的文本使用颜色1的外发光。
+ * 窗口字符：\dDCOG[1:5:1:1]    之后的文本使用颜色1，厚度5，偏移(1,1)的外发光。
+ * 窗口字符：\dDCOG[reset]      之后的文本只恢复默认外发光。
  * 
  * 1.这里的窗口字符均为效果字符，
- *   比如"\dDCOG[1]发光\dDCOGr"，包裹的字符将会产生自定义外发光效果。
- * 2.字符"\dDCOGr"和"\fr"会恢复默认的外发光效果，
- *   字符"\dDCOGoff"可以临时关闭外发光效果。
+ *   比如"\dDCOG[1]发光\dDCOG[reset]"，包裹的字符将会产生自定义外发光效果。
+ * 2.字符"\dDCOG[reset]"和"\fr"会恢复默认的外发光效果，
+ *   字符"\dDCOG[off]"可以临时关闭外发光效果。
  * 
  * -----------------------------------------------------------------------------
- * ----可选设定
- * 你可以通过插件指令修改外发光设置：
+ * ----可选设定 - 全局默认值
+ * 你可以通过插件指令修改默认设置：
  * 
- * 插件指令：>外发光效果 : 所有文本 : 开启
- * 插件指令：>外发光效果 : 所有文本 : 关闭
- * 插件指令：>外发光效果 : 所有文本 : 修改设置 : 颜色[1] : 厚度[4] : 偏移[0,0]
+ * 插件指令：>外发光效果 : 所有文本 : 外发光开关 : 开启
+ * 插件指令：>外发光效果 : 所有文本 : 外发光开关 : 关闭
  * 插件指令：>外发光效果 : 所有文本 : 修改颜色 : 颜色[1]
  * 插件指令：>外发光效果 : 所有文本 : 修改厚度 : 厚度[4]
  * 插件指令：>外发光效果 : 所有文本 : 修改偏移 : 偏移[0,0]
- * 插件指令：>外发光效果 : 所有文本 : 恢复默认设置
+ * 插件指令：>外发光效果 : 所有文本 : 修改设置 : 颜色[1] : 厚度[4] : 偏移[0,0]
+ * 插件指令：>外发光效果 : 所有文本 : 恢复默认外发光
  * 
- * 插件指令：>外发光效果 : 对话框 : 修改模式 : 自定义外发光
- * 插件指令：>外发光效果 : 对话框 : 修改模式 : 与所有文本的外发光一致
- * 插件指令：>外发光效果 : 对话框 : 修改模式 : 不发光
- * 插件指令：>外发光效果 : 对话框 : 修改设置 : 颜色[1] : 厚度[4] : 偏移[0,0]
+ * 插件指令：>外发光效果 : 对话框 : 修改模式 : 自定义模式
+ * 插件指令：>外发光效果 : 对话框 : 修改模式 : 与所有文本一致
+ * 插件指令：>外发光效果 : 对话框 : 外发光开关 : 开启
+ * 插件指令：>外发光效果 : 对话框 : 外发光开关 : 关闭
  * 插件指令：>外发光效果 : 对话框 : 修改颜色 : 颜色[1]
  * 插件指令：>外发光效果 : 对话框 : 修改厚度 : 厚度[4]
  * 插件指令：>外发光效果 : 对话框 : 修改偏移 : 偏移[0,0]
- * 插件指令：>外发光效果 : 对话框 : 恢复默认设置
+ * 插件指令：>外发光效果 : 对话框 : 修改设置 : 颜色[1] : 厚度[4] : 偏移[0,0]
+ * 插件指令：>外发光效果 : 对话框 : 恢复默认外发光
  * 
- * 1.插件指令设置后，其修改永久有效。
+ * 1.插件指令修改的是全局默认值，设置后永久有效。
+ *   新建的所有贴图/窗口，全部使用此设置作为 默认值。
+ *   并且 全重置字符\fr 执行重置时，也会重置为 此设置的值。
  *   但注意，窗口字符的优先级 比该指令高，若有窗口字符，优先用窗口字符效果。
  * 2."修改厚度 : 厚度[0]" 与 "修改模式 : 不发光" 的效果一样，
  *   都会关闭发光的功能。
- * 3."恢复默认设置"即恢复当前插件参数配置的情况，包括开启/关闭的状态设置。
+ * 3."恢复默认外发光"即恢复当前插件参数配置的情况，包括开启/关闭的状态设置。
  *   另外，游戏设置的默认为所有字符都不发光。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - Debug查看
+ * 你可以通过插件指令打开插件的Debug查看：
+ * 
+ * 插件指令：>外发光效果 : DEBUG外发光效果字符测试 : 开启
+ * 插件指令：>外发光效果 : DEBUG外发光效果字符测试 : 关闭
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -115,78 +129,89 @@
  * 添加了 插件指令 固定对话框的 外发光功能。
  * [v1.2]
  * 完善了作用于所有文本的功能。
+ * [v1.3]
+ * 区分了所有文本和对话框的外发光设置。
+ * [v1.4]
+ * 大幅度修改了底层，并且兼容了新的底层结构。
  * 
  *
  * 
- * @param ---常规---
+ * @param ---全局默认值---
  * @desc 
  *
- * @param 是否对所有文本有效
- * @parent ---常规---
+ * @param 所有文本-默认是否外发光
+ * @parent ---全局默认值---
  * @type boolean
  * @on 开启
  * @off 关闭
- * @desc true - 开启，false - 关闭，开启后所有文本都发光。也可以通过插件指令开启或关闭。
+ * @desc 开启后所有文本会外发光，外发光开关也可以通过插件指令控制。
  * @default false
  * 
- * @param 所有文本-外发光颜色ID
- * @parent 是否对所有文本有效
+ * @param 所有文本-默认外发光颜色ID
+ * @parent ---全局默认值---
  * @type number
  * @min 1
- * @desc 外发光颜色对应当前插件配置的外发光颜色的id。注意，对游戏中的所有文本都有效。
+ * @desc 所有字符的 默认外发光颜色，需填入当前插件配置的外发光颜色id。
  * @default 11
  * 
- * @param 所有文本-外发光厚度
- * @parent 是否对所有文本有效
+ * @param 所有文本-默认外发光厚度
+ * @parent ---全局默认值---
  * @type number
  * @min 1
- * @desc 外发光的厚度，单位像素。(不允许设置厚度0) 注意，对游戏中的所有文本都有效。
+ * @desc 所有字符的 默认外发光厚度。(不允许设置厚度0)
  * @default 6
  * 
- * @param 所有文本-外发光偏移 X
- * @parent 是否对所有文本有效
- * @desc x轴方向平移，单位像素。正数向右，负数向左。注意，对游戏中的所有文本都有效。
+ * @param 所有文本-默认外发光偏移 X
+ * @parent ---全局默认值---
+ * @desc 所有字符的 默认x轴方向平移，单位像素。正数向右，负数向左。
  * @default 0
  * 
- * @param 所有文本-外发光偏移 Y
- * @parent 是否对所有文本有效
- * @desc y轴方向平移，单位像素。正数向下，负数向上。注意，对游戏中的所有文本都有效。
+ * @param 所有文本-默认外发光偏移 Y
+ * @parent ---全局默认值---
+ * @desc 所有字符的 默认y轴方向平移，单位像素。正数向下，负数向上。
  * @default 0
- *
+ * 
+ * 
  * @param 对话框外发光模式
- * @parent ---常规---
+ * @parent ---全局默认值---
  * @type select
- * @option 自定义外发光
- * @value 自定义外发光
- * @option 与所有文本的外发光一致
- * @value 与所有文本的外发光一致
- * @option 不发光
- * @value 不发光
- * @desc 对话框的描边模式。
- * @default 与所有文本的外发光一致
+ * @option 自定义模式
+ * @value 自定义模式
+ * @option 与所有文本一致
+ * @value 与所有文本一致
+ * @desc 对话框的模式。
+ * @default 与所有文本一致
+ *
+ * @param 对话框-是否外发光
+ * @parent 对话框外发光模式
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc 对话框模式为"自定义模式"时生效。开启后所有文本会外发光，外发光开关也可以通过插件指令控制。
+ * @default false
  * 
  * @param 对话框-外发光颜色ID
  * @parent 对话框外发光模式
  * @type number
  * @min 1
- * @desc 外发光颜色对应当前配置的外发光颜色的id。
+ * @desc 对话框模式为"自定义模式"时生效。对话框字符的外发光颜色，需填入当前插件配置的外发光颜色id。
  * @default 11
  * 
  * @param 对话框-外发光厚度
  * @parent 对话框外发光模式
  * @type number
  * @min 1
- * @desc 外发光的厚度，单位像素。(不允许设置厚度0)
+ * @desc 对话框模式为"自定义模式"时生效。对话框字符的外发光厚度。(不允许设置厚度0)
  * @default 6
  * 
  * @param 对话框-外发光偏移 X
  * @parent 对话框外发光模式
- * @desc x轴方向平移，单位像素。正数向右，负数向左。
+ * @desc 对话框模式为"自定义模式"时生效。对话框字符x轴方向平移，单位像素。正数向右，负数向左。
  * @default 1
  * 
  * @param 对话框-外发光偏移 Y
  * @parent 对话框外发光模式
- * @desc y轴方向平移，单位像素。正数向下，负数向上。
+ * @desc 对话框模式为"自定义模式"时生效。对话框字符y轴方向平移，单位像素。正数向下，负数向上。
  * @default 1
  * 
  * 
@@ -197,25 +222,25 @@
  * @parent ---外发光颜色---
  * @type struct<CommonColor>
  * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
- * @default {"标记":"==赤==","颜色代码":"#FF4444"}
+ * @default {"标记":"==赤==","颜色代码":"#ff3333"}
  * 
  * @param 颜色-2
  * @parent ---外发光颜色---
  * @type struct<CommonColor>
  * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
- * @default {"标记":"==橙==","颜色代码":"#FF784C"}
+ * @default {"标记":"==橙==","颜色代码":"#ffbe55"}
  * 
  * @param 颜色-3
  * @parent ---外发光颜色---
  * @type struct<CommonColor>
  * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
- * @default {"标记":"==黄==","颜色代码":"#FFFF40"}
+ * @default {"标记":"==黄==","颜色代码":"#ffff88"}
  * 
  * @param 颜色-4
  * @parent ---外发光颜色---
  * @type struct<CommonColor>
  * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
- * @default {"标记":"==绿==","颜色代码":"#80FF80"}
+ * @default {"标记":"==绿==","颜色代码":"#80ff80"}
  * 
  * @param 颜色-5
  * @parent ---外发光颜色---
@@ -227,31 +252,31 @@
  * @parent ---外发光颜色---
  * @type struct<CommonColor>
  * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
- * @default {"标记":"==蓝==","颜色代码":"#40C0F0"}
+ * @default {"标记":"==蓝==","颜色代码":"#6067ff"}
  * 
  * @param 颜色-7
  * @parent ---外发光颜色---
  * @type struct<CommonColor>
  * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
- * @default {"标记":"==紫==","颜色代码":"#8080FF"}
+ * @default {"标记":"==紫==","颜色代码":"#a180ff"}
  * 
  * @param 颜色-8
  * @parent ---外发光颜色---
  * @type struct<CommonColor>
  * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
- * @default {"标记":"==粉==","颜色代码":"#FF69B4"}
+ * @default {"标记":"==粉==","颜色代码":"#ffbfbf"}
  * 
  * @param 颜色-9
  * @parent ---外发光颜色---
  * @type struct<CommonColor>
  * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
- * @default {"标记":"==棕==","颜色代码":"#8B4C39"}
+ * @default {"标记":"==棕==","颜色代码":"#ccac86"}
  * 
  * @param 颜色-10
  * @parent ---外发光颜色---
  * @type struct<CommonColor>
  * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
- * @default {"标记":"==灰==","颜色代码":"#797979"}
+ * @default {"标记":"==灰==","颜色代码":"#c0c0c0"}
  * 
  * @param 颜色-11
  * @parent ---外发光颜色---
@@ -681,7 +706,7 @@
  * @default ==新的颜色==
  * 
  * @param 颜色代码
- * @desc 颜色对应的字符串代码。
+ * @desc 颜色对应的字符串代码，格式为"#FFFFFF"，大写小写字母都可以识别。
  * @default #FFFFFF
  *
  */
@@ -699,10 +724,9 @@
 //		★工作类型		单次执行
 //		★时间复杂度		o(n) 每帧
 //		★性能测试因素	窗口字符管理层
-//		★性能测试消耗	4.6ms（drill_DCOG_clearGlow）0.8ms（Bitmap.drill_DCOG_setGlow）
-//		★最坏情况		所有文本都发光
-//		★备注			以前测出了发光字符占了很多消耗，可能是因为厚度设0的问题。
-//						但现在是通过发光开关控制，目前没有出现高消耗情况。
+//		★性能测试消耗	
+//		★最坏情况		
+//		★备注			
 //		
 //		★优化记录		暂无
 //
@@ -714,13 +738,32 @@
 //			->☆插件指令
 //			->☆存储数据
 //			
-//			->☆效果字符应用
-//			->☆外发光控制
-//				->设置（开放函数）
-//				->只修改颜色（开放函数）
-//				->只修改厚度（开放函数）
-//				->清除（开放函数）
-//			->☆外发光绑定
+//			->☆窗口字符应用之效果字符
+//				> \OO[on]
+//				> \OO[off]
+//				> \OG[1]
+//				> \OS[5]
+//				> \dDCOG[reset]
+//				> \dDCOG[on]
+//				> \dDCOG[off]
+//				> \dDCOG[1]
+//				> \dDCOG[1:5:0:0]
+//			->☆全局默认值
+//				->准备绘制配置（继承）
+//			->☆重置控制
+//				->全重置字符（继承）
+//				->自定义重置字符
+//					> @@@dog[reset]
+//			
+//			->☆外发光的底层字符实现
+//				> @@@dog[true]
+//				> @@@dog[false]
+//				> @@@dog[color:#eeeeff]
+//				> @@@dog[blur:2]
+//				> @@@dog[pos:1,1]
+//				> @@@dog[reset]
+//			
+//			->☆DEBUG外发光测试
 //
 //
 //		★家谱：
@@ -754,7 +797,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_DCOG_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_DCOG_PluginTip_baseList.length == 0 ){ return ""; }
@@ -782,10 +825,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_DialogCharOuterGlow = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_DialogCharOuterGlow');
+	var Imported = Imported || {};
+	Imported.Drill_DialogCharOuterGlow = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_DialogCharOuterGlow');
 	
 	
 	//==============================
@@ -797,29 +840,6 @@
 		data['color'] = String( dataFrom["颜色代码"] || "#FFFFFF" );
 		return data;
 	}
-	//==============================
-	// * 临时全局 - 获取外发光颜色
-	//
-	//			说明：	> 此处设置与 颜色核心 相互独立，使用自己的颜色表。
-	//==============================
-	DrillUp.drill_DCOG_getColor = function( index ){
-		if( DrillUp.g_DCOG_color_list[index] == undefined ){ console.log( DrillUp.drill_DCOG_getPluginTip_ColorError( index ) ); return "#ffffff" }
-		if( DrillUp.g_DCOG_color_list[index]['color'] == undefined ){ console.log( DrillUp.drill_DCOG_getPluginTip_ColorNotFind( index ) ); return "#ffffff" }
-		return DrillUp.g_DCOG_color_list[index]['color'];
-	}
-	
-	/*-----------------杂项------------------*/
-	DrillUp.g_DCOG_globalEnabled = String(DrillUp.parameters["是否对所有文本有效"] || "true") == "true"; 
-	DrillUp.g_DCOG_globalColorIndex = Number(DrillUp.parameters["所有文本-外发光颜色ID"] || 11) -1; 
-	DrillUp.g_DCOG_globalBlur = Number(DrillUp.parameters["所有文本-外发光厚度"] || 6); 
-	DrillUp.g_DCOG_globalOffsetX = Number(DrillUp.parameters["所有文本-外发光偏移 X"] || 0); 
-	DrillUp.g_DCOG_globalOffsetY = Number(DrillUp.parameters["所有文本-外发光偏移 Y"] || 0); 
-	
-	DrillUp.g_DCOG_dialogMode = String(DrillUp.parameters["对话框外发光模式"] || "与所有文本的外发光一致"); 
-	DrillUp.g_DCOG_dialogColorIndex = Number(DrillUp.parameters["对话框-外发光颜色ID"] || 11) -1; 
-	DrillUp.g_DCOG_dialogBlur = Number(DrillUp.parameters["对话框-外发光厚度"] || 6); 
-	DrillUp.g_DCOG_dialogOffsetX = Number(DrillUp.parameters["对话框-外发光偏移 X"] || 1); 
-	DrillUp.g_DCOG_dialogOffsetY = Number(DrillUp.parameters["对话框-外发光偏移 Y"] || 1); 
 	
 	/*-----------------外发光颜色------------------*/
 	DrillUp.g_DCOG_color_list_length = 80;
@@ -834,6 +854,22 @@
 		}
 	}
 	
+	
+	/*-----------------『全局默认值』所有文本（静态数据）------------------*/
+	DrillUp.g_DCOG_globalEnabled = String(DrillUp.parameters["所有文本-默认是否外发光"] || "false") == "true"; 
+	DrillUp.g_DCOG_globalColorIndex = Number(DrillUp.parameters["所有文本-默认外发光颜色ID"] || 11) -1; 	//（注意，index需要-1）
+	DrillUp.g_DCOG_globalBlur = Number(DrillUp.parameters["所有文本-默认外发光厚度"] || 6); 
+	DrillUp.g_DCOG_globalOffsetX = Number(DrillUp.parameters["所有文本-默认外发光偏移 X"] || 0); 
+	DrillUp.g_DCOG_globalOffsetY = Number(DrillUp.parameters["所有文本-默认外发光偏移 Y"] || 0); 
+	
+	/*-----------------『全局默认值』对话框（静态数据）------------------*/
+	DrillUp.g_DCOG_dialogMode = String(DrillUp.parameters["对话框外发光模式"] || "与所有文本一致"); 
+	DrillUp.g_DCOG_dialogEnabled = String(DrillUp.parameters["对话框-是否外发光"] || "false") == "true"; 
+	DrillUp.g_DCOG_dialogColorIndex = Number(DrillUp.parameters["对话框-外发光颜色ID"] || 11) -1; 	//（注意，index需要-1）
+	DrillUp.g_DCOG_dialogBlur = Number(DrillUp.parameters["对话框-外发光厚度"] || 6); 
+	DrillUp.g_DCOG_dialogOffsetX = Number(DrillUp.parameters["对话框-外发光偏移 X"] || 1); 
+	DrillUp.g_DCOG_dialogOffsetY = Number(DrillUp.parameters["对话框-外发光偏移 Y"] || 1); 
+	
 
 //=============================================================================
 // * >>>>基于插件检测>>>>
@@ -844,33 +880,24 @@ if( Imported.Drill_CoreOfWindowCharacter ){
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_DCOG_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_DCOG_pluginCommand.call(this, command, args);
+	this.drill_DCOG_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_DCOG_pluginCommand = function( command, args ){
 	if( command === ">外发光效果" ){
 		
-		/*-----------------所有文本------------------*/
+		/*-----------------『全局默认值』所有文本（插件指令）------------------*/
 		if( args.length >= 2 ){
 			var type = String(args[1]);
 			if( type == "所有文本" ){
-				
-				if( args.length == 4 ){
-					var type = String(args[1]);
-					var temp1 = String(args[3]);
-					if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
-						$gameSystem._drill_DCOG_globalEnabled = true;
-					}
-					if( temp1 == "关闭" || temp1 == "禁用" ){
-						$gameSystem._drill_DCOG_globalEnabled = false;
-					}
-					if( temp1 == "恢复默认设置" ){
-						$gameSystem._drill_DCOG_globalEnabled = DrillUp.g_DCOG_globalEnabled;
-						$gameSystem._drill_DCOG_globalColorIndex = DrillUp.g_DCOG_globalColorIndex;
-						$gameSystem._drill_DCOG_globalBlur = DrillUp.g_DCOG_globalBlur;
-						$gameSystem._drill_DCOG_globalOffsetX = DrillUp.g_DCOG_globalOffsetX;
-						$gameSystem._drill_DCOG_globalOffsetY = DrillUp.g_DCOG_globalOffsetY;
-					}
-				}
 				if( args.length == 6 ){
 					var temp1 = String(args[3]);
 					var temp2 = String(args[5]);
@@ -878,6 +905,14 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp2 = temp2.replace("厚度[","");
 					temp2 = temp2.replace("偏移[","");
 					temp2 = temp2.replace("]","");
+					if( temp1 == "外发光开关" ){
+						if( temp2 == "启用" || temp2 == "开启" || temp2 == "打开" || temp2 == "启动" ){
+							$gameSystem._drill_DCOG_globalEnabled = true;
+						}
+						if( temp2 == "关闭" || temp2 == "禁用" ){
+							$gameSystem._drill_DCOG_globalEnabled = false;
+						}
+					}
 					if( temp1 == "修改颜色" ){
 						$gameSystem._drill_DCOG_globalColorIndex = Number(temp2)-1;
 					}
@@ -892,7 +927,18 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 						}
 					}
 				}
-				if( args.length == 10 ){
+				if( args.length == 4 ){
+					var type = String(args[1]);
+					var temp1 = String(args[3]);
+					if( temp1 == "恢复默认外发光" || temp1 == "恢复默认设置" ){
+						$gameSystem._drill_DCOG_globalEnabled = DrillUp.g_DCOG_globalEnabled;
+						$gameSystem._drill_DCOG_globalColorIndex = DrillUp.g_DCOG_globalColorIndex;
+						$gameSystem._drill_DCOG_globalBlur = DrillUp.g_DCOG_globalBlur;
+						$gameSystem._drill_DCOG_globalOffsetX = DrillUp.g_DCOG_globalOffsetX;
+						$gameSystem._drill_DCOG_globalOffsetY = DrillUp.g_DCOG_globalOffsetY;
+					}
+				}
+				if( args.length == 10 ){	//>外发光效果 : 所有文本 : 修改设置 : 颜色[1] : 厚度[4] : 偏移[0,0]
 					var temp1 = String(args[3]);
 					var temp2 = String(args[5]);
 					var temp3 = String(args[7]);
@@ -916,22 +962,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			}
 		}
 		
-		
-		/*-----------------对话框------------------*/
+		/*-----------------『全局默认值』对话框（插件指令）------------------*/
 		if( args.length >= 2 ){
 			var type = String(args[1]);
 			if( type == "对话框" ){
-			
-				if( args.length == 4 ){
-					var temp1 = String(args[3]);
-					if( temp1 == "恢复默认设置" ){
-						$gameSystem._drill_DCOG_dialogMode = DrillUp.g_DCOG_dialogMode;
-						$gameSystem._drill_DCOG_dialogColorIndex = DrillUp.g_DCOG_dialogColorIndex;
-						$gameSystem._drill_DCOG_dialogBlur = DrillUp.g_DCOG_dialogBlur;
-						$gameSystem._drill_DCOG_dialogOffsetX = DrillUp.g_DCOG_dialogOffsetX;
-						$gameSystem._drill_DCOG_dialogOffsetY = DrillUp.g_DCOG_dialogOffsetY;
-					}
-				}
 				if( args.length == 6 ){
 					var temp1 = String(args[3]);
 					var temp2 = String(args[5]);
@@ -942,15 +976,19 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					if( temp1 == "修改模式" ){
 						$gameSystem._drill_DCOG_dialogMode = temp2;
 					}
+					if( temp1 == "外发光开关" ){
+						if( temp2 == "启用" || temp2 == "开启" || temp2 == "打开" || temp2 == "启动" ){
+							$gameSystem._drill_DCOG_dialogEnabled = true;
+						}
+						if( temp2 == "关闭" || temp2 == "禁用" ){
+							$gameSystem._drill_DCOG_dialogEnabled = false;
+						}
+					}
 					if( temp1 == "修改颜色" ){
 						$gameSystem._drill_DCOG_dialogColorIndex = Number(temp2)-1;
 					}
 					if( temp1 == "修改厚度" ){
-						if( Number(temp2) <= 0 ){	//（厚度为0时，关闭发光）
-							$gameSystem._drill_DCOG_dialogMode = "不发光";
-						}else{
-							$gameSystem._drill_DCOG_dialogBlur = Number(temp2);
-						}
+						$gameSystem._drill_DCOG_dialogBlur = Number(temp2);
 					}
 					if( temp1 == "修改偏移" ){
 						var temp_arr = temp2.split(/[,，]/);
@@ -960,7 +998,17 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 						}
 					}
 				}
-				if( args.length == 10 ){
+				if( args.length == 4 ){
+					var temp1 = String(args[3]);
+					if( temp1 == "恢复默认外发光" || temp1 == "恢复默认设置" ){
+						$gameSystem._drill_DCOG_dialogEnabled = DrillUp.g_DCOG_dialogEnabled;
+						$gameSystem._drill_DCOG_dialogColorIndex = DrillUp.g_DCOG_dialogColorIndex;
+						$gameSystem._drill_DCOG_dialogBlur = DrillUp.g_DCOG_dialogBlur;
+						$gameSystem._drill_DCOG_dialogOffsetX = DrillUp.g_DCOG_dialogOffsetX;
+						$gameSystem._drill_DCOG_dialogOffsetY = DrillUp.g_DCOG_dialogOffsetY;
+					}
+				}
+				if( args.length == 10 ){	//>外发光效果 : 对话框 : 修改设置 : 颜色[1] : 厚度[4] : 偏移[0,0]
 					var temp1 = String(args[3]);
 					var temp2 = String(args[5]);
 					var temp3 = String(args[7]);
@@ -984,6 +1032,20 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			}
 		}
 		
+		/*-----------------DEBUG------------------*/
+		if( args.length == 4 ){
+			var type = String(args[1]);
+			var temp1 = String(args[3]);
+			if( type == "DEBUG外发光效果字符测试" ){
+				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
+					$gameTemp._drill_DCOG_DebugEnabled = true;
+				}
+				if( temp1 == "关闭" || temp1 == "禁用" ){
+					$gameTemp._drill_DCOG_DebugEnabled = false;
+					
+				}
+			}
+		}
 	}
 }
 	
@@ -1055,19 +1117,20 @@ Game_System.prototype.drill_DCOG_checkSysData = function() {
 //==============================
 Game_System.prototype.drill_DCOG_initSysData_Private = function() {
 	
-	// > 所有文本
-	this._drill_DCOG_globalEnabled = DrillUp.g_DCOG_globalEnabled;				//开关
-	this._drill_DCOG_globalColorIndex = DrillUp.g_DCOG_globalColorIndex;		//外发光颜色
-	this._drill_DCOG_globalBlur = DrillUp.g_DCOG_globalBlur;					//外发光厚度
-	this._drill_DCOG_globalOffsetX = DrillUp.g_DCOG_globalOffsetX;				//外发光偏移X
-	this._drill_DCOG_globalOffsetY = DrillUp.g_DCOG_globalOffsetY;				//外发光偏移Y
+	// > 『全局默认值』 - 所有文本（存储数据）
+	this._drill_DCOG_globalEnabled = DrillUp.g_DCOG_globalEnabled;				//所有文本 - 开关
+	this._drill_DCOG_globalColorIndex = DrillUp.g_DCOG_globalColorIndex;		//所有文本 - 颜色
+	this._drill_DCOG_globalBlur = DrillUp.g_DCOG_globalBlur;					//所有文本 - 厚度
+	this._drill_DCOG_globalOffsetX = DrillUp.g_DCOG_globalOffsetX;				//所有文本 - 偏移X
+	this._drill_DCOG_globalOffsetY = DrillUp.g_DCOG_globalOffsetY;				//所有文本 - 偏移Y
 	
-	// > 对话框
-	this._drill_DCOG_dialogMode = DrillUp.g_DCOG_dialogMode;					//开关
-	this._drill_DCOG_dialogColorIndex = DrillUp.g_DCOG_dialogColorIndex;		//外发光颜色
-	this._drill_DCOG_dialogBlur = DrillUp.g_DCOG_dialogBlur;					//外发光厚度
-	this._drill_DCOG_dialogOffsetX = DrillUp.g_DCOG_dialogOffsetX;				//外发光偏移X
-	this._drill_DCOG_dialogOffsetY = DrillUp.g_DCOG_dialogOffsetY;				//外发光偏移Y
+	// > 『全局默认值』 - 对话框（存储数据）
+	this._drill_DCOG_dialogMode = DrillUp.g_DCOG_dialogMode;					//对话框 - 模式
+	this._drill_DCOG_dialogEnabled = DrillUp.g_DCOG_dialogEnabled;				//对话框 - 开关
+	this._drill_DCOG_dialogColorIndex = DrillUp.g_DCOG_dialogColorIndex;		//对话框 - 颜色
+	this._drill_DCOG_dialogBlur = DrillUp.g_DCOG_dialogBlur;					//对话框 - 厚度
+	this._drill_DCOG_dialogOffsetX = DrillUp.g_DCOG_dialogOffsetX;				//对话框 - 偏移X
+	this._drill_DCOG_dialogOffsetY = DrillUp.g_DCOG_dialogOffsetY;				//对话框 - 偏移Y
 };
 //==============================
 // * 存储数据 - 载入存档时检查数据（私有）
@@ -1075,263 +1138,416 @@ Game_System.prototype.drill_DCOG_initSysData_Private = function() {
 Game_System.prototype.drill_DCOG_checkSysData_Private = function() {
 	
 	// > 旧存档数据自动补充
-	if( this._drill_DCOG_dialogMode == undefined ){
+	if( this._drill_DCOG_dialogEnabled == undefined ){
 		this.drill_DCOG_initSysData();
 	}
-	
 };
+
 	
 	
 //=============================================================================
-// ** ☆效果字符应用
+// ** ☆窗口字符应用之效果字符
 //=============================================================================
 //==============================
-// * 效果字符应用 - 字符转换（简单符）
+// * 窗口字符应用之效果字符 - 组合符配置（继承）
 //==============================
-var _drill_DCOG_processNewEffectChar_Simple = Window_Base.prototype.drill_COWC_processNewEffectChar_Simple;
-Window_Base.prototype.drill_COWC_processNewEffectChar_Simple = function( matched_index, command ){
-	_drill_DCOG_processNewEffectChar_Simple.call( this, matched_index, command );
+var _drill_COWC_DCOG_effect_processCombined = Game_Temp.prototype.drill_COWC_effect_processCombined;
+Game_Temp.prototype.drill_COWC_effect_processCombined = function( matched_index, matched_str, command, args ){
+	_drill_COWC_DCOG_effect_processCombined.call( this, matched_index, matched_str, command, args );
 	
-	// > 重置（\dDCOGr）
-	if( command == "dDCOGr" ){
-		this.drill_DCOG_resetOuterGlow();
-		this.drill_COWC_charSubmit_Effect(0,0);
+	// > 『窗口字符定义』 - 外发光开关（\OO[on]、\OO[off]）
+	if( command.toUpperCase() == "OO" ){
+		if( args.length == 1 ){
+			if( String(args[0]).toUpperCase() == "ON" || String(args[0]).toUpperCase() == "TRUE" ){
+				this.drill_COWC_effect_submitCombined( "@@@dog[true]" );
+				return;
+			}
+			if( String(args[0]).toUpperCase() == "OFF" || String(args[0]).toUpperCase() == "FALSE" ){
+				this.drill_COWC_effect_submitCombined( "@@@dog[false]" );
+				return;
+			}
+			return;
+		}
 	}
-	// > 清除（\dDCOGoff）
-	if( command == "dDCOGoff" ){
-		this.contents.drill_DCOG_clearGlow();
-		this.drill_COWC_charSubmit_Effect(0,0);
+	
+	// > 『窗口字符定义』 - 外发光颜色（\OG[1]）
+	if( command.toUpperCase() == "OG" ){
+		if( args.length == 1 ){
+			var color_str = DrillUp.drill_DCOG_getColor( Number(args[0])-1 );
+			this.drill_COWC_effect_submitCombined( "@@@dog[color:" + color_str + "]" );
+		}
 	}
-}
-//==============================
-// * 效果字符应用 - 字符转换（组合符）
-//==============================
-var _drill_DCOG_processNewEffectChar_Combined = Window_Base.prototype.drill_COWC_processNewEffectChar_Combined;
-Window_Base.prototype.drill_COWC_processNewEffectChar_Combined = function( matched_index, matched_str, command, args ){
-	_drill_DCOG_processNewEffectChar_Combined.call( this, matched_index, matched_str, command, args );
+	
+	// > 『窗口字符定义』 - 外发光厚度（\OS[5]）
+	if( command.toUpperCase() == "OS" ){
+		if( args.length == 1 ){
+			var blur = Number(args[0]);
+			this.drill_COWC_effect_submitCombined( "@@@dog[blur:" + blur + "]" );
+		}
+	}
 	
 	if( command == "dDCOG" ){
 		
-		// > 只设置颜色（\dDCOG[1]）
+		// > 『窗口字符定义』 - 外发光配置 - 自定义重置字符（\dDCOG[reset]）
 		if( args.length == 1 ){
-			var temp1 = String(args[0]);
-			if( this.contents != undefined ){
-				var color = DrillUp.drill_DCOG_getColor( Number(temp1)-1 );
-				this.contents.drill_DCOG_setGlowColor( color );
+			if( String(args[0]).toUpperCase() == "RESET" ){
+				this.drill_COWC_effect_submitCombined( "@@@dog[reset]" );
+				return;
 			}
-			this.drill_COWC_charSubmit_Effect(0,0);
 		}
 		
-		// > 全属性设置（\dDCOG[1:5:0:0]）
+		// > 『窗口字符定义』 - 外发光配置 - 开关（\dDCOG[on]、\dDCOG[off]）
+		if( args.length == 1 ){
+			if( String(args[0]).toUpperCase() == "ON" || String(args[0]).toUpperCase() == "TRUE" ){
+				this.drill_COWC_effect_submitCombined( "@@@dog[true]" );
+				return;
+			}
+			if( String(args[0]).toUpperCase() == "OFF" || String(args[0]).toUpperCase() == "FALSE" ){
+				this.drill_COWC_effect_submitCombined( "@@@dog[false]" );
+				return;
+			}
+		}
+		
+		// > 『窗口字符定义』 - 外发光配置 - 颜色（\dDCOG[1]）
+		if( args.length == 1 ){
+			var color_str = DrillUp.drill_DCOG_getColor( Number(args[0])-1 );
+			this.drill_COWC_effect_submitCombined( "@@@dog[color:" + color_str + "]" );
+			return;
+		}
+		
+		// > 『窗口字符定义』 - 外发光配置 - 颜色+厚度+偏移（\dDCOG[1:5:0:0]）
 		if( args.length == 4 ){
-			var temp1 = String(args[0]);
+			var color_str = DrillUp.drill_DCOG_getColor( Number(args[0])-1 );
 			var temp2 = String(args[1]);
 			var temp3 = String(args[2]);
 			var temp4 = String(args[3]);
-			if( this.contents != undefined ){
-				var color = DrillUp.drill_DCOG_getColor( Number(temp1)-1 );
-				this.contents.drill_DCOG_setGlow(
-					color,
-					Number(temp2),
-					Number(temp3),
-					Number(temp4),
-				);
-			}
-			this.drill_COWC_charSubmit_Effect(0,0);
-		}
-	}
-	
-	// > 只设置颜色（\og[1]）
-	if( command.toLowerCase() == "og" ){
-		if( args.length == 1 ){
-			var temp1 = String(args[0]);
-			if( this.contents != undefined ){
-				var color = DrillUp.drill_DCOG_getColor( Number(temp1)-1 );
-				this.contents.drill_DCOG_setGlowColor( color );
-			}
-			this.drill_COWC_charSubmit_Effect(0,0);
-		}
-	}
-	// > 只设置厚度（\og[5]）
-	if( command.toLowerCase() == "os" ){
-		if( args.length == 1 ){
-			var temp1 = String(args[0]);
-			if( Number(temp1) == 0 ){	//（厚度为0时，直接关闭）
-				this.contents.drill_DCOG_clearGlow();
-			}else{
-				if( this.contents != undefined ){
-					this.contents.drill_DCOG_setGlowBlur( Number(temp1) );
-				}
-			}
-			this.drill_COWC_charSubmit_Effect(0,0);
+			this.drill_COWC_effect_submitCombined(
+				"@@@dog[color:" +color_str+ "]" + 
+				"@@@dog[blur:" +temp2+ "]" + 
+				"@@@dog[pos:" +temp3+":"+temp4+ "]"
+			);
 		}
 	}
 };
 
 
 //=============================================================================
-// ** ☆外发光控制
+// ** ☆全局默认值
 //
-//			说明：	> 此模块专门管理 外发光的函数。
-//					> 注意，只有这个模块才能使用关键词 shadow， 其他地方不要直接设置。
+//			说明：	> 此处提供 全局默认值，使得可以作用于所有文本。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 外发光控制 - 设置（开放函数）
+// * 全局默认值 - 准备绘制配置（继承）
 //
-//			说明：	> 注意shadowColor必须为 颜色字符串。
+//			说明：	> 由于 Bitmap 没有存放相关参数，所以直接继承函数 drill_COCD_initOptions 进行初始化。
 //==============================
-Bitmap.prototype.drill_DCOG_setGlow = function( shadowColor, shadowBlur, shadowOffsetX, shadowOffsetY ){
-	if( shadowBlur <= 0 ){ return; }
-	if( shadowColor == "" ){ return; }
-	if( this._context == undefined ){ return; }
-	this._context.shadowOffsetX = shadowOffsetX;
-	this._context.shadowOffsetY = shadowOffsetY;
-	this._context.shadowBlur = shadowBlur;
-	this._context.shadowColor = shadowColor;
-};
-//==============================
-// * 外发光控制 - 只修改颜色（开放函数）
-//
-//			说明：	> 注意shadowColor必须为 颜色字符串。
-//==============================
-Bitmap.prototype.drill_DCOG_setGlowColor = function( shadowColor ){
-	if( shadowColor == "" ){ return; }
-	if( this._context == undefined ){ return; }
-	if( this._context.shadowOffsetX == undefined ){		//（若为null，则使用默认 所有文本 的设置）
-		this._context.shadowOffsetX = $gameSystem._drill_DCOG_globalOffsetX;
-	}
-	if( this._context.shadowOffsetY == undefined ){
-		this._context.shadowOffsetY = $gameSystem._drill_DCOG_globalOffsetY;
-	}
-	if( this._context.shadowBlur == undefined ||
-		this._context.shadowBlur == 0 ){
-		this._context.shadowBlur = $gameSystem._drill_DCOG_globalBlur;
-	}
-	this._context.shadowColor = shadowColor;
-};
-//==============================
-// * 外发光控制 - 只修改厚度（开放函数）
-//==============================
-Bitmap.prototype.drill_DCOG_setGlowBlur = function( shadowBlur ){
-	if( shadowBlur <= 0 ){ return; }
-	if( this._context == undefined ){ return; }
-	if( this._context.shadowOffsetX == undefined ){		//（若为null，则使用默认 所有文本 的设置）
-		this._context.shadowOffsetX = $gameSystem._drill_DCOG_globalOffsetX;
-	}
-	if( this._context.shadowOffsetY == undefined ){
-		this._context.shadowOffsetY = $gameSystem._drill_DCOG_globalOffsetY;
-	}
-	this._context.shadowBlur = shadowBlur;
-	if( this._context.shadowColor == undefined ){
-		this._context.shadowColor = DrillUp.drill_DCOG_getColor( $gameSystem._drill_DCOG_globalColorIndex );
-	}
-};
-//==============================
-// * 外发光控制 - 清除（开放函数）
-//
-//			说明：	> 暂时测试不出shadowBlur设为0是否能关闭外发光，但是设为null肯定是好一些。
-//==============================
-Bitmap.prototype.drill_DCOG_clearGlow = function(){
-	if( this._context == undefined ){ return; }
-	if( this._context.shadowColor == undefined ){ return; }
-	this._context.shadowColor = null;
-	this._context.shadowBlur = null;		//（注意，该参数赋值后，获取会返回0而不是null）
-	this._context.shadowOffsetX = null;
-	this._context.shadowOffsetY = null;
-};
-//==============================
-// * 外发光控制 - 画笔同步（继承）
-//==============================
-var _drill_COWC_DCOG_drawSynchronization = Window_Base.prototype.drill_COWC_drawSynchronization;
-Window_Base.prototype.drill_COWC_drawSynchronization = function( bitmap_from, bitmap_to ){
-	_drill_COWC_DCOG_drawSynchronization.call( this, bitmap_from, bitmap_to );
-	bitmap_to._context.shadowColor = bitmap_from._context.shadowColor;
-	bitmap_to._context.shadowBlur = bitmap_from._context.shadowBlur;
-	bitmap_to._context.shadowOffsetX = bitmap_from._context.shadowOffsetX;
-	bitmap_to._context.shadowOffsetY = bitmap_from._context.shadowOffsetY;
-};
-
-
-//=============================================================================
-// ** ☆外发光绑定
-//
-//			说明：	> 此模块专门管理 外发光 的窗口绑定。
-//					（插件完整的功能目录去看看：功能结构树）
-//=============================================================================
-//==============================
-// * 外发光绑定 - 重置绑定
-//==============================
-var _drill_DCOG_resetFontSettings = Window_Base.prototype.resetFontSettings;
-Window_Base.prototype.resetFontSettings = function() {
-	_drill_DCOG_resetFontSettings.call(this);
-	this.drill_DCOG_resetOuterGlow();
-};
-//==============================
-// * 外发光绑定 - 重置（全局默认）
-//==============================
-Window_Base.prototype.drill_DCOG_resetOuterGlow = function() {
-	if( this.contents == undefined ){ return; }
+var _drill_DCOG_COCD_drawTextInit = Game_Temp.prototype.drill_COCD_initOptions;
+Game_Temp.prototype.drill_COCD_initOptions = function( o_data, o_bitmap ){
+	_drill_DCOG_COCD_drawTextInit.call( this, o_data, o_bitmap );
+	if( $gameSystem == undefined ){ return; }
 	
-	// > 所有文本-开关，关闭时，清理发光
-	if( $gameSystem._drill_DCOG_globalEnabled != true ){
-		this.contents.drill_DCOG_clearGlow();
+	// > 『全局默认值』 - 使用值 - 所有文本
+	var cur_enabled = $gameSystem._drill_DCOG_globalEnabled;									//开关
+	var cur_color = DrillUp.drill_DCOG_getColor( $gameSystem._drill_DCOG_globalColorIndex );	//颜色
+	var cur_blur = $gameSystem._drill_DCOG_globalBlur;											//厚度
+	var cur_offsetX = $gameSystem._drill_DCOG_globalOffsetX;									//偏移X
+	var cur_offsetY = $gameSystem._drill_DCOG_globalOffsetY;									//偏移Y
+	
+	// > 『全局默认值』 - 使用值 - 对话框
+	if( o_bitmap != undefined &&
+		o_bitmap.drill_COWC_isInMessageWindow() ){
 		
-	// > 所有文本-开关，开启时
-	}else{	
-		this.contents.drill_DCOG_setGlow(
-			DrillUp.drill_DCOG_getColor( $gameSystem._drill_DCOG_globalColorIndex ),
-			$gameSystem._drill_DCOG_globalBlur,
-			$gameSystem._drill_DCOG_globalOffsetX,
-			$gameSystem._drill_DCOG_globalOffsetY
-		);
+		if( $gameSystem._drill_DCOG_dialogMode == "自定义模式" ){
+			cur_enabled = $gameSystem._drill_DCOG_dialogEnabled;									//开关
+			cur_color = DrillUp.drill_DCOG_getColor( $gameSystem._drill_DCOG_dialogColorIndex );	//颜色
+			cur_blur = $gameSystem._drill_DCOG_dialogBlur;											//厚度
+			cur_offsetX = $gameSystem._drill_DCOG_dialogOffsetX;									//偏移X
+			cur_offsetY = $gameSystem._drill_DCOG_dialogOffsetY;									//偏移Y
+		}
 	}
+	
+	// > 『全局默认值』 - 使用值
+	if( o_data['baseParam']['glowEnabled'] == undefined ){ o_data['baseParam']['glowEnabled'] = cur_enabled; }
+	if( o_data['baseParam']['glowColor']   == undefined ){ o_data['baseParam']['glowColor']   = cur_color;   }
+	if( o_data['baseParam']['glowBlur']    == undefined ){ o_data['baseParam']['glowBlur']    = cur_blur;    }
+	if( o_data['baseParam']['glowOffsetX'] == undefined ){ o_data['baseParam']['glowOffsetX'] = cur_offsetX; }
+	if( o_data['baseParam']['glowOffsetY'] == undefined ){ o_data['baseParam']['glowOffsetY'] = cur_offsetY; }
+	
+	// > 重置控制 - 使用值
+	//		（在全局默认值之后赋值，这样其它插件就不用管fr_xxx参数有没有值，要不要赋值的问题了）
+	if( o_data['baseParam']['fr_glowEnabled'] == undefined ){ o_data['baseParam']['fr_glowEnabled'] = o_data['baseParam']['glowEnabled']; }
+	if( o_data['baseParam']['fr_glowColor']   == undefined ){ o_data['baseParam']['fr_glowColor']   = o_data['baseParam']['glowColor'];   }
+	if( o_data['baseParam']['fr_glowBlur']    == undefined ){ o_data['baseParam']['fr_glowBlur']    = o_data['baseParam']['glowBlur'];    }
+	if( o_data['baseParam']['fr_glowOffsetX'] == undefined ){ o_data['baseParam']['fr_glowOffsetX'] = o_data['baseParam']['glowOffsetX']; }
+	if( o_data['baseParam']['fr_glowOffsetY'] == undefined ){ o_data['baseParam']['fr_glowOffsetY'] = o_data['baseParam']['glowOffsetY']; }
+}
+//==============================
+// * 全局默认值 - 获取外发光颜色（开放函数）
+//
+//			说明：	> 此处设置与 颜色核心 相互独立，使用自己的颜色表。
+//					> 返回字符串，格式如"#eeeeff"。
+//==============================
+DrillUp.drill_DCOG_getColor = function( index ){
+	if( DrillUp.g_DCOG_color_list[index] == undefined ){ console.log( DrillUp.drill_DCOG_getPluginTip_ColorError( index ) ); return "#ffffff" }
+	if( DrillUp.g_DCOG_color_list[index]['color'] == undefined ){ console.log( DrillUp.drill_DCOG_getPluginTip_ColorNotFind( index ) ); return "#ffffff" }
+	return DrillUp.g_DCOG_color_list[index]['color'];
+}
+
+
+//=============================================================================
+// ** ☆重置控制
+//
+//			说明：	> 此处兼容 重置 功能，包括 全重置字符 的效果。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 重置控制 - 全重置字符（继承）
+//==============================
+var _drill_COCD_DCOG_textBlock_fontReset = Game_Temp.prototype.drill_COCD_textBlock_fontReset;
+Game_Temp.prototype.drill_COCD_textBlock_fontReset = function( cur_infoParam, cur_baseParam, cur_blockParam ){
+	_drill_COCD_DCOG_textBlock_fontReset.call( this, cur_infoParam, cur_baseParam, cur_blockParam );
+	this.drill_DCOG_reset( cur_infoParam, cur_baseParam, cur_blockParam );
 };
 //==============================
-// * 外发光绑定 - 重置（对话框）
+// * 重置控制 - 全重置字符 - 执行
 //==============================
-Window_Message.prototype.drill_DCOG_resetOuterGlow = function() {
-	if( this.contents == undefined ){ return; }
+Game_Temp.prototype.drill_DCOG_reset = function( cur_infoParam, cur_baseParam, cur_blockParam ){
+	if( cur_baseParam['fr_glowEnabled'] != undefined ){ cur_baseParam['glowEnabled'] = cur_baseParam['fr_glowEnabled']; }
+	if( cur_baseParam['fr_glowColor']   != undefined ){ cur_baseParam['glowColor']   = cur_baseParam['fr_glowColor'];   }
+	if( cur_baseParam['fr_glowBlur']    != undefined ){ cur_baseParam['glowBlur']    = cur_baseParam['fr_glowBlur'];    }
+	if( cur_baseParam['fr_glowOffsetX'] != undefined ){ cur_baseParam['glowOffsetX'] = cur_baseParam['fr_glowOffsetX']; }
+	if( cur_baseParam['fr_glowOffsetY'] != undefined ){ cur_baseParam['glowOffsetY'] = cur_baseParam['fr_glowOffsetY']; }
+};
+//==============================
+// * 重置控制 - 样式阶段-配置阶段（继承）
+//==============================
+var _drill_COCD_DCOG_textBlock_processStyle = Game_Temp.prototype.drill_COCD_textBlock_processStyle;
+Game_Temp.prototype.drill_COCD_textBlock_processStyle = function( command, args, cur_infoParam, cur_baseParam, cur_blockParam, cur_rowParam ){
+	_drill_COCD_DCOG_textBlock_processStyle.call( this, command, args, cur_infoParam, cur_baseParam, cur_blockParam, cur_rowParam );
 	
-	if( $gameSystem._drill_DCOG_dialogMode == "与所有文本的外发光一致" ){
-		Window_Base.prototype.drill_DCOG_resetOuterGlow.call(this);
-		return;
-	}
-	
-	if( $gameSystem._drill_DCOG_dialogMode == "自定义外发光" ){
-		this.contents.drill_DCOG_setGlow(
-			DrillUp.drill_DCOG_getColor( $gameSystem._drill_DCOG_dialogColorIndex ),
-			$gameSystem._drill_DCOG_dialogBlur,
-			$gameSystem._drill_DCOG_dialogOffsetX,
-			$gameSystem._drill_DCOG_dialogOffsetY
-		);
-		return;
-	}
-	
-	if( $gameSystem._drill_DCOG_dialogMode == "不发光" ){
-		this.contents.drill_DCOG_clearGlow();
-		return;
+	// > 『底层字符定义』 - 自定义重置字符（@@@dog[reset]） drill_outer_glow
+	if( command == "@@@dog" ){	//（大小写敏感）
+		if( args.length == 1 ){
+			if( String(args[0]) == "reset" ){
+				this.drill_DCOG_reset( cur_infoParam, cur_baseParam, cur_blockParam );
+				this.drill_COCD_textBlock_submitStyle();
+				return;
+			}
+		}
 	}
 };
 
-/*
+
+//=============================================================================
+// ** ☆外发光的底层字符实现
+//
+//			说明：	> 此处对 字符绘制核心 底层进行扩展，支持外发光功能。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
 //==============================
-// * 外发光绑定 - 直接绑定
+// * 外发光的底层字符实现 - 默认值（私有）
+//
+//			说明：	> 该函数可以放帧刷新中反复执行。
 //==============================
-var _drill_DCOG__drawTextOutline = Bitmap.prototype._drawTextOutline;
-Bitmap.prototype._drawTextOutline = function( text, tx, ty, maxWidth ){
+var _drill_COCD_DCOG_drawBaseText_initParam = Game_Temp.prototype.drill_COCD_drawBaseText_initParam;
+Game_Temp.prototype.drill_COCD_drawBaseText_initParam = function( baseParam ){
+	_drill_COCD_DCOG_drawBaseText_initParam.call( this, baseParam );
+	if( baseParam['glowEnabled'] == undefined ){ baseParam['glowEnabled'] = false };
+	if( baseParam['glowColor'] == undefined ){ baseParam['glowColor'] = DrillUp.drill_DCOG_getColor( DrillUp.g_DCOG_globalColorIndex ) };
+	if( baseParam['glowBlur'] == undefined ){ baseParam['glowBlur'] = DrillUp.g_DCOG_globalBlur };
+	if( baseParam['glowOffsetX'] == undefined ){ baseParam['glowOffsetX'] = DrillUp.g_DCOG_globalOffsetX };
+	if( baseParam['glowOffsetY'] == undefined ){ baseParam['glowOffsetY'] = DrillUp.g_DCOG_globalOffsetY };
+}
+//==============================
+// * 外发光的底层字符实现 - 样式阶段-配置阶段（继承）
+//==============================
+var _drill_COCD_DCOG_textBlock_processStyle_2 = Game_Temp.prototype.drill_COCD_textBlock_processStyle;
+Game_Temp.prototype.drill_COCD_textBlock_processStyle = function( command, args, cur_infoParam, cur_baseParam, cur_blockParam, cur_rowParam ){
+	_drill_COCD_DCOG_textBlock_processStyle_2.call( this, command, args, cur_infoParam, cur_baseParam, cur_blockParam, cur_rowParam );
 	
-	this.drill_DCOG_setGlow(
-		"#00ffff",
-		5,
-		1,
-		1
-	);
+	if( command == "@@@dog" ){	//（大小写敏感）
+		var type = "";
+		if( args.length >= 1 ){
+			type = String(args[0]);
+		}
+		
+		// > 『底层字符定义』 - 外发光 - 开关（@@@dog[true]） drill_outer_glow
+		if( type == "true" ){
+			if( args.length == 1 ){
+				cur_baseParam['glowEnabled'] = true;
+				this.drill_COCD_textBlock_submitStyle();
+				return;
+			}
+		}
+		
+		// > 『底层字符定义』 - 外发光 - 开关（@@@dog[false]） drill_outer_glow
+		if( type == "false" ){
+			if( args.length == 1 ){
+				cur_baseParam['glowEnabled'] = false;
+				this.drill_COCD_textBlock_submitStyle();
+				return;
+			}
+		}
+		
+		// > 『底层字符定义』 - 外发光 - 颜色（@@@dog[color:#eeeeff]） drill_outer_glow
+		if( type == "color" ){
+			if( args.length == 2 ){
+				cur_baseParam['glowEnabled'] = true;		//（修改了就立即生效）
+				cur_baseParam['glowColor'] = String(args[1]);
+				this.drill_COCD_textBlock_submitStyle();
+				return;
+			}
+		}
+		
+		// > 『底层字符定义』 - 外发光 - 厚度（@@@dog[blur:2]） drill_outer_glow
+		if( type == "blur" ){
+			if( args.length == 2 ){
+				if( Number(args[1]) <= 0 ){
+					cur_baseParam['glowEnabled'] = false;	//（厚度为0视作关闭开关）
+				}else{
+					cur_baseParam['glowEnabled'] = true;	//（修改了就立即生效）
+					cur_baseParam['glowBlur'] = Number(args[1]);
+				}
+				this.drill_COCD_textBlock_submitStyle();
+				return;
+			}
+		}
+		
+		// > 『底层字符定义』 - 外发光 - 偏移（@@@dog[pos:1,1]） drill_outer_glow
+		if( type == "pos" ){
+			if( args.length == 3 ){
+				cur_baseParam['glowEnabled'] = true;		//（修改了就立即生效）
+				cur_baseParam['glowOffsetX'] = Number(args[1]);
+				cur_baseParam['glowOffsetY'] = Number(args[2]);
+				this.drill_COCD_textBlock_submitStyle();
+				return;
+			}
+		}
+	}
+}
+//==============================
+// * 外发光的底层字符实现 - 绘制基础字符 - 文本本体（继承）
+//==============================
+var _drill_COCD_DCOG_drawBaseText_body = Game_Temp.prototype.drill_COCD_drawBaseText_body;
+Game_Temp.prototype.drill_COCD_drawBaseText_body = function( painter, text, tx, ty, baseParam ){
+	
+	if( baseParam['glowEnabled'] == true ){
+		painter.shadowColor = baseParam['glowColor'];
+		painter.shadowBlur = baseParam['glowBlur'];
+		painter.shadowOffsetX = baseParam['glowOffsetX'];
+		painter.shadowOffsetY = baseParam['glowOffsetY'];
+	}
 	
 	// > 原函数
-	_drill_DCOG__drawTextOutline.call( this, text, tx, ty, maxWidth );
+	_drill_COCD_DCOG_drawBaseText_body.call( this, painter, text, tx, ty, baseParam );
+	
+	painter.shadowColor = null;
+	painter.shadowBlur = null;
+	painter.shadowOffsetX = null;
+	painter.shadowOffsetY = null;
 }
-*/
+
+
+
+//=============================================================================
+// ** ☆DEBUG外发光测试
+//
+//			说明：	> 此模块控制 DEBUG外发光测试 功能。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * DEBUG外发光测试 - 帧刷新（地图界面）
+//==============================
+var _drill_DCOG_debug_update = Scene_Map.prototype.update;
+Scene_Map.prototype.update = function() {
+    _drill_DCOG_debug_update.call(this);
+	
+	// > 创建贴图
+	if( $gameTemp._drill_DCOG_DebugEnabled == true ){
+		$gameTemp._drill_DCOG_DebugEnabled = undefined;
+		this.drill_DCOG_createDebugSprite();
+	}
+	// > 销毁贴图
+	if( $gameTemp._drill_DCOG_DebugEnabled == false ){
+		$gameTemp._drill_DCOG_DebugEnabled = undefined;
+		if( this._drill_DCOG_DebugSprite != undefined ){
+			this.removeChild(this._drill_DCOG_DebugSprite);
+			this._drill_DCOG_DebugSprite = undefined;
+		}
+	}
+}
+//==============================
+// * DEBUG外发光测试 - 创建贴图
+//==============================
+Scene_Map.prototype.drill_DCOG_createDebugSprite = function() {
+	
+	// > 销毁贴图
+	if( this._drill_DCOG_DebugSprite != undefined ){
+		this.removeChild(this._drill_DCOG_DebugSprite);
+		this._drill_DCOG_DebugSprite = undefined;
+	}
+	
+	// > 创建贴图
+	var temp_window = new Window_Base( 40, 40, 736, 544 );
+	this.addChild( temp_window );	//（直接加在最顶层的上面）
+	this._drill_DCOG_DebugSprite = temp_window;
+	
+	// > 绘制 - 矩形
+	var temp_bitmap = temp_window.contents;
+	temp_bitmap.drill_COCD_strokeRect( 0, 0, temp_bitmap.width, temp_bitmap.height, "#ff2222", 2, "miter" );
+	
+	// > 绘制 - 参数准备
+	var options = {};
+	options['infoParam'] = {};
+	options['infoParam']['x'] = 0;
+	options['infoParam']['y'] = 0;
+	options['infoParam']['canvasWidth'] = temp_bitmap.width;
+	options['infoParam']['canvasHeight'] = temp_bitmap.height;
+	
+	// > 绘制 - 参数准备 - 自定义
+	options['blockParam'] = {};					//『清零字符默认间距』
+	options['blockParam']['paddingTop'] = 0;
+	options['rowParam'] = {};
+	options['rowParam']['lineHeight_upCorrection'] = 0;
+	
+	options['baseParam'] = {};
+	options['baseParam']['drawDebugBaseRect'] = false;
+	options['baseParam']['fontSize'] = 18;		//（初始设置字体大小，这样就不会被 全局默认值 干扰了）
+	
+	
+	// > 绘制 - 测试的字符
+	var text =  "【" + DrillUp.g_DCOG_PluginTip_curName + "】\n" + 
+				"》当前测试 外发光 的功能效果。\n" + 
+				"如果不做任何操作，则使用 全局默认值-所有文本 的外发光配置。\n" + 
+				"若插件配置了所有文本开启外发光，那么此段文本也会对应有外发光效果。\n" + 
+				
+				"》外发光颜色如下：\n" + 
+				"\\\\og[1]  外发光（赤）  \\og[1]测试的字符 \\dDCOG[reset]\n" + 
+				"\\\\og[2]  外发光（橙）  \\og[2]测试的字符 \\dDCOG[reset]\n" + 
+				"\\\\og[3]  外发光（黄）  \\og[3]测试的字符 \\dDCOG[reset]\n" + 
+				"\\\\og[4]  外发光（绿）  \\og[4]测试的字符 \\dDCOG[reset]\n" + 
+				"\\\\og[5]  外发光（青）  \\og[5]测试的字符 \\dDCOG[reset]\n" + 
+				"\\\\og[6]  外发光（蓝）  \\og[6]测试的字符 \\dDCOG[reset]\n" + 
+				"\\\\og[7]  外发光（紫）  \\og[7]测试的字符 \\dDCOG[reset]\n" + 
+				"\\\\og[8]  外发光（粉）  \\og[8]测试的字符 \\dDCOG[reset]\n" + 
+				"\\\\og[9]  外发光（棕）  \\og[9]测试的字符 \\dDCOG[reset]\n" + 
+				"\\\\og[10]  外发光（灰）  \\og[10]测试的字符 \\dDCOG[reset]\n" + 
+				"\\\\og[11]  外发光（黑）  \\og[11]测试的字符 \\dDCOG[reset]\n" + 
+				"\\\\og[12]  外发光（白）  \\og[12]测试的字符 \\dDCOG[reset]\n" + 
+				
+				"》外发光厚度如下：\n" + 
+				"\\\\os[20]  外发光（赤+加宽）  \\og[1]\\os[20]测试的字符 \\dDCOG[reset]\n" + 
+				"\\\\os[20]  外发光（白+加宽）  \\og[12]\\os[20]测试的字符 \\dDCOG[reset]\n" + 
+				"可以看出，外发光如果加宽，颜色会被减淡，\n" + 
+				"并且由于外发光亮度很低，需要 亮红、亮橙、亮黄 之类的颜色，才能隐约看出发光效果。\n" + 
+				"当然，将描边和外发光叠加使用也是一个突出发光的有效办法。\n" + 
+				
+				"》外发光临时关闭/开启：\n" + 
+				"\\\\oo[on]或\\\\oo[off]  \\og[12]\\os[20]测试\\oo[off]的一段\\oo[on]字符\\oo[off]      \\\\dDCOG[5:8:10:-16]  \\dDCOG[5:8:10:-16]发光偏移很远的字符 \n";
+	
+	temp_window.drill_COWC_drawText( text, options );
+}
 
 
 //=============================================================================

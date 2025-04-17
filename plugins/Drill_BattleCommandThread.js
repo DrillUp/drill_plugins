@@ -18,10 +18,12 @@
  *
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该插件可以单独使用。
- * 也可以辅助扩展下列插件。
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。
+ * 基于：
+ *   - Drill_CoreOfConditionBranch   系统-分支条件核心
  * 可作用于：
- *   - Drill_SecretCode           键盘-秘籍输入器
+ *   - Drill_SecretCode              键盘-秘籍输入器
  *     该插件可以使得上述目标插件具有串行与并行的功能。
  * 
  * -----------------------------------------------------------------------------
@@ -172,7 +174,21 @@
 	//==============================
 	var DrillUp = DrillUp || {}; 
 	DrillUp.g_BCT_PluginTip_curName = "Drill_BattleCommandThread.js 战斗-多线程";
-	DrillUp.g_BCT_PluginTip_baseList = [];
+	DrillUp.g_BCT_PluginTip_baseList = ["Drill_CoreOfConditionBranch.js 系统-分支条件核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_BCT_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_BCT_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_BCT_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_BCT_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_BCT_PluginTip_baseList[i];
+		}
+		return message;
+	};
 	//==============================
 	// * 提示信息 - 报错 - 参数不存在
 	//==============================
@@ -190,19 +206,33 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_BattleCommandThread = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_BattleCommandThread');
+	var Imported = Imported || {};
+	Imported.Drill_BattleCommandThread = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_BattleCommandThread');
 	
+	
+//=============================================================================
+// * >>>>基于插件检测>>>>
+//=============================================================================
+if( Imported.Drill_CoreOfConditionBranch ){
 	
 	
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_BCT_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_BCT_pluginCommand.call(this, command, args);
+	this.drill_BCT_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_BCT_pluginCommand = function( command, args ){
 	if( command === ">战斗多线程" ){
 		
 		if( args.length == 4 ){		//>战斗多线程 : 串行执行 : 公共事件[1]
@@ -478,8 +508,9 @@ Game_Troop.prototype.isEventRunning = function() {
 // ** 管道物体【Drill_BCT_GamePipeEvent】
 // **		
 // **		作用域：	战斗界面
-// **		主功能：	> 定义一个构建 串行/并行 的小型事件，执行公共事件用。
-// **		子功能：	->控制器
+// **		主功能：	定义一个构建 串行/并行 的小型事件，执行公共事件用。
+// **		子功能：	
+// **					->管道物体
 // **						->帧刷新
 // **						->重设数据
 // **							->序列号
@@ -731,5 +762,13 @@ Drill_BCT_GamePipeEvent.prototype.drill_clearStartingFlag = function() {
 };
 
 
+//=============================================================================
+// * <<<<基于插件检测<<<<
+//=============================================================================
+}else{
+		Imported.Drill_BattleCommandThread = false;
+		var pluginTip = DrillUp.drill_BCT_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
+}
 
 

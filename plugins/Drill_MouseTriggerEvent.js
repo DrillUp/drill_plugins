@@ -264,7 +264,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_MTE_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_MTE_PluginTip_baseList.length == 0 ){ return ""; }
@@ -280,10 +280,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_MouseTriggerEvent = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_MouseTriggerEvent');
+	var Imported = Imported || {};
+	Imported.Drill_MouseTriggerEvent = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_MouseTriggerEvent');
 	
 	
 //=============================================================================

@@ -138,10 +138,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_CoreOfEventTags = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_CoreOfEventTags');
+	var Imported = Imported || {};
+	Imported.Drill_CoreOfEventTags = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_CoreOfEventTags');
 	
 	
 	// > 『已弃用的插件』

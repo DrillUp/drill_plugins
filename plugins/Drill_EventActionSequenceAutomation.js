@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        行走图 - GIF动画序列全标签播放
+ * @plugindesc [v1.5]        行走图 - GIF动画序列全标签播放
  * @author Drill_up
  * 
  * 
@@ -14,14 +14,14 @@
  * 如果你有兴趣，也可以来看看更多我写的drill插件哦ヽ(*。>Д<)o゜
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
- * 开启后，将根据物体的情况，自动播放标签对应的状态元。
+ * 行走图有一套固定的标签，通过那些标签能自动播放动画序列的 状态元/状态节点。
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
  * 该插件 不能 单独使用。
  * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_EventActionSequence       行走图-GIF动画序列★★v1.2及以上★★
+ *   - Drill_EventActionSequence       行走图-GIF动画序列★★v1.5及以上★★
  * 可作用于：
  *   - Drill_EventActionSequenceBind   行走图-GIF动画序列全绑定
  * 
@@ -30,12 +30,15 @@
  * 1.插件的作用域：地图界面。
  *   作用于行走图。
  * 2.更多详细内容，去看看 "7.行走图 > 关于行走图GIF动画序列.docx"。
+ * 标签播放：
+ *   (1.标签播放：指 通过标签控制 播放 状态元/状态节点。
+ *      需要手动通过插件指令调用，才能实现标签播放。
  * 全标签播放：
- *   (1.如果你配置了行走图动画序列，那么事件将会根据情况，自动对符合
- *      标签条件的 状态节点/状态元 进行切换。
- *   (2.标签中包含 静止、移动、跳跃、奔跑 等，具体去看看文档中
- *      全标签播放 的章节。
- *   (3.静止等待时间 指标签切换到<行走图-静止>时，保持什么都不做的持续时间。
+ *   (1.全标签播放：指行走图有一套固定的标签，通过那些标签自动播放 状态元/状态节点。
+ *      通过插件指令或事件注释 开启 全标签开关后，自动进行标签播放。
+ *   (2.全标签包含<行走图-静止>、<行走图-移动>、<行走图-跳跃>、<行走图-奔跑>等，
+ *      具体去看看文档中 全标签播放 的章节。
+ *   (3."静止等待时间"是指标签切换到<行走图-静止>时，保持什么都不做的持续时间。
  *      此功能一般用于防止小爱丽丝刚停下脚步就立刻照镜子的动作行为。
  * 小工具：
  *   (1.防止你看不见：
@@ -45,7 +48,7 @@
  *   (2.小工具能导入 行走图、序列大图、GIF文件 等资源，
  *      然后小工具能将配置转移到插件 GIF动画序列核心 中。
  * 设计：
- *   (1.你可以将一个行走图拆分成 行走图动画序列，再配置给事件或玩家。
+ *   (1.你可以将一个原12帧的行走图资源，拆分成 行走图动画序列，再配置给事件或玩家。
  *      跑通后再进行更复杂的 状态节点 连接，实现更复杂的动画效果。
  *
  * -----------------------------------------------------------------------------
@@ -55,10 +58,15 @@
  * 事件注释：=>行走图动画序列 : 全标签播放 : 开启
  * 事件注释：=>行走图动画序列 : 全标签播放 : 关闭
  * 
+ * 事件注释：=>行走图动画序列 : 静止等待时间 : 时长[120]
+ * 事件注释：=>行走图动画序列 : 静止等待时间 : 恢复默认
+ * 
  * 1.必须包含注释 "全标签播放 : 开启" 的事件页 才会生效。
  * 2.注意，如果你只写了 创建动画序列 注释，而没写 开启全标签播放 的注释。
  *   那么动画序列将只播放 默认的状态元集合 。
  *   因此事件移动时，不会播放移动动画，而是保持站立平移。
+ * 2."静止等待时间"是指标签切换到<行走图-静止>时，保持什么都不做的持续时间。
+ *   此功能一般用于防止小爱丽丝刚停下脚步就立刻照镜子的动作行为。
  * 
  * -----------------------------------------------------------------------------
  * ----激活条件 - 全标签播放开关
@@ -98,6 +106,8 @@
  * 插件指令：>行走图动画序列 : 事件[1] : 播放指定标签 : <行走图-被举起>
  * 插件指令：>行走图动画序列 : 事件[1] : 播放指定标签 : <行走图-举花盆>
  * 
+ * 插件指令：>行走图动画序列 : 事件[1] : 播放指定标签 : 自定义动作-拾取
+ * 插件指令：>行走图动画序列 : 事件[1] : 播放指定标签 : 自定义动作-拾取重要道具
  * 插件指令：>行走图动画序列 : 事件[1] : 播放指定标签 : 其他自定义标签
  * 
  * 1.前半部分（事件[1]）和 后半部分（播放指定标签 : <行走图-静止>）
@@ -109,13 +119,18 @@
  *   手动播放"其他自定义标签"也能生效，但是不受 全标签播放 控制。
  *
  * -----------------------------------------------------------------------------
- * ----可选设定 - 修改静止等待时间
+ * ----可选设定 - 静止等待时间
  * 你可以通过插件指令修改静止等待时间：
  * 
- * 插件指令：>行走图动画序列 : 修改静止等待时间 : 持续时长[180]
+ * 插件指令：>行走图动画序列 : 修改默认静止等待时间 : 时长[180]
+ * 
+ * 插件指令：>行走图动画序列 : 玩家 : 静止等待时间 : 时长[180]
+ * 插件指令：>行走图动画序列 : 玩家 : 静止等待时间 : 恢复默认
+ * 插件指令：>行走图动画序列 : 事件[1] : 静止等待时间 : 时长[180]
+ * 插件指令：>行走图动画序列 : 事件[1] : 静止等待时间 : 恢复默认
  * 
  * 1.设置后永久有效，持续时长可以设为0。
- * 2.静止等待时间 指标签切换到<行走图-静止>时，保持什么都不做的持续时间。
+ * 2."静止等待时间"是指标签切换到<行走图-静止>时，保持什么都不做的持续时间。
  *   此功能一般用于防止小爱丽丝刚停下脚步就立刻照镜子的动作行为。
  * 
  * -----------------------------------------------------------------------------
@@ -152,12 +167,14 @@
  * 支持了二方向行走图，该插件重新兼容。
  * [v1.4]
  * 优化了动画序列存储底层。
+ * [v1.5]
+ * 修正描述细节，修复了 行走图-跳跃 无效的bug。
  *
  *
  * @param 默认静止等待时间
  * @type number
  * @min 0
- * @desc 行走图停止移动后，保持什么都不做的静止状态的时间。
+ * @desc 指标签切换到<行走图-静止>时，保持什么都不做的持续时间。
  * @default 120
  * 
  */
@@ -193,14 +210,21 @@
 //			->☆事件注释
 //			->☆存储数据
 //
-//			->☆状态规划器
+//			->☆播放（继承）
+//				> 播放默认的状态元集合
+//				> 播放简单状态元集合
+//				> 播放状态节点
+//
+//			->☆状态规划器 标准函数
+//			->☆状态规划器实现
 //				->检查 - 未开启功能
 //				->检查 - 控制器为空
 //				->检查 - 镜头范围外
 //				->注解
-//					->常规
+//					->基础
 //						> <行走图-静止>
 //						> <行走图-移动>
+//					->常规
 //						> <行走图-奔跑>
 //						> <行走图-跳跃>
 //					->插件
@@ -208,14 +232,17 @@
 //						> <行走图-滑行静止>
 //						> <行走图-被举起>
 //						> <行走图-举花盆>
-//			->☆播放（继承）
-//				> 播放默认的状态元集合
-//				> 播放简单状态元集合
-//				> 播放状态节点
+//			
+//			->☆状态规划器 标准接口
+//			->☆标签播放器
+//				->播放失败时
+//					> <行走图-滑行> 转 <行走图-移动>
+//					> <行走图-滑行静止> 转 <行走图-静止>
+//					> <行走图-奔跑> 转 <行走图-移动>
+//					> <行走图-跳跃> 转 <行走图-移动>
+//				->滑行标记
 //
 //			->☆静止等待时间
-//				->暂停条件
-//				->暂停控制
 //			->☆移动变速
 //			->☆固定帧
 //
@@ -252,7 +279,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_EASA_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_EASA_PluginTip_baseList.length == 0 ){ return ""; }
@@ -274,10 +301,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_EventActionSequenceAutomation = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_EventActionSequenceAutomation');
+	var Imported = Imported || {};
+	Imported.Drill_EventActionSequenceAutomation = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_EventActionSequenceAutomation');
 	
 	/*-----------------杂项------------------*/
 	DrillUp.g_EASA_defaultWaitTime = Number(DrillUp.parameters["默认静止等待时间"] || 120); 
@@ -293,9 +320,18 @@ if( Imported.Drill_EventActionSequence ){
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_EASA_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_EASA_pluginCommand.call(this, command, args);
+	this.drill_EASA_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_EASA_pluginCommand = function( command, args ){
 	if( command === ">行走图动画序列" ){ 
 	
 		/*-----------------对象组获取------------------*/
@@ -408,19 +444,46 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var temp1 = String(args[5]);
 			if( type == "播放指定标签" ){
 				for( var k=0; k < e_chars.length; k++ ){
-					e_chars[k].drill_EASA_setAnnotation( temp1 );
+					e_chars[k].drill_EASA_setAnInCommand( temp1 );
+				}
+				for( var k=0; k < p_chars.length; k++ ){
+					p_chars[k].drill_EASA_setAnInCommand( temp1 );
 				}
 			}
 		}
 		
-		/*-----------------修改静止等待时间------------------*/
+		/*-----------------静止等待时间------------------*/
 		if( args.length == 4 ){
 			var type = String(args[1]);
 			var temp1 = String(args[3]);
-			if( type == "修改静止等待时间" ){
+			if( type == "修改默认静止等待时间" ){
 				temp1 = temp1.replace("持续时长[","");
 				temp1 = temp1.replace("]","");
 				$gameSystem._drill_EASA_defaultWaitTime = Number(temp1);
+			}
+		}
+		if( args.length == 6 ){
+			var type = String(args[3]);
+			var temp1 = String(args[5]);
+			if( type == "静止等待时间" ){
+				if( temp1.indexOf("时长[") != -1 ){
+					temp1 = temp1.replace("时长[","");
+					temp1 = temp1.replace("]","");
+					for( var k=0; k < e_chars.length; k++ ){
+						e_chars[k].drill_EASA_setWaitTime( Number(temp1) );
+					}
+					for( var k=0; k < p_chars.length; k++ ){
+						p_chars[k].drill_EASA_setWaitTime( Number(temp1) );
+					}
+					
+				}else if( temp1 == "恢复默认" ){
+					for( var k=0; k < e_chars.length; k++ ){
+						e_chars[k].drill_EASA_resetWaitTime();
+					}
+					for( var k=0; k < p_chars.length; k++ ){
+						p_chars[k].drill_EASA_resetWaitTime();
+					}
+				}
 			}
 		}
 	}
@@ -458,7 +521,8 @@ Game_Event.prototype.setupPage = function() {
 //==============================
 Game_Event.prototype.drill_EASA_setupPage = function() {
 	
-	var is_set = false;
+	var is_set1 = false;
+	var is_set2 = false;
 	
 	if( !this._erased && this.page() ){ this.list().forEach(function( l ){
 		if( l.code === 108 ){
@@ -471,7 +535,19 @@ Game_Event.prototype.drill_EASA_setupPage = function() {
 					if( type == "全标签播放" ){
 						if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
 							this.drill_EASA_setEnabled( true );
-							is_set = true;
+							is_set1 = true;
+						}
+					}
+					if( type == "静止等待时间" ){
+						if( temp1.indexOf("时长[") != -1 ){
+							temp1 = temp1.replace("时长[","");
+							temp1 = temp1.replace("]","");
+							this.drill_EASA_setWaitTime( Number(temp1) );
+							is_set2 = true;
+							
+						}else if( temp1 == "恢复默认" ){
+							this.drill_EASA_resetWaitTime();
+							is_set2 = true;
 						}
 					}
 				}
@@ -479,8 +555,11 @@ Game_Event.prototype.drill_EASA_setupPage = function() {
 		};
 	}, this);};
 	
-	if( is_set == false ){
-		this.drill_EASA_setEnabled( false );
+	if( is_set1 == false ){
+		this.drill_EASA_setEnabled( false );	//关闭 全标签播放
+	}
+	if( is_set2 == false ){
+		this.drill_EASA_resetWaitTime();		//关闭 静止等待时间
 	}
 };
 
@@ -563,9 +642,40 @@ Game_System.prototype.drill_EASA_checkSysData_Private = function() {
 	if( this._drill_EASA_defaultWaitTime == undefined ){
 		this.drill_EASA_initSysData();
 	}
-	
 };
 
+
+
+//=============================================================================
+// ** ☆播放（继承）
+//
+//			说明：	> 继承于 行走图动画序列 ，并提供 标签播放 的功能。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 播放 - 播放默认的状态元集合（继承）
+//==============================
+var _drill_EASA_EASe_setStateNodeDefault = Game_Character.prototype.drill_EASe_setStateNodeDefault;
+Game_Character.prototype.drill_EASe_setStateNodeDefault = function(){
+	this.drill_EASA_setEnabled( false );		//（立即关闭 全标签播放）
+	_drill_EASA_EASe_setStateNodeDefault.call(this);
+}
+//==============================
+// * 播放 - 播放简单状态元集合（继承）
+//==============================
+var _drill_EASA_EASe_setSimpleStateNode = Game_Character.prototype.drill_EASe_setSimpleStateNode;
+Game_Character.prototype.drill_EASe_setSimpleStateNode = function( state_nameList ){
+	this.drill_EASA_setEnabled( false );		//（立即关闭 全标签播放）
+	_drill_EASA_EASe_setSimpleStateNode.call( this, state_nameList );
+}
+//==============================
+// * 播放 - 播放状态节点（继承）
+//==============================
+var _drill_EASA_EASe_setStateNode = Game_Character.prototype.drill_EASe_setStateNode;
+Game_Character.prototype.drill_EASe_setStateNode = function( node_name ){
+	this.drill_EASA_setEnabled( false );		//（立即关闭 全标签播放）
+	_drill_EASA_EASe_setStateNode.call( this, node_name );
+}
 
 
 //=============================================================================
@@ -588,7 +698,7 @@ Game_Character.prototype.initialize = function() {
 	_drill_EASA_c_initialize.call(this);
 }
 //==============================
-// * 状态规划器 - 帧刷新
+// * 状态规划器 - 启动/关闭（开放函数）
 //==============================
 Game_Character.prototype.drill_EASA_setEnabled = function( enabled ){
 	
@@ -603,11 +713,17 @@ Game_Character.prototype.drill_EASA_setEnabled = function( enabled ){
 	}
 }
 //==============================
-// * 状态规划器 - 帧刷新
+// * 状态规划器 - 帧刷新 绑定
 //==============================
 var _drill_EASA_ch_update = Game_CharacterBase.prototype.update;
 Game_CharacterBase.prototype.update = function(){
 	_drill_EASA_ch_update.call(this);
+	this.drill_EASA_updateAnnotation();
+}
+//==============================
+// * 状态规划器 - 帧刷新
+//==============================
+Game_CharacterBase.prototype.drill_EASA_updateAnnotation = function(){
 	
 	// > 检查 - 未开启功能，跳过
 	if( this._drill_EASA_enabled != true ){ return; }
@@ -625,8 +741,28 @@ Game_CharacterBase.prototype.update = function(){
 	}
 	
 	
-	// > 注解 - 初始化
-	var cur_annotation = "";		//当前注解
+	// > 注解 - 基础（只区分 静止情况 和 移动情况 ）
+	var is_stoping = false;
+	if( this.isStopping() ){
+		is_stoping = true;
+	}
+	
+	// > 注解 - 当前注解
+	var cur_annotation = "<行走图-静止>";
+	if( is_stoping == false ){
+		cur_annotation = "<行走图-移动>";
+	}
+	
+	
+	// > 注解优先级
+	//
+	// push(50,"滑行判定");
+	// push(90,"被举起判定");
+	// push(30,"举花盆判定");	//（外部插件仍然需要在自己脚本中单独开辟 动画序列优先级 设置的配置，并文档统一管理）
+	// push(20,"奔跑判定");
+	// push(100,"跳跃判定");
+	//
+	// check("滑行判定");
 	
 	
 	// > 注解 - 第一层 - 插件【图块-物体滑行】
@@ -661,14 +797,15 @@ Game_CharacterBase.prototype.update = function(){
 			cur_annotation = "<行走图-移动>";
 		}
 	
-	}else if( this.isJumping() ){
-		cur_annotation = "<行走图-跳跃>";
-	
 	}else if( this.isStopping() ){
 		cur_annotation = "<行走图-静止>";
 	}
 	
 	
+	// > 注解 - 第二层 - 常规
+	if( this.isJumping() ){
+		cur_annotation = "<行走图-跳跃>";
+	}
 	// > 注解 - 第二层 - 插件【互动-举起花盆能力】
 	if( this._drill_PT_is_lifting == true ){
 		cur_annotation = "<行走图-举花盆>";
@@ -687,21 +824,11 @@ Game_CharacterBase.prototype.update = function(){
 	this._drill_EASA_lastAnnotation = cur_annotation;
 	
 	
-	// > 刷新 - 静止等待时间
-	this.drill_EASA_waitTime_refresh( cur_annotation );
-	
-	// > 刷新 - 移动变速
-	this.drill_EASA_speed_refresh( cur_annotation );
-	
-	
-	// > 播放 状态元/状态节点 根据标签
-	this.drill_EASA_setAnnotation( cur_annotation );
-	
-	// > 强制刷新动画序列（切换标签后，立即暂停，要保持新标签的图像）
-	this._drill_EASe_controller.drill_controllerMain_update();
+	// > 标签播放器 - 帧刷新控制
+	this.drill_EASA_setAnInUpdate( is_stoping, cur_annotation );
 }
 //==============================
-// * 优化策略 - 判断贴图是否在镜头范围内
+// * 状态规划器 - 优化策略 - 判断贴图是否在镜头范围内
 //==============================
 Game_CharacterBase.prototype.drill_EASA_posIsInCamera = function( realX, realY ){
 	var oww = Graphics.boxWidth  / $gameMap.tileWidth();
@@ -718,37 +845,42 @@ Game_CharacterBase.prototype.drill_EASA_posIsInCamera = function( realX, realY )
 
 
 //=============================================================================
-// ** ☆播放（继承）
+// ** ☆标签播放器
 //
-//			说明：	> 继承于 行走图动画序列 ，并提供 标签播放 的功能。
+//			说明：	> 此模块专门管理 播放指定标签 的功能。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 播放 - 播放默认的状态元集合（继承）
+// * 标签播放器 - 帧刷新控制
 //==============================
-var _drill_EASA_EASe_setStateNodeDefault = Game_Character.prototype.drill_EASe_setStateNodeDefault;
-Game_Character.prototype.drill_EASe_setStateNodeDefault = function(){
-	this.drill_EASA_setEnabled( false );		//（执行状态元变化时，立即关闭 全标签播放）
-	_drill_EASA_EASe_setStateNodeDefault.call(this);
+Game_Character.prototype.drill_EASA_setAnInUpdate = function( is_stoping, cur_annotation ){
+	
+	// > 重置 - 静止等待时间
+	this.drill_EASA_waitTime_reset( is_stoping, cur_annotation );
+	
+	// > 重置 - 移动变速
+	this.drill_EASA_speed_reset( cur_annotation );
+	
+	// > 执行播放
+	var success = this.drill_EASA_setAnnotation( cur_annotation );
+	
+	// > 强制刷新动画序列（切换标签后，静止等待时间内，要保持新标签的图像）
+	this._drill_EASe_controller.drill_COAS_update();
 }
 //==============================
-// * 播放 - 播放简单状态元集合（继承）
+// * 标签播放器 - 插件指令控制
 //==============================
-var _drill_EASA_EASe_setSimpleStateNode = Game_Character.prototype.drill_EASe_setSimpleStateNode;
-Game_Character.prototype.drill_EASe_setSimpleStateNode = function( state_nameList ){
-	this.drill_EASA_setEnabled( false );
-	_drill_EASA_EASe_setSimpleStateNode.call( this, state_nameList );
+Game_Character.prototype.drill_EASA_setAnInCommand = function( annotation ){
+	
+	// > 清除等待设置
+	this.drill_EASA_clearWait();
+	
+	// > 执行播放
+	var success = this.drill_EASA_setAnnotation( annotation );
 }
+
 //==============================
-// * 播放 - 播放状态节点（继承）
-//==============================
-var _drill_EASA_EASe_setStateNode = Game_Character.prototype.drill_EASe_setStateNode;
-Game_Character.prototype.drill_EASe_setStateNode = function( node_name ){
-	this.drill_EASA_setEnabled( false );
-	_drill_EASA_EASe_setStateNode.call( this, node_name );
-}
-//==============================
-// * 播放 - 播放状态元/状态节点 根据标签（开放函数）
+// * 标签播放器 - 执行播放
 //
 //			参数：	> annotation 字符串（标签文本）
 //			说明：	> 状态元/状态节点名称中含有特定注解的，会被捕获。
@@ -756,21 +888,27 @@ Game_Character.prototype.drill_EASe_setStateNode = function( node_name ){
 //==============================
 Game_Character.prototype.drill_EASA_setAnnotation = function( annotation ){
 	
-	// > 执行标签
-	var has_annotation = this._drill_EASe_controller.drill_COAS_setAnnotation( annotation );
+	// > 执行播放（状态元+状态节点+动作元）
+	var success = this._drill_EASe_controller.drill_COAS_setAnnotation( annotation );
 	
-	// > 标记重置
-	this._drill_EASA_tag_slideWithNoSeq = false;	//标记 - 滑行时但没有滑行标签
+	// > 执行播放 - 播放失败时
+	if( success == false ){
+		success = this.drill_EASA_setAnnotation_Unsuccess( annotation );
+	}
+	return success;
+}
+//==============================
+// * 标签播放器 - 执行播放 - 播放失败时
+//==============================
+Game_Character.prototype.drill_EASA_setAnnotation_Unsuccess = function( annotation ){
+	var success = false;
 	
-	
-	// > 复杂动作没有对应配置时
-	if( has_annotation == false ){
+	// > 注解 - 第一层 - 插件【图块-物体滑行】
+	if( annotation == "<行走图-滑行>" ){
 		
-		// > 注解 - 第一层 - 插件【图块-物体滑行】
-		if( annotation == "<行走图-滑行>" ){
-			
-			// > 修改标签
-			has_annotation = this._drill_EASe_controller.drill_COAS_setAnnotation( "<行走图-移动>" );
+		// > 修改标签
+		success = this._drill_EASe_controller.drill_COAS_setAnnotation( "<行走图-移动>" );
+		if( success == true ){
 			this._drill_EASe_controller.drill_COAS_update();	//（设置标签后，强制刷新一次，确保节点被赋值）
 			
 			// > 标记 - 滑行时但没有滑行标签
@@ -780,17 +918,46 @@ Game_Character.prototype.drill_EASA_setAnnotation = function( annotation ){
 			var cur_state = this._drill_EASe_controller.drill_controllerMain_Node_getCurState();
 			cur_state.drill_controllerState_setCurIndex(2);
 		}
-		if( annotation == "<行走图-滑行静止>" ){
-			has_annotation = this._drill_EASe_controller.drill_COAS_setAnnotation( "<行走图-静止>" );
-		}
-		
-		// > 注解 - 第一层 - 常规
-		if( annotation == "<行走图-奔跑>" ){
-			has_annotation = this._drill_EASe_controller.drill_COAS_setAnnotation( "<行走图-移动>" );
-		}
+	}
+	if( annotation == "<行走图-滑行静止>" ){
+		success = this._drill_EASe_controller.drill_COAS_setAnnotation( "<行走图-静止>" );
 	}
 	
-	return has_annotation;
+	// > 注解 - 第一层 - 常规
+	if( annotation == "<行走图-奔跑>" ){
+		success = this._drill_EASe_controller.drill_COAS_setAnnotation( "<行走图-移动>" );
+	}
+	
+	// > 注解 - 第二层 - 常规
+	if( annotation == "<行走图-跳跃>" ){
+		success = this._drill_EASe_controller.drill_COAS_setAnnotation( "<行走图-移动>" );
+	}
+	
+	return success;
+}
+//==============================
+// * 标签播放器 - 滑行标记（继承）
+//==============================
+var _drill_EASA_EASA_setAnnotation = Game_Character.prototype.drill_EASA_setAnnotation;
+Game_Character.prototype.drill_EASA_setAnnotation = function( annotation ){
+	
+	// > 滑行标记 - 重置
+	this._drill_EASA_tag_slideWithNoSeq = false;	//标记 - 滑行时但没有滑行标签
+	
+	// > 原函数
+	return _drill_EASA_EASA_setAnnotation.call( this, annotation );
+}
+//==============================
+// * 标签播放器 - 滑行标记 - 是否暂停（继承）
+//==============================
+var _drill_EASA_EASe_needPause1 = Game_CharacterBase.prototype.drill_EASe_needPause;
+Game_CharacterBase.prototype.drill_EASe_needPause = function(){
+	
+	// > 滑行标记 - 条件（滑行时但没有滑行标签）
+	if( this._drill_EASA_tag_slideWithNoSeq == true ){ return true; }
+	
+	// > 原函数
+	return _drill_EASA_EASe_needPause1.call(this);
 }
 
 
@@ -809,31 +976,62 @@ Game_Character.prototype.drill_EASA_setAnnotation = function( annotation ){
 //==============================
 var _drill_EASA_waitTime_initialize = Game_Character.prototype.initialize;
 Game_Character.prototype.initialize = function() {
-	this._drill_EASA_waitTime = undefined;			//剩余静止等待时间
+	this._drill_EASA_dataWaitTime = undefined;		//指定静止等待时间
+	this._drill_EASA_curWaitTime = undefined;		//剩余静止等待时间
 	
 	// > 原函数
 	_drill_EASA_waitTime_initialize.call(this);
 }
 //==============================
-// * 静止等待时间 - 刷新
+// * 静止等待时间 - 设置等待时间（开放函数）
+//==============================
+Game_Character.prototype.drill_EASA_setWaitTime = function( wait_time ){
+	this._drill_EASA_dataWaitTime = wait_time;
+}
+//==============================
+// * 静止等待时间 - 恢复默认等待时间（开放函数）
+//==============================
+Game_Character.prototype.drill_EASA_resetWaitTime = function(){
+	this._drill_EASA_dataWaitTime = undefined;
+}
+//==============================
+// * 静止等待时间 - 清除等待设置（开放函数）
+//
+//			说明：	> 如果要播放指定标签，就不要被 静止等待时间 卡住播放了。
+//==============================
+Game_Character.prototype.drill_EASA_clearWait = function(){
+	this._drill_EASA_curWaitTime = undefined;
+}
+//==============================
+// * 静止等待时间 - 重置
 //
 //			说明：	> 此函数不在帧刷新中，而是 行走图状态变化后，执行的注释刷新。
 //==============================
-Game_Character.prototype.drill_EASA_waitTime_refresh = function( annotation ){
-	if( annotation == "<行走图-静止>" ){	//（从其他状态回到 静止状态 时，执行的等待时间）
-		this._drill_EASA_waitTime = $gameSystem._drill_EASA_defaultWaitTime;
-	}else{
-		this._drill_EASA_waitTime = undefined;
+Game_Character.prototype.drill_EASA_waitTime_reset = function( is_stoping, cur_annotation ){
+	
+	// > 正在播放动作元，跳出
+	if( this._drill_EASe_controller.drill_COAS_isPlayingAct() ){
+		this.drill_EASA_clearWait();
+		return;
 	}
-}
-//==============================
-// * 静止等待时间 - 暂停条件
-//==============================
-Game_Character.prototype.drill_EASA_needPause = function(){
-	if( this._drill_EASA_waitTime == undefined ){ return false; }		//条件 - 未设置时间，关闭静止
-	if( this._drill_EASA_waitTime > 0 ){ return true; }					//条件 - 时间未结束
-	if( this._drill_EASA_tag_slideWithNoSeq == true ){ return true; }	//条件 - 滑行时但没有滑行标签
-	return false;
+	
+	// > 静止情况时
+	if( is_stoping == true ){
+		
+		// > 默认静止等待时间
+		this._drill_EASA_curWaitTime = $gameSystem._drill_EASA_defaultWaitTime;
+		
+		// > 指定静止等待时间
+		if( this._drill_EASA_dataWaitTime != undefined ){
+			this._drill_EASA_curWaitTime = this._drill_EASA_dataWaitTime;
+		}
+		return;
+		
+	// > 移动情况时
+	}else{
+		this.drill_EASA_clearWait();
+		return;
+	}
 }
 //==============================
 // * 静止等待时间 - 帧刷新
@@ -844,16 +1042,23 @@ Game_CharacterBase.prototype.update = function(){
 	if( this._drill_EASe_controller == null ){ return; }
 	
 	// > 静止等待时间-1
-	if( this._drill_EASA_waitTime != undefined ){
-		this._drill_EASA_waitTime -= 1;
+	if( this._drill_EASA_curWaitTime != undefined ){
+		this._drill_EASA_curWaitTime -= 1;
+	}
+}
+//==============================
+// * 静止等待时间 - 是否暂停（继承）
+//==============================
+var _drill_EASA_EASe_needPause2 = Game_CharacterBase.prototype.drill_EASe_needPause;
+Game_CharacterBase.prototype.drill_EASe_needPause = function(){
+	
+	// > 条件 - 时间未结束时，暂停播放
+	if( this._drill_EASA_curWaitTime != undefined ){
+		if( this._drill_EASA_curWaitTime > 0 ){ return true; }
 	}
 	
-	// > 暂停控制
-	if( this.drill_EASA_needPause() ){
-		this._drill_EASe_controller.drill_controllerMain_setPause(true);
-	}else{
-		this._drill_EASe_controller.drill_controllerMain_setPause(false);
-	}
+	// > 原函数
+	return _drill_EASA_EASe_needPause2.call(this);
 }
 
 
@@ -864,15 +1069,17 @@ Game_CharacterBase.prototype.update = function(){
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 移动变速 - 刷新
+// * 移动变速 - 重置
 //
 //			说明：	> 此函数不在帧刷新中，而是 行走图状态变化后，执行的注释刷新。
 //==============================
-Game_Character.prototype.drill_EASA_speed_refresh = function( annotation ){
+Game_Character.prototype.drill_EASA_speed_reset = function( annotation ){
 	
 	// > 变速控制
-	if( annotation == "<行走图-移动>" ||
-		annotation == "<行走图-奔跑>" ){
+	if( this._drill_EASe_controller.drill_controllerMain_Act_isPlayingAct() == false &&	//（只对状态元变速）
+		(annotation == "<行走图-移动>" ||
+		 annotation == "<行走图-奔跑>")
+		){
 		
 		var moveSpeed = this.moveSpeed();
 		if( moveSpeed == 1 ){

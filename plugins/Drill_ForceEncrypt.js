@@ -43,7 +43,8 @@
  * [v1.2]
  * 修改了插件分类。
  * 
- *
+ * 
+ * 
  * @param ----文件组 1至20----
  * @default 
  * 
@@ -3643,7 +3644,8 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			暂无
+//			->☆静态数据
+//
 //
 //		★家谱：
 //			无
@@ -3665,11 +3667,11 @@
 //
 
 //=============================================================================
-// ** 静态数据
+// ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_ForceEncrypt = true;
-　　var DrillUp = DrillUp || {}; 
+	var Imported = Imported || {};
+	Imported.Drill_ForceEncrypt = true;
+	var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_ForceEncrypt');
 	
 

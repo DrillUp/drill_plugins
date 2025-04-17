@@ -188,7 +188,7 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称：		PAlEM (Player_Allow_Event_Move)
+//		插件简称		PAlEM (Player_Allow_Event_Move)
 //		临时全局变量	DrillUp.g_PAlEM_xxx
 //		临时局部变量	无
 //		存储数据变量	无
@@ -265,10 +265,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_PlayerAllowEventMove = true;
-　　var DrillUp = DrillUp || {};
-    DrillUp.parameters = PluginManager.parameters('Drill_PlayerAllowEventMove');
+	var Imported = Imported || {};
+	Imported.Drill_PlayerAllowEventMove = true;
+	var DrillUp = DrillUp || {};
+	DrillUp.parameters = PluginManager.parameters('Drill_PlayerAllowEventMove');
 	
 	
 	//==============================
@@ -301,9 +301,18 @@
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_PAlEM_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_PAlEM_pluginCommand.call(this, command, args);
+	this.drill_PAlEM_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_PAlEM_pluginCommand = function( command, args ){
 	if( command === ">允许操作事件移动" ){
 		
 		/*-----------------鼠标设置------------------*/

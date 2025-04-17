@@ -242,7 +242,7 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称：		RCG (Core_Of_Move_Route)
+//		插件简称		RCG (Core_Of_Move_Route)
 //		临时全局变量	DrillUp.g_RCG_xxx
 //		临时局部变量	无
 //		存储数据变量	无
@@ -315,7 +315,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_RCG_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_RCG_PluginTip_baseList.length == 0 ){ return ""; }
@@ -331,10 +331,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_RouteCommandGroup = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_RouteCommandGroup');
+	var Imported = Imported || {};
+	Imported.Drill_RouteCommandGroup = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_RouteCommandGroup');
 	
 	/*-----------------杂项------------------*/
     DrillUp.g_RCG_towardStop = String(DrillUp.parameters["接近到重叠位置时是否停下"] || "true") === "true";

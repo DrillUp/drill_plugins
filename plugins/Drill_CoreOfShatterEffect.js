@@ -839,7 +839,8 @@
 //			无
 //		
 //		★插件私有类：
-//			无
+//			* 方块粉碎控制器【Drill_COSE_Controller】
+//			* 方块粉碎贴图【Drill_COSE_LayerSprite】
 //		
 //		★必要注意事项：
 //			1.这里引用了弹道核心的：坐标、透明度 功能。
@@ -871,7 +872,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_COSE_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_COSE_PluginTip_baseList.length == 0 ){ return ""; }
@@ -905,10 +906,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_CoreOfShatterEffect = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_CoreOfShatterEffect');
+	var Imported = Imported || {};
+	Imported.Drill_CoreOfShatterEffect = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_CoreOfShatterEffect');
 	
 	
 	//==============================
@@ -1031,15 +1032,11 @@ if( Imported.Drill_CoreOfBallistics ){
 	
 //=============================================================================
 // ** 方块粉碎控制器【Drill_COSE_Controller】
-// **			
-// **		索引：	COSE（可从子插件搜索到函数、类用法）
-// **		来源：	独立数据
-// **		实例：	> Drill_EventShatterEffect 插件中 Game_CharacterBase 对象的 ._drill_ESE_controller 成员
-// **		应用：	> Drill_EventShatterEffect 插件中 Game_CharacterBase 对象的 drill_COSE_update 帧刷新。
 // **		
 // **		作用域：	地图界面、战斗界面、菜单界面
-// **		主功能：	> 定义一个专门控制粉碎的数据类。
-// **		子功能：	->帧刷新
+// **		主功能：	定义一个专门控制粉碎的数据类。
+// **		子功能：	
+// **					->帧刷新
 // **						->重设数据
 // **						->显示/隐藏
 // **						->暂停/继续
@@ -1536,17 +1533,14 @@ Drill_COSE_Controller.prototype.drill_updateTime = function(){
 
 //=============================================================================
 // ** 方块粉碎贴图【Drill_COSE_LayerSprite】
-// **			
-// **		索引：	COSE（可从子插件搜索到函数、类用法）
-// **		来源：	继承于Sprite
-// **		实例：	> Drill_EventShatterEffect 插件中 Sprite_Character 对象的 ._drill_ESE_sprite 成员
-// **		应用：	> Drill_EventShatterEffect 插件中 Sprite_Character 对象的 drill_COSE_setController 绑定
 // **		
 // **		作用域：	地图界面、战斗界面、菜单界面
-// **		主功能：	> 定义一个粉碎贴图，能够播放碎片四散的动画。
-// **					> 贴图不影响父贴图，更【不会隐藏】父贴图。
+// **		主功能：	定义一个粉碎贴图，能够播放碎片四散的动画。
+// **		子功能：	
+// **					->帧刷新
 // **
-// **		说明：	> 子插件需要根据情况，手动控制 父贴图 的显示。
+// **		说明：	> 贴图不影响父贴图，更【不会隐藏】父贴图。
+// **				> 子插件需要根据情况，手动控制 父贴图 的显示。
 // **				> 该类不能单独使用，必须结合 方块粉碎控制器 数据类。
 // **
 // **		代码：	> 范围 - 该类只对 粉碎配置 提供简易动画。

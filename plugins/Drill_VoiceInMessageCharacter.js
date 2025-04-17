@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        声音 - 对话文字响声
+ * @plugindesc [v1.4]        声音 - 逐个绘制的响声
  * @author Drill_up
  * 
  * @Drill_LE_param "声音-%d"
@@ -18,23 +18,27 @@
  * 如果你有兴趣，也可以来看看更多我写的drill插件哦ヽ(*。>Д<)o゜
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
- * 你可以使得对话框的每个字符播放时，发出相应的文字响声。
+ * 你可以使得逐个绘制每个字符时，发出相应的字符响声。
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
  * 该插件 不能 单独使用。
  * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfWindowCharacter   窗口字符-窗口字符核心
+ *   - Drill_CoreOfWindowCharacter   窗口字符-窗口字符核心★★v2.0及以上★★
+ * 可被扩展：
+ *   - Drill_CoreOfDialog            对话框-对话框优化核心
+ *     如果没有对话框优化核心，则响声的设置在对话框中不起作用。
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：战斗界面、地图界面。
  *   作用于对话框。
- * 2.了解更多响声相关，可以去看看 "23.窗口字符 > 关于对话文字速度.docx"。
+ * 2.了解更多响声相关，可以去看看 "23.窗口字符 > 关于逐个绘制的播放速度.docx"。
  * 细节：
- *   (1.窗口字符设置的优先级比 插件指令设置 高。
- *      如果窗口字符设置了声音，优先使用窗口字符的。
+ *   (1.窗口字符设置的优先级比插件指令设置的高。
+ *      如果窗口字符修改了声音，那么按窗口字符来修改。
+ *      但窗口字符的修改，只临时有效，对话框中下一页 或 执行重新绘制，都会被重置。
  * 设计：
  *   (1.由于默认情况下游戏对话的播放速度为每帧一个字，速度
  *      特别快，对话响声会比较刺耳。
@@ -44,29 +48,43 @@
  *      比如设置每2个字才播放一次声音，这样能有效减少播放频率。
  * 
  * -----------------------------------------------------------------------------
- * ----可选设定 - 插件指令修改
- * 你可以通过插件指令修改当前的声音：
- * 
- * 插件指令：>对话文字响声 : 声音开关 : 开启
- * 插件指令：>对话文字响声 : 声音开关 : 关闭
- * 插件指令：>对话文字响声 : 设置声音 : 声音[1]
- * 插件指令：>对话文字响声 : 设置声音 : 默认声音
- * 
- * 插件指令：>对话文字响声 : 设置字数跳跃 : 字数[2]
- * 插件指令：>对话文字响声 : 设置字数跳跃 : 默认字数
- * 
- * 1."声音[1]"表示对应声音配置1，修改后将使用该文字响声。
- * 
- * -----------------------------------------------------------------------------
- * ----可选设定 - 窗口字符修改
- * 你可以使用窗口字符修改文字响声：
+ * ----激活条件
+ * 你可以使用窗口字符修改字符响声：
  * 
  * 窗口字符：\dVIMC[1]
- * 窗口字符：\dVIMC[默认]
+ * 窗口字符：\dVIMC[默认声音]
  * 窗口字符：\dVIMC[关闭]
  * 
  * 1."\dVIMC[1]"表示对应ID为1的声音配置。
  *   窗口字符设置后，只在当前对话框页内有效，下一页将恢复设置。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 全局默认值
+ * 你可以通过插件指令修改默认设置：
+ * 
+ * 插件指令：>逐个绘制的响声 : 所有文本 : 修改声音 : 声音[1]
+ * 插件指令：>逐个绘制的响声 : 所有文本 : 修改字数跳跃 : 字数[2]
+ * 插件指令：>逐个绘制的响声 : 所有文本 : 恢复默认声音
+ * 插件指令：>逐个绘制的响声 : 所有文本 : 恢复默认字数跳跃
+ * 
+ * 插件指令：>逐个绘制的响声 : 对话框 : 修改模式 : 自定义模式
+ * 插件指令：>逐个绘制的响声 : 对话框 : 修改模式 : 与所有文本一致
+ * 插件指令：>逐个绘制的响声 : 对话框 : 修改声音 : 声音[1]
+ * 插件指令：>逐个绘制的响声 : 对话框 : 修改字数跳跃 : 字数[2]
+ * 插件指令：>逐个绘制的响声 : 对话框 : 恢复默认声音
+ * 插件指令：>逐个绘制的响声 : 对话框 : 恢复默认字数跳跃
+ * 
+ * 1.插件指令修改的是全局默认值，设置后永久有效。
+ *   新建的所有贴图/窗口，全部使用此设置作为 默认值。
+ *   但注意，窗口字符的优先级 比该指令高，若有窗口字符，优先用窗口字符效果。
+ * 2."声音[1]"表示对应声音配置1，修改后将使用该字符响声。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 插件指令修改
+ * 你可以通过插件指令修改当前的声音：
+ * 
+ * 插件指令：>逐个绘制的响声 : 声音总开关 : 开启
+ * 插件指令：>逐个绘制的响声 : 声音总开关 : 关闭
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -99,21 +117,55 @@
  * 优化了旧存档的识别与兼容。
  * [v1.3]
  * 修复了按键时会响一声的bug。
+ * [v1.4]
+ * 大幅度修改了底层，并且兼容了新的底层结构。
  * 
  * 
  * 
  * 
- * @param 字数跳跃
+ * 
+ * @param ---全局默认值---
+ * @desc 
+ * 
+ * @param 所有文本-默认对话播放声音
+ * @parent ---全局默认值---
+ * @type number
+ * @min 0
+ * @desc 默认对话播放的声音ID，0表示没有声音。
+ * @default 0
+ * 
+ * @param 所有文本-默认字数跳跃
+ * @parent ---全局默认值---
  * @type number
  * @min 1
  * @desc 默认为1，1表示每1个字播放一次声音，2表示每2个字播放一次声音。
  * @default 1
  * 
- * @param 默认对话播放声音
+ * 
+ * @param 对话框声音模式
+ * @parent ---全局默认值---
+ * @type select
+ * @option 自定义模式
+ * @value 自定义模式
+ * @option 与所有文本一致
+ * @value 与所有文本一致
+ * @desc 对话框的模式。
+ * @default 自定义模式
+ * 
+ * @param 对话框-默认对话播放声音
+ * @parent 对话框声音模式
  * @type number
  * @min 0
  * @desc 默认对话播放的声音ID，0表示没有声音。
  * @default 0
+ * 
+ * @param 对话框-默认字数跳跃
+ * @parent 对话框声音模式
+ * @type number
+ * @min 1
+ * @desc 默认为1，1表示每1个字播放一次声音，2表示每2个字播放一次声音。
+ * @default 1
+ * 
  * 
  * @param ---声音组 1至20---
  * @default
@@ -247,7 +299,7 @@
  * 
  * @param 资源-声音
  * @desc 声音的资源文件。
- * @default (需配置)默认对话文字响声
+ * @default (需配置)默认逐个绘制的响声
  * @require 1
  * @dir audio/se/
  * @type file
@@ -298,9 +350,16 @@
 //			->☆静态数据
 //			->☆插件指令
 //			->☆存储数据
-//			->☆窗口字符
 //			
-//			->☆文字响声
+//			->☆窗口字符应用之效果字符
+//				> \dVIMC[关闭]
+//				> \dVIMC[默认声音]
+//				> \dVIMC[1]
+//			->☆全局默认值
+//				->准备绘制配置（继承）
+//			x->☆重置控制
+//			
+//			->☆字符响声
 //				->字数跳跃
 //				->每帧最多播放一次
 //			
@@ -317,7 +376,7 @@
 //			暂无
 //
 //		★其它说明细节：
-//			1.对话文字响声的实际效果并没有想象中那么合适。
+//			1.逐个绘制的响声的实际效果并没有想象中那么合适。
 //			  暂时不要考虑太多扩展功能，以免显得配置过于臃肿。
 //			
 //		★存在的问题：
@@ -331,12 +390,12 @@
 	// * 提示信息 - 参数
 	//==============================
 	var DrillUp = DrillUp || {}; 
-	DrillUp.g_VIMC_PluginTip_curName = "Drill_VoiceInMessageCharacter.js 声音-对话文字响声";
+	DrillUp.g_VIMC_PluginTip_curName = "Drill_VoiceInMessageCharacter.js 声音-逐个绘制的响声";
 	DrillUp.g_VIMC_PluginTip_baseList = ["Drill_CoreOfWindowCharacter.js 窗口字符-窗口字符核心"];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_VIMC_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_VIMC_PluginTip_baseList.length == 0 ){ return ""; }
@@ -352,9 +411,9 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_VoiceInMessageCharacter = true;
-　　var DrillUp = DrillUp || {}; 
+	var Imported = Imported || {};
+	Imported.Drill_VoiceInMessageCharacter = true;
+	var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_VoiceInMessageCharacter');
 	
 	
@@ -370,11 +429,6 @@
 		data['pan'] = Number( dataFrom["声像"] || 0);
 		return data;
 	}
-	
-	/*-----------------杂项------------------*/
-	DrillUp.g_VIMC_charSkip = Number(DrillUp.parameters["字数跳跃"] || 1);
-	DrillUp.g_VIMC_default = Number(DrillUp.parameters["默认对话播放声音"] || 0);
-	
 	/*-----------------声音------------------*/
 	DrillUp.g_VIMC_sound_length = 20;
 	DrillUp.g_VIMC_sound = [];
@@ -388,6 +442,16 @@
 		}
 	}
 	
+	/*-----------------『全局默认值』所有文本（静态数据）------------------*/
+	DrillUp.g_VIMC_globalVoice = Number(DrillUp.parameters["所有文本-默认对话播放声音"] || 0);
+	DrillUp.g_VIMC_globalCharSkip = Number(DrillUp.parameters["所有文本-默认字数跳跃"] || 1);
+	
+	/*-----------------『全局默认值』对话框（静态数据）------------------*/
+	DrillUp.g_VIMC_dialogMode = String(DrillUp.parameters["对话框声音模式"] || "自定义模式"); 
+	DrillUp.g_VIMC_dialogVoice = Number(DrillUp.parameters["对话框-默认对话播放声音"] || 0);
+	DrillUp.g_VIMC_dialogCharSkip = Number(DrillUp.parameters["对话框-默认字数跳跃"] || 1);
+	
+	
 	
 //=============================================================================
 // * >>>>基于插件检测>>>>
@@ -398,57 +462,103 @@ if( Imported.Drill_CoreOfWindowCharacter ){
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_VIMC_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_VIMC_pluginCommand.call(this, command, args);
-	if( command === ">对话文字响声" ){
+	this.drill_VIMC_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_VIMC_pluginCommand = function( command, args ){
+	if( command === ">逐个绘制的响声" ){
 		
-		/*-----------------声音开关------------------*/
+		/*-----------------『全局默认值』所有文本（插件指令）------------------*/
+		if( args.length >= 2 ){
+			var type = String(args[1]);
+			if( type == "所有文本" ){
+				if( args.length == 4 ){
+					var temp1 = String(args[3]);
+					if( temp1 == "恢复默认声音" ){
+						$gameSystem._drill_VIMC_globalVoice = DrillUp.g_VIMC_globalVoice;
+					}
+					if( temp1 == "恢复默认字数跳跃" ){
+						$gameSystem._drill_VIMC_globalCharSkip = DrillUp.g_VIMC_globalCharSkip;
+					}
+				}
+				if( args.length == 6 ){
+					var temp1 = String(args[3]);
+					var temp2 = String(args[5]);
+					if( temp1 == "修改声音" ){
+						temp2 = temp2.replace("声音[","");
+						temp2 = temp2.replace("]","");
+						$gameSystem._drill_VIMC_globalVoice = Number(temp2);
+					}
+					if( temp1 == "修改字数跳跃" ){
+						temp2 = temp2.replace("字数[","");
+						temp2 = temp2.replace("]","");
+						$gameSystem._drill_VIMC_globalCharSkip = Math.max( 1,Number(temp2) );
+					}
+				}
+			}
+		}
+		
+		/*-----------------『全局默认值』对话框（插件指令）------------------*/
+		if( args.length >= 2 ){
+			var type = String(args[1]);
+			if( type == "对话框" ){
+				if( args.length == 4 ){
+					var temp1 = String(args[3]);
+					if( temp1 == "恢复默认声音" ){
+						$gameSystem._drill_VIMC_dialogVoice = DrillUp.g_VIMC_globalVoice;
+					}
+					if( temp1 == "恢复默认字数跳跃" ){
+						$gameSystem._drill_VIMC_dialogCharSkip = DrillUp.g_VIMC_globalCharSkip;
+					}
+				}
+				if( args.length == 6 ){
+					var temp1 = String(args[3]);
+					var temp2 = String(args[5]);
+					if( temp1 == "修改模式" ){
+						$gameSystem._drill_VIMC_dialogMode = temp2;
+					}
+					if( temp1 == "修改声音" ){
+						temp2 = temp2.replace("声音[","");
+						temp2 = temp2.replace("]","");
+						$gameSystem._drill_VIMC_dialogVoice = Number(temp2);
+					}
+					if( temp1 == "修改字数跳跃" ){
+						temp2 = temp2.replace("字数[","");
+						temp2 = temp2.replace("]","");
+						$gameSystem._drill_VIMC_dialogCharSkip = Math.max( 1,Number(temp2) );
+					}
+				}
+			}
+		}
+		
+		/*-----------------声音总开关------------------*/
 		if( args.length == 4 ){
 			var type = String(args[1]);
 			var temp1 = String(args[3]);
-			if( type == "声音开关" ){
+			if( type == "声音总开关" || type == "声音开关" ){
 				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
-					$gameSystem._drill_VIMC_soundEnabled = true;
+					$gameSystem._drill_VIMC_voiceEnabled = true;
 				}
 				if( temp1 == "关闭" || temp1 == "禁用" ){
-					$gameSystem._drill_VIMC_soundEnabled = false;
-				}
-			}
-			if( type == "设置声音" ){
-				if( temp1 == "默认声音" ){
-					$gameSystem._drill_VIMC_curSound = DrillUp.g_VIMC_default;
-				}
-				if( temp1.indexOf("声音[") != -1 ){
-					temp1 = temp1.replace("声音[","");
-					temp1 = temp1.replace("]","");
-					$gameSystem._drill_VIMC_curSound = Number(temp1);
+					$gameSystem._drill_VIMC_voiceEnabled = false;
 				}
 			}
 		}
 		if( args.length == 2 ){
 			var type = String(args[1]);
 			if( type == "开启声音" ){
-				$gameSystem._drill_VIMC_soundEnabled = true;
+				$gameSystem._drill_VIMC_voiceEnabled = true;
 			}
 			if( type == "关闭声音" ){
-				$gameSystem._drill_VIMC_soundEnabled = false;
-			}
-		}
-		
-		/*-----------------设置字数跳跃------------------*/
-		if( args.length == 4 ){
-			var type = String(args[1]);
-			var temp1 = String(args[3]);
-			if( type == "设置字数跳跃" ){
-				if( temp1 == "默认字数" ){
-					$gameSystem._drill_VIMC_charSkip = DrillUp.g_VIMC_charSkip;		//（目标字数）
-				}
-				if( temp1.indexOf("字数[") != -1 ){
-					temp1 = temp1.replace("字数[","");
-					temp1 = temp1.replace("]","");
-					$gameSystem._drill_VIMC_charSkip = Math.max( 1,Number(temp1) );	//（目标字数）
-				}
+				$gameSystem._drill_VIMC_voiceEnabled = false;
 			}
 		}
 	}
@@ -522,12 +632,16 @@ Game_System.prototype.drill_VIMC_checkSysData = function() {
 //==============================
 Game_System.prototype.drill_VIMC_initSysData_Private = function() {
 	
-	this._drill_VIMC_soundEnabled = true;						//声音开关
-	this._drill_VIMC_curSound = DrillUp.g_VIMC_default;			//当前声音（默认的）
-	this._drill_VIMC_curMessageSound = -1;						//当前声音（窗口字符的，优先级更高）
+	// > 『全局默认值』 - 所有文本（存储数据）
+	this._drill_VIMC_globalVoice = DrillUp.g_VIMC_globalVoice;			//所有文本-默认对话播放声音
+	this._drill_VIMC_globalCharSkip = DrillUp.g_VIMC_globalCharSkip;	//所有文本-默认字数跳跃
 	
-	this._drill_VIMC_charSkip = DrillUp.g_VIMC_charSkip;		//字数跳跃 - 目标字数
-	this._drill_VIMC_playCount = 0;								//字数跳跃 - 字数计数
+	// > 『全局默认值』 - 对话框（存储数据）
+	this._drill_VIMC_dialogMode = DrillUp.g_VIMC_dialogMode;			//对话框-模式
+	this._drill_VIMC_dialogVoice = DrillUp.g_VIMC_dialogVoice;			//对话框-默认对话播放声音
+	this._drill_VIMC_dialogCharSkip = DrillUp.g_VIMC_dialogCharSkip;	//对话框-默认字数跳跃
+	
+	this._drill_VIMC_voiceEnabled = true;		//声音总开关
 };
 //==============================
 // * 存储数据 - 载入存档时检查数据（私有）
@@ -535,7 +649,7 @@ Game_System.prototype.drill_VIMC_initSysData_Private = function() {
 Game_System.prototype.drill_VIMC_checkSysData_Private = function() {
 	
 	// > 旧存档数据自动补充
-	if( this._drill_VIMC_soundEnabled == undefined ){
+	if( this._drill_VIMC_voiceEnabled == undefined ){
 		this.drill_VIMC_initSysData();
 	}
 	
@@ -543,107 +657,179 @@ Game_System.prototype.drill_VIMC_checkSysData_Private = function() {
 
 
 //=============================================================================
-// ** ☆窗口字符
+// ** ☆窗口字符应用之效果字符
 //=============================================================================
 //==============================
-// * 窗口字符 - 效果字符（继承）
+// * 窗口字符应用之效果字符 - 组合符配置
 //==============================
-var _drill_VIMC_COWC_processNewEffectChar_Combined = Window_Base.prototype.drill_COWC_processNewEffectChar_Combined;
-Window_Base.prototype.drill_COWC_processNewEffectChar_Combined = function( matched_index, matched_str, command, args ){
-	_drill_VIMC_COWC_processNewEffectChar_Combined.call( this, matched_index, matched_str, command, args );
+var _drill_VIMC_COWC_effect_processCombined = Game_Temp.prototype.drill_COWC_effect_processCombined;
+Game_Temp.prototype.drill_COWC_effect_processCombined = function( matched_index, matched_str, command, args ){
+	_drill_VIMC_COWC_effect_processCombined.call( this, matched_index, matched_str, command, args );
 	
 	if( command == "dVIMC" ){
 		if( args.length == 1 ){
 			var temp1 = String(args[0]);
+			
+			// > 『窗口字符定义』 - 关闭声音（\dVIMC[关闭]）
 			if( temp1 == "关闭" || temp1 == "禁用" ){
-				$gameSystem._drill_VIMC_curMessageSound = 0;
-			}else if( temp1 == "默认" ){
-				$gameSystem._drill_VIMC_curMessageSound = DrillUp.g_VIMC_default;
+				this.drill_COWC_effect_submitCombined( "@@@dvc[false]" );
+				
+			// > 『窗口字符定义』 - 播放默认声音（\dVIMC[默认声音]）
+			}else if( temp1 == "默认" || temp1 == "默认声音" ){
+				this.drill_COWC_effect_submitCombined( "@@@dvc[default]" );
+				
+			// > 『窗口字符定义』 - 播放指定声音（\dVIMC[1]）
 			}else{
-				$gameSystem._drill_VIMC_curMessageSound = Number(temp1);
+				this.drill_COWC_effect_submitCombined( "@@@dvc[" + String(temp1) + "]" );
 			}
-			this.drill_COWC_charSubmit_Effect( 0, 0 );
 		}
 	}
 };
 //==============================
-// * 窗口字符 - 新建页 - 执行新建
+// * 窗口字符应用之效果字符 - 样式阶段-配置阶段（继承）
 //==============================
-var _drill_VIMC_newPage = Window_Message.prototype.newPage;
-Window_Message.prototype.newPage = function( textState ){
-	_drill_VIMC_newPage.call( this, textState );
-	$gameSystem._drill_VIMC_curMessageSound = -1;
+var _drill_VIMC_COCD_textBlock_processStyle = Game_Temp.prototype.drill_COCD_textBlock_processStyle;
+Game_Temp.prototype.drill_COCD_textBlock_processStyle = function( command, args, cur_infoParam, cur_baseParam, cur_blockParam, cur_rowParam ){
+	_drill_VIMC_COCD_textBlock_processStyle.call( this, command, args, cur_infoParam, cur_baseParam, cur_blockParam, cur_rowParam );
+	
+	if( command == "@@@dvc" ){	//（大小写敏感）
+		if( args.length == 1 ){
+			
+			// > 『底层字符定义』 - 关闭声音（@@@dvc[0]） drill_voice_character
+			if( String(args[0]) == "false" ){
+				cur_blockParam['VIMC_voiceId'] = 0;
+				
+			// > 『底层字符定义』 - 播放默认声音（@@@dvc[1]） drill_voice_character
+			}else if( String(args[0]) == "default" ){
+				if( $gameSystem._drill_VIMC_dialogMode == "自定义模式" && 
+					cur_infoParam['parentWindow'] == "Window_Message" ){
+					cur_blockParam['VIMC_voiceId'] = $gameSystem._drill_VIMC_dialogVoice;
+				}else{
+					cur_blockParam['VIMC_voiceId'] = $gameSystem._drill_VIMC_globalVoice;
+				}
+				
+			// > 『底层字符定义』 - 播放声音（@@@dvc[1]） drill_voice_character
+			}else{
+				cur_blockParam['VIMC_voiceId'] = Number(args[0]);
+			}
+			
+			this.drill_COCD_textBlock_submitStyle();
+			return;
+		}
+	}
 };
+
+
+//=============================================================================
+// ** ☆全局默认值
+//
+//			说明：	> 此处提供 全局默认值，使得可以作用于所有文本。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 全局默认值 - 准备绘制配置（继承）
+//
+//			说明：	> 由于 Bitmap 没有存放相关参数，所以直接继承函数 drill_COCD_initOptions 进行初始化。
+//==============================
+var _drill_VIMC_COCD_drawTextInit = Game_Temp.prototype.drill_COCD_initOptions;
+Game_Temp.prototype.drill_COCD_initOptions = function( o_data, o_bitmap ){
+	_drill_VIMC_COCD_drawTextInit.call( this, o_data, o_bitmap );
+	
+	// > 『全局默认值』 - 使用值 - 所有文本
+	if( $gameSystem == undefined ){ return; }
+	var cur_voice_id = $gameSystem._drill_VIMC_globalVoice;
+	
+	// > 『全局默认值』 - 使用值 - 对话框
+	if( o_bitmap != undefined && 
+		o_bitmap.drill_COWC_isInMessageWindow() ){
+		
+		if( $gameSystem._drill_VIMC_dialogMode == "自定义模式" ){
+			cur_voice_id = $gameSystem._drill_VIMC_dialogVoice;
+		}
+	}
+	
+	// > 『全局默认值』 - 使用值
+	if( o_data['blockParam']['VIMC_voiceId'] == undefined ){ o_data['blockParam']['VIMC_voiceId'] = cur_voice_id; }
+	
+}
 
 
 
 //=============================================================================
-// ** ☆文字响声『音效模块』
+// ** ☆字符响声『音效模块』
 //
 //			说明：	> 此模块控制 在指定文字位置，播放响声。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 文字响声 - 添加声音
+// * 字符响声 - 每个字符开始时（继承）
 //==============================
-var _drill_VIMC_processNormalCharacter = Window_Message.prototype.processNormalCharacter;
-Window_Message.prototype.processNormalCharacter = function( textState ){
-	_drill_VIMC_processNormalCharacter.call( this, textState );
+var _drill_VIMC_COWC_timing_textStart = Bitmap.prototype.drill_COWC_timing_textStart;
+Bitmap.prototype.drill_COWC_timing_textStart = function( textBlock, row_index, text_index ){
+	_drill_VIMC_COWC_timing_textStart.call( this, textBlock, row_index, text_index );
+	/*
+		这个过程已经处于 逐个绘制 中，且 <xxx>  \xxx  \xxx[xxx]  @@@xxx 全部都转换完毕。
+		进入到此函数，至少与前面的字符解析过程相差1帧，具体看update情况。
+	*/
+	var cur_blockParam = textBlock.drill_textBlock_getBlockParam();
 	
 	// > 开关关闭时，不要播放声音
-	if( $gameSystem._drill_VIMC_soundEnabled == false ){ return; }
+	if( $gameSystem._drill_VIMC_voiceEnabled == false ){ return; }
 	
-	// > 计算时，不要播放声音
-	if( this.drill_COWA_isCalculating() == true ){ return; }
+	// > 每帧最多播放一次
+	if( $gameTemp._drill_VIMC_canPlayInUpdate != true ){ return; }
+	$gameTemp._drill_VIMC_canPlayInUpdate = false;
 	
-	// > 跳出字符绘制时，才播放声音（循环打印多个字的时候，只发出一个字的响声）
-	if( this.drill_COWC_canBreakProcess() ){
-		
-		var cur_sound = -1;
-		if( $gameSystem._drill_VIMC_curSound > 0 ){
-			cur_sound = $gameSystem._drill_VIMC_curSound-1;
+	// > 声音资源
+	var voice_id = cur_blockParam['VIMC_voiceId'] -1;
+	var se_data = DrillUp.g_VIMC_sound[ voice_id ];
+	if( se_data == undefined ){ return; }
+	
+	
+	// > 字数跳跃 - 字数计数
+	if( this._drill_VIMC_charCount == undefined ){
+		this._drill_VIMC_charCount = 0;
+	}
+	this._drill_VIMC_charCount += 1;
+	
+	// > 字数跳跃 - 执行跳跃
+	if( this.drill_COWC_isInMessageWindow() ){
+		if( $gameSystem._drill_VIMC_dialogMode == "自定义模式" ){
+			if( this._drill_VIMC_charCount % $gameSystem._drill_VIMC_dialogCharSkip != 0 ){
+				return;
+			}
 		}
-		if( $gameSystem._drill_VIMC_curMessageSound > 0 ){
-			cur_sound = $gameSystem._drill_VIMC_curMessageSound-1;
-		}
-		if( cur_sound < 0 ){ return; }
-		
-		// > 声音资源
-		var se_data = DrillUp.g_VIMC_sound[ cur_sound ];
-		if( se_data == undefined ){ return; }
-		
-		
-		// > 每帧最多播放一次
-		if( $gameTemp._drill_VIMC_canPlay != true ){ return; }
-		$gameTemp._drill_VIMC_canPlay = false;
-		
-		
-		// > 字数跳跃 - 字数计数
-		$gameSystem._drill_VIMC_playCount += 1;
-		
-		// > 字数跳跃 - 执行跳跃
-		if( $gameSystem._drill_VIMC_playCount % $gameSystem._drill_VIMC_charSkip != 0 ){
+	}else{
+		if( this._drill_VIMC_charCount % $gameSystem._drill_VIMC_globalCharSkip != 0 ){
 			return;
 		}
-		
-		// > 播放声音
-		var se = {};
-		se.name = se_data['name'];
-		se.volume = se_data['volume'];
-		se.pitch = se_data['pitch'];
-		se.pan = se_data['pan'];
-		AudioManager.playSe(se);
 	}
+	
+	// > 『绘制过程定义』 - 播放声音（@@@dvc[1]）
+	$gameTemp.drill_VIMC_playSE( se_data );
 }
 //==============================
-// * 文字响声 - 帧刷新
+// * 字符响声 - 播放声音（开放函数）
 //==============================
-var _drill_VIMC_update = Window_Message.prototype.update;
-Window_Message.prototype.update = function() {
+Game_Temp.prototype.drill_VIMC_playSE = function( se_data ){
+	var se = {};
+	se.name = se_data['name'];
+	se.volume = se_data['volume'];
+	se.pitch = se_data['pitch'];
+	se.pan = se_data['pan'];
+	AudioManager.playSe(se);
+}
+//==============================
+// * 字符响声 - 场景基类 帧刷新
+//==============================
+var _drill_VIMC_update = Scene_Base.prototype.update;
+Scene_Base.prototype.update = function(){
 	_drill_VIMC_update.call(this);
 	
 	// > 每帧最多播放一次
-	$gameTemp._drill_VIMC_canPlay = true;
+	if( $gameTemp != undefined ){
+		$gameTemp._drill_VIMC_canPlayInUpdate = true;
+	}
 }
 
 

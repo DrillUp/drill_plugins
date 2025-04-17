@@ -146,10 +146,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_GaugeMapNameController = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_GaugeMapNameController');
+	var Imported = Imported || {};
+	Imported.Drill_GaugeMapNameController = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_GaugeMapNameController');
 	
 	
 	/*-----------------杂项------------------*/
@@ -157,11 +157,20 @@
 	
 	
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_GMNC_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_GMNC_pluginCommand.call(this, command, args);
+	this.drill_GMNC_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_GMNC_pluginCommand = function( command, args ){
 	if( command === ">地图名控制器" ){
 		
 		if( args.length == 2 ){

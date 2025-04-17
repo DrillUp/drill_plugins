@@ -208,10 +208,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_CoreOfFilter = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_CoreOfFilter');
+	var Imported = Imported || {};
+	Imported.Drill_CoreOfFilter = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_CoreOfFilter');
 	
 	
 //=============================================================================
@@ -241,10 +241,10 @@ Bitmap.prototype.drawCircle = function(x, y, radius, color) {
 	_drill_COF_bitmap_drawCircle.apply(this,arguments);
 	this._drill_COF_isDirty = true;
 }
-var _drill_COF_bitmap_drawText = Bitmap.prototype.drawText;
-Bitmap.prototype.drawText = function(text, x, y, maxWidth, lineHeight, align) {
-	_drill_COF_bitmap_drawText.apply(this,arguments);
-	if (text !== undefined) {
+var _drill_COF_COCD_org_drawText = Bitmap.prototype.drill_COCD_org_drawText;
+Bitmap.prototype.drill_COCD_org_drawText = function( text, x, y, maxWidth, lineHeight, align){
+	_drill_COF_COCD_org_drawText.call( this, text, x, y, maxWidth, lineHeight, align );
+	if( text !== undefined ){
 		this._drill_COF_isDirty = true;
 	}
 }

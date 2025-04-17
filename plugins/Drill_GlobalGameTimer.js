@@ -316,7 +316,7 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称：		GGT (Global_Game_Timer)
+//		插件简称		GGT (Global_Game_Timer)
 //		临时全局变量	DrillUp.g_GGT_xxx
 //		临时局部变量	无
 //		存储数据变量	无
@@ -393,10 +393,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_GlobalGameTimer = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_GlobalGameTimer');
+	var Imported = Imported || {};
+	Imported.Drill_GlobalGameTimer = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_GlobalGameTimer');
 	
 	//==============================
 	// * 静态数据 - 定时开关
@@ -441,9 +441,18 @@
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_GGT_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_GGT_pluginCommand.call(this,command, args);
+	this.drill_GGT_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_GGT_pluginCommand = function( command, args ){
 	if( command === ">累计游戏计时器" ){ 
 	
 		/*-----------------当前累计时间------------------*/

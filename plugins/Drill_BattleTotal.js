@@ -234,10 +234,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_BattleTotal = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_BattleTotal');
+	var Imported = Imported || {};
+	Imported.Drill_BattleTotal = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_BattleTotal');
 	
 	
 	/*-----------------杂项------------------*/
@@ -258,11 +258,20 @@
 
 	
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
-var _drill_BT_pluginCommand = Game_Interpreter.prototype.pluginCommand
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
+var _drill_BT_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_BT_pluginCommand.call(this, command, args);
+	this.drill_BT_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_BT_pluginCommand = function( command, args ){
 	if( command === ">单次战斗统计" ){
 		
 		if( args.length == 6 ){

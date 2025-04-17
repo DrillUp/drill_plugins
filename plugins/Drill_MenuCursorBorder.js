@@ -236,6 +236,7 @@
  * @desc 只用于方便区分查看的标签，不作用在插件中。
  * @default ==新的选项边框样式==
  * 
+ * 
  * @param ---常规---
  * @desc 
  * 
@@ -256,6 +257,7 @@
  * @min 255
  * @desc 选项边框在窗口未激活时的透明度。0为完全透明，255为完全不透明。
  * @default 125
+ * 
  * 
  * @param ---边框---
  * @desc 
@@ -315,6 +317,7 @@
  * @value 保持切割原样
  * @desc 边框的拉伸方式。
  * @default 循环平铺
+ * 
  * 
  * @param ---边角---
  * @desc 
@@ -378,7 +381,6 @@
  * @desc 使用左右或者上下浮动时，浮动偏移的位置量，单位像素。
  * @default 8
  * 
- * 
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -394,7 +396,7 @@
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^2)*o(贴图处理)*o(选项窗口数)
 //		★性能测试因素	技能面板
-//		★性能测试消耗	菜单：21.51ms（drill_MCB_updateCorner函数）20.31ms（drill_MCB_updateBorder函数）
+//		★性能测试消耗	菜单：21.51ms（drill_sprite_updateCorner函数）20.31ms（drill_sprite_updateBorder函数）
 //						地图：29.31ms
 //						战斗：56.60ms
 //		★最坏情况		暂无
@@ -405,13 +407,18 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			菜单选项边框：
-//				->闪烁白矩形
-//				->边框
-//					->9区域剪切
-//				->边角
-//					->4区域剪切
-//					->4区域移动动画
+//			->☆提示信息
+//			->☆静态数据
+//			->☆插件指令
+//			->☆存储数据
+//			
+//			->☆闪烁白矩形
+//			->☆选项边贴图控制
+//			->选项边贴图【Drill_MCB_Sprite】
+//				->A主体
+//				->B播放GIF
+//				->C边框层
+//				->D边角层
 //
 //
 //		★家谱：
@@ -421,7 +428,7 @@
 //			无
 //		
 //		★插件私有类：
-//			* 选项边框贴图【Drill_MCB_Sprite】
+//			* 选项边贴图【Drill_MCB_Sprite】
 //		
 //		★必要注意事项：
 //			暂无
@@ -435,7 +442,7 @@
 //		
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -446,11 +453,11 @@
 	
 	
 //=============================================================================
-// ** 静态数据
+// ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_MenuCursorBorder = true;
-　　var DrillUp = DrillUp || {}; 
+	var Imported = Imported || {};
+	Imported.Drill_MenuCursorBorder = true;
+	var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_MenuCursorBorder');
 
 	//==============================
@@ -495,9 +502,6 @@
 		return data;
 	}
 	
-	/*-----------------杂项------------------*/
-	DrillUp.g_MCB_defaultStyle = Number(DrillUp.parameters["默认边框样式"] || 1); 
-	
 	/*-----------------样式集------------------*/
 	DrillUp.g_MCB_list_length = 20;
 	DrillUp.g_MCB_list = [];
@@ -510,15 +514,28 @@
 			DrillUp.g_MCB_list[i] = DrillUp.drill_MCB_initStyle( {} );
 		}
 	}
-
+	
+	/*-----------------杂项------------------*/
+	DrillUp.g_MCB_defaultStyle = Number(DrillUp.parameters["默认边框样式"] || 1); 
+	
 	
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_MCB_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_MCB_pluginCommand.call(this, command, args);
+	this.drill_MCB_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_MCB_pluginCommand = function( command, args ){
 	if( command === ">菜单选项边框" ){
+		
 		if(args.length == 2){
 			var type = String(args[1]);
 			if( type == "显示" ){	
@@ -542,7 +559,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -608,9 +625,10 @@ Game_System.prototype.drill_MCB_checkSysData = function() {
 //==============================
 Game_System.prototype.drill_MCB_initSysData_Private = function() {
 	
-	this._drill_MCB_visible = true;
-	this._drill_MCB_style = DrillUp.g_MCB_defaultStyle;
-	this._drill_MCB_glimmerRect_visible = true;
+	this._drill_MCB_visible = true;							//是否启用边框
+	this._drill_MCB_style = DrillUp.g_MCB_defaultStyle;		//当前边框样式
+	
+	this._drill_MCB_glimmerRect_visible = true;				//是否显示闪烁白矩形
 };
 //==============================
 // * 存储数据 - 载入存档时检查数据（私有）
@@ -626,7 +644,10 @@ Game_System.prototype.drill_MCB_checkSysData_Private = function() {
 
 
 //=============================================================================
-// * 闪烁白矩形
+// ** ☆闪烁白矩形
+//
+//			说明：	> 该模块将对 窗口底层 的 闪烁白矩形 进行专门管理。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 闪烁白矩形 - 基类捕获
@@ -639,7 +660,7 @@ Window.prototype._updateCursor = function() {
 	}
 }
 //==============================
-// * 闪烁白矩形 - 可见控制（子类继承用接口）
+// * 闪烁白矩形 - 可见控制（可继承）（子类接口）
 //==============================
 Window.prototype.drill_MCB_glimmerRectVisible = function() {
 	return $gameSystem._drill_MCB_glimmerRect_visible;
@@ -647,10 +668,13 @@ Window.prototype.drill_MCB_glimmerRectVisible = function() {
 
 
 //=============================================================================
-// * 选项边框
+// ** ☆选项边贴图控制
+//
+//			说明：	> 该模块将对 选项边贴图 进行专门管理。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 选项边框 - 初始化
+// * 选项边贴图控制 - 初始化
 //==============================
 var _drill_MCB_initialize = Window_Selectable.prototype.initialize;
 Window_Selectable.prototype.initialize = function( x, y, width, height ){
@@ -662,8 +686,10 @@ Window_Selectable.prototype.initialize = function( x, y, width, height ){
 		this.addChild( this._drill_selectable_layer );
 	}
 	
-	// > 选项边框
-	this._drill_MCB_needRefresh = false;
+	// > 位置刷新锁
+	this._drill_MCB_needRefreshPosition = false;
+	
+	// > 选项边贴图
 	this._drill_MCB_sprite = new Drill_MCB_Sprite( this );
 	this._drill_MCB_sprite.zIndex = 10;
 	this._drill_selectable_layer.addChild( this._drill_MCB_sprite );
@@ -672,47 +698,66 @@ Window_Selectable.prototype.initialize = function( x, y, width, height ){
 	this._drill_selectable_layer.children.sort(function(a, b){return a.zIndex-b.zIndex});
 };
 //==============================
-// * 选项边框 - 捕获
+// * 选项边贴图控制 - 捕获
 //==============================
 var _drill_MCB_setCursorRect = Window_Selectable.prototype.setCursorRect;
 Window_Selectable.prototype.setCursorRect = function( x, y, width, height ){
 	_drill_MCB_setCursorRect.call(this,x, y, width, height);
 	
-	// > 刷新标记
-	this._drill_MCB_needRefresh = true;
+	// > 位置刷新锁
+	this._drill_MCB_needRefreshPosition = true;
 	
 	// > 按钮组样式
-	if( this._drill_MCB_sprite ){
+	if( this._drill_MCB_sprite != undefined ){
 		var style_id = this.drill_MCB_borderStyleId();	//（子类可继承此方法，来锁定样式）
 		this._drill_MCB_sprite.drill_MCB_changeStyle( style_id );
 	}
 };
 //==============================
-// * 选项边框 - 是否启用边框（子类继承用接口）
+// * 选项边贴图控制 - 是否启用边框（可继承）（子类接口）
 //==============================
 Window_Selectable.prototype.drill_MCB_borderEnabled = function() {
 	return $gameSystem._drill_MCB_visible;
 }
 //==============================
-// * 选项边框 - 当前边框样式（子类继承用接口）
+// * 选项边贴图控制 - 当前边框样式（可继承）（子类接口）
 //==============================
 Window_Selectable.prototype.drill_MCB_borderStyleId = function() {
 	return $gameSystem._drill_MCB_style;
 }
 
 
+
 //=============================================================================
-// ** 选项边框贴图【Drill_MCB_Sprite】
-//
-//	 		代码：	> 范围 - 该类对选项窗口的矩形区域进行可视化。
-//					> 结构 - [ ●合并 /分离/混乱] 数据与贴图合并，外部只能改样式。
-//					> 数量 - [单个/ ●多个 ] 每个选项窗口带一个。
-//					> 创建 - [ ●一次性 /自延迟/外部延迟] 
-//					> 销毁 - [ ●不考虑 /自销毁/外部销毁 ] 
-//					> 样式 - [不可修改/ ●自变化 /外部变化] 所有样式的参数都在贴图内部自变化。
+// ** 选项边贴图【Drill_MCB_Sprite】
+// **		
+// **		作用域：	地图界面、战斗界面、菜单界面
+// **		主功能：	定义一个贴图，包含边框和边角两个结构。
+// **		子功能：	
+// **					->贴图『独立贴图』
+// **						x->显示贴图/隐藏贴图
+// **						x->是否就绪
+// **						x->优化策略
+// **						x->销毁
+// **						->初始化数据
+// **						->初始化对象
+// **					
+// **					->A主体
+// **						->刷新样式
+// **						->刷新位置
+// **					->B播放GIF
+// **					->C边框层
+// **					->D边角层
+// **
+// ** 		代码：	> 范围 - 该类对选项窗口的矩形区域进行可视化。
+// **				> 结构 - [ ●合并 /分离/混乱] 数据与贴图合并，外部只能改样式。
+// **				> 数量 - [单个/ ●多个 ] 每个选项窗口带一个。
+// **				> 创建 - [ ●一次性 /自延迟/外部延迟] 
+// **				> 销毁 - [ ●不考虑 /自销毁/外部销毁 ] 
+// **				> 样式 - [不可修改/ ●自变化 /外部变化] 所有样式的参数都在贴图内部自变化。
 //=============================================================================
 //==============================
-// * 边框贴图 - 定义
+// * 选项边贴图 - 定义
 //==============================
 function Drill_MCB_Sprite() {
 	this.initialize.apply(this, arguments);
@@ -720,74 +765,202 @@ function Drill_MCB_Sprite() {
 Drill_MCB_Sprite.prototype = Object.create(Sprite_Base.prototype);
 Drill_MCB_Sprite.prototype.constructor = Drill_MCB_Sprite;
 //==============================
-// * 边框贴图 - 初始化
+// * 选项边贴图 - 初始化
 //==============================
 Drill_MCB_Sprite.prototype.initialize = function( parent ){
 	Sprite_Base.prototype.initialize.call(this);
 	this._drill_parent = parent;
 	this._drill_curStyleId = DrillUp.g_MCB_defaultStyle;
-	this._drill_curStyle = JSON.parse(JSON.stringify( DrillUp.g_MCB_list[ this._drill_curStyleId-1 ] ));	//深拷贝数据
+	this._drill_curStyleData = JSON.parse(JSON.stringify( DrillUp.g_MCB_list[ this._drill_curStyleId-1 ] ));	//深拷贝数据
 	
-	this.drill_initSprite();			//初始化对象
+	this.drill_initData();					//初始化数据
+	this.drill_initSprite();				//初始化对象
 };
 //==============================
-// * 边框贴图 - 帧刷新
+// * 选项边贴图 - 帧刷新
 //==============================
 Drill_MCB_Sprite.prototype.update = function() {
 	Sprite_Base.prototype.update.call(this);
 	if( this._drill_parent == undefined ){ return; }
-	this.drill_updateSprite();			//帧刷新对象
+	
+	this.drill_sprite_updateAttr_Visible();		//帧刷新 - A主体 - 可见
+	this.drill_sprite_updateAttr_Opacity();		//帧刷新 - A主体 - 透明度
+	this.drill_sprite_updateAttr_Position();	//帧刷新 - A主体 - 位置
+	this.drill_sprite_updateGIF();				//帧刷新 - B播放GIF
+	this.drill_sprite_updateBorder();			//帧刷新 - C边框层
+	this.drill_sprite_updateCorner();			//帧刷新 - D边角层
+}
+//==============================
+// * 选项边贴图 - 初始化数据『独立贴图』
+//==============================
+Drill_MCB_Sprite.prototype.drill_initData = function() {
+	//（暂无 默认值）
 };
 //==============================
-// * 边框贴图 - 修改样式（接口）
-//==============================
-Drill_MCB_Sprite.prototype.drill_MCB_changeStyle = function( style_id ){
-	if( style_id == 0 ){ return; }
-	if( this._drill_curStyleId == style_id ){ return; }
-	this._drill_curStyleId = style_id;
-	this._drill_curStyle = JSON.parse(JSON.stringify( DrillUp.g_MCB_list[ this._drill_curStyleId-1 ] ));	//深拷贝数据
-	this.drill_initSprite();			//强制重新初始化;
-};
-//==============================
-// * 创建 - 初始化对象
+// * 选项边贴图 - 初始化对象『独立贴图』
 //==============================
 Drill_MCB_Sprite.prototype.drill_initSprite = function() {
-	var data = this._drill_curStyle;	
+	this.drill_sprite_initAttr();			//子功能初始化 - A主体
+	this.drill_sprite_initGIF();			//子功能初始化 - B播放GIF
+	this.drill_sprite_initBorder();			//子功能初始化 - C边框层
+	this.drill_sprite_initCorner();			//子功能初始化 - D边角层
+}
+
+
+//==============================
+// * A主体 - 子功能初始化
+//==============================
+Drill_MCB_Sprite.prototype.drill_sprite_initAttr = function() {
 	
 	// > 私有属性初始化
 	this.anchor.x = 0.5;
 	this.anchor.y = 0.5;
 	this.opacity = 0;
-	
-	// > 私有变量初始化
-	this._drill_time = 0;								//持续时间
-	this._drill_gifTime = 0;							//当前gif播放时间
-	this._drill_border_bitmaps = [];					//边框bitmap对象序列
-	this._drill_corner_bitmaps = [];					//边角bitmap对象序列
-	
-	// > 资源读取
-	for(var j = 0; j < data['border_gif_src'].length ; j++){
-		var src_str = data['border_gif_src'][j];
-		var obj_bitmap = ImageManager.loadBitmap( data['border_gif_src_file'], src_str, 0, true);
-		this._drill_border_bitmaps.push( obj_bitmap );
-	};
-	for(var j = 0; j < data['corner_gif_src'].length ; j++){
-		var src_str = data['corner_gif_src'][j];
-		var obj_bitmap = ImageManager.loadBitmap( data['corner_gif_src_file'], src_str, 0, true);
-		this._drill_corner_bitmaps.push( obj_bitmap );
-	};
-	
-	this.drill_createBorder();
-	this.drill_createCorner();
 }
 //==============================
-// * 创建 - 边框
+// * A主体 - 帧刷新 - 可见
+//==============================
+Drill_MCB_Sprite.prototype.drill_sprite_updateAttr_Visible = function() {
+	
+	// > 可见 - 全关情况
+	if( $gameSystem._drill_MCB_visible == false ){
+		this.visible = false;
+		return;
+	}
+	
+	// > 可见 - 继承控制不显示
+	if( this._drill_parent.drill_MCB_borderEnabled() == false ){
+		this.visible = false;
+		return;
+	}
+	
+	// > 检测父类 - 窗口关闭
+	if( this._drill_parent.isClosed() == true ){
+		this.visible = false;
+		return;
+	}
+	
+	// > 检测父类 - 窗口被完全隐藏
+	if( this._drill_parent.contentsOpacity <= 0 && 	//（文本域 透明度）
+		this._drill_parent.opacity <= 0 ){			//（背景容器层 透明度）
+		this.visible = false;
+		return;
+	}
+	
+	// > 可见 - 矩形长宽太小时，不可见
+	var rect = this.drill_MCB_getRect();
+	if( rect.width <= 2 || rect.height <= 2 ){
+		this.visible = false;
+		return;
+	}
+	
+	this.visible = true;
+}
+//==============================
+// * A主体 - 帧刷新 - 透明度
+//==============================
+Drill_MCB_Sprite.prototype.drill_sprite_updateAttr_Opacity = function() {
+	var data = this._drill_curStyleData;	
+	
+	// > 初始化前情况
+	if( this._drill_parent.active == false && this.opacity == 0 ){ return; }
+	
+	// > 根据激活状态刷新透明度
+	if( this._drill_parent.active == true ){
+		this.opacity += 15;
+	}else{
+		this.opacity -= 25;
+	}
+	
+	// > 未激活时，处于最低透明度
+	if( this.opacity < data['opacity'] ){
+		this.opacity = data['opacity'];
+	}
+}
+//==============================
+// * A主体 - 帧刷新 - 位置
+//==============================
+Drill_MCB_Sprite.prototype.drill_sprite_updateAttr_Position = function() {
+	if( this._drill_parent._drill_MCB_needRefreshPosition == false ){ return; }
+	this._drill_parent._drill_MCB_needRefreshPosition = false;	//位置刷新锁
+	
+	// > 刷新位置
+	this.drill_MCB_refreshPosition();
+}
+//==============================
+// * A主体 - 刷新样式（开放函数）
+//==============================
+Drill_MCB_Sprite.prototype.drill_MCB_changeStyle = function( style_id ){
+	if( style_id == undefined ){ return; }
+	if( style_id == 0 ){ return; }
+	
+	if( this._drill_curStyleId == style_id ){ return; }
+	this._drill_curStyleId = style_id;
+	this._drill_curStyleData = JSON.parse(JSON.stringify( DrillUp.g_MCB_list[ this._drill_curStyleId-1 ] ));	//深拷贝数据
+	
+	// > 强制 初始化对象
+	this.drill_initSprite();
+};
+//==============================
+// * A主体 - 刷新位置（开放函数）
+//==============================
+Drill_MCB_Sprite.prototype.drill_MCB_refreshPosition = function() {
+	var data = this._drill_curStyleData;	
+	var rect = this.drill_MCB_getRect();
+	this.x = rect.x + rect.width*0.5  + this._drill_parent.standardPadding() + data['shifting_x'];	//默认中心（注意要包含画布的内边距位置）
+	this.y = rect.y + rect.height*0.5 + this._drill_parent.standardPadding() + data['shifting_y'];
+}
+//==============================
+// * A主体 - 获取矩形（开放函数）
+//==============================
+Drill_MCB_Sprite.prototype.drill_MCB_getRect = function(){
+   return this._drill_parent._cursorRect
+};
+
+
+//==============================
+// * B播放GIF - 子功能初始化
+//==============================
+Drill_MCB_Sprite.prototype.drill_sprite_initGIF = function() {
+	this._drill_gifTime = 0;
+}
+//==============================
+// * B播放GIF - 帧刷新
+//==============================
+Drill_MCB_Sprite.prototype.drill_sprite_updateGIF = function() {
+	
+	// > 时间+1
+	if( this._drill_parent.active == true ){
+		this._drill_gifTime += 1;
+	}
+}
+
+
+//==============================
+// * C边框层 - 子功能初始化
+//==============================
+Drill_MCB_Sprite.prototype.drill_sprite_initBorder = function() {
+	var data = this._drill_curStyleData;
+	
+	// > 读取资源
+	this._drill_border_bitmaps = [];
+	for(var j = 0; j < data['border_gif_src'].length; j++){
+		var src_str = data['border_gif_src'][j];
+		var obj_bitmap = ImageManager.loadBitmap( data['border_gif_src_file'], src_str, 0, true );
+		this._drill_border_bitmaps.push( obj_bitmap );
+	};
+	
+	// > 创建
+	this.drill_createBorder();
+}
+//==============================
+// * C边框层 - 创建
 //==============================
 Drill_MCB_Sprite.prototype.drill_createBorder = function() {
-	var data = this._drill_curStyle;	
+	var data = this._drill_curStyleData;	
 	var rect = this.drill_MCB_getRect();
 	
-	// > 清理贴图
+	// > 清理 旧贴图
 	if( this._borderSprite_1 != undefined ){ this.removeChild( this._borderSprite_1 ); }
 	if( this._borderSprite_2 != undefined ){ this.removeChild( this._borderSprite_2 ); }
 	if( this._borderSprite_3 != undefined ){ this.removeChild( this._borderSprite_3 ); }
@@ -885,143 +1058,14 @@ Drill_MCB_Sprite.prototype.drill_createBorder = function() {
 	}
 }
 //==============================
-// * 创建 - 边角
+// * C边框层 - 帧刷新
 //==============================
-Drill_MCB_Sprite.prototype.drill_createCorner = function() {
-	var data = this._drill_curStyle;	
-	
-	// > 清理贴图
-	if( this._cornerSprite_1 != undefined ){ this.removeChild( this._cornerSprite_1 ); }
-	if( this._cornerSprite_2 != undefined ){ this.removeChild( this._cornerSprite_2 ); }
-	if( this._cornerSprite_3 != undefined ){ this.removeChild( this._cornerSprite_3 ); }
-	if( this._cornerSprite_4 != undefined ){ this.removeChild( this._cornerSprite_4 ); }
-	
-	// > 建立 左上、右上、左下、右下 区域
-	this._cornerSprite_1 = new Sprite();
-	this._cornerSprite_1.anchor.x = 0.5;
-	this._cornerSprite_1.anchor.y = 0.5;
-	this._cornerSprite_1.blendMode = data['corner_blendMode'];
-	this.addChild( this._cornerSprite_1 );
-	this._cornerSprite_2 = new Sprite();
-	this._cornerSprite_2.anchor.x = 0.5;
-	this._cornerSprite_2.anchor.y = 0.5;
-	this._cornerSprite_2.blendMode = data['corner_blendMode'];
-	this.addChild( this._cornerSprite_2 );
-	this._cornerSprite_3 = new Sprite();
-	this._cornerSprite_3.anchor.x = 0.5;
-	this._cornerSprite_3.anchor.y = 0.5;
-	this._cornerSprite_3.blendMode = data['corner_blendMode'];
-	this.addChild( this._cornerSprite_3 );
-	this._cornerSprite_4 = new Sprite();
-	this._cornerSprite_4.anchor.x = 0.5;
-	this._cornerSprite_4.anchor.y = 0.5;
-	this._cornerSprite_4.blendMode = data['corner_blendMode'];
-	this.addChild( this._cornerSprite_4 );
-
-	if( this._drill_corner_bitmaps.length > 0 ){
-		this._cornerSprite_1.bitmap = this._drill_corner_bitmaps[0];
-		this._cornerSprite_2.bitmap = this._drill_corner_bitmaps[0];
-		this._cornerSprite_3.bitmap = this._drill_corner_bitmaps[0];
-		this._cornerSprite_4.bitmap = this._drill_corner_bitmaps[0];
-	}
-	
-}
-//==============================
-// * 帧刷新对象
-//==============================
-Drill_MCB_Sprite.prototype.drill_updateSprite = function() {
-	this._drill_time += 1;						//时间+1
-	if( this._drill_parent.active ){ this._drill_gifTime += 1; }	//gif播放+1
-	this.drill_MCB_updateVisible();				//显示控制
-	this.drill_MCB_updateOpacity();				//透明度控制
-	this.drill_MCB_refreshPosition();			//位置刷新
-	
-	this.drill_MCB_updateBorder();				//帧刷新 边框
-	this.drill_MCB_updateCorner();				//帧刷新 边角
-	
-	// > 关闭刷新状态位
-	if( this._drill_parent._drill_MCB_needRefresh != false ){
-		this._drill_parent._drill_MCB_needRefresh = false;		
-	}
-}
-//==============================
-// * 帧刷新 - 显示控制
-//==============================
-Drill_MCB_Sprite.prototype.drill_MCB_updateVisible = function() {
-	
-	// > 全关情况
-	if( $gameSystem._drill_MCB_visible == false ){
-		this.visible = false;
-		return;
-	}
-	
-	// > 继承控制不显示
-	if( this._drill_parent.drill_MCB_borderEnabled() == false ){
-		this.visible = false;
-		return;
-	}
-	
-	// > 检测父类 - 窗口关闭
-	if( this._drill_parent.isClosed() == true ){
-		this.visible = false;
-		return;
-	}
-	
-	// > 检测父类 - 窗口被完全隐藏
-	if( this._drill_parent.contentsOpacity <= 0 && 	//（文本域 透明度）
-		this._drill_parent.opacity <= 0 ){			//（背景容器层 透明度）
-		this.visible = false;
-		return;
-	}
-	
-	// > 矩形长宽太小
-	if( this.drill_MCB_getRect().width <= 2 || this.drill_MCB_getRect().height <= 2 ){
-		this.visible = false;
-		return;
-	}
-	
-	this.visible = true;
-}
-//==============================
-// * 帧刷新 - 透明度控制
-//==============================
-Drill_MCB_Sprite.prototype.drill_MCB_updateOpacity = function() {
-	var data = this._drill_curStyle;	
-	
-	// > 初始化前情况
-	if( this._drill_parent.active == false && this.opacity == 0 ){ return; }
-	
-	// > 根据激活状态刷新透明度
-	if( this._drill_parent.active == true ){
-		this.opacity += 15;
-	}else{
-		this.opacity -= 25;
-	}
-	
-	// > 未激活时，处于最低透明度
-	if( this.opacity < data['opacity'] ){
-		this.opacity = data['opacity'];
-	}
-}
-//==============================
-// * 位置刷新
-//==============================
-Drill_MCB_Sprite.prototype.drill_MCB_refreshPosition = function() {
-	if( this._drill_parent._drill_MCB_needRefresh == false ){ return; }
-	var data = this._drill_curStyle;	
-	var rect = this.drill_MCB_getRect();
-	
-	this.x = rect.x + rect.width*0.5  + this._drill_parent.standardPadding() + data['shifting_x'];	//默认中心（注意要包含画布的内边距位置）
-	this.y = rect.y + rect.height*0.5 + this._drill_parent.standardPadding() + data['shifting_y'];
-}
-//==============================
-// * 帧刷新 - 边框
-//==============================
-Drill_MCB_Sprite.prototype.drill_MCB_updateBorder = function() {
-	var data = this._drill_curStyle;	
+Drill_MCB_Sprite.prototype.drill_sprite_updateBorder = function() {
+	var data = this._drill_curStyleData;	
+	if( this._drill_border_bitmaps == undefined ){ return; }
 	if( this._drill_border_bitmaps.length == 0 ){ return; }
 	
-	// > 播放gif
+	// > B播放GIF - C边框层
 	var inter = this._drill_gifTime;
 	inter = inter / data['border_gif_interval'];
 	inter = inter % this._drill_border_bitmaps.length;
@@ -1030,6 +1074,7 @@ Drill_MCB_Sprite.prototype.drill_MCB_updateBorder = function() {
 	}
 	inter = Math.floor(inter);
 	var temp_bitmap = this._drill_border_bitmaps[inter];
+	
 	
 	// > 分区划片
 	if( temp_bitmap.isReady() == false ){ return; }
@@ -1114,15 +1159,76 @@ Drill_MCB_Sprite.prototype.drill_MCB_updateBorder = function() {
 	this._borderSprite_7.y =  1 * rhh;
 	this._borderSprite_9.x =  1 * rww;
 	this._borderSprite_9.y =  1 * rhh;
-}	
+}
+
+
 //==============================
-// * 帧刷新 - 边角
+// * D边角层 - 子功能初始化
 //==============================
-Drill_MCB_Sprite.prototype.drill_MCB_updateCorner = function() {
-	var data = this._drill_curStyle;	
+Drill_MCB_Sprite.prototype.drill_sprite_initCorner = function() {
+	var data = this._drill_curStyleData;
+	
+	// > 读取资源
+	this._drill_corner_bitmaps = [];
+	for(var j = 0; j < data['corner_gif_src'].length; j++){
+		var src_str = data['corner_gif_src'][j];
+		var obj_bitmap = ImageManager.loadBitmap( data['corner_gif_src_file'], src_str, 0, true );
+		this._drill_corner_bitmaps.push( obj_bitmap );
+	};
+	
+	// > 创建
+	this.drill_createCorner();
+}
+//==============================
+// * D边角层 - 创建
+//==============================
+Drill_MCB_Sprite.prototype.drill_createCorner = function() {
+	var data = this._drill_curStyleData;	
+	
+	// > 清理 旧贴图
+	if( this._cornerSprite_1 != undefined ){ this.removeChild( this._cornerSprite_1 ); }
+	if( this._cornerSprite_2 != undefined ){ this.removeChild( this._cornerSprite_2 ); }
+	if( this._cornerSprite_3 != undefined ){ this.removeChild( this._cornerSprite_3 ); }
+	if( this._cornerSprite_4 != undefined ){ this.removeChild( this._cornerSprite_4 ); }
+	
+	// > 建立 左上、右上、左下、右下 区域
+	this._cornerSprite_1 = new Sprite();
+	this._cornerSprite_1.anchor.x = 0.5;
+	this._cornerSprite_1.anchor.y = 0.5;
+	this._cornerSprite_1.blendMode = data['corner_blendMode'];
+	this.addChild( this._cornerSprite_1 );
+	this._cornerSprite_2 = new Sprite();
+	this._cornerSprite_2.anchor.x = 0.5;
+	this._cornerSprite_2.anchor.y = 0.5;
+	this._cornerSprite_2.blendMode = data['corner_blendMode'];
+	this.addChild( this._cornerSprite_2 );
+	this._cornerSprite_3 = new Sprite();
+	this._cornerSprite_3.anchor.x = 0.5;
+	this._cornerSprite_3.anchor.y = 0.5;
+	this._cornerSprite_3.blendMode = data['corner_blendMode'];
+	this.addChild( this._cornerSprite_3 );
+	this._cornerSprite_4 = new Sprite();
+	this._cornerSprite_4.anchor.x = 0.5;
+	this._cornerSprite_4.anchor.y = 0.5;
+	this._cornerSprite_4.blendMode = data['corner_blendMode'];
+	this.addChild( this._cornerSprite_4 );
+
+	if( this._drill_corner_bitmaps.length > 0 ){
+		this._cornerSprite_1.bitmap = this._drill_corner_bitmaps[0];
+		this._cornerSprite_2.bitmap = this._drill_corner_bitmaps[0];
+		this._cornerSprite_3.bitmap = this._drill_corner_bitmaps[0];
+		this._cornerSprite_4.bitmap = this._drill_corner_bitmaps[0];
+	}
+}
+//==============================
+// * D边角层 - 帧刷新
+//==============================
+Drill_MCB_Sprite.prototype.drill_sprite_updateCorner = function() {
+	var data = this._drill_curStyleData;	
+	if( this._drill_corner_bitmaps == undefined ){ return; }
 	if( this._drill_corner_bitmaps.length == 0 ){ return; }
 	
-	// > 播放gif
+	// > B播放GIF - D边角层
 	var inter = this._drill_gifTime;
 	inter = inter / data['corner_gif_interval'];
 	inter = inter % this._drill_corner_bitmaps.length;
@@ -1131,6 +1237,7 @@ Drill_MCB_Sprite.prototype.drill_MCB_updateCorner = function() {
 	}
 	inter = Math.floor(inter);
 	var temp_bitmap = this._drill_corner_bitmaps[inter];
+	
 	
 	// > 分区划片
 	if( temp_bitmap.isReady() == false ){ return; }
@@ -1175,10 +1282,4 @@ Drill_MCB_Sprite.prototype.drill_MCB_updateCorner = function() {
 	}
 }
 
-//==============================
-// * 边框贴图 - 获取矩形
-//==============================
-Drill_MCB_Sprite.prototype.drill_MCB_getRect = function(){
-   return this._drill_parent._cursorRect
-};
 

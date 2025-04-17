@@ -81,7 +81,7 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称：		GTM (Global_Test_Manager)
+//		插件简称		GTM (Global_Test_Manager)
 //		临时全局变量	无
 //		临时局部变量	无
 //		存储数据变量	无
@@ -139,10 +139,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_GlobalTestManager = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_GlobalTestManager');
+	var Imported = Imported || {};
+	Imported.Drill_GlobalTestManager = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_GlobalTestManager');
 	
 	
 	/*-----------------杂项------------------*/
@@ -150,11 +150,20 @@
 	
 
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_GTM_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_GTM_pluginCommand.call(this, command, args);
+	this.drill_GTM_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_GTM_pluginCommand = function( command, args ){
 	if( command === ">调试管理器" ){
 		if( args.length == 2 ){
 			var type = String(args[1]);
@@ -176,6 +185,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		}
 	}
 }
+
 
 //=============================================================================
 // * 功能部件 - 初始是否开启fps框

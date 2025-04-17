@@ -439,7 +439,7 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称：		TBS (Title_Boot_Scene)
+//		插件简称		TBS (Title_Boot_Scene)
 //		临时全局变量	DrillUp.g_TBS_xxx
 //		临时局部变量	无
 //		存储数据变量	无
@@ -546,10 +546,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_TitleBootScene = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_TitleBootScene');
+	var Imported = Imported || {};
+	Imported.Drill_TitleBootScene = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_TitleBootScene');
 	
 	//==============================
 	// * 静态数据 - 阶段
@@ -658,10 +658,10 @@ Scene_Boot.prototype.stop = function() {
     Scene_Base.prototype.stop.call(this);
 };
 //==============================
-// * 启动界面（场景基类） - 判断是否激活/启动
+// * 启动界面（场景基类） - 忙碌状态
 //==============================
-Scene_Boot.prototype.isActive = function() {
-	return Scene_Base.prototype.isActive.call(this);
+Scene_Boot.prototype.isBusy = function() {
+	return Scene_Base.prototype.isBusy.call(this);
 };
 //==============================
 // * 启动界面（场景基类） - 析构函数
@@ -669,7 +669,6 @@ Scene_Boot.prototype.isActive = function() {
 Scene_Boot.prototype.terminate = function() {
     Scene_Base.prototype.terminate.call(this);
 };
-
 //==============================
 // * 启动界面（场景基类） - 判断加载完成
 //==============================
@@ -677,10 +676,10 @@ Scene_Boot.prototype.terminate = function() {
 //	return Scene_Base.prototype.isReady.call(this);
 //};
 //==============================
-// * 启动界面（场景基类） - 忙碌状态
+// * 启动界面（场景基类） - 判断是否激活/启动
 //==============================
-Scene_Boot.prototype.isBusy = function() {
-	return Scene_Base.prototype.isBusy.call(this);
+Scene_Boot.prototype.isActive = function() {
+	return Scene_Base.prototype.isActive.call(this);
 };
 
 
@@ -777,9 +776,21 @@ Graphics.initialize = function( width, height, type ){
 // **
 // **		作用域：	菜单界面
 // **		主功能：	> 启动界面时，播放各类标志、视频的界面。
-// **		子功能：	->面板
-// **						->创建
-// **						->帧刷新
+// **		子功能：	
+// **					->界面重要函数
+// **						> 初始化（initialize）
+// **						> 创建（create）
+// **						> 帧刷新（update）
+// **						x> 开始运行（start）
+// **						x> 结束运行（stop）
+// **						x> 忙碌状态（isBusy）
+// **						x> 析构函数（terminate）
+// **						x> 判断加载完成（isReady）
+// **						x> 判断是否激活/启动（isActive）
+// **						x> 当前角色切换时（onActorChange）
+// **						x> 创建 - 菜单背景（createBackground）
+// **						x> 创建 - 帮助窗口（createHelpWindow）
+// **					
 // **					->A主体
 // **						->界面底色
 // **					->B预加载
@@ -791,6 +802,10 @@ Graphics.initialize = function( width, height, type ){
 // **					->E播放GIF模式
 // **					->F视频模式
 // **					->G音乐设置
+// **		界面成员：
+// **					> ._drill_main_layer			主层
+// **						> ._drill_pic_sprite		单图
+// **						> ._drill_gif_sprite		GIF
 // **
 // **		说明：	> 暂无
 //=============================================================================
@@ -803,7 +818,7 @@ function Scene_Drill_TBS() {
 Scene_Drill_TBS.prototype = Object.create(Scene_Base.prototype);
 Scene_Drill_TBS.prototype.constructor = Scene_Drill_TBS;
 //==============================
-// * 启动标志界面 - 初始化
+// * 启动标志界面 - 初始化（继承）
 //==============================
 Scene_Drill_TBS.prototype.initialize = function() {
     Scene_Base.prototype.initialize.call(this);
@@ -818,14 +833,14 @@ Scene_Drill_TBS.prototype.initialize = function() {
 	this.drill_scene_initMusic();				//初始化子功能 - G音乐设置
 }
 //==============================
-// * 启动标志界面 - 创建
+// * 启动标志界面 - 创建（继承）
 //==============================
 Scene_Drill_TBS.prototype.create = function() {	
     Scene_Base.prototype.create.call(this);
 	this.drill_scene_createAttr();				//创建 - A主体
 };
 //==============================
-// * 启动标志界面 - 帧刷新
+// * 启动标志界面 - 帧刷新（继承）
 //==============================
 Scene_Drill_TBS.prototype.update = function() {
 	Scene_Base.prototype.update.call(this);
@@ -1278,10 +1293,10 @@ Scene_Drill_TBS.prototype.stop = function() {
     Scene_Base.prototype.stop.call(this);
 };
 //==============================
-// * 启动标志界面（场景基类） - 判断是否激活/启动
+// * 启动标志界面（场景基类） - 忙碌状态
 //==============================
-Scene_Drill_TBS.prototype.isActive = function() {
-	return Scene_Base.prototype.isActive.call(this);
+Scene_Drill_TBS.prototype.isBusy = function() {
+	return Scene_Base.prototype.isBusy.call(this);
 };
 //==============================
 // * 启动标志界面（场景基类） - 析构函数
@@ -1289,7 +1304,6 @@ Scene_Drill_TBS.prototype.isActive = function() {
 Scene_Drill_TBS.prototype.terminate = function() {
     Scene_Base.prototype.terminate.call(this);
 };
-
 //==============================
 // * 启动标志界面（场景基类） - 判断加载完成
 //==============================
@@ -1297,9 +1311,9 @@ Scene_Drill_TBS.prototype.isReady = function() {
 	return Scene_Base.prototype.isReady.call(this);
 };
 //==============================
-// * 启动标志界面（场景基类） - 忙碌状态
+// * 启动标志界面（场景基类） - 判断是否激活/启动
 //==============================
-Scene_Drill_TBS.prototype.isBusy = function() {
-	return Scene_Base.prototype.isBusy.call(this);
+Scene_Drill_TBS.prototype.isActive = function() {
+	return Scene_Base.prototype.isActive.call(this);
 };
 

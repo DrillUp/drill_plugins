@@ -295,10 +295,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_X_BattlePictureChange = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_X_BattlePictureChange');
+	var Imported = Imported || {};
+	Imported.Drill_X_BattlePictureChange = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_X_BattlePictureChange');
 	
 	
 	DrillUp.g_XBPC_face_list_length = 20;
@@ -309,11 +309,20 @@
 
 
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_XBPC_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_XBPC_pluginCommand.call(this, command, args);
+	this.drill_XBPC_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_XBPC_pluginCommand = function( command, args ){
 	if (command === '>角色立绘') {
 		if(args.length >= 4){
 			var temp1 = Number(args[1]);

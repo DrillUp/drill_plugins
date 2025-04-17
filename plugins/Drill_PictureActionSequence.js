@@ -166,7 +166,7 @@
 //			->☆提示信息
 //			->☆静态数据
 //			->☆插件指令
-//			->☆图片贴图
+//			->☆场景容器之图片贴图
 //				>图片对象层 的图片贴图
 //				>最顶层 的图片贴图
 //				>图片层 的图片贴图
@@ -187,10 +187,12 @@
 //					> 播放状态节点（开放函数）
 //					> 播放动作元（开放函数）
 //					> 立即停止动作元（开放函数）
+//			
 //			->☆图片贴图控制
 //				->创建 动画序列贴图
 //				->销毁 动画序列贴图
-//				->贴图销毁标记
+//				->帧刷新 动画序列贴图
+//					->贴图销毁标记
 //				->获取bitmap资源对象
 //
 //
@@ -228,7 +230,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_PASe_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_PASe_PluginTip_baseList.length == 0 ){ return ""; }
@@ -255,7 +257,8 @@
 	// * 提示信息 - 报错 - 动画序列未创建
 	//==============================
 	DrillUp.drill_PASe_getPluginTip_NoActionSequence = function( p_id ){
-		return "【" + DrillUp.g_PASe_PluginTip_curName + "】\n插件指令错误，图片"+p_id+"的动画序列并没有创建，无法播放动画。\n（如果你知道存在此问题但不想弹出此提示，可在配置中关闭此提示）";
+		return "【" + DrillUp.g_PASe_PluginTip_curName + "】（此提示可在插件中关闭）\n" +   //『可关闭提示信息』
+				"插件指令错误，图片"+p_id+"的动画序列并没有创建，无法播放动画。\n（如果你知道存在此问题但不想弹出此提示，可在配置中关闭此提示）";
 	};
 	
 	
@@ -263,10 +266,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_PictureActionSequence = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_PictureActionSequence');
+	var Imported = Imported || {};
+	Imported.Drill_PictureActionSequence = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_PictureActionSequence');
 	
 	
 	/*-----------------杂项------------------*/
@@ -290,9 +293,18 @@ if( DrillUp.drill_COAS_getSequenceData_ById == undefined ){
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_PASe_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_PASe_pluginCommand.call(this, command, args);
+	this.drill_PASe_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_PASe_pluginCommand = function( command, args ){
 	if( command === ">图片动画序列" ){ 
 		
 		/*-----------------对象组获取------------------*/
@@ -455,13 +467,32 @@ Game_Screen.prototype.drill_PASe_isPictureExist = function( pic_id ){
 	}
 	return true;
 };
+//==============================
+// * 插件指令 - STG兼容『STG的插件指令』
+//==============================
+if( Imported.Drill_STG__objects ){
+	
+	//==============================
+	// * 插件指令 - STG指令绑定
+	//==============================
+	var _drill_STG_PASe_pluginCommand = Drill_STG_GameInterpreter.prototype.pluginCommand;
+	Drill_STG_GameInterpreter.prototype.pluginCommand = function( command, args ){
+		_drill_STG_PASe_pluginCommand.call(this, command, args);
+		this.drill_PASe_pluginCommand( command, args );
+	}
+	//==============================
+	// * 插件指令 - STG指令执行
+	//==============================
+	Drill_STG_GameInterpreter.prototype.drill_PASe_pluginCommand = Game_Interpreter.prototype.drill_PASe_pluginCommand;
+};
+
 
 
 //#############################################################################
-// ** 【标准模块】图片贴图 ☆图片贴图
+// ** 【标准模块】图片贴图容器 ☆场景容器之图片贴图
 //#############################################################################
 //##############################
-// * 图片贴图 - 获取 - 全部图片贴图【标准函数】
+// * 图片贴图容器 - 获取 - 全部图片贴图【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 贴图数组       （图片贴图）
@@ -472,7 +503,7 @@ Game_Temp.prototype.drill_PASe_getAllPictureSprite = function(){
 	return this.drill_PASe_getAllPictureSprite_Private();
 }
 //##############################
-// * 图片贴图 - 获取 - 容器指针【标准函数】
+// * 图片贴图容器 - 获取 - 容器指针【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 贴图数组       （图片贴图）
@@ -484,7 +515,7 @@ Game_Temp.prototype.drill_PASe_getPictureSpriteTank = function(){
 	return this.drill_PASe_getPictureSpriteTank_Private();
 }
 //##############################
-// * 图片贴图 - 获取 - 根据图片ID【标准函数】
+// * 图片贴图容器 - 获取 - 根据图片ID【标准函数】
 //			
 //			参数：	> picture_id 数字（图片ID）
 //			返回：	> 贴图对象       （图片贴图）
@@ -498,7 +529,7 @@ Game_Temp.prototype.drill_PASe_getPictureSpriteByPictureId = function( picture_i
 	return this.drill_PASe_getPictureSpriteByPictureId_Private( picture_id );
 }
 //=============================================================================
-// ** 图片贴图（接口实现）
+// ** 场景容器之图片贴图（实现）
 //=============================================================================
 //==============================
 // * 图片贴图容器 - 获取 - 容器（私有）
@@ -759,7 +790,7 @@ Game_Picture.prototype.drill_PASe_getPictureId = function(){
 //==============================
 Game_Picture.prototype.drill_PASe_setStateNodeDefault = function(){
 	if( this._drill_PASe_controller == undefined ){		//（动画序列校验）
-		if( DrillUp.g_PASe_TipEnabled_NoActionSequence == true ){
+		if( DrillUp.g_PASe_TipEnabled_NoActionSequence == true ){  //『可关闭提示信息』
 			alert( DrillUp.drill_PASe_getPluginTip_NoActionSequence(this.drill_PASe_getPictureId()) );
 		}
 		return;
@@ -774,7 +805,7 @@ Game_Picture.prototype.drill_PASe_setStateNodeDefault = function(){
 //==============================
 Game_Picture.prototype.drill_PASe_setSimpleStateNode = function( state_nameList ){
 	if( this._drill_PASe_controller == undefined ){		//（动画序列校验）
-		if( DrillUp.g_PASe_TipEnabled_NoActionSequence == true ){
+		if( DrillUp.g_PASe_TipEnabled_NoActionSequence == true ){  //『可关闭提示信息』
 			alert( DrillUp.drill_PASe_getPluginTip_NoActionSequence(this.drill_PASe_getPictureId()) );
 		}
 		return;
@@ -789,7 +820,7 @@ Game_Picture.prototype.drill_PASe_setSimpleStateNode = function( state_nameList 
 //==============================
 Game_Picture.prototype.drill_PASe_setStateNode = function( node_name ){
 	if( this._drill_PASe_controller == undefined ){		//（动画序列校验）
-		if( DrillUp.g_PASe_TipEnabled_NoActionSequence == true ){
+		if( DrillUp.g_PASe_TipEnabled_NoActionSequence == true ){  //『可关闭提示信息』
 			alert( DrillUp.drill_PASe_getPluginTip_NoActionSequence(this.drill_PASe_getPictureId()) );
 		}
 		return;
@@ -801,7 +832,7 @@ Game_Picture.prototype.drill_PASe_setStateNode = function( node_name ){
 //==============================
 Game_Picture.prototype.drill_PASe_setAct = function( act_name ){
 	if( this._drill_PASe_controller == undefined ){		//（动画序列校验）
-		if( DrillUp.g_PASe_TipEnabled_NoActionSequence == true ){
+		if( DrillUp.g_PASe_TipEnabled_NoActionSequence == true ){  //『可关闭提示信息』
 			alert( DrillUp.drill_PASe_getPluginTip_NoActionSequence(this.drill_PASe_getPictureId()) );
 		}
 		return;
@@ -813,13 +844,14 @@ Game_Picture.prototype.drill_PASe_setAct = function( act_name ){
 //==============================
 Game_Picture.prototype.drill_PASe_stopAct = function(){
 	if( this._drill_PASe_controller == undefined ){		//（动画序列校验）
-		if( DrillUp.g_PASe_TipEnabled_NoActionSequence == true ){
+		if( DrillUp.g_PASe_TipEnabled_NoActionSequence == true ){  //『可关闭提示信息』
 			alert( DrillUp.drill_PASe_getPluginTip_NoActionSequence(this.drill_PASe_getPictureId()) );
 		}
 		return;
 	}
 	this._drill_PASe_controller.drill_COAS_stopAct();
 }
+
 
 
 //=============================================================================
@@ -829,7 +861,7 @@ Game_Picture.prototype.drill_PASe_stopAct = function(){
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 图片贴图 - 初始化
+// * 图片贴图绑定 - 初始化
 //==============================
 var _drill_PASe_sp_initialize = Sprite_Picture.prototype.initialize;
 Sprite_Picture.prototype.initialize = function( pictureId ){
@@ -838,7 +870,7 @@ Sprite_Picture.prototype.initialize = function( pictureId ){
     _drill_PASe_sp_initialize.call( this,pictureId );
 }
 //==============================
-// * 图片贴图 - 创建 动画序列贴图
+// * 图片贴图绑定 - 创建 动画序列贴图
 //
 //			说明：	> 此函数可以在帧刷新中反复执行。只在 空贴图 的时候才创建。
 //					> 由于一帧内 先刷新 图片的属性，后刷新 贴图的属性。
@@ -857,7 +889,7 @@ Sprite_Picture.prototype.drill_PASe_createDecorator = function(){
 	//	（至于 decorator 和 controller 是如何初始化并实现bitmap赋值，此插件不管）
 }
 //==============================
-// * 图片贴图 - 销毁 动画序列贴图
+// * 图片贴图绑定 - 销毁 动画序列贴图
 //
 //			说明：	> 此函数可以在帧刷新中反复执行。只在 非空贴图 的时候才销毁。
 //==============================
@@ -868,7 +900,7 @@ Sprite_Picture.prototype.drill_PASe_destroyDecorator = function(){
 	}
 }
 //==============================
-// * 图片贴图 - 帧刷新
+// * 图片贴图绑定 - 帧刷新
 //==============================
 var _drill_PASe_sp_update = Sprite_Picture.prototype.update;
 Sprite_Picture.prototype.update = function() {
@@ -880,7 +912,7 @@ Sprite_Picture.prototype.update = function() {
 	_drill_PASe_sp_update.call(this);
 };
 //==============================
-// * 图片贴图 - 帧刷新 - 创建贴图
+// * 图片贴图绑定 - 帧刷新 - 创建贴图
 //==============================
 Sprite_Picture.prototype.drill_PASe_updateDecoratorCreate = function() {
 	var picture = this.picture();
@@ -904,7 +936,7 @@ Sprite_Picture.prototype.drill_PASe_updateDecoratorCreate = function() {
 	}
 }
 //==============================
-// * 图片贴图 - 帧刷新 - 销毁贴图
+// * 图片贴图绑定 - 帧刷新 - 销毁贴图
 //==============================
 Sprite_Picture.prototype.drill_PASe_updateDecoratorDestroy = function() {
 	var picture = this.picture();
@@ -921,7 +953,7 @@ Sprite_Picture.prototype.drill_PASe_updateDecoratorDestroy = function() {
 	}
 }
 //==============================
-// * 图片贴图 - 帧刷新 - 贴图
+// * 图片贴图绑定 - 帧刷新 - 贴图
 //==============================
 Sprite_Picture.prototype.drill_PASe_updateDecorator = function() {
 	if( this._drill_PASe_decorator != null ){
@@ -930,7 +962,7 @@ Sprite_Picture.prototype.drill_PASe_updateDecorator = function() {
 }
 
 //==============================
-// * 图片贴图 - 获取bitmap资源对象
+// * 图片贴图绑定 - 获取bitmap资源对象
 //==============================
 var _drill_PASe_sp_loadBitmap = Sprite_Picture.prototype.loadBitmap;
 Sprite_Picture.prototype.loadBitmap = function() {

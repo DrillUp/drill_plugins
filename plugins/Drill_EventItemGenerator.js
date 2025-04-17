@@ -311,10 +311,16 @@
 //				随机行走图 + 下方触发 + 拾取声音 + 获得道具情况 + 获得金钱情况 + 拾取后消失
 //				跳跃速度 + 图标行走图 + mata标签（如果没有，镜面反射会不兼容）
 //				道具不能落入不可行走区域
-//			3.正在播放音乐：（2024/7/25）
-//				 ~《小爱丽丝捡金币》~
-//				 0:59 ━━━━●───── 2:02
-//				  ←   ❚❚   →   ■   ≡  
+//			3.该插件多用于复制一堆收集用道具，
+//			  比如金币、糖果，这里也放上一罐。
+//				╭═══════╮
+//				╰══╮ ╭══╯
+//				╭═╯╰-╯╰═╮
+//				║       ║
+//				║糖糖 糖║
+//				║ 糖 糖 ║
+//				║糖 糖糖║
+//				╰═══════╯
 //
 //		★存在的问题：
 //			1.问题：每多一条可选注释，插件就要多一个额外扩展。需要想办法优化。
@@ -333,7 +339,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_EIG_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_EIG_PluginTip_baseList.length == 0 ){ return ""; }
@@ -361,10 +367,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_EventItemGenerator = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_EventItemGenerator');
+	var Imported = Imported || {};
+	Imported.Drill_EventItemGenerator = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_EventItemGenerator');
 	
 	
 	/*-----------------杂项------------------*/
@@ -400,18 +406,18 @@ if( Imported.Drill_CoreOfEventManager ){
 // ** ☆插件指令
 //=============================================================================
 //==============================
-// * 插件指令 - 绑定
+// * 插件指令 - 指令绑定
 //==============================
 var _drill_EIG_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args){
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_EIG_pluginCommand.call(this,command, args);
-	this.drill_EIG_command(command, args);
-	this.drill_EIG_oldCommand(command, args);
+	this.drill_EIG_command( command, args );
+	this.drill_EIG_oldCommand( command, args );
 };
 //==============================
-// * 插件指令 - 指令
+// * 插件指令 - 指令执行
 //==============================
-Game_Interpreter.prototype.drill_EIG_command = function(command, args){
+Game_Interpreter.prototype.drill_EIG_command = function( command, args ){
 	if( command === ">可拾取物生成器" ){
 		if( args.length >= 4 ){
 			var main_type = String(args[1]);
@@ -811,7 +817,7 @@ Game_Interpreter.prototype.drill_EIG_command = function(command, args){
 //==============================
 // * 插件指令 - 旧指令
 //==============================
-Game_Interpreter.prototype.drill_EIG_oldCommand = function(command, args){
+Game_Interpreter.prototype.drill_EIG_oldCommand = function( command, args ){
 	if( command === ">可拾取物生成器" ){	// 旧指令
 		var temp_type = String(args[1]);
 		var temp_need_generate = false;
@@ -997,6 +1003,7 @@ Game_Map.prototype.drill_EIG_isEventExist = function( e_id ){
 	}
 	return true;
 };
+
 
 //#############################################################################
 // ** 【标准模块】存储数据 ☆存储数据

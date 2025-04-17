@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.5]        对话框 - 对话框皮肤
+ * @plugindesc [v1.6]        对话框 - 对话框皮肤
  * @author Drill_up
  * 
  * @Drill_LE_param "皮肤样式-%d"
@@ -19,17 +19,16 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 使得你可以装饰对话框。
- * ★★必须放在 姓名框窗口 插件后面★★
- *
+ * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
  * 该插件可以单独使用。
  * 可作用于：
- *   - Drill_DialogNameBox           对话框-姓名框窗口
- *     该插件能够支持 姓名框窗口 的皮肤设计。
  *   - Drill_DialogSkinBackground    对话框-对话框背景
  *   - Drill_DialogSkinDecoration    对话框-对话框装饰图
  *     背景和装饰图可以在对话框皮肤插件的基础上，添加更多装饰功能。
+ *   - Drill_DialogNameBox           对话框-姓名框窗口
+ *     该插件能够支持 姓名框窗口 的皮肤设计。
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -43,11 +42,11 @@
  *      只有类型为"窗口"，才会被换皮肤。
  * 子窗口：
  *   (1.对话框有很多子窗口，这些窗口都属于对话框使用。
- *        对话框金钱窗口
- *        对话框选择项窗口
- *        对话框数字输入窗口
- *        对话框选择物品窗口
- *        对话框姓名框窗口
+ *        对话框 金钱窗口
+ *        对话框 选择项窗口
+ *        对话框 数字输入窗口
+ *        对话框 选择物品窗口
+ *        对话框 姓名框窗口
  *      具体去看看文档介绍。
  *   (2.对话框样式可以作用于 对话框本身，也可以单独作用于子窗口。
  *      你可以配置不同的样式分别对应各个窗口。
@@ -84,18 +83,25 @@
  * 皮肤样式2 资源-边框
  * 皮肤样式2 资源-边角
  * ……
- *
+ * 
  * -----------------------------------------------------------------------------
  * ----可选设定
  * 你可以通过插件指令手动控制边框的属性：
  * 
  * 插件指令：>对话框皮肤 : 对话框及全部子窗口 : 修改样式 : 样式[2]
+ * 插件指令：>对话框皮肤 : 对话框及全部子窗口 : 恢复默认样式
  * 插件指令：>对话框皮肤 : 只对话框 : 修改样式 : 样式[2]
+ * 插件指令：>对话框皮肤 : 只对话框 : 恢复默认样式
  * 插件指令：>对话框皮肤 : 只金钱窗口 : 修改样式 : 样式[2]
+ * 插件指令：>对话框皮肤 : 只金钱窗口 : 恢复默认样式
  * 插件指令：>对话框皮肤 : 只选择项窗口 : 修改样式 : 样式[2]
+ * 插件指令：>对话框皮肤 : 只选择项窗口 : 恢复默认样式
  * 插件指令：>对话框皮肤 : 只数字输入窗口 : 修改样式 : 样式[2]
+ * 插件指令：>对话框皮肤 : 只数字输入窗口 : 恢复默认样式
  * 插件指令：>对话框皮肤 : 只选择物品窗口 : 修改样式 : 样式[2]
+ * 插件指令：>对话框皮肤 : 只选择物品窗口 : 恢复默认样式
  * 插件指令：>对话框皮肤 : 只姓名框窗口 : 修改样式 : 样式[2]
+ * 插件指令：>对话框皮肤 : 只姓名框窗口 : 恢复默认样式
  * 
  * 1.修改样式后，立即生效，且永久有效。
  *   你可以在角色对话时随时切换不同对话框样式。
@@ -138,9 +144,11 @@
  * 修复了预加载有时候失效的bug。
  * [v1.5]
  * 优化了旧存档的识别与兼容。
+ * [v1.6]
+ * 翻新了对话框的内部结构，修复了yep姓名框显示黑边的bug。
  * 
- *
- *
+ * 
+ * 
  * @param 默认样式-对话框
  * @type number
  * @min 1
@@ -176,7 +184,8 @@
  * @min 1
  * @desc 窗口默认使用的皮肤样式。
  * @default 1
- *
+ * 
+ * 
  * @param ---皮肤样式集---
  * @default
  *
@@ -427,6 +436,7 @@
  * @desc 只用于方便区分查看的标签，不作用在插件中。
  * @default ==新的皮肤样式==
  * 
+ * 
  * @param ---窗口---
  * @default 
  * 
@@ -591,6 +601,7 @@
  * @desc 边框的拉伸方式。
  * @default 循环平铺
  * 
+ * 
  * @param ---边角---
  * @desc 
  *
@@ -703,31 +714,33 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			对话框皮肤：
-//				->窗口
-//					->子窗口
-//						> 对话框金钱窗口
-//						> 对话框选择项窗口
-//						> 对话框数字输入窗口
-//						> 对话框选择物品窗口
-//						> 对话框姓名框窗口
-//					->窗口皮肤初始化
-//						> 默认窗口皮肤
-//						> 自定义窗口皮肤
-//						> 自定义背景图片
-//						> 黑底背景
-//						->窗口平铺背景向内缩进距
-//					->边框皮肤初始化
-//				->边框与边角
-//					->边框
-//						->向内缩进距
-//						->GIF效果
-//						->划分厚度
-//						->拉伸方式
-//					->边角
-//						->向内缩进距
-//						->GIF效果
-//						->浮动效果
+//			->☆提示信息
+//			->☆静态数据
+//			->☆插件指令
+//			->☆存储数据
+//				->获取样式ID（根据窗口类名）
+//				->获取样式数据（根据窗口类名）
+//			
+//			->☆预加载
+//			->☆对话框控制
+//				->3A主体
+//				->3B边框皮肤
+//				->3C窗口皮肤
+//					->窗口平铺背景向内缩进距
+//			->☆对话框子窗口控制
+//				->4A金钱窗口
+//				->4B选择项窗口
+//				->4C数字输入窗口
+//				->4D选择物品窗口
+//				->4E姓名框窗口
+//			
+//			->对话框边贴图【Drill_DSk_BorderSprite】
+//				->A主体
+//					->刷新样式
+//					->刷新位置
+//				->B播放GIF
+//				->C边框层
+//				->D边角层
 //
 //
 //		★家谱：
@@ -752,7 +765,7 @@
 //		
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -769,11 +782,11 @@
 	
 	
 //=============================================================================
-// ** 静态数据
+// ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_DialogSkin = true;
-　　var DrillUp = DrillUp || {}; 
+	var Imported = Imported || {};
+	Imported.Drill_DialogSkin = true;
+	var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_DialogSkin');
 
 	//==============================
@@ -790,11 +803,11 @@
 		data['window_pic_src'] = String( dataFrom["资源-自定义背景图片"] || "");
 		data['window_pic_x'] = Number( dataFrom["平移-自定义背景图片 X"] || 0);
 		data['window_pic_y'] = Number( dataFrom["平移-自定义背景图片 Y"] || 0);
-		// > 窗口（底层特殊）
 		data['window_tone_lock'] = String( dataFrom["是否锁定窗口色调"] || "false") == "true";
 		data['window_tone_r'] = Number( dataFrom["窗口色调-红"] || 0);
 		data['window_tone_g'] = Number( dataFrom["窗口色调-绿"] || 0);
 		data['window_tone_b'] = Number( dataFrom["窗口色调-蓝"] || 0);
+		// > 窗口（底层特殊）
 		data['window_backInner'] = Number( dataFrom["窗口平铺背景向内缩进距"] || 0);
 		
 		// > 边框
@@ -837,14 +850,6 @@
 		return data;
 	}
 	
-	/*-----------------杂项------------------*/
-	DrillUp.g_DSk_messageStyleId = Number(DrillUp.parameters["默认样式-对话框"] || 1); 
-	DrillUp.g_DSk_goldStyleId = Number(DrillUp.parameters["默认样式-对话框金钱窗口"] || 1); 
-	DrillUp.g_DSk_choiceStyleId = Number(DrillUp.parameters["默认样式-对话框选择项窗口"] || 1); 
-	DrillUp.g_DSk_numberStyleId = Number(DrillUp.parameters["默认样式-对话框数字输入窗口"] || 1); 
-	DrillUp.g_DSk_itemStyleId = Number(DrillUp.parameters["默认样式-对话框选择物品窗口"] || 1); 
-	DrillUp.g_DSk_nameStyleId = Number(DrillUp.parameters["默认样式-对话框姓名框窗口"] || 1); 
-	
 	/*-----------------样式集------------------*/
 	DrillUp.g_DSk_list_length = 40;
 	DrillUp.g_DSk_list = [];
@@ -857,50 +862,98 @@
 			DrillUp.g_DSk_list[i] = DrillUp.drill_DSk_initStyle( {} );
 		}
 	}
+	
+	/*-----------------杂项------------------*/
+	DrillUp.g_DSk_messageStyleId = Number(DrillUp.parameters["默认样式-对话框"] || 1); 
+	DrillUp.g_DSk_goldStyleId = Number(DrillUp.parameters["默认样式-对话框金钱窗口"] || 1); 
+	DrillUp.g_DSk_choiceStyleId = Number(DrillUp.parameters["默认样式-对话框选择项窗口"] || 1); 
+	DrillUp.g_DSk_numberStyleId = Number(DrillUp.parameters["默认样式-对话框数字输入窗口"] || 1); 
+	DrillUp.g_DSk_itemStyleId = Number(DrillUp.parameters["默认样式-对话框选择物品窗口"] || 1); 
+	DrillUp.g_DSk_nameStyleId = Number(DrillUp.parameters["默认样式-对话框姓名框窗口"] || 1); 
 
 	
 
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_DSk_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_DSk_pluginCommand.call(this, command, args);
+	this.drill_DSk_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_DSk_pluginCommand = function( command, args ){
 	if( command === ">对话框皮肤" ){
 		
-		if(args.length == 6){
+		if( args.length == 6 ){
 			var temp1 = String(args[1]);
 			var type = String(args[3]);
 			var temp2 = String(args[5]);
-			if( type == "修改样式" ){	
+			if( type == "修改样式" ){
 				temp2 = temp2.replace("样式[","");
 				temp2 = temp2.replace("]","");
-				temp2 = Number(temp2);
 				if( temp1 == "对话框及全部子窗口" ){
-					$gameSystem._drill_DSk_messageStyleId = temp2;
-					$gameSystem._drill_DSk_goldStyleId = temp2;
-					$gameSystem._drill_DSk_choiceStyleId = temp2;
-					$gameSystem._drill_DSk_numberStyleId = temp2;
-					$gameSystem._drill_DSk_itemStyleId = temp2;
-					$gameSystem._drill_DSk_nameStyleId = temp2;
+					$gameSystem._drill_DSk_messageStyleId = Number(temp2);
+					$gameSystem._drill_DSk_goldStyleId = Number(temp2);
+					$gameSystem._drill_DSk_choiceStyleId = Number(temp2);
+					$gameSystem._drill_DSk_numberStyleId = Number(temp2);
+					$gameSystem._drill_DSk_itemStyleId = Number(temp2);
+					$gameSystem._drill_DSk_nameStyleId = Number(temp2);
 				}
 				if( temp1 == "只对话框" ){
-					$gameSystem._drill_DSk_messageStyleId = temp2;
+					$gameSystem._drill_DSk_messageStyleId = Number(temp2);
 				}
 				if( temp1 == "只金钱窗口" || temp1 == "只金钱框" ){
-					$gameSystem._drill_DSk_goldStyleId = temp2;
+					$gameSystem._drill_DSk_goldStyleId = Number(temp2);
 				}
 				if( temp1 == "只选择项窗口" || temp1 == "只选择项" ){
-					$gameSystem._drill_DSk_choiceStyleId = temp2;
+					$gameSystem._drill_DSk_choiceStyleId = Number(temp2);
 				}
 				if( temp1 == "只数字输入窗口" || temp1 == "只数字输入框" ){
-					$gameSystem._drill_DSk_numberStyleId = temp2;
+					$gameSystem._drill_DSk_numberStyleId = Number(temp2);
 				}
 				if( temp1 == "只选择物品窗口" || temp1 == "只选择物品框" ){
-					$gameSystem._drill_DSk_itemStyleId = temp2;
+					$gameSystem._drill_DSk_itemStyleId = Number(temp2);
 				}
 				if( temp1 == "只姓名框窗口" || temp1 == "只姓名框" ){
-					$gameSystem._drill_DSk_nameStyleId = temp2;
+					$gameSystem._drill_DSk_nameStyleId = Number(temp2);
+				}
+			}
+		}
+		if( args.length == 4 ){
+			var temp1 = String(args[1]);
+			var type = String(args[3]);
+			if( type == "恢复默认样式" ){
+				if( temp1 == "对话框及全部子窗口" ){
+					$gameSystem._drill_DSk_messageStyleId = DrillUp.g_DSk_messageStyleId;
+					$gameSystem._drill_DSk_goldStyleId = DrillUp.g_DSk_goldStyleId;
+					$gameSystem._drill_DSk_choiceStyleId = DrillUp.g_DSk_choiceStyleId;
+					$gameSystem._drill_DSk_numberStyleId = DrillUp.g_DSk_numberStyleId;
+					$gameSystem._drill_DSk_itemStyleId = DrillUp.g_DSk_itemStyleId;
+					$gameSystem._drill_DSk_nameStyleId = DrillUp.g_DSk_nameStyleId;
+				}
+				if( temp1 == "只对话框" ){
+					$gameSystem._drill_DSk_messageStyleId = DrillUp.g_DSk_messageStyleId;
+				}
+				if( temp1 == "只金钱窗口" || temp1 == "只金钱框" ){
+					$gameSystem._drill_DSk_goldStyleId = DrillUp.g_DSk_goldStyleId;
+				}
+				if( temp1 == "只选择项窗口" || temp1 == "只选择项" ){
+					$gameSystem._drill_DSk_choiceStyleId = DrillUp.g_DSk_choiceStyleId;
+				}
+				if( temp1 == "只数字输入窗口" || temp1 == "只数字输入框" ){
+					$gameSystem._drill_DSk_numberStyleId = DrillUp.g_DSk_numberStyleId;
+				}
+				if( temp1 == "只选择物品窗口" || temp1 == "只选择物品框" ){
+					$gameSystem._drill_DSk_itemStyleId = DrillUp.g_DSk_itemStyleId;
+				}
+				if( temp1 == "只姓名框窗口" || temp1 == "只姓名框" ){
+					$gameSystem._drill_DSk_nameStyleId = DrillUp.g_DSk_nameStyleId;
 				}
 			}
 		}
@@ -909,7 +962,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -975,12 +1028,12 @@ Game_System.prototype.drill_DSk_checkSysData = function() {
 //==============================
 Game_System.prototype.drill_DSk_initSysData_Private = function() {
 	
-	this._drill_DSk_messageStyleId = DrillUp.g_DSk_messageStyleId;
-	this._drill_DSk_goldStyleId = DrillUp.g_DSk_goldStyleId;
-	this._drill_DSk_choiceStyleId = DrillUp.g_DSk_choiceStyleId;
-	this._drill_DSk_numberStyleId = DrillUp.g_DSk_numberStyleId;
-	this._drill_DSk_itemStyleId = DrillUp.g_DSk_itemStyleId;
-	this._drill_DSk_nameStyleId = DrillUp.g_DSk_nameStyleId;
+	this._drill_DSk_messageStyleId = DrillUp.g_DSk_messageStyleId;	//样式ID - 对话框
+	this._drill_DSk_goldStyleId = DrillUp.g_DSk_goldStyleId;		//样式ID - 对话框金钱窗口
+	this._drill_DSk_choiceStyleId = DrillUp.g_DSk_choiceStyleId;	//样式ID - 对话框选择项窗口
+	this._drill_DSk_numberStyleId = DrillUp.g_DSk_numberStyleId;	//样式ID - 对话框数字输入窗口
+	this._drill_DSk_itemStyleId = DrillUp.g_DSk_itemStyleId;		//样式ID - 对话框选择物品窗口
+	this._drill_DSk_nameStyleId = DrillUp.g_DSk_nameStyleId;		//样式ID - 对话框姓名框窗口
 };
 //==============================
 // * 存储数据 - 载入存档时检查数据（私有）
@@ -991,40 +1044,40 @@ Game_System.prototype.drill_DSk_checkSysData_Private = function() {
 	if( this._drill_DSk_messageStyleId == undefined ){
 		this.drill_DSk_initSysData();
 	}
-	
 };
 //==============================
-// * 存储数据 - 获取id
+// * 存储数据 - 获取样式ID（根据窗口类名）
 //==============================
-Game_System.prototype.drill_DSk_getStyleId = function( tag ){
-	if( tag == "Window_Message" ){
-		return  this._drill_DSk_messageStyleId -1;
+Game_System.prototype.drill_DSk_getStyleId = function( windowName ){
+	if( windowName == "Window_Message" ){
+		return this._drill_DSk_messageStyleId -1;
 	}
-	if( tag == "Window_Gold" ){
-		return  this._drill_DSk_goldStyleId -1;
+	if( windowName == "Window_Gold" ){
+		return this._drill_DSk_goldStyleId -1;
 	}
-	if( tag == "Window_ChoiceList" ){
-		return  this._drill_DSk_choiceStyleId -1;
+	if( windowName == "Window_ChoiceList" ){
+		return this._drill_DSk_choiceStyleId -1;
 	}
-	if( tag == "Window_NumberInput" ){
-		return  this._drill_DSk_numberStyleId -1;
+	if( windowName == "Window_NumberInput" ){
+		return this._drill_DSk_numberStyleId -1;
 	}
-	if( tag == "Window_EventItem" ){
-		return  this._drill_DSk_itemStyleId -1;
+	if( windowName == "Window_EventItem" ){
+		return this._drill_DSk_itemStyleId -1;
 	}
-	if( tag == "Window_NameBox" || tag == "Drill_DNB_NameBoxWindow" ){
-		return  this._drill_DSk_nameStyleId -1;
+	if( windowName == "Window_NameBox" || windowName == "Drill_DNB_NameBoxWindow" ){
+		return this._drill_DSk_nameStyleId -1;
 	}
 	return -1;
 }
 //==============================
-// * 存储数据 - 获取数据
+// * 存储数据 - 获取样式数据（根据窗口类名）
 //==============================
-Game_System.prototype.drill_DSk_getStyle = function( tag ){
-	var style_id = this.drill_DSk_getStyleId( tag );
+Game_System.prototype.drill_DSk_getStyle = function( windowName ){
+	var style_id = this.drill_DSk_getStyleId( windowName );
 	if( style_id == -1 ){ return {}; }
 	return DrillUp.g_DSk_list[ style_id ];
 }
+
 
 
 //=============================================================================
@@ -1059,6 +1112,9 @@ if( DrillUp.g_DSk_preloadEnabled == true ){
 		this._drill_DSk_preloadTank = [];
 		for(var i=0; i < DrillUp.g_DSk_list.length; i++ ){
 			var temp_data = DrillUp.g_DSk_list[i];
+			if( temp_data == undefined ){ continue; }
+			
+			// > 『窗口皮肤的预加载』
 			if( temp_data['window_type'] == "自定义窗口皮肤" && temp_data['window_sys_src'] != "" ){
 				var bitmap = ImageManager.reserveBitmap( "img/Menu__ui_message/", temp_data['window_sys_src'], 0, true, this._drill_DSk_cacheId );
 				this._drill_DSk_preloadTank.push( bitmap );
@@ -1072,31 +1128,24 @@ if( DrillUp.g_DSk_preloadEnabled == true ){
 }
 
 
-
 //=============================================================================
-// ** 对话框
-// **		
-// **		子功能：	->窗口皮肤初始化
-// **						> 默认窗口皮肤
-// **						> 自定义窗口皮肤
-// **						> 自定义背景图片
-// **						> 黑底背景
-// **						->窗口平铺背景向内缩进距
-// **					->边框皮肤初始化
+// ** ☆对话框控制
+//
+//			说明：	> 该模块将对 对话框 进行专门管理。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 对话框 - 初始化
+// * 3A主体 - 初始化
 //==============================
 var _drill_DSk_initialize = Window_Message.prototype.initialize;
 Window_Message.prototype.initialize = function() {
 	_drill_DSk_initialize.call( this );
-
 	this._drill_DSk_tag = "Window_Message";
-	this.drill_DSk_initSkin();			//窗口皮肤初始化
-	this.drill_DSk_initBorder();		//边框皮肤初始化
+	this.drill_DSk_initSkin();					//初始化 - 3C窗口皮肤
+	this.drill_DSk_initBorder();				//初始化 - 3B边框皮肤
 };
 //==============================
-// * 对话框 - 设置背景（非帧刷新，窗口/暗淡/透明）
+// * 3A主体 - 设置背景（非帧刷新，窗口/暗淡/透明）
 //==============================
 var _drill_DSk_setBackgroundType = Window_Message.prototype.setBackgroundType;
 Window_Message.prototype.setBackgroundType = function( type ){
@@ -1104,62 +1153,57 @@ Window_Message.prototype.setBackgroundType = function( type ){
 	
     if( type === 0 ){	// 窗口 类型
 		var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
-		this.drill_DSk_resetData_Skin( data );	//刷新窗口皮肤
-		this.drill_DSk_resetBorder();			//刷新边框皮肤
+		this.drill_DSk_resetData_Skin( data );	//重设数据 - 3C窗口皮肤
+		this.drill_DSk_resetBorder();			//重设数据 - 3B边框皮肤
 	}
 }
 //==============================
-// * 对话框 - 帧刷新
+// * 3A主体 - 帧刷新
 //==============================
 var _drill_DSk_mes_update = Window_Message.prototype.update;
 Window_Message.prototype.update = function(){
 	_drill_DSk_mes_update.call(this);
-	this.drill_DSk_updateSkin();				//帧刷新 - 窗口皮肤
-}
-//==============================
-// * 对话框底层 - 窗口平铺背景向内缩进距
-//==============================
-var _drill_DSk__refreshBack = Window.prototype._refreshBack;
-Window.prototype._refreshBack = function(){
-	
-	if( this._drill_DSk_tag != undefined ){
-		var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
-		this._drill_DSk_marginTemp = this._margin;		//（控制 _margin 向内缩进距）
-		this._margin = this._drill_DSk_marginTemp + data['window_backInner'];
-	}
-	
-	_drill_DSk__refreshBack.call(this);
-	
-	if( this._drill_DSk_tag != undefined ){
-		this._margin = this._drill_DSk_marginTemp;
-	}
+	this.drill_DSk_updateSkin();				//帧刷新 - 3C窗口皮肤
+												//帧刷新 - 3B边框皮肤（无）
 }
 
+
 //==============================
-// * 边框皮肤 - 初始化
+// * 3B边框皮肤 - 初始化（Window_Base）
 //==============================
 Window_Base.prototype.drill_DSk_initBorder = function() {
-
-	// > 边框层
-	this._drill_DSk_border_needRefresh = false;
+	
+	// > 对话框边贴图
 	this._drill_DSk_border = new Drill_DSk_BorderSprite( this );
 	this.addChildToBack( this._drill_DSk_border );
 	//（注意， _windowSpriteContainer 是一个 PIXI.Container，不能addChild，巨坑 ）
 }
 //==============================
-// * 边框皮肤 - 刷新边框皮肤
+// * 3B边框皮肤 - 刷新边框皮肤（Window_Base）
 //==============================
 Window_Base.prototype.drill_DSk_resetBorder = function(){
+	if( this._drill_DSk_border == undefined ){ return; }
 	
-	// > 刷新标记
-	this._drill_DSk_border_needRefresh = true;
-	
-	// > 边框样式
 	this._drill_DSk_border.drill_DSk_refreshStyle();
+	this._drill_DSk_border.drill_DSk_refreshPosition();
+}
+//==============================
+// * 3B边框皮肤 - 兼容Yep修正窗口对象
+//==============================
+if( Imported.YEP_MessageCore ){	
+	var _drill_DSk_yep_adjustWindowSettings = Window_Message.prototype.adjustWindowSettings;
+	Window_Message.prototype.adjustWindowSettings = function() {
+		_drill_DSk_yep_adjustWindowSettings.call(this);			//（宽度变化后，立即刷新边角和边框，不要出现一帧闪边框）
+		if( this._drill_DSk_border ){
+			this._drill_DSk_border.drill_sprite_updateBorder();	//帧刷新 边框
+			this._drill_DSk_border.drill_sprite_updateCorner();	//帧刷新 边角
+		}
+	}
 }
 
+
 //==============================
-// * 窗口皮肤 - 初始化
+// * 3C窗口皮肤 - 初始化『窗口皮肤』（Window_Base）
 //
 //			说明：	> 此函数只在初始化时执行一次，不要执行多了。
 //==============================
@@ -1168,17 +1212,21 @@ Window_Base.prototype.drill_DSk_initSkin = function() {
 	// > 皮肤资源
 	this._drill_skin_defaultSkin = this.windowskin;
 	
-	// > 重设数据
+	// > 初始化皮肤样式『窗口皮肤』
 	if( this._drill_DSk_tag == undefined ){ return; }
 	var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
 	this.drill_DSk_resetData_Skin( data );
 }
 //==============================
-// * 窗口皮肤 - 重设数据
+// * 3C窗口皮肤 - 重设数据『窗口皮肤』（Window_Base）
 //
-//			说明：	> data对象中的参数【可以缺项】。
+//			说明：	> 窗口皮肤样式切换时重设，data对象中的参数【可以缺项】。
 //==============================
 Window_Base.prototype.drill_DSk_resetData_Skin = function( data ){
+	
+	// > 插件自定义值『窗口皮肤』
+	var window_pic_file1 = "img/Menu__ui_message/";
+	var window_pic_file2 = "img/Menu__ui_message/";
 	
 	// > 默认值
 	if( data['window_type'] == undefined ){ data['window_type'] = "默认窗口皮肤" };		//布局模式（默认窗口皮肤/自定义窗口皮肤/自定义背景图片/黑底背景）
@@ -1201,7 +1249,7 @@ Window_Base.prototype.drill_DSk_resetData_Skin = function( data ){
 	this._drill_skinBackground_width = 0;
 	this._drill_skinBackground_height = 0;
 	if( data['window_type'] == "自定义背景图片" && data['window_pic_src'] != "" ){
-		this._drill_skin_pic_bitmap = ImageManager.loadBitmap( "img/Menu__ui_message/", data['window_pic_src'], 0, true);
+		this._drill_skin_pic_bitmap = ImageManager.loadBitmap( window_pic_file1, data['window_pic_src'], 0, true );
 		this._drill_skin_pic_x = data['window_pic_x'];
 		this._drill_skin_pic_y = data['window_pic_y'];
 	}else{
@@ -1209,7 +1257,7 @@ Window_Base.prototype.drill_DSk_resetData_Skin = function( data ){
 	}
 	
 	if( data['window_type'] == "自定义窗口皮肤" && data['window_sys_src'] != "" ){
-		this._drill_skin_sys_bitmap = ImageManager.loadBitmap( "img/Menu__ui_message/", data['window_sys_src'], 0, true);
+		this._drill_skin_sys_bitmap = ImageManager.loadBitmap( window_pic_file2, data['window_sys_src'], 0, true );
 	}else{
 		this._drill_skin_sys_bitmap = this._drill_skin_defaultSkin;
 	}
@@ -1270,7 +1318,7 @@ Window_Base.prototype.drill_DSk_resetData_Skin = function( data ){
 		//this.opacity = 255;											//背景容器层 透明度
 		this._windowBackSprite.opacity = 0;								//背景容器层 - 平铺贴图 透明度
 		this._windowFrameSprite.opacity = 0;							//背景容器层 - 框架贴图 透明度
-		this._drill_skinBackground.opacity = this._drill_skin_opacity;	//背景容器层 - 背景图片 透明度]
+		this._drill_skinBackground.opacity = this._drill_skin_opacity;	//背景容器层 - 背景图片 透明度
 		
 		// （背景图片布局）
 		this._drill_skinBackground.bitmap = this._drill_skin_pic_bitmap;
@@ -1302,62 +1350,142 @@ Window_Base.prototype.drill_DSk_resetData_Skin = function( data ){
 	this._windowSpriteContainer.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
 }
 //==============================
-// * 窗口皮肤 - 帧刷新
+// * 3C窗口皮肤 - 帧刷新『窗口皮肤』（Window_Base）
 //==============================
 Window_Base.prototype.drill_DSk_updateSkin = function() {
+	this.drill_DSk_updateSkin_skinBackground();		//帧刷新 - 高宽变化
+	this.drill_DSk_updateSkin_opacity();			//帧刷新 - 透明度锁定
+}
+//==============================
+// * 3C窗口皮肤 - 帧刷新 - 高宽变化『窗口皮肤』（Window_Base）
+//==============================
+Window_Base.prototype.drill_DSk_updateSkin_skinBackground = function() {
+	if( this._drill_windowWidth == undefined ){ return; }
+	if( this._drill_windowHeight == undefined ){ return; }
 	
+	// > 高宽变化 - 锁
+	if( this._drill_skinBackground_width  == this._drill_windowWidth &&
+		this._drill_skinBackground_height == this._drill_windowHeight ){
+		return;
+	}
+	this._drill_skinBackground_width = this._drill_windowWidth;
+	this._drill_skinBackground_height = this._drill_windowHeight;
+	
+	// > 高宽变化 - 背景图片（重置中心锚点）
+	if( this._drill_skin_type == "自定义背景图片" || this._drill_skin_type == "图片窗口布局" ){
+		var xx = this._drill_skin_pic_x;
+		var yy = this._drill_skin_pic_y;
+		var anchor_x = this._drill_windowAnchorX || 0;
+		var anchor_y = this._drill_windowAnchorY || 0;
+		xx += this._drill_windowWidth  * anchor_x;
+		yy += this._drill_windowHeight * anchor_y;
+		this._drill_skinBackground.x = xx;
+		this._drill_skinBackground.y = yy;
+		this._drill_skinBackground.anchor.x = anchor_x;
+		this._drill_skinBackground.anchor.y = anchor_y;
+	}
+	
+	// > 高宽变化 - 黑底背景（重建黑色画布）
 	if( this._drill_skin_type == "黑底背景" || this._drill_skin_type == "黑底布局" ){
-		
-		// > 高宽改变锁
-		if( this._drill_skinBackground_width  == this._drill_width &&
-			this._drill_skinBackground_height == this._drill_height ){
-			return;
-		}
-		this._drill_skinBackground_width = this._drill_width;
-		this._drill_skinBackground_height = this._drill_height;
-		
-		// > 改变时新建黑色画布
-		this._drill_skinBackground_BlackBitmap = new Bitmap(this._drill_width, this._drill_height);
-		this._drill_skinBackground_BlackBitmap.fillRect(0, 0 , this._drill_width, this._drill_height, "#000000");
+		this._drill_skinBackground_BlackBitmap = new Bitmap(this._drill_windowWidth, this._drill_windowHeight);
+		this._drill_skinBackground_BlackBitmap.fillRect(0, 0 , this._drill_windowWidth, this._drill_windowHeight, "#000000");
 		this._drill_skinBackground.bitmap = this._drill_skinBackground_BlackBitmap;
 	}
 }
 //==============================
-// * 窗口皮肤 - 帧刷新色调
+// * 3C窗口皮肤 - 帧刷新 - 透明度锁定『窗口皮肤』（Window_Base）
 //
-//			说明：	setTone可以反复调用赋值，有变化监听的锁。
+//			说明：	> 不允许其它插件修改透明度，所以专门帧刷新赋值。
 //==============================
-var _drill_DSk_updateTone = Window_Base.prototype.updateTone;
+Window_Base.prototype.drill_DSk_updateSkin_opacity = function() {
+	if( this._drill_skin_opacity == undefined ){ return; }
+	if( isNaN( this._drill_skin_opacity ) ){ return; }
+	
+	if( this._drill_skin_type == "默认窗口皮肤" || this._drill_skin_type == "默认窗口布局" ){
+		//this.contentsOpacity = 255;									//文本域 透明度（与 背景容器层 并列）
+		//this.opacity = 255;											//背景容器层 透明度
+		this._windowBackSprite.opacity = this._drill_skin_opacity;		//背景容器层 - 平铺贴图 透明度
+		this._windowFrameSprite.opacity = this._drill_skin_opacity;		//背景容器层 - 框架贴图 透明度
+		this._drill_skinBackground.opacity = 0;							//背景容器层 - 背景图片 透明度
+		
+	}else if( this._drill_skin_type == "自定义窗口皮肤" || this._drill_skin_type == "系统窗口布局" ){
+		//this.contentsOpacity = 255;									//文本域 透明度（与 背景容器层 并列）
+		//this.opacity = 255;											//背景容器层 透明度
+		this._windowBackSprite.opacity = this._drill_skin_opacity;		//背景容器层 - 平铺贴图 透明度
+		this._windowFrameSprite.opacity = this._drill_skin_opacity;		//背景容器层 - 框架贴图 透明度
+		this._drill_skinBackground.opacity = 0;							//背景容器层 - 背景图片 透明度
+		
+	}else if( this._drill_skin_type == "自定义背景图片" || this._drill_skin_type == "图片窗口布局" ){
+		//this.contentsOpacity = 255;									//文本域 透明度（与 背景容器层 并列）
+		//this.opacity = 255;											//背景容器层 透明度
+		this._windowBackSprite.opacity = 0;								//背景容器层 - 平铺贴图 透明度
+		this._windowFrameSprite.opacity = 0;							//背景容器层 - 框架贴图 透明度
+		this._drill_skinBackground.opacity = this._drill_skin_opacity;	//背景容器层 - 背景图片 透明度
+		
+	}else if( this._drill_skin_type == "黑底背景" || this._drill_skin_type == "黑底布局" ){
+		//this.contentsOpacity = 255;									//文本域 透明度（与 背景容器层 并列）
+		//this.opacity = 255;											//背景容器层 透明度
+		this._windowBackSprite.opacity = 0;								//背景容器层 - 平铺贴图 透明度
+		this._windowFrameSprite.opacity = 0;							//背景容器层 - 框架贴图 透明度
+		this._drill_skinBackground.opacity = this._drill_skin_opacity;	//背景容器层 - 背景图片 透明度
+	}
+}
+//==============================
+// * 3C窗口皮肤 - 帧刷新色调『窗口皮肤』（Window_Base）
+//
+//			说明：	> setTone可以反复调用赋值，因为函数内有变化监听锁。
+//==============================
+var _drill_DSk_skin_updateTone = Window_Base.prototype.updateTone;
 Window_Base.prototype.updateTone = function() {
 	if( this._drill_skin_tone_lock == true ){
 		this.setTone( this._drill_skin_tone_r, this._drill_skin_tone_g, this._drill_skin_tone_b );
 		return;
 	}
-	_drill_DSk_updateTone.call( this );
+	_drill_DSk_skin_updateTone.call( this );
+}
+
+//==============================
+// * 3C窗口皮肤 - 窗口平铺背景向内缩进距
+//
+//			说明：	> 此设置属于特殊底层设置，修改 窗口的平铺背景。
+//==============================
+var _drill_DSk__refreshBack = Window.prototype._refreshBack;
+Window.prototype._refreshBack = function(){
+	
+	if( this._drill_DSk_tag != undefined ){
+		var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
+		this._drill_DSk_marginTemp = this._margin;		//（控制 _margin 向内缩进距）
+		this._margin = this._drill_DSk_marginTemp + data['window_backInner'];
+	}
+	
+	// > 原函数
+	_drill_DSk__refreshBack.call(this);
+	
+	if( this._drill_DSk_tag != undefined ){
+		this._margin = this._drill_DSk_marginTemp;
+	}
 }
 
 
 
 //=============================================================================
-// * 对话框子窗口
+// ** ☆对话框子窗口控制
+//
+//			说明：	> 该模块将对 对话框的子窗口 进行专门管理。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 金钱窗口 - 初始化
+// * 4A金钱窗口 - 初始化
 //==============================
 var _drill_DSk_createSubWindows = Window_Message.prototype.createSubWindows;
 Window_Message.prototype.createSubWindows = function(){
 	_drill_DSk_createSubWindows.call( this );
-	
-	// > 通用函数
-	this._goldWindow.drill_DSk_initBorder = this.drill_DSk_initBorder;
-	this._goldWindow.drill_DSk_resetBorder = this.drill_DSk_resetBorder;	
-	
 	this._goldWindow._drill_DSk_tag = "Window_Gold";
-	this._goldWindow.drill_DSk_initSkin();				//窗口皮肤初始化
-	this._goldWindow.drill_DSk_initBorder();			//边框皮肤初始化
+	this._goldWindow.drill_DSk_initSkin();		//初始化 - 3C窗口皮肤
+	this._goldWindow.drill_DSk_initBorder();	//初始化 - 3B边框皮肤
 }
 //==============================
-// * 金钱窗口 - 刷新
+// * 4A金钱窗口 - 刷新
 //==============================
 var _drill_DSk_Gold_open = Window_Gold.prototype.open;
 Window_Gold.prototype.open = function() {
@@ -1365,182 +1493,187 @@ Window_Gold.prototype.open = function() {
 	
 	if( this._drill_DSk_tag != undefined ){
 		var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
-		this.drill_DSk_resetData_Skin( data );	//刷新窗口皮肤
-		this.drill_DSk_resetBorder();			//刷新边框皮肤
+		this.drill_DSk_resetData_Skin( data );	//重设数据 - 3C窗口皮肤
+		this.drill_DSk_resetBorder();			//重设数据 - 3B边框皮肤
 	}
 }
 //==============================
-// * 金钱窗口 - 帧刷新
+// * 4A金钱窗口 - 帧刷新
 //==============================
 var _drill_DSk_Gold_update = Window_Gold.prototype.update;
 Window_Gold.prototype.update = function(){
 	_drill_DSk_Gold_update.call(this);
-	this.drill_DSk_updateSkin();				//帧刷新 - 窗口皮肤
+	this.drill_DSk_updateSkin();				//帧刷新 - 3C窗口皮肤
+												//帧刷新 - 3B边框皮肤（无）
 }
 
 //==============================
-// * 选择项窗口 - 初始化
+// * 4B选择项窗口 - 初始化
 //==============================
 var _drill_DSk_ChoiceList_initialize = Window_ChoiceList.prototype.initialize;
 Window_ChoiceList.prototype.initialize = function( messageWindow ){
 	_drill_DSk_ChoiceList_initialize.call( this,messageWindow );
 	this._drill_DSk_tag = "Window_ChoiceList";
-	this.drill_DSk_initSkin();				//窗口皮肤初始化
-	this.drill_DSk_initBorder();			//边框皮肤初始化
+	this.drill_DSk_initSkin();				//初始化 - 3C窗口皮肤
+	this.drill_DSk_initBorder();			//初始化 - 3B边框皮肤
 }
 //==============================
-// * 选择项窗口 - 刷新
+// * 4B选择项窗口 - 刷新
 //==============================
 var _drill_DSk_ChoiceList_start = Window_ChoiceList.prototype.start;
 Window_ChoiceList.prototype.start = function() {
 	_drill_DSk_ChoiceList_start.call(this);
 	var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
-	this.drill_DSk_resetData_Skin( data );	//刷新窗口皮肤
-	this.drill_DSk_resetBorder();			//刷新边框皮肤
+	this.drill_DSk_resetData_Skin( data );	//重设数据 - 3C窗口皮肤
+	this.drill_DSk_resetBorder();			//重设数据 - 3B边框皮肤
 }
 //==============================
-// * 选择项窗口 - 帧刷新
+// * 4B选择项窗口 - 帧刷新
 //==============================
 var _drill_DSk_ChoiceList_update = Window_ChoiceList.prototype.update;
 Window_ChoiceList.prototype.update = function(){
 	_drill_DSk_ChoiceList_update.call(this);
-	this.drill_DSk_updateSkin();			//帧刷新 - 窗口皮肤
+	this.drill_DSk_updateSkin();			//帧刷新 - 3C窗口皮肤
+											//帧刷新 - 3B边框皮肤（无）
 }
 
 //==============================
-// * 数字输入窗口 - 初始化
+// * 4C数字输入窗口 - 初始化
 //==============================
 var _drill_DSk_NumberInput_initialize = Window_NumberInput.prototype.initialize;
 Window_NumberInput.prototype.initialize = function( messageWindow ){
 	_drill_DSk_NumberInput_initialize.call( this,messageWindow );
 	this._drill_DSk_tag = "Window_NumberInput";
-	this.drill_DSk_initSkin();				//窗口皮肤初始化
-	this.drill_DSk_initBorder();			//边框皮肤初始化
+	this.drill_DSk_initSkin();					//初始化 - 3C窗口皮肤
+	this.drill_DSk_initBorder();				//初始化 - 3B边框皮肤
 }
 //==============================
-// * 数字输入窗口 - 刷新
+// * 4C数字输入窗口 - 刷新
 //==============================
 var _drill_DSk_NumberInput_start = Window_NumberInput.prototype.start;
 Window_NumberInput.prototype.start = function() {
 	_drill_DSk_NumberInput_start.call(this);
 	var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
-	this.drill_DSk_resetData_Skin( data );	//刷新窗口皮肤
-	this.drill_DSk_resetBorder();			//刷新边框皮肤
+	this.drill_DSk_resetData_Skin( data );		//重设数据 - 3C窗口皮肤
+	this.drill_DSk_resetBorder();				//重设数据 - 3B边框皮肤
 }
 //==============================
-// * 数字输入窗口 - 帧刷新
+// * 4C数字输入窗口 - 帧刷新
 //==============================
 var _drill_DSk_NumberInput_update = Window_NumberInput.prototype.update;
 Window_NumberInput.prototype.update = function(){
 	_drill_DSk_NumberInput_update.call(this);
-	this.drill_DSk_updateSkin();			//帧刷新 - 窗口皮肤
+	this.drill_DSk_updateSkin();				//帧刷新 - 3C窗口皮肤
+												//帧刷新 - 3B边框皮肤（无）
 }
 
 //==============================
-// * 选择物品窗口 - 初始化
+// * 4D选择物品窗口 - 初始化
 //==============================
 var _drill_DSk_EventItem_initialize = Window_EventItem.prototype.initialize;
 Window_EventItem.prototype.initialize = function( messageWindow ){
 	_drill_DSk_EventItem_initialize.call( this,messageWindow );
 	this._drill_DSk_tag = "Window_EventItem";
-	this.drill_DSk_initSkin();				//窗口皮肤初始化
-	this.drill_DSk_initBorder();			//边框皮肤初始化
+	this.drill_DSk_initSkin();				//初始化 - 3C窗口皮肤
+	this.drill_DSk_initBorder();			//初始化 - 3B边框皮肤
 }
 //==============================
-// * 选择物品窗口 - 刷新
+// * 4D选择物品窗口 - 刷新
 //==============================
 var _drill_DSk_EventItem_start = Window_EventItem.prototype.start;
 Window_EventItem.prototype.start = function() {
 	_drill_DSk_EventItem_start.call(this);
 	var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
-	this.drill_DSk_resetData_Skin( data );	//刷新窗口皮肤
-	this.drill_DSk_resetBorder();			//刷新边框皮肤
+	this.drill_DSk_resetData_Skin( data );	//重设数据 - 3C窗口皮肤
+	this.drill_DSk_resetBorder();			//重设数据 - 3B边框皮肤
 }
 //==============================
-// * 选择物品窗口 - 帧刷新
+// * 4D选择物品窗口 - 帧刷新
 //==============================
 var _drill_DSk_EventItem_update = Window_EventItem.prototype.update;
 Window_EventItem.prototype.update = function(){
 	_drill_DSk_EventItem_update.call(this);
-	this.drill_DSk_updateSkin();			//帧刷新 - 窗口皮肤
+	this.drill_DSk_updateSkin();			//帧刷新 - 3C窗口皮肤
+											//帧刷新 - 3B边框皮肤（无）
 }
 
-//=============================================================================
-// * 兼容 - Drill姓名框
-//=============================================================================
-if( Imported.Drill_DialogNameBox ){	
+//==============================
+// * 对话框子窗口控制 - 最后继承1级
+//==============================
+var _drill_DSk_scene_initialize = SceneManager.initialize;
+SceneManager.initialize = function() {
+	_drill_DSk_scene_initialize.call(this);
+	
 	//==============================
-	// * Drill姓名框 - 初始化
+	// * 4E姓名框窗口 - Drill姓名框
 	//==============================
-	var _drill_DSk_DNB_initialize = Drill_DNB_NameBoxWindow.prototype.initialize;
-	Drill_DNB_NameBoxWindow.prototype.initialize = function( parentWindow ){
-		_drill_DSk_DNB_initialize.call( this,parentWindow );
-		this._drill_DSk_tag = "Drill_DNB_NameBoxWindow";
-		this.drill_DSk_initSkin();				//窗口皮肤初始化
-		this.drill_DSk_initBorder();			//边框皮肤初始化
+	if( Imported.Drill_DialogNameBox ){	
+	
+		//==============================
+		// * Drill姓名框 - 初始化
+		//==============================
+		var _drill_DSk_DNB_initialize = Drill_DNB_NameBoxWindow.prototype.initialize;
+		Drill_DNB_NameBoxWindow.prototype.initialize = function( parentWindow ){
+			_drill_DSk_DNB_initialize.call( this,parentWindow );
+			this._drill_DSk_tag = "Drill_DNB_NameBoxWindow";
+			this.drill_DSk_initSkin();				//初始化 - 3C窗口皮肤
+			this.drill_DSk_initBorder();			//初始化 - 3B边框皮肤
+		}
+		//==============================
+		// * Drill姓名框 - 设置位置类型
+		//==============================
+		var _drill_DSk_DNB_setPositionType = Drill_DNB_NameBoxWindow.prototype.drill_resetData_Message;
+		Drill_DNB_NameBoxWindow.prototype.drill_resetData_Message = function( text, position_type ){
+			_drill_DSk_DNB_setPositionType.call( this, text, position_type );
+			var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
+			this.drill_DSk_resetData_Skin( data );	//重设数据 - 3C窗口皮肤
+			this.drill_DSk_resetBorder();			//重设数据 - 3B边框皮肤
+		}
+		//==============================
+		// * Drill姓名框 - 帧刷新
+		//==============================
+		var _drill_DSk_DNB_update = Drill_DNB_NameBoxWindow.prototype.update;
+		Drill_DNB_NameBoxWindow.prototype.update = function(){
+			_drill_DSk_DNB_update.call(this);
+			this.drill_DSk_updateSkin();			//帧刷新 - 3C窗口皮肤
+													//帧刷新 - 3B边框皮肤（无）
+		}
 	}
 	//==============================
-	// * Drill姓名框 - 刷新
+	// * 4E姓名框窗口 - Yep姓名框
 	//==============================
-	var _drill_DSk_DNB_setData = Drill_DNB_NameBoxWindow.prototype.drill_setData;
-	Drill_DNB_NameBoxWindow.prototype.drill_setData = function( text, position_type ){
-		var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
-		this.drill_DSk_resetData_Skin( data );	//刷新窗口皮肤
-		this.drill_DSk_resetBorder();			//刷新边框皮肤
-		return _drill_DSk_DNB_setData.call( this, text, position_type );
-	}
-	//==============================
-	// * Drill姓名框 - 帧刷新
-	//==============================
-	var _drill_DSk_DNB_update = Drill_DNB_NameBoxWindow.prototype.update;
-	Drill_DNB_NameBoxWindow.prototype.update = function(){
-		_drill_DSk_DNB_update.call(this);
-		this.drill_DSk_updateSkin();			//帧刷新 - 窗口皮肤
-	}
-}
-//=============================================================================
-// * 兼容 - Yep姓名框
-//=============================================================================
-if( Imported.YEP_MessageCore ){	
-	//==============================
-	// * Yep姓名框 - 初始化
-	//==============================
-	var _drill_DSk_yep_NameBox_initialize = Window_NameBox.prototype.initialize;
-	Window_NameBox.prototype.initialize = function( parentWindow ){
-		_drill_DSk_yep_NameBox_initialize.call( this,parentWindow );
-		this._drill_DSk_tag = "Window_NameBox";
-		this.drill_DSk_initSkin();				//窗口皮肤初始化
-		this.drill_DSk_initBorder();			//边框皮肤初始化
-	}
-	//==============================
-	// * Yep姓名框 - 刷新
-	//==============================
-	var _drill_DSk_yep_NameBox_refresh = Window_NameBox.prototype.refresh;
-	Window_NameBox.prototype.refresh = function( text, position ){
-		var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
-		this.drill_DSk_resetData_Skin( data );	//刷新窗口皮肤
-		this.drill_DSk_resetBorder();			//刷新边框皮肤
-		return _drill_DSk_yep_NameBox_refresh.call( this,text,position );
-	}
-	//==============================
-	// * Yep姓名框 - 帧刷新
-	//==============================
-	var _drill_DSk_yep_NameBox_update = Window_NameBox.prototype.update;
-	Window_NameBox.prototype.update = function(){
-		_drill_DSk_yep_NameBox_update.call(this);
-		this.drill_DSk_updateSkin();			//帧刷新 - 窗口皮肤
-	}
-}
-//=============================================================================
-// * 兼容 - Yep修正窗口对象
-//=============================================================================
-if( Imported.YEP_MessageCore ){	
-	var _drill_DSk_yep_adjustWindowSettings = Window_Message.prototype.adjustWindowSettings;
-	Window_Message.prototype.adjustWindowSettings = function() {
-		_drill_DSk_yep_adjustWindowSettings.call(this);			//（宽度变化后，立即刷新边角和边框，不要出现一帧闪边框）
-		if( this._drill_DSk_border ){
-			this._drill_DSk_border.drill_DSk_updateBorder();		//帧刷新 边框
-			this._drill_DSk_border.drill_DSk_updateCorner();		//帧刷新 边角
+	if( Imported.YEP_MessageCore ){	
+		
+		//==============================
+		// * Yep姓名框 - 初始化
+		//==============================
+		var _drill_DSk_yep_NameBox_initialize = Window_NameBox.prototype.initialize;
+		Window_NameBox.prototype.initialize = function( parentWindow ){
+			_drill_DSk_yep_NameBox_initialize.call( this,parentWindow );
+			this._drill_DSk_tag = "Window_NameBox";
+			this.drill_DSk_initSkin();					//初始化 - 3C窗口皮肤
+			this.drill_DSk_initBorder();				//初始化 - 3B边框皮肤
+		}
+		//==============================
+		// * Yep姓名框 - 刷新
+		//==============================
+		var _drill_DSk_yep_NameBox_refresh = Window_NameBox.prototype.refresh;
+		Window_NameBox.prototype.refresh = function( text, position ){
+			var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
+			this.drill_DSk_resetData_Skin( data );		//重设数据 - 3C窗口皮肤
+			this.drill_DSk_resetBorder();				//重设数据 - 3B边框皮肤
+			
+			// > 原函数
+			return _drill_DSk_yep_NameBox_refresh.call( this, text, position );
+		}
+		//==============================
+		// * Yep姓名框 - 帧刷新
+		//==============================
+		var _drill_DSk_yep_NameBox_update = Window_NameBox.prototype.update;
+		Window_NameBox.prototype.update = function(){
+			_drill_DSk_yep_NameBox_update.call(this);
+			this.drill_DSk_updateSkin();				//帧刷新 - 3C窗口皮肤
+														//帧刷新 - 3B边框皮肤（无）
 		}
 	}
 }
@@ -1549,18 +1682,34 @@ if( Imported.YEP_MessageCore ){
 
 //=============================================================================
 // ** 对话框边贴图【Drill_DSk_BorderSprite】
-//
-//			主功能：	包含边框和边角两个结构。
-//			
-// 			代码：	> 范围 - 该类额外显示边框和边角装饰。
-//					> 结构 - [ ●合并/分离/ 混乱 ] 数据与贴图合并。通过记录父类的_drill_DSk_tag，来访问$gameSystem进行自变化。
-//					> 数量 - [单个/ ●多个 ] 每个子窗口都有一个对应。
-//					> 创建 - [ ●一次性 /自延迟/外部延迟] 
-//					> 销毁 - [ ●不考虑 /自销毁/外部销毁] 
-//					> 样式 - [不可修改/ ●自变化 /外部变化] 样式根据 _drill_curStyleId 自变化 _drill_curStyle 数据。
+// **		
+// **		作用域：	地图界面、战斗界面
+// **		主功能：	定义一个贴图，包含边框和边角两个结构。
+// **		子功能：	
+// **					->贴图『独立贴图』
+// **						x->显示贴图/隐藏贴图
+// **						x->是否就绪
+// **						x->优化策略
+// **						x->销毁
+// **						->初始化数据
+// **						->初始化对象
+// **					
+// **					->A主体
+// **						->刷新样式
+// **						->刷新位置
+// **					->B播放GIF
+// **					->C边框层
+// **					->D边角层
+// **					
+// **		代码：	> 范围 - 该类额外显示边框和边角装饰。
+// **				> 结构 - [ ●合并/分离/ 混乱 ] 数据与贴图合并。通过记录父类的_drill_DSk_tag，来访问$gameSystem进行自变化。
+// **				> 数量 - [单个/ ●多个 ] 每个子窗口都有一个对应。
+// **				> 创建 - [ ●一次性 /自延迟/外部延迟] 
+// **				> 销毁 - [ ●不考虑 /自销毁/外部销毁] 
+// **				> 样式 - [不可修改/ ●自变化 /外部变化] 样式根据 _drill_curStyleId 自变化 _drill_curStyleData 数据。
 //=============================================================================
 //==============================
-// * 边贴图 - 定义
+// * 对话框边贴图 - 定义
 //==============================
 function Drill_DSk_BorderSprite() {
 	this.initialize.apply(this, arguments);
@@ -1568,77 +1717,173 @@ function Drill_DSk_BorderSprite() {
 Drill_DSk_BorderSprite.prototype = Object.create(Sprite.prototype);
 Drill_DSk_BorderSprite.prototype.constructor = Drill_DSk_BorderSprite;
 //==============================
-// * 边贴图 - 初始化
+// * 对话框边贴图 - 初始化
 //==============================
-Drill_DSk_BorderSprite.prototype.initialize = function( p ){
+Drill_DSk_BorderSprite.prototype.initialize = function( parentWindow ){
 	Sprite.prototype.initialize.call(this);
-	this._drill_parent = p;
-	this._drill_curStyleId = $gameSystem.drill_DSk_getStyleId( this._drill_parent._drill_DSk_tag );
-	this._drill_curStyle = JSON.parse(JSON.stringify( $gameSystem.drill_DSk_getStyle( this._drill_parent._drill_DSk_tag ) ));	//深拷贝数据
+	this._drill_parent = parentWindow;
+	this._drill_curStyleId = $gameSystem.drill_DSk_getStyleId( parentWindow._drill_DSk_tag );
+	this._drill_curStyleData = JSON.parse(JSON.stringify( $gameSystem.drill_DSk_getStyle( parentWindow._drill_DSk_tag ) ));	//深拷贝数据
 	
-	this.drill_initSprite();			//初始化对象
+	this.drill_initData();					//初始化数据
+	this.drill_initSprite();				//初始化对象
 };
 //==============================
-// * 边贴图 - 帧刷新
+// * 对话框边贴图 - 帧刷新
 //==============================
 Drill_DSk_BorderSprite.prototype.update = function() {
 	Sprite.prototype.update.call(this);
+	if( this._drill_parent == undefined ){ return; }
 	
-	this.drill_updateSprite();				//帧刷新对象
+	this.drill_sprite_updateAttr();			//帧刷新 - A主体
+	this.drill_sprite_updateGIF();			//帧刷新 - B播放GIF
+	
+	this.drill_sprite_updateBorder();		//帧刷新 - C边框层
+	this._drill_border_updated = false;		//帧刷新 - C边框层 锁
+	
+	this.drill_sprite_updateCorner();		//帧刷新 - D边角层
+	this._drill_corner_updated = false;		//帧刷新 - D边角层 锁
 };
 //==============================
-// * 边贴图 - 修改样式（接口）
+// * 对话框边贴图 - 初始化数据『独立贴图』
 //==============================
-Drill_DSk_BorderSprite.prototype.drill_DSk_refreshStyle = function(){
-	var styleId = $gameSystem.drill_DSk_getStyleId( this._drill_parent._drill_DSk_tag );
-	if( styleId == -1 ){ return; }
-	if( this._drill_curStyleId == styleId ){ return; }
-	this._drill_curStyleId = styleId;
-	this._drill_curStyle = JSON.parse(JSON.stringify( $gameSystem.drill_DSk_getStyle( this._drill_parent._drill_DSk_tag ) ));	//深拷贝数据
-	this.drill_initSprite();			//强制重新初始化
+Drill_DSk_BorderSprite.prototype.drill_initData = function() {
+	//（暂无 默认值）
 };
 //==============================
-// * 创建 - 初始化对象
+// * 对话框边贴图 - 初始化对象『独立贴图』
 //==============================
 Drill_DSk_BorderSprite.prototype.drill_initSprite = function() {
-	var data = this._drill_curStyle;	
+	this.drill_sprite_initAttr();			//子功能初始化 - A主体
+	this.drill_sprite_initGIF();			//子功能初始化 - B播放GIF
+	this.drill_sprite_initBorder();			//子功能初始化 - C边框层
+	this.drill_sprite_initCorner();			//子功能初始化 - D边角层
+}
+
+
+//==============================
+// * A主体 - 子功能初始化
+//==============================
+Drill_DSk_BorderSprite.prototype.drill_sprite_initAttr = function() {
 	
 	// > 私有属性初始化
 	this.anchor.x = 0.5;
 	this.anchor.y = 0.5;
 	this.opacity = 255;
-	
-	// > 私有变量初始化
-	this._drill_time = 0;								//持续时间
-	this._drill_gifTime = 0;							//当前gif播放时间
-	this._drill_border_bitmaps = [];					//边框bitmap对象序列
-	this._drill_corner_bitmaps = [];					//边角bitmap对象序列
-	this._drill_border_updated = false;					//帧刷新锁（放置update调用次数过多）
-	this._drill_corner_updated = false;					//帧刷新锁
-	
-	// > 资源读取
-	for(var j = 0; j < data['border_gif_src'].length ; j++){
-		var src_str = data['border_gif_src'][j];
-		var obj_bitmap = ImageManager.loadBitmap( data['border_gif_src_file'], src_str, 0, true);
-		this._drill_border_bitmaps.push( obj_bitmap );
-	};
-	for(var j = 0; j < data['corner_gif_src'].length ; j++){
-		var src_str = data['corner_gif_src'][j];
-		var obj_bitmap = ImageManager.loadBitmap( data['corner_gif_src_file'], src_str, 0, true);
-		this._drill_corner_bitmaps.push( obj_bitmap );
-	};
-	
-	this.drill_createBorder();
-	this.drill_createCorner();
 }
 //==============================
-// * 创建 - 边框
+// * A主体 - 帧刷新
 //==============================
-Drill_DSk_BorderSprite.prototype.drill_createBorder = function() {
-	var data = this._drill_curStyle;	
+Drill_DSk_BorderSprite.prototype.drill_sprite_updateAttr = function() {
+	var data = this._drill_curStyleData;
+	
+	// > 窗口开关动画
+	this.opacity = this._drill_parent.opacity;
+	this.scale.y = this._drill_parent._windowSpriteContainer.scale.y;
+	
+	
+	// > 可见
+	var sprite_visible = true;
+	
+	// > 可见 - 矩形长宽太小时，不可见
+	var rect = this.drill_DSk_getRect();
+	if( rect.width <= 2 || rect.height <= 2 ){
+		sprite_visible = false;
+	}
+	
+	this.visible = sprite_visible;
+	
+	// > 可见 - C边框层
+	if( this._borderSprite_layer != undefined ){
+		this._borderSprite_layer.visible = data['border_visible'];
+	}
+	
+	// > 可见 - D边角层
+	if( this._cornerSprite_layer != undefined ){
+		this._cornerSprite_layer.visible = data['corner_visible'];
+	}
+}
+//==============================
+// * A主体 - 刷新样式（开放函数）
+//==============================
+Drill_DSk_BorderSprite.prototype.drill_DSk_refreshStyle = function(){
+	var styleId = $gameSystem.drill_DSk_getStyleId( this._drill_parent._drill_DSk_tag );
+	if( styleId == -1 ){ return; }
+	
+	if( this._drill_curStyleId == styleId ){ return; }
+	this._drill_curStyleId = styleId;
+	this._drill_curStyleData = JSON.parse(JSON.stringify( $gameSystem.drill_DSk_getStyle( this._drill_parent._drill_DSk_tag ) ));	//深拷贝数据
+	
+	// > 强制 初始化对象
+	this.drill_initSprite();
+};
+//==============================
+// * A主体 - 刷新位置（开放函数）
+//==============================
+Drill_DSk_BorderSprite.prototype.drill_DSk_refreshPosition = function() {
+	var rect = this.drill_DSk_getRect();
+	this.x = rect.x + rect.width*0.5;
+	this.y = rect.y + rect.height*0.5;
+}
+//==============================
+// * A主体 - 获取矩形（开放函数）
+//==============================
+Drill_DSk_BorderSprite.prototype.drill_DSk_getRect = function(){
+	var rect = {};
+	rect['x'] = 0;		//（注意，这里是相对于父类的矩形，所以x y肯定为零）
+	rect['y'] = 0;
+	rect['width'] = this._drill_parent.width;
+	rect['height'] = this._drill_parent.height;
+	return rect;
+};
+
+
+//==============================
+// * B播放GIF - 子功能初始化
+//==============================
+Drill_DSk_BorderSprite.prototype.drill_sprite_initGIF = function() {
+	this._drill_gifTime = 0;
+}
+//==============================
+// * B播放GIF - 帧刷新
+//==============================
+Drill_DSk_BorderSprite.prototype.drill_sprite_updateGIF = function() {
+	
+	// > 时间+1
+	if( this._drill_parent.visible == true ){
+		this._drill_gifTime += 1;
+	}
+}
+
+
+//==============================
+// * C边框层 - 子功能初始化
+//==============================
+Drill_DSk_BorderSprite.prototype.drill_sprite_initBorder = function() {
+	var data = this._drill_curStyleData;
+	
+	// > 读取资源
+	this._drill_border_bitmaps = [];
+	for(var j = 0; j < data['border_gif_src'].length; j++){
+		var src_str = data['border_gif_src'][j];
+		var obj_bitmap = ImageManager.loadBitmap( data['border_gif_src_file'], src_str, 0, true );
+		this._drill_border_bitmaps.push( obj_bitmap );
+	};
+	
+	// > 帧刷新锁（防止update调用次数过多）
+	this._drill_border_updated = false;
+	
+	// > 创建
+	this.drill_sprite_createBorder();
+}
+//==============================
+// * C边框层 - 创建
+//==============================
+Drill_DSk_BorderSprite.prototype.drill_sprite_createBorder = function() {
+	var data = this._drill_curStyleData;
 	var rect = this.drill_DSk_getRect();
 	
-	// > 清理贴图
+	// > 清理 旧贴图
 	if( this._borderSprite_1 != undefined ){ this._borderSprite_layer.removeChild( this._borderSprite_1 ); }
 	if( this._borderSprite_2 != undefined ){ this._borderSprite_layer.removeChild( this._borderSprite_2 ); }
 	if( this._borderSprite_3 != undefined ){ this._borderSprite_layer.removeChild( this._borderSprite_3 ); }
@@ -1743,124 +1988,17 @@ Drill_DSk_BorderSprite.prototype.drill_createBorder = function() {
 	}
 }
 //==============================
-// * 创建 - 边角
+// * C边框层 - 帧刷新
 //==============================
-Drill_DSk_BorderSprite.prototype.drill_createCorner = function() {
-	var data = this._drill_curStyle;	
-	
-	// > 清理贴图
-	if( this._cornerSprite_1 != undefined ){ this._cornerSprite_layer.removeChild( this._cornerSprite_1 ); }
-	if( this._cornerSprite_2 != undefined ){ this._cornerSprite_layer.removeChild( this._cornerSprite_2 ); }
-	if( this._cornerSprite_3 != undefined ){ this._cornerSprite_layer.removeChild( this._cornerSprite_3 ); }
-	if( this._cornerSprite_4 != undefined ){ this._cornerSprite_layer.removeChild( this._cornerSprite_4 ); }
-	if( this._cornerSprite_layer != undefined ){ this.removeChild( this._cornerSprite_layer ); }
-	
-	// > 建立边角层
-	this._cornerSprite_layer = new Sprite();
-	this._cornerSprite_layer.anchor.x = 0.5;
-	this._cornerSprite_layer.anchor.y = 0.5;
-	this.addChild( this._cornerSprite_layer );
-	
-	// > 建立 左上、右上、左下、右下 区域
-	this._cornerSprite_1 = new Sprite();
-	this._cornerSprite_1.anchor.x = 0.5;
-	this._cornerSprite_1.anchor.y = 0.5;
-	this._cornerSprite_1.blendMode = data['corner_blendMode'];
-	this._cornerSprite_layer.addChild( this._cornerSprite_1 );
-	this._cornerSprite_2 = new Sprite();
-	this._cornerSprite_2.anchor.x = 0.5;
-	this._cornerSprite_2.anchor.y = 0.5;
-	this._cornerSprite_2.blendMode = data['corner_blendMode'];
-	this._cornerSprite_layer.addChild( this._cornerSprite_2 );
-	this._cornerSprite_3 = new Sprite();
-	this._cornerSprite_3.anchor.x = 0.5;
-	this._cornerSprite_3.anchor.y = 0.5;
-	this._cornerSprite_3.blendMode = data['corner_blendMode'];
-	this._cornerSprite_layer.addChild( this._cornerSprite_3 );
-	this._cornerSprite_4 = new Sprite();
-	this._cornerSprite_4.anchor.x = 0.5;
-	this._cornerSprite_4.anchor.y = 0.5;
-	this._cornerSprite_4.blendMode = data['corner_blendMode'];
-	this._cornerSprite_layer.addChild( this._cornerSprite_4 );
-
-	if( this._drill_corner_bitmaps.length > 0 ){
-		this._cornerSprite_1.bitmap = this._drill_corner_bitmaps[0];
-		this._cornerSprite_2.bitmap = this._drill_corner_bitmaps[0];
-		this._cornerSprite_3.bitmap = this._drill_corner_bitmaps[0];
-		this._cornerSprite_4.bitmap = this._drill_corner_bitmaps[0];
-	}
-	
-}
-//==============================
-// * 帧刷新对象
-//==============================
-Drill_DSk_BorderSprite.prototype.drill_updateSprite = function() {
-	this._drill_time += 1;						//时间+1
-	if( this._drill_parent.visible ){ this._drill_gifTime += 1; }	//gif播放+1
-	this.drill_DSk_updateVisible();				//显示控制
-	this.drill_DSk_updateOpacity();				//透明度控制
-	this.drill_DSk_refreshPosition();			//位置刷新
-	
-	this.drill_DSk_updateBorder();				//帧刷新 边框
-	this.drill_DSk_updateCorner();				//帧刷新 边角
-	
-	// > 关闭刷新状态位
-	if( this._drill_parent._drill_DSk_border_needRefresh != false ){
-		this._drill_parent._drill_DSk_border_needRefresh = false;		
-	}
-	
-	this._drill_border_updated = false;			//帧刷新锁 边框
-	this._drill_corner_updated = false;			//帧刷新锁 边角
-}
-//==============================
-// * 帧刷新 - 显示控制
-//==============================
-Drill_DSk_BorderSprite.prototype.drill_DSk_updateVisible = function() {
-	var data = this._drill_curStyle;	
-	
-	this._borderSprite_layer.visible = data['border_visible'];
-	this._cornerSprite_layer.visible = data['corner_visible'];
-	
-	// > 矩形长宽太小
-	if( this.drill_DSk_getRect().width <= 2 || this.drill_DSk_getRect().height <= 2 ){
-		this.visible = false;
-		return;
-	}
-	
-	this.visible = true;
-}
-//==============================
-// * 帧刷新 - 透明度控制
-//==============================
-Drill_DSk_BorderSprite.prototype.drill_DSk_updateOpacity = function() {
-	var data = this._drill_curStyle;	
-	
-	this.opacity = this._drill_parent.opacity;
-	this.scale.y = this._drill_parent._windowSpriteContainer.scale.y;
-}
-//==============================
-// * 位置刷新
-//==============================
-Drill_DSk_BorderSprite.prototype.drill_DSk_refreshPosition = function() {
-	if( this._drill_parent._drill_DSk_border_needRefresh == false ){ return; }
-	var data = this._drill_curStyle;	
-	var rect = this.drill_DSk_getRect();
-	
-	this.x = rect.x + rect.width*0.5;
-	this.y = rect.y + rect.height*0.5;
-}
-//==============================
-// * 帧刷新 - 边框
-//==============================
-Drill_DSk_BorderSprite.prototype.drill_DSk_updateBorder = function() {
+Drill_DSk_BorderSprite.prototype.drill_sprite_updateBorder = function() {
 	if( this._drill_border_updated == true ){ return; }	//（帧刷新锁）
 	this._drill_border_updated = true;
 	
-	var data = this._drill_curStyle;	
+	var data = this._drill_curStyleData;	
 	if( this._drill_border_bitmaps == undefined ){ return; }
 	if( this._drill_border_bitmaps.length == 0 ){ return; }
 	
-	// > 播放gif
+	// > B播放GIF - C边框层
 	var inter = this._drill_gifTime;
 	inter = inter / data['border_gif_interval'];
 	inter = inter % this._drill_border_bitmaps.length;
@@ -1869,6 +2007,7 @@ Drill_DSk_BorderSprite.prototype.drill_DSk_updateBorder = function() {
 	}
 	inter = Math.floor(inter);
 	var temp_bitmap = this._drill_border_bitmaps[inter];
+	
 	
 	// > 分区划片
 	if( temp_bitmap == undefined ){ return; }
@@ -1896,7 +2035,7 @@ Drill_DSk_BorderSprite.prototype.drill_DSk_updateBorder = function() {
 	
 	// > 位置
 	var rect = this.drill_DSk_getRect();
-	rect.width  -= data['border_inner'] * 2;
+	rect.width  -= data['border_inner'] * 2;	//（向内缩进距）
 	rect.height -= data['border_inner'] * 2;
 	var rww = rect.width*0.5;
 	var rhh = rect.height*0.5;
@@ -1956,19 +2095,89 @@ Drill_DSk_BorderSprite.prototype.drill_DSk_updateBorder = function() {
 	this._borderSprite_7.y =  1 * rhh;
 	this._borderSprite_9.x =  1 * rww;
 	this._borderSprite_9.y =  1 * rhh;
-}	
+}
+
+
 //==============================
-// * 帧刷新 - 边角
+// * D边角层 - 子功能初始化
 //==============================
-Drill_DSk_BorderSprite.prototype.drill_DSk_updateCorner = function() {
+Drill_DSk_BorderSprite.prototype.drill_sprite_initCorner = function() {
+	var data = this._drill_curStyleData;
+	
+	// > 读取资源
+	this._drill_corner_bitmaps = [];
+	for(var j = 0; j < data['corner_gif_src'].length; j++){
+		var src_str = data['corner_gif_src'][j];
+		var obj_bitmap = ImageManager.loadBitmap( data['corner_gif_src_file'], src_str, 0, true);
+		this._drill_corner_bitmaps.push( obj_bitmap );
+	};
+	
+	// > 帧刷新锁（防止update调用次数过多）
+	this._drill_corner_updated = false;
+	
+	// > 创建
+	this.drill_sprite_createCorner();
+}
+//==============================
+// * D边角层 - 创建
+//==============================
+Drill_DSk_BorderSprite.prototype.drill_sprite_createCorner = function() {
+	var data = this._drill_curStyleData;	
+	
+	// > 清理 旧贴图
+	if( this._cornerSprite_1 != undefined ){ this._cornerSprite_layer.removeChild( this._cornerSprite_1 ); }
+	if( this._cornerSprite_2 != undefined ){ this._cornerSprite_layer.removeChild( this._cornerSprite_2 ); }
+	if( this._cornerSprite_3 != undefined ){ this._cornerSprite_layer.removeChild( this._cornerSprite_3 ); }
+	if( this._cornerSprite_4 != undefined ){ this._cornerSprite_layer.removeChild( this._cornerSprite_4 ); }
+	if( this._cornerSprite_layer != undefined ){ this.removeChild( this._cornerSprite_layer ); }
+	
+	// > 建立边角层
+	this._cornerSprite_layer = new Sprite();
+	this._cornerSprite_layer.anchor.x = 0.5;
+	this._cornerSprite_layer.anchor.y = 0.5;
+	this.addChild( this._cornerSprite_layer );
+	
+	// > 建立 左上、右上、左下、右下 区域
+	this._cornerSprite_1 = new Sprite();
+	this._cornerSprite_1.anchor.x = 0.5;
+	this._cornerSprite_1.anchor.y = 0.5;
+	this._cornerSprite_1.blendMode = data['corner_blendMode'];
+	this._cornerSprite_layer.addChild( this._cornerSprite_1 );
+	this._cornerSprite_2 = new Sprite();
+	this._cornerSprite_2.anchor.x = 0.5;
+	this._cornerSprite_2.anchor.y = 0.5;
+	this._cornerSprite_2.blendMode = data['corner_blendMode'];
+	this._cornerSprite_layer.addChild( this._cornerSprite_2 );
+	this._cornerSprite_3 = new Sprite();
+	this._cornerSprite_3.anchor.x = 0.5;
+	this._cornerSprite_3.anchor.y = 0.5;
+	this._cornerSprite_3.blendMode = data['corner_blendMode'];
+	this._cornerSprite_layer.addChild( this._cornerSprite_3 );
+	this._cornerSprite_4 = new Sprite();
+	this._cornerSprite_4.anchor.x = 0.5;
+	this._cornerSprite_4.anchor.y = 0.5;
+	this._cornerSprite_4.blendMode = data['corner_blendMode'];
+	this._cornerSprite_layer.addChild( this._cornerSprite_4 );
+
+	if( this._drill_corner_bitmaps.length > 0 ){
+		this._cornerSprite_1.bitmap = this._drill_corner_bitmaps[0];
+		this._cornerSprite_2.bitmap = this._drill_corner_bitmaps[0];
+		this._cornerSprite_3.bitmap = this._drill_corner_bitmaps[0];
+		this._cornerSprite_4.bitmap = this._drill_corner_bitmaps[0];
+	}
+}
+//==============================
+// * D边角层 - 帧刷新
+//==============================
+Drill_DSk_BorderSprite.prototype.drill_sprite_updateCorner = function() {
 	if( this._drill_corner_updated == true ){ return; }	//（帧刷新锁）
 	this._drill_corner_updated = true;
 	
-	var data = this._drill_curStyle;	
+	var data = this._drill_curStyleData;	
 	if( this._drill_corner_bitmaps == undefined ){ return; }
 	if( this._drill_corner_bitmaps.length == 0 ){ return; }
 	
-	// > 播放gif
+	// > B播放GIF - D边角层
 	var inter = this._drill_gifTime;
 	inter = inter / data['corner_gif_interval'];
 	inter = inter % this._drill_corner_bitmaps.length;
@@ -1977,6 +2186,7 @@ Drill_DSk_BorderSprite.prototype.drill_DSk_updateCorner = function() {
 	}
 	inter = Math.floor(inter);
 	var temp_bitmap = this._drill_corner_bitmaps[inter];
+	
 	
 	// > 分区划片
 	if( temp_bitmap == undefined ){ return; }
@@ -1995,7 +2205,7 @@ Drill_DSk_BorderSprite.prototype.drill_DSk_updateCorner = function() {
 	
 	// > 位置
 	var rect = this.drill_DSk_getRect();
-	rect.width  -= data['corner_inner'] * 2;
+	rect.width  -= data['corner_inner'] * 2;	//（向内缩进距）
 	rect.height -= data['corner_inner'] * 2;
 	var rww = rect.width*0.5;
 	var rhh = rect.height*0.5;
@@ -2023,15 +2233,4 @@ Drill_DSk_BorderSprite.prototype.drill_DSk_updateCorner = function() {
 		this._cornerSprite_4.y +=  1 * f_move;
 	}
 }
-//==============================
-// * 边框贴图 - 获取矩形
-//==============================
-Drill_DSk_BorderSprite.prototype.drill_DSk_getRect = function(){
-	var data = {};
-	data['x'] = 0;		//（注意，这里是相对于父类的矩形，所以x y肯定为零）
-	data['y'] = 0;
-	data['width'] = this._drill_parent.width;
-	data['height'] = this._drill_parent.height;
-	return data;
-};
 

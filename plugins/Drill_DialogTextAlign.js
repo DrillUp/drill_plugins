@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.5]        窗口字符 - 文本居中
+ * @plugindesc [v1.6]        窗口字符 - 文本居中
  * @author Drill_up
  * 
  * 
@@ -14,48 +14,66 @@
  * 如果你有兴趣，也可以来看看更多我写的drill插件哦ヽ(*。>Д<)o゜
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
- * 使得你可以控制指定行的文字居中，并且支持图标、不同字体大小的居中。
- * ★★必须基于 相关核心 插件★★
+ * 使得你可以控制横向左对齐、居中、右对齐；纵向顶部对齐、居中、底部对齐。
  *
  * -----------------------------------------------------------------------------
  * ----插件扩展
  * 该插件 不能 单独使用。
  * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfWindowCharacter   窗口字符-窗口字符核心
- *     需要该核心才能设置居中与右对齐。
+ *   - Drill_CoreOfWindowCharacter   窗口字符-窗口字符核心★★v2.0及以上★★
+ *     需要该核心才能设置横向与纵向对齐。
  *
  * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：地图界面、战斗界面、菜单界面。
  *   对所有窗口有效。
  * 2.了解更多窗口字符，可以去看看 "23.窗口字符 > 关于窗口字符.docx"。
+ *   了解文本居中原理，可以去看看 "23.窗口字符 > 关于文本居中.docx"。
  * 细节：
- *   (1.如果对话框中有头像，插件会以除去头像外的剩余位置来居中适应。
- *   (2.居中字符能与窗口字符"\px[100]"兼容。
- *   (3.字符对所有窗口都有效，你可以在任何支持 窗口字符 的窗口中试
- *      试该字符。对于某些特殊修改了自身的光标结构的窗口，可能无效。
+ *   (1.字符对所有窗口都有效，你可以在任何支持 窗口字符 的窗口中试试该字符。
+ *   (2.文本居中控制的对象是 整行文本，不是单个字符。
+ *   (3.如果对话框中有头像，插件会以除去头像外的剩余位置来居中适应。
  * 叠加情况：
- *   (1.注意，同一行不能出现两个以上 居中/右对齐 字符。
- *      否则字符光标的偏移会叠加，导致字符越界看不见。
- *   (2.同样的，如果你设置了面板中自带的居中/右对齐功能，使用字符时
- *      光标的偏移也会叠加，导致字符越界看不见。
+ *   (1.同一行不能设置两个以上 居中/右对齐 字符，设置了只按第一个生效。
+ *      同一行不能设置两个以上 居中/底部对齐 字符，设置了只按第一个生效。
+ *   (2.左对齐需要写在当前行的开头位置，并且不能出现 居中/右对齐 字符，否则左对齐失效。
  * 设计：
- *   (1.你可以将右对齐符号插入文本的中间，实现右对齐符号两边的文本
- *      断开并贴着两边显示。
+ *   (1.你可以将居中、右对齐符号插入文本的中间，
+ *      实现文本断开成两段或三段贴着窗口边缘显示。
+ *   (2.你可以结合 行高控制器 和 文本居中 两个插件，自由修改文本。
+ *      比如：居中的标题、短文的段落间隔、右对齐的署名等。
  * 
  * -----------------------------------------------------------------------------
  * ----激活条件
  * 你需要使用下面的窗口字符来实现效果：
  * 
- * 窗口字符：\dal       当前行中，该字符之后的文字左对齐
- * 窗口字符：\dac       当前行中，该字符之后的文字居中
- * 窗口字符：\dar       当前行中，该字符之后的文字右对齐
+ * 窗口字符：\dta[横向左对齐]     当前行和后面所有行都 横向左对齐。
+ * 窗口字符：\dta[横向居中]       当前行和后面所有行都 横向居中。
+ * 窗口字符：\dta[横向右对齐]     当前行和后面所有行都 横向右对齐。
  * 
- * 1.注意，同一行不能出现两个以上 居中/右对齐 字符。
- *   (dal全称为：Drill_Align_Left，即左对齐)
- *   (dac全称为：Drill_Align_Center，即居中)
- *   (dar全称为：Drill_Align_Right，即右对齐)
+ * 窗口字符：\dta[横切居中]       只当前行有效，该字符之后的文字 横向居中，可切断。
+ * 窗口字符：\dta[横切右对齐]     只当前行有效，该字符之后的文字 横向右对齐，可切断。
+ * 
+ * 窗口字符：\dta[纵向顶部对齐]   当前行和后面所有行都 纵向顶部对齐。
+ * 窗口字符：\dta[纵向居中]       当前行和后面所有行都 纵向居中。
+ * 窗口字符：\dta[纵向底部对齐]   当前行和后面所有行都 纵向底部对齐。
+ * 
+ * 1.同一行不能设置两个以上 居中/右对齐 字符，设置了只按第一个生效。
+ *   同一行不能设置两个以上 居中/底部对齐 字符，设置了只按第一个生效。
+ * 2.左对齐需要写在当前行的开头位置，并且不能出现 居中/右对齐 字符，否则左对齐失效。
+ *   （dta全称为：Drill_Text_Align）
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - Debug查看
+ * 你可以通过插件指令打开插件的Debug查看：
+ * 
+ * 插件指令：>文本居中 : DEBUG对齐方式 : 开启
+ * 插件指令：>文本居中 : DEBUG对齐方式 : 关闭
+ * 
+ * 1.执行插件指令后，会弹出四个窗口。
+ *   一个是 横向纵向对齐方式 的测试；另一个是 宝塔诗 的测试；
+ *   最后是两个窗口合并成的 能力面板窗口 的测试。
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -93,6 +111,8 @@
  * 修复了 居中字符 在选项窗口中使用时，会多一点点偏移的bug。
  * [v1.5]
  * 修改了插件的分类。
+ * [v1.6]
+ * 大幅度修改了底层，并且兼容了新的底层结构。
  * 
  */
  
@@ -109,35 +129,36 @@
 //		★工作类型		单次执行
 //		★时间复杂度		o(n)
 //		★性能测试因素	窗口字符管理层
-//		★性能测试消耗	4.94ms（drawTextEx） 2.40ms（没有插件使用时）
-//		★最坏情况		暂无
-//		★备注			在反复测试刷选项窗口时，帧数会降低到22帧，但是只是添加了渲染render的负担，过一下就好了。
+//		★性能测试消耗	
+//		★最坏情况		
+//		★备注			
 //		
 //		★优化记录		暂无
 //
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			文本居中：
-//				->drawTextEx捕获计算
-//					->contents重建时（ this.createContents() ）
-//					->contents清空时（ this.contents.clear() 暂时不考虑，因为窗口都在refresh的时候重建了 ）
-//				->对话框捕获计算
-//					->新建页时（ this.newPage() ）
-//				->防套娃死循环
+//			->☆提示信息
+//			->☆静态数据
+//			->☆插件指令
+//
+//			->☆窗口字符应用之效果字符
+//				> \dta[]
+//			->☆DEBUG对齐方式
+//
 //
 //		★家谱：
 //			无
 //		
 //		★脚本文档：
-//			无
+//			1.系统 > 关于字符绘制核心（脚本）.docx
 //		
 //		★插件私有类：
 //			无
 //		
 //		★必要注意事项：
-//			1. 2022/4/16 窗口字符核心 进行了一次大翻新，文本居中根本就没那么复杂。
-//			   先计算每行宽度（居中字符不纳入计算），居中字符再进行宽度变化。
+//			1. 2024/9/14 编写了 字符绘制核心，两个月进行了全底层的翻新。
+//			   直接从底层就开始支持 对齐方式 的设置。
 //			
 //		★其它说明细节：
 //			暂无
@@ -145,7 +166,7 @@
 //		★存在的问题：
 //			暂无
 //		
-//		★旧日志（2022/4以前）：
+//		★旧日志（2024/9以前）：
 //			1.因为 Window_Message 根本就没用到 drawTextEx 函数。
 //			  所以需要额外进行一次捕获。
 //			2.修改 textState.x 时，【千万注意！】
@@ -161,10 +182,12 @@
 //			5. \px[100] 字符也是个影响因素，只不过是最外层的影响因素，最后考虑。
 //			6.问题：设置多行时，超过6行，右对齐和居中会产生偏移位置。（套娃bug，已发现并解决）
 //			7.问题：信息面板k中，移动选项光标时，计算的字符长度会变长，原因不明。可以确定不是套娃问题。（行数+1的问题，这里又是比较绕的地方了）
+//			8. 2022/4/16 窗口字符核心 进行了一次大翻新，文本居中根本就没那么复杂。
+//			   先计算每行宽度（居中字符不纳入计算），居中字符再进行宽度变化。
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -175,7 +198,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_DTA_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_DTA_PluginTip_baseList.length == 0 ){ return ""; }
@@ -189,12 +212,12 @@
 	
 	
 //=============================================================================
-// ** 静态数据
+// ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_DialogTextAlign = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_DialogTextAlign');
+	var Imported = Imported || {};
+	Imported.Drill_DialogTextAlign = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_DialogTextAlign');
 	
 	
 //=============================================================================
@@ -202,96 +225,324 @@
 //=============================================================================
 if( Imported.Drill_CoreOfWindowCharacter ){
 	
-
+	
+	
 //=============================================================================
-// ** 行宽标记
+// ** ☆插件指令
 //=============================================================================
 //==============================
-// * 当前行 - 执行当前行（继承接口）
+// * 插件指令 - 指令绑定
 //==============================
-var _drill_DTA_COWC_processNewLine = Window_Base.prototype.drill_COWC_processNewLine;
-Window_Base.prototype.drill_COWC_processNewLine = function( line_index, line_text ){
-	_drill_DTA_COWC_processNewLine.call( this, line_index, line_text );
-	this._drill_DTA_line_width = this.drill_COWC_getCurLineWidth();
+var _drill_DTA_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
+	_drill_DTA_pluginCommand.call(this, command, args);
+	this.drill_DTA_pluginCommand( command, args );
 }
 //==============================
-// * 效果字符应用 - 光标偏移X（\PX 效果字符专用）
+// * 插件指令 - 指令执行
 //==============================
-var _drill_DTA_COWC_charOffsetX = Window_Base.prototype.drill_COWC_charOffsetX;
-Window_Base.prototype.drill_COWC_charOffsetX = function( xx ){
-	_drill_DTA_COWC_charOffsetX.call( this, xx );
-	// （此函数用不上，因为计算宽度时，\px[100] 的宽度已经纳入了宽度计算。）
-}
-
-//=============================================================================
-// ** 效果字符应用
-//=============================================================================
-//==============================
-// * 效果字符应用 - 字符转换（简单符）
-//==============================
-var _drill_DTA_processNewEffectChar_Simple = Window_Base.prototype.drill_COWC_processNewEffectChar_Simple;
-Window_Base.prototype.drill_COWC_processNewEffectChar_Simple = function( matched_index, command ){
-	_drill_DTA_processNewEffectChar_Simple.call( this, matched_index, command );
-	
-	// > 不准套娃（该字符是算好单行宽度后，而变化的宽度。所以不准套娃计算。）
-	if( this.drill_COWA_isCalculating() ){ 
-		if( command.toUpperCase() == "DAL" ){ this.drill_COWC_charSubmit_Effect(0,0); }
-		if( command.toUpperCase() == "DAC" ){ this.drill_COWC_charSubmit_Effect(0,0); }
-		if( command.toUpperCase() == "DAR" ){ this.drill_COWC_charSubmit_Effect(0,0); }
-		return; 
-	}
-	
-	
-	// > 左对齐（\DAL）
-	if( command.toUpperCase() == "DAL" ){
-		//（什么都不做）
-		this.drill_COWC_charSubmit_Effect(0,0);
-	}
-	// > 居中（\DAC）
-	if( command.toUpperCase() == "DAC" ){
-		var ww = this._drill_DTA_line_width;
-		var xx = 0;
-		if( ww > 0 ){
-			
-			// > 当前行宽度
-			var c_ww = this.contentsWidth();
-			c_ww -= this._drill_COWC_effect_curData['left'] || 0;	//（去除起始光标位置的影响）
-			
-			// > 对话框的脸图宽度影响
-			if( this._drill_COWC_messageFaceWidthSubtracted != true ){	//（来自核心的标记）
-				if( this instanceof Window_Message == true && $gameMessage.faceName() != "" ){
-					c_ww -= (Window_Base._faceWidth + 20);
+Game_Interpreter.prototype.drill_DTA_pluginCommand = function( command, args ){
+	if( command === ">文本居中" ){
+		if( args.length == 4 ){
+			var type = String(args[1]);
+			var temp1 = String(args[3]);
+			if( type == "DEBUG对齐方式" ){
+				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
+					$gameTemp._drill_DTA_Align_DebugEnabled = true;
+				}
+				if( temp1 == "关闭" || temp1 == "禁用" ){
+					$gameTemp._drill_DTA_Align_DebugEnabled = false;
+					
 				}
 			}
-			
-			// > 居中
-			xx = c_ww *0.5 - ww*0.5;
 		}
-		this.drill_COWC_charSubmit_Effect(xx,0);
 	}
-	// > 右对齐（\DAR）
-	if( command.toUpperCase() == "DAR" ){
-		var ww = this._drill_DTA_line_width;
-		var xx = 0;
-		if( ww > 0 ){
+};
+
+
+//=============================================================================
+// ** ☆窗口字符应用之效果字符
+//=============================================================================
+//==============================
+// * 窗口字符应用之效果字符 - 组合符配置
+//==============================
+var _drill_COWC_DTA_effect_processCombined = Game_Temp.prototype.drill_COWC_effect_processCombined;
+Game_Temp.prototype.drill_COWC_effect_processCombined = function( matched_index, matched_str, command, args ){
+	_drill_COWC_DTA_effect_processCombined.call( this, matched_index, matched_str, command, args );
+	if( command == "dta" ){
+		if( args.length == 1 ){
 			
-			// > 当前行宽度
-			var c_ww = this.contentsWidth();
-			c_ww -= this._drill_COWC_effect_curData['left'] || 0;	//（去除起始光标位置的影响）
-			
-			// > 对话框的脸图宽度影响
-			if( this._drill_COWC_messageFaceWidthSubtracted != true ){	//（来自核心的标记）
-				if( this instanceof Window_Message == true && $gameMessage.faceName() != "" ){
-					c_ww -= (Window_Base._faceWidth + 20);
-				}
+			// > 『窗口字符定义』 - \dta[横向左对齐]
+			if( String(args[0]) == "横向左对齐" ){
+				this.drill_COWC_effect_submitCombined( "@@@-a0" );
 			}
 			
-			// > 右对齐
-			xx = c_ww - ww;
+			// > 『窗口字符定义』 - \dta[横向居中]
+			if( String(args[0]) == "横向居中" ){
+				this.drill_COWC_effect_submitCombined( "@@@-a1" );
+			}
+			
+			// > 『窗口字符定义』 - \dta[横向右对齐]
+			if( String(args[0]) == "横向右对齐" ){
+				this.drill_COWC_effect_submitCombined( "@@@-a2" );
+			}
+			
+			// > 『窗口字符定义』 - \dta[横切居中]
+			if( String(args[0]) == "横切居中" ){
+				this.drill_COWC_effect_submitCombined( "@@@-a3" );
+			}
+			
+			// > 『窗口字符定义』 - \dta[横切右对齐]
+			if( String(args[0]) == "横切右对齐" ){
+				this.drill_COWC_effect_submitCombined( "@@@-a4" );
+			}
+			
+			// > 『窗口字符定义』 - \dta[纵向顶部对齐]
+			if( String(args[0]) == "纵向顶部对齐" ){
+				this.drill_COWC_effect_submitCombined( "@@@-a5" );
+			}
+			
+			// > 『窗口字符定义』 - \dta[纵向居中]
+			if( String(args[0]) == "纵向居中" ){
+				this.drill_COWC_effect_submitCombined( "@@@-a6" );
+			}
+			
+			// > 『窗口字符定义』 - \dta[纵向底部对齐]
+			if( String(args[0]) == "纵向底部对齐" ){
+				this.drill_COWC_effect_submitCombined( "@@@-a7" );
+			}
 		}
-		this.drill_COWC_charSubmit_Effect(xx,0);
 	}
 }
+
+
+//=============================================================================
+// ** ☆DEBUG对齐方式
+//
+//			说明：	> 此模块控制 DEBUG对齐方式 功能。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * DEBUG对齐方式 - 帧刷新（地图界面）
+//==============================
+var _drill_DTA_Align_update = Scene_Map.prototype.update;
+Scene_Map.prototype.update = function() {
+    _drill_DTA_Align_update.call(this);
+	
+	// > 创建贴图
+	if( $gameTemp._drill_DTA_Align_DebugEnabled == true ){
+		$gameTemp._drill_DTA_Align_DebugEnabled = undefined;
+		this.drill_DTA_Align_createDebugSprite();
+	}
+	// > 销毁贴图
+	if( $gameTemp._drill_DTA_Align_DebugEnabled == false ){
+		$gameTemp._drill_DTA_Align_DebugEnabled = undefined;
+		if( this._drill_DTA_Align_DebugSprite_1 != undefined ){
+			this.removeChild(this._drill_DTA_Align_DebugSprite_1);
+			this._drill_DTA_Align_DebugSprite_1 = undefined;
+		}
+		if( this._drill_DTA_Align_DebugSprite_2 != undefined ){
+			this.removeChild(this._drill_DTA_Align_DebugSprite_2);
+			this._drill_DTA_Align_DebugSprite_2 = undefined;
+		}
+		if( this._drill_DTA_Align_DebugSprite_3 != undefined ){
+			this.removeChild(this._drill_DTA_Align_DebugSprite_3);
+			this._drill_DTA_Align_DebugSprite_3 = undefined;
+		}
+		if( this._drill_DTA_Align_DebugSprite_4 != undefined ){
+			this.removeChild(this._drill_DTA_Align_DebugSprite_4);
+			this._drill_DTA_Align_DebugSprite_4 = undefined;
+		}
+	}
+}
+//==============================
+// * DEBUG对齐方式 - 创建贴图
+//==============================
+Scene_Map.prototype.drill_DTA_Align_createDebugSprite = function() {
+	
+	// > 销毁贴图
+	if( this._drill_DTA_Align_DebugSprite_1 != undefined ){
+		this.removeChild(this._drill_DTA_Align_DebugSprite_1);
+		this._drill_DTA_Align_DebugSprite_1 = undefined;
+	}
+	if( this._drill_DTA_Align_DebugSprite_2 != undefined ){
+		this.removeChild(this._drill_DTA_Align_DebugSprite_2);
+		this._drill_DTA_Align_DebugSprite_2 = undefined;
+	}
+	if( this._drill_DTA_Align_DebugSprite_3 != undefined ){
+		this.removeChild(this._drill_DTA_Align_DebugSprite_3);
+		this._drill_DTA_Align_DebugSprite_3 = undefined;
+	}
+	if( this._drill_DTA_Align_DebugSprite_4 != undefined ){
+		this.removeChild(this._drill_DTA_Align_DebugSprite_4);
+		this._drill_DTA_Align_DebugSprite_4 = undefined;
+	}
+	
+	// > 创建贴图1
+	var temp_window = new Window_Base( 20, 60, 320, 200 );
+	this.addChild( temp_window );	//（直接加在最顶层的上面）
+	this._drill_DTA_Align_DebugSprite_1 = temp_window;
+	
+	// > 绘制 - 矩形
+	var temp_bitmap = temp_window.contents;
+	temp_bitmap.drill_COCD_strokeRect( 0, 0, temp_bitmap.width, temp_bitmap.height, "#22aa22", 2, "miter" );
+	
+	// > 绘制 - 参数准备
+	var options = {};
+	options['infoParam'] = {};
+	options['infoParam']['x'] = 0;
+	options['infoParam']['y'] = 0;
+	options['infoParam']['canvasWidth'] = temp_bitmap.width;
+	options['infoParam']['canvasHeight'] = temp_bitmap.height;
+	
+	// > 绘制 - 参数准备 - 自定义
+	options['blockParam'] = {};			//『清零字符默认间距』
+	options['blockParam']['paddingTop'] = 0;
+	options['rowParam'] = {};
+	options['rowParam']['lineHeight_upCorrection'] = 0;
+	
+	options['baseParam'] = {};
+	options['baseParam']['drawDebugBaseRect'] = true;
+	
+	// > 绘制 - 测试的字符
+	var text =  "\\fs[18]【" + DrillUp.g_DTA_PluginTip_curName + "】\n" + 
+				"横向对齐和纵向对齐的效果：\n" + 
+				"左上角\\dta[横切居中]正上方\\dta[横切右对齐]右上角\n" + 
+				"\\dta[纵向居中]正左方\\dta[横切居中]居中\\dta[横切右对齐]正右方\n" + 
+				"\\dta[纵向底部对齐]左下角\\dta[横切居中]正下方\\dta[横切右对齐]右下角\n";
+	temp_window.drill_COWC_drawText( text, options );
+	
+	
+	// > 创建贴图2
+	var temp_window = new Window_Base( 20, 260, 170, 310 );
+	this.addChild( temp_window );	//（直接加在最顶层的上面）
+	this._drill_DTA_Align_DebugSprite_2 = temp_window;
+	
+	// > 绘制 - 矩形
+	var temp_bitmap = temp_window.contents;
+	temp_bitmap.drill_COCD_strokeRect( 0, 0, temp_bitmap.width, temp_bitmap.height, "#22aa22", 2, "miter" );
+	
+	// > 绘制 - 参数准备
+	var options = {};
+	options['infoParam'] = {};
+	options['infoParam']['x'] = 0;
+	options['infoParam']['y'] = 0;
+	options['infoParam']['canvasWidth'] = temp_bitmap.width;
+	options['infoParam']['canvasHeight'] = temp_bitmap.height;
+	
+	// > 绘制 - 参数准备 - 自定义
+	options['blockParam'] = {};			//『清零字符默认间距』
+	options['blockParam']['paddingTop'] = 0;
+	options['rowParam'] = {};
+	options['rowParam']['lineHeight_upCorrection'] = 0;
+	
+	options['baseParam'] = {};
+	options['baseParam']['drawDebugBaseRect'] = false;
+	
+	// > 绘制 - 测试的字符
+	var text =  "\\fs[16]【" + DrillUp.g_DTA_PluginTip_curName + "】\n" + 
+				"全体单位能力：\n" + 
+				"物理攻击：\\dta[横切右对齐]\\c[24]+24\\c[0]\n" + 
+				"物理加成：\\dta[横切右对齐]\\c[24]+6.5%\\c[0]\n" + 
+				"无视护甲：\\dta[横切右对齐]\\c[24]+5\\c[0]\n" + 
+				"暴击率：\\dta[横切右对齐]\\c[0]+0.0%\\c[0]\n" + 
+				"暴击伤害：\\dta[横切右对齐]\\c[24]+8.0%\\c[0]\n" + 
+				"攻击速度：\\dta[横切右对齐]\\c[24]+3.5%\\c[0]\n" + 
+				"攻击距离：\\dta[横切右对齐]\\c[24]+30\\c[0]\n" + 
+				"\n" + 
+				"生命上限：\\dta[横切右对齐]\\c[24]+150\\c[0]\n" + 
+				"生命加成：\\dta[横切右对齐]\\c[0]+0.0%\\c[0]\n" + 
+				"生命恢复：\\dta[横切右对齐]\\c[24]+1.0\\c[0]\n" + 
+				"回血加成：\\dta[横切右对齐]\\c[0]+0.0%\\c[0]\n" + 
+				"物品掉率：\\dta[横切右对齐]\\c[24]+5%\\c[0]\n";
+	temp_window.drill_COWC_drawText( text, options );
+	
+	
+	// > 创建贴图3
+	var temp_window = new Window_Base( 170, 260, 170, 310 );
+	this.addChild( temp_window );	//（直接加在最顶层的上面）
+	this._drill_DTA_Align_DebugSprite_3 = temp_window;
+	
+	// > 绘制 - 矩形
+	var temp_bitmap = temp_window.contents;
+	temp_bitmap.drill_COCD_strokeRect( 0, 0, temp_bitmap.width, temp_bitmap.height, "#22aa22", 2, "miter" );
+	
+	// > 绘制 - 参数准备
+	var options = {};
+	options['infoParam'] = {};
+	options['infoParam']['x'] = 0;
+	options['infoParam']['y'] = 0;
+	options['infoParam']['canvasWidth'] = temp_bitmap.width;
+	options['infoParam']['canvasHeight'] = temp_bitmap.height;
+	
+	// > 绘制 - 参数准备 - 自定义
+	options['blockParam'] = {};			//『清零字符默认间距』
+	options['blockParam']['paddingTop'] = 0;
+	options['rowParam'] = {};
+	options['rowParam']['lineHeight_upCorrection'] = 0;
+	
+	options['baseParam'] = {};
+	options['baseParam']['drawDebugBaseRect'] = false;
+	
+	// > 绘制 - 测试的字符
+	var text =  "\\fs[16]\n" + 
+				"\n" + 
+				"魔法攻击：\\dta[横切右对齐]\\c[0]+0\\c[0]\n" + 
+				"魔法加成：\\dta[横切右对齐]\\c[24]+1.4%\\c[0]\n" + 
+				"无视魔抗：\\dta[横切右对齐]\\c[0]+0\\c[0]\n" + 
+				"物理吸血：\\dta[横切右对齐]\\c[0]+0.0%\\c[0]\n" + 
+				"魔法吸血：\\dta[横切右对齐]\\c[24]+1.0%\\c[0]\n" + 
+				"命中率：\\dta[横切右对齐]\\c[0]+0%\\c[0]\n" + 
+				"多重施法：\\dta[横切右对齐]\\c[0]+0%\\c[0]\n" + 
+				"\n" + 
+				"物理防御：\\dta[横切右对齐]\\c[24]+2\\c[0]\n" + 
+				"魔法防御：\\dta[横切右对齐]\\c[24]+1\\c[0]\n" + 
+				"魔法恢复：\\dta[横切右对齐]\\c[24]+0.1\\c[0]\n" + 
+				"闪避率：\\dta[横切右对齐]\\c[0]+0%\\c[0]\n" + 
+				"经验加成：\\dta[横切右对齐]\\c[24]+10%\\c[0]\n";
+	temp_window.drill_COWC_drawText( text, options );
+	
+	
+	// > 创建贴图4
+	var temp_window = new Window_Base( 350, 80, 450, 420 );
+	this.addChild( temp_window );	//（直接加在最顶层的上面）
+	this._drill_DTA_Align_DebugSprite_4 = temp_window;
+	
+	// > 绘制 - 矩形
+	var temp_bitmap = temp_window.contents;
+	temp_bitmap.drill_COCD_strokeRect( 0, 0, temp_bitmap.width, temp_bitmap.height, "#22aa22", 2, "miter" );
+	
+	// > 绘制 - 参数准备
+	var options = {};
+	options['infoParam'] = {};
+	options['infoParam']['x'] = 0;
+	options['infoParam']['y'] = 0;
+	options['infoParam']['canvasWidth'] = temp_bitmap.width;
+	options['infoParam']['canvasHeight'] = temp_bitmap.height;
+	
+	// > 绘制 - 参数准备 - 自定义
+	options['blockParam'] = {};			//『清零字符默认间距』
+	options['blockParam']['paddingTop'] = 0;
+	options['rowParam'] = {};
+	options['rowParam']['lineHeight_upCorrection'] = 0;
+	
+	options['baseParam'] = {};
+	options['baseParam']['drawDebugBaseRect'] = true;
+	
+	// > 绘制 - 测试的字符
+	var text =  "\\fs[18]【" + DrillUp.g_DTA_PluginTip_curName + "】\n" + 
+				"《一七体诗•诗》\n\n" + 
+				"\\dta[横向居中]诗\n\n" + 
+				"绮美，瑰奇\n\n" + 
+				"明月夜，落花时\n\n" + 
+				"能助欢笑，亦伤别离\n\n" + 
+				"调清金石怨，吟苦鬼神悲\n\n" + 
+				"天下只应我爱，世间唯有君知\n\n" + 
+				"自从都尉别苏句，便到司空送白辞\n" + 
+				"\\dta[纵向底部对齐]\\dta[横向右对齐]——[唐]白居易\n";
+	temp_window.drill_COWC_drawText( text, options );
+}
+
 
 
 //=============================================================================

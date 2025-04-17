@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.5]        行走图 - 图块同步镜像
+ * @plugindesc [v2.6]        行走图 - 图块同步镜像
  * @author Drill_up
  * 
  * @Drill_LE_param "地图镜面-%d"
@@ -72,28 +72,6 @@
  *   (1.你可以直接画一张大的镜面图，用于特殊的解谜，将密码写在镜面上。
  *   (2.你可以像 镜像管理层示例 那样画一个大镜子，镜子的反射可以不一致。
  *      镜子里的敌人向你的镜像发动攻击命中后，你会受到实质的伤害。
- *
- * -----------------------------------------------------------------------------
- * ----激活条件 - 地图开关
- * 你可以在地图备注中设置镜像的开关与关闭，在地图中添加：
- * （注意，地图备注的冒号没有空格，插件指令的冒号两边有空格）
- * 
- * 地图备注：=>图块同步镜像:启用
- * 地图备注：=>图块同步镜像:禁用
- * 
- * 地图备注：=>图块同步镜像:同步镜像边:288
- * 地图备注：=>图块同步镜像:同步镜像边(图块单位):6
- * 插件指令：>图块同步镜像 : 设置同步镜像边 : 288
- * 插件指令：>图块同步镜像 : 设置同步镜像边(图块单位) : 6
- * 插件指令：>图块同步镜像 : 设置同步镜像模式 : 等距同步
- * 插件指令：>图块同步镜像 : 设置同步镜像模式 : 单行同步
- * 
- * 1.同步镜像启用后，必须设置 同步镜像边 作为反射的基准。
- *   你可以根据地图镜子的 Y轴像素距离 或 图块距离 来 同步镜像边。
- * 2.如果地图中的事件过多（300以上），镜像造成的性能消耗可能会非常大，
- *   所以建议在设计镜像时，最好考虑一些整张地图大小和事件数量。
- * 3.同步镜像有两种模式： 单行同步 和 等距同步。
- *   具体效果可以去看看文档说明。
  * 
  * -----------------------------------------------------------------------------
  * ----激活条件 - 镜面
@@ -118,6 +96,38 @@
  * 地图镜面-1
  * 地图镜面-2
  * ……
+ * 
+ * -----------------------------------------------------------------------------
+ * ----激活条件 - 总开关
+ * 你可以在控制镜像的总开关：
+ * 
+ * 插件指令：>图块同步镜像 : 总开关 : 启用
+ * 插件指令：>图块同步镜像 : 总开关 : 禁用
+ * 
+ * 1."总开关"如果禁用，则整个游戏，所有地图，都不反射镜像。
+ *   这里介绍的启用禁用优先级依次为："总开关"、"地图开关"、"镜像开关"。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----激活条件 - 地图开关
+ * 你可以在地图备注中设置镜像的开关与关闭，在地图中添加：
+ * （注意，地图备注的冒号没有空格，插件指令的冒号两边有空格）
+ * 
+ * 地图备注：=>图块同步镜像:启用
+ * 地图备注：=>图块同步镜像:禁用
+ * 
+ * 地图备注：=>图块同步镜像:同步镜像边:288
+ * 地图备注：=>图块同步镜像:同步镜像边(图块单位):6
+ * 插件指令：>图块同步镜像 : 设置同步镜像边 : 288
+ * 插件指令：>图块同步镜像 : 设置同步镜像边(图块单位) : 6
+ * 插件指令：>图块同步镜像 : 设置同步镜像模式 : 等距同步
+ * 插件指令：>图块同步镜像 : 设置同步镜像模式 : 单行同步
+ * 
+ * 1.同步镜像启用后，必须设置 同步镜像边 作为反射的基准。
+ *   你可以根据地图镜子的 Y轴像素距离 或 图块距离 来 同步镜像边。
+ * 2.如果地图中的事件过多（300以上），镜像造成的性能消耗可能会非常大，
+ *   所以建议在设计镜像时，最好考虑一些整张地图大小和事件数量。
+ * 3.同步镜像有两种模式： 单行同步 和 等距同步。
+ *   具体效果可以去看看文档说明。
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 镜像开关
@@ -245,8 +255,17 @@
  * 改进了内部结构，添加了关闭遮罩底层的支持。
  * [v2.5]
  * 大幅度改进了结构，兼容了行走图优化核心的堆叠级设置。
+ * [v2.6]
+ * 添加了 镜像总开关 的功能。
  * 
  * 
+ * 
+ * @param 总开关是否启用
+ * @type boolean
+ * @on 启用
+ * @off 禁用
+ * @desc 镜像插件的总开关。可以在游戏中通过插件指令开启关闭。
+ * @default true
  * 
  * @param 所有地图是否默认启用镜像
  * @type boolean
@@ -916,7 +935,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_LSR_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_LSR_PluginTip_baseList.length == 0 ){ return ""; }
@@ -938,13 +957,14 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_LayerSynchronizedReflection = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_LayerSynchronizedReflection');
+	var Imported = Imported || {};
+	Imported.Drill_LayerSynchronizedReflection = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_LayerSynchronizedReflection');
 	
 	
 	/*-----------------杂项------------------*/
+	DrillUp.g_LSR_enabled = String(DrillUp.parameters['总开关是否启用'] || "true") === "true";
 	DrillUp.g_LSR_map_default = String(DrillUp.parameters['所有地图是否默认启用镜像'] || "false") === "true";	
 	DrillUp.g_LSR_map_blurDefault = String(DrillUp.parameters['所有地图是否默认启用毛玻璃效果'] || "false") === "true";	
     DrillUp.g_LSR_blurValue = Number(DrillUp.parameters['毛玻璃模糊程度'] || 4);
@@ -984,11 +1004,34 @@ if( Imported.Drill_CoreOfEventFrame ){
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
-var _Drill_LSR_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
-	_Drill_LSR_pluginCommand.call(this, command, args);
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
+var _drill_LSR_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
+	_drill_LSR_pluginCommand.call(this, command, args);
+	this.drill_LSR_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_LSR_pluginCommand = function( command, args ){
 	if( command === ">图块同步镜像" ){ //>图块同步镜像 : 玩家 : 不反射镜像
 	
+		/*-----------------总开关------------------*/
+		if( args.length == 4 ){
+			var temp1 = String(args[1]);
+			var temp2 = String(args[3]);
+			if( temp1 == "总开关" ){ 
+				if( temp2 == "启用" || temp2 == "开启" || temp2 == "打开" || temp2 == "启动" ){
+					$gameSystem._drill_LSR_enabled = true;
+				}
+				if( temp2 == "关闭" || temp2 == "禁用" ){
+					$gameSystem._drill_LSR_enabled = false;
+				}
+				return;
+			}
+		}
 		/*-----------------同步镜像边------------------*/
 		if( args.length == 4 ){
 			var temp1 = String(args[1]);
@@ -1183,6 +1226,8 @@ Game_System.prototype.drill_LSR_checkSysData = function() {
 //==============================
 Game_System.prototype.drill_LSR_initSysData_Private = function() {
 	
+	this._drill_LSR_enabled = DrillUp.g_LSR_enabled;
+	
     this._drill_LSR_tileEdge = DrillUp.g_LSR_edge;		//同步镜像边
     this._drill_LSR_mode = DrillUp.g_LSR_mode;			//同步镜像模式
 };
@@ -1192,7 +1237,7 @@ Game_System.prototype.drill_LSR_initSysData_Private = function() {
 Game_System.prototype.drill_LSR_checkSysData_Private = function() {
 	
 	// > 旧存档数据自动补充
-	if( this._drill_LSR_tileEdge == undefined ){
+	if( this._drill_LSR_enabled == undefined ){
 		this.drill_LSR_initSysData();
 	}
 	
@@ -1275,7 +1320,7 @@ Game_Map.prototype.setup = function(mapId) {
 Game_Map.prototype.drill_LSR_setupReflection = function() {
 	
 	// > 启用标记 初始化
-	this._drill_LSR_enable = DrillUp.g_LSR_map_default;
+	this._drill_LSR_mapEnable = DrillUp.g_LSR_map_default;
 	this._drill_LSR_blurEnable = DrillUp.g_LSR_map_blurDefault;
 	
 	// > 镜面 初始化
@@ -1288,10 +1333,10 @@ Game_Map.prototype.drill_LSR_setupReflection = function() {
 			if( args.length == 1 ){
 				var temp1 = String(args[0]);
 				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
-					this._drill_LSR_enable = true;
+					this._drill_LSR_mapEnable = true;
 				}
 				if( temp1 == "关闭" || temp1 == "禁用" ){
-					this._drill_LSR_enable = false;
+					this._drill_LSR_mapEnable = false;
 				}
 			}
 			if( args.length == 2 ){
@@ -1328,10 +1373,10 @@ Game_Map.prototype.drill_LSR_setupReflection = function() {
 		
 		/*-----------------旧备注------------------*/
 		if( command === "=>启用图块同步镜像"){
-			this._drill_LSR_enable = true;
+			this._drill_LSR_mapEnable = true;
 		}
 		if( command === "=>禁用图块同步镜像"){
-			this._drill_LSR_enable = false;
+			this._drill_LSR_mapEnable = false;
 		}
 		if( command === "=>设置同步镜像边"){
 			$gameSystem._drill_LSR_tileEdge = Number(args[0] || 0) / this.tileHeight();
@@ -1355,8 +1400,11 @@ Game_Map.prototype.drill_LSR_setupReflection = function() {
 //==============================
 Game_Map.prototype.drill_LSR_isEnable = function() {
 	
+	// > 总开关
+	if( $gameSystem._drill_LSR_enabled == false ){ return false; }
+	
 	// > 地图开关
-	if( $gameMap._drill_LSR_enable == false ){ return false; }
+	if( $gameMap._drill_LSR_mapEnable == false ){ return false; }
 	
 	// > 遮罩底层开关【系统 - rmmv核心漏洞修复】
 	//		（手动设置为false关闭，才不执行）
@@ -1510,8 +1558,9 @@ Spriteset_Map.prototype.drill_LSR_updateBlurFilter = function() {
 // ** 镜面遮罩【Drill_MaskSprite_LSR】
 // **
 // **		作用域：	地图界面
-// **		主功能：	> 定义一个镜面，作为所有镜像的动态遮罩板。
-// **		子功能：	->贴图
+// **		主功能：	定义一个镜面，作为所有镜像的动态遮罩板。
+// **		子功能：	
+// **					->贴图
 // **						->自定义镜面
 // **						->默认镜面
 // **
@@ -1794,8 +1843,9 @@ Tilemap.prototype.drill_LSR_compareChildOrder = function( a, b ){
 // ** 镜像贴图【Drill_Sprite_LSR】
 // **
 // **		作用域：	地图界面
-// **		主功能：	> 定义一个物体镜像的贴图。
-// **		子功能：	->贴图
+// **		主功能：	定义一个物体镜像的贴图。
+// **		子功能：	
+// **					->贴图
 // **						->继承于 Sprite_Character 事件贴图
 // **						->绑定原物体贴图
 // **						->销毁（手动）
@@ -1848,6 +1898,12 @@ SceneManager.initialize = function() {
 		
 		// > 【行走图 - 行走图优化核心】优化策略 - 阻塞判定
 		if( this.drill_COEF_isOptimizationPassed() == false ){ 
+			this.visible = false;
+			return;
+		}
+		
+		// > 镜像实时关闭情况
+		if( $gameMap.drill_LSR_isEnable() != true ){
 			this.visible = false;
 			return;
 		}

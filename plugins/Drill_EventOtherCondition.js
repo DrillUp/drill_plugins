@@ -150,10 +150,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_EventOtherCondition = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_EventOtherCondition');
+	var Imported = Imported || {};
+	Imported.Drill_EventOtherCondition = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_EventOtherCondition');
 
 	
 

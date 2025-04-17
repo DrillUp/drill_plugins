@@ -1552,10 +1552,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_CoreOfNumberArray = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_CoreOfNumberArray');
+	var Imported = Imported || {};
+	Imported.Drill_CoreOfNumberArray = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_CoreOfNumberArray');
 	
 	//==============================
 	// * 静态数据 - 变量数组
@@ -1611,9 +1611,18 @@
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_CONA_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_CONA_pluginCommand.call(this, command, args);
+	this.drill_CONA_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_CONA_pluginCommand = function( command, args ){
 	if( command === ">变量数组核心" ){
 		
 		/*-----------------同步删除------------------*/
@@ -2372,7 +2381,6 @@ Game_Map.prototype.setup = function( mapId ){
 	for(var i = 0; i < $gameSystem._drill_CONA_autoClearTank.length; i++){
 		var arr_index = $gameSystem._drill_CONA_autoClearTank[i];
 		$gameNumberArray.setValue( arr_index, [] );
-		alert( arr_index );
 	}
 };
 //==============================
@@ -2484,14 +2492,8 @@ DataManager.extractSaveContents = function( contents ){
 //=============================================================================
 // ** 变量数组【Game_NumberArray】
 // **		
-// **		实例：	$gameNumberArray
-// **		索引：	无
-// **		来源：	无（独立数据）
-// **		应用：	> 事件指令
-// **		
 // **		作用域：	地图界面、战斗界面、菜单界面
-// **		主功能：	提供基本的变量数组数据设置/获取功能。
-// **					根据名称/根据索引 操作。
+// **		主功能：	提供基本的变量数组 数据设置/获取功能，根据名称/根据索引 操作。
 // **		子功能：	
 // **					->获取数组（开放函数）
 // **					->设置数组（开放函数）

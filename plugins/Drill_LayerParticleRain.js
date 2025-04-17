@@ -1769,10 +1769,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_LayerParticleRain = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_LayerParticleRain');
+	var Imported = Imported || {};
+	Imported.Drill_LayerParticleRain = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_LayerParticleRain');
 
 	//==============================
 	// * 静态数据 - 粒子
@@ -1846,7 +1846,7 @@
 			var temp = JSON.parse(DrillUp.parameters["数字雨层-" + String(i+1) ]);
 			DrillUp.g_LPR_layers[i] = DrillUp.drill_LPR_rainInit( temp );
 		}else{
-			DrillUp.g_LPR_layers[i] = null;		//（强制设为空值，节约存储资源）
+			DrillUp.g_LPR_layers[i] = undefined;		//（设为空值，节约静态数据占用容量）
 		}
 	}
 
@@ -1854,9 +1854,18 @@
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_LPR_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_LPR_pluginCommand.call(this, command, args);
+	this.drill_LPR_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_LPR_pluginCommand = function( command, args ){
 	if( command === ">地图数字雨" ){ // >地图数字雨 : 数字雨[1] : 显示
 	
 		/*-----------------对象组获取------------------*/
@@ -2686,8 +2695,7 @@ Scene_Map.prototype.drill_LPR_resetParticleRains = function( i ){
 
 
 //=============================================================================
-// * 雨滴贴图【Drill_LPR_RaindropSprite】
-//			
+// ** 雨滴贴图【Drill_LPR_RaindropSprite】
 //			
 //			作用域：	地图界面
 //			主功能：	定义 一个雨滴（单束字符粒子） 的贴图。

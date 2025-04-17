@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.9]        键盘 - 键盘手柄按键修改器
+ * @plugindesc [v2.0]        键盘 - 键盘手柄按键修改器
  * @author Drill_up
  * 
  * 
@@ -224,6 +224,8 @@
  * 优化了旧存档的识别与兼容。
  * [v1.9]
  * 大幅度优化了内部结构，添加了 游戏测试时 按键加速的功能。
+ * [v2.0]
+ * 更新并兼容了新的窗口字符底层。
  * 
  * 
  * @param ----手柄基本键----
@@ -1101,15 +1103,21 @@
 	DrillUp.drill_OKe_getPluginTip_IsBaseKey_keyboard = function( name ){
 		return "【" + DrillUp.g_OKe_PluginTip_curName + "】\n键盘 基本键 "+name+"不能设置为 A键+B键 的格式，只能为 单键 。";
 	};
+	//==============================
+	// * 提示信息 - 报错 - 窗口字符底层校验
+	//==============================
+	DrillUp.drill_OKe_getPluginTip_NeedUpdate_drawText = function(){
+		return "【" + DrillUp.g_OKe_PluginTip_curName + "】\n检测到窗口字符核心版本过低。\n由于底层变化巨大，你需要更新 全部 窗口字符相关插件。\n去看看\"23.窗口字符 > 关于窗口字符底层全更新说明.docx\"进行更新。";
+	};
 	
 	
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_OperateKeys = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_OperateKeys');
+	var Imported = Imported || {};
+	Imported.Drill_OperateKeys = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_OperateKeys');
 
 
 	/*-----------------手柄 基本键------------------*/
@@ -1255,9 +1263,18 @@
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_OKe_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_OKe_pluginCommand.call(this,command, args);
+	this.drill_OKe_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_OKe_pluginCommand = function( command, args ){
 	if( command === ">按键修改器" || command === ">按键修改" ){
 		
 		/*-----------------修改手柄键位------------------*/
@@ -2077,8 +2094,9 @@ Input.drill_OKe_isGamepadControling = function() {
 // ** 手柄配置 实体类【Drill_OKe_PadBean】
 // **		
 // **		作用域：	地图界面
-// **		主功能：	> 定义一个专门的 手柄配置 数据类。
-// **		子功能：	->无帧刷新
+// **		主功能：	定义一个专门的 手柄配置 数据类。
+// **		子功能：	
+// **					->无帧刷新
 // **					->重设数据
 // **						->序列号
 // **						->复制对象
@@ -2511,8 +2529,9 @@ Game_Temp.prototype.drill_OKe_keyboardKeys_RefreshMapper = function() {
 // ** 键盘配置 实体类【Drill_OKe_KeyboardBean】
 // **		
 // **		作用域：	地图界面
-// **		主功能：	> 定义一个专门的 手柄配置 数据类。
-// **		子功能：	->无帧刷新
+// **		主功能：	定义一个专门的 手柄配置 数据类。
+// **		子功能：	
+// **					->无帧刷新
 // **					->重设数据
 // **						->序列号
 // **						->复制对象
@@ -3311,13 +3330,14 @@ Game_Temp.prototype.drill_OKe_getRandomString = function( count, list ){
 
 //=============================================================================
 // ** 手柄DEBUG窗口【Drill_OKe_PadDebugWindow】
-//			
-//			作用域：	地图界面、战斗界面、菜单界面
-//			主功能：	定义一个窗口，用于描述 手柄设备 的内容信息。
-//			子功能：	->设备绑定
-//						->内容显示
-//						
-//			说明：	> 临时的调试窗口。
+// **		
+// **		作用域：	地图界面、战斗界面、菜单界面
+// **		主功能：	定义一个窗口，用于描述 手柄设备 的内容信息。
+// **		子功能：	
+// **					->设备绑定
+// **					->内容显示
+// **					
+// **		说明：	> 临时的调试窗口。
 //=============================================================================
 //==============================
 // * 手柄DEBUG窗口 - 定义
@@ -3344,7 +3364,6 @@ Drill_OKe_PadDebugWindow.prototype.update = function() {
 //==============================
 // * 手柄DEBUG窗口 - 窗口属性
 //==============================
-Drill_OKe_PadDebugWindow.prototype.lineHeight = function(){ return 18; };
 Drill_OKe_PadDebugWindow.prototype.standardFontSize = function(){ return 16; };
 //==============================
 // * 手柄DEBUG窗口 - 初始化子功能
@@ -3420,30 +3439,53 @@ Drill_OKe_PadDebugWindow.prototype.drill_window_updateContext = function() {
 	this._drill_lastContext = context;
 	
 	// > 绘制设置
-	if( Imported.Drill_CoreOfWindowAuxiliary ){
-		var context_list = context.split("\n");
-		var options = {
-			'width':this.width,
-			'lineheight':18,
-			'align':"左对齐",
+	if( Imported.Drill_CoreOfWindowCharacter ){
+		
+		// > 窗口字符底层校验
+		if( typeof(_drill_COWC_drawText_functionExist) == "undefined" ){
+			alert( DrillUp.drill_OKe_getPluginTip_NeedUpdate_drawText() );
 		};
-		this.drill_COWA_drawTextListEx( context_list, options);
+		
+		// > 参数准备
+		var options = {};
+		options['infoParam'] = {};
+		options['infoParam']['x'] = 0;
+		options['infoParam']['y'] = 0;
+		options['infoParam']['canvasWidth']  = this.width;
+		options['infoParam']['canvasHeight'] = this.height;
+		
+		options['blockParam'] = {};			//『清零字符默认间距』
+		options['blockParam']['paddingTop'] = 0;
+		options['rowParam'] = {};
+		options['rowParam']['lineHeight_upCorrection'] = 0;
+		
+		options['baseParam'] = {};
+		options['baseParam']['fontSize'] = this.standardFontSize();	//（使用当前窗口的字体大小）
+		
+		// > 清空画布（固定高宽只需要清空）
+		this.contents.clear();
+		
+		
+		// > 『字符主流程』 - 绘制文本【窗口字符 - 窗口字符核心】
+		this.drill_COWC_drawText( context, options );
+		
 	}else{
 		this.drawText("缺少核心插件，无法显示文本。", 2, 2, this.width, 'left');
-		this.drawText("需要 Drill_CoreOfWindowAuxiliary 窗口辅助核心。", 2, 22, this.width, 'left');
+		this.drawText("需要 Drill_CoreOfWindowCharacter 窗口字符-窗口字符核心★★v2.0及以上★★。", 2, 22, this.width, 'left');
 	}
 };
 
 
 //=============================================================================
 // ** 键盘DEBUG窗口【Drill_OKe_KeyboardDebugWindow】
-//			
-//			作用域：	地图界面、战斗界面、菜单界面
-//			主功能：	定义一个窗口，用于描述 键盘设备 的内容信息。
-//			子功能：	->设备绑定
-//						->内容显示
-//						
-//			说明：	> 临时的调试窗口。
+// **		
+// **		作用域：	地图界面、战斗界面、菜单界面
+// **		主功能：	定义一个窗口，用于描述 键盘设备 的内容信息。
+// **		子功能：	
+// **					->设备绑定
+// **					->内容显示
+// **					
+// **		说明：	> 临时的调试窗口。
 //=============================================================================
 //==============================
 // * 键盘DEBUG窗口 - 定义
@@ -3470,7 +3512,6 @@ Drill_OKe_KeyboardDebugWindow.prototype.update = function() {
 //==============================
 // * 键盘DEBUG窗口 - 窗口属性
 //==============================
-Drill_OKe_KeyboardDebugWindow.prototype.lineHeight = function(){ return 18; };
 Drill_OKe_KeyboardDebugWindow.prototype.standardFontSize = function(){ return 16; };
 //==============================
 // * 键盘DEBUG窗口 - 初始化子功能
@@ -3551,17 +3592,39 @@ Drill_OKe_KeyboardDebugWindow.prototype.drill_window_updateContext = function() 
 	this._drill_lastContext = context;
 	
 	// > 绘制设置
-	if( Imported.Drill_CoreOfWindowAuxiliary ){
-		var context_list = context.split("\n");
-		var options = {
-			'width':this.width,
-			'lineheight':18,
-			'align':"左对齐",
+	if( Imported.Drill_CoreOfWindowCharacter ){
+		
+		// > 窗口字符底层校验
+		if( typeof(_drill_COWC_drawText_functionExist) == "undefined" ){
+			alert( DrillUp.drill_OKe_getPluginTip_NeedUpdate_drawText() );
 		};
-		this.drill_COWA_drawTextListEx( context_list, options);
+		
+		// > 参数准备
+		var options = {};
+		options['infoParam'] = {};
+		options['infoParam']['x'] = 0;
+		options['infoParam']['y'] = 0;
+		options['infoParam']['canvasWidth']  = this.width;
+		options['infoParam']['canvasHeight'] = this.height;
+		
+		options['blockParam'] = {};			//『清零字符默认间距』
+		options['blockParam']['paddingTop'] = 0;
+		options['rowParam'] = {};
+		options['rowParam']['lineHeight_upCorrection'] = 0;
+		
+		options['baseParam'] = {};
+		options['baseParam']['fontSize'] = this.standardFontSize();	//（使用当前窗口的字体大小）
+		
+		// > 清空画布（固定高宽只需要清空）
+		this.contents.clear();
+		
+		
+		// > 『字符主流程』 - 绘制文本【窗口字符 - 窗口字符核心】
+		this.drill_COWC_drawText( context, options );
+		
 	}else{
 		this.drawText("缺少核心插件，无法显示文本。", 2, 2, this.width, 'left');
-		this.drawText("需要 Drill_CoreOfWindowAuxiliary 窗口辅助核心。", 2, 22, this.width, 'left');
+		this.drawText("需要 Drill_CoreOfWindowCharacter 窗口字符-窗口字符核心★★v2.0及以上★★。", 2, 22, this.width, 'left');
 	}
 };
 

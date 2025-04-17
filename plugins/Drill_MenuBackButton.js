@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        主菜单 - 返回按钮
+ * @plugindesc [v1.5]        主菜单 - 返回按钮
  * @author Drill_up
  * 
  * @Drill_LE_param "返回按钮-%d"
@@ -30,7 +30,7 @@
  * 该插件 不能 单独使用。
  * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfWindowAuxiliary    系统-窗口辅助核心
+ *   - Drill_CoreOfWindowAuxiliary    系统-窗口辅助核心★★v2.2及以上★★
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -110,6 +110,8 @@
  * 优化了内部结构。
  * [v1.4]
  * 优化了旧存档的识别与兼容。
+ * [v1.5]
+ * 更新并兼容了新的窗口字符底层。
  *
  *
  *
@@ -939,7 +941,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_MBB_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_MBB_PluginTip_baseList.length == 0 ){ return ""; }
@@ -961,10 +963,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_MenuBackButton = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_MenuBackButton');
+	var Imported = Imported || {};
+	Imported.Drill_MenuBackButton = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_MenuBackButton');
 	
 	
 	//==============================
@@ -1096,13 +1098,21 @@
 if( Imported.Drill_CoreOfWindowAuxiliary ){
 	
 	
-	
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_MBB_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_MBB_pluginCommand.call(this, command, args);
+	this.drill_MBB_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_MBB_pluginCommand = function( command, args ){
 	if( command === ">菜单返回按钮" ){
 		if(args.length == 4){
 			var temp1 = Number(args[1]) - 1;
@@ -1452,7 +1462,7 @@ Scene_MenuBase.prototype.drill_MBB_create = function() {
 					"slideAbsoluteX": temp_sprite_data['slideAnim']['slideAbsoluteX'],
 					"slideAbsoluteY": temp_sprite_data['slideAnim']['slideAbsoluteY'],
 				}
-				temp_sprite.drill_COWA_setButtonMove( data );		//辅助核心 - 控制按钮贴图基本属性
+				temp_sprite.drill_COWA_setAttrMove( data ); //『辅助核心初始化』-贴图基本属性
 			}
 			temp_layer.addChild(temp_sprite);
 			this._drill_MBB_sprites.push(temp_sprite);
@@ -1525,7 +1535,7 @@ Scene_MenuBase.prototype.drill_MBB_create = function() {
 					"slideAbsoluteX": temp_sprite_data['slideAnim']['slideAbsoluteX'],
 					"slideAbsoluteY": temp_sprite_data['slideAnim']['slideAbsoluteY'],
 				}
-				temp_sprite.drill_COWA_setButtonMove( data );		//辅助核心 - 控制按钮贴图基本属性
+				temp_sprite.drill_COWA_setAttrMove( data ); //『辅助核心初始化』-贴图基本属性
 			}
 			temp_layer.addChild(temp_sprite);
 			this._drill_MBB_sprites.push(temp_sprite);

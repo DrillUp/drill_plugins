@@ -78,7 +78,7 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称：		PAlTN (Player_Allow_Touch_Nonstop)
+//		插件简称		PAlTN (Player_Allow_Touch_Nonstop)
 //		临时全局变量	DrillUp.g_PAlTN_xxx
 //		临时局部变量	无
 //		存储数据变量	无
@@ -140,7 +140,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_PAlTN_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_PAlTN_PluginTip_baseList.length == 0 ){ return ""; }
@@ -164,10 +164,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_PlayerAllowTouchNonstop = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_PlayerAllowTouchNonstop');
+	var Imported = Imported || {};
+	Imported.Drill_PlayerAllowTouchNonstop = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_PlayerAllowTouchNonstop');
 	
 	
 	/*-----------------杂项------------------*/
@@ -195,9 +195,18 @@ SceneManager.initialize = function() {
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_PAlTN_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_PAlTN_pluginCommand.call(this, command, args);
+	this.drill_PAlTN_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_PAlTN_pluginCommand = function( command, args ){
 	if( command === ">允许鼠标寻路不停止" ){
 		
 		if( args.length == 2 ){

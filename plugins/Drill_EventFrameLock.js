@@ -240,7 +240,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_EFL_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_EFL_PluginTip_baseList.length == 0 ){ return ""; }
@@ -262,10 +262,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_EventFrameLock = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_EventFrameLock');
+	var Imported = Imported || {};
+	Imported.Drill_EventFrameLock = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_EventFrameLock');
 	
 	
 //=============================================================================
@@ -277,9 +277,18 @@ if( Imported.Drill_CoreOfEventFrame ){
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_EFL_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_EFL_pluginCommand.call(this, command, args);
+	this.drill_EFL_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_EFL_pluginCommand = function( command, args ){
 	if( command === ">行走图锁定帧" ){
 		
 		/*-----------------对象组获取------------------*/

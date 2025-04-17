@@ -140,7 +140,7 @@
 //			->☆提示信息
 //			->☆静态数据
 //			->☆插件指令
-//			->☆单位贴图
+//			->☆场景容器之单位贴图
 //			->☆战斗层级
 //			
 //			->☆图片的属性
@@ -206,19 +206,28 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_PictureThumbtack = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_PictureThumbtack');
+	var Imported = Imported || {};
+	Imported.Drill_PictureThumbtack = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_PictureThumbtack');
 	
 
 
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_PTh_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_PTh_pluginCommand.call(this, command, args);
+	this.drill_PTh_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_PTh_pluginCommand = function( command, args ){
 	if( command === ">图片图钉" ){ 
 	
 		/*-----------------对象组获取------------------*/
@@ -470,13 +479,31 @@ Game_Map.prototype.drill_PTh_isEventExist = function( e_id ){
 	}
 	return true;
 };
+//==============================
+// * 插件指令 - STG兼容『STG的插件指令』
+//==============================
+if( Imported.Drill_STG__objects ){
+	
+	//==============================
+	// * 插件指令 - STG指令绑定
+	//==============================
+	var _drill_STG_PTh_pluginCommand = Drill_STG_GameInterpreter.prototype.pluginCommand;
+	Drill_STG_GameInterpreter.prototype.pluginCommand = function( command, args ){
+		_drill_STG_PTh_pluginCommand.call(this, command, args);
+		this.drill_PTh_pluginCommand( command, args );
+	}
+	//==============================
+	// * 插件指令 - STG指令执行
+	//==============================
+	Drill_STG_GameInterpreter.prototype.drill_PTh_pluginCommand = Game_Interpreter.prototype.drill_PTh_pluginCommand;
+};
 
 
 //#############################################################################
-// ** 【标准模块】单位贴图 ☆单位贴图
+// ** 【标准模块】单位贴图容器 ☆场景容器之单位贴图
 //#############################################################################
 //##############################
-// * 单位贴图 - 获取 - 敌人容器指针【标准函数】
+// * 单位贴图容器 - 获取 - 敌人容器指针【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 贴图数组    （敌人贴图）
@@ -487,7 +514,7 @@ Game_Temp.prototype.drill_PTh_getEnemySpriteTank = function(){
 	return this.drill_PTh_getEnemySpriteTank_Private();
 }
 //##############################
-// * 单位贴图 - 获取 - 根据敌方索引【标准函数】
+// * 单位贴图容器 - 获取 - 根据敌方索引【标准函数】
 //				
 //			参数：	> index 数字 （敌方第n个位置，从0开始计数）
 //			返回：	> 贴图       （敌人贴图）
@@ -498,7 +525,7 @@ Game_Temp.prototype.drill_PTh_getEnemySpriteByIndex = function( index ){
 	return this.drill_PTh_getEnemySpriteByIndex_Private( index );
 }
 //##############################
-// * 单位贴图 - 获取 - 根据敌人ID【标准函数】
+// * 单位贴图容器 - 获取 - 根据敌人ID【标准函数】
 //				
 //			参数：	> enemy_id 数字（敌人ID）
 //			返回：	> 贴图数组     （敌人贴图数组）
@@ -509,7 +536,7 @@ Game_Temp.prototype.drill_PTh_getEnemySpriteByEnemyId = function( enemy_id ){
 	return this.drill_PTh_getEnemySpriteByEnemyId_Private( enemy_id );
 }
 //##############################
-// * 单位贴图 - 获取 - 角色容器指针【标准函数】
+// * 单位贴图容器 - 获取 - 角色容器指针【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 贴图数组   （角色贴图）
@@ -520,7 +547,7 @@ Game_Temp.prototype.drill_PTh_getActorSpriteTank = function(){
 	return this.drill_PTh_getActorSpriteTank_Private();
 }
 //##############################
-// * 单位贴图 - 获取 - 根据我方索引【标准函数】
+// * 单位贴图容器 - 获取 - 根据我方索引【标准函数】
 //				
 //			参数：	> index 数字 （我方第n个位置，从0开始计数）
 //			返回：	> 贴图       （角色贴图）
@@ -531,7 +558,7 @@ Game_Temp.prototype.drill_PTh_getActorSpriteByIndex = function( index ){
 	return this.drill_PTh_getActorSpriteByIndex_Private( index );
 }
 //##############################
-// * 单位贴图 - 获取 - 根据角色ID【标准函数】
+// * 单位贴图容器 - 获取 - 根据角色ID【标准函数】
 //				
 //			参数：	> actor_id 数字（角色ID）
 //			返回：	> sprite 贴图  （角色贴图）
@@ -542,7 +569,7 @@ Game_Temp.prototype.drill_PTh_getActorSpriteByActorId = function( actor_id ){
 	return this.drill_PTh_getActorSpriteByActorId_Private( actor_id );
 }
 //=============================================================================
-// ** 单位贴图（接口实现）
+// ** 场景容器之单位贴图（实现）
 //=============================================================================
 //==============================
 // * 单位贴图容器 - 获取 - 敌人容器指针（私有）

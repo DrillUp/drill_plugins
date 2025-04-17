@@ -149,7 +149,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_MIl_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_MIl_PluginTip_baseList.length == 0 ){ return ""; }
@@ -165,10 +165,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_MouseIllumination = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_MouseIllumination');
+	var Imported = Imported || {};
+	Imported.Drill_MouseIllumination = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_MouseIllumination');
 	
 	
 //=============================================================================
@@ -178,11 +178,20 @@ if( Imported.Drill_LayerIllumination ){
 
 
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_MIl_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_MIl_pluginCommand.call(this, command, args);
+	this.drill_MIl_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_MIl_pluginCommand = function( command, args ){
 	if( command === ">自定义照明" ){
 		
 		// > 如果黑暗层未开，则插件指令无效

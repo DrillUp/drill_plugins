@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        行走图 - 行走图优化核心
+ * @plugindesc [v1.3]        行走图 - 行走图优化核心
  * @author Drill_up
  * 
  * 
@@ -85,6 +85,8 @@
  * 添加了部分脚本的规范。
  * [v1.2]
  * 添加了碰撞体的定义，堆叠级的定义。
+ * [v1.3]
+ * 修复了切换地图时悬停判定未刷新的bug。
  * 
  */
  
@@ -135,7 +137,7 @@
 //			->☆静态数据
 //			->☆插件指令
 //			->☆存储数据
-//			->☆物体贴图
+//			->☆场景容器之物体贴图
 //			
 //			->☆管辖权 - 行走图数据
 //			->☆管辖权 - 行走图贴图【全权接管 Sprite_Character】
@@ -249,7 +251,7 @@
 //			7.行走图 > 关于行走图优化核心（脚本）.docx
 //		
 //		★插件私有类：
-//			无
+//			* 碰撞体 实体类【Drill_COEF_CollisionBean】
 //		
 //		★核心说明：
 //			无
@@ -325,9 +327,9 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_CoreOfEventFrame = true;
-　　var DrillUp = DrillUp || {}; 
+	var Imported = Imported || {};
+	Imported.Drill_CoreOfEventFrame = true;
+	var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_CoreOfEventFrame');
 	
 	
@@ -335,9 +337,18 @@
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_COEF_pluginCommand = Game_Interpreter.prototype.pluginCommand
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_COEF_pluginCommand.call(this, command, args);
+	this.drill_COEF_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_COEF_pluginCommand = function( command, args ){
 	if( command === ">行走图优化核心" ){
 		
 		/*-----------------DEBUG------------------*/
@@ -345,19 +356,19 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var temp1 = String(args[1]);
 			var temp2 = String(args[3]);
 			if( temp1 == "DEBUG碰撞体查看" ){
-				if( temp2 == "开启" ){
+				if( temp2 == "启用" || temp2 == "开启" || temp2 == "打开" || temp2 == "启动" ){
 					$gameSystem._drill_COEF_DebugEnabled = true;
 					$gameSystem._drill_COEFWM_DebugEnabled = false;	//（【行走图-行走图优化核心】防止重叠显示）
 				}
-				if( temp2 == "关闭" ){
+				if( temp2 == "关闭" || temp2 == "禁用" ){
 					$gameSystem._drill_COEF_DebugEnabled = false;
 				}
 			}
 			if( temp1 == "DEBUG堆叠级查看" ){
-				if( temp2 == "开启" ){
+				if( temp2 == "启用" || temp2 == "开启" || temp2 == "打开" || temp2 == "启动" ){
 					$gameSystem._drill_COEF_DebugZIndexEnabled = true;
 				}
-				if( temp2 == "关闭" ){
+				if( temp2 == "关闭" || temp2 == "禁用" ){
 					$gameSystem._drill_COEF_DebugZIndexEnabled = false;
 				}
 			}
@@ -450,10 +461,10 @@ Game_System.prototype.drill_COEF_checkSysData_Private = function() {
 
 
 //#############################################################################
-// ** 【标准模块】物体贴图 ☆物体贴图
+// ** 【标准模块】物体贴图容器 ☆场景容器之物体贴图
 //#############################################################################
 //##############################
-// * 物体贴图 - 获取 - 容器指针【标准函数】
+// * 物体贴图容器 - 获取 - 容器指针【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 贴图数组     （物体贴图）
@@ -464,7 +475,7 @@ Game_Temp.prototype.drill_COEF_getCharacterSpriteTank = function(){
 	return this.drill_COEF_getCharacterSpriteTank_Private();
 }
 //##############################
-// * 物体贴图 - 获取 - 根据事件ID【标准函数】
+// * 物体贴图容器 - 获取 - 根据事件ID【标准函数】
 //			
 //			参数：	> event_id 数字（事件ID）
 //			返回：	> 贴图对象     （事件贴图）
@@ -476,7 +487,7 @@ Game_Temp.prototype.drill_COEF_getCharacterSpriteByEventId = function( event_id 
 	return this.drill_COEF_getCharacterSpriteByEventId_Private( event_id );
 }
 //##############################
-// * 物体贴图 - 获取 - 根据玩家队员索引【标准函数】
+// * 物体贴图容器 - 获取 - 根据玩家队员索引【标准函数】
 //			
 //			参数：	> follower_index 数字（玩家队员索引）
 //			返回：	> 贴图对象           （玩家队员贴图）
@@ -488,7 +499,7 @@ Game_Temp.prototype.drill_COEF_getCharacterSpriteByFollowerIndex = function( fol
 	return this.drill_COEF_getCharacterSpriteByFollowerIndex_Private( follower_index );
 }
 //=============================================================================
-// ** 物体贴图（接口实现）
+// ** 场景容器之物体贴图（实现）
 //=============================================================================
 //==============================
 // * 物体贴图容器 - 获取 - 容器指针（私有）
@@ -1987,13 +1998,25 @@ Sprite_Character.prototype.drill_COEF__refreshFrame = function(){
 	if( this._character == undefined ){ return; }
 	if( this._character._drill_COEF_collisionBean == undefined ){ return; }
 	
-	// > 条件 - 未读取时不赋值
-	if( this.bitmap == undefined ){ return; }
-	if( this.bitmap.isReady() == false ){ return; }
+	// > 『贴图框架值归零』 - 未读取时不赋值
+	if( this.bitmap == undefined ){
+		this._character._drill_COEF_collisionBean.drill_bean_resetFrame(0,0,0,0);
+		return;
+	}
+	if( this.bitmap.isReady() == false ){
+		this._character._drill_COEF_collisionBean.drill_bean_resetFrame(0,0,0,0);
+		return;
+	}
 	
-	// > 条件 - 不接受宽度为0的标记
-	if( this._realFrame.width == 0 ){ return; }
-	if( this._realFrame.height == 0 ){ return; }
+	// > 『贴图框架值归零』 - 不接受宽度为0的标记
+	if( this._realFrame.width == 0  ){
+		this._character._drill_COEF_collisionBean.drill_bean_resetFrame(0,0,0,0);
+		return;
+	}
+	if( this._realFrame.height == 0 ){
+		this._character._drill_COEF_collisionBean.drill_bean_resetFrame(0,0,0,0);
+		return;
+	}
 	
 	// > 刷新框架
 	this._character._drill_COEF_collisionBean.drill_bean_resetFrame(
@@ -2009,8 +2032,9 @@ Sprite_Character.prototype.drill_COEF__refreshFrame = function(){
 // ** 碰撞体 实体类【Drill_COEF_CollisionBean】
 // **		
 // **		作用域：	地图界面
-// **		主功能：	> 定义一个专门的实体类数据类。
-// **		子功能：	->无帧刷新
+// **		主功能：	定义一个专门的实体类数据类。
+// **		子功能：	
+// **					->无帧刷新
 // **					->重设数据
 // **						->序列号
 // **					->被动赋值（Sprite_Character）
@@ -2391,6 +2415,8 @@ Scene_Map.prototype.drill_COEF_updateDrawBeanRangeSprite = function() {
 		
 		// > 销毁贴图
 		if( this._drill_COEF_DebugSprite != undefined ){
+			this._drill_COEF_DebugSprite.bitmap.clear();
+			this._drill_COEF_DebugSprite.bitmap = null;
 			this._spriteset._drill_mapUpArea.removeChild(this._drill_COEF_DebugSprite);
 			this._drill_COEF_DebugSprite = undefined;
 		}
@@ -2964,6 +2990,8 @@ Scene_Map.prototype.drill_COEF_updateDrawZIndexSprite = function() {
 		
 		// > 销毁贴图
 		if( this._drill_COEF_DebugZIndexSprite != undefined ){
+			this._drill_COEF_DebugZIndexSprite.bitmap.clear();
+			this._drill_COEF_DebugZIndexSprite.bitmap = null;
 			this._spriteset._drill_mapUpArea.removeChild(this._drill_COEF_DebugZIndexSprite);
 			this._drill_COEF_DebugZIndexSprite = undefined;
 		}

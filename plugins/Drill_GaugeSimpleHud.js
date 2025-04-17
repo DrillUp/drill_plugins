@@ -561,7 +561,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_GSH_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_GSH_PluginTip_baseList.length == 0 ){ return ""; }
@@ -589,10 +589,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_GaugeSimpleHud = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_GaugeSimpleHud');
+	var Imported = Imported || {};
+	Imported.Drill_GaugeSimpleHud = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_GaugeSimpleHud');
 	
 	
 	//==============================
@@ -668,12 +668,22 @@ ImageManager.load_MapUi = function(filename) {
     return this.loadBitmap('img/Map__ui/', filename, 0, true);
 };
 	
+	
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_GSH_pluginCommand = Game_Interpreter.prototype.pluginCommand
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_GSH_pluginCommand.call(this, command, args);
+	this.drill_GSH_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_GSH_pluginCommand = function( command, args ){
 	if( command === ">地图简单生命框" ){
 		
 		/*-----------------去除绑定------------------*/
@@ -784,7 +794,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	};
 };
 //==============================
-// ** 插件指令 - 事件检查
+// * 插件指令 - 事件检查
 //==============================
 Game_Map.prototype.drill_GSH_isEventExist = function( e_id ){
 	if( e_id == 0 ){ return false; }
@@ -1176,7 +1186,7 @@ Drill_GSH_LifeSprite.prototype.drill_createMeter = function() {
 		data['hp_meter_id'] > 0 ){
 	
 		var hp_meter_id = data['hp_meter_id'];
-		this._drill_hp_meterData = JSON.parse(JSON.stringify( DrillUp.g_COGM_list[ hp_meter_id -1 ] ));
+		this._drill_hp_meterData = DrillUp.drill_COGM_getCopyedData( hp_meter_id -1 );
 		this._drill_hp_meterData['level_max'] = data['hpLevel_max'];				//段上限
 		this._drill_hp_meterData['x'] = data['hp_meter_x'];							//x
 		this._drill_hp_meterData['y'] = data['hp_meter_y'];							//y
@@ -1194,7 +1204,7 @@ Drill_GSH_LifeSprite.prototype.drill_createMeter = function() {
 		data['mp_meter_id'] > 0 ){
 			
 		var mp_meter_id = this._drill_data['mp_meter_id'];
-		this._drill_mp_meterData = JSON.parse(JSON.stringify( DrillUp.g_COGM_list[ mp_meter_id -1 ] ));
+		this._drill_mp_meterData = DrillUp.drill_COGM_getCopyedData( mp_meter_id -1 );
 		this._drill_mp_meterData['level_max'] = data['mpLevel_max'];				//段上限
 		this._drill_mp_meterData['x'] = data['mp_meter_x'];							//x
 		this._drill_mp_meterData['y'] = data['mp_meter_y'];							//y

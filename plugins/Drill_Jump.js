@@ -249,7 +249,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_jump_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_jump_PluginTip_baseList.length == 0 ){ return ""; }
@@ -265,10 +265,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_Jump = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_Jump');
+	var Imported = Imported || {};
+	Imported.Drill_Jump = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_Jump');
 
 
 	/*-----------------杂项------------------*/
@@ -287,11 +287,20 @@ if( Imported.Drill_EventJump ){
 	
 
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_jump_pluginCommand = Game_Interpreter.prototype.pluginCommand
 Game_Interpreter.prototype.pluginCommand = function(command, args ){
 	_drill_jump_pluginCommand.call(this,command, args);
+	this.drill_jump_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_jump_pluginCommand = function( command, args ){
 	
 	/*-----------------玩家跳跃------------------*/
 	if( command === ">玩家跳跃" ){
@@ -336,6 +345,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args ){
 		}
 	}
 };
+
 
 //=============================================================================
 // ** 鼠标长按触发跳跃

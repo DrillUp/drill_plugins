@@ -169,10 +169,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_SceneEmpty = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_SceneEmpty');
+	var Imported = Imported || {};
+	Imported.Drill_SceneEmpty = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_SceneEmpty');
 	
 	
 	/*-----------------杂项------------------*/
@@ -185,9 +185,18 @@
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_SEm_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_SEm_pluginCommand.call(this, command, args);
+	this.drill_SEm_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_SEm_pluginCommand = function( command, args ){
 	if( command === ">空面板" ){
 		
 		if(args.length == 2){
@@ -249,7 +258,28 @@ Window_TitleCommand.prototype.makeCommandList = function() {
 
 //=============================================================================
 // ** 空面板【Scene_Drill_SEm】
-//
+// **
+// **		作用域：	菜单界面
+// **		主功能：	提供一个空白的面板。
+// **		子功能：
+// **					->界面重要函数
+// **						> 初始化（initialize）
+// **						> 创建（create）
+// **						> 帧刷新（update）
+// **						x> 开始运行（start）
+// **						x> 结束运行（stop）
+// **						x> 忙碌状态（isBusy）
+// **						x> 析构函数（terminate）
+// **						x> 判断加载完成（isReady）
+// **						x> 判断是否激活/启动（isActive）
+// **						x> 当前角色切换时（onActorChange）
+// **						x> 创建 - 菜单背景（createBackground）
+// **						x> 创建 - 帮助窗口（createHelpWindow）
+// **					
+// **		界面成员：
+// **					无
+// **				
+// **		说明：	> 暂无。
 //=============================================================================
 //==============================
 // * 空面板 - 定义
@@ -260,24 +290,24 @@ function Scene_Drill_SEm() {
 Scene_Drill_SEm.prototype = Object.create(Scene_MenuBase.prototype);
 Scene_Drill_SEm.prototype.constructor = Scene_Drill_SEm;
 //==============================
-// * 空面板 - 初始化
+// * 空面板 - 初始化（继承）
 //==============================
 Scene_Drill_SEm.prototype.initialize = function() {
     Scene_MenuBase.prototype.initialize.call(this);
 };
 //==============================
-// * 空面板 - 创建
+// * 空面板 - 创建（继承）
 //==============================
 Scene_Drill_SEm.prototype.create = function() {
     Scene_MenuBase.prototype.create.call(this);
 };
 //==============================
-// * 空面板 - 帧刷新
+// * 空面板 - 帧刷新（继承）
 //==============================
 Scene_Drill_SEm.prototype.update = function() { 
 	Scene_MenuBase.prototype.update.call(this);	
 	
-	this.drill_updateQuit();			//退出监听
+	this.drill_updateQuit();			//退出
 };
 //==============================
 // * 空面板 - 退出
@@ -330,10 +360,10 @@ Scene_Drill_SEm.prototype.stop = function() {
     Scene_MenuBase.prototype.stop.call(this);
 };
 //==============================
-// * 空面板（场景基类） - 判断是否激活/启动
+// * 空面板（场景基类） - 忙碌状态
 //==============================
-Scene_Drill_SEm.prototype.isActive = function() {
-	return Scene_MenuBase.prototype.isActive.call(this);
+Scene_Drill_SEm.prototype.isBusy = function() {
+	return Scene_MenuBase.prototype.isBusy.call(this);
 };
 //==============================
 // * 空面板（场景基类） - 析构函数
@@ -341,7 +371,6 @@ Scene_Drill_SEm.prototype.isActive = function() {
 Scene_Drill_SEm.prototype.terminate = function() {
     Scene_MenuBase.prototype.terminate.call(this);
 };
-
 //==============================
 // * 空面板（场景基类） - 判断加载完成
 //==============================
@@ -349,12 +378,18 @@ Scene_Drill_SEm.prototype.isReady = function() {
 	return Scene_MenuBase.prototype.isReady.call(this);
 };
 //==============================
-// * 空面板（场景基类） - 忙碌状态
+// * 空面板（场景基类） - 判断是否激活/启动
 //==============================
-Scene_Drill_SEm.prototype.isBusy = function() {
-	return Scene_MenuBase.prototype.isBusy.call(this);
+Scene_Drill_SEm.prototype.isActive = function() {
+	return Scene_MenuBase.prototype.isActive.call(this);
 };
 
+//==============================
+// * 空面板（菜单界面基类） - 当前角色切换时
+//==============================
+Scene_Drill_SEm.prototype.onActorChange = function() {
+	Scene_MenuBase.prototype.onActorChange.call(this);
+};
 //==============================
 // * 空面板（菜单界面基类） - 创建 - 菜单背景
 //==============================

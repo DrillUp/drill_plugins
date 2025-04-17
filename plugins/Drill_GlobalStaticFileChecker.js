@@ -147,10 +147,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_GlobalStaticFileChecker = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_GlobalStaticFileChecker');
+	var Imported = Imported || {};
+	Imported.Drill_GlobalStaticFileChecker = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_GlobalStaticFileChecker');
 	
 	
 	/*-----------------杂项------------------*/

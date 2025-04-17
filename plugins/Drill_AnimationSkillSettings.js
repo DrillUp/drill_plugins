@@ -165,10 +165,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_AnimationSkillSettings = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_AnimationSkillSettings');
+	var Imported = Imported || {};
+	Imported.Drill_AnimationSkillSettings = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_AnimationSkillSettings');
 
 
 

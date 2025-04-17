@@ -247,121 +247,121 @@
  *
  * @param 背景层-1
  * @parent ---背景层组 1至20---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-2
  * @parent ---背景层组 1至20---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-3
  * @parent ---背景层组 1至20---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-4
  * @parent ---背景层组 1至20---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-5
  * @parent ---背景层组 1至20---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-6
  * @parent ---背景层组 1至20---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-7
  * @parent ---背景层组 1至20---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-8
  * @parent ---背景层组 1至20---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-9
  * @parent ---背景层组 1至20---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-10
  * @parent ---背景层组 1至20---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-11
  * @parent ---背景层组 1至20---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-12
  * @parent ---背景层组 1至20---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-13
  * @parent ---背景层组 1至20---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-14
  * @parent ---背景层组 1至20---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-15
  * @parent ---背景层组 1至20---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-16
  * @parent ---背景层组 1至20---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-17
  * @parent ---背景层组 1至20---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-18
  * @parent ---背景层组 1至20---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-19
  * @parent ---背景层组 1至20---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-20
  * @parent ---背景层组 1至20---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
@@ -370,121 +370,121 @@
  *
  * @param 背景层-21
  * @parent ---背景层组21至40---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-22
  * @parent ---背景层组21至40---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-23
  * @parent ---背景层组21至40---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-24
  * @parent ---背景层组21至40---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-25
  * @parent ---背景层组21至40---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-26
  * @parent ---背景层组21至40---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-27
  * @parent ---背景层组21至40---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-28
  * @parent ---背景层组21至40---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-29
  * @parent ---背景层组21至40---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-30
  * @parent ---背景层组21至40---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-31
  * @parent ---背景层组21至40---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-32
  * @parent ---背景层组21至40---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-33
  * @parent ---背景层组21至40---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-34
  * @parent ---背景层组21至40---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-35
  * @parent ---背景层组21至40---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-36
  * @parent ---背景层组21至40---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-37
  * @parent ---背景层组21至40---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-38
  * @parent ---背景层组21至40---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-39
  * @parent ---背景层组21至40---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-40
  * @parent ---背景层组21至40---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
@@ -493,121 +493,121 @@
  *
  * @param 背景层-41
  * @parent ---背景层组41至60---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-42
  * @parent ---背景层组41至60---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-43
  * @parent ---背景层组41至60---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-44
  * @parent ---背景层组41至60---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-45
  * @parent ---背景层组41至60---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-46
  * @parent ---背景层组41至60---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-47
  * @parent ---背景层组41至60---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-48
  * @parent ---背景层组41至60---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-49
  * @parent ---背景层组41至60---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-50
  * @parent ---背景层组41至60---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-51
  * @parent ---背景层组41至60---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-52
  * @parent ---背景层组41至60---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-53
  * @parent ---背景层组41至60---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-54
  * @parent ---背景层组41至60---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-55
  * @parent ---背景层组41至60---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-56
  * @parent ---背景层组41至60---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-57
  * @parent ---背景层组41至60---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-58
  * @parent ---背景层组41至60---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-59
  * @parent ---背景层组41至60---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-60
  * @parent ---背景层组41至60---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
@@ -616,126 +616,126 @@
  *
  * @param 背景层-61
  * @parent ---背景层组61至80---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-62
  * @parent ---背景层组61至80---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-63
  * @parent ---背景层组61至80---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-64
  * @parent ---背景层组61至80---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-65
  * @parent ---背景层组61至80---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-66
  * @parent ---背景层组61至80---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-67
  * @parent ---背景层组61至80---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-68
  * @parent ---背景层组61至80---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-69
  * @parent ---背景层组61至80---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-70
  * @parent ---背景层组61至80---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-71
  * @parent ---背景层组61至80---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-72
  * @parent ---背景层组61至80---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-73
  * @parent ---背景层组61至80---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-74
  * @parent ---背景层组61至80---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-75
  * @parent ---背景层组61至80---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-76
  * @parent ---背景层组61至80---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-77
  * @parent ---背景层组61至80---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-78
  * @parent ---背景层组61至80---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-79
  * @parent ---背景层组61至80---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-80
  * @parent ---背景层组61至80---
- * @type struct<HDSBBackground>
+ * @type struct<HDSHDSBckground>
  * @desc 背景的详细配置信息。
  * @default 
  *
  */
-/*~struct~HDSBBackground:
+/*~struct~HDSHDSBckground:
  * 
  * @param 标签
  * @desc 只用于方便区分查看的标签，不作用在插件中。
@@ -1024,7 +1024,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_HDSB_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_HDSB_PluginTip_baseList.length == 0 ){ return ""; }
@@ -1034,6 +1034,18 @@
 			message += DrillUp.g_HDSB_PluginTip_baseList[i];
 		}
 		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到样式
+	//==============================
+	DrillUp.drill_HDSB_getPluginTip_StyleNotFind = function( style_id ){
+		return "【" + DrillUp.g_HDSB_PluginTip_curName + "】\n对象创建失败，id为"+style_id+"的样式配置为空或不存在。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - NaN校验值
+	//==============================
+	DrillUp.drill_HDSB_getPluginTip_ParamIsNaN = function( param_name ){
+		return "【" + DrillUp.g_HDSB_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
 	};
 	//==============================
 	// * 提示信息 - 报错 - 底层版本过低
@@ -1058,14 +1070,14 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_HtmlDynamicSnapshotBackground = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_HtmlDynamicSnapshotBackground');
+	var Imported = Imported || {};
+	Imported.Drill_HtmlDynamicSnapshotBackground = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_HtmlDynamicSnapshotBackground');
 
 	//==============================
 	// * 静态数据 - 背景
-	//				（~struct~HDSBBackground）
+	//				（~struct~HDSHDSBckground）
 	//==============================
 	DrillUp.drill_HDSB_backgroundInit = function( dataFrom ) {
 		var data = {};
@@ -1131,7 +1143,7 @@
 			var temp = JSON.parse(DrillUp.parameters["背景层-" + String(i+1) ]);
 			DrillUp.g_HDSB_layers[i] = DrillUp.drill_HDSB_backgroundInit( temp );
 		}else{
-			DrillUp.g_HDSB_layers[i] = undefined;		//（强制设为空值，节约存储资源）
+			DrillUp.g_HDSB_layers[i] = undefined;		//（设为空值，节约静态数据占用容量）
 		}
 	}
 	
@@ -1151,9 +1163,18 @@ if( Imported.Drill_CoreOfDynamicSnapshot &&
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_HDSB_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_HDSB_pluginCommand.call(this, command, args);
+	this.drill_HDSB_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_HDSB_pluginCommand = function( command, args ){
 	if( command === ">天窗层背景" ){ // >天窗层背景 : 背景[1] : 显示
 		
 		/*-----------------对象组获取------------------*/
@@ -2050,14 +2071,16 @@ Scene_MenuBase.prototype.drill_HDSB_updateDestroy = Scene_Map.prototype.drill_HD
 // ** 天窗层背景控制器【Drill_HDSB_Controller】
 // **		
 // **		作用域：	地图界面、战斗界面、菜单界面
-// **		主功能：	> 定义一个专门控制天窗层背景的数据类。
-// **		子功能：	->控制器
+// **		主功能：	定义一个专门控制天窗层背景的数据类。
+// **		子功能：	
+// **					->控制器『控制器与贴图』
 // **						->帧刷新
 // **						->重设数据
 // **							->序列号
 // **						->显示/隐藏
 // **						->暂停/继续
 // **						->销毁
+// **					
 // **					->A主体『界面装饰最终变换值』『变换特性的规范』
 // **						->基础特性
 // **							>  资源名
@@ -2093,7 +2116,7 @@ Scene_MenuBase.prototype.drill_HDSB_updateDestroy = Scene_Map.prototype.drill_HD
 // **						> 平铺贴图>浮动效果
 // **						> 主体贴图>闪烁效果
 // **						> 主体贴图>缩放效果
-// **		
+// **					
 // **		说明：	> 该类可存储。
 // **				> 注意，该类不能放 物体指针、贴图指针 。
 //=============================================================================
@@ -2107,6 +2130,7 @@ function Drill_HDSB_Controller(){
 // * 控制器 - 校验标记
 //==============================
 DrillUp.g_HDSB_checkNaN = true;
+DrillUp.g_HDSB_notFindStyleAlertOnce = true;
 //==============================
 // * 控制器 - 初始化
 //==============================
@@ -2208,7 +2232,7 @@ Drill_HDSB_Controller.prototype.drill_controller_setZIndex = function( zIndex ){
 };
 
 //##############################
-// * 控制器 - 初始化数据【标准默认值】
+// * 控制器 - 初始化数据『控制器与贴图』【标准默认值】
 //
 //			参数：	> 无
 //			返回：	> 无
@@ -2263,7 +2287,7 @@ Drill_HDSB_Controller.prototype.drill_controller_initData = function(){
 	if( data['effect_zoomRange'] == undefined ){ data['effect_zoomRange'] = 0.2 };					//F自变化效果 - 缩放幅度范围
 }
 //==============================
-// * 初始化 - 初始化子功能
+// * 控制器 - 初始化子功能『控制器与贴图』
 //==============================
 Drill_HDSB_Controller.prototype.drill_controller_initChild = function(){
 	this.drill_controller_initAttr();				//初始化子功能 - A主体
@@ -2291,13 +2315,13 @@ Drill_HDSB_Controller.prototype.drill_controller_resetData_Private = function( d
     this.drill_controller_initChild();										//初始化子功能
 }
 //##############################
-// * 控制器 - 空的静态数据
+// * 控制器 - 『控制器与贴图的样式』空的静态数据
 //			
 //			说明：	> 空数据会在initData时会进行默认值初始化，在其他地方只读。
 //##############################
 Drill_HDSB_Controller.emptyData = {};
 //##############################
-// * 控制器 - 获取静态数据【标准函数】
+// * 控制器 - 『控制器与贴图的样式』获取静态数据【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 对象指针
@@ -2307,9 +2331,18 @@ Drill_HDSB_Controller.emptyData = {};
 //					> 【此函数不含遍历，而是直接获取值，可以放在帧刷新中使用】
 //##############################
 Drill_HDSB_Controller.prototype.drill_data = function(){
-	var data = DrillUp.g_HDSB_layers[ this._drill_data_id ];
-	if( data == undefined ){ return Drill_HDSB_Controller.emptyData; }
-	return data;
+	var cur_styleId   = this._drill_data_id +1;
+	var cur_styleData = DrillUp.g_HDSB_layers[ this._drill_data_id ];
+	if( cur_styleData == undefined ){
+		
+		// > 『控制器与贴图的样式』 - 校验+提示信息（只执行一次）
+		if( DrillUp.g_HDSB_notFindStyleAlertOnce == true ){
+			DrillUp.g_HDSB_notFindStyleAlertOnce = false;
+			alert( DrillUp.drill_HDSB_getPluginTip_StyleNotFind(cur_styleId) );
+		}
+		return Drill_HDSB_Controller.emptyData;
+	}
+	return cur_styleData;
 };
 
 
@@ -2952,12 +2985,14 @@ Drill_HDSB_Controller.prototype.drill_controller_updateEffect = function(){
 // ** 天窗层背景贴图【Drill_HDSB_Sprite】
 // **
 // **		作用域：	地图界面、战斗界面、菜单界面
-// **		主功能：	> 定义一个背景贴图。
-// **		子功能：	->贴图
+// **		主功能：	定义一个背景贴图。
+// **		子功能：	
+// **					->贴图『控制器与贴图』
 // **						->是否就绪
 // **						->优化策略
 // **						->是否需要销毁（未使用）
 // **						->销毁（手动）
+// **					
 // **					->A主体
 // **					->B变换特性
 // **					->C对象绑定
@@ -2966,7 +3001,7 @@ Drill_HDSB_Controller.prototype.drill_controller_updateEffect = function(){
 // **					->D指令叠加变化-控制器用
 // **					->E延迟指令
 // **					->F自变化效果
-// **
+// **					
 // **		说明：	> 你必须在创建贴图后，手动初始化。（还需要先设置 控制器 ）
 // **
 // **		代码：	> 范围 - 该类显示单独的贴图。
@@ -3019,7 +3054,7 @@ Drill_HDSB_Sprite.prototype.drill_sprite_setController = function( controller ){
 	this._drill_curSerial = controller._drill_controllerSerial;
 };
 //##############################
-// * C对象绑定 - 贴图初始化【开放函数】
+// * C对象绑定 - 初始化子功能『控制器与贴图』【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -3084,14 +3119,14 @@ Drill_HDSB_Sprite.prototype.drill_sprite_destroy = function(){
 	this.drill_sprite_destroySelf();			//销毁 - 销毁自身
 };
 //==============================
-// * 背景贴图 - 贴图初始化（私有）
+// * 背景贴图 - 初始化自身『控制器与贴图』
 //==============================
 Drill_HDSB_Sprite.prototype.drill_sprite_initSelf = function(){
 	this._drill_controller = null;				//控制器对象
 	this._drill_curSerial = -1;					//当前序列号
 };
 //==============================
-// * 背景贴图 - 销毁子功能（私有）
+// * 背景贴图 - 销毁子功能『控制器与贴图』
 //==============================
 Drill_HDSB_Sprite.prototype.drill_sprite_destroyChild = function(){
 	if( this._drill_controller == null ){ return; }
@@ -3109,7 +3144,7 @@ Drill_HDSB_Sprite.prototype.drill_sprite_destroyChild = function(){
 	
 };
 //==============================
-// * 背景贴图 - 销毁自身（私有）
+// * 背景贴图 - 销毁自身『控制器与贴图』
 //==============================
 Drill_HDSB_Sprite.prototype.drill_sprite_destroySelf = function(){
 	this._drill_controller = null;				//控制器对象

@@ -449,8 +449,9 @@
 //			无
 //		
 //		★必要注意事项：
-//			1.绘制渐变颜色时，bitmap的刷子不知道为什么产生了偏移，置零了。目前解决方法是用 【Bitmap.drill_elements_drawText】 做识别。
-//
+//			1.绘制渐变颜色时，bitmap的刷子不知道为什么产生了偏移，置零了。目前解决方法是用 .drill_elements_drawText 做识别。
+//			  （此问题在 2024/9 窗口字符核心 重写之后消失了）
+//	
 //		★原理：
 //			原窗口绘制，是在一个bitmap上面，重复画一堆内容，超过窗口的选项不画。（原本以为存在下拉图，结果完全不是）
 //			原窗口每次上移下移动作，都会通过刷新drawItems，重新绘制当前的技能内容。
@@ -483,10 +484,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_WindowSkillElement = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_WindowSkillElement');
+	var Imported = Imported || {};
+	Imported.Drill_WindowSkillElement = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_WindowSkillElement');
 
 
 	//==============================

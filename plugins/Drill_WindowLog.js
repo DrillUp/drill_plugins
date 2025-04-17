@@ -414,7 +414,7 @@
  */
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称：		WL (Window_Log)
+//		插件简称		WL (Window_Log)
 //		临时全局变量	DrillUp.g_WL_xxx
 //		临时局部变量	无
 //		存储数据变量	无
@@ -472,10 +472,10 @@
 //=============================================================================
 // ** 变量配置
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_WindowLog = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_WindowLog');
+	var Imported = Imported || {};
+	Imported.Drill_WindowLog = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_WindowLog');
 	
 	
 	/*-----------------杂项------------------*/
@@ -1001,7 +1001,7 @@ Game_Enemy.prototype.drill_WL_enemyColorName = function(){
 		var name = this.name();
 		var color = $gameTemp.drill_ETC_getColorId( this.enemyId() );
 		if( color >= 0 ){
-			name = "\\c["+ String(Number(color)+100) + "]" + name + "\\c[0]";
+			name = "\\c["+ String(Number(color)+100) + "]" + name + "\\cc[reset]";
 		}
 		return name;
 	}else{
@@ -1016,7 +1016,7 @@ Game_Actor.prototype.drill_WL_actorColorName = function(){
 		var name = this.name();
 		var color = $gameTemp.drill_ATC_getColorId( this.actorId() );
 		if( color >= 0 ){
-			name = "\\c["+ String(color) + "]" + name + "\\c[0]";
+			name = "\\c["+ String(color) + "]" + name + "\\cc[reset]";
 		}
 		return name;
 	}else{

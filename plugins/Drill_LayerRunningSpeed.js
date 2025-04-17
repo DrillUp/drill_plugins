@@ -31,7 +31,7 @@
  *      加速后，声音的速度并不会变，变化的只是地图事件处理的速度。
  * 加速键：
  *   (1.插件中有各种各样的加速键设置，详细可以去看看文档：
- *      "1.系统 > 关于输入设备核心.docx" 的 所有加速键 章节。
+ *      "1.系统 > 关于输入设备核心（高级篇）.docx" 的 所有加速键 章节。
  * 性能：
  *   (1.注意，该插件虽然只轻微改改配置，但是修改的影响类似于变速齿轮。
  *      如果开了五倍速，整体消耗会增加，最坏情况会达到五倍消耗。
@@ -156,9 +156,9 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_LayerRunningSpeed = true;
-　　var DrillUp = DrillUp || {}; 
+	var Imported = Imported || {};
+	Imported.Drill_LayerRunningSpeed = true;
+	var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_LayerRunningSpeed');
 	
 	/*-----------------杂项------------------*/
@@ -169,9 +169,18 @@
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_LRS_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_LRS_pluginCommand.call(this, command, args);
+	this.drill_LRS_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_LRS_pluginCommand = function( command, args ){
 	if( command === ">长按加速控制" ){
 		
 		if( args.length == 2 ){				//>长按加速控制 : 开启

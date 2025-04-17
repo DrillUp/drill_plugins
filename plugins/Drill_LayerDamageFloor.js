@@ -36,9 +36,9 @@
  * 3.插件需要将指定 图块R区域 地形伤害/治愈，
  *   去看看 "26.图块 > 关于插件与图块R占用说明.xlsx"
  * 细节：
- *   (1.地形伤害/地形治愈 对所有角色队伍成员有效。
- *      如果地形伤害能够致死，所有成员死亡后会导致游戏失败。
- *   (2.角色成员可以设置 地形伤害的倍率 翻倍或减半，
+ *   (1.地形伤害/地形治愈 对所有玩家队员有效。
+ *      如果地形伤害能够致死，所有玩家队员死亡后会导致游戏失败。
+ *   (2.角色可以设置 地形伤害的倍率 翻倍或减半，
  *      此倍率同样对治愈有效，即 地形伤害翻倍 = 地形治愈翻倍。
  * 自定义地形伤害：
  *   (1.游戏中遇到多个自定义地形伤害的图块时，不会叠加效果，而是
@@ -287,10 +287,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_LayerDamageFloor = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_LayerDamageFloor');
+	var Imported = Imported || {};
+	Imported.Drill_LayerDamageFloor = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_LayerDamageFloor');
 
 
 	//==============================
@@ -382,9 +382,18 @@ Game_Actor.prototype.performMapDamage = function(){
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_LDF_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_LDF_pluginCommand.call(this, command, args);
+	this.drill_LDF_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_LDF_pluginCommand = function( command, args ){
 	if( command === ">地形伤害与地形治愈" ){
 		
 		/*-----------------默认------------------*/

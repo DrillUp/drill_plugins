@@ -193,6 +193,16 @@
 //			2.由于 Game_CharacterBase.prototype.isMoving 的判断条件
 //			  是 this._realX !== this._x || this._realY !== this._y;
 //			  所以 this._realX与this._x 碰撞时，必须存储误差，加到下次移动中。
+//			3.看，水池里有好多慢悠悠移动的水母，像不像那么多年你都改不了的移动速度上限的bug？
+//				┌───────────────────────┐
+//				  ଳ~              ଳ~                   ~ଳ 
+//				           ~ଳ                  ଳ~
+//				    ~ଳ            ଳ~            ~ଳ    ~ଳ
+//				      ଳ~  ~ଳ                           ଳ~
+//				                             ଳ~     ~ଳ 
+//				    ଳ~            ଳ~                
+//				                ~ଳ          ଳ~          ଳ~
+//				└───────────────────────┘
 //
 //		★其它说明细节：
 //			1.该插件需要参照注释大全来看，单独看非常绕。
@@ -217,7 +227,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_MS_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_MS_PluginTip_baseList.length == 0 ){ return ""; }
@@ -239,10 +249,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_MoveSpeed = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_MoveSpeed');
+	var Imported = Imported || {};
+	Imported.Drill_MoveSpeed = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_MoveSpeed');
 	
 	
 	/*-----------------杂项------------------*/	
@@ -257,11 +267,20 @@ if( Imported.Drill_CoreOfMoveRoute ){
 	
 	
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_MS_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_MS_pluginCommand.call(this, command, args);
+	this.drill_MS_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_MS_pluginCommand = function( command, args ){
 	
 	/*-----------------对象组获取------------------*/
 	if( command === ">移动速度" ){
@@ -405,7 +424,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 };
 //==============================
-// ** 插件指令 - 事件检查
+// * 插件指令 - 事件检查
 //==============================
 Game_Map.prototype.drill_MS_isEventExist = function( e_id ){
 	if( e_id == 0 ){ return false; }

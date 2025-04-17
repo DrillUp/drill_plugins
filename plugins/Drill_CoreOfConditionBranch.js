@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        系统 - 分支条件核心
+ * @plugindesc [v1.1]        系统 - 分支条件核心
  * @author Drill_up
  * 
  * 
@@ -105,16 +105,18 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 修复了大于、小于符号报错的bug。
  * 
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称：		COCB (Core_Of_Condition_Branch)
+//		插件简称		COCB (Core_Of_Condition_Branch)
 //		临时全局变量	DrillUp.g_COCB_xxx
 //		临时局部变量	无
 //		存储数据变量	无
 //		全局存储变量	无
-//		覆盖重写方法	无
+//		覆盖重写方法	Game_Interpreter.prototype.command111（半覆写）
 //
 //<<<<<<<<性能记录<<<<<<<<
 //
@@ -186,10 +188,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_CoreOfConditionBranch = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_CoreOfConditionBranch');
+	var Imported = Imported || {};
+	Imported.Drill_CoreOfConditionBranch = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_CoreOfConditionBranch');
 	
 	
 	
@@ -249,12 +251,13 @@ DrillUp.drill_COCB_addScript = function( temp_script ){
 	}
 };
 //==============================
-// * 分支指令 - 执行事件指令
+// * 分支指令 - 执行事件指令（半覆写）
 //==============================
 var _drill_COCB_command111 = Game_Interpreter.prototype.command111;
 Game_Interpreter.prototype.command111 = function(){
 	
 	// > 拦截脚本的情况
+	//		（来自 Game_Interpreter.prototype.command111 的 case 12: ）
 	//		（注意，执行了这条指令之后，分支条件一定要赋值，不管是 true还是false，都需要赋值）
     var param = this._params[0];
 	if( param == 12 ){
@@ -280,12 +283,16 @@ Game_Interpreter.prototype.command111 = function(){
 			
 			
 		// > 阻止 "没有括号的函数"
-		}else if( temp_script.indexOf("=") == -1 && ( temp_script.indexOf("(") == -1 || temp_script.indexOf(")") == -1 ) ){
+		}else if( temp_script.indexOf("=") == -1 && 
+				  temp_script.indexOf(">") == -1 && 
+				  temp_script.indexOf("<") == -1 && 
+				  temp_script.indexOf(".") == -1 && 
+				 (temp_script.indexOf("(") == -1 || temp_script.indexOf(")") == -1) ){
 			DrillUp.drill_COCB_addScript( temp_script );
 			result = false;
 			
 			
-		// > 正常脚本判断
+		// > 正常脚本判断（来自 Game_Interpreter.prototype.command111 的 case 12: ）
 		}else{
 			result = !!eval(this._params[1]);
 		}

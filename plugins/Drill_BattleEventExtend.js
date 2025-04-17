@@ -166,10 +166,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_BattleEventExtend = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_BattleEventExtend');
+	var Imported = Imported || {};
+	Imported.Drill_BattleEventExtend = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_BattleEventExtend');
 	
 	/*-----------------杂项------------------*/
 	DrillUp.g_BEE_commentEventId_start = Number(DrillUp.parameters["战斗开始时执行"] || 0);
@@ -179,10 +179,19 @@
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_BEE_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_BEE_pluginCommand.call(this, command, args);
-	if( command === ">战斗时公共事件" && command === ">战斗事件扩展" ){
+	this.drill_BEE_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_BEE_pluginCommand = function( command, args ){
+	if( command === ">战斗时公共事件" || command === ">战斗事件扩展" ){
 		
 		if( args.length == 6 ){
 			var type = String(args[1]);

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        图片 - 图片优化核心
+ * @plugindesc [v1.2]        图片 - 图片优化核心
  * @author Drill_up
  * 
  * 
@@ -68,6 +68,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 优化了碰撞体的功能细节。
+ * [v1.2]
+ * 修复了切换地图时悬停判定未刷新的bug。
  * 
  */
  
@@ -103,7 +105,7 @@
 //			->☆静态数据
 //			->☆插件指令
 //			->☆存储数据
-//			->☆图片贴图
+//			->☆场景容器之图片贴图
 //			
 //			->☆管辖权 - 图片数据【全权接管 Game_Picture】
 //			->☆管辖权 - 图片贴图【全权接管 Sprite_Picture】
@@ -214,10 +216,30 @@
 //			16.图片 > 关于图片优化核心（脚本）.docx
 //		
 //		★插件私有类：
-//			无
+//			* 碰撞体 实体类【Drill_COPi_CollisionBean】
 //		
 //		★必要注意事项：
-//			无
+//			1.这个插件几乎完全脱离了rpg底层代码。
+//			  放一批马在这里，以后如果要跑路换底层引擎，随时骑马跑路。（2024/5/2）
+//				                             _(\_/)
+//				                           ,((((^`\
+//				                          ((((  (6 \
+//				                        ,((((( ,    \
+//				    ,,,_              ,(((((  /"._  ,`,
+//				   ((((\\ ,...       ,((((   /    `-.-'
+//				   )))  ;'    `"'"'""((((   (
+//				  (((  /            (((      \
+//				   )) |                      |
+//				  ((  |        .       '     |
+//				  ))  \     _ '      `t   ,.')
+//				  (   |   y;- -,-""'"-.\   \/ 
+//				  )   / ./  ) /         `\  \
+//				     |./   ( (           / /'
+//				     ||     \\          //'|
+//				     ||      \\       _//'||
+//				     ||       ))     |_/  ||
+//				     \_\     |_/          ||
+//				     `'"                  \_\
 //
 //		★其它说明细节：
 //			1.图片比较特殊，同时在战斗界面和地图界面都要有效果。
@@ -238,7 +260,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_COPi_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_COPi_PluginTip_baseList.length == 0 ){ return ""; }
@@ -260,19 +282,28 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_CoreOfPicture = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_CoreOfPicture');
+	var Imported = Imported || {};
+	Imported.Drill_CoreOfPicture = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_CoreOfPicture');
 	
 	
 	
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_COPi_pluginCommand = Game_Interpreter.prototype.pluginCommand
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_COPi_pluginCommand.call(this, command, args);
+	this.drill_COPi_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_COPi_pluginCommand = function( command, args ){
 	if( command === ">图片优化核心" ){
 		
 		/*-----------------DEBUG------------------*/
@@ -280,11 +311,11 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var temp1 = String(args[1]);
 			var temp2 = String(args[3]);
 			if( temp1 == "DEBUG碰撞体查看" ){
-				if( temp2 == "开启" ){
+				if( temp2 == "启用" || temp2 == "开启" || temp2 == "打开" || temp2 == "启动" ){
 					$gameSystem._drill_COPi_DebugEnabled = true;
 					$gameSystem._drill_COPWM_DebugEnabled = false;	//（【图片-图片与鼠标控制核心】防止重叠显示）
 				}
-				if( temp2 == "关闭" ){
+				if( temp2 == "关闭" || temp2 == "禁用" ){
 					$gameSystem._drill_COPi_DebugEnabled = false;
 				}
 			}
@@ -376,10 +407,10 @@ Game_System.prototype.drill_COPi_checkSysData_Private = function() {
 
 
 //#############################################################################
-// ** 【标准模块】图片贴图 ☆图片贴图
+// ** 【标准模块】图片贴图容器 ☆场景容器之图片贴图
 //#############################################################################
 //##############################
-// * 图片贴图 - 获取 - 全部图片贴图【标准函数】
+// * 图片贴图容器 - 获取 - 全部图片贴图【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 贴图数组       （图片贴图）
@@ -390,7 +421,7 @@ Game_Temp.prototype.drill_COPi_getAllPictureSprite = function(){
 	return this.drill_COPi_getAllPictureSprite_Private();
 }
 //##############################
-// * 图片贴图 - 获取 - 容器指针【标准函数】
+// * 图片贴图容器 - 获取 - 容器指针【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 贴图数组       （图片贴图）
@@ -402,7 +433,7 @@ Game_Temp.prototype.drill_COPi_getPictureSpriteTank = function(){
 	return this.drill_COPi_getPictureSpriteTank_Private();
 }
 //##############################
-// * 图片贴图 - 获取 - 根据图片ID【标准函数】
+// * 图片贴图容器 - 获取 - 根据图片ID【标准函数】
 //			
 //			参数：	> picture_id 数字（图片ID）
 //			返回：	> 贴图对象       （图片贴图）
@@ -416,7 +447,7 @@ Game_Temp.prototype.drill_COPi_getPictureSpriteByPictureId = function( picture_i
 	return this.drill_COPi_getPictureSpriteByPictureId_Private( picture_id );
 }
 //=============================================================================
-// ** 图片贴图（接口实现）
+// ** 场景容器之图片贴图（实现）
 //=============================================================================
 //==============================
 // * 图片贴图容器 - 获取 - 容器（私有）
@@ -690,8 +721,8 @@ Game_Picture.prototype.initBasic = function(){
 	//this._drill_skewY = 0;		//斜切Y
 	
 	// > 属性 - 高宽
-	//this._drill_width = 0;		//图片宽度
-	//this._drill_height = 0;		//图片高度
+	//this._drill_pictureWidth = 0;		//图片宽度
+	//this._drill_pictureHeight = 0;	//图片高度
 	
 	// > 属性 - 锚点
     this._origin = 0;				//锚点值（数字）
@@ -1235,16 +1266,16 @@ Game_Picture.prototype.drill_COPi_getPictureId = function(){
 //==============================
 // * 高度宽度获取 - 属性获取
 //==============================
-Game_Picture.prototype.drill_width  = function(){ return this._drill_width;  };	//图片宽度
-Game_Picture.prototype.drill_height = function(){ return this._drill_height; };	//图片高度
+Game_Picture.prototype.drill_width  = function(){ return this._drill_pictureWidth;  };	//图片宽度
+Game_Picture.prototype.drill_height = function(){ return this._drill_pictureHeight; };	//图片高度
 //==============================
 // * 高度宽度获取 - 初始化
 //==============================
 var _drill_COPi_p_wh_initBasic = Game_Picture.prototype.initBasic;
 Game_Picture.prototype.initBasic = function() {
 	_drill_COPi_p_wh_initBasic.call(this);
-	this._drill_width = 0;					//图片宽度
-	this._drill_height = 0;					//图片高度
+	this._drill_pictureWidth = 0;					//图片宽度
+	this._drill_pictureHeight = 0;					//图片高度
 }
 //==============================
 // * 高度宽度获取 - 帧刷新
@@ -1258,8 +1289,8 @@ Sprite_Picture.prototype.update = function() {
 		
 		var picture = this.picture();
 		if( picture != undefined ){
-			picture._drill_width = this.bitmap.width;
-			picture._drill_height = this.bitmap.height;
+			picture._drill_pictureWidth = this.bitmap.width;
+			picture._drill_pictureHeight = this.bitmap.height;
 		}
 	}
 	
@@ -1408,15 +1439,15 @@ Game_Picture.prototype.drill_COPi_setAnchorWithKeepPosition = function( anchorX,
 	var point = $gameTemp.drill_COPi_Math2D_getFixPointInAnchor(
 					org_anchor_x, org_anchor_y,
 					anchorX, anchorY,
-					this._drill_width, this._drill_height,
+					this._drill_pictureWidth, this._drill_pictureHeight,
 					this._angle / 180 * Math.PI,
 					this._scaleX*0.01 , this._scaleY*0.01,
 					this._drill_skewX*0.01 , this._drill_skewY*0.01 
 				);
 	this._drill_anchorOffsetX -= point.x;
 	this._drill_anchorOffsetY -= point.y;
-	this._drill_anchorOffsetX += this._drill_width  *(anchorX - org_anchor_x);	//（锚点的偏移）
-	this._drill_anchorOffsetY += this._drill_height *(anchorY - org_anchor_y);
+	this._drill_anchorOffsetX += this._drill_pictureWidth  *(anchorX - org_anchor_x);	//（锚点的偏移）
+	this._drill_anchorOffsetY += this._drill_pictureHeight *(anchorY - org_anchor_y);
 	
 	this._origin = 100;
 	this._drill_anchorX = anchorX;
@@ -1715,13 +1746,25 @@ Sprite_Picture.prototype.drill_COPi__refreshFrame = function(){
 	//if( this.visible == false ){ return; }
 	//if( this.opacity == 0 ){ return; }
 	
-	// > 条件 - 未读取时不赋值
-	if( this.bitmap == undefined ){ return; }
-	if( this.bitmap.isReady() == false ){ return; }
+	// > 『贴图框架值归零』 - 未读取时不赋值
+	if( this.bitmap == undefined ){
+		picture._drill_COPi_collisionBean.drill_bean_resetFrame(0,0,0,0);
+		return;
+	}
+	if( this.bitmap.isReady() == false ){
+		picture._drill_COPi_collisionBean.drill_bean_resetFrame(0,0,0,0);
+		return;
+	}
 	
-	// > 条件 - 不接受宽度为0的标记
-	if( this._realFrame.width == 0 ){ return; }
-	if( this._realFrame.height == 0 ){ return; }
+	// > 『贴图框架值归零』 - 不接受宽度为0的标记
+	if( this._realFrame.width == 0  ){
+		picture._drill_COPi_collisionBean.drill_bean_resetFrame(0,0,0,0);
+		return;
+	}
+	if( this._realFrame.height == 0 ){
+		picture._drill_COPi_collisionBean.drill_bean_resetFrame(0,0,0,0);
+		return;
+	}
 	
 	// > 刷新框架
 	picture._drill_COPi_collisionBean.drill_bean_resetFrame(
@@ -1737,8 +1780,9 @@ Sprite_Picture.prototype.drill_COPi__refreshFrame = function(){
 // ** 碰撞体 实体类【Drill_COPi_CollisionBean】
 // **		
 // **		作用域：	地图界面
-// **		主功能：	> 定义一个专门的实体类数据类。
-// **		子功能：	->无帧刷新
+// **		主功能：	定义一个专门的实体类数据类。
+// **		子功能：	
+// **					->无帧刷新
 // **					->重设数据
 // **						->序列号
 // **					->被动赋值（Sprite_Picture）
@@ -2211,6 +2255,8 @@ Scene_Map.prototype.drill_COPi_updateDrawBeanRangeSprite = function() {
 		
 		// > 销毁贴图
 		if( this._drill_COPi_DebugSprite != undefined ){
+			this._drill_COPi_DebugSprite.bitmap.clear();
+			this._drill_COPi_DebugSprite.bitmap = null;
 			this.removeChild(this._drill_COPi_DebugSprite);
 			this._drill_COPi_DebugSprite = undefined;
 		}
@@ -2483,9 +2529,9 @@ Scene_Map.prototype.drill_COPi_sortByZIndex = function () {
 //==============================
 // * 地图层级 - 图片层
 //==============================
-var _drill_COPi_layer_createPictures = Spriteset_Map.prototype.createPictures;
+var _drill_COPi_layer_createPictures1 = Spriteset_Map.prototype.createPictures;
 Spriteset_Map.prototype.createPictures = function() {
-	_drill_COPi_layer_createPictures.call(this);		//图片对象层 < 图片层 < 对话框集合
+	_drill_COPi_layer_createPictures1.call(this);		//图片对象层 < 图片层 < 对话框集合
 	if( !this._drill_mapPicArea ){
 		this._drill_mapPicArea = new Sprite();
 		this.addChild(this._drill_mapPicArea);	
@@ -2615,9 +2661,9 @@ Game_Temp.prototype.drill_COPi_whenRefreshZIndex = function( temp_sprite, pictur
 //==============================
 // * 层级控制 - 初始化绑定
 //==============================
-var _drill_COPi_layer_createPictures = Spriteset_Base.prototype.createPictures;
+var _drill_COPi_layer_createPictures2 = Spriteset_Base.prototype.createPictures;
 Spriteset_Base.prototype.createPictures = function(){
-	_drill_COPi_layer_createPictures.call(this);
+	_drill_COPi_layer_createPictures2.call(this);
 	$gameTemp._drill_COPi_needRefreshSpriteLayer = true;
 };
 //==============================

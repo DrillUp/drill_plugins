@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        行走图 - 多层行走图环绕球
+ * @plugindesc [v1.3]        行走图 - 多层行走图环绕球
  * @author Drill_up
  * 
  * @Drill_LE_param "环绕球样式-%d"
@@ -59,6 +59,8 @@
  * 事件注释：=>多层行走图环绕球 : 槽[1] : 删除环绕球
  * 事件注释：=>多层行走图环绕球 : 清空当前全部环绕球
  * 
+ * 1.如果切换事件页时，"槽[1]"的前一页和后一页样式设置相同，则环绕球不会变化。
+ * 
  * -----------------------------------------------------------------------------
  * ----可选设定
  * 你也可以通过插件指令来进行设置：
@@ -111,6 +113,8 @@
  * 优化了插件的性能。
  * [v1.2]
  * 大幅度优化了内部结构。
+ * [v1.3]
+ * 添加了重复设置槽与样式时，不重建装饰的功能。
  *
  *
  *
@@ -1643,6 +1647,12 @@
 		return "【" + DrillUp.g_EFSu_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
 	};
 	//==============================
+	// * 提示信息 - 报错 - 找不到样式
+	//==============================
+	DrillUp.drill_EFSu_getPluginTip_StyleNotFind = function( style_id ){
+		return "【" + DrillUp.g_EFSu_PluginTip_curName + "】\n对象创建失败，id为"+style_id+"的样式配置为空或不存在。";
+	};
+	//==============================
 	// * 提示信息 - 报错 - 强制更新提示
 	//==============================
 	DrillUp.drill_EFSu_getPluginTip_NeedUpdate_Camera = function(){
@@ -1659,9 +1669,9 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_EventFrameSurround = true;
-　　var DrillUp = DrillUp || {}; 
+	var Imported = Imported || {};
+	Imported.Drill_EventFrameSurround = true;
+	var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_EventFrameSurround');
 	
 	
@@ -1743,9 +1753,18 @@
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_EFSu_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_EFSu_pluginCommand.call(this, command, args);
+	this.drill_EFSu_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_EFSu_pluginCommand = function( command, args ){
 	if( command === ">多层行走图环绕球" ){
 		
 		/*-----------------对象组获取------------------*/
@@ -2169,12 +2188,32 @@ Game_CharacterBase.prototype.drill_EFSu_createController = function( slot_id, st
 		this._drill_EFSu_controllerTank = [];
 	}
 	
-	// > 销毁原来的
-	this.drill_EFSu_removeController( slot_id );
+	// > 旧控制器
+	var old_controller = this.drill_EFSu_getController( slot_id );
+	if( old_controller != undefined ){
+		
+		// > 旧控制器 - 重复设置，跳出
+		if( old_controller._drill_lastStyleId == style_id ){
+			return;
+			
+		// > 旧控制器 - 不重复设置，销毁
+		}else{
+			this.drill_EFSu_removeController( slot_id );
+		}
+	}
 	
-	// > 创建控制器
-	var data = JSON.parse(JSON.stringify( DrillUp.g_EFSu_style[ style_id ] ));
-	var controller = new Drill_EFSu_Controller( data );
+	// > 『控制器与贴图的样式』 - 校验+提示信息
+	var cur_styleId   = style_id +1;
+	var cur_styleData = DrillUp.g_EFSu_style[ style_id ];
+	if( cur_styleData == undefined || 
+		cur_styleData['inited'] == false ){
+		alert( DrillUp.drill_EFSu_getPluginTip_StyleNotFind(cur_styleId) );
+		return;
+	}
+	
+	// > 『控制器与贴图的样式』 - 创建控制器
+	var controller = new Drill_EFSu_Controller( cur_styleData );
+	controller._drill_lastStyleId = style_id;		//（直接在对象身上暂挂样式id）
 	this._drill_EFSu_controllerTank[ slot_id ] = controller;
 	
 	// > 刷新统计
@@ -2198,6 +2237,14 @@ Game_CharacterBase.prototype.drill_EFSu_removeControllerAll = function(){
 		this.drill_EFSu_removeController( i );
 	}
 	this._drill_EFSu_controllerTank = undefined;
+}
+//==============================
+// * 物体绑定 - 获取控制器（开放函数）
+//==============================
+Game_CharacterBase.prototype.drill_EFSu_getController = function( slot_id ){
+	if( this._drill_EFSu_controllerTank == undefined ){ return null; }
+	if( this._drill_EFSu_controllerTank[ slot_id ] == undefined ){ return null; }
+	return this._drill_EFSu_controllerTank[ slot_id ];
 }
 //==============================
 // * 物体绑定 - 帧刷新
@@ -2410,14 +2457,16 @@ Scene_Map.prototype.drill_EFSu_terminate = function() {
 // ** 行走图环绕球控制器【Drill_EFSu_Controller】
 // **		
 // **		作用域：	地图界面、战斗界面
-// **		主功能：	> 定义一个专门控制行走图环绕球的数据类。
-// **		子功能：	->控制器
+// **		主功能：	定义一个专门控制行走图环绕球的数据类。
+// **		子功能：	
+// **					->控制器『控制器与贴图』
 // **						->帧刷新
 // **						->重设数据
 // **							->序列号
 // **						->显示/隐藏
 // **						->暂停/继续
 // **						->销毁
+// **					
 // **					->A主体
 // **					->B变化控制
 // **					->C播放GIF
@@ -2425,7 +2474,7 @@ Scene_Map.prototype.drill_EFSu_terminate = function() {
 // **						->层级变化
 // **						->行走图前面层/父贴图前面层/父贴图后面层
 // **					->E自动调整效果
-// **		
+// **					
 // **		说明：	> 该类可与 Game_CharacterBase 一并存储在 $gameMap 中。
 // **				> 注意，该类不能放 物体指针、贴图指针 。
 //=============================================================================
@@ -2524,7 +2573,7 @@ Drill_EFSu_Controller.prototype.drill_controller_isDead = function(){
 };
 
 //##############################
-// * 控制器 - 初始化数据【标准默认值】
+// * 控制器 - 初始化数据『控制器与贴图』【标准默认值】
 //
 //			参数：	> 无
 //			返回：	> 无
@@ -2578,7 +2627,7 @@ Drill_EFSu_Controller.prototype.drill_controller_initData = function(){
 	if( data['auto_sizeRange'] == undefined ){ data['auto_sizeRange'] = 0.2 };					//E自动调整效果 - 自动大小的变化幅度
 }
 //==============================
-// * 初始化 - 初始化子功能
+// * 控制器 - 初始化子功能『控制器与贴图』
 //==============================
 Drill_EFSu_Controller.prototype.drill_controller_initChild = function(){
 	this.drill_controller_initAttr();			//初始化子功能 - A主体
@@ -2833,12 +2882,14 @@ Drill_EFSu_Controller.prototype.drill_controller_initAuto = function() {
 // ** 行走图环绕球贴图【Drill_EFSu_Sprite】
 // **
 // **		作用域：	地图界面
-// **		主功能：	> 定义一个环绕球贴图，能够环绕 行走图 进行变化。
-// **		子功能：	->贴图
+// **		主功能：	定义一个环绕球贴图，能够环绕 行走图 进行变化。
+// **		子功能：	
+// **					->贴图『控制器与贴图』
 // **						->是否就绪
 // **						->优化策略
 // **						->是否需要销毁（未使用）
 // **						->销毁（手动）
+// **					
 // **					->A主体
 // **					->B变化控制
 // **						->层级位置修正
@@ -2848,7 +2899,7 @@ Drill_EFSu_Controller.prototype.drill_controller_initAuto = function() {
 // **						->贴图初始化（手动）
 // **					->D环绕轨迹
 // **					->E自动调整效果
-// **
+// **					
 // **		说明：	> 你必须在创建贴图后，手动初始化。（还需要先设置 控制器和个体贴图 ）
 // **
 // **		代码：	> 范围 - 该类显示单独的行走图装饰。
@@ -2911,7 +2962,7 @@ Drill_EFSu_Sprite.prototype.drill_sprite_setIndividualSprite = function( individ
 	this._character = this._drill_individualSprite._character;
 };
 //##############################
-// * C对象绑定 - 贴图初始化【开放函数】
+// * C对象绑定 - 初始化子功能『控制器与贴图』【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -2976,7 +3027,7 @@ Drill_EFSu_Sprite.prototype.drill_sprite_destroy = function(){
 	this.drill_sprite_destroySelf();			//销毁 - 销毁自身
 };
 //==============================
-// * 环绕球贴图 - 初始化自身（私有）
+// * 环绕球贴图 - 初始化自身『控制器与贴图』
 //==============================
 Drill_EFSu_Sprite.prototype.drill_sprite_initSelf = function(){
 	this._drill_controller = null;				//控制器对象
@@ -2985,7 +3036,7 @@ Drill_EFSu_Sprite.prototype.drill_sprite_initSelf = function(){
 	this._character = null;						//物体（指针）
 };
 //==============================
-// * 环绕球贴图 - 销毁子功能（私有）
+// * 环绕球贴图 - 销毁子功能『控制器与贴图』
 //==============================
 Drill_EFSu_Sprite.prototype.drill_sprite_destroyChild = function(){
 	if( this._drill_controller == null ){ return; }
@@ -3010,7 +3061,7 @@ Drill_EFSu_Sprite.prototype.drill_sprite_destroyChild = function(){
 	//	（无）
 };
 //==============================
-// * 环绕球贴图 - 销毁自身（私有）
+// * 环绕球贴图 - 销毁自身『控制器与贴图』
 //==============================
 Drill_EFSu_Sprite.prototype.drill_sprite_destroySelf = function(){
 	this._drill_controller = null;				//控制器对象
@@ -3105,21 +3156,21 @@ Drill_EFSu_Sprite.prototype.drill_sprite_updateChange = function(){
 		
 		// > 其他插件位置修正
 		if( Imported.Drill_EventContinuedEffect ){ //【行走图 - 持续动作效果】
-			if( this._character._Drill_ECE != undefined ){
-				xx += this._character._Drill_ECE.x;
-				yy += this._character._Drill_ECE.y;
+			if( this._character._drill_ECE_spriteData != undefined ){
+				xx += this._character._drill_ECE_spriteData.x;
+				yy += this._character._drill_ECE_spriteData.y;
 			}
 		}
 		if( Imported.Drill_EventFadeInEffect ){ //【行走图 - 显现动作效果】
-			if( this._character._Drill_EFIE != undefined ){
-				xx += this._character._Drill_EFIE.x;
-				yy += this._character._Drill_EFIE.y;
+			if( this._character._drill_EFIE_spriteData != undefined ){
+				xx += this._character._drill_EFIE_spriteData.x;
+				yy += this._character._drill_EFIE_spriteData.y;
 			}
 		}
 		if( Imported.Drill_EventFadeOutEffect ){ //【行走图 - 持续动作效果】
-			if( this._character._Drill_EFOE != undefined ){
-				xx += this._character._Drill_EFOE.x;
-				yy += this._character._Drill_EFOE.y;
+			if( this._character._drill_EFOE_spriteData != undefined ){
+				xx += this._character._drill_EFOE_spriteData.x;
+				yy += this._character._drill_EFOE_spriteData.y;
 			}
 		}
 	}

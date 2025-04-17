@@ -94,7 +94,7 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称：		GVa（Global_Variable）
+//		插件简称		GVa（Global_Variable）
 //		临时全局变量	DrillUp.g_GVa_xxx
 //		临时局部变量	无
 //		存储数据变量	无
@@ -152,7 +152,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_GVa_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_GVa_PluginTip_baseList.length == 0 ){ return ""; }
@@ -168,10 +168,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_GlobalVariable = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_GlobalVariable');
+	var Imported = Imported || {};
+	Imported.Drill_GlobalVariable = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_GlobalVariable');
 	
 	/*-----------------杂项------------------*/
     DrillUp.g_GVa_saveFileId = Number(DrillUp.parameters['全局存储的文件路径'] || 1);

@@ -76,7 +76,7 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称：		PAlM (Player_Allow_Move)
+//		插件简称		PAlM (Player_Allow_Move)
 //		临时全局变量	DrillUp.g_PAlM_xxx
 //		临时局部变量	无
 //		存储数据变量	无
@@ -151,10 +151,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_PlayerAllowMove = true;
-　　var DrillUp = DrillUp || {};
-    DrillUp.parameters = PluginManager.parameters('Drill_PlayerAllowMove');
+	var Imported = Imported || {};
+	Imported.Drill_PlayerAllowMove = true;
+	var DrillUp = DrillUp || {};
+	DrillUp.parameters = PluginManager.parameters('Drill_PlayerAllowMove');
 	
 	
 	/*-----------------杂项------------------*/
@@ -249,9 +249,18 @@ Game_Player.prototype.executeMove = function( direction ){
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_PAlM_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_PAlM_pluginCommand.call(this, command, args);
+	this.drill_PAlM_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_PAlM_pluginCommand = function( command, args ){
 	if( command === ">允许操作玩家移动" ){
 		
 		if( args.length == 2 ){

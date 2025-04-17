@@ -192,18 +192,27 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_LayerFilter = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_LayerFilter');
+	var Imported = Imported || {};
+	Imported.Drill_LayerFilter = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_LayerFilter');
 
 	
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_LFi_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_LFi_pluginCommand.call(this, command, args);
+	this.drill_LFi_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_LFi_pluginCommand = function( command, args ){
 	if( command === ">地图滤镜" ){		// >地图滤镜 : 纯色滤镜 : 纯蓝 : 155
 	
 		/*-----------------关闭滤镜------------------*/

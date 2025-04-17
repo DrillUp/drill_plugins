@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.4]        UI - 物品+技能文本颜色
+ * @plugindesc [v2.5]        UI - 物品+技能文本颜色
  * @author Drill_up
  * 
  * 
@@ -23,7 +23,7 @@
  * 该插件 不能 单独使用。
  * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfColor        窗口字符-颜色核心★★v1.5及以上★★
+ *   - Drill_CoreOfColor        窗口字符-颜色核心★★v1.8及以上★★
  *     需要该核心才能修改颜色。
  * 
  * -----------------------------------------------------------------------------
@@ -37,12 +37,12 @@
  *   (2.注意名词：物品/武器/护甲/技能
  *      护甲=防具，物品=道具，这两个名词是同一个意思，指令写防具、道具都有效。
  *      另外，没有下列名词：装备/装甲/装束 。
- *   (3.注意，发布游戏版本前一定要确认 物品和装备 的颜色不再修改，
- *      玩家存档后，在不同版本的颜色设置中不同步，会累积成更加复杂的问题。
  * 存档问题：
- *   (1.进入游戏后，颜色数据会被保存到存档中，如果你修改了物品的颜色，
+ *   (1.发布游戏版本前一定要确认 物品和装备 的颜色不再修改，
+ *      玩家存档后，不同版本的颜色设置会相互覆盖，版本多了会造成更加复杂的问题。
+ *   (2.进入游戏后，颜色数据会被保存到存档中，如果你修改了物品的颜色，
  *      再次载入旧存档，将读取到 旧存档 的旧颜色。
- *   (2.插件支持 空数据同步更新 的优化，若新物品加注释后，在旧存档中能同步。
+ *   (3.插件支持 空数据同步更新 的优化，若新物品加注释后，在旧存档中能同步。
  *      详细去看看"21.管理器 > 数据更新与旧存档.docx"
  * 设计：
  *   (1.你可以给物品用颜色文本染色，用不同颜色来表现物品的品级。
@@ -67,7 +67,7 @@
  * 技能注释：<高级颜色:1>
  * 技能注释：<颜色:#FF4444>
  * 
- * 1.颜色后面的数字1对应你配置中的第1个颜色。你也可以直接贴颜色代码。
+ * 1.颜色后面的数字1对应你配置中的第1个普通颜色。你也可以直接贴颜色代码。
  * 2.注意，配置颜色后，在每次新开档时会刷新，但是在旧存档中，不一定会刷新。
  * 3.变色对 物品名称 的指代字符 "\ni[1]"  "\ii[1]" 也有效。
  *   变色对 武器名称 的指代字符 "\nw[1]"  "\iw[1]" 也有效。
@@ -177,6 +177,8 @@
  * 优化了yep物品核心的兼容。
  * [v2.4]
  * 修复插件指令无效的bug。
+ * [v2.5]
+ * 更新并兼容了新的窗口字符底层。
  * 
  * 
  * @param MOG-技能浮动框是否变色
@@ -189,7 +191,7 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称：		ITC (Item_Text_Color)
+//		插件简称		ITC (Item_Text_Color)
 //		临时全局变量	DrillUp.g_ITC_xxx
 //		临时局部变量	无
 //		存储数据变量	$gameSystem._drill_ITC_xxx
@@ -242,7 +244,13 @@
 //			无
 //		
 //		★必要注意事项：
-//			暂无
+//			1.又来看这个插件啦？这里道一声早安：
+//				╔══╗    ╔╗  ╔═╦═╗     ╔╗
+//				║╔═╬═╦═╦╝║  ║║║║╠═╦╦╦═╬╬═╦═╗
+//				║╚╗║╬║╬║╬║  ║║║║║╬║╔╣║║║║║╬║
+//				╚══╩═╩═╩═╝  ╚╩═╩╩═╩╝╚╩╩╩╩╬╗║
+//				                         ╚═╝
+//			  以前就改了很多次，现在继续慢慢改，总会改好的。
 //
 //		★其它说明细节：
 //			1.这个插件不看插件指令的话，结构比较清晰，直接在drawItem识别注释就可以了。
@@ -275,7 +283,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_ITC_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_ITC_PluginTip_baseList.length == 0 ){ return ""; }
@@ -286,15 +294,21 @@
 		}
 		return message;
 	};
+	//==============================
+	// * 提示信息 - 报错 - 窗口字符底层校验
+	//==============================
+	DrillUp.drill_ITC_getPluginTip_NeedUpdate_drawText = function(){
+		return "【" + DrillUp.g_ITC_PluginTip_curName + "】\n检测到窗口字符核心版本过低。\n由于底层变化巨大，你需要更新 全部 窗口字符相关插件。\n去看看\"23.窗口字符 > 关于窗口字符底层全更新说明.docx\"进行更新。";
+	};
 	
 	
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_ItemTextColor = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_ItemTextColor');
+	var Imported = Imported || {};
+	Imported.Drill_ItemTextColor = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_ItemTextColor');
 	
 	
 	/*-----------------杂项------------------*/
@@ -307,12 +321,29 @@
 if( Imported.Drill_CoreOfColor ){
 	
 	
+//==============================
+// * 基于插件检测 - 窗口字符底层校验
+//==============================
+if( typeof(_drill_COWC_drawText_functionExist) == "undefined" ){
+	alert( DrillUp.drill_ITC_getPluginTip_NeedUpdate_drawText() );
+}
+
+
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_ITC_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_ITC_pluginCommand.call(this, command, args);
+	this.drill_ITC_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_ITC_pluginCommand = function( command, args ){
 	if( command === ">文本颜色" ){
 		
 		if(args.length == 6){
@@ -361,11 +392,11 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					if( temp2.slice(0,1) === "#" ){				//（temp2为颜色字符串如"#FFFFFF"，则直接赋值颜色）
 						$gameSystem._drill_ITC_colorCode_Item[temp1] = temp2;
 					}else{										//（temp2为颜色数字如"1"，则赋值对应的普通颜色）
-						$gameSystem._drill_ITC_colorCode_Item[temp1] = String(DrillUp.drill_COC_getColor( Number(temp2)-1 ));
+						$gameSystem._drill_ITC_colorCode_Item[temp1] = String(DrillUp.drill_COC_getColor( 100+ Number(temp2) ));
 					}
 				}
 				if( type == "物品高级" || type == "道具高级" ){	//（temp2为颜色数字如"1"，则赋值对应的高级颜色）
-					$gameSystem._drill_ITC_colorCode_Item[temp1] = String(DrillUp.drill_COC_getSeniorColor( Number(temp2) -1 ));
+					$gameSystem._drill_ITC_colorCode_Item[temp1] = String(DrillUp.drill_COC_getColor( 200+ Number(temp2) ));
 				}
 				
 				/*-----------------转换 武器------------------*/
@@ -373,11 +404,11 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					if( temp2.slice(0,1) === "#" ){
 						$gameSystem._drill_ITC_colorCode_Weapon[temp1] = temp2;
 					}else{
-						$gameSystem._drill_ITC_colorCode_Weapon[temp1] = String(DrillUp.drill_COC_getColor( Number(temp2) -1 ));
+						$gameSystem._drill_ITC_colorCode_Weapon[temp1] = String(DrillUp.drill_COC_getColor( 100+ Number(temp2) ));
 					}
 				}
 				if( type == "武器高级" ){
-					$gameSystem._drill_ITC_colorCode_Weapon[temp1] = String(DrillUp.drill_COC_getSeniorColor( Number(temp2) -1 ));
+					$gameSystem._drill_ITC_colorCode_Weapon[temp1] = String(DrillUp.drill_COC_getColor( 200+ Number(temp2) ));
 				}
 				
 				/*-----------------转换 护甲------------------*/
@@ -385,11 +416,11 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					if( temp2.slice(0,1) === "#" ){
 						$gameSystem._drill_ITC_colorCode_Armor[temp1] = temp2;
 					}else{
-						$gameSystem._drill_ITC_colorCode_Armor[temp1] = String(DrillUp.drill_COC_getColor( Number(temp2) -1 ));
+						$gameSystem._drill_ITC_colorCode_Armor[temp1] = String(DrillUp.drill_COC_getColor( 100+ Number(temp2) ));
 					}
 				}
 				if( type == "护甲高级" || type == "防具高级" ){
-					$gameSystem._drill_ITC_colorCode_Armor[temp1] = String(DrillUp.drill_COC_getSeniorColor( Number(temp2) -1 ));
+					$gameSystem._drill_ITC_colorCode_Armor[temp1] = String(DrillUp.drill_COC_getColor( 200+ Number(temp2) ));
 				}
 				
 				/*-----------------转换 技能------------------*/
@@ -397,11 +428,11 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					if( temp2.slice(0,1) === "#" ){
 						$gameSystem._drill_ITC_colorCode_Skill[temp1] = temp2;
 					}else{
-						$gameSystem._drill_ITC_colorCode_Skill[temp1] = String(DrillUp.drill_COC_getColor( Number(temp2) -1 ));
+						$gameSystem._drill_ITC_colorCode_Skill[temp1] = String(DrillUp.drill_COC_getColor( 100+ Number(temp2) ));
 					}
 				}
 				if( type == "技能高级" ){
-					$gameSystem._drill_ITC_colorCode_Skill[temp1] = String(DrillUp.drill_COC_getSeniorColor( Number(temp2) -1 ));
+					$gameSystem._drill_ITC_colorCode_Skill[temp1] = String(DrillUp.drill_COC_getColor( 200+ Number(temp2) ));
 				}
 			}
 		}
@@ -414,28 +445,28 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var temp2 = $gameVariables.value( Number(args[5]) ) ;
 			var type = String(args[3]);
 			if( type == "物品普通" || type == "道具普通" ){
-				$gameSystem._drill_ITC_colorCode_Item[temp1] = String(DrillUp.drill_COC_getColor( Number(temp2) -1 ));
+				$gameSystem._drill_ITC_colorCode_Item[temp1] = String(DrillUp.drill_COC_getColor( 100+ Number(temp2) ));
 			}
 			if( type == "物品高级" || type == "道具高级" ){
-				$gameSystem._drill_ITC_colorCode_Item[temp1] = String(DrillUp.drill_COC_getSeniorColor( Number(temp2) -1 ));
+				$gameSystem._drill_ITC_colorCode_Item[temp1] = String(DrillUp.drill_COC_getColor( 200+ Number(temp2) ));
 			}
 			if( type == "武器普通" ){
-				$gameSystem._drill_ITC_colorCode_Weapon[temp1] = String(DrillUp.drill_COC_getColor( Number(temp2) -1 ));
+				$gameSystem._drill_ITC_colorCode_Weapon[temp1] = String(DrillUp.drill_COC_getColor( 100+ Number(temp2) ));
 			}
 			if( type == "武器高级" ){
-				$gameSystem._drill_ITC_colorCode_Weapon[temp1] = String(DrillUp.drill_COC_getSeniorColor( Number(temp2) -1 ));
+				$gameSystem._drill_ITC_colorCode_Weapon[temp1] = String(DrillUp.drill_COC_getColor( 200+ Number(temp2) ));
 			}
 			if( type == "护甲普通" || type == "防具普通" ){
-				$gameSystem._drill_ITC_colorCode_Armor[temp1] = String(DrillUp.drill_COC_getColor( Number(temp2) -1 ));
+				$gameSystem._drill_ITC_colorCode_Armor[temp1] = String(DrillUp.drill_COC_getColor( 100+ Number(temp2) ));
 			}
 			if( type == "护甲高级" || type == "防具高级" ){
-				$gameSystem._drill_ITC_colorCode_Armor[temp1] = String(DrillUp.drill_COC_getSeniorColor( Number(temp2) -1 ));
+				$gameSystem._drill_ITC_colorCode_Armor[temp1] = String(DrillUp.drill_COC_getColor( 200+ Number(temp2) ));
 			}
 			if( type == "技能普通" ){
-				$gameSystem._drill_ITC_colorCode_Skill[temp1] = String(DrillUp.drill_COC_getColor( Number(temp2) -1 ));
+				$gameSystem._drill_ITC_colorCode_Skill[temp1] = String(DrillUp.drill_COC_getColor( 100+ Number(temp2) ));
 			}
 			if( type == "技能高级" ){
-				$gameSystem._drill_ITC_colorCode_Skill[temp1] = String(DrillUp.drill_COC_getSeniorColor( Number(temp2) -1 ));
+				$gameSystem._drill_ITC_colorCode_Skill[temp1] = String(DrillUp.drill_COC_getColor( 200+ Number(temp2) ));
 			}
 		}
 	}
@@ -602,18 +633,18 @@ Game_Temp.prototype.initialize = function() {
 			// > 普通颜色 - 颜色编号
 			}else{
 				var data = {};
-				data['color_code'] = String(DrillUp.drill_COC_getColor( Number(color[1]) -1 )) ;
-				data['color_id'] = Number(color[1]) ; //(101开始)
-				if( data['color_code'] == "#ffffff" ){ data['color_code'] = ""; }
+				data['color_id'] = 100+ Number(color[1]);  //(101开始)
+				data['color_code'] = DrillUp.drill_COC_getColor( 100+ Number(color[1]) );
+				if( data['color_code'] == "#ffffff" ){ data['color_code'] = ""; }	//『初始为白色则不变色』
 				this._drill_ITC_itemData[i] = data;
 			}
 			
 		// > 高级颜色
 		}else if( colorG != "" && colorG != [] ){
 			var data = {};
-			data['color_code'] = DrillUp.drill_COC_getSeniorColor( Number(colorG[1]) -1 );
-			data['color_id'] = Number(colorG[1]) + 100 ; //(201开始)
-			if( data['color_code'] == "#ffffff" ){ data['color_code'] = ""; }
+			data['color_id'] = 200+ Number(colorG[1]);  //(201开始)
+			data['color_code'] = DrillUp.drill_COC_getColor( 200+ Number(colorG[1]) );
+			if( data['color_code'] == "#ffffff" ){ data['color_code'] = ""; }	//『初始为白色则不变色』
 			this._drill_ITC_itemData[i] = data;
 		
 		}else{
@@ -645,18 +676,18 @@ Game_Temp.prototype.initialize = function() {
 			// > 普通颜色 - 颜色编号
 			}else{
 				var data = {};
-				data['color_code'] = String(DrillUp.drill_COC_getColor( Number(color[1]) -1 )) ;
-				data['color_id'] = Number(color[1]) ; //(101开始)
-				if( data['color_code'] == "#ffffff" ){ data['color_code'] = ""; }
+				data['color_id'] = 100+ Number(color[1]);  //(101开始)
+				data['color_code'] = DrillUp.drill_COC_getColor( 100+ Number(color[1]) );
+				if( data['color_code'] == "#ffffff" ){ data['color_code'] = ""; }	//『初始为白色则不变色』
 				this._drill_ITC_weaponData[i] = data;
 			}
 			
 		// > 高级颜色
 		}else if( colorG != "" && colorG != [] ){
 			var data = {};
-			data['color_code'] = DrillUp.drill_COC_getSeniorColor( Number(colorG[1]) -1 );
-			data['color_id'] = Number(colorG[1]) + 100 ; //(201开始)
-			if( data['color_code'] == "#ffffff" ){ data['color_code'] = ""; }
+			data['color_id'] = 200+ Number(colorG[1]);  //(201开始)
+			data['color_code'] = DrillUp.drill_COC_getColor( 200+ Number(colorG[1]) );
+			if( data['color_code'] == "#ffffff" ){ data['color_code'] = ""; }	//『初始为白色则不变色』
 			this._drill_ITC_weaponData[i] = data;
 		
 		}else{
@@ -688,18 +719,18 @@ Game_Temp.prototype.initialize = function() {
 			// > 普通颜色 - 颜色编号
 			}else{
 				var data = {};
-				data['color_code'] = String(DrillUp.drill_COC_getColor( Number(color[1]) -1 )) ;
-				data['color_id'] = Number(color[1]) ; //(101开始)
-				if( data['color_code'] == "#ffffff" ){ data['color_code'] = ""; }
+				data['color_id'] = 100+ Number(color[1]);  //(101开始)
+				data['color_code'] = DrillUp.drill_COC_getColor( 100+ Number(color[1]) );
+				if( data['color_code'] == "#ffffff" ){ data['color_code'] = ""; }	//『初始为白色则不变色』
 				this._drill_ITC_armorData[i] = data;
 			}
 			
 		// > 高级颜色
 		}else if( colorG != "" && colorG != [] ){
 			var data = {};
-			data['color_code'] = DrillUp.drill_COC_getSeniorColor( Number(colorG[1]) -1 );
-			data['color_id'] = Number(colorG[1]) + 100 ; //(201开始)
-			if( data['color_code'] == "#ffffff" ){ data['color_code'] = ""; }
+			data['color_id'] = 200+ Number(colorG[1]);  //(201开始)
+			data['color_code'] = DrillUp.drill_COC_getColor( 200+ Number(colorG[1]) );
+			if( data['color_code'] == "#ffffff" ){ data['color_code'] = ""; }	//『初始为白色则不变色』
 			this._drill_ITC_armorData[i] = data;
 		
 		}else{
@@ -731,18 +762,18 @@ Game_Temp.prototype.initialize = function() {
 			// > 普通颜色 - 颜色编号
 			}else{
 				var data = {};
-				data['color_code'] = String(DrillUp.drill_COC_getColor( Number(color[1]) -1 )) ;
-				data['color_id'] = Number(color[1]) ; //(101开始)
-				if( data['color_code'] == "#ffffff" ){ data['color_code'] = ""; }
+				data['color_id'] = 100+ Number(color[1]);  //(101开始)
+				data['color_code'] = DrillUp.drill_COC_getColor( 100+ Number(color[1]) );
+				if( data['color_code'] == "#ffffff" ){ data['color_code'] = ""; }	//『初始为白色则不变色』
 				this._drill_ITC_skillData[i] = data;
 			}
 			
 		// > 高级颜色
 		}else if( colorG != "" && colorG != [] ){
 			var data = {};
-			data['color_code'] = DrillUp.drill_COC_getSeniorColor( Number(colorG[1]) -1 );
-			data['color_id'] = Number(colorG[1]) + 100 ; //(201开始)
-			if( data['color_code'] == "#ffffff" ){ data['color_code'] = ""; }
+			data['color_id'] = 200+ Number(colorG[1]);  //(201开始)
+			data['color_code'] = DrillUp.drill_COC_getColor( 200+ Number(colorG[1]) );
+			if( data['color_code'] == "#ffffff" ){ data['color_code'] = ""; }	//『初始为白色则不变色』
 			this._drill_ITC_skillData[i] = data;
 		
 		}else{
@@ -792,7 +823,7 @@ Game_Temp.prototype.initialize = function() {
 //==============================
 // * 颜色数据 - 获取 - 物品的颜色代码（开放函数）
 //
-//			说明：	> 返回如"#ffffff"的颜色代码。包括 普通颜色和高级颜色。窗口字符拼接时，建议用"\\cc[]"。
+//			说明：	> 返回如"#eeeeff"的颜色代码。包括 普通颜色和高级颜色。窗口字符拼接时，建议用"\\cc[]"。
 //					> 如果没对应配置，返回【空字符串】。
 //==============================
 Game_Temp.prototype.drill_ITC_getColorCode_Item = function( i ){
@@ -813,7 +844,7 @@ Game_Temp.prototype.drill_ITC_getColorCode_Item = function( i ){
 //==============================
 // * 颜色数据 - 获取 - 武器的颜色代码（开放函数）
 //
-//			说明：	> 返回如"#ffffff"的颜色代码。包括 普通颜色和高级颜色。窗口字符拼接时，建议用"\\cc[]"。
+//			说明：	> 返回如"#eeeeff"的颜色代码。包括 普通颜色和高级颜色。窗口字符拼接时，建议用"\\cc[]"。
 //					> 如果没对应配置，返回【空字符串】。
 //==============================
 Game_Temp.prototype.drill_ITC_getColorCode_Weapon = function( i ){
@@ -834,7 +865,7 @@ Game_Temp.prototype.drill_ITC_getColorCode_Weapon = function( i ){
 //==============================
 // * 颜色数据 - 获取 - 护甲的颜色代码（开放函数）
 //
-//			说明：	> 返回如"#ffffff"的颜色代码。包括 普通颜色和高级颜色。窗口字符拼接时，建议用"\\cc[]"。
+//			说明：	> 返回如"#eeeeff"的颜色代码。包括 普通颜色和高级颜色。窗口字符拼接时，建议用"\\cc[]"。
 //					> 如果没对应配置，返回【空字符串】。
 //==============================
 Game_Temp.prototype.drill_ITC_getColorCode_Armor = function( i ){
@@ -855,7 +886,7 @@ Game_Temp.prototype.drill_ITC_getColorCode_Armor = function( i ){
 //==============================
 // * 颜色数据 - 获取 - 技能的颜色代码（开放函数）
 //
-//			说明：	> 返回如"#ffffff"的颜色代码。包括 普通颜色和高级颜色。窗口字符拼接时，建议用"\\cc[]"。
+//			说明：	> 返回如"#eeeeff"的颜色代码。包括 普通颜色和高级颜色。窗口字符拼接时，建议用"\\cc[]"。
 //					> 如果没对应配置，返回【空字符串】。
 //==============================
 Game_Temp.prototype.drill_ITC_getColorCode_Skill = function( i ){
@@ -874,19 +905,19 @@ Game_Temp.prototype.drill_ITC_getColorCode_Skill = function( i ){
 //=============================================================================
 // ** ☆指代字符同步变色
 //
-//			说明：	> 与 物品/武器/护甲/技能 相关的指代字符，能同步变色。加 \csave \cload \c 等窗口字符。
+//			说明：	> 与 物品/武器/护甲/技能 相关的指代字符，能同步变色。加 \cc[oSave] \cc[oLoad] \c 等窗口字符。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 指代字符 - 物品名称（\NI[n]）
 //==============================
-var _drill_ITC_COWC_itemName = Window_Base.prototype.drill_COWC_itemName;
-Window_Base.prototype.drill_COWC_itemName = function( n ){
+var _drill_ITC_COWC_itemName = Game_Temp.prototype.drill_COWC_itemName;
+Game_Temp.prototype.drill_COWC_itemName = function( n ){
 	var result = _drill_ITC_COWC_itemName.call( this, n );
 	if( result != "" ){
 		var code = $gameTemp.drill_ITC_getColorCode_Item( n );
 		if( code != "" ){
-			result = "\x1bcsave\x1bcc["+ code +"]"+ result +"\x1bcload";
+			result = "\\cc[oSave]\\cc["+ code +"]"+ result +"\\cc[oLoad]";
 		}
 	}
 	return result;
@@ -894,13 +925,13 @@ Window_Base.prototype.drill_COWC_itemName = function( n ){
 //==============================
 // * 指代字符 - 武器名称（\NW[n]）
 //==============================
-var _drill_ITC_COWC_weaponName = Window_Base.prototype.drill_COWC_weaponName;
-Window_Base.prototype.drill_COWC_weaponName = function( n ){
+var _drill_ITC_COWC_weaponName = Game_Temp.prototype.drill_COWC_weaponName;
+Game_Temp.prototype.drill_COWC_weaponName = function( n ){
 	var result = _drill_ITC_COWC_weaponName.call( this, n );
 	if( result != "" ){
 		var code = $gameTemp.drill_ITC_getColorCode_Weapon( n );
 		if( code != "" ){
-			result = "\x1bcsave\x1bcc["+ code +"]"+ result +"\x1bcload";
+			result = "\\cc[oSave]\\cc["+ code +"]"+ result +"\\cc[oLoad]";
 		}
 	}
 	return result;
@@ -908,13 +939,13 @@ Window_Base.prototype.drill_COWC_weaponName = function( n ){
 //==============================
 // * 指代字符 - 护甲名称（\NA[n]）
 //==============================
-var _drill_ITC_COWC_armorName = Window_Base.prototype.drill_COWC_armorName;
-Window_Base.prototype.drill_COWC_armorName = function( n ){
+var _drill_ITC_COWC_armorName = Game_Temp.prototype.drill_COWC_armorName;
+Game_Temp.prototype.drill_COWC_armorName = function( n ){
 	var result = _drill_ITC_COWC_armorName.call( this, n );
 	if( result != "" ){
 		var code = $gameTemp.drill_ITC_getColorCode_Armor( n );
 		if( code != "" ){
-			result = "\x1bcsave\x1bcc["+ code +"]"+ result +"\x1bcload";
+			result = "\\cc[oSave]\\cc["+ code +"]"+ result +"\\cc[oLoad]";
 		}
 	}
 	return result;
@@ -922,13 +953,13 @@ Window_Base.prototype.drill_COWC_armorName = function( n ){
 //==============================
 // * 指代字符 - 技能名称（\NS[n]）
 //==============================
-var _drill_ITC_COWC_skillName = Window_Base.prototype.drill_COWC_skillName;
-Window_Base.prototype.drill_COWC_skillName = function( n ){
+var _drill_ITC_COWC_skillName = Game_Temp.prototype.drill_COWC_skillName;
+Game_Temp.prototype.drill_COWC_skillName = function( n ){
 	var result = _drill_ITC_COWC_skillName.call( this, n );
 	if( result != "" ){
 		var code = $gameTemp.drill_ITC_getColorCode_Skill( n );
 		if( code != "" ){
-			result = "\x1bcsave\x1bcc["+ code +"]"+ result +"\x1bcload";
+			result = "\\cc[oSave]\\cc["+ code +"]"+ result +"\\cc[oLoad]";
 		}
 	}
 	return result;
@@ -936,13 +967,13 @@ Window_Base.prototype.drill_COWC_skillName = function( n ){
 //==============================
 // * 指代字符 - 图标+物品名（\II[n]）
 //==============================
-var _drill_ITC_COWC_itemNameWithIcon = Window_Base.prototype.drill_COWC_itemNameWithIcon;
-Window_Base.prototype.drill_COWC_itemNameWithIcon = function( n ){
+var _drill_ITC_COWC_itemNameWithIcon = Game_Temp.prototype.drill_COWC_itemNameWithIcon;
+Game_Temp.prototype.drill_COWC_itemNameWithIcon = function( n ){
 	var result = _drill_ITC_COWC_itemNameWithIcon.call( this, n );
 	if( result != "" ){
 		var code = $gameTemp.drill_ITC_getColorCode_Item( n );
 		if( code != "" ){
-			result = "\x1bcsave\x1bcc["+ code +"]"+ result +"\x1bcload";
+			result = "\\cc[oSave]\\cc["+ code +"]"+ result +"\\cc[oLoad]";
 		}
 	}
 	return result;
@@ -950,13 +981,13 @@ Window_Base.prototype.drill_COWC_itemNameWithIcon = function( n ){
 //==============================
 // * 指代字符 - 图标+武器名（\IW[n]）
 //==============================
-var _drill_ITC_COWC_weaponNameWithIcon = Window_Base.prototype.drill_COWC_weaponNameWithIcon;
-Window_Base.prototype.drill_COWC_weaponNameWithIcon = function( n ){
+var _drill_ITC_COWC_weaponNameWithIcon = Game_Temp.prototype.drill_COWC_weaponNameWithIcon;
+Game_Temp.prototype.drill_COWC_weaponNameWithIcon = function( n ){
 	var result = _drill_ITC_COWC_weaponNameWithIcon.call( this, n );
 	if( result != "" ){
 		var code = $gameTemp.drill_ITC_getColorCode_Weapon( n );
 		if( code != "" ){
-			result = "\x1bcsave\x1bcc["+ code +"]"+ result +"\x1bcload";
+			result = "\\cc[oSave]\\cc["+ code +"]"+ result +"\\cc[oLoad]";
 		}
 	}
 	return result;
@@ -964,13 +995,13 @@ Window_Base.prototype.drill_COWC_weaponNameWithIcon = function( n ){
 //==============================
 // * 指代字符 - 图标+护甲名（\IA[n]）
 //==============================
-var _drill_ITC_COWC_armorNameWithIcon = Window_Base.prototype.drill_COWC_armorNameWithIcon;
-Window_Base.prototype.drill_COWC_armorNameWithIcon = function( n ){
+var _drill_ITC_COWC_armorNameWithIcon = Game_Temp.prototype.drill_COWC_armorNameWithIcon;
+Game_Temp.prototype.drill_COWC_armorNameWithIcon = function( n ){
 	var result = _drill_ITC_COWC_armorNameWithIcon.call( this, n );
 	if( result != "" ){
 		var code = $gameTemp.drill_ITC_getColorCode_Armor( n );
 		if( code != "" ){
-			result = "\x1bcsave\x1bcc["+ code +"]"+ result +"\x1bcload";
+			result = "\\cc[oSave]\\cc["+ code +"]"+ result +"\\cc[oLoad]";
 		}
 	}
 	return result;
@@ -978,13 +1009,13 @@ Window_Base.prototype.drill_COWC_armorNameWithIcon = function( n ){
 //==============================
 // * 指代字符 - 图标+技能名（\IS[n]）
 //==============================
-var _drill_ITC_COWC_skillNameWithIcon = Window_Base.prototype.drill_COWC_skillNameWithIcon;
-Window_Base.prototype.drill_COWC_skillNameWithIcon = function( n ){
+var _drill_ITC_COWC_skillNameWithIcon = Game_Temp.prototype.drill_COWC_skillNameWithIcon;
+Game_Temp.prototype.drill_COWC_skillNameWithIcon = function( n ){
 	var result = _drill_ITC_COWC_skillNameWithIcon.call( this, n );
 	if( result != "" ){
 		var code = $gameTemp.drill_ITC_getColorCode_Skill( n );
 		if( code != "" ){
-			result = "\x1bcsave\x1bcc["+ code +"]"+ result +"\x1bcload";
+			result = "\\cc[oSave]\\cc["+ code +"]"+ result +"\\cc[oLoad]";
 		}
 	}
 	return result;
@@ -1012,9 +1043,9 @@ Window_Base.prototype.drawItemName = function(item, x, y, width) {
 //=============================
 // * 绑定 - 物品文本绘制 - 修改颜色
 //=============================
-var _drill_ITC_drawText = Window_Base.prototype.drawText;
-Window_Base.prototype.drawText = function(text, x, y, maxWidth, align) {
-
+var _drill_ITC_COWC_org_drawText = Window_Base.prototype.drill_COWC_org_drawText;
+Window_Base.prototype.drill_COWC_org_drawText = function( text, x, y, maxWidth, align ){
+	
 	// > 绘制
 	if( this._drill_ITC_isDrawingItemName == true ){
 		var item = this._drill_ITC_curItem;
@@ -1042,11 +1073,12 @@ Window_Base.prototype.drawText = function(text, x, y, maxWidth, align) {
 		}
 	}
 	
-	_drill_ITC_drawText.call(this, text, x, y, maxWidth, align);
+	// > 原函数
+	_drill_ITC_COWC_org_drawText.call(this, text, x, y, maxWidth, align);
 	
 	// > 绘制后颜色恢复
 	if( this._drill_ITC_isDrawingItemName == true ){
-		this.resetTextColor();
+		this.contents.drill_COC_initBitmapDefault();		//（全局默认值-自带参数初始化）
 	}
 }
 
@@ -1057,8 +1089,7 @@ if(Imported.MOG_ActionName ){
 	
 	var _drill_ITC_mog_refreshSkillName = SpriteSkillName.prototype.refreshSkillName;
 	SpriteSkillName.prototype.refreshSkillName = function() {
-		
-		if(Imported.MOG_ActionName && DrillUp.g_ITC_mog_action){
+		if( Imported.MOG_ActionName && DrillUp.g_ITC_mog_action ){
 			var item = this.item();
 			if( DataManager.isItem(item) ){
 				var item__id = item.id;
@@ -1082,9 +1113,15 @@ if(Imported.MOG_ActionName ){
 				var color = $gameTemp.drill_ITC_getColorCode_Skill( item.id );
 				if( color != "" ){this._name.bitmap.textColor = color;}
 			}
+			
+			// > 原函数
 			_drill_ITC_mog_refreshSkillName.call(this);
-			this._name.bitmap.textColor = "#ffffff";
+			
+			this._name.bitmap.drill_COC_initBitmapDefault();	//（全局默认值-自带参数初始化）
+			
 		}else{
+			
+			// > 原函数
 			_drill_ITC_mog_refreshSkillName.call(this);
 		}
 	};
@@ -1124,7 +1161,7 @@ if(Imported.MOG_BattleResult ){
 				if( color != "" ){ name_sprite.bitmap.textColor = color;}
 			}
 			name_sprite.bitmap.drawText(data.name,0,0,160,32);
-			name_sprite.bitmap.textColor = "#ffffff";
+			name_sprite.bitmap.drill_COC_initBitmapDefault();	//（全局默认值-自带参数初始化）
 		}
 	}
 }
@@ -1161,7 +1198,7 @@ if( Imported.MOG_TreasurePopup ){
 			if( color != "" ){this._name.bitmap.textColor = color;}
 		}
 		this._name.bitmap.drawText(name,0,0,145,32);
-		this._name.bitmap.textColor = "#ffffff";
+		this._name.bitmap.drill_COC_initBitmapDefault();	//（全局默认值-自带参数初始化）
 	};
 }
 //=============================
@@ -1197,7 +1234,7 @@ if( Imported.MOG_TreasureHud  ){
 			if( color != "" ){this._text.bitmap.textColor = color;}
 		}
 		this._text.bitmap.drawText(text,0,0,160,32,"left");
-		this._text.bitmap.textColor = "#ffffff";
+		this._text.bitmap.drill_COC_initBitmapDefault();	//（全局默认值-自带参数初始化）
 	};
 }
 

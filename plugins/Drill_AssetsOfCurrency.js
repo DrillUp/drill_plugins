@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        管理器 - 货币素材库
+ * @plugindesc [v1.2]        管理器 - 货币素材库
  * @author Drill_up
  * 
  * @Drill_LE_param "货币样式-%d"
@@ -54,6 +54,7 @@
  * 你可以通过插件指令修改样式：
  * 
  * 插件指令：>货币素材库 : 修改样式 : 样式[1]
+ * 插件指令：>货币素材库 : 恢复默认样式
  * 
  * 1.注意，插件指令修改样式，只是给游戏默认的货币进行换皮。
  *   如果你希望定义多种不同的货币，建议直接用物品来作为特殊货币。
@@ -84,6 +85,10 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 兼容了新的窗口字符。
+ * [v1.2]
+ * 更新并兼容了新的窗口字符底层。
  *
  *
  *
@@ -264,7 +269,16 @@
 //			无
 //			
 //		★必要注意事项：
-//			暂无
+//			1.这个插件2023/5/21就写好了，然而现在已经2024年快2025年了，还是没开坑到这里。
+//			  群友："什么时候填坑？" 我："以后"。开坑喜+1。
+//				  ╭━━━━━━━━━━━╮
+//				  ┃╱╱╱╱╱╱╱┏┓╱╱┃
+//				  ┃╱╱┏┓╱╱┏╯┃╱╱┃
+//				  ┃╱┏┛┗┓╱┗┓┃╱╱┃
+//				  ┃╱┗┓┏┛╱╱┃┃╱╱┃
+//				  ┃╱╱┗┛╱╱╱┃┃╱╱┃
+//				  ┃╱╱╱╱╱╱╱┗┛╱╱┃
+//				  ╰━━━━━━━━━━━╯
 //
 //		★其它说明细节：
 //			暂无
@@ -287,10 +301,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_AssetsOfCurrency = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_AssetsOfCurrency');
+	var Imported = Imported || {};
+	Imported.Drill_AssetsOfCurrency = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_AssetsOfCurrency');
 	
 	
 	//==============================
@@ -334,9 +348,18 @@
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_AsOC_pluginCommand = Game_Interpreter.prototype.pluginCommand
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_AsOC_pluginCommand.call(this, command, args);
+	this.drill_AsOC_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_AsOC_pluginCommand = function( command, args ){
 	if( command === ">货币素材库" ){
 		
 		/*-----------------修改样式------------------*/
@@ -347,6 +370,13 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp1 = temp1.replace("样式[","");
 				temp1 = temp1.replace("]","");
 				$gameSystem._drill_AsOC_styleId = Number(temp1);
+				$gameTemp.drill_AsOC_dataChanged();
+			}
+		}
+		if( args.length == 2 ){
+			var type = String(args[1]);
+			if( type == "恢复默认样式" ){
+				$gameSystem._drill_AsOC_styleId = DrillUp.g_AsOC_defaultStyleId;
 				$gameTemp.drill_AsOC_dataChanged();
 			}
 		}
@@ -439,6 +469,9 @@ Game_System.prototype.drill_AsOC_checkSysData_Private = function() {
 
 //=============================================================================
 // ** ☆素材库
+//
+//			说明：	> 该模块提供 素材库 功能。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 素材库 - 样式变化（子插件继承用）
@@ -481,15 +514,17 @@ Game_Temp.prototype.drill_AsOC_getFullTextByType = function( type ){
 		context += "\\i[" + data['currency_icon'] + "]";
 	}
 	if( type == "只文本" ){
-		context += "\\csave\\c[" + data['currency_textColor'] + "]";
+		if( Imported.Drill_CoreOfColor ){ context += "\\cc[oSave]"; }
+		context += "\\c[" + data['currency_textColor'] + "]";
 		context += data['currency_text'];
-		context += "\\cload";
+		if( Imported.Drill_CoreOfColor ){ context += "\\cc[oLoad]"; }
 	}
 	if( type == "图标+文本" ){
 		context += "\\i[" + data['currency_icon'] + "]";
-		context += "\\csave\\c[" + data['currency_textColor'] + "]";
+		if( Imported.Drill_CoreOfColor ){ context += "\\cc[oSave]"; }
+		context += "\\c[" + data['currency_textColor'] + "]";
 		context += data['currency_text'];
-		context += "\\cload";
+		if( Imported.Drill_CoreOfColor ){ context += "\\cc[oLoad]"; }
 	}
 	return context;
 };

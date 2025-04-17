@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        系统 - 字符串核心
+ * @plugindesc [v1.3]        系统 - 字符串核心
  * @author Drill_up
  * 
  * @Drill_LE_param "字符串-%d"
@@ -25,8 +25,10 @@
  * 该插件可以单独使用。
  * 该插件为基础核心，可以作用于下列插件。
  * 可被扩展：
- *   - Drill_CoreOfNumberArray     系统-变量数组核心
+ *   - Drill_CoreOfNumberArray      系统-变量数组核心
  *     目标插件可以将数组输出成字符串，给该核心使用。
+ *   - Drill_CoreOfWindowCharacter  窗口字符-窗口字符核心★★v2.0及以上★★
+ *     通过目标插件可以支持"\str[21]"的窗口字符。
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -51,7 +53,7 @@
  * ----激活条件
  * 使用该插件后，你可以使用窗口字符来显示字符串内容：
  * 
- * 窗口字符：\str[1]      数字1表示对应配置的第1个字符串
+ * 窗口字符：\str[1]      替换为对应配置的第1个字符串
  * 
  * 1.你可以在窗口、对话框中设置窗口字符，配置后将显示相应的字符串。
  *   (str全称为：String，即字符串)
@@ -60,9 +62,9 @@
  * ----可选设定
  * 你可以通过插件指令修改字符串内容：
  * 
- * 插件指令：>字符串核心 : 字符串[1] : 使用弹出框修改 : 请输入
- * 插件指令：>字符串核心 : 字符串[1] : 修改字符串 : 某\c[2]字符串
- * 插件指令：>字符串核心 : 字符串[1] : 还原字符串
+ * 插件指令：>字符串核心 : 字符串[21] : 使用弹出框修改 : 请输入
+ * 插件指令：>字符串核心 : 字符串[21] : 修改字符串 : 某\c[2]字符串
+ * 插件指令：>字符串核心 : 字符串[21] : 还原字符串
  * 
  * 1.插件指令修改字符串后，永久有效。
  * 2.由于字符串不能加英文空格，你可以用中文空格代替。
@@ -109,6 +111,8 @@
  * 修复了 \str[\v[21]] 不生效的bug。感谢群友 孑然一身。
  * [v1.2]
  * 修复了 对话框中 \str[21] 不能及时生效的bug。
+ * [v1.3]
+ * 更新并兼容了新的窗口字符底层。
  * 
  * 
  * @param ---字符串组 1至20---
@@ -1381,13 +1385,17 @@
 //			->☆静态数据
 //			->☆插件指令
 //				->字符串输入框
-//			
+//			->☆窗口字符应用之优先指代
+//
 //			->字符串【Game_Strings】
 //				->脚本提供
 //				->指代内容
 //			->☆数据管理器
 //				->多重嵌套转义
-//			->☆字符串应用
+//
+//			->☆字符串手动转义
+//				->旧指代字符 转义
+//				->对话框 转义
 //
 //
 //		★家谱：
@@ -1428,15 +1436,21 @@
 	DrillUp.drill_COSt_getPluginTip_DeadLoop = function( str_index ){
 		return "【" + DrillUp.g_COSt_PluginTip_curName + "】\n错误，id为"+String(str_index)+"的字符串在自我嵌套字符时出现死循环。";
 	};
+	//==============================
+	// * 提示信息 - 报错 - 窗口字符底层校验
+	//==============================
+	DrillUp.drill_COSt_getPluginTip_NeedUpdate_drawText = function(){
+		return "【" + DrillUp.g_COSt_PluginTip_curName + "】\n检测到窗口字符核心版本过低。\n由于底层变化巨大，你需要更新 全部 窗口字符相关插件。\n去看看\"23.窗口字符 > 关于窗口字符底层全更新说明.docx\"进行更新。";
+	};
 	
 	
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_CoreOfString = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_CoreOfString');
+	var Imported = Imported || {};
+	Imported.Drill_CoreOfString = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_CoreOfString');
 	
 	//==============================
 	// * 静态数据 - 字符串
@@ -1470,9 +1484,18 @@
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_COSt_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_COSt_pluginCommand.call(this, command, args);
+	this.drill_COSt_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_COSt_pluginCommand = function( command, args ){
 	if( command === ">字符串核心" ){		//>字符串核心 : 字符串[1] : 修改字符串 : 某\c[2]字符串
 		
 		if(args.length == 6){
@@ -1504,38 +1527,91 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		}
 	}
 };
+
+
+//=============================================================================
+// ** ☆窗口字符应用之优先指代
+//=============================================================================
+//==============================
+// * 窗口字符应用之优先指代 - 最后继承
+//==============================
+var _drill_COSt_scene_initialize = SceneManager.initialize;
+SceneManager.initialize = function() {
+	_drill_COSt_scene_initialize.call(this);		//（此方法放到最后再继承）
+	
+	if( Imported.Drill_CoreOfWindowCharacter ){		//【窗口字符 - 窗口字符核心】
+		
+		//==============================
+		// * 窗口字符应用之优先指代 - 优先指代 - 组合符配置（继承）
+		//==============================
+		var _drill_COSt_COWC_firstTransform_processCombined_1 = Game_Temp.prototype.drill_COWC_firstTransform_processCombined;
+		Game_Temp.prototype.drill_COWC_firstTransform_processCombined = function( matched_index, matched_str, command, args ){
+			_drill_COSt_COWC_firstTransform_processCombined_1.call( this, matched_index, matched_str, command, args );
+			
+			// > 『窗口字符定义』 - 字符串（\STR[1]）『优先指代』
+			if( command.toUpperCase() == "STR" ){
+				if( args.length == 1 ){
+					var str = $gameStrings.convertedValue( Number(args[0]) );
+					this.drill_COWC_firstTransform_submitCombined( str );
+				}
+			}
+		}
+		//==============================
+		// * 窗口字符应用之优先指代 - 指代字符 - 组合符配置（继承）
+		//==============================
+		var _drill_COSt_COWC_transform_processCombined_1 = Game_Temp.prototype.drill_COWC_transform_processCombined;
+		Game_Temp.prototype.drill_COWC_transform_processCombined = function( matched_index, matched_str, command, args ){
+			_drill_COSt_COWC_transform_processCombined_1.call( this, matched_index, matched_str, command, args );
+			
+			// > 『窗口字符定义』 - 字符串（\STR[1]）
+			if( command.toUpperCase() == "STR" ){
+				if( args.length == 1 ){
+					var str = $gameStrings.convertedValue( Number(args[0]) );
+					this.drill_COWC_transform_submitCombined( str );
+				}
+			}
+		}
+		
+		//==============================
+		// * 窗口字符应用之优先指代 - 窗口字符底层校验
+		//==============================
+		if( typeof(_drill_COWC_drawText_functionExist) == "undefined" ){
+			alert( DrillUp.drill_COSt_getPluginTip_NeedUpdate_drawText() );
+		}
+	}
+}
 	
 
 //=============================================================================
 // ** 字符串【Game_Strings】
-//			
-//			实例：	$gameStrings
-//			索引：	无
-//			来源：	无（独立数据）
-//			应用：	> 事件指令
-//			
-//			主功能：	> 提供基本的字符串数据存储功能。
-//						> 字符串转义
+// **		
+// **		作用域：	地图界面、战斗界面、菜单界面
+// **		主功能：	提供基本的字符串 数据设置/获取功能。
+// **		子功能：	
+// **					->获取值（开放函数）
+// **					->设置值（开放函数）
+// **
+// **		说明：	> 无。
 //=============================================================================
 //==============================
-// * 变量 - 定义
+// * 字符串 - 定义
 //==============================
 function Game_Strings() {
     this.initialize.apply(this, arguments);
 }
 //==============================
-// * 变量 - 初始化
+// * 字符串 - 初始化
 //==============================
 Game_Strings.prototype.initialize = function() {
     this.clear();
     this.drill_COSt_init();
 };
 //==============================
-// * 变量 - 清理全部
+// * 字符串 - 清理全部
 //==============================
 Game_Strings.prototype.clear = function(){ this._data = []; };
 //==============================
-// * 变量 - 数据初始化
+// * 字符串 - 数据初始化
 //==============================
 Game_Strings.prototype.drill_COSt_init = function(){
 	var temp_tank = [""];		//（第0个为空字符串）
@@ -1547,13 +1623,13 @@ Game_Strings.prototype.drill_COSt_init = function(){
 };
 
 //==============================
-// * 变量 - 获取值
+// * 字符串 - 获取值（开放函数）
 //==============================
 Game_Strings.prototype.value = function( stringId ){
     return this._data[stringId] || "";
 };
 //==============================
-// * 变量 - 设置值
+// * 字符串 - 设置值（开放函数）
 //==============================
 Game_Strings.prototype.setValue = function( stringId, value ){
     if( stringId > 0 ){
@@ -1561,7 +1637,7 @@ Game_Strings.prototype.setValue = function( stringId, value ){
     }
 };
 //==============================
-// * 变量 - 获取转义的值
+// * 字符串 - 获取转义的值（开放函数）
 //==============================
 Game_Strings.prototype.convertedValue = function( stringId ){
 	var value = this._data[stringId];
@@ -1638,16 +1714,18 @@ DataManager.drill_COSt_replaceChar = function( text ){
 	
 	
 //=============================================================================
-// ** ☆字符串应用
+// ** ☆字符串手动转义
 //
 //			说明：	> 此模块将字符串的功能应用到基础功能中。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 字符串应用 - 指代字符 转义
+// * 字符串手动转义 - 旧指代字符 转义
+//
+//			说明：	> 该函数用于兼容 旧插件 的功能，新的窗口字符插件用不到此函数。
 //==============================
 var _drill_COSt_convertExtraEscapeCharacters = Window_Base.prototype.convertEscapeCharacters;
-Window_Base.prototype.convertEscapeCharacters = function(text) {
+Window_Base.prototype.convertEscapeCharacters = function( text ){
 	
 	// > 指代字符（含变量的）
     text = text.replace(/[\\]?\\STR\[\\V\[(\d+)\]\]/gi, function() {
@@ -1659,11 +1737,12 @@ Window_Base.prototype.convertEscapeCharacters = function(text) {
         return $gameStrings.convertedValue( parseInt(arguments[1]) );
     }.bind(this));
 	
+	// > 原函数
 	var text = _drill_COSt_convertExtraEscapeCharacters.call( this, text );
 	return text;
 }
 //==============================
-// * 字符串应用 - 对话框 转义
+// * 字符串手动转义 - 对话框 转义
 //==============================
 var _drill_COSt_message_add = Game_Message.prototype.add;
 Game_Message.prototype.add = function( text ){
@@ -1671,6 +1750,7 @@ Game_Message.prototype.add = function( text ){
 	//（添加字符串时，提前 多重嵌套转义）
 	text = DataManager.drill_COSt_replaceChar( text );
 	
+	// > 原函数
 	_drill_COSt_message_add.call( this, text );
 };
 

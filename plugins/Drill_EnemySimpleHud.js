@@ -712,7 +712,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_ESH_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_ESH_PluginTip_baseList.length == 0 ){ return ""; }
@@ -734,10 +734,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_EnemySimpleHud = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_EnemySimpleHud');
+	var Imported = Imported || {};
+	Imported.Drill_EnemySimpleHud = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_EnemySimpleHud');
 	
 	
 	//==============================
@@ -825,10 +825,19 @@ if( Imported.Drill_CoreOfGaugeMeter &&
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
-var _drill_ESH_pluginCommand = Game_Interpreter.prototype.pluginCommand
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
+var _drill_ESH_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_ESH_pluginCommand.call(this, command, args);
-	if(command === ">战斗简单生命框" && args.length >= 2 ){
+	this.drill_ESH_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_ESH_pluginCommand = function( command, args ){
+	if( command === ">战斗简单生命框" && args.length >= 2 ){
 		var sprite_id = String(args[1]);
 		
 		/*-----------------生命框获取------------------*/
@@ -1430,8 +1439,9 @@ Scene_Battle.prototype.terminate = function() {
 // ** 生命框贴图 实体类【Drill_ESH_Bean】
 // **		
 // **		作用域：	战斗界面
-// **		主功能：	> 定义一个专门的实体类数据类。
-// **		子功能：	->无帧刷新
+// **		主功能：	定义一个专门的实体类数据类。
+// **		子功能：	
+// **					->无帧刷新
 // **					->重设数据
 // **						->序列号
 // **					->捕获
@@ -1948,10 +1958,17 @@ DrillUp.g_ESH_checkNaN = true;
 //=============================================================================
 // ** 生命框贴图【Drill_ESH_LifeSprite】
 // **		
-// **		作用域：	地图界面、战斗界面、菜单界面
-// **		主功能：	> 定义一个贴图组合体，根据预设定义，得到一个参数条贴图。
-// **					> 具体功能见 "1.系统 > 关于参数条.docx"。
-// **		子功能：	->贴图
+// **		作用域：	战斗界面
+// **		主功能：	定义一个贴图组合体，根据预设定义，得到一个参数条贴图。
+// **		子功能：	
+// **					->贴图『独立贴图』
+// **						->显示贴图/隐藏贴图
+// **						->是否就绪
+// **						->优化策略
+// **						->销毁
+// **						->初始化数据
+// **						->初始化对象
+// **					
 // **					->A主体
 // **						->显示/隐藏
 // **						->显现/消失
@@ -1975,8 +1992,9 @@ DrillUp.g_ESH_checkNaN = true;
 // **						> 生命数字
 // **						> 魔法数字
 // **						> 怒气数字
-// **
+// **					
 // **		说明：	> sprite贴在任意地方都可以。
+// **				> 具体功能见 "1.系统 > 关于参数条.docx"。
 // **				> 改变 实体类、样式 【不重建】贴图。
 // **				
 // ** 		代码：	> 范围 - 该类显示单独的敌人生命框。
@@ -2013,7 +2031,9 @@ Drill_ESH_LifeSprite.prototype.initialize = function(){
 Drill_ESH_LifeSprite.prototype.update = function() {
 	if( this.drill_ESH_isReady() == false ){ return; }
 	if( this.drill_ESH_isOptimizationPassed() == false ){ return; }
+	
 	Sprite_Base.prototype.update.call(this);
+	
 	this.drill_updateVisible();			//帧刷新 - A主体 - 显示/隐藏
 	this.drill_updateSlide();			//帧刷新 - A主体 - 显现/消失
 	this.drill_updateBind();			//帧刷新 - B绑定
@@ -2022,7 +2042,7 @@ Drill_ESH_LifeSprite.prototype.update = function() {
 	this.drill_updateNumberValue();		//帧刷新 - F参数数字
 };
 //##############################
-// * 生命框贴图 - 显示/隐藏【标准函数】
+// * 生命框贴图 - 显示贴图/隐藏贴图【标准函数】
 //
 //			参数：	> visible 布尔（是否显示）
 //			返回：	> 无
@@ -2071,9 +2091,23 @@ Drill_ESH_LifeSprite.prototype.drill_ESH_isOptimizationPassed = function(){
 Drill_ESH_LifeSprite.prototype.drill_ESH_destroy = function(){
 	this.drill_ESH_destroy_Private();
 };
-//==============================
-// * 生命框贴图 - 初始化对象
-//==============================
+//##############################
+// * 生命框贴图 - 初始化数据『独立贴图』
+//
+//			参数：	> 无
+//			返回：	> 无
+//			
+//			说明：	> 暂无。
+//##############################
+Drill_ESH_LifeSprite.prototype.drill_initData = function() {
+	//（暂无 默认值）
+};
+//##############################
+// * 生命框贴图 - 初始化对象『独立贴图』
+//
+//			参数：	> 无
+//			返回：	> 无
+//##############################
 Drill_ESH_LifeSprite.prototype.drill_initSprite = function() {
 	this.drill_initAttr();					//初始化对象 - A主体
 	this.drill_initBind();					//初始化对象 - B绑定
@@ -2376,8 +2410,9 @@ Drill_ESH_LifeSprite.prototype.drill_updateStyle = function() {
 	// > 销毁
 	this.drill_ESH_destroy();
 	
-	// > 初始化对象
-	this.drill_initSprite();
+	// > 初始化
+	this.drill_initData();				//初始化数据
+	this.drill_initSprite();			//初始化对象
 }
 //==============================
 // * C样式 - 获取 - 样式数据（开放函数）

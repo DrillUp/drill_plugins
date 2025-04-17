@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        行走图 - 行走图与鼠标控制核心
+ * @plugindesc [v1.1]        行走图 - 行走图与鼠标控制核心
  * @author Drill_up
  * 
  * 
@@ -79,6 +79,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 修复了切换地图时悬停判定未刷新的bug。
  * 
  */
  
@@ -164,7 +166,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_COEFWM_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_COEFWM_PluginTip_baseList.length == 0 ){ return ""; }
@@ -180,10 +182,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_CoreOfEventFrameWithMouse = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_CoreOfEventFrameWithMouse');
+	var Imported = Imported || {};
+	Imported.Drill_CoreOfEventFrameWithMouse = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_CoreOfEventFrameWithMouse');
 	
 	
 	
@@ -197,9 +199,18 @@ if( Imported.Drill_CoreOfInput &&
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_COEFWM_pluginCommand = Game_Interpreter.prototype.pluginCommand
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_COEFWM_pluginCommand.call(this, command, args);
+	this.drill_COEFWM_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_COEFWM_pluginCommand = function( command, args ){
 	if( command === ">行走图与鼠标控制核心" ){
 		
 		/*-----------------DEBUG------------------*/
@@ -207,11 +218,11 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var temp1 = String(args[1]);
 			var temp2 = String(args[3]);
 			if( temp1 == "DEBUG碰撞体+悬停查看" ){
-				if( temp2 == "开启" ){
+				if( temp2 == "启用" || temp2 == "开启" || temp2 == "打开" || temp2 == "启动" ){
 					$gameSystem._drill_COEFWM_DebugEnabled = true;
 					$gameSystem._drill_COEF_DebugEnabled = false;	//（【行走图-行走图优化核心】防止重叠显示）
 				}
-				if( temp2 == "关闭" ){
+				if( temp2 == "关闭" || temp2 == "禁用" ){
 					$gameSystem._drill_COEFWM_DebugEnabled = false;
 				}
 			}
@@ -427,13 +438,18 @@ Game_Character.prototype.drill_COEFWM_isOnHover_Private = function(){
 	if( this._drill_COEFWM_mouseData == undefined ){ return false; }
 	var mouseData = this._drill_COEFWM_mouseData;
 	
+	// > 优化控制 - 初始化8帧关闭悬停
+	//		（防止渐变进入地图时，玩家的鼠标乱晃误点其它贴图）
+	//		（防止切换地图时，上一张地图的bean还未销毁，就触发了悬停判定）
+	if( $gameTemp._drill_COEFWM_op_curTime < 8 ){ return false; }
+	
 	// > 优化控制
 	//		（如果此函数在 同一贴图+同一帧中 被多次调用）
 	//		（那么第一次调用 走正常流程，第二次调用 返回第一次的结果）
-	if( mouseData['op_time'] == $gameTemp._drill_COEFWM_op_time ){
+	if( mouseData['op_time'] == $gameTemp._drill_COEFWM_op_curTime ){
 		return mouseData['op_result'];
 	}
-	mouseData['op_time'] = $gameTemp._drill_COEFWM_op_time;
+	mouseData['op_time'] = $gameTemp._drill_COEFWM_op_curTime;
 	
 	
 	// > 判定 - 鼠标位置
@@ -510,15 +526,23 @@ Game_Character.prototype.drill_COEFWM_isOnHoverWithUnification_Private = functio
 var _drill_COEFWM_optimization_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {	
 	_drill_COEFWM_optimization_initialize.call(this);
-    this._drill_COEFWM_op_time = 0;			//帧数标记
+    this._drill_COEFWM_op_curTime = 0;		//当前帧数
 }
 //==============================
-// * 优化控制 - 帧刷新
+// * 优化控制 - 初始化（地图界面）
+//==============================
+var _drill_COEFWM_optimizationMap_initialize = Scene_Map.prototype.initialize;
+Scene_Map.prototype.initialize = function(){
+	_drill_COEFWM_optimizationMap_initialize.call(this);
+    $gameTemp._drill_COEFWM_op_curTime = 0;
+}
+//==============================
+// * 优化控制 - 帧刷新（地图界面）
 //==============================
 var _drill_COEFWM_optimizationMap_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {
     _drill_COEFWM_optimizationMap_update.call(this);
-    $gameTemp._drill_COEFWM_op_time += 1;
+    $gameTemp._drill_COEFWM_op_curTime += 1;
 }
 
 
@@ -548,6 +572,8 @@ Scene_Map.prototype.drill_COEFWM_updateDrawBeanRangeSprite = function() {
 		
 		// > 销毁贴图
 		if( this._drill_COEFWM_DebugSprite != undefined ){
+			this._drill_COEFWM_DebugSprite.bitmap.clear();
+			this._drill_COEFWM_DebugSprite.bitmap = null;
 			this.removeChild(this._drill_COEFWM_DebugSprite);
 			this._drill_COEFWM_DebugSprite = undefined;
 		}

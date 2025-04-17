@@ -2055,7 +2055,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_LPa_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_LPa_PluginTip_baseList.length == 0 ){ return ""; }
@@ -2095,10 +2095,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_LayerParticle = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_LayerParticle');
+	var Imported = Imported || {};
+	Imported.Drill_LayerParticle = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_LayerParticle');
 
 	//==============================
 	// * 静态数据 - 粒子样式
@@ -2211,7 +2211,7 @@
 			var temp = JSON.parse(DrillUp.parameters["粒子层-" + String(i+1) ]);
 			DrillUp.g_LPa_layers[i] = DrillUp.drill_LPa_initParticle( temp );
 		}else{
-			DrillUp.g_LPa_layers[i] = undefined;		//（强制设为空值，节约存储资源）
+			DrillUp.g_LPa_layers[i] = undefined;		//（设为空值，节约静态数据占用容量）
 		}
 	}
 	
@@ -2231,9 +2231,18 @@ if( Imported.Drill_CoreOfParticle &&
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_LPa_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_LPa_pluginCommand.call(this, command, args);
+	this.drill_LPa_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_LPa_pluginCommand = function( command, args ){
 	if( command === ">地图粒子" ){ // >地图粒子 : 粒子[1] : 显示
 		
 		/*-----------------对象组获取------------------*/
@@ -2705,7 +2714,7 @@ Game_Temp.prototype.drill_LPa_preloadInit = function(){
 	this._drill_LPa_preloadTank = [];						//bitmap容器
 	for( var i = 0; i < DrillUp.g_LPa_layers.length; i++ ){
 		var temp_data = DrillUp.g_LPa_layers[i];
-		if( temp_data == undefined ){ continue; }
+		if( temp_data == undefined ){ continue; }			//『控制器与贴图的样式』 - 校验+直接跳出（预加载）
 		if( temp_data['preload'] != true ){ continue; }
 		
 		this._drill_LPa_preloadTank.push( 
@@ -2789,13 +2798,13 @@ Game_System.prototype.drill_LPa_checkSysData = function(){
 Game_System.prototype.drill_LPa_initSysData_Private = function(){
 	
 	this._drill_LPa_dataTank_curController = [];	//当前地图容器（与 g_LPa_layers 依次对应，容器允许出现null值）
-	for(var i = 0; i < DrillUp.g_LPa_layers.length; i++){
+	for( var i = 0; i < DrillUp.g_LPa_layers.length; i++){
 		var temp_data = DrillUp.g_LPa_layers[i];
-		if( temp_data == undefined ){ continue; }
+		if( temp_data == undefined ){ continue; }	//『控制器与贴图的样式』 - 校验+直接跳出
 		
 		// > 控制器 - 匹配全地图数据时（直接存储，每次地图刷新时，不刷新 全地图数据）
 		if( temp_data['mapToAll'] == true ){
-			var temp_controller = new Drill_LPa_Controller( temp_data );
+			var temp_controller = new Drill_LPa_Controller( temp_data );	//『控制器与贴图的样式』 - 创建控制器
 			this._drill_LPa_dataTank_curController[i] = temp_controller;
 		}
 		
@@ -2822,8 +2831,8 @@ Game_System.prototype.drill_LPa_checkSysData_Private = function(){
 	}
 	
 	// > 容器的 空数据 检查
-	for(var i = 0; i < DrillUp.g_LPa_layers.length; i++ ){
-		var temp_data = DrillUp.g_LPa_layers[i];
+	for( var i = 0; i < DrillUp.g_LPa_layers.length; i++ ){
+		var temp_data = DrillUp.g_LPa_layers[i];	//『控制器与贴图的样式』 - 校验+直接跳出（存储数据检查）
 		
 		// > 已配置（检查 全地图数据 的配置情况）
 		if( temp_data != undefined &&
@@ -3066,9 +3075,9 @@ Game_Map.prototype.setup = function( mapId ){
 Game_Map.prototype.drill_LPa_initMapdata = function(){
 	
 	// > 刷新当前地图容器
-	for(var i = 0; i< DrillUp.g_LPa_layers.length ;i++){
+	for( var i = 0; i < DrillUp.g_LPa_layers.length ;i++){
 		var temp_data = DrillUp.g_LPa_layers[i];
-		if( temp_data == undefined ){
+		if( temp_data == undefined ){	//『控制器与贴图的样式』 - 校验+直接跳出
 			$gameSystem._drill_LPa_dataTank_curController[i] = null;
 			continue;
 		}
@@ -3079,7 +3088,7 @@ Game_Map.prototype.drill_LPa_initMapdata = function(){
 			
 		// > 控制器 - 匹配单地图数据时
 		}else if( temp_data['map'] == this.mapId() ){
-			var temp_controller = new Drill_LPa_Controller( temp_data );
+			var temp_controller = new Drill_LPa_Controller( temp_data );		//『控制器与贴图的样式』 - 创建控制器
 			$gameSystem._drill_LPa_dataTank_curController[i] = temp_controller;	//（重刷数据）
 			
 		// > 控制器 - 不匹配时
@@ -3341,14 +3350,16 @@ Scene_Map.prototype.drill_LPa_updateDestroy = function(){
 // ** 粒子控制器【Drill_LPa_Controller】
 // **		
 // **		作用域：	地图界面
-// **		主功能：	> 定义一个专门控制动画粒子的数据类。
-// **		子功能：	->控制器
+// **		主功能：	定义一个专门控制动画粒子的数据类。
+// **		子功能：	
+// **					->控制器『控制器与贴图』
 // **						->帧刷新
 // **						->重设数据
 // **							->序列号
 // **						->显示/隐藏
 // **						->暂停/继续
 // **						->销毁
+// **					
 // **					->A主体
 // **					->B粒子群弹道
 // **					->C随机因子
@@ -3366,7 +3377,7 @@ Scene_Map.prototype.drill_LPa_updateDestroy = function(){
 // **						> 粒子贴图组-缩放X
 // **						> 粒子贴图组-缩放Y
 // **					->2C延迟指令
-// **		
+// **					
 // **		说明：	> 该类可与 Game_CharacterBase 一并存储在 $gameMap 中。
 //=============================================================================
 //==============================
@@ -3484,7 +3495,7 @@ Drill_LPa_Controller.prototype.drill_controller_setZIndex = function( zIndex ){
 
 
 //##############################
-// * 控制器 - 初始化数据【标准默认值】
+// * 控制器 - 初始化数据『控制器与贴图』【标准默认值】
 //
 //			参数：	> 无
 //			返回：	> 无
@@ -3526,7 +3537,7 @@ Drill_LPa_Controller.prototype.drill_controller_initData = function(){
 	
 }
 //==============================
-// * 控制器 - 初始化子功能
+// * 控制器 - 初始化子功能『控制器与贴图』
 //==============================
 Drill_LPa_Controller.prototype.drill_controller_initChild = function(){
 	Drill_COPa_Controller.prototype.drill_controller_initChild.call( this );
@@ -3947,12 +3958,14 @@ Drill_LPa_Controller.prototype.drill_controller_clearDelayingCommand = function(
 // ** 粒子贴图【Drill_LPa_Sprite】
 // **
 // **		作用域：	地图界面
-// **		主功能：	> 定义一个粒子贴图。
-// **		子功能：	->贴图
+// **		主功能：	定义一个粒子贴图。
+// **		子功能：	
+// **					->贴图『控制器与贴图』
 // **						->是否就绪
 // **						->优化策略
 // **						->是否需要销毁
 // **						->销毁
+// **					
 // **					->A主体
 // **						->层级位置修正
 // **					->B粒子群弹道
@@ -3965,7 +3978,7 @@ Drill_LPa_Controller.prototype.drill_controller_clearDelayingCommand = function(
 // **					->I粒子生命周期
 // **					->2B指令叠加变化-控制器用
 // **					->2C延迟指令
-// **
+// **					
 // **		说明：	> 你必须在创建贴图后，手动初始化。（还需要先设置 控制器 ）
 // **
 // **		代码：	> 范围 - 该类显示单独的贴图。
@@ -4012,7 +4025,7 @@ Drill_LPa_Sprite.prototype.drill_sprite_setController = function( controller ){
     Drill_COPa_Sprite.prototype.drill_sprite_setController.call( this, controller );
 };
 //##############################
-// * C对象绑定 - 初始化子功能【开放函数】
+// * C对象绑定 - 初始化子功能『控制器与贴图』【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -4070,19 +4083,19 @@ Drill_LPa_Sprite.prototype.drill_sprite_destroy = function(){
 	Drill_COPa_Sprite.prototype.drill_sprite_destroy.call( this );
 };
 //==============================
-// * 粒子贴图 - 初始化自身
+// * 粒子贴图 - 初始化自身『控制器与贴图』
 //==============================
 Drill_LPa_Sprite.prototype.drill_sprite_initSelf = function(){
     Drill_COPa_Sprite.prototype.drill_sprite_initSelf.call( this );
 };
 //==============================
-// * 粒子贴图 - 销毁子功能
+// * 粒子贴图 - 销毁子功能『控制器与贴图』
 //==============================
 Drill_LPa_Sprite.prototype.drill_sprite_destroyChild = function(){
     Drill_COPa_Sprite.prototype.drill_sprite_destroyChild.call( this );
 };
 //==============================
-// * 粒子贴图 - 销毁自身
+// * 粒子贴图 - 销毁自身『控制器与贴图』
 //==============================
 Drill_LPa_Sprite.prototype.drill_sprite_destroySelf = function(){
     Drill_COPa_Sprite.prototype.drill_sprite_destroySelf.call( this );
@@ -4317,12 +4330,14 @@ Drill_LPa_Sprite.prototype.drill_sprite_initDelayingCommand = function(){
 // ** 粒子贴图（第二层）【Drill_LPa_SecSprite】
 // **
 // **		作用域：	地图界面
-// **		主功能：	> 定义一个 第二层粒子贴图 。
-// **		子功能：	->贴图
+// **		主功能：	定义一个 第二层粒子贴图 。
+// **		子功能：	
+// **					->贴图（第二层）『控制器与贴图』
 // **						->是否就绪
 // **						->优化策略
 // **						->是否需要销毁
 // **						->销毁
+// **					
 // **					->A主体
 // **					->B粒子群弹道（无）
 // **					->C对象绑定（无）
@@ -4332,7 +4347,7 @@ Drill_LPa_Sprite.prototype.drill_sprite_initDelayingCommand = function(){
 // **					->G直线拖尾贴图（无）
 // **					->H贴图高宽（无）
 // **					->I粒子生命周期（无）
-// **
+// **					
 // **		说明：	> 第二层粒子与 父贴图 的 D粒子变化 保持一致。
 //=============================================================================
 //==============================
@@ -4400,25 +4415,25 @@ Drill_LPa_SecSprite.prototype.drill_spriteSec_destroy = function(){
     return Drill_COPa_SecSprite.prototype.drill_spriteSec_destroy.call(this);
 };
 //==============================
-// * 第二层粒子 - 初始化自身
-//==============================
-Drill_LPa_SecSprite.prototype.drill_spriteSec_initSelf = function( parentSprite ){
-	Drill_COPa_SecSprite.prototype.drill_spriteSec_initSelf.call( this, parentSprite );
-};
-//==============================
-// * 第二层粒子 - 初始化子功能
+// * 第二层粒子 - 初始化子功能『控制器与贴图』
 //==============================
 Drill_LPa_SecSprite.prototype.drill_spriteSec_initChild = function(){
 	Drill_COPa_SecSprite.prototype.drill_spriteSec_initChild.call( this );
 };
 //==============================
-// * 第二层粒子 - 销毁子功能
+// * 第二层粒子 - 初始化自身『控制器与贴图』
+//==============================
+Drill_LPa_SecSprite.prototype.drill_spriteSec_initSelf = function( parentSprite ){
+	Drill_COPa_SecSprite.prototype.drill_spriteSec_initSelf.call( this, parentSprite );
+};
+//==============================
+// * 第二层粒子 - 销毁子功能『控制器与贴图』
 //==============================
 Drill_LPa_SecSprite.prototype.drill_spriteSec_destroyChild = function(){
 	Drill_COPa_SecSprite.prototype.drill_spriteSec_destroyChild.call( this );
 };
 //==============================
-// * 第二层粒子 - 销毁自身
+// * 第二层粒子 - 销毁自身『控制器与贴图』
 //==============================
 Drill_LPa_SecSprite.prototype.drill_spriteSec_destroySelf = function(){
 	Drill_COPa_SecSprite.prototype.drill_spriteSec_destroySelf.call( this );

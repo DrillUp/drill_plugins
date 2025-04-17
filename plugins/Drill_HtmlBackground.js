@@ -409,7 +409,7 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称：		HB (Html_Background)
+//		插件简称		HB (Html_Background)
 //		临时全局变量	DrillUp.g_HB_xxxx
 //		临时局部变量	this._drill_HB_xxx
 //		存储数据变量	$gameSystem._drill_HB_xxx
@@ -480,10 +480,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_HtmlBackground = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_HtmlBackground');
+	var Imported = Imported || {};
+	Imported.Drill_HtmlBackground = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_HtmlBackground');
 	
 	//==============================
 	// * 静态数据 - 黑边背景
@@ -541,12 +541,22 @@ ImageManager.load_SpecialLayer = function(filename) {
     return this.loadBitmap('img/Special__layer/', filename, 0, true);
 };
 
+
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_HB_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_HB_pluginCommand.call( this, command, args );
+	this.drill_HB_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_HB_pluginCommand = function( command, args ){
 	if( command === ">黑边背景" ){		//>黑边背景 : 背景 : 3 : 显示
 	
 		if( args.length == 6 ){

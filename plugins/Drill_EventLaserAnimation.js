@@ -300,10 +300,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_EventLaserAnimation = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_EventLaserAnimation');
+	var Imported = Imported || {};
+	Imported.Drill_EventLaserAnimation = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_EventLaserAnimation');
 
 
 	DrillUp.g_ELA_diagonalThrough = String(DrillUp.parameters['斜向激光是否穿透两边阻碍'] || "true") === "true";
@@ -313,12 +313,22 @@
 
 	
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_ELA_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_ELA_pluginCommand.call(this, command, args);
+	this.drill_ELA_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_ELA_pluginCommand = function( command, args ){
 	if( command === ">物体范围动画" ){
+		
 		if(args.length == 10){	//>物体范围动画 : 本事件 : 可变激光区域 : 东 : 2 : 动画[81]
 			var unit = String(args[1]);
 			var type = String(args[3]);
@@ -472,7 +482,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 };
 //==============================
-// ** 插件指令 - 事件检查
+// * 插件指令 - 事件检查
 //==============================
 Game_Map.prototype.drill_ELA_isEventExist = function( e_id ){
 	if( e_id == 0 ){ return false; }

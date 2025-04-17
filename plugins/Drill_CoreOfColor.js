@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.7]        窗口字符 - 颜色核心
+ * @plugindesc [v1.8]        窗口字符 - 颜色核心
  * @author Drill_up
  * 
  * @Drill_LE_editForbidden
@@ -16,14 +16,14 @@
  * 如果你有兴趣，也可以来看看更多我写的drill插件哦ヽ(*。>Д<)o゜
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
- * 可使得窗口中的字符变为自定义的颜色。
+ * 可使得你添加自定义的文本颜色和文本高级颜色。
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
  * 该插件 不能 单独使用。
  * 需要基于其他核心插件，才能运行，并作用于其他子插件。
  * 基于：
- *   - Drill_CoreOfWindowCharacter   窗口字符-窗口字符核心★★v1.7及以上★★
+ *   - Drill_CoreOfWindowCharacter   窗口字符-窗口字符核心★★v2.0及以上★★
  * 可作用于：
  *   - Drill_ActorTextColor          UI-角色文本颜色
  *   - Drill_EnemyTextColor          UI-敌人文本颜色
@@ -32,9 +32,9 @@
  * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：战斗界面、菜单界面、地图界面。
- *   作用于任何显示文本的地方。
- * 2.如果想了解高级颜色设置方法，去看看 "23.窗口字符 > 关于颜色核心.docx"。
- * 3.如果想了解更多窗口字符，可以去看看 "23.窗口字符 > 关于窗口字符.docx"。
+ *   对所有窗口有效。
+ * 2.如果想了解更多窗口字符，可以去看看 "23.窗口字符 > 关于窗口字符.docx"。
+ *   如果想了解高级颜色设置方法，去看看 "23.窗口字符 > 关于颜色核心.docx"。
  * 细节：
  *   (1.由于颜色固定只能配置99种，高级颜色固定99种，渐变固定6种，
  *      如果超过了99，会出现数组错位，所以该插件被禁止修改最大值。
@@ -46,14 +46,20 @@
  *   (2.你可以使用 高级渐变色+字体+窗口字符效果，组合出漂亮的艺术文字。
  * 
  * -----------------------------------------------------------------------------
- * ----可选设定 - 颜色窗口字符
+ * ----激活条件
  * 你可以使用窗口字符调整 自定义颜色：
  * 
- * 窗口字符：\c[101]
- * 窗口字符：\c[102]
+ * 窗口字符：\c[0]        之后文字显示为默认颜色。
+ * 窗口字符：\c[1]        之后文字显示为默认颜色。
+ * 窗口字符：\c[2]        之后文字显示为默认颜色。
  * 
- * 窗口字符：\c[201]
- * 窗口字符：\c[202]
+ * 窗口字符：\c[101]      之后文字显示为普通颜色。
+ * 窗口字符：\c[102]      之后文字显示为普通颜色。
+ * 窗口字符：\c[103]      之后文字显示为普通颜色。
+ * 
+ * 窗口字符：\c[201]      之后文字显示为高级渐变颜色。
+ * 窗口字符：\c[202]      之后文字显示为高级渐变颜色。
+ * 窗口字符：\c[203]      之后文字显示为高级渐变颜色。
  * 
  * 1.游戏中有默认32种颜色窗口字符，即 \c[0] - \c[31] 。
  * 2.颜色和高级颜色固定99种自定义设置。
@@ -61,40 +67,58 @@
  *   "\c[201] - \c[299]"对应了 高级颜色1 至 高级颜色99。
  * 
  * -----------------------------------------------------------------------------
- * ----可选设定 - 普通颜色
- * 你可以使用窗口字符设置 普通颜色：
+ * ----可选设定 - 全局默认值
+ * 你可以通过插件指令修改默认设置：
  * 
- * 窗口字符：\cc[#ffffff]
- * 窗口字符：\clc[#ffffff:#ffffff:10]
- * 窗口字符：\clc[#ffffff:#ffffff:当前行字数]
+ * 插件指令：>颜色核心 : 所有文本 : 修改颜色 : 颜色[0]
+ * 插件指令：>颜色核心 : 所有文本 : 恢复默认颜色
  * 
- * 1."\cc"由于普通颜色非常多，通过序号来定义比较麻烦，你可以使用 \cc 直接
- *   定义普通颜色来使用。
- * 2."\clc"可以使得后面的字符每个字变一种普通颜色，合起来看起来像渐变。
- *   分别表示 起始颜色、终止颜色、过渡的字数 。
- * 3."当前行字数"即当前行 一般字符 的字数。
+ * 插件指令：>颜色核心 : 对话框 : 修改模式 : 自定义模式
+ * 插件指令：>颜色核心 : 对话框 : 修改模式 : 与所有文本一致
+ * 插件指令：>颜色核心 : 对话框 : 修改颜色 : 颜色[0]
+ * 插件指令：>颜色核心 : 对话框 : 恢复默认颜色
+ * 
+ * 1.插件指令修改的是全局默认值，设置后永久有效。
+ *   新建的所有贴图/窗口，全部使用此设置作为 默认值。
+ *   并且 全重置字符\fr 执行重置时，也会重置为 此设置的值。
+ *   但注意，窗口字符的优先级 比该指令高，若有窗口字符，优先用窗口字符效果。
+ * 2.你可以修改 默认颜色 为 201 高级颜色，同样对所有贴图/窗口有效。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 临时颜色
+ * 你可以使用窗口字符设置临时颜色，也可以暂存读取颜色：
+ * 
+ * 窗口字符：\cc[#ffffff]       之后的文本使用此临时普通颜色。
+ * 窗口字符：\cc[save]          暂存当前文本颜色。
+ * 窗口字符：\cc[load]          之后的文本使用暂存的颜色。
+ * 
+ * 窗口字符：\cc[reset]         之后的文本只恢复默认颜色。
+ * 窗口字符：\fr                全重置字符，重置之后文本所有设置，包括恢复默认颜色。
+ * 
+ * 1.由于普通颜色非常多，通过序号来定义比较麻烦，
+ *   你可以使用 "\cc[#ffffff]" 直接定义普通颜色来使用。
+ * 2.窗口字符 是一个一个顺序绘制上去的，存在先后顺序。
+ *   如果你有 插播的字符串 要临时变色，可以先暂存之前的颜色，在最后恢复颜色。
+ *   使用 "\cc[save]xxxxxx\cc[load]" 即可。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 逐个字符变色
+ * 你可以使用下面窗口字符实现逐个字符变色：
+ * 
+ * 窗口字符：\clc[#00ff00:#0000ff:10]
+ * 窗口字符：\clc[#00ff00:#0000ff:当前行字数]
+ * 
+ * 1."\clc"可以使得后面的字符每个字变一种普通颜色，合起来看起来像渐变。
+ *   参数分别为 起始颜色、终止颜色、过渡的字数 。
+ * 2."当前行字数"即当前行 常规字符 的字数。
  *    注意，当前行字数统计不含 效果字符、字符块 的数量。
  * 
  * -----------------------------------------------------------------------------
- * ----可选设定 - 颜色暂存
- * 你可以使用窗口字符暂存颜色：
+ * ----可选设定 - Debug字符
+ * 使用该插件后，你可以使用下列窗口字符：
  * 
- * 窗口字符：\csave
- * 窗口字符：\cload
- * 
- * 1.窗口字符 是一个一个顺序绘制上去的，存在先后顺序。
- *   如果你有 插播的字符串 要临时变色，可以先暂存之前的颜色，在最后恢复颜色。
- * 
- * -----------------------------------------------------------------------------
- * ----可选设定 - 对话框
- * 你可以通过插件指令修改默认设置：
- * 
- * 插件指令：>颜色核心 : 固定对话框文本色 : 文本色[0]
- * 插件指令：>颜色核心 : 恢复对话框文本色
- * 
- * 1.插件指令设置后，对话框文本颜色的修改 永久有效。
- *   但注意，窗口字符的优先级 比该指令高，若有窗口字符，优先用窗口字符效果。
- * 2.注意，"文本色[0]" 与 "\c[0]" 意思一样。
+ * 窗口字符：\debug[显示高级颜色框]      之后的高级颜色显示方框
+ * 窗口字符：\debug[隐藏高级颜色框]      之后的高级颜色取消显示方框
  * 
  * -----------------------------------------------------------------------------
  * ----知识点 - 关于颜色
@@ -150,26 +174,53 @@
  * 添加了 插件指令 固定对话框的 文本色功能。
  * [v1.7]
  * 优化了渐变色的结构，修复了部分渐变色只显示白色的bug。
+ * [v1.8]
+ * 更新并兼容了新的窗口字符底层。
  * 
  * 
  * 
- * @param ---默认设置---
+ * 
+ * 
+ * @param ---全局默认值---
  * @desc 
  * 
- * @param 默认文本颜色(全局)
- * @parent ---默认设置---
+ * @param 所有文本-默认颜色
+ * @parent ---全局默认值---
  * @type number
  * @min 0
- * @desc 全局默认的文本颜色，对应"\c[0]"中的数字。注意，对游戏中的所有窗口都有效。
+ * @desc 所有文本默认的颜色。默认可填0，对应"\c[0]"。
  * @default 0
  * 
- * @param 是否开启Debug模式
- * @parent ---默认设置---
+ * @param 对话框颜色模式
+ * @parent ---全局默认值---
+ * @type select
+ * @option 自定义模式
+ * @value 自定义模式
+ * @option 与所有文本一致
+ * @value 与所有文本一致
+ * @desc 对话框的模式。
+ * @default 自定义模式
+ * 
+ * @param 对话框-颜色
+ * @parent 对话框颜色模式
+ * @type number
+ * @min 0
+ * @desc 对话框模式为"自定义模式"时生效。对话框的颜色。默认可填0，对应"\c[0]"。
+ * @default 0
+ * 
+ * 
+ * @param ---DEBUG测试---
+ * @desc 
+ * 
+ * @param DEBUG-强制显示全部高级颜色框
+ * @parent ---DEBUG测试---
  * @type boolean
- * @on 开启
+ * @on 强制显示
  * @off 关闭
- * @desc 主要用于全选出文字绘制的块区域，识别高级渐变颜色的布局。
+ * @desc true - 强制显示，false - 关闭。注意，所有高级颜色都会显示框。
  * @default false
+ * 
+ * 
  * 
  * @param ---普通颜色---
  * @default 
@@ -767,8 +818,8 @@
  * @type struct<CommonColor>
  * @desc 自定义你的配置颜色。颜色代码大写小写字母都可以识别。
  * @default 
- *
- *
+ * 
+ * 
  * 
  * @param ---高级颜色---
  * @default 
@@ -1444,7 +1495,7 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称：		COC (Core_Of_Color)
+//		插件简称		COC (Core_Of_Color)
 //		临时全局变量	DrillUp.g_COC_xxx
 //		临时局部变量	无
 //		存储数据变量	无
@@ -1468,16 +1519,47 @@
 //		★功能结构树：
 //			->☆提示信息
 //			->☆静态数据
-//			->☆管辖权
 //			->☆插件指令
 //			->☆存储数据
-//			->☆效果字符应用
 //			
-//			->☆文本颜色
-//			->☆颜色文本绘制
-//			->☆文本颜色绑定
+//			->☆窗口字符应用之效果字符
+//				> \C[0]       （可大小写）
+//				> \CC[#eeeeff]（可大小写）
+//				> \CC[save]   （可大小写）
+//				> \CC[load]   （可大小写）
+//				> \CC[oSave]  （可大小写）
+//				> \CC[oLoad]  （可大小写）
+//				> \CC[reset]  （可大小写）
+//				> \clc[#00ff00:#0000ff:当前行字数] （只能小写）
+//				> \clc[#00ff00:#0000ff:10]         （只能小写）
+//			->☆全局默认值
+//				->自带参数（继承）
+//					> this.textColor
+//			->☆重置控制
+//				->全重置字符（继承）
+//				->自定义重置字符
+//					> @@@dcc[reset]
+//			
+//			->☆管辖权
+//			->☆管辖权覆写函数
+//			
+//			->☆高级颜色绘制
+//				->数学工具-求相交的两点
+//			->☆颜色暂存
+//				> @@@dcc[save]
+//				> @@@dcc[load]
+//				> @@@dcc[oSave]
+//				> @@@dcc[oLoad]
 //			->☆逐个字符变色
+//				> @@@dcc[linear:#0f0:#00f:10]
+//				> @@@dcc[linear:#0f0:#00f]
+//			
 //			->☆颜色工具
+//				->字符串转RGB（开放函数）
+//				->RGB转字符串（开放函数）
+//				->字符串转RGBA（开放函数）
+//				->RGBA转字符串（开放函数）
+//			->☆DEBUG颜色测试
 //		
 //		
 //		★家谱：
@@ -1500,8 +1582,7 @@
 //				_drill_COC_bitmap_drawTextBody	 渐变颜色识别函数
 //
 //		★其它说明细节：
-//			1.Bitmap.drill_elements_drawText用于控制颜色渐变的位置修正。（目前不理解为啥bitmap绘制渐变时会产生brush偏移的情况。）
-//			2.高级颜色格式为： drill__90__0.0__#ffffff__0.5__#ff99ff__1.0__#ff55ff
+//			1.高级颜色格式为："drill__45__0.0__#00ff00__1.0__#0000ff" 
 //			（见drill_COC_initSeniorColor）
 //
 //		★存在的问题：
@@ -1520,7 +1601,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_COC_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_COC_PluginTip_baseList.length == 0 ){ return ""; }
@@ -1555,6 +1636,12 @@
 	DrillUp.drill_COC_getPluginTip_ColorNotFind2 = function( n ){
 		return "【" + DrillUp.g_COC_PluginTip_curName + "】\n你没有在 高级颜色-"+n+" 中配置颜色，而你在游戏中使用了它。";
 	};
+	//==============================
+	// * 提示信息 - 报错 - 窗口字符底层校验
+	//==============================
+	DrillUp.drill_COC_getPluginTip_NeedUpdate_drawText = function(){
+		return "【" + DrillUp.g_COC_PluginTip_curName + "】\n检测到窗口字符核心版本过低。\n由于底层变化巨大，你需要更新 全部 窗口字符相关插件。\n去看看\"23.窗口字符 > 关于窗口字符底层全更新说明.docx\"进行更新。";
+	};
 	
 	
 //=============================================================================
@@ -1571,7 +1658,7 @@
 	//==============================
 	DrillUp.drill_COC_initCommonColor = function( dataFrom ) {
 		var data = {};
-		data['color'] = String( dataFrom["颜色代码"] || "#FFFFFF" );
+		data['color'] = String( dataFrom["颜色代码"] || "#ffffff" );
 		return data;
 	}
 	//==============================
@@ -1590,40 +1677,14 @@
 		data['color'] = temp_text;
 		return data;
 	}
-	//==============================
-	// * 临时全局 - 获取普通颜色（开放函数）
-	//
-	//			说明：	> 返回如"#ffffff"的颜色代码。
-	//					> 此处的 n=1 等同于 \c[101]，等同于 <普通颜色:1> 。
-	//==============================
-	DrillUp.drill_COC_getColor = function( n ) {
-		if( DrillUp.g_COC_color_list[n] == undefined ){ console.log( DrillUp.drill_COC_getPluginTip_ColorError1( n ) ); return "#ffffff" }
-		if( DrillUp.g_COC_color_list[n]['color'] == undefined ){ console.log( DrillUp.drill_COC_getPluginTip_ColorNotFind1( n ) ); return "#ffffff" }
-		return DrillUp.g_COC_color_list[n]['color'];
-	}
-	//==============================
-	// * 临时全局 - 获取高级颜色
-	//
-	//			说明：	> 返回如"#ffffff"的颜色代码。
-	//					> 此处的 n=1 等同于 \c[201]，等同于 <高级颜色:1> 。
-	//==============================
-	DrillUp.drill_COC_getSeniorColor = function( n ) {
-		if( DrillUp.g_COC_seniorColor_list[n] == undefined ){ console.log( DrillUp.drill_COC_getPluginTip_ColorError2( n ) ); return "#ffffff" }
-		if( DrillUp.g_COC_seniorColor_list[n]['color'] == undefined ){ console.log( DrillUp.drill_COC_getPluginTip_ColorNotFind2( n ) ); return "#ffffff" }
-		return DrillUp.g_COC_seniorColor_list[n]['color'];
-	}
-	
-	/*-----------------杂项------------------*/
-	DrillUp.g_COC_fontColorIndex = Number(DrillUp.parameters["默认文本颜色(全局)"] || 0); 
-	DrillUp.g_COC_debugMode = String(DrillUp.parameters["是否开启Debug模式"] || "false") == "true"; 
 	
 	/*-----------------普通颜色------------------*/
 	DrillUp.g_COC_color_list_length = 99;
 	DrillUp.g_COC_color_list = [];
 	for (var i = 0; i < DrillUp.g_COC_color_list_length; i++) {
-		if( DrillUp.parameters['颜色-' + String(i+1) ] != undefined &&
-			DrillUp.parameters['颜色-' + String(i+1) ] != "" ){
-			var data = JSON.parse(DrillUp.parameters['颜色-' + String(i+1) ]);
+		if( DrillUp.parameters["颜色-" + String(i+1) ] != undefined &&
+			DrillUp.parameters["颜色-" + String(i+1) ] != "" ){
+			var data = JSON.parse(DrillUp.parameters["颜色-" + String(i+1) ]);
 			DrillUp.g_COC_color_list[i] = DrillUp.drill_COC_initCommonColor( data );
 		}else{
 			DrillUp.g_COC_color_list[i] = {};
@@ -1634,14 +1695,26 @@
 	DrillUp.g_COC_seniorColor_list_length = 99;
 	DrillUp.g_COC_seniorColor_list = [];
 	for (var i = 0; i < DrillUp.g_COC_seniorColor_list_length; i++) {
-		if( DrillUp.parameters['高级颜色-' + String(i+1) ] != undefined &&
-			DrillUp.parameters['高级颜色-' + String(i+1) ] != "" ){
-			var data = JSON.parse(DrillUp.parameters['高级颜色-' + String(i+1) ]);
+		if( DrillUp.parameters["高级颜色-" + String(i+1) ] != undefined &&
+			DrillUp.parameters["高级颜色-" + String(i+1) ] != "" ){
+			var data = JSON.parse(DrillUp.parameters["高级颜色-" + String(i+1) ]);
 			DrillUp.g_COC_seniorColor_list[i] = DrillUp.drill_COC_initSeniorColor( data );
 		}else{
 			DrillUp.g_COC_seniorColor_list[i] = {};
 		}
 	}
+	
+	
+	/*-----------------『全局默认值』所有文本（静态数据）------------------*/
+	DrillUp.g_COC_globalColorId = Number(DrillUp.parameters["所有文本-默认颜色"] || 0); 
+	
+	/*-----------------『全局默认值』对话框（静态数据）------------------*/
+	DrillUp.g_COC_dialogMode = String(DrillUp.parameters["对话框颜色模式"] || "与所有文本一致"); 
+	DrillUp.g_COC_dialogColorId = Number(DrillUp.parameters["对话框-颜色"] || 0); 
+	
+	/*-----------------杂项------------------*/
+    DrillUp.g_COC_seniorColorDebugAll = String(DrillUp.parameters["DEBUG-强制显示全部高级颜色框"] || "false") === "true";
+	
 	
 	
 //=============================================================================
@@ -1650,108 +1723,93 @@
 if( Imported.Drill_CoreOfWindowCharacter ){
 	
 	
-	
-//=============================================================================
-// ** ☆管辖权
-//
-//			说明：	> 管辖权 即对 原函数 进行 修改、覆写、继承、控制子插件继承 等的权利。
-//					> 用于后期脱离 原游戏框架 且仍保持兼容性 的标记。
-//=============================================================================
-/*
 //==============================
-// * D窗口皮肤『颜色核心』 - 取色器 - 获取皮肤中的颜色
-//
-//			说明：	> 颜色取自窗口皮肤中的特定像素点。
+// * 基于插件检测 - 窗口字符底层校验
 //==============================
-Window_Base.prototype.textColor = function( n ){
-    var px = 96 + (n % 8) * 12 + 6;
-    var py = 144 + Math.floor(n / 8) * 12 + 6;
-    return this.windowskin.getPixel(px, py);
-};
-//==============================
-// * D窗口皮肤『颜色核心』 - 取色器 - 定义的颜色函数
-//==============================
-Window_Base.prototype.normalColor    = function(){ return this.textColor(0); };
-Window_Base.prototype.systemColor    = function(){ return this.textColor(16); };
-Window_Base.prototype.crisisColor    = function(){ return this.textColor(17); };
-Window_Base.prototype.deathColor     = function(){ return this.textColor(18); };
-Window_Base.prototype.gaugeBackColor = function(){ return this.textColor(19); };
-Window_Base.prototype.hpGaugeColor1  = function(){ return this.textColor(20); };
-Window_Base.prototype.hpGaugeColor2  = function(){ return this.textColor(21); };
-Window_Base.prototype.mpGaugeColor1  = function(){ return this.textColor(22); };
-Window_Base.prototype.mpGaugeColor2  = function(){ return this.textColor(23); };
-Window_Base.prototype.mpCostColor    = function(){ return this.textColor(23); };
-Window_Base.prototype.powerUpColor   = function(){ return this.textColor(24); };
-Window_Base.prototype.powerDownColor = function(){ return this.textColor(25); };
-Window_Base.prototype.tpGaugeColor1  = function(){ return this.textColor(28); };
-Window_Base.prototype.tpGaugeColor2  = function(){ return this.textColor(29); };
-Window_Base.prototype.tpCostColor    = function(){ return this.textColor(29); };
-//==============================
-// * D窗口皮肤『颜色核心』 - 取色器 - 背景颜色
-//==============================
-Window_Base.prototype.pendingColor = function(){
-    return this.windowskin.getPixel(120, 120);
-};
-//==============================
-// * D窗口皮肤『颜色核心』 - 取色器 - 属性增减的文本颜色
-//==============================
-Window_Base.prototype.paramchangeTextColor = function( change ){
-    if( change > 0 ){
-        return this.powerUpColor();
-    }else if( change < 0 ){
-        return this.powerDownColor();
-    }else{
-        return this.normalColor();
-    }
-};
-//==============================
-// * D窗口皮肤『颜色核心』 - 半透明（置灰的文字）
-//==============================
-Window_Base.prototype.translucentOpacity = function(){
-    return 160;
-};
-//==============================
-// * D窗口皮肤『颜色核心』 - 切换半透明（是否置灰）
-//==============================
-Window_Base.prototype.changePaintOpacity = function( enabled ){
-    this.contents.paintOpacity = enabled ? 255 : this.translucentOpacity();
-};
-//==============================
-// * D窗口皮肤『颜色核心』 - 改变文本色
-//==============================
-Window_Base.prototype.changeTextColor = function( color ){
-    this.contents.textColor = color;
-};
-//==============================
-// * D窗口皮肤『颜色核心』 - 重置字体颜色
-//==============================
-Window_Base.prototype.resetTextColor = function(){
-    this.changeTextColor(this.normalColor());
-};
-*/
+if( typeof(_drill_COWC_drawText_functionExist) == "undefined" ){
+	alert( DrillUp.drill_COC_getPluginTip_NeedUpdate_drawText() );
+}
 	
 	
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_COC_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_COC_pluginCommand.call(this, command, args);
+	this.drill_COC_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_COC_pluginCommand = function( command, args ){
 	if( command === ">颜色核心" ){
 		
-		if( args.length == 2 ){
+		/*-----------------『全局默认值』所有文本（插件指令）------------------*/
+		if( args.length >= 2 ){
 			var type = String(args[1]);
-			if( type == "恢复对话框文本色" ){
-				$gameSystem._drill_COC_dialog_fontColorIndex = DrillUp.g_COC_fontColorIndex;
+			if( type == "所有文本" ){
+				if( args.length == 6 ){
+					var temp1 = String(args[3]);
+					var temp2 = String(args[5]);
+					temp2 = temp2.replace("颜色[","");
+					temp2 = temp2.replace("]","");
+					temp2 = Number(temp2);
+					if( temp1 == "修改颜色" ){
+						$gameSystem._drill_COC_globalColorId = temp2;
+					}
+				}
+				if( args.length == 4 ){
+					var type = String(args[1]);
+					var temp1 = String(args[3]);
+					if( temp1 == "恢复默认颜色" || temp1 == "恢复默认设置" ){
+						$gameSystem._drill_COC_globalColorId = DrillUp.g_COC_globalColorId;
+					}
+				}
 			}
 		}
+		
+		/*-----------------『全局默认值』对话框（插件指令）------------------*/
+		if( args.length >= 2 ){
+			var type = String(args[1]);
+			if( type == "对话框" ){
+				if( args.length == 6 ){
+					var temp1 = String(args[3]);
+					var temp2 = String(args[5]);
+					temp2 = temp2.replace("颜色[","");
+					temp2 = temp2.replace("]","");
+					temp2 = Number(temp2);
+					if( temp1 == "修改模式" ){
+						$gameSystem._drill_COC_dialogMode = temp2;
+					}
+					if( temp1 == "修改颜色" ){
+						$gameSystem._drill_COC_dialogColorId = temp2;
+					}
+				}
+				if( args.length == 4 ){
+					var temp1 = String(args[3]);
+					if( temp1 == "恢复默认颜色" || temp1 == "恢复默认设置" ){
+						$gameSystem._drill_COC_dialogColorId = DrillUp.g_COC_dialogColorId;
+					}
+				}
+			}
+		}
+		
+		/*-----------------DEBUG------------------*/
 		if( args.length == 4 ){
 			var type = String(args[1]);
 			var temp1 = String(args[3]);
-			temp1 = temp1.replace("文本色[","");
-			temp1 = temp1.replace("]","");
-			if( type == "固定对话框文本色" ){
-				$gameSystem._drill_COC_dialog_fontColorIndex = Number(temp1);
+			if( type == "DEBUG颜色核心字符测试" ){
+				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
+					$gameTemp._drill_COC_DebugEnabled = true;
+				}
+				if( temp1 == "关闭" || temp1 == "禁用" ){
+					$gameTemp._drill_COC_DebugEnabled = false;
+					
+				}
 			}
 		}
 	}
@@ -1825,10 +1883,12 @@ Game_System.prototype.drill_COC_checkSysData = function() {
 //==============================
 Game_System.prototype.drill_COC_initSysData_Private = function() {
 	
-	this._drill_COC_fontColorIndex = DrillUp.g_COC_fontColorIndex;				//字符文本色（全局默认）
+	// > 『全局默认值』 - 所有文本（存储数据）
+	this._drill_COC_globalColorId = DrillUp.g_COC_globalColorId;		//所有文本 - 颜色
 	
-	this._drill_COC_dialog_fontColorIndex = DrillUp.g_COC_fontColorIndex;		//字符文本色（对话框）
-	
+	// > 『全局默认值』 - 对话框（存储数据）
+	this._drill_COC_dialogMode = DrillUp.g_COC_dialogMode;				//对话框 - 模式
+	this._drill_COC_dialogColorId = DrillUp.g_COC_dialogColorId;		//对话框 - 颜色
 };
 //==============================
 // * 存储数据 - 载入存档时检查数据（私有）
@@ -1836,134 +1896,390 @@ Game_System.prototype.drill_COC_initSysData_Private = function() {
 Game_System.prototype.drill_COC_checkSysData_Private = function() {
 	
 	// > 旧存档数据自动补充
-	if( this._drill_COC_dialog_fontColorIndex == undefined ){
+	if( this._drill_COC_dialogColorId == undefined ){
 		this.drill_COC_initSysData();
 	}
-	
 };
 	
 
+
 //=============================================================================
-// ** ☆效果字符应用
+// ** ☆窗口字符应用之效果字符
 //=============================================================================
 //==============================
-// * 效果字符应用 - 字符转换（简单符）
+// * 窗口字符应用之效果字符 - 字符转换（组合符）
 //==============================
-var _drill_COC_COWC_processNewEffectChar_Simple = Window_Base.prototype.drill_COWC_processNewEffectChar_Simple;
-Window_Base.prototype.drill_COWC_processNewEffectChar_Simple = function( matched_index, command ){
-	_drill_COC_COWC_processNewEffectChar_Simple.call( this, matched_index, command );
+var _drill_COC_COWC_effect_processCombined = Game_Temp.prototype.drill_COWC_effect_processCombined;
+Game_Temp.prototype.drill_COWC_effect_processCombined = function( matched_index, matched_str, command, args ){
+	_drill_COC_COWC_effect_processCombined.call( this, matched_index, matched_str, command, args );
 	
-	if( command == "csave" ){
-		this._drill_COC_tempColor = this.contents.textColor;
-		this.drill_COWC_charSubmit_Effect( 0, 0 );
-	}
-	if( command == "cload" ){
-		if( this._drill_COC_tempColor != undefined ){
-			this.contents.textColor = this._drill_COC_tempColor;
-		}
-		this.drill_COWC_charSubmit_Effect( 0, 0 );
-	}
-}
-//==============================
-// * 效果字符应用 - 字符转换（组合符）
-//==============================
-var _drill_COC_COWC_processNewEffectChar_Combined = Window_Base.prototype.drill_COWC_processNewEffectChar_Combined;
-Window_Base.prototype.drill_COWC_processNewEffectChar_Combined = function( matched_index, matched_str, command, args ){
-	_drill_COC_COWC_processNewEffectChar_Combined.call( this, matched_index, matched_str, command, args );
+	// > 『窗口字符定义』 - 颜色（\C[0] ~ \C[31]）
+	//	（该功能在核心插件中实现【窗口字符 - 窗口字符核心】）
 	
-	if( command == "cc" ){
+	// > 『窗口字符定义』 - 颜色（\C[101] ~ \C[199]）
+	//	（该功能见函数 drill_COC_getColor ）
+	
+	// > 『窗口字符定义』 - 颜色（\C[201] ~ \C[299]）
+	//	（该功能见函数 drill_COC_getColor ）
+	
+	if( command.toUpperCase() == "CC" ){
 		if( args.length == 1 ){
 			var temp1 = String(args[0]);
-			this.drill_COC_setColor_Code( temp1 );	//（文本颜色）
-			this.drill_COWC_charSubmit_Effect( 0, 0 );
+			
+			// > 『窗口字符定义』 - 颜色配置 - 自定义重置字符（\CC[RESET]）
+			if( temp1.toUpperCase() == "RESET" ){
+				this.drill_COWC_effect_submitCombined( "@@@dcc[reset]" );
+				return;
+			}
+			
+			// > 『窗口字符定义』 - 颜色配置 - 暂存颜色（\CC[SAVE]）
+			if( temp1.toUpperCase() == "SAVE" ){
+				this.drill_COWC_effect_submitCombined( "@@@dcc[save]" );
+				return;
+			}
+			// > 『窗口字符定义』 - 颜色配置 - 读取颜色（\CC[LOAD]）
+			if( temp1.toUpperCase() == "LOAD" ){
+				this.drill_COWC_effect_submitCombined( "@@@dcc[load]" );
+				return;
+			}
+			// > 『窗口字符定义』 - 颜色配置 - 暂存颜色-脚本专用（\CC[OSAVE]）
+			if( temp1.toUpperCase() == "OSAVE" ){
+				this.drill_COWC_effect_submitCombined( "@@@dcc[oSave]" );
+				return;
+			}
+			// > 『窗口字符定义』 - 颜色配置 - 读取颜色-脚本专用（\CC[OLOAD]）
+			if( temp1.toUpperCase() == "OLOAD" ){
+				this.drill_COWC_effect_submitCombined( "@@@dcc[oLoad]" );
+				return;
+			}
+			
+			// > 『窗口字符定义』 - 颜色配置 - 颜色（\CC[#eeeeff]）
+			var str = "@@@-tc[" + temp1 + "]";
+			this.drill_COWC_effect_submitCombined( str );
+			return;
+		}
+		if( args.length == 2 ){
+			var temp1 = String(args[0]);
+			var temp2 = String(args[1]);
+			
+			// > 『窗口字符定义』 - 颜色配置 - DEBUG（\CC[DEBUG:显示高级颜色框]、\CC[DEBUG:隐藏高级颜色框]）
+			if( temp1.toUpperCase() == "DEBUG" ){
+				this.drill_COWC_effect_submitCombined( "@@@dcc[debug:" + temp2 + "]" );
+				return;
+			}
 		}
 	}
+	
 	if( command == "clc" ){
 		if( args.length == 3 ){
 			var temp1 = String(args[0]);
 			var temp2 = String(args[1]);
 			var temp3 = String(args[2]);
+			
+			// > 『窗口字符定义』 - 逐个字符变色（\clc[#00ff00:#0000ff:当前行字数]）
 			if( temp3 == "当前行字数" ){
-				this.drill_COC_setColorLinearCode( temp1, temp2, null );
+				this.drill_COWC_effect_submitCombined( "@@@-sr@@@dcc[linear:" +temp1+ ":" +temp2+ "]" );
+			
+			// > 『窗口字符定义』 - 逐个字符变色（\clc[#00ff00:#0000ff:10]）
 			}else{
-				this.drill_COC_setColorLinearCode( temp1, temp2, Number(temp3) );
+				this.drill_COWC_effect_submitCombined( "@@@-sr@@@dcc[linear:" +temp1+ ":" +temp2+ ":" +Number(temp3)+ "]" );
 			}
-			this.drill_COWC_charSubmit_Effect( 0, 0 );
 		}
 	}
 }
 //==============================
-// * 效果字符应用 - 当前行
+// * 窗口字符应用之效果字符 - 文本颜色（覆写）
+//
+//			参数：	> n 数字   （颜色ID）
+//			返回：	> 字符串   （颜色字符串，如"#eeeeff"）
 //==============================
-var _drill_COC_COWC_processNewLine = Window_Base.prototype.drill_COWC_processNewLine;
-Window_Base.prototype.drill_COWC_processNewLine = function( line_index, line_text ){
-	_drill_COC_COWC_processNewLine.call( this, line_index, line_text );
+Game_Temp.prototype.drill_COWC_effect_textColor = function( n ){
+	return DrillUp.drill_COC_getColor( n );
+};
+
+
+//=============================================================================
+// ** ☆全局默认值
+//
+//			说明：	> 此处专门窗口相关控制操作。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 全局默认值 - 自带参数（继承）
+//
+//			说明：	> 由于 Bitmap 中存放了参数 textColor，所以需要初始化赋值。
+//					  核心会使用上述参数，并在函数 drill_COCD_initOptions 中执行绘制配置。
+//==============================
+var _drill_COC_COCD_initBitmapDefault = Bitmap.prototype.drill_COCD_org_initBitmapDefault;
+Bitmap.prototype.drill_COCD_org_initBitmapDefault = function(){
+	_drill_COC_COCD_initBitmapDefault.call(this);
+	this.drill_COC_initBitmapDefault();
+}
+//==============================
+// * 全局默认值 - 自带参数初始化
+//==============================
+Bitmap.prototype.drill_COC_initBitmapDefault = function(){
+	if( $gameSystem == undefined ){ return; }
 	
-	// > 得到当前行字数
-	this._drill_COC_curLineNormalCharacterCount = this.drill_COWC_getCurLineNormalCharCount();
+	// > 『全局默认值』 - 使用值 - 所有文本
+	var cur_colorCode = DrillUp.drill_COC_getColor( $gameSystem._drill_COC_globalColorId );
 	
-	// > 清除 逐个字符变色 设置
-	this._drill_COC_linearCodeData = null;
+	// > 『全局默认值』 - 使用值 - 对话框
+	if( this.drill_COWC_isInMessageWindow() == true ){
+		if( $gameSystem._drill_COC_dialogMode == "自定义模式" ){
+			cur_colorCode = DrillUp.drill_COC_getColor( $gameSystem._drill_COC_dialogColorId );
+		}
+	}
+	
+	// > 『全局默认值』 - 使用值
+	this.textColor = cur_colorCode;
+};
+//==============================
+// * 全局默认值 - 获取颜色（开放函数）
+//
+//			说明：	> 返回如"#eeeeff"的颜色代码。
+//					> 此处的 n=1 等同于 \c[101]，等同于 <普通颜色:1> 。
+//==============================
+DrillUp.drill_COC_getColor = function( n ){
+	if( n > 200 ){			// 高级颜色（\c[200] - \c[299]）
+		return DrillUp.drill_COC_getSeniorColor( n-201 );
+	}else if(n > 100){		// 颜色（\c[100] - \c[199]）
+		return DrillUp.drill_COC_getCommonColor( n-101 );
+	}else{					// 默认颜色（\c[0] - \c[31]）
+		return DrillUp.drill_COWC_getTextColor( n );	//获取文本颜色【窗口字符 - 窗口字符核心】
+	}
+}
+//==============================
+// * 全局默认值 - 获取颜色 - 普通颜色
+//
+//			说明：	> 返回如"#eeeeff"的颜色代码。
+//					> 此处的 n=1 等同于 \c[101]，等同于 <普通颜色:1> 。
+//==============================
+DrillUp.drill_COC_getCommonColor = function( n ){
+	if( DrillUp.g_COC_color_list[n] == undefined ){ console.log( DrillUp.drill_COC_getPluginTip_ColorError1( n ) ); return "#ffffff" }
+	if( DrillUp.g_COC_color_list[n]['color'] == undefined ){ console.log( DrillUp.drill_COC_getPluginTip_ColorNotFind1( n ) ); return "#ffffff" }
+	return DrillUp.g_COC_color_list[n]['color'];
+}
+//==============================
+// * 全局默认值 - 获取颜色 - 高级颜色
+//
+//			说明：	> 返回如"#eeeeff"的颜色代码。
+//					> 此处的 n=1 等同于 \c[201]，等同于 <高级颜色:1> 。
+//==============================
+DrillUp.drill_COC_getSeniorColor = function( n ){
+	if( DrillUp.g_COC_seniorColor_list[n] == undefined ){ console.log( DrillUp.drill_COC_getPluginTip_ColorError2( n ) ); return "#ffffff" }
+	if( DrillUp.g_COC_seniorColor_list[n]['color'] == undefined ){ console.log( DrillUp.drill_COC_getPluginTip_ColorNotFind2( n ) ); return "#ffffff" }
+	return DrillUp.g_COC_seniorColor_list[n]['color'];
 }
 
 
 //=============================================================================
-// ** ☆文本颜色
+// ** ☆重置控制
 //
-//			说明：	> 此处将 文本颜色 功能统一为 开放函数 。
+//			说明：	> 此处兼容 重置 功能，包括 全重置字符 的效果。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 文本颜色 - 设置颜色代码（开放函数）
-//
-//			说明：	普通颜色(#开头)和高级颜色(drill开头)都可以。
+// * 重置控制 - 全重置字符（继承）
 //==============================
-Window_Base.prototype.drill_COC_setColor_Code = function( color ){
-	this.contents.textColor = color;
+// （不需要继承，因为 drill_COCD_textBlock_fontReset 中已经实现了赋值fr_xxx）
+//==============================
+// * 重置控制 - 全重置字符 - 执行
+//==============================
+Game_Temp.prototype.drill_COC_reset = function( cur_infoParam, cur_baseParam, cur_blockParam ){
+	if( cur_baseParam['fr_textColor'] != undefined ){ cur_baseParam['textColor'] = cur_baseParam['fr_textColor']; }
 };
 //==============================
-// * 文本颜色 - 设置颜色ID（开放函数）
+// * 重置控制 - 样式阶段-配置阶段（继承）
 //==============================
-Window_Base.prototype.drill_COC_setColor_Id = function( id ){
-	if( typeof id != "number" ){ return; }
-	this.contents.textColor = this.textColor( id );
-};
-//==============================
-// * 文本颜色 - 获取颜色代码 根据ID
-//
-//			说明：	调用此函数时，可以写："var color = this.textColor(101)"。
-//==============================
-var _drill_COC_textColor = Window_Base.prototype.textColor;
-Window_Base.prototype.textColor = function( n ){
-	if( n > 200 ){			// 高级颜色（\c[200] - \c[299]）
-		return DrillUp.drill_COC_getSeniorColor( n-201 );
-	}else if(n > 100){		// 颜色（\c[100] - \c[199]）
-		return DrillUp.drill_COC_getColor( n-101 );
-	}else{					// 默认颜色（\c[0] - \c[31]）
-		return _drill_COC_textColor.call(this,n);
+var _drill_COC_COCD_textBlock_processStyle_1 = Game_Temp.prototype.drill_COCD_textBlock_processStyle;
+Game_Temp.prototype.drill_COCD_textBlock_processStyle = function( command, args, cur_infoParam, cur_baseParam, cur_blockParam, cur_rowParam ){
+	_drill_COC_COCD_textBlock_processStyle_1.call( this, command, args, cur_infoParam, cur_baseParam, cur_blockParam, cur_rowParam );
+	
+	// > 『底层字符定义』 - 自定义重置字符（@@@dcc[reset]） drill_core_color
+	if( command == "@@@dcc" ){		//（大小写敏感）
+		if( args.length == 1 ){
+			if( String(args[0]) == "reset" ){
+				this.drill_COC_reset( cur_infoParam, cur_baseParam, cur_blockParam );
+				this.drill_COCD_textBlock_submitStyle();
+				return;
+			}
+		}
 	}
 };
 
+	
+	
 //=============================================================================
-// ** ☆颜色文本绘制
+// ** ☆管辖权
+//
+//			说明：	> 管辖权 即对 原函数 进行 修改、覆写、继承、控制子插件继承 等的权利。
+//					> 用于后期脱离 原游戏框架 且仍保持兼容性 的标记。
+//=============================================================================
+/*
+//==============================
+// * D窗口皮肤『颜色核心』 - 取色器 - 获取皮肤中的颜色
+//
+//			说明：	> 颜色取自窗口皮肤中的特定像素点。
+//==============================
+Window_Base.prototype.textColor = function( n ){
+    var px = 96 + (n % 8) * 12 + 6;
+    var py = 144 + Math.floor(n / 8) * 12 + 6;
+    return this.windowskin.getPixel(px, py);
+};
+//==============================
+// * D窗口皮肤『颜色核心』 - 取色器 - 获取指定含义的颜色
+//==============================
+Window_Base.prototype.normalColor    = function(){ return this.textColor(0);  };	//普通文本的颜色
+Window_Base.prototype.systemColor    = function(){ return this.textColor(16); };	//系统文本的颜色（比如角色属性的文本）
+Window_Base.prototype.crisisColor    = function(){ return this.textColor(17); };	//临死数字的颜色
+Window_Base.prototype.deathColor     = function(){ return this.textColor(18); };	//死亡数字的颜色
+Window_Base.prototype.gaugeBackColor = function(){ return this.textColor(19); };
+Window_Base.prototype.hpGaugeColor1  = function(){ return this.textColor(20); };
+Window_Base.prototype.hpGaugeColor2  = function(){ return this.textColor(21); };
+Window_Base.prototype.mpGaugeColor1  = function(){ return this.textColor(22); };
+Window_Base.prototype.mpGaugeColor2  = function(){ return this.textColor(23); };
+Window_Base.prototype.mpCostColor    = function(){ return this.textColor(23); };
+Window_Base.prototype.powerUpColor   = function(){ return this.textColor(24); };
+Window_Base.prototype.powerDownColor = function(){ return this.textColor(25); };
+Window_Base.prototype.tpGaugeColor1  = function(){ return this.textColor(28); };
+Window_Base.prototype.tpGaugeColor2  = function(){ return this.textColor(29); };
+Window_Base.prototype.tpCostColor    = function(){ return this.textColor(29); };
+//==============================
+// * D窗口皮肤『颜色核心』 - 取色器 - 获取队伍选中角色时的矩形颜色
+//
+//			说明：	> 该函数只被 Window_MenuStatus.prototype.drawItemBackground 用到了。
+//					  该函数返回的颜色是 闪烁白矩形 区域内的颜色。
+//==============================
+Window_Base.prototype.pendingColor = function(){
+    return this.windowskin.getPixel(120, 120);
+};
+//==============================
+// * D窗口皮肤『颜色核心』 - 取色器 - 获取属性增减的文本颜色
+//==============================
+Window_Base.prototype.paramchangeTextColor = function( change ){
+    if( change > 0 ){
+        return this.powerUpColor();
+    }else if( change < 0 ){
+        return this.powerDownColor();
+    }else{
+        return this.normalColor();
+    }
+};
+//==============================
+// * D窗口皮肤『颜色核心』 - 半透明（置灰的文字用）
+//==============================
+Window_Base.prototype.translucentOpacity = function(){
+    return 160;
+};
+//==============================
+// * D窗口皮肤『颜色核心』 - 切换半透明（是否置灰）
+//==============================
+Window_Base.prototype.changePaintOpacity = function( enabled ){
+    this.contents.paintOpacity = enabled ? 255 : this.translucentOpacity();
+};
+//==============================
+// * D窗口皮肤『颜色核心』 - 改变文本色
+//==============================
+Window_Base.prototype.changeTextColor = function( color ){
+    this.contents.textColor = color;
+};
+//==============================
+// * D窗口皮肤『颜色核心』 - 重置字体颜色
+//==============================
+Window_Base.prototype.resetTextColor = function(){
+    this.changeTextColor(this.normalColor());
+};
+*/
+	
+
+//=============================================================================
+// ** ☆管辖权覆写函数
+//
+//			说明：	> 此处将 管辖权覆写函数 功能统一为 开放函数 。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 管辖权覆写函数 - 获取文本颜色（覆写）
+//
+//			参数：	> n 数字   （颜色ID）
+//			返回：	> 字符串   （颜色字符串，如"#eeeeff"）
+//==============================
+Window_Base.prototype.textColor = function( n ){
+	return DrillUp.drill_COC_getColor( n );
+};
+//==============================
+// * 管辖权覆写函数 - 获取队伍选中角色时的矩形颜色（覆写）
+//
+//			参数：	> 无
+//			返回：	> 字符串   （颜色字符串，如"#eeeeff"）
+//==============================
+Window_Base.prototype.pendingColor = function(){
+	return DrillUp.drill_COWC_getPendingColor();	//获取队伍选中角色时的矩形颜色【窗口字符 - 窗口字符核心】
+};
+//==============================
+// * 管辖权覆写函数 - 窗口默认颜色（覆写）
+//==============================
+Window_Base.prototype.normalColor = function(){
+	return this.textColor( $gameSystem._drill_COC_globalColorId );
+};
+//==============================
+// * 管辖权覆写函数 - 对话框默认颜色（覆写）
+//==============================
+Window_Message.prototype.normalColor = function(){
+	return this.textColor( $gameSystem._drill_COC_dialogColorId );
+};
+
+
+
+//=============================================================================
+// ** ☆高级颜色绘制
 //
 //			说明：	> 在文本绘制时，解析高级颜色并使用渐变。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 颜色文本绘制 - 绘制绑定
+// * 高级颜色绘制 - 样式阶段-配置阶段（继承）
 //==============================
-var _drill_COC_bitmap_drawTextBody = Bitmap.prototype._drawTextBody;
-Bitmap.prototype._drawTextBody = function( text, tx, ty, maxWidth ){
+var _drill_COC_senior_COCD_textBlock_processStyle_1 = Game_Temp.prototype.drill_COCD_textBlock_processStyle;
+Game_Temp.prototype.drill_COCD_textBlock_processStyle = function( command, args, cur_infoParam, cur_baseParam, cur_blockParam, cur_rowParam ){
+	_drill_COC_senior_COCD_textBlock_processStyle_1.call( this, command, args, cur_infoParam, cur_baseParam, cur_blockParam, cur_rowParam );
+	
+	if( command == "@@@dcc" ){		//（大小写敏感）
+		if( args.length == 2 ){
+			if( String(args[0]) == "debug" ){
+				
+				// > 『底层字符定义』 - 高级颜色绘制（@@@dcc[debug:显示高级颜色框]） drill_core_color
+				if( String(args[1]) == "显示高级颜色框" ){
+					cur_baseParam['COC_seniorColorDebug'] = true;
+					this.drill_COCD_textBlock_submitStyle();
+					return;
+				}
+				
+				// > 『底层字符定义』 - 高级颜色绘制（@@@dcc[debug:隐藏高级颜色框]） drill_core_color
+				if( String(args[1]) == "隐藏高级颜色框" ){
+					cur_baseParam['COC_seniorColorDebug'] = false;
+					this.drill_COCD_textBlock_submitStyle();
+					return;
+				}
+			}
+		}
+	}
+};
+//==============================
+// * 高级颜色绘制 - 绘制绑定
+//==============================
+var _drill_COC_COCD_drawBaseText_body = Game_Temp.prototype.drill_COCD_drawBaseText_body;
+Game_Temp.prototype.drill_COCD_drawBaseText_body = function( painter, text, tx, ty, baseParam ){
 	
 	// > 高级颜色（渐变色）
-	if( typeof(this.textColor) == "string" && 
-		this.textColor != "" && 
-		this.textColor.indexOf("drill__") != -1 ){
+	if( baseParam['textColor'] != undefined && 
+		baseParam['textColor'] != "" && 
+		baseParam['textColor'].indexOf("drill__") != -1 ){
 		
 		// > 渐变数据
-		//		（比如："drill__45__0.0__#ffffff__1.0__#000000" ）
-		var str_args = this.textColor.substring(7).split('__');
+		//		（比如："drill__45__0.0__#00ff00__1.0__#0000ff" ）
+		var str_args = baseParam['textColor'].substring(7).split('__');
 		var angle = Number( str_args[0] );
 		var stop_valueList = [];
 		var stop_colorList = [];
@@ -1977,76 +2293,42 @@ Bitmap.prototype._drawTextBody = function( text, tx, ty, maxWidth ){
 		}
 		
 		// > 绘制高级颜色
-		this.drill_COC__drawSeniorTextBody( text, tx, ty, maxWidth, angle, stop_valueList, stop_colorList );
-		this._setDirty();
+		this.drill_COC_drawSeniorText_body( painter, text, tx, ty, baseParam, angle, stop_valueList, stop_colorList );
 		
 		
 	// > 普通颜色
 	}else{
-		_drill_COC_bitmap_drawTextBody.call(this,text, tx, ty, maxWidth);
+		_drill_COC_COCD_drawBaseText_body.call( this, painter, text, tx, ty, baseParam );
 	}
 };
 //==============================
-// * 颜色文本绘制 - 绘制高级颜色
+// * 高级颜色绘制 - 绘制高级颜色
 //==============================
-Bitmap.prototype.drill_COC__drawSeniorTextBody = function( text, tx, ty, maxWidth, angle, stop_valueList, stop_colorList ){
-	if( angle >= 360 ){ angle = angle % 360; }		//角度
-	var radian = angle / 180 * Math.PI;				//弧度
+Game_Temp.prototype.drill_COC_drawSeniorText_body = function( painter, text, tx, ty, baseParam, angle, stop_valueList, stop_colorList ){
+
+	// > 获取高宽
+	var width  = this.drill_COCD_measureBaseTextWidth( text, baseParam );		//宽度（直接计算）
+	var height = this.drill_COCD_measureBaseTextHeight( text, baseParam );		//高度（直接计算）
+	var xx = tx;			//（修正位置，即矩形的左上角位置）
+	var yy = ty - height;	//
 	
-	var width = this.measureTextWidth( text );		//宽度
-	if( width > maxWidth ){ width = maxWidth; }		//
-	var height = this.fontSize -4;					//高度（实际文字比字体大小要矮一点）
+	// > 求相交的两点
+	var result = this.drill_COC_Math2D_getTwoIntersectionPointInGradRect( xx, yy, width, height, angle );
+	if( result == null ){ return; }
 	
-	
-	// > 长方形与渐变斜线 求相交的两点
-	var midPoint = new Point( tx+width/2, ty-height/2 );
-	var angle_lim = Math.atan(width/height);
-	//  90度
-	if( radian === Math.PI/2 ){				
-		var x_0 = midPoint.x + width/2;
-		var y_0 = midPoint.y;
-		var x_1 = midPoint.x - width/2;
-		var y_1 = midPoint.y;
-	//  270度
-	}else if( radian === Math.PI*3/2 ){
-		var x_0 = midPoint.x - width/2;
-		var y_0 = midPoint.y;
-		var x_1 = midPoint.x + width/2;
-		var y_1 = midPoint.y;
-	}else if( radian <= angle_lim || radian > 2*Math.PI - angle_lim ){
-		var x_0 = midPoint.x + height/2 * Math.tan(radian);
-		var y_0 = midPoint.y - height/2;
-		var x_1 = midPoint.x - height/2 * Math.tan(radian);
-		var y_1 = midPoint.y + height/2;
-	}else if( radian > angle_lim && radian <= Math.PI - angle_lim ){
-		var x_0 = midPoint.x + width/2;
-		var y_0 = midPoint.y - width/(2 * Math.tan(radian));
-		var x_1 = midPoint.x - width/2;
-		var y_1 = midPoint.y + width/(2 * Math.tan(radian));
-	}else if( radian > Math.PI - angle_lim && radian <= Math.PI + angle_lim ){
-		var x_0 = midPoint.x - height/2 * Math.tan(radian);
-		var y_0 = midPoint.y + height/2;
-		var x_1 = midPoint.x + height/2 * Math.tan(radian);
-		var y_1 = midPoint.y - height/2;
-	}else {
-		var x_0 = midPoint.x - width/2;
-		var y_0 = midPoint.y + width/(2 * Math.tan(radian));
-		var x_1 = midPoint.x + width/2;
-		var y_1 = midPoint.y - width/(2 * Math.tan(radian));
-	}
-	
+	/*
 	// > 特殊偏移设置
 	//		（可能是nwjs的bug，只要是在Bitmap中设置渐变绘制，都会出现此偏移问题）
 	if( Utils.isNwjs() && this['drill_elements_drawText'] == true ){
-		x_0 -= tx;
-		x_1 -= tx;
-		y_0 -= ty;
-		y_1 -= ty;
+		result.x1 -= tx;
+		result.y1 -= tx;
+		result.x2 -= ty;
+		result.y2 -= ty;
 	}
+	*/
 	
 	// > 绘制渐变文字
-	var painter = this._context;
-	var grad = painter.createLinearGradient( x_0, y_0, x_1, y_1 );
+	var grad = painter.createLinearGradient( result.x1, result.y1, result.x2, result.y2 );
 	for( var i = 0; i < stop_valueList.length; i++ ){
 		grad.addColorStop( parseFloat(stop_valueList[i]), String(stop_colorList[i]) );
 	}
@@ -2054,104 +2336,188 @@ Bitmap.prototype.drill_COC__drawSeniorTextBody = function( text, tx, ty, maxWidt
 	
 	painter.fillStyle = grad;					//（b.设置样式）
 	
-	painter.fillText(text, tx, ty, maxWidth);	//（c.路径填充/描边，fillRect）
+	painter.fillText(text, tx, ty);				//（c.路径填充/描边，fillRect）
 	
     painter.restore();							//（d.回滚上一个画笔状态）
 	
 	
-	// > DEBUG
-	if( DrillUp.g_COC_debugMode == true ){
+	// > 『绘制过程定义』 - 高级颜色绘制（@@@dcc[debug:显示高级颜色框]、@@@dcc[debug:隐藏高级颜色框]）
+	if( DrillUp.g_COC_seniorColorDebugAll == true ||
+		baseParam['COC_seniorColorDebug'] == true ){
 		
 		// > DEBUG - 渐变矩阵范围
 		painter.save();										//（a.存储上一个画笔状态）
 		
-		painter.strokeStyle = "#ffff00";					//（b.设置样式）
+		painter.strokeStyle = "#ff0";						//（b.设置样式）
 		painter.lineWidth = 2;
 		
-		painter.strokeRect( tx, ty-height, width, height);	//（c.路径填充/描边，strokeRect）
+		painter.strokeRect( xx, yy, width, height);	//（c.路径填充/描边，strokeRect）
 	
 		painter.restore();									//（d.回滚上一个画笔状态）
 		
 		
 		// > DEBUG - 中心点
-		painter.save();											//（a.存储上一个画笔状态）
+		painter.save();												//（a.存储上一个画笔状态）
 		
-		painter.fillStyle = "#ff0000";							//（b.设置样式）
+		painter.fillStyle = "#f00";									//（b.设置样式）
 		
-		painter.fillRect( midPoint.x -2, midPoint.y -2, 4, 4 );	//（c.路径填充/描边，fillRect）
+		painter.fillRect( xx+width*0.5 -2, yy+height*0.5 -2, 4, 4 );//（c.路径填充/描边，fillRect）
 		
-		painter.restore();										//（d.回滚上一个画笔状态）
+		painter.restore();											//（d.回滚上一个画笔状态）
 		
 		
+		/*
 		// > DEBUG - 特殊偏移设置
 		if( Utils.isNwjs() && this['drill_elements_drawText'] == true ){
-			x_0 += tx;
-			x_1 += tx;
-			y_0 += ty;
-			y_1 += ty;
+			result.x1 -= tx;
+			result.y1 -= tx;
+			result.x2 -= ty;
+			result.y2 -= ty;
 		}
+		*/
 		
 		// > DEBUG - 渐变点
-		painter.save();								//（a.存储上一个画笔状态）
+		painter.save();											//（a.存储上一个画笔状态）
 		
-		painter.fillStyle = "#ff00ff";				//（b.设置样式）
+		painter.fillStyle = "#f0f";								//（b.设置样式）
 		
-		painter.fillRect( x_0 -2, y_0 -2, 4, 4);	//（c.路径填充/描边，fillRect）
-		painter.fillRect( x_1 -2, y_1 -2, 4, 4);
+		painter.fillRect( result.x1 -2, result.y1 -2, 4, 4 );	//（c.路径填充/描边，fillRect）
+		painter.fillRect( result.x2 -2, result.y2 -2, 4, 4 );
 		
-		painter.restore();							//（d.回滚上一个画笔状态）
+		painter.restore();										//（d.回滚上一个画笔状态）
 	}
 };
+//==============================
+// * 高级颜色绘制 - 数学工具 - 求相交的两点（矩形与一根穿过矩形中心的任意角度直线）
+//			
+//			参数：	> x, y, width, height 矩形范围
+//					> angle 数字                    （直线角度）
+//			返回：	> {'x1':0,'y1':0,'x2':1,'y2':1} （相交的两点）
+//					> null                          （无解）
+//			
+//			说明：	> 该函数主要用于计算渐变节点位置。
+//					> 要留意无解的情况，并做相关处理。
+//==============================
+Game_Temp.prototype.drill_COC_Math2D_getTwoIntersectionPointInGradRect = function( x,y,width,height, angle ){
+	
+	// > 检查是否为合法矩形
+	if( width  <= 0 ){ return null; }
+	if( height <= 0 ){ return null; }
+	
+	// > 角度转弧度
+	if( angle >= 360 ){ angle = angle % 360; }		//角度值（确保在 0~360 范围内）
+	var radian = angle / 180 * Math.PI;				//弧度值
+	
+	// > 求相交的两点
+	var c_x = x + width*0.5;					//（中心点）
+	var c_y = y + height*0.5;					//
+	var angle_lim = Math.atan(width/height);	//（对角线斜率）
+	
+	// > 求相交的两点 - 等于90度时
+	if( radian === Math.PI*0.5 ){
+		var x1 = c_x + width*0.5;
+		var y1 = c_y;
+		var x2 = c_x - width*0.5;
+		var y2 = c_y;
+	// > 求相交的两点 - 等于270度时
+	}else if( radian === Math.PI*1.5 ){
+		var x1 = c_x - width*0.5;
+		var y1 = c_y;
+		var x2 = c_x + width*0.5;
+		var y2 = c_y;
+	// > 求相交的两点 - 与矩形右侧线相交时 （假设对角线形成为45度，则表示 0度~45度 或 315度~360度 的范围）
+	}else if( radian <= angle_lim || radian > Math.PI*2 - angle_lim ){
+		var x1 = c_x + height*0.5 * Math.tan(radian);
+		var y1 = c_y - height*0.5;
+		var x2 = c_x - height*0.5 * Math.tan(radian);
+		var y2 = c_y + height*0.5;
+	// > 求相交的两点 - 与矩形上侧线相交时（假设对角线形成为45度，则表示 45度~135度 的范围）
+	}else if( radian > angle_lim && radian <= Math.PI - angle_lim ){
+		var x1 = c_x + width*0.5;
+		var y1 = c_y - width/(2 * Math.tan(radian));
+		var x2 = c_x - width*0.5;
+		var y2 = c_y + width/(2 * Math.tan(radian));
+	// > 求相交的两点 - 与矩形左侧线相交时（假设对角线形成为45度，则表示 135度~225度 的范围）
+	}else if( radian > Math.PI - angle_lim && radian <= Math.PI + angle_lim ){
+		var x1 = c_x - height*0.5 * Math.tan(radian);
+		var y1 = c_y + height*0.5;
+		var x2 = c_x + height*0.5 * Math.tan(radian);
+		var y2 = c_y - height*0.5;
+	// > 求相交的两点 - 与矩形下侧线相交时（假设对角线形成为45度，则表示 225度~315度 的范围）
+	}else {
+		var x1 = c_x - width*0.5;
+		var y1 = c_y + width/(2 * Math.tan(radian));
+		var x2 = c_x + width*0.5;
+		var y2 = c_y - width/(2 * Math.tan(radian));
+	}
+	
+	return {'x1':x1,'y1':y1,'x2':x2,'y2':y2};
+}
 
 
 //=============================================================================
-// ** ☆文本颜色绑定
+// ** ☆颜色暂存
 //
-//			说明：	> 此模块管理 默认文本色 的配置，其中包含插件指令 固定对话框文本色 的功能。
+//			说明：	> 在文本绘制时，解析高级颜色并使用渐变。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 文本颜色绑定 - 画笔同步（继承）
+// * 颜色暂存 - 样式阶段-配置阶段（继承）
 //==============================
-var _drill_COWC_COC_drawSynchronization = Window_Base.prototype.drill_COWC_drawSynchronization;
-Window_Base.prototype.drill_COWC_drawSynchronization = function( bitmap_from, bitmap_to ){
-	_drill_COWC_COC_drawSynchronization.call( this, bitmap_from, bitmap_to );
-	bitmap_to.color = bitmap_from.color;
+var _drill_COC_COCD_textBlock_processStyle_2 = Game_Temp.prototype.drill_COCD_textBlock_processStyle;
+Game_Temp.prototype.drill_COCD_textBlock_processStyle = function( command, args, cur_infoParam, cur_baseParam, cur_blockParam, cur_rowParam ){
+	_drill_COC_COCD_textBlock_processStyle_2.call( this, command, args, cur_infoParam, cur_baseParam, cur_blockParam, cur_rowParam );
+	
+	if( command.toLowerCase() == "@@@dcc" ){
+		if( args.length == 1 ){
+			
+			// > 『底层字符定义』 - 颜色暂存 - 存储（@@@dcc[save]） drill_core_color
+			if( String(args[0]) == "save" ){
+				cur_baseParam['COC_savedColor'] = cur_baseParam['textColor'];
+				this.drill_COCD_textBlock_submitStyle();
+				return;
+			}
+			// > 『底层字符定义』 - 颜色暂存 - 读取（@@@dcc[load]） drill_core_color
+			if( String(args[0]) == "load" ){
+				if( cur_baseParam['COC_savedColor'] != undefined ){
+					cur_baseParam['textColor'] = cur_baseParam['COC_savedColor'];
+				}
+				this.drill_COCD_textBlock_submitStyle();
+				return;
+			}
+			
+			// > 『底层字符定义』 - 颜色暂存 - 脚本用存储（@@@dcc[oSave]） drill_core_color
+			if( String(args[0]) == "oSave" ){	//（与save一样，但是脚本专用）
+				cur_baseParam['COC_otherSavedColor'] = cur_baseParam['textColor'];
+				this.drill_COCD_textBlock_submitStyle();
+				return;
+			}
+			// > 『底层字符定义』 - 颜色暂存 - 脚本用读取（@@@dcc[oLoad]） drill_core_color
+			if( String(args[0]) == "oLoad" ){	//（与load一样，但是脚本专用）
+				if( cur_baseParam['COC_otherSavedColor'] != undefined ){
+					cur_baseParam['textColor'] = cur_baseParam['COC_otherSavedColor'];
+				}
+				this.drill_COCD_textBlock_submitStyle();
+				return;
+			}
+		}
+	}
 };
-/*
 //==============================
-// * 文本颜色绑定 - 重置绑定
+// * 逐个字符变色 - 样式阶段-回滚样式（继承）
 //==============================
-var _drill_COC_resetFontSettings = Window_Base.prototype.resetFontSettings;
-Window_Base.prototype.resetFontSettings = function() {
-	_drill_COC_resetFontSettings.call(this);
-	this.drill_COC_resetTextColor();
-};
-//==============================
-// * 文本颜色绑定 - 重置（全局默认）
-//==============================
-Window_Base.prototype.drill_COC_resetTextColor = function() {
-	if( this.contents == undefined ){ return; }
-	this.contents.color = this.textColor( $gameSystem._drill_COC_fontColorIndex );
-};
-//==============================
-// * 文本颜色绑定 - 重置（对话框）
-//==============================
-Window_Message.prototype.drill_COC_resetTextColor = function() {
-	if( this.contents == undefined ){ return; }
-	this.contents.color = this.textColor( $gameSystem._drill_COC_dialog_fontColorIndex );
-};*/
-//==============================
-// * 文本颜色绑定 - 默认颜色（覆写）
-//==============================
-Window_Base.prototype.normalColor = function(){
-	return this.textColor( $gameSystem._drill_COC_fontColorIndex );
-};
-//==============================
-// * 文本颜色绑定 - 默认颜色（对话框）（覆写）
-//==============================
-Window_Message.prototype.normalColor = function(){
-	return this.textColor( $gameSystem._drill_COC_dialog_fontColorIndex );
+var _drill_COC_COCD_textBlock_restoreStyle_2 = Game_Temp.prototype.drill_COCD_textBlock_restoreStyle;
+Game_Temp.prototype.drill_COCD_textBlock_restoreStyle = function( cur_infoParam, cur_baseParam, cur_blockParam, cur_rowParam ){
+	_drill_COC_COCD_textBlock_restoreStyle_2.call( this, cur_infoParam, cur_baseParam, cur_blockParam, cur_rowParam );
+	
+	// > 『底层字符样式回滚』 - 颜色暂存 - 存储（@@@dcc[save]）
+	//	（不操作）
+	// > 『底层字符样式回滚』 - 颜色暂存 - 读取（@@@dcc[load]）
+	//	（不操作）
+	// > 『底层字符样式回滚』 - 颜色暂存 - 脚本用存储（@@@dcc[oSave]）
+	//	（不操作）
+	// > 『底层字符样式回滚』 - 颜色暂存 - 脚本用读取（@@@dcc[oLoad]）
+	//	（不操作）
 };
 
 
@@ -2162,58 +2528,112 @@ Window_Message.prototype.normalColor = function(){
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 逐个变色 - 初始化（开放函数）
+// * 逐个字符变色 - 样式阶段-配置阶段（继承）
 //==============================
-Window_Base.prototype.drill_COC_setColorLinearCode = function( color1, color2, char_num ){
-	if( color1.slice(0,1) != "#" ){ return; }
-	if( color2.slice(0,1) != "#" ){ return; }
-    this.contents.textColor = color1;
+var _drill_COC_COCD_textBlock_processStyle_3 = Game_Temp.prototype.drill_COCD_textBlock_processStyle;
+Game_Temp.prototype.drill_COCD_textBlock_processStyle = function( command, args, cur_infoParam, cur_baseParam, cur_blockParam, cur_rowParam ){
+	_drill_COC_COCD_textBlock_processStyle_3.call( this, command, args, cur_infoParam, cur_baseParam, cur_blockParam, cur_rowParam );
 	
-	// > 如果为空，则获取到 当前行字数
-	if( char_num == undefined ){
-		char_num = this._drill_COC_curLineNormalCharacterCount;
+	if( command == "@@@dcc" ){		//（大小写敏感）
+	
+		// > 『底层字符定义』 - 逐个字符变色（@@@dcc[linear:#0f0:#00f]） drill_core_color
+		if( args.length == 3 ){
+			if( String(args[0]) == "linear" ){
+				cur_blockParam['COC_linearEnabled'] = true;
+				cur_blockParam['COC_linearStart'] = String(args[1]);
+				cur_blockParam['COC_linearEnd'] = String(args[2]);
+				cur_blockParam['COC_linearCount'] = null;	//（这个时候 cur_infoParam 中还没有统计数据）
+			}
+			this.drill_COCD_textBlock_submitStyle();
+			return;
+		}
+		
+		// > 『底层字符定义』 - 逐个字符变色（@@@dcc[linear:#0f0:#00f:10]） drill_core_color
+		if( args.length == 4 ){
+			if( String(args[0]) == "linear" ){
+				cur_blockParam['COC_linearEnabled'] = true;
+				cur_blockParam['COC_linearStart'] = String(args[1]);
+				cur_blockParam['COC_linearEnd'] = String(args[2]);
+				cur_blockParam['COC_linearCount'] = String(args[3]);
+			}
+			this.drill_COCD_textBlock_submitStyle();
+			return;
+		}
 	}
-	if( char_num <= 1 ){ return; }
-	
-	// > 数据标记
-	var rgb1 = $gameTemp.drill_COC_color_StringToRGB( color1 );
-	var rgb2 = $gameTemp.drill_COC_color_StringToRGB( color2 );
-	var data = {};
-	data['cur_index'] = -1;
-	data['tar_index'] = char_num;
-	data['org_r'] = rgb1['r'];
-	data['org_g'] = rgb1['g'];
-	data['org_b'] = rgb1['b'];
-	data['inc_r'] = (rgb2['r'] - rgb1['r'])/(char_num-1);
-	data['inc_g'] = (rgb2['g'] - rgb1['g'])/(char_num-1);
-	data['inc_b'] = (rgb2['b'] - rgb1['b'])/(char_num-1);
-	this._drill_COC_linearCodeData = data;
 };
 //==============================
-// * 逐个变色 - 逐一绘制 - 一般字符
+// * 逐个字符变色 - 样式阶段-回滚样式（继承）
 //==============================
-var _drill_COC_processNormalCharacter = Window_Base.prototype.processNormalCharacter;
-Window_Base.prototype.processNormalCharacter = function( textState ){
-	_drill_COC_processNormalCharacter.call( this,textState );
-	if( this.drill_COWA_isCalculating() == true ){ return; }	//（排除 计算文本高度/宽度 情况）
+var _drill_COC_COCD_textBlock_restoreStyle_3 = Game_Temp.prototype.drill_COCD_textBlock_restoreStyle;
+Game_Temp.prototype.drill_COCD_textBlock_restoreStyle = function( cur_infoParam, cur_baseParam, cur_blockParam, cur_rowParam ){
+	_drill_COC_COCD_textBlock_restoreStyle_3.call( this, cur_infoParam, cur_baseParam, cur_blockParam, cur_rowParam );
 	
-	if( this._drill_COC_linearCodeData != undefined ){
-		var data = this._drill_COC_linearCodeData;
-		data['cur_index'] += 1;
+	// > 『底层字符样式回滚』 - 逐个字符变色（@@@dcc[linear:#0f0:#00f]、@@@dcc[linear:#0f0:#00f:10]）
+	cur_blockParam['COC_linearEnabled'] = undefined;
+	cur_blockParam['COC_linearStart'] = undefined;
+	cur_blockParam['COC_linearEnd'] = undefined;
+	cur_blockParam['COC_linearCount'] = undefined;
+};
+//==============================
+// * 逐个字符变色 - 统计结束阶段（继承）
+//==============================
+var _drill_COC_COCD_total_processAfterTotal = Game_Temp.prototype.drill_COCD_total_processAfterTotal;
+Game_Temp.prototype.drill_COCD_total_processAfterTotal = function( rowBlock_list, infoParam ){
+	_drill_COC_COCD_total_processAfterTotal.call( this, rowBlock_list, infoParam );
+	
+	// > 『绘制过程定义』 - 逐个字符变色（@@@dcc[linear:#0f0:#00f]、@@@dcc[linear:#0f0:#00f:10]）
+	for(var i = 0; i < rowBlock_list.length; i++ ){
+		var rowBlock = rowBlock_list[i];
+		var rowParam = rowBlock.drill_rowBlock_getRowParam();
+		var linearEnabled = false;
+		var linearIndex = 0;
+		var linearCount = 0;
+		var org_rgb = null;
+		var inc_rgb = null;
 		
-		// > 设置颜色
-		var r = Math.floor( data['org_r'] + data['inc_r'] * data['cur_index'] );
-		var g = Math.floor( data['org_g'] + data['inc_g'] * data['cur_index'] );
-		var b = Math.floor( data['org_b'] + data['inc_b'] * data['cur_index'] );
-		var str = "rgb("+r+","+g+","+b+")";
-		this.drill_COC_setColor_Code( str );
-		
-		// > 结束后 销毁标记
-		if( data['cur_index'] > data['tar_index'] ){
-			this._drill_COC_linearCodeData = null;
+		var textBlock_list = rowBlock.drill_rowBlock_getTextBlockList();
+		for(var j = 0; j < textBlock_list.length; j++ ){
+			var textBlock = textBlock_list[j];
+			var baseParam = textBlock.drill_textBlock_getBaseParam();
+			var blockParam = textBlock.drill_textBlock_getBlockParam();
+			
+			// > 开始计数
+			//		（COC_linearEnabled只会出现一次，如果出现多次，可能是核心中 回滚样式 功能出了问题）
+			if( blockParam['COC_linearEnabled'] == true ){
+				linearEnabled = true;
+				linearIndex = 0;
+				linearCount = blockParam['COC_linearCount'];
+				if( linearCount == null ){
+					linearCount = rowParam['total_rowCharCount'] - j;	//（当前行的剩余字数）
+				}
+				var rgb1 = $gameTemp.drill_COC_color_StringToRGB( blockParam['COC_linearStart'] );
+				var rgb2 = $gameTemp.drill_COC_color_StringToRGB( blockParam['COC_linearEnd'] );
+				org_rgb = rgb1;
+				var inc_r = (rgb2['r'] - rgb1['r'])/(linearCount-1);
+				var inc_g = (rgb2['g'] - rgb1['g'])/(linearCount-1);
+				var inc_b = (rgb2['b'] - rgb1['b'])/(linearCount-1);
+				inc_rgb = { 'r':inc_r, 'g':inc_g, 'b':inc_b };
+			}
+			
+			// > 逐个字符变色
+			if( linearEnabled == true ){
+				var r = Math.floor( org_rgb['r'] + inc_rgb['r'] * linearIndex );
+				var g = Math.floor( org_rgb['g'] + inc_rgb['g'] * linearIndex );
+				var b = Math.floor( org_rgb['b'] + inc_rgb['b'] * linearIndex );
+				var color_str = "rgb("+r+","+g+","+b+")";
+				baseParam['textColor'] = color_str;
+				//alert( linearIndex + " - " + color_str );
+				
+				// > 索引+1
+				linearIndex += 1;
+				if( linearIndex >= linearCount ){
+					linearEnabled = false;
+				}
+			}
 		}
 	}
 }
+
 
 
 //=============================================================================
@@ -2233,11 +2653,11 @@ Window_Base.prototype.processNormalCharacter = function( textState ){
 Game_Temp.prototype.drill_COC_color_StringToRGB = function( color_string ){
 	color_string = color_string.toLowerCase();
 	
-	// > 格式"#ffffff"情况
+	// > 格式"#eeeeff"情况
 	if( color_string.charAt(0) == "#" ){
 		color_string = color_string.substring(1);
 		
-		// > 格式"#fff"情况
+		// > 格式"#eef"情况
 		if( color_string.length == 3 ){
 			color_string = color_string[0]+color_string[0] +color_string[1]+color_string[1] +color_string[2]+color_string[2];
 		}
@@ -2283,11 +2703,11 @@ Game_Temp.prototype.drill_COC_color_RGBToString = function( r, g, b ){
 Game_Temp.prototype.drill_COC_color_StringToRGBA = function( color_string ){
 	color_string = color_string.toLowerCase();
 	
-	// > 格式"#ffffff"情况
+	// > 格式"#eeeeff"情况
 	if( color_string.charAt(0) == "#" ){
 		color_string = color_string.substring(1);
 		
-		// > 格式"#fff"情况
+		// > 格式"#eef"情况
 		if( color_string.length == 3 ){
 			color_string = color_string[0]+color_string[0] +color_string[1]+color_string[1] +color_string[2]+color_string[2];
 		}
@@ -2328,6 +2748,110 @@ Game_Temp.prototype.drill_COC_color_RGBAToString = function( r, g, b, a ){
 
 
 //=============================================================================
+// ** ☆DEBUG颜色测试
+//
+//			说明：	> 此模块控制 DEBUG颜色测试 功能。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * DEBUG颜色测试 - 帧刷新（地图界面）
+//==============================
+var _drill_COC_debug_update = Scene_Map.prototype.update;
+Scene_Map.prototype.update = function() {
+    _drill_COC_debug_update.call(this);
+	
+	// > 创建贴图
+	if( $gameTemp._drill_COC_DebugEnabled == true ){
+		$gameTemp._drill_COC_DebugEnabled = undefined;
+		this.drill_COC_createDebugSprite();
+	}
+	// > 销毁贴图
+	if( $gameTemp._drill_COC_DebugEnabled == false ){
+		$gameTemp._drill_COC_DebugEnabled = undefined;
+		if( this._drill_COC_DebugSprite != undefined ){
+			this.removeChild(this._drill_COC_DebugSprite);
+			this._drill_COC_DebugSprite = undefined;
+		}
+	}
+}
+//==============================
+// * DEBUG颜色测试 - 创建贴图
+//==============================
+Scene_Map.prototype.drill_COC_createDebugSprite = function() {
+	
+	// > 销毁贴图
+	if( this._drill_COC_DebugSprite != undefined ){
+		this.removeChild(this._drill_COC_DebugSprite);
+		this._drill_COC_DebugSprite = undefined;
+	}
+	
+	// > 创建贴图
+	var temp_window = new Window_Base( 40, 40, 736, 544 );
+	this.addChild( temp_window );	//（直接加在最顶层的上面）
+	this._drill_COC_DebugSprite = temp_window;
+	
+	// > 绘制 - 矩形
+	var temp_bitmap = temp_window.contents;
+	temp_bitmap.drill_COCD_strokeRect( 0, 0, temp_bitmap.width, temp_bitmap.height, "#22aa22", 2, "miter" );
+	
+	// > 绘制 - 参数准备
+	var options = {};
+	options['infoParam'] = {};
+	options['infoParam']['x'] = 0;
+	options['infoParam']['y'] = 0;
+	options['infoParam']['canvasWidth'] = temp_bitmap.width;
+	options['infoParam']['canvasHeight'] = temp_bitmap.height;
+	
+	// > 绘制 - 参数准备 - 自定义
+	options['blockParam'] = {};					//『清零字符默认间距』
+	options['blockParam']['paddingTop'] = 0;
+	options['rowParam'] = {};
+	options['rowParam']['lineHeight_upCorrection'] = 0;
+	
+	options['baseParam'] = {};
+	options['baseParam']['drawDebugBaseRect'] = false;
+	options['baseParam']['fontSize'] = 18;		//（初始设置字体大小，这样就不会被 全局默认值 干扰了）
+												//（但是fr重置之后，仍然需要再次修改字体大小）
+	
+	
+	// > 绘制 - 测试的字符
+	var text =  "【" + DrillUp.g_COC_PluginTip_curName + "】\n" + 
+				"》当前测试 颜色核心 的功能效果。\n" + 
+				"如果不做任何操作，则使用 全局默认值-所有文本 的颜色配置。\n" + 
+				"若插件配置了所有文本开启颜色，那么此段文本也会对应有颜色效果。\n" + 
+				
+				"》普通颜色如下：\n" + 
+				"\\\\c[101]  颜色（赤）  \\c[101]测试的字符 \\CC[reset]\n" + 
+				"\\\\c[102]  颜色（橙）  \\c[102]测试的字符 \\CC[reset]\n" + 
+				"\\\\c[103]  颜色（黄）  \\c[103]测试的字符 \\CC[reset]\n" + 
+				"\\\\c[104]  颜色（绿）  \\c[104]测试的字符 \\CC[reset]\n" + 
+				
+				"》高级颜色如下：\n" + 
+				"\\\\c[202]  颜色（渐变橙）  \\c[202]测试的字符 \\CC[reset]\n" + 
+				"\\\\c[203]  颜色（渐变黄）  \\c[203]测试的字符 \\CC[reset]\n" + 
+				"\\\\c[204]  颜色（渐变绿）  \\c[204]测试的字符 \\CC[reset]\n" + 
+				"\\\\c[212]  颜色（横渐变红）  \\c[212]测试的字符 \\CC[reset]\n" + 
+				"\\\\c[213]  颜色（横渐变绿）  \\c[213]测试的字符 \\CC[reset]\n" + 
+				"\\\\c[214]  颜色（横渐变蓝）  \\c[214]测试的字符 \\CC[reset]\n" + 
+				"\\\\CC[DEBUG:显示高级颜色框]  显示/隐藏高级颜色框  \\CC[DEBUG:显示高级颜色框]\\c[201]测试的字符\\c[203]测试字符\\c[204]测试的\\CC[DEBUG:隐藏高级颜色框]字符 \\CC[reset]\n" + 
+				
+				"》自定义颜色如下：\n" + 
+				"\\\\cc[#ff00ff]  颜色（紫红）  \\cc[#ff00ff]测试的字符 \\CC[reset]\n" + 
+				
+				"》暂存颜色测试：\n" + 
+				"\\\\cc[save] 和 \\\\cc[load]  暂存颜色/读取颜色  \\c[201]现在是红色，\\cc[save]存储\\c[6]并改色，现在\\cc[load]恢复颜色 \\CC[reset]\n" + 
+				
+				"》逐个字符变色测试：\n" + 
+				"\\\\clc[#aaffaa:#aaaaff:10]  逐个字符变色  \\clc[#aaffaa:#aaaaff:10]这是一串测试渐变效果的字符 \\CC[reset]\n" + 
+				"\\\\clc[#aaffaa:#aaaaff:当前行字数]  逐个字符变色  \\clc[#aaffaa:#aaaaff:当前行字数]这是一串测试渐变效果的字符 \\CC[reset]\n" + 
+				
+				"\n";
+	
+	temp_window.drill_COWC_drawText( text, options );
+}
+
+
+//=============================================================================
 // * <<<<基于插件检测<<<<
 //=============================================================================
 }else{
@@ -2335,4 +2859,5 @@ Game_Temp.prototype.drill_COC_color_RGBAToString = function( r, g, b, a ){
 		var pluginTip = DrillUp.drill_COC_getPluginTip_NoBasePlugin();
 		alert( pluginTip );
 }
+
 

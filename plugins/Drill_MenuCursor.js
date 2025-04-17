@@ -28,7 +28,7 @@
  * 基于：
  *   - Drill_CoreOfBallistics        数学模型-弹道核心★★v1.5以上★★
  * 可作用于：
- *   - Drill_CoreOfSelectableButton  系统-按钮组核心
+ *   - Drill_CoreOfSelectableButton  系统-按钮组核心★★v1.8及以上★★
  *     可以使得该指针指向按钮组核心中的按钮。
  * 
  * -----------------------------------------------------------------------------
@@ -72,6 +72,7 @@
  * 插件指令：>菜单指针 : 显示
  * 插件指令：>菜单指针 : 隐藏
  * 插件指令：>菜单指针 : 修改样式 : 样式[2]
+ * 插件指令：>菜单指针 : 恢复默认样式
  * 
  * 1.修改样式后，对所有窗口都有效，但不包括锁定了指针的窗口。
  * 
@@ -248,6 +249,7 @@
  * @desc 只用于方便区分查看的标签，不作用在插件中。
  * @default ==新的指针样式==
  * 
+ * 
  * @param ---常规---
  * @desc 
  * 
@@ -307,6 +309,7 @@
  * @value 4
  * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
  * @default 0
+ * 
  * 
  * @param ---移动方式---
  * @desc 
@@ -394,6 +397,30 @@
  * 
  * @param ---自变化效果---
  * @desc 
+ *
+ * @param 浮动效果
+ * @parent ---自变化效果---
+ * @type select
+ * @option 关闭
+ * @value 关闭
+ * @option 左右浮动
+ * @value 左右浮动
+ * @option 上下浮动
+ * @value 上下浮动
+ * @desc 当前选中的按钮，会来回浮动。
+ * @default 关闭
+ * 
+ * @param 浮动速度
+ * @parent 浮动效果
+ * @desc 浮动变化的速度。
+ * @default 7.0
+ *
+ * @param 浮动偏移量
+ * @parent 浮动效果
+ * @type number
+ * @min 1
+ * @desc 使用左右或者上下浮动时，浮动偏移的位置量，单位像素。
+ * @default 8
  * 
  * @param 摇晃效果
  * @parent ---自变化效果---
@@ -440,30 +467,6 @@
  * @parent 缩放效果
  * @desc 缩放变化的比例幅度范围。
  * @default 0.2
- *
- * @param 浮动效果
- * @parent ---自变化效果---
- * @type select
- * @option 关闭
- * @value 关闭
- * @option 左右浮动
- * @value 左右浮动
- * @option 上下浮动
- * @value 上下浮动
- * @desc 当前选中的按钮，会来回浮动。
- * @default 关闭
- * 
- * @param 浮动速度
- * @parent 浮动效果
- * @desc 浮动变化的速度。
- * @default 7.0
- *
- * @param 浮动偏移量
- * @parent 浮动效果
- * @type number
- * @min 1
- * @desc 使用左右或者上下浮动时，浮动偏移的位置量，单位像素。
- * @default 8
  * 
  * @param 持续自旋转
  * @parent ---自变化效果---
@@ -592,7 +595,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_MCu_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_MCu_PluginTip_baseList.length == 0 ){ return ""; }
@@ -603,21 +606,33 @@
 		}
 		return message;
 	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到样式
+	//==============================
+	DrillUp.drill_MCu_getPluginTip_StyleNotFind = function( style_id ){
+		return "【" + DrillUp.g_MCu_PluginTip_curName + "】\n对象创建失败，id为"+style_id+"的样式配置为空或不存在。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - NaN校验值
+	//==============================
+	DrillUp.drill_MCu_getPluginTip_ParamIsNaN = function( param_name ){
+		return "【" + DrillUp.g_MCu_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+	};
 	
 	
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_MenuCursor = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_MenuCursor');
+	var Imported = Imported || {};
+	Imported.Drill_MenuCursor = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_MenuCursor');
 
 	//==============================
 	// * 静态数据 - 样式
 	//				（~struct~DrillMCuStyle）
 	//==============================
-	DrillUp.drill_MCu_initStyle = function( dataFrom ) {
+	DrillUp.drill_MCu_initStyle = function( dataFrom ){
 		var data = {};
 		
 		// > 控制器
@@ -659,23 +674,36 @@
 		data['gif_initFrame'] = Number( dataFrom["锁定帧数"] || 0);
 		
 		// > E自变化效果
-		data['cursor_swing'] = String( dataFrom["摇晃效果"] || "关闭");
-		data['cursor_swingSpeed'] = Number( dataFrom["摇晃速度"] || 4.0);
-		data['cursor_swingRange'] = Number( dataFrom["摇晃幅度范围"] || 12);
-		data['cursor_zoom'] = String( dataFrom["缩放效果"] || "关闭");
-		data['cursor_zoomSpeed'] = Number( dataFrom["缩放速度"] || 1.0);
-		data['cursor_zoomRange'] = Number( dataFrom["缩放幅度范围"] || 0.2);
-		data['cursor_float'] = String( dataFrom["浮动效果"] || "关闭");
-		data['cursor_floatSpeed'] = Number( dataFrom["浮动速度"] || 1.0);
-		data['cursor_floatRange'] = Number( dataFrom["浮动偏移量"] || 15);
-		data['cursor_rotating'] = String( dataFrom["持续自旋转"] || "关闭");
-		data['cursor_rotatingSpeed'] = Number( dataFrom["自旋转速度"] || 10);
+		data['effect_float'] = String( dataFrom["浮动效果"] || "关闭");
+		data['effect_floatSpeed'] = Number( dataFrom["浮动速度"] || 1.0);
+		data['effect_floatRange'] = Number( dataFrom["浮动偏移量"] || 15);
+		//data['effect_flicker'] = String( dataFrom["闪烁效果"] || "关闭");
+		//data['effect_flickerSpeed'] = Number( dataFrom["闪烁速度"] || 6.0);
+		//data['effect_flickerRange'] = Number( dataFrom["闪烁幅度范围"] || 20);
+		data['effect_swing'] = String( dataFrom["摇晃效果"] || "关闭");
+		data['effect_swingSpeed'] = Number( dataFrom["摇晃速度"] || 4.0);
+		data['effect_swingRange'] = Number( dataFrom["摇晃幅度范围"] || 12);
+		data['effect_zoom'] = String( dataFrom["缩放效果"] || "关闭");
+		data['effect_zoomSpeed'] = Number( dataFrom["缩放速度"] || 1.0);
+		data['effect_zoomRange'] = Number( dataFrom["缩放幅度范围"] || 0.2);
+		data['effect_rotating'] = String( dataFrom["持续自旋转"] || "关闭");
+		data['effect_rotatingSpeed'] = Number( dataFrom["自旋转速度"] || 10);
 		
 		return data;
 	}
-	
-	/*-----------------杂项------------------*/
-	DrillUp.g_MCu_defaultStyle = Number(DrillUp.parameters["默认指针样式"] || 1);
+	//==============================
+	// * 静态数据 - 获取样式
+	//==============================
+	DrillUp.drill_MCu_getStyleData = function( style_index ){
+		var cur_styleId   = style_index +1;
+		var cur_styleData = DrillUp.g_MCu_list[ style_index ];
+		if( cur_styleData == undefined ){
+			alert( DrillUp.drill_MCu_getPluginTip_StyleNotFind(cur_styleId) );
+			//（警告后继续执行）
+			return DrillUp.drill_MCu_initStyle( {} );
+		}
+		return cur_styleData;
+	};
 	
 	/*-----------------样式集------------------*/
 	DrillUp.g_MCu_list_length = 20;
@@ -686,9 +714,12 @@
 			var data = JSON.parse(DrillUp.parameters["菜单指针样式-" + String(i+1) ]);
 			DrillUp.g_MCu_list[i] = DrillUp.drill_MCu_initStyle( data );
 		}else{
-			DrillUp.g_MCu_list[i] = DrillUp.drill_MCu_initStyle( {} );
+			DrillUp.g_MCu_list[i] = undefined;		//（设为空值，节约静态数据占用容量）
 		}
 	}
+	
+	/*-----------------杂项------------------*/
+	DrillUp.g_MCu_defaultStyleId = Number(DrillUp.parameters["默认指针样式"] || 1);
 	
 	
 //=============================================================================
@@ -700,18 +731,31 @@ if( Imported.Drill_CoreOfBallistics ){
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_MCu_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_MCu_pluginCommand.call(this, command, args);
+	this.drill_MCu_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_MCu_pluginCommand = function( command, args ){
 	if( command === ">菜单指针" ){
 		
 		if( args.length == 2 ){
 			var type = String(args[1]);
-			if( type == "显示" ){	
+			if( type == "显示" ){
 				$gameSystem._drill_MCu_controller.drill_controller_setVisible( true );
 			}
-			if( type == "隐藏" ){	
+			if( type == "隐藏" ){
 				$gameSystem._drill_MCu_controller.drill_controller_setVisible( false );
+			}
+			if( type == "恢复默认样式" ){
+				$gameSystem._drill_MCu_curStyleId = DrillUp.g_MCu_defaultStyleId;
+				DrillUp.drill_MCu_getStyleData( $gameSystem._drill_MCu_curStyleId -1 );	//（校验）
 			}
 		}
 		if( args.length == 4 ){
@@ -720,7 +764,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( type == "修改样式" ){	
 				temp1 = temp1.replace("样式[","");
 				temp1 = temp1.replace("]","");
-				$gameSystem._drill_MCu_style = Number(temp1);
+				$gameSystem._drill_MCu_curStyleId = Number(temp1);
+				DrillUp.drill_MCu_getStyleData( $gameSystem._drill_MCu_curStyleId -1 );	//（校验）
 			}
 		}
 	}
@@ -794,16 +839,14 @@ Game_System.prototype.drill_MCu_checkSysData = function() {
 //==============================
 Game_System.prototype.drill_MCu_initSysData_Private = function() {
 	
-	// > 当前样式
-	var style_id = DrillUp.g_MCu_defaultStyle;
-	this._drill_MCu_style = style_id;
+	// > 『控制器与贴图的样式』 - 校验+提示信息
+	this._drill_MCu_curStyleId = DrillUp.g_MCu_defaultStyleId;	//（注意，这个id从1开始计数，因为要适配子插件）
+	var cur_styleData = DrillUp.drill_MCu_getStyleData( this._drill_MCu_curStyleId -1 );
 	
-	// > 控制器（单个）
-	var data = DrillUp.g_MCu_list[ style_id -1 ];
-	var temp_controller = new Drill_MCu_Controller( data );
-	temp_controller._drill_curStyleId = style_id;
+	// > 『控制器与贴图的样式』 - 创建控制器
+	var temp_controller = new Drill_MCu_Controller( cur_styleData );
+	temp_controller._drill_curStyleId = this._drill_MCu_curStyleId;
 	this._drill_MCu_controller = temp_controller;
-	
 };
 //==============================
 // * 存储数据 - 载入存档时检查数据（私有）
@@ -811,10 +854,9 @@ Game_System.prototype.drill_MCu_initSysData_Private = function() {
 Game_System.prototype.drill_MCu_checkSysData_Private = function() {
 	
 	// > 旧存档数据自动补充
-	if( this._drill_MCu_controller == undefined ){
+	if( this._drill_MCu_curStyleId == undefined ){
 		this.drill_MCu_initSysData();
 	}
-	
 };
 
 
@@ -1274,7 +1316,7 @@ Window_Selectable.prototype.drill_MCu_cursorEnabled = function() {
 //			说明：	> 子类继承用接口，注意必须是 可选项窗口 才能自定义菜单指针。
 //==============================
 Window_Selectable.prototype.drill_MCu_cursorStyleId = function() {
-	return $gameSystem._drill_MCu_style;
+	return $gameSystem._drill_MCu_curStyleId;
 };
 
 
@@ -1375,15 +1417,17 @@ Window_Selectable.prototype.updateArrows = function() {
 	// > 实体类 - 启用/关闭
 	bean.drill_bean_setEnable( this.drill_MCu_isEnabled() );
 	
-	// > 实体类 - 按钮组样式
+	// > 实体类 - 按钮组样式【系统 - 按钮组核心】
 	var style_id = this.drill_MCu_cursorStyleId();	//（子类可继承此方法，来锁定指针样式）
-	if( this._drill_COSB_isOccupyed == true ){
+	if( Imported.Drill_CoreOfSelectableButton &&
+		this._drill_COSB_isOccupyed == true ){
 		style_id = this._drill_COSB_forceCursorStyle;
 	}
 	bean.drill_bean_setStyleId( style_id );
 	
-	// > 按钮组情况
-	if( this._drill_COSB_isOccupyed == true &&
+	// > 实体类 - 按钮组情况【系统 - 按钮组核心】
+	if( Imported.Drill_CoreOfSelectableButton &&
+		this._drill_COSB_isOccupyed == true &&
 		this._drill_COSB_selectedBtnX != 0 ){
 		
 		// > 实体类 - 设置目标中心
@@ -1398,6 +1442,7 @@ Window_Selectable.prototype.updateArrows = function() {
 		//（'isPointingButton'标记？）
 		return;
 	}
+	
 	
 	// > 实体类 - 设置目标中心
 	var rect = this.itemRect(this.index());
@@ -1444,8 +1489,9 @@ Window_Selectable.prototype.drill_MCu_isEnabled = function() {
 // ** 菜单指针 实体类【Drill_MCu_Bean】
 // **		
 // **		作用域：	地图界面、战斗界面、菜单界面
-// **		主功能：	> 定义一个专门的实体类数据类。
-// **		子功能：	->无帧刷新
+// **		主功能：	定义一个专门的实体类数据类。
+// **		子功能：	
+// **					->无帧刷新
 // **					->重设数据
 // **						->序列号
 // **					->被动赋值
@@ -1856,14 +1902,16 @@ Scene_Title.prototype.drill_MCu_updateDestroy = Scene_Map.prototype.drill_MCu_up
 // ** 菜单指针控制器【Drill_MCu_Controller】
 // **		
 // **		作用域：	地图界面、战斗界面、菜单界面
-// **		主功能：	> 定义一个专门控制菜单指针的数据类。
-// **		子功能：	->控制器
+// **		主功能：	定义一个专门控制菜单指针的数据类。
+// **		子功能：	
+// **					->控制器『控制器与贴图』
 // **						->帧刷新
 // **						->重设数据
 // **							->序列号
 // **						->显示/隐藏
 // **						->暂停/继续
 // **						->销毁
+// **					
 // **					->A主体
 // **					->B指针目标
 // **						->帧刷新实体类
@@ -1879,7 +1927,7 @@ Scene_Title.prototype.drill_MCu_updateDestroy = Scene_Map.prototype.drill_MCu_up
 // **						> 主体贴图>摇晃效果
 // **						> GIF层>缩放效果
 // **						> GIF层>持续自旋转
-// **		
+// **					
 // **		说明：	> 该类可与 Game_CharacterBase 一并存储在 $gameMap 中。
 // **				> 注意，该类不能放 物体指针、贴图指针 。
 //=============================================================================
@@ -2029,7 +2077,7 @@ Drill_MCu_Controller.prototype.drill_controller_GIF_setOncePlay = function( once
 };
 
 //##############################
-// * 控制器 - 初始化数据【标准默认值】
+// * 控制器 - 初始化数据『控制器与贴图』【标准默认值】
 //
 //			参数：	> 无
 //			返回：	> 无
@@ -2082,7 +2130,7 @@ Drill_MCu_Controller.prototype.drill_controller_initData = function(){
 	//	（见 静态数据）
 }
 //==============================
-// * 初始化 - 初始化子功能
+// * 控制器 - 初始化子功能『控制器与贴图』
 //==============================
 Drill_MCu_Controller.prototype.drill_controller_initChild = function(){
 	this.drill_controller_initAttr();			//初始化子功能 - A主体
@@ -2153,10 +2201,13 @@ Drill_MCu_Controller.prototype.drill_controller_updateAttr = function() {
 		if( bean._drill_enabled != true ){ continue; }
 		
 		if( this._drill_curStyleId != bean._drill_styleId ){
-			
 			if( bean._drill_styleId > 0 ){
-				var new_data = DrillUp.g_MCu_list[ bean._drill_styleId -1 ];
-				this.drill_controller_resetData( new_data );
+				
+				// > 『控制器与贴图的样式』 - 校验+提示信息
+				var cur_styleData = DrillUp.drill_MCu_getStyleData( bean._drill_styleId -1 );
+				
+				// > 『控制器与贴图的样式』 - 创建控制器
+				this.drill_controller_resetData( cur_styleData );
 			}
 			this._drill_curStyleId =  bean._drill_styleId;	//（注意样式赋值要在reset之后）
 		}
@@ -2519,7 +2570,7 @@ Drill_MCu_Controller.prototype.drill_controller_initEffect = function() {
 	this._drill_curEffectTime = 0;
 	
 	this._drill_childGIF_rotation = 0;									//子贴图（自旋转）
-	this._drill_childGIF_rotateSpeed = data['cursor_rotatingSpeed'];	//子贴图（自旋转速度）
+	this._drill_childGIF_rotateSpeed = data['effect_rotatingSpeed'];	//子贴图（自旋转速度）
 }
 //==============================
 // * E自变化效果 - 帧刷新
@@ -2529,7 +2580,7 @@ Drill_MCu_Controller.prototype.drill_controller_updateEffect = function(){
 	this._drill_curEffectTime += 1;
 	
 	// > 贴图 - 旋转（子贴图）
-	if( data['cursor_rotating'] == "开启" ){
+	if( data['effect_rotating'] == "开启" ){
 		this._drill_childGIF_rotation += this._drill_childGIF_rotateSpeed;
 	}
 }
@@ -2540,12 +2591,14 @@ Drill_MCu_Controller.prototype.drill_controller_updateEffect = function(){
 // ** 菜单指针贴图【Drill_MCu_Sprite】
 // **
 // **		作用域：	地图界面、战斗界面、菜单界面
-// **		主功能：	> 定义一个菜单指针贴图。
-// **		子功能：	->贴图
+// **		主功能：	定义一个菜单指针贴图。
+// **		子功能：	
+// **					->贴图『控制器与贴图』
 // **						->是否就绪
 // **						->优化策略
 // **						->是否需要销毁（未使用）
 // **						->销毁（手动）
+// **					
 // **					->A主体
 // **					->B指针目标
 // **					->C对象绑定
@@ -2558,7 +2611,7 @@ Drill_MCu_Controller.prototype.drill_controller_updateEffect = function(){
 // **						> 主体贴图>摇晃效果
 // **						> GIF层>缩放效果
 // **						> GIF层>持续自旋转
-// **
+// **					
 // **		说明：	> 你必须在创建贴图后，手动初始化。（还需要先设置 控制器 ）
 // **
 // **		代码：	> 范围 - 该类显示单独的贴图。
@@ -2609,7 +2662,7 @@ Drill_MCu_Sprite.prototype.drill_sprite_setController = function( controller ){
 	this._drill_controller = controller;
 };
 //##############################
-// * C对象绑定 - 贴图初始化【开放函数】
+// * C对象绑定 - 初始化子功能『控制器与贴图』【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -2673,14 +2726,14 @@ Drill_MCu_Sprite.prototype.drill_sprite_destroy = function(){
 	this.drill_sprite_destroySelf();			//销毁 - 销毁自身
 };
 //==============================
-// * 菜单指针贴图 - 贴图初始化（私有）
+// * 菜单指针贴图 - 初始化自身『控制器与贴图』
 //==============================
 Drill_MCu_Sprite.prototype.drill_sprite_initSelf = function(){
 	this._drill_controller = null;				//控制器对象
 	this._drill_curSerial = -1;					//当前序列号
 };
 //==============================
-// * 菜单指针贴图 - 销毁子功能（私有）
+// * 菜单指针贴图 - 销毁子功能『控制器与贴图』
 //==============================
 Drill_MCu_Sprite.prototype.drill_sprite_destroyChild = function(){
 	if( this._drill_controller == null ){ return; }
@@ -2703,7 +2756,7 @@ Drill_MCu_Sprite.prototype.drill_sprite_destroyChild = function(){
 	
 };
 //==============================
-// * 菜单指针贴图 - 销毁自身（私有）
+// * 菜单指针贴图 - 销毁自身『控制器与贴图』
 //==============================
 Drill_MCu_Sprite.prototype.drill_sprite_destroySelf = function(){
 	this._drill_controller = null;				//控制器对象

@@ -127,10 +127,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_LayerUpperBlock = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_LayerUpperBlock');
+	var Imported = Imported || {};
+	Imported.Drill_LayerUpperBlock = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_LayerUpperBlock');
 
 
 	//==============================

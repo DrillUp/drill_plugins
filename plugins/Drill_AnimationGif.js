@@ -1861,6 +1861,12 @@
 		return "【" + DrillUp.g_AGi_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
 	};
 	//==============================
+	// * 提示信息 - 报错 - 找不到样式
+	//==============================
+	DrillUp.drill_AGi_getPluginTip_StyleNotFind = function( style_id ){
+		return "【" + DrillUp.g_AGi_PluginTip_curName + "】\n对象创建失败，id为"+style_id+"的样式配置为空或不存在。";
+	};
+	//==============================
 	// * 提示信息 - 报错 - NaN校验值
 	//==============================
 	DrillUp.drill_AGi_getPluginTip_ParamIsNaN = function( param_name ){
@@ -1871,10 +1877,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_AnimationGif = true;
-　　Imported.Drill_AnimationGIF = true;
-　　var DrillUp = DrillUp || {}; 
+	var Imported = Imported || {};
+	Imported.Drill_AnimationGif = true;
+	Imported.Drill_AnimationGIF = true;
+	var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_AnimationGif');
 	
 	//==============================
@@ -1970,9 +1976,18 @@
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_AGi_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_AGi_pluginCommand.call(this, command, args);
+	this.drill_AGi_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_AGi_pluginCommand = function( command, args ){
 	if( command === ">动画GIF" ){
 		
 		/*-----------------对象组获取 - 样式------------------*/
@@ -2770,7 +2785,16 @@ Sprite_Animation.prototype.setup = function(target, animation, mirror, delay) {
 		var anim_data = DrillUp.g_AGi_style[i];
 		if( this._animation.id == anim_data['anim'] ){
 			
-			// > 创建数据
+			// > 『控制器与贴图的样式』 - 校验+提示信息
+			var cur_styleId   = i +1;
+			var cur_styleData = anim_data;
+			if( cur_styleData == undefined || 
+				cur_styleData['inited'] == false ){
+				alert( DrillUp.drill_AGi_getPluginTip_StyleNotFind(cur_styleId) );
+				return;
+			}
+			
+			// > 『控制器与贴图的样式』 - 创建控制器
 			var temp_controller = new Drill_AGi_Controller( anim_data );
 			$gameTemp._drill_AGi_controllerTank.push( temp_controller );
 			
@@ -2959,8 +2983,9 @@ Sprite_Animation.prototype.remove = function() {
 // ** 动画GIF控制器【Drill_AGi_Controller】
 // **		
 // **		作用域：	地图界面、战斗界面
-// **		主功能：	> 定义一个专门控制动画GIF的数据类。
-// **		子功能：	->控制器
+// **		主功能：	定义一个专门控制动画GIF的数据类。
+// **		子功能：	
+// **					->控制器『控制器与贴图』
 // **						->帧刷新
 // **						->重设数据
 // **							->序列号
@@ -3105,7 +3130,7 @@ Drill_AGi_Controller.prototype.drill_AGi_isDead = function(){
 };
 
 //##############################
-// * 控制器 - 初始化数据【标准默认值】
+// * 控制器 - 初始化数据『控制器与贴图』【标准默认值】
 //
 //			参数：	> 无
 //			返回：	> 无
@@ -3173,7 +3198,7 @@ Drill_AGi_Controller.prototype.drill_controller_initData = function(){
 	if( data['deathOpacity'] == undefined ){ data['deathOpacity'] = 0 };					//2A阶段 - 消失-自定义透明度
 }
 //==============================
-// * 初始化 - 初始化子功能
+// * 控制器 - 初始化子功能『控制器与贴图』
 //==============================
 Drill_AGi_Controller.prototype.drill_controller_initChild = function(){
 	this.drill_controller_initAttr();			//初始化子功能 - A主体
@@ -3603,12 +3628,14 @@ Drill_AGi_Controller.prototype.drill_initDeathState = function() {
 // ** 动画GIF贴图【Drill_AGi_Sprite】
 // **
 // **		作用域：	地图界面、战斗界面
-// **		主功能：	> 定义一个动画GIF贴图。
-// **		子功能：	->贴图
+// **		主功能：	定义一个动画GIF贴图。
+// **		子功能：	
+// **					->贴图『控制器与贴图』
 // **						->是否就绪
 // **						->优化策略
 // **						->是否需要销毁（未使用）
 // **						->销毁（手动）
+// **					
 // **					->A主体
 // **					->B变化控制
 // **						->层级位置修正
@@ -3618,7 +3645,7 @@ Drill_AGi_Controller.prototype.drill_initDeathState = function() {
 // **						->设置个体贴图
 // **						->贴图初始化（手动）
 // **					->D播放GIF
-// **
+// **					
 // **		说明：	> 你必须在创建贴图后，手动初始化。（还需要先设置 控制器和个体贴图 ）
 // **
 // **		代码：	> 范围 - 该类显示单独的动画装饰。
@@ -3689,7 +3716,7 @@ Drill_AGi_Sprite.prototype.drill_sprite_setIndividualSprite = function( individu
 	this._drill_individualSprite = individual_sprite;
 };
 //##############################
-// * C对象绑定 - 贴图初始化【开放函数】
+// * C对象绑定 - 初始化子功能『控制器与贴图』【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -3754,7 +3781,7 @@ Drill_AGi_Sprite.prototype.drill_sprite_destroy = function(){
 	this.drill_sprite_destroySelf();			//销毁 - 销毁自身
 };
 //==============================
-// * 动画GIF贴图 - 初始化自身（私有）
+// * 动画GIF贴图 - 初始化自身『控制器与贴图』
 //==============================
 Drill_AGi_Sprite.prototype.drill_sprite_initSelf = function(){
 	this._drill_controller = null;				//控制器对象
@@ -3764,7 +3791,7 @@ Drill_AGi_Sprite.prototype.drill_sprite_initSelf = function(){
 	this._animation = null;						//动画对象（指针）
 };
 //==============================
-// * 动画GIF贴图 - 销毁子功能（私有）
+// * 动画GIF贴图 - 销毁子功能『控制器与贴图』
 //==============================
 Drill_AGi_Sprite.prototype.drill_sprite_destroyChild = function(){
 	if( this._drill_controller == null ){ return; }
@@ -3788,7 +3815,7 @@ Drill_AGi_Sprite.prototype.drill_sprite_destroyChild = function(){
 	//	（无）
 };
 //==============================
-// * 动画GIF贴图 - 销毁自身（私有）
+// * 动画GIF贴图 - 销毁自身『控制器与贴图』
 //==============================
 Drill_AGi_Sprite.prototype.drill_sprite_destroySelf = function(){
 	this._drill_controller = null;				//控制器对象

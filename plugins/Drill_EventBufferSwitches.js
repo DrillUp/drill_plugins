@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        物体管理 - 事件的缓存开关值
+ * @plugindesc [v1.1]        物体管理 - 事件的缓存开关值
  * @author Drill_up
  * 
  * 
@@ -42,7 +42,7 @@
  *      先存储到事件，等待几帧，然后再读取，拿出值使用。
  * 
  * -----------------------------------------------------------------------------
- * ----激活条件
+ * ----激活条件 - 单事件时
  * 你可以通过设置插件指令，对指定事件进行存储：
  * 
  * 插件指令：>事件的缓存开关值 : 本事件 : 存储开关值 : 槽位[1] : 开关[21]
@@ -51,6 +51,8 @@
  * 
  * 插件指令：>事件的缓存开关值 : 本事件 : 存储-开关给槽位 : 槽位[1] : 开关[21]
  * 插件指令：>事件的缓存开关值 : 本事件 : 存储-开关给槽位 : 槽位[自定义名] : 开关[21]
+ * 插件指令：>事件的缓存开关值 : 本事件 : 存储-值给槽位 : 槽位[1] : 值[ON]
+ * 插件指令：>事件的缓存开关值 : 本事件 : 存储-值给槽位 : 槽位[自定义名] : 值[ON]
  * 插件指令：>事件的缓存开关值 : 本事件 : 读取-槽位给开关 : 槽位[1] : 开关[21]
  * 插件指令：>事件的缓存开关值 : 本事件 : 读取-槽位给开关 : 槽位[自定义名] : 开关[21]
  * 插件指令：>事件的缓存开关值 : 本事件 : 读取-槽位给开关 : 槽位[1] : 开关[21] : 槽位为空则赋值[ON]
@@ -67,7 +69,19 @@
  * 4.指令只在当前地图有效，离开地图后会失效，因为事件被销毁重建了。
  * 
  * -----------------------------------------------------------------------------
- * ----可选设定 - 批量槽位时
+ * ----激活条件 - 单事件的注释
+ * 你可以通过设置事件注释，进行初始化赋值：
+ * 
+ * 事件注释：=>事件的缓存开关值 : 存储-值给槽位-跨事件页 : 槽位[1] : 值[ON]
+ * 事件注释：=>事件的缓存开关值 : 存储-值给槽位-跨事件页 : 槽位[自定义名] : 值[ON]
+ * 事件注释：=>事件的缓存开关值 : 存储-值给槽位-不跨事件页 : 槽位[1] : 值[ON]
+ * 事件注释：=>事件的缓存开关值 : 存储-值给槽位-不跨事件页 : 槽位[自定义名] : 值[ON]
+ * 
+ * 1."不跨事件页" 是值每次事件页切换时，都会生效并赋值。
+ *   "跨事件页" 是指事件创建时，也就是进入地图时，会被赋值一次，切换事件页不会被再次赋值。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - (批量槽位)时
  * 你还可以进行批量操作：
  * 
  * 插件指令：>事件的缓存开关值 : 本事件 : 存储-开关给槽位(批量槽位) : 批量槽位[1,3,2] : 批量开关[21,22,23]
@@ -75,6 +89,7 @@
  * 插件指令：>事件的缓存开关值 : 事件变量[21] : 存储-开关给槽位(批量槽位) : 批量槽位[1,3,2] : 批量开关[21,22,23]
  * 
  * 插件指令：>事件的缓存开关值 : 本事件 : 存储-开关给槽位(批量槽位) : 批量槽位[1,3,2] : 批量开关[21,22,23]
+ * 插件指令：>事件的缓存开关值 : 本事件 : 存储-值给槽位(批量槽位) : 批量槽位[1,3,2] : 数组值[ON,ON,ON]
  * 插件指令：>事件的缓存开关值 : 本事件 : 读取-槽位给开关(批量槽位) : 批量槽位[1,3,2] : 批量开关[21,22,23]
  * 插件指令：>事件的缓存开关值 : 本事件 : 读取-槽位给开关(批量槽位) : 批量槽位[点数,分数] : 批量开关[21,22]
  * 插件指令：>事件的缓存开关值 : 本事件 : 读取-槽位给开关(批量槽位) : 批量槽位[点数,分数] : 批量开关[21,22] : 槽位为空则赋值[OFF]
@@ -91,7 +106,7 @@
  * 5.注意，批量槽位和批量事件不能同时使用，只能选择其一进行批量赋值。
  * 
  * -----------------------------------------------------------------------------
- * ----可选设定 - 批量事件时
+ * ----可选设定 - (批量事件)时
  * 你还可以进行批量操作：
  * 
  * 插件指令：>事件的缓存开关值 : 批量事件[10,11] : 存储-开关给槽位(批量事件) : 槽位[1] : 批量开关[21,22]
@@ -100,6 +115,7 @@
  * 插件指令：>事件的缓存开关值 : 事件变量数组[数组名] : 存储-开关给槽位(批量事件) : 槽位[1] : 批量开关[21,22]
  * 
  * 插件指令：>事件的缓存开关值 : 批量事件[10,11] : 存储-开关给槽位(批量事件) : 槽位[1] : 批量开关[21,22]
+ * 插件指令：>事件的缓存开关值 : 批量事件[10,11] : 存储-值给槽位(批量事件) : 槽位[1] : 数组值[ON,ON,ON]
  * 插件指令：>事件的缓存开关值 : 批量事件[10,11] : 读取-槽位给开关(批量事件) : 槽位[1] : 批量开关[21,22]
  * 插件指令：>事件的缓存开关值 : 批量事件[10,11] : 读取-槽位给开关(批量事件) : 槽位[点数] : 批量开关[21,22]
  * 插件指令：>事件的缓存开关值 : 批量事件[10,11] : 读取-槽位给开关(批量事件) : 槽位[点数] : 批量开关[21,22] : 槽位为空则赋值[OFF]
@@ -114,7 +130,7 @@
  * 4.注意，"(批量槽位)"和"(批量事件)"不能同时使用，只能选择其一进行批量存储/读取。
  * 
  * -----------------------------------------------------------------------------
- * ----可选设定 - 使用变量数组
+ * ----可选设定 - (批量槽位)(批量事件)使用变量数组
  * 你还可以使用变量数组进行批量操作：
  * 
  * 插件指令：>事件的缓存开关值 : 本事件 : 存储-开关给槽位(批量槽位) : 槽位[1,3,2] : 变量数组[21]
@@ -134,7 +150,7 @@
  * 3.详细操作可以去看看文档，有图解，方便理解。
  * 
  * -----------------------------------------------------------------------------
- * ----可选设定 - 窗口字符
+ * ----可选设定 - 窗口字符显示
  * 你可以通过设置窗口字符，显示缓存的开关值：
  * 
  * 窗口字符：\dEBS[12]
@@ -180,6 +196,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 更新并兼容了新的窗口字符底层。
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -208,7 +226,8 @@
 //			->☆提示信息
 //			->☆静态数据
 //			->☆插件指令
-//			->☆窗口字符
+//			->☆事件注释
+//			->☆窗口字符应用之指代字符
 //			
 //			->☆物体的属性
 //
@@ -244,7 +263,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_EBS_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_EBS_PluginTip_baseList.length == 0 ){ return ""; }
@@ -279,15 +298,21 @@
 	DrillUp.drill_EBS_getPluginTip_ListError_Event = function(){
 		return "【" + DrillUp.g_EBS_PluginTip_curName + "】\n插件指令错误，检测到指令中指向了多个事件，而多个事件必须使用指令\"存储-开关给槽位(批量事件)\"或\"读取-槽位给开关(批量事件)\"才能生效。注意看插件指令说明。";
 	};
+	//==============================
+	// * 提示信息 - 报错 - 窗口字符底层校验
+	//==============================
+	DrillUp.drill_EBS_getPluginTip_NeedUpdate_drawText = function(){
+		return "【" + DrillUp.g_EBS_PluginTip_curName + "】\n检测到窗口字符核心版本过低。\n由于底层变化巨大，你需要更新 全部 窗口字符相关插件。\n去看看\"23.窗口字符 > 关于窗口字符底层全更新说明.docx\"进行更新。";
+	};
 	
 	
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_EventBufferSwitches = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_EventBufferSwitches');
+	var Imported = Imported || {};
+	Imported.Drill_EventBufferSwitches = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_EventBufferSwitches');
 	
 	
 //=============================================================================
@@ -299,9 +324,18 @@ if( Imported.Drill_CoreOfNumberArray ){
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_EBS_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_EBS_pluginCommand.call(this, command, args);
+	this.drill_EBS_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_EBS_pluginCommand = function( command, args ){
 	if( command === ">事件的缓存开关值" ){
 		
 		/*-----------------对象组获取-事件组------------------*/
@@ -390,58 +424,83 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			}
 		}
 		/*-----------------对象组获取-开关组------------------*/
-		var varId_list = null;	//批量开关
-		var arrId = null;		//变量数组（数据结构不一样，需要分别处理）
+		var switchIdList = null;	//批量开关
+		var valueList = null;		//数组值
+		var arrId = null;			//变量数组（数据结构不一样，需要分别处理）
 		if( args.length >= 8 ){
-			var varId_str = String(args[7]);
-			if( arrId == null && varId_str.indexOf("变量数组[") != -1 ){
-				varId_str = varId_str.replace("变量数组[","");
-				varId_str = varId_str.replace("]","");
-				arrId = String( varId_str );	//（字符串名）
+			var cur_str = String(args[7]);
+			if( cur_str.indexOf("变量数组[") != -1 ){
+				cur_str = cur_str.replace("变量数组[","");
+				cur_str = cur_str.replace("]","");
+				arrId = String( cur_str );	//（字符串名）
 			}
-			if( varId_list == null && varId_str.indexOf("批量开关[") != -1 ){
-				varId_str = varId_str.replace("批量开关[","");
-				varId_str = varId_str.replace("]","");
-				varId_list = [];
-				var varId_str_list = varId_str.split(/[,，]/);
-				for( var k=0; k < varId_str_list.length; k++ ){
-					varId_list.push( Number(varId_str_list[k]) );
+			else if( cur_str.indexOf("批量开关[") != -1 ){
+				cur_str = cur_str.replace("批量开关[","");
+				cur_str = cur_str.replace("]","");
+				switchIdList = [];
+				var cur_str_list = cur_str.split(/[,，]/);
+				for( var k=0; k < cur_str_list.length; k++ ){
+					switchIdList.push( Number(cur_str_list[k]) );
 				}
 			}
-			if( varId_list == null && varId_str.indexOf("开关[") != -1 ){
-				varId_str = varId_str.replace("开关[","");
-				varId_str = varId_str.replace("]","");
-				varId_list = [];
-				varId_list.push( Number(varId_str) );
+			else if( cur_str.indexOf("开关[") != -1 ){
+				cur_str = cur_str.replace("开关[","");
+				cur_str = cur_str.replace("]","");
+				switchIdList = [];
+				switchIdList.push( Number(cur_str) );
+			}
+			else if( cur_str.indexOf("数组值[") != -1 ){
+				cur_str = cur_str.replace("数组值[","");
+				cur_str = cur_str.replace("]","");
+				valueList = [];
+				var cur_str_list = cur_str.split(/[,，]/);
+				for( var k=0; k < cur_str_list.length; k++ ){
+					valueList.push( Number(cur_str_list[k]) );
+				}
+			}
+			else if( cur_str.indexOf("值[") != -1 ){
+				cur_str = cur_str.replace("值[","");
+				cur_str = cur_str.replace("]","");
+				valueList = [];
+				var cur_str_list = cur_str.split(/[,，]/);
+				for( var k=0; k < cur_str_list.length; k++ ){
+					valueList.push( Number(cur_str_list[k]) );
+				}
 			}
 		}
 		
 		
-		if( e_list != null && slot_list != null && args.length >= 8 ){
+		if( e_list != null    && e_list.length > 0    && 
+			slot_list != null && slot_list.length > 0 && 
+			args.length >= 8 ){
 			var type = String(args[3]);
 			
 			/*-----------------存储与读取-单事件单槽位------------------*/
-			if( type == "存储-开关给槽位" ){
+			if( type == "存储-开关给槽位" || type == "存储-值给槽位" ){
 				
-				// > 单事件单槽位 - 存储 - 批量关系校验
-				if( e_list.length == 0){ return; }
+				// > 单事件单槽位 - 存储 校验
 				if( e_list.length >= 2 ){
 					alert( DrillUp.drill_EBS_getPluginTip_ListError_Event() );
 					return;
 				}
-				if( slot_list.length == 0){ return; }
 				if( slot_list.length >= 2 ){
 					alert( DrillUp.drill_EBS_getPluginTip_ListError_Slot() );
 					return;
 				}
 				
-				// > 单事件单槽位 - 存储（三个数组都是下标0）
-				if( varId_list != null ){
+				// > 单事件单槽位 - 存储 批量开关（选第一个赋值）
+				if( switchIdList != null ){
 					var e = e_list[0];
-					e.drill_EBS_setData( String(slot_list[0]), $gameSwitches.value( Number(varId_list[0]) ) );
+					e.drill_EBS_setData( String(slot_list[0]), $gameSwitches.value( Number(switchIdList[0]) ) );
 				}
 				
-				// > 单事件单槽位 - 存储（不支持变量数组）
+				// > 单事件单槽位 - 存储 数组值
+				if( valueList != null ){
+					var e = e_list[0];
+					e.drill_EBS_setData( String(slot_list[0]), String(valueList[0]) );
+				}
+				
+				// > 单事件单槽位 - 存储 变量数组（不支持）
 				if( arrId != null ){ }
 			}
 			if( type == "读取-槽位给开关" ){
@@ -456,56 +515,66 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					if( default_enabled.toLowerCase == "false" ){ default_enabled = false; }
 				}
 				
-				// > 单事件单槽位 - 读取 - 批量关系校验
-				if( e_list.length == 0){ return; }
+				// > 单事件单槽位 - 读取 校验
 				if( e_list.length >= 2 ){
 					alert( DrillUp.drill_EBS_getPluginTip_ListError_Event() );
 					return;
 				}
-				if( slot_list.length == 0){ return; }
 				if( slot_list.length >= 2 ){
 					alert( DrillUp.drill_EBS_getPluginTip_ListError_Slot() );
 					return;
 				}
 				
-				// > 单事件单槽位 - 读取（三个数组都是下标0）
-				if( varId_list != null ){
+				// > 单事件单槽位 - 读取 批量开关（选第一个赋值）
+				if( switchIdList != null ){
 					var e = e_list[0];
 					var v_e_enabled = e.drill_EBS_getData( String(slot_list[0]) );
 					if( v_e_enabled == undefined ){
-						$gameSwitches.setValue( Number(varId_list[0]), default_enabled );
+						$gameSwitches.setValue( Number(switchIdList[0]), default_enabled );
 					}else{
-						$gameSwitches.setValue( Number(varId_list[0]), v_e_enabled );
+						$gameSwitches.setValue( Number(switchIdList[0]), v_e_enabled );
 					}
 				}
 				
-				// > 单事件单槽位 - 读取（不支持变量数组）
+				// > 单事件单槽位 - 读取 数组值（不支持，只有存值）
+				if( valueList != null ){ }
+				
+				// > 单事件单槽位 - 读取 变量数组（不支持）
 				if( arrId != null ){ }
 			}
 			
-			/*-----------------存储与读取-单事件多槽位------------------*/
-			if( type == "存储-开关给槽位(批量槽位)" ){
+			/*-----------------存储与读取-单事件多槽位 (批量槽位)------------------*/
+			if( type == "存储-开关给槽位(批量槽位)" || type == "存储-值给槽位(批量槽位)" ){
 				
-				// > 单事件多槽位 - 存储 - 批量关系校验
-				if( slot_list.length == 0){ return; }
-				if( e_list.length == 0){ return; }
+				// > 单事件多槽位 - 存储 校验
 				if( e_list.length >= 2 ){
 					alert( DrillUp.drill_EBS_getPluginTip_ListError_Event() );
 					return;
 				}
 				
-				// > 单事件多槽位 - 存储
-				if( varId_list != null ){
-					if( varId_list.length != slot_list.length ){
-						alert( DrillUp.drill_EBS_getPluginTip_ListLengthError("槽位","批量开关") );
+				// > 单事件多槽位 - 存储 批量开关
+				if( switchIdList != null ){
+					if( switchIdList.length != slot_list.length ){
+						alert( DrillUp.drill_EBS_getPluginTip_ListLengthError("批量槽位","批量开关") );
 						return;
 					}
 					var e = e_list[0];
-					for(var k = 0; k < varId_list.length; k++){
-						e.drill_EBS_setData( String(slot_list[k]), $gameSwitches.value( Number(varId_list[k]) ) );
+					for(var k = 0; k < switchIdList.length; k++){
+						e.drill_EBS_setData( String(slot_list[k]), $gameSwitches.value( Number(switchIdList[k]) ) );
 					}
 				}
-				// > 单事件多槽位 - 存储（从变量数组中）
+				// > 单事件多槽位 - 存储 数组值
+				if( valueList != null ){
+					if( valueList.length != slot_list.length ){
+						alert( DrillUp.drill_EBS_getPluginTip_ListLengthError("批量槽位","数组值") );
+						return;
+					}
+					var e = e_list[0];
+					for(var k = 0; k < slot_list.length; k++){
+						e.drill_EBS_setData( String(slot_list[k]), String(valueList[k]) );
+					}
+				}
+				// > 单事件多槽位 - 存储 变量数组
 				if( arrId != null ){
 					var num_arr = $gameNumberArray.value( arrId );
 					if( num_arr.length != slot_list.length ){
@@ -514,7 +583,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					}
 					var e = e_list[0];
 					for(var k = 0; k < slot_list.length; k++){
-						e.drill_EBS_setData( String(slot_list[k]), (num_arr[k] != 0) );
+						e.drill_EBS_setData( String(slot_list[k]), num_arr[k] );
 					}
 				}
 			}
@@ -530,31 +599,31 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					if( default_enabled.toLowerCase == "false" ){ default_enabled = false; }
 				}
 				
-				// > 单事件多槽位 - 读取 - 批量关系校验
-				if( slot_list.length == 0){ return; }
-				if( e_list.length == 0){ return; }
+				// > 单事件多槽位 - 读取 校验
 				if( e_list.length >= 2 ){
 					alert( DrillUp.drill_EBS_getPluginTip_ListError_Event() );
 					return;
 				}
 				
-				// > 单事件多槽位 - 读取
-				if( varId_list != null ){
-					if( varId_list.length != slot_list.length ){
-						alert( DrillUp.drill_EBS_getPluginTip_ListLengthError("槽位","批量开关") );
+				// > 单事件多槽位 - 读取 批量开关
+				if( switchIdList != null ){
+					if( switchIdList.length != slot_list.length ){
+						alert( DrillUp.drill_EBS_getPluginTip_ListLengthError("批量槽位","批量开关") );
 						return;
 					}
 					var e = e_list[0];
-					for(var k = 0; k < varId_list.length; k++){
+					for(var k = 0; k < switchIdList.length; k++){
 						var v_e_enabled = e.drill_EBS_getData( String(slot_list[k]) );
 						if( v_e_enabled == undefined ){
-							$gameSwitches.setValue( Number(varId_list[k]), default_enabled );
+							$gameSwitches.setValue( Number(switchIdList[k]), default_enabled );
 						}else{
-							$gameSwitches.setValue( Number(varId_list[k]), v_e_enabled );
+							$gameSwitches.setValue( Number(switchIdList[k]), v_e_enabled );
 						}
 					}
 				}
-				// > 单事件多槽位 - 读取（到变量数组中）
+				// > 单事件多槽位 - 读取 数组值（不支持，只有存值）
+				if( valueList != null ){ }
+				// > 单事件多槽位 - 读取 变量数组
 				if( arrId != null ){
 					var num_arr = [];	//（读取时，变量数组长度可以不一致）
 					var e = e_list[0];
@@ -578,29 +647,38 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				}
 			}
 			
-			/*-----------------存储与读取-多事件单槽位------------------*/
-			if( type == "存储-开关给槽位(批量事件)" ){
+			/*-----------------存储与读取-多事件单槽位 (批量事件)------------------*/
+			if( type == "存储-开关给槽位(批量事件)" || type == "存储-值给槽位(批量事件)" ){
 				
-				// > 多事件单槽位 - 存储 - 批量关系校验
-				if( e_list.length == 0){ return; }
-				if( slot_list.length == 0){ return; }
+				// > 多事件单槽位 - 存储 校验
 				if( slot_list.length >= 2 ){
 					alert( DrillUp.drill_EBS_getPluginTip_ListError_Slot() );
 					return;
 				}
 				
-				// > 多事件单槽位 - 存储
-				if( varId_list != null ){
-					if( varId_list.length != e_list.length ){
-						alert( DrillUp.drill_EBS_getPluginTip_ListLengthError("事件","批量开关") );
+				// > 多事件单槽位 - 存储 批量开关
+				if( switchIdList != null ){
+					if( switchIdList.length != e_list.length ){
+						alert( DrillUp.drill_EBS_getPluginTip_ListLengthError("批量事件","批量开关") );
 						return;
 					}
-					for(var k = 0; k < varId_list.length; k++){
+					for(var k = 0; k < switchIdList.length; k++){
 						var e = e_list[k];
-						e.drill_EBS_setData( String(slot_list[0]), $gameSwitches.value( Number(varId_list[k]) ) );
+						e.drill_EBS_setData( String(slot_list[0]), $gameSwitches.value( Number(switchIdList[k]) ) );
 					}
 				}
-				// > 多事件单槽位 - 存储（从变量数组中）
+				// > 多事件单槽位 - 存储 数组值
+				if( valueList != null ){
+					if( valueList.length != e_list.length ){
+						alert( DrillUp.drill_EBS_getPluginTip_ListLengthError("批量事件","数组值") );
+						return;
+					}
+					for(var k = 0; k < e_list.length; k++){
+						var e = e_list[k];
+						e.drill_EBS_setData( String(slot_list[0]), String(valueList[k]) );
+					}
+				}
+				// > 多事件单槽位 - 存储 变量数组
 				if( arrId != null ){
 					var num_arr = $gameNumberArray.value( arrId );
 					if( num_arr.length != e_list.length ){
@@ -609,7 +687,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					}
 					for(var k = 0; k < e_list.length; k++){
 						var e = e_list[k];
-						e.drill_EBS_setData( String(slot_list[0]), (num_arr[k] != 0) );
+						e.drill_EBS_setData( String(slot_list[0]), num_arr[k] );
 					}
 				}
 			}
@@ -625,31 +703,31 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					if( default_enabled.toLowerCase == "false" ){ default_enabled = false; }
 				}
 				
-				// > 多事件单槽位 - 读取 - 批量关系校验
-				if( e_list.length == 0){ return; }
-				if( slot_list.length == 0){ return; }
+				// > 多事件单槽位 - 读取 校验
 				if( slot_list.length >= 2 ){
 					alert( DrillUp.drill_EBS_getPluginTip_ListError_Slot() );
 					return;
 				}
 				
-				// > 多事件单槽位 - 读取
-				if( varId_list != null ){
-					if( varId_list.length != e_list.length ){
-						alert( DrillUp.drill_EBS_getPluginTip_ListLengthError("事件","批量开关") );
+				// > 多事件单槽位 - 读取 批量开关
+				if( switchIdList != null ){
+					if( switchIdList.length != e_list.length ){
+						alert( DrillUp.drill_EBS_getPluginTip_ListLengthError("批量事件","批量开关") );
 						return;
 					}
-					for(var k = 0; k < varId_list.length; k++){
+					for(var k = 0; k < switchIdList.length; k++){
 						var e = e_list[k];
 						var v_e_enabled = e.drill_EBS_getData( String(slot_list[0]) );
 						if( v_e_enabled == undefined ){
-							$gameSwitches.setValue( Number(varId_list[k]), default_enabled );
+							$gameSwitches.setValue( Number(switchIdList[k]), default_enabled );
 						}else{
-							$gameSwitches.setValue( Number(varId_list[k]), v_e_enabled );
+							$gameSwitches.setValue( Number(switchIdList[k]), v_e_enabled );
 						}
 					}
 				}
-				// > 多事件单槽位 - 读取（到变量数组中）
+				// > 多事件单槽位 - 读取 数组值（不支持，只有存值）
+				if( valueList != null ){ }
+				// > 多事件单槽位 - 读取 变量数组
 				if( arrId != null ){
 					var num_arr = [];	//（读取时，变量数组长度可以不一致）
 					for(var k = 0; k < e_list.length; k++){
@@ -721,139 +799,181 @@ Game_Map.prototype.drill_EBS_isEventExist = function( e_id ){
 
 
 //=============================================================================
-// ** ☆窗口字符
+// ** ☆事件注释
 //=============================================================================
 //==============================
-// * 窗口字符 - 转义字符转换（继承）
+// * 事件注释 - 第一页标记
 //==============================
-var _drill_EBS_COWC_processNewTransformChar_Combined_ = Window_Base.prototype.drill_COWC_processNewTransformChar_Combined;
-Window_Base.prototype.drill_COWC_processNewTransformChar_Combined = function( matched_index, matched_str, command, args ){
-	_drill_EBS_COWC_processNewTransformChar_Combined_.call( this, matched_index, matched_str, command, args );
-	if( command == "dEBS" ){
-		
-		// > 本事件的值（\dEBS[12]）
-		if( args.length == 1 ){
-			var e_id = -1;
-			var slot_name = String(args[0]);
-			
-			// > 取出事件id值『窗口字符的本事件』
-			if( $gameMessage._drill_EBS_tempId != undefined ){
-				e_id = $gameMessage._drill_EBS_tempId;
-			}
-			
-			// > 【行走图 - 事件漂浮文字】
-			if( Imported.Drill_EventText ){
-				if( this instanceof Drill_ET_WindowSprite ){
-					e_id = this._drill_event._eventId;
-				}
-			}
-			
-			// > 获取事件
-			if( $gameMap == undefined ){
-				this.drill_COWC_charSubmit_Transform( " null" );
-				return;
-			}
-			var e = $gameMap.event( Number(e_id) );
-			if( e == undefined ){
-				this.drill_COWC_charSubmit_Transform( " null" );
-				return;
-			}
-			
-			// > 获取值
-			var v_e_enabled = e.drill_EBS_getData( slot_name );
-			if( v_e_enabled != undefined ){
-				if( v_e_enabled == true ){
-					this.drill_COWC_charSubmit_Transform( " ON" );
-				}else{
-					this.drill_COWC_charSubmit_Transform( " OFF" );
-				}
-			}else{
-				this.drill_COWC_charSubmit_Transform( " null" );
-			}
-		}
-		
-		// > 指定事件的值（\dEBS[事件[10]:12]）
-		if( args.length == 2 ){
-			var temp1 = String(args[0]);
-			var e_id = -1;
-			var slot_name = String(args[1]);
-			
-			if( e_id == -1 && unit.indexOf("事件变量[") != -1 ){
-				temp1 = temp1.replace("事件变量[","");
-				temp1 = temp1.replace("]","");
-				e_id = $gameVariables.value( Number(temp1) );
-			}
-			if( e_id == -1 && unit.indexOf("事件[") != -1 ){
-				temp1 = temp1.replace("事件[","");
-				temp1 = temp1.replace("]","");
-				e_id = Number(temp1);
-			}
-			
-			// > 获取事件
-			if( $gameMap == undefined ){
-				this.drill_COWC_charSubmit_Transform( " null" );
-				return;
-			}
-			var e = $gameMap.event( Number(e_id) );
-			if( e == undefined ){
-				this.drill_COWC_charSubmit_Transform( " null" );
-				return;
-			}
-			
-			// > 获取值
-			var v_e_enabled = e.drill_EBS_getData( slot_name );
-			if( v_e_enabled != undefined ){
-				if( v_e_enabled == true ){
-					this.drill_COWC_charSubmit_Transform( " ON" );
-				}else{
-					this.drill_COWC_charSubmit_Transform( " OFF" );
-				}
-			}else{
-				this.drill_COWC_charSubmit_Transform( " null" );
-			}
-		}
+var _drill_EBS_event_initMembers = Game_Event.prototype.initMembers;
+Game_Event.prototype.initMembers = function() {
+	_drill_EBS_event_initMembers.call(this);
+	this._drill_EBS_isFirstBirth = true;
+};
+//==============================
+// * 事件注释 - 第一页绑定
+//==============================
+var _drill_EBS_event_setupPage = Game_Event.prototype.setupPage;
+Game_Event.prototype.setupPage = function() {
+	_drill_EBS_event_setupPage.call(this);
+    this.drill_EBS_setupEffect();
+};
+//==============================
+// * 事件注释 - 初始化绑定
+//==============================
+Game_Event.prototype.drill_EBS_setupEffect = function() {	
+	
+	// > 第一次出生，强制读取第一页注释（防止离开地图后，回来，开关失效）
+	if( !this._erased && this.event() && this.event().pages[0] && this._drill_EBS_isFirstBirth == true ){ 
+		this._drill_EBS_isFirstBirth = undefined;		//『节约临时参数存储空间』
+		this.drill_EBS_readPage( this.event().pages[0].list );
+	}
+	
+	// > 读取当前页注释
+	if( !this._erased && this.page() ){ 
+		this.drill_EBS_readPage( this.list() );
 	}
 }
 //==============================
-// * 窗口字符 - 插入事件id值 - 最后继承
+// * 事件注释 - 初始化
 //==============================
-var _drill_EBS_scene_initialize = SceneManager.initialize;
-SceneManager.initialize = function() {
-	_drill_EBS_scene_initialize.call(this);		//（此方法放到最后再继承）
+Game_Event.prototype.drill_EBS_readPage = function( page_list ){
+	page_list.forEach( function( l ){
+		if( l.code === 108 ){
+			var l_str = l.parameters[0];
+			var args = l_str.split(' ');
+			var command = args.shift();
+			
+			if( command == "=>事件的缓存开关值" ){
+				if( args.length == 6 ){
+					var type = String(args[1]);
+					var slot_id = String(args[3]);
+					var value = String(args[5]);
+					
+					if( type == "存储-值给槽位-跨事件页" ){
+						slot_id = slot_id.replace("槽位[","");
+						slot_id = slot_id.replace("]","");
+						value = value.replace("值[","");
+						value = value.replace("]","");
+						
+						if( this._drill_EBS_isFirstBirth == true ){		//（只在事件重建时赋值）
+							this.drill_EBS_setData( String(slot_id), String(value) );
+						}
+					}
+					if( type == "存储-值给槽位-不跨事件页" ){
+						slot_id = slot_id.replace("槽位[","");
+						slot_id = slot_id.replace("]","");
+						value = value.replace("值[","");
+						value = value.replace("]","");
+						
+						this.drill_EBS_setData( String(slot_id), String(value) );
+					}
+				}
+			}
+		}
+	}, this);
+}
+
+
+//=============================================================================
+// ** ☆窗口字符应用之指代字符
+//=============================================================================
+if( Imported.Drill_CoreOfWindowCharacter ){
 	
 	//==============================
-	// * 窗口字符 - 插入事件id值 - 【信息 > 显示文字】
+	// * 窗口字符应用之指代字符 - 指代字符阶段（继承）
 	//==============================
-	var _drill_EBS_command101 = Game_Interpreter.prototype.command101;
-	Game_Interpreter.prototype.command101 = function(){
-		$gameMessage._drill_EBS_tempId = this._eventId;
-		return _drill_EBS_command101.call(this);
+	var _drill_EBS_COWC_transform_processCombined = Game_Temp.prototype.drill_COWC_transform_processCombined;
+	Game_Temp.prototype.drill_COWC_transform_processCombined = function( matched_index, matched_str, command, args ){
+		_drill_EBS_COWC_transform_processCombined.call( this, matched_index, matched_str, command, args );
+		if( command == "dEBS" ){
+			
+			// > 本事件的值（\dEBS[12]）
+			if( args.length == 1 ){
+				
+				// > 『窗口字符的本事件』
+				var e_id = $gameTemp.drill_COWC_getEvnetId_InInterpreter();
+				if( Imported.Drill_EventText ){  //【行走图 - 事件漂浮文字】
+					if( e_id == undefined ){ e_id = $gameTemp.drill_ET_getEvnetId_InEventText(); }
+				}
+				if( e_id == undefined ){ return; }
+				var slot_name = String(args[0]);
+				
+				// > 获取事件
+				if( $gameMap == undefined ){
+					this.drill_COWC_transform_submitCombined( "null" );
+					return;
+				}
+				var e = $gameMap.event( Number(e_id) );
+				if( e == undefined ){
+					this.drill_COWC_transform_submitCombined( "null" );
+					return;
+				}
+				
+				// > 获取值
+				var v_e_enabled = e.drill_EBS_getData( slot_name );
+				if( v_e_enabled != undefined ){
+					if( v_e_enabled == true ){
+						this.drill_COWC_transform_submitCombined( "ON" );
+					}else{
+						this.drill_COWC_transform_submitCombined( "OFF" );
+					}
+				}else{
+					this.drill_COWC_transform_submitCombined( "null" );
+				}
+				return;
+			}
+			
+			// > 指定事件的值（\dEBS[事件[10]:12]）
+			if( args.length == 2 ){
+				var temp1 = String(args[0]);
+				var e_id = -1;
+				var slot_name = String(args[1]);
+				
+				if( e_id == -1 && unit.indexOf("事件变量[") != -1 ){
+					temp1 = temp1.replace("事件变量[","");
+					temp1 = temp1.replace("]","");
+					e_id = $gameVariables.value( Number(temp1) );
+				}
+				if( e_id == -1 && unit.indexOf("事件[") != -1 ){
+					temp1 = temp1.replace("事件[","");
+					temp1 = temp1.replace("]","");
+					e_id = Number(temp1);
+				}
+				
+				// > 获取事件
+				if( $gameMap == undefined ){
+					this.drill_COWC_transform_submitCombined( "null" );
+					return;
+				}
+				var e = $gameMap.event( Number(e_id) );
+				if( e == undefined ){
+					this.drill_COWC_transform_submitCombined( "null" );
+					return;
+				}
+				
+				// > 获取值
+				var v_e_enabled = e.drill_EBS_getData( slot_name );
+				if( v_e_enabled != undefined ){
+					if( v_e_enabled == true ){
+						this.drill_COWC_transform_submitCombined( "ON" );
+					}else{
+						this.drill_COWC_transform_submitCombined( "OFF" );
+					}
+				}else{
+					this.drill_COWC_transform_submitCombined( "null" );
+				}
+				return;
+			}
+		}
 	}
 	//==============================
-	// * 窗口字符 - 插入事件id值 - 【信息 > 显示选项】
+	// * 窗口字符应用之指代字符 - 窗口字符底层校验
 	//==============================
-	var _drill_EBS_command102 = Game_Interpreter.prototype.command102;
-	Game_Interpreter.prototype.command102 = function(){
-		$gameMessage._drill_EBS_tempId = this._eventId;
-		return _drill_EBS_command102.call(this);
-	}
-	//==============================
-	// * 窗口字符 - 插入事件id值 - 【信息 > 数值输入处理】
-	//==============================
-	var _drill_EBS_command103 = Game_Interpreter.prototype.command103;
-	Game_Interpreter.prototype.command103 = function(){
-		$gameMessage._drill_EBS_tempId = this._eventId;
-		return _drill_EBS_command103.call(this);
-	}
-	//==============================
-	// * 窗口字符 - 插入事件id值 - 【信息 > 物品选择处理】
-	//==============================
-	var _drill_EBS_command104 = Game_Interpreter.prototype.command104;
-	Game_Interpreter.prototype.command104 = function(){
-		$gameMessage._drill_EBS_tempId = this._eventId;
-		return _drill_EBS_command104.call(this);
+	if( typeof(_drill_COWC_drawText_functionExist) == "undefined" ){
+		alert( DrillUp.drill_EBS_getPluginTip_NeedUpdate_drawText() );
 	}
 }
+
 
 
 //=============================================================================
@@ -865,10 +985,10 @@ SceneManager.initialize = function() {
 //==============================
 // * 物体的属性 - 初始化
 //==============================
-var _drill_EBS_initMembers = Game_Event.prototype.initMembers;
+var _drill_EBS_event_initMembers2 = Game_Event.prototype.initMembers;
 Game_Event.prototype.initMembers = function() {
 	this._drill_EBS_data = undefined;		//（要放前面，不然会盖掉子类如 Game_Player.prototype.initMembers 的设置）
-	_drill_EBS_initMembers.call(this);
+	_drill_EBS_event_initMembers2.call(this);
 };
 //==============================
 // * 物体的属性 - 初始化 数据
@@ -884,6 +1004,18 @@ Game_Event.prototype.drill_EBS_checkData = function(){
 //==============================
 Game_Event.prototype.drill_EBS_setData = function( key, enabled ){
 	this.drill_EBS_checkData();
+	
+	// > 值转换
+	if( typeof enabled == "number" ){
+		if( enabled == 0 ){ enabled = false; }else{ enabled = true; }
+	}
+	if( typeof enabled == "string" ){
+		if( enabled.toUpperCase() == "OFF" ||
+			enabled.toUpperCase() == "FALSE"
+		){ enabled = false; }else{ enabled = true; }
+	}
+	
+	// > 赋值
 	this._drill_EBS_data[ key ] = enabled;
 }
 //==============================

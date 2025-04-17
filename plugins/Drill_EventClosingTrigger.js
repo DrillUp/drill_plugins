@@ -727,7 +727,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_ECT_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_ECT_PluginTip_baseList.length == 0 ){ return ""; }
@@ -755,10 +755,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_EventClosingTrigger = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_EventClosingTrigger');
+	var Imported = Imported || {};
+	Imported.Drill_EventClosingTrigger = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_EventClosingTrigger');
 	
 	
 	//==============================
@@ -843,11 +843,20 @@ if( Imported.Drill_CoreOfFixedArea ){
 	
 	
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_ECT_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_ECT_pluginCommand.call(this, command, args);
+	this.drill_ECT_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_ECT_pluginCommand = function( command, args ){
 	
 	/*-----------------被触发------------------*/
 	if( command === ">被触发" ){
@@ -945,7 +954,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 };
 //==============================
-// ** 插件指令 - 事件检查
+// * 插件指令 - 事件检查
 //==============================
 Game_Map.prototype.drill_ECT_isEventExist = function( e_id ){
 	if( e_id == 0 ){ return false; }

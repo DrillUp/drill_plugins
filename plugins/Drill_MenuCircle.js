@@ -824,9 +824,9 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_MenuCircle = true;
-　　var DrillUp = DrillUp || {}; 
+	var Imported = Imported || {};
+	Imported.Drill_MenuCircle = true;
+	var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_MenuCircle');
 	
 	//==============================
@@ -877,13 +877,21 @@
 	}
 	
 	
-	
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_MCi_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_MCi_pluginCommand.call(this, command, args);
+	this.drill_MCi_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_MCi_pluginCommand = function( command, args ){
 	if( command === ">菜单魔法圈" ){
 		if(args.length == 4){
 			var temp1 = String(args[1]);
@@ -891,10 +899,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			temp1 = temp1.replace("]","");
 			temp1 = Number(temp1) - 1;
 			var type = String(args[3]);
-			if (type === '显示') {
+			if( type === '显示' ){
 				$gameSystem._drill_MCi_visible[temp1] = true;
 			}
-			if (type === '隐藏') {
+			if( type === '隐藏' ){
 				$gameSystem._drill_MCi_visible[temp1] = false;
 			}
 		}

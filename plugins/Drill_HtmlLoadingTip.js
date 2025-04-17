@@ -165,10 +165,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_HtmlLoadingTip = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_HtmlLoadingTip');
+	var Imported = Imported || {};
+	Imported.Drill_HtmlLoadingTip = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_HtmlLoadingTip');
 
 	
 	/*-----------------杂项------------------*/

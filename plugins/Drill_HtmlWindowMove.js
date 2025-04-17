@@ -78,7 +78,7 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称：		HWM (Html_Window_Move)
+//		插件简称		HWM (Html_Window_Move)
 //		临时全局变量	DrillUp.drill_HWM_xxx
 //		临时局部变量	无
 //		存储数据变量	无
@@ -139,21 +139,27 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_HtmlWindowMove = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_HtmlWindowMove');
+	var Imported = Imported || {};
+	Imported.Drill_HtmlWindowMove = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_HtmlWindowMove');
 	
 	
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
 //==============================
-// * 插件指令 - 指令
+// * 插件指令 - 指令绑定
 //==============================
 var _drill_HWM_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_HWM_pluginCommand.call(this, command, args);
+	this.drill_HWM_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_HWM_pluginCommand = function( command, args ){
 	if( command === ">游戏窗体" ){
 		
 		/*-----------------窗体------------------*/
@@ -178,6 +184,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		
 	}
 }
+
 
 //=============================================================================
 // ** 全局临时数据

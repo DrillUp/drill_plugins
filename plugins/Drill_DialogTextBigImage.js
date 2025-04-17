@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        窗口字符 - 大图片字符
+ * @plugindesc [v1.4]        窗口字符 - 大图片字符
  * @author Drill_up
  * 
  * @Drill_LE_param "字符图-%d"
@@ -18,16 +18,15 @@
  * 如果你有兴趣，也可以来看看更多我写的drill插件哦ヽ(*。>Д<)o゜
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
- * 使得你可以将图片当成一个字符，绘制在窗口中。
- * ★★必须基于 窗口字符核心 插件★★
+ * 使得你可以将任意大小的资源图片当成一个字符，绘制在窗口中。
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
  * 该插件 不能 单独使用。
  * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfWindowCharacter   窗口字符-窗口字符核心
- *     需要该核心才能将图片绘制在窗口的文本域中。
+ *   - Drill_CoreOfWindowCharacter   窗口字符-窗口字符核心★★v2.0及以上★★
+ *     需要该核心才能将图片绘制在文本域中。
  * 
  * -----------------------------------------------------------------------------
  * ----关联文件
@@ -35,13 +34,11 @@
  * 先确保项目img文件夹下是否有Menu__main文件夹。
  * 要查看所有关联资源文件的插件，可以去看看"插件清单.xlsx"。
  * 如果没有，需要自己建立。需要配置资源文件：
- *
+ * 
  * 字符图-1
  * 字符图-2
  * 字符图-3
  * ……
- * 
- * 注意，虽然属于对话框分类，但是实际也作用于菜单中的窗口。
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -49,33 +46,44 @@
  *   只对话框有效。
  * 2.了解更多窗口字符，可以去看看 "23.窗口字符 > 关于窗口字符.docx"。
  * 细节：
- *   (1.不要将大图片当成背景来用，因为窗口的文本域限制，绘制到边缘时
- *      会被切割。
- *   (2.在游戏启动5秒前后，窗口需要加载并初始化全部窗口字符图。
- *      如果这时候立即使用窗口字符，插件可能会反应不过来。
- *      因为图片未加载结束，所以可能会出现偶尔的绘制失败情况。
+ *   (1.大图片可以当成背景来用，
+ *      但是要注意窗口、贴图的文本域大小，超出边缘的部分会被切割。
  * 预加载：
  *   (1.插件中的资源会被反复使用，所以插件默认所有资源都预加载，
  *      预加载相关介绍可以去看看"1.系统 > 关于预加载.docx"。
  * 设计：
  *   (1.该插件可以和 字符串核心 结合使用。
  *      因为字符串核心可以通过插件指令或者玩家手动编辑修改。
- *      所以二者功能结合后，可以通过修改 大图片字符，达成窗口说明中
- *      显示/切换图片的效果。
+ *      所以二者功能结合后，可以通过修改 大图片字符，实现窗口说明中
+ *      显示/切换不同图片的效果。
+ *   (2.字符图还能设置"占用高宽"，能与窗口字符挤在一起。
+ *      实现文本中穿插自定义图片的功能，与qq聊天功能类似。
  * 
  * -----------------------------------------------------------------------------
  * ----激活条件
  * 你需要使用下面的窗口字符来绘制大图片：
  * 
  * 窗口字符：\dimg[1]
- * 窗口字符：\dimg[1:位置[10,-10]]
+ * 窗口字符：\dimg[1:不占高宽]
+ * 窗口字符：\dimg[1:不占高宽:位置[10,-10]]
  * 
- * 1."\dimg[1]"字符会把编号为1的图片绘制到当前光标下。 
+ * 窗口字符：\dimg[1:占用高宽]
+ * 
+ * 1."\dimg[1]"字符会把编号为1的图片绘制到当前光标下，默认不占高宽。 
+ * 2."\dimg[1:不占高宽:位置[10,-10]]"字符会把编号为1的图片绘制到
+ *   当前光标偏移 x 10像素 y -10像素 的位置。
+ *   注意，不占高宽的情况下才能偏移。
+ * 3.如果出现了多个"\dimg[]"，则后绘制的图片，能够遮挡先绘制的文字或图片。
+ *   但不包括 字符块 。详细可以去看看 窗口字符管理层示例 阅后即焚 的效果。
+ * 4.大图片字符也可以设置"占用高宽"，这样文本和图片就全挤在一起了。
  *   （dimg全称为：Drill_Image，即图片字符）
- * 2."\dimg[1:位置[10,-10]]"字符会把编号为1的图片绘制到当前光标
- *   偏移到 x 10像素 y -10像素 的位置。
- * 3.后绘制的图片，能够遮挡先绘制的文字或图片。但不包括 字符块 。
- *   详细可以去看看 窗口字符管理层示例 阅后即焚 的效果。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - Debug查看
+ * 你可以通过插件指令打开插件的Debug查看：
+ * 
+ * 插件指令：>大图片字符 : DEBUG字符图测试 : 开启
+ * 插件指令：>大图片字符 : DEBUG字符图测试 : 关闭
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -110,6 +118,8 @@
  * 修改了插件的分类。
  * [v1.3]
  * 修复了部分情况下无法显示图片的问题。
+ * [v1.4]
+ * 更新并兼容了新的窗口字符底层。
  * 
  * 
  * 
@@ -1769,11 +1779,18 @@
 //		★功能结构树：
 //			->☆提示信息
 //			->☆静态数据
+//			->☆插件指令
 //			->☆预加载
-//			->☆窗口字符解析
 //			
+//			->☆窗口字符应用之效果字符
+//				> \dimg[]
 //			->☆字符图
-//				->绘制大图片
+//				->继承 再处理阶段
+//				->获取文本宽度（半覆写）
+//				->获取文本高度（半覆写）
+//				->绘制基础字符（半覆写）
+//					->绘制大图片
+//			->☆DEBUG字符图测试
 //		
 //		
 //		★家谱：
@@ -1789,8 +1806,8 @@
 //			暂无
 //			
 //		★其它说明细节：
-//			1.没什么细节说明，就是照着drawIcon仿写了一下。
-//
+//			暂无
+//		
 //		★存在的问题：
 //			暂无
 //		
@@ -1807,7 +1824,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_DTBI_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_DTBI_PluginTip_baseList.length == 0 ){ return ""; }
@@ -1824,15 +1841,21 @@
 	DrillUp.drill_DTBI_getPluginTip_LowVersion = function(){
 		return "【" + DrillUp.g_DTBI_PluginTip_curName + "】\n游戏底层版本过低，插件基本功能无法执行。\n你可以去看\"rmmv软件版本（必看）.docx\"中的 \"旧工程升级至1.6版本\" 章节，来升级你的游戏底层版本。";
 	};
+	//==============================
+	// * 提示信息 - 报错 - 窗口字符底层校验
+	//==============================
+	DrillUp.drill_DTBI_getPluginTip_NeedUpdate_drawText = function(){
+		return "【" + DrillUp.g_DTBI_PluginTip_curName + "】\n检测到窗口字符核心版本过低。\n由于底层变化巨大，你需要更新 全部 窗口字符相关插件。\n去看看\"23.窗口字符 > 关于窗口字符底层全更新说明.docx\"进行更新。";
+	};
 	
 	
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_DialogTextBigImage = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_DialogTextBigImage');
+	var Imported = Imported || {};
+	Imported.Drill_DialogTextBigImage = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_DialogTextBigImage');
 	
 	/*------------------字符图-------------------*/
 	DrillUp.g_DTBI_list_length = 200;
@@ -1846,6 +1869,45 @@
 // * >>>>基于插件检测>>>>
 //=============================================================================
 if( Imported.Drill_CoreOfWindowCharacter ){
+	
+//==============================
+// * >>>>基于插件检测>>>> - 窗口字符底层校验
+//==============================
+if( typeof(_drill_COWC_drawText_functionExist) == "undefined" ){
+	alert( DrillUp.drill_DTBI_getPluginTip_NeedUpdate_drawText() );
+}
+	
+	
+//=============================================================================
+// ** ☆插件指令
+//=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
+var _drill_DTBI_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
+	_drill_DTBI_pluginCommand.call(this, command, args);
+	this.drill_DTBI_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_DTBI_pluginCommand = function( command, args ){
+	if( command === ">大图片字符" ){
+		if( args.length == 4 ){
+			var type = String(args[1]);
+			var temp1 = String(args[3]);
+			if( type == "DEBUG字符图测试" ){
+				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
+					$gameTemp._drill_DTBI_DebugEnabled = true;
+				}
+				if( temp1 == "关闭" || temp1 == "禁用" ){
+					$gameTemp._drill_DTBI_DebugEnabled = false;
+				}
+			}
+		}
+	}
+};
 	
 	
 //=============================================================================
@@ -1891,36 +1953,66 @@ if( DrillUp.g_DTBI_preloadEnabled == true ){
 
 
 //=============================================================================
-// ** ☆窗口字符解析
+// ** ☆窗口字符应用之效果字符
 //=============================================================================
 //==============================
-// * 窗口字符解析 - 效果字符 组合符（继承）
+// * 窗口字符应用之效果字符 - 组合符配置
 //==============================
-var _drill_DTBI_COWC_processNewEffectChar_Combined = Window_Base.prototype.drill_COWC_processNewEffectChar_Combined;
-Window_Base.prototype.drill_COWC_processNewEffectChar_Combined = function( matched_index, matched_str, command, args ){
-	_drill_DTBI_COWC_processNewEffectChar_Combined.call( this, matched_index, matched_str, command, args );
+var _drill_DTBI_COWC_effect_processCombined = Game_Temp.prototype.drill_COWC_effect_processCombined;
+Game_Temp.prototype.drill_COWC_effect_processCombined = function( matched_index, matched_str, command, args ){
+	_drill_DTBI_COWC_effect_processCombined.call( this, matched_index, matched_str, command, args );
+	
 	if( command == "dimg" ){
 		
+		// > 『窗口字符定义』 - 大图片字符（\dimg[1]）
 		if( args.length == 1 ){
-			this.drill_DTBI_drawImg( Number(args[0]), 
-				this._drill_COWC_effect_curData['x'], 
-				this._drill_COWC_effect_curData['y'] );
-			this.drill_COWC_charSubmit_Effect(0,0);
+			this.drill_COWC_effect_submitCombined( "@@@dbi[draw:" + String(args[0]) + ":0:0]" );
+			return;
 		}
+		
 		if( args.length == 2 ){
 			var temp1 = String(args[0]);
 			var temp2 = String(args[1]);
-			temp2 = temp2.replace("位置[","");
-			temp2 = temp2.replace("]","");
-			var pos = temp2.split(/[,，]/);
-			if( pos.length >= 2 ){
-				this.drill_DTBI_drawImg( Number(temp1), 
-					this._drill_COWC_effect_curData['x'] + Number(pos[0]), 
-					this._drill_COWC_effect_curData['y'] + Number(pos[1]) );
+			
+			// > 『窗口字符定义』 - 大图片字符（\dimg[1:不占高宽]）
+			if( temp2 == "不占高宽" ){
+				this.drill_COWC_effect_submitCombined( "@@@dbi[draw:" + temp1 + ":0:0]" );
+				return;
 			}
-			this.drill_COWC_charSubmit_Effect(0,0);
+			
+			// > 『窗口字符定义』 - 大图片字符（\dimg[1:占用高宽]）
+			if( temp2 == "占用高宽" ){
+				var imgIndex = Number(temp1) -1;
+				var src_bitmap = $gameTemp._drill_DTBI_preloadTank[ imgIndex ];	//（『预加载直接赋值』直接从 预加载容器 中取出高宽值）
+				this.drill_COWC_effect_submitCombined( "@@@dbi[draw:" +temp1+ ":"+String(src_bitmap.width)+ ":"+String(src_bitmap.height)+ "]" );
+				return;
+			}
+			
+			// > 『窗口字符定义』 - 大图片字符（\dimg[1:位置[10,-10]]）
+			if( temp2.indexOf("位置[") != -1 ){
+				temp2 = temp2.replace("位置[","");
+				temp2 = temp2.replace("]","");
+				var pos = temp2.split(/[,，]/);
+				if( pos.length >= 2 ){
+					this.drill_COWC_effect_submitCombined( "@@@dbi[drawWithPos:" +temp1+ ":0:0:"+String(pos[0])+ ":"+String(pos[1])+ "]" );
+					return;
+				}
+			}
 		}
 		
+		// > 『窗口字符定义』 - 大图片字符（\dimg[1:不占高宽:位置[10,-10]]）
+		if( args.length == 3 ){
+			var temp1 = String(args[0]);
+			var temp2 = String(args[1]);
+			var temp3 = String(args[2]);
+			temp3 = temp3.replace("位置[","");
+			temp3 = temp3.replace("]","");
+			var pos = temp3.split(/[,，]/);
+			if( pos.length >= 2 ){
+				this.drill_COWC_effect_submitCombined( "@@@dbi[drawWithPos:" +temp1+ ":0:0:"+String(pos[0])+ ":"+String(pos[1])+ "]" );
+				return;
+			}
+		}
 	}
 };
 
@@ -1932,18 +2024,212 @@ Window_Base.prototype.drill_COWC_processNewEffectChar_Combined = function( match
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
+// * 字符图 - 再处理阶段-配置阶段（继承）
+//==============================
+var _drill_DTBI_COCD_textBlock_processSecond = Game_Temp.prototype.drill_COCD_textBlock_processSecond;
+Game_Temp.prototype.drill_COCD_textBlock_processSecond = function( command, args, cur_baseParam, cur_blockParam, cur_rowParam ){
+	_drill_DTBI_COCD_textBlock_processSecond.call( this, command, args, cur_baseParam, cur_blockParam, cur_rowParam );
+	
+	if( command == "@@@dbi" ){
+		
+		// > 『底层字符定义』 - 字符图（@@@dbi[draw:1:0:0]） drill_big_image
+		if( args.length == 4 ){
+			var type = String(args[0]);
+			if( type == "draw" ){
+				cur_baseParam['DTBI_imgIndex'] = Number(args[1]) -1;	//（基础字符配置）
+				cur_baseParam['DTBI_imgWidth'] = Number(args[2]);
+				cur_baseParam['DTBI_imgHeight'] = Number(args[3]);
+				cur_baseParam['DTBI_imgPosX'] = 0;
+				cur_baseParam['DTBI_imgPosY'] = 0;
+				this.drill_COCD_textBlock_submitSecond( "@" );			//（必须提交一个字符）
+				return;
+			}
+		}
+		
+		// > 『底层字符定义』 - 字符图（@@@dbi[drawWithPos:1:0:0:4:4]） drill_big_image
+		if( args.length == 6 ){
+			var type = String(args[0]);
+			if( type == "drawWithPos" ){
+				cur_baseParam['DTBI_imgIndex'] = Number(args[1]) -1;	//（基础字符配置）
+				cur_baseParam['DTBI_imgWidth'] = Number(args[2]);
+				cur_baseParam['DTBI_imgHeight'] = Number(args[3]);
+				cur_baseParam['DTBI_imgPosX'] = Number(args[4]);
+				cur_baseParam['DTBI_imgPosY'] = Number(args[5]);
+				this.drill_COCD_textBlock_submitSecond( "@" );			//（必须提交一个字符）
+				return;
+			}
+		}
+	}
+}
+//==============================
+// * 字符图 - 基础字符 - 默认值（继承）
+//==============================
+var _drill_DTBI_COCD_drawBaseText_initParam = Game_Temp.prototype.drill_COCD_drawBaseText_initParam;
+Game_Temp.prototype.drill_COCD_drawBaseText_initParam = function( baseParam ){
+	_drill_DTBI_COCD_drawBaseText_initParam.call( this, baseParam );
+	if( baseParam['DTBI_imgIndex'] == undefined ){ baseParam['DTBI_imgIndex'] = -1 };		//绘制的字符图索引
+}
+//==============================
+// * 字符图 - 基础字符 - 获取文本宽度（半覆写）
+//==============================
+var _drill_DTBI_COCD_measureBaseTextWidth_Private = Game_Temp.prototype.drill_COCD_measureBaseTextWidth_Private;
+Game_Temp.prototype.drill_COCD_measureBaseTextWidth_Private = function( painter, text, baseParam ){
+	
+	// > 字符图时（直接返回零）
+	if( baseParam['DTBI_imgIndex'] >= 0 ){
+		return baseParam['DTBI_imgWidth'];
+		
+	// > 原函数
+	}else{
+		return _drill_DTBI_COCD_measureBaseTextWidth_Private.call( this, painter, text, baseParam );
+	}
+}
+//==============================
+// * 字符图 - 基础字符 - 获取文本高度（半覆写）
+//==============================
+var _drill_DTBI_COCD_measureBaseTextHeight_Private = Game_Temp.prototype.drill_COCD_measureBaseTextHeight_Private;
+Game_Temp.prototype.drill_COCD_measureBaseTextHeight_Private = function( painter, text, baseParam ){
+	
+	// > 字符图时（直接返回零）
+	if( baseParam['DTBI_imgIndex'] >= 0 ){
+		return baseParam['DTBI_imgHeight'];
+		
+	// > 原函数
+	}else{
+		return _drill_DTBI_COCD_measureBaseTextHeight_Private.call( this, painter, text, baseParam );
+	}
+}
+//==============================
+// * 字符图 - 基础字符 - 绘制基础字符（半覆写）
+//==============================
+var _drill_DTBI_COCD_drawBaseText_Private = Bitmap.prototype.drill_COCD_drawBaseText_Private;
+Bitmap.prototype.drill_COCD_drawBaseText_Private = function( text, x, y, baseParam ){
+	
+	// > 字符图时
+	if( baseParam['DTBI_imgIndex'] >= 0 ){
+		
+		// > 字符图时 - 『绘制过程定义』 - 字符图（@@@dbi[draw:1:0:0]）字符图（@@@dbi[drawWithPos:1:0:0:4:4]）
+		this.drill_DTBI_drawImg(
+			baseParam['DTBI_imgIndex'],
+			x + baseParam['DTBI_imgPosX'],
+			y + baseParam['DTBI_imgPosY'],
+			baseParam
+		);
+		
+	// > 原函数
+	}else{
+		_drill_DTBI_COCD_drawBaseText_Private.call( this, text, x, y, baseParam );
+	}
+}
+//==============================
 // * 字符图 - 绘制大图片
 //==============================
-Window_Base.prototype.drill_DTBI_drawImg = function( imgIndex, x, y ){
-    var bitmap = $gameTemp._drill_DTBI_preloadTank[ imgIndex-1 ];	//（『预加载直接赋值』直接从 预加载容器 中取出并绘制）
-	if( bitmap && bitmap.isReady() ){
-		var pw = bitmap.width;
-		var ph = bitmap.height;
-		var sx = 0;
-		var sy = 0;
-		this.contents.blt(bitmap, sx, sy, pw, ph, x, y);
+Bitmap.prototype.drill_DTBI_drawImg = function( imgIndex, x, y, baseParam ){
+    var src_bitmap = $gameTemp._drill_DTBI_preloadTank[ imgIndex ];	//（『预加载直接赋值』直接从 预加载容器 中取出并绘制）
+	var pw = src_bitmap.width;
+	var ph = src_bitmap.height;
+	var sx = 0;
+	var sy = 0;
+	
+	// > 占用时
+	if( baseParam['DTBI_imgHeight'] > 0 ){
+		y -= src_bitmap.height;
+		
+	// > 不占时
+	}else{
+		y -= baseParam['fontSize'] *1.10;		//『手算高度』
 	}
+	
+	this.blt(src_bitmap, sx, sy, pw, ph, x, y);
 };
+
+
+//=============================================================================
+// ** ☆DEBUG字符图测试
+//
+//			说明：	> 此模块控制 DEBUG字符图测试 功能。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * DEBUG字符图测试 - 帧刷新（地图界面）
+//==============================
+var _drill_DTBI_debugMap_update = Scene_Map.prototype.update;
+Scene_Map.prototype.update = function() {
+    _drill_DTBI_debugMap_update.call(this);
+	
+	// > 创建贴图
+	if( $gameTemp._drill_DTBI_DebugEnabled == true ){
+		$gameTemp._drill_DTBI_DebugEnabled = undefined;
+		this.drill_DTBI_createDebugSprite();
+	}
+	
+	// > 销毁贴图
+	if( $gameTemp._drill_DTBI_DebugEnabled == false ){
+		$gameTemp._drill_DTBI_DebugEnabled = undefined;
+		if( this._drill_DTBI_DebugSprite != undefined ){
+			this.removeChild(this._drill_DTBI_DebugSprite);
+			this._drill_DTBI_DebugSprite = undefined;
+		}
+	}
+}
+//==============================
+// * DEBUG字符图测试 - 创建贴图
+//==============================
+Scene_Map.prototype.drill_DTBI_createDebugSprite = function() {
+	
+	// > 销毁贴图
+	if( this._drill_DTBI_DebugSprite != undefined ){
+		this.removeChild(this._drill_DTBI_DebugSprite);
+		this._drill_DTBI_DebugSprite = undefined;
+	}
+	
+	// > 创建贴图
+	var temp_bitmap = new Bitmap( Graphics.boxWidth*0.75, Graphics.boxHeight*0.75 );
+	var temp_sprite = new Sprite();
+	temp_sprite.x = Graphics.boxWidth*0.5;
+	temp_sprite.y = Graphics.boxHeight*0.5;
+	temp_sprite.anchor.x = 0.5;
+	temp_sprite.anchor.y = 0.5;
+	temp_sprite.bitmap = temp_bitmap;
+	temp_sprite.bitmap.fillAll("rgba(0,0,0,0.5)");
+	this.addChild( temp_sprite );	//（直接加在最顶层的上面）
+	this._drill_DTBI_DebugSprite = temp_sprite;
+	
+	// > 绘制 - DEBUG显示画布范围
+	temp_bitmap.drill_COWC_debug_drawRect();
+	
+	// > 绘制 - 参数准备
+	var options = {};
+	options['infoParam'] = {};
+	options['infoParam']['x'] = 20;
+	options['infoParam']['y'] = 20;
+	options['infoParam']['canvasWidth'] = temp_bitmap.width;
+	options['infoParam']['canvasHeight'] = temp_bitmap.height;
+	
+	// > 绘制 - 参数准备 - 自定义
+	options['baseParam'] = {};
+	//options['baseParam']['drawDebugBaseRect'] = true;
+	options['baseParam']['fontSize'] = 24;		//（初始设置字体大小，这样就不会被 全局默认值 干扰了，fr也会重置为此值）
+	
+	
+	// > 绘制 - 测试的字符
+	var text =  "【" + DrillUp.g_DTBI_PluginTip_curName + "】\n" + 
+				"该插件能绘制大图片字符，图片可以作为底片，\n也可以与字符挤一起排列。\n" + 
+				
+				"》》大图片字符测试-不占高宽： \\fr\n" + 
+				"    \\dimg[10]测试的字符（大图片可以作为背景用）\n    测试的字符\n    测试的字符\n\n\n" + 
+				"》》大图片字符测试-占用高宽： \\fr\n" + 
+				"    小爱丽丝\\dimg[5:占用高宽]量子妹 \\fr\n" + 
+				"    小爱丽丝\\dimg[6:占用高宽]量子妹 \\fr\n" + 
+				"    量子妹\\dimg[7:占用高宽]小爱丽丝 \\fr\n" + 
+				"    小爱丽丝\\dimg[8:占用高宽]量子妹 \\fr\n" + 
+				"    量子妹滑铲三连击\\dimg[6:占用高宽]\\dimg[6:占用高宽]\\dimg[6:占用高宽]抓住小爱丽丝 \\fr\n" ;
+				
+	temp_bitmap.drill_COWC_drawText( text, options );
+	
+	// > 『字符贴图流程』 - 刷新字符块贴图【窗口字符 - 窗口字符贴图核心】
+	temp_sprite.drill_COWCSp_sprite_refreshAllSprite();
+}
 
 
 //=============================================================================

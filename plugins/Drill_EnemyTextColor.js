@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.2]        UI - 敌人文本颜色
+ * @plugindesc [v2.3]        UI - 敌人文本颜色
  * @author Drill_up
  * 
  * 
@@ -23,7 +23,7 @@
  * 该插件 不能 单独使用。
  * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfColor    窗口字符-颜色核心★★v1.5及以上★★
+ *   - Drill_CoreOfColor    窗口字符-颜色核心★★v1.8及以上★★
  *     需要该核心才能修改颜色。
  * 作用于：
  *   - Drill_WindowLog      战斗UI-窗口提示消息★★v1.3及以上★★
@@ -39,8 +39,11 @@
  * 1.插件的作用域：战斗界面、菜单界面。
  *   作用于战斗界面和窗口界面中的敌人名字。
  * 2.如果想了解高级颜色设置方法，去看看 "23.窗口字符 > 关于颜色核心.docx"。
- * 3.如果你改动注释配置后，使用了旧存档，可能会出现文本为旧存档设定的颜色情况。
- *   具体说明去看看 "21.管理器 > 数据更新与旧存档.docx"。
+ * 细节：
+ *   (1.由于颜色与敌人id直接绑定，所以重名的敌人并不会影响颜色绑定。
+ * 存档问题：
+ *   (1.如果你改动注释配置后，使用了旧存档，可能会出现文本为旧存档设定的颜色情况。
+ *      具体说明去看看 "21.管理器 > 数据更新与旧存档.docx"。
  *
  * -----------------------------------------------------------------------------
  * ----激活条件：
@@ -50,7 +53,7 @@
  * 敌人注释：<高级颜色:1>
  * 敌人注释：<颜色:#FF4444>
  * 
- * 1."颜色:1" 表示颜色核心的配置中的第1个颜色。你也可以直接写颜色代码。
+ * 1."颜色:1" 表示颜色核心的配置中的第1个普通颜色。你也可以直接写颜色代码。
  * 2."高级颜色:3" 表示核心中配置的第3个高级渐变色。
  * 3.变色对 敌人名称 的指代字符 "\ne[1]" 也有效。
  * 
@@ -128,8 +131,10 @@
  * 优化了旧存档的识别与兼容。
  * [v2.2]
  * 添加了 窗口字符 的变色兼容功能。
- *
- *
+ * [v2.3]
+ * 更新并兼容了新的窗口字符底层。
+ * 
+ * 
  * @param MOG-敌人指针是否变色
  * @type boolean
  * @on 变色
@@ -147,7 +152,7 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称：		ETC (Enemy_Text_Color)
+//		插件简称		ETC (Enemy_Text_Color)
 //		临时全局变量	DrillUp.g_ETC_xxx
 //		临时局部变量	无
 //		存储数据变量	$gameSystem._drill_ETC_xxx
@@ -218,7 +223,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_ETC_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_ETC_PluginTip_baseList.length == 0 ){ return ""; }
@@ -238,15 +243,21 @@
 			"\n- Drill_ActorTextColor UI-角色文本颜色"+
 			"\n- Drill_WindowLog 战斗UI-窗口提示消息";
 	};
+	//==============================
+	// * 提示信息 - 报错 - 窗口字符底层校验
+	//==============================
+	DrillUp.drill_ETC_getPluginTip_NeedUpdate_drawText = function(){
+		return "【" + DrillUp.g_ETC_PluginTip_curName + "】\n检测到窗口字符核心版本过低。\n由于底层变化巨大，你需要更新 全部 窗口字符相关插件。\n去看看\"23.窗口字符 > 关于窗口字符底层全更新说明.docx\"进行更新。";
+	};
 	
 	
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_EnemyTextColor = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_EnemyTextColor');
+	var Imported = Imported || {};
+	Imported.Drill_EnemyTextColor = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_EnemyTextColor');
 
 
 	/*-----------------杂项------------------*/
@@ -260,12 +271,29 @@
 if( Imported.Drill_CoreOfColor ){
 	
 	
+//==============================
+// * 基于插件检测 - 窗口字符底层校验
+//==============================
+if( typeof(_drill_COWC_drawText_functionExist) == "undefined" ){
+	alert( DrillUp.drill_ETC_getPluginTip_NeedUpdate_drawText() );
+}
+	
+	
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_ETC_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_ETC_pluginCommand.call(this, command, args);
+	this.drill_ETC_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_ETC_pluginCommand = function( command, args ){
 	if( command === ">文本颜色" ){
 		
 		if(args.length == 6){
@@ -304,11 +332,11 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					if( temp2.slice(0,1) === "#" ){
 						$gameSystem._drill_ETC_colorCode[Number(temp1)] = temp2;
 					}else{
-						$gameSystem._drill_ETC_colorCode[Number(temp1)] = String(DrillUp.drill_COC_getColor( Number(temp2) -1 ));
+						$gameSystem._drill_ETC_colorCode[Number(temp1)] = String(DrillUp.drill_COC_getColor( 100+ Number(temp2) ));
 					}
 				}
 				if( type == "敌人高级" ){
-					$gameSystem._drill_ETC_colorCode[Number(temp1)] = String(DrillUp.drill_COC_getSeniorColor( Number(temp2) -1 ));
+					$gameSystem._drill_ETC_colorCode[Number(temp1)] = String(DrillUp.drill_COC_getColor( 200+ Number(temp2) ));
 				}
 			}
 		}
@@ -321,10 +349,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var temp2 = $gameVariables.value( Number(args[5]) ) ;
 			var type = String(args[3]);
 			if( type == "敌人普通" ){
-				$gameSystem._drill_ETC_colorCode[Number(temp1)] = String(DrillUp.drill_COC_getColor( temp2-1 )) ;
+				$gameSystem._drill_ETC_colorCode[Number(temp1)] = String(DrillUp.drill_COC_getColor( 100+ temp2 )) ;
 			}
 			if( type == "敌人高级" ){
-				$gameSystem._drill_ETC_colorCode[Number(temp1)] = String(DrillUp.drill_COC_getSeniorColor( temp2-1 )) ;
+				$gameSystem._drill_ETC_colorCode[Number(temp1)] = String(DrillUp.drill_COC_getColor( 200+ temp2 )) ;
 			}
 		}
 	}
@@ -464,18 +492,18 @@ Game_Temp.prototype.initialize = function() {
 			// > 普通颜色 - 颜色编号
 			}else{
 				var data = {};
-				data['color_code'] = String(DrillUp.drill_COC_getColor( Number(color[1]) -1 )) ;
-				data['color_id'] = Number(color[1]) ; //(101开始)
-				if( data['color_code'] == "#ffffff" ){ data['color_code'] = ""; }
+				data['color_id'] = 100+ Number(color[1]);  //(101开始)
+				data['color_code'] = DrillUp.drill_COC_getColor( 100+ Number(color[1]) );
+				if( data['color_code'] == "#ffffff" ){ data['color_code'] = ""; }	//『初始为白色则不变色』
 				this._drill_ETC_enemyData[i] = data;
 			}
 			
 		// > 高级颜色
 		}else if( colorG != "" && colorG != [] ){
 			var data = {};
-			data['color_code'] = DrillUp.drill_COC_getSeniorColor( Number(colorG[1]) -1 );
-			data['color_id'] = Number(colorG[1]) + 100 ; //(201开始)
-			if( data['color_code'] == "#ffffff" ){ data['color_code'] = ""; }
+			data['color_id'] = 200+ Number(colorG[1]);  //(201开始)
+			data['color_code'] = DrillUp.drill_COC_getColor( 200+ Number(colorG[1]) );
+			if( data['color_code'] == "#ffffff" ){ data['color_code'] = ""; }	//『初始为白色则不变色』
 			this._drill_ETC_enemyData[i] = data;
 		
 		}else{
@@ -495,7 +523,7 @@ Game_Temp.prototype.drill_ETC_getEnemyName = function( enemy_id ){
 //==============================
 // * 颜色数据 - 获取 - 敌人颜色代码（开放函数）
 //
-//			说明：	> 返回如"#ffffff"的颜色代码。包括 普通颜色和高级颜色。窗口字符拼接时，建议用"\\cc[]"。
+//			说明：	> 返回如"#eeeeff"的颜色代码。包括 普通颜色和高级颜色。窗口字符拼接时，建议用"\\cc[]"。
 //					> 如果没对应配置，返回【空字符串】。
 //==============================
 Game_Temp.prototype.drill_ETC_getColorCode = function( enemy_id ){
@@ -527,19 +555,19 @@ Game_Temp.prototype.drill_ETC_getColorId = function( enemy_id ){
 //=============================================================================
 // ** ☆指代字符同步变色
 //
-//			说明：	> 与 物品/武器/护甲/技能 相关的指代字符，能同步变色。加 \csave \cload \c 等窗口字符。
+//			说明：	> 与 物品/武器/护甲/技能 相关的指代字符，能同步变色。加 \cc[oSave] \cc[oLoad] \c 等窗口字符。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
 // * 指代字符 - 敌人名称（\NE[n]）
 //==============================
-var _drill_ETC_COWC_enemyName = Window_Base.prototype.drill_COWC_enemyName;
-Window_Base.prototype.drill_COWC_enemyName = function( n ){
+var _drill_ETC_COWC_enemyName = Game_Temp.prototype.drill_COWC_enemyName;
+Game_Temp.prototype.drill_COWC_enemyName = function( n ){
 	var result = _drill_ETC_COWC_enemyName.call( this, n );
 	if( result != "" ){
 		var code = $gameTemp.drill_ETC_getColorCode( n );
 		if( code != "" ){
-			result = "\x1bcsave\x1bcc["+ code +"]"+ result +"\x1bcload";
+			result = "\\cc[oSave]\\cc["+ code +"]"+ result +"\\cc[oLoad]";
 		}
 	}
 	return result;
@@ -577,8 +605,11 @@ BattleCursor.prototype.refresh_arrow_name = function( battler, sprite ){
 				sprite.bitmap.textColor = color;
 			}
 		}
+		
+		// > 原函数
 		_drill_ETC_mogCursor_refresh.call(this,battler,sprite);
-		sprite.bitmap.textColor = "#ffffff";
+		
+		sprite.bitmap.drill_COC_initBitmapDefault();	//（全局默认值-自带参数初始化）
 	}else{
 		_drill_ETC_mogCursor_refresh.call(this,battler,sprite);
 	}
@@ -589,17 +620,21 @@ BattleCursor.prototype.refresh_arrow_name = function( battler, sprite ){
 if( Imported.MOG_BossHP ){
 	var _drill_ETC_mogBossHP_refresh = Sprite_BossHP.prototype.refresh_name;
 	Sprite_BossHP.prototype.refresh_name = function() {
-		
-		if( DrillUp.g_ETC_mogBoss){
+		if( DrillUp.g_ETC_mogBoss ){
 			if( this._battler ){
 				var color = $gameTemp.drill_ETC_getColorCode( this._battler._enemyId );
 				if( color != "" ){
 					this._name.bitmap.textColor = color;
 				}
 			}
+			
+			// > 原函数
 			_drill_ETC_mogBossHP_refresh.call(this);
-			this._name.bitmap.textColor = "#ffffff";
+			
+			this._name.bitmap.drill_COC_initBitmapDefault();	//（全局默认值-自带参数初始化）
 		}else{
+			
+			// > 原函数
 			_drill_ETC_mogBossHP_refresh.call(this);
 		}
 	};
@@ -610,15 +645,19 @@ if( Imported.MOG_BossHP ){
 if( Imported.Drill_GaugeForBoss ){
 	var _drill_ETC_GFB_drawName = Drill_GFB_StyleSprite.prototype.drill_drawName;
 	Drill_GFB_StyleSprite.prototype.drill_drawName = function() {
-		
-		if( DrillUp.g_ETC_mogBoss){
+		if( DrillUp.g_ETC_mogBoss ){
 			var color = $gameTemp.drill_ETC_getColorCode( this._drill_enemy._enemyId );
 			if( color != "" ){
 				this._drill_name_sprite.bitmap.textColor = color;
 			}
+			
+			// > 原函数
 			_drill_ETC_GFB_drawName.call(this);
-			this._drill_name_sprite.bitmap.textColor = "#ffffff";
+			
+			this._drill_name_sprite.bitmap.drill_COC_initBitmapDefault();	//（全局默认值-自带参数初始化）
 		}else{
+			
+			// > 原函数
 			_drill_ETC_GFB_drawName.call(this);
 		}
 	};

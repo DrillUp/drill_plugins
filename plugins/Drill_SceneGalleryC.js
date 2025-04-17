@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        面板 - 全自定义画廊C
+ * @plugindesc [v1.4]        面板 - 全自定义画廊C
  * @author Drill_up
  * 
  * @Drill_LE_param "内容-%d"
@@ -25,10 +25,11 @@
  * 该插件 不能 单独使用。
  * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfInput            系统-输入设备核心★★v1.5及以上★★
+ *   - Drill_CoreOfInput             系统-输入设备核心★★v1.5及以上★★
  *     必须基于该插件才能控制查看图片细节。
- *   - Drill_CoreOfGlobalSave       管理器-全局存储核心
- *   - Drill_CoreOfWindowAuxiliary  系统-窗口辅助核心★★v1.3及以上★★
+ *   - Drill_CoreOfGlobalSave        管理器-全局存储核心
+ *   - Drill_CoreOfWindowAuxiliary   系统-窗口辅助核心★★v2.2及以上★★
+ *   - Drill_CoreOfWindowCharacter   窗口字符-窗口字符核心★★v2.0及以上★★
  *     必须基于该插件才能显示描述内容。
  *
  * -----------------------------------------------------------------------------
@@ -72,8 +73,8 @@
  * 内容锁定：
  *   (1.你可以将某个内容锁定，锁定项将会只显示锁定信息。
  *      但注意前提是内容正在显示，没有隐藏。
- *   (2.内容锁定时，可以选择锁定内容或描述图。
- *      如果你想让锁定时描述图不显示，可以配置空的锁定图片。
+ *   (2.内容锁定时，可以选择锁定内容或缩略图。
+ *      如果你想让锁定时缩略图不显示，可以配置空的锁定图片。
  * 设计：
  *   (1.该面板默认定义为一种可收集画的画廊面板。
  *      但由于该面板插件可复制很多个，所以你可以将画廊用于其它功能，
@@ -89,7 +90,7 @@
  * 如果没有文件夹，自己建立。需要配置下列资源文件：
  *
  * 资源-整体布局           （默认为 画廊C-整体布局）
- * 资源-锁定的描述图       （默认为 画廊C-锁定描述图）
+ * 资源-上锁的缩略图       （默认为 画廊C-上锁的缩略图）
  * 选项窗口布局 资源-贴图  （默认为 单张背景贴图 - 背景贴图）
  * 描述窗口布局 资源-贴图  （默认为 单张背景贴图 - 背景贴图）
  * 
@@ -163,6 +164,9 @@
  * 优化了旧存档的识别与兼容。
  * [v1.3]
  * 添加了 按钮声音设置。
+ * [v1.4]
+ * 添加了窗口选项的未读功能。
+ * 更新并兼容了新的窗口字符底层。
  * 
  * 
  * 
@@ -278,6 +282,39 @@
  * @desc 选项模式为 窗口模式 时，选项窗口的配置数据。
  * @type struct<DrillSelectWindow>
  * @default {"选项窗口 X":"0","选项窗口 Y":"480","选项窗口宽度":"816","选项窗口高度":"140","选项窗口列数":"5","每条选项高度":"100","是否启用选项内容":"false","选项窗口对齐方式":"居中","选项窗口字体大小":"20","选项窗口移动动画":"{\"移动类型\":\"弹性移动\",\"移动时长\":\"30\",\"移动延迟\":\"0\",\"---起点---\":\"\",\"坐标类型\":\"相对坐标\",\"起点-相对坐标 X\":\"-60\",\"起点-相对坐标 Y\":\"0\",\"起点-绝对坐标 X\":\"0\",\"起点-绝对坐标 Y\":\"0\"}","选项窗口布局":"{\"布局类型\":\"隐藏布局\",\"---单张背景贴图---\":\"\",\"资源-贴图\":\"画廊C-选项窗口\",\"贴图位置修正 X\":\"0\",\"贴图位置修正 Y\":\"0\"}","选项窗口指针与边框":"{}","是否启用选项小缩略图":"true","选项小缩略图缩放模式":"等比缩放","是否涂黑小缩略图背景":"true"}
+ * 
+ * 
+ * @param ----未读提示----
+ * @default 
+ *
+ * @param 是否启用未读提示
+ * @parent ----未读提示----
+ * @type boolean
+ * @on 启用
+ * @off 关闭
+ * @desc true - 启用，false - 关闭。未读提示只在选项窗口中有效。
+ * @default true
+ *
+ * @param 未读提示字体大小
+ * @parent ----未读提示----
+ * @type number
+ * @min 0
+ * @desc 未读提示的字体大小。
+ * @default 18
+ *
+ * @param 未读提示是否放右下角
+ * @parent ----未读提示----
+ * @type boolean
+ * @on 放右下角
+ * @off 默认左上角
+ * @desc true - 放右下角，false - 默认左上角
+ * @default true
+ * 
+ * @param 用语-未读提示信息
+ * @parent ----未读提示----
+ * @type note
+ * @desc 未读提示的文本内容，可以使用各种窗口字符。
+ * @default "\\c[6]新"
  * 
  * 
  * @param ----描述窗口----
@@ -1123,6 +1160,7 @@
  * @desc 当前的选项名字。
  * @default 未命名选项
  * 
+ * 
  * @param ---选项内容---
  * @default 
  *
@@ -1147,7 +1185,8 @@
  * @type note
  * @desc 每个选项显示的长文本内容。（只有窗口模式有效，且需要启用 选项内容 。）
  * @default "长文本选项描述"
- *
+ * 
+ * 
  * @param ---画廊内容---
  * @default 
  *
@@ -1165,7 +1204,7 @@
  * @desc 该选项下的描述窗口显示的内容。
  * @default "没有描述"
  *
- * @param 画廊描述内容对齐方式
+ * @param 描述内容对齐方式
  * @parent ---画廊内容---
  * @type select
  * @option 左对齐
@@ -1177,20 +1216,33 @@
  * @desc 文本的对齐方式。
  * @default 左对齐
  *
- * @param 画廊描述内容是否自适应行间距
+ * @param 行高控制模式
  * @parent ---画廊内容---
- * @type boolean
- * @on 自适应
- * @off 固定行间距
- * @desc true - 自适应，false - 固定行间距
- * @default true
+ * @type select
+ * @option 默认补正
+ * @value 默认补正
+ * @option 自定义补正
+ * @value 自定义补正
+ * @option 锁定行高
+ * @value 锁定行高
+ * @option 关闭行高控制
+ * @value 关闭行高控制
+ * @desc 行高的控制模式。你也可以关闭行高控制，用窗口字符来修改行高设置。
+ * @default 自定义补正
  *
- * @param 画廊描述内容固定行间距
- * @parent 画廊描述内容是否自适应行间距
+ * @param 自定义补正值
+ * @parent 行高控制模式
  * @type number
- * @min 1
- * @desc 如果你选择了手动行间距，这里将使得每行的文字的行间距都是固定值。
- * @default 28
+ * @min 0
+ * @desc 行高控制模式为"自定义补正"时，每行文本的行高补正值。（默认补正为36，因为默认字体就为28，所以补正值大）
+ * @default 30
+ *
+ * @param 锁定行高值
+ * @parent 行高控制模式
+ * @type number
+ * @min 0
+ * @desc 行高控制模式为"锁定行高"时，锁定的行高值。
+ * @default 30
  *
  */
 /*~struct~DrillWindowMoving:
@@ -1558,7 +1610,8 @@
 //			->☆面板控制
 //			
 //			->画廊C【Scene_Drill_SGaC】
-//				->选项
+//				->A主体
+//				->B选项窗口
 //					->选项窗口模式
 //						> 标准属性
 //						> 选项图片（小图）
@@ -1578,13 +1631,23 @@
 //					->帮助图
 //					->原图查看器窗口
 //				->原图全部全加载
+//				->I箭头
 //				->☆原型链规范（Scene_Drill_SGaC）
 //				->☆箭头
 //					->帧刷新 贴图
 //					->帧刷新 点击
 //			
 //			->选项窗口【Drill_SGaC_SelectWindow】
+//				->G子项（覆写）
+//				->2A选中
+//				->2B绘制选项
+//					->绘制单个小缩略图
+//				->2C已读情况
+//				->2D兼容
 //			->显示窗口【Drill_SGaC_DescWindow】
+//				->窗口行高
+//				->对齐方式
+//				->绘制文本
 //			->完成度窗口【Drill_SGaC_CompletionWindow】
 //			->原图查看器窗口【Drill_SGaC_ImgExpandWindow】
 //			
@@ -1628,12 +1691,13 @@
 	DrillUp.g_SGaC_PluginTip_baseList = [
 		"Drill_CoreOfInput.js 系统-输入设备核心",
 		"Drill_CoreOfGlobalSave.js 管理器-全局存储核心",
-		"Drill_CoreOfWindowAuxiliary.js 系统-窗口辅助核心"
+		"Drill_CoreOfWindowAuxiliary.js 系统-窗口辅助核心",
+		"Drill_CoreOfWindowCharacter.js 窗口字符-窗口字符核心"
 	];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_SGaC_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_SGaC_PluginTip_baseList.length == 0 ){ return ""; }
@@ -1644,15 +1708,21 @@
 		}
 		return message;
 	};
+	//==============================
+	// * 提示信息 - 报错 - 窗口字符底层校验
+	//==============================
+	DrillUp.drill_SGaC_getPluginTip_NeedUpdate_drawText = function(){
+		return "【" + DrillUp.g_SGaC_PluginTip_curName + "】\n检测到窗口字符核心版本过低。\n由于底层变化巨大，你需要更新 全部 窗口字符相关插件。\n去看看\"23.窗口字符 > 关于窗口字符底层全更新说明.docx\"进行更新。";
+	};
 	
 	
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_SceneGalleryC = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_SceneGalleryC');
+	var Imported = Imported || {};
+	Imported.Drill_SceneGalleryC = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_SceneGalleryC');
 	
 	
 	//==============================
@@ -1770,11 +1840,14 @@
 			data['nameEx'] = "";
 		}
 		
-		// > 显示处理
+		// > 显示情况
 		data['enabled'] = (dataFrom["是否初始显示"] || "false") == "true" ;
 		
-		// > 锁定处理
+		// > 锁定情况
 		data['locked'] = (dataFrom["是否初始锁定"] || "false") == "true" ;
+		
+		// > 已读情况
+		data['watched'] = false;
 		
 		// > 画廊图片
 		data['pic'] = (dataFrom["资源-画廊图片"] || "");
@@ -1786,9 +1859,10 @@
 		}else{
 			data['context'] = "";
 		}
-		data['contextAlign'] = String(dataFrom["画廊描述内容对齐方式"] || "左对齐");
-		data['contextAutoLineheight'] = String(dataFrom["画廊描述内容是否自适应行间距"] || "true") === "true";	
-		data['contextLineheight'] = Number(dataFrom["画廊描述内容固定行间距"] || 28);
+		data['context_align'] = String(dataFrom["描述内容对齐方式"] || "左对齐");
+		data['context_lineheight_type'] = String(DrillUp.parameters["行高控制模式"] || "默认补正");
+		data['context_lineheight_custom'] = Number(DrillUp.parameters["自定义补正值"] || 30);
+		data['context_lineheight_lock'] = Number(DrillUp.parameters["锁定行高值"] || 30);
 		
 		return data;
 	}
@@ -1929,9 +2003,23 @@
 		DrillUp.g_SGaC_arrowClickSound = null;
 	}
 	
+	/*-----------------内容------------------*/
+	DrillUp.g_SGaC_context_list_length = 80;
+	DrillUp.g_SGaC_context_list = [];
+	for( var i = 0; i < DrillUp.g_SGaC_context_list_length; i++ ){
+		if( DrillUp.parameters["内容-" + String(i+1) ] != "" &&
+			DrillUp.parameters["内容-" + String(i+1) ] != undefined ){
+			var data = JSON.parse(DrillUp.parameters["内容-" + String(i+1)] );
+			DrillUp.g_SGaC_context_list[i] = DrillUp.drill_SGaC_initContext( data );
+			DrillUp.g_SGaC_context_list[i]['index'] = i;
+		}else{
+			DrillUp.g_SGaC_context_list[i] = null;
+		}
+	};
+	
 	/*-----------------锁定内容------------------*/
 	DrillUp.g_SGaC_locked_name = String(DrillUp.parameters["用语-锁定的选项名"] || "");
-	DrillUp.g_SGaC_locked_name = DrillUp.g_SGaC_locked_name.replace(/\\\\/g,"\\");		//（消除单串字符"\\"过多情况）
+	DrillUp.g_SGaC_locked_name = DrillUp.g_SGaC_locked_name.replace(/\\\\/g,"\\");	//（为了支持\\n的写法）
 	if( DrillUp.parameters["用语-锁定的选项内容"] != "" &&
 		DrillUp.parameters["用语-锁定的选项内容"] != undefined ){
 		DrillUp.g_SGaC_locked_context = JSON.parse( DrillUp.parameters["用语-锁定的选项内容"] );
@@ -1941,23 +2029,21 @@
 	DrillUp.g_SGaC_locked_type = String(DrillUp.parameters["内容锁定方式"] || "锁定缩略图和描述内容");
 	DrillUp.g_SGaC_locked_pic = String(DrillUp.parameters["资源-上锁的缩略图"] || "");
 	
-	/*-----------------内容------------------*/
-	DrillUp.g_SGaC_context_list_length = 80;
-	DrillUp.g_SGaC_context_list = [];
-	for( var i = 1; i <= DrillUp.g_SGaC_context_list_length ; i++ ){
-		if( DrillUp.parameters["内容-" + String(i) ] != "" &&
-			DrillUp.parameters["内容-" + String(i) ] != undefined ){
-			var data = JSON.parse(DrillUp.parameters["内容-" + String(i)] );
-			DrillUp.g_SGaC_context_list[i] = DrillUp.drill_SGaC_initContext( data );
-			DrillUp.g_SGaC_context_list[i]['index'] = i;
-		}else{
-			DrillUp.g_SGaC_context_list[i] = null;
-		}
-	};
+	/*-----------------未读提示------------------*/
+	DrillUp.g_SGaC_watch_enabled = String(DrillUp.parameters["是否启用未读提示"] || "true") === "true";	
+	DrillUp.g_SGaC_watch_fontsize = Number(DrillUp.parameters["未读提示字体大小"] || 20);
+	DrillUp.g_SGaC_watch_setCorner = String(DrillUp.parameters["未读提示是否放右下角"] || "true") === "true";
+	if( DrillUp.parameters["用语-未读提示信息"] != undefined && 
+		DrillUp.parameters["用语-未读提示信息"] != "" ){
+		DrillUp.g_SGaC_watch_text = JSON.parse( DrillUp.parameters["用语-未读提示信息"] );
+	}else{
+		DrillUp.g_SGaC_watch_text = "";
+	}
 	
 	/*-----------------全局存储对象------------------*/
 	DrillUp.global_SGaC_enableTank = null;
 	DrillUp.global_SGaC_lockTank = null;
+	DrillUp.global_SGaC_watchedTank = null;
 	
 	
 //=============================================================================
@@ -1965,7 +2051,8 @@
 //=============================================================================
 if( Imported.Drill_CoreOfInput &&
 	Imported.Drill_CoreOfGlobalSave &&
-	Imported.Drill_CoreOfWindowAuxiliary ){
+	Imported.Drill_CoreOfWindowAuxiliary &&
+	Imported.Drill_CoreOfWindowCharacter ){
 	
 	
 //=============================================================================
@@ -1975,15 +2062,15 @@ if( Imported.Drill_CoreOfInput &&
 // * 全局 - 检查数据 - 显示情况
 //==============================
 DrillUp.drill_SGaC_gCheckData_enable = function(){
-	for( var i = 1; i <= DrillUp.g_SGaC_context_list_length ; i++ ){
-		var temp_c = DrillUp.g_SGaC_context_list[i];
+	for( var i = 0; i < DrillUp.g_SGaC_context_list.length; i++ ){
+		var temp_data = DrillUp.g_SGaC_context_list[i];
 		
 		// > 指定数据为空时
 		if( DrillUp.global_SGaC_enableTank[i] == null ){
-			if( temp_c == null ){		//（无内容配置，跳过）
+			if( temp_data == null ){		//（无内容配置，跳过）
 				DrillUp.global_SGaC_enableTank[i] = null;
-			}else{						//（有内容配置，初始化默认）
-				DrillUp.global_SGaC_enableTank[i] = temp_c['enabled'];
+			}else{							//（有内容配置，初始化默认）
+				DrillUp.global_SGaC_enableTank[i] = temp_data['enabled'];
 			}
 			
 		// > 不为空则跳过检查
@@ -1996,15 +2083,36 @@ DrillUp.drill_SGaC_gCheckData_enable = function(){
 // * 全局 - 检查数据 - 锁定情况
 //==============================
 DrillUp.drill_SGaC_gCheckData_lock = function(){
-	for( var i = 1; i <= DrillUp.g_SGaC_context_list_length ; i++ ){
-		var temp_c = DrillUp.g_SGaC_context_list[i];
+	for( var i = 0; i < DrillUp.g_SGaC_context_list.length; i++ ){
+		var temp_data = DrillUp.g_SGaC_context_list[i];
 		
 		// > 指定数据为空时
 		if( DrillUp.global_SGaC_lockTank[i] == null ){
-			if( temp_c == null ){		//（无内容配置，跳过）
+			if( temp_data == null ){		//（无内容配置，跳过）
 				DrillUp.global_SGaC_lockTank[i] = null;
-			}else{						//（有内容配置，初始化默认）
-				DrillUp.global_SGaC_lockTank[i] = temp_c['locked'];
+			}else{							//（有内容配置，初始化默认）
+				DrillUp.global_SGaC_lockTank[i] = temp_data['locked'];
+			}
+			
+		// > 不为空则跳过检查
+		}else{
+			//（不操作）
+		}
+	}
+}
+//==============================
+// * 全局 - 检查数据 - 已读情况
+//==============================
+DrillUp.drill_SGaC_gCheckData_watched = function(){
+	for( var i = 0; i < DrillUp.g_SGaC_context_list.length; i++ ){
+		var temp_data = DrillUp.g_SGaC_context_list[i];
+		
+		// > 指定数据为空时
+		if( DrillUp.global_SGaC_watchedTank[i] == null ){
+			if( temp_data == null ){		//（无内容配置，跳过）
+				DrillUp.global_SGaC_watchedTank[i] = null;
+			}else{							//（有内容配置，初始化默认）
+				DrillUp.global_SGaC_watchedTank[i] = temp_data['watched'];
 			}
 			
 		// > 不为空则跳过检查
@@ -2033,6 +2141,13 @@ DrillUp.drill_SGaC_gCheckData_lock = function(){
 		DrillUp.global_SGaC_lockTank = data;
 		DrillUp.drill_SGaC_gCheckData_lock();
 	}
+	// > 已读情况
+	if( DrillUp.global_SGaC_watchedTank == null ){	
+		var data = global_data["global_watchedTank"];
+		if( data == undefined ){ data = [] };
+		DrillUp.global_SGaC_watchedTank = data;
+		DrillUp.drill_SGaC_gCheckData_watched();
+	}
 	
 //==============================
 // * 全局 - 存储
@@ -2042,6 +2157,7 @@ StorageManager.drill_SGaC_saveData = function(){
 	var data = {};
 	data["global_enableTank"] = DrillUp.global_SGaC_enableTank;
 	data["global_lockTank"] = DrillUp.global_SGaC_lockTank;
+	data["global_watchedTank"] = DrillUp.global_SGaC_watchedTank;
 	this.drill_COGS_saveData( file_id, "SGaC", data );
 };
 
@@ -2115,11 +2231,13 @@ Game_System.prototype.drill_SGaC_initSysData_Private = function() {
 	
 	this._drill_SGaC_enableTank = [];				//显示情况
 	this._drill_SGaC_lockTank = [];					//锁定情况
-	for(var i = 0; i < DrillUp.g_SGaC_context_list.length; i++){
+	this._drill_SGaC_watchedTank = [];				//已读情况
+	for( var i = 0; i < DrillUp.g_SGaC_context_list.length; i++ ){
 		var temp_data = DrillUp.g_SGaC_context_list[i];
 		if( temp_data == undefined ){ continue; }
 		this._drill_SGaC_enableTank[i] = temp_data['enabled'];
 		this._drill_SGaC_lockTank[i] = temp_data['locked'];
+		this._drill_SGaC_watchedTank[i] = temp_data['watched'];
 	}
 };
 //==============================
@@ -2156,6 +2274,15 @@ Game_System.prototype.drill_SGaC_checkSysData_Private = function() {
 			}else{
 				//（不操作）
 			}
+			
+			// > 未存储的，重新初始化
+			if( this._drill_SGaC_watchedTank[i] == undefined ){
+				this._drill_SGaC_watchedTank[i] = temp_data['watched'];
+			
+			// > 已存储的，跳过
+			}else{
+				//（不操作）
+			}
 		}
 	}
 };
@@ -2165,9 +2292,18 @@ Game_System.prototype.drill_SGaC_checkSysData_Private = function() {
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_SGaC_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_SGaC_pluginCommand.call(this, command, args);
+	this.drill_SGaC_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_SGaC_pluginCommand = function( command, args ){
 	if( command === ">画廊C" ){
 		
 		if(args.length == 2){
@@ -2176,28 +2312,28 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				SceneManager.push(Scene_Drill_SGaC);
 			}
 			if( type == "显示全部" ){
-				for( var i = 1; i <= DrillUp.g_SGaC_context_list_length; i++){
+				for( var i = 0; i < DrillUp.g_SGaC_context_list.length; i++ ){
 					DrillUp.global_SGaC_enableTank[i] = true;			//全局存储
 					$gameSystem._drill_SGaC_enableTank[i] = true;		//正常存储
 				}
 				StorageManager.drill_SGaC_saveData();
 			}
 			if( type == "隐藏全部" ){
-				for( var i = 1; i <= DrillUp.g_SGaC_context_list_length; i++){
+				for( var i = 0; i < DrillUp.g_SGaC_context_list.length; i++ ){
 					DrillUp.global_SGaC_enableTank[i] = false;			//全局存储
 					$gameSystem._drill_SGaC_enableTank[i] = false;		//正常存储
 				}
 				StorageManager.drill_SGaC_saveData();
 			}
 			if( type == "锁定全部" ){
-				for( var i = 1; i <= DrillUp.g_SGaC_context_list_length; i++){
+				for( var i = 0; i < DrillUp.g_SGaC_context_list.length; i++ ){
 					DrillUp.global_SGaC_lockTank[i] = true;				//全局存储
 					$gameSystem._drill_SGaC_lockTank[i] = true;			//正常存储
 				}
 				StorageManager.drill_SGaC_saveData();
 			}
 			if( type == "解锁全部" ){
-				for( var i = 1; i <= DrillUp.g_SGaC_context_list_length; i++){
+				for( var i = 0; i < DrillUp.g_SGaC_context_list.length; i++ ){
 					DrillUp.global_SGaC_lockTank[i] = false;			//全局存储
 					$gameSystem._drill_SGaC_lockTank[i] = false;		//正常存储
 				}
@@ -2209,23 +2345,23 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var type = String(args[1]);
 			var temp1 = String(args[3]);
 			if( type == "显示选项" ){
-				DrillUp.global_SGaC_enableTank[ Number(temp1) ] = true;			//全局存储
-				$gameSystem._drill_SGaC_enableTank[ Number(temp1) ] = true;		//正常存储
+				DrillUp.global_SGaC_enableTank[ Number(temp1)-1 ] = true;			//全局存储
+				$gameSystem._drill_SGaC_enableTank[ Number(temp1)-1 ] = true;		//正常存储
 				StorageManager.drill_SGaC_saveData();
 			}
 			if( type == "隐藏选项" ){
-				DrillUp.global_SGaC_enableTank[ Number(temp1) ] = false;		//全局存储
-				$gameSystem._drill_SGaC_enableTank[ Number(temp1) ] = false;	//正常存储
+				DrillUp.global_SGaC_enableTank[ Number(temp1)-1 ] = false;			//全局存储
+				$gameSystem._drill_SGaC_enableTank[ Number(temp1)-1 ] = false;		//正常存储
 				StorageManager.drill_SGaC_saveData();
 			}
 			if( type == "锁定选项" ){
-				DrillUp.global_SGaC_lockTank[ Number(temp1) ] = true;			//全局存储
-				$gameSystem._drill_SGaC_lockTank[ Number(temp1) ] = true;		//正常存储
+				DrillUp.global_SGaC_lockTank[ Number(temp1)-1 ] = true;				//全局存储
+				$gameSystem._drill_SGaC_lockTank[ Number(temp1)-1 ] = true;			//正常存储
 				StorageManager.drill_SGaC_saveData();
 			}
 			if( type == "解锁选项" ){
-				DrillUp.global_SGaC_lockTank[ Number(temp1) ] = false;			//全局存储
-				$gameSystem._drill_SGaC_lockTank[ Number(temp1) ] = false;		//正常存储
+				DrillUp.global_SGaC_lockTank[ Number(temp1)-1 ] = false;			//全局存储
+				$gameSystem._drill_SGaC_lockTank[ Number(temp1)-1 ] = false;		//正常存储
 				StorageManager.drill_SGaC_saveData();
 			}
 			if( type == "选中页" ){
@@ -2234,9 +2370,9 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( type == "打开面板(单图查看模式)" ){
 				temp1 = temp1.replace("内容[","");
 				temp1 = temp1.replace("]","");
-				temp1 = Number(temp1);
+				temp1 = Number(temp1) -1;
 				$gameTemp._drill_SGaC_isSinglePictureMode = true;
-				$gameTemp._drill_SGaC_isSinglePictureIndex = temp1;		//（不需要-1）
+				$gameTemp._drill_SGaC_isSinglePictureIndex = temp1;
 				SceneManager.push(Scene_Drill_SGaC);
 			}
 		}
@@ -2307,7 +2443,7 @@ Game_Temp.prototype.initialize = function() {
 	
 	this._drill_SGaC_isSinglePictureMode = false;	//单图查看模式（插件指令标记）
 	this._drill_SGaC_isSinglePictureIndex = 0;		//单图id
-	this._drill_SGaC_visibleDataList = [];			//可见的列表
+	this._drill_SGaC_visibleContextDataList = [];	//可见的列表
 };
 //==============================
 // * 面板控制 - 判断 锁定情况
@@ -2354,6 +2490,28 @@ Game_Temp.prototype.drill_SGaC_isEnabled = function( context_realIndex ){
 	}
 }
 //==============================
+// * 面板控制 - 判断 已读情况
+//==============================
+Game_Temp.prototype.drill_SGaC_isWatched = function( context_realIndex ){
+	
+	// > 全局存储控制
+	if( DrillUp.g_SGaC_title_data_global == true ){
+		if( DrillUp.global_SGaC_watchedTank[ context_realIndex ] == true ){
+			return true;
+		}else{
+			return false;
+		}
+		
+	// > 正常存储控制
+	}else{
+		if( $gameSystem._drill_SGaC_watchedTank[ context_realIndex ] == true ){
+			return true;
+		}else{
+			return false;
+		}
+	}
+};
+//==============================
 // * 面板控制 - 资源文件夹
 //==============================
 ImageManager.load_MenuGallery = function(filename) {
@@ -2364,40 +2522,71 @@ ImageManager.load_MenuGallery = function(filename) {
 
 //=============================================================================
 // ** 画廊C【Scene_Drill_SGaC】
-//
-//			主功能：	画廊的基本功能。
-//			子功能：
-//						->基本功能
-//							> 继承属性
-//							> 初始化
-//							> 创建
-//							> 帧刷新
-//							> 析构函数（关闭单图模式）
-//						->选项变化
-//							->重设窗口起点
-//							->缩略图刷新
-//							->（描述窗口刷新在自身中进行）
-//							->刷新箭头
-//						->流程
-//							->退出窗口（cancel键）
-//							->选项窗口按钮确认（ok键，进入大图）
-//							->离开原图查看器（cancel键，离开大图）
-//						->流程（单图模式）
-//							->退出窗口（cancel键，直接从大图退出）
-//			主要成员：
-//						> ._window_select						选项窗口
-//						> ._window_desc							描述窗口
-//						> ._sprite_thumbnail					缩略图
-//						> ._window_comp							完成度窗口
-//						> ._window_imgExpand					原图查看器 窗口
-//						> ._sprite_imgExpand_pic				原图查看器 贴图
-//						> ._sprite_imgExpand_help				原图查看器 帮助贴图
-//						> ._arrow_left							左箭头 
-//		                > ._arrow_right							右箭头
-//                      > ._arrow_up 							上箭头
-//                      > ._arrow_down 							下箭头
-//					
-//			说明：	> 注意单图模式和非单图模式的流程情况。
+// **
+// **		作用域：	菜单界面
+// **		主功能：	画廊的基本功能。
+// **		子功能：
+// **					->界面重要函数
+// **						> 初始化（initialize）
+// **						> 创建（create）
+// **						> 帧刷新（update）
+// **						x> 开始运行（start）
+// **						x> 结束运行（stop）
+// **						x> 忙碌状态（isBusy）
+// **						> 析构函数（terminate）
+// **						x> 判断加载完成（isReady）
+// **						x> 判断是否激活/启动（isActive）
+// **						x> 当前角色切换时（onActorChange）
+// **						x> 创建 - 菜单背景（createBackground）
+// **						x> 创建 - 帮助窗口（createHelpWindow）
+// **					
+// **					->面板
+// **						> 析构函数（关闭单图模式）
+// **						->退出面板（processCancel函数）
+// **					->A主体
+// **					->B选项窗口
+// **						->选项窗口
+// **							> 标准属性
+// **							> 选项图片（小图）
+// **						x->选项按钮组
+// **						->选项变化时
+// **							->重播窗口动画
+// **							->重绘内容
+// **							->重播贴图动画
+// **							->切换缩略图
+// **					->C描述窗口
+// **					->D缩略图（中图）
+// **					->E完成度窗口
+// **					->F原图查看器
+// **						->原图（大图）
+// **							> 键盘移动
+// **							> 鼠标拖拽
+// **							> 自适应模式
+// **						->帮助图
+// **						->原图查看器窗口
+// **					->G单图查看模式
+// **					->H流程
+// **						->选项窗口按钮确认（ok键，进入大图）
+// **						->离开原图查看器（cancel键，离开大图）
+// **					->H流程（单图模式）
+// **						->退出窗口（cancel键，直接从大图退出）
+// **					->I箭头
+// **		界面成员：
+// **					> ._drill_field							布局层
+// **						> ._window_select						选项窗口
+// **						> ._window_desc							描述窗口
+// **						> ._sprite_thumbnail					缩略图
+// **						> ._window_comp							完成度窗口
+// **						> ._arrow_left							左箭头
+// **		                > ._arrow_right							右箭头
+// **                   	> ._arrow_up 							上箭头
+// **                   	> ._arrow_down 							下箭头
+// **						> ._window_imgExpand					原图查看器 窗口
+// **						> ._sprite_imgExpand_pic				原图查看器 贴图
+// **						> ._sprite_imgExpand_help				原图查看器 帮助图
+// **					> ._drill_layout						整体布局贴图
+// **					
+// **			说明：	> 注意单图模式和非单图模式的流程情况。
 //=============================================================================
 //==============================
 // * 画廊C - 定义
@@ -2408,65 +2597,56 @@ function Scene_Drill_SGaC() {
 Scene_Drill_SGaC.prototype = Object.create(Scene_MenuBase.prototype);
 Scene_Drill_SGaC.prototype.constructor = Scene_Drill_SGaC;
 //==============================
-// * 画廊C - 初始化
+// * 画廊C - 初始化（继承）
 //==============================
 Scene_Drill_SGaC.prototype.initialize = function() {
     Scene_MenuBase.prototype.initialize.call(this);
-	this._cur_index = -1;
+	this._drill_curSelectedIndex = -1;
+	this._drill_lastSelectedIndex = -1;
 };
 //==============================
-// * 画廊C - 创建
+// * 画廊C - 创建（继承）
 //============================== 
 Scene_Drill_SGaC.prototype.create = function() {
     Scene_MenuBase.prototype.create.call(this);
-
-	// > 创建布局层（先画，其图层都被放在后面）
-	this._drill_field = new Sprite();
-	this.addChild(this._drill_field);
-
-	this.drill_loadAllSrc();				//创建 - 资源全加载
-	this.drill_createLayout();				//创建 - 整体布局
-	this.drill_createSelect();				//创建 - 选项窗口
-	this.drill_createDesc();				//创建 - 描述窗口
-	this.drill_createThumbnail();			//创建 - 缩略图
-	this.drill_createComp();				//创建 - 完成度窗口
-	this.drill_createImgExpandSprite();		//创建 - 原图查看器贴图
-	this.drill_createImgExpandHelp();		//创建 - 原图查看器帮助
-	this.drill_createImgExpandWindow();		//创建 - 原图查看器窗口
-	
-	this.drill_createArrow();				//创建 - 箭头
-	
-	this.drill_createSinglePictureMode();	//创建 - 单图查看模式
+	this.drill_loadAllSrc();				//创建 - A主体 - 资源全加载
+	this.drill_createAttr();				//创建 - A主体
+	this.drill_createSelect();				//创建 - B选项窗口
+	this.drill_createThumbnail();			//创建 - D缩略图
+	this.drill_createDesc();				//创建 - C描述窗口
+	this.drill_createComp();				//创建 - E完成度窗口
+	this.drill_createArrow();				//创建 - I箭头
+	this.drill_createImgExpandSprite();		//创建 - F原图查看器 - 贴图
+	this.drill_createImgExpandHelp();		//创建 - F原图查看器 - 帮助图
+	this.drill_createImgExpandWindow();		//创建 - F原图查看器 - 窗口
+	this.drill_createSinglePictureMode();	//创建 - G单图查看模式
+											//创建 - H流程（无）
 };
 //==============================
-// * 画廊C - 帧刷新
+// * 画廊C - 帧刷新（继承）
 //==============================
 Scene_Drill_SGaC.prototype.update = function() { 
 	Scene_MenuBase.prototype.update.call(this);	
+											//帧刷新 - A主体（无）
+	this.drill_updateSelect();				//帧刷新 - B选项窗口
+	this.drill_updateSelectChanged();		//帧刷新 - B选项窗口 - 选项变化时
+	this.drill_updateDesc();				//帧刷新 - C描述窗口
+	this.drill_updateThumbnail();			//帧刷新 - D缩略图
 	
-	// > 选项模式
-	this._window_select.drill_COWA_CPD_update();
-	if( this._drill_needDelayRefreshSelectWindow == true &&
-		this.drill_isAllBitmapLoaded() == true ){
-		this._drill_needDelayRefreshSelectWindow = false;
-		this._window_select.refresh();
-	}
+											//帧刷新 - E完成度窗口（无）
+	this.drill_updateImgExpandSprite();		//帧刷新 - F原图查看器 - 贴图
+	this.drill_updateImgExpandHelp();		//帧刷新 - F原图查看器 - 帮助图
 	
-	this._window_desc.drill_COWA_CPD_update();	//帧刷新 - 描述窗口
-	this.drill_updateThumbnail();				//帧刷新 - 缩略图
-	this.drill_updateIndex();					//帧刷新 - 窗口选项
-	this.drill_updateImgExpandSprite();			//帧刷新 - 原图查看器
-	this.drill_updateImgExpandHelp();			//帧刷新 - 原图查看器帮助
+	this.drill_updateSinglePictureMode();	//帧刷新 - G单图查看模式
+											//帧刷新 - H流程（无）
 	
-	this.drill_updateArrowHover();				//帧刷新 - 箭头高亮
-	this.drill_updateArrowSprite();				//帧刷新 - 箭头贴图
-	this.drill_updateArrowTouch();				//帧刷新 - 箭头点击
-	this.drill_updateArrowLastHover();			//帧刷新 - 箭头上一次高亮
-	
-	this.drill_updateSinglePictureMode();		//帧刷新 - 单图查看模式
+	this.drill_updateArrowHover();			//帧刷新 - I箭头 - 箭头高亮
+	this.drill_updateArrowSprite();			//帧刷新 - I箭头 - 箭头贴图
+	this.drill_updateArrowTouch();			//帧刷新 - I箭头 - 箭头点击
+	this.drill_updateArrowLastHover();		//帧刷新 - I箭头 - 箭头上一次高亮
 }
 //==============================
-// * 画廊C - 析构函数
+// * 画廊C - 析构函数（继承）
 //==============================
 Scene_Drill_SGaC.prototype.terminate = function() { 
 	Scene_MenuBase.prototype.terminate.call(this);	
@@ -2474,19 +2654,19 @@ Scene_Drill_SGaC.prototype.terminate = function() {
 }
 
 //==============================
-// * 创建 - 资源全加载
+// * A主体 - 资源全加载
 //==============================
 Scene_Drill_SGaC.prototype.drill_loadAllSrc = function() {
 	this._drill_needDelayRefreshSelectWindow = true;
 	this._drill_SGaC_bitmaps = [];
-	for(var i=0; i < DrillUp.g_SGaC_context_list.length; i++){
+	for(var i = 0; i < DrillUp.g_SGaC_context_list.length; i++){
 		var data = DrillUp.g_SGaC_context_list[i];	//（直接一次性加载全部原图）
 		if( data == null ){ continue; }
 		this._drill_SGaC_bitmaps.push( ImageManager.load_MenuGallery(data['pic']) );
 	}
 };
 //==============================
-// * 判断 - 资源全加载
+// * A主体 - 判断资源全加载
 //==============================
 Scene_Drill_SGaC.prototype.drill_isAllBitmapLoaded = function() {
 	for(var i=0; i < this._drill_SGaC_bitmaps.length; i++){
@@ -2497,36 +2677,103 @@ Scene_Drill_SGaC.prototype.drill_isAllBitmapLoaded = function() {
 	return true;
 };
 //==============================
-// * 创建 - 整体布局
+// * A主体 - 创建 - 整体布局
 //==============================
-Scene_Drill_SGaC.prototype.drill_createLayout = function() {
+Scene_Drill_SGaC.prototype.drill_createAttr = function() {
+	
+	// > 布局层（先画，其图层都被放在后面）
+	this._drill_field = new Sprite();
+	this.addChild(this._drill_field);
+	
+	// > 整体布局贴图
 	this._drill_layout = new Sprite(ImageManager.load_MenuGallery(DrillUp.g_SGaC_layout));
-
-	// > 单图查看模式
 	if( $gameTemp._drill_SGaC_isSinglePictureMode == true &&
 		DrillUp.g_SGaC_singlePicture_hide == true ){
 		//（单图模式则直接不添加）
 	}else{
-		this._drill_field.addChild(this._drill_layout);	
+		this.addChild(this._drill_layout);	
 	}
 };
+
 //==============================
-// * 创建 - 选项窗口
+// * B选项窗口 - 创建
 //==============================
 Scene_Drill_SGaC.prototype.drill_createSelect = function() {
 	var data = DrillUp.g_SGaC_command_window;	//（直接读取选项窗口中的项）
 	
 	this._window_select = new Drill_SGaC_SelectWindow(0, 0, 0, 0);
-	this._window_select.drill_COWA_changeParamData( data );			//辅助核心 - 控制窗口基本属性
+	this._window_select.drill_COWA_changeParamData( data ); //『辅助核心初始化』-窗口基本属性
 	this._window_select.refresh();
-	this._window_select.drill_initSelect();
+	this._window_select.drill_window_initSelect();
 	
 	this._window_select.setHandler('ok', this.drill_selectOk.bind(this));	//绑定确定选择选项
 	this._window_select.setHandler('cancel', this.popScene.bind(this));		//绑定退出界面事件
-	this.addChild(this._window_select);
+	this._drill_field.addChild(this._window_select);
 };
 //==============================
-// * 创建 - 描述窗口
+// * B选项窗口 - 帧刷新
+//==============================
+Scene_Drill_SGaC.prototype.drill_updateSelect = function() {
+	
+	// > 初始化 - 插件指令选中
+	var max_index = $gameTemp._drill_SGaC_visibleContextDataList.length -1;
+	if( $gameSystem._drill_SGaC_context_index != undefined ){
+		var index = $gameSystem._drill_SGaC_context_index;
+		if( index < 0 ){ index = 0; };
+		if( index > max_index ){ index = max_index; };
+		this._window_select.select( index );			//（设置选中选项）
+		$gameSystem._drill_SGaC_context_index = null;	//（激活后清空）
+	}
+	
+	// > 初始化 - 默认选中
+	if( this._window_select._index == null ){ this._window_select.select(0); }
+	if( this._window_select._index < 0 ){ this._window_select.select(0); }
+	if( this._window_select._index > max_index ){ this._window_select.select(max_index); }
+	
+	
+	if( this._drill_needDelayRefreshSelectWindow == true &&
+		this.drill_isAllBitmapLoaded() == true ){
+		this._drill_needDelayRefreshSelectWindow = false;
+		this._window_select.refresh();
+	}
+};
+//==============================
+// * B选项窗口 - 帧刷新 - 选项变化时
+//==============================
+Scene_Drill_SGaC.prototype.drill_updateSelectChanged = function() {
+	if( $gameTemp._drill_SGaC_visibleContextDataList.length == 0 ){ return };
+	
+	// > 选项变化时
+	if( this._drill_curSelectedIndex != this._window_select._index ){
+		this._drill_curSelectedIndex  = this._window_select._index;
+		
+		// > 描述窗口 - 重播窗口动画
+		if( DrillUp.g_SGaC_descWin_replay ){
+			this._window_desc.drill_COWA_resetAttrMove(); //『辅助核心动画』-重播窗口动画
+			this._window_desc.drill_COWA_resetAttrOpacity(); //『辅助核心动画』-重播窗口动画
+		}
+		// > 描述窗口 - 重绘内容
+		this._window_desc.drill_refreshDescText(this._drill_curSelectedIndex);
+		
+		// > 缩略图 - 重播贴图动画
+		if( DrillUp.g_SGaC_Thumbnail_replay ){
+			this._sprite_thumbnail.drill_COWA_resetAttrMove(); //『辅助核心动画』-重播贴图动画
+		}
+		// > 缩略图 - 切换缩略图
+		this.drill_refreshThumbnail(this._drill_curSelectedIndex);
+		
+		// > 选项窗口 - 已读情况
+		this._window_select.drill_window_watchedChanged(this._drill_lastSelectedIndex);
+		
+		// > 箭头
+		this.drill_refreshArrow(this._drill_curSelectedIndex);
+		
+		this._drill_lastSelectedIndex = this._drill_curSelectedIndex;
+	}
+}
+
+//==============================
+// * C描述窗口 - 创建
 //==============================
 Scene_Drill_SGaC.prototype.drill_createDesc = function() {
 	var data = {
@@ -2552,12 +2799,19 @@ Scene_Drill_SGaC.prototype.drill_createDesc = function() {
 		"layoutSrcFile": DrillUp.g_SGaC_descWin_layout['layoutSrcFile'],
 	}
 	this._window_desc = new Drill_SGaC_DescWindow(0, 0, 0, 0);
-	this._window_desc.drill_COWA_changeParamData( data );		//辅助核心 - 控制窗口基本属性
+	this._window_desc.drill_COWA_changeParamData( data ); //『辅助核心初始化』-窗口基本属性
 	
-	this.addChild(this._window_desc);
+	this._drill_field.addChild(this._window_desc);
 };
 //==============================
-// * 创建 - 缩略图
+// * C描述窗口 - 帧刷新
+//==============================
+Scene_Drill_SGaC.prototype.drill_updateDesc = function() {
+	//（不操作，动画自己会帧刷新）
+};
+
+//==============================
+// * D缩略图 - 创建
 //==============================
 Scene_Drill_SGaC.prototype.drill_createThumbnail = function() {
 	var data = {
@@ -2574,244 +2828,13 @@ Scene_Drill_SGaC.prototype.drill_createThumbnail = function() {
 		"slideAbsoluteY": DrillUp.g_SGaC_Thumbnail_slideAnim['slideAbsoluteY'],
 	}
 	this._sprite_thumbnail = new Sprite();
-	this._sprite_thumbnail.drill_COWA_setButtonMove( data );		//辅助核心 - 控制按钮贴图基本属性
+	this._sprite_thumbnail.drill_COWA_setAttrMove( data ); //『辅助核心初始化』-贴图基本属性
 	this._drill_field.addChild(this._sprite_thumbnail);	
 	
 	this._sprite_thumbnail._drill_bitmaps = [];
 };
 //==============================
-// * 创建 - 完成度窗口
-//==============================
-Scene_Drill_SGaC.prototype.drill_createComp = function() {
-	var data = {
-		"x": DrillUp.g_SGaC_compWin_x,
-		"y": DrillUp.g_SGaC_compWin_y,
-		"width": DrillUp.g_SGaC_compWin_width,
-		"height": DrillUp.g_SGaC_compWin_height,
-		"fontsize": DrillUp.g_SGaC_compWin_fontsize,
-		
-		"slideMoveType": DrillUp.g_SGaC_compWin_slideAnim['slideMoveType'],
-		"slideTime": DrillUp.g_SGaC_compWin_slideAnim['slideTime'],
-		"slideDelay": DrillUp.g_SGaC_compWin_slideAnim['slideDelay'],
-		"slidePosType": DrillUp.g_SGaC_compWin_slideAnim['slidePosType'],
-		"slideX": DrillUp.g_SGaC_compWin_slideAnim['slideX'],
-		"slideY": DrillUp.g_SGaC_compWin_slideAnim['slideY'],
-		"slideAbsoluteX": DrillUp.g_SGaC_compWin_slideAnim['slideAbsoluteX'],
-		"slideAbsoluteY": DrillUp.g_SGaC_compWin_slideAnim['slideAbsoluteY'],
-		
-		"layoutType": DrillUp.g_SGaC_compWin_layout['layoutType'],
-		"layoutX": DrillUp.g_SGaC_compWin_layout['layoutX'],
-		"layoutY": DrillUp.g_SGaC_compWin_layout['layoutY'],
-		"layoutSrc": DrillUp.g_SGaC_compWin_layout['layoutSrc'],
-		"layoutSrcFile": DrillUp.g_SGaC_compWin_layout['layoutSrcFile'],
-	}
-	this._window_comp = new Drill_SGaC_CompletionWindow(0, 0, 0, 0);
-	this._window_comp.drill_COWA_changeParamData( data );		//辅助核心 - 控制窗口基本属性
-	this._window_comp.drill_refresh();							//（绘制完成度信息）
-	
-	// > 单图查看模式
-	if( $gameTemp._drill_SGaC_isSinglePictureMode == true ){
-		//（单图模式则直接不添加）
-	}else{
-		this.addChild(this._window_comp);
-	}
-	
-};
-//==============================
-// * 创建 - 原图查看器 窗口
-//==============================
-Scene_Drill_SGaC.prototype.drill_createImgExpandWindow = function() {
-	
-	this._window_imgExpand = new Drill_SGaC_ImgExpandWindow(0, 0, 0, 0);
-	this._window_imgExpand.refresh();
-	this._window_imgExpand.y = Graphics.boxHeight * 2;
-	
-	this._window_imgExpand.setHandler('cancel', this.drill_expandCancel.bind(this));	//绑定关闭原图查看器
-	this.addChild(this._window_imgExpand);
-};
-//==============================
-// * 创建 - 原图查看器 贴图
-//==============================
-Scene_Drill_SGaC.prototype.drill_createImgExpandSprite = function() {
-
-	var temp_sprite = new Sprite();
-	temp_sprite.anchor.x = 0.5;
-	temp_sprite.anchor.y = 0.5;
-	temp_sprite['cur_time'] = 0;		//（移动时间标记）
-	this._sprite_imgExpand_pic = temp_sprite;
-	this.addChild(this._sprite_imgExpand_pic);	
-	this.drill_expandHoming();			//（归位）
-	
-	this._sprite_imgExpand_isInAdaptionMode = false;		//自适应模式
-};
-//==============================
-// * 创建 - 原图查看器 帮助贴图
-//==============================
-Scene_Drill_SGaC.prototype.drill_createImgExpandHelp = function() {
-	
-	var temp_sprite = new Sprite();
-	temp_sprite.x = Graphics.boxWidth * 0.5;
-	temp_sprite.y = Graphics.boxHeight * 0;
-	temp_sprite.anchor.x = 0.5;
-	temp_sprite.anchor.y = 0;
-	temp_sprite.bitmap = ImageManager.load_MenuGallery( DrillUp.g_SGaC_imgExpandHelp_src );
-	temp_sprite['cur_time'] = 0;		//（移动时间标记）
-	temp_sprite['sustain_time'] = 0;	//（持续时间标记）
-	this._sprite_imgExpand_help = temp_sprite;
-	this.addChild(this._sprite_imgExpand_help);	
-};
-//==============================
-// * 创建 - 单图查看模式
-//==============================
-Scene_Drill_SGaC.prototype.drill_createSinglePictureMode = function() {
-	if( $gameTemp._drill_SGaC_isSinglePictureMode != true ){ return; }
-	
-	this.drill_selectOk();		//（强制走确认流程）
-};
-
-
-//==============================
-// * 画廊C - 重设窗口起点（切换选项时）
-//==============================
-Scene_Drill_SGaC.prototype.drill_resetPosition = function() {
-	
-	// > 刷新描述窗口
-	if( DrillUp.g_SGaC_descWin_replay ){
-		this._window_desc.drill_COWA_CPD_resetMove();		//辅助核心 - 重播窗口动画
-	}
-	
-	// > 刷新缩略图
-	if( DrillUp.g_SGaC_Thumbnail_replay ){
-		this._sprite_thumbnail.drill_COWA_SBM_resetMove();	//辅助核心 - 重播按钮贴图动画
-	}
-};
-//==============================
-// * 画廊C - 缩略图刷新
-//==============================
-Scene_Drill_SGaC.prototype.drill_refreshThumbnail = function( cur_index ) {
-	var data_list = $gameTemp._drill_SGaC_visibleDataList;		//可见项列表
-	
-	// > 资源全加载
-	var src_tank = this._sprite_thumbnail._drill_bitmaps;	//资源bitmap容器
-	if( src_tank.length == 0 ){
-		src_tank[0] = ImageManager.load_MenuGallery( DrillUp.g_SGaC_locked_pic );
-		for( var i=0; i < data_list.length; i++ ){
-			var data = data_list[i];
-			if( data == null ){ continue; }
-			if( data == "" ){ continue; }
-			
-			src_tank[ i+1 ] = ImageManager.load_MenuGallery( data['pic'] );	
-		}
-		this._sprite_thumbnail._drill_bitmaps = src_tank;
-	}
-	
-	// > 切换缩略图
-	var data = data_list[ cur_index ];					//当前选项
-	var context_realIndex = data['index'];
-	
-	if( $gameTemp.drill_SGaC_isLocked( context_realIndex ) == true && 
-	   (DrillUp.g_SGaC_locked_type == "锁定缩略图和描述内容" || 
-		DrillUp.g_SGaC_locked_type == "只锁定缩略图" ) ){
-			
-		this._sprite_thumbnail.bitmap = src_tank[ 0 ];			//锁定缩略图
-	}else{
-		this._sprite_thumbnail.bitmap = src_tank[ cur_index+1 ];	//当前缩略图
-	}
-	
-	// > 瞬间显示
-	if( DrillUp.g_SGaC_Thumbnail_showInstant == false ){
-		this._sprite_thumbnail.opacity = 0;
-	}
-}
-//==============================
-// * 画廊C流程 - 选项窗口按钮确认
-//==============================
-Scene_Drill_SGaC.prototype.drill_selectOk = function() {
-	
-	// > 获取选中的内容
-	var temp_data = $gameTemp._drill_SGaC_visibleDataList[ this._window_select.index() ];
-	if(!temp_data ){ 
-		this._window_select.activate();
-		this._window_imgExpand.deactivate();
-		return; 
-	}
-	
-	// > 锁定时，不允许执行
-	var realIndex = temp_data['index'];
-	if( $gameTemp.drill_SGaC_isLocked( realIndex ) == true ){
-		SoundManager.playBuzzer();
-		this._window_select.activate();
-		this._window_imgExpand.deactivate();
-		return;
-	}
-	
-	// > 展开原图查看器
-	this._window_select.deactivate(); 
-	this._window_imgExpand.activate(); 
-	
-	// > 设置 原图
-	this.drill_expandHoming();		//（归位）
-	this._sprite_imgExpand_pic.bitmap = ImageManager.load_MenuGallery( temp_data['pic'] );	
-	
-	// > 帮助图 持续时间归零
-	this._sprite_imgExpand_help['sustain_time'] = 0;
-};
-//==============================
-// * 画廊C流程 - 原图居中归位
-//==============================
-Scene_Drill_SGaC.prototype.drill_expandHoming = function() {
-	this._sprite_imgExpand_pic['dragging'] = false;				//（清理鼠标拖拽标记）
-	this._sprite_imgExpand_pic['lastX'] = 0;
-	this._sprite_imgExpand_pic['lastY'] = 0;
-	this._sprite_imgExpand_pic['offsetX'] = 0;
-	this._sprite_imgExpand_pic['offsetY'] = 0;
-	this._sprite_imgExpand_pic.x = Graphics.boxWidth * 0.5;		//（位置居中）
-	this._sprite_imgExpand_pic.y = Graphics.boxHeight * 0.5;
-};
-//==============================
-// * 画廊C流程 - 离开原图查看器
-//==============================
-Scene_Drill_SGaC.prototype.drill_expandCancel = function() {
-	
-	// > 单图查看模式
-	if( $gameTemp._drill_SGaC_isSinglePictureMode == true ){
-		this.popScene();		//（离开界面）
-		
-	// > 一般模式
-	}else{
-		this._window_select.activate(); 	//（恢复选项窗口）
-		this._window_imgExpand.deactivate();
-	
-	}
-};
-
-
-//==============================
-// * 帧刷新 - 窗口选项
-//==============================
-Scene_Drill_SGaC.prototype.drill_updateIndex = function() {
-	if( $gameSystem._drill_SGaC_context_index != undefined ){
-		var temp = $gameSystem._drill_SGaC_context_index;
-		$gameSystem._drill_SGaC_context_index = null;	//（激活后清空）
-		if( temp < 0 ){ temp = 0; };
-		if( temp > $gameTemp._drill_SGaC_visibleDataList.length -1 ){ temp = $gameTemp._drill_SGaC_visibleDataList.length -1; };
-		this._window_select.select( temp );				//（设置选中页）
-	}
-	if( this._window_select._index == null || 
-		this._window_select._index > $gameTemp._drill_SGaC_visibleDataList.length -1 ||
-		this._window_select._index < 0){ this._window_select.select(0);}
-	if( $gameTemp._drill_SGaC_visibleDataList.length == 0 ){ return };	//如果选项全部为空，强制选择第一个
-	
-	if( this._cur_index != this._window_select._index ){
-		this._cur_index = this._window_select._index;
-		this.drill_resetPosition();
-		this._window_desc.drill_refreshDesc(this._cur_index);
-		this.drill_refreshThumbnail(this._cur_index);
-		this.drill_refreshArrow(this._cur_index);
-	}
-}
-//==============================
-// * 帧刷新 - 缩略图
+// * D缩略图 - 帧刷新
 //==============================
 Scene_Drill_SGaC.prototype.drill_updateThumbnail = function() {
 	if( this._sprite_thumbnail.bitmap == undefined ){ return; }
@@ -2823,7 +2846,7 @@ Scene_Drill_SGaC.prototype.drill_updateThumbnail = function() {
 		return;
 	}
 	
-	// > 透明度
+	// > 显现效果
 	if( DrillUp.g_SGaC_Thumbnail_showInstant == false ){
 		this._sprite_thumbnail.opacity += 255/DrillUp.g_SGaC_Thumbnail_slideAnim['slideTime'];
 	}
@@ -2871,7 +2894,123 @@ Scene_Drill_SGaC.prototype.drill_updateThumbnail = function() {
 	}
 }
 //==============================
-// * 帧刷新 - 原图查看器
+// * D缩略图 - 切换缩略图
+//==============================
+Scene_Drill_SGaC.prototype.drill_refreshThumbnail = function( cur_index ) {
+	
+	// > 资源全加载
+	var src_tank = this._sprite_thumbnail._drill_bitmaps;	//资源bitmap容器
+	if( src_tank.length == 0 ){
+		src_tank[0] = ImageManager.load_MenuGallery( DrillUp.g_SGaC_locked_pic );
+		for( var i = 0; i < $gameTemp._drill_SGaC_visibleContextDataList.length; i++ ){
+			var temp_data = $gameTemp._drill_SGaC_visibleContextDataList[i];
+			if( temp_data == null ){ continue; }
+			if( temp_data == "" ){ continue; }
+			
+			src_tank[ i+1 ] = ImageManager.load_MenuGallery( temp_data['pic'] );	
+		}
+		this._sprite_thumbnail._drill_bitmaps = src_tank;
+	}
+	
+	// > 切换缩略图
+	var temp_data = $gameTemp._drill_SGaC_visibleContextDataList[ cur_index ];	//（当前选项）
+	if( $gameTemp.drill_SGaC_isLocked( temp_data['index'] ) == true && 
+		(DrillUp.g_SGaC_locked_type == "锁定缩略图和描述内容" || 
+		 DrillUp.g_SGaC_locked_type == "只锁定缩略图" ) ){
+		this._sprite_thumbnail.bitmap = src_tank[ 0 ];				//锁定缩略图
+	}else{
+		this._sprite_thumbnail.bitmap = src_tank[ cur_index+1 ];	//当前缩略图
+	}
+	
+	// > 显现效果 重置
+	if( DrillUp.g_SGaC_Thumbnail_showInstant == false ){
+		this._sprite_thumbnail.opacity = 0;
+	}
+}
+
+//==============================
+// * E完成度窗口 - 创建
+//==============================
+Scene_Drill_SGaC.prototype.drill_createComp = function() {
+	var data = {
+		"x": DrillUp.g_SGaC_compWin_x,
+		"y": DrillUp.g_SGaC_compWin_y,
+		"width": DrillUp.g_SGaC_compWin_width,
+		"height": DrillUp.g_SGaC_compWin_height,
+		"fontsize": DrillUp.g_SGaC_compWin_fontsize,
+		
+		"slideMoveType": DrillUp.g_SGaC_compWin_slideAnim['slideMoveType'],
+		"slideTime": DrillUp.g_SGaC_compWin_slideAnim['slideTime'],
+		"slideDelay": DrillUp.g_SGaC_compWin_slideAnim['slideDelay'],
+		"slidePosType": DrillUp.g_SGaC_compWin_slideAnim['slidePosType'],
+		"slideX": DrillUp.g_SGaC_compWin_slideAnim['slideX'],
+		"slideY": DrillUp.g_SGaC_compWin_slideAnim['slideY'],
+		"slideAbsoluteX": DrillUp.g_SGaC_compWin_slideAnim['slideAbsoluteX'],
+		"slideAbsoluteY": DrillUp.g_SGaC_compWin_slideAnim['slideAbsoluteY'],
+		
+		"layoutType": DrillUp.g_SGaC_compWin_layout['layoutType'],
+		"layoutX": DrillUp.g_SGaC_compWin_layout['layoutX'],
+		"layoutY": DrillUp.g_SGaC_compWin_layout['layoutY'],
+		"layoutSrc": DrillUp.g_SGaC_compWin_layout['layoutSrc'],
+		"layoutSrcFile": DrillUp.g_SGaC_compWin_layout['layoutSrcFile'],
+	}
+	this._window_comp = new Drill_SGaC_CompletionWindow(0, 0, 0, 0);
+	this._window_comp.drill_COWA_changeParamData( data ); //『辅助核心初始化』-窗口基本属性
+	this._window_comp.drill_refresh();					  //（绘制完成度信息）
+	
+	// > 单图查看模式
+	if( $gameTemp._drill_SGaC_isSinglePictureMode == true ){
+		//（单图模式则直接不添加）
+	}else{
+		this._drill_field.addChild(this._window_comp);
+	}
+};
+
+//==============================
+// * F原图查看器 - 创建 窗口
+//==============================
+Scene_Drill_SGaC.prototype.drill_createImgExpandWindow = function() {
+	
+	this._window_imgExpand = new Drill_SGaC_ImgExpandWindow(0, 0, 0, 0);
+	this._window_imgExpand.refresh();
+	this._window_imgExpand.y = Graphics.boxHeight * 2;
+	
+	this._window_imgExpand.setHandler('cancel', this.drill_expandCancel.bind(this));	//绑定关闭原图查看器
+	this._drill_field.addChild(this._window_imgExpand);
+};
+//==============================
+// * F原图查看器 - 创建 贴图
+//==============================
+Scene_Drill_SGaC.prototype.drill_createImgExpandSprite = function() {
+
+	var temp_sprite = new Sprite();
+	temp_sprite.anchor.x = 0.5;
+	temp_sprite.anchor.y = 0.5;
+	temp_sprite['cur_time'] = 0;		//（移动时间标记）
+	this._sprite_imgExpand_pic = temp_sprite;
+	this._drill_field.addChild(this._sprite_imgExpand_pic);	
+	this.drill_expandHoming();			//（归位）
+	
+	this._sprite_imgExpand_isInAdaptionMode = false;		//自适应模式
+};
+//==============================
+// * F原图查看器 - 创建 帮助图
+//==============================
+Scene_Drill_SGaC.prototype.drill_createImgExpandHelp = function() {
+	
+	var temp_sprite = new Sprite();
+	temp_sprite.x = Graphics.boxWidth * 0.5;
+	temp_sprite.y = Graphics.boxHeight * 0;
+	temp_sprite.anchor.x = 0.5;
+	temp_sprite.anchor.y = 0;
+	temp_sprite.bitmap = ImageManager.load_MenuGallery( DrillUp.g_SGaC_imgExpandHelp_src );
+	temp_sprite['cur_time'] = 0;		//（移动时间标记）
+	temp_sprite['sustain_time'] = 0;	//（持续时间标记）
+	this._sprite_imgExpand_help = temp_sprite;
+	this._drill_field.addChild(this._sprite_imgExpand_help);	
+};
+//==============================
+// * F原图查看器 - 帧刷新 贴图
 //==============================
 Scene_Drill_SGaC.prototype.drill_updateImgExpandSprite = function() {
 	if( this._sprite_imgExpand_pic.bitmap == undefined ){ return; }
@@ -2977,7 +3116,7 @@ Scene_Drill_SGaC.prototype.drill_updateImgExpandSprite = function() {
 	}
 }
 //==============================
-// * 帧刷新 - 原图查看器 帮助图
+// * F原图查看器 - 帧刷新 帮助图
 //==============================
 Scene_Drill_SGaC.prototype.drill_updateImgExpandHelp = function() {
 	if( this._sprite_imgExpand_help.bitmap == undefined ){ return; }
@@ -3014,8 +3153,17 @@ Scene_Drill_SGaC.prototype.drill_updateImgExpandHelp = function() {
 	this._sprite_imgExpand_help.x = xx;
 	this._sprite_imgExpand_help.y = yy;
 }
+
 //==============================
-// * 帧刷新 - 单图查看模式
+// * G单图查看模式 - 创建
+//==============================
+Scene_Drill_SGaC.prototype.drill_createSinglePictureMode = function() {
+	if( $gameTemp._drill_SGaC_isSinglePictureMode != true ){ return; }
+	
+	this.drill_selectOk();		//（强制走确认流程）
+};
+//==============================
+// * G单图查看模式 - 帧刷新
 //==============================
 Scene_Drill_SGaC.prototype.drill_updateSinglePictureMode = function() {
 	if( $gameTemp._drill_SGaC_isSinglePictureMode != true ){ return; }
@@ -3023,6 +3171,67 @@ Scene_Drill_SGaC.prototype.drill_updateSinglePictureMode = function() {
 	this._window_select.y = Graphics.boxHeight * 2;
 	this._window_desc.y = Graphics.boxHeight * 2;
 }
+
+//==============================
+// * H流程 - 选项窗口按钮确认
+//==============================
+Scene_Drill_SGaC.prototype.drill_selectOk = function() {
+	
+	// > 获取选中的内容
+	var temp_data = $gameTemp._drill_SGaC_visibleContextDataList[ this._window_select.index() ];
+	if(!temp_data ){ 
+		this._window_select.activate();
+		this._window_imgExpand.deactivate();
+		return; 
+	}
+	
+	// > 锁定时，不允许执行
+	var realIndex = temp_data['index'];
+	if( $gameTemp.drill_SGaC_isLocked( realIndex ) == true ){
+		SoundManager.playBuzzer();
+		this._window_select.activate();
+		this._window_imgExpand.deactivate();
+		return;
+	}
+	
+	// > 展开原图查看器
+	this._window_select.deactivate(); 
+	this._window_imgExpand.activate(); 
+	
+	// > 设置 原图
+	this.drill_expandHoming();		//（归位）
+	this._sprite_imgExpand_pic.bitmap = ImageManager.load_MenuGallery( temp_data['pic'] );	
+	
+	// > 帮助图 持续时间归零
+	this._sprite_imgExpand_help['sustain_time'] = 0;
+};
+//==============================
+// * H流程 - 原图居中归位
+//==============================
+Scene_Drill_SGaC.prototype.drill_expandHoming = function() {
+	this._sprite_imgExpand_pic['dragging'] = false;				//（清理鼠标拖拽标记）
+	this._sprite_imgExpand_pic['lastX'] = 0;
+	this._sprite_imgExpand_pic['lastY'] = 0;
+	this._sprite_imgExpand_pic['offsetX'] = 0;
+	this._sprite_imgExpand_pic['offsetY'] = 0;
+	this._sprite_imgExpand_pic.x = Graphics.boxWidth * 0.5;		//（位置居中）
+	this._sprite_imgExpand_pic.y = Graphics.boxHeight * 0.5;
+};
+//==============================
+// * H流程 - 离开原图查看器
+//==============================
+Scene_Drill_SGaC.prototype.drill_expandCancel = function() {
+	
+	// > 单图查看模式
+	if( $gameTemp._drill_SGaC_isSinglePictureMode == true ){
+		this.popScene();		//（离开界面）
+		
+	// > 一般模式
+	}else{
+		this._window_select.activate(); 	//（恢复选项窗口）
+		this._window_imgExpand.deactivate();
+	}
+};
 
 
 //=============================================================================
@@ -3062,10 +3271,10 @@ Scene_Drill_SGaC.prototype.stop = function() {
     Scene_MenuBase.prototype.stop.call(this);
 };
 //==============================
-// * 画廊C（场景基类） - 判断是否激活/启动
+// * 画廊C（场景基类） - 忙碌状态
 //==============================
-Scene_Drill_SGaC.prototype.isActive = function() {
-	return Scene_MenuBase.prototype.isActive.call(this);
+Scene_Drill_SGaC.prototype.isBusy = function() {
+	return Scene_MenuBase.prototype.isBusy.call(this);
 };
 //==============================
 // * 画廊C（场景基类） - 析构函数
@@ -3073,7 +3282,6 @@ Scene_Drill_SGaC.prototype.isActive = function() {
 //Scene_Drill_SGaC.prototype.terminate = function() {
 //    Scene_MenuBase.prototype.terminate.call(this);
 //};
-
 //==============================
 // * 画廊C（场景基类） - 判断加载完成
 //==============================
@@ -3081,12 +3289,18 @@ Scene_Drill_SGaC.prototype.isReady = function() {
 	return Scene_MenuBase.prototype.isReady.call(this);
 };
 //==============================
-// * 画廊C（场景基类） - 忙碌状态
+// * 画廊C（场景基类） - 判断是否激活/启动
 //==============================
-Scene_Drill_SGaC.prototype.isBusy = function() {
-	return Scene_MenuBase.prototype.isBusy.call(this);
+Scene_Drill_SGaC.prototype.isActive = function() {
+	return Scene_MenuBase.prototype.isActive.call(this);
 };
 
+//==============================
+// * 画廊C（菜单界面基类） - 当前角色切换时
+//==============================
+Scene_Drill_SGaC.prototype.onActorChange = function() {
+	Scene_MenuBase.prototype.onActorChange.call(this);
+};
 //==============================
 // * 画廊C（菜单界面基类） - 创建 - 菜单背景
 //==============================
@@ -3108,7 +3322,7 @@ Scene_Drill_SGaC.prototype.createHelpWindow = function() {
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 箭头 - 创建
+// * I箭头 - 创建
 //==============================
 Scene_Drill_SGaC.prototype.drill_createArrow = function() {
 	
@@ -3144,7 +3358,7 @@ Scene_Drill_SGaC.prototype.drill_createArrow = function() {
 	this._drill_field.addChild(this._arrow_down);	
 };
 //==============================
-// * 箭头 - 帧刷新 贴图
+// * I箭头 - 帧刷新 贴图
 //==============================
 Scene_Drill_SGaC.prototype.drill_updateArrowSprite = function() {
 	this._arrow_left.opacity  = 180;
@@ -3200,9 +3414,16 @@ Scene_Drill_SGaC.prototype.drill_updateArrowSprite = function() {
 	if( this._arrow_hoverType == 2 ){ this._arrow_down.opacity = 255; }
 }
 //==============================
-// * 箭头 - 帧刷新 点击
+// * I箭头 - 帧刷新 点击
 //==============================
 Scene_Drill_SGaC.prototype.drill_updateArrowTouch = function() {
+	
+	// > 单图查看模式（关闭功能）
+	if( $gameTemp._drill_SGaC_isSinglePictureMode == true ){ return; }
+	
+	// > 原图查看器（关闭功能）
+	if( this._window_imgExpand.active == true ){ return; }
+	
     if( TouchInput.isTriggered() ){
 		if( this._arrow_hoverType == 4 ){ this._window_select.cursorLeft();  SoundManager.drill_SGaC_playClick_Arrow(); }
 		if( this._arrow_hoverType == 6 ){ this._window_select.cursorRight(); SoundManager.drill_SGaC_playClick_Arrow(); }
@@ -3211,9 +3432,16 @@ Scene_Drill_SGaC.prototype.drill_updateArrowTouch = function() {
 	}
 }
 //==============================
-// * 箭头 - 帧刷新 高亮
+// * I箭头 - 帧刷新 高亮
 //==============================
 Scene_Drill_SGaC.prototype.drill_updateArrowHover = function() {
+	
+	// > 单图查看模式（关闭功能）
+	if( $gameTemp._drill_SGaC_isSinglePictureMode == true ){ return; }
+	
+	// > 原图查看器（关闭功能）
+	if( this._window_imgExpand.active == true ){ return; }
+	
 	var xx = _drill_mouse_x;
 	var yy = _drill_mouse_y;
 	var hoverType = 0;
@@ -3224,13 +3452,13 @@ Scene_Drill_SGaC.prototype.drill_updateArrowHover = function() {
 	this._arrow_hoverType = hoverType;
 }
 //==============================
-// * 箭头 - 帧刷新 上一次高亮
+// * I箭头 - 帧刷新 上一次高亮
 //==============================
 Scene_Drill_SGaC.prototype.drill_updateArrowLastHover = function() {
 	this._arrow_lastHoverType = this._arrow_hoverType;
 }
 //==============================
-// * 箭头 - 是否鼠标悬停
+// * I箭头 - 是否鼠标悬停
 //==============================
 Scene_Drill_SGaC.prototype.drill_isOnHover = function( x, y, temp_sprite ){
 	if( temp_sprite == undefined ){ return false };
@@ -3246,9 +3474,8 @@ Scene_Drill_SGaC.prototype.drill_isOnHover = function( x, y, temp_sprite ){
 	if( y > temp_sprite._org_y + ph ){ return false };
 	return true;	
 };
-
 //==============================
-// * 箭头 - 窗口选项刷新 箭头显示
+// * I箭头 - 窗口选项刷新 箭头显示
 //==============================
 Scene_Drill_SGaC.prototype.drill_refreshArrow = function( index ){
 	var l_visible = true;
@@ -3259,13 +3486,13 @@ Scene_Drill_SGaC.prototype.drill_refreshArrow = function( index ){
 		l_visible = false;
 	}
 	if( index % DrillUp.g_SGaC_command_window['col'] == DrillUp.g_SGaC_command_window['col']-1 ||
-		index == $gameTemp._drill_SGaC_visibleDataList.length -1 ){
+		index == $gameTemp._drill_SGaC_visibleContextDataList.length -1 ){
 		r_visible = false;
 	}
 	if( index <= DrillUp.g_SGaC_command_window['col']-1 ){
 		u_visible = false;
 	}
-	if( index > $gameTemp._drill_SGaC_visibleDataList.length -1 - DrillUp.g_SGaC_command_window['col'] ){
+	if( index > $gameTemp._drill_SGaC_visibleContextDataList.length -1 - DrillUp.g_SGaC_command_window['col'] ){
 		d_visible = false;
 	}
 	this._arrow_left.visible = l_visible;
@@ -3275,9 +3502,23 @@ Scene_Drill_SGaC.prototype.drill_refreshArrow = function( index ){
 }
 
 
+
 //==========================================================================================
 // ** 选项窗口【Drill_SGaC_SelectWindow】
-//
+// **
+// **		作用域：	菜单界面
+// **		主功能：	定义一个选项窗口，能进行选项切换。
+// **		子功能：	
+// **					->窗口
+// **						->帧刷新
+// **					->G子项（覆写）
+// **					->2A选中
+// **					->2B绘制选项
+// **						->绘制单个小缩略图
+// **					->2C已读情况
+// **					->2D兼容
+// **
+// **		说明：	> 该插件专用。
 //==========================================================================================
 //==============================
 // * 选项窗口 - 定义
@@ -3287,168 +3528,318 @@ function Drill_SGaC_SelectWindow() {
 }
 Drill_SGaC_SelectWindow.prototype = Object.create(Window_Selectable.prototype);
 Drill_SGaC_SelectWindow.prototype.constructor = Drill_SGaC_SelectWindow;
-Drill_SGaC_SelectWindow.lastTopRow = 0;
-Drill_SGaC_SelectWindow.lastIndex  = 0;
 //==============================
 // * 选项窗口 - 初始化
 //==============================
-Drill_SGaC_SelectWindow.prototype.initialize = function(x, y, width, height) {
+Drill_SGaC_SelectWindow.prototype.initialize = function( x, y, width, height ){
 	Window_Selectable.prototype.initialize.call(this, x, y, width, height);
 	this.refresh();
 	this.activate();
-	this.drill_initSelect();
+	this.drill_window_initSelect();
 };
-
-//==============================
-// * 选项窗口 - 窗口数据
-//==============================
-Drill_SGaC_SelectWindow.prototype.maxCols = function() {
-	return DrillUp.g_SGaC_command_window['col'] || 1;
-};
-Drill_SGaC_SelectWindow.prototype.maxItems = function() {
-	return this._list ? this._list.length : 0;
-};
-Drill_SGaC_SelectWindow.prototype.itemHeight = function() {
-	return DrillUp.g_SGaC_command_window['itemHeight'] || this.lineHeight();
-};
-
 //==============================
 // * 选项窗口 - 帧刷新
 //==============================
 Drill_SGaC_SelectWindow.prototype.update = function() {
 	Window_Selectable.prototype.update.call(this);
-	//...（暂无）
+	//（无）
 };
 
 //==============================
-// * 选项窗口 - 重绘内容
+// * G子项 - 属性 - 列数（覆写）
+//==============================
+Drill_SGaC_SelectWindow.prototype.maxCols = function() {
+	return DrillUp.g_SGaC_command_window['col'] || 1;
+};
+//==============================
+// * G子项 - 属性 - 子项数量（覆写）
+//==============================
+Drill_SGaC_SelectWindow.prototype.maxItems = function() {
+	return this._drill_selectionNameList ? this._drill_selectionNameList.length : 0;
+};
+//==============================
+// * G子项 - 属性 - 子项间距
+//==============================
+// （不操作）
+//==============================
+// * G子项 - 属性 - 子项宽度
+//==============================
+// （不操作）
+//==============================
+// * G子项 - 属性 - 子项高度（覆写）
+//==============================
+Drill_SGaC_SelectWindow.prototype.itemHeight = function() {
+	return DrillUp.g_SGaC_command_window['itemHeight'] || this.lineHeight();
+};
+//==============================
+// * G子项 - 重画所有子项（覆写）
 //==============================
 Drill_SGaC_SelectWindow.prototype.refresh = function() {
 	
 	// > 单图查看模式
 	if( $gameTemp._drill_SGaC_isSinglePictureMode == true ){
-		$gameTemp._drill_SGaC_visibleDataList = [];
+		$gameTemp._drill_SGaC_visibleContextDataList = [];
 		
 		var index = $gameTemp._drill_SGaC_isSinglePictureIndex;
-		$gameTemp._drill_SGaC_visibleDataList.push( DrillUp.g_SGaC_context_list[index] );
+		$gameTemp._drill_SGaC_visibleContextDataList.push( DrillUp.g_SGaC_context_list[index] );
 		
-		this._list = [""];
+		this._drill_selectionNameList = [""];
 		this.createContents();
-		this.drawAllItems();	//绘制选项内容
+		this.drill_window_drawAllItem();	//绘制选项内容
 		
 		
 	// > 一般模式
 	}else{
-		$gameTemp._drill_SGaC_visibleDataList = [];
-		for(var i=1; i<= DrillUp.g_SGaC_context_list_length ;i++){
-			var temp_c = DrillUp.g_SGaC_context_list[i];
-			if( temp_c == null ){ continue; }
+		
+		// > 一般模式 - 重刷可见项列表
+		$gameTemp._drill_SGaC_visibleContextDataList = [];
+		for( var i = 0; i < DrillUp.g_SGaC_context_list.length; i++ ){
+			var temp_data = DrillUp.g_SGaC_context_list[i];
+			if( temp_data == null ){ continue; }
 			
 			if( $gameTemp.drill_SGaC_isEnabled( i ) == true ){
-				$gameTemp._drill_SGaC_visibleDataList.push( temp_c );
+				$gameTemp._drill_SGaC_visibleContextDataList.push( temp_data );
 			}
 		}
 		
-		// > 待绘制的字符串
-		this._list = [];
-		for( var j=0; j< $gameTemp._drill_SGaC_visibleDataList.length ;j++ ){
-			var temp_c = $gameTemp._drill_SGaC_visibleDataList[j];
-			var context_realIndex = temp_c['index'];
+		// > 一般模式 - 选项显示的文本（与可见项一对一）
+		this._drill_selectionNameList = [];
+		for( var j = 0; j < $gameTemp._drill_SGaC_visibleContextDataList.length ;j++ ){
+			var temp_data = $gameTemp._drill_SGaC_visibleContextDataList[j];
+			var context_realIndex = temp_data['index'];
 			
 			// > 选项锁定
 			if( $gameTemp.drill_SGaC_isLocked( context_realIndex ) == true ){
-				this._list.push( DrillUp.g_SGaC_locked_name );
+				this._drill_selectionNameList[j] = String(DrillUp.g_SGaC_locked_name);
 				continue;
 			}
 			
-			// > 长文本选项
+			// > 选项长文本
 			if( DrillUp.g_SGaC_command_window['nameExEnabled'] == true ){
-				this._list.push( temp_c['nameEx'] );
+				this._drill_selectionNameList[j] = String(temp_data['nameEx']);
 				continue;
 			}
 			
-			this._list.push( temp_c['name'] );
+			// > 选项名
+			this._drill_selectionNameList[j] = String(temp_data['name']);
 		}
 		
+		// > 绘制选项内容
 		this.createContents();
-		this.drawAllItems();	//绘制选项内容
+		this.drill_window_drawAllItem();
 	}
+	
+	// > 选项兼容（._list 是 Window_Command 的参数，Window_Selectable 没有此参数，但为了兼容这里赋值一下）
+	this._list = this._drill_selectionNameList;
 };
+
 //==============================
-// * 选项窗口 - 设置选项
+// * 2A选中 - 参数初始化
 //==============================
-Drill_SGaC_SelectWindow.prototype.drill_initSelect = function() {
-	if( Drill_SGaC_SelectWindow.lastIndex >= this._list.length ){
-		Drill_SGaC_SelectWindow.lastIndex = this._list.length-1;
+Drill_SGaC_SelectWindow.g_drill_lastTopRow = 0;
+Drill_SGaC_SelectWindow.g_drill_lastIndex  = 0;
+//==============================
+// * 2A选中 - 设置选项
+//==============================
+Drill_SGaC_SelectWindow.prototype.drill_window_initSelect = function() {
+	if( Drill_SGaC_SelectWindow.g_drill_lastIndex >= this._drill_selectionNameList.length ){
+		Drill_SGaC_SelectWindow.g_drill_lastIndex = this._drill_selectionNameList.length-1;
 	}
-	this.setTopRow(Drill_SGaC_SelectWindow.lastTopRow);
-	this.select(Drill_SGaC_SelectWindow.lastIndex);
+	this.setTopRow(Drill_SGaC_SelectWindow.g_drill_lastTopRow);
+	this.select(Drill_SGaC_SelectWindow.g_drill_lastIndex);
 }
 //==============================
-// * 选项窗口 - 绘制选项
-//==============================
-Drill_SGaC_SelectWindow.prototype.drawItem = function( index ){
-    var name_str = this._list[index];
-	var name_str_list = name_str.split(/\\n/);
-	var rect = this.itemRectForText(index);
-	
-	// > 绘制小缩略图
-	if( DrillUp.g_SGaC_command_window['icon_enabled'] == true ){
-		var temp_data = $gameTemp._drill_SGaC_visibleDataList[ index ];
-		var bitmap = null;
-		
-		// > 锁定时，显示锁定小缩略图
-		var realIndex = temp_data['index'];
-		if( $gameTemp.drill_SGaC_isLocked( realIndex ) == true ){
-			bitmap = ImageManager.load_MenuGallery( DrillUp.g_SGaC_locked_pic );
-		}else{
-			bitmap = ImageManager.load_MenuGallery( temp_data['pic'] );	//（注意全加载问题）
-		}
-		
-		if( bitmap != null && bitmap.isReady() == true ){
-			var ww = bitmap.width;
-			var hh = bitmap.height;
-			
-			if( DrillUp.g_SGaC_command_window['icon_black'] == true ){
-				this.contents.fillRect( rect.x, rect.y, rect.width, rect.height, "#000000" );
-			}
-			
-			if( DrillUp.g_SGaC_command_window['icon_mode'] == "等比缩放" ){
-				var pw = rect.width / ww;
-				var ph = rect.height / hh;
-				if( pw > ph ){ pw = ph; }
-				var rxx = (rect.width - ww * pw)*0.5;
-				var ryy = (rect.height - hh * pw)*0.5;
-				this.contents.blt(bitmap, 0, 0, ww, hh, rect.x + rxx, rect.y + ryy, ww*pw, hh*pw );
-			}else{	//（拉伸缩放）
-				var pw = rect.width / ww;
-				var ph = rect.height / hh;
-				if( pw > ph ){ pw = ph; }
-				this.contents.blt(bitmap, 0, 0, ww, hh, rect.x, rect.y, ww*pw, hh*pw );
-			}
-		}
-	}
-	
-	// > 绘制内容
-	var op = {
-		"align":DrillUp.g_SGaC_command_window['align'],
-		"autoLineheight":true,
-		"x": rect.x,
-		"y": rect.y,
-		"width": rect.width,
-	}
-	this.drill_COWA_drawTextListEx_notClean(name_str_list,op);
-};
-//==============================
-// * 选项窗口 - 退出事件
+// * 2A选中 - 退出时暂存选项（继承）
 //==============================
 Drill_SGaC_SelectWindow.prototype.processCancel = function() {
 	Window_Selectable.prototype.processCancel.call(this);
-	Drill_SGaC_SelectWindow.lastTopRow = this.topRow();
-	Drill_SGaC_SelectWindow.lastIndex = this.index();
+	Drill_SGaC_SelectWindow.g_drill_lastTopRow = this.topRow();
+	Drill_SGaC_SelectWindow.g_drill_lastIndex = this.index();
+};
+
+//==============================
+// * 2B绘制选项 - 绘制所有
+//
+//			说明：	> 该函数是一个单独定义的函数，参考了 Window_Selectable.prototype.drawAllItems 结构。
+//==============================
+Drill_SGaC_SelectWindow.prototype.drill_window_drawAllItem = function(){
+	
+	// > 『字符贴图流程』 - 清空字符块贴图【窗口字符 - 窗口字符贴图核心】
+	if( Imported.Drill_CoreOfWindowCharacterSprite ){
+		this.drill_COWCSp_sprite_clearAllSprite();
+	}
+	
+	// > 原函数
+	var topIndex = this.topIndex();
+	for( var i = 0; i < this.maxPageItems(); i++ ){
+		var index = topIndex + i;
+		if( index < this.maxItems() ){
+			//this.drill_window_drawIcon(index);
+			this.drill_window_drawItem(index);
+			//this.drill_window_drawNewTag(index);
+		}
+	}
+	
+	// > 『字符贴图流程』 - 刷新字符块贴图【窗口字符 - 窗口字符贴图核心】
+	if( Imported.Drill_CoreOfWindowCharacterSprite ){
+		this.drill_COWCSp_sprite_refreshAllSprite();
+	}
 };
 //==============================
-// * 选项窗口 - 兼容 - mog菜单指针插件
+// * 2B绘制选项 - 绘制单个
+//
+//			说明：	> 该函数是一个单独定义的函数，参考了 Window_Selectable.prototype.drawItem 结构。
+//==============================
+Drill_SGaC_SelectWindow.prototype.drill_window_drawItem = function( index ){
+	var rect = this.itemRectForText(index);
+	
+	// > 参数准备 - 校验
+	var temp_bitmap = this.contents;
+	if( temp_bitmap == undefined ){ return; }
+	var org_text = this._drill_selectionNameList[index];
+	if( org_text == undefined ){ return; }
+	if( org_text == "" ){ return; }
+	
+	// > 参数准备
+	var options = {};
+	options['infoParam'] = {};
+	options['infoParam']['x'] = rect.x,
+	options['infoParam']['y'] = rect.y,
+	options['infoParam']['canvasWidth'] = temp_bitmap.width;
+	options['infoParam']['canvasHeight'] = temp_bitmap.height;
+	
+	// > 参数准备 - 自定义
+	options['rowParam'] = {};
+	options['rowParam']['alignHor_maxWidth'] = rect.width;
+	options['rowParam']['alignVer_maxHeight'] = rect.height;
+	
+	options['rowParam']['alignHor_type'] = DrillUp.g_SGaC_command_window['align'];	//（对齐方式）
+	
+	// > 清空画布（这里在连续绘制选项，不要清空）
+	//temp_bitmap.clear();
+	
+	// > 『字符主流程』 - 绘制文本【窗口字符 - 窗口字符核心】
+	this.drill_COWC_drawText( org_text, options );
+};
+//==============================
+// * 2B绘制选项 - 绘制单个小缩略图
+//==============================
+Drill_SGaC_SelectWindow.prototype.drill_window_drawIcon = function( index ){
+	if( DrillUp.g_SGaC_command_window['icon_enabled'] != true ){ return; }
+	
+	var temp_data = $gameTemp._drill_SGaC_visibleContextDataList[index];	//（当前选项）
+	if( temp_data == undefined ){ return; }
+	var rect = this.itemRectForText(index);
+	var bitmap = null;
+	
+	// > 锁定时，显示锁定小缩略图
+	var context_realIndex = temp_data['index'];
+	if( $gameTemp.drill_SGaC_isLocked( context_realIndex ) == true ){
+		bitmap = ImageManager.load_MenuGallery( DrillUp.g_SGaC_locked_pic );
+	}else{
+		bitmap = ImageManager.load_MenuGallery( temp_data['pic'] );	//（注意全加载问题）
+	}
+	
+	if( bitmap != null && bitmap.isReady() == true ){
+		var ww = bitmap.width;
+		var hh = bitmap.height;
+		
+		if( DrillUp.g_SGaC_command_window['icon_black'] == true ){
+			this.contents.fillRect( rect.x, rect.y, rect.width, rect.height, "#000000" );
+		}
+		
+		if( DrillUp.g_SGaC_command_window['icon_mode'] == "等比缩放" ){
+			var pw = rect.width / ww;
+			var ph = rect.height / hh;
+			if( pw > ph ){ pw = ph; }
+			var rxx = (rect.width - ww * pw)*0.5;
+			var ryy = (rect.height - hh * pw)*0.5;
+			this.contents.blt(bitmap, 0, 0, ww, hh, rect.x + rxx, rect.y + ryy, ww*pw, hh*pw );
+		}else{	//（拉伸缩放）
+			var pw = rect.width / ww;
+			var ph = rect.height / hh;
+			if( pw > ph ){ pw = ph; }
+			this.contents.blt(bitmap, 0, 0, ww, hh, rect.x, rect.y, ww*pw, hh*pw );
+		}
+	}
+};
+
+//==============================
+// * 2C已读情况 - 绘制新标签
+//==============================
+Drill_SGaC_SelectWindow.prototype.drill_window_drawNewTag = function( index ){
+	if( DrillUp.g_SGaC_watch_enabled != true ){ return; }
+	
+	var temp_data = $gameTemp._drill_SGaC_visibleContextDataList[index];	//（当前选项）
+	if( temp_data == undefined ){ return; }
+	var rect = this.itemRectForText(index);
+	var context_realIndex = temp_data['index'];
+	
+	// > 已读则跳出
+	if( $gameTemp.drill_SGaC_isWatched( context_realIndex ) == true ){ return; }
+	// > 锁定则跳出
+	if( $gameTemp.drill_SGaC_isLocked( context_realIndex ) == true ){ return; }
+	
+	
+	// > 参数准备 - 校验
+	var temp_bitmap = this.contents;
+	if( temp_bitmap == undefined ){ return; }
+	var org_text = DrillUp.g_SGaC_watch_text;
+	if( org_text == undefined ){ return; }
+	if( org_text == "" ){ return; }
+	
+	// > 参数准备
+	var options = {};
+	options['infoParam'] = {};
+	options['infoParam']['x'] = rect.x,
+	options['infoParam']['y'] = rect.y,
+	options['infoParam']['canvasWidth'] = temp_bitmap.width;
+	options['infoParam']['canvasHeight'] = temp_bitmap.height;
+	
+	// > 参数准备 - 自定义
+	options['rowParam'] = {};
+	options['rowParam']['alignHor_maxWidth'] = rect.width;
+	options['rowParam']['alignVer_maxHeight'] = rect.height;
+	if( DrillUp.g_SGaC_watch_setCorner == true ){
+		options['rowParam']['alignHor_type'] = "right";	//（右下角）
+		options['rowParam']['alignVer_type'] = "bottom";
+	}
+	
+	options['baseParam'] = {};
+	options['baseParam']['fontSize'] = DrillUp.g_SGaC_watch_fontsize;
+	
+	// > 清空画布（这里在连续绘制选项，不要清空）
+	//temp_bitmap.clear();
+	
+	// > 『字符主流程』 - 绘制文本【窗口字符 - 窗口字符核心】
+	this.drill_COWC_drawText( org_text, options );
+};
+//==============================
+// * 2C已读情况 - 选项变化时
+//
+//			说明：	> 注意选项变化时，要传入上一次选项的索引。因为当前索引不算已读，上一次索引才算已读。
+//==============================
+Drill_SGaC_SelectWindow.prototype.drill_window_watchedChanged = function( last_index ){
+	if( DrillUp.g_SGaC_watch_enabled != true ){ return; }
+	
+	var temp_data = $gameTemp._drill_SGaC_visibleContextDataList[ last_index ];	//（当前选项）
+	if( temp_data == undefined ){ return; }
+	var context_realIndex = temp_data['index'];
+	
+	// > 锁定则跳出
+	if( $gameTemp.drill_SGaC_isLocked( context_realIndex ) == true ){ return; }
+	
+	// > 新标签 数据变化
+	if( $gameTemp.drill_SGaC_isWatched( context_realIndex ) != true ){
+		DrillUp.global_SGaC_watchedTank[ context_realIndex ] = true;
+		$gameSystem._drill_SGaC_watchedTank[ context_realIndex ] = true;
+		this.createContents();				//（强制重绘）
+		this.drill_window_drawAllItem();	//（强制重绘）
+	}
+};
+
+//==============================
+// * 2D兼容 - mog菜单指针插件
 //==============================
 if( Imported.MOG_MenuCursor == true ){
 	var _drill_SGaC_mog_set_mcursor_data = Drill_SGaC_SelectWindow.prototype.need_set_mcursor_data;
@@ -3460,7 +3851,7 @@ if( Imported.MOG_MenuCursor == true ){
 	}
 }
 //==============================
-// * 选项窗口 - 兼容 - mog菜单边框插件
+// * 2D兼容 - mog菜单边框插件
 //==============================
 if( Imported.MOG_CursorBorder == true ){
 	var _drill_SGaC_mog_createSprSelMenu = Drill_SGaC_SelectWindow.prototype.createSprSelMenu;
@@ -3472,7 +3863,7 @@ if( Imported.MOG_CursorBorder == true ){
 	}
 }
 //==============================
-// * 选项窗口 - 兼容 - 【Drill_MenuCursor 主菜单 - 多样式菜单指针】
+// * 2D兼容 - 【Drill_MenuCursor 主菜单 - 多样式菜单指针】
 //==============================
 if( Imported.Drill_MenuCursor == true ){
 	Drill_SGaC_SelectWindow.prototype.drill_MCu_cursorEnabled = function() {
@@ -3487,7 +3878,7 @@ if( Imported.Drill_MenuCursor == true ){
 	}
 }
 //==============================
-// * 选项窗口 - 兼容 - 【Drill_MenuCursorBorder 主菜单 - 多样式菜单选项边框】
+// * 2D兼容 - 【Drill_MenuCursorBorder 主菜单 - 多样式菜单选项边框】
 //==============================
 if( Imported.Drill_MenuCursorBorder == true ){
 	Drill_SGaC_SelectWindow.prototype.drill_MCB_glimmerRectVisible = function() {
@@ -3505,7 +3896,7 @@ if( Imported.Drill_MenuCursorBorder == true ){
 	}
 }
 //==============================
-// * 选项窗口 - 兼容 - 【Drill_MenuScrollBar 主菜单 - 多样式菜单滚动条】
+// * 2D兼容 - 【Drill_MenuScrollBar 主菜单 - 多样式菜单滚动条】
 //==============================
 if( Imported.Drill_MenuScrollBar == true ){
 	Drill_SGaC_SelectWindow.prototype.drill_MSB_scrollBarEnabled = function() {
@@ -3523,7 +3914,16 @@ if( Imported.Drill_MenuScrollBar == true ){
 
 //==========================================================================================
 // ** 显示窗口【Drill_SGaC_DescWindow】
-//
+// **
+// **		作用域：	菜单界面
+// **		主功能：	定义一个窗口，用于绘制段落文本。
+// **		子功能：	
+// **					->窗口
+// **					->窗口行高
+// **					->对齐方式
+// **					->绘制文本
+// **
+// **		说明：	> 该插件专用。
 //==========================================================================================
 //==============================
 // * 显示窗口 - 定义
@@ -3536,50 +3936,112 @@ Drill_SGaC_DescWindow.prototype.constructor = Drill_SGaC_DescWindow;
 //==============================
 // * 显示窗口 - 初始化
 //==============================
-Drill_SGaC_DescWindow.prototype.initialize = function(x, y, width, height) {
+Drill_SGaC_DescWindow.prototype.initialize = function( x, y, width, height ){
     Window_Base.prototype.initialize.call(this, x,y,width,height);
-	//...（暂无）
+	//（无）
 };
 //==============================
 // * 显示窗口 - 帧刷新
 //==============================
 Drill_SGaC_DescWindow.prototype.update = function() {
 	Window_Base.prototype.update.call(this);
-	//...（暂无）
+	//（无）
 };
 //==============================
 // * 显示窗口 - 重绘内容
 //==============================
-Drill_SGaC_DescWindow.prototype.drill_refreshDesc = function( cur_index ) {
-	var temp_list = $gameTemp._drill_SGaC_visibleDataList;		//可见项列表
-	var temp_c = temp_list[ cur_index ];					//当前选项
+Drill_SGaC_DescWindow.prototype.drill_refreshDescText = function( cur_index ){
+	var temp_data = $gameTemp._drill_SGaC_visibleContextDataList[ cur_index ];	//（当前选项）
+	if( temp_data == undefined ){ return; }
 	
 	// > 切换描述内容
-	var context_list = [];
-	var context_realIndex = temp_c['index'];
-	
-	if( $gameTemp.drill_SGaC_isLocked( context_realIndex ) == true && 
-	   (DrillUp.g_SGaC_locked_type == "锁定缩略图和描述内容" || 
-		DrillUp.g_SGaC_locked_type == "只锁定描述内容" ) ){
-			
-		context_list.push( DrillUp.g_SGaC_locked_context );	//锁定内容
+	var context = "";
+	if( $gameTemp.drill_SGaC_isLocked( temp_data['index'] ) == true && 
+		(DrillUp.g_SGaC_locked_type == "锁定缩略图和描述内容" || 	//（注意是缩略图）
+		 DrillUp.g_SGaC_locked_type == "只锁定描述内容" ) ){
+		context = DrillUp.g_SGaC_locked_context;	//锁定内容
 	}else{
-		context_list = temp_c['context'].split("\n");		//当前内容
+		context = temp_data['context'];				//当前内容
 	}
 	
-	// > 绘制内容
-	var op = {
-		"align":temp_c['contextAlign'],
-		"autoLineheight":temp_c['contextAutoLineheight'],
-		"lineheight":temp_c['contextLineheight'],
+	// > 窗口行高
+	var cur_lineHeight = 0;
+	if( temp_data['context_lineheight_type'] == "默认补正" ){
+		cur_lineHeight = 30;
 	}
-	this.drill_COWA_drawTextListEx(context_list,op);
+	if( temp_data['context_lineheight_type'] == "自定义补正" ){
+		cur_lineHeight = temp_data['context_lineheight_custom'];
+	}
+	if( temp_data['context_lineheight_type'] == "锁定行高" ){
+		cur_lineHeight = temp_data['context_lineheight_lock'];
+	}
+	if( temp_data['context_lineheight_type'] == "关闭行高控制" ){
+		cur_lineHeight = 0;
+	}
+	
+	// > 对齐方式
+	var cur_align = "left";
+	if( temp_data['context_align'] == "居中" ){ cur_align = "center"; }
+	if( temp_data['context_align'] == "右对齐" ){ cur_align = "right"; }
+	
+	
+	// > 『字符贴图流程』 - 清空字符块贴图【窗口字符 - 窗口字符贴图核心】
+	if( Imported.Drill_CoreOfWindowCharacterSprite ){
+		this.drill_COWCSp_sprite_clearAllSprite();
+	}
+	
+	// > 参数准备 - 校验
+	var temp_bitmap = this.contents;
+	if( temp_bitmap == undefined ){ return; }
+	var org_text = context;
+	if( org_text == undefined ){ return; }
+	if( org_text == "" ){ return; }
+	
+	// > 参数准备
+	var options = {};
+	options['infoParam'] = {};
+	options['infoParam']['x'] = 0;
+	options['infoParam']['y'] = 0;
+	options['infoParam']['canvasWidth'] = temp_bitmap.width;
+	options['infoParam']['canvasHeight'] = temp_bitmap.height;
+	
+	// > 参数准备 - 自定义
+	options['blockParam'] = {};							//『自定义字符默认间距』
+	options['blockParam']['paddingTop'] = 0;
+	options['rowParam'] = {};
+	options['rowParam']['lineHeight_upCorrection'] = cur_lineHeight;
+	
+	options['rowParam']['alignHor_type'] = cur_align;	//（对齐方式）
+	
+	// > 清空画布（固定高宽只需要清空）
+	temp_bitmap.clear();
+	
+	// > 『字符主流程』 - 绘制文本【窗口字符 - 窗口字符核心】
+	this.drill_COWC_drawText( org_text, options );
+	
+	// > 『字符贴图流程』 - 刷新字符块贴图【窗口字符 - 窗口字符贴图核心】
+	if( Imported.Drill_CoreOfWindowCharacterSprite ){
+		this.drill_COWCSp_sprite_refreshAllSprite();
+	}
+}
+//==============================
+// * 显示窗口 - 刷新内容 - 窗口字符底层校验
+//==============================
+if( typeof(_drill_COWC_drawText_functionExist) == "undefined" ){
+	alert( DrillUp.drill_SGaC_getPluginTip_NeedUpdate_drawText() );
 }
 
 
 //==========================================================================================
 // ** 完成度窗口【Drill_SGaC_CompletionWindow】
-//
+// **
+// **		作用域：	菜单界面
+// **		主功能：	定义一个窗口，用于绘制完成度文本。
+// **		子功能：	
+// **					->窗口
+// **					->重绘内容
+// **
+// **		说明：	> 该插件专用。
 //==========================================================================================
 //==============================
 // * 完成度窗口 - 定义
@@ -3592,28 +4054,28 @@ Drill_SGaC_CompletionWindow.prototype.constructor = Drill_SGaC_CompletionWindow;
 //==============================
 // * 完成度窗口 - 初始化
 //==============================
-Drill_SGaC_CompletionWindow.prototype.initialize = function(x, y, width, height) {
+Drill_SGaC_CompletionWindow.prototype.initialize = function( x, y, width, height ){
     Window_Base.prototype.initialize.call(this, x,y,width,height);
-	//...（暂无）
+	//（无）
 };
 //==============================
 // * 完成度窗口 - 帧刷新
 //==============================
 Drill_SGaC_CompletionWindow.prototype.update = function() {
 	Window_Base.prototype.update.call(this);
-	//...（暂无）
+	//（无）
 };
 //==============================
 // * 完成度窗口 - 重绘内容
 //==============================
 Drill_SGaC_CompletionWindow.prototype.drill_refresh = function(){
-	var temp_list = $gameTemp._drill_SGaC_visibleDataList;		//可见项列表
+	var temp_list = $gameTemp._drill_SGaC_visibleContextDataList;		//可见项列表
 	
 	// > 上锁的数量
 	var locked_count = 0;
-	for( var i=0; i < temp_list.length; i++ ){
-		var temp_c = temp_list[ i ];	
-		var context_realIndex = temp_c['index'];
+	for( var i = 0; i < temp_list.length; i++ ){
+		var temp_data = temp_list[ i ];	
+		var context_realIndex = temp_data['index'];
 		if( $gameTemp.drill_SGaC_isLocked( context_realIndex ) == true ){
 			locked_count += 1;
 		}
@@ -3623,19 +4085,46 @@ Drill_SGaC_CompletionWindow.prototype.drill_refresh = function(){
 	var context = "";
 	context = DrillUp.g_SGaC_compWin_word + String( temp_list.length - locked_count ) + "/" + String( temp_list.length );
 	
-	// > 绘制内容
-	var op = {
-		"align":"居中",
-		"autoLineheight":true,
-	}
-	this.drill_COWA_drawTextListEx( [ context ],op);
+	
+	// > 参数准备 - 校验
+	var temp_bitmap = this.contents;
+	if( temp_bitmap == undefined ){ return; }
+	var org_text = context;
+	if( org_text == undefined ){ return; }
+	if( org_text == "" ){ return; }
+	
+	// > 参数准备
+	var options = {};
+	options['infoParam'] = {};
+	options['infoParam']['x'] = 0;
+	options['infoParam']['y'] = 0;
+	options['infoParam']['canvasWidth'] = temp_bitmap.width;
+	options['infoParam']['canvasHeight'] = temp_bitmap.height;
+	
+	// > 参数准备 - 自定义
+	options['rowParam'] = {};
+	options['rowParam']['alignHor_type'] = "center";	//（对齐方式）
+	
+	// > 清空画布（固定高宽只需要清空）
+	temp_bitmap.clear();
+	
+	// > 『字符主流程』 - 绘制文本【窗口字符 - 窗口字符核心】
+	this.drill_COWC_drawText( org_text, options );
 }
 
 
 //==========================================================================================
 // ** 原图查看器窗口【Drill_SGaC_ImgExpandWindow】
-//
-//			说明：	这个窗口只是用于阻塞流程关系，在展开原图查看器时，提供取消返回选项的功能。
+// **
+// **		作用域：	菜单界面
+// **		主功能：	定义一个窗口，控制流程用。
+// **		子功能：	
+// **					->窗口
+// **					->窗口行高
+// **					->对齐方式
+// **					->绘制文本
+// **
+// **		说明：	> 这个窗口只是用于阻塞流程关系，在展开原图查看器时，提供取消返回选项的功能。
 //==========================================================================================
 //==============================
 // * 原图查看器窗口 - 定义
@@ -3648,7 +4137,7 @@ Drill_SGaC_ImgExpandWindow.prototype.constructor = Drill_SGaC_ImgExpandWindow;
 //==============================
 // * 原图查看器窗口 - 初始化
 //==============================
-Drill_SGaC_ImgExpandWindow.prototype.initialize = function(x, y, width, height) {
+Drill_SGaC_ImgExpandWindow.prototype.initialize = function( x, y, width, height ){
 	Window_Selectable.prototype.initialize.call(this, x, y, width, height);
 	this.refresh();
 };
@@ -3662,14 +4151,14 @@ Drill_SGaC_ImgExpandWindow.prototype.maxItems = function(){ return 1; };
 //==============================
 Drill_SGaC_ImgExpandWindow.prototype.update = function() {
 	Window_Selectable.prototype.update.call(this);
-	//...（暂无）
+	//（无）
 };
 //==============================
 // * 原图查看器窗口 - 退出事件
 //==============================
 Drill_SGaC_ImgExpandWindow.prototype.processCancel = function() {
 	Window_Selectable.prototype.processCancel.call(this);
-	//...（暂无）
+	//（无）
 };
 //==============================
 // * 原图查看器窗口 - 阻塞

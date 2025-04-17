@@ -1724,7 +1724,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_EDMB_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_EDMB_PluginTip_baseList.length == 0 ){ return ""; }
@@ -1764,10 +1764,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_EventDynamicMaskB = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_EventDynamicMaskB');
+	var Imported = Imported || {};
+	Imported.Drill_EventDynamicMaskB = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_EventDynamicMaskB');
 
 
 	//==============================
@@ -1831,11 +1831,20 @@ if( Imported.Drill_CoreOfDynamicMask ){
 
 
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_EDMB_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_EDMB_pluginCommand.call(this, command, args);
+	this.drill_EDMB_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_EDMB_pluginCommand = function( command, args ){
 	if( command === ">行走图动态遮罩板B" ){
 		
 		/*-----------------动态遮罩板绑定------------------*/
@@ -2383,7 +2392,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 };
 //==============================
-// ** 插件指令 - 事件检查
+// * 插件指令 - 事件检查
 //==============================
 Game_Map.prototype.drill_EDMB_isEventExist = function( e_id ){
 	if( e_id == 0 ){ return false; }
@@ -2396,7 +2405,7 @@ Game_Map.prototype.drill_EDMB_isEventExist = function( e_id ){
 	return true;
 };
 //==============================
-// ** 插件指令 - 图片检查
+// * 插件指令 - 图片检查
 //==============================
 Game_Screen.prototype.drill_EDMB_isPictureExist = function( pic_id ){
 	if( pic_id == 0 ){ return false; }
@@ -2660,16 +2669,17 @@ Game_System.prototype.drill_EDMB_rotateTo = function( marker_id, o_data ){
 
 //=============================================================================
 // ** 透视镜物体容器
-//			
-//			主功能：	> 专门控制该插件 动态遮罩板 的 透视镜 的容器。
-//			子功能：	
-//						->简单透视镜
-//							> 绑定事件
-//							> 绑定鼠标
-//							> 绑定图片
-//						->高级透视镜
-//
-//			说明：	直接使用父类的容器【Drill_CODM_PerspectiveMarkerContainer】，添加数据。
+// **		
+// **		作用域：	地图界面
+// **		主功能：	专门控制该插件 动态遮罩板 的 透视镜 的容器。
+// **		子功能：	
+// **					->简单透视镜
+// **						> 绑定事件
+// **						> 绑定鼠标
+// **						> 绑定图片
+// **					->高级透视镜
+// **
+// **		说明：	> 直接使用父类的容器【Drill_CODM_PerspectiveMarkerContainer】，添加数据。
 //=============================================================================
 //==============================
 // * 物体容器 - 地图初始化

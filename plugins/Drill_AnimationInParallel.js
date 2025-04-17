@@ -186,18 +186,27 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_AnimationInParallel = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_AnimationInParallel');
+	var Imported = Imported || {};
+	Imported.Drill_AnimationInParallel = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_AnimationInParallel');
 
 
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_AIP_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_AIP_pluginCommand.call(this, command, args);
+	this.drill_AIP_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_AIP_pluginCommand = function( command, args ){
 	if( command === ">并行战斗动画" ){
 		
 		/*-----------------对象组获取 - 动画------------------*/

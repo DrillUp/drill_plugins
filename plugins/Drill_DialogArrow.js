@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        对话框 - 对话框小箭头
+ * @plugindesc [v1.3]        对话框 - 对话框小箭头
  * @author Drill_up
  * 
  * @Drill_LE_param "小箭头-%d"
@@ -92,6 +92,8 @@
  * 修改了插件指令细节。
  * [v1.2]
  * 优化了旧存档的识别与兼容。
+ * [v1.3]
+ * 翻新了对话框的内部结构。
  * 
  * 
  *
@@ -114,61 +116,61 @@
  * @param 小箭头-1
  * @parent ----小箭头----
  * @type struct<DrillDArSprite>
- * @desc 当前小箭头的样式配置。
+ * @desc 指定小箭头的样式配置。
  * @default 
  *
  * @param 小箭头-2
  * @parent ----小箭头----
  * @type struct<DrillDArSprite>
- * @desc 当前小箭头的样式配置。
+ * @desc 指定小箭头的样式配置。
  * @default 
  *
  * @param 小箭头-3
  * @parent ----小箭头----
  * @type struct<DrillDArSprite>
- * @desc 当前小箭头的样式配置。
+ * @desc 指定小箭头的样式配置。
  * @default 
  *
  * @param 小箭头-4
  * @parent ----小箭头----
  * @type struct<DrillDArSprite>
- * @desc 当前小箭头的样式配置。
+ * @desc 指定小箭头的样式配置。
  * @default 
  *
  * @param 小箭头-5
  * @parent ----小箭头----
  * @type struct<DrillDArSprite>
- * @desc 当前小箭头的样式配置。
+ * @desc 指定小箭头的样式配置。
  * @default 
  *
  * @param 小箭头-6
  * @parent ----小箭头----
  * @type struct<DrillDArSprite>
- * @desc 当前小箭头的样式配置。
+ * @desc 指定小箭头的样式配置。
  * @default 
  *
  * @param 小箭头-7
  * @parent ----小箭头----
  * @type struct<DrillDArSprite>
- * @desc 当前小箭头的样式配置。
+ * @desc 指定小箭头的样式配置。
  * @default 
  *
  * @param 小箭头-8
  * @parent ----小箭头----
  * @type struct<DrillDArSprite>
- * @desc 当前小箭头的样式配置。
+ * @desc 指定小箭头的样式配置。
  * @default 
  *
  * @param 小箭头-9
  * @parent ----小箭头----
  * @type struct<DrillDArSprite>
- * @desc 当前小箭头的样式配置。
+ * @desc 指定小箭头的样式配置。
  * @default 
  *
  * @param 小箭头-10
  * @parent ----小箭头----
  * @type struct<DrillDArSprite>
- * @desc 当前小箭头的样式配置。
+ * @desc 指定小箭头的样式配置。
  * @default 
  * 
  */
@@ -177,6 +179,7 @@
  * @param 标签
  * @desc 只用于方便区分查看的标签，不作用在插件中。
  * @default ==新的小箭头样式==
+ * 
  * 
  * @param ---贴图---
  * @default 
@@ -237,6 +240,7 @@
  * @value 4
  * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
  * @default 0
+ * 
  * 
  * @param ---效果---
  * @default 
@@ -324,7 +328,7 @@
 //		★工作类型		持续执行
 //		★时间复杂度		o(n)*o(贴图处理) 每帧
 //		★性能测试因素	各个管理层跑一圈
-//		★性能测试消耗	2.50ms（drill_DAr_updateGif）,11.42ms（drill_DAr_updateGif战斗界面、卡顿时）
+//		★性能测试消耗	2.50ms（drill_sprite_updateGIF）,11.42ms（drill_sprite_updateGIF战斗界面、卡顿时）
 //		★最坏情况		暂无
 //		★备注			只有一个，所以消耗不可能上去。
 //		
@@ -333,10 +337,19 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			对话框小箭头：
-//				->对话框位置设置
-//				->样式gif
-//				->缩放效果/闪烁效果
+//			->☆提示信息
+//			->☆静态数据
+//			->☆插件指令
+//			->☆存储数据
+//			
+//			->☆对话框控制
+//				> 原箭头
+//				> 样式箭头
+//			
+//			->小箭头贴图【Drill_DAr_ArrowSprite】
+//				->A主体
+//				->B播放GIF
+//				->C自变化效果
 //
 //
 //		★家谱：
@@ -360,7 +373,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -371,12 +384,12 @@
 	
 	
 //=============================================================================
-// ** 静态数据
+// ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_DialogArrow = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_DialogArrow');
+	var Imported = Imported || {};
+	Imported.Drill_DialogArrow = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_DialogArrow');
 	
 	
 	//==============================
@@ -385,6 +398,7 @@
 	//==============================
 	DrillUp.drill_DAr_initArrowData = function( dataFrom ) {
 		var data = {};
+		
 		if( dataFrom["资源-小箭头GIF"] != undefined &&
 			dataFrom["资源-小箭头GIF"] != "" ){
 			data['src_img'] = JSON.parse( dataFrom["资源-小箭头GIF"] || [] );
@@ -434,14 +448,22 @@
 	}
 	
 	
-
-//=============================================================================
-// * 插件指令
-//=============================================================================
-var _drill_DAr_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
-	_drill_DAr_pluginCommand.call(this, command, args);
 	
+//=============================================================================
+// ** ☆插件指令
+//=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
+var _drill_DAr_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
+	_drill_DAr_pluginCommand.call(this, command, args);
+	this.drill_DAr_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_DAr_pluginCommand = function( command, args ){
 	if( command === ">对话框小箭头" ){
 		if( args.length == 2 ){
 			var type = String(args[1]);
@@ -452,7 +474,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				$gameSystem._drill_DAr_visible = false;
 			}
 			if( type == "恢复默认箭头" ){
-				$gameSystem._drill_DAr_curStyle = 0;
+				$gameSystem._drill_DAr_curStyle = DrillUp.g_DAr_curStyle;
 			}
 		}
 		if( args.length == 4 ){
@@ -469,7 +491,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -546,15 +568,18 @@ Game_System.prototype.drill_DAr_checkSysData_Private = function() {
 	if( this._drill_DAr_curStyle == undefined ){
 		this.drill_DAr_initSysData();
 	}
-	
 };
 
 
+
 //=============================================================================
-// ** 对话框
+// ** ☆对话框控制
+//
+//			说明：	> 该模块将对 对话框 进行专门管理。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 对话框 - 创建
+// * 对话框控制 - 创建
 //==============================
 var _drill_DAr__createAllParts = Window_Message.prototype._createAllParts;
 Window_Message.prototype._createAllParts = function() {
@@ -564,73 +589,116 @@ Window_Message.prototype._createAllParts = function() {
 	this.addChild( this._drill_DAr_arrowSprite );
 };
 //==============================
-// * 对话框 - 等待输入
-//==============================
-var _drill_DAr_startPause = Window_Message.prototype.startPause;
-Window_Message.prototype.startPause = function() {
-    _drill_DAr_startPause.call( this );
-	this._drill_DAr_arrowSprite.drill_DAr_setParentWindowSize( this._width, this._height );	//刷新父窗口数据
-};
-//==============================
-// * 原箭头 - 刷新
+// * 对话框控制 - I小箭头（窗口底层） - 部件刷新
 //==============================
 var _drill_DAr__refreshPauseSign = Window_Message.prototype._refreshPauseSign;
 Window_Message.prototype._refreshPauseSign = function() {
 	
-	// > 原箭头刷新
+	// > 部件刷新 - 原箭头
 	if( $gameSystem._drill_DAr_curStyle == 0 ){
 		_drill_DAr__refreshPauseSign.call( this );
 		
-	// > 样式箭头刷新
+	// > 部件刷新 - 样式箭头
 	}else{
 		//（不操作）
-	}	
+	}
 }
 //==============================
-// * 原箭头 - 帧刷新
+// * 对话框控制 - I小箭头（窗口底层） - 帧刷新
 //==============================
 var _drill_DAr__updatePauseSign = Window_Message.prototype._updatePauseSign;
 Window_Message.prototype._updatePauseSign = function() {
 	
-	// > 原箭头帧刷新
+	var is_pause = this.pause;
+	if( Imported.Drill_CoreOfDialog ){	//【对话框 - 对话框优化核心】
+		
+		// > 等待按下
+		if( is_pause == false && this.drill_COWC_timing_isWaitingInType( "inputWait" ) == true ){ is_pause = true; }
+		
+		// > 绘制页等待按下
+		if( is_pause == false && this.drill_CODi_message_isPageWaitingInput() == true ){ is_pause = true; }
+	}
+	
+	
+	// > 帧刷新 - 原箭头
 	if( $gameSystem._drill_DAr_curStyle == 0 ){
+		
+		// > 原函数
 		_drill_DAr__updatePauseSign.call( this );
 		
-		this._drill_DAr_arrowSprite.visible = false;
+		// > 闪烁控制（对应 Window.prototype._updatePauseSign 中方法）
+		var temp_sprite = this._windowPauseSignSprite;
+		if( is_pause != true ){
+			temp_sprite.alpha = 0;
+		}else if( temp_sprite.alpha < 1 ){
+			temp_sprite.alpha = Math.min( temp_sprite.alpha + 0.1, 1 );
+		}
+		
+		
+		// > 可见控制
+		this._windowPauseSignSprite.visible = this.isOpen();	//（D开关动画 - openness帧刷新控制）
 		if( $gameSystem._drill_DAr_visible == false ){
 			this._windowPauseSignSprite.visible = false;
 		}
+		this._drill_DAr_arrowSprite.visible = false;
 	
-	// > 样式箭头帧刷新
+	// > 帧刷新 - 样式箭头
 	}else{
-		var sprite = this._drill_DAr_arrowSprite;
-		if( !this.pause ){			//（对应 Window.prototype._updatePauseSign 中方法）
-			sprite.alpha = 0;
-		}else if( sprite.alpha < 1 ){
-			sprite.alpha = Math.min( sprite.alpha + 0.1, 1 );
-		}
-		sprite.visible = this.isOpen();
 		
-		this._windowPauseSignSprite.visible = false;
+		// > 闪烁控制（对应 Window.prototype._updatePauseSign 中方法）
+		var temp_sprite = this._drill_DAr_arrowSprite;
+		if( is_pause != true ){
+			temp_sprite.alpha = 0;
+		}else if( temp_sprite.alpha < 1 ){
+			temp_sprite.alpha = Math.min( temp_sprite.alpha + 0.1, 1 );
+		}
+		
+		
+		// > 可见控制
+		this._drill_DAr_arrowSprite.visible = this.isOpen();	//（D开关动画 - openness帧刷新控制）
 		if( $gameSystem._drill_DAr_visible == false ){
 			this._drill_DAr_arrowSprite.visible = false;
 		}
-	}	
+		this._windowPauseSignSprite.visible = false;
+	}
+	
+	
+	// > 刷新父窗口数据
+	if( is_pause == true && this._drill_DAr_lastIsPause == false ){
+		this._drill_DAr_arrowSprite.drill_DAr_setParentWindowSize( this._width, this._height );
+	}
+	this._drill_DAr_lastIsPause = is_pause;
 }
+
 
 
 //=============================================================================
 // ** 小箭头贴图【Drill_DAr_ArrowSprite】
-//
-// 			代码：	> 范围 - 该类显示单独的小箭头装饰。
-//					> 结构 - [ ●合并/分离/ 混乱 ] 数据与贴图合并。只visible和curStyle被外部控制。
-//					> 数量 - [ ●单个 /多个] 
-//					> 创建 - [ ●一次性 /自延迟/外部延迟] 
-//					> 销毁 - [ ●不考虑 /自销毁/外部销毁] 
-//					> 样式 - [不可修改/ ●自变化 /外部变化] 样式根据 _drill_curStyle 自变化_drill_data数据。
+// **		
+// **		作用域：	地图界面、战斗界面
+// **		主功能：	定义一个小箭头贴图。
+// **		子功能：	
+// **					->贴图『独立贴图』
+// **						x->显示贴图/隐藏贴图
+// **						x->是否就绪
+// **						x->优化策略
+// **						x->销毁
+// **						->初始化数据
+// **						->初始化对象
+// **					
+// **					->A主体
+// **					->B播放GIF
+// **					->C自变化效果
+// **
+// **		代码：	> 范围 - 该类显示单独的小箭头装饰。
+// **				> 结构 - [ ●合并/分离/ 混乱 ] 数据与贴图合并。只visible和curStyle被外部控制。
+// **				> 数量 - [ ●单个 /多个] 
+// **				> 创建 - [ ●一次性 /自延迟/外部延迟] 
+// **				> 销毁 - [ ●不考虑 /自销毁/外部销毁] 
+// **				> 样式 - [不可修改/ ●自变化 /外部变化] 样式根据 _drill_curStyleId 自变化_drill_data数据。
 //=============================================================================
 //==============================
-// * 贴图 - 定义
+// * 小箭头贴图 - 定义
 //==============================
 function Drill_DAr_ArrowSprite() {
 	this.initialize.apply(this, arguments);
@@ -638,64 +706,99 @@ function Drill_DAr_ArrowSprite() {
 Drill_DAr_ArrowSprite.prototype = Object.create(Sprite.prototype);
 Drill_DAr_ArrowSprite.prototype.constructor = Drill_DAr_ArrowSprite;
 //==============================
-// * 贴图 - 初始化
+// * 小箭头贴图 - 初始化
 //==============================
 Drill_DAr_ArrowSprite.prototype.initialize = function() {
 	Sprite.prototype.initialize.call(this);
+	this.drill_initData();				//初始化数据
+	this.drill_initSprite();			//初始化对象
+};
+//==============================
+// * 小箭头贴图 - 帧刷新
+//==============================
+Drill_DAr_ArrowSprite.prototype.update = function() {
+	Sprite.prototype.update.call(this);
+	this.drill_sprite_updateAttr();		//帧刷新 - A主体
+	this.drill_sprite_updateGIF();		//帧刷新 - B播放GIF
+	this.drill_sprite_updateEffect();	//帧刷新 - C自变化效果
+};
+//==============================
+// * 小箭头贴图 - 初始化数据『独立贴图』
+//==============================
+Drill_DAr_ArrowSprite.prototype.drill_initData = function() {
+	//（暂无 默认值）
+};
+//==============================
+// * 小箭头贴图 - 初始化对象『独立贴图』
+//==============================
+Drill_DAr_ArrowSprite.prototype.drill_initSprite = function() {
+	this.drill_sprite_initAttr();		//子功能初始化 - A主体
+	this.drill_sprite_initGIF();		//子功能初始化 - B播放GIF
+	this.drill_sprite_initEffect();		//子功能初始化 - C自变化效果
+};
+
+
+//==============================
+// * A主体 - 子功能初始化
+//==============================
+Drill_DAr_ArrowSprite.prototype.drill_sprite_initAttr = function() {
+	this._drill_data = null;			//样式数据
+	this._drill_curStyleId = -1;		//当前样式
+	this._drill_curTime = 0;			//当前时间
+	
+	this._drill_formulaX = 0;			//公式计算结果X
+	this._drill_formulaY = 0;			//公式计算结果Y
 	
 	// > 私有属性初始化
 	this.anchor.x = 0.5;				//中心锚点
 	this.anchor.y = 0.5;				//
-	this._drill_time = 0;				//持续时间
-	this._drill_data = null;			//样式数据
-	this._drill_curStyle = -1;			//当前样式
-	
-	this._drill_x = 0;					//公式计算结果X
-	this._drill_y = 0;					//公式计算结果Y
 	
 	// > 子贴图
-	this._drill_DAr_sprite = null;		//指针贴图
+	this._drill_DAr_sprite = null;
 };
 //==============================
-// * 贴图 - 帧刷新
+// * A主体 - 帧刷新
 //==============================
-Drill_DAr_ArrowSprite.prototype.update = function() {
-	Sprite.prototype.update.call(this);
-	this._drill_time += 1;
+Drill_DAr_ArrowSprite.prototype.drill_sprite_updateAttr = function() {
 	
-	if( this._drill_curStyle != $gameSystem._drill_DAr_curStyle ){	//重刷结构
-		this._drill_curStyle = $gameSystem._drill_DAr_curStyle;
+	// > 当前时间+1
+	this._drill_curTime += 1;
+	
+	// > 刷新样式
+	if( this._drill_curStyleId != $gameSystem._drill_DAr_curStyle ){
+		this._drill_curStyleId = $gameSystem._drill_DAr_curStyle;
 		this.drill_DAr_refreshAll();
 	}
-	if( this.visible == false ){ return; }			//未显示，不刷新
-	if( this._drill_data == null ){ return; }		//未载入，不刷新
 	
-	this.drill_DAr_updatePosition();				//位置
-	this.drill_DAr_updateGif();						//播放gif
-	this.drill_DAr_updateEffects();					//效果控制
+	// > 位置
+	this.x = this._drill_formulaX;
+	this.y = this._drill_formulaY;
 };
 //==============================
-// * 贴图 - 设置父窗口大小（接口）
+// * A主体 - 设置父窗口大小（开放函数）
 //==============================
 Drill_DAr_ArrowSprite.prototype.drill_DAr_setParentWindowSize = function( ww, hh ){
 	if( this._drill_data == undefined ){ return; }
 	var data = this._drill_data;
-	
-	this._drill_x = Number( eval( data['x_formula'] ) );
-	this._drill_y = Number( eval( data['y_formula'] ) );
+	this._drill_formulaX = Number( eval( data['x_formula'] ) );	//公式计算结果X（ww和hh 作为公式参数使用）
+	this._drill_formulaY = Number( eval( data['y_formula'] ) );	//公式计算结果Y
 };
-
 //==============================
-// * 帧刷新 - 重刷结构
+// * A主体 - 刷新样式（开放函数）
 //==============================
 Drill_DAr_ArrowSprite.prototype.drill_DAr_refreshAll = function() {
 	
-	// > 载入data
-	var temp = DrillUp.g_DAr_list[ this._drill_curStyle - 1 ];
-	if( temp == null ){ return; }
-	this._drill_data = JSON.parse(JSON.stringify( temp ));
+	// > 样式数据
+	var new_data = DrillUp.g_DAr_list[ this._drill_curStyleId - 1 ];
+	if( new_data == undefined ){ return; }
+	this._drill_data = JSON.parse(JSON.stringify( new_data ));
 	
-	// > 建立sprite
+	// > 清除 旧贴图
+	if( this._drill_DAr_sprite != undefined ){
+		this.removeChild( this._drill_DAr_sprite );
+	}
+	
+	// > 建立 新贴图
 	var temp_sprite = new Sprite();
 	var temp_sprite_data = this._drill_data;
 	for(var j = 0; j < temp_sprite_data['src_img'].length ; j++){
@@ -708,58 +811,61 @@ Drill_DAr_ArrowSprite.prototype.drill_DAr_refreshAll = function() {
 	temp_sprite.y = temp_sprite_data['y'];
 	temp_sprite.opacity = temp_sprite_data['opacity'];
 	temp_sprite.blendMode = temp_sprite_data['blendMode'];
-	
-	// > 重添sprite
-	if( this._drill_DAr_sprite ){this.removeChild( this._drill_DAr_sprite ); }
 	this._drill_DAr_sprite = temp_sprite;
 	this.addChild(temp_sprite);
 }
+
+
 //==============================
-// * 帧刷新 - 位置
+// * B播放GIF - 子功能初始化
 //==============================
-Drill_DAr_ArrowSprite.prototype.drill_DAr_updatePosition = function() {
-	var data = this._drill_data;
-	
-	this.x = this._drill_x;
-	this.y = this._drill_y;
-};
-//==============================
-// * 帧刷新 - 播放gif
-//==============================
-Drill_DAr_ArrowSprite.prototype.drill_DAr_updateGif = function() {
-	if( this._drill_data == undefined ){ return; }
-	if( this._drill_DAr_sprite == undefined ){ return; }
-	
-	var t_gif = this._drill_DAr_sprite;
-	var t_gif_data = this._drill_data;
-	
-	// > 播放gif
-	var inter = this._drill_time ;
-	inter = inter / t_gif_data['interval'];
-	inter = inter % t_gif_data['src_bitmaps'].length;
-	if( t_gif_data['back_run'] ){
-		inter = t_gif_data['src_bitmaps'].length - 1 - inter;
-	}
-	inter = Math.floor(inter);
-	t_gif.bitmap = t_gif_data['src_bitmaps'][inter];
-	
-	// > 自旋转
-	t_gif.rotation += t_gif_data['rotate'] /180*Math.PI;
-	
+Drill_DAr_ArrowSprite.prototype.drill_sprite_initGIF = function() {
+	//（无）
 }
 //==============================
-// * 帧刷新 - 效果控制
+// * B播放GIF - 帧刷新
 //==============================
-Drill_DAr_ArrowSprite.prototype.drill_DAr_updateEffects = function() {
+Drill_DAr_ArrowSprite.prototype.drill_sprite_updateGIF = function() {
 	if( this._drill_data == undefined ){ return; }
 	if( this._drill_DAr_sprite == undefined ){ return; }
+	if( this.visible == false ){ return; }
+	
+	// > 播放gif
+	var data = this._drill_data;
+	var inter = this._drill_curTime;
+	inter = inter / data['interval'];
+	inter = inter % data['src_bitmaps'].length;
+	if( data['back_run'] ){
+		inter = data['src_bitmaps'].length - 1 - inter;
+	}
+	inter = Math.floor(inter);
+	this._drill_DAr_sprite.bitmap = data['src_bitmaps'][inter];
+	
+	// > 自旋转
+	this._drill_DAr_sprite.rotation += data['rotate'] /180*Math.PI;
+}
+
+
+//==============================
+// * C自变化效果 - 子功能初始化
+//==============================
+Drill_DAr_ArrowSprite.prototype.drill_sprite_initEffect = function() {
+	//（无）
+}
+//==============================
+// * C自变化效果 - 帧刷新
+//==============================
+Drill_DAr_ArrowSprite.prototype.drill_sprite_updateEffect = function() {
+	if( this._drill_data == undefined ){ return; }
+	if( this._drill_DAr_sprite == undefined ){ return; }
+	if( this.visible == false ){ return; }
 	var data = this._drill_data;
 	
 	// > 缩放效果
 	if( data['zoom_enable'] == true ){
 		var zoom_range = data['zoom_range'];
 		var zoom_speed = data['zoom_speed'];
-		var scale_value = 1 + zoom_range * Math.cos( this._drill_time*zoom_speed /180*Math.PI );
+		var scale_value = 1 + zoom_range * Math.cos( this._drill_curTime*zoom_speed /180*Math.PI );
 		this.scale.x = scale_value;
 		this.scale.y = scale_value;
 	}
@@ -767,7 +873,7 @@ Drill_DAr_ArrowSprite.prototype.drill_DAr_updateEffects = function() {
 	// > 闪烁效果
 	if( data['flicker_enable'] == true ){
 		var flicker_speed = data['flicker_speed'];
-		this._drill_DAr_sprite.opacity = data['opacity']/2 + data['opacity']/2 * Math.cos( this._drill_time*flicker_speed /180*Math.PI );
+		this._drill_DAr_sprite.opacity = data['opacity']/2 + data['opacity']/2 * Math.cos( this._drill_curTime*flicker_speed /180*Math.PI );
 	}
 	
 	// > 漂浮效果
@@ -775,18 +881,18 @@ Drill_DAr_ArrowSprite.prototype.drill_DAr_updateEffects = function() {
 		var float_range = data['float_range'];
 		var float_speed = data['float_speed'];
 		if( data['float_type'] == "上下漂浮" ){
-			this._drill_DAr_sprite.y = data['y'] + float_range * Math.sin( this._drill_time*float_speed /180*Math.PI );
+			this._drill_DAr_sprite.y = data['y'] + float_range * Math.sin( this._drill_curTime*float_speed /180*Math.PI );
 		}
 		if( data['float_type'] == "左右漂浮" ){
-			this._drill_DAr_sprite.x = data['x'] + float_range * Math.sin( this._drill_time*float_speed /180*Math.PI );
+			this._drill_DAr_sprite.x = data['x'] + float_range * Math.sin( this._drill_curTime*float_speed /180*Math.PI );
 		}
 		if( data['float_type'] == "右下斜向漂浮" ){
-			this._drill_DAr_sprite.x = data['x'] + float_range * Math.sin( this._drill_time*float_speed /180*Math.PI );
-			this._drill_DAr_sprite.y = data['y'] + float_range * Math.sin( this._drill_time*float_speed /180*Math.PI );
+			this._drill_DAr_sprite.x = data['x'] + float_range * Math.sin( this._drill_curTime*float_speed /180*Math.PI );
+			this._drill_DAr_sprite.y = data['y'] + float_range * Math.sin( this._drill_curTime*float_speed /180*Math.PI );
 		}
 		if( data['float_type'] == "左下斜向漂浮" ){
-			this._drill_DAr_sprite.x = data['x'] - float_range * Math.sin( this._drill_time*float_speed /180*Math.PI );
-			this._drill_DAr_sprite.y = data['y'] + float_range * Math.sin( this._drill_time*float_speed /180*Math.PI );
+			this._drill_DAr_sprite.x = data['x'] - float_range * Math.sin( this._drill_curTime*float_speed /180*Math.PI );
+			this._drill_DAr_sprite.y = data['y'] + float_range * Math.sin( this._drill_curTime*float_speed /180*Math.PI );
 		}
 	}
 }

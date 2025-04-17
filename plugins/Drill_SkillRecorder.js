@@ -353,10 +353,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_SkillRecorder = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_SkillRecorder');
+	var Imported = Imported || {};
+	Imported.Drill_SkillRecorder = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_SkillRecorder');
 	
 	
     DrillUp.g_SkR_varLast_i = Number(DrillUp.parameters["上一个使用的物品ID"] || 0);
@@ -386,11 +386,20 @@
 
 
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_SkR_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_SkR_pluginCommand.call(this, command, args);
+	this.drill_SkR_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_SkR_pluginCommand = function( command, args ){
 	if( command === ">物品记录器" ){
 		
 		if( args.length == 6 ){

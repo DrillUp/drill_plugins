@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.6]        标题 - 全自定义标题界面
+ * @plugindesc [v1.7]        标题 - 全自定义标题界面
  * @author Drill_up
  * 
  * @Drill_LE_param "布局样式-%d"
@@ -23,7 +23,6 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 可全自定义的标题界面。
- * ★★最好放在所有 标题类 插件的最后面★★
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
@@ -31,10 +30,10 @@
  * 必须基于核心插件才能运行。
  * 基于：
  *   - Drill_CoreOfGlobalSave       管理器-全局存储核心
- *   - Drill_CoreOfWindowAuxiliary  系统-窗口辅助核心
+ *   - Drill_CoreOfWindowAuxiliary  系统-窗口辅助核心★★v2.2及以上★★
  *     必须基于该插件才能显示内容。
  * 可扩展：
- *   - Drill_CoreOfSelectableButton 系统-按钮组核心
+ *   - Drill_CoreOfSelectableButton 系统-按钮组核心★★v1.8及以上★★
  *     如果有按钮组核心，则可以使用 按钮组模式 的选项。
  * 
  * -----------------------------------------------------------------------------
@@ -56,14 +55,6 @@
  *   (1.注意，如果配置某些参数不起作用，记得 删掉存档 再看看。
  *      比如修改按钮组的坐标不生效，就要删掉旧存档在打开才可以。
  *      此问题在群友之间反复出现，一定要注意看文档和插件说明啊。
- * 去掉标题界面：
- *   (1.如果你的游戏一开始就不想要标题界面，可以在参数中设置直接
- *      去掉标题界面。
- *   (2.去掉界面后，将切断下面三个路线：
- *      启动界面 -> 标题界面 -> 新游戏
- *      游戏结束界面 -> 标题界面 -> 退出游戏
- *      游戏失败界面 -> 标题界面 -> 新游戏
- *   (3.你需要去 数据库>用语 中修改"回到标题"的字符串。 
  * 多主题切换：
  *   (1.通过该插件，你可以使用插件指令全局切换 音乐与样式。
  *   (2.萌新注意：
@@ -74,9 +65,6 @@
  *      标题按钮组的 样式 在 按钮组核心 中设置。
  *   (2.注意，如果你想切换多主题，那么就需要配置 "按钮贴图序列" 为空。
  *      因为暂时只能修改默认贴图，不能修改关键字对应的序列贴图。
- * 设计：
- *   (1.如果你的游戏一开始就不想要标题界面，可以在参数中设置直接
- *      去掉标题界面。
  * 
  * -----------------------------------------------------------------------------
  * ----关联文件
@@ -143,6 +131,8 @@
  * 修复了去掉标题界面后，玩家在失败界面后，仍然可以回到标题界面的bug。
  * [v1.6]
  * 大幅度修改了全局存储的文件存储结构。
+ * [v1.7]
+ * 更新并兼容了新的窗口字符底层。
  * 
  * 
  * 
@@ -152,16 +142,9 @@
  * @desc 指对应的文件路径ID，该插件的数据将存储到指定的文件路径中，具体去 全局存储核心 看看。
  * @default 1
  * 
+ * 
  * @param ---杂项---
  * @default 
- *
- * @param 是否直接去掉标题界面
- * @parent ---杂项---
- * @type boolean
- * @on 跳过
- * @off 不跳过
- * @desc true - 跳过，false - 不跳过，进入游戏后，不会进入标题界面。
- * @default false
  *
  * @param 是否自动隐藏'继续'选项
  * @parent ---杂项---
@@ -191,6 +174,7 @@
  * @parent 是否添加退出选项
  * @desc 退出选项的用语显示文本。（新游戏、继续等其他选项，在 数据库>用语 中设置。）
  * @default 退出
+ * 
  * 
  * @param ---标题贴图---
  * @default 
@@ -692,7 +676,7 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称：		TSc (Title_Scene)
+//		插件简称		TSc (Title_Scene)
 //		临时全局变量	DrillUp.g_TSc_xxx
 //		临时局部变量	this._drill_TSc_xxx
 //		存储数据变量	无
@@ -715,14 +699,22 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			标题界面：
-//				->退出选项
-//				->跳过标题界面
-//				->选项窗口
-//				->选项按钮组
-//				->背景音乐
-//		
-//		
+//			->☆提示信息
+//			->☆静态数据
+//			->☆插件指令
+//			->☆全局存储
+//			->☆原型链规范（Scene_Title）
+//			
+//			->☆标题界面控制
+//				->面板
+//					->2A背景前景（继承）
+//					->2C音乐（继承）
+//				->3A主体
+//				->3B按钮组
+//				->3C选项窗口
+//				->3D选项管理
+//			
+//			
 //		★家谱：
 //			无
 //		
@@ -744,7 +736,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -758,7 +750,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_TSc_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_TSc_PluginTip_baseList.length == 0 ){ return ""; }
@@ -810,11 +802,11 @@
 	
 	
 //=============================================================================
-// ** 静态数据
+// ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_TitleScene = true;
-　　var DrillUp = DrillUp || {}; 
+	var Imported = Imported || {};
+	Imported.Drill_TitleScene = true;
+	var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_TitleScene');
 	
 	
@@ -824,12 +816,18 @@
 	//==============================
 	DrillUp.drill_TSc_initCommandButton = function( dataFrom ) {
 		var data = {};
+		data['style_id'] = Number( dataFrom["按钮组样式"] || 0);
+		
 		data['debug_search'] = String( dataFrom["DEBUG-按钮关键字搜索"] || "false") == "true";
 		
+		// > 按钮组 - 3A主体
 		data['x'] = Number( dataFrom["平移-按钮组 X"] || 0);
 		data['y'] = Number( dataFrom["平移-按钮组 Y"] || 0);
-		data['style_id'] = Number( dataFrom["按钮组样式"] || 0);
+		
+		// > 按钮组 - B父窗口
 		data['btn_constructor'] = "Window_Command";
+		
+		// > 按钮组 - B父窗口（资源）
 		data['btn_src_file'] = "img/titles1/";
 		if( dataFrom["按钮贴图序列"] != "" &&
 			dataFrom["按钮贴图序列"] != undefined ){
@@ -856,6 +854,8 @@
 			data['btn_src'] = [];
 			data['btn_srcKeyword'] = [];
 		}
+		
+		// > 默认按钮贴图（['btn_src_default']）
 		data['btn_src_default_id'] = Number( dataFrom["初始的默认按钮贴图"] || 1);
 		if( dataFrom["默认按钮贴图列表"] != "" &&
 			dataFrom["默认按钮贴图列表"] != undefined ){
@@ -863,16 +863,16 @@
 		}else{
 			data['btn_src_default_tank'] = [];
 		}
-		
-		// > 按钮组校验
 		if( DrillUp.g_TSc_command_mode == "按钮组模式" &&
 			data['btn_src_default_tank'].length == 0 ){
 			alert( DrillUp.drill_TSc_getPluginTip_NoSupportData_src() );
 		}
 		
+		// > 按钮组 - F激活
 		data['active_enableMouseOk'] = true;	//（鼠标ok点击 开启）
 		data['active_hide'] = false;			//（激活后是否瞬间隐藏，克隆选中按钮用）
 		data['active_out'] = false;				//（激活后不出列）
+		
 		return data;
 	}
 	
@@ -881,6 +881,7 @@
 	//				（~struct~DrillTScCommandWindow）
 	//==============================
 	DrillUp.drill_TSc_initCommandWindow = function( dataFrom ) {
+		
 		DrillUp.g_TSc_selWin_x = Number(dataFrom["选项窗口 X"] || 30);
 		DrillUp.g_TSc_selWin_y = Number(dataFrom["选项窗口 Y"] || 120);
 		DrillUp.g_TSc_selWin_width = Number(dataFrom["选项窗口宽度"] || 220);
@@ -888,7 +889,8 @@
 		DrillUp.g_TSc_selWin_fontsize = Number(dataFrom["选项窗口字体大小"] || 22);
 		DrillUp.g_TSc_selWin_col = Number(dataFrom["选项窗口列数"] || 1);
 		DrillUp.g_TSc_selWin_align = String(dataFrom["选项对齐方式"] || "center");
-//			~struct~DrillWindowMoving:			窗口移动动画（窗口辅助核心-通用）
+		
+		// ~struct~DrillWindowMoving: 窗口移动动画（窗口辅助核心-通用）
 		if( dataFrom["选项窗口移动动画"] != undefined && 
 			dataFrom["选项窗口移动动画"] != "" ){
 			DrillUp.g_TSc_selWin_slideAnim = JSON.parse( dataFrom["选项窗口移动动画"] );
@@ -903,7 +905,8 @@
 		}else{
 			DrillUp.g_TSc_selWin_slideAnim = {};
 		}
-//			~struct~DrillWindowLayout:			窗口布局（窗口辅助核心-通用）
+		
+		// ~struct~DrillWindowLayout: 窗口布局（窗口辅助核心-通用）
 		DrillUp.g_TSc_selWin_styleId = Number(dataFrom["选项窗口初始布局样式"] || 1);
 		DrillUp.g_TSc_style_list_length = 10;
 		DrillUp.g_TSc_style_list = [];
@@ -921,22 +924,6 @@
 			}
 		};
 	}
-	
-	
-	/*----------------杂项-----------------*/
-	DrillUp.g_TSc_skip = String(DrillUp.parameters["是否直接去掉标题界面"] || "false") === "true";
-	DrillUp.g_TSc_continueAutoHide = String(DrillUp.parameters["是否自动隐藏'继续'选项"] || "true") === "true";
-	DrillUp.g_TSc_optionHide = String(DrillUp.parameters["是否隐藏'设置'选项"] || "false") === "true";
-	DrillUp.g_TSc_quit_option = String(DrillUp.parameters["是否添加退出选项"] || "true") === "true";
-	DrillUp.g_TSc_quit_text = String(DrillUp.parameters["用语-退出选项"] || "退出");
-    DrillUp.g_TSc_dataFileId = Number(DrillUp.parameters["全局存储的文件路径"] || 1);
-	
-	/*----------------标题贴图-----------------*/
-	DrillUp.g_TSc_text_visible = String(DrillUp.parameters["是否显示标题文字"] || "true") === "true";	
-	DrillUp.g_TSc_text_x = Number(DrillUp.parameters["标题文字 X"] || 30);
-	DrillUp.g_TSc_text_y = Number(DrillUp.parameters["标题文字 Y"] || 120);
-	DrillUp.g_TSc_text_fontsize = Number(DrillUp.parameters["标题文字字体大小"] || 72);
-	DrillUp.g_TSc_text_outlineWidth = Number(DrillUp.parameters["标题文字描边厚度"] || 8);
 	
 	/*----------------标题选项-----------------*/
 	DrillUp.g_TSc_command_mode = String(DrillUp.parameters["标题选项模式"] || "按钮组模式");
@@ -967,6 +954,22 @@
 		DrillUp.g_TSc_command_button = {};
 	}
 	
+	
+	
+	/*----------------杂项-----------------*/
+	DrillUp.g_TSc_continueAutoHide = String(DrillUp.parameters["是否自动隐藏'继续'选项"] || "true") === "true";
+	DrillUp.g_TSc_optionHide = String(DrillUp.parameters["是否隐藏'设置'选项"] || "false") === "true";
+	DrillUp.g_TSc_quit_option = String(DrillUp.parameters["是否添加退出选项"] || "true") === "true";
+	DrillUp.g_TSc_quit_text = String(DrillUp.parameters["用语-退出选项"] || "退出");
+    DrillUp.g_TSc_dataFileId = Number(DrillUp.parameters["全局存储的文件路径"] || 1);
+	
+	/*----------------标题贴图-----------------*/
+	DrillUp.g_TSc_text_visible = String(DrillUp.parameters["是否显示标题文字"] || "true") === "true";	
+	DrillUp.g_TSc_text_x = Number(DrillUp.parameters["标题文字 X"] || 30);
+	DrillUp.g_TSc_text_y = Number(DrillUp.parameters["标题文字 Y"] || 120);
+	DrillUp.g_TSc_text_fontsize = Number(DrillUp.parameters["标题文字字体大小"] || 72);
+	DrillUp.g_TSc_text_outlineWidth = Number(DrillUp.parameters["标题文字描边厚度"] || 8);
+	
 	/*-----------------背景音乐------------------*/
 	DrillUp.g_TSc_bgmId = Number(DrillUp.parameters["初始播放的音乐"] || 1);
 	DrillUp.g_TSc_bgm_list_length = 16;
@@ -978,86 +981,90 @@
 	
 	
 //=============================================================================
-// * 外部影响插件检测
+// * >>>>基于插件检测>>>>
 //=============================================================================
+if( Imported.Drill_CoreOfGlobalSave && 
+	Imported.Drill_CoreOfWindowAuxiliary ){
+	
+//==============================
+// * 基于插件检测 - 外部影响插件
+//==============================
 if( typeof(_Window_TitleCommand_updatePlacement) != "undefined" ){
 	alert( DrillUp.drill_TSc_getPluginTip_CompatibilityOther() );
 };
 
 
 //=============================================================================
-// * >>>>基于插件检测>>>>
-//=============================================================================
-if( Imported.Drill_CoreOfGlobalSave && 
-	Imported.Drill_CoreOfWindowAuxiliary ){
-	
-
-
-//=============================================================================
-// ** ☆原型链规范（Scene_Title）
-//
-//			说明：	> 此处专门补上缺失的原型链，未缺失的则注释掉。
-//					（插件完整的功能目录去看看：功能结构树）
+// ** ☆插件指令
 //=============================================================================
 //==============================
-// * 启动界面（场景基类） - 初始化
+// * 插件指令 - 指令绑定
 //==============================
-//Scene_Title.prototype.initialize = function() {
-//    Scene_Base.prototype.initialize.call(this);
-//};
+var _drill_TSc_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
+	_drill_TSc_pluginCommand.call(this, command, args);
+	this.drill_TSc_pluginCommand( command, args );
+}
 //==============================
-// * 启动界面（场景基类） - 创建
+// * 插件指令 - 指令执行
 //==============================
-//Scene_Title.prototype.create = function() {
-//    Scene_Base.prototype.create.call(this);
-//};
-//==============================
-// * 启动界面（场景基类） - 帧刷新
-//==============================
-//Scene_Title.prototype.update = function() {
-//    Scene_Base.prototype.update.call(this);
-//};
-//==============================
-// * 启动界面（场景基类） - 开始运行
-//==============================
-//Scene_Title.prototype.start = function() {
-//    Scene_Base.prototype.start.call(this);
-//};
-//==============================
-// * 启动界面（场景基类） - 结束运行
-//==============================
-Scene_Title.prototype.stop = function() {
-    Scene_Base.prototype.stop.call(this);
+Game_Interpreter.prototype.drill_TSc_pluginCommand = function( command, args ){
+	if( command === ">标题界面" || command === ">标题窗口" ){
+		
+		if( args.length == 4 ){
+			var type = String(args[1]);
+			var temp1 = String(args[3]);
+			if( type === "修改布局样式" ){
+				temp1 = temp1.replace("样式[","");
+				temp1 = temp1.replace("]","");
+				DrillUp.global_TSc_styleId = Number(temp1) - 1;
+				StorageManager.drill_TSc_saveData();
+			}
+		}
+		if( args.length == 4 ){
+			var type = String(args[1]);
+			var temp1 = String(args[3]);
+			if( type === "修改背景音乐" ){
+				temp1 = temp1.replace("音乐[","");
+				temp1 = temp1.replace("]","");
+				DrillUp.global_TSc_bgmId = Number(temp1) - 1;
+				StorageManager.drill_TSc_saveData();
+			}
+		}
+			
+		/*-----------------标题选项按钮组------------------*/
+		if( type == "标题选项按钮组" ){
+			if( temp1.indexOf("改变位置[") != -1 ){
+				temp1 = temp1.replace("改变位置[","");
+				temp1 = temp1.replace("]","");
+				var temp_arr = temp1.split(/[,，]/);
+				if( temp_arr.length >= 2 ){
+					DrillUp.global_TSc_commandButton_x =  Number(temp_arr[0]);
+					DrillUp.global_TSc_commandButton_y =  Number(temp_arr[1]);
+					StorageManager.drill_TSc_saveData();
+				}
+			}
+			if( temp1.indexOf("改变样式[") != -1 ){
+				temp1 = temp1.replace("改变样式[","");
+				temp1 = temp1.replace("]","");
+				temp1 = Number(temp1);
+				DrillUp.global_TSc_commandButton_index = temp1 - 1;
+				StorageManager.drill_TSc_saveData();
+			}
+			if( temp1.indexOf("改变默认按钮贴图[") != -1 ){
+				temp1 = temp1.replace("改变默认按钮贴图[","");
+				temp1 = temp1.replace("]","");
+				temp1 = Number(temp1);
+				DrillUp.global_TSc_commandButton_defaultId = temp1 - 1;
+				StorageManager.drill_TSc_saveData();
+			}
+		}
+	}
 };
-//==============================
-// * 启动界面（场景基类） - 判断是否激活/启动
-//==============================
-Scene_Title.prototype.isActive = function() {
-	return Scene_Base.prototype.isActive.call(this);
-};
-//==============================
-// * 启动界面（场景基类） - 析构函数
-//==============================
-//Scene_Title.prototype.terminate = function() {
-//    Scene_Base.prototype.terminate.call(this);
-//};
 
-//==============================
-// * 启动界面（场景基类） - 判断加载完成
-//==============================
-Scene_Title.prototype.isReady = function() {
-	return Scene_Base.prototype.isReady.call(this);
-};
-//==============================
-// * 启动界面（场景基类） - 忙碌状态
-//==============================
-//Scene_Title.prototype.isBusy = function() {
-//	return Scene_Base.prototype.isBusy.call(this);
-//};
-	
 
 //=============================================================================
-// ** 全局存储
+// ** ☆全局存储
 //=============================================================================
 //==============================
 // * 全局 - 读取
@@ -1118,166 +1125,176 @@ StorageManager.drill_TSc_saveData = function(){
 	this.drill_COGS_saveData( file_id, "TSc", data );
 };
 
+
 //=============================================================================
-// * 插件指令
+// ** ☆原型链规范（Scene_Title）
+//
+//			说明：	> 此处专门补上缺失的原型链，未缺失的则注释掉。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
-var _drill_TSc_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
-	_drill_TSc_pluginCommand.call(this, command, args);
-	if( command === ">标题界面" || command === ">标题窗口" ){
-		
-		if( args.length == 4 ){
-			var type = String(args[1]);
-			var temp1 = String(args[3]);
-			if( type === "修改布局样式" ){
-				temp1 = temp1.replace("样式[","");
-				temp1 = temp1.replace("]","");
-				DrillUp.global_TSc_styleId = Number(temp1) - 1;
-				StorageManager.drill_TSc_saveData();
-			}
-		}
-		if( args.length == 4 ){
-			var type = String(args[1]);
-			var temp1 = String(args[3]);
-			if( type === "修改背景音乐" ){
-				temp1 = temp1.replace("音乐[","");
-				temp1 = temp1.replace("]","");
-				DrillUp.global_TSc_bgmId = Number(temp1) - 1;
-				StorageManager.drill_TSc_saveData();
-			}
-		}
-			
-		/*-----------------标题选项按钮组------------------*/
-		if( type == "标题选项按钮组" ){
-			if( temp1.indexOf("改变位置[") != -1 ){
-				temp1 = temp1.replace("改变位置[","");
-				temp1 = temp1.replace("]","");
-				var temp_arr = temp1.split(/[,，]/);
-				if( temp_arr.length >= 2 ){
-					DrillUp.global_TSc_commandButton_x =  Number(temp_arr[0]);
-					DrillUp.global_TSc_commandButton_y =  Number(temp_arr[1]);
-					StorageManager.drill_TSc_saveData();
-				}
-			}
-			if( temp1.indexOf("改变样式[") != -1 ){
-				temp1 = temp1.replace("改变样式[","");
-				temp1 = temp1.replace("]","");
-				temp1 = Number(temp1);
-				DrillUp.global_TSc_commandButton_index = temp1 - 1;
-				StorageManager.drill_TSc_saveData();
-			}
-			if( temp1.indexOf("改变默认按钮贴图[") != -1 ){
-				temp1 = temp1.replace("改变默认按钮贴图[","");
-				temp1 = temp1.replace("]","");
-				temp1 = Number(temp1);
-				DrillUp.global_TSc_commandButton_defaultId = temp1 - 1;
-				StorageManager.drill_TSc_saveData();
-			}
-		}
-	}
-	
+//==============================
+// * 标题界面（场景基类） - 初始化
+//==============================
+//Scene_Title.prototype.initialize = function() {
+//    Scene_Base.prototype.initialize.call(this);
+//};
+//==============================
+// * 标题界面（场景基类） - 创建
+//==============================
+//Scene_Title.prototype.create = function() {
+//    Scene_Base.prototype.create.call(this);
+//};
+//==============================
+// * 标题界面（场景基类） - 帧刷新
+//==============================
+//Scene_Title.prototype.update = function() {
+//    Scene_Base.prototype.update.call(this);
+//};
+//==============================
+// * 标题界面（场景基类） - 开始运行
+//==============================
+//Scene_Title.prototype.start = function() {
+//    Scene_Base.prototype.start.call(this);
+//};
+//==============================
+// * 标题界面（场景基类） - 结束运行
+//==============================
+Scene_Title.prototype.stop = function() {
+    Scene_Base.prototype.stop.call(this);
+};
+//==============================
+// * 标题界面（场景基类） - 忙碌状态
+//==============================
+//Scene_Title.prototype.isBusy = function() {
+//	return Scene_Base.prototype.isBusy.call(this);
+//};
+//==============================
+// * 标题界面（场景基类） - 析构函数
+//==============================
+//Scene_Title.prototype.terminate = function() {
+//    Scene_Base.prototype.terminate.call(this);
+//};
+//==============================
+// * 标题界面（场景基类） - 判断加载完成
+//==============================
+Scene_Title.prototype.isReady = function() {
+	return Scene_Base.prototype.isReady.call(this);
+};
+//==============================
+// * 标题界面（场景基类） - 判断是否激活/启动
+//==============================
+Scene_Title.prototype.isActive = function() {
+	return Scene_Base.prototype.isActive.call(this);
 };
 
 
-//=============================================================================
-// ** 去掉标题界面
-//=============================================================================
-//==============================
-// * 去掉 - 启动界面跳转
-//==============================
-var _drill_TSc_boot_start = Scene_Boot.prototype.start;
-Scene_Boot.prototype.start = function() {
-	DataManager._drill_TSc_in_boot = true;
-	_drill_TSc_boot_start.call(this);
-};
-//==============================
-// * 去掉 - 游戏结束界面跳转
-//==============================
-var _drill_TSc_gameEnd_toTitle = Scene_GameEnd.prototype.commandToTitle;
-Scene_GameEnd.prototype.commandToTitle = function() {
-	DataManager._drill_TSc_in_gameEnd = true;
-    _drill_TSc_gameEnd_toTitle.call(this);
-};
-//==============================
-// * 去掉 - 游戏失败界面跳转
-//==============================
-var _drill_TSc_gameover_toTitle = Scene_Gameover.prototype.gotoTitle;
-Scene_Gameover.prototype.gotoTitle = function() {
-	DataManager._drill_TSc_in_gameover = true;
-    _drill_TSc_gameover_toTitle.call(this);
-};
-//==============================
-// * 去掉 - 场景跳转限制
-//==============================
-var _drill_TSc_boot_goto = SceneManager.goto;
-SceneManager.goto = function(sceneClass) {
-	if( DrillUp.g_TSc_skip == true ){
-		
-		// > 从启动界面到标题
-		if( DataManager._drill_TSc_in_boot == true && DataManager._drill_TBS_in_boot !== true && sceneClass == Scene_Title ){
-			DataManager._drill_TSc_in_boot = false;
-			
-			DataManager.setupNewGame();
-			SceneManager.goto(Scene_Map);
-			
-			return ;
-		}
-		// > 从游戏结束界面到标题
-		if( DataManager._drill_TSc_in_gameEnd == true && sceneClass == Scene_Title ){
-			DataManager._drill_TSc_in_gameEnd = false;
-			
-			SceneManager.exit();
-			return ;
-		}
-		// > 从游戏失败界面到标题
-		if( DataManager._drill_TSc_in_gameover == true && sceneClass == Scene_Title ){
-			DataManager._drill_TSc_in_gameover = false;
-			
-			DataManager.setupNewGame();
-			SceneManager.goto(Scene_Map);
-			
-			return ;
-		}
-	}
-	_drill_TSc_boot_goto.call(this, sceneClass);
-}
-
 
 //=============================================================================
-// ** 标题界面
+// ** ☆标题界面控制
+//			
+//			作用域：	菜单界面
+//			主功能：	信息面板的基本功能。
+//			子功能：
+//						->界面重要函数
+//							x> 初始化（initialize）
+//							> 创建（create）
+//							> 帧刷新（update）
+//							x> 开始运行（start）
+//							x> 结束运行（stop）
+//							x> 忙碌状态（isBusy）
+//							x> 析构函数（terminate）
+//							x> 判断加载完成（isReady）
+//							x> 判断是否激活/启动（isActive）
+//							x> 当前角色切换时（onActorChange）
+//							x> 创建 - 菜单背景（createBackground）
+//							x> 创建 - 帮助窗口（createHelpWindow）
+//						
+//						->面板
+//							->2A背景前景（继承）
+//							->2C音乐（继承）
+//						->3A主体
+//						->3B按钮组
+//						->3C选项窗口
+//						->3D选项管理
+//			界面成员：
+//						> ._backSprite1							背景1
+//						> ._backSprite2							背景2
+//						> ._commandWindow						标题选项窗口
+//						> ._gameTitleSprite						标题前景贴图
+//						> ._drill_field							内容层
+//							>._drill_TSc_commandButtonSprite		按钮组贴图
+//						> ._drill_outerLayer					外层
+//			
+//			说明：	> 此处专门控制 标题界面 的功能。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 标题界面 - 创建
+// * 标题界面控制 - 创建（继承）
 //==============================
 var _drill_TSc_create = Scene_Title.prototype.create;
 Scene_Title.prototype.create = function() {
 	_drill_TSc_create.call(this);
-	this.drill_TSc_createLayer();					//层级
-	this.drill_TSc_createCommandButton();			//标题选项按钮集
-}
+	this.drill_TSc_createAttr();				//创建 - 3A主体
+	this.drill_TSc_createButton();				//创建 - 3B按钮组
+												//创建 - 3C选项窗口（无）
+												//创建 - 3D选项管理（无）
+};
 //==============================
-// * 标题界面 - 帧刷新
+// * 标题界面控制 - 帧刷新（继承）
 //==============================
 var _drill_TSc_update = Scene_Title.prototype.update;
 Scene_Title.prototype.update = function() { 
 	_drill_TSc_update.call(this);
+												//帧刷新 - 3A主体（无）
+	this.drill_TSc_updateButton_OrgWindow();	//帧刷新 - 3B按钮组 - 原装窗口
+	this.drill_TSc_updateButton_Btns();			//帧刷新 - 3B按钮组 - 标题选项按钮
+												//帧刷新 - 3C选项窗口（无）
+												//帧刷新 - 3D选项管理（无）
+};
+
+//==============================
+// * 2A背景前景 - 创建前景 - 绘制文本（覆写）
+//==============================
+Scene_Title.prototype.drawGameTitle = function() {
+	var x = DrillUp.g_TSc_text_x;
+	var y = DrillUp.g_TSc_text_y;
+	var maxWidth = Graphics.width;
+	var text = $dataSystem.gameTitle;
+	this._gameTitleSprite.bitmap.outlineColor = 'black';
+	this._gameTitleSprite.bitmap.outlineWidth = DrillUp.g_TSc_text_outlineWidth;
+	this._gameTitleSprite.bitmap.fontSize = DrillUp.g_TSc_text_fontsize;
+	this._gameTitleSprite.bitmap.drawText(text, x, y, maxWidth, DrillUp.g_TSc_text_fontsize/2, 'center');
+	this._gameTitleSprite.visible = DrillUp.g_TSc_text_visible;
+};
+//==============================
+// * 2C音乐 - 播放音乐（覆写）
+//==============================
+Scene_Title.prototype.playTitleMusic = function() {
+	var bgm = {};
+	bgm.name = DrillUp.g_TSc_bgm_list[ DrillUp.global_TSc_bgmId ];		//全局存储的音乐id
+	bgm.pitch = 100;
+	bgm.volume = 100;
+	$dataSystem.titleBgm = bgm;
 	
-	this.drill_TSc_updateOrgWindow();				//原装窗口控制
-	this.drill_TSc_updateCommandButton();			//标题选项按钮集
-}
+	AudioManager.playBgm($dataSystem.titleBgm);
+	AudioManager.stopBgs();
+	AudioManager.stopMe();
+};
+
 //==============================
-// * 创建 - 层级
+// * 3A主体 - 创建
 //==============================
-Scene_Title.prototype.drill_TSc_createLayer = function() {
-	this._layer_context = new Sprite();		//内容层
-	this.addChild( this._layer_context );
-	this._layer_outer = new Sprite();		//外层
-	this.addChild( this._layer_outer );
-}
+Scene_Title.prototype.drill_TSc_createAttr = function() {
+	this._drill_contextLayer = new Sprite();		//内容层
+	this.addChild( this._drill_contextLayer );
+	this._drill_outerLayer = new Sprite();			//外层
+	this.addChild( this._drill_outerLayer );
+};
+
 //==============================
-// * 创建 - 菜单选项按钮集
+// * 3B按钮组 - 创建
 //==============================
-Scene_Title.prototype.drill_TSc_createCommandButton = function() {
+Scene_Title.prototype.drill_TSc_createButton = function() {
 	if( DrillUp.g_TSc_command_mode != "按钮组模式" ){ return; }
 	
 	// > 参数监听
@@ -1303,36 +1320,60 @@ Scene_Title.prototype.drill_TSc_createCommandButton = function() {
 	
 	// > 建立按钮组层
 	var temp_sprite = new Drill_COSB_LayerSprite( data_style, this._commandWindow );
-	this._layer_context.addChild( temp_sprite );
+	this._drill_contextLayer.addChild( temp_sprite );
 	this._drill_TSc_commandButtonSprite = temp_sprite;
 }
 //==============================
-// * 帧刷新 - 原装窗口控制
+// * 3B按钮组 - 帧刷新 - 原装窗口
 //==============================
-Scene_Title.prototype.drill_TSc_updateOrgWindow = function() { 
-	// > 标题选项窗口
+Scene_Title.prototype.drill_TSc_updateButton_OrgWindow = function() {
 	if( DrillUp.g_TSc_command_mode == "按钮组模式" ){
 		this._commandWindow.y = Graphics.boxHeight * 2;
 	}
 	if( DrillUp.g_TSc_command_mode == "窗口模式" ){
-		this._commandWindow.drill_COWA_CPD_update();
+		//（不操作，动画自己会帧刷新）
 	}
 }
 //==============================
-// * 帧刷新 - 标题选项按钮集
+// * 3B按钮组 - 帧刷新 - 标题选项按钮
 //==============================
-Scene_Title.prototype.drill_TSc_updateCommandButton = function() { 
+Scene_Title.prototype.drill_TSc_updateButton_Btns = function() { 
 	if( DrillUp.g_TSc_command_mode != "按钮组模式" ){ return; }
 	
 	// （暂无操作）（按钮组核心已经全部包揽）
 }
 
 
-//=============================================================================
-// ** 选项窗口
-//=============================================================================
 //==============================
-// * 选项窗口 - 初始化
+// * 3C选项窗口 - 属性 - 列数（覆写）
+//==============================
+Window_TitleCommand.prototype.maxCols = function() {
+	return DrillUp.g_TSc_selWin_col;
+};
+//==============================
+// * 3C选项窗口 - 属性 - 子项数量
+//==============================
+// （不操作）
+//==============================
+// * 3C选项窗口 - 属性 - 子项间距
+//==============================
+// （不操作）
+//==============================
+// * 3C选项窗口 - 属性 - 子项宽度
+//==============================
+// （不操作）
+//==============================
+// * 3C选项窗口 - 属性 - 子项高度
+//==============================
+// （不操作）
+//==============================
+// * 3C选项窗口 - 属性 - 3A命令窗口属性 - 对齐方式
+//==============================
+Window_TitleCommand.prototype.itemTextAlign = function() {
+	return DrillUp.g_TSc_selWin_align;
+};
+//==============================
+// * 3C选项窗口 - 初始化
 //==============================
 var _drill_title_window_createCommandWindow_init = Scene_Title.prototype.createCommandWindow;
 Scene_Title.prototype.createCommandWindow = function() {
@@ -1360,94 +1401,64 @@ Scene_Title.prototype.createCommandWindow = function() {
 		"layoutSrc": DrillUp.g_TSc_style_list[i]['layoutSrc'],
 		"layoutSrcFile": DrillUp.g_TSc_style_list[i]['layoutSrcFile'],
 	}
-	this._commandWindow.drill_COWA_changeParamData( data );			//辅助核心 - 控制窗口基本属性
+	this._commandWindow.drill_COWA_changeParamData( data ); //『辅助核心初始化』-窗口基本属性
 	this._commandWindow.hide = function(){ return null; };
 	this._commandWindow.refresh();
 	this._commandWindow.open();
-	this._commandWindow.drill_COWA_CPD_resetMove();
-};
-//==============================
-// * 选项窗口 - 基本数据
-//==============================
-Window_TitleCommand.prototype.maxCols = function() {
-    return DrillUp.g_TSc_selWin_col;
-};
-Window_TitleCommand.prototype.itemTextAlign = function() {
-    return DrillUp.g_TSc_selWin_align;
+	this._commandWindow.drill_COWA_resetAttrMove(); //『辅助核心动画』-重播窗口动画
+	this._commandWindow.drill_COWA_resetAttrOpacity(); //『辅助核心动画』-重播窗口动画
 };
 
 
-
-//=============================================================================
-// ** 标题界面杂项功能
-//=============================================================================
 //==============================
-// * 杂项 - 标题文字
+// * 3D选项管理 - 最后继承1级
 //==============================
-Scene_Title.prototype.drawGameTitle = function() {
-    var x = DrillUp.g_TSc_text_x;
-    var y = DrillUp.g_TSc_text_y;
-    var maxWidth = Graphics.width;
-    var text = $dataSystem.gameTitle;
-    this._gameTitleSprite.bitmap.outlineColor = 'black';
-    this._gameTitleSprite.bitmap.outlineWidth = DrillUp.g_TSc_text_outlineWidth;
-    this._gameTitleSprite.bitmap.fontSize = DrillUp.g_TSc_text_fontsize;
-    this._gameTitleSprite.bitmap.drawText(text, x, y, maxWidth, DrillUp.g_TSc_text_fontsize/2, 'center');
-	this._gameTitleSprite.visible = DrillUp.g_TSc_text_visible;
-};
-//==============================
-// * 杂项 - 退出选项
-//==============================
-var _drill_TSc_createCommandWindow = Scene_Title.prototype.createCommandWindow;
-Scene_Title.prototype.createCommandWindow = function() {
-	_drill_TSc_createCommandWindow.call(this);
-    this._commandWindow.setHandler('Drill_TSc_Quit',  this.drill_TSc_commandQuit.bind(this));
-};
-Scene_Title.prototype.drill_TSc_commandQuit = function() {
-    this._commandWindow.close();
-    SceneManager.pop();
-};
-var _drill_TSc_makeCommandList = Window_TitleCommand.prototype.makeCommandList;
-Window_TitleCommand.prototype.makeCommandList = function() {
-    _drill_TSc_makeCommandList.call(this);
-	if( DrillUp.g_TSc_quit_option ){
-		this.addCommand(DrillUp.g_TSc_quit_text, 'Drill_TSc_Quit');
-	}
-};
-//==============================
-// ** 杂项 - 背景音乐
-//==============================
-Scene_Title.prototype.playTitleMusic = function() {
-	var bgm = {};
-	bgm.name = DrillUp.g_TSc_bgm_list[ DrillUp.global_TSc_bgmId ];		//全局存储的音乐id
-	bgm.pitch = 100;
-	bgm.volume = 100;
-	$dataSystem.titleBgm = bgm;
+var _drill_TSc_scene_initialize = SceneManager.initialize;
+SceneManager.initialize = function() {
+	_drill_TSc_scene_initialize.call(this);
 	
-    AudioManager.playBgm($dataSystem.titleBgm);
-    AudioManager.stopBgs();
-    AudioManager.stopMe();
-};
-//==============================
-// * 杂项 - 继续/设置 选项
-//==============================
-var _drill_TSc_makeCommandList2 = Window_TitleCommand.prototype.makeCommandList;
-Window_TitleCommand.prototype.makeCommandList = function() {
-    _drill_TSc_makeCommandList2.call(this);
-	
-	if( DrillUp.g_TSc_continueAutoHide == true &&
-		this.isContinueEnabled() == false ){
-			
-		var index = this.findSymbol('continue');
-		this._list.splice( index, 1 );
-	}
-	
-	if( DrillUp.g_TSc_optionHide == true ){
+	//==============================
+	// * 3D选项管理 - 退出选项
+	//==============================
+	var _drill_TSc_createCommandWindow = Scene_Title.prototype.createCommandWindow;
+	Scene_Title.prototype.createCommandWindow = function() {
+		_drill_TSc_createCommandWindow.call(this);
+		this._commandWindow.setHandler('Drill_TSc_Quit',  this.drill_TSc_commandQuit.bind(this));
+	};
+	Scene_Title.prototype.drill_TSc_commandQuit = function() {
+		this._commandWindow.close();
+		SceneManager.pop();
+	};
+	var _drill_TSc_makeCommandList = Window_TitleCommand.prototype.makeCommandList;
+	Window_TitleCommand.prototype.makeCommandList = function() {
+		_drill_TSc_makeCommandList.call(this);
+		if( DrillUp.g_TSc_quit_option == true ){ //（是否添加退出选项）
+			this.addCommand(DrillUp.g_TSc_quit_text, 'Drill_TSc_Quit');
+		}
+	};
+	//==============================
+	// * 3D选项管理 - 继续选项/设置选项
+	//==============================
+	var _drill_TSc_makeCommandList2 = Window_TitleCommand.prototype.makeCommandList;
+	Window_TitleCommand.prototype.makeCommandList = function() {
+		_drill_TSc_makeCommandList2.call(this);
 		
-		var index = this.findSymbol('options');
-		this._list.splice( index, 1 );
-	}
-};
+		// > 隐藏'继续'选项
+		if( DrillUp.g_TSc_continueAutoHide == true &&
+			this.isContinueEnabled() == false ){
+				
+			var index = this.findSymbol('continue');
+			this._list.splice( index, 1 );
+		}
+		
+		// > 隐藏'设置'选项
+		if( DrillUp.g_TSc_optionHide == true ){
+			
+			var index = this.findSymbol('options');
+			this._list.splice( index, 1 );
+		}
+	};
+}
 
 
 //=============================================================================

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        对话框 - 姓名框窗口
+ * @plugindesc [v1.2]        对话框 - 姓名框窗口
  * @author Drill_up
  * 
  * 
@@ -21,10 +21,9 @@
  * 该插件 不能 单独使用。
  * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfWindowAuxiliary    系统-窗口辅助核心★★v1.9及以上★★
- *     姓名框窗口需要根据窗口字符的宽度来确定窗口大小，需要用到该核心。
+ *   - Drill_CoreOfDialog           对话框-对话框优化核心
  * 可被扩展：
- *   - Drill_DialogSkin               对话框-对话框皮肤
+ *   - Drill_DialogSkin             对话框-对话框皮肤
  *     对话框皮肤能够对 本插件的姓名框 进行皮肤装饰。
  * 
  * -----------------------------------------------------------------------------
@@ -33,8 +32,7 @@
  *   只对对话框窗口有效。
  * 2.了解更多窗口字符，可以去看看 "23.窗口字符 > 关于窗口字符.docx"。
  * 细节：
- *   (1.姓名框窗口的窗口字符转换的 优先级 最高，最先进行识别与转换。
- *      姓名框"\n<>"的结构中，你甚至可以嵌套其它 窗口字符 。
+ *   (1.姓名框"\dDNB[]"或"\n<>"的结构中，可以嵌套其它 窗口字符 。
  *   (2.姓名框窗口关闭的速度比 对话框 要慢。
  *      如果这时候你快速进入商店页面，那么商店页面可能会提前把地图界面
  *      进行截图然后模糊，这样对话框就被截进去了。
@@ -47,17 +45,18 @@
  * ----激活条件
  * 你需要使用下面的窗口字符来显示姓名框：
  * 
- * 窗口字符：\n<姓名框内容>
- * 窗口字符：\nl<姓名框内容>
- * 窗口字符：\nc<姓名框内容>
- * 窗口字符：\nr<姓名框内容>
+ * 窗口字符：\dDNB[姓名框内容]            对话框中，打开姓名框并显示内容，姓名框位置左对齐
+ * 窗口字符：\dDNB[姓名框内容:左对齐]     对话框中，打开姓名框并显示内容，姓名框位置左对齐
+ * 窗口字符：\dDNB[姓名框内容:居中]       对话框中，打开姓名框并显示内容，姓名框位置居中
+ * 窗口字符：\dDNB[姓名框内容:右对齐]     对话框中，打开姓名框并显示内容，姓名框位置右对齐
  * 
- * 1."\n"和"\nl"表示姓名框在最左侧。
- *   "\nc"表示姓名框在中间。
- *   "\nr"表示姓名框在最右侧。
- * 2.注意，姓名框的内容需要用尖括号包裹。
- *   并且，尖括号内的内容，支持其他窗口字符嵌套。
- *   比如："\n<\c[6]小爱丽丝>"
+ * 窗口字符：\n<姓名框内容>            对话框中，打开姓名框并显示内容，姓名框位置左对齐
+ * 窗口字符：\nl<姓名框内容>           对话框中，打开姓名框并显示内容，姓名框位置左对齐
+ * 窗口字符：\nc<姓名框内容>           对话框中，打开姓名框并显示内容，姓名框位置居中
+ * 窗口字符：\nr<姓名框内容>           对话框中，打开姓名框并显示内容，姓名框位置右对齐
+ * 
+ * 1. "\dDNB[姓名框内容]" 可以嵌套其它窗口字符，比如 "\dDNB[\c[6]姓名\c[0]]" 。
+ *    "\n<姓名框内容>" 是旧版本的窗口字符设置，也能用。
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -86,6 +85,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 修复了姓名框能遮挡对话框的bug。
+ * [v1.2]
+ * 更新并兼容了新的窗口字符底层。
  * 
  * 
  * 
@@ -119,12 +120,12 @@
  * @param 姓名框-额外前缀
  * @parent ---姓名框窗口---
  * @desc 姓名框文本基础上额外的添加的额外前缀文本。
- * @default 
+ * @default \c[6]
  * 
  * @param 姓名框-额外后缀
  * @parent ---姓名框窗口---
  * @desc 姓名框文本基础上额外的添加的额外后缀文本。
- * @default 
+ * @default \c[0]
  * 
  */
  
@@ -150,8 +151,15 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			姓名框窗口：
-//				->姓名框
+//			->☆提示信息
+//			->☆静态数据
+//			->☆窗口字符应用之消息输入字符
+//			
+//			->☆姓名框控制
+//			->姓名窗口【Drill_DNB_NameBoxWindow】
+//				->A主体
+//				->B开关动画
+//				->C窗口内容
 //
 //
 //		★家谱：
@@ -174,18 +182,18 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
 	//==============================
 	var DrillUp = DrillUp || {}; 
 	DrillUp.g_DNB_PluginTip_curName = "Drill_DialogNameBox.js 对话框-姓名框窗口";
-	DrillUp.g_DNB_PluginTip_baseList = ["Drill_CoreOfWindowAuxiliary.js 系统-窗口辅助核心"];
+	DrillUp.g_DNB_PluginTip_baseList = ["Drill_CoreOfDialog.js 对话框-对话框优化核心"];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_DNB_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_DNB_PluginTip_baseList.length == 0 ){ return ""; }
@@ -202,17 +210,23 @@
 	DrillUp.drill_DNB_getPluginTip_CompatibilityYEP = function(){
 		return  "【" + DrillUp.g_DNB_PluginTip_curName + "】\n"+
 				"检测到你开启了 YEP_MessageCore插件。\n"+
-				"请及时关闭该插件，该插件与 窗口字符核心 存在兼容冲突。";
+				"请及时关闭该插件，该插件与 对话框优化核心 存在兼容冲突。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 窗口字符底层校验
+	//==============================
+	DrillUp.drill_DNB_getPluginTip_NeedUpdate_drawText = function(){
+		return "【" + DrillUp.g_DNB_PluginTip_curName + "】\n检测到窗口字符核心版本过低。\n由于底层变化巨大，你需要更新 全部 窗口字符相关插件。\n去看看\"23.窗口字符 > 关于窗口字符底层全更新说明.docx\"进行更新。";
 	};
 	
 	
 //=============================================================================
-// ** 静态数据
+// ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_DialogNameBox = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_DialogNameBox');
+	var Imported = Imported || {};
+	Imported.Drill_DialogNameBox = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_DialogNameBox');
 	
 	
 	/*-----------------杂项------------------*/
@@ -228,156 +242,172 @@
 //=============================================================================
 // * >>>>基于插件检测>>>>
 //=============================================================================
-if( Imported.Drill_CoreOfWindowAuxiliary ){
-	
-	
+if( Imported.Drill_CoreOfDialog ){
+
+
 //=============================================================================
-// ** 启动时校验
+// ** ☆窗口字符应用之消息输入字符
 //=============================================================================
-var _drill_DNB_scene_initialize = SceneManager.initialize;
-SceneManager.initialize = function() {
-	_drill_DNB_scene_initialize.call(this);
+//==============================
+// * 窗口字符应用之消息输入字符 - 窗口字符 - 组合符配置
+//==============================
+var _drill_DNB_COWC_effect_processCombined = Game_Temp.prototype.drill_COWC_effect_processCombined;
+Game_Temp.prototype.drill_COWC_effect_processCombined = function( matched_index, matched_str, command, args ){
+	_drill_DNB_COWC_effect_processCombined.call( this, matched_index, matched_str, command, args );
 	
-	if( Imported.YEP_MessageCore ){
-		alert( DrillUp.drill_DNB_getPluginTip_CompatibilityYEP() );
+	if( command == "dDNB" ){
+		
+		// > 『窗口字符定义』 - 打开姓名框（\dDNB[姓名框内容]）
+		//		（不通过底层字符，直接从$gameTemp控制对话框，因为姓名框不需要依靠 窗口字符 实时变化）
+		if( args.length == 1 ){
+			$gameTemp._drill_DNB_text = String(args[0]);
+			$gameTemp._drill_DNB_type = "";
+			this.drill_COWC_effect_submitCombined( "" );
+		}
+		
+		// > 『窗口字符定义』 - 打开姓名框（\dDNB[姓名框内容:左对齐]）
+		//		（不通过底层字符，直接从$gameTemp控制对话框，因为姓名框不需要依靠 窗口字符 实时变化）
+		if( args.length == 2 ){
+			var text = String(args[0]);
+			var type = String(args[1]);
+			if( type == "左对齐" || type == "居中" || type == "右对齐" ){
+				$gameTemp._drill_DNB_text = text;
+				$gameTemp._drill_DNB_type = type;
+			}
+			this.drill_COWC_effect_submitCombined( "" );
+		}
+	}
+}
+//==============================
+// * 窗口字符应用之消息输入字符 - 窗口字符（表达式） - 字符转换
+//==============================
+var _drill_DNB_COWC_expression_process = Game_Temp.prototype.drill_COWC_expression_process;
+Game_Temp.prototype.drill_COWC_expression_process = function( matched_index, matched_str, command, args ){
+	_drill_DNB_COWC_expression_process.call( this, matched_index, matched_str, command, args );
+	
+	// > 『窗口字符定义』 - 打开姓名框（\N<姓名框内容>）
+	var last_allText = this._drill_COWC_expression_curAllText;	//（后台参数）
+	if( last_allText.substring( last_allText.length-2,last_allText.length ).toUpperCase() == "\\N" ){	//（倒切）
+		this._drill_COWC_expression_removeCharNum = 2;			//（后台参数）
+		$gameTemp._drill_DNB_text = matched_str.substring( 1,matched_str.length-1 );
+		$gameTemp._drill_DNB_type = "";
+		this.drill_COWC_expression_submit( "" );
+	}
+	// > 『窗口字符定义』 - 打开姓名框（\NL<姓名框内容>）
+	if( last_allText.substring( last_allText.length-3,last_allText.length ).toUpperCase() == "\\NL" ){	//（倒切）
+		this._drill_COWC_expression_removeCharNum = 3;			//（后台参数）
+		$gameTemp._drill_DNB_text = matched_str.substring( 1,matched_str.length-1 );
+		$gameTemp._drill_DNB_type = "左对齐";
+		this.drill_COWC_expression_submit( "" );
+	}
+	// > 『窗口字符定义』 - 打开姓名框（\NC<姓名框内容>）
+	if( last_allText.substring( last_allText.length-3,last_allText.length ).toUpperCase() == "\\NC" ){	//（倒切）
+		this._drill_COWC_expression_removeCharNum = 3;			//（后台参数）
+		$gameTemp._drill_DNB_text = matched_str.substring( 1,matched_str.length-1 );
+		$gameTemp._drill_DNB_type = "居中";
+		this.drill_COWC_expression_submit( "" );
+	}
+	// > 『窗口字符定义』 - 打开姓名框（\NR<姓名框内容>）
+	if( last_allText.substring( last_allText.length-3,last_allText.length ).toUpperCase() == "\\NR" ){	//（倒切）
+		this._drill_COWC_expression_removeCharNum = 3;			//（后台参数）
+		$gameTemp._drill_DNB_text = matched_str.substring( 1,matched_str.length-1 );
+		$gameTemp._drill_DNB_type = "右对齐";
+		this.drill_COWC_expression_submit( "" );
 	}
 };
 
 
+
 //=============================================================================
-// ** 姓名框绑定
+// ** ☆姓名框控制
+//
+//			说明：	> 此模块专门控制 姓名框。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 对话框 - 创建子窗口
+// * 姓名框控制 - 对话框 创建子窗口
 //==============================
 var _drill_DNB_msg_createSubWindows = Window_Message.prototype.createSubWindows;
 Window_Message.prototype.createSubWindows = function() {
 	_drill_DNB_msg_createSubWindows.call(this);
+	
+	// > 创建姓名框
 	this._drill_DNB_nameWindow = new Drill_DNB_NameBoxWindow( this );
     
-	// > 强行用addChild，因为addWindow会出现窗口相互遮挡问题
+	// > 添加到层级（强行用addChild，因为addWindow会出现窗口相互遮挡问题）
 	var scene = SceneManager._scene;
     scene.addChild(this._drill_DNB_nameWindow);
 };
 //==============================
-// * 对话框 - 相关子窗口
+// * 姓名框控制 - 对话框 获取子窗口
 //
-//			说明：	该函数被父场景调用并自动addWindow。
+//			说明：	> 该函数被父场景调用并自动addWindow，所以此函数不需要。
 //==============================
 //var _drill_DNB_msg_subWindows = Window_Message.prototype.subWindows;
 //Window_Message.prototype.subWindows = function(){
-//	var win_list = _drill_DNB_msg_subWindows.call(this);
-//	win_list.push( this._drill_DNB_nameWindow );
-//	return win_list;
+//	var window_list = _drill_DNB_msg_subWindows.call(this);
+//	window_list.push( this._drill_DNB_nameWindow );
+//	return window_list;
 //};
 //==============================
-// * 对话框 - 显示新建页
+// * 姓名框控制 - 对话框 执行新建页时
 //==============================
-var _drill_DNB_msg_startMessage = Window_Message.prototype.startMessage;
-Window_Message.prototype.startMessage = function() {
-    this._drill_DNB_nameWindow.deactivate();	//（关闭姓名框）
-    _drill_DNB_msg_startMessage.call(this);
+var _drill_DNB_CODi_message_doStart = Window_Message.prototype.drill_CODi_message_newPage;
+Window_Message.prototype.drill_CODi_message_newPage = function() {
+	
+	// > 解析前
+	$gameTemp._drill_DNB_text = "";
+	$gameTemp._drill_DNB_type = "";
+	
+	// > 原函数（此过程会解析窗口字符）
+	_drill_DNB_CODi_message_doStart.call(this);
+	
+	// > 解析后
+	if( $gameTemp._drill_DNB_text != "" ){
+		
+		// > 重设数据
+		this._drill_DNB_nameWindow.drill_resetData_Message(
+			$gameTemp._drill_DNB_text, $gameTemp._drill_DNB_type
+		);
+		
+		// > 打开姓名框
+		this._drill_DNB_nameWindow.drill_DNB_openNow();
+	}
 };
 //==============================
-// * 对话框 - 关闭对话框
+// * 姓名框控制 - 对话框 关闭对话框时
 //==============================
-var _drill_DNB_msg_terminateMessage = Window_Message.prototype.terminateMessage;
-Window_Message.prototype.terminateMessage = function() {
-	this._drill_DNB_nameWindow.deactivate();	//（关闭姓名框）
-	_drill_DNB_msg_terminateMessage.call(this);
+var _drill_DNB_CODi_message_doTerminate = Window_Message.prototype.drill_CODi_message_doTerminate;
+Window_Message.prototype.drill_CODi_message_doTerminate = function() {
+	_drill_DNB_CODi_message_doTerminate.call(this);
+	
+	// > 延迟关闭姓名框
+	this._drill_DNB_nameWindow.drill_DNB_closeDelay( 3 );
 };
-
-//==============================
-// * 对话框 - 执行转义字符
-//==============================
-var _drill_DNB_convertEscapeCharacters = Window_Base.prototype.convertEscapeCharacters;
-Window_Base.prototype.convertEscapeCharacters = function( text ){
-	
-	// > 姓名框捕获（注意，这个位置是在 \ 变成 \x1b 之前的时候）
-	if( this instanceof Window_Message ){
-		text = this.drill_DNB_processNameBox( text );
-	}
-	
-	// > 原函数
-	return _drill_DNB_convertEscapeCharacters.call( this, text );
-}
-//==============================
-// * 对话框 - 姓名框字符转换
-//==============================
-Window_Message.prototype.drill_DNB_processNameBox = function( text ){
-	
-	var re = /\\N\<([^\>]+)\>/gi;		//（用g时，lastIndex才能生效）
-	var re_data = re.exec(text);
-	if( re_data != null ){
-		
-		// > 刷新姓名窗口
-		this._drill_DNB_nameWindow.drill_setData( re_data[1], "左");
-		
-		// > 截断字符串
-		var index_a = re.lastIndex - re_data[0].length;
-		var index_b = re.lastIndex;
-		var text_a = text.substring( 0, index_a );
-		var text_b = text.substring( index_b );
-		text = text_a + text_b;
-		return text;
-	}
-	
-	var re = /\\NL\<([^\>]+)\>/gi;
-	var re_data = re.exec(text);
-	if( re_data != null ){
-		
-		// > 刷新姓名窗口
-		this._drill_DNB_nameWindow.drill_setData( re_data[1], "左");
-		
-		// > 截断字符串
-		var index_a = re.lastIndex - re_data[0].length;
-		var index_b = re.lastIndex;
-		var text_a = text.substring( 0, index_a );
-		var text_b = text.substring( index_b );
-		text = text_a + text_b;
-		return text;
-	}
-	
-	var re = /\\NC\<([^\>]+)\>/gi;
-	var re_data = re.exec(text);
-	if( re_data != null ){
-		
-		// > 刷新姓名窗口
-		this._drill_DNB_nameWindow.drill_setData( re_data[1], "中");
-		
-		// > 截断字符串
-		var index_a = re.lastIndex - re_data[0].length;
-		var index_b = re.lastIndex;
-		var text_a = text.substring( 0, index_a );
-		var text_b = text.substring( index_b );
-		text = text_a + text_b;
-		return text;
-	}
-	
-	var re = /\\NR\<([^\>]+)\>/gi;
-	var re_data = re.exec(text);
-	if( re_data != null ){
-		
-		// > 刷新姓名窗口
-		this._drill_DNB_nameWindow.drill_setData( re_data[1], "右");
-		
-		// > 截断字符串
-		var index_a = re.lastIndex - re_data[0].length;
-		var index_b = re.lastIndex;
-		var text_a = text.substring( 0, index_a );
-		var text_b = text.substring( index_b );
-		text = text_a + text_b;
-		return text;
-	}
-	
-	return text;
-};
-
 
 
 //=============================================================================
 // ** 姓名窗口【Drill_DNB_NameBoxWindow】
-//
+// **		
+// **		作用域：	地图界面
+// **		主功能：	定义一个窗口，用于显示姓名。
+// **		子功能：	
+// **					->窗口『独立贴图』
+// **						x->显示贴图/隐藏贴图
+// **						x->是否就绪
+// **						x->优化策略
+// **						x->销毁
+// **						->初始化数据
+// **						->初始化对象
+// **					
+// **					->A主体
+// **						->窗口属性
+// **					->B开关动画
+// **					->C窗口内容
+// **						->窗口字符
+// **						->文本域自适应
+// **					
+// **		说明：	> 该窗口在游戏中实时创建，创建后将被销毁。
 //=============================================================================
 //==============================
 // * 姓名窗口 - 定义
@@ -390,123 +420,84 @@ Drill_DNB_NameBoxWindow.prototype.constructor = Drill_DNB_NameBoxWindow;
 //==============================
 // * 姓名窗口 - 初始化
 //==============================
-Drill_DNB_NameBoxWindow.prototype.initialize = function( p ){
+Drill_DNB_NameBoxWindow.prototype.initialize = function( parentWindow ){
+    Window_Base.prototype.initialize.call(this, 0, 0, 0, 0);
+	this._drill_parentWindow = parentWindow;	//（绑定父窗体）
 	
-	// > 绑定父窗体
-	this._drill_parentWindow = p;
-	
-	// > 原函数
-    Window_Base.prototype.initialize.call(this, 0, 0, 240, this.windowHeight());
-	
-	// > 私有参数初始化
-    this._drill_text = "";
-    this._drill_showingText = "";
-    this._drill_width = 240;
-    this._drill_closeDelay = 0;
-	
-	// > 私有属性初始化
-    this._openness = 0;			//初始紧闭
-	
-	// > 初始隐藏
-    this.deactivate();
-    this.hide();
+	this.drill_initData();				//初始化数据
+	this.drill_initSprite();			//初始化对象
 };
-//==============================
-// * 姓名窗口 - 属性 - 内边距
-//==============================
-Drill_DNB_NameBoxWindow.prototype.standardPadding = function(){ return DrillUp.g_DNB_nameBox_padding; };
-//==============================
-// * 姓名窗口 - 属性 - 窗口宽度（暂不考虑文本伸缩情况，后续还需要伸缩）
-//==============================
-Drill_DNB_NameBoxWindow.prototype.windowWidth = function(){ return this._drill_width + this.standardPadding()*2; };
-//==============================
-// * 姓名窗口 - 属性 - 高度（1行高）
-//==============================
-Drill_DNB_NameBoxWindow.prototype.windowHeight = function(){ return this.fittingHeight(1); };
-//==============================
-// * 姓名窗口 - 属性 - 字体大小
-//==============================
-Drill_DNB_NameBoxWindow.prototype.standardFontSize = function() { return DrillUp.g_DNB_nameBox_fontSize; };
-
 //==============================
 // * 姓名窗口 - 帧刷新
 //==============================
 Drill_DNB_NameBoxWindow.prototype.update = function() {
     Window_Base.prototype.update.call(this);
-	this.drill_updateClosing();
+	this.drill_updateAttr();		//帧刷新 - A主体
+	this.drill_updateOpen();		//帧刷新 - B开关动画
+									//帧刷新 - C窗口内容（无）
 };
 //==============================
-// * 帧刷新 - 跟随父窗口关闭
+// * 姓名窗口 - 初始化数据『独立贴图』
 //==============================
-Drill_DNB_NameBoxWindow.prototype.drill_updateClosing = function() {
-	if( this.active ){ return; }
-	if( this.isClosed() ){ return; }
-	if( this.isClosing() ){ return; }
-	
-	// > 关闭延迟
-	this._drill_closeDelay -= 1;
-	if( this._drill_closeDelay > 0 ){ return; }
-	
-	// > 父窗口关闭 则关闭
-	if( this._drill_parentWindow.isClosing() ){
-		this._openness = this._drill_parentWindow.openness;
-	}else{
-		this.close();
-	}
+Drill_DNB_NameBoxWindow.prototype.drill_initData = function() {
+	//（暂无 默认值）
 }
 //==============================
-// * 姓名窗口 - 设置数据（接口）
+// * 姓名窗口 - 初始化对象『独立贴图』
 //
-//			说明：	通过手动调用此函数，
+//			说明：	> 此函数只在初始化时执行一次，重设数据 被分到各个子功能里面执行。
 //==============================
-Drill_DNB_NameBoxWindow.prototype.drill_setData = function( text, position_type ){
-	
-	// > 参数刷新
-	this._drill_text = text;					//文本
-	this._drill_showingText = DrillUp.g_DNB_nameBox_prefix + text + DrillUp.g_DNB_nameBox_suffix;
-	this._drill_positionType = position_type;	//位置类型
-	this._drill_closeDelay = 4;					//关闭激活延迟
-	
-	// > 刷新姓名框大小
-	this._drill_width = this.drill_COWA_getTextExWidth( this._drill_showingText );	//（计算宽度）
-	this.width = this.windowWidth();
-	this.createContents();
-	this.contents.clear();
-	this.resetFontSettings();
-	
-	// > 绘制内容（窗口辅助核心的 标准函数 ）
-	this.drill_COWA_drawTextEx( this._drill_showingText, {"x":0,"y":0} );
-	
-	if( this._drill_parentWindow instanceof Window_Message ){
-		this._drill_parentWindow.updatePlacement();
-	}
-	this.drill_refreshPositionX();
-	this.drill_refreshPositionY();
-	
-	// > 激活窗口
-	this.show();
-	this.open();
-	this.activate();
+Drill_DNB_NameBoxWindow.prototype.drill_initSprite = function() {
+	this.drill_initAttr();				//初始化对象 - A主体
+	this.drill_initOpen();				//初始化对象 - B开关动画
+	this.drill_initMessage();			//初始化对象 - C窗口内容
+}
+//==============================
+// * 姓名窗口 - 窗口属性
+//==============================
+Drill_DNB_NameBoxWindow.prototype.standardPadding = function(){ return DrillUp.g_DNB_nameBox_padding; };		//窗口内边距
+Drill_DNB_NameBoxWindow.prototype.standardFontSize = function() { return DrillUp.g_DNB_nameBox_fontSize; };		//窗口字体大小
+
+//==============================
+// * A主体 - 初始化
+//==============================
+Drill_DNB_NameBoxWindow.prototype.drill_initAttr = function() {
+	this._drill_positionXType = "";
+}
+//==============================
+// * A主体 - 设置位置类型（开放函数）
+//==============================
+Drill_DNB_NameBoxWindow.prototype.drill_setPositionType = function( position_type ){
+	this._drill_positionXType = position_type;
+}
+//==============================
+// * A主体 - 帧刷新
+//==============================
+Drill_DNB_NameBoxWindow.prototype.drill_updateAttr = function() {
+	this.drill_updateAttr_PositionX();
+	this.drill_updateAttr_PositionY();
 };
 //==============================
-// * 姓名窗口 - 刷新位置X
+// * A主体 - 帧刷新 - 位置X
 //==============================
-Drill_DNB_NameBoxWindow.prototype.drill_refreshPositionX = function() {
+Drill_DNB_NameBoxWindow.prototype.drill_updateAttr_PositionX = function() {
 	var xx = 0;
 	
-	if( this._drill_positionType == "左" ){
+	// > 位置类型
+	var cur_x_type = this._drill_positionXType;
+	if( cur_x_type == "" || cur_x_type == "左对齐" ){
 		xx = this._drill_parentWindow.x;
-		xx += DrillUp.g_DNB_nameBox_closingX;		//（向内偏移量）
+		xx += DrillUp.g_DNB_nameBox_closingX;		//（横向收拢偏移量）
 	
-	}else if( this._drill_positionType === "中" ){
+	}else if( cur_x_type === "居中" ){
 		xx = this._drill_parentWindow.x;
 		xx += this._drill_parentWindow.width / 2;
 		xx -= this.width / 2;
 	
-	}else if( this._drill_positionType === "右" ){
+	}else if( cur_x_type === "右对齐" ){
 		xx = this._drill_parentWindow.x + this._drill_parentWindow.width;
 		xx -= this.width;
-		xx -= DrillUp.g_DNB_nameBox_closingX;
+		xx -= DrillUp.g_DNB_nameBox_closingX;		//（横向收拢偏移量）
 	}
 	
 	// > 不能过界
@@ -516,23 +507,155 @@ Drill_DNB_NameBoxWindow.prototype.drill_refreshPositionX = function() {
 	this.x = xx;
 };
 //==============================
-// * 姓名窗口 - 刷新位置Y
+// * A主体 - 帧刷新 - 位置Y
 //==============================
-Drill_DNB_NameBoxWindow.prototype.drill_refreshPositionY = function() {
+Drill_DNB_NameBoxWindow.prototype.drill_updateAttr_PositionY = function() {
+	var yy = 0;
 	
-	if( $gameMessage.positionType() == 0 ){		//顶部
-		this.y = this._drill_parentWindow.y + this._drill_parentWindow.height;
-		this.y -= DrillUp.g_DNB_nameBox_closingY;
+	// > 对话框位置 - 0顶部
+	if( $gameMessage.positionType() == 0 ){
+		yy = this._drill_parentWindow.y + this._drill_parentWindow.height;
+		yy -= DrillUp.g_DNB_nameBox_closingY;	//（纵向收拢偏移量）
+		
+	// > 对话框位置 - 1中间/2底部
 	}else{
-		this.y = this._drill_parentWindow.y;
-		this.y -= this.height;
-		this.y += DrillUp.g_DNB_nameBox_closingY;
+		yy = this._drill_parentWindow.y;
+		yy -= this.height;
+		yy += DrillUp.g_DNB_nameBox_closingY;	//（纵向收拢偏移量）
 	}
 	
-	if( this.y < 0 ){
-		this.y = this._drill_parentWindow.y + this._drill_parentWindow.height;
-		this.y -= DrillUp.g_DNB_nameBox_closingY;
+	this.y = yy;
+};
+
+//==============================
+// * B开关动画 - 初始化
+//==============================
+Drill_DNB_NameBoxWindow.prototype.drill_initOpen = function() {
+	this._openness = 0;				//初始紧闭
+	this._drill_closeDelayTime = -1;
+}
+//==============================
+// * B开关动画 - 打开姓名框（开放函数）
+//==============================
+Drill_DNB_NameBoxWindow.prototype.drill_DNB_openNow = function(){
+	this._drill_closeDelayTime = -1;
+	this.open();
+}
+//==============================
+// * B开关动画 - 关闭姓名框（开放函数）
+//==============================
+Drill_DNB_NameBoxWindow.prototype.drill_DNB_closeNow = function(){
+	this._drill_closeDelayTime = -1;
+	this.close();
+}
+//==============================
+// * B开关动画 - 延迟关闭姓名框（开放函数）
+//==============================
+Drill_DNB_NameBoxWindow.prototype.drill_DNB_closeDelay = function( closeDelayTime ){
+	this._drill_closeDelayTime = closeDelayTime;
+}
+//==============================
+// * B开关动画 - 帧刷新
+//==============================
+Drill_DNB_NameBoxWindow.prototype.drill_updateOpen = function() {
+	
+	// > 延迟关闭姓名框
+	this._drill_closeDelayTime -= 1;
+	if( this._drill_closeDelayTime == 0 ){
+		this.drill_DNB_closeNow();
 	}
+}
+
+//==============================
+// * C窗口内容 - 初始化
+//==============================
+Drill_DNB_NameBoxWindow.prototype.drill_initMessage = function() {
+    this._drill_text = "";
+}
+//==============================
+// * C窗口内容 - 重设数据（开放函数）
+//==============================
+Drill_DNB_NameBoxWindow.prototype.drill_resetData_Message = function( text, position_type ){
+	
+	// > 刷新内容
+	this._drill_text = text;
+	var result_text = DrillUp.g_DNB_nameBox_prefix + text + DrillUp.g_DNB_nameBox_suffix;
+	this.drill_refreshMessage( result_text );
+	
+	this.drill_setPositionType( position_type );	//A主体 - 设置位置类型
+};
+//==============================
+// * C窗口内容 - 刷新内容
+//==============================
+Drill_DNB_NameBoxWindow.prototype.drill_refreshMessage = function( context ){
+	
+	// > 『字符贴图流程』 - 清空字符块贴图【窗口字符 - 窗口字符贴图核心】
+	if( Imported.Drill_CoreOfWindowCharacterSprite ){
+		this.drill_COWCSp_sprite_clearAllSprite();
+	}
+	
+	// > 参数准备 - 校验
+	var temp_bitmap = this.contents;
+	if( temp_bitmap == undefined ){ return; }
+	var org_text = context;
+	if( org_text == undefined ){ return; }
+	if( org_text == "" ){ return; }
+	
+	// > 参数准备
+	var options = {};
+	options['infoParam'] = {};
+	options['infoParam']['x'] = 0;
+	options['infoParam']['y'] = 0;
+	options['infoParam']['canvasWidth']  = 100;	//（此参数暂时不用，先给个非零值）
+	options['infoParam']['canvasHeight'] = 100;
+	
+	// > 参数准备 - 自定义
+	options['blockParam'] = {};					//『清零字符默认间距』
+	options['blockParam']['paddingTop'] = 0;
+	options['rowParam'] = {};
+	options['rowParam']['lineHeight_upCorrection'] = 0;
+	
+	options['baseParam'] = {};
+	options['baseParam']['fontSize'] = this.standardFontSize();	//（使用当前窗口的字体大小）
+	
+	// > 参数准备 - 『字符主流程』 - 获取文本高宽【窗口字符 - 窗口字符核心】
+	var ww = this.drill_COWC_getOrgTextWidth( org_text, options );
+	var hh = this.drill_COWC_getOrgTextHeight( org_text, options );
+	ww = Math.ceil(ww);
+	hh = Math.ceil(hh);
+	options['infoParam']['canvasWidth']  = ww;
+	options['infoParam']['canvasHeight'] = hh;
+	
+	
+	// > 自适应 - 设置窗口高宽
+	ww += this.standardPadding() * 2;		//（使用当前窗口的内边距）
+	hh += this.standardPadding() * 2;
+	this._drill_windowWidth = ww;
+	this._drill_windowHeight = hh;
+	this.width = this._drill_windowWidth;		//（窗口宽度）
+	this.height = this._drill_windowHeight;		//（窗口高度）
+	
+	// > 自适应 - 重建画布（自适应高宽需要重建）
+	this.createContents();
+	temp_bitmap = this.contents;			//（临时画布重新绑定）
+	
+	
+	// > 『字符主流程』 - DEBUG显示画布范围【窗口字符 - 窗口字符核心】
+	//temp_bitmap.drill_COWC_debug_drawRect();
+	
+	// > 『字符主流程』 - 绘制文本【窗口字符 - 窗口字符核心】
+	this.drill_COWC_drawText( org_text, options );
+	
+	// > 『字符贴图流程』 - 刷新字符块贴图【窗口字符 - 窗口字符贴图核心】
+	if( Imported.Drill_CoreOfWindowCharacterSprite ){
+		this.drill_COWCSp_sprite_refreshAllSprite();
+	}
+}
+//==============================
+// * C窗口内容 - 刷新内容 - 窗口字符底层校验
+//==============================
+if( typeof(_drill_COWC_drawText_functionExist) == "undefined" ){
+	alert( DrillUp.drill_DNB_getPluginTip_NeedUpdate_drawText() );
 };
 
 

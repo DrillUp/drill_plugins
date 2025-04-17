@@ -163,18 +163,27 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_X_LayerColorFilter = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_X_LayerColorFilter');
+	var Imported = Imported || {};
+	Imported.Drill_X_LayerColorFilter = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_X_LayerColorFilter');
 	
-
+	
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_XLCF_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_XLCF_pluginCommand.call(this, command, args);
+	this.drill_XLCF_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_XLCF_pluginCommand = function( command, args ){
 	if( command === '>全图纯色滤镜' || command === '>全图滤色镜' ){ // >全图纯色滤镜 : 透明度 : 255
 		if(args.length == 4){
 			var type = String(args[1]);

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        窗口字符 - 对话加速键
+ * @plugindesc [v1.1]        对话框 - 对话加速键
  * @author Drill_up
  * 
  * 
@@ -21,25 +21,29 @@
  * 该插件 不能 单独使用。
  * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfWindowCharacter  窗口字符-窗口字符核心★★v1.9及以上★★
+ *   - Drill_CoreOfDialog       对话框-对话框优化核心
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：地图界面、战斗界面。
  *   只作用于 对话框 。
  * 加速键：
- *   (1.插件中有各种各样的加速键设置，详细可以去看看文档：
- *      "1.系统 > 关于输入设备核心.docx" 的 所有加速键 章节。
+ *   (1.对话框的按键管理介绍，可以去看看文档：
+ *      "15.对话框 > 关于对话框优化核心.docx"。
  *   (2.该插件支持对话加速，按对话加速键时，能够快速跳过对话框中的对话。
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定
  * 你可以通过插件指令修改设置：
  * 
- * 插件指令：>对话加速键 : 启用
- * 插件指令：>对话加速键 : 关闭
+ * 插件指令：>对话加速键 : 加速键 : 启用
+ * 插件指令：>对话加速键 : 加速键 : 关闭
+ * 插件指令：>对话加速键 : 连按立即显示 : 启用
+ * 插件指令：>对话加速键 : 连按立即显示 : 关闭
  * 
  * 1.对话加速键按下后，对话框转为瞬间显示，能够跳过非常多的文本剧情。
+ * 2."连按立即显示"即对话框被打开后，字符会一个一个显示，如果这时再按一次
+ *   确定键，那么当前对话页内的全部剩余文本，会立即显示出来。
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -66,11 +70,13 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 大幅度修改了底层，并且兼容了新的底层结构。
  * 
- *
  * 
- *
- * @param 初始是否启用
+ * 
+ * 
+ * @param 初始是否启用加速键
  * @type boolean
  * @on 启用
  * @off 关闭
@@ -88,7 +94,13 @@
  * @desc 对话加速键与逻辑按键直接绑定。逻辑键位修改可以去看看插件 键盘-键盘手柄按键修改器。
  * @default pagedown
  * 
- *
+ * @param 初始是否启用连按立即显示
+ * @type boolean
+ * @on 启用
+ * @off 关闭
+ * @desc 启用 - true，关闭 - false。
+ * @default true
+ * 
  */
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -120,8 +132,9 @@
 //			->☆存储数据
 //			
 //			->☆对话加速键
-//				->按键监听
-//				->跳过 等待按键输入字符 的功能
+//				->一直保持按下状态
+//				->一直拒绝等待
+//			->☆连按立即显示
 //
 //
 //		★家谱：
@@ -131,7 +144,7 @@
 //			无
 //		
 //		★必要注意事项：
-//			暂无
+//			1. 连按立即显示 对应了底层字符功能：按下跳帧开关（@@@_ts[true]）
 //
 //		★其它说明细节：
 //			暂无
@@ -147,12 +160,12 @@
 	// * 提示信息 - 参数
 	//==============================
 	var DrillUp = DrillUp || {}; 
-	DrillUp.g_DMFS_PluginTip_curName = "Drill_DialogMessageFastSkip.js 窗口字符-对话加速键";
-	DrillUp.g_DMFS_PluginTip_baseList = ["Drill_CoreOfWindowCharacter.js 窗口字符-窗口字符核心"];
+	DrillUp.g_DMFS_PluginTip_curName = "Drill_DialogMessageFastSkip.js 对话框-对话加速键";
+	DrillUp.g_DMFS_PluginTip_baseList = ["Drill_CoreOfDialog.js 对话框-对话框优化核心"];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_DMFS_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_DMFS_PluginTip_baseList.length == 0 ){ return ""; }
@@ -168,32 +181,43 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_DialogMessageFastSkip = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_DialogMessageFastSkip');
+	var Imported = Imported || {};
+	Imported.Drill_DialogMessageFastSkip = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_DialogMessageFastSkip');
 	
 	
 	/*-----------------杂项------------------*/
-	DrillUp.g_DMFS_fastSkipEnabled = String(DrillUp.parameters["初始是否启用"] || "true") == "true"; 
-	DrillUp.g_DMFS_fastSkipKey = String(DrillUp.parameters["对话加速键"] || "pagedown"); 
+	DrillUp.g_DMFS_fastSkipEnabled = String(DrillUp.parameters["初始是否启用加速键"] || "true") == "true"; 
+	DrillUp.g_DMFS_fastSkipKey = String(DrillUp.parameters["对话加速键"] || "pagedown");
+	DrillUp.g_DMFS_inputTickSkipEnabled = String(DrillUp.parameters["初始是否启用连按立即显示"] || "true") == "true"; 
 	
-
+	
 //=============================================================================
 // * >>>>基于插件检测>>>>
 //=============================================================================
-if( Imported.Drill_CoreOfWindowCharacter ){
+if( Imported.Drill_CoreOfDialog ){
 	
 
 
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_DMFS_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function( command, args ){
     _drill_DMFS_pluginCommand.call(this, command, args);
+	this.drill_DMFS_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_DMFS_pluginCommand = function( command, args ){
     if( command === ">对话加速键" ){
 		
+		/*-----------------加速键------------------*/
         if( args.length == 2 ){
             var type = String(args[1]);
 			if( type == "启用" || type == "开启" || type == "打开" || type == "启动" ){
@@ -202,6 +226,32 @@ Game_Interpreter.prototype.pluginCommand = function( command, args ){
             if( type == "关闭" || type == "禁用" ){
                 $gameSystem._drill_DMFS_fastSkipEnabled = false;
             }
+        }
+        if( args.length == 4 ){
+            var type = String(args[1]);
+            var temp1 = String(args[3]);
+			if( type == "加速键" ){
+				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
+					$gameSystem._drill_DMFS_fastSkipEnabled = true;
+				}
+				if( temp1 == "关闭" || temp1 == "禁用" ){
+					$gameSystem._drill_DMFS_fastSkipEnabled = false;
+				}
+			}
+		}
+		
+		/*-----------------连按立即显示------------------*/
+        if( args.length == 4 ){
+            var type = String(args[1]);
+            var temp1 = String(args[3]);
+			if( type == "连按立即显示" ){
+				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
+					$gameSystem._drill_DMFS_inputTickSkipEnabled = true;
+				}
+				if( temp1 == "关闭" || temp1 == "禁用" ){
+					$gameSystem._drill_DMFS_inputTickSkipEnabled = false;
+				}
+			}
         }
     }
 }
@@ -274,8 +324,10 @@ Game_System.prototype.drill_DMFS_checkSysData = function() {
 //==============================
 Game_System.prototype.drill_DMFS_initSysData_Private = function() {
 
-	this._drill_DMFS_fastSkipEnabled = DrillUp.g_DMFS_fastSkipEnabled;
-	this._drill_DMFS_fastSkipKey = DrillUp.g_DMFS_fastSkipKey;
+	this._drill_DMFS_fastSkipEnabled = DrillUp.g_DMFS_fastSkipEnabled;	//初始是否启用加速键
+	this._drill_DMFS_fastSkipKey = DrillUp.g_DMFS_fastSkipKey;			//对话加速键
+	
+	this._drill_DMFS_inputTickSkipEnabled = DrillUp.g_DMFS_inputTickSkipEnabled;	//连按立即显示
 };
 //==============================
 // * 存储数据 - 载入存档时检查数据（私有）
@@ -283,10 +335,9 @@ Game_System.prototype.drill_DMFS_initSysData_Private = function() {
 Game_System.prototype.drill_DMFS_checkSysData_Private = function() {
 	
 	// > 旧存档数据自动补充
-	if( this._drill_DMFS_fastSkipKey == undefined ){
+	if( this._drill_DMFS_inputTickSkipEnabled == undefined ){
 		this.drill_DMFS_initSysData();
 	}
-
 };
 
 
@@ -309,58 +360,68 @@ Window_Message.prototype.drill_DMFS_isFastSkip = function() {
 	return Input.isPressed( $gameSystem._drill_DMFS_fastSkipKey );
 }
 //=============================
-// * 对话加速键 - 帧刷新输入
+// * 对话加速键 - 帧刷新
 //=============================
-var _drill_DMFS_msg_updateInput = Window_Message.prototype.updateInput;
-Window_Message.prototype.updateInput = function() {
-    if( this.pause && this.drill_DMFS_isFastSkip() ){
-		if( !this._textState ){
-			this.pause = false;
-			this.terminateMessage();
+var _drill_DMFS_CODi_message_update1 = Window_Message.prototype.drill_CODi_message_update;
+Window_Message.prototype.drill_CODi_message_update = function() {
+	_drill_DMFS_CODi_message_update1.call(this);
+	
+	// > 标记
+    if( this.drill_DMFS_isFastSkip() ){
+		this.contents._drill_DMFS_bitmap_fastSkipEnabled = true;
+    }else{
+		this.contents._drill_DMFS_bitmap_fastSkipEnabled = false;
+	}
+}
+//==============================
+// * 对话加速键 - 最后继承1级
+//==============================
+var _drill_DMFS_scene_initialize = SceneManager.initialize;
+SceneManager.initialize = function() {
+	_drill_DMFS_scene_initialize.call(this);
+	
+	//=============================
+	// * 对话加速键 - 逐个绘制 - 按下条件
+	//=============================
+	var _drill_DMFS_COWC_timing_isTriggered = Bitmap.prototype.drill_COWC_timing_isTriggered;
+	Bitmap.prototype.drill_COWC_timing_isTriggered = function(){
+		
+		// > 一直保持按下状态
+		if( this._drill_DMFS_bitmap_fastSkipEnabled == true ){ return true; }
+		
+		// > 原函数
+		return _drill_DMFS_COWC_timing_isTriggered.call(this);
+	}
+	//==============================
+	// * 对话加速键 - 逐个绘制 - 5E等待管理器
+	//==============================
+	var _drill_DMFS_COWC_timing_tickWaitType = Bitmap.prototype.drill_COWC_timing_tickWaitType;
+	Bitmap.prototype.drill_COWC_timing_tickWaitType = function( rowBlock, textBlock ){
+		_drill_DMFS_COWC_timing_tickWaitType.call( this, rowBlock, textBlock );
+		
+		// > 一直拒绝等待
+		if( this._drill_DMFS_bitmap_fastSkipEnabled == true ){
+			this._drill_COWC_timing_waitingType = "";
 		}
-    }
-	return _drill_DMFS_msg_updateInput.call(this);
-}
-//=============================
-// * 对话加速键 - 强制快速显示
-//=============================
-var _drill_DMFS_msg_updateShowFast = Window_Message.prototype.updateShowFast;
-Window_Message.prototype.updateShowFast = function() {
-    if( this.drill_DMFS_isFastSkip() ){
-		this._showFast = true;	//开启瞬间显示（此参数为 Window_Message 的内部参数）
-	}
-	_drill_DMFS_msg_updateShowFast.call(this);
-}
-//=============================
-// * 对话加速键 - 禁止等待
-//=============================
-var _drill_DMFS_msg_updateWait = Window_Message.prototype.updateWait;
-Window_Message.prototype.updateWait = function() {
-    if( this.drill_DMFS_isFastSkip() ){
-		return false;
-	}
-	return _drill_DMFS_msg_updateWait.call(this);
-}
-//=============================
-// * 对话加速键 - 等待时间归零
-//=============================
-var _drill_DMFS_msg_startWait = Window_Message.prototype.startWait;
-Window_Message.prototype.startWait = function( count ){
-	_drill_DMFS_msg_startWait.call( this, count );
-    if( this.drill_DMFS_isFastSkip() ){
-		this._waitCount = 0;
 	}
 }
+
+
+//=============================================================================
+// ** ☆连按立即显示
+//
+//			说明：	> 此模块专门管理 连按立即显示。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
 //=============================
-// * 对话加速键 - 跳过 等待按键输入字符 的功能
+// * 连按立即显示 - 帧刷新
 //=============================
-var _drill_DMFS_msg_processEscapeCharacter = Window_Message.prototype.processEscapeCharacter;
-Window_Message.prototype.processEscapeCharacter = function( code, textState ){
-	if( code == "!" && this.drill_DMFS_isFastSkip() ){
-		this.startPause();
-		return;
-	}
-	_drill_DMFS_msg_processEscapeCharacter.call( this, code, textState );
+var _drill_DMFS_CODi_message_update2 = Window_Message.prototype.drill_CODi_message_update;
+Window_Message.prototype.drill_CODi_message_update = function() {
+	_drill_DMFS_CODi_message_update2.call(this);
+	
+	// > 固定赋值（这会导致 对话框的按下跳帧开关 被占用）
+	this.contents._drill_COWC_timing_inputTickSkip_enabled = $gameSystem._drill_DMFS_inputTickSkipEnabled;
 }
 
 

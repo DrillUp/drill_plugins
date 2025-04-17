@@ -191,7 +191,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_EFP_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_EFP_PluginTip_baseList.length == 0 ){ return ""; }
@@ -230,10 +230,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_EventForPlayer = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_EventForPlayer');
+	var Imported = Imported || {};
+	Imported.Drill_EventForPlayer = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_EventForPlayer');
 	
 	
 	
@@ -247,9 +247,18 @@ if( Imported.Drill_EventSelfSwitch &&
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_EFP_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_EFP_pluginCommand.call(this, command, args);
+	this.drill_EFP_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_EFP_pluginCommand = function( command, args ){
 	if( command === ">玩家的事件" ){
 			
 		/*-----------------绑定------------------*/

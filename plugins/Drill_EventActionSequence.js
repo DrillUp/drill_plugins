@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        行走图 - GIF动画序列
+ * @plugindesc [v1.5]        行走图 - GIF动画序列
  * @author Drill_up
  * 
  * 
@@ -14,7 +14,7 @@
  * 如果你有兴趣，也可以来看看更多我写的drill插件哦ヽ(*。>Д<)o゜
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
- * 使得你可以使得 行走图 具有动画序列功能。
+ * 使得你可以控制 行走图 具有动画序列的功能。
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
@@ -34,7 +34,7 @@
  *   作用于行走图。
  * 2.更多详细内容，去看看 "7.行走图 > 关于行走图GIF动画序列.docx"。
  * 细节：
- *   (1.事件的 GIF动画序列 可以与消失/显现/持续动作效果叠加。
+ *   (1.事件的 GIF动画序列 可以与消失动作/显现动作/持续动作效果叠加。
  *   (2.如果你配置的动画帧数量特别多，那么在进入游戏后显示会出现闪图，
  *      你可以勾选 预加载 的设置，防止设置动画序列后闪图。
  * 小工具：
@@ -46,8 +46,8 @@
  *      然后小工具能将配置转移到插件 GIF动画序列核心 中。
  * 设计：
  *   (1.动画序列可以是一个简单的GIF，也可以是一组动作集。
- *      比如，单纯的事件动画播放，或者事件根据 变量 播放不同的动作。
- *      你需要先 动画序列核心 ，然后通过该插件调用指令实现事件GIF切换。
+ *      比如，单纯的事件GIF播放 或者 根据情况播放不同的动画。
+ *      你需要先了解动画序列核心 ，然后通过该插件调用指令实现事件GIF切换。
  *      具体可以去看看 "1.系统 > 大家族-GIF动画序列.docx" ，了解通过
  *      小工具配置GIF动画序列的方法。
  *
@@ -56,14 +56,18 @@
  * 你需要通过下面事件注释来激活动画序列：
  * 
  * 事件注释：=>行走图动画序列 : 创建动画序列 : 动画序列[1]
+ * 事件注释：=>行走图动画序列 : 创建动画序列(站桩) : 动画序列[1]
  * 事件注释：=>行走图动画序列 : 创建动画序列(四方向) : 动画序列[1]
  * 事件注释：=>行走图动画序列 : 创建动画序列(二方向) : 动画序列[1]
  * 
  * 1.必须包含 注释的事件页 才会 创建动画序列。
  *   切换事件页时，插件会根据是否有注释而执行创建或销毁。
- * 2.如果行走图同时被 全绑定和行走图动画序列的事件注释 控制改变动画序列，
+ * 2. "创建动画序列" 与 "创建动画序列(站桩)" 指令是一样的意思，默认按站桩识别。
+ *   动画序列分为 站桩动画序列、四方向动画序列、二方向动画序列，
+ *   详细可以去看看文档："7.行走图 > 关于行走图GIF动画序列.docx"。
+ * 3.如果行走图同时被 全绑定和行走图动画序列的事件注释 控制改变动画序列，
  *   则按 全绑定 的设置来，全绑定的优先级高。
- * 3.注意，如果你只写了 创建动画序列 注释，而没写 开启全标签播放 的注释。
+ * 4.注意，如果你只写了 创建动画序列 注释，而没写 开启全标签播放 的注释。
  *   那么动画序列将只播放 默认的状态元集合 。
  *   因此事件移动时，不会播放移动动画，而是保持站立平移。
  * 
@@ -83,13 +87,15 @@
  * 插件指令：>行走图动画序列 : 批量事件变量[21,22] : 创建动画序列 : 动画序列[1]
  * 
  * 插件指令：>行走图动画序列 : 事件[1] : 创建动画序列 : 动画序列[1]
+ * 插件指令：>行走图动画序列 : 事件[1] : 创建动画序列(站桩) : 动画序列[1]
  * 插件指令：>行走图动画序列 : 事件[1] : 创建动画序列(四方向) : 动画序列[1]
  * 插件指令：>行走图动画序列 : 事件[1] : 创建动画序列(二方向) : 动画序列[1]
  * 插件指令：>行走图动画序列 : 事件[1] : 销毁动画序列
  * 
  * 1.前半部分（事件[1]）和 后半部分（创建动画序列 : 动画序列[1]）
  *   的参数可以随意组合。一共有10*2种组合方式。
- * 2.动画序列分为 站桩动画序列、四方向动画序列、二方向动画序列，
+ * 2. "创建动画序列" 与 "创建动画序列(站桩)" 指令是一样的意思，默认按站桩识别。
+ *   动画序列分为 站桩动画序列、四方向动画序列、二方向动画序列，
  *   详细可以去看看文档："7.行走图 > 关于行走图GIF动画序列.docx"。
  *
  * -----------------------------------------------------------------------------
@@ -149,6 +155,8 @@
  * 进一步优化了动画序列底层，添加了二方向行走图，该插件重新兼容。
  * [v1.4]
  * 优化了动画序列存储底层。
+ * [v1.5]
+ * 优化了内部结构，修正描述细节。
  * 
  * 
  * @param DEBUG-是否提示动画序列未创建
@@ -191,15 +199,15 @@
 //			->☆插件指令
 //			->☆事件注释
 //			
-//			->☆物体控制
+//			->☆物体的属性
 //				->绑定
 //					> 初始化
 //					> 帧刷新
 //					> 事件销毁时
 //				->创建 动画序列控制器
-//				->创建 动画序列控制器(四方向)
-//				->创建 动画序列控制器(二方向)
-//				->创建 动画序列控制器(八方向)
+//					->创建动画序列(站桩)
+//					->创建动画序列(四方向)
+//					->创建动画序列(二方向)
 //				->销毁 动画序列控制器
 //				->播放
 //					> 播放默认的状态元集合（开放函数）
@@ -207,13 +215,20 @@
 //					> 播放状态节点（开放函数）
 //					> 播放动作元（开放函数）
 //					> 立即停止动作元（开放函数）
-//			->☆行走图贴图控制
+//			->☆暂停控制
+//				->是否暂停（可继承）
+//			
+//			->☆行走图贴图绑定
 //				->创建 动画序列贴图
 //				->销毁 动画序列贴图
-//				->原行走图阻塞
-//					->行走图 刷新
-//					->行走图动画帧 刷新
-//			->☆行走图贴图优化
+//				->帧刷新 动画序列贴图
+//					->贴图销毁标记
+//				->是否正在播放
+//			->☆行走图贴图替换
+//				->行走图 替换
+//				->动画帧 替换
+//				->播放动画序列的动画帧
+//			->☆行走图贴图兼容
 //				->宽度
 //				->高度
 //
@@ -254,7 +269,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_EASe_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_EASe_PluginTip_baseList.length == 0 ){ return ""; }
@@ -287,17 +302,18 @@
 	// * 提示信息 - 报错 - 动画序列未创建
 	//==============================
 	DrillUp.drill_EASe_getPluginTip_NoActionSequence = function( e_id ){
-		return "【" + DrillUp.g_EASe_PluginTip_curName + "】\n插件指令错误，事件"+e_id+"的动画序列并没有创建，无法播放动画。\n（如果你知道存在此问题但不想弹出此提示，可在配置中关闭此提示）";
+		return "【" + DrillUp.g_EASe_PluginTip_curName + "】（此提示可在插件中关闭）\n" +   //『可关闭提示信息』
+				"插件指令错误，事件"+e_id+"的动画序列并没有创建，无法播放动画。\n（如果你知道存在此问题但不想弹出此提示，可在配置中关闭此提示）";
 	};
 	
 	
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_EventActionSequence = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_EventActionSequence');
+	var Imported = Imported || {};
+	Imported.Drill_EventActionSequence = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_EventActionSequence');
 	
 	
 	/*-----------------杂项------------------*/
@@ -333,9 +349,18 @@ SceneManager.initialize = function() {
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_EASe_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_EASe_pluginCommand.call(this, command, args);
+	this.drill_EASe_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_EASe_pluginCommand = function( command, args ){
 	if( command === ">行走图动画序列" ){ 
 	
 		/*-----------------对象组获取------------------*/
@@ -433,7 +458,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		if( args.length == 6 ){
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
-			if( type == "创建动画序列" || type == "设置动画序列" ){
+			if( type == "创建动画序列" || type == "设置动画序列" ||
+				type == "创建动画序列(站桩)" || type == "设置动画序列(站桩)" ){
 				temp1 = temp1.replace("动画序列[","");
 				temp1 = temp1.replace("]","");
 				for( var k=0; k < e_chars.length; k++ ){
@@ -567,7 +593,7 @@ Game_Event.prototype.drill_EASe_setupPage = function() {
 					var temp1 = String(args[3]);
 					temp1 = temp1.replace("动画序列[","");
 					temp1 = temp1.replace("]","");
-					if( type == "创建动画序列" ){
+					if( type == "创建动画序列" || type == "创建动画序列(站桩)" ){
 						this.drill_EASe_setActionSequence( Number(temp1)-1, "stand" );
 						is_set = true;
 					}
@@ -592,13 +618,13 @@ Game_Event.prototype.drill_EASe_setupPage = function() {
 
 
 //=============================================================================
-// ** ☆物体控制
+// ** ☆物体的属性
 //
 //			说明：	> 此模块专门控制 动画序列控制器 绑定到物体。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 物体 - 初始化
+// * 物体的属性 - 初始化
 //
 //			说明：	> 这里的数据默认为空。『节约事件数据存储空间』
 //==============================
@@ -616,7 +642,7 @@ Game_Character.prototype.initialize = function() {
 	_drill_EASe_c_initialize.call(this);
 }
 //==============================
-// * 物体 - 帧刷新
+// * 物体的属性 - 帧刷新
 //==============================
 var _drill_EASe_c_update = Game_CharacterBase.prototype.update;
 Game_CharacterBase.prototype.update = function() {
@@ -628,7 +654,7 @@ Game_CharacterBase.prototype.update = function() {
 	}
 }
 //==============================
-// * 物体 - 事件销毁时
+// * 物体的属性 - 事件销毁时
 //==============================
 var _drill_EASe_c_erase = Game_Event.prototype.erase;
 Game_Event.prototype.erase = function() {
@@ -637,7 +663,7 @@ Game_Event.prototype.erase = function() {
 }
 
 //==============================
-// * 物体 - 创建 动画序列控制器
+// * 物体的属性 - 创建 动画序列控制器（开放函数）
 //
 //			说明：	> 此函数用于去除重复的 创建 。
 //==============================
@@ -665,7 +691,7 @@ Game_Character.prototype.drill_EASe_setActionSequence = function( as_id, type ){
 	}
 }
 //==============================
-// * 物体 - 创建 动画序列控制器 - 站桩
+// * 物体的属性 - 创建 动画序列控制器 - 站桩
 //
 //			说明：	> 要强制改变动画序列，直接 new控制器 即可，贴图会根据序列号自动销毁重建。
 //==============================
@@ -683,7 +709,7 @@ Game_Character.prototype.drill_EASe_setActionSequenceOrg = function( as_id ){
 	this._drill_EASe_keepDecoratorNull = undefined;
 }
 //==============================
-// * 物体 - 创建 动画序列控制器 - 四方向
+// * 物体的属性 - 创建 动画序列控制器 - 四方向
 //==============================
 Game_Character.prototype.drill_EASe_setActionSequenceWith4Direction = function( as_id ){
 	
@@ -699,7 +725,7 @@ Game_Character.prototype.drill_EASe_setActionSequenceWith4Direction = function( 
 	this._drill_EASe_keepDecoratorNull = undefined;
 }
 //==============================
-// * 物体 - 创建 动画序列控制器 - 二方向
+// * 物体的属性 - 创建 动画序列控制器 - 二方向
 //==============================
 Game_Character.prototype.drill_EASe_setActionSequenceWith2Direction = function( as_id ){
 	
@@ -715,7 +741,7 @@ Game_Character.prototype.drill_EASe_setActionSequenceWith2Direction = function( 
 	this._drill_EASe_keepDecoratorNull = undefined;
 }
 //==============================
-// * 物体 - 创建 动画序列控制器 - 八方向
+// * 物体的属性 - 创建 动画序列控制器 - 八方向
 //==============================
 Game_Character.prototype.drill_EASe_setActionSequenceWith8Direction = function( as_id ){
 	
@@ -731,12 +757,13 @@ Game_Character.prototype.drill_EASe_setActionSequenceWith8Direction = function( 
 	this._drill_EASe_keepDecoratorNull = undefined;
 }
 //==============================
-// * 物体 - 销毁 动画序列控制器
+// * 物体的属性 - 销毁 动画序列控制器（开放函数）
 //==============================
 Game_Character.prototype.drill_EASe_removeActionSequence = function(){
 	this._drill_EASe_controller = undefined;
 	this._drill_EASe_keepDecoratorNull = true;
 }
+
 
 //==============================
 // * 播放 - 播放默认的状态元集合（开放函数）
@@ -745,7 +772,7 @@ Game_Character.prototype.drill_EASe_removeActionSequence = function(){
 //==============================
 Game_Character.prototype.drill_EASe_setStateNodeDefault = function(){
 	if( this._drill_EASe_controller == undefined ){		//（动画序列校验）
-		if( DrillUp.g_EASe_TipEnabled_NoActionSequence == true ){
+		if( DrillUp.g_EASe_TipEnabled_NoActionSequence == true ){  //『可关闭提示信息』
 			if( this._eventId != undefined ){ alert( DrillUp.drill_EASe_getPluginTip_NoActionSequence(this._eventId) ); }
 		}
 		return;
@@ -760,7 +787,7 @@ Game_Character.prototype.drill_EASe_setStateNodeDefault = function(){
 //==============================
 Game_Character.prototype.drill_EASe_setSimpleStateNode = function( state_nameList ){
 	if( this._drill_EASe_controller == undefined ){		//（动画序列校验）
-		if( DrillUp.g_EASe_TipEnabled_NoActionSequence == true ){
+		if( DrillUp.g_EASe_TipEnabled_NoActionSequence == true ){  //『可关闭提示信息』
 			if( this._eventId != undefined ){ alert( DrillUp.drill_EASe_getPluginTip_NoActionSequence(this._eventId) ); }
 		}
 		return;
@@ -775,7 +802,7 @@ Game_Character.prototype.drill_EASe_setSimpleStateNode = function( state_nameLis
 //==============================
 Game_Character.prototype.drill_EASe_setStateNode = function( node_name ){
 	if( this._drill_EASe_controller == undefined ){		//（动画序列校验）
-		if( DrillUp.g_EASe_TipEnabled_NoActionSequence == true ){
+		if( DrillUp.g_EASe_TipEnabled_NoActionSequence == true ){  //『可关闭提示信息』
 			if( this._eventId != undefined ){ alert( DrillUp.drill_EASe_getPluginTip_NoActionSequence(this._eventId) ); }
 		}
 		return;
@@ -787,7 +814,7 @@ Game_Character.prototype.drill_EASe_setStateNode = function( node_name ){
 //==============================
 Game_Character.prototype.drill_EASe_setAct = function( act_name ){
 	if( this._drill_EASe_controller == undefined ){		//（动画序列校验）
-		if( DrillUp.g_EASe_TipEnabled_NoActionSequence == true ){
+		if( DrillUp.g_EASe_TipEnabled_NoActionSequence == true ){  //『可关闭提示信息』
 			if( this._eventId != undefined ){ alert( DrillUp.drill_EASe_getPluginTip_NoActionSequence(this._eventId) ); }
 		}
 		return;
@@ -799,7 +826,7 @@ Game_Character.prototype.drill_EASe_setAct = function( act_name ){
 //==============================
 Game_Character.prototype.drill_EASe_stopAct = function(){
 	if( this._drill_EASe_controller == undefined ){		//（动画序列校验）
-		if( DrillUp.g_EASe_TipEnabled_NoActionSequence == true ){
+		if( DrillUp.g_EASe_TipEnabled_NoActionSequence == true ){  //『可关闭提示信息』
 			if( this._eventId != undefined ){ alert( DrillUp.drill_EASe_getPluginTip_NoActionSequence(this._eventId) ); }
 		}
 		return;
@@ -809,14 +836,63 @@ Game_Character.prototype.drill_EASe_stopAct = function(){
 
 
 //=============================================================================
-// ** ☆行走图贴图控制
+// ** ☆暂停控制
+//
+//			说明：	> 此模块专门控制 暂停 动画序列。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 暂停控制 - 帧刷新
+//==============================
+var _drill_EASe_pause_update = Game_CharacterBase.prototype.update;
+Game_CharacterBase.prototype.update = function(){
+	_drill_EASe_pause_update.call(this);
+	if( this._drill_EASe_controller == null ){ return; }
+	
+	// > 暂停控制
+	if( this.drill_EASe_needPause() ){
+		this._drill_EASe_controller.drill_controllerMain_setPause(true);
+	}else{
+		this._drill_EASe_controller.drill_controllerMain_setPause(false);
+	}
+	
+	// > 强制关闭暂停
+	if( this._drill_EASe_pauseDisabledTime != undefined ){
+		this._drill_EASe_pauseDisabledTime -= 1;
+		if( this._drill_EASe_pauseDisabledTime <= 0 ){
+			this._drill_EASe_pauseDisabledTime = undefined;
+		}
+		this._drill_EASe_controller.drill_controllerMain_setPause(false);
+	}
+}
+//==============================
+// * 暂停控制 - 强制关闭暂停（开放函数）
+//
+//			说明：	> 部分子插件如果无法关闭暂停，这里可以 在有限时间内 强制关闭暂停。
+//==============================
+Game_CharacterBase.prototype.drill_EASe_setPauseDisabledInTime = function( time ){
+	this._drill_EASe_pauseDisabledTime = time;
+}
+//==============================
+// * 暂停控制 - 是否暂停（可继承）
+//
+//			说明：	> 子插件可根据情况来继承，控制 动画序列 暂停。
+//==============================
+Game_CharacterBase.prototype.drill_EASe_needPause = function(){
+	return false;
+}
+
+
+
+//=============================================================================
+// ** ☆行走图贴图绑定
 //
 //			说明：	> 此模块专门控制 动画序列贴图 绑定到行走图。
 //					> 行走图的动画序列支持镜像反射。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 行走图贴图 - 初始化
+// * 行走图贴图绑定 - 初始化
 //==============================
 var _drill_EASe_sp_initialize = Sprite_Character.prototype.initMembers;
 Sprite_Character.prototype.initMembers = function(){
@@ -825,7 +901,7 @@ Sprite_Character.prototype.initMembers = function(){
 	this._drill_EASe_decoratorCreateSerial = -1;		//动画序列 贴图序列号
 }
 //==============================
-// * 图片贴图 - 创建 动画序列贴图
+// * 行走图贴图绑定 - 创建 动画序列贴图
 //
 //			说明：	> 此函数可以在帧刷新中反复执行。只在 空贴图 的时候才创建。
 //==============================
@@ -838,7 +914,7 @@ Sprite_Character.prototype.drill_EASe_createDecorator = function(){
 	}
 }
 //==============================
-// * 图片贴图 - 销毁 动画序列贴图
+// * 行走图贴图绑定 - 销毁 动画序列贴图
 //
 //			说明：	> 此函数可以在帧刷新中反复执行。只在 非空贴图 的时候才销毁。
 //==============================
@@ -849,7 +925,7 @@ Sprite_Character.prototype.drill_EASe_destroyDecorator = function(){
 	}
 }
 //==============================
-// * 行走图贴图 - 帧刷新绑定
+// * 行走图贴图绑定 - 帧刷新
 //==============================
 var _drill_EASe_sp_update = Sprite_Character.prototype.update;
 Sprite_Character.prototype.update = function() {
@@ -864,7 +940,7 @@ Sprite_Character.prototype.update = function() {
 	_drill_EASe_sp_update.call(this);
 };
 //==============================
-// * 行走图贴图 - 帧刷新 - 创建贴图
+// * 行走图贴图绑定 - 帧刷新 - 创建贴图
 //==============================
 Sprite_Character.prototype.drill_EASe_updateDecoratorCreate = function() {
 	var character = this._character;
@@ -888,7 +964,7 @@ Sprite_Character.prototype.drill_EASe_updateDecoratorCreate = function() {
 	}
 }
 //==============================
-// * 行走图贴图 - 帧刷新 - 销毁贴图
+// * 行走图贴图绑定 - 帧刷新 - 销毁贴图
 //==============================
 Sprite_Character.prototype.drill_EASe_updateDecoratorDestroy = function() {
 	var character = this._character;
@@ -903,16 +979,15 @@ Sprite_Character.prototype.drill_EASe_updateDecoratorDestroy = function() {
 	}
 }
 //==============================
-// * 行走图贴图 - 帧刷新 - 贴图
+// * 行走图贴图绑定 - 帧刷新 - 贴图
 //==============================
 Sprite_Character.prototype.drill_EASe_updateDecorator = function() {
 	if( this.drill_EASe_isPlaying() ){
 		this._drill_EASe_decorator.update();
 	}
 }
-
 //==============================
-// * 原行走图阻塞 - 条件
+// * 行走图贴图绑定 - 是否正在播放
 //==============================
 Sprite_Character.prototype.drill_EASe_isPlaying = function() {
 	if( this._drill_EASe_decorator == null ){ return false; }
@@ -920,89 +995,149 @@ Sprite_Character.prototype.drill_EASe_isPlaying = function() {
 	if( this._character._drill_EASe_controller == undefined ){ return false; }
 	return true;
 }
+
+
+//=============================================================================
+// ** ☆行走图贴图替换
+//
+//			说明：	> 此模块专门控制 行走图 替换为 动画序列。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
 //==============================
-// * 原行走图阻塞 - 行走图 刷新
+// * 行走图贴图替换 - 帧刷新 - 行走图
 //==============================
 var _drill_EASe_sp_updateBitmap = Sprite_Character.prototype.updateBitmap;
 Sprite_Character.prototype.updateBitmap = function() {
+	
+	// > 播放时，阻塞原函数
 	if( this.drill_EASe_isPlaying() == true ){ return; }
+	
+	// > 原函数
 	_drill_EASe_sp_updateBitmap.call(this);
 }
 //==============================
-// * 原行走图阻塞 - 行走图动画帧 刷新
+// * 行走图贴图替换 - 帧刷新 - 动画帧
 //==============================
 var _drill_EASe_sp_updateFrame = Sprite_Character.prototype.updateFrame;
 Sprite_Character.prototype.updateFrame = function() {
 	
-	// > 播放时，阻塞贴图的 动画帧
+	// > 播放时，阻塞原函数
 	if( this.drill_EASe_isPlaying() == true ){
 		if( this._drill_EASe_decorator.drill_COAS_isReady() == false ){ return; }
-		var pw = this.patternWidth();
-		var ph = this.patternHeight();
-		var sx = 0;
-		var sy = 0;
-		
-		// > 四方向情况
-		if( this._character._drill_EASe_type == "4dir" ){
-			var cur_dir = this._character.direction();
-			
-			// > 兼容【行走图 - 图块同步镜像】
-			if( Imported.Drill_LayerSynchronizedReflection ){
-				if( this instanceof Drill_Sprite_LSR ){
-					
-					// > 朝向倒转
-					if( cur_dir == 2 && !this._character.drill_LSR_isLockDir() ){ cur_dir = 8; }
-					else if( cur_dir == 8 && !this._character.drill_LSR_isLockDir() ){ cur_dir = 2; }
-				}
-			}
-			
-			var y_index = (cur_dir - 2) / 2;
-			sy = y_index * ph;
-		}
-		
-		// > 二方向情况
-		if( this._character._drill_EASe_type == "2dir" ){
-			var cur_dir = this._character.direction();
-			
-			// > 默认朝向右
-			if( this._drill_EASe_lastSpriteDir == undefined ){ this._drill_EASe_lastSpriteDir = 6; }
-			
-			// > 上下朝向时，保持左右朝向
-			var cur_sp_dir = 6;
-			if( cur_dir == 4 ){ this._drill_EASe_lastSpriteDir = 4; cur_sp_dir = 4; }
-			if( cur_dir == 6 ){ this._drill_EASe_lastSpriteDir = 6; cur_sp_dir = 6; }
-			if( cur_dir == 2 ){ cur_sp_dir = this._drill_EASe_lastSpriteDir; }
-			if( cur_dir == 8 ){ cur_sp_dir = this._drill_EASe_lastSpriteDir; }
-			
-			var y_index = 0;
-			if( cur_sp_dir == 6 ){ y_index = 0; }	//（二方向资源：先朝右，后朝左）
-			if( cur_sp_dir == 4 ){ y_index = 1; }
-			sy = y_index * ph;
-		}
-		
-		// >  八方向情况
-		if( this._character._drill_EASe_type == "8dir" ){
-			var cur_dir = this._character.direction();
-			//...
-		}
-		
-		this.setFrame(sx, sy, pw, ph);
+		this.drill_EASe_updateFrame();
 		return;
 	}
 	
 	// > 原函数
 	_drill_EASe_sp_updateFrame.call(this);
 }
+//==============================
+// * 行走图贴图替换 - 帧刷新 - 播放动画序列的动画帧
+//==============================
+Sprite_Character.prototype.drill_EASe_updateFrame = function() {
+	var pw = this.patternWidth();
+	var ph = this.patternHeight();
+	var sx = 0;
+	var sy = 0;
+	
+	// > 当前朝向
+	var cur_dir = this._character.direction();	//（默认朝向 2/4/6/8）
+	//。。。
+	
+	// > 当前朝向 - 兼容【行走图 - 图块同步镜像】
+	if( Imported.Drill_LayerSynchronizedReflection ){
+		if( this instanceof Drill_Sprite_LSR ){
+			
+			// > 朝向倒转
+			if( this._character.drill_LSR_isLockDir() != true ){
+				if( cur_dir == 2 ){ cur_dir = 8; }
+				else if( cur_dir == 8 ){ cur_dir = 2; }
+				else if( cur_dir == 1 ){ cur_dir = 7; }
+				else if( cur_dir == 7 ){ cur_dir = 1; }
+				else if( cur_dir == 3 ){ cur_dir = 9; }
+				else if( cur_dir == 9 ){ cur_dir = 3; }
+			}
+		}
+	}
+	
+	
+	// > 四方向情况
+	if( this._character._drill_EASe_type == "4dir" ){
+		
+		// > 上下朝向时，保持左右朝向
+		var cur_sp_dir = 2;
+		if( cur_dir == 2 ){ cur_sp_dir = 2; }
+		if( cur_dir == 4 ){ cur_sp_dir = 4; }
+		if( cur_dir == 6 ){ cur_sp_dir = 6; }
+		if( cur_dir == 8 ){ cur_sp_dir = 8; }
+		
+		if( cur_dir == 1 ){ cur_sp_dir = 2; }	//（这里直接写死吧，后期再考虑改进）
+		if( cur_dir == 7 ){ cur_sp_dir = 4; }
+		if( cur_dir == 3 ){ cur_sp_dir = 6; }
+		if( cur_dir == 9 ){ cur_sp_dir = 8; }
+		
+		var y_index = 0;
+		if( cur_sp_dir == 2 ){ y_index = 0; }
+		else if( cur_sp_dir == 4 ){ y_index = 1; }
+		else if( cur_sp_dir == 6 ){ y_index = 2; }
+		else if( cur_sp_dir == 8 ){ y_index = 3; }
+		sy = y_index * ph;
+	}
+	
+	// > 二方向情况
+	else if( this._character._drill_EASe_type == "2dir" ){
+		
+		// > 默认朝向右
+		if( this._drill_EASe_lastSpriteDir == undefined ){ this._drill_EASe_lastSpriteDir = 6; }
+		
+		// > 上下朝向时，保持之前的朝向
+		var cur_sp_dir = 6;
+		if( cur_dir == 2 ){ cur_sp_dir = this._drill_EASe_lastSpriteDir; }
+		if( cur_dir == 8 ){ cur_sp_dir = this._drill_EASe_lastSpriteDir; }
+		if( cur_dir == 4 ){ this._drill_EASe_lastSpriteDir = 4; cur_sp_dir = 4; }
+		if( cur_dir == 6 ){ this._drill_EASe_lastSpriteDir = 6; cur_sp_dir = 6; }
+		if( cur_dir == 1 ){ this._drill_EASe_lastSpriteDir = 1; cur_sp_dir = 1; }
+		if( cur_dir == 7 ){ this._drill_EASe_lastSpriteDir = 7; cur_sp_dir = 7; }
+		if( cur_dir == 3 ){ this._drill_EASe_lastSpriteDir = 3; cur_sp_dir = 3; }
+		if( cur_dir == 9 ){ this._drill_EASe_lastSpriteDir = 9; cur_sp_dir = 9; }
+		
+		var y_index = 0;
+		if( cur_sp_dir == 6 ){ y_index = 0; }	//（二方向资源：先朝右，后朝左）
+		else if( cur_sp_dir == 4 ){ y_index = 1; }
+		else if( cur_sp_dir == 1 ){ y_index = 1; }
+		else if( cur_sp_dir == 7 ){ y_index = 1; }
+		else if( cur_sp_dir == 3 ){ y_index = 0; }
+		else if( cur_sp_dir == 9 ){ y_index = 0; }
+		sy = y_index * ph;
+	}
+	
+	// >  八方向情况
+	else if( this._character._drill_EASe_type == "8dir" ){
+		
+		var y_index = 0;
+		if( cur_dir == 2 ){ y_index = 0; }
+		else if( cur_dir == 4 ){ y_index = 1; }
+		else if( cur_dir == 6 ){ y_index = 2; }
+		else if( cur_dir == 8 ){ y_index = 3; }
+		else if( cur_dir == 1 ){ y_index = 4; }
+		else if( cur_dir == 7 ){ y_index = 5; }
+		else if( cur_dir == 3 ){ y_index = 6; }
+		else if( cur_dir == 9 ){ y_index = 7; }
+		sy = y_index * ph;
+	}
+	
+	this.setFrame(sx, sy, pw, ph);
+}
 
 
 //=============================================================================
-// ** ☆行走图贴图优化
+// ** ☆行走图贴图兼容
 //
 //			说明：	> 此模块专门兼容 行走图优化核心 插件。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 行走图贴图优化 - 宽度
+// * 行走图贴图兼容 - 宽度
 //==============================
 var _drill_EASe_COEF_s_patternWidth = Sprite_Character.prototype.drill_COEF_updateValue_PatternWidth;
 Sprite_Character.prototype.drill_COEF_updateValue_PatternWidth = function() {
@@ -1013,10 +1148,11 @@ Sprite_Character.prototype.drill_COEF_updateValue_PatternWidth = function() {
 	// > 图块情况
 	if( this._tileId > 0 ){ return; }
 	
+	// > 宽度
 	this._drill_COEF_PatternWidth = this.bitmap.width;
 };
 //==============================
-// * 行走图贴图优化 - 高度
+// * 行走图贴图兼容 - 高度
 //==============================
 var _drill_EASe_COEF_s_patternHeight = Sprite_Character.prototype.drill_COEF_updateValue_PatternHeight;
 Sprite_Character.prototype.drill_COEF_updateValue_PatternHeight = function() {
@@ -1028,19 +1164,19 @@ Sprite_Character.prototype.drill_COEF_updateValue_PatternHeight = function() {
 	if( this._tileId > 0 ){ return; }
 	
 	
-	// > 四方向情况
+	// > 高度 - 四方向情况
 	if( this._character._drill_EASe_type == "4dir" ){
 		this._drill_COEF_PatternHeight = this.bitmap.height / 4;
 	
-	// > 二方向情况
+	// > 高度 - 二方向情况
 	}else if( this._character._drill_EASe_type == "2dir" ){
 		this._drill_COEF_PatternHeight = this.bitmap.height / 2;
 	
-	// > 八方向情况
+	// > 高度 - 八方向情况
 	}else if( this._character._drill_EASe_type == "8dir" ){
 		this._drill_COEF_PatternHeight = this.bitmap.height / 8;
 	
-	// > 站桩情况
+	// > 高度 - 站桩情况
 	}else{
 		this._drill_COEF_PatternHeight = this.bitmap.height;
 	}

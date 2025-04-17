@@ -186,7 +186,7 @@
  * @min 0
  * @max 255
  * @desc 填入R区域的ID，地图中设置的R区域将会变为光滑区域。
- * @default []
+ * @default ["10","34","35"]
  * 
  * @param 滑行动作帧
  * @type number
@@ -219,7 +219,7 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称：		LST (Layer_Slippery_Tile)
+//		插件简称		LST (Layer_Slippery_Tile)
 //		临时全局变量	DrillUp.drill_LST_xxx
 //		临时局部变量	无
 //		存储数据变量	无
@@ -329,10 +329,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_LayerSlipperyTile = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_LayerSlipperyTile');
+	var Imported = Imported || {};
+	Imported.Drill_LayerSlipperyTile = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_LayerSlipperyTile');
 	
 	
 	/*-----------------杂项------------------*/
@@ -356,11 +356,17 @@
 // ** ☆插件指令
 //=============================================================================
 //==============================
-// * 插件指令 - 指令
+// * 插件指令 - 指令绑定
 //==============================
 var _drill_LST_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_LST_pluginCommand.call(this, command, args);
+	this.drill_LST_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_LST_pluginCommand = function( command, args ){
 	if( command === ">物体滑行" ){
 		
 		/*-----------------DEBUG------------------*/
@@ -482,7 +488,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 };
 //==============================
-// ** 插件指令 - 事件检查
+// * 插件指令 - 事件检查
 //==============================
 Game_Map.prototype.drill_LST_isEventExist = function( e_id ){
 	if( e_id == 0 ){ return false; }
@@ -810,15 +816,16 @@ Scene_Map.prototype.drill_LST_updateDebugSprite = function() {
 // ** 稀疏矩阵【Drill_LST_SparseMatrix】
 // **		
 // **		作用域：	地图界面
-// **		主功能：	> 定义一个稀疏矩阵的数据类。
-// **					> 此矩阵适用于 存在大量零值null值 的情况。
-// **		子功能：	->稀疏矩阵
+// **		主功能：	定义一个稀疏矩阵的数据类。
+// **		子功能：	
+// **					->稀疏矩阵
 // **						->设置值（开放函数）
 // **						->获取值（开放函数）
 // **						->删除值（开放函数）
 // **						->矩阵是否为空（开放函数）
 // **		
 // **		说明：	> 该类可存储在 $gameMap 中。
+// **				> 此矩阵适用于 存在大量零值null值 的情况。
 //=============================================================================
 //==============================
 // * 稀疏矩阵 - 定义

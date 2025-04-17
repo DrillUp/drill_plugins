@@ -196,7 +196,7 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称：		TSB (Title_Social_Button)
+//		插件简称		TSB (Title_Social_Button)
 //		临时全局变量	DrillUp.g_TSB_xxx
 //		临时局部变量	this._drill_TSB_xxx
 //		存储数据变量	无

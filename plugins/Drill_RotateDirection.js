@@ -157,18 +157,27 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_RotateDirection = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_RotateDirection');
+	var Imported = Imported || {};
+	Imported.Drill_RotateDirection = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_RotateDirection');
 
 
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_RD_pluginCommand = Game_Interpreter.prototype.pluginCommand
-Game_Interpreter.prototype.pluginCommand = function(command, args){
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_RD_pluginCommand.call(this,command, args);
+	this.drill_RD_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_RD_pluginCommand = function( command, args ){
 	if( command === ">玩家原地转向" ){
 		if(args.length == 2){
 			var type = String(args[1]);
@@ -181,6 +190,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args){
 		}
 	}
 };
+
 
 //=============================================================================
 // ** 玩家原地转向

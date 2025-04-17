@@ -486,7 +486,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_TVi_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_TVi_PluginTip_baseList.length == 0 ){ return ""; }
@@ -502,9 +502,9 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_TitleVideo = true;
-　　var DrillUp = DrillUp || {}; 
+	var Imported = Imported || {};
+	Imported.Drill_TitleVideo = true;
+	var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_TitleVideo');
 
 	//==============================
@@ -567,9 +567,18 @@ if( Imported.Drill_CoreOfGlobalSave ){
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_TVi_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_TVi_pluginCommand.call(this, command, args);
+	this.drill_TVi_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_TVi_pluginCommand = function( command, args ){
 	if( command === ">标题视频" ){
 		if(args.length == 4){
 			var temp1 = String(args[1]);

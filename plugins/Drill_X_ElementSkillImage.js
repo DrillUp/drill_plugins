@@ -1802,7 +1802,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_XESI_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_XESI_PluginTip_baseList.length == 0 ){ return ""; }
@@ -1824,10 +1824,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_X_ElementSkillImage = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_X_ElementSkillImage');
+	var Imported = Imported || {};
+	Imported.Drill_X_ElementSkillImage = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_X_ElementSkillImage');
 	
 	/*-----------------杂项------------------*/
 	DrillUp.g_XESI_hide_icon = String(DrillUp.parameters['是否隐藏技能图标'] || "true") === "true";	

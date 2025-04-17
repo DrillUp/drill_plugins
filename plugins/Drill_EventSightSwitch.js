@@ -205,10 +205,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_EventSightSwitch = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_EventSightSwitch');
+	var Imported = Imported || {};
+	Imported.Drill_EventSightSwitch = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_EventSightSwitch');
 
 
 //=============================================================================

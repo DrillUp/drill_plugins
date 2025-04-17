@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.0]        系统 - 输入设备核心
+ * @plugindesc [v2.1]        系统 - 输入设备核心
  * @author Drill_up、汗先生
  * 
  * 
@@ -187,6 +187,8 @@
  * 添加了通过插件指令获取鼠标位置功能。
  * [v2.0]
  * 改进了手柄的物理按键连接，支持多手柄的物理按键监听。
+ * [v2.1]
+ * 更新并兼容了新的窗口字符底层。
  * 
  * 
  *
@@ -403,7 +405,7 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称：		COI (Core_Of_Input)
+//		插件简称		COI (Core_Of_Input)
 //		临时全局变量	DrillUp.g_COI_xxx
 //		临时局部变量	无
 //		存储数据变量	无
@@ -565,15 +567,21 @@
 	var DrillUp = DrillUp || {}; 
 	DrillUp.g_COI_PluginTip_curName = "Drill_CoreOfInput.js 系统-输入设备核心";
 	DrillUp.g_COI_PluginTip_baseList = [];
+	//==============================
+	// * 提示信息 - 报错 - 窗口字符底层校验
+	//==============================
+	DrillUp.drill_COI_getPluginTip_NeedUpdate_drawText = function(){
+		return "【" + DrillUp.g_COI_PluginTip_curName + "】\n检测到窗口字符核心版本过低。\n由于底层变化巨大，你需要更新 全部 窗口字符相关插件。\n去看看\"23.窗口字符 > 关于窗口字符底层全更新说明.docx\"进行更新。";
+	};
 	
 	
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_CoreOfInput = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_CoreOfInput');
+	var Imported = Imported || {};
+	Imported.Drill_CoreOfInput = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_CoreOfInput');
 	
 	
 	/*-----------------默认开关------------------*/
@@ -614,9 +622,18 @@
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_COI_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_COI_pluginCommand.call(this, command, args);
+	this.drill_COI_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_COI_pluginCommand = function( command, args ){
 	if( command === ">输入设备核心" ){
 		
 		/*-----------------默认开关------------------*/
@@ -2050,9 +2067,9 @@ TouchInput._onTouchEnd = function( event ){
 		if( DrillUp.g_COI_touchPad_r_up == true ){ this.drill_COI_onRightUp(null); }
 	}
 };
-
 	
-
+	
+	
 //=============================================================================
 // ** ☆键盘
 //		
@@ -2079,6 +2096,22 @@ TouchInput._onTouchEnd = function( event ){
 //					> 这里全为【物理按键】，如果要判断 逻辑按键 是否触发，去用原函数。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
+/*
+  ┌───┐   ┌───┬───┬───┬───┐ ┌───┬───┬───┬───┐ ┌───┬───┬───┬───┐ ┌───┬───┬───┐
+  │Esc│   │F1 │F2 │F3 │F4 │ │F5 │F6 │F7 │F8 │ │F9 │F10│F11│F12│ │P/S│ScL│P/B│  ┌┐    ┌┐    ┌┐
+  └───┘   └───┴───┴───┴───┘ └───┴───┴───┴───┘ └───┴───┴───┴───┘ └───┴───┴───┘  └┘    └┘    └┘
+  ┌───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───────┐ ┌───┬───┬───┐ ┌───┬───┬───┬───┐
+  │~ `│! 1│@ 2│# 3│$ 4│% 5│^ 6│& 7│* 8│( 9│) 0│_ -│+ =│ BacSp │ │Ins│Hom│PUp│ │NmL│ / │ * │ - │
+  ├───┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─────┤ ├───┼───┼───┤ ├───┼───┼───┼───┤
+  │ Tab │ Q │ W │ E │ R │ T │ Y │ U │ I │ O │ P │{ [│} ]│ | \ │ │Del│End│PDn│ │ 7 │ 8 │ 9 │   │
+  ├─────┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴─────┤ └───┴───┴───┘ ├───┼───┼───┤ + │
+  │ Caps │ A │ S │ D │ F │ G │ H │ J │ K │ L │: ;│" '│ Enter  │               │ 4 │ 5 │ 6 │   │
+  ├──────┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴────────┤     ┌───┐     ├───┼───┼───┼───┤
+  │ Shift  │ Z │ X │ C │ V │ B │ N │ M │< ,│> .│? /│  Shift   │     │ ↑ │     │ 1 │ 2 │ 3 │   │
+  ├─────┬──┴─┬─┴──┬┴───┴───┴───┴───┴───┴──┬┴───┼───┴┬────┬────┤ ┌───┼───┼───┐ ├───┴───┼───┤ E││
+  │ Ctrl│Win │Alt │         Space         │ Alt│ Win│Menu│Ctrl│ │ ← │ ↓ │ → │ │   0   │ . │←─┘│
+  └─────┴────┴────┴───────────────────────┴────┴────┴────┴────┘ └───┴───┴───┘ └───────┴───┴───┘
+*/
 //==============================
 // * 键盘 - 物理按键
 //==============================
@@ -2794,13 +2827,14 @@ Input.drill_COI_getPadInfo = function(){
 
 //=============================================================================
 // ** 鼠标DEBUG窗口【Drill_COI_MouseDebugWindow】
-//			
-//			作用域：	地图界面、战斗界面、菜单界面
-//			主功能：	定义一个窗口，用于描述 鼠标设备 的内容信息。
-//			子功能：	->设备绑定
-//						->内容显示
-//						
-//			说明：	> 临时的调试窗口。
+// **		
+// **		作用域：	地图界面、战斗界面、菜单界面
+// **		主功能：	定义一个窗口，用于描述 鼠标设备 的内容信息。
+// **		子功能：	
+// **					->设备绑定
+// **					->内容显示
+// **					
+// **		说明：	> 临时的调试窗口。
 //=============================================================================
 //==============================
 // * 鼠标DEBUG窗口 - 定义
@@ -2814,7 +2848,7 @@ Drill_COI_MouseDebugWindow.prototype.constructor = Drill_COI_MouseDebugWindow;
 // * 鼠标DEBUG窗口 - 初始化
 //==============================
 Drill_COI_MouseDebugWindow.prototype.initialize = function(){
-    Window_Base.prototype.initialize.call(this, Graphics.boxWidth - 400, 8, 400, 160);	//（固定矩形范围）
+    Window_Base.prototype.initialize.call(this, Graphics.boxWidth - 400, 8, 400, 140);	//（固定矩形范围）
 	this.drill_window_initChild();		//初始化子功能
 };
 //==============================
@@ -2827,7 +2861,6 @@ Drill_COI_MouseDebugWindow.prototype.update = function() {
 //==============================
 // * 鼠标DEBUG窗口 - 窗口属性
 //==============================
-Drill_COI_MouseDebugWindow.prototype.lineHeight = function(){ return 18; };
 Drill_COI_MouseDebugWindow.prototype.standardFontSize = function(){ return 16; };
 //==============================
 // * 鼠标DEBUG窗口 - 初始化子功能
@@ -2870,6 +2903,7 @@ Drill_COI_MouseDebugWindow.prototype.drill_window_updateContext = function() {
 	context += "\n";
 	context += "\\c[0]（按键后会变为亮黄色。注意物理按键与改键无关）";
 	context += "\n";
+	context += "\n";
 	context += "\\c[24]鼠标位置：\\c[0]（" + mouse_pos['x'] + "," + mouse_pos['y'] + "）";
 	if( TouchInput.drill_COI_isMousePosInOutside() == true ){
 		context += "出界";
@@ -2889,30 +2923,53 @@ Drill_COI_MouseDebugWindow.prototype.drill_window_updateContext = function() {
 	this._drill_lastContext = context;
 	
 	// > 绘制设置
-	if( Imported.Drill_CoreOfWindowAuxiliary ){
-		var context_list = context.split("\n");
-		var options = {
-			'width':this.width,
-			'lineheight':18,
-			'align':"左对齐",
+	if( Imported.Drill_CoreOfWindowCharacter ){
+		
+		// > 窗口字符底层校验
+		if( typeof(_drill_COWC_drawText_functionExist) == "undefined" ){
+			alert( DrillUp.drill_COI_getPluginTip_NeedUpdate_drawText() );
 		};
-		this.drill_COWA_drawTextListEx( context_list, options);
+		
+		// > 参数准备
+		var options = {};
+		options['infoParam'] = {};
+		options['infoParam']['x'] = 0;
+		options['infoParam']['y'] = 0;
+		options['infoParam']['canvasWidth']  = this.width;
+		options['infoParam']['canvasHeight'] = this.height;
+		
+		options['blockParam'] = {};			//『清零字符默认间距』
+		options['blockParam']['paddingTop'] = 0;
+		options['rowParam'] = {};
+		options['rowParam']['lineHeight_upCorrection'] = 0;
+		
+		options['baseParam'] = {};
+		options['baseParam']['fontSize'] = this.standardFontSize();	//（使用当前窗口的字体大小）
+		
+		// > 清空画布（固定高宽只需要清空）
+		this.contents.clear();
+		
+		
+		// > 『字符主流程』 - 绘制文本【窗口字符 - 窗口字符核心】
+		this.drill_COWC_drawText( context, options );
+		
 	}else{
 		this.drawText("缺少核心插件，无法显示文本。", 2, 2, this.width, 'left');
-		this.drawText("需要 Drill_CoreOfWindowAuxiliary 窗口辅助核心。", 2, 22, this.width, 'left');
+		this.drawText("需要 Drill_CoreOfWindowCharacter 窗口字符-窗口字符核心★★v2.0及以上★★。", 2, 22, this.width, 'left');
 	}
 };
 
 
 //=============================================================================
 // ** 键盘DEBUG窗口【Drill_COI_KeyboardDebugWindow】
-//			
-//			作用域：	地图界面、战斗界面、菜单界面
-//			主功能：	定义一个窗口，用于描述 键盘设备 的内容信息。
-//			子功能：	->设备绑定
-//						->内容显示
-//						
-//			说明：	> 临时的调试窗口。
+// **		
+// **		作用域：	地图界面、战斗界面、菜单界面
+// **		主功能：	定义一个窗口，用于描述 键盘设备 的内容信息。
+// **		子功能：	
+// **					->设备绑定
+// **					->内容显示
+// **					
+// **		说明：	> 临时的调试窗口。
 //=============================================================================
 //==============================
 // * 键盘DEBUG窗口 - 定义
@@ -2926,7 +2983,7 @@ Drill_COI_KeyboardDebugWindow.prototype.constructor = Drill_COI_KeyboardDebugWin
 // * 键盘DEBUG窗口 - 初始化
 //==============================
 Drill_COI_KeyboardDebugWindow.prototype.initialize = function(){
-    Window_Base.prototype.initialize.call(this, Graphics.boxWidth - 816, 8, 816, 305);	//（固定矩形范围）
+    Window_Base.prototype.initialize.call(this, Graphics.boxWidth - 816, 8, 816, 240);	//（固定矩形范围）
 	this.drill_window_initChild();		//初始化子功能
 };
 //==============================
@@ -2939,7 +2996,6 @@ Drill_COI_KeyboardDebugWindow.prototype.update = function() {
 //==============================
 // * 键盘DEBUG窗口 - 窗口属性
 //==============================
-Drill_COI_KeyboardDebugWindow.prototype.lineHeight = function(){ return 18; };
 Drill_COI_KeyboardDebugWindow.prototype.standardFontSize = function(){ return 16; };
 //==============================
 // * 键盘DEBUG窗口 - 初始化子功能
@@ -3271,30 +3327,53 @@ Drill_COI_KeyboardDebugWindow.prototype.drill_window_updateContext = function() 
 	this._drill_lastContext = context;
 	
 	// > 绘制设置
-	if( Imported.Drill_CoreOfWindowAuxiliary ){
-		var context_list = context.split("\n");
-		var options = {
-			'width':this.width,
-			'lineheight':18,
-			'align':"左对齐",
+	if( Imported.Drill_CoreOfWindowCharacter ){
+		
+		// > 窗口字符底层校验
+		if( typeof(_drill_COWC_drawText_functionExist) == "undefined" ){
+			alert( DrillUp.drill_COI_getPluginTip_NeedUpdate_drawText() );
 		};
-		this.drill_COWA_drawTextListEx( context_list, options);
+		
+		// > 参数准备
+		var options = {};
+		options['infoParam'] = {};
+		options['infoParam']['x'] = 0;
+		options['infoParam']['y'] = 0;
+		options['infoParam']['canvasWidth']  = this.width;
+		options['infoParam']['canvasHeight'] = this.height;
+		
+		options['blockParam'] = {};			//『清零字符默认间距』
+		options['blockParam']['paddingTop'] = 0;
+		options['rowParam'] = {};
+		options['rowParam']['lineHeight_upCorrection'] = 0;
+		
+		options['baseParam'] = {};
+		options['baseParam']['fontSize'] = this.standardFontSize();	//（使用当前窗口的字体大小）
+		
+		// > 清空画布（固定高宽只需要清空）
+		this.contents.clear();
+		
+		
+		// > 『字符主流程』 - 绘制文本【窗口字符 - 窗口字符核心】
+		this.drill_COWC_drawText( context, options );
+		
 	}else{
 		this.drawText("缺少核心插件，无法显示文本。", 2, 2, this.width, 'left');
-		this.drawText("需要 Drill_CoreOfWindowAuxiliary 窗口辅助核心。", 2, 22, this.width, 'left');
+		this.drawText("需要 Drill_CoreOfWindowCharacter 窗口字符-窗口字符核心★★v2.0及以上★★。", 2, 22, this.width, 'left');
 	}
 };
 
 
 //=============================================================================
 // ** 手柄DEBUG窗口【Drill_COI_PadDebugWindow】
-//			
-//			作用域：	地图界面、战斗界面、菜单界面
-//			主功能：	定义一个窗口，用于描述 手柄设备 的内容信息。
-//			子功能：	->设备绑定
-//						->内容显示
-//						
-//			说明：	> 临时的调试窗口。
+// **		
+// **		作用域：	地图界面、战斗界面、菜单界面
+// **		主功能：	定义一个窗口，用于描述 手柄设备 的内容信息。
+// **		子功能：	
+// **					->设备绑定
+// **					->内容显示
+// **					
+// **		说明：	> 临时的调试窗口。
 //=============================================================================
 //==============================
 // * 手柄DEBUG窗口 - 定义
@@ -3312,12 +3391,12 @@ Drill_COI_PadDebugWindow.prototype.initialize = function( padIndex ){
 	var yy = 4;
 	if( padIndex == 0 ){ xx = 4; yy = 4; }
 	if( padIndex == 1 ){ xx = Graphics.boxWidth-404; yy = 4; }
-	if( padIndex == 2 ){ xx = 4; yy = 258; }
-	if( padIndex == 3 ){ xx = Graphics.boxWidth-404; yy = 258; }
+	if( padIndex == 2 ){ xx = 4; yy = 220; }
+	if( padIndex == 3 ){ xx = Graphics.boxWidth-404; yy = 220; }
 	if( padIndex == undefined ){ padIndex = DrillUp.g_COI_pads_mainPadIndex; }
 	this._drill_COI_padIndex = padIndex;
 	
-    Window_Base.prototype.initialize.call(this, xx, yy, 400, 250);	//（固定矩形范围）
+    Window_Base.prototype.initialize.call(this, xx, yy, 400, 216);	//（固定矩形范围）
 	
 	this.drill_window_initChild();		//初始化子功能
 };
@@ -3331,7 +3410,6 @@ Drill_COI_PadDebugWindow.prototype.update = function() {
 //==============================
 // * 手柄DEBUG窗口 - 窗口属性
 //==============================
-Drill_COI_PadDebugWindow.prototype.lineHeight = function(){ return 18; };
 Drill_COI_PadDebugWindow.prototype.standardFontSize = function(){ return 16; };
 //==============================
 // * 手柄DEBUG窗口 - 初始化子功能
@@ -3369,14 +3447,22 @@ Drill_COI_PadDebugWindow.prototype.drill_window_updateContext = function() {
         var gamepad_list = navigator.getGamepads();
         if( gamepad_list ){
 			if( gamepad_list.length > 0 ){
-		
+				
 				var gamepad = gamepad_list[ padIndex ];
 				if( gamepad && gamepad.connected ){
-					if( gamepad.buttons.length >= 16 ){		//（只要键位数量>=16的设备，就算能用的手柄）
-						context += "（手柄设备）" + gamepad.id + "\n";
+					var gamepad_str = gamepad.id;
+					gamepad_str = gamepad_str.replace(/[ ][ ]+/g,"");
+					if( gamepad.buttons.length >= 16 ){			//（只要键位数量>=16的设备，就算能用的手柄）
+						context += gamepad_str + "\n";
+						context += "\\c[24]【有效手柄设备】\\c[0]\n";
+						is_available = true;
+					}else if( gamepad.buttons.length >= 6 ){	//（键位不足但是有 上下左右+AB键 的设备，也能用）
+						context += gamepad_str + "\n";
+						context += "\\c[2]【缺少部分按键的手柄设备】\\c[0]\n";
 						is_available = true;
 					}else{
-						context += "（未知设备）" + gamepad.id + "\n";
+						context += gamepad_str + "\n";
+						context += "\\c[2]【未知设备】\\c[0]\n";
 					}
 				}else{
 					context += "\\c[7]（未连接）\\c[0]\n";
@@ -3455,17 +3541,39 @@ Drill_COI_PadDebugWindow.prototype.drill_window_updateContext = function() {
 	this._drill_lastContext = context;
 	
 	// > 绘制设置
-	if( Imported.Drill_CoreOfWindowAuxiliary ){
-		var context_list = context.split("\n");
-		var options = {
-			'width':this.width,
-			'lineheight':18,
-			'align':"左对齐",
+	if( Imported.Drill_CoreOfWindowCharacter ){
+		
+		// > 窗口字符底层校验
+		if( typeof(_drill_COWC_drawText_functionExist) == "undefined" ){
+			alert( DrillUp.drill_COI_getPluginTip_NeedUpdate_drawText() );
 		};
-		this.drill_COWA_drawTextListEx( context_list, options);
+		
+		// > 参数准备
+		var options = {};
+		options['infoParam'] = {};
+		options['infoParam']['x'] = 0;
+		options['infoParam']['y'] = 0;
+		options['infoParam']['canvasWidth']  = this.width;
+		options['infoParam']['canvasHeight'] = this.height;
+		
+		options['blockParam'] = {};			//『清零字符默认间距』
+		options['blockParam']['paddingTop'] = 0;
+		options['rowParam'] = {};
+		options['rowParam']['lineHeight_upCorrection'] = 0;
+		
+		options['baseParam'] = {};
+		options['baseParam']['fontSize'] = this.standardFontSize();	//（使用当前窗口的字体大小）
+		
+		// > 清空画布（固定高宽只需要清空）
+		this.contents.clear();
+		
+		
+		// > 『字符主流程』 - 绘制文本【窗口字符 - 窗口字符核心】
+		this.drill_COWC_drawText( context, options );
+		
 	}else{
 		this.drawText("缺少核心插件，无法显示文本。", 2, 2, this.width, 'left');
-		this.drawText("需要 Drill_CoreOfWindowAuxiliary 窗口辅助核心。", 2, 22, this.width, 'left');
+		this.drawText("需要 Drill_CoreOfWindowCharacter 窗口字符-窗口字符核心★★v2.0及以上★★。", 2, 22, this.width, 'left');
 	}
 };
 	

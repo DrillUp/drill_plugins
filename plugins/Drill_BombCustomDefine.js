@@ -602,7 +602,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_BoCD_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_BoCD_PluginTip_baseList.length == 0 ){ return ""; }
@@ -627,10 +627,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_BombCustomDefine = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_BombCustomDefine');
+	var Imported = Imported || {};
+	Imported.Drill_BombCustomDefine = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_BombCustomDefine');
 	
 	DrillUp.g_BoCD_p_canPick = String(DrillUp.parameters["玩家标准炸弹是否可举起"] || "true") == "true";
 	DrillUp.g_BoCD_p_throwRange = Number(DrillUp.parameters["玩家标准炸弹投掷距离"] || 1);
@@ -672,11 +672,20 @@ if( Imported.Drill_BombCore ){
 	
 	
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_BoCD_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_BoCD_pluginCommand.call(this, command, args);
+	this.drill_BoCD_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_BoCD_pluginCommand = function( command, args ){
 	if( command === ">炸弹人控制台" ){
 		
 		if(args.length == 2){
@@ -717,6 +726,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		}
 	}
 };
+
 
 //#############################################################################
 // ** 【标准模块】存储数据

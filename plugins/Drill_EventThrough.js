@@ -141,7 +141,7 @@
 //			->☆插件指令
 //			->☆事件注释
 //
-//			->☆原型链规范（isCollided）
+//			->☆原型链规范（isCollided 物体碰撞）
 //
 //			->☆物体的属性
 //			->☆穿透判断
@@ -209,10 +209,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_EventThrough = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_EventThrough');
+	var Imported = Imported || {};
+	Imported.Drill_EventThrough = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_EventThrough');
 
 
 	/*-----------------杂项------------------*/
@@ -227,9 +227,18 @@
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_ETh_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_ETh_pluginCommand.call(this, command, args);
+	this.drill_ETh_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_ETh_pluginCommand = function( command, args ){
 	if( command === ">事件穿透关系" ){
 		
 		/*-----------------对象组获取------------------*/
@@ -395,7 +404,7 @@ Game_Event.prototype.drill_ETh_readPage = function( page_list ){
 
 
 //=============================================================================
-// ** ☆原型链规范（isCollided）
+// ** ☆原型链规范（isCollided 物体碰撞）
 //
 //			说明：	> 此处专门补上缺失的原型链，未缺失的则注释掉。
 //					（插件完整的功能目录去看看：功能结构树）

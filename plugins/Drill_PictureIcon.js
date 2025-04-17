@@ -132,7 +132,7 @@
 //			->☆静态数据
 //			->☆插件指令
 //				->物品、武器、护甲、技能 四大分类
-//			->☆图片贴图
+//			->☆场景容器之图片贴图
 //				>图片对象层 的图片贴图
 //				>最顶层 的图片贴图
 //				>图片层 的图片贴图
@@ -184,18 +184,27 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_PictureIcon = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_PictureIcon');
+	var Imported = Imported || {};
+	Imported.Drill_PictureIcon = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_PictureIcon');
 	
 	
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_PIc_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_PIc_pluginCommand.call(this, command, args);
+	this.drill_PIc_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_PIc_pluginCommand = function( command, args ){
 	if( command === ">图标图片" ){ 
 		
 		/*-----------------对象组获取------------------*/
@@ -616,13 +625,31 @@ Game_Screen.prototype.drill_PIc_isPictureExist = function( pic_id ){
 	}
 	return true;
 };
+//==============================
+// * 插件指令 - STG兼容『STG的插件指令』
+//==============================
+if( Imported.Drill_STG__objects ){
+	
+	//==============================
+	// * 插件指令 - STG指令绑定
+	//==============================
+	var _drill_STG_PIc_pluginCommand = Drill_STG_GameInterpreter.prototype.pluginCommand;
+	Drill_STG_GameInterpreter.prototype.pluginCommand = function( command, args ){
+		_drill_STG_PIc_pluginCommand.call(this, command, args);
+		this.drill_PIc_pluginCommand( command, args );
+	}
+	//==============================
+	// * 插件指令 - STG指令执行
+	//==============================
+	Drill_STG_GameInterpreter.prototype.drill_PIc_pluginCommand = Game_Interpreter.prototype.drill_PIc_pluginCommand;
+};
 
 
 //#############################################################################
-// ** 【标准模块】图片贴图 ☆图片贴图
+// ** 【标准模块】图片贴图容器 ☆场景容器之图片贴图
 //#############################################################################
 //##############################
-// * 图片贴图 - 获取 - 全部图片贴图【标准函数】
+// * 图片贴图容器 - 获取 - 全部图片贴图【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 贴图数组       （图片贴图）
@@ -633,7 +660,7 @@ Game_Temp.prototype.drill_PIc_getAllPictureSprite = function(){
 	return this.drill_PIc_getAllPictureSprite_Private();
 }
 //##############################
-// * 图片贴图 - 获取 - 容器指针【标准函数】
+// * 图片贴图容器 - 获取 - 容器指针【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 贴图数组       （图片贴图）
@@ -645,7 +672,7 @@ Game_Temp.prototype.drill_PIc_getPictureSpriteTank = function(){
 	return this.drill_PIc_getPictureSpriteTank_Private();
 }
 //##############################
-// * 图片贴图 - 获取 - 根据图片ID【标准函数】
+// * 图片贴图容器 - 获取 - 根据图片ID【标准函数】
 //			
 //			参数：	> picture_id 数字（图片ID）
 //			返回：	> 贴图对象       （图片贴图）
@@ -659,7 +686,7 @@ Game_Temp.prototype.drill_PIc_getPictureSpriteByPictureId = function( picture_id
 	return this.drill_PIc_getPictureSpriteByPictureId_Private( picture_id );
 }
 //=============================================================================
-// ** 图片贴图（接口实现）
+// ** 场景容器之图片贴图（实现）
 //=============================================================================
 //==============================
 // * 图片贴图容器 - 获取 - 容器（私有）

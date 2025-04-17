@@ -806,7 +806,7 @@
 //			->☆插件指令
 //				->简单指令
 //				->高级指令
-//			->☆单位贴图
+//			->☆场景容器之单位贴图
 //				->获取 - 敌人容器指针【标准函数】
 //				->获取 - 根据敌方索引【标准函数】
 //				->获取 - 根据敌人ID【标准函数】
@@ -868,7 +868,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_BFN_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_BFN_PluginTip_baseList.length == 0 ){ return ""; }
@@ -908,10 +908,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_BattleFloatingNum = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_BattleFloatingNum');
+	var Imported = Imported || {};
+	Imported.Drill_BattleFloatingNum = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_BattleFloatingNum');
 	
 	
 	//==============================
@@ -1073,9 +1073,18 @@ if( Imported.Drill_CoreOfBallistics &&
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
-var _drill_BFN_pluginCommand = Game_Interpreter.prototype.pluginCommand
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
+var _drill_BFN_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_BFN_pluginCommand.call(this, command, args);
+	this.drill_BFN_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_BFN_pluginCommand = function( command, args ){
 	if( command === ">战斗临时漂浮参数数字" ){
 		
 		
@@ -1370,10 +1379,10 @@ if( typeof(_drill_mouse_getCurPos) == "undefined" ){	//防止重复定义
 
 
 //#############################################################################
-// ** 【标准模块】单位贴图 ☆单位贴图
+// ** 【标准模块】单位贴图容器 ☆场景容器之单位贴图
 //#############################################################################
 //##############################
-// * 单位贴图 - 获取 - 敌人容器指针【标准函数】
+// * 单位贴图容器 - 获取 - 敌人容器指针【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 贴图数组    （敌人贴图）
@@ -1384,7 +1393,7 @@ Game_Temp.prototype.drill_BFN_getEnemySpriteTank = function(){
 	return this.drill_BFN_getEnemySpriteTank_Private();
 }
 //##############################
-// * 单位贴图 - 获取 - 根据敌方索引【标准函数】
+// * 单位贴图容器 - 获取 - 根据敌方索引【标准函数】
 //				
 //			参数：	> index 数字 （敌方第n个位置，从0开始计数）
 //			返回：	> 贴图       （敌人贴图）
@@ -1395,7 +1404,7 @@ Game_Temp.prototype.drill_BFN_getEnemySpriteByIndex = function( index ){
 	return this.drill_BFN_getEnemySpriteByIndex_Private( index );
 }
 //##############################
-// * 单位贴图 - 获取 - 根据敌人ID【标准函数】
+// * 单位贴图容器 - 获取 - 根据敌人ID【标准函数】
 //				
 //			参数：	> enemy_id 数字（敌人ID）
 //			返回：	> 贴图数组     （敌人贴图数组）
@@ -1406,7 +1415,7 @@ Game_Temp.prototype.drill_BFN_getEnemySpriteByEnemyId = function( enemy_id ){
 	return this.drill_BFN_getEnemySpriteByEnemyId_Private( enemy_id );
 }
 //##############################
-// * 单位贴图 - 获取 - 角色容器指针【标准函数】
+// * 单位贴图容器 - 获取 - 角色容器指针【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 贴图数组   （角色贴图）
@@ -1417,7 +1426,7 @@ Game_Temp.prototype.drill_BFN_getActorSpriteTank = function(){
 	return this.drill_BFN_getActorSpriteTank_Private();
 }
 //##############################
-// * 单位贴图 - 获取 - 根据我方索引【标准函数】
+// * 单位贴图容器 - 获取 - 根据我方索引【标准函数】
 //				
 //			参数：	> index 数字 （我方第n个位置，从0开始计数）
 //			返回：	> 贴图       （角色贴图）
@@ -1428,7 +1437,7 @@ Game_Temp.prototype.drill_BFN_getActorSpriteByIndex = function( index ){
 	return this.drill_BFN_getActorSpriteByIndex_Private( index );
 }
 //##############################
-// * 单位贴图 - 获取 - 根据角色ID【标准函数】
+// * 单位贴图容器 - 获取 - 根据角色ID【标准函数】
 //				
 //			参数：	> actor_id 数字（角色ID）
 //			返回：	> sprite 贴图  （角色贴图）
@@ -1439,7 +1448,7 @@ Game_Temp.prototype.drill_BFN_getActorSpriteByActorId = function( actor_id ){
 	return this.drill_BFN_getActorSpriteByActorId_Private( actor_id );
 }
 //=============================================================================
-// ** 单位贴图（接口实现）
+// ** 场景容器之单位贴图（实现）
 //=============================================================================
 //==============================
 // * 单位贴图容器 - 获取 - 敌人容器指针（私有）
@@ -2053,13 +2062,24 @@ Scene_Battle.prototype.drill_BFN_updateNumberSpriteDelete = function() {
 // ** 数字贴图【Drill_BFN_NumberSprite】
 // **
 // **		作用域：	战斗界面
-// **		主功能：	> 定义一个 数字贴图 。
-// **		子功能：	->贴图
+// **		主功能：	定义一个 数字贴图 。
+// **		子功能：	
+// **					->贴图『独立贴图』
+// **						x->显示贴图/隐藏贴图
+// **						x->是否就绪
+// **						x->优化策略
+// **						->销毁
+// **						->初始化数据
+// **						->初始化对象
+// **					
+// **					->数字贴图
+// **						->是否可被销毁（开放函数）
+// **						->执行销毁（开放函数）
 // **						->UI基准
 // **						->镜头与位置
 // **					->弹道
 // **					->参数数字
-// **				
+// **					
 // **		代码：	> 范围 - 该类只显示一个参数数字贴图。
 // **				> 结构 - [ ●合并 /分离/混乱] 数据与贴图合并。
 // **				> 数量 - [单个/ ●多个 ] 
@@ -2083,6 +2103,8 @@ Drill_BFN_NumberSprite.prototype.constructor = Drill_BFN_NumberSprite;
 Drill_BFN_NumberSprite.prototype.initialize = function( data ) {
 	Sprite_Base.prototype.initialize.call(this);
 	this._drill_data = JSON.parse(JSON.stringify( data ));	//深拷贝数据
+	
+	this.drill_initData();									//初始化数据
 	this.drill_initSprite();								//初始化对象
 };
 //==============================
@@ -2094,14 +2116,14 @@ Drill_BFN_NumberSprite.prototype.update = function() {
 	this.drill_updateOpacity();		//帧刷新 - 透明度
 };
 //==============================
-// * 数字贴图 - 是否可被销毁（开放函数）
+// * 数字贴图 - 初始化数据『独立贴图』
 //==============================
-Drill_BFN_NumberSprite.prototype.drill_isDead = function() {
-	var b_data = this._drill_data['b_data'];
-	return this._drill_curTime > b_data['movementTime'];
+Drill_BFN_NumberSprite.prototype.drill_initData = function() {
+	//（暂无 默认值）
+	//（可见 ['s_data'] 和 ['b_data']）
 };
 //==============================
-// * 数字贴图 - 初始化对象
+// * 数字贴图 - 初始化对象『独立贴图』
 //==============================
 Drill_BFN_NumberSprite.prototype.drill_initSprite = function() {
 	var s_data = this._drill_data['s_data'];
@@ -2181,7 +2203,14 @@ Drill_BFN_NumberSprite.prototype.drill_initNumberSprite = function() {
 	this._drill_symbolSprite.drill_COGN_reflashString( this._drill_data['param_context'] );
 };
 //==============================
-// * 销毁 - 执行销毁
+// * 数字贴图 - 是否可被销毁（开放函数）
+//==============================
+Drill_BFN_NumberSprite.prototype.drill_isDead = function() {
+	var b_data = this._drill_data['b_data'];
+	return this._drill_curTime > b_data['movementTime'];
+};
+//==============================
+// * 数字贴图 - 执行销毁（开放函数）
 //==============================
 Drill_BFN_NumberSprite.prototype.drill_destroy = function() {
 	

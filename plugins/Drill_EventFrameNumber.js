@@ -394,7 +394,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_EFN_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_EFN_PluginTip_baseList.length == 0 ){ return ""; }
@@ -428,10 +428,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_EventFrameNumber = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_EventFrameNumber');
+	var Imported = Imported || {};
+	Imported.Drill_EventFrameNumber = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_EventFrameNumber');
 	
 	
 	/*-----------------杂项------------------*/
@@ -450,9 +450,18 @@ if( Imported.Drill_CoreOfEventFrame ){
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_EFN_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_EFN_pluginCommand.call(this, command, args);
+	this.drill_EFN_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_EFN_pluginCommand = function( command, args ){
 	if( command === ">多帧行走图" ){
 		
 		/*-----------------对象组获取------------------*/
@@ -903,11 +912,13 @@ Game_CharacterBase.prototype.drill_EFN_setupNote = function( note ){
 // ** 多帧行走图 控制器【Drill_EFN_Controller】
 // **		
 // **		作用域：	地图界面
-// **		主功能：	> 定义一个专门控制行走图动画帧的数据类。
-// **		子功能：	->动画帧
+// **		主功能：	定义一个专门控制行走图动画帧的数据类。
+// **		子功能：	
+// **					->控制器
 // **						->启用/关闭
 // **						->暂停/继续
 // **						->重设数据
+// **					
 // **					->A主体
 // **						> 初始帧
 // **						> 帧数
@@ -925,7 +936,7 @@ Game_CharacterBase.prototype.drill_EFN_setupNote = function( note ){
 // **						->循环播放
 // **						->排除初始帧
 // **						->获取序列
-// **		
+// **					
 // **		说明：	> 该类可与 Game_CharacterBase 一并存储在 $gameMap 中。
 //=============================================================================
 //==============================

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        地图 - 多线程
+ * @plugindesc [v1.5]        地图 - 多线程
  * @author Drill_up
  * 
  * 
@@ -18,13 +18,15 @@
  *
  * -----------------------------------------------------------------------------
  * ----插件扩展
- * 该插件可以单独使用。
- * 也可以辅助扩展下列插件。
+ * 该插件 不能 单独使用。
+ * 必须基于核心插件才能运行。
+ * 基于：
+ *   - Drill_CoreOfConditionBranch   系统-分支条件核心
  * 可作用于：
- *   - Drill_GaugeButton          鼠标-地图按钮集
- *   - Drill_OperateHud           鼠标-鼠标辅助操作面板
- *   - Drill_WindowMenuButton     控件-主菜单选项按钮管理器
- *   - Drill_SecretCode           键盘-秘籍输入器
+ *   - Drill_GaugeButton             鼠标-地图按钮集
+ *   - Drill_OperateHud              鼠标-鼠标辅助操作面板
+ *   - Drill_WindowMenuButton        控件-主菜单选项按钮管理器
+ *   - Drill_SecretCode              键盘-秘籍输入器
  *     该插件可以使得上述目标插件具有串行与并行的功能。
  * 
  * -----------------------------------------------------------------------------
@@ -107,6 +109,8 @@
  * 大幅度优化了内部结构。
  * [v1.4]
  * 添加了强制插入串行执行的功能。
+ * [v1.5]
+ * 修复了切换地图时，指令执行到一半就没了的bug。
  * 
  */
  
@@ -194,7 +198,21 @@
 	//==============================
 	var DrillUp = DrillUp || {}; 
 	DrillUp.g_LCT_PluginTip_curName = "Drill_LayerCommandThread.js 地图-多线程";
-	DrillUp.g_LCT_PluginTip_baseList = [];
+	DrillUp.g_LCT_PluginTip_baseList = ["Drill_CoreOfConditionBranch.js 系统-分支条件核心"];
+	//==============================
+	// * 提示信息 - 报错 - 缺少基础插件
+	//			
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
+	//==============================
+	DrillUp.drill_LCT_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_LCT_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_LCT_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_LCT_PluginTip_baseList.length; i++){
+			message += "\n- ";
+			message += DrillUp.g_LCT_PluginTip_baseList[i];
+		}
+		return message;
+	};
 	//==============================
 	// * 提示信息 - 报错 - 参数不存在
 	//==============================
@@ -212,19 +230,33 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_LayerCommandThread = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_LayerCommandThread');
+	var Imported = Imported || {};
+	Imported.Drill_LayerCommandThread = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_LayerCommandThread');
 	
+	
+//=============================================================================
+// * >>>>基于插件检测>>>>
+//=============================================================================
+if( Imported.Drill_CoreOfConditionBranch ){
 	
 	
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_LCT_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_LCT_pluginCommand.call(this, command, args);
+	this.drill_LCT_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_LCT_pluginCommand = function( command, args ){
 	if( command === ">地图多线程" || command === ">多线程" ){
 		
 		if( args.length == 4 ){		//>地图多线程 : 串行执行 : 公共事件[1]
@@ -345,7 +377,7 @@ Game_Map.prototype.drill_LCT_forceInsertPipeEvent = function( data ){
 var _drill_LCT_map_initialize = Game_Map.prototype.initialize;
 Game_Map.prototype.initialize = function() {
 	_drill_LCT_map_initialize.call(this);
-    this._drill_LCT_pipeEventTank = [];
+	this._drill_LCT_pipeEventTank = [];
 }
 //==============================
 // * 管道容器 - 切换地图时
@@ -353,7 +385,15 @@ Game_Map.prototype.initialize = function() {
 var _drill_LCT_map_setupEvents = Game_Map.prototype.setupEvents;
 Game_Map.prototype.setupEvents = function() {
 	_drill_LCT_map_setupEvents.call(this);
-    this._drill_LCT_pipeEventTank = [];
+	//this._drill_LCT_pipeEventTank = [];		//（切换地图后不要清空管道，否则会出现指令执行到一半，就没了的bug）
+}
+//==============================
+// * 管道容器 - 校验数据
+//==============================
+Game_Map.prototype.drill_LCT_checkData = function() {
+	if( this._drill_LCT_pipeEventTank == undefined ){
+		this._drill_LCT_pipeEventTank = [];
+	}
 }
 //==============================
 // * 管道容器 - 添加公共事件（私有）
@@ -369,6 +409,8 @@ Game_Map.prototype.drill_LCT_addPipeEvent_private = function( data ){
 		alert( DrillUp.drill_LCT_getPluginTip_ErrorDataEmpty( data['commonEventId'] ) );
 		return;
 	}
+	// > 校验数据
+	this.drill_LCT_checkData();
 	
 	// > 添加
 	var pipe_event = new Drill_LCT_GamePipeEvent( data );
@@ -392,6 +434,8 @@ Game_Map.prototype.drill_LCT_forceInsertPipeEvent_private = function( data ){
 		alert( DrillUp.drill_LCT_getPluginTip_ErrorDataEmpty( data['commonEventId'] ) );
 		return;
 	}
+	// > 校验数据
+	this.drill_LCT_checkData();
 	
 	// > 添加
 	var pipe_event = new Drill_LCT_GamePipeEvent( data );
@@ -430,8 +474,12 @@ var _drill_LCT_map_update = Game_Map.prototype.updateInterpreter;
 Game_Map.prototype.updateInterpreter = function() {
 	_drill_LCT_map_update.call(this);
 	
+	// > 校验数据
+	this.drill_LCT_checkData();
+	
 	for(var i = 0; i < this._drill_LCT_pipeEventTank.length; i++ ){
 		var pipe_event = this._drill_LCT_pipeEventTank[i];
+		if( pipe_event == undefined ){ continue; }
 		pipe_event.drill_controller_update();
 	}
 };
@@ -442,15 +490,23 @@ var _drill_LCT_map_update2 = Game_Map.prototype.update;
 Game_Map.prototype.update = function( sceneActive ){
 	_drill_LCT_map_update2.call( this, sceneActive );
 	
+	// > 校验数据
+	this.drill_LCT_checkData();
+	
 	for(var i = this._drill_LCT_pipeEventTank.length-1; i >= 0; i-- ){
 		var pipe_event = this._drill_LCT_pipeEventTank[i];
+		if( pipe_event == undefined ){
+			this._drill_LCT_pipeEventTank.splice(i,1);
+			delete pipe_event;
+			continue;
+		}
 		if( pipe_event._drill_erased == true ){
 			this._drill_LCT_pipeEventTank.splice(i,1);
 			delete pipe_event;
+			continue;
 		}
 	}
 }
-
 //==============================
 // * 管道容器控制 - 刷新（不需要）
 //==============================
@@ -459,7 +515,6 @@ Game_Map.prototype.update = function( sceneActive ){
 //	（刷新操作）
 //	_drill_LCT_map_refresh.call(this);
 //};
-
 //==============================
 // * 管道容器控制 - 串行处理 - 事件执行队列
 //==============================
@@ -477,10 +532,14 @@ Game_Map.prototype.setupStartingMapEvent = function() {
 	}
 	if( available_events.length > 0 ){
 		
+		// > 校验数据
+		this.drill_LCT_checkData();
+		
 		// > 管道事件 依附
 		//		 （随机依附一个eventid，依附的id为0时，玩家可以乱跑）
 		for(var i = 0; i < this._drill_LCT_pipeEventTank.length; i++ ){
 			var pipe_event = this._drill_LCT_pipeEventTank[i];
+			if( pipe_event == undefined ){ continue; }
 			if( pipe_event.drill_isStarting() == true ){
 				
 				// > 塞入指令
@@ -503,9 +562,13 @@ Game_Map.prototype.isAnyEventStarting = function() {
 	var b = _drill_LCT_isAnyEventStarting.call( this );
 	if( b == false ){
 		
+		// > 校验数据
+		this.drill_LCT_checkData();
+		
 		// > 没有事件运行时，检查 管道容器
 		for(var i = 0; i < this._drill_LCT_pipeEventTank.length; i++ ){
 			var pipe_event = this._drill_LCT_pipeEventTank[i];
+			if( pipe_event == undefined ){ continue; }
 			if( pipe_event.drill_isStarting() == true ){	//（有管道物体运行，则阻塞全部事件）
 				return true;
 			}
@@ -520,8 +583,9 @@ Game_Map.prototype.isAnyEventStarting = function() {
 // ** 管道物体【Drill_LCT_GamePipeEvent】
 // **		
 // **		作用域：	地图界面
-// **		主功能：	> 定义一个构建 串行/并行 的小型事件，执行公共事件用。
-// **		子功能：	->控制器
+// **		主功能：	定义一个构建 串行/并行 的小型事件，执行公共事件用。
+// **		子功能：	
+// **					->管道物体
 // **						->帧刷新
 // **						->重设数据
 // **							->序列号
@@ -771,6 +835,16 @@ Drill_LCT_GamePipeEvent.prototype.drill_isStarting = function() {
 Drill_LCT_GamePipeEvent.prototype.drill_clearStartingFlag = function() {
     this._drill_block_starting = false;
 };
+
+
+//=============================================================================
+// * <<<<基于插件检测<<<<
+//=============================================================================
+}else{
+		Imported.Drill_LayerCommandThread = false;
+		var pluginTip = DrillUp.drill_LCT_getPluginTip_NoBasePlugin();
+		alert( pluginTip );
+}
 
 
 

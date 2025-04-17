@@ -152,7 +152,7 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称：		SG (Speed_Gear)
+//		插件简称		SG (Speed_Gear)
 //		临时全局变量	DrillUp.g_SG_xxx
 //		临时局部变量	无
 //		存储数据变量	$gameSystem._drill_SG_xxx
@@ -218,10 +218,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_SpeedGear = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_SpeedGear');
+	var Imported = Imported || {};
+	Imported.Drill_SpeedGear = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_SpeedGear');
 	
 	
 	/*-----------------杂项------------------*/
@@ -239,9 +239,18 @@
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_SG_pluginCommand = Game_Interpreter.prototype.pluginCommand
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_SG_pluginCommand.call(this,command, args);
+	this.drill_SG_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_SG_pluginCommand = function( command, args ){
 	if( command === ">变速齿轮" ){ 
 	
 		if( args.length == 4 ){

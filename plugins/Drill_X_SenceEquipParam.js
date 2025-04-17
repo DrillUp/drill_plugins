@@ -415,10 +415,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_X_SenceEquipParam = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_X_SenceEquipParam');
+	var Imported = Imported || {};
+	Imported.Drill_X_SenceEquipParam = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_X_SenceEquipParam');
 	
 	/*-----------------杂项------------------*/
     DrillUp.g_XSEP_param_float_acc = Number(DrillUp.parameters['显示数值小数点位数'] || 1);

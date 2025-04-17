@@ -227,6 +227,12 @@
 //		★其它说明细节：
 //			1.玩家的id是 -2 ，所有声音捕获都会被赋值，有玩家也有事件。
 //			  玩家不设置声音距离化。
+//			2.正在播放音乐：（2024/7/25）
+//				╭══════════════════════╮
+//				║ ~《小爱丽丝捡金币》~ ║
+//				║ 0:59 ━━━━●───── 2:02 ║
+//				║  ←   ‖   →   ■   ≡   ║
+//				╰══════════════════════╯
 //		
 //		★存在的问题：
 //			1.问题：捕获SE的方法有些零散，代码的结构有些复杂，不直观。
@@ -245,7 +251,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_ESo_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_ESo_PluginTip_baseList.length == 0 ){ return ""; }
@@ -267,10 +273,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_EventSound = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_EventSound');
+	var Imported = Imported || {};
+	Imported.Drill_EventSound = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_EventSound');
 	
 	/*-----------------声音距离化------------------*/
 	DrillUp.g_ESo_enableDefault = String(DrillUp.parameters['地图默认是否开启距离化'] || "true") === "true";	
@@ -286,12 +292,23 @@
 //=============================================================================
 if( Imported.Drill_RmmvCoreFix ){
 	
+	
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_ESo_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_ESo_pluginCommand.call(this, command, args);
+	this.drill_ESo_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_ESo_pluginCommand = function( command, args ){
+	
 	/*-----------------声音距离化------------------*/
 	if( command === ">事件的声音" ){ // >事件的声音 : 开启声音距离化
 		if(args.length == 2){
@@ -377,7 +394,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 };
 //==============================
-// ** 插件指令 - 事件检查
+// * 插件指令 - 事件检查
 //==============================
 Game_Map.prototype.drill_ESo_isEventExist = function( e_id ){
 	if( e_id == 0 ){ return false; }

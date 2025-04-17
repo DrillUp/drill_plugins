@@ -898,7 +898,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_GFN_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_GFN_PluginTip_baseList.length == 0 ){ return ""; }
@@ -938,10 +938,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_GaugeFloatingNum = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_GaugeFloatingNum');
+	var Imported = Imported || {};
+	Imported.Drill_GaugeFloatingNum = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_GaugeFloatingNum');
 	
 	
 	//==============================
@@ -1103,9 +1103,18 @@ if( Imported.Drill_CoreOfBallistics &&
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_GFN_pluginCommand = Game_Interpreter.prototype.pluginCommand
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_GFN_pluginCommand.call(this, command, args);
+	this.drill_GFN_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_GFN_pluginCommand = function( command, args ){
 	if( command === ">地图临时漂浮参数数字" || command === ">地图漂浮数字" ){
 		
 		
@@ -2038,13 +2047,24 @@ Scene_Map.prototype.drill_GFN_updateNumberSpriteDelete = function() {
 // ** 数字贴图【Drill_GFN_NumberSprite】
 // **
 // **		作用域：	地图界面
-// **		主功能：	> 定义一个 数字贴图 。
-// **		子功能：	->贴图
+// **		主功能：	定义一个 数字贴图 。
+// **		子功能：	
+// **					->贴图『独立贴图』
+// **						x->显示贴图/隐藏贴图
+// **						x->是否就绪
+// **						x->优化策略
+// **						->销毁
+// **						->初始化数据
+// **						->初始化对象
+// **					
+// **					->数字贴图
+// **						->是否可被销毁（开放函数）
+// **						->执行销毁（开放函数）
 // **						->UI基准
 // **						->镜头与位置
 // **					->弹道
 // **					->参数数字
-// **				
+// **					
 // **		代码：	> 范围 - 该类只显示一个参数数字贴图。
 // **				> 结构 - [ ●合并 /分离/混乱] 数据与贴图合并。
 // **				> 数量 - [单个/ ●多个 ] 
@@ -2068,6 +2088,8 @@ Drill_GFN_NumberSprite.prototype.constructor = Drill_GFN_NumberSprite;
 Drill_GFN_NumberSprite.prototype.initialize = function( data ) {
 	Sprite_Base.prototype.initialize.call(this);
 	this._drill_data = JSON.parse(JSON.stringify( data ));	//深拷贝数据
+	
+	this.drill_initData();									//初始化数据
 	this.drill_initSprite();								//初始化对象
 };
 //==============================
@@ -2079,14 +2101,13 @@ Drill_GFN_NumberSprite.prototype.update = function() {
 	this.drill_updateOpacity();		//帧刷新 - 透明度
 };
 //==============================
-// * 数字贴图 - 是否可被销毁（开放函数）
+// * 数字贴图 - 初始化数据『独立贴图』
 //==============================
-Drill_GFN_NumberSprite.prototype.drill_isDead = function() {
-	var b_data = this._drill_data['b_data'];
-	return this._drill_curTime > b_data['movementTime'];
-};
+Drill_GFN_NumberSprite.prototype.drill_initData = function() {
+	//（暂无 默认值）
+}
 //==============================
-// * 数字贴图 - 初始化对象
+// * 数字贴图 - 初始化对象『独立贴图』
 //==============================
 Drill_GFN_NumberSprite.prototype.drill_initSprite = function() {
 	var s_data = this._drill_data['s_data'];
@@ -2171,7 +2192,14 @@ Drill_GFN_NumberSprite.prototype.drill_initNumberSprite = function() {
 	this._drill_symbolSprite.drill_COGN_reflashString( this._drill_data['param_context'] );
 };
 //==============================
-// * 销毁 - 执行销毁
+// * 数字贴图 - 是否可被销毁（开放函数）
+//==============================
+Drill_GFN_NumberSprite.prototype.drill_isDead = function() {
+	var b_data = this._drill_data['b_data'];
+	return this._drill_curTime > b_data['movementTime'];
+};
+//==============================
+// * 数字贴图 - 执行销毁（开放函数）
 //==============================
 Drill_GFN_NumberSprite.prototype.drill_destroy = function() {
 	

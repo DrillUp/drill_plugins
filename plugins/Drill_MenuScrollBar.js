@@ -450,9 +450,9 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_MenuScrollBar = true;
-　　var DrillUp = DrillUp || {}; 
+	var Imported = Imported || {};
+	Imported.Drill_MenuScrollBar = true;
+	var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_MenuScrollBar');
 
 	//==============================
@@ -511,15 +511,25 @@
 			DrillUp.g_MSB_list[i] = DrillUp.drill_MSB_initStyle( {} );
 		}
 	}
-
+	
 	
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_MSB_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_MSB_pluginCommand.call(this, command, args);
+	this.drill_MSB_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_MSB_pluginCommand = function( command, args ){
 	if( command === ">菜单滚动条" ){
+		
 		if(args.length == 2){
 			var type = String(args[1]);
 			if( type == "显示" ){	

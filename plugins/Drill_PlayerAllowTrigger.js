@@ -78,7 +78,7 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称：		PAlT (Player_Allow_Trigger)
+//		插件简称		PAlT (Player_Allow_Trigger)
 //		临时全局变量	DrillUp.g_PAlT_xxx
 //		临时局部变量	无
 //		存储数据变量	无
@@ -145,10 +145,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_PlayerAllowTrigger = true;
-　　var DrillUp = DrillUp || {};
-    DrillUp.parameters = PluginManager.parameters('Drill_PlayerAllowTrigger');
+	var Imported = Imported || {};
+	Imported.Drill_PlayerAllowTrigger = true;
+	var DrillUp = DrillUp || {};
+	DrillUp.parameters = PluginManager.parameters('Drill_PlayerAllowTrigger');
 	
 	
 	/*-----------------杂项------------------*/
@@ -375,9 +375,18 @@ Game_Event.prototype.checkEventTriggerTouch = function( x, y ){
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_PAlT_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_PAlT_pluginCommand.call(this, command, args);
+	this.drill_PAlT_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_PAlT_pluginCommand = function( command, args ){
 	if( command === ">允许操作玩家触发" ){
 		
 		if( args.length == 2 ){

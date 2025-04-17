@@ -258,7 +258,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_EFi_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_EFi_PluginTip_baseList.length == 0 ){ return ""; }
@@ -274,10 +274,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_EnemyFilter = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_EnemyFilter');
+	var Imported = Imported || {};
+	Imported.Drill_EnemyFilter = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_EnemyFilter');
 	
 	
 //=============================================================================
@@ -287,12 +287,21 @@ if( Imported.Drill_CoreOfFilter ){
 
 
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_EFi_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_EFi_pluginCommand.call(this, command, args);
-	if( command === '>单位滤镜' || command === '>敌人滤镜' ){ // >单位滤镜 : 敌方 : 1 : 纯色滤镜 : 纯蓝 : 155 : 60
+	this.drill_EFi_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_EFi_pluginCommand = function( command, args ){
+	if( command === ">单位滤镜" || command === ">敌人滤镜" ){ // >单位滤镜 : 敌方 : 1 : 纯色滤镜 : 纯蓝 : 155 : 60
 		if(args.length >= 10){
 			var target_group = String(args[1]);
 			var target = String(args[3]);
@@ -301,8 +310,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var temp2 = String(args[9]);
 			if( args[11]!=undefined ){ var temp3 = String(args[11]); }
 			
-			if( target_group === '敌方' ){
-				if( target === '全体' ){
+			if( target_group === "敌方" ){
+				if( target === "全体" ){
 					this.iterateEnemyIndex(-1,function(enemy) {
 						if( enemy.isAlive() ){
 							if( type == "纯色滤镜" ){
@@ -394,8 +403,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					}.bind(this));
 				}
 			}
-			if( target_group === '我方' ){
-				if( target === '全体' ){
+			if( target_group === "我方" ){
+				if( target === "全体" ){
 					this.iterateActorId(0,function(actor) {
 						if( actor.isAlive() ){
 							if( actor._drill_EFi == undefined ){ actor.drill_EFi_initFilter(); }	//（强制初始化）

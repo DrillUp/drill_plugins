@@ -380,6 +380,18 @@
 	var DrillUp = DrillUp || {}; 
 	DrillUp.g_ASSE_PluginTip_curName = "Drill_AnimationSnapShotEffect.js UI-屏幕快照的眩晕效果";
 	DrillUp.g_ASSE_PluginTip_baseList = [];
+	//==============================
+	// * 提示信息 - 报错 - NaN校验值
+	//==============================
+	DrillUp.drill_ASSE_getPluginTip_ParamIsNaN = function( param_name ){
+		return "【" + DrillUp.g_ASSE_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到样式
+	//==============================
+	DrillUp.drill_ASSE_getPluginTip_StyleNotFind = function( style_id ){
+		return "【" + DrillUp.g_ASSE_PluginTip_curName + "】\n对象创建失败，id为"+style_id+"的样式配置为空或不存在。";
+	};
 	
 	
 //=============================================================================
@@ -432,9 +444,18 @@
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
-var _Drill_ASSE_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
-	_Drill_ASSE_pluginCommand.call(this, command, args);
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
+var _drill_ASSE_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
+	_drill_ASSE_pluginCommand.call(this, command, args);
+	this.drill_ASSE_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_ASSE_pluginCommand = function( command, args ){
 	if( command === ">屏幕快照的眩晕效果" ){ 
 		
 		if( args.length == 4 ){
@@ -1143,9 +1164,17 @@ Scene_Map.prototype.drill_ASSE_updateCreateConstant = function() {
 //==============================
 Scene_Map.prototype.drill_ASSE_createOne = function( style_id ){
 	
-	// > 创建控制器
-	var temp_data = DrillUp.g_ASSE_style[ style_id ];
-	var temp_controller = new Drill_ASSE_Controller( temp_data );
+	// > 『控制器与贴图的样式』 - 校验+提示信息
+	var cur_styleId   = style_id +1;
+	var cur_styleData = DrillUp.g_ASSE_style[ style_id ];
+	if( cur_styleData == undefined || 
+		cur_styleData['inited'] == false ){
+		alert( DrillUp.drill_ASSE_getPluginTip_StyleNotFind(cur_styleId) );
+		return;
+	}
+	
+	// > 『控制器与贴图的样式』 - 创建控制器
+	var temp_controller = new Drill_ASSE_Controller( cur_styleData );
 	$gameSystem._drill_ASSE_controllerTank.push( temp_controller );
 	
 	// > 创建贴图
@@ -1156,12 +1185,12 @@ Scene_Map.prototype.drill_ASSE_createOne = function( style_id ){
 	
 	// > 图片层级
 	if( SceneManager._scene instanceof Scene_Map ){
-		temp_sprite.zIndex = temp_data['map_zIndex'];
-		this.drill_ASSE_layerAddSprite( temp_sprite, temp_data['map_layer'] );
+		temp_sprite.zIndex = cur_styleData['map_zIndex'];
+		this.drill_ASSE_layerAddSprite( temp_sprite, cur_styleData['map_layer'] );
 	}
 	if( SceneManager._scene instanceof Scene_Battle ){
-		temp_sprite.zIndex = temp_data['battle_zIndex'];
-		this.drill_ASSE_layerAddSprite( temp_sprite, temp_data['battle_layer'] );
+		temp_sprite.zIndex = cur_styleData['battle_zIndex'];
+		this.drill_ASSE_layerAddSprite( temp_sprite, cur_styleData['battle_layer'] );
 	}
 	
 	// > 层级排序
@@ -1304,17 +1333,19 @@ Scene_Battle.prototype.drill_ASSE_updateDestroy = Scene_Map.prototype.drill_ASSE
 // ** 静态快照控制器【Drill_ASSE_Controller】
 // **		
 // **		作用域：	地图界面、战斗界面
-// **		主功能：	> 定义一个专门控制静态快照的数据类。
-// **		子功能：	->控制器
+// **		主功能：	定义一个专门控制静态快照的数据类。
+// **		子功能：	
+// **					->控制器『控制器与贴图』
 // **						->帧刷新
 // **						->重设数据
 // **							->序列号
 // **						->显示/隐藏
 // **						->暂停/继续
 // **						->销毁
+// **					
 // **					->A主体
 // **					->B基本变化
-// **		
+// **					
 // **		说明：	> 该类可存储在 $gameMap 中。
 // **				> 注意，该类不能放 物体指针、贴图指针 。
 //=============================================================================
@@ -1413,7 +1444,7 @@ Drill_ASSE_Controller.prototype.drill_controller_isDead = function(){
 };
 
 //##############################
-// * 控制器 - 初始化数据【标准默认值】
+// * 控制器 - 初始化数据『控制器与贴图』【标准默认值】
 //
 //			参数：	> 无
 //			返回：	> 无
@@ -1445,7 +1476,7 @@ Drill_ASSE_Controller.prototype.drill_controller_initData = function(){
 	if( data['scaleSpeed'] == undefined ){ data['scaleSpeed'] = 1 };				//B基本变化 - 目标缩放大小
 }
 //==============================
-// * 初始化 - 初始化子功能
+// * 控制器 - 初始化子功能『控制器与贴图』
 //==============================
 Drill_ASSE_Controller.prototype.drill_controller_initChild = function(){
 	this.drill_controller_initAttr();			//初始化子功能 - A主体
@@ -1617,18 +1648,20 @@ Drill_ASSE_Controller.prototype.drill_controller_updateChange_Rotation = functio
 // ** 静态快照贴图【Drill_ASSE_Sprite】
 // **
 // **		作用域：	地图界面、战斗界面
-// **		主功能：	> 定义一个静态快照贴图。
-// **		子功能：	->贴图
+// **		主功能：	定义一个静态快照贴图。
+// **		子功能：	
+// **					->贴图『控制器与贴图』
 // **						->是否就绪
 // **						->优化策略
 // **						->是否需要销毁（未使用）
 // **						->销毁（手动）
+// **					
 // **					->A主体
 // **					->B基本变化
 // **					->C对象绑定
 // **						->设置控制器
 // **						->贴图初始化（手动）
-// **
+// **					
 // **		说明：	> 你必须在创建贴图后，手动初始化。（还需要先设置 控制器 ）
 // **
 // **		代码：	> 范围 - 该类显示单独的贴图。
@@ -1677,7 +1710,7 @@ Drill_ASSE_Sprite.prototype.drill_sprite_setController = function( controller ){
 	this._drill_controller = controller;
 };
 //##############################
-// * C对象绑定 - 贴图初始化【开放函数】
+// * C对象绑定 - 初始化子功能『控制器与贴图』【开放函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -1739,13 +1772,13 @@ Drill_ASSE_Sprite.prototype.drill_sprite_destroy = function(){
 	this.drill_sprite_destroySelf();			//销毁 - 销毁自身
 };
 //==============================
-// * 静态快照贴图 - 贴图初始化（私有）
+// * 静态快照贴图 - 初始化自身『控制器与贴图』
 //==============================
 Drill_ASSE_Sprite.prototype.drill_sprite_initSelf = function(){
 	this._drill_controller = null;				//控制器对象
 };
 //==============================
-// * 静态快照贴图 - 销毁子功能（私有）
+// * 静态快照贴图 - 销毁子功能『控制器与贴图』
 //==============================
 Drill_ASSE_Sprite.prototype.drill_sprite_destroyChild = function(){
 	if( this._drill_controller == null ){ return; }
@@ -1763,7 +1796,7 @@ Drill_ASSE_Sprite.prototype.drill_sprite_destroyChild = function(){
 	
 };
 //==============================
-// * 静态快照贴图 - 销毁自身（私有）
+// * 静态快照贴图 - 销毁自身『控制器与贴图』
 //==============================
 Drill_ASSE_Sprite.prototype.drill_sprite_destroySelf = function(){
 	this._drill_controller = null;				//控制器对象

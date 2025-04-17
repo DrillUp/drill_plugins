@@ -152,10 +152,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_EventKeepMoving = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_EventKeepMoving');
+	var Imported = Imported || {};
+	Imported.Drill_EventKeepMoving = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_EventKeepMoving');
 
 
 	/*-----------------杂项------------------*/
@@ -163,11 +163,20 @@
 	
 	
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_EKM_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_EKM_pluginCommand.call(this, command, args);
+	this.drill_EKM_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_EKM_pluginCommand = function( command, args ){
 	if( command === ">镜头外事件保持移动" ){
 		if(args.length == 2){				//>镜头外事件保持移动 : 关闭
 			var type = String(args[1]);

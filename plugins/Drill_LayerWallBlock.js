@@ -199,10 +199,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_LayerWallBlock = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_LayerWallBlock');
+	var Imported = Imported || {};
+	Imported.Drill_LayerWallBlock = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_LayerWallBlock');
 
 
 	/*-----------------杂项------------------*/
@@ -214,9 +214,18 @@
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_LWB_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_LWB_pluginCommand.call(this, command, args);
+	this.drill_LWB_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_LWB_pluginCommand = function( command, args ){
 	if( command === ">墙壁阻塞器" ){
 		if(args.length == 2){
 			var temp1 = String(args[1]);

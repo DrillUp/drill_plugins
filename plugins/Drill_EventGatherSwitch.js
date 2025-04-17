@@ -342,15 +342,21 @@
 	DrillUp.drill_EGS_getPluginTip_EventNotFind = function( e_id ){
 		return "【" + DrillUp.g_EGS_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
 	};
+	//==============================
+	// * 提示信息 - 报错 - NaN校验值
+	//==============================
+	DrillUp.drill_EGS_getPluginTip_ParamIsNaN = function( param_name ){
+		return "【" + DrillUp.g_EGS_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+	};
 	
 	
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_EventGatherSwitch = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_EventGatherSwitch');
+	var Imported = Imported || {};
+	Imported.Drill_EventGatherSwitch = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_EventGatherSwitch');
 	
 	
 	/*-----------------杂项------------------*/
@@ -361,9 +367,18 @@
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_EGS_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_EGS_pluginCommand.call(this, command, args);
+	this.drill_EGS_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_EGS_pluginCommand = function( command, args ){
 	if( command === ">聚集开关" ){	// >聚集开关 : 变量[21] : 获取上一次触发聚集的数量
 		
 		if( args.length == 4 ){

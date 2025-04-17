@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.6]        图片 - 消失动作效果
+ * @plugindesc [v1.7]        图片 - 消失动作效果
  * @author Drill_up
  * 
  * 
@@ -27,9 +27,12 @@
  * 2.建议先了解 "0.基本定义 > 显示与透明度.docx"。
  *   更多详细内容，去看看 "7.行走图 > 关于动作效果.docx"。
  * 细节：
- *   (1.所有动作都是并行的，你可能需要手动加等待时间。
- *   (2.所有 消失动作 都可以与其它动作效果叠加，但不包括透明度的叠加。
- *      消失动作 同时只能播放一种。
+ *   (1.所有动作都是并行的，你需要手动设置总时间。
+ *      并且需要 等待 时，加等待指令。
+ *   (2.消失动作 同时只能播放一种。
+ *      所有 消失动作 都可以与持续动作效果叠加，但不包括透明度的叠加。
+ *      叠加效果要自己试，但叠加效果一般都不太好。
+ *   (3.动作效果 与 动画序列 插件相互独立，可以叠加使用。
  * 指令：
  *   (1.消失动作固定为：从 完全不透明 到 完全透明 的过程。
  *      动作结束后，对象的透明度将变为0。
@@ -48,45 +51,51 @@
  * ----激活条件 - 指定人物
  * 你需要通过下面插件指令来执行消失动作：
  * 
- * 插件指令：>消失动作 : 图片[1] : 标准弹跳 : 时间[60] : 高度[168]
- * 插件指令：>消失动作 : 图片变量[1] : 标准弹跳 : 时间[60] : 高度[168]
- * 插件指令：>消失动作 : 批量图片[10,11] : 标准弹跳 : 时间[60] : 高度[168]
- * 插件指令：>消失动作 : 批量图片变量[21,22] : 标准弹跳 : 时间[60] : 高度[168]
+ * 插件指令：>消失动作 : 图片[1] : 标准弹跳 : 总时间[60] : 高度[168]
+ * 插件指令：>消失动作 : 图片变量[1] : 标准弹跳 : 总时间[60] : 高度[168]
+ * 插件指令：>消失动作 : 批量图片[10,11] : 标准弹跳 : 总时间[60] : 高度[168]
+ * 插件指令：>消失动作 : 批量图片变量[21,22] : 标准弹跳 : 总时间[60] : 高度[168]
  * 
- * 插件指令：>消失动作 : 图片[1] : 直接消失 : 时间[60]
- * 插件指令：>消失动作 : 图片[1] : 移动消失 : 时间[60] : 方向角度[90] : 移动距离[100]
- * 插件指令：>消失动作 : 图片[1] : 标准升起 : 时间[60] : 缓冲时间[20] : 高度[168]
- * 插件指令：>消失动作 : 图片[1] : 标准弹跳 : 时间[60] : 高度[500]
- * 插件指令：>消失动作 : 图片[1] : 向左炸飞 : 时间[60] : 速度[11.5]
- * 插件指令：>消失动作 : 图片[1] : 向右炸飞 : 时间[60] : 速度[11.5]
- * 插件指令：>消失动作 : 图片[1] : 横向挤扁 : 时间[60] : 横向比例[1.5]
- * 插件指令：>消失动作 : 图片[1] : 横向挤扁(不透明) : 时间[60] : 横向比例[1.5]
- * 插件指令：>消失动作 : 图片[1] : 纵向挤扁 : 时间[60] : 纵向比例[1.5]
- * 插件指令：>消失动作 : 图片[1] : 纵向挤扁(不透明) : 时间[60] : 纵向比例[1.5]
- * 插件指令：>消失动作 : 图片[1] : 缩小消失 : 时间[60]
- * 插件指令：>消失动作 : 图片[1] : 缩小消失(不透明) : 时间[60]
- * 插件指令：>消失动作 : 图片[1] : 弹性缩小消失 : 时间[60] : 比例溢出[0.2] : 中心锚点[0.5,1.0]
- * 插件指令：>消失动作 : 图片[1] : 弹性缩小消失(不透明) : 时间[60] : 比例溢出[0.2] : 中心锚点[0.5,1.0]
+ * 插件指令：>消失动作 : 图片[1] : 直接消失 : 总时间[60]
+ * 插件指令：>消失动作 : 图片[1] : 移动消失 : 总时间[60] : 方向角度[90] : 移动距离[100]
+ * 插件指令：>消失动作 : 图片[1] : 标准升起 : 总时间[60] : 缓冲时间[20] : 高度[168]
+ * 插件指令：>消失动作 : 图片[1] : 标准弹跳 : 总时间[60] : 高度[100]
+ * 插件指令：>消失动作 : 图片[1] : 向左炸飞 : 总时间[60] : 速度[11.5]
+ * 插件指令：>消失动作 : 图片[1] : 向右炸飞 : 总时间[60] : 速度[11.5]
+ * 插件指令：>消失动作 : 图片[1] : 横向挤扁 : 总时间[60] : 横向比例[1.5]
+ * 插件指令：>消失动作 : 图片[1] : 横向挤扁(不透明) : 总时间[60] : 横向比例[1.5]
+ * 插件指令：>消失动作 : 图片[1] : 纵向挤扁 : 总时间[60] : 纵向比例[1.5]
+ * 插件指令：>消失动作 : 图片[1] : 纵向挤扁(不透明) : 总时间[60] : 纵向比例[1.5]
+ * 插件指令：>消失动作 : 图片[1] : 缩小消失 : 总时间[60]
+ * 插件指令：>消失动作 : 图片[1] : 缩小消失(不透明) : 总时间[60]
+ * 插件指令：>消失动作 : 图片[1] : 弹性缩小消失 : 总时间[60] : 比例溢出[0.2] : 中心锚点[0.5,1.0]
+ * 插件指令：>消失动作 : 图片[1] : 弹性缩小消失(不透明) : 总时间[60] : 比例溢出[0.2] : 中心锚点[0.5,1.0]
+ * 插件指令：>消失动作 : 图片[1] : 向左旋转倒下 : 总时间[60] : 倒下时间[20] : 消失时间[30]
+ * 插件指令：>消失动作 : 图片[1] : 向右旋转倒下 : 总时间[60] : 倒下时间[20] : 消失时间[30]
+ * 插件指令：>消失动作 : 图片[1] : 顺时针螺旋消失 : 总时间[120] : 最大螺旋半径[165] : 螺旋一圈时间[40] : 透明度变化时间[30]
+ * 插件指令：>消失动作 : 图片[1] : 逆时针螺旋消失 : 总时间[120] : 最大螺旋半径[165] : 螺旋一圈时间[40] : 透明度变化时间[30]
  * 插件指令：>消失动作 : 图片[1] : 立即终止动作
  * 
- * 1.前半部分（图片[1]）和 后半部分（标准升起 : 时间[60] : 缓冲时间[20] : 高度[168]）
- *   的参数可以随意组合。一共有4*15种组合方式。
- * 2.参数中"时间"、"周期"的单位是帧。1秒60帧。
+ * 1.前半部分（图片[1]）和 后半部分（标准升起 : 总时间[60] : 缓冲时间[20] : 高度[168]）
+ *   的参数可以随意组合。一共有4*19种组合方式。
+ * 2.参数中"总时间"、"周期"的单位是帧。1秒60帧。
  *   参数中"距离"、"高度"的单位是像素。
- * 3.类型的更详细介绍，去看看 "7.行走图 > 关于动作效果.docx"。
- * 4.部分类型的动作有 时间和缓冲时间 两个设置，该动作分两个阶段。
- *   比如"标准升起"，分别对应升起的动作时间，和升起前阶段起跳效果的缓冲时间。
+ * 3.部分类型的动作有 缓冲时间 的设置，该动作会被分为多个阶段。
+ *   比如"标准升起"为例，
+ *   一阶段升起前阶段起跳效果，时长为 缓冲时间。
+ *   二阶段对应升起的动作，时长为 总时间 减 缓冲时间。
+ * 4.类型的更详细介绍，去看看 "7.行走图 > 关于动作效果.docx"。
  *
  * -----------------------------------------------------------------------------
  * ----可选设定 - 透明度检查
- * 如果有的图片已经是透明度为255了，你不想让他再播放一次出现动画，你可以使用
- * 下面的插件指令。
+ * 你可以使用下面的插件指令。
  * 
  * 插件指令：>消失动作 : 图片 : 透明度检查 : 开启
  * 插件指令：>消失动作 : 图片 : 透明度检查 : 关闭
  * 
  * 1.插件指令直接作用于所有图片。
- * 2.开启检查后，如果当前图片透明度为255，出现动作不会起作用。
+ * 2.如果已经透明度为0了，你不想让他再播放一次动画，
+ *   则开启"透明度检查"即可。开启后会阻止 消失动作 多次播放。
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 获取状态
@@ -101,7 +110,7 @@
  * 1.前半部分（图片）和 后半部分（是否正在播放 : 开关[21]）
  *   的参数可以随意组合。一共有2*2种组合方式。
  * 2.用开关值获取时，可以考虑设置并行执行时获取。
- * 3."字符串[21]"表示 字符串核心 中字符串，
+ * 3."字符串[21]"表示 字符串核心 中的字符串，
  *   如果当前没有播放的类型，则获取到 空字符串 。
  * 
  * -----------------------------------------------------------------------------
@@ -143,6 +152,8 @@
  * 优化了数学缩短锚点的计算公式。
  * [v1.6]
  * 优化了旧存档的识别与兼容。
+ * [v1.7]
+ * 优化了内部结构，减小存档时数据占用的空间。
  *
  *
  * 
@@ -178,32 +189,28 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			消失动作效果：
-//				->动作
-//					->标准升起
-//					->标准弹跳
-//					->缩小消失
-//					->横向挤扁
-//					->纵向挤扁
-//					->向左炸飞
-//					->向右炸飞
-//					->翻转消失	x
-//					->地面升起	x
-//				->其他
-//					->数学锚点变换问题
+//			->☆提示信息
+//			->☆静态数据
+//			->☆插件指令
+//			->☆存储数据
+//			
+//			->☆图片贴图控制
+//			->☆图片的属性
+//			->☆消失动作
+//				->搜索『消失动作』查看所有动作
+//
 //
 //		★家谱：
 //			无
 //		
 //		★脚本文档：
-//			无
+//			7.行走图 > 关于动作效果（脚本）.docx
 //		
 //		★插件私有类：
 //			无
 //		
 //		★必要注意事项：
-//			1.变化原理为：每帧都【固定初始值】，然后适时赋值公式变化值。
-//			  该插件限定透明度 255->0 的变化。
+//			无
 //
 //		★其它说明细节：
 //			1.图片的锚点不是固定的，可能会到处变，注意控制锚点。
@@ -213,7 +220,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -228,6 +235,12 @@
 		return "【" + DrillUp.g_PFOE_PluginTip_curName + "】\n插件指令错误，id为"+pic_id+"的图片还没被创建。\n你可能需要将指令放在'显示图片'事件指令之后。";
 	};
 	//==============================
+	// * 提示信息 - 报错 - 时间计算不正确
+	//==============================
+	DrillUp.drill_PFOE_getPluginTip_allTimeError = function( playing_type ){
+		return "【" + DrillUp.g_PFOE_PluginTip_curName + "】\n动作效果\""+playing_type+"\"播放失败，其配置的时间参数总和大于 总时间的值。";
+	};
+	//==============================
 	// * 提示信息 - 报错 - NaN校验值
 	//==============================
 	DrillUp.drill_PFOE_getPluginTip_ParamIsNaN = function( param_name ){
@@ -236,12 +249,12 @@
 	
 	
 //=============================================================================
-// ** 静态数据
+// ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_PictureFadeOutEffect = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_PictureFadeOutEffect');
+	var Imported = Imported || {};
+	Imported.Drill_PictureFadeOutEffect = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_PictureFadeOutEffect');
 	
 	
 	/*-----------------杂项------------------*/
@@ -249,11 +262,20 @@
 	
 	
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
-var _Drill_PFOE_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
-	_Drill_PFOE_pluginCommand.call(this, command, args);
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
+var _drill_PFOE_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
+	_drill_PFOE_pluginCommand.call(this, command, args);
+	this.drill_PFOE_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_PFOE_pluginCommand = function( command, args ){
 	if( command === ">消失动作" ){ 
 		
 		/*-----------------透明度检查------------------*/
@@ -338,8 +360,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					}
 				}
 			}
-		}	
-		
+		}
 		/*-----------------获取状态------------------*/
 		if( args.length == 6 ){
 			var type = String(args[3]);
@@ -363,24 +384,146 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				if( pics != null){
 					var str = false;
 					for( var k=0; k < pics.length; k++ ){
-						str = pics[k]._Drill_PFOE.playing_type;
+						str = pics[k].drill_PFOE_getPlayingType();
 					}
 					$gameStrings.setValue( temp1, str );
 				}
 			}
+		}
+		
+		
+		if( args.length == 6 ){
+			var type = String(args[3]);
+			var temp1 = String(args[5]);
 			
 			/*-----------------直接消失------------------*/
 			if( type == "直接消失" ){
+				temp1 = temp1.replace("总时间[","");
 				temp1 = temp1.replace("时间[","");
 				temp1 = temp1.replace("]","");
-				if( pics != null){
+				if( pics != null ){
 					for( var k=0; k < pics.length; k++ ){
 						pics[k].drill_PFOE_playHidingDisappear( Number(temp1) );
 					}
 				}
 			}
-		}	
+			/*-----------------缩小消失------------------*/
+			if( type == "缩小消失" ){
+				temp1 = temp1.replace("总时间[","");
+				temp1 = temp1.replace("时间[","");
+				temp1 = temp1.replace("]","");
+				if( pics != null ){
+					for( var k=0; k < pics.length; k++ ){
+						pics[k].drill_PFOE_playHidingShrink( Number(temp1), false );
+					}
+				}
+			}
+			if( type == "缩小消失(不透明)" ){
+				temp1 = temp1.replace("总时间[","");
+				temp1 = temp1.replace("时间[","");
+				temp1 = temp1.replace("]","");
+				if( pics != null ){
+					for( var k=0; k < pics.length; k++ ){
+						pics[k].drill_PFOE_playHidingShrink( Number(temp1), true );
+					}
+				}
+			}
+		}
+		if( args.length == 8 ){
+			var type = String(args[3]);
+			var temp1 = String(args[5]);
+			var temp2 = String(args[7]);
 			
+			/*-----------------标准弹跳------------------*/
+			if( type == "标准弹跳" ){
+				temp1 = temp1.replace("总时间[","");
+				temp1 = temp1.replace("时间[","");
+				temp1 = temp1.replace("]","");
+				temp2 = temp2.replace("高度[","");
+				temp2 = temp2.replace("]","");
+				if( pics != null ){
+					for( var k=0; k < pics.length; k++ ){
+						pics[k].drill_PFOE_playHidingJump( Number(temp1),Number(temp2) );
+					}
+				}
+			}
+			/*-----------------横向挤扁------------------*/
+			if( type == "横向挤扁" ){
+				temp1 = temp1.replace("总时间[","");
+				temp1 = temp1.replace("时间[","");
+				temp1 = temp1.replace("]","");
+				temp2 = temp2.replace("横向比例[","");
+				temp2 = temp2.replace("]","");
+				if( pics != null ){
+					for( var k=0; k < pics.length; k++ ){
+						pics[k].drill_PFOE_playHidingHorizonFlat( Number(temp1),Number(temp2), false );
+					}
+				}
+			}
+			if( type == "横向挤扁(不透明)" ){
+				temp1 = temp1.replace("总时间[","");
+				temp1 = temp1.replace("时间[","");
+				temp1 = temp1.replace("]","");
+				temp2 = temp2.replace("横向比例[","");
+				temp2 = temp2.replace("]","");
+				if( pics != null ){
+					for( var k=0; k < pics.length; k++ ){
+						pics[k].drill_PFOE_playHidingHorizonFlat( Number(temp1),Number(temp2), true );
+					}
+				}
+			}
+			/*-----------------纵向挤扁------------------*/
+			if( type == "纵向挤扁" ){
+				temp1 = temp1.replace("总时间[","");
+				temp1 = temp1.replace("时间[","");
+				temp1 = temp1.replace("]","");
+				temp2 = temp2.replace("纵向比例[","");
+				temp2 = temp2.replace("]","");
+				if( pics != null ){
+					for( var k=0; k < pics.length; k++ ){
+						pics[k].drill_PFOE_playHidingVerticalFlat( Number(temp1),Number(temp2), false );
+					}
+				}
+			}
+			if( type == "纵向挤扁(不透明)" ){
+				temp1 = temp1.replace("总时间[","");
+				temp1 = temp1.replace("时间[","");
+				temp1 = temp1.replace("]","");
+				temp2 = temp2.replace("纵向比例[","");
+				temp2 = temp2.replace("]","");
+				if( pics != null ){
+					for( var k=0; k < pics.length; k++ ){
+						pics[k].drill_PFOE_playHidingVerticalFlat( Number(temp1),Number(temp2), true );
+					}
+				}
+			}
+			/*-----------------向左炸飞------------------*/
+			if( type == "向左炸飞" ){
+				temp1 = temp1.replace("总时间[","");
+				temp1 = temp1.replace("时间[","");
+				temp1 = temp1.replace("]","");
+				temp2 = temp2.replace("速度[","");
+				temp2 = temp2.replace("]","");
+				if( pics != null ){
+					for( var k=0; k < pics.length; k++ ){
+						pics[k].drill_PFOE_playHidingBlowOutLeft( Number(temp1),Number(temp2) );
+					}
+				}
+			}
+			/*-----------------向右炸飞------------------*/
+			if( type == "向右炸飞" ){
+				temp1 = temp1.replace("总时间[","");
+				temp1 = temp1.replace("时间[","");
+				temp1 = temp1.replace("]","");
+				temp2 = temp2.replace("速度[","");
+				temp2 = temp2.replace("]","");
+				if( pics != null ){
+					for( var k=0; k < pics.length; k++ ){
+						pics[k].drill_PFOE_playHidingBlowOutRight( Number(temp1),Number(temp2) );
+					}
+				}
+			}
+		}
 		if( args.length == 10 ){
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
@@ -389,6 +532,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			
 			/*-----------------移动消失------------------*/
 			if( type == "移动消失" ){
+				temp1 = temp1.replace("总时间[","");
 				temp1 = temp1.replace("时间[","");
 				temp1 = temp1.replace("]","");
 				temp2 = temp2.replace("方向角度[","");
@@ -403,6 +547,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			}
 			/*-----------------标准升起------------------*/
 			if( type == "标准升起" ){
+				temp1 = temp1.replace("总时间[","");
 				temp1 = temp1.replace("时间[","");
 				temp1 = temp1.replace("]","");
 				temp2 = temp2.replace("缓冲时间[","");
@@ -417,6 +562,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			}
 			/*-----------------弹性缩小消失------------------*/
 			if( type == "弹性缩小消失" ){
+				temp1 = temp1.replace("总时间[","");
 				temp1 = temp1.replace("时间[","");
 				temp1 = temp1.replace("]","");
 				temp2 = temp2.replace("比例溢出[","");
@@ -431,6 +577,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				}
 			}
 			if( type == "弹性缩小消失(不透明)" ){
+				temp1 = temp1.replace("总时间[","");
 				temp1 = temp1.replace("时间[","");
 				temp1 = temp1.replace("]","");
 				temp2 = temp2.replace("比例溢出[","");
@@ -444,123 +591,84 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					}
 				}
 			}
-			
+			/*-----------------向左旋转倒下------------------*/
+			if( type == "向左旋转倒下" ){
+				temp1 = temp1.replace("总时间[","");
+				temp1 = temp1.replace("时间[","");
+				temp1 = temp1.replace("]","");
+				temp2 = temp2.replace("倒下时间[","");
+				temp2 = temp2.replace("]","");
+				temp3 = temp3.replace("消失时间[","");
+				temp3 = temp3.replace("]","");
+				if( pics != null ){
+					for( var k=0; k < pics.length; k++ ){
+						pics[k].drill_PFOE_playHidingFallGroundLeft( Number(temp1), Number(temp2), Number(temp3) );
+					}
+				}
+			}
+			/*-----------------向右旋转倒下------------------*/
+			if( type == "向右旋转倒下" ){
+				temp1 = temp1.replace("总时间[","");
+				temp1 = temp1.replace("时间[","");
+				temp1 = temp1.replace("]","");
+				temp2 = temp2.replace("倒下时间[","");
+				temp2 = temp2.replace("]","");
+				temp3 = temp3.replace("消失时间[","");
+				temp3 = temp3.replace("]","");
+				if( pics != null ){
+					for( var k=0; k < pics.length; k++ ){
+						pics[k].drill_PFOE_playHidingFallGroundRight( Number(temp1), Number(temp2), Number(temp3) );
+					}
+				}
+			}
 		}
-		if( args.length == 8 ){
+		if( args.length == 12 ){
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
 			var temp2 = String(args[7]);
-			/*-----------------标准弹跳------------------*/
-			if( type == "标准弹跳" ){
+			var temp3 = String(args[9]);
+			var temp4 = String(args[11]);
+			
+			/*-----------------顺时针螺旋消失------------------*/
+			if( type == "顺时针螺旋消失" ){
+				temp1 = temp1.replace("总时间[","");
 				temp1 = temp1.replace("时间[","");
 				temp1 = temp1.replace("]","");
-				temp2 = temp2.replace("高度[","");
+				temp2 = temp2.replace("最大螺旋半径[","");
 				temp2 = temp2.replace("]","");
+				temp3 = temp3.replace("螺旋一圈时间[","");
+				temp3 = temp3.replace("]","");
+				temp4 = temp4.replace("透明度变化时间[","");
+				temp4 = temp4.replace("]","");
 				if( pics != null ){
 					for( var k=0; k < pics.length; k++ ){
-						pics[k].drill_PFOE_playHidingJump( Number(temp1),Number(temp2) );
+						pics[k].drill_PFOE_playHidingSpiralMove( Number(temp1), 1, Number(temp2),Number(temp3),Number(temp4) );
 					}
 				}
 			}
-			/*-----------------横向挤扁------------------*/
-			if( type == "横向挤扁" ){
+			/*-----------------逆时针螺旋消失------------------*/
+			if( type == "逆时针螺旋消失" ){
+				temp1 = temp1.replace("总时间[","");
 				temp1 = temp1.replace("时间[","");
 				temp1 = temp1.replace("]","");
-				temp2 = temp2.replace("横向比例[","");
+				temp2 = temp2.replace("最大螺旋半径[","");
 				temp2 = temp2.replace("]","");
+				temp3 = temp3.replace("螺旋一圈时间[","");
+				temp3 = temp3.replace("]","");
+				temp4 = temp4.replace("透明度变化时间[","");
+				temp4 = temp4.replace("]","");
 				if( pics != null ){
 					for( var k=0; k < pics.length; k++ ){
-						pics[k].drill_PFOE_playHidingHorizonFlat( Number(temp1),Number(temp2), false );
-					}
-				}
-			}
-			if( type == "横向挤扁(不透明)" ){
-				temp1 = temp1.replace("时间[","");
-				temp1 = temp1.replace("]","");
-				temp2 = temp2.replace("横向比例[","");
-				temp2 = temp2.replace("]","");
-				if( pics != null ){
-					for( var k=0; k < pics.length; k++ ){
-						pics[k].drill_PFOE_playHidingHorizonFlat( Number(temp1),Number(temp2), true );
-					}
-				}
-			}
-			/*-----------------纵向挤扁------------------*/
-			if( type == "纵向挤扁" ){
-				temp1 = temp1.replace("时间[","");
-				temp1 = temp1.replace("]","");
-				temp2 = temp2.replace("纵向比例[","");
-				temp2 = temp2.replace("]","");
-				if( pics != null ){
-					for( var k=0; k < pics.length; k++ ){
-						pics[k].drill_PFOE_playHidingVerticalFlat( Number(temp1),Number(temp2), false );
-					}
-				}
-			}
-			if( type == "纵向挤扁(不透明)" ){
-				temp1 = temp1.replace("时间[","");
-				temp1 = temp1.replace("]","");
-				temp2 = temp2.replace("纵向比例[","");
-				temp2 = temp2.replace("]","");
-				if( pics != null ){
-					for( var k=0; k < pics.length; k++ ){
-						pics[k].drill_PFOE_playHidingVerticalFlat( Number(temp1),Number(temp2), true );
-					}
-				}
-			}
-			/*-----------------向左炸飞------------------*/
-			if( type == "向左炸飞" ){
-				temp1 = temp1.replace("时间[","");
-				temp1 = temp1.replace("]","");
-				temp2 = temp2.replace("速度[","");
-				temp2 = temp2.replace("]","");
-				if( pics != null ){
-					for( var k=0; k < pics.length; k++ ){
-						pics[k].drill_PFOE_playHidingBlowOutLeft( Number(temp1),Number(temp2) );
-					}
-				}
-			}
-			/*-----------------向右炸飞------------------*/
-			if( type == "向右炸飞" ){
-				temp1 = temp1.replace("时间[","");
-				temp1 = temp1.replace("]","");
-				temp2 = temp2.replace("速度[","");
-				temp2 = temp2.replace("]","");
-				if( pics != null ){
-					for( var k=0; k < pics.length; k++ ){
-						pics[k].drill_PFOE_playHidingBlowOutRight( Number(temp1),Number(temp2) );
+						pics[k].drill_PFOE_playHidingSpiralMove( Number(temp1), -1, Number(temp2),Number(temp3),Number(temp4) );
 					}
 				}
 			}
 		}
-		if( args.length == 6 ){
-			var type = String(args[3]);
-			var temp1 = String(args[5]);
-			/*-----------------缩小消失------------------*/
-			if( type == "缩小消失" ){
-				temp1 = temp1.replace("时间[","");
-				temp1 = temp1.replace("]","");
-				if( pics != null ){
-					for( var k=0; k < pics.length; k++ ){
-						pics[k].drill_PFOE_playHidingShrink( Number(temp1), false );
-					}
-				}
-			}
-			if( type == "缩小消失(不透明)" ){
-				temp1 = temp1.replace("时间[","");
-				temp1 = temp1.replace("]","");
-				if( pics != null ){
-					for( var k=0; k < pics.length; k++ ){
-						pics[k].drill_PFOE_playHidingShrink( Number(temp1), true );
-					}
-				}
-			}
-		}
+		
 	}
-	
 };
 //==============================
-// ** 插件指令 - 图片检查
+// * 插件指令 - 图片检查
 //==============================
 Game_Screen.prototype.drill_PFOE_isPictureExist = function( pic_id ){
 	if( pic_id == 0 ){ return false; }
@@ -572,90 +680,28 @@ Game_Screen.prototype.drill_PFOE_isPictureExist = function( pic_id ){
 	}
 	return true;
 };
-
-
-//=============================================================================
-// * 数学工具 - 锁定锚点
-//			
-//			参数：	> org_anchor_x 数字    （原贴图锚点X）
-//					> org_anchor_y 数字    （原贴图锚点Y）
-//					> target_anchor_x 数字 （新的锚点X）
-//					> target_anchor_y 数字 （新的锚点Y）
-//					> width 数字           （贴图宽度）
-//					> height 数字          （贴图高度）
-//					> rotation 数字        （旋转度数，弧度）
-//					> scale_x,scale_y 数字 （缩放比例XY，默认1.00）
-//					> skew_x,skew_y 数字   （斜切比例XY，默认0.00）
-//			返回：	> { x:0, y:0 }         （偏移的坐标）
-//			
-//			说明：	> 修正 旋转+缩放+斜切 的坐标，使其看起来像是在绕着 新的锚点 变换。
-//					  旋转+缩放+斜切 可为负数。
-//=============================================================================
-Game_Temp.prototype.drill_PFOE_Math2D_getFixPointInAnchor = function( 
-					org_anchor_x,org_anchor_y,			//原贴图锚点 
-					target_anchor_x,target_anchor_y, 	//新的锚点 
-					width, height,						//贴图高宽
-					rotation,							//变换的值（旋转）
-					scale_x, scale_y,					//变换的值（缩放）
-					skew_x, skew_y  ){					//变换的值（斜切）
+//==============================
+// * 插件指令 - STG兼容『STG的插件指令』
+//==============================
+if( Imported.Drill_STG__objects ){
 	
-	if( scale_x == undefined ){ scale_x = 1; }
-	if( scale_y == undefined ){ scale_y = 1; }
-	if( skew_x == undefined ){ skew_x = 0; }
-	if( skew_y == undefined ){ skew_y = 0; }
-	
-	// > 参数准备 （来自 Pixi.Transform）
-    var _cx = 1; // cos rotation + skewY;
-    var _sx = 0; // sin rotation + skewY;
-    var _cy = 0; // cos rotation + Math.PI/2 - skewX;
-    var _sy = 1; // sin rotation + Math.PI/2 - skewX;
-	
-	// > 旋转+斜切 （来自 Pixi.Transform.prototype.updateSkew）
-    _cx = Math.cos( rotation + skew_y );
-    _sx = Math.sin( rotation + skew_y );
-    _cy = -Math.sin( rotation - skew_x ); // cos, added PI/2
-    _sy = Math.cos( rotation - skew_x ); // sin, added PI/2
-	
-	// > 缩放 （来自 Pixi.Transform.prototype.updateLocalTransform）
-    var a = _cx * scale_x;
-    var b = _sx * scale_x;
-    var c = _cy * scale_y;
-    var d = _sy * scale_y;
-	
-	// > 将参数应用到坐标
-	var cur_x = width  * target_anchor_x;
-	var cur_y = height * target_anchor_y;
-	var center_x = width  * org_anchor_x;
-	var center_y = height * org_anchor_y;
-	var dx = (center_x - cur_x);
-	var dy = (center_y - cur_y);
-    var tar_x = cur_x + (dx * a + dy * c) - center_x;
-    var tar_y = cur_y + (dx * b + dy * d) - center_y;
-	
-	return { "x":tar_x, "y":tar_y };
-}
-//=============================================================================
-// * 数学工具 - 抛物线三点式
-//			
-//			参数：	> x1,y1 数字（点A）
-//					> x2,y2 数字（点B）
-//					> x3,y3 数字（点C）
-//			返回：	> { a:0, b:0, c:0 } （抛物线公式的abc）
-//			
-//			说明：	已知三点，返回抛物线公式 y = a*x^2 + b*x + c 的abc值。
-//=============================================================================
-Game_Temp.prototype.drill_PFOE_Math2D_getParabolicThree = function( x1,y1,x2,y2,x3,y3 ){
-	
-	var b = ((x2*x2 - x3*x3)*(y1 - y2) - (x1*x1 - x2*x2)*(y2 - y3)) / ((x2*x2 - x3*x3)*(x1 - x2) - (x1*x1 - x2*x2)*(x2 - x3));
-	var a = (y1 - y2 - b*(x1 - x2)) / (x1*x1 - x2*x2);
-	var c = y1 - a*x1*x1 - b*x1;
-	
-	return { "a":a, "b":b, "c":c };
-}
+	//==============================
+	// * 插件指令 - STG指令绑定
+	//==============================
+	var _drill_STG_PFOE_pluginCommand = Drill_STG_GameInterpreter.prototype.pluginCommand;
+	Drill_STG_GameInterpreter.prototype.pluginCommand = function( command, args ){
+		_drill_STG_PFOE_pluginCommand.call(this, command, args);
+		this.drill_PFOE_pluginCommand( command, args );
+	}
+	//==============================
+	// * 插件指令 - STG指令执行
+	//==============================
+	Drill_STG_GameInterpreter.prototype.drill_PFOE_pluginCommand = Game_Interpreter.prototype.drill_PFOE_pluginCommand;
+};
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -732,97 +778,199 @@ Game_System.prototype.drill_PFOE_checkSysData_Private = function() {
 	if( this._drill_PFOE_opacityCheck_pic == undefined ){
 		this.drill_PFOE_initSysData();
 	}
-	
 };
 
 
+
 //=============================================================================
-// ** 图片贴图
+// ** ☆图片贴图控制
+//
+//			说明：	> 此模块专门控制 图片贴图 。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 图片贴图 - 初始化
+// * 图片贴图控制 - 帧刷新
 //==============================
-var _drill_PFOE_sp_initialize = Sprite_Picture.prototype.initialize;
-Sprite_Picture.prototype.initialize = function(pictureId) {
-    _drill_PFOE_sp_initialize.call(this,pictureId);
-	// ...暂无
-}
-//==============================
-// * 图片贴图 - 帧刷新
-//==============================
-var _Drill_PFOE_sp_update2 = Sprite_Picture.prototype.update;
+var _drill_PFOE_sp_update2 = Sprite_Picture.prototype.update;
 Sprite_Picture.prototype.update = function() {
-	_Drill_PFOE_sp_update2.call(this);
+	_drill_PFOE_sp_update2.call(this);
 	if( this.picture() ){
-		this._Drill_PFOE = this.picture()._Drill_PFOE;
-		this.drill_PFOE_updateEffect();			//执行变换
-		this.drill_PFOE_updateBitmap();			//获取图片宽高
+		this.drill_PFOE_updateEffect();			//帧刷新 - 执行变换
+		this.drill_PFOE_updateBitmap();			//帧刷新 - 获取资源宽高
 	}
 };
 //==============================
-// * 帧刷新 - 执行变换
+// * 图片贴图控制 - 帧刷新 - 执行变换
 //
 //			说明：	> 此处直接作用于 贴图属性，并不影响 数据最终变换值 。
 //==============================
 Sprite_Picture.prototype.drill_PFOE_updateEffect = function() {
-	if( !this.picture().drill_PFOE_isPlaying() ){ return; }
+	if( this.picture().drill_PFOE_isPlaying() != true ){ return; }
 	
-	this.x += this._Drill_PFOE.x ;					// x
-	this.y += this._Drill_PFOE.y ;					// y
-	this.rotation += this._Drill_PFOE.rotation;		// 旋转
-	this.scale.x += this._Drill_PFOE.scale_x;		// 缩放x
-	this.scale.y += this._Drill_PFOE.scale_y;		// 缩放y
-	//this.skew.x += this._Drill_PFOE.skew_x;		// 斜切x
-	//this.skew.y += this._Drill_PFOE.skew_y;		// 斜切y
-	
-	this.opacity = this._Drill_PFOE.opacity;		// 透明度
+	var sprite_data = this.picture()._drill_PFOE_spriteData;
+												// 贴图 - 锚点X（不操作）
+												// 贴图 - 锚点Y（不操作）
+	this.x += sprite_data.x ;					// 贴图 - 位置X
+	this.y += sprite_data.y ;					// 贴图 - 位置Y
+	this.scale.x += sprite_data.scale_x;		// 贴图 - 缩放X
+	this.scale.y += sprite_data.scale_y;		// 贴图 - 缩放Y
+	this.opacity = sprite_data.opacity;			// 贴图 - 透明度
+	//this.skew.x += sprite_data.skew_x;		// 贴图 - 斜切X
+	//this.skew.y += sprite_data.skew_y;		// 贴图 - 斜切Y
+	this.rotation += sprite_data.rotation;		// 贴图 - 旋转
 }
 //==============================
-// * 帧刷新 - 获取图片宽高
+// * 图片贴图控制 - 帧刷新 - 获取资源宽高
 //==============================
 Sprite_Picture.prototype.drill_PFOE_updateBitmap = function() {
-	if( this.bitmap && this.bitmap.isReady() ){
-		this._Drill_PFOE.real_width = this.bitmap.width;
-		this._Drill_PFOE.real_height = this.bitmap.height;
+	if( this.bitmap && this.bitmap.isReady() &&
+		this.picture()._drill_PFOE_spriteData != undefined ){
+		this.picture()._drill_PFOE_spriteData.real_width = this.bitmap.width;
+		this.picture()._drill_PFOE_spriteData.real_height = this.bitmap.height;
 	}
 }
 
 
 //=============================================================================
-// ** 图片
+// ** ☆图片的属性
+//
+//			说明：	> 此模块专门管理 图片的属性 。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 图片 - 初始化
+// * 图片的属性 - 初始化
 //==============================
-var _Drill_PFOE_c_initialize = Game_Picture.prototype.initialize;
+var _drill_PFOE_c_initialize = Game_Picture.prototype.initialize;
 Game_Picture.prototype.initialize = function() {
-	_Drill_PFOE_c_initialize.call(this);
-	this._Drill_PFOE = {};					//（不要用initMembers，follower没有这个方法）
-	this._Drill_PFOE.x = 0;					// x
-	this._Drill_PFOE.y = 0;					// y
-	this._Drill_PFOE.rotation = 0;			// 旋转
-	this._Drill_PFOE.scale_x = 0;			// 缩放x
-	this._Drill_PFOE.scale_y = 0;			// 缩放y
-	this._Drill_PFOE.skew_x = 0;			// 斜切x
-	this._Drill_PFOE.skew_y = 0;			// 斜切y
-	
-	this._Drill_PFOE.opacity = 255;			// 透明度（不叠加，【注意，这里是消失效果，默认255】）
-	this._Drill_PFOE.playing_type = "";		// 显示类型
-	this._Drill_PFOE.real_width = -1;		// 贴图宽
-	this._Drill_PFOE.real_height = -1;		// 贴图高
-	this._Drill_PFOE.anchor_x = 0;			// 锚点中心x
-	this._Drill_PFOE.anchor_y = 0;			// 锚点中心y
+	this._drill_PFOE_spriteData = undefined;
+	this._drill_PFOE_param = undefined;
+	_drill_PFOE_c_initialize.call(this);
 }
 //==============================
-// * 图片 - 动作判定
+// * 图片的属性 - 初始化 数据
+//
+//			说明：	> 这里的数据都要初始化才能用。『节约事件数据存储空间』
+//==============================
+Game_Picture.prototype.drill_PFOE_checkData = function() {
+	
+	// > 贴图属性
+	if( this._drill_PFOE_spriteData == undefined ){
+		this._drill_PFOE_spriteData = {};
+		
+		if( this._origin == 0 ){
+			this._drill_PFOE_spriteData.anchor_x = 0;	// 锚点X
+			this._drill_PFOE_spriteData.anchor_y = 0;	// 锚点Y
+		}else if( this._origin == 1 ){
+			this._drill_PFOE_spriteData.anchor_x = 0.5;	// 锚点X
+			this._drill_PFOE_spriteData.anchor_y = 0.5;	// 锚点Y
+		}
+		if( Imported.Drill_CoreOfPicture ){  //【图片 - 图片优化核心】
+			this._drill_PFOE_spriteData.anchor_x = this._drill_anchorX;
+			this._drill_PFOE_spriteData.anchor_y = this._drill_anchorY;
+		}
+		
+		this._drill_PFOE_spriteData.x = 0;				// 位置X
+		this._drill_PFOE_spriteData.y = 0;				// 位置Y
+		this._drill_PFOE_spriteData.scale_x = 0;		// 缩放X
+		this._drill_PFOE_spriteData.scale_y = 0;		// 缩放Y
+		this._drill_PFOE_spriteData.opacity = 255;		// 透明度（不叠加，【注意，这里是消失效果，默认255】）
+		this._drill_PFOE_spriteData.skew_x = 0;			// 斜切X
+		this._drill_PFOE_spriteData.skew_y = 0;			// 斜切Y
+		this._drill_PFOE_spriteData.rotation = 0;		// 旋转
+		
+		this._drill_PFOE_spriteData.real_width = -1;	// 贴图宽
+		this._drill_PFOE_spriteData.real_height = -1;	// 贴图高
+	}
+	
+	// > 动作配置
+	if( this._drill_PFOE_param == undefined ){
+		this._drill_PFOE_param = {};
+		this._drill_PFOE_param.playing_type = "";		// 显示类型
+	}
+}
+//==============================
+// * 图片的属性 - 帧刷新
+//==============================
+var _drill_PFOE_p_update = Game_Picture.prototype.update;
+Game_Picture.prototype.update = function() {
+	_drill_PFOE_p_update.call(this);
+	
+	if( this._drill_PFOE_spriteData == undefined ){ return; } 		//需要等资源加载完成
+	if( this._drill_PFOE_spriteData.real_width == -1 ){ return; }	//
+	if( this._drill_PFOE_spriteData.real_height == -1 ){ return; }	//
+	
+	this.drill_PFOE_updateHidingDisappear();			//帧刷新 - 直接消失
+	this.drill_PFOE_updateHidingMoveDisappear();		//帧刷新 - 移动消失
+	this.drill_PFOE_updateHidingSpring();				//帧刷新 - 标准升起
+	this.drill_PFOE_updateHidingJump();					//帧刷新 - 标准弹跳
+	this.drill_PFOE_updateHidingShrink();				//帧刷新 - 缩小消失
+	this.drill_PFOE_updateHidingHorizonFlat();			//帧刷新 - 横向挤扁
+	this.drill_PFOE_updateHidingVerticalFlat();			//帧刷新 - 纵向挤扁
+	this.drill_PFOE_updateHidingBlowOutLeft();			//帧刷新 - 向左炸飞
+	this.drill_PFOE_updateHidingBlowOutRight();			//帧刷新 - 向右炸飞
+	this.drill_PFOE_updateHidingShrinkSpring();			//帧刷新 - 弹性缩小消失
+	this.drill_PFOE_updateHidingFallGroundLeft();		//帧刷新 - 向左旋转倒下
+	this.drill_PFOE_updateHidingFallGroundRight();		//帧刷新 - 向右旋转倒下
+	this.drill_PFOE_updateHidingSpiralMove();			//帧刷新 - 顺时针/逆时针螺旋消失
+}
+//==============================
+// * 图片的属性 - 控制 - 显示图片
+//==============================
+var _drill_PFOE_p_show = Game_Picture.prototype.show;
+Game_Picture.prototype.show = function(name, origin, x, y, scaleX, scaleY, opacity, blendMode) {
+	_drill_PFOE_p_show.call(this, name, origin, x, y, scaleX, scaleY, opacity, blendMode);
+	if( this._drill_PFOE_spriteData != undefined ){
+		if( this._origin == 0 ){
+			this._drill_PFOE_spriteData.anchor_x = 0;	// 锚点X
+			this._drill_PFOE_spriteData.anchor_y = 0;	// 锚点Y
+		}else if( this._origin == 1 ){
+			this._drill_PFOE_spriteData.anchor_x = 0.5;	// 锚点X
+			this._drill_PFOE_spriteData.anchor_y = 0.5;	// 锚点Y
+		}
+		if( Imported.Drill_CoreOfPicture ){  //【图片 - 图片优化核心】
+			this._drill_PFOE_spriteData.anchor_x = this._drill_anchorX;
+			this._drill_PFOE_spriteData.anchor_y = this._drill_anchorY;
+		}
+	}
+}
+//==============================
+// * 图片的属性 - 控制 - 移动图片
+//==============================
+var _drill_PFOE_p_move = Game_Picture.prototype.move;
+Game_Picture.prototype.move = function(origin, x, y, scaleX, scaleY, opacity, blendMode, duration) {
+	_drill_PFOE_p_move.call(this, origin, x, y, scaleX, scaleY, opacity, blendMode, duration);
+	if( this._drill_PFOE_spriteData != undefined ){
+		if( this._origin == 0 ){
+			this._drill_PFOE_spriteData.anchor_x = 0;	// 锚点X
+			this._drill_PFOE_spriteData.anchor_y = 0;	// 锚点Y
+		}else if( this._origin == 1 ){
+			this._drill_PFOE_spriteData.anchor_x = 0.5;	// 锚点X
+			this._drill_PFOE_spriteData.anchor_y = 0.5;	// 锚点Y
+		}
+		if( Imported.Drill_CoreOfPicture ){  //【图片 - 图片优化核心】
+			this._drill_PFOE_spriteData.anchor_x = this._drill_anchorX;
+			this._drill_PFOE_spriteData.anchor_y = this._drill_anchorY;
+		}
+	}
+}
+
+//==============================
+// * 图片的属性 - 是否正在播放（开放函数）
 //==============================
 Game_Picture.prototype.drill_PFOE_isPlaying = function() {
-	if( !this._Drill_PFOE ){ return false; }
-	if( this._Drill_PFOE.playing_type == "" ){ return false; }
+	if( this._drill_PFOE_param == undefined ){ return false; }
+	if( this._drill_PFOE_param.playing_type == "" ){ return false; }
 	return true;
 }
 //==============================
-// * 图片 - 设置透明度
+// * 图片的属性 - 获取正在播放的类型（开放函数）
+//==============================
+Game_Picture.prototype.drill_PFOE_getPlayingType = function() {
+	if( this._drill_PFOE_param == undefined ){ return ""; }
+	return this._drill_PFOE_param.playing_type;
+}
+//==============================
+// * 图片的属性 - 设置透明度（开放函数）
 //==============================
 Game_Picture.prototype.drill_PFOE_setOpacity = function( opacity ){
 	if( isNaN(opacity) ){
@@ -831,494 +979,845 @@ Game_Picture.prototype.drill_PFOE_setOpacity = function( opacity ){
 	this._opacity = opacity;
 }
 //==============================
-// * 图片 - 控制 - 显示图片
-//==============================
-var _Drill_PFOE_p_show = Game_Picture.prototype.show;
-Game_Picture.prototype.show = function(name, origin, x, y, scaleX, scaleY, opacity, blendMode) {
-	_Drill_PFOE_p_show.call(this, name, origin, x, y, scaleX, scaleY, opacity, blendMode);
-	if( origin == 0 ){
-		this._Drill_PFOE.anchor_x = 0;			// 锚点中心x
-		this._Drill_PFOE.anchor_y = 0;			// 锚点中心y
-	}
-	if( origin == 1 ){
-		this._Drill_PFOE.anchor_x = 0.5;		// 锚点中心x
-		this._Drill_PFOE.anchor_y = 0.5;		// 锚点中心y
-	}
-}
-//==============================
-// * 图片 - 控制 - 移动图片
-//==============================
-var _Drill_PFOE_p_move = Game_Picture.prototype.move;
-Game_Picture.prototype.move = function(origin, x, y, scaleX, scaleY, opacity, blendMode, duration) {
-	_Drill_PFOE_p_move.call(this, origin, x, y, scaleX, scaleY, opacity, blendMode, duration);
-	if( origin == 0 ){
-		this._Drill_PFOE.anchor_x = 0;			// 锚点中心x
-		this._Drill_PFOE.anchor_y = 0;			// 锚点中心y
-	}
-	if( origin == 1 ){
-		this._Drill_PFOE.anchor_x = 0.5;		// 锚点中心x
-		this._Drill_PFOE.anchor_y = 0.5;		// 锚点中心y
-	}
-}
-//==============================
-// * 图片 - 帧刷新
-//==============================
-var _Drill_PFOE_p_update = Game_Picture.prototype.update;
-Game_Picture.prototype.update = function() {
-	_Drill_PFOE_p_update.call(this);
-	
-	if( this._Drill_PFOE == undefined ){ return; } 
-	if( this._Drill_PFOE.playing_type == "" ){ return; }
-	if( this._Drill_PFOE.real_width == -1 ){ return; }		//需要等图片加载完成
-	if( this._Drill_PFOE.real_height == -1 ){ return; }
-	
-	this.drill_PFOE_updateHidingDisappear();		//帧刷新 - 直接消失
-	this.drill_PFOE_updateHidingMoveDisappear();	//帧刷新 - 移动消失
-	this.drill_PFOE_updateHidingSpring();			//帧刷新 - 标准升起
-	this.drill_PFOE_updateHidingJump();				//帧刷新 - 标准弹跳
-	this.drill_PFOE_updateHidingShrink();			//帧刷新 - 缩小消失
-	this.drill_PFOE_updateHidingHorizonFlat();		//帧刷新 - 横向挤扁
-	this.drill_PFOE_updateHidingVerticalFlat();		//帧刷新 - 纵向挤扁
-	this.drill_PFOE_updateHidingBlowOutLeft();		//帧刷新 - 向左炸飞
-	this.drill_PFOE_updateHidingBlowOutRight();		//帧刷新 - 向右炸飞
-	this.drill_PFOE_updateHidingShrinkSpring();		//帧刷新 - 弹性缩小消失
-}
-//==============================
-// * 图片 - 终止效果
+// * 图片的属性 - 立即终止动作（开放函数）
 //==============================
 Game_Picture.prototype.drill_PFOE_stopEffect = function() {
-	var ef = this._Drill_PFOE;
-	ef.x = 0;					// x
-	ef.y = 0;					// y
-	ef.rotation = 0;			// 旋转
-	ef.scale_x = 0;				// 缩放x
-	ef.scale_y = 0;				// 缩放y
-	ef.skew_x = 0;				// 斜切x
-	ef.skew_y = 0;				// 斜切y
-	ef.opacity = 0 ;
-	ef.playing_type = "";
-	this.drill_PFOE_setOpacity(ef.opacity);
+	this.drill_PFOE_setOpacity( 0 );
+	this._drill_PFOE_spriteData = undefined;
+	this._drill_PFOE_param = undefined;
+}
+
+//==============================
+// * 图片的属性 - 数学工具 - 锁定锚点
+//			
+//			参数：	> org_anchor_x 数字    （原贴图锚点X）
+//					> org_anchor_y 数字    （原贴图锚点Y）
+//					> target_anchor_x 数字 （新的锚点X）
+//					> target_anchor_y 数字 （新的锚点Y）
+//					> width 数字           （贴图宽度）
+//					> height 数字          （贴图高度）
+//					> rotation 数字        （旋转度数，弧度）
+//					> scale_x,scale_y 数字 （缩放比例XY，默认1.00）
+//					> skew_x,skew_y 数字   （斜切比例XY，默认0.00）
+//			返回：	> { x:0, y:0 }         （偏移的坐标）
+//			
+//			说明：	> 修正 旋转+缩放+斜切 的坐标，使其看起来像是在绕着 新的锚点 变换。
+//					  旋转+缩放+斜切 可为负数。
+//==============================
+Game_Temp.prototype.drill_PFOE_Math2D_getFixPointInAnchor = function( 
+					org_anchor_x,org_anchor_y,			//原贴图锚点 
+					target_anchor_x,target_anchor_y, 	//新的锚点 
+					width, height,						//贴图高宽
+					rotation,							//变换的值（旋转）
+					scale_x, scale_y,					//变换的值（缩放）
+					skew_x, skew_y  ){					//变换的值（斜切）
+	
+	if( scale_x == undefined ){ scale_x = 1; }
+	if( scale_y == undefined ){ scale_y = 1; }
+	if( skew_x == undefined ){ skew_x = 0; }
+	if( skew_y == undefined ){ skew_y = 0; }
+	
+	// > 参数准备 （来自 Pixi.Transform）
+    var _cx = 1; // cos rotation + skewY;
+    var _sx = 0; // sin rotation + skewY;
+    var _cy = 0; // cos rotation + Math.PI/2 - skewX;
+    var _sy = 1; // sin rotation + Math.PI/2 - skewX;
+	
+	// > 旋转+斜切 （来自 Pixi.Transform.prototype.updateSkew）
+    _cx = Math.cos( rotation + skew_y );
+    _sx = Math.sin( rotation + skew_y );
+    _cy = -Math.sin( rotation - skew_x ); // cos, added PI/2
+    _sy = Math.cos( rotation - skew_x ); // sin, added PI/2
+	
+	// > 缩放 （来自 Pixi.Transform.prototype.updateLocalTransform）
+    var a = _cx * scale_x;
+    var b = _sx * scale_x;
+    var c = _cy * scale_y;
+    var d = _sy * scale_y;
+	
+	// > 将参数应用到坐标
+	var cur_x = width  * target_anchor_x;
+	var cur_y = height * target_anchor_y;
+	var center_x = width  * org_anchor_x;
+	var center_y = height * org_anchor_y;
+	var dx = (center_x - cur_x);
+	var dy = (center_y - cur_y);
+    var tar_x = cur_x + (dx * a + dy * c) - center_x;
+    var tar_y = cur_y + (dx * b + dy * d) - center_y;
+	
+	return { "x":tar_x, "y":tar_y };
+}
+//==============================
+// * 图片的属性 - 数学工具 - 抛物线三点式
+//			
+//			参数：	> x1,y1 数字（点A）
+//					> x2,y2 数字（点B）
+//					> x3,y3 数字（点C）
+//			返回：	> { a:0, b:0, c:0 } （抛物线公式的abc）
+//			
+//			说明：	已知三点，返回抛物线公式 y = a*x^2 + b*x + c 的abc值。
+//==============================
+Game_Temp.prototype.drill_PFOE_Math2D_getParabolicThree = function( x1,y1,x2,y2,x3,y3 ){
+	
+	var b = ((x2*x2 - x3*x3)*(y1 - y2) - (x1*x1 - x2*x2)*(y2 - y3)) / ((x2*x2 - x3*x3)*(x1 - x2) - (x1*x1 - x2*x2)*(x2 - x3));
+	var a = (y1 - y2 - b*(x1 - x2)) / (x1*x1 - x2*x2);
+	var c = y1 - a*x1*x1 - b*x1;
+	
+	return { "a":a, "b":b, "c":c };
 }
 
 
+
 //=============================================================================
-// ** 消失动作
+// ** ☆消失动作
+//
+//			说明：	> 此模块专门管理 消失动作 的设置。
+//					> 不考虑转控制器结构，且不考虑自定义变换扩展，只硬编码的公式控制变换动画。
+//					> 此模块的代码 在其他同类插件中一模一样，只要替换 类名和简称 即可。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 初始化 - 消失 直接消失
+// * 『消失动作』直接消失 - 初始化
 //==============================
-Game_Picture.prototype.drill_PFOE_playHidingDisappear = function( time ){
-	var ef = this._Drill_PFOE;
-	ef.playing_type = "直接消失";
-	ef.fA_dtime = time;
-	ef.fA_time = 0;
-}
+Game_Picture.prototype.drill_PFOE_playHidingDisappear = function( allTime ){
+	this.drill_PFOE_checkData();
+	allTime -= 2;		//『动作效果总时间的时差』
+	
+	var p_data = this._drill_PFOE_param;
+	p_data.playing_type = "直接消失";
+	p_data.fA_time = 0;
+	p_data.fA_dest = allTime;
+	
+	p_data.fZ_time = 0;
+	p_data.fZ_dest = allTime;
+};
 //==============================
-// * 帧刷新 - 消失 直接消失
+// * 『消失动作』直接消失 - 帧刷新
 //==============================
 Game_Picture.prototype.drill_PFOE_updateHidingDisappear = function() {
-	var ef = this._Drill_PFOE;
-	if( ef.playing_type != "直接消失" ){ return; }
+	var p_data = this._drill_PFOE_param;
+	if( p_data == undefined ){ return; }
+	if( p_data.playing_type != "直接消失" ){ return; }
+	var s_data = this._drill_PFOE_spriteData;
+	if( s_data == undefined ){ return; }
 	
-	if( ef.fA_time < ef.fA_dtime ){
-		ef.fA_time ++;
-		ef.opacity = 255 *(1 - ef.fA_time/ef.fA_dtime);
-		this.drill_PFOE_setOpacity(ef.opacity);
-	}else{
-		this.drill_PFOE_stopEffect();	//结束动作
+	if( p_data.fA_time < p_data.fA_dest ){
+		p_data.fA_time ++;
+		
+		// > 透明度变化
+		s_data.opacity = 255 *(1 - p_data.fA_time/p_data.fA_dest);
+		this.drill_PFOE_setOpacity(s_data.opacity);
 	}
-}
+	
+	// > 终止动作（立即）
+	p_data.fZ_time ++;
+	if( p_data.fZ_time >= p_data.fZ_dest ){
+		this.drill_PFOE_stopEffect();
+	}
+};
 
 //==============================
-// * 初始化 - 消失 移动消失
+// * 『消失动作』移动消失 - 初始化
 //==============================
-Game_Picture.prototype.drill_PFOE_playHidingMoveDisappear = function( time,angle,distance ){
-	var ef = this._Drill_PFOE;
-	ef.playing_type = "移动消失";
-	ef.fA_dtime = time;
-	ef.fA_time = 0;
-	ef.fA_angle = angle;
-	ef.fA_distance = distance;
-}
+Game_Picture.prototype.drill_PFOE_playHidingMoveDisappear = function( allTime,angle,distance ){
+	this.drill_PFOE_checkData();
+	allTime -= 2;		//『动作效果总时间的时差』
+	
+	var p_data = this._drill_PFOE_param;
+	p_data.playing_type = "移动消失";
+	p_data.fA_time = 0;
+	p_data.fA_dest = allTime;
+	p_data.fA_angle = angle;
+	p_data.fA_distance = distance;
+	
+	p_data.fZ_time = 0;
+	p_data.fZ_dest = allTime;
+};
 //==============================
-// * 帧刷新 - 消失 移动消失
+// * 『消失动作』移动消失 - 帧刷新
 //==============================
 Game_Picture.prototype.drill_PFOE_updateHidingMoveDisappear = function() {
-	var ef = this._Drill_PFOE;
-	if( ef.playing_type != "移动消失" ){ return; }
+	var p_data = this._drill_PFOE_param;
+	if( p_data == undefined ){ return; }
+	if( p_data.playing_type != "移动消失" ){ return; }
+	var s_data = this._drill_PFOE_spriteData;
+	if( s_data == undefined ){ return; }
 	
-	if( ef.fA_time < ef.fA_dtime ){
-		ef.fA_time ++;
-		var temp_d = ef.fA_distance * ef.fA_time/ef.fA_dtime;		//匀速移动
-		ef.x = temp_d * Math.cos( ef.fA_angle *Math.PI/180 );
-		ef.y = temp_d * Math.sin( ef.fA_angle *Math.PI/180 );
-		ef.opacity = 255 *(1 - ef.fA_time/ef.fA_dtime);
-		this.drill_PFOE_setOpacity(ef.opacity);
-	}else{
-		this.drill_PFOE_stopEffect();	//结束动作
+	if( p_data.fA_time < p_data.fA_dest ){
+		p_data.fA_time ++;
+		
+		// > 匀速移动
+		var temp_d = p_data.fA_distance * p_data.fA_time/p_data.fA_dest;
+		s_data.x = temp_d * Math.cos( p_data.fA_angle *Math.PI/180 );
+		s_data.y = temp_d * Math.sin( p_data.fA_angle *Math.PI/180 );
+		
+		// > 透明度变化
+		s_data.opacity = 255 *(1 - p_data.fA_time/p_data.fA_dest);
+		this.drill_PFOE_setOpacity(s_data.opacity);
 	}
-}
+	
+	// > 终止动作（立即）
+	p_data.fZ_time ++;
+	if( p_data.fZ_time >= p_data.fZ_dest ){
+		this.drill_PFOE_stopEffect();
+	}
+};
 
 //==============================
-// * 初始化 - 消失 标准升起
+// * 『消失动作』标准升起 - 初始化
 //==============================
-Game_Picture.prototype.drill_PFOE_playHidingSpring = function( time,height,b_time ) {
-	var ef = this._Drill_PFOE;
-	ef.playing_type = "标准升起";
-	ef.fA_dTime = time;
-	ef.fA_distance = -1 * height;
-	ef.fA_a = 2*ef.fA_distance/ef.fA_dTime/ef.fA_dTime;	//加速度公式
-	ef.fA_time = 0;
-	ef.fB_dTime = b_time || 30;
-	ef.fB_time = 0;
-}
+Game_Picture.prototype.drill_PFOE_playHidingSpring = function( allTime,height,bufferTime ){
+	this.drill_PFOE_checkData();
+	if( bufferTime == undefined ){ bufferTime = 20; }
+	if( allTime < bufferTime ){
+		alert( DrillUp.drill_PFOE_getPluginTip_allTimeError("标准升起") );
+		return;
+	}
+	allTime -= 2;		//『动作效果总时间的时差』
+	
+	var p_data = this._drill_PFOE_param;
+	p_data.playing_type = "标准升起";
+	p_data.fA_time = 0;
+	p_data.fA_dest = allTime - bufferTime;
+	p_data.fA_distance = -1 * height;
+	p_data.fA_a = 2*p_data.fA_distance/p_data.fA_dest/p_data.fA_dest;	//加速度公式
+	p_data.fB_time = 0;
+	p_data.fB_dest = bufferTime;
+	
+	p_data.fZ_time = 0;
+	p_data.fZ_dest = allTime;
+};
 //==============================
-// * 帧刷新 - 消失 标准升起
+// * 『消失动作』标准升起 - 帧刷新
 //==============================
 Game_Picture.prototype.drill_PFOE_updateHidingSpring = function() {
-	var ef = this._Drill_PFOE;
-	if( ef.playing_type != "标准升起" ){ return; }
+	var p_data = this._drill_PFOE_param;
+	if( p_data == undefined ){ return; }
+	if( p_data.playing_type != "标准升起" ){ return; }
+	var s_data = this._drill_PFOE_spriteData;
+	if( s_data == undefined ){ return; }
 	
-	if( ef.fB_time <= ef.fB_dTime ){
-		ef.fB_time ++;
-		var t = ef.fB_time;
-		var a = 0.8 / ef.fB_dTime / ef.fB_dTime;	//固定压缩0.2比例
-		var b = -1 * a * ef.fB_dTime;
+	if( p_data.fB_time <= p_data.fB_dest ){
+		p_data.fB_time ++;
+		
+		// > 向下挤压
+		var t = p_data.fB_time;
+		var a = 0.8 / p_data.fB_dest / p_data.fB_dest;	//固定压缩0.2比例
+		var b = -1 * a * p_data.fB_dest;
 		var c = 0;
-		ef.scale_x = -1*(a*ef.fB_time*ef.fB_time + b*ef.fB_time + c);
-		ef.scale_y = -ef.scale_x;
+		s_data.scale_x = -1*(a*p_data.fB_time*p_data.fB_time + b*p_data.fB_time + c);
+		s_data.scale_y = -s_data.scale_x;
+		s_data.y = 0;
+		s_data.opacity = 255;
+		this.drill_PFOE_setOpacity(s_data.opacity);
 		
-		// > 锚点(0.5,1.0)锁定
-		var fix_point = $gameTemp.drill_PFOE_Math2D_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, 0.5,1.0, ef.real_width,ef.real_height, ef.rotation, ef.scale_x+1, ef.scale_y+1 );
-		ef.x = fix_point.x;
-		ef.y = fix_point.y;
+	}else if( p_data.fA_time < p_data.fA_dest ){
+		p_data.fA_time ++;
 		
-		ef.opacity = 255;
-		this.drill_PFOE_setOpacity(ef.opacity);
-	}else if( ef.fA_time < ef.fA_dTime ){
-		ef.fA_time ++;
-		var t = ef.fA_time;
-		ef.y = ef.fA_a*t*t/2;	//加速上升
-		ef.opacity = 255 * (ef.fA_dTime - ef.fA_time) /ef.fA_dTime * 2 ;
-		this.drill_PFOE_setOpacity(ef.opacity);
-	}else{
-		this.drill_PFOE_stopEffect();	//结束动作
+		// > 加速上升+透明度变化
+		var t = p_data.fA_time;
+		s_data.y = p_data.fA_a*t*t/2;
+		s_data.opacity = 255 * (p_data.fA_dest - p_data.fA_time) /p_data.fA_dest * 2 ;
+		this.drill_PFOE_setOpacity(s_data.opacity);
 	}
-}
+	
+	// > 终止动作（立即）
+	p_data.fZ_time ++;
+	if( p_data.fZ_time >= p_data.fZ_dest ){
+		this.drill_PFOE_stopEffect();
+	}
+};
 
 
 //==============================
-// * 初始化 - 消失 标准弹跳
+// * 『消失动作』标准弹跳 - 初始化
 //==============================
-Game_Picture.prototype.drill_PFOE_playHidingJump = function( time, height ) {
-	var ef = this._Drill_PFOE;
-	ef.playing_type = "标准弹跳";
-	ef.f_a = -4*height/time/time;	//抛物线公式 y = ax2 + bx +c（一样）
-	ef.f_b = 4*height/time;	
-	ef.f_c = 0;	
-	ef.f_time = 0;
-	ef.f_dTime = time;
-}
+Game_Picture.prototype.drill_PFOE_playHidingJump = function( allTime, height ){
+	this.drill_PFOE_checkData();
+	allTime -= 2;		//『动作效果总时间的时差』
+	
+	var p_data = this._drill_PFOE_param;
+	p_data.playing_type = "标准弹跳";
+	p_data.fA_time = 0;
+	p_data.fA_dest = allTime;
+	p_data.fA_a = -4*height/allTime/allTime;	//抛物线公式 y = ax2 + bx +c（一样）
+	p_data.fA_b = 4*height/allTime;	
+	p_data.fA_c = 0;
+	
+	p_data.fZ_time = 0;
+	p_data.fZ_dest = allTime;
+};
 //==============================
-// * 帧刷新 - 消失 标准弹跳
+// * 『消失动作』标准弹跳 - 帧刷新
 //==============================
 Game_Picture.prototype.drill_PFOE_updateHidingJump = function() {
-	var ef = this._Drill_PFOE;
-	if( ef.playing_type != "标准弹跳" ){ return; }
+	var p_data = this._drill_PFOE_param;
+	if( p_data == undefined ){ return; }
+	if( p_data.playing_type != "标准弹跳" ){ return; }
+	var s_data = this._drill_PFOE_spriteData;
+	if( s_data == undefined ){ return; }
 	
-	if( ef.f_time < ef.f_dTime/2 ){		//通用一个公式，只是根据顶点值分成了两份
-		ef.f_time ++;
-		var t = ef.f_time;
-		ef.y = -1*(ef.f_a*t*t + ef.f_b*t);
-		ef.opacity = 255 ;
-		this.drill_PFOE_setOpacity(ef.opacity);
-	}else if( ef.f_time < ef.f_dTime ){
-		ef.f_time ++;
-		var t = ef.f_time;
-		ef.y = -1*(ef.f_a*t*t + ef.f_b*t);
-		if(ef.y >0){ ef.y = 0; }
-		ef.opacity = 255 - 255 * (ef.f_time - ef.f_dTime/2 ) /ef.f_dTime*2 ;
-		this.drill_PFOE_setOpacity(ef.opacity);
-	}else{
-		this.drill_PFOE_stopEffect();	//结束动作
+	if( p_data.fA_time < p_data.fA_dest/2 ){		//通用一个公式，只是根据顶点值分成了两份
+		p_data.fA_time ++;
+		var t = p_data.fA_time;
+		s_data.y = -1*(p_data.fA_a*t*t + p_data.fA_b*t + p_data.fA_c);
+		s_data.opacity = 255 ;
+		this.drill_PFOE_setOpacity(s_data.opacity);
+	}else if( p_data.fA_time < p_data.fA_dest ){
+		p_data.fA_time ++;
+		var t = p_data.fA_time;
+		s_data.y = -1*(p_data.fA_a*t*t + p_data.fA_b*t + p_data.fA_c);
+		if(s_data.y >0){ s_data.y = 0; }
+		s_data.opacity = 255 - 255 * (p_data.fA_time - p_data.fA_dest/2 ) /p_data.fA_dest*2 ;
+		this.drill_PFOE_setOpacity(s_data.opacity);
 	}
-}
+	
+	// > 终止动作（立即）
+	p_data.fZ_time ++;
+	if( p_data.fZ_time >= p_data.fZ_dest ){
+		this.drill_PFOE_stopEffect();
+	}
+};
 
 
 //==============================
-// * 初始化 - 消失 缩小消失
+// * 『消失动作』缩小消失 - 初始化
 //==============================
-Game_Picture.prototype.drill_PFOE_playHidingShrink = function( time, opacity_off ) {
-	var ef = this._Drill_PFOE;
-	ef.playing_type = "缩小消失";
+Game_Picture.prototype.drill_PFOE_playHidingShrink = function( allTime, opacity_off ){
+	this.drill_PFOE_checkData();
+	allTime -= 2;		//『动作效果总时间的时差』
 	
-	ef.fA_sa = 2/time/time/2;	//匀加速公式 scale = 1/2 * at2
-	ef.fA_sb = 0;	
-	ef.fA_sc = 0;	
-	ef.fA_ya = 20/time/time/2;	//抛物线公式 y = ax2 + bx +c
-	ef.fA_yb = 0;	
-	ef.fA_yc = 0;	
-	ef.fA_time = 0;
-	ef.fA_dTime = time;
+	var p_data = this._drill_PFOE_param;
+	p_data.playing_type = "缩小消失";
+	p_data.fA_time = 0;
+	p_data.fA_dest = allTime;
+	p_data.fA_sa = 2/allTime/allTime/2;		//匀加速公式 scale = 1/2 * at2
+	p_data.fA_sb = 0;
+	p_data.fA_sc = 0;
+	p_data.fA_ya = 20/allTime/allTime/2;	//抛物线公式 y = ax2 + bx +c
+	p_data.fA_yb = 0;
+	p_data.fA_yc = 0;
 	
-	ef.f_opacityOff = opacity_off;
-}
+	p_data.fZ_time = 0;
+	p_data.fZ_dest = allTime;
+	
+	p_data.f_opacityOff = opacity_off;
+};
 //==============================
-// * 帧刷新 - 消失 缩小消失
+// * 『消失动作』缩小消失 - 帧刷新
 //==============================
 Game_Picture.prototype.drill_PFOE_updateHidingShrink = function() {
-	var ef = this._Drill_PFOE;
-	if( ef.playing_type != "缩小消失" ){ return; }
+	var p_data = this._drill_PFOE_param;
+	if( p_data == undefined ){ return; }
+	if( p_data.playing_type != "缩小消失" ){ return; }
+	var s_data = this._drill_PFOE_spriteData;
+	if( s_data == undefined ){ return; }
 	
-	if( ef.fA_time < ef.fA_dTime ){
-		ef.fA_time ++;
-		var t = ef.fA_time;
+	if( p_data.fA_time < p_data.fA_dest ){
+		p_data.fA_time ++;
+		var t = p_data.fA_time;
 		
-		ef.y = 20 -1*(ef.fA_ya*t*t + ef.fA_yb*t);	//抛物线
-		ef.scale_x = - ef.fA_sa*t*t - ef.fA_sb*t;	//匀加速放大
-		ef.scale_y = ef.scale_x;
-		if(ef.y >0){ ef.y = 0;}
+		s_data.y = 20 -1*(p_data.fA_ya*t*t + p_data.fA_yb*t + p_data.fA_yc);	//抛物线
+		s_data.scale_x = - p_data.fA_sa*t*t - p_data.fA_sb*t + p_data.fA_sc;	//匀加速放大
+		s_data.scale_y = s_data.scale_x;
+		if(s_data.y >0){ s_data.y = 0;}
 		
 		// > 锚点(0.5,1.0)锁定
-		var fix_point = $gameTemp.drill_PFOE_Math2D_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, 0.5,1.0, ef.real_width,ef.real_height, ef.rotation, ef.scale_x+1, ef.scale_y+1 );
-		ef.x = fix_point.x;
-		ef.y = ef.y + fix_point.y;
+		var fix_point = $gameTemp.drill_PFOE_Math2D_getFixPointInAnchor( s_data.anchor_x,s_data.anchor_y, 0.5,1.0, s_data.real_width,s_data.real_height, s_data.rotation, s_data.scale_x+1, s_data.scale_y+1 );
+		s_data.x = fix_point.x;
+		s_data.y = s_data.y + fix_point.y;
 
 		// > 透明度变化
-		if( ef.f_opacityOff == true ){
-			ef.opacity = 255
+		if( p_data.f_opacityOff == true ){
+			s_data.opacity = 255
 			this.drill_PFOE_setOpacity(255);
 		}else{
-			ef.opacity = 255 - 255 * ef.fA_time /ef.fA_dTime ;
-			this.drill_PFOE_setOpacity(ef.opacity);
+			s_data.opacity = 255 - 255 * p_data.fA_time /p_data.fA_dest;
+			this.drill_PFOE_setOpacity(s_data.opacity);
 		}
-		
-	}else{
-		this.drill_PFOE_stopEffect();	//结束动作
 	}
-}
+	
+	// > 终止动作（立即）
+	p_data.fZ_time ++;
+	if( p_data.fZ_time >= p_data.fZ_dest ){
+		this.drill_PFOE_stopEffect();
+	}
+};
 
 
 //==============================
-// * 初始化 - 消失 横向挤扁
+// * 『消失动作』横向挤扁 - 初始化
 //==============================
-Game_Picture.prototype.drill_PFOE_playHidingHorizonFlat = function( time, scale_x, opacity_off ) {
-	var ef = this._Drill_PFOE;
-	ef.playing_type = "横向挤扁";
+Game_Picture.prototype.drill_PFOE_playHidingHorizonFlat = function( allTime, scale_x, opacity_off ){
+	this.drill_PFOE_checkData();
+	allTime -= 2;		//『动作效果总时间的时差』
 	
-	ef.f_dTime = time ;
-	ef.f_time = 0;
-	ef.f_scale_x = scale_x - 1.0;
+	var p_data = this._drill_PFOE_param;
+	p_data.playing_type = "横向挤扁";
+	p_data.fA_time = 0;
+	p_data.fA_dest = allTime;
+	p_data.fA_scale_x = scale_x - 1.0;
 	
-	ef.f_opacityOff = opacity_off;
-}
+	p_data.fZ_time = 0;
+	p_data.fZ_dest = allTime;
+	
+	p_data.f_opacityOff = opacity_off;
+};
 //==============================
-// * 帧刷新 - 消失 横向挤扁
+// * 『消失动作』横向挤扁 - 帧刷新
 //==============================
 Game_Picture.prototype.drill_PFOE_updateHidingHorizonFlat = function() {
-	var ef = this._Drill_PFOE;
-	if( ef.playing_type != "横向挤扁" ){ return; }
+	var p_data = this._drill_PFOE_param;
+	if( p_data == undefined ){ return; }
+	if( p_data.playing_type != "横向挤扁" ){ return; }
+	var s_data = this._drill_PFOE_spriteData;
+	if( s_data == undefined ){ return; }
+	
+	if( p_data.fA_time < p_data.fA_dest ){
+		p_data.fA_time ++;
 		
-	if( ef.f_time < ef.f_dTime ){
-		ef.f_time ++;
-		
-		ef.scale_x = ef.f_scale_x * ef.f_time/ef.f_dTime ;
-		ef.scale_y = -1.0 * ef.f_time/ef.f_dTime ;
+		s_data.scale_x = p_data.fA_scale_x * p_data.fA_time/p_data.fA_dest ;
+		s_data.scale_y = -1.0 * p_data.fA_time/p_data.fA_dest ;
 		
 		// > 锚点(0.5,1.0)锁定
-		var fix_point = $gameTemp.drill_PFOE_Math2D_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, 0.5,1.0, ef.real_width,ef.real_height, ef.rotation, ef.scale_x+1, ef.scale_y+1 );
-		ef.x = fix_point.x;
-		ef.y = fix_point.y;
+		var fix_point = $gameTemp.drill_PFOE_Math2D_getFixPointInAnchor( s_data.anchor_x,s_data.anchor_y, 0.5,1.0, s_data.real_width,s_data.real_height, s_data.rotation, s_data.scale_x+1, s_data.scale_y+1 );
+		s_data.x = fix_point.x;
+		s_data.y = fix_point.y;
 		
 		// > 透明度变化
-		if( ef.f_opacityOff == true ){
-			ef.opacity = 255
+		if( p_data.f_opacityOff == true ){
+			s_data.opacity = 255
 			this.drill_PFOE_setOpacity(255);
 		}else{
-			ef.opacity = 255 - 255 * ef.f_time /ef.f_dTime ;
-			this.drill_PFOE_setOpacity(ef.opacity);
+			s_data.opacity = 255 - 255 * p_data.fA_time /p_data.fA_dest ;
+			this.drill_PFOE_setOpacity(s_data.opacity);
 		}
-		
-	}else{
-		this.drill_PFOE_stopEffect();	//结束动作
 	}
-}
-
-
-//==============================
-// * 初始化 - 消失 纵向挤扁
-//==============================
-Game_Picture.prototype.drill_PFOE_playHidingVerticalFlat = function( time, scale_y, opacity_off ) {
-	var ef = this._Drill_PFOE;
-	ef.playing_type = "纵向挤扁";
 	
-	ef.f_dTime = time ;
-	ef.f_time = 0;
-	ef.f_scale_y = scale_y - 1.0;
-	
-	ef.f_opacityOff = opacity_off;
-}
+	// > 终止动作（立即）
+	p_data.fZ_time ++;
+	if( p_data.fZ_time >= p_data.fZ_dest ){
+		this.drill_PFOE_stopEffect();
+	}
+};
+
 //==============================
-// * 帧刷新 - 消失 纵向挤扁
+// * 『消失动作』纵向挤扁 - 初始化
+//==============================
+Game_Picture.prototype.drill_PFOE_playHidingVerticalFlat = function( allTime, scale_y, opacity_off ){
+	this.drill_PFOE_checkData();
+	allTime -= 2;		//『动作效果总时间的时差』
+	
+	var p_data = this._drill_PFOE_param;
+	p_data.playing_type = "纵向挤扁";
+	p_data.fA_time = 0;
+	p_data.fA_dest = allTime;
+	p_data.fA_scale_y = scale_y - 1.0;
+	
+	p_data.fZ_time = 0;
+	p_data.fZ_dest = allTime;
+	
+	p_data.f_opacityOff = opacity_off;
+};
+//==============================
+// * 『消失动作』纵向挤扁 - 帧刷新
 //==============================
 Game_Picture.prototype.drill_PFOE_updateHidingVerticalFlat = function() {
-	var ef = this._Drill_PFOE;
-	if( ef.playing_type != "纵向挤扁" ){ return; }
+	var p_data = this._drill_PFOE_param;
+	if( p_data == undefined ){ return; }
+	if( p_data.playing_type != "纵向挤扁" ){ return; }
+	var s_data = this._drill_PFOE_spriteData;
+	if( s_data == undefined ){ return; }
+	
+	if( p_data.fA_time < p_data.fA_dest ){
+		p_data.fA_time ++;
 		
-	if( ef.f_time < ef.f_dTime ){
-		ef.f_time ++;
-		
-		ef.scale_x = -1.0 * ef.f_time/ef.f_dTime ;
-		ef.scale_y = ef.f_scale_y * ef.f_time/ef.f_dTime ;
+		s_data.scale_x = -1.0 * p_data.fA_time/p_data.fA_dest ;
+		s_data.scale_y = p_data.fA_scale_y * p_data.fA_time/p_data.fA_dest ;
 		
 		// > 锚点(0.5,1.0)锁定
-		var fix_point = $gameTemp.drill_PFOE_Math2D_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, 0.5,1.0, ef.real_width,ef.real_height, ef.rotation, ef.scale_x+1, ef.scale_y+1 );
-		ef.x = fix_point.x;
-		ef.y = fix_point.y;
+		var fix_point = $gameTemp.drill_PFOE_Math2D_getFixPointInAnchor( s_data.anchor_x,s_data.anchor_y, 0.5,1.0, s_data.real_width,s_data.real_height, s_data.rotation, s_data.scale_x+1, s_data.scale_y+1 );
+		s_data.x = fix_point.x;
+		s_data.y = fix_point.y;
 		
 		// > 透明度变化
-		if( ef.f_opacityOff == true ){
-			ef.opacity = 255
+		if( p_data.f_opacityOff == true ){
+			s_data.opacity = 255
 			this.drill_PFOE_setOpacity(255);
 		}else{
-			ef.opacity = 255 - 255 * ef.f_time /ef.f_dTime ;
-			this.drill_PFOE_setOpacity(ef.opacity);
+			s_data.opacity = 255 - 255 * p_data.fA_time /p_data.fA_dest ;
+			this.drill_PFOE_setOpacity(s_data.opacity);
 		}
-		
-	}else{
-		this.drill_PFOE_stopEffect();	//结束动作
 	}
-}
-
-
-//==============================
-// * 初始化 - 消失 向左炸飞
-//==============================
-Game_Picture.prototype.drill_PFOE_playHidingBlowOutLeft = function( time, speed ) {
-	var ef = this._Drill_PFOE;
-	ef.playing_type = "向左炸飞";
 	
-	ef.f_dTime = time ;
-	ef.f_time = 0;
-	ef.f_speedX = speed;
-	ef.f_speedY = speed * 0.5;
-	ef.f_rotate = Math.PI/2 + Math.PI/4;	//135度
-}
+	// > 终止动作（立即）
+	p_data.fZ_time ++;
+	if( p_data.fZ_time >= p_data.fZ_dest ){
+		this.drill_PFOE_stopEffect();
+	}
+};
+
+
 //==============================
-// * 帧刷新 - 消失 向左炸飞
+// * 『消失动作』向左炸飞 - 初始化
+//==============================
+Game_Picture.prototype.drill_PFOE_playHidingBlowOutLeft = function( allTime, speed ){
+	this.drill_PFOE_checkData();
+	allTime -= 2;		//『动作效果总时间的时差』
+	
+	var p_data = this._drill_PFOE_param;
+	p_data.playing_type = "向左炸飞";
+	p_data.fA_time = 0;
+	p_data.fA_dest = allTime;
+	p_data.fA_speedX = speed;
+	p_data.fA_speedY = speed * 0.5;
+	p_data.fA_rotate = Math.PI/2 + Math.PI/4;	//135度
+	
+	p_data.fZ_time = 0;
+	p_data.fZ_dest = allTime;
+};
+//==============================
+// * 『消失动作』向左炸飞 - 帧刷新
 //==============================
 Game_Picture.prototype.drill_PFOE_updateHidingBlowOutLeft = function() {
-	var ef = this._Drill_PFOE;
-	if( ef.playing_type != "向左炸飞" ){ return; }
-		
-	if( ef.f_time < ef.f_dTime ){
-		ef.f_time ++;
-		
-		ef.x = -1 * ef.f_speedX * ef.f_time ;
-		ef.y = -1 *(ef.f_speedY*ef.f_time - ef.f_speedY*0.015 *ef.f_time*ef.f_time);	//抛物线公式
-		ef.rotation = -1*(ef.f_rotate * ef.f_time/ef.f_dTime);
-		
-		ef.opacity = 255 - 255 * ef.f_time /ef.f_dTime ;
-		this.drill_PFOE_setOpacity(ef.opacity);
-	}else{
-		this.drill_PFOE_stopEffect();	//结束动作
-	}
-}
-
-
-//==============================
-// * 初始化 - 消失 向右炸飞
-//==============================
-Game_Picture.prototype.drill_PFOE_playHidingBlowOutRight = function( time, speed ) {
-	var ef = this._Drill_PFOE;
-	ef.playing_type = "向右炸飞";
+	var p_data = this._drill_PFOE_param;
+	if( p_data == undefined ){ return; }
+	if( p_data.playing_type != "向左炸飞" ){ return; }
+	var s_data = this._drill_PFOE_spriteData;
+	if( s_data == undefined ){ return; }
 	
-	ef.f_dTime = time ;
-	ef.f_time = 0;
-	ef.f_speedX = speed;
-	ef.f_speedY = speed * 0.5;
-	ef.f_rotate = Math.PI/2 + Math.PI/4;	//135度
-}
+	if( p_data.fA_time < p_data.fA_dest ){
+		p_data.fA_time ++;
+		
+		s_data.x = -1 * p_data.fA_speedX * p_data.fA_time ;
+		s_data.y = -1 *(p_data.fA_speedY*p_data.fA_time - p_data.fA_speedY*0.015 *p_data.fA_time*p_data.fA_time);	//抛物线公式
+		s_data.rotation = -1*(p_data.fA_rotate * p_data.fA_time/p_data.fA_dest);
+		
+		// > 透明度变化
+		s_data.opacity = 255 - 255 * p_data.fA_time /p_data.fA_dest ;
+		this.drill_PFOE_setOpacity(s_data.opacity);
+	}
+	
+	// > 终止动作（立即）
+	p_data.fZ_time ++;
+	if( p_data.fZ_time >= p_data.fZ_dest ){
+		this.drill_PFOE_stopEffect();
+	}
+};
+
 //==============================
-// * 帧刷新 - 消失 向右炸飞
+// * 『消失动作』向右炸飞 - 初始化
+//==============================
+Game_Picture.prototype.drill_PFOE_playHidingBlowOutRight = function( allTime, speed ){
+	this.drill_PFOE_checkData();
+	allTime -= 2;		//『动作效果总时间的时差』
+	
+	var p_data = this._drill_PFOE_param;
+	p_data.playing_type = "向右炸飞";
+	p_data.fA_time = 0;
+	p_data.fA_dest = allTime;
+	p_data.fA_speedX = speed;
+	p_data.fA_speedY = speed * 0.5;
+	p_data.fA_rotate = Math.PI/2 + Math.PI/4;	//135度
+	
+	p_data.fZ_time = 0;
+	p_data.fZ_dest = allTime;
+};
+//==============================
+// * 『消失动作』向右炸飞 - 帧刷新
 //==============================
 Game_Picture.prototype.drill_PFOE_updateHidingBlowOutRight = function() {
-	var ef = this._Drill_PFOE;
-	if( ef.playing_type != "向右炸飞" ){ return; }
+	var p_data = this._drill_PFOE_param;
+	if( p_data == undefined ){ return; }
+	if( p_data.playing_type != "向右炸飞" ){ return; }
+	var s_data = this._drill_PFOE_spriteData;
+	if( s_data == undefined ){ return; }
+	
+	if( p_data.fA_time < p_data.fA_dest ){
+		p_data.fA_time ++;
 		
-	if( ef.f_time < ef.f_dTime ){
-		ef.f_time ++;
+		s_data.x = p_data.fA_speedX * p_data.fA_time ;
+		s_data.y = -1 *(p_data.fA_speedY*p_data.fA_time - p_data.fA_speedY*0.015 *p_data.fA_time*p_data.fA_time);	//抛物线公式
+		s_data.rotation = (p_data.fA_rotate * p_data.fA_time/p_data.fA_dest);
 		
-		ef.x = ef.f_speedX * ef.f_time ;
-		ef.y = -1 *(ef.f_speedY*ef.f_time - ef.f_speedY*0.015 *ef.f_time*ef.f_time);	//抛物线公式
-		ef.rotation = (ef.f_rotate * ef.f_time/ef.f_dTime);
-		
-		ef.opacity = 255 - 255 * ef.f_time /ef.f_dTime ;
-		this.drill_PFOE_setOpacity(ef.opacity);
-	}else{
-		this.drill_PFOE_stopEffect();	//结束动作
+		// > 透明度变化
+		s_data.opacity = 255 - 255 * p_data.fA_time /p_data.fA_dest ;
+		this.drill_PFOE_setOpacity(s_data.opacity);
 	}
-}
+	
+	// > 终止动作（立即）
+	p_data.fZ_time ++;
+	if( p_data.fZ_time >= p_data.fZ_dest ){
+		this.drill_PFOE_stopEffect();
+	}
+};
 
 
 //==============================
-// * 初始化 - 消失 弹性缩小消失
+// * 『消失动作』弹性缩小消失 - 初始化
 //==============================
-Game_Picture.prototype.drill_PFOE_playHidingShrinkSpring = function( dtime, overflow_scale, anchor_x, anchor_y, opacity_off ){
-	var ef = this._Drill_PFOE;
-	ef.playing_type = "弹性缩小消失";
+Game_Picture.prototype.drill_PFOE_playHidingShrinkSpring = function( allTime, overflow_scale, anchor_x, anchor_y, opacity_off ){
+	this.drill_PFOE_checkData();
+	allTime -= 2;		//『动作效果总时间的时差』
 	
-	ef.f_time = 0;	
-	ef.f_dTime = dtime;
+	var p_data = this._drill_PFOE_param;
+	p_data.playing_type = "弹性缩小消失";
+	p_data.fA_time = 0;	
+	p_data.fA_dest = allTime;
+	p_data.fA_anchor_x = anchor_x;
+	p_data.fA_anchor_y = anchor_y;
+	p_data.fA_abc = $gameTemp.drill_PFOE_Math2D_getParabolicThree( 0,0, allTime*0.2,overflow_scale, allTime,-1 );
 	
-	ef.f_anchor_x = anchor_x;
-	ef.f_anchor_y = anchor_y;
-	ef.f_opacityOff = opacity_off;
+	p_data.fZ_time = 0;
+	p_data.fZ_dest = allTime;
 	
-	ef.f_abc = $gameTemp.drill_PFOE_Math2D_getParabolicThree( 0,0, dtime*0.2,overflow_scale, dtime,-1 );
-	
-}
+	p_data.f_opacityOff = opacity_off;
+};
 //==============================
-// * 帧刷新 - 消失 弹性缩小消失
+// * 『消失动作』弹性缩小消失 - 帧刷新
 //==============================
 Game_Picture.prototype.drill_PFOE_updateHidingShrinkSpring = function() {
-	var ef = this._Drill_PFOE;
-	if( ef.playing_type != "弹性缩小消失" ){ return; }
+	var p_data = this._drill_PFOE_param;
+	if( p_data == undefined ){ return; }
+	if( p_data.playing_type != "弹性缩小消失" ){ return; }
+	var s_data = this._drill_PFOE_spriteData;
+	if( s_data == undefined ){ return; }
+	
+	if( p_data.fA_time < p_data.fA_dest ){
+		p_data.fA_time ++;
+		var time = p_data.fA_time;
 		
-	if( ef.f_time < ef.f_dTime ){
-		ef.f_time ++;
-		var time = ef.f_time;
-		
-		var dt = ef.f_dTime;		//计算 落脚点
-		var a = 2 / dt / dt;		//（匀减速移动到目标值）
+		var dt = p_data.fA_dest;		//计算 落脚点
+		var a = 2 / dt / dt;			//（匀减速移动到目标值）
 		var c_time = dt - time;
 		var per_step = 0.5 * a * dt * dt - 0.5 * a * c_time * c_time ;
 		
 		//【不要用分段函数，分段函数必然有 锯齿感 和 不和谐感 】
 		
 		// > 落脚点分配缩放值（三点抛物线）
-		ef.scale_x = ef.f_abc['a']*time*time + ef.f_abc['b']*time + ef.f_abc['c'];
-		ef.scale_y = ef.scale_x;
+		s_data.scale_x = p_data.fA_abc['a']*time*time + p_data.fA_abc['b']*time + p_data.fA_abc['c'];
+		s_data.scale_y = s_data.scale_x;
 		
 		// > 锚点锁定
-		var fix_point = $gameTemp.drill_PFOE_Math2D_getFixPointInAnchor( ef.anchor_x,ef.anchor_y, ef.f_anchor_x, ef.f_anchor_y, ef.real_width,ef.real_height, ef.rotation, ef.scale_x+1, ef.scale_y+1 );
-		ef.x = fix_point.x;
-		ef.y = fix_point.y;
+		var fix_point = $gameTemp.drill_PFOE_Math2D_getFixPointInAnchor( s_data.anchor_x,s_data.anchor_y, p_data.fA_anchor_x, p_data.fA_anchor_y, s_data.real_width,s_data.real_height, s_data.rotation, s_data.scale_x+1, s_data.scale_y+1 );
+		s_data.x = fix_point.x;
+		s_data.y = fix_point.y;
 		
 		// > 透明度变化
-		if( ef.f_opacityOff == true ){
-			ef.opacity = 255
+		if( p_data.f_opacityOff == true ){
+			s_data.opacity = 255
 			this.drill_PFOE_setOpacity(255);
 		}else{
-			ef.opacity = 255 - 255 * ef.f_time /ef.f_dTime ;
-			this.drill_PFOE_setOpacity(ef.opacity);
+			s_data.opacity = 255 - 255 * p_data.fA_time /p_data.fA_dest ;
+			this.drill_PFOE_setOpacity(s_data.opacity);
 		}
-		
-	}else{
-		this.drill_PFOE_stopEffect();	//结束动作
 	}
-}
+	
+	// > 终止动作（立即）
+	p_data.fZ_time ++;
+	if( p_data.fZ_time >= p_data.fZ_dest ){
+		this.drill_PFOE_stopEffect();
+	}
+};
 
 
+//==============================
+// * 『消失动作』向左旋转倒下 - 初始化
+//==============================
+Game_Picture.prototype.drill_PFOE_playHidingFallGroundLeft = function( allTime, fallTime, hideTime ){
+	this.drill_PFOE_checkData();
+	if( allTime < fallTime + hideTime ){
+		alert( DrillUp.drill_PFOE_getPluginTip_allTimeError("向左旋转倒下") );
+		return;
+	}
+	allTime -= 2;		//『动作效果总时间的时差』
+	
+	var p_data = this._drill_PFOE_param;
+	p_data.playing_type = "向左旋转倒下";
+	p_data.fA_time = 0;
+	p_data.fA_dest = fallTime;
+	p_data.fA_rotate = -1 * Math.PI/2;	//-90度
+	p_data.fB_time = 0;
+	p_data.fB_dest = allTime -fallTime -hideTime;
+	p_data.fC_time = 0;
+	p_data.fC_dest = hideTime;
+	
+	p_data.fZ_time = 0;
+	p_data.fZ_dest = allTime;
+};
+//==============================
+// * 『消失动作』向左旋转倒下 - 帧刷新
+//==============================
+Game_Picture.prototype.drill_PFOE_updateHidingFallGroundLeft = function() {
+	var p_data = this._drill_PFOE_param;
+	if( p_data == undefined ){ return; }
+	if( p_data.playing_type != "向左旋转倒下" ){ return; }
+	var s_data = this._drill_PFOE_spriteData;
+	if( s_data == undefined ){ return; }
+	
+	if( p_data.fA_time < p_data.fA_dest ){
+		p_data.fA_time ++;
+		
+		// > 旋转
+		s_data.rotation = (p_data.fA_rotate * p_data.fA_time/p_data.fA_dest);
+		// > 旋转 - 锚点(0.5,1.0)锁定
+		var fix_point = $gameTemp.drill_PFOE_Math2D_getFixPointInAnchor( s_data.anchor_x,s_data.anchor_y, 0.5,1.0, s_data.real_width,s_data.real_height, s_data.rotation, s_data.scale_x+1, s_data.scale_y+1 );
+		s_data.x = fix_point.x;
+		s_data.y = fix_point.y;
+		
+		// > 透明度变化
+		s_data.opacity = 255;
+		this.drill_PFOE_setOpacity(s_data.opacity);
+		
+	}else if( p_data.fB_time < p_data.fB_dest ){
+		p_data.fB_time ++;
+		
+		// > 透明度变化
+		s_data.opacity = 255;
+		this.drill_PFOE_setOpacity(s_data.opacity);
+		
+	}else if( p_data.fC_time < p_data.fC_dest ){
+		p_data.fC_time ++;
+		
+		// > 透明度变化
+		s_data.opacity = 255 - 255 * p_data.fC_time /p_data.fC_dest ;
+		this.drill_PFOE_setOpacity(s_data.opacity);
+	}
+	
+	// > 终止动作（立即）
+	p_data.fZ_time ++;
+	if( p_data.fZ_time >= p_data.fZ_dest ){
+		this.drill_PFOE_stopEffect();
+	}
+};
+
+//==============================
+// * 『消失动作』向右旋转倒下 - 初始化
+//==============================
+Game_Picture.prototype.drill_PFOE_playHidingFallGroundRight = function( allTime, fallTime, hideTime ){
+	this.drill_PFOE_checkData();
+	if( allTime < fallTime + hideTime ){
+		alert( DrillUp.drill_PFOE_getPluginTip_allTimeError("向右旋转倒下") );
+		return;
+	}
+	allTime -= 2;		//『动作效果总时间的时差』
+	
+	var p_data = this._drill_PFOE_param;
+	p_data.playing_type = "向右旋转倒下";
+	p_data.fA_time = 0;
+	p_data.fA_dest = fallTime;
+	p_data.fA_rotate = Math.PI/2;	//90度
+	p_data.fB_time = 0;
+	p_data.fB_dest = allTime -fallTime -hideTime;
+	p_data.fC_time = 0;
+	p_data.fC_dest = hideTime;
+	
+	p_data.fZ_time = 0;
+	p_data.fZ_dest = allTime;
+};
+//==============================
+// * 『消失动作』向右旋转倒下 - 帧刷新
+//==============================
+Game_Picture.prototype.drill_PFOE_updateHidingFallGroundRight = function() {
+	var p_data = this._drill_PFOE_param;
+	if( p_data == undefined ){ return; }
+	if( p_data.playing_type != "向右旋转倒下" ){ return; }
+	var s_data = this._drill_PFOE_spriteData;
+	if( s_data == undefined ){ return; }
+	
+	if( p_data.fA_time < p_data.fA_dest ){
+		p_data.fA_time ++;
+		
+		// > 旋转
+		s_data.rotation = (p_data.fA_rotate * p_data.fA_time/p_data.fA_dest);
+		// > 旋转 - 锚点(0.5,1.0)锁定
+		var fix_point = $gameTemp.drill_PFOE_Math2D_getFixPointInAnchor( s_data.anchor_x,s_data.anchor_y, 0.5,1.0, s_data.real_width,s_data.real_height, s_data.rotation, s_data.scale_x+1, s_data.scale_y+1 );
+		s_data.x = fix_point.x;
+		s_data.y = fix_point.y;
+		
+		// > 透明度变化
+		s_data.opacity = 255;
+		this.drill_PFOE_setOpacity(s_data.opacity);
+		
+	}else if( p_data.fB_time < p_data.fB_dest ){
+		p_data.fB_time ++;
+		
+		// > 透明度变化
+		s_data.opacity = 255;
+		this.drill_PFOE_setOpacity(s_data.opacity);
+		
+	}else if( p_data.fC_time < p_data.fC_dest ){
+		p_data.fC_time ++;
+		
+		// > 透明度变化
+		s_data.opacity = 255 - 255 * p_data.fC_time /p_data.fC_dest ;
+		this.drill_PFOE_setOpacity(s_data.opacity);
+	}
+	
+	// > 终止动作（立即）
+	p_data.fZ_time ++;
+	if( p_data.fZ_time >= p_data.fZ_dest ){
+		this.drill_PFOE_stopEffect();
+	}
+};
+
+//==============================
+// * 『消失动作』顺时针/逆时针螺旋消失 - 初始化
+//==============================
+Game_Picture.prototype.drill_PFOE_playHidingSpiralMove = function( allTime, numDirection, radius, spiralTime, hideTime ){
+	this.drill_PFOE_checkData();
+	if( allTime < hideTime ){
+		alert( DrillUp.drill_PFOE_getPluginTip_allTimeError("顺时针/逆时针螺旋消失") );
+		return;
+	}
+	allTime -= 2;		//『动作效果总时间的时差』
+	
+	var p_data = this._drill_PFOE_param;
+	p_data.playing_type = "顺时针/逆时针螺旋消失";
+	p_data.fA_time = 0;
+	p_data.fA_dest = allTime;
+	p_data.fA_period = spiralTime;
+	p_data.fA_radius = radius;
+	p_data.fA_hideTime = hideTime;
+	
+	p_data.fZ_time = 0;
+	p_data.fZ_dest = allTime;
+	
+	p_data.f_numDirection = numDirection;
+};
+//==============================
+// * 『消失动作』顺时针/逆时针螺旋消失 - 帧刷新
+//==============================
+Game_Picture.prototype.drill_PFOE_updateHidingSpiralMove = function() {
+	var p_data = this._drill_PFOE_param;
+	if( p_data == undefined ){ return; }
+	if( p_data.playing_type != "顺时针/逆时针螺旋消失" ){ return; }
+	var s_data = this._drill_PFOE_spriteData;
+	if( s_data == undefined ){ return; }
+	
+	// > 圆周移动
+	p_data.fA_time ++;
+	var cur_radius = p_data.fA_radius *p_data.fA_time/p_data.fA_dest;
+	var cur_rotation = 360*Math.PI/180 *p_data.fA_time/p_data.fA_period;
+	cur_rotation *= p_data.f_numDirection;
+	s_data.x = cur_radius*Math.cos(cur_rotation);
+	s_data.y = cur_radius*Math.sin(cur_rotation);
+	
+	// > 透明度变化
+	var left_time = p_data.fA_dest - p_data.fA_time;
+	if( left_time < p_data.fA_hideTime ){
+		s_data.opacity = 255 *left_time/p_data.fA_hideTime;
+		this.drill_PFOE_setOpacity(s_data.opacity);
+	}else{
+		s_data.opacity = 255
+		this.drill_PFOE_setOpacity(s_data.opacity);
+	}
+	
+	// > 终止动作（立即）
+	p_data.fZ_time ++;
+	if( p_data.fZ_time >= p_data.fZ_dest ){
+		this.drill_PFOE_stopEffect();
+	}
+};
 
 

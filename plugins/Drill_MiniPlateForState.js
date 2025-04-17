@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.7]        鼠标 - 状态和buff说明窗口
+ * @plugindesc [v2.8]        鼠标 - 状态和buff说明窗口
  * @author Drill_up
  * 
  * @Drill_LE_param "状态-%d"
@@ -27,7 +27,7 @@
  * 必须基于核心插件才能运行。该插件也可以对其它插件扩展。
  * 基于：
  *   - Drill_CoreOfInput             系统-输入设备核心
- *   - Drill_CoreOfWindowAuxiliary   系统-窗口辅助核心
+ *   - Drill_CoreOfWindowCharacter   窗口字符-窗口字符核心★★v2.0及以上★★
  * 作用于：
  *   - MOG_BattleHud                 战斗UI-角色窗口 
  *     使得角色窗口的状态能显示，状态说明。
@@ -162,6 +162,8 @@
  * 添加了 <当前图标> 的表达式，省去找图标编号的麻烦。
  * [v2.7]
  * 修复了使用自定义窗口皮肤时文字变黑的bug。
+ * [v2.8]
+ * 更新并兼容了新的窗口字符底层。
  * 
  * 
  * 
@@ -321,12 +323,33 @@
  * @desc 将说明窗口锁定在一个固定的地方，而不是跟随鼠标位置走。y轴方向平移，单位像素，0为贴在最上面。
  * @default 0
  *
- * @param 窗口行间距
+ * @param 行高控制模式
  * @parent ---窗口---
+ * @type select
+ * @option 默认补正
+ * @value 默认补正
+ * @option 自定义补正
+ * @value 自定义补正
+ * @option 锁定行高
+ * @value 锁定行高
+ * @option 关闭行高控制
+ * @value 关闭行高控制
+ * @desc 行高的控制模式。你也可以关闭行高控制，用窗口字符来修改行高设置。
+ * @default 自定义补正
+ *
+ * @param 自定义补正值
+ * @parent 行高控制模式
  * @type number
  * @min 0
- * @desc 窗口内容之间的行间距。（默认标准：36）
- * @default 10
+ * @desc 行高控制模式为"自定义补正"时，每行文本的行高补正值。（默认补正为36，因为默认字体就为28，所以补正值大）
+ * @default 30
+ *
+ * @param 锁定行高值
+ * @parent 行高控制模式
+ * @type number
+ * @min 0
+ * @desc 行高控制模式为"锁定行高"时，锁定的行高值。
+ * @default 30
  *
  * @param 窗口内边距
  * @parent ---窗口---
@@ -1011,7 +1034,7 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称：		MPFS (Mini_Plate_For_State)
+//		插件简称		MPFS (Mini_Plate_For_State)
 //		临时全局变量	DrillUp.g_MPFS_xxx
 //		临时局部变量	this._drill_MPFS_xxx
 //		存储数据变量	$gameSystem._drill_MPFS_xxx
@@ -1120,12 +1143,12 @@
 	DrillUp.g_MPFS_PluginTip_curName = "Drill_MiniPlateForState.js 鼠标-状态和buff说明窗口";
 	DrillUp.g_MPFS_PluginTip_baseList = [
 		"Drill_CoreOfInput.js 系统-输入设备核心",
-		"Drill_CoreOfWindowAuxiliary.js 系统-窗口辅助核心"
+		"Drill_CoreOfWindowCharacter.js 窗口字符-窗口字符核心"
 	];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_MPFS_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_MPFS_PluginTip_baseList.length == 0 ){ return ""; }
@@ -1148,15 +1171,21 @@
 	DrillUp.drill_MPFS_getPluginTip_BuffNotFind = function( buff_name, level ){
 		return "【" + DrillUp.g_MPFS_PluginTip_curName + "】\n找不到Buff对应消息，当前"+buff_name+"叠加到了"+level+"，请检查一下Buff组配置中是否有对应的信息。";
 	};
+	//==============================
+	// * 提示信息 - 报错 - 窗口字符底层校验
+	//==============================
+	DrillUp.drill_MPFS_getPluginTip_NeedUpdate_drawText = function(){
+		return "【" + DrillUp.g_MPFS_PluginTip_curName + "】\n检测到窗口字符核心版本过低。\n由于底层变化巨大，你需要更新 全部 窗口字符相关插件。\n去看看\"23.窗口字符 > 关于窗口字符底层全更新说明.docx\"进行更新。";
+	};
 	
 	
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_MiniPlateForState = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_MiniPlateForState');
+	var Imported = Imported || {};
+	Imported.Drill_MiniPlateForState = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_MiniPlateForState');
 	
 	
 	/*----------------窗口---------------*/
@@ -1170,7 +1199,9 @@
 	DrillUp.g_MPFS_lock_enable = String(DrillUp.parameters["是否锁定窗口位置"] || "false") === "true";
 	DrillUp.g_MPFS_lock_x = Number(DrillUp.parameters["平移-锁定位置 X"] || 0);
 	DrillUp.g_MPFS_lock_y = Number(DrillUp.parameters["平移-锁定位置 Y"] || 0);
-	DrillUp.g_MPFS_lineheight = Number(DrillUp.parameters["窗口行间距"] || 10);
+	DrillUp.g_MPFS_lineheight_type = String(DrillUp.parameters["行高控制模式"] || "默认补正");
+	DrillUp.g_MPFS_lineheight_custom = Number(DrillUp.parameters["自定义补正值"] || 30);
+	DrillUp.g_MPFS_lineheight_lock = Number(DrillUp.parameters["锁定行高值"] || 30);
 	DrillUp.g_MPFS_padding = Number(DrillUp.parameters["窗口内边距"] || 18);
 	DrillUp.g_MPFS_fontsize = Number(DrillUp.parameters["窗口字体大小"] || 22);
 	DrillUp.g_MPFS_ex_width = Number(DrillUp.parameters["窗口附加宽度"] || 0);
@@ -1295,15 +1326,24 @@
 // * >>>>基于插件检测>>>>
 //=============================================================================
 if( Imported.Drill_CoreOfInput &&
-	Imported.Drill_CoreOfWindowAuxiliary ){
+	Imported.Drill_CoreOfWindowCharacter ){
 
 
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_MPFS_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_MPFS_pluginCommand.call(this, command, args);
+	this.drill_MPFS_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_MPFS_pluginCommand = function( command, args ){
 	if( command === ">状态说明窗口" ){	// >状态说明窗口 : A : 使用模糊说明
 		
 		/*-----------------内容------------------*/
@@ -2152,8 +2192,9 @@ if( Imported.Drill_GaugeForBoss ){
 // ** 状态和buff说明窗口 实体类【Drill_MPFS_Bean】
 // **		
 // **		作用域：	地图界面
-// **		主功能：	> 定义一个专门的实体类数据类。
-// **		子功能：	->无帧刷新
+// **		主功能：	定义一个专门的实体类数据类。
+// **		子功能：	
+// **					->无帧刷新
 // **					->重设数据
 // **						->序列号
 // **					->被动赋值
@@ -2307,17 +2348,17 @@ Scene_Map.prototype.createAllWindows = function(){
 //=============================================================================
 // ** 状态和buff说明窗口【Drill_MPFS_Window】
 // **		
-// **		索引：	无
-// **		来源：	继承于Window_Base
-// **		实例：	Scene_Battle下的 _drill_MPFS_window 成员
-// **		应用：	暂无 
-// **		
 // **		作用域：	战斗界面
 // **		主功能：	定义一个窗口，能随时改变内容和高宽，用于描述状态信息。
-// **		子功能：	->窗口
+// **		子功能：	
+// **					->窗口『独立贴图』
+// **						x->显示贴图/隐藏贴图（通过实体类控制）
 // **						x->是否就绪
 // **						x->优化策略
 // **						x->销毁
+// **						->初始化数据
+// **						->初始化对象
+// **					
 // **					->A主体
 // **						->显示/隐藏控制
 // **						->锁定皮肤样式
@@ -2335,7 +2376,7 @@ Scene_Map.prototype.createAllWindows = function(){
 // **						->状态的详细说明
 // **						->状态的模糊说明
 // **						->buff的说明
-// **			
+// **					
 // **		说明：	> 整个场景只有一个该窗口。
 // **				> 其它相似的可变窗口插件，可以搜关键词："initSkin"。
 //=============================================================================
@@ -2368,19 +2409,13 @@ Drill_MPFS_Window.prototype.update = function() {
 	this.drill_updateAttr_Visible();	//帧刷新 - A主体 - 可见
 }
 //==============================
-// * 说明窗口 - 私有覆写函数
-//==============================
-Drill_MPFS_Window.prototype.lineHeight = function(){ return DrillUp.g_MPFS_lineheight; };		//窗口行间距
-Drill_MPFS_Window.prototype.standardPadding = function(){ return DrillUp.g_MPFS_padding; };		//窗口内边距
-Drill_MPFS_Window.prototype.standardFontSize = function(){ return DrillUp.g_MPFS_fontsize; };	//窗口字体大小
-//==============================
-// * 说明窗口 - 初始化数据
+// * 说明窗口 - 初始化数据『独立贴图』
 //==============================
 Drill_MPFS_Window.prototype.drill_initData = function() {
 	//（暂无 默认值）
 }
 //==============================
-// * 说明窗口 - 初始化数据
+// * 说明窗口 - 初始化数据『独立贴图』
 //
 //			说明：	> 此函数只在初始化时执行一次，重设数据 被分到各个子功能里面执行。
 //==============================
@@ -2416,6 +2451,39 @@ Drill_MPFS_Window.prototype.drill_initSprite = function() {
 	// > 重设数据（E窗口内容）
 	this.drill_resetData_Message( data );
 };
+//==============================
+// * 说明窗口 - 窗口属性
+//==============================
+Drill_MPFS_Window.prototype.standardPadding = function(){ return DrillUp.g_MPFS_padding; };		//窗口内边距
+Drill_MPFS_Window.prototype.standardFontSize = function(){ return DrillUp.g_MPFS_fontsize; };	//窗口字体大小
+//==============================
+// * 说明窗口 - 窗口行高
+//
+//			说明：	> 行高关系到其它窗口高度、选项的判定，因此不能为零。如果为零，则用父类值。
+//==============================
+Drill_MPFS_Window.prototype.lineHeight = function(){
+	var base_lineHeight = Window_Base.prototype.lineHeight.call(this);
+	var cur_lineHeight = base_lineHeight;
+	
+	if( DrillUp.g_MPFS_lineheight_type == "默认补正" ){
+		cur_lineHeight = base_lineHeight;
+	}
+	if( DrillUp.g_MPFS_lineheight_type == "自定义补正" ){
+		cur_lineHeight = DrillUp.g_MPFS_lineheight_custom;
+	}
+	if( DrillUp.g_MPFS_lineheight_type == "锁定行高" ){
+		cur_lineHeight = DrillUp.g_MPFS_lineheight_lock;
+	}
+	if( DrillUp.g_MPFS_lineheight_type == "关闭行高控制" ){
+		cur_lineHeight = 0;
+	}
+	
+	if( cur_lineHeight <= 0 ){
+		return base_lineHeight;		//（不能返回零，因此为零只能返回默认行高）
+	}else{
+		return cur_lineHeight;
+	}
+};
 
 
 //==============================
@@ -2424,8 +2492,8 @@ Drill_MPFS_Window.prototype.drill_initSprite = function() {
 Drill_MPFS_Window.prototype.drill_initAttr = function() {
 	
 	// > 私有属性初始化
-	this._drill_width = 0;				//窗口宽度
-	this._drill_height = 0;				//窗口高度
+	this._drill_windowWidth = 0;		//窗口宽度
+	this._drill_windowHeight = 0;		//窗口高度
 	this._drill_showDelay = 0;			//显示延迟
 }
 //==============================
@@ -2561,22 +2629,22 @@ Drill_MPFS_Window.prototype.drill_isMouseControl = function( bean ){
 // * C位置跟随 - 初始化
 //==============================
 Drill_MPFS_Window.prototype.drill_initPosition = function() {
-	this._drill_anchor_x = 0;		//中心锚点x
-	this._drill_anchor_y = 0;		//中心锚点y
+	this._drill_windowAnchorX = 0;		//中心锚点x
+	this._drill_windowAnchorY = 0;		//中心锚点y
 }
 //==============================
 // * C位置跟随 - 重设数据
 //==============================
 Drill_MPFS_Window.prototype.drill_resetData_Position = function( data ) {
-	if( data['anchor'] == "左上角" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 0.0; }
-	if( data['anchor'] == "右上角" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 0.0; }
-	if( data['anchor'] == "左下角" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 1.0; }
-	if( data['anchor'] == "右下角" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 1.0; }
-	if( data['anchor'] == "正上方" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 0.0; }
-	if( data['anchor'] == "正下方" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 1.0; }
-	if( data['anchor'] == "正左方" ){ this._drill_anchor_x = 0.0; this._drill_anchor_y = 0.5; }
-	if( data['anchor'] == "正右方" ){ this._drill_anchor_x = 1.0; this._drill_anchor_y = 0.5; }
-	if( data['anchor'] == "正中心" ){ this._drill_anchor_x = 0.5; this._drill_anchor_y = 0.5; }
+	if( data['anchor'] == "左上角" ){ this._drill_windowAnchorX = 0.0; this._drill_windowAnchorY = 0.0; }
+	if( data['anchor'] == "右上角" ){ this._drill_windowAnchorX = 1.0; this._drill_windowAnchorY = 0.0; }
+	if( data['anchor'] == "左下角" ){ this._drill_windowAnchorX = 0.0; this._drill_windowAnchorY = 1.0; }
+	if( data['anchor'] == "右下角" ){ this._drill_windowAnchorX = 1.0; this._drill_windowAnchorY = 1.0; }
+	if( data['anchor'] == "正上方" ){ this._drill_windowAnchorX = 0.5; this._drill_windowAnchorY = 0.0; }
+	if( data['anchor'] == "正下方" ){ this._drill_windowAnchorX = 0.5; this._drill_windowAnchorY = 1.0; }
+	if( data['anchor'] == "正左方" ){ this._drill_windowAnchorX = 0.0; this._drill_windowAnchorY = 0.5; }
+	if( data['anchor'] == "正右方" ){ this._drill_windowAnchorX = 1.0; this._drill_windowAnchorY = 0.5; }
+	if( data['anchor'] == "正中心" ){ this._drill_windowAnchorX = 0.5; this._drill_windowAnchorY = 0.5; }
 }
 //==============================
 // * C位置跟随 - 帧刷新
@@ -2633,19 +2701,19 @@ Drill_MPFS_Window.prototype.drill_updatePosition = function() {
 	
 	
 	// > 中心锚点
-	xx -= this._drill_width * this._drill_anchor_x;
-	yy -= this._drill_height * this._drill_anchor_y;
+	xx -= this._drill_windowWidth * this._drill_windowAnchorX;
+	yy -= this._drill_windowHeight * this._drill_windowAnchorY;
 	
 	
 	// > 边缘修正 - 横向贴边
 	if( xx < 0 ){ xx = 0; }
-	if( xx > Graphics.boxWidth - this._drill_width ){
-		xx = Graphics.boxWidth - this._drill_width;
+	if( xx > Graphics.boxWidth - this._drill_windowWidth ){
+		xx = Graphics.boxWidth - this._drill_windowWidth;
 	}
 	// > 边缘修正 - 纵向贴边
 	if( yy < 0 ){ yy = 0; }
-	if( yy > Graphics.boxHeight - this._drill_height ){
-		yy = Graphics.boxHeight - this._drill_height;
+	if( yy > Graphics.boxHeight - this._drill_windowHeight ){
+		yy = Graphics.boxHeight - this._drill_windowHeight;
 	}
 	
 	this.x = xx;
@@ -2654,7 +2722,7 @@ Drill_MPFS_Window.prototype.drill_updatePosition = function() {
 
 
 //==============================
-// * D窗口皮肤 - 初始化
+// * D窗口皮肤 - 初始化『窗口皮肤』
 //
 //			说明：	> 此函数只在初始化时执行一次，不要执行多了。
 //==============================
@@ -2662,13 +2730,20 @@ Drill_MPFS_Window.prototype.drill_initSkin = function() {
 	
 	// > 皮肤资源
 	this._drill_skin_defaultSkin = this.windowskin;
+	
+	// > 初始化皮肤样式『窗口皮肤』
+	//	（不操作，见 drill_refreshStyle ）
 }
 //==============================
-// * D窗口皮肤 - 重设数据
+// * D窗口皮肤 - 重设数据『窗口皮肤』
 //
 //			说明：	> 样式切换时重设，data对象中的参数【可以缺项】。
 //==============================
 Drill_MPFS_Window.prototype.drill_resetData_Skin = function( data ){
+	
+	// > 插件自定义值『窗口皮肤』
+	var window_pic_file1 = "img/system/";
+	var window_pic_file2 = "img/system/";
 	
 	// > 默认值
 	if( data['window_type'] == undefined ){ data['window_type'] = "默认窗口皮肤" };		//布局模式（默认窗口皮肤/自定义窗口皮肤/自定义背景图片/黑底背景）
@@ -2691,7 +2766,7 @@ Drill_MPFS_Window.prototype.drill_resetData_Skin = function( data ){
 	this._drill_skinBackground_width = 0;
 	this._drill_skinBackground_height = 0;
 	if( data['window_type'] == "自定义背景图片" && data['window_pic_src'] != "" ){
-		this._drill_skin_pic_bitmap = ImageManager.loadBitmap( "img/system/", data['window_pic_src'], 0, true );
+		this._drill_skin_pic_bitmap = ImageManager.loadBitmap( window_pic_file1, data['window_pic_src'], 0, true );
 		this._drill_skin_pic_x = data['window_pic_x'];
 		this._drill_skin_pic_y = data['window_pic_y'];
 	}else{
@@ -2699,7 +2774,7 @@ Drill_MPFS_Window.prototype.drill_resetData_Skin = function( data ){
 	}
 	
 	if( data['window_type'] == "自定义窗口皮肤" && data['window_sys_src'] != "" ){
-		this._drill_skin_sys_bitmap = ImageManager.loadBitmap( "img/system/", data['window_sys_src'], 0, true );
+		this._drill_skin_sys_bitmap = ImageManager.loadBitmap( window_pic_file2, data['window_sys_src'], 0, true );
 	}else{
 		this._drill_skin_sys_bitmap = this._drill_skin_defaultSkin;
 	}
@@ -2760,7 +2835,7 @@ Drill_MPFS_Window.prototype.drill_resetData_Skin = function( data ){
 		//this.opacity = 255;											//背景容器层 透明度
 		this._windowBackSprite.opacity = 0;								//背景容器层 - 平铺贴图 透明度
 		this._windowFrameSprite.opacity = 0;							//背景容器层 - 框架贴图 透明度
-		this._drill_skinBackground.opacity = this._drill_skin_opacity;	//背景容器层 - 背景图片 透明度]
+		this._drill_skinBackground.opacity = this._drill_skin_opacity;	//背景容器层 - 背景图片 透明度
 		
 		// （背景图片布局）
 		this._drill_skinBackground.bitmap = this._drill_skin_pic_bitmap;
@@ -2794,51 +2869,52 @@ Drill_MPFS_Window.prototype.drill_resetData_Skin = function( data ){
 	}
 }
 //==============================
-// * D窗口皮肤 - 帧刷新
+// * D窗口皮肤 - 帧刷新『窗口皮肤』
 //==============================
 Drill_MPFS_Window.prototype.drill_updateSkin = function() {
+	this.drill_updateSkin_skinBackground();		//帧刷新 - 高宽变化
+												//帧刷新 - 透明度锁定（无）
+}
+//==============================
+// * D窗口皮肤 - 帧刷新 - 高宽变化『窗口皮肤』
+//==============================
+Drill_MPFS_Window.prototype.drill_updateSkin_skinBackground = function() {
+	if( this._drill_windowWidth == undefined ){ return; }
+	if( this._drill_windowHeight == undefined ){ return; }
 	
+	// > 高宽变化 - 锁
+	if( this._drill_skinBackground_width  == this._drill_windowWidth &&
+		this._drill_skinBackground_height == this._drill_windowHeight ){
+		return;
+	}
+	this._drill_skinBackground_width = this._drill_windowWidth;
+	this._drill_skinBackground_height = this._drill_windowHeight;
+	
+	// > 高宽变化 - 背景图片（重置中心锚点）
 	if( this._drill_skin_type == "自定义背景图片" || this._drill_skin_type == "图片窗口布局" ){
-		
-		// > 高宽改变锁
-		if( this._drill_skinBackground_width  == this._drill_width &&
-			this._drill_skinBackground_height == this._drill_height ){
-			return;
-		}
-		this._drill_skinBackground_width = this._drill_width;
-		this._drill_skinBackground_height = this._drill_height;
-		
-		// > 背景图片与中心锚点
 		var xx = this._drill_skin_pic_x;
 		var yy = this._drill_skin_pic_y;
-		xx += this._drill_width * this._drill_anchor_x;
-		yy += this._drill_height * this._drill_anchor_y;
+		var anchor_x = this._drill_windowAnchorX || 0;
+		var anchor_y = this._drill_windowAnchorY || 0;
+		xx += this._drill_windowWidth  * anchor_x;
+		yy += this._drill_windowHeight * anchor_y;
 		this._drill_skinBackground.x = xx;
 		this._drill_skinBackground.y = yy;
-		this._drill_skinBackground.anchor.x = this._drill_anchor_x;
-		this._drill_skinBackground.anchor.y = this._drill_anchor_y;
+		this._drill_skinBackground.anchor.x = anchor_x;
+		this._drill_skinBackground.anchor.y = anchor_y;
 	}
 	
+	// > 高宽变化 - 黑底背景（重建黑色画布）
 	if( this._drill_skin_type == "黑底背景" || this._drill_skin_type == "黑底布局" ){
-		
-		// > 高宽改变锁
-		if( this._drill_skinBackground_width  == this._drill_width &&
-			this._drill_skinBackground_height == this._drill_height ){
-			return;
-		}
-		this._drill_skinBackground_width = this._drill_width;
-		this._drill_skinBackground_height = this._drill_height;
-		
-		// > 改变时新建黑色画布
-		this._drill_skinBackground_BlackBitmap = new Bitmap(this._drill_width, this._drill_height);
-		this._drill_skinBackground_BlackBitmap.fillRect(0, 0 , this._drill_width, this._drill_height, "#000000");
+		this._drill_skinBackground_BlackBitmap = new Bitmap(this._drill_windowWidth, this._drill_windowHeight);
+		this._drill_skinBackground_BlackBitmap.fillRect(0, 0 , this._drill_windowWidth, this._drill_windowHeight, "#000000");
 		this._drill_skinBackground.bitmap = this._drill_skinBackground_BlackBitmap;
 	}
 }
 //==============================
-// * D窗口皮肤 - 帧刷新色调
+// * D窗口皮肤 - 帧刷新色调『窗口皮肤』
 //
-//			说明：	setTone可以反复调用赋值，有变化监听的锁。
+//			说明：	> setTone可以反复调用赋值，因为函数内有变化监听锁。
 //==============================
 var _drill_MPFS_updateTone = Drill_MPFS_Window.prototype.updateTone;
 Drill_MPFS_Window.prototype.updateTone = function() {
@@ -2863,7 +2939,6 @@ Drill_MPFS_Window.prototype.drill_initMessage = function() {
 	// > 绘制初始内容
 	this._drill_text_default = DrillUp.g_MPFS_default_text;
 	this._drill_text_default = this._drill_text_default.substring(1,this._drill_text_default.length-1);
-	this.drill_COWA_drawTextEx( this._drill_text_default, {"x":0,"y":0} );
 }
 //==============================
 // * E窗口内容 - 重设数据
@@ -2977,7 +3052,7 @@ Drill_MPFS_Window.prototype.drill_updateMessage = function(){
 	}
 	
 	// > 刷新内容
-	this.drill_refreshMessage( context_list );
+	this.drill_refreshMessage( context_list.join("\n") );
 	this._drill_showDelay = 1;	//（延迟1帧再显示，防止看到内容和高宽的变化）
 }
 //==============================
@@ -3027,31 +3102,83 @@ Drill_MPFS_Window.prototype.drill_isStateAndBuffChanged = function( state_ids, b
 //==============================
 // * E窗口内容 - 刷新内容
 //==============================
-Drill_MPFS_Window.prototype.drill_refreshMessage = function( context_list ){
-	if( context_list.length == 0 ){ return; }
+Drill_MPFS_Window.prototype.drill_refreshMessage = function( context ){
 	
+	// > 『字符贴图流程』 - 清空字符块贴图【窗口字符 - 窗口字符贴图核心】
+	if( Imported.Drill_CoreOfWindowCharacterSprite ){
+		this.drill_COWCSp_sprite_clearAllSprite();
+	}
 	
-	// > 窗口高宽 - 计算
+	// > 参数准备 - 校验
+	var temp_bitmap = this.contents;
+	if( temp_bitmap == undefined ){ return; }
+	var org_text = context;
+	if( org_text == undefined ){ return; }
+	if( org_text == "" ){ return; }
+	
+	// > 参数准备
 	var options = {};
-	options['autoLineheight'] = true;
-	this.drill_COWA_calculateHeightAndWidth( context_list, options );		//（窗口辅助核心）
-	// > 窗口高宽 - 赋值
-	var ww = 0;
-	var hh = 0;
-	for( var i=0; i < this.drill_COWA_widthList.length; i++ ){ if( ww < this.drill_COWA_widthList[i] ){ ww = this.drill_COWA_widthList[i]; } }
-	for( var i=0; i < this.drill_COWA_heightList.length; i++ ){ hh += this.drill_COWA_heightList[i]; }
-	ww += this.standardPadding() * 2;
+	options['infoParam'] = {};
+	options['infoParam']['x'] = 0;
+	options['infoParam']['y'] = 0;
+	options['infoParam']['canvasWidth']  = 100;	//（此参数暂时不用，先给个非零值）
+	options['infoParam']['canvasHeight'] = 100;
+	
+	// > 参数准备 - 自定义
+	options['blockParam'] = {};					//『自定义字符默认间距』
+	options['blockParam']['paddingTop'] = 0;
+	var lineHeight = this.lineHeight();
+	if( DrillUp.g_MPFS_lineheight_type == "关闭行高控制" ){
+		lineHeight = 0;
+	}
+	options['rowParam'] = {};
+	options['rowParam']['lineHeight_upCorrection'] = lineHeight;
+	
+	options['baseParam'] = {};
+	options['baseParam']['fontSize'] = this.standardFontSize();	//（使用当前窗口的字体大小）
+	
+	// > 参数准备 - 『字符主流程』 - 获取文本高宽【窗口字符 - 窗口字符核心】
+	var ww = this.drill_COWC_getOrgTextWidth( org_text, options );
+	var hh = this.drill_COWC_getOrgTextHeight( org_text, options );
+	ww = Math.ceil(ww);
+	hh = Math.ceil(hh);
+	options['infoParam']['canvasWidth']  = ww;
+	options['infoParam']['canvasHeight'] = hh;
+	
+	// > 附加宽高
+	ww += $gameSystem._drill_MPFS_ex_width;
+	hh += $gameSystem._drill_MPFS_ex_height;
+	
+	
+	// > 自适应 - 设置窗口高宽
+	ww += this.standardPadding() * 2;		//（使用当前窗口的内边距）
 	hh += this.standardPadding() * 2;
-	ww += $gameSystem._drill_MPFS_ex_width || 0;		//（附加高宽）
-	hh += $gameSystem._drill_MPFS_ex_height || 0;
-	this._drill_width = ww;
-	this._drill_height = hh;
-	this.width = this._drill_width;
-	this.height = this._drill_height;
+	this._drill_windowWidth = ww;
+	this._drill_windowHeight = hh;
+	this.width = this._drill_windowWidth;		//（窗口宽度）
+	this.height = this._drill_windowHeight;		//（窗口高度）
+	
+	// > 自适应 - 重建画布（自适应高宽需要重建）
+	this.createContents();
+	temp_bitmap = this.contents;			//（临时画布重新绑定）
 	
 	
-	// > 绘制内容
-	this.drill_COWA_drawTextListEx( context_list, options );
+	// > 『字符主流程』 - DEBUG显示画布范围【窗口字符 - 窗口字符核心】
+	//temp_bitmap.drill_COWC_debug_drawRect();
+	
+	// > 『字符主流程』 - 绘制文本【窗口字符 - 窗口字符核心】
+	this.drill_COWC_drawText( org_text, options );
+	
+	// > 『字符贴图流程』 - 刷新字符块贴图【窗口字符 - 窗口字符贴图核心】
+	if( Imported.Drill_CoreOfWindowCharacterSprite ){
+		this.drill_COWCSp_sprite_refreshAllSprite();
+	}
+}
+//==============================
+// * E窗口内容 - 刷新内容 - 窗口字符底层校验
+//==============================
+if( typeof(_drill_COWC_drawText_functionExist) == "undefined" ){
+	alert( DrillUp.drill_MPFS_getPluginTip_NeedUpdate_drawText() );
 }
 
 

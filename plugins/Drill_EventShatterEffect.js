@@ -162,6 +162,9 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
+//
+//			->☆场景容器之物体贴图
+//
 //			方块粉碎效果：
 //				->事件贴图
 //					->获取 - 容器指针【标准函数】
@@ -220,7 +223,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_ESE_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_ESE_PluginTip_baseList.length == 0 ){ return ""; }
@@ -242,10 +245,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_EventShatterEffect = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_EventShatterEffect');
+	var Imported = Imported || {};
+	Imported.Drill_EventShatterEffect = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_EventShatterEffect');
 	
 	
 	/*-----------------杂项------------------*/
@@ -259,11 +262,20 @@ if( Imported.Drill_CoreOfShatterEffect ){
 	
 
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
-var _Drill_ESE_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
-	_Drill_ESE_pluginCommand.call(this, command, args);
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
+var _drill_ESE_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
+	_drill_ESE_pluginCommand.call(this, command, args);
+	this.drill_ESE_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_ESE_pluginCommand = function( command, args ){
 	if( command === ">方块粉碎效果" ){	// >方块粉碎效果 : 本事件 : 方块粉碎[1]
 		if(args.length == 4){
 			var unit = String(args[1]);
@@ -486,36 +498,48 @@ Game_System.prototype.drill_ESE_checkSysData_Private = function() {
 
 
 //#############################################################################
-// ** 【标准模块】事件贴图
+// ** 【标准模块】物体贴图容器 ☆场景容器之物体贴图
 //#############################################################################
 //##############################
-// * 事件贴图 - 获取 - 容器指针【标准函数】
+// * 物体贴图容器 - 获取 - 容器指针【标准函数】
 //			
 //			参数：	> 无
-//			返回：	> 贴图数组     （事件贴图）
+//			返回：	> 贴图数组     （物体贴图）
 //          
-//			说明：	> 此函数直接返回容器对象。
+//			说明：	> 此函数直接返回容器对象。不含镜像。
 //##############################
 Game_Temp.prototype.drill_ESE_getCharacterSpriteTank = function(){
 	return this.drill_ESE_getCharacterSpriteTank_Private();
 }
 //##############################
-// * 事件贴图 - 获取 - 根据事件ID【标准函数】
+// * 物体贴图容器 - 获取 - 根据事件ID【标准函数】
 //			
 //			参数：	> event_id 数字（事件ID）
 //			返回：	> 贴图对象     （事件贴图）
 //          
-//			说明：	> 事件id和事件贴图一一对应。（不含镜像）
+//			说明：	> -2表示玩家，1表示第一个事件的贴图。不含镜像。
 //					> 此函数只读，且不缓存任何对象，直接读取容器数据。
 //##############################
 Game_Temp.prototype.drill_ESE_getCharacterSpriteByEventId = function( event_id ){
 	return this.drill_ESE_getCharacterSpriteByEventId_Private( event_id );
 }
+//##############################
+// * 物体贴图容器 - 获取 - 根据玩家队员索引【标准函数】
+//			
+//			参数：	> follower_index 数字（玩家队员索引）
+//			返回：	> 贴图对象           （玩家队员贴图）
+//          
+//			说明：	> -2表示玩家，1表示第一个玩家队员的贴图。不含镜像。
+//					> 此函数只读，且不缓存任何对象，直接读取容器数据。
+//##############################
+Game_Temp.prototype.drill_ESE_getCharacterSpriteByFollowerIndex = function( follower_index ){
+	return this.drill_ESE_getCharacterSpriteByFollowerIndex_Private( follower_index );
+}
 //=============================================================================
-// ** 事件贴图（接口实现）
+// ** 场景容器之物体贴图（实现）
 //=============================================================================
 //==============================
-// * 事件贴图容器 - 获取 - 根据事件ID（私有）
+// * 物体贴图容器 - 获取 - 容器指针（私有）
 //          
 //			说明：	> 贴图容器 _characterSprites，存放全部物体贴图，不含镜像贴图。
 //					  这只是一个贴图容器，即使贴图在其他层级，也不影响容器获取到贴图。（更多细节去看 脚本文档说明）
@@ -526,15 +550,39 @@ Game_Temp.prototype.drill_ESE_getCharacterSpriteTank_Private = function(){
 	return SceneManager._scene._spriteset._characterSprites;
 };
 //==============================
-// * 事件贴图容器 - 获取 - 根据事件ID（私有）
+// * 物体贴图容器 - 获取 - 根据事件ID（私有）
 //==============================
 Game_Temp.prototype.drill_ESE_getCharacterSpriteByEventId_Private = function( event_id ){
 	var sprite_list = this.drill_ESE_getCharacterSpriteTank_Private();
 	if( sprite_list == undefined ){ return null; }
 	for(var i=0; i < sprite_list.length; i++){
 		var sprite = sprite_list[i];
-		if( sprite._character == undefined ){ continue; }		//（判断 _character 就可以，不需要检验 Sprite_Character）
+		if( sprite._character == undefined ){ continue; }	//（判断 _character 就可以，不需要检验 Sprite_Character）
+		if( event_id == -2 &&   //『玩家id』
+			sprite._character == $gamePlayer ){
+			return sprite;
+		}
 		if( sprite._character._eventId == event_id ){
+			return sprite;
+		}
+	}
+	return null;
+};
+//==============================
+// * 物体贴图容器 - 获取 - 根据玩家索引（私有）
+//==============================
+Game_Temp.prototype.drill_ESE_getCharacterSpriteByFollowerIndex_Private = function( follower_index ){
+	var sprite_list = this.drill_ESE_getCharacterSpriteTank_Private();
+	if( sprite_list == undefined ){ return null; }
+	for(var i=0; i < sprite_list.length; i++){
+		var sprite = sprite_list[i];
+		if( sprite._character == undefined ){ continue; }	//（判断 _character 就可以，不需要检验 Sprite_Character）
+		if( follower_index == -2 &&   //『玩家id』
+			sprite._character == $gamePlayer ){
+			return sprite;
+		}
+		if( sprite._character._memberIndex == follower_index &&
+			sprite._character.isVisible() ){
 			return sprite;
 		}
 	}

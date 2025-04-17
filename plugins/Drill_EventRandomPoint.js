@@ -225,7 +225,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_ERP_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_ERP_PluginTip_baseList.length == 0 ){ return ""; }
@@ -247,10 +247,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_EventRandomPoint = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_EventRandomPoint');
+	var Imported = Imported || {};
+	Imported.Drill_EventRandomPoint = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_EventRandomPoint');
 	
 	
 //=============================================================================
@@ -259,125 +259,22 @@
 if( Imported.Drill_CoreOfFixedArea ){
 	
 
-//=============================================================================
-// ** 随机出生点
-//=============================================================================
-//==============================
-// * 事件初始化
-//==============================
-var _drill_ERP_event_initialize = Game_Event.prototype.initialize;
-Game_Event.prototype.initialize = function( mapId, eventId ){
-	this._drill_ERP_isInInit = true;
-	_drill_ERP_event_initialize.call(this, mapId, eventId);
-};
-//==============================
-// * 注释初始化
-//==============================
-var _drill_ERP_event_setupPage = Game_Event.prototype.setupPage;
-Game_Event.prototype.setupPage = function() {
-	_drill_ERP_event_setupPage.call(this);
-	this.drill_ERP_setupPage();
-};
-Game_Event.prototype.drill_ERP_setupPage = function() {
-	if( this._drill_ERP_isInInit != true ){ return; } 	//（进入地图后只执行一次）
-	this._drill_ERP_isInInit = false;
-	var cur_condition = {};				//筛选器
-	
-	if( this.event().pages[0] ){		//（强制读取第一页）
-		var li = this.event().pages[0].list;
-		var seed_lock = false;
-		for(var k=0; k < li.length; k++){
-			var l = li[k];
-			if( l.code !== 108 ){ continue }
-			var args = l.parameters[0].split(' ');
-			var command = args.shift();
-			if( command == "=>随机出生点" ){	//=>随机出生点 : 固定随机种子
-				if( args.length == 2 ){
-					var type = String(args[1]);
-					if( type == "固定随机种子" ){
-						seed_lock = true;
-						break;
-					}
-				}
-			}
-		}
-		for(var k=0; k < li.length; k++){
-			var l = li[k];
-			if( l.code !== 108 ){ continue }
-			var args = l.parameters[0].split(' ');
-			var command = args.shift();
-			if( command == "=>随机出生点" ){
-				
-				if( args.length == 4 ){		//=>随机出生点 : 使用筛选器 : 1
-					var type = String(args[1]);
-					var temp1 = Number(args[3]);
-					if( type == "使用筛选器" ){
-						cur_condition = DrillUp.g_COFA_condition_list[ temp1-1 ];
-					}
-				}
-				
-				var c_area = null;
-				if( args.length == 4 ){		//=>随机出生点 : 菱形区域 : 1
-					var type = String(args[1]);
-					var temp1 = Number(args[3]);
-					if( type == "菱形区域" || type == "方形区域"  || type == "圆形区域"  || 
-						type == "十字区域" || type == "横条区域"  || type == "竖条区域" ){
-						var range = Number(temp1);
-						c_area = $gameMap.drill_COFA_getShapePointsWithCondition( this._x,this._y,type,range, cur_condition );
-					}
-					if( type == "自定义区域" ){
-						var a_id = Number(temp1);
-						c_area = $gameMap.drill_COFA_getCustomPointsByIdWithCondition( this._eventId, a_id, cur_condition );
-					}
-					
-					if( c_area != null ){		//从符合条件的点集合中，随机选出一个点并放置
-						if( c_area.length == 0 ){ c_area.push({'x':this.x,'y':this.y }) }
-						
-						var ran = 0;
-						if( seed_lock == false ){
-							
-							// > 位置设置
-							ran = Math.floor( Math.random()*c_area.length );
-						}else{
-							
-							// > 随机种子（与 地图id、事件id 相关，与事件页无关）
-							var seed = this._mapId * this._eventId + this._eventId * this._eventId +101;
-							var random_num = this.drill_ERP_Math1D_getRandomInSeed( seed );
-							
-							// > 位置设置
-							ran = Math.floor( random_num*c_area.length );
-						}
-						var p = c_area[ ran ];
-						
-						this.locate(p.x,p.y);
-						this.event().x = p.x;
-						this.event().y = p.y;
-					}
-				}
-			};
-		}
-	}
-};
-//==============================
-// * 数学工具 - 生成随机数（随机种子）
-//			
-//			参数：	> seed 数字	（正整数）
-//			返回：	> 数字 		（0~1随机数）
-//			
-//			说明：	> 如果随机种子为 1至100，那么你将得到线性均匀分布的随机值。不是乱序随机。
-//==============================
-Game_Event.prototype.drill_ERP_Math1D_getRandomInSeed = function( seed ){
-	var new_ran = ( seed * 9301 + 49297 ) % 233280;
-	new_ran = new_ran / 233280.0;
-	return new_ran;
-};
 	
 //=============================================================================
-// * 获取随机坐标
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_ERP_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_ERP_pluginCommand.call(this, command, args);
+	this.drill_ERP_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_ERP_pluginCommand = function( command, args ){
 	if( command === ">获取随机坐标" ){
 		
 		/*-----------------形状区域------------------*/
@@ -512,7 +409,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 };
 //==============================
-// ** 插件指令 - 事件检查
+// * 插件指令 - 事件检查
 //==============================
 Game_Map.prototype.drill_ERP_isEventExist = function( e_id ){
 	if( e_id == 0 ){ return false; }
@@ -607,6 +504,120 @@ Game_System.prototype.drill_ERP_checkSysData_Private = function() {
 	
 };
 
+
+
+//=============================================================================
+// ** 随机出生点
+//=============================================================================
+//==============================
+// * 事件初始化
+//==============================
+var _drill_ERP_event_initialize = Game_Event.prototype.initialize;
+Game_Event.prototype.initialize = function( mapId, eventId ){
+	this._drill_ERP_isInInit = true;
+	_drill_ERP_event_initialize.call(this, mapId, eventId);
+};
+//==============================
+// * 注释初始化
+//==============================
+var _drill_ERP_event_setupPage = Game_Event.prototype.setupPage;
+Game_Event.prototype.setupPage = function() {
+	_drill_ERP_event_setupPage.call(this);
+	this.drill_ERP_setupPage();
+};
+Game_Event.prototype.drill_ERP_setupPage = function() {
+	if( this._drill_ERP_isInInit != true ){ return; } 	//（进入地图后只执行一次）
+	this._drill_ERP_isInInit = false;
+	var cur_condition = {};				//筛选器
+	
+	if( this.event().pages[0] ){		//（强制读取第一页）
+		var li = this.event().pages[0].list;
+		var seed_lock = false;
+		for(var k=0; k < li.length; k++){
+			var l = li[k];
+			if( l.code !== 108 ){ continue }
+			var args = l.parameters[0].split(' ');
+			var command = args.shift();
+			if( command == "=>随机出生点" ){	//=>随机出生点 : 固定随机种子
+				if( args.length == 2 ){
+					var type = String(args[1]);
+					if( type == "固定随机种子" ){
+						seed_lock = true;
+						break;
+					}
+				}
+			}
+		}
+		for(var k=0; k < li.length; k++){
+			var l = li[k];
+			if( l.code !== 108 ){ continue }
+			var args = l.parameters[0].split(' ');
+			var command = args.shift();
+			if( command == "=>随机出生点" ){
+				
+				if( args.length == 4 ){		//=>随机出生点 : 使用筛选器 : 1
+					var type = String(args[1]);
+					var temp1 = Number(args[3]);
+					if( type == "使用筛选器" ){
+						cur_condition = DrillUp.g_COFA_condition_list[ temp1-1 ];
+					}
+				}
+				
+				var c_area = null;
+				if( args.length == 4 ){		//=>随机出生点 : 菱形区域 : 1
+					var type = String(args[1]);
+					var temp1 = Number(args[3]);
+					if( type == "菱形区域" || type == "方形区域"  || type == "圆形区域"  || 
+						type == "十字区域" || type == "横条区域"  || type == "竖条区域" ){
+						var range = Number(temp1);
+						c_area = $gameMap.drill_COFA_getShapePointsWithCondition( this._x,this._y,type,range, cur_condition );
+					}
+					if( type == "自定义区域" ){
+						var a_id = Number(temp1);
+						c_area = $gameMap.drill_COFA_getCustomPointsByIdWithCondition( this._eventId, a_id, cur_condition );
+					}
+					
+					if( c_area != null ){		//从符合条件的点集合中，随机选出一个点并放置
+						if( c_area.length == 0 ){ c_area.push({'x':this.x,'y':this.y }) }
+						
+						var ran = 0;
+						if( seed_lock == false ){
+							
+							// > 位置设置
+							ran = Math.floor( Math.random()*c_area.length );
+						}else{
+							
+							// > 随机种子（与 地图id、事件id 相关，与事件页无关）
+							var seed = this._mapId * this._eventId + this._eventId * this._eventId +101;
+							var random_num = this.drill_ERP_Math1D_getRandomInSeed( seed );
+							
+							// > 位置设置
+							ran = Math.floor( random_num*c_area.length );
+						}
+						var p = c_area[ ran ];
+						
+						this.locate(p.x,p.y);
+						this.event().x = p.x;
+						this.event().y = p.y;
+					}
+				}
+			};
+		}
+	}
+};
+//==============================
+// * 数学工具 - 生成随机数（随机种子）
+//			
+//			参数：	> seed 数字	（正整数）
+//			返回：	> 数字 		（0~1随机数）
+//			
+//			说明：	> 如果随机种子为 1至100，那么你将得到线性均匀分布的随机值。不是乱序随机。
+//==============================
+Game_Event.prototype.drill_ERP_Math1D_getRandomInSeed = function( seed ){
+	var new_ran = ( seed * 9301 + 49297 ) % 233280;
+	new_ran = new_ran / 233280.0;
+	return new_ran;
+};
 
 
 //=============================================================================

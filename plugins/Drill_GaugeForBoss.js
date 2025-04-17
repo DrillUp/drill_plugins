@@ -1393,7 +1393,7 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称：		GFB (Gauge_For_Boss)
+//		插件简称		GFB (Gauge_For_Boss)
 //		临时全局变量	DrillUp.g_GFB_xxx
 //		临时局部变量	this._drill_GFB_xxx
 //		存储数据变量	$gameSystem._drill_GFB_xxx
@@ -1486,7 +1486,7 @@
 //			2.状态显示：
 //				状态和数值原理一样，建立固定数量的sprite，排成一排，然后根据情况变图标。
 //			3.与车轮战的交互：
-//				如果车轮战陆续出现了很多boss，那么他们的生命浮动框不会被立即去除。（索引："去除旧的boss框"）
+//				如果车轮战陆续出现了很多boss，那么他们的生命浮动框不会被立即去除。
 //				"战斗结算时是否隐藏框"如果为不隐藏，则玩家可能会看到积压了很多的boss框。
 //			4.由于框在战斗界面，还受到镜头的影响，这里使用 弹道-两点式 + 镜头修正 来确定位移坐标。
 //			
@@ -1510,7 +1510,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_GFB_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_GFB_PluginTip_baseList.length == 0 ){ return ""; }
@@ -1532,9 +1532,9 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_GaugeForBoss = true;
-　　var DrillUp = DrillUp || {}; 
+	var Imported = Imported || {};
+	Imported.Drill_GaugeForBoss = true;
+	var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_GaugeForBoss');
 	
 	
@@ -1729,13 +1729,22 @@ ImageManager.load_SpecialBoss = function(filename) {
     return this.loadBitmap('img/Special__boss/', filename, 0, true);
 };
 
+
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_GFB_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_GFB_pluginCommand.call(this, command, args);
-	
+	this.drill_GFB_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_GFB_pluginCommand = function( command, args ){
 	if( command === ">高级BOSS框" ){
 		
 		/*-----------------绑定设置捕获------------------*/
@@ -1929,6 +1938,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		}
 	}
 };
+
 
 //=============================================================================
 // * 临时数据

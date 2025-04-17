@@ -198,18 +198,27 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_BattleFilter = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_BattleFilter');
+	var Imported = Imported || {};
+	Imported.Drill_BattleFilter = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_BattleFilter');
 
 	
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_BFi_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_BFi_pluginCommand.call(this, command, args);
+	this.drill_BFi_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_BFi_pluginCommand = function( command, args ){
 	if( command === ">战斗滤镜" ){		// >战斗滤镜 : 纯色滤镜 : 纯蓝 : 155
 	
 		/*-----------------关闭滤镜------------------*/

@@ -8,7 +8,7 @@
  * 
  * @Drill_LE_param "吸附槽样式-%d"
  * @Drill_LE_parentKey "---吸附槽样式组%d至%d---"
- * @Drill_LE_var "DrillUp.g_PAS_style_length"
+ * @Drill_LE_var "DrillUp.g_PASl_style_length"
  * 
  * 
  * @help  
@@ -265,6 +265,7 @@
  * [v1.3]
  * 大幅度改进了内部结构。
  * [v1.4]
+ * 进一步改进了内部结构。
  * 
  * 
  * 
@@ -304,126 +305,126 @@
  *
  * @param 吸附槽样式-1
  * @parent ---吸附槽样式组 1至20---
- * @type struct<PASStyle>
+ * @type struct<PASlStyle>
  * @desc 吸附槽样式的详细配置信息。
  * @default 
  *
  * @param 吸附槽样式-2
  * @parent ---吸附槽样式组 1至20---
- * @type struct<PASStyle>
+ * @type struct<PASlStyle>
  * @desc 吸附槽样式的详细配置信息。
  * @default 
  *
  * @param 吸附槽样式-3
  * @parent ---吸附槽样式组 1至20---
- * @type struct<PASStyle>
+ * @type struct<PASlStyle>
  * @desc 吸附槽样式的详细配置信息。
  * @default 
  *
  * @param 吸附槽样式-4
  * @parent ---吸附槽样式组 1至20---
- * @type struct<PASStyle>
+ * @type struct<PASlStyle>
  * @desc 吸附槽样式的详细配置信息。
  * @default 
  *
  * @param 吸附槽样式-5
  * @parent ---吸附槽样式组 1至20---
- * @type struct<PASStyle>
+ * @type struct<PASlStyle>
  * @desc 吸附槽样式的详细配置信息。
  * @default 
  *
  * @param 吸附槽样式-6
  * @parent ---吸附槽样式组 1至20---
- * @type struct<PASStyle>
+ * @type struct<PASlStyle>
  * @desc 吸附槽样式的详细配置信息。
  * @default 
  *
  * @param 吸附槽样式-7
  * @parent ---吸附槽样式组 1至20---
- * @type struct<PASStyle>
+ * @type struct<PASlStyle>
  * @desc 吸附槽样式的详细配置信息。
  * @default 
  *
  * @param 吸附槽样式-8
  * @parent ---吸附槽样式组 1至20---
- * @type struct<PASStyle>
+ * @type struct<PASlStyle>
  * @desc 吸附槽样式的详细配置信息。
  * @default 
  *
  * @param 吸附槽样式-9
  * @parent ---吸附槽样式组 1至20---
- * @type struct<PASStyle>
+ * @type struct<PASlStyle>
  * @desc 吸附槽样式的详细配置信息。
  * @default 
  *
  * @param 吸附槽样式-10
  * @parent ---吸附槽样式组 1至20---
- * @type struct<PASStyle>
+ * @type struct<PASlStyle>
  * @desc 吸附槽样式的详细配置信息。
  * @default 
  *
  * @param 吸附槽样式-11
  * @parent ---吸附槽样式组 1至20---
- * @type struct<PASStyle>
+ * @type struct<PASlStyle>
  * @desc 吸附槽样式的详细配置信息。
  * @default 
  *
  * @param 吸附槽样式-12
  * @parent ---吸附槽样式组 1至20---
- * @type struct<PASStyle>
+ * @type struct<PASlStyle>
  * @desc 吸附槽样式的详细配置信息。
  * @default 
  *
  * @param 吸附槽样式-13
  * @parent ---吸附槽样式组 1至20---
- * @type struct<PASStyle>
+ * @type struct<PASlStyle>
  * @desc 吸附槽样式的详细配置信息。
  * @default 
  *
  * @param 吸附槽样式-14
  * @parent ---吸附槽样式组 1至20---
- * @type struct<PASStyle>
+ * @type struct<PASlStyle>
  * @desc 吸附槽样式的详细配置信息。
  * @default 
  *
  * @param 吸附槽样式-15
  * @parent ---吸附槽样式组 1至20---
- * @type struct<PASStyle>
+ * @type struct<PASlStyle>
  * @desc 吸附槽样式的详细配置信息。
  * @default 
  *
  * @param 吸附槽样式-16
  * @parent ---吸附槽样式组 1至20---
- * @type struct<PASStyle>
+ * @type struct<PASlStyle>
  * @desc 吸附槽样式的详细配置信息。
  * @default 
  *
  * @param 吸附槽样式-17
  * @parent ---吸附槽样式组 1至20---
- * @type struct<PASStyle>
+ * @type struct<PASlStyle>
  * @desc 吸附槽样式的详细配置信息。
  * @default 
  *
  * @param 吸附槽样式-18
  * @parent ---吸附槽样式组 1至20---
- * @type struct<PASStyle>
+ * @type struct<PASlStyle>
  * @desc 吸附槽样式的详细配置信息。
  * @default 
  *
  * @param 吸附槽样式-19
  * @parent ---吸附槽样式组 1至20---
- * @type struct<PASStyle>
+ * @type struct<PASlStyle>
  * @desc 吸附槽样式的详细配置信息。
  * @default 
  *
  * @param 吸附槽样式-20
  * @parent ---吸附槽样式组 1至20---
- * @type struct<PASStyle>
+ * @type struct<PASlStyle>
  * @desc 吸附槽样式的详细配置信息。
  * @default 
  * 
  */
-/*~struct~PASStyle:
+/*~struct~PASlStyle:
  * 
  * @param 标签
  * @desc 只用于方便区分查看的标签，不作用在插件中。
@@ -627,10 +628,10 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		PAS (Picture_Adsorption_Slot)
-//		临时全局变量	DrillUp.g_PAS_xxx
-//		临时局部变量	this._drill_PAS_xxx
-//		存储数据变量	$gameSystem._drill_PAS_xxx
+//		插件简称		PASl (Picture_Adsorption_Slot)
+//		临时全局变量	DrillUp.g_PASl_xxx
+//		临时局部变量	this._drill_PASl_xxx
+//		存储数据变量	$gameSystem._drill_PASl_xxx
 //		全局存储变量	无
 //		覆盖重写方法	无
 //
@@ -640,7 +641,7 @@
 //		★时间复杂度		o(n^2)  每帧
 //		★性能测试因素	图片管理层
 //		★性能测试消耗	2024/5/2：
-//							》12.3ms（drill_PAS_org_finalTransform_x）37.2ms（drill_PAS_updateAdsorb）
+//							》12.3ms（drill_PASl_org_finalTransform_x）37.2ms（drill_PASl_updateAdsorb）
 //		★最坏情况		暂无
 //		★备注			核心功能应用到图片贴图上，不需要过多考虑优化问题。
 //		
@@ -715,7 +716,7 @@
 //		★必要注意事项：
 //			1.注意，图片-可拖拽的图片 的偏移量 已经叠加到了 数据最终变换值。
 //			  吸附控制器 的帧刷新 drill_controllerAdsorb_update 要求 不含吸附+不含拖拽 的原位置。
-//			  因此才编写了 drill_PAS_org_finalTransform_x 的实现函数。
+//			  因此才编写了 drill_PASl_org_finalTransform_x 的实现函数。
 //			
 //		★其它说明细节：
 //			1.图片比较特殊，同时在战斗界面和地图界面都要有效果。
@@ -741,57 +742,63 @@
 	// * 提示信息 - 参数
 	//==============================
 	var DrillUp = DrillUp || {}; 
-	DrillUp.g_PAS_PluginTip_curName = "Drill_PictureAdsorptionSlot.js 图片-图片吸附槽";
-	DrillUp.g_PAS_PluginTip_baseList = [
+	DrillUp.g_PASl_PluginTip_curName = "Drill_PictureAdsorptionSlot.js 图片-图片吸附槽";
+	DrillUp.g_PASl_PluginTip_baseList = [
 		"Drill_PictureDraggable.js 图片-可拖拽的图片"
 	];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
-	DrillUp.drill_PAS_getPluginTip_NoBasePlugin = function(){
-		if( DrillUp.g_PAS_PluginTip_baseList.length == 0 ){ return ""; }
-		var message = "【" + DrillUp.g_PAS_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
-		for(var i=0; i < DrillUp.g_PAS_PluginTip_baseList.length; i++){
+	DrillUp.drill_PASl_getPluginTip_NoBasePlugin = function(){
+		if( DrillUp.g_PASl_PluginTip_baseList.length == 0 ){ return ""; }
+		var message = "【" + DrillUp.g_PASl_PluginTip_curName + "】\n缺少基础插件，去看看下列插件是不是 未添加 / 被关闭 / 顺序不对：";
+		for(var i=0; i < DrillUp.g_PASl_PluginTip_baseList.length; i++){
 			message += "\n- ";
-			message += DrillUp.g_PAS_PluginTip_baseList[i];
+			message += DrillUp.g_PASl_PluginTip_baseList[i];
 		}
 		return message;
 	};
 	//==============================
 	// * 提示信息 - 报错 - 找不到槽
 	//==============================
-	DrillUp.drill_PAS_getPluginTip_SlotNotFind = function( slot_id ){
-		return "【" + DrillUp.g_PAS_PluginTip_curName + "】\n插件指令错误，id为"+slot_id+"的槽还没被创建。";
+	DrillUp.drill_PASl_getPluginTip_SlotNotFind = function( slot_id ){
+		return "【" + DrillUp.g_PASl_PluginTip_curName + "】\n插件指令错误，id为"+slot_id+"的槽还没被创建。";
 	};
 	//==============================
 	// * 提示信息 - 报错 - 找不到图片
 	//==============================
-	DrillUp.drill_PAS_getPluginTip_PictureNotFind = function( pic_id ){
-		return "【" + DrillUp.g_PAS_PluginTip_curName + "】\n插件指令错误，id为"+pic_id+"的图片还没被创建。\n你可能需要将指令放在'显示图片'事件指令之后。";
+	DrillUp.drill_PASl_getPluginTip_PictureNotFind = function( pic_id ){
+		return "【" + DrillUp.g_PASl_PluginTip_curName + "】\n插件指令错误，id为"+pic_id+"的图片还没被创建。\n你可能需要将指令放在'显示图片'事件指令之后。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 找不到样式
+	//==============================
+	DrillUp.drill_PASl_getPluginTip_StyleNotFind = function( style_id ){
+		return "【" + DrillUp.g_PASl_PluginTip_curName + "】\n插件指令错误，吸附槽创建时，找不到样式"+style_id+"的数据。";
 	};
 	//==============================
 	// * 提示信息 - 报错 - 插件指令已改变
 	//==============================
-	DrillUp.drill_PAS_getPluginTip_CommandChanged = function( temp3 ){
-		return "【" + DrillUp.g_PAS_PluginTip_curName + "】\n插件指令错误，指令中'"+temp3+"'已不支持，需要改成'样式[]'。";
+	DrillUp.drill_PASl_getPluginTip_CommandChanged = function( temp3 ){
+		return "【" + DrillUp.g_PASl_PluginTip_curName + "】\n插件指令错误，指令中'"+temp3+"'已不支持，需要改成'样式[]'。";
 	};
 	
 	
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_PictureAdsorptionSlot = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_PictureAdsorptionSlot');
+	var Imported = Imported || {};
+	Imported.Drill_PictureAdsorptionSlot = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_PictureAdsorptionSlot');
 	
 	//==============================
 	// * 静态数据 - 吸附槽样式
-	//				（~struct~PASStyle）
+	//				（~struct~PASlStyle）
 	//==============================
-	DrillUp.drill_PAS_styleInit = function( dataFrom ){
+	DrillUp.drill_PASl_styleInit = function( dataFrom ){
 		var data = {};
 		
 		// > B吸附类型
@@ -839,22 +846,22 @@
 	}
 	
 	/*-----------------吸附槽样式------------------*/
-	DrillUp.g_PAS_style_length = 20;
-	DrillUp.g_PAS_style = [];
-	for( var i = 0; i < DrillUp.g_PAS_style_length; i++ ){
+	DrillUp.g_PASl_style_length = 20;
+	DrillUp.g_PASl_style = [];
+	for( var i = 0; i < DrillUp.g_PASl_style_length; i++ ){
 		if( DrillUp.parameters['吸附槽样式-' + String(i+1) ] != undefined &&
 			DrillUp.parameters['吸附槽样式-' + String(i+1) ] != "" ){
 			var data = JSON.parse(DrillUp.parameters['吸附槽样式-' + String(i+1) ]);
-			DrillUp.g_PAS_style[i] = DrillUp.drill_PAS_styleInit( data );
+			DrillUp.g_PASl_style[i] = DrillUp.drill_PASl_styleInit( data );
 		}else{
-			DrillUp.g_PAS_style[i] = null;
+			DrillUp.g_PASl_style[i] = null;
 		}
 	}
 	
 	/*-----------------杂项------------------*/
-	DrillUp.g_PAS_adsorptAnimEnabled = String(DrillUp.parameters['是否启用吸附动画'] || "true") == "true";
-	DrillUp.g_PAS_adsorptTime = Number(DrillUp.parameters['吸附时长'] || 20);
-	DrillUp.g_PAS_adsorptMoveType = String(DrillUp.parameters['吸附移动方式'] || "弹性移动");
+	DrillUp.g_PASl_adsorptAnimEnabled = String(DrillUp.parameters['是否启用吸附动画'] || "true") == "true";
+	DrillUp.g_PASl_adsorptTime = Number(DrillUp.parameters['吸附时长'] || 20);
+	DrillUp.g_PASl_adsorptMoveType = String(DrillUp.parameters['吸附移动方式'] || "弹性移动");
 
 
 //=============================================================================
@@ -866,9 +873,18 @@ if( Imported.Drill_PictureDraggable ){
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
-var _drill_PAS_pluginCommand = Game_Interpreter.prototype.pluginCommand
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
-	_drill_PAS_pluginCommand.call(this, command, args);
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
+var _drill_PASl_pluginCommand = Game_Interpreter.prototype.pluginCommand
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
+	_drill_PASl_pluginCommand.call(this, command, args);
+	this.drill_PASl_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_PASl_pluginCommand = function( command, args ){
 	if(command === ">图片吸附槽"){
 		
 		/*-----------------槽 - 对象组获取------------------*/
@@ -915,7 +931,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			
 			if( type == "建立吸附槽" ){
 				if( temp3.indexOf("类型[") != -1 ){
-					alert( DrillUp.drill_PAS_getPluginTip_CommandChanged( temp3 ) );
+					alert( DrillUp.drill_PASl_getPluginTip_CommandChanged( temp3 ) );
 				}
 				temp3 = temp3.replace("样式[","");
 				temp3 = temp3.replace("]","");
@@ -930,7 +946,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 							$gameVariables.value( Number(temp_arr[1]) )
 						];
 						var slot_index = slotIndex_list[0];
-						$gameScreen.drill_PAS_addSlot_ByIndex( slot_index, pos[0], pos[1], Number(temp3)-1 );
+						$gameScreen.drill_PASl_addSlot_ByIndex( slot_index, pos[0], pos[1], Number(temp3)-1 );
 					}
 				}
 				else if( temp4.indexOf("位置[") != -1 ){
@@ -943,9 +959,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 							Number(temp_arr[1]) 
 						];
 						var slot_index = slotIndex_list[0];
-						$gameScreen.drill_PAS_addSlot_ByIndex( slot_index, pos[0], pos[1], Number(temp3)-1 );
+						$gameScreen.drill_PASl_addSlot_ByIndex( slot_index, pos[0], pos[1], Number(temp3)-1 );
 					}
 				}
+				return;
 			}
 		}
 		/*-----------------槽 - 修改属性------------------*/
@@ -957,15 +974,15 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				if( temp3 == "必然吸附" ){
 					if( temp4 == "启用" || temp4 == "开启" || temp4 == "打开" || temp4 == "启动" ){
 						for( var k=0; k < slotIndex_list.length; k++ ){
-							if( $gameScreen.drill_PAS_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
-							var slot = $gameScreen.drill_PAS_getSlotController_ByIndex( slotIndex_list[k] );
+							if( $gameScreen.drill_PASl_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
+							var slot = $gameScreen.drill_PASl_getSlotController_ByIndex( slotIndex_list[k] );
 							slot._drill_data['essentialEnabled'] = true;
 						}
 					}
 					if( temp4 == "关闭" || temp4 == "禁用" ){
 						for( var k=0; k < slotIndex_list.length; k++ ){
-							if( $gameScreen.drill_PAS_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
-							var slot = $gameScreen.drill_PAS_getSlotController_ByIndex( slotIndex_list[k] );
+							if( $gameScreen.drill_PASl_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
+							var slot = $gameScreen.drill_PASl_getSlotController_ByIndex( slotIndex_list[k] );
 							slot._drill_data['essentialEnabled'] = false;
 						}
 					}
@@ -973,15 +990,15 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				if( temp3 == "一般吸附" ){
 					if( temp4 == "启用" || temp4 == "开启" || temp4 == "打开" || temp4 == "启动" ){
 						for( var k=0; k < slotIndex_list.length; k++ ){
-							if( $gameScreen.drill_PAS_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
-							var slot = $gameScreen.drill_PAS_getSlotController_ByIndex( slotIndex_list[k] );
+							if( $gameScreen.drill_PASl_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
+							var slot = $gameScreen.drill_PASl_getSlotController_ByIndex( slotIndex_list[k] );
 							slot._drill_data['commonEnabled'] = true;
 						}
 					}
 					if( temp4 == "关闭" || temp4 == "禁用" ){
 						for( var k=0; k < slotIndex_list.length; k++ ){
-							if( $gameScreen.drill_PAS_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
-							var slot = $gameScreen.drill_PAS_getSlotController_ByIndex( slotIndex_list[k] );
+							if( $gameScreen.drill_PASl_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
+							var slot = $gameScreen.drill_PASl_getSlotController_ByIndex( slotIndex_list[k] );
 							slot._drill_data['commonEnabled'] = false;
 						}
 					}
@@ -989,15 +1006,15 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				if( temp3 == "交换吸附" ){
 					if( temp4 == "启用" || temp4 == "开启" || temp4 == "打开" || temp4 == "启动" ){
 						for( var k=0; k < slotIndex_list.length; k++ ){
-							if( $gameScreen.drill_PAS_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
-							var slot = $gameScreen.drill_PAS_getSlotController_ByIndex( slotIndex_list[k] );
+							if( $gameScreen.drill_PASl_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
+							var slot = $gameScreen.drill_PASl_getSlotController_ByIndex( slotIndex_list[k] );
 							slot._drill_data['exchangeEnabled'] = true;
 						}
 					}
 					if( temp4 == "关闭" || temp4 == "禁用" ){
 						for( var k=0; k < slotIndex_list.length; k++ ){
-							if( $gameScreen.drill_PAS_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
-							var slot = $gameScreen.drill_PAS_getSlotController_ByIndex( slotIndex_list[k] );
+							if( $gameScreen.drill_PASl_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
+							var slot = $gameScreen.drill_PASl_getSlotController_ByIndex( slotIndex_list[k] );
 							slot._drill_data['exchangeEnabled'] = false;
 						}
 					}
@@ -1012,8 +1029,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp3 = temp3.replace("最大吸附图片数量[","");
 					temp3 = temp3.replace("]","");
 					for(var k = 0; k < slotIndex_list.length; k++ ){
-						if( $gameScreen.drill_PAS_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
-						var slot = $gameScreen.drill_PAS_getSlotController_ByIndex( slotIndex_list[k] );
+						if( $gameScreen.drill_PASl_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
+						var slot = $gameScreen.drill_PASl_getSlotController_ByIndex( slotIndex_list[k] );
 						slot.drill_slot_setMaxAdsorbNum( Number(temp3) );
 					}
 				}
@@ -1023,7 +1040,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var type = String(args[3]);
 			if( type == "删除吸附槽" ){
 				for(var k = 0; k < slotIndex_list.length; k++ ){
-					$gameScreen.drill_PAS_removeSlot_ByIndex( slotIndex_list[k] );
+					$gameScreen.drill_PASl_removeSlot_ByIndex( slotIndex_list[k] );
 				}
 			}
 		}
@@ -1040,8 +1057,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp3 = temp3.replace("必然吸附半径[","");
 					temp3 = temp3.replace("]","");
 					for( var k=0; k < slotIndex_list.length; k++ ){
-						if( $gameScreen.drill_PAS_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
-						var slot = $gameScreen.drill_PAS_getSlotController_ByIndex( slotIndex_list[k] );
+						if( $gameScreen.drill_PASl_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
+						var slot = $gameScreen.drill_PASl_getSlotController_ByIndex( slotIndex_list[k] );
 						slot._drill_data['essentialRadius'] = Number(temp3);
 					}
 				}
@@ -1049,8 +1066,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp3 = temp3.replace("必然吸附宽度[","");
 					temp3 = temp3.replace("]","");
 					for( var k=0; k < slotIndex_list.length; k++ ){
-						if( $gameScreen.drill_PAS_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
-						var slot = $gameScreen.drill_PAS_getSlotController_ByIndex( slotIndex_list[k] );
+						if( $gameScreen.drill_PASl_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
+						var slot = $gameScreen.drill_PASl_getSlotController_ByIndex( slotIndex_list[k] );
 						slot._drill_data['essentialWidth'] = Number(temp3);
 					}
 				}
@@ -1058,8 +1075,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp3 = temp3.replace("必然吸附高度[","");
 					temp3 = temp3.replace("]","");
 					for( var k=0; k < slotIndex_list.length; k++ ){
-						if( $gameScreen.drill_PAS_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
-						var slot = $gameScreen.drill_PAS_getSlotController_ByIndex( slotIndex_list[k] );
+						if( $gameScreen.drill_PASl_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
+						var slot = $gameScreen.drill_PASl_getSlotController_ByIndex( slotIndex_list[k] );
 						slot._drill_data['essentialHeight'] = Number(temp3);
 					}
 				}
@@ -1067,8 +1084,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp3 = temp3.replace("必然吸附范围类型[","");
 					temp3 = temp3.replace("]","");
 					for( var k=0; k < slotIndex_list.length; k++ ){
-						if( $gameScreen.drill_PAS_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
-						var slot = $gameScreen.drill_PAS_getSlotController_ByIndex( slotIndex_list[k] );
+						if( $gameScreen.drill_PASl_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
+						var slot = $gameScreen.drill_PASl_getSlotController_ByIndex( slotIndex_list[k] );
 						slot._drill_data['essentialType'] = Number(temp3);
 					}
 				}
@@ -1079,8 +1096,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp3 = temp3.replace("一般吸附半径[","");
 					temp3 = temp3.replace("]","");
 					for(var k = 0; k < slotIndex_list.length; k++ ){
-						if( $gameScreen.drill_PAS_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
-						var slot = $gameScreen.drill_PAS_getSlotController_ByIndex( slotIndex_list[k] );
+						if( $gameScreen.drill_PASl_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
+						var slot = $gameScreen.drill_PASl_getSlotController_ByIndex( slotIndex_list[k] );
 						slot._drill_data['commonRadius'] = Number(temp3);
 					}
 				}
@@ -1088,8 +1105,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp3 = temp3.replace("一般吸附宽度[","");
 					temp3 = temp3.replace("]","");
 					for(var k = 0; k < slotIndex_list.length; k++ ){
-						if( $gameScreen.drill_PAS_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
-						var slot = $gameScreen.drill_PAS_getSlotController_ByIndex( slotIndex_list[k] );
+						if( $gameScreen.drill_PASl_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
+						var slot = $gameScreen.drill_PASl_getSlotController_ByIndex( slotIndex_list[k] );
 						slot._drill_data['commonWidth'] = Number(temp3);
 					}
 				}
@@ -1097,8 +1114,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp3 = temp3.replace("一般吸附高度[","");
 					temp3 = temp3.replace("]","");
 					for(var k = 0; k < slotIndex_list.length; k++ ){
-						if( $gameScreen.drill_PAS_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
-						var slot = $gameScreen.drill_PAS_getSlotController_ByIndex( slotIndex_list[k] );
+						if( $gameScreen.drill_PASl_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
+						var slot = $gameScreen.drill_PASl_getSlotController_ByIndex( slotIndex_list[k] );
 						slot._drill_data['commonHeight'] = Number(temp3);
 					}
 				}
@@ -1106,8 +1123,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp3 = temp3.replace("一般吸附范围类型[","");
 					temp3 = temp3.replace("]","");
 					for( var k=0; k < slotIndex_list.length; k++ ){
-						if( $gameScreen.drill_PAS_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
-						var slot = $gameScreen.drill_PAS_getSlotController_ByIndex( slotIndex_list[k] );
+						if( $gameScreen.drill_PASl_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
+						var slot = $gameScreen.drill_PASl_getSlotController_ByIndex( slotIndex_list[k] );
 						slot._drill_data['commonType'] = Number(temp3);
 					}
 				}
@@ -1118,8 +1135,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp3 = temp3.replace("交换吸附半径[","");
 					temp3 = temp3.replace("]","");
 					for(var k = 0; k < slotIndex_list.length; k++ ){
-						if( $gameScreen.drill_PAS_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
-						var slot = $gameScreen.drill_PAS_getSlotController_ByIndex( slotIndex_list[k] );
+						if( $gameScreen.drill_PASl_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
+						var slot = $gameScreen.drill_PASl_getSlotController_ByIndex( slotIndex_list[k] );
 						slot._drill_data['exchangeRadius'] = Number(temp3);
 					}
 				}
@@ -1127,8 +1144,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp3 = temp3.replace("交换吸附宽度[","");
 					temp3 = temp3.replace("]","");
 					for(var k = 0; k < slotIndex_list.length; k++ ){
-						if( $gameScreen.drill_PAS_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
-						var slot = $gameScreen.drill_PAS_getSlotController_ByIndex( slotIndex_list[k] );
+						if( $gameScreen.drill_PASl_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
+						var slot = $gameScreen.drill_PASl_getSlotController_ByIndex( slotIndex_list[k] );
 						slot._drill_data['exchangeWidth'] = Number(temp3);
 					}
 				}
@@ -1136,8 +1153,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp3 = temp3.replace("交换吸附高度[","");
 					temp3 = temp3.replace("]","");
 					for(var k = 0; k < slotIndex_list.length; k++ ){
-						if( $gameScreen.drill_PAS_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
-						var slot = $gameScreen.drill_PAS_getSlotController_ByIndex( slotIndex_list[k] );
+						if( $gameScreen.drill_PASl_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
+						var slot = $gameScreen.drill_PASl_getSlotController_ByIndex( slotIndex_list[k] );
 						slot._drill_data['exchangeHeight'] = Number(temp3);
 					}
 				}
@@ -1145,8 +1162,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp3 = temp3.replace("交换吸附范围类型[","");
 					temp3 = temp3.replace("]","");
 					for( var k=0; k < slotIndex_list.length; k++ ){
-						if( $gameScreen.drill_PAS_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
-						var slot = $gameScreen.drill_PAS_getSlotController_ByIndex( slotIndex_list[k] );
+						if( $gameScreen.drill_PASl_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
+						var slot = $gameScreen.drill_PASl_getSlotController_ByIndex( slotIndex_list[k] );
 						slot._drill_data['exchangeType'] = Number(temp3);
 					}
 				}
@@ -1155,8 +1172,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp3 = temp3.replace("浮动效果[","");
 					temp3 = temp3.replace("]","");
 					for(var k = 0; k < slotIndex_list.length; k++ ){
-						if( $gameScreen.drill_PAS_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
-						var slot = $gameScreen.drill_PAS_getSlotController_ByIndex( slotIndex_list[k] );
+						if( $gameScreen.drill_PASl_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
+						var slot = $gameScreen.drill_PASl_getSlotController_ByIndex( slotIndex_list[k] );
 						slot._drill_data['effect_float'] = temp3;
 					}
 				}
@@ -1164,8 +1181,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp3 = temp3.replace("浮动速度[","");
 					temp3 = temp3.replace("]","");
 					for(var k = 0; k < slotIndex_list.length; k++ ){
-						if( $gameScreen.drill_PAS_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
-						var slot = $gameScreen.drill_PAS_getSlotController_ByIndex( slotIndex_list[k] );
+						if( $gameScreen.drill_PASl_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
+						var slot = $gameScreen.drill_PASl_getSlotController_ByIndex( slotIndex_list[k] );
 						slot._drill_data['effect_floatSpeed'] = Number(temp3);
 					}
 				}
@@ -1173,8 +1190,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp3 = temp3.replace("浮动偏移量[","");
 					temp3 = temp3.replace("]","");
 					for(var k = 0; k < slotIndex_list.length; k++ ){
-						if( $gameScreen.drill_PAS_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
-						var slot = $gameScreen.drill_PAS_getSlotController_ByIndex( slotIndex_list[k] );
+						if( $gameScreen.drill_PASl_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
+						var slot = $gameScreen.drill_PASl_getSlotController_ByIndex( slotIndex_list[k] );
 						slot._drill_data['effect_floatRange'] = Number(temp3);
 					}
 				}
@@ -1182,8 +1199,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp3 = temp3.replace("圆周移动效果[","");
 					temp3 = temp3.replace("]","");
 					for(var k = 0; k < slotIndex_list.length; k++ ){
-						if( $gameScreen.drill_PAS_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
-						var slot = $gameScreen.drill_PAS_getSlotController_ByIndex( slotIndex_list[k] );
+						if( $gameScreen.drill_PASl_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
+						var slot = $gameScreen.drill_PASl_getSlotController_ByIndex( slotIndex_list[k] );
 						slot._drill_data['effect_ring'] = temp3;
 					}
 				}
@@ -1191,8 +1208,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp3 = temp3.replace("圆周移动起始角度[","");
 					temp3 = temp3.replace("]","");
 					for(var k = 0; k < slotIndex_list.length; k++ ){
-						if( $gameScreen.drill_PAS_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
-						var slot = $gameScreen.drill_PAS_getSlotController_ByIndex( slotIndex_list[k] );
+						if( $gameScreen.drill_PASl_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
+						var slot = $gameScreen.drill_PASl_getSlotController_ByIndex( slotIndex_list[k] );
 						slot._drill_data['effect_ringStart'] = Number(temp3);
 					}
 				}
@@ -1200,8 +1217,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp3 = temp3.replace("圆周移动旋转速度[","");
 					temp3 = temp3.replace("]","");
 					for(var k = 0; k < slotIndex_list.length; k++ ){
-						if( $gameScreen.drill_PAS_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
-						var slot = $gameScreen.drill_PAS_getSlotController_ByIndex( slotIndex_list[k] );
+						if( $gameScreen.drill_PASl_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
+						var slot = $gameScreen.drill_PASl_getSlotController_ByIndex( slotIndex_list[k] );
 						slot._drill_data['effect_ringSpeed'] = Number(temp3);
 					}
 				}
@@ -1209,8 +1226,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp3 = temp3.replace("圆周移动半径[","");
 					temp3 = temp3.replace("]","");
 					for(var k = 0; k < slotIndex_list.length; k++ ){
-						if( $gameScreen.drill_PAS_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
-						var slot = $gameScreen.drill_PAS_getSlotController_ByIndex( slotIndex_list[k] );
+						if( $gameScreen.drill_PASl_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
+						var slot = $gameScreen.drill_PASl_getSlotController_ByIndex( slotIndex_list[k] );
 						slot._drill_data['effect_ringRadius'] = Number(temp3);
 					}
 				}
@@ -1219,8 +1236,8 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp3 = temp3.replace("添加槽的吸附类型[","");
 					temp3 = temp3.replace("]","");
 					for(var k = 0; k < slotIndex_list.length; k++ ){
-						if( $gameScreen.drill_PAS_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
-						var slot = $gameScreen.drill_PAS_getSlotController_ByIndex( slotIndex_list[k] );
+						if( $gameScreen.drill_PASl_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
+						var slot = $gameScreen.drill_PASl_getSlotController_ByIndex( slotIndex_list[k] );
 						slot.drill_slot_addAdsorbType( temp3 );
 					}
 				}
@@ -1228,15 +1245,15 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp3 = temp3.replace("去除槽的吸附类型[","");
 					temp3 = temp3.replace("]","");
 					for(var k = 0; k < slotIndex_list.length; k++ ){
-						if( $gameScreen.drill_PAS_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
-						var slot = $gameScreen.drill_PAS_getSlotController_ByIndex( slotIndex_list[k] );
+						if( $gameScreen.drill_PASl_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
+						var slot = $gameScreen.drill_PASl_getSlotController_ByIndex( slotIndex_list[k] );
 						slot.drill_slot_removeAdsorbType( temp3 );
 					}
 				}
 				if( temp3 == "去除槽的全部吸附类型" ){
 					for(var k = 0; k < slotIndex_list.length; k++ ){
-						if( $gameScreen.drill_PAS_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
-						var slot = $gameScreen.drill_PAS_getSlotController_ByIndex( slotIndex_list[k] );
+						if( $gameScreen.drill_PASl_isSlotExist( slotIndex_list[k] ) == false ){ continue; }
+						var slot = $gameScreen.drill_PASl_getSlotController_ByIndex( slotIndex_list[k] );
 						slot.drill_slot_removeAllAdsorbType();
 					}
 				}
@@ -1254,14 +1271,14 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp1 = temp1.replace("]","");
 					temp1 = Number(temp1);
 					
-					var slot = $gameScreen.drill_PAS_getSlotController_ByIndex( slotIndex_list[0] );
+					var slot = $gameScreen.drill_PASl_getSlotController_ByIndex( slotIndex_list[0] );
 					var adsorb_list = $gameSystem._drill_CODAA_adsorbFactory.drill_factoryAdsorb_getBySlotId( slot._drill_productId );
 					if( adsorb_list.length == 0 ){
 						$gameVariables.setValue( temp1, -1 );
 						return;
 					}
 					var adsorb_controller = adsorb_list[0];
-					var pic_id = $gameScreen.drill_PAS_getPictureID_ByAdsorbControllerId( adsorb_controller._drill_productId );
+					var pic_id = $gameScreen.drill_PASl_getPictureID_ByAdsorbControllerId( adsorb_controller._drill_productId );
 					$gameVariables.setValue( temp1, pic_id );
 				}
 			}
@@ -1272,14 +1289,14 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 						temp1 = temp1.replace("]","");
 						var arr = [];
 						for(var k = 0; k < slotIndex_list.length; k++ ){
-							var slot = $gameScreen.drill_PAS_getSlotController_ByIndex( slotIndex_list[k] );
+							var slot = $gameScreen.drill_PASl_getSlotController_ByIndex( slotIndex_list[k] );
 							var adsorb_list = $gameSystem._drill_CODAA_adsorbFactory.drill_factoryAdsorb_getBySlotId( slot._drill_productId );
 							if( adsorb_list.length == 0 ){
 								arr.push( -1 );
 								continue;
 							}
 							var adsorb_controller = adsorb_list[0];
-							var pic_id = $gameScreen.drill_PAS_getPictureID_ByAdsorbControllerId( adsorb_controller._drill_productId );
+							var pic_id = $gameScreen.drill_PASl_getPictureID_ByAdsorbControllerId( adsorb_controller._drill_productId );
 							arr.push( pic_id );
 						}
 						$gameNumberArray.setValue( temp1, arr );
@@ -1293,12 +1310,12 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 						temp1 = temp1.replace("数组[","");
 						temp1 = temp1.replace("]","");
 						
-						var slot = $gameScreen.drill_PAS_getSlotController_ByIndex( slotIndex_list[0] );
+						var slot = $gameScreen.drill_PASl_getSlotController_ByIndex( slotIndex_list[0] );
 						var adsorb_list = $gameSystem._drill_CODAA_adsorbFactory.drill_factoryAdsorb_getBySlotId( slot._drill_productId );
 						var arr = [];
 						for(var k = 0; k < adsorb_list.length; k++ ){
 							var adsorb_controller = adsorb_list[k];
-							var pic_id = $gameScreen.drill_PAS_getPictureID_ByAdsorbControllerId( adsorb_controller._drill_productId );
+							var pic_id = $gameScreen.drill_PASl_getPictureID_ByAdsorbControllerId( adsorb_controller._drill_productId );
 							arr.push( pic_id );
 						}
 						$gameNumberArray.setValue( temp1, arr );
@@ -1319,7 +1336,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				var temp_arr = pic_str.split(/[,，]/);
 				for( var k=0; k < temp_arr.length; k++ ){
 					var pic_id = Number(temp_arr[k]);
-					if( $gameScreen.drill_PAS_isPictureExist( pic_id ) == false ){ continue; }
+					if( $gameScreen.drill_PASl_isPictureExist( pic_id ) == false ){ continue; }
 					var p = $gameScreen.picture( pic_id );
 					pics.push( p );
 				}
@@ -1331,7 +1348,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				var temp_arr = pic_str.split(/[,，]/);
 				for( var k=0; k < temp_arr.length; k++ ){
 					var pic_id = $gameVariables.value(Number(temp_arr[k]));
-					if( $gameScreen.drill_PAS_isPictureExist( pic_id ) == false ){ continue; }
+					if( $gameScreen.drill_PASl_isPictureExist( pic_id ) == false ){ continue; }
 					var pic = $gameScreen.picture( pic_id );
 					pics.push( pic );
 				}
@@ -1340,7 +1357,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				pic_str = pic_str.replace("图片变量[","");
 				pic_str = pic_str.replace("]","");
 				var pic_id = $gameVariables.value( Number(pic_str) );
-				if( $gameScreen.drill_PAS_isPictureExist( pic_id ) == false ){ return; }
+				if( $gameScreen.drill_PASl_isPictureExist( pic_id ) == false ){ return; }
 				var p = $gameScreen.picture( pic_id );
 				pics = [ p ];
 			}
@@ -1348,7 +1365,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				pic_str = pic_str.replace("图片[","");
 				pic_str = pic_str.replace("]","");
 				var pic_id = Number(pic_str);
-				if( $gameScreen.drill_PAS_isPictureExist( pic_id ) == false ){ return; }
+				if( $gameScreen.drill_PASl_isPictureExist( pic_id ) == false ){ return; }
 				var p = $gameScreen.picture( pic_id );
 				pics = [ p ];
 			}
@@ -1361,24 +1378,24 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			if( type == "吸附功能" ){
 				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
 					for( var k=0; k < pics.length; k++ ){
-						pics[k].drill_PAS_setCanAdsorb( true );
+						pics[k].drill_PASl_setCanAdsorb( true );
 					}
 				}
 				if( temp1 == "关闭" || temp1 == "禁用" ){
 					for( var k=0; k < pics.length; k++ ){
-						pics[k].drill_PAS_setCanAdsorb( false );
+						pics[k].drill_PASl_setCanAdsorb( false );
 					}
 				}
 			}
 			if( type == "拖拽后可脱离槽" ){
 				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
 					for( var k=0; k < pics.length; k++ ){
-						pics[k].drill_PAS_setPullOutEnabled( true );
+						pics[k].drill_PASl_setPullOutEnabled( true );
 					}
 				}
 				if( temp1 == "关闭" || temp1 == "禁用" ){
 					for( var k=0; k < pics.length; k++ ){
-						pics[k].drill_PAS_setPullOutEnabled( false );
+						pics[k].drill_PASl_setPullOutEnabled( false );
 					}
 				}
 			}
@@ -1386,14 +1403,14 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp1 = temp1.replace("类型[","");
 				temp1 = temp1.replace("]","");
 				for( var k=0; k < pics.length; k++ ){
-					pics[k].drill_PAS_addAdsorbType( temp1 );
+					pics[k].drill_PASl_addAdsorbType( temp1 );
 				}
 			}
 			if( type == "去除吸附类型" ){
 				temp1 = temp1.replace("类型[","");
 				temp1 = temp1.replace("]","");
 				for( var k=0; k < pics.length; k++ ){
-					pics[k].drill_PAS_removeAdsorbType( temp1 );
+					pics[k].drill_PASl_removeAdsorbType( temp1 );
 				}
 			}
 		}
@@ -1401,17 +1418,17 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var type = String(args[3]);
 			if( type == "关闭吸附功能" ){
 				for( var k=0; k < pics.length; k++ ){
-					pics[k].drill_PAS_setCanAdsorb( false );
+					pics[k].drill_PASl_setCanAdsorb( false );
 				}
 			}
 			if( type == "恢复吸附功能" ){
 				for( var k=0; k < pics.length; k++ ){
-					pics[k].drill_PAS_setCanAdsorb( true );
+					pics[k].drill_PASl_setCanAdsorb( true );
 				}
 			}
 			if( type == "去除全部吸附类型" ){
 				for( var k=0; k < pics.length; k++ ){
-					pics[k].drill_PAS_removeAllAdsorbType();
+					pics[k].drill_PASl_removeAllAdsorbType();
 				}
 			}
 		}
@@ -1424,7 +1441,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp1 = temp1.replace("]","");
 				for( var k=0; k < pics.length; k++ ){
 					var slot_index = Number(temp1);
-					pics[k].drill_PAS_doAdsorb2_ByIndex( slot_index );
+					pics[k].drill_PASl_doAdsorb2_ByIndex( slot_index );
 				}
 			}
 			else if( temp1.indexOf("吸附到槽[") != -1 ){
@@ -1432,17 +1449,17 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 				temp1 = temp1.replace("]","");
 				for( var k=0; k < pics.length; k++ ){
 					var slot_index = Number(temp1);
-					pics[k].drill_PAS_doAdsorb1_ByIndex( slot_index );
+					pics[k].drill_PASl_doAdsorb1_ByIndex( slot_index );
 				}
 			}
 			if( temp1 == "立即合并吸附偏移量" ){
 				for( var k=0; k < pics.length; k++ ){
-					pics[k].drill_PAS_mergeAdsorbPosition();
+					pics[k].drill_PASl_mergeAdsorbPosition();
 				}
 			}
 			if( temp1 == "立即清零吸附偏移量" ){
 				for( var k=0; k < pics.length; k++ ){
-					pics[k].drill_PAS_clearAdsorbPosition();
+					pics[k].drill_PASl_clearAdsorbPosition();
 				}
 			}
 		}
@@ -1458,13 +1475,13 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 					temp1 = temp1.replace("]","");
 					temp1 = Number(temp1);
 					
-					var adsorb_controller = pics[0].drill_PAS_getAdsorbController();
+					var adsorb_controller = pics[0].drill_PASl_getAdsorbController();
 					if( adsorb_controller == undefined ){
 						$gameVariables.setValue( temp1, -1 );
 						return;
 					}
 					var product_id = adsorb_controller.drill_controllerAdsorb_getSlotId();
-					var slot_index = $gameScreen.drill_PAS_getSlotIndex_ByProductId( product_id );
+					var slot_index = $gameScreen.drill_PASl_getSlotIndex_ByProductId( product_id );
 					$gameVariables.setValue( temp1, slot_index );	//（这里告诉玩家使用的是index，而不是product_id）
 				}
 			}
@@ -1475,13 +1492,13 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 						temp1 = temp1.replace("]","");
 						var arr = [];
 						for(var k = 0; k < pics.length; k++ ){
-							var adsorb_controller = pics[k].drill_PAS_getAdsorbController();
+							var adsorb_controller = pics[k].drill_PASl_getAdsorbController();
 							if( adsorb_controller == undefined ){
 								arr.push( -1 );
 								continue;
 							}
 							var product_id = adsorb_controller.drill_controllerAdsorb_getSlotId();
-							var slot_index = $gameScreen.drill_PAS_getSlotIndex_ByProductId( product_id );
+							var slot_index = $gameScreen.drill_PASl_getSlotIndex_ByProductId( product_id );
 							arr.push( slot_index );		//（这里告诉玩家使用的是index，而不是product_id）
 						}
 						$gameNumberArray.setValue( temp1, arr );
@@ -1496,19 +1513,19 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var temp1 = String(args[3]);
 			if( type == "吸附动画-修改吸附动画开关" ){
 				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
-					$gameSystem._drill_PAS_adsorptAnimEnabled = true;
+					$gameSystem._drill_PASl_adsorptAnimEnabled = true;
 				}
 				if( temp1 == "关闭" || temp1 == "禁用" ){
-					$gameSystem._drill_PAS_adsorptAnimEnabled = false;
+					$gameSystem._drill_PASl_adsorptAnimEnabled = false;
 				}
 			}
 			if( type == "吸附动画-修改吸附时长" ){
 				temp1 = temp1.replace("时间[","");
 				temp1 = temp1.replace("]","");
-				$gameSystem._drill_PAS_adsorptTime = Number(temp1);
+				$gameSystem._drill_PASl_adsorptTime = Number(temp1);
 			}
 			if( type == "吸附动画-修改吸附移动方式" ){
-				$gameSystem._drill_PAS_adsorptMoveType = temp1;
+				$gameSystem._drill_PASl_adsorptMoveType = temp1;
 			}
 		}
 		
@@ -1516,7 +1533,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		if( args.length == 2 ){
 			var type = String(args[1]);
 			if( type == "槽吸附范围DEBUG显示" ){
-				$gameSystem._drill_PAS_DebugEnabled = true;
+				$gameSystem._drill_PASl_DebugEnabled = true;
 			}
 		}
 		if( args.length == 4 ){
@@ -1524,10 +1541,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 			var temp1 = String(args[3]);
 			if( type == "DEBUG吸附槽范围查看" ){
 				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
-					$gameSystem._drill_PAS_DebugEnabled = true;
+					$gameSystem._drill_PASl_DebugEnabled = true;
 				}
 				if( temp1 == "关闭" || temp1 == "禁用" ){
-					$gameSystem._drill_PAS_DebugEnabled = false;
+					$gameSystem._drill_PASl_DebugEnabled = false;
 				}
 			}
 		}
@@ -1536,12 +1553,12 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 //==============================
 // * 插件指令 - 槽检查
 //==============================
-Game_Screen.prototype.drill_PAS_isSlotExist = function( slot_id ){
+Game_Screen.prototype.drill_PASl_isSlotExist = function( slot_id ){
 	if( slot_id == 0 ){ return false; }
 	
-	var slot = this.drill_PAS_getSlotController_ByIndex( slot_id );
+	var slot = this.drill_PASl_getSlotController_ByIndex( slot_id );
 	if( slot == undefined ){
-		alert( DrillUp.drill_PAS_getPluginTip_SlotNotFind( slot_id ) );
+		alert( DrillUp.drill_PASl_getPluginTip_SlotNotFind( slot_id ) );
 		return false;
 	}
 	return true;
@@ -1549,15 +1566,33 @@ Game_Screen.prototype.drill_PAS_isSlotExist = function( slot_id ){
 //==============================
 // * 插件指令 - 图片检查
 //==============================
-Game_Screen.prototype.drill_PAS_isPictureExist = function( pic_id ){
+Game_Screen.prototype.drill_PASl_isPictureExist = function( pic_id ){
 	if( pic_id == 0 ){ return false; }
 	
 	var pic = this.picture( pic_id );
 	if( pic == undefined ){
-		alert( DrillUp.drill_PAS_getPluginTip_PictureNotFind( pic_id ) );
+		alert( DrillUp.drill_PASl_getPluginTip_PictureNotFind( pic_id ) );
 		return false;
 	}
 	return true;
+};
+//==============================
+// * 插件指令 - STG兼容『STG的插件指令』
+//==============================
+if( Imported.Drill_STG__objects ){
+	
+	//==============================
+	// * 插件指令 - STG指令绑定
+	//==============================
+	var _drill_STG_PASl_pluginCommand = Drill_STG_GameInterpreter.prototype.pluginCommand;
+	Drill_STG_GameInterpreter.prototype.pluginCommand = function( command, args ){
+		_drill_STG_PASl_pluginCommand.call(this, command, args);
+		this.drill_PASl_pluginCommand( command, args );
+	}
+	//==============================
+	// * 插件指令 - STG指令执行
+	//==============================
+	Drill_STG_GameInterpreter.prototype.drill_PASl_pluginCommand = Game_Interpreter.prototype.drill_PASl_pluginCommand;
 };
 
 
@@ -1569,33 +1604,33 @@ Game_Screen.prototype.drill_PAS_isPictureExist = function( pic_id ){
 //          
 //			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
 //##############################
-DrillUp.g_PAS_saveEnabled = true;
+DrillUp.g_PASl_saveEnabled = true;
 //##############################
 // * 存储数据 - 初始化
 //          
 //			说明：	> 下方为固定写法，不要动。
 //##############################
-var _drill_PAS_sys_initialize = Game_System.prototype.initialize;
+var _drill_PASl_sys_initialize = Game_System.prototype.initialize;
 Game_System.prototype.initialize = function() {
-    _drill_PAS_sys_initialize.call(this);
-	this.drill_PAS_initSysData();
+    _drill_PASl_sys_initialize.call(this);
+	this.drill_PASl_initSysData();
 };
 //##############################
 // * 存储数据 - 载入存档
 //          
 //			说明：	> 下方为固定写法，不要动。
 //##############################
-var _drill_PAS_sys_extractSaveContents = DataManager.extractSaveContents;
+var _drill_PASl_sys_extractSaveContents = DataManager.extractSaveContents;
 DataManager.extractSaveContents = function( contents ){
-	_drill_PAS_sys_extractSaveContents.call( this, contents );
+	_drill_PASl_sys_extractSaveContents.call( this, contents );
 	
 	// > 参数存储 启用时（检查数据）
-	if( DrillUp.g_PAS_saveEnabled == true ){	
-		$gameSystem.drill_PAS_checkSysData();
+	if( DrillUp.g_PASl_saveEnabled == true ){	
+		$gameSystem.drill_PASl_checkSysData();
 		
 	// > 参数存储 关闭时（直接覆盖）
 	}else{
-		$gameSystem.drill_PAS_initSysData();
+		$gameSystem.drill_PASl_initSysData();
 	}
 };
 //##############################
@@ -1606,8 +1641,8 @@ DataManager.extractSaveContents = function( contents ){
 //          
 //			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
 //##############################
-Game_System.prototype.drill_PAS_initSysData = function() {
-	this.drill_PAS_initSysData_Private();
+Game_System.prototype.drill_PASl_initSysData = function() {
+	this.drill_PASl_initSysData_Private();
 };
 //##############################
 // * 存储数据 - 载入存档时检查数据【标准函数】
@@ -1617,8 +1652,8 @@ Game_System.prototype.drill_PAS_initSysData = function() {
 //          
 //			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
 //##############################
-Game_System.prototype.drill_PAS_checkSysData = function() {
-	this.drill_PAS_checkSysData_Private();
+Game_System.prototype.drill_PASl_checkSysData = function() {
+	this.drill_PASl_checkSysData_Private();
 };
 //=============================================================================
 // ** 存储数据（接口实现）
@@ -1626,22 +1661,22 @@ Game_System.prototype.drill_PAS_checkSysData = function() {
 //==============================
 // * 存储数据 - 初始化数据（私有）
 //==============================
-Game_System.prototype.drill_PAS_initSysData_Private = function() {
+Game_System.prototype.drill_PASl_initSysData_Private = function() {
 	
-	this._drill_PAS_DebugEnabled = false;									//DEBUG吸附槽范围查看
+	this._drill_PASl_DebugEnabled = false;										//DEBUG吸附槽范围查看
 	
-	this._drill_PAS_adsorptAnimEnabled = DrillUp.g_PAS_adsorptAnimEnabled;	//是否启用吸附动画
-	this._drill_PAS_adsorptTime = DrillUp.g_PAS_adsorptTime;				//吸附时长
-	this._drill_PAS_adsorptMoveType = DrillUp.g_PAS_adsorptMoveType;		//吸附移动方式
+	this._drill_PASl_adsorptAnimEnabled = DrillUp.g_PASl_adsorptAnimEnabled;	//是否启用吸附动画
+	this._drill_PASl_adsorptTime = DrillUp.g_PASl_adsorptTime;					//吸附时长
+	this._drill_PASl_adsorptMoveType = DrillUp.g_PASl_adsorptMoveType;			//吸附移动方式
 };
 //==============================
 // * 存储数据 - 载入存档时检查数据（私有）
 //==============================
-Game_System.prototype.drill_PAS_checkSysData_Private = function() {
+Game_System.prototype.drill_PASl_checkSysData_Private = function() {
 	
 	// > 旧存档数据自动补充
-	if( this._drill_PAS_adsorptMoveType == undefined ){
-		this.drill_PAS_initSysData();
+	if( this._drill_PASl_adsorptMoveType == undefined ){
+		this.drill_PASl_initSysData();
 	}
 };
 
@@ -1661,8 +1696,8 @@ Game_System.prototype.drill_PAS_checkSysData_Private = function() {
 //			说明：	> 吸附位置X，单位像素。
 //					> 注意，吸附后就被固定位置了，与吸附槽的位置始终一致。
 //##############################
-Game_Picture.prototype.drill_PAS_getAdsorbingX = function(){
-	return this.drill_PAS_getAdsorbingX_Private();
+Game_Picture.prototype.drill_PASl_getAdsorbingX = function(){
+	return this.drill_PASl_getAdsorbingX_Private();
 }
 //##############################
 // * 图片吸附管理 - 获取吸附位置Y【标准函数】
@@ -1673,8 +1708,8 @@ Game_Picture.prototype.drill_PAS_getAdsorbingX = function(){
 //			说明：	> 吸附位置Y，单位像素。
 //					> 注意，吸附后就被固定位置了，与吸附槽的位置始终一致。
 //##############################
-Game_Picture.prototype.drill_PAS_getAdsorbingY = function(){
-	return this.drill_PAS_getAdsorbingY_Private();
+Game_Picture.prototype.drill_PASl_getAdsorbingY = function(){
+	return this.drill_PASl_getAdsorbingY_Private();
 }
 //##############################
 // * 图片吸附管理 - 立即合并吸附偏移量【标准函数】
@@ -1685,8 +1720,8 @@ Game_Picture.prototype.drill_PAS_getAdsorbingY = function(){
 //			说明：	> 将吸附槽偏移量转移到图片坐标中，图片显示的位置不会变。
 //					> 合并不会改变 吸附状态 。
 //##############################
-Game_Picture.prototype.drill_PAS_mergeAdsorbPosition = function(){
-	this.drill_PAS_mergeAdsorbPosition_Private();
+Game_Picture.prototype.drill_PASl_mergeAdsorbPosition = function(){
+	this.drill_PASl_mergeAdsorbPosition_Private();
 }
 //##############################
 // * 图片吸附管理 - 立即清零吸附偏移量【标准函数】
@@ -1697,8 +1732,8 @@ Game_Picture.prototype.drill_PAS_mergeAdsorbPosition = function(){
 //			说明：	> 将吸附槽偏移量清零，图片会立即归位原位置。
 //					> 清零会使得 吸附状态 变为 "未吸附"。
 //##############################
-Game_Picture.prototype.drill_PAS_clearAdsorbPosition = function(){
-	this.drill_PAS_clearAdsorbPosition_Private();
+Game_Picture.prototype.drill_PASl_clearAdsorbPosition = function(){
+	this.drill_PASl_clearAdsorbPosition_Private();
 }
 
 
@@ -1712,10 +1747,10 @@ Game_Picture.prototype.drill_PAS_clearAdsorbPosition = function(){
 //==============================
 // * 图片的属性 - 初始化
 //==============================
-var _drill_PAS_switch_initialize = Game_Picture.prototype.initialize;
+var _drill_PASl_switch_initialize = Game_Picture.prototype.initialize;
 Game_Picture.prototype.initialize = function(){
-	this._drill_PAS_switchData = undefined;		//（要放前面，不然会盖掉子类的设置）
-	_drill_PAS_switch_initialize.call(this);
+	this._drill_PASl_switchData = undefined;		//（要放前面，不然会盖掉子类的设置）
+	_drill_PASl_switch_initialize.call(this);
 }
 //==============================
 // * 图片的属性 - 初始化 数据
@@ -1723,66 +1758,66 @@ Game_Picture.prototype.initialize = function(){
 //			说明：	> 这里的数据都要初始化才能用。『节约事件数据存储空间』
 //					> 层面关键字为：switchData，一对一。
 //==============================
-Game_Picture.prototype.drill_PAS_checkSwitchData = function(){
+Game_Picture.prototype.drill_PASl_checkSwitchData = function(){
 	
 	// > 【图片-可拖拽的图片】强制绑定
 	this.drill_PDr_checkSwitchData();
 	
-	if( this._drill_PAS_switchData != undefined ){ return; }
-	this._drill_PAS_switchData = {};
+	if( this._drill_PASl_switchData != undefined ){ return; }
+	this._drill_PASl_switchData = {};
 	
 	// > 数据 - 图片ID【图片-图片优化核心】
-	this._drill_PAS_switchData['pic_id'] = this.drill_COPi_getPictureId();
+	this._drill_PASl_switchData['pic_id'] = this.drill_COPi_getPictureId();
 	
 	// > 数据 - 吸附控制器ID【数学模型-拖拽与吸附核心】
 	var adsorb_factory = $gameSystem.drill_CODAA_adsorbFactory();
-	var product_id = adsorb_factory.drill_factoryAdsorb_create( "PAS" );	//（通过工厂创建控制器，并印上该插件的简称）
-	this._drill_PAS_switchData['adsorbController_id'] = product_id;
+	var product_id = adsorb_factory.drill_factoryAdsorb_create( "PASl" );	//（通过工厂创建控制器，并印上该插件的简称）
+	this._drill_PASl_switchData['adsorbController_id'] = product_id;
 	
 	// > 控制器初始化 - 外键绑定 拖拽控制器ID
-	var adsorb_controller = this.drill_PAS_getAdsorbController();
+	var adsorb_controller = this.drill_PASl_getAdsorbController();
 	adsorb_controller.drill_controllerAdsorb_setForeignKey_dragId( this._drill_PDr_switchData['dragController_id'] );
 	
 	// > 控制器初始化 - 设置吸附动画开关
-	adsorb_controller.drill_controllerAdsorb_setAnimEnabled( $gameSystem._drill_PAS_adsorptAnimEnabled );
+	adsorb_controller.drill_controllerAdsorb_setAnimEnabled( $gameSystem._drill_PASl_adsorptAnimEnabled );
 	
 	// > 控制器初始化 - 设置动画时长
-	adsorb_controller.drill_controllerAdsorb_setAnim1PlayerTime( $gameSystem._drill_PAS_adsorptTime );
+	adsorb_controller.drill_controllerAdsorb_setAnim1PlayerTime( $gameSystem._drill_PASl_adsorptTime );
 	
 	// > 控制器初始化 - 设置动画移动方式
-	adsorb_controller.drill_controllerAdsorb_setAnim1MoveType( $gameSystem._drill_PAS_adsorptMoveType );
+	adsorb_controller.drill_controllerAdsorb_setAnim1MoveType( $gameSystem._drill_PASl_adsorptMoveType );
 }
 //==============================
 // * 图片的属性 - 删除数据
 //==============================
-Game_Picture.prototype.drill_PAS_removeSwitchData = function(){
+Game_Picture.prototype.drill_PASl_removeSwitchData = function(){
 	
 	// > 删除控制器
-	var controller = this.drill_PAS_getAdsorbController();
+	var controller = this.drill_PASl_getAdsorbController();
 	$gameSystem.drill_CODAA_adsorbFactory().drill_factoryAdsorb_remove( controller );
 	
 	// > 删除数据
-	this._drill_PAS_switchData = undefined;
+	this._drill_PASl_switchData = undefined;
 }
 //==============================
 // * 图片的属性 - 消除图片
 //==============================
-var _drill_PAS_p_erase = Game_Picture.prototype.erase;
+var _drill_PASl_p_erase = Game_Picture.prototype.erase;
 Game_Picture.prototype.erase = function(){
-	_drill_PAS_p_erase.call( this );
-	this.drill_PAS_removeSwitchData();						//（删除数据）
+	_drill_PASl_p_erase.call( this );
+	this.drill_PASl_removeSwitchData();						//（删除数据）
 }
 //==============================
 // * 图片的属性 - 消除图片（command235）
 //==============================
-var _drill_PAS_p_erasePicture = Game_Screen.prototype.erasePicture;
+var _drill_PASl_p_erasePicture = Game_Screen.prototype.erasePicture;
 Game_Screen.prototype.erasePicture = function( pictureId ){
     var realPictureId = this.realPictureId(pictureId);
 	var picture = this._pictures[realPictureId];
 	if( picture != undefined ){
-		picture.drill_PAS_removeSwitchData();				//（删除数据）
+		picture.drill_PASl_removeSwitchData();				//（删除数据）
 	}
-	_drill_PAS_p_erasePicture.call( this, pictureId );
+	_drill_PASl_p_erasePicture.call( this, pictureId );
 }
 
 //==============================
@@ -1790,15 +1825,15 @@ Game_Screen.prototype.erasePicture = function( pictureId ){
 //
 //			说明：	> 该函数返回 吸附控制器 的指针。
 //==============================
-Game_Picture.prototype.drill_PAS_getAdsorbController = function(){
-	if( this._drill_PAS_switchData == undefined ){ return null; }
-	var c_id = this._drill_PAS_switchData['adsorbController_id'];
+Game_Picture.prototype.drill_PASl_getAdsorbController = function(){
+	if( this._drill_PASl_switchData == undefined ){ return null; }
+	var c_id = this._drill_PASl_switchData['adsorbController_id'];
 	return $gameSystem.drill_CODAA_adsorbFactory().drill_factoryAdsorb_getByProductId( c_id );
 }
 //==============================
 // * 图片的属性 - 获取图片ID（根据 吸附控制器ID）
 //==============================
-Game_Screen.prototype.drill_PAS_getPictureID_ByAdsorbControllerId = function( adsorbController_id ){
+Game_Screen.prototype.drill_PASl_getPictureID_ByAdsorbControllerId = function( adsorbController_id ){
 	
 	// > 图片遍历『图片与多场景』
 	var i_offset = 0;							//地图界面的图片
@@ -1809,9 +1844,9 @@ Game_Screen.prototype.drill_PAS_getPictureID_ByAdsorbControllerId = function( ad
 	for(var i = 0; i < pic_length; i++ ){
 		var picture = this._pictures[ i + i_offset ];
 		if( picture == undefined ){ continue; }
-		if( picture._drill_PAS_switchData == undefined ){ continue; }
-		if( picture._drill_PAS_switchData['adsorbController_id'] == adsorbController_id ){
-			return picture._drill_PAS_switchData['pic_id'];
+		if( picture._drill_PASl_switchData == undefined ){ continue; }
+		if( picture._drill_PASl_switchData['adsorbController_id'] == adsorbController_id ){
+			return picture._drill_PASl_switchData['pic_id'];
 		}
 	}
 	return -1;
@@ -1819,82 +1854,82 @@ Game_Screen.prototype.drill_PAS_getPictureID_ByAdsorbControllerId = function( ad
 //==============================
 // * 图片的属性 - 参数 - 设置可吸附
 //==============================
-Game_Picture.prototype.drill_PAS_setCanAdsorb = function( enabled ){
-	this.drill_PAS_checkSwitchData();
-	this.drill_PAS_getAdsorbController().drill_controllerAdsorb_setCanAdsorb( enabled );
+Game_Picture.prototype.drill_PASl_setCanAdsorb = function( enabled ){
+	this.drill_PASl_checkSwitchData();
+	this.drill_PASl_getAdsorbController().drill_controllerAdsorb_setCanAdsorb( enabled );
 }
 //==============================
 // * 图片的属性 - 参数 - 是否可吸附
 //==============================
-Game_Picture.prototype.drill_PAS_canAdsorb = function(){
-	if( this._drill_PAS_switchData == undefined ){ return false; }
-	return this.drill_PAS_getAdsorbController().drill_controllerAdsorb_canAdsorb();
+Game_Picture.prototype.drill_PASl_canAdsorb = function(){
+	if( this._drill_PASl_switchData == undefined ){ return false; }
+	return this.drill_PASl_getAdsorbController().drill_controllerAdsorb_canAdsorb();
 }
 //==============================
 // * 图片的属性 - 参数 - 设置可脱离槽
 //==============================
-Game_Picture.prototype.drill_PAS_setPullOutEnabled = function( enabled ){
-	this.drill_PAS_checkSwitchData();
-	this.drill_PAS_getAdsorbController().drill_controllerAdsorb_setPullOutEnabled( enabled );
+Game_Picture.prototype.drill_PASl_setPullOutEnabled = function( enabled ){
+	this.drill_PASl_checkSwitchData();
+	this.drill_PASl_getAdsorbController().drill_controllerAdsorb_setPullOutEnabled( enabled );
 }
 //==============================
 // * 图片的属性 - 参数 - 是否可脱离槽
 //==============================
-Game_Picture.prototype.drill_PAS_pullOutEnabled = function(){
-	if( this._drill_PAS_switchData == undefined ){ return false; }
-	return this.drill_PAS_getAdsorbController().drill_controllerAdsorb_pullOutEnabled();
+Game_Picture.prototype.drill_PASl_pullOutEnabled = function(){
+	if( this._drill_PASl_switchData == undefined ){ return false; }
+	return this.drill_PASl_getAdsorbController().drill_controllerAdsorb_pullOutEnabled();
 }
 
 //==============================
 // * 图片的属性 - 参数 - 添加可吸附类型
 //==============================
-Game_Picture.prototype.drill_PAS_addAdsorbType = function( type_str ){
-	this.drill_PAS_checkSwitchData();
-	this.drill_PAS_getAdsorbController().drill_controllerAdsorb_addAdsorbType( type_str );
+Game_Picture.prototype.drill_PASl_addAdsorbType = function( type_str ){
+	this.drill_PASl_checkSwitchData();
+	this.drill_PASl_getAdsorbController().drill_controllerAdsorb_addAdsorbType( type_str );
 }
 //==============================
 // * 图片的属性 - 参数 - 去除可吸附类型
 //==============================
-Game_Picture.prototype.drill_PAS_removeAdsorbType = function( type_str ){
-	this.drill_PAS_checkSwitchData();
-	this.drill_PAS_getAdsorbController().drill_controllerAdsorb_removeAdsorbType( type_str );
+Game_Picture.prototype.drill_PASl_removeAdsorbType = function( type_str ){
+	this.drill_PASl_checkSwitchData();
+	this.drill_PASl_getAdsorbController().drill_controllerAdsorb_removeAdsorbType( type_str );
 }
 //==============================
 // * 图片的属性 - 参数 - 去除全部可吸附类型
 //==============================
-Game_Picture.prototype.drill_PAS_removeAllAdsorbType = function(){
-	this.drill_PAS_checkSwitchData();
-	this.drill_PAS_getAdsorbController().drill_controllerAdsorb_removeAllAdsorbType();
+Game_Picture.prototype.drill_PASl_removeAllAdsorbType = function(){
+	this.drill_PASl_checkSwitchData();
+	this.drill_PASl_getAdsorbController().drill_controllerAdsorb_removeAllAdsorbType();
 }
 
 //==============================
 // * 图片的属性 - 操作 - 吸附到槽
 //==============================
-Game_Picture.prototype.drill_PAS_doAdsorb1_ByIndex = function( slot_index ){
-	this.drill_PAS_checkSwitchData();
-	var slot_controller = $gameScreen.drill_PAS_getSlotController_ByIndex( slot_index );
+Game_Picture.prototype.drill_PASl_doAdsorb1_ByIndex = function( slot_index ){
+	this.drill_PASl_checkSwitchData();
+	var slot_controller = $gameScreen.drill_PASl_getSlotController_ByIndex( slot_index );
 	if( slot_controller == undefined ){ return; }
 	
-	var adsorb_controller = this.drill_PAS_getAdsorbController();
+	var adsorb_controller = this.drill_PASl_getAdsorbController();
 	adsorb_controller.drill_controllerAdsorb_setState1( slot_controller );
 }
 //==============================
 // * 图片的属性 - 操作 - 立即吸附到槽
 //==============================
-Game_Picture.prototype.drill_PAS_doAdsorb2_ByIndex = function( slot_index ){
-	this.drill_PAS_checkSwitchData();
-	var slot_controller = $gameScreen.drill_PAS_getSlotController_ByIndex( slot_index );
+Game_Picture.prototype.drill_PASl_doAdsorb2_ByIndex = function( slot_index ){
+	this.drill_PASl_checkSwitchData();
+	var slot_controller = $gameScreen.drill_PASl_getSlotController_ByIndex( slot_index );
 	if( slot_controller == undefined ){ return; }
 	
-	var adsorb_controller = this.drill_PAS_getAdsorbController();
+	var adsorb_controller = this.drill_PASl_getAdsorbController();
 	adsorb_controller.drill_controllerAdsorb_setState2( slot_controller );
 }
 //==============================
 // * 图片的属性 - 操作 - 立即合并吸附偏移量（私有）
 //==============================
-Game_Picture.prototype.drill_PAS_mergeAdsorbPosition_Private = function() {
-	this.drill_PAS_checkSwitchData();
-	var adsorb_controller = this.drill_PAS_getAdsorbController();
+Game_Picture.prototype.drill_PASl_mergeAdsorbPosition_Private = function() {
+	this.drill_PASl_checkSwitchData();
+	var adsorb_controller = this.drill_PASl_getAdsorbController();
 	
 	// > 吸附时
 	if( adsorb_controller.drill_controllerAdsorb_isState1() ||
@@ -1905,8 +1940,8 @@ Game_Picture.prototype.drill_PAS_mergeAdsorbPosition_Private = function() {
 		this.drill_PDr_clearDragPosition();
 		
 		// > 直接覆盖为吸附位置
-		this._x = this.drill_PAS_getAdsorbingX();
-		this._y = this.drill_PAS_getAdsorbingY();
+		this._x = this.drill_PASl_getAdsorbingX();
+		this._y = this.drill_PASl_getAdsorbingY();
 		
 	// > 没吸附时
 	}else{
@@ -1918,14 +1953,14 @@ Game_Picture.prototype.drill_PAS_mergeAdsorbPosition_Private = function() {
 //==============================
 // * 图片的属性 - 操作 - 立即清零吸附偏移量（私有）
 //==============================
-Game_Picture.prototype.drill_PAS_clearAdsorbPosition_Private = function() {
-	this.drill_PAS_checkSwitchData();
+Game_Picture.prototype.drill_PASl_clearAdsorbPosition_Private = function() {
+	this.drill_PASl_checkSwitchData();
 	
 	// > 【图片-可拖拽的图片】立即清零拖拽偏移量
 	this.drill_PDr_clearDragPosition();
 	
 	// > 立即清零吸附偏移量
-	var controller = this.drill_PAS_getAdsorbController();
+	var controller = this.drill_PASl_getAdsorbController();
 	controller.drill_controllerAdsorb_clearAdsorbPosition();
 	
 	// > 设置"未吸附"
@@ -1942,76 +1977,76 @@ Game_Picture.prototype.drill_PAS_clearAdsorbPosition_Private = function() {
 //==============================
 // * 图片吸附控制 - 帧刷新
 //==============================
-var _drill_PAS_p_update = Game_Picture.prototype.update;
+var _drill_PASl_p_update = Game_Picture.prototype.update;
 Game_Picture.prototype.update = function(){
-	_drill_PAS_p_update.call( this );
-	this.drill_PAS_updateAdsorb();
+	_drill_PASl_p_update.call( this );
+	this.drill_PASl_updateAdsorb();
 }
 //==============================
 // * 图片吸附控制 - 帧刷新吸附
 //==============================
-Game_Picture.prototype.drill_PAS_updateAdsorb = function() {
-	if( this.drill_PAS_canAdsorb() != true ){ return; }
+Game_Picture.prototype.drill_PASl_updateAdsorb = function() {
+	if( this.drill_PASl_canAdsorb() != true ){ return; }
 	
 	// > 参数 - 原位置
-	var cur_orgX = this.drill_PAS_org_finalTransform_x();
-	var cur_orgY = this.drill_PAS_org_finalTransform_y();
+	var cur_orgX = this.drill_PASl_org_finalTransform_x();
+	var cur_orgY = this.drill_PASl_org_finalTransform_y();
 	
 	// > 帧刷新 控制器
-	var controller = this.drill_PAS_getAdsorbController();
+	var controller = this.drill_PASl_getAdsorbController();
 	controller.drill_controllerAdsorb_update( cur_orgX, cur_orgY );
 }
 
 //==============================
 // * 图片吸附控制 - 获取吸附位置X（私有）
 //==============================
-Game_Picture.prototype.drill_PAS_getAdsorbingX_Private = function(){
-	if( this._drill_PAS_switchData == undefined ){ return 0; }
-	return this.drill_PAS_getAdsorbController().drill_controllerAdsorb_getAdsorbingX();
+Game_Picture.prototype.drill_PASl_getAdsorbingX_Private = function(){
+	if( this._drill_PASl_switchData == undefined ){ return 0; }
+	return this.drill_PASl_getAdsorbController().drill_controllerAdsorb_getAdsorbingX();
 }
 //==============================
 // * 图片吸附控制 - 获取吸附位置Y（私有）
 //==============================
-Game_Picture.prototype.drill_PAS_getAdsorbingY_Private = function(){
-	if( this._drill_PAS_switchData == undefined ){ return 0; }
-	return this.drill_PAS_getAdsorbController().drill_controllerAdsorb_getAdsorbingY();
+Game_Picture.prototype.drill_PASl_getAdsorbingY_Private = function(){
+	if( this._drill_PASl_switchData == undefined ){ return 0; }
+	return this.drill_PASl_getAdsorbController().drill_controllerAdsorb_getAdsorbingY();
 }
 //==============================
 // * 图片吸附控制 - 不含吸附+不含拖拽 的数据最终变换值X
 //==============================
-Game_Picture.prototype.drill_PAS_org_finalTransform_x = function() {
+Game_Picture.prototype.drill_PASl_org_finalTransform_x = function() {
 	this.drill_COPi_finalTransform_x();		//（执行一次函数，就能刷新值）
-	return $gameTemp._drill_PAS_org_final_x;
+	return $gameTemp._drill_PASl_org_final_x;
 }
 //==============================
 // * 图片吸附控制 - 不含吸附+不含拖拽 的数据最终变换值Y
 //==============================
-Game_Picture.prototype.drill_PAS_org_finalTransform_y = function() {
+Game_Picture.prototype.drill_PASl_org_finalTransform_y = function() {
 	this.drill_COPi_finalTransform_y();		//（执行一次函数，就能刷新值）
-	return $gameTemp._drill_PAS_org_final_y;
+	return $gameTemp._drill_PASl_org_final_y;
 }
 //==============================
 // * 图片吸附控制 - 吸附位置X（继承）
 //
 //			说明：	> 由于吸附后就被固定位置了，所以这里会覆盖位置。
 //==============================
-var _drill_PAS_COPi_finalTransform_x = Game_Picture.prototype.drill_COPi_finalTransform_x;
+var _drill_PASl_COPi_finalTransform_x = Game_Picture.prototype.drill_COPi_finalTransform_x;
 Game_Picture.prototype.drill_COPi_finalTransform_x = function() {
-	var xx = _drill_PAS_COPi_finalTransform_x.call(this);
+	var xx = _drill_PASl_COPi_finalTransform_x.call(this);
 	
 	// > 不含吸附+不含拖拽 的数据最终变换值
 	//			（减去偏移量【图片-可拖拽的图片】）
-	$gameTemp._drill_PAS_org_final_x = xx - this.drill_PDr_getDraggingXOffset();
+	$gameTemp._drill_PASl_org_final_x = xx - this.drill_PDr_getDraggingXOffset();
 	
 	// > 直接覆盖【图片-图片优化核心】
-	if( this._drill_PAS_switchData != undefined ){
-		var controller = this.drill_PAS_getAdsorbController();
+	if( this._drill_PASl_switchData != undefined ){
+		var controller = this.drill_PASl_getAdsorbController();
 		if( controller._drill_curState == 1 ||
 			controller._drill_curState == 2 ||
 			controller._drill_curState == 3 ){
 			
 			// > 直接覆盖为吸附位置
-			return this.drill_PAS_getAdsorbingX_Private();
+			return this.drill_PASl_getAdsorbingX_Private();
 		}
 	}
 	return xx;
@@ -2021,23 +2056,23 @@ Game_Picture.prototype.drill_COPi_finalTransform_x = function() {
 //
 //			说明：	> 由于吸附后就被固定位置了，所以这里会覆盖位置。
 //==============================
-var _drill_PAS_COPi_finalTransform_y = Game_Picture.prototype.drill_COPi_finalTransform_y;
+var _drill_PASl_COPi_finalTransform_y = Game_Picture.prototype.drill_COPi_finalTransform_y;
 Game_Picture.prototype.drill_COPi_finalTransform_y = function() {
-	var yy = _drill_PAS_COPi_finalTransform_y.call(this);
+	var yy = _drill_PASl_COPi_finalTransform_y.call(this);
 	
 	// > 不含吸附+不含拖拽 的数据最终变换值
 	//			（减去偏移量【图片-可拖拽的图片】）
-	$gameTemp._drill_PAS_org_final_y = yy - this.drill_PDr_getDraggingYOffset();
+	$gameTemp._drill_PASl_org_final_y = yy - this.drill_PDr_getDraggingYOffset();
 	
 	// > 直接覆盖【图片-图片优化核心】
-	if( this._drill_PAS_switchData != undefined ){
-		var controller = this.drill_PAS_getAdsorbController();
+	if( this._drill_PASl_switchData != undefined ){
+		var controller = this.drill_PASl_getAdsorbController();
 		if( controller._drill_curState == 1 ||
 			controller._drill_curState == 2 ||
 			controller._drill_curState == 3 ){
 			
 			// > 直接覆盖为吸附位置
-			return this.drill_PAS_getAdsorbingY_Private();
+			return this.drill_PASl_getAdsorbingY_Private();
 		}
 	}
 	return yy;
@@ -2054,19 +2089,22 @@ Game_Picture.prototype.drill_COPi_finalTransform_y = function() {
 //==============================
 // * 吸附槽容器 - 初始化
 //==============================
-var _drill_PAS_screen_initialize = Game_Screen.prototype.initialize;
+var _drill_PASl_screen_initialize = Game_Screen.prototype.initialize;
 Game_Screen.prototype.initialize = function() {
-	_drill_PAS_screen_initialize.call(this);
-	this._drill_PAS_slotIdTank = [];		//吸附槽ID容器
+	_drill_PASl_screen_initialize.call(this);
+	this._drill_PASl_slotIdTank = [];		//吸附槽ID容器
 };
 //==============================
 // * 吸附槽容器 - 添加吸附槽（开放函数）
 //
 //			说明：	> index 是吸附槽ID容器的索引位置，与 工厂标识 互为映射关系。
 //==============================
-Game_Screen.prototype.drill_PAS_addSlot_ByIndex = function( index, x, y, style_id ){
-	var data = DrillUp.g_PAS_style[ style_id ];
-	if( data == null ){ return; }
+Game_Screen.prototype.drill_PASl_addSlot_ByIndex = function( index, x, y, style_id ){
+	var data = DrillUp.g_PASl_style[ style_id ];
+	if( data == null ){
+		alert( DrillUp.drill_PASl_getPluginTip_StyleNotFind( style_id+1 ) );
+		return;
+	}
 	
 	// > A主体
 	var c_data = JSON.parse(JSON.stringify( data ));
@@ -2074,47 +2112,47 @@ Game_Screen.prototype.drill_PAS_addSlot_ByIndex = function( index, x, y, style_i
 	c_data['y'] = y;
 	
 	// > 删除 旧控制器
-	this.drill_PAS_removeSlot_ByIndex( index );
+	this.drill_PASl_removeSlot_ByIndex( index );
 	
 	// > 创建控制器
 	var slot_factory = $gameSystem.drill_CODAA_slotFactory();
-	var product_id = slot_factory.drill_factorySlot_create( "PAS", c_data );
-	this._drill_PAS_slotIdTank[ index ] = product_id;
+	var product_id = slot_factory.drill_factorySlot_create( "PASl", c_data );
+	this._drill_PASl_slotIdTank[ index ] = product_id;
 };
 //==============================
 // * 吸附槽容器 - 删除吸附槽（开放函数）
 //==============================
-Game_Screen.prototype.drill_PAS_removeSlot_ByIndex = function( index ){
+Game_Screen.prototype.drill_PASl_removeSlot_ByIndex = function( index ){
 	
 	// > 删除控制器
-	if( this._drill_PAS_slotIdTank != undefined ){
-		var product_id = this._drill_PAS_slotIdTank[ index ];
+	if( this._drill_PASl_slotIdTank != undefined ){
+		var product_id = this._drill_PASl_slotIdTank[ index ];
 		if( product_id != undefined ){
 			$gameSystem.drill_CODAA_slotFactory().drill_factorySlot_removeByProductId( product_id );
 		}
 	}
 	
-	this._drill_PAS_slotIdTank[ index ] = undefined;
+	this._drill_PASl_slotIdTank[ index ] = undefined;
 };
 //==============================
 // * 吸附槽容器 - 获取吸附槽 - 根据索引（开放函数）
 //==============================
-Game_Screen.prototype.drill_PAS_getSlotController_ByIndex = function( index ){
-	var product_id = this._drill_PAS_slotIdTank[ index ];
-	return this.drill_PAS_getSlotController_ByProductId( product_id );
+Game_Screen.prototype.drill_PASl_getSlotController_ByIndex = function( index ){
+	var product_id = this._drill_PASl_slotIdTank[ index ];
+	return this.drill_PASl_getSlotController_ByProductId( product_id );
 };
 //==============================
 // * 吸附槽容器 - 获取吸附槽 - 根据工厂标识（开放函数）
 //==============================
-Game_Screen.prototype.drill_PAS_getSlotController_ByProductId = function( productId ){
+Game_Screen.prototype.drill_PASl_getSlotController_ByProductId = function( productId ){
 	return $gameSystem.drill_CODAA_slotFactory().drill_factorySlot_getByProductId( productId );
 };
 //==============================
 // * 吸附槽容器 - 获取索引 根据工厂标识
 //==============================
-Game_Screen.prototype.drill_PAS_getSlotIndex_ByProductId = function( productId ){
-	for(var i = 0; i < this._drill_PAS_slotIdTank.length; i++ ){
-		var id = this._drill_PAS_slotIdTank[i];
+Game_Screen.prototype.drill_PASl_getSlotIndex_ByProductId = function( productId ){
+	for(var i = 0; i < this._drill_PASl_slotIdTank.length; i++ ){
+		var id = this._drill_PASl_slotIdTank[i];
 		if( id == productId ){
 			return i;
 		}
@@ -2132,19 +2170,19 @@ Game_Screen.prototype.drill_PAS_getSlotIndex_ByProductId = function( productId )
 //==============================
 // * 吸附槽容器 - 帧刷新
 //==============================
-var _drill_PAS_screen_update = Game_Screen.prototype.update;
+var _drill_PASl_screen_update = Game_Screen.prototype.update;
 Game_Screen.prototype.update = function() {
-	_drill_PAS_screen_update.call(this);
-	this.drill_PAS_updateSlotTank();
+	_drill_PASl_screen_update.call(this);
+	this.drill_PASl_updateSlotTank();
 };
 //==============================
 // * 吸附槽容器 - 帧刷新吸附槽
 //==============================
-Game_Screen.prototype.drill_PAS_updateSlotTank = function() {
-	if( this._drill_PAS_slotIdTank == undefined ){ return; }
-	for(var i = 0; i < this._drill_PAS_slotIdTank.length; i++ ){
-		var product_id = this._drill_PAS_slotIdTank[i];
-		var controller = this.drill_PAS_getSlotController_ByProductId( product_id );
+Game_Screen.prototype.drill_PASl_updateSlotTank = function() {
+	if( this._drill_PASl_slotIdTank == undefined ){ return; }
+	for(var i = 0; i < this._drill_PASl_slotIdTank.length; i++ ){
+		var product_id = this._drill_PASl_slotIdTank[i];
+		var controller = this.drill_PASl_getSlotController_ByProductId( product_id );
 		if( controller == undefined ){ continue; }
 		controller.drill_slot_update();
 	}
@@ -2162,55 +2200,55 @@ Game_Screen.prototype.drill_PAS_updateSlotTank = function() {
 //==============================
 // * DEBUG吸附槽范围 - 帧刷新（地图界面）
 //==============================
-var _drill_PAS_debugMap_update = Scene_Map.prototype.update;
+var _drill_PASl_debugMap_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {
-    _drill_PAS_debugMap_update.call(this);
-    this.drill_PAS_updateDrawBeanRangeSprite();		//帧刷新 - 初始化贴图
-    this.drill_PAS_updateDrawBeanRangeBitmap();		//帧刷新 - 绘制范围
+    _drill_PASl_debugMap_update.call(this);
+    this.drill_PASl_updateDrawBeanRangeSprite();		//帧刷新 - 初始化贴图
+    this.drill_PASl_updateDrawBeanRangeBitmap();		//帧刷新 - 绘制范围
 }
 //==============================
 // * DEBUG吸附槽范围 - 帧刷新 初始化贴图
 //==============================
-Scene_Map.prototype.drill_PAS_updateDrawBeanRangeSprite = function() {
+Scene_Map.prototype.drill_PASl_updateDrawBeanRangeSprite = function() {
 	
 	// > 功能关闭时
-	if( $gameSystem._drill_PAS_DebugEnabled != true ){
+	if( $gameSystem._drill_PASl_DebugEnabled != true ){
 		
 		// > 销毁贴图
-		if( this._drill_PAS_DebugSprite != undefined ){
-			this.removeChild(this._drill_PAS_DebugSprite);
-			this._drill_PAS_DebugSprite = undefined;
+		if( this._drill_PASl_DebugSprite != undefined ){
+			this.removeChild(this._drill_PASl_DebugSprite);
+			this._drill_PASl_DebugSprite = undefined;
 		}
 		
 	// > 功能开启时
 	}else{
 		
 		// > 创建贴图
-		if( this._drill_PAS_DebugSprite == undefined ){
+		if( this._drill_PASl_DebugSprite == undefined ){
 			var temp_bitmap = new Bitmap( Graphics.boxWidth, Graphics.boxHeight );
 			var temp_sprite = new Sprite();
 			temp_sprite.x = 0;
 			temp_sprite.y = 0;
 			temp_sprite.bitmap = temp_bitmap;
 			this.addChild( temp_sprite );	//（直接加在最顶层的上面）
-			this._drill_PAS_DebugSprite = temp_sprite;
+			this._drill_PASl_DebugSprite = temp_sprite;
 		}
 	}
 }
 //==============================
 // * DEBUG吸附槽范围 - 帧刷新 绘制范围
 //==============================
-Scene_Map.prototype.drill_PAS_updateDrawBeanRangeBitmap = function() {
-	if( this._drill_PAS_DebugSprite == undefined ){ return; }
+Scene_Map.prototype.drill_PASl_updateDrawBeanRangeBitmap = function() {
+	if( this._drill_PASl_DebugSprite == undefined ){ return; }
 	
 	// > 清空绘制
-	var temp_bitmap = this._drill_PAS_DebugSprite.bitmap;
+	var temp_bitmap = this._drill_PASl_DebugSprite.bitmap;
 	temp_bitmap.clear();
 	
 	// > 吸附槽遍历
-	for(var i = 0; i < $gameScreen._drill_PAS_slotIdTank.length; i++ ){
-		var product_id = $gameScreen._drill_PAS_slotIdTank[i];
-		var slot_controller = $gameScreen.drill_PAS_getSlotController_ByProductId( product_id );
+	for(var i = 0; i < $gameScreen._drill_PASl_slotIdTank.length; i++ ){
+		var product_id = $gameScreen._drill_PASl_slotIdTank[i];
+		var slot_controller = $gameScreen.drill_PASl_getSlotController_ByProductId( product_id );
 		if( slot_controller == undefined ){ continue; }
 		
 		// > 必然吸附
@@ -2227,7 +2265,7 @@ Scene_Map.prototype.drill_PAS_updateDrawBeanRangeBitmap = function() {
 		//cur_str += "<";
 		//cur_str += String( slot_controller._drill_productId );
 		//cur_str += ">";
-		temp_bitmap.drill_PAS_drawCustomText( cur_str, slot_controller.drill_slot_x() -4, slot_controller.drill_slot_y() +4, "rgba(0,255,145,1)" );
+		temp_bitmap.drill_PASl_drawCustomText( cur_str, slot_controller.drill_slot_x() -4, slot_controller.drill_slot_y() +4, "rgba(0,255,145,1)" );
 	}
 	
 	// > 图片遍历『图片与多场景』（显示所有图片的悬停范围）
@@ -2250,19 +2288,19 @@ Scene_Map.prototype.drill_PAS_updateDrawBeanRangeBitmap = function() {
 		temp_bitmap.drawCircle( xx, yy, 5, "#ff0000" );
 		
 		// > 绘制 - 无吸附功能时
-		if( picture.drill_PAS_canAdsorb() != true ){
+		if( picture.drill_PASl_canAdsorb() != true ){
 			var pic_id_str = String(i);
 			pic_id_str += "无吸附功能";
-			temp_bitmap.drill_PAS_drawCustomText( pic_id_str, xx+10, yy, color_line );
+			temp_bitmap.drill_PASl_drawCustomText( pic_id_str, xx+10, yy, color_line );
 			continue;
 		}
 		
 		// > 绘制 - 有吸附功能时
-		var adsorb_controller = picture.drill_PAS_getAdsorbController();
+		var adsorb_controller = picture.drill_PASl_getAdsorbController();
 		
 		// > 绘制 - 图片id + 吸附状态 + 吸附的槽id + 吸附类型
 		var cur_str = String(i);	//（此处i就是图片id）
-		var adsorb_index = $gameScreen.drill_PAS_getSlotIndex_ByProductId( adsorb_controller._drill_foreignKey_slotId );
+		var adsorb_index = $gameScreen.drill_PASl_getSlotIndex_ByProductId( adsorb_controller._drill_foreignKey_slotId );
 		cur_str += adsorb_controller.drill_controllerAdsorb_getAdsorbingStateString();
 		cur_str += "(";
 		cur_str += String( adsorb_index );
@@ -2270,28 +2308,28 @@ Scene_Map.prototype.drill_PAS_updateDrawBeanRangeBitmap = function() {
 		//cur_str += "<";
 		//cur_str += String( adsorb_controller._drill_productId );
 		//cur_str += ">";
-		temp_bitmap.drill_PAS_drawCustomText( cur_str, xx+10, yy, color_line );
+		temp_bitmap.drill_PASl_drawCustomText( cur_str, xx+10, yy, color_line );
 	}
 }
 //==============================
 // * DEBUG吸附槽范围 - 帧刷新（战斗界面）
 //==============================
-var _drill_PAS_debugBattle_update = Scene_Battle.prototype.update;
+var _drill_PASl_debugBattle_update = Scene_Battle.prototype.update;
 Scene_Battle.prototype.update = function(){
-	_drill_PAS_debugBattle_update.call( this );
-    this.drill_PAS_updateDrawBeanRangeSprite();		//帧刷新 - 初始化贴图
-    this.drill_PAS_updateDrawBeanRangeBitmap();		//帧刷新 - 绘制范围
+	_drill_PASl_debugBattle_update.call( this );
+    this.drill_PASl_updateDrawBeanRangeSprite();		//帧刷新 - 初始化贴图
+    this.drill_PASl_updateDrawBeanRangeBitmap();		//帧刷新 - 绘制范围
 }
 //==============================
 // * DEBUG吸附槽范围 - 函数赋值『图片与多场景』
 //==============================
-Scene_Battle.prototype.drill_PAS_updateDrawBeanRangeSprite = Scene_Map.prototype.drill_PAS_updateDrawBeanRangeSprite;
-Scene_Battle.prototype.drill_PAS_updateDrawBeanRangeBitmap = Scene_Map.prototype.drill_PAS_updateDrawBeanRangeBitmap;
+Scene_Battle.prototype.drill_PASl_updateDrawBeanRangeSprite = Scene_Map.prototype.drill_PASl_updateDrawBeanRangeSprite;
+Scene_Battle.prototype.drill_PASl_updateDrawBeanRangeBitmap = Scene_Map.prototype.drill_PASl_updateDrawBeanRangeBitmap;
 
 //==============================
 // * DEBUG吸附槽范围 - 绘制自定义文本
 //==============================
-Bitmap.prototype.drill_PAS_drawCustomText = function( str, x, y, color_text ){
+Bitmap.prototype.drill_PASl_drawCustomText = function( str, x, y, color_text ){
 	var painter = this._context;
 	painter.save();										//（a.存储上一个画笔状态）
 	
@@ -2315,7 +2353,7 @@ Bitmap.prototype.drill_PAS_drawCustomText = function( str, x, y, color_text ){
 //=============================================================================
 }else{
 		Imported.Drill_PictureAdsorptionSlot = false;
-		var pluginTip = DrillUp.drill_PAS_getPluginTip_NoBasePlugin();
+		var pluginTip = DrillUp.drill_PASl_getPluginTip_NoBasePlugin();
 		alert( pluginTip );
 }
 

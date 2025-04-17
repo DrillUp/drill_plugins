@@ -382,10 +382,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_X_BattleComControl = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_X_BattleComControl');
+	var Imported = Imported || {};
+	Imported.Drill_X_BattleComControl = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_X_BattleComControl');
 	
 	
 	/*-----------------杂项------------------*/
@@ -402,11 +402,20 @@
 	
 
 //=============================================================================
-// ** 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_XBCC_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_XBCC_pluginCommand.call(this, command, args);
+	this.drill_XBCC_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_XBCC_pluginCommand = function( command, args ){
 	if( command === ">技能类型" ){		// >技能类型 : A : 禁用攻击
 	
 		/*-----------------对象组获取------------------*/

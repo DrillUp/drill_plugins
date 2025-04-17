@@ -91,19 +91,16 @@
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 //		插件简称		EU（Event_Unification）
 //		临时全局变量	无
-//		临时局部变量	this._drill_EU.xxx
-//						$gameTemp.drill_EU_xxx函数
-//		存储数据变量	$gameSystem._drill_EU_player
+//		临时局部变量	无
+//		存储数据变量	无
 //		全局存储变量	无
-//		覆盖重写方法	Game_CharacterBase.prototype.moveStraight	（半覆写）
-//						Game_CharacterBase.prototype.moveDiagonally	（半覆写）
-//						Game_CharacterBase.prototype.setDirection	（半覆写）
+//		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
 //
 //		★工作类型		单次执行
 //		★时间复杂度		o(n)
-//		★性能测试因素	体积管理层
+//		★性能测试因素	暂无
 //		★性能测试消耗	暂无
 //		★最坏情况		暂无
 //		★备注			暂无
@@ -160,10 +157,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_EventUnification = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_EventUnification');
+	var Imported = Imported || {};
+	Imported.Drill_EventUnification = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_EventUnification');
 	
 	
 	// > 『已弃用的插件』

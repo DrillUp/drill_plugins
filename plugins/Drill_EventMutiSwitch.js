@@ -253,10 +253,10 @@
 //=============================================================================
 // ** ☆静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_EventMutiSwitch = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_EventMutiSwitch');
+	var Imported = Imported || {};
+	Imported.Drill_EventMutiSwitch = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_EventMutiSwitch');
 	
 	
 //=============================================================================

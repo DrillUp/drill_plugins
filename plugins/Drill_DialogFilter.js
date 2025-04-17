@@ -84,7 +84,6 @@
  * 插件指令：>对话框滤镜 : 全部 : 噪点滤镜 : 155 : 60
  * 
  * 1.对话框有几个部分，分别为对话框，选择框。
- *   姓名框需要 YEP消息核心 插件的支持。
  * 2.滤镜后面的两个参数表示：目标程度，变化时长。
  * 3.目标程度范围为0-255。255的程度最强烈。
  *   比如，纯蓝滤镜的255表示敌人图像完全过滤为蓝色。
@@ -169,7 +168,7 @@
 //			对话框-滤镜效果：
 //				->窗口的滤镜
 //				->选项、子窗口的滤镜
-//				->消息核心的姓名框滤镜
+//				->姓名框滤镜
 //				->（滤镜核）优化，滤镜/滤镜板用到的时候才new
 //
 //
@@ -204,7 +203,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
-	//			说明：	此函数只提供提示信息，不校验真实的插件关系。
+	//			说明：	> 此函数只提供提示信息，不校验真实的插件关系。
 	//==============================
 	DrillUp.drill_DFi_getPluginTip_NoBasePlugin = function(){
 		if( DrillUp.g_DFi_PluginTip_baseList.length == 0 ){ return ""; }
@@ -220,10 +219,10 @@
 //=============================================================================
 // ** 静态数据
 //=============================================================================
-　　var Imported = Imported || {};
-　　Imported.Drill_DialogFilter = true;
-　　var DrillUp = DrillUp || {}; 
-    DrillUp.parameters = PluginManager.parameters('Drill_DialogFilter');
+	var Imported = Imported || {};
+	Imported.Drill_DialogFilter = true;
+	var DrillUp = DrillUp || {}; 
+	DrillUp.parameters = PluginManager.parameters('Drill_DialogFilter');
 	
  
 //=============================================================================
@@ -233,11 +232,20 @@ if( Imported.Drill_CoreOfFilter ){
 	
 	
 //=============================================================================
-// * 插件指令
+// ** ☆插件指令
 //=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
 var _drill_DFi_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function(command, args) {
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
 	_drill_DFi_pluginCommand.call(this, command, args);
+	this.drill_DFi_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_DFi_pluginCommand = function( command, args ){
 	if( command === ">对话框滤镜" ){	//>对话框滤镜 : 全部 : 纯色滤镜 : 纯黑 : 155 : 60
 		if(args.length == 8 || args.length == 10){
 			var target = String(args[1]);
