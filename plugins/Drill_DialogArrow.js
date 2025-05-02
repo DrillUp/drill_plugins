@@ -473,7 +473,8 @@ Game_Interpreter.prototype.drill_DAr_pluginCommand = function( command, args ){
 			if( type == "隐藏" ){
 				$gameSystem._drill_DAr_visible = false;
 			}
-			if( type == "恢复默认箭头" ){
+			if( type == "恢复默认箭头" || type == "恢复默认设置" ){
+				$gameSystem._drill_DAr_visible = true;
 				$gameSystem._drill_DAr_curStyle = DrillUp.g_DAr_curStyle;
 			}
 		}

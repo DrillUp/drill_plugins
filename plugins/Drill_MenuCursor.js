@@ -407,6 +407,10 @@
  * @value 左右浮动
  * @option 上下浮动
  * @value 上下浮动
+ * @option 左上右下斜向浮动
+ * @value 左上右下斜向浮动
+ * @option 右上左下斜向浮动
+ * @value 右上左下斜向浮动
  * @desc 当前选中的按钮，会来回浮动。
  * @default 关闭
  * 
@@ -421,6 +425,29 @@
  * @min 1
  * @desc 使用左右或者上下浮动时，浮动偏移的位置量，单位像素。
  * @default 8
+ *
+ * @param 闪烁效果
+ * @parent ---自变化效果---
+ * @type select
+ * @option 关闭
+ * @value 关闭
+ * @option 开启
+ * @value 开启
+ * @desc 当前贴图，会来回闪烁。
+ * @default 关闭
+ * 
+ * @param 闪烁速度
+ * @parent 闪烁效果
+ * @desc 闪烁明亮变化的速度。
+ * @default 6.0
+ * 
+ * @param 闪烁幅度范围
+ * @parent 闪烁效果
+ * @type number
+ * @min 1
+ * @max 255
+ * @desc 闪烁变化的透明度幅度范围。
+ * @default 35
  * 
  * @param 摇晃效果
  * @parent ---自变化效果---
@@ -677,9 +704,9 @@
 		data['effect_float'] = String( dataFrom["浮动效果"] || "关闭");
 		data['effect_floatSpeed'] = Number( dataFrom["浮动速度"] || 1.0);
 		data['effect_floatRange'] = Number( dataFrom["浮动偏移量"] || 15);
-		//data['effect_flicker'] = String( dataFrom["闪烁效果"] || "关闭");
-		//data['effect_flickerSpeed'] = Number( dataFrom["闪烁速度"] || 6.0);
-		//data['effect_flickerRange'] = Number( dataFrom["闪烁幅度范围"] || 20);
+		data['effect_flicker'] = String( dataFrom["闪烁效果"] || "关闭");
+		data['effect_flickerSpeed'] = Number( dataFrom["闪烁速度"] || 6.0);
+		data['effect_flickerRange'] = Number( dataFrom["闪烁幅度范围"] || 20);
 		data['effect_swing'] = String( dataFrom["摇晃效果"] || "关闭");
 		data['effect_swingSpeed'] = Number( dataFrom["摇晃速度"] || 4.0);
 		data['effect_swingRange'] = Number( dataFrom["摇晃幅度范围"] || 12);
@@ -1397,12 +1424,25 @@ Scene_Title.prototype.terminate = function() {
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
+// * 实体类绑定 - 最后继承
+//==============================
+var _drill_MCu_scene_initialize = SceneManager.initialize;
+SceneManager.initialize = function() {
+	_drill_MCu_scene_initialize.call(this);		//（此方法放到最后再继承）
+	
+	//==============================
+	// * 实体类绑定 - 帧刷新绑定
+	//==============================
+	var _drill_MCu_updateArrows = Window_Selectable.prototype.updateArrows
+	Window_Selectable.prototype.updateArrows = function() {
+		_drill_MCu_updateArrows.call(this);
+		this.drill_MCu_updateBean();
+	}
+}
+//==============================
 // * 实体类绑定 - 帧刷新
 //==============================
-var _drill_MCu_updateArrows = Window_Selectable.prototype.updateArrows
-Window_Selectable.prototype.updateArrows = function() {
-    _drill_MCu_updateArrows.call(this);
-	
+Window_Selectable.prototype.drill_MCu_updateBean = function() {
 	
 	// > 实体类创建
 	if( this._drill_MCu_bean == undefined ){
@@ -1473,8 +1513,8 @@ Window_Selectable.prototype.drill_MCu_isEnabled = function() {
 	
 	// > 条件 - 该窗口被激活才能显示（场景中每次只有一个窗口会被激活）
 	if( this.active != true ){ return false; }
-	if( this.visible != true ){ return false; }
 	if( this.index() == -1 ){ return false; }
+	//if( this.visible != true ){ return false; }	//（2025-4-22 此设置不能生效，因为会导致对话框选项按钮组设置 菜单指针 无效）
 	
 	// > 条件 - 窗口开关动画时隐藏
 	if( this._opening == true ){ return false; }
@@ -2208,6 +2248,10 @@ Drill_MCu_Controller.prototype.drill_controller_updateAttr = function() {
 				
 				// > 『控制器与贴图的样式』 - 创建控制器
 				this.drill_controller_resetData( cur_styleData );
+				
+				// > 样式改变测试
+				//		（按钮组核心、选项窗口经常会出现菜单指针出不来的问题，这里测试先看看指针是否触发了）
+				//alert( bean._drill_styleId );
 			}
 			this._drill_curStyleId =  bean._drill_styleId;	//（注意样式赋值要在reset之后）
 		}
@@ -2458,6 +2502,12 @@ Drill_MCu_Controller.prototype.drill_controller_updateChange_Position = function
 		this._drill_curX = this._drill_change_ballisticsX[time];
 		this._drill_curY = this._drill_change_ballisticsY[time];
 		
+		// > 瞬间移动 情况
+		if( this._drill_change_ballisticsX.length <= 2 ){
+			this._drill_curX = this._drill_change_ballisticsX[ this._drill_change_ballisticsX.length-1 ];
+			this._drill_curY = this._drill_change_ballisticsY[ this._drill_change_ballisticsY.length-1 ];
+		}
+		
 		// > 时间+1
 		this._drill_changeMove_curTime += 1;
 	}
@@ -2489,6 +2539,11 @@ Drill_MCu_Controller.prototype.drill_controller_updateChange_Opacity = function(
 		if( time < 0 ){ time = 0; }
 		if( time > this._drill_change_ballisticsOpacity.length-1 ){ time = this._drill_change_ballisticsOpacity.length-1; }
 		oo = this._drill_change_ballisticsOpacity[time];
+		
+		// > 瞬间变化 情况
+		if( this._drill_change_ballisticsOpacity.length <= 2 ){
+			oo = this._drill_change_ballisticsOpacity[ this._drill_change_ballisticsOpacity.length-1 ];
+		}
 		
 		// > 时间+1
 		this._drill_changeOpacity_curTime += 1;
@@ -2927,7 +2982,15 @@ Drill_MCu_Sprite.prototype.drill_sprite_updateEffect = function(){
 	if( data['effect_flicker'] == "开启" ){
 		var speed = data['effect_flickerSpeed'];
 		var range = data['effect_flickerRange'];
-		this.opacity += range * Math.sin( cur_time * speed /180*Math.PI );
+		if( this._drill_controller._drill_opacity >= 255-range ){
+			this.opacity = 255-range;
+			this.opacity += range * Math.sin( cur_time * speed /180*Math.PI );
+		}else{
+			this.opacity += range * Math.sin( cur_time * speed /180*Math.PI );
+		}
+		if( this._drill_controller._drill_opacity <= 0 ){
+			this.opacity = 0;
+		}
 	}
 	// > 摇晃效果
 	if( data['effect_swing'] == "开启" ){

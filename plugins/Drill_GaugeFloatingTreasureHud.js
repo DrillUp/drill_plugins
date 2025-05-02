@@ -1380,7 +1380,7 @@ Game_Interpreter.prototype.drill_GFTH_getText_gold = function( count ){
 		
 		//【管理器 - 货币素材库】
 		context += $gameTemp.drill_AsOC_getFullTextByType( data['gold_text_type'] );
-		context += " x ";
+		context += " × ";
 		context += "\\c[" + data['gain_color'] + "]" + count;
 	}
 	// > 失去时
@@ -1388,7 +1388,7 @@ Game_Interpreter.prototype.drill_GFTH_getText_gold = function( count ){
 		
 		//【管理器 - 货币素材库】
 		context += $gameTemp.drill_AsOC_getFullTextByType( data['gold_text_type'] );
-		context += " x ";
+		context += " × ";
 		context += "\\c[" + data['lost_color'] + "]" + count;
 	}
 	return context;

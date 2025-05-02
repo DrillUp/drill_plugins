@@ -708,7 +708,7 @@
  * @parent ---主体---
  * @type struct<DrillButtonGroupMoving>
  * @desc 按钮组改变时会从某个点跑回自己的原位置。
- * @default {"移动类型":"弹性移动","移动时长":"20","移动延迟":"0","依次移动延迟间隔":"10","---起点---":"","坐标类型":"各按钮的相对坐标","起点-相对坐标 X":"0","起点-相对坐标 Y":"-80","起点-统一坐标 X":"0","起点-统一坐标 Y":"0"}
+ * @default {"移动类型":"弹性移动","移动时长":"15","移动延迟":"0","依次移动延迟间隔":"0","---起点---":"","坐标类型":"各按钮的相对坐标","起点-相对坐标 X":"0","起点-相对坐标 Y":"-80","起点-统一坐标 X":"0","起点-统一坐标 Y":"0"}
  * 
  * @param ---排列---
  * @desc 
@@ -762,6 +762,14 @@
  * @parent 是否限制最大长度
  * @desc 限制指定长度后，如果 按钮数*间距 超过了最大长度，将会缩短间距，确保挤压在一起。
  * @default 600
+ *
+ * @param 只有一个按钮时是否按最大长度居中
+ * @parent 是否限制最大长度
+ * @type boolean
+ * @on 居中
+ * @off 关闭
+ * @desc true - 居中，false - 关闭。如果你一开始就想让按钮挤在一起，那么只有一个按钮时，可以设置居中。
+ * @default false
  * 
  * @param ==环形排列==
  * @parent ---排列---
@@ -1379,9 +1387,9 @@
 		data['mode'] = String( dataFrom["按钮组模式"] || "固定指针式");
 		
 		// > 按钮组 - A主体
-		//		data['x']【平移x】
-		//		data['y']【平移y】
-		//		data['visible']【可见】
+		//		data['x']【平移x】（子插件可通过 drill_COSB_setPosition 实时控制）
+		//		data['y']【平移y】（子插件可通过 drill_COSB_setPosition 实时控制）
+		//		data['visible']【可见】（子插件可通过 drill_COSB_setVisible 实时控制）
 		
 		// > 按钮组 - B父窗口
 		//		data['btn_constructor']【窗口子类类型】（"Window_Selectable"、"Window_Command"）
@@ -1427,6 +1435,7 @@
 		data['arrange_angle'] = Number( dataFrom["直线旋转角度"] || 0);
 		data['arrange_limitEnable'] = String( dataFrom["是否限制最大长度"] || "false") == "true";
 		data['arrange_limitLength'] = Number( dataFrom["直线最大长度"] || 600);
+		data['arrange_limitOneCenter'] = String( dataFrom["只有一个按钮时是否按最大长度居中"] || "false") == "true";
 		data['arrange_radius'] = Number( dataFrom["环形半径"] || 10);
 		data['arrange_angleStart'] = Number( dataFrom["环形起始角"] || 0);
 		data['arrange_angleEnd'] = Number( dataFrom["环形终止角"] || 0);
@@ -1712,10 +1721,7 @@ Drill_COSB_LayerSprite.prototype.update = function() {
 Drill_COSB_LayerSprite.prototype.drill_sprite_updateDelayingInit = function() {
 	var data = this._drill_data;
 	
-	// > A主体
-	if( this.visible != data['visible'] ){
-		this.visible = data['visible'];
-	}
+	// > A主体（无）
 	
 	// > B父窗口（无）
 	
@@ -1742,6 +1748,19 @@ Drill_COSB_LayerSprite.prototype.drill_sprite_updateDelayingInit = function() {
 	// > DEBUG（无）
 	
 }
+//##############################
+// * 按钮组贴图 - 设置位置（开放函数）
+//
+//			参数：	> x,y 数字
+//			返回：	> 无
+//			
+//			说明：	> 可放在帧刷新函数中实时调用。
+//##############################
+Drill_COSB_LayerSprite.prototype.drill_COSB_setPosition = function( x, y ){
+	var data = this._drill_data;
+	data['x'] = x;
+	data['y'] = y;
+};
 //##############################
 // * 按钮组贴图 - 显示贴图/隐藏贴图【标准函数】
 //
@@ -1836,6 +1855,7 @@ Drill_COSB_LayerSprite.prototype.drill_initData = function() {
 	if( data['arrange_angle'] == undefined ){ data['arrange_angle'] = 0 };							//C按钮集合 - 按钮排列 - 直线旋转角度
 	if( data['arrange_limitEnable'] == undefined ){ data['arrange_limitEnable'] = false };			//C按钮集合 - 按钮排列 - 是否限制最大长度
 	if( data['arrange_limitLength'] == undefined ){ data['arrange_limitLength'] = 0 };				//C按钮集合 - 按钮排列 - 直线最大长度
+	if( data['arrange_limitOneCenter'] == undefined ){ data['arrange_limitOneCenter'] = false };	//C按钮集合 - 按钮排列 - 只有一个按钮时是否按最大长度居中
 	if( data['arrange_radius'] == undefined ){ data['arrange_radius'] = 10 };						//C按钮集合 - 按钮排列 - 环形半径
 	if( data['arrange_angleStart'] == undefined ){ data['arrange_angleStart'] = 0 };				//C按钮集合 - 按钮排列 - 环形起始角
 	if( data['arrange_angleEnd'] == undefined ){ data['arrange_angleEnd'] = 0 };					//C按钮集合 - 按钮排列 - 环形终止角
@@ -1998,7 +2018,19 @@ Drill_COSB_LayerSprite.prototype.drill_sprite_createLayer = function() {
 // * A主体 - 帧刷新
 //==============================
 Drill_COSB_LayerSprite.prototype.drill_sprite_updateAttr = function() {
+	var data = this._drill_data;
+	
+	// > 时间+1
 	this._drill_curTime += 1;
+	
+	// > 位置
+	this._drill_contextLayer.x = data['x'];
+	this._drill_contextLayer.y = data['y'];
+	
+	// > 可见
+	if( this.visible != data['visible'] ){
+		this.visible = data['visible'];
+	}
 };
 
 
@@ -2259,6 +2291,10 @@ Drill_COSB_LayerSprite.prototype.drill_sprite_createButtonList = function() {
 			var xx = temp_data['arrange_spacing'] * i;
 			var yy = (i % 2) * temp_data['arrange_wSpacing'];
 			var angle = temp_data['arrange_angle'] / 180.0 * Math.PI;
+			if( count == 1 && 	//（只有一个按钮时是否按最大长度居中）
+				temp_data['arrange_limitOneCenter'] == true ){
+				xx = temp_data['arrange_limitLength'] *0.5;
+			}
 			if( count > 1 && 	//（限宽）
 				temp_data['arrange_limitEnable'] == true &&	
 				temp_data['arrange_spacing'] * (count - 1) > temp_data['arrange_limitLength'] ){

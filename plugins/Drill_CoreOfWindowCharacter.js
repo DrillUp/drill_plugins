@@ -37,17 +37,17 @@
  * 2.了解更多窗口字符，可以去看看 "23.窗口字符 > 关于窗口字符.docx"。
  * 3.该插件的指令较多且使用频繁，建议使用小工具：插件信息查看器。
  *   在开启游戏编辑器时，可以并行使用读取器复制指令。
- * 窗口字符：
- *   (1.窗口字符指绘制在窗口中的字符。窗口字符分为下面三种：
- *      指代字符：指在窗口中显示时，会被替换成特定字符串的字符。
- *      效果字符：指在窗口中显示时，执行特定效果切换的字符。
- *      消息输入字符：指逐个绘制时，每个字符显示、停顿等操作的字符。
- * 表达式：
- *   (1.表达式是一种优先级更高的指代字符。
- *      也就是说，表达式会最先被替换成其他字符串。
+ * 窗口字符类型：
+ *   (1.窗口字符指绘制在窗口中的字符。分为下面几种：
+ *        常规字符：常规绘制的字符。
+ *        表达式：能识别"<xxx>"格式的字符串，并将其转成其它的字符。
+ *        指代字符：能识别"\xxx"或"\xxx[]"格式的字符串，并将其转成其它的字符。
+ *        效果字符：能识别"\xxx"或"\xxx[]"格式的字符串，并实现特定效果的字符。
+ *        消息输入字符：能识别"\xxx"或"\xxx[]"格式的字符串，只在 逐个绘制 过程中
+ *      生效的功能，比如等待、实时切换脸图功能。
  * 细节：
- *   (1.窗口字符的转换/生效顺序如下：
- *      表达式 > 指代字符 > 效果字符 > 消息输入字符
+ *   (1.窗口字符的优先级，转换/生效顺序如下：
+ *      表达式 > 指代字符 > 效果字符/消息输入字符
  *   (2.该插件 旧版本 与YEP消息核心插件冲突。
  *      底层重写后，该插件与YEP消息核心插件不再冲突，但是YEP的窗口字符可能会失效。
  * 设计：
@@ -266,19 +266,26 @@
 //<<<<<<<<性能记录<<<<<<<<
 //
 //		★工作类型		单次执行
-//		★时间复杂度		o(n)
+//		★时间复杂度		o(n^2)
 //		★性能测试因素	地图界面
-//		★性能测试消耗	4.94ms（drawTextEx） 2.40ms（没有插件使用时）
+//		★性能测试消耗	2025/4/30：
+//							》1.2ms（drill_COWC_timing_updateTick）15.4ms（Window_Base.drill_COWC_drawText）35.6ms（drill_COWC_getTextColor）
+//							》『TotalTime』：133.1ms（drill_COWC_timing_updateTick）33.4ms（Window_Base.drill_COWC_drawText）
 //		★最坏情况		暂无
 //		★备注			在反复测试刷选项窗口时，帧数会降低到22帧，但是只是添加了渲染render的负担，过一下就好了。
 //		
 //		★优化记录		2024/11/16：
-//							优化失败，本来优化的是函数 drill_COWC_analysisOrgText_InBitmap 。
+//							这个时候，正在重构窗口字符的全部函数，顺带加一下优化功能。
+//							但是，优化失败，本来优化的是函数 drill_COWC_analysisOrgText_InBitmap 。
 //							第一次优化：一开始直接优化 converted_text 和 rowBlock_list 两个，只要文本重复，就返回相同 单行块 结果。
 //							第一次优化造成的bug：如果两次传入的文本都是 "\v[1]"，那么指代字符的结果根本就不刷新。
 //							第二次优化：只优化 rowBlock_list ，如果 converted_text 转换后的文本重复，就返回相同 单行块 结果。
 //							第二次优化造成的bug：画廊C中，每个选项会进行多次绘制，但碰巧有三个选项都是文本"已锁定"。
 //												 结果造成了第一个选项显示，后两个选项被重叠了，看不见文本。（三个选项文本一模一样，但options的位置不一样，才出现此bug）
+//						2025/5/1：
+//							这个时候，已经完成窗口字符的全部重构。
+//							之前的优化后来去掉了，后来又由于 一次性绘制和逐个绘制 的特殊性，分离成了两类函数，优化空间不好说。
+//							从性能测试消耗来看，本体不消耗，但是子插件调用，消耗很多，暂时没找到优化方法。
 //							
 //<<<<<<<<插件记录<<<<<<<<
 //
@@ -629,6 +636,8 @@ Game_Interpreter.prototype.drill_COWC_pluginCommand = function( command, args ){
 //					> 该函数封装了 窗口字符 的规则，支持\v\c[]窗口字符，并且@@@xxx的底层字符也能使用。
 //##############################
 Window_Base.prototype.drill_COWC_drawText = function( org_text, options ){
+	org_text = String(org_text);
+	if( org_text == "" ){ return; }
 	
 	// > 『字符核心流程』 - 准备绘制配置【系统 - 字符绘制核心】
 	var temp_bitmap = this.contents;
@@ -664,6 +673,8 @@ Window_Base.prototype.drill_COWC_drawText = function( org_text, options ){
 //					> 该函数封装了 窗口字符 的规则，支持\v\c[]窗口字符，并且@@@xxx的底层字符也能使用。
 //##############################
 Bitmap.prototype.drill_COWC_drawText = function( org_text, options ){
+	org_text = String(org_text);
+	if( org_text == "" ){ return; }
 	
 	// > 『字符核心流程』 - 准备绘制配置【系统 - 字符绘制核心】
 	this.drill_COWC_timing_setEnabled( false );
@@ -697,6 +708,8 @@ Bitmap.prototype.drill_COWC_drawText = function( org_text, options ){
 //					> 该函数计算过程中，不会用到 canvasWidth 或 canvasHeight，因此参数可以赋任意值。
 //##############################
 Window_Base.prototype.drill_COWC_getOrgTextWidth = function( org_text, options ){
+	org_text = String(org_text);
+	if( org_text == "" ){ return 0; }
 	
 	// > 『字符核心流程』 - 准备绘制配置【系统 - 字符绘制核心】
 	var temp_bitmap = this.contents;
@@ -726,6 +739,8 @@ Window_Base.prototype.drill_COWC_getOrgTextWidth = function( org_text, options )
 //					> 该函数计算过程中，不会用到 canvasWidth 或 canvasHeight，因此参数可以赋任意值。
 //##############################
 Window_Base.prototype.drill_COWC_getOrgTextHeight = function( org_text, options ){
+	org_text = String(org_text);
+	if( org_text == "" ){ return 0; }
 	
 	// > 『字符核心流程』 - 准备绘制配置【系统 - 字符绘制核心】
 	var temp_bitmap = this.contents;

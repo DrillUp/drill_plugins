@@ -27,6 +27,9 @@
  * 基于：
  *   - Drill_CoreOfWindowCharacter   窗口字符-窗口字符核心★★v2.0及以上★★
  *     需要该核心才能将图片绘制在文本域中。
+ * 可被扩展：
+ *   - Drill_AssetsOfCurrency        管理器-货币素材库
+ *     通过该插件，能绘制出货币的资源图片。
  * 
  * -----------------------------------------------------------------------------
  * ----关联文件
@@ -64,19 +67,40 @@
  * 你需要使用下面的窗口字符来绘制大图片：
  * 
  * 窗口字符：\dimg[1]
+ * 
+ * 1."\dimg[1]"字符会把该插件配置的编号为1的资源图绘制出来，默认不占高宽。 
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 高宽设置
+ * 你需要使用下面的窗口字符来绘制大图片：
+ * 
  * 窗口字符：\dimg[1:不占高宽]
  * 窗口字符：\dimg[1:不占高宽:位置[10,-10]]
- * 
  * 窗口字符：\dimg[1:占用高宽]
  * 
- * 1."\dimg[1]"字符会把编号为1的图片绘制到当前光标下，默认不占高宽。 
- * 2."\dimg[1:不占高宽:位置[10,-10]]"字符会把编号为1的图片绘制到
- *   当前光标偏移 x 10像素 y -10像素 的位置。
+ * 1."\dimg[1:不占高宽:位置[10,-10]]"字符会把该插件配置的编号为1的资源图
+ *   绘制到当前光标偏移 x 10像素 y -10像素 的位置。
  *   注意，不占高宽的情况下才能偏移。
- * 3.如果出现了多个"\dimg[]"，则后绘制的图片，能够遮挡先绘制的文字或图片。
+ * 2.如果出现了多个"\dimg[]"，则后绘制的图片，能够遮挡先绘制的文字或图片。
  *   但不包括 字符块 。详细可以去看看 窗口字符管理层示例 阅后即焚 的效果。
- * 4.大图片字符也可以设置"占用高宽"，这样文本和图片就全挤在一起了。
+ * 3.大图片字符也可以设置"占用高宽"，这样文本和图片就全挤在一起了。
  *   （dimg全称为：Drill_Image，即图片字符）
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 货币素材库
+ * 你可以使用素材库中的资源图片来绘制：
+ * 
+ * 窗口字符：\dimg[货币素材:小图:不占高宽]
+ * 窗口字符：\dimg[货币素材:小图:不占高宽:位置[10,-10]]
+ * 窗口字符：\dimg[货币素材:小图:占用高宽]
+ * 
+ * 窗口字符：\dimg[货币素材:中型图:不占高宽]
+ * 窗口字符：\dimg[货币素材:中型图:不占高宽:位置[10,-10]]
+ * 窗口字符：\dimg[货币素材:中型图:占用高宽]
+ * 
+ * 窗口字符：\dimg[货币素材:高清图:不占高宽]
+ * 窗口字符：\dimg[货币素材:高清图:不占高宽:位置[10,-10]]
+ * 窗口字符：\dimg[货币素材:高清图:占用高宽]
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - Debug查看
@@ -1966,7 +1990,7 @@ Game_Temp.prototype.drill_COWC_effect_processCombined = function( matched_index,
 		
 		// > 『窗口字符定义』 - 大图片字符（\dimg[1]）
 		if( args.length == 1 ){
-			this.drill_COWC_effect_submitCombined( "@@@dbi[draw:" + String(args[0]) + ":0:0]" );
+			this.drill_COWC_effect_submitCombined( "@@@dbi[drawOrg:" + String(args[0]) + ":0:0]" );
 			return;
 		}
 		
@@ -1976,7 +2000,7 @@ Game_Temp.prototype.drill_COWC_effect_processCombined = function( matched_index,
 			
 			// > 『窗口字符定义』 - 大图片字符（\dimg[1:不占高宽]）
 			if( temp2 == "不占高宽" ){
-				this.drill_COWC_effect_submitCombined( "@@@dbi[draw:" + temp1 + ":0:0]" );
+				this.drill_COWC_effect_submitCombined( "@@@dbi[drawOrg:" + temp1 + ":0:0]" );
 				return;
 			}
 			
@@ -1984,33 +2008,100 @@ Game_Temp.prototype.drill_COWC_effect_processCombined = function( matched_index,
 			if( temp2 == "占用高宽" ){
 				var imgIndex = Number(temp1) -1;
 				var src_bitmap = $gameTemp._drill_DTBI_preloadTank[ imgIndex ];	//（『预加载直接赋值』直接从 预加载容器 中取出高宽值）
-				this.drill_COWC_effect_submitCombined( "@@@dbi[draw:" +temp1+ ":"+String(src_bitmap.width)+ ":"+String(src_bitmap.height)+ "]" );
+				this.drill_COWC_effect_submitCombined( "@@@dbi[drawOrg:" +temp1+ ":"+String(src_bitmap.width)+ ":"+String(src_bitmap.height)+ "]" );
 				return;
 			}
 			
-			// > 『窗口字符定义』 - 大图片字符（\dimg[1:位置[10,-10]]）
+			// > 『窗口字符定义』 - 大图片字符（兼容旧字符）（\dimg[1:位置[10,-10]]）
 			if( temp2.indexOf("位置[") != -1 ){
 				temp2 = temp2.replace("位置[","");
 				temp2 = temp2.replace("]","");
 				var pos = temp2.split(/[,，]/);
 				if( pos.length >= 2 ){
-					this.drill_COWC_effect_submitCombined( "@@@dbi[drawWithPos:" +temp1+ ":0:0:"+String(pos[0])+ ":"+String(pos[1])+ "]" );
+					this.drill_COWC_effect_submitCombined( "@@@dbi[drawOrg:" +temp1+ ":0:0:"+String(pos[0])+ ":"+String(pos[1])+ "]" );
 					return;
 				}
 			}
 		}
 		
-		// > 『窗口字符定义』 - 大图片字符（\dimg[1:不占高宽:位置[10,-10]]）
 		if( args.length == 3 ){
 			var temp1 = String(args[0]);
 			var temp2 = String(args[1]);
 			var temp3 = String(args[2]);
 			temp3 = temp3.replace("位置[","");
 			temp3 = temp3.replace("]","");
+			
+			// > 『窗口字符定义』 - 大图片字符（\dimg[1:不占高宽:位置[10,-10]]）
 			var pos = temp3.split(/[,，]/);
 			if( pos.length >= 2 ){
-				this.drill_COWC_effect_submitCombined( "@@@dbi[drawWithPos:" +temp1+ ":0:0:"+String(pos[0])+ ":"+String(pos[1])+ "]" );
+				this.drill_COWC_effect_submitCombined( "@@@dbi[drawOrg:" +temp1+ ":0:0:"+String(pos[0])+ ":"+String(pos[1])+ "]" );
 				return;
+			}
+		}
+	}
+	
+	// > 【管理器 - 货币素材库】
+	if( Imported.Drill_AssetsOfCurrency ){
+		if( command == "dimg" && args.length >= 3 ){
+			var temp1 = String(args[0]);
+			var temp2 = String(args[1]);
+			var temp3 = String(args[2]);
+			if( temp1 == "货币素材" ){
+			
+				if( args.length == 3 ){
+						
+					// > 『窗口字符定义』 - 大图片字符（\dimg[货币素材:小图:不占高宽]）
+					if( temp3 == "不占高宽" ){
+						if( temp2 == "小图" ){
+							this.drill_COWC_effect_submitCombined( "@@@dbi[drawAsset:AsOC_currency:1:0:0]" );
+						}
+						if( temp2 == "中型图" ){
+							this.drill_COWC_effect_submitCombined( "@@@dbi[drawAsset:AsOC_currency:2:0:0]" );
+						}
+						if( temp2 == "高清图" ){
+							this.drill_COWC_effect_submitCombined( "@@@dbi[drawAsset:AsOC_currency:3:0:0]" );
+						}
+						return;
+					}
+					
+					// > 『窗口字符定义』 - 大图片字符（\dimg[货币素材:小图:占用高宽]）
+					if( temp3 == "占用高宽" ){
+						if( temp2 == "小图" ){
+							var src_bitmap = $gameTemp.drill_AsOC_getDataSrcImg_Small();	//（『预加载直接赋值』直接从 预加载容器 中取出高宽值）
+							this.drill_COWC_effect_submitCombined( "@@@dbi[drawAsset:AsOC_currency:1:" +String(src_bitmap.width)+":"+String(src_bitmap.height)+ "]" );
+						}
+						if( temp2 == "中型图" ){
+							var src_bitmap = $gameTemp.drill_AsOC_getDataSrcImg_Middle();	//（『预加载直接赋值』直接从 预加载容器 中取出高宽值）
+							this.drill_COWC_effect_submitCombined( "@@@dbi[drawAsset:AsOC_currency:2:" +String(src_bitmap.width)+":"+String(src_bitmap.height)+ "]" );
+						}
+						if( temp2 == "高清图" ){
+							var src_bitmap = $gameTemp.drill_AsOC_getDataSrcImg_Big();		//（『预加载直接赋值』直接从 预加载容器 中取出高宽值）
+							this.drill_COWC_effect_submitCombined( "@@@dbi[drawAsset:AsOC_currency:3:" +String(src_bitmap.width)+":"+String(src_bitmap.height)+ "]" );
+						}
+						return;
+					}
+				}
+				
+				if( args.length == 4 ){
+					var temp4 = String(args[3]);
+					temp4 = temp4.replace("位置[","");
+					temp4 = temp4.replace("]","");
+					
+					// > 『窗口字符定义』 - 大图片字符（\dimg[货币素材:小图:不占高宽:位置[10,-10]]）
+					var pos = temp4.split(/[,，]/);
+					if( pos.length >= 2 ){
+						if( temp2 == "小图" ){
+							this.drill_COWC_effect_submitCombined( "@@@dbi[drawAsset:AsOC_currency:1:0:0"+String(pos[0])+ ":"+String(pos[1])+ "]" );
+						}
+						if( temp2 == "中型图" ){
+							this.drill_COWC_effect_submitCombined( "@@@dbi[drawAsset:AsOC_currency:2:0:0"+String(pos[0])+ ":"+String(pos[1])+ "]" );
+						}
+						if( temp2 == "高清图" ){
+							this.drill_COWC_effect_submitCombined( "@@@dbi[drawAsset:AsOC_currency:3:0:0"+String(pos[0])+ ":"+String(pos[1])+ "]" );
+						}
+						return;
+					}
+				}
 			}
 		}
 	}
@@ -2031,32 +2122,63 @@ Game_Temp.prototype.drill_COCD_textBlock_processSecond = function( command, args
 	_drill_DTBI_COCD_textBlock_processSecond.call( this, command, args, cur_baseParam, cur_blockParam, cur_rowParam );
 	
 	if( command == "@@@dbi" ){
-		
-		// > 『底层字符定义』 - 字符图（@@@dbi[draw:1:0:0]） drill_big_image
-		if( args.length == 4 ){
-			var type = String(args[0]);
-			if( type == "draw" ){
-				cur_baseParam['DTBI_imgIndex'] = Number(args[1]) -1;	//（基础字符配置）
-				cur_baseParam['DTBI_imgWidth'] = Number(args[2]);
-				cur_baseParam['DTBI_imgHeight'] = Number(args[3]);
-				cur_baseParam['DTBI_imgPosX'] = 0;
-				cur_baseParam['DTBI_imgPosY'] = 0;
-				this.drill_COCD_textBlock_submitSecond( "@" );			//（必须提交一个字符）
-				return;
+		if( args.length >= 4 ){
+			var drawType = String(args[0]);
+			if( drawType == "drawOrg" ){
+				
+				// > 『底层字符定义』 - 字符图（@@@dbi[drawOrg:1:0:0]） drill_big_image
+				if( args.length == 4 ){
+					cur_baseParam['DTBI_imgType'] = "org";
+					cur_baseParam['DTBI_imgIndex'] = Number(args[1]) -1;	//（基础字符配置）
+					cur_baseParam['DTBI_imgWidth'] = Number(args[2]);
+					cur_baseParam['DTBI_imgHeight'] = Number(args[3]);
+					cur_baseParam['DTBI_imgPosX'] = 0;
+					cur_baseParam['DTBI_imgPosY'] = 0;
+					this.drill_COCD_textBlock_submitSecond( "@" );			//（必须提交一个字符）
+					return;
+				}
+				
+				// > 『底层字符定义』 - 字符图（@@@dbi[drawOrg:1:0:0:4:4]） drill_big_image
+				if( args.length == 6 ){
+					cur_baseParam['DTBI_imgType'] = "org";
+					cur_baseParam['DTBI_imgIndex'] = Number(args[1]) -1;	//（基础字符配置）
+					cur_baseParam['DTBI_imgWidth'] = Number(args[2]);
+					cur_baseParam['DTBI_imgHeight'] = Number(args[3]);
+					cur_baseParam['DTBI_imgPosX'] = Number(args[4]);
+					cur_baseParam['DTBI_imgPosY'] = Number(args[5]);
+					this.drill_COCD_textBlock_submitSecond( "@" );			//（必须提交一个字符）
+					return;
+				}
 			}
 		}
-		
-		// > 『底层字符定义』 - 字符图（@@@dbi[drawWithPos:1:0:0:4:4]） drill_big_image
-		if( args.length == 6 ){
-			var type = String(args[0]);
-			if( type == "drawWithPos" ){
-				cur_baseParam['DTBI_imgIndex'] = Number(args[1]) -1;	//（基础字符配置）
-				cur_baseParam['DTBI_imgWidth'] = Number(args[2]);
-				cur_baseParam['DTBI_imgHeight'] = Number(args[3]);
-				cur_baseParam['DTBI_imgPosX'] = Number(args[4]);
-				cur_baseParam['DTBI_imgPosY'] = Number(args[5]);
-				this.drill_COCD_textBlock_submitSecond( "@" );			//（必须提交一个字符）
-				return;
+		if( args.length >= 5 ){
+			var drawType = String(args[0]);
+			var imgType = String(args[1]);
+			if( drawType == "drawAsset" ){
+				
+				// > 『底层字符定义』 - 字符图（@@@dbi[drawAsset:imgType:1:0:0]） drill_big_image
+				if( args.length == 5 ){
+					cur_baseParam['DTBI_imgType'] = imgType;
+					cur_baseParam['DTBI_imgIndex'] = Number(args[2]);	//（基础字符配置）
+					cur_baseParam['DTBI_imgWidth'] = Number(args[3]);
+					cur_baseParam['DTBI_imgHeight'] = Number(args[4]);
+					cur_baseParam['DTBI_imgPosX'] = 0;
+					cur_baseParam['DTBI_imgPosY'] = 0;
+					this.drill_COCD_textBlock_submitSecond( "@" );			//（必须提交一个字符）
+					return;
+				}
+				
+				// > 『底层字符定义』 - 字符图（@@@dbi[drawAsset:imgType:1:0:0:4:4]） drill_big_image
+				if( args.length == 7 ){
+					cur_baseParam['DTBI_imgType'] = imgType;
+					cur_baseParam['DTBI_imgIndex'] = Number(args[2]);	//（基础字符配置）
+					cur_baseParam['DTBI_imgWidth'] = Number(args[3]);
+					cur_baseParam['DTBI_imgHeight'] = Number(args[4]);
+					cur_baseParam['DTBI_imgPosX'] = Number(args[5]);
+					cur_baseParam['DTBI_imgPosY'] = Number(args[6]);
+					this.drill_COCD_textBlock_submitSecond( "@" );			//（必须提交一个字符）
+					return;
+				}
 			}
 		}
 	}
@@ -2067,6 +2189,7 @@ Game_Temp.prototype.drill_COCD_textBlock_processSecond = function( command, args
 var _drill_DTBI_COCD_drawBaseText_initParam = Game_Temp.prototype.drill_COCD_drawBaseText_initParam;
 Game_Temp.prototype.drill_COCD_drawBaseText_initParam = function( baseParam ){
 	_drill_DTBI_COCD_drawBaseText_initParam.call( this, baseParam );
+	if( baseParam['DTBI_imgType'] == undefined ){ baseParam['DTBI_imgType'] = "" };			//绘制的字符图类型
 	if( baseParam['DTBI_imgIndex'] == undefined ){ baseParam['DTBI_imgIndex'] = -1 };		//绘制的字符图索引
 }
 //==============================
@@ -2108,8 +2231,9 @@ Bitmap.prototype.drill_COCD_drawBaseText_Private = function( text, x, y, basePar
 	// > 字符图时
 	if( baseParam['DTBI_imgIndex'] >= 0 ){
 		
-		// > 字符图时 - 『绘制过程定义』 - 字符图（@@@dbi[draw:1:0:0]）字符图（@@@dbi[drawWithPos:1:0:0:4:4]）
+		// > 字符图时 - 『绘制过程定义』 - 字符图（@@@dbi[]）
 		this.drill_DTBI_drawImg(
+			baseParam['DTBI_imgType'],
 			baseParam['DTBI_imgIndex'],
 			x + baseParam['DTBI_imgPosX'],
 			y + baseParam['DTBI_imgPosY'],
@@ -2124,22 +2248,46 @@ Bitmap.prototype.drill_COCD_drawBaseText_Private = function( text, x, y, basePar
 //==============================
 // * 字符图 - 绘制大图片
 //==============================
-Bitmap.prototype.drill_DTBI_drawImg = function( imgIndex, x, y, baseParam ){
-    var src_bitmap = $gameTemp._drill_DTBI_preloadTank[ imgIndex ];	//（『预加载直接赋值』直接从 预加载容器 中取出并绘制）
+Bitmap.prototype.drill_DTBI_drawImg = function( imgType, imgIndex, x, y, baseParam ){
+    
+	// > 资源加载
+	var src_bitmap = null;
+	if( imgType == "" || imgType == "org" ){
+		src_bitmap = $gameTemp._drill_DTBI_preloadTank[ imgIndex ];	//（『预加载直接赋值』直接从 预加载容器 中取出并绘制）
+	}
+	// > 资源加载 - 【管理器 - 货币素材库】
+	if( Imported.Drill_AssetsOfCurrency ){
+		if( imgType == "AsOC_currency" ){
+			if( imgIndex == 1 ){
+				src_bitmap = $gameTemp.drill_AsOC_getDataSrcImg_Small();
+			}
+			if( imgIndex == 2 ){
+				src_bitmap = $gameTemp.drill_AsOC_getDataSrcImg_Middle();
+			}
+			if( imgIndex == 3 ){
+				src_bitmap = $gameTemp.drill_AsOC_getDataSrcImg_Big();
+			}
+		}
+	}
+	if( src_bitmap == null ){ return; }
+	
+	
+	// > 执行绘制
 	var pw = src_bitmap.width;
 	var ph = src_bitmap.height;
 	var sx = 0;
 	var sy = 0;
 	
-	// > 占用时
+	// > 执行绘制 - 占用时
 	if( baseParam['DTBI_imgHeight'] > 0 ){
 		y -= src_bitmap.height;
 		
-	// > 不占时
+	// > 执行绘制 - 不占时
 	}else{
 		y -= baseParam['fontSize'] *1.10;		//『手算高度』
 	}
 	
+	// > 执行绘制
 	this.blt(src_bitmap, sx, sy, pw, ph, x, y);
 };
 

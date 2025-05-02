@@ -33,11 +33,11 @@
  * 1.插件的作用域：地图界面、战斗界面。
  *   只作用于对话框选项窗口。
  * 2.详细去看看文档 "15.对话框 > 关于对话选项按钮组.docx"
- * 对话选项样式：
+ * 按钮组：
  *   (1.你需要先在按钮组核心中，配置 排列方式、按钮名称模式、
  *      指针、动画效果 等样式，然后在此插件中关联样式。
  *   (2.该插件的选项与资源序列为 顺序对应。
- *      即第一个选项，将使用资源序列的第一个背景作为按钮背景。
+ *      即第一个选项，将使用资源序列的第一个贴图作为按钮。
  * 设计：
  *   (1.由于默认的对话选项有字数限制，你可以结合字符串核心，
  *      制作多行、长文本的按钮组。
@@ -62,10 +62,13 @@
  *
  * 插件指令：>对话选项按钮组 : 切换为按钮组 : 样式[1]
  * 插件指令：>对话选项按钮组 : 恢复为选项窗口
+ *
+ * 插件指令：>对话选项按钮组 : 修改按钮组位置 : 位置[400,300]
  * 
  * 1.最好在对话开始前，先替换样式。
  *   如果插件指令 夹在 对话指令与选择项指令中间，会使得对话时，
  *   对话框和选项窗口分开成两步显示。
+ * 2."修改按钮组位置" 需要放在 "切换为按钮组" 指令的后面，否则修改位置无效。
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -745,13 +748,14 @@ Game_Interpreter.prototype.pluginCommand = function( command, args ){
 //==============================
 Game_Interpreter.prototype.drill_DCB_pluginCommand = function( command, args ){
 	if( command === ">对话选项按钮组" ){
-		if(args.length == 2){
+		if( args.length == 2 ){
 			var type = String(args[1]);
 			if( type == "恢复为选项窗口" ){
 				$gameSystem._drill_DCB_enable = false;
+				$gameSystem._drill_DCB_posLockEnabled = false;
 			}
 		}
-		if(args.length == 4){
+		if( args.length == 4 ){
 			var type = String(args[1]);
 			var temp1 = String(args[3]);
 			if( type == "切换为按钮组" ){
@@ -759,6 +763,21 @@ Game_Interpreter.prototype.drill_DCB_pluginCommand = function( command, args ){
 				temp1 = temp1.replace("]","");
 				$gameSystem._drill_DCB_enable = true;
 				$gameSystem._drill_DCB_curStyle = Number(temp1);
+				$gameSystem._drill_DCB_posLockEnabled = false;
+			}
+		}
+		if( args.length == 4 ){
+			var type = String(args[1]);
+			var temp1 = String(args[3]);
+			if( type == "修改按钮组位置" ){
+				temp1 = temp1.replace("位置[","");
+				temp1 = temp1.replace("]","");
+				var pos = temp1.split(/[,，]/);
+				if( pos.length >= 2 ){
+					$gameSystem._drill_DCB_posLockEnabled = true;
+					$gameSystem._drill_DCB_posLockX = Number(pos[0]);
+					$gameSystem._drill_DCB_posLockY = Number(pos[1]);
+				}
 			}
 		}
 	};
@@ -832,8 +851,12 @@ Game_System.prototype.drill_DCB_checkSysData = function() {
 //==============================
 Game_System.prototype.drill_DCB_initSysData_Private = function() {
 	
-	this._drill_DCB_enable = DrillUp.g_DCB_enable;
-	this._drill_DCB_curStyle = DrillUp.g_DCB_defaultStyle;
+	this._drill_DCB_enable = DrillUp.g_DCB_enable;			//是否启用
+	this._drill_DCB_curStyle = DrillUp.g_DCB_defaultStyle;	//当前样式
+	
+	this._drill_DCB_posLockEnabled = false;		//锁定位置
+	this._drill_DCB_posLockX = 0;				//
+	this._drill_DCB_posLockY = 0;				//
 };
 //==============================
 // * 存储数据 - 载入存档时检查数据（私有）
@@ -841,7 +864,7 @@ Game_System.prototype.drill_DCB_initSysData_Private = function() {
 Game_System.prototype.drill_DCB_checkSysData_Private = function() {
 	
 	// > 旧存档数据自动补充
-	if( this._drill_DCB_curStyle == undefined ){
+	if( this._drill_DCB_posLockX == undefined ){
 		this.drill_DCB_initSysData();
 	}
 };
@@ -1506,6 +1529,13 @@ Drill_DCB_BtnLayerSprite.prototype.drill_sprite_updateAttr = function() {
 			this.drill_DCB_destroy();
 		}
 	}
+	
+	// > 当前位置 - 帧刷新
+	if( $gameSystem._drill_DCB_posLockEnabled == true ){
+		if( this._drill_layerSprite != undefined ){
+			this._drill_layerSprite.drill_COSB_setPosition( $gameSystem._drill_DCB_posLockX, $gameSystem._drill_DCB_posLockY );
+		}
+	}
 };
 
 //==============================
@@ -1568,7 +1598,7 @@ Drill_DCB_BtnLayerSprite.prototype.drill_sprite_rebuild = function() {
 		data_style[key] = data_org[key];
 	}
 	
-	// > 按钮组
+	// > 按钮组贴图
 	var temp_sprite = new Drill_COSB_LayerSprite( data_style, this._drill_choiceWindow );
 	this.addChild(temp_sprite);
 	this._drill_layerSprite = temp_sprite;

@@ -277,7 +277,6 @@ Game_Interpreter.prototype.drill_DSCS_pluginCommand = function( command, args ){
 					}
 				}
 				if( args.length == 4 ){
-					var type = String(args[1]);
 					var temp1 = String(args[3]);
 					if( temp1 == "恢复默认大小" || temp1 == "恢复默认设置" ){
 						$gameSystem._drill_DSCS_globalFontSize = DrillUp.g_DSCS_globalFontSize;
@@ -297,12 +296,14 @@ Game_Interpreter.prototype.drill_DSCS_pluginCommand = function( command, args ){
 						$gameSystem._drill_DSCS_dialogMode = temp2;
 					}
 					if( temp1 == "修改字体大小" ){
+						$gameSystem._drill_DSCS_dialogMode = "自定义模式";	//（改了字体大小直接设为自定义模式）
 						$gameSystem._drill_DSCS_dialogFontSize = Number(temp2);
 					}
 				}
 				if( args.length == 4 ){
 					var temp1 = String(args[3]);
 					if( temp1 == "恢复默认大小" || temp1 == "恢复默认设置" ){
+						$gameSystem._drill_DSCS_dialogMode = DrillUp.g_DSCS_dialogMode;
 						$gameSystem._drill_DSCS_dialogFontSize = DrillUp.g_DSCS_dialogFontSize;
 					}
 				}

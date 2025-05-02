@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        游戏窗体 - 资源“加载中”提示图
+ * @plugindesc [v1.2]        游戏窗体 - 资源“加载中”提示图
  * @author Drill_up
  *
  *
@@ -61,6 +61,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 修改了插件分类。
+ * [v1.2]
+ * 添加了位置模式。
  * 
  * 
  *
@@ -81,6 +83,41 @@
  * @min 1
  * @desc "加载中"贴图显现的时长。
  * @default 20
+ *
+ * @param 位置模式
+ * @parent ---常规---
+ * @type select
+ * @option 正中心
+ * @value 正中心
+ * @option 贴在左侧
+ * @value 贴在左侧
+ * @option 贴在右侧
+ * @value 贴在右侧
+ * @option 贴在上侧
+ * @value 贴在上侧
+ * @option 贴在下侧
+ * @value 贴在下侧
+ * @option 贴在左上角
+ * @value 贴在左上角
+ * @option 贴在左下角
+ * @value 贴在左下角
+ * @option 贴在右上角
+ * @value 贴在右上角
+ * @option 贴在右下角
+ * @value 贴在右下角
+ * @desc 贴图所处的位置模式。
+ * @default 正中心
+ * 
+ * @param 偏移-位置 X
+ * @parent ---常规---
+ * @desc 以位置模式所处的位置为基准，x轴方向平移，单位像素。正数向右，负数向左。
+ * @default 0
+ * 
+ * @param 偏移-位置 Y
+ * @parent ---常规---
+ * @desc 以位置模式所处的位置为基准，y轴方向平移，单位像素。正数向下，负数向上。
+ * @default 0
+ * 
  * 
  * @param ---GIF效果---
  * @desc 
@@ -98,7 +135,6 @@
  * @min 1
  * @desc gif每帧播放间隔时间，单位帧。（1秒60帧）
  * @default 4
- *
  * 
  */
 
@@ -174,6 +210,9 @@
 	/*-----------------杂项------------------*/
 	DrillUp.g_HLT_delay = Number(DrillUp.parameters["最小载入超时时间"] || 20);
 	DrillUp.g_HLT_showingTime = Number(DrillUp.parameters["贴图显现时长"] || 20);
+	DrillUp.g_HLT_posType = String(DrillUp.parameters["位置模式"] || "正中心");
+	DrillUp.g_HLT_posX = Number(DrillUp.parameters["偏移-位置 X"] || 0);
+	DrillUp.g_HLT_posY = Number(DrillUp.parameters["偏移-位置 Y"] || 0);
 	DrillUp.g_HLT_gifFrame = Number(DrillUp.parameters["切割帧数"] || 1);
 	DrillUp.g_HLT_gifInterval = Number(DrillUp.parameters["帧间隔"] || 4);
 	
@@ -213,8 +252,51 @@ Graphics._paintUpperCanvas = function() {
 		var sy = sh * this._drill_HLT_curFrame;
 		var pw = ww;		//（放置的矩形）
 		var ph = sh;
-        var px = (this._width - ww) / 2;
-        var py = (this._height - sh) / 2;
+        var px = 0;
+        var py = 0;
+		
+		// > 位置 - 位置模式
+		if( DrillUp.g_HLT_posType == "正中心" ){
+			px = (this._width  - ww) / 2;
+			py = (this._height - sh) / 2;
+		}
+		if( DrillUp.g_HLT_posType == "贴在左侧" ){
+			px = 0;
+			py = (this._height - sh) / 2;
+		}
+		if( DrillUp.g_HLT_posType == "贴在右侧" ){
+			px = (this._width  - ww);
+			py = (this._height - sh) / 2;
+		}
+		if( DrillUp.g_HLT_posType == "贴在上侧" ){
+			px = (this._width  - ww) / 2;
+			py = 0;
+		}
+		if( DrillUp.g_HLT_posType == "贴在下侧" ){
+			px = (this._width  - ww) / 2;
+			py = (this._height - sh);
+		}
+		if( DrillUp.g_HLT_posType == "贴在左上角" ){
+			px = 0;
+			py = 0;
+		}
+		if( DrillUp.g_HLT_posType == "贴在左下角" ){
+			px = 0;
+			py = (this._height - sh);
+		}
+		if( DrillUp.g_HLT_posType == "贴在右上角" ){
+			px = (this._width  - ww);
+			py = 0;
+		}
+		if( DrillUp.g_HLT_posType == "贴在右下角" ){
+			px = (this._width  - ww);
+			py = (this._height - sh);
+		}
+		// > 位置 - 偏移
+		px += DrillUp.g_HLT_posX;
+		py += DrillUp.g_HLT_posY;
+		
+		// > 贴图显现时长
         var alpha = ((this._loadingCount - DrillUp.g_HLT_delay) / DrillUp.g_HLT_showingTime).clamp(0, 1);
 		
 		painter.save();															//（a.存储上一个画笔状态）

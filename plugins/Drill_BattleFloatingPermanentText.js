@@ -2192,7 +2192,7 @@ Drill_BFPT_Window.prototype.drill_refreshMessage = function( context ){
 	// > 参数准备
 	var options = {};
 	options['infoParam'] = {};
-	options['infoParam']['x'] = 0;
+	options['infoParam']['x'] = 1;	//『窗口字符差1像素的切割问题』
 	options['infoParam']['y'] = 0;
 	options['infoParam']['canvasWidth']  = 100;	//（此参数暂时不用，先给个非零值）
 	options['infoParam']['canvasHeight'] = 100;
@@ -2218,6 +2218,7 @@ Drill_BFPT_Window.prototype.drill_refreshMessage = function( context ){
 	// > 自适应 - 设置窗口高宽
 	ww += this.standardPadding() * 2;		//（使用当前窗口的内边距）
 	hh += this.standardPadding() * 2;
+	ww += 2;								//『窗口字符差1像素的切割问题』
 	this._drill_windowWidth = ww;
 	this._drill_windowHeight = hh;
 	this.width = this._drill_windowWidth;		//（窗口宽度）

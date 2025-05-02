@@ -950,7 +950,7 @@ Game_Interpreter.prototype.drill_DCOB_pluginCommand = function( command, args ){
 						$gameSystem._drill_DCOB_dialogColorIndex = Number(temp2)-1;
 					}
 					if( temp1 == "修改厚度" ){
-						$gameSystem._drill_DCOB_dialogThickness = Number(temp1);
+						$gameSystem._drill_DCOB_dialogThickness = Number(temp2);
 					}
 				}
 				if( args.length == 4 ){

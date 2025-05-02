@@ -806,13 +806,9 @@ Window.prototype._updateContents = function() {
 		this._windowContentsSprite.texture.frame = Rectangle.emptyRectangle;
 		this._drill_DSE_frameIsEmpty = true;
 		
-		// > 【窗口字符 - 窗口字符贴图核心】隐藏窗口字符块
-		if( Imported.Drill_CoreOfWindowCharacterSprite ){				
-			var char_sprite_list = this.drill_COWCSp_sprite_getAllSprite();
-			for(var i = 0; i < char_sprite_list.length; i++){
-				char_sprite_list[i].visible = false;
-			}
-			
+		// > 『字符贴图流程』 - 清空字符块贴图【窗口字符 - 窗口字符贴图核心】
+		if( Imported.Drill_CoreOfWindowCharacterSprite ){
+			this.drill_COWCSp_sprite_clearAllSprite();
 		}
 	}else{
 		
