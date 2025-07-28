@@ -501,22 +501,22 @@
 	//==============================
 	DrillUp.drill_XETT_initSoundGroup = function( dataFrom ){
 		var data = {};
-		if( dataFrom["声音-漂浮文字显现时"] != "" &&
-			dataFrom["声音-漂浮文字显现时"] != undefined ){
+		if( dataFrom["声音-漂浮文字显现时"] != undefined &&
+			dataFrom["声音-漂浮文字显现时"] != "" ){
 			var p_data = JSON.parse( dataFrom["声音-漂浮文字显现时"] );
 			data['se_text'] = DrillUp.drill_XETT_initSound( p_data );
 		}else{
 			data['se_text'] = DrillUp.drill_XETT_initSound( {} );
 		}
-		if( dataFrom["声音-批注线显现时"] != "" &&
-			dataFrom["声音-批注线显现时"] != undefined ){
+		if( dataFrom["声音-批注线显现时"] != undefined &&
+			dataFrom["声音-批注线显现时"] != "" ){
 			var p_data = JSON.parse( dataFrom["声音-批注线显现时"] );
 			data['se_line'] = DrillUp.drill_XETT_initSound( p_data );
 		}else{
 			data['se_line'] = DrillUp.drill_XETT_initSound( {} );
 		}
-		if( dataFrom["声音-背景显现时"] != "" &&
-			dataFrom["声音-背景显现时"] != undefined ){
+		if( dataFrom["声音-背景显现时"] != undefined &&
+			dataFrom["声音-背景显现时"] != "" ){
 			var p_data = JSON.parse( dataFrom["声音-背景显现时"] );
 			data['se_background'] = DrillUp.drill_XETT_initSound( p_data );
 		}else{
@@ -543,8 +543,8 @@
 	DrillUp.g_XETT_soundList_length = 10;
 	DrillUp.g_XETT_soundList = [];
 	for (var i = 0; i < DrillUp.g_XETT_soundList_length; i++) {
-		if( DrillUp.parameters["声音集合-" + String(i+1) ] != "" && 
-			DrillUp.parameters["声音集合-" + String(i+1) ] != undefined ){
+		if( DrillUp.parameters["声音集合-" + String(i+1) ] != undefined && 
+			DrillUp.parameters["声音集合-" + String(i+1) ] != "" ){
 			var temp = JSON.parse(DrillUp.parameters["声音集合-" + String(i+1) ]);
 			DrillUp.g_XETT_soundList[i] = DrillUp.drill_XETT_initSoundGroup( temp );
 		}else{

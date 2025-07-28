@@ -3019,7 +3019,7 @@ DrillUp.g_AGi_checkNaN = true;
 //==============================
 Drill_AGi_Controller.prototype.initialize = function( data ){
 	this._drill_data = {};
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能
 	if( data == undefined ){ data = {}; }
@@ -3237,7 +3237,7 @@ Drill_AGi_Controller.prototype.drill_controller_resetData_Private = function( da
 	
 	// > 执行重置
 	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能
 }
@@ -3397,11 +3397,11 @@ Drill_AGi_Controller.prototype.drill_controller_initRandom = function() {
 	this._drill_randomPos_y = 0;			//随机位置 - 位置Y
 	this._drill_randomPos_lastInter = 0;	//随机位置 - 上一次时间
 	if( data['randomPos_enable'] == true ){
-		this._drill_randomPos_x = Math.floor( data['randomPos_width'] *( Math.random()-0.5 ));
-		this._drill_randomPos_y = Math.floor( data['randomPos_height']*( Math.random()-0.5 ));
+		this._drill_randomPos_x = Math.floor( data['randomPos_width'] *( Math.random()-0.5 ));	//『随机因子-图像用』
+		this._drill_randomPos_y = Math.floor( data['randomPos_height']*( Math.random()-0.5 ));	//『随机因子-图像用』
 	}
 	if( data['randomPos_gifFrame'] == true ){
-		this._drill_GIF_time = Math.floor( data['interval']*data['src_img_gif'].length * Math.random() );
+		this._drill_GIF_time = Math.floor( data['interval']*data['src_img_gif'].length * Math.random() );	//『随机因子-图像用』
 	}
 }
 //==============================
@@ -3415,8 +3415,8 @@ Drill_AGi_Controller.prototype.drill_controller_updateRandom = function(){
 		var inter = Math.floor(this._drill_GIF_time / data['interval'] / data['src_img_gif'].length);
 		if( this._drill_randomPos_lastInter != inter ){
 			this._drill_randomPos_lastInter = inter;
-			this._drill_randomPos_x = Math.floor( data['randomPos_width'] *( Math.random()-0.5 ));
-			this._drill_randomPos_y = Math.floor( data['randomPos_height']*( Math.random()-0.5 ));
+			this._drill_randomPos_x = Math.floor( data['randomPos_width'] *( Math.random()-0.5 ));	//『随机因子-图像用』
+			this._drill_randomPos_y = Math.floor( data['randomPos_height']*( Math.random()-0.5 ));	//『随机因子-图像用』
 		}
 	}
 }

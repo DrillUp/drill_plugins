@@ -128,7 +128,7 @@
  * @param 全局存储的文件路径
  * @type number
  * @min 1
- * @desc 指对应的文件路径ID，该插件的数据将存储到指定的文件路径中，具体去 全局存储核心 看看。
+ * @desc 指对应的文件路径ID,该插件的数据将存储到指定文件路径,具体看看"21.管理器 > 关于全局存储.docx"。
  * @default 1
  *
  * @param ---视频组---
@@ -511,7 +511,7 @@
 	// * 静态数据 - 视频
 	//				（~struct~TitleVideo）
 	//==============================
-	DrillUp.drill_TVi_videoInit = function( dataFrom ) {
+	DrillUp.drill_TVi_videoInit = function( dataFrom ){
 		var data = {};
 		data['visible'] = String( dataFrom["初始是否显示"] || "true") == "true";
 		data['src'] = String( dataFrom["资源-视频动画"] || "");
@@ -540,12 +540,12 @@
 	
 	/*-----------------杂项------------------*/
 	DrillUp.g_TVi_DEBUG = String(DrillUp.parameters['是否开启Debug模式'] || "true") === "true";
-    DrillUp.g_TVi_dataFileId = Number(DrillUp.parameters['全局存储的文件路径'] || 1);
+    DrillUp.g_TVi_dataFileId = Number(DrillUp.parameters["全局存储的文件路径"] || 1);
 	
 	/*-----------------视频------------------*/
 	DrillUp.g_TVi_list_length = 20;
 	DrillUp.g_TVi_list = [];
-	for (var i = 0; i < DrillUp.g_TVi_list_length; i++) {
+	for( var i = 0; i < DrillUp.g_TVi_list_length; i++ ){
 		if( DrillUp.parameters["视频-" + String(i+1) ] != undefined &&
 			DrillUp.parameters["视频-" + String(i+1) ] != "" ){
 			var temp = JSON.parse(DrillUp.parameters["视频-" + String(i+1) ]);
@@ -614,7 +614,7 @@ Game_Interpreter.prototype.drill_TVi_pluginCommand = function( command, args ){
 // ** ☆全局存储
 //=============================================================================
 //==============================
-// * 全局 - 检查数据 - 显示情况
+// * 『全局存储』 - 载入时检查数据 - 显示情况
 //==============================
 DrillUp.drill_TVi_gCheckData_visible = function(){
 	for( var i = 0; i < DrillUp.g_TVi_list_length ; i++ ){
@@ -635,10 +635,10 @@ DrillUp.drill_TVi_gCheckData_visible = function(){
 	}
 }
 //==============================
-// * 全局 - 读取
+// * 『全局存储』 - 载入
 //==============================
 	var global_fileId = DrillUp.g_TVi_dataFileId;
-	var global_data = StorageManager.drill_COGS_loadData( global_fileId, "TVi" );
+	var global_data = StorageManager.drill_COGS_loadData( global_fileId, "TVi" );  //『全局存储执行函数』
 	
 	// > 显示情况
 	if( DrillUp.global_TVi_visibleTank == null ){			//（游戏没关时，不会为null)
@@ -649,13 +649,13 @@ DrillUp.drill_TVi_gCheckData_visible = function(){
 	}
 	
 //==============================
-// * 全局 - 存储
+// * 『全局存储』 - 存储
 //==============================
 StorageManager.drill_TVi_saveData = function(){
 	var file_id = DrillUp.g_TVi_dataFileId;
 	var data = {};
 	data["global_visibleTank"] = DrillUp.global_TVi_visibleTank;
-	this.drill_COGS_saveData( file_id, "TVi", data );
+	this.drill_COGS_saveData( file_id, "TVi", data );  //『全局存储执行函数』
 };
 
 

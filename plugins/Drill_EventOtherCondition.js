@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        物体 - 事件页出现条件
+ * @plugindesc [v1.2]        物体 - 事件页出现条件
  * @author Drill_up
  * 
  * 
@@ -83,6 +83,9 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 修复了注释英文拼写错误的bug，改为 ON和NO 写法都有效。
+ * [v1.2]
+ * 改进优化了内部数据结构。
+ * 
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -107,13 +110,14 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			事件页出现条件：
-//				->基本条件
-//					->开关为OFF情况
-//					->变量小于、等于情况
-//					->添加多个出现条件，表示多个限制
-//				->插件条件
-//					->独立开关 的控制
+//			->☆提示信息
+//			->☆静态数据
+//
+//			->☆出现条件
+//				->读取事件数据的页
+//				->出现条件控制
+//			->☆事件数据的属性
+//
 //
 //		★家谱：
 //			无
@@ -137,7 +141,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -148,7 +152,7 @@
 	
 	
 //=============================================================================
-// ** 静态数据
+// ** ☆静态数据
 //=============================================================================
 	var Imported = Imported || {};
 	Imported.Drill_EventOtherCondition = true;
@@ -158,131 +162,180 @@
 	
 
 //=============================================================================
-// ** 参数绑定
+// ** ☆出现条件
+//
+//			说明：	> 此模块管理 事件页出现条件 的控制。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 绑定 - 初始参数转换
+// * 出现条件 - 绑定
 //==============================
-var _drill_EOC_onMapLoaded = Scene_Map.prototype.onMapLoaded;
+var _drill_EOC_eventData_onMapLoaded = Scene_Map.prototype.onMapLoaded;
 Scene_Map.prototype.onMapLoaded = function() {
 	
-	// > 事件data源（该位置$dataMap数据正好载入完全）
-	for( var i in $dataMap.events ){
-		this.drill_EOC_dataCovert( $dataMap.events[i] );
-	}
+	// > 读取事件数据（该位置的$dataMap数据正好加载完毕）
+	$gameTemp.drill_EOC_eventData_readAll();
 	
-	// > 执行原函数
-	_drill_EOC_onMapLoaded.call(this);
+	// > 原函数
+	_drill_EOC_eventData_onMapLoaded.call(this);
 };
 //==============================
-// * 绑定 - 转换 事件data源
+// * 出现条件 - 读取事件数据
 //==============================
-Scene_Map.prototype.drill_EOC_dataCovert = function( data_e ){
-	if( data_e == undefined ){ return; }
-	if( data_e.pages == undefined ){ return; }
-	for(var j in data_e.pages ){
+Game_Temp.prototype.drill_EOC_eventData_readAll = function(){
+	
+	// > 事件数据
+	for( var i = 0; i < $dataMap.events.length; i++ ){
+		var eventData = $dataMap.events[i];
+		if( eventData == undefined ){ continue; }
+		if( eventData.pages == undefined ){ continue; }
 		
-		// > 事件页
-		var page = data_e.pages[j];	
-		if( page == undefined ){ continue; }	
-		for(var k in page.list ){
-			var l = page.list[k];
-			if( l.code != 108 ){ continue; }
+		// > 事件页列表
+		for( var j = 0; j < eventData.pages.length; j++ ){
+			var page = eventData.pages[j];
+			if( page == undefined ){ continue; }
+			this.drill_EOC_eventData_readOnePage( i, page );
+		}
+	}
+};
+//==============================
+// * 出现条件 - 读取事件数据的页
+//==============================
+Game_Temp.prototype.drill_EOC_eventData_readOnePage = function( eventId, page ){
+	var pageOfList = page.list;
+	if( pageOfList == undefined ){ return; }
+	
+	// > 事件注释
+	for(var n = 0; n < pageOfList.length; n++){
+		var l = pageOfList[n];
+		if( l.code != 108 ){ continue; }
+		var l_str = l.parameters[0];
+		var args = l_str.split(' ');
+		var command = args.shift();
+		if( command == "<<出现条件>>" ){
 			
-			// > 事件注释
-			var args = l.parameters[0].split(' ');
-			var command = args.shift();
-			if( command == "<<出现条件>>" ){
-			
-				// > 条件容器
-				if(!page.conditions.drill_EOC_tank ){
-					page.conditions.drill_EOC_tank = [];
-				}
-			
-				/*-----------------开关------------------*/
-				if(args.length == 4){
-					var temp1 = String(args[1]);
-					var temp2 = String(args[3]);
-					if( temp1.indexOf("开关[") != -1 ){
-						temp1 = temp1.replace("开关[","");
-						temp1 = temp1.replace("]","");
-						if( temp2 == "必须为NO" || temp2 == "必须为ON"  ){
-							var data = {
-								'type':"switch",
-								'id':Number(temp1),
-								'value':true,
-							}
-							page.conditions.drill_EOC_tank.push( data );
-						}
-						if( temp2 == "必须为OFF"  ){
-							var data = {
-								'type':"switch",
-								'id':Number(temp1),
-								'value':false,
-							}
-							page.conditions.drill_EOC_tank.push( data );
-						}
+			/*-----------------开关------------------*/
+			if( args.length == 4 ){
+				var temp1 = String(args[1]);
+				var temp2 = String(args[3]);
+				if( temp1.indexOf("开关[") != -1 ){
+					temp1 = temp1.replace("开关[","");
+					temp1 = temp1.replace("]","");
+					if( temp2 == "必须为NO" || temp2 == "必须为ON"  ){
+						this.drill_EOC_addData_Switch( page, Number(temp1), true );
+					}
+					if( temp2 == "必须为OFF"  ){
+						this.drill_EOC_addData_Switch( page, Number(temp1), false );
 					}
 				}
-				/*-----------------变量------------------*/
-				if(args.length == 6){
-					var temp1 = String(args[1]);
-					var temp2 = String(args[3]);
-					var temp3 = String(args[5]);
-					if( temp1.indexOf("变量[") != -1 ){
-						temp1 = temp1.replace("变量[","");
-						temp1 = temp1.replace("]","");
-						var data = {
-							'type':"variable",
-							'id':Number(temp1),
-							'symbol':temp2,
-							'value':Number(temp3),
-						}
-						page.conditions.drill_EOC_tank.push( data );
-					}
+			}
+			/*-----------------变量------------------*/
+			if( args.length == 6 ){
+				var temp1 = String(args[1]);
+				var temp2 = String(args[3]);
+				var temp3 = String(args[5]);
+				if( temp1.indexOf("变量[") != -1 ){
+					temp1 = temp1.replace("变量[","");
+					temp1 = temp1.replace("]","");
+					this.drill_EOC_addData_Variable( page, Number(temp1), Number(temp3), temp2 );
 				}
 			}
 		}
 	}
-}
+};
+//==============================
+// * 出现条件 - 出现条件控制
+//==============================
+var _drill_EOC_meetsConditions = Game_Event.prototype.meetsConditions;
+Game_Event.prototype.meetsConditions = function( page ){
+	
+	// > 出现条件控制
+	var result = this.drill_EOC_meetsConditions( page );
+	if( result == false ){ return false; }
+	if( result == null ){ } //（不操作，继续进入原函数）
+	
+	// > 原函数
+	return _drill_EOC_meetsConditions.call(this, page );
+};
+
 
 //=============================================================================
-// ** 参数条件
+// ** ☆事件数据的属性
+//
+//			说明：	> 此模块专门定义 事件数据的属性 。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
-var _drill_EOC_meetsConditions = Game_Event.prototype.meetsConditions;
-Game_Event.prototype.meetsConditions = function( page ) {
-	
-	if( page.conditions.drill_EOC_tank ){
-		var tank = page.conditions.drill_EOC_tank;
-		for( var i=0; i < tank.length; i++ ){
-			var condition = tank[i];
-			if( condition['type'] == "switch" ){	//开关
-				var temp_value = $gameSwitches.value( condition['id'] );
-				if( temp_value != condition['value'] ){
-					return false;
-				}
+//==============================
+// * 事件数据的属性 - 初始化 数据
+//==============================
+Game_Temp.prototype.drill_EOC_checkData = function( page ){
+	if( page._drill_EOC_conditionTank != undefined ){ return; }
+	page._drill_EOC_conditionTank = [];		//（这里就不要放在 page.conditions 数据下面了）
+};
+//==============================
+// * 事件数据的属性 - 添加数据 - 开关
+//==============================
+Game_Temp.prototype.drill_EOC_addData_Switch = function( page, switch_id, switch_value ){
+	this.drill_EOC_checkData( page );
+	var conditionData = {};
+	conditionData['type'] = "switch";
+	conditionData['id'] = Number(switch_id);
+	conditionData['value'] = switch_value;
+	page._drill_EOC_conditionTank.push( conditionData );
+};
+//==============================
+// * 事件数据的属性 - 添加数据 - 变量
+//==============================
+Game_Temp.prototype.drill_EOC_addData_Variable = function( page, variable_id, variable_value, variable_symbol ){
+	this.drill_EOC_checkData( page );
+	var conditionData = {};
+	conditionData['type'] = "variable";
+	conditionData['id'] = Number(variable_id);
+	conditionData['value'] = variable_value;
+	conditionData['symbol'] = variable_symbol;
+	page._drill_EOC_conditionTank.push( conditionData );
+};
+
+//==============================
+// * 事件数据的属性 - 出现条件控制
+//
+//			说明：	> 该函数只会返回 false 和 null 两种值。
+//					> 添加多个出现条件，表示多个限制。
+//					> 原函数的出现条件要求 所有条件全部满足 才能返回true。
+//==============================
+Game_Event.prototype.drill_EOC_meetsConditions = function( page ){
+	if( page._drill_EOC_conditionTank == undefined ){ return null; }
+	for( var i = 0; i < page._drill_EOC_conditionTank.length; i++ ){
+		var condition = page._drill_EOC_conditionTank[i];
+		
+		// > 开关
+		if( condition['type'] == "switch" ){
+			var temp_value = $gameSwitches.value( condition['id'] );
+			if( temp_value != condition['value'] ){
+				return false;
 			}
-			if( condition['type'] == "variable" ){	//变量
-				var temp_value = $gameVariables.value( condition['id'] );
-				if( condition['symbol'] == "大于" && ( !( temp_value > condition['value'] )) ){
-					return false;
-				}
-				else if( condition['symbol'] == "小于" && ( !( temp_value < condition['value'] )) ){
-					return false;
-				}
-				else if( condition['symbol'] == "等于" && ( !( temp_value == condition['value'] )) ){
-					return false;
-				}
-				else if( condition['symbol'] == "大于等于" && ( !( temp_value >= condition['value'] )) ){
-					return false;
-				}
-				else if( condition['symbol'] == "小于等于" && ( !( temp_value <= condition['value'] )) ){
-					return false;
-				}
+		}
+		
+		// > 变量
+		if( condition['type'] == "variable" ){
+			var temp_value = $gameVariables.value( condition['id'] );
+			if( condition['symbol'] == "大于" && ( !( temp_value > condition['value'] )) ){
+				return false;
+			}
+			else if( condition['symbol'] == "小于" && ( !( temp_value < condition['value'] )) ){
+				return false;
+			}
+			else if( condition['symbol'] == "等于" && ( !( temp_value == condition['value'] )) ){
+				return false;
+			}
+			else if( condition['symbol'] == "大于等于" && ( !( temp_value >= condition['value'] )) ){
+				return false;
+			}
+			else if( condition['symbol'] == "小于等于" && ( !( temp_value <= condition['value'] )) ){
+				return false;
 			}
 		}
 	}
-	
-	return _drill_EOC_meetsConditions.call(this, page );
-}
+	return null;
+};
 

@@ -847,7 +847,7 @@
 	/*-----------------自定义------------------*/
 	DrillUp.g_OH_self_list_length = 10;
 	DrillUp.g_OH_self_list = [];
-	for (var i = 0; i < DrillUp.g_OH_self_list_length; i++) {
+	for( var i = 0; i < DrillUp.g_OH_self_list_length; i++ ){
 		if( DrillUp.parameters["自定义按钮-" + String(i+1) ] != undefined &&
 			DrillUp.parameters["自定义按钮-" + String(i+1) ] != "" ){
 			DrillUp.g_OH_self_list[i] = JSON.parse(DrillUp.parameters["自定义按钮-" + String(i+1) ]);

@@ -915,25 +915,25 @@
 	
 	
 	/*-----------------杂项------------------*/
-	DrillUp.g_LRR_enabled = String(DrillUp.parameters['总开关是否启用'] || "true") === "true";
-	DrillUp.g_LRR_map_default = String(DrillUp.parameters['所有地图是否默认启用镜像'] || "true") === "true";
-	DrillUp.g_LRR_map_blurDefault = String(DrillUp.parameters['所有地图是否默认启用毛玻璃效果'] || "false") === "true";	
-    DrillUp.g_LRR_blurValue = Number(DrillUp.parameters['毛玻璃模糊程度'] || 4);
-    DrillUp.g_LRR_opacity_per = Number(DrillUp.parameters['镜像透明比例'] || 35);
-    DrillUp.g_LRR_height_size = Number(DrillUp.parameters['镜像长度缩放'] || 1.0);	
-	DrillUp.g_LRR_auto_close = String(DrillUp.parameters['镜像离开镜头是否自动关闭'] || "true") === "true";	
+	DrillUp.g_LRR_enabled = String(DrillUp.parameters["总开关是否启用"] || "true") === "true";
+	DrillUp.g_LRR_map_default = String(DrillUp.parameters["所有地图是否默认启用镜像"] || "true") === "true";
+	DrillUp.g_LRR_map_blurDefault = String(DrillUp.parameters["所有地图是否默认启用毛玻璃效果"] || "false") === "true";	
+    DrillUp.g_LRR_blurValue = Number(DrillUp.parameters["毛玻璃模糊程度"] || 4);
+    DrillUp.g_LRR_opacity_per = Number(DrillUp.parameters["镜像透明比例"] || 35);
+    DrillUp.g_LRR_height_size = Number(DrillUp.parameters["镜像长度缩放"] || 1.0);	
+	DrillUp.g_LRR_auto_close = String(DrillUp.parameters["镜像离开镜头是否自动关闭"] || "true") === "true";	
 	DrillUp.g_LRR_reflectionMap = "";		//（当前镜面资源，备注中设置）
 	
 	/*-----------------标记------------------*/
-	if( DrillUp.parameters['图块标记'] != "" &&
-		DrillUp.parameters['图块标记'] != undefined ){
-		DrillUp.g_LRR_terrainIds = (JSON.parse( DrillUp.parameters['图块标记'])).map(function(n){ return Number(n) });;
+	if( DrillUp.parameters["图块标记"] != undefined &&
+		DrillUp.parameters["图块标记"] != "" ){
+		DrillUp.g_LRR_terrainIds = (JSON.parse( DrillUp.parameters["图块标记"])).map(function(n){ return Number(n) });;
 	}else{
 		DrillUp.g_LRR_terrainIds = ([]).map(function(n){ return Number(n) }); ;
 	}
-	if( DrillUp.parameters['区域标记'] != "" &&
-		DrillUp.parameters['区域标记'] != undefined ){
-		DrillUp.g_LRR_areaIds = (JSON.parse( DrillUp.parameters['区域标记'])).map(function(n){ return Number(n) });;
+	if( DrillUp.parameters["区域标记"] != undefined &&
+		DrillUp.parameters["区域标记"] != "" ){
+		DrillUp.g_LRR_areaIds = (JSON.parse( DrillUp.parameters["区域标记"])).map(function(n){ return Number(n) });;
 	}else{
 		DrillUp.g_LRR_areaIds = ([]).map(function(n){ return Number(n) }); ;
 	}
@@ -942,7 +942,7 @@
 	DrillUp.g_LRR_mirror_length = 60;
 	DrillUp.g_LRR_mirror = [];	
 	for( var i = 0; i < DrillUp.g_LRR_mirror_length; i++ ){
-		DrillUp.g_LRR_mirror[i] = String( DrillUp.parameters['地图镜面-'+String(i+1)] ) || "";
+		DrillUp.g_LRR_mirror[i] = String( DrillUp.parameters["地图镜面-"+String(i+1)] ) || "";
 	}
 	
 	
@@ -1049,7 +1049,7 @@ Game_Interpreter.prototype.drill_LRR_pluginCommand = function( command, args ){
 			}
 			if( chars == null && unit == "玩家" ){
 				chars = [ $gamePlayer ];
-				var f_char = $gamePlayer.followers().visibleFollowers();
+				var f_char = $gamePlayer.followers().visibleFollowers();	//（直接玩家全员）
 				for( var i=0; i < f_char.length; i++ ){
 					chars.push( f_char[i] );
 				}
@@ -1750,7 +1750,7 @@ Tilemap.prototype.drill_LRR_compareChildOrder = function( a, b ){
 
 
 //=============================================================================
-// ** 镜像贴图【Drill_Sprite_LRR】
+// ** 镜像贴图【Drill_Sprite_LRR】『复制的行走图贴图』
 // **
 // **		作用域：	地图界面
 // **		主功能：	定义一个物体镜像的贴图。

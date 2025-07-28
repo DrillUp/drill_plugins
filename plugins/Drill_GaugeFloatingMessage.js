@@ -660,7 +660,7 @@
 	// * 静态数据 - 漂浮消息样式
 	//				（~struct~DrillGFMStyle）
 	//==============================
-	DrillUp.drill_GFM_initContext = function( dataFrom ) {
+	DrillUp.drill_GFM_initContext = function( dataFrom ){
 		var data = {};
 	
 		// > 常规
@@ -1319,7 +1319,7 @@ function Drill_GFM_Allocator(){
 //==============================
 Drill_GFM_Allocator.prototype.initialize = function( data ){
 	this._drill_data = {};
-	this._drill_allocatorSerial = new Date().getTime() + Math.random();		//（生成一个不重复的序列号）
+	this._drill_allocatorSerial = new Date().getTime() + Math.random();		//『生成一个不重复的序列号』
     this.drill_allocator_initData();										//初始化数据
     this.drill_allocator_initChild();										//初始化子功能
 	if( data == undefined ){ data = {}; }
@@ -1458,7 +1458,7 @@ Drill_GFM_Allocator.prototype.drill_allocator_resetData_Private = function( data
 	
 	// > 执行重置
 	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
-	this._drill_allocatorSerial = new Date().getTime() + Math.random();		//（生成一个不重复的序列号）
+	this._drill_allocatorSerial = new Date().getTime() + Math.random();		//『生成一个不重复的序列号』
     this.drill_allocator_initData();										//初始化数据
     this.drill_allocator_initChild();										//初始化子功能
 }

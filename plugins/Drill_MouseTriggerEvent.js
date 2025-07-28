@@ -227,7 +227,7 @@
 //		★功能结构树：
 //			->☆提示信息
 //			->☆静态数据
-//			->☆事件注释
+//			->☆事件注释（Sprite_Character）
 //			
 //			
 //		★家谱：
@@ -294,48 +294,48 @@ if( Imported.Drill_EventMouseSwitch &&
 	
 	
 //=============================================================================
-// ** ☆事件注释
+// ** ☆事件注释（Sprite_Character）
 //=============================================================================
 //==============================
 // * 事件注释 - 第一页标记
 //==============================
-var _drill_MTE_initMembers = Game_Event.prototype.initMembers;
+var _drill_MTE_event_initMembers = Game_Event.prototype.initMembers;
 Game_Event.prototype.initMembers = function(){ 
-	_drill_MTE_initMembers.call(this);
+	_drill_MTE_event_initMembers.call(this);
 	this._drill_MTE_isFirstBirth = true;
 };
 //==============================
-// * 事件注释 - 第一页绑定（Sprite_Character）
+// * 事件注释 - 读取绑定（Sprite_Character）
 //==============================
-var _drill_MTE_setCharacter = Sprite_Character.prototype.setCharacter;
+var _drill_MTE_event_setCharacter = Sprite_Character.prototype.setCharacter;
 Sprite_Character.prototype.setCharacter = function(character){ 		//图像改变，范围就改变
-	_drill_MTE_setCharacter.call(this,character);
-    this.drill_MTE_setupTrigger();
+	_drill_MTE_event_setCharacter.call(this,character);
+    this.drill_MTE_event_readPage();
 };
 //==============================
-// * 事件注释 - 初始化绑定（Sprite_Character）
+// * 事件注释 - 读取 页（Sprite_Character）
 //==============================
-Sprite_Character.prototype.drill_MTE_setupTrigger = function(){ 
+Sprite_Character.prototype.drill_MTE_event_readPage = function(){ 
 	if( this._character && this._character instanceof Game_Event ){
 		var ch = this._character;
 		
 		// > 第一次出生，强制读取第一页注释（防止离开地图后，回来，开关失效）
 		if( !ch._erased && ch.event() && ch.event().pages[0] && ch._drill_MTE_isFirstBirth == true ){ 
-			ch._drill_MTE_isFirstBirth = undefined;		//『节约临时参数存储空间』
-			ch.drill_MTE_readPage( ch.event().pages[0].list );
+			ch.drill_MTE_event_readList( ch.event().pages[0].list );
+			ch._drill_MTE_isFirstBirth = undefined;		//『节约临时参数存储空间』（放后面，注释通过这个识别"跨事件页/不跨事件页"。"跨事件页"的注释必须放在第一页才能生效。）
 		}
 		
 		// > 读取当前页注释
 		if( !ch._erased && ch.page() ){ 
-			ch.drill_MTE_readPage( ch.list() );
+			ch.drill_MTE_event_readList( ch.list() );
 		}
 	}
 };
 //==============================
-// * 事件注释 - 初始化
+// * 事件注释 - 读取 注释
 //==============================
-Game_Event.prototype.drill_MTE_readPage = function( page_list ){
-	page_list.forEach( function(l){
+Game_Event.prototype.drill_MTE_event_readList = function( pageOfList ){
+	pageOfList.forEach( function( l ){
 		if( l.code === 108 ){
 			var l_str = l.parameters[0];
 			var args = l_str.split(' ');

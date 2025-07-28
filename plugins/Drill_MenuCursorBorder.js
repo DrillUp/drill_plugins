@@ -464,7 +464,7 @@
 	// * 静态数据 - 样式
 	//				（~struct~DrillMCBStyle）
 	//==============================
-	DrillUp.drill_MCB_initStyle = function( dataFrom ) {
+	DrillUp.drill_MCB_initStyle = function( dataFrom ){
 		var data = {};
 		data['shifting_x'] = Number( dataFrom["偏移-框 X"] || 0);
 		data['shifting_y'] = Number( dataFrom["偏移-框 Y"] || 0);

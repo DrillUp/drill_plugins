@@ -1778,7 +1778,7 @@
 	// * 静态数据 - 粒子
 	//				（~struct~LPRMapRain）
 	//==============================
-	DrillUp.drill_LPR_rainInit = function( dataFrom ) {
+	DrillUp.drill_LPR_rainInit = function( dataFrom ){
 		var data = {};
 		
 		// > 绑定

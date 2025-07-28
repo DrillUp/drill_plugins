@@ -340,18 +340,18 @@
 	
 	
 	/*-----------------杂项------------------*/
-	DrillUp.g_PT_liftingHeight = Number(DrillUp.parameters['默认运输时花盆高度'] || 22);
-	DrillUp.g_PT_pickSE = String(DrillUp.parameters['举起音效'] || "");
-	DrillUp.g_PT_throwSE = String(DrillUp.parameters['投掷音效'] || "");
-	DrillUp.g_PT_isLifting_switch = Number(DrillUp.parameters['开关-是否正在运输'] || 0);
-	DrillUp.g_PT_liftingEvent_par = Number(DrillUp.parameters['变量-正在运输的事件id'] || 0);
+	DrillUp.g_PT_liftingHeight = Number(DrillUp.parameters["默认运输时花盆高度"] || 22);
+	DrillUp.g_PT_pickSE = String(DrillUp.parameters["举起音效"] || "");
+	DrillUp.g_PT_throwSE = String(DrillUp.parameters["投掷音效"] || "");
+	DrillUp.g_PT_isLifting_switch = Number(DrillUp.parameters["开关-是否正在运输"] || 0);
+	DrillUp.g_PT_liftingEvent_par = Number(DrillUp.parameters["变量-正在运输的事件id"] || 0);
 	
 	/*-----------------禁止花盆区------------------*/
-	DrillUp.g_PT_forbidden_area = [];
-	if( DrillUp.parameters['禁止花盆区'] != undefined  && DrillUp.parameters['禁止花盆区'] != "" ){
-		DrillUp.g_PT_forbidden_area = JSON.parse(DrillUp.parameters['禁止花盆区']);
+	if( DrillUp.parameters["禁止花盆区"] != undefined &&
+		DrillUp.parameters["禁止花盆区"] != "" ){
+		DrillUp.g_PT_forbidden_area = JSON.parse(DrillUp.parameters["禁止花盆区"]);
 	}else{
-		DrillUp.g_PT_forbidden_area = [] ;
+		DrillUp.g_PT_forbidden_area = [];
 	}
 	//（这里不含举起姿势动作配置）
 	

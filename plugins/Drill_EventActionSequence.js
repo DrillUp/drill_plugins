@@ -97,6 +97,7 @@
  * 2. "创建动画序列" 与 "创建动画序列(站桩)" 指令是一样的意思，默认按站桩识别。
  *   动画序列分为 站桩动画序列、四方向动画序列、二方向动画序列，
  *   详细可以去看看文档："7.行走图 > 关于行走图GIF动画序列.docx"。
+ * 3."玩家队员[1]"中，-2表示领队，1表示第一个跟随者。
  *
  * -----------------------------------------------------------------------------
  * ----可选设定 - 播放
@@ -424,18 +425,28 @@ Game_Interpreter.prototype.drill_EASe_pluginCommand = function( command, args ){
 			if( p_chars == null && unit.indexOf("玩家队员变量[") != -1 ){
 				unit = unit.replace("玩家队员变量[","");
 				unit = unit.replace("]","");
-				var group = $gamePlayer.followers().visibleFollowers();
-				group.unshift($gamePlayer);
-				p_chars = [];
-				p_chars.push(group[ $gameVariables.value(Number(unit)) ]);
+				var p_id = $gameVariables.value(Number(unit));
+				if( p_id == -2 ){  //『玩家id』
+					p_chars = [ $gamePlayer ];
+				}
+				if( p_id > 0 ){  //『玩家队员id』
+					var group = $gamePlayer.followers().visibleFollowers();
+					p_chars = [];
+					p_chars.push(group[ p_id-1 ]);
+				}
 			}
 			if( p_chars == null && unit.indexOf("玩家队员[") != -1 ){
 				unit = unit.replace("玩家队员[","");
 				unit = unit.replace("]","");
-				var group = $gamePlayer.followers().visibleFollowers();
-				group.unshift($gamePlayer);
-				p_chars = [];
-				p_chars.push(group[ Number(unit) ]);
+				var p_id = Number(unit);
+				if( p_id == -2 ){  //『玩家id』
+					p_chars = [ $gamePlayer ];
+				}
+				if( p_id > 0 ){  //『玩家队员id』
+					var group = $gamePlayer.followers().visibleFollowers();
+					p_chars = [];
+					p_chars.push(group[ p_id-1 ]);
+				}
 			}
 		}
 		if( e_chars == null ){ e_chars = []; }

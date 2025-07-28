@@ -1668,6 +1668,10 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
+//			
+//			☆插件指令
+//			☆场景容器之图片贴图
+//			
 //			图片动态遮罩板A：
 //				->动态遮罩容器
 //					->创建 动态遮罩板
@@ -1788,8 +1792,8 @@
 		var data = {};
 		
 		// > 贴图
-		if( dataFrom["资源-遮罩GIF"] != "" &&
-			dataFrom["资源-遮罩GIF"] != undefined ){
+		if( dataFrom["资源-遮罩GIF"] != undefined &&
+			dataFrom["资源-遮罩GIF"] != "" ){
 			data['gif_src'] = JSON.parse( dataFrom["资源-遮罩GIF"] );
 		}else{
 			data['gif_src'] = [];
@@ -1823,9 +1827,9 @@
 	/*-----------------透视镜样式------------------*/
 	DrillUp.g_PDMA_childData_length = 200;
 	DrillUp.g_PDMA_childData = [];	
-	for (var i = 0; i < DrillUp.g_PDMA_childData_length; i++) {
-		if( DrillUp.parameters["透视镜样式-" + String(i+1) ] != "" &&
-			DrillUp.parameters["透视镜样式-" + String(i+1) ] != undefined ){
+	for( var i = 0; i < DrillUp.g_PDMA_childData_length; i++ ){
+		if( DrillUp.parameters["透视镜样式-" + String(i+1) ] != undefined &&
+			DrillUp.parameters["透视镜样式-" + String(i+1) ] != "" ){
 			var data = JSON.parse(DrillUp.parameters["透视镜样式-" + String(i+1) ]);
 			DrillUp.g_PDMA_childData[i] = DrillUp.drill_PDMA_childSpriteInit( data );
 		}else{
@@ -2431,6 +2435,170 @@ if( Imported.Drill_STG__objects ){
 };
 
 
+//#############################################################################
+// ** 【标准模块】图片贴图容器 ☆场景容器之图片贴图
+//#############################################################################
+//##############################
+// * 图片贴图容器 - 获取 - 全部图片贴图【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 贴图数组       （图片贴图）
+//          
+//			说明：	> 此函数返回所有图片贴图，包括被转移到 图片层、最顶层 的图片。
+//##############################
+Game_Temp.prototype.drill_PDMA_getAllPictureSprite = function(){
+	return this.drill_PDMA_getAllPictureSprite_Private();
+}
+//##############################
+// * 图片贴图容器 - 获取 - 容器指针【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 贴图数组       （图片贴图）
+//          
+//			说明：	> 此函数直接返回容器对象。
+//					> 注意，被转移到 图片层、最顶层 的图片，不在此容器内。
+//##############################
+Game_Temp.prototype.drill_PDMA_getPictureSpriteTank = function(){
+	return this.drill_PDMA_getPictureSpriteTank_Private();
+}
+//##############################
+// * 图片贴图容器 - 获取 - 根据图片ID【标准函数】
+//			
+//			参数：	> picture_id 数字（图片ID）
+//			返回：	> 贴图对象       （图片贴图）
+//          
+//			说明：	> 图片id和图片贴图一一对应。
+//					> 此函数只读，且不缓存任何对象，直接读取容器数据。
+//					> 注意，图片数据类 与 图片贴图 为 多对一，图片数据类在战斗界面和地图界面分两类，而图片贴图不分。
+//					> 此函数能获取到被转移到 图片层、最顶层 的图片。
+//##############################
+Game_Temp.prototype.drill_PDMA_getPictureSpriteByPictureId = function( picture_id ){
+	return this.drill_PDMA_getPictureSpriteByPictureId_Private( picture_id );
+}
+//=============================================================================
+// ** 场景容器之图片贴图（实现）
+//=============================================================================
+//==============================
+// * 图片贴图容器 - 获取 - 容器（私有）
+//==============================
+Game_Temp.prototype.drill_PDMA_getPictureSpriteTank_Private = function(){
+	if( SceneManager._scene == undefined ){ return null; }
+	if( SceneManager._scene._spriteset == undefined ){ return null; }
+	if( SceneManager._scene._spriteset._pictureContainer == undefined ){ return null; }
+	return SceneManager._scene._spriteset._pictureContainer.children;
+};
+//==============================
+// * 图片贴图容器 - 获取 - 最顶层容器（私有）
+//==============================
+Game_Temp.prototype.drill_PDMA_getPictureSpriteTank_SenceTopArea = function(){
+	if( SceneManager._scene == undefined ){ return null; }
+	if( SceneManager._scene._drill_SenceTopArea == undefined ){ return null; }
+	return SceneManager._scene._drill_SenceTopArea.children;
+};
+//==============================
+// * 图片贴图容器 - 获取 - 图片层容器（私有）
+//==============================
+Game_Temp.prototype.drill_PDMA_getPictureSpriteTank_PicArea = function(){
+	if( SceneManager._scene == undefined ){ return null; }
+	if( SceneManager._scene instanceof Scene_Battle ){		//『图片与多场景-战斗界面』
+		if( SceneManager._scene._spriteset == undefined ){ return null; }
+		if( SceneManager._scene._spriteset._drill_battlePicArea == undefined ){ return null; }
+		return SceneManager._scene._spriteset._drill_battlePicArea.children;
+	}
+	if( SceneManager._scene instanceof Scene_Map ){			//『图片与多场景-地图界面』
+		if( SceneManager._scene._spriteset == undefined ){ return null; }
+		if( SceneManager._scene._spriteset._drill_mapPicArea == undefined ){ return null; }
+		return SceneManager._scene._spriteset._drill_mapPicArea.children;
+	}
+	return null;
+};
+//==============================
+// * 图片贴图容器 - 获取 - 全部图片贴图（私有）
+//==============================
+Game_Temp.prototype.drill_PDMA_getAllPictureSprite_Private = function(){
+	var result_list = [];
+	
+	// > 图片对象层 的图片贴图
+	var sprite_list = this.drill_PDMA_getPictureSpriteTank_Private();
+	if( sprite_list != undefined ){
+		for(var i=0; i < sprite_list.length; i++){
+			var sprite = sprite_list[i];
+			if( sprite instanceof Sprite_Picture ){
+				result_list.push( sprite );
+			}
+		}
+	}
+	
+	// > 最顶层 的图片贴图
+	var sprite_list = this.drill_PDMA_getPictureSpriteTank_SenceTopArea();
+	if( sprite_list != undefined ){
+		for(var i=0; i < sprite_list.length; i++){
+			var sprite = sprite_list[i];
+			if( sprite instanceof Sprite_Picture ){
+				result_list.push( sprite );
+			}
+		}
+	}
+	
+	// > 图片层 的图片贴图
+	var sprite_list = this.drill_PDMA_getPictureSpriteTank_PicArea();
+	if( sprite_list != undefined ){
+		for(var i=0; i < sprite_list.length; i++){
+			var sprite = sprite_list[i];
+			if( sprite instanceof Sprite_Picture ){
+				result_list.push( sprite );
+			}
+		}
+	}
+	return result_list;
+};
+//==============================
+// * 图片贴图容器 - 获取 - 根据图片ID（私有）
+//==============================
+Game_Temp.prototype.drill_PDMA_getPictureSpriteByPictureId_Private = function( picture_id ){
+	
+	// > 图片对象层 的图片贴图
+	var sprite_list = this.drill_PDMA_getPictureSpriteTank_Private();
+	if( sprite_list != undefined ){
+		for(var i=0; i < sprite_list.length; i++){
+			var sprite = sprite_list[i];
+			if( sprite instanceof Sprite_Picture ){
+				if( sprite._pictureId == picture_id ){
+					return sprite;
+				}
+			}
+		}
+	}
+	
+	// > 最顶层 的图片贴图
+	var sprite_list = this.drill_PDMA_getPictureSpriteTank_SenceTopArea();
+	if( sprite_list != undefined ){
+		for(var i=0; i < sprite_list.length; i++){
+			var sprite = sprite_list[i];
+			if( sprite instanceof Sprite_Picture ){
+				if( sprite._pictureId == picture_id ){
+					return sprite;
+				}
+			}
+		}
+	}
+	
+	// > 图片层 的图片贴图
+	var sprite_list = this.drill_PDMA_getPictureSpriteTank_PicArea();
+	if( sprite_list != undefined ){
+		for(var i=0; i < sprite_list.length; i++){
+			var sprite = sprite_list[i];
+			if( sprite instanceof Sprite_Picture ){
+				if( sprite._pictureId == picture_id ){
+					return sprite;
+				}
+			}
+		}
+	}
+	return null;
+};
+
+
 
 //=============================================================================
 // ** ☆预加载
@@ -2974,11 +3142,10 @@ Scene_Base.prototype.drill_PDMA_setMaskOpened = function( b ){
 }
 
 //=============================================================================
-// ** 动态遮罩板（地图界面）
-//
+// ** 动态遮罩板
 //=============================================================================
 //==============================
-// * 地图界面 - 创建『图片与多场景』
+// * 动态遮罩板 - 创建『图片与多场景-地图界面』
 //==============================
 var _drill_PDMA_mapScene_initialize = Scene_Map.prototype.initialize;
 Scene_Map.prototype.initialize = function() {
@@ -2986,7 +3153,7 @@ Scene_Map.prototype.initialize = function() {
 	this.drill_PDMA_createMaskLayer();		//（容器必须在所有 场景装饰插件 之前创建）
 };
 //==============================
-// * 地图界面 - 帧刷新
+// * 动态遮罩板 - 帧刷新『图片与多场景-地图界面』
 //==============================
 var _drill_PDMA_mapScene_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {	
@@ -2998,7 +3165,7 @@ Scene_Map.prototype.update = function() {
 	// > 测试 - update激活监听
 	//if( DrillUp.g_PDMA_debugUpdate_map == true ){
 	//	DrillUp.g_PDMA_debugUpdate_map = false;
-	//	alert("图片动态遮罩板A 开始帧刷新（地图界面）。");
+	//	alert("图片动态遮罩板A 开始帧刷新 地图界面。");
 	//}
 	
 	// > 帧刷新 - 创建透视镜贴图
@@ -3014,12 +3181,9 @@ Scene_Map.prototype.update = function() {
 	}
 };
 DrillUp.g_PDMA_debugUpdate_map = true;
-//=============================================================================
-// ** 动态遮罩板（战斗界面）
-//
-//=============================================================================
+
 //==============================
-// * 战斗界面 - 创建『图片与多场景』
+// * 动态遮罩板 - 创建『图片与多场景-战斗界面』
 //==============================
 var _drill_PDMA_battleScene_initialize = Scene_Battle.prototype.initialize;
 Scene_Battle.prototype.initialize = function() {
@@ -3027,7 +3191,7 @@ Scene_Battle.prototype.initialize = function() {
 	this.drill_PDMA_createMaskLayer();		//（容器必须在所有 场景装饰插件 之前创建）
 };
 //==============================
-// * 战斗界面 - 帧刷新
+// * 动态遮罩板 - 帧刷新『图片与多场景-战斗界面』
 //==============================
 var _drill_PDMA_battleScene_update = Scene_Battle.prototype.update;
 Scene_Battle.prototype.update = function() {	
@@ -3039,7 +3203,7 @@ Scene_Battle.prototype.update = function() {
 	// > 测试 - update激活监听
 	//if( DrillUp.g_PDMA_debugUpdate_battle == true ){
 	//	DrillUp.g_PDMA_debugUpdate_battle = false;
-	//	alert("图片动态遮罩板A 开始帧刷新（战斗界面）。");
+	//	alert("图片动态遮罩板A 开始帧刷新 战斗界面。");
 	//}
 	
 	// > 帧刷新 - 创建透视镜贴图
@@ -3074,25 +3238,25 @@ Game_Picture.prototype.initialize = function() {
 //==============================
 var _drill_PDMA_sp_initialize = Sprite_Picture.prototype.initialize;
 Sprite_Picture.prototype.initialize = function( pictureId ){
-	_drill_PDMA_sp_initialize.call( this, pictureId );
 	
+	// > 初始化（要放前面，因为 图片贴图initialize中会执行一次update）
 	this._drill_PDMA_curMaskBind = null;
 	this._drill_PDMA_maskSprite = null;
+	
+	// > 原函数
+	_drill_PDMA_sp_initialize.call( this, pictureId );
 }
 //==============================
 // * 图片贴图 - 帧刷新
 //
 //			说明：	在 界面类 中，对 Spriteset_Base图层贴图 中的图片对象进行 动态遮罩板绑定刷新。
 //==============================
-Scene_Base.prototype.drill_PDMA_updatePictureSprite = function(){	
-	if( this._spriteset == undefined ){ return; }
+Scene_Base.prototype.drill_PDMA_updatePictureSprite = function(){
 	
 	// > 遍历图片组
-	var sprite_list = this._spriteset._pictureContainer.children;
+	var sprite_list = $gameTemp.drill_PDMA_getAllPictureSprite();
 	for(var i=0; i < sprite_list.length; i++ ){
 		var temp_sprite = sprite_list[i];
-		if( temp_sprite == undefined ){ continue; }
-		if( temp_sprite instanceof Sprite_Picture == false ){ continue; }
 		var picture = temp_sprite.picture();
 		if( picture == undefined ){ continue; }
 		
@@ -3111,7 +3275,7 @@ Scene_Base.prototype.drill_PDMA_updatePictureSprite = function(){
 	}
 }
 //==============================
-// * 地图界面 - 帧刷新绑定『图片与多场景』
+// * 地图界面 - 帧刷新绑定『图片与多场景-地图界面』
 //==============================
 var _drill_PDMA_mapScene_update2 = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {	
@@ -3119,7 +3283,7 @@ Scene_Map.prototype.update = function() {
 	this.drill_PDMA_updatePictureSprite();
 }
 //==============================
-// * 战斗界面 - 帧刷新绑定『图片与多场景』
+// * 战斗界面 - 帧刷新绑定『图片与多场景-战斗界面』
 //==============================
 var _drill_PDMA_battleScene_update2 = Scene_Battle.prototype.update;
 Scene_Battle.prototype.update = function() {	

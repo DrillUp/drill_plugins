@@ -452,8 +452,12 @@ Game_Picture.prototype.initialize = function() {
 //==============================
 var _drill_PFi_sp_initialize = Sprite_Picture.prototype.initialize;
 Sprite_Picture.prototype.initialize = function( pictureId ){
-	_drill_PFi_sp_initialize.call( this, pictureId );
+	
+	// > 初始化（要放前面，因为 图片贴图initialize中会执行一次update）
 	this._drill_PFi_filterOpened = false;		//滤镜开启标记（部分情况下 图片贴图的存活时间比数据的 要长）
+	
+	// > 原函数
+	_drill_PFi_sp_initialize.call( this, pictureId );
 }
 //==============================
 // * 图片贴图 - 帧刷新

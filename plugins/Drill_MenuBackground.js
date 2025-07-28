@@ -1002,7 +1002,7 @@
 	// * 静态数据 - 默认背景
 	//				（~struct~MenuBackgroundDefault）
 	//==============================
-	DrillUp.drill_MBa_backgroundDefaultInit = function( dataFrom ) {
+	DrillUp.drill_MBa_backgroundDefaultInit = function( dataFrom ){
 		var data = {};
 		
 		// > 贴图
@@ -1031,7 +1031,7 @@
 	// * 静态数据 - 背景
 	//				（~struct~MenuBackground）
 	//==============================
-	DrillUp.drill_MBa_backgroundInit = function( dataFrom ) {
+	DrillUp.drill_MBa_backgroundInit = function( dataFrom ){
 		var data = {};
 
 		// > 绑定

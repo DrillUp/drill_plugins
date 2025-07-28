@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        互动 - 玩家队员管理
+ * @plugindesc [v1.1]        互动 - 玩家队员管理
  * @author Drill_up
  * 
  * 
@@ -24,10 +24,13 @@
  * ----设定注意事项
  * 1.插件的作用域：地图界面。
  *   作用于玩家、玩家队员。
+ * 2.如果想了解详细内容，去看看 "10.互动 > 关于玩家队员管理.docx"。
  * 细节：
  *   (1."角色队伍"指战斗界面中参加战斗的队伍。
  *      "玩家队员"指地图界面中跟随玩家的行走图。
  *      二者有一一对应的关系，但在细微定义上有些不一样。
+ *   (2."玩家队员[1]"中，-2表示领队，1表示第一个跟随者。
+ *      此设定与"事件[1]"一样，-2表示玩家，1表示id为1的事件。
  * 设计：
  *   (1.你可以修改"自定义队员显示数量"，以防止战斗角色成员过多时，
  *      玩家队员的队伍拖的太长不好看。
@@ -35,16 +38,38 @@
  *      比如在动画序列小房间的二方向行走图，能让挤在一起的队伍变宽一点。
  * 
  * -----------------------------------------------------------------------------
- * ----可选设定
+ * ----可选设定 - 常规指令
  * 你可以通过插件指令手动控制开关：
  * 
  * 插件指令：>玩家队员管理 : 显示玩家队员
  * 插件指令：>玩家队员管理 : 隐藏玩家队员
  * 插件指令：>玩家队员管理 : 集合玩家队员
+ * 插件指令：>玩家队员管理 : 角色入队 : 角色[1]
+ * 插件指令：>玩家队员管理 : 角色入队 : 角色变量[21]
+ * 插件指令：>玩家队员管理 : 角色离队 : 角色[1]
+ * 插件指令：>玩家队员管理 : 角色离队 : 角色变量[21]
  * 
  * 1."显示/隐藏"的插件指令直接对应事件指令"人物 > 更改队列行进"的开关功能。
  *   另外，系统>选项>队列行进 为游戏初始时 是否显示玩家队员 的配置。
  * 2."集合玩家队员"的插件指令直接对应事件指令"人物 > 集合队列成员"的功能。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 获取值
+ * 你可以获取使用下面插件指令获取数据：
+ * 
+ * 插件指令：>玩家队员管理 : 变量[21] : 获取当前玩家队员数量
+ * 插件指令：>玩家队员管理 : 变量[21] : 获取玩家领队的角色ID
+ * 插件指令：>玩家队员管理 : 变量[21] : 获取玩家队员的角色ID : 玩家队员[1]
+ * 插件指令：>玩家队员管理 : 变量[21] : 获取角色ID对应的玩家队员 : 角色[1]
+ * 
+ * 1.获取角色ID时，
+ *   "玩家队员[1]"中，-2表示领队，1表示第一个跟随者。
+ *   如果指定位置没有角色，则变量会被赋值-1。
+ * 2.获取玩家队员ID时，
+ *   获取到的，-2表示领队，1表示第一个跟随者。
+ *   如果没有角色ID对应的玩家队员，则变量会被赋值-1。
+ * 3.当前玩家队员数量可以为0，因为游戏中允许空白队伍的情况，
+ *   详细可以看看文档 "10.互动 > 关于玩家队员管理.docx"。
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 显示设置
@@ -86,12 +111,14 @@
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
  *   测试结果并不是精确值，范围在给定值的10ms范围内波动。
  *   更多性能介绍，去看看 "0.性能测试报告 > 关于插件性能.docx"。
- * 2.
+ * 2.该插件提供的指令都是单次执行所以消耗不大。
  * 
  * -----------------------------------------------------------------------------
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 添加了角色变量值对应的角色入队的指令。
  * 
  * 
  * 
@@ -147,6 +174,7 @@
 //			->☆插件指令
 //			->☆存储数据
 //			
+//			->☆玩家队员ID
 //			->☆队员跟随
 //			->☆队员显示
 //			
@@ -246,7 +274,7 @@ Game_Interpreter.prototype.pluginCommand = function( command, args ){
 Game_Interpreter.prototype.drill_PFM_pluginCommand = function( command, args ){
 	if( command === ">玩家队员管理" ){
 		
-		/*-----------------事件指令------------------*/
+		/*-----------------常规指令------------------*/
 		if( args.length == 2 ){
 			var type = String(args[1]);
 			if( type == "显示玩家队员" ){
@@ -259,6 +287,73 @@ Game_Interpreter.prototype.drill_PFM_pluginCommand = function( command, args ){
 			}
 			if( type == "集合玩家队员" ){
 				this.command217();
+			}
+		}
+		if( args.length == 4 ){
+			var type = String(args[1]);
+			var temp1 = String(args[3]);
+			if( type == "角色入队" ){
+				if( temp1.indexOf("角色[") != -1 ){
+					temp1 = temp1.replace("角色[","");
+					temp1 = temp1.replace("]","");
+					$gameParty.addActor( Number(temp1) );
+				}else if( temp1.indexOf("角色变量[") != -1 ){
+					temp1 = temp1.replace("角色变量[","");
+					temp1 = temp1.replace("]","");
+					$gameParty.addActor( $gameVariables.value(Number(temp1)) );
+				}
+			}
+			if( type == "角色离队" ){
+				if( temp1.indexOf("角色[") != -1 ){
+					temp1 = temp1.replace("角色[","");
+					temp1 = temp1.replace("]","");
+					$gameParty.removeActor( Number(temp1) );
+				}else if( temp1.indexOf("角色变量[") != -1 ){
+					temp1 = temp1.replace("角色变量[","");
+					temp1 = temp1.replace("]","");
+					$gameParty.removeActor( $gameVariables.value(Number(temp1)) );
+				}
+			}
+		}
+		
+		/*-----------------获取值------------------*/
+		if( args.length == 4 ){
+			var temp1 = String(args[1]);
+			var type = String(args[3]);
+			if( type == "获取当前玩家队员数量" ){
+				temp1 = temp1.replace("变量[","");
+				temp1 = temp1.replace("]","");
+				$gameVariables.setValue( Number(temp1), $gameParty.battleMembers().length );
+			}
+			if( type == "获取玩家领队的角色ID" ){
+				temp1 = temp1.replace("变量[","");
+				temp1 = temp1.replace("]","");
+				var actor = $gameParty.leader();
+				if( actor == undefined ){
+					$gameVariables.setValue( Number(temp1), -1 );
+				}else{
+					$gameVariables.setValue( Number(temp1), actor._actorId );
+				}
+			}
+		}
+		if( args.length == 6 ){
+			var temp1 = String(args[1]);
+			var type = String(args[3]);
+			var temp2 = String(args[5]);
+			if( type == "获取玩家队员的角色ID" ){
+				temp1 = temp1.replace("变量[","");
+				temp1 = temp1.replace("]","");
+				temp2 = temp2.replace("玩家队员[","");
+				temp2 = temp2.replace("]","");
+				$gameVariables.setValue( Number(temp1), $gameTemp.drill_PFM_getActorId_ByFollowerId( Number(temp2) ) );
+			}
+			if( type == "获取角色ID对应的玩家队员" ){
+				temp1 = temp1.replace("变量[","");
+				temp1 = temp1.replace("]","");
+				temp2 = temp2.replace("角色[","");
+				temp2 = temp2.replace("]","");
+				$gameVariables.setValue( Number(temp1), $gameTemp.drill_PFM_getFollowerId_ByActorId( Number(temp2) ) );
+				
 			}
 		}
 		
@@ -291,6 +386,7 @@ Game_Interpreter.prototype.drill_PFM_pluginCommand = function( command, args ){
 				$gameSystem._drill_PFM_distance = Number( temp1 );
 			}
 		}
+		
 	}
 };
 	
@@ -378,6 +474,47 @@ Game_System.prototype.drill_PFM_checkSysData_Private = function() {
 };
 	
 	
+	
+//=============================================================================
+// ** ☆玩家队员ID
+//
+//			说明：	> 此模块专门管理 玩家队员显示 控制功能。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 玩家队员ID - 获取玩家队员ID（根据角色ID）
+//==============================
+Game_Temp.prototype.drill_PFM_getFollowerId_ByActorId = function( actor_id ){
+	var actors = $gameParty.members();
+	for( var i = 0; i < actors.length; i++ ){
+		var actor = actors[i];
+		if( actor.actorId() == actor_id ){
+			if( i == 0 ){
+				return -2;  //『玩家id』
+			}
+			if( i > 0 ){
+				return i;  //『玩家队员id』
+			}
+		}
+	}
+    return -1;
+};
+//==============================
+// * 玩家队员ID - 获取角色ID（根据玩家队员ID）
+//==============================
+Game_Temp.prototype.drill_PFM_getActorId_ByFollowerId = function( follower_id ){
+	var actor = null;
+	if( follower_id == -2 ){  //『玩家id』
+		actor = $gameParty.members()[ 0 ];
+	}
+	if( follower_id > 0 ){  //『玩家队员id』
+		actor = $gameParty.members()[ follower_id ];
+	}
+	if( actor == undefined ){ return -1; }
+    return actor.actorId();
+};
+
+
 //=============================================================================
 // ** ☆队员显示
 //

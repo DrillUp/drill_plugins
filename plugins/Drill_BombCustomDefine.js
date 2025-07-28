@@ -643,7 +643,8 @@
 	DrillUp.g_BoCD_p_list_length = 30;
 	DrillUp.g_BoCD_p_list = [];
 	for( var i = 0; i < DrillUp.g_BoCD_p_list_length; i++ ){
-		if( DrillUp.parameters['玩家炸弹-火力' + String(i+1) ] != "" ){
+		if( DrillUp.parameters['玩家炸弹-火力' + String(i+1) ] != undefined &&
+			DrillUp.parameters['玩家炸弹-火力' + String(i+1) ] != "" ){
 			DrillUp.g_BoCD_p_list[i] = JSON.parse(DrillUp.parameters['玩家炸弹-火力' + String(i+1) ]);
 			DrillUp.g_BoCD_p_list[i]['enable'] = String(DrillUp.g_BoCD_p_list[i]["是否开启"] || "true") == "true";
 			DrillUp.g_BoCD_p_list[i]['map_id'] = Number(DrillUp.g_BoCD_p_list[i]["自定义炸弹所在地图ID"]);
@@ -655,7 +656,8 @@
 	DrillUp.g_BoCD_e_list_length = 30;
 	DrillUp.g_BoCD_e_list = [];
 	for( var i = 0; i < DrillUp.g_BoCD_e_list_length; i++ ){
-		if( DrillUp.parameters['事件炸弹-火力' + String(i+1) ] != "" ){
+		if( DrillUp.parameters['事件炸弹-火力' + String(i+1) ] != undefined &&
+			DrillUp.parameters['事件炸弹-火力' + String(i+1) ] != "" ){
 			DrillUp.g_BoCD_e_list[i] = JSON.parse(DrillUp.parameters['事件炸弹-火力' + String(i+1) ]);
 			DrillUp.g_BoCD_e_list[i]['enable'] = String(DrillUp.g_BoCD_e_list[i]["是否开启"] || "true") == "true";
 			DrillUp.g_BoCD_e_list[i]['map_id'] = Number(DrillUp.g_BoCD_e_list[i]["自定义炸弹所在地图ID"]);

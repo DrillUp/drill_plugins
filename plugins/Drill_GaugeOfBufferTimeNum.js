@@ -644,7 +644,7 @@
 	// * 静态数据 - 时间数字样式
 	//				（~struct~BufferTimeNum）
 	//==============================
-	DrillUp.drill_GOBTN_initParam = function( dataFrom ) {
+	DrillUp.drill_GOBTN_initParam = function( dataFrom ){
 		var data = {};
 		data['x'] = Number( dataFrom["平移-整体 X"] || 0 );
 		data['y'] = Number( dataFrom["平移-整体 Y"] || 0 );

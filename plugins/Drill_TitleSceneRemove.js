@@ -31,9 +31,9 @@
  *   (1.如果你的游戏一开始就不想要标题界面，可以在参数中设置直接
  *      去掉标题界面。
  *   (2.去掉界面后，将切断下面三个路线：
- *      启动界面 -> 标题界面 -> 新游戏
- *      游戏结束界面 -> 标题界面 -> 退出游戏
- *      游戏失败界面 -> 标题界面 -> 新游戏
+ *        启动界面 -> 标题界面 -> 新游戏
+ *        游戏结束界面 -> 标题界面 -> 退出游戏
+ *        游戏失败界面 -> 标题界面 -> 新游戏
  *   (3.你需要去 数据库>用语 中修改"回到标题"的字符串。 
  * 设计：
  *   (1.如果你的游戏一开始就不想要标题界面，可以在参数中设置直接
@@ -86,7 +86,7 @@
  * @param 全局存储的文件路径
  * @type number
  * @min 1
- * @desc 若没加全局存储核心插件，则此设置没有效果。 该设置对应文件路径ID，具体去 全局存储核心 看看。
+ * @desc 若没加全局存储核心插件，则此设置没有效果。 该设置对应文件路径ID，具体看看"21.管理器 > 关于全局存储.docx"。
  * @default 1
  *
  */
@@ -207,12 +207,12 @@ Game_Interpreter.prototype.drill_TSRe_pluginCommand = function( command, args ){
 if( Imported.Drill_CoreOfGlobalSave ){
 	
 	//==============================
-	// * 全局 - 读取
+	// * 『全局存储』 - 载入
 	//
 	//			说明：	这里全局存储的是单一固定数据，不需要数据检查。
 	//==============================
 		var global_fileId = DrillUp.g_TSRe_dataFileId;
-		var global_data = StorageManager.drill_COGS_loadData( global_fileId, "TSRe" );
+		var global_data = StorageManager.drill_COGS_loadData( global_fileId, "TSRe" );  //『全局存储执行函数』
 		
 		// > 布局样式ID
 		if( DrillUp.g_TSRe_removeEnabled == null ){			//（游戏没关时，不会为null)
@@ -222,13 +222,13 @@ if( Imported.Drill_CoreOfGlobalSave ){
 		}
 		
 	//==============================
-	// * 全局 - 存储
+	// * 『全局存储』 - 存储
 	//==============================
 	StorageManager.drill_TSRe_saveData = function(){
 		var file_id = DrillUp.g_TSRe_dataFileId;
 		var data = {};
 		data["global_removeEnabled"] = DrillUp.g_TSRe_removeEnabled;
-		this.drill_COGS_saveData( file_id, "TSRe", data );
+		this.drill_COGS_saveData( file_id, "TSRe", data );  //『全局存储执行函数』
 	};
 }
 

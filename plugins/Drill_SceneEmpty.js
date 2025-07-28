@@ -70,19 +70,19 @@
  * 完成插件ヽ(*。>Д<)o゜
  * 
  *
- * @param ----杂项----
+ * @param ----面板跳转----
  * @default 
  *
- * @param 是否添加到主菜单
+ * @param 是否在主菜单窗口中显示
  * @parent ----杂项----
  * @type boolean
- * @on 添加
- * @off 不添加
- * @desc true - 添加，false - 不添加
+ * @on 显示
+ * @off 不显示
+ * @desc true-显示,false-不显示。
  * @default false
  *
- * @param 主菜单显示名
- * @parent 是否添加到主菜单
+ * @param 主菜单窗口显示名
+ * @parent 是否在主菜单窗口中显示
  * @desc 主菜单显示的选项名。
  * @default 空面板
  *
@@ -129,8 +129,8 @@
 //			->☆静态数据
 //			->☆插件指令
 //			
-//			->☆主菜单选项
-//			->☆标题选项
+//			->☆面板跳转之主菜单
+//			->☆面板跳转之标题
 //			
 //			->空面板【Scene_Drill_SEm】
 //				->☆原型链规范（Scene_Drill_SEm）
@@ -175,9 +175,9 @@
 	DrillUp.parameters = PluginManager.parameters('Drill_SceneEmpty');
 	
 	
-	/*-----------------杂项------------------*/
-	DrillUp.g_SEm_add_to_menu = String(DrillUp.parameters['是否添加到主菜单'] || "true") === "true";	
-    DrillUp.g_SEm_menu_name = String(DrillUp.parameters['主菜单显示名'] || "");
+	/*-----------------面板跳转------------------*/
+	DrillUp.g_SEm_add_to_menu = String(DrillUp.parameters['是否在主菜单窗口中显示'] || "true") === "true";	
+    DrillUp.g_SEm_menu_name = String(DrillUp.parameters['主菜单窗口显示名'] || "");
 	DrillUp.g_SEm_add_to_title = String(DrillUp.parameters['是否在标题窗口中显示'] || "false") === "true";	
     DrillUp.g_SEm_title_name = String(DrillUp.parameters['标题窗口显示名'] || "");
 
@@ -201,7 +201,7 @@ Game_Interpreter.prototype.drill_SEm_pluginCommand = function( command, args ){
 		
 		if(args.length == 2){
 			var type = String(args[1]);
-			if( type == "打开面板" ){			//打开菜单
+			if( type == "打开面板" ){
 				SceneManager.push(Scene_Drill_SEm);
 			}
 		}
@@ -210,7 +210,7 @@ Game_Interpreter.prototype.drill_SEm_pluginCommand = function( command, args ){
 
 
 //=============================================================================
-// ** ☆主菜单选项
+// ** ☆面板跳转之主菜单
 //
 //			说明：	> 此模块专门关联主菜单选项，选项进入后跳转到 空面板 界面。
 //					（插件完整的功能目录去看看：功能结构树）
@@ -233,7 +233,7 @@ Window_MenuCommand.prototype.addOriginalCommands = function() {
 
 
 //=============================================================================
-// ** ☆标题选项
+// ** ☆面板跳转之标题
 //
 //			说明：	> 此模块专门关联标题选项，选项进入后跳转到 空面板 界面。
 //					（插件完整的功能目录去看看：功能结构树）

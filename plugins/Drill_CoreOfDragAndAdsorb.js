@@ -61,6 +61,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 改进了拖拽多个对象时的结构。
  * 
  */
  
@@ -79,6 +81,8 @@
 //		★性能测试因素	图片管理层
 //		★性能测试消耗	2024/5/2：
 //							》2.5ms（drill_slot_update）5.2ms（drill_controllerAdsorb_update）0.9ms（drill_controllerDrag_update）
+//						2025/7/27：
+//							》7.1ms（drill_factoryDrag_updateDragMax）
 //		★最坏情况		暂无
 //		★备注			每帧的纯数据计算，不受贴图影响。
 //		
@@ -94,18 +98,23 @@
 //				->获取 吸附数据工厂（开放函数）
 //				->获取 吸附槽数据工厂（开放函数）
 //			
+//			
 //			->拖拽控制器【Drill_CODAA_DragController】
 //				->A主体
 //					->设置可拖拽
-//				->B拖拽控制
-//					->开始拖拽时（可继承）
-//					->结束拖拽时（可继承）
-//					x->【无法决定拖拽顺序】
+//				->B拖拽优先级数据
+//					->帧刷新（散装，手动调用）
+//					->设置优先级（开放函数）
 //				->C拖拽位移
+//					->帧刷新（散装，手动调用）
 //					->获取拖拽偏移量X
 //					->获取拖拽偏移量Y
 //					->立即合并拖拽偏移量
 //					->立即清零拖拽偏移量
+//				->D正在拖拽标记
+//					->帧刷新（散装，手动调用）
+//					->开始拖拽时（可继承）
+//					->结束拖拽时（可继承）
 //			->拖拽数据工厂【Drill_CODAA_DragFactory】
 //				->A容器
 //					->创建 拖拽控制器
@@ -114,6 +123,7 @@
 //					->获取 拖拽控制器 - 根据ID
 //					->获取 拖拽控制器列表 - 根据子插件
 //					->获取 拖拽控制器列表 - 正在拖拽的
+//			
 //			
 //			->吸附控制器【Drill_CODAA_AdsorbController】
 //				->A主体
@@ -149,6 +159,7 @@
 //					->获取 吸附控制器 - 根据拖拽ID
 //					->获取 吸附控制器列表 - 根据吸附槽ID
 //			
+//			
 //			->吸附槽控制器【Drill_CODAA_SlotController】
 //				->A主体
 //				->B槽吸附类型
@@ -166,10 +177,17 @@
 //					->获取 吸附槽控制器 - 根据ID
 //					->获取 吸附槽控制器列表 - 根据子插件
 //			
-//			->☆拖拽数量管理
-//				->设置最大同时拖拽数量（开放函数）
-//				->拖拽数量是否已满（开放函数）
-//				->开始拖拽时（最后继承2级）
+//			
+//			->☆拖拽优先级与数量管理
+//				->2A拖拽数量最大值
+//					->设置最大值（开放函数）
+//					->帧刷新（散装，手动调用）
+//				->2B拖拽优先级顺序
+//				->2C拖拽优先级结果
+//				->2D拖拽优先级最大值
+//					->获取最大优先级（开放函数）
+//					->获取推荐优先级（开放函数）
+//			
 //			->☆吸附数量管理
 //				->获取槽的吸附数量（开放函数）
 //				->获取未吸附的数量（开放函数）
@@ -211,7 +229,7 @@
 //			无
 //		
 //		★脚本文档：
-//			1.系统 > 关于拖拽与吸附控制核心（脚本）.docx
+//			32.数学模型 > 关于拖拽与吸附控制核心（脚本）.docx
 //		
 //		★插件私有类：
 //			* 拖拽控制器【Drill_CODAA_DragController】（不能定义子类，因为工厂类）
@@ -413,17 +431,21 @@ Game_System.prototype.drill_CODAA_slotFactory = function() {
 // **		主功能：	定义一个 拖拽 数据类。
 // **		子功能：	
 // **					->控制器
-// **						->帧刷新
 // **					->A主体
 // **						->设置可拖拽
-// **					->B拖拽控制
-// **						->开始拖拽时（可继承）
-// **						->结束拖拽时（可继承）
+// **					->B拖拽优先级数据
+// **						->帧刷新设置
+// **						->设置优先级（开放函数）
 // **					->C拖拽位移
+// **						->帧刷新
 // **						->获取拖拽偏移量X
 // **						->获取拖拽偏移量Y
 // **						->立即合并拖拽偏移量
 // **						->立即清零拖拽偏移量
+// **					->D正在拖拽标记
+// **						->帧刷新
+// **						->开始拖拽时（可继承）
+// **						->结束拖拽时（可继承）
 // **		
 // **		说明：	> 子插件必须通过工厂类创建控制器。
 // **				> 因为工厂关系，子插件不能定义子类，但可以继承函数。
@@ -438,26 +460,48 @@ function Drill_CODAA_DragController() {
 // * 控制器 - 初始化
 //==============================
 Drill_CODAA_DragController.prototype.initialize = function(){
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
     this.drill_controllerDrag_initChild();									//初始化子功能
 };
 //##############################
-// * 控制器 - 帧刷新
+// * 控制器 - 帧刷新『拖拽的散装帧刷新』 - B拖拽优先级数据
 //			
-//			参数：	> mouse_x 数字    （鼠标位置X）
-//					> mouse_y 数字    （鼠标位置X）
-//					> is_onHover 布尔 （鼠标是否悬停）
+//			参数：	> is_onHover 布尔 （鼠标是否悬停）
 //					> is_onPress 布尔 （鼠标是否按下）
 //			返回：	> 无
 //			
-//			说明：	> 帧刷新需要子插件 手动调用，并且实时传参。
+//			说明：	> 当前为散装帧刷新，需要子插件 手动调用，并且实时传参。
 //					> 只要正确传参，使用非鼠标设备控制，也能实现拖拽。
-//					> 【无法决定拖拽顺序】该插件只能拖拽1个时，无法决定谁先被拖拽，先执行update的控制器先被拖拽，需要子插件来控制。
+//					> 注意，此帧刷新必须提前全部执行完，即在 C拖拽位移 和 D正在拖拽标记 之前执行，详细去看子插件。
 //##############################
-Drill_CODAA_DragController.prototype.drill_controllerDrag_update = function( mouse_x, mouse_y, is_onHover, is_onPress ){
-																		//帧刷新 - A主体（无）
-	this.drill_controllerDrag_updateOffset( mouse_x, mouse_y );			//帧刷新 - C拖拽位移
-	this.drill_controllerDrag_updateDraging( is_onHover, is_onPress );	//帧刷新 - B拖拽控制
+Drill_CODAA_DragController.prototype.drill_controllerDrag_updatePriority = function( is_onHover, is_onPress ){
+	this.drill_controllerDrag_updatePriority_Private( is_onHover, is_onPress );
+};
+//##############################
+// * 控制器 - 帧刷新『拖拽的散装帧刷新』 - C拖拽位移
+//			
+//			参数：	> mouse_x 数字    （鼠标位置X）
+//					> mouse_y 数字    （鼠标位置X）
+//			返回：	> 无
+//			
+//			说明：	> 当前为散装帧刷新，需要子插件 手动调用，并且实时传参。
+//					> 只要正确传参，使用非鼠标设备控制，也能实现拖拽。
+//##############################
+Drill_CODAA_DragController.prototype.drill_controllerDrag_updateOffset = function( mouse_x, mouse_y ){
+	this.drill_controllerDrag_updateOffset_Private( mouse_x, mouse_y );
+};
+//##############################
+// * 控制器 - 帧刷新『拖拽的散装帧刷新』 - D正在拖拽标记
+//			
+//			参数：	> is_onHover 布尔 （鼠标是否悬停）
+//					> is_onPress 布尔 （鼠标是否按下）
+//			返回：	> 无
+//			
+//			说明：	> 当前为散装帧刷新，需要子插件 手动调用，并且实时传参。
+//					> 只要正确传参，使用非鼠标设备控制，也能实现拖拽。
+//##############################
+Drill_CODAA_DragController.prototype.drill_controllerDrag_updateDraging = function( is_onHover, is_onPress ){
+	this.drill_controllerDrag_updateDraging_Private( is_onHover, is_onPress );
 };
 //##############################
 // * A主体 - 设置工厂标识
@@ -484,8 +528,9 @@ Drill_CODAA_DragController.prototype.drill_controllerDrag_setPluginShort = funct
 //==============================
 Drill_CODAA_DragController.prototype.drill_controllerDrag_initChild = function(){
 	this.drill_controllerDrag_initAttr();			//初始化子功能 - A主体
-	this.drill_controllerDrag_initDraging();		//初始化子功能 - B拖拽控制
+	this.drill_controllerDrag_initPriority();		//初始化子功能 - B拖拽优先级数据
 	this.drill_controllerDrag_initOffset();			//初始化子功能 - C拖拽位移
+	this.drill_controllerDrag_initDraging();		//初始化子功能 - D正在拖拽标记
 };
 
 //==============================
@@ -512,90 +557,53 @@ Drill_CODAA_DragController.prototype.drill_controllerDrag_canDrag = function(){
 
 
 //==============================
-// * B拖拽控制 - 初始化子功能
-//==============================
-Drill_CODAA_DragController.prototype.drill_controllerDrag_initDraging = function(){
-	this._drill_isDraging = false;		//是否正在拖拽
-	this._drill_lastIsHover = false;	//悬停标记
-	this._drill_lastIsPress = false;	//按下标记
-}
-//==============================
-// * B拖拽控制 - 是否正在拖拽（开放函数）
-//==============================
-Drill_CODAA_DragController.prototype.drill_controllerDrag_isDraging = function(){
-	return this._drill_isDraging;
-}
-//==============================
-// * B拖拽控制 - 是否正在悬停（开放函数）
-//==============================
-Drill_CODAA_DragController.prototype.drill_controllerDrag_isHovering = function(){
-	return this._drill_lastIsHover;
-}
-//==============================
-// * B拖拽控制 - 是否正在按下（开放函数）
-//==============================
-Drill_CODAA_DragController.prototype.drill_controllerDrag_isPressing = function(){
-	return this._drill_lastIsPress;
-}
-//==============================
-// * B拖拽控制 - 帧刷新
-//==============================
-Drill_CODAA_DragController.prototype.drill_controllerDrag_updateDraging = function( is_onHover, is_onPress ){
-	if( this.drill_controllerDrag_canDrag() != true ){ return; }
-	
-	var last_isHover = this._drill_lastIsHover;
-	var last_isPress = this._drill_lastIsPress;
-	
-	// > 监听 - 开始拖拽时（一帧）
-	if( is_onHover == true ){
-		if( is_onPress == true && last_isPress == false ){	//（先悬停，再按下，才能拖拽）
-			
-			// > 开始拖拽时
-			this.drill_controllerDrag_dragStarting();
-		}
-	}
-	
-	// > 监听 - 结束拖拽时（一帧）
-	//			（注意，is_onHover存在慢一帧问题，所以不能作为结束拖拽的条件。『鼠标悬停图片慢一帧』）
-	if( is_onPress == false ){
-		if( this._drill_isDraging == true ){
-			
-			// > 结束拖拽时
-			this.drill_controllerDrag_dragEnding();
-		}
-	}
-	
-	this._drill_lastIsHover = is_onHover;
-	this._drill_lastIsPress = is_onPress;
-}
-//==============================
-// * B拖拽控制 - 开始拖拽时（可继承）
+// * B拖拽优先级数据 - 初始化子功能
 //
-//			说明：	> 此函数可以被继承，用于 子插件 在开始拖拽时进行相关处理。
-//					> 继承时注意使用 _drill_pluginShort 进行子插件区分。
-//					> 【无法决定拖拽顺序】该插件只能拖拽1个时，无法决定谁先被拖拽，先执行update的控制器先被拖拽，需要子插件来控制。
+//			说明：	> 【此功能】，只是一个赋值功能。
+//					> 具体控制见后面功能：2B拖拽优先级顺序、2C拖拽优先级结果 等。
 //==============================
-Drill_CODAA_DragController.prototype.drill_controllerDrag_dragStarting = function() {
-	
-	// > 拖拽
-	this._drill_isDraging = true;
-	
-	// > 开始拖拽时 C拖拽位移（私有）
-	this.drill_controllerDrag_offset_dragStarting();
+Drill_CODAA_DragController.prototype.drill_controllerDrag_initPriority = function(){
+	this._drill_dragPriority_value = 0;					//拖拽优先级值
+	this._drill_dragPriority_isHover = false;			//优先级的悬停标记
+	this._drill_dragPriority_isPress = false;			//优先级的按下标记
 }
 //==============================
-// * B拖拽控制 - 结束拖拽时（可继承）
+// * B拖拽优先级数据 - 设置优先级（开放函数）
 //
-//			说明：	> 此函数可以被继承，用于 子插件 在结束拖拽时进行相关处理。
-//					> 继承时注意使用 _drill_pluginShort 进行子插件区分。
+//			参数：	> priority 数字
+//			返回：	> 无
+//
+//			说明：	> 建议子插件使用 堆叠级 进行赋值，这样能保证优先拖拽 堆叠级 最上面的对象。
 //==============================
-Drill_CODAA_DragController.prototype.drill_controllerDrag_dragEnding = function() {
-	
-	// > 拖拽
-	this._drill_isDraging = false;
-	
-	// > 结束拖拽时 C拖拽位移（私有）
-	this.drill_controllerDrag_offset_dragEnding();
+Drill_CODAA_DragController.prototype.drill_controllerDrag_setPriorityValue = function( priority ){
+	this._drill_dragPriority_value = priority;
+	/*
+		这里原本考虑在 优先级变化时，立即同步 2B拖拽优先级顺序。
+		但立即同步后，会浪费大量计算性能；
+		并且在调用函数 drill_factoryDrag_getDragRecommendPriority 获取推荐优先级 时，由于同步的太快，获取的值不稳定；
+		所以改成了帧刷新的模式。
+	*/
+}
+//==============================
+// * B拖拽优先级数据 - 帧刷新（私有）
+//==============================
+Drill_CODAA_DragController.prototype.drill_controllerDrag_updatePriority_Private = function( is_onHover, is_onPress ){
+	this._drill_dragPriority_isHover = is_onHover;
+	this._drill_dragPriority_isPress = is_onPress;
+}
+//==============================
+// * B拖拽优先级数据 - 是否启用（可继承）
+//==============================
+Drill_CODAA_DragController.prototype.drill_controllerDrag_isPriorityEnabled = function(){
+	// （子插件 继承此函数）
+	return true;
+}
+//==============================
+// * B拖拽优先级数据 - 是否阻塞拖拽（可继承）
+//==============================
+Drill_CODAA_DragController.prototype.drill_controllerDrag_isPriorityOrderBlocked = function(){
+	// （后面功能 2C拖拽优先级结果 继承此函数）
+	return false;
 }
 
 
@@ -631,9 +639,9 @@ Drill_CODAA_DragController.prototype.drill_controllerDrag_offset_dragEnding = fu
 	this._drill_draging_y = 0;
 }
 //==============================
-// * C拖拽位移 - 帧刷新
+// * C拖拽位移 - 帧刷新（私有）
 //==============================
-Drill_CODAA_DragController.prototype.drill_controllerDrag_updateOffset = function( mouse_x, mouse_y ){
+Drill_CODAA_DragController.prototype.drill_controllerDrag_updateOffset_Private = function( mouse_x, mouse_y ){
 	if( this.drill_controllerDrag_canDrag() != true ){ return; }
 	
 	// > 鼠标位置（实时）
@@ -676,6 +684,100 @@ Drill_CODAA_DragController.prototype.drill_controllerDrag_clearDragPosition = fu
 }
 
 
+//==============================
+// * D正在拖拽标记 - 初始化子功能
+//==============================
+Drill_CODAA_DragController.prototype.drill_controllerDrag_initDraging = function(){
+	this._drill_isDraging = false;		//是否正在拖拽
+	this._drill_lastIsHover = false;	//悬停标记
+	this._drill_lastIsPress = false;	//按下标记
+}
+//==============================
+// * D正在拖拽标记 - 是否正在拖拽（开放函数）
+//==============================
+Drill_CODAA_DragController.prototype.drill_controllerDrag_isDraging = function(){
+	return this._drill_isDraging;
+}
+//==============================
+// * D正在拖拽标记 - 是否正在悬停（开放函数）
+//==============================
+Drill_CODAA_DragController.prototype.drill_controllerDrag_isHovering = function(){
+	return this._drill_lastIsHover;
+}
+//==============================
+// * D正在拖拽标记 - 是否正在按下（开放函数）
+//==============================
+Drill_CODAA_DragController.prototype.drill_controllerDrag_isPressing = function(){
+	return this._drill_lastIsPress;
+}
+//==============================
+// * D正在拖拽标记 - 帧刷新（私有）
+//==============================
+Drill_CODAA_DragController.prototype.drill_controllerDrag_updateDraging_Private = function( is_onHover, is_onPress ){
+	if( this.drill_controllerDrag_canDrag() != true ){ return; }
+	
+	var last_isHover = this._drill_lastIsHover;
+	var last_isPress = this._drill_lastIsPress;
+	
+	// > 监听 - 开始拖拽时（一帧）
+	if( is_onHover == true ){
+		if( is_onPress == true && last_isPress == false ){	//（先悬停，再按下，才能拖拽）
+			
+			// > 开始拖拽时
+			this.drill_controllerDrag_dragStarting();
+		}
+	}
+	
+	// > 监听 - 结束拖拽时（一帧）
+	//			（注意，is_onHover存在慢一帧问题，所以不能作为结束拖拽的条件。『鼠标悬停图片慢一帧』）
+	if( is_onPress == false ){
+		if( this._drill_isDraging == true ){
+			
+			// > 结束拖拽时
+			this.drill_controllerDrag_dragEnding();
+		}
+	}
+	
+	this._drill_lastIsHover = is_onHover;
+	this._drill_lastIsPress = is_onPress;
+}
+//==============================
+// * D正在拖拽标记 - 开始拖拽时（可继承）
+//
+//			说明：	> 此函数可以被继承，用于 子插件 在开始拖拽时进行相关处理。
+//					> 继承时注意使用 _drill_pluginShort 进行子插件区分。
+//==============================
+Drill_CODAA_DragController.prototype.drill_controllerDrag_dragStarting = function() {
+	
+	// > B拖拽优先级数据 - 是否启用
+	if( this.drill_controllerDrag_isPriorityEnabled() == true ){
+		// > B拖拽优先级数据 - 是否阻塞拖拽
+		if( this.drill_controllerDrag_isPriorityOrderBlocked() == true ){ return; }
+	}
+	
+	// > 拖拽
+	this._drill_isDraging = true;
+	
+	// > C拖拽位移 - 开始拖拽时（私有）
+	this.drill_controllerDrag_offset_dragStarting();
+}
+//==============================
+// * D正在拖拽标记 - 结束拖拽时（可继承）
+//
+//			说明：	> 此函数可以被继承，用于 子插件 在结束拖拽时进行相关处理。
+//					> 继承时注意使用 _drill_pluginShort 进行子插件区分。
+//==============================
+Drill_CODAA_DragController.prototype.drill_controllerDrag_dragEnding = function() {
+	
+	// > 拖拽
+	this._drill_isDraging = false;
+	
+	// > C拖拽位移 - 结束拖拽时（私有）
+	this.drill_controllerDrag_offset_dragEnding();
+}
+
+
+
 //=============================================================================
 // ** 拖拽数据工厂【Drill_CODAA_DragFactory】
 // **		
@@ -703,7 +805,7 @@ function Drill_CODAA_DragFactory() {
 // * 数据工厂 - 初始化
 //==============================
 Drill_CODAA_DragFactory.prototype.initialize = function(){
-	this._drill_factorySerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+	this._drill_factorySerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
     this.drill_factoryDrag_initChild();									//初始化子功能
 };
 //==============================
@@ -844,7 +946,7 @@ function Drill_CODAA_AdsorbController() {
 // * 控制器 - 初始化
 //==============================
 Drill_CODAA_AdsorbController.prototype.initialize = function(){
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
     this.drill_controllerAdsorb_initChild();								//初始化子功能
 };
 //##############################
@@ -1465,7 +1567,7 @@ function Drill_CODAA_AdsorbFactory() {
 // * 数据工厂 - 初始化
 //==============================
 Drill_CODAA_AdsorbFactory.prototype.initialize = function(){
-	this._drill_factorySerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+	this._drill_factorySerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
     this.drill_factoryAdsorb_initChild();								//初始化子功能
 };
 //==============================
@@ -1602,7 +1704,7 @@ function Drill_CODAA_SlotController() {
 //==============================
 Drill_CODAA_SlotController.prototype.initialize = function( data ){
 	this._drill_data = {};
-	this._drill_slotSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+	this._drill_slotSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
     this.drill_slot_initData();										//初始化数据
     this.drill_slot_initChild();									//初始化子功能
 	if( data == undefined ){ data = {}; }
@@ -1774,7 +1876,7 @@ Drill_CODAA_SlotController.prototype.drill_slot_resetData_Private = function( da
 	
 	// > 执行重置
 	this._drill_data = JSON.parse(JSON.stringify( data ));				//深拷贝
-	this._drill_slotSerial = new Date().getTime() + Math.random();		//（生成一个不重复的序列号）
+	this._drill_slotSerial = new Date().getTime() + Math.random();		//『生成一个不重复的序列号』
     this.drill_slot_initData();											//初始化数据
     this.drill_slot_initChild();										//初始化子功能
 }
@@ -2118,7 +2220,7 @@ function Drill_CODAA_SlotFactory() {
 // * 数据工厂 - 初始化
 //==============================
 Drill_CODAA_SlotFactory.prototype.initialize = function(){
-	this._drill_factorySerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+	this._drill_factorySerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
     this.drill_factorySlot_initChild();									//初始化子功能
 };
 //==============================
@@ -2217,95 +2319,231 @@ Drill_CODAA_SlotFactory.prototype.drill_factorySlot_getByPluginShort = function(
 	
 	
 //=============================================================================
-// ** ☆拖拽数量管理
+// ** ☆拖拽优先级与数量管理
 //
 //			说明：	> 该模块基于 拖拽数据工厂 ，实现只能有固定数量的 拖拽控制器 进入拖拽状态。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 拖拽数量管理 - 初始化子功能
+// * 2A拖拽数量最大值 - 初始化
+//
+//			说明：	> 【此功能】，只是一个赋值功能。
 //==============================
-var _drill_CODAA_CODAA_dragMax_initChild = Drill_CODAA_DragFactory.prototype.drill_factoryDrag_initChild;
+var _drill_CODAA_CODAA_dragMax_initChild1 = Drill_CODAA_DragFactory.prototype.drill_factoryDrag_initChild;
 Drill_CODAA_DragFactory.prototype.drill_factoryDrag_initChild = function(){
-	_drill_CODAA_CODAA_dragMax_initChild.call( this );
-	this.drill_factoryDrag_initMax();		//初始化子功能 - 拖拽数量
+	_drill_CODAA_CODAA_dragMax_initChild1.call( this );
+	this._drill_dragMaxCount = {};
 };
 //==============================
-// * 拖拽数量管理 - 初始化子功能
-//==============================
-Drill_CODAA_DragFactory.prototype.drill_factoryDrag_initMax = function(){
-	this._drill_dragMaxCount = {};			//拖拽最大值
-	this._drill_dragCurCount = {};			//拖拽计数器
-}
-//==============================
-// * 拖拽数量管理 - 统计拖拽数量
+// * 2A拖拽数量最大值 - 设置最大值（开放函数）
 //
-//			说明：	> 统计能确保计数器始终能有正确的值，不能用+1-1的方法。
-//==============================
-Drill_CODAA_DragFactory.prototype.drill_factoryDrag_refreshCount = function(){
-	this._drill_dragCurCount = {};
-	
-	for(var i = 0; i < this._drill_productTank.length; i++ ){
-		var drag_controller = this._drill_productTank[i];
-		if( drag_controller == undefined ){ continue; }
-		
-		// > 条件 - 正在拖拽时
-		if( drag_controller._drill_isDraging != true ){ continue; }
-		
-		var pluginShort = drag_controller._drill_pluginShort;
-		if( this._drill_dragCurCount[ pluginShort ] == undefined ){
-			this._drill_dragCurCount[ pluginShort ] = 0;
-		}
-		this._drill_dragCurCount[ pluginShort ] += 1;
-	}
-}
-//==============================
-// * 拖拽数量管理 - 设置最大同时拖拽数量（开放函数）
+//			参数：	> pluginShort 字符串（插件简称）
+//					> value 数字        （最大值）
+//			返回：	> 无
 //
-//			说明：	> 每个 子插件 都能设置自己的最大同时拖拽数量。
+//			说明：	> 该函数需要子插件 手动调用赋值。
+//					> 如果未赋值，则默认值为1。
 //==============================
 Drill_CODAA_DragFactory.prototype.drill_factoryDrag_setDragMaxCount = function( pluginShort, value ){
 	this._drill_dragMaxCount[ pluginShort ] = value;
-}
+};
 //==============================
-// * 拖拽数量管理 - 拖拽数量是否已满（开放函数）
+// * 2A拖拽数量最大值 - 帧刷新『拖拽的散装帧刷新』
+//			
+//			参数：	> pluginShort 字符串（插件简称）
+//			返回：	> 无
+//			
+//			说明：	> 当前为散装帧刷新，需要子插件 手动调用，并且实时传参。
+//					> 注意，此帧刷新必须在 B拖拽优先级数据 与 C拖拽位移 之间执行完。
 //==============================
-Drill_CODAA_DragFactory.prototype.drill_factoryDrag_isDragCountFull = function( pluginShort ){
-	
-	// > 统计拖拽数量
-	//		（直接在判断前进行统计，在其他地方统计总是会漏，造成拖拽不了的bug）
-	this.drill_factoryDrag_refreshCount();
-	
-	// > 是否已满
-	var max_count = this._drill_dragMaxCount[ pluginShort ];
-	if( max_count == undefined ){ return false; }
-	return this._drill_dragCurCount[ pluginShort ] >= max_count;
-}
+Drill_CODAA_DragFactory.prototype.drill_factoryDrag_updateDragMax = function( pluginShort ){
+	this.drill_factoryDrag_updatePrioritySeq_Private( pluginShort );	//帧刷新 - 2B拖拽优先级顺序
+	this.drill_factoryDrag_updateOrderTank_Private( pluginShort );		//帧刷新 - 2C拖拽优先级结果
+	this.drill_factoryDrag_updateMaxPriority_Private( pluginShort );	//帧刷新 - 2D拖拽优先级最大值
+};
+
 //==============================
-// * 拖拽数量管理 - 最后继承2级
+// * 2B拖拽优先级顺序 - 初始化
 //
-//			说明：	> 拖拽数量已满是最高阻塞优先级，所以使用2级。
+//			说明：	> 【此功能】，通过帧刷新，实时计算得到 优先级顺序。
 //==============================
-var _drill_CODAA_scene_dragMax_requestUpdateOnce = true;
-var _drill_CODAA_scene_dragMax_requestUpdate = SceneManager.requestUpdate;
-SceneManager.requestUpdate = function() {
-	_drill_CODAA_scene_dragMax_requestUpdate.call(this);						//（注意此函数会执行多次）
-	if( _drill_CODAA_scene_dragMax_requestUpdateOnce == undefined ){ return; }	//（继承一次后就跳出）
-	_drill_CODAA_scene_dragMax_requestUpdateOnce = undefined;
+var _drill_CODAA_CODAA_dragMax_temp_initialize2 = Game_Temp.prototype.initialize;
+Game_Temp.prototype.initialize = function(){
+	_drill_CODAA_CODAA_dragMax_temp_initialize2.call(this);
+	this._drill_CODAA_dragPrioritySeq = {};
+};
+//==============================
+// * 2B拖拽优先级顺序 - 帧刷新（私有）
+//
+//			说明：	> 该函数只按 优先级排序，从大到小。
+//					> 该函数与 是否正在拖拽 无关，此排序作用于所有 可拖拽控制器。
+//==============================
+Drill_CODAA_DragFactory.prototype.drill_factoryDrag_updatePrioritySeq_Private = function( pluginShort ){
 	
-	//==============================
-	// * 拖拽数量管理 - 开始拖拽时（继承）
-	//==============================
-	var _drill_CODAA_CODAA_dragMax_dragStarting = Drill_CODAA_DragController.prototype.drill_controllerDrag_dragStarting;
-	Drill_CODAA_DragController.prototype.drill_controllerDrag_dragStarting = function(){
+	// > 顺序数据 - 初始化
+	var cur_seq = [];
+	for(var i = 0; i < this._drill_productTank.length; i++ ){
+		var drag_controller = this._drill_productTank[i];
+		if( drag_controller == undefined ){ continue; }
+		var temp_pluginShort = drag_controller._drill_pluginShort;
+		if( temp_pluginShort == pluginShort ){
+			var temp_data = {};
+			temp_data['productId'] = drag_controller._drill_productId;
+			temp_data['priority']  = drag_controller._drill_dragPriority_value;
+			cur_seq.push( temp_data );
+		}
+	}
+	
+	// > 顺序数据 - 排序
+	cur_seq.sort(function(a, b){ return b['priority']-a['priority'] });
+	
+	// > 顺序数据 - 测试查看
+	//alert( JSON.stringify(cur_seq) );
+	
+	// > 顺序数据 - 赋值
+	$gameTemp._drill_CODAA_dragPrioritySeq[ pluginShort ] = cur_seq;
+};
+
+//==============================
+// * 2C拖拽优先级结果 - 初始化
+//
+//			说明：	> 【此功能】，通过帧刷新，实时计算得到 结果列表。
+//					> 这个结果列表是 符合条件 组合的结果，用于判断 多个控制器 能不能同时拖拽。
+//==============================
+var _drill_CODAA_CODAA_dragMax_temp_initialize3 = Game_Temp.prototype.initialize;
+Game_Temp.prototype.initialize = function(){
+	_drill_CODAA_CODAA_dragMax_temp_initialize3.call(this);
+	this._drill_CODAA_dragPriorityOrderTank = {};
+};
+//==============================
+// * 2C拖拽优先级结果 - 帧刷新（私有）
+//==============================
+Drill_CODAA_DragFactory.prototype.drill_factoryDrag_updateOrderTank_Private = function( pluginShort ){
+	
+	// > 结果列表 - 清空
+	$gameTemp._drill_CODAA_dragPriorityOrderTank[ pluginShort ] = [];
+	
+	// > 结果列表 - 获取 最大值和顺序
+	var max_count = this._drill_dragMaxCount[ pluginShort ];
+	if( max_count == undefined ){ max_count = 1; }  //（默认值为1）
+	var cur_seq = $gameTemp._drill_CODAA_dragPrioritySeq[ pluginShort ];
+	if( cur_seq == undefined ){ return; }
+	
+	// > 结果列表 - 即时计算
+	for(var i = 0; i < cur_seq.length; i++ ){
+		var cur_data = cur_seq[i];
 		
-		// > 拖拽数量已满，跳出
-		if( $gameSystem._drill_CODAA_dragFactory.drill_factoryDrag_isDragCountFull( this._drill_pluginShort ) ){ return; }
-		
-		// > 原函数
-		_drill_CODAA_CODAA_dragMax_dragStarting.call( this );
-	};
+		// > 符合条件（鼠标悬停 + 鼠标按下 + 优先级高的 + 最大值范围内）
+		var cur_controller = this.drill_factoryDrag_getByProductId( cur_data['productId'] );
+		if( cur_controller == undefined ){ continue; }
+		if( cur_controller._drill_dragPriority_isHover == true &&  //优先级的悬停标记
+			cur_controller._drill_dragPriority_isPress == true ){  //优先级的按下标记
+			
+			// > 数量超出时，跳出
+			if( $gameTemp._drill_CODAA_dragPriorityOrderTank[ pluginShort ].length >= max_count ){ return; }
+			$gameTemp._drill_CODAA_dragPriorityOrderTank[ pluginShort ].push( cur_data['productId'] );
+		}
+	}
 }
+//==============================
+// * 2C拖拽优先级结果 - 是否阻塞拖拽（继承）
+//==============================
+var _drill_CODAA_CODAA_dragMax_isPriorityOrderBlocked = Drill_CODAA_DragController.prototype.drill_controllerDrag_isPriorityOrderBlocked;
+Drill_CODAA_DragController.prototype.drill_controllerDrag_isPriorityOrderBlocked = function(){
+	
+	// > 结果列表 - 不符合则阻塞
+	var order_tank = $gameTemp.drill_CODAA_getDragPriorityOrderTank( this._drill_pluginShort );
+	if( order_tank != undefined && order_tank.contains( this._drill_productId ) != true ){ return true; }
+	
+	// > 原函数
+	return _drill_CODAA_CODAA_dragMax_isPriorityOrderBlocked.call( this );
+};
+//==============================
+// * 2C拖拽优先级结果 - 获取结果列表（开放函数）
+//
+//			参数：	> pluginShort 字符串（插件简称）
+//			返回：	> 数字列表          （控制器标识列表）
+//			
+//			说明：	> 该函数必须在 每帧执行完 2C拖拽优先级结果-帧刷新 之后，才能获取。（数据才能是最新的同步）
+//==============================
+Game_Temp.prototype.drill_CODAA_getDragPriorityOrderTank = function( pluginShort ){
+	return this._drill_CODAA_dragPriorityOrderTank[ pluginShort ];
+};
+
+//==============================
+// * 2D拖拽优先级最大值 - 初始化
+//
+//			说明：	> 【此功能】，通过帧刷新，实时计算得到 最大优先级。
+//					> 此功能只提供 最大优先级、推荐优先级 获取函数。给子插件用。
+//==============================
+var _drill_CODAA_CODAA_dragMax_temp_initialize4 = Game_Temp.prototype.initialize;
+Game_Temp.prototype.initialize = function(){
+	_drill_CODAA_CODAA_dragMax_temp_initialize4.call(this);
+	this._drill_CODAA_dragMaxPriority = {};
+};
+//==============================
+// * 2D拖拽优先级最大值 - 帧刷新（私有）
+//			
+//			参数：	> pluginShort 字符串（插件简称）
+//			返回：	> 无
+//==============================
+Drill_CODAA_DragFactory.prototype.drill_factoryDrag_updateMaxPriority_Private = function( pluginShort ){
+	var max_priority = 0;
+	var cur_seq = $gameTemp._drill_CODAA_dragPrioritySeq[ pluginShort ];
+	if( cur_seq == undefined ){ return; }
+	for(var i = 0; i < cur_seq.length; i++ ){
+		var cur_data = cur_seq[i];
+		var cur_controller = this.drill_factoryDrag_getByProductId( cur_data['productId'] );
+		if( cur_controller == undefined ){ continue; }
+		
+		// > 计算最大优先级
+		if( max_priority < cur_controller._drill_dragPriority_value ){
+			max_priority = cur_controller._drill_dragPriority_value;
+		}
+	}
+	$gameTemp._drill_CODAA_dragMaxPriority[ pluginShort ] = max_priority;
+};
+//==============================
+// * 2D拖拽优先级最大值 - 获取最大优先级（开放函数）
+//
+//			参数：	> pluginShort 字符串（插件简称）
+//			返回：	> 数字              （最大优先级）
+//
+//			说明：	> 该函数必须在 每帧执行完 2C拖拽优先级结果-帧刷新 之后，才能获取。（数据才能是最新的同步）
+//==============================
+Game_Temp.prototype.drill_CODAA_getDragMaxPriority = function( pluginShort ){
+	return this._drill_CODAA_dragMaxPriority[ pluginShort ];
+};
+//==============================
+// * 2D拖拽优先级最大值 - 获取推荐优先级（开放函数）
+//			
+//			参数：	> pluginShort 字符串（插件简称）
+//					> product_id 数字   （控制器标识）
+//			返回：	> 数字              （推荐优先级）
+//
+//			说明：	> 该函数必须在 每帧执行完 2C拖拽优先级结果-帧刷新 之后，才能获取。（数据才能是最新的同步）
+//					> 该函数用于处理同时拖拽 多个 时，提供的推荐优先级值，能确保 堆叠级 增加，但不影响顺序。
+//==============================
+Game_Temp.prototype.drill_CODAA_getDragRecommendPriority = function( pluginShort, product_id ){
+	
+	// > 最大优先级
+	var max_priority = this._drill_CODAA_dragMaxPriority[ pluginShort ];
+	if( max_priority == undefined ){ return 0; }
+	
+	// > 优先级顺序
+	//		（优先级顺序中已包含 所有可拖拽对象的id ）
+	//		（这里不用 优先级结果，是因为执行时，可能结果已经变成了空数组）
+	var cur_seq = this._drill_CODAA_dragPrioritySeq[ pluginShort ];
+	if( cur_seq == undefined ){ return max_priority+1; }
+	for(var i = 0; i < cur_seq.length; i++ ){
+		var cur_data = cur_seq[i];
+		if( cur_data['productId'] == product_id ){
+			return max_priority+1 +cur_seq.length-i;
+		}
+	}
+	return max_priority+1;
+};
+	
 	
 	
 //=============================================================================

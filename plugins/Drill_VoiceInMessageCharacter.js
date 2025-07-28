@@ -432,9 +432,9 @@
 	/*-----------------声音------------------*/
 	DrillUp.g_VIMC_sound_length = 20;
 	DrillUp.g_VIMC_sound = [];
-	for (var i = 0; i < DrillUp.g_VIMC_sound_length; i++) {
-		if( DrillUp.parameters["声音-" + String(i+1) ] != "" && 
-			DrillUp.parameters["声音-" + String(i+1) ] != undefined ){
+	for( var i = 0; i < DrillUp.g_VIMC_sound_length; i++ ){
+		if( DrillUp.parameters["声音-" + String(i+1) ] != undefined && 
+			DrillUp.parameters["声音-" + String(i+1) ] != "" ){
 			var temp = JSON.parse(DrillUp.parameters["声音-" + String(i+1) ]);
 			DrillUp.g_VIMC_sound[i] = DrillUp.drill_VIMC_initSound( temp );
 		}else{

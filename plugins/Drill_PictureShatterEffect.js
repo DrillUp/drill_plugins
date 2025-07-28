@@ -495,12 +495,12 @@ Game_Temp.prototype.drill_PSE_getPictureSpriteTank_SenceTopArea = function(){
 //==============================
 Game_Temp.prototype.drill_PSE_getPictureSpriteTank_PicArea = function(){
 	if( SceneManager._scene == undefined ){ return null; }
-	if( SceneManager._scene instanceof Scene_Battle ){		//『图片与多场景』
+	if( SceneManager._scene instanceof Scene_Battle ){		//『图片与多场景-战斗界面』
 		if( SceneManager._scene._spriteset == undefined ){ return null; }
 		if( SceneManager._scene._spriteset._drill_battlePicArea == undefined ){ return null; }
 		return SceneManager._scene._spriteset._drill_battlePicArea.children;
 	}
-	if( SceneManager._scene instanceof Scene_Map ){
+	if( SceneManager._scene instanceof Scene_Map ){			//『图片与多场景-地图界面』
 		if( SceneManager._scene._spriteset == undefined ){ return null; }
 		if( SceneManager._scene._spriteset._drill_mapPicArea == undefined ){ return null; }
 		return SceneManager._scene._spriteset._drill_mapPicArea.children;
@@ -660,10 +660,12 @@ Game_Screen.prototype.erasePicture = function( pictureId ){
 //==============================
 var _drill_PSE_sp_initialize = Sprite_Picture.prototype.initialize;
 Sprite_Picture.prototype.initialize = function( pictureId ){
-    _drill_PSE_sp_initialize.call(this,pictureId);
 	
 	// > 贴图框架标记
 	this.drill_PSE_initBitmapFrame();
+	
+	// > 原函数
+    _drill_PSE_sp_initialize.call( this, pictureId );
 	
 	// > 创建贴图
 	this._drill_PSE_sprite = new Drill_COSE_LayerSprite();

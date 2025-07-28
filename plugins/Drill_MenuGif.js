@@ -954,7 +954,7 @@
 	// * 静态数据 - GIF
 	//				（~struct~MenuGIF）
 	//==============================
-	DrillUp.drill_MGi_gifInit = function( dataFrom ) {
+	DrillUp.drill_MGi_gifInit = function( dataFrom ){
 		var data = {};
 		
 		// > 绑定
@@ -1411,8 +1411,8 @@ Scene_MenuBase.prototype.drill_MGi_create = function() {
 			temp_sprite.skew.y = temp_sprite_data['skew_y'];
 			temp_sprite.visible = $gameSystem._drill_MGi_spriteTank_visible[i] || false;
 			
-			temp_sprite._breath = Math.random() * temp_sprite_data['breath_period'];
-			temp_sprite._breath_dir = Math.floor(Math.random() * 2);
+			temp_sprite._breath = Math.random() * temp_sprite_data['breath_period'];	//『随机因子-图像用』
+			temp_sprite._breath_dir = Math.floor(Math.random() * 2);	//『随机因子-图像用』
 			temp_sprite._f_time = 0;
 			this._drill_MGi_spriteTank.push(temp_sprite);
 			this._drill_MGi_dataTank.push(temp_sprite_data);

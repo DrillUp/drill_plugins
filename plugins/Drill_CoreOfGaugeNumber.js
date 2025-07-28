@@ -803,7 +803,7 @@
 //			* 参数数字【Drill_COGN_NumberSprite】
 //		
 //		★核心说明：
-//			1.整个核心只提供了一个封装好的【Sprite独立子类】。
+//			1.整个核心只提供了一个封装好的 独立贴图。
 //			  具体见类的说明。
 //		
 //		★必要注意事项：
@@ -866,7 +866,7 @@
 	//
 	//			说明：	函数未定义白色括号中的参数，需要子插件定义。若不定义则为默认值。
 	//==============================
-	DrillUp.drill_COGN_initStyle = function( dataFrom ) {
+	DrillUp.drill_COGN_initStyle = function( dataFrom ){
 		var data = {};
 		
 		// > A主体

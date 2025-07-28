@@ -1167,7 +1167,7 @@
 //			* 加满动画遮罩【Drill_COGM_MeterSpriteMask】
 //		
 //		★核心说明：
-//			1.整个核心只提供了一个封装好的【Sprite独立子类】。
+//			1.整个核心只提供了一个封装好的 独立贴图。
 //			  具体见类的说明。
 //		
 //		★必要注意事项：
@@ -1241,7 +1241,7 @@
 	//
 	//			说明：	函数未定义白色括号中的参数，为默认值。
 	//==============================
-	DrillUp.drill_COGM_ballisticsInit = function( dataFrom ) {
+	DrillUp.drill_COGM_ballisticsInit = function( dataFrom ){
 		var data = {};
 		
 		//   移动（movement）
@@ -1309,7 +1309,7 @@
 	//
 	//				说明：函数未定义白色括号中的参数，需要子插件定义。若不定义则为默认值。
 	//==============================
-	DrillUp.drill_COGM_initStyle = function( dataFrom ) {
+	DrillUp.drill_COGM_initStyle = function( dataFrom ){
 		var data = {};
 		
 		// > 主体
@@ -1351,7 +1351,8 @@
 		data['spring_enable'] = String( dataFrom["是否启用弹出效果"] || "true") === "true";
 		data['spring_type'] = String( dataFrom["弹出条块模式"] || "当前参数条");
 		data['spring_maxNum'] = Number( dataFrom["弹出条最大数量"] || 30 );
-		if( dataFrom["弹出条弹道"] != undefined && dataFrom["弹出条弹道"] != "" ){
+		if( dataFrom["弹出条弹道"] != undefined &&
+			dataFrom["弹出条弹道"] != "" ){
 			data['spring_ballistics'] = DrillUp.drill_COGM_ballisticsInit( JSON.parse( dataFrom["弹出条弹道"] ));		
 		}else{
 			data['spring_ballistics'] = {};		

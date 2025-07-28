@@ -427,8 +427,8 @@
 	DrillUp.g_WET_trigger_length = 20;
 	DrillUp.g_WET_trigger = [];
 	for( var i = 0; i < DrillUp.g_WET_trigger_length; i++ ){
-		if( DrillUp.parameters["遇敌触发-" + String(i+1) ] != "" &&
-			DrillUp.parameters["遇敌触发-" + String(i+1) ] != undefined ){
+		if( DrillUp.parameters["遇敌触发-" + String(i+1) ] != undefined &&
+			DrillUp.parameters["遇敌触发-" + String(i+1) ] != "" ){
 			var data = JSON.parse(DrillUp.parameters["遇敌触发-" + String(i+1) ]);
 			DrillUp.g_WET_trigger[i] = DrillUp.drill_WET_triggerInit( data );
 		}else{

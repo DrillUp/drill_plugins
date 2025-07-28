@@ -60,7 +60,7 @@
  * 
  * 窗口字符：\v[1]        替换为第1个变量的值（0002变量，输入2，不要多余0）
  * 窗口字符：\n[1]        替换为第1个角色的名字
- * 窗口字符：\p[1]        替换为第1个玩家队员的名字(1表示领队,2表示第一个跟随者)
+ * 窗口字符：\p[-2]       替换为玩家队员的名字(-2表示领队，1表示第一个跟随者)
  * 窗口字符：\G           替换为货币单位（ 数据库>系统 中设置单位）
  * 窗口字符：\\           替换为'\'反斜杠字符本身。
  * 
@@ -125,8 +125,8 @@
  * 
  * 窗口字符：\ac[1]       替换为第1个角色的职业名
  * 窗口字符：\an[1]       替换为第1个角色的昵称（小名）
- * 窗口字符：\pc[1]       替换为第1个玩家队员的职业名(1表示领队,2表示第一个跟随者)
- * 窗口字符：\pn[1]       替换为第1个玩家队员的昵称（小名）(1表示领队,2表示第一个跟随者)
+ * 窗口字符：\pc[-2]      替换为玩家队员的职业名(-2表示领队，1表示第一个跟随者)
+ * 窗口字符：\pn[-2]      替换为玩家队员的昵称（小名）(-2表示领队，1表示第一个跟随者)
  * 窗口字符：\nc[1]       替换为第1个职业的名字
  * 窗口字符：\ni[1]       替换为第1个物品的名字
  * 窗口字符：\nw[1]       替换为第1个武器的名字
@@ -1060,8 +1060,8 @@ Scene_Map.prototype.drill_COWC_OrgText_createDebugWindow = function() {
 				"    \\\\v[21]  变量21的值  '\\v[21]'  \\fr<br>" + 
 				"    \\\\v[\\\\v[21]]  变量[变量21的值]的值  '\\v[\\v[21]]'  \\fr<br>" + 
 				"    \\\\n[5]  角色5的名字  '\\n[5]'  \\fr<br>" + 
-				"    \\\\p[1]  玩家领队(玩家队员1)的名字  '\\p[1]'  \\fr<br>" + 
-				"    \\\\p[2]  玩家队员2的名字  '\\p[2]'  \\fr<br>" + 
+				"    \\\\p[-2]  玩家领队(玩家队员-2)的名字  '\\p[-2]'  \\fr<br>" + 
+				"    \\\\p[1]  玩家队员1的名字  '\\p[1]'  \\fr<br>" + 
 				"    \\\\g  货币单位  '\\g'  \\fr<br>" + 
 				"    \\\\\\\\  两个斜杠表示单独的一个'\\'  \\fr<br>" + 
 				
@@ -1135,9 +1135,9 @@ Scene_Map.prototype.drill_COWC_ExText_createDebugWindow = function() {
 				"\\c[24]》字符应用C扩展-指代字符：\\fr<br>" + 
 				"    \\\\ac[5]  角色5的职业名  '\\ac[5]'  <br>" + 
 				"    \\\\an[5]  角色5的昵称（小名）  '\\an[5]'  <br>" + 
-				"    \\\\pc[1]  玩家领队(玩家队员1)的职业名  '\\pc[1]'  <br>" + 
-				"    \\\\pc[2]  玩家队员1的职业名  '\\pc[2]'  <br>" + 
-				"    \\\\pn[2]  玩家队员1的昵称（小名）  '\\pn[2]'  <br>" + 
+				"    \\\\pc[-2]  玩家领队(玩家队员-2)的职业名  '\\pc[-2]'  <br>" + 
+				"    \\\\pc[1]  玩家队员1的职业名  '\\pc[1]'  <br>" + 
+				"    \\\\pn[1]  玩家队员1的昵称（小名）  '\\pn[1]'  <br>" + 
 				"    \\\\nc[16]  第16个职业名  '\\nc[16]'  <br>" + 
 				"    \\\\ni[1]  第1个物品名  '\\ni[1]'  <br>" + 
 				"    \\\\nw[1]  第1个武器名  '\\nw[1]'  <br>" + 
@@ -1908,10 +1908,8 @@ Game_Temp.prototype.drill_COWC_transform_processCombined = function( matched_ind
 	// > 『窗口字符定义』字符应用B原版 - 玩家队员名字（\P[1]）
 	if( command.toUpperCase() == "P" ){
 		if( args.length == 1 ){
-			if( Number(args[0]) >= 0 ){
-				var str = this.drill_COWC_partyMemberName( Number(args[0]) );
-				this.drill_COWC_transform_submitCombined( str );
-			}
+			var str = this.drill_COWC_partyMemberName( Number(args[0]) );
+			this.drill_COWC_transform_submitCombined( str );
 		}
 	}
 }
@@ -1927,9 +1925,15 @@ Game_Temp.prototype.drill_COWC_actorName = function( n ){
 // * 窗口字符应用之指代字符（字符应用B原版） - 玩家队员名字（\P[1]）
 //==============================
 Game_Temp.prototype.drill_COWC_partyMemberName = function( n ){
-    var member = $gameParty.members()[n -1];
-	if( member == undefined ){ return ""; }
-    return member.name();
+	var actor = null;
+	if( n == -2 ){  //『玩家id』
+		actor = $gameParty.members()[ 0 ];
+	}
+	if( n > 0 ){  //『玩家队员id』
+		actor = $gameParty.members()[ n ];
+	}
+	if( actor == undefined ){ return ""; }
+    return actor.name();
 };
 
 //=============================================================================
@@ -2080,7 +2084,13 @@ Game_Temp.prototype.drill_COWC_actorNickname = function( n ){
 // * 窗口字符应用之指代字符（字符应用C扩展） - 玩家队员职业名称（\PC[n]）
 //==============================
 Game_Temp.prototype.drill_COWC_partyClassName = function( n ){
-    var actor = $gameParty.members()[n -1];
+	var actor = null;
+	if( n == -2 ){  //『玩家id』
+		actor = $gameParty.members()[ 0 ];
+	}
+	if( n > 0 ){  //『玩家队员id』
+		actor = $gameParty.members()[ n ];
+	}
 	if( actor == undefined ){ return ""; }
     return actor.currentClass().name;
 };
@@ -2088,7 +2098,13 @@ Game_Temp.prototype.drill_COWC_partyClassName = function( n ){
 // * 窗口字符应用之指代字符（字符应用C扩展） - 玩家队员昵称（\PN[n]）
 //==============================
 Game_Temp.prototype.drill_COWC_partyNickname = function( n ){
-    var actor = $gameParty.members()[n -1];
+	var actor = null;
+	if( n == -2 ){  //『玩家id』
+		actor = $gameParty.members()[ 0 ];
+	}
+	if( n > 0 ){  //『玩家队员id』
+		actor = $gameParty.members()[ n ];
+	}
 	if( actor == undefined ){ return ""; }
     return actor.nickname();
 };
@@ -2997,7 +3013,7 @@ Window_Base.prototype.actorName = function( n ){
 // * E绘制『窗口字符核心』 - 扩展文本 - 指代字符 - 玩家队员名字
 //==============================
 Window_Base.prototype.partyMemberName = function( n ){
-    var actor = n >= 1 ? $gameParty.members()[n - 1] : null;
+    var actor = n >= 1 ? $gameParty.members()[n - 1] : null;  //『玩家队员id』此处的定义已被修改(-2表示领队，1表示第一个跟随者)
     return actor ? actor.name() : '';
 };
 
@@ -3885,7 +3901,7 @@ Bitmap.prototype.drill_COWC_timing_setEnabled = function( enabled ){
 	
 	// > 加入时
 	if( enabled == true ){
-		this._drill_COWC_timing_serial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+		this._drill_COWC_timing_serial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
 		$gameTemp._drill_COWC_timing_bitmapTank[ this._drill_COWC_timing_serial ] = this;
 		
 	// > 清除时

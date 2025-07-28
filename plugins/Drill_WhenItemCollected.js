@@ -416,8 +416,8 @@
 	DrillUp.g_WIC_trigger_length = 20;
 	DrillUp.g_WIC_trigger = [];
 	for( var i = 0; i < DrillUp.g_WIC_trigger_length; i++ ){
-		if( DrillUp.parameters["积累触发-" + String(i+1) ] != "" &&
-			DrillUp.parameters["积累触发-" + String(i+1) ] != undefined ){
+		if( DrillUp.parameters["积累触发-" + String(i+1) ] != undefined &&
+			DrillUp.parameters["积累触发-" + String(i+1) ] != "" ){
 			var data = JSON.parse(DrillUp.parameters["积累触发-" + String(i+1) ]);
 			DrillUp.g_WIC_trigger[i] = DrillUp.drill_WIC_triggerInit( data );
 		}else{

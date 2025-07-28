@@ -555,7 +555,7 @@
 	// * 静态数据 - 阶段
 	//				（~struct~TitlePart）
 	//==============================
-	DrillUp.drill_TBS_partInit = function( dataFrom ) {
+	DrillUp.drill_TBS_partInit = function( dataFrom ){
 		var data = {};
 		data['delay'] = Number( dataFrom["当前阶段至少播放时长"] || 0);
 		data['mode'] = String( dataFrom["显示模式"] || "单图模式" );

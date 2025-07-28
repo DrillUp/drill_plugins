@@ -593,6 +593,8 @@ Game_Interpreter.prototype.drill_BECut_pluginCommand = function( command, args )
 /*
 //==============================
 // * 2D遇敌动画『战斗-战斗界面的动画转场』 - 创建 屏幕效果贴图
+//
+//			说明：	> 注意该函数『因为缺失原型链所以不要直接继承』。
 //==============================
 Spriteset_Base.prototype.createScreenSprites = function(){
     this._flashSprite = new ScreenSprite();

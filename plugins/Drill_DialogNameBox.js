@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        对话框 - 姓名框窗口
+ * @plugindesc [v1.3]        对话框 - 姓名框窗口
  * @author Drill_up
  * 
  * 
@@ -88,6 +88,8 @@
  * 修复了姓名框能遮挡对话框的bug。
  * [v1.2]
  * 更新并兼容了新的窗口字符底层。
+ * [v1.3]
+ * 修复了姓名框的边框有时缝合不了的bug。
  * 
  * 
  * 
@@ -143,7 +145,8 @@
 //		★工作类型		单次执行
 //		★时间复杂度		o(n)
 //		★性能测试因素	对话框管理层
-//		★性能测试消耗	太小，未找到
+//		★性能测试消耗	2025/7/27：
+//							》0.9ms（drill_resetData_Message）4.5ms（drill_updateAttr）48.5ms（Drill_DNB_NameBoxWindow.update）
 //		★最坏情况		暂无
 //		★备注			暂无
 //		
@@ -206,7 +209,7 @@
 		return message;
 	};
 	//==============================
-	// * 提示信息 - 报错 - 兼容冲突
+	// * 提示信息 - 报错 - 兼容冲突（目前窗口字符核心已不再冲突）
 	//==============================
 	DrillUp.drill_DNB_getPluginTip_CompatibilityYEP = function(){
 		return  "【" + DrillUp.g_DNB_PluginTip_curName + "】\n"+
@@ -218,6 +221,20 @@
 	//==============================
 	DrillUp.drill_DNB_getPluginTip_NeedUpdate_drawText = function(){
 		return "【" + DrillUp.g_DNB_PluginTip_curName + "】\n检测到窗口字符核心版本过低。\n由于底层变化巨大，你需要更新 全部 窗口字符相关插件。\n去看看\"23.窗口字符 > 关于窗口字符底层全更新说明.docx\"进行更新。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 漏洞函数警告
+	//==============================
+	DrillUp.drill_DNB_getPluginTip_TransformBugWarning = function(){
+		return "【" + DrillUp.g_DNB_PluginTip_curName + "】\n注意，检测到函数Yanfly.Core.Sprite_updateTransform，该函数会破坏pixi渲染底层，从而引入像素抖动问题。\n目前已知危害到了镜头插件、对话框插件。\n去看看文档 \"0.问题解答集合（FAQ） > Rmmv中的罕见问题.docx\" 的章节 \"偶尔1像素缝隙抖动问题\" 来解决。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 漏洞函数警告 - 检测『非整数坐标抖动问题』
+	//==============================
+	if( Yanfly != undefined && 
+		Yanfly.Core != undefined && 
+		Yanfly.Core.Sprite_updateTransform != undefined ){
+		alert( DrillUp.drill_DNB_getPluginTip_TransformBugWarning() );
 	};
 	
 	
@@ -364,7 +381,8 @@ Window_Message.prototype.drill_CODi_message_newPage = function() {
 	_drill_DNB_CODi_message_doStart.call(this);
 	
 	// > 解析后
-	if( $gameTemp._drill_DNB_text != "" ){
+	if( $gameTemp._drill_DNB_text != undefined && 
+		$gameTemp._drill_DNB_text != "" ){
 		
 		// > 重设数据
 		this._drill_DNB_nameWindow.drill_resetData_Message(
@@ -403,6 +421,8 @@ Window_Message.prototype.drill_CODi_message_doTerminate = function() {
 // **					
 // **					->A主体
 // **						->窗口属性
+// **						->位置X类型
+// **						->位置Y类型
 // **					->B开关动画
 // **					->C窗口内容
 // **						->窗口字符
@@ -463,7 +483,8 @@ Drill_DNB_NameBoxWindow.prototype.standardFontSize = function() { return DrillUp
 // * A主体 - 初始化
 //==============================
 Drill_DNB_NameBoxWindow.prototype.drill_initAttr = function() {
-	this._drill_positionXType = "";
+	this._drill_positionXType = "";		//（位置X类型）
+	//（无）							//（位置Y类型）
 }
 //==============================
 // * A主体 - 设置位置类型（开放函数）
@@ -484,7 +505,7 @@ Drill_DNB_NameBoxWindow.prototype.drill_updateAttr = function() {
 Drill_DNB_NameBoxWindow.prototype.drill_updateAttr_PositionX = function() {
 	var xx = 0;
 	
-	// > 位置类型
+	// > 位置X类型
 	var cur_x_type = this._drill_positionXType;
 	if( cur_x_type == "" || cur_x_type == "左对齐" ){
 		xx = this._drill_parentWindow.x;
@@ -506,6 +527,7 @@ Drill_DNB_NameBoxWindow.prototype.drill_updateAttr_PositionX = function() {
 	if( xx > Graphics.boxWidth - this.width ){ xx = Graphics.boxWidth - this.width; }
 	
 	this.x = xx;
+	//this.x = Math.round( xx );	//『非整数坐标抖动问题』问题来自YEP插件，而不是该插件
 };
 //==============================
 // * A主体 - 帧刷新 - 位置Y
@@ -513,12 +535,12 @@ Drill_DNB_NameBoxWindow.prototype.drill_updateAttr_PositionX = function() {
 Drill_DNB_NameBoxWindow.prototype.drill_updateAttr_PositionY = function() {
 	var yy = 0;
 	
-	// > 对话框位置 - 0顶部
-	if( $gameMessage.positionType() == 0 ){
+	// > 位置Y类型 - 0顶部（根据父窗口的位置来判断，这里不用 $gameMessage.positionType() == 0 ）
+	if( this._drill_parentWindow.y < this._drill_parentWindow.height ){
 		yy = this._drill_parentWindow.y + this._drill_parentWindow.height;
 		yy -= DrillUp.g_DNB_nameBox_closingY;	//（纵向收拢偏移量）
 		
-	// > 对话框位置 - 1中间/2底部
+	// > 位置Y类型 - 1中间/2底部
 	}else{
 		yy = this._drill_parentWindow.y;
 		yy -= this.height;
@@ -526,6 +548,7 @@ Drill_DNB_NameBoxWindow.prototype.drill_updateAttr_PositionY = function() {
 	}
 	
 	this.y = yy;
+	//this.y = Math.round( yy );	//『非整数坐标抖动问题』问题来自YEP插件，而不是该插件
 };
 
 //==============================

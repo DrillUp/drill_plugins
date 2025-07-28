@@ -60,7 +60,7 @@
  *      设置两个选项，一个激活，一个未激活（灰色），
  *      通过插件指令显示/隐藏两个按钮,只显示一个,使其看起来像一个选项。
  *   (3.注意，画廊具有当前页记忆，如果你修改了一些选项，你需要用插
- *      件指令设置一下当前选中页。
+ *      件指令设置一下当前选中选项。
  * 内容：
  *   (1.每篇内容可以单独控制行间距，居中对齐等功能。
  *   (2.选项窗口和描述窗口支持所有文本的特殊字符：
@@ -106,30 +106,35 @@
  *
  * 插件指令：>画廊C : 打开面板
  * 插件指令：>画廊C : 打开面板(单图查看模式) : 内容[1]
- *
- * 插件指令：>画廊C : 显示选项 : 1
- * 插件指令：>画廊C : 隐藏选项 : 1
- * 插件指令：>画廊C : 显示全部
- * 插件指令：>画廊C : 隐藏全部
  * 
- * 插件指令：>画廊C : 锁定选项 : 1
- * 插件指令：>画廊C : 解锁选项 : 1
- * 插件指令：>画廊C : 锁定全部
- * 插件指令：>画廊C : 解锁全部
+ * 插件指令：>画廊C : 显示选项 : 选项[1]
+ * 插件指令：>画廊C : 显示选项 : 选项变量[21]
+ * 插件指令：>画廊C : 隐藏选项 : 选项[1]
+ * 插件指令：>画廊C : 隐藏选项 : 选项变量[21]
+ * 插件指令：>画廊C : 显示全部选项
+ * 插件指令：>画廊C : 隐藏全部选项
+ * 
+ * 插件指令：>画廊C : 锁定选项 : 选项[1]
+ * 插件指令：>画廊C : 锁定选项 : 选项变量[21]
+ * 插件指令：>画廊C : 解锁选项 : 选项[1]
+ * 插件指令：>画廊C : 解锁选项 : 选项变量[21]
+ * 插件指令：>画廊C : 锁定全部选项
+ * 插件指令：>画廊C : 解锁全部选项
  *
  * 1.面板打开时，游戏是暂停的，所以你不能在面板中实时变化某些数值。
  * 2.按照单图模式打开时，选定的内容是被强制播放的，不管是否隐藏，
  *   是否上锁，都会打开图片，并直接进入原图。
  *
  * -----------------------------------------------------------------------------
- * ----可选设定 - 选中页
+ * ----可选设定 - 选中选项
  * 你可以控制选项窗口当前选中第N页。（选项有3个，表示有3页）
  * 
- * 插件指令：>画廊C : 选中页 : N
+ * 插件指令：>画廊C : 选中选项 : 选项[1]
+ * 插件指令：>画廊C : 选中选项 : 选项变量[21]
  * 
  * 1.画廊具有当前页记忆，如果你修改了一些选项，你需要用该指令
- *   设置一下当前选中页。
- * 2.不存在第0页，如果选中页大于页数，将选择最末尾的页。
+ *   设置一下当前选中的选项。
+ * 2.不存在第0个选项，如果选中选项大于页数，将选择最末尾的选项。
  *
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -181,21 +186,25 @@
  * @dir img/Menu__picturegallery/
  * @type file
  *
- * @param 是否添加到主菜单
- * @parent ----杂项----
+ *
+ * @param ----面板跳转----
+ * @default 
+ *
+ * @param 是否在主菜单窗口中显示
+ * @parent ----面板跳转----
  * @type boolean
- * @on 添加
- * @off 不添加
- * @desc true - 添加，false - 不添加
+ * @on 显示
+ * @off 不显示
+ * @desc true-显示,false-不显示。
  * @default false
  *
- * @param 主菜单显示名
- * @parent 是否添加到主菜单
+ * @param 主菜单窗口显示名
+ * @parent 是否在主菜单窗口中显示
  * @desc 主菜单显示的选项名。
  * @default 画廊C
  *
  * @param 是否在标题窗口中显示
- * @parent ----杂项----
+ * @parent ----面板跳转----
  * @type boolean
  * @on 显示
  * @off 不显示
@@ -206,25 +215,37 @@
  * @parent 是否在标题窗口中显示
  * @desc 标题窗口显示的名称。
  * @default 画廊C
+ * 
+ * 
+ * @param ----存储数据----
+ * @default 
  *
  * @param 数据是否全局存储
- * @parent 是否在标题窗口中显示
+ * @parent ----存储数据----
  * @type boolean
  * @on 全局存储
  * @off 正常存储
- * @desc true-存储在全局游戏中,false-普通存档,控制该面板的解锁隐藏的状态数据存储位置。(设置不会立即生效,要删旧档)
+ * @desc true-存储在外部文件中,false-存储在普通存档文件中。(设置不会立即生效,要删旧档)
  * @default false
  *
  * @param 全局存储的文件路径
- * @parent 是否在标题窗口中显示
+ * @parent ----存储数据----
  * @type number
  * @min 1
- * @desc 指对应的文件路径ID，该插件的数据将存储到指定的文件路径中，具体去 全局存储核心 看看。
+ * @desc 指对应的文件路径ID,该插件的数据将存储到指定文件路径,具体看看"21.管理器 > 关于全局存储.docx"。
  * @default 1
  * 
  * 
  * @param ----原图查看器----
  * @default 
+ *
+ * @param 是否启用原图查看器
+ * @parent ----原图查看器----
+ * @type boolean
+ * @on 启用
+ * @off 关闭
+ * @desc true - 启用，false - 关闭。关闭原图查看器后，从画廊中按确定键无法打开原图查看器。
+ * @default true
  *
  * @param 原图显现时长
  * @parent ----原图查看器----
@@ -1603,10 +1624,10 @@
 //			->☆插件指令
 //				->打开面板
 //				->打开面板（单图查看模式）
-//				->选中页
+//				->选中选项
 //			
-//			->☆主菜单选项
-//			->☆标题选项
+//			->☆面板跳转之主菜单
+//			->☆面板跳转之标题
 //			->☆面板控制
 //			
 //			->画廊C【Scene_Drill_SGaC】
@@ -1729,7 +1750,7 @@
 	// * 静态数据 - 指针与边框
 	//				（~struct~DrillCursor）
 	//==============================
-	DrillUp.drill_SGaC_initMenuCursor = function( dataFrom ) {
+	DrillUp.drill_SGaC_initMenuCursor = function( dataFrom ){
 		var data = {};
 		
 		data['mog_enabled'] = String( dataFrom["是否启用mog菜单指针"] || "true") == "true";
@@ -1754,7 +1775,7 @@
 	// * 静态数据 - 移动动画
 	//				（~struct~DrillWindowMoving）
 	//==============================
-	DrillUp.drill_SGaC_initWindowMoving = function( dataFrom ) {
+	DrillUp.drill_SGaC_initWindowMoving = function( dataFrom ){
 		var data = {};
 		data['slideMoveType'] = String( dataFrom["移动类型"] || "匀速移动");
 		data['slideTime'] = Number( dataFrom["移动时长"] || 20);
@@ -1770,7 +1791,7 @@
 	// * 静态数据 - 布局
 	//				（~struct~DrillWindowLayout）
 	//==============================
-	DrillUp.drill_SGaC_initWindowLayout = function( dataFrom ) {
+	DrillUp.drill_SGaC_initWindowLayout = function( dataFrom ){
 		var data = {};
 		data['layoutType'] = String( dataFrom["布局类型"] || "默认皮肤");
 		data['layoutSrc'] = String( dataFrom["资源-贴图"] || "");
@@ -1783,7 +1804,7 @@
 	// * 静态数据 - 选项窗口参数
 	//				（~struct~DrillSelectWindow）
 	//==============================
-	DrillUp.drill_SGaC_initCommandWindow = function( dataFrom ) {
+	DrillUp.drill_SGaC_initCommandWindow = function( dataFrom ){
 		var data = {};
 		data['x'] = Number( dataFrom["选项窗口 X"] || 50);
 		data['y'] = Number( dataFrom["选项窗口 Y"] || 160);
@@ -1794,24 +1815,24 @@
 		data['nameExEnabled'] = String( dataFrom["是否启用选项内容"] || "false") == "true";
 		data['align'] = String( dataFrom["选项窗口对齐方式"] || "左对齐");
 		data['fontsize'] = Number( dataFrom["选项窗口字体大小"] || 20);
-		if( dataFrom["选项窗口移动动画"] != "" &&
-			dataFrom["选项窗口移动动画"] != undefined ){
+		if( dataFrom["选项窗口移动动画"] != undefined &&
+			dataFrom["选项窗口移动动画"] != "" ){
 			var slideAnim = JSON.parse( dataFrom["选项窗口移动动画"] );
 			var slideAnim_data = DrillUp.drill_SGaC_initWindowMoving( slideAnim );
 			for(var key in slideAnim_data){		//（注意，这里的 移动动画参数 是平铺的）
 				data[ key ] = slideAnim_data[ key ];
 			}
 		}
-		if( dataFrom["选项窗口布局"] != "" &&
-			dataFrom["选项窗口布局"] != undefined ){
+		if( dataFrom["选项窗口布局"] != undefined &&
+			dataFrom["选项窗口布局"] != "" ){
 			var layout = JSON.parse( dataFrom["选项窗口布局"] );
 			var layout_data = DrillUp.drill_SGaC_initWindowLayout( layout );
 			for(var key in layout_data){		//（注意，这里的 布局参数 是平铺的）
 				data[ key ] = layout_data[ key ];
 			}
 		}
-		if( dataFrom["选项窗口指针与边框"] != "" &&
-			dataFrom["选项窗口指针与边框"] != undefined ){
+		if( dataFrom["选项窗口指针与边框"] != undefined &&
+			dataFrom["选项窗口指针与边框"] != "" ){
 			var cursor = JSON.parse( dataFrom["选项窗口指针与边框"] );
 			data['cursor'] = DrillUp.drill_SGaC_initMenuCursor( cursor );
 		}else{
@@ -1826,35 +1847,35 @@
 	// * 静态数据 - 内容
 	//				（~struct~DrillSGaC）
 	//==============================
-	DrillUp.drill_SGaC_initContext = function( dataFrom ) {
+	DrillUp.drill_SGaC_initContext = function( dataFrom ){
 		var data = {};
 		
 		// > 选项名处理
 		data['name'] = String( dataFrom["选项名"] || "" );
 		
 		// > 选项内容处理
-		if( dataFrom["选项内容"] != "" &&
-			dataFrom["选项内容"] != undefined ){
+		if( dataFrom["选项内容"] != undefined &&
+			dataFrom["选项内容"] != "" ){
 			data['nameEx'] = JSON.parse( dataFrom["选项内容"] );
 		}else{
 			data['nameEx'] = "";
 		}
 		
 		// > 显示情况
-		data['enabled'] = (dataFrom["是否初始显示"] || "false") == "true" ;
+		data['enabled'] = String(dataFrom["是否初始显示"] || "false") == "true" ;
 		
 		// > 锁定情况
-		data['locked'] = (dataFrom["是否初始锁定"] || "false") == "true" ;
+		data['locked'] = String(dataFrom["是否初始锁定"] || "false") == "true" ;
 		
 		// > 已读情况
 		data['watched'] = false;
 		
 		// > 画廊图片
-		data['pic'] = (dataFrom["资源-画廊图片"] || "");
+		data['pic'] = String(dataFrom["资源-画廊图片"] || "");
 		
 		// > 画廊描述内容处理
-		if( dataFrom["画廊描述内容"] != "" &&
-			dataFrom["画廊描述内容"] != undefined ){
+		if( dataFrom["画廊描述内容"] != undefined &&
+			dataFrom["画廊描述内容"] != "" ){
 			data['context'] = JSON.parse( dataFrom["画廊描述内容"] );
 		}else{
 			data['context'] = "";
@@ -1882,27 +1903,28 @@
 	
 	/*-----------------杂项------------------*/
     DrillUp.g_SGaC_layout = String(DrillUp.parameters["资源-整体布局"] || "");
-	DrillUp.g_SGaC_add_to_menu = String(DrillUp.parameters["是否添加到主菜单"] || "true") === "true";	
-    DrillUp.g_SGaC_menu_name = String(DrillUp.parameters["主菜单显示名"] || "");
+	
+	/*-----------------面板跳转------------------*/
+	DrillUp.g_SGaC_add_to_menu = String(DrillUp.parameters["是否在主菜单窗口中显示"] || "true") === "true";	
+    DrillUp.g_SGaC_menu_name = String(DrillUp.parameters["主菜单窗口显示名"] || "");
 	DrillUp.g_SGaC_add_to_title = String(DrillUp.parameters["是否在标题窗口中显示"] || "false") === "true";	
     DrillUp.g_SGaC_title_name = String(DrillUp.parameters["标题窗口显示名"] || "");
-	DrillUp.g_SGaC_title_data_global = String(DrillUp.parameters["数据是否全局存储"] || "false") === "true";	
-    DrillUp.g_SGaC_title_data_fileId = Number(DrillUp.parameters["全局存储的文件路径"] || 1);	
 	
 	
 	/*-----------------原图查看器------------------*/
+	DrillUp.g_SGaC_imgExpandPic_enabled = String(DrillUp.parameters["是否启用原图查看器"] || "true") === "true";
 	DrillUp.g_SGaC_imgExpandPic_slideTime = Number(DrillUp.parameters["原图显现时长"] || 20);
 	DrillUp.g_SGaC_imgExpandHelp_src = String(DrillUp.parameters["资源-帮助图"] || "");
 	DrillUp.g_SGaC_imgExpandHelp_x = Number(DrillUp.parameters["偏移-帮助图 X"] || 0);
 	DrillUp.g_SGaC_imgExpandHelp_y = Number(DrillUp.parameters["偏移-帮助图 Y"] || 0);
 	DrillUp.g_SGaC_imgExpandHelp_slideTime = Number(DrillUp.parameters["帮助图移动时长"] || 40);
 	DrillUp.g_SGaC_imgExpandHelp_sustain = Number(DrillUp.parameters["帮助图持续时间"] || 180);
-	DrillUp.g_SGaC_singlePicture_hide = String(DrillUp.parameters["单图模式时是否隐藏整体布局"] || "true") === "true";	
+	DrillUp.g_SGaC_singlePicture_hideLayout = String(DrillUp.parameters["单图模式时是否隐藏整体布局"] || "true") === "true";
 	
 	
 	/*-----------------选项------------------*/
-	if( DrillUp.parameters["选项窗口"] != "" &&
-		DrillUp.parameters["选项窗口"] != undefined ){
+	if( DrillUp.parameters["选项窗口"] != undefined &&
+		DrillUp.parameters["选项窗口"] != "" ){
 		var data = JSON.parse( DrillUp.parameters["选项窗口"] );
 		DrillUp.g_SGaC_command_window = DrillUp.drill_SGaC_initCommandWindow( data );
 	}else{
@@ -1916,15 +1938,15 @@
 	DrillUp.g_SGaC_descWin_height = Number(DrillUp.parameters["描述窗口高度"] || 180);
 	DrillUp.g_SGaC_descWin_fontsize = Number(DrillUp.parameters["描述窗口字体大小"] || 22);
 	DrillUp.g_SGaC_descWin_replay = String(DrillUp.parameters["是否重播描述窗口移动动画"] || "true") === "true";	
-	if( DrillUp.parameters["描述窗口移动动画"] != "" &&
-		DrillUp.parameters["描述窗口移动动画"] != undefined ){
+	if( DrillUp.parameters["描述窗口移动动画"] != undefined &&
+		DrillUp.parameters["描述窗口移动动画"] != "" ){
 		var data = JSON.parse( DrillUp.parameters["描述窗口移动动画"] );
 		DrillUp.g_SGaC_descWin_slideAnim = DrillUp.drill_SGaC_initWindowMoving( data );
 	}else{
 		DrillUp.g_SGaC_descWin_slideAnim = DrillUp.drill_SGaC_initWindowMoving( {} );
 	}
-	if( DrillUp.parameters["描述窗口布局"] != "" &&
-		DrillUp.parameters["描述窗口布局"] != undefined ){
+	if( DrillUp.parameters["描述窗口布局"] != undefined &&
+		DrillUp.parameters["描述窗口布局"] != "" ){
 		var data = JSON.parse( DrillUp.parameters["描述窗口布局"] );
 		DrillUp.g_SGaC_descWin_layout = DrillUp.drill_SGaC_initWindowLayout( data );
 	}else{
@@ -1939,8 +1961,8 @@
 	DrillUp.g_SGaC_Thumbnail_mode = String(DrillUp.parameters["缩略图缩放模式"] || "等比缩放");
 	DrillUp.g_SGaC_Thumbnail_replay = String(DrillUp.parameters["是否重播缩略图移动动画"] || "true") === "true";	
 	DrillUp.g_SGaC_Thumbnail_showInstant = String(DrillUp.parameters["是否瞬间显示缩略图"] || "false") === "true";	
-	if( DrillUp.parameters["缩略图移动动画"] != "" &&
-		DrillUp.parameters["缩略图移动动画"] != undefined ){
+	if( DrillUp.parameters["缩略图移动动画"] != undefined &&
+		DrillUp.parameters["缩略图移动动画"] != "" ){
 		var data = JSON.parse( DrillUp.parameters["缩略图移动动画"] );
 		DrillUp.g_SGaC_Thumbnail_slideAnim = DrillUp.drill_SGaC_initWindowMoving( data );
 	}else{
@@ -1953,16 +1975,16 @@
 	DrillUp.g_SGaC_compWin_width = Number(DrillUp.parameters["完成度窗口宽度"] || 210);
 	DrillUp.g_SGaC_compWin_height = Number(DrillUp.parameters["完成度窗口高度"] || 70);
 	DrillUp.g_SGaC_compWin_fontsize = Number(DrillUp.parameters["完成度窗口字体大小"] || 22);
-	DrillUp.g_SGaC_compWin_word = String(DrillUp.parameters["完成度用语"] || "完成度：");
-	if( DrillUp.parameters["完成度窗口移动动画"] != "" &&
-		DrillUp.parameters["完成度窗口移动动画"] != undefined ){
+	DrillUp.g_SGaC_compWin_word = String(DrillUp.parameters["完成度用语"] || "");
+	if( DrillUp.parameters["完成度窗口移动动画"] != undefined &&
+		DrillUp.parameters["完成度窗口移动动画"] != "" ){
 		var data = JSON.parse( DrillUp.parameters["完成度窗口移动动画"] );
 		DrillUp.g_SGaC_compWin_slideAnim = DrillUp.drill_SGaC_initWindowMoving( data );
 	}else{
 		DrillUp.g_SGaC_compWin_slideAnim = DrillUp.drill_SGaC_initWindowMoving( {} );
 	}
-	if( DrillUp.parameters["完成度窗口布局"] != "" &&
-		DrillUp.parameters["完成度窗口布局"] != undefined ){
+	if( DrillUp.parameters["完成度窗口布局"] != undefined &&
+		DrillUp.parameters["完成度窗口布局"] != "" ){
 		var data = JSON.parse( DrillUp.parameters["完成度窗口布局"] );
 		DrillUp.g_SGaC_compWin_layout = DrillUp.drill_SGaC_initWindowLayout( data );
 	}else{
@@ -1970,34 +1992,34 @@
 	}
 	
 	/*-----------------箭头------------------*/
-	DrillUp.g_SGaC_arrowLeft = String(DrillUp.parameters['资源-左箭头'] || "");
-	DrillUp.g_SGaC_arrowRight = String(DrillUp.parameters['资源-右箭头'] || "");
-	DrillUp.g_SGaC_arrowUp = String(DrillUp.parameters['资源-上箭头'] || "");
-	DrillUp.g_SGaC_arrowDown = String(DrillUp.parameters['资源-下箭头'] || "");
-	DrillUp.g_SGaC_arrowLeft_X = Number(DrillUp.parameters['平移-左箭头 X'] || 60);
-	DrillUp.g_SGaC_arrowLeft_Y = Number(DrillUp.parameters['平移-左箭头 Y'] || 300);
-	DrillUp.g_SGaC_arrowRight_X = Number(DrillUp.parameters['平移-右箭头 X'] || 750);
-	DrillUp.g_SGaC_arrowRight_Y = Number(DrillUp.parameters['平移-右箭头 Y'] || 300);
-	DrillUp.g_SGaC_arrowUp_X = Number(DrillUp.parameters['平移-上箭头 X'] || 408);
-	DrillUp.g_SGaC_arrowUp_Y = Number(DrillUp.parameters['平移-上箭头 Y'] || 35);
-	DrillUp.g_SGaC_arrowDown_X = Number(DrillUp.parameters['平移-下箭头 X'] || 408);
-	DrillUp.g_SGaC_arrowDown_Y = Number(DrillUp.parameters['平移-下箭头 Y'] || 560);
-	DrillUp.g_SGaC_arrow_zoom = String(DrillUp.parameters['是否使用缩放效果'] || "false") === "true";	
-	DrillUp.g_SGaC_arrow_flicker = String(DrillUp.parameters['是否使用闪烁效果'] || "false") === "true";	
-	DrillUp.g_SGaC_arrow_float_val = Number(DrillUp.parameters['浮动偏移量'] || 10);
-	DrillUp.g_SGaC_arrow_float_lr = String(DrillUp.parameters['是否使用左右浮动'] || "true") === "true";
-	DrillUp.g_SGaC_arrow_float_ud = String(DrillUp.parameters['是否使用上下浮动'] || "true") === "true";
-	DrillUp.g_SGaC_arrowClickDefaultEnabled = String(DrillUp.parameters['箭头是否使用默认音效'] || "true") === "true";
-	if( DrillUp.parameters['箭头悬停音效'] != "" && 
-		DrillUp.parameters['箭头悬停音效'] != undefined ){
-		var temp = JSON.parse(DrillUp.parameters['箭头悬停音效']);
+	DrillUp.g_SGaC_arrowLeft = String(DrillUp.parameters["资源-左箭头"] || "");
+	DrillUp.g_SGaC_arrowRight = String(DrillUp.parameters["资源-右箭头"] || "");
+	DrillUp.g_SGaC_arrowUp = String(DrillUp.parameters["资源-上箭头"] || "");
+	DrillUp.g_SGaC_arrowDown = String(DrillUp.parameters["资源-下箭头"] || "");
+	DrillUp.g_SGaC_arrowLeft_X = Number(DrillUp.parameters["平移-左箭头 X"] || 60);
+	DrillUp.g_SGaC_arrowLeft_Y = Number(DrillUp.parameters["平移-左箭头 Y"] || 300);
+	DrillUp.g_SGaC_arrowRight_X = Number(DrillUp.parameters["平移-右箭头 X"] || 750);
+	DrillUp.g_SGaC_arrowRight_Y = Number(DrillUp.parameters["平移-右箭头 Y"] || 300);
+	DrillUp.g_SGaC_arrowUp_X = Number(DrillUp.parameters["平移-上箭头 X"] || 408);
+	DrillUp.g_SGaC_arrowUp_Y = Number(DrillUp.parameters["平移-上箭头 Y"] || 35);
+	DrillUp.g_SGaC_arrowDown_X = Number(DrillUp.parameters["平移-下箭头 X"] || 408);
+	DrillUp.g_SGaC_arrowDown_Y = Number(DrillUp.parameters["平移-下箭头 Y"] || 560);
+	DrillUp.g_SGaC_arrow_zoom = String(DrillUp.parameters["是否使用缩放效果"] || "false") === "true";	
+	DrillUp.g_SGaC_arrow_flicker = String(DrillUp.parameters["是否使用闪烁效果"] || "false") === "true";	
+	DrillUp.g_SGaC_arrow_float_val = Number(DrillUp.parameters["浮动偏移量"] || 10);
+	DrillUp.g_SGaC_arrow_float_lr = String(DrillUp.parameters["是否使用左右浮动"] || "true") === "true";
+	DrillUp.g_SGaC_arrow_float_ud = String(DrillUp.parameters["是否使用上下浮动"] || "true") === "true";
+	DrillUp.g_SGaC_arrowClickDefaultEnabled = String(DrillUp.parameters["箭头是否使用默认音效"] || "true") === "true";
+	if( DrillUp.parameters["箭头悬停音效"] != undefined && 
+		DrillUp.parameters["箭头悬停音效"] != "" ){
+		var temp = JSON.parse(DrillUp.parameters["箭头悬停音效"]);
 		DrillUp.g_SGaC_arrowHoverSound = DrillUp.drill_SGaC_initSound( temp );
 	}else{
 		DrillUp.g_SGaC_arrowHoverSound = null;
 	}
-	if( DrillUp.parameters['箭头点击音效'] != "" && 
-		DrillUp.parameters['箭头点击音效'] != undefined ){
-		var temp = JSON.parse(DrillUp.parameters['箭头点击音效']);
+	if( DrillUp.parameters["箭头点击音效"] != undefined && 
+		DrillUp.parameters["箭头点击音效"] != "" ){
+		var temp = JSON.parse(DrillUp.parameters["箭头点击音效"]);
 		DrillUp.g_SGaC_arrowClickSound = DrillUp.drill_SGaC_initSound( temp );
 	}else{
 		DrillUp.g_SGaC_arrowClickSound = null;
@@ -2007,8 +2029,8 @@
 	DrillUp.g_SGaC_context_list_length = 80;
 	DrillUp.g_SGaC_context_list = [];
 	for( var i = 0; i < DrillUp.g_SGaC_context_list_length; i++ ){
-		if( DrillUp.parameters["内容-" + String(i+1) ] != "" &&
-			DrillUp.parameters["内容-" + String(i+1) ] != undefined ){
+		if( DrillUp.parameters["内容-" + String(i+1) ] != undefined &&
+			DrillUp.parameters["内容-" + String(i+1) ] != "" ){
 			var data = JSON.parse(DrillUp.parameters["内容-" + String(i+1)] );
 			DrillUp.g_SGaC_context_list[i] = DrillUp.drill_SGaC_initContext( data );
 			DrillUp.g_SGaC_context_list[i]['index'] = i;
@@ -2020,8 +2042,8 @@
 	/*-----------------锁定内容------------------*/
 	DrillUp.g_SGaC_locked_name = String(DrillUp.parameters["用语-锁定的选项名"] || "");
 	DrillUp.g_SGaC_locked_name = DrillUp.g_SGaC_locked_name.replace(/\\\\/g,"\\");	//（为了支持\\n的写法）
-	if( DrillUp.parameters["用语-锁定的选项内容"] != "" &&
-		DrillUp.parameters["用语-锁定的选项内容"] != undefined ){
+	if( DrillUp.parameters["用语-锁定的选项内容"] != undefined &&
+		DrillUp.parameters["用语-锁定的选项内容"] != "" ){
 		DrillUp.g_SGaC_locked_context = JSON.parse( DrillUp.parameters["用语-锁定的选项内容"] );
 	}else{
 		DrillUp.g_SGaC_locked_context = "";
@@ -2041,6 +2063,8 @@
 	}
 	
 	/*-----------------全局存储对象------------------*/
+	DrillUp.g_SGaC_globalSetting_enabled = String(DrillUp.parameters["数据是否全局存储"] || "false") === "true";
+    DrillUp.g_SGaC_globalSetting_fileId = Number(DrillUp.parameters["全局存储的文件路径"] || 1);
 	DrillUp.global_SGaC_enableTank = null;
 	DrillUp.global_SGaC_lockTank = null;
 	DrillUp.global_SGaC_watchedTank = null;
@@ -2059,7 +2083,7 @@ if( Imported.Drill_CoreOfInput &&
 // ** ☆全局存储
 //=============================================================================
 //==============================
-// * 全局 - 检查数据 - 显示情况
+// * 『全局存储』 - 载入时检查数据 - 显示情况
 //==============================
 DrillUp.drill_SGaC_gCheckData_enable = function(){
 	for( var i = 0; i < DrillUp.g_SGaC_context_list.length; i++ ){
@@ -2080,7 +2104,7 @@ DrillUp.drill_SGaC_gCheckData_enable = function(){
 	}
 }
 //==============================
-// * 全局 - 检查数据 - 锁定情况
+// * 『全局存储』 - 载入时检查数据 - 锁定情况
 //==============================
 DrillUp.drill_SGaC_gCheckData_lock = function(){
 	for( var i = 0; i < DrillUp.g_SGaC_context_list.length; i++ ){
@@ -2101,7 +2125,7 @@ DrillUp.drill_SGaC_gCheckData_lock = function(){
 	}
 }
 //==============================
-// * 全局 - 检查数据 - 已读情况
+// * 『全局存储』 - 载入时检查数据 - 已读情况
 //==============================
 DrillUp.drill_SGaC_gCheckData_watched = function(){
 	for( var i = 0; i < DrillUp.g_SGaC_context_list.length; i++ ){
@@ -2122,10 +2146,10 @@ DrillUp.drill_SGaC_gCheckData_watched = function(){
 	}
 }
 //==============================
-// * 全局 - 读取
+// * 『全局存储』 - 载入
 //==============================
-	var global_fileId = DrillUp.g_SGaC_title_data_fileId;
-	var global_data = StorageManager.drill_COGS_loadData( global_fileId, "SGaC" );
+	var global_fileId = DrillUp.g_SGaC_globalSetting_fileId;
+	var global_data = StorageManager.drill_COGS_loadData( global_fileId, "SGaC" );  //『全局存储执行函数』
 	
 	// > 显示情况
 	if( DrillUp.global_SGaC_enableTank == null ){			//（游戏没关时，不会为null)
@@ -2150,15 +2174,15 @@ DrillUp.drill_SGaC_gCheckData_watched = function(){
 	}
 	
 //==============================
-// * 全局 - 存储
+// * 『全局存储』 - 存储
 //==============================
 StorageManager.drill_SGaC_saveData = function(){
-	var file_id = DrillUp.g_SGaC_title_data_fileId;
+	var file_id = DrillUp.g_SGaC_globalSetting_fileId;
 	var data = {};
 	data["global_enableTank"] = DrillUp.global_SGaC_enableTank;
 	data["global_lockTank"] = DrillUp.global_SGaC_lockTank;
 	data["global_watchedTank"] = DrillUp.global_SGaC_watchedTank;
-	this.drill_COGS_saveData( file_id, "SGaC", data );
+	this.drill_COGS_saveData( file_id, "SGaC", data );  //『全局存储执行函数』
 };
 
 
@@ -2306,44 +2330,37 @@ Game_Interpreter.prototype.pluginCommand = function( command, args ){
 Game_Interpreter.prototype.drill_SGaC_pluginCommand = function( command, args ){
 	if( command === ">画廊C" ){
 		
-		if(args.length == 2){
+		if( args.length == 2 ){
 			var type = String(args[1]);
-			if( type == "打开面板" ){			//打开菜单
+			if( type == "打开面板" ){
 				SceneManager.push(Scene_Drill_SGaC);
 			}
-			if( type == "显示全部" ){
-				for( var i = 0; i < DrillUp.g_SGaC_context_list.length; i++ ){
-					DrillUp.global_SGaC_enableTank[i] = true;			//全局存储
-					$gameSystem._drill_SGaC_enableTank[i] = true;		//正常存储
-				}
-				StorageManager.drill_SGaC_saveData();
-			}
-			if( type == "隐藏全部" ){
-				for( var i = 0; i < DrillUp.g_SGaC_context_list.length; i++ ){
-					DrillUp.global_SGaC_enableTank[i] = false;			//全局存储
-					$gameSystem._drill_SGaC_enableTank[i] = false;		//正常存储
-				}
-				StorageManager.drill_SGaC_saveData();
-			}
-			if( type == "锁定全部" ){
-				for( var i = 0; i < DrillUp.g_SGaC_context_list.length; i++ ){
-					DrillUp.global_SGaC_lockTank[i] = true;				//全局存储
-					$gameSystem._drill_SGaC_lockTank[i] = true;			//正常存储
-				}
-				StorageManager.drill_SGaC_saveData();
-			}
-			if( type == "解锁全部" ){
-				for( var i = 0; i < DrillUp.g_SGaC_context_list.length; i++ ){
-					DrillUp.global_SGaC_lockTank[i] = false;			//全局存储
-					$gameSystem._drill_SGaC_lockTank[i] = false;		//正常存储
-				}
-				StorageManager.drill_SGaC_saveData();
+		}
+		if( args.length == 4 ){
+			var type = String(args[1]);
+			var temp1 = String(args[3]);
+			if( type == "打开面板(单图查看模式)" ){
+				temp1 = temp1.replace("内容[","");
+				temp1 = temp1.replace("]","");
+				temp1 = Number(temp1) -1;
+				$gameTemp._drill_SGaC_isSinglePictureMode = true;
+				$gameTemp._drill_SGaC_isSinglePictureIndex = temp1;
+				SceneManager.push(Scene_Drill_SGaC);
 			}
 		}
 		
-		if(args.length == 4){
+		if( args.length == 4 ){
 			var type = String(args[1]);
 			var temp1 = String(args[3]);
+			if( temp1.indexOf("选项变量[") != -1 ){
+				temp1 = temp1.replace("选项变量[","");
+				temp1 = temp1.replace("]","");
+				temp1 = $gameVariables.value(Number(temp1));
+			}else if( temp1.indexOf("选项[") != -1 ){
+				temp1 = temp1.replace("选项[","");
+				temp1 = temp1.replace("]","");
+				temp1 = Number(temp1);
+			}
 			if( type == "显示选项" ){
 				DrillUp.global_SGaC_enableTank[ Number(temp1)-1 ] = true;			//全局存储
 				$gameSystem._drill_SGaC_enableTank[ Number(temp1)-1 ] = true;		//正常存储
@@ -2364,16 +2381,39 @@ Game_Interpreter.prototype.drill_SGaC_pluginCommand = function( command, args ){
 				$gameSystem._drill_SGaC_lockTank[ Number(temp1)-1 ] = false;		//正常存储
 				StorageManager.drill_SGaC_saveData();
 			}
-			if( type == "选中页" ){
+			if( type == "选中选项" || type == "选中页" ){
 				$gameSystem._drill_SGaC_context_index = Number(temp1) -1;
 			}
-			if( type == "打开面板(单图查看模式)" ){
-				temp1 = temp1.replace("内容[","");
-				temp1 = temp1.replace("]","");
-				temp1 = Number(temp1) -1;
-				$gameTemp._drill_SGaC_isSinglePictureMode = true;
-				$gameTemp._drill_SGaC_isSinglePictureIndex = temp1;
-				SceneManager.push(Scene_Drill_SGaC);
+		}
+		if( args.length == 2 ){
+			var type = String(args[1]);
+			if( type == "显示全部选项" || type == "显示全部" ){
+				for( var i = 0; i < DrillUp.g_SGaC_context_list.length; i++ ){
+					DrillUp.global_SGaC_enableTank[i] = true;			//全局存储
+					$gameSystem._drill_SGaC_enableTank[i] = true;		//正常存储
+				}
+				StorageManager.drill_SGaC_saveData();
+			}
+			if( type == "隐藏全部选项" || type == "隐藏全部" ){
+				for( var i = 0; i < DrillUp.g_SGaC_context_list.length; i++ ){
+					DrillUp.global_SGaC_enableTank[i] = false;			//全局存储
+					$gameSystem._drill_SGaC_enableTank[i] = false;		//正常存储
+				}
+				StorageManager.drill_SGaC_saveData();
+			}
+			if( type == "锁定全部选项" || type == "锁定全部" ){
+				for( var i = 0; i < DrillUp.g_SGaC_context_list.length; i++ ){
+					DrillUp.global_SGaC_lockTank[i] = true;				//全局存储
+					$gameSystem._drill_SGaC_lockTank[i] = true;			//正常存储
+				}
+				StorageManager.drill_SGaC_saveData();
+			}
+			if( type == "解锁全部选项" || type == "解锁全部" ){
+				for( var i = 0; i < DrillUp.g_SGaC_context_list.length; i++ ){
+					DrillUp.global_SGaC_lockTank[i] = false;			//全局存储
+					$gameSystem._drill_SGaC_lockTank[i] = false;		//正常存储
+				}
+				StorageManager.drill_SGaC_saveData();
 			}
 		}
 	}
@@ -2383,7 +2423,7 @@ Game_Interpreter.prototype.drill_SGaC_pluginCommand = function( command, args ){
 
 
 //=============================================================================
-// ** ☆主菜单选项
+// ** ☆面板跳转之主菜单
 //
 //			说明：	> 此模块专门关联主菜单选项，选项进入后跳转到 画廊C 界面。
 //					（插件完整的功能目录去看看：功能结构树）
@@ -2405,7 +2445,7 @@ Window_MenuCommand.prototype.addOriginalCommands = function() {
 };
 
 //=============================================================================
-// ** ☆标题选项
+// ** ☆面板跳转之标题
 //
 //			说明：	> 此模块专门关联标题选项，选项进入后跳转到 画廊C 界面。
 //					（插件完整的功能目录去看看：功能结构树）
@@ -2451,7 +2491,7 @@ Game_Temp.prototype.initialize = function() {
 Game_Temp.prototype.drill_SGaC_isLocked = function( context_realIndex ){
 	
 	// > 全局存储控制
-	if( DrillUp.g_SGaC_title_data_global == true ){
+	if( DrillUp.g_SGaC_globalSetting_enabled == true ){
 		if( DrillUp.global_SGaC_lockTank[ context_realIndex ] == true ){
 			return true;
 		}else{
@@ -2473,7 +2513,7 @@ Game_Temp.prototype.drill_SGaC_isLocked = function( context_realIndex ){
 Game_Temp.prototype.drill_SGaC_isEnabled = function( context_realIndex ){
 	
 	// > 全局存储控制
-	if( DrillUp.g_SGaC_title_data_global == true ){
+	if( DrillUp.g_SGaC_globalSetting_enabled == true ){
 		if( DrillUp.global_SGaC_enableTank[ context_realIndex ] == true ){
 			return true;
 		}else{
@@ -2495,7 +2535,7 @@ Game_Temp.prototype.drill_SGaC_isEnabled = function( context_realIndex ){
 Game_Temp.prototype.drill_SGaC_isWatched = function( context_realIndex ){
 	
 	// > 全局存储控制
-	if( DrillUp.g_SGaC_title_data_global == true ){
+	if( DrillUp.g_SGaC_globalSetting_enabled == true ){
 		if( DrillUp.global_SGaC_watchedTank[ context_realIndex ] == true ){
 			return true;
 		}else{
@@ -2688,7 +2728,7 @@ Scene_Drill_SGaC.prototype.drill_createAttr = function() {
 	// > 整体布局贴图
 	this._drill_layout = new Sprite(ImageManager.load_MenuGallery(DrillUp.g_SGaC_layout));
 	if( $gameTemp._drill_SGaC_isSinglePictureMode == true &&
-		DrillUp.g_SGaC_singlePicture_hide == true ){
+		DrillUp.g_SGaC_singlePicture_hideLayout == true ){
 		//（单图模式则直接不添加）
 	}else{
 		this.addChild(this._drill_layout);	
@@ -2706,7 +2746,9 @@ Scene_Drill_SGaC.prototype.drill_createSelect = function() {
 	this._window_select.refresh();
 	this._window_select.drill_window_initSelect();
 	
-	this._window_select.setHandler('ok', this.drill_selectOk.bind(this));	//绑定确定选择选项
+	if( DrillUp.g_SGaC_imgExpandPic_enabled == true ){							//（单图模式开关）
+		this._window_select.setHandler('ok', this.drill_selectOk.bind(this));	//绑定确定选择选项
+	}
 	this._window_select.setHandler('cancel', this.popScene.bind(this));		//绑定退出界面事件
 	this._drill_field.addChild(this._window_select);
 };
@@ -2876,21 +2918,23 @@ Scene_Drill_SGaC.prototype.drill_updateThumbnail = function() {
 	this._sprite_thumbnail.y = DrillUp.g_SGaC_Thumbnail_y + ryy;
 	
 	// > 鼠标点击缩略图
-	if( this._window_select.active == true &&
-		TouchInput.drill_isLeftTriggerd() ){
-		
-		var pw = ww * this._sprite_thumbnail.scale.x;
-		var ph = hh * this._sprite_thumbnail.scale.y;
-		
-		var _x = _drill_mouse_x;
-		var _y = _drill_mouse_y;
-		if( _x >= this._sprite_thumbnail.x - 10 &&
-			_x <= this._sprite_thumbnail.x + pw + 10 &&
-			_y >= this._sprite_thumbnail.y - 10 &&
-			_y <= this._sprite_thumbnail.y + ph + 10 ){
-			SoundManager.playOk();
-			this.drill_selectOk();
-		};
+	if( DrillUp.g_SGaC_imgExpandPic_enabled == true ){	//（单图模式开关）
+		if( this._window_select.active == true &&
+			TouchInput.drill_isLeftTriggerd() ){
+			
+			var pw = ww * this._sprite_thumbnail.scale.x;
+			var ph = hh * this._sprite_thumbnail.scale.y;
+			
+			var _x = _drill_mouse_x;
+			var _y = _drill_mouse_y;
+			if( _x >= this._sprite_thumbnail.x - 10 &&
+				_x <= this._sprite_thumbnail.x + pw + 10 &&
+				_y >= this._sprite_thumbnail.y - 10 &&
+				_y <= this._sprite_thumbnail.y + ph + 10 ){
+				SoundManager.playOk();
+				this.drill_selectOk();
+			};
+		}
 	}
 }
 //==============================
@@ -3649,6 +3693,13 @@ Drill_SGaC_SelectWindow.prototype.drill_window_initSelect = function() {
 	this.select(Drill_SGaC_SelectWindow.g_drill_lastIndex);
 }
 //==============================
+// * 2A选中 - 执行 确定键（继承）
+//==============================
+Drill_SGaC_SelectWindow.prototype.processOk = function(){
+	if( DrillUp.g_SGaC_imgExpandPic_enabled != true ){ return; }	//（单图模式开关）
+	Window_Selectable.prototype.processOk.call(this);
+};
+//==============================
 // * 2A选中 - 退出时暂存选项（继承）
 //==============================
 Drill_SGaC_SelectWindow.prototype.processCancel = function() {
@@ -3674,9 +3725,9 @@ Drill_SGaC_SelectWindow.prototype.drill_window_drawAllItem = function(){
 	for( var i = 0; i < this.maxPageItems(); i++ ){
 		var index = topIndex + i;
 		if( index < this.maxItems() ){
-			//this.drill_window_drawIcon(index);
+			this.drill_window_drawIcon(index);
 			this.drill_window_drawItem(index);
-			//this.drill_window_drawNewTag(index);
+			this.drill_window_drawNewTag(index);
 		}
 	}
 	

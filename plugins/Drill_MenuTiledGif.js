@@ -877,7 +877,7 @@
 	// * 静态数据 - 平铺GIF
 	//				（~struct~MenuTiledGIF）
 	//==============================
-	DrillUp.drill_MTG_tiledGifInit = function( dataFrom ) {
+	DrillUp.drill_MTG_tiledGifInit = function( dataFrom ){
 		var data = {};
 		
 		// > 绑定

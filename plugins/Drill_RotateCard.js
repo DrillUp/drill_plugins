@@ -655,101 +655,101 @@
 	// * 静态数据 - 卡片设置
 	//				（~struct~RotateCardSet）
 	//==============================
-	DrillUp.drill_RCard_initRotateCardSet = function( dataFrom ) {
+	DrillUp.drill_RCard_initRotateCardSet = function( dataFrom ){
 		var data = {};
 		
-		data['r_speed'] = Number( dataFrom['卡片旋转速度'] || 0);
-		data['is_float'] = String( dataFrom['是否使用浮动效果'] || 'true') === 'true';
-		data['f_speed'] = Number( dataFrom['浮动速度'] || 0);
-		data['is_degree'] = String( dataFrom['是否对齐对角线角度'] || 'true') === 'true';
-		data['degree'] = Number( dataFrom['卡片斜向角度'] || 0);
-		data['is_back'] = String( dataFrom['是否含有背面'] || 'true') === 'true';
-		data['size'] = Number( dataFrom['默认图标缩放比例'] || 0);
+		data['r_speed'] = Number( dataFrom["卡片旋转速度"] || 0);
+		data['is_float'] = String( dataFrom["是否使用浮动效果"] || "true") === "true";
+		data['f_speed'] = Number( dataFrom["浮动速度"] || 0);
+		data['is_degree'] = String( dataFrom["是否对齐对角线角度"] || "true") === "true";
+		data['degree'] = Number( dataFrom["卡片斜向角度"] || 0);
+		data['is_back'] = String( dataFrom["是否含有背面"] || "true") === "true";
+		data['size'] = Number( dataFrom["默认图标缩放比例"] || 0);
 		
 		data['img_list'] = [];
-		data['img_list'][0] = String( dataFrom['资源-默认卡片正面'] || "" );
+		data['img_list'][0] = String( dataFrom["资源-默认卡片正面"] || "" );
 		for( var j = 1; j <= 12 ; j++ ){
-			data['img_list'][j] = String( dataFrom['资源-卡片正面' + String(j)] || "" );
+			data['img_list'][j] = String( dataFrom["资源-卡片正面" + String(j)] || "" );
 		}
 		data['img_back_list'] = [];
-		data['img_back_list'][0] = String( dataFrom['资源-默认卡片背面'] || "" );
+		data['img_back_list'][0] = String( dataFrom["资源-默认卡片背面"] || "" );
 		for( var j = 1; j <= 12 ; j++ ){
-			data['img_back_list'][j] = String( dataFrom['资源-卡片背面' + String(j)] || "" );
+			data['img_back_list'][j] = String( dataFrom["资源-卡片背面" + String(j)] || "" );
 		}
 		
 		return data;
 	}
 	
 	/*-----------------杂项------------------*/
-    DrillUp.g_RCard_btn_key = JSON.parse( DrillUp.parameters['切换按钮'] || [] );
-    DrillUp.g_RCard_useSceneItem = String(DrillUp.parameters['是否启用物品界面卡片'] || "true") === "true";
-    DrillUp.g_RCard_item_offset_fix = String(DrillUp.parameters['是否固定物品界面坐标'] || "true") === "true" ;
-    DrillUp.g_RCard_item_offsetX = Number(DrillUp.parameters['平移-物品界面窗口 X'] || 0);
-    DrillUp.g_RCard_item_offsetY = Number(DrillUp.parameters['平移-物品界面窗口 Y'] || 0);
-    DrillUp.g_RCard_useSceneSkill = String(DrillUp.parameters['是否启用技能界面卡片'] || "true") === "true";
-    DrillUp.g_RCard_skill_offset_fix = String(DrillUp.parameters['是否固定技能界面坐标'] || "true") === "true" ;
-    DrillUp.g_RCard_skill_offsetX = Number(DrillUp.parameters['平移-技能界面窗口 X'] || 0);
-    DrillUp.g_RCard_skill_offsetY = Number(DrillUp.parameters['平移-技能界面窗口 Y'] || 0);
-    DrillUp.g_RCard_useSceneEquip = String(DrillUp.parameters['是否启用装备界面卡片'] || "true") === "true";
-    DrillUp.g_RCard_equip_offset_fix = String(DrillUp.parameters['是否固定装备界面坐标'] || "true") === "true" ;
-    DrillUp.g_RCard_equip_offsetX = Number(DrillUp.parameters['平移-装备界面窗口 X'] || 0);
-    DrillUp.g_RCard_equip_offsetY = Number(DrillUp.parameters['平移-装备界面窗口 Y'] || 0);
-    DrillUp.g_RCard_useSceneShop = String(DrillUp.parameters['是否启用商店界面卡片'] || "true") === "true";
-    DrillUp.g_RCard_shop_offset_fix = String(DrillUp.parameters['是否固定商店界面坐标'] || "true") === "true" ;
-    DrillUp.g_RCard_shop_offsetX = Number(DrillUp.parameters['平移-商店界面窗口 X'] || 0);
-    DrillUp.g_RCard_shop_offsetY = Number(DrillUp.parameters['平移-商店界面窗口 Y'] || 0);
-	DrillUp.g_RCard_useSceneBattle = String(DrillUp.parameters['是否启用战斗界面卡片'] || "true") === "true";
-    DrillUp.g_RCard_battle_offset_fix = String(DrillUp.parameters['是否固定战斗界面坐标'] || "true") === "true" ;
-    DrillUp.g_RCard_battle_offsetX = Number(DrillUp.parameters['平移-战斗界面窗口 X'] || 0);
-    DrillUp.g_RCard_battle_offsetY = Number(DrillUp.parameters['平移-战斗界面窗口 Y'] || 0);
-	DrillUp.g_RCard_useSceneFTKR = String(DrillUp.parameters['是否启用技能树界面卡片'] || "true") === "true";
-    DrillUp.g_RCard_FTKR_offset_fix = String(DrillUp.parameters['是否固定FTKR技能树界面坐标'] || "true") === "true" ;
-    DrillUp.g_RCard_FTKR_offsetX = Number(DrillUp.parameters['平移-FTKR技能树界面窗口 X'] || 0);
-    DrillUp.g_RCard_FTKR_offsetY = Number(DrillUp.parameters['平移-FTKR技能树界面窗口 Y'] || 0);
+    DrillUp.g_RCard_btn_key = JSON.parse( DrillUp.parameters["切换按钮"] || [] );
+    DrillUp.g_RCard_useSceneItem = String(DrillUp.parameters["是否启用物品界面卡片"] || "true") === "true";
+    DrillUp.g_RCard_item_offset_fix = String(DrillUp.parameters["是否固定物品界面坐标"] || "true") === "true" ;
+    DrillUp.g_RCard_item_offsetX = Number(DrillUp.parameters["平移-物品界面窗口 X"] || 0);
+    DrillUp.g_RCard_item_offsetY = Number(DrillUp.parameters["平移-物品界面窗口 Y"] || 0);
+    DrillUp.g_RCard_useSceneSkill = String(DrillUp.parameters["是否启用技能界面卡片"] || "true") === "true";
+    DrillUp.g_RCard_skill_offset_fix = String(DrillUp.parameters["是否固定技能界面坐标"] || "true") === "true" ;
+    DrillUp.g_RCard_skill_offsetX = Number(DrillUp.parameters["平移-技能界面窗口 X"] || 0);
+    DrillUp.g_RCard_skill_offsetY = Number(DrillUp.parameters["平移-技能界面窗口 Y"] || 0);
+    DrillUp.g_RCard_useSceneEquip = String(DrillUp.parameters["是否启用装备界面卡片"] || "true") === "true";
+    DrillUp.g_RCard_equip_offset_fix = String(DrillUp.parameters["是否固定装备界面坐标"] || "true") === "true" ;
+    DrillUp.g_RCard_equip_offsetX = Number(DrillUp.parameters["平移-装备界面窗口 X"] || 0);
+    DrillUp.g_RCard_equip_offsetY = Number(DrillUp.parameters["平移-装备界面窗口 Y"] || 0);
+    DrillUp.g_RCard_useSceneShop = String(DrillUp.parameters["是否启用商店界面卡片"] || "true") === "true";
+    DrillUp.g_RCard_shop_offset_fix = String(DrillUp.parameters["是否固定商店界面坐标"] || "true") === "true" ;
+    DrillUp.g_RCard_shop_offsetX = Number(DrillUp.parameters["平移-商店界面窗口 X"] || 0);
+    DrillUp.g_RCard_shop_offsetY = Number(DrillUp.parameters["平移-商店界面窗口 Y"] || 0);
+	DrillUp.g_RCard_useSceneBattle = String(DrillUp.parameters["是否启用战斗界面卡片"] || "true") === "true";
+    DrillUp.g_RCard_battle_offset_fix = String(DrillUp.parameters["是否固定战斗界面坐标"] || "true") === "true" ;
+    DrillUp.g_RCard_battle_offsetX = Number(DrillUp.parameters["平移-战斗界面窗口 X"] || 0);
+    DrillUp.g_RCard_battle_offsetY = Number(DrillUp.parameters["平移-战斗界面窗口 Y"] || 0);
+	DrillUp.g_RCard_useSceneFTKR = String(DrillUp.parameters["是否启用技能树界面卡片"] || "true") === "true";
+    DrillUp.g_RCard_FTKR_offset_fix = String(DrillUp.parameters["是否固定FTKR技能树界面坐标"] || "true") === "true" ;
+    DrillUp.g_RCard_FTKR_offsetX = Number(DrillUp.parameters["平移-FTKR技能树界面窗口 X"] || 0);
+    DrillUp.g_RCard_FTKR_offsetY = Number(DrillUp.parameters["平移-FTKR技能树界面窗口 Y"] || 0);
 	
 	/*-----------------卡片设置------------------*/
 	DrillUp.g_RCard_setting = {};
-	if( DrillUp.parameters['物品卡片设置'] != "" &&
-		DrillUp.parameters['物品卡片设置'] != undefined ){
-		var data = JSON.parse(DrillUp.parameters['物品卡片设置']);
-		DrillUp.g_RCard_setting["Scene_Item"] = DrillUp.drill_RCard_initRotateCardSet( data );
+	if( DrillUp.parameters["物品卡片设置"] != undefined &&
+		DrillUp.parameters["物品卡片设置"] != "" ){
+		var data = JSON.parse(DrillUp.parameters["物品卡片设置"]);
+		DrillUp.g_RCard_setting['Scene_Item'] = DrillUp.drill_RCard_initRotateCardSet( data );
 	}else{
-		DrillUp.g_RCard_setting["Scene_Item"] = null;
+		DrillUp.g_RCard_setting['Scene_Item'] = null;
 	}
-	if( DrillUp.parameters['技能卡片设置'] != "" &&
-		DrillUp.parameters['技能卡片设置'] != undefined ){
-		var data = JSON.parse(DrillUp.parameters['技能卡片设置']);
-		DrillUp.g_RCard_setting["Scene_Skill"] = DrillUp.drill_RCard_initRotateCardSet( data );
+	if( DrillUp.parameters["技能卡片设置"] != undefined &&
+		DrillUp.parameters["技能卡片设置"] != "" ){
+		var data = JSON.parse(DrillUp.parameters["技能卡片设置"]);
+		DrillUp.g_RCard_setting['Scene_Skill'] = DrillUp.drill_RCard_initRotateCardSet( data );
 	}else{
-		DrillUp.g_RCard_setting["Scene_Skill"] = null;
+		DrillUp.g_RCard_setting['Scene_Skill'] = null;
 	}
-	if( DrillUp.parameters['装备卡片设置'] != "" &&
-		DrillUp.parameters['装备卡片设置'] != undefined ){
-		var data = JSON.parse(DrillUp.parameters['装备卡片设置']);
-		DrillUp.g_RCard_setting["Scene_Equip"] = DrillUp.drill_RCard_initRotateCardSet( data );
+	if( DrillUp.parameters["装备卡片设置"] != undefined &&
+		DrillUp.parameters["装备卡片设置"] != "" ){
+		var data = JSON.parse(DrillUp.parameters["装备卡片设置"]);
+		DrillUp.g_RCard_setting['Scene_Equip'] = DrillUp.drill_RCard_initRotateCardSet( data );
 	}else{
-		DrillUp.g_RCard_setting["Scene_Equip"] = null;
+		DrillUp.g_RCard_setting['Scene_Equip'] = null;
 	}
-	if( DrillUp.parameters['商店卡片设置'] != "" &&
-		DrillUp.parameters['商店卡片设置'] != undefined ){
-		var data = JSON.parse(DrillUp.parameters['商店卡片设置']);
-		DrillUp.g_RCard_setting["Scene_Shop"] = DrillUp.drill_RCard_initRotateCardSet( data );
+	if( DrillUp.parameters["商店卡片设置"] != undefined &&
+		DrillUp.parameters["商店卡片设置"] != "" ){
+		var data = JSON.parse(DrillUp.parameters["商店卡片设置"]);
+		DrillUp.g_RCard_setting['Scene_Shop'] = DrillUp.drill_RCard_initRotateCardSet( data );
 	}else{
-		DrillUp.g_RCard_setting["Scene_Shop"] = null;
+		DrillUp.g_RCard_setting['Scene_Shop'] = null;
 	}
-	if( DrillUp.parameters['战斗卡片设置'] != "" &&
-		DrillUp.parameters['战斗卡片设置'] != undefined ){
-		var data = JSON.parse(DrillUp.parameters['战斗卡片设置']);
-		DrillUp.g_RCard_setting["Scene_Battle"] = DrillUp.drill_RCard_initRotateCardSet( data );
+	if( DrillUp.parameters["战斗卡片设置"] != undefined &&
+		DrillUp.parameters["战斗卡片设置"] != "" ){
+		var data = JSON.parse(DrillUp.parameters["战斗卡片设置"]);
+		DrillUp.g_RCard_setting['Scene_Battle'] = DrillUp.drill_RCard_initRotateCardSet( data );
 	}else{
-		DrillUp.g_RCard_setting["Scene_Battle"] = null;
+		DrillUp.g_RCard_setting['Scene_Battle'] = null;
 	}
-	if( DrillUp.parameters['技能树卡片设置'] != "" &&
-		DrillUp.parameters['技能树卡片设置'] != undefined ){
-		var data = JSON.parse(DrillUp.parameters['技能树卡片设置']);
-		DrillUp.g_RCard_setting["Scene_STS"] = DrillUp.drill_RCard_initRotateCardSet( data );
+	if( DrillUp.parameters["技能树卡片设置"] != undefined &&
+		DrillUp.parameters["技能树卡片设置"] != "" ){
+		var data = JSON.parse(DrillUp.parameters["技能树卡片设置"]);
+		DrillUp.g_RCard_setting['Scene_STS'] = DrillUp.drill_RCard_initRotateCardSet( data );
 	}else{
-		DrillUp.g_RCard_setting["Scene_STS"] = null;
+		DrillUp.g_RCard_setting['Scene_STS'] = null;
 	}
 	
 	DrillUp.g_RCard_curScene = "";

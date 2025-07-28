@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.6]        对话框 - 对话框皮肤
+ * @plugindesc [v1.7]        对话框 - 对话框皮肤
  * @author Drill_up
  * 
  * @Drill_LE_param "皮肤样式-%d"
@@ -120,7 +120,7 @@
  * 时间复杂度： o(n^3)*o(贴图处理) 每帧
  * 测试方法：   在不同界面进行测试。
  * 测试结果：   战斗界面中，平均消耗为：【29.21ms】
- *              地图界面中，平均消耗为：【31.29ms】
+ *              地图界面中，平均消耗为：【52.10ms】
  * 
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
  *   测试结果并不是精确值，范围在给定值的10ms范围内波动。
@@ -146,6 +146,8 @@
  * 优化了旧存档的识别与兼容。
  * [v1.6]
  * 翻新了对话框的内部结构，修复了yep姓名框显示黑边的bug。
+ * [v1.7]
+ * 修复了子窗口的边框有时缝合不了的bug。
  * 
  * 
  * 
@@ -705,7 +707,8 @@
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^3)*o(贴图处理) 每帧
 //		★性能测试因素	对话框管理层
-//		★性能测试消耗	31.29ms（Drill_DSk_BorderSprite.prototype.update） 17.52ms（drill_DSk_getStyle）
+//		★性能测试消耗	2025/7/27：
+//							》52.1ms（Drill_DSk_BorderSprite.update）8.7ms（drill_DSk_updateSkin）
 //		★最坏情况		暂无（由于对话框数量有限，不能增加更多性能消耗）
 //		★备注			这里的消耗比我想象的要高。
 //		
@@ -779,6 +782,20 @@
 	DrillUp.drill_DSk_getPluginTip_LowVersion = function(){
 		return "【" + DrillUp.g_DSk_PluginTip_curName + "】\n游戏底层版本过低，插件基本功能无法执行。\n你可以去看\"rmmv软件版本（必看）.docx\"中的 \"旧工程升级至1.6版本\" 章节，来升级你的游戏底层版本。";
 	};
+	//==============================
+	// * 提示信息 - 报错 - 漏洞函数警告
+	//==============================
+	DrillUp.drill_DSk_getPluginTip_TransformBugWarning = function(){
+		return "【" + DrillUp.g_DSk_PluginTip_curName + "】\n注意，检测到函数Yanfly.Core.Sprite_updateTransform，该函数会破坏pixi渲染底层，从而引入像素抖动问题。\n目前已知危害到了镜头插件、对话框插件。\n去看看文档 \"0.问题解答集合（FAQ） > Rmmv中的罕见问题.docx\" 的章节 \"偶尔1像素缝隙抖动问题\" 来解决。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 漏洞函数警告 - 检测『非整数坐标抖动问题』
+	//==============================
+	if( Yanfly != undefined && 
+		Yanfly.Core != undefined && 
+		Yanfly.Core.Sprite_updateTransform != undefined ){
+		alert( DrillUp.drill_DSk_getPluginTip_TransformBugWarning() );
+	};
 	
 	
 //=============================================================================
@@ -793,7 +810,7 @@
 	// * 静态数据 - 样式
 	//				（~struct~DrillDSkStyle）
 	//==============================
-	DrillUp.drill_DSk_initStyle = function( dataFrom ) {
+	DrillUp.drill_DSk_initStyle = function( dataFrom ){
 		var data = {};
 		
 		// > 窗口
@@ -1822,8 +1839,10 @@ Drill_DSk_BorderSprite.prototype.drill_DSk_refreshStyle = function(){
 //==============================
 Drill_DSk_BorderSprite.prototype.drill_DSk_refreshPosition = function() {
 	var rect = this.drill_DSk_getRect();
-	this.x = rect.x + rect.width*0.5;
+	this.x = rect.x + rect.width*0.5 ;
 	this.y = rect.y + rect.height*0.5;
+	//this.x = Math.round( rect.x + rect.width*0.5 );	//『非整数坐标抖动问题』问题来自YEP插件，而不是该插件
+	//this.y = Math.round( rect.y + rect.height*0.5);	//
 }
 //==============================
 // * A主体 - 获取矩形（开放函数）
@@ -1900,7 +1919,7 @@ Drill_DSk_BorderSprite.prototype.drill_sprite_createBorder = function() {
 	this._borderSprite_layer.anchor.y = 0.5;
 	this.addChild( this._borderSprite_layer );
 	
-	// > 建立 2468 区域
+	// > 建立 2468 区域（正上、正左、正右、正下）
 	if( data['border_type'] == "循环平铺" ){
 		this._borderSprite_2 = new TilingSprite();	//TilingSprite平铺图层
 		this._borderSprite_2.move(0, 0, 0, 0);
@@ -1954,7 +1973,7 @@ Drill_DSk_BorderSprite.prototype.drill_sprite_createBorder = function() {
 	this._borderSprite_layer.addChild( this._borderSprite_6 );
 	this._borderSprite_layer.addChild( this._borderSprite_8 );
 	
-	// > 建立 1379 区域
+	// > 建立 1379 区域（左上、右上、左下、右下）
 	this._borderSprite_1 = new Sprite();
 	this._borderSprite_1.anchor.x = 1.0;
 	this._borderSprite_1.anchor.y = 1.0;
@@ -2037,10 +2056,11 @@ Drill_DSk_BorderSprite.prototype.drill_sprite_updateBorder = function() {
 	var rect = this.drill_DSk_getRect();
 	rect.width  -= data['border_inner'] * 2;	//（向内缩进距）
 	rect.height -= data['border_inner'] * 2;
-	var rww = rect.width*0.5;
+	var rww = rect.width *0.5;
 	var rhh = rect.height*0.5;
 	
-	// > 位置 - 2468 区域刷新
+	// > 位置 - 2468 区域刷新（正上、正左、正右、正下）
+	//		（这里不要加 round、floor、ceil 都会导致位置偏差1像素）
 	if( data['border_type'] == "循环平铺" ){
 		this._borderSprite_2.x = -1 * rww;		//（TilingSprite没有anchor）
 		this._borderSprite_2.y = -1 * rhh - bb;
@@ -2070,10 +2090,10 @@ Drill_DSk_BorderSprite.prototype.drill_sprite_updateBorder = function() {
 		this._borderSprite_8.x =  0 * rww;
 		this._borderSprite_8.y =  1 * rhh;
 		
-		this._borderSprite_2.scale.x = (rect.width +1) / (ww-bb*2) ;	//多1像素用来缝合边
-		this._borderSprite_4.scale.y = (rect.height+1) / (hh-bb*2) ;
-		this._borderSprite_6.scale.y = (rect.height+1) / (hh-bb*2) ;
-		this._borderSprite_8.scale.x = (rect.width +1) / (ww-bb*2) ;
+		this._borderSprite_2.scale.x = rect.width  / (ww-bb*2) ;	//（多1像素用来缝合边？暂不考虑）
+		this._borderSprite_4.scale.y = rect.height / (hh-bb*2) ;
+		this._borderSprite_6.scale.y = rect.height / (hh-bb*2) ;
+		this._borderSprite_8.scale.x = rect.width  / (ww-bb*2) ;
 		
 	}else if( data['border_type'] == "保持切割原样" ){
 		this._borderSprite_2.x =  0 * rww;
@@ -2086,7 +2106,8 @@ Drill_DSk_BorderSprite.prototype.drill_sprite_updateBorder = function() {
 		this._borderSprite_8.y =  1 * rhh;
 	}
 	
-	// > 位置 - 1379 区域刷新
+	// > 位置 - 1379 区域刷新（左上、右上、左下、右下）
+	//		（这里不要加 round、floor、ceil 都会导致位置偏差1像素）
 	this._borderSprite_1.x = -1 * rww;
 	this._borderSprite_1.y = -1 * rhh;
 	this._borderSprite_3.x =  1 * rww;
@@ -2137,7 +2158,7 @@ Drill_DSk_BorderSprite.prototype.drill_sprite_createCorner = function() {
 	this._cornerSprite_layer.anchor.y = 0.5;
 	this.addChild( this._cornerSprite_layer );
 	
-	// > 建立 左上、右上、左下、右下 区域
+	// > 建立 1234 区域（左上、右上、左下、右下）
 	this._cornerSprite_1 = new Sprite();
 	this._cornerSprite_1.anchor.x = 0.5;
 	this._cornerSprite_1.anchor.y = 0.5;
@@ -2204,10 +2225,11 @@ Drill_DSk_BorderSprite.prototype.drill_sprite_updateCorner = function() {
 	this._cornerSprite_4.setFrame( ww*0.5,  hh*0.5,  ww*0.5,  hh*0.5 );
 	
 	// > 位置
+	//		（这里不要加 round、floor、ceil 都会导致位置偏差1像素）
 	var rect = this.drill_DSk_getRect();
 	rect.width  -= data['corner_inner'] * 2;	//（向内缩进距）
 	rect.height -= data['corner_inner'] * 2;
-	var rww = rect.width*0.5;
+	var rww = rect.width *0.5;
 	var rhh = rect.height*0.5;
 	this._cornerSprite_1.x = -1 * rww;
 	this._cornerSprite_1.y = -1 * rhh;

@@ -680,7 +680,7 @@
 	// * 静态数据 - 视频弹幕样式
 	//				（~struct~DrillGFVBStyle）
 	//==============================
-	DrillUp.drill_GFVB_initContext = function( dataFrom ) {
+	DrillUp.drill_GFVB_initContext = function( dataFrom ){
 		var data = {};
 		
 		// > 常规
@@ -1594,7 +1594,7 @@ function Drill_GFVB_SeatAllocator(){
 //==============================
 Drill_GFVB_SeatAllocator.prototype.initialize = function( data ){
 	this._drill_data = {};
-	this._drill_allocatorSerial = new Date().getTime() + Math.random();		//（生成一个不重复的序列号）
+	this._drill_allocatorSerial = new Date().getTime() + Math.random();		//『生成一个不重复的序列号』
     this.drill_allocator_initData();										//初始化数据
     this.drill_allocator_initChild();										//初始化子功能
 	if( data == undefined ){ data = {}; }
@@ -1736,7 +1736,7 @@ Drill_GFVB_SeatAllocator.prototype.drill_allocator_resetData_Private = function(
 	
 	// > 执行重置
 	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
-	this._drill_allocatorSerial = new Date().getTime() + Math.random();		//（生成一个不重复的序列号）
+	this._drill_allocatorSerial = new Date().getTime() + Math.random();		//『生成一个不重复的序列号』
     this.drill_allocator_initData();										//初始化数据
     this.drill_allocator_initChild();										//初始化子功能
 }
@@ -1977,7 +1977,7 @@ function Drill_GFVB_LaneAllocator(){
 //==============================
 Drill_GFVB_LaneAllocator.prototype.initialize = function( data ){
 	this._drill_data = {};
-	this._drill_allocatorSerial = new Date().getTime() + Math.random();		//（生成一个不重复的序列号）
+	this._drill_allocatorSerial = new Date().getTime() + Math.random();		//『生成一个不重复的序列号』
     this.drill_allocator_initData();										//初始化数据
     this.drill_allocator_initChild();										//初始化子功能
 	if( data == undefined ){ data = {}; }
@@ -2121,7 +2121,7 @@ Drill_GFVB_LaneAllocator.prototype.drill_allocator_resetData_Private = function(
 	
 	// > 执行重置
 	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
-	this._drill_allocatorSerial = new Date().getTime() + Math.random();		//（生成一个不重复的序列号）
+	this._drill_allocatorSerial = new Date().getTime() + Math.random();		//『生成一个不重复的序列号』
     this.drill_allocator_initData();										//初始化数据
     this.drill_allocator_initChild();										//初始化子功能
 }

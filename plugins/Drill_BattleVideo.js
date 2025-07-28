@@ -479,7 +479,7 @@
 	// * 静态数据 - 视频
 	//				（~struct~TitleVideo）
 	//==============================
-	DrillUp.drill_BVi_videoInit = function( dataFrom ) {
+	DrillUp.drill_BVi_videoInit = function( dataFrom ){
 		var data = {};
 		data['src'] = String( dataFrom["资源-视频动画"] || "");
 		//data['src_mask'] = String( dataFrom["资源-视频遮罩"] || "");

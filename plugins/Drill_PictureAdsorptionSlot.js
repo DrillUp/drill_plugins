@@ -708,7 +708,7 @@
 //		
 //		★脚本文档：
 //			16.图片 > 关于图片与鼠标控制核心（脚本）.docx
-//			1.系统 > 关于拖拽与吸附控制核心（脚本）.docx
+//			32.数学模型 > 关于拖拽与吸附控制核心（脚本）.docx
 //		
 //		★插件私有类：
 //			无
@@ -802,8 +802,8 @@
 		var data = {};
 		
 		// > B吸附类型
-		if( dataFrom["可吸附类型"] != "" &&
-			dataFrom["可吸附类型"] != undefined ){
+		if( dataFrom["可吸附类型"] != undefined &&
+			dataFrom["可吸附类型"] != "" ){
 			data['slotTypeList'] = JSON.parse( dataFrom["可吸附类型"] );
 		}else{
 			data['slotTypeList'] = [];
@@ -1747,36 +1747,36 @@ Game_Picture.prototype.drill_PASl_clearAdsorbPosition = function(){
 //==============================
 // * 图片的属性 - 初始化
 //==============================
-var _drill_PASl_switch_initialize = Game_Picture.prototype.initialize;
+var _drill_PASl_attr_initialize = Game_Picture.prototype.initialize;
 Game_Picture.prototype.initialize = function(){
-	this._drill_PASl_switchData = undefined;		//（要放前面，不然会盖掉子类的设置）
-	_drill_PASl_switch_initialize.call(this);
+	this._drill_PASl_attrData = undefined;		//（要放前面，不然会盖掉子类的设置）
+	_drill_PASl_attr_initialize.call(this);
 }
 //==============================
 // * 图片的属性 - 初始化 数据
 //
 //			说明：	> 这里的数据都要初始化才能用。『节约事件数据存储空间』
-//					> 层面关键字为：switchData，一对一。
+//					> 层面关键字为：attrData，一对一。
 //==============================
-Game_Picture.prototype.drill_PASl_checkSwitchData = function(){
+Game_Picture.prototype.drill_PASl_checkAttrData = function(){
 	
 	// > 【图片-可拖拽的图片】强制绑定
-	this.drill_PDr_checkSwitchData();
+	this.drill_PDr_checkAttrData();
 	
-	if( this._drill_PASl_switchData != undefined ){ return; }
-	this._drill_PASl_switchData = {};
+	if( this._drill_PASl_attrData != undefined ){ return; }
+	this._drill_PASl_attrData = {};
 	
 	// > 数据 - 图片ID【图片-图片优化核心】
-	this._drill_PASl_switchData['pic_id'] = this.drill_COPi_getPictureId();
+	this._drill_PASl_attrData['pic_id'] = this.drill_COPi_getPictureId();
 	
 	// > 数据 - 吸附控制器ID【数学模型-拖拽与吸附核心】
 	var adsorb_factory = $gameSystem.drill_CODAA_adsorbFactory();
 	var product_id = adsorb_factory.drill_factoryAdsorb_create( "PASl" );	//（通过工厂创建控制器，并印上该插件的简称）
-	this._drill_PASl_switchData['adsorbController_id'] = product_id;
+	this._drill_PASl_attrData['adsorbController_id'] = product_id;
 	
 	// > 控制器初始化 - 外键绑定 拖拽控制器ID
 	var adsorb_controller = this.drill_PASl_getAdsorbController();
-	adsorb_controller.drill_controllerAdsorb_setForeignKey_dragId( this._drill_PDr_switchData['dragController_id'] );
+	adsorb_controller.drill_controllerAdsorb_setForeignKey_dragId( this._drill_PDr_attrData['dragController_id'] );
 	
 	// > 控制器初始化 - 设置吸附动画开关
 	adsorb_controller.drill_controllerAdsorb_setAnimEnabled( $gameSystem._drill_PASl_adsorptAnimEnabled );
@@ -1790,14 +1790,14 @@ Game_Picture.prototype.drill_PASl_checkSwitchData = function(){
 //==============================
 // * 图片的属性 - 删除数据
 //==============================
-Game_Picture.prototype.drill_PASl_removeSwitchData = function(){
+Game_Picture.prototype.drill_PASl_removeAttrData = function(){
 	
 	// > 删除控制器
 	var controller = this.drill_PASl_getAdsorbController();
 	$gameSystem.drill_CODAA_adsorbFactory().drill_factoryAdsorb_remove( controller );
 	
 	// > 删除数据
-	this._drill_PASl_switchData = undefined;
+	this._drill_PASl_attrData = undefined;
 }
 //==============================
 // * 图片的属性 - 消除图片
@@ -1805,7 +1805,7 @@ Game_Picture.prototype.drill_PASl_removeSwitchData = function(){
 var _drill_PASl_p_erase = Game_Picture.prototype.erase;
 Game_Picture.prototype.erase = function(){
 	_drill_PASl_p_erase.call( this );
-	this.drill_PASl_removeSwitchData();						//（删除数据）
+	this.drill_PASl_removeAttrData();						//（删除数据）
 }
 //==============================
 // * 图片的属性 - 消除图片（command235）
@@ -1815,7 +1815,7 @@ Game_Screen.prototype.erasePicture = function( pictureId ){
     var realPictureId = this.realPictureId(pictureId);
 	var picture = this._pictures[realPictureId];
 	if( picture != undefined ){
-		picture.drill_PASl_removeSwitchData();				//（删除数据）
+		picture.drill_PASl_removeAttrData();				//（删除数据）
 	}
 	_drill_PASl_p_erasePicture.call( this, pictureId );
 }
@@ -1826,8 +1826,8 @@ Game_Screen.prototype.erasePicture = function( pictureId ){
 //			说明：	> 该函数返回 吸附控制器 的指针。
 //==============================
 Game_Picture.prototype.drill_PASl_getAdsorbController = function(){
-	if( this._drill_PASl_switchData == undefined ){ return null; }
-	var c_id = this._drill_PASl_switchData['adsorbController_id'];
+	if( this._drill_PASl_attrData == undefined ){ return null; }
+	var c_id = this._drill_PASl_attrData['adsorbController_id'];
 	return $gameSystem.drill_CODAA_adsorbFactory().drill_factoryAdsorb_getByProductId( c_id );
 }
 //==============================
@@ -1835,18 +1835,18 @@ Game_Picture.prototype.drill_PASl_getAdsorbController = function(){
 //==============================
 Game_Screen.prototype.drill_PASl_getPictureID_ByAdsorbControllerId = function( adsorbController_id ){
 	
-	// > 图片遍历『图片与多场景』
-	var i_offset = 0;							//地图界面的图片
+	// > 图片遍历
+	var i_offset = 0;							//地图界面的图片『图片与多场景-地图界面』
 	var pic_length = this.maxPictures();
-	if( $gameParty.inBattle() == true ){		//战斗界面的图片
+	if( $gameParty.inBattle() == true ){		//战斗界面的图片『图片与多场景-战斗界面』
 		i_offset = pic_length;
 	}
 	for(var i = 0; i < pic_length; i++ ){
 		var picture = this._pictures[ i + i_offset ];
 		if( picture == undefined ){ continue; }
-		if( picture._drill_PASl_switchData == undefined ){ continue; }
-		if( picture._drill_PASl_switchData['adsorbController_id'] == adsorbController_id ){
-			return picture._drill_PASl_switchData['pic_id'];
+		if( picture._drill_PASl_attrData == undefined ){ continue; }
+		if( picture._drill_PASl_attrData['adsorbController_id'] == adsorbController_id ){
+			return picture._drill_PASl_attrData['pic_id'];
 		}
 	}
 	return -1;
@@ -1855,28 +1855,28 @@ Game_Screen.prototype.drill_PASl_getPictureID_ByAdsorbControllerId = function( a
 // * 图片的属性 - 参数 - 设置可吸附
 //==============================
 Game_Picture.prototype.drill_PASl_setCanAdsorb = function( enabled ){
-	this.drill_PASl_checkSwitchData();
+	this.drill_PASl_checkAttrData();
 	this.drill_PASl_getAdsorbController().drill_controllerAdsorb_setCanAdsorb( enabled );
 }
 //==============================
 // * 图片的属性 - 参数 - 是否可吸附
 //==============================
 Game_Picture.prototype.drill_PASl_canAdsorb = function(){
-	if( this._drill_PASl_switchData == undefined ){ return false; }
+	if( this._drill_PASl_attrData == undefined ){ return false; }
 	return this.drill_PASl_getAdsorbController().drill_controllerAdsorb_canAdsorb();
 }
 //==============================
 // * 图片的属性 - 参数 - 设置可脱离槽
 //==============================
 Game_Picture.prototype.drill_PASl_setPullOutEnabled = function( enabled ){
-	this.drill_PASl_checkSwitchData();
+	this.drill_PASl_checkAttrData();
 	this.drill_PASl_getAdsorbController().drill_controllerAdsorb_setPullOutEnabled( enabled );
 }
 //==============================
 // * 图片的属性 - 参数 - 是否可脱离槽
 //==============================
 Game_Picture.prototype.drill_PASl_pullOutEnabled = function(){
-	if( this._drill_PASl_switchData == undefined ){ return false; }
+	if( this._drill_PASl_attrData == undefined ){ return false; }
 	return this.drill_PASl_getAdsorbController().drill_controllerAdsorb_pullOutEnabled();
 }
 
@@ -1884,21 +1884,21 @@ Game_Picture.prototype.drill_PASl_pullOutEnabled = function(){
 // * 图片的属性 - 参数 - 添加可吸附类型
 //==============================
 Game_Picture.prototype.drill_PASl_addAdsorbType = function( type_str ){
-	this.drill_PASl_checkSwitchData();
+	this.drill_PASl_checkAttrData();
 	this.drill_PASl_getAdsorbController().drill_controllerAdsorb_addAdsorbType( type_str );
 }
 //==============================
 // * 图片的属性 - 参数 - 去除可吸附类型
 //==============================
 Game_Picture.prototype.drill_PASl_removeAdsorbType = function( type_str ){
-	this.drill_PASl_checkSwitchData();
+	this.drill_PASl_checkAttrData();
 	this.drill_PASl_getAdsorbController().drill_controllerAdsorb_removeAdsorbType( type_str );
 }
 //==============================
 // * 图片的属性 - 参数 - 去除全部可吸附类型
 //==============================
 Game_Picture.prototype.drill_PASl_removeAllAdsorbType = function(){
-	this.drill_PASl_checkSwitchData();
+	this.drill_PASl_checkAttrData();
 	this.drill_PASl_getAdsorbController().drill_controllerAdsorb_removeAllAdsorbType();
 }
 
@@ -1906,7 +1906,7 @@ Game_Picture.prototype.drill_PASl_removeAllAdsorbType = function(){
 // * 图片的属性 - 操作 - 吸附到槽
 //==============================
 Game_Picture.prototype.drill_PASl_doAdsorb1_ByIndex = function( slot_index ){
-	this.drill_PASl_checkSwitchData();
+	this.drill_PASl_checkAttrData();
 	var slot_controller = $gameScreen.drill_PASl_getSlotController_ByIndex( slot_index );
 	if( slot_controller == undefined ){ return; }
 	
@@ -1917,7 +1917,7 @@ Game_Picture.prototype.drill_PASl_doAdsorb1_ByIndex = function( slot_index ){
 // * 图片的属性 - 操作 - 立即吸附到槽
 //==============================
 Game_Picture.prototype.drill_PASl_doAdsorb2_ByIndex = function( slot_index ){
-	this.drill_PASl_checkSwitchData();
+	this.drill_PASl_checkAttrData();
 	var slot_controller = $gameScreen.drill_PASl_getSlotController_ByIndex( slot_index );
 	if( slot_controller == undefined ){ return; }
 	
@@ -1928,7 +1928,7 @@ Game_Picture.prototype.drill_PASl_doAdsorb2_ByIndex = function( slot_index ){
 // * 图片的属性 - 操作 - 立即合并吸附偏移量（私有）
 //==============================
 Game_Picture.prototype.drill_PASl_mergeAdsorbPosition_Private = function() {
-	this.drill_PASl_checkSwitchData();
+	this.drill_PASl_checkAttrData();
 	var adsorb_controller = this.drill_PASl_getAdsorbController();
 	
 	// > 吸附时
@@ -1954,7 +1954,7 @@ Game_Picture.prototype.drill_PASl_mergeAdsorbPosition_Private = function() {
 // * 图片的属性 - 操作 - 立即清零吸附偏移量（私有）
 //==============================
 Game_Picture.prototype.drill_PASl_clearAdsorbPosition_Private = function() {
-	this.drill_PASl_checkSwitchData();
+	this.drill_PASl_checkAttrData();
 	
 	// > 【图片-可拖拽的图片】立即清零拖拽偏移量
 	this.drill_PDr_clearDragPosition();
@@ -2001,14 +2001,14 @@ Game_Picture.prototype.drill_PASl_updateAdsorb = function() {
 // * 图片吸附控制 - 获取吸附位置X（私有）
 //==============================
 Game_Picture.prototype.drill_PASl_getAdsorbingX_Private = function(){
-	if( this._drill_PASl_switchData == undefined ){ return 0; }
+	if( this._drill_PASl_attrData == undefined ){ return 0; }
 	return this.drill_PASl_getAdsorbController().drill_controllerAdsorb_getAdsorbingX();
 }
 //==============================
 // * 图片吸附控制 - 获取吸附位置Y（私有）
 //==============================
 Game_Picture.prototype.drill_PASl_getAdsorbingY_Private = function(){
-	if( this._drill_PASl_switchData == undefined ){ return 0; }
+	if( this._drill_PASl_attrData == undefined ){ return 0; }
 	return this.drill_PASl_getAdsorbController().drill_controllerAdsorb_getAdsorbingY();
 }
 //==============================
@@ -2039,7 +2039,7 @@ Game_Picture.prototype.drill_COPi_finalTransform_x = function() {
 	$gameTemp._drill_PASl_org_final_x = xx - this.drill_PDr_getDraggingXOffset();
 	
 	// > 直接覆盖【图片-图片优化核心】
-	if( this._drill_PASl_switchData != undefined ){
+	if( this._drill_PASl_attrData != undefined ){
 		var controller = this.drill_PASl_getAdsorbController();
 		if( controller._drill_curState == 1 ||
 			controller._drill_curState == 2 ||
@@ -2065,7 +2065,7 @@ Game_Picture.prototype.drill_COPi_finalTransform_y = function() {
 	$gameTemp._drill_PASl_org_final_y = yy - this.drill_PDr_getDraggingYOffset();
 	
 	// > 直接覆盖【图片-图片优化核心】
-	if( this._drill_PASl_switchData != undefined ){
+	if( this._drill_PASl_attrData != undefined ){
 		var controller = this.drill_PASl_getAdsorbController();
 		if( controller._drill_curState == 1 ||
 			controller._drill_curState == 2 ||
@@ -2198,7 +2198,7 @@ Game_Screen.prototype.drill_PASl_updateSlotTank = function() {
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * DEBUG吸附槽范围 - 帧刷新（地图界面）
+// * DEBUG吸附槽范围 - 帧刷新『图片与多场景-地图界面』
 //==============================
 var _drill_PASl_debugMap_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {
@@ -2207,7 +2207,7 @@ Scene_Map.prototype.update = function() {
     this.drill_PASl_updateDrawBeanRangeBitmap();		//帧刷新 - 绘制范围
 }
 //==============================
-// * DEBUG吸附槽范围 - 帧刷新 初始化贴图
+// * DEBUG吸附槽范围 - 帧刷新 初始化贴图『图片与多场景-地图界面』
 //==============================
 Scene_Map.prototype.drill_PASl_updateDrawBeanRangeSprite = function() {
 	
@@ -2236,7 +2236,7 @@ Scene_Map.prototype.drill_PASl_updateDrawBeanRangeSprite = function() {
 	}
 }
 //==============================
-// * DEBUG吸附槽范围 - 帧刷新 绘制范围
+// * DEBUG吸附槽范围 - 帧刷新 绘制范围『图片与多场景-地图界面』
 //==============================
 Scene_Map.prototype.drill_PASl_updateDrawBeanRangeBitmap = function() {
 	if( this._drill_PASl_DebugSprite == undefined ){ return; }
@@ -2268,10 +2268,10 @@ Scene_Map.prototype.drill_PASl_updateDrawBeanRangeBitmap = function() {
 		temp_bitmap.drill_PASl_drawCustomText( cur_str, slot_controller.drill_slot_x() -4, slot_controller.drill_slot_y() +4, "rgba(0,255,145,1)" );
 	}
 	
-	// > 图片遍历『图片与多场景』（显示所有图片的悬停范围）
-	var i_offset = 0;							//地图界面的图片
+	// > 图片遍历（显示所有图片的悬停范围）
+	var i_offset = 0;							//地图界面的图片『图片与多场景-地图界面』
 	var pic_length = $gameScreen.maxPictures();
-	if( $gameParty.inBattle() == true ){		//战斗界面的图片
+	if( $gameParty.inBattle() == true ){		//战斗界面的图片『图片与多场景-战斗界面』
 		i_offset = pic_length;
 	}
 	for(var i = 0; i < pic_length; i++ ){
@@ -2312,7 +2312,7 @@ Scene_Map.prototype.drill_PASl_updateDrawBeanRangeBitmap = function() {
 	}
 }
 //==============================
-// * DEBUG吸附槽范围 - 帧刷新（战斗界面）
+// * DEBUG吸附槽范围 - 帧刷新『图片与多场景-战斗界面』
 //==============================
 var _drill_PASl_debugBattle_update = Scene_Battle.prototype.update;
 Scene_Battle.prototype.update = function(){
@@ -2321,9 +2321,12 @@ Scene_Battle.prototype.update = function(){
     this.drill_PASl_updateDrawBeanRangeBitmap();		//帧刷新 - 绘制范围
 }
 //==============================
-// * DEBUG吸附槽范围 - 函数赋值『图片与多场景』
+// * DEBUG吸附槽范围 - 帧刷新 初始化贴图『图片与多场景-战斗界面』
 //==============================
 Scene_Battle.prototype.drill_PASl_updateDrawBeanRangeSprite = Scene_Map.prototype.drill_PASl_updateDrawBeanRangeSprite;
+//==============================
+// * DEBUG吸附槽范围 - 帧刷新 绘制范围『图片与多场景-战斗界面』
+//==============================
 Scene_Battle.prototype.drill_PASl_updateDrawBeanRangeBitmap = Scene_Map.prototype.drill_PASl_updateDrawBeanRangeBitmap;
 
 //==============================

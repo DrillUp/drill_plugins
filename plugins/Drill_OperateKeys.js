@@ -2118,7 +2118,7 @@ function Drill_OKe_PadBean(){
 // * 手柄实体类 - 初始化
 //==============================
 Drill_OKe_PadBean.prototype.initialize = function(){
-	this._drill_beanSerial = new Date().getTime() + Math.random();		//（生成一个不重复的序列号）
+	this._drill_beanSerial = new Date().getTime() + Math.random();		//『生成一个不重复的序列号』
     this.drill_bean_initData();											//私有数据初始化
 };
 //##############################
@@ -2554,7 +2554,7 @@ function Drill_OKe_KeyboardBean(){
 // * 键盘实体类 - 初始化
 //==============================
 Drill_OKe_KeyboardBean.prototype.initialize = function(){
-	this._drill_beanSerial = new Date().getTime() + Math.random();		//（生成一个不重复的序列号）
+	this._drill_beanSerial = new Date().getTime() + Math.random();		//『生成一个不重复的序列号』
     this.drill_bean_initData();											//私有数据初始化
 };
 //##############################

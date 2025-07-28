@@ -92,6 +92,7 @@
  *   没有设置标签则只能播放 默认的状态元集合 。
  * 3.需要先关闭 全标签播放，
  *   才能再 播放状态元 或者 播放指定标签。
+ * 4."玩家队员[1]"中，-2表示领队，1表示第一个跟随者。
  *
  * -----------------------------------------------------------------------------
  * ----可选设定 - 播放指定标签
@@ -395,18 +396,28 @@ Game_Interpreter.prototype.drill_EASA_pluginCommand = function( command, args ){
 			if( p_chars == null && unit.indexOf("玩家队员变量[") != -1 ){
 				unit = unit.replace("玩家队员变量[","");
 				unit = unit.replace("]","");
-				var group = $gamePlayer.followers().visibleFollowers();
-				group.unshift($gamePlayer);
-				p_chars = [];
-				p_chars.push(group[ $gameVariables.value(Number(unit)) ]);
+				var p_id = $gameVariables.value(Number(unit));
+				if( p_id == -2 ){  //『玩家id』
+					p_chars = [ $gamePlayer ];
+				}
+				if( p_id > 0 ){  //『玩家队员id』
+					var group = $gamePlayer.followers().visibleFollowers();
+					p_chars = [];
+					p_chars.push(group[ p_id-1 ]);
+				}
 			}
 			if( p_chars == null && unit.indexOf("玩家队员[") != -1 ){
 				unit = unit.replace("玩家队员[","");
 				unit = unit.replace("]","");
-				var group = $gamePlayer.followers().visibleFollowers();
-				group.unshift($gamePlayer);
-				p_chars = [];
-				p_chars.push(group[ Number(unit) ]);
+				var p_id = Number(unit);
+				if( p_id == -2 ){  //『玩家id』
+					p_chars = [ $gamePlayer ];
+				}
+				if( p_id > 0 ){  //『玩家队员id』
+					var group = $gamePlayer.followers().visibleFollowers();
+					p_chars = [];
+					p_chars.push(group[ p_id-1 ]);
+				}
 			}
 		}
 		if( e_chars == null ){ e_chars = []; }

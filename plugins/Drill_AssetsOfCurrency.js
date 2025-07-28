@@ -313,7 +313,7 @@
 	// * 静态数据 - 货币样式
 	//				（~struct~DrillAsOCStyle）
 	//==============================
-	DrillUp.drill_AsOC_initStyle = function( dataFrom ) {
+	DrillUp.drill_AsOC_initStyle = function( dataFrom ){
 		var data = {};
 		
 		// > 常规

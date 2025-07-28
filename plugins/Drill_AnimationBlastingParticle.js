@@ -67,6 +67,7 @@
  *
  * 1.粒子小爆炸动画是临时效果，播放完毕后自动销毁。
  * 2.小爆炸绑定于地图物体，物体移动时，爆炸效果会跟随一并移动。
+ * 3."玩家队员[1]"中，-2表示领队，1表示第一个跟随者。
  * 
  * -----------------------------------------------------------------------------
  * ----激活条件 - 战斗单位
@@ -1590,12 +1591,10 @@
  * @type select
  * @option 在父贴图后面
  * @value 在父贴图后面
- * @option 在动画后面
- * @value 在动画后面
- * @option 在动画前面
- * @value 在动画前面
+ * @option 在父贴图前面
+ * @value 在父贴图前面
  * @desc 第二层粒子所属的层级。父贴图后面是指：战斗时，敌人/玩家贴图的后面，地图中，事件贴图的后面。
- * @default 在动画后面
+ * @default 在父贴图前面
  *
  * @param 第二层粒子图片层级
  * @parent ---双层效果---
@@ -1996,14 +1995,14 @@ Game_Interpreter.prototype.drill_ABPa_pluginCommand = function( command, args ){
 				unit = unit.replace("]","");
 				var f_index = Number(unit);
 				charSprite_list = [];
-				charSprite_list.push( $gameTemp.drill_ABPa_getCharacterSpriteByFollowerIndex( f_index ) );
+				charSprite_list.push( $gameTemp.drill_ABPa_getCharacterSpriteByFollowerIndex( f_index ) );  //『玩家队员id』
 			}
 			if( charSprite_list == null && unit.indexOf("玩家队员变量[") != -1 ){
 				unit = unit.replace("玩家队员变量[","");
 				unit = unit.replace("]","");
 				var f_index = $gameVariables.value(Number(unit));
 				charSprite_list = [];
-				charSprite_list.push( $gameTemp.drill_ABPa_getCharacterSpriteByFollowerIndex( f_index ) );
+				charSprite_list.push( $gameTemp.drill_ABPa_getCharacterSpriteByFollowerIndex( f_index ) );  //『玩家队员id』
 			}
 		}
 		/*-----------------对象组获取 - 战斗单位------------------*/
@@ -2352,7 +2351,7 @@ Game_Temp.prototype.drill_ABPa_getCharacterSpriteByFollowerIndex_Private = funct
 			sprite._character == $gamePlayer ){
 			return sprite;
 		}
-		if( sprite._character._memberIndex == follower_index &&
+		if( sprite._character._memberIndex == follower_index &&  //『玩家队员id』
 			sprite._character.isVisible() ){
 			return sprite;
 		}

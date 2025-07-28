@@ -566,7 +566,7 @@
 	// * 静态数据 - 样式
 	//				（~struct~DrillDSBStyle）
 	//==============================
-	DrillUp.drill_DSB_initStyle = function( dataFrom ) {
+	DrillUp.drill_DSB_initStyle = function( dataFrom ){
 		var data = {};
 		
 		// > 样式

@@ -1013,9 +1013,9 @@
 	DrillUp.g_COSE_style_list_length = 60;
 	DrillUp.g_COSE_style_list = [];
 	for( var i = 0; i < DrillUp.g_COSE_style_list_length; i++ ){
-		if( DrillUp.parameters['方块粉碎-' + String(i+1) ] != "" &&
-			DrillUp.parameters['方块粉碎-' + String(i+1) ] != undefined ){
-			var data = JSON.parse(DrillUp.parameters['方块粉碎-' + String(i+1)] );
+		if( DrillUp.parameters["方块粉碎-" + String(i+1) ] != undefined &&
+			DrillUp.parameters["方块粉碎-" + String(i+1) ] != "" ){
+			var data = JSON.parse(DrillUp.parameters["方块粉碎-" + String(i+1)] );
 			DrillUp.g_COSE_style_list[i] = DrillUp.drill_COSE_styleInit( data );
 		}else{
 			DrillUp.g_COSE_style_list[i] = null;
@@ -1068,7 +1068,7 @@ function Drill_COSE_Controller() {
 //==============================
 Drill_COSE_Controller.prototype.initialize = function( data ){
 	this._drill_data = {};
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
     this.drill_initData();													//初始化数据
     this.drill_initPrivateData();											//私有数据初始化
 	if( data == undefined ){ data = {}; }
@@ -1430,7 +1430,7 @@ Drill_COSE_Controller.prototype.drill_COSE_resetData_Private = function( data ){
 	
 	// > 执行重置
 	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
     this.drill_initData();													//初始化数据
     this.drill_initPrivateData();											//私有数据初始化
 }

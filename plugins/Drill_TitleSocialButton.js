@@ -268,7 +268,8 @@
 	DrillUp.g_TSB_btn_length = 10;
 	DrillUp.g_TSB_btn = [];
 	for(var i = 0; i < DrillUp.g_TSB_btn_length; i++ ){
-		if( DrillUp.parameters['网址按钮-' + String(i+1) ] != "" ){
+		if( DrillUp.parameters['网址按钮-' + String(i+1) ] != undefined &&
+			DrillUp.parameters['网址按钮-' + String(i+1) ] != "" ){
 			DrillUp.g_TSB_btn[i] = JSON.parse(DrillUp.parameters['网址按钮-' + String(i+1) ]);
 			
 			DrillUp.g_TSB_btn[i]['url'] = String(DrillUp.g_TSB_btn[i]["访问网址"]);

@@ -562,7 +562,7 @@
 	/*-----------------菜单按钮------------------*/
 	DrillUp.g_WMB_btns_length = 20;
 	DrillUp.g_WMB_btns = [];
-	for (var i = 0; i < DrillUp.g_WMB_btns_length ; i++ ) {
+	for( var i = 0; i < DrillUp.g_WMB_btns_length ; i++ ){
 		if( DrillUp.parameters["菜单按钮-" + String(i+1) ] != undefined &&
 			DrillUp.parameters["菜单按钮-" + String(i+1) ] != "" ){
 			var data = JSON.parse(DrillUp.parameters["菜单按钮-" + String(i+1)] );

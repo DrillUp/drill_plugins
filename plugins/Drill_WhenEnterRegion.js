@@ -392,9 +392,9 @@
 		// > 绑定
 		data['mapToAll'] = String( dataFrom["是否作用到所有地图"] || "true") == "true";
 		data['mapId'] = Number( dataFrom["所属地图"] || 0);
-		if( dataFrom['区域组'] != "" &&
-			dataFrom['区域组'] != undefined ){
-			var temp = JSON.parse( dataFrom['区域组'] );
+		if( dataFrom["区域组"] != undefined &&
+			dataFrom["区域组"] != "" ){
+			var temp = JSON.parse( dataFrom["区域组"] );
 			data['regionIdTank'] = (temp).map( function(n){ return Number(n);} );
 		}else{
 			data['regionIdTank'] = ([]).map( function(n){ return Number(n);} );
@@ -413,8 +413,8 @@
 	DrillUp.g_WER_trigger_length = 20;
 	DrillUp.g_WER_trigger = [];
 	for( var i = 0; i < DrillUp.g_WER_trigger_length; i++ ){
-		if( DrillUp.parameters["区域触发-" + String(i+1) ] != "" &&
-			DrillUp.parameters["区域触发-" + String(i+1) ] != undefined ){
+		if( DrillUp.parameters["区域触发-" + String(i+1) ] != undefined &&
+			DrillUp.parameters["区域触发-" + String(i+1) ] != "" ){
 			var data = JSON.parse(DrillUp.parameters["区域触发-" + String(i+1) ]);
 			DrillUp.g_WER_trigger[i] = DrillUp.drill_WER_triggerInit( data );
 		}else{

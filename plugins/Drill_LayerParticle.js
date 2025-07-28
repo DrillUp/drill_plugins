@@ -2104,7 +2104,7 @@
 	// * 静态数据 - 粒子样式
 	//				（~struct~LPaMapParticle）
 	//==============================
-	DrillUp.drill_LPa_initParticle = function( dataFrom ) {
+	DrillUp.drill_LPa_initParticle = function( dataFrom ){
 		var data = {};
 		
 		// > 绑定

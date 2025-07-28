@@ -1141,7 +1141,7 @@
 	// * 静态数据 - 临时漂浮样式
 	//				（~struct~DrillGFTTStyle）
 	//==============================
-	DrillUp.drill_GFTT_initContext = function( dataFrom ) {
+	DrillUp.drill_GFTT_initContext = function( dataFrom ){
 		var data = {};
 		
 		// > 常规
@@ -1188,7 +1188,7 @@
 	// * 静态数据 - 弹道样式
 	//				（~struct~DrillGFTTBallistic）
 	//==============================
-	DrillUp.drill_GFTT_initBallistics = function( dataFrom ) {
+	DrillUp.drill_GFTT_initBallistics = function( dataFrom ){
 		var data = {};
 		
 		// > 透明度（opacity）

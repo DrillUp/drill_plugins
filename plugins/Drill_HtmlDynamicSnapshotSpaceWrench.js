@@ -553,7 +553,7 @@
 	// * 静态数据 - 动态快照
 	//				（~struct~HDSSWCircle）
 	//==============================
-	DrillUp.drill_HDSSW_circleInit = function( dataFrom ) {
+	DrillUp.drill_HDSSW_circleInit = function( dataFrom ){
 		var data = {};
 		
 		// > 动态快照控制器
@@ -648,10 +648,10 @@ Game_Interpreter.prototype.drill_HDSSW_pluginCommand = function( command, args )
 				if( temp2 == "随机线段" ){
 					var data = {};
 					data['style_id'] = Number(temp1) -1;
-					data['x1'] = Graphics.boxWidth * Math.random();
-					data['y1'] = Graphics.boxHeight * Math.random();
-					data['x2'] = Graphics.boxWidth * Math.random();
-					data['y2'] = Graphics.boxHeight * Math.random();
+					data['x1'] = Graphics.boxWidth * Math.random();		//『随机因子-图像用』
+					data['y1'] = Graphics.boxHeight * Math.random();	//『随机因子-图像用』
+					data['x2'] = Graphics.boxWidth * Math.random();		//『随机因子-图像用』
+					data['y2'] = Graphics.boxHeight * Math.random();	//『随机因子-图像用』
 					$gameTemp._drill_HDSSW_createCut = data;
 					return;
 				}
@@ -1454,7 +1454,7 @@ DrillUp.g_HDSSW_checkNaN = true;
 //==============================
 Drill_HDSSW_Controller.prototype.initialize = function( data ){
 	this._drill_data = {};
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能
 	if( data == undefined ){ data = {}; }
@@ -1594,7 +1594,7 @@ Drill_HDSSW_Controller.prototype.drill_controller_resetData_Private = function( 
 	
 	// > 执行重置
 	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能
 }
@@ -1660,8 +1660,8 @@ Drill_HDSSW_Controller.prototype.drill_controller_initChange = function() {
 	// > 贴图 - 位置
 	this._drill_x = 0;
 	this._drill_y = 0;
-	this._drill_randomX = data['scope_x'] * (Math.random()-0.5);
-	this._drill_randomY = data['scope_y'] * (Math.random()-0.5);
+	this._drill_randomX = data['scope_x'] * (Math.random()-0.5);	//『随机因子-图像用』
+	this._drill_randomY = data['scope_y'] * (Math.random()-0.5);	//『随机因子-图像用』
 	
 	// > 贴图 - 透明度
 	this._drill_opacity = data['opacity'];
@@ -1671,11 +1671,11 @@ Drill_HDSSW_Controller.prototype.drill_controller_initChange = function() {
 	this._drill_scaleY = 1;
 	
 	// > 贴图 - 缩放（子贴图）
-	this._drill_layer_scaleX = data['min_scale'] + data['scope_scaleX'] * Math.random();
-	this._drill_layer_scaleY = data['min_scale'] + data['scope_scaleY'] * Math.random();
+	this._drill_layer_scaleX = data['min_scale'] + data['scope_scaleX'] * Math.random();	//『随机因子-图像用』
+	this._drill_layer_scaleY = data['min_scale'] + data['scope_scaleY'] * Math.random();	//『随机因子-图像用』
 	
 	// > 贴图 - 旋转
-	this._drill_rotation = data['scope_rotate'] * (Math.random()-0.5);
+	this._drill_rotation = data['scope_rotate'] * (Math.random()-0.5);	//『随机因子-图像用』
 }
 //==============================
 // * B基本变化 - 帧刷新 位置
@@ -1700,14 +1700,14 @@ Drill_HDSSW_Controller.prototype.drill_controller_updateChange_Position = functi
 //==============================
 Drill_HDSSW_Controller.prototype.drill_controller_initMask = function() {
 	var data = this._drill_data;
-	this._drill_convex_serial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+	this._drill_convex_serial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
 	this._drill_convex_points = [];
 }
 //==============================
 // * 2A遮罩管理 - 设置多边形（开放函数）
 //==============================
 Drill_HDSSW_Controller.prototype.drill_controller_setMaskConvex = function( convex_points ){
-	this._drill_convex_serial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+	this._drill_convex_serial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
 	this._drill_convex_points = convex_points;
 }
 
@@ -2380,8 +2380,8 @@ Scene_Map.prototype.drill_HDSSW_executeCircleCut = function( cur_cut ){
 		temp_data['menu_enabled'] = cur_styleData['menu_enabled'];
 		
 		temp_data['circle_img_src'] = cur_styleData['knife_img_src'];
+		temp_data['circle_opacity'] = 255;
 		
-		temp_data['opacity'] = cur_styleData['opacity'];
 		temp_data['rotate'] = $gameTemp.drill_HDSSW_Math2D_getPointToPointDegree( points[0]['x'],points[0]['y'], points[1]['x'],points[1]['y'] );
 		//temp_data['rotate'] = $gameTemp.drill_HDSSW_Math2D_getPointToPointDegree( cur_cut['x1'], cur_cut['y1'], cur_cut['x2'], cur_cut['y2'] );
 		//（两点被延长后，按常规来说，计算的角度不会出现偏差，但是这里有偏差，可能是精度问题，暂时不明原因）
@@ -2402,9 +2402,9 @@ Scene_Map.prototype.drill_HDSSW_executeCircleCut = function( cur_cut ){
 		temp_data['menu_enabled'] = cur_styleData['menu_enabled'];
 		
 		temp_data['circle_img_src'] = cur_styleData['background_img_src'];
-		temp_data['flicker_time'] = cur_styleData['flicker_time'];
+		temp_data['circle_time'] = cur_styleData['flicker_time'];
+		temp_data['circle_opacity'] = 255;
 		
-		temp_data['opacity'] = cur_styleData['opacity'];
 		temp_data['rotate'] = 0;
 		
 		var temp_controller = new Drill_HDSSW_CircleController( temp_data );
@@ -2422,9 +2422,9 @@ Scene_Map.prototype.drill_HDSSW_executeCircleCut = function( cur_cut ){
 		temp_data['menu_enabled'] = cur_styleData['menu_enabled'];
 		
 		temp_data['circle_img_src'] = cur_styleData['flicker_img_src'];
-		temp_data['flicker_time'] = cur_styleData['flicker_time'];
+		temp_data['circle_time'] = cur_styleData['flicker_time'];
+		temp_data['circle_opacity'] = cur_styleData['flicker_opacity'];
 		
-		temp_data['opacity'] = cur_styleData['flicker_opacity'];
 		temp_data['rotate'] = 0;
 		
 		var temp_controller = new Drill_HDSSW_CircleController( temp_data );
@@ -2742,7 +2742,7 @@ DrillUp.g_HDSSW_checkNaN = true;
 //==============================
 Drill_HDSSW_CircleController.prototype.initialize = function( data ){
 	this._drill_data = {};
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能
 	if( data == undefined ){ data = {}; }
@@ -2837,7 +2837,7 @@ Drill_HDSSW_CircleController.prototype.drill_controller_setFlickerMode = functio
 //##############################
 Drill_HDSSW_CircleController.prototype.drill_controller_playOnceFlicker = function(){
 	this._drill_flicker_enabled = true;
-	this._drill_flicker_opacity = 155;
+	this._drill_flicker_opacity = this._drill_data['circle_opacity'];
 };
 
 //##############################
@@ -2890,7 +2890,8 @@ Drill_HDSSW_CircleController.prototype.drill_controller_initData = function(){
 	// > A主体（无）
 	
 	// > B基本变化
-	if( data['opacity'] == undefined ){ data['opacity'] = 255 };				//B基本变化 - 透明度
+	if( data['circle_time'] == undefined ){ data['circle_time'] = 24 };			//B基本变化 - 变化时长
+	if( data['circle_opacity'] == undefined ){ data['circle_opacity'] = 255 };	//B基本变化 - 透明度
 	if( data['rotate'] == undefined ){ data['rotate'] = 0 };					//B基本变化 - 旋转角度
 }
 //==============================
@@ -2932,7 +2933,7 @@ Drill_HDSSW_CircleController.prototype.drill_controller_resetData_Private = func
 	
 	// > 执行重置
 	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能
 }
@@ -2994,7 +2995,7 @@ Drill_HDSSW_CircleController.prototype.drill_controller_initChange = function() 
 	this._drill_y = 0;
 	
 	// > 贴图 - 透明度
-	this._drill_opacity = data['opacity'];
+	this._drill_opacity = data['circle_opacity'];
 	
 	// > 贴图 - 缩放（无）
 	
@@ -3039,7 +3040,7 @@ Drill_HDSSW_CircleController.prototype.drill_controller_updateFlicker = function
 	if( this._drill_flicker_enabled != true ){ return; }
 	this._drill_opacity = this._drill_flicker_opacity;
 	
-	var diff = 255 / data['flicker_time'];
+	var diff = data['circle_opacity'] / data['circle_time'];
 	this._drill_flicker_opacity -= diff;
 	if( this._drill_flicker_opacity < 0-diff ){
 		this._drill_flicker_enabled = false;

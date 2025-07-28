@@ -79,7 +79,7 @@
  * @param 全局存储的文件路径
  * @type number
  * @min 1
- * @desc 指对应的文件路径ID，该插件的数据将存储到指定的文件路径中，具体去 全局存储核心 看看。
+ * @desc 指对应的文件路径ID,该插件的数据将存储到指定文件路径,具体看看"21.管理器 > 关于全局存储.docx"。
  * @default 1
  * 
  * @param 跨存档的开关
@@ -174,16 +174,16 @@
 	DrillUp.parameters = PluginManager.parameters('Drill_GlobalVariable');
 	
 	/*-----------------杂项------------------*/
-    DrillUp.g_GVa_saveFileId = Number(DrillUp.parameters['全局存储的文件路径'] || 1);
-	if( DrillUp.parameters['跨存档的开关'] != undefined && 
-		DrillUp.parameters['跨存档的开关'] != "" ){
-		DrillUp.g_GVa_switch_id = JSON.parse(DrillUp.parameters['跨存档的开关']);
+    DrillUp.g_GVa_saveFileId = Number(DrillUp.parameters["全局存储的文件路径"] || 1);
+	if( DrillUp.parameters["跨存档的开关"] != undefined && 
+		DrillUp.parameters["跨存档的开关"] != "" ){
+		DrillUp.g_GVa_switch_id = JSON.parse(DrillUp.parameters["跨存档的开关"]);
 	}else{
 		DrillUp.g_GVa_switch_id = [];
 	}
-	if( DrillUp.parameters['跨存档的变量'] != undefined && 
-		DrillUp.parameters['跨存档的变量'] != "" ){
-		DrillUp.g_GVa_variable_id = JSON.parse(DrillUp.parameters['跨存档的变量']);
+	if( DrillUp.parameters["跨存档的变量"] != undefined && 
+		DrillUp.parameters["跨存档的变量"] != "" ){
+		DrillUp.g_GVa_variable_id = JSON.parse(DrillUp.parameters["跨存档的变量"]);
 	}else{
 		DrillUp.g_GVa_variable_id = [];
 	}
@@ -196,13 +196,13 @@ if( Imported.Drill_CoreOfGlobalSave ){
 	
 	
 //=============================================================================
-// ** 全局存储
+// ** ☆全局存储
 //=============================================================================
 //==============================
-// * 全局 - 读取
+// * 『全局存储』 - 载入
 //==============================
 	var global_fileId = DrillUp.g_GVa_saveFileId;
-	var global_data = StorageManager.drill_COGS_loadData( global_fileId, "GVa" );
+	var global_data = StorageManager.drill_COGS_loadData( global_fileId, "GVa" );  //『全局存储执行函数』
 	
 	// > 开关列表
 	if( DrillUp.global_GVa_switchTank == null ){			//（游戏没关时，不会为null)
@@ -218,15 +218,16 @@ if( Imported.Drill_CoreOfGlobalSave ){
 	}
 	
 //==============================
-// * 全局 - 存储
+// * 『全局存储』 - 存储
 //==============================
 StorageManager.drill_GVa_saveData = function(){
 	var file_id = DrillUp.g_GVa_saveFileId;
 	var data = {};
 	data["global_switchTank"] = DrillUp.global_GVa_switchTank;
 	data["global_variableTank"] = DrillUp.global_GVa_variableTank;
-	this.drill_COGS_saveData( file_id, "GVa", data );
+	this.drill_COGS_saveData( file_id, "GVa", data );  //『全局存储执行函数』
 };
+
 
 //=============================================================================
 // ** 赋值

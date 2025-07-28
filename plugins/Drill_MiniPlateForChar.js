@@ -1864,7 +1864,7 @@ function Drill_MPFC_Bean(){
 // * 实体类 - 初始化
 //==============================
 Drill_MPFC_Bean.prototype.initialize = function(){
-	this._drill_beanSerial = new Date().getTime() + Math.random();		//（生成一个不重复的序列号）
+	this._drill_beanSerial = new Date().getTime() + Math.random();		//『生成一个不重复的序列号』
     this.drill_bean_initData();											//私有数据初始化
 };
 //##############################
@@ -1920,7 +1920,7 @@ Drill_MPFC_Bean.prototype.drill_bean_setContext = function( context ){
 //			返回：	> 无
 //##############################
 Drill_MPFC_Bean.prototype.drill_bean_refreshContext = function(){
-	this._drill_contextSerial = new Date().getTime() + Math.random();	//（文本变化标记）
+	this._drill_contextSerial = new Date().getTime() + Math.random();	//（强制刷新内容）『生成一个不重复的序列号』
 };
 //##############################
 // * 实体类 - 设置皮肤样式【开放函数】
@@ -1960,8 +1960,8 @@ Drill_MPFC_Bean.prototype.drill_bean_initData = function(){
 	this._drill_frameW = 0;					//实体类 - 框架宽度
 	this._drill_frameH = 0;					//实体类 - 框架高度
 	
-	this._drill_context = "";											//实体类 - 当前文本
-	this._drill_contextSerial = new Date().getTime() + Math.random();	//实体类 - 刷新内容
+	this._drill_context = "";				//实体类 - 当前文本
+	this.drill_bean_refreshContext();		//实体类 - 刷新内容
 	
 	this._drill_styleMode = "默认皮肤样式";								//实体类 - 绑定的模式
 	this._drill_styleLockedId = $gameSystem._drill_MPFC_defaultStyle;	//实体类 - 锁定皮肤样式

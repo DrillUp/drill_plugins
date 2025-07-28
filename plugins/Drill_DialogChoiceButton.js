@@ -668,7 +668,7 @@
 	// * 静态数据 - 对话选项样式
 	//				（~struct~DrillDCBStyle）
 	//==============================
-	DrillUp.drill_DCB_initParam = function( dataFrom ) {
+	DrillUp.drill_DCB_initParam = function( dataFrom ){
 		var data = {};
 		
 		// > 基本属性

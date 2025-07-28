@@ -223,7 +223,7 @@
 		return message;
 	};
 	//==============================
-	// * 提示信息 - 报错 - 兼容冲突
+	// * 提示信息 - 报错 - 兼容冲突（目前窗口字符核心已不再冲突）
 	//==============================
 	DrillUp.drill_DFF_getPluginTip_CompatibilityYEP = function(){
 		return "【" + DrillUp.g_DFF_PluginTip_curName + "】\n"+
@@ -262,19 +262,6 @@
 // * >>>>基于插件检测>>>>
 //=============================================================================
 if( Imported.Drill_CoreOfWindowCharacter ){
-	
-	
-//==============================
-// * 基于插件检测 - 启动时检测兼容性
-//==============================
-var _drill_DFF_scene_initialize = SceneManager.initialize;
-SceneManager.initialize = function() {
-	_drill_DFF_scene_initialize.call(this);
-	
-	if( Imported.YEP_MessageCore ){
-		alert( DrillUp.drill_DFF_getPluginTip_CompatibilityYEP() );
-	}
-};
 	
 	
 //=============================================================================

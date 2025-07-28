@@ -1581,9 +1581,9 @@
 	DrillUp.g_CONA_list_length = 200;
 	DrillUp.g_CONA_list = [];
 	for( var i = 0; i < DrillUp.g_CONA_list_length ; i++ ){
-		if( DrillUp.parameters['变量数组-' + String(i+1) ] != "" &&
-			DrillUp.parameters['变量数组-' + String(i+1) ] != undefined ){
-			var temp = JSON.parse( DrillUp.parameters['变量数组-' + String(i+1)] || {} );
+		if( DrillUp.parameters["变量数组-" + String(i+1) ] != undefined &&
+			DrillUp.parameters["变量数组-" + String(i+1) ] != "" ){
+			var temp = JSON.parse( DrillUp.parameters["变量数组-" + String(i+1)] || {} );
 			DrillUp.g_CONA_list[i] = DrillUp.drill_CONA_initNATank( temp );
 		}else{
 			DrillUp.g_CONA_list[i] = DrillUp.drill_CONA_initNATank( {} );

@@ -932,7 +932,8 @@
 	DrillUp.g_AP_condition_list_length = 6;
 	DrillUp.g_AP_list = [];
 	for (var i = 0; i < DrillUp.g_AP_list_length; i++) {
-		if( DrillUp.parameters['角色肖像-' + String(i+1) ] != "" ){
+		if( DrillUp.parameters['角色肖像-' + String(i+1) ] != undefined &&
+			DrillUp.parameters['角色肖像-' + String(i+1) ] != "" ){
 			var src_data_all = JSON.parse(DrillUp.parameters['角色肖像-' + String(i+1) ]);
 			
 			var temp_condition = {};		//由于嵌套层数太多，这里重新构建。
@@ -1371,8 +1372,8 @@ Drill_AP_Sprite.prototype.drill_AP_initSprite = function() {
 	this._drill_p_sprite.y = Graphics.boxHeight - DrillUp.g_AP_p_y - DrillUp.g_AP_p_silde_y;
 	this._drill_p_sprite.opacity = 0;
 	this._drill_p_sprite._move = 0;
-	this._drill_p_sprite._breath = Math.random() * 10;
-	this._drill_p_sprite._breath_dir = Math.floor(Math.random() * 2);
+	this._drill_p_sprite._breath = Math.random() * 10;	//『随机因子-图像用』
+	this._drill_p_sprite._breath_dir = Math.floor(Math.random() * 2);	//『随机因子-图像用』
 	this._drill_p_sprite._f_time = 0;
 	
 	this._drill_b_sprite = new Sprite();

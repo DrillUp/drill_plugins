@@ -40,14 +40,14 @@
  * 
  * 窗口字符：\v[1]        替换为第1个变量的值（0002变量，输入2，不要多余0）
  * 窗口字符：\n[1]        替换为第1个角色的名字
- * 窗口字符：\p[1]        替换为第1个玩家队员的名字(1表示领队,2表示第一个跟随者)
+ * 窗口字符：\p[-2]       替换为玩家队员的名字(-2表示领队，1表示第一个跟随者)
  * 窗口字符：\G           替换为货币单位（ 数据库>系统 中设置单位）
  * 窗口字符：\\           替换为'\'反斜杠字符本身。
  * 
  * 窗口字符：\ac[1]       替换为第1个角色的职业名
  * 窗口字符：\an[1]       替换为第1个角色的昵称（小名）
- * 窗口字符：\pc[1]       替换为第1个玩家队员的职业名(1表示领队,2表示第一个跟随者)
- * 窗口字符：\pn[1]       替换为第1个玩家队员的昵称（小名）(1表示领队,2表示第一个跟随者)
+ * 窗口字符：\pc[-2]      替换为玩家队员的职业名(-2表示领队，1表示第一个跟随者)
+ * 窗口字符：\pn[-2]      替换为玩家队员的昵称（小名）(-2表示领队，1表示第一个跟随者)
  * 窗口字符：\nc[1]       替换为第1个职业的名字
  * 窗口字符：\ni[1]       替换为第1个物品的名字
  * 窗口字符：\nw[1]       替换为第1个武器的名字
@@ -109,7 +109,7 @@
  * 窗口字符：\dDCDD[characterScreenX:-2]     替换为玩家的屏幕位置X
  * 窗口字符：\dDCDD[characterScreenY:-2]     替换为玩家的屏幕位置Y
  * 
- * 窗口字符：\dDCDD[memberActorId:1]         替换为id为1的玩家队员的角色id
+ * 窗口字符：\dDCDD[memberActorId:-2]        替换为指定玩家队员的角色id(-2表示领队，1表示第一个跟随者)
  * 
  * 窗口字符：\dDCDD[mapId]             替换为当前所在地图ID
  * 窗口字符：\dDCDD[partyMemberNum]    替换为当前队伍人数
@@ -166,7 +166,7 @@
  * 窗口字符：\dDCDD[characterScreenX:\v[21]]     替换为id为变量21值的事件的屏幕位置X
  * 窗口字符：\dDCDD[characterScreenY:\v[21]]     替换为id为变量21值的事件的屏幕位置Y
  * 
- * 窗口字符：\dDCDD[memberActorId:\v[21]]        替换为id为1的玩家队员的角色id
+ * 窗口字符：\dDCDD[memberActorId:\v[21]]        替换为指定玩家队员的角色id(-2表示领队，1表示第一个跟随者)
  * 
  * 1.上述指代字符为嵌套写法，即通过变量\v[21]来表示值。
  * 
@@ -940,7 +940,13 @@ Game_Temp.prototype.drill_DCDD_characterScreenY = function( n ){
 // * 窗口字符应用之指代字符 - 玩家队员的角色id（\dDCDD[memberActorId:1]）
 //==============================
 Game_Temp.prototype.drill_DCDD_memberActorId = function( n ){
-	var actor = $gameParty.members()[ n -1 ];
+	var actor = null;
+	if( n == -2 ){  //『玩家id』
+		actor = $gameParty.members()[ 0 ];
+	}
+	if( n > 0 ){  //『玩家队员id』
+		actor = $gameParty.members()[ n ];
+	}
 	if( actor == undefined ){ return ""; }
 	return String( actor.actorId() );
 };
@@ -1079,8 +1085,8 @@ Scene_Map.prototype.drill_DCDD_createDebugSprite = function() {
 				"\n" + 
 				
 				"》其它属性\n" + 
+				"玩家领队的角色ID：\\dDCDD[memberActorId:-2]    " +
 				"玩家队员1的角色ID：\\dDCDD[memberActorId:1]    " +
-				"玩家队员2的角色ID：\\dDCDD[memberActorId:2]    " +
 				"队伍人数：\\dDCDD[partyMemberNum]    \n" +
 				"地图ID：\\dDCDD[mapId]    " +
 				"金币持有数：\\dDCDD[gold]    " +

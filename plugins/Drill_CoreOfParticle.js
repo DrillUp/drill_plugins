@@ -361,7 +361,7 @@ DrillUp.g_COPa_checkNaN = true;
 //==============================
 Drill_COPa_Controller.prototype.initialize = function( data ){
 	this._drill_data = {};
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能
 	if( data == undefined ){ data = {}; }
@@ -606,7 +606,7 @@ Drill_COPa_Controller.prototype.drill_controller_resetData_Private = function( d
 	
 	// > 执行重置
 	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能
 }
@@ -736,9 +736,9 @@ Drill_COPa_Controller.prototype.drill_controller_initBallistics = function() {
 	var data = this._drill_data;
 	
 	// > 弹道用 随机因子
-	this._drill_randomFactor_speed = Math.random();
-	this._drill_randomFactor_dir = Math.random();
-	this._drill_randomFactor_opacity = Math.random();
+	this._drill_randomFactor_speed = Math.random();		//『随机因子-图像用』
+	this._drill_randomFactor_dir = Math.random();		//『随机因子-图像用』
+	this._drill_randomFactor_opacity = Math.random();	//『随机因子-图像用』
 	if( data['seed_enable'] == true ){
 		this._drill_randomFactor_speed = data['seed_value'] %1;
 		this._drill_randomFactor_dir = data['seed_value'] *41 %1;
@@ -900,7 +900,7 @@ Drill_COPa_Controller.prototype.drill_controller_initRandom = function() {
 	var data = this._drill_data;
 	
 	// > 粒子用 随机因子
-	this._drill_randomFactor_parListOfRan = Math.random();
+	this._drill_randomFactor_parListOfRan = Math.random();	//『随机因子-图像用』
 	if( data['seed_enable'] == true ){
 		this._drill_randomFactor_parListOfRan = data['seed_value'] *31 %1;
 	}
@@ -2286,7 +2286,7 @@ Drill_COPa_SecSprite.prototype.drill_spriteSec_destroyChild = function(){
 		var par_sprite = this._drill_COPa_parSecSpriteTank[i];
 		this.removeChild( par_sprite );
 	}
-	this._drill_COPa_parSecSpriteTank = null;
+	this._drill_COPa_parSecSpriteTank.length = 0;
 	
 	// > 销毁 - E粒子重设
 	//	（无）
@@ -2364,7 +2364,7 @@ Drill_COPa_SecSprite.prototype.drill_spriteSec_initTransform = function() {
 	
 	// > 粒子贴图容器
 	this._drill_COPa_parSecSpriteTank = [];
-	for( var j = 0; j < p_data['par_count'] ; j++ ){
+	for( var j = 0; j < p_data['par_count']; j++ ){
 		var temp_sprite = new Sprite();
 		temp_sprite.bitmap = ImageManager.loadBitmap( p_data['src_img_file'], p_data['second_src_img'], p_data['tint'], p_data['smooth'] );
 		temp_sprite.anchor.x = 0.5;

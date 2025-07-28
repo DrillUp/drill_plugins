@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        行走图 - 行走图与鼠标控制核心
+ * @plugindesc [v1.2]        行走图 - 行走图与鼠标控制核心
  * @author Drill_up
  * 
  * 
@@ -53,6 +53,36 @@
  * 插件指令：>行走图与鼠标控制核心 : DEBUG碰撞体+悬停查看 : 关闭
  * 
  * -----------------------------------------------------------------------------
+ * ----可选设定 - 像素判定
+ * 你可以通过插件指令手动修改悬停的判定方式：
+ * 
+ * 插件指令：>行走图与鼠标控制核心 : 本事件 : 修改为像素判定
+ * 插件指令：>行走图与鼠标控制核心 : 事件[1] : 修改为像素判定
+ * 插件指令：>行走图与鼠标控制核心 : 事件变量[21] : 修改为像素判定
+ * 插件指令：>行走图与鼠标控制核心 : 批量事件[10,11] : 修改为像素判定
+ * 插件指令：>行走图与鼠标控制核心 : 批量事件变量[21,22] : 修改为像素判定
+ * 
+ * 插件指令：>行走图与鼠标控制核心 : 事件[1] : 修改为碰撞体判定
+ * 插件指令：>行走图与鼠标控制核心 : 事件[1] : 修改为像素判定
+ * 
+ * 1.前半部分（事件[1]）和 后半部分（修改为碰撞体判定）
+ *   的参数可以随意组合。一共有4*2种组合方式。
+ * 2.行走图悬停判定方式，默认为 碰撞体判定，即行走图切割后的矩形范围。
+ * 3."像素判定"是指 根据鼠标是否接触到 行走图资源的不透明像素点 进行判定，
+ *   接触到不透明的像素点，则表示悬停，接触到透明的像素，则表示离开悬停。
+ *   即使图像 旋转、斜切、缩放，此判定也仍然有效。
+ *   即使图像 是动态的动画序列，此判定也仍然有效。（但开启此判定会增加性能消耗）
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 像素判定的注释
+ * 你可以通过事件注释手动修改悬停的判定方式：
+ * 
+ * 事件注释：=>行走图与鼠标控制核心 : 使用像素判定
+ * 事件注释：=>行走图与鼠标控制核心 : 使用碰撞体判定
+ * 
+ * 1.该注释跨事件页，将注释写在第一页就能生效。
+ * 
+ * -----------------------------------------------------------------------------
  * ----插件性能
  * 测试仪器：   4G 内存，Intel Core i5-2520M CPU 2.5GHz 处理器
  *              Intel(R) HD Graphics 3000 集显 的垃圾笔记本
@@ -81,6 +111,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 修复了切换地图时悬停判定未刷新的bug。
+ * [v1.2]
+ * 添加了 像素判定 的功能。
  * 
  */
  
@@ -99,6 +131,7 @@
 //		★性能测试因素	行走图管理层
 //		★性能测试消耗	2024/5/2：
 //							》0.2ms（drill_COEFWM_updateDrawBeanRangeSprite）
+//							》5.9ms（drill_COEFWM_isOnHover_ByPixel，加了像素判定后的消耗）
 //		★最坏情况		暂无
 //		★备注			该核心就是为了把所有 鼠标悬停判定 都集中到一起，节省性能消耗。
 //		
@@ -111,6 +144,7 @@
 //			->☆静态数据
 //			->☆插件指令
 //			->☆存储数据
+//			->☆事件注释
 //			
 //			->☆鼠标悬停监听
 //				->执行绑定【标准函数】
@@ -124,7 +158,8 @@
 //					->删除数据
 //					->事件销毁时
 //			->☆悬停判定
-//				->碰撞体判定
+//				->是否在 碰撞体 范围内
+//				->是否在 像素判定 范围内
 //				->一体化情况
 //			->☆优化控制
 //				->同一贴图+同一帧中 被多次调用 优化
@@ -228,6 +263,73 @@ Game_Interpreter.prototype.drill_COEFWM_pluginCommand = function( command, args 
 			}
 		}
 		
+		/*-----------------对象组获取------------------*/
+		var c_chars = null;			// 事件对象组
+		if( args.length >= 2 ){
+			var unit = String(args[1]);
+			if( c_chars == null && unit == "本事件" ){
+				var e = $gameMap.event( this._eventId );
+				if( e == undefined ){ return; } //『防止并行删除事件出错』
+				c_chars = [ e ];
+			}
+			if( c_chars == null && unit.indexOf("批量事件[") != -1 ){
+				unit = unit.replace("批量事件[","");
+				unit = unit.replace("]","");
+				c_chars = [];
+				var temp_arr = unit.split(/[,，]/);
+				for( var k=0; k < temp_arr.length; k++ ){
+					var e_id = Number(temp_arr[k]);
+					if( $gameMap.drill_COEFWM_isEventExist( e_id ) == false ){ continue; }
+					var e = $gameMap.event( e_id );
+					c_chars.push( e );
+				}
+			}
+			if( c_chars == null && unit.indexOf("批量事件变量[") != -1 ){
+				unit = unit.replace("批量事件变量[","");
+				unit = unit.replace("]","");
+				c_chars = [];
+				var temp_arr = unit.split(/[,，]/);
+				for( var k=0; k < temp_arr.length; k++ ){
+					var e_id = $gameVariables.value(Number(temp_arr[k]));
+					if( $gameMap.drill_COEFWM_isEventExist( e_id ) == false ){ continue; }
+					var e = $gameMap.event( e_id );
+					c_chars.push( e );
+				}
+			}
+			if( c_chars == null && unit.indexOf("事件变量[") != -1 ){
+				unit = unit.replace("事件变量[","");
+				unit = unit.replace("]","");
+				var e_id = $gameVariables.value(Number(unit));
+				if( $gameMap.drill_COEFWM_isEventExist( e_id ) == false ){ return; }
+				var e = $gameMap.event( e_id );
+				c_chars = [ e ];
+			}
+			if( c_chars == null && unit.indexOf("事件[") != -1 ){
+				unit = unit.replace("事件[","");
+				unit = unit.replace("]","");
+				var e_id = Number(unit);
+				if( $gameMap.drill_COEFWM_isEventExist( e_id ) == false ){ return; }
+				var e = $gameMap.event( e_id );
+				c_chars = [ e ];
+			}
+		}
+		if( c_chars == null ){ return }; 		
+		
+		/*-----------------像素判定------------------*/	
+		if( args.length == 4 ){
+			var type = String(args[3]);
+			if( type == "修改为像素判定" ){
+				for( var k=0; k < c_chars.length; k++ ){
+					c_chars[k].drill_COEFWM_setPixelHoverEnabled( true );
+				}
+			}
+			if( type == "修改为碰撞体判定" ){
+				for( var k=0; k < c_chars.length; k++ ){
+					c_chars[k].drill_COEFWM_setPixelHoverEnabled( false );
+				}
+			}
+		}
+		
 	};
 };
 
@@ -310,6 +412,67 @@ Game_System.prototype.drill_COEFWM_checkSysData_Private = function() {
 	if( this._drill_COEFWM_DebugEnabled == undefined ){
 		this.drill_COEFWM_initSysData();
 	}
+};
+
+
+//=============================================================================
+// ** ☆事件注释
+//=============================================================================
+//==============================
+// * 事件注释 - 第一页标记
+//==============================
+var _drill_COEFWM_event_initMembers = Game_Event.prototype.initMembers;
+Game_Event.prototype.initMembers = function() {
+	_drill_COEFWM_event_initMembers.call(this);
+	this._drill_COEFWM_isFirstBirth = true;
+};
+//==============================
+// * 事件注释 - 第一页绑定
+//==============================
+var _drill_COEFWM_event_setupPage = Game_Event.prototype.setupPage;
+Game_Event.prototype.setupPage = function() {
+	_drill_COEFWM_event_setupPage.call(this);
+    this.drill_COEFWM_setupSwitch();
+};
+//==============================
+// * 事件注释 - 初始化绑定
+//==============================
+Game_Event.prototype.drill_COEFWM_setupSwitch = function() {
+	
+	// > 第一次出生，强制读取第一页注释（防止离开地图后，回来，开关失效）
+	if( !this._erased && this.event() && this.event().pages[0] && this._drill_COEFWM_isFirstBirth == true ){ 
+		this._drill_COEFWM_isFirstBirth = undefined;		//『节约临时参数存储空间』
+		this.drill_COEFWM_readPage( this.event().pages[0].list );
+	}
+	
+	// > 读取当前页注释
+	if( !this._erased && this.page() ){ 
+		this.drill_COEFWM_readPage( this.list() );
+	}
+}
+//==============================
+// * 事件注释 - 初始化
+//==============================
+Game_Event.prototype.drill_COEFWM_readPage = function( page_list ){
+	
+	page_list.forEach( function( l ){
+		if( l.code === 108 ){
+			var l_str = l.parameters[0];
+			var args = l_str.split(' ');
+			var command = args.shift();
+			if( command == "=>行走图与鼠标控制核心" ){
+				if( args.length == 2 ){
+					var type = String(args[1]);
+					if( type == "使用像素判定" ){
+						this.drill_COEFWM_setPixelHoverEnabled( true );
+					}
+					if( type == "使用碰撞体判定" ){
+						this.drill_COEFWM_setPixelHoverEnabled( false );
+					}
+				}
+			};
+		};
+	}, this);
 };
 
 
@@ -396,8 +559,13 @@ Game_Character.prototype.initialize = function(){
 Game_Character.prototype.drill_COEFWM_checkData_Private = function(){	
 	if( this._drill_COEFWM_mouseData != undefined ){ return; }
 	this._drill_COEFWM_mouseData = {};
-	this._drill_COEFWM_mouseData['op_time'] = -1;			//优化控制 - 帧数标记
-	this._drill_COEFWM_mouseData['op_result'] = false;		//优化控制 - 第一次的悬停结果
+	
+	this._drill_COEFWM_mouseData['op_time'] = -1;				//优化控制（碰撞体） - 帧数标记
+	this._drill_COEFWM_mouseData['op_result'] = false;			//优化控制（碰撞体） - 当前帧第一次的悬停结果
+	
+	this._drill_COEFWM_mouseData['pixelHoverEnabled'] = false;	//像素判定开关
+	this._drill_COEFWM_mouseData['op_pixelTime'] = -1;			//优化控制（像素判定） - 帧数标记
+	this._drill_COEFWM_mouseData['op_pixelResult'] = false;		//优化控制（像素判定） - 当前帧第一次的悬停结果
 }
 //==============================
 // * 行走图的属性 - 删除数据（私有）
@@ -411,9 +579,15 @@ Game_Character.prototype.drill_COEFWM_removeData_Private = function(){
 var _drill_COEFWM_e_erase = Game_Event.prototype.erase;
 Game_Event.prototype.erase = function(){
 	_drill_COEFWM_e_erase.call( this );
-	this.drill_COEFWM_removeData();							//（删除数据）
+	this.drill_COEFWM_removeData();		//（删除数据）
 }
-
+//==============================
+// * 行走图的属性 - 是否启用像素判定（开放函数）
+//==============================
+Game_Character.prototype.drill_COEFWM_setPixelHoverEnabled = function( enabled ){
+	this.drill_COEFWM_checkData();
+	this._drill_COEFWM_mouseData['pixelHoverEnabled'] = enabled;
+}
 
 
 //=============================================================================
@@ -423,27 +597,48 @@ Game_Event.prototype.erase = function(){
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
+// * 悬停判定 - 鼠标是否正在悬停（私有）
+//			
+//			参数：	> 无
+//			返回：	> 布尔
+//			
+//			说明：	> 该函数为悬停判断的 主入口 。
+//==============================
+Game_Character.prototype.drill_COEFWM_isOnHover_Private = function(){
+	
+	// > 未绑定属性，跳出
+	if( this._drill_COEFWM_mouseData == undefined ){ return false; }
+	var mouseData = this._drill_COEFWM_mouseData;
+	
+	// > 是否在 像素判定 范围内
+	if( mouseData['pixelHoverEnabled'] == true ){
+		return this.drill_COEFWM_isOnHover_ByPixel();
+	}
+	
+	// > 是否在 碰撞体 范围内
+	return this.drill_COEFWM_isOnHover_ByCollision();
+}
+//==============================
 // * 悬停判定 - 是否在 碰撞体 范围内
 //			
 //			参数：	> 无
+//			返回：	> 布尔
+//			
 //			说明：	> 检查鼠标是否在碰撞体的范围内。『鼠标落点与实体类范围』
-//						镜头与层级 - 已支持
+//						镜头与层级 - 无需支持
 //						中心锚点   - 已支持（行走图-碰撞体 支持）
 //						特殊变换   - 已支持（行走图-碰撞体 支持，缩放+斜切+旋转）
 //						触屏响应   - 暂不明确
 //==============================
-Game_Character.prototype.drill_COEFWM_isOnHover_Private = function(){
-	
-	// > 未绑定则返回false
-	if( this._drill_COEFWM_mouseData == undefined ){ return false; }
+Game_Character.prototype.drill_COEFWM_isOnHover_ByCollision = function(){
 	var mouseData = this._drill_COEFWM_mouseData;
 	
-	// > 优化控制 - 初始化8帧关闭悬停
+	// > 优化控制（碰撞体） - 初始化8帧关闭悬停
 	//		（防止渐变进入地图时，玩家的鼠标乱晃误点其它贴图）
 	//		（防止切换地图时，上一张地图的bean还未销毁，就触发了悬停判定）
 	if( $gameTemp._drill_COEFWM_op_curTime < 8 ){ return false; }
 	
-	// > 优化控制
+	// > 优化控制（碰撞体）
 	//		（如果此函数在 同一贴图+同一帧中 被多次调用）
 	//		（那么第一次调用 走正常流程，第二次调用 返回第一次的结果）
 	if( mouseData['op_time'] == $gameTemp._drill_COEFWM_op_curTime ){
@@ -483,7 +678,69 @@ Game_Character.prototype.drill_COEFWM_isOnHover_Private = function(){
 	return result;
 }
 //==============================
-// * 悬停判定 - 一体化情况
+// * 悬停判定 - 是否在 像素判定 范围内
+//			
+//			参数：	> 无
+//			返回：	> 布尔
+//			
+//			说明：	> 此判定为 碰撞体范围+贴图像素点判定 。
+//==============================
+Game_Character.prototype.drill_COEFWM_isOnHover_ByPixel = function(){
+	var mouseData = this._drill_COEFWM_mouseData;
+	
+	// > 前提条件 - 碰撞体范围
+	var is_hover = this.drill_COEFWM_isOnHover_ByCollision();
+	if( is_hover == false ){ return false; }
+	
+	
+	// > 优化控制（像素判定）
+	//		（如果此函数在 同一贴图+同一帧中 被多次调用）
+	//		（那么第一次调用 走正常流程，第二次调用 返回第一次的结果）
+	if( mouseData['op_pixelTime'] == $gameTemp._drill_COEFWM_op_curTime ){
+		return mouseData['op_pixelResult'];
+	}
+	mouseData['op_pixelTime'] = $gameTemp._drill_COEFWM_op_curTime;
+	
+	
+	// > 判定 - 鼠标位置
+	var _x = _drill_mouse_x;
+	var _y = _drill_mouse_y;
+	
+	// > 判定 - 鼠标位置转回成像素图形的位置
+	var bean = this.drill_COEF_getCollisionBean();											//【行走图-行走图优化核心】获取碰撞体
+	var org_pos = $gameTemp.drill_COEF_getPointByBeanTransformInversed( _x, _y, bean );		//【行走图-行走图优化核心】某点经过碰撞体的反向变换
+	var x1 = org_pos.x - bean['_drill_x'] + bean['_drill_anchor_x'] * bean['_drill_frameW'];
+	var y1 = org_pos.y - bean['_drill_y'] + bean['_drill_anchor_y'] * bean['_drill_frameH'];
+	x1 += bean['_drill_frameX'];
+	y1 += bean['_drill_frameY'];		//（框架位置，兼容八行走图、单行走图、四方向动画序列）
+	
+	// > 判定 - 从贴图中获取像素点
+	var result = false;
+	var ch_id = 0;
+	if( this instanceof Game_Player ){	//『玩家id』
+		ch_id = -2;
+	}else{
+		ch_id = this._eventId;
+	}
+	var temp_sprite = $gameTemp.drill_COEF_getCharacterSpriteByEventId( ch_id );	//【行走图-行走图优化核心】获取-根据事件ID
+	if( temp_sprite != undefined &&
+		temp_sprite.bitmap != undefined ){
+		var painter = temp_sprite.bitmap._context;
+		var pixel_data = painter.getImageData(x1, y1, 1, 1).data;
+		if( pixel_data[3] > 10 ){	//（获取到的是rgba，范围都为 0~255，此处为 a > 10 的透明判定）
+			result = true;
+		}
+	}
+	
+	// > 判定 - 碰撞体
+	mouseData['op_pixelResult'] = result;
+	return result;
+}
+//==============================
+// * 悬停判定 - 一体化情况（私有）
+//			
+//			参数：	> 无
+//			返回：	> 布尔
 //==============================
 Game_Character.prototype.drill_COEFWM_isOnHoverWithUnification_Private = function(){
 	
@@ -617,6 +874,7 @@ Scene_Map.prototype.drill_COEFWM_updateDrawBeanRangeBitmap = function() {
 		//if( character == undefined ){ continue; }
 		//if( character._erased == true ){ continue; }	//『有效事件』（这里不要检查，物体管理-事件管理核心 插件能确保贴图创建时，使用有效事件创建）
 		character.drill_COEFWM_checkData();
+		var data = character._drill_COEFWM_mouseData;
 		var bean = character.drill_COEF_getCollisionBean();		//【行走图-行走图优化核心】获取碰撞体
 		
 		// > 判断悬停
@@ -625,6 +883,7 @@ Scene_Map.prototype.drill_COEFWM_updateDrawBeanRangeBitmap = function() {
 		
 		// > 绘制 - 颜色标记
 		var color_line = "rgb(180,90,215)";
+		var color_line_pixel = "rgb(180,90,215,0.13)";
 		var color_text = "rgb(255,90,255)";
 		var color_background = "rgba(180,90,215,0.2)";
 		if( is_hover == true ){
@@ -651,7 +910,11 @@ Scene_Map.prototype.drill_COEFWM_updateDrawBeanRangeBitmap = function() {
 		}
 		
 		// > 绘制 - 绘制凸多边形
-		temp_bitmap.drill_COEFWM_drawPolygon( point_list, color_background, color_line, 2, "miter" );
+		if( data['pixelHoverEnabled'] == true ){
+			temp_bitmap.drill_COEFWM_drawPolygon( point_list, color_background, color_line_pixel, 24, "round" );
+		}else{
+			temp_bitmap.drill_COEFWM_drawPolygon( point_list, color_background, color_line, 2, "miter" );
+		}
 		
 		// > 绘制 - ID编号
 		if( id_str != null ){

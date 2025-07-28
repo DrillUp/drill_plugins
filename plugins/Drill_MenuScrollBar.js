@@ -459,7 +459,7 @@
 	// * 静态数据 - 样式
 	//				（~struct~DrillMSBStyle）
 	//==============================
-	DrillUp.drill_MSB_initStyle = function( dataFrom ) {
+	DrillUp.drill_MSB_initStyle = function( dataFrom ){
 		var data = {};
 		data['scroll_pos'] = String( dataFrom["边沿靠向"] || "右侧");
 		data['shifting_x'] = Number( dataFrom["偏移-滚动条 X"] || 0);

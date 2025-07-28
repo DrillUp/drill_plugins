@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.7]        管理器 - 变速齿轮
+ * @plugindesc [v1.8]        管理器 - 变速齿轮
  * @author Drill_up
  * 
  * 
@@ -91,6 +91,8 @@
  * 添加了 游戏测试时 按键加速的功能。
  * [v1.7]
  * 修复了声音在变速齿轮切换时，叠加的bug。
+ * [v1.8]
+ * 修复了之前关闭播放的声音，切换速度后会开启播放的bug。
  * 
  * 
  * @param ---齿轮速度---
@@ -380,7 +382,6 @@ Game_System.prototype.drill_SG_checkSysData_Private = function() {
 	if( this._drill_SG_lastSpeed == undefined ){
 		this.drill_SG_initSysData();
 	}
-	
 };
 
 
@@ -485,7 +486,10 @@ AudioManager.drill_SG_refreshPitch = function() {
 	if( $gameSystem._drill_SG_soundEnabled != true ){ return; }
 	
 	// > 当前bgm变调
-	if( this._bgmBuffer != undefined ){
+	if( this._bgmBuffer != undefined &&
+		this._bgmBuffer.isPlaying() &&
+		this._currentBgm != undefined ){		//（正在播放的音乐才变调）
+		
 		if( this._bgmBuffer._drill_orgPitch == undefined ){
 			this._bgmBuffer._drill_orgPitch = this._bgmBuffer.pitch;
 		};
@@ -495,7 +499,10 @@ AudioManager.drill_SG_refreshPitch = function() {
 	}
 	
 	// > 当前bgs变调
-	if( this._bgsBuffer != undefined ){
+	if( this._bgsBuffer != undefined &&
+		this._bgsBuffer.isPlaying() &&
+		this._currentBgs != undefined ){		//（正在播放的音乐才变调）
+		
 		if( this._bgsBuffer._drill_orgPitch == undefined ){
 			this._bgsBuffer._drill_orgPitch = this._bgsBuffer.pitch; 
 		};

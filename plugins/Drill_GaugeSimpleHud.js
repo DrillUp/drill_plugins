@@ -599,7 +599,7 @@
 	// * 静态数据 - 生命框
 	//				（~struct~DrillGSHStyle）
 	//==============================
-	DrillUp.drill_GSH_initParam = function( dataFrom ) {
+	DrillUp.drill_GSH_initParam = function( dataFrom ){
 		var data = {};
 		// > 参数值
 		data['autoHide'] = String( dataFrom["生命值为零后框是否消失"] || "false") === "true";

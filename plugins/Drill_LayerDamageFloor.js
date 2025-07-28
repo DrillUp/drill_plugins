@@ -297,7 +297,7 @@
 	// * 静态数据 - 自定义地形伤害
 	//				（~struct~LDFCustom）
 	//==============================
-	DrillUp.drill_LDF_initParam = function( dataFrom ) {
+	DrillUp.drill_LDF_initParam = function( dataFrom ){
 		var data = {};
 		data['enabled'] = String( dataFrom["初始是否开启"] || "true") == "true";
 		data['regionId'] = Number( dataFrom["判定区域"] || 0);

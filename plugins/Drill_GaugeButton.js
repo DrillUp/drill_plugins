@@ -805,7 +805,7 @@
 	// * 静态数据 - 按钮参数
 	//				（~struct~DrillGBuBtn）
 	//==============================
-	DrillUp.drill_GBu_initParam = function( dataFrom ) {
+	DrillUp.drill_GBu_initParam = function( dataFrom ){
 		var data = {};
 		
 		// > 贴图

@@ -3,12 +3,12 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        标题 - 制作组
+ * @plugindesc [v1.4]        标题 - 制作组
  * @author Drill_up
  * 
  * @Drill_LE_param "阶段-%d"
  * @Drill_LE_parentKey ""
- * @Drill_LE_var "DrillUp.g_SCr_list_length"
+ * @Drill_LE_var "DrillUp.g_SCr_stepList_length"
  * 
  * 
  * @help  
@@ -25,7 +25,8 @@
  * 该插件 不能 单独使用。
  * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfScreenRoller     窗口字符-长画布贴图核心
+ *   - Drill_CoreOfGlobalSave        管理器-全局存储核心
+ *   - Drill_CoreOfScreenRoller      窗口字符-长画布贴图核心
  *     必须基于该插件才能建立长画布并播放内容。
  *
  * -----------------------------------------------------------------------------
@@ -73,6 +74,19 @@
  * 插件指令：>制作组 : 打开面板
  *
  * -----------------------------------------------------------------------------
+ * ----可选设定 - 阶段设置
+ * 你可以通过插件指令修改阶段设置：
+ * 
+ * 插件指令：>制作组 : 显示阶段 : 阶段[1]
+ * 插件指令：>制作组 : 显示阶段 : 阶段变量[21]
+ * 插件指令：>制作组 : 隐藏阶段 : 阶段[1]
+ * 插件指令：>制作组 : 隐藏阶段 : 阶段变量[21]
+ * 插件指令：>制作组 : 显示全部阶段
+ * 插件指令：>制作组 : 隐藏全部阶段
+ * 
+ * 1.面板打开时，游戏是暂停的，所以你不能在面板中实时变化某些数值。
+ * 
+ * -----------------------------------------------------------------------------
  * ----插件性能
  * 测试仪器：   4G 内存，Intel Core i5-2520M CPU 2.5GHz 处理器
  *              Intel(R) HD Graphics 3000 集显 的垃圾笔记本
@@ -85,7 +99,7 @@
  * 工作类型：   持续执行
  * 时间复杂度： o(n^2)*o(场景元素) 每帧
  * 测试方法：   直接进入该信息面板进行测试。
- * 测试结果：   在菜单界面中，基本元素消耗为：【10.97ms】
+ * 测试结果：   在菜单界面中，基本元素消耗为：【5.60ms】
  * 
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
  *   测试结果并不是精确值，范围在给定值的10ms范围内波动。
@@ -106,6 +120,9 @@
  * 添加了插件指令。
  * [v1.3]
  * 更新并兼容了新的窗口字符底层。
+ * [v1.4]
+ * 添加了阶段的显示与隐藏功能。
+ * 
  * 
  * 
  * @param ----杂项----
@@ -144,6 +161,18 @@
  * @parent 是否初始阶段渐变显示
  * @desc 初始阶段渐变中，渐变显示的速度。
  * @default 2
+ * 
+ * 
+ * @param ----存储数据----
+ * @default 
+ *
+ * @param 全局存储的文件路径
+ * @parent ----存储数据----
+ * @type number
+ * @min 1
+ * @desc 指对应的文件路径ID,该插件的数据将存储到指定文件路径,具体看看"21.管理器 > 关于全局存储.docx"。
+ * @default 1
+ *
  *
  * @param ----滚动内容----
  * @default 
@@ -593,9 +622,11 @@
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^2)*o(场景元素) 每帧
 //		★性能测试因素	直接进入信息面板进行测试。
-//		★性能测试消耗	13.65ms  10.97ms
+//		★性能测试消耗	2025/7/27：
+//							》5.6ms（drill_updateRoller）0.3ms（drill_updateMask）155.0ms（drill_createRoller）
 //		★最坏情况		无
-//		★备注			无
+//		★备注			进入此面板后，前一场景的缓存全部清除，帧刷新也全部停止，有充足的计算资源给面板用。
+//						因此不需要担心性能问题，但测一下性能也无伤大雅。
 //		
 //		★优化记录		暂无
 //
@@ -604,9 +635,11 @@
 //		★功能结构树：
 //			->☆提示信息
 //			->☆静态数据
+//			->☆全局存储
 //			->☆插件指令
 //			
-//			->☆标题选项
+//			->☆面板跳转之标题
+//			->☆面板控制
 //			
 //			->制作组面板【Scene_Drill_SCr】
 //				->A主体
@@ -644,7 +677,10 @@
 	//==============================
 	var DrillUp = DrillUp || {}; 
 	DrillUp.g_SCr_PluginTip_curName = "Drill_SceneCredits.js 标题-制作组";
-	DrillUp.g_SCr_PluginTip_baseList = ["Drill_CoreOfScreenRoller.js 窗口字符-长画布贴图核心"];
+	DrillUp.g_SCr_PluginTip_baseList = [
+		"Drill_CoreOfGlobalSave.js 管理器-全局存储核心",
+		"Drill_CoreOfScreenRoller.js 窗口字符-长画布贴图核心"
+	];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
@@ -676,26 +712,21 @@
 	DrillUp.drill_SCr_initStep = function( dataFrom ){
 		var data = {};
 		
-		data['height'] = Number(dataFrom["阶段高度"] || 0);
+		// > B阶段
+		data['stepVisible'] = String(dataFrom["阶段是否可见"] || "true") == "true";
 		data['speed'] = Number(dataFrom["阶段滚动速度"] || 1.5);
-		
-		// > D播放GIF
-		data['bgm_set'] = String(dataFrom["当前阶段BGM设置"] || "不操作");
-		data['bgm_src'] = String(dataFrom["资源-BGM"] || "");
-		
-		
-		// > 阶段
+		data['height'] = Number(dataFrom["阶段高度"] || 0);
 		data['mode'] = String(dataFrom["显示模式"] || "单图模式");
 		
-		// > 阶段 - 单图模式
+		// > B阶段 - 单图模式
 		data['img_src'] = String(dataFrom["资源-单图"] || "");
 		data['img_src_file'] = "img/titles2/";
 		data['img_x'] = Number(dataFrom["平移-单图 X"] || 0);
 		data['img_y'] = Number(dataFrom["平移-单图 Y"] || 0);
 		
-		// > 阶段 - GIF模式
-		if( dataFrom["资源-GIF"] != "" &&
-			dataFrom["资源-GIF"] != undefined ){
+		// > B阶段 - GIF模式
+		if( dataFrom["资源-GIF"] != undefined &&
+			dataFrom["资源-GIF"] != "" ){
 			data['gif_src'] = JSON.parse( dataFrom["资源-GIF"] );
 		}else{
 			data['gif_src'] = [];
@@ -708,9 +739,9 @@
 		data['gif_back_run'] = String(dataFrom["是否倒放"] || "false") == "true";
 		data['gif_replay'] = String(dataFrom["GIF到末尾是否重播"] || "false") == "true";
 		
-		// > 阶段 - 文本模式
-		if( dataFrom["文本内容"] != "" &&
-			dataFrom["文本内容"] != undefined ){
+		// > B阶段 - 文本模式
+		if( dataFrom["文本内容"] != undefined &&
+			dataFrom["文本内容"] != "" ){
 			data['text_context'] = String( JSON.parse(dataFrom["文本内容"]) );
 		}else{
 			data['text_context'] = "";
@@ -723,19 +754,23 @@
 		data['text_x'] = Number(dataFrom["平移-文本 X"] || 0);
 		data['text_y'] = Number(dataFrom["平移-文本 Y"] || 0);
 		
+		// > E音乐切换
+		data['bgm_set'] = String(dataFrom["当前阶段BGM设置"] || "不操作");
+		data['bgm_src'] = String(dataFrom["资源-BGM"] || "");
+		
 		return data;
 	}
 	
 	/*-----------------阶段------------------*/
-	DrillUp.g_SCr_list_length = 40;
-	DrillUp.g_SCr_list = [];
-	for (var i = 0; i < DrillUp.g_SCr_list_length; i++) {
+	DrillUp.g_SCr_stepList_length = 40;
+	DrillUp.g_SCr_stepList = [];
+	for( var i = 0; i < DrillUp.g_SCr_stepList_length; i++ ){
 		if( DrillUp.parameters["阶段-" + String(i+1) ] != undefined &&
 			DrillUp.parameters["阶段-" + String(i+1) ] != "" ){
 			var data = JSON.parse(DrillUp.parameters["阶段-" + String(i+1) ]);
-			DrillUp.g_SCr_list[i] = DrillUp.drill_SCr_initStep( data );
+			DrillUp.g_SCr_stepList[i] = DrillUp.drill_SCr_initStep( data );
 		}else{
-			DrillUp.g_SCr_list[i] = DrillUp.drill_SCr_initStep( {} );
+			DrillUp.g_SCr_stepList[i] = null;
 		}
 	}
 	
@@ -746,11 +781,65 @@
     DrillUp.g_SCr_opacityShow = String(DrillUp.parameters["是否初始阶段渐变显示"] || "true") == "true";
     DrillUp.g_SCr_opacitySpeed = Number(DrillUp.parameters["渐变速度"] || 2);
 	
+	/*-----------------全局存储对象------------------*/
+    DrillUp.g_SCr_globalSetting_fileId = Number(DrillUp.parameters["全局存储的文件路径"] || 1);
+	DrillUp.global_SCr_enableTank = null;
+	
 	
 //=============================================================================
 // * >>>>基于插件检测>>>>
 //=============================================================================
-if( Imported.Drill_CoreOfScreenRoller ){
+if( Imported.Drill_CoreOfGlobalSave &&
+	Imported.Drill_CoreOfScreenRoller ){
+	
+	
+//=============================================================================
+// ** ☆全局存储
+//=============================================================================
+//==============================
+// * 『全局存储』 - 载入时检查数据 - 阶段显示情况
+//==============================
+DrillUp.drill_SCr_gCheckData_enable = function(){
+	for( var i = 0; i < DrillUp.g_SCr_stepList.length; i++ ){
+		var temp_data = DrillUp.g_SCr_stepList[i];
+		
+		// > 指定数据为空时
+		if( DrillUp.global_SCr_stepVisibleTank[i] == null ){
+			if( temp_data == null ){		//（无内容配置，跳过）
+				DrillUp.global_SCr_stepVisibleTank[i] = null;
+			}else{							//（有内容配置，初始化默认）
+				DrillUp.global_SCr_stepVisibleTank[i] = temp_data['stepVisible'];
+			}
+			
+		// > 不为空则跳过检查
+		}else{
+			//（不操作）
+		}
+	}
+}
+//==============================
+// * 『全局存储』 - 载入
+//==============================
+	var global_fileId = DrillUp.g_SCr_globalSetting_fileId;
+	var global_data = StorageManager.drill_COGS_loadData( global_fileId, "SCr" );  //『全局存储执行函数』
+	
+	// > 显示情况
+	if( DrillUp.global_SCr_stepVisibleTank == null ){		//（游戏没关时，不会为null)
+		var data = global_data["global_stepVisibleTank"];
+		if( data == undefined ){ data = [] };
+		DrillUp.global_SCr_stepVisibleTank = data;
+		DrillUp.drill_SCr_gCheckData_enable();				//（检查时自动赋新值）
+	}
+	
+//==============================
+// * 『全局存储』 - 存储
+//==============================
+StorageManager.drill_SCr_saveData = function(){
+	var file_id = DrillUp.g_SCr_globalSetting_fileId;
+	var data = {};
+	data["global_stepVisibleTank"] = DrillUp.global_SCr_stepVisibleTank;
+	this.drill_COGS_saveData( file_id, "SCr", data );  //『全局存储执行函数』
+};
 	
 	
 //=============================================================================
@@ -769,10 +858,48 @@ Game_Interpreter.prototype.pluginCommand = function( command, args ){
 //==============================
 Game_Interpreter.prototype.drill_SCr_pluginCommand = function( command, args ){
 	if( command === ">制作组" ){
-		if(args.length == 2){
+		
+		if( args.length == 2 ){
 			var type = String(args[1]);
 			if( type == "打开面板" ){
 				SceneManager.push(Scene_Drill_SCr);
+			}
+		}
+		
+		if( args.length == 4 ){
+			var type = String(args[1]);
+			var temp1 = String(args[3]);
+			if( temp1.indexOf("阶段变量[") != -1 ){
+				temp1 = temp1.replace("阶段变量[","");
+				temp1 = temp1.replace("]","");
+				temp1 = $gameVariables.value(Number(temp1));
+			}else if( temp1.indexOf("阶段[") != -1 ){
+				temp1 = temp1.replace("阶段[","");
+				temp1 = temp1.replace("]","");
+				temp1 = Number(temp1);
+			}
+			if( type == "显示阶段" ){
+				DrillUp.global_SCr_stepVisibleTank[ Number(temp1)-1 ] = true;		//全局存储
+				StorageManager.drill_SCr_saveData();
+			}
+			if( type == "隐藏阶段" ){
+				DrillUp.global_SCr_stepVisibleTank[ Number(temp1)-1 ] = false;		//全局存储
+				StorageManager.drill_SCr_saveData();
+			}
+		}
+		if( args.length == 2 ){
+			var type = String(args[1]);
+			if( type == "显示全部阶段" ){
+				for( var i = 0; i < DrillUp.g_SCr_stepList.length; i++ ){
+					DrillUp.global_SCr_stepVisibleTank[i] = true;			//全局存储
+				}
+				StorageManager.drill_SCr_saveData();
+			}
+			if( type == "隐藏全部阶段" ){
+				for( var i = 0; i < DrillUp.g_SCr_stepList.length; i++ ){
+					DrillUp.global_SCr_stepVisibleTank[i] = false;			//全局存储
+				}
+				StorageManager.drill_SCr_saveData();
 			}
 		}
 	}
@@ -780,7 +907,7 @@ Game_Interpreter.prototype.drill_SCr_pluginCommand = function( command, args ){
 	
 
 //=============================================================================
-// ** ☆标题选项
+// ** ☆面板跳转之标题
 //
 //			说明：	> 此模块专门关联标题选项，选项进入后跳转到 制作组面板 界面。
 //					（插件完整的功能目录去看看：功能结构树）
@@ -797,8 +924,29 @@ Scene_Title.prototype.drill_SCr_commandCredits = function() {
 var _drill_SCr_makeCommandList = Window_TitleCommand.prototype.makeCommandList;
 Window_TitleCommand.prototype.makeCommandList = function() {
     _drill_SCr_makeCommandList.call(this);
+	// > 添加了该插件就直接在标题窗口中显示
 	this.addCommand( DrillUp.g_SCr_commandName,   'Drill_SCr_command' );
 };	
+
+
+//=============================================================================
+// ** ☆面板控制
+//
+//			说明：	> 此模块专门将部分面板配置转移到 Game_Temp 方便随时调用。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 面板控制 - 判断 显示情况
+//==============================
+Game_Temp.prototype.drill_SCr_isVisible = function( context_realIndex ){
+	
+	// > 全局存储控制
+	if( DrillUp.global_SCr_stepVisibleTank[ context_realIndex ] == true ){
+		return true;
+	}else{
+		return false;
+	}
+};
 
 
 //=============================================================================
@@ -814,7 +962,7 @@ Window_TitleCommand.prototype.makeCommandList = function() {
 // **						x> 开始运行（start）
 // **						x> 结束运行（stop）
 // **						x> 忙碌状态（isBusy）
-// **						x> 析构函数（terminate）
+// **						> 析构函数（terminate）
 // **						x> 判断加载完成（isReady）
 // **						x> 判断是否激活/启动（isActive）
 // **						x> 当前角色切换时（onActorChange）
@@ -866,6 +1014,13 @@ Scene_Drill_SCr.prototype.update = function() {
 	this.drill_updateMask();			//帧刷新 - B内容遮罩
 	this.drill_updateRoller();			//帧刷新 - C长画布控制
 };
+//==============================
+// * 制作组面板 - 析构函数（继承）
+//==============================
+Scene_Drill_SCr.prototype.terminate = function() {
+    Scene_MenuBase.prototype.terminate.call(this);
+	this._drill_rollerSprite.drill_sprite_destroy();
+};
 
 //==============================
 // * A主体 - 创建
@@ -885,7 +1040,10 @@ Scene_Drill_SCr.prototype.drill_createAttr = function() {
 // * B内容遮罩 - 创建
 //==============================
 Scene_Drill_SCr.prototype.drill_createMask = function() {
-	this._drill_rollerMask = new Sprite( ImageManager.loadTitle2(DrillUp.g_SCr_contextMask) );
+	var mask_src = DrillUp.g_SCr_contextMask;
+	if( mask_src == undefined ){ return; }
+	if( mask_src == "" ){ return; }
+	this._drill_rollerMask = new Sprite( ImageManager.loadTitle2(mask_src) );
 	this._drill_rollerMask_needResize = true;
 	this._drill_field.addChild(this._drill_rollerMask);	
 	this._drill_field.mask = this._drill_rollerMask;		//『遮罩赋值』
@@ -909,14 +1067,24 @@ Scene_Drill_SCr.prototype.drill_updateMask = function() {
 // * C长画布控制 - 创建
 //==============================
 Scene_Drill_SCr.prototype.drill_createRoller = function() {
-	var data = {
+	
+	// > 阶段列表
+	var step_data = JSON.parse(JSON.stringify( DrillUp.g_SCr_stepList ));
+	for( var i = 0; i < step_data.length; i++ ){
+		var temp_data = step_data[i];
+		if( temp_data == undefined ){ continue; }
+		temp_data['stepVisible'] = $gameTemp.drill_SCr_isVisible( i );
+	}
+	
+	// > 长画布贴图 - 数据
+	var sprite_data = {
 		"opacityShow": DrillUp.g_SCr_opacityShow,		//开始时渐变显示 开关
 		"opacitySpeed": DrillUp.g_SCr_opacitySpeed,		//开始时渐变显示 速度
-		"steps": DrillUp.g_SCr_list,					//阶段列表
+		"steps": step_data,								//阶段列表
 	};
 	
 	// > 长画布贴图
-	this._drill_rollerSprite = new Drill_COSR_Sprite( data );
+	this._drill_rollerSprite = new Drill_COSR_Sprite( sprite_data );
 	this._drill_field.addChild(this._drill_rollerSprite);	
 	
 	// > 长画布贴图 - 开始滚动
@@ -989,9 +1157,9 @@ Scene_Drill_SCr.prototype.isBusy = function() {
 //==============================
 // * 制作组面板（场景基类） - 析构函数
 //==============================
-Scene_Drill_SCr.prototype.terminate = function() {
-    Scene_MenuBase.prototype.terminate.call(this);
-};
+//Scene_Drill_SCr.prototype.terminate = function() {
+//    Scene_MenuBase.prototype.terminate.call(this);
+//};
 //==============================
 // * 制作组面板（场景基类） - 判断加载完成
 //==============================

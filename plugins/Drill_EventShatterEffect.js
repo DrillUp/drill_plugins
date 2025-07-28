@@ -581,7 +581,7 @@ Game_Temp.prototype.drill_ESE_getCharacterSpriteByFollowerIndex_Private = functi
 			sprite._character == $gamePlayer ){
 			return sprite;
 		}
-		if( sprite._character._memberIndex == follower_index &&
+		if( sprite._character._memberIndex == follower_index &&  //『玩家队员id』
 			sprite._character.isVisible() ){
 			return sprite;
 		}

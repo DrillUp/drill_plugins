@@ -139,7 +139,7 @@
  * @param 全局存储的文件路径
  * @type number
  * @min 1
- * @desc 指对应的文件路径ID，该插件的数据将存储到指定的文件路径中，具体去 全局存储核心 看看。
+ * @desc 指对应的文件路径ID,该插件的数据将存储到指定文件路径,具体看看"21.管理器 > 关于全局存储.docx"。
  * @default 1
  * 
  * 
@@ -814,7 +814,7 @@
 	// * 静态数据 - 标题选项 - 标题选项按钮组（必须写在前面）
 	//				（~struct~DrillTScCommandButton）
 	//==============================
-	DrillUp.drill_TSc_initCommandButton = function( dataFrom ) {
+	DrillUp.drill_TSc_initCommandButton = function( dataFrom ){
 		var data = {};
 		data['style_id'] = Number( dataFrom["按钮组样式"] || 0);
 		
@@ -829,8 +829,8 @@
 		
 		// > 按钮组 - B父窗口（资源）
 		data['btn_src_file'] = "img/titles1/";
-		if( dataFrom["按钮贴图序列"] != "" &&
-			dataFrom["按钮贴图序列"] != undefined ){
+		if( dataFrom["按钮贴图序列"] != undefined &&
+			dataFrom["按钮贴图序列"] != "" ){
 			var seq = JSON.parse( dataFrom["按钮贴图序列"] );
 			data['btn_src'] = [];
 			data['btn_srcKeyword'] = [];
@@ -857,8 +857,8 @@
 		
 		// > 默认按钮贴图（['btn_src_default']）
 		data['btn_src_default_id'] = Number( dataFrom["初始的默认按钮贴图"] || 1);
-		if( dataFrom["默认按钮贴图列表"] != "" &&
-			dataFrom["默认按钮贴图列表"] != undefined ){
+		if( dataFrom["默认按钮贴图列表"] != undefined &&
+			dataFrom["默认按钮贴图列表"] != "" ){
 			data['btn_src_default_tank'] = JSON.parse( dataFrom["默认按钮贴图列表"] );
 		}else{
 			data['btn_src_default_tank'] = [];
@@ -880,7 +880,7 @@
 	// * 静态数据 - 标题选项 - 标题选项窗口（必须写在前面）
 	//				（~struct~DrillTScCommandWindow）
 	//==============================
-	DrillUp.drill_TSc_initCommandWindow = function( dataFrom ) {
+	DrillUp.drill_TSc_initCommandWindow = function( dataFrom ){
 		
 		DrillUp.g_TSc_selWin_x = Number(dataFrom["选项窗口 X"] || 30);
 		DrillUp.g_TSc_selWin_y = Number(dataFrom["选项窗口 Y"] || 120);
@@ -910,7 +910,7 @@
 		DrillUp.g_TSc_selWin_styleId = Number(dataFrom["选项窗口初始布局样式"] || 1);
 		DrillUp.g_TSc_style_list_length = 10;
 		DrillUp.g_TSc_style_list = [];
-		for (var i = 0; i < DrillUp.g_TSc_style_list_length ; i++ ) {
+		for( var i = 0; i < DrillUp.g_TSc_style_list_length; i++ ){
 			if( dataFrom["布局样式-"+String(i+1)] != undefined &&
 				dataFrom["布局样式-"+String(i+1)] != "" ){
 				DrillUp.g_TSc_style_list[i] = JSON.parse( dataFrom["布局样式-" + String(i+1)] );
@@ -1067,12 +1067,12 @@ Game_Interpreter.prototype.drill_TSc_pluginCommand = function( command, args ){
 // ** ☆全局存储
 //=============================================================================
 //==============================
-// * 全局 - 读取
+// * 『全局存储』 - 载入
 //
 //			说明：	这里全局存储的是单一固定数据，不需要数据检查。
 //==============================
 	var global_fileId = DrillUp.g_TSc_dataFileId;
-	var global_data = StorageManager.drill_COGS_loadData( global_fileId, "TSc" );
+	var global_data = StorageManager.drill_COGS_loadData( global_fileId, "TSc" );  //『全局存储执行函数』
 	
 	// > 布局样式ID
 	if( DrillUp.global_TSc_styleId == null ){			//（游戏没关时，不会为null)
@@ -1111,7 +1111,7 @@ Game_Interpreter.prototype.drill_TSc_pluginCommand = function( command, args ){
 	}
 	
 //==============================
-// * 全局 - 存储
+// * 『全局存储』 - 存储
 //==============================
 StorageManager.drill_TSc_saveData = function(){
 	var file_id = DrillUp.g_TSc_dataFileId;
@@ -1122,7 +1122,7 @@ StorageManager.drill_TSc_saveData = function(){
 	data["global_commandButton_y"] = DrillUp.global_TSc_commandButton_y;
 	data["global_commandButton_index"] = DrillUp.global_TSc_commandButton_index;
 	data["global_commandButton_defaultId"] = DrillUp.global_TSc_commandButton_defaultId;
-	this.drill_COGS_saveData( file_id, "TSc", data );
+	this.drill_COGS_saveData( file_id, "TSc", data );  //『全局存储执行函数』
 };
 
 

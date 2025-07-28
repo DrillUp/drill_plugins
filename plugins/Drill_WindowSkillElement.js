@@ -513,51 +513,51 @@
 	}
 	
 	/*-----------------面板------------------*/
-	DrillUp.g_WSE_menuSceneEnabled = String(DrillUp.parameters['是否应用于菜单技能窗口'] || "true") === "true";	
-	DrillUp.g_WSE_battleSceneEnabled = String(DrillUp.parameters['是否应用于战斗技能窗口'] || "true") === "true";	
+	DrillUp.g_WSE_menuSceneEnabled = String(DrillUp.parameters["是否应用于菜单技能窗口"] || "true") === "true";	
+	DrillUp.g_WSE_battleSceneEnabled = String(DrillUp.parameters["是否应用于战斗技能窗口"] || "true") === "true";	
 	
 	/*-----------------指针与边框------------------*/
-	DrillUp.g_WSE_cursorEnabled = String(DrillUp.parameters['是否统一并覆盖指针与边框配置'] || "true") === "true";	
-	if( DrillUp.parameters['技能窗口指针与边框'] != "" &&
-		DrillUp.parameters['技能窗口指针与边框'] != undefined ){
-		var cursor = JSON.parse( DrillUp.parameters['技能窗口指针与边框'] );
+	DrillUp.g_WSE_cursorEnabled = String(DrillUp.parameters["是否统一并覆盖指针与边框配置"] || "true") === "true";	
+	if( DrillUp.parameters["技能窗口指针与边框"] != undefined &&
+		DrillUp.parameters["技能窗口指针与边框"] != "" ){
+		var cursor = JSON.parse( DrillUp.parameters["技能窗口指针与边框"] );
 		DrillUp.g_WSE_cursor = DrillUp.drill_WSE_initMenuCursor( cursor );
 	}else{
 		DrillUp.g_WSE_cursor = DrillUp.drill_WSE_initMenuCursor( {} );
 	}
 	
 	/*----------------元素组-----------------*/
-    DrillUp.g_WSE_selected_pos_x = Number(DrillUp.parameters['选中元素偏移 X'] || 0);
-    DrillUp.g_WSE_selected_pos_y = Number(DrillUp.parameters['选中元素偏移 Y'] || -20);
-    DrillUp.g_WSE_selected_size_x = Number(DrillUp.parameters['选中元素缩放 X'] || 1.00);
-    DrillUp.g_WSE_selected_size_y = Number(DrillUp.parameters['选中元素缩放 Y'] || 1.00);
-    DrillUp.g_WSE_battle_col = Number(DrillUp.parameters['元素列数-战斗界面'] || 4);
-    DrillUp.g_WSE_menu_col = Number(DrillUp.parameters['元素列数-菜单界面'] || 2);
-    DrillUp.g_WSE_height = Number(DrillUp.parameters['元素高度'] || 90);
-    DrillUp.g_WSE_spacing = Number(DrillUp.parameters['元素横向间距'] || 12);
-	DrillUp.g_WSE_is_strict = String(DrillUp.parameters['是否严格控制元素的区域'] || "true") === "true";	
+    DrillUp.g_WSE_selected_pos_x = Number(DrillUp.parameters["选中元素偏移 X"] || 0);
+    DrillUp.g_WSE_selected_pos_y = Number(DrillUp.parameters["选中元素偏移 Y"] || -20);
+    DrillUp.g_WSE_selected_size_x = Number(DrillUp.parameters["选中元素缩放 X"] || 1.00);
+    DrillUp.g_WSE_selected_size_y = Number(DrillUp.parameters["选中元素缩放 Y"] || 1.00);
+    DrillUp.g_WSE_battle_col = Number(DrillUp.parameters["元素列数-战斗界面"] || 4);
+    DrillUp.g_WSE_menu_col = Number(DrillUp.parameters["元素列数-菜单界面"] || 2);
+    DrillUp.g_WSE_height = Number(DrillUp.parameters["元素高度"] || 90);
+    DrillUp.g_WSE_spacing = Number(DrillUp.parameters["元素横向间距"] || 12);
+	DrillUp.g_WSE_is_strict = String(DrillUp.parameters["是否严格控制元素的区域"] || "true") === "true";	
 	
 	/*----------------背景块-----------------*/
-    DrillUp.g_WSE_src_background = String(DrillUp.parameters['资源-元素背景'] || "");
-    DrillUp.g_WSE_icon_x = Number(DrillUp.parameters['平移-图标 X'] || 134);
-    DrillUp.g_WSE_icon_y = Number(DrillUp.parameters['平移-图标 Y'] || 18);
-    DrillUp.g_WSE_icon_size = Number(DrillUp.parameters['图标大小'] || 1.00);
-    DrillUp.g_WSE_skill_x = Number(DrillUp.parameters['平移-技能名 X'] || 42);
-    DrillUp.g_WSE_skill_y = Number(DrillUp.parameters['平移-技能名 Y'] || 3);
-    DrillUp.g_WSE_skill_fontsize = Number(DrillUp.parameters['技能名字体大小'] || 20);
-    DrillUp.g_WSE_skill_width = Number(DrillUp.parameters['技能块宽度'] || 88);
-    DrillUp.g_WSE_skill_align = String(DrillUp.parameters['技能名对齐方式'] || 'left');
+    DrillUp.g_WSE_src_background = String(DrillUp.parameters["资源-元素背景"] || "");
+    DrillUp.g_WSE_icon_x = Number(DrillUp.parameters["平移-图标 X"] || 134);
+    DrillUp.g_WSE_icon_y = Number(DrillUp.parameters["平移-图标 Y"] || 18);
+    DrillUp.g_WSE_icon_size = Number(DrillUp.parameters["图标大小"] || 1.00);
+    DrillUp.g_WSE_skill_x = Number(DrillUp.parameters["平移-技能名 X"] || 42);
+    DrillUp.g_WSE_skill_y = Number(DrillUp.parameters["平移-技能名 Y"] || 3);
+    DrillUp.g_WSE_skill_fontsize = Number(DrillUp.parameters["技能名字体大小"] || 20);
+    DrillUp.g_WSE_skill_width = Number(DrillUp.parameters["技能块宽度"] || 88);
+    DrillUp.g_WSE_skill_align = String(DrillUp.parameters["技能名对齐方式"] || "left");
 	
 	/*----------------消耗块-----------------*/
-    DrillUp.g_WSE_cost_x = Number(DrillUp.parameters['平移-消耗块 X'] || 42);
-    DrillUp.g_WSE_cost_y = Number(DrillUp.parameters['平移-消耗块 Y'] || 31);
-    DrillUp.g_WSE_cost_fontsize = Number(DrillUp.parameters['消耗值字体大小'] || 20);
-    DrillUp.g_WSE_cost_width = Number(DrillUp.parameters['消耗块宽度'] || 88);
-    DrillUp.g_WSE_cost_align = String(DrillUp.parameters['消耗值对齐方式'] || 'left');
-    DrillUp.g_WSE_cost_mp_color = Number(DrillUp.parameters['魔法消耗文本颜色'] || 23);
-    DrillUp.g_WSE_cost_tp_color = Number(DrillUp.parameters['怒气消耗文本颜色'] || 27);
-    DrillUp.g_WSE_cost_no_cost = String(DrillUp.parameters['无消耗文本'] || "-");
-    DrillUp.g_WSE_cost_no_cost_color = Number(DrillUp.parameters['无消耗文本颜色'] || 23);
+    DrillUp.g_WSE_cost_x = Number(DrillUp.parameters["平移-消耗块 X"] || 42);
+    DrillUp.g_WSE_cost_y = Number(DrillUp.parameters["平移-消耗块 Y"] || 31);
+    DrillUp.g_WSE_cost_fontsize = Number(DrillUp.parameters["消耗值字体大小"] || 20);
+    DrillUp.g_WSE_cost_width = Number(DrillUp.parameters["消耗块宽度"] || 88);
+    DrillUp.g_WSE_cost_align = String(DrillUp.parameters["消耗值对齐方式"] || "left");
+    DrillUp.g_WSE_cost_mp_color = Number(DrillUp.parameters["魔法消耗文本颜色"] || 23);
+    DrillUp.g_WSE_cost_tp_color = Number(DrillUp.parameters["怒气消耗文本颜色"] || 27);
+    DrillUp.g_WSE_cost_no_cost = String(DrillUp.parameters["无消耗文本"] || "-");
+    DrillUp.g_WSE_cost_no_cost_color = Number(DrillUp.parameters["无消耗文本颜色"] || 23);
 	
 	
 //=============================================================================

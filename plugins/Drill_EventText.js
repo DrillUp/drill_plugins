@@ -871,7 +871,7 @@ Game_Temp.prototype.drill_ET_getCharacterSpriteByFollowerIndex_Private = functio
 			sprite._character == $gamePlayer ){
 			return sprite;
 		}
-		if( sprite._character._memberIndex == follower_index &&
+		if( sprite._character._memberIndex == follower_index &&  //『玩家队员id』
 			sprite._character.isVisible() ){
 			return sprite;
 		}
@@ -1316,7 +1316,7 @@ function Drill_ET_Controller() {
 //==============================
 Drill_ET_Controller.prototype.initialize = function( data ){
 	this._drill_data = {};
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能
 	if( data == undefined ){ data = {}; }
@@ -1573,10 +1573,10 @@ Drill_ET_Controller.prototype.drill_controller_resetData_Private = function( dat
 	}
 	
 	// > 执行重置
-	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
-	//this._drill_controllerSerial = new Date().getTime() + Math.random();	//（重设数据不改变序列号）
-    this.drill_controller_initData();										//初始化数据
-    this.drill_controller_initChild();										//初始化子功能
+	this._drill_data = JSON.parse(JSON.stringify( data ));		//深拷贝
+	//this._drill_controllerSerial;								//（重设数据不改变序列号）
+    this.drill_controller_initData();							//初始化数据
+    this.drill_controller_initChild();							//初始化子功能
 }
 
 
@@ -1723,7 +1723,7 @@ Drill_ET_Controller.prototype.drill_controller_updateLoop = function(){
 		}
 		// > 随机
 		if( loop_mode == "随机" ){
-			index = Math.floor( Math.random()*loop_textTank.length );
+			index = Math.floor( Math.random()*loop_textTank.length );	//『随机因子-图像用』
 		}
 		this._drill_curText = loop_textTank[ index ];
 		this._drill_curLoopPos += 1;

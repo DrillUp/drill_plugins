@@ -269,7 +269,7 @@ Game_Interpreter.prototype.drill_COPWM_pluginCommand = function( command, args )
 			}
 		}
 		
-		/*-----------------设置可拖拽------------------*/
+		/*-----------------像素判定------------------*/
 		if( args.length == 4 ){
 			var pic_str = String(args[1]);
 			var type = String(args[3]);
@@ -500,12 +500,12 @@ Game_Picture.prototype.drill_COPWM_checkData_Private = function(){
 	if( this._drill_COPWM_mouseData != undefined ){ return; }
 	this._drill_COPWM_mouseData = {};
 	
-	this._drill_COPWM_mouseData['op_time'] = -1;				//优化控制 - 帧数标记
-	this._drill_COPWM_mouseData['op_result'] = false;			//优化控制 - 第一次的悬停结果
+	this._drill_COPWM_mouseData['op_time'] = -1;				//优化控制（碰撞体） - 帧数标记
+	this._drill_COPWM_mouseData['op_result'] = false;			//优化控制（碰撞体） - 当前帧第一次的悬停结果
 	
 	this._drill_COPWM_mouseData['pixelHoverEnabled'] = false;	//像素判定开关
-	this._drill_COPWM_mouseData['op_pixelTime'] = -1;			//优化控制 - 帧数标记（像素判定）
-	this._drill_COPWM_mouseData['op_pixelResult'] = false;		//优化控制 - 第一次的悬停结果（像素判定）
+	this._drill_COPWM_mouseData['op_pixelTime'] = -1;			//优化控制（像素判定） - 帧数标记
+	this._drill_COPWM_mouseData['op_pixelResult'] = false;		//优化控制（像素判定） - 当前帧第一次的悬停结果
 }
 //==============================
 // * 图片的属性 - 删除数据（私有）
@@ -519,7 +519,7 @@ Game_Picture.prototype.drill_COPWM_removeData_Private = function(){
 var _drill_COPWM_p_erase = Game_Picture.prototype.erase;
 Game_Picture.prototype.erase = function(){
 	_drill_COPWM_p_erase.call( this );
-	this.drill_COPWM_removeData();								//（删除数据）
+	this.drill_COPWM_removeData();				//（删除数据）
 }
 //==============================
 // * 图片的属性 - 消除图片（command235）
@@ -529,12 +529,12 @@ Game_Screen.prototype.erasePicture = function( pictureId ){
     var realPictureId = this.realPictureId(pictureId);
 	var picture = this._pictures[realPictureId];
 	if( picture != undefined ){
-		picture.drill_COPWM_removeData();						//（删除数据）
+		picture.drill_COPWM_removeData();		//（删除数据）
 	}
 	_drill_COPWM_p_erasePicture.call( this, pictureId );
 }
 //==============================
-// * 图片的属性 - 是否启用像素判定
+// * 图片的属性 - 是否启用像素判定（开放函数）
 //==============================
 Game_Picture.prototype.drill_COPWM_setPixelHoverEnabled = function( enabled ){
 	this.drill_COPWM_checkData();
@@ -551,10 +551,15 @@ Game_Picture.prototype.drill_COPWM_setPixelHoverEnabled = function( enabled ){
 //=============================================================================
 //==============================
 // * 悬停判定 - 鼠标是否正在悬停（私有）
+//			
+//			参数：	> 无
+//			返回：	> 布尔
+//			
+//			说明：	> 该函数为悬停判断的 主入口 。
 //==============================
 Game_Picture.prototype.drill_COPWM_isOnHover_Private = function(){
 	
-	// > 未绑定则返回false
+	// > 未绑定属性，跳出
 	if( this._drill_COPWM_mouseData == undefined ){ return false; }
 	var mouseData = this._drill_COPWM_mouseData;
 	
@@ -570,6 +575,8 @@ Game_Picture.prototype.drill_COPWM_isOnHover_Private = function(){
 // * 悬停判定 - 是否在 碰撞体 范围内
 //			
 //			参数：	> 无
+//			返回：	> 布尔
+//			
 //			说明：	> 检查鼠标是否在碰撞体的范围内。『鼠标落点与实体类范围』
 //						镜头与层级 - 无需支持
 //						中心锚点   - 已支持（图片-碰撞体 支持）
@@ -579,12 +586,12 @@ Game_Picture.prototype.drill_COPWM_isOnHover_Private = function(){
 Game_Picture.prototype.drill_COPWM_isOnHover_ByCollision = function(){
 	var mouseData = this._drill_COPWM_mouseData;
 	
-	// > 优化控制 - 初始化8帧关闭悬停
+	// > 优化控制（碰撞体） - 初始化8帧关闭悬停
 	//		（防止渐变进入地图时，玩家的鼠标乱晃误点其它贴图）
 	//		（防止切换地图时，上一张地图的bean还未销毁，就触发了悬停判定）
 	if( $gameTemp._drill_COPWM_op_curTime < 8 ){ return false; }
 	
-	// > 优化控制
+	// > 优化控制（碰撞体）
 	//		（如果此函数在 同一贴图+同一帧中 被多次调用）
 	//		（那么第一次调用 走正常流程，第二次调用 返回第一次的结果）
 	if( mouseData['op_time'] == $gameTemp._drill_COPWM_op_curTime ){
@@ -615,20 +622,26 @@ Game_Picture.prototype.drill_COPWM_isOnHover_ByCollision = function(){
 // * 悬停判定 - 是否在 像素判定 范围内
 //			
 //			参数：	> 无
-//			说明：	> 此判定基于贴图资源。
+//			返回：	> 布尔
+//			
+//			说明：	> 此判定为 碰撞体范围+贴图像素点判定 。
 //==============================
 Game_Picture.prototype.drill_COPWM_isOnHover_ByPixel = function(){
 	var mouseData = this._drill_COPWM_mouseData;
 	
-	// > 首先就要在 碰撞体 范围内
+	// > 前提条件 - 碰撞体范围
 	var is_hover = this.drill_COPWM_isOnHover_ByCollision();
 	if( is_hover == false ){ return false; }
 	
+	
 	// > 优化控制（像素判定）
+	//		（如果此函数在 同一贴图+同一帧中 被多次调用）
+	//		（那么第一次调用 走正常流程，第二次调用 返回第一次的结果）
 	if( mouseData['op_pixelTime'] == $gameTemp._drill_COPWM_op_curTime ){
 		return mouseData['op_pixelResult'];
 	}
 	mouseData['op_pixelTime'] = $gameTemp._drill_COPWM_op_curTime;
+	
 	
 	// > 判定 - 鼠标位置
 	var _x = _drill_mouse_x;
@@ -639,6 +652,8 @@ Game_Picture.prototype.drill_COPWM_isOnHover_ByPixel = function(){
 	var org_pos = $gameTemp.drill_COPi_getPointByBeanTransformInversed( _x, _y, bean );		//【图片-图片优化核心】某点经过碰撞体的反向变换
 	var x1 = org_pos.x - bean['_drill_x'] + bean['_drill_anchor_x'] * bean['_drill_frameW'];
 	var y1 = org_pos.y - bean['_drill_y'] + bean['_drill_anchor_y'] * bean['_drill_frameH'];
+	x1 += bean['_drill_frameX'];
+	y1 += bean['_drill_frameY'];		//（框架位置）
 	
 	// > 判定 - 从贴图中获取像素点
 	var result = false;

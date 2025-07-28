@@ -515,7 +515,7 @@
 	// * 静态数据 - 视频
 	//				（~struct~MenuVideo）
 	//==============================
-	DrillUp.drill_MVi_videoInit = function( dataFrom ) {
+	DrillUp.drill_MVi_videoInit = function( dataFrom ){
 		var data = {};
 		data['menu'] = String( dataFrom["所属菜单"] || "");
 		data['menu_key'] = String( dataFrom["自定义关键字"] || "");

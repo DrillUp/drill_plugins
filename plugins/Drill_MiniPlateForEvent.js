@@ -1433,7 +1433,7 @@ function Drill_MPFE_Bean(){
 // * 实体类 - 初始化
 //==============================
 Drill_MPFE_Bean.prototype.initialize = function(){
-	this._drill_beanSerial = new Date().getTime() + Math.random();		//（生成一个不重复的序列号）
+	this._drill_beanSerial = new Date().getTime() + Math.random();		//『生成一个不重复的序列号』
     this.drill_bean_initData();											//私有数据初始化
 };
 //##############################
@@ -1535,8 +1535,8 @@ Drill_MPFE_Bean.prototype.drill_bean_initData = function(){
 	this._drill_frameW = 0;					//实体类 - 框架宽度
 	this._drill_frameH = 0;					//实体类 - 框架高度
 	
-	this._drill_contextList = [];										//实体类 - 当前文本
-	this._drill_contextSerial = new Date().getTime() + Math.random();	//实体类 - 刷新内容
+	this._drill_contextList = [];			//实体类 - 当前文本
+	this.drill_bean_refreshContext();		//实体类 - 刷新内容
 	
 	this._drill_styleId = DrillUp.g_MPFE_defaultStyle;		//实体类 - 当前样式
 	

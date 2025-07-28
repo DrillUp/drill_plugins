@@ -1456,7 +1456,7 @@
 	// * 静态数据 - 默认粒子
 	//				（~struct~MenuParticleDefault）
 	//==============================
-	DrillUp.drill_MPa_particleDefaultInit = function( dataFrom ) {
+	DrillUp.drill_MPa_particleDefaultInit = function( dataFrom ){
 		var data = {};
 		
 		// > 控制器
@@ -1537,7 +1537,7 @@
 	// * 静态数据 - 粒子
 	//				（~struct~MenuParticle）
 	//==============================
-	DrillUp.drill_MPa_particleInit = function( dataFrom ) {
+	DrillUp.drill_MPa_particleInit = function( dataFrom ){
 		var data = {};
 		
 		// > 绑定

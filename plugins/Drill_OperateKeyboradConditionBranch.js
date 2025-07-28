@@ -187,7 +187,8 @@ Game_Interpreter.prototype.drill_COCB_conditionCommand = function(command, args)
 			var temp2 = String(args[1]);
 			if( temp1.indexOf("物理按键") != -1 ){
 				temp1 = temp1.replace("物理按键","");
-				temp1 = temp1.replace(/\"/g,"");
+				temp1 = temp1.replace("\"","");
+				temp1 = temp1.replace("\"","");
 				if( temp2 == "按下时" ){
 					var passed = Input.drill_isKeyPressed( temp1 ) == true;
 					this.drill_COCB_conditionSubmit( passed );

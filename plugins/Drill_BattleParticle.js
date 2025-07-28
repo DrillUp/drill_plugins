@@ -2016,7 +2016,7 @@
 	// * 静态数据 - 粒子
 	//				（~struct~BPaParticle）
 	//==============================
-	DrillUp.drill_BPa_circleInit = function( dataFrom ) {
+	DrillUp.drill_BPa_circleInit = function( dataFrom ){
 		var data = {};
 		
 		// > 控制器

@@ -1500,11 +1500,11 @@
 	// * 静态数据 - 背景样式
 	//				（~struct~EventTextGIF）
 	//==============================
-	DrillUp.drill_XETB_initEventTextGIF = function( dataFrom ) {
+	DrillUp.drill_XETB_initEventTextGIF = function( dataFrom ){
 		var data = {};
 		
-		if( dataFrom["资源-图片序列"] != "" &&
-			dataFrom["资源-图片序列"] != undefined ){
+		if( dataFrom["资源-图片序列"] != undefined &&
+			dataFrom["资源-图片序列"] != "" ){
 			data['src_img'] = JSON.parse( dataFrom["资源-图片序列"] );
 		}else{
 			data['src_img'] = [];

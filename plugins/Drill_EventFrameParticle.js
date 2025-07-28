@@ -2102,21 +2102,31 @@ Game_Interpreter.prototype.drill_EFPa_pluginCommand = function( command, args ){
 				char_list = $gamePlayer.followers().visibleFollowers();
 				char_list.unshift($gamePlayer);
 			}
-			if( char_list == null && unit.indexOf("玩家队员[") != -1 ){
-				unit = unit.replace("玩家队员[","");
-				unit = unit.replace("]","");
-				var group = $gamePlayer.followers().visibleFollowers();
-				group.unshift($gamePlayer);
-				char_list = [];
-				char_list.push(group[ Number(unit) ]);
-			}
 			if( char_list == null && unit.indexOf("玩家队员变量[") != -1 ){
 				unit = unit.replace("玩家队员变量[","");
 				unit = unit.replace("]","");
-				var group = $gamePlayer.followers().visibleFollowers();
-				group.unshift($gamePlayer);
-				char_list = [];
-				char_list.push(group[ $gameVariables.value(Number(unit)) ]);
+				var p_id = $gameVariables.value(Number(unit));
+				if( p_id == -2 ){  //『玩家id』
+					char_list = [ $gamePlayer ];
+				}
+				if( p_id > 0 ){  //『玩家队员id』
+					var group = $gamePlayer.followers().visibleFollowers();
+					char_list = [];
+					char_list.push(group[ p_id-1 ]);
+				}
+			}
+			if( char_list == null && unit.indexOf("玩家队员[") != -1 ){
+				unit = unit.replace("玩家队员[","");
+				unit = unit.replace("]","");
+				var p_id = Number(unit);
+				if( p_id == -2 ){  //『玩家id』
+					char_list = [ $gamePlayer ];
+				}
+				if( p_id > 0 ){  //『玩家队员id』
+					var group = $gamePlayer.followers().visibleFollowers();
+					char_list = [];
+					char_list.push(group[ p_id-1 ]);
+				}
 			}
 		}
 		

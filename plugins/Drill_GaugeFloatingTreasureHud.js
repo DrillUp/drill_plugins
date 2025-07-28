@@ -770,7 +770,7 @@
 	// * 静态数据 - 物品框样式
 	//				（~struct~DrillGFTHStyle）
 	//==============================
-	DrillUp.drill_GFTH_initContext = function( dataFrom ) {
+	DrillUp.drill_GFTH_initContext = function( dataFrom ){
 		var data = {};
 	
 		// > 常规
@@ -1710,7 +1710,7 @@ function Drill_GFTH_Allocator(){
 //==============================
 Drill_GFTH_Allocator.prototype.initialize = function( data ){
 	this._drill_data = {};
-	this._drill_allocatorSerial = new Date().getTime() + Math.random();		//（生成一个不重复的序列号）
+	this._drill_allocatorSerial = new Date().getTime() + Math.random();		//『生成一个不重复的序列号』
     this.drill_allocator_initData();										//初始化数据
     this.drill_allocator_initChild();										//初始化子功能
 	if( data == undefined ){ data = {}; }
@@ -1849,7 +1849,7 @@ Drill_GFTH_Allocator.prototype.drill_allocator_resetData_Private = function( dat
 	
 	// > 执行重置
 	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
-	this._drill_allocatorSerial = new Date().getTime() + Math.random();		//（生成一个不重复的序列号）
+	this._drill_allocatorSerial = new Date().getTime() + Math.random();		//『生成一个不重复的序列号』
     this.drill_allocator_initData();										//初始化数据
     this.drill_allocator_initChild();										//初始化子功能
 }

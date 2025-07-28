@@ -489,14 +489,16 @@
 	var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_X_BattleHudFilter');
 	
-	DrillUp.g_XBHF_mog_hud = String(Moghunter.parameters['头像是否与敌人滤镜同步'] || "true") == "true";
-	DrillUp.g_XBHF_deathBlackWhite = String(Moghunter.parameters['角色死亡时是否加整体黑白滤镜'] || "true") == "true";
+	
+	DrillUp.g_XBHF_mog_hud = String(Moghunter.parameters["头像是否与敌人滤镜同步"] || "true") == "true";
+	DrillUp.g_XBHF_deathBlackWhite = String(Moghunter.parameters["角色死亡时是否加整体黑白滤镜"] || "true") == "true";
 
 	DrillUp.g_XBHF_condition_list_length = 10;
 	DrillUp.g_XBHF_condition_list = [];
-	for (var i = 0; i < DrillUp.g_XBHF_condition_list_length; i++) {
-		if( DrillUp.parameters['滤镜条件-' + String(i+1) ] != "" ){
-			DrillUp.g_XBHF_condition_list[i] = JSON.parse(DrillUp.parameters['滤镜条件-' + String(i+1) ]);
+	for( var i = 0; i < DrillUp.g_XBHF_condition_list_length; i++ ){
+		if( DrillUp.parameters["滤镜条件-" + String(i+1) ] != undefined &&
+			DrillUp.parameters["滤镜条件-" + String(i+1) ] != "" ){
+			DrillUp.g_XBHF_condition_list[i] = JSON.parse(DrillUp.parameters["滤镜条件-" + String(i+1) ]);
 			
 			DrillUp.g_XBHF_condition_list[i]['hp_enable'] = String(DrillUp.g_XBHF_condition_list[i]["是否添加生命条件"] || "true") == "true";
 			DrillUp.g_XBHF_condition_list[i]['hp_top'] = Number(DrillUp.g_XBHF_condition_list[i]["条件-生命百分比上限"] || 0);

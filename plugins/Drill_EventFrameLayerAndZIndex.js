@@ -93,6 +93,7 @@
  *   因为在物体层级时，所有物体对象的 堆叠级，都与贴图y坐标相关，且为实时变换。
  *   所以使用"附加堆叠级"，能提升一部分优先级，其它详细介绍去看文档。
  * 3.堆叠级可以设置为小数、负数。
+ * 4."玩家队员[1]"中，-2表示领队，1表示第一个跟随者。
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -543,7 +544,7 @@ Game_Temp.prototype.drill_EFLAZ_getCharacterSpriteByFollowerIndex_Private = func
 			sprite._character == $gamePlayer ){
 			return sprite;
 		}
-		if( sprite._character._memberIndex == follower_index &&
+		if( sprite._character._memberIndex == follower_index &&  //『玩家队员id』
 			sprite._character.isVisible() ){
 			return sprite;
 		}

@@ -82,6 +82,7 @@
  * 
  * 1."不跨事件页" 是值每次事件页切换时，都会生效并赋值。
  *   "跨事件页" 是指事件创建时，也就是进入地图时，会被赋值一次，切换事件页不会被再次赋值。
+ *   注意，"跨事件页" 的设置必须放在第一页才能生效。
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - (批量槽位)时
@@ -791,34 +792,34 @@ Game_Event.prototype.initMembers = function() {
 	this._drill_EBV_isFirstBirth = true;
 };
 //==============================
-// * 事件注释 - 第一页绑定
+// * 事件注释 - 读取绑定
 //==============================
 var _drill_EBV_event_setupPage = Game_Event.prototype.setupPage;
 Game_Event.prototype.setupPage = function() {
 	_drill_EBV_event_setupPage.call(this);
-    this.drill_EBV_setupEffect();
+    this.drill_EBV_event_readPage();
 };
 //==============================
-// * 事件注释 - 初始化绑定
+// * 事件注释 - 读取 页
 //==============================
-Game_Event.prototype.drill_EBV_setupEffect = function() {	
+Game_Event.prototype.drill_EBV_event_readPage = function() {	
 	
 	// > 第一次出生，强制读取第一页注释（防止离开地图后，回来，开关失效）
 	if( !this._erased && this.event() && this.event().pages[0] && this._drill_EBV_isFirstBirth == true ){
-		this.drill_EBV_readPage( this.event().pages[0].list );
-		this._drill_EBV_isFirstBirth = undefined;		//『节约临时参数存储空间』（放后面，readPage要用这个识别 跨事件页）
+		this.drill_EBV_event_readList( this.event().pages[0].list );
+		this._drill_EBV_isFirstBirth = undefined;		//『节约临时参数存储空间』（放后面，注释通过这个识别"跨事件页/不跨事件页"。"跨事件页"的注释必须放在第一页才能生效。）
 	}
 	
 	// > 读取当前页注释
 	if( !this._erased && this.page() ){ 
-		this.drill_EBV_readPage( this.list() );
+		this.drill_EBV_event_readList( this.list() );
 	}
 }
 //==============================
-// * 事件注释 - 初始化
+// * 事件注释 - 读取 注释
 //==============================
-Game_Event.prototype.drill_EBV_readPage = function( page_list ){
-	page_list.forEach( function( l ){
+Game_Event.prototype.drill_EBV_event_readList = function( pageOfList ){
+	pageOfList.forEach( function( l ){
 		if( l.code === 108 ){
 			var l_str = l.parameters[0];
 			var args = l_str.split(' ');

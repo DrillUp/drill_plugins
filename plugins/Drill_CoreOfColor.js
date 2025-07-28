@@ -1656,7 +1656,7 @@
 	// * 静态数据 - 普通颜色
 	//				（~struct~CommonColor）
 	//==============================
-	DrillUp.drill_COC_initCommonColor = function( dataFrom ) {
+	DrillUp.drill_COC_initCommonColor = function( dataFrom ){
 		var data = {};
 		data['color'] = String( dataFrom["颜色代码"] || "#ffffff" );
 		return data;
@@ -1669,7 +1669,8 @@
 		var temp_text = "drill__";
 		temp_text += String( dataFrom["渐变方向"] || "" );
 		for( var j = 0; j < 6; j++ ){
-			if( dataFrom[ "渐变节点颜色-"+String(j+1) ] != "" ){
+			if( dataFrom[ "渐变节点颜色-"+String(j+1) ] != undefined &&
+				dataFrom[ "渐变节点颜色-"+String(j+1) ] != "" ){
 				temp_text += "__" + String(dataFrom[ "渐变节点-"+String(j+1) ] );
 				temp_text += "__" + String(dataFrom[ "渐变节点颜色-"+String(j+1) ] );
 			}

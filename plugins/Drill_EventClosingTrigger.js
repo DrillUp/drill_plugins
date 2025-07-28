@@ -799,8 +799,8 @@
 	DrillUp.g_ECT_area_length = 60;
 	DrillUp.g_ECT_area = [];
 	for( var i = 0; i < DrillUp.g_ECT_area_length; i++ ){
-		if( DrillUp.parameters["事件触发-" + String(i+1) ] != "" &&
-			DrillUp.parameters["事件触发-" + String(i+1) ] != undefined ){
+		if( DrillUp.parameters["事件触发-" + String(i+1) ] != undefined &&
+			DrillUp.parameters["事件触发-" + String(i+1) ] != "" ){
 			var data = JSON.parse(DrillUp.parameters["事件触发-" + String(i+1) ]);
 			DrillUp.g_ECT_area[i] = DrillUp.drill_ECT_areaInit( data );
 			DrillUp.g_ECT_area[i]['id'] = i;
@@ -969,42 +969,45 @@ Game_Map.prototype.drill_ECT_isEventExist = function( e_id ){
 
 
 //=============================================================================
-// ** 事件注释
-//=============================================================================	
+// ** ☆事件注释
+//=============================================================================
 //==============================
-// * 事件注释 - 标记
+// * 事件注释 - 第一页标记
 //==============================
-var _drill_ECT_ev_initialize = Game_Event.prototype.initialize;
-Game_Event.prototype.initialize = function( mapId, eventId ){
-	this._drill_ECT_isFirstBirth = true;	//第一次出生
-	_drill_ECT_ev_initialize.call( this,mapId, eventId );
+var _drill_ECT_event_initMembers = Game_Event.prototype.initMembers;
+Game_Event.prototype.initMembers = function() {
+	_drill_ECT_event_initMembers.call(this);
+	this._drill_ECT_isFirstBirth = true;
 };
 //==============================
-// * 事件注释 - 注释初始化
+// * 事件注释 - 读取绑定
 //==============================
 var _drill_ECT_event_setupPage = Game_Event.prototype.setupPage;
 Game_Event.prototype.setupPage = function() {
 	_drill_ECT_event_setupPage.call(this);
-    this.drill_ECT_setupPage();
+    this.drill_ECT_event_readPage();
 };
-Game_Event.prototype.drill_ECT_setupPage = function() {
+//==============================
+// * 事件注释 - 读取 页
+//==============================
+Game_Event.prototype.drill_ECT_event_readPage = function() {
 	
 	// > 第一次出生，强制读取第一页注释（防止离开地图后，回来，开关失效）
 	if( !this._erased && this.event() && this.event().pages[0] && this._drill_ECT_isFirstBirth == true ){ 
-		this._drill_ECT_isFirstBirth = undefined;		//『节约临时参数存储空间』
-		this.drill_ECT_readPage( this.event().pages[0].list );
+		this.drill_ECT_event_readList( this.event().pages[0].list );
+		this._drill_ECT_isFirstBirth = undefined;		//『节约临时参数存储空间』（放后面，注释通过这个识别"跨事件页/不跨事件页"。"跨事件页"的注释必须放在第一页才能生效。）
 	}
 	
 	// > 读取当前页注释
 	if( !this._erased && this.page() ){ 
-		this.drill_ECT_readPage( this.list() );
+		this.drill_ECT_event_readList( this.list() );
 	}
 };
 //==============================
-// * 事件注释 - 读取注释
+// * 事件注释 - 读取 注释
 //==============================
-Game_Event.prototype.drill_ECT_readPage = function( page_list ) {	
-	page_list.forEach( function(l) {	//这里并不需要与另一个插件同步，因为他们仅仅是相同的注释有相同的效果而已
+Game_Event.prototype.drill_ECT_event_readList = function( pageOfList ){
+	pageOfList.forEach( function(l) {	//这里并不需要与另一个插件同步，因为他们仅仅是相同的注释有相同的效果而已
 		if( l.code === 108 ){
 			var args = l.parameters[0].split(' ');
 			var command = args.shift();

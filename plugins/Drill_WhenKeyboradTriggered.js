@@ -508,7 +508,7 @@
 	/*-----------------物理按键绑定------------------*/
 	DrillUp.g_WKT_list_length = 40;
 	DrillUp.g_WKT_list = [];
-	for (var i = 0; i < DrillUp.g_WKT_list_length; i++) {
+	for( var i = 0; i < DrillUp.g_WKT_list_length; i++ ){
 		if( DrillUp.parameters["物理按键绑定-" + String(i+1) ] != undefined &&
 			DrillUp.parameters["物理按键绑定-" + String(i+1) ] != "" ){
 			var data = JSON.parse(DrillUp.parameters["物理按键绑定-" + String(i+1) ]);

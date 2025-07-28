@@ -477,7 +477,7 @@
 	// * 静态数据 - 计时框样式
 	//				（~struct~DrillGTHStyle）
 	//==============================
-	DrillUp.drill_GTH_initParam = function( dataFrom ) {
+	DrillUp.drill_GTH_initParam = function( dataFrom ){
 		var data = {};
 		
 		// > 基本属性

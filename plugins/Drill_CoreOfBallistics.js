@@ -2417,7 +2417,7 @@ Drill_COBa_ExtendTool.drill_COBa_Common_controller_setTarget = function( control
 	
 	// > 刷新目标与弹道
 	var c_data = controller[CDataName];
-	c_data['serial'] = new Date().getTime() + Math.random();
+	c_data['serial'] = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
 	c_data['cur_time'] = 0;
 	c_data['change_type'] = change_type;
 	c_data['tar_value'] = tar_value;
@@ -2517,7 +2517,7 @@ Drill_COBa_ExtendTool.drill_COBa_Planimetry_controller_setTarget = function( con
 	
 	// > 刷新目标与弹道
 	var c_data = controller[CDataName];
-	c_data['serial'] = new Date().getTime() + Math.random();
+	c_data['serial'] = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
 	c_data['cur_time'] = 0;
 	c_data['change_type'] = change_type;
 	c_data['tar_valueA'] = tar_valueA;

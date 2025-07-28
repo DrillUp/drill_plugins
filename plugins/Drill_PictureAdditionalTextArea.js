@@ -747,8 +747,8 @@
 	DrillUp.g_PATA_context_list_length = 80;
 	DrillUp.g_PATA_context_list = [];
 	for( var i = 0; i < DrillUp.g_PATA_context_list_length ; i++ ){
-		if( DrillUp.parameters["文本内容-" + String(i+1) ] != "" &&
-			DrillUp.parameters["文本内容-" + String(i+1) ] != undefined ){
+		if( DrillUp.parameters["文本内容-" + String(i+1) ] != undefined &&
+			DrillUp.parameters["文本内容-" + String(i+1) ] != "" ){
 			var data = JSON.parse(DrillUp.parameters["文本内容-" + String(i+1)] );
 			DrillUp.g_PATA_context_list[i] = data;
 		}else{
@@ -1036,12 +1036,12 @@ Game_Temp.prototype.drill_PATA_getPictureSpriteTank_SenceTopArea = function(){
 //==============================
 Game_Temp.prototype.drill_PATA_getPictureSpriteTank_PicArea = function(){
 	if( SceneManager._scene == undefined ){ return null; }
-	if( SceneManager._scene instanceof Scene_Battle ){		//『图片与多场景』
+	if( SceneManager._scene instanceof Scene_Battle ){		//『图片与多场景-战斗界面』
 		if( SceneManager._scene._spriteset == undefined ){ return null; }
 		if( SceneManager._scene._spriteset._drill_battlePicArea == undefined ){ return null; }
 		return SceneManager._scene._spriteset._drill_battlePicArea.children;
 	}
-	if( SceneManager._scene instanceof Scene_Map ){
+	if( SceneManager._scene instanceof Scene_Map ){			//『图片与多场景-地图界面』
 		if( SceneManager._scene._spriteset == undefined ){ return null; }
 		if( SceneManager._scene._spriteset._drill_mapPicArea == undefined ){ return null; }
 		return SceneManager._scene._spriteset._drill_mapPicArea.children;
@@ -1250,7 +1250,7 @@ Game_Screen.prototype.erasePicture = function( pictureId ){
 var _drill_PATA_sp_initialize = Sprite_Picture.prototype.initialize;
 Sprite_Picture.prototype.initialize = function( pictureId ){
 	
-	// > 参数
+	// > 初始化（要放前面，因为 图片贴图initialize中会执行一次update）
 	this._drill_PATA_sp_lastText = undefined;		//（要放前面，不然会盖掉子类的设置）
 	this._drill_PATA_sp_lastWidth = 0;
 	this._drill_PATA_sp_lastHeight = 0;

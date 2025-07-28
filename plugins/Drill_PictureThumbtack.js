@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        图片 - 图片图钉
+ * @plugindesc [v1.4]        图片 - 图片图钉
  * @author Drill_up
  * 
  * 
@@ -48,10 +48,9 @@
  * 插件指令：>图片图钉 : 批量图片[10,11] : 设置事件图钉 : 事件[1]
  * 插件指令：>图片图钉 : 批量图片变量[21,22] : 设置事件图钉 : 事件[1]
  * 
- * 插件指令：>图片图钉 : 图片[1] : 设置图片图钉 : 图片[2]
- * 插件指令：>图片图钉 : 图片[1] : 设置图片图钉 : 图片变量[21]
  * 插件指令：>图片图钉 : 图片[1] : 设置玩家图钉 : 玩家领队
  * 插件指令：>图片图钉 : 图片[1] : 设置玩家图钉 : 玩家队员[1]
+ * 插件指令：>图片图钉 : 图片[1] : 设置玩家图钉 : 玩家队员变量[21]
  * 插件指令：>图片图钉 : 图片[1] : 设置事件图钉 : 本事件
  * 插件指令：>图片图钉 : 图片[1] : 设置事件图钉 : 事件[1]
  * 插件指令：>图片图钉 : 图片[1] : 设置事件图钉 : 事件变量[21]
@@ -59,16 +58,19 @@
  * 插件指令：>图片图钉 : 图片[1] : 设置战斗敌人图钉 : 战斗敌人变量[21]
  * 插件指令：>图片图钉 : 图片[1] : 设置战斗角色图钉 : 战斗角色[1]
  * 插件指令：>图片图钉 : 图片[1] : 设置战斗角色图钉 : 战斗角色变量[21]
+ * 插件指令：>图片图钉 : 图片[1] : 设置图片图钉 : 图片[2]
+ * 插件指令：>图片图钉 : 图片[1] : 设置图片图钉 : 图片变量[21]
  * 插件指令：>图片图钉 : 图片[1] : 设置鼠标图钉
  * 插件指令：>图片图钉 : 图片[1] : 去除图钉
  * 
  * 1.前半部分（图片[1]）和 后半部分（设置事件图钉 : 事件[1]）
- *   的参数可以随意组合。一共有4*13种组合方式。
+ *   的参数可以随意组合。一共有4*14种组合方式。
  * 2."设置事件图钉"指将图钉钉在地图界面中的事件。
  *   "设置图片图钉"指将图钉钉在另一张图片上。
  *   "设置战斗敌人图钉"指将图钉钉在战斗界面中第N个敌人。
  *   "设置鼠标图钉"指将图钉钉在鼠标上。
- * 3."玩家队员[1]"表示领队后面第一个跟随的队友。
+ * 3."玩家队员[0]"的指令无效。
+ *   "玩家队员[1]"中，-2表示领队，1表示第一个跟随者。
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 图钉偏移坐标
@@ -112,6 +114,8 @@
  * 优化了与战斗活动镜头的变换关系。
  * [v1.3]
  * 添加了 鼠标图钉 的功能。
+ * [v1.4]
+ * 改进了内部结构。
  * 
  */
  
@@ -140,8 +144,8 @@
 //			->☆提示信息
 //			->☆静态数据
 //			->☆插件指令
-//			->☆场景容器之单位贴图
 //			->☆战斗层级
+//			->☆场景容器之单位贴图
 //			
 //			->☆图片的属性
 //				->数据
@@ -171,7 +175,7 @@
 //		
 //		★必要注意事项：
 //			1.只锁定图片xy坐标，不考虑缩放、旋转情况。
-//			2.图钉绑定于指定场景的指定对象身上，该插件不需要考虑新场景的兼容函数，但可以考虑对新场景的功能支持。『图片与多场景』
+//			2.图钉绑定于指定场景的指定对象身上，该插件不需要考虑新场景的兼容函数，但可以考虑对新场景的功能支持。
 //
 //		★其它说明细节：
 //			暂无
@@ -289,39 +293,9 @@ Game_Interpreter.prototype.drill_PTh_pluginCommand = function( command, args ){
 			}
 		}
 		/*-----------------设置图钉------------------*/
-		if( args.length == 4 ){
-			var type = String(args[3]);
-			if( type == "设置鼠标图钉" ){
-				if( pics != null){
-					for( var k=0; k < pics.length; k++ ){
-						pics[k].drill_PTh_bindMouse();
-					}
-				}
-			}
-		}
 		if( args.length == 6 ){
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
-			if( type == "设置图片图钉" ){
-				if( temp1.indexOf("图片变量[") != -1 ){
-					temp1 = temp1.replace("图片变量[","");
-					temp1 = temp1.replace("]","");
-					if( pics != null ){
-						for( var k=0; k < pics.length; k++ ){
-							pics[k].drill_PTh_bindPic( $gameVariables.value(Number(temp1)) );
-						}
-					}
-				}
-				if( temp1.indexOf("图片[") != -1 ){
-					temp1 = temp1.replace("图片[","");
-					temp1 = temp1.replace("]","");
-					if( pics != null ){
-						for( var k=0; k < pics.length; k++ ){
-							pics[k].drill_PTh_bindPic( Number(temp1) );
-						}
-					}
-				}
-			}
 			if( type == "设置事件图钉" ){
 				if( temp1 == "本事件" ){
 					if( pics != null ){
@@ -359,15 +333,25 @@ Game_Interpreter.prototype.drill_PTh_pluginCommand = function( command, args ){
 				if( temp1 == "玩家领队" ){
 					if( pics != null ){
 						for( var k=0; k < pics.length; k++ ){
-							pics[k].drill_PTh_bindFollower( -2 );	//『玩家id』
+							pics[k].drill_PTh_bindFollower( -2 );  //『玩家id』
 						}
 					}
 				}else{
-					temp1 = temp1.replace("玩家队员[","");
-					temp1 = temp1.replace("]","");
-					if( pics != null ){
-						for( var k=0; k < pics.length; k++ ){
-							pics[k].drill_PTh_bindFollower( Number(temp1) );
+					if( temp1.indexOf("战斗敌人变量[") != -1 ){
+						temp1 = temp1.replace("战斗敌人变量[","");
+						temp1 = temp1.replace("]","");
+						if( pics != null ){
+							for( var k=0; k < pics.length; k++ ){
+								pics[k].drill_PTh_bindFollower( $gameVariables.value(Number(temp1)) );  //『玩家队员id』
+							}
+						}
+					}else{
+						temp1 = temp1.replace("玩家队员[","");
+						temp1 = temp1.replace("]","");
+						if( pics != null ){
+							for( var k=0; k < pics.length; k++ ){
+								pics[k].drill_PTh_bindFollower( Number(temp1) );  //『玩家队员id』
+							}
 						}
 					}
 				}
@@ -412,6 +396,36 @@ Game_Interpreter.prototype.drill_PTh_pluginCommand = function( command, args ){
 					}
 				}
 			}
+			if( type == "设置图片图钉" ){
+				if( temp1.indexOf("图片变量[") != -1 ){
+					temp1 = temp1.replace("图片变量[","");
+					temp1 = temp1.replace("]","");
+					if( pics != null ){
+						for( var k=0; k < pics.length; k++ ){
+							pics[k].drill_PTh_bindPic( $gameVariables.value(Number(temp1)) );
+						}
+					}
+				}
+				if( temp1.indexOf("图片[") != -1 ){
+					temp1 = temp1.replace("图片[","");
+					temp1 = temp1.replace("]","");
+					if( pics != null ){
+						for( var k=0; k < pics.length; k++ ){
+							pics[k].drill_PTh_bindPic( Number(temp1) );
+						}
+					}
+				}
+			}
+		}
+		if( args.length == 4 ){
+			var type = String(args[3]);
+			if( type == "设置鼠标图钉" ){
+				if( pics != null){
+					for( var k=0; k < pics.length; k++ ){
+						pics[k].drill_PTh_bindMouse();
+					}
+				}
+			}
 		}
 		
 		/*-----------------图钉偏移坐标------------------*/
@@ -426,7 +440,7 @@ Game_Interpreter.prototype.drill_PTh_pluginCommand = function( command, args ){
 					if( temp_arr.length >= 2 ){
 						if( pics != null ){
 							for( var k=0; k < pics.length; k++ ){
-								pics[k].drill_PTh_setOffsetPos(
+								pics[k].drill_PTh_bindOffsetPos(
 									$gameVariables.value(Number(temp_arr[0])),
 									$gameVariables.value(Number(temp_arr[1]))
 								);
@@ -440,7 +454,7 @@ Game_Interpreter.prototype.drill_PTh_pluginCommand = function( command, args ){
 					if( temp_arr.length >= 2 ){
 						if( pics != null ){
 							for( var k=0; k < pics.length; k++ ){
-								pics[k].drill_PTh_setOffsetPos(
+								pics[k].drill_PTh_bindOffsetPos(
 									Number(temp_arr[0]),
 									Number(temp_arr[1])
 								);
@@ -450,6 +464,7 @@ Game_Interpreter.prototype.drill_PTh_pluginCommand = function( command, args ){
 				}
 			}
 		}
+		
 	}
 		
 };
@@ -497,6 +512,50 @@ if( Imported.Drill_STG__objects ){
 	//==============================
 	Drill_STG_GameInterpreter.prototype.drill_PTh_pluginCommand = Game_Interpreter.prototype.drill_PTh_pluginCommand;
 };
+
+
+//#############################################################################
+// ** 【标准模块】战斗层级 ☆战斗层级
+//#############################################################################
+//##############################
+// * 战斗层级 - 层级与镜头的位移【标准函数】
+//				
+//			参数：	> x 数字              （x位置）
+//					> y 数字              （y位置）
+//					> layer 字符串        （层级，下层/上层/图片层/最顶层）
+//					> option 动态参数对象 （计算时的必要数据）
+//			返回：	> pos 动态参数对象
+//                  > pos['x']
+//                  > pos['y']
+//          
+//			说明：	> 强行规范的接口，必须按照接口的结构来，把要考虑的问题全考虑清楚了再去实现。
+//##############################
+Game_Picture.prototype.drill_PTh_layerCameraMoving = function( x, y, layer, option ){
+	return this.drill_PTh_layerCameraMoving_Private( x, y, layer, option );
+}
+//==============================
+// * 战斗层级 - 层级与镜头的位移（私有）
+//==============================
+Game_Picture.prototype.drill_PTh_layerCameraMoving_Private = function( xx, yy, layer, option ){
+	
+	// > 【战斗 - 活动战斗镜头】
+	//	 （长期在图片层，不需要考虑在下层、上层情况）
+	if( Imported.Drill_BattleCamera ){
+		
+		// > 镜头基点位置 
+		var camera_pos = $gameSystem._drill_BCa_controller.drill_BCa_getCameraPos_Children();
+		xx += camera_pos.x;
+		yy += camera_pos.y;
+		
+		// > 镜头变换位置
+		var camera_pos = $gameSystem._drill_BCa_controller.drill_BCa_getCameraPos_OuterSprite( xx, yy );
+		xx = camera_pos.x;
+		yy = camera_pos.y;
+		
+		return {'x':xx, 'y':yy };
+	}
+	return {'x':xx, 'y':yy };
+}
 
 
 //#############################################################################
@@ -654,50 +713,6 @@ Game_Temp.prototype.drill_PTh_getActorSpriteByActorId_Private = function( actor_
 };
 
 
-//#############################################################################
-// ** 【标准模块】战斗层级 ☆战斗层级
-//#############################################################################
-//##############################
-// * 战斗层级 - 层级与镜头的位移【标准函数】
-//				
-//			参数：	> x 数字              （x位置）
-//					> y 数字              （y位置）
-//					> layer 字符串        （层级，下层/上层/图片层/最顶层）
-//					> option 动态参数对象 （计算时的必要数据）
-//			返回：	> pos 动态参数对象
-//                  > pos['x']
-//                  > pos['y']
-//          
-//			说明：	> 强行规范的接口，必须按照接口的结构来，把要考虑的问题全考虑清楚了再去实现。
-//##############################
-Game_Picture.prototype.drill_PTh_layerCameraMoving = function( x, y, layer, option ){
-	return this.drill_PTh_layerCameraMoving_Private( x, y, layer, option );
-}
-//==============================
-// * 战斗层级 - 层级与镜头的位移（私有）
-//==============================
-Game_Picture.prototype.drill_PTh_layerCameraMoving_Private = function( xx, yy, layer, option ){
-	
-	// > 【战斗 - 活动战斗镜头】
-	//	 （长期在图片层，不需要考虑在下层、上层情况）
-	if( Imported.Drill_BattleCamera ){
-		
-		// > 镜头基点位置 
-		var camera_pos = $gameSystem._drill_BCa_controller.drill_BCa_getCameraPos_Children();
-		xx += camera_pos.x;
-		yy += camera_pos.y;
-		
-		// > 镜头变换位置
-		var camera_pos = $gameSystem._drill_BCa_controller.drill_BCa_getCameraPos_OuterSprite( xx, yy );
-		xx = camera_pos.x;
-		yy = camera_pos.y;
-		
-		return {'x':xx, 'y':yy };
-	}
-	return {'x':xx, 'y':yy };
-}
-
-
 
 //=============================================================================
 // ** ☆图片的属性
@@ -722,15 +737,16 @@ Game_Picture.prototype.drill_PTh_checkData = function(){
 	if( this._drill_PTh_data != undefined ){ return; }
 	this._drill_PTh_data = {};
 	
-	this._drill_PTh_data['offsetX'] = 0;			//偏移位置x
-	this._drill_PTh_data['offsetY'] = 0;			//偏移位置y
+	this._drill_PTh_data['bindPos_type'] = "";			//『实时绑定对象位置』绑定类型（玩家队员/事件/战斗敌人/战斗角色/图片/鼠标）
+	this._drill_PTh_data['bindPos_offsetX'] = 0;		//『实时绑定对象位置』偏移位置X
+	this._drill_PTh_data['bindPos_offsetY'] = 0;		//『实时绑定对象位置』偏移位置Y
 	
-	this._drill_PTh_data['type'] = "图片";		//绑定类型
-	this._drill_PTh_data['pic_id'] = 0;			//绑定的图片
-	this._drill_PTh_data['follower_id'] = 0;	//绑定的玩家队员
-	this._drill_PTh_data['event_id'] = 0;		//绑定的事件
-	this._drill_PTh_data['enemy_Index'] = 0;	//绑定的敌人
-	this._drill_PTh_data['actor_Index'] = 0;	//绑定的角色
+	this._drill_PTh_data['bindPos_followerId'] = 0;		//『实时绑定对象位置』绑定 - 玩家队员（-2玩家/0无效/1第一个队员）
+	this._drill_PTh_data['bindPos_eventId'] = 0;		//『实时绑定对象位置』绑定 - 事件
+	this._drill_PTh_data['bindPos_enemyIndex'] = 0;		//『实时绑定对象位置』绑定 - 战斗敌人
+	this._drill_PTh_data['bindPos_actorIndex'] = 0;		//『实时绑定对象位置』绑定 - 战斗角色
+	this._drill_PTh_data['bindPos_picId'] = 0;			//『实时绑定对象位置』绑定 - 图片
+	//（无）											//『实时绑定对象位置』绑定 - 鼠标
 }
 //==============================
 // * 图片的属性 - 删除数据
@@ -760,59 +776,59 @@ Game_Screen.prototype.erasePicture = function( pictureId ){
 }
 
 //==============================
-// * 图片的属性 - 设置偏移位置
+// * 图片的属性 - 『实时绑定对象位置』 设置偏移位置
 //==============================
-Game_Picture.prototype.drill_PTh_setOffsetPos = function( offsetX, offsetY ){
+Game_Picture.prototype.drill_PTh_bindOffsetPos = function( offsetX, offsetY ){
 	this.drill_PTh_checkData();
-	this._drill_PTh_data['offsetX'] = offsetX;
-	this._drill_PTh_data['offsetY'] = offsetY;
+	this._drill_PTh_data['bindPos_offsetX'] = offsetX;
+	this._drill_PTh_data['bindPos_offsetY'] = offsetY;
 }
 //==============================
-// * 图片的属性 - 绑定 图片
-//==============================
-Game_Picture.prototype.drill_PTh_bindPic = function( pic_id ){
-	this.drill_PTh_checkData();
-	this._drill_PTh_data['type'] = "图片";
-	this._drill_PTh_data['pic_id'] = pic_id;
-}
-//==============================
-// * 图片的属性 - 绑定 玩家队员
+// * 图片的属性 - 『实时绑定对象位置』 绑定 - 玩家队员
 //==============================
 Game_Picture.prototype.drill_PTh_bindFollower = function( follower_id ){
 	this.drill_PTh_checkData();
-	this._drill_PTh_data['type'] = "玩家队员";
-	this._drill_PTh_data['follower_id'] = follower_id;
+	this._drill_PTh_data['bindPos_type'] = "玩家队员";
+	this._drill_PTh_data['bindPos_followerId'] = follower_id;
 }
 //==============================
-// * 图片的属性 - 绑定 事件
+// * 图片的属性 - 『实时绑定对象位置』 绑定 - 事件
 //==============================
 Game_Picture.prototype.drill_PTh_bindEvent = function( event_id ){
 	this.drill_PTh_checkData();
-	this._drill_PTh_data['type'] = "事件";
-	this._drill_PTh_data['event_id'] = event_id;
+	this._drill_PTh_data['bindPos_type'] = "事件";
+	this._drill_PTh_data['bindPos_eventId'] = event_id;
 }
 //==============================
-// * 图片的属性 - 绑定 战斗敌人
+// * 图片的属性 - 『实时绑定对象位置』 绑定 - 战斗敌人
 //==============================
 Game_Picture.prototype.drill_PTh_bindEnemy = function( enemy_Index ){
 	this.drill_PTh_checkData();
-	this._drill_PTh_data['type'] = "战斗敌人";
-	this._drill_PTh_data['enemy_Index'] = enemy_Index;
+	this._drill_PTh_data['bindPos_type'] = "战斗敌人";
+	this._drill_PTh_data['bindPos_enemyIndex'] = enemy_Index;
 }
 //==============================
-// * 图片的属性 - 绑定 战斗角色
+// * 图片的属性 - 『实时绑定对象位置』 绑定 - 战斗角色
 //==============================
 Game_Picture.prototype.drill_PTh_bindActor = function( actor_Index ){
 	this.drill_PTh_checkData();
-	this._drill_PTh_data['type'] = "战斗角色";
-	this._drill_PTh_data['actor_Index'] = actor_Index;
+	this._drill_PTh_data['bindPos_type'] = "战斗角色";
+	this._drill_PTh_data['bindPos_actorIndex'] = actor_Index;
 }
 //==============================
-// * 图片的属性 - 绑定 鼠标
+// * 图片的属性 - 『实时绑定对象位置』 绑定 - 图片
+//==============================
+Game_Picture.prototype.drill_PTh_bindPic = function( pic_id ){
+	this.drill_PTh_checkData();
+	this._drill_PTh_data['bindPos_type'] = "图片";
+	this._drill_PTh_data['bindPos_picId'] = pic_id;
+}
+//==============================
+// * 图片的属性 - 『实时绑定对象位置』 绑定 - 鼠标
 //==============================
 Game_Picture.prototype.drill_PTh_bindMouse = function(){
 	this.drill_PTh_checkData();
-	this._drill_PTh_data['type'] = "鼠标";
+	this._drill_PTh_data['bindPos_type'] = "鼠标";
 }
 
 
@@ -833,7 +849,7 @@ SceneManager.initialize = function() {
 	_drill_PTh_scene_initialize.call(this);
 	
 	//==============================
-	// * 图钉控制 - 帧刷新（这里刷新不是最后执行帧刷新）
+	// * 图钉控制 - 帧刷新（这里不是最后执行帧刷新）
 	//==============================
 	//var _drill_PTh_c_update = Game_Picture.prototype.update;
 	//Game_Picture.prototype.update = function() {
@@ -847,6 +863,7 @@ SceneManager.initialize = function() {
 	//	this.drill_PTh_updateActorPos();		//帧刷新 - 位置 角色
 	//	this.drill_PTh_updateMouse();			//帧刷新 - 位置 鼠标
 	//}
+	
 	//==============================
 	// * 图钉控制 - 帧刷新
 	//==============================
@@ -854,10 +871,10 @@ SceneManager.initialize = function() {
 	Game_Screen.prototype.update = function(){
 		_drill_PTh_c_update2.call(this);
 		
-		// > 图片遍历『图片与多场景』
-		var i_offset = 0;							//地图界面的图片
+		// > 图片遍历
+		var i_offset = 0;							//地图界面的图片『图片与多场景-地图界面』
 		var pic_length = this.maxPictures();
-		if( $gameParty.inBattle() == true ){		//战斗界面的图片
+		if( $gameParty.inBattle() == true ){		//战斗界面的图片『图片与多场景-战斗界面』
 			i_offset = pic_length;
 		}
 		for(var i = 0; i < pic_length; i++ ){
@@ -875,13 +892,121 @@ SceneManager.initialize = function() {
 	}
 }
 //==============================
-// * 图钉控制 - 帧刷新位置 图片
+// * 图钉控制 - 『实时绑定对象位置』帧刷新位置 - 玩家队员
+//==============================
+Game_Picture.prototype.drill_PTh_updateFollowerPos = function() {
+	var data = this._drill_PTh_data;
+	if( data['bindPos_type'] != "玩家队员" ){ return; }
+	
+	// > 无效队员
+	if( data['bindPos_followerId'] == 0 ){ return; }
+	
+	// > 玩家
+	if( data['bindPos_followerId'] == -2 ){	 //『玩家id』
+		var ev = $gamePlayer;
+		if( ev == undefined ){ return; }
+		
+		var xx = ev.screenX();
+		var yy = ev.screenY() - $gameMap.tileHeight();
+		xx += data['bindPos_offsetX'];	//（绑定的偏移位置）
+		yy += data['bindPos_offsetY'];
+		this._x = xx;
+		this._y = yy;
+		
+		return;
+	}
+	
+	// > 玩家队员
+	var ev = $gamePlayer.followers().follower( data['bindPos_followerId']-1 );	 //『玩家队员id』
+	if( ev == undefined ){ return; }
+	
+	var xx = ev.screenX();
+	var yy = ev.screenY() - $gameMap.tileHeight();
+	xx += data['bindPos_offsetX'];	//（绑定的偏移位置）
+	yy += data['bindPos_offsetY'];
+	this._x = xx;
+	this._y = yy;
+}
+//==============================
+// * 图钉控制 - 『实时绑定对象位置』帧刷新位置 - 事件
+//==============================
+Game_Picture.prototype.drill_PTh_updateEventPos = function() {
+	var data = this._drill_PTh_data;
+	if( data['bindPos_type'] != "事件" ){ return; }
+	
+	var ev = $gameMap.event( data['bindPos_eventId'] );
+	if( ev == undefined ){ return; }
+	
+	var xx = ev.screenX();
+	var yy = ev.screenY() - $gameMap.tileHeight();
+	xx += data['bindPos_offsetX'];	//（绑定的偏移位置）
+	yy += data['bindPos_offsetY'];
+	
+	this._x = xx;
+	this._y = yy;
+}
+//==============================
+// * 图钉控制 - 『实时绑定对象位置』帧刷新位置 - 战斗敌人
+//==============================
+Game_Picture.prototype.drill_PTh_updateEnemyPos = function() {
+	var data = this._drill_PTh_data;
+	if( data['bindPos_type'] != "战斗敌人" ){ return; }
+	
+	// > 获取战斗敌群信息
+	var index = data['bindPos_enemyIndex']-1;
+	var enemy_sprite = $gameTemp.drill_PTh_getEnemySpriteByIndex( index );
+	if( enemy_sprite == undefined ){ return; }
+	
+	//var xx = enemy_sprite._homeX + enemy_sprite._offsetX;
+	//var yy = enemy_sprite._homeY + enemy_sprite._offsetY;
+	var xx = enemy_sprite.x;
+	var yy = enemy_sprite.y;
+	xx += data['bindPos_offsetX'];	//（绑定的偏移位置）
+	yy += data['bindPos_offsetY'];
+	
+	// > 层级与镜头的位移
+	var camera_pos = this.drill_PTh_layerCameraMoving( xx, yy, "图片层", {} );
+	xx = camera_pos.x;
+	yy = camera_pos.y;
+	
+	this._x = xx;
+	this._y = yy;
+}
+//==============================
+// * 图钉控制 - 『实时绑定对象位置』帧刷新位置 - 战斗角色
+//==============================
+Game_Picture.prototype.drill_PTh_updateActorPos = function() {
+	var data = this._drill_PTh_data;
+	if( data['bindPos_type'] != "战斗角色" ){ return; }
+	
+	// > 战斗角色贴图
+	var index = data['bindPos_actorIndex']-1;
+	var actor_sprite = $gameTemp.drill_PTh_getActorSpriteByIndex( index );
+	if( actor_sprite == undefined ){ return; }
+	
+	//var xx = actor_sprite._homeX + actor_sprite._offsetX;
+	//var yy = actor_sprite._homeY + actor_sprite._offsetY;
+	var xx = actor_sprite.x;
+	var yy = actor_sprite.y;
+	xx += data['bindPos_offsetX'];	//（绑定的偏移位置）
+	yy += data['bindPos_offsetY'];
+	
+	// > 层级与镜头的位移
+	var camera_pos = this.drill_PTh_layerCameraMoving( xx, yy, "图片层", {} );
+	xx = camera_pos.x;
+	yy = camera_pos.y;
+	
+	this._x = xx;
+	this._y = yy;
+}
+//==============================
+// * 图钉控制 - 『实时绑定对象位置』帧刷新位置 - 图片
 //==============================
 Game_Picture.prototype.drill_PTh_updatePicPos = function() {
 	var data = this._drill_PTh_data;
-	if( data['type'] != "图片" ){ return; }
+	if( data['bindPos_type'] != "图片" ){ return; }
 	
-	var pic = $gameScreen.picture( data['pic_id'] );
+	var pic = $gameScreen.picture( data['bindPos_picId'] );
 	if( pic == undefined ){ return; }
 	
 	// > 【图片 - 图片优化核心】『图片数据最终变换值』
@@ -892,137 +1017,29 @@ Game_Picture.prototype.drill_PTh_updatePicPos = function() {
 		yy = pic.drill_COPi_finalTransform_y();
 	}
 	
-	// > 偏移的位置
-	xx += data['offsetX'];
-	yy += data['offsetY'];
+	// > 绑定的偏移位置
+	xx += data['bindPos_offsetX'];
+	yy += data['bindPos_offsetY'];
 	
 	this._x = xx;
 	this._y = yy;
 }
 //==============================
-// * 图钉控制 - 帧刷新位置 玩家队员
-//==============================
-Game_Picture.prototype.drill_PTh_updateFollowerPos = function() {
-	var data = this._drill_PTh_data;
-	if( data['type'] != "玩家队员" ){ return; }
-	
-	// > 无效队员
-	if( data['follower_id'] == 0 ){ return; }
-	
-	// > 玩家
-	if( data['follower_id'] == -2 ){	//『玩家id』
-		var ev = $gamePlayer;
-		if( ev == undefined ){ return; }
-		
-		var xx = ev.screenX();
-		var yy = ev.screenY() - $gameMap.tileHeight();
-		xx += data['offsetX'];	//（偏移的位置）
-		yy += data['offsetY'];
-		this._x = xx;
-		this._y = yy;
-		
-		return;
-	}
-	
-	// > 玩家队员
-	var ev = $gamePlayer.followers()[ data['follower_id']-1 ];
-	if( ev == undefined ){ return; }
-	
-	var xx = ev.screenX();
-	var yy = ev.screenY() - $gameMap.tileHeight();
-	xx += data['offsetX'];	//（偏移的位置）
-	yy += data['offsetY'];
-	this._x = xx;
-	this._y = yy;
-}
-//==============================
-// * 图钉控制 - 帧刷新位置 事件
-//==============================
-Game_Picture.prototype.drill_PTh_updateEventPos = function() {
-	var data = this._drill_PTh_data;
-	if( data['type'] != "事件" ){ return; }
-	
-	var ev = $gameMap.event( data['event_id'] );
-	if( ev == undefined ){ return; }
-	
-	var xx = ev.screenX();
-	var yy = ev.screenY() - $gameMap.tileHeight();
-	xx += data['offsetX'];	//（偏移的位置）
-	yy += data['offsetY'];
-	
-	this._x = xx;
-	this._y = yy;
-}
-//==============================
-// * 图钉控制 - 帧刷新位置 战斗敌人
-//==============================
-Game_Picture.prototype.drill_PTh_updateEnemyPos = function() {
-	var data = this._drill_PTh_data;
-	if( data['type'] != "战斗敌人" ){ return; }
-	
-	// > 获取战斗敌群信息
-	var index = data['enemy_Index']-1;
-	var enemy_sprite = $gameTemp.drill_PTh_getEnemySpriteByIndex( index );
-	if( enemy_sprite == undefined ){ return; }
-	
-	//var xx = enemy_sprite._homeX + enemy_sprite._offsetX;
-	//var yy = enemy_sprite._homeY + enemy_sprite._offsetY;
-	var xx = enemy_sprite.x;
-	var yy = enemy_sprite.y;
-	xx += data['offsetX'];	//（偏移的位置）
-	yy += data['offsetY'];
-	
-	// > 层级与镜头的位移
-	var camera_pos = this.drill_PTh_layerCameraMoving( xx, yy, "图片层", {} );
-	xx = camera_pos.x;
-	yy = camera_pos.y;
-	
-	this._x = xx;
-	this._y = yy;
-}
-//==============================
-// * 图钉控制 - 帧刷新位置 战斗角色
-//==============================
-Game_Picture.prototype.drill_PTh_updateActorPos = function() {
-	var data = this._drill_PTh_data;
-	if( data['type'] != "战斗角色" ){ return; }
-	
-	// > 战斗角色贴图
-	var index = data['actor_Index']-1;
-	var actor_sprite = $gameTemp.drill_PTh_getActorSpriteByIndex( index );
-	if( actor_sprite == undefined ){ return; }
-	
-	//var xx = actor_sprite._homeX + actor_sprite._offsetX;
-	//var yy = actor_sprite._homeY + actor_sprite._offsetY;
-	var xx = actor_sprite.x;
-	var yy = actor_sprite.y;
-	xx += data['offsetX'];	//（偏移的位置）
-	yy += data['offsetY'];
-	
-	// > 层级与镜头的位移
-	var camera_pos = this.drill_PTh_layerCameraMoving( xx, yy, "图片层", {} );
-	xx = camera_pos.x;
-	yy = camera_pos.y;
-	
-	this._x = xx;
-	this._y = yy;
-}
-//==============================
-// * 图钉控制 - 帧刷新位置 鼠标
+// * 图钉控制 - 『实时绑定对象位置』帧刷新位置 - 鼠标
 //==============================
 Game_Picture.prototype.drill_PTh_updateMouse = function() {
 	var data = this._drill_PTh_data;
-	if( data['type'] != "鼠标" ){ return; }
+	if( data['bindPos_type'] != "鼠标" ){ return; }
 	
 	var xx = _drill_mouse_x;
 	var yy = _drill_mouse_y;
-	xx += data['offsetX'];	//（偏移的位置）
-	yy += data['offsetY'];
+	xx += data['bindPos_offsetX'];	//（绑定的偏移位置）
+	yy += data['bindPos_offsetY'];
 	this._x = xx;
 	this._y = yy;
 }
 //==============================
-// * 图钉控制 - 帧刷新位置 鼠标 - 鼠标通用函数
+// * 图钉控制 - 鼠标通用函数
 //==============================
 if( typeof(_drill_mouse_getCurPos) == "undefined" ){	//防止重复定义（该函数在许多插件都用到了）
 

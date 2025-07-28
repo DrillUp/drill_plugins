@@ -1542,7 +1542,7 @@
 	// * 静态数据 - BOSS固定框样式
 	//				（~struct~GFBStyle）
 	//==============================
-	DrillUp.drill_GFB_initStyle = function( dataFrom ) {
+	DrillUp.drill_GFB_initStyle = function( dataFrom ){
 		var data = {};
 		// > 参数条
 		data['hp_meter_enable'] = String( dataFrom["生命-是否显示参数条"] || "true") === "true";
@@ -1629,7 +1629,7 @@
 	// * 静态数据 - BOSS设置
 	//				（~struct~GFBBind）
 	//==============================
-	DrillUp.drill_GFB_initBind = function( dataFrom ) {
+	DrillUp.drill_GFB_initBind = function( dataFrom ){
 		var data = {};
 		// > 绑定
 		data['enemy_id'] = Number( dataFrom["绑定的敌人"] || 0 );
@@ -1689,7 +1689,8 @@
 	DrillUp.g_GFB_styleList_length = 10;
 	DrillUp.g_GFB_styleList = [];
 	for (var i = 0; i < DrillUp.g_GFB_styleList_length; i++) {
-		if( DrillUp.parameters["固定框样式-" + String(i+1) ] != "" ){
+		if( DrillUp.parameters["固定框样式-" + String(i+1) ] != undefined &&
+			DrillUp.parameters["固定框样式-" + String(i+1) ] != "" ){
 			var data = JSON.parse(DrillUp.parameters["固定框样式-" + String(i+1) ]);
 			DrillUp.g_GFB_styleList[i] = DrillUp.drill_GFB_initStyle( data );
 			DrillUp.g_GFB_styleList[i]['inited'] = true;
@@ -1703,7 +1704,8 @@
 	DrillUp.g_GFB_bind_length = 60;
 	DrillUp.g_GFB_bind = [];
 	for (var i = 0; i < DrillUp.g_GFB_bind_length; i++) {
-		if( DrillUp.parameters["BOSS设置-" + String(i+1) ] != "" ){
+		if( DrillUp.parameters["BOSS设置-" + String(i+1) ] != undefined &&
+			DrillUp.parameters["BOSS设置-" + String(i+1) ] != "" ){
 			var data = JSON.parse(DrillUp.parameters["BOSS设置-" + String(i+1) ]);
 			DrillUp.g_GFB_bind[i] = DrillUp.drill_GFB_initBind( data );
 		}else{

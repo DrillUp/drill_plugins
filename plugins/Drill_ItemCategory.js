@@ -300,14 +300,14 @@
 	DrillUp.parameters = PluginManager.parameters('Drill_ItemCategory');
 	
 	/*-----------------类型序列------------------*/
-	if( DrillUp.parameters["物品界面物品类型"] != "" &&
-		DrillUp.parameters["物品界面物品类型"] != undefined ){
+	if( DrillUp.parameters["物品界面物品类型"] != undefined &&
+		DrillUp.parameters["物品界面物品类型"] != "" ){
 		DrillUp.g_ICa_SenceItemType = JSON.parse(DrillUp.parameters["物品界面物品类型"]);
 	}else{
 		DrillUp.g_ICa_SenceItemType = ["物品","武器","护甲","重要物品"];
 	}
-	if( DrillUp.parameters["商店出售物品类型"] != "" &&
-		DrillUp.parameters["商店出售物品类型"] != undefined ){
+	if( DrillUp.parameters["商店出售物品类型"] != undefined &&
+		DrillUp.parameters["商店出售物品类型"] != "" ){
 		DrillUp.g_ICa_SenceShopType = JSON.parse(DrillUp.parameters["商店出售物品类型"]);
 	}else{
 		DrillUp.g_ICa_SenceShopType = ["物品","武器","护甲","重要物品"];
@@ -317,7 +317,8 @@
 	DrillUp.g_ICa_type_length = 10;
 	DrillUp.g_ICa_type = [];
 	for (var i = 0; i < DrillUp.g_ICa_type_length; i++) {
-		if( DrillUp.parameters["物品类型-" + String(i+1) ] != "" ){
+		if( DrillUp.parameters["物品类型-" + String(i+1) ] != undefined &&
+			DrillUp.parameters["物品类型-" + String(i+1) ] != "" ){
 			DrillUp.g_ICa_type[i] = JSON.parse(DrillUp.parameters["物品类型-" + String(i+1) ]);
 			DrillUp.g_ICa_type[i]['name'] = String(DrillUp.g_ICa_type[i]["物品类型名"] || "");
 			DrillUp.g_ICa_type[i]['src_img'] = String(DrillUp.g_ICa_type[i]["资源-类型按钮"] || "");

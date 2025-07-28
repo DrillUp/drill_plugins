@@ -127,7 +127,7 @@
  * 
  * 1.信息面板具有当前选项的记忆，如果你修改了一些选项，你需要用该指令
  *   设置一下当前选中的选项。
- * 2.不存在第0页，如果选中选项大于页数，将选择最末尾的页。
+ * 2.不存在第0个选项，如果选中选项大于页数，将选择最末尾的选项。
  *
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -188,16 +188,20 @@
  * @dir img/Menu__self/
  * @type file
  *
- * @param 是否添加到主菜单
- * @parent ----杂项----
+ *
+ * @param ----面板跳转----
+ * @default 
+ *
+ * @param 是否在主菜单窗口中显示
+ * @parent ----面板跳转----
  * @type boolean
- * @on 添加
- * @off 不添加
- * @desc true - 添加，false - 不添加
+ * @on 显示
+ * @off 不显示
+ * @desc true-显示,false-不显示。
  * @default false
  *
- * @param 主菜单显示名
- * @parent 是否添加到主菜单
+ * @param 主菜单窗口显示名
+ * @parent 是否在主菜单窗口中显示
  * @desc 主菜单显示的选项名。
  * @default 信息面板L
  * 
@@ -1359,8 +1363,8 @@
 //			->☆存储数据
 //			->☆插件指令
 //			
-//			->☆主菜单选项
-//			x->☆标题选项
+//			->☆面板跳转之主菜单
+//			x->☆面板跳转之标题
 //			->☆面板控制
 //			
 //			->信息面板L【Scene_Drill_SSpL】
@@ -1464,7 +1468,7 @@
 	// * 静态数据 - 指针与边框
 	//				（~struct~DrillCursor）
 	//==============================
-	DrillUp.drill_SSpL_initMenuCursor = function( dataFrom ) {
+	DrillUp.drill_SSpL_initMenuCursor = function( dataFrom ){
 		var data = {};
 		
 		data['mog_enabled'] = String( dataFrom["是否启用mog菜单指针"] || "true") == "true";
@@ -1489,7 +1493,7 @@
 	// * 静态数据 - 选项窗口参数
 	//				（~struct~DrillSelectWindow）
 	//==============================
-	DrillUp.drill_SSpL_initCommandWindow = function( dataFrom ) {
+	DrillUp.drill_SSpL_initCommandWindow = function( dataFrom ){
 		var data = {};
 		data['x'] = Number( dataFrom["选项窗口 X"] || 0);
 		data['y'] = Number( dataFrom["选项窗口 Y"] || 0);
@@ -1500,8 +1504,8 @@
 		data['nameExEnabled'] = String( dataFrom["是否启用选项内容"] || "false") == "true";
 		data['align'] = String( dataFrom["选项窗口对齐方式"] || "左对齐");
 		data['fontsize'] = Number( dataFrom["选项窗口字体大小"] || 22);
-		if( dataFrom["选项窗口移动动画"] != "" &&
-			dataFrom["选项窗口移动动画"] != undefined ){
+		if( dataFrom["选项窗口移动动画"] != undefined &&
+			dataFrom["选项窗口移动动画"] != "" ){
 			var slideAnim = JSON.parse( dataFrom["选项窗口移动动画"] );
 			data['slideMoveType'] = String( slideAnim["移动类型"] || "匀速移动");
 			data['slideTime'] = Number( slideAnim["移动时长"] || 20);
@@ -1512,8 +1516,8 @@
 			data['slideAbsoluteX'] = Number( slideAnim["起点-绝对坐标 X"] || 0);
 			data['slideAbsoluteY'] = Number( slideAnim["起点-绝对坐标 Y"] || 0);
 		}
-		if( dataFrom["选项窗口布局"] != "" &&
-			dataFrom["选项窗口布局"] != undefined ){
+		if( dataFrom["选项窗口布局"] != undefined &&
+			dataFrom["选项窗口布局"] != "" ){
 			var layout = JSON.parse( dataFrom["选项窗口布局"] );
 			data['layoutType'] = String( layout["布局类型"] || "默认皮肤");
 			data['layoutSrc'] = String( layout["资源-贴图"] || "");
@@ -1521,8 +1525,8 @@
 			data['layoutX'] = Number( layout["贴图位置修正 X"] || -100);
 			data['layoutY'] = Number( layout["贴图位置修正 Y"] || 0);
 		}
-		if( dataFrom["选项窗口指针与边框"] != "" &&
-			dataFrom["选项窗口指针与边框"] != undefined ){
+		if( dataFrom["选项窗口指针与边框"] != undefined &&
+			dataFrom["选项窗口指针与边框"] != "" ){
 			var cursor = JSON.parse( dataFrom["选项窗口指针与边框"] );
 			data['cursor'] = DrillUp.drill_SSpL_initMenuCursor( cursor );
 		}else{
@@ -1534,7 +1538,7 @@
 	// * 静态数据 - 选项按钮组
 	//				（~struct~DrillCommandButton）
 	//==============================
-	DrillUp.drill_SSpL_initCommandButton = function( dataFrom ) {
+	DrillUp.drill_SSpL_initCommandButton = function( dataFrom ){
 		var data = {};
 		data['style_id'] = Number( dataFrom["按钮组样式"] || 0);
 		
@@ -1548,8 +1552,8 @@
 		// > 按钮组 - B父窗口（资源）
 		data['btn_src_default'] = String( dataFrom["默认按钮贴图"] || "");
 		data['btn_src_file'] = "img/Menu__self/";
-		if( dataFrom["按钮贴图序列"] != "" &&
-			dataFrom["按钮贴图序列"] != undefined ){
+		if( dataFrom["按钮贴图序列"] != undefined &&
+			dataFrom["按钮贴图序列"] != "" ){
 			data['btn_src'] = JSON.parse( dataFrom["按钮贴图序列"] );
 		}else{
 			data['btn_src'] = [];
@@ -1565,37 +1569,37 @@
 	// * 静态数据 - 内容
 	//				（~struct~DrillSSpL）
 	//==============================
-	DrillUp.drill_SSpL_initContext = function( dataFrom ) {
+	DrillUp.drill_SSpL_initContext = function( dataFrom ){
 		var data = {};
 		
 		// > 选项名处理
-		var temp = String(dataFrom['选项名']);
+		var temp = String(dataFrom["选项名"]);
 		temp = temp.replace(/\\\\/g,"\\");	//（为了支持\\n的写法）
 		data['name'] = temp;
 		
 		// > 选项内容处理
-		if( dataFrom["选项内容"] != "" &&
-			dataFrom["选项内容"] != undefined ){
+		if( dataFrom["选项内容"] != undefined &&
+			dataFrom["选项内容"] != "" ){
 			data['nameEx'] = JSON.parse( dataFrom["选项内容"] );
 		}else{
 			data['nameEx'] = "";
 		}
 		
 		// > 显示情况
-		data['enabled'] = (dataFrom['是否初始显示'] || "false") == "true" ;
+		data['enabled'] = String(dataFrom["是否初始显示"] || "false") == "true" ;
 		
 		// > 锁定情况
-		data['locked'] = (dataFrom['是否初始锁定'] || "false") == "true" ;
+		data['locked'] = String(dataFrom["是否初始锁定"] || "false") == "true" ;
 		
 		// > 已读情况
 		data['watched'] = false;
 		
 		// > 描述图片处理
-		data['pic'] = (dataFrom['资源-描述图片'] || "");
+		data['pic'] = String(dataFrom["资源-描述图片"] || "");
 		
 		// > 描述内容处理
-		if( dataFrom["描述内容"] != "" &&
-			dataFrom["描述内容"] != undefined ){
+		if( dataFrom["描述内容"] != undefined &&
+			dataFrom["描述内容"] != "" ){
 			data['context'] = JSON.parse( dataFrom["描述内容"] );
 		}else{
 			data['context'] = "";
@@ -1606,20 +1610,21 @@
 		data['context_lineheight_lock'] = Number(DrillUp.parameters["锁定行高值"] || 30);
 		
 		// > 选项功能
-		data['script'] = String(dataFrom['执行的脚本'] || "");
-		data['commonEventEnable'] = String(dataFrom['是否执行公共事件'] || "false") == "true";
-		data['commonEventId'] = Number(dataFrom['执行的公共事件'] || 0);
-		data['commonEventVarId'] = Number(dataFrom['执行对应变量的公共事件'] || 0);
-		data['pipeType'] = String(dataFrom['公共事件执行方式'] || "串行");
+		data['script'] = String(dataFrom["执行的脚本"] || "");
+		data['commonEventEnable'] = String(dataFrom["是否执行公共事件"] || "false") == "true";
+		data['commonEventId'] = Number(dataFrom["执行的公共事件"] || 0);
+		data['commonEventVarId'] = Number(dataFrom["执行对应变量的公共事件"] || 0);
+		data['pipeType'] = String(dataFrom["公共事件执行方式"] || "串行");
 		
 		return data;
 	}
 
 	/*-----------------杂项------------------*/
-    DrillUp.g_SSpL_layout = String(DrillUp.parameters['资源-整体布局'] || "");
-	DrillUp.g_SSpL_add_to_menu = String(DrillUp.parameters['是否添加到主菜单'] || "true") === "true";	
-    DrillUp.g_SSpL_menu_name = String(DrillUp.parameters['主菜单显示名'] || "");
-	DrillUp.g_SSpL_title_data_global = false;	
+    DrillUp.g_SSpL_layout = String(DrillUp.parameters["资源-整体布局"] || "");
+	
+	/*-----------------面板跳转------------------*/
+	DrillUp.g_SSpL_add_to_menu = String(DrillUp.parameters["是否在主菜单窗口中显示"] || "true") === "true";	
+    DrillUp.g_SSpL_menu_name = String(DrillUp.parameters["主菜单窗口显示名"] || "");
 	
 	/*-----------------选项------------------*/
 	DrillUp.g_SSpL_command_mode = String(DrillUp.parameters["选项模式"] || "按钮组模式");
@@ -1639,14 +1644,15 @@
 	}
 
 	/*-----------------描述窗口------------------*/
-	DrillUp.g_SSpL_descWin_x = Number(DrillUp.parameters['描述窗口 X'] || 285);
-	DrillUp.g_SSpL_descWin_y = Number(DrillUp.parameters['描述窗口 Y'] || 100);
-	DrillUp.g_SSpL_descWin_width = Number(DrillUp.parameters['描述窗口宽度'] || 510);
-	DrillUp.g_SSpL_descWin_height = Number(DrillUp.parameters['描述窗口高度'] || 360);
-	DrillUp.g_SSpL_descWin_fontsize = Number(DrillUp.parameters['描述窗口字体大小'] || 22);
-	DrillUp.g_SSpL_descWin_replay = String(DrillUp.parameters['是否重播描述窗口移动动画'] || "true") === "true";	
-	if( DrillUp.parameters['描述窗口移动动画'] != undefined ){
-		DrillUp.g_SSpL_descWin_slideAnim = JSON.parse( DrillUp.parameters['描述窗口移动动画'] );
+	DrillUp.g_SSpL_descWin_x = Number(DrillUp.parameters["描述窗口 X"] || 285);
+	DrillUp.g_SSpL_descWin_y = Number(DrillUp.parameters["描述窗口 Y"] || 100);
+	DrillUp.g_SSpL_descWin_width = Number(DrillUp.parameters["描述窗口宽度"] || 510);
+	DrillUp.g_SSpL_descWin_height = Number(DrillUp.parameters["描述窗口高度"] || 360);
+	DrillUp.g_SSpL_descWin_fontsize = Number(DrillUp.parameters["描述窗口字体大小"] || 22);
+	DrillUp.g_SSpL_descWin_replay = String(DrillUp.parameters["是否重播描述窗口移动动画"] || "true") === "true";	
+	if( DrillUp.parameters["描述窗口移动动画"] != undefined &&
+		DrillUp.parameters["描述窗口移动动画"] != "" ){
+		DrillUp.g_SSpL_descWin_slideAnim = JSON.parse( DrillUp.parameters["描述窗口移动动画"] );
 		DrillUp.g_SSpL_descWin_slideAnim['slideMoveType'] = String(DrillUp.g_SSpL_descWin_slideAnim['移动类型'] || "匀速移动");
 		DrillUp.g_SSpL_descWin_slideAnim['slideTime'] = Number(DrillUp.g_SSpL_descWin_slideAnim['移动时长'] || 20);
 		DrillUp.g_SSpL_descWin_slideAnim['slideDelay'] = Number(DrillUp.g_SSpL_descWin_slideAnim['移动延迟'] || 0);
@@ -1658,8 +1664,9 @@
 	}else{
 		DrillUp.g_SSpL_descWin_slideAnim = {};
 	}
-	if( DrillUp.parameters['描述窗口布局'] != undefined ){
-		DrillUp.g_SSpL_descWin_layout = JSON.parse( DrillUp.parameters['描述窗口布局'] );
+	if( DrillUp.parameters["描述窗口布局"] != undefined &&
+		DrillUp.parameters["描述窗口布局"] != "" ){
+		DrillUp.g_SSpL_descWin_layout = JSON.parse( DrillUp.parameters["描述窗口布局"] );
 		DrillUp.g_SSpL_descWin_layout['layoutType'] = String(DrillUp.g_SSpL_descWin_layout['布局类型'] || "默认皮肤");
 		DrillUp.g_SSpL_descWin_layout['layoutSrc'] = String(DrillUp.g_SSpL_descWin_layout['资源-贴图'] || "");
 		DrillUp.g_SSpL_descWin_layout['layoutSrcFile'] = "img/Menu__self/";
@@ -1670,12 +1677,13 @@
 	}
 
 	/*-----------------描述图------------------*/
-	DrillUp.g_SSpL_descPic_x = Number(DrillUp.parameters['描述图 X'] || 285);
-	DrillUp.g_SSpL_descPic_y = Number(DrillUp.parameters['描述图 Y'] || 480);
-	DrillUp.g_SSpL_descPic_replay = String(DrillUp.parameters['是否重播描述图移动动画'] || "true") === "true";	
-	DrillUp.g_SSpL_descPic_showInstant = String(DrillUp.parameters['是否瞬间显示描述图'] || "false") === "true";	
-	if( DrillUp.parameters['描述图移动动画'] != undefined ){
-		DrillUp.g_SSpL_descPic_slideAnim = JSON.parse( DrillUp.parameters['描述图移动动画'] );
+	DrillUp.g_SSpL_descPic_x = Number(DrillUp.parameters["描述图 X"] || 285);
+	DrillUp.g_SSpL_descPic_y = Number(DrillUp.parameters["描述图 Y"] || 480);
+	DrillUp.g_SSpL_descPic_replay = String(DrillUp.parameters["是否重播描述图移动动画"] || "true") === "true";	
+	DrillUp.g_SSpL_descPic_showInstant = String(DrillUp.parameters["是否瞬间显示描述图"] || "false") === "true";	
+	if( DrillUp.parameters["描述图移动动画"] != undefined &&
+		DrillUp.parameters["描述图移动动画"] != "" ){
+		DrillUp.g_SSpL_descPic_slideAnim = JSON.parse( DrillUp.parameters["描述图移动动画"] );
 		DrillUp.g_SSpL_descPic_slideAnim['slideMoveType'] = String(DrillUp.g_SSpL_descPic_slideAnim['移动类型'] || "匀速移动");
 		DrillUp.g_SSpL_descPic_slideAnim['slideTime'] = Number(DrillUp.g_SSpL_descPic_slideAnim['移动时长'] || 20);
 		DrillUp.g_SSpL_descPic_slideAnim['slideDelay'] = Number(DrillUp.g_SSpL_descPic_slideAnim['移动延迟'] || 0);
@@ -1692,8 +1700,8 @@
 	DrillUp.g_SSpL_context_list_length = 80;
 	DrillUp.g_SSpL_context_list = [];
 	for( var i = 0; i < DrillUp.g_SSpL_context_list_length ; i++ ){
-		if( DrillUp.parameters["内容-" + String(i+1) ] != "" &&
-			DrillUp.parameters["内容-" + String(i+1) ] != undefined ){
+		if( DrillUp.parameters["内容-" + String(i+1) ] != undefined &&
+			DrillUp.parameters["内容-" + String(i+1) ] != "" ){
 			var data = JSON.parse(DrillUp.parameters["内容-" + String(i+1)] );
 			DrillUp.g_SSpL_context_list[i] = DrillUp.drill_SSpL_initContext( data );
 			DrillUp.g_SSpL_context_list[i]['index'] = i;
@@ -1726,6 +1734,7 @@
 	}
 	
 	/*-----------------全局存储对象------------------*/
+	DrillUp.g_SSpL_title_data_global = false;
 	//（无）
 	
 	
@@ -1883,34 +1892,14 @@ Game_Interpreter.prototype.pluginCommand = function( command, args ){
 Game_Interpreter.prototype.drill_SSpL_pluginCommand = function( command, args ){
 	if( command === ">信息面板L" ){
 		
-		if(args.length == 2){
+		if( args.length == 2 ){
 			var type = String(args[1]);
-			if( type == "打开面板" ){			//打开菜单
+			if( type == "打开面板" ){
 				SceneManager.push(Scene_Drill_SSpL);
-			}
-			if( type == "显示全部选项" || type == "显示全部" ){
-				for( var i = 0; i < DrillUp.g_SSpL_context_list.length; i++ ){
-					$gameSystem._drill_SSpL_enableTank[i] = true;		//正常存储
-				}
-			}
-			if( type == "隐藏全部选项" || type == "隐藏全部" ){
-				for( var i = 0; i < DrillUp.g_SSpL_context_list.length; i++ ){
-					$gameSystem._drill_SSpL_enableTank[i] = false;		//正常存储
-				}
-			}
-			if( type == "锁定全部选项" || type == "锁定全部" ){
-				for( var i = 0; i < DrillUp.g_SSpL_context_list.length; i++ ){
-					$gameSystem._drill_SSpL_lockTank[i] = true;			//正常存储
-				}
-			}
-			if( type == "解锁全部选项" || type == "解锁全部" ){
-				for( var i = 0; i < DrillUp.g_SSpL_context_list.length; i++ ){
-					$gameSystem._drill_SSpL_lockTank[i] = false;		//正常存储
-				}
 			}
 		}
 		
-		if(args.length == 4){
+		if( args.length == 4 ){
 			var type = String(args[1]);
 			var temp1 = String(args[3]);
 			if( temp1.indexOf("选项变量[") != -1 ){
@@ -1938,13 +1927,36 @@ Game_Interpreter.prototype.drill_SSpL_pluginCommand = function( command, args ){
 				$gameSystem._drill_SSpL_context_index = Number(temp1) -1;
 			}
 		}
+		if( args.length == 2 ){
+			var type = String(args[1]);
+			if( type == "显示全部选项" || type == "显示全部" ){
+				for( var i = 0; i < DrillUp.g_SSpL_context_list.length; i++ ){
+					$gameSystem._drill_SSpL_enableTank[i] = true;		//正常存储
+				}
+			}
+			if( type == "隐藏全部选项" || type == "隐藏全部" ){
+				for( var i = 0; i < DrillUp.g_SSpL_context_list.length; i++ ){
+					$gameSystem._drill_SSpL_enableTank[i] = false;		//正常存储
+				}
+			}
+			if( type == "锁定全部选项" || type == "锁定全部" ){
+				for( var i = 0; i < DrillUp.g_SSpL_context_list.length; i++ ){
+					$gameSystem._drill_SSpL_lockTank[i] = true;			//正常存储
+				}
+			}
+			if( type == "解锁全部选项" || type == "解锁全部" ){
+				for( var i = 0; i < DrillUp.g_SSpL_context_list.length; i++ ){
+					$gameSystem._drill_SSpL_lockTank[i] = false;		//正常存储
+				}
+			}
+		}
 	}
 	
 };
 
 
 //=============================================================================
-// ** ☆主菜单选项
+// ** ☆面板跳转之主菜单
 //
 //			说明：	> 此模块专门关联主菜单选项，选项进入后跳转到 信息面板L 界面。
 //					（插件完整的功能目录去看看：功能结构树）

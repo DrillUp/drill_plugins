@@ -1552,7 +1552,7 @@ function Drill_MCu_Bean(){
 // * 实体类 - 初始化
 //==============================
 Drill_MCu_Bean.prototype.initialize = function(){
-	this._drill_beanSerial = new Date().getTime() + Math.random();		//（生成一个不重复的序列号）
+	this._drill_beanSerial = new Date().getTime() + Math.random();		//『生成一个不重复的序列号』
     this.drill_bean_initData();											//私有数据初始化
 };
 //##############################
@@ -1986,7 +1986,7 @@ DrillUp.g_MCu_checkNaN = true;
 //==============================
 Drill_MCu_Controller.prototype.initialize = function( data ){
 	this._drill_data = {};
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能
 	this.drill_controller_initChange();										//初始化子功能 - B指针目标（特殊）
@@ -2209,7 +2209,7 @@ Drill_MCu_Controller.prototype.drill_controller_resetData_Private = function( da
 	
 	// > 执行重置
 	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能
 }

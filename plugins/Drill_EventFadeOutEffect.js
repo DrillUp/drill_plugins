@@ -431,18 +431,28 @@ Game_Interpreter.prototype.drill_EFOE_pluginCommand = function( command, args ){
 			if( p_chars == null && unit.indexOf("玩家队员变量[") != -1 ){
 				unit = unit.replace("玩家队员变量[","");
 				unit = unit.replace("]","");
-				var group = $gamePlayer.followers().visibleFollowers();
-				group.unshift($gamePlayer);
-				p_chars = [];
-				p_chars.push(group[ $gameVariables.value(Number(unit)) ]);
+				var p_id = $gameVariables.value(Number(unit));
+				if( p_id == -2 ){  //『玩家id』
+					p_chars = [ $gamePlayer ];
+				}
+				if( p_id > 0 ){  //『玩家队员id』
+					var group = $gamePlayer.followers().visibleFollowers();
+					p_chars = [];
+					p_chars.push(group[ p_id-1 ]);
+				}
 			}
 			if( p_chars == null && unit.indexOf("玩家队员[") != -1 ){
 				unit = unit.replace("玩家队员[","");
 				unit = unit.replace("]","");
-				var group = $gamePlayer.followers().visibleFollowers();
-				group.unshift($gamePlayer);
-				p_chars = [];
-				p_chars.push(group[ Number(unit) ]);
+				var p_id = Number(unit);
+				if( p_id == -2 ){  //『玩家id』
+					p_chars = [ $gamePlayer ];
+				}
+				if( p_id > 0 ){  //『玩家队员id』
+					var group = $gamePlayer.followers().visibleFollowers();
+					p_chars = [];
+					p_chars.push(group[ p_id-1 ]);
+				}
 			}
 		}
 		// > 透明度检查

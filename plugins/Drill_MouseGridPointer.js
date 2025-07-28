@@ -426,7 +426,7 @@
 	// * 静态数据 - 网格指向标
 	//				（~struct~DrillMGPSprite）
 	//==============================
-	DrillUp.drill_MGP_initGridData = function( dataFrom ) {
+	DrillUp.drill_MGP_initGridData = function( dataFrom ){
 		var data = {};
 		
 		// > 贴图
@@ -477,10 +477,10 @@
 	}
 	
 	/*-----------------杂项------------------*/
-	DrillUp.g_MGP_visible = String(DrillUp.parameters['是否初始显示'] || 'true') === 'true';
-	if( DrillUp.parameters['当前指向标列表'] != undefined &&
-		DrillUp.parameters['当前指向标列表'] != "" ){
-		DrillUp.g_MGP_styleList = JSON.parse( DrillUp.parameters['当前指向标列表'] || [] );
+	DrillUp.g_MGP_visible = String(DrillUp.parameters["是否初始显示"] || "true") === "true";
+	if( DrillUp.parameters["当前指向标列表"] != undefined &&
+		DrillUp.parameters["当前指向标列表"] != "" ){
+		DrillUp.g_MGP_styleList = JSON.parse( DrillUp.parameters["当前指向标列表"] || [] );
 	}else{
 		DrillUp.g_MGP_styleList = [];
 	}
@@ -489,8 +489,9 @@
 	DrillUp.g_MGP_list_length = 10;
 	DrillUp.g_MGP_list = [];
 	for( var i = 0; i < DrillUp.g_MGP_list_length; i++ ){
-		if( DrillUp.parameters['指向标-' + String(i+1) ] != "" ){
-			var temp = JSON.parse(DrillUp.parameters['指向标-' + String(i+1) ]);
+		if( DrillUp.parameters["指向标-" + String(i+1) ] != undefined &&
+			DrillUp.parameters["指向标-" + String(i+1) ] != "" ){
+			var temp = JSON.parse(DrillUp.parameters["指向标-" + String(i+1) ]);
 			DrillUp.g_MGP_list[i] = DrillUp.drill_MGP_initGridData( temp );
 		}else{
 			DrillUp.g_MGP_list[i] = null;

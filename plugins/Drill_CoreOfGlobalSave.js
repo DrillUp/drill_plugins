@@ -52,6 +52,12 @@
  *      很多没用的存储文件。
  * 
  * -----------------------------------------------------------------------------
+ * ----可选设定 - Debug查看
+ * 你可以通过插件指令打开插件的Debug查看：
+ * 
+ * 插件指令：>全局存储核心 : DEBUG查看全部文件路径
+ * 
+ * -----------------------------------------------------------------------------
  * ----插件性能
  * 测试仪器：   4G 内存，Intel Core i5-2520M CPU 2.5GHz 处理器
  *              Intel(R) HD Graphics 3000 集显 的垃圾笔记本
@@ -199,6 +205,7 @@
 //		★功能结构树：
 //			->☆提示信息
 //			->☆静态数据
+//			->☆插件指令
 //
 //			->☆全局存储
 //				->存储（开放函数）
@@ -268,22 +275,23 @@
 		data['url_path'] = String( dataFrom["文件夹路径"] || "save/");
 		return data;
 	}
-	
-	/*-----------------杂项------------------*/
-	DrillUp.g_COGS_saveTimeDelay = Number(DrillUp.parameters['全局存储轮询时间'] || 10);
-	
 	/*-----------------文件路径------------------*/
 	DrillUp.g_COGS_fileSet_list_length = 8;
 	DrillUp.g_COGS_fileSet_list = [];
 	for( var i = 1; i <= DrillUp.g_COGS_fileSet_list_length; i++ ){
-		if( DrillUp.parameters['文件路径-' + String(i) ] != "" &&
-			DrillUp.parameters['文件路径-' + String(i) ] != undefined ){
-			var data = JSON.parse(DrillUp.parameters['文件路径-' + String(i)] );
+		if( DrillUp.parameters["文件路径-" + String(i) ] != undefined &&
+			DrillUp.parameters["文件路径-" + String(i) ] != "" ){
+			var data = JSON.parse(DrillUp.parameters["文件路径-" + String(i)] );
 			DrillUp.g_COGS_fileSet_list[i] = DrillUp.drill_COGS_initFile( data );
 		}else{
 			DrillUp.g_COGS_fileSet_list[i] = null;
 		}
 	};
+	
+	
+	/*-----------------杂项------------------*/
+	DrillUp.g_COGS_saveTimeDelay = Number(DrillUp.parameters["全局存储轮询时间"] || 10);
+	
 	
 	//==============================
 	// * 静态数据 - 默认值
@@ -291,7 +299,7 @@
 	DrillUp.g_COGS_fileSet_list[0] = DrillUp.drill_COGS_initFile( {} );
 	DrillUp.g_COGS_fileSet_list[0]['name'] = "drill_globalDefault";
 	//==============================
-	// * 静态数据 - 判断数据
+	// * 静态数据 - 判断数据（开放函数）
 	//==============================
 	DrillUp.drill_COGS_hasFileSet = function( file_id ){
 		var file_set = DrillUp.g_COGS_fileSet_list[ file_id ];
@@ -299,7 +307,7 @@
 		return true;
 	};
 	//==============================
-	// * 静态数据 - 获取数据
+	// * 静态数据 - 获取数据（开放函数）
 	//==============================
 	DrillUp.drill_COGS_getFileSet = function( file_id ){
 		var file_set = DrillUp.g_COGS_fileSet_list[ file_id ];
@@ -308,6 +316,64 @@
 	};
 	
 	
+//=============================================================================
+// ** ☆插件指令
+//=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
+var _drill_COGS_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
+	_drill_COGS_pluginCommand.call( this, command, args );
+	this.drill_COGS_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_COGS_pluginCommand = function( command, args ){
+	if( command === ">全局存储核心" ){
+		
+		if( args.length == 2 ){
+			var type = String(args[1]);
+			if( type == "DEBUG查看全部文件路径" ){
+				var debug_text = "【" + DrillUp.g_COGS_PluginTip_curName + "】\n";
+				
+				debug_text += "当前类型：";
+				if( StorageManager.isLocalMode() ){
+					debug_text += "本地文件模式";
+				}else{
+					debug_text += "本地网页模式";
+				}
+				debug_text += "\n";
+				
+				debug_text += "默认路径：";
+				if( StorageManager.isLocalMode() ){
+					debug_text += StorageManager.drill_COGS_path_getPath( DrillUp.g_COGS_fileSet_list[0] );
+				}else{
+					debug_text += StorageManager.drill_COGS_path_getWebName( DrillUp.g_COGS_fileSet_list[0] );
+				}
+				debug_text += "\n";
+				
+				debug_text += "路径列表：\n";
+				for( var i = 1; i <= DrillUp.g_COGS_fileSet_list_length; i++ ){
+					var fileSet = DrillUp.g_COGS_fileSet_list[i];
+					if( fileSet == undefined ){ continue; }
+					
+					debug_text += String(i);
+					debug_text += "：";
+					if( StorageManager.isLocalMode() ){
+						debug_text += StorageManager.drill_COGS_path_getPath( DrillUp.g_COGS_fileSet_list[i] );
+					}else{
+						debug_text += StorageManager.drill_COGS_path_getWebName( DrillUp.g_COGS_fileSet_list[i] );
+					}
+					debug_text += "\n";
+				}
+				alert( debug_text );
+			}
+		}
+	}
+}
+
 	
 //=============================================================================
 // ** ☆全局存储
@@ -413,13 +479,13 @@ StorageManager.drill_COGS_saveFile = function( file_id ){
 	if( file_data == undefined ){ return; }
 	
 	// > 本地文件模式
-    if (this.isLocalMode()) {
-        this.drill_COGS_saveToLocalFile( file_set, JSON.stringify(file_data) );
-    
+	if( this.isLocalMode() ){
+		this.drill_COGS_saveToLocalFile( file_set, JSON.stringify(file_data) );
+	
 	// > 本地网页模式
 	} else {
-        this.drill_COGS_saveToWebStorage( file_set, JSON.stringify(file_data) );
-    }
+		this.drill_COGS_saveToWebStorage( file_set, JSON.stringify(file_data) );
+	}
 };
 //==============================
 // * 存储管理器 - 执行全局读取（开放函数）
@@ -453,12 +519,8 @@ StorageManager.drill_COGS_saveToLocalFile = function( file_set, json_str ){
 	var fs = require('fs');
 	
 	// > 路径解析
-	var fileRoot = "C:/"
-	if( file_set['url_type'] == "当前游戏根目录" ){
-		fileRoot = this.drill_COGS_parentDirectoryPath();
-	}
-	var filePath = fileRoot + file_set['url_path'] + file_set['name'] + "." + file_set['suffix'];
-	var dirPath = fileRoot + file_set['url_path'];
+	var filePath = this.drill_COGS_path_getPath( file_set );
+	var dirPath  = this.drill_COGS_path_getDir( file_set );
 	
 	// > 加密
 	var data = LZString.compressToBase64( json_str );
@@ -480,11 +542,7 @@ StorageManager.drill_COGS_loadFromLocalFile = function( file_set ){
 	var fs = require('fs');
 	
 	// > 路径解析
-	var fileRoot = "C:/"
-	if( file_set['url_type'] == "当前游戏根目录" ){
-		fileRoot = this.drill_COGS_parentDirectoryPath();
-	}
-	var filePath = fileRoot + file_set['url_path'] + file_set['name'] + "." + file_set['suffix'];
+	var filePath = this.drill_COGS_path_getPath( file_set );
 	var data = null;
 	
 	// > 读取
@@ -495,9 +553,31 @@ StorageManager.drill_COGS_loadFromLocalFile = function( file_set ){
 	return LZString.decompressFromBase64(data);	//（返回字符串）
 };
 //==============================
-// * 文件 - 获取根目录
+// * 文件 - 获取 - 文件路径（开放函数）
 //==============================
-StorageManager.drill_COGS_parentDirectoryPath = function() {
+StorageManager.drill_COGS_path_getPath = function( file_set ){
+    var fileRoot = "C:/"
+	if( file_set['url_type'] == "当前游戏根目录" ){
+		fileRoot = this.drill_COGS_path_getParentDirectory();
+	}
+	var filePath = fileRoot + file_set['url_path'] + file_set['name'] + "." + file_set['suffix'];
+    return filePath;
+};
+//==============================
+// * 文件 - 获取 - 文件夹路径（开放函数）
+//==============================
+StorageManager.drill_COGS_path_getDir = function( file_set ){
+    var fileRoot = "C:/"
+	if( file_set['url_type'] == "当前游戏根目录" ){
+		fileRoot = this.drill_COGS_path_getParentDirectory();
+	}
+	var fileDir = fileRoot + file_set['url_path'];
+    return fileDir;
+};
+//==============================
+// * 文件 - 获取 - 游戏根目录（开放函数）
+//==============================
+StorageManager.drill_COGS_path_getParentDirectory = function() {
     var path = require('path');
     var base = path.dirname(process.mainModule.filename);
     return path.join(base, '/');
@@ -507,7 +587,7 @@ StorageManager.drill_COGS_parentDirectoryPath = function() {
 // * 网页 - 存储
 //==============================
 StorageManager.drill_COGS_saveToWebStorage = function( file_set, json_str ){
-    var key = this.webStorageKey( "RPG " + file_set['name'] );
+    var key = this.webStorageKey( this.drill_COGS_path_getWebName(file_set) );
     var data = LZString.compressToBase64( json_str );
     localStorage.setItem(key, data);
 };
@@ -515,10 +595,16 @@ StorageManager.drill_COGS_saveToWebStorage = function( file_set, json_str ){
 // * 网页 - 读取
 //==============================
 StorageManager.drill_COGS_loadFromWebStorage = function( file_set ){
-    var key = this.webStorageKey( "RPG " + file_set['name'] );
+    var key = this.webStorageKey( this.drill_COGS_path_getWebName(file_set) );
     var data = localStorage.getItem(key);
 	if( data == undefined ){ return ""; }
     return LZString.decompressFromBase64(data);
+};
+//==============================
+// * 网页 - 获取 - 存储名（开放函数）
+//==============================
+StorageManager.drill_COGS_path_getWebName = function( file_set ){
+    return "RPG " + file_set['name'];
 };
 
 

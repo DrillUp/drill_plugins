@@ -493,15 +493,16 @@
 	DrillUp.parameters = PluginManager.parameters('Drill_X_GaugeBossFilter');
 	
 	/*-----------------杂项------------------*/
-	DrillUp.g_XGBF_boss_gauge = String(Moghunter.parameters['头像是否与敌人滤镜同步'] || "true") == "true";
-	DrillUp.g_XGBF_deathBlackWhite = String(Moghunter.parameters['BOSS死亡时是否加整体黑白滤镜'] || "true") == "true";
+	DrillUp.g_XGBF_boss_gauge = String(Moghunter.parameters["头像是否与敌人滤镜同步"] || "true") == "true";
+	DrillUp.g_XGBF_deathBlackWhite = String(Moghunter.parameters["BOSS死亡时是否加整体黑白滤镜"] || "true") == "true";
 
 	/*-----------------滤镜条件------------------*/
 	DrillUp.g_XGBF_condition_list_length = 10;
 	DrillUp.g_XGBF_condition_list = [];
 	for (var i = 0; i < DrillUp.g_XGBF_condition_list_length; i++) {
-		if( DrillUp.parameters['滤镜条件-' + String(i+1) ] != "" ){
-			DrillUp.g_XGBF_condition_list[i] = JSON.parse(DrillUp.parameters['滤镜条件-' + String(i+1) ]);
+		if( DrillUp.parameters["滤镜条件-" + String(i+1) ] != undefined &&
+			DrillUp.parameters["滤镜条件-" + String(i+1) ] != "" ){
+			DrillUp.g_XGBF_condition_list[i] = JSON.parse(DrillUp.parameters["滤镜条件-" + String(i+1) ]);
 			
 			DrillUp.g_XGBF_condition_list[i]['hp_enable'] = String(DrillUp.g_XGBF_condition_list[i]["是否添加生命条件"] || "true") == "true";
 			DrillUp.g_XGBF_condition_list[i]['hp_top'] = Number(DrillUp.g_XGBF_condition_list[i]["条件-生命百分比上限"] || 0);

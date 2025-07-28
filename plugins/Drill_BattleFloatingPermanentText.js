@@ -835,7 +835,7 @@
 	// * 静态数据 - 永久漂浮样式
 	//				（~struct~DrillBFPTStyle）
 	//==============================
-	DrillUp.drill_BFPT_initContext = function( dataFrom ) {
+	DrillUp.drill_BFPT_initContext = function( dataFrom ){
 		var data = {};
 		
 		// > 常规

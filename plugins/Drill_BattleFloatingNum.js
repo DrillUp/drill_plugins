@@ -918,7 +918,7 @@
 	// * 静态数据 - 漂浮数字参数
 	//				（~struct~DrillBFNStyle）
 	//==============================
-	DrillUp.drill_BFN_initStyle = function( dataFrom ) {
+	DrillUp.drill_BFN_initStyle = function( dataFrom ){
 		var data = {};
 		
 		// > 层级
@@ -948,7 +948,7 @@
 	// * 静态数据 - 漂浮数字弹道
 	//				（~struct~DrillBFNBallistic）
 	//==============================
-	DrillUp.drill_BFN_initBallistics = function( dataFrom ) {
+	DrillUp.drill_BFN_initBallistics = function( dataFrom ){
 		var data = {};
 		
 		// > 透明度（opacity）

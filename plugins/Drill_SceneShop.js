@@ -1397,7 +1397,7 @@
 	// * 静态数据 - 指针与边框
 	//				（~struct~DrillCursor）
 	//==============================
-	DrillUp.drill_SSh_initMenuCursor = function( dataFrom ) {
+	DrillUp.drill_SSh_initMenuCursor = function( dataFrom ){
 		var data = {};
 		//data['mog_enabled'] = String( dataFrom["是否启用mog菜单指针"] || "true") == "true";
 		//data['mog_borderEnabled'] = String( dataFrom["是否启用mog菜单边框"] || "true") == "true";
@@ -1415,41 +1415,41 @@
 	}
 
 	/*-----------------杂项------------------*/
-    DrillUp.g_SSh_layout = String(DrillUp.parameters['资源-整体布局'] || "");
-	DrillUp.g_SSh_buyingPer = Number(DrillUp.parameters['默认购买倍率'] || 1);
-	DrillUp.g_SSh_sellingPer = Number(DrillUp.parameters['默认出售倍率'] || 0.5);
+    DrillUp.g_SSh_layout = String(DrillUp.parameters["资源-整体布局"] || "");
+	DrillUp.g_SSh_buyingPer = Number(DrillUp.parameters["默认购买倍率"] || 1);
+	DrillUp.g_SSh_sellingPer = Number(DrillUp.parameters["默认出售倍率"] || 0.5);
 	
 	/*-----------------选项按钮组------------------*/
-	DrillUp.g_SSh_btn_start_X = Number(DrillUp.parameters['平移-按钮起点 X'] || 25);
-	DrillUp.g_SSh_btn_start_Y = Number(DrillUp.parameters['平移-按钮起点 Y'] || 130); 
-	DrillUp.g_SSh_btn_active_usable = String(DrillUp.parameters['是否使用激活按钮移动效果'] || "true") === "true";	
-	DrillUp.g_SSh_btn_active_X = Number(DrillUp.parameters['平移-激活的按钮 X'] || 25);
-	DrillUp.g_SSh_btn_active_Y = Number(DrillUp.parameters['平移-激活的按钮 Y'] || 130);   
-    DrillUp.g_SSh_btn_unselect_opacity = Number(DrillUp.parameters['未选中按钮透明度'] || 160);
-	DrillUp.g_SSh_btn_a_zoom = String(DrillUp.parameters['是否使用缩放效果'] || "true") == "true";	
-	DrillUp.g_SSh_btn_a_flicker = String(DrillUp.parameters['是否使用闪烁效果'] || "false") == "true";	
-    DrillUp.g_SSh_btn_a_float_var = Number(DrillUp.parameters['浮动偏移量'] || 15);
-	DrillUp.g_SSh_btn_a_float_lr = String(DrillUp.parameters['是否使用左右浮动'] || "false") == "true";	
-	DrillUp.g_SSh_btn_a_float_ud = String(DrillUp.parameters['是否使用上下浮动'] || "false") == "true";	
-    DrillUp.g_SSh_btn_1 = String(DrillUp.parameters['资源-购买按钮'] || "");
-	DrillUp.g_SSh_btn_1X = Number(DrillUp.parameters['平移-购买按钮 X'] || 370);
-	DrillUp.g_SSh_btn_1Y = Number(DrillUp.parameters['平移-购买按钮 Y'] || 210);  
-    DrillUp.g_SSh_btn_2 = String(DrillUp.parameters['资源-出售按钮'] || "");
-	DrillUp.g_SSh_btn_2X = Number(DrillUp.parameters['平移-出售按钮 X'] || 370);
-	DrillUp.g_SSh_btn_2Y = Number(DrillUp.parameters['平移-出售按钮 Y'] || 295);  
-    DrillUp.g_SSh_btn_3 = String(DrillUp.parameters['资源-离开按钮'] || "");
-	DrillUp.g_SSh_btn_3X = Number(DrillUp.parameters['平移-离开按钮 X'] || 370);
-	DrillUp.g_SSh_btn_3Y = Number(DrillUp.parameters['平移-离开按钮 Y'] || 380);  
+	DrillUp.g_SSh_btn_start_X = Number(DrillUp.parameters["平移-按钮起点 X"] || 25);
+	DrillUp.g_SSh_btn_start_Y = Number(DrillUp.parameters["平移-按钮起点 Y"] || 130); 
+	DrillUp.g_SSh_btn_active_usable = String(DrillUp.parameters["是否使用激活按钮移动效果"] || "true") === "true";	
+	DrillUp.g_SSh_btn_active_X = Number(DrillUp.parameters["平移-激活的按钮 X"] || 25);
+	DrillUp.g_SSh_btn_active_Y = Number(DrillUp.parameters["平移-激活的按钮 Y"] || 130);   
+    DrillUp.g_SSh_btn_unselect_opacity = Number(DrillUp.parameters["未选中按钮透明度"] || 160);
+	DrillUp.g_SSh_btn_a_zoom = String(DrillUp.parameters["是否使用缩放效果"] || "true") == "true";	
+	DrillUp.g_SSh_btn_a_flicker = String(DrillUp.parameters["是否使用闪烁效果"] || "false") == "true";	
+    DrillUp.g_SSh_btn_a_float_var = Number(DrillUp.parameters["浮动偏移量"] || 15);
+	DrillUp.g_SSh_btn_a_float_lr = String(DrillUp.parameters["是否使用左右浮动"] || "false") == "true";	
+	DrillUp.g_SSh_btn_a_float_ud = String(DrillUp.parameters["是否使用上下浮动"] || "false") == "true";	
+    DrillUp.g_SSh_btn_1 = String(DrillUp.parameters["资源-购买按钮"] || "");
+	DrillUp.g_SSh_btn_1X = Number(DrillUp.parameters["平移-购买按钮 X"] || 370);
+	DrillUp.g_SSh_btn_1Y = Number(DrillUp.parameters["平移-购买按钮 Y"] || 210);  
+    DrillUp.g_SSh_btn_2 = String(DrillUp.parameters["资源-出售按钮"] || "");
+	DrillUp.g_SSh_btn_2X = Number(DrillUp.parameters["平移-出售按钮 X"] || 370);
+	DrillUp.g_SSh_btn_2Y = Number(DrillUp.parameters["平移-出售按钮 Y"] || 295);  
+    DrillUp.g_SSh_btn_3 = String(DrillUp.parameters["资源-离开按钮"] || "");
+	DrillUp.g_SSh_btn_3X = Number(DrillUp.parameters["平移-离开按钮 X"] || 370);
+	DrillUp.g_SSh_btn_3Y = Number(DrillUp.parameters["平移-离开按钮 Y"] || 380);  
 	
 	/*-----------------帮助窗口参数------------------*/
-	DrillUp.g_SSh_help_x = Number(DrillUp.parameters['帮助窗口 X'] || 30);
-	DrillUp.g_SSh_help_y = Number(DrillUp.parameters['帮助窗口 Y'] || 120);
-	DrillUp.g_SSh_help_width = Number(DrillUp.parameters['帮助窗口宽度'] || 220);
-	DrillUp.g_SSh_help_height = Number(DrillUp.parameters['帮助窗口高度'] || 460);
-	DrillUp.g_SSh_help_fontsize = Number(DrillUp.parameters['帮助窗口字体大小'] || 22);
-	if( DrillUp.parameters['帮助窗口移动动画'] != "" &&
-		DrillUp.parameters['帮助窗口移动动画'] != undefined ){
-		DrillUp.g_SSh_help_slideAnim = JSON.parse( DrillUp.parameters['帮助窗口移动动画'] );
+	DrillUp.g_SSh_help_x = Number(DrillUp.parameters["帮助窗口 X"] || 30);
+	DrillUp.g_SSh_help_y = Number(DrillUp.parameters["帮助窗口 Y"] || 120);
+	DrillUp.g_SSh_help_width = Number(DrillUp.parameters["帮助窗口宽度"] || 220);
+	DrillUp.g_SSh_help_height = Number(DrillUp.parameters["帮助窗口高度"] || 460);
+	DrillUp.g_SSh_help_fontsize = Number(DrillUp.parameters["帮助窗口字体大小"] || 22);
+	if( DrillUp.parameters["帮助窗口移动动画"] != undefined &&
+		DrillUp.parameters["帮助窗口移动动画"] != "" ){
+		DrillUp.g_SSh_help_slideAnim = JSON.parse( DrillUp.parameters["帮助窗口移动动画"] );
 		DrillUp.g_SSh_help_slideAnim['slideMoveType'] = String(DrillUp.g_SSh_help_slideAnim['移动类型'] || "匀速移动");
 		DrillUp.g_SSh_help_slideAnim['slideTime'] = Number(DrillUp.g_SSh_help_slideAnim['移动时长'] || 20);
 		DrillUp.g_SSh_help_slideAnim['slideDelay'] = Number(DrillUp.g_SSh_help_slideAnim['移动延迟'] || 0);
@@ -1461,9 +1461,9 @@
 	}else{
 		DrillUp.g_SSh_help_slideAnim = {};
 	}
-	if( DrillUp.parameters['帮助窗口布局'] != "" &&
-		DrillUp.parameters['帮助窗口布局'] != undefined ){
-		DrillUp.g_SSh_help_layout = JSON.parse( DrillUp.parameters['帮助窗口布局'] );
+	if( DrillUp.parameters["帮助窗口布局"] != undefined &&
+		DrillUp.parameters["帮助窗口布局"] != "" ){
+		DrillUp.g_SSh_help_layout = JSON.parse( DrillUp.parameters["帮助窗口布局"] );
 		DrillUp.g_SSh_help_layout['layoutType'] = String(DrillUp.g_SSh_help_layout['布局类型'] || "默认皮肤");
 		DrillUp.g_SSh_help_layout['layoutSrc'] = String(DrillUp.g_SSh_help_layout['资源-贴图'] || "");
 		DrillUp.g_SSh_help_layout['layoutSrcFile'] = "img/Menu__shop/";
@@ -1474,14 +1474,14 @@
 	}
 	
 	/*-----------------金钱窗口参数------------------*/
-	DrillUp.g_SSh_gold_x = Number(DrillUp.parameters['金钱窗口 X'] || 30);
-	DrillUp.g_SSh_gold_y = Number(DrillUp.parameters['金钱窗口 Y'] || 120);
-	DrillUp.g_SSh_gold_width = Number(DrillUp.parameters['金钱窗口宽度'] || 220);
-	DrillUp.g_SSh_gold_height = Number(DrillUp.parameters['金钱窗口高度'] || 460);
-	DrillUp.g_SSh_gold_fontsize = Number(DrillUp.parameters['金钱窗口字体大小'] || 22);
-	if( DrillUp.parameters['金钱窗口移动动画'] != "" &&
-		DrillUp.parameters['金钱窗口移动动画'] != undefined ){
-		DrillUp.g_SSh_gold_slideAnim = JSON.parse( DrillUp.parameters['金钱窗口移动动画'] );
+	DrillUp.g_SSh_gold_x = Number(DrillUp.parameters["金钱窗口 X"] || 30);
+	DrillUp.g_SSh_gold_y = Number(DrillUp.parameters["金钱窗口 Y"] || 120);
+	DrillUp.g_SSh_gold_width = Number(DrillUp.parameters["金钱窗口宽度"] || 220);
+	DrillUp.g_SSh_gold_height = Number(DrillUp.parameters["金钱窗口高度"] || 460);
+	DrillUp.g_SSh_gold_fontsize = Number(DrillUp.parameters["金钱窗口字体大小"] || 22);
+	if( DrillUp.parameters["金钱窗口移动动画"] != undefined &&
+		DrillUp.parameters["金钱窗口移动动画"] != "" ){
+		DrillUp.g_SSh_gold_slideAnim = JSON.parse( DrillUp.parameters["金钱窗口移动动画"] );
 		DrillUp.g_SSh_gold_slideAnim['slideMoveType'] = String(DrillUp.g_SSh_gold_slideAnim['移动类型'] || "匀速移动");
 		DrillUp.g_SSh_gold_slideAnim['slideTime'] = Number(DrillUp.g_SSh_gold_slideAnim['移动时长'] || 20);
 		DrillUp.g_SSh_gold_slideAnim['slideDelay'] = Number(DrillUp.g_SSh_gold_slideAnim['移动延迟'] || 0);
@@ -1493,9 +1493,9 @@
 	}else{
 		DrillUp.g_SSh_gold_slideAnim = {};
 	}
-	if( DrillUp.parameters['金钱窗口布局'] != "" &&
-		DrillUp.parameters['金钱窗口布局'] != undefined ){
-		DrillUp.g_SSh_gold_layout = JSON.parse( DrillUp.parameters['金钱窗口布局'] );
+	if( DrillUp.parameters["金钱窗口布局"] != undefined &&
+		DrillUp.parameters["金钱窗口布局"] != "" ){
+		DrillUp.g_SSh_gold_layout = JSON.parse( DrillUp.parameters["金钱窗口布局"] );
 		DrillUp.g_SSh_gold_layout['layoutType'] = String(DrillUp.g_SSh_gold_layout['布局类型'] || "默认皮肤");
 		DrillUp.g_SSh_gold_layout['layoutSrc'] = String(DrillUp.g_SSh_gold_layout['资源-贴图'] || "");
 		DrillUp.g_SSh_gold_layout['layoutSrcFile'] = "img/Menu__shop/";
@@ -1506,15 +1506,15 @@
 	}
 	
 	/*-----------------购买窗口参数------------------*/
-	DrillUp.g_SSh_buy_x = Number(DrillUp.parameters['购买窗口 X'] || 30);
-	DrillUp.g_SSh_buy_y = Number(DrillUp.parameters['购买窗口 Y'] || 120);
-	DrillUp.g_SSh_buy_width = Number(DrillUp.parameters['购买窗口宽度'] || 220);
-	DrillUp.g_SSh_buy_height = Number(DrillUp.parameters['购买窗口高度'] || 460);
-	DrillUp.g_SSh_buy_col = Number(DrillUp.parameters['购买窗口列数'] || 1);
-	DrillUp.g_SSh_buy_fontsize = Number(DrillUp.parameters['购买窗口字体大小'] || 22);
-	if( DrillUp.parameters['购买窗口移动动画'] != "" &&
-		DrillUp.parameters['购买窗口移动动画'] != undefined ){
-		DrillUp.g_SSh_buy_slideAnim = JSON.parse( DrillUp.parameters['购买窗口移动动画'] );
+	DrillUp.g_SSh_buy_x = Number(DrillUp.parameters["购买窗口 X"] || 30);
+	DrillUp.g_SSh_buy_y = Number(DrillUp.parameters["购买窗口 Y"] || 120);
+	DrillUp.g_SSh_buy_width = Number(DrillUp.parameters["购买窗口宽度"] || 220);
+	DrillUp.g_SSh_buy_height = Number(DrillUp.parameters["购买窗口高度"] || 460);
+	DrillUp.g_SSh_buy_col = Number(DrillUp.parameters["购买窗口列数"] || 1);
+	DrillUp.g_SSh_buy_fontsize = Number(DrillUp.parameters["购买窗口字体大小"] || 22);
+	if( DrillUp.parameters["购买窗口移动动画"] != undefined &&
+		DrillUp.parameters["购买窗口移动动画"] != "" ){
+		DrillUp.g_SSh_buy_slideAnim = JSON.parse( DrillUp.parameters["购买窗口移动动画"] );
 		DrillUp.g_SSh_buy_slideAnim['slideMoveType'] = String(DrillUp.g_SSh_buy_slideAnim['移动类型'] || "匀速移动");
 		DrillUp.g_SSh_buy_slideAnim['slideTime'] = Number(DrillUp.g_SSh_buy_slideAnim['移动时长'] || 20);
 		DrillUp.g_SSh_buy_slideAnim['slideDelay'] = Number(DrillUp.g_SSh_buy_slideAnim['移动延迟'] || 0);
@@ -1526,9 +1526,9 @@
 	}else{
 		DrillUp.g_SSh_buy_slideAnim = {};
 	}
-	if( DrillUp.parameters['购买窗口布局'] != "" && 
-		DrillUp.parameters['购买窗口布局'] != undefined ){
-		DrillUp.g_SSh_buy_layout = JSON.parse( DrillUp.parameters['购买窗口布局'] );
+	if( DrillUp.parameters["购买窗口布局"] != undefined && 
+		DrillUp.parameters["购买窗口布局"] != "" ){
+		DrillUp.g_SSh_buy_layout = JSON.parse( DrillUp.parameters["购买窗口布局"] );
 		DrillUp.g_SSh_buy_layout['layoutType'] = String(DrillUp.g_SSh_buy_layout['布局类型'] || "默认皮肤");
 		DrillUp.g_SSh_buy_layout['layoutSrc'] = String(DrillUp.g_SSh_buy_layout['资源-贴图'] || "");
 		DrillUp.g_SSh_buy_layout['layoutSrcFile'] = "img/Menu__shop/";
@@ -1537,23 +1537,23 @@
 	}else{
 		DrillUp.g_SSh_buy_layout = {};
 	}
-	if( DrillUp.parameters['购买窗口指针与边框'] != "" && 
-		DrillUp.parameters['购买窗口指针与边框'] != undefined ){
-		var cursor = JSON.parse( DrillUp.parameters['购买窗口指针与边框'] );
+	if( DrillUp.parameters["购买窗口指针与边框"] != undefined && 
+		DrillUp.parameters["购买窗口指针与边框"] != "" ){
+		var cursor = JSON.parse( DrillUp.parameters["购买窗口指针与边框"] );
 		DrillUp.g_SSh_buy_cursor = DrillUp.drill_SSh_initMenuCursor( cursor );
 	}else{
 		DrillUp.g_SSh_buy_cursor = null;
 	}
 	
 	/*-----------------持有数窗口参数------------------*/
-	DrillUp.g_SSh_status_x = Number(DrillUp.parameters['持有数窗口 X'] || 30);
-	DrillUp.g_SSh_status_y = Number(DrillUp.parameters['持有数窗口 Y'] || 120);
-	DrillUp.g_SSh_status_width = Number(DrillUp.parameters['持有数窗口宽度'] || 220);
-	DrillUp.g_SSh_status_height = Number(DrillUp.parameters['持有数窗口高度'] || 460);
-	DrillUp.g_SSh_status_fontsize = Number(DrillUp.parameters['持有数窗口字体大小'] || 22);
-	if( DrillUp.parameters['持有数窗口移动动画'] != "" &&
-		DrillUp.parameters['持有数窗口移动动画'] != undefined ){
-		DrillUp.g_SSh_status_slideAnim = JSON.parse( DrillUp.parameters['持有数窗口移动动画'] );
+	DrillUp.g_SSh_status_x = Number(DrillUp.parameters["持有数窗口 X"] || 30);
+	DrillUp.g_SSh_status_y = Number(DrillUp.parameters["持有数窗口 Y"] || 120);
+	DrillUp.g_SSh_status_width = Number(DrillUp.parameters["持有数窗口宽度"] || 220);
+	DrillUp.g_SSh_status_height = Number(DrillUp.parameters["持有数窗口高度"] || 460);
+	DrillUp.g_SSh_status_fontsize = Number(DrillUp.parameters["持有数窗口字体大小"] || 22);
+	if( DrillUp.parameters["持有数窗口移动动画"] != undefined &&
+		DrillUp.parameters["持有数窗口移动动画"] != "" ){
+		DrillUp.g_SSh_status_slideAnim = JSON.parse( DrillUp.parameters["持有数窗口移动动画"] );
 		DrillUp.g_SSh_status_slideAnim['slideMoveType'] = String(DrillUp.g_SSh_status_slideAnim['移动类型'] || "匀速移动");
 		DrillUp.g_SSh_status_slideAnim['slideTime'] = Number(DrillUp.g_SSh_status_slideAnim['移动时长'] || 20);
 		DrillUp.g_SSh_status_slideAnim['slideDelay'] = Number(DrillUp.g_SSh_status_slideAnim['移动延迟'] || 0);
@@ -1565,9 +1565,9 @@
 	}else{
 		DrillUp.g_SSh_status_slideAnim = {};
 	}
-	if( DrillUp.parameters['持有数窗口布局'] != "" &&
-		DrillUp.parameters['持有数窗口布局'] != undefined ){
-		DrillUp.g_SSh_status_layout = JSON.parse( DrillUp.parameters['持有数窗口布局'] );
+	if( DrillUp.parameters["持有数窗口布局"] != undefined &&
+		DrillUp.parameters["持有数窗口布局"] != "" ){
+		DrillUp.g_SSh_status_layout = JSON.parse( DrillUp.parameters["持有数窗口布局"] );
 		DrillUp.g_SSh_status_layout['layoutType'] = String(DrillUp.g_SSh_status_layout['布局类型'] || "默认皮肤");
 		DrillUp.g_SSh_status_layout['layoutSrc'] = String(DrillUp.g_SSh_status_layout['资源-贴图'] || "");
 		DrillUp.g_SSh_status_layout['layoutSrcFile'] = "img/Menu__shop/";
@@ -1578,14 +1578,14 @@
 	}
 	
 	/*-----------------物品数量窗口参数------------------*/
-	DrillUp.g_SSh_number_x = Number(DrillUp.parameters['物品数量窗口 X'] || 30);
-	DrillUp.g_SSh_number_y = Number(DrillUp.parameters['物品数量窗口 Y'] || 120);
-	DrillUp.g_SSh_number_width = Number(DrillUp.parameters['物品数量窗口宽度'] || 220);
-	DrillUp.g_SSh_number_height = Number(DrillUp.parameters['物品数量窗口高度'] || 460);
-	DrillUp.g_SSh_number_fontsize = Number(DrillUp.parameters['物品数量窗口字体大小'] || 22);
-	if( DrillUp.parameters['物品数量窗口移动动画'] != "" &&
-		DrillUp.parameters['物品数量窗口移动动画'] != undefined ){
-		DrillUp.g_SSh_number_slideAnim = JSON.parse( DrillUp.parameters['物品数量窗口移动动画'] );
+	DrillUp.g_SSh_number_x = Number(DrillUp.parameters["物品数量窗口 X"] || 30);
+	DrillUp.g_SSh_number_y = Number(DrillUp.parameters["物品数量窗口 Y"] || 120);
+	DrillUp.g_SSh_number_width = Number(DrillUp.parameters["物品数量窗口宽度"] || 220);
+	DrillUp.g_SSh_number_height = Number(DrillUp.parameters["物品数量窗口高度"] || 460);
+	DrillUp.g_SSh_number_fontsize = Number(DrillUp.parameters["物品数量窗口字体大小"] || 22);
+	if( DrillUp.parameters["物品数量窗口移动动画"] != undefined &&
+		DrillUp.parameters["物品数量窗口移动动画"] != "" ){
+		DrillUp.g_SSh_number_slideAnim = JSON.parse( DrillUp.parameters["物品数量窗口移动动画"] );
 		DrillUp.g_SSh_number_slideAnim['slideMoveType'] = String(DrillUp.g_SSh_number_slideAnim['移动类型'] || "匀速移动");
 		DrillUp.g_SSh_number_slideAnim['slideTime'] = Number(DrillUp.g_SSh_number_slideAnim['移动时长'] || 20);
 		DrillUp.g_SSh_number_slideAnim['slideDelay'] = Number(DrillUp.g_SSh_number_slideAnim['移动延迟'] || 0);
@@ -1597,9 +1597,9 @@
 	}else{
 		DrillUp.g_SSh_number_slideAnim = {};
 	}
-	if( DrillUp.parameters['物品数量窗口布局'] != "" &&
-		DrillUp.parameters['物品数量窗口布局'] != undefined ){
-		DrillUp.g_SSh_number_layout = JSON.parse( DrillUp.parameters['物品数量窗口布局'] );
+	if( DrillUp.parameters["物品数量窗口布局"] != undefined &&
+		DrillUp.parameters["物品数量窗口布局"] != "" ){
+		DrillUp.g_SSh_number_layout = JSON.parse( DrillUp.parameters["物品数量窗口布局"] );
 		DrillUp.g_SSh_number_layout['layoutType'] = String(DrillUp.g_SSh_number_layout['布局类型'] || "默认皮肤");
 		DrillUp.g_SSh_number_layout['layoutSrc'] = String(DrillUp.g_SSh_number_layout['资源-贴图'] || "");
 		DrillUp.g_SSh_number_layout['layoutSrcFile'] = "img/Menu__shop/";
@@ -1610,15 +1610,15 @@
 	}
 	
 	/*-----------------出售窗口参数------------------*/
-	DrillUp.g_SSh_sell_x = Number(DrillUp.parameters['出售窗口 X'] || 30);
-	DrillUp.g_SSh_sell_y = Number(DrillUp.parameters['出售窗口 Y'] || 120);
-	DrillUp.g_SSh_sell_width = Number(DrillUp.parameters['出售窗口宽度'] || 220);
-	DrillUp.g_SSh_sell_height = Number(DrillUp.parameters['出售窗口高度'] || 460);
-	DrillUp.g_SSh_sell_col = Number(DrillUp.parameters['出售窗口列数'] || 1);
-	DrillUp.g_SSh_sell_fontsize = Number(DrillUp.parameters['出售窗口字体大小'] || 22);
-	if( DrillUp.parameters['出售窗口移动动画'] != "" &&
-		DrillUp.parameters['出售窗口移动动画'] != undefined ){
-		DrillUp.g_SSh_sell_slideAnim = JSON.parse( DrillUp.parameters['出售窗口移动动画'] );
+	DrillUp.g_SSh_sell_x = Number(DrillUp.parameters["出售窗口 X"] || 30);
+	DrillUp.g_SSh_sell_y = Number(DrillUp.parameters["出售窗口 Y"] || 120);
+	DrillUp.g_SSh_sell_width = Number(DrillUp.parameters["出售窗口宽度"] || 220);
+	DrillUp.g_SSh_sell_height = Number(DrillUp.parameters["出售窗口高度"] || 460);
+	DrillUp.g_SSh_sell_col = Number(DrillUp.parameters["出售窗口列数"] || 1);
+	DrillUp.g_SSh_sell_fontsize = Number(DrillUp.parameters["出售窗口字体大小"] || 22);
+	if( DrillUp.parameters["出售窗口移动动画"] != undefined &&
+		DrillUp.parameters["出售窗口移动动画"] != "" ){
+		DrillUp.g_SSh_sell_slideAnim = JSON.parse( DrillUp.parameters["出售窗口移动动画"] );
 		DrillUp.g_SSh_sell_slideAnim['slideMoveType'] = String(DrillUp.g_SSh_sell_slideAnim['移动类型'] || "匀速移动");
 		DrillUp.g_SSh_sell_slideAnim['slideTime'] = Number(DrillUp.g_SSh_sell_slideAnim['移动时长'] || 20);
 		DrillUp.g_SSh_sell_slideAnim['slideDelay'] = Number(DrillUp.g_SSh_sell_slideAnim['移动延迟'] || 0);
@@ -1630,9 +1630,9 @@
 	}else{
 		DrillUp.g_SSh_sell_slideAnim = {};
 	}
-	if( DrillUp.parameters['出售窗口布局'] != "" &&
-		DrillUp.parameters['出售窗口布局'] != undefined ){
-		DrillUp.g_SSh_sell_layout = JSON.parse( DrillUp.parameters['出售窗口布局'] );
+	if( DrillUp.parameters["出售窗口布局"] != undefined &&
+		DrillUp.parameters["出售窗口布局"] != "" ){
+		DrillUp.g_SSh_sell_layout = JSON.parse( DrillUp.parameters["出售窗口布局"] );
 		DrillUp.g_SSh_sell_layout['layoutType'] = String(DrillUp.g_SSh_sell_layout['布局类型'] || "默认皮肤");
 		DrillUp.g_SSh_sell_layout['layoutSrc'] = String(DrillUp.g_SSh_sell_layout['资源-贴图'] || "");
 		DrillUp.g_SSh_sell_layout['layoutSrcFile'] = "img/Menu__shop/";
@@ -1641,25 +1641,25 @@
 	}else{
 		DrillUp.g_SSh_sell_layout = {};
 	}
-	if( DrillUp.parameters['出售窗口指针与边框'] != "" && 
-		DrillUp.parameters['出售窗口指针与边框'] != undefined ){
-		var cursor = JSON.parse( DrillUp.parameters['出售窗口指针与边框'] );
+	if( DrillUp.parameters["出售窗口指针与边框"] != undefined && 
+		DrillUp.parameters["出售窗口指针与边框"] != "" ){
+		var cursor = JSON.parse( DrillUp.parameters["出售窗口指针与边框"] );
 		DrillUp.g_SSh_sell_cursor = DrillUp.drill_SSh_initMenuCursor( cursor );
 	}else{
 		DrillUp.g_SSh_sell_cursor = null;
 	}
 	
 	/*-----------------出售类型窗口参数------------------*/
-	DrillUp.g_SSh_sellCategory_x = Number(DrillUp.parameters['出售类型窗口 X'] || 30);
-	DrillUp.g_SSh_sellCategory_y = Number(DrillUp.parameters['出售类型窗口 Y'] || 120);
-	DrillUp.g_SSh_sellCategory_width = Number(DrillUp.parameters['出售类型窗口宽度'] || 220);
-	DrillUp.g_SSh_sellCategory_height = Number(DrillUp.parameters['出售类型窗口高度'] || 460);
-	DrillUp.g_SSh_sellCategory_col = Number(DrillUp.parameters['出售类型窗口列数'] || 1);
-    DrillUp.g_SSh_sellCategory_align  = String(DrillUp.parameters['出售类型对齐方式'] || "left");
-	DrillUp.g_SSh_sellCategory_fontsize = Number(DrillUp.parameters['出售类型窗口字体大小'] || 22);
-	if( DrillUp.parameters['出售类型窗口移动动画'] != "" &&
-		DrillUp.parameters['出售类型窗口移动动画'] != undefined ){
-		DrillUp.g_SSh_sellCategory_slideAnim = JSON.parse( DrillUp.parameters['出售类型窗口移动动画'] );
+	DrillUp.g_SSh_sellCategory_x = Number(DrillUp.parameters["出售类型窗口 X"] || 30);
+	DrillUp.g_SSh_sellCategory_y = Number(DrillUp.parameters["出售类型窗口 Y"] || 120);
+	DrillUp.g_SSh_sellCategory_width = Number(DrillUp.parameters["出售类型窗口宽度"] || 220);
+	DrillUp.g_SSh_sellCategory_height = Number(DrillUp.parameters["出售类型窗口高度"] || 460);
+	DrillUp.g_SSh_sellCategory_col = Number(DrillUp.parameters["出售类型窗口列数"] || 1);
+    DrillUp.g_SSh_sellCategory_align  = String(DrillUp.parameters["出售类型对齐方式"] || "left");
+	DrillUp.g_SSh_sellCategory_fontsize = Number(DrillUp.parameters["出售类型窗口字体大小"] || 22);
+	if( DrillUp.parameters["出售类型窗口移动动画"] != undefined &&
+		DrillUp.parameters["出售类型窗口移动动画"] != "" ){
+		DrillUp.g_SSh_sellCategory_slideAnim = JSON.parse( DrillUp.parameters["出售类型窗口移动动画"] );
 		DrillUp.g_SSh_sellCategory_slideAnim['slideMoveType'] = String(DrillUp.g_SSh_sellCategory_slideAnim['移动类型'] || "匀速移动");
 		DrillUp.g_SSh_sellCategory_slideAnim['slideTime'] = Number(DrillUp.g_SSh_sellCategory_slideAnim['移动时长'] || 20);
 		DrillUp.g_SSh_sellCategory_slideAnim['slideDelay'] = Number(DrillUp.g_SSh_sellCategory_slideAnim['移动延迟'] || 0);
@@ -1671,9 +1671,9 @@
 	}else{
 		DrillUp.g_SSh_sellCategory_slideAnim = {};
 	}
-	if( DrillUp.parameters['出售类型窗口布局'] != "" &&
-		DrillUp.parameters['出售类型窗口布局'] != undefined ){
-		DrillUp.g_SSh_sellCategory_layout = JSON.parse( DrillUp.parameters['出售类型窗口布局'] );
+	if( DrillUp.parameters["出售类型窗口布局"] != undefined &&
+		DrillUp.parameters["出售类型窗口布局"] != "" ){
+		DrillUp.g_SSh_sellCategory_layout = JSON.parse( DrillUp.parameters["出售类型窗口布局"] );
 		DrillUp.g_SSh_sellCategory_layout['layoutType'] = String(DrillUp.g_SSh_sellCategory_layout['布局类型'] || "默认皮肤");
 		DrillUp.g_SSh_sellCategory_layout['layoutSrc'] = String(DrillUp.g_SSh_sellCategory_layout['资源-贴图'] || "");
 		DrillUp.g_SSh_sellCategory_layout['layoutSrcFile'] = "img/Menu__shop/";
@@ -1682,9 +1682,9 @@
 	}else{
 		DrillUp.g_SSh_sellCategory_layout = {};
 	}
-	if( DrillUp.parameters['出售类型窗口指针与边框'] != "" && 
-		DrillUp.parameters['出售类型窗口指针与边框'] != undefined ){
-		var cursor = JSON.parse( DrillUp.parameters['出售类型窗口指针与边框'] );
+	if( DrillUp.parameters["出售类型窗口指针与边框"] != undefined && 
+		DrillUp.parameters["出售类型窗口指针与边框"] != "" ){
+		var cursor = JSON.parse( DrillUp.parameters["出售类型窗口指针与边框"] );
 		DrillUp.g_SSh_sellCategory_cursor = DrillUp.drill_SSh_initMenuCursor( cursor );
 	}else{
 		DrillUp.g_SSh_sellCategory_cursor = null;
@@ -1695,30 +1695,30 @@
 	// * 静态数据 - 服务员行为
 	//				（~struct~DrillSShWaitressAct）
 	//==============================
-	DrillUp.drill_SSh_convertWaitressAct = function( dataFrom ) {		//服务员行为数据转换
+	DrillUp.drill_SSh_convertWaitressAct = function( dataFrom ){		//服务员行为数据转换
 		var data = {};
-		data['enable'] = String(dataFrom['是否启用该行为'] || "false") == "true" ;
-		data['sustain'] = Number(dataFrom['动作持续时间'] || 60);
-		data['delay'] = Number(dataFrom['动作延迟'] || 0);
-		data['se'] = String(dataFrom['资源-动作声音'] || "");
-		data['gif_src'] = JSON.parse( dataFrom['资源-动作GIF'] || []);
+		data['enable'] = String(dataFrom["是否启用该行为"] || "false") == "true" ;
+		data['sustain'] = Number(dataFrom["动作持续时间"] || 60);
+		data['delay'] = Number(dataFrom["动作延迟"] || 0);
+		data['se'] = String(dataFrom["资源-动作声音"] || "");
+		data['gif_src'] = JSON.parse( dataFrom["资源-动作GIF"] || []);
 		data['gif_src_file'] = "img/Menu__shop/";
-		data['gif_interval'] = Number(dataFrom['帧间隔'] || 4);
-		data['gif_back_run'] = String(dataFrom['是否倒放'] || "false") == "true" ;
-		data['gif_replay'] = String(dataFrom['GIF到末尾是否重播'] || "true") == "true" ;
+		data['gif_interval'] = Number(dataFrom["帧间隔"] || 4);
+		data['gif_back_run'] = String(dataFrom["是否倒放"] || "false") == "true" ;
+		data['gif_replay'] = String(dataFrom["GIF到末尾是否重播"] || "true") == "true" ;
 		return data;
 	}
 	//==============================
 	// * 静态数据 - 服务员
 	//				（~struct~DrillSShWaitress）
 	//==============================
-	DrillUp.drill_SSh_convertWaitress = function( dataFrom ) {
+	DrillUp.drill_SSh_convertWaitress = function( dataFrom ){
 		var waitress = {}
-		waitress['x'] = Number(dataFrom['服务员 X'] || 580);
-		waitress['y'] = Number(dataFrom['服务员 Y'] || 200);
-		if( dataFrom['服务员移动动画'] != "" && 
-			dataFrom['服务员移动动画'] != undefined ){
-			var waitress_slide = JSON.parse( dataFrom['服务员移动动画'] );
+		waitress['x'] = Number(dataFrom["服务员 X"] || 580);
+		waitress['y'] = Number(dataFrom["服务员 Y"] || 200);
+		if( dataFrom["服务员移动动画"] != undefined && 
+			dataFrom["服务员移动动画"] != "" ){
+			var waitress_slide = JSON.parse( dataFrom["服务员移动动画"] );
 			waitress['slideMoveType'] = String(waitress_slide['移动类型'] || "匀速移动");
 			waitress['slideTime'] = Number(waitress_slide['移动时长'] || 20);
 			waitress['slideDelay'] = Number(waitress_slide['移动延迟'] || 0);
@@ -1728,9 +1728,9 @@
 			waitress['slideAbsoluteX'] = Number(waitress_slide['起点-绝对坐标 X'] || 0);
 			waitress['slideAbsoluteY'] = Number(waitress_slide['起点-绝对坐标 Y'] || 0);
 		}
-		if( dataFrom['行为-默认'] != "" && 
-			dataFrom['行为-默认'] != undefined ){
-			var act_default = JSON.parse( dataFrom['行为-默认'] || {} );
+		if( dataFrom["行为-默认"] != undefined && 
+			dataFrom["行为-默认"] != "" ){
+			var act_default = JSON.parse( dataFrom["行为-默认"] || {} );
 			act_default['gif_src'] = JSON.parse( act_default['资源-动作GIF'] || []);
 			act_default['gif_src_file'] = "img/Menu__shop/";
 			act_default['gif_interval'] = Number(act_default['帧间隔'] || 4);
@@ -1739,37 +1739,37 @@
 		}else{
 			waitress['act-default'] = {};
 		}
-		if( dataFrom['行为-欢迎光临'] != "" && 
-			dataFrom['行为-欢迎光临'] != undefined ){
-			var act = JSON.parse( dataFrom['行为-欢迎光临'] || {} );
+		if( dataFrom["行为-欢迎光临"] != undefined && 
+			dataFrom["行为-欢迎光临"] != "" ){
+			var act = JSON.parse( dataFrom["行为-欢迎光临"] || {} );
 			waitress['act-welcome'] = DrillUp.drill_SSh_convertWaitressAct( act );
 		}else{
 			waitress['act-welcome'] = {};
 		}
-		if( dataFrom['行为-购买一个物品'] != "" && 
-			dataFrom['行为-购买一个物品'] != undefined ){
-			var act = JSON.parse( dataFrom['行为-购买一个物品'] || {} );
+		if( dataFrom["行为-购买一个物品"] != undefined && 
+			dataFrom["行为-购买一个物品"] != "" ){
+			var act = JSON.parse( dataFrom["行为-购买一个物品"] || {} );
 			waitress['act-buyOne'] = DrillUp.drill_SSh_convertWaitressAct( act );
 		}else{
 			waitress['act-buyOne'] = {};
 		}
-		if( dataFrom['行为-出售一个物品'] != "" && 
-			dataFrom['行为-出售一个物品'] != undefined ){
-			var act = JSON.parse( dataFrom['行为-出售一个物品'] || {} );
+		if( dataFrom["行为-出售一个物品"] != undefined && 
+			dataFrom["行为-出售一个物品"] != "" ){
+			var act = JSON.parse( dataFrom["行为-出售一个物品"] || {} );
 			waitress['act-sellOne'] = DrillUp.drill_SSh_convertWaitressAct( act );
 		}else{
 			waitress['act-sellOne'] = {};
 		}
-		if( dataFrom['行为-余额不足'] != "" && 
-			dataFrom['行为-余额不足'] != undefined ){
-			var act = JSON.parse( dataFrom['行为-余额不足'] || {} );
+		if( dataFrom["行为-余额不足"] != undefined && 
+			dataFrom["行为-余额不足"] != "" ){
+			var act = JSON.parse( dataFrom["行为-余额不足"] || {} );
 			waitress['act-goldNotEnough'] = DrillUp.drill_SSh_convertWaitressAct( act );
 		}else{
 			waitress['act-goldNotEnough'] = {};
 		}
-		if( dataFrom['行为-余额不足(交换物)'] != "" && 
-			dataFrom['行为-余额不足(交换物)'] != undefined ){
-			var act = JSON.parse( dataFrom['行为-余额不足(交换物)'] || {} );
+		if( dataFrom["行为-余额不足(交换物)"] != undefined && 
+			dataFrom["行为-余额不足(交换物)"] != "" ){
+			var act = JSON.parse( dataFrom["行为-余额不足(交换物)"] || {} );
 			waitress['act-itemNotEnough'] = DrillUp.drill_SSh_convertWaitressAct( act );
 		}else{
 			waitress['act-itemNotEnough'] = {};
@@ -1780,10 +1780,10 @@
 	/*-----------------服务员参数------------------*/
 	DrillUp.g_SSh_waitress_list_length = 30;
 	DrillUp.g_SSh_waitress_list = [];
-	for (var i = 0; i < DrillUp.g_SSh_waitress_list_length ; i++ ) {
-		if( DrillUp.parameters['服务员-' + String(i+1) ] != "" &&
-			DrillUp.parameters['服务员-' + String(i+1) ] != undefined ){
-			var waitress_params = JSON.parse(DrillUp.parameters['服务员-' + String(i+1)] );
+	for( var i = 0; i < DrillUp.g_SSh_waitress_list_length ; i++ ){
+		if( DrillUp.parameters["服务员-" + String(i+1) ] != undefined &&
+			DrillUp.parameters["服务员-" + String(i+1) ] != "" ){
+			var waitress_params = JSON.parse(DrillUp.parameters["服务员-" + String(i+1)] );
 			DrillUp.g_SSh_waitress_list[i] = DrillUp.drill_SSh_convertWaitress( waitress_params );
 		}else{
 			DrillUp.g_SSh_waitress_list[i] = DrillUp.drill_SSh_convertWaitress( {} );

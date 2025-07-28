@@ -376,20 +376,20 @@
 	/*-----------------杂项------------------*/
     DrillUp.g_EIG_goldRandomDir = String(DrillUp.parameters["金币的朝向是否随机"] || "true") === "true";
     DrillUp.g_EIG_itemRandomDir = String(DrillUp.parameters["可拾取物的朝向是否随机"] || "true") === "true";
-	if( DrillUp.parameters["资源-金币行走图"] != "" &&
-		DrillUp.parameters["资源-金币行走图"] != undefined ){
+	if( DrillUp.parameters["资源-金币行走图"] != undefined &&
+		DrillUp.parameters["资源-金币行走图"] != "" ){
 		DrillUp.g_EIG_goldPic = JSON.parse(DrillUp.parameters["资源-金币行走图"]);
 	}else{
 		DrillUp.g_EIG_goldPic = [];
 	}
-	if( DrillUp.parameters["资源-可拾取物行走图"] != "" &&
-		DrillUp.parameters["资源-可拾取物行走图"] != undefined ){
+	if( DrillUp.parameters["资源-可拾取物行走图"] != undefined &&
+		DrillUp.parameters["资源-可拾取物行走图"] != "" ){
 		DrillUp.g_EIG_itemPic = JSON.parse(DrillUp.parameters["资源-可拾取物行走图"]);
 	}else{
 		DrillUp.g_EIG_itemPic = [];
 	}
-	if( DrillUp.parameters["资源-拾取音效"] != "" &&
-		DrillUp.parameters["资源-拾取音效"] != undefined ){
+	if( DrillUp.parameters["资源-拾取音效"] != undefined &&
+		DrillUp.parameters["资源-拾取音效"] != "" ){
 		DrillUp.g_EIG_se = JSON.parse(DrillUp.parameters["资源-拾取音效"]);
 	}else{
 		DrillUp.g_EIG_se = [""];

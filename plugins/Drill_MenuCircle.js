@@ -833,7 +833,7 @@
 	// * 静态数据 - 魔法圈
 	//				（~struct~MenuCircle）
 	//==============================
-	DrillUp.drill_MCi_circleInit = function( dataFrom ) {
+	DrillUp.drill_MCi_circleInit = function( dataFrom ){
 		var data = {};
 		
 		// > 绑定

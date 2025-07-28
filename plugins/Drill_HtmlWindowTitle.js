@@ -145,7 +145,7 @@
  * @param 全局存储的文件路径
  * @type number
  * @min 1
- * @desc 指对应的文件路径ID，该插件的数据将存储到指定的文件路径中，具体去 全局存储核心 看看。
+ * @desc 指对应的文件路径ID,该插件的数据将存储到指定文件路径,具体看看"21.管理器 > 关于全局存储.docx"。
  * @default 1
  */
  
@@ -247,7 +247,7 @@
 	}else{
 		DrillUp.g_HWT_loop_context = [];
 	}
-    DrillUp.g_HWT_saveFileId = Number(DrillUp.parameters['全局存储的文件路径'] || 1);
+    DrillUp.g_HWT_saveFileId = Number(DrillUp.parameters["全局存储的文件路径"] || 1);
 	
 	
 //=============================================================================
@@ -330,13 +330,13 @@ Game_Interpreter.prototype.drill_HWT_pluginCommand = function( command, args ){
 	
 	
 //=============================================================================
-// ** 全局存储
+// ** ☆全局存储
 //=============================================================================
 //==============================
-// * 全局 - 读取
+// * 『全局存储』 - 载入
 //==============================
 	var global_fileId = DrillUp.g_HWT_saveFileId;
-	var global_data = StorageManager.drill_COGS_loadData( global_fileId, "HWT" );
+	var global_data = StorageManager.drill_COGS_loadData( global_fileId, "HWT" );  //『全局存储执行函数』
 	
 	// > 原名称
 	if( DrillUp.global_HWT_orgName == null ){			//（游戏没关时，不会为null)
@@ -358,7 +358,7 @@ Game_Interpreter.prototype.drill_HWT_pluginCommand = function( command, args ){
 	}
 	
 //==============================
-// * 全局 - 存储
+// * 『全局存储』 - 存储
 //==============================
 StorageManager.drill_HWT_saveData = function(){
 	var file_id = DrillUp.g_HWT_saveFileId;
@@ -366,9 +366,14 @@ StorageManager.drill_HWT_saveData = function(){
 	data["global_orgName"] = DrillUp.global_HWT_orgName;
 	data["global_curName"] = DrillUp.global_HWT_curName;
 	data["global_curIndex"] = DrillUp.global_HWT_curIndex;
-	this.drill_COGS_saveData( file_id, "HWT", data );
+	this.drill_COGS_saveData( file_id, "HWT", data );  //『全局存储执行函数』
 };
 
+
+
+//==============================
+// * 标题初始化
+//==============================
 // > 强制赋值
 if( DrillUp.g_HWT_homingOrgName == true ){
 	document.title = DrillUp.global_HWT_orgName;

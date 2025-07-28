@@ -1897,7 +1897,7 @@
 	// * 静态数据 - 光源
 	//				（~struct~LIlLight）
 	//==============================
-	DrillUp.drill_LIl_initLight = function( dataFrom ) {
+	DrillUp.drill_LIl_initLight = function( dataFrom ){
 		var data = {};
 		
 		// > 贴图
@@ -1942,9 +1942,9 @@
 	/*-----------------光源------------------*/
 	DrillUp.g_LIl_light_length = 200;
 	DrillUp.g_LIl_light = [];	
-	for (var i = 0; i < DrillUp.g_LIl_light_length; i++) {
-		if( DrillUp.parameters["光源-" + String(i+1) ] != "" &&
-			DrillUp.parameters["光源-" + String(i+1) ] != undefined ){
+	for( var i = 0; i < DrillUp.g_LIl_light_length; i++ ){
+		if( DrillUp.parameters["光源-" + String(i+1) ] != undefined &&
+			DrillUp.parameters["光源-" + String(i+1) ] != "" ){
 			var data = JSON.parse(DrillUp.parameters["光源-" + String(i+1) ]);
 			DrillUp.g_LIl_light[i] = DrillUp.drill_LIl_initLight( data );
 		}else{

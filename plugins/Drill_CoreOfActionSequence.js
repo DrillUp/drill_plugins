@@ -2808,7 +2808,7 @@ Drill_COAS_StateController.prototype.initialize = function( sequenceData_id, sta
 	
 	this._drill_sequenceData_id = sequenceData_id;
 	this._drill_stateData_id = stateData_id;
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
     this.drill_controllerState_initData();									//初始化数据
     this.drill_controllerState_initChild();									//初始化子功能
     this.drill_controllerState_resetData( sequenceData_id, stateData_id );
@@ -3025,7 +3025,7 @@ Drill_COAS_StateController.prototype.drill_controllerState_resetData_Private = f
 	// > 执行重置
 	this._drill_sequenceData_id = sequenceData_id;
 	this._drill_stateData_id = stateData_id;
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
     this.drill_controllerState_initData();									//初始化数据
     this.drill_controllerState_initChild();									//初始化子功能
 };
@@ -3209,7 +3209,7 @@ Drill_COAS_StateNodeController.prototype.initialize = function( sequenceData_id,
 	
 	this._drill_sequenceData_id = sequenceData_id;
 	this._drill_stateNodeData_id = stateNodeData_id;
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
     this.drill_controllerNode_initData();									//初始化数据
     this.drill_controllerNode_initChild();									//初始化子功能
     this.drill_controllerNode_resetData( sequenceData_id, stateNodeData_id );
@@ -3605,7 +3605,7 @@ Drill_COAS_StateNodeController.prototype.drill_controllerNode_resetData_Private 
 	// > 执行重置
 	this._drill_sequenceData_id = sequenceData_id;
 	this._drill_stateNodeData_id = stateNodeData_id;
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
     this.drill_controllerNode_initData();									//初始化数据
     this.drill_controllerNode_initChild();									//初始化子功能
 }
@@ -3834,7 +3834,8 @@ Drill_COAS_StateNodeController.prototype.drill_controllerNode_nextRollObjData = 
 		if( proportion <= 0 ){ proportion = 1; }
 		
 		// > 概率命中，则返回数据
-		if( Math.random() <= proportion / total_proportion ){
+		var randomValue_proportion = Math.random();				//『随机因子-图像用』
+		if( randomValue_proportion * total_proportion <= proportion ){
 			return objData;
 		}
 		
@@ -3942,7 +3943,7 @@ Drill_COAS_ActController.prototype.initialize = function( sequenceData_id, actDa
 	
 	this._drill_sequenceData_id = sequenceData_id;
 	this._drill_actData_id = actData_id;
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
     this.drill_controllerAct_initData();									//初始化数据
     this.drill_controllerAct_initChild();									//初始化子功能
     this.drill_controllerAct_resetData( sequenceData_id, actData_id );
@@ -4145,7 +4146,7 @@ Drill_COAS_ActController.prototype.drill_controllerAct_resetData_Private = funct
 	// > 执行重置
 	this._drill_sequenceData_id = sequenceData_id;
 	this._drill_actData_id = actData_id;
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
     this.drill_controllerAct_initData();									//初始化数据
     this.drill_controllerAct_initChild();									//初始化子功能
 };
@@ -4344,7 +4345,7 @@ Drill_COAS_MainController.prototype.initialize = function( sequenceData_id ){
 	}
 	
 	this._drill_sequenceData_id = sequenceData_id;
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
     this.drill_controllerMain_initData();									//初始化数据
     this.drill_controllerMain_initChild();									//初始化子功能
     this.drill_controllerMain_resetData( sequenceData_id );
@@ -4842,7 +4843,7 @@ Drill_COAS_MainController.prototype.drill_controllerMain_resetData_Private = fun
 	
 	// > 执行重置
 	this._drill_sequenceData_id = sequenceData_id;
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
     this.drill_controllerMain_initData();									//初始化数据
     this.drill_controllerMain_initChild();									//初始化子功能
 };

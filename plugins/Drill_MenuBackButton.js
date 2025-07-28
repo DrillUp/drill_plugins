@@ -973,7 +973,7 @@
 	// * 静态数据 - 默认返回按钮
 	//				（~struct~BackButtonDefault）
 	//==============================
-	DrillUp.drill_MBB_initBackButtonDefault = function( dataFrom ) {
+	DrillUp.drill_MBB_initBackButtonDefault = function( dataFrom ){
 		var data = {};
 		data['visible'] = String( dataFrom["初始是否显示"] || "true") === "true";
 		//data['menu'] = String( dataFrom["所属菜单"] || "");
@@ -994,7 +994,7 @@
 	// * 静态数据 - 返回按钮
 	//				（~struct~BackButton）
 	//==============================
-	DrillUp.drill_MBB_initBackButton = function( dataFrom ) {
+	DrillUp.drill_MBB_initBackButton = function( dataFrom ){
 		var data = {};
 		data['visible'] = String( dataFrom["初始是否显示"] || "true") === "true";
 		data['menu'] = String( dataFrom["所属菜单"] || "");
@@ -1015,7 +1015,7 @@
 	// * 静态数据 - 移动动画
 	//				（~struct~DrillWindowMoving）
 	//==============================
-	DrillUp.drill_MBB_initWindowMoving = function( dataFrom ) {
+	DrillUp.drill_MBB_initWindowMoving = function( dataFrom ){
 		var data = {};
 		data['slideMoveType'] = String( dataFrom["移动类型"] || "匀速移动");
 		data['slideTime'] = Number( dataFrom["移动时长"] || 20);
@@ -1031,7 +1031,7 @@
 	// * 静态数据 - 返回按钮样式
 	//				（~struct~BackButtonStyle）
 	//==============================
-	DrillUp.drill_MBB_initBackButtonStyle = function( dataFrom ) {
+	DrillUp.drill_MBB_initBackButtonStyle = function( dataFrom ){
 		var data = {};
 		if( dataFrom["资源-返回按钮"] != "" &&
 			dataFrom["资源-返回按钮"] != undefined ){

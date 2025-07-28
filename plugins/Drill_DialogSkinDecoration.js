@@ -531,7 +531,7 @@
 	// * 静态数据 - 样式
 	//				（~struct~DrillDSDStyle）
 	//==============================
-	DrillUp.drill_DSD_initStyle = function( dataFrom ) {
+	DrillUp.drill_DSD_initStyle = function( dataFrom ){
 		var data = {};
 		
 		// > 样式
@@ -930,7 +930,7 @@ Drill_DSD_DecorationSprite.prototype.update = function() {
 	
 	this.drill_sprite_updateAttr();				//帧刷新 - A主体
 	this.drill_sprite_updateAttr_Position();	//帧刷新 - A主体 - 位置
-	this.drill_sprite_updateGIF();				//帧刷新 - 播放GIF
+	this.drill_sprite_updateGIF();				//帧刷新 - B播放GIF
 };
 //==============================
 // * 对话框装饰图 - 初始化数据『独立贴图』

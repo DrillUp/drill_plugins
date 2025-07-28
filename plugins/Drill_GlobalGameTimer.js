@@ -402,7 +402,7 @@
 	// * 静态数据 - 定时开关
 	//				（~struct~TimingSwitch）
 	//==============================
-	DrillUp.drill_GGT_initTimingSwitch = function( dataFrom ) {
+	DrillUp.drill_GGT_initTimingSwitch = function( dataFrom ){
 		var data = {};
 		
 		// > 定时设置
@@ -423,14 +423,15 @@
 	
 	
 	/*-----------------杂项------------------*/
-	DrillUp.g_GGT_recordNum = Number(DrillUp.parameters['默认计次上限'] || 10);	
-
+	DrillUp.g_GGT_recordNum = Number(DrillUp.parameters["默认计次上限"] || 10);	
+	
 	/*-----------------定时开关------------------*/
 	DrillUp.g_GGT_list_length = 20;
 	DrillUp.g_GGT_list = [];
-	for (var i = 0; i < DrillUp.g_GGT_list_length; i++) {
-		if( DrillUp.parameters['定时开关-' + String(i+1) ] != "" ){
-			var temp = JSON.parse(DrillUp.parameters['定时开关-' + String(i+1) ]);
+	for( var i = 0; i < DrillUp.g_GGT_list_length; i++ ){
+		if( DrillUp.parameters["定时开关-" + String(i+1) ] != undefined && 
+			DrillUp.parameters["定时开关-" + String(i+1) ] != "" ){
+			var temp = JSON.parse(DrillUp.parameters["定时开关-" + String(i+1) ]);
 			DrillUp.g_GGT_list[i] = DrillUp.drill_GGT_initTimingSwitch( temp );
 		}else{
 			DrillUp.g_GGT_list[i] = null;		//（直接null，防止反复判定）

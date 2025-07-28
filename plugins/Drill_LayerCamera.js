@@ -650,6 +650,20 @@
 	DrillUp.drill_LCa_getPluginTip_ParamIsNaN = function( param_name ){
 		return "【" + DrillUp.g_LCa_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
 	};
+	//==============================
+	// * 提示信息 - 报错 - 漏洞函数警告
+	//==============================
+	DrillUp.drill_LCa_getPluginTip_TransformBugWarning = function(){
+		return "【" + DrillUp.g_LCa_PluginTip_curName + "】\n注意，检测到函数Yanfly.Core.Sprite_updateTransform，该函数会破坏pixi渲染底层，从而引入像素抖动问题。\n目前已知危害到了镜头插件、对话框插件。\n去看看文档 \"0.问题解答集合（FAQ） > Rmmv中的罕见问题.docx\" 的章节 \"偶尔1像素缝隙抖动问题\" 来解决。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 漏洞函数警告 - 检测『非整数坐标抖动问题』
+	//==============================
+	if( Yanfly != undefined && 
+		Yanfly.Core != undefined && 
+		Yanfly.Core.Sprite_updateTransform != undefined ){
+		alert( DrillUp.drill_LCa_getPluginTip_TransformBugWarning() );
+	};
 	
 	
 //=============================================================================
@@ -1890,7 +1904,7 @@ Drill_LCa_Controller.prototype.isLoopVertical = function(){ return $gameMap.isLo
 //==============================
 Drill_LCa_Controller.prototype.initialize = function( data ){
 	this._drill_data = {};
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能
 	if( data == undefined ){ data = {}; }
@@ -2526,7 +2540,7 @@ Drill_LCa_Controller.prototype.drill_LCa_resetData_Private = function( data ){
 	
 	// > 执行重置
 	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能
 }

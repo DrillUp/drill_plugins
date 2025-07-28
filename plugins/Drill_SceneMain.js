@@ -2722,15 +2722,15 @@
 	// * 静态数据 - 金钱显示 - 金钱窗口参数（必须写在前面）
 	//				（~struct~DrillSMaGoldWindow）
 	//==============================
-	DrillUp.drill_SMa_initGoldWindow = function( dataFrom ) {
+	DrillUp.drill_SMa_initGoldWindow = function( dataFrom ){
 		var data = {};
 		data['x'] = Number( dataFrom["金钱窗口 X"] || 0);
 		data['y'] = Number( dataFrom["金钱窗口 Y"] || 0);
 		data['width'] = Number( dataFrom["金钱窗口宽度"] || 100);
 		data['height'] = Number( dataFrom["金钱窗口高度"] || 100);
 		data['fontsize'] = Number( dataFrom["金钱窗口字体大小"] || 22);
-		if( dataFrom["金钱窗口移动动画"] != "" &&
-			dataFrom["金钱窗口移动动画"] != undefined ){
+		if( dataFrom["金钱窗口移动动画"] != undefined &&
+			dataFrom["金钱窗口移动动画"] != "" ){
 			var slideAnim = JSON.parse( dataFrom["金钱窗口移动动画"] );
 			data['slideMoveType'] = String( slideAnim["移动类型"] || "匀速移动");
 			data['slideTime'] = Number( slideAnim["移动时长"] || 20);
@@ -2741,8 +2741,8 @@
 			data['slideAbsoluteX'] = Number( slideAnim["起点-绝对坐标 X"] || 0);
 			data['slideAbsoluteY'] = Number( slideAnim["起点-绝对坐标 Y"] || 0);
 		}
-		if( dataFrom["金钱窗口布局"] != "" &&
-			dataFrom["金钱窗口布局"] != undefined ){
+		if( dataFrom["金钱窗口布局"] != undefined &&
+			dataFrom["金钱窗口布局"] != "" ){
 			var layout = JSON.parse( dataFrom["金钱窗口布局"] );
 			data['layoutType'] = String( layout["布局类型"] || "默认皮肤");
 			data['layoutSrc'] = String( layout["资源-贴图"] || "");
@@ -2756,7 +2756,7 @@
 	// * 静态数据 - 金钱显示 - 金钱数字参数（必须写在前面）
 	//				（~struct~DrillSMaGoldNumber）
 	//==============================
-	DrillUp.drill_SMa_initGoldNumber = function( dataFrom ) {
+	DrillUp.drill_SMa_initGoldNumber = function( dataFrom ){
 		var data = {};
 		data = DrillUp.drill_COGN_initStyle( dataFrom );	//使用数字核心初始化部分参数
 		data['x'] = Number( dataFrom["金钱数字 X"] || 0);
@@ -2770,27 +2770,32 @@
 	// * 静态数据 - 指针与边框
 	//				（~struct~DrillCursor）
 	//==============================
-	DrillUp.drill_SMa_initMenuCursor = function( dataFrom ) {
+	DrillUp.drill_SMa_initMenuCursor = function( dataFrom ){
 		var data = {};
+		
 		//data['mog_enabled'] = String( dataFrom["是否启用mog菜单指针"] || "true") == "true";
 		//data['mog_borderEnabled'] = String( dataFrom["是否启用mog菜单边框"] || "true") == "true";
+		
 		data['MCu_enabled'] = String( dataFrom["是否显示菜单指针"] || "true") == "true";
 		data['MCu_lock'] = String( dataFrom["是否锁定菜单指针样式"] || "false") == "true";
 		data['MCu_style'] = Number( dataFrom["锁定的菜单指针样式"] || 1);
+		
 		data['MCB_rectEnabled'] = String( dataFrom["是否启用闪烁白矩形"] || "true") == "true";
 		data['MCB_enabled'] = String( dataFrom["是否启用菜单边框"] || "true") == "true";
 		data['MCB_lock'] = String( dataFrom["是否锁定菜单边框样式"] || "false") == "true";
 		data['MCB_style'] = Number( dataFrom["锁定的菜单边框样式"] || 1);
+		
 		data['MSB_enabled'] = String( dataFrom["是否启用滚动条"] || "true") == "true";
 		data['MSB_lock'] = String( dataFrom["是否锁定滚动条样式"] || "false") == "true";
 		data['MSB_style'] = Number( dataFrom["锁定的滚动条样式"] || 1);
+		
 		return data;
 	}
 	//==============================
 	// * 静态数据 - 菜单选项 - 菜单选项窗口参数（必须写在前面）
 	//				（~struct~DrillSMaCommandWindow）
 	//==============================
-	DrillUp.drill_SMa_initCommandWindow = function( dataFrom ) {
+	DrillUp.drill_SMa_initCommandWindow = function( dataFrom ){
 		var data = {};
 		data['x'] = Number( dataFrom["菜单选项窗口 X"] || 0);
 		data['y'] = Number( dataFrom["菜单选项窗口 Y"] || 0);
@@ -2798,8 +2803,8 @@
 		data['height'] = Number( dataFrom["菜单选项窗口高度"] || 100);
 		data['col'] = Number( dataFrom["菜单选项窗口列数"] || 1);
 		data['fontsize'] = Number( dataFrom["菜单选项窗口字体大小"] || 22);
-		if( dataFrom["菜单选项窗口移动动画"] != "" &&
-			dataFrom["菜单选项窗口移动动画"] != undefined ){
+		if( dataFrom["菜单选项窗口移动动画"] != undefined &&
+			dataFrom["菜单选项窗口移动动画"] != "" ){
 			var slideAnim = JSON.parse( dataFrom["菜单选项窗口移动动画"] );
 			data['slideMoveType'] = String( slideAnim["移动类型"] || "匀速移动");
 			data['slideTime'] = Number( slideAnim["移动时长"] || 20);
@@ -2810,8 +2815,8 @@
 			data['slideAbsoluteX'] = Number( slideAnim["起点-绝对坐标 X"] || 0);
 			data['slideAbsoluteY'] = Number( slideAnim["起点-绝对坐标 Y"] || 0);
 		}
-		if( dataFrom["菜单选项窗口布局"] != "" &&
-			dataFrom["菜单选项窗口布局"] != undefined ){
+		if( dataFrom["菜单选项窗口布局"] != undefined &&
+			dataFrom["菜单选项窗口布局"] != "" ){
 			var layout = JSON.parse( dataFrom["菜单选项窗口布局"] );
 			data['layoutType'] = String( layout["布局类型"] || "默认皮肤");
 			data['layoutSrc'] = String( layout["资源-贴图"] || "");
@@ -2820,8 +2825,8 @@
 			data['layoutY'] = Number( layout["贴图位置修正 Y"] || 0);
 		}
 		data['align'] = String( dataFrom["菜单选项对齐方式"] || "左对齐");
-		if( dataFrom["菜单选项窗口指针与边框"] != "" &&
-			dataFrom["菜单选项窗口指针与边框"] != undefined ){
+		if( dataFrom["菜单选项窗口指针与边框"] != undefined &&
+			dataFrom["菜单选项窗口指针与边框"] != "" ){
 			var cursor = JSON.parse( dataFrom["菜单选项窗口指针与边框"] );
 			data['cursor'] = DrillUp.drill_SMa_initMenuCursor( cursor );
 		}else{
@@ -2833,7 +2838,7 @@
 	// * 静态数据 - 菜单选项 - 菜单选项按钮组（必须写在前面）
 	//				（~struct~DrillSMaCommandButton）
 	//==============================
-	DrillUp.drill_SMa_initCommandButton = function( dataFrom ) {
+	DrillUp.drill_SMa_initCommandButton = function( dataFrom ){
 		var data = {};
 		data['debug_search'] = String( dataFrom["DEBUG-按钮关键字搜索"] || "false") == "true";
 		
@@ -2846,8 +2851,8 @@
 		// > 按钮组 - 按钮贴图
 		data['btn_src_default'] = String( dataFrom["默认按钮贴图"] || "");
 		data['btn_src_file'] = "img/Menu__main/";
-		if( dataFrom["按钮贴图序列"] != "" &&
-			dataFrom["按钮贴图序列"] != undefined ){
+		if( dataFrom["按钮贴图序列"] != undefined &&
+			dataFrom["按钮贴图序列"] != "" ){
 			var seq = JSON.parse( dataFrom["按钮贴图序列"] );
 			data['btn_src'] = [];
 			data['btn_srcKeyword'] = [];
@@ -2892,7 +2897,7 @@
 	// * 静态数据 - 角色头像 - 角色头像按钮组（必须写在前面）
 	//				（~struct~DrillSMaActorButton）
 	//==============================
-	DrillUp.drill_SMa_initActorAvatarButton = function( dataFrom ) {
+	DrillUp.drill_SMa_initActorAvatarButton = function( dataFrom ){
 		var data = {};
 		data['style_id'] = Number( dataFrom["按钮组样式"] || 0);
 		
@@ -2906,8 +2911,8 @@
 		// > 按钮组 - B父窗口（资源）
 		data['btn_src_default'] = String( dataFrom["默认头像按钮贴图"] || "");
 		data['btn_src_file'] = "img/Menu__actorFaces/";
-		if( dataFrom["头像按钮贴图序列"] != "" &&
-			dataFrom["头像按钮贴图序列"] != undefined ){
+		if( dataFrom["头像按钮贴图序列"] != undefined &&
+			dataFrom["头像按钮贴图序列"] != "" ){
 			data['btn_src'] = JSON.parse( dataFrom["头像按钮贴图序列"] );
 		}else{
 			data['btn_src'] = [];
@@ -2927,7 +2932,7 @@
 	// * 静态数据 - 角色固定框样式 - 参数条
 	//				（~struct~DrillActorMeter）
 	//==============================
-	DrillUp.drill_SMa_initActorBoardMeter = function( dataFrom ) {
+	DrillUp.drill_SMa_initActorBoardMeter = function( dataFrom ){
 		var data = {};
 		
 		// > 主体
@@ -3002,7 +3007,7 @@
 	// * 静态数据 - 角色固定框样式 - 参数数字
 	//				（~struct~DrillActorNumber）
 	//==============================
-	DrillUp.drill_SMa_initActorBoardNumber = function( dataFrom ) {
+	DrillUp.drill_SMa_initActorBoardNumber = function( dataFrom ){
 		var data = {};
 		
 		// > 主体
@@ -3049,7 +3054,7 @@
 	// * 静态数据 - 角色固定框样式
 	//				（~struct~DrillSMaActorBoardStyle）
 	//==============================
-	DrillUp.drill_SMa_initActorBoardStyle = function( dataFrom ) {
+	DrillUp.drill_SMa_initActorBoardStyle = function( dataFrom ){
 		var data = {};
 		// > 参数条
 		data['hp_meter_enable'] = String( dataFrom["生命-是否显示参数条"] || "false") === "true";
@@ -3165,7 +3170,7 @@
 	// * 静态数据 - 角色框设置
 	//				（~struct~DrillSMaActorBoardBind）
 	//==============================
-	DrillUp.drill_SMa_initActorBoardBind = function( dataFrom ) {
+	DrillUp.drill_SMa_initActorBoardBind = function( dataFrom ){
 		var data = {};
 		// > 绑定
 		data['style_id'] = Number( dataFrom["绑定的样式"] || 1 );
@@ -3196,7 +3201,7 @@
 	// * 静态数据 - 角色固定框组设置
 	//				（~struct~DrillSMaActorBoardArrange）
 	//==============================
-	DrillUp.drill_SMa_initActorBoardArrange = function( dataFrom ) {
+	DrillUp.drill_SMa_initActorBoardArrange = function( dataFrom ){
 		var data = {};
 		// > 主体
 		data['x'] = Number( dataFrom["平移-固定框组 X"] || 0 );
@@ -3242,8 +3247,8 @@
 		data['arrange_col'] = Number( dataFrom["矩阵列数"] || 1);
 		data['arrange_width'] = Number( dataFrom["矩阵列宽"] || 10);
 		data['arrange_height'] = Number( dataFrom["矩阵行高"] || 10);
-		if( dataFrom["固定离散位置序列"] != "" &&
-			dataFrom["固定离散位置序列"] != undefined ){
+		if( dataFrom["固定离散位置序列"] != undefined &&
+			dataFrom["固定离散位置序列"] != "" ){
 			data['arrange_squeeze'] = JSON.parse( dataFrom["固定离散位置序列"] );
 		}else{
 			data['arrange_squeeze'] = [];

@@ -211,9 +211,9 @@
 	
 	
 	/*-----------------杂项------------------*/
-	if( DrillUp.parameters['资源-多次弹跳音效'] != "" &&
-		DrillUp.parameters['资源-多次弹跳音效'] != undefined  ){
-		DrillUp.g_JSp_se = JSON.parse(DrillUp.parameters['资源-多次弹跳音效']);
+	if( DrillUp.parameters["资源-多次弹跳音效"] != undefined &&
+		DrillUp.parameters["资源-多次弹跳音效"] != ""  ){
+		DrillUp.g_JSp_se = JSON.parse(DrillUp.parameters["资源-多次弹跳音效"]);
 	}else{
 		DrillUp.g_JSp_se = [];
 	}

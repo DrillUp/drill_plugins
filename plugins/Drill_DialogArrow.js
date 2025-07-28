@@ -396,7 +396,7 @@
 	// * 静态数据 - 对话框小箭头
 	//				（~struct~DrillDArSprite）
 	//==============================
-	DrillUp.drill_DAr_initArrowData = function( dataFrom ) {
+	DrillUp.drill_DAr_initArrowData = function( dataFrom ){
 		var data = {};
 		
 		if( dataFrom["资源-小箭头GIF"] != undefined &&
@@ -431,16 +431,16 @@
 	}
 	
 	/*-----------------杂项------------------*/
-	DrillUp.g_DAr_visible = String(DrillUp.parameters['是否初始显示'] || 'true') === 'true';
-	DrillUp.g_DAr_curStyle = Number(DrillUp.parameters['当前小箭头'] || 0);
+	DrillUp.g_DAr_visible = String(DrillUp.parameters["是否初始显示"] || 'true') === 'true';
+	DrillUp.g_DAr_curStyle = Number(DrillUp.parameters["当前小箭头"] || 0);
 	
 	/*-----------------对话框小箭头------------------*/
 	DrillUp.g_DAr_list_length = 10;
 	DrillUp.g_DAr_list = [];
 	for( var i = 0; i < DrillUp.g_DAr_list_length; i++ ){
-		if( DrillUp.parameters['小箭头-' + String(i+1) ] != undefined &&
-			DrillUp.parameters['小箭头-' + String(i+1) ] != "" ){
-			var temp = JSON.parse(DrillUp.parameters['小箭头-' + String(i+1) ]);
+		if( DrillUp.parameters["小箭头-" + String(i+1) ] != undefined &&
+			DrillUp.parameters["小箭头-" + String(i+1) ] != "" ){
+			var temp = JSON.parse(DrillUp.parameters["小箭头-" + String(i+1) ]);
 			DrillUp.g_DAr_list[i] = DrillUp.drill_DAr_initArrowData( temp );
 		}else{
 			DrillUp.g_DAr_list[i] = null;

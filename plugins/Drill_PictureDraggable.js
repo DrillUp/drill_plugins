@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        图片 - 可拖拽的图片
+ * @plugindesc [v1.5]        图片 - 可拖拽的图片
  * @author Drill_up
  * 
  * 
@@ -23,6 +23,7 @@
  * 基于：
  *   - Drill_CoreOfDragAndAdsorb        数学模型-拖拽与吸附核心
  *   - Drill_CoreOfPictureWithMouse     图片-图片与鼠标控制核心
+ *   - Drill_PictureLayerAndZIndex      图片-层级与堆叠级
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -96,9 +97,13 @@
  * 
  * 插件指令：>鼠标拖拽图片 : 拖拽时自动置顶图片 : 开启
  * 插件指令：>鼠标拖拽图片 : 拖拽时自动置顶图片 : 关闭
+ * 插件指令：>鼠标拖拽图片 : 拖拽后永久置顶图片 : 开启
+ * 插件指令：>鼠标拖拽图片 : 拖拽后永久置顶图片 : 关闭
  * 
  * 1."设置拖拽按键"即鼠标的拖拽功能开关，可以全关，表示关闭拖拽功能。
  * 2.如果拖拽数量只有1，则拖拽时将会优先选择 最前面的（堆叠级大的）图片。
+ * 3."拖拽时自动置顶图片" 可以在拖拽时，使得图片堆叠级在最上面，结束拖拽就能还原堆叠级。
+ *   "拖拽后永久置顶图片" 可以在结束拖拽后，改变图片的堆叠级，使其处于最上方。
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -138,6 +143,9 @@
  * 添加了 立即合并拖拽偏移量 功能。
  * [v1.4]
  * 大幅度改进了内部结构。
+ * [v1.5]
+ * 改进了拖拽多个对象时的结构。
+ * 
  * 
  * 
  * @param 鼠标左键是否可拖拽
@@ -174,6 +182,13 @@
  * @desc true - 顺序置顶，false - 关闭
  * @default true
  * 
+ * @param 图片被拖拽后是否永久置顶
+ * @type boolean
+ * @on 永久置顶
+ * @off 关闭
+ * @desc true - 永久置顶，false - 关闭。注意，永久置顶会改变图片的堆叠级。
+ * @default false
+ * 
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -190,7 +205,9 @@
 //		★时间复杂度		o(n^3)  每帧
 //		★性能测试因素	图片管理层
 //		★性能测试消耗	2024/5/2：
-//							》16.7ms（drill_PDr_updateDrag）
+//							》16.7ms（drill_PDr_updateDrag_OffsetAndDraging）
+//						2025/7/27：
+//							》6.9ms（drill_PDr_updateDrag_OffsetAndDraging）11.9ms（drill_PDr_updateDrag_Priority）
 //		★最坏情况		暂无
 //		★备注			核心功能应用到图片贴图上，不需要过多考虑优化问题。
 //		
@@ -242,6 +259,8 @@
 //			->☆堆叠级控制
 //				->开始拖拽时（继承）
 //				->结束拖拽时（继承）
+//				->刷新 拖拽时自动置顶图片
+//				->刷新 拖拽后永久置顶图片
 //			->☆地图点击拦截
 //
 //
@@ -250,7 +269,7 @@
 //		
 //		★脚本文档：
 //			16.图片 > 关于图片与鼠标控制核心（脚本）.docx
-//			1.系统 > 关于拖拽与吸附控制核心（脚本）.docx
+//			32.数学模型 > 关于拖拽与吸附控制核心（脚本）.docx
 //		
 //		★插件私有类：
 //			无
@@ -275,7 +294,8 @@
 	DrillUp.g_PDr_PluginTip_curName = "Drill_PictureDraggable.js 图片-可拖拽的图片";
 	DrillUp.g_PDr_PluginTip_baseList = [
 		"Drill_CoreOfDragAndAdsorb.js 数学模型-拖拽与吸附核心",
-		"Drill_CoreOfPictureWithMouse.js 图片-图片与鼠标控制核心"
+		"Drill_CoreOfPictureWithMouse.js 图片-图片与鼠标控制核心",
+		"Drill_PictureLayerAndZIndex.js 图片-层级与堆叠级"
 	];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
@@ -314,18 +334,20 @@
 	DrillUp.parameters = PluginManager.parameters('Drill_PictureDraggable');
 	
 	/*-----------------杂项------------------*/
-	DrillUp.g_PDr_dragableLeft = String(DrillUp.parameters['鼠标左键是否可拖拽'] || "true") === "true";
-	DrillUp.g_PDr_dragableMiddle = String(DrillUp.parameters['鼠标中键是否可拖拽'] || "true") === "true";
-	DrillUp.g_PDr_dragableRight = String(DrillUp.parameters['鼠标右键是否可拖拽'] || "true") === "true";
-	DrillUp.g_PDr_dragMaxCount = Number(DrillUp.parameters['最大同时拖拽数量'] || 1);
-	DrillUp.g_PDr_dragAutoTop = String(DrillUp.parameters['图片被拖拽时是否自动顺序置顶'] || "true") === "true";
+	DrillUp.g_PDr_dragableLeft = String(DrillUp.parameters["鼠标左键是否可拖拽"] || "true") === "true";
+	DrillUp.g_PDr_dragableMiddle = String(DrillUp.parameters["鼠标中键是否可拖拽"] || "true") === "true";
+	DrillUp.g_PDr_dragableRight = String(DrillUp.parameters["鼠标右键是否可拖拽"] || "true") === "true";
+	DrillUp.g_PDr_dragMaxCount = Number(DrillUp.parameters["最大同时拖拽数量"] || 1);
+	DrillUp.g_PDr_dragAutoTop = String(DrillUp.parameters["图片被拖拽时是否自动顺序置顶"] || "true") === "true";
+	DrillUp.g_PDr_dragChangeZIndex = String(DrillUp.parameters["图片被拖拽后是否永久置顶"] || "false") === "true";
 
 
 //=============================================================================
 // * >>>>基于插件检测>>>>
 //=============================================================================
 if( Imported.Drill_CoreOfDragAndAdsorb &&
-	Imported.Drill_CoreOfPictureWithMouse ){
+	Imported.Drill_CoreOfPictureWithMouse &&
+	Imported.Drill_PictureLayerAndZIndex ){
 	
 //==============================
 // * >>>>基于插件检测>>>> - 最后继承
@@ -337,7 +359,7 @@ SceneManager.initialize = function() {
 		alert( DrillUp.drill_PDr_getPluginTip_ConflictOldName() );
 	};
 }
-
+	
 	
 //=============================================================================
 // ** ☆插件指令
@@ -357,7 +379,7 @@ Game_Interpreter.prototype.drill_PDr_pluginCommand = function( command, args ){
 	if( command === ">鼠标拖拽图片" ){
 		
 		/*-----------------设置可拖拽------------------*/
-		if( args.length == 4 ){				//>鼠标拖拽图片 : 图片[1] : 设置可拖拽
+		if( args.length == 4 ){			//>鼠标拖拽图片 : 图片[1] : 设置可拖拽
 			var pic_str = String(args[1]);
 			var type = String(args[3]);
 			
@@ -495,6 +517,16 @@ Game_Interpreter.prototype.drill_PDr_pluginCommand = function( command, args ){
 				}
 				if( temp2 == "关闭" || temp2 == "禁用" ){
 					$gameSystem._drill_PDr_dragAutoTop = false;
+					$gameSystem._drill_PDr_dragChangeZIndex = false;	//（自动置顶关闭时，永久置顶也关闭）
+				}
+			}
+			if( temp1 == "拖拽后永久置顶图片" ){
+				if( temp2 == "启用" || temp2 == "开启" || temp2 == "打开" || temp2 == "启动" ){
+					$gameSystem._drill_PDr_dragAutoTop = true;
+					$gameSystem._drill_PDr_dragChangeZIndex = true;		//（永久置顶开启时，自动置顶也开启）
+				}
+				if( temp2 == "关闭" || temp2 == "禁用" ){
+					$gameSystem._drill_PDr_dragChangeZIndex = false;
 				}
 			}
 		}
@@ -604,6 +636,8 @@ Game_System.prototype.drill_PDr_initSysData_Private = function() {
 	this._drill_PDr_dragableMiddle = DrillUp.g_PDr_dragableMiddle;		//鼠标中键是否可拖拽
 	this._drill_PDr_dragableRight = DrillUp.g_PDr_dragableRight;		//鼠标右键是否可拖拽
 	this._drill_PDr_dragAutoTop = DrillUp.g_PDr_dragAutoTop;			//拖拽时自动置顶图片
+	this._drill_PDr_dragChangeZIndex = DrillUp.g_PDr_dragChangeZIndex;	//拖拽后永久置顶图片
+	
 	
 	// > 最大同时拖拽数量
 	this.drill_CODAA_dragFactory().drill_factoryDrag_setDragMaxCount( "PDr", DrillUp.g_PDr_dragMaxCount );
@@ -689,43 +723,47 @@ Game_Picture.prototype.drill_MDP_getDraggingYOffset = Game_Picture.prototype.dri
 //==============================
 // * 图片的属性 - 初始化
 //==============================
-var _drill_PDr_switch_initialize = Game_Picture.prototype.initialize;
+var _drill_PDr_attr_initialize = Game_Picture.prototype.initialize;
 Game_Picture.prototype.initialize = function(){
-	this._drill_PDr_switchData = undefined;		//（要放前面，不然会盖掉子类的设置）
-	_drill_PDr_switch_initialize.call(this);
+	this._drill_PDr_attrData = undefined;		//（要放前面，不然会盖掉子类的设置）
+	_drill_PDr_attr_initialize.call(this);
 }
 //==============================
 // * 图片的属性 - 初始化 数据
 //
 //			说明：	> 这里的数据都要初始化才能用。『节约事件数据存储空间』
-//					> 层面关键字为：switchData，一对一。
+//					> 层面关键字为：attrData，一对一。
 //==============================
-Game_Picture.prototype.drill_PDr_checkSwitchData = function(){
+Game_Picture.prototype.drill_PDr_checkAttrData = function(){
 	
 	// > 【图片-图片与鼠标控制核心】强制绑定
 	this.drill_COPWM_checkData();
 	
-	if( this._drill_PDr_switchData != undefined ){ return; }
-	this._drill_PDr_switchData = {};
+	if( this._drill_PDr_attrData != undefined ){ return; }
+	this._drill_PDr_attrData = {};
 	
 	// > 数据 - 图片ID【图片-图片优化核心】
 	var pic_id = this.drill_COPi_getPictureId();
-	this._drill_PDr_switchData['pic_id'] = pic_id;
-	
-	// > 数据 - 被拖拽顺序
-	this._drill_PDr_switchData['drag_zIndex'] = pic_id;
+	this._drill_PDr_attrData['pic_id'] = pic_id;
 	
 	// > 数据 - 拖拽控制器ID【数学模型-拖拽与吸附核心】
 	var drag_factory = $gameSystem.drill_CODAA_dragFactory();
 	var product_id = drag_factory.drill_factoryDrag_create( "PDr" );	//（通过工厂创建控制器，并印上该插件的简称）
-	this._drill_PDr_switchData['dragController_id'] = product_id;
+	this._drill_PDr_attrData['dragController_id'] = product_id;
 	
-	$gameTemp._drill_PDr_needRestatistics_data = true;		//（刷新统计）
+	// > 数据 - 拖拽控制器的优先级
+	var controller = this.drill_PDr_getDragController();
+	controller.drill_controllerDrag_setPriorityValue( pic_id );
+	
+	// > 数据 - 拖拽控制器的优先级 堆叠级影响【图片 - 层级与堆叠级】
+	if( this._drill_PLAZ_data != undefined ){
+		controller.drill_controllerDrag_setPriorityValue( this._drill_PLAZ_data['zIndex'] );
+	}
 }
 //==============================
 // * 图片的属性 - 删除数据
 //==============================
-Game_Picture.prototype.drill_PDr_removeSwitchData = function(){
+Game_Picture.prototype.drill_PDr_removeAttrData = function(){
 	
 	// > 删除控制器
 	var controller = this.drill_PDr_getDragController();
@@ -734,9 +772,7 @@ Game_Picture.prototype.drill_PDr_removeSwitchData = function(){
 	}
 	
 	// > 删除数据
-	this._drill_PDr_switchData = undefined;
-	
-	$gameTemp._drill_PDr_needRestatistics_data = true;		//（刷新统计）
+	this._drill_PDr_attrData = undefined;
 }
 //==============================
 // * 图片的属性 - 消除图片
@@ -744,7 +780,7 @@ Game_Picture.prototype.drill_PDr_removeSwitchData = function(){
 var _drill_PDr_p_erase = Game_Picture.prototype.erase;
 Game_Picture.prototype.erase = function(){
 	_drill_PDr_p_erase.call( this );
-	this.drill_PDr_removeSwitchData();						//（删除数据）
+	this.drill_PDr_removeAttrData();						//（删除数据）
 }
 //==============================
 // * 图片的属性 - 消除图片（command235）
@@ -754,40 +790,71 @@ Game_Screen.prototype.erasePicture = function( pictureId ){
     var realPictureId = this.realPictureId(pictureId);
 	var picture = this._pictures[realPictureId];
 	if( picture != undefined ){
-		picture.drill_PDr_removeSwitchData();				//（删除数据）
+		picture.drill_PDr_removeAttrData();				//（删除数据）
 	}
 	_drill_PDr_p_erasePicture.call( this, pictureId );
 }
 
 //==============================
-// * 图片的属性 - 获取控制器
+// * 图片的属性 - 获取控制器（根据控制器id）（开放函数）
 //
 //			说明：	> 该函数返回 拖拽控制器 的指针。
 //==============================
 Game_Picture.prototype.drill_PDr_getDragController = function(){
-	if( this._drill_PDr_switchData == undefined ){ return null; }
-	var product_id = this._drill_PDr_switchData['dragController_id'];
+	if( this._drill_PDr_attrData == undefined ){ return null; }
+	var product_id = this._drill_PDr_attrData['dragController_id'];
 	return $gameSystem.drill_CODAA_dragFactory().drill_factoryDrag_getByProductId( product_id );
+}
+//==============================
+// * 图片的属性 - 获取图片（根据控制器id）（开放函数）
+//
+//			说明：	> 该函数返回 图片数据 的指针。注意此处是Game_Screen类。
+//==============================
+Game_Screen.prototype.drill_PDr_getPicture_ByDragControllerId = function( dragControllerId ){
+	for(var i = 0; i < this._pictures.length; i++ ){
+		var temp_picture = this._pictures[i];
+		if( temp_picture == undefined ){ continue; }
+		if( temp_picture._drill_PDr_attrData == undefined ){ continue; }
+		if( temp_picture._drill_PDr_attrData['dragController_id'] == dragControllerId ){
+			return temp_picture;
+		}
+	}
+	return null;
+}
+//==============================
+// * 图片的属性 - 设置堆叠级（继承）【图片 - 层级与堆叠级】
+//
+//			说明：	> 此处专门同步 拖拽控制器的优先级 的数据。
+//==============================
+var _drill_PDr_PLAZ_setZIndex = Game_Picture.prototype.drill_PLAZ_setZIndex;
+Game_Picture.prototype.drill_PLAZ_setZIndex = function( zIndex ){
+	_drill_PDr_PLAZ_setZIndex.call( this, zIndex );
+	
+	// > 同步 拖拽控制器的优先级
+	var controller = this.drill_PDr_getDragController();
+	if( controller != undefined ){
+		controller.drill_controllerDrag_setPriorityValue( zIndex );
+	}
 }
 //==============================
 // * 图片的属性 - 参数 - 设置可拖拽
 //==============================
 Game_Picture.prototype.drill_PDr_setCanDrag = function( enabled ){
-	this.drill_PDr_checkSwitchData();
+	this.drill_PDr_checkAttrData();
 	this.drill_PDr_getDragController().drill_controllerDrag_setCanDrag( enabled );
 }
 //==============================
 // * 图片的属性 - 参数 - 是否可拖拽
 //==============================
 Game_Picture.prototype.drill_PDr_canDrag = function(){
-	if( this._drill_PDr_switchData == undefined ){ return false; }
+	if( this._drill_PDr_attrData == undefined ){ return false; }
 	return this.drill_PDr_getDragController().drill_controllerDrag_canDrag();
 }
 //==============================
 // * 图片的属性 - 参数 - 是否正在拖拽
 //==============================
 Game_Picture.prototype.drill_PDr_isDraging = function(){
-	if( this._drill_PDr_switchData == undefined ){ return false; }
+	if( this._drill_PDr_attrData == undefined ){ return false; }
 	return this.drill_PDr_getDragController().drill_controllerDrag_isDraging();
 }
 
@@ -795,7 +862,7 @@ Game_Picture.prototype.drill_PDr_isDraging = function(){
 // * 图片的属性 - 操作 - 立即合并拖拽偏移量（私有）
 //==============================
 Game_Picture.prototype.drill_PDr_mergeDragPosition_Private = function() {
-	this.drill_PDr_checkSwitchData();
+	this.drill_PDr_checkAttrData();
 	
 	// > 原位置+=偏移量
 	var controller = this.drill_PDr_getDragController();
@@ -809,99 +876,9 @@ Game_Picture.prototype.drill_PDr_mergeDragPosition_Private = function() {
 // * 图片的属性 - 操作 - 立即清零拖拽偏移量（私有）
 //==============================
 Game_Picture.prototype.drill_PDr_clearDragPosition_Private = function() {
-	this.drill_PDr_checkSwitchData();
+	this.drill_PDr_checkAttrData();
 	this.drill_PDr_getDragController().drill_controllerDrag_clearDragPosition();
 }
-
-
-//=============================================================================
-// ** ☆图片容器
-//			
-//			说明：	> 此模块专门对 绑定数据的图片 进行 捕获。
-//					（插件完整的功能目录去看看：功能结构树）
-//=============================================================================
-//==============================
-// * 容器 - 初始化
-//==============================
-var _drill_PDr_temp_initialize = Game_Temp.prototype.initialize;
-Game_Temp.prototype.initialize = function() {	
-	_drill_PDr_temp_initialize.call(this);
-	this._drill_PDr_pictureTank = [];			//实体类容器
-	this._drill_PDr_needRestatistics_data = true;
-};
-//==============================
-// * 容器 - 切换地图时
-//==============================
-var _drill_PDr_gmap_setup = Game_Map.prototype.setup;
-Game_Map.prototype.setup = function( mapId ){
-	$gameTemp._drill_PDr_pictureTank = [];		//实体类容器
-	$gameTemp._drill_PDr_needRestatistics_data = true;
-	_drill_PDr_gmap_setup.call(this,mapId);
-};
-//==============================
-// * 容器 - 切换贴图时（菜单界面/战斗界面 刷新）
-//==============================
-var _drill_PDr_sbase_createPictures = Spriteset_Base.prototype.createPictures;
-Spriteset_Base.prototype.createPictures = function() {
-	$gameTemp._drill_PDr_pictureTank = [];		//实体类容器
-	$gameTemp._drill_PDr_needRestatistics_data = true;
-	_drill_PDr_sbase_createPictures.call(this);
-};
-//==============================
-// * 容器 - 场景销毁时『图片与多场景』
-//==============================
-var _drill_PDr_terminate = Scene_Battle.prototype.terminate;
-Scene_Battle.prototype.terminate = function() {
-	_drill_PDr_terminate.call(this);
-	$gameTemp._drill_PDr_pictureTank = [];		//实体类容器
-	$gameTemp._drill_PDr_needRestatistics_data = true;
-};
-//==============================
-// * 容器 - 帧刷新
-//==============================
-var _drill_PDr_screen_update = Game_Screen.prototype.update;
-Game_Screen.prototype.update = function(){
-	_drill_PDr_screen_update.call( this );
-	this.drill_PDr_updateRestatistics();		//帧刷新 - 刷新统计
-};
-//==============================
-// * 容器 - 帧刷新 - 刷新统计
-//==============================
-Game_Screen.prototype.drill_PDr_updateRestatistics = function() {
-	if( $gameTemp._drill_PDr_needRestatistics_data != true ){ return }
-	$gameTemp._drill_PDr_needRestatistics_data = false;
-	
-	$gameTemp._drill_PDr_pictureTank = [];		//实体类容器
-	
-	// > 图片遍历『图片与多场景』
-	var i_offset = 0;							//地图界面的图片
-	var pic_length = this.maxPictures();
-	if( $gameParty.inBattle() == true ){		//战斗界面的图片
-		i_offset = pic_length;
-	}
-	for(var i = 0; i < pic_length; i++ ){
-		var picture = this._pictures[ i + i_offset ];
-		if( picture == undefined ){ continue; }
-		if( picture._drill_PDr_switchData != undefined ){
-			$gameTemp._drill_PDr_pictureTank.push( picture );
-		}
-	}
-	
-	// > 刷新统计 被拖拽顺序
-	for(var i = 0; i < $gameTemp._drill_PDr_pictureTank.length; i++ ){
-		var picture = $gameTemp._drill_PDr_pictureTank[i];
-		picture._drill_PDr_switchData['drag_zIndex'] = picture._drill_PDr_switchData['pic_id'];
-		
-		// > 堆叠级影响【图片 - 层级与堆叠级】
-		if( Imported.Drill_PictureLayerAndZIndex ){
-			if( this._drill_PLAZ_data != undefined ){
-				picture._drill_PDr_switchData['drag_zIndex'] = picture._drill_PLAZ_data['zIndex'];
-			}
-		}
-	}
-	$gameTemp._drill_PDr_pictureTank.sort(function(a, b){return a._drill_PDr_switchData['drag_zIndex']-b._drill_PDr_switchData['drag_zIndex']});
-	
-};
 
 
 
@@ -918,17 +895,51 @@ var _drill_PDr_screen2_update = Game_Screen.prototype.update;
 Game_Screen.prototype.update = function(){
 	_drill_PDr_screen2_update.call( this );
 	
-	// > 根据 被拖拽顺序 执行 帧刷新（大的优先）
-	for(var i = $gameTemp._drill_PDr_pictureTank.length-1; i >=0; i-- ){
-		var picture = $gameTemp._drill_PDr_pictureTank[i];
-		picture.drill_PDr_updateDrag();
+	// > 『拖拽的散装帧刷新』 - 拖拽优先级
+	for(var i = 0; i < $gameScreen._pictures.length; i++){
+		var picture = $gameScreen._pictures[i];
+		if( picture == undefined ){ continue; }
+		picture.drill_PDr_updateDrag_Priority();
+	}
+	
+	// > 『拖拽的散装帧刷新』 - 拖拽数量最大值
+	$gameSystem.drill_CODAA_dragFactory().drill_factoryDrag_updateDragMax( "PDr" );
+	
+	// > 『拖拽的散装帧刷新』 - 拖拽位移和标记
+	for(var i = 0; i < $gameScreen._pictures.length; i++){
+		var picture = $gameScreen._pictures[i];
+		if( picture == undefined ){ continue; }
+		picture.drill_PDr_updateDrag_OffsetAndDraging();
 	}
 }
 //==============================
-// * 图片拖拽控制 - 帧刷新 拖拽
+// * 图片拖拽控制 - 帧刷新 - 拖拽优先级
 //==============================
-Game_Picture.prototype.drill_PDr_updateDrag = function() {
-	if( this.drill_PDr_canDrag() != true ){ return; }
+Game_Picture.prototype.drill_PDr_updateDrag_Priority = function() {
+	var controller = this.drill_PDr_getDragController();
+	if( controller == undefined ){ return; }
+	
+	// > 参数 - 是否悬停【图片 - 图片与鼠标控制核心】
+	var is_onHover = this.drill_COPWM_isOnHover();
+	
+	// > 参数 - 是否按下
+	var is_onPress = false;
+	if( $gameSystem._drill_PDr_dragableLeft   && TouchInput.drill_isLeftPressed()   ){ is_onPress = true; }
+	if( $gameSystem._drill_PDr_dragableMiddle && TouchInput.drill_isMiddlePressed() ){ is_onPress = true; }
+	if( $gameSystem._drill_PDr_dragableRight  && TouchInput.drill_isRightPressed()  ){ is_onPress = true; }
+	
+	// > 帧刷新 控制器
+	controller.drill_controllerDrag_updatePriority( is_onHover, is_onPress );
+}
+//==============================
+// * 图片拖拽控制 - 帧刷新 - 拖拽位移和标记
+//			
+//			说明：	> 此处已经完成了 拖拽优先级 和 拖拽优先级结果 的帧刷新。
+//					> 可以获取 优先级结果列表。（$gameTemp.drill_CODAA_getDragPriorityOrderTank("PDr"); ）
+//==============================
+Game_Picture.prototype.drill_PDr_updateDrag_OffsetAndDraging = function() {
+	var controller = this.drill_PDr_getDragController();
+	if( controller == undefined ){ return; }
 	
 	// > 参数 - 是否悬停【图片 - 图片与鼠标控制核心】
 	var is_onHover = this.drill_COPWM_isOnHover();
@@ -944,22 +955,22 @@ Game_Picture.prototype.drill_PDr_updateDrag = function() {
 	var yy = _drill_mouse_y;
 	
 	// > 帧刷新 控制器
-	var controller = this.drill_PDr_getDragController();
-	controller.drill_controllerDrag_update( xx, yy, is_onHover, is_onPress );
+	controller.drill_controllerDrag_updateOffset( xx, yy );
+	controller.drill_controllerDrag_updateDraging( is_onHover, is_onPress );
 }
 
 //==============================
 // * 图片拖拽控制 - 获取拖拽偏移量X（私有）
 //==============================
 Game_Picture.prototype.drill_PDr_getDraggingXOffset_Private = function(){
-	if( this._drill_PDr_switchData == undefined ){ return 0; }
+	if( this._drill_PDr_attrData == undefined ){ return 0; }
 	return this.drill_PDr_getDragController().drill_controllerDrag_getDraggingXOffset();
 }
 //==============================
 // * 图片拖拽控制 - 获取拖拽偏移量Y（私有）
 //==============================
 Game_Picture.prototype.drill_PDr_getDraggingYOffset_Private = function(){
-	if( this._drill_PDr_switchData == undefined ){ return 0; }
+	if( this._drill_PDr_attrData == undefined ){ return 0; }
 	return this.drill_PDr_getDragController().drill_controllerDrag_getDraggingYOffset();
 }
 //==============================
@@ -1007,8 +1018,9 @@ var _drill_PDr_CODAA_dragEnding = Drill_CODAA_DragController.prototype.drill_con
 Drill_CODAA_DragController.prototype.drill_controllerDrag_dragEnding = function() {
 	_drill_PDr_CODAA_dragEnding.call(this);
 	
-	if( this._drill_pluginShort == "PDr" ){				//（根据插件简称，找到该插件创建的 拖拽控制器 ）
-		$gameTemp.drill_COPi_needRefreshSpriteZIndex();	//（刷新堆叠级）
+	if( this._drill_pluginShort == "PDr" ){									//（根据插件简称，找到该插件创建的 拖拽控制器 ）
+		$gameScreen.drill_PDr_refreshPictureZIndex(this._drill_productId);	//（刷新堆叠级数据）
+		$gameTemp.drill_COPi_needRefreshSpriteZIndex();						//（刷新堆叠级）
 	}
 }
 //==============================
@@ -1017,11 +1029,16 @@ Drill_CODAA_DragController.prototype.drill_controllerDrag_dragEnding = function(
 var _drill_PDr_whenRefreshZIndex = Game_Temp.prototype.drill_COPi_whenRefreshZIndex;
 Game_Temp.prototype.drill_COPi_whenRefreshZIndex = function( temp_sprite, picture_id ){
 	_drill_PDr_whenRefreshZIndex.call( this, temp_sprite, picture_id );
-	
+	this.drill_PDr_refreshSpriteZIndex( temp_sprite, picture_id );
+}
+//==============================
+// * 堆叠级控制 - 刷新 拖拽时自动置顶图片
+//==============================
+Game_Temp.prototype.drill_PDr_refreshSpriteZIndex = function( temp_sprite, picture_id ){
 	var picture = temp_sprite.picture();
 	if( picture == undefined ){ return; }
 	
-	// > 设置堆叠级
+	// > 设置 贴图的堆叠级
 	if( picture.drill_PDr_isDraging() == true ){
 		if( $gameSystem._drill_PDr_dragAutoTop == true ){
 			temp_sprite.zIndex += 9999;
@@ -1032,18 +1049,48 @@ Game_Temp.prototype.drill_COPi_whenRefreshZIndex = function( temp_sprite, pictur
 	// > 钉住的图片情况【图片-图片图钉】
 	if( Imported.Drill_PictureThumbtack ){
 		if( picture._drill_PTh_data != undefined &&
-			picture._drill_PTh_data['type'] == "图片" ){
-			var tar_pic_id = picture._drill_PTh_data['pic_id'];
+			picture._drill_PTh_data['bindPos_type'] == "图片" ){
+			var tar_pic_id = picture._drill_PTh_data['bindPos_picId'];
 			var tar_picture = $gameScreen.picture( tar_pic_id );
 			if( tar_picture != undefined ){
 				
-				// > 设置堆叠级（图钉的目标图片被拖拽，图钉图片也一起提升 堆叠级）
+				// > 设置 贴图的堆叠级（图钉的目标图片被拖拽，图钉图片也一起提升 堆叠级）
 				if( tar_picture.drill_PDr_isDraging() == true ){
 					if( $gameSystem._drill_PDr_dragAutoTop == true ){
 						temp_sprite.zIndex += 9999;
 						return;
 					}
 				}
+			}
+		}
+	}
+}
+//==============================
+// * 堆叠级控制 - 刷新 拖拽后永久置顶图片
+//==============================
+Game_Screen.prototype.drill_PDr_refreshPictureZIndex = function( dragControllerId ){
+	if( $gameSystem._drill_PDr_dragChangeZIndex != true ){ return; }
+	
+	// > 获取推荐优先级
+	//		（结束拖拽时，处于函数 拖拽位移和标记 中，此时已经执行完了 drill_factoryDrag_updateDragMax ）
+	var recommend_zIndex = $gameTemp.drill_CODAA_getDragRecommendPriority( "PDr", dragControllerId );
+	
+	// > 设置 堆叠级
+	var picture = this.drill_PDr_getPicture_ByDragControllerId( dragControllerId );
+	if( picture == undefined ){ return; }
+	var last_zIndex = picture.drill_PLAZ_getZIndex();
+	var diff_zIndex = recommend_zIndex - last_zIndex;
+	picture.drill_PLAZ_setZIndex( recommend_zIndex );
+	
+	// > 钉住的图片情况【图片-图片图钉】
+	if( Imported.Drill_PictureThumbtack ){
+		if( picture._drill_PTh_data != undefined &&
+			picture._drill_PTh_data['bindPos_type'] == "图片" ){
+			var tar_pic_id = picture._drill_PTh_data['bindPos_picId'];
+			var tar_picture = $gameScreen.picture( tar_pic_id );
+			if( tar_picture != undefined ){
+				var tar_zIndex = tar_picture.drill_PLAZ_getZIndex();
+				tar_picture.drill_PLAZ_setZIndex( tar_zIndex + diff_zIndex );
 			}
 		}
 	}
@@ -1057,7 +1104,7 @@ Game_Temp.prototype.drill_COPi_whenRefreshZIndex = function( temp_sprite, pictur
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 地图点击拦截 - 点击监听『图片与多场景』
+// * 地图点击拦截 - 点击监听『图片与多场景-地图界面』
 //==============================
 var _drill_PDr_processMapTouch = Scene_Map.prototype.processMapTouch;
 Scene_Map.prototype.processMapTouch = function() {	
@@ -1068,9 +1115,12 @@ Scene_Map.prototype.processMapTouch = function() {
 // * 地图点击拦截 - 条件
 //==============================
 Scene_Map.prototype.drill_PDr_hasAnyHovered = function() {
-	for(var i = 0; i < $gameTemp._drill_PDr_pictureTank.length; i++){
-		var picture = $gameTemp._drill_PDr_pictureTank[i];
-		if( picture.drill_PDr_getDragController().drill_controllerDrag_isHovering() == true ){
+	for(var i = 0; i < $gameScreen._pictures.length; i++){
+		var picture = $gameScreen._pictures[i];
+		if( picture == undefined ){ continue; }
+		var controller = picture.drill_PDr_getDragController();
+		if( controller == undefined ){ continue; }
+		if( controller.drill_controllerDrag_isHovering() == true ){
 			return true;
 		}
 	}

@@ -289,8 +289,9 @@
 	DrillUp.g_PAlEM_list_length = 10;
 	DrillUp.g_PAlEM_list = [];
 	for( var i = 0; i < DrillUp.g_PAlEM_list_length; i++ ){
-		if( DrillUp.parameters['操作移动权限-' + String(i+1) ] != "" ){
-			var temp = JSON.parse(DrillUp.parameters['操作移动权限-' + String(i+1) ]);
+		if( DrillUp.parameters["操作移动权限-" + String(i+1) ] != undefined &&
+			DrillUp.parameters["操作移动权限-" + String(i+1) ] != "" ){
+			var temp = JSON.parse(DrillUp.parameters["操作移动权限-" + String(i+1) ]);
 			DrillUp.g_PAlEM_list[i] = DrillUp.drill_PAlEM_initData( temp );
 		}else{
 			DrillUp.g_PAlEM_list[i] = null;

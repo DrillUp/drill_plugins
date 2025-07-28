@@ -780,9 +780,11 @@
 //			->☆地图层级
 //			->☆战斗层级
 //			
-//			->☆播放控制
-//			->☆贴图控制
 //			->☆对话框控制
+//			->☆播放控制
+//				->对话框 执行打开
+//				->对话框 执行关闭
+//			->☆贴图控制
 //
 //
 //		★家谱：
@@ -1156,6 +1158,91 @@ Scene_Battle.prototype.drill_DSS_layerAddSprite_Private = function( sprite, laye
 
 
 //=============================================================================
+// ** ☆对话框控制
+//			
+//			说明：	> 此模块专门控制 对话框 。
+//					> 播放 简易对话图 时，需要隐藏对话框。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 对话框控制 - 初始化
+//==============================
+var _drill_DSS_initialize = Window_Message.prototype.initialize;
+Window_Message.prototype.initialize = function() {
+	_drill_DSS_initialize.call(this);
+	this._drill_DSS_spriteData = {};					//
+	this._drill_DSS_spriteData['orgX'] = -1;			//原坐标x
+	this._drill_DSS_spriteData['orgY'] = -1;			//原坐标y
+	this._drill_DSS_spriteData['delay'] = 0;			//变动延迟
+	this._drill_DSS_spriteData['lastState'] = false;	//变化锁
+}
+//==============================
+// * 对话框控制（兼容） - 对话框 帧刷新
+//==============================
+var _drill_DSS_update = Window_Message.prototype.update;
+Window_Message.prototype.update = function() {
+	_drill_DSS_update.call(this);
+	this.drill_DSS_updateWindowHide();			//帧刷新变换
+};
+if( Imported.Drill_CoreOfDialog ){
+	//==============================
+	// * 对话框控制（对话框优化核心） - 对话框 帧刷新
+	//==============================
+	var _drill_DSS_CODi_message_update = Window_Message.prototype.drill_CODi_message_update;
+	Window_Message.prototype.drill_CODi_message_update = function(){
+		_drill_DSS_CODi_message_update.call(this);
+		this.drill_DSS_updateWindowHide();		//帧刷新变换
+	}
+}
+//==============================
+// * 对话框控制 - 帧刷新变换
+//==============================
+Window_Message.prototype.drill_DSS_updateWindowHide = function() {
+	
+	// > 时间+1
+	this._drill_DSS_spriteData['delay'] += 1;
+	
+	// > 播放隐藏
+	if( $gameTemp.drill_DSS_isPlaying() == true ){				//（是否正在播放）
+		if( this._drill_DSS_spriteData['lastState'] == false ){
+			this._drill_DSS_spriteData['lastState'] = true;		//锁-开始播放时
+			
+			this._drill_DSS_spriteData['orgX'] = this.x;		//（记录位置）
+			this._drill_DSS_spriteData['orgY'] = this.y;
+			
+			this.x += 0;
+			this.y += Graphics.boxHeight * 2;
+		}
+		
+	// > 关闭隐藏
+	}else{
+		if( this._drill_DSS_spriteData['lastState'] == true ){
+			this._drill_DSS_spriteData['lastState'] = false;		//锁-结束播放时
+			
+			this._drill_DSS_spriteData['delay'] = 0;
+		}
+		
+		// > 延迟归位（8帧后 执行一次归位，已经归位则不执行）
+		if( this._drill_DSS_spriteData['lastState'] == false && 
+			this._drill_DSS_spriteData['delay'] > 8 ){
+			this.drill_DSS_homingPosition();
+		}
+	}
+}
+//==============================
+// * 对话框控制 - 执行归位（开放函数）
+//==============================
+Window_Message.prototype.drill_DSS_homingPosition = function() {
+	if( this._drill_DSS_spriteData['orgX'] == -1 &&
+		this._drill_DSS_spriteData['orgY'] == -1 ){ return; }
+	this.x = this._drill_DSS_spriteData['orgX'];
+	this.y = this._drill_DSS_spriteData['orgY'];
+	this._drill_DSS_spriteData['orgX'] = -1;			//（清理原坐标）
+	this._drill_DSS_spriteData['orgY'] = -1;			//
+}
+
+
+//=============================================================================
 // ** ☆播放控制
 //			
 //			说明：	> 此模块专门控制 播放 。
@@ -1187,7 +1274,7 @@ Game_Temp.prototype.drill_DSS_checkPicIndex = function() {
 	}
 };
 //==============================
-// * 播放控制 - 检查播放
+// * 播放控制 - 是否正在播放（开放函数）
 //==============================
 Game_Temp.prototype.drill_DSS_isPlaying = function() {
 	if( this._drill_DSS_picIndex >= 0 ){ return true; }
@@ -1195,15 +1282,21 @@ Game_Temp.prototype.drill_DSS_isPlaying = function() {
 };
 
 //==============================
-// * 播放控制 - 新的消息（兼容）
+// * 播放控制 - 对话框 执行打开（兼容）
 //==============================
 var _drill_DSS_startMessage = Window_Message.prototype.startMessage;
 Window_Message.prototype.startMessage = function() {
 	_drill_DSS_startMessage.call(this);
+	/*
+		实现原理：
+			1. 通过插件指令播放 $gameMessage.add() 来捕获参数，进入对话框。
+			2. 进入到此函数后，开启 drill_DSS_isPlaying 判定。
+			3. 根据判定，自动隐藏对话框，显示对话图。
+	*/
 	$gameTemp.drill_DSS_checkPicIndex();
 };
 //==============================
-// * 播放控制 - 关闭消息（兼容）
+// * 播放控制 - 对话框 执行关闭（兼容）
 //==============================
 var _drill_DSS_terminateMessage = Window_Message.prototype.terminateMessage;
 Window_Message.prototype.terminateMessage = function() {
@@ -1212,7 +1305,7 @@ Window_Message.prototype.terminateMessage = function() {
 };
 if( Imported.Drill_CoreOfDialog ){
 	//==============================
-	// * 播放控制 - 新的消息（对话框优化核心）
+	// * 播放控制 - 对话框 执行打开（对话框优化核心）
 	//==============================
 	var _drill_DSS_CODi_message_newPage = Window_Message.prototype.drill_CODi_message_newPage;
 	Window_Message.prototype.drill_CODi_message_newPage = function() {
@@ -1220,7 +1313,7 @@ if( Imported.Drill_CoreOfDialog ){
 		$gameTemp.drill_DSS_checkPicIndex();
 	};
 	//==============================
-	// * 播放控制 - 关闭消息（对话框优化核心）
+	// * 播放控制 - 对话框 执行关闭（对话框优化核心）
 	//==============================
 	var _drill_DSS_CODi_message_doTerminate = Window_Message.prototype.drill_CODi_message_doTerminate;
 	Window_Message.prototype.drill_CODi_message_doTerminate = function() {
@@ -1324,85 +1417,3 @@ Scene_Battle.prototype.update = function() {
 Scene_Battle.prototype.drill_DSS_updateSprite = Scene_Map.prototype.drill_DSS_updateSprite;
 	
 	
-//=============================================================================
-// ** ☆对话框控制
-//			
-//			说明：	> 此模块专门控制 对话框 。
-//					（插件完整的功能目录去看看：功能结构树）
-//=============================================================================
-//==============================
-// * 对话框控制 - 初始化
-//==============================
-var _drill_DSS_initialize = Window_Message.prototype.initialize;
-Window_Message.prototype.initialize = function() {
-	_drill_DSS_initialize.call(this);
-	this._drill_DSS_spriteData = {};					//
-	this._drill_DSS_spriteData['orgX'] = -1;			//原坐标x
-	this._drill_DSS_spriteData['orgY'] = -1;			//原坐标y
-	this._drill_DSS_spriteData['delay'] = 0;			//变动延迟
-	this._drill_DSS_spriteData['lastState'] = false;	//变动延迟
-}
-//==============================
-// * 对话框控制 - 帧刷新（兼容）
-//==============================
-var _drill_DSS_update = Window_Message.prototype.update;
-Window_Message.prototype.update = function() {
-	_drill_DSS_update.call(this);
-	this.drill_DSS_updateEffect();			//帧刷新变换
-};
-if( Imported.Drill_CoreOfDialog ){
-	//==============================
-	// * 对话框控制 - 帧刷新（对话框优化核心）
-	//==============================
-	var _drill_DSS_CODi_message_update = Window_Message.prototype.drill_CODi_message_update;
-	Window_Message.prototype.drill_CODi_message_update = function(){
-		_drill_DSS_CODi_message_update.call(this);
-		this.drill_DSS_updateEffect();		//帧刷新变换
-	}
-}
-//==============================
-// * 对话框控制 - 帧刷新变换
-//==============================
-Window_Message.prototype.drill_DSS_updateEffect = function() {
-	
-	// > 时间+1
-	this._drill_DSS_spriteData['delay'] += 1;
-	
-	// > 播放隐藏
-	if( $gameTemp.drill_DSS_isPlaying() == true ){
-		if( this._drill_DSS_spriteData['lastState'] == false ){
-			this._drill_DSS_spriteData['lastState'] = true;		//锁-开始播放时
-			
-			this._drill_DSS_spriteData['orgX'] = this.x;		//（记录位置）
-			this._drill_DSS_spriteData['orgY'] = this.y;
-			
-			this.x += 0;
-			this.y += Graphics.boxHeight * 2;
-		}
-		
-	// > 关闭隐藏
-	}else{
-		if( this._drill_DSS_spriteData['lastState'] == true ){
-			this._drill_DSS_spriteData['lastState'] = false;		//锁-结束播放时
-			
-			this._drill_DSS_spriteData['delay'] = 0;
-		}
-		
-		// > 延迟归位（8帧后 执行一次归位，已经归位则不执行）
-		if( this._drill_DSS_spriteData['lastState'] == false && 
-			this._drill_DSS_spriteData['delay'] > 8 ){
-			this.drill_DSS_homingPosition();
-		}
-	}
-}
-//==============================
-// * 对话框控制 - 执行归位（开放函数）
-//==============================
-Window_Message.prototype.drill_DSS_homingPosition = function() {
-	if( this._drill_DSS_spriteData['orgX'] == -1 &&
-		this._drill_DSS_spriteData['orgY'] == -1 ){ return; }
-	this.x = this._drill_DSS_spriteData['orgX'];
-	this.y = this._drill_DSS_spriteData['orgY'];
-	this._drill_DSS_spriteData['orgX'] = -1;			//（清理原坐标）
-	this._drill_DSS_spriteData['orgY'] = -1;			//
-}

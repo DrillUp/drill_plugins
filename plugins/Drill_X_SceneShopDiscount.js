@@ -782,15 +782,15 @@
 	// * 静态数据 - 折扣设置
 	//				（~struct~DrillShopDiscount）
 	//==============================
-	DrillUp.drill_XSSD_initShopDiscount = function( dataFrom ) {
+	DrillUp.drill_XSSD_initShopDiscount = function( dataFrom ){
 		var data = {};
 		
 		// > 作用域
 		data['shopEnabled'] = String( dataFrom["是否应用到全自定义商店界面"] || "true") == "true";
 		data['limitShopEnabled'] = String( dataFrom["是否应用到限量商店界面"] || "true") == "true";
 		data['limitShopAllDiscount'] = String( dataFrom["是否所有限量商店含折扣"] || "false") == "true";
-		if( dataFrom["指定限量商店含折扣"] != "" &&
-			dataFrom["指定限量商店含折扣"] != undefined ){
+		if( dataFrom["指定限量商店含折扣"] != undefined &&
+			dataFrom["指定限量商店含折扣"] != "" ){
 			data['limitShopIdList'] = JSON.parse( dataFrom["指定限量商店含折扣"] );
 		}else{
 			data['limitShopIdList'] = [];
@@ -828,8 +828,8 @@
 		data['zIndex'] = Number( dataFrom["图片层级"] || 4);
 		
 		// > 折扣信息框
-		if( dataFrom["折扣文本信息"] != "" &&
-			dataFrom["折扣文本信息"] != undefined ){
+		if( dataFrom["折扣文本信息"] != undefined &&
+			dataFrom["折扣文本信息"] != "" ){
 			data['window_context'] = JSON.parse( dataFrom["折扣文本信息"] );
 		}else{
 			data['window_context'] = "";
@@ -841,7 +841,7 @@
 	/*-----------------折扣------------------*/
 	DrillUp.g_XSSD_list_length = 20;
 	DrillUp.g_XSSD_list = [];
-	for (var i = 0; i < DrillUp.g_XSSD_list_length; i++) {
+	for( var i = 0; i < DrillUp.g_XSSD_list_length; i++ ){
 		if( DrillUp.parameters["折扣-" + String(i+1) ] != undefined &&
 			DrillUp.parameters["折扣-" + String(i+1) ] != "" ){
 			var temp = JSON.parse(DrillUp.parameters["折扣-" + String(i+1) ]);

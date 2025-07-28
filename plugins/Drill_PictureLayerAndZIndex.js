@@ -392,12 +392,26 @@ Game_Picture.prototype.drill_PLAZ_setLayer = function( layer ){
 	$gameTemp.drill_COPi_needRefreshSpriteZIndex();	//（刷新堆叠级）
 }
 //==============================
+// * 图片的属性 - 获取层级（开放函数）
+//==============================
+Game_Picture.prototype.drill_PLAZ_getLayer = function(){
+	if( this._drill_PLAZ_data == undefined ){ return "图片对象层"; }
+	return this._drill_PLAZ_data['layer'];
+}
+//==============================
 // * 图片的属性 - 设置堆叠级（开放函数）
 //==============================
 Game_Picture.prototype.drill_PLAZ_setZIndex = function( zIndex ){
 	this.drill_PLAZ_checkData();
 	this._drill_PLAZ_data['zIndex'] = zIndex;
 	$gameTemp.drill_COPi_needRefreshSpriteZIndex();	//（刷新堆叠级）
+}
+//==============================
+// * 图片的属性 - 获取堆叠级（开放函数）
+//==============================
+Game_Picture.prototype.drill_PLAZ_getZIndex = function(){
+	if( this._drill_PLAZ_data == undefined ){ return this.drill_COPi_getPictureId(); }
+	return this._drill_PLAZ_data['zIndex'];
 }
 //==============================
 // * 图片的属性 - 恢复默认（开放函数）
@@ -429,7 +443,7 @@ Game_Temp.prototype.drill_COPi_whenRefreshLayer = function( temp_sprite, picture
 	if( picture._drill_PLAZ_data == undefined ){ return; }
 	
 	// > 设置层级
-	temp_sprite._drill_layer = picture._drill_PLAZ_data['layer'];
+	temp_sprite._drill_layer = picture.drill_PLAZ_getLayer();
 }
 //==============================
 // * 图片贴图控制 - 设置堆叠级时（继承）
@@ -443,7 +457,7 @@ Game_Temp.prototype.drill_COPi_whenRefreshZIndex = function( temp_sprite, pictur
 	if( picture._drill_PLAZ_data == undefined ){ return; }
 	
 	// > 设置堆叠级
-	temp_sprite.zIndex = picture._drill_PLAZ_data['zIndex'];
+	temp_sprite.zIndex = picture.drill_PLAZ_getZIndex();
 }
 
 

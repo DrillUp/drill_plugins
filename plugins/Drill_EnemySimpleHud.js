@@ -744,7 +744,7 @@
 	// * 静态数据 - 生命框
 	//				（~struct~DrillESHStyle）
 	//==============================
-	DrillUp.drill_ESH_initParam = function( dataFrom ) {
+	DrillUp.drill_ESH_initParam = function( dataFrom ){
 		var data = {};
 		// > 层级
 		data['x'] = Number( dataFrom["平移-位置 X"] || 0);
@@ -1468,7 +1468,7 @@ function Drill_ESH_Bean(){
 // * 实体类 - 初始化
 //==============================
 Drill_ESH_Bean.prototype.initialize = function(){
-	this._drill_beanSerial = new Date().getTime() + Math.random();		//（生成一个不重复的序列号）
+	this._drill_beanSerial = new Date().getTime() + Math.random();		//『生成一个不重复的序列号』
     this.drill_initPrivateData();										//私有数据初始化
 };
 //##############################

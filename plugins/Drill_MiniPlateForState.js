@@ -1243,22 +1243,70 @@
 	DrillUp.g_MPFS_debuff[5] = [];
 	DrillUp.g_MPFS_debuff[6] = [];
 	DrillUp.g_MPFS_debuff[7] = [];
-	if( DrillUp.parameters["强化-生命"] != "" ){ DrillUp.g_MPFS_buff[0] = JSON.parse(DrillUp.parameters["强化-生命"] ); }
-	if( DrillUp.parameters["强化-魔法"] != "" ){ DrillUp.g_MPFS_buff[1] = JSON.parse(DrillUp.parameters["强化-魔法"] ); }
-	if( DrillUp.parameters["强化-攻击力"] != "" ){ DrillUp.g_MPFS_buff[2] = JSON.parse(DrillUp.parameters["强化-攻击力"] ); }
-	if( DrillUp.parameters["强化-防御力"] != "" ){ DrillUp.g_MPFS_buff[3] = JSON.parse(DrillUp.parameters["强化-防御力"] ); }
-	if( DrillUp.parameters["强化-魔法攻击"] != "" ){ DrillUp.g_MPFS_buff[4] = JSON.parse(DrillUp.parameters["强化-魔法攻击"] ); }
-	if( DrillUp.parameters["强化-魔法防御"] != "" ){ DrillUp.g_MPFS_buff[5] = JSON.parse(DrillUp.parameters["强化-魔法防御"] ); }
-	if( DrillUp.parameters["强化-敏捷"] != "" ){ DrillUp.g_MPFS_buff[6] = JSON.parse(DrillUp.parameters["强化-敏捷"] ); }
-	if( DrillUp.parameters["强化-幸运"] != "" ){ DrillUp.g_MPFS_buff[7] = JSON.parse(DrillUp.parameters["强化-幸运"] ); }
-	if( DrillUp.parameters["弱化-生命"] != "" ){ DrillUp.g_MPFS_debuff[0] = JSON.parse(DrillUp.parameters["弱化-生命"] ); }
-	if( DrillUp.parameters["弱化-魔法"] != "" ){ DrillUp.g_MPFS_debuff[1] = JSON.parse(DrillUp.parameters["弱化-魔法"] ); }
-	if( DrillUp.parameters["弱化-攻击力"] != "" ){ DrillUp.g_MPFS_debuff[2] = JSON.parse(DrillUp.parameters["弱化-攻击力"] ); }
-	if( DrillUp.parameters["弱化-防御力"] != "" ){ DrillUp.g_MPFS_debuff[3] = JSON.parse(DrillUp.parameters["弱化-防御力"] ); }
-	if( DrillUp.parameters["弱化-魔法攻击"] != "" ){ DrillUp.g_MPFS_debuff[4] = JSON.parse(DrillUp.parameters["弱化-魔法攻击"] ); }
-	if( DrillUp.parameters["弱化-魔法防御"] != "" ){ DrillUp.g_MPFS_debuff[5] = JSON.parse(DrillUp.parameters["弱化-魔法防御"] ); }
-	if( DrillUp.parameters["弱化-敏捷"] != "" ){ DrillUp.g_MPFS_debuff[6] = JSON.parse(DrillUp.parameters["弱化-敏捷"] ); }
-	if( DrillUp.parameters["弱化-幸运"] != "" ){ DrillUp.g_MPFS_debuff[7] = JSON.parse(DrillUp.parameters["弱化-幸运"] ); }
+	if( DrillUp.parameters["强化-生命"] != undefined &&
+		DrillUp.parameters["强化-生命"] != "" ){
+		DrillUp.g_MPFS_buff[0] = JSON.parse(DrillUp.parameters["强化-生命"] );
+	}
+	if( DrillUp.parameters["强化-魔法"] != undefined &&
+		DrillUp.parameters["强化-魔法"] != "" ){
+		DrillUp.g_MPFS_buff[1] = JSON.parse(DrillUp.parameters["强化-魔法"] );
+	}
+	if( DrillUp.parameters["强化-攻击力"] != undefined &&
+		DrillUp.parameters["强化-攻击力"] != "" ){
+		DrillUp.g_MPFS_buff[2] = JSON.parse(DrillUp.parameters["强化-攻击力"] );
+	}
+	if( DrillUp.parameters["强化-防御力"] != undefined &&
+		DrillUp.parameters["强化-防御力"] != "" ){
+		DrillUp.g_MPFS_buff[3] = JSON.parse(DrillUp.parameters["强化-防御力"] );
+	}
+	if( DrillUp.parameters["强化-魔法攻击"] != undefined &&
+		DrillUp.parameters["强化-魔法攻击"] != "" ){
+		DrillUp.g_MPFS_buff[4] = JSON.parse(DrillUp.parameters["强化-魔法攻击"] );
+	}
+	if( DrillUp.parameters["强化-魔法防御"] != undefined &&
+		DrillUp.parameters["强化-魔法防御"] != "" ){
+		DrillUp.g_MPFS_buff[5] = JSON.parse(DrillUp.parameters["强化-魔法防御"] );
+	}
+	if( DrillUp.parameters["强化-敏捷"] != undefined &&
+		DrillUp.parameters["强化-敏捷"] != "" ){
+		DrillUp.g_MPFS_buff[6] = JSON.parse(DrillUp.parameters["强化-敏捷"] );
+	}
+	if( DrillUp.parameters["强化-幸运"] != undefined &&
+		DrillUp.parameters["强化-幸运"] != "" ){
+		DrillUp.g_MPFS_buff[7] = JSON.parse(DrillUp.parameters["强化-幸运"] );
+	}
+	if( DrillUp.parameters["弱化-生命"] != undefined &&
+		DrillUp.parameters["弱化-生命"] != "" ){
+		DrillUp.g_MPFS_debuff[0] = JSON.parse(DrillUp.parameters["弱化-生命"] );
+	}
+	if( DrillUp.parameters["弱化-魔法"] != undefined &&
+		DrillUp.parameters["弱化-魔法"] != "" ){
+		DrillUp.g_MPFS_debuff[1] = JSON.parse(DrillUp.parameters["弱化-魔法"] );
+	}
+	if( DrillUp.parameters["弱化-攻击力"] != undefined &&
+		DrillUp.parameters["弱化-攻击力"] != "" ){
+		DrillUp.g_MPFS_debuff[2] = JSON.parse(DrillUp.parameters["弱化-攻击力"] );
+	}
+	if( DrillUp.parameters["弱化-防御力"] != undefined &&
+		DrillUp.parameters["弱化-防御力"] != "" ){
+		DrillUp.g_MPFS_debuff[3] = JSON.parse(DrillUp.parameters["弱化-防御力"] );
+	}
+	if( DrillUp.parameters["弱化-魔法攻击"] != undefined &&
+		DrillUp.parameters["弱化-魔法攻击"] != "" ){
+		DrillUp.g_MPFS_debuff[4] = JSON.parse(DrillUp.parameters["弱化-魔法攻击"] );
+	}
+	if( DrillUp.parameters["弱化-魔法防御"] != undefined &&
+		DrillUp.parameters["弱化-魔法防御"] != "" ){
+		DrillUp.g_MPFS_debuff[5] = JSON.parse(DrillUp.parameters["弱化-魔法防御"] );
+	}
+	if( DrillUp.parameters["弱化-敏捷"] != undefined &&
+		DrillUp.parameters["弱化-敏捷"] != "" ){
+		DrillUp.g_MPFS_debuff[6] = JSON.parse(DrillUp.parameters["弱化-敏捷"] );
+	}
+	if( DrillUp.parameters["弱化-幸运"] != undefined &&
+		DrillUp.parameters["弱化-幸运"] != "" ){
+		DrillUp.g_MPFS_debuff[7] = JSON.parse(DrillUp.parameters["弱化-幸运"] );
+	}
 	for(var i = 0; i < DrillUp.g_MPFS_buff.length; i++ ){		//（buff内容处理）
 		var texts = DrillUp.g_MPFS_buff[i];
 		for(var j = 0; j < texts.length; j++ ){
@@ -1270,7 +1318,7 @@
 			texts[j] = JSON.parse( String(texts[j]) || "" );
 		}
 	}
-	for(var i = 0; i < DrillUp.g_MPFS_debuff.length; i++ ){	//（debuff内容处理）
+	for(var i = 0; i < DrillUp.g_MPFS_debuff.length; i++ ){		//（debuff内容处理）
 		var texts = DrillUp.g_MPFS_debuff[i];
 		for(var j = 0; j < texts.length; j++ ){
 			//var temp = String(texts[j]);
@@ -1286,7 +1334,7 @@
 	// * 静态数据 - 状态描述
 	//				（~struct~MiniPlateForState）
 	//==============================
-	DrillUp.drill_MPFS_initState = function( dataFrom ) {
+	DrillUp.drill_MPFS_initState = function( dataFrom ){
 		var data = {};
 		data['enabled'] = String( dataFrom["是否初始使用详细说明"] || "true") == "true";
 		
@@ -2217,7 +2265,7 @@ function Drill_MPFS_Bean(){
 // * 实体类 - 初始化
 //==============================
 Drill_MPFS_Bean.prototype.initialize = function(){
-	this._drill_beanSerial = new Date().getTime() + Math.random();		//（生成一个不重复的序列号）
+	this._drill_beanSerial = new Date().getTime() + Math.random();		//『生成一个不重复的序列号』
     this.drill_bean_initData();											//私有数据初始化
 };
 //##############################

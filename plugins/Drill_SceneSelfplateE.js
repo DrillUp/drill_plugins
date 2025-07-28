@@ -3,12 +3,12 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        面板 - 全自定义信息面板E
+ * @plugindesc [v1.3]        面板 - 全自定义信息面板E
  * @author Drill_up
  * 
  * @Drill_LE_param "阶段-%d"
  * @Drill_LE_parentKey ""
- * @Drill_LE_var "DrillUp.g_SSpE_list_length"
+ * @Drill_LE_var "DrillUp.g_SSpE_stepList_length"
  * 
  * 
  * @help  
@@ -25,7 +25,8 @@
  * 该插件 不能 单独使用。
  * 必须基于核心插件才能运行。
  * 基于：
- *   - Drill_CoreOfScreenRoller    窗口字符-长画布贴图核心
+ *   - Drill_CoreOfGlobalSave        管理器-全局存储核心
+ *   - Drill_CoreOfScreenRoller      窗口字符-长画布贴图核心
  *     必须基于该插件才能建立长画布并播放内容。
  *
  * -----------------------------------------------------------------------------
@@ -75,6 +76,19 @@
  * 插件指令：>信息面板E : 打开面板
  *
  * -----------------------------------------------------------------------------
+ * ----可选设定 - 阶段设置
+ * 你可以通过插件指令修改阶段设置：
+ * 
+ * 插件指令：>信息面板E : 显示阶段 : 阶段[1]
+ * 插件指令：>信息面板E : 显示阶段 : 阶段变量[21]
+ * 插件指令：>信息面板E : 隐藏阶段 : 阶段[1]
+ * 插件指令：>信息面板E : 隐藏阶段 : 阶段变量[21]
+ * 插件指令：>信息面板E : 显示全部阶段
+ * 插件指令：>信息面板E : 隐藏全部阶段
+ * 
+ * 1.面板打开时，游戏是暂停的，所以你不能在面板中实时变化某些数值。
+ *
+ * -----------------------------------------------------------------------------
  * ----插件性能
  * 测试仪器：   4G 内存，Intel Core i5-2520M CPU 2.5GHz 处理器
  *              Intel(R) HD Graphics 3000 集显 的垃圾笔记本
@@ -87,7 +101,7 @@
  * 工作类型：   持续执行
  * 时间复杂度： o(n^2)*o(场景元素) 每帧
  * 测试方法：   直接进入该信息面板进行测试。
- * 测试结果：   在菜单界面中，基本元素消耗为：【13.65ms】
+ * 测试结果：   在菜单界面中，基本元素消耗为：【5ms以下】
  * 
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
  *   测试结果并不是精确值，范围在给定值的10ms范围内波动。
@@ -106,6 +120,8 @@
  * 遮罩资源会根据游戏分辨率自动缩放。
  * [v1.2]
  * 更新并兼容了新的窗口字符底层。
+ * [v1.3]
+ * 添加了阶段的显示与隐藏功能。
  * 
  * 
  * @param ----杂项----
@@ -127,32 +143,6 @@
  * @dir img/Menu__self/
  * @type file
  *
- * @param 是否添加到主菜单
- * @parent ----杂项----
- * @type boolean
- * @on 添加
- * @off 不添加
- * @desc true - 添加，false - 不添加
- * @default false
- *
- * @param 主菜单显示名
- * @parent 是否添加到主菜单
- * @desc 主菜单显示的选项名。
- * @default 信息面板E
- *
- * @param 是否在标题窗口中显示
- * @parent ----杂项----
- * @type boolean
- * @on 显示
- * @off 不显示
- * @desc true-显示,false-不显示。注意数据存储的位置，如果是正常存储，标题将打开上一存档的数据。没有存档则会报错。
- * @default false
- *
- * @param 标题窗口显示名
- * @parent 是否在标题窗口中显示
- * @desc 标题窗口显示的名称。
- * @default 信息面板E
- *
  * @param 是否初始阶段渐变显示
  * @parent ----杂项----
  * @type boolean
@@ -165,7 +155,57 @@
  * @parent 是否初始阶段渐变显示
  * @desc 初始阶段渐变中，渐变显示的速度。
  * @default 2
+ * 
+ * 
+ * @param ----面板跳转----
+ * @default 
  *
+ * @param 是否在主菜单窗口中显示
+ * @parent ----面板跳转----
+ * @type boolean
+ * @on 显示
+ * @off 不显示
+ * @desc true-显示,false-不显示。
+ * @default false
+ *
+ * @param 主菜单窗口显示名
+ * @parent 是否在主菜单窗口中显示
+ * @desc 主菜单显示的选项名。
+ * @default 信息面板E
+ *
+ * @param 是否在标题窗口中显示
+ * @parent ----面板跳转----
+ * @type boolean
+ * @on 显示
+ * @off 不显示
+ * @desc true-显示,false-不显示。注意数据存储的位置，如果是正常存储，标题将打开上一存档的数据。没有存档则会报错。
+ * @default false
+ *
+ * @param 标题窗口显示名
+ * @parent 是否在标题窗口中显示
+ * @desc 标题窗口显示的名称。
+ * @default 信息面板E
+ * 
+ * 
+ * @param ----存储数据----
+ * @default 
+ *
+ * @param 数据是否全局存储
+ * @parent ----存储数据----
+ * @type boolean
+ * @on 全局存储
+ * @off 正常存储
+ * @desc true-存储在外部文件中,false-存储在普通存档文件中。(设置不会立即生效,要删旧档)
+ * @default false
+ *
+ * @param 全局存储的文件路径
+ * @parent ----存储数据----
+ * @type number
+ * @min 1
+ * @desc 指对应的文件路径ID,该插件的数据将存储到指定文件路径,具体看看"21.管理器 > 关于全局存储.docx"。
+ * @default 1
+ * 
+ * 
  * @param ----滚动内容----
  * @default 
  *
@@ -614,9 +654,11 @@
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^2)*o(场景元素) 每帧
 //		★性能测试因素	直接进入信息面板进行测试。
-//		★性能测试消耗	13.65ms  10.97ms
+//		★性能测试消耗	2025/7/27：
+//							》3.9ms（drill_updateRoller）0.2ms（drill_updateMask）106.2ms（drill_createRoller）
 //		★最坏情况		无
-//		★备注			无
+//		★备注			进入此面板后，前一场景的缓存全部清除，帧刷新也全部停止，有充足的计算资源给面板用。
+//						因此不需要担心性能问题，但测一下性能也无伤大雅。
 //		
 //		★优化记录		暂无
 //
@@ -626,9 +668,11 @@
 //			->☆提示信息
 //			->☆静态数据
 //			->☆插件指令
+//			->☆全局存储
+//			->☆存储数据
 //			
-//			->☆主菜单选项
-//			->☆标题选项
+//			->☆面板跳转之主菜单
+//			->☆面板跳转之标题
 //			->☆面板控制
 //			
 //			->信息面板E【Scene_Drill_SSpE】
@@ -670,7 +714,10 @@
 	//==============================
 	var DrillUp = DrillUp || {}; 
 	DrillUp.g_SSpE_PluginTip_curName = "Drill_SceneSelfplateE.js 面板-全自定义信息面板E";
-	DrillUp.g_SSpE_PluginTip_baseList = ["Drill_CoreOfScreenRoller.js 窗口字符-长画布贴图核心"];
+	DrillUp.g_SSpE_PluginTip_baseList = [
+		"Drill_CoreOfGlobalSave.js 管理器-全局存储核心",
+		"Drill_CoreOfScreenRoller.js 窗口字符-长画布贴图核心"
+	];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
@@ -702,26 +749,21 @@
 	DrillUp.drill_SSpE_initStep = function( dataFrom ){
 		var data = {};
 		
-		data['height'] = Number(dataFrom["阶段高度"] || 0);
+		// > B阶段
+		data['stepVisible'] = String(dataFrom["阶段是否可见"] || "true") == "true";
 		data['speed'] = Number(dataFrom["阶段滚动速度"] || 1.5);
-		
-		// > D播放GIF
-		data['bgm_set'] = String(dataFrom["当前阶段BGM设置"] || "不操作");
-		data['bgm_src'] = String(dataFrom["资源-BGM"] || "");
-		
-		
-		// > 阶段
+		data['height'] = Number(dataFrom["阶段高度"] || 0);
 		data['mode'] = String(dataFrom["显示模式"] || "单图模式");
 		
-		// > 阶段 - 单图模式
+		// > B阶段 - 单图模式
 		data['img_src'] = String(dataFrom["资源-单图"] || "");
 		data['img_src_file'] = "img/Menu__self/";
 		data['img_x'] = Number(dataFrom["平移-单图 X"] || 0);
 		data['img_y'] = Number(dataFrom["平移-单图 Y"] || 0);
 		
-		// > 阶段 - GIF模式
-		if( dataFrom["资源-GIF"] != "" &&
-			dataFrom["资源-GIF"] != undefined ){
+		// > B阶段 - GIF模式
+		if( dataFrom["资源-GIF"] != undefined &&
+			dataFrom["资源-GIF"] != "" ){
 			data['gif_src'] = JSON.parse( dataFrom["资源-GIF"] );
 		}else{
 			data['gif_src'] = [];
@@ -734,9 +776,9 @@
 		data['gif_back_run'] = String(dataFrom["是否倒放"] || "false") == "true";
 		data['gif_replay'] = String(dataFrom["GIF到末尾是否重播"] || "false") == "true";
 		
-		// > 阶段 - 文本模式
-		if( dataFrom["文本内容"] != "" &&
-			dataFrom["文本内容"] != undefined ){
+		// > B阶段 - 文本模式
+		if( dataFrom["文本内容"] != undefined &&
+			dataFrom["文本内容"] != "" ){
 			data['text_context'] = String( JSON.parse(dataFrom["文本内容"]) );
 		}else{
 			data['text_context'] = "";
@@ -749,37 +791,202 @@
 		data['text_x'] = Number(dataFrom["平移-文本 X"] || 0);
 		data['text_y'] = Number(dataFrom["平移-文本 Y"] || 0);
 		
+		// > E音乐切换
+		data['bgm_set'] = String(dataFrom["当前阶段BGM设置"] || "不操作");
+		data['bgm_src'] = String(dataFrom["资源-BGM"] || "");
+		
 		return data;
 	}
 	
 	/*-----------------阶段------------------*/
-	DrillUp.g_SSpE_list_length = 40;
-	DrillUp.g_SSpE_list = [];
-	for (var i = 0; i < DrillUp.g_SSpE_list_length; i++) {
-		if( DrillUp.parameters["阶段-" + String(i+1) ] != "" &&
-			DrillUp.parameters["阶段-" + String(i+1) ] != undefined ){
+	DrillUp.g_SSpE_stepList_length = 40;
+	DrillUp.g_SSpE_stepList = [];
+	for( var i = 0; i < DrillUp.g_SSpE_stepList_length; i++ ){
+		if( DrillUp.parameters["阶段-" + String(i+1) ] != undefined &&
+			DrillUp.parameters["阶段-" + String(i+1) ] != "" ){
 			var data = JSON.parse(DrillUp.parameters["阶段-" + String(i+1) ]);
-			DrillUp.g_SSpE_list[i] = DrillUp.drill_SSpE_initStep( data );
+			DrillUp.g_SSpE_stepList[i] = DrillUp.drill_SSpE_initStep( data );
 		}else{
-			DrillUp.g_SSpE_list[i] = DrillUp.drill_SSpE_initStep( {} );
+			DrillUp.g_SSpE_stepList[i] = null;
 		}
 	}
 	
 	/*-----------------杂项------------------*/
     DrillUp.g_SSpE_layout = String(DrillUp.parameters["资源-整体布局"] || "");
     DrillUp.g_SSpE_contextMask = String(DrillUp.parameters["资源-内容遮罩"] || "");
-	DrillUp.g_SSpE_add_to_menu = String(DrillUp.parameters["是否添加到主菜单"] || "true") === "true";	
-    DrillUp.g_SSpE_menu_name = String(DrillUp.parameters["主菜单显示名"] || "");
-	DrillUp.g_SSpE_add_to_title = String(DrillUp.parameters["是否在标题窗口中显示"] || "false") === "true";	
-    DrillUp.g_SSpE_title_name = String(DrillUp.parameters["标题窗口显示名"] || "");
     DrillUp.g_SSpE_opacityShow = String(DrillUp.parameters["是否初始阶段渐变显示"] || "true") == "true";
     DrillUp.g_SSpE_opacitySpeed = Number(DrillUp.parameters["渐变速度"] || 2);
+	
+	/*-----------------面板跳转------------------*/
+	DrillUp.g_SSpE_add_to_menu = String(DrillUp.parameters["是否在主菜单窗口中显示"] || "true") === "true";	
+    DrillUp.g_SSpE_menu_name = String(DrillUp.parameters["主菜单窗口显示名"] || "");
+	DrillUp.g_SSpE_add_to_title = String(DrillUp.parameters["是否在标题窗口中显示"] || "false") === "true";	
+    DrillUp.g_SSpE_title_name = String(DrillUp.parameters["标题窗口显示名"] || "");
+	
+	/*-----------------全局存储对象------------------*/
+	DrillUp.g_SSpE_globalSetting_enabled = String(DrillUp.parameters["数据是否全局存储"] || "false") === "true";
+    DrillUp.g_SSpE_globalSetting_fileId = Number(DrillUp.parameters["全局存储的文件路径"] || 1);
+	DrillUp.global_SSpE_stepVisibleTank = null;
 	
 	
 //=============================================================================
 // * >>>>基于插件检测>>>>
 //=============================================================================
-if( Imported.Drill_CoreOfScreenRoller ){
+if( Imported.Drill_CoreOfGlobalSave &&
+	Imported.Drill_CoreOfScreenRoller ){
+	
+	
+//=============================================================================
+// ** ☆全局存储
+//=============================================================================
+//==============================
+// * 『全局存储』 - 载入时检查数据 - 阶段显示情况
+//==============================
+DrillUp.drill_SSpE_gCheckData_enable = function(){
+	for( var i = 0; i < DrillUp.g_SSpE_stepList.length; i++ ){
+		var temp_data = DrillUp.g_SSpE_stepList[i];
+		
+		// > 指定数据为空时
+		if( DrillUp.global_SSpE_stepVisibleTank[i] == null ){
+			if( temp_data == null ){		//（无内容配置，跳过）
+				DrillUp.global_SSpE_stepVisibleTank[i] = null;
+			}else{							//（有内容配置，初始化默认）
+				DrillUp.global_SSpE_stepVisibleTank[i] = temp_data['stepVisible'];
+			}
+			
+		// > 不为空则跳过检查
+		}else{
+			//（不操作）
+		}
+	}
+}
+//==============================
+// * 『全局存储』 - 载入
+//==============================
+	var global_fileId = DrillUp.g_SSpE_globalSetting_fileId;
+	var global_data = StorageManager.drill_COGS_loadData( global_fileId, "SSpE" );  //『全局存储执行函数』
+	
+	// > 显示情况
+	if( DrillUp.global_SSpE_stepVisibleTank == null ){		//（游戏没关时，不会为null)
+		var data = global_data["global_stepVisibleTank"];
+		if( data == undefined ){ data = [] };
+		DrillUp.global_SSpE_stepVisibleTank = data;
+		DrillUp.drill_SSpE_gCheckData_enable();				//（检查时自动赋新值）
+	}
+	
+//==============================
+// * 『全局存储』 - 存储
+//==============================
+StorageManager.drill_SSpE_saveData = function(){
+	var file_id = DrillUp.g_SSpE_globalSetting_fileId;
+	var data = {};
+	data["global_stepVisibleTank"] = DrillUp.global_SSpE_stepVisibleTank;
+	this.drill_COGS_saveData( file_id, "SSpE", data );  //『全局存储执行函数』
+};
+
+
+//#############################################################################
+// ** 【标准模块】存储数据 ☆存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_SSpE_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_SSpE_sys_initialize = Game_System.prototype.initialize;
+Game_System.prototype.initialize = function() {
+    _drill_SSpE_sys_initialize.call(this);
+	this.drill_SSpE_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_SSpE_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_SSpE_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_SSpE_saveEnabled == true ){	
+		$gameSystem.drill_SSpE_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_SSpE_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_SSpE_initSysData = function() {
+	this.drill_SSpE_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_SSpE_checkSysData = function() {
+	this.drill_SSpE_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_SSpE_initSysData_Private = function() {
+	
+	this._drill_SSpE_stepVisibleTank = [];				//阶段显示情况
+	for( var i = 0; i < DrillUp.g_SSpE_stepList.length; i++ ){
+		var temp_data = DrillUp.g_SSpE_stepList[i];
+		if( temp_data == undefined ){ continue; }
+		this._drill_SSpE_stepVisibleTank[i] = temp_data['stepVisible'];
+	}
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_SSpE_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_SSpE_stepVisibleTank == undefined ){
+		this.drill_SSpE_initSysData();
+	}
+	
+	// > 容器的 空数据 检查
+	for( var i = 0; i < DrillUp.g_SSpE_stepList.length; i++ ){
+		var temp_data = DrillUp.g_SSpE_stepList[i];
+		
+		// > 已配置（undefined表示未配置的空数据）
+		if( temp_data != undefined ){
+			
+			// > 未存储的，重新初始化
+			if( this._drill_SSpE_stepVisibleTank[i] == undefined ){
+				this._drill_SSpE_stepVisibleTank[i] = temp_data['stepVisible'];
+			
+			// > 已存储的，跳过
+			}else{
+				//（不操作）
+			}
+		}
+	}
+};
 	
 	
 //=============================================================================
@@ -799,10 +1006,51 @@ Game_Interpreter.prototype.pluginCommand = function( command, args ){
 Game_Interpreter.prototype.drill_SSpE_pluginCommand = function( command, args ){
 	if( command === ">信息面板E" ){
 		
-		if(args.length == 2){
+		if( args.length == 2 ){
 			var type = String(args[1]);
-			if( type == "打开面板" ){			//打开菜单
+			if( type == "打开面板" ){
 				SceneManager.push(Scene_Drill_SSpE);
+			}
+		}
+		
+		if( args.length == 4 ){
+			var type = String(args[1]);
+			var temp1 = String(args[3]);
+			if( temp1.indexOf("阶段变量[") != -1 ){
+				temp1 = temp1.replace("阶段变量[","");
+				temp1 = temp1.replace("]","");
+				temp1 = $gameVariables.value(Number(temp1));
+			}else if( temp1.indexOf("阶段[") != -1 ){
+				temp1 = temp1.replace("阶段[","");
+				temp1 = temp1.replace("]","");
+				temp1 = Number(temp1);
+			}
+			if( type == "显示阶段" ){
+				DrillUp.global_SSpE_stepVisibleTank[ Number(temp1)-1 ] = true;			//全局存储
+				$gameSystem._drill_SSpE_stepVisibleTank[ Number(temp1)-1 ] = true;		//正常存储
+				StorageManager.drill_SSpE_saveData();
+			}
+			if( type == "隐藏阶段" ){
+				DrillUp.global_SSpE_stepVisibleTank[ Number(temp1)-1 ] = false;			//全局存储
+				$gameSystem._drill_SSpE_stepVisibleTank[ Number(temp1)-1 ] = false;		//正常存储
+				StorageManager.drill_SSpE_saveData();
+			}
+		}
+		if( args.length == 2 ){
+			var type = String(args[1]);
+			if( type == "显示全部阶段" ){
+				for( var i = 0; i < DrillUp.g_SSpE_stepList.length; i++ ){
+					DrillUp.global_SSpE_stepVisibleTank[i] = true;			//全局存储
+					$gameSystem._drill_SSpE_stepVisibleTank[i] = true;		//正常存储
+				}
+				StorageManager.drill_SSpE_saveData();
+			}
+			if( type == "隐藏全部阶段" ){
+				for( var i = 0; i < DrillUp.g_SSpE_stepList.length; i++ ){
+					DrillUp.global_SSpE_stepVisibleTank[i] = false;			//全局存储
+					$gameSystem._drill_SSpE_stepVisibleTank[i] = false;		//正常存储
+				}
+				StorageManager.drill_SSpE_saveData();
 			}
 		}
 	}
@@ -810,7 +1058,7 @@ Game_Interpreter.prototype.drill_SSpE_pluginCommand = function( command, args ){
 
 
 //=============================================================================
-// ** ☆主菜单选项
+// ** ☆面板跳转之主菜单
 //
 //			说明：	> 此模块专门关联主菜单选项，选项进入后跳转到 信息面板E 界面。
 //					（插件完整的功能目录去看看：功能结构树）
@@ -832,7 +1080,7 @@ Window_MenuCommand.prototype.addOriginalCommands = function() {
 };
 
 //=============================================================================
-// ** ☆标题选项
+// ** ☆面板跳转之标题
 //
 //			说明：	> 此模块专门关联标题选项，选项进入后跳转到 信息面板E 界面。
 //					（插件完整的功能目录去看看：功能结构树）
@@ -856,6 +1104,36 @@ Window_TitleCommand.prototype.makeCommandList = function() {
 
 
 //=============================================================================
+// ** ☆面板控制
+//
+//			说明：	> 此模块专门将部分面板配置转移到 Game_Temp 方便随时调用。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 面板控制 - 判断 显示情况
+//==============================
+Game_Temp.prototype.drill_SSpE_isVisible = function( context_realIndex ){
+	
+	// > 全局存储控制
+	if( DrillUp.g_SSpE_globalSetting_enabled == true ){
+		if( DrillUp.global_SSpE_stepVisibleTank[ context_realIndex ] == true ){
+			return true;
+		}else{
+			return false;
+		}
+		
+	// > 正常存储控制
+	}else{
+		if( $gameSystem._drill_SSpE_stepVisibleTank[ context_realIndex ] == true ){
+			return true;
+		}else{
+			return false;
+		}
+	}
+};
+
+
+//=============================================================================
 // ** 信息面板E【Scene_Drill_SSpE】
 // **
 // **		作用域：	菜单界面
@@ -868,7 +1146,7 @@ Window_TitleCommand.prototype.makeCommandList = function() {
 // **						x> 开始运行（start）
 // **						x> 结束运行（stop）
 // **						x> 忙碌状态（isBusy）
-// **						x> 析构函数（terminate）
+// **						> 析构函数（terminate）
 // **						x> 判断加载完成（isReady）
 // **						x> 判断是否激活/启动（isActive）
 // **						x> 当前角色切换时（onActorChange）
@@ -920,6 +1198,13 @@ Scene_Drill_SSpE.prototype.update = function() {
 	this.drill_updateMask();			//帧刷新 - B内容遮罩
 	this.drill_updateRoller();			//帧刷新 - C长画布控制
 }
+//==============================
+// * 信息面板E - 析构函数（继承）
+//==============================
+Scene_Drill_SSpE.prototype.terminate = function() {
+    Scene_MenuBase.prototype.terminate.call(this);
+	this._drill_rollerSprite.drill_sprite_destroy();
+};
 
 //==============================
 // * A主体 - 创建
@@ -939,7 +1224,10 @@ Scene_Drill_SSpE.prototype.drill_createAttr = function() {
 // * B内容遮罩 - 创建
 //==============================
 Scene_Drill_SSpE.prototype.drill_createMask = function() {
-	this._drill_rollerMask = new Sprite( ImageManager.loadBitmap("img/Menu__self/", DrillUp.g_SSpE_contextMask, 0, true) );
+	var mask_src = DrillUp.g_SSpE_contextMask;
+	if( mask_src == undefined ){ return; }
+	if( mask_src == "" ){ return; }
+	this._drill_rollerMask = new Sprite( ImageManager.loadBitmap("img/Menu__self/", mask_src, 0, true) );
 	this._drill_rollerMask_needResize = true;
 	this._drill_field.addChild(this._drill_rollerMask);	
 	this._drill_field.mask = this._drill_rollerMask;			//『遮罩赋值』
@@ -963,14 +1251,24 @@ Scene_Drill_SSpE.prototype.drill_updateMask = function() {
 // * C长画布控制 - 创建
 //==============================
 Scene_Drill_SSpE.prototype.drill_createRoller = function() {
-	var data = {
+	
+	// > 阶段列表
+	var step_data = JSON.parse(JSON.stringify( DrillUp.g_SSpE_stepList ));
+	for( var i = 0; i < step_data.length; i++ ){
+		var temp_data = step_data[i];
+		if( temp_data == undefined ){ continue; }
+		temp_data['stepVisible'] = $gameTemp.drill_SSpE_isVisible( i );
+	}
+	
+	// > 长画布贴图 - 数据
+	var sprite_data = {
 		"opacityShow": DrillUp.g_SSpE_opacityShow,		//开始时渐变显示 开关
 		"opacitySpeed": DrillUp.g_SSpE_opacitySpeed,	//开始时渐变显示 速度
-		"steps": DrillUp.g_SSpE_list,					//阶段列表
+		"steps": step_data,								//阶段列表
 	};
 	
 	// > 长画布贴图
-	this._drill_rollerSprite = new Drill_COSR_Sprite( data );
+	this._drill_rollerSprite = new Drill_COSR_Sprite( sprite_data );
 	this._drill_field.addChild(this._drill_rollerSprite);	
 	
 	// > 长画布贴图 - 开始滚动
@@ -1043,9 +1341,9 @@ Scene_Drill_SSpE.prototype.isBusy = function() {
 //==============================
 // * 信息面板E（场景基类） - 析构函数
 //==============================
-Scene_Drill_SSpE.prototype.terminate = function() {
-    Scene_MenuBase.prototype.terminate.call(this);
-};
+//Scene_Drill_SSpE.prototype.terminate = function() {
+//    Scene_MenuBase.prototype.terminate.call(this);
+//};
 //==============================
 // * 信息面板E（场景基类） - 判断加载完成
 //==============================

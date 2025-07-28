@@ -1064,7 +1064,7 @@
 	// * 静态数据 - 触发时机
 	//				（~struct~ActorPortraitureCondition）
 	//==============================
-	DrillUp.drill_APEx_initCondition = function( dataFrom ) {
+	DrillUp.drill_APEx_initCondition = function( dataFrom ){
 		var data = {};
 		
 		// > 触发条件
@@ -1115,7 +1115,7 @@
 	// * 静态数据 - 角色肖像
 	//				（~struct~ActorPortraiture）
 	//==============================
-	DrillUp.drill_APEx_initPortraiture = function( dataFrom ) {
+	DrillUp.drill_APEx_initPortraiture = function( dataFrom ){
 		var data = {};
 		
 		// > B前视图的动画序列
@@ -1641,8 +1641,8 @@ Drill_APEx_Sprite.prototype.drill_sprite_initAttr = function() {
 	this._drill_p_sprite.y = Graphics.boxHeight - DrillUp.g_APEx_p_y - DrillUp.g_APEx_p_silde_y;
 	this._drill_p_sprite.opacity = 0;
 	this._drill_p_sprite._move = 0;
-	this._drill_p_sprite._breath = Math.random() * 10;
-	this._drill_p_sprite._breath_dir = Math.floor(Math.random() * 2);
+	this._drill_p_sprite._breath = Math.random() * 10;	//『随机因子-图像用』
+	this._drill_p_sprite._breath_dir = Math.floor(Math.random() * 2);	//『随机因子-图像用』
 	this._drill_p_sprite._f_time = 0;
 	
 	// > 背景图贴图

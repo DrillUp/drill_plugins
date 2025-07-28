@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        图片 - 图片优化核心
+ * @plugindesc [v1.3]        图片 - 图片优化核心
  * @author Drill_up
  * 
  * 
@@ -70,6 +70,8 @@
  * 优化了碰撞体的功能细节。
  * [v1.2]
  * 修复了切换地图时悬停判定未刷新的bug。
+ * [v1.3]
+ * 兼容了图片阴影效果。
  * 
  */
  
@@ -93,6 +95,9 @@
 //		★性能测试消耗	2024/5/2：
 //							》变换消耗：11.8ms（drill_COPi_updateCollisionPosition）10.6ms（drill_COPi_finalTransform_x）
 //							》堆叠级相关消耗：3.6ms（drill_COPi_updateZIndex）
+//						2025/7/27：（强制拖拽的发牌功能，8个图片）
+//							》变换消耗：10.6ms（drill_COPi_updateCollisionPosition）2.1ms（drill_COPi_finalTransform_x）
+//							》堆叠级相关消耗：6.1ms（drill_COPi_updateZIndex）
 //		★最坏情况		暂无
 //		★备注			该插件直接管图片的全部功能，本身图片可控制的数量也不多，所以不担心消耗。
 //		
@@ -185,7 +190,7 @@
 //				->所有点是否在当前碰撞体内【标准函数】
 //				->获取当前碰撞体的全部顶点【标准函数】
 //			->☆碰撞体判定实现
-//				->点是否在当前碰撞体内
+//				->点是否在当前碰撞体内（私有）
 //				->数学工具
 //					->获取两点的叉乘/向量积
 //					->判断点是否在凸多边形内
@@ -195,6 +200,7 @@
 //				->某点经过碰撞体的反向变换
 //				->数学工具
 //					->矩阵点的变换/点A绕点B旋转缩放斜切
+//					->矩阵点的变换（逆向）/点A绕点B旋转缩放斜切（逆向）
 //			->☆DEBUG碰撞体范围
 //			
 //			
@@ -2529,9 +2535,9 @@ Scene_Map.prototype.drill_COPi_sortByZIndex = function () {
 //==============================
 // * 地图层级 - 图片层
 //==============================
-var _drill_COPi_layer_createPictures1 = Spriteset_Map.prototype.createPictures;
+var _drill_COPi_layer_createPictures = Spriteset_Map.prototype.createPictures;
 Spriteset_Map.prototype.createPictures = function() {
-	_drill_COPi_layer_createPictures1.call(this);		//图片对象层 < 图片层 < 对话框集合
+	_drill_COPi_layer_createPictures.call(this);		//图片对象层 < 图片层 < 对话框集合
 	if( !this._drill_mapPicArea ){
 		this._drill_mapPicArea = new Sprite();
 		this.addChild(this._drill_mapPicArea);	
@@ -2659,11 +2665,11 @@ Game_Temp.prototype.drill_COPi_whenRefreshZIndex = function( temp_sprite, pictur
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 层级控制 - 初始化绑定
+// * 层级控制 - 初始化绑定（地图界面）
 //==============================
-var _drill_COPi_layer_createPictures2 = Spriteset_Base.prototype.createPictures;
-Spriteset_Base.prototype.createPictures = function(){
-	_drill_COPi_layer_createPictures2.call(this);
+var _drill_COPi_layer_map_createPictures2 = Spriteset_Map.prototype.createPictures;
+Spriteset_Map.prototype.createPictures = function(){
+	_drill_COPi_layer_map_createPictures2.call(this);
 	$gameTemp._drill_COPi_needRefreshSpriteLayer = true;
 };
 //==============================
@@ -2707,13 +2713,21 @@ Scene_Map.prototype.drill_COPi_updateLayer = function() {
 			temp_sprite._drill_layer = "图片对象层";
 			
 			// > 设置层级时
-			//	（无）
+			$gameTemp.drill_COPi_whenRefreshLayer( temp_sprite, picture_id );
 			
 			// > 应用设置（添加贴图到层级【标准函数】）
 			this.drill_COPi_layerAddSprite( temp_sprite, temp_sprite._drill_layer );
 		}
 	}
 }
+//==============================
+// * 层级控制 - 初始化绑定（地图界面）
+//==============================
+var _drill_COPi_layer_battle_createPictures2 = Spriteset_Battle.prototype.createPictures;
+Spriteset_Battle.prototype.createPictures = function(){
+	_drill_COPi_layer_battle_createPictures2.call(this);
+	$gameTemp._drill_COPi_needRefreshSpriteLayer = true;
+};
 //==============================
 // * 层级控制 - 帧刷新（战斗界面）
 //==============================
@@ -2737,11 +2751,11 @@ Scene_Battle.prototype.drill_COPi_updateLayer = Scene_Map.prototype.drill_COPi_u
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 堆叠级控制 - 初始化绑定
+// * 堆叠级控制 - 初始化绑定（地图界面）
 //==============================
-var _drill_COPi_zIndex_createPictures = Spriteset_Base.prototype.createPictures;
-Spriteset_Base.prototype.createPictures = function(){
-	_drill_COPi_zIndex_createPictures.call(this);
+var _drill_COPi_zIndex_map_createPictures3 = Spriteset_Map.prototype.createPictures;
+Spriteset_Map.prototype.createPictures = function(){
+	_drill_COPi_zIndex_map_createPictures3.call(this);
 	$gameTemp._drill_COPi_needRefreshSpriteZIndex = true;
 };
 //==============================
@@ -2782,13 +2796,21 @@ Scene_Map.prototype.drill_COPi_updateZIndex = function() {
 			temp_sprite.zIndex = temp_sprite._pictureId;	//（数据没了，只能按索引值进行排序）
 			
 			// > 设置堆叠级时
-			//	（无）
+			$gameTemp.drill_COPi_whenRefreshZIndex( temp_sprite, picture_id );
 		}
 	}
 	
 	// > 应用设置（图片层级排序【标准函数】）
 	this.drill_COPi_sortByZIndex();
 }
+//==============================
+// * 堆叠级控制 - 初始化绑定（地图界面）
+//==============================
+var _drill_COPi_zIndex_battle_createPictures3 = Spriteset_Battle.prototype.createPictures;
+Spriteset_Battle.prototype.createPictures = function(){
+	_drill_COPi_zIndex_battle_createPictures3.call(this);
+	$gameTemp._drill_COPi_needRefreshSpriteZIndex = true;
+};
 //==============================
 // * 堆叠级控制 - 帧刷新（战斗界面）
 //==============================

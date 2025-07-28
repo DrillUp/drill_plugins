@@ -1806,21 +1806,31 @@ Game_Interpreter.prototype.drill_EFGi_pluginCommand = function( command, args ){
 				char_list = $gamePlayer.followers().visibleFollowers();
 				char_list.unshift($gamePlayer);
 			}
-			if( char_list == null && unit.indexOf("玩家队员[") != -1 ){
-				unit = unit.replace("玩家队员[","");
-				unit = unit.replace("]","");
-				var group = $gamePlayer.followers().visibleFollowers();
-				group.unshift($gamePlayer);
-				char_list = [];
-				char_list.push(group[ Number(unit) ]);
-			}
 			if( char_list == null && unit.indexOf("玩家队员变量[") != -1 ){
 				unit = unit.replace("玩家队员变量[","");
 				unit = unit.replace("]","");
-				var group = $gamePlayer.followers().visibleFollowers();
-				group.unshift($gamePlayer);
-				char_list = [];
-				char_list.push(group[ $gameVariables.value(Number(unit)) ]);
+				var p_id = $gameVariables.value(Number(unit));
+				if( p_id == -2 ){  //『玩家id』
+					char_list = [ $gamePlayer ];
+				}
+				if( p_id > 0 ){  //『玩家队员id』
+					var group = $gamePlayer.followers().visibleFollowers();
+					char_list = [];
+					char_list.push(group[ p_id-1 ]);
+				}
+			}
+			if( char_list == null && unit.indexOf("玩家队员[") != -1 ){
+				unit = unit.replace("玩家队员[","");
+				unit = unit.replace("]","");
+				var p_id = Number(unit);
+				if( p_id == -2 ){  //『玩家id』
+					char_list = [ $gamePlayer ];
+				}
+				if( p_id > 0 ){  //『玩家队员id』
+					var group = $gamePlayer.followers().visibleFollowers();
+					char_list = [];
+					char_list.push(group[ p_id-1 ]);
+				}
 			}
 		}
 		
@@ -2432,7 +2442,7 @@ DrillUp.g_EFGi_checkNaN = true;
 //==============================
 Drill_EFGi_Controller.prototype.initialize = function( data ){
 	this._drill_data = {};
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//私有数据初始化
 	if( data == undefined ){ data = {}; }
@@ -2599,7 +2609,7 @@ Drill_EFGi_Controller.prototype.drill_controller_resetData_Private = function( d
 	
 	// > 执行重置
 	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//私有数据初始化
 }
@@ -2759,11 +2769,11 @@ Drill_EFGi_Controller.prototype.drill_controller_initRandom = function() {
 	this._drill_randomPos_y = 0;			//随机位置 - 位置Y
 	this._drill_randomPos_lastInter = 0;	//随机位置 - 上一次时间
 	if( data['randomPos_enable'] == true ){
-		this._drill_randomPos_x = Math.floor( data['randomPos_width'] *( Math.random()-0.5 ));
-		this._drill_randomPos_y = Math.floor( data['randomPos_height']*( Math.random()-0.5 ));
+		this._drill_randomPos_x = Math.floor( data['randomPos_width'] *( Math.random()-0.5 ));	//『随机因子-图像用』
+		this._drill_randomPos_y = Math.floor( data['randomPos_height']*( Math.random()-0.5 ));	//『随机因子-图像用』
 	}
 	if( data['randomPos_gifFrame'] == true ){
-		this._drill_GIF_time = Math.floor( data['interval']*data['src_img_gif'].length * Math.random() );
+		this._drill_GIF_time = Math.floor( data['interval']*data['src_img_gif'].length * Math.random() );	//『随机因子-图像用』
 	}
 }
 //==============================
@@ -2777,8 +2787,8 @@ Drill_EFGi_Controller.prototype.drill_controller_updateRandom = function(){
 		var inter = Math.floor(this._drill_GIF_time / data['interval'] / data['src_img_gif'].length);
 		if( this._drill_randomPos_lastInter != inter ){
 			this._drill_randomPos_lastInter = inter;
-			this._drill_randomPos_x = Math.floor( data['randomPos_width'] *( Math.random()-0.5 ));
-			this._drill_randomPos_y = Math.floor( data['randomPos_height']*( Math.random()-0.5 ));
+			this._drill_randomPos_x = Math.floor( data['randomPos_width'] *( Math.random()-0.5 ));	//『随机因子-图像用』
+			this._drill_randomPos_y = Math.floor( data['randomPos_height']*( Math.random()-0.5 ));	//『随机因子-图像用』
 		}
 	}
 }

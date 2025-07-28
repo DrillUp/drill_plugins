@@ -1549,9 +1549,9 @@ Spriteset_Battle.prototype.createLowerLayer = function() {
 //==============================
 // * 战斗层级 - 图片层
 //==============================
-var _drill_MPFP_battle_createPictures = Spriteset_Battle.prototype.createPictures;
+var _drill_MPFP_battle_createPictures2 = Spriteset_Battle.prototype.createPictures;
 Spriteset_Battle.prototype.createPictures = function() {
-	_drill_MPFP_battle_createPictures.call(this);		//图片对象层 < 图片层 < 对话框集合
+	_drill_MPFP_battle_createPictures2.call(this);		//图片对象层 < 图片层 < 对话框集合
 	if( !this._drill_battlePicArea ){
 		this._drill_battlePicArea = new Sprite();
 		this.addChild(this._drill_battlePicArea);	
@@ -1782,13 +1782,22 @@ Game_Map.prototype.setup = function( mapId ){
 	_drill_MPFP_gmap_setup.call(this,mapId);
 };
 //==============================
-// * 容器 - 切换贴图时（菜单界面/战斗界面 刷新）
+// * 容器 - 切换贴图时（地图界面）
 //==============================
-var _drill_MPFP_sbase_createPictures = Spriteset_Base.prototype.createPictures;
-Spriteset_Base.prototype.createPictures = function() {
+var _drill_MPFP_map_createPictures1 = Spriteset_Map.prototype.createPictures;
+Spriteset_Map.prototype.createPictures = function() {
 	$gameTemp._drill_MPFP_beanTank = [];		//实体类容器
 	$gameTemp._drill_MPFP_needRestatistics = true;
-	_drill_MPFP_sbase_createPictures.call(this);
+	_drill_MPFP_map_createPictures1.call(this);
+};
+//==============================
+// * 容器 - 切换贴图时（战斗界面）
+//==============================
+var _drill_MPFP_battle_createPictures1 = Spriteset_Battle.prototype.createPictures;
+Spriteset_Battle.prototype.createPictures = function() {
+	$gameTemp._drill_MPFP_beanTank = [];		//实体类容器
+	$gameTemp._drill_MPFP_needRestatistics = true;
+	_drill_MPFP_battle_createPictures1.call(this);
 };
 //==============================
 // * 容器 - 销毁时
@@ -1816,10 +1825,10 @@ Game_Screen.prototype.drill_MPFP_updateRestatistics = function() {
 	
 	$gameTemp._drill_MPFP_beanTank = [];		//实体类容器
 	
-	// > 图片遍历『图片与多场景』
-	var i_offset = 0;							//地图界面的图片
+	// > 图片遍历
+	var i_offset = 0;							//地图界面的图片『图片与多场景-地图界面』
 	var pic_length = this.maxPictures();
-	if( $gameParty.inBattle() == true ){		//战斗界面的图片
+	if( $gameParty.inBattle() == true ){		//战斗界面的图片『图片与多场景-战斗界面』
 		i_offset = pic_length;
 	}
 	for(var i = 0; i < pic_length; i++ ){
@@ -1963,7 +1972,7 @@ function Drill_MPFP_Bean(){
 // * 实体类 - 初始化
 //==============================
 Drill_MPFP_Bean.prototype.initialize = function(){
-	this._drill_beanSerial = new Date().getTime() + Math.random();		//（生成一个不重复的序列号）
+	this._drill_beanSerial = new Date().getTime() + Math.random();		//『生成一个不重复的序列号』
     this.drill_bean_initData();											//私有数据初始化
 };
 //##############################
@@ -2028,7 +2037,7 @@ Drill_MPFP_Bean.prototype.drill_bean_setContext = function( context ){
 //			返回：	> 无
 //##############################
 Drill_MPFP_Bean.prototype.drill_bean_refreshContext = function(){
-	this._drill_contextSerial = new Date().getTime() + Math.random();	//（文本变化标记）
+	this._drill_contextSerial = new Date().getTime() + Math.random();	//（强制刷新内容）『生成一个不重复的序列号』
 };
 //##############################
 // * 实体类 - 设置皮肤样式【开放函数】
@@ -2070,8 +2079,8 @@ Drill_MPFP_Bean.prototype.drill_bean_initData = function(){
 	this._drill_frameW = 0;					//实体类 - 框架宽度
 	this._drill_frameH = 0;					//实体类 - 框架高度
 	
-	this._drill_context = "";											//实体类 - 当前文本
-	this._drill_contextSerial = new Date().getTime() + Math.random();	//实体类 - 刷新内容
+	this._drill_context = "";				//实体类 - 当前文本
+	this.drill_bean_refreshContext();		//实体类 - 刷新内容
 	
 	this._drill_styleMode = "默认皮肤样式";								//实体类 - 绑定的模式
 	this._drill_styleLockedId = $gameSystem._drill_MPFP_defaultStyle;	//实体类 - 锁定皮肤样式

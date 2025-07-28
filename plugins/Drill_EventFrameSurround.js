@@ -1826,21 +1826,31 @@ Game_Interpreter.prototype.drill_EFSu_pluginCommand = function( command, args ){
 				char_list = $gamePlayer.followers().visibleFollowers();
 				char_list.unshift($gamePlayer);
 			}
-			if( char_list == null && unit.indexOf("玩家队员[") != -1 ){
-				unit = unit.replace("玩家队员[","");
-				unit = unit.replace("]","");
-				var group = $gamePlayer.followers().visibleFollowers();
-				group.unshift($gamePlayer);
-				char_list = [];
-				char_list.push(group[ Number(unit) ]);
-			}
 			if( char_list == null && unit.indexOf("玩家队员变量[") != -1 ){
 				unit = unit.replace("玩家队员变量[","");
 				unit = unit.replace("]","");
-				var group = $gamePlayer.followers().visibleFollowers();
-				group.unshift($gamePlayer);
-				char_list = [];
-				char_list.push(group[ $gameVariables.value(Number(unit)) ]);
+				var p_id = $gameVariables.value(Number(unit));
+				if( p_id == -2 ){  //『玩家id』
+					char_list = [ $gamePlayer ];
+				}
+				if( p_id > 0 ){  //『玩家队员id』
+					var group = $gamePlayer.followers().visibleFollowers();
+					char_list = [];
+					char_list.push(group[ p_id-1 ]);
+				}
+			}
+			if( char_list == null && unit.indexOf("玩家队员[") != -1 ){
+				unit = unit.replace("玩家队员[","");
+				unit = unit.replace("]","");
+				var p_id = Number(unit);
+				if( p_id == -2 ){  //『玩家id』
+					char_list = [ $gamePlayer ];
+				}
+				if( p_id > 0 ){  //『玩家队员id』
+					var group = $gamePlayer.followers().visibleFollowers();
+					char_list = [];
+					char_list.push(group[ p_id-1 ]);
+				}
 			}
 		}
 		
@@ -2493,7 +2503,7 @@ DrillUp.g_EFSu_checkNaN = true;
 //==============================
 Drill_EFSu_Controller.prototype.initialize = function( data ){
 	this._drill_data = {};
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能
 	if( data == undefined ){ data = {}; }
@@ -2666,7 +2676,7 @@ Drill_EFSu_Controller.prototype.drill_controller_resetData_Private = function( d
 	
 	// > 执行重置
 	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//（生成一个不重复的序列号）
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能
 }

@@ -50,10 +50,10 @@
  * 窗口字符：\$              对话框中，打开金钱窗口(右上角出现一个金钱窗口,结束对话消失)
  * 
  * 窗口字符：\fc[资源名:1]   对话框中，第二个为脸图索引，从0开始计数，范围为0~7。
- * 窗口字符：\fa[5]          对话框中，换成第n个角色脸图，角色从1开始计数。
+ * 窗口字符：\fa[5]          对话框中，换成第n个角色脸图(角色从1开始计数)。
  * 窗口字符：\fa[5:0]        对话框中，换成第n个角色脸图，第二个为脸图索引，从0开始计数，范围为0~7。
- * 窗口字符：\fp[1]          对话框中，换成第n个玩家队员脸图，玩家队员从1开始计数，1表示领队。
- * 窗口字符：\fp[1:0]        对话框中，换成第n个玩家队员脸图，第二个为脸图索引，从0开始计数，范围为0~7。
+ * 窗口字符：\fp[-2]         对话框中，换成玩家队员脸图(-2表示领队，1表示第一个跟随者)。
+ * 窗口字符：\fp[-2:0]       对话框中，换成玩家队员脸图，第二个为脸图索引，从0开始计数，范围为0~7。
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - Debug查看
@@ -189,7 +189,7 @@
 		return message;
 	};
 	//==============================
-	// * 提示信息 - 报错 - 兼容冲突
+	// * 提示信息 - 报错 - 兼容冲突（目前窗口字符核心已不再冲突）
 	//==============================
 	DrillUp.drill_CODi_getPluginTip_CompatibilityYEP = function(){
 		return  "【" + DrillUp.g_CODi_PluginTip_curName + "】\n"+
@@ -420,8 +420,8 @@ Window_Message.prototype.startMessage = function(){
 	
     this.newPage(this._textState);	//2H消息输入字符 - 执行新建
 	
-    this.updatePlacement();			//2C保持显示 - 设置位置
-    this.updateBackground();		//2C保持显示 - 设置背景
+    this.updatePlacement();			//2C保持显示 - 设置位置（非帧刷新）
+    this.updateBackground();		//2C保持显示 - 设置背景（非帧刷新）
     this.open();					//2C保持显示 - 打开窗口
 };
 //==============================
@@ -891,8 +891,8 @@ Window_Message.prototype.drill_CODi_message_doStart = function(){
 	
 	this.drill_CODi_message_newPage();		//2Q绘制页 - 执行新建页
 	
-    this.updatePlacement();					//2C保持显示 - 设置位置
-    this.updateBackground();				//2C保持显示 - 设置背景
+    this.updatePlacement();					//2C保持显示 - 设置位置（非帧刷新）
+    this.updateBackground();				//2C保持显示 - 设置背景（非帧刷新）
     this.open();							//2C保持显示 - 打开窗口
 };
 
@@ -1403,7 +1403,14 @@ Game_Temp.prototype.drill_COWC_effect_processCombined = function( matched_index,
 	// > 『窗口字符定义』 - 第1个玩家队员脸图（\FP[1]、\FP[1:0]）
 	if( command.toUpperCase() == "FP" ){
 		if( args.length == 1 ){
-			var actor = $gameParty.members()[ Number(args[0]) -1 ];
+			var actor = null;
+			var p_id = Number(args[0]);
+			if( p_id == -2 ){  //『玩家id』
+				actor = $gameParty.members()[ 0 ];
+			}
+			if( p_id > 0 ){  //『玩家队员id』
+				actor = $gameParty.members()[ p_id ];
+			}
 			if( actor != undefined ){
 				var faceName = actor.faceName();
 				var faceIndex = actor.faceIndex();
@@ -1414,7 +1421,14 @@ Game_Temp.prototype.drill_COWC_effect_processCombined = function( matched_index,
 			}
 		}
 		if( args.length == 2 ){
-			var actor = $gameParty.members()[ Number(args[0]) -1 ];
+			var actor = null;
+			var p_id = Number(args[0]);
+			if( p_id == -2 ){  //『玩家id』
+				actor = $gameParty.members()[ 0 ];
+			}
+			if( p_id > 0 ){  //『玩家队员id』
+				actor = $gameParty.members()[ p_id ];
+			}
 			if( actor != undefined ){
 				var faceName = actor.faceName();
 				var faceIndex = Number(args[1]);

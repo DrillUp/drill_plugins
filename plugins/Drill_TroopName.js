@@ -140,16 +140,18 @@
 	DrillUp.parameters = PluginManager.parameters('Drill_TroopName');
 	
 	
-	if( DrillUp.parameters['重复敌人后缀名-半字节'] != "" ){
-		DrillUp.g_TN_half = JSON.parse(DrillUp.parameters['重复敌人后缀名-半字节']);
+	if( DrillUp.parameters["重复敌人后缀名-半字节"] != undefined &&
+		DrillUp.parameters["重复敌人后缀名-半字节"] != "" ){
+		DrillUp.g_TN_half = JSON.parse(DrillUp.parameters["重复敌人后缀名-半字节"]);
 	}else{
 		DrillUp.g_TN_half = [
 			' A',' B',' C',' D',' E',' F',' G',' H',' I',' J',' K',' L',' M',
 			' N',' O',' P',' Q',' R',' S',' T',' U',' V',' W',' X',' Y',' Z'
 		];
 	}
-	if( DrillUp.parameters['重复敌人后缀名-全字节'] != "" ){
-		DrillUp.g_TN_full = JSON.parse(DrillUp.parameters['重复敌人后缀名-全字节']);
+	if( DrillUp.parameters["重复敌人后缀名-全字节"] != undefined &&
+		DrillUp.parameters["重复敌人后缀名-全字节"] != "" ){
+		DrillUp.g_TN_full = JSON.parse(DrillUp.parameters["重复敌人后缀名-全字节"]);
 	}else{
 		DrillUp.g_TN_full = [
 			'Ａ','Ｂ','Ｃ','Ｄ','Ｅ','Ｆ','Ｇ','Ｈ','Ｉ','Ｊ','Ｋ','Ｌ','Ｍ',

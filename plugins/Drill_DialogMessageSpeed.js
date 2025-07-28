@@ -292,6 +292,12 @@ Game_Interpreter.prototype.drill_DMS_pluginCommand = function( command, args ){
 		if( args.length >= 2 ){
 			var type = String(args[1]);
 			if( type == "所有文本" ){
+				if( args.length == 4 ){
+					var temp1 = String(args[3]);
+					if( temp1 == "恢复默认模式" ){
+						$gameSystem._drill_DMS_globalSpeedMode = DrillUp.g_DMS_globalSpeedMode;
+					}
+				}
 				if( args.length == 6 ){
 					var temp1 = String(args[3]);
 					var temp2 = String(args[5]);
@@ -313,9 +319,6 @@ Game_Interpreter.prototype.drill_DMS_pluginCommand = function( command, args ){
 						if( temp2 == "模式-快" ){
 							$gameSystem._drill_DMS_globalSpeedMode = "快";
 						}
-						if( temp2 == "恢复默认模式" ){
-							$gameSystem._drill_DMS_globalSpeedMode = DrillUp.g_DMS_globalSpeedMode;
-						}
 					}
 				}
 			}
@@ -325,6 +328,12 @@ Game_Interpreter.prototype.drill_DMS_pluginCommand = function( command, args ){
 		if( args.length >= 2 ){
 			var type = String(args[1]);
 			if( type == "对话框" ){
+				if( args.length == 4 ){
+					var temp1 = String(args[3]);
+					if( temp1 == "恢复默认模式" ){	
+						$gameSystem._drill_DMS_dialogSpeedMode = DrillUp.g_DMS_dialogSpeedMode;
+					}
+				}
 				if( args.length == 6 ){
 					var temp1 = String(args[3]);
 					var temp2 = String(args[5]);
@@ -345,9 +354,6 @@ Game_Interpreter.prototype.drill_DMS_pluginCommand = function( command, args ){
 						}
 						if( temp2 == "模式-快" ){	
 							$gameSystem._drill_DMS_dialogSpeedMode = "快";
-						}
-						if( temp2 == "恢复默认模式" ){	
-							$gameSystem._drill_DMS_dialogSpeedMode = DrillUp.g_DMS_dialogSpeedMode;
 						}
 					}
 				}

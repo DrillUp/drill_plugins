@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.7]        图片 - 快捷变换操作
+ * @plugindesc [v1.8]        图片 - 快捷变换操作
  * @author Drill_up
  * 
  * @Drill_LE_param "预加载资源-%d"
@@ -80,8 +80,10 @@
  * 插件指令：>图片快捷变换操作 : 图片[1] : 修改单属性 : 相对位置X[+100] : 时间[60]
  * 插件指令：>图片快捷变换操作 : 图片[1] : 修改单属性 : 相对位置Y[+100] : 时间[60]
  * 插件指令：>图片快捷变换操作 : 图片[1] : 修改单属性 : 透明度[255] : 时间[60]
+ * 插件指令：>图片快捷变换操作 : 图片[1] : 修改单属性 : 透明度变量[21] : 时间[60]
  * 插件指令：>图片快捷变换操作 : 图片[1] : 修改单属性 : 相对透明度[+25] : 时间[60]
  * 插件指令：>图片快捷变换操作 : 图片[1] : 修改单属性 : 旋转[90] : 时间[60]
+ * 插件指令：>图片快捷变换操作 : 图片[1] : 修改单属性 : 旋转变量[21] : 时间[60]
  * 插件指令：>图片快捷变换操作 : 图片[1] : 修改单属性 : 相对旋转[+45] : 时间[60]
  * 插件指令：>图片快捷变换操作 : 图片[1] : 修改单属性 : 缩放X[1.2] : 时间[60]
  * 插件指令：>图片快捷变换操作 : 图片[1] : 修改单属性 : 缩放Y[1.2] : 时间[60]
@@ -93,7 +95,7 @@
  * 插件指令：>图片快捷变换操作 : 图片[1] : 修改单属性 : 相对斜切Y[+0.5] : 时间[60]
  * 
  * 1.前半部分（图片[1]）和 后半部分（修改单属性 : 位置X[100] : 时间[60]）
- *   的参数可以随意组合。一共有4*19种组合方式。
+ *   的参数可以随意组合。一共有4*21种组合方式。
  * 2.你可以同时执行 多条 "修改单属性"的指令，并且重复指令可以叠加执行。
  *   设置"时间[0]"与设置"时间[1]"一样，在下一帧才能瞬间切换。
  * 3.所有"相对"参数都可以填正数 +10 ，也可以填负数 -10。
@@ -217,6 +219,8 @@
  * 修复了预加载有时候失效的bug。
  * [v1.7]
  * 将原先的功能分离出 层级与堆叠级，优化了插件结构。
+ * [v1.8]
+ * 添加了 透明度变量和旋转变量 的设置。
  * 
  * 
  * 
@@ -2280,6 +2284,18 @@ Game_Interpreter.prototype.drill_PSh_pluginCommand = function( command, args ){
 						pics[k]._drill_PSh_commandChangeTank.push(data);
 					}
 				}
+				else if( temp1.indexOf("透明度变量[") != -1  ){
+					temp1 = temp1.replace("透明度变量[","");
+					temp1 = temp1.replace("]","");
+					for( var k=0; k < pics.length; k++ ){
+						var data = {
+							"type":"opacity",
+							"value": $gameVariables.value(Number(temp1)) - pics[k]._opacity,
+							"time":Number(temp2),
+						}
+						pics[k]._drill_PSh_commandChangeTank.push(data);
+					}
+				}
 				else if( temp1.indexOf("透明度[") != -1  ){
 					temp1 = temp1.replace("透明度[","");
 					temp1 = temp1.replace("]","");
@@ -2299,6 +2315,18 @@ Game_Interpreter.prototype.drill_PSh_pluginCommand = function( command, args ){
 						var data = {
 							"type":"relativeAngle",
 							"value":Number(temp1),
+							"time":Number(temp2),
+						}
+						pics[k]._drill_PSh_commandChangeTank.push(data);
+					}
+				}
+				else if( temp1.indexOf("旋转变量[") != -1  ){
+					temp1 = temp1.replace("旋转变量[","");
+					temp1 = temp1.replace("]","");
+					for( var k=0; k < pics.length; k++ ){
+						var data = {
+							"type":"angle",
+							"value": $gameVariables.value(Number(temp1)) - pics[k]._angle,
 							"time":Number(temp2),
 						}
 						pics[k]._drill_PSh_commandChangeTank.push(data);
