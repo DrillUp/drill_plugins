@@ -139,6 +139,9 @@
 //			->☆插件指令
 //			->☆存储数据
 //			
+//			--------------------------
+//			
+//			
 //			->☆鼠标悬停监听
 //				->执行绑定【标准函数】
 //				->解除绑定【标准函数】
@@ -160,6 +163,8 @@
 //			->☆DEBUG悬停范围
 //				->地图界面的图片
 //				->战斗界面的图片
+//			
+//			--------------------------
 //
 //
 //		★家谱：
@@ -688,7 +693,7 @@ Game_Temp.prototype.initialize = function() {
     this._drill_COPWM_op_curTime = 0;		//当前帧数
 }
 //==============================
-// * 优化控制 - 初始化（地图界面）
+// * 优化控制 - 初始化『多场景与图片-地图界面』
 //==============================
 var _drill_COPWM_optimizationMap_initialize = Scene_Map.prototype.initialize;
 Scene_Map.prototype.initialize = function(){
@@ -696,7 +701,7 @@ Scene_Map.prototype.initialize = function(){
     $gameTemp._drill_COPWM_op_curTime = 0;
 }
 //==============================
-// * 优化控制 - 帧刷新（地图界面）
+// * 优化控制 - 帧刷新『多场景与图片-地图界面』
 //==============================
 var _drill_COPWM_optimizationMap_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {
@@ -704,7 +709,7 @@ Scene_Map.prototype.update = function() {
     $gameTemp._drill_COPWM_op_curTime += 1;
 }
 //==============================
-// * 优化控制 - 初始化（战斗界面）
+// * 优化控制 - 初始化『多场景与图片-战斗界面』
 //==============================
 var _drill_COPWM_optimizationBattle_initialize = Scene_Battle.prototype.initialize;
 Scene_Battle.prototype.initialize = function(){
@@ -712,7 +717,7 @@ Scene_Battle.prototype.initialize = function(){
     $gameTemp._drill_COPWM_op_curTime = 0;
 }
 //==============================
-// * 优化控制 - 帧刷新（战斗界面）『图片与多场景』
+// * 优化控制 - 帧刷新『多场景与图片-战斗界面』
 //==============================
 var _drill_COPWM_optimizationBattle_update = Scene_Battle.prototype.update;
 Scene_Battle.prototype.update = function() {
@@ -729,7 +734,7 @@ Scene_Battle.prototype.update = function() {
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * DEBUG悬停范围 - 帧刷新（地图界面）
+// * DEBUG悬停范围 - 帧刷新『多场景与图片-地图界面』
 //==============================
 var _drill_COPWM_debugMap_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {
@@ -738,7 +743,7 @@ Scene_Map.prototype.update = function() {
     this.drill_COPWM_updateDrawBeanRangeBitmap();		//帧刷新 - 绘制范围
 }
 //==============================
-// * DEBUG悬停范围 - 帧刷新 初始化贴图
+// * DEBUG悬停范围 - 帧刷新 初始化贴图『多场景与图片-地图界面』
 //==============================
 Scene_Map.prototype.drill_COPWM_updateDrawBeanRangeSprite = function() {
 	
@@ -769,7 +774,7 @@ Scene_Map.prototype.drill_COPWM_updateDrawBeanRangeSprite = function() {
 	}
 }
 //==============================
-// * DEBUG悬停范围 - 帧刷新 绘制范围
+// * DEBUG悬停范围 - 帧刷新 绘制范围『多场景与图片-地图界面』
 //==============================
 Scene_Map.prototype.drill_COPWM_updateDrawBeanRangeBitmap = function() {
 	if( this._drill_COPWM_DebugSprite == undefined ){ return; }
@@ -778,10 +783,10 @@ Scene_Map.prototype.drill_COPWM_updateDrawBeanRangeBitmap = function() {
 	var temp_bitmap = this._drill_COPWM_DebugSprite.bitmap;
 	temp_bitmap.clear();
 	
-	// > 图片遍历『图片与多场景』（显示所有图片的悬停范围）
-	var i_offset = 0;							//地图界面的图片
+	// > 图片遍历（显示所有图片的悬停范围）
+	var i_offset = 0;							//『多场景与图片-地图界面』
 	var pic_length = $gameScreen.maxPictures();
-	if( $gameParty.inBattle() == true ){		//战斗界面的图片
+	if( $gameParty.inBattle() == true ){		//『多场景与图片-战斗界面』
 		i_offset = pic_length;
 	}
 	for(var i = 0; i < pic_length; i++ ){
@@ -840,7 +845,7 @@ Scene_Map.prototype.drill_COPWM_updateDrawBeanRangeBitmap = function() {
 	}
 }
 //==============================
-// * DEBUG悬停范围 - 帧刷新（战斗界面）
+// * DEBUG悬停范围 - 帧刷新『多场景与图片-战斗界面』
 //==============================
 var _drill_COPWM_debugBattle_update = Scene_Battle.prototype.update;
 Scene_Battle.prototype.update = function(){
@@ -849,9 +854,12 @@ Scene_Battle.prototype.update = function(){
     this.drill_COPWM_updateDrawBeanRangeBitmap();		//帧刷新 - 绘制范围
 }
 //==============================
-// * DEBUG悬停范围 - 函数赋值『图片与多场景』
+// * DEBUG悬停范围 - 帧刷新 初始化贴图『多场景与图片-战斗界面』
 //==============================
 Scene_Battle.prototype.drill_COPWM_updateDrawBeanRangeSprite = Scene_Map.prototype.drill_COPWM_updateDrawBeanRangeSprite;
+//==============================
+// * DEBUG悬停范围 - 帧刷新 绘制范围『多场景与图片-战斗界面』
+//==============================
 Scene_Battle.prototype.drill_COPWM_updateDrawBeanRangeBitmap = Scene_Map.prototype.drill_COPWM_updateDrawBeanRangeBitmap;
 
 //==============================

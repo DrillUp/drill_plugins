@@ -1122,7 +1122,7 @@ if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义�
 			this.__drill_zIndex = value;
 		},
 		get: function(){
-			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			if( this.__drill_zIndex == undefined ){ return 20250701; }	//（如果未定义则放最上面）
 			return this.__drill_zIndex;
 		},
 		configurable: true
@@ -1459,9 +1459,9 @@ Scene_Map.prototype.drill_GFVB_seatUpper_updateRegist = function() {
 		// > 物品信息 控制
 		var data = temp_window._drill_data;
 		var b_data = temp_window._drill_data['b_data'];
-		b_data['orgX'] = regist_data['x'];
-		b_data['orgY'] = regist_data['y'];
-		b_data['orgOpacity'] = 255;
+		b_data['org_x'] = regist_data['x'];
+		b_data['org_y'] = regist_data['y'];
+		b_data['org_opacity'] = 255;
 		
 		b_data['movementNum'] = 1;
 		b_data['movementTime'] = data['param_sustainTime'];
@@ -1517,9 +1517,9 @@ Scene_Map.prototype.drill_GFVB_seatLower_updateRegist = function() {
 		// > 物品信息 控制
 		var data = temp_window._drill_data;
 		var b_data = temp_window._drill_data['b_data'];
-		b_data['orgX'] = regist_data['x'];
-		b_data['orgY'] = regist_data['y'];
-		b_data['orgOpacity'] = 255;
+		b_data['org_x'] = regist_data['x'];
+		b_data['org_y'] = regist_data['y'];
+		b_data['org_opacity'] = 255;
 		
 		b_data['movementNum'] = 1;
 		b_data['movementTime'] = data['param_sustainTime'];
@@ -1594,7 +1594,7 @@ function Drill_GFVB_SeatAllocator(){
 //==============================
 Drill_GFVB_SeatAllocator.prototype.initialize = function( data ){
 	this._drill_data = {};
-	this._drill_allocatorSerial = new Date().getTime() + Math.random();		//『生成一个不重复的序列号』
+	this._drill_allocatorSerial = new Date().getTime() + Math.random();		//『随机因子-生成一个不重复的序列号』
     this.drill_allocator_initData();										//初始化数据
     this.drill_allocator_initChild();										//初始化子功能
 	if( data == undefined ){ data = {}; }
@@ -1736,7 +1736,7 @@ Drill_GFVB_SeatAllocator.prototype.drill_allocator_resetData_Private = function(
 	
 	// > 执行重置
 	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
-	this._drill_allocatorSerial = new Date().getTime() + Math.random();		//『生成一个不重复的序列号』
+	this._drill_allocatorSerial = new Date().getTime() + Math.random();		//『随机因子-生成一个不重复的序列号』
     this.drill_allocator_initData();										//初始化数据
     this.drill_allocator_initChild();										//初始化子功能
 }
@@ -1901,9 +1901,9 @@ Scene_Map.prototype.drill_GFVB_lane_updateRegist = function() {
 		// > 物品信息 控制
 		var data = temp_window._drill_data;
 		var b_data = temp_window._drill_data['b_data'];
-		b_data['orgX'] = regist_data['x'];
-		b_data['orgY'] = regist_data['y'];
-		b_data['orgOpacity'] = 255;
+		b_data['org_x'] = regist_data['x'];
+		b_data['org_y'] = regist_data['y'];
+		b_data['org_opacity'] = 255;
 		
 		b_data['movementNum'] = 1;
 		b_data['movementTime'] = data['param_sustainTime'];
@@ -1977,7 +1977,7 @@ function Drill_GFVB_LaneAllocator(){
 //==============================
 Drill_GFVB_LaneAllocator.prototype.initialize = function( data ){
 	this._drill_data = {};
-	this._drill_allocatorSerial = new Date().getTime() + Math.random();		//『生成一个不重复的序列号』
+	this._drill_allocatorSerial = new Date().getTime() + Math.random();		//『随机因子-生成一个不重复的序列号』
     this.drill_allocator_initData();										//初始化数据
     this.drill_allocator_initChild();										//初始化子功能
 	if( data == undefined ){ data = {}; }
@@ -2121,7 +2121,7 @@ Drill_GFVB_LaneAllocator.prototype.drill_allocator_resetData_Private = function(
 	
 	// > 执行重置
 	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
-	this._drill_allocatorSerial = new Date().getTime() + Math.random();		//『生成一个不重复的序列号』
+	this._drill_allocatorSerial = new Date().getTime() + Math.random();		//『随机因子-生成一个不重复的序列号』
     this.drill_allocator_initData();										//初始化数据
     this.drill_allocator_initChild();										//初始化子功能
 }
@@ -2575,7 +2575,7 @@ Drill_GFVB_Window.prototype.drill_initBallistics = function() {
 //==============================
 // * B窗口弹道 - 刷新弹道（开放函数）
 //
-//			说明：	> 需要单独赋值参数：orgX、orgY、orgOpacity。
+//			说明：	> 需要单独赋值参数：org_x、org_y、org_opacity。
 //					> 此函数只刷新弹道，如果要重置你还需设置 _drill_curTime 为0。
 //==============================
 Drill_GFVB_Window.prototype.drill_refreshBallistics = function( b_data ){
@@ -2586,14 +2586,14 @@ Drill_GFVB_Window.prototype.drill_refreshBallistics = function( b_data ){
 	
 	
 	// > 移动弹道
-	var org_x = b_data['orgX'];
-	var org_y = b_data['orgY'];
+	var org_x = b_data['org_x'];
+	var org_y = b_data['org_y'];
 	$gameTemp.drill_COBa_setBallisticsMove( b_data );					//移动弹道 - 初始化数据
 	$gameTemp.drill_COBa_preBallisticsMove( this, 0, org_x, org_y );	//移动弹道 - 推演赋值
 	
 	
 	// > 透明度弹道
-	var org_opacity = b_data['orgOpacity'];
+	var org_opacity = b_data['org_opacity'];
 	var o_time = b_data['movementDelay'] + b_data['movementTime'] + b_data['movementEndDelay'];
 	var o_data = {};
 	o_data['opacityNum'] = 1;											//对象数量

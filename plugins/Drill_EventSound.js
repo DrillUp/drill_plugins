@@ -229,7 +229,7 @@
 //			  玩家不设置声音距离化。
 //			2.正在播放音乐：（2024/7/25）
 //				╭══════════════════════╮
-//				║ ~《小爱丽丝捡金币》~ ║
+//				║ ~~ 小爱丽丝捡金币 ~~ ║
 //				║ 0:59 ━━━━●───── 2:02 ║
 //				║  ←   ‖   →   ■   ≡   ║
 //				╰══════════════════════╯
@@ -620,11 +620,13 @@ Sprite_Base.prototype.startAnimation = function(animation, mirror, delay) {
 //==============================
 var _drill_ESo_processTimingData = Sprite_Animation.prototype.processTimingData;
 Sprite_Animation.prototype.processTimingData = function(timing) {
-    if (!this._duplicated && timing.se) {
+    if( !this._duplicated && timing.se ){
 		$gameTemp._drill_ESo_event = this._drill_ESo_event;		//每次播放声音前，进行一次声音捕获
 		$gameTemp._drill_ESo_isOff = $gameTemp._drill_ESo_nextAnimOff;
 		$gameTemp._drill_ESo_nextAnimOff = false;
     }
+	
+	// > 原函数
 	_drill_ESo_processTimingData.call(this,timing);
 };
 

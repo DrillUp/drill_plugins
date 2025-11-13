@@ -50,8 +50,8 @@
  *   (1.你可以将贴图放置在地图的五种层级中，分别为：
  *      下层、中层、上层、图片层、最顶层
  *   (2.地图层级之间的关系为：
- *      地图远景 《 下层 《 图块层 《 中层 《 事件/玩家层 《 上层
- *      《 图片对象层 《 图片层 《 对话框集合 《 最顶层
+ *      地图远景 < 下层 < 图块层 < 中层 < 事件/玩家层 < 上层
+ *      < 图片对象层 < 图片层 < 对话框集合 < 最顶层
  *   (3.处于最顶层，可以把地图界面的对话框、窗口也给挡住。
  *   (4.处于同一 地图层级 时，将根据 图片层级 再先后排序。
  * 位移比：
@@ -3083,7 +3083,7 @@ if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义�
 			this.__drill_zIndex = value;
 		},
 		get: function(){
-			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			if( this.__drill_zIndex == undefined ){ return 20250701; }	//（如果未定义则放最上面）
 			return this.__drill_zIndex;
 		},
 		configurable: true
@@ -3488,7 +3488,7 @@ DrillUp.g_LGi_notFindStyleAlertOnce = true;
 //==============================
 Drill_LGi_Controller.prototype.initialize = function( data_id ){
 	this._drill_data_id = data_id;
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能
     this.drill_controller_resetData( data_id );
@@ -3760,7 +3760,7 @@ Drill_LGi_Controller.prototype.drill_controller_resetData_Private = function( da
 	
 	// > 执行重置
 	this._drill_data_id = data_id;
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能
 }

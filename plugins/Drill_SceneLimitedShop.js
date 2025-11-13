@@ -1451,7 +1451,7 @@
 //			->☆原型链规范（Scene_Drill_SLS）
 //			
 //			->金钱窗口【Drill_SLS_GoldWindow】
-//				->C开关动画
+//				->B展开动画
 //				->2A私有函数
 //				->2B金钱数据
 //					->只金钱
@@ -3449,7 +3449,7 @@ if( Imported.Drill_MenuScrollBar == true && DrillUp.g_SLS_confirmWin_cursor != n
 // **		子功能：	
 // **					->窗口
 // **						->帧刷新
-// **					->C开关动画
+// **					->B展开动画
 // **					->2A私有函数
 // **					->2B金钱数据
 // **		
@@ -3476,7 +3476,7 @@ Drill_SLS_GoldWindow.prototype.update = function() {
 	Window_Base.prototype.update.call(this);
 };
 //==============================
-// * C开关动画 - 打开窗口（继承）
+// * B展开动画 - 打开窗口（继承）
 //==============================
 Drill_SLS_GoldWindow.prototype.open = function() {
     this.drill_SLS_refresh();

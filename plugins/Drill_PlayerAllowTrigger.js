@@ -163,13 +163,13 @@
 //=============================================================================
 /*
 //==============================
-// * 3G触发事件『允许操作玩家触发』 - 是否允许触发
+// * 3G串行触发事件《互动-允许操作玩家触发》 - 是否允许触发
 //==============================
 Game_Player.prototype.canStartLocalEvents = function(){
     return !this.isInAirship();
 };
 //==============================
-// * 3G触发事件『允许操作玩家触发』 - D动作 - 接触触发（继承）
+// * 3G串行触发事件《互动-允许操作玩家触发》 - D对象操作 - 接触触发（继承）
 //==============================
 Game_Player.prototype.checkEventTriggerTouch = function( x, y ){
     if( this.canStartLocalEvents() ){		//（是否允许触发）
@@ -177,7 +177,7 @@ Game_Player.prototype.checkEventTriggerTouch = function( x, y ){
     }
 };
 //==============================
-// * 3G触发事件『允许操作玩家触发』 - 执行触发（绑定start标记）
+// * 3G串行触发事件《互动-允许操作玩家触发》 - 执行触发（绑定start标记）
 //
 //			说明：	> triggers为数组，主要包含[0,1,2]的判断。（0确定键 1玩家接触 2事件接触 3自动执行 4并行处理）
 //					> normal为布尔，判断是否为 与人物相同 的优先级。
@@ -193,7 +193,33 @@ Game_Player.prototype.startMapEvent = function( x, y, triggers, normal ){
     }
 };
 //==============================
-// * 3G触发事件『允许操作玩家触发』 - 暂停移动时（帧刷新）
+// * 3G串行触发事件《互动-允许操作玩家触发》 - 执行触发 - 脚下位置触发
+//==============================
+Game_Player.prototype.checkEventTriggerHere = function( triggers ){
+    if( this.canStartLocalEvents() ){		//（是否允许触发）
+        this.startMapEvent(this.x, this.y, triggers, false);
+    }
+};
+//==============================
+// * 3G串行触发事件《互动-允许操作玩家触发》 - 执行触发 - 前方位置触发
+//==============================
+Game_Player.prototype.checkEventTriggerThere = function( triggers ){
+    if( this.canStartLocalEvents() ){		//（是否允许触发）
+        var direction = this.direction();
+        var x1 = this.x;
+        var y1 = this.y;
+        var x2 = $gameMap.roundXWithDirection(x1, direction);
+        var y2 = $gameMap.roundYWithDirection(y1, direction);
+        this.startMapEvent(x2, y2, triggers, true);
+        if( !$gameMap.isAnyEventStarting() && $gameMap.isCounter(x2, y2) ){
+            var x3 = $gameMap.roundXWithDirection(x2, direction);
+            var y3 = $gameMap.roundYWithDirection(y2, direction);
+            this.startMapEvent(x3, y3, triggers, true);
+        }
+    }
+};
+//==============================
+// * 3G串行触发事件《互动-允许操作玩家触发》 - 暂停移动时（帧刷新）
 //
 //			说明：	> 注意，wasMoving为true的时候，表示在 玩家移动然后静止 的那一帧执行。
 //					  wasMoving为false的时候，才表示在 帧刷新。
@@ -230,7 +256,7 @@ Game_Player.prototype.updateNonmoving = function( wasMoving ){
     }
 };
 //==============================
-// * 3G触发事件『允许操作玩家触发』 - 静止时触发
+// * 3G串行触发事件《互动-允许操作玩家触发》 - 静止时触发
 //
 //			说明：	> 静止时，是指玩家站在原地，然后按一下 键盘/手柄 的触发效果。
 //					  或者，鼠标/触屏指向目的后，玩家暂停移动时，执行一次 鼠标/触屏 的触发效果。
@@ -247,7 +273,7 @@ Game_Player.prototype.triggerAction = function(){
     return false;
 };
 //==============================
-// * 3G触发事件『允许操作玩家触发』 - 静止时触发（键盘/手柄）
+// * 3G串行触发事件《互动-允许操作玩家触发》 - 静止时触发（键盘/手柄）
 //==============================
 Game_Player.prototype.triggerButtonAction = function(){
     if( Input.isTriggered('ok') ){
@@ -266,7 +292,7 @@ Game_Player.prototype.triggerButtonAction = function(){
     return false;
 };
 //==============================
-// * 3G触发事件『允许操作玩家触发』 - 静止时触发（鼠标/触屏）
+// * 3G串行触发事件《互动-允许操作玩家触发》 - 静止时触发（鼠标/触屏）
 //==============================
 Game_Player.prototype.triggerTouchAction = function(){
     if( $gameTemp.isDestinationValid() ){
@@ -290,7 +316,7 @@ Game_Player.prototype.triggerTouchAction = function(){
     return false;
 };
 //==============================
-// * 3G触发事件『允许操作玩家触发』 - 静止时触发（鼠标/触屏） - 脚下情况
+// * 3G串行触发事件《互动-允许操作玩家触发》 - 静止时触发（鼠标/触屏） - 脚下情况
 //==============================
 Game_Player.prototype.triggerTouchActionD1 = function( x1, y1 ){
     if( $gameMap.airship().pos(x1, y1) ){
@@ -302,7 +328,7 @@ Game_Player.prototype.triggerTouchActionD1 = function( x1, y1 ){
     return $gameMap.setupStartingEvent();	//（如果有事件成功绑定start标记，那么执行事件）
 };
 //==============================
-// * 3G触发事件『允许操作玩家触发』 - 静止时触发（鼠标/触屏） - 前方一图块情况
+// * 3G串行触发事件《互动-允许操作玩家触发》 - 静止时触发（鼠标/触屏） - 前方一图块情况
 //==============================
 Game_Player.prototype.triggerTouchActionD2 = function( x2, y2 ){
     if( $gameMap.boat().pos(x2, y2) || $gameMap.ship().pos(x2, y2) ){
@@ -319,7 +345,7 @@ Game_Player.prototype.triggerTouchActionD2 = function( x2, y2 ){
     return $gameMap.setupStartingEvent();	//（如果有事件成功绑定start标记，那么执行事件）
 };
 //==============================
-// * 3G触发事件『允许操作玩家触发』 - 静止时触发（鼠标/触屏） - 前方两图块情况（桌子）
+// * 3G串行触发事件《互动-允许操作玩家触发》 - 静止时触发（鼠标/触屏） - 前方两图块情况（桌子）
 //==============================
 Game_Player.prototype.triggerTouchActionD3 = function( x2, y2 ){
     if( $gameMap.isCounter(x2, y2) ){
@@ -327,38 +353,12 @@ Game_Player.prototype.triggerTouchActionD3 = function( x2, y2 ){
     }											//
     return $gameMap.setupStartingEvent();		//（如果有事件成功绑定start标记，那么执行事件）
 };
+*/
+/*
 //==============================
-// * 3G触发事件『允许操作玩家触发』 - 静止时触发（鼠标/触屏） - 脚下位置触发
-//==============================
-Game_Player.prototype.checkEventTriggerHere = function( triggers ){
-    if( this.canStartLocalEvents() ){		//（是否允许触发）
-        this.startMapEvent(this.x, this.y, triggers, false);
-    }
-};
-//==============================
-// * 3G触发事件『允许操作玩家触发』 - 静止时触发（鼠标/触屏） - 前方位置触发
-//==============================
-Game_Player.prototype.checkEventTriggerThere = function( triggers ){
-    if( this.canStartLocalEvents() ){		//（是否允许触发）
-        var direction = this.direction();
-        var x1 = this.x;
-        var y1 = this.y;
-        var x2 = $gameMap.roundXWithDirection(x1, direction);
-        var y2 = $gameMap.roundYWithDirection(y1, direction);
-        this.startMapEvent(x2, y2, triggers, true);
-        if( !$gameMap.isAnyEventStarting() && $gameMap.isCounter(x2, y2) ){
-            var x3 = $gameMap.roundXWithDirection(x2, direction);
-            var y3 = $gameMap.roundYWithDirection(y2, direction);
-            this.startMapEvent(x3, y3, triggers, true);
-        }
-    }
-};
-
-
-//==============================
-// * 3E触发事件『允许操作玩家触发』 - D动作 - 接触触发（继承）
+// * 3E串行触发事件《互动-允许操作玩家触发》 - D对象操作 - 接触触发（继承）
 //
-//			说明：	> 此处为事件激活 触发条件-2事件接触 的功能，其他触发见 玩家-3G触发事件。
+//			说明：	> 此处为事件激活 触发条件-2事件接触 的功能，其他触发见 玩家-3G串行触发事件。
 //==============================
 Game_Event.prototype.checkEventTriggerTouch = function( x, y ){
     if( !$gameMap.isEventRunning() ){
@@ -495,7 +495,7 @@ Game_Temp.prototype.drill_PAlT_isPlayerEnabled = function() {
 //=============================================================================
 // ** ☆玩家触发权限
 //
-//			说明：	> 此模块专门管理 玩家触发权限（来自 3G触发事件）的控制功能。
+//			说明：	> 此模块专门管理 玩家触发权限（来自 3G串行触发事件）的控制功能。
 //					> 注意，具体如何触发，该模块不管。
 //					> 该模块提供【统一函数】，子插件可以继承并作为 玩家触发权限 的条件。
 //					  也就是说，用到了 Game_Player.prototype.canStartLocalEvents 的子插件，都要继承此插件。

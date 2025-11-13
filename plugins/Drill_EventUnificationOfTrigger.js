@@ -576,7 +576,7 @@ Game_SelfSwitches.prototype.drill_ESS_valueChanged = function( key, value ){
 		for(var i=0; i < ev_list.length; i++){
 			var e_key = [ key[0], ev_list[i]._eventId, key[2] ];
 			if( value ){ 
-				this._data[e_key] = true;
+				this._data[e_key] = true;	//『json赋值时数组变字符串问题』
 			} else {
 				delete this._data[e_key];
 			}

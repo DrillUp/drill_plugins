@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        系统 - 字符绘制核心
+ * @plugindesc [v1.1]        系统 - 字符绘制核心
  * @author Drill_up
  * 
  * 
@@ -80,7 +80,14 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 添加了 保持图标原大小 的底层功能，添加了比率设置。
  * 
+ * 
+ * 
+ * @param 文本高度与字体大小的比率
+ * @desc 文本高度=字体大小*比率；默认比率1.10，此比率会影响所有字符的高度计算，去看看文档的常见问题。
+ * @default 1.10
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -237,6 +244,8 @@
 //			
 //			->☆管辖权
 //			->☆管辖权覆写函数
+//			
+//			--------------------------
 //
 //
 //		★家谱：
@@ -326,6 +335,8 @@
 	DrillUp.parameters = PluginManager.parameters('Drill_CoreOfCharDraw');
 	
 	
+	/*-----------------杂项------------------*/
+	DrillUp.g_COCD_textHeightPer = Number(DrillUp.parameters["文本高度与字体大小的比率"] || 1.10);
 	
 	
 //=============================================================================
@@ -668,7 +679,7 @@ Game_Temp.prototype.drill_COCD_measureBaseTextWidth_Private = function( painter,
 //			说明：	> 注意，painter需要通过参数传入指针。
 //==============================
 Game_Temp.prototype.drill_COCD_measureBaseTextHeight_Private = function( painter, text, baseParam ){
-	return baseParam['fontSize'] *1.10;		//『手算高度』（没有直接获取高度的方法，但通常为1.1倍字体大小）
+	return baseParam['fontSize'] *DrillUp.g_COCD_textHeightPer;		//『手算高度』（没有直接获取高度的方法，但通常为1.1倍字体大小）
 };
 
 
@@ -696,8 +707,8 @@ Game_Temp.prototype.drill_COCD_drawBaseText_outline = function( painter, text, t
 // * DEBUG基础字符配置 - 显示字符方框（继承）
 //==============================
 Game_Temp.prototype.drill_COCD_drawBaseText_debug = function( painter, text, tx, ty, baseParam ){
-	var width  = painter.measureText(text).width;		//（因为此处正被 save和restore 包裹，所以直接获取文本宽度）
-	var height = baseParam['fontSize'] *1.10;			//『手算高度』（因为此处正被 save和restore 包裹，所以直接获取文本高度）
+	var width  = painter.measureText(text).width;						//（因为此处正被 save和restore 包裹，所以直接获取文本宽度）
+	var height = baseParam['fontSize'] *DrillUp.g_COCD_textHeightPer;	//『手算高度』（因为此处正被 save和restore 包裹，所以直接获取文本高度）
 	
 	painter.strokeStyle = "rgb(255,255,255)";
 	painter.lineWidth = 1;
@@ -4190,6 +4201,36 @@ Game_Temp.prototype.drill_COCD_textBlock_processSecond = function( command, args
 			return;
 		}
 	}
+}//==============================
+// * 图标字符 - 样式阶段-配置阶段（继承）
+//==============================
+var _drill_COCD_COCD_icon_textBlock_processStyle = Game_Temp.prototype.drill_COCD_textBlock_processStyle;
+Game_Temp.prototype.drill_COCD_textBlock_processStyle = function( command, args, cur_infoParam, cur_baseParam, cur_blockParam, cur_rowParam ){
+	_drill_COCD_COCD_icon_textBlock_processStyle.call( this, command, args, cur_infoParam, cur_baseParam, cur_blockParam, cur_rowParam );
+	
+	// > 『底层字符定义』 - 图标保持原大小（@@@-ik[true]） icon_keep
+	if( command.toLowerCase() == "@@@-ik" ){
+		if( args.length == 1 ){
+			if( String(args[0]) == "true" ){
+				cur_baseParam['iconKeepSize'] = true;	//（基础字符配置）
+			}else{
+				cur_baseParam['iconKeepSize'] = false;
+			}
+			this.drill_COCD_textBlock_submitStyle();
+			return;
+		}
+	}
+}
+//==============================
+// * 图标字符 - 样式阶段-回滚样式（继承）
+//==============================
+var _drill_COCD_COCD_icon_textBlock_restoreStyle = Game_Temp.prototype.drill_COCD_textBlock_restoreStyle;
+Game_Temp.prototype.drill_COCD_textBlock_restoreStyle = function( cur_infoParam, cur_baseParam, cur_blockParam, cur_rowParam ){
+	_drill_COCD_COCD_icon_textBlock_restoreStyle.call( this, cur_infoParam, cur_baseParam, cur_blockParam, cur_rowParam );
+	
+	// > 『底层字符样式回滚』 - 图标保持原大小（@@@-ik[true]）
+	//	（不操作）
+	
 }
 //==============================
 // * 图标字符 - 基础字符 - 默认值（继承）
@@ -4207,7 +4248,8 @@ Game_Temp.prototype.drill_COCD_measureBaseTextWidth_Private = function( painter,
 	
 	// > 图标情况时（直接返回宽度值，因为图标是固定的正方形）
 	if( baseParam['iconIndex'] >= 0 ){
-		return baseParam['fontSize'] *1.10;		//『手算高度』
+		if( baseParam['iconKeepSize'] == true ){ return Window_Base._iconWidth; }
+		return baseParam['fontSize'] *DrillUp.g_COCD_textHeightPer;		//『手算高度』
 		
 	// > 原函数
 	}else{
@@ -4222,7 +4264,8 @@ Game_Temp.prototype.drill_COCD_measureBaseTextHeight_Private = function( painter
 	
 	// > 图标情况时（直接返回高度值，因为图标是固定的正方形）
 	if( baseParam['iconIndex'] >= 0 ){
-		return baseParam['fontSize'] *1.10;		//『手算高度』
+		if( baseParam['iconKeepSize'] == true ){ return Window_Base._iconHeight; }
+		return baseParam['fontSize'] *DrillUp.g_COCD_textHeightPer;		//『手算高度』
 		
 	// > 原函数
 	}else{
@@ -4251,20 +4294,28 @@ Bitmap.prototype.drill_COCD_drawBaseText_Private = function( text, x, y, basePar
 //==============================
 Bitmap.prototype.drill_COCD_drawBaseText_Icon = function( iconIndex, x, y, baseParam ){
 	
-	// > 开始绘制 图标
+	// > 开始绘制 - 图标
 	var painter = this._context;
 	var bitmap = ImageManager.loadSystem('IconSet');	//（IconSet在启动界面就被加载了，见函数 Scene_Boot.loadSystemImages）
 	var pw = Window_Base._iconWidth;
 	var ph = Window_Base._iconHeight;
 	var sx = iconIndex % 16 * pw;
 	var sy = Math.floor(iconIndex / 16) * ph;
-	var size = baseParam['fontSize'] *1.10;				//『手算高度』（图标大小就是字符高度）
-	y -= size;
+	var size = baseParam['fontSize'] *DrillUp.g_COCD_textHeightPer;		//『手算高度』（图标大小就是字符高度）
 	
-	var last_enabled = painter.imageSmoothingEnabled;
-	painter.imageSmoothingEnabled = false;
-	this.blt(bitmap, sx, sy, pw, ph, x, y, size, size);
-	painter.imageSmoothingEnabled = last_enabled;
+	// > 开始绘制 - 保持原大小
+	if( baseParam['iconKeepSize'] == true ){
+		y -= ph;
+		this.blt(bitmap, sx, sy, pw, ph, x, y);
+		
+	// > 开始绘制 - 根据字符大小缩放
+	}else{
+		y -= size;
+		var last_enabled = painter.imageSmoothingEnabled;
+		painter.imageSmoothingEnabled = false;
+		this.blt(bitmap, sx, sy, pw, ph, x, y, size, size);
+		painter.imageSmoothingEnabled = last_enabled;
+	}
 }
 
 
@@ -4333,7 +4384,7 @@ Game_Temp.prototype.drill_COCD_measureBaseTextHeight_Private = function( painter
 	// > 分割线情况时（直接返回高度值）
 	if( baseParam['sepType'] != undefined &&
 		baseParam['sepType'] != "" ){
-		return baseParam['fontSize'] *1.10;		//『手算高度』
+		return baseParam['fontSize'] *DrillUp.g_COCD_textHeightPer;		//『手算高度』
 		
 	// > 原函数
 	}else{
@@ -4362,7 +4413,7 @@ Bitmap.prototype.drill_COCD_drawBaseText_Private = function( text, x, y, basePar
 // * 分割线字符 - 基础字符 - 绘制基础字符 - 绘制分割线
 //==============================
 Bitmap.prototype.drill_COCD_drawBaseText_Sep = function( sepType, thickness, color, x, y, baseParam ){
-	var height = baseParam['fontSize'] *1.10;		//『手算高度』
+	var height = baseParam['fontSize'] *DrillUp.g_COCD_textHeightPer;		//『手算高度』
 	y -= (height - thickness)*0.5;
 	y = Math.floor(y);
 	
@@ -4485,7 +4536,7 @@ Scene_Map.prototype.drill_COCD_Mix_createDebugSprite = function() {
 //=============================================================================
 /*  管辖 - 文本绘制
 //==============================
-// * C画布『系统-字符绘制核心』 - 文本绘制 - 绘制文本内容（开放函数）
+// * 0C画布《系统-字符绘制核心》 - 文本绘制 - 绘制文本内容
 //			
 //			参数：	> text 字符串    （目标文本）
 //					> x, y 数字      （文本位置）
@@ -4493,6 +4544,8 @@ Scene_Map.prototype.drill_COCD_Mix_createDebugSprite = function() {
 //					> lineHeight 数字（行高）
 //					> align 字符串   （对齐方式，left/center/right）
 //			返回：	> 无
+//
+//			标签：	> 函数『Bitmap的开放函数』。
 //==============================
 Bitmap.prototype.drawText = function( text, x, y, maxWidth, lineHeight, align ){
     // Note: Firefox has a bug with textBaseline: Bug 737852
@@ -4528,14 +4581,18 @@ Bitmap.prototype.drawText = function( text, x, y, maxWidth, lineHeight, align ){
     }
 };
 //==============================
-// * C画布『系统-字符绘制核心』 - 文本绘制 - 斜体设置
+// * 0C画布《系统-字符绘制核心》 - 文本绘制 - 斜体设置
+//
+//			标签：	> 函数『Bitmap的开放函数』。
 //==============================
 Bitmap.prototype._makeFontNameText = function(){
     return (this.fontItalic ? 'Italic ' : '') +
             this.fontSize + 'px ' + this.fontFace;
 };
 //==============================
-// * C画布『系统-字符绘制核心』 - 文本绘制 - 绘制文本本体
+// * 0C画布《系统-字符绘制核心》 - 文本绘制 - 绘制文本本体
+//
+//			标签：	> 函数『Bitmap的开放函数』。
 //==============================
 Bitmap.prototype._drawTextBody = function( text, tx, ty, maxWidth ){
     var context = this._context;
@@ -4543,7 +4600,9 @@ Bitmap.prototype._drawTextBody = function( text, tx, ty, maxWidth ){
     context.fillText(text, tx, ty, maxWidth);
 };
 //==============================
-// * C画布『系统-字符绘制核心』 - 文本绘制 - 绘制文本描边
+// * 0C画布《系统-字符绘制核心》 - 文本绘制 - 绘制文本描边
+//
+//			标签：	> 函数『Bitmap的开放函数』。
 //==============================
 Bitmap.prototype._drawTextOutline = function( text, tx, ty, maxWidth ){
     var context = this._context;
@@ -4555,11 +4614,12 @@ Bitmap.prototype._drawTextOutline = function( text, tx, ty, maxWidth ){
 */
 /*  管辖 - 高宽计算
 //==============================
-// * C画布『系统-字符绘制核心』 - 文本绘制 - 获取文本宽度（开放函数）
+// * 0C画布《系统-字符绘制核心》 - 文本绘制 - 获取文本宽度
 //			
 //			参数：	> text 字符串（目标文本）
 //			返回：	> 数字（文本宽度值）
 //
+//			标签：	> 函数『Bitmap的开放函数』。
 //			说明：	> 这个函数只被 Window_Base.prototype.textWidth 用到了。
 //==============================
 Bitmap.prototype.measureTextWidth = function( text ){
@@ -4661,16 +4721,16 @@ Bitmap.prototype.drill_COCD_org_drawText = function( text, x, y, maxWidth, lineH
 // * 管辖权覆写函数 - 自带参数初始化
 //==============================
 Bitmap.prototype.drill_COCD_org_initBitmapDefault = function(){
-	this.textColor = "#ffffff";					//C画布 - 文本绘制 - 文本色
+	this.textColor = "#ffffff";					//0C画布 - 文本绘制 - 文本色
 	
-	this.outlineEnabled = true;					//C画布 - 文本绘制 - 描边颜色（该插件新加的）
-	this.outlineColor = "rgba(0,0,0,0.5)";		//C画布 - 文本绘制 - 描边颜色
-	this.outlineWidth = 4;						//C画布 - 文本绘制 - 描边厚度
+	this.outlineEnabled = true;					//0C画布 - 文本绘制 - 描边颜色（该插件新加的）
+	this.outlineColor = "rgba(0,0,0,0.5)";		//0C画布 - 文本绘制 - 描边颜色
+	this.outlineWidth = 4;						//0C画布 - 文本绘制 - 描边厚度
 	
-	this.fontBold = false;						//C画布 - 文本绘制 - 是否加粗（该插件新加的）
-	this.fontItalic = false;					//C画布 - 文本绘制 - 是否斜体
-	this.fontSize = 28;							//C画布 - 文本绘制 - 字体大小
-	this.fontFace = "GameFont";					//C画布 - 文本绘制 - 字体类型
+	this.fontBold = false;						//0C画布 - 文本绘制 - 是否加粗（该插件新加的）
+	this.fontItalic = false;					//0C画布 - 文本绘制 - 是否斜体
+	this.fontSize = 28;							//0C画布 - 文本绘制 - 字体大小
+	this.fontFace = "GameFont";					//0C画布 - 文本绘制 - 字体类型
 }
 //==============================
 // * 管辖权覆写函数 - 准备绘制配置（继承）

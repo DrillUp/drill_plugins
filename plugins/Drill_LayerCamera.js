@@ -659,7 +659,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 漏洞函数警告 - 检测『非整数坐标抖动问题』
 	//==============================
-	if( Yanfly != undefined && 
+	if( typeof(Yanfly) != "undefined" && 
 		Yanfly.Core != undefined && 
 		Yanfly.Core.Sprite_updateTransform != undefined ){
 		alert( DrillUp.drill_LCa_getPluginTip_TransformBugWarning() );
@@ -723,21 +723,22 @@ if( Imported.Drill_CoreOfBallistics &&
 //=============================================================================
 /*
 //==============================
-// * A基本属性『地图-活动地图镜头』 - 图块 - 屏幕宽度（图块单位）
+// * A基本属性《地图-活动地图镜头》 - 图块 - 屏幕宽度（图块单位）
 //==============================
 Game_Map.prototype.screenTileX = function(){ return Graphics.width / this.tileWidth(); };
 //==============================
-// * A基本属性『地图-活动地图镜头』 - 图块 - 屏幕高度（图块单位）
+// * A基本属性《地图-活动地图镜头》 - 图块 - 屏幕高度（图块单位）
 //==============================
 Game_Map.prototype.screenTileY = function(){ return Graphics.height / this.tileHeight(); };
-
+*/
+/*
 //==============================
-// * E镜头『地图-活动地图镜头』 - 访问器（图块单位）
+// * E镜头《地图-活动地图镜头》 - 访问器（图块单位）
 //==============================
 Game_Map.prototype.displayX = function(){ return this._displayX; };
 Game_Map.prototype.displayY = function(){ return this._displayY; };
 //==============================
-// * E镜头『地图-活动地图镜头』 - 设置镜头位置
+// * E镜头《地图-活动地图镜头》 - 设置镜头位置
 //
 //			说明：	> 所有脚本中，控制 _displayX 和 _displayY 的只有两个地方。
 //					  一个是该函数，强制设置固定的位置。
@@ -772,7 +773,7 @@ Game_Map.prototype.setDisplayPos = function( x, y ){
 //=============================================================================
 /*
 //==============================
-// * F镜头滚动『地图-活动地图镜头』 - 载入初始化
+// * F镜头滚动《地图-活动地图镜头》 - 载入初始化
 //
 //			说明：	> 只在 载入地图时 执行一次。
 //==============================
@@ -782,7 +783,7 @@ Game_Map.prototype.setupScroll = function(){
     this._scrollSpeed = 4;
 };
 //==============================
-// * F镜头滚动『地图-活动地图镜头』 - 开始滚动（command204）
+// * F镜头滚动《地图-活动地图镜头》 - 开始滚动（command204）
 //==============================
 Game_Map.prototype.startScroll = function( direction, distance, speed ){
     this._scrollDirection = direction;
@@ -790,15 +791,15 @@ Game_Map.prototype.startScroll = function( direction, distance, speed ){
     this._scrollSpeed = speed;
 };
 //==============================
-// * F镜头滚动『地图-活动地图镜头』 - 判断滚动状态
+// * F镜头滚动《地图-活动地图镜头》 - 判断滚动状态
 //==============================
 Game_Map.prototype.isScrolling = function(){ return this._scrollRest > 0; };
 //==============================
-// * F镜头滚动『地图-活动地图镜头』 - 滚动距离
+// * F镜头滚动《地图-活动地图镜头》 - 滚动距离
 //==============================
 Game_Map.prototype.scrollDistance = function(){ return Math.pow(2, this._scrollSpeed) / 256; };
 //==============================
-// * F镜头滚动『地图-活动地图镜头』 - 帧刷新
+// * F镜头滚动《地图-活动地图镜头》 - 帧刷新
 //
 //			应用：	调用了 .scrollDown、.scrollLeft、.scrollRight、.scrollUp 函数。
 //			说明：	> 注意，地图镜头受两个地方控制，这里为其中一个，事件指令的作用。
@@ -820,7 +821,7 @@ Game_Map.prototype.updateScroll = function(){
     }
 };
 //==============================
-// * F镜头滚动『地图-活动地图镜头』 - 执行滚动（帧刷新）
+// * F镜头滚动《地图-活动地图镜头》 - 执行滚动（帧刷新）
 //==============================
 Game_Map.prototype.doScroll = function( direction, distance ){
     switch( direction ){
@@ -839,7 +840,7 @@ Game_Map.prototype.doScroll = function( direction, distance ){
     }
 };
 //==============================
-// * F镜头滚动『地图-活动地图镜头』 - 向下滚动
+// * F镜头滚动《地图-活动地图镜头》 - 向下滚动
 //
 //			应用：	> 被函数 Game_Player.prototype.updateScroll 调用（注意）
 //					> 被函数 Game_Map.prototype.updateScroll 调用
@@ -859,7 +860,7 @@ Game_Map.prototype.scrollDown = function( distance ){
     }
 };
 //==============================
-// * F镜头滚动『地图-活动地图镜头』 - 向左滚动
+// * F镜头滚动《地图-活动地图镜头》 - 向左滚动
 //
 //			应用：	> 被函数 Game_Player.prototype.updateScroll 调用（注意）
 //					> 被函数 Game_Map.prototype.updateScroll 调用
@@ -878,7 +879,7 @@ Game_Map.prototype.scrollLeft = function( distance ){
     }
 };
 //==============================
-// * F镜头滚动『地图-活动地图镜头』 - 向右滚动
+// * F镜头滚动《地图-活动地图镜头》 - 向右滚动
 //
 //			应用：	> 被函数 Game_Player.prototype.updateScroll 调用（注意）
 //					> 被函数 Game_Map.prototype.updateScroll 调用
@@ -898,7 +899,7 @@ Game_Map.prototype.scrollRight = function( distance ){
     }
 };
 //==============================
-// * F镜头滚动『地图-活动地图镜头』 - 向上滚动
+// * F镜头滚动《地图-活动地图镜头》 - 向上滚动
 //
 //			应用：	> 被函数 Game_Player.prototype.updateScroll 调用（注意）
 //					> 被函数 Game_Map.prototype.updateScroll 调用
@@ -916,9 +917,10 @@ Game_Map.prototype.scrollUp = function( distance ){
         this._parallaxY += this._displayY - lastY;
     }
 };
-
+*/
+/*
 //==============================
-// * 玩家『地图-活动地图镜头』 - 帧刷新 镜头滚动
+// * 玩家《地图-活动地图镜头》 - 帧刷新 镜头滚动
 //
 //			应用：	调用了 .scrollDown、.scrollLeft、.scrollRight、.scrollUp 函数。
 //			说明：	> 注意，地图镜头受两个地方控制，这里为其中一个，玩家移动的影响。
@@ -1904,7 +1906,7 @@ Drill_LCa_Controller.prototype.isLoopVertical = function(){ return $gameMap.isLo
 //==============================
 Drill_LCa_Controller.prototype.initialize = function( data ){
 	this._drill_data = {};
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能
 	if( data == undefined ){ data = {}; }
@@ -2540,7 +2542,7 @@ Drill_LCa_Controller.prototype.drill_LCa_resetData_Private = function( data ){
 	
 	// > 执行重置
 	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能
 }

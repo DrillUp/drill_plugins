@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.0]        窗口字符 - 窗口字符核心
+ * @plugindesc [v2.1]        窗口字符 - 窗口字符核心
  * @author Drill_up
  * 
  * 
@@ -108,6 +108,10 @@
  * 窗口字符：\ff[GameFont]    之后的文本设置字体类型为GameFont。
  * 窗口字符：\fr              全重置字符，重置之后文本所有设置。
  * 
+ * 窗口字符：\i[1]            绘制第1个图标。
+ * 窗口字符：\ik[on]          之后的图标保持原大小（32x32像素）。
+ * 窗口字符：\ik[off]         取消保持原大小。
+ * 
  * 1.窗口字符分为四种类型：
  *     表达式：       格式为<xxx>，优先级最高，能比指代字符、效果字符更先执行文本转换。
  *     指代字符：     格式为\xxx[]，能会被替换成指代的文本。
@@ -118,6 +122,8 @@
  * 3.设置<WordWrap>表示自动换行，只要有一个自动换行符，则表示当前所有文本全都自动换行。
  *   该窗口的文本将会去除所有"\n"换行符，并根据窗口宽度自动换行。
  *   如果你需要在自动换行基础上强制换行，添加<br>手动换行即可。
+ * 4."\i[1]" 图标默认会根据字体大小自适应变化。
+ *   如果你想保持图标的原本清晰度，可以使用"\ik[on]"来使得图标固定原大小（32x32像素）。
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 字符应用C扩展
@@ -252,6 +258,9 @@
  * 分离了 对话加速键 的功能。
  * [v2.0]
  * 完全翻新了底层结构，基于 字符绘制核心 插件。
+ * [v2.1]
+ * 添加了 保持图标原大小 的底层功能。
+ * 兼容了YEP的插件，修复选项文本上移的问题。
  * 
  */
  
@@ -453,6 +462,10 @@
 //			->☆DEBUG逐个绘制的底层字符应用
 //			->☆DEBUG逐个绘制流程测试
 //			
+//			
+//			--------------------------
+//			
+//			->☆YEP插件兼容
 //			
 //			
 //		★家谱：
@@ -866,7 +879,7 @@ Game_Temp.prototype.drill_COWC_convertOrgText = function( org_text ){
 	return result_text;
 }
 //==============================
-// * 流程实现 - 子窗口强制继承
+// * 流程实现 - 对话框强制继承
 //==============================
 Window_Message.prototype.drill_COWC_drawText = function( org_text, options ){
 	Window_Base.prototype.drill_COWC_drawText.call( this, org_text, options );
@@ -999,6 +1012,7 @@ Scene_Map.prototype.drill_COWC_BlockText_createDebugWindow = function() {
 				"    \\\\{ 和 \\\\}  缩放字体大小  测\\{试\\}的\\{字\\}符  \\fr<br>" + 
 				"    \\\\ff[HappyFont]  字体名称  \\ff[HappyFont]测试的字符\\fs[16]（需字体管理器插件,否则不生效）\\fr<br>" + 
 				"    \\\\i[9]  图标字符  测试的\\i[9]  \\fr<br>" + 
+				"    \\\\ik[on]  图标保持原大小  测试的\\ik[on]\\i[9]\\ik[off]\\i[9]  \\fr<br>" + 
 				
 				"\\c[24]》字符应用A底层-效果字符全叠加：\\fr<br>" +
 				"    \\\\px[3]\\\\py[3]\\\\c[24]\\\\ff[HappyFont]\\\\fi[on]\\\\{" + 
@@ -2525,6 +2539,20 @@ Game_Temp.prototype.drill_COWC_effect_processCombined = function( matched_index,
 		}
 	}
 	
+	// > 『窗口字符定义』字符应用A底层 - 图标保持原大小（\IK[on]、\IK[off]）
+	if( command.toUpperCase() == "IK" ){
+		if( args.length == 1 ){
+			if( String(args[0]).toUpperCase() == "ON" || String(args[0]).toUpperCase() == "TRUE" ){
+				this.drill_COWC_effect_submitCombined( "@@@-ik[true]" );
+				return;
+			}
+			if( String(args[0]).toUpperCase() == "OFF" || String(args[0]).toUpperCase() == "FALSE" ){
+				this.drill_COWC_effect_submitCombined( "@@@-ik[false]" );
+				return;
+			}
+		}
+	}
+	
 	
 	if( command.toUpperCase() == "DEBUG" ){
 		if( args.length == 1 ){
@@ -2678,7 +2706,9 @@ Window_Base.prototype.drill_COWC_initWindowOptions = function( org_text, options
 	
 	// > 赋值 - 『字符默认间距』 - 行上补正32像素
 	if( options['rowParam']['lineHeight_upCorrection'] == undefined ){
-		options['rowParam']['lineHeight_upCorrection'] = 32;
+		var value = 32;
+		if( this.lineHeight() < 32 ){ value = this.lineHeight(); }	//（如果行高被改小，就按小的算）
+		options['rowParam']['lineHeight_upCorrection'] = value;
 	}
 	
 	// > 赋值 - DEBUG显示方框
@@ -2763,13 +2793,13 @@ SceneManager.initialize = function() {
 //=============================================================================
 /*  管辖 - 文本绘制
 //==============================
-// * E绘制『窗口字符核心』 - 绘制【基本文本】
+// * H绘制《窗口字符-窗口字符核心》 - 绘制 基本文本
 //==============================
 Window_Base.prototype.drawText = function( text, x, y, maxWidth, align ){
     this.contents.drawText(text, x, y, maxWidth, this.lineHeight(), align);
 };
 //==============================
-// * E绘制『窗口字符核心』 - 绘制【扩展文本】
+// * H绘制《窗口字符-窗口字符核心》 - 绘制 扩展文本
 //==============================
 Window_Base.prototype.drawTextEx = function( text, x, y ){
     if( text ){
@@ -2778,7 +2808,7 @@ Window_Base.prototype.drawTextEx = function( text, x, y ){
         textState.height = this.calcTextHeight(textState, false);	//高度计算
         this.resetFontSettings();									//重置字体（如果是一行行绘制，效果字符会中断）
         while (textState.index < textState.text.length ){	
-            this.processCharacter(textState);						//绘制每个字符（包含效果字符的转义）
+            this.processCharacter(textState);						//开始绘制字符/推进字符（已转义）
         }
         return textState.x - x;
     }else{
@@ -2788,13 +2818,13 @@ Window_Base.prototype.drawTextEx = function( text, x, y ){
 */
 /*  管辖 - 高宽计算
 //==============================
-// * E绘制『窗口字符核心』 - 计算【基本文本】宽度
+// * H绘制《窗口字符-窗口字符核心》 - 计算 基本文本宽度
 //==============================
 Window_Base.prototype.textWidth = function( text ){
     return this.contents.measureTextWidth(text);
 };
 //==============================
-// * E绘制『窗口字符核心』 - 计算【扩展文本】高度
+// * H绘制《窗口字符-窗口字符核心》 - 计算 扩展文本高度
 //==============================
 Window_Base.prototype.calcTextHeight = function( textState, all ){
     var lastFontSize = this.contents.fontSize;
@@ -2847,7 +2877,7 @@ SceneManager.initialize = function() {
 	var _drill_COWC_baseOrg_calcTextHeight = Window_Base.prototype.calcTextHeight;
 	
 	//==============================
-	// * 管辖权覆写函数 - 绘制【基本文本】（覆写） 『窗口字符旧函数覆写』
+	// * 管辖权覆写函数 - 绘制 基本文本（覆写） 『窗口字符旧函数覆写』
 	//
 	//			说明：	> 覆盖其它非drill插件的影响，确保文本能完美绘制。
 	//					> 所有窗口字符都不分 drawText 或 drawTextEx，全部统一转换。
@@ -2857,7 +2887,7 @@ SceneManager.initialize = function() {
 		this.drill_COWC_org_drawText( text, x, y, maxWidth, align );
 	};
 	//==============================
-	// * 管辖权覆写函数 - 绘制【扩展文本】（覆写） 『窗口字符旧函数覆写』
+	// * 管辖权覆写函数 - 绘制 扩展文本（覆写） 『窗口字符旧函数覆写』
 	//
 	//			说明：	> 覆盖其它非drill插件的影响，确保文本能完美绘制。
 	//					> 所有窗口字符都不分 drawText 或 drawTextEx，全部统一转换。
@@ -2868,7 +2898,7 @@ SceneManager.initialize = function() {
 		return this.drill_COWC_org_textWidth( text );	//（注意drawTextEx有返回值）
 	};
 	//==============================
-	// * 管辖权覆写函数 - 计算【基本文本】宽度（覆写） 『窗口字符旧函数覆写』
+	// * 管辖权覆写函数 - 计算 基本文本宽度（覆写） 『窗口字符旧函数覆写』
 	//
 	//			说明：	> 覆盖其它非drill插件的影响，确保文本能完美绘制。
 	//					> 注意，drill插件如果想继承 Window_Base.prototype.textWidth ，去继承函数 Window_Base.prototype.drill_COWC_org_textWidth 即可。
@@ -2877,7 +2907,7 @@ SceneManager.initialize = function() {
 		return this.drill_COWC_org_textWidth( text );
 	};
 	//==============================
-	// * 管辖权覆写函数 - 计算【扩展文本】高度（覆写） 『窗口字符旧函数覆写』
+	// * 管辖权覆写函数 - 计算 扩展文本高度（覆写） 『窗口字符旧函数覆写』
 	//
 	//			说明：	> 覆盖其它非drill插件的影响，确保文本能完美绘制。
 	//					> 注意，drill插件如果想继承 Window_Base.prototype.calcTextHeight ，去继承函数 Window_Base.prototype.drill_COWC_org_calcTextHeight 即可。
@@ -2974,7 +3004,7 @@ Window_Base.prototype.drill_COWC_org_calcTextHeight = function( textState, all )
 //=============================================================================
 /*
 //==============================
-// * E绘制『窗口字符核心』 - 重置字体
+// * H绘制《窗口字符-窗口字符核心》 - 重置字体
 //==============================
 Window_Base.prototype.resetFontSettings = function(){
     this.contents.fontFace = this.standardFontFace();		//字体类型
@@ -2982,7 +3012,7 @@ Window_Base.prototype.resetFontSettings = function(){
     this.resetTextColor();									//字体颜色
 };
 //==============================
-// * E绘制『窗口字符核心』 - 扩展文本 - 指代字符转换
+// * H绘制《窗口字符-窗口字符核心》 - 扩展文本 - 指代字符转换
 //==============================
 Window_Base.prototype.convertEscapeCharacters = function( text ){
     text = text.replace(/\\/g, '\x1b');							//单个下划线转 Escape字符
@@ -3003,14 +3033,14 @@ Window_Base.prototype.convertEscapeCharacters = function( text ){
     return text;
 };
 //==============================
-// * E绘制『窗口字符核心』 - 扩展文本 - 指代字符 - 角色名字
+// * H绘制《窗口字符-窗口字符核心》 - 扩展文本 - 指代字符 - 角色名字
 //==============================
 Window_Base.prototype.actorName = function( n ){
     var actor = n >= 1 ? $gameActors.actor(n) : null;
     return actor ? actor.name() : '';
 };
 //==============================
-// * E绘制『窗口字符核心』 - 扩展文本 - 指代字符 - 玩家队员名字
+// * H绘制《窗口字符-窗口字符核心》 - 扩展文本 - 指代字符 - 玩家队员名字
 //==============================
 Window_Base.prototype.partyMemberName = function( n ){
     var actor = n >= 1 ? $gameParty.members()[n - 1] : null;  //『玩家队员id』此处的定义已被修改(-2表示领队，1表示第一个跟随者)
@@ -3018,7 +3048,7 @@ Window_Base.prototype.partyMemberName = function( n ){
 };
 
 //==============================
-// * E绘制『窗口字符核心』 - 逐一绘制 - 从当前光标开始绘制
+// * H绘制《窗口字符-窗口字符核心》 - 逐一绘制 - 从当前光标开始绘制
 //==============================
 Window_Base.prototype.processCharacter = function( textState ){
     switch (textState.text[textState.index] ){
@@ -3037,7 +3067,7 @@ Window_Base.prototype.processCharacter = function( textState ){
     }
 };
 //==============================
-// * E绘制『窗口字符核心』 - 逐一绘制 - 常规字符
+// * H绘制《窗口字符-窗口字符核心》 - 逐一绘制 - 常规字符
 //==============================
 Window_Base.prototype.processNormalCharacter = function( textState ){
     var c = textState.text[textState.index++];
@@ -3046,7 +3076,7 @@ Window_Base.prototype.processNormalCharacter = function( textState ){
     textState.x += w;
 };
 //==============================
-// * E绘制『窗口字符核心』 - 逐一绘制 - 换行符
+// * H绘制《窗口字符-窗口字符核心》 - 逐一绘制 - 换行符
 //==============================
 Window_Base.prototype.processNewLine = function( textState ){
     textState.x = textState.left;
@@ -3055,13 +3085,13 @@ Window_Base.prototype.processNewLine = function( textState ){
     textState.index++;
 };
 //==============================
-// * E绘制『窗口字符核心』 - 逐一绘制 - 新建页符（子类用属性）
+// * H绘制《窗口字符-窗口字符核心》 - 逐一绘制 - 新建页符（子类用属性）
 //==============================
 Window_Base.prototype.processNewPage = function( textState ){
     textState.index++;
 };
 //==============================
-// * E绘制『窗口字符核心』 - 逐一绘制 - 效果字符获取
+// * H绘制《窗口字符-窗口字符核心》 - 逐一绘制 - 效果字符获取
 //==============================
 Window_Base.prototype.obtainEscapeCode = function( textState ){
     textState.index++;
@@ -3075,7 +3105,7 @@ Window_Base.prototype.obtainEscapeCode = function( textState ){
     }
 };
 //==============================
-// * E绘制『窗口字符核心』 - 逐一绘制 - 效果字符参数
+// * H绘制《窗口字符-窗口字符核心》 - 逐一绘制 - 效果字符参数
 //==============================
 Window_Base.prototype.obtainEscapeParam = function( textState ){
     var arr = /^\[\d+\]/.exec(textState.text.slice(textState.index));
@@ -3087,7 +3117,7 @@ Window_Base.prototype.obtainEscapeParam = function( textState ){
     }
 };
 //==============================
-// * E绘制『窗口字符核心』 - 逐一绘制 - 效果字符功能
+// * H绘制《窗口字符-窗口字符核心》 - 逐一绘制 - 效果字符功能
 //==============================
 Window_Base.prototype.processEscapeCharacter = function( code, textState ){
     switch (code ){
@@ -3106,14 +3136,14 @@ Window_Base.prototype.processEscapeCharacter = function( code, textState ){
     }
 };
 //==============================
-// * E绘制『窗口字符核心』 - 效果字符 - 图标字符
+// * H绘制《窗口字符-窗口字符核心》 - 效果字符 - 图标字符
 //==============================
 Window_Base.prototype.processDrawIcon = function( iconIndex, textState ){
     this.drawIcon(iconIndex, textState.x + 2, textState.y + 2);		//（绘制图标时，预留2像素的内边距）
     textState.x += Window_Base._iconWidth + 4;
 };
 //==============================
-// * E绘制『窗口字符核心』 - 效果字符 - 字体放大
+// * H绘制《窗口字符-窗口字符核心》 - 效果字符 - 字体放大
 //==============================
 Window_Base.prototype.makeFontBigger = function(){
     if( this.contents.fontSize <= 96 ){
@@ -3121,7 +3151,7 @@ Window_Base.prototype.makeFontBigger = function(){
     }
 };
 //==============================
-// * E绘制『窗口字符核心』 - 效果字符 - 字体缩小
+// * H绘制《窗口字符-窗口字符核心》 - 效果字符 - 字体缩小
 //==============================
 Window_Base.prototype.makeFontSmaller = function(){
     if( this.contents.fontSize >= 24 ){
@@ -3147,16 +3177,21 @@ Window_Base.prototype.makeFontSmaller = function(){
 //			说明：	> 管辖权 即对 原函数 进行 修改、覆写、继承、控制子插件继承 等的权利。
 //					> 用于后期脱离 原游戏框架 且仍保持兼容性 的标记。
 //=============================================================================
-/* 绘制指代 - 绘制图标
+/* 绘制指代 - 效果字符
 //==============================
-// * E绘制『窗口字符核心』 - 效果字符 - 图标字符
+// * H绘制《窗口字符-窗口字符核心》 - 效果字符 - 图标字符
 //==============================
 Window_Base.prototype.processDrawIcon = function( iconIndex, textState ){
     this.drawIcon(iconIndex, textState.x + 2, textState.y + 2);		//（绘制图标时，预留2像素的内边距）
     textState.x += Window_Base._iconWidth + 4;
 };
+*/
+/* 绘制指代 - 绘制图标
 //==============================
-// * E绘制『窗口字符核心』 - 绘制图标 - 执行绘制
+// * H绘制《窗口字符-窗口字符核心》 - 绘制图标 - 执行绘制
+//				
+//			说明：	> 在contents画板中的指定xy位置，绘制图标。
+//					> 越界绘制也不会报错，只是没有效果。
 //==============================
 Window_Base.prototype.drawIcon = function( iconIndex, x, y ){
     var bitmap = ImageManager.loadSystem('IconSet');
@@ -3167,7 +3202,7 @@ Window_Base.prototype.drawIcon = function( iconIndex, x, y ){
     this.contents.blt(bitmap, sx, sy, pw, ph, x, y);
 };
 //==============================
-// * E绘制『窗口字符核心』 - 绘制图标 - 角色状态图标
+// * H绘制《窗口字符-窗口字符核心》 - 绘制图标 - 角色状态图标
 //==============================
 Window_Base.prototype.drawActorIcons = function( actor, x, y, width ){
     width = width || 144;
@@ -3177,7 +3212,7 @@ Window_Base.prototype.drawActorIcons = function( actor, x, y, width ){
     }
 };
 //==============================
-// * E绘制『窗口字符核心』 - 绘制图标 - 物品名称与图标
+// * H绘制《窗口字符-窗口字符核心》 - 绘制图标 - 物品名称与图标
 //==============================
 Window_Base.prototype.drawItemName = function( item, x, y, width ){
     width = width || 312;
@@ -3191,7 +3226,7 @@ Window_Base.prototype.drawItemName = function( item, x, y, width ){
 */
 /* 绘制指代 - 绘制基本文本
 //==============================
-// * E绘制 - 绘制基本文本 - 货币单位
+// * H绘制《窗口字符-窗口字符核心》 - 绘制基本文本 - 货币单位
 //
 //			说明：	> 绘制 值+单位，比如"100G"。
 //==============================
@@ -3217,29 +3252,29 @@ SceneManager.initialize = function() {
 	_drill_COWC_scene_initialize3.call(this);
 	
 	//==============================
-	// * E绘制『窗口字符核心』 - 效果字符 - 图标字符
+	// * H绘制 - 效果字符 - 图标字符
 	//==============================
 	// （该函数不覆写）
 	
 	//==============================
-	// * E绘制『窗口字符核心』 - 绘制图标 - 执行绘制
+	// * H绘制 - 绘制图标 - 执行绘制
 	//==============================
 	// （该函数不覆写）（因为该函数直接绘制一个图标，而且其它插件可能会用到）
 	
 	//==============================
-	// * E绘制『窗口字符核心』 - 绘制图标 - 角色状态图标
+	// * H绘制 - 绘制图标 - 角色状态图标
 	//==============================
 	// （该函数不覆写）（因为是状态图标集的显示，不需要转窗口字符）
 	
 	//==============================
-	// * E绘制『窗口字符核心』 - 绘制图标 - 物品名称与图标（覆写） 『窗口字符旧函数覆写』
+	// * H绘制 - 绘制图标 - 物品名称与图标（覆写） 『窗口字符旧函数覆写』
 	//==============================
 	Window_Base.prototype.drawItemName = function( item, x, y, width ){
 		this.drill_COWC_org_drawItemName( item, x, y, width );
 	};
 	
 	//==============================
-	// * E绘制 - 绘制基本文本 - 货币单位 覆写函数
+	// * H绘制 - 绘制基本文本 - 货币单位 覆写函数
 	//==============================
 	Window_Base.prototype.drawCurrencyValue = function( value, unit, x, y, width ){
 		this.drill_COWC_org_drawCurrencyValue( value, unit, x, y, width );
@@ -3901,7 +3936,7 @@ Bitmap.prototype.drill_COWC_timing_setEnabled = function( enabled ){
 	
 	// > 加入时
 	if( enabled == true ){
-		this._drill_COWC_timing_serial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+		this._drill_COWC_timing_serial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
 		$gameTemp._drill_COWC_timing_bitmapTank[ this._drill_COWC_timing_serial ] = this;
 		
 	// > 清除时
@@ -4356,6 +4391,50 @@ Scene_Map.prototype.drill_COWC_timing_updateDebugWindow = function() {
 	}
 }
 	
+	
+	
+//=============================================================================
+// ** ☆YEP插件兼容
+//
+//			说明：	> 该模块专门对 YEP插件 做兼容。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * YEP插件兼容 - 最后继承1级
+//==============================
+var _drill_COWC_scene_initialize5 = SceneManager.initialize;
+SceneManager.initialize = function() {
+	_drill_COWC_scene_initialize5.call(this);
+	
+	//==============================
+	// * YEP插件兼容 - 默认 字体类型
+	//
+	//			功能：	> 如果没有加 字体管理器，这个函数会被YEP搞乱，导致 "行上补正32像素" 不生效。
+	//					> 不知道为什么会出现这个问题，但确实还原函数就没问题了。
+	//==============================
+	if( Imported.Drill_DialogFontFace != true ){
+		Window_Base.prototype.standardFontFace = function(){
+			if( $gameSystem.isChinese() ){
+				return 'SimHei, Heiti TC, sans-serif';
+			}else if( $gameSystem.isKorean() ){
+				return 'Dotum, AppleGothic, sans-serif';
+			}else{
+				return 'GameFont';
+			}
+		};
+	}
+	
+	//==============================
+	// * YEP插件兼容 - 任务系统
+	//
+	//			功能：	> 绘制函数兼容。
+	//==============================
+	if( Imported.YEP_QuestJournal == true ){
+		Window_QuestData.prototype.drawQuestTextEx = function( text, x, y ){
+			return this.drawTextEx( text, x, y );
+		}
+	}
+}
 	
 	
 //=============================================================================

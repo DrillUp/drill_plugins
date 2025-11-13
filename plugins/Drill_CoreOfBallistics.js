@@ -190,13 +190,13 @@
 //			2.用法：
 //					// > 移动
 //					$gameTemp.drill_COBa_setBallisticsMove( data );							//初始化
-//					$gameTemp.drill_COBa_preBallisticsMove( obj, index , orgX, orgY );		//推演赋值（也叫 预推演，两词一样意思）
+//					$gameTemp.drill_COBa_preBallisticsMove( obj, index , org_x, org_y );	//推演赋值（也叫 预推演，两词一样意思）
 //					// > 透明度
 //					$gameTemp.drill_COBa_setBallisticsOpacity( data );						//初始化
-//					$gameTemp.drill_COBa_preBallisticsOpacity( obj, index , orgOpacity );	//推演赋值（也叫 预推演，两词一样意思）
+//					$gameTemp.drill_COBa_preBallisticsOpacity( obj, index , org_opacity );	//推演赋值（也叫 预推演，两词一样意思）
 //					// > 旋转
 //					$gameTemp.drill_COBa_setBallisticsRotate( data );						//初始化
-//					$gameTemp.drill_COBa_preBallisticsRotate( obj, index , orgRotate );		//推演赋值（也叫 预推演，两词一样意思）
+//					$gameTemp.drill_COBa_preBallisticsRotate( obj, index , org_rotate );	//推演赋值（也叫 预推演，两词一样意思）
 //	
 //			  【注意，初始化和推演函数不要隔得太远】因为有可能会被重叠推演盖掉。
 //			  obj用于放配置数据，执行完后，结果集会放到下面两个数组中：
@@ -309,8 +309,8 @@ Drill_COBa_Manager.drill_COBa_getBallisticsMove_TotalTime = function(){
 //			
 //			参数：	> obj_data 对象									（对象容器）
 //					> obj_index 数字								（对象编号）
-//					> orgX 数字										（初始x位置）
-//					> orgY 数字										（初始y位置）
+//					> org_x 数字										（初始x位置）
+//					> org_y 数字										（初始y位置）
 //					> Drill_COBa_Manager._drill_COBa_planimetryData	（初始化数据后得到的）
 //			返回：	> 无
 //					> this['_drill_COBa_x'] 数字数组（计算的X结果）
@@ -324,11 +324,11 @@ Drill_COBa_Manager.drill_COBa_getBallisticsMove_TotalTime = function(){
 //					  但注意 弹道长度 = 时长+1，延迟参数 会影响弹道长度。
 //					> 此处的【随机因子】已被固定，如果要再次推演不同的随机弹道，可以修改【随机迭代次数】。
 //##############################
-Game_Temp.prototype.drill_COBa_preBallisticsMove = function( obj_data, obj_index, orgX, orgY ){
-	Drill_COBa_Manager.drill_COBa_preBallisticsMove( obj_data, obj_index, orgX, orgY );
+Game_Temp.prototype.drill_COBa_preBallisticsMove = function( obj_data, obj_index, org_x, org_y ){
+	Drill_COBa_Manager.drill_COBa_preBallisticsMove( obj_data, obj_index, org_x, org_y );
 }
-Drill_COBa_Manager.drill_COBa_preBallisticsMove = function( obj_data, obj_index, orgX, orgY ){
-	this.drill_COBa_preBallisticsMove_Private( obj_data, obj_index, orgX, orgY );
+Drill_COBa_Manager.drill_COBa_preBallisticsMove = function( obj_data, obj_index, org_x, org_y ){
+	this.drill_COBa_preBallisticsMove_Private( obj_data, obj_index, org_x, org_y );
 }
 
 
@@ -368,16 +368,16 @@ Drill_COBa_Manager.drill_COBa_getBallisticsOpacity_TotalTime = function(){
 //			
 //			参数：	> obj_data 对象								（对象容器）
 //					> obj_index 数字							（对象编号）
-//					> orgOpacity 数字							（初始透明度）
+//					> org_opacity 数字							（初始透明度）
 //					> Drill_COBa_Manager._drill_COBa_commonData	（初始化数据后得到的）
 //			返回：	> 无
 //					> this['_drill_COBa_opacity'] 数字数组（计算的结果）
 //##############################
-Game_Temp.prototype.drill_COBa_preBallisticsOpacity = function( obj_data, obj_index, orgOpacity ){
-	Drill_COBa_Manager.drill_COBa_preBallisticsOpacity( obj_data, obj_index, orgOpacity );
+Game_Temp.prototype.drill_COBa_preBallisticsOpacity = function( obj_data, obj_index, org_opacity ){
+	Drill_COBa_Manager.drill_COBa_preBallisticsOpacity( obj_data, obj_index, org_opacity );
 }
-Drill_COBa_Manager.drill_COBa_preBallisticsOpacity = function( obj_data, obj_index, orgOpacity ){
-	this.drill_COBa_preBallisticsOpacity_Private( obj_data, obj_index, orgOpacity );
+Drill_COBa_Manager.drill_COBa_preBallisticsOpacity = function( obj_data, obj_index, org_opacity ){
+	this.drill_COBa_preBallisticsOpacity_Private( obj_data, obj_index, org_opacity );
 }
 
 //#############################################################################
@@ -512,16 +512,16 @@ Drill_COBa_Manager.drill_COBa_getBallisticsRotate_TotalTime = function(){
 //			
 //			参数：	> obj_data 对象								（对象容器）
 //					> obj_index 数字							（对象编号）
-//					> orgRotate 数字							（初始旋转角）
+//					> org_rotate 数字							（初始旋转角）
 //					> Drill_COBa_Manager._drill_COBa_commonData	（初始化数据后得到的）
 //			返回：	> 无
 //					> this['_drill_COBa_rotate'] 数字数组（计算的结果）
 //##############################
-Game_Temp.prototype.drill_COBa_preBallisticsRotate = function( obj_data, obj_index, orgRotate ){
-	Drill_COBa_Manager.drill_COBa_preBallisticsRotate( obj_data, obj_index, orgRotate );
+Game_Temp.prototype.drill_COBa_preBallisticsRotate = function( obj_data, obj_index, org_rotate ){
+	Drill_COBa_Manager.drill_COBa_preBallisticsRotate( obj_data, obj_index, org_rotate );
 }
-Drill_COBa_Manager.drill_COBa_preBallisticsRotate = function( obj_data, obj_index, orgRotate ){
-	this.drill_COBa_preBallisticsRotate_Private( obj_data, obj_index, orgRotate );
+Drill_COBa_Manager.drill_COBa_preBallisticsRotate = function( obj_data, obj_index, org_rotate ){
+	this.drill_COBa_preBallisticsRotate_Private( obj_data, obj_index, org_rotate );
 }
 
 
@@ -563,6 +563,7 @@ Drill_COBa_Manager.drill_COBa_convertPointListToString = function( point_list ){
 //			参数：	> seed 数字	（正整数）
 //			返回：	> 数字 		（0~1随机数）
 //			
+//			标签：	> 『随机因子-迭代工具』
 //			说明：	> 如果随机种子为 1至100，那么你将得到线性均匀分布的随机值。不是乱序随机。
 //##############################
 DrillUp.drill_COBa_Math1D_getRandomInSeed = function( seed ){
@@ -578,6 +579,7 @@ Drill_COBa_Manager.drill_COBa_Math1D_getRandomInSeed = function( seed ){
 //					> iteration 数字 （正整数，迭代次数）
 //			返回：	> 数字           （0~1新随机数）
 //			
+//			标签：	> 『随机因子-迭代工具』
 //			说明：	> 经过迭代后，能够得到乱序的随机数。
 //##############################
 DrillUp.drill_COBa_Math1D_getRandomInIteration = function( org_ran, iteration ){
@@ -808,7 +810,7 @@ Drill_COBa_Manager.drill_COBa_setBallisticsCommon = function( data ){
 	
 	
 	// > 随机因子（RandomFactor）
-	result['randomFactor'] = data['randomFactor'] || Math.random();
+	result['randomFactor'] = data['randomFactor'] || Math.random();		//『随机因子-玩法用』
 	
 	
 	// > 随机迭代次数（RandomIteration）
@@ -1165,18 +1167,18 @@ Drill_COBa_Manager.drill_COBa_setBallisticsPlanimetry = function( data ){
 	
 	
 	// > 随机因子（RandomFactor）
-	//		（若子插件设置参数时直接用了 Math.random()，那么此处的随机因子就没用了。）
+	//		（若子插件设置参数时直接用了 Math.random()，那么此处的随机因子就没用了。）『随机因子-玩法用』
 	//		（注意，独立参数项之间，随机因子不可共用！会造成强关联的错误关系。）
 	if( result['planimetryMode'] == "极坐标模式" ){
-		result['polarSpeedRandomFactor'] = data['polarSpeedRandomFactor'] || Math.random();
-		result['polarDirRandomFactor'] = data['polarDirRandomFactor'] || Math.random();
+		result['polarSpeedRandomFactor'] = data['polarSpeedRandomFactor'] || Math.random();		//『随机因子-玩法用』
+		result['polarDirRandomFactor'] = data['polarDirRandomFactor'] || Math.random();			//『随机因子-玩法用』
 	}
 	else if( result['planimetryMode'] == "直角坐标模式" ){
-		result['cartXSpeedRandomFactor'] = data['cartXSpeedRandomFactor'] || Math.random();
-		result['cartYSpeedRandomFactor'] = data['cartYSpeedRandomFactor'] || Math.random();
+		result['cartXSpeedRandomFactor'] = data['cartXSpeedRandomFactor'] || Math.random();		//『随机因子-玩法用』
+		result['cartYSpeedRandomFactor'] = data['cartYSpeedRandomFactor'] || Math.random();		//『随机因子-玩法用』
 	}
 	else if( result['planimetryMode'] == "轨道锚点模式" ){
-		result['trackSpeedRandomFactor'] = data['trackSpeedRandomFactor'] || Math.random();
+		result['trackSpeedRandomFactor'] = data['trackSpeedRandomFactor'] || Math.random();		//『随机因子-玩法用』
 	}
 	else if( result['planimetryMode'] == "两点式" ){
 		//（无随机因子）
@@ -1184,7 +1186,7 @@ Drill_COBa_Manager.drill_COBa_setBallisticsPlanimetry = function( data ){
 	
 	
 	// > 随机迭代次数（RandomIteration）
-	//		（若子插件设置参数时直接用了 Math.random()，那么此处的随机迭代次数就没用了。）
+	//		（若子插件设置参数时直接用了 Math.random()，那么此处的随机迭代次数就没用了。）『随机因子-玩法用』
 	if( result['planimetryMode'] == "极坐标模式" ){
 		result['polarSpeedRandomIterationList'] = data['polarSpeedRandomIterationList'];	//（这里直接用指针，迭代次数变化，推演跟着变）
 		result['polarDirRandomIterationList'] = data['polarDirRandomIterationList'];		//（可直接为空对象，节约配置参数存储空间）
@@ -1231,7 +1233,7 @@ Drill_COBa_Manager.drill_COBa_getBallisticsPlanimetry_TotalTime = function(){
 //==============================
 // * E二维弹道 - 推演赋值（私有）
 //==============================
-Drill_COBa_Manager.drill_COBa_preBallisticsPlanimetry = function( obj_data, obj_index, orgX, orgY ){
+Drill_COBa_Manager.drill_COBa_preBallisticsPlanimetry = function( obj_data, obj_index, org_x, org_y ){
 	var data = this._drill_COBa_planimetryData;
 	var obj = this._drill_COBa_planimetryObj;
 	
@@ -1240,13 +1242,13 @@ Drill_COBa_Manager.drill_COBa_preBallisticsPlanimetry = function( obj_data, obj_
 		DrillUp._drill_COBa_checkOn = false;
 		alert( DrillUp.drill_COBa_getPluginTip_ParamIsNaN( "obj_index" ) );
 	}
-	if( isNaN( orgX ) == true && DrillUp._drill_COBa_checkOn == true ){
+	if( isNaN( org_x ) == true && DrillUp._drill_COBa_checkOn == true ){
 		DrillUp._drill_COBa_checkOn = false;
-		alert( DrillUp.drill_COBa_getPluginTip_ParamIsNaN( "orgX" ) );
+		alert( DrillUp.drill_COBa_getPluginTip_ParamIsNaN( "org_x" ) );
 	}
-	if( isNaN( orgY ) == true && DrillUp._drill_COBa_checkOn == true ){
+	if( isNaN( org_y ) == true && DrillUp._drill_COBa_checkOn == true ){
 		DrillUp._drill_COBa_checkOn = false;
-		alert( DrillUp.drill_COBa_getPluginTip_ParamIsNaN( "orgY" ) );
+		alert( DrillUp.drill_COBa_getPluginTip_ParamIsNaN( "org_y" ) );
 	}
 	obj_data['_drill_COBa_x'] = [];
 	obj_data['_drill_COBa_y'] = [];
@@ -1297,8 +1299,8 @@ Drill_COBa_Manager.drill_COBa_preBallisticsPlanimetry = function( obj_data, obj_
 	if( data['planimetryMode'] == "极坐标模式" ){
 		
 		// > 起点值
-		obj_data['_drill_COBa_x'].push( orgX );
-		obj_data['_drill_COBa_y'].push( orgY );
+		obj_data['_drill_COBa_x'].push( org_x );
+		obj_data['_drill_COBa_y'].push( org_y );
 		
 		// > 随机值（方向随机因子）
 		var randomDirValue = Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration( data['polarDirRandomFactor'], obj_index +12345 );
@@ -1398,8 +1400,8 @@ Drill_COBa_Manager.drill_COBa_preBallisticsPlanimetry = function( obj_data, obj_
 		
 			xx = 0;
 			yy = 0;
-			xx = orgX + radius * Math.cos(dir);
-			yy = orgY + radius * Math.sin(dir);
+			xx = org_x + radius * Math.cos(dir);
+			yy = org_y + radius * Math.sin(dir);
 			obj_data['_drill_COBa_x'].push(xx);
 			obj_data['_drill_COBa_y'].push(yy);
 			
@@ -1417,8 +1419,8 @@ Drill_COBa_Manager.drill_COBa_preBallisticsPlanimetry = function( obj_data, obj_
 	else if( data['planimetryMode'] == "直角坐标模式"){
 		
 		// > 起点值
-		obj_data['_drill_COBa_x'].push( orgX );
-		obj_data['_drill_COBa_y'].push( orgY );
+		obj_data['_drill_COBa_x'].push( org_x );
+		obj_data['_drill_COBa_y'].push( org_y );
 		
 		// > 随机值（X随机因子）
 		var x_randomSpeed = Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration( data['cartXSpeedRandomFactor'], obj_index +34567 );
@@ -1515,8 +1517,8 @@ Drill_COBa_Manager.drill_COBa_preBallisticsPlanimetry = function( obj_data, obj_
 			r_xx = xx * Math.cos( rotate ) - yy * Math.sin( rotate );
 			r_yy = xx * Math.sin( rotate ) + yy * Math.cos( rotate );
 		
-			xx = orgX + r_xx;
-			yy = orgY + r_yy;
+			xx = org_x + r_xx;
+			yy = org_y + r_yy;
 			obj_data['_drill_COBa_x'].push(xx);
 			obj_data['_drill_COBa_y'].push(yy);
 			
@@ -1535,8 +1537,8 @@ Drill_COBa_Manager.drill_COBa_preBallisticsPlanimetry = function( obj_data, obj_
 	else if( data['planimetryMode'] == "轨道锚点模式"){
 		
 		// > 起点值
-		obj_data['_drill_COBa_x'].push( orgX );
-		obj_data['_drill_COBa_y'].push( orgY );
+		obj_data['_drill_COBa_x'].push( org_x );
+		obj_data['_drill_COBa_y'].push( org_y );
 		
 		// > 随机值（随机因子）
 		var track_randomSpeed = Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration( data['trackSpeedRandomFactor'], obj_index +56789 );
@@ -1649,8 +1651,8 @@ Drill_COBa_Manager.drill_COBa_preBallisticsPlanimetry = function( obj_data, obj_
 			
 			xx = 0;
 			yy = 0;
-			xx = orgX + p_xx;
-			yy = orgY + p_yy;
+			xx = org_x + p_xx;
+			yy = org_y + p_yy;
 			obj_data['_drill_COBa_x'].push(xx);
 			obj_data['_drill_COBa_y'].push(yy);
 			
@@ -1784,8 +1786,8 @@ Drill_COBa_Manager.drill_COBa_preBallisticsPlanimetry = function( obj_data, obj_
 				yy = c_xx * Math.sin( org_dir ) + c_yy * Math.cos( org_dir );
 			}
 			
-			xx = orgX + xx;
-			yy = orgY + yy;
+			xx = org_x + xx;
+			yy = org_y + yy;
 			obj_data['_drill_COBa_x'].push(xx);
 			obj_data['_drill_COBa_y'].push(yy);
 			
@@ -1999,8 +2001,8 @@ Drill_COBa_Manager.drill_COBa_setBallisticsOpacity_Private = function( data ){
 //==============================
 // * H1透明度弹道 - 推演赋值（私有）
 //==============================
-Drill_COBa_Manager.drill_COBa_preBallisticsOpacity_Private = function( obj_data, obj_index, orgOpacity ){
-	this.drill_COBa_preBallisticsCommon( obj_data, obj_index, orgOpacity );		//（按一维弹道规则推演）
+Drill_COBa_Manager.drill_COBa_preBallisticsOpacity_Private = function( obj_data, obj_index, org_opacity ){
+	this.drill_COBa_preBallisticsCommon( obj_data, obj_index, org_opacity );		//（按一维弹道规则推演）
 	
 	// > 指针结果交换
 	obj_data['_drill_COBa_opacity'] = obj_data['_drill_COBa_common'];
@@ -2200,8 +2202,8 @@ Drill_COBa_Manager.drill_COBa_setBallisticsRotate_Private = function( data ){
 //==============================
 // * H4旋转角弹道 - 推演赋值（私有）
 //==============================
-Drill_COBa_Manager.drill_COBa_preBallisticsRotate_Private = function( obj_data, obj_index, orgRotate ){
-	this.drill_COBa_preBallisticsCommon( obj_data, obj_index, orgRotate );		//（按一维弹道规则推演）
+Drill_COBa_Manager.drill_COBa_preBallisticsRotate_Private = function( obj_data, obj_index, org_rotate ){
+	this.drill_COBa_preBallisticsCommon( obj_data, obj_index, org_rotate );		//（按一维弹道规则推演）
 	
 	// > 指针结果交换
 	obj_data['_drill_COBa_rotate'] = obj_data['_drill_COBa_common'];
@@ -2341,8 +2343,8 @@ Drill_COBa_Manager.drill_COBa_setBallisticsMove_Private = function( data ){
 //==============================
 // * I1移动弹道 - 推演赋值（私有）
 //==============================
-Drill_COBa_Manager.drill_COBa_preBallisticsMove_Private = function( obj_data, obj_index, orgX, orgY ){
-	this.drill_COBa_preBallisticsPlanimetry( obj_data, obj_index, orgX, orgY );		//（按一维弹道规则推演）
+Drill_COBa_Manager.drill_COBa_preBallisticsMove_Private = function( obj_data, obj_index, org_x, org_y ){
+	this.drill_COBa_preBallisticsPlanimetry( obj_data, obj_index, org_x, org_y );		//（按一维弹道规则推演）
 	
 	// > 指针结果交换（不需要交换）
 	//obj_data['_drill_COBa_x'];
@@ -2417,7 +2419,7 @@ Drill_COBa_ExtendTool.drill_COBa_Common_controller_setTarget = function( control
 	
 	// > 刷新目标与弹道
 	var c_data = controller[CDataName];
-	c_data['serial'] = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+	c_data['serial'] = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
 	c_data['cur_time'] = 0;
 	c_data['change_type'] = change_type;
 	c_data['tar_value'] = tar_value;
@@ -2517,7 +2519,7 @@ Drill_COBa_ExtendTool.drill_COBa_Planimetry_controller_setTarget = function( con
 	
 	// > 刷新目标与弹道
 	var c_data = controller[CDataName];
-	c_data['serial'] = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+	c_data['serial'] = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
 	c_data['cur_time'] = 0;
 	c_data['change_type'] = change_type;
 	c_data['tar_valueA'] = tar_valueA;

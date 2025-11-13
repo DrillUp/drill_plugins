@@ -41,8 +41,8 @@
  *   (1.你可以将贴图放置在战斗的四种层级中，分别为：
  *      下层、上层、图片层、最顶层
  *   (2.战斗层级之间的关系为：
- *      底图 《 战斗背景 《 下层 《 敌人/角色层 《 上层
- *      《 图片对象层 《 图片层 《 对话框集合 《 最顶层
+ *      底图 < 战斗背景 < 下层 < 敌人/角色层 < 上层
+ *      < 图片对象层 < 图片层 < 对话框集合 < 最顶层
  *   (3.最顶层可以把战斗界面的对话框、窗口也给挡住。
  *   (4.处于同一 战斗层级 时，将根据 图片层级 再先后排序。
  * 位移比：
@@ -2944,7 +2944,7 @@ if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义�
 			this.__drill_zIndex = value;
 		},
 		get: function(){
-			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			if( this.__drill_zIndex == undefined ){ return 20250701; }	//（如果未定义则放最上面）
 			return this.__drill_zIndex;
 		},
 		configurable: true

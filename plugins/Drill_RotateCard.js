@@ -955,8 +955,8 @@ Drill_RCardSprite.prototype.initialize = function() {
 	
 	this._drill_time = 0;
 	this._drill_floatTime = 0;
-	this._drill_orgX = 0;
-	this._drill_orgY = 0;
+	this._drill_org_x = 0;
+	this._drill_org_y = 0;
 	
 	// > 私有属性初始化
 	this.x = Graphics.boxWidth * (-2);	//（刚开始移出界面）
@@ -996,8 +996,8 @@ Drill_RCardSprite.prototype.update = function() {
 	}
 	
 	// > 位置变化
-	var xx = this._drill_orgX;
-	var yy = this._drill_orgY;
+	var xx = this._drill_org_x;
+	var yy = this._drill_org_y;
 	if( card['is_float'] == true ){		//（浮动效果）
 		this._drill_floatTime += card['f_speed'];
 		if(this._drill_floatTime > 360){ this._drill_floatTime -= 360; }
@@ -1158,6 +1158,6 @@ Drill_RCardSprite.prototype.drill_refreshPosition = function(rect, padding) {
 			yy += DrillUp.g_RCard_FTKR_offsetY;
 		}
 	}
-	this._drill_orgX = xx;
-	this._drill_orgY = yy;
+	this._drill_org_x = xx;
+	this._drill_org_y = yy;
 };

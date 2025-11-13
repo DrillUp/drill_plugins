@@ -147,13 +147,7 @@
 //			2.滤镜使用本体可能由于支持的内容太多，看起来较复杂。
 //			  使用物品文本滤镜，必须走流程：>注释初始化 >物品数据初始化 >滤镜初始化 >滤镜配置
 //			  （注释初始化直接存储在system中全局通用。）
-//			3.归纳变色作用域：
-//				覆写.drawItemName （作用于所有窗口）
-//				mog技能浮动框
-//				mog战斗结果界面
-//				mog道具浮动文字
-//				mog道具浮动框
-//			  实际上通过sprite画出来的物品的，都需要手动变色，而窗口中的不存在问题。
+//			3.实际上通过sprite画出来的物品的，都需要手动变色，而窗口中的不存在问题。
 //
 //		★其它说明细节：
 //			1.bitmap清理的clearRect有可能只是一个区域。
@@ -523,39 +517,42 @@ Bitmap.prototype.clearRect = function(x, y, width, height) {
 // ** 滤镜创建
 //=============================================================================
 //=============================
-// * 创建 - 物品绘制标记
+// * 滤镜创建 - 物品文本绘制 - 标记
+//
+//			说明：	> 由于窗口字符核心覆写了 drawItemName 函数，所以这里 继承 窗口字符核心函数。
 //=============================
-var _drill_ITFi_drawItemName = Window_Base.prototype.drawItemName;
-Window_Base.prototype.drawItemName = function( item, x, y, width ){
-	
-	// > 标记物品
-	this._drill_ITFi_isDrawingItemName = true;
-	this._drill_ITFi_curItem = item;
+var _drill_ITFi_COWC_org_drawItemName = Window_Base.prototype.drill_COWC_org_drawItemName;
+Window_Base.prototype.drill_COWC_org_drawItemName = function( item, x, y, width ){
+	this._drill_ITFi_isDrawingItemName = true;		//绘制标记 - 开
+	this._drill_ITFi_curItem = item;				//当前的物品对象
 	
 	// > 原函数
-	_drill_ITFi_drawItemName.call(this, item, x, y, width);
+	_drill_ITFi_COWC_org_drawItemName.call(this, item, x, y, width);
 	
-	// > 解除标记
-	this._drill_ITFi_isDrawingItemName = false;
-	this._drill_ITFi_curItem = null;
-}
+	this._drill_ITFi_isDrawingItemName = false;		//绘制标记 - 关
+	this._drill_ITFi_curItem = null;				//置空物品对象
+};
 //=============================
-// * 创建 - 绑定文本块
+// * 滤镜创建 - 物品文本绘制 - 修改颜色
+//
+//			说明：	> 由于窗口字符核心覆写了 drawText 函数，所以这里 继承 窗口字符核心函数。
 //=============================
 var _drill_ITFi_COWC_org_drawText = Window_Base.prototype.drill_COWC_org_drawText;
 Window_Base.prototype.drill_COWC_org_drawText = function( text, x, y, maxWidth, align ){
 	
-	// > 创建文本块（所有绘制物品的文本都转成贴图）
+	// > 绘制标记 - 执行
 	if( this._drill_ITFi_isDrawingItemName == true ){
+		
+		// > 创建文本块（所有绘制物品的文本都转成贴图）
 		this.drill_ITFi_drawItemSpriteText( text, x, y, maxWidth, align );
 		return;
 	}
 	
 	// > 原函数
-	_drill_ITFi_COWC_org_drawText.call(this, text, x, y, maxWidth, align);
-}
+	_drill_ITFi_COWC_org_drawText.call( this, text, x, y, maxWidth, align );
+};
 //=============================
-// * 创建 - 创建文本块
+// * 滤镜创建 - 创建文本块
 //=============================
 Window_Base.prototype.drill_ITFi_drawItemSpriteText = function( text, x, y, maxWidth, align ){
 	var item = this._drill_ITFi_curItem;
@@ -602,6 +599,7 @@ Window_Base.prototype.drill_ITFi_drawItemSpriteText = function( text, x, y, maxW
 	this._drill_ITFi_spriteTank.push(temp_sprite);
 	this._windowContentsSprite.addChild(temp_sprite);
 }
+
 
 //==============================
 // * 帧刷新
@@ -660,7 +658,7 @@ Window_Base.prototype.drill_ITFi_updateItemTextFilter = function() {
 }
 
 //=============================================================================
-// ** 滤镜 - 兼容 mog技能浮动框/气泡框
+// ** 滤镜 - 兼容 mog技能浮动框/招式名气泡框
 //=============================================================================
 if(Imported.MOG_ActionName ){
 	

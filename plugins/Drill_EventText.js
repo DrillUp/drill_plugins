@@ -988,7 +988,7 @@ if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义�
 			this.__drill_zIndex = value;
 		},
 		get: function(){
-			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			if( this.__drill_zIndex == undefined ){ return 20250701; }	//（如果未定义则放最上面）
 			return this.__drill_zIndex;
 		},
 		configurable: true
@@ -1316,7 +1316,7 @@ function Drill_ET_Controller() {
 //==============================
 Drill_ET_Controller.prototype.initialize = function( data ){
 	this._drill_data = {};
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能
 	if( data == undefined ){ data = {}; }
@@ -2127,8 +2127,10 @@ Drill_ET_WindowSprite.prototype.drill_refreshMessage = function( context ){
 		
 		// > 自适应
 		var painter = temp_bitmap._context;
-		var org_ww = painter.measureText(org_text).width;	//（获取文本宽度）
-		var org_hh = this.standardFontSize() *1.10;			//『手算高度』
+		var org_hh_per = DrillUp.g_COCD_textHeightPer;			//（比率）【系统 - 字符绘制核心】
+		if( org_hh_per == undefined ){ org_hh_per = 1.10; }		//
+		var org_ww = painter.measureText(org_text).width;		//（获取文本宽度）
+		var org_hh = this.standardFontSize() *org_hh_per;		//『手算高度』
 		org_ww = Math.ceil(org_ww) +20;
 		org_hh = Math.ceil(org_hh) +10;
 		

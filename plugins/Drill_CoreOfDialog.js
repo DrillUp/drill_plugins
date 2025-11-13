@@ -120,24 +120,38 @@
 //			->☆静态数据
 //			->☆插件指令
 //			->☆场景容器之对话框贴图
+//
+//
+//			--------------------------
+//			----贴图属性类（不管辖）（变形器）
+//
+//
+//			--------------------------
+//			----子贴图属性类（不管辖）（皮肤）
+//
+//
+//			--------------------------
+//			----绘制属性类
 //			
-//			
-//			->☆管辖权（对话框）
-//			->☆管辖权覆写函数（对话框）
-//			->☆对话框控制
+//			->☆管辖权（对话框的绘制）
+//			->☆管辖权覆写函数（对话框的绘制）
+//			->☆对话框绘制控制
 //				->2O打开对话框
 //				->2P关闭对话框
 //				->2Q绘制页
 //				->2R逐个绘制
 //				->2S脸图管理
-//
+//			
 //			->☆窗口字符应用之消息输入字符（金钱窗口开关）
-//
+//			
 //			->☆管辖权（2S脸图管理）
 //			->☆管辖权覆写函数（2S脸图管理）
 //			->☆实时加载（2S脸图管理）
 //			->☆窗口字符应用之消息输入字符（2S脸图管理）
-//			
+//
+//
+//			--------------------------
+//			----外链贴图类
 //			
 //			->☆管辖权（选择项窗口）
 //			->☆管辖权覆写函数（选择项窗口）
@@ -148,6 +162,7 @@
 //		
 //		★脚本文档：
 //			1.系统 > 关于字符绘制核心（脚本）.docx
+//			15.对话框 > 关于对话框优化核心（脚本）.docx
 //		
 //		★插件私有类：
 //			无
@@ -248,7 +263,6 @@ Game_Interpreter.prototype.drill_CODi_pluginCommand = function( command, args ){
 };
 	
 	
-	
 //#############################################################################
 // ** 【标准模块】对话框贴图容器 ☆场景容器之对话框贴图
 //#############################################################################
@@ -294,26 +308,27 @@ Game_Temp.prototype.drill_CODi_getMassageSubWindowByType_Private = function( win
 
 
 
+
 //=============================================================================
-// ** ☆管辖权（对话框）
+// ** ☆管辖权（对话框的绘制）
 //
 //			说明：	> 管辖权 即对 原函数 进行 修改、覆写、继承、控制子插件继承 等的权利。
 //					> 用于后期脱离 原游戏框架 且仍保持兼容性 的标记。
 //=============================================================================
 /*
 //==============================
-// * 对话框『对话框优化核心』 - 帧刷新
+// * 对话框《对话框-对话框优化核心》 - 帧刷新
 //==============================
 Window_Message.prototype.update = function(){
 	
-	// > 帧刷新 - 2C保持显示 - 开关动画
+	// > 帧刷新 - 2B保持显示 - 展开动画
     this.checkToNotClose();
 	
 	// > 父类帧刷新
     Window_Base.prototype.update.call(this);
     
 	// > 遍历对话
-	while (!this.isOpening() && !this.isClosing() ){	//（2C保持显示 - 打开时/关闭时，当前帧等待）
+	while (!this.isOpening() && !this.isClosing() ){	//（2B保持显示 - 打开时/关闭时，当前帧等待）
         
 		// > 遍历对话 - 2D等待
 		if( this.updateWait() ){ return; } 
@@ -332,7 +347,7 @@ Window_Message.prototype.update = function(){
             this.startMessage();
 			//（注意此处没有return，会继续执行循环）
 			
-		// > 遍历对话 - 2B子窗口 - 执行子窗口
+		// > 遍历对话 - 2C子窗口 - 执行子窗口
 		}else{
             this.startInput();
             return;
@@ -342,7 +357,7 @@ Window_Message.prototype.update = function(){
 */
 /*
 //==============================
-// * 2D等待『对话框优化核心』 - 帧刷新 等待
+// * 2D等待《对话框-对话框优化核心》 - 帧刷新 等待
 //
 //			说明：	> 返回true表示当前帧等待，返回false表示继续遍历对话。
 //==============================
@@ -355,21 +370,21 @@ Window_Message.prototype.updateWait = function(){
     }
 };
 //==============================
-// * 2D等待『对话框优化核心』 - 设置等待时间（开放函数）
+// * 2D等待《对话框-对话框优化核心》 - 设置等待时间（开放函数）
 //==============================
 Window_Message.prototype.startWait = function( count ){
     this._waitCount = count;
 };
-
-
+*/
+/*
 //==============================
-// * 2F按键按下『对话框优化核心』 - 帧刷新
+// * 2F按键按下《对话框-对话框优化核心》 - 帧刷新
 //
 //			说明：	> 返回true表示当前帧等待，返回false表示继续遍历对话。
 //==============================
 Window_Message.prototype.updateInput = function(){
 	
-	// > 2F按键按下 - 2B子窗口 - 有子窗口时，该功能跳出
+	// > 2F按键按下 - 2C子窗口 - 有子窗口时，该功能跳出
     if( this.isAnySubWindowActive() ){
         return true;
     }
@@ -391,14 +406,14 @@ Window_Message.prototype.updateInput = function(){
     return false;
 };
 //==============================
-// * 2F按键按下『对话框优化核心』 - 是否按下
+// * 2F按键按下《对话框-对话框优化核心》 - 是否按下
 //==============================
 Window_Message.prototype.isTriggered = function(){
     return (Input.isRepeated('ok') || Input.isRepeated('cancel') ||
             TouchInput.isRepeated());
 };
 //==============================
-// * 2F按键按下『对话框优化核心』 - 设置等待按下（开放函数）
+// * 2F按键按下《对话框-对话框优化核心》 - 设置等待按下（开放函数）
 //
 //			说明：	> this.pause与父类 Window 的 ._windowPauseSignSprite小箭头标贴图 相关。
 //==============================
@@ -409,7 +424,7 @@ Window_Message.prototype.startPause = function(){
 
 
 //==============================
-// * 2G下一页『对话框优化核心』 - 显示新建页
+// * 2G下一页《对话框-对话框优化核心》 - 显示新建页
 //==============================
 Window_Message.prototype.startMessage = function(){
 	
@@ -420,12 +435,12 @@ Window_Message.prototype.startMessage = function(){
 	
     this.newPage(this._textState);	//2H消息输入字符 - 执行新建
 	
-    this.updatePlacement();			//2C保持显示 - 设置位置（非帧刷新）
-    this.updateBackground();		//2C保持显示 - 设置背景（非帧刷新）
-    this.open();					//2C保持显示 - 打开窗口
+    this.updatePlacement();			//2B保持显示 - 设置位置（非帧刷新）
+    this.updateBackground();		//2B保持显示 - 设置背景（非帧刷新）
+    this.open();					//2B保持显示 - 打开窗口
 };
 //==============================
-// * 2G下一页『对话框优化核心』 - 显示新建页 - 帧刷新监听
+// * 2G下一页《对话框-对话框优化核心》 - 显示新建页 - 帧刷新监听
 //
 //			说明：	> 返回true表示当前帧等待，返回false表示继续遍历对话。
 //==============================
@@ -433,17 +448,17 @@ Window_Message.prototype.canStart = function(){
     return $gameMessage.hasText() && !$gameMessage.scrollMode();
 };
 //==============================
-// * 2G下一页『对话框优化核心』 - 判断末尾
+// * 2G下一页《对话框-对话框优化核心》 - 判断末尾
 //==============================
 Window_Message.prototype.isEndOfText = function( textState ){
     return textState.index >= textState.text.length;
 };
 //==============================
-// * 2G下一页『对话框优化核心』 - 达到末尾时
+// * 2G下一页《对话框-对话框优化核心》 - 达到末尾时
 //==============================
 Window_Message.prototype.onEndOfText = function(){
 	
-	// > 达到末尾时 - 2B子窗口 - 执行子窗口
+	// > 达到末尾时 - 2C子窗口 - 执行子窗口
     if( !this.startInput() ){
 		
 		// > 达到末尾时 - 2F按键按下 - 设置等待按下
@@ -460,17 +475,17 @@ Window_Message.prototype.onEndOfText = function(){
     this._textState = null;
 };
 //==============================
-// * 2G下一页『对话框优化核心』 - 达到末尾时 - 关闭对话框
+// * 2G下一页《对话框-对话框优化核心》 - 达到末尾时 - 关闭对话框
 //==============================
 Window_Message.prototype.terminateMessage = function(){
     this.close();
     this._goldWindow.close();
-    $gameMessage.clear();
+    $gameMessage.clear();	//结束阻塞『对话框的阻塞原理』
 };
 
 
 //==============================
-// * E绘制『对话框优化核心』 - 逐一绘制 - 换行符（继承）
+// * H绘制《对话框-对话框优化核心》 - 逐一绘制 - 换行符（继承）
 //
 //			说明：	> 对话框的 换行符 控制，根据换行符数量，决定是否新建页。
 //==============================
@@ -487,7 +502,7 @@ Window_Message.prototype.processNewLine = function( textState ){
     }
 };
 //==============================
-// * E绘制『对话框优化核心』 - 逐一绘制 - 新建页符（继承）
+// * H绘制《对话框-对话框优化核心》 - 逐一绘制 - 新建页符（继承）
 //
 //			说明：	> 该函数只有该类 Window_Message 用到了。
 //					> 对话框的 新建页符 控制。
@@ -501,7 +516,7 @@ Window_Message.prototype.processNewPage = function( textState ){
     this.startPause();
 };
 //==============================
-// * E绘制『对话框优化核心』 - 逐一绘制 - 效果字符功能（继承）
+// * H绘制《对话框-对话框优化核心》 - 逐一绘制 - 效果字符功能（继承）
 //
 //			说明：	> 对话框的 效果字符功能 控制。
 //==============================
@@ -534,10 +549,10 @@ Window_Message.prototype.processEscapeCharacter = function( code, textState ){
     }
 };
 //==============================
-// * 2H消息输入字符『对话框优化核心』 - 帧刷新
+// * 2H消息输入字符《对话框-对话框优化核心》 - 帧刷新
 //
 //			说明：	> 返回true表示当前帧等待，返回false表示继续遍历对话。
-//					> 【核心漏洞修复】Drill_CoreOfDialog 此函数应该被分解，作为更适合扩展的结构。
+//					> 『核心漏洞修复』Drill_CoreOfWindowCharacter 此函数应该被分解，作为更适合扩展的结构。
 //==============================
 Window_Message.prototype.updateMessage = function(){
     if( this._textState ){
@@ -553,7 +568,7 @@ Window_Message.prototype.updateMessage = function(){
 			// > 遍历字符 - 按确定键 瞬间显示当前页
             this.updateShowFast();
 			
-			// > 遍历字符 - E绘制 - 绘制下一个字符
+			// > 遍历字符 - H绘制 - 绘制下一个字符
             this.processCharacter(this._textState);
 			
 			// > 遍历字符 - 瞬间显示/瞬间显示当前行 时，强制继续循环（此处其实可以拆成两个if，true时break）
@@ -576,14 +591,14 @@ Window_Message.prototype.updateMessage = function(){
     }
 };
 //==============================
-// * 2H消息输入字符『对话框优化核心』 - 新建页 - 判断是否需要新建页
+// * 2H消息输入字符《对话框-对话框优化核心》 - 新建页 - 判断是否需要新建页
 //==============================
 Window_Message.prototype.needsNewPage = function( textState ){
     return (!this.isEndOfText(textState) &&
             textState.y + textState.height > this.contents.height);
 };
 //==============================
-// * 2H消息输入字符『对话框优化核心』 - 新建页 - 执行新建
+// * 2H消息输入字符《对话框-对话框优化核心》 - 新建页 - 执行新建
 //==============================
 Window_Message.prototype.newPage = function( textState ){
 	
@@ -600,7 +615,7 @@ Window_Message.prototype.newPage = function( textState ){
     textState.height = this.calcTextHeight(textState, false);
 };
 //==============================
-// * 2H消息输入字符『对话框优化核心』 - 按确定键 瞬间显示当前页
+// * 2H消息输入字符《对话框-对话框优化核心》 - 按确定键 瞬间显示当前页
 //
 //			说明：	> 此功能实现 再次按确定键，能瞬间加速当前内容 。
 //==============================
@@ -610,7 +625,7 @@ Window_Message.prototype.updateShowFast = function(){
     }
 };
 //==============================
-// * 2H消息输入字符『对话框优化核心』 - 清理字符标记
+// * 2H消息输入字符《对话框-对话框优化核心》 - 清理字符标记
 //==============================
 Window_Message.prototype.clearFlags = function(){
     this._showFast = false;			//瞬间显示
@@ -620,13 +635,13 @@ Window_Message.prototype.clearFlags = function(){
 */
 
 //=============================================================================
-// ** ☆管辖权覆写函数（对话框）
+// ** ☆管辖权覆写函数（对话框的绘制）
 //
 //			说明：	> 管辖权 即对 原函数 进行 修改、覆写、继承、控制子插件继承 等的权利。
 //					> 用于后期脱离 原游戏框架 且仍保持兼容性 的标记。
 //=============================================================================
 //==============================
-// * 管辖权覆写函数（对话框） - 最后继承1级
+// * 管辖权覆写函数（对话框的绘制） - 最后继承1级
 //==============================
 var _drill_CODi_scene_initialize4 = SceneManager.initialize;
 SceneManager.initialize = function() {
@@ -637,7 +652,7 @@ SceneManager.initialize = function() {
 	var _drill_CODi_message_textWidth = Window_Message.prototype.textWidth;
 	var _drill_CODi_message_calcTextHeight = Window_Message.prototype.calcTextHeight;
 	//==============================
-	// * 管辖权覆写函数（对话框） - 绘制【基本文本】（覆写） 『窗口字符旧函数覆写』
+	// * 管辖权覆写函数（对话框） - 绘制 基本文本（覆写） 『窗口字符旧函数覆写』
 	//
 	//			说明：	> 对话框的绘制函数，完全弃用。
 	//					> 注意，drill插件如果想继承 Window_Message.prototype.drawText ，去继承函数 Window_Message.prototype.drill_CODi_message_initDrawText 即可。
@@ -646,7 +661,7 @@ SceneManager.initialize = function() {
 		//（不操作）
 	};
 	//==============================
-	// * 管辖权覆写函数（对话框） - 绘制【扩展文本】（覆写） 『窗口字符旧函数覆写』
+	// * 管辖权覆写函数（对话框） - 绘制 扩展文本（覆写） 『窗口字符旧函数覆写』
 	//
 	//			说明：	> 对话框的绘制函数，完全弃用。
 	//					> 注意，drill插件如果想继承 Window_Message.prototype.drawTextEx ，去继承函数 Window_Message.prototype.drill_CODi_message_initDrawText 即可。
@@ -656,7 +671,7 @@ SceneManager.initialize = function() {
 		return 0;
 	};
 	//==============================
-	// * 管辖权覆写函数（对话框） - 计算【基本文本】宽度（覆写） 『窗口字符旧函数覆写』
+	// * 管辖权覆写函数（对话框） - 计算 基本文本宽度（覆写） 『窗口字符旧函数覆写』
 	//
 	//			说明：	> 对话框的绘制函数，完全弃用。
 	//==============================
@@ -664,7 +679,7 @@ SceneManager.initialize = function() {
 		return 0;
 	};
 	//==============================
-	// * 管辖权覆写函数（对话框） - 计算【扩展文本】高度（覆写） 『窗口字符旧函数覆写』
+	// * 管辖权覆写函数（对话框） - 计算 扩展文本高度（覆写） 『窗口字符旧函数覆写』
 	//
 	//			说明：	> 对话框的绘制函数，完全弃用。
 	//==============================
@@ -742,17 +757,17 @@ SceneManager.initialize = function() {
 	};
 	
 	//==============================
-	// * 管辖权覆写函数（对话框） - E绘制 - 换行符（覆写） 『窗口字符旧函数覆写』
+	// * 管辖权覆写函数（对话框） - H绘制 - 换行符（覆写） 『窗口字符旧函数覆写』
 	//==============================
 	Window_Message.prototype.processNewLine = function( textState ){
 	};
 	//==============================
-	// * 管辖权覆写函数（对话框） - E绘制 - 新建页符（覆写） 『窗口字符旧函数覆写』
+	// * 管辖权覆写函数（对话框） - H绘制 - 新建页符（覆写） 『窗口字符旧函数覆写』
 	//==============================
 	Window_Message.prototype.processNewPage = function( textState ){
 	};
 	//==============================
-	// * 管辖权覆写函数（对话框） - E绘制 - 效果字符功能（覆写） 『窗口字符旧函数覆写』
+	// * 管辖权覆写函数（对话框） - H绘制 - 效果字符功能（覆写） 『窗口字符旧函数覆写』
 	//==============================
 	Window_Message.prototype.processEscapeCharacter = function( code, textState ){
 	};
@@ -786,7 +801,7 @@ SceneManager.initialize = function() {
 }
 
 //=============================================================================
-// ** ☆对话框控制
+// ** ☆对话框绘制控制
 //					
 //			作用域：	地图界面、战斗界面
 //			主功能：	定义一个对话框，并能根据 消息输入字符 控制输入。
@@ -796,22 +811,23 @@ SceneManager.initialize = function() {
 //							->与 Game_Message 交互
 //						
 //						->2A私有函数
-//						->2B子窗口
+//						->2B保持显示
+//							->展开动画
+//							->设置位置（顶部/中间/底部）
+//							->设置背景（窗口/暗淡/透明）
+//						
+//						->2C子窗口
 //							> 金钱窗口
 //							> 选项窗口基类
 //							> 数字输入窗口
 //							> 物品选择窗口
-//						->2C保持显示
-//							->开关动画
-//							->设置位置（顶部/中间/底部）
-//							->设置背景（窗口/暗淡/透明）
 //						
 //						x->2D等待
 //						x->2E脸图
 //						x->2F按键按下
 //						x->2G下一页
 //						x->2H消息输入字符
-//							x->E绘制
+//							x->H绘制
 //						
 //						->2O打开对话框
 //						->2P关闭对话框
@@ -825,7 +841,7 @@ SceneManager.initialize = function() {
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 对话框控制 - 初始化
+// * 对话框绘制控制 - 初始化
 //==============================
 var _drill_CODi_message_initialize = Window_Message.prototype.initialize;
 Window_Message.prototype.initialize = function() {
@@ -833,11 +849,11 @@ Window_Message.prototype.initialize = function() {
 	this._drill_CODi_message_isStarted = false;		//（打开关闭标记）
 }
 //==============================
-// * 对话框控制 - 帧刷新
+// * 对话框绘制控制 - 帧刷新
 //==============================
 Window_Message.prototype.drill_CODi_message_update = function(){
 	
-	// > 帧刷新 - 2C保持显示 - 开关动画
+	// > 帧刷新 - 2B保持显示 - 展开动画
     this.checkToNotClose();
 	
 	// > 父类帧刷新
@@ -891,9 +907,9 @@ Window_Message.prototype.drill_CODi_message_doStart = function(){
 	
 	this.drill_CODi_message_newPage();		//2Q绘制页 - 执行新建页
 	
-    this.updatePlacement();					//2C保持显示 - 设置位置（非帧刷新）
-    this.updateBackground();				//2C保持显示 - 设置背景（非帧刷新）
-    this.open();							//2C保持显示 - 打开窗口
+    this.updatePlacement();					//2B保持显示 - 设置位置（非帧刷新）
+    this.updateBackground();				//2B保持显示 - 设置背景（非帧刷新）
+    this.open();							//2B保持显示 - 打开窗口
 };
 
 
@@ -926,14 +942,14 @@ Window_Message.prototype.drill_CODi_message_doTerminate = function(){
 	
     this.close();
     this._goldWindow.close();
-    $gameMessage.clear();
+    $gameMessage.clear();	//结束阻塞『对话框的阻塞原理』
 };
 
 
 //==============================
 // * 2Q绘制页 - 执行新建页
 //
-//			说明：	> 绘制页流程 = 逐个绘制流程 + 绘制结束时的等待按下 + 2B子窗口的阻塞。
+//			说明：	> 绘制页流程 = 逐个绘制流程 + 绘制结束时的等待按下 + 2C子窗口的阻塞。
 //==============================
 Window_Message.prototype.drill_CODi_message_newPage = function(){
 	
@@ -984,10 +1000,10 @@ Window_Message.prototype.drill_CODi_message_updatePage = function(){
 	if( this.drill_COWC_timing_isPlaying() == false ){
 		
 		
-		// > 绘制结束时 - 2B子窗口 - 有子窗口时，该功能跳出
+		// > 绘制结束时 - 2C子窗口 - 有子窗口时，该功能跳出
 		if( this.isAnySubWindowActive() == true ){ return; }
 		
-		// > 绘制结束时 - 2B子窗口 - 帧刷新
+		// > 绘制结束时 - 2C子窗口 - 帧刷新
 		//		（子窗口打开后，后面的流程直接跳出了，因为子窗口会执行『子窗口手动关闭对话框』）
 		var has_subWindow = this.startInput();
 		if( has_subWindow == true ){ return; }
@@ -1175,7 +1191,7 @@ Bitmap.prototype.drill_COWC_timing_textStart = function( textBlock, row_index, t
 //=============================================================================
 /*
 //==============================
-// * 2E脸图『对话框优化核心』 - 帧刷新
+// * 2E脸图《对话框-对话框优化核心》 - 帧刷新
 //
 //			说明：	> 返回true表示当前帧等待，返回false表示继续遍历对话。
 //==============================
@@ -1195,20 +1211,20 @@ Window_Message.prototype.updateLoading = function(){
     }
 };
 //==============================
-// * 2E脸图『对话框优化核心』 - 读取脸图
+// * 2E脸图《对话框-对话框优化核心》 - 读取脸图
 //==============================
 Window_Message.prototype.loadMessageFace = function(){
     this._faceBitmap = ImageManager.reserveFace($gameMessage.faceName(), 0, this._imageReservationId);
 };
 //==============================
-// * 2E脸图『对话框优化核心』 - 绘制脸图
+// * 2E脸图《对话框-对话框优化核心》 - 绘制脸图
 //==============================
 Window_Message.prototype.drawMessageFace = function(){
     this.drawFace($gameMessage.faceName(), $gameMessage.faceIndex(), 0, 0);
     ImageManager.releaseReservation(this._imageReservationId);
 };
 //==============================
-// * 2E脸图『对话框优化核心』 - 脸图偏移量X
+// * 2E脸图《对话框-对话框优化核心》 - 脸图偏移量X
 //
 //			说明：	> 该函数只被 Window_Message.prototype.newPage 用到了。
 //==============================
@@ -1491,15 +1507,16 @@ Bitmap.prototype.drill_COWC_timing_textStart = function( textBlock, row_index, t
 
 
 
+
 //=============================================================================
-// ** ☆管辖权（选择项窗口）
+// ** ☆管辖权（4B选择项窗口『对话框多个子窗口』）
 //
 //			说明：	> 管辖权 即对 原函数 进行 修改、覆写、继承、控制子插件继承 等的权利。
 //					> 用于后期脱离 原游戏框架 且仍保持兼容性 的标记。
 //=============================================================================
 /*
 //==============================
-// * 选择项窗口 - 获取文本宽度
+// * 4B位置刷新《对话框-对话框优化核心》 - 刷新 - 最大选项宽度 - 获取文本宽度
 //==============================
 Window_ChoiceList.prototype.textWidthEx = function( text ){
     return this.drawTextEx(text, 0, this.contents.height);
@@ -1507,25 +1524,27 @@ Window_ChoiceList.prototype.textWidthEx = function( text ){
 */
 
 //=============================================================================
-// ** ☆管辖权覆写函数（选择项窗口）
+// ** ☆管辖权覆写函数（4B选择项窗口）
 //
 //			说明：	> 管辖权 即对 原函数 进行 修改、覆写、继承、控制子插件继承 等的权利。
 //					> 用于后期脱离 原游戏框架 且仍保持兼容性 的标记。
 //=============================================================================
 //==============================
-// * 管辖权覆写函数（选择项窗口） - 最后继承1级
+// * 管辖权覆写函数（4B选择项窗口） - 最后继承1级
 //==============================
 var _drill_CODi_scene_initialize6 = SceneManager.initialize;
 SceneManager.initialize = function() {
 	_drill_CODi_scene_initialize6.call(this);
 	
 	//==============================
-	// * 管辖权覆写函数（选择项窗口） - 获取文本宽度
+	// * 管辖权覆写函数（4B选择项窗口） - 获取文本宽度
 	//==============================
 	Window_ChoiceList.prototype.textWidthEx = function( text ){
 		return this.drill_COWC_getOrgTextWidth( text, {} );
 	};
 };
+
+
 
 //=============================================================================
 // * <<<<基于插件检测<<<<

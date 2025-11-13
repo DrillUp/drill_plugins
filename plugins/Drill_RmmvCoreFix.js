@@ -385,7 +385,7 @@ DrillUp.drill_RCF_getPluginTip_TransformBugWarning = function(){
 //==============================
 // * 偶尔1像素缝隙抖动问题 - 报错 - 漏洞函数警告 - 检测『非整数坐标抖动问题』
 //==============================
-if( Yanfly != undefined && 
+if( typeof(Yanfly) != "undefined" && 
 	Yanfly.Core != undefined && 
 	Yanfly.Core.Sprite_updateTransform != undefined ){
 	alert( DrillUp.drill_RCF_getPluginTip_TransformBugWarning() );

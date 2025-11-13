@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        对话框 - 姓名框窗口
+ * @plugindesc [v1.4]        对话框 - 姓名框窗口
  * @author Drill_up
  * 
  * 
@@ -14,7 +14,7 @@
  * 如果你有兴趣，也可以来看看更多我写的drill插件哦ヽ(*。>Д<)o゜
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
- * 使得你可以使用窗口字符，在对话框旁建立姓名框窗口。
+ * 使得你可以使用窗口字符，在对话框旁边显示姓名框窗口。
  *
  * -----------------------------------------------------------------------------
  * ----插件扩展
@@ -60,6 +60,28 @@
  *    "\n<姓名框内容>" 是旧版本的窗口字符设置，也能用。
  * 
  * -----------------------------------------------------------------------------
+ * ----可选设定 - 修改参数
+ * 你需要通过下面插件指令来修改：
+ * 
+ * 插件指令：>姓名框窗口 : 修改横向收拢偏移量 : 偏移[10]
+ * 插件指令：>姓名框窗口 : 修改横向收拢偏移量 : 偏移变量[25]
+ * 插件指令：>姓名框窗口 : 修改横向收拢偏移量 : 默认值
+ * 插件指令：>姓名框窗口 : 修改纵向收拢偏移量 : 偏移[10]
+ * 插件指令：>姓名框窗口 : 修改纵向收拢偏移量 : 偏移变量[25]
+ * 插件指令：>姓名框窗口 : 修改纵向收拢偏移量 : 默认值
+ * 
+ * 插件指令：>姓名框窗口 : 修改前缀 : 文本[\c[6]]
+ * 插件指令：>姓名框窗口 : 修改前缀 : 默认值
+ * 插件指令：>姓名框窗口 : 修改后缀 : 文本[\c[0]]
+ * 插件指令：>姓名框窗口 : 修改后缀 : 默认值
+ * 
+ * 1.修改后永久有效。
+ *   横向收拢偏移量：左对齐时，正右负左；右对齐时，正左负右；居中时，不偏移。
+ *   纵向收拢偏移量：姓名框在对话框下方时，正上负下；姓名框在对话框上方时，正下负上。
+ * 2.对话框皮肤插件中，
+ *   在指定样式下有参数能自定义 收拢偏移量、前缀后缀，可以不通过此修改来实现收拢。
+ * 
+ * -----------------------------------------------------------------------------
  * ----插件性能
  * 测试仪器：   4G 内存，Intel Core i5-2520M CPU 2.5GHz 处理器
  *              Intel(R) HD Graphics 3000 集显 的垃圾笔记本
@@ -90,6 +112,9 @@
  * 更新并兼容了新的窗口字符底层。
  * [v1.3]
  * 修复了姓名框的边框有时缝合不了的bug。
+ * [v1.4]
+ * 添加了插件指令修改 收拢偏移量、前缀后缀。
+ * 修复了姓名框修改样式后一直显示的bug。
  * 
  * 
  * 
@@ -98,13 +123,23 @@
  * 
  * @param 姓名框-横向收拢偏移量
  * @parent ---姓名框窗口---
- * @desc 姓名框基础上额外的偏移量，x轴方向平移，单位像素。正数向右，负数向左。
+ * @desc 横向收拢偏移量。左对齐时，正右负左；右对齐时，正左负右；居中时，不偏移。
  * @default 0
  * 
  * @param 姓名框-纵向收拢偏移量
  * @parent ---姓名框窗口---
- * @desc 姓名框基础上额外的偏移量，y轴方向平移，单位像素。正数向下，负数向上。
+ * @desc 纵向收拢偏移量。姓名框在对话框下方时，正上负下；姓名框在对话框上方时，正下负上。
  * @default 0
+ * 
+ * @param 姓名框-额外前缀
+ * @parent ---姓名框窗口---
+ * @desc 姓名框文本基础上额外的添加的前缀文本。
+ * @default \c[6]
+ * 
+ * @param 姓名框-额外后缀
+ * @parent ---姓名框窗口---
+ * @desc 姓名框文本基础上额外的添加的后缀文本。
+ * @default \c[0]
  * 
  * @param 姓名框-内边距
  * @parent ---姓名框窗口---
@@ -119,16 +154,6 @@
  * @min 4
  * @desc 姓名框的默认字体大小。
  * @default 28
- * 
- * @param 姓名框-额外前缀
- * @parent ---姓名框窗口---
- * @desc 姓名框文本基础上额外的添加的额外前缀文本。
- * @default \c[6]
- * 
- * @param 姓名框-额外后缀
- * @parent ---姓名框窗口---
- * @desc 姓名框文本基础上额外的添加的额外后缀文本。
- * @default \c[0]
  * 
  */
  
@@ -157,13 +182,15 @@
 //		★功能结构树：
 //			->☆提示信息
 //			->☆静态数据
+//			->☆插件指令
+//			->☆存储数据
 //			->☆窗口字符应用之消息输入字符
 //			
-//			->☆姓名框控制
+//			->☆姓名框展开控制
 //			->姓名窗口【Drill_DNB_NameBoxWindow】
-//				->A主体
-//				->B开关动画
-//				->C窗口内容
+//				->2A主体
+//				->2B展开控制
+//				->2C窗口内容
 //
 //
 //		★家谱：
@@ -231,7 +258,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 漏洞函数警告 - 检测『非整数坐标抖动问题』
 	//==============================
-	if( Yanfly != undefined && 
+	if( typeof(Yanfly) != "undefined" && 
 		Yanfly.Core != undefined && 
 		Yanfly.Core.Sprite_updateTransform != undefined ){
 		alert( DrillUp.drill_DNB_getPluginTip_TransformBugWarning() );
@@ -250,10 +277,10 @@
 	/*-----------------杂项------------------*/
 	DrillUp.g_DNB_nameBox_closingX = Number(DrillUp.parameters["姓名框-横向收拢偏移量"] || 0); 
 	DrillUp.g_DNB_nameBox_closingY = Number(DrillUp.parameters["姓名框-纵向收拢偏移量"] || 0); 
-	DrillUp.g_DNB_nameBox_padding = Number(DrillUp.parameters["姓名框-内边距"] || 18); 
-	DrillUp.g_DNB_nameBox_fontSize = Number(DrillUp.parameters["姓名框-字体大小"] || 28); 
 	DrillUp.g_DNB_nameBox_prefix = String(DrillUp.parameters["姓名框-额外前缀"] || ""); 
 	DrillUp.g_DNB_nameBox_suffix = String(DrillUp.parameters["姓名框-额外后缀"] || ""); 
+	DrillUp.g_DNB_nameBox_padding = Number(DrillUp.parameters["姓名框-内边距"] || 18); 
+	DrillUp.g_DNB_nameBox_fontSize = Number(DrillUp.parameters["姓名框-字体大小"] || 28); 
 	
 	
 	
@@ -261,6 +288,192 @@
 // * >>>>基于插件检测>>>>
 //=============================================================================
 if( Imported.Drill_CoreOfDialog ){
+
+
+
+//=============================================================================
+// ** ☆插件指令
+//=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
+var _drill_DNB_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
+	_drill_DNB_pluginCommand.call(this, command, args);
+	this.drill_DNB_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_DNB_pluginCommand = function( command, args ){
+	if( command === ">姓名框窗口" ){
+		
+		/*-----------------收拢偏移量------------------*/
+		if( args.length == 4 ){
+			var type = String(args[1]);
+			var temp1 = String(args[3]);
+			if( type == "修改横向收拢偏移量" ){
+				if( temp1 == "默认值" ){
+					$gameSystem._drill_DNB_closingX = DrillUp.g_DNB_nameBox_closingX;
+				}else if( temp1.indexOf("偏移变量[") != -1 ){
+					temp1 = temp1.replace("偏移变量[","");
+					temp1 = temp1.replace("]","");
+					$gameSystem._drill_DNB_closingX = $gameVariables.value( Number(temp1) );
+				}else if( temp1.indexOf("偏移[") != -1 ){
+					temp1 = temp1.replace("偏移[","");
+					temp1 = temp1.replace("]","");
+					$gameSystem._drill_DNB_closingX = Number(temp1);
+				}
+			}
+			if( type == "修改纵向收拢偏移量" ){
+				if( temp1 == "默认值" ){
+					$gameSystem._drill_DNB_closingY = DrillUp.g_DNB_nameBox_closingY;
+				}else if( temp1.indexOf("偏移变量[") != -1 ){
+					temp1 = temp1.replace("偏移变量[","");
+					temp1 = temp1.replace("]","");
+					$gameSystem._drill_DNB_closingY = $gameVariables.value( Number(temp1) );
+				}else if( temp1.indexOf("偏移[") != -1 ){
+					temp1 = temp1.replace("偏移[","");
+					temp1 = temp1.replace("]","");
+					$gameSystem._drill_DNB_closingY = Number(temp1);
+				}
+			}
+		}
+		
+		/*-----------------前缀后缀------------------*/
+		if( args.length == 4 ){
+			var type = String(args[1]);
+			var temp1 = String(args[3]);
+			if( type == "修改前缀" ){
+				if( temp1 == "默认值" ){
+					$gameSystem._drill_DNB_prefix = DrillUp.g_DNB_nameBox_prefix;
+				}else{
+					temp1 = temp1.replace("文本[","");
+					temp1 = temp1.replace(/\]$/,"");	//（去掉末尾的]）
+					$gameSystem._drill_DNB_prefix = String(temp1);
+				}
+			}
+			if( type == "修改后缀" ){
+				if( temp1 == "默认值" ){
+					$gameSystem._drill_DNB_suffix = DrillUp.g_DNB_nameBox_suffix;
+				}else{
+					temp1 = temp1.replace("文本[","");
+					temp1 = temp1.replace(/\]$/,"");	//（去掉末尾的]）
+					$gameSystem._drill_DNB_suffix = String(temp1);
+				}
+			}
+		}
+	}
+};
+
+
+//#############################################################################
+// ** 【标准模块】存储数据 ☆存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_DNB_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_DNB_sys_initialize = Game_System.prototype.initialize;
+Game_System.prototype.initialize = function() {
+    _drill_DNB_sys_initialize.call(this);
+	this.drill_DNB_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_DNB_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_DNB_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_DNB_saveEnabled == true ){	
+		$gameSystem.drill_DNB_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_DNB_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_DNB_initSysData = function() {
+	this.drill_DNB_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_DNB_checkSysData = function() {
+	this.drill_DNB_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_DNB_initSysData_Private = function() {
+	
+	this._drill_DNB_closingX = DrillUp.g_DNB_nameBox_closingX;		//横向收拢偏移量
+	this._drill_DNB_closingY = DrillUp.g_DNB_nameBox_closingY;		//纵向收拢偏移量
+	this._drill_DNB_prefix = DrillUp.g_DNB_nameBox_prefix;			//额外前缀
+	this._drill_DNB_suffix = DrillUp.g_DNB_nameBox_suffix;			//额外后缀
+};
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_DNB_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_DNB_prefix == undefined ){
+		this.drill_DNB_initSysData();
+	}
+};
+
+//==============================
+// * 存储数据 - 获取 横向收拢偏移量（可继承）
+//==============================
+Game_System.prototype.drill_DNB_getClosingX = function(){
+	return this._drill_DNB_closingX;
+};
+//==============================
+// * 存储数据 - 获取 纵向收拢偏移量（可继承）
+//==============================
+Game_System.prototype.drill_DNB_getClosingY = function(){
+	return this._drill_DNB_closingY;
+};
+//==============================
+// * 存储数据 - 获取 额外前缀（可继承）
+//==============================
+Game_System.prototype.drill_DNB_getPrefix = function(){
+	return this._drill_DNB_prefix;
+};
+//==============================
+// * 存储数据 - 获取 额外后缀（可继承）
+//==============================
+Game_System.prototype.drill_DNB_getSuffix = function(){
+	return this._drill_DNB_suffix;
+};
 
 
 //=============================================================================
@@ -337,13 +550,13 @@ Game_Temp.prototype.drill_COWC_expression_process = function( matched_index, mat
 
 
 //=============================================================================
-// ** ☆姓名框控制
+// ** ☆姓名框展开控制
 //
 //			说明：	> 此模块专门控制 姓名框。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 姓名框控制 - 对话框 创建子窗口
+// * 姓名框展开控制 - 对话框 创建子窗口
 //==============================
 var _drill_DNB_msg_createSubWindows = Window_Message.prototype.createSubWindows;
 Window_Message.prototype.createSubWindows = function() {
@@ -357,7 +570,7 @@ Window_Message.prototype.createSubWindows = function() {
     scene.addChild(this._drill_DNB_nameWindow);
 };
 //==============================
-// * 姓名框控制 - 对话框 获取子窗口
+// * 姓名框展开控制 - 对话框 获取子窗口
 //
 //			说明：	> 该函数被父场景调用并自动addWindow，所以此函数不需要。
 //==============================
@@ -368,7 +581,7 @@ Window_Message.prototype.createSubWindows = function() {
 //	return window_list;
 //};
 //==============================
-// * 姓名框控制 - 对话框 执行新建页时
+// * 姓名框展开控制 - 对话框 执行新建页时
 //==============================
 var _drill_DNB_CODi_message_doStart = Window_Message.prototype.drill_CODi_message_newPage;
 Window_Message.prototype.drill_CODi_message_newPage = function() {
@@ -394,7 +607,7 @@ Window_Message.prototype.drill_CODi_message_newPage = function() {
 	}
 };
 //==============================
-// * 姓名框控制 - 对话框 关闭对话框时
+// * 姓名框展开控制 - 对话框 关闭对话框时
 //==============================
 var _drill_DNB_CODi_message_doTerminate = Window_Message.prototype.drill_CODi_message_doTerminate;
 Window_Message.prototype.drill_CODi_message_doTerminate = function() {
@@ -419,12 +632,12 @@ Window_Message.prototype.drill_CODi_message_doTerminate = function() {
 // **						->初始化数据
 // **						->初始化对象
 // **					
-// **					->A主体
+// **					->2A主体
 // **						->窗口属性
 // **						->位置X类型
 // **						->位置Y类型
-// **					->B开关动画
-// **					->C窗口内容
+// **					->2B展开控制
+// **					->2C窗口内容
 // **						->窗口字符
 // **						->文本域自适应
 // **					
@@ -443,7 +656,7 @@ Drill_DNB_NameBoxWindow.prototype.constructor = Drill_DNB_NameBoxWindow;
 //==============================
 Drill_DNB_NameBoxWindow.prototype.initialize = function( parentWindow ){
     Window_Base.prototype.initialize.call(this, 0, 0, 0, 0);
-	this._drill_parentWindow = parentWindow;	//（绑定父窗体）
+	this._messageWindow = parentWindow;	//（绑定父窗体）
 	
 	this.drill_initData();				//初始化数据
 	this.drill_initSprite();			//初始化对象
@@ -453,9 +666,9 @@ Drill_DNB_NameBoxWindow.prototype.initialize = function( parentWindow ){
 //==============================
 Drill_DNB_NameBoxWindow.prototype.update = function() {
     Window_Base.prototype.update.call(this);
-	this.drill_updateAttr();		//帧刷新 - A主体
-	this.drill_updateOpen();		//帧刷新 - B开关动画
-									//帧刷新 - C窗口内容（无）
+	this.drill_updateAttr();		//帧刷新 - 2A主体
+	this.drill_updateOpen();		//帧刷新 - 2B展开控制
+									//帧刷新 - 2C窗口内容（无）
 };
 //==============================
 // * 姓名窗口 - 初始化数据『独立贴图』
@@ -469,9 +682,9 @@ Drill_DNB_NameBoxWindow.prototype.drill_initData = function() {
 //			说明：	> 此函数只在初始化时执行一次，重设数据 被分到各个子功能里面执行。
 //==============================
 Drill_DNB_NameBoxWindow.prototype.drill_initSprite = function() {
-	this.drill_initAttr();				//初始化对象 - A主体
-	this.drill_initOpen();				//初始化对象 - B开关动画
-	this.drill_initMessage();			//初始化对象 - C窗口内容
+	this.drill_initAttr();				//初始化对象 - 2A主体
+	this.drill_initOpen();				//初始化对象 - 2B展开控制
+	this.drill_initMessage();			//初始化对象 - 2C窗口内容
 }
 //==============================
 // * 姓名窗口 - 窗口属性
@@ -480,27 +693,29 @@ Drill_DNB_NameBoxWindow.prototype.standardPadding = function(){ return DrillUp.g
 Drill_DNB_NameBoxWindow.prototype.standardFontSize = function() { return DrillUp.g_DNB_nameBox_fontSize; };		//窗口字体大小
 
 //==============================
-// * A主体 - 初始化
+// * 2A主体 - 初始化
 //==============================
 Drill_DNB_NameBoxWindow.prototype.drill_initAttr = function() {
 	this._drill_positionXType = "";		//（位置X类型）
 	//（无）							//（位置Y类型）
 }
 //==============================
-// * A主体 - 设置位置类型（开放函数）
+// * 2A主体 - 设置位置类型（开放函数）
 //==============================
 Drill_DNB_NameBoxWindow.prototype.drill_setPositionType = function( position_type ){
 	this._drill_positionXType = position_type;
 }
 //==============================
-// * A主体 - 帧刷新
+// * 2A主体 - 帧刷新
 //==============================
 Drill_DNB_NameBoxWindow.prototype.drill_updateAttr = function() {
 	this.drill_updateAttr_PositionX();
 	this.drill_updateAttr_PositionY();
 };
 //==============================
-// * A主体 - 帧刷新 - 位置X
+// * 2A主体 - 帧刷新 - 位置X（开放函数）
+//
+//			说明：	> 该函数会被 对话框变形器 调用，用于对话框位置跟随控制。
 //==============================
 Drill_DNB_NameBoxWindow.prototype.drill_updateAttr_PositionX = function() {
 	var xx = 0;
@@ -508,18 +723,18 @@ Drill_DNB_NameBoxWindow.prototype.drill_updateAttr_PositionX = function() {
 	// > 位置X类型
 	var cur_x_type = this._drill_positionXType;
 	if( cur_x_type == "" || cur_x_type == "左对齐" ){
-		xx = this._drill_parentWindow.x;
-		xx += DrillUp.g_DNB_nameBox_closingX;		//（横向收拢偏移量）
+		xx = this._messageWindow.x;
+		xx += $gameSystem.drill_DNB_getClosingX();		//（横向收拢偏移量）
 	
 	}else if( cur_x_type === "居中" ){
-		xx = this._drill_parentWindow.x;
-		xx += this._drill_parentWindow.width / 2;
+		xx = this._messageWindow.x;
+		xx += this._messageWindow.width / 2;
 		xx -= this.width / 2;
 	
 	}else if( cur_x_type === "右对齐" ){
-		xx = this._drill_parentWindow.x + this._drill_parentWindow.width;
+		xx = this._messageWindow.x + this._messageWindow.width;
 		xx -= this.width;
-		xx -= DrillUp.g_DNB_nameBox_closingX;		//（横向收拢偏移量）
+		xx -= $gameSystem.drill_DNB_getClosingX();		//（横向收拢偏移量）
 	}
 	
 	// > 不能过界
@@ -530,21 +745,23 @@ Drill_DNB_NameBoxWindow.prototype.drill_updateAttr_PositionX = function() {
 	//this.x = Math.round( xx );	//『非整数坐标抖动问题』问题来自YEP插件，而不是该插件
 };
 //==============================
-// * A主体 - 帧刷新 - 位置Y
+// * 2A主体 - 帧刷新 - 位置Y（开放函数）
+//
+//			说明：	> 该函数会被 对话框变形器 调用，用于对话框位置跟随控制。
 //==============================
 Drill_DNB_NameBoxWindow.prototype.drill_updateAttr_PositionY = function() {
 	var yy = 0;
 	
 	// > 位置Y类型 - 0顶部（根据父窗口的位置来判断，这里不用 $gameMessage.positionType() == 0 ）
-	if( this._drill_parentWindow.y < this._drill_parentWindow.height ){
-		yy = this._drill_parentWindow.y + this._drill_parentWindow.height;
-		yy -= DrillUp.g_DNB_nameBox_closingY;	//（纵向收拢偏移量）
+	if( this._messageWindow.y < this._messageWindow.height ){
+		yy = this._messageWindow.y + this._messageWindow.height;
+		yy -= $gameSystem.drill_DNB_getClosingY();		//（纵向收拢偏移量）
 		
 	// > 位置Y类型 - 1中间/2底部
 	}else{
-		yy = this._drill_parentWindow.y;
+		yy = this._messageWindow.y;
 		yy -= this.height;
-		yy += DrillUp.g_DNB_nameBox_closingY;	//（纵向收拢偏移量）
+		yy += $gameSystem.drill_DNB_getClosingY();		//（纵向收拢偏移量）
 	}
 	
 	this.y = yy;
@@ -552,34 +769,34 @@ Drill_DNB_NameBoxWindow.prototype.drill_updateAttr_PositionY = function() {
 };
 
 //==============================
-// * B开关动画 - 初始化
+// * 2B展开控制 - 初始化
 //==============================
 Drill_DNB_NameBoxWindow.prototype.drill_initOpen = function() {
-	this._openness = 0;				//初始紧闭
-	this._drill_closeDelayTime = -1;
+    this.openness = 0;					//初始紧闭（0C展开动画）（不要直接给_openness赋值，具体去看变量定义）
+	this._drill_closeDelayTime = -1;	//延迟时间
 }
 //==============================
-// * B开关动画 - 打开姓名框（开放函数）
+// * 2B展开控制 - 打开姓名框（开放函数）
 //==============================
 Drill_DNB_NameBoxWindow.prototype.drill_DNB_openNow = function(){
 	this._drill_closeDelayTime = -1;
 	this.open();
 }
 //==============================
-// * B开关动画 - 关闭姓名框（开放函数）
+// * 2B展开控制 - 关闭姓名框（开放函数）
 //==============================
 Drill_DNB_NameBoxWindow.prototype.drill_DNB_closeNow = function(){
 	this._drill_closeDelayTime = -1;
 	this.close();
 }
 //==============================
-// * B开关动画 - 延迟关闭姓名框（开放函数）
+// * 2B展开控制 - 延迟关闭姓名框（开放函数）
 //==============================
 Drill_DNB_NameBoxWindow.prototype.drill_DNB_closeDelay = function( closeDelayTime ){
 	this._drill_closeDelayTime = closeDelayTime;
 }
 //==============================
-// * B开关动画 - 帧刷新
+// * 2B展开控制 - 帧刷新
 //==============================
 Drill_DNB_NameBoxWindow.prototype.drill_updateOpen = function() {
 	
@@ -591,25 +808,25 @@ Drill_DNB_NameBoxWindow.prototype.drill_updateOpen = function() {
 }
 
 //==============================
-// * C窗口内容 - 初始化
+// * 2C窗口内容 - 初始化
 //==============================
 Drill_DNB_NameBoxWindow.prototype.drill_initMessage = function() {
     this._drill_text = "";
 }
 //==============================
-// * C窗口内容 - 重设数据（开放函数）
+// * 2C窗口内容 - 重设数据（开放函数）
 //==============================
 Drill_DNB_NameBoxWindow.prototype.drill_resetData_Message = function( text, position_type ){
 	
 	// > 刷新内容
 	this._drill_text = text;
-	var result_text = DrillUp.g_DNB_nameBox_prefix + text + DrillUp.g_DNB_nameBox_suffix;
+	var result_text = $gameSystem.drill_DNB_getPrefix() + text + $gameSystem.drill_DNB_getSuffix();
 	this.drill_refreshMessage( result_text );
 	
-	this.drill_setPositionType( position_type );	//A主体 - 设置位置类型
+	this.drill_setPositionType( position_type );	//2A主体 - 设置位置类型
 };
 //==============================
-// * C窗口内容 - 刷新内容
+// * 2C窗口内容 - 刷新内容
 //==============================
 Drill_DNB_NameBoxWindow.prototype.drill_refreshMessage = function( context ){
 	
@@ -676,7 +893,7 @@ Drill_DNB_NameBoxWindow.prototype.drill_refreshMessage = function( context ){
 	}
 }
 //==============================
-// * C窗口内容 - 刷新内容 - 窗口字符底层校验
+// * 2C窗口内容 - 刷新内容 - 窗口字符底层校验
 //==============================
 if( typeof(_drill_COWC_drawText_functionExist) == "undefined" ){
 	alert( DrillUp.drill_DNB_getPluginTip_NeedUpdate_drawText() );

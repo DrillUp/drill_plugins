@@ -637,7 +637,7 @@ Window_Message.prototype._updatePauseSign = function() {
 		
 		
 		// > 可见控制
-		this._windowPauseSignSprite.visible = this.isOpen();	//（D开关动画 - openness帧刷新控制）
+		this._windowPauseSignSprite.visible = this.isOpen();	//（0C展开动画 - openness帧刷新控制）
 		if( $gameSystem._drill_DAr_visible == false ){
 			this._windowPauseSignSprite.visible = false;
 		}
@@ -656,7 +656,7 @@ Window_Message.prototype._updatePauseSign = function() {
 		
 		
 		// > 可见控制
-		this._drill_DAr_arrowSprite.visible = this.isOpen();	//（D开关动画 - openness帧刷新控制）
+		this._drill_DAr_arrowSprite.visible = this.isOpen();	//（0C展开动画 - openness帧刷新控制）
 		if( $gameSystem._drill_DAr_visible == false ){
 			this._drill_DAr_arrowSprite.visible = false;
 		}
@@ -771,7 +771,7 @@ Drill_DAr_ArrowSprite.prototype.drill_sprite_updateAttr = function() {
 		this.drill_DAr_refreshAll();
 	}
 	
-	// > 位置
+	// > 刷新位置
 	this.x = this._drill_formulaX;
 	this.y = this._drill_formulaY;
 };
@@ -783,6 +783,10 @@ Drill_DAr_ArrowSprite.prototype.drill_DAr_setParentWindowSize = function( ww, hh
 	var data = this._drill_data;
 	this._drill_formulaX = Number( eval( data['x_formula'] ) );	//公式计算结果X（ww和hh 作为公式参数使用）
 	this._drill_formulaY = Number( eval( data['y_formula'] ) );	//公式计算结果Y
+	
+	// > 立即刷新位置（防止看见大小变化后小箭头闪过去）
+	this.x = this._drill_formulaX;
+	this.y = this._drill_formulaY;
 };
 //==============================
 // * A主体 - 刷新样式（开放函数）

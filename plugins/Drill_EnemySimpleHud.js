@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.6]        战斗UI - 简单生命框
+ * @plugindesc [v1.7]        战斗UI - 简单生命框
  * @author Drill_up
  * 
  * @Drill_LE_param "生命框-%d"
@@ -183,6 +183,8 @@
  * 大幅度优化了内部结构。
  * [v1.6]
  * 修复了默认生命框设置无效的bug。
+ * [v1.7]
+ * 修复了敌人被强制排序的bug。
  *
  * 
  * 
@@ -336,6 +338,7 @@
  * @desc 只用于方便区分查看的标签，不作用在插件中。
  * @default ==新的生命框==
  *
+ *
  * @param ---层级---
  * @desc 
  *
@@ -414,11 +417,11 @@
  * @default 20
  * 
  * 
- * @param ----参数条----
+ * @param ---参数条---
  * @desc 
  * 
  * @param 生命-是否显示参数条
- * @parent ----参数条----
+ * @parent ---参数条---
  * @type boolean
  * @on 显示
  * @off 隐藏
@@ -443,7 +446,7 @@
  * @default 10
  * 
  * @param 魔法-是否显示参数条
- * @parent ----参数条----
+ * @parent ---参数条---
  * @type boolean
  * @on 显示
  * @off 隐藏
@@ -468,7 +471,7 @@
  * @default 10
  * 
  * @param 怒气-是否显示参数条
- * @parent ----参数条----
+ * @parent ---参数条---
  * @type boolean
  * @on 显示
  * @off 隐藏
@@ -493,11 +496,11 @@
  * @default 10
  *
  * 
- * @param ----参数数字----
+ * @param ---参数数字---
  * @desc 
  * 
  * @param 生命-是否显示参数数字
- * @parent ----参数数字----
+ * @parent ---参数数字---
  * @type boolean
  * @on 显示
  * @off 隐藏
@@ -522,7 +525,7 @@
  * @default 10
  * 
  * @param 魔法-是否显示参数数字
- * @parent ----参数数字----
+ * @parent ---参数数字---
  * @type boolean
  * @on 显示
  * @off 隐藏
@@ -547,7 +550,7 @@
  * @default 10
  * 
  * @param 怒气-是否显示参数数字
- * @parent ----参数数字----
+ * @parent ---参数数字---
  * @type boolean
  * @on 显示
  * @off 隐藏
@@ -572,11 +575,11 @@
  * @default 10
  * 
  * 
- * @param ----外框----
+ * @param ---外框---
  * @desc 
  *
  * @param 资源-固定框背景
- * @parent ----外框----
+ * @parent ---外框---
  * @desc 固定框背景的图片资源。
  * @default (需配置)战斗生命框背景
  * @require 1
@@ -584,17 +587,17 @@
  * @type file
  *
  * @param 平移-固定框背景 X
- * @parent ----外框----
+ * @parent ---外框---
  * @desc 修正校对背景的位置用，x轴方向平移，单位像素。正数向右，负数向左。
  * @default 0
  *
  * @param 平移-固定框背景 Y
- * @parent ----外框----
+ * @parent ---外框---
  * @desc 修正校对背景的位置用，y轴方向平移，单位像素。正数向下，负数向上。
  * @default 0
  *
  * @param 资源-固定框前景
- * @parent ----外框----
+ * @parent ---外框---
  * @desc 固定框前景的图片资源，可以遮住生命条、魔法条、怒气条。
  * @default (需配置)战斗生命框前景
  * @require 1
@@ -602,12 +605,12 @@
  * @type file
  *
  * @param 平移-固定框前景 X
- * @parent ----外框----
+ * @parent ---外框---
  * @desc 修正校对前景的位置用，x轴方向平移，单位像素。正数向右，负数向左。
  * @default 0
  *
  * @param 平移-固定框前景 Y
- * @parent ----外框----
+ * @parent ---外框---
  * @desc 修正校对前景的位置用，y轴方向平移，单位像素。正数向下，负数向上。
  * @default 0
  * 
@@ -642,26 +645,29 @@
 //			->☆战斗层级
 //			
 //			->☆角色实体类赋值
-//				> 原位置
-//				> 贴图位置
-//				> 隐藏状态
-//				> 死亡状态
-//				> 选中状态
-//				> 帧刷新聚焦时长
+//				->捕获
+//					->原位置
+//					->贴图位置
+//					->隐藏状态
+//					->死亡状态
+//					->选中状态
+//				->帧刷新聚焦时长
+//				->战斗行动聚焦时
 //			->☆敌人实体类赋值
-//				->隐藏状态（中途出现的敌人）
-//				->敌人数据排序（车轮战）
-//				->敌人变身
-//				->战斗行动 聚焦
+//				->初始化绑定
+//				->捕获
+//					->原位置
+//					->贴图位置
+//					->隐藏状态（中途出现的敌人）
+//					->死亡状态
+//					->选中状态
+//				->帧刷新聚焦时长
+//				->战斗行动聚焦时
+//				->敌人变身时
 //			->☆实体类容器
 //				> 角色 实体类容器（1-8个）
 //				> 敌人 实体类容器（1-8个）
 //			->生命框贴图 实体类【Drill_ESH_Bean】
-//				->无帧刷新
-//				->重设数据
-//				->捕获
-//				->聚焦
-//				->单位注释初始化
 //			
 //			->☆生命框贴图容器
 //			->生命框贴图【Drill_ESH_LifeSprite】
@@ -685,8 +691,7 @@
 //		
 //		★必要注意事项：
 //			1.插件的图片层级与多个插件共享。【必须自写 层级排序 函数】
-//			2.注意，这里是【第一次】尝试混写 敌人和角色 的贴图数据变化，之前从未深入，结构不一定成熟 2021-5-27。
-//			3.车轮战重组后，【索引会错位】，只有标定enemyIndex才能避免。
+//			2.车轮战重组后，【索引会错位】，只有标定enemyIndex才能避免。
 //
 //		★其它说明细节：
 //			1.敌人创建的顺序如下：
@@ -746,11 +751,13 @@
 	//==============================
 	DrillUp.drill_ESH_initParam = function( dataFrom ){
 		var data = {};
+		
 		// > 层级
 		data['x'] = Number( dataFrom["平移-位置 X"] || 0);
 		data['y'] = Number( dataFrom["平移-位置 Y"] || 0);
 		data['battle_index'] = String( dataFrom["战斗层级"] || "上层");
 		data['zIndex'] = Number( dataFrom["图片层级"] || 0);
+		
 		// > 显现效果
 		data['lockHomePos_enable'] = String( dataFrom["是否固定生命框"] || "false") === "true";
 		data['slide_permanentShowing'] = String( dataFrom["是否永久显示"] || "false") === "true";
@@ -758,6 +765,7 @@
 		data['slide_x'] = Number( dataFrom["消失位置 X"] || 0);
 		data['slide_y'] = Number( dataFrom["消失位置 Y"] || 0);
 		data['slide_time'] = Number( dataFrom["消失时长"] || 30);
+		
 		// > 参数条
 		data['hp_meter_enable'] = String( dataFrom["生命-是否显示参数条"] || "true") === "true";
 		data['hp_meter_id'] = Number( dataFrom["生命-参数条样式"] || 0 );
@@ -771,6 +779,7 @@
 		data['tp_meter_id'] = Number( dataFrom["怒气-参数条样式"] || 0 );
 		data['tp_meter_x'] = Number( dataFrom["怒气-平移-参数条 X"] || 0 );
 		data['tp_meter_y'] = Number( dataFrom["怒气-平移-参数条 Y"] || 0 );
+		
 		// > 参数数字
 		data['hp_number_enable'] = String( dataFrom["生命-是否显示参数数字"] || "true") === "true";
 		data['hp_number_id'] = Number( dataFrom["生命-参数数字样式"] || 0 );
@@ -784,6 +793,7 @@
 		data['tp_number_id'] = Number( dataFrom["怒气-参数数字样式"] || 0 );
 		data['tp_number_x'] = Number( dataFrom["怒气-平移-参数数字 X"] || 0 );
 		data['tp_number_y'] = Number( dataFrom["怒气-平移-参数数字 Y"] || 0 );
+		
 		// > 外框
 		data['background_src'] = String( dataFrom["资源-固定框背景"] || "" );
 		data['background_x'] = Number( dataFrom["平移-固定框背景 X"] || 0 );
@@ -791,13 +801,9 @@
 		data['foreground_src'] = String( dataFrom["资源-固定框前景"] || "" );
 		data['foreground_x'] = Number( dataFrom["平移-固定框前景 X"] || 0 );
 		data['foreground_y'] = Number( dataFrom["平移-固定框前景 Y"] || 0 );
+		
 		return data;
 	}
-	
-	/*-----------------杂项------------------*/
-    DrillUp.g_ESH_focusingTime = Number(DrillUp.parameters['受伤后框保持显现时间'] || 60);
-    DrillUp.g_ESH_actorGroupShow = String(DrillUp.parameters['角色组是否显示生命框'] || "false") == "true";
-    DrillUp.g_ESH_defaultIndex = Number(DrillUp.parameters['默认生命框'] || 1);
 	
 	/*-----------------生命框集合------------------*/
 	DrillUp.g_ESH_data_length = 20;
@@ -811,6 +817,11 @@
 			DrillUp.g_ESH_data[i] = null;
 		}
 	}
+	
+	/*-----------------杂项------------------*/
+    DrillUp.g_ESH_focusingTime = Number(DrillUp.parameters["受伤后框保持显现时间"] || 60);
+    DrillUp.g_ESH_actorGroupShow = String(DrillUp.parameters["角色组是否显示生命框"] || "false") == "true";
+    DrillUp.g_ESH_defaultIndex = Number(DrillUp.parameters["默认生命框"] || 1);
 	
 	
 	
@@ -994,7 +1005,7 @@ Game_System.prototype.drill_ESH_checkSysData = function() {
 //==============================
 Game_System.prototype.drill_ESH_initSysData_Private = function() {
 	
-	this._drill_ESH_defaultIndex = DrillUp.g_ESH_defaultIndex - 1;		//默认生命框
+	this._drill_ESH_defaultStyleId = DrillUp.g_ESH_defaultIndex;		//默认生命框
 };
 //==============================
 // * 存储数据 - 载入存档时检查数据（私有）
@@ -1002,7 +1013,7 @@ Game_System.prototype.drill_ESH_initSysData_Private = function() {
 Game_System.prototype.drill_ESH_checkSysData_Private = function() {
 	
 	// > 旧存档数据自动补充
-	if( this._drill_ESH_defaultIndex == undefined ){
+	if( this._drill_ESH_defaultStyleId == undefined ){
 		this.drill_ESH_initSysData();
 	}
 	
@@ -1123,7 +1134,7 @@ if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义�
 			this.__drill_zIndex = value;
 		},
 		get: function(){
-			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			if( this.__drill_zIndex == undefined ){ return 20250701; }	//（如果未定义则放最上面）
 			return this.__drill_zIndex;
 		},
 		configurable: true
@@ -1203,42 +1214,41 @@ Scene_Battle.prototype.drill_ESH_layerCameraMoving_Private = function( xx, yy, l
 }
 
 
+
 //=============================================================================
 // ** ☆角色实体类赋值
 //
-//			说明：	> 注意，角色数据是在开始游戏后，永久存在的。
-//					  但是生命框数据的 生命周期 只有一场战斗的时间。
-//					> 生命框数据划分出来，是为了确保贴图被重建时，数据不会再次初始化。
-//					> 生命框数据嵌套到 Game_Actor 类中，这样 角色贴图 能获取到对象指针。
-//					  注意，生命框数据由于嵌套到该类，会被一并保存。
-//					  实际上该数据只在战斗中临时有用。
+//			说明：	> 实体类数据的 生命周期 只有一场战斗的时间。
+//					  实体类数据划分出来，是为了确保贴图被重建时，数据不会再次初始化。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 实体类赋值 - 初始化（战斗图层）
+// * 角色实体类赋值 - 初始化绑定（战斗图层）
 //
-//			说明：	角色数据长期存在，而敌人数据是临时的，所以刷新标记的位置不一样。
+//			说明：	> 角色数据长期存在，而敌人数据是临时的，所以刷新标记的位置不一样。
 //==============================
 var _drill_ESH_createActors = Spriteset_Battle.prototype.createActors;
 Spriteset_Battle.prototype.createActors = function() {
 	_drill_ESH_createActors.call(this);
 	
 	// > 实体类初始化
-	var actors = $gameParty.members();
 	$gameTemp._drill_ESH_actorBeanTank = [];
-	for(var i=0; i < actors.length; i++){
-		var actor = actors[i];
+	var actor_list = $gameParty.members();
+	for(var i=0; i < actor_list.length; i++){
+		var actor = actor_list[i];
+		var index = i;
 		
 		// > 实体类创建
 		var bean = new Drill_ESH_Bean();
-		bean.drill_ESH_setActor( actor.actorId(), i );
-		$gameTemp._drill_ESH_actorBeanTank[i] = bean;
+		bean.drill_ESH_setActor( actor.actorId(), index );
+		$gameTemp._drill_ESH_actorBeanTank[ index ] = bean;
 	}
 	
 	// > 重建标记（角色贴图重建时）
 	$gameTemp._drill_ESH_needRecreateActor = true;
-}
+};
 //==============================
-// * 实体类赋值 - 帧刷新（角色贴图）
+// * 角色实体类赋值 - 帧刷新（角色贴图）
 //==============================
 var _drill_ESH_actor_update = Sprite_Actor.prototype.update;
 Sprite_Actor.prototype.update = function() {
@@ -1255,10 +1265,6 @@ Sprite_Actor.prototype.update = function() {
 	bean.drill_ESH_setPosition( this.x, this.y );
 	
 	
-	//// > 标识变化
-	//ESH_data['actorId'] = this._actor.actorId();
-	////	（角色索引没有变化）
-	
 	// > 捕获 - 角色贴图 隐藏状态
 	bean.drill_ESH_setHidden( this._actor.isHidden() );
 	
@@ -1270,46 +1276,95 @@ Sprite_Actor.prototype.update = function() {
 	
 	// > 帧刷新聚焦时长
 	bean.drill_ESH_updateFocusingTime();
-}
+};
+//==============================
+// * 角色实体类赋值 - 战斗行动聚焦时
+//==============================
+var _drill_ESH_apply1 = Game_Action.prototype.apply;
+Game_Action.prototype.apply = function( target ){
+	_drill_ESH_apply1.call( this, target );
+	if( target == undefined ){ return; }
+	
+	// > 角色受伤
+	if( target.isActor() ){
+		var bean = $gameTemp._drill_ESH_actorBeanTank[ target.index() ];
+		if( bean == undefined ){ return; }
+		
+		// > 角色受伤 - 设置聚焦时长
+		if( this.isHpRecover() ){
+			bean.drill_ESH_setFocusingTime( DrillUp.g_ESH_focusingTime );
+			
+		}else if( this.item() && this.item().damage.type === 5 ){
+			bean.drill_ESH_setFocusingTime( DrillUp.g_ESH_focusingTime );
+			
+		};
+	}
+};
 
 
 //=============================================================================
 // ** ☆敌人实体类赋值
 //
-//			说明：	> 敌人数据 是进入战斗后，实时新建的。
-//					  生命框数据和敌人数据的 生命周期 都是一场战斗的时间。
-//					> 生命框数据划分出来，是为了确保贴图被重建时，数据不会再次初始化。
-//					> 生命框数据嵌套到 Game_Troop 类中，这样 敌人贴图 能获取到对象指针。
+//			说明：	> 实体类数据的 生命周期 只有一场战斗的时间。
+//					  实体类数据划分出来，是为了确保贴图被重建时，数据不会再次初始化。
+//					
+//					> 敌人数据排序，会影响绑定对应的index，注意兼容排序的情况。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 实体类赋值 - 初始化（敌群）
+// * 敌人实体类赋值 - 初始化绑定（敌群）
 //==============================
 var _drill_ESH_troop_setup = Game_Troop.prototype.setup;
 Game_Troop.prototype.setup = function( troopId ){
 	_drill_ESH_troop_setup.call( this, troopId );
 	
-	// > 敌人数据排序（$gameTroop中的顺序是 添加顺序，而不是按照 x位置 从左往右，需要排序）
-	var enemies = this.members();
-	enemies.sort( function(a, b){ return a._screenX-b._screenX } );
+	/*
+		// > 敌人数据排序（mog的旧功能）（$gameTroop中的顺序是 添加顺序，而不是按照 x位置 从左往右，mog需要排序）
+		var enemy_list = this.members();
+		enemy_list.sort( function(a, b){ return a._screenX-b._screenX } );
+	*/
+	
+	// > 初始化
+	this.drill_ESH_initBeanTank();
+};
+//==============================
+// * 敌人实体类赋值 - 初始化绑定（mog单位指针）
+//
+//			说明：	> 要在敌人数据排序后，执行一遍 实体类初始化，绑定关系才不会乱。
+//==============================
+if( Imported.MOG_BattleCursor ){
+	var _drill_ESH_mog_BattleCursor_setup = BattleCursor.prototype.setup;
+	BattleCursor.prototype.setup = function( spriteset, actorsprites ){
+		_drill_ESH_mog_BattleCursor_setup.call( this, spriteset, actorsprites );
+		
+		// > 初始化
+		$gameTroop.drill_ESH_initBeanTank();
+	}
+};
+//==============================
+// * 敌人实体类赋值 - 初始化
+//==============================
+Game_Troop.prototype.drill_ESH_initBeanTank = function(){
 	
 	// > 实体类初始化
 	$gameTemp._drill_ESH_enemyBeanTank = [];
-	for(var i=0; i < enemies.length; i++){
-		var enemy = enemies[i];
+	var enemy_list = this.members();
+	for(var i=0; i < enemy_list.length; i++){
+		var enemy = enemy_list[i];
+		var index = i;
 		
 		// > 实体类创建
 		var bean = new Drill_ESH_Bean();
-		bean.drill_ESH_setEnemy( enemy.enemyId(), i );
-		$gameTemp._drill_ESH_enemyBeanTank[i] = bean;
-		
-		//alert( "enemy:"+enemy.enemyId() );
+		bean.drill_ESH_setEnemy( enemy.enemyId(), index );
+		$gameTemp._drill_ESH_enemyBeanTank[ index ] = bean;
 	}
 	
 	// > 重建标记
 	$gameTemp._drill_ESH_needRecreateEnemy = true;
-}
+};
+
 //==============================
-// * 实体类赋值 - 帧刷新（敌人贴图）
+// * 敌人实体类赋值 - 帧刷新（敌人贴图）
 //==============================
 var _drill_ESH_enemy_update = Sprite_Enemy.prototype.update;
 Sprite_Enemy.prototype.update = function() {
@@ -1326,10 +1381,6 @@ Sprite_Enemy.prototype.update = function() {
 	bean.drill_ESH_setPosition( this.x, this.y );
 	
 	
-	//// > 标识变化
-	//ESH_data['enemyId'] = this._enemy.enemyId();
-	//ESH_data['enemyIndex'] = this._enemy.index();
-	
 	// > 捕获 - 敌人贴图 隐藏状态
 	bean.drill_ESH_setHidden( this._enemy.isHidden() );
 	
@@ -1341,28 +1392,13 @@ Sprite_Enemy.prototype.update = function() {
 	
 	// > 帧刷新聚焦时长
 	bean.drill_ESH_updateFocusingTime();
-}
+};
 //==============================
-// * 实体类赋值 - 敌人变身
+// * 敌人实体类赋值 - 战斗行动聚焦时
 //==============================
-var _drill_ESH_transform = Game_Enemy.prototype.transform;
-Game_Enemy.prototype.transform = function( enemyId ){
-	_drill_ESH_transform.call( this, enemyId );
-
-	// > 实体类重置
-	var bean = $gameTemp._drill_ESH_enemyBeanTank[ this.index() ];
-	bean.drill_ESH_setEnemy( this.enemyId(), this.index() );
-	
-	$gameTemp._drill_ESH_needRecreateEnemy = true;
-}
-//==============================
-// * 实体类赋值 - 战斗行动 聚焦
-//
-//			说明：	此处 角色和敌人 都放一起进行聚焦判定。
-//==============================
-var _drill_ESH_apply = Game_Action.prototype.apply;
+var _drill_ESH_apply2 = Game_Action.prototype.apply;
 Game_Action.prototype.apply = function( target ){
-	_drill_ESH_apply.call( this, target );
+	_drill_ESH_apply2.call( this, target );
 	if( target == undefined ){ return; }
 	
 	// > 敌人受伤
@@ -1370,6 +1406,7 @@ Game_Action.prototype.apply = function( target ){
 		var bean = $gameTemp._drill_ESH_enemyBeanTank[ target.index() ];
 		if( bean == undefined ){ return; }
 		
+		// > 敌人受伤 - 设置聚焦时长
 		if( this.isHpRecover() ){
 			bean.drill_ESH_setFocusingTime( DrillUp.g_ESH_focusingTime );
 			
@@ -1383,20 +1420,19 @@ Game_Action.prototype.apply = function( target ){
 			//}
 		};
 	}
+};
+//==============================
+// * 敌人实体类赋值 - 敌人变身时
+//==============================
+var _drill_ESH_transform = Game_Enemy.prototype.transform;
+Game_Enemy.prototype.transform = function( enemyId ){
+	_drill_ESH_transform.call( this, enemyId );
+
+	// > 实体类重置
+	var bean = $gameTemp._drill_ESH_enemyBeanTank[ this.index() ];
+	bean.drill_ESH_setEnemy( this.enemyId(), this.index() );
 	
-	// > 角色受伤
-	if( target.isActor() ){
-		var bean = $gameTemp._drill_ESH_actorBeanTank[ target.index() ];
-		if( bean == undefined ){ return; }
-		
-		if( this.isHpRecover() ){
-			bean.drill_ESH_setFocusingTime( DrillUp.g_ESH_focusingTime );
-			
-		}else if( this.item() && this.item().damage.type === 5 ){
-			bean.drill_ESH_setFocusingTime( DrillUp.g_ESH_focusingTime );
-			
-		};
-	}
+	$gameTemp._drill_ESH_needRecreateEnemy = true;
 };
 
 
@@ -1404,7 +1440,7 @@ Game_Action.prototype.apply = function( target ){
 // ** ☆实体类容器
 //
 //			说明：	> 此模块用于存放 实体类 对象，贴图能够通过容器，直接操作到实体类。
-//					> 比如通过 $gameTemp._drill_ESH_actorBeanTank[0] 直接获取到第一个角色的实体类。
+//					  比如通过 $gameTemp._drill_ESH_actorBeanTank[0] 直接获取到第一个角色的实体类。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
@@ -1468,7 +1504,7 @@ function Drill_ESH_Bean(){
 // * 实体类 - 初始化
 //==============================
 Drill_ESH_Bean.prototype.initialize = function(){
-	this._drill_beanSerial = new Date().getTime() + Math.random();		//『生成一个不重复的序列号』
+	this._drill_beanSerial = new Date().getTime() + Math.random();		//『随机因子-生成一个不重复的序列号』
     this.drill_initPrivateData();										//私有数据初始化
 };
 //##############################
@@ -1499,13 +1535,13 @@ Drill_ESH_Bean.prototype.drill_ESH_setStyleId = function( styleId ){
 //			说明：	> 此函数不能放在 帧刷新 中执行，最好必要时才执行一次。
 //##############################
 Drill_ESH_Bean.prototype.drill_ESH_setActor = function( actorId, actorIndex ){
-	var members = $gameParty.members();
-	if( members.length == 0 ){ return; }
-	var actor = members[ actorIndex ];
+	var actor_list = $gameParty.members();
+	if( actor_list.length == 0 ){ return; }
+	var actor = actor_list[ actorIndex ];
 	var actor_data = actor.actor();
-	this.drill_ESH_readNote( actor_data.note );		//（注释初始化）
 	this._drill_actorId = actorId;
 	this._drill_actorIndex = actorIndex;
+	this.drill_ESH_readNote( actor_data.note );		//（注释初始化）
 	
 	this._drill_enemyId = -1;
 	this._drill_enemyIndex = -1;
@@ -1520,13 +1556,13 @@ Drill_ESH_Bean.prototype.drill_ESH_setActor = function( actorId, actorIndex ){
 //			说明：	> 此函数不能放在 帧刷新 中执行，最好必要时才执行一次。
 //##############################
 Drill_ESH_Bean.prototype.drill_ESH_setEnemy = function( enemyId, enemyIndex ){
-	var members = $gameTroop.members();
-	if( members.length == 0 ){ return; }
-	//var enemy = members[ enemyIndex ];
+	var enemy_list = $gameTroop.members();
+	if( enemy_list.length == 0 ){ return; }
+	//var enemy = enemy_list[ enemyIndex ];
 	//var enemy_data = enemy.enemy();
-	this.drill_ESH_readNote( $dataEnemies[ enemyId ].note );		//（注释初始化）
 	this._drill_enemyId = enemyId;
 	this._drill_enemyIndex = enemyIndex;
+	this.drill_ESH_readNote( $dataEnemies[ enemyId ].note );		//（注释初始化）
 	
 	this._drill_actorId = -1;
 	this._drill_actorIndex = -1;
@@ -1665,8 +1701,8 @@ Drill_ESH_Bean.prototype.drill_ESH_isLongTimeShowing = function(){
 //==============================
 Drill_ESH_Bean.prototype.drill_initPrivateData = function(){
 	
-	this._drill_visible = true;									//实体类 - 可见
-	this._drill_styleId = $gameSystem._drill_ESH_defaultIndex;	//实体类 - 样式ID
+	this._drill_visible = true;										//实体类 - 可见
+	this._drill_styleId = $gameSystem._drill_ESH_defaultStyleId;	//实体类 - 样式ID
 	
 	this._drill_actorId = -1;				//实体类 - 单位 - 角色ID
 	this._drill_actorIndex = -1;			//实体类 - 单位 - 我方索引
@@ -1687,7 +1723,7 @@ Drill_ESH_Bean.prototype.drill_initPrivateData = function(){
 	this._drill_focusingTime = 0;			//实体类 - 聚焦 - 聚焦时长
 };
 //==============================
-// * 实体类 - 单位注释初始化
+// * 实体类 - 单位注释初始化（开放函数）
 //
 //			说明：	> 此函数不能放在 帧刷新 中执行，最好必要时才执行一次。
 //==============================
@@ -1710,7 +1746,7 @@ Drill_ESH_Bean.prototype.drill_ESH_readNote = function( note_str ){
 				var type = String(args[0]);
 				var temp1 = String(args[1]);
 				if( type == "样式" ){
-					this._drill_styleId = Number( temp1 )-1;
+					this._drill_styleId = Number( temp1 );
 				}
 			}
 			if( args.length == 3 ){
@@ -1768,9 +1804,9 @@ Scene_Battle.prototype.terminate = function() {
 };
 
 //==============================
-// * 敌人贴图容器 - 创建生命框
+// * 贴图容器（敌人） - 创建生命框
 //
-//			说明：	此函数在 帧刷新 中，通过 重建标记 来执行重建。
+//			说明：	> 此函数在 帧刷新 中，通过 重建标记 来执行重建。
 //==============================
 Scene_Battle.prototype.drill_ESH_updateCreateEnemySprite = function() {
 	if( $gameTemp._drill_ESH_needRecreateEnemy != true ){ return; }
@@ -1779,12 +1815,13 @@ Scene_Battle.prototype.drill_ESH_updateCreateEnemySprite = function() {
 	// > 清理旧贴图
 	this.drill_ESH_clearEnemySpriteTank();
 	
-	// > 敌方队员（这时敌人已排序）
-	for( var i = 0; i < $gameTroop.members().length; i++ ){
-		var enemy_data = $gameTroop.members()[i];
+	// > 敌方队员
+	for( var i = 0; i < $gameTemp._drill_ESH_enemyBeanTank.length; i++ ){
+		var enemy_bean = $gameTemp._drill_ESH_enemyBeanTank[i];
+		if( enemy_bean == undefined ){ continue; }
 		
 		var temp_sprite = new Drill_ESH_LifeSprite();
-		temp_sprite.drill_ESH_bindEnemy( i );	//绑定敌人
+		temp_sprite.drill_ESH_bindEnemyIndex( enemy_bean._drill_enemyIndex );	//绑定敌人
 		
 		var s_data = temp_sprite._drill_styleData;
 		if( s_data != undefined ){
@@ -1798,7 +1835,7 @@ Scene_Battle.prototype.drill_ESH_updateCreateEnemySprite = function() {
 	this.drill_ESH_sortByZIndex();
 }
 //==============================
-// * 敌人贴图容器 - 清空全部敌人生命框
+// * 贴图容器（敌人） - 清空全部敌人生命框
 //==============================
 Scene_Battle.prototype.drill_ESH_clearEnemySpriteTank = function(){
 	var s_tank = $gameTemp._drill_ESH_enemySpriteTank;
@@ -1809,16 +1846,18 @@ Scene_Battle.prototype.drill_ESH_clearEnemySpriteTank = function(){
 	$gameTemp._drill_ESH_enemySpriteTank = [];
 }
 //==============================
-// * 敌人贴图容器 - 帧刷新
+// * 贴图容器（敌人） - 帧刷新
 //==============================
 Scene_Battle.prototype.drill_ESH_updateEnemySprite = function() {
 	for(var i = 0; i < $gameTemp._drill_ESH_enemySpriteTank.length; i++ ){
 		var temp_sprite = $gameTemp._drill_ESH_enemySpriteTank[i];
+		
+		// > 帧刷新 镜头与位置
 		this.drill_ESH_updatePosition( temp_sprite );
 	}
 }
 //==============================
-// * 敌人贴图容器 - 重建时
+// * 贴图容器（敌人） - 重建时
 //==============================
 var _drill_ESH_spTank_createEnemies = Spriteset_Battle.prototype.createEnemies;
 Spriteset_Battle.prototype.createEnemies = function() {
@@ -1827,9 +1866,9 @@ Spriteset_Battle.prototype.createEnemies = function() {
 };
 
 //==============================
-// * 角色贴图容器 - 创建生命框
+// * 贴图容器（角色） - 创建生命框
 //
-//			说明：	此函数在 帧刷新 中，通过 重建标记 来执行重建。
+//			说明：	> 此函数在 帧刷新 中，通过 重建标记 来执行重建。
 //==============================
 Scene_Battle.prototype.drill_ESH_updateCreateActorSprite = function() {
 	if( $gameTemp._drill_ESH_needRecreateActor != true ){ return; }
@@ -1839,11 +1878,12 @@ Scene_Battle.prototype.drill_ESH_updateCreateActorSprite = function() {
 	this.drill_ESH_clearActorSpriteTank();
 	
 	// > 我方队员
-	for( var i = 0; i < $gameParty.members().length; i++ ){
-		var actor_data = $gameParty.members()[i];
+	for( var i = 0; i < $gameTemp._drill_ESH_actorBeanTank.length; i++ ){
+		var actor_bean = $gameTemp._drill_ESH_actorBeanTank[i];
+		if( actor_bean == undefined ){ continue; }
 		
 		var temp_sprite = new Drill_ESH_LifeSprite();
-		temp_sprite.drill_ESH_bindActor( i );	//绑定角色
+		temp_sprite.drill_ESH_bindActorIndex( actor_bean._drill_actorIndex );	//绑定角色
 		
 		var s_data = temp_sprite._drill_styleData;
 		if( s_data != undefined ){
@@ -1857,7 +1897,7 @@ Scene_Battle.prototype.drill_ESH_updateCreateActorSprite = function() {
 	this.drill_ESH_sortByZIndex();
 }
 //==============================
-// * 角色贴图容器 - 清空全部角色生命框
+// * 贴图容器（角色） - 清空全部角色生命框
 //==============================
 Scene_Battle.prototype.drill_ESH_clearActorSpriteTank = function(){
 	var s_tank = $gameTemp._drill_ESH_actorSpriteTank;
@@ -1868,16 +1908,18 @@ Scene_Battle.prototype.drill_ESH_clearActorSpriteTank = function(){
 	$gameTemp._drill_ESH_actorSpriteTank = [];
 }
 //==============================
-// * 角色贴图容器 - 帧刷新
+// * 贴图容器（角色） - 帧刷新
 //==============================
 Scene_Battle.prototype.drill_ESH_updateActorSprite = function() {
 	for(var i = 0; i < $gameTemp._drill_ESH_actorSpriteTank.length; i++ ){
 		var temp_sprite = $gameTemp._drill_ESH_actorSpriteTank[i];
+		
+		// > 帧刷新 镜头与位置
 		this.drill_ESH_updatePosition( temp_sprite );
 	}
 }
 //==============================
-// * 角色贴图容器 - 重建时
+// * 贴图容器（角色） - 重建时
 //==============================
 var _drill_ESH_spTank_createActors = Spriteset_Battle.prototype.createActors;
 Spriteset_Battle.prototype.createActors = function() {
@@ -2017,8 +2059,10 @@ Drill_ESH_LifeSprite.prototype.constructor = Drill_ESH_LifeSprite;
 //==============================
 Drill_ESH_LifeSprite.prototype.initialize = function(){
 	Sprite_Base.prototype.initialize.call(this);
-	this._drill_actorBeanId = -1;		//B绑定 - 绑定角色
-	this._drill_enemyBeanId = -1;		//B绑定 - 绑定敌人
+	
+	this._drill_sp_actorIndex = -1;		//B绑定 - 绑定角色
+	this._drill_sp_enemyIndex = -1;		//B绑定 - 绑定敌人
+	
 	this._drill_styleId = -1;			//C样式 - 样式ID
 	this._drill_styleData = null;		//C样式 - 样式数据
 	
@@ -2264,8 +2308,8 @@ Drill_ESH_LifeSprite.prototype.drill_isShowing = function(){
 Drill_ESH_LifeSprite.prototype.drill_initBind = function() {
 	
 	// > 此处不能对id初始化，会丢失绑定
-	//this._drill_actorBeanId = -1;
-	//this._drill_enemyBeanId = -1;
+	//this._drill_sp_actorIndex = -1;
+	//this._drill_sp_enemyIndex = -1;
 	
 	// > hp/mp标定值初始化
 	this._drill_hp_flag = 0;
@@ -2284,64 +2328,66 @@ Drill_ESH_LifeSprite.prototype.drill_initBind = function() {
 //==============================
 // * B绑定 - 绑定角色（开放函数）
 //==============================
-Drill_ESH_LifeSprite.prototype.drill_ESH_bindActor = function( actorBeanId ){
+Drill_ESH_LifeSprite.prototype.drill_ESH_bindActorIndex = function( actorIndex ){
 	
-	// > 角色赋值
-	this._drill_actorBeanId = actorBeanId;
-	this._drill_enemyBeanId = -1;
+	// > 绑定角色
+	this._drill_sp_actorIndex = actorIndex;
+	this._drill_sp_enemyIndex = -1;
 	
 	// > 帧刷新样式
+	this._drill_styleId = -1;
 	this.drill_updateStyle();
 };
 //==============================
 // * B绑定 - 绑定敌人（开放函数）
 //==============================
-Drill_ESH_LifeSprite.prototype.drill_ESH_bindEnemy = function( enemyBeanId ){
+Drill_ESH_LifeSprite.prototype.drill_ESH_bindEnemyIndex = function( enemyIndex ){
 	
-	// > 敌人赋值
-	this._drill_enemyBeanId = enemyBeanId;
-	this._drill_actorBeanId = -1;
+	// > 绑定敌人
+	this._drill_sp_enemyIndex = enemyIndex;
+	this._drill_sp_actorIndex = -1;
 	
 	// > 帧刷新样式
+	this._drill_styleId = -1;
 	this.drill_updateStyle();
 };
 //==============================
 // * B绑定 - 判断是否为角色（开放函数）
 //==============================
 Drill_ESH_LifeSprite.prototype.drill_ESH_isBindingActor = function() {
-	return this._drill_actorBeanId != -1;
+	return this._drill_sp_actorIndex != -1;
 };
 //==============================
 // * B绑定 - 判断是否为敌人（开放函数）
 //==============================
 Drill_ESH_LifeSprite.prototype.drill_ESH_isBindingEnemy = function() {
-	return this._drill_enemyBeanId != -1;
+	return this._drill_sp_enemyIndex != -1;
 };
 //==============================
 // * B绑定 - 获取 - 实体类（开放函数）
 //==============================
 Drill_ESH_LifeSprite.prototype.drill_ESH_getBean = function() {
-	if( this._drill_actorBeanId != -1 ){ return $gameTemp._drill_ESH_actorBeanTank[ this._drill_actorBeanId ]; }
-	if( this._drill_enemyBeanId != -1 ){ return $gameTemp._drill_ESH_enemyBeanTank[ this._drill_enemyBeanId ]; }
+	if( this._drill_sp_actorIndex != -1 ){ return $gameTemp._drill_ESH_actorBeanTank[ this._drill_sp_actorIndex ]; }
+	if( this._drill_sp_enemyIndex != -1 ){ return $gameTemp._drill_ESH_enemyBeanTank[ this._drill_sp_enemyIndex ]; }
 	return null;
 };
 //==============================
 // * B绑定 - 获取 - 角色对象（开放函数）
 //==============================
 Drill_ESH_LifeSprite.prototype.drill_ESH_getActor = function() {
-	if( this._drill_actorBeanId == -1 ){ return null; }
-	var members = $gameParty.members();
-	if( members.length == 0 ){ return null; }
-	return members[ this._drill_actorBeanId ];
+	if( this._drill_sp_actorIndex == -1 ){ return null; }
+	var actor_list = $gameParty.members();
+	if( actor_list.length == 0 ){ return null; }
+	return actor_list[ this._drill_sp_actorIndex ];
 };
 //==============================
 // * B绑定 - 获取 - 敌人对象（开放函数）
 //==============================
 Drill_ESH_LifeSprite.prototype.drill_ESH_getEnemy = function() {
-	if( this._drill_enemyBeanId == -1 ){ return null; }
-	var members = $gameTroop.members();
-	if( members.length == 0 ){ return null; }
-	return members[ this._drill_enemyBeanId ];
+	if( this._drill_sp_enemyIndex == -1 ){ return null; }
+	var enemy_list = $gameTroop.members();
+	if( enemy_list.length == 0 ){ return null; }
+	return enemy_list[ this._drill_sp_enemyIndex ];
 };
 //==============================
 // * B绑定 - 帧刷新 聚焦
@@ -2400,10 +2446,14 @@ Drill_ESH_LifeSprite.prototype.drill_updateStyle = function() {
 	// > id变化时，自变化 销毁与重建
 	if( this._drill_styleId == b_data._drill_styleId ){ return; }
 	this._drill_styleId = b_data._drill_styleId;
-	if( this._drill_styleId == -1 ){ return; }
+	
+	if( this._drill_styleId == -1 ){
+		this.drill_ESH_destroy();
+		return;
+	}
 	
 	// > 样式数据初始化
-	var s_data = DrillUp.g_ESH_data[ this._drill_styleId ];
+	var s_data = DrillUp.g_ESH_data[ this._drill_styleId -1 ];
 	if( s_data == undefined ){ return; }
 	this._drill_styleData = JSON.parse(JSON.stringify( s_data ));
 	

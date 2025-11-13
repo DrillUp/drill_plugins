@@ -2500,12 +2500,12 @@ Game_Temp.prototype.drill_PDMA_getPictureSpriteTank_SenceTopArea = function(){
 //==============================
 Game_Temp.prototype.drill_PDMA_getPictureSpriteTank_PicArea = function(){
 	if( SceneManager._scene == undefined ){ return null; }
-	if( SceneManager._scene instanceof Scene_Battle ){		//『图片与多场景-战斗界面』
+	if( SceneManager._scene instanceof Scene_Battle ){		//『多场景与图片-战斗界面』
 		if( SceneManager._scene._spriteset == undefined ){ return null; }
 		if( SceneManager._scene._spriteset._drill_battlePicArea == undefined ){ return null; }
 		return SceneManager._scene._spriteset._drill_battlePicArea.children;
 	}
-	if( SceneManager._scene instanceof Scene_Map ){			//『图片与多场景-地图界面』
+	if( SceneManager._scene instanceof Scene_Map ){			//『多场景与图片-地图界面』
 		if( SceneManager._scene._spriteset == undefined ){ return null; }
 		if( SceneManager._scene._spriteset._drill_mapPicArea == undefined ){ return null; }
 		return SceneManager._scene._spriteset._drill_mapPicArea.children;
@@ -3145,7 +3145,7 @@ Scene_Base.prototype.drill_PDMA_setMaskOpened = function( b ){
 // ** 动态遮罩板
 //=============================================================================
 //==============================
-// * 动态遮罩板 - 创建『图片与多场景-地图界面』
+// * 动态遮罩板 - 创建『多场景与图片-地图界面』
 //==============================
 var _drill_PDMA_mapScene_initialize = Scene_Map.prototype.initialize;
 Scene_Map.prototype.initialize = function() {
@@ -3153,7 +3153,7 @@ Scene_Map.prototype.initialize = function() {
 	this.drill_PDMA_createMaskLayer();		//（容器必须在所有 场景装饰插件 之前创建）
 };
 //==============================
-// * 动态遮罩板 - 帧刷新『图片与多场景-地图界面』
+// * 动态遮罩板 - 帧刷新『多场景与图片-地图界面』
 //==============================
 var _drill_PDMA_mapScene_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {	
@@ -3183,7 +3183,7 @@ Scene_Map.prototype.update = function() {
 DrillUp.g_PDMA_debugUpdate_map = true;
 
 //==============================
-// * 动态遮罩板 - 创建『图片与多场景-战斗界面』
+// * 动态遮罩板 - 创建『多场景与图片-战斗界面』
 //==============================
 var _drill_PDMA_battleScene_initialize = Scene_Battle.prototype.initialize;
 Scene_Battle.prototype.initialize = function() {
@@ -3191,7 +3191,7 @@ Scene_Battle.prototype.initialize = function() {
 	this.drill_PDMA_createMaskLayer();		//（容器必须在所有 场景装饰插件 之前创建）
 };
 //==============================
-// * 动态遮罩板 - 帧刷新『图片与多场景-战斗界面』
+// * 动态遮罩板 - 帧刷新『多场景与图片-战斗界面』
 //==============================
 var _drill_PDMA_battleScene_update = Scene_Battle.prototype.update;
 Scene_Battle.prototype.update = function() {	
@@ -3275,7 +3275,7 @@ Scene_Base.prototype.drill_PDMA_updatePictureSprite = function(){
 	}
 }
 //==============================
-// * 地图界面 - 帧刷新绑定『图片与多场景-地图界面』
+// * 地图界面 - 帧刷新绑定『多场景与图片-地图界面』
 //==============================
 var _drill_PDMA_mapScene_update2 = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {	
@@ -3283,7 +3283,7 @@ Scene_Map.prototype.update = function() {
 	this.drill_PDMA_updatePictureSprite();
 }
 //==============================
-// * 战斗界面 - 帧刷新绑定『图片与多场景-战斗界面』
+// * 战斗界面 - 帧刷新绑定『多场景与图片-战斗界面』
 //==============================
 var _drill_PDMA_battleScene_update2 = Scene_Battle.prototype.update;
 Scene_Battle.prototype.update = function() {	

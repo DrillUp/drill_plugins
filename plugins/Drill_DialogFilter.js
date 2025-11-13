@@ -421,7 +421,7 @@ Game_System.prototype.drill_DFi_checkSysData_Private = function() {
 
 
 //=============================================================================
-// ** 地图界面
+// ** 地图界面『多场景与对话框-地图界面』
 //=============================================================================
 //==============================
 // * 帧刷新
@@ -436,7 +436,7 @@ Scene_Map.prototype.update = function() {
 	}
 }
 //==============================
-// * 帧刷新 - 对话框
+// * 帧刷新 - 对话框『对话框多个子窗口』
 //==============================
 Scene_Map.prototype.drill_DFi_updateMessageContentsSprite = function() {
 	if( this._messageWindow && this._messageWindow._windowContentsSprite ){
@@ -476,7 +476,7 @@ Scene_Map.prototype.drill_DFi_updateMessageContentsSprite = function() {
 	}
 }
 //==============================
-// * 帧刷新 - 选择框
+// * 帧刷新 - 选择框『对话框多个子窗口』
 //==============================
 Scene_Map.prototype.drill_DFi_updateMessageChoiceSprite = function() {
 	if( this._messageWindow && this._messageWindow._choiceWindow && this._messageWindow._choiceWindow._windowContentsSprite ){
@@ -515,7 +515,7 @@ Scene_Map.prototype.drill_DFi_updateMessageChoiceSprite = function() {
 	}
 }
 //==============================
-// * 帧刷新 - 姓名框
+// * 帧刷新 - 姓名框『对话框多个子窗口』
 //==============================
 Scene_Map.prototype.drill_DFi_updateMessageNameSprite = function() {
 	var window_sprite = null;
@@ -565,7 +565,7 @@ Scene_Map.prototype.drill_DFi_updateMessageNameSprite = function() {
 	}
 }
 //=============================================================================
-// ** 战斗界面
+// ** 战斗界面『多场景与对话框-战斗界面』
 //=============================================================================
 //==============================
 // * 帧刷新

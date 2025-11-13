@@ -1580,7 +1580,7 @@ if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义�
 			this.__drill_zIndex = value;
 		},
 		get: function(){
-			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			if( this.__drill_zIndex == undefined ){ return 20250701; }	//（如果未定义则放最上面）
 			return this.__drill_zIndex;
 		},
 		configurable: true
@@ -1695,7 +1695,7 @@ if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义�
 			this.__drill_zIndex = value;
 		},
 		get: function(){
-			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			if( this.__drill_zIndex == undefined ){ return 20250701; }	//（如果未定义则放最上面）
 			return this.__drill_zIndex;
 		},
 		configurable: true
@@ -1826,9 +1826,9 @@ Game_Screen.prototype.drill_MPFP_updateRestatistics = function() {
 	$gameTemp._drill_MPFP_beanTank = [];		//实体类容器
 	
 	// > 图片遍历
-	var i_offset = 0;							//地图界面的图片『图片与多场景-地图界面』
+	var i_offset = 0;							//地图界面的图片『多场景与图片-地图界面』
 	var pic_length = this.maxPictures();
-	if( $gameParty.inBattle() == true ){		//战斗界面的图片『图片与多场景-战斗界面』
+	if( $gameParty.inBattle() == true ){		//战斗界面的图片『多场景与图片-战斗界面』
 		i_offset = pic_length;
 	}
 	for(var i = 0; i < pic_length; i++ ){
@@ -1972,7 +1972,7 @@ function Drill_MPFP_Bean(){
 // * 实体类 - 初始化
 //==============================
 Drill_MPFP_Bean.prototype.initialize = function(){
-	this._drill_beanSerial = new Date().getTime() + Math.random();		//『生成一个不重复的序列号』
+	this._drill_beanSerial = new Date().getTime() + Math.random();		//『随机因子-生成一个不重复的序列号』
     this.drill_bean_initData();											//私有数据初始化
 };
 //##############################
@@ -2037,7 +2037,7 @@ Drill_MPFP_Bean.prototype.drill_bean_setContext = function( context ){
 //			返回：	> 无
 //##############################
 Drill_MPFP_Bean.prototype.drill_bean_refreshContext = function(){
-	this._drill_contextSerial = new Date().getTime() + Math.random();	//（强制刷新内容）『生成一个不重复的序列号』
+	this._drill_contextSerial = new Date().getTime() + Math.random();	//（强制刷新内容）『随机因子-生成一个不重复的序列号』
 };
 //##############################
 // * 实体类 - 设置皮肤样式【开放函数】

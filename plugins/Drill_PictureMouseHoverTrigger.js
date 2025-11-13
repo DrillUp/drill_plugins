@@ -1095,11 +1095,11 @@ Game_Picture.prototype.drill_PMHT_setMouseType = function( switch_index, type ){
 // * 图片的属性 - 获取图片ID
 //==============================
 Game_Screen.prototype.drill_PMHT_getPictureId = function( game_picture ){
-    if( $gameParty.inBattle() ){	//战斗界面的图片『图片与多场景-战斗界面』
+    if( $gameParty.inBattle() ){	//战斗界面的图片『多场景与图片-战斗界面』
 		var pic_id = this._pictures.indexOf( game_picture );
 		if( pic_id == -1 ){ return -1; }
         return pic_id - this.maxPictures();
-    }else{							//地图界面的图片『图片与多场景-地图界面』
+    }else{							//地图界面的图片『多场景与图片-地图界面』
 		var pic_id = this._pictures.indexOf( game_picture );
         return pic_id;
     }
@@ -1181,7 +1181,7 @@ Game_Map.prototype.setup = function( mapId ){
 	_drill_PMHT_gmap_setup.call(this,mapId);
 };
 //==============================
-// * 容器 - 切换贴图时『图片与多场景-地图界面』
+// * 容器 - 切换贴图时『多场景与图片-地图界面』
 //==============================
 var _drill_PMHT_map_createPictures1 = Spriteset_Map.prototype.createPictures;
 Spriteset_Map.prototype.createPictures = function() {
@@ -1190,7 +1190,7 @@ Spriteset_Map.prototype.createPictures = function() {
 	_drill_PMHT_map_createPictures1.call(this);
 };
 //==============================
-// * 容器 - 切换贴图时『图片与多场景-战斗界面』
+// * 容器 - 切换贴图时『多场景与图片-战斗界面』
 //==============================
 var _drill_PMHT_battle_createPictures1 = Spriteset_Battle.prototype.createPictures;
 Spriteset_Battle.prototype.createPictures = function() {
@@ -1199,7 +1199,7 @@ Spriteset_Battle.prototype.createPictures = function() {
 	_drill_PMHT_battle_createPictures1.call(this);
 };
 //==============================
-// * 容器 - 场景销毁时『图片与多场景-战斗界面』
+// * 容器 - 场景销毁时『多场景与图片-战斗界面』
 //==============================
 var _drill_PMHT_terminate = Scene_Battle.prototype.terminate;
 Scene_Battle.prototype.terminate = function() {
@@ -1225,9 +1225,9 @@ Game_Screen.prototype.drill_PMHT_updateRestatistics = function() {
 	$gameTemp._drill_PMHT_pictureTank = [];		//实体类容器
 	
 	// > 图片遍历
-	var i_offset = 0;							//地图界面的图片『图片与多场景-地图界面』
+	var i_offset = 0;							//地图界面的图片『多场景与图片-地图界面』
 	var pic_length = this.maxPictures();
-	if( $gameParty.inBattle() == true ){		//战斗界面的图片『图片与多场景-战斗界面』
+	if( $gameParty.inBattle() == true ){		//战斗界面的图片『多场景与图片-战斗界面』
 		i_offset = pic_length;
 	}
 	for(var i = 0; i < pic_length; i++ ){
@@ -1262,7 +1262,7 @@ Game_Screen.prototype.drill_PMHT_updateRestatistics = function() {
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 图片触发控制 - 帧刷新绑定『图片与多场景-地图界面』
+// * 图片触发控制 - 帧刷新绑定『多场景与图片-地图界面』
 //==============================
 var _drill_PMHT_map_update2 = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function(){
@@ -1282,7 +1282,7 @@ Scene_Map.prototype.drill_PMHT_isOptimizationPassed = function(){
 	return true;
 }
 //==============================
-// * 图片触发控制 - 帧刷新『图片与多场景-地图界面』
+// * 图片触发控制 - 帧刷新『多场景与图片-地图界面』
 //==============================
 Scene_Map.prototype.drill_PMHT_updatePictureList = function(){
 	
@@ -1525,7 +1525,7 @@ Scene_Map.prototype.drill_PMHT_executeResult = function( triggerResult ){
 };
 
 //==============================
-// * 图片触发控制 - 帧刷新绑定『图片与多场景-战斗界面』
+// * 图片触发控制 - 帧刷新绑定『多场景与图片-战斗界面』
 //==============================
 var _drill_PMHT_battle_update2 = Scene_Battle.prototype.update;
 Scene_Battle.prototype.update = function(){
@@ -1534,7 +1534,7 @@ Scene_Battle.prototype.update = function(){
 	this.drill_PMHT_updatePictureList();
 }
 //==============================
-// * 图片触发控制 - 函数赋值『图片与多场景-战斗界面』
+// * 图片触发控制 - 函数赋值『多场景与图片-战斗界面』
 //==============================
 Scene_Battle.prototype.drill_PMHT_isOptimizationPassed = Scene_Map.prototype.drill_PMHT_isOptimizationPassed;
 Scene_Battle.prototype.drill_PMHT_updatePictureList = Scene_Map.prototype.drill_PMHT_updatePictureList;
@@ -1549,7 +1549,7 @@ Scene_Battle.prototype.drill_PMHT_executeResult = Scene_Map.prototype.drill_PMHT
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 公共事件控制 - 『执行公共事件』『图片与多场景-地图界面』
+// * 公共事件控制 - 『执行公共事件』『多场景与图片-地图界面』
 //==============================
 Scene_Map.prototype.drill_PMHT_executeCommonEvent = function( commonId ){
 	
@@ -1567,7 +1567,7 @@ Scene_Map.prototype.drill_PMHT_executeCommonEvent = function( commonId ){
 	$gameMap.drill_LCT_addPipeEvent( e_data );
 }
 //==============================
-// * 公共事件控制 - 『执行公共事件』『图片与多场景-战斗界面』
+// * 公共事件控制 - 『执行公共事件』『多场景与图片-战斗界面』
 //==============================
 Scene_Battle.prototype.drill_PMHT_executeCommonEvent = function( commonId ){
 	
@@ -1593,7 +1593,7 @@ Scene_Battle.prototype.drill_PMHT_executeCommonEvent = function( commonId ){
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 地图点击拦截 - 点击监听『图片与多场景-地图界面』
+// * 地图点击拦截 - 点击监听『多场景与图片-地图界面』
 //==============================
 var _drill_PMHT_processMapTouch = Scene_Map.prototype.processMapTouch;
 Scene_Map.prototype.processMapTouch = function() {	

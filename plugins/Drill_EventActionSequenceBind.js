@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        行走图 - GIF动画序列全绑定
+ * @plugindesc [v1.3]        行走图 - GIF动画序列全绑定
  * @author Drill_up
  * 
  * @Drill_LE_param "全绑定-%d"
@@ -102,6 +102,8 @@
  * 进一步优化了动画序列底层，该插件重新兼容。
  * [v1.2]
  * 优化了动画序列存储底层。
+ * [v1.3]
+ * 更新了类型设置。
  * 
  * 
  * 
@@ -396,12 +398,14 @@
  * @param 行走图动画序列类型
  * @parent ---动画序列---
  * @type select
- * @option 站桩动画序列
- * @value 站桩动画序列
- * @option 四方向动画序列
- * @value 四方向动画序列
+ * @option 无方向动画序列
+ * @value 无方向动画序列
+ * @option 无方向可翻转动画序列
+ * @value 无方向可翻转动画序列
  * @option 二方向动画序列
  * @value 二方向动画序列
+ * @option 四方向动画序列
+ * @value 四方向动画序列
  * @desc 绑定的行走图动画序列的类型。
  * @default 四方向动画序列
  *
@@ -850,6 +854,8 @@ Game_CharacterBase.prototype.drill_EASB_openActionSequence = function( data ){
 		this.drill_EASe_setActionSequence( data['bind_seqId']-1, "4dir" );
 	}else if( data['sequenceType'] == "二方向动画序列" ){
 		this.drill_EASe_setActionSequence( data['bind_seqId']-1, "2dir" );
+	}else if( data['sequenceType'] == "无方向可翻转动画序列" ){
+		this.drill_EASe_setActionSequence( data['bind_seqId']-1, "stand+flip" );
 	}else{
 		this.drill_EASe_setActionSequence( data['bind_seqId']-1, "stand" );
 	}

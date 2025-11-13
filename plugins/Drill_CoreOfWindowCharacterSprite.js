@@ -679,9 +679,9 @@ Window_Base.prototype.drill_COWCSp_sprite_removeCustomSprite = function( custom_
 //			说明：	> 该函数 可以 放在帧刷新中反复调用。
 //					> 该函数的主类为 字符块贴图 。
 //##############################
-Sprite.prototype.drill_COWCSp_sprite_getOrgX = function(){
-	if( this._drill_COWCSp_sprite_orgX == undefined ){ return 0; }
-	return this._drill_COWCSp_sprite_orgX;
+Sprite.prototype.drill_COWCSp_sprite_getOriginalX = function(){
+	if( this._drill_COWCSp_sprite_org_x == undefined ){ return 0; }
+	return this._drill_COWCSp_sprite_org_x;
 }
 //##############################
 // * 字符块贴图『字符贴图流程』 - 获取贴图原位置Y【标准函数】【子Sprite】
@@ -692,9 +692,9 @@ Sprite.prototype.drill_COWCSp_sprite_getOrgX = function(){
 //			说明：	> 该函数 可以 放在帧刷新中反复调用。
 //					> 该函数的主类为 字符块贴图 。
 //##############################
-Sprite.prototype.drill_COWCSp_sprite_getOrgY = function(){
-	if( this._drill_COWCSp_sprite_orgY == undefined ){ return 0; }
-	return this._drill_COWCSp_sprite_orgY;
+Sprite.prototype.drill_COWCSp_sprite_getOriginalY = function(){
+	if( this._drill_COWCSp_sprite_org_y == undefined ){ return 0; }
+	return this._drill_COWCSp_sprite_org_y;
 }
 
 //=============================================================================
@@ -970,8 +970,8 @@ Bitmap.prototype.drill_COWCSp_sprite_createSprite = function( new_bitmap, x, y, 
 	new_sprite.y = y;
 	new_sprite.anchor.x = 0.5;
 	new_sprite.anchor.y = 0.5;
-	new_sprite._drill_COWCSp_sprite_orgX = x;	//（记录 贴图原位置）
-	new_sprite._drill_COWCSp_sprite_orgY = y;
+	new_sprite._drill_COWCSp_sprite_org_x = x;	//（记录 贴图原位置）
+	new_sprite._drill_COWCSp_sprite_org_y = y;
 	new_sprite.bitmap = new_bitmap;
 	
 	// > 创建贴图容器

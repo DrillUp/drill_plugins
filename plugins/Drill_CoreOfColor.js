@@ -2119,7 +2119,7 @@ Game_Temp.prototype.drill_COCD_textBlock_processStyle = function( command, args,
 //=============================================================================
 /*
 //==============================
-// * D窗口皮肤『颜色核心』 - 取色器 - 获取皮肤中的颜色
+// * D窗口皮肤《窗口字符-颜色核心》 - 取色器 - 获取皮肤中的颜色
 //
 //			说明：	> 颜色取自窗口皮肤中的特定像素点。
 //==============================
@@ -2129,7 +2129,7 @@ Window_Base.prototype.textColor = function( n ){
     return this.windowskin.getPixel(px, py);
 };
 //==============================
-// * D窗口皮肤『颜色核心』 - 取色器 - 获取指定含义的颜色
+// * D窗口皮肤《窗口字符-颜色核心》 - 取色器 - 获取指定含义的颜色
 //==============================
 Window_Base.prototype.normalColor    = function(){ return this.textColor(0);  };	//普通文本的颜色
 Window_Base.prototype.systemColor    = function(){ return this.textColor(16); };	//系统文本的颜色（比如角色属性的文本）
@@ -2147,7 +2147,7 @@ Window_Base.prototype.tpGaugeColor1  = function(){ return this.textColor(28); };
 Window_Base.prototype.tpGaugeColor2  = function(){ return this.textColor(29); };
 Window_Base.prototype.tpCostColor    = function(){ return this.textColor(29); };
 //==============================
-// * D窗口皮肤『颜色核心』 - 取色器 - 获取队伍选中角色时的矩形颜色
+// * D窗口皮肤《窗口字符-颜色核心》 - 取色器 - 获取队伍选中角色时的矩形颜色
 //
 //			说明：	> 该函数只被 Window_MenuStatus.prototype.drawItemBackground 用到了。
 //					  该函数返回的颜色是 闪烁白矩形 区域内的颜色。
@@ -2156,7 +2156,7 @@ Window_Base.prototype.pendingColor = function(){
     return this.windowskin.getPixel(120, 120);
 };
 //==============================
-// * D窗口皮肤『颜色核心』 - 取色器 - 获取属性增减的文本颜色
+// * D窗口皮肤《窗口字符-颜色核心》 - 取色器 - 获取属性增减的文本颜色
 //==============================
 Window_Base.prototype.paramchangeTextColor = function( change ){
     if( change > 0 ){
@@ -2168,25 +2168,25 @@ Window_Base.prototype.paramchangeTextColor = function( change ){
     }
 };
 //==============================
-// * D窗口皮肤『颜色核心』 - 半透明（置灰的文字用）
+// * D窗口皮肤《窗口字符-颜色核心》 - 半透明（置灰的文字用）
 //==============================
 Window_Base.prototype.translucentOpacity = function(){
     return 160;
 };
 //==============================
-// * D窗口皮肤『颜色核心』 - 切换半透明（是否置灰）
+// * D窗口皮肤《窗口字符-颜色核心》 - 切换半透明（是否置灰）
 //==============================
 Window_Base.prototype.changePaintOpacity = function( enabled ){
     this.contents.paintOpacity = enabled ? 255 : this.translucentOpacity();
 };
 //==============================
-// * D窗口皮肤『颜色核心』 - 改变文本色
+// * D窗口皮肤《窗口字符-颜色核心》 - 改变文本色
 //==============================
 Window_Base.prototype.changeTextColor = function( color ){
     this.contents.textColor = color;
 };
 //==============================
-// * D窗口皮肤『颜色核心』 - 重置字体颜色
+// * D窗口皮肤《窗口字符-颜色核心》 - 重置字体颜色
 //==============================
 Window_Base.prototype.resetTextColor = function(){
     this.changeTextColor(this.normalColor());

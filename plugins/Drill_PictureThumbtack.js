@@ -872,9 +872,9 @@ SceneManager.initialize = function() {
 		_drill_PTh_c_update2.call(this);
 		
 		// > 图片遍历
-		var i_offset = 0;							//地图界面的图片『图片与多场景-地图界面』
+		var i_offset = 0;							//地图界面的图片『多场景与图片-地图界面』
 		var pic_length = this.maxPictures();
-		if( $gameParty.inBattle() == true ){		//战斗界面的图片『图片与多场景-战斗界面』
+		if( $gameParty.inBattle() == true ){		//战斗界面的图片『多场景与图片-战斗界面』
 			i_offset = pic_length;
 		}
 		for(var i = 0; i < pic_length; i++ ){

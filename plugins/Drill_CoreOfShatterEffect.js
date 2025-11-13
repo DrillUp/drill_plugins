@@ -1068,7 +1068,7 @@ function Drill_COSE_Controller() {
 //==============================
 Drill_COSE_Controller.prototype.initialize = function( data ){
 	this._drill_data = {};
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_initData();													//初始化数据
     this.drill_initPrivateData();											//私有数据初始化
 	if( data == undefined ){ data = {}; }
@@ -1430,7 +1430,7 @@ Drill_COSE_Controller.prototype.drill_COSE_resetData_Private = function( data ){
 	
 	// > 执行重置
 	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_initData();													//初始化数据
     this.drill_initPrivateData();											//私有数据初始化
 }
@@ -1756,11 +1756,11 @@ Drill_COSE_LayerSprite.prototype.drill_rebuildShatter = function(){
 			
 			// > 碎片初始化
 			var temp_sprite = new Sprite();
-			temp_sprite._orgX = 0 + sw * i;
-			temp_sprite._orgY = 0 + sh * j;
+			temp_sprite._org_x = 0 + sw * i;
+			temp_sprite._org_y = 0 + sh * j;
 			temp_sprite._orgOpacity = 255;
-			temp_sprite.x = temp_sprite._orgX;
-			temp_sprite.y = temp_sprite._orgY;
+			temp_sprite.x = temp_sprite._org_x;
+			temp_sprite.y = temp_sprite._org_y;
 			
 			// > 添加碎片
 			this.addChild( temp_sprite );
@@ -1846,7 +1846,7 @@ Drill_COSE_LayerSprite.prototype.drill_rebuildBallistics = function(){
 			if( temp_sprite == undefined ){ continue; }
 			
 			// > 碎片群弹道 - 推演赋值（坐标）
-			$gameTemp.drill_COBa_preBallisticsMove( temp_sprite, i*rowNum+j , temp_sprite._orgX, temp_sprite._orgY );
+			$gameTemp.drill_COBa_preBallisticsMove( temp_sprite, i*rowNum+j , temp_sprite._org_x, temp_sprite._org_y );
 			
 			// > 碎片群弹道 - 推演赋值（透明度）
 			$gameTemp.drill_COBa_preBallisticsOpacity( temp_sprite, i*rowNum+j , temp_sprite._orgOpacity );
@@ -1860,10 +1860,10 @@ Drill_COSE_LayerSprite.prototype.drill_rebuildBallistics = function(){
 				
 				a = a *( 1-style_data['speedPerMin'] ) + style_data['speedPerMin'];
 				for( var n = 0; n < temp_sprite["_drill_COBa_x"].length; n++ ){
-					temp_sprite["_drill_COBa_x"][n] = temp_sprite["_drill_COBa_x"][n] * a + temp_sprite._orgX * (1-a);
+					temp_sprite["_drill_COBa_x"][n] = temp_sprite["_drill_COBa_x"][n] * a + temp_sprite._org_x * (1-a);
 				}
 				for( var n = 0; n < temp_sprite["_drill_COBa_y"].length; n++ ){
-					temp_sprite["_drill_COBa_y"][n] = temp_sprite["_drill_COBa_y"][n] * a + temp_sprite._orgY * (1-a);
+					temp_sprite["_drill_COBa_y"][n] = temp_sprite["_drill_COBa_y"][n] * a + temp_sprite._org_y * (1-a);
 				}
 			}
 			

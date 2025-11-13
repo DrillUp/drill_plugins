@@ -490,7 +490,7 @@ Game_Temp.prototype.drill_COWC_effect_fontSizeChangedValue = function(){
 //=============================================================================
 /*
 //==============================
-// * A默认属性『窗口字符-字符大小控制器』 - 默认字体大小
+// * A默认属性《窗口字符-字符大小控制器》 - 默认 字体大小
 //==============================
 Window_Base.prototype.standardFontSize = function(){ return 28; };
 */

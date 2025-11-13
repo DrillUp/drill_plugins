@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        对话框 - 气泡对话框
+ * @plugindesc [v1.1]        对话框 - 气泡对话框
  * @author Drill_up
  * 
  * @Drill_LE_param "气泡样式-%d"
@@ -18,7 +18,7 @@
  * 如果你有兴趣，也可以来看看更多我写的drill插件哦ヽ(*。>Д<)o゜
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
- * 使得你可以把对话框变成气泡结构。
+ * 使得你可以把对话框变成气泡效果。
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
@@ -136,6 +136,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 添加了上下翻转开关的功能。
  * 
  * 
  * 
@@ -399,6 +401,14 @@
  * @min 0
  * @desc 绑定对象后，气泡距离对象的间距高度。
  * @default 5
+ *
+ * @param 是否开启自动上下翻转
+ * @parent ---常规---
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭。在指定位置时会上下翻转。
+ * @default true
  * 
  * 
  * @param ---窗口矩形---
@@ -683,6 +693,7 @@
 		
 		// > 常规
 		data['bubble_space'] = Number( dataFrom["气泡间距"] || 0);
+		data['bubble_convertEnabled'] = String( dataFrom["是否开启自动上下翻转"] || "true") == "true";
 		
 		
 		// > 窗口矩形 - 位置
@@ -1531,7 +1542,7 @@ if( typeof(_drill_mouse_getCurPos) == "undefined" ){	//防止重复定义（该�
 //=============================================================================
 // ** ☆气泡框皮肤
 //
-//			说明：	> 此模块专门控制 对话框变形器 和 对话框皮肤。
+//			说明：	> 此模块专门控制 对话框皮肤。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
@@ -1577,11 +1588,13 @@ Game_System.prototype.drill_DSk_getStyleId = function( windowName ){
 //=============================================================================
 // ** ☆气泡框矩形
 //
-//			说明：	> 此模块专门控制 对话框变形器 和 对话框皮肤。
+//			说明：	> 此模块专门控制 对话框变形器 的矩形。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 气泡框矩形 - 是否启用实时刷新位置（继承）
+// * 气泡框矩形 - 是否启用 实时刷新位置（继承）
+//
+//			说明：	> 对话框变形器 需要开启 实时刷新位置，确保气泡框始终跟随。
 //==============================
 var _drill_DBu_DOp_isUpdatePositionEnabled = Window_Message.prototype.drill_DOp_isUpdatePositionEnabled;
 Window_Message.prototype.drill_DOp_isUpdatePositionEnabled = function(){
@@ -1593,43 +1606,75 @@ Window_Message.prototype.drill_DOp_isUpdatePositionEnabled = function(){
 	return _drill_DBu_DOp_isUpdatePositionEnabled.call(this);
 };
 //==============================
+// * 气泡框矩形 - 自动调整后（继承）
+//
+//			说明：	> 对话框变形器变形后，需要刷气泡框的位置。
+//==============================
+var _drill_DBu_DOp_afterRefresh = Window_Message.prototype.drill_DOp_afterRefresh;
+Window_Message.prototype.drill_DOp_afterRefresh = function() {
+	_drill_DBu_DOp_afterRefresh.call(this);
+	$gameSystem.drill_DBu_updateAllPos();	//（强制 刷新一次位置）
+	this._drill_DBu_bubbleSprite.update();	//（强制 让子贴图帧刷新一次）
+};
+//==============================
 // * 气泡框矩形 - 刷新位置（继承）
 //==============================
 var _drill_DBu_DOp_refresh_position = Window_Message.prototype.drill_DOp_refresh_position;
 Window_Message.prototype.drill_DOp_refresh_position = function() {
 	
+	// > 刷新气泡位置
+	this.drill_DBu_refreshBubblePosition();
+	
+	// > 原函数
+	_drill_DBu_DOp_refresh_position.call(this);
+}
+//==============================
+// * 气泡框矩形 - 刷新位置 - 刷新气泡位置
+//==============================
+Window_Message.prototype.drill_DBu_refreshBubblePosition = function(){
+	
 	// > 气泡框位置计算
 	var xx = $gameSystem._drill_DBu_curBubbleCursorX;
 	var yy = $gameSystem._drill_DBu_curBubbleCursorY;
+	var ww = this._drill_DOp_lastWidth;		//【对话框 - 对话框变形器】
+	var hh = this._drill_DOp_lastHeight;	//
+	var is_convert = false;
 	
 	var style_data = $gameSystem.drill_DBu_getCurBubbleStyle();
 	if( style_data != undefined ){
 		
 		// > 气泡框位置计算 - X位置
-		xx -= this._drill_DOp_lastWidth *0.5;	//（窗口的锚点在左上角，需要转换位置）
+		xx -= ww *0.5;		//（窗口的锚点在左上角，需要转换位置）
 		
-		// > 气泡框位置计算 - Y位置（翻转情况）
+		// > 气泡框位置计算 - 是否上下翻转
+		if( yy < hh ){
+			is_convert = true;
+		}else{
+			is_convert = false;
+		}
+		if( style_data['bubble_convertEnabled'] != true ){	//（是否开启自动上下翻转）
+			is_convert = false;
+		}
+		
+		// > 气泡框位置计算 - Y位置（气泡间距）
 		var bubble_space = style_data['bubble_space'];
-		if( $gameSystem._drill_DBu_curBubbleSpaceLocked == true ){
+		if( $gameSystem._drill_DBu_curBubbleSpaceLocked == true ){	//（锁定气泡间距）
 			bubble_space = $gameSystem._drill_DBu_curBubbleSpaceValue;
 		}
-		var hh = this._drill_DOp_lastHeight;
-		if( yy >= hh ){
+		
+		// > 气泡框位置计算 - Y位置（上下翻转）
+		if( is_convert == true ){
+			yy += bubble_space;
+		}else{
 			yy -= hh;
 			yy -= bubble_space;
-			$gameTemp._drill_DBu_isBubbleConvert = false;
-		}else{
-			yy += bubble_space;
-			$gameTemp._drill_DBu_isBubbleConvert = true;
 		}
 	}
 	
 	// > 气泡框位置计算 - 赋值
 	$gameTemp._drill_DBu_curBubbleX = xx;
 	$gameTemp._drill_DBu_curBubbleY = yy;
-	
-	// > 原函数
-	_drill_DBu_DOp_refresh_position.call(this);
+	$gameTemp._drill_DBu_isBubbleConvert = is_convert;
 }
 //==============================
 // * 气泡框矩形 - 获取变形器样式（继承）
@@ -1711,8 +1756,8 @@ Window_Message.prototype.drill_DBu_refreshSprite = function(){
 	// > 样式检查
 	var styleId = $gameSystem.drill_DSk_getStyleId( "Window_Message" ); //【对话框 - 对话框皮肤】
 	if( styleId == -1 ){ return; }
-	if( styleId == this._drill_DBu_curStyle ){ return; }
-	this._drill_DBu_curStyle = styleId;
+	var style_data = $gameSystem.drill_DBu_getCurBubbleStyle();
+	if( style_data == undefined ){ return; }
 	
 	// > 刷新样式
 	this._drill_DBu_bubbleSprite.drill_initSprite();
@@ -1800,7 +1845,7 @@ Drill_DBu_DecorationSprite.prototype.drill_sprite_initAttr = function() {
 //==============================
 Drill_DBu_DecorationSprite.prototype.drill_sprite_updateAttr = function() {
 	
-	// > 翻转情况
+	// > 上下翻转
 	if( $gameTemp._drill_DBu_isBubbleConvert == true ){
 		this.rotation = Math.PI;
 	}else{
@@ -1814,7 +1859,7 @@ Drill_DBu_DecorationSprite.prototype.drill_sprite_updateAttr = function() {
 		this.visible = false;
 	}
 	
-	// > 窗口开关动画
+	// > 气泡的展开动画（同步窗口的 0C展开动画）
 	this.scale.y = this._drill_parent._windowSpriteContainer.scale.y;
 }
 //==============================

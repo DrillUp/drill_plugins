@@ -4077,8 +4077,8 @@ Scene_Menu.prototype.drill_SMa_createActorBoard = function() {
 		}
 		
 		// > 固定框排列
-		var orgX = 0;
-		var orgY = 0;
+		var org_x = 0;
+		var org_y = 0;
 		if( temp_data['arrange_mode'] == "直线排列" ){
 			var xx = temp_data['arrange_spacing'] * i;
 			var yy = (i % 2) * temp_data['arrange_wSpacing'];
@@ -4088,25 +4088,25 @@ Scene_Menu.prototype.drill_SMa_createActorBoard = function() {
 				temp_data['arrange_spacing'] * (count - 1) > temp_data['arrange_limitLength'] ){
 				xx = temp_data['arrange_limitLength'] / (count - 1) * i;
 			}
-			orgX = xx * Math.cos(angle) - yy * Math.sin(angle);
-			orgY = xx * Math.sin(angle) + yy * Math.cos(angle);
+			org_x = xx * Math.cos(angle) - yy * Math.sin(angle);
+			org_y = xx * Math.sin(angle) + yy * Math.cos(angle);
 		}
 		if( temp_data['arrange_mode'] == "环形排列" ){
 			if( Math.abs( temp_data['arrange_angleStart'] - temp_data['arrange_angleEnd'] ) % 360 == 0 ){
 				var angle = 360 * i / count + temp_data['arrange_angleStart'];
 				angle = angle / 180.0 * Math.PI;
-				orgX = temp_data['arrange_radius'] * Math.cos(angle) ;
-				orgY = temp_data['arrange_radius'] * Math.sin(angle) ;
+				org_x = temp_data['arrange_radius'] * Math.cos(angle) ;
+				org_y = temp_data['arrange_radius'] * Math.sin(angle) ;
 			}else{
 				var angle = (temp_data['arrange_angleEnd'] - temp_data['arrange_angleStart']) * i / (count-1) + temp_data['arrange_angleStart'];
 				angle = angle / 180.0 * Math.PI;
-				orgX = temp_data['arrange_radius'] * Math.cos(angle) ;
-				orgY = temp_data['arrange_radius'] * Math.sin(angle) ;
+				org_x = temp_data['arrange_radius'] * Math.cos(angle) ;
+				org_y = temp_data['arrange_radius'] * Math.sin(angle) ;
 			}
 		}
 		if( temp_data['arrange_mode'] == "矩阵排列" ){
-			orgX = Math.floor(i % temp_data['arrange_col']) * temp_data['arrange_width'] ;
-			orgY = Math.floor(i / temp_data['arrange_col']) * temp_data['arrange_height'] ;
+			org_x = Math.floor(i % temp_data['arrange_col']) * temp_data['arrange_width'] ;
+			org_y = Math.floor(i / temp_data['arrange_col']) * temp_data['arrange_height'] ;
 		}
 		if( temp_data['arrange_mode'] == "固定离散排列" ){
 			if( temp_data['arrange_squeeze'][i] != undefined ){
@@ -4114,19 +4114,19 @@ Scene_Menu.prototype.drill_SMa_createActorBoard = function() {
 				str = str.replace("(","");
 				str = str.replace(")","");
 				var str_arr = str.split(/[,，]/);
-				orgX = Number( str_arr[0] );
-				orgY = Number( str_arr[1] );
+				org_x = Number( str_arr[0] );
+				org_y = Number( str_arr[1] );
 			}
 		}
-		temp_sprite['_org_x'] = orgX;	//（建立固定框后，赋值初始位置）
-		temp_sprite['_org_y'] = orgY;
-		temp_sprite.x = orgX;
-		temp_sprite.y = orgY;
+		temp_sprite['_org_x'] = org_x;	//（建立固定框后，赋值初始位置）
+		temp_sprite['_org_y'] = org_y;
+		temp_sprite.x = org_x;
+		temp_sprite.y = org_y;
 		
 		// > 按钮添加
 		temp_layer.addChild( temp_sprite );
 		this._drill_SMa_actorSpriteTank[i] = temp_sprite;
-		var pos = { "x" : orgX, "y" : orgY };
+		var pos = { "x" : org_x, "y" : org_y };
 		this._drill_SMa_actorPositionTank.push( pos );
 		
 		

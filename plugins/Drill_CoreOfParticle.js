@@ -361,7 +361,7 @@ DrillUp.g_COPa_checkNaN = true;
 //==============================
 Drill_COPa_Controller.prototype.initialize = function( data ){
 	this._drill_data = {};
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能
 	if( data == undefined ){ data = {}; }
@@ -606,7 +606,7 @@ Drill_COPa_Controller.prototype.drill_controller_resetData_Private = function( d
 	
 	// > 执行重置
 	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能
 }
@@ -921,6 +921,7 @@ Drill_COPa_Controller.prototype.drill_controller_curRandom = function( iteration
 //			参数：	> seed 数字	（正整数）
 //			返回：	> 数字 		（0~1随机数）
 //			
+//			标签：	> 『随机因子-迭代工具』
 //			说明：	> 如果随机种子为 1至100，那么你将得到线性均匀分布的随机值。不是乱序随机。
 //==============================
 Drill_COPa_Controller.prototype.drill_controller_Math1D_getRandomInSeed = function( seed ){
@@ -935,6 +936,7 @@ Drill_COPa_Controller.prototype.drill_controller_Math1D_getRandomInSeed = functi
 //					> iteration 数字 （正整数，迭代次数）
 //			返回：	> 数字           （0~1新随机数）
 //			
+//			标签：	> 『随机因子-迭代工具』
 //			说明：	> 经过迭代后，能够得到乱序的随机数。
 //==============================
 Drill_COPa_Controller.prototype.drill_controller_Math1D_getRandomInIteration = function( org_ran, iteration ){

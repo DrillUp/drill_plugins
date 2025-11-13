@@ -832,6 +832,7 @@ Game_Temp.prototype.drill_OKCE_isCommonTriggered = function( i ){
 	// > 手柄
 	if( Input.drill_OKe_isGamepadControling() ){
 		if( data['pad_enable'] != true ){ return false; }
+		if( this._drill_OKe_pad_LogicMapperInverse == undefined ){ return false; }
 		
 		var name = "common" + i ;
 		var key = "data_" + name;
@@ -853,7 +854,8 @@ Game_Temp.prototype.drill_OKCE_isCommonTriggered = function( i ){
 		
 	// > 键盘
 	}else{
-		if( data['keyboard_enable'] != true ){ return; }
+		if( data['keyboard_enable'] != true ){ return false; }
+		if( this._drill_OKe_keyboard_LogicMapperInverse == undefined ){ return false; }
 		
 		var name = "common" + i ;
 		var key = "dataList_" + name;

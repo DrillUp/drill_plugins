@@ -685,7 +685,7 @@ Sprite.prototype.drill_DSE_updateBitmapFrame = function() {
 
 
 //=============================================================================
-// ** 地图界面
+// ** 地图界面『多场景与对话框-地图界面』
 //=============================================================================
 //==============================
 // * 地图 - 初始化
@@ -700,7 +700,7 @@ Scene_Map.prototype.createMessageWindow = function() {
 //==============================
 Scene_Map.prototype.drill_DSE_scene_createMessageWindow = function() {
 	
-	// > 对话框
+	// > 对话框『对话框多个子窗口』
 	var temp_sprite = $gameTemp.drill_DSE_getContentSprite_MessageWindow();
 	if( temp_sprite != undefined ){
 		
@@ -713,7 +713,7 @@ Scene_Map.prototype.drill_DSE_scene_createMessageWindow = function() {
 		temp_sprite.addChild( temp_sprite._drill_DSE_sprite );
 	}
 	
-	// > 选择框
+	// > 选择框『对话框多个子窗口』
 	var temp_sprite = $gameTemp.drill_DSE_getContentSprite_ChoiceWindow();
 	if( temp_sprite != undefined ){
 		
@@ -726,7 +726,7 @@ Scene_Map.prototype.drill_DSE_scene_createMessageWindow = function() {
 		temp_sprite.addChild( temp_sprite._drill_DSE_sprite );
 	}
 	
-	// > 姓名框（Yep）
+	// > 姓名框（Yep）『对话框多个子窗口』
 	var temp_sprite = $gameTemp.drill_DSE_getContentSprite_NameWindowYep();
 	if( temp_sprite != undefined ){
 		
@@ -739,7 +739,7 @@ Scene_Map.prototype.drill_DSE_scene_createMessageWindow = function() {
 		temp_sprite.addChild( temp_sprite._drill_DSE_sprite );
 	}
 	
-	// > 姓名框（Drill）
+	// > 姓名框（Drill）『对话框多个子窗口』
 	var temp_sprite = $gameTemp.drill_DSE_getContentSprite_NameWindowDrill();
 	if( temp_sprite != undefined ){
 		
@@ -794,7 +794,7 @@ Scene_Map.prototype.drill_DSE_scene_updateAfter = function() {
 	}
 }
 //==============================
-// * 窗体 - 粉碎时图像隐藏
+// * 0D文本域 - 粉碎时图像隐藏（继承）
 //==============================
 var _drill_DSE_w__updateContents = Window.prototype._updateContents;
 Window.prototype._updateContents = function() {
@@ -823,7 +823,7 @@ Window.prototype._updateContents = function() {
 
 
 //=============================================================================
-// ** 战斗界面复刻
+// ** 战斗界面复刻『多场景与对话框-战斗界面』
 //=============================================================================
 //==============================
 // * 战斗 - 初始化

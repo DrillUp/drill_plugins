@@ -46,6 +46,7 @@
  * 插件指令：>允许操作事件移动 : 事件变量[21] : 绑定权限 : 权限[1]
  * 插件指令：>允许操作事件移动 : 批量事件[10,11] : 绑定权限 : 权限[1]
  * 插件指令：>允许操作事件移动 : 批量事件变量[21,22] : 绑定权限 : 权限[1]
+ * 插件指令：>允许操作事件移动 : 全图事件 : 绑定权限 : 权限[1]
  * 
  * 插件指令：>允许操作事件移动 : 本事件 : 绑定权限 : 权限[1]
  * 插件指令：>允许操作事件移动 : 本事件 : 取消权限绑定
@@ -373,6 +374,16 @@ Game_Interpreter.prototype.drill_PAlEM_pluginCommand = function( command, args )
 				var e = $gameMap.event( e_id );
 				c_chars = [ e ];
 			}
+			if( c_chars == null && unit == "全图事件" ){
+				c_chars = [];
+				var event_list = $gameMap._events;
+				for( var k=0; k < event_list.length; k++ ){
+					var temp_event = event_list[k];
+					if( temp_event == null ){ continue; }
+					if( temp_event._erased == true ){ continue; }	//『有效事件』
+					c_chars.push( temp_event );
+				}
+			}
 		}
 		if( c_chars == null ){ return }; 		
 		
@@ -542,14 +553,24 @@ Game_Event.prototype.drill_PAlEM_checkBindData = function(){
 	this._drill_PAlEM_bindData['PermissionId'] = -1;		//权限ID
 };
 //==============================
-// * 事件的属性 - 绑定数据ID
+// * 事件的属性 - 删除数据
 //==============================
-Game_Event.prototype.drill_PAlEM_setDataId = function( permissionId ){
-	this.drill_PAlEM_checkBindData();
-	this._drill_PAlEM_bindData['PermissionId'] = permissionId;
+Game_Event.prototype.drill_PAlEM_removeData = function(){
+	this._drill_PAlEM_bindData = undefined;
 };
 //==============================
-// * 事件的属性 - 获取数据
+// * 事件的属性 - 绑定数据ID（开放函数）
+//==============================
+Game_Event.prototype.drill_PAlEM_setDataId = function( permissionId ){
+	if( permissionId >= 0 ){
+		this.drill_PAlEM_checkBindData();
+		this._drill_PAlEM_bindData['PermissionId'] = permissionId;
+	}else{
+		this.drill_PAlEM_removeData();
+	}
+};
+//==============================
+// * 事件的属性 - 获取数据（开放函数）
 //==============================
 Game_Event.prototype.drill_PAlEM_getData = function(){
 	if( this._drill_PAlEM_bindData == undefined ){ return null; }
@@ -557,7 +578,7 @@ Game_Event.prototype.drill_PAlEM_getData = function(){
 	return DrillUp.g_PAlEM_list[ this._drill_PAlEM_bindData['PermissionId'] ];
 };
 //==============================
-// * 事件的属性 - 是否被控制
+// * 事件的属性 - 是否被控制（开放函数）
 //==============================
 Game_Event.prototype.drill_PAlEM_isBeingControled = function(){
 	if( this._drill_PAlEM_bindData == undefined ){ return false; }

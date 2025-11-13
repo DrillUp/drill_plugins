@@ -1495,7 +1495,7 @@ Spriteset_Map.prototype.drill_LSR_createMaskReflect = function() {
 	// > 滤镜 - 设置滤镜
 	this._drill_LSR_layer.filters = [cf];
 	
-	// > 添加到 层级（详细去看脚本文档"地图层级的各个子贴图.txt"）
+	// > 添加到 层级（详细去看脚本文档 "6.地图 > 全流程梳理-地图界面的贴图和窗口.txt" ）
 	this._drill_LSR_layer.z = 0.55;
 	this._tilemap.addChild(this._drill_LSR_layer);
 }
@@ -2140,7 +2140,7 @@ SceneManager.initialize = function() {
 	// * E兼容设置 - 去掉相关的函数
 	//==============================
 	Drill_Sprite_LSR.prototype.updateAnimation = function() {}	//动画遮挡
-	Drill_Sprite_LSR.prototype.updateBalloon = function() {}	//气泡遮挡
+	Drill_Sprite_LSR.prototype.updateBalloon = function() {}	//气泡球动画遮挡
 	//==============================
 	// * E兼容设置 - mog粒子
 	//==============================

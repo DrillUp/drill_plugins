@@ -460,7 +460,7 @@ function Drill_CODAA_DragController() {
 // * 控制器 - 初始化
 //==============================
 Drill_CODAA_DragController.prototype.initialize = function(){
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_controllerDrag_initChild();									//初始化子功能
 };
 //##############################
@@ -805,7 +805,7 @@ function Drill_CODAA_DragFactory() {
 // * 数据工厂 - 初始化
 //==============================
 Drill_CODAA_DragFactory.prototype.initialize = function(){
-	this._drill_factorySerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+	this._drill_factorySerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_factoryDrag_initChild();									//初始化子功能
 };
 //==============================
@@ -946,25 +946,25 @@ function Drill_CODAA_AdsorbController() {
 // * 控制器 - 初始化
 //==============================
 Drill_CODAA_AdsorbController.prototype.initialize = function(){
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_controllerAdsorb_initChild();								//初始化子功能
 };
 //##############################
 // * 控制器 - 帧刷新
 //			
-//			参数：	> cur_orgX 数字 （原位置 数据最终变换值X，不含拖拽偏移量，不含吸附位置）
-//					> cur_orgY 数字 （原位置 数据最终变换值Y，不含拖拽偏移量，不含吸附位置）
+//			参数：	> cur_org_x 数字 （原位置 数据最终变换值X，不含拖拽偏移量，不含吸附位置）
+//					> cur_org_y 数字 （原位置 数据最终变换值Y，不含拖拽偏移量，不含吸附位置）
 //			返回：	> 无
 //			
 //			说明：	> 帧刷新需要子插件 手动调用，并且实时传参。
 //					> 子插件必须要 原位置，确保坐标不会出错。
 //##############################
-Drill_CODAA_AdsorbController.prototype.drill_controllerAdsorb_update = function( cur_orgX, cur_orgY ){
+Drill_CODAA_AdsorbController.prototype.drill_controllerAdsorb_update = function( cur_org_x, cur_org_y ){
 																	//帧刷新 - A主体（无）
 																	//帧刷新 - B可吸附类型（无）
 																	//帧刷新 - C外键拖拽（无）
 																	//帧刷新 - D外键吸附槽（无）
-	this.drill_controllerAdsorb_updateOffset(cur_orgX,cur_orgY);	//帧刷新 - E吸附位移
+	this.drill_controllerAdsorb_updateOffset(cur_org_x,cur_org_y);	//帧刷新 - E吸附位移
 																	//帧刷新 - F吸附状态（无）
 	this.drill_controllerAdsorb_updateAnim0();						//帧刷新 - H吸附动画"未吸附"
 	this.drill_controllerAdsorb_updateAnim1();						//帧刷新 - I吸附动画"正被吸附"
@@ -1179,15 +1179,15 @@ Drill_CODAA_AdsorbController.prototype.drill_controllerAdsorb_initOffset = funct
 	this._drill_curSlotX = 0;			//E吸附位移 - 吸附槽的位置
 	this._drill_curSlotY = 0;			//
 	
-	this._drill_curOrgX = 0;			//E吸附位移 - 原位置（数据最终变换值，不含拖拽偏移量，不含吸附位置）
-	this._drill_curOrgY = 0;			//
+	this._drill_cur_org_x = 0;			//E吸附位移 - 原位置（数据最终变换值，不含拖拽偏移量，不含吸附位置）
+	this._drill_cur_org_y = 0;			//
 }
 //==============================
 // * E吸附位移 - 帧刷新
 //==============================
-Drill_CODAA_AdsorbController.prototype.drill_controllerAdsorb_updateOffset = function( cur_orgX, cur_orgY ){
-	this._drill_curOrgX = cur_orgX;
-	this._drill_curOrgY = cur_orgY;
+Drill_CODAA_AdsorbController.prototype.drill_controllerAdsorb_updateOffset = function( cur_org_x, cur_org_y ){
+	this._drill_cur_org_x = cur_org_x;
+	this._drill_cur_org_y = cur_org_y;
 }
 //==============================
 // * E吸附位移 - 获取吸附位置X（开放函数）
@@ -1225,8 +1225,8 @@ Drill_CODAA_AdsorbController.prototype.drill_controllerAdsorb_clearAdsorbPositio
 //					  因为该插件不修改 原位置，所以要转移成 拖拽偏移量。
 //==============================
 Drill_CODAA_AdsorbController.prototype.drill_controllerAdsorb_convertToDraggingOffset = function() {
-	var dx = this._drill_curOrgX - this.drill_controllerAdsorb_getAdsorbingX();		//（此处已包含 拖拽偏移量 的影响）
-	var dy = this._drill_curOrgY - this.drill_controllerAdsorb_getAdsorbingY();		//
+	var dx = this._drill_cur_org_x - this.drill_controllerAdsorb_getAdsorbingX();		//（此处已包含 拖拽偏移量 的影响）
+	var dy = this._drill_cur_org_y - this.drill_controllerAdsorb_getAdsorbingY();		//
 	var drag_controller = this.drill_controllerAdsorb_getDragController();
 	drag_controller._drill_draging_x = 0;
 	drag_controller._drill_draging_y = 0;
@@ -1416,8 +1416,8 @@ Drill_CODAA_AdsorbController.prototype.drill_controllerAdsorb_setAnim1Move = fun
 	
 	// > 位置（原位置+拖拽偏移量）
 	var drag_controller = this.drill_controllerAdsorb_getDragController();
-	var cur_x = this._drill_curOrgX + drag_controller.drill_controllerDrag_getDraggingXOffset();
-	var cur_y = this._drill_curOrgY + drag_controller.drill_controllerDrag_getDraggingYOffset();
+	var cur_x = this._drill_cur_org_x + drag_controller.drill_controllerDrag_getDraggingXOffset();
+	var cur_y = this._drill_cur_org_y + drag_controller.drill_controllerDrag_getDraggingYOffset();
 	
 	// > 位置（吸附位置，包含了拖拽偏移量）
 	if( last_state == 1 || 
@@ -1567,7 +1567,7 @@ function Drill_CODAA_AdsorbFactory() {
 // * 数据工厂 - 初始化
 //==============================
 Drill_CODAA_AdsorbFactory.prototype.initialize = function(){
-	this._drill_factorySerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+	this._drill_factorySerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_factoryAdsorb_initChild();								//初始化子功能
 };
 //==============================
@@ -1704,7 +1704,7 @@ function Drill_CODAA_SlotController() {
 //==============================
 Drill_CODAA_SlotController.prototype.initialize = function( data ){
 	this._drill_data = {};
-	this._drill_slotSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+	this._drill_slotSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_slot_initData();										//初始化数据
     this.drill_slot_initChild();									//初始化子功能
 	if( data == undefined ){ data = {}; }
@@ -1876,7 +1876,7 @@ Drill_CODAA_SlotController.prototype.drill_slot_resetData_Private = function( da
 	
 	// > 执行重置
 	this._drill_data = JSON.parse(JSON.stringify( data ));				//深拷贝
-	this._drill_slotSerial = new Date().getTime() + Math.random();		//『生成一个不重复的序列号』
+	this._drill_slotSerial = new Date().getTime() + Math.random();		//『随机因子-生成一个不重复的序列号』
     this.drill_slot_initData();											//初始化数据
     this.drill_slot_initChild();										//初始化子功能
 }
@@ -2220,7 +2220,7 @@ function Drill_CODAA_SlotFactory() {
 // * 数据工厂 - 初始化
 //==============================
 Drill_CODAA_SlotFactory.prototype.initialize = function(){
-	this._drill_factorySerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+	this._drill_factorySerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_factorySlot_initChild();									//初始化子功能
 };
 //==============================
@@ -2789,8 +2789,8 @@ Drill_CODAA_SlotFactory.prototype.drill_factorySlot_removeByProductId = function
 // * 监听"正被吸附" - 帧刷新
 //==============================
 var _drill_CODAA_CODAA_check1_update = Drill_CODAA_AdsorbController.prototype.drill_controllerAdsorb_update;
-Drill_CODAA_AdsorbController.prototype.drill_controllerAdsorb_update = function( cur_orgX, cur_orgY ){
-	_drill_CODAA_CODAA_check1_update.call( this, cur_orgX, cur_orgY );
+Drill_CODAA_AdsorbController.prototype.drill_controllerAdsorb_update = function( cur_org_x, cur_org_y ){
+	_drill_CODAA_CODAA_check1_update.call( this, cur_org_x, cur_org_y );
     this.drill_CODAA_update0To1();
     this.drill_CODAA_update3To1();
 }
@@ -2803,8 +2803,8 @@ Drill_CODAA_AdsorbController.prototype.drill_CODAA_update0To1 = function(){
 	
 	// > "未吸附"的位置（原位置+拖拽偏移量）
 	var drag_controller = this.drill_controllerAdsorb_getDragController();
-	var cur_x = this._drill_curOrgX + drag_controller.drill_controllerDrag_getDraggingXOffset();
-	var cur_y = this._drill_curOrgY + drag_controller.drill_controllerDrag_getDraggingYOffset();
+	var cur_x = this._drill_cur_org_x + drag_controller.drill_controllerDrag_getDraggingXOffset();
+	var cur_y = this._drill_cur_org_y + drag_controller.drill_controllerDrag_getDraggingYOffset();
 	
 	// > 遍历吸附槽
 	var slot_controller_tank = $gameSystem._drill_CODAA_slotFactory._drill_productTank;
@@ -3028,8 +3028,8 @@ Drill_CODAA_AdsorbController.prototype.drill_CODAA_setAdsorbingExchange = functi
 // * 监听"已吸附" - 帧刷新
 //==============================
 var _drill_CODAA_CODAA_check2_update = Drill_CODAA_AdsorbController.prototype.drill_controllerAdsorb_update;
-Drill_CODAA_AdsorbController.prototype.drill_controllerAdsorb_update = function( cur_orgX, cur_orgY ){
-	_drill_CODAA_CODAA_check2_update.call( this, cur_orgX, cur_orgY );
+Drill_CODAA_AdsorbController.prototype.drill_controllerAdsorb_update = function( cur_org_x, cur_org_y ){
+	_drill_CODAA_CODAA_check2_update.call( this, cur_org_x, cur_org_y );
     this.drill_CODAA_update1To2();
 }
 //==============================

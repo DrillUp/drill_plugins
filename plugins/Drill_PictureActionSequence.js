@@ -553,12 +553,12 @@ Game_Temp.prototype.drill_PASe_getPictureSpriteTank_SenceTopArea = function(){
 //==============================
 Game_Temp.prototype.drill_PASe_getPictureSpriteTank_PicArea = function(){
 	if( SceneManager._scene == undefined ){ return null; }
-	if( SceneManager._scene instanceof Scene_Battle ){		//『图片与多场景-战斗界面』
+	if( SceneManager._scene instanceof Scene_Battle ){		//『多场景与图片-战斗界面』
 		if( SceneManager._scene._spriteset == undefined ){ return null; }
 		if( SceneManager._scene._spriteset._drill_battlePicArea == undefined ){ return null; }
 		return SceneManager._scene._spriteset._drill_battlePicArea.children;
 	}
-	if( SceneManager._scene instanceof Scene_Map ){			//『图片与多场景-地图界面』
+	if( SceneManager._scene instanceof Scene_Map ){			//『多场景与图片-地图界面』
 		if( SceneManager._scene._spriteset == undefined ){ return null; }
 		if( SceneManager._scene._spriteset._drill_mapPicArea == undefined ){ return null; }
 		return SceneManager._scene._spriteset._drill_mapPicArea.children;
@@ -772,11 +772,11 @@ Game_Picture.prototype.drill_PASe_removeActionSequence = function(){
 //					> 若找不到ID则返回-1。
 //==============================
 Game_Picture.prototype.drill_PASe_getPictureId = function(){
-	if( $gameParty.inBattle() ){	//战斗界面的图片『图片与多场景-战斗界面』
+	if( $gameParty.inBattle() ){	//战斗界面的图片『多场景与图片-战斗界面』
 		var pic_id = $gameScreen._pictures.indexOf( this );
 		if( pic_id == -1 ){ return -1; }
         return pic_id - $gameScreen.maxPictures();
-    }else{							//地图界面的图片『图片与多场景-地图界面』
+    }else{							//地图界面的图片『多场景与图片-地图界面』
 		var pic_id = $gameScreen._pictures.indexOf( this );
         return pic_id;
     }

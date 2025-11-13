@@ -39,8 +39,8 @@
  *   (1.你可以将贴图放置在战斗的四种层级中，分别为：
  *      下层、上层、图片层、最顶层
  *   (2.战斗层级之间的关系为：
- *      底图 《 战斗背景 《 下层 《 敌人/角色层 《 上层
- *      《 图片对象层 《 图片层 《 对话框集合 《 最顶层
+ *      底图 < 战斗背景 < 下层 < 敌人/角色层 < 上层
+ *      < 图片对象层 < 图片层 < 对话框集合 < 最顶层
  *   (3.最顶层可以把战斗界面的对话框、窗口也给挡住。
  *   (4.处于同一 战斗层级 时，将根据 图片层级 再先后排序。
  * 位移比：
@@ -2935,7 +2935,7 @@ if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义�
 			this.__drill_zIndex = value;
 		},
 		get: function(){
-			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			if( this.__drill_zIndex == undefined ){ return 20250701; }	//（如果未定义则放最上面）
 			return this.__drill_zIndex;
 		},
 		configurable: true
@@ -3019,7 +3019,7 @@ Scene_Battle.prototype.drill_BBa_layerCameraMoving_Private = function( xx, yy, l
 //=============================================================================
 /*
 //==============================
-// * 指令『多层战斗背景』 - 【地图 > 更改战斗背景】
+// * 指令《战斗-多层战斗背景》 - 【地图 > 更改战斗背景】
 //==============================
 Game_Interpreter.prototype.command283 = function(){
     $gameMap.changeBattleback(this._params[0], this._params[1]);
@@ -3027,12 +3027,12 @@ Game_Interpreter.prototype.command283 = function(){
 };
 
 //==============================
-// * 组合背景『多层战斗背景』 - 访问器
+// * 组合背景《战斗-多层战斗背景》 - 访问器
 //==============================
 Game_Map.prototype.battleback1Name = function(){ return this._battleback1Name; };	//组合背景 - 默认战斗背景1
 Game_Map.prototype.battleback2Name = function(){ return this._battleback2Name; };	//组合背景 - 默认战斗背景2
 //==============================
-// * 组合背景『多层战斗背景』 - 设置战斗组合背景
+// * 组合背景《战斗-多层战斗背景》 - 设置战斗组合背景
 //==============================
 Game_Map.prototype.setupBattleback = function(){
     if( $dataMap.specifyBattleback ){
@@ -3044,7 +3044,7 @@ Game_Map.prototype.setupBattleback = function(){
     }
 };
 //==============================
-// * 组合背景『多层战斗背景』 - 修改组合背景（command283）
+// * 组合背景《战斗-多层战斗背景》 - 修改组合背景（command283）
 //==============================
 Game_Map.prototype.changeBattleback = function( battleback1Name, battleback2Name ){
     this._battleback1Name = battleback1Name;
@@ -3053,16 +3053,17 @@ Game_Map.prototype.changeBattleback = function( battleback1Name, battleback2Name
 */
 /*
 //==============================
-// * 3B底图『多层战斗背景』 - 创建
+// * 3B底图《战斗-多层战斗背景》 - 创建
 //==============================
 Spriteset_Battle.prototype.createBackground = function(){
     this._backgroundSprite = new Sprite();
     this._backgroundSprite.bitmap = SceneManager.backgroundBitmap();
-    this._baseSprite.addChild(this._backgroundSprite);	//（添加到 内容基层 下）
+    this._baseSprite.addChild(this._backgroundSprite);	//（添加到 内容基层 ）
 };
 
+
 //==============================
-// * 3C组合背景『多层战斗背景』 - 创建
+// * 3C组合背景《战斗-多层战斗背景》 - 创建
 //==============================
 Spriteset_Battle.prototype.createBattleback = function(){
     var margin = 32;
@@ -3080,7 +3081,7 @@ Spriteset_Battle.prototype.createBattleback = function(){
     this._battleField.addChild(this._back2Sprite);
 };
 //==============================
-// * 3C组合背景『多层战斗背景』 - 帧刷新
+// * 3C组合背景《战斗-多层战斗背景》 - 帧刷新
 //==============================
 Spriteset_Battle.prototype.updateBattleback = function(){
     if( !this._battlebackLocated ){
@@ -3089,7 +3090,7 @@ Spriteset_Battle.prototype.updateBattleback = function(){
     }
 };
 //==============================
-// * 3C组合背景『多层战斗背景』 - 计算位置
+// * 3C组合背景《战斗-多层战斗背景》 - 计算位置
 //==============================
 Spriteset_Battle.prototype.locateBattleback = function(){
     var width = this._battleField.width;
@@ -3104,39 +3105,51 @@ Spriteset_Battle.prototype.locateBattleback = function(){
     }
 };
 //==============================
-// * 3C组合背景『多层战斗背景』 - 资源 - 获取后背景bitmap
+// * 3C组合背景《战斗-多层战斗背景》 - 资源 - 获取后背景bitmap
 //==============================
 Spriteset_Battle.prototype.battleback1Bitmap = function(){
     return ImageManager.loadBattleback1(this.battleback1Name());
 };
 //==============================
-// * 3C组合背景『多层战斗背景』 - 资源 - 获取前背景bitmap
+// * 3C组合背景《战斗-多层战斗背景》 - 资源 - 获取前背景bitmap
 //==============================
 Spriteset_Battle.prototype.battleback2Bitmap = function(){
     return ImageManager.loadBattleback2(this.battleback2Name());
 };
 //==============================
-// * 3C组合背景『多层战斗背景』 - 资源 - 获取后背景资源名
+// * 3C组合背景《战斗-多层战斗背景》 - 资源 - 获取后背景资源名
 //==============================
 Spriteset_Battle.prototype.battleback1Name = function(){
-    if( BattleManager.isBattleTest() ){
-        return $dataSystem.battleback1Name;
-    }else if( $gameMap.battleback1Name() ){
-        return $gameMap.battleback1Name();
-    }else if( $gameMap.isOverworld() ){
-        return this.overworldBattleback1Name();
-    }else{
-        return '';
-    }
+	
+	// > 测试的战斗 战斗背景设置
+	if( BattleManager.isBattleTest() ){
+		return $dataSystem.battleback1Name;
+	
+	// > 地图界面 战斗背景设置
+	}else if( $gameMap.battleback1Name() ){
+		return $gameMap.battleback1Name();
+		
+	// > 世界图块 战斗背景设置
+	}else if( $gameMap.isOverworld() ){
+		return this.overworldBattleback1Name();
+	}else{
+		return '';
+	}
 };
 //==============================
-// * 3C组合背景『多层战斗背景』 - 资源 - 获取前背景资源名
+// * 3C组合背景《战斗-多层战斗背景》 - 资源 - 获取前背景资源名
 //==============================
 Spriteset_Battle.prototype.battleback2Name = function(){
+	
+	// > 测试的战斗 战斗背景设置
     if( BattleManager.isBattleTest() ){
         return $dataSystem.battleback2Name;
+		
+	// > 地图界面 战斗背景设置
     }else if( $gameMap.battleback2Name() ){
         return $gameMap.battleback2Name();
+		
+	// > 世界图块 战斗背景设置
     }else if( $gameMap.isOverworld() ){
         return this.overworldBattleback2Name();
     }else{
@@ -3144,7 +3157,7 @@ Spriteset_Battle.prototype.battleback2Name = function(){
     }
 };
 //==============================
-// * 3C组合背景『多层战斗背景』 - 资源 - 后背景资源名 - 世界图块
+// * 3C组合背景《战斗-多层战斗背景》 - 资源 - 后背景资源名 - 世界图块
 //==============================
 Spriteset_Battle.prototype.overworldBattleback1Name = function(){
     if( $gameMap.battleback1Name() === '') return '';
@@ -3155,7 +3168,7 @@ Spriteset_Battle.prototype.overworldBattleback1Name = function(){
     }
 };
 //==============================
-// * 3C组合背景『多层战斗背景』 - 资源 - 前背景资源名 - 世界图块
+// * 3C组合背景《战斗-多层战斗背景》 - 资源 - 前背景资源名 - 世界图块
 //==============================
 Spriteset_Battle.prototype.overworldBattleback2Name = function(){
     if( $gameMap.battleback2Name() === '') return '';
@@ -3166,7 +3179,7 @@ Spriteset_Battle.prototype.overworldBattleback2Name = function(){
     }
 };
 //==============================
-// * 3C组合背景『多层战斗背景』 - 资源 - 后背景资源名 - 一般图块
+// * 3C组合背景《战斗-多层战斗背景》 - 资源 - 后背景资源名 - 一般图块
 //==============================
 Spriteset_Battle.prototype.normalBattleback1Name = function(){
     return (this.terrainBattleback1Name(this.autotileType(1)) ||
@@ -3174,7 +3187,7 @@ Spriteset_Battle.prototype.normalBattleback1Name = function(){
             this.defaultBattleback1Name());
 };
 //==============================
-// * 3C组合背景『多层战斗背景』 - 资源 - 前背景资源名 - 一般图块
+// * 3C组合背景《战斗-多层战斗背景》 - 资源 - 前背景资源名 - 一般图块
 //==============================
 Spriteset_Battle.prototype.normalBattleback2Name = function(){
     return (this.terrainBattleback2Name(this.autotileType(1)) ||
@@ -3182,62 +3195,64 @@ Spriteset_Battle.prototype.normalBattleback2Name = function(){
             this.defaultBattleback2Name());
 };
 //==============================
-// * 3C组合背景『多层战斗背景』 - 资源 - 后背景资源名 - 类型标识
+// * 3C组合背景《战斗-多层战斗背景》 - 资源 - 后背景资源名 - 类型标识
 //==============================
 Spriteset_Battle.prototype.terrainBattleback1Name = function( type ){
-    switch (type ){
-    case 24: case 25:
-        return 'Wasteland';
-    case 26: case 27:
-        return 'DirtField';
-    case 32: case 33:
-        return 'Desert';
-    case 34:
-        return 'Lava1';
-    case 35:
-        return 'Lava2';
-    case 40: case 41:
-        return 'Snowfield';
-    case 42:
-        return 'Clouds';
-    case 4: case 5:
-        return 'PoisonSwamp';
-    default:
-        return null;
+    switch ( type ){
+		case 24: case 25:
+			return 'Wasteland';
+		case 26: case 27:
+			return 'DirtField';
+		case 32: case 33:
+			return 'Desert';
+		case 34:
+			return 'Lava1';
+		case 35:
+			return 'Lava2';
+		case 40: case 41:
+			return 'Snowfield';
+		case 42:
+			return 'Clouds';
+		case 4: case 5:
+			return 'PoisonSwamp';
+		default:
+			return null;
     }
 };
 //==============================
-// * 3C组合背景『多层战斗背景』 - 资源 - 前背景资源名 - 类型标识
+// * 3C组合背景《战斗-多层战斗背景》 - 资源 - 前背景资源名 - 类型标识
 //==============================
 Spriteset_Battle.prototype.terrainBattleback2Name = function( type ){
-    switch (type ){
-    case 20: case 21:
-        return 'Forest';
-    case 22: case 30: case 38:
-        return 'Cliff';
-    case 24: case 25: case 26: case 27:
-        return 'Wasteland';
-    case 32: case 33:
-        return 'Desert';
-    case 34: case 35:
-        return 'Lava';
-    case 40: case 41:
-        return 'Snowfield';
-    case 42:
-        return 'Clouds';
-    case 4: case 5:
-        return 'PoisonSwamp';
+    switch ( type ){
+		case 20: case 21:
+			return 'Forest';
+		case 22: case 30: case 38:
+			return 'Cliff';
+		case 24: case 25: case 26: case 27:
+			return 'Wasteland';
+		case 32: case 33:
+			return 'Desert';
+		case 34: case 35:
+			return 'Lava';
+		case 40: case 41:
+			return 'Snowfield';
+		case 42:
+			return 'Clouds';
+		case 4: case 5:
+			return 'PoisonSwamp';
     }
 };
 //==============================
-// * 3C组合背景『多层战斗背景』 - 默认背景名
+// * 3C组合背景《战斗-多层战斗背景》 - 默认背景名
 //==============================
 Spriteset_Battle.prototype.defaultBattleback1Name = function(){ return 'Grassland'; };
 Spriteset_Battle.prototype.defaultBattleback2Name = function(){ return 'Grassland'; };
 Spriteset_Battle.prototype.shipBattleback1Name = function(){ return 'Ship'; };
 Spriteset_Battle.prototype.shipBattleback2Name = function(){ return 'Ship'; };
 //==============================
-// * 3C组合背景『多层战斗背景』 - 根据角色地图位置自适应背景
+// * 3C组合背景《战斗-多层战斗背景》 - 根据角色地图位置自适应背景
+//
+//			说明：	> 此处根据 玩家 所处的图块，判断进入战斗使用哪种背景。
 //==============================
 Spriteset_Battle.prototype.autotileType = function( z ){
     return $gameMap.autotileType($gamePlayer.x, $gamePlayer.y, z);
@@ -3571,7 +3586,7 @@ DrillUp.g_BBa_notFindStyleAlertOnce = true;
 //==============================
 Drill_BBa_Controller.prototype.initialize = function( data_id ){
 	this._drill_data_id = data_id;
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能
     this.drill_controller_resetData( data_id );
@@ -3771,7 +3786,7 @@ Drill_BBa_Controller.prototype.drill_controller_resetData_Private = function( da
 	
 	// > 执行重置
 	this._drill_data_id = data_id;
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能
 }

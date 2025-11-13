@@ -428,7 +428,7 @@ Scene_Map.prototype.drill_SG_updateSpeed = function() {
 	
 	// > 赋值
 	d_time = d_time / d_speed;
-	SceneManager._deltaTime = d_time;
+	SceneManager._deltaTime = d_time;		//『游戏变速之帧率变速』
 	
 	// > 声音变速
 	if( $gameSystem._drill_SG_lastSpeed != d_speed ){

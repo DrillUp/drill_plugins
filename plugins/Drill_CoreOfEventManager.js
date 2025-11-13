@@ -369,7 +369,7 @@ Game_Map.prototype.drill_COEM_isEventExist = function( e_id ){
 //=============================================================================
 /*
 //==============================
-// * C事件容器『物体管理-事件管理核心』 - 载入初始化
+// * B事件容器《物体管理-事件管理核心》 - 载入初始化
 //
 //			说明：	> 只在 载入地图时 执行一次。
 //==============================
@@ -391,13 +391,13 @@ Game_Map.prototype.setupEvents = function(){
     this.refreshTileEvents();
 };
 //==============================
-// * C事件容器『物体管理-事件管理核心』 - 移除事件（根据id，command214）
+// * B事件容器《物体管理-事件管理核心》 - 移除事件（根据id，command214）
 //==============================
 Game_Map.prototype.eraseEvent = function( eventId ){
     this._events[eventId].erase();
 };
 //==============================
-// * C事件容器『物体管理-事件管理核心』 - 帧刷新
+// * B事件容器《物体管理-事件管理核心》 - 帧刷新
 //==============================
 Game_Map.prototype.updateEvents = function(){
     this.events().forEach(function( event ){
@@ -408,7 +408,7 @@ Game_Map.prototype.updateEvents = function(){
     });
 };
 //==============================
-// * C事件容器『物体管理-事件管理核心』 - 获取 - 全部事件
+// * B事件容器《物体管理-事件管理核心》 - 获取 - 全部事件
 //==============================
 Game_Map.prototype.events = function(){
     return this._events.filter(function( event ){
@@ -416,7 +416,7 @@ Game_Map.prototype.events = function(){
     });
 };
 //==============================
-// * C事件容器『物体管理-事件管理核心』 - 获取 - 事件（根据id）
+// * B事件容器《物体管理-事件管理核心》 - 获取 - 事件（根据id）
 //==============================
 Game_Map.prototype.event = function( eventId ){
     return this._events[eventId];
@@ -431,7 +431,7 @@ Game_Map.prototype.event = function( eventId ){
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 管辖函数覆写『物体管理-事件管理核心』 - C事件容器 - 帧刷新（覆写）
+// * 管辖函数覆写『物体管理-事件管理核心』 - B事件容器 - 帧刷新（覆写）
 //
 //			说明：	> 注意，此函数覆写的位置较晚，其它插件继承时注意避开。
 //==============================
@@ -458,7 +458,7 @@ Game_Map.prototype.updateEvents = function() {
 	}
 };
 //==============================
-// * 管辖函数覆写『物体管理-事件管理核心』 - C事件容器 - 获取全部事件（覆写）
+// * 管辖函数覆写『物体管理-事件管理核心』 - B事件容器 - 获取全部事件（覆写）
 //
 //			说明：	> 此函数强制 返回 有效事件容器备份。
 //==============================
@@ -1085,8 +1085,8 @@ Game_SelfSwitches.prototype.drill_COEM_deleteEventKeys_Private = function( map_i
 	// > 获取键
 	var org_keys = Object.keys(this._data);
 	var del_keys = [];
-	for(var i=0; i < org_keys.length; i++){
-		var key = org_keys[i].split(",");
+	for(var i = 0; i < org_keys.length; i++){
+		var key = org_keys[i].split(",");	//『json赋值时数组变字符串问题』
 		if( Number(key[0]) == Number(map_id) && Number(key[1]) == Number(e_id) ){
 			del_keys.push( org_keys[i] );
 		}
@@ -1096,7 +1096,7 @@ Game_SelfSwitches.prototype.drill_COEM_deleteEventKeys_Private = function( map_i
 	//if( del_keys.length > 0 ){ alert(JSON.stringify(del_keys)); }
 	
 	// > 删除键
-	for(var i=0; i < del_keys.length; i++){
+	for(var i = 0; i < del_keys.length; i++){
 		delete this._data[ del_keys[i] ];
 	}
 };

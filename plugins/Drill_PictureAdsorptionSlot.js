@@ -1683,9 +1683,9 @@ Game_System.prototype.drill_PASl_checkSysData_Private = function() {
 
 
 //#############################################################################
-// ** 标准接口（☆图片吸附管理 标准模块）
+// ** ☆图片吸附管理 标准模块
 //
-//			说明：	即对子插件开放的固定函数，无论插件如何变化，标准函数都不变。
+//			说明：	> 即对子插件开放的固定函数，无论插件如何变化，标准函数都不变。
 //#############################################################################
 //##############################
 // * 图片吸附管理 - 获取吸附位置X【标准函数】
@@ -1836,9 +1836,9 @@ Game_Picture.prototype.drill_PASl_getAdsorbController = function(){
 Game_Screen.prototype.drill_PASl_getPictureID_ByAdsorbControllerId = function( adsorbController_id ){
 	
 	// > 图片遍历
-	var i_offset = 0;							//地图界面的图片『图片与多场景-地图界面』
+	var i_offset = 0;							//地图界面的图片『多场景与图片-地图界面』
 	var pic_length = this.maxPictures();
-	if( $gameParty.inBattle() == true ){		//战斗界面的图片『图片与多场景-战斗界面』
+	if( $gameParty.inBattle() == true ){		//战斗界面的图片『多场景与图片-战斗界面』
 		i_offset = pic_length;
 	}
 	for(var i = 0; i < pic_length; i++ ){
@@ -1989,12 +1989,12 @@ Game_Picture.prototype.drill_PASl_updateAdsorb = function() {
 	if( this.drill_PASl_canAdsorb() != true ){ return; }
 	
 	// > 参数 - 原位置
-	var cur_orgX = this.drill_PASl_org_finalTransform_x();
-	var cur_orgY = this.drill_PASl_org_finalTransform_y();
+	var cur_org_x = this.drill_PASl_org_finalTransform_x();
+	var cur_org_y = this.drill_PASl_org_finalTransform_y();
 	
 	// > 帧刷新 控制器
 	var controller = this.drill_PASl_getAdsorbController();
-	controller.drill_controllerAdsorb_update( cur_orgX, cur_orgY );
+	controller.drill_controllerAdsorb_update( cur_org_x, cur_org_y );
 }
 
 //==============================
@@ -2198,7 +2198,7 @@ Game_Screen.prototype.drill_PASl_updateSlotTank = function() {
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * DEBUG吸附槽范围 - 帧刷新『图片与多场景-地图界面』
+// * DEBUG吸附槽范围 - 帧刷新『多场景与图片-地图界面』
 //==============================
 var _drill_PASl_debugMap_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {
@@ -2207,7 +2207,7 @@ Scene_Map.prototype.update = function() {
     this.drill_PASl_updateDrawBeanRangeBitmap();		//帧刷新 - 绘制范围
 }
 //==============================
-// * DEBUG吸附槽范围 - 帧刷新 初始化贴图『图片与多场景-地图界面』
+// * DEBUG吸附槽范围 - 帧刷新 初始化贴图『多场景与图片-地图界面』
 //==============================
 Scene_Map.prototype.drill_PASl_updateDrawBeanRangeSprite = function() {
 	
@@ -2236,7 +2236,7 @@ Scene_Map.prototype.drill_PASl_updateDrawBeanRangeSprite = function() {
 	}
 }
 //==============================
-// * DEBUG吸附槽范围 - 帧刷新 绘制范围『图片与多场景-地图界面』
+// * DEBUG吸附槽范围 - 帧刷新 绘制范围『多场景与图片-地图界面』
 //==============================
 Scene_Map.prototype.drill_PASl_updateDrawBeanRangeBitmap = function() {
 	if( this._drill_PASl_DebugSprite == undefined ){ return; }
@@ -2269,9 +2269,9 @@ Scene_Map.prototype.drill_PASl_updateDrawBeanRangeBitmap = function() {
 	}
 	
 	// > 图片遍历（显示所有图片的悬停范围）
-	var i_offset = 0;							//地图界面的图片『图片与多场景-地图界面』
+	var i_offset = 0;							//地图界面的图片『多场景与图片-地图界面』
 	var pic_length = $gameScreen.maxPictures();
-	if( $gameParty.inBattle() == true ){		//战斗界面的图片『图片与多场景-战斗界面』
+	if( $gameParty.inBattle() == true ){		//战斗界面的图片『多场景与图片-战斗界面』
 		i_offset = pic_length;
 	}
 	for(var i = 0; i < pic_length; i++ ){
@@ -2312,7 +2312,7 @@ Scene_Map.prototype.drill_PASl_updateDrawBeanRangeBitmap = function() {
 	}
 }
 //==============================
-// * DEBUG吸附槽范围 - 帧刷新『图片与多场景-战斗界面』
+// * DEBUG吸附槽范围 - 帧刷新『多场景与图片-战斗界面』
 //==============================
 var _drill_PASl_debugBattle_update = Scene_Battle.prototype.update;
 Scene_Battle.prototype.update = function(){
@@ -2321,11 +2321,11 @@ Scene_Battle.prototype.update = function(){
     this.drill_PASl_updateDrawBeanRangeBitmap();		//帧刷新 - 绘制范围
 }
 //==============================
-// * DEBUG吸附槽范围 - 帧刷新 初始化贴图『图片与多场景-战斗界面』
+// * DEBUG吸附槽范围 - 帧刷新 初始化贴图『多场景与图片-战斗界面』
 //==============================
 Scene_Battle.prototype.drill_PASl_updateDrawBeanRangeSprite = Scene_Map.prototype.drill_PASl_updateDrawBeanRangeSprite;
 //==============================
-// * DEBUG吸附槽范围 - 帧刷新 绘制范围『图片与多场景-战斗界面』
+// * DEBUG吸附槽范围 - 帧刷新 绘制范围『多场景与图片-战斗界面』
 //==============================
 Scene_Battle.prototype.drill_PASl_updateDrawBeanRangeBitmap = Scene_Map.prototype.drill_PASl_updateDrawBeanRangeBitmap;
 

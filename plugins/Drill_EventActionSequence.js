@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.5]        行走图 - GIF动画序列
+ * @plugindesc [v1.6]        行走图 - GIF动画序列
  * @author Drill_up
  * 
  * 
@@ -56,14 +56,15 @@
  * 你需要通过下面事件注释来激活动画序列：
  * 
  * 事件注释：=>行走图动画序列 : 创建动画序列 : 动画序列[1]
- * 事件注释：=>行走图动画序列 : 创建动画序列(站桩) : 动画序列[1]
+ * 事件注释：=>行走图动画序列 : 创建动画序列(无方向) : 动画序列[1]
+ * 事件注释：=>行走图动画序列 : 创建动画序列(无方向可翻转) : 动画序列[1]
  * 事件注释：=>行走图动画序列 : 创建动画序列(四方向) : 动画序列[1]
  * 事件注释：=>行走图动画序列 : 创建动画序列(二方向) : 动画序列[1]
  * 
  * 1.必须包含 注释的事件页 才会 创建动画序列。
  *   切换事件页时，插件会根据是否有注释而执行创建或销毁。
- * 2. "创建动画序列" 与 "创建动画序列(站桩)" 指令是一样的意思，默认按站桩识别。
- *   动画序列分为 站桩动画序列、四方向动画序列、二方向动画序列，
+ * 2. "创建动画序列"、"创建动画序列(站桩)"、"创建动画序列(无方向)" 指令是一样的意思。
+ *   动画序列分为 无方向动画序列、四方向动画序列、二方向动画序列，
  *   详细可以去看看文档："7.行走图 > 关于行走图GIF动画序列.docx"。
  * 3.如果行走图同时被 全绑定和行走图动画序列的事件注释 控制改变动画序列，
  *   则按 全绑定 的设置来，全绑定的优先级高。
@@ -72,7 +73,7 @@
  *   因此事件移动时，不会播放移动动画，而是保持站立平移。
  * 
  * -----------------------------------------------------------------------------
- * ----激活条件 - 动画序列
+ * ----激活条件 - 插件指令
  * 你需要通过下面插件指令来激活动画序列：
  * 
  * 插件指令：>行走图动画序列 : 玩家 : 创建动画序列 : 动画序列[1]
@@ -87,25 +88,59 @@
  * 插件指令：>行走图动画序列 : 批量事件变量[21,22] : 创建动画序列 : 动画序列[1]
  * 
  * 插件指令：>行走图动画序列 : 事件[1] : 创建动画序列 : 动画序列[1]
- * 插件指令：>行走图动画序列 : 事件[1] : 创建动画序列(站桩) : 动画序列[1]
+ * 插件指令：>行走图动画序列 : 事件[1] : 创建动画序列(无方向) : 动画序列[1]
+ * 插件指令：>行走图动画序列 : 事件[1] : 创建动画序列(无方向可翻转) : 动画序列[1]
  * 插件指令：>行走图动画序列 : 事件[1] : 创建动画序列(四方向) : 动画序列[1]
  * 插件指令：>行走图动画序列 : 事件[1] : 创建动画序列(二方向) : 动画序列[1]
  * 插件指令：>行走图动画序列 : 事件[1] : 销毁动画序列
  * 
  * 1.前半部分（事件[1]）和 后半部分（创建动画序列 : 动画序列[1]）
- *   的参数可以随意组合。一共有10*2种组合方式。
- * 2. "创建动画序列" 与 "创建动画序列(站桩)" 指令是一样的意思，默认按站桩识别。
- *   动画序列分为 站桩动画序列、四方向动画序列、二方向动画序列，
+ *   的参数可以随意组合。一共有10*6种组合方式。
+ * 2. "创建动画序列"、"创建动画序列(站桩)"、"创建动画序列(无方向)" 指令是一样的意思。
+ *   动画序列分为 无方向动画序列、四方向动画序列、二方向动画序列，
  *   详细可以去看看文档："7.行走图 > 关于行走图GIF动画序列.docx"。
  * 3."玩家队员[1]"中，-2表示领队，1表示第一个跟随者。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 左右反向
+ * 你可以通过下面事件注释或插件指令，控制左右反向：
+ * 
+ * 事件注释：=>行走图动画序列 : 设置左右反向
+ * 事件注释：=>行走图动画序列 : 取消左右反向
+ * 
+ * 插件指令：>行走图动画序列 : 玩家 : 设置左右反向
+ * 插件指令：>行走图动画序列 : 玩家领队 : 设置左右反向
+ * 插件指令：>行走图动画序列 : 玩家全员 : 设置左右反向
+ * 插件指令：>行走图动画序列 : 玩家队员[1] : 设置左右反向
+ * 插件指令：>行走图动画序列 : 玩家队员变量[21] : 设置左右反向
+ * 插件指令：>行走图动画序列 : 本事件 : 设置左右反向
+ * 插件指令：>行走图动画序列 : 事件[1] : 设置左右反向
+ * 插件指令：>行走图动画序列 : 事件变量[1] : 设置左右反向
+ * 插件指令：>行走图动画序列 : 批量事件[10,11] : 设置左右反向
+ * 插件指令：>行走图动画序列 : 批量事件变量[21,22] : 设置左右反向
+ * 
+ * 插件指令：>行走图动画序列 : 事件[1] : 设置左右反向
+ * 插件指令：>行走图动画序列 : 事件[1] : 取消左右反向
+ * 
+ * 1.如果你之前在动画序列配置中，弄反了方向，可以使用上述指令，左右反向摆正。
+ *   但是建议最好把资源给改正。二方向，先右后左；无方向，默认朝右。
  *
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 保持状态元
+ * 你可以通过下面事件注释，让事件页处于指定状态元下：
+ * 
+ * 事件注释：=>行走图动画序列 : 当前页-播放默认的状态元集合
+ * 事件注释：=>行走图动画序列 : 当前页-播放简单状态元集合 : 集合[小爱丽丝静止1,小爱丽丝静止2]
+ * 事件注释：=>行走图动画序列 : 当前页-播放状态节点 : 状态节点[小爱丽丝拍裙子流程]
+ * 
+ * 1.该事件注释，需要放在"创建动画序列"的注释后面。
+ * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 播放
  * 你需要通过下面插件指令来操作动画序列：
  * 
  * 插件指令：>行走图动画序列 : 事件[1] : 播放默认的状态元集合
  * 插件指令：>行走图动画序列 : 事件[1] : 播放简单状态元集合 : 集合[小爱丽丝静止1,小爱丽丝静止2]
- * 
  * 插件指令：>行走图动画序列 : 事件[1] : 播放状态节点 : 状态节点[小爱丽丝拍裙子流程]
  * 
  * 插件指令：>行走图动画序列 : 事件[1] : 播放动作元 : 动作元[小爱丽丝发火]
@@ -158,6 +193,8 @@
  * 优化了动画序列存储底层。
  * [v1.5]
  * 优化了内部结构，修正描述细节。
+ * [v1.6]
+ * 添加了翻转功能，重新定义了 无方向和无方向可翻转 。
  * 
  * 
  * @param DEBUG-是否提示动画序列未创建
@@ -206,7 +243,8 @@
 //					> 帧刷新
 //					> 事件销毁时
 //				->创建 动画序列控制器
-//					->创建动画序列(站桩)
+//					->创建动画序列(无方向)
+//					->创建动画序列(无方向可翻转)
 //					->创建动画序列(四方向)
 //					->创建动画序列(二方向)
 //				->销毁 动画序列控制器
@@ -216,8 +254,12 @@
 //					> 播放状态节点（开放函数）
 //					> 播放动作元（开放函数）
 //					> 立即停止动作元（开放函数）
-//			->☆暂停控制
-//				->是否暂停（可继承）
+//			->☆翻转控制
+//				->设置左右可翻转（开放函数）
+//				->设置左右反向（开放函数）
+//			->☆暂停控制 实现
+//			->☆暂停控制 标准模块
+//				->是否暂停【标准接口】
 //			
 //			->☆行走图贴图绑定
 //				->创建 动画序列贴图
@@ -470,7 +512,8 @@ Game_Interpreter.prototype.drill_EASe_pluginCommand = function( command, args ){
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
 			if( type == "创建动画序列" || type == "设置动画序列" ||
-				type == "创建动画序列(站桩)" || type == "设置动画序列(站桩)" ){
+				type == "创建动画序列(站桩)" || type == "设置动画序列(站桩)" ||
+				type == "创建动画序列(无方向)" || type == "设置动画序列(无方向)" ){
 				temp1 = temp1.replace("动画序列[","");
 				temp1 = temp1.replace("]","");
 				for( var k=0; k < e_chars.length; k++ ){
@@ -478,6 +521,16 @@ Game_Interpreter.prototype.drill_EASe_pluginCommand = function( command, args ){
 				}
 				for( var k=0; k < p_chars.length; k++ ){
 					p_chars[k].drill_EASe_setActionSequence( Number(temp1)-1, "stand" );
+				}
+			}
+			if( type == "创建动画序列(无方向可翻转)" || type == "设置动画序列(无方向可翻转)" ){
+				temp1 = temp1.replace("动画序列[","");
+				temp1 = temp1.replace("]","");
+				for( var k=0; k < e_chars.length; k++ ){
+					e_chars[k].drill_EASe_setActionSequence( Number(temp1)-1, "stand+flip" );
+				}
+				for( var k=0; k < p_chars.length; k++ ){
+					p_chars[k].drill_EASe_setActionSequence( Number(temp1)-1, "stand+flip" );
 				}
 			}
 			if( type == "创建动画序列(四方向)" || type == "设置动画序列(四方向)" ){
@@ -501,16 +554,37 @@ Game_Interpreter.prototype.drill_EASe_pluginCommand = function( command, args ){
 				}
 			}
 		}
-			
-		/*-----------------动画序列操作------------------*/
+		
+		/*-----------------左右反向------------------*/
+		if( args.length == 4 ){
+			var type = String(args[3]);
+			if( type == "设置左右反向" ){
+				for( var k=0; k < e_chars.length; k++ ){
+					e_chars[k].drill_EASe_setRLFlipReverse( true );
+				}
+				for( var k=0; k < p_chars.length; k++ ){
+					p_chars[k].drill_EASe_setRLFlipReverse( true );
+				}
+			}
+			if( type == "取消左右反向" ){
+				for( var k=0; k < e_chars.length; k++ ){
+					e_chars[k].drill_EASe_setRLFlipReverse( false );
+				}
+				for( var k=0; k < p_chars.length; k++ ){
+					p_chars[k].drill_EASe_setRLFlipReverse( false );
+				}
+			}
+		}
+		
+		/*-----------------播放------------------*/
 		if( args.length == 4 ){
 			var type = String(args[3]);
 			if( type == "播放默认的状态元集合" ){
 				for( var k=0; k < e_chars.length; k++ ){
-					e_chars[k].drill_EASe_setSimpleStateNodeDefault();
+					e_chars[k].drill_EASe_setStateNodeDefault();
 				}
 				for( var k=0; k < p_chars.length; k++ ){
-					p_chars[k].drill_EASe_setSimpleStateNodeDefault();
+					p_chars[k].drill_EASe_setStateNodeDefault();
 				}
 			}
 			if( type == "立即停止动作元" || type == "立即停止动作" ){
@@ -598,14 +672,20 @@ Game_Event.prototype.drill_EASe_setupPage = function() {
 		if( l.code === 108 ){
 			var args = l.parameters[0].split(' ');
 			var command = args.shift();
-			if( command == "=>行走图动画序列" ){	//=>行走图动画序列 : 创建动画序列 : 动画序列[1]
-				if( args.length == 4 ){
+			if( command == "=>行走图动画序列" ){
+				
+				/*-----------------创建动画序列------------------*/
+				if( args.length == 4 ){	//=>行走图动画序列 : 创建动画序列 : 动画序列[1]
 					var type = String(args[1]);
 					var temp1 = String(args[3]);
 					temp1 = temp1.replace("动画序列[","");
 					temp1 = temp1.replace("]","");
-					if( type == "创建动画序列" || type == "创建动画序列(站桩)" ){
+					if( type == "创建动画序列" || type == "创建动画序列(站桩)" || type == "创建动画序列(无方向)" ){
 						this.drill_EASe_setActionSequence( Number(temp1)-1, "stand" );
+						is_set = true;
+					}
+					if( type == "创建动画序列(无方向可翻转)" ){
+						this.drill_EASe_setActionSequence( Number(temp1)-1, "stand+flip" );
 						is_set = true;
 					}
 					if( type == "创建动画序列(四方向)" ){
@@ -615,6 +695,39 @@ Game_Event.prototype.drill_EASe_setupPage = function() {
 					if( type == "创建动画序列(二方向)" ){
 						this.drill_EASe_setActionSequence( Number(temp1)-1, "2dir" );
 						is_set = true;
+					}
+				}
+				
+				/*-----------------左右反向------------------*/
+				if( args.length == 2 ){
+					var type = String(args[1]);
+					if( type == "设置左右反向" ){
+						this.drill_EASe_setRLFlipReverse( true );
+					}
+					if( type == "取消左右反向" ){
+						this.drill_EASe_setRLFlipReverse( false );
+					}
+				}
+				
+				/*-----------------播放------------------*/
+				if( args.length == 2 ){
+					var type = String(args[1]);
+					if( type == "当前页-播放默认的状态元集合" ){
+						this.drill_EASe_setStateNodeDefault();
+					}
+				}
+				if( args.length == 4 ){
+					var type = String(args[1]);
+					var temp1 = String(args[3]);
+					if( type == "当前页-播放简单状态元集合" ){
+						temp1 = temp1.replace("集合[","");
+						temp1 = temp1.replace("]","");
+						this.drill_EASe_setSimpleStateNode( temp1.split(",") );
+					}
+					if( type == "当前页-播放状态节点" ){
+						temp1 = temp1.replace("状态节点[","");
+						temp1 = temp1.replace("]","");
+						this.drill_EASe_setStateNode( temp1 );
 					}
 				}
 			};
@@ -641,11 +754,10 @@ Game_Event.prototype.drill_EASe_setupPage = function() {
 //==============================
 var _drill_EASe_c_initialize = Game_Character.prototype.initialize;
 Game_Character.prototype.initialize = function() {
-	
-	this._drill_EASe_type = undefined;				//动画序列类型（字符串）（stand站桩/4dir四方向/2dir二方向/8dir八方向）
 	this._drill_EASe_controller = undefined;		//动画序列控制器（对象）
-	this._drill_EASe_keepDecoratorNull = undefined;	//贴图销毁标记（布尔）
 	
+	this._drill_EASe_type = undefined;				//动画序列类型（字符串）（stand无方向/stand+flip无方向可翻转/4dir四方向/2dir二方向/8dir八方向）
+	this._drill_EASe_keepDecoratorNull = undefined;	//贴图销毁标记（布尔）
 	this._drill_EASe_lastId = undefined;			//上一个 动画序列ID（数字）
 	this._drill_EASe_lastType = undefined;			//上一个 动画序列类型（字符串）
 	
@@ -657,7 +769,7 @@ Game_Character.prototype.initialize = function() {
 //==============================
 var _drill_EASe_c_update = Game_CharacterBase.prototype.update;
 Game_CharacterBase.prototype.update = function() {
-	_drill_EASe_c_update.call(this);	
+	_drill_EASe_c_update.call(this);
 	
 	// > 帧刷新控制器
 	if( this._drill_EASe_controller != undefined ){
@@ -677,6 +789,7 @@ Game_Event.prototype.erase = function() {
 // * 物体的属性 - 创建 动画序列控制器（开放函数）
 //
 //			说明：	> 此函数用于去除重复的 创建 。
+//					> 要强制改变动画序列，直接 new控制器 即可，贴图会根据序列号自动销毁重建。
 //==============================
 Game_Character.prototype.drill_EASe_setActionSequence = function( as_id, type ){
 	
@@ -689,7 +802,10 @@ Game_Character.prototype.drill_EASe_setActionSequence = function( as_id, type ){
 	
 	// > 根据类型创建
 	if( type == "" || type == "stand" ){
-		this.drill_EASe_setActionSequenceOrg( as_id );
+		this.drill_EASe_setActionSequenceStand( as_id );
+	}
+	if( type == "stand+flip" ){
+		this.drill_EASe_setActionSequenceStandAndFlip( as_id );
 	}
 	if( type == "4dir" ){
 		this.drill_EASe_setActionSequenceWith4Direction( as_id );
@@ -702,13 +818,11 @@ Game_Character.prototype.drill_EASe_setActionSequence = function( as_id, type ){
 	}
 }
 //==============================
-// * 物体的属性 - 创建 动画序列控制器 - 站桩
-//
-//			说明：	> 要强制改变动画序列，直接 new控制器 即可，贴图会根据序列号自动销毁重建。
+// * 物体的属性 - 创建 动画序列控制器 - 无方向（私有）
 //==============================
-Game_Character.prototype.drill_EASe_setActionSequenceOrg = function( as_id ){
+Game_Character.prototype.drill_EASe_setActionSequenceStand = function( as_id ){
 	
-	// > 创建数据
+	// > 创建控制器
 	if( this._drill_EASe_controller == undefined ){
 		this._drill_EASe_controller = new Drill_COAS_MainController( as_id );
 	}else{
@@ -716,15 +830,37 @@ Game_Character.prototype.drill_EASe_setActionSequenceOrg = function( as_id ){
 	}
 	this._drill_EASe_controller.drill_COAS_setBitmapRefreshFrame( false );	//（禁止刷新框架）
 	
+	// > 其它数据
 	this._drill_EASe_type = "stand";
 	this._drill_EASe_keepDecoratorNull = undefined;
+	this.drill_EASe_setRLFlipEnabled( false );  //（翻转控制 - 关闭可翻转）
+	this.drill_EASe_setRLFlipReverse( false );  //（翻转控制 - 关闭左右反向）
 }
 //==============================
-// * 物体的属性 - 创建 动画序列控制器 - 四方向
+// * 物体的属性 - 创建 动画序列控制器 - 无方向可翻转（私有）
+//==============================
+Game_Character.prototype.drill_EASe_setActionSequenceStandAndFlip = function( as_id ){
+	
+	// > 创建控制器
+	if( this._drill_EASe_controller == undefined ){
+		this._drill_EASe_controller = new Drill_COAS_MainController( as_id );
+	}else{
+		this._drill_EASe_controller.drill_controllerMain_resetData( as_id );
+	}
+	this._drill_EASe_controller.drill_COAS_setBitmapRefreshFrame( false );	//（禁止刷新框架）
+	
+	// > 其它数据
+	this._drill_EASe_type = "stand";
+	this._drill_EASe_keepDecoratorNull = undefined;
+	this.drill_EASe_setRLFlipEnabled( true );   //（翻转控制 - 开启可翻转）
+	this.drill_EASe_setRLFlipReverse( false );  //（翻转控制 - 关闭左右反向）
+}
+//==============================
+// * 物体的属性 - 创建 动画序列控制器 - 四方向（私有）
 //==============================
 Game_Character.prototype.drill_EASe_setActionSequenceWith4Direction = function( as_id ){
 	
-	// > 创建数据
+	// > 创建控制器
 	if( this._drill_EASe_controller == undefined ){
 		this._drill_EASe_controller = new Drill_COAS_MainController( as_id );
 	}else{
@@ -732,15 +868,18 @@ Game_Character.prototype.drill_EASe_setActionSequenceWith4Direction = function( 
 	}
 	this._drill_EASe_controller.drill_COAS_setBitmapRefreshFrame( false );	//（禁止刷新框架）
 	
+	// > 其它数据
 	this._drill_EASe_type = "4dir";
 	this._drill_EASe_keepDecoratorNull = undefined;
+	this.drill_EASe_setRLFlipEnabled( false );  //（翻转控制 - 关闭可翻转）
+	this.drill_EASe_setRLFlipReverse( false );  //（翻转控制 - 关闭左右反向）
 }
 //==============================
-// * 物体的属性 - 创建 动画序列控制器 - 二方向
+// * 物体的属性 - 创建 动画序列控制器 - 二方向（私有）
 //==============================
 Game_Character.prototype.drill_EASe_setActionSequenceWith2Direction = function( as_id ){
 	
-	// > 创建数据
+	// > 创建控制器
 	if( this._drill_EASe_controller == undefined ){
 		this._drill_EASe_controller = new Drill_COAS_MainController( as_id );
 	}else{
@@ -748,15 +887,18 @@ Game_Character.prototype.drill_EASe_setActionSequenceWith2Direction = function( 
 	}
 	this._drill_EASe_controller.drill_COAS_setBitmapRefreshFrame( false );	//（禁止刷新框架）
 	
+	// > 其它数据
 	this._drill_EASe_type = "2dir";
 	this._drill_EASe_keepDecoratorNull = undefined;
+	this.drill_EASe_setRLFlipEnabled( false );  //（翻转控制 - 关闭可翻转）
+	this.drill_EASe_setRLFlipReverse( false );  //（翻转控制 - 关闭左右反向）
 }
 //==============================
-// * 物体的属性 - 创建 动画序列控制器 - 八方向
+// * 物体的属性 - 创建 动画序列控制器 - 八方向（私有）
 //==============================
 Game_Character.prototype.drill_EASe_setActionSequenceWith8Direction = function( as_id ){
 	
-	// > 创建数据
+	// > 创建控制器
 	if( this._drill_EASe_controller == undefined ){
 		this._drill_EASe_controller = new Drill_COAS_MainController( as_id );
 	}else{
@@ -764,17 +906,23 @@ Game_Character.prototype.drill_EASe_setActionSequenceWith8Direction = function( 
 	}
 	this._drill_EASe_controller.drill_COAS_setBitmapRefreshFrame( false );	//（禁止刷新框架）
 	
+	// > 其它数据
 	this._drill_EASe_type = "8dir";
 	this._drill_EASe_keepDecoratorNull = undefined;
+	this.drill_EASe_setRLFlipEnabled( false );  //（翻转控制 - 关闭可翻转）
+	this.drill_EASe_setRLFlipReverse( false );  //（翻转控制 - 关闭左右反向）
 }
 //==============================
 // * 物体的属性 - 销毁 动画序列控制器（开放函数）
 //==============================
 Game_Character.prototype.drill_EASe_removeActionSequence = function(){
-	this._drill_EASe_controller = undefined;
-	this._drill_EASe_keepDecoratorNull = true;
+	this._drill_EASe_controller = undefined;	//动画序列控制器
+	
+	this._drill_EASe_type = undefined;			//动画序列类型
+	this._drill_EASe_keepDecoratorNull = true;	//贴图销毁标记
+	this.drill_EASe_setRLFlipEnabled( false );  //（翻转控制 - 关闭可翻转）
+	this.drill_EASe_setRLFlipReverse( false );  //（翻转控制 - 关闭左右反向）
 }
-
 
 //==============================
 // * 播放 - 播放默认的状态元集合（开放函数）
@@ -846,8 +994,75 @@ Game_Character.prototype.drill_EASe_stopAct = function(){
 }
 
 
+
 //=============================================================================
-// ** ☆暂停控制
+// ** ☆翻转控制
+//
+//			说明：	> 此模块专门控制 翻转 动画序列。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 翻转控制 - 帧刷新
+//==============================
+var _drill_EASe_flip_initialize = Game_Character.prototype.initialize;
+Game_Character.prototype.initialize = function() {
+	this._drill_EASe_RLFlip_enabled = false;		//是否开启
+	this._drill_EASe_RLFlip_isReverse = false;		//是否反向
+	this._drill_EASe_RLFlip_dirValue = 1;			//翻转值
+	
+	// > 原函数
+	_drill_EASe_flip_initialize.call(this);
+}
+//==============================
+// * 翻转控制 - 设置左右可翻转（开放函数）
+//==============================
+Game_Character.prototype.drill_EASe_setRLFlipEnabled = function( enabled ){ this._drill_EASe_RLFlip_enabled = enabled; }
+Game_Character.prototype.drill_EASe_isRLFlipEnabled = function(){ return this._drill_EASe_RLFlip_enabled; }
+//==============================
+// * 翻转控制 - 设置左右反向（开放函数）
+//==============================
+Game_Character.prototype.drill_EASe_setRLFlipReverse = function( enabled ){ this._drill_EASe_RLFlip_isReverse = enabled; }
+Game_Character.prototype.drill_EASe_isRLFlipReversed = function(){ return this._drill_EASe_RLFlip_isReverse; }
+//==============================
+// * 翻转控制 - 帧刷新
+//==============================
+var _drill_EASe_flip_update = Game_CharacterBase.prototype.update;
+Game_CharacterBase.prototype.update = function() {
+	_drill_EASe_flip_update.call(this);
+	
+	// > 左右可翻转
+	if( this._drill_EASe_RLFlip_enabled == true ){
+		var cur_dir = this.direction();
+		if( cur_dir == 6 ){ 		//（朝右）
+			this._drill_EASe_RLFlip_dirValue = 1;
+		}else if( cur_dir == 4 ){	//（朝左）
+			this._drill_EASe_RLFlip_dirValue = -1;
+		}
+		//（其它情况不要改变翻转值）
+	}
+}
+//==============================
+// * 翻转控制 - 翻转设置
+//==============================
+var _drill_EASe_flip_finalTransform_scaleX = Game_CharacterBase.prototype.drill_COEF_finalTransform_scaleX;
+Game_CharacterBase.prototype.drill_COEF_finalTransform_scaleX = function(){
+	var value = _drill_EASe_flip_finalTransform_scaleX.call(this);
+	
+	// > 左右可翻转
+	if( this._drill_EASe_RLFlip_enabled == true ){
+		value *= this._drill_EASe_RLFlip_dirValue;
+	}
+	
+	// > 左右反向
+	if( this._drill_EASe_RLFlip_isReverse == true ){
+		value *= -1;
+	}
+	return value;
+}
+
+
+//=============================================================================
+// ** ☆暂停控制 实现
 //
 //			说明：	> 此模块专门控制 暂停 动画序列。
 //					（插件完整的功能目录去看看：功能结构树）
@@ -884,11 +1099,20 @@ Game_CharacterBase.prototype.update = function(){
 Game_CharacterBase.prototype.drill_EASe_setPauseDisabledInTime = function( time ){
 	this._drill_EASe_pauseDisabledTime = time;
 }
-//==============================
-// * 暂停控制 - 是否暂停（可继承）
+
+//#############################################################################
+// ** ☆暂停控制 标准模块
+//
+//			说明：	> 即对子插件开放的固定函数，无论插件如何变化，标准函数都不变。
+//#############################################################################
+//##############################
+// * 暂停控制 - 是否暂停【标准接口】
+//
+//			参数：	> 无
+//			返回：	> 布尔
 //
 //			说明：	> 子插件可根据情况来继承，控制 动画序列 暂停。
-//==============================
+//##############################
 Game_CharacterBase.prototype.drill_EASe_needPause = function(){
 	return false;
 }
@@ -1015,7 +1239,7 @@ Sprite_Character.prototype.drill_EASe_isPlaying = function() {
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 行走图贴图替换 - 帧刷新 - 行走图
+// * 行走图贴图替换 - 帧刷新 - 2B资源（半覆写）
 //==============================
 var _drill_EASe_sp_updateBitmap = Sprite_Character.prototype.updateBitmap;
 Sprite_Character.prototype.updateBitmap = function() {
@@ -1027,7 +1251,7 @@ Sprite_Character.prototype.updateBitmap = function() {
 	_drill_EASe_sp_updateBitmap.call(this);
 }
 //==============================
-// * 行走图贴图替换 - 帧刷新 - 动画帧
+// * 行走图贴图替换 - 帧刷新 - 2C切割矩形（半覆写）
 //==============================
 var _drill_EASe_sp_updateFrame = Sprite_Character.prototype.updateFrame;
 Sprite_Character.prototype.updateFrame = function() {
@@ -1053,7 +1277,6 @@ Sprite_Character.prototype.drill_EASe_updateFrame = function() {
 	
 	// > 当前朝向
 	var cur_dir = this._character.direction();	//（默认朝向 2/4/6/8）
-	//。。。
 	
 	// > 当前朝向 - 兼容【行走图 - 图块同步镜像】
 	if( Imported.Drill_LayerSynchronizedReflection ){
@@ -1071,8 +1294,13 @@ Sprite_Character.prototype.drill_EASe_updateFrame = function() {
 		}
 	}
 	
+	// > 当前朝向 - 无方向
+	//	（不操作）
 	
-	// > 四方向情况
+	// > 当前朝向 - 无方向可翻转
+	//	（不操作）
+	
+	// > 当前朝向 - 四方向
 	if( this._character._drill_EASe_type == "4dir" ){
 		
 		// > 上下朝向时，保持左右朝向
@@ -1093,10 +1321,9 @@ Sprite_Character.prototype.drill_EASe_updateFrame = function() {
 		else if( cur_sp_dir == 6 ){ y_index = 2; }
 		else if( cur_sp_dir == 8 ){ y_index = 3; }
 		sy = y_index * ph;
-	}
 	
-	// > 二方向情况
-	else if( this._character._drill_EASe_type == "2dir" ){
+	// > 当前朝向 - 二方向
+	}else if( this._character._drill_EASe_type == "2dir" ){
 		
 		// > 默认朝向右
 		if( this._drill_EASe_lastSpriteDir == undefined ){ this._drill_EASe_lastSpriteDir = 6; }
@@ -1120,10 +1347,9 @@ Sprite_Character.prototype.drill_EASe_updateFrame = function() {
 		else if( cur_sp_dir == 3 ){ y_index = 0; }
 		else if( cur_sp_dir == 9 ){ y_index = 0; }
 		sy = y_index * ph;
-	}
 	
-	// >  八方向情况
-	else if( this._character._drill_EASe_type == "8dir" ){
+	// > 当前朝向 - 八方向
+	}else if( this._character._drill_EASe_type == "8dir" ){
 		
 		var y_index = 0;
 		if( cur_dir == 2 ){ y_index = 0; }
@@ -1137,6 +1363,7 @@ Sprite_Character.prototype.drill_EASe_updateFrame = function() {
 		sy = y_index * ph;
 	}
 	
+	// > 当前朝向 - 执行切割
 	this.setFrame(sx, sy, pw, ph);
 }
 
@@ -1175,19 +1402,19 @@ Sprite_Character.prototype.drill_COEF_updateValue_PatternHeight = function() {
 	if( this._tileId > 0 ){ return; }
 	
 	
-	// > 高度 - 四方向情况
+	// > 高度 - 四方向
 	if( this._character._drill_EASe_type == "4dir" ){
 		this._drill_COEF_PatternHeight = this.bitmap.height / 4;
 	
-	// > 高度 - 二方向情况
+	// > 高度 - 二方向
 	}else if( this._character._drill_EASe_type == "2dir" ){
 		this._drill_COEF_PatternHeight = this.bitmap.height / 2;
 	
-	// > 高度 - 八方向情况
+	// > 高度 - 八方向
 	}else if( this._character._drill_EASe_type == "8dir" ){
 		this._drill_COEF_PatternHeight = this.bitmap.height / 8;
 	
-	// > 高度 - 站桩情况
+	// > 高度 - 无方向、无方向可翻转
 	}else{
 		this._drill_COEF_PatternHeight = this.bitmap.height;
 	}

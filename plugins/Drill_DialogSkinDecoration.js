@@ -460,15 +460,15 @@
 //			->☆插件指令
 //			->☆存储数据
 //			
-//			->☆对话框控制
+//			->☆对话框绑定
 //				->创建装饰图（Window_Base）
 //				->刷新装饰图（Window_Base）
-//			->☆对话框子窗口控制
+//			->☆对话框子窗口绑定
 //				->4A金钱窗口
 //				->4B选择项窗口
 //				->4C数字输入窗口
 //				->4D选择物品窗口
-//				x->4E姓名框窗口
+//				->4E姓名框窗口
 //			
 //			->对话框装饰图【Drill_DSD_DecorationSprite】
 //				->A主体
@@ -721,13 +721,13 @@ Game_System.prototype.drill_DSD_checkSysData_Private = function() {
 
 
 //=============================================================================
-// ** ☆对话框控制
+// ** ☆对话框绑定
 //
 //			说明：	> 该模块将对 对话框 进行专门管理。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 3A主体 - 初始化
+// * 3A主体 - 初始化装饰图
 //==============================
 var _drill_DSD_initialize = Window_Message.prototype.initialize;
 Window_Message.prototype.initialize = function() {
@@ -749,7 +749,7 @@ Window_Message.prototype.setBackgroundType = function( type ){
 }
 
 //==============================
-// * 对话框控制 - 创建装饰图（Window_Base）
+// * 对话框绑定 - 创建装饰图（Window_Base）
 //==============================
 Window_Base.prototype.drill_DSD_createSprite = function() {
 	if( this._drill_DSk_tag == undefined ){ return; }
@@ -764,7 +764,7 @@ Window_Base.prototype.drill_DSD_createSprite = function() {
 	this._drill_DSD_curStyle = -1;
 };
 //==============================
-// * 对话框控制 - 刷新装饰图（Window_Base）
+// * 对话框绑定 - 刷新装饰图（Window_Base）
 //
 //			说明：	> 每个窗口中都建立一个装饰图层，然后根据样式检查，删除全部装饰图，再重建并添加到图层。
 //==============================
@@ -804,13 +804,13 @@ Window_Base.prototype.drill_DSD_refreshSprite = function(){
 
 
 //=============================================================================
-// ** ☆对话框子窗口控制
+// ** ☆对话框子窗口绑定
 //
 //			说明：	> 该模块将对 对话框的子窗口 进行专门管理。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 4A金钱窗口 - 初始化
+// * 4A金钱窗口 - 初始化装饰图『对话框多个子窗口』
 //==============================
 var _drill_DSD_createSubWindows = Window_Message.prototype.createSubWindows;
 Window_Message.prototype.createSubWindows = function(){
@@ -827,7 +827,7 @@ Window_Gold.prototype.open = function() {
 }
 
 //==============================
-// * 4B选择项窗口 - 初始化
+// * 4B选择项窗口 - 初始化装饰图『对话框多个子窗口』
 //==============================
 var _drill_DSD_ChoiceList_initialize = Window_ChoiceList.prototype.initialize;
 Window_ChoiceList.prototype.initialize = function( messageWindow ){
@@ -844,7 +844,7 @@ Window_ChoiceList.prototype.start = function() {
 }
 
 //==============================
-// * 4C数字输入窗口 - 初始化
+// * 4C数字输入窗口 - 初始化装饰图『对话框多个子窗口』
 //==============================
 var _drill_DSD_NumberInput_initialize = Window_NumberInput.prototype.initialize;
 Window_NumberInput.prototype.initialize = function( messageWindow ){
@@ -861,7 +861,7 @@ Window_NumberInput.prototype.start = function() {
 }
 
 //==============================
-// * 4D选择物品窗口 - 初始化
+// * 4D选择物品窗口 - 初始化装饰图『对话框多个子窗口』
 //==============================
 var _drill_DSD_EventItem_initialize = Window_EventItem.prototype.initialize;
 Window_EventItem.prototype.initialize = function( messageWindow ){
@@ -877,31 +877,86 @@ Window_EventItem.prototype.start = function() {
 	this.drill_DSD_refreshSprite();
 }
 
+//==============================
+// * 对话框子窗口绑定 - 最后继承1级
+//==============================
+var _drill_DSD_scene_initialize = SceneManager.initialize;
+SceneManager.initialize = function() {
+	_drill_DSD_scene_initialize.call(this);
+	
+	//==============================
+	// * 4E姓名框窗口（Drill姓名框）
+	//==============================
+	if( Imported.Drill_DialogNameBox ){	
+		
+		//==============================
+		// * 4E姓名框窗口（Drill姓名框） - 初始化装饰图『对话框多个子窗口』
+		//==============================
+		var _drill_DSD_DNB_initialize = Drill_DNB_NameBoxWindow.prototype.initialize;
+		Drill_DNB_NameBoxWindow.prototype.initialize = function( messageWindow ){
+			_drill_DSD_DNB_initialize.call( this,messageWindow );
+			this.drill_DSD_createSprite();
+		}
+		//==============================
+		// * 4E姓名框窗口（Drill姓名框） - 设置位置类型
+		//==============================
+		var _drill_DSD_DNB_setPositionType = Drill_DNB_NameBoxWindow.prototype.drill_resetData_Message;
+		Drill_DNB_NameBoxWindow.prototype.drill_resetData_Message = function( text, position_type ){
+			_drill_DSD_DNB_setPositionType.call( this, text, position_type );
+			this.drill_DSD_refreshSprite();
+		}
+	}
+	//==============================
+	// * 4E姓名框窗口（Yep姓名框）
+	//==============================
+	if( Imported.YEP_MessageCore ){	
+		
+		//==============================
+		// * 4E姓名框窗口（Yep姓名框） - 初始化装饰图『对话框多个子窗口』
+		//==============================
+		var _drill_DSD_yep_NameBox_initialize = Window_NameBox.prototype.initialize;
+		Window_NameBox.prototype.initialize = function( messageWindow ){
+			_drill_DSD_yep_NameBox_initialize.call( this,messageWindow );
+			this.drill_DSD_createSprite();
+		}
+		//==============================
+		// * 4E姓名框窗口（Yep姓名框） - 刷新
+		//==============================
+		var _drill_DSD_yep_NameBox_refresh = Window_NameBox.prototype.refresh;
+		Window_NameBox.prototype.refresh = function( text, position ){
+			this.drill_DSD_refreshSprite();
+			
+			// > 原函数
+			return _drill_DSD_yep_NameBox_refresh.call( this, text, position );
+		}
+	}
+}
+
 
 
 //=============================================================================
 // ** 对话框装饰图【Drill_DSD_DecorationSprite】
-// **		
-// **		作用域：	地图界面、战斗界面
-// **		主功能：	定义一个贴图。
-// **		子功能：	
-// **					->贴图『独立贴图』
-// **						x->显示贴图/隐藏贴图
-// **						x->是否就绪
-// **						x->优化策略
-// **						x->销毁
-// **						->初始化数据
-// **						->初始化对象
-// **					
-// **					->A主体
-// **					->B播放GIF
-// **
-// **		代码：	> 范围 - 该类额外显示单图的装饰。
-// **				> 结构 - [ ●合并/分离/ 混乱 ] 数据与贴图合并。只有visible被控制。
-// **				> 数量 - [单个/ ●多个 ] 
-// **				> 创建 - [ ●一次性 /自延迟/外部延迟] 
-// **				> 销毁 - [ ●不考虑 /自销毁/外部销毁] 
-// **				> 样式 - [ ●不可修改 /自变化/外部变化] 
+//			
+//			作用域：	地图界面、战斗界面
+//			主功能：	定义一个贴图。
+//			子功能：	
+//						->贴图『独立贴图』
+//							x->显示贴图/隐藏贴图
+//							x->是否就绪
+//							x->优化策略
+//							x->销毁
+//							->初始化数据
+//							->初始化对象
+//						
+//						->A主体
+//						->B播放GIF
+//	
+//			代码：	> 范围 - 该类额外显示单图的装饰。
+//					> 结构 - [ ●合并/分离/ 混乱 ] 数据与贴图合并。只有visible被控制。
+//					> 数量 - [单个/ ●多个 ] 
+//					> 创建 - [ ●一次性 /自延迟/外部延迟] 
+//					> 销毁 - [ ●不考虑 /自销毁/外部销毁] 
+//					> 样式 - [ ●不可修改 /自变化/外部变化] 
 //=============================================================================
 //==============================
 // * 对话框装饰图 - 定义
@@ -964,7 +1019,7 @@ Drill_DSD_DecorationSprite.prototype.drill_sprite_updateAttr = function() {
 	// > 可见
 	this.visible = $gameSystem._drill_DSD_visibleTank[ data['id'] ];
 	
-	// > 窗口开关动画
+	// > 装饰图的展开动画（同步窗口的 0C展开动画）
 	this.scale.y = this._drill_parent._windowSpriteContainer.scale.y;
 }
 //==============================

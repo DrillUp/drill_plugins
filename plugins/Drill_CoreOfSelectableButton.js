@@ -1256,7 +1256,7 @@
 //		★时间复杂度		o(n^3)*o(贴图处理) 每帧
 //		★性能测试因素	主菜单界面
 //		★性能测试消耗	24.54ms（update函数 9.71ms）
-//						57.41ms（对话选项按钮组 drill_COSB_getVisibleRowNum）
+//						57.41ms（选择项窗口的按钮组 drill_COSB_getVisibleRowNum）
 //		★最坏情况		出现了100个以上的按钮，不过一般情况下，子插件都会限制最大显示数量。
 //		★备注			按钮组消耗一般，类似于gif的消耗。
 //		
@@ -2285,8 +2285,8 @@ Drill_COSB_LayerSprite.prototype.drill_sprite_createButtonList = function() {
 		temp_sprite.visible = false;
 		
 		// > 按钮排列
-		var orgX = 0;
-		var orgY = 0;
+		var org_x = 0;
+		var org_y = 0;
 		if( temp_data['arrange_mode'] == "直线排列" ){
 			var xx = temp_data['arrange_spacing'] * i;
 			var yy = (i % 2) * temp_data['arrange_wSpacing'];
@@ -2300,25 +2300,25 @@ Drill_COSB_LayerSprite.prototype.drill_sprite_createButtonList = function() {
 				temp_data['arrange_spacing'] * (count - 1) > temp_data['arrange_limitLength'] ){
 				xx = temp_data['arrange_limitLength'] / (count - 1) * i;
 			}
-			orgX = xx * Math.cos(angle) - yy * Math.sin(angle);
-			orgY = xx * Math.sin(angle) + yy * Math.cos(angle);
+			org_x = xx * Math.cos(angle) - yy * Math.sin(angle);
+			org_y = xx * Math.sin(angle) + yy * Math.cos(angle);
 		}
 		if( temp_data['arrange_mode'] == "环形排列" ){
 			if( Math.abs( temp_data['arrange_angleStart'] - temp_data['arrange_angleEnd'] ) % 360 == 0 ){
 				var angle = 360 * i / count + temp_data['arrange_angleStart'];
 				angle = angle / 180.0 * Math.PI;
-				orgX = temp_data['arrange_radius'] * Math.cos(angle) ;
-				orgY = temp_data['arrange_radius'] * Math.sin(angle) ;
+				org_x = temp_data['arrange_radius'] * Math.cos(angle) ;
+				org_y = temp_data['arrange_radius'] * Math.sin(angle) ;
 			}else{
 				var angle = (temp_data['arrange_angleEnd'] - temp_data['arrange_angleStart']) * i / (count-1) + temp_data['arrange_angleStart'];
 				angle = angle / 180.0 * Math.PI;
-				orgX = temp_data['arrange_radius'] * Math.cos(angle) ;
-				orgY = temp_data['arrange_radius'] * Math.sin(angle) ;
+				org_x = temp_data['arrange_radius'] * Math.cos(angle) ;
+				org_y = temp_data['arrange_radius'] * Math.sin(angle) ;
 			}
 		}
 		if( temp_data['arrange_mode'] == "矩阵排列" ){
-			orgX = Math.floor(i % temp_data['arrange_col']) * temp_data['arrange_width'] ;
-			orgY = Math.floor(i / temp_data['arrange_col']) * temp_data['arrange_height'] ;
+			org_x = Math.floor(i % temp_data['arrange_col']) * temp_data['arrange_width'] ;
+			org_y = Math.floor(i / temp_data['arrange_col']) * temp_data['arrange_height'] ;
 		}
 		if( temp_data['arrange_mode'] == "固定离散排列" ){
 			if( temp_data['arrange_squeeze'][i] != undefined ){
@@ -2326,19 +2326,19 @@ Drill_COSB_LayerSprite.prototype.drill_sprite_createButtonList = function() {
 				str = str.replace("(","");
 				str = str.replace(")","");
 				var str_arr = str.split(",");
-				orgX = Number( str_arr[0] );
-				orgY = Number( str_arr[1] );
+				org_x = Number( str_arr[0] );
+				org_y = Number( str_arr[1] );
 			}
 		}
-		temp_sprite['_org_x'] = orgX;
-		temp_sprite['_org_y'] = orgY;
-		temp_sprite.x = orgX;
-		temp_sprite.y = orgY;
+		temp_sprite['_org_x'] = org_x;
+		temp_sprite['_org_y'] = org_y;
+		temp_sprite.x = org_x;
+		temp_sprite.y = org_y;
 		
 		// > 按钮添加
 		this._drill_contextLayer.addChild(temp_sprite);
 		this._drill_button_spriteTank[i] = temp_sprite;
-		var pos = { "x" : orgX, "y" : orgY };
+		var pos = { "x" : org_x, "y" : org_y };
 		this._drill_button_orgPositionTank.push( pos );
 		
 		// > 按钮名称

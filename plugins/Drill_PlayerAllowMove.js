@@ -182,7 +182,7 @@ SceneManager.initialize = function() {
 //=============================================================================
 /*
 //==============================
-// * 3E按键移动『允许操作玩家移动』 - 帧刷新
+// * 3E按键移动《互动-允许操作玩家移动》 - 帧刷新
 //==============================
 Game_Player.prototype.moveByInput = function(){
     if( !this.isMoving() && this.canMove() ){
@@ -206,7 +206,7 @@ Game_Player.prototype.moveByInput = function(){
     }
 };
 //==============================
-// * 3E按键移动『允许操作玩家移动』 - 是否允许操作移动
+// * 3E按键移动《互动-允许操作玩家移动》 - 是否允许操作移动
 //==============================
 Game_Player.prototype.canMove = function(){
     if( $gameMap.isEventRunning() || $gameMessage.isBusy() ){
@@ -224,13 +224,13 @@ Game_Player.prototype.canMove = function(){
     return true;
 };
 //==============================
-// * 3E按键移动『允许操作玩家移动』 - 获取按键方向
+// * 3E按键移动《互动-允许操作玩家移动》 - 获取按键方向
 //==============================
 Game_Player.prototype.getInputDirection = function(){
     return Input.dir4;
 };
 //==============================
-// * 3E按键移动『允许操作玩家移动』 - 执行移动
+// * 3E按键移动《互动-允许操作玩家移动》 - 执行移动
 //==============================
 Game_Player.prototype.executeMove = function( direction ){
     this.moveStraight(direction);
@@ -444,11 +444,11 @@ Game_Player.prototype.canMove = function(){
 	return _drill_PAlM_enabled_canMove.call(this);
 };
 //==============================
-// * 允许开关 - 3G触发事件 - 暂停移动时（非帧刷新，继承）
+// * 允许开关 - 3G串行触发事件 - 暂停移动时（非帧刷新，继承）
 //==============================
 var _drill_PAlM_enabled_updateNonmoving = Game_Player.prototype.updateNonmoving;
 Game_Player.prototype.updateNonmoving = function( wasMoving ){
-	if( $gameSystem._drill_PAlM_enabled == false ){ return; }		//（开关关闭，则关闭 3G触发事件 ）
+	if( $gameSystem._drill_PAlM_enabled == false ){ return; }		//（开关关闭，则关闭 3G串行触发事件 ）
 	_drill_PAlM_enabled_updateNonmoving.call( this, wasMoving );
 };
 	

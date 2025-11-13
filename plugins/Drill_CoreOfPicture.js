@@ -112,9 +112,15 @@
 //			->☆存储数据
 //			->☆场景容器之图片贴图
 //			
+//			--------------------------
+//			
+//			
 //			->☆管辖权 - 图片数据【全权接管 Game_Picture】
 //			->☆管辖权 - 图片贴图【全权接管 Sprite_Picture】
 //			->☆管辖函数覆写
+//			
+//			--------------------------
+//			
 //			
 //			->☆数据最终变换值『图片数据最终变换值』『变换特性的规范』
 //				->基础特性
@@ -162,6 +168,8 @@
 //				->数学工具
 //					->锁定锚点
 //			
+//			--------------------------
+//			
 //			
 //			->☆碰撞体
 //				->绑定碰撞体【标准函数】
@@ -203,6 +211,8 @@
 //					->矩阵点的变换（逆向）/点A绕点B旋转缩放斜切（逆向）
 //			->☆DEBUG碰撞体范围
 //			
+//			--------------------------
+//			
 //			
 //			->☆图片的战斗层级
 //			->☆图片的地图层级
@@ -213,6 +223,8 @@
 //				->设置堆叠级时【标准函数】
 //			->☆层级控制
 //			->☆堆叠级控制
+//			
+//			--------------------------
 //			
 //			
 //		★家谱：
@@ -477,12 +489,12 @@ Game_Temp.prototype.drill_COPi_getPictureSpriteTank_SenceTopArea = function(){
 //==============================
 Game_Temp.prototype.drill_COPi_getPictureSpriteTank_PicArea = function(){
 	if( SceneManager._scene == undefined ){ return null; }
-	if( SceneManager._scene instanceof Scene_Battle ){		//『图片与多场景』
+	if( SceneManager._scene instanceof Scene_Battle ){		//『多场景与图片-战斗界面』
 		if( SceneManager._scene._spriteset == undefined ){ return null; }
 		if( SceneManager._scene._spriteset._drill_battlePicArea == undefined ){ return null; }
 		return SceneManager._scene._spriteset._drill_battlePicArea.children;
 	}
-	if( SceneManager._scene instanceof Scene_Map ){
+	if( SceneManager._scene instanceof Scene_Map ){			//『多场景与图片-地图界面』
 		if( SceneManager._scene._spriteset == undefined ){ return null; }
 		if( SceneManager._scene._spriteset._drill_mapPicArea == undefined ){ return null; }
 		return SceneManager._scene._spriteset._drill_mapPicArea.children;
@@ -585,14 +597,14 @@ Game_Temp.prototype.drill_COPi_getPictureSpriteByPictureId_Private = function( p
 //=============================================================================
 /*  管辖 - 创建数据+操作数据
 //==============================
-// * G图片容器『图片-图片优化核心』 - 获取图片
+// * G图片容器《图片-图片优化核心》 - 获取图片
 //==============================
 Game_Screen.prototype.picture = function( pictureId ){
     var realPictureId = this.realPictureId(pictureId);
     return this._pictures[realPictureId];
 };
 //==============================
-// * G图片容器『图片-图片优化核心』 - 获取实际图片ID
+// * G图片容器《图片-图片优化核心》 - 获取实际图片ID
 //==============================
 Game_Screen.prototype.realPictureId = function( pictureId ){
     if( $gameParty.inBattle() ){
@@ -602,7 +614,7 @@ Game_Screen.prototype.realPictureId = function( pictureId ){
     }
 };
 //==============================
-// * G图片容器『图片-图片优化核心』 - 图片最大数量
+// * G图片容器《图片-图片优化核心》 - 图片最大数量
 //
 //			说明：	> 用于分离 战斗界面的图片数据 与 地图界面的图片数据。
 //==============================
@@ -610,19 +622,19 @@ Game_Screen.prototype.maxPictures = function(){
     return 100;
 };
 //==============================
-// * G图片容器『图片-图片优化核心』 - 清除全部
+// * G图片容器《图片-图片优化核心》 - 清除全部
 //==============================
 Game_Screen.prototype.clearPictures = function(){
     this._pictures = [];
 };
 //==============================
-// * G图片容器『图片-图片优化核心』 - 清除上一场战斗的图片数据
+// * G图片容器《图片-图片优化核心》 - 清除上一场战斗的图片数据
 //==============================
 Game_Screen.prototype.eraseBattlePictures = function(){
     this._pictures = this._pictures.slice(0, this.maxPictures() + 1);
 };
 //==============================
-// * G图片容器『图片-图片优化核心』 - 帧刷新图片数据
+// * G图片容器《图片-图片优化核心》 - 帧刷新图片数据
 //==============================
 Game_Screen.prototype.updatePictures = function(){
     this._pictures.forEach(function( picture ){
@@ -633,7 +645,7 @@ Game_Screen.prototype.updatePictures = function(){
 };
 
 //==============================
-// * H图片操作『图片-图片优化核心』 - 显示图片（command231）
+// * H图片操作《图片-图片优化核心》 - 显示图片（command231）
 //==============================
 Game_Screen.prototype.showPicture = function( pictureId, name, origin, x, y,
                                              scaleX, scaleY, opacity, blendMode ){
@@ -643,7 +655,7 @@ Game_Screen.prototype.showPicture = function( pictureId, name, origin, x, y,
     this._pictures[realPictureId] = picture;
 };
 //==============================
-// * H图片操作『图片-图片优化核心』 - 移动图片（command232）
+// * H图片操作《图片-图片优化核心》 - 移动图片（command232）
 //==============================
 Game_Screen.prototype.movePicture = function( pictureId, origin, x, y, scaleX,
                                              scaleY, opacity, blendMode, duration ){
@@ -653,7 +665,7 @@ Game_Screen.prototype.movePicture = function( pictureId, origin, x, y, scaleX,
     }
 };
 //==============================
-// * H图片操作『图片-图片优化核心』 - 旋转图片（command233）
+// * H图片操作《图片-图片优化核心》 - 旋转图片（command233）
 //==============================
 Game_Screen.prototype.rotatePicture = function( pictureId, speed ){
     var picture = this.picture(pictureId);
@@ -662,7 +674,7 @@ Game_Screen.prototype.rotatePicture = function( pictureId, speed ){
     }
 };
 //==============================
-// * H图片操作『图片-图片优化核心』 - 更改图片色调（command234）
+// * H图片操作《图片-图片优化核心》 - 更改图片色调（command234）
 //==============================
 Game_Screen.prototype.tintPicture = function( pictureId, tone, duration ){
     var picture = this.picture(pictureId);
@@ -671,7 +683,7 @@ Game_Screen.prototype.tintPicture = function( pictureId, tone, duration ){
     }
 };
 //==============================
-// * H图片操作『图片-图片优化核心』 - 消除图片（command235）
+// * H图片操作《图片-图片优化核心》 - 消除图片（command235）
 //
 //			说明：	> 注意，此处直接暴力删除了 图片数据，此函数执行后，图片数据直接获取不到了。
 //==============================
@@ -683,7 +695,7 @@ Game_Screen.prototype.erasePicture = function( pictureId ){
 */
 /*  管辖 - 数据类
 //==============================
-// * 图片『图片-图片优化核心』 - 初始化
+// * 图片《图片-图片优化核心》 - 初始化
 //==============================
 Game_Picture.prototype.initialize = function(){
     this.initBasic();			//基本信息
@@ -693,7 +705,7 @@ Game_Picture.prototype.initialize = function(){
 };
 
 //==============================
-// * 图片『图片-图片优化核心』 - 属性获取
+// * 图片《图片-图片优化核心》 - 属性获取
 //==============================
 Game_Picture.prototype.name = function(){ return this._name; };				//图片资源名
 Game_Picture.prototype.blendMode = function(){ return this._blendMode; };	//混合模式
@@ -709,7 +721,7 @@ Game_Picture.prototype.tone = function(){ return this._tone; };				//色调（�
 Game_Picture.prototype.angle = function(){ return this._angle; };			//旋转（单位角度）
 
 //==============================
-// * 初始化『图片-图片优化核心』 - 基本信息
+// * 初始化《图片-图片优化核心》 - 基本信息
 //==============================
 Game_Picture.prototype.initBasic = function(){
 	
@@ -746,7 +758,7 @@ Game_Picture.prototype.initBasic = function(){
 	// > 属性 - 堆叠级（贴图的属性，这里不定义）
 };
 //==============================
-// * 初始化『图片-图片优化核心』 - 目标变换
+// * 初始化《图片-图片优化核心》 - 目标变换
 //==============================
 Game_Picture.prototype.initTarget = function(){
     this._targetX = this._x;				//目标变换 - 位置X
@@ -757,7 +769,7 @@ Game_Picture.prototype.initTarget = function(){
     this._duration = 0;						//目标变换 - 剩余时间
 };
 //==============================
-// * 初始化『图片-图片优化核心』 - 色调
+// * 初始化《图片-图片优化核心》 - 色调
 //==============================
 Game_Picture.prototype.initTone = function(){
     this._tone = null;			//色调（数组）
@@ -765,7 +777,7 @@ Game_Picture.prototype.initTone = function(){
     this._toneDuration = 0;		//目标变换 - 剩余时间
 };
 //==============================
-// * 初始化『图片-图片优化核心』 - 旋转
+// * 初始化《图片-图片优化核心》 - 旋转
 //==============================
 Game_Picture.prototype.initRotation = function(){
     this._angle = 0;			//旋转（单位角度）
@@ -773,7 +785,7 @@ Game_Picture.prototype.initRotation = function(){
 };
 
 //==============================
-// * 图片操作『图片-图片优化核心』 - 显示图片（对应函数showPicture）
+// * 图片操作《图片-图片优化核心》 - 显示图片（对应函数showPicture）
 //==============================
 Game_Picture.prototype.show = function( name, origin, x, y, scaleX,
                                        scaleY, opacity, blendMode ){
@@ -790,7 +802,7 @@ Game_Picture.prototype.show = function( name, origin, x, y, scaleX,
     this.initRotation();
 };
 //==============================
-// * 图片操作『图片-图片优化核心』 - 移动图片（对应函数movePicture）
+// * 图片操作《图片-图片优化核心》 - 移动图片（对应函数movePicture）
 //==============================
 Game_Picture.prototype.move = function( origin, x, y, scaleX, scaleY,
                                        opacity, blendMode, duration ){
@@ -804,13 +816,13 @@ Game_Picture.prototype.move = function( origin, x, y, scaleX, scaleY,
     this._duration = duration;
 };
 //==============================
-// * 图片操作『图片-图片优化核心』 - 旋转图片（对应函数rotatePicture）
+// * 图片操作《图片-图片优化核心》 - 旋转图片（对应函数rotatePicture）
 //==============================
 Game_Picture.prototype.rotate = function( speed ){
     this._rotationSpeed = speed;
 };
 //==============================
-// * 图片操作『图片-图片优化核心』 - 更改图片色调（对应函数tintPicture）
+// * 图片操作《图片-图片优化核心》 - 更改图片色调（对应函数tintPicture）
 //==============================
 Game_Picture.prototype.tint = function( tone, duration ){
     if( !this._tone ){
@@ -823,7 +835,7 @@ Game_Picture.prototype.tint = function( tone, duration ){
     }
 };
 //==============================
-// * 图片操作『图片-图片优化核心』 - 消除图片（无对应）
+// * 图片操作《图片-图片优化核心》 - 消除图片（无对应）
 //
 //			说明：	> 注意，函数 erasePicture 没有执行到此函数，因此子插件继承时需要 两个函数 都考虑。
 //==============================
@@ -836,7 +848,7 @@ Game_Picture.prototype.erase = function(){
 };
 
 //==============================
-// * 图片『图片-图片优化核心』 - 帧刷新
+// * 图片《图片-图片优化核心》 - 帧刷新
 //==============================
 Game_Picture.prototype.update = function(){
     this.updateMove();			//位置
@@ -844,7 +856,7 @@ Game_Picture.prototype.update = function(){
     this.updateRotation();		//旋转
 };
 //==============================
-// * 图片『图片-图片优化核心』 - 帧刷新 - 位置
+// * 图片《图片-图片优化核心》 - 帧刷新 - 位置
 //==============================
 Game_Picture.prototype.updateMove = function(){
     if( this._duration > 0 ){
@@ -858,7 +870,7 @@ Game_Picture.prototype.updateMove = function(){
     }
 };
 //==============================
-// * 图片『图片-图片优化核心』 - 帧刷新 - 色调
+// * 图片《图片-图片优化核心》 - 帧刷新 - 色调
 //==============================
 Game_Picture.prototype.updateTone = function(){
     if( this._toneDuration > 0 ){
@@ -870,7 +882,7 @@ Game_Picture.prototype.updateTone = function(){
     }
 };
 //==============================
-// * 图片『图片-图片优化核心』 - 帧刷新 - 旋转
+// * 图片《图片-图片优化核心》 - 帧刷新 - 旋转
 //==============================
 Game_Picture.prototype.updateRotation = function(){
     if( this._rotationSpeed !== 0 ){
@@ -887,7 +899,9 @@ Game_Picture.prototype.updateRotation = function(){
 //=============================================================================
 /*  管辖 - 创建贴图
 //==============================
-// * 2C上图层『图片-图片优化核心』 - 创建 图片层
+// * 2C上图层《图片-图片优化核心》 - 创建 图片层
+//
+//			说明：	> 注意该函数『因为缺失原型链所以不要直接继承』。
 //==============================
 Spriteset_Base.prototype.createPictures = function(){
     var width = Graphics.boxWidth;
@@ -896,39 +910,39 @@ Spriteset_Base.prototype.createPictures = function(){
     var y = (Graphics.height - height) / 2;
     this._pictureContainer = new Sprite();
     this._pictureContainer.setFrame(x, y, width, height);
-    for (var i = 1; i <= $gameScreen.maxPictures(); i++ ){
+    for( var i = 1; i <= $gameScreen.maxPictures(); i++ ){
         this._pictureContainer.addChild(new Sprite_Picture(i));
     }
     this.addChild(this._pictureContainer);
 };
-
+*/
+/*  管辖 - 贴图类
 //==============================
-// * 图片贴图『图片-图片优化核心』 - 初始化
+// * 图片贴图《图片-图片优化核心》 - 初始化
 //==============================
-Sprite_Picture.prototype.initialize = function(  pictureId ){
+Sprite_Picture.prototype.initialize = function( pictureId ){
     Sprite.prototype.initialize.call(this);
     this._pictureId = pictureId;
     this._pictureName = '';
     this._isPicture = true;		//（没用的变量）
     this.update();
 };
-*/
-/*  管辖 - 贴图类
+
 //==============================
-// * 图片贴图『图片-图片优化核心』 - 获取 图片纯数据
+// * 图片贴图《图片-图片优化核心》 - 获取 图片纯数据
 //==============================
 Sprite_Picture.prototype.picture = function(){
     return $gameScreen.picture(this._pictureId);
 };
 //==============================
-// * 图片贴图『图片-图片优化核心』 - 获取bitmap资源对象
+// * 图片贴图《图片-图片优化核心》 - 获取bitmap资源对象
 //==============================
 Sprite_Picture.prototype.loadBitmap = function(){
     this.bitmap = ImageManager.loadPicture(this._pictureName);
 };
 
 //==============================
-// * 图片贴图『图片-图片优化核心』 - 帧刷新
+// * 图片贴图《图片-图片优化核心》 - 帧刷新
 //==============================
 Sprite_Picture.prototype.update = function(){
     Sprite.prototype.update.call(this);
@@ -942,7 +956,7 @@ Sprite_Picture.prototype.update = function(){
     }
 };
 //==============================
-// * 图片贴图『图片-图片优化核心』 - 帧刷新 - 资源
+// * 图片贴图《图片-图片优化核心》 - 帧刷新 - 资源
 //==============================
 Sprite_Picture.prototype.updateBitmap = function(){
     var picture = this.picture();
@@ -960,7 +974,7 @@ Sprite_Picture.prototype.updateBitmap = function(){
     }
 };
 //==============================
-// * 图片贴图『图片-图片优化核心』 - 帧刷新 - 锚点
+// * 图片贴图《图片-图片优化核心》 - 帧刷新 - 锚点
 //==============================
 Sprite_Picture.prototype.updateOrigin = function(){
     var picture = this.picture();
@@ -973,7 +987,7 @@ Sprite_Picture.prototype.updateOrigin = function(){
     }
 };
 //==============================
-// * 图片贴图『图片-图片优化核心』 - 帧刷新 - 位置
+// * 图片贴图《图片-图片优化核心》 - 帧刷新 - 位置
 //==============================
 Sprite_Picture.prototype.updatePosition = function(){
     var picture = this.picture();
@@ -981,7 +995,7 @@ Sprite_Picture.prototype.updatePosition = function(){
     this.y = Math.floor(picture.y());
 };
 //==============================
-// * 图片贴图『图片-图片优化核心』 - 帧刷新 - 缩放
+// * 图片贴图《图片-图片优化核心》 - 帧刷新 - 缩放
 //==============================
 Sprite_Picture.prototype.updateScale = function(){
     var picture = this.picture();
@@ -989,7 +1003,7 @@ Sprite_Picture.prototype.updateScale = function(){
     this.scale.y = picture.scaleY() / 100;
 };
 //==============================
-// * 图片贴图『图片-图片优化核心』 - 帧刷新 - 色调
+// * 图片贴图《图片-图片优化核心》 - 帧刷新 - 色调
 //
 //			说明：	> 持续帧刷新可能会影响性能。
 //==============================
@@ -1002,7 +1016,7 @@ Sprite_Picture.prototype.updateTone = function(){
     }
 };
 //==============================
-// * 图片贴图『图片-图片优化核心』 - 帧刷新 - 其他属性
+// * 图片贴图《图片-图片优化核心》 - 帧刷新 - 其他属性
 //==============================
 Sprite_Picture.prototype.updateOther = function(){
     var picture = this.picture();
@@ -1020,7 +1034,7 @@ Sprite_Picture.prototype.updateOther = function(){
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 管辖函数覆写 - H图片操作『图片-图片优化核心』 - 显示图片（command231）
+// * 管辖函数覆写 - H图片操作《图片-图片优化核心》 - 显示图片（command231）
 //==============================
 Game_Screen.prototype.showPicture = function( pictureId, name, origin, x, y,
 											scaleX, scaleY, opacity, blendMode ){
@@ -1038,7 +1052,7 @@ Game_Screen.prototype.showPicture = function( pictureId, name, origin, x, y,
 	this._pictures[realPictureId] = picture;
 };
 //==============================
-// * 管辖函数覆写 - G图片容器『图片-图片优化核心』 - 帧刷新图片数据
+// * 管辖函数覆写 - G图片容器《图片-图片优化核心》 - 帧刷新图片数据
 //==============================
 Game_Screen.prototype.updatePictures = function(){
 	for(var i = 0; i < this._pictures.length; i++ ){
@@ -1231,7 +1245,7 @@ Sprite_Picture.prototype.drill_COPi_updateSkew = function(){
 //					  图片贴图容器 有 maxPictures 个贴图。（容器在：SceneManager._scene._spriteset._pictureContainer）
 //					
 //					> 扩展说明：
-//					  后期扩展仍然保持此结构不变，如果出现了 新的大界面（如STG界面），则会考虑 maxPictures X 3 个数据。
+//					  后期扩展仍然保持此结构不变，如果出现了 新的大界面，则可能考虑 maxPictures X 3 个数据。（目前STG和ACT不扩展）
 //					  由于图片贴图可以 任意换 层级/堆叠级，子插件应该考虑使用 drill_COPi_getPictureSpriteByPictureId() 获取贴图。
 //					
 //					（插件完整的功能目录去看看：功能结构树）
@@ -1243,11 +1257,11 @@ Sprite_Picture.prototype.drill_COPi_updateSkew = function(){
 //					> 若找不到ID则返回-1。
 //==============================
 Game_Picture.prototype.drill_COPi_getPictureId = function(){
-	if( $gameParty.inBattle() ){	//战斗界面的图片『图片与多场景』
+	if( $gameParty.inBattle() ){	//『多场景与图片-战斗界面』
 		var pic_id = $gameScreen._pictures.indexOf( this );
 		if( pic_id == -1 ){ return -1; }
         return pic_id - $gameScreen.maxPictures();
-    }else{							//地图界面的图片
+    }else{							//『多场景与图片-地图界面』
 		var pic_id = $gameScreen._pictures.indexOf( this );
         return pic_id;
     }
@@ -1809,7 +1823,7 @@ function Drill_COPi_CollisionBean(){
 // * 实体类 - 初始化
 //==============================
 Drill_COPi_CollisionBean.prototype.initialize = function(){
-	this._drill_beanSerial = new Date().getTime() + Math.random();		//（生成一个不重复的序列号）
+	this._drill_beanSerial = new Date().getTime() + Math.random();		//『随机因子-生成一个不重复的序列号』
     this.drill_bean_initData();											//私有数据初始化
 };
 //##############################
@@ -2243,7 +2257,7 @@ Game_Temp.prototype.drill_COPi_Math2D_getPointWithTransformInversed = function(
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * DEBUG碰撞体范围 - 帧刷新（地图界面）
+// * DEBUG碰撞体范围 - 帧刷新『多场景与图片-地图界面』
 //==============================
 var _drill_COPi_debugMap_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {
@@ -2252,7 +2266,7 @@ Scene_Map.prototype.update = function() {
     this.drill_COPi_updateDrawBeanRangeBitmap();		//帧刷新 - 绘制范围
 }
 //==============================
-// * DEBUG碰撞体范围 - 帧刷新 初始化贴图
+// * DEBUG碰撞体范围 - 帧刷新 初始化贴图『多场景与图片-地图界面』
 //==============================
 Scene_Map.prototype.drill_COPi_updateDrawBeanRangeSprite = function() {
 	
@@ -2283,7 +2297,7 @@ Scene_Map.prototype.drill_COPi_updateDrawBeanRangeSprite = function() {
 	}
 }
 //==============================
-// * DEBUG碰撞体范围 - 帧刷新 绘制范围
+// * DEBUG碰撞体范围 - 帧刷新 绘制范围『多场景与图片-地图界面』
 //==============================
 Scene_Map.prototype.drill_COPi_updateDrawBeanRangeBitmap = function() {
 	if( this._drill_COPi_DebugSprite == undefined ){ return; }
@@ -2292,10 +2306,10 @@ Scene_Map.prototype.drill_COPi_updateDrawBeanRangeBitmap = function() {
 	var temp_bitmap = this._drill_COPi_DebugSprite.bitmap;
 	temp_bitmap.clear();
 	
-	// > 图片遍历『图片与多场景』（显示所有图片的悬停范围）
-	var i_offset = 0;							//地图界面的图片
+	// > 图片遍历（显示所有图片的悬停范围）
+	var i_offset = 0;							//『多场景与图片-地图界面』
 	var pic_length = $gameScreen.maxPictures();
-	if( $gameParty.inBattle() == true ){		//战斗界面的图片
+	if( $gameParty.inBattle() == true ){		//『多场景与图片-战斗界面』
 		i_offset = pic_length;
 	}
 	for(var i = 0; i < pic_length; i++ ){
@@ -2339,7 +2353,7 @@ Scene_Map.prototype.drill_COPi_updateDrawBeanRangeBitmap = function() {
 	}
 }
 //==============================
-// * DEBUG碰撞体范围 - 帧刷新（战斗界面）
+// * DEBUG碰撞体范围 - 帧刷新『多场景与图片-战斗界面』
 //==============================
 var _drill_COPi_debugBattle_update = Scene_Battle.prototype.update;
 Scene_Battle.prototype.update = function(){
@@ -2348,9 +2362,12 @@ Scene_Battle.prototype.update = function(){
     this.drill_COPi_updateDrawBeanRangeBitmap();		//帧刷新 - 绘制范围
 }
 //==============================
-// * DEBUG碰撞体范围 - 函数赋值『图片与多场景』
+// * DEBUG碰撞体范围 - 帧刷新 初始化贴图『多场景与图片-战斗界面』
 //==============================
 Scene_Battle.prototype.drill_COPi_updateDrawBeanRangeSprite = Scene_Map.prototype.drill_COPi_updateDrawBeanRangeSprite;
+//==============================
+// * DEBUG碰撞体范围 - 帧刷新 绘制范围『多场景与图片-战斗界面』
+//==============================
 Scene_Battle.prototype.drill_COPi_updateDrawBeanRangeBitmap = Scene_Map.prototype.drill_COPi_updateDrawBeanRangeBitmap;
 
 //==============================
@@ -2462,7 +2479,7 @@ if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义�
 			this.__drill_zIndex = value;
 		},
 		get: function(){
-			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			if( this.__drill_zIndex == undefined ){ return 20250701; }	//（如果未定义则放最上面）
 			return this.__drill_zIndex;
 		},
 		configurable: true
@@ -2566,7 +2583,7 @@ if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义�
 			this.__drill_zIndex = value;
 		},
 		get: function(){
-			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			if( this.__drill_zIndex == undefined ){ return 20250701; }	//（如果未定义则放最上面）
 			return this.__drill_zIndex;
 		},
 		configurable: true
@@ -2665,7 +2682,7 @@ Game_Temp.prototype.drill_COPi_whenRefreshZIndex = function( temp_sprite, pictur
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 层级控制 - 初始化绑定（地图界面）
+// * 层级控制 - 初始化绑定『多场景与图片-地图界面』
 //==============================
 var _drill_COPi_layer_map_createPictures2 = Spriteset_Map.prototype.createPictures;
 Spriteset_Map.prototype.createPictures = function(){
@@ -2673,7 +2690,7 @@ Spriteset_Map.prototype.createPictures = function(){
 	$gameTemp._drill_COPi_needRefreshSpriteLayer = true;
 };
 //==============================
-// * 层级控制 - 帧刷新（地图界面）
+// * 层级控制 - 帧刷新绑定『多场景与图片-地图界面』
 //==============================
 var _drill_COPi_layer_map_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {
@@ -2681,7 +2698,7 @@ Scene_Map.prototype.update = function() {
 	this.drill_COPi_updateLayer();
 }
 //==============================
-// * 层级控制 - 帧刷新
+// * 层级控制 - 帧刷新『多场景与图片-地图界面』
 //==============================
 Scene_Map.prototype.drill_COPi_updateLayer = function() {
 	if( !$gameTemp._drill_COPi_needRefreshSpriteLayer ){ return; }
@@ -2721,7 +2738,7 @@ Scene_Map.prototype.drill_COPi_updateLayer = function() {
 	}
 }
 //==============================
-// * 层级控制 - 初始化绑定（地图界面）
+// * 层级控制 - 初始化绑定『多场景与图片-战斗界面』
 //==============================
 var _drill_COPi_layer_battle_createPictures2 = Spriteset_Battle.prototype.createPictures;
 Spriteset_Battle.prototype.createPictures = function(){
@@ -2729,7 +2746,7 @@ Spriteset_Battle.prototype.createPictures = function(){
 	$gameTemp._drill_COPi_needRefreshSpriteLayer = true;
 };
 //==============================
-// * 层级控制 - 帧刷新（战斗界面）
+// * 层级控制 - 帧刷新绑定『多场景与图片-战斗界面』
 //==============================
 var _drill_COPi_layer_battle_update = Scene_Battle.prototype.update;
 Scene_Battle.prototype.update = function() {
@@ -2737,7 +2754,7 @@ Scene_Battle.prototype.update = function() {
 	this.drill_COPi_updateLayer();
 }
 //==============================
-// * 层级控制 - 函数赋值『图片与多场景』
+// * 层级控制 - 帧刷新『多场景与图片-战斗界面』
 //==============================
 Scene_Battle.prototype.drill_COPi_updateLayer = Scene_Map.prototype.drill_COPi_updateLayer;
 
@@ -2751,7 +2768,7 @@ Scene_Battle.prototype.drill_COPi_updateLayer = Scene_Map.prototype.drill_COPi_u
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 堆叠级控制 - 初始化绑定（地图界面）
+// * 堆叠级控制 - 初始化绑定『多场景与图片-地图界面』
 //==============================
 var _drill_COPi_zIndex_map_createPictures3 = Spriteset_Map.prototype.createPictures;
 Spriteset_Map.prototype.createPictures = function(){
@@ -2759,7 +2776,7 @@ Spriteset_Map.prototype.createPictures = function(){
 	$gameTemp._drill_COPi_needRefreshSpriteZIndex = true;
 };
 //==============================
-// * 堆叠级控制 - 帧刷新（地图界面）
+// * 堆叠级控制 - 帧刷新绑定『多场景与图片-地图界面』
 //==============================
 var _drill_COPi_zIndex_map_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {
@@ -2767,7 +2784,7 @@ Scene_Map.prototype.update = function() {
 	this.drill_COPi_updateZIndex();
 }
 //==============================
-// * 堆叠级控制 - 帧刷新
+// * 堆叠级控制 - 帧刷新『多场景与图片-地图界面』
 //==============================
 Scene_Map.prototype.drill_COPi_updateZIndex = function() {
 	if( !$gameTemp._drill_COPi_needRefreshSpriteZIndex ){ return; }
@@ -2804,7 +2821,7 @@ Scene_Map.prototype.drill_COPi_updateZIndex = function() {
 	this.drill_COPi_sortByZIndex();
 }
 //==============================
-// * 堆叠级控制 - 初始化绑定（地图界面）
+// * 堆叠级控制 - 初始化绑定『多场景与图片-战斗界面』
 //==============================
 var _drill_COPi_zIndex_battle_createPictures3 = Spriteset_Battle.prototype.createPictures;
 Spriteset_Battle.prototype.createPictures = function(){
@@ -2812,7 +2829,7 @@ Spriteset_Battle.prototype.createPictures = function(){
 	$gameTemp._drill_COPi_needRefreshSpriteZIndex = true;
 };
 //==============================
-// * 堆叠级控制 - 帧刷新（战斗界面）
+// * 堆叠级控制 - 帧刷新绑定『多场景与图片-战斗界面』
 //==============================
 var _drill_COPi_zIndex_battle_update = Scene_Battle.prototype.update;
 Scene_Battle.prototype.update = function() {
@@ -2820,7 +2837,7 @@ Scene_Battle.prototype.update = function() {
 	this.drill_COPi_updateZIndex();
 }
 //==============================
-// * 堆叠级控制 - 函数赋值『图片与多场景』
+// * 堆叠级控制 - 帧刷新『多场景与图片-战斗界面』
 //==============================
 Scene_Battle.prototype.drill_COPi_updateZIndex = Scene_Map.prototype.drill_COPi_updateZIndex;
 

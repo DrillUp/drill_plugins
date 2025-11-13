@@ -1454,7 +1454,7 @@ DrillUp.g_HDSSW_checkNaN = true;
 //==============================
 Drill_HDSSW_Controller.prototype.initialize = function( data ){
 	this._drill_data = {};
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能
 	if( data == undefined ){ data = {}; }
@@ -1594,7 +1594,7 @@ Drill_HDSSW_Controller.prototype.drill_controller_resetData_Private = function( 
 	
 	// > 执行重置
 	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能
 }
@@ -1700,14 +1700,14 @@ Drill_HDSSW_Controller.prototype.drill_controller_updateChange_Position = functi
 //==============================
 Drill_HDSSW_Controller.prototype.drill_controller_initMask = function() {
 	var data = this._drill_data;
-	this._drill_convex_serial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+	this._drill_convex_serial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
 	this._drill_convex_points = [];
 }
 //==============================
 // * 2A遮罩管理 - 设置多边形（开放函数）
 //==============================
 Drill_HDSSW_Controller.prototype.drill_controller_setMaskConvex = function( convex_points ){
-	this._drill_convex_serial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+	this._drill_convex_serial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
 	this._drill_convex_points = convex_points;
 }
 
@@ -2742,7 +2742,7 @@ DrillUp.g_HDSSW_checkNaN = true;
 //==============================
 Drill_HDSSW_CircleController.prototype.initialize = function( data ){
 	this._drill_data = {};
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能
 	if( data == undefined ){ data = {}; }
@@ -2933,7 +2933,7 @@ Drill_HDSSW_CircleController.prototype.drill_controller_resetData_Private = func
 	
 	// > 执行重置
 	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能
 }

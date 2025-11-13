@@ -323,7 +323,7 @@ Game_Temp.prototype.drill_COWC_effect_processCombined = function( matched_index,
 //=============================================================================
 /*
 //==============================
-// * A默认属性『窗口字符-行高控制器』 - 默认行高
+// * A默认属性《窗口字符-行高控制器》 - 默认 行高
 //==============================
 Window_Base.prototype.lineHeight = function(){ return 36; };
 */

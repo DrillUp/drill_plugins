@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        对话框 - 对话框变形器
+ * @plugindesc [v1.5]        对话框 - 对话框变形器
  * @author Drill_up
  * 
  * @Drill_LE_param "变形样式-%d"
@@ -33,24 +33,26 @@
  *   作用于对话框和其子窗口。
  * 2.详细内容和图解，去看看 "15.对话框 > 关于对话框变形器.docx"。
  * 细节：
- *   (1."对话框是否可出界"，表示如果对话框矩形超出了游戏窗口边界，
+ *   (1.参数"对话框是否可出界"，表示如果对话框矩形超出了游戏窗口边界，
  *      则会根据情况被拉回到靠边角的位置。
  *      如果对话框的宽度高度比游戏窗口还大，则会被拉到0的位置。
  * 设计：
- *   (1.你可以将对话框形状设为 自由的小对话框，通过改变坐标，将
- *      小对话框放置在事件附近的位置，来表示此对话是事件NPC说的。
+ *   (1.你可以将对话框形状设为 自由的小对话框，通过改变坐标，
+ *      将小对话框放置在游戏图像的任意位置。
  *
  * -----------------------------------------------------------------------------
  * ----可选设定 - 常用参数
- * 你可以通过插件指令手动控制边框的属性：
+ * 你可以通过插件指令手动修改属性：
  * 
  * 插件指令：>对话框变形器 : 设置对话框行数 : 10
  * 插件指令：>对话框变形器 : 还原默认对话框行数
+ * 
  * 插件指令：>对话框变形器 : 开启自动换行
  * 插件指令：>对话框变形器 : 关闭自动换行
  * 
- * 1.注意，当前形状的 高度模式 必须为"使用自定义行数的高度"的设置时，
- *   修改行数才能有效。详细去看看 "15.对话框 > 关于对话框变形器.docx"。
+ * 1.注意，上述插件指令，
+ *   需要在当前样式的 高度模式 为"使用自定义行数的高度"的设置时，
+ *   修改行数才能有效。其它模式下修改行数不生效。
  * 
  * 以下是旧版本的指令，也可以用：
  * 插件指令(旧)：>消息核心 : 设置对话框行数 : 10
@@ -58,17 +60,17 @@
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 样式修改
- * 你可以通过插件指令手动控制边框的属性：
+ * 你可以通过插件指令手动修改属性：
  * 
  * 插件指令：>对话框变形器 : 切换形状 : 变形样式[1]
- * 插件指令：>对话框变形器 : 还原默认形状样式
+ * 插件指令：>对话框变形器 : 还原默认变形样式
  * 
  * 1.修改变形样式后，立即生效，且永久有效。
  *   你可以在角色对话时随时切换变形形状。
  *
  * -----------------------------------------------------------------------------
  * ----可选设定 - 自定义值
- * 你可以通过插件指令手动控制边框的属性：
+ * 你可以通过插件指令手动修改属性：
  * 
  * 插件指令：>对话框变形器 : 设置对话框X位置 : 400
  * 插件指令：>对话框变形器 : 设置对话框X位置 : 变量[21]
@@ -82,8 +84,9 @@
  * 插件指令：>对话框变形器 : 设置对话框宽度 : 变量[21]
  * 插件指令：>对话框变形器 : 还原默认对话框宽度
  * 
- * 1.注意，上述插件指令，必须X、Y、宽度、高度任一的模式在"使用自定义值"，
- *   的情况，才能支持修改。其它模式下修改值不生效。
+ * 1.注意，上述插件指令，
+ *   需要在X、Y、宽度、高度任一的模式在"使用自定义值"的设置时，
+ *   才能支持修改。其它模式下修改值不生效。
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -104,7 +107,7 @@
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
  *   测试结果并不是精确值，范围在给定值的10ms范围内波动。
  *   更多性能介绍，去看看 "0.性能测试报告 > 关于插件性能.docx"。
- * 2.插件只单次执行，产生的消耗几乎可以忽略不计。
+ * 2.插件持续执行只改变坐标，产生的消耗几乎可以忽略不计。
  *
  * -----------------------------------------------------------------------------
  * ----更新日志
@@ -118,6 +121,8 @@
  * 翻新了对话框的内部结构。
  * [v1.4]
  * 改进并兼容了子插件气泡对话框。
+ * [v1.5]
+ * 改进了各类子窗口的位置管理。
  * 
  * 
  * 
@@ -148,37 +153,37 @@
  * @parent ---变形样式集---
  * @type struct<DrillDOpStyle>
  * @desc 对话框相关窗口的变形样式配置。
- * @default {"标签":"==标准对话框形状==","---窗口---":"","位置X模式":"框居中","平移-自定义值 X":"0","位置Y模式":"与'窗口位置'设置一致","平移-自定义值 Y":"0","宽度模式":"使用自定义值","宽度自定义值":"816","高度模式":"使用自定义行数的高度","默认自定义行数":"4","高度自定义值":"192","---其它---":""}
- * 
+ * @default {"标签":"==标准对话框形状==","---窗口矩形---":"","位置X模式":"框居中","平移-自定义值 X":"0","位置Y模式":"与'窗口位置'设置一致","平移-自定义值 Y":"0","宽度模式":"使用自定义值","宽度自定义值":"816","高度模式":"使用自定义行数的高度","默认自定义行数":"4","高度自定义值":"192"}
+ *
  * @param 变形样式-2
  * @parent ---变形样式集---
  * @type struct<DrillDOpStyle>
  * @desc 对话框相关窗口的变形样式配置。
- * @default {"标签":"==居中的短对话框==","---窗口---":"","位置X模式":"框居中","平移-自定义值 X":"0","位置Y模式":"与'窗口位置'设置一致","平移-自定义值 Y":"0","宽度模式":"与最长文本宽度一致","宽度自定义值":"816","高度模式":"自适应1至4行数的高度","默认自定义行数":"4","高度自定义值":"192","---其它---":""}
- * 
+ * @default {"标签":"==居中的短对话框==","---窗口矩形---":"","位置X模式":"框居中","平移-自定义值 X":"0","位置Y模式":"与'窗口位置'设置一致","平移-自定义值 Y":"0","宽度模式":"与最长文本宽度一致","宽度自定义值":"816","高度模式":"自适应1至4行数的高度","默认自定义行数":"4","高度自定义值":"192"}
+ *
  * @param 变形样式-3
  * @parent ---变形样式集---
  * @type struct<DrillDOpStyle>
  * @desc 对话框相关窗口的变形样式配置。
- * @default {"标签":"==左半对话框==","---窗口---":"","位置X模式":"紧贴左侧","平移-自定义值 X":"0","位置Y模式":"与'窗口位置'设置一致","平移-自定义值 Y":"0","宽度模式":"使用自定义值","宽度自定义值":"408","高度模式":"使用自定义行数的高度","默认自定义行数":"4","高度自定义值":"192","---其它---":""}
- * 
+ * @default {"标签":"==左半对话框==","---窗口矩形---":"","位置X模式":"紧贴左侧","平移-自定义值 X":"0","位置Y模式":"与'窗口位置'设置一致","平移-自定义值 Y":"0","宽度模式":"使用自定义值","宽度自定义值":"408","高度模式":"使用自定义行数的高度","默认自定义行数":"4","高度自定义值":"192"}
+ *
  * @param 变形样式-4
  * @parent ---变形样式集---
  * @type struct<DrillDOpStyle>
  * @desc 对话框相关窗口的变形样式配置。
- * @default {"标签":"==右半对话框==","---窗口---":"","位置X模式":"紧贴右侧","平移-自定义值 X":"0","位置Y模式":"与'窗口位置'设置一致","平移-自定义值 Y":"0","宽度模式":"使用自定义值","宽度自定义值":"408","高度模式":"使用自定义行数的高度","默认自定义行数":"4","高度自定义值":"192","---其它---":""}
- * 
+ * @default {"标签":"==右半对话框==","---窗口矩形---":"","位置X模式":"紧贴右侧","平移-自定义值 X":"0","位置Y模式":"与'窗口位置'设置一致","平移-自定义值 Y":"0","宽度模式":"使用自定义值","宽度自定义值":"408","高度模式":"使用自定义行数的高度","默认自定义行数":"4","高度自定义值":"192"}
+ *
  * @param 变形样式-5
  * @parent ---变形样式集---
  * @type struct<DrillDOpStyle>
  * @desc 对话框相关窗口的变形样式配置。
- * @default {"标签":"==自由的小对话框==","---窗口---":"","位置X模式":"使用自定义值","平移-自定义值 X":"0","位置Y模式":"使用自定义值","平移-自定义值 Y":"0","宽度模式":"与最长文本宽度一致","宽度自定义值":"816","高度模式":"自适应1至4行数的高度","默认自定义行数":"4","高度自定义值":"192","---其它---":""}
- * 
+ * @default {"标签":"==自由的小对话框==","---窗口矩形---":"","位置X模式":"使用自定义值","平移-自定义值 X":"0","位置Y模式":"使用自定义值","平移-自定义值 Y":"0","宽度模式":"与最长文本宽度一致","宽度自定义值":"816","高度模式":"自适应1至4行数的高度","默认自定义行数":"4","高度自定义值":"192"}
+ *
  * @param 变形样式-6
  * @parent ---变形样式集---
  * @type struct<DrillDOpStyle>
  * @desc 对话框相关窗口的变形样式配置。
- * @default 
+ * @default {"标签":"==位置+宽度自定义==","---窗口矩形---":"","位置X模式":"使用自定义值","平移-自定义值 X":"0","位置Y模式":"使用自定义值","平移-自定义值 Y":"0","宽度模式":"使用自定义值","宽度自定义值":"816","高度模式":"自适应1至4行数的高度","默认自定义行数":"4","高度自定义值":"192"}
  * 
  * @param 变形样式-7
  * @parent ---变形样式集---
@@ -507,32 +512,48 @@
 //			->☆静态数据
 //			->☆插件指令
 //			->☆存储数据
+//				->获取变形样式
+//				->获取行数
 //			
-//			->☆对话框的矩形获取
+//			
+//			->☆管辖权（对话框的高宽）
+//			->☆对话框的高宽
 //				->行数（覆写）
 //				->高度（覆写）
 //				->宽度（覆写）
 //					->与最长文本宽度一致
-//			->☆对话框子窗口的矩形获取
+//				->对话框 刷新高宽（开放函数）
 //			
-//			->☆对话框的矩形设置
-//				->对话框
-//					->刷新高宽（开放函数）
-//					->刷新位置（开放函数）
-//				->子窗口
-//					->刷新高宽（开放函数）
-//					->刷新位置（开放函数）
-//			->☆对话框子窗口的矩形设置
+//			->☆管辖权（对话框的位置）
+//			->☆对话框的位置
+//				->对话框 刷新位置（开放函数）
+//			
+//			->☆管辖权（对话框子窗口的位置）
+//			->☆对话框子窗口的位置
+//				->子窗口 刷新位置（开放函数）
 //				->4A金钱窗口
 //				->4B选择项窗口
 //				->4C数字输入窗口
 //				->4D选择物品窗口
 //				x->4E姓名框窗口
 //			
-//			->☆自动调整
-//			->☆实时刷新位置
+//			
+//			->☆自动调整 实现
+//			->☆自动调整 标准模块
+//				->自动调整前【标准接口】
+//				->自动调整后【标准接口】
+//			->☆自动调整 兼容
+//			
+//			->☆实时刷新位置 实现
+//			->☆实时刷新位置 标准模块
+//				->是否启用【标准接口】
+//			
+//			->☆管辖权（多行合并）
 //			->☆多行合并
-//			->☆外部插件兼容
+//			
+//			
+//			->☆引擎兼容（STG）
+//			->☆引擎兼容（ACT）
 //			
 //			
 //		★家谱：
@@ -546,6 +567,7 @@
 //		
 //		★必要注意事项：
 //			1. "\iin[\v[21]]" 的嵌套写法支持，来自 窗口字符核心 的优先指代阶段的功能。
+//			2. 结构关系可见"对话框的全部结构.png"。
 //
 //		★其它说明细节：
 //			无
@@ -673,7 +695,7 @@ Game_Interpreter.prototype.drill_DOp_pluginCommand = function( command, args ){
 				var id = $gameSystem._drill_DOp_curStyle['id'];
 				$gameSystem._drill_DOp_curStyle['width_value'] = DrillUp.g_DOp_list[ id-1 ]['width_value'];
 			}
-			if( type == "还原默认形状样式" ){	
+			if( type == "还原默认变形样式" || type == "还原默认形状样式" ){	
 				var id = DrillUp.g_DOp_defaultStyleId;
 				$gameSystem._drill_DOp_curStyle = JSON.parse(JSON.stringify( DrillUp.g_DOp_list[ id-1 ] ));
 			}
@@ -839,7 +861,7 @@ Game_System.prototype.drill_DOp_initSysData_Private = function() {
 	
 	this._drill_DOp_outFrameEnabled = DrillUp.g_DOp_outFrameEnabled;	//对话框是否可出界
 	this._drill_DOp_autoWrap = DrillUp.g_DOp_autoWrap;					//自动换行开关
-	this._drill_DOp_curStyle = JSON.parse(JSON.stringify( DrillUp.g_DOp_list[ DrillUp.g_DOp_defaultStyleId -1 ] ));										//默认变形样式
+	this._drill_DOp_curStyle = JSON.parse(JSON.stringify( DrillUp.g_DOp_list[ DrillUp.g_DOp_defaultStyleId -1 ] )); //默认变形样式
 };
 //==============================
 // * 存储数据 - 载入存档时检查数据（私有）
@@ -852,7 +874,7 @@ Game_System.prototype.drill_DOp_checkSysData_Private = function() {
 	}
 };
 //==============================
-// * 存储数据 - 获取样式（开放函数）
+// * 存储数据 - 获取变形样式（开放函数）
 //==============================
 Game_System.prototype.drill_DOp_getCurStyle = function() {
 	return this._drill_DOp_curStyle;
@@ -888,19 +910,42 @@ Game_System.prototype.drill_DOp_getHeight_rowCount = function() {
 
 
 //=============================================================================
-// ** ☆对话框的矩形获取
+// ** ☆管辖权（对话框的高宽）
 //
-//			说明：	> 此模块提供 对话框的矩形获取 功能。
+//			说明：	> 管辖权 即对 原函数 进行 修改、覆写、继承、控制子插件继承 等的权利。
+//					> 用于后期脱离 原游戏框架 且仍保持兼容性 的标记。
+//=============================================================================
+/*
+//==============================
+// * 2A私有函数《对话框-对话框变形器》 - 窗口宽度（基函数）
+//==============================
+Window_Message.prototype.windowWidth = function(){ return Graphics.boxWidth; };
+//==============================
+// * 2A私有函数《对话框-对话框变形器》 - 窗口高度（基函数）
+//==============================
+Window_Message.prototype.windowHeight = function(){ return this.fittingHeight(this.numVisibleRows()); };
+//==============================
+// * 2A私有函数《对话框-对话框变形器》 - 窗口高度 - 最大可见行数（基函数）
+//
+//			说明：	> 该参数直接影响 窗口高度 。
+//==============================
+Window_Message.prototype.numVisibleRows = function(){ return 4; };
+*/
+
+//=============================================================================
+// ** ☆对话框的高宽
+//
+//			说明：	> 此模块提供 对话框的高宽获取、设置 功能。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 对话框的矩形获取 - 行数（覆写）
+// * 对话框的高宽 - 获取 - 行数（覆写）
 //==============================
 Window_Message.prototype.numVisibleRows = function() {
     return $gameSystem.drill_DOp_getHeight_rowCount();
 };
 //==============================
-// * 对话框的矩形获取 - 高度（覆写）
+// * 对话框的高宽 - 获取 - 高度（覆写）
 //==============================
 Window_Message.prototype.windowHeight = function(){
 	var style_data = $gameSystem.drill_DOp_getCurStyle();
@@ -916,7 +961,7 @@ Window_Message.prototype.windowHeight = function(){
 	return Graphics.boxHeight;
 };
 //==============================
-// * 对话框的矩形获取 - 宽度（覆写）
+// * 对话框的高宽 - 获取 - 宽度（覆写）
 //==============================
 Window_Message.prototype.windowWidth = function() {
 	var style_data = $gameSystem.drill_DOp_getCurStyle();
@@ -967,32 +1012,15 @@ Window_Message.prototype.windowWidth = function() {
     return Graphics.boxWidth;
 };
 //==============================
-// * 对话框的矩形获取 - 窗口字符底层校验
+// * 对话框的高宽 - 窗口字符底层校验
 //==============================
 if( Imported.Drill_CoreOfWindowCharacter ){
 	if( typeof(_drill_COWC_drawText_functionExist) == "undefined" ){
 		alert( DrillUp.drill_DOp_getPluginTip_NeedUpdate_drawText() );
 	}
 };
-
-
-//=============================================================================
-// ** ☆对话框子窗口的矩形获取
-//
-//			说明：	> 此模块提供 对话框子窗口的矩形获取 功能。
-//					（插件完整的功能目录去看看：功能结构树）
-//=============================================================================
-//（暂无）
-
-
-//=============================================================================
-// ** ☆对话框的矩形设置
-//
-//			说明：	> 此模块提供 对话框的矩形设置 功能。
-//					（插件完整的功能目录去看看：功能结构树）
-//=============================================================================
 //==============================
-// * 对话框的矩形设置 - 初始化
+// * 对话框的高宽 - 设置 - 初始化
 //==============================
 var _drill_DOp_initialize = Window_Message.prototype.initialize;
 Window_Message.prototype.initialize = function(){
@@ -1001,7 +1029,7 @@ Window_Message.prototype.initialize = function(){
 	this._drill_DOp_lastHeight = 0;			//（上一次变化的高度）
 };
 //==============================
-// * 对话框的矩形设置 - 对话框 - 刷新高宽（开放函数）
+// * 对话框的高宽 - 设置 - 对话框 刷新高宽（开放函数）
 //==============================
 Window_Message.prototype.drill_DOp_refresh_widthAndHeight = function() {
 	
@@ -1028,8 +1056,34 @@ Window_Message.prototype.drill_DOp_refresh_widthAndHeight = function() {
 		this.createContents();
 	}
 };
+
+
+
+//=============================================================================
+// ** ☆管辖权（对话框的位置）
+//
+//			说明：	> 管辖权 即对 原函数 进行 修改、覆写、继承、控制子插件继承 等的权利。
+//					> 用于后期脱离 原游戏框架 且仍保持兼容性 的标记。
+//=============================================================================
+/*
 //==============================
-// * 对话框的矩形设置 - 对话框 - 刷新位置（开放函数）
+// * 2B保持显示《对话框-对话框变形器》 - 设置 位置（非帧刷新）（0顶部/1中间/2底部）
+//==============================
+Window_Message.prototype.updatePlacement = function(){
+    this._positionType = $gameMessage.positionType();
+    this.y = this._positionType * (Graphics.boxHeight - this.height) / 2;
+    this._goldWindow.y = this.y > 0 ? 0 : Graphics.boxHeight - this._goldWindow.height;
+};
+*/
+
+//=============================================================================
+// ** ☆对话框的位置
+//
+//			说明：	> 此模块提供 对话框的位置 功能。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 对话框的位置 - 对话框 刷新位置（开放函数）
 //==============================
 Window_Message.prototype.drill_DOp_refresh_position = function() {
 	var style_data = $gameSystem.drill_DOp_getCurStyle();
@@ -1082,60 +1136,157 @@ Window_Message.prototype.drill_DOp_refresh_position = function() {
     this.x = xx;
     this.y = yy;
 };
+
+
+
+//=============================================================================
+// ** ☆管辖权（对话框子窗口的位置）
+//
+//			说明：	> 管辖权 即对 原函数 进行 修改、覆写、继承、控制子插件继承 等的权利。
+//					> 用于后期脱离 原游戏框架 且仍保持兼容性 的标记。
+//=============================================================================
+/* 子窗口 - 4A金钱窗口
+	（无）
+*/
+/* 子窗口 - 4B选择项窗口
 //==============================
-// * 对话框的矩形设置 - 子窗口 - 刷新高宽（开放函数）
+// * 4B位置刷新《对话框-对话框变形器》 - 刷新（非帧刷新）
 //==============================
-Window_Message.prototype.drill_DOp_refreshChild_widthAndHeight = function() {
-	//（暂无）
+Window_ChoiceList.prototype.updatePlacement = function(){
+    var positionType = $gameMessage.choicePositionType();
+    var messageY = this._messageWindow.y;
+    this.width = this.windowWidth();
+    this.height = this.windowHeight();
+    switch( positionType ){
+		case 0:
+			this.x = 0;
+			break;
+		case 1:
+			this.x = (Graphics.boxWidth - this.width) / 2;
+			break;
+		case 2:
+			this.x = Graphics.boxWidth - this.width;
+			break;
+    }
+    if( messageY >= Graphics.boxHeight / 2 ){
+        this.y = messageY - this.height;
+    }else{
+        this.y = messageY + this._messageWindow.height;
+    }
 };
+*/
+/* 子窗口 - 4C数字输入窗口
 //==============================
-// * 对话框的矩形设置 - 子窗口 - 刷新位置（开放函数）
+// * 4B位置刷新《对话框-对话框变形器》 - 刷新（非帧刷新）
+//==============================
+Window_NumberInput.prototype.updatePlacement = function(){
+    var messageY = this._messageWindow.y;
+    var spacing = 8;
+    this.width = this.windowWidth();
+    this.height = this.windowHeight();
+    this.x = (Graphics.boxWidth - this.width) / 2;
+    if( messageY >= Graphics.boxHeight / 2 ){
+        this.y = messageY - this.height - spacing;
+    }else{
+        this.y = messageY + this._messageWindow.height + spacing;
+    }
+};
+*/
+/* 子窗口 - 4D选择物品窗口
+//==============================
+// * 4C位置刷新《对话框-对话框变形器》 - 刷新（非帧刷新）
+//==============================
+Window_EventItem.prototype.updatePlacement = function(){
+    if( this._messageWindow.y >= Graphics.boxHeight / 2 ){
+        this.y = 0;
+    }else{
+        this.y = Graphics.boxHeight - this.height;
+    }
+};
+*/
+/* 子窗口 - 4E姓名框窗口
+	（无）
+*/
+
+//=============================================================================
+// ** ☆对话框子窗口的位置
+//
+//			说明：	> 此模块专门控制对话框子窗口的位置。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 对话框子窗口的位置 - 子窗口 刷新位置（开放函数）
+//
+//			说明：	> 该功能为子窗口的位置跟随。
+//					> 不考虑位置偏移，位置偏移由子窗口自己控制。可见"对话框的全部结构.png"。
 //==============================
 Window_Message.prototype.drill_DOp_refreshChild_position = function() {
 	
-	// > 位置 - 4A金钱窗口
-	if( this.y == 0 ){	//（处于右下角，遮挡时）
-		this._goldWindow.x = Graphics.boxWidth - this._goldWindow.width;
-		this._goldWindow.y = Graphics.boxHeight - this._goldWindow.height;
-	}else{				//（处于右上角，默认）
-		this._goldWindow.x = Graphics.boxWidth - this._goldWindow.width;
-		this._goldWindow.y = 0
+	// > 『对话框多个子窗口』位置 - 4A金钱窗口
+	this._goldWindow.drill_DOp_gold_updatePlacementX();
+	this._goldWindow.drill_DOp_gold_updatePlacementY();
+	
+	// > 『对话框多个子窗口』位置 - 4B选择项窗口
+	this._choiceWindow.drill_DOp_choice_updatePlacementX();
+	this._choiceWindow.drill_DOp_choice_updatePlacementY();
+	
+	// > 『对话框多个子窗口』位置 - 4C数字输入窗口
+	this._numberWindow.drill_DOp_number_updatePlacementX();
+	this._numberWindow.drill_DOp_number_updatePlacementY();
+	
+	// > 『对话框多个子窗口』位置 - 4D选择物品窗口
+	this._itemWindow.drill_DOp_item_updatePlacementX();
+	this._itemWindow.drill_DOp_item_updatePlacementY();
+	
+	// > 『对话框多个子窗口』位置 - 4E姓名框窗口（Drill姓名框）
+	if( Imported.Drill_DialogNameBox ){
+		//this._drill_DNB_nameWindow.drill_updateAttr_PositionX();	//（姓名框因为要实时对齐已开启帧刷新，这里就不浪费性能了）
+		//this._drill_DNB_nameWindow.drill_updateAttr_PositionY();
 	}
 	
-	// > 位置 - 4B选择项窗口
-	this._choiceWindow.drill_DOp_c_updatePlacementX();
-	this._choiceWindow.drill_DOp_c_updatePlacementY();
-	
-	// > 位置 - 4C数字输入窗口
-	this._numberWindow.drill_DOp_n_updatePlacementY();
-	
-	// > 位置 - 4D选择物品窗口
-	this._itemWindow.drill_DOp_i_updatePlacementY();
-	
-	// > 位置 - 4E姓名框窗口
-	//	（不属于该插件管）
+	// > 『对话框多个子窗口』位置 - 4E姓名框窗口（Yep姓名框）
+	//	（不处理）
 };
 
+//==============================
+// * 4A金钱窗口 - 创建（继承）
+//==============================
+var _drill_DOp_gold_createSubWindows = Window_Message.prototype.createSubWindows;
+Window_Message.prototype.createSubWindows = function(){
+	_drill_DOp_gold_createSubWindows.call(this);
+	this._goldWindow._messageWindow = this;		//绑定父窗口（金钱窗口作为子窗口，没有绑定对话框，这里强制绑定）
+}
+//==============================
+// * 4A金钱窗口 - 位置刷新 - 位置X（开放函数）
+//==============================
+Window_Gold.prototype.drill_DOp_gold_updatePlacementX = function(){
+	this.x = Graphics.boxWidth - this.width;
+}
+//==============================
+// * 4A金钱窗口 - 位置刷新 - 位置Y（开放函数）
+//==============================
+Window_Gold.prototype.drill_DOp_gold_updatePlacementY = function(){
+	if( this._messageWindow == undefined ){ return; }
+	if( this._messageWindow.y == 0 ){	//（处于右下角，遮挡时）
+		this.y = Graphics.boxHeight - this.height;
+	}else{								//（处于右上角，默认）
+		this.y = 0
+	}
+}
 
-//=============================================================================
-// ** ☆对话框子窗口的矩形设置
-//
-//			说明：	> 此模块专门控制对话框子窗口的 矩形，即位置和高宽。
-//					（插件完整的功能目录去看看：功能结构树）
-//=============================================================================
 //==============================
 // * 4B选择项窗口 - 位置刷新（继承）
 //==============================
 var _drill_DOp_c_updatePlacement = Window_ChoiceList.prototype.updatePlacement;
 Window_ChoiceList.prototype.updatePlacement = function(){
 	_drill_DOp_c_updatePlacement.call(this);
-	this.drill_DOp_c_updatePlacementX();
-	this.drill_DOp_c_updatePlacementY();
+	this.drill_DOp_choice_updatePlacementX();
+	this.drill_DOp_choice_updatePlacementY();
 }
 //==============================
-// * 4B选择项窗口 - 位置刷新 - 位置X
+// * 4B选择项窗口 - 位置刷新 - 位置X（开放函数）
 //==============================
-Window_ChoiceList.prototype.drill_DOp_c_updatePlacementX = function(){
+Window_ChoiceList.prototype.drill_DOp_choice_updatePlacementX = function(){
 	var positionType = $gameMessage.choicePositionType();
 	switch( positionType ){
 		case 0:
@@ -1150,9 +1301,9 @@ Window_ChoiceList.prototype.drill_DOp_c_updatePlacementX = function(){
 	}
 }
 //==============================
-// * 4B选择项窗口 - 位置刷新 - 位置Y
+// * 4B选择项窗口 - 位置刷新 - 位置Y（开放函数）
 //==============================
-Window_ChoiceList.prototype.drill_DOp_c_updatePlacementY = function(){
+Window_ChoiceList.prototype.drill_DOp_choice_updatePlacementY = function(){
 	var bottom_height = Graphics.boxHeight - this._messageWindow.y - this._messageWindow.height;
 	if( bottom_height < this.height ){	//（处于对话框上方，遮挡时）
 		this.y = this._messageWindow.y - this.height;
@@ -1167,12 +1318,19 @@ Window_ChoiceList.prototype.drill_DOp_c_updatePlacementY = function(){
 var _drill_DOp_n_updatePlacement = Window_NumberInput.prototype.updatePlacement;
 Window_NumberInput.prototype.updatePlacement = function(){
 	_drill_DOp_n_updatePlacement.call(this);
-	this.drill_DOp_n_updatePlacementY();
+	this.drill_DOp_number_updatePlacementX();
+	this.drill_DOp_number_updatePlacementY();
 }
 //==============================
-// * 4C数字输入窗口 - 位置刷新 - 位置Y
+// * 4C数字输入窗口 - 位置刷新 - 位置X（开放函数）
 //==============================
-Window_NumberInput.prototype.drill_DOp_n_updatePlacementY = function(){
+Window_NumberInput.prototype.drill_DOp_number_updatePlacementX = function(){
+	//（暂无）
+}
+//==============================
+// * 4C数字输入窗口 - 位置刷新 - 位置Y（开放函数）
+//==============================
+Window_NumberInput.prototype.drill_DOp_number_updatePlacementY = function(){
 	var bottom_height = Graphics.boxHeight - this._messageWindow.y - this._messageWindow.height;
 	if( bottom_height < this.height ){	//（处于对话框上方，遮挡时）
 		this.y = this._messageWindow.y - this.height;
@@ -1187,12 +1345,19 @@ Window_NumberInput.prototype.drill_DOp_n_updatePlacementY = function(){
 var _drill_DOp_i_updatePlacement = Window_EventItem.prototype.updatePlacement;
 Window_EventItem.prototype.updatePlacement = function(){
 	_drill_DOp_i_updatePlacement.call(this);
-	this.drill_DOp_i_updatePlacementY();
+	this.drill_DOp_item_updatePlacementX();
+	this.drill_DOp_item_updatePlacementY();
 }
 //==============================
-// * 4D选择物品窗口 - 位置刷新 - 位置Y
+// * 4D选择物品窗口 - 位置刷新 - 位置X（开放函数）
 //==============================
-Window_EventItem.prototype.drill_DOp_i_updatePlacementY = function(){
+Window_EventItem.prototype.drill_DOp_item_updatePlacementX = function(){
+	//（暂无）
+}
+//==============================
+// * 4D选择物品窗口 - 位置刷新 - 位置Y（开放函数）
+//==============================
+Window_EventItem.prototype.drill_DOp_item_updatePlacementY = function(){
 	var bottom_height = Graphics.boxHeight - this._messageWindow.y - this._messageWindow.height;
 	if( bottom_height < this.height ){	//（处于对话框上方，遮挡时）
 		this.y = 0;
@@ -1204,9 +1369,9 @@ Window_EventItem.prototype.drill_DOp_i_updatePlacementY = function(){
 
 
 //=============================================================================
-// ** ☆自动调整
+// ** ☆自动调整 实现
 //
-//			说明：	> 此模块专门控制 自动调整 功能。
+//			说明：	> 此模块专门提供 自动调整 功能。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
@@ -1218,7 +1383,7 @@ Window_Message.prototype.initialize = function(){
 	this._drill_DOp_autoRect_needUpdate = true;			//（帧刷新锁）
 };
 //==============================
-// * 自动调整（兼容） - 帧刷新时
+// * 自动调整（对话框） - 帧刷新时
 //
 //			说明：	> 该函数会被 对话框优化核心 覆写，这里用于兼容默认没用核心的情况。
 //==============================
@@ -1232,7 +1397,7 @@ Window_Message.prototype.update = function(){
     _drill_DOp_autoRect_update.call(this);
 };
 //==============================
-// * 自动调整（兼容） - 执行对话框时
+// * 自动调整（对话框） - 执行对话框时
 //
 //			说明：	> 该函数会被 对话框优化核心 覆写，这里用于兼容默认没用核心的情况。
 //==============================
@@ -1242,7 +1407,7 @@ Window_Message.prototype.startMessage = function(){
     _drill_DOp_autoRect_startMessage.call( this );
 };
 //==============================
-// * 自动调整（兼容） - 新建页时
+// * 自动调整（对话框） - 新建页时
 //
 //			说明：	> 该函数会被 对话框优化核心 覆写，这里用于兼容默认没用核心的情况。
 //==============================
@@ -1252,7 +1417,7 @@ Window_Message.prototype.newPage = function( textState ){
     _drill_DOp_autoRect_newPage.call( this, textState );
 };
 //==============================
-// * 自动调整（兼容） - 设置位置时（非帧刷新）
+// * 自动调整（对话框） - 设置位置时（非帧刷新）
 //==============================
 var _drill_DOp_autoRect_updatePlacement = Window_Message.prototype.updatePlacement;
 Window_Message.prototype.updatePlacement = function() {
@@ -1315,7 +1480,7 @@ Window_Message.prototype.drill_DOp_autoRect_refresh = function() {
 	this.drill_DOp_refresh_position();
 	
 	// > 子窗口 刷新高宽
-	this.drill_DOp_refreshChild_widthAndHeight();
+	//	（无）
 	// > 子窗口 刷新位置
 	this.drill_DOp_refreshChild_position();
 	
@@ -1323,15 +1488,77 @@ Window_Message.prototype.drill_DOp_autoRect_refresh = function() {
 	this.drill_DOp_afterRefresh();
 };
 
+//#############################################################################
+// ** ☆自动调整 标准模块
+//
+//			说明：	> 即对子插件开放的固定函数，无论插件如何变化，标准函数都不变。
+//#############################################################################
+//##############################
+// * 自动调整 - 自动调整前【标准接口】
+//
+//			参数：	> 无
+//			返回：	> 布尔
+//
+//			说明：	> 默认不会实时刷新位置，子插件可以继承此接口自定义。
+//##############################
+Window_Message.prototype.drill_DOp_beforeRefresh = function() {
+	//（可继承）
+};
+//##############################
+// * 自动调整 - 自动调整后【标准接口】
+//
+//			参数：	> 无
+//			返回：	> 布尔
+//
+//			说明：	> 默认不会实时刷新位置，子插件可以继承此接口自定义。
+//##############################
+Window_Message.prototype.drill_DOp_afterRefresh = function() {
+	//（可继承）
+};
 
 //=============================================================================
-// ** ☆实时刷新位置
+// ** ☆自动调整 兼容
+//
+//			说明：	> 此模块用于兼容 外部插件 的操作，由于不存在 基于 关系，所以这里要灵活判断处理。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 自动调整 - 兼容 - 自动调整前
+//==============================
+var _drill_DOp_DOp_beforeRefresh = Window_Message.prototype.drill_DOp_beforeRefresh;
+Window_Message.prototype.drill_DOp_beforeRefresh = function() {
+	_drill_DOp_DOp_beforeRefresh.call(this);
+	
+	// > 【对话框 - 简易对话图】
+	if( Imported.Drill_DialogSingleSprite ){
+		this.drill_DSS_homingPosition();	//（强制归位）
+	}
+};
+//==============================
+// * 自动调整 - 兼容 - 自动调整后
+//==============================
+var _drill_DOp_DOp_afterRefresh = Window_Message.prototype.drill_DOp_afterRefresh;
+Window_Message.prototype.drill_DOp_afterRefresh = function() {
+	_drill_DOp_DOp_afterRefresh.call(this);
+	
+	// > 【对话框 - 对话框皮肤】
+	if( Imported.Drill_DialogSkin ){
+		this.drill_DSk_updateSkin();
+		this.drill_DSk_resetBorder();
+		this._drill_DSk_border.update();	//（强制让子贴图帧刷新一次）
+	}
+};
+
+
+
+//=============================================================================
+// ** ☆实时刷新位置 实现
 //
 //			说明：	> 此模块专门控制 实时刷新位置 功能。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 实时刷新位置（兼容） - 帧刷新时
+// * 实时刷新位置（对话框） - 帧刷新时
 //==============================
 var _drill_DOp_update2 = Window_Message.prototype.update;
 Window_Message.prototype.update = function(){
@@ -1358,15 +1585,74 @@ if( Imported.Drill_CoreOfDialog ){
 		}
 	};
 }
-//==============================
-// * 实时刷新位置 - 是否启用
+
+//#############################################################################
+// ** ☆实时刷新位置 标准模块
+//
+//			说明：	> 即对子插件开放的固定函数，无论插件如何变化，标准函数都不变。
+//#############################################################################
+//##############################
+// * 实时刷新位置 - 是否启用【标准接口】
+//
+//			参数：	> 无
+//			返回：	> 布尔
 //
 //			说明：	> 默认不会实时刷新位置，子插件可以继承此接口自定义。
-//==============================
+//##############################
 Window_Message.prototype.drill_DOp_isUpdatePositionEnabled = function() {
 	return false;
 };
 
+
+
+//=============================================================================
+// ** ☆管辖权（多行合并）
+//
+//			说明：	> 管辖权 即对 原函数 进行 修改、覆写、继承、控制子插件继承 等的权利。
+//					> 用于后期脱离 原游戏框架 且仍保持兼容性 的标记。
+//=============================================================================
+/*
+//==============================
+// * I指令《对话框-对话框变形器》 - 【信息 > 显示文字】
+//
+//			说明：	> 插件《对话框-对话框变形器》覆写了此函数，用于支持 多行合并 功能。
+//					  如果子插件要继承此函数，则记得使用 最后继承。
+//==============================
+Game_Interpreter.prototype.command101 = function(){
+    if( !$gameMessage.isBusy() ){  //重复锁『对话框的阻塞原理』
+        $gameMessage.setFaceImage(this._params[0], this._params[1]);
+        $gameMessage.setBackground(this._params[2]);
+        $gameMessage.setPositionType(this._params[3]);
+		
+		// > 遍历指令
+		//		（在游戏编辑器中，101指令的内容后面会跟1~4行的401指令）
+		//		（此处遍历多条指令，并将指令的文本收集起来）
+        while( this.nextEventCode() === 401 ){
+            this._index++;
+            $gameMessage.add(this.currentCommand().parameters[0]);
+        }
+		
+        switch( this.nextEventCode() ){
+			case 102:  //（对话选项窗口）
+				this._index++;
+				this.setupChoices(this.currentCommand().parameters);
+				break;
+			case 103:  //（数字输入窗口）
+				this._index++;
+				this.setupNumInput(this.currentCommand().parameters);
+				break;
+			case 104:  //（物品选择窗口）
+				this._index++;
+				this.setupItemChoice(this.currentCommand().parameters);
+				break;
+        }
+		
+        this._index++;
+        this.setWaitMode('message');  //开始阻塞『对话框的阻塞原理』
+    }
+    return false;
+};
+*/
 
 //=============================================================================
 // ** ☆多行合并
@@ -1375,63 +1661,75 @@ Window_Message.prototype.drill_DOp_isUpdatePositionEnabled = function() {
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 多行合并 - 【信息 > 显示文字】（覆写）
+// * 多行合并 - 【信息 > 显示文字】（覆写）『多场景与对话框-地图界面』『多场景与对话框-战斗界面』
 //==============================
 Game_Interpreter.prototype.command101 = function() {
-	if( $gameMessage.isBusy() == false ){
+	if( $gameMessage.isBusy() == false ){  //重复锁『对话框的阻塞原理』
 		$gameMessage.setFaceImage(this._params[0], this._params[1]);
 		$gameMessage.setBackground(this._params[2]);
 		$gameMessage.setPositionType(this._params[3]);
 		
 		// > 遍历指令
-		//		（在游戏编辑器中，101指令的内容会被拆分成1~4行的401指令）
-		//		（所以，只要大于4行，就多行合并即可）
-		//		（特殊情况1：设置了6行，但遇到了4+3行的指令，则最后一行的内容会被丢弃）
-		//		（特殊情况2：设置了3行，但遇到了4行的指令，则最后一行的内容会被丢弃）
-		while( true ){
-			
-			// > 遍历指令 - 单行内容时
-			if( this.nextEventCode() === 401 ){
-				this._index++;
-				$gameMessage.drill_DOp_addText(this.currentCommand().parameters[0]);
-				continue;
-			}
-			
-			// > 遍历指令 - 下一条显示文字时
-			if( this.nextEventCode() === 101 && $gameSystem.drill_DOp_getHeight_rowCount() > 4 ){
-				if( $gameMessage._texts.length < $gameSystem.drill_DOp_getHeight_rowCount() ){
-					this._index++;
-					continue;
-				}
-			}
-			break;
-		}
+		//		（在游戏编辑器中，101指令的内容后面会跟1~4行的401指令）
+		//		（此处遍历多条指令，并将指令的文本收集起来）
+		this.drill_DOp_searchText();
 		
 		switch( this.nextEventCode() ){
-			case 102:	// 消息选项
+			case 102:	//（对话选项窗口）
 				this._index++;
 				this.setupChoices(this.currentCommand().parameters);
 				break;
-			case 103:	// 数字输入
+			case 103:	//（数字输入窗口）
 				this._index++;
 				this.setupNumInput(this.currentCommand().parameters);
 				break;
-			case 104:	// 物品选择
+			case 104:	//（物品选择窗口）
 				this._index++;
 				this.setupItemChoice(this.currentCommand().parameters);
 				break;
 		}
 		this._index++;
-		this.setWaitMode('message');		//『强制等待』
+		this.setWaitMode('message');  //开始阻塞『对话框的阻塞原理』『强制等待』
 	}
 	return false;
 };
 //==============================
-// * 多行合并 - 添加文本
+// * 多行合并 - 【信息 > 显示文字】 - 遍历指令
 //==============================
-Game_Message.prototype.drill_DOp_addText = function( text ){
+Game_Interpreter.prototype.drill_DOp_searchText = function(){
+	// （所以，只要大于4行，就多行合并即可）
+	// （特殊情况1：设置了6行，但遇到了4+3行的指令，则最后一行的内容会被丢弃）
+	// （特殊情况2：设置了3行，但遇到了4行的指令，则最后一行的内容会被丢弃）
 	
-	// > 【窗口字符 - 窗口字符核心】
+	while( true ){
+		
+		// > 遍历指令 - 单行内容时
+		if( this.nextEventCode() === 401 ){
+			this._index++;
+			var text = this.currentCommand().parameters[0];
+			text = $gameTemp.drill_DOp_convertText( text );  //（处理文本）
+			$gameMessage.add(text);
+			continue;
+		}
+		
+		// > 遍历指令 - 下一条显示文字时
+		if( this.nextEventCode() === 101 && $gameSystem.drill_DOp_getHeight_rowCount() > 4 ){
+			if( $gameMessage._texts.length < $gameSystem.drill_DOp_getHeight_rowCount() ){
+				this._index++;
+				continue;
+			}
+		}
+		break;
+	}
+};
+//==============================
+// * 多行合并 - 【信息 > 显示文字】 - 处理文本
+//
+//			说明：	> 注意该函数的类是 $gameTemp 。
+//==============================
+Game_Temp.prototype.drill_DOp_convertText = function( text ){
+	
+	// > 自动换行处理【窗口字符 - 窗口字符核心】
 	if( Imported.Drill_CoreOfWindowCharacter ){
 		var style_data = $gameSystem.drill_DOp_getCurStyle();
 		if( style_data != undefined && style_data['width_mode'] == "与最长文本宽度一致" ){
@@ -1442,43 +1740,122 @@ Game_Message.prototype.drill_DOp_addText = function( text ){
 			}
 		}
 	}
-	this.add(text);
+	
+	return text;
 };
 
 
+
+
 //=============================================================================
-// ** ☆外部插件兼容
+// ** ☆引擎兼容（STG）
 //
-//			说明：	> 此模块用于兼容外部插件的操作。
+//			说明：	> 此模块对引擎进行专门兼容。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 外部插件兼容 - 自动调整前
+// * 引擎兼容 - 插件指令『STG的插件指令』
 //==============================
-Window_Message.prototype.drill_DOp_beforeRefresh = function() {
+if( Imported.Drill_STG__objects ){
 	
-	// > 【对话框 - 简易对话图】
-	if( Imported.Drill_DialogSingleSprite ){
-		this.drill_DSS_homingPosition();	//（强制归位）
+	//==============================
+	// * 插件指令 - STG指令绑定
+	//==============================
+	var _drill_STG_DOp_pluginCommand = Drill_STG_GameInterpreter.prototype.pluginCommand;
+	Drill_STG_GameInterpreter.prototype.pluginCommand = function( command, args ){
+		_drill_STG_DOp_pluginCommand.call(this, command, args);
+		this.drill_DOp_pluginCommand( command, args );
 	}
+	//==============================
+	// * 插件指令 - STG指令执行
+	//==============================
+	Drill_STG_GameInterpreter.prototype.drill_DOp_pluginCommand = Game_Interpreter.prototype.drill_DOp_pluginCommand;
 };
 //==============================
-// * 外部插件兼容 - 自动调整后
+// * 引擎兼容 - 多行合并（STG）
 //==============================
-Window_Message.prototype.drill_DOp_afterRefresh = function() {
+if( Imported.Drill_STG__objects ){
 	
-	// > 【对话框 - 对话框皮肤】
-	if( Imported.Drill_DialogSkin ){
-		this.drill_DSk_updateSkin();
-		this.drill_DSk_resetBorder();
-		this._drill_DSk_border.update();		//（强制让子贴图帧刷新一次）
-	}
-	
-	// > 【对话框 - 气泡对话框】
-	if( Imported.Drill_DialogBubble ){
-		$gameSystem.drill_DBu_updateAllPos();
-		this._drill_DBu_bubbleSprite.update();	//（强制让子贴图帧刷新一次）
-	}
+	//==============================
+	// * 多行合并（STG） - 【信息 > 显示文字】 - 遍历指令（覆写）『多场景与对话框-STG界面』
+	//==============================
+	Drill_STG_GameInterpreter.prototype.drill_STG_searchText = function(){
+		while( true ){
+			
+			// > 遍历指令（STG） - 单行内容时
+			if( this.drill_nextEventCode() === 401 ){
+				this._drill_index++;
+				var text = this.drill_currentCommand().parameters[0];
+				text = $gameTemp.drill_DOp_convertText( text );  //（处理文本）
+				$gameMessage.add(text);
+				continue;
+			}
+			
+			// > 遍历指令（STG） - 下一条显示文字时
+			if( this.drill_nextEventCode() === 101 && $gameSystem.drill_DOp_getHeight_rowCount() > 4 ){
+				if( $gameMessage._texts.length < $gameSystem.drill_DOp_getHeight_rowCount() ){
+					this._drill_index++;
+					continue;
+				}
+			}
+			break;
+		}
+	};
 };
 
+//=============================================================================
+// ** ☆引擎兼容（ACT）
+//
+//			说明：	> 此模块对引擎进行专门兼容。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 引擎兼容 - 插件指令『ACT的插件指令』
+//==============================
+if( Imported.Drill_ACT__objects ){
+	
+	//==============================
+	// * 插件指令 - ACT指令绑定
+	//==============================
+	var _drill_ACT_DOp_pluginCommand = Drill_ACT_GameInterpreter.prototype.pluginCommand;
+	Drill_ACT_GameInterpreter.prototype.pluginCommand = function( command, args ){
+		_drill_ACT_DOp_pluginCommand.call(this, command, args);
+		this.drill_DOp_pluginCommand( command, args );
+	}
+	//==============================
+	// * 插件指令 - ACT指令执行
+	//==============================
+	Drill_ACT_GameInterpreter.prototype.drill_DOp_pluginCommand = Game_Interpreter.prototype.drill_DOp_pluginCommand;
+};
+//==============================
+// * 引擎兼容 - 多行合并（ACT）
+//==============================
+if( Imported.Drill_ACT__objects ){
+	
+	//==============================
+	// * 多行合并（ACT） - 【信息 > 显示文字】 - 遍历指令（覆写）『多场景与对话框-ACT界面』
+	//==============================
+	Drill_ACT_GameInterpreter.prototype.drill_ACT_searchText = function(){
+		while( true ){
+			
+			// > 遍历指令（ACT） - 单行内容时
+			if( this.drill_nextEventCode() === 401 ){
+				this._drill_index++;
+				var text = this.drill_currentCommand().parameters[0];
+				text = $gameTemp.drill_DOp_convertText( text );  //（处理文本）
+				$gameMessage.add(text);
+				continue;
+			}
+			
+			// > 遍历指令（ACT） - 下一条显示文字时
+			if( this.drill_nextEventCode() === 101 && $gameSystem.drill_DOp_getHeight_rowCount() > 4 ){
+				if( $gameMessage._texts.length < $gameSystem.drill_DOp_getHeight_rowCount() ){
+					this._drill_index++;
+					continue;
+				}
+			}
+			break;
+		}
+	};
+};
 

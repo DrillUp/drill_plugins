@@ -44,6 +44,7 @@
  * 插件指令：>允许操作事件触发 : 事件变量[21] : 绑定权限 : 权限[1]
  * 插件指令：>允许操作事件触发 : 批量事件[10,11] : 绑定权限 : 权限[1]
  * 插件指令：>允许操作事件触发 : 批量事件变量[21,22] : 绑定权限 : 权限[1]
+ * 插件指令：>允许操作事件触发 : 全图事件 : 绑定权限 : 权限[1]
  * 
  * 插件指令：>允许操作事件触发 : 本事件 : 绑定权限 : 权限[1]
  * 插件指令：>允许操作事件触发 : 本事件 : 取消权限绑定
@@ -356,6 +357,16 @@ Game_Interpreter.prototype.drill_PAlET_pluginCommand = function( command, args )
 				var e = $gameMap.event( e_id );
 				c_chars = [ e ];
 			}
+			if( c_chars == null && unit == "全图事件" ){
+				c_chars = [];
+				var event_list = $gameMap._events;
+				for( var k=0; k < event_list.length; k++ ){
+					var temp_event = event_list[k];
+					if( temp_event == null ){ continue; }
+					if( temp_event._erased == true ){ continue; }	//『有效事件』
+					c_chars.push( temp_event );
+				}
+			}
 		}
 		if( c_chars == null ){ return }; 		
 		
@@ -494,14 +505,24 @@ Game_Event.prototype.drill_PAlET_checkBindData = function(){
 	this._drill_PAlET_bindData['PermissionId'] = -1;		//权限ID
 };
 //==============================
-// * 事件的属性 - 绑定数据ID
+// * 事件的属性 - 删除数据
 //==============================
-Game_Event.prototype.drill_PAlET_setDataId = function( permissionId ){
-	this.drill_PAlET_checkBindData();
-	this._drill_PAlET_bindData['PermissionId'] = permissionId;
+Game_Event.prototype.drill_PAlET_removeData = function(){
+	this._drill_PAlET_bindData = undefined;
 };
 //==============================
-// * 事件的属性 - 获取数据
+// * 事件的属性 - 绑定数据ID（开放函数）
+//==============================
+Game_Event.prototype.drill_PAlET_setDataId = function( permissionId ){
+	if( permissionId >= 0 ){
+		this.drill_PAlET_checkBindData();
+		this._drill_PAlET_bindData['PermissionId'] = permissionId;
+	}else{
+		this.drill_PAlET_removeData();
+	}
+};
+//==============================
+// * 事件的属性 - 获取数据（开放函数）
 //==============================
 Game_Event.prototype.drill_PAlET_getData = function(){
 	if( this._drill_PAlET_bindData == undefined ){ return null; }
@@ -509,7 +530,7 @@ Game_Event.prototype.drill_PAlET_getData = function(){
 	return DrillUp.g_PAlET_list[ this._drill_PAlET_bindData['PermissionId'] ];
 };
 //==============================
-// * 事件的属性 - 是否被控制
+// * 事件的属性 - 是否被控制（开放函数）
 //==============================
 Game_Event.prototype.drill_PAlET_isBeingControled = function(){
 	if( this._drill_PAlET_bindData == undefined ){ return false; }
@@ -622,7 +643,7 @@ Game_Event.prototype.drill_PAlET_updateNonmoving = function( wasMoving ){
 //=============================================================================
 // ** ☆事件执行触发
 //
-//			说明：	> 此模块专门提供 玩家-3G触发事件 的控制功能。
+//			说明：	> 此模块专门提供 玩家-3G串行触发事件 的控制功能。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================

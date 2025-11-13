@@ -1000,7 +1000,7 @@ if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义�
 			this.__drill_zIndex = value;
 		},
 		get: function(){
-			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			if( this.__drill_zIndex == undefined ){ return 20250701; }	//（如果未定义则放最上面）
 			return this.__drill_zIndex;
 		},
 		configurable: true
@@ -1136,7 +1136,7 @@ if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义�
 			this.__drill_zIndex = value;
 		},
 		get: function(){
-			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			if( this.__drill_zIndex == undefined ){ return 20250701; }	//（如果未定义则放最上面）
 			return this.__drill_zIndex;
 		},
 		configurable: true
@@ -1185,8 +1185,8 @@ var _drill_DSRS_initialize = Window_ScrollText.prototype.initialize;
 Window_ScrollText.prototype.initialize = function() {
 	_drill_DSRS_initialize.call(this);
 	this._drill_DSRS_spriteData = {};					//
-	this._drill_DSRS_spriteData['orgX'] = -1;			//原坐标x
-	this._drill_DSRS_spriteData['orgY'] = -1;			//原坐标y
+	this._drill_DSRS_spriteData['org_x'] = -1;			//原坐标x
+	this._drill_DSRS_spriteData['org_y'] = -1;			//原坐标y
 	this._drill_DSRS_spriteData['lastState'] = false;	//变化锁
 }
 //==============================
@@ -1213,8 +1213,8 @@ Window_ScrollText.prototype.drill_DSRS_updateWindowHide = function() {
 		if( this._drill_DSRS_spriteData['lastState'] == false ){
 			this._drill_DSRS_spriteData['lastState'] = true;	//锁-开始播放时
 			
-			this._drill_DSRS_spriteData['orgX'] = this.x;		//（记录位置）
-			this._drill_DSRS_spriteData['orgY'] = this.y;
+			this._drill_DSRS_spriteData['org_x'] = this.x;		//（记录位置）
+			this._drill_DSRS_spriteData['org_y'] = this.y;
 			
 			this.x += 0;
 			this.y += Graphics.boxHeight * 2;
@@ -1234,12 +1234,12 @@ Window_ScrollText.prototype.drill_DSRS_updateWindowHide = function() {
 // * 滚动窗口控制 - 执行归位（开放函数）
 //==============================
 Window_ScrollText.prototype.drill_DSRS_homingPosition = function() {
-	if( this._drill_DSRS_spriteData['orgX'] == -1 &&
-		this._drill_DSRS_spriteData['orgY'] == -1 ){ return; }
-	this.x = this._drill_DSRS_spriteData['orgX'];
-	this.y = this._drill_DSRS_spriteData['orgY'];
-	this._drill_DSRS_spriteData['orgX'] = -1;			//（清理原坐标）
-	this._drill_DSRS_spriteData['orgY'] = -1;			//
+	if( this._drill_DSRS_spriteData['org_x'] == -1 &&
+		this._drill_DSRS_spriteData['org_y'] == -1 ){ return; }
+	this.x = this._drill_DSRS_spriteData['org_x'];
+	this.y = this._drill_DSRS_spriteData['org_y'];
+	this._drill_DSRS_spriteData['org_x'] = -1;			//（清理原坐标）
+	this._drill_DSRS_spriteData['org_y'] = -1;			//
 }
 
 
@@ -1315,7 +1315,7 @@ if( Imported.Drill_CoreOfDialog ){
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 贴图控制 - 贴图层 - 创建绑定（地图界面）
+// * 贴图控制 - 贴图层 - 创建绑定『多场景与对话框-地图界面』
 //==============================
 var _drill_DSRS_mapSprite_createAllWindows = Scene_Map.prototype.createAllWindows;
 Scene_Map.prototype.createAllWindows = function() {
@@ -1324,7 +1324,7 @@ Scene_Map.prototype.createAllWindows = function() {
 	this.drill_DSRS_createMask();		//创建 - 内容遮罩
 };
 //==============================
-// * 贴图控制 - 贴图层 - 创建（地图界面）
+// * 贴图控制 - 贴图层 - 创建『多场景与对话框-地图界面』
 //==============================
 Scene_Map.prototype.drill_DSRS_createLayer = function() {
 	
@@ -1348,7 +1348,7 @@ Scene_Map.prototype.drill_DSRS_createLayer = function() {
 	this.drill_DSRS_sortByZIndex();
 };
 //==============================
-// * 贴图控制 - 贴图层 - 帧刷新绑定（地图界面）
+// * 贴图控制 - 贴图层 - 帧刷新绑定『多场景与对话框-地图界面』
 //==============================
 var _drill_DSRS_mapSprite_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {	
@@ -1359,7 +1359,7 @@ Scene_Map.prototype.update = function() {
 	}
 };
 //==============================
-// * 贴图控制 - 贴图层 - 帧刷新（地图界面）
+// * 贴图控制 - 贴图层 - 帧刷新『多场景与对话框-地图界面』
 //==============================
 Scene_Map.prototype.drill_DSRS_updateLayer = function() {
 	
@@ -1383,7 +1383,7 @@ Scene_Map.prototype.drill_DSRS_updateLayer = function() {
 };
 
 //==============================
-// * 贴图控制 - 贴图层 - 创建绑定（战斗界面）
+// * 贴图控制 - 贴图层 - 创建绑定『多场景与对话框-战斗界面』
 //==============================
 var _drill_DSRS_battleSprite_createDisplayObjects = Scene_Battle.prototype.createDisplayObjects;
 Scene_Battle.prototype.createDisplayObjects = function() {
@@ -1392,11 +1392,11 @@ Scene_Battle.prototype.createDisplayObjects = function() {
 	this.drill_DSRS_createMask();		//创建 - 内容遮罩
 };
 //==============================
-// * 贴图控制 - 贴图层 - 创建（战斗界面）
+// * 贴图控制 - 贴图层 - 创建『多场景与对话框-战斗界面』
 //==============================
 Scene_Battle.prototype.drill_DSRS_createLayer = Scene_Map.prototype.drill_DSRS_createLayer;
 //==============================
-// * 贴图控制 - 贴图层 - 帧刷新绑定（战斗界面）
+// * 贴图控制 - 贴图层 - 帧刷新绑定『多场景与对话框-战斗界面』
 //==============================
 var _drill_DSRS_battleSprite_update = Scene_Battle.prototype.update;
 Scene_Battle.prototype.update = function() {	
@@ -1407,14 +1407,14 @@ Scene_Battle.prototype.update = function() {
 	}
 };
 //==============================
-// * 贴图控制 - 贴图层 - 帧刷新（战斗界面）
+// * 贴图控制 - 贴图层 - 帧刷新『多场景与对话框-战斗界面』
 //==============================
 Scene_Battle.prototype.drill_DSRS_updateLayer = Scene_Map.prototype.drill_DSRS_updateLayer;
 
 
 
 //==============================
-// * 贴图控制 - 内容遮罩 - 创建（地图界面）
+// * 贴图控制 - 内容遮罩 - 创建『多场景与对话框-地图界面』
 //==============================
 Scene_Map.prototype.drill_DSRS_createMask = function() {
 	var mask_src = DrillUp.g_DSRS_contextMask;
@@ -1426,7 +1426,7 @@ Scene_Map.prototype.drill_DSRS_createMask = function() {
 	this._drill_DSRS_layer.mask = this._drill_rollerMask;			//『遮罩赋值』
 };
 //==============================
-// * 贴图控制 - 内容遮罩 - 帧刷新（地图界面）
+// * 贴图控制 - 内容遮罩 - 帧刷新『多场景与对话框-地图界面』
 //==============================
 Scene_Map.prototype.drill_DSRS_updateMask = function() {
 	if( this._drill_rollerMask_needResize == true &&
@@ -1440,18 +1440,18 @@ Scene_Map.prototype.drill_DSRS_updateMask = function() {
 	}
 }
 //==============================
-// * 贴图控制 - 内容遮罩 - 创建（战斗界面）
+// * 贴图控制 - 内容遮罩 - 创建『多场景与对话框-战斗界面』
 //==============================
 Scene_Battle.prototype.drill_DSRS_createMask = Scene_Map.prototype.drill_DSRS_createMask;
 //==============================
-// * 贴图控制 - 内容遮罩 - 帧刷新（战斗界面）
+// * 贴图控制 - 内容遮罩 - 帧刷新『多场景与对话框-战斗界面』
 //==============================
 Scene_Battle.prototype.drill_DSRS_updateMask = Scene_Map.prototype.drill_DSRS_updateMask;
 
 
 
 //==============================
-// * 长画布贴图 - 创建（地图界面）
+// * 长画布贴图 - 创建『多场景与对话框-地图界面』
 //==============================
 Scene_Map.prototype.drill_DSRS_createRoller = function() {
 	
@@ -1482,7 +1482,7 @@ Scene_Map.prototype.drill_DSRS_createRoller = function() {
 	this._drill_rollerSprite.drill_COSR_start();
 }
 //==============================
-// * 长画布贴图 - 帧刷新（地图界面）
+// * 长画布贴图 - 帧刷新『多场景与对话框-地图界面』
 //==============================
 Scene_Map.prototype.drill_DSRS_updateRoller = function() {
 	
@@ -1506,7 +1506,7 @@ Scene_Map.prototype.drill_DSRS_updateRoller = function() {
 	}
 }
 //==============================
-// * 长画布贴图 - 销毁（地图界面）
+// * 长画布贴图 - 销毁『多场景与对话框-地图界面』
 //==============================
 Scene_Map.prototype.drill_DSRS_destroyRoller = function() {
 	this._drill_rollerSprite.drill_sprite_destroy();
@@ -1514,15 +1514,15 @@ Scene_Map.prototype.drill_DSRS_destroyRoller = function() {
 	this._drill_rollerSprite = null;
 }
 //==============================
-// * 长画布贴图 - 创建（战斗界面）
+// * 长画布贴图 - 创建『多场景与对话框-战斗界面』
 //==============================
 Scene_Battle.prototype.drill_DSRS_createRoller = Scene_Map.prototype.drill_DSRS_createRoller;
 //==============================
-// * 长画布贴图 - 帧刷新（战斗界面）
+// * 长画布贴图 - 帧刷新『多场景与对话框-战斗界面』
 //==============================
 Scene_Battle.prototype.drill_DSRS_updateRoller = Scene_Map.prototype.drill_DSRS_updateRoller;
 //==============================
-// * 长画布贴图 - 销毁（战斗界面）
+// * 长画布贴图 - 销毁『多场景与对话框-战斗界面』
 //==============================
 Scene_Battle.prototype.drill_DSRS_destroyRoller = Scene_Map.prototype.drill_DSRS_destroyRoller;
 

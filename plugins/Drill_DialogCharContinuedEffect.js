@@ -1328,13 +1328,13 @@ Drill_DCCE_Sprite.prototype.update = function() {
 // * 字符块贴图 - 帧刷新 - 固定帧初始值
 //==============================
 Drill_DCCE_Sprite.prototype.drill_DCCE_updateOrg = function() {
-	this.x = this.drill_COWCSp_sprite_getOrgX();	// 位置X （获取贴图原位置X【窗口字符 - 窗口字符贴图核心】）
-	this.y = this.drill_COWCSp_sprite_getOrgY();	// 位置Y （获取贴图原位置Y【窗口字符 - 窗口字符贴图核心】）
-	this.scale.x = 1;								// 缩放X
-	this.scale.y = 1;								// 缩放Y
-	//this.skew.x = 0;								// 斜切X
-	//this.skew.y = 0;								// 斜切Y
-	this.rotation = 0;								// 旋转
+	this.x = this.drill_COWCSp_sprite_getOriginalX();	// 位置X （获取贴图原位置X【窗口字符 - 窗口字符贴图核心】）
+	this.y = this.drill_COWCSp_sprite_getOriginalY();	// 位置Y （获取贴图原位置Y【窗口字符 - 窗口字符贴图核心】）
+	this.scale.x = 1;									// 缩放X
+	this.scale.y = 1;									// 缩放Y
+	//this.skew.x = 0;									// 斜切X
+	//this.skew.y = 0;									// 斜切Y
+	this.rotation = 0;									// 旋转
 }
 //==============================
 // * 字符块贴图 - 帧刷新 - 执行变换

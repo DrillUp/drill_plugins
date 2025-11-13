@@ -1749,6 +1749,7 @@ Game_System.prototype.drill_OKe_keyboard_setKeyStrAllDefault = function() {
 //			说明：	> 管辖权 即对 原函数 进行 修改、覆写、继承、控制子插件继承 等的权利。
 //					> 用于后期脱离 原游戏框架 且仍保持兼容性 的标记。
 //=============================================================================
+//	（插件改名后，管辖权再进行标记）
 /*
 //==============================
 // * 键盘/手柄 - 常量
@@ -2118,7 +2119,7 @@ function Drill_OKe_PadBean(){
 // * 手柄实体类 - 初始化
 //==============================
 Drill_OKe_PadBean.prototype.initialize = function(){
-	this._drill_beanSerial = new Date().getTime() + Math.random();		//『生成一个不重复的序列号』
+	this._drill_beanSerial = new Date().getTime() + Math.random();		//『随机因子-生成一个不重复的序列号』
     this.drill_bean_initData();											//私有数据初始化
 };
 //##############################
@@ -2554,7 +2555,7 @@ function Drill_OKe_KeyboardBean(){
 // * 键盘实体类 - 初始化
 //==============================
 Drill_OKe_KeyboardBean.prototype.initialize = function(){
-	this._drill_beanSerial = new Date().getTime() + Math.random();		//『生成一个不重复的序列号』
+	this._drill_beanSerial = new Date().getTime() + Math.random();		//『随机因子-生成一个不重复的序列号』
     this.drill_bean_initData();											//私有数据初始化
 };
 //##############################

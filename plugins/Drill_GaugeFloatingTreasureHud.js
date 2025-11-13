@@ -1108,7 +1108,7 @@ if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义�
 			this.__drill_zIndex = value;
 		},
 		get: function(){
-			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			if( this.__drill_zIndex == undefined ){ return 20250701; }	//（如果未定义则放最上面）
 			return this.__drill_zIndex;
 		},
 		configurable: true
@@ -1710,7 +1710,7 @@ function Drill_GFTH_Allocator(){
 //==============================
 Drill_GFTH_Allocator.prototype.initialize = function( data ){
 	this._drill_data = {};
-	this._drill_allocatorSerial = new Date().getTime() + Math.random();		//『生成一个不重复的序列号』
+	this._drill_allocatorSerial = new Date().getTime() + Math.random();		//『随机因子-生成一个不重复的序列号』
     this.drill_allocator_initData();										//初始化数据
     this.drill_allocator_initChild();										//初始化子功能
 	if( data == undefined ){ data = {}; }
@@ -1849,7 +1849,7 @@ Drill_GFTH_Allocator.prototype.drill_allocator_resetData_Private = function( dat
 	
 	// > 执行重置
 	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
-	this._drill_allocatorSerial = new Date().getTime() + Math.random();		//『生成一个不重复的序列号』
+	this._drill_allocatorSerial = new Date().getTime() + Math.random();		//『随机因子-生成一个不重复的序列号』
     this.drill_allocator_initData();										//初始化数据
     this.drill_allocator_initChild();										//初始化子功能
 }
@@ -2002,8 +2002,8 @@ Drill_GFTH_Allocator.prototype.drill_allocator_targetMovement = function( i, tem
 	// > 计算 - 移动弹道
 	var data = temp_window._drill_data;
 	var b_data = temp_window._drill_data['b_data'];
-	b_data['orgX'] = temp_window._drill_COBa_curPosX;	//（从窗口当前的位置开始算起）
-	b_data['orgY'] = temp_window._drill_COBa_curPosY;
+	b_data['org_x'] = temp_window._drill_COBa_curPosX;	//（从窗口当前的位置开始算起）
+	b_data['org_y'] = temp_window._drill_COBa_curPosY;
 	
 	b_data['movementNum'] = 1;
 	b_data['movementTime'] = sustain_time;
@@ -2012,8 +2012,8 @@ Drill_GFTH_Allocator.prototype.drill_allocator_targetMovement = function( i, tem
 	
 	b_data['movementMode'] = "两点式";
 	b_data['twoPointType'] = g_data['regist_moveType'];
-	b_data['twoPointDifferenceX'] = tarX - b_data['orgX'];				//两点式 - 距离差值x（终点减起点）
-	b_data['twoPointDifferenceY'] = tarY - b_data['orgY'];	            //两点式 - 距离差值y（终点减起点）
+	b_data['twoPointDifferenceX'] = tarX - b_data['org_x'];				//两点式 - 距离差值x（终点减起点）
+	b_data['twoPointDifferenceY'] = tarY - b_data['org_y'];	            //两点式 - 距离差值y（终点减起点）
 	
 	return b_data;
 }
@@ -2054,14 +2054,14 @@ Drill_GFTH_Allocator.prototype.drill_allocator_getAccumulateHeight = function( i
 Drill_GFTH_Allocator.prototype.drill_allocator_targetOpacity = function( cur_opacity, tar_opacity, sustain_time ){
 	var o_data = {};
 	
-	o_data['orgOpacity'] = cur_opacity;
+	o_data['org_opacity'] = cur_opacity;
 	
 	o_data['opacityNum'] = 1;
 	o_data['opacityTime'] = sustain_time;
 	
 	o_data['opacityMode'] = "目标值模式";
 	o_data['targetType'] = "匀速变化";
-	o_data['targetDifference'] = tar_opacity - o_data['orgOpacity'];
+	o_data['targetDifference'] = tar_opacity - o_data['org_opacity'];
 	
 	return o_data;
 }
@@ -2372,13 +2372,13 @@ Drill_GFTH_Window.prototype.drill_refreshBallistics = function( b_data, o_data )
 	this._drill_ballisticsInited = true;
 	
 	// > 移动弹道
-	var org_x = b_data['orgX'];
-	var org_y = b_data['orgY'];
+	var org_x = b_data['org_x'];
+	var org_y = b_data['org_y'];
 	$gameTemp.drill_COBa_setBallisticsMove( b_data );					//移动弹道 - 初始化数据
 	$gameTemp.drill_COBa_preBallisticsMove( this, 0, org_x, org_y );	//移动弹道 - 推演赋值
 	
 	// > 透明度弹道
-	var org_opacity = o_data['orgOpacity'];
+	var org_opacity = o_data['org_opacity'];
 	$gameTemp.drill_COBa_setBallisticsOpacity( o_data );				//透明度弹道 - 初始化数据
 	$gameTemp.drill_COBa_preBallisticsOpacity( this, 0, org_opacity );	//透明度弹道 - 推演赋值
 }

@@ -454,8 +454,8 @@ Game_CharacterBase.prototype.drill_JSp_initData = function() {
 	// > 公式参数
 	this._drill_JSp['_data_inited'] = false;	//初始化（在起跳setjump时初始化）
 	this._drill_JSp['_count'] = 0;				//起跳时间
-	this._drill_JSp['_orgX'] = 0;				//起跳点x
-	this._drill_JSp['_orgY'] = 0;				//起跳点y
+	this._drill_JSp['_org_x'] = 0;				//起跳点x
+	this._drill_JSp['_org_y'] = 0;				//起跳点y
 	this._drill_JSp['_realDistance'] = 0;		//抛物线距离
 	this._drill_JSp['_realHight'] = 0;			//抛物线高度
 	
@@ -581,9 +581,9 @@ Game_CharacterBase.prototype.drill_JSp_jumpSet = function(xPlus, yPlus) {
 	var data = this._drill_JSp;
 	data['_data_inited'] = true;													//初始化
 	data['_count'] = 0;																//起跳时间
-	data['_orgX'] = Number(this._realX);											//起跳点x
-	data['_orgY'] = Number(this._realY);											//起跳点y
-	data['_realDistance'] = Math.abs(data['_orgX'] - this._x);						//抛物线距离
+	data['_org_x'] = Number(this._realX);											//起跳点x
+	data['_org_y'] = Number(this._realY);											//起跳点y
+	data['_realDistance'] = Math.abs(data['_org_x'] - this._x);						//抛物线距离
 	data['_realHight'] = this.drill_JSp_maxJumpHeight() + Number(data['height']);	//抛物线高度
 	
 	if( data['time'] == -1 ){
@@ -614,12 +614,12 @@ Game_CharacterBase.prototype.drill_JSp_updateJump = function() {
 	// > 跳跃 - 直线位移公式
 	if( data['level'] == 1 ){
 		// > 匀速平移
-		this._realX = data['_orgX'] + (this._x - data['_orgX']) * data['_count'] / data['time'];
-		this._realY = data['_orgY'] + (this._y - data['_orgY']) * data['_count'] / data['time'];
+		this._realX = data['_org_x'] + (this._x - data['_org_x']) * data['_count'] / data['time'];
+		this._realY = data['_org_y'] + (this._y - data['_org_y']) * data['_count'] / data['time'];
 	}else{
 		// > 分段速度
-		var x_vspeed = (this._x - data['_orgX']) / data['time'];
-		var y_vspeed = (this._y - data['_orgY']) / data['time'];
+		var x_vspeed = (this._x - data['_org_x']) / data['time'];
+		var y_vspeed = (this._y - data['_org_y']) / data['time'];
 		var p_time = data['time'] / data['level'];
 		var p_count = data['_count'];
 		var x_distance = 0;
@@ -638,8 +638,8 @@ Game_CharacterBase.prototype.drill_JSp_updateJump = function() {
 				break;
 			}
 		}
-		this._realX = data['_orgX'] + x_distance;
-		this._realY = data['_orgY'] + y_distance;
+		this._realX = data['_org_x'] + x_distance;
+		this._realY = data['_org_y'] + y_distance;
 	}
 	
 	
@@ -704,7 +704,7 @@ Game_CharacterBase.prototype.jumpHeight = function() {
 Game_CharacterBase.prototype.drill_JSp_maxJumpHeight = function() {
 	var count = this._jumpCount /2;
 	var peakHeight = (this._jumpPeak * this._jumpPeak - Math.pow(Math.abs(count - this._jumpPeak), 2)) / 2;
-	peakHeight -= (this._y - this._drill_JSp['_orgY'])/2;		//去掉斜向直线公式的干扰
+	peakHeight -= (this._y - this._drill_JSp['_org_y'])/2;		//去掉斜向直线公式的干扰
 	return peakHeight;
 }
 

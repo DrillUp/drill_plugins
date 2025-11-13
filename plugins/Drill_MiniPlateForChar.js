@@ -1416,7 +1416,7 @@ if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义�
 			this.__drill_zIndex = value;
 		},
 		get: function(){
-			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			if( this.__drill_zIndex == undefined ){ return 20250701; }	//（如果未定义则放最上面）
 			return this.__drill_zIndex;
 		},
 		configurable: true
@@ -1501,7 +1501,7 @@ if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义�
 			this.__drill_zIndex = value;
 		},
 		get: function(){
-			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			if( this.__drill_zIndex == undefined ){ return 20250701; }	//（如果未定义则放最上面）
 			return this.__drill_zIndex;
 		},
 		configurable: true
@@ -1590,7 +1590,7 @@ if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义�
 			this.__drill_zIndex = value;
 		},
 		get: function(){
-			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			if( this.__drill_zIndex == undefined ){ return 20250701; }	//（如果未定义则放最上面）
 			return this.__drill_zIndex;
 		},
 		configurable: true
@@ -1864,7 +1864,7 @@ function Drill_MPFC_Bean(){
 // * 实体类 - 初始化
 //==============================
 Drill_MPFC_Bean.prototype.initialize = function(){
-	this._drill_beanSerial = new Date().getTime() + Math.random();		//『生成一个不重复的序列号』
+	this._drill_beanSerial = new Date().getTime() + Math.random();		//『随机因子-生成一个不重复的序列号』
     this.drill_bean_initData();											//私有数据初始化
 };
 //##############################
@@ -1920,7 +1920,7 @@ Drill_MPFC_Bean.prototype.drill_bean_setContext = function( context ){
 //			返回：	> 无
 //##############################
 Drill_MPFC_Bean.prototype.drill_bean_refreshContext = function(){
-	this._drill_contextSerial = new Date().getTime() + Math.random();	//（强制刷新内容）『生成一个不重复的序列号』
+	this._drill_contextSerial = new Date().getTime() + Math.random();	//（强制刷新内容）『随机因子-生成一个不重复的序列号』
 };
 //##############################
 // * 实体类 - 设置皮肤样式【开放函数】

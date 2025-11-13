@@ -274,19 +274,19 @@ Game_System.prototype.drill_COCut_checkSysData_Private = function() {
 //=============================================================================
 /*
 //==============================
-// * C淡出淡入『系统-动画转场核心』 - 淡出淡入速度 - 常规
+// * C淡出淡入《系统-动画转场核心》 - 淡出淡入速度 - 常规
 //==============================
 Scene_Base.prototype.fadeSpeed = function(){ return 24; };
 //==============================
-// * C淡出淡入『系统-动画转场核心』 - 淡出淡入速度 - 慢速
+// * C淡出淡入《系统-动画转场核心》 - 淡出淡入速度 - 慢速
 //==============================
 Scene_Base.prototype.slowFadeSpeed = function(){ return this.fadeSpeed() * 2; };
 //==============================
-// * C淡出淡入『系统-动画转场核心』 - 执行淡出
+// * C淡出淡入《系统-动画转场核心》 - 执行淡出
 //
-//				参数：	> duration 数字（持续时间，单位帧）
-//						> white 布尔   （是否为白底，否则为黑底）
-//				说明：	> 子场景对duration参数不直接赋值数字，而是使用函数 fadeSpeed() 或 slowFadeSpeed() 赋值。
+//			参数：	> duration 数字（持续时间，单位帧）
+//					> white 布尔   （是否为白底，否则为黑底）
+//			说明：	> 子场景对duration参数不直接赋值数字，而是使用函数 fadeSpeed() 或 slowFadeSpeed() 赋值。
 //==============================
 Scene_Base.prototype.startFadeOut = function( duration, white ){
     this.createFadeSprite(white);
@@ -295,9 +295,9 @@ Scene_Base.prototype.startFadeOut = function( duration, white ){
     this._fadeSprite.opacity = 0;
 };
 //==============================
-// * C淡出淡入『系统-动画转场核心』 - 执行淡出 声音和画面
+// * C淡出淡入《系统-动画转场核心》 - 执行淡出 声音和画面
 //==============================
-Scene_Base.prototype.fadeOutAll = function() {
+Scene_Base.prototype.fadeOutAll = function(){
     var time = this.slowFadeSpeed() / 60;
     AudioManager.fadeOutBgm(time);
     AudioManager.fadeOutBgs(time);
@@ -305,11 +305,11 @@ Scene_Base.prototype.fadeOutAll = function() {
     this.startFadeOut(this.slowFadeSpeed());
 };
 //==============================
-// * C淡出淡入『系统-动画转场核心』 - 执行淡入
+// * C淡出淡入《系统-动画转场核心》 - 执行淡入
 //
-//				参数：	> duration 数字（持续时间，单位帧）
-//						> white 布尔   （是否为白底，否则为黑底）
-//				说明：	> 子场景对duration参数不直接赋值数字，而是使用函数 fadeSpeed() 或 slowFadeSpeed() 赋值。
+//			参数：	> duration 数字（持续时间，单位帧）
+//					> white 布尔   （是否为白底，否则为黑底）
+//			说明：	> 子场景对duration参数不直接赋值数字，而是使用函数 fadeSpeed() 或 slowFadeSpeed() 赋值。
 //==============================
 Scene_Base.prototype.startFadeIn = function( duration, white ){
     this.createFadeSprite(white);
@@ -318,15 +318,19 @@ Scene_Base.prototype.startFadeIn = function( duration, white ){
     this._fadeSprite.opacity = 255;
 };
 //==============================
-// * C淡出淡入『系统-动画转场核心』 - 创建贴图对象
+// * C淡出淡入《系统-动画转场核心》 - 创建贴图对象
 //
-//				参数：	> white 布尔   （是否为白底，否则为黑底）
+//			参数：	> white 布尔   （是否为白底，否则为黑底）
 //==============================
 Scene_Base.prototype.createFadeSprite = function( white ){
+	
+	// > 屏幕单色贴图 创建
     if( !this._fadeSprite ){
         this._fadeSprite = new ScreenSprite();
         this.addChild(this._fadeSprite);
     }
+	
+	// > 屏幕单色贴图 设置颜色（白/黑）
     if( white ){
         this._fadeSprite.setWhite();
     }else{
@@ -334,9 +338,9 @@ Scene_Base.prototype.createFadeSprite = function( white ){
     }
 };
 //==============================
-// * C淡出淡入『系统-动画转场核心』 - 帧刷新
+// * C淡出淡入《系统-动画转场核心》 - 帧刷新
 //==============================
-Scene_Base.prototype.updateFade = function() {
+Scene_Base.prototype.updateFade = function(){
     if( this._fadeDuration > 0 ){
         var d = this._fadeDuration;
         if( this._fadeSign > 0 ){
@@ -836,13 +840,13 @@ Scene_Base.prototype.createFadeSprite = function( white ){
 	
 	// > 最顶层
 	if( this._drill_SenceTopArea != undefined ){
-		this._fadeSprite.zIndex = 666422 + 100;
+		this._fadeSprite.zIndex = 20250701 + 100;
 		this._drill_SenceTopArea.addChild(this._fadeSprite);
 	}
 	
 	// > 菜单前面层
 	if( this._foregroundSprite != undefined ){
-		this._fadeSprite.zIndex = 666422 + 100;
+		this._fadeSprite.zIndex = 20250701 + 100;
 		this._foregroundSprite.addChild(this._fadeSprite);
 	}
 }

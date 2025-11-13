@@ -1032,18 +1032,24 @@
  * @value 绑定变量id
  * @option 绑定物品id
  * @value 绑定物品id
+ * @option 绑定金币持有数
+ * @value 绑定金币持有数
+ * @option 绑定移动总步数
+ * @value 绑定移动总步数
+ * @option 绑定游戏时长-秒
+ * @value 绑定游戏时长-秒
  * @desc 变量框场景显示的模式。
  * @default 绑定变量id
  * 
  * @param 绑定的变量id
  * @parent 绑定类型
- * @desc 变量类型下对应变量id号，如果是物品类型，此项无效。
+ * @desc 绑定类型为"绑定变量id"时，对应的变量id号。
  * @type variable
  * @default 0
  * 
  * @param 绑定的物品id
  * @parent 绑定类型
- * @desc 物品类型下对应变量id号，如果是变量类型，此项无效。
+ * @desc 绑定类型为"绑定物品id"时，对应的变量id号。
  * @type item
  * @default 0
  * 
@@ -1846,7 +1852,7 @@ if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义�
 			this.__drill_zIndex = value;
 		},
 		get: function(){
-			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			if( this.__drill_zIndex == undefined ){ return 20250701; }	//（如果未定义则放最上面）
 			return this.__drill_zIndex;
 		},
 		configurable: true
@@ -2146,7 +2152,7 @@ if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义�
 			this.__drill_zIndex = value;
 		},
 		get: function(){
-			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			if( this.__drill_zIndex == undefined ){ return 20250701; }	//（如果未定义则放最上面）
 			return this.__drill_zIndex;
 		},
 		configurable: true
@@ -2650,9 +2656,16 @@ Drill_GFV_StyleSprite.prototype.drill_updateMeter = function() {
 		var param_value = 0;
 		if( slot_b['type'] == "绑定变量id" ){
 			param_value = Number( $gameVariables.value( slot_b['var_id'] ) );
-		}else{
+		}else if( slot_b['type'] == "绑定物品id" ){
 			param_value = Number( $gameParty.numItems( $dataItems[ slot_b['item_id'] ] ) );
+		}else if( slot_b['type'] == "绑定金币持有数" ){
+			param_value = Number( $gameParty.gold() );
+		}else if( slot_b['type'] == "绑定移动总步数" ){
+			param_value = Number( $gameParty.steps() );
+		}else if( slot_b['type'] == "绑定游戏时长-秒" ){
+			param_value = Number( $gameSystem.playtime() );
 		}
+		
 		if( this._drill_meterSpriteTank[i] ){
 			this._drill_meterSpriteTank[i].drill_COGM_reflashValue( param_value );
 		}
@@ -2677,9 +2690,16 @@ Drill_GFV_StyleSprite.prototype.drill_updateNumber = function() {
 		var param_value = 0;
 		if( slot_b['type'] == "绑定变量id" ){
 			param_value = Number( $gameVariables.value( slot_b['var_id'] ) );
-		}else{
+		}else if( slot_b['type'] == "绑定物品id" ){
 			param_value = Number( $gameParty.numItems( $dataItems[ slot_b['item_id'] ] ) );
+		}else if( slot_b['type'] == "绑定金币持有数" ){
+			param_value = Number( $gameParty.gold() );
+		}else if( slot_b['type'] == "绑定移动总步数" ){
+			param_value = Number( $gameParty.steps() );
+		}else if( slot_b['type'] == "绑定游戏时长-秒" ){
+			param_value = Number( $gameSystem.playtime() );
 		}
+		
 		if( this._drill_numberSpriteTank[i] ){
 			this._drill_numberSpriteTank[i].drill_COGN_reflashValue( param_value );
 		}

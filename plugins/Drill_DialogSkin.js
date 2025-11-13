@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.7]        对话框 - 对话框皮肤
+ * @plugindesc [v1.8]        对话框 - 对话框皮肤
  * @author Drill_up
  * 
  * @Drill_LE_param "皮肤样式-%d"
@@ -148,6 +148,8 @@
  * 翻新了对话框的内部结构，修复了yep姓名框显示黑边的bug。
  * [v1.7]
  * 修复了子窗口的边框有时缝合不了的bug。
+ * [v1.8]
+ * 添加了子窗口姓名框的收拢偏移量、前缀后缀配置。
  * 
  * 
  * 
@@ -692,6 +694,46 @@
  * @default 8
  * 
  * 
+ * @param ---子窗口---
+ * @desc 
+ *
+ * @param 绑姓名框时-是否修改收拢偏移量
+ * @parent ---子窗口---
+ * @type boolean
+ * @on 修改
+ * @off 不修改
+ * @desc true - 修改，false - 不修改。如果此皮肤样式绑定到了姓名框，那么就执行相应修改配置。
+ * @default false
+ *
+ * @param 绑姓名框时-横向收拢偏移量
+ * @parent 绑姓名框时-是否修改收拢偏移量
+ * @desc 横向收拢偏移量。左对齐时，正右负左；右对齐时，正左负右；居中时，不偏移。
+ * @default 0
+ *
+ * @param 绑姓名框时-纵向收拢偏移量
+ * @parent 绑姓名框时-是否修改收拢偏移量
+ * @desc 纵向收拢偏移量。姓名框在对话框下方时，正上负下；姓名框在对话框上方时，正下负上。
+ * @default 0
+ *
+ * @param 绑姓名框时-是否修改前缀后缀
+ * @parent ---子窗口---
+ * @type boolean
+ * @on 修改
+ * @off 不修改
+ * @desc true - 修改，false - 不修改。如果此皮肤样式绑定到了姓名框，那么就执行相应修改配置。
+ * @default false
+ *
+ * @param 绑姓名框时-前缀
+ * @parent 绑姓名框时-是否修改前缀后缀
+ * @desc 姓名框文本基础上额外的添加的前缀文本。
+ * @default \c[6]
+ *
+ * @param 绑姓名框时-后缀
+ * @parent 绑姓名框时-是否修改前缀后缀
+ * @desc 姓名框文本基础上额外的添加的后缀文本。
+ * @default \c[0]
+ * 
+ * 
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -725,12 +767,12 @@
 //				->获取样式数据（根据窗口类名）
 //			
 //			->☆预加载
-//			->☆对话框控制
+//			->☆对话框的皮肤
 //				->3A主体
 //				->3B边框皮肤
 //				->3C窗口皮肤
 //					->窗口平铺背景向内缩进距
-//			->☆对话框子窗口控制
+//			->☆对话框子窗口的皮肤
 //				->4A金钱窗口
 //				->4B选择项窗口
 //				->4C数字输入窗口
@@ -744,6 +786,9 @@
 //				->B播放GIF
 //				->C边框层
 //				->D边角层
+//			
+//			->☆对话框子窗口的特殊配置
+//				->4E姓名框窗口
 //
 //
 //		★家谱：
@@ -758,6 +803,7 @@
 //		★必要注意事项：
 //			1._windowSpriteContainer 是一个 PIXI.Container，不能addChild，巨坑。
 //			  要使用提供的Window类方法： addChildToBack 。
+//			2. 结构关系可见"对话框的全部结构.png"。
 //
 //		★其它说明细节：
 //			1.边框边角原理相对简单，平铺用TilingSprite，拉伸用scale.x。
@@ -791,7 +837,7 @@
 	//==============================
 	// * 提示信息 - 报错 - 漏洞函数警告 - 检测『非整数坐标抖动问题』
 	//==============================
-	if( Yanfly != undefined && 
+	if( typeof(Yanfly) != "undefined" && 
 		Yanfly.Core != undefined && 
 		Yanfly.Core.Sprite_updateTransform != undefined ){
 		alert( DrillUp.drill_DSk_getPluginTip_TransformBugWarning() );
@@ -863,6 +909,14 @@
 		data['corner_float'] = String( dataFrom["浮动效果"] || "关闭");
 		data['corner_floatSpeed'] = Number( dataFrom["浮动速度"] || 7.0);
 		data['corner_floatRange'] = Number( dataFrom["浮动偏移量"] || 8);
+		
+		// > 子窗口的参数
+		data['nameBox_closingEnabled'] = String( dataFrom["绑姓名框时-是否修改收拢偏移量"] || "false") == "true";
+		data['nameBox_closingX'] = Number( dataFrom["绑姓名框时-横向收拢偏移量"] || 0);
+		data['nameBox_closingY'] = Number( dataFrom["绑姓名框时-纵向收拢偏移量"] || 0);
+		data['nameBox_textEnabled'] = String( dataFrom["绑姓名框时-是否修改前缀后缀"] || "false") == "true";
+		data['nameBox_textPrefix'] = String( dataFrom["绑姓名框时-前缀"] || "");
+		data['nameBox_textSuffix'] = String( dataFrom["绑姓名框时-后缀"] || "");
 		
 		return data;
 	}
@@ -1146,13 +1200,13 @@ if( DrillUp.g_DSk_preloadEnabled == true ){
 
 
 //=============================================================================
-// ** ☆对话框控制
+// ** ☆对话框的皮肤
 //
 //			说明：	> 该模块将对 对话框 进行专门管理。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 3A主体 - 初始化
+// * 3A主体 - 初始化皮肤
 //==============================
 var _drill_DSk_initialize = Window_Message.prototype.initialize;
 Window_Message.prototype.initialize = function() {
@@ -1469,6 +1523,7 @@ Window_Base.prototype.updateTone = function() {
 var _drill_DSk__refreshBack = Window.prototype._refreshBack;
 Window.prototype._refreshBack = function(){
 	
+	// > 0G背景贴图（设置平铺间距）
 	if( this._drill_DSk_tag != undefined ){
 		var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
 		this._drill_DSk_marginTemp = this._margin;		//（控制 _margin 向内缩进距）
@@ -1478,6 +1533,7 @@ Window.prototype._refreshBack = function(){
 	// > 原函数
 	_drill_DSk__refreshBack.call(this);
 	
+	// > 0G背景贴图（还原平铺间距）
 	if( this._drill_DSk_tag != undefined ){
 		this._margin = this._drill_DSk_marginTemp;
 	}
@@ -1486,13 +1542,13 @@ Window.prototype._refreshBack = function(){
 
 
 //=============================================================================
-// ** ☆对话框子窗口控制
+// ** ☆对话框子窗口的皮肤
 //
 //			说明：	> 该模块将对 对话框的子窗口 进行专门管理。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 4A金钱窗口 - 初始化
+// * 4A金钱窗口 - 初始化皮肤『对话框多个子窗口』
 //==============================
 var _drill_DSk_createSubWindows = Window_Message.prototype.createSubWindows;
 Window_Message.prototype.createSubWindows = function(){
@@ -1525,7 +1581,7 @@ Window_Gold.prototype.update = function(){
 }
 
 //==============================
-// * 4B选择项窗口 - 初始化
+// * 4B选择项窗口 - 初始化皮肤『对话框多个子窗口』
 //==============================
 var _drill_DSk_ChoiceList_initialize = Window_ChoiceList.prototype.initialize;
 Window_ChoiceList.prototype.initialize = function( messageWindow ){
@@ -1555,7 +1611,7 @@ Window_ChoiceList.prototype.update = function(){
 }
 
 //==============================
-// * 4C数字输入窗口 - 初始化
+// * 4C数字输入窗口 - 初始化皮肤『对话框多个子窗口』
 //==============================
 var _drill_DSk_NumberInput_initialize = Window_NumberInput.prototype.initialize;
 Window_NumberInput.prototype.initialize = function( messageWindow ){
@@ -1585,7 +1641,7 @@ Window_NumberInput.prototype.update = function(){
 }
 
 //==============================
-// * 4D选择物品窗口 - 初始化
+// * 4D选择物品窗口 - 初始化皮肤『对话框多个子窗口』
 //==============================
 var _drill_DSk_EventItem_initialize = Window_EventItem.prototype.initialize;
 Window_EventItem.prototype.initialize = function( messageWindow ){
@@ -1615,29 +1671,29 @@ Window_EventItem.prototype.update = function(){
 }
 
 //==============================
-// * 对话框子窗口控制 - 最后继承1级
+// * 对话框子窗口的皮肤 - 最后继承1级
 //==============================
 var _drill_DSk_scene_initialize = SceneManager.initialize;
 SceneManager.initialize = function() {
 	_drill_DSk_scene_initialize.call(this);
 	
 	//==============================
-	// * 4E姓名框窗口 - Drill姓名框
+	// * 4E姓名框窗口（Drill姓名框）
 	//==============================
 	if( Imported.Drill_DialogNameBox ){	
 	
 		//==============================
-		// * Drill姓名框 - 初始化
+		// * 4E姓名框窗口（Drill姓名框） - 初始化皮肤『对话框多个子窗口』
 		//==============================
 		var _drill_DSk_DNB_initialize = Drill_DNB_NameBoxWindow.prototype.initialize;
-		Drill_DNB_NameBoxWindow.prototype.initialize = function( parentWindow ){
-			_drill_DSk_DNB_initialize.call( this,parentWindow );
+		Drill_DNB_NameBoxWindow.prototype.initialize = function( messageWindow ){
+			_drill_DSk_DNB_initialize.call( this,messageWindow );
 			this._drill_DSk_tag = "Drill_DNB_NameBoxWindow";
 			this.drill_DSk_initSkin();				//初始化 - 3C窗口皮肤
 			this.drill_DSk_initBorder();			//初始化 - 3B边框皮肤
 		}
 		//==============================
-		// * Drill姓名框 - 设置位置类型
+		// * 4E姓名框窗口（Drill姓名框） - 设置位置类型
 		//==============================
 		var _drill_DSk_DNB_setPositionType = Drill_DNB_NameBoxWindow.prototype.drill_resetData_Message;
 		Drill_DNB_NameBoxWindow.prototype.drill_resetData_Message = function( text, position_type ){
@@ -1647,7 +1703,7 @@ SceneManager.initialize = function() {
 			this.drill_DSk_resetBorder();			//重设数据 - 3B边框皮肤
 		}
 		//==============================
-		// * Drill姓名框 - 帧刷新
+		// * 4E姓名框窗口（Drill姓名框） - 帧刷新
 		//==============================
 		var _drill_DSk_DNB_update = Drill_DNB_NameBoxWindow.prototype.update;
 		Drill_DNB_NameBoxWindow.prototype.update = function(){
@@ -1657,22 +1713,22 @@ SceneManager.initialize = function() {
 		}
 	}
 	//==============================
-	// * 4E姓名框窗口 - Yep姓名框
+	// * 4E姓名框窗口（Yep姓名框）
 	//==============================
 	if( Imported.YEP_MessageCore ){	
 		
 		//==============================
-		// * Yep姓名框 - 初始化
+		// * 4E姓名框窗口（Yep姓名框） - 初始化皮肤『对话框多个子窗口』
 		//==============================
 		var _drill_DSk_yep_NameBox_initialize = Window_NameBox.prototype.initialize;
-		Window_NameBox.prototype.initialize = function( parentWindow ){
-			_drill_DSk_yep_NameBox_initialize.call( this,parentWindow );
+		Window_NameBox.prototype.initialize = function( messageWindow ){
+			_drill_DSk_yep_NameBox_initialize.call( this,messageWindow );
 			this._drill_DSk_tag = "Window_NameBox";
 			this.drill_DSk_initSkin();					//初始化 - 3C窗口皮肤
 			this.drill_DSk_initBorder();				//初始化 - 3B边框皮肤
 		}
 		//==============================
-		// * Yep姓名框 - 刷新
+		// * 4E姓名框窗口（Yep姓名框） - 刷新
 		//==============================
 		var _drill_DSk_yep_NameBox_refresh = Window_NameBox.prototype.refresh;
 		Window_NameBox.prototype.refresh = function( text, position ){
@@ -1684,7 +1740,7 @@ SceneManager.initialize = function() {
 			return _drill_DSk_yep_NameBox_refresh.call( this, text, position );
 		}
 		//==============================
-		// * Yep姓名框 - 帧刷新
+		// * 4E姓名框窗口（Yep姓名框） - 帧刷新
 		//==============================
 		var _drill_DSk_yep_NameBox_update = Window_NameBox.prototype.update;
 		Window_NameBox.prototype.update = function(){
@@ -1699,31 +1755,31 @@ SceneManager.initialize = function() {
 
 //=============================================================================
 // ** 对话框边贴图【Drill_DSk_BorderSprite】
-// **		
-// **		作用域：	地图界面、战斗界面
-// **		主功能：	定义一个贴图，包含边框和边角两个结构。
-// **		子功能：	
-// **					->贴图『独立贴图』
-// **						x->显示贴图/隐藏贴图
-// **						x->是否就绪
-// **						x->优化策略
-// **						x->销毁
-// **						->初始化数据
-// **						->初始化对象
-// **					
-// **					->A主体
-// **						->刷新样式
-// **						->刷新位置
-// **					->B播放GIF
-// **					->C边框层
-// **					->D边角层
-// **					
-// **		代码：	> 范围 - 该类额外显示边框和边角装饰。
-// **				> 结构 - [ ●合并/分离/ 混乱 ] 数据与贴图合并。通过记录父类的_drill_DSk_tag，来访问$gameSystem进行自变化。
-// **				> 数量 - [单个/ ●多个 ] 每个子窗口都有一个对应。
-// **				> 创建 - [ ●一次性 /自延迟/外部延迟] 
-// **				> 销毁 - [ ●不考虑 /自销毁/外部销毁] 
-// **				> 样式 - [不可修改/ ●自变化 /外部变化] 样式根据 _drill_curStyleId 自变化 _drill_curStyleData 数据。
+//			
+//			作用域：	地图界面、战斗界面
+//			主功能：	定义一个贴图，包含边框和边角两个结构。
+//			子功能：	
+//						->贴图『独立贴图』
+//							x->显示贴图/隐藏贴图
+//							x->是否就绪
+//							x->优化策略
+//							x->销毁
+//							->初始化数据
+//							->初始化对象
+//						
+//						->A主体
+//							->刷新样式
+//							->刷新位置
+//						->B播放GIF
+//						->C边框层
+//						->D边角层
+//						
+//			代码：	> 范围 - 该类额外显示边框和边角装饰。
+//					> 结构 - [ ●合并/分离/ 混乱 ] 数据与贴图合并。通过记录父类的_drill_DSk_tag，来访问$gameSystem进行自变化。
+//					> 数量 - [单个/ ●多个 ] 每个子窗口都有一个对应。
+//					> 创建 - [ ●一次性 /自延迟/外部延迟] 
+//					> 销毁 - [ ●不考虑 /自销毁/外部销毁] 
+//					> 样式 - [不可修改/ ●自变化 /外部变化] 样式根据 _drill_curStyleId 自变化 _drill_curStyleData 数据。
 //=============================================================================
 //==============================
 // * 对话框边贴图 - 定义
@@ -1794,7 +1850,7 @@ Drill_DSk_BorderSprite.prototype.drill_sprite_initAttr = function() {
 Drill_DSk_BorderSprite.prototype.drill_sprite_updateAttr = function() {
 	var data = this._drill_curStyleData;
 	
-	// > 窗口开关动画
+	// > 边贴图的展开动画（同步窗口的 0C展开动画）
 	this.opacity = this._drill_parent.opacity;
 	this.scale.y = this._drill_parent._windowSpriteContainer.scale.y;
 	
@@ -2254,5 +2310,93 @@ Drill_DSk_BorderSprite.prototype.drill_sprite_updateCorner = function() {
 		this._cornerSprite_4.x +=  1 * f_move;
 		this._cornerSprite_4.y +=  1 * f_move;
 	}
+}
+
+
+//=============================================================================
+// ** ☆对话框子窗口的特殊配置
+//
+//			说明：	> 该模块将对 对话框的子窗口 的参数进行适配管理。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 对话框子窗口的特殊配置 - 最后继承1级
+//==============================
+var _drill_DSk_scene_initialize2 = SceneManager.initialize;
+SceneManager.initialize = function() {
+	_drill_DSk_scene_initialize2.call(this);
+	
+	//==============================
+	// * 4E姓名框窗口（Drill姓名框） - 特殊配置『对话框多个子窗口』
+	//==============================
+	if( Imported.Drill_DialogNameBox ){
+		
+		//==============================
+		// * Drill姓名框 - 获取 横向收拢偏移量（继承）
+		//==============================
+		var _drill_DSk_DNB_getClosingX = Game_System.prototype.drill_DNB_getClosingX;
+		Game_System.prototype.drill_DNB_getClosingX = function(){
+			
+			// > 横向收拢偏移量
+			var temp_data = this.drill_DSk_getStyle( "Drill_DNB_NameBoxWindow" );
+			if( temp_data['nameBox_closingEnabled'] == true ){
+				return temp_data['nameBox_closingX'];
+			}
+			
+			// > 原函数
+			return _drill_DSk_DNB_getClosingX.call( this );
+		};
+		//==============================
+		// * Drill姓名框 - 获取 纵向收拢偏移量（继承）
+		//==============================
+		var _drill_DSk_DNB_getClosingY = Game_System.prototype.drill_DNB_getClosingY;
+		Game_System.prototype.drill_DNB_getClosingY = function(){
+			
+			// > 纵向收拢偏移量
+			var temp_data = this.drill_DSk_getStyle( "Drill_DNB_NameBoxWindow" );
+			if( temp_data['nameBox_closingEnabled'] == true ){
+				return temp_data['nameBox_closingY'];
+			}
+			
+			// > 原函数
+			return _drill_DSk_DNB_getClosingY.call( this );
+		};
+		//==============================
+		// * Drill姓名框 - 获取 额外前缀（继承）
+		//==============================
+		var _drill_DSk_DNB_getPrefix = Game_System.prototype.drill_DNB_getPrefix;
+		Game_System.prototype.drill_DNB_getPrefix = function(){
+			
+			// > 额外前缀
+			var temp_data = this.drill_DSk_getStyle( "Drill_DNB_NameBoxWindow" );
+			if( temp_data['nameBox_textEnabled'] == true ){
+				return temp_data['nameBox_textPrefix'];
+			}
+			
+			// > 原函数
+			return _drill_DSk_DNB_getPrefix.call( this );
+		};
+		//==============================
+		// * Drill姓名框 - 获取 额外后缀（继承）
+		//==============================
+		var _drill_DSk_DNB_getSuffix = Game_System.prototype.drill_DNB_getSuffix;
+		Game_System.prototype.drill_DNB_getSuffix = function(){
+			
+			// > 额外后缀
+			var temp_data = this.drill_DSk_getStyle( "Drill_DNB_NameBoxWindow" );
+			if( temp_data['nameBox_textEnabled'] == true ){
+				return temp_data['nameBox_textSuffix'];
+			}
+			
+			// > 原函数
+			return _drill_DSk_DNB_getSuffix.call( this );
+		};
+	}
+	
+	//==============================
+	// * 4E姓名框窗口（Yep姓名框） - 特殊配置『对话框多个子窗口』
+	//==============================
+	//	（无）
+	
 }
 

@@ -2167,7 +2167,7 @@ DrillUp.g_HDSS_notFindStyleAlertOnce = true;
 //==============================
 Drill_HDSS_Controller.prototype.initialize = function( data_id ){
 	this._drill_data_id = data_id;
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能
     this.drill_controller_resetData( data_id );
@@ -2341,7 +2341,7 @@ Drill_HDSS_Controller.prototype.drill_controller_resetData_Private = function( d
 	
 	// > 执行重置
 	this._drill_data_id = data_id;
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能
 }

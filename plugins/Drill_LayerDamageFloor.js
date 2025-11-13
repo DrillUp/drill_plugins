@@ -332,7 +332,7 @@
 //=============================================================================
 /*
 //==============================
-// * 地形伤害『地形伤害与地形治愈』 - 检查伤害
+// * 地形伤害《图块-地形伤害与地形治愈》 - 检查伤害
 //==============================
 Game_Actor.prototype.checkFloorEffect = function(){
     if( $gamePlayer.isOnDamageFloor() ){
@@ -340,7 +340,7 @@ Game_Actor.prototype.checkFloorEffect = function(){
     }
 };
 //==============================
-// * 地形伤害『地形伤害与地形治愈』 - 执行伤害（￠）
+// * 地形伤害《图块-地形伤害与地形治愈》 - 执行伤害
 //==============================
 Game_Actor.prototype.executeFloorDamage = function(){
 	
@@ -355,13 +355,13 @@ Game_Actor.prototype.executeFloorDamage = function(){
     }
 };
 //==============================
-// * 地形伤害『地形伤害与地形治愈』 - 基础伤害（￠）
+// * 地形伤害《图块-地形伤害与地形治愈》 - 基础伤害
 //==============================
 Game_Actor.prototype.basicFloorDamage = function(){
     return 10;
 };
 //==============================
-// * 地形伤害『地形伤害与地形治愈』 - 最大伤害（￠）
+// * 地形伤害《图块-地形伤害与地形治愈》 - 最大伤害
 //
 //			说明：	此设置用于防止生命值低于1而造成死亡。
 //==============================
@@ -369,7 +369,7 @@ Game_Actor.prototype.maxFloorDamage = function(){
     return $dataSystem.optFloorDeath ? this.hp : Math.max(this.hp - 1, 0);
 };
 //==============================
-// ** 地形伤害『地形伤害与地形治愈』 - 伤害效果（￠）
+// ** 地形伤害《图块-地形伤害与地形治愈》 - 伤害效果
 //==============================
 Game_Actor.prototype.performMapDamage = function(){
     if( !$gameParty.inBattle() ){

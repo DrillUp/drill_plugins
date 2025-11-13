@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.9]        系统 - GIF动画序列核心
+ * @plugindesc [v2.0]        系统 - GIF动画序列核心
  * @author Drill_up
  * 
  * @Drill_LE_param "动画序列-%d"
@@ -146,6 +146,8 @@
  * 完善了贴图创建细节，确保设置动画序列后能立即显示预加载的图片。
  * [v1.9]
  * 更新并兼容了新的窗口字符底层。
+ * [v2.0]
+ * 修复了多个动作元之间播放，不能覆盖的bug。
  * 
  * @param ---动画序列 1至20---
  * @default
@@ -2808,7 +2810,7 @@ Drill_COAS_StateController.prototype.initialize = function( sequenceData_id, sta
 	
 	this._drill_sequenceData_id = sequenceData_id;
 	this._drill_stateData_id = stateData_id;
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_controllerState_initData();									//初始化数据
     this.drill_controllerState_initChild();									//初始化子功能
     this.drill_controllerState_resetData( sequenceData_id, stateData_id );
@@ -3025,7 +3027,7 @@ Drill_COAS_StateController.prototype.drill_controllerState_resetData_Private = f
 	// > 执行重置
 	this._drill_sequenceData_id = sequenceData_id;
 	this._drill_stateData_id = stateData_id;
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_controllerState_initData();									//初始化数据
     this.drill_controllerState_initChild();									//初始化子功能
 };
@@ -3209,7 +3211,7 @@ Drill_COAS_StateNodeController.prototype.initialize = function( sequenceData_id,
 	
 	this._drill_sequenceData_id = sequenceData_id;
 	this._drill_stateNodeData_id = stateNodeData_id;
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_controllerNode_initData();									//初始化数据
     this.drill_controllerNode_initChild();									//初始化子功能
     this.drill_controllerNode_resetData( sequenceData_id, stateNodeData_id );
@@ -3605,7 +3607,7 @@ Drill_COAS_StateNodeController.prototype.drill_controllerNode_resetData_Private 
 	// > 执行重置
 	this._drill_sequenceData_id = sequenceData_id;
 	this._drill_stateNodeData_id = stateNodeData_id;
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_controllerNode_initData();									//初始化数据
     this.drill_controllerNode_initChild();									//初始化子功能
 }
@@ -3689,26 +3691,34 @@ Drill_COAS_StateNodeController.prototype.drill_controllerNode_setCurIndex_Privat
 Drill_COAS_StateNodeController.prototype.drill_controllerNode_updateNode = function(){
 	var data = this.drill_data();
 	
-	// > 帧刷新 状态元类型
+	// > 子节点（状态元类型）
 	if( this.drill_controllerNode_isTypeState() ){
+		
+		// > 子节点（状态元类型） - 帧刷新
 		this._drill_curState.drill_controllerState_update();
 		
-		// > 等待子节点 播放结束
+		// > 子节点（状态元类型） - 播放结束时
 		if( this._drill_curState.drill_controllerState_isEnd() == true ){
-			this._drill_curIndex += 1;		//（结束后，索引+1）
+			this._drill_curIndex += 1;		//（索引+1）
+			
+			// > 当前节点 - 播放未结束，继续刷新子节点
 			if( this.drill_controllerNode_isEnd() == false ){
 				this.drill_controllerNode_refreshNext();
 			}
 		}
 	}
 	
-	// > 帧刷新 状态节点类型
+	// > 子节点（状态节点类型）
 	if( this.drill_controllerNode_isTypeNode() ){
+		
+		// > 子节点（状态节点类型） - 帧刷新
 		this._drill_curNode.drill_controllerNode_update();
 		
-		// > 等待子节点 播放结束
+		// > 子节点（状态节点类型） - 播放结束时
 		if( this._drill_curNode.drill_controllerNode_isEnd() == true ){
-			this._drill_curIndex += 1;		//（结束后，索引+1）
+			this._drill_curIndex += 1;		//（索引+1）
+			
+			// > 当前节点 - 播放未结束，继续刷新子节点
 			if( this.drill_controllerNode_isEnd() == false ){
 				this.drill_controllerNode_refreshNext();
 			}
@@ -3728,14 +3738,14 @@ Drill_COAS_StateNodeController.prototype.drill_controllerNode_initNext = functio
 //==============================
 // * D子节点 - 刷新子节点
 //
-//			说明：	重刷 当前集合的子节点 以及所有子节点集合的内容。
-//					（因为所有子节点 执行 resetData ）
+//			说明：	> 重刷 当前集合的子节点 以及所有子节点集合的内容。
+//					  （因为所有子节点 执行 resetData ）
 //==============================
 Drill_COAS_StateNodeController.prototype.drill_controllerNode_refreshNext_Private = function(){
 	var data = this.drill_data();
 	var parent_id = this._drill_sequenceData_id;
 	
-	// > 结束播放后，停止刷新子节点
+	// > 当前节点 - 播放结束时，停止刷新子节点
 	if( this.drill_controllerNode_isEnd() ){ return; }
 	
 	if( this._drill_play_type == "随机播放状态元" ){
@@ -3943,7 +3953,7 @@ Drill_COAS_ActController.prototype.initialize = function( sequenceData_id, actDa
 	
 	this._drill_sequenceData_id = sequenceData_id;
 	this._drill_actData_id = actData_id;
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_controllerAct_initData();									//初始化数据
     this.drill_controllerAct_initChild();									//初始化子功能
     this.drill_controllerAct_resetData( sequenceData_id, actData_id );
@@ -4146,7 +4156,7 @@ Drill_COAS_ActController.prototype.drill_controllerAct_resetData_Private = funct
 	// > 执行重置
 	this._drill_sequenceData_id = sequenceData_id;
 	this._drill_actData_id = actData_id;
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_controllerAct_initData();									//初始化数据
     this.drill_controllerAct_initChild();									//初始化子功能
 };
@@ -4345,7 +4355,7 @@ Drill_COAS_MainController.prototype.initialize = function( sequenceData_id ){
 	}
 	
 	this._drill_sequenceData_id = sequenceData_id;
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_controllerMain_initData();									//初始化数据
     this.drill_controllerMain_initChild();									//初始化子功能
     this.drill_controllerMain_resetData( sequenceData_id );
@@ -4843,7 +4853,7 @@ Drill_COAS_MainController.prototype.drill_controllerMain_resetData_Private = fun
 	
 	// > 执行重置
 	this._drill_sequenceData_id = sequenceData_id;
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『生成一个不重复的序列号』
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_controllerMain_initData();									//初始化数据
     this.drill_controllerMain_initChild();									//初始化子功能
 };
@@ -4904,7 +4914,7 @@ Drill_COAS_MainController.prototype.drill_controllerMain_initState = function() 
 //==============================
 // * C管理状态元 - 获取数据 - 全部（私有）
 //
-//			说明：	> 当前动画序列中操作的 状态元 数据。
+//			说明：	> 此处返回的是 静态数据 指针。
 //==============================
 Drill_COAS_MainController.prototype.drill_controllerMain_getStateData_All_Private = function(){
 	return this.drill_data()['state_tank'];
@@ -4972,18 +4982,19 @@ Drill_COAS_MainController.prototype.drill_controllerMain_updateStateAndNode = fu
 		}
 	}
 	
-	// > 状态节点 数据刷新情况
+	// > 状态节点 - 重设数据
 	if( this._drill_node_curSerial != this._drill_node_curController._drill_controllerSerial ){
 		this._drill_node_curController.drill_controllerNode_resetTimer();
 		this._drill_node_curController.drill_controllerNode_refreshNext();
 		this._drill_node_curSerial = this._drill_node_curController._drill_controllerSerial;
 	}
 	
-	// > 状态节点 播放完毕情况
+	// > 状态节点 - 播放结束时
 	if( this._drill_node_curController.drill_controllerNode_isEnd() == true ){
 		this._drill_node_curController.drill_controllerNode_resetTimer();
 		this._drill_node_curController.drill_controllerNode_refreshNext();
 	}
+	
 	
 	// > 状态节点 - 帧刷新
 	this._drill_node_curController.drill_controllerNode_update();
@@ -4997,7 +5008,7 @@ Drill_COAS_MainController.prototype.drill_controllerMain_updateStateAndNode = fu
 //==============================
 // * D管理状态节点 - 获取数据 - 全部（私有）
 //
-//			说明：	> 当前动画序列中操作的 状态节点 数据。
+//			说明：	> 此处返回的是 静态数据 指针。
 //==============================
 Drill_COAS_MainController.prototype.drill_controllerMain_getNodeData_All_Private = function(){
 	return this.drill_data()['stateNode_tank'];
@@ -5096,7 +5107,7 @@ Drill_COAS_MainController.prototype.drill_controllerMain_updateAct = function() 
 	// > 动作元打断 锁
 	this._drill_act_interrupt = true;
 	
-	// > 动作元 重设数据
+	// > 动作元 - 重设数据
 	if( this._drill_act_curSerial != this._drill_act_curController._drill_controllerSerial ){
 		var data_act = this.drill_controllerMain_getActData_ByName( this._drill_act_curName );
 		if( data_act != undefined ){
@@ -5105,11 +5116,11 @@ Drill_COAS_MainController.prototype.drill_controllerMain_updateAct = function() 
 		this._drill_act_curSerial = this._drill_act_curController._drill_controllerSerial;
 	}
 	
-	// > 动作元 播放完毕情况
+	// > 动作元 - 播放结束时
 	if( this._drill_act_curController.drill_controllerAct_isEnd() == true ){
-		this._drill_act_curName = "";
-		this._drill_act_curSerial = -1;
+		this.drill_controllerMain_Act_stopAct();	//（立刻终止动作）
 	}
+	
 	
 	// > 动作元 - 帧刷新
 	this._drill_act_curController.drill_controllerAct_update();
@@ -5123,7 +5134,7 @@ Drill_COAS_MainController.prototype.drill_controllerMain_updateAct = function() 
 //==============================
 // * E管理动作元 - 获取数据 - 全部（私有）
 //
-//			说明：	当前动画序列中操作的 动作元 数据。
+//			说明：	> 此处返回的是 静态数据 指针。
 //==============================
 Drill_COAS_MainController.prototype.drill_controllerMain_getActData_All_Private = function(){
 	return this.drill_data()['act_tank'];
@@ -5170,31 +5181,36 @@ Drill_COAS_MainController.prototype.drill_controllerMain_Act_getCurName_Private 
 };
 //==============================
 // * E管理动作元 - 操作 - 播放动作元（私有）
+//
+//			说明：	> 注意，同名的动作元可以相互覆盖，同名的状态元则不能覆盖。
 //==============================
 Drill_COAS_MainController.prototype.drill_controllerMain_Act_setAct_Private = function( act_name ){
 	if( this._drill_act_curName === act_name ){ return; }
 	
-	// > 检查高优先级状态元
-	if( this._drill_act_curName == "" ){
+	// > 新的 动作元 -> 旧的 状态元
+	if( this.drill_controllerMain_Act_isPlayingAct() == false ){
 		var data_act = this.drill_controllerMain_getActData_ByName( act_name );
 		if( data_act == null ){ return; }
-		var state_priority = this.drill_controllerMain_Node_getCurPriority();
-		if( state_priority > data_act['priority'] ){	//（同级的动作元可以覆盖状态元）
-			return;
-		}
-	}
-		
-	// > 动作正在播放时
-	if( this._drill_act_curName != "" ){
-		var data_act = this.drill_controllerMain_getActData_ByName( act_name );
-		var cur_act = this.drill_controllerMain_getActData_ByName( this._drill_act_curName );
-		
-		if( cur_act['priority'] >= data_act['priority'] ){	//（只能覆盖小的优先级，不包括同级）
+		var cur_state_priority = this.drill_controllerMain_Node_getCurPriority();
+		if( cur_state_priority > data_act['priority'] ){	//（同级的动作元可以覆盖状态元）
 			return;
 		}
 	}
 	
+	// > 新的 动作元 -> 旧的 动作元
+	if( this.drill_controllerMain_Act_isPlayingAct() == true ){
+		var data_act = this.drill_controllerMain_getActData_ByName( act_name );
+		if( data_act == null ){ return; }
+		var cur_act = this.drill_controllerMain_getActData_ByName( this._drill_act_curName );
+		if( cur_act != null && 
+			cur_act['priority'] > data_act['priority'] ){	//（同级的动作元可以覆盖动作元）
+			return;
+		}
+	}
+	
+	// > 播放动作元
 	this._drill_act_curName = act_name;
+	this._drill_act_curSerial = -1;		//（重设序列号，重建动作元才能播放新的）
 };
 //==============================
 // * E管理动作元 - 操作 - 立刻终止动作（私有）

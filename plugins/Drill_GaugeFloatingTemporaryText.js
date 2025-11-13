@@ -1901,7 +1901,7 @@ if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义�
 			this.__drill_zIndex = value;
 		},
 		get: function(){
-			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			if( this.__drill_zIndex == undefined ){ return 20250701; }	//（如果未定义则放最上面）
 			return this.__drill_zIndex;
 		},
 		configurable: true
@@ -2501,15 +2501,15 @@ Drill_GFTT_Window.prototype.drill_updateAttr = function() {
 //==============================
 Drill_GFTT_Window.prototype.drill_initBallistics = function() {
 	var b_data = this._drill_data['b_data'];
-	b_data['orgX'] = this._drill_data['param_x'];
-	b_data['orgY'] = this._drill_data['param_y'];
-	b_data['orgOpacity'] = 255;
+	b_data['org_x'] = this._drill_data['param_x'];
+	b_data['org_y'] = this._drill_data['param_y'];
+	b_data['org_opacity'] = 255;
 	this.drill_refreshBallistics( b_data );
 }
 //==============================
 // * B窗口弹道 - 刷新弹道（开放函数）
 //
-//			说明：	> 需要单独赋值参数：orgX、orgY、orgOpacity。
+//			说明：	> 需要单独赋值参数：org_x、org_y、org_opacity。
 //					> 此函数只刷新弹道，如果要重置你还需设置 _drill_curTime 为0。
 //==============================
 Drill_GFTT_Window.prototype.drill_refreshBallistics = function( b_data ){
@@ -2519,14 +2519,14 @@ Drill_GFTT_Window.prototype.drill_refreshBallistics = function( b_data ){
 	
 	
 	// > 移动弹道
-	var org_x = b_data['orgX'];
-	var org_y = b_data['orgY'];
+	var org_x = b_data['org_x'];
+	var org_y = b_data['org_y'];
 	$gameTemp.drill_COBa_setBallisticsMove( b_data );					//移动弹道 - 初始化数据
 	$gameTemp.drill_COBa_preBallisticsMove( this, 0, org_x, org_y );	//移动弹道 - 推演赋值
 	
 	
 	// > 透明度弹道
-	var org_opacity = b_data['orgOpacity'];
+	var org_opacity = b_data['org_opacity'];
 	var o_time = b_data['movementDelay'] + b_data['movementTime'] + b_data['movementEndDelay'];
 	var o_data = {};
 	o_data['opacityNum'] = 1;											//对象数量

@@ -635,7 +635,7 @@ Game_Temp.prototype.drill_PSwE_getShadowSpriteByPictureSprite = function( pictur
 	return null;
 };
 //==============================
-// * 场景容器之图片阴影贴图 - 创建贴图绑定『图片与多场景-地图界面』
+// * 场景容器之图片阴影贴图 - 创建贴图绑定『多场景与图片-地图界面』
 //==============================
 var _drill_PSwE_tank_map_createPictures = Spriteset_Map.prototype.createPictures;
 Spriteset_Map.prototype.createPictures = function(){
@@ -643,7 +643,7 @@ Spriteset_Map.prototype.createPictures = function(){
 	this.drill_PSwE_createShadow();
 };
 //==============================
-// * 场景容器之图片阴影贴图 - 创建贴图『图片与多场景-地图界面』
+// * 场景容器之图片阴影贴图 - 创建贴图『多场景与图片-地图界面』
 //==============================
 Spriteset_Map.prototype.drill_PSwE_createShadow = function(){
 	//（注意，图片贴图创建100个后就长期存在，根据图片数据进行自变化，不会执行removeChild。）
@@ -668,7 +668,7 @@ Spriteset_Map.prototype.drill_PSwE_createShadow = function(){
 	}
 };
 //==============================
-// * 场景容器之图片阴影贴图 - 创建贴图绑定『图片与多场景-战斗界面』
+// * 场景容器之图片阴影贴图 - 创建贴图绑定『多场景与图片-战斗界面』
 //==============================
 var _drill_PSwE_tank_battle_createPictures = Spriteset_Battle.prototype.createPictures;
 Spriteset_Battle.prototype.createPictures = function(){
@@ -676,7 +676,7 @@ Spriteset_Battle.prototype.createPictures = function(){
 	this.drill_PSwE_createShadow();
 };
 //==============================
-// * 场景容器之图片阴影贴图 - 创建贴图『图片与多场景-战斗界面』
+// * 场景容器之图片阴影贴图 - 创建贴图『多场景与图片-战斗界面』
 //==============================
 Spriteset_Battle.prototype.drill_PSwE_createShadow = Spriteset_Map.prototype.drill_PSwE_createShadow;
 

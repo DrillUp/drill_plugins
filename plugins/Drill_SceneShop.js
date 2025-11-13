@@ -1299,7 +1299,7 @@
 //			
 //			->☆金钱窗口控制
 //			->金钱窗口【Drill_SSh_GoldWindow】
-//				->C开关动画
+//				->B展开动画
 //				->2A私有函数
 //				->2B金钱数据
 //					> 交换物
@@ -2622,7 +2622,7 @@ Scene_Shop.prototype.drill_SSh_GoldWindow_init = function() {
 // **		子功能：	
 // **					->窗口
 // **						->帧刷新
-// **					->C开关动画
+// **					->B展开动画
 // **					->2A私有函数
 // **					->2B金钱数据
 // **		
@@ -2649,7 +2649,7 @@ Drill_SSh_GoldWindow.prototype.update = function() {
 	Window_Base.prototype.update.call(this);
 };
 //==============================
-// * C开关动画 - 打开窗口（继承）
+// * B展开动画 - 打开窗口（继承）
 //==============================
 Drill_SSh_GoldWindow.prototype.open = function() {
     this.drill_SSh_refresh();

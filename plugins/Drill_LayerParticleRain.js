@@ -46,8 +46,8 @@
  *   (1.你可以将贴图放置在地图的五种层级中，分别为：
  *      下层、中层、上层、图片层、最顶层
  *   (2.地图层级之间的关系为：
- *      地图远景 《 下层 《 图块层 《 中层 《 事件/玩家层 《 上层
- *      《 图片对象层 《 图片层 《 对话框集合 《 最顶层
+ *      地图远景 < 下层 < 图块层 < 中层 < 事件/玩家层 < 上层
+ *      < 图片对象层 < 图片层 < 对话框集合 < 最顶层
  *   (3.处于最顶层，可以把地图界面的对话框、窗口也给挡住。
  *   (4.处于同一 地图层级 时，将根据 图片层级 再先后排序。
  *   (5.如果你设置了数字雨在 中层 ，你会发现数字雨可能会切割图块画的
@@ -2194,7 +2194,7 @@ if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义�
 			this.__drill_zIndex = value;
 		},
 		get: function(){
-			if( this.__drill_zIndex == undefined ){ return 666422; }	//（如果未定义则放最上面）
+			if( this.__drill_zIndex == undefined ){ return 20250701; }	//（如果未定义则放最上面）
 			return this.__drill_zIndex;
 		},
 		configurable: true

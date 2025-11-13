@@ -2284,7 +2284,7 @@ Bitmap.prototype.drill_DTBI_drawImg = function( imgType, imgIndex, x, y, basePar
 		
 	// > 执行绘制 - 不占时
 	}else{
-		y -= baseParam['fontSize'] *1.10;		//『手算高度』
+		y -= baseParam['fontSize'] *DrillUp.g_COCD_textHeightPer;	//『手算高度』
 	}
 	
 	// > 执行绘制

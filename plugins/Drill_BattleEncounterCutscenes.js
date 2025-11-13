@@ -592,7 +592,7 @@ Game_Interpreter.prototype.drill_BECut_pluginCommand = function( command, args )
 //=============================================================================
 /*
 //==============================
-// * 2D遇敌动画『战斗-战斗界面的动画转场』 - 创建 屏幕效果贴图
+// * 2D遇敌动画《战斗-遇敌的动画转场》 - 创建 屏幕单色贴图
 //
 //			说明：	> 注意该函数『因为缺失原型链所以不要直接继承』。
 //==============================
@@ -603,7 +603,7 @@ Spriteset_Base.prototype.createScreenSprites = function(){
     this.addChild(this._fadeSprite);
 };
 //==============================
-// * 2D遇敌动画『战斗-战斗界面的动画转场』 - 帧刷新 屏幕效果贴图
+// * 2D遇敌动画《战斗-遇敌的动画转场》 - 帧刷新 屏幕单色贴图
 //
 //			说明：	> 该功能被 $gameScreen 控制，用于播放 玩家遇敌 后，屏幕的闪烁效果。
 //==============================
@@ -614,7 +614,7 @@ Spriteset_Base.prototype.updateScreenSprites = function(){
     this._fadeSprite.opacity = 255 - $gameScreen.brightness();
 };
 //==============================
-// * 2D遇敌动画『战斗-战斗界面的动画转场』 - 帧刷新 位置与缩放
+// * 2D遇敌动画《战斗-遇敌的动画转场》 - 帧刷新 位置与缩放
 //
 //			说明：	> 该功能被 $gameScreen 控制，用于播放 玩家遇敌 后，屏幕的缩放效果。
 //==============================
@@ -636,9 +636,9 @@ Spriteset_Base.prototype.updatePosition = function(){
 //=============================================================================
 /*
 //==============================
-// * 2G遇敌的切换『战斗-战斗界面的动画转场』 - 监听切换
+// * 2G遇敌的切换《战斗-遇敌的动画转场》 - 监听切换
 //==============================
-Scene_Map.prototype.updateEncounter = function() {
+Scene_Map.prototype.updateEncounter = function(){
 	if( $gamePlayer.executeEncounter() ){
 		
 		// > 切换到战斗界面
@@ -647,9 +647,9 @@ Scene_Map.prototype.updateEncounter = function() {
 	}
 };
 //==============================
-// * 2G遇敌的切换『战斗-战斗界面的动画转场』 - 切换初始化
+// * 2G遇敌的切换《战斗-遇敌的动画转场》 - 切换初始化
 //==============================
-Scene_Map.prototype.launchBattle = function() {
+Scene_Map.prototype.launchBattle = function(){
 	
 	// > 遇敌音乐控制
     BattleManager.saveBgmAndBgs();
@@ -661,10 +661,10 @@ Scene_Map.prototype.launchBattle = function() {
     this._mapNameWindow.hide();
 };
 //==============================
-// * 2G遇敌的切换『战斗-战斗界面的动画转场』 - 切换前暂停音乐
+// * 2G遇敌的切换《战斗-遇敌的动画转场》 - 切换前暂停音乐
 //==============================
-Scene_Map.prototype.stopAudioOnBattleStart = function() {
-    if (!AudioManager.isCurrentBgm($gameSystem.battleBgm())) {
+Scene_Map.prototype.stopAudioOnBattleStart = function(){
+    if( !AudioManager.isCurrentBgm($gameSystem.battleBgm()) ){
         AudioManager.stopBgm();
     }
     AudioManager.stopBgs();
@@ -673,20 +673,20 @@ Scene_Map.prototype.stopAudioOnBattleStart = function() {
 };
 
 //==============================
-// * 2G遇敌的切换『战斗-战斗界面的动画转场』 - 遇敌动画 - 初始化
+// * 2G遇敌的切换《战斗-遇敌的动画转场》 - 遇敌动画 - 初始化
 //==============================
-Scene_Map.prototype.startEncounterEffect = function() {
+Scene_Map.prototype.startEncounterEffect = function(){
     this._spriteset.hideCharacters();								//隐藏行走图
     this._encounterEffectDuration = this.encounterEffectSpeed();	//设置遇敌动画时长
 };
 //==============================
-// * 2G遇敌的切换『战斗-战斗界面的动画转场』 - 遇敌动画 - 时长
+// * 2G遇敌的切换《战斗-遇敌的动画转场》 - 遇敌动画 - 时长
 //==============================
 Scene_Map.prototype.encounterEffectSpeed = function(){ return 60; };
 //==============================
-// * 2G遇敌的切换『战斗-战斗界面的动画转场』 - 遇敌动画 - 帧刷新
+// * 2G遇敌的切换《战斗-遇敌的动画转场》 - 遇敌动画 - 帧刷新
 //==============================
-Scene_Map.prototype.updateEncounterEffect = function() {
+Scene_Map.prototype.updateEncounterEffect = function(){
     if( this._encounterEffectDuration > 0 ){		//（参数 _encounterEffectDuration 会使界面处于 isBusy 状态，从而延迟界面切换）
         this._encounterEffectDuration--;
         var speed = this.encounterEffectSpeed();
@@ -714,15 +714,15 @@ Scene_Map.prototype.updateEncounterEffect = function() {
     }
 };
 //==============================
-// * 2G遇敌的切换『战斗-战斗界面的动画转场』 - 遇敌动画 - 地图截图
+// * 2G遇敌的切换《战斗-遇敌的动画转场》 - 遇敌动画 - 地图截图
 //==============================
-Scene_Map.prototype.snapForBattleBackground = function() {
+Scene_Map.prototype.snapForBattleBackground = function(){
     this._windowLayer.visible = false;		//（隐藏窗口层 再截图）
     SceneManager.snapForBackground();
     this._windowLayer.visible = true;
 };
 //==============================
-// * 2G遇敌的切换『战斗-战斗界面的动画转场』 - 遇敌动画 - 执行白色闪烁
+// * 2G遇敌的切换《战斗-遇敌的动画转场》 - 遇敌动画 - 执行白色闪烁
 //==============================
 Scene_Map.prototype.startFlashForEncounter = function( duration ){
     var color = [255, 255, 255, 255];
@@ -737,16 +737,18 @@ Scene_Map.prototype.startFlashForEncounter = function( duration ){
 //=============================================================================
 /*
 //==============================
-// * 战斗流程『战斗-战斗界面的动画转场』 - 开始 - 战斗开始对话
+// * B战斗开始时《战斗-遇敌的动画转场》 - 执行开始 - 战斗开始对话
+//
+//			说明：	> 先发制人 和 偷袭，只在 E遇敌的战斗 情况下有效，其他情况都为false不执行。
 //==============================
-BattleManager.displayStartMessages = function() {
+BattleManager.displayStartMessages = function(){
 	$gameTroop.enemyNames().forEach(function( name ){
-		$gameMessage.add( TextManager.emerge.format(name) );					//信息 - 敌人出现
+		$gameMessage.add( TextManager.emerge.format(name) );					//信息 - 出现
 	});
 	if( this._preemptive ){
 		$gameMessage.add( TextManager.preemptive.format($gameParty.name()) );	//信息 - 先发制人
 	}else if( this._surprise ){
-		$gameMessage.add( TextManager.surprise.format($gameParty.name()) );		//信息 - 被偷袭
+		$gameMessage.add( TextManager.surprise.format($gameParty.name()) );		//信息 - 偷袭
 	}
 };
 */
@@ -760,7 +762,7 @@ BattleManager.displayStartMessages = function() {
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 遇敌动画 - 帧刷新 屏幕效果贴图
+// * 遇敌动画 - 帧刷新 屏幕单色贴图
 //==============================
 var _drill_BECut_updateScreenSprites = Spriteset_Base.prototype.updateScreenSprites;
 Spriteset_Base.prototype.updateScreenSprites = function(){
@@ -936,7 +938,7 @@ SceneManager.initialize = function() {
 	_drill_BECut_scene_initialize.call(this);		//（此方法放到最后再继承）
 	
 	//==============================
-	// * 战斗开始对话 - 添加对话
+	// * 战斗开始对话 - 执行开始（覆写）
 	//==============================
 	BattleManager.displayStartMessages = function(){
 		

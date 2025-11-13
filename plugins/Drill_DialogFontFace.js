@@ -471,6 +471,8 @@ Bitmap.prototype.drill_DFF_initBitmapDefault = function(){
 			cur_fontFace = $gameSystem._drill_DFF_dialogFontFace;
 		}
 	}
+	if( cur_fontFace == undefined ){ return; }
+	if( cur_fontFace == "" ){ return; }
 	
 	// > 『全局默认值』 - 使用值
 	this.fontFace = cur_fontFace;
@@ -529,7 +531,7 @@ Graphics._createGameFontLoader = function(){
 //=============================================================================
 /*
 //==============================
-// * A默认属性『窗口字符-字体管理器』 - 默认字体类型
+// * A默认属性《窗口字符-字体管理器》 - 默认 字体类型
 //
 //			功能：	> 该函数会根据语言配置自动切换字体，但实际上并没有明显的效果。
 //					> 语言功能比较鸡肋，可有可无。
@@ -556,10 +558,18 @@ Window_Base.prototype.standardFontFace = function(){
 // * 兼容 - 所有窗口的默认字体（覆写）
 //
 //			说明：	> drill插件并不会使用此函数，只作为外部插件兼容用。
+//					> 这个函数，如果直接返回"GameFont"，部分群友的电脑会出现 行高贴顶 的问题。
+//					  使用中文返回'SimHei, Heiti TC, sans-serif'才会正常。
+//					  （暂时不明问题来源，加了 字符绘制核心+窗口字符核心，却仍然出现问题）
 //==============================
 Window_Base.prototype.standardFontFace = function(){
-	if( $gameSystem == undefined ){ return DrillUp.g_DFF_globalFontFace; }
-	return $gameSystem._drill_DFF_globalFontFace;
+    if( $gameSystem.isChinese() ){
+        return 'SimHei, Heiti TC, sans-serif';
+    }else if( $gameSystem.isKorean() ){
+        return 'Dotum, AppleGothic, sans-serif';
+    }else{
+        return 'GameFont';
+    }
 };
 //==============================
 // * 兼容 - 对话框的默认字体（覆写）

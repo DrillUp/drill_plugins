@@ -295,7 +295,7 @@ Game_System.prototype.drill_LRS_checkSysData_Private = function() {
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 长按加速控制 - 执行运行
+// * 长按加速控制 - 执行运行『游戏变速之界面数据变速』
 //==============================
 var _drill_LRS_updateMainMultiply = Scene_Map.prototype.updateMainMultiply;
 Scene_Map.prototype.updateMainMultiply = function() {
@@ -323,4 +323,30 @@ Scene_Map.prototype.isFastForward = function() {
 	return _drill_LRS_isFastForward.call(this);
 };
 
+/*
+
+	需要分离出 管辖变速 的功能。
+	
+	且 长按加速控制 属于互动，不属于地图。
+
+//==============================
+// * 2C界面数据变速 - 变速条件『游戏变速之界面数据变速』
+//==============================
+	//（不需要）
+//==============================
+// * 2C界面数据变速 - 变速倍率『游戏变速之界面数据变速』
+//==============================
+Drill_STG_MapScene.prototype.drill_scene_multiplyCount = function() {
+	return 1;
+};
+//==============================
+// * 2C界面数据变速 - 帧刷新变速『游戏变速之界面数据变速』
+//==============================
+Drill_STG_MapScene.prototype.drill_scene_updateMainMultiply = function() {
+	for( var i = 0; i < this.drill_scene_multiplyCount(); i++ ){
+		this.drill_scene_updateMain();
+	}
+};
+
+*/
 

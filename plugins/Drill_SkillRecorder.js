@@ -367,22 +367,22 @@
     DrillUp.g_SkR_varLast_i_tar_eid = Number(DrillUp.parameters["上一个作用目标敌人ID"] || 0);
     DrillUp.g_SkR_varLast_i_tar_eindex = Number(DrillUp.parameters["上一个作用目标敌方队伍序号"] || 0);
 	
-	DrillUp.g_SkR_varLast_clear = String(DrillUp.parameters["每次新战斗时是否清零敌方次数"] || "true") == "true";
-    DrillUp.g_SkR_varLast_sa = Number(DrillUp.parameters["敌方上一个施法的技能ID"] || 0);
-    DrillUp.g_SkR_varLast_sa_from_id = Number(DrillUp.parameters["敌方上一个施法者ID"] || 0);
-    DrillUp.g_SkR_varLast_sa_from_index = Number(DrillUp.parameters["敌方上一个施法者队伍序号"] || 0);
-    DrillUp.g_SkR_varLast_sa_tar_aid = Number(DrillUp.parameters["敌方上一个目标角色ID"] || 0);
-    DrillUp.g_SkR_varLast_sa_tar_aindex = Number(DrillUp.parameters["敌方上一个目标我方队伍序号"] || 0);
-    DrillUp.g_SkR_varLast_sa_tar_eid = Number(DrillUp.parameters["敌方上一个目标敌人ID"] || 0);
-    DrillUp.g_SkR_varLast_sa_tar_eindex = Number(DrillUp.parameters["敌方上一个目标敌方队伍序号"] || 0);
+    DrillUp.g_SkR_varLast_sa = Number(DrillUp.parameters["我方上一个施法的技能ID"] || 0);
+    DrillUp.g_SkR_varLast_sa_from_id = Number(DrillUp.parameters["我方上一个施法者ID"] || 0);
+    DrillUp.g_SkR_varLast_sa_from_index = Number(DrillUp.parameters["我方上一个施法者队伍序号"] || 0);
+    DrillUp.g_SkR_varLast_sa_tar_aid = Number(DrillUp.parameters["我方上一个目标角色ID"] || 0);
+    DrillUp.g_SkR_varLast_sa_tar_aindex = Number(DrillUp.parameters["我方上一个目标我方队伍序号"] || 0);
+    DrillUp.g_SkR_varLast_sa_tar_eid = Number(DrillUp.parameters["我方上一个目标敌人ID"] || 0);
+    DrillUp.g_SkR_varLast_sa_tar_eindex = Number(DrillUp.parameters["我方上一个目标敌方队伍序号"] || 0);
 	
-    DrillUp.g_SkR_varLast_se = Number(DrillUp.parameters["我方上一个施法的技能ID"] || 0);
-    DrillUp.g_SkR_varLast_se_from_id = Number(DrillUp.parameters["我方上一个施法者ID"] || 0);
-    DrillUp.g_SkR_varLast_se_from_index = Number(DrillUp.parameters["我方上一个施法者队伍序号"] || 0);
-    DrillUp.g_SkR_varLast_se_tar_aid = Number(DrillUp.parameters["我方上一个目标角色ID"] || 0);
-    DrillUp.g_SkR_varLast_se_tar_aindex = Number(DrillUp.parameters["我方上一个目标我方队伍序号"] || 0);
-    DrillUp.g_SkR_varLast_se_tar_eid = Number(DrillUp.parameters["我方上一个目标敌人ID"] || 0);
-    DrillUp.g_SkR_varLast_se_tar_eindex = Number(DrillUp.parameters["我方上一个目标敌方队伍序号"] || 0);
+	DrillUp.g_SkR_varLast_clear = String(DrillUp.parameters["每次新战斗时是否清零敌方次数"] || "true") == "true";
+    DrillUp.g_SkR_varLast_se = Number(DrillUp.parameters["敌方上一个施法的技能ID"] || 0);
+    DrillUp.g_SkR_varLast_se_from_id = Number(DrillUp.parameters["敌方上一个施法者ID"] || 0);
+    DrillUp.g_SkR_varLast_se_from_index = Number(DrillUp.parameters["敌方上一个施法者队伍序号"] || 0);
+    DrillUp.g_SkR_varLast_se_tar_aid = Number(DrillUp.parameters["敌方上一个目标角色ID"] || 0);
+    DrillUp.g_SkR_varLast_se_tar_aindex = Number(DrillUp.parameters["敌方上一个目标我方队伍序号"] || 0);
+    DrillUp.g_SkR_varLast_se_tar_eid = Number(DrillUp.parameters["敌方上一个目标敌人ID"] || 0);
+    DrillUp.g_SkR_varLast_se_tar_eindex = Number(DrillUp.parameters["敌方上一个目标敌方队伍序号"] || 0);
 
 
 //=============================================================================
