@@ -1240,6 +1240,9 @@ Drill_CODAA_AdsorbController.prototype.drill_controllerAdsorb_convertToDraggingO
 //==============================
 Drill_CODAA_AdsorbController.prototype.drill_controllerAdsorb_initState = function(){
 	this._drill_curState = 0;			//吸附状态（0未吸附/1正被吸附/2已吸附/3拖走吸附）
+	
+	this['_drill_COBa_x'] = undefined;	//弹道设置X（用完后删除弹道）
+	this['_drill_COBa_y'] = undefined;	//弹道设置Y
 }
 //==============================
 // * F吸附状态 - 获取当前吸附状态字符串（开放函数）

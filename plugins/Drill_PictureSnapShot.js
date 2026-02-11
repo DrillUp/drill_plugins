@@ -38,6 +38,7 @@
  * 你需要通过下面插件指令来执行截图：
  * 
  * 插件指令：>图片临时屏幕快照 : 临时快照 : 建立屏幕截图
+ * 
  * 插件指令：>图片临时屏幕快照 : 图片[1] : 设为临时快照
  * 插件指令：>图片临时屏幕快照 : 图片变量[21] : 设为临时快照
  * 插件指令：>图片临时屏幕快照 : 批量图片[1,2] : 设为临时快照
@@ -666,7 +667,7 @@ Sprite_Picture.prototype.initialize = function( pictureId ){
 //					  （一种急用的情况：设置快照 执行后，就立即执行粉碎效果。）
 //==============================
 Sprite_Picture.prototype.drill_PSS_setBitmapSnapshot = function( snapshot_id ){
-	this._drill_PSS_sp_lastSnapshotId = snapshot_id;	//（需要赋值，外部函数设置快照后，帧刷新中就不会重复设置了）
+	this._drill_PSS_sp_lastSnapshotId = snapshot_id;	//（需要赋值，这样帧刷新中就不会重复设置了）
 	var bitmap = $gameTemp._drill_PSS_curBitmapTank[ snapshot_id ];
 	if( bitmap == undefined ){ return; }
 	this.bitmap = bitmap;
@@ -712,14 +713,14 @@ Sprite_Picture.prototype.updateBitmap = function() {
 
 
 //=============================================================================
-// ** ☆静态快照容器
+// ** ☆静态快照容器『图片bitmap临时容器』
 //
 //			说明：	> 此模块提供 静态快照 的创建。
 //					> 暂时不考虑销毁Bitmap情况，因为本身贴图占内存就小。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 静态快照容器 - 初始化
+// * 静态快照容器 - 初始化 容器
 //==============================
 var _drill_PSS_temp_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {
@@ -730,21 +731,30 @@ Game_Temp.prototype.initialize = function() {
 //==============================
 // * 静态快照容器 - 创建快照
 //
-//			说明：	> 每创建一次，计数器都+1，确保设置的都为当前创建的静态快照，且不影响旧快照图像。
+//			说明：	> 每创建一次，计数器都+1，确保设置的都为最新创建的Bitmap。
+//					> 由于Bitmap是现做的，所以该容器不考虑保存读取的情况。
 //==============================
 Game_Temp.prototype.drill_PSS_createSnapshot = function() {
+	
+	// > 计数器+1
 	this._drill_PSS_curBitmapId += 1;
-	this._drill_PSS_curBitmapTank.push( SceneManager.snap() );	//（bitmap对象，可以跨越地图界面、战斗界面和菜单界面）
+	var bitmap_id = this._drill_PSS_curBitmapId;
+	
+	// > 创建Bitmap
+	var bitmap = SceneManager.snap();
+	this._drill_PSS_curBitmapTank[ bitmap_id ] = bitmap;
+	
+	return bitmap_id;
 }
 //==============================
-// * 静态快照容器 - 获取 创建的快照
+// * 静态快照容器 - 获取 创建的快照（开放函数）
 //==============================
 Game_Temp.prototype.drill_PSS_getLastSnapshot = function() {
 	if( this._drill_PSS_curBitmapId == -1 ){ return null; }
 	return this._drill_PSS_curBitmapTank[ this._drill_PSS_curBitmapId ];
 }
 //==============================
-// * 静态快照容器 - 获取 创建的快照ID
+// * 静态快照容器 - 获取 创建的快照ID（开放函数）
 //==============================
 Game_Temp.prototype.drill_PSS_getLastSnapshotId = function() {
 	return this._drill_PSS_curBitmapId;

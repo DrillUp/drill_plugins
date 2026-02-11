@@ -131,6 +131,7 @@
 //			->☆提示信息
 //			->☆静态数据
 //			
+//			
 //			->☆移动弹道
 //				->初始化数据【标准默认值】
 //				->获取弹道总时间【标准函数】
@@ -171,8 +172,12 @@
 //				->I二维弹道应用
 //					->I1移动弹道
 //			
+//			
 //			->弹道扩展工具【Drill_COBa_ExtendTool】
 //				->A叠加变化宏定义
+//					->设置目标（开放函数）
+//					->控制器帧刷新（开放函数）
+//					->贴图帧刷新（开放函数）
 //		
 //		
 //		★家谱：
@@ -182,11 +187,13 @@
 //			无
 //		
 //		★插件私有类：
-//			* 弹道管理器【Drill_COBa_Manager】
+//			* 弹道管理器（私有）【Drill_COBa_Manager】
 //			* 弹道扩展工具【Drill_COBa_ExtendTool】
 //		
 //		★核心说明：
-//			1.整个核心提供多个可调用的函数接口。	
+//			1.插件提供数学计算，setBallistics初始化，preBallistics推演赋值（也叫 预推演，两词一样意思）。
+//			  预推演 是指在 移动之前 进行弹道计算，才有"预"的意思。
+//			  此计算过程【不存储】任何参数。
 //			2.用法：
 //					// > 移动
 //					$gameTemp.drill_COBa_setBallisticsMove( data );							//初始化
@@ -197,19 +204,16 @@
 //					// > 旋转
 //					$gameTemp.drill_COBa_setBallisticsRotate( data );						//初始化
 //					$gameTemp.drill_COBa_preBallisticsRotate( obj, index , org_rotate );	//推演赋值（也叫 预推演，两词一样意思）
-//	
-//			  【注意，初始化和推演函数不要隔得太远】因为有可能会被重叠推演盖掉。
+//			
+//			  注意，【初始化和推演函数不要隔得太远】因为有可能会被重叠推演盖掉。
 //			  obj用于放配置数据，执行完后，结果集会放到下面两个数组中：
 //			  		obj['_drill_COBa_x']
 //			  		obj['_drill_COBa_y']
-//			  obj可以是个对象，空数组也可以，只要能放结果就可以。
+//			  obj可以是 控制器、贴图、空对象、空数组，只要能放结果就可以。
 //		
 //		★必要注意事项：
-//			1.插件提供数学计算，setBallistics初始化，preBallistics推演赋值。
-//			  推演赋值 也叫 预推演，两词一样意思。
-//			  预推演 的意思是指在 移动之前 进行弹道计算，才有"预"的意思。
-//			2.结合文档 "32.数学模型 > 关于弹道.docx" 来看脚本。
-//			3.记得多画几个星星弹道作为演示，小爱丽丝+星星的效果本身就不差。
+//			1.结合文档 "32.数学模型 > 关于弹道.docx" 来看脚本。
+//			2.记得多画几个星星弹道作为演示，小爱丽丝+星星的效果本身就不差。
 //				   ____________   / \
 //				__________ ......'   '......
 //				 __________ '-._       _.-'
@@ -219,8 +223,8 @@
 //		★其它说明细节：
 //			1.随机因子是一个特殊的参数，作用是使得轨迹既有随机性，又不会在重新赋值时出现轨迹重置现象。
 //			  如果你要锁定随机因子，在 默认值 中对因子数列进行的赋值即可。【通常情况下随机因子是不需要赋值的。】
-//			2.未设置延迟的情况下，data['planimetryTime'] 时长 就是数组的长度。
-//			  但如果你设置了延迟，就需要考虑数组长度变化的问题了。
+//			2.默认情况下，data['planimetryTime'] 时长 就是数组的长度。
+//			  但如果你设置了 延迟时间，就需要考虑数组长度变化的问题了。
 //
 //		★存在的问题：
 //			暂无
@@ -245,8 +249,15 @@
 	//==============================
 	// * 提示信息 - 报错 - NaN校验值
 	//==============================
-	DrillUp.drill_COBa_getPluginTip_ParamIsNaN = function( param_name ){
-		return "【" + DrillUp.g_COBa_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+	DrillUp.drill_COBa_getPluginTip_ParamIsNaN = function( param_name, check_tank ){
+		var text = "【" + DrillUp.g_COBa_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+		if( check_tank ){
+			var keys = Object.keys( check_tank );
+			for( var i=0; i < keys.length; i++ ){
+				text += "\n" + keys[i] + "的值：" + check_tank[ keys[i] ] ;
+			}
+		}
+		return text;
 	};
 	
 	
@@ -257,6 +268,14 @@
 	Imported.Drill_CoreOfBallistics = true;
 	var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_CoreOfBallistics');
+	
+	
+	//==============================
+	// * 静态数据 - 定义弹道管理器
+	//==============================
+	function Drill_COBa_Manager() {
+		throw new Error("弹道管理器 Drill_COBa_Manager 是一个静态类，不需要实例化。");
+	};
 
 
 
@@ -665,13 +684,6 @@ Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration = function( org_ran, i
 // **				> 具体功能见 "32.数学模型 > 关于弹道.docx"。
 // **				> 如果子插件要存储弹道，可以只存参数配置，需要用时才执行 初始化和推演赋值；也可以存储 推演赋值 的结果。
 //=============================================================================
-//==============================
-// * 弹道管理器 - 定义
-//==============================
-function Drill_COBa_Manager() {
-    throw new Error("弹道管理器 Drill_COBa_Manager 是一个静态类，不需要实例化。");
-}
-
 //==============================
 // * A工具函数 - 字符串 转 锚点列表（私有）
 //==============================
@@ -2353,6 +2365,7 @@ Drill_COBa_Manager.drill_COBa_preBallisticsMove_Private = function( obj_data, ob
 
 
 
+
 //=============================================================================
 // ** 弹道扩展工具【Drill_COBa_ExtendTool】
 // **			
@@ -2382,14 +2395,15 @@ function Drill_COBa_ExtendTool() {
 //=============================================================================
 // * A叠加变化宏定义
 //
+//			限制条件：	> 弹道的变化只能为 "目标值模式"（一维） 和 "两点式"（二维）。
+//						> 必须绑定在 控制器-贴图 的结构中。
+//						> 必须要求的 控制器-贴图 是一对一。因为贴图会改变控制器中的数据。
+//
 //			说明：	> 通过 调用 设置目标，可以快速定义一个弹道，并执行弹道的变化。
 //					  定义的弹道能被一并保存，没有被定义时，不消耗存储和性能。
-//					> 弹道的变化只能为 "目标值模式"（一维） 或 "两点式"（二维）。
-//
+//					
 //					> 此工具包含三个函数：
 //							设置目标、控制器帧刷新、贴图帧刷新。
-//					  需要绑定在 控制器-贴图 的结构中。如果不是此结构，则用不了此功能。
-//					> 注意，贴图会改变控制器中的数据，因此只能在 控制器-贴图 一对一的情况下使用。
 //					
 //					> 原理上类似于在 控制器-贴图 中套一个更小的弹道控制器 来获取数据。
 //					> 贴图帧刷新 完全可以避免掉，但是考虑到性能和内存，这里还是把计算转移到贴图中吧。
@@ -2406,14 +2420,16 @@ function Drill_COBa_ExtendTool() {
 //					> tar_time 数字      （变化时长）
 //			返回：	> 无
 //
-//			说明：	> 调用时要给定 初始值，虽然初始值只在第一次调用指令时有效，但必须要给。
+//			说明：	> 该静态类中【不存储】任何参数。
+//					> 该函数会给 controller 进行参数赋值。
+//					> 调用时要给定初始值 org_value，虽然初始值只在第一次调用指令时有效，但必须要给。
 //==============================
 Drill_COBa_ExtendTool.drill_COBa_Common_controller_setTarget = function( controller, CDataName, org_value, change_type, tar_value, tar_time ){
 	
 	// > 第一次调用时，创建
 	if( controller[CDataName] == undefined ){
 		var c_data = {};
-		c_data['cur_value'] = org_value;
+		c_data['cur_value'] = org_value;	//（初始值只赋值一次）
 		controller[CDataName] = c_data;
 	}
 	
@@ -2505,15 +2521,17 @@ Drill_COBa_ExtendTool.drill_COBa_Common_sprite_update = function( sprite, SDataN
 //					> tar_time 数字      （变化时长）
 //			返回：	> 无
 //
-//			说明：	> 调用时要给定 初始值，虽然初始值只在第一次调用指令时有效，但必须要给。
+//			说明：	> 该静态类中【不存储】任何参数。
+//					> 该函数会给 controller 进行参数赋值。
+//					> 调用时要给定初始值 org_valueA、org_valueB，虽然初始值只在第一次调用指令时有效，但必须要给。
 //==============================
 Drill_COBa_ExtendTool.drill_COBa_Planimetry_controller_setTarget = function( controller, CDataName, org_valueA, org_valueB, change_type, tar_valueA, tar_valueB, tar_time ){
 	
 	// > 第一次调用时，创建
 	if( controller[CDataName] == undefined ){
 		var c_data = {};
-		c_data['cur_valueA'] = org_valueA;
-		c_data['cur_valueB'] = org_valueB;
+		c_data['cur_valueA'] = org_valueA;	//（初始值只赋值一次）
+		c_data['cur_valueB'] = org_valueB;	//
 		controller[CDataName] = c_data;
 	}
 	
@@ -2598,3 +2616,4 @@ Drill_COBa_ExtendTool.drill_COBa_Planimetry_sprite_update = function( sprite, SD
 		c_data['cur_valueB'] = s_data['valueB_seq'][cur_time];
 	}
 }
+

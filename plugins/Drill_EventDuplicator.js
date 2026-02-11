@@ -557,7 +557,7 @@ var _drill_EDu_updateWaitMode = Game_Interpreter.prototype.updateWaitMode;
 Game_Interpreter.prototype.updateWaitMode = function(){
 	
 	// > 等待类型
-	if( this._waitMode == "_drill_EDu_waitLoading" ){		//『强制等待』指定的图片任何一个未加载，则持续等待
+	if( this._waitMode == "_drill_EDu_waitLoading" ){		//『强制等待』指定的地图任何一个未加载，则持续等待
 		if( this._drill_EDu_wait_map_id != undefined ){
 			var map_id = this._drill_EDu_wait_map_id;
 			if( DataManager.drill_COEM_isMapLoaded( map_id ) == false ){

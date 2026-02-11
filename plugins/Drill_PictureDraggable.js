@@ -350,7 +350,7 @@ if( Imported.Drill_CoreOfDragAndAdsorb &&
 	Imported.Drill_PictureLayerAndZIndex ){
 	
 //==============================
-// * >>>>基于插件检测>>>> - 最后继承
+// * >>>>基于插件检测>>>> - 最后继承1级
 //==============================
 var _drill_PDr_scene_initialize = SceneManager.initialize;
 SceneManager.initialize = function() {

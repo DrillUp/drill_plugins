@@ -1973,7 +1973,7 @@ Drill_ET_WindowSprite.prototype.drill_sprite_updateAttr_Position = function() {
 	var xx = this._drill_controller._drill_x;
 	var yy = this._drill_controller._drill_y;
 	
-	// > 位置 - 对齐方式
+	// > 位置 - 对齐方式（偏移实现）
 	if( data['align'] == "左对齐" ){
 		xx += 0 ;
 		yy += -0.5 * this.height ;
@@ -2050,11 +2050,6 @@ Drill_ET_WindowSprite.prototype.drill_refreshMessage = function( context ){
 	
 	// > 使用【窗口字符 - 窗口字符核心】时
 	if( Imported.Drill_CoreOfWindowCharacter ){
-	
-		// > 『字符贴图流程』 - 清空字符块贴图【窗口字符 - 窗口字符贴图核心】
-		if( Imported.Drill_CoreOfWindowCharacterSprite ){
-			this.drill_COWCSp_sprite_clearAllSprite();
-		}
 		
 		// > 参数准备 - 校验
 		var temp_bitmap = this.contents;
@@ -2109,7 +2104,7 @@ Drill_ET_WindowSprite.prototype.drill_refreshMessage = function( context ){
 		// > 『字符主流程』 - 绘制文本【窗口字符 - 窗口字符核心】
 		this.drill_COWC_drawText( org_text, options );
 		
-		// > 『字符贴图流程』 - 刷新字符块贴图【窗口字符 - 窗口字符贴图核心】
+		// > 『字符贴图流程』 - 刷新当前的字符块贴图【窗口字符 - 窗口字符贴图核心】
 		if( Imported.Drill_CoreOfWindowCharacterSprite ){
 			this.drill_COWCSp_sprite_refreshAllSprite();
 		}
@@ -2168,7 +2163,7 @@ Game_Temp.prototype.drill_ET_getEvnetId_InEventText = function(){
 	return this._drill_ET_curEventTextEventId;
 };
 //==============================
-// * C窗口内容 - 『窗口字符的本事件』 - 最后继承
+// * C窗口内容 - 『窗口字符的本事件』 - 最后继承1级
 //==============================
 var _drill_ET_scene_initialize2 = SceneManager.initialize;
 SceneManager.initialize = function() {

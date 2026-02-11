@@ -711,7 +711,7 @@ Game_Map.prototype.drill_ETh_eventsXyNtEx2 = function( x, y, tag_list ){
 
 
 //==============================
-// * 穿透判断 - 最后继承
+// * 穿透判断 - 最后继承1级
 //==============================
 var _drill_ETh_scene_initialize = SceneManager.initialize;
 SceneManager.initialize = function() {

@@ -698,8 +698,8 @@
 //				> @@@dcu[false]
 //				> @@@dcu[set:1]
 //				> @@@dcu[reset]
-//				->刷新字符块贴图（继承）
-//				->清空字符块贴图（继承）
+//				->刷新当前的字符块贴图（继承）
+//				->清空字符块贴图-全部（继承）
 //				->帧刷新控制器
 //				->每个字符开始时（继承）
 //				->流程结束时（继承）
@@ -769,8 +769,21 @@
 	//==============================
 	// * 提示信息 - 报错 - NaN校验值
 	//==============================
-	DrillUp.drill_DCCu_getPluginTip_ParamIsNaN = function( param_name ){
-		return "【" + DrillUp.g_DCCu_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+	DrillUp.drill_DCCu_getPluginTip_ParamIsNaN = function( param_name, check_tank ){
+		var text = "【" + DrillUp.g_DCCu_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+		if( check_tank ){
+			var keys = Object.keys( check_tank );
+			for( var i=0; i < keys.length; i++ ){
+				text += "\n" + keys[i] + "的值：" + check_tank[ keys[i] ] ;
+			}
+		}
+		return text;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 底层版本过低
+	//==============================
+	DrillUp.drill_DCCu_getPluginTip_LowVersion = function(){
+		return "【" + DrillUp.g_DCCu_PluginTip_curName + "】\n游戏底层版本过低，插件基本功能无法执行。\n你可以去看\"rmmv软件版本（必看）.docx\"中的 \"旧工程升级至1.6版本\" 章节，来升级你的游戏底层版本。";
 	};
 	
 	
@@ -1257,7 +1270,7 @@ Game_Temp.prototype.drill_COCD_textBlock_processStyle = function( command, args,
 }
 
 //==============================
-// * 文本光标实现 - 刷新字符块贴图（继承）
+// * 文本光标实现 - 刷新当前的字符块贴图（继承）
 //==============================
 var _drill_DCCu_COWCSp_sprite_refreshAllSprite = Sprite.prototype.drill_COWCSp_sprite_refreshAllSprite;
 Sprite.prototype.drill_COWCSp_sprite_refreshAllSprite = function(){
@@ -1275,7 +1288,7 @@ Sprite.prototype.drill_COWCSp_sprite_refreshAllSprite = function(){
 	_drill_DCCu_COWCSp_sprite_refreshAllSprite.call( this );
 }
 //==============================
-// * 文本光标实现 - 清空字符块贴图（继承）
+// * 文本光标实现 - 清空字符块贴图-全部（继承）
 //==============================
 var _drill_DCCu_COWCSp_sprite_clearAllSprite = Sprite.prototype.drill_COWCSp_sprite_clearAllSprite;
 Sprite.prototype.drill_COWCSp_sprite_clearAllSprite = function(){
@@ -1551,7 +1564,7 @@ Drill_DCCu_Controller.prototype.drill_controller_setStyleId = function( style_id
 	this._drill_curStyleId = style_id;
 	if( style_id > 0 ){
 		
-		// > 『控制器与贴图的样式』 - 校验+提示信息（自变化）
+		// > 『控制器与贴图的样式-』 - 校验+提示信息（自变化）
 		var cur_styleId   = style_id;
 		var cur_styleData = DrillUp.g_DCCu_style_list[ style_id -1 ];
 		if( cur_styleData == undefined ){
@@ -1559,7 +1572,7 @@ Drill_DCCu_Controller.prototype.drill_controller_setStyleId = function( style_id
 			return;
 		}
 		
-		// > 『控制器与贴图的样式』 - 重设数据
+		// > 『控制器与贴图的样式-』 - 重设数据
 		this.drill_controller_resetData( cur_styleData );
 	}
 };
@@ -2490,7 +2503,7 @@ Scene_Map.prototype.drill_DCCu_createDebugSprite = function() {
 	// > 『字符逐个绘制流程』 - 逐个绘制初始化
 	temp_bitmap_1.drill_COWC_timing_initDrawText( text, options );
 	
-	// > 『字符贴图流程』 - 刷新字符块贴图【窗口字符 - 窗口字符贴图核心】
+	// > 『字符贴图流程』 - 刷新当前的字符块贴图【窗口字符 - 窗口字符贴图核心】
 	if( Imported.Drill_CoreOfWindowCharacterSprite ){
 		temp_sprite_1.drill_COWCSp_sprite_refreshAllSprite();
 	}
@@ -2507,7 +2520,7 @@ Scene_Map.prototype.drill_DCCu_createDebugSprite = function() {
 	// > 『字符逐个绘制流程』 - 逐个绘制初始化
 	temp_bitmap_2.drill_COWC_timing_initDrawText( text, options );
 	
-	// > 『字符贴图流程』 - 刷新字符块贴图【窗口字符 - 窗口字符贴图核心】
+	// > 『字符贴图流程』 - 刷新当前的字符块贴图【窗口字符 - 窗口字符贴图核心】
 	if( Imported.Drill_CoreOfWindowCharacterSprite ){
 		temp_sprite_2.drill_COWCSp_sprite_refreshAllSprite();
 	}
@@ -2524,7 +2537,7 @@ Scene_Map.prototype.drill_DCCu_createDebugSprite = function() {
 	// > 『字符逐个绘制流程』 - 逐个绘制初始化
 	temp_bitmap_3.drill_COWC_timing_initDrawText( text, options );
 	
-	// > 『字符贴图流程』 - 刷新字符块贴图【窗口字符 - 窗口字符贴图核心】
+	// > 『字符贴图流程』 - 刷新当前的字符块贴图【窗口字符 - 窗口字符贴图核心】
 	if( Imported.Drill_CoreOfWindowCharacterSprite ){
 		temp_sprite_3.drill_COWCSp_sprite_refreshAllSprite();
 	}
@@ -2541,7 +2554,7 @@ Scene_Map.prototype.drill_DCCu_createDebugSprite = function() {
 	// > 『字符逐个绘制流程』 - 逐个绘制初始化
 	temp_bitmap_4.drill_COWC_timing_initDrawText( text, options );
 	
-	// > 『字符贴图流程』 - 刷新字符块贴图【窗口字符 - 窗口字符贴图核心】
+	// > 『字符贴图流程』 - 刷新当前的字符块贴图【窗口字符 - 窗口字符贴图核心】
 	if( Imported.Drill_CoreOfWindowCharacterSprite ){
 		temp_sprite_4.drill_COWCSp_sprite_refreshAllSprite();
 	}
@@ -2614,7 +2627,7 @@ Scene_Map.prototype.drill_DCCu_createDebug2Sprite = function() {
 	// > 『字符逐个绘制流程』 - 逐个绘制初始化
 	temp_bitmap.drill_COWC_timing_initDrawText( text, options );
 	
-	// > 『字符贴图流程』 - 刷新字符块贴图【窗口字符 - 窗口字符贴图核心】
+	// > 『字符贴图流程』 - 刷新当前的字符块贴图【窗口字符 - 窗口字符贴图核心】
 	if( Imported.Drill_CoreOfWindowCharacterSprite ){
 		temp_sprite.drill_COWCSp_sprite_refreshAllSprite();
 	}

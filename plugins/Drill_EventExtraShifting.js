@@ -419,7 +419,7 @@ Game_Event.prototype.drill_EES_setupPage = function() {
 // ** ☆移动路线指令
 //=============================================================================
 //==============================
-// * 移动路线指令 - 最后继承
+// * 移动路线指令 - 最后继承1级
 //==============================
 var _drill_EES_scene_initialize = SceneManager.initialize;
 SceneManager.initialize = function() {

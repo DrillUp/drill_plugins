@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        战斗 - 战斗界面的动画转场
+ * @plugindesc [v1.1]        战斗 - 战斗界面的动画转场
  * @author Drill_up
  * 
  * 
@@ -26,7 +26,7 @@
  * ----设定注意事项
  * 1.插件的作用域：地图界面、战斗界面。
  *   作用于界面切换的动画。
- * 2.详细内容可以去看看 "16.图片 > 关于动画转场核心.docx"。
+ * 2.详细内容可以去看看 "17.主菜单 > 关于动画转场核心.docx"。
  * 细节：
  *   (1.战斗界面有一些默认的动画流程，你可以分别控制它们：
  *      遇敌动画、战斗开始-淡出淡入动画、开始战斗对话、
@@ -109,6 +109,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 改进了内部结构。
  * 
  * 
  * 
@@ -248,20 +250,20 @@
 //			->☆存储数据
 //			->☆插件指令
 //
-//			->☆管辖权 - 遇敌动画
-//			->☆管辖权 - 地图场景遇敌的切换
-//			->☆管辖权 - 战斗开始对话
+//			->☆淡出淡入动画
+//				->战斗开始时-执行淡出
+//				->战斗开始时-执行淡入
+//				->战斗结束时-执行淡出
+//				->战斗结束时-执行淡入
 //
+//			->☆管辖权（遇敌动画）
 //			->☆遇敌动画
 //				->遇敌动画开关
 //				->时长
 //				->隐藏全部行走图
 //				->遇敌的声音
-//			->☆淡出淡入动画
-//				->战斗开始-执行淡出
-//				->战斗开始-执行淡入
-//				->战斗结束-执行淡出
-//				->战斗结束-执行淡入
+//
+//			->☆管辖权（战斗开始对话）
 //			->☆战斗开始对话
 //				->是否显示对话
 //
@@ -277,10 +279,10 @@
 //		
 //		★必要注意事项：
 //			1.动画转场 【不管】 公共事件的执行。
-//
+//		
 //		★其它说明细节：
 //			暂无
-//				
+//		
 //		★存在的问题：
 //			1.问题：战斗音乐在地图界面淡出动画之前就切换播放了，地图音乐也在战斗界面淡出动画之前就切换播放了。（2024-6-12）
 //			  解决：【未解决】
@@ -582,15 +584,109 @@ Game_Interpreter.prototype.drill_BECut_pluginCommand = function( command, args )
 		}
 	}
 };
-	
-	
+
+
+
 //=============================================================================
-// ** ☆管辖权 - 遇敌动画
+// ** ☆淡出淡入动画
+//
+//			说明：	> 此模块控制场景切换时 淡出淡入 的过程。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 淡出淡入动画 - 配置初始化
+//==============================
+var _drill_BECut_COCut_setFadeData = Scene_Base.prototype.drill_COCut_setFadeData;
+Scene_Base.prototype.drill_COCut_setFadeData = function( cur_sceneName, tar_sceneName, fade_type, is_white ){
+	_drill_BECut_COCut_setFadeData.call( this, cur_sceneName, tar_sceneName, fade_type, is_white );
+	
+	// > 执行淡出（地图界面 -> 战斗界面）『动画转场的界面』
+	//		（战斗开始时）（不区分 is_white 参数）
+	if( cur_sceneName == "Scene_Map" &&
+		tar_sceneName == "Scene_Battle" &&
+		fade_type == "淡出" ){
+		
+		// > 关闭动画时
+		if( $gameSystem._drill_BECut_fadeStart_enabled == false ){
+			this.drill_COCut_submitFade( false );
+			
+		// > 开启动画时
+		}else{
+			this.drill_COCut_setFadeColor( $gameSystem._drill_BECut_fadeStart_color );
+			this.drill_COCut_setFadeTime( $gameSystem._drill_BECut_fadeStart_time );
+			this.drill_COCut_submitFade( true );
+		}
+		return;
+	}
+	
+	// > 执行淡入（地图界面 -> 战斗界面）『动画转场的界面』
+	//		（战斗开始时）（不区分 is_white 参数）
+	if( cur_sceneName == "Scene_Map" &&
+		tar_sceneName == "Scene_Battle" &&
+		fade_type == "淡入" ){
+		
+		// > 关闭动画时
+		if( $gameSystem._drill_BECut_fadeStart_enabled == false ){
+			this.drill_COCut_submitFade( false );
+			
+		// > 开启动画时
+		}else{
+			this.drill_COCut_setFadeColor( $gameSystem._drill_BECut_fadeStart_color );
+			this.drill_COCut_setFadeTime( $gameSystem._drill_BECut_fadeStart_time );
+			this.drill_COCut_submitFade( true );
+		}
+		return;
+	}
+	
+	
+	// > 执行淡出（战斗界面 -> 地图界面/战斗失败界面）『动画转场的界面』
+	//		（战斗结束时）（不区分 is_white 参数）
+	if( cur_sceneName == "Scene_Battle" &&
+		(tar_sceneName == "Scene_Map" || tar_sceneName == "Scene_Gameover") &&
+		fade_type == "淡出" ){
+		
+		// > 关闭动画时
+		if( $gameSystem._drill_BECut_fadeEnd_enabled == false ){
+			this.drill_COCut_submitFade( false );
+			
+		// > 开启动画时
+		}else{
+			this.drill_COCut_setFadeColor( $gameSystem._drill_BECut_fadeEnd_color );
+			this.drill_COCut_setFadeTime( $gameSystem._drill_BECut_fadeEnd_time );
+			this.drill_COCut_submitFade( true );
+		}
+		return;
+	}
+	
+	// > 执行淡入（战斗界面 -> 地图界面/战斗失败界面）『动画转场的界面』
+	//		（战斗结束时）（不区分 is_white 参数）
+	if( cur_sceneName == "Scene_Battle" &&
+		(tar_sceneName == "Scene_Map" || tar_sceneName == "Scene_Gameover") &&
+		fade_type == "淡入" ){
+		
+		// > 关闭动画时
+		if( $gameSystem._drill_BECut_fadeEnd_enabled == false ){
+			this.drill_COCut_submitFade( false );
+			
+		// > 开启动画时
+		}else{
+			this.drill_COCut_setFadeColor( $gameSystem._drill_BECut_fadeEnd_color );
+			this.drill_COCut_setFadeTime( $gameSystem._drill_BECut_fadeEnd_time );
+			this.drill_COCut_submitFade( true );
+		}
+		return;
+	}
+}
+
+
+
+//=============================================================================
+// ** ☆管辖权（遇敌动画）
 //
 //			说明：	> 管辖权 即对 原函数 进行 修改、覆写、继承、控制子插件继承 等的权利。
 //					> 用于后期脱离 原游戏框架 且仍保持兼容性 的标记。
 //=============================================================================
-/*
+/*  图层 - 2D遇敌动画
 //==============================
 // * 2D遇敌动画《战斗-遇敌的动画转场》 - 创建 屏幕单色贴图
 //
@@ -628,13 +724,7 @@ Spriteset_Base.prototype.updatePosition = function(){
     this.x += Math.round(screen.shake());
 };
 */
-//=============================================================================
-// ** ☆管辖权 - 地图场景遇敌的切换
-//
-//			说明：	> 管辖权 即对 原函数 进行 修改、覆写、继承、控制子插件继承 等的权利。
-//					> 用于后期脱离 原游戏框架 且仍保持兼容性 的标记。
-//=============================================================================
-/*
+/*  地图场景 - 2G遇敌的切换
 //==============================
 // * 2G遇敌的切换《战斗-遇敌的动画转场》 - 监听切换
 //==============================
@@ -729,31 +819,6 @@ Scene_Map.prototype.startFlashForEncounter = function( duration ){
     $gameScreen.startFlash(color, duration);
 };
 */
-//=============================================================================
-// ** ☆管辖权 - 战斗开始对话
-//
-//			说明：	> 管辖权 即对 原函数 进行 修改、覆写、继承、控制子插件继承 等的权利。
-//					> 用于后期脱离 原游戏框架 且仍保持兼容性 的标记。
-//=============================================================================
-/*
-//==============================
-// * B战斗开始时《战斗-遇敌的动画转场》 - 执行开始 - 战斗开始对话
-//
-//			说明：	> 先发制人 和 偷袭，只在 E遇敌的战斗 情况下有效，其他情况都为false不执行。
-//==============================
-BattleManager.displayStartMessages = function(){
-	$gameTroop.enemyNames().forEach(function( name ){
-		$gameMessage.add( TextManager.emerge.format(name) );					//信息 - 出现
-	});
-	if( this._preemptive ){
-		$gameMessage.add( TextManager.preemptive.format($gameParty.name()) );	//信息 - 先发制人
-	}else if( this._surprise ){
-		$gameMessage.add( TextManager.surprise.format($gameParty.name()) );		//信息 - 偷袭
-	}
-};
-*/
-
-
 
 //=============================================================================
 // ** ☆遇敌动画
@@ -837,92 +902,30 @@ SoundManager.playBattleStart = function() {
 };
 
 
-//=============================================================================
-// ** ☆淡出淡入动画
-//
-//			说明：	> 此模块控制场景切换时 淡出淡入 的过程。
-//					（插件完整的功能目录去看看：功能结构树）
-//=============================================================================
-//==============================
-// * 淡出淡入动画 - 配置初始化
-//==============================
-var _drill_BECut_COCut_setFadeData = Scene_Base.prototype.drill_COCut_setFadeData;
-Scene_Base.prototype.drill_COCut_setFadeData = function( cur_sceneName, tar_sceneName, fade_type, is_white ){
-	_drill_BECut_COCut_setFadeData.call( this, cur_sceneName, tar_sceneName, fade_type, is_white );
-	
-	// > 战斗开始-执行淡出（地图界面 -> 战斗界面，不区分 is_white 参数）
-	if( cur_sceneName == "Scene_Map" &&
-		tar_sceneName == "Scene_Battle" &&
-		fade_type == "淡出" ){
-		
-		// > 关闭动画时
-		if( $gameSystem._drill_BECut_fadeStart_enabled == false ){
-			this.drill_COCut_submitFade( false );
-			
-		// > 开启动画时
-		}else{
-			this.drill_COCut_setFadeColor( $gameSystem._drill_BECut_fadeStart_color );
-			this.drill_COCut_setFadeTime( $gameSystem._drill_BECut_fadeStart_time );
-			this.drill_COCut_submitFade( true );
-		}
-		return;
-	}
-	
-	// > 战斗开始-执行淡入（地图界面 -> 战斗界面，不区分 is_white 参数）
-	if( cur_sceneName == "Scene_Map" &&
-		tar_sceneName == "Scene_Battle" &&
-		fade_type == "淡入" ){
-		
-		// > 关闭动画时
-		if( $gameSystem._drill_BECut_fadeStart_enabled == false ){
-			this.drill_COCut_submitFade( false );
-			
-		// > 开启动画时
-		}else{
-			this.drill_COCut_setFadeColor( $gameSystem._drill_BECut_fadeStart_color );
-			this.drill_COCut_setFadeTime( $gameSystem._drill_BECut_fadeStart_time );
-			this.drill_COCut_submitFade( true );
-		}
-		return;
-	}
-	
-	// > 战斗结束-执行淡出（战斗界面 -> 地图界面/战斗失败界面，不区分 is_white 参数）
-	if( cur_sceneName == "Scene_Battle" &&
-		(tar_sceneName == "Scene_Map" || tar_sceneName == "Scene_Gameover") &&
-		fade_type == "淡出" ){
-		
-		// > 关闭动画时
-		if( $gameSystem._drill_BECut_fadeEnd_enabled == false ){
-			this.drill_COCut_submitFade( false );
-			
-		// > 开启动画时
-		}else{
-			this.drill_COCut_setFadeColor( $gameSystem._drill_BECut_fadeEnd_color );
-			this.drill_COCut_setFadeTime( $gameSystem._drill_BECut_fadeEnd_time );
-			this.drill_COCut_submitFade( true );
-		}
-		return;
-	}
-	
-	// > 战斗结束-执行淡入（战斗界面 -> 地图界面/战斗失败界面，不区分 is_white 参数）
-	if( cur_sceneName == "Scene_Battle" &&
-		(tar_sceneName == "Scene_Map" || tar_sceneName == "Scene_Gameover") &&
-		fade_type == "淡入" ){
-		
-		// > 关闭动画时
-		if( $gameSystem._drill_BECut_fadeEnd_enabled == false ){
-			this.drill_COCut_submitFade( false );
-			
-		// > 开启动画时
-		}else{
-			this.drill_COCut_setFadeColor( $gameSystem._drill_BECut_fadeEnd_color );
-			this.drill_COCut_setFadeTime( $gameSystem._drill_BECut_fadeEnd_time );
-			this.drill_COCut_submitFade( true );
-		}
-		return;
-	}
-}
 
+//=============================================================================
+// ** ☆管辖权（战斗开始对话）
+//
+//			说明：	> 管辖权 即对 原函数 进行 修改、覆写、继承、控制子插件继承 等的权利。
+//					> 用于后期脱离 原游戏框架 且仍保持兼容性 的标记。
+//=============================================================================
+/*
+//==============================
+// * B战斗开始时《战斗-遇敌的动画转场》 - 执行开始 - 战斗开始对话
+//
+//			说明：	> 先发制人 和 偷袭，只在 E遇敌的战斗 情况下有效，其他情况都为false不执行。
+//==============================
+BattleManager.displayStartMessages = function(){
+	$gameTroop.enemyNames().forEach(function( name ){
+		$gameMessage.add( TextManager.emerge.format(name) );					//信息 - 出现
+	});
+	if( this._preemptive ){
+		$gameMessage.add( TextManager.preemptive.format($gameParty.name()) );	//信息 - 先发制人
+	}else if( this._surprise ){
+		$gameMessage.add( TextManager.surprise.format($gameParty.name()) );		//信息 - 偷袭
+	}
+};
+*/
 
 //=============================================================================
 // ** ☆战斗开始对话
@@ -931,7 +934,7 @@ Scene_Base.prototype.drill_COCut_setFadeData = function( cur_sceneName, tar_scen
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 战斗开始对话 - 最后继承
+// * 战斗开始对话 - 最后继承1级
 //==============================
 var _drill_BECut_scene_initialize = SceneManager.initialize;
 SceneManager.initialize = function() {

@@ -3378,14 +3378,6 @@
 	
 
 //=============================================================================
-// * 外部影响插件检测
-//=============================================================================
-if( typeof(_Scene_Menu_create) != "undefined" || typeof(_Window_MenuActor_initialize) != "undefined" ){
-	
-	alert( DrillUp.drill_SMa_getPluginTip_CompatibilityOther() );
-};
-
-//=============================================================================
 // * >>>>基于插件检测>>>>
 //=============================================================================
 if( Imported.Drill_CoreOfWindowAuxiliary &&
@@ -3393,6 +3385,13 @@ if( Imported.Drill_CoreOfWindowAuxiliary &&
 	Imported.Drill_CoreOfGaugeNumber &&
 	Imported.Drill_CoreOfSelectableButton	){
 	
+//==============================
+// * >>>>基于插件检测>>>> - 外部影响插件检测
+//==============================
+if( typeof(_Scene_Menu_create) != "undefined" || typeof(_Window_MenuActor_initialize) != "undefined" ){
+	
+	alert( DrillUp.drill_SMa_getPluginTip_CompatibilityOther() );
+};
 	
 	
 //=============================================================================

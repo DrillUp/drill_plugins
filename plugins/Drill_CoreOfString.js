@@ -1533,7 +1533,7 @@ Game_Interpreter.prototype.drill_COSt_pluginCommand = function( command, args ){
 // ** ☆窗口字符应用之优先指代
 //=============================================================================
 //==============================
-// * 窗口字符应用之优先指代 - 最后继承
+// * 窗口字符应用之优先指代 - 最后继承1级
 //==============================
 var _drill_COSt_scene_initialize = SceneManager.initialize;
 SceneManager.initialize = function() {

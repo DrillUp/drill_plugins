@@ -977,10 +977,10 @@ Game_System.prototype.drill_MSPa_initSysData_Private = function() {
 	this._drill_MSPa_controllerTank = [];				// 绑定数据容器
 	for( var i = 0; i < DrillUp.g_MSPa_style.length; i++ ){
 		var temp_data = DrillUp.g_MSPa_style[i];
-		if( temp_data == undefined ){ continue; }		//『控制器与贴图的样式』 - 校验+直接跳出
+		if( temp_data == undefined ){ continue; }		//『控制器与贴图的样式-』 - 校验+直接跳出
 		
 		var temp_controller = new Drill_MSPa_Controller( temp_data );	//『$gameSystem优先初始化』
-		this._drill_MSPa_controllerTank[i] = temp_controller;			//『控制器与贴图的样式』 - 创建控制器
+		this._drill_MSPa_controllerTank[i] = temp_controller;			//『控制器与贴图的样式-』 - 创建控制器
 	}
 };
 //==============================
@@ -995,7 +995,7 @@ Game_System.prototype.drill_MSPa_checkSysData_Private = function() {
 	
 	// > 容器的 空数据 检查
 	for(var i = 0; i < DrillUp.g_MSPa_style.length; i++ ){
-		var temp_data = DrillUp.g_MSPa_style[i];		//『控制器与贴图的样式』 - 校验+直接跳出（存储数据检查）
+		var temp_data = DrillUp.g_MSPa_style[i];		//『控制器与贴图的样式-』 - 校验+直接跳出（存储数据检查）
 		
 		// > 已配置（undefined表示未配置的空数据）
 		if( temp_data != undefined ){
@@ -1437,14 +1437,14 @@ Scene_MenuBase.prototype.drill_MSPa_layerRemoveSprite_Private = function( sprite
 //==============================
 // * 菜单层级 - 添加贴图到层级（私有）
 //
-//			说明：	> 此处兼容了 战斗界面、地图界面 的层级名词。
+//			说明：	> 此处兼容了 菜单界面、战斗界面、地图界面 的层级名词。
 //==============================
 Scene_MenuBase.prototype.drill_MSPa_layerAddSprite_Private = function( sprite, layer_index ){
-	if( layer_index == "菜单后面层" || layer_index === 0 || 
+	if( layer_index == "菜单后面层" || layer_index === "0" || layer_index === 0 || 
 		layer_index == "下层" || layer_index == "中层" || layer_index == "上层"){
 		this._backgroundSprite.addChild( sprite );
 	}
-	if( layer_index == "菜单前面层" || layer_index === 1 || 
+	if( layer_index == "菜单前面层" || layer_index === "1" || layer_index === 1 || 
 		layer_index == "图片层" || layer_index == "最顶层" ){
 		this._foregroundSprite.addChild( sprite );
 	}

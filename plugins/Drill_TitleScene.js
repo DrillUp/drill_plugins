@@ -1427,7 +1427,8 @@ SceneManager.initialize = function() {
 	};
 	Scene_Title.prototype.drill_TSc_commandQuit = function() {
 		this._commandWindow.close();
-		SceneManager.pop();
+		//SceneManager.pop();
+		SceneManager.exit();
 	};
 	var _drill_TSc_makeCommandList = Window_TitleCommand.prototype.makeCommandList;
 	Window_TitleCommand.prototype.makeCommandList = function() {

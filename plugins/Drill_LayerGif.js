@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.2]        地图 - 多层地图GIF
+ * @plugindesc [v2.3]        地图 - 多层地图GIF
  * @author Drill_up
  * 
  * @Drill_LE_param "GIF层-%d"
@@ -147,16 +147,6 @@
  *   指令中不含相对移动，比如多次执行移动到[20,20]，贴图只会到达一个固定的位置。
  * 
  * -----------------------------------------------------------------------------
- * ----可选设定 - 修改中心锚点
- * 你可以通过插件指令手动修改中心锚点：
- * 
- * 插件指令：>地图GIF : GIF[11] : 修改中心锚点 : 锚点[0.5,0.5]
- * 插件指令：>地图GIF : GIF变量[21] : 修改中心锚点 : 锚点[0.5,0.5]
- * 
- * 1.注意，由于中心锚点会影响缩放、旋转效果，
- *   最好在创建后，修改一次中心锚点，就不要再动了。
- * 
- * -----------------------------------------------------------------------------
  * ----可选设定 - 获取属性
  * 你可以通过插件指令来获取 地图GIF 的属性值：
  * 
@@ -179,6 +169,18 @@
  *   比如缩放值为1.2时，则获取到： 1.2 * 100 = 120。
  * 
  * -----------------------------------------------------------------------------
+ * ----可选设定 - 修改中心锚点
+ * 你可以通过插件指令手动修改中心锚点：
+ * 
+ * 插件指令：>地图GIF : GIF[11] : 修改中心锚点 : 锚点[0.5,0.5]
+ * 插件指令：>地图GIF : GIF变量[21] : 修改中心锚点 : 锚点[0.5,0.5]
+ * 插件指令：>地图GIF : 批量GIF[7,8] : 修改中心锚点 : 锚点[0.5,0.5]
+ * 插件指令：>地图GIF : 批量GIF变量[21,22] : 修改中心锚点 : 锚点[0.5,0.5]
+ * 
+ * 1.注意，由于中心锚点会影响缩放、旋转效果，
+ *   最好在创建后，修改一次中心锚点，就不要再动了。
+ * 
+ * -----------------------------------------------------------------------------
  * ----可选设定 - GIF播放
  * 你还可以通过插件指令控制GIF播放：
  * 
@@ -189,11 +191,13 @@
  * 插件指令：>地图GIF : GIF[11] : 正向播放一次并停留在末尾帧
  * 插件指令：>地图GIF : GIF[11] : 反向播放一次并停留在起始帧
  * 
- * 1.前半部分和后半部分的参数可以随意组合，一共有4*6种组合方式。
+ * 1.前半部分（GIF[11]）和 后半部分（锁定帧）
+ *   的参数可以随意组合，一共有4*6种组合方式。
  * 2."设置当前帧"的 当前帧，1表示第1帧。
  *   你可以设置GIF锁定在某一帧，帧数与资源配置的id对应。
  * 3."正向播放一次并停留在末尾帧"表示强制该GIF播放重头到尾播放一次。
  *   播放完毕后，自动锁定到末尾帧。
+ * 
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 延迟修改单属性
@@ -257,7 +261,77 @@
  * 插件指令：>地图GIF : GIF[11] : 正向播放一次并停留在末尾帧(延迟) : 延迟执行时间[20]
  * 插件指令：>地图GIF : GIF[11] : 反向播放一次并停留在起始帧(延迟) : 延迟执行时间[20]
  * 
- * 1.前半部分和后半部分的参数可以随意组合，一共有4*6种组合方式。
+ * 1.前半部分（GIF[11]）和 后半部分（锁定帧(延迟) : 延迟执行时间[20]）
+ *   的参数可以随意组合，一共有4*6种组合方式。
+ * 
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 周期修改单属性
+ * 上述的插件指令中，部分插件指令可以周期执行：
+ * 
+ * 插件指令：>地图GIF : GIF[11] : 添加周期-隐藏(周期) : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图GIF : GIF变量[21] : 添加周期-隐藏(周期) : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图GIF : 批量GIF[7,8] : 添加周期-隐藏(周期) : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图GIF : 批量GIF变量[21,22] : 添加周期-隐藏(周期) : 周期时长[90] : 周期内开始时间[0]
+ * 
+ * 插件指令：>地图GIF : GIF[11] : 添加周期-显示(周期) : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图GIF : GIF[11] : 添加周期-隐藏(周期) : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图GIF : GIF[11] : 添加周期-暂停(周期) : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图GIF : GIF[11] : 添加周期-继续(周期) : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图GIF : GIF[11] : 添加周期-修改单属性(周期) : 透明度[255] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图GIF : GIF[11] : 添加周期-修改单属性(周期) : 透明度变量[21] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图GIF : GIF[11] : 添加周期-修改单属性(周期) : 旋转[90] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图GIF : GIF[11] : 添加周期-修改单属性(周期) : 旋转变量[21] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图GIF : GIF[11] : 添加周期-修改单属性(周期) : 转速[10.0] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图GIF : GIF[11] : 添加周期-修改单属性(周期) : 转速变量[21] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图GIF : GIF[11] : 添加周期-修改单属性(周期) : 缩放X[1.2] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图GIF : GIF[11] : 添加周期-修改单属性(周期) : 缩放X变量%[21] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图GIF : GIF[11] : 添加周期-修改单属性(周期) : 缩放Y[1.2] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图GIF : GIF[11] : 添加周期-修改单属性(周期) : 缩放Y变量%[21] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图GIF : GIF[11] : 添加周期-修改单属性(周期) : 斜切X[0.2] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图GIF : GIF[11] : 添加周期-修改单属性(周期) : 斜切X变量%[21] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图GIF : GIF[11] : 添加周期-修改单属性(周期) : 斜切Y[0.2] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图GIF : GIF[11] : 添加周期-修改单属性(周期) : 斜切Y变量%[21] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图GIF : GIF[11] : 添加周期-还原所有单属性(周期) : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图GIF : GIF[11] : 清空周期指令
+ * 
+ * 1.前半部分（GIF[11]）和 后半部分（ 添加周期-隐藏(周期) ）
+ *   的参数可以随意组合。一共有4*20种组合方式。
+ * 2."添加周期"后，指令会根据"周期时长"和"开始时间"，持续循环执行。
+ *   "清空周期指令"可以清空添加的指令。
+ * 3.你可以塞入多条周期指令，每个周期指令控制不同的属性，实现复杂的变换效果。
+ * 4."变量%["表示该变量修改属性值时，会缩小100倍。因为变量只能存整数。
+ *   比如缩放的变量值为120时，则表示赋值： 120 / 100 = 1.2。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 周期移动到
+ * 上述的插件指令中，移动到的插件指令也可以周期执行：
+ * 
+ * 插件指令：>地图GIF : GIF[11] : 添加周期-移动到(周期)-匀速移动 : 位置[100,100] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图GIF : GIF[11] : 添加周期-移动到(周期)-匀速移动 : 位置变量[25,26] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图GIF : GIF[11] : 添加周期-移动到(周期)-弹性移动 : 位置[100,100] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图GIF : GIF[11] : 添加周期-移动到(周期)-弹性移动 : 位置变量[25,26] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图GIF : GIF[11] : 添加周期-移动到(周期)-增减速移动 : 位置[100,100] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图GIF : GIF[11] : 添加周期-移动到(周期)-增减速移动 : 位置变量[25,26] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图GIF : GIF[11] : 添加周期-移动到(周期)-执行归位 : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图GIF : GIF[11] : 清空周期指令
+ * 
+ * 1.前半部分（GIF[11]）和 后半部分（ 添加周期-移动到(周期)-匀速移动 ）
+ *   的参数可以随意组合。一共有4*8种组合方式。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 周期GIF播放
+ * 上述的插件指令中，GIF播放也可以周期执行：
+ * 
+ * 插件指令：>地图GIF : GIF[11] : 添加周期-锁定帧(周期) : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图GIF : GIF[11] : 添加周期-解锁帧(周期) : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图GIF : GIF[11] : 添加周期-设置帧(周期) : 当前帧[1] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图GIF : GIF[11] : 添加周期-设置帧(周期) : 当前帧变量[21] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图GIF : GIF[11] : 清空周期指令
+ * 
+ * 1.前半部分（GIF[11]）和 后半部分（ 添加周期-锁定帧(周期) ）
+ *   的参数可以随意组合，一共有4*5种组合方式。
+ * 
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -311,6 +385,9 @@
  * 添加了延迟指令功能。
  * [v2.2]
  * 完善了变换功能的插件指令。
+ * [v2.3]
+ * 添加了地图列表的设置，一层可以同时绑定给多个地图。
+ * 整理改进了内部结构，并添加了周期指令。
  * 
  * 
  * 
@@ -1558,6 +1635,7 @@
  * @desc 只用于方便区分查看的标签，不作用在插件中。
  * @default ==新的地图GIF==
  *
+ *
  * @param ---绑定---
  * @default 
  *
@@ -1575,6 +1653,13 @@
  * @min 1
  * @desc 该GIF将放在指定对应的地图id中。
  * @default 1
+ * 
+ * @param 作用到的地图列表
+ * @parent 是否作用到所有地图
+ * @type number[]
+ * @min 1
+ * @desc 除了"所属地图"，你还可以填多个地图id，同一个贴图在多个地图里面复用。
+ * @default []
  * 
  * 
  * @param ---贴图---
@@ -1611,6 +1696,25 @@
  * @dir img/Map__layer_gif/
  * @type file[]
  *
+ * @param 预加载类型
+ * @parent ---贴图---
+ * @type select
+ * @option 关闭预加载
+ * @value 关闭预加载
+ * @option 固定预加载数量
+ * @value 固定预加载数量
+ * @option 全部预加载
+ * @value 全部预加载
+ * @desc 预加载的类型，详细去看看文档说明："1.系统 > 关于预加载.docx"。
+ * @default 关闭预加载
+ *
+ * @param 固定预加载的数量
+ * @parent 预加载类型
+ * @type number
+ * @min 0
+ * @desc 如果你配置的GIF资源数量非常多，可以设置固定预加载数量，减少内存消耗。剩下的在播放时边播放边加载。
+ * @default 35
+ *
  * @param 帧间隔
  * @parent ---贴图---
  * @type number
@@ -1625,38 +1729,6 @@
  * @off 不倒放
  * @desc true - 倒放，false - 不倒放
  * @default false
- *
- * @param 透明度
- * @parent ---贴图---
- * @type number
- * @min 0
- * @max 255
- * @desc 0为完全透明，255为完全不透明。
- * @default 255
- *
- * @param 是否预加载
- * @parent ---贴图---
- * @type boolean
- * @on 开启
- * @off 关闭
- * @desc true - 开启，false - 关闭，预加载详细介绍可见："1.系统 > 关于预加载.docx"。
- * @default false
- *
- * @param 混合模式
- * @parent ---贴图---
- * @type select
- * @option 普通
- * @value 0
- * @option 发光
- * @value 1
- * @option 实色混合(正片叠底)
- * @value 2
- * @option 浅色
- * @value 3
- * @option 叠加
- * @value 4
- * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
- * @default 0
  *
  * @param 图像-色调值
  * @parent ---贴图---
@@ -1674,6 +1746,7 @@
  * @desc 此参数为缩放设置，设置模糊后，缩放时可以模糊资源图像的边缘，防止出现像素锯齿。
  * @default false
  *
+ *
  * @param 平移-GIF X
  * @parent ---贴图---
  * @desc x轴方向平移，单位像素。0为贴在最左边。这里用来表示进入地图时图片的初始位置。
@@ -1688,6 +1761,14 @@
  * @parent ---贴图---
  * @desc 正数逆时针，负数顺时针，单位 角度/帧。(1秒60帧，360.0为一周)
  * @default 0.0
+ *
+ * @param 透明度
+ * @parent ---贴图---
+ * @type number
+ * @min 0
+ * @max 255
+ * @desc 0为完全透明，255为完全不透明。
+ * @default 255
  *
  * @param 位移比X
  * @parent ---贴图---
@@ -1707,6 +1788,22 @@
  * @param 位移图块偏移 Y
  * @parent ---贴图---
  * @desc 与位移比相关，图片的中心点所在的图块Y偏移量。单位图块，可为小数。
+ * @default 0
+ *
+ * @param 混合模式
+ * @parent ---贴图---
+ * @type select
+ * @option 普通
+ * @value 0
+ * @option 发光
+ * @value 1
+ * @option 实色混合(正片叠底)
+ * @value 2
+ * @option 浅色
+ * @value 3
+ * @option 叠加
+ * @value 4
+ * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
  * @default 0
  *
  * @param 地图层级
@@ -1907,6 +2004,19 @@
 //			->☆提示信息
 //			->☆静态数据
 //			->☆插件指令
+//				->『变换特性-单贴图』
+//					->修改单属性
+//					->移动到
+//					->获取属性
+//					->修改中心锚点
+//					->延迟修改单属性（不含混合模式、层级、图片层级）
+//					->延迟移动到
+//					->周期修改单属性（不含混合模式、层级、图片层级）
+//					->周期移动到
+//				->其它特性
+//					->GIF播放
+//					->延迟GIF播放
+//					->周期GIF播放
 //			->☆预加载
 //			->☆存储数据
 //			->☆地图层级
@@ -1933,32 +2043,19 @@
 //				->销毁
 //			
 //			->地图GIF控制器【Drill_LGi_Controller】
-//				->A主体
-//				->B变换特性
-//				->C镜头参数
-//				->D播放GIF
+//				->O播放GIF
 //					->设置帧
 //					->锁定帧/解锁帧
 //					->单次播放
-//				->E随机位置
-//				->F指令叠加变化
-//				->G延迟指令
-//				->H自变化效果
+//				->Z镜头参数
 //			->地图GIF贴图【Drill_LGi_Sprite】
-//				->A主体
-//				->B变换特性
-//				->C对象绑定
-//				->D播放GIF
-//				->F指令叠加变化-控制器用
-//				->G延迟指令
-//				->H自变化效果
 //
 //
 //		★家谱：
 //			无
 //		
 //		★脚本文档：
-//			17.主菜单 > 多层组合装饰（界面装饰-地图界面）（脚本）.docx
+//			17.主菜单 > 多层组合装饰（界面装饰）（脚本）.docx
 //		
 //		★插件私有类：
 //			* 地图GIF控制器【Drill_LGi_Controller】
@@ -1974,7 +2071,17 @@
 //			3.原理基于【定量】赋值，【你直接用_displayX就可以了】,增量赋值方法绕太多远路！
 //
 //		★其它说明细节：
-//			暂无
+//			1.这里空间很大，感觉应该放点什么……那就给所有 界面装饰插件 编个号吧。
+//			  ┌──────────────────────────────────┐
+//			  │   /@@@@@@      /@@      /@@@@@@  │
+//			  │  /@@__  @@   /@@@@     /@@__  @@ │
+//			  │ | @@  \ @@  |_  @@    | @@  \ @@ │
+//			  │ | @@  | @@    | @@    |  @@@@@@@ │
+//			  │ | @@  | @@    | @@     \____  @@ │
+//			  │ | @@  | @@    | @@     /@@  \ @@ │
+//			  │ |  @@@@@@/   /@@@@@@  |  @@@@@@/ │
+//			  │  \______/   |______/   \______/  │
+//			  └──────────────────────────────────┘
 //				
 //		★存在的问题：
 //			暂无
@@ -2012,8 +2119,15 @@
 	//==============================
 	// * 提示信息 - 报错 - NaN校验值
 	//==============================
-	DrillUp.drill_LGi_getPluginTip_ParamIsNaN = function( param_name ){
-		return "【" + DrillUp.g_LGi_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+	DrillUp.drill_LGi_getPluginTip_ParamIsNaN = function( param_name, check_tank ){
+		var text = "【" + DrillUp.g_LGi_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+		if( check_tank ){
+			var keys = Object.keys( check_tank );
+			for( var i=0; i < keys.length; i++ ){
+				text += "\n" + keys[i] + "的值：" + check_tank[ keys[i] ] ;
+			}
+		}
+		return text;
 	};
 	//==============================
 	// * 提示信息 - 报错 - 底层版本过低
@@ -2059,10 +2173,19 @@
 		
 		// > 绑定
 		data['mapToAll'] = String( dataFrom["是否作用到所有地图"] || "false") == "true";
-		data['map'] = Number( dataFrom["所属地图"] || 0);
+		data['map'] = String( dataFrom["所属地图"] || "0" );
+		if( dataFrom["作用到的地图列表"] != "" &&
+			dataFrom["作用到的地图列表"] != undefined ){
+			data['mapList'] = JSON.parse( dataFrom["作用到的地图列表"] );
+		}else{
+			data['mapList'] = [];
+		}
+		data['mapList'].push( data['map'] );
 		
-		// > 预加载
-		data['preload'] = String( dataFrom["是否预加载"] || "false") == "true";
+		
+		// > P预加载GIF管理
+		data['preloadType'] = String( dataFrom["预加载类型"] || "关闭预加载");
+		data['preloadNum'] = Number( dataFrom["固定预加载的数量"] || 35);
 		
 		// > 动态遮罩
 		data['dynamicMask_enabled'] = String( dataFrom["是否启用地图动态遮罩"] || "false") == "true";
@@ -2084,12 +2207,12 @@
 		data['smooth'] = String( dataFrom["图像-模糊边缘"] || "false") == "true";
 		
 		data['visible'] = String( dataFrom["初始是否显示"] || "true") == "true";
+		data['pause'] = false;
 		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
 		data['layerIndex'] = String( dataFrom["地图层级"] || "下层");
 		data['zIndex'] = Number( dataFrom["图片层级"] || 0);
 		
 		// > A主体 - 其它特性
-		data['pause'] = false;
 		data['XPer'] = Number( dataFrom["位移比X"] || 0);
 		data['YPer'] = Number( dataFrom["位移比Y"] || 0);
 		data['tile_x'] = parseFloat( dataFrom["位移图块偏移 X"] || 0);
@@ -2112,14 +2235,7 @@
 		data['parentRotate'] = 0;
 		
 		
-		// > D播放GIF
-		data['gif_lock'] = String( dataFrom["初始是否锁定帧"] || "false") == "true";
-		data['gif_initFrame'] = Number( dataFrom["锁定帧数"] || 0);
-		
-		// > E随机位置
-		//	（无）
-		
-		// > H自变化效果
+		// > G自变化效果
 		data['effect_float'] = String( dataFrom["浮动效果"] || "关闭");
 		data['effect_floatSpeed'] = Number( dataFrom["浮动速度"] || 1.0);
 		data['effect_floatRange'] = Number( dataFrom["浮动偏移量"] || 15);
@@ -2133,24 +2249,47 @@
 		data['effect_zoomSpeed'] = Number( dataFrom["缩放速度"] || 1.0);
 		data['effect_zoomRange'] = Number( dataFrom["缩放幅度范围"] || 0.2);
 		
+		// > O播放GIF
+		data['gif_lock'] = String( dataFrom["初始是否锁定帧"] || "false") == "true";
+		data['gif_initFrame'] = Number( dataFrom["锁定帧数"] || 0);
+		
+		// > Q随机位置
+		//	（无）
+		
+		// > 控制器 初始化数据『控制器与贴图的样式-静态数据-指针初始化』
+		Drill_LGi_Controller.drill_controller_initData( data );
+		
 		return data;
 	}
-	
-	/*-----------------杂项------------------*/
-	DrillUp.g_LGi_saveEnabled = String(DrillUp.parameters["是否开启参数存储"] || "false") == "true" ;
-	
+	//==============================
+	// * 静态数据 - 最后继承1级
+	//==============================
+	var _drill_LGi_scene_initialize = SceneManager.initialize;
+	SceneManager.initialize = function() {
+		_drill_LGi_scene_initialize.call(this);
+		
+		/*-----------------GIF------------------*/
+		for( var i = 0; i < DrillUp.g_LGi_layers.length; i++ ){
+			var temp = DrillUp.g_LGi_layers[i];
+			if( temp != undefined ){
+				DrillUp.g_LGi_layers[i] = DrillUp.drill_LGi_gifInit( temp );
+			}
+		}
+	}
 	/*-----------------GIF------------------*/
 	DrillUp.g_LGi_layers_length = 200;
 	DrillUp.g_LGi_layers = [];
 	for( var i = 0; i < DrillUp.g_LGi_layers_length; i++ ){
 		if( DrillUp.parameters["GIF层-" + String(i+1) ] != undefined &&
 			DrillUp.parameters["GIF层-" + String(i+1) ] != "" ){
-			var temp = JSON.parse(DrillUp.parameters["GIF层-" + String(i+1) ]);
-			DrillUp.g_LGi_layers[i] = DrillUp.drill_LGi_gifInit( temp );
+			DrillUp.g_LGi_layers[i] = JSON.parse(DrillUp.parameters["GIF层-" + String(i+1) ]);
 		}else{
 			DrillUp.g_LGi_layers[i] = undefined;		//（设为空值，节约静态数据占用容量）
 		}
 	}
+	
+	/*-----------------杂项------------------*/
+	DrillUp.g_LGi_saveEnabled = String(DrillUp.parameters["是否开启参数存储"] || "false") == "true" ;
 	
 	
 	
@@ -2328,43 +2467,7 @@ Game_Interpreter.prototype.drill_LGi_pluginCommand = function( command, args ){
 			}
 		}
 		
-		/*-----------------D播放GIF------------------*/
-		if( args.length == 4 ){
-			var type = String(args[3]);
-			if( type == "锁定帧" ){
-				for( var k=0; k < controllers.length; k++ ){
-					controllers[k].drill_controller_GIF_setLocked( true );
-				}
-			}
-			if( type == "解锁帧" ){
-				for( var k=0; k < controllers.length; k++ ){
-					controllers[k].drill_controller_GIF_setLocked( false );
-				}
-			}
-			if( type == "正向播放一次并停留在末尾帧" ){
-				for( var k=0; k < controllers.length; k++ ){
-					controllers[k].drill_controller_GIF_setOncePlay( "forwardRun" );
-				}
-			}
-			if( type == "反向播放一次并停留在起始帧" ){
-				for( var k=0; k < controllers.length; k++ ){
-					controllers[k].drill_controller_GIF_setOncePlay( "backRun" );
-				}
-			}
-		}
-		if( args.length == 6 ){
-			var type = String(args[3]);
-			var temp1 = String(args[5]);
-			var num_list = this.drill_LGi_getArgNumList( temp1 );
-			
-			if( type == "设置帧" || type == "设置当前帧" ){
-				for( var k=0; k < controllers.length; k++ ){
-					controllers[k].drill_controller_GIF_setFrame( num_list[0]-1 );
-				}
-			}
-		}
-		
-		/*-----------------F指令叠加变化------------------*/
+		/*-----------------D指令叠加变化------------------*/
 		if( args.length == 4 ){
 			var type = String(args[3]);
 			if( type == "立即还原所有单属性" ){
@@ -2491,7 +2594,7 @@ Game_Interpreter.prototype.drill_LGi_pluginCommand = function( command, args ){
 			}
 		}
 		
-		/*-----------------G延迟指令------------------*/
+		/*-----------------E延迟指令------------------*/
 		if( args.length == 4 ){
 			var type = String(args[3]);
 			if( type == "立即取消全部延迟指令" ){
@@ -2699,6 +2802,7 @@ Game_Interpreter.prototype.drill_LGi_pluginCommand = function( command, args ){
 				}
 			}
 		}
+		/*-----------------E延迟指令 + O播放GIF------------------*/
 		if( args.length == 6 ){
 			var type = String(args[3]);
 			var delay_time = String(args[5]);
@@ -2753,6 +2857,333 @@ Game_Interpreter.prototype.drill_LGi_pluginCommand = function( command, args ){
 						"drill_controller_GIF_setFrame",
 						[ num_list[0]-1 ], delay_time
 					);
+				}
+			}
+		}
+		
+		/*-----------------F周期指令------------------*/
+		if( args.length == 4 ){
+			var type = String(args[3]);
+			if( type == "清空周期指令" ){
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_clearPeriodizeCommand();
+				}
+			}
+		}
+		if( args.length == 8 ){
+			var type = String(args[3]);
+			var time_period = String(args[5]);
+			var time_start = String(args[7]);
+			if( type == "添加周期-显示(周期)" ){
+				time_period = time_period.replace("周期时长[","");
+				time_period = time_period.replace("]","");
+				time_period = Number( time_period );
+				time_start = time_start.replace("周期内开始时间[","");
+				time_start = time_start.replace("]","");
+				time_start = Number( time_start );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setPeriodizeCommand(
+						"drill_controller_setVisible", [true], time_period, time_start
+					);
+				}
+			}
+			if( type == "添加周期-隐藏(周期)" ){
+				time_period = time_period.replace("周期时长[","");
+				time_period = time_period.replace("]","");
+				time_period = Number( time_period );
+				time_start = time_start.replace("周期内开始时间[","");
+				time_start = time_start.replace("]","");
+				time_start = Number( time_start );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setPeriodizeCommand(
+						"drill_controller_setVisible", [false], time_period, time_start
+					);
+				}
+			}
+			if( type == "添加周期-暂停(周期)" ){
+				time_period = time_period.replace("周期时长[","");
+				time_period = time_period.replace("]","");
+				time_period = Number( time_period );
+				time_start = time_start.replace("周期内开始时间[","");
+				time_start = time_start.replace("]","");
+				time_start = Number( time_start );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setPeriodizeCommand(
+						"drill_controller_setPause", [true], time_period, time_start
+					);
+				}
+			}
+			if( type == "添加周期-继续(周期)" ){
+				time_period = time_period.replace("周期时长[","");
+				time_period = time_period.replace("]","");
+				time_period = Number( time_period );
+				time_start = time_start.replace("周期内开始时间[","");
+				time_start = time_start.replace("]","");
+				time_start = Number( time_start );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setPeriodizeCommand(
+						"drill_controller_setPause", [false], time_period, time_start
+					);
+				}
+			}
+			if( type == "添加周期-还原所有单属性(周期)" ){
+				time_period = time_period.replace("周期时长[","");
+				time_period = time_period.replace("]","");
+				time_period = Number( time_period );
+				time_start = time_start.replace("周期内开始时间[","");
+				time_start = time_start.replace("]","");
+				time_start = Number( time_start );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setPeriodizeCommand(
+						"drill_controller_commandChange_restoreAttr", [], time_period, time_start
+					);
+				}
+			}
+			if( type == "添加周期-移动到(周期)-执行归位" ){
+				time_period = time_period.replace("周期时长[","");
+				time_period = time_period.replace("]","");
+				time_period = Number( time_period );
+				time_start = time_start.replace("周期内开始时间[","");
+				time_start = time_start.replace("]","");
+				time_start = Number( time_start );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setPeriodizeCommand(
+						"drill_controller_commandChange_restoreMove", [], time_period, time_start
+					);
+				}
+			}
+		}
+		if( args.length == 12 ){
+			var type = String(args[3]);
+			var temp1 = String(args[5]);
+			var temp2 = String(args[7]);
+			var time_period = String(args[9]);
+			var time_start = String(args[11]);
+			if( type == "添加周期-修改单属性(周期)" ){
+				temp2 = temp2.replace("时间[","");
+				temp2 = temp2.replace("]","");
+				time_period = time_period.replace("周期时长[","");
+				time_period = time_period.replace("]","");
+				time_period = Number( time_period );
+				time_start = time_start.replace("周期内开始时间[","");
+				time_start = time_start.replace("]","");
+				time_start = Number( time_start );
+				
+				if( temp1.indexOf("透明度[") != -1 ||
+					temp1.indexOf("透明度变量[") != -1 ){
+					var num_list = this.drill_LGi_getArgNumList(temp1);
+					for( var k=0; k < controllers.length; k++ ){
+						controllers[k].drill_controller_setPeriodizeCommand(
+							"drill_controller_commandChange_setOpacity", 
+							[ "匀速变化", num_list[0], Number(temp2) ], time_period, time_start
+						);
+					}
+				}
+				if( temp1.indexOf("旋转[") != -1 ||
+					temp1.indexOf("旋转变量[") != -1 ){
+					var num_list = this.drill_LGi_getArgNumList(temp1);
+					for( var k=0; k < controllers.length; k++ ){
+						controllers[k].drill_controller_setPeriodizeCommand(
+							"drill_controller_commandChange_setRotate",
+							[ "匀速变化", num_list[0], Number(temp2) ], time_period, time_start
+						);
+					}
+				}
+				if( temp1.indexOf("转速[") != -1 ||
+					temp1.indexOf("转速变量[") != -1 ){
+					var num_list = this.drill_LGi_getArgNumList(temp1);
+					for( var k=0; k < controllers.length; k++ ){
+						controllers[k].drill_controller_setPeriodizeCommand(
+							"drill_controller_commandChange_setRotateSpeed",
+							["匀速变化", num_list[0], Number(temp2) ], time_period, time_start
+						);
+					}
+				}
+				if( temp1.indexOf("缩放X[") != -1 ||
+					temp1.indexOf("缩放X变量%[") != -1 ){
+					var num_list = this.drill_LGi_getArgNumList(temp1);
+					for( var k=0; k < controllers.length; k++ ){
+						controllers[k].drill_controller_setPeriodizeCommand(
+							"drill_controller_commandChange_setScaleX",
+							[ "匀速变化", num_list[0], Number(temp2) ], time_period, time_start
+						);
+					}
+				}
+				if( temp1.indexOf("缩放Y[") != -1 ||
+					temp1.indexOf("缩放Y变量%[") != -1 ){
+					var num_list = this.drill_LGi_getArgNumList(temp1);
+					for( var k=0; k < controllers.length; k++ ){
+						controllers[k].drill_controller_setPeriodizeCommand(
+							"drill_controller_commandChange_setScaleY",
+							[ "匀速变化", num_list[0], Number(temp2) ], time_period, time_start
+						);
+					}
+				}
+				if( temp1.indexOf("斜切X[") != -1 ||
+					temp1.indexOf("斜切X变量%[") != -1 ){
+					var num_list = this.drill_LGi_getArgNumList(temp1);
+					for( var k=0; k < controllers.length; k++ ){
+						controllers[k].drill_controller_setPeriodizeCommand(
+							"drill_controller_commandChange_setSkewX",
+							[ "匀速变化", num_list[0], Number(temp2) ], time_period, time_start
+						);
+					}
+				}
+				if( temp1.indexOf("斜切Y[") != -1 ||
+					temp1.indexOf("斜切Y变量%[") != -1 ){
+					var num_list = this.drill_LGi_getArgNumList(temp1);
+					for( var k=0; k < controllers.length; k++ ){
+						controllers[k].drill_controller_setPeriodizeCommand(
+							"drill_controller_commandChange_setSkewY",
+							[ "匀速变化", num_list[0], Number(temp2) ], time_period, time_start
+						);
+					}
+				}
+			}
+			if( type == "添加周期-移动到(周期)-匀速移动" ){
+				temp2 = temp2.replace("时间[","");
+				temp2 = temp2.replace("]","");
+				time_period = time_period.replace("周期时长[","");
+				time_period = time_period.replace("]","");
+				time_period = Number( time_period );
+				time_start = time_start.replace("周期内开始时间[","");
+				time_start = time_start.replace("]","");
+				time_start = Number( time_start );
+				if( temp1.indexOf("位置[") != -1 ||
+					temp1.indexOf("位置变量[") != -1 ){
+					var num_list = this.drill_LGi_getArgNumList(temp1);
+					for( var k=0; k < controllers.length; k++ ){
+						controllers[k].drill_controller_setPeriodizeCommand(
+							"drill_controller_commandChange_setMove",
+							[ "匀速变化", num_list[0], num_list[1], Number(temp2) ], time_period, time_start
+						);
+					}
+				}
+			}
+			if( type == "添加周期-移动到(周期)-弹性移动" ){
+				temp2 = temp2.replace("时间[","");
+				temp2 = temp2.replace("]","");
+				time_period = time_period.replace("周期时长[","");
+				time_period = time_period.replace("]","");
+				time_period = Number( time_period );
+				time_start = time_start.replace("周期内开始时间[","");
+				time_start = time_start.replace("]","");
+				time_start = Number( time_start );
+				if( temp1.indexOf("位置[") != -1 ||
+					temp1.indexOf("位置变量[") != -1 ){
+					var num_list = this.drill_LGi_getArgNumList(temp1);
+					for( var k=0; k < controllers.length; k++ ){
+						controllers[k].drill_controller_setPeriodizeCommand(
+							"drill_controller_commandChange_setMove",
+							[ "弹性变化", num_list[0], num_list[1], Number(temp2) ], time_period, time_start
+						);
+					}
+				}
+			}
+			if( type == "添加周期-移动到(周期)-增减速移动" ){
+				temp2 = temp2.replace("时间[","");
+				temp2 = temp2.replace("]","");
+				time_period = time_period.replace("周期时长[","");
+				time_period = time_period.replace("]","");
+				time_period = Number( time_period );
+				time_start = time_start.replace("周期内开始时间[","");
+				time_start = time_start.replace("]","");
+				time_start = Number( time_start );
+				if( temp1.indexOf("位置[") != -1 ||
+					temp1.indexOf("位置变量[") != -1 ){
+					var num_list = this.drill_LGi_getArgNumList(temp1);
+					for( var k=0; k < controllers.length; k++ ){
+						controllers[k].drill_controller_setPeriodizeCommand(
+							"drill_controller_commandChange_setMove",
+							[ "增减速变化", num_list[0], num_list[1], Number(temp2) ], time_period, time_start
+						);
+					}
+				}
+			}
+		}
+		/*-----------------F周期指令 + O播放GIF------------------*/
+		if( args.length == 8 ){
+			var type = String(args[3]);
+			var time_period = String(args[5]);
+			var time_start = String(args[7]);
+			time_period = time_period.replace("周期时长[","");
+			time_period = time_period.replace("]","");
+			time_period = Number( time_period );
+			time_start = time_start.replace("周期内开始时间[","");
+			time_start = time_start.replace("]","");
+			time_start = Number( time_start );
+			if( type == "添加周期-锁定帧(周期)" ){
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setPeriodizeCommand(
+						"drill_controller_GIF_setLocked",
+						[ true ], time_period, time_start
+					);
+				}
+			}
+			if( type == "添加周期-解锁帧(周期)" ){
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setPeriodizeCommand(
+						"drill_controller_GIF_setLocked",
+						[ false ], time_period, time_start
+					);
+				}
+			}
+		}
+		if( args.length == 10 ){
+			var type = String(args[3]);
+			var temp1 = String(args[5]);
+			var time_period = String(args[7]);
+			var time_start = String(args[9]);
+			time_period = time_period.replace("周期时长[","");
+			time_period = time_period.replace("]","");
+			time_period = Number( time_period );
+			time_start = time_start.replace("周期内开始时间[","");
+			time_start = time_start.replace("]","");
+			time_start = Number( time_start );
+			var num_list = this.drill_LTG_getArgNumList( temp1 );
+			
+			if( type == "添加周期-设置帧(周期)" || type == "添加周期-设置当前帧(周期)" ){
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setPeriodizeCommand(
+						"drill_controller_GIF_setFrame",
+						[ num_list[0]-1 ], time_period, time_start
+					);
+				}
+			}
+		}
+		
+		/*-----------------O播放GIF------------------*/
+		if( args.length == 4 ){
+			var type = String(args[3]);
+			if( type == "锁定帧" ){
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_GIF_setLocked( true );
+				}
+			}
+			if( type == "解锁帧" ){
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_GIF_setLocked( false );
+				}
+			}
+			if( type == "正向播放一次并停留在末尾帧" ){
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_GIF_setOncePlay( "forwardRun" );
+				}
+			}
+			if( type == "反向播放一次并停留在起始帧" ){
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_GIF_setOncePlay( "backRun" );
+				}
+			}
+		}
+		if( args.length == 6 ){
+			var type = String(args[3]);
+			var temp1 = String(args[5]);
+			var num_list = this.drill_LGi_getArgNumList( temp1 );
+			
+			if( type == "设置帧" || type == "设置当前帧" ){
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_GIF_setFrame( num_list[0]-1 );
 				}
 			}
 		}
@@ -2825,12 +3256,24 @@ Game_Temp.prototype.drill_LGi_preloadInit = function(){
 	for( var i = 0; i < DrillUp.g_LGi_layers.length; i++ ){
 		var temp_data = DrillUp.g_LGi_layers[i];
 		if( temp_data == undefined ){ continue; }
-		if( temp_data['preload'] != true ){ continue; }
 		
-		for(var k=0; k < temp_data['src_img_gif'].length; k++){
-			this._drill_LGi_preloadTank.push( 
-				ImageManager.reserveBitmap( temp_data['src_img_file'], temp_data['src_img_gif'][k], temp_data['tint'], temp_data['smooth'], this._drill_LGi_cacheId ) 
-			);
+		// > P预加载GIF管理
+		if( temp_data['preloadType'] == "全部预加载" ){
+			var src_img_num = temp_data['src_img_gif'].length;
+			for( var k = 0; k < src_img_num; k++ ){
+				this._drill_LGi_preloadTank.push( 
+					ImageManager.reserveBitmap( temp_data['src_img_file'], temp_data['src_img_gif'][k], temp_data['tint'], temp_data['smooth'], this._drill_LGi_cacheId ) 
+				);
+			}
+		}
+		if( temp_data['preloadType'] == "固定预加载数量" ){
+			var src_img_num = temp_data['preloadNum'];
+			if( src_img_num >= temp_data['src_img_gif'].length ){ src_img_num = temp_data['src_img_gif'].length; }
+			for( var k = 0; k < src_img_num; k++ ){
+				this._drill_LGi_preloadTank.push( 
+					ImageManager.reserveBitmap( temp_data['src_img_file'], temp_data['src_img_gif'][k], temp_data['tint'], temp_data['smooth'], this._drill_LGi_cacheId ) 
+				);
+			}
 		}
 	}
 }
@@ -3184,7 +3627,7 @@ Game_Map.prototype.drill_LGi_initMapdata = function(){
 			//（不刷新数据）
 			
 		// > 控制器 - 匹配单地图数据时
-		}else if( temp_data['map'] == this.mapId() ){
+		}else if( temp_data['mapList'].contains( String(this.mapId()) ) ){
 			var temp_controller = new Drill_LGi_Controller( i );
 			$gameSystem._drill_LGi_dataTank_curController[i] = temp_controller;	//（重刷数据）
 			
@@ -3430,12 +3873,12 @@ Scene_Map.prototype.drill_LGi_updateDestroy = function(){
 // **					->A主体『界面装饰最终变换值』『变换特性的规范』
 // **						->基础特性
 // **							>  资源名
-// **							>  可见
+// **							>  显示/隐藏
+// **							>  暂停/继续
 // **							>  混合模式
 // **							>  层级
 // **							>  堆叠级
 // **						->其它特性
-// **							> 暂停/继续
 // **					->B变换特性『变换特性-单贴图』
 // **						>  锚点X
 // **						>  锚点Y
@@ -3448,13 +3891,8 @@ Scene_Map.prototype.drill_LGi_updateDestroy = function(){
 // **						>  斜切Y
 // **						>  旋转
 // **						>  转速
-// **					->C镜头参数
-// **					->D播放GIF
-// **						->设置帧
-// **						->锁定帧/解锁帧
-// **						->单次播放
-// **					->E随机位置
-// **					->F指令叠加变化
+// **					->C校验值
+// **					->D指令叠加变化
 // **						> 主体贴图>移动到
 // **						> 主体贴图>透明度
 // **						> 主体贴图>旋转
@@ -3463,12 +3901,22 @@ Scene_Map.prototype.drill_LGi_updateDestroy = function(){
 // **						> 层贴图>缩放Y
 // **						> 层贴图>斜切X
 // **						> 层贴图>斜切Y
-// **					->G延迟指令
-// **					->H自变化效果
+// **					->E延迟指令
+// **					->F周期指令
+// **					->G自变化效果
 // **						> 主体贴图>浮动效果
 // **						> 主体贴图>闪烁效果
 // **						> 圈贴图>摇晃效果
 // **						> 层贴图>缩放效果
+// **					
+// **					->O播放GIF
+// **						->设置帧
+// **						->锁定帧/解锁帧
+// **						->单次播放
+// **					->P预加载GIF管理
+// **					->Q随机位置
+// **					
+// **					->Z镜头参数
 // **					
 // **		说明：	> 注意，该类不能放 物体指针、贴图指针 。
 //=============================================================================
@@ -3479,19 +3927,14 @@ function Drill_LGi_Controller(){
     this.initialize.apply(this, arguments);
 };
 //==============================
-// * 控制器 - 校验标记
-//==============================
-DrillUp.g_LGi_checkNaN = true;
-DrillUp.g_LGi_notFindStyleAlertOnce = true;
-//==============================
 // * 控制器 - 初始化
 //==============================
 Drill_LGi_Controller.prototype.initialize = function( data_id ){
 	this._drill_data_id = data_id;
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
-    this.drill_controller_initData();										//初始化数据
-    this.drill_controller_initChild();										//初始化子功能
-    this.drill_controller_resetData( data_id );
+	//this.drill_controller_initData();										//初始化数据
+	this.drill_controller_initChild();										//初始化子功能
+	this.drill_controller_resetData( data_id );
 }
 //##############################
 // * 控制器 - 帧刷新【标准函数】
@@ -3502,17 +3945,23 @@ Drill_LGi_Controller.prototype.initialize = function( data_id ){
 //			说明：	> 此函数必须在 帧刷新 中手动调用执行。
 //##############################
 Drill_LGi_Controller.prototype.drill_controller_update = function(){
-	this.drill_controller_updateDelayingCommandImportant();		//帧刷新 - G延迟指令 - 时间流逝
+	this.drill_controller_updateDelayingCommandImportant();		//帧刷新 - E延迟指令 - 时间流逝
+	this.drill_controller_updatePeriodizeCommandImportant();	//帧刷新 - F周期指令 - 时间流逝
 	if( this._drill_pause == true ){ return; }
 	this.drill_controller_updateAttr();							//帧刷新 - A主体
 	this.drill_controller_updateChange_Rotation();				//帧刷新 - B变换特性 - 旋转
-																//帧刷新 - C镜头参数（无）
-	this.drill_controller_updateGIF();							//帧刷新 - D播放GIF
-	this.drill_controller_updateRandom();						//帧刷新 - E随机位置
-	this.drill_controller_updateCommandChange();				//帧刷新 - F指令叠加变化
-	this.drill_controller_updateDelayingCommand();				//帧刷新 - G延迟指令 - 执行延迟指令
-	this.drill_controller_updateEffect();						//帧刷新 - H自变化效果
-	this.drill_controller_updateCheckNaN();						//帧刷新 - A主体 - 校验值
+	this.drill_controller_updateCommandChange();				//帧刷新 - D指令叠加变化
+	this.drill_controller_updateDelayingCommand();				//帧刷新 - E延迟指令 - 执行延迟指令
+	this.drill_controller_updatePeriodizeCommand();				//帧刷新 - F周期指令 - 执行延迟指令
+	this.drill_controller_updateEffect();						//帧刷新 - G自变化效果
+	
+	this.drill_controller_updateGIF();							//帧刷新 - O播放GIF
+																//帧刷新 - P预加载GIF管理（无）
+	this.drill_controller_updateRandomPos();					//帧刷新 - Q随机位置
+	
+																//帧刷新 - Z镜头参数（无）
+	
+	this.drill_controller_updateCheckNaN();						//帧刷新 - C校验值
 }
 //##############################
 // * 控制器 - 重设数据【标准函数】
@@ -3605,7 +4054,7 @@ Drill_LGi_Controller.prototype.drill_controller_setPer = function( xPer, yPer ){
 };
 
 //##############################
-// * D播放GIF - 设置帧【标准函数】
+// * O播放GIF - 设置帧【标准函数】
 //
 //			参数：	> cur_frame 数字（当前帧）
 //			返回：	> 无
@@ -3630,7 +4079,7 @@ Drill_LGi_Controller.prototype.drill_controller_GIF_setFrame = function( cur_fra
 	this._drill_GIF_index = Math.floor(inter);
 };
 //##############################
-// * D播放GIF - 锁定帧/解锁帧【标准函数】
+// * O播放GIF - 锁定帧/解锁帧【标准函数】
 //
 //			参数：	> locked 布尔
 //			返回：	> 无
@@ -3640,7 +4089,7 @@ Drill_LGi_Controller.prototype.drill_controller_GIF_setLocked = function( locked
 	this._drill_GIF_oncePlay = false;
 };
 //##############################
-// * D播放GIF - 单次播放【标准函数】
+// * O播放GIF - 单次播放【标准函数】
 //
 //			参数：	> once_type 字符串（forwardRun正向播放/backRun反向播放）
 //			返回：	> 无
@@ -3656,13 +4105,14 @@ Drill_LGi_Controller.prototype.drill_controller_GIF_setOncePlay = function( once
 //##############################
 // * 控制器 - 初始化数据『控制器与贴图』【标准默认值】
 //
-//			参数：	> 无
+//			参数：	> data 对象
 //			返回：	> 无
 //			
 //			说明：	> 该对象初始化 静态数据，提供所需的所有默认值。
 //##############################
-Drill_LGi_Controller.prototype.drill_controller_initData = function(){
-	var data = this.drill_data();		//（此处会修改到 静态数据 的指针值）
+Drill_LGi_Controller.drill_controller_initData = function( data ){
+	//	（该函数是静态函数，直接修改 静态数据 的指针值）
+	//	（参数会有细微区别，因为此处针对 控制器 的参数，而静态数据针对 接收数据 的参数）
 	
 	// > A主体 - 基础特性
 	if( data['src_img_gif'] == undefined ){ data['src_img_gif'] = [] };								//A主体 - 资源
@@ -3673,13 +4123,13 @@ Drill_LGi_Controller.prototype.drill_controller_initData = function(){
 	if( data['tint'] == undefined ){ data['tint'] = 0 };											//A主体 - 图像-色调值
 	if( data['smooth'] == undefined ){ data['smooth'] = false };									//A主体 - 图像-模糊边缘
 	
-	if( data['visible'] == undefined ){ data['visible'] = true };									//A主体 - 显示情况
+	if( data['visible'] == undefined ){ data['visible'] = true };									//A主体 - 显示/隐藏
+	if( data['pause'] == undefined ){ data['pause'] = false };										//A主体 - 暂停/继续
 	if( data['blendMode'] == undefined ){ data['blendMode'] = 0 };									//A主体 - 混合模式
 	if( data['layerIndex'] == undefined ){ data['layerIndex'] = "上层" };							//A主体 - 地图层级
 	if( data['zIndex'] == undefined ){ data['zIndex'] = 0 };										//A主体 - 图片层级
 	
 	// > A主体 - 其它特性
-	if( data['pause'] == undefined ){ data['pause'] = false };										//A主体 - 暂停情况
 	if( data['XPer'] == undefined ){ data['XPer'] = 0 };											//A主体 - 位移比X
 	if( data['YPer'] == undefined ){ data['YPer'] = 0 };											//A主体 - 位移比Y
 	if( data['tile_x'] == undefined ){ data['tile_x'] = 0 };										//A主体 - 位移图块偏移X
@@ -3702,36 +4152,44 @@ Drill_LGi_Controller.prototype.drill_controller_initData = function(){
 	if( data['parentRotate'] == undefined ){ data['parentRotate'] = 0 };							//B变换特性 - 3d效果 - 整体再旋转角度（单位角度）
 	
 	
-	// > C镜头参数（无）
+	// > C校验值（无）
 	
-	// > D播放GIF
-	if( data['gif_lock'] == undefined ){ data['gif_lock'] = false };								//D播放GIF - 初始是否锁定帧
-	if( data['gif_initFrame'] == undefined ){ data['gif_initFrame'] = 0 };							//D播放GIF - 锁定帧数
+	// > D指令叠加变化（无）
 	
-	// > E随机位置
-	if( data['randomPos_enable'] == undefined ){ data['randomPos_enable'] = false };				//E随机位置 - 是否启用随机位置
-	if( data['randomPos_width'] == undefined ){ data['randomPos_width'] = 50 };						//E随机位置 - 随机位置的范围宽度
-	if( data['randomPos_height'] == undefined ){ data['randomPos_height'] = 50 };					//E随机位置 - 随机位置的范围高度
-	if( data['randomPos_autoChange'] == undefined ){ data['randomPos_autoChange'] = false };		//E随机位置 - 是否在每次播放GIF完毕后变化位置
-	if( data['randomPos_gifFrame'] == undefined ){ data['randomPos_gifFrame'] = false };			//E随机位置 - 是否随机GIF初始帧
+	// > E延迟指令（无）
 	
-	// > F指令叠加变化（无）
+	// > F周期指令（无）
 	
-	// > G延迟指令（无）
+	// > G自变化效果
+	if( data['effect_float'] == undefined ){ data['effect_float'] = "关闭" };						//G自变化效果 - 浮动效果
+	if( data['effect_floatSpeed'] == undefined ){ data['effect_floatSpeed'] = 1.0 };				//G自变化效果 - 浮动速度
+	if( data['effect_floatRange'] == undefined ){ data['effect_floatRange'] = 15 };					//G自变化效果 - 浮动偏移量
+	if( data['effect_flicker'] == undefined ){ data['effect_flicker'] = "关闭" };					//G自变化效果 - 闪烁效果
+	if( data['effect_flickerSpeed'] == undefined ){ data['effect_flickerSpeed'] = 6.0 };			//G自变化效果 - 闪烁速度
+	if( data['effect_flickerRange'] == undefined ){ data['effect_flickerRange'] = 20 };				//G自变化效果 - 闪烁幅度范围
+	if( data['effect_swing'] == undefined ){ data['effect_swing'] = "关闭" };						//G自变化效果 - 摇晃效果
+	if( data['effect_swingSpeed'] == undefined ){ data['effect_swingSpeed'] = 4.0 };				//G自变化效果 - 摇晃速度
+	if( data['effect_swingRange'] == undefined ){ data['effect_swingRange'] = 12 };					//G自变化效果 - 摇晃幅度范围
+	if( data['effect_zoom'] == undefined ){ data['effect_zoom'] = "关闭" };							//G自变化效果 - 缩放效果
+	if( data['effect_zoomSpeed'] == undefined ){ data['effect_zoomSpeed'] = 1.0 };					//G自变化效果 - 缩放速度
+	if( data['effect_zoomRange'] == undefined ){ data['effect_zoomRange'] = 0.2 };					//G自变化效果 - 缩放幅度范围
 	
-	// > H自变化效果
-	if( data['effect_float'] == undefined ){ data['effect_float'] = "关闭" };						//H自变化效果 - 浮动效果
-	if( data['effect_floatSpeed'] == undefined ){ data['effect_floatSpeed'] = 1.0 };				//H自变化效果 - 浮动速度
-	if( data['effect_floatRange'] == undefined ){ data['effect_floatRange'] = 15 };					//H自变化效果 - 浮动偏移量
-	if( data['effect_flicker'] == undefined ){ data['effect_flicker'] = "关闭" };					//H自变化效果 - 闪烁效果
-	if( data['effect_flickerSpeed'] == undefined ){ data['effect_flickerSpeed'] = 6.0 };			//H自变化效果 - 闪烁速度
-	if( data['effect_flickerRange'] == undefined ){ data['effect_flickerRange'] = 20 };				//H自变化效果 - 闪烁幅度范围
-	if( data['effect_swing'] == undefined ){ data['effect_swing'] = "关闭" };						//H自变化效果 - 摇晃效果
-	if( data['effect_swingSpeed'] == undefined ){ data['effect_swingSpeed'] = 4.0 };				//H自变化效果 - 摇晃速度
-	if( data['effect_swingRange'] == undefined ){ data['effect_swingRange'] = 12 };					//H自变化效果 - 摇晃幅度范围
-	if( data['effect_zoom'] == undefined ){ data['effect_zoom'] = "关闭" };							//H自变化效果 - 缩放效果
-	if( data['effect_zoomSpeed'] == undefined ){ data['effect_zoomSpeed'] = 1.0 };					//H自变化效果 - 缩放速度
-	if( data['effect_zoomRange'] == undefined ){ data['effect_zoomRange'] = 0.2 };					//H自变化效果 - 缩放幅度范围
+	// > O播放GIF
+	if( data['gif_lock'] == undefined ){ data['gif_lock'] = false };								//O播放GIF - 初始是否锁定帧
+	if( data['gif_initFrame'] == undefined ){ data['gif_initFrame'] = 0 };							//O播放GIF - 锁定帧数
+	
+	// > P预加载GIF管理
+	if( data['preloadType'] == undefined ){ data['preloadType'] = "关闭预加载" };					//P预加载GIF管理 - 预加载类型
+	if( data['preloadNum'] == undefined ){ data['preloadNum'] = 35 };								//P预加载GIF管理 - 固定预加载的数量
+	
+	// > Q随机位置
+	if( data['randomPos_enable'] == undefined ){ data['randomPos_enable'] = false };				//Q随机位置 - 是否启用随机位置
+	if( data['randomPos_width'] == undefined ){ data['randomPos_width'] = 50 };						//Q随机位置 - 随机位置的范围宽度
+	if( data['randomPos_height'] == undefined ){ data['randomPos_height'] = 50 };					//Q随机位置 - 随机位置的范围高度
+	if( data['randomPos_autoChange'] == undefined ){ data['randomPos_autoChange'] = false };		//Q随机位置 - 是否在每次播放GIF完毕后变化位置
+	if( data['randomPos_gifFrame'] == undefined ){ data['randomPos_gifFrame'] = false };			//Q随机位置 - 是否随机GIF初始帧
+	
+	// > Z镜头参数（无）
 }
 //==============================
 // * 控制器 - 初始化子功能『控制器与贴图』
@@ -3739,12 +4197,17 @@ Drill_LGi_Controller.prototype.drill_controller_initData = function(){
 Drill_LGi_Controller.prototype.drill_controller_initChild = function(){
 	this.drill_controller_initAttr();				//初始化子功能 - A主体
 	this.drill_controller_initChange();				//初始化子功能 - B变换特性
-	this.drill_controller_initCamera();				//初始化子功能 - C镜头参数
-	this.drill_controller_initGIF();				//初始化子功能 - D播放GIF
-	this.drill_controller_initRandom();				//初始化子功能 - E随机位置
-	this.drill_controller_initCommandChange();		//初始化子功能 - F指令叠加变化
-	this.drill_controller_initDelayingCommand();	//初始化子功能 - G延迟指令
-	this.drill_controller_initEffect();				//初始化子功能 - H自变化效果
+	this.drill_controller_initCheck();				//初始化子功能 - C校验值
+	this.drill_controller_initCommandChange();		//初始化子功能 - D指令叠加变化
+	this.drill_controller_initDelayingCommand();	//初始化子功能 - E延迟指令
+	this.drill_controller_initPeriodizeCommand();	//初始化子功能 - F周期指令
+	this.drill_controller_initEffect();				//初始化子功能 - G自变化效果
+	
+	this.drill_controller_initGIF();				//初始化子功能 - O播放GIF
+	this.drill_controller_initPreload();			//初始化子功能 - P预加载GIF管理
+	this.drill_controller_initRandomPos();			//初始化子功能 - Q随机位置
+	
+	this.drill_controller_initCamera();				//初始化子功能 - Z镜头参数
 }
 //==============================
 // * 控制器 - 重设数据（私有）
@@ -3761,17 +4224,21 @@ Drill_LGi_Controller.prototype.drill_controller_resetData_Private = function( da
 	// > 执行重置
 	this._drill_data_id = data_id;
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
-    this.drill_controller_initData();										//初始化数据
-    this.drill_controller_initChild();										//初始化子功能
+	//this.drill_controller_initData();										//初始化数据
+	this.drill_controller_initChild();										//初始化子功能
 }
 //##############################
-// * 控制器 - 『控制器与贴图的样式』空的静态数据
+// * 控制器 - 『控制器与贴图的样式-静态数据』校验标记
+//##############################
+DrillUp.g_LGi_notFindStyleAlertOnce = true;
+//##############################
+// * 控制器 - 『控制器与贴图的样式-静态数据』空的静态数据
 //			
 //			说明：	> 空数据会在initData时会进行默认值初始化，在其他地方只读。
 //##############################
 Drill_LGi_Controller.emptyData = {};
 //##############################
-// * 控制器 - 『控制器与贴图的样式』获取静态数据【标准函数】
+// * 控制器 - 『控制器与贴图的样式-静态数据』获取静态数据【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 对象指针
@@ -3785,7 +4252,7 @@ Drill_LGi_Controller.prototype.drill_data = function(){
 	var cur_styleData = DrillUp.g_LGi_layers[ this._drill_data_id ];
 	if( cur_styleData == undefined ){
 		
-		// > 『控制器与贴图的样式』 - 校验+提示信息（只执行一次）
+		// > 『控制器与贴图的样式-静态数据』 - 校验+提示信息（只执行一次）
 		if( DrillUp.g_LGi_notFindStyleAlertOnce == true ){
 			DrillUp.g_LGi_notFindStyleAlertOnce = false;
 			alert( DrillUp.drill_LGi_getPluginTip_StyleNotFind(cur_styleId) );
@@ -3803,13 +4270,13 @@ Drill_LGi_Controller.prototype.drill_controller_initAttr = function(){
 	var data = this.drill_data();
 	
 	// > A主体 - 基础特性
-	this._drill_visible = data['visible'];
-	this._drill_blendMode = data['blendMode'];
-	this._drill_layerIndex = data['layerIndex'];
-	this._drill_zIndex = data['zIndex'];
+	this._drill_visible = data['visible'];			//控制器 - 显示/隐藏
+	this._drill_pause = data['pause'];				//控制器 - 暂停/继续
+	this._drill_blendMode = data['blendMode'];		//控制器 - 混合模式
+	this._drill_layerIndex = data['layerIndex'];	//控制器 - 层级
+	this._drill_zIndex = data['zIndex'];			//控制器 - 堆叠级
 	
 	// > A主体 - 其它特性
-	this._drill_pause = data['pause'];
 	this._drill_XPer = data['XPer'];
 	this._drill_YPer = data['YPer'];
 	this._drill_tile_x = data['tile_x'];
@@ -3826,33 +4293,6 @@ Drill_LGi_Controller.prototype.drill_controller_updateAttr = function(){
 	
 	// > 时间流逝
 	this._drill_curTime += 1;
-}
-//==============================
-// * A主体 - 帧刷新 - 校验值
-//==============================
-Drill_LGi_Controller.prototype.drill_controller_updateCheckNaN = function(){
-	if( $gameTemp == undefined ){ return; }		//（测试版开启功能，发布版关闭功能）
-	if( $gameTemp.isPlaytest() != true ){ return; }
-	
-	// > 校验值
-	if( DrillUp.g_LGi_checkNaN == true ){
-		if( isNaN( this.drill_controller_finalTransform_x() ) ){
-			DrillUp.g_LGi_checkNaN = false;
-			alert( DrillUp.drill_LGi_getPluginTip_ParamIsNaN( "drill_controller_finalTransform_x" ) );
-		}
-		if( isNaN( this.drill_controller_finalTransform_y() ) ){
-			DrillUp.g_LGi_checkNaN = false;
-			alert( DrillUp.drill_LGi_getPluginTip_ParamIsNaN( "drill_controller_finalTransform_y" ) );
-		}
-		if( isNaN( this.drill_controller_finalTransform_opacity() ) ){
-			DrillUp.g_LGi_checkNaN = false;
-			alert( DrillUp.drill_LGi_getPluginTip_ParamIsNaN( "drill_controller_finalTransform_opacity" ) );
-		}
-		if( isNaN( this.drill_controller_finalTransform_rotate() ) ){
-			DrillUp.g_LGi_checkNaN = false;
-			alert( DrillUp.drill_LGi_getPluginTip_ParamIsNaN( "drill_controller_finalTransform_rotate" ) );
-		}
-	}
 }
 
 //==============================
@@ -3962,173 +4402,53 @@ Drill_LGi_Controller.prototype.drill_controller_finalTransform_rotateSpeed = fun
 	return this._drill_childGIF_rotateSpeed;
 }
 
-
 //==============================
-// * C镜头参数 - 初始化子功能
+// * C校验值 - 初始化子功能
 //==============================
-Drill_LGi_Controller.prototype.drill_controller_initCamera = function(){
-	//this._drill_cameraXAcc = 0;			//循环积累值（不存）
-	//this._drill_cameraYAcc = 0;
-	
-	this._drill_cameraResultSpriteX = 0;	//镜头位移结果
-	this._drill_cameraResultSpriteY = 0;
+Drill_LGi_Controller.prototype.drill_controller_initCheck = function(){
+	//（无）
 }
-// > 强制更新提示 锁
-DrillUp.g_LGi_alert = true;
 //==============================
-// * C镜头参数 - 获取 循环积累值（开放函数）
-//
-//			说明：	> 此处直接调用函数获取值。参数不存，因为浪费 帧刷新 和 存储空间。
+// * C校验值 - 校验标记
 //==============================
-Drill_LGi_Controller.prototype.drill_controller_getCameraXAcc = function(){
-	if( $gameMap == undefined ){ return 0; }	//『$gameSystem优先初始化』（注意此处，调用时 $gameMap和$dataMap 都可能未创建。）
-	if( $dataMap == undefined ){ return 0; }
+DrillUp.g_LGi_checkNaN = true;
+//==============================
+// * C校验值 - 帧刷新
+//==============================
+Drill_LGi_Controller.prototype.drill_controller_updateCheckNaN = function(){
+	if( $gameTemp == undefined ){ return; }		//（测试版开启功能，发布版关闭功能）
+	if( $gameTemp.isPlaytest() != true ){ return; }
 	
-	// > 循环积累值 【地图 - 活动地图镜头】
-	if( Imported.Drill_LayerCamera ){
-		
-		// > 强制更新提示
-		if( $gameSystem._drill_LCa_controller == undefined && DrillUp.g_LGi_alert == true ){ 
-			alert( DrillUp.drill_LGi_getPluginTip_NeedUpdate_Camera() );
-			DrillUp.g_LGi_alert = false;
-			return; 
+	// > 校验值
+	if( DrillUp.g_LGi_checkNaN == true ){
+		if( isNaN( this.drill_controller_finalTransform_x() ) ){
+			DrillUp.g_LGi_checkNaN = false;
+			var check_tank = {};
+			check_tank["_drill_change_x"] = this._drill_change_x;
+			check_tank["_drill_cameraResultSpriteX"] = this._drill_cameraResultSpriteX;
+			alert( DrillUp.drill_LGi_getPluginTip_ParamIsNaN( "drill_controller_finalTransform_x", check_tank ) );
 		}
-		
-		return $gameSystem._drill_LCa_controller._drill_cameraX_offsetAcc * $gameMap.tileWidth();
-	}else{
-		return $gameMap.displayX() * $gameMap.tileWidth();
-	}
-}
-//==============================
-// * C镜头参数 - 获取 循环积累值（开放函数）
-//
-//			说明：	> 此处直接调用函数获取值。参数不存，因为浪费 帧刷新 和 存储空间。
-//==============================
-Drill_LGi_Controller.prototype.drill_controller_getCameraYAcc = function(){
-	if( $gameMap == undefined ){ return 0; }	//『$gameSystem优先初始化』（注意此处，调用时 $gameMap和$dataMap 都可能未创建。）
-	if( $dataMap == undefined ){ return 0; }
-	
-	// > 循环积累值 【地图 - 活动地图镜头】
-	if( Imported.Drill_LayerCamera ){
-		
-		// > 强制更新提示
-		if( $gameSystem._drill_LCa_controller == undefined && DrillUp.g_LGi_alert == true ){ 
-			alert( DrillUp.drill_LGi_getPluginTip_NeedUpdate_Camera() );
-			DrillUp.g_LGi_alert = false;
-			return; 
+		if( isNaN( this.drill_controller_finalTransform_y() ) ){
+			DrillUp.g_LGi_checkNaN = false;
+			var check_tank = {};
+			check_tank["_drill_change_y"] = this._drill_change_y;
+			check_tank["_drill_cameraResultSpriteY"] = this._drill_cameraResultSpriteY;
+			alert( DrillUp.drill_LGi_getPluginTip_ParamIsNaN( "drill_controller_finalTransform_y", check_tank ) );
 		}
-		
-		return $gameSystem._drill_LCa_controller._drill_cameraY_offsetAcc * $gameMap.tileHeight();
-	}else{
-		return $gameMap.displayY() * $gameMap.tileHeight();
-	}
-}
-
-
-//==============================
-// * D播放GIF - 初始化子功能
-//==============================
-Drill_LGi_Controller.prototype.drill_controller_initGIF = function(){
-	var data = this.drill_data();
-	
-	// > 播放GIF
-	this.drill_controller_GIF_setFrame( data['gif_initFrame'] -1 );		//播放GIF - 当前时间
-	this._drill_GIF_index = 0;											//播放GIF - 当前索引
-	this._drill_GIF_lockEnabled = data['gif_lock'];						//播放GIF - 是否锁定帧
-	
-	// > 单次播放
-	this._drill_GIF_oncePlay = false;
-	this._drill_GIF_onceType = "forwardRun";	//（forwardRun正向播放/backRun反向播放）
-	this._drill_GIF_onceTarTime = 0;
-}
-//==============================
-// * D播放GIF - 帧刷新
-//==============================
-Drill_LGi_Controller.prototype.drill_controller_updateGIF = function(){
-	var data = this.drill_data();
-	
-	// > 单次播放
-	if( this._drill_GIF_oncePlay == true ){
-		
-		// > 播放GIF
-		var inter = this._drill_GIF_time;
-		inter = inter / data['interval'];
-		inter = Math.floor(inter);
-		inter = inter % data['src_img_gif'].length;
-		if( this._drill_GIF_onceType == "backRun" ){
-			inter = data['src_img_gif'].length - 1 - inter;
+		if( isNaN( this.drill_controller_finalTransform_opacity() ) ){
+			DrillUp.g_LGi_checkNaN = false;
+			alert( DrillUp.drill_LGi_getPluginTip_ParamIsNaN( "drill_controller_finalTransform_opacity" ) );
 		}
-		this._drill_GIF_index = Math.floor(inter);
-		
-		// > 时间+1（放后面）
-		this._drill_GIF_time += 1;
-		
-		// > 播放完毕后，锁定帧
-		if( this._drill_GIF_time > this._drill_GIF_onceTarTime ){
-			this._drill_GIF_oncePlay = false;
-			this.drill_controller_GIF_setLocked( true );
-		}
-		return;
-	}
-	
-	
-	// > 锁定帧时（注意，锁定帧时 _drill_GIF_index 不刷新）
-	if( this._drill_GIF_lockEnabled == true ){ return; }
-	
-	// > 播放GIF
-	var inter = this._drill_GIF_time;
-	inter = inter / data['interval'];
-	inter = Math.floor(inter);
-	inter = inter % data['src_img_gif'].length;
-	if( data['back_run'] == true ){
-		inter = data['src_img_gif'].length - 1 - inter;
-	}
-	this._drill_GIF_index = Math.floor(inter);
-	
-	// > 时间+1（放后面）
-	this._drill_GIF_time += 1;
-}
-
-//==============================
-// * E随机位置 - 初始化子功能
-//
-//			说明：	> 此功能对 B变换特性 和 D播放GIF 进行组合控制。
-//==============================
-Drill_LGi_Controller.prototype.drill_controller_initRandom = function(){
-	var data = this.drill_data();
-	
-	// > 随机位置
-	this._drill_randomPos_x = 0;			//随机位置 - 位置X
-	this._drill_randomPos_y = 0;			//随机位置 - 位置Y
-	this._drill_randomPos_lastInter = 0;	//随机位置 - 上一次时间
-	if( data['randomPos_enable'] == true ){
-		this._drill_randomPos_x = Math.floor( data['randomPos_width'] *( Math.random()-0.5 ));	//『随机因子-图像用』
-		this._drill_randomPos_y = Math.floor( data['randomPos_height']*( Math.random()-0.5 ));	//『随机因子-图像用』
-	}
-	if( data['randomPos_gifFrame'] == true ){
-		this._drill_GIF_time = Math.floor( data['interval']*data['src_img_gif'].length * Math.random() );	//『随机因子-图像用』
-	}
-}
-//==============================
-// * E随机位置 - 帧刷新
-//==============================
-Drill_LGi_Controller.prototype.drill_controller_updateRandom = function(){
-	var data = this.drill_data();
-	
-	// > 每次播放结束后变化
-	if( data['randomPos_enable'] == true ){
-		var inter = Math.floor(this._drill_GIF_time / data['interval'] / data['src_img_gif'].length);
-		if( this._drill_randomPos_lastInter != inter ){
-			this._drill_randomPos_lastInter = inter;
-			this._drill_randomPos_x = Math.floor( data['randomPos_width'] *( Math.random()-0.5 ));	//『随机因子-图像用』
-			this._drill_randomPos_y = Math.floor( data['randomPos_height']*( Math.random()-0.5 ));	//『随机因子-图像用』
+		if( isNaN( this.drill_controller_finalTransform_rotate() ) ){
+			DrillUp.g_LGi_checkNaN = false;
+			alert( DrillUp.drill_LGi_getPluginTip_ParamIsNaN( "drill_controller_finalTransform_rotate" ) );
 		}
 	}
 }
 
 
 //==============================
-// * F指令叠加变化 - 初始化子功能
+// * D指令叠加变化 - 初始化子功能
 //
 //			说明：	> 此处使用弹道核心提供的 弹道扩展工具-A叠加变化宏定义 控制器部分。
 //					> 参数使用字符串进行控制，默认为 null 值。
@@ -4157,7 +4477,7 @@ Drill_LGi_Controller.prototype.drill_controller_initCommandChange = function(){
 	this["_drill_command_skewY_data"] = undefined;
 }
 //==============================
-// * F指令叠加变化 - 帧刷新
+// * D指令叠加变化 - 帧刷新
 //==============================
 Drill_LGi_Controller.prototype.drill_controller_updateCommandChange = function(){
 	
@@ -4183,7 +4503,7 @@ Drill_LGi_Controller.prototype.drill_controller_updateCommandChange = function()
 	Drill_COBa_ExtendTool.drill_COBa_Common_controller_update( this, "_drill_command_skewY_data" );
 }
 //==============================
-// * F指令叠加变化 - 立即还原所有单属性
+// * D指令叠加变化 - 立即还原所有单属性
 //==============================
 Drill_LGi_Controller.prototype.drill_controller_commandChange_restoreAttr = function(){
 	
@@ -4209,13 +4529,13 @@ Drill_LGi_Controller.prototype.drill_controller_commandChange_restoreAttr = func
 	this["_drill_command_skewY_data"] = undefined;
 }
 //==============================
-// * F指令叠加变化 - 立即归位
+// * D指令叠加变化 - 立即归位
 //==============================
 Drill_LGi_Controller.prototype.drill_controller_commandChange_restoreMove = function(){
 	this["_drill_command_move_data"] = undefined;
 }
 //==============================
-// * F指令叠加变化 - 修改单属性 - 移动到
+// * D指令叠加变化 - 修改单属性 - 移动到
 //==============================
 Drill_LGi_Controller.prototype.drill_controller_commandChange_setMove = function( change_type, tar_valueA, tar_valueB, tar_time ){
 	var data = this.drill_data();
@@ -4225,7 +4545,7 @@ Drill_LGi_Controller.prototype.drill_controller_commandChange_setMove = function
 	);
 }
 //==============================
-// * F指令叠加变化 - 修改单属性 - 透明度
+// * D指令叠加变化 - 修改单属性 - 透明度
 //==============================
 Drill_LGi_Controller.prototype.drill_controller_commandChange_setOpacity = function( change_type, tar_value, tar_time ){
 	var data = this.drill_data();
@@ -4235,7 +4555,7 @@ Drill_LGi_Controller.prototype.drill_controller_commandChange_setOpacity = funct
 	);
 }
 //==============================
-// * F指令叠加变化 - 修改单属性 - 旋转
+// * D指令叠加变化 - 修改单属性 - 旋转
 //==============================
 Drill_LGi_Controller.prototype.drill_controller_commandChange_setRotate = function( change_type, tar_value, tar_time ){
 	var data = this.drill_data();
@@ -4245,7 +4565,7 @@ Drill_LGi_Controller.prototype.drill_controller_commandChange_setRotate = functi
 	);
 }
 //==============================
-// * F指令叠加变化 - 修改单属性 - 转速
+// * D指令叠加变化 - 修改单属性 - 转速
 //==============================
 Drill_LGi_Controller.prototype.drill_controller_commandChange_setRotateSpeed = function( change_type, tar_value, tar_time ){
 	var data = this.drill_data();
@@ -4255,7 +4575,7 @@ Drill_LGi_Controller.prototype.drill_controller_commandChange_setRotateSpeed = f
 	);
 }
 //==============================
-// * F指令叠加变化 - 修改单属性 - 缩放X
+// * D指令叠加变化 - 修改单属性 - 缩放X
 //==============================
 Drill_LGi_Controller.prototype.drill_controller_commandChange_setScaleX = function( change_type, tar_value, tar_time ){
 	var data = this.drill_data();
@@ -4265,7 +4585,7 @@ Drill_LGi_Controller.prototype.drill_controller_commandChange_setScaleX = functi
 	);
 }
 //==============================
-// * F指令叠加变化 - 修改单属性 - 缩放Y
+// * D指令叠加变化 - 修改单属性 - 缩放Y
 //==============================
 Drill_LGi_Controller.prototype.drill_controller_commandChange_setScaleY = function( change_type, tar_value, tar_time ){
 	var data = this.drill_data();
@@ -4275,7 +4595,7 @@ Drill_LGi_Controller.prototype.drill_controller_commandChange_setScaleY = functi
 	);
 }
 //==============================
-// * F指令叠加变化 - 修改单属性 - 斜切X
+// * D指令叠加变化 - 修改单属性 - 斜切X
 //==============================
 Drill_LGi_Controller.prototype.drill_controller_commandChange_setSkewX = function( change_type, tar_value, tar_time ){
 	var data = this.drill_data();
@@ -4285,7 +4605,7 @@ Drill_LGi_Controller.prototype.drill_controller_commandChange_setSkewX = functio
 	);
 }
 //==============================
-// * F指令叠加变化 - 修改单属性 - 斜切Y
+// * D指令叠加变化 - 修改单属性 - 斜切Y
 //==============================
 Drill_LGi_Controller.prototype.drill_controller_commandChange_setSkewY = function( change_type, tar_value, tar_time ){
 	var data = this.drill_data();
@@ -4297,13 +4617,13 @@ Drill_LGi_Controller.prototype.drill_controller_commandChange_setSkewY = functio
 
 
 //==============================
-// * G延迟指令 - 初始化子功能
+// * E延迟指令 - 初始化子功能
 //==============================
 Drill_LGi_Controller.prototype.drill_controller_initDelayingCommand = function(){
 	this._drill_curDelayingCommandTank = [];
 }
 //==============================
-// * G延迟指令 - 帧刷新 - 时间流逝
+// * E延迟指令 - 帧刷新 - 时间流逝
 //
 //			说明：	> 此处的时间流逝不会因为 暂停 而停止流逝。
 //==============================
@@ -4332,7 +4652,7 @@ Drill_LGi_Controller.prototype.drill_controller_updateDelayingCommandImportant =
 	}
 }
 //==============================
-// * G延迟指令 - 帧刷新 - 执行延迟指令
+// * E延迟指令 - 帧刷新 - 执行延迟指令
 //==============================
 Drill_LGi_Controller.prototype.drill_controller_updateDelayingCommand = function(){
 	if( this._drill_curDelayingCommandTank.length == 0 ){ return; }
@@ -4389,7 +4709,7 @@ Drill_LGi_Controller.prototype.drill_controller_updateDelayingCommand = function
 	}
 }
 //==============================
-// * G延迟指令 - 设置指令（开放函数）
+// * E延迟指令 - 设置指令（开放函数）
 //==============================
 Drill_LGi_Controller.prototype.drill_controller_setDelayingCommand = function( method, paramList, delay_time ){
 	if( method != "drill_controller_setVisible" &&
@@ -4420,7 +4740,7 @@ Drill_LGi_Controller.prototype.drill_controller_setDelayingCommand = function( m
 	this._drill_curDelayingCommandTank.push( dc_data );
 }
 //==============================
-// * G延迟指令 - 清空全部（开放函数）
+// * E延迟指令 - 清空全部（开放函数）
 //==============================
 Drill_LGi_Controller.prototype.drill_controller_clearDelayingCommand = function(){
 	this._drill_curDelayingCommandTank = [];
@@ -4428,16 +4748,314 @@ Drill_LGi_Controller.prototype.drill_controller_clearDelayingCommand = function(
 
 
 //==============================
-// * H自变化效果 - 初始化子功能
+// * F周期指令 - 初始化子功能
+//==============================
+Drill_LGi_Controller.prototype.drill_controller_initPeriodizeCommand = function(){
+	this._drill_curPeriodizeCommandTank = [];
+}
+//==============================
+// * F周期指令 - 帧刷新 - 时间流逝
+//
+//			说明：	> 此处的时间流逝不会因为 暂停 而停止流逝。
+//==============================
+Drill_LGi_Controller.prototype.drill_controller_updatePeriodizeCommandImportant = function(){
+	if( this._drill_curPeriodizeCommandTank.length == 0 ){ return; }
+	
+	// > 帧刷新 时间流逝
+	for(var i = 0; i < this._drill_curPeriodizeCommandTank.length; i++ ){
+		var pc_data = this._drill_curPeriodizeCommandTank[i];
+		
+		// > 时间-1
+		pc_data['cur_time'] += 1;
+	}
+	
+	// > 执行周期指令（暂停/继续）
+	for(var i = 0; i < this._drill_curPeriodizeCommandTank.length; i++ ){
+		var pc_data = this._drill_curPeriodizeCommandTank[i];
+		var time =  pc_data['cur_time'] % pc_data['time_period'];
+		if( time == pc_data['time_start'] ){
+			var method = pc_data['method'];
+			var paramList = pc_data['paramList'];
+			if( method == "drill_controller_setPause" ){
+				this.drill_controller_setPause( paramList[0] );
+			}
+		}
+	}
+}
+//==============================
+// * F周期指令 - 帧刷新 - 执行周期指令
+//==============================
+Drill_LGi_Controller.prototype.drill_controller_updatePeriodizeCommand = function(){
+	if( this._drill_curPeriodizeCommandTank.length == 0 ){ return; }
+	
+	// > 执行周期指令
+	for(var i = 0; i < this._drill_curPeriodizeCommandTank.length; i++ ){
+		var pc_data = this._drill_curPeriodizeCommandTank[i];
+		var time =  pc_data['cur_time'] % pc_data['time_period'];
+		if( time == pc_data['time_start'] ){
+			var method = pc_data['method'];
+			var paramList = pc_data['paramList'];
+			
+			if( method == "drill_controller_setVisible" ){
+				this.drill_controller_setVisible( paramList[0] );
+			
+			}else if( method == "drill_controller_commandChange_setOpacity" ){
+				this.drill_controller_commandChange_setOpacity( paramList[0], paramList[1], paramList[2] );
+			}else if( method == "drill_controller_commandChange_setRotate" ){
+				this.drill_controller_commandChange_setRotate( paramList[0], paramList[1], paramList[2] );
+			}else if( method == "drill_controller_commandChange_setRotateSpeed" ){
+				this.drill_controller_commandChange_setRotateSpeed( paramList[0], paramList[1], paramList[2] );
+				
+			}else if( method == "drill_controller_commandChange_setScaleX" ){
+				this.drill_controller_commandChange_setScaleX( paramList[0], paramList[1], paramList[2] );
+			}else if( method == "drill_controller_commandChange_setScaleY" ){
+				this.drill_controller_commandChange_setScaleY( paramList[0], paramList[1], paramList[2] );
+			}else if( method == "drill_controller_commandChange_setSkewX" ){
+				this.drill_controller_commandChange_setSkewX( paramList[0], paramList[1], paramList[2] );
+			}else if( method == "drill_controller_commandChange_setSkewY" ){
+				this.drill_controller_commandChange_setSkewY( paramList[0], paramList[1], paramList[2] );
+			}else if( method == "drill_controller_commandChange_restoreAttr" ){
+				this.drill_controller_commandChange_restoreAttr();
+			
+			}else if( method == "drill_controller_commandChange_setMove" ){
+				this.drill_controller_commandChange_setMove( paramList[0], paramList[1], paramList[2], paramList[3] );
+			}else if( method == "drill_controller_commandChange_restoreMove" ){
+				this.drill_controller_commandChange_restoreMove();
+			
+			}else if( method == "drill_controller_GIF_setLocked" ){
+				this.drill_controller_GIF_setLocked( paramList[0] );
+			}else if( method == "drill_controller_GIF_setOncePlay" ){
+				this.drill_controller_GIF_setOncePlay( paramList[0] );
+			}else if( method == "drill_controller_GIF_setFrame" ){
+				this.drill_controller_GIF_setFrame( paramList[0] );
+			}
+		}
+	}
+	
+}
+//==============================
+// * F周期指令 - 设置指令（开放函数）
+//==============================
+Drill_LGi_Controller.prototype.drill_controller_setPeriodizeCommand = function( method, paramList, time_period, time_start ){
+	if( method != "drill_controller_setVisible" &&
+		method != "drill_controller_setPause" &&
+		
+		method != "drill_controller_commandChange_setOpacity" &&
+		method != "drill_controller_commandChange_setRotate" &&
+		method != "drill_controller_commandChange_setRotateSpeed" &&
+		
+		method != "drill_controller_commandChange_setScaleX" &&
+		method != "drill_controller_commandChange_setScaleY" &&
+		method != "drill_controller_commandChange_setSkewX" &&
+		method != "drill_controller_commandChange_setSkewY" &&
+		method != "drill_controller_commandChange_restoreAttr" &&
+		
+		method != "drill_controller_commandChange_setMove" &&
+		method != "drill_controller_commandChange_restoreMove" &&
+		
+		method != "drill_controller_GIF_setLocked" &&
+		method != "drill_controller_GIF_setOncePlay" &&
+		method != "drill_controller_GIF_setFrame"
+	){ return; }
+	
+	var pc_data = {};
+	pc_data['method'] = method;
+	pc_data['paramList'] = paramList;
+	pc_data['time_period'] = time_period;
+	pc_data['time_start'] = time_start;
+	pc_data['cur_time'] = -1;			//（时间先+1后判断，所以取-1）
+	this._drill_curPeriodizeCommandTank.push( pc_data );
+}
+//==============================
+// * F周期指令 - 清空全部（开放函数）
+//==============================
+Drill_LGi_Controller.prototype.drill_controller_clearPeriodizeCommand = function(){
+	this._drill_curPeriodizeCommandTank = [];
+}
+
+
+//==============================
+// * G自变化效果 - 初始化子功能
 //==============================
 Drill_LGi_Controller.prototype.drill_controller_initEffect = function(){
 	this._drill_curEffectTime = 0;
 }
 //==============================
-// * H自变化效果 - 帧刷新
+// * G自变化效果 - 帧刷新
 //==============================
 Drill_LGi_Controller.prototype.drill_controller_updateEffect = function(){
 	this._drill_curEffectTime += 1;
+}
+
+
+//==============================
+// * O播放GIF - 初始化子功能
+//==============================
+Drill_LGi_Controller.prototype.drill_controller_initGIF = function(){
+	var data = this.drill_data();
+	
+	// > 播放GIF
+	this.drill_controller_GIF_setFrame( data['gif_initFrame'] -1 );		//播放GIF - 当前时间
+	this._drill_GIF_index = 0;											//播放GIF - 当前索引
+	this._drill_GIF_lockEnabled = data['gif_lock'];						//播放GIF - 是否锁定帧
+	
+	// > 单次播放
+	this._drill_GIF_oncePlay = false;
+	this._drill_GIF_onceType = "forwardRun";	//（forwardRun正向播放/backRun反向播放）
+	this._drill_GIF_onceTarTime = 0;
+}
+//==============================
+// * O播放GIF - 帧刷新
+//==============================
+Drill_LGi_Controller.prototype.drill_controller_updateGIF = function(){
+	var data = this.drill_data();
+	
+	// > 单次播放
+	if( this._drill_GIF_oncePlay == true ){
+		
+		// > 播放GIF
+		var inter = this._drill_GIF_time;
+		inter = inter / data['interval'];
+		inter = Math.floor(inter);
+		inter = inter % data['src_img_gif'].length;
+		if( this._drill_GIF_onceType == "backRun" ){
+			inter = data['src_img_gif'].length - 1 - inter;
+		}
+		this._drill_GIF_index = Math.floor(inter);
+		
+		// > 时间+1（放后面）
+		this._drill_GIF_time += 1;
+		
+		// > 播放完毕后，锁定帧
+		if( this._drill_GIF_time > this._drill_GIF_onceTarTime ){
+			this._drill_GIF_oncePlay = false;
+			this.drill_controller_GIF_setLocked( true );
+		}
+		return;
+	}
+	
+	
+	// > 锁定帧时（注意，锁定帧时 _drill_GIF_index 不刷新）
+	if( this._drill_GIF_lockEnabled == true ){ return; }
+	
+	// > 播放GIF
+	var inter = this._drill_GIF_time;
+	inter = inter / data['interval'];
+	inter = Math.floor(inter);
+	inter = inter % data['src_img_gif'].length;
+	if( data['back_run'] == true ){
+		inter = data['src_img_gif'].length - 1 - inter;
+	}
+	this._drill_GIF_index = Math.floor(inter);
+	
+	// > 时间+1（放后面）
+	this._drill_GIF_time += 1;
+}
+
+//==============================
+// * P预加载GIF管理 - 初始化子功能
+//==============================
+Drill_LGi_Controller.prototype.drill_controller_initPreload = function(){
+	//	（无）
+}
+
+//==============================
+// * Q随机位置 - 初始化子功能
+//
+//			说明：	> 此功能对 B变换特性 和 O播放GIF 进行组合控制。
+//==============================
+Drill_LGi_Controller.prototype.drill_controller_initRandomPos = function(){
+	var data = this.drill_data();
+	
+	// > 随机位置
+	this._drill_randomPos_x = 0;			//随机位置 - 位置X
+	this._drill_randomPos_y = 0;			//随机位置 - 位置Y
+	this._drill_randomPos_lastInter = 0;	//随机位置 - 上一次时间
+	if( data['randomPos_enable'] == true ){
+		this._drill_randomPos_x = Math.floor( data['randomPos_width'] *( Math.random()-0.5 ));	//『随机因子-图像用』
+		this._drill_randomPos_y = Math.floor( data['randomPos_height']*( Math.random()-0.5 ));	//『随机因子-图像用』
+	}
+	if( data['randomPos_gifFrame'] == true ){
+		this._drill_GIF_time = Math.floor( data['interval']*data['src_img_gif'].length * Math.random() );	//『随机因子-图像用』
+	}
+}
+//==============================
+// * Q随机位置 - 帧刷新
+//==============================
+Drill_LGi_Controller.prototype.drill_controller_updateRandomPos = function(){
+	var data = this.drill_data();
+	
+	// > 每次播放结束后变化
+	if( data['randomPos_enable'] == true ){
+		var inter = Math.floor(this._drill_GIF_time / data['interval'] / data['src_img_gif'].length);
+		if( this._drill_randomPos_lastInter != inter ){
+			this._drill_randomPos_lastInter = inter;
+			this._drill_randomPos_x = Math.floor( data['randomPos_width'] *( Math.random()-0.5 ));	//『随机因子-图像用』
+			this._drill_randomPos_y = Math.floor( data['randomPos_height']*( Math.random()-0.5 ));	//『随机因子-图像用』
+		}
+	}
+}
+
+
+//==============================
+// * Z镜头参数 - 初始化子功能
+//==============================
+Drill_LGi_Controller.prototype.drill_controller_initCamera = function(){
+	//this._drill_cameraXAcc = 0;			//循环积累值（不存）
+	//this._drill_cameraYAcc = 0;
+	
+	this._drill_cameraResultSpriteX = 0;	//镜头位移结果
+	this._drill_cameraResultSpriteY = 0;
+}
+// > 强制更新提示 锁
+DrillUp.g_LGi_alert = true;
+//==============================
+// * Z镜头参数 - 获取 循环积累值（开放函数）
+//
+//			说明：	> 此处直接调用函数获取值。参数不存，因为浪费 帧刷新 和 存储空间。
+//==============================
+Drill_LGi_Controller.prototype.drill_controller_getCameraXAcc = function(){
+	if( $gameMap == undefined ){ return 0; }	//『$gameSystem优先初始化』（注意此处，调用时 $gameMap和$dataMap 都可能未创建。）
+	if( $dataMap == undefined ){ return 0; }
+	
+	// > 循环积累值 【地图 - 活动地图镜头】
+	if( Imported.Drill_LayerCamera ){
+		
+		// > 强制更新提示
+		if( $gameSystem._drill_LCa_controller == undefined && DrillUp.g_LGi_alert == true ){ 
+			alert( DrillUp.drill_LGi_getPluginTip_NeedUpdate_Camera() );
+			DrillUp.g_LGi_alert = false;
+			return; 
+		}
+		
+		return $gameSystem._drill_LCa_controller._drill_cameraX_offsetAcc * $gameMap.tileWidth();
+	}else{
+		return $gameMap.displayX() * $gameMap.tileWidth();
+	}
+}
+//==============================
+// * Z镜头参数 - 获取 循环积累值（开放函数）
+//
+//			说明：	> 此处直接调用函数获取值。参数不存，因为浪费 帧刷新 和 存储空间。
+//==============================
+Drill_LGi_Controller.prototype.drill_controller_getCameraYAcc = function(){
+	if( $gameMap == undefined ){ return 0; }	//『$gameSystem优先初始化』（注意此处，调用时 $gameMap和$dataMap 都可能未创建。）
+	if( $dataMap == undefined ){ return 0; }
+	
+	// > 循环积累值 【地图 - 活动地图镜头】
+	if( Imported.Drill_LayerCamera ){
+		
+		// > 强制更新提示
+		if( $gameSystem._drill_LCa_controller == undefined && DrillUp.g_LGi_alert == true ){ 
+			alert( DrillUp.drill_LGi_getPluginTip_NeedUpdate_Camera() );
+			DrillUp.g_LGi_alert = false;
+			return; 
+		}
+		
+		return $gameSystem._drill_LCa_controller._drill_cameraY_offsetAcc * $gameMap.tileHeight();
+	}else{
+		return $gameMap.displayY() * $gameMap.tileHeight();
+	}
 }
 
 
@@ -4454,15 +5072,19 @@ Drill_LGi_Controller.prototype.drill_controller_updateEffect = function(){
 // **						->是否需要销毁（未使用）
 // **						->销毁（手动）
 // **					
-// **					->A主体
+// **					->A贴图主体
 // **					->B变换特性
 // **					->C对象绑定
 // **						->设置控制器
 // **						->贴图初始化（手动）
-// **					->D播放GIF
-// **					->F指令叠加变化-控制器用
-// **					->G延迟指令
-// **					->H自变化效果
+// **					->D指令叠加变化-控制器用
+// **					->E延迟指令
+// **					->F周期指令
+// **					->G自变化效果
+// **					
+// **					->O播放GIF
+// **					->P预加载GIF管理
+// **					->Q随机位置
 // **					
 // **		说明：	> 你必须在创建贴图后，手动初始化。（还需要先设置 控制器 ）
 // **
@@ -4495,13 +5117,17 @@ Drill_LGi_Sprite.prototype.update = function(){
 	if( this.drill_sprite_isReady() == false ){ return; }
 	if( this.drill_sprite_isOptimizationPassed() == false ){ return; }
 	Sprite.prototype.update.call(this);
-	this.drill_sprite_updateAttr();					//帧刷新 - A主体
+	this.drill_sprite_updateAttr();					//帧刷新 - A贴图主体
 	this.drill_sprite_updateChange();				//帧刷新 - B变换特性
 													//帧刷新 - C对象绑定（无）
-	this.drill_sprite_updateGIF();					//帧刷新 - D播放GIF
-	this.drill_sprite_updateCommandChange();		//帧刷新 - F指令叠加变化-控制器用
-													//帧刷新 - G延迟指令（无）
-	this.drill_sprite_updateEffect();				//帧刷新 - H自变化效果
+	this.drill_sprite_updateCommandChange();		//帧刷新 - D指令叠加变化-控制器用
+													//帧刷新 - E延迟指令（无）
+													//帧刷新 - F周期指令（无）
+	this.drill_sprite_updateEffect();				//帧刷新 - G自变化效果
+	
+	this.drill_sprite_updateGIF();					//帧刷新 - O播放GIF
+	this.drill_sprite_updatePreload();				//帧刷新 - P预加载GIF管理
+													//帧刷新 - Q随机位置（无）
 }
 
 //##############################
@@ -4525,13 +5151,17 @@ Drill_LGi_Sprite.prototype.drill_sprite_setController = function( controller ){
 //			说明：	> 需要设置 控制器 之后，才能进行初始化。
 //##############################
 Drill_LGi_Sprite.prototype.drill_sprite_initChild = function(){
-	this.drill_sprite_initAttr();				//初始化子功能 - A主体
+	this.drill_sprite_initAttr();				//初始化子功能 - A贴图主体
 	this.drill_sprite_initChange();				//初始化子功能 - B变换特性
 												//初始化子功能 - C对象绑定（无）
-	this.drill_sprite_initGIF();				//初始化子功能 - D播放GIF
-	this.drill_sprite_initCommandChange();		//初始化子功能 - F指令叠加变化-控制器用
-	this.drill_sprite_initDelayingCommand();	//初始化子功能 - G延迟指令
-	this.drill_sprite_initEffect();				//初始化子功能 - H自变化效果
+	this.drill_sprite_initCommandChange();		//初始化子功能 - D指令叠加变化-控制器用
+	this.drill_sprite_initDelayingCommand();	//初始化子功能 - E延迟指令
+	this.drill_sprite_initPeriodizeCommand();	//初始化子功能 - F周期指令
+	this.drill_sprite_initEffect();				//初始化子功能 - G自变化效果
+	
+	this.drill_sprite_initGIF();				//初始化子功能 - O播放GIF
+	this.drill_sprite_initPreload();			//初始化子功能 - P预加载GIF管理
+	this.drill_sprite_initRandomPos();			//初始化子功能 - Q随机位置
 };
 
 //##############################
@@ -4595,7 +5225,7 @@ Drill_LGi_Sprite.prototype.drill_sprite_initSelf = function(){
 Drill_LGi_Sprite.prototype.drill_sprite_destroyChild = function(){
 	if( this._drill_controller == null ){ return; }
 	
-	// > 销毁 - A主体
+	// > 销毁 - A贴图主体
 	this.visible = false;
 	this._drill_layerSprite.removeChild( this._drill_childGIFSprite );
 	this.removeChild( this._drill_layerSprite );
@@ -4608,7 +5238,13 @@ Drill_LGi_Sprite.prototype.drill_sprite_destroyChild = function(){
 	// > 销毁 - C对象绑定
 	//	（无）
 	
-	// > 销毁 - D播放GIF
+	// > 销毁 - O播放GIF
+	//	（无）
+	
+	// > 销毁 - P预加载GIF管理
+	//	（无）
+	
+	// > 销毁 - Q随机位置
 	//	（无）
 };
 //==============================
@@ -4621,15 +5257,15 @@ Drill_LGi_Sprite.prototype.drill_sprite_destroySelf = function(){
 
 
 //==============================
-// * A主体 - 初始化子功能
+// * A贴图主体 - 初始化子功能
 //==============================
 Drill_LGi_Sprite.prototype.drill_sprite_initAttr = function(){
 	var data = this._drill_controller.drill_data();
 	/*
 		贴图的层级如下：
-			- 主体贴图
-			- - 层贴图
-			- - - 圈贴图
+			- 主体贴图（this）
+			- - 层贴图（_drill_layerSprite）
+			- - - 圈贴图（_drill_childGIFSprite）
 		
 		其中，圈贴图专门用于旋转（所以缩放必须为1.0），层贴图可以带遮罩，
 		主体贴图和层贴图的缩放旋转效果一样，可以看情况自定义，不需要刻意区分。
@@ -4638,24 +5274,18 @@ Drill_LGi_Sprite.prototype.drill_sprite_initAttr = function(){
 	// > 主体贴图
 	this.anchor.x = 0.5;
 	this.anchor.y = 0.5;
-	this.visible = this._drill_controller._drill_visible;
-	this.blendMode = this._drill_controller._drill_blendMode;
-	this.layerIndex = this._drill_controller._drill_layerIndex;
-	this.zIndex = this._drill_controller._drill_zIndex;
-	
-	// > 圈贴图 - 资源对象组
-	this._drill_bitmapTank = [];
-	for(var j = 0; j < data['src_img_gif'].length; j++ ){
-		var bitmap = ImageManager.loadBitmap( data['src_img_file'], data['src_img_gif'][j], data['tint'], data['smooth'] );
-		this._drill_bitmapTank.push( bitmap );
-	}
+	this.visible = this._drill_controller._drill_visible;		//贴图 - 显示/隐藏
+																//贴图 - 暂停/继续（无）
+	this.blendMode = this._drill_controller._drill_blendMode;	//贴图 - 混合模式
+	this.layerIndex = this._drill_controller._drill_layerIndex;	//贴图 - 层级
+	this.zIndex = this._drill_controller._drill_zIndex;			//贴图 - 堆叠级
 	
 	// > 圈贴图
 	var temp_sprite = new Sprite(); 
 	temp_sprite.anchor.x = 0.5;
 	temp_sprite.anchor.y = 0.5;
 	temp_sprite.blendMode = this._drill_controller._drill_blendMode;
-	temp_sprite.bitmap = this._drill_bitmapTank[0];
+	temp_sprite.bitmap = this.drill_sprite_getGIFBitmapByIndex( 0 );	//（第1帧GIF）
 	this._drill_childGIFSprite = temp_sprite;
 	
 	// > 层贴图
@@ -4669,12 +5299,15 @@ Drill_LGi_Sprite.prototype.drill_sprite_initAttr = function(){
 	this.addChild( this._drill_layerSprite );
 }
 //==============================
-// * A主体 - 帧刷新
+// * A贴图主体 - 帧刷新
 //==============================
 Drill_LGi_Sprite.prototype.drill_sprite_updateAttr = function(){
 	
-	// > 基础特性 - 可见
+	// > 基础特性 - 显示/隐藏
 	this.visible = this._drill_controller._drill_visible;
+	
+	// > 基础特性 - 暂停/继续
+	//	（无）
 	
 	// > 基础特性 - 混合模式
 	if( this.blendMode != this._drill_controller._drill_blendMode ){
@@ -4746,23 +5379,7 @@ Drill_LGi_Sprite.prototype.drill_sprite_updateChange = function(){
 
 
 //==============================
-// * D播放GIF - 初始化子功能
-//==============================
-Drill_LGi_Sprite.prototype.drill_sprite_initGIF = function(){
-	//	（无）
-}
-//==============================
-// * D播放GIF - 帧刷新
-//==============================
-Drill_LGi_Sprite.prototype.drill_sprite_updateGIF = function(){
-	
-	// > 贴图Bitmap
-	this._drill_childGIFSprite.bitmap = this._drill_bitmapTank[ this._drill_controller._drill_GIF_index ];
-}
-
-
-//==============================
-// * F指令叠加变化-控制器用 - 初始化子功能
+// * D指令叠加变化-控制器用 - 初始化子功能
 //
 //			说明：	> 此处使用弹道核心提供的 弹道扩展工具-A叠加变化宏定义 贴图部分。
 //					> 之所以把代码放这里，是因为 控制器-贴图 一对一，且可以节约弹道计算的存储空间。
@@ -4792,7 +5409,7 @@ Drill_LGi_Sprite.prototype.drill_sprite_initCommandChange = function(){
 	this["_drill_command_skewY_spriteData"] = undefined;
 }
 //==============================
-// * F指令叠加变化-控制器用 - 帧刷新
+// * D指令叠加变化-控制器用 - 帧刷新
 //==============================
 Drill_LGi_Sprite.prototype.drill_sprite_updateCommandChange = function(){
 	var data = this._drill_controller.drill_data();
@@ -4906,21 +5523,28 @@ Drill_LGi_Sprite.prototype.drill_sprite_updateCommandChange = function(){
 
 
 //==============================
-// * G延迟指令 - 初始化子功能
+// * E延迟指令 - 初始化子功能
 //==============================
 Drill_LGi_Sprite.prototype.drill_sprite_initDelayingCommand = function(){
 	//（无）
 }
 
+//==============================
+// * F周期指令 - 初始化子功能
+//==============================
+Drill_LGi_Sprite.prototype.drill_sprite_initPeriodizeCommand = function(){
+	//（无）
+}
+
 
 //==============================
-// * H自变化效果 - 初始化子功能
+// * G自变化效果 - 初始化子功能
 //==============================
 Drill_LGi_Sprite.prototype.drill_sprite_initEffect = function(){
 	//（无）
 }
 //==============================
-// * H自变化效果 - 帧刷新
+// * G自变化效果 - 帧刷新
 //==============================
 Drill_LGi_Sprite.prototype.drill_sprite_updateEffect = function(){
 	var data = this._drill_controller.drill_data();
@@ -4986,6 +5610,117 @@ Drill_LGi_Sprite.prototype.drill_sprite_updateEffect = function(){
 		this._drill_layerSprite.scale.x += value;
 		this._drill_layerSprite.scale.y += value;
 	}
+}
+
+
+//==============================
+// * O播放GIF - 初始化子功能
+//==============================
+Drill_LGi_Sprite.prototype.drill_sprite_initGIF = function(){
+	//	（无）
+}
+//==============================
+// * O播放GIF - 帧刷新
+//==============================
+Drill_LGi_Sprite.prototype.drill_sprite_updateGIF = function(){
+	if( this.visible != true ){ return; }	//（显示时才帧刷新）
+	
+	// > 圈贴图 - 第N帧GIF
+	this._drill_childGIFSprite.bitmap = this.drill_sprite_getGIFBitmapByIndex( this._drill_controller._drill_GIF_index );
+}
+//==============================
+// * O播放GIF - 获取资源bitmap
+//==============================
+Drill_LGi_Sprite.prototype.drill_sprite_getGIFBitmapByIndex = function( index ){
+	
+	// > 缓存容器 - 创建
+	//		（不管有没有预加载，loadBitmap后，都要有一个容器接住，不然bitmap会被清理，导致闪）
+	if( this._drill_GIF_bitmapTank == undefined ){
+		this._drill_GIF_bitmapTank = [];
+	}
+	// > 缓存容器 - 返回缓存的资源
+	if( this._drill_GIF_bitmapTank[ index ] != undefined ){
+		return this._drill_GIF_bitmapTank[ index ];
+	}
+	
+	// > 载入资源
+	var data = this._drill_controller.drill_data();
+	var bitmap_filename = data['src_img_gif'][ index ];
+	if( bitmap_filename == undefined ){ bitmap_filename = ""; }
+	var bitmap = ImageManager.loadBitmap( data['src_img_file'], bitmap_filename, data['tint'], data['smooth'] );
+	
+	// > 缓存容器 - 记录资源
+	this._drill_GIF_bitmapTank[ index ] = bitmap;
+	
+	return bitmap;
+}
+
+//==============================
+// * P预加载GIF管理 - 初始化子功能
+//
+//			说明：	> 该功能在贴图内，已经不是预加载，而是边播放边加载。
+//==============================
+Drill_LGi_Sprite.prototype.drill_sprite_initPreload = function(){
+	this._drill_load_curTime = 0;			//当前加载时间
+}
+//==============================
+// * P预加载GIF管理 - 帧刷新
+//==============================
+Drill_LGi_Sprite.prototype.drill_sprite_updatePreload = function(){
+	if( this.visible != true ){ return; }	//（显示时才帧刷新）
+	var data = this._drill_controller.drill_data();
+	
+	// > 时间+1
+	this._drill_load_curTime += 1;
+	
+	// > 加载控制
+	if( data['preloadType'] == "固定预加载数量" ){
+		var index = this._drill_load_curTime + data['preloadNum'] -1 ;
+		if( index < data['src_img_gif'].length ){
+			this.drill_sprite_getGIFBitmapByIndex( index );	//（只要在适当的时机去激活 获取资源bitmap 即可）
+			//alert( index );
+		}
+	}
+	
+	
+	// > 测试 - 加载情况1
+	//		（第1帧时间，加载开始时，预加载的已经有了，接下来每帧加载剩下的，这时true的数量为 固定预加载的数量 ）
+	//if( this._drill_load_curTime == 1 ){
+	//	var isReady_tank = this.drill_sprite_getReadyTank_ForDebug();
+	//	var isReady_text = "第1帧：" + String( isReady_tank.length ) + "\n" + isReady_tank.join(",");
+	//	alert( isReady_text );
+	//}
+	
+	// > 测试 - 加载情况2
+	//		（第6帧时间，已经开始加载6个，会比 情况1 多0~6个true）
+	//		（注意，alert弹出时也在加载，两种情况要分别注释来测试）
+	//if( this._drill_load_curTime == 6 ){
+	//	var isReady_tank = this.drill_sprite_getReadyTank_ForDebug();
+	//	var isReady_text = "第6帧：" + String( isReady_tank.length ) + "\n" + isReady_tank.join(",");
+	//	alert( isReady_text );
+	//}
+}
+//==============================
+// * P预加载GIF管理 - 获取加载情况列表（私有）
+//
+//			说明：	> 该函数用于 测试 加载情况。
+//					> 注意，该函数执行一次后，所有资源就开始加载了。
+//==============================
+Drill_LGi_Sprite.prototype.drill_sprite_getReadyTank_ForDebug = function(){
+	var data = this._drill_controller.drill_data();
+	var isReady_tank = [];
+	for( var i = 0; i < data['src_img_gif'].length; i++ ){
+		var bitmap = this.drill_sprite_getGIFBitmapByIndex(i);
+		isReady_tank.push( bitmap.isReady() );
+	}
+	return isReady_tank;
+}
+
+//==============================
+// * Q随机位置 - 初始化子功能
+//==============================
+Drill_LGi_Sprite.prototype.drill_sprite_initRandomPos = function(){
+	//	（无）
 }
 
 	

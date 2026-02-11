@@ -3152,11 +3152,6 @@ Drill_MPFS_Window.prototype.drill_isStateAndBuffChanged = function( state_ids, b
 //==============================
 Drill_MPFS_Window.prototype.drill_refreshMessage = function( context ){
 	
-	// > 『字符贴图流程』 - 清空字符块贴图【窗口字符 - 窗口字符贴图核心】
-	if( Imported.Drill_CoreOfWindowCharacterSprite ){
-		this.drill_COWCSp_sprite_clearAllSprite();
-	}
-	
 	// > 参数准备 - 校验
 	var temp_bitmap = this.contents;
 	if( temp_bitmap == undefined ){ return; }
@@ -3217,7 +3212,7 @@ Drill_MPFS_Window.prototype.drill_refreshMessage = function( context ){
 	// > 『字符主流程』 - 绘制文本【窗口字符 - 窗口字符核心】
 	this.drill_COWC_drawText( org_text, options );
 	
-	// > 『字符贴图流程』 - 刷新字符块贴图【窗口字符 - 窗口字符贴图核心】
+	// > 『字符贴图流程』 - 刷新当前的字符块贴图【窗口字符 - 窗口字符贴图核心】
 	if( Imported.Drill_CoreOfWindowCharacterSprite ){
 		this.drill_COWCSp_sprite_refreshAllSprite();
 	}

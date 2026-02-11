@@ -2693,7 +2693,7 @@ Scene_Map.prototype.drill_GFBPa_updateWindowAddChild = function() {
 		var temp_data = $gameTemp._drill_GFBPa_commandSeq[i];
 		if( temp_data == undefined ){ continue; }
 		
-		// > 『控制器与贴图的样式』 - 校验+提示信息
+		// > 『控制器与贴图的样式-』 - 校验+提示信息
 		var cur_styleId   = temp_data['id'];
 		var cur_styleData = temp_data['s_data'];
 		if( cur_styleData == undefined || 
@@ -2705,7 +2705,7 @@ Scene_Map.prototype.drill_GFBPa_updateWindowAddChild = function() {
 			continue;
 		}
 		
-		// > 『控制器与贴图的样式』 - 创建控制器
+		// > 『控制器与贴图的样式-』 - 创建控制器
 		cur_styleData['param_x'] = temp_data['param_x'];
 		cur_styleData['param_y'] = temp_data['param_y'];
 		var temp_controller = new Drill_GFBPa_Controller( cur_styleData );

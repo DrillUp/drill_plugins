@@ -1862,7 +1862,18 @@
 //					┕-	父贴图前面层（_drill_characterUpArea）
 //
 //		★其它说明细节：
-//			1.该插件的数据存储在事件中，作为控制器对象而存在。
+//			1.这里空间很大，感觉应该放点什么……那就给所有 界面装饰插件 编个号吧。
+//			  ┌──────────────────────────────────┐
+//			  │   /@@@@@@    /@@@@@@      /@@    │
+//			  │  /@@__  @@  /@@__  @@   /@@@@    │
+//			  │ | @@  \ @@ |__/  \ @@  |_  @@    │
+//			  │ | @@  | @@    /@@@@@/    | @@    │
+//			  │ | @@  | @@   |___  @@    | @@    │
+//			  │ | @@  | @@  /@@  \ @@    | @@    │
+//			  │ |  @@@@@@/ |  @@@@@@/   /@@@@@@  │
+//			  │  \______/   \______/   |______/  │
+//			  └──────────────────────────────────┘
+//			2.该插件的数据存储在事件中，作为控制器对象而存在。
 //
 //		★存在的问题：
 //			暂无
@@ -2566,7 +2577,7 @@ Game_CharacterBase.prototype.drill_EFPa_createController = function( slot_id, st
 		}
 	}
 	
-	// > 『控制器与贴图的样式』 - 校验+提示信息
+	// > 『控制器与贴图的样式-』 - 校验+提示信息
 	var cur_styleId   = style_id +1;
 	var cur_styleData = DrillUp.g_EFPa_style[ style_id ];
 	if( cur_styleData == undefined || 
@@ -2575,7 +2586,7 @@ Game_CharacterBase.prototype.drill_EFPa_createController = function( slot_id, st
 		return;
 	}
 	
-	// > 『控制器与贴图的样式』 - 创建控制器
+	// > 『控制器与贴图的样式-』 - 创建控制器
 	var controller = new Drill_EFPa_Controller( cur_styleData );
 	controller._drill_lastStyleId = style_id;		//（直接在对象身上暂挂样式id）
 	this._drill_EFPa_controllerTank[ slot_id ] = controller;

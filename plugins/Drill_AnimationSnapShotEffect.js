@@ -383,8 +383,15 @@
 	//==============================
 	// * 提示信息 - 报错 - NaN校验值
 	//==============================
-	DrillUp.drill_ASSE_getPluginTip_ParamIsNaN = function( param_name ){
-		return "【" + DrillUp.g_ASSE_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+	DrillUp.drill_ASSE_getPluginTip_ParamIsNaN = function( param_name, check_tank ){
+		var text = "【" + DrillUp.g_ASSE_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+		if( check_tank ){
+			var keys = Object.keys( check_tank );
+			for( var i=0; i < keys.length; i++ ){
+				text += "\n" + keys[i] + "的值：" + check_tank[ keys[i] ] ;
+			}
+		}
+		return text;
 	};
 	//==============================
 	// * 提示信息 - 报错 - 找不到样式
@@ -1164,7 +1171,7 @@ Scene_Map.prototype.drill_ASSE_updateCreateConstant = function() {
 //==============================
 Scene_Map.prototype.drill_ASSE_createOne = function( style_id ){
 	
-	// > 『控制器与贴图的样式』 - 校验+提示信息
+	// > 『控制器与贴图的样式-』 - 校验+提示信息
 	var cur_styleId   = style_id +1;
 	var cur_styleData = DrillUp.g_ASSE_style[ style_id ];
 	if( cur_styleData == undefined || 
@@ -1173,7 +1180,7 @@ Scene_Map.prototype.drill_ASSE_createOne = function( style_id ){
 		return;
 	}
 	
-	// > 『控制器与贴图的样式』 - 创建控制器
+	// > 『控制器与贴图的样式-』 - 创建控制器
 	var temp_controller = new Drill_ASSE_Controller( cur_styleData );
 	$gameSystem._drill_ASSE_controllerTank.push( temp_controller );
 	

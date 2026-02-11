@@ -1879,6 +1879,9 @@
 		//data['se_src'] = String( dataFrom["声音-声音资源"] || "");
 		//data['se_delay'] = Number( dataFrom["声音-播放延迟"] || 0);
 		
+		// > 控制器 初始化数据『控制器与贴图的样式-静态数据-指针初始化』
+		Drill_COAS_StateController.drill_controllerState_initData( data );
+		
 		return data;
 	}
 	//==============================
@@ -1936,6 +1939,9 @@
 		}
 		data['play_randomMax'] = Number( dataFrom["随机播放的次数上限"] || 5);
 		
+		// > 控制器 初始化数据『控制器与贴图的样式-静态数据-指针初始化』
+		Drill_COAS_StateNodeController.drill_controllerNode_initData( data );
+		
 		return data;
 	}
 	//==============================
@@ -1984,6 +1990,9 @@
 		data['gif_interval'] = Number( dataFrom["帧间隔"] || 4);
 		data['gif_back_run'] = String( dataFrom["是否倒放"] || "false") == "true";
 		data['gif_preload'] = String( dataFrom["是否预加载"] || "false") == "true";
+		
+		// > 控制器 初始化数据『控制器与贴图的样式-静态数据-指针初始化』
+		Drill_COAS_ActController.drill_controllerAct_initData( data );
 		
 		return data;
 	}
@@ -2064,24 +2073,41 @@
 			}
 		}
 		
+		// > 控制器 初始化数据『控制器与贴图的样式-静态数据-指针初始化』
+		Drill_COAS_MainController.drill_controllerMain_initData( data );
+		
 		return data;
 	}
-	
-	
-	/*-----------------杂项------------------*/
+	//==============================
+	// * 静态数据 - 最后继承1级
+	//==============================
+	var _drill_COAS_scene_initialize1 = SceneManager.initialize;
+	SceneManager.initialize = function() {
+		_drill_COAS_scene_initialize1.call(this);
+		
+		/*-----------------动画序列------------------*/
+		for( var i = 0; i < DrillUp.g_COAS_list.length; i++ ){
+			var sequence = DrillUp.g_COAS_list[i];
+			if( sequence != undefined ){
+				DrillUp.g_COAS_list[i] = DrillUp.drill_COAS_initSequence( sequence );
+				DrillUp.g_COAS_list[i]['id'] = i;
+				DrillUp.g_COAS_list[i]['inited'] = true;
+			}else{
+				DrillUp.g_COAS_list[i] = DrillUp.drill_COAS_initSequence( {} );
+				DrillUp.g_COAS_list[i]['id'] = i;
+				DrillUp.g_COAS_list[i]['inited'] = false;
+			}
+		}
+	}
+	/*-----------------动画序列------------------*/
 	DrillUp.g_COAS_list_length = 80;
 	DrillUp.g_COAS_list = [];
 	for( var i = 0; i < DrillUp.g_COAS_list_length; i++ ){
 		if( DrillUp.parameters["动画序列-" + String(i+1) ] != undefined &&
 			DrillUp.parameters["动画序列-" + String(i+1) ] != "" ){
-			var sequence = JSON.parse(DrillUp.parameters["动画序列-" + String(i+1) ]);
-			DrillUp.g_COAS_list[i] = DrillUp.drill_COAS_initSequence( sequence );
-			DrillUp.g_COAS_list[i]['id'] = i;
-			DrillUp.g_COAS_list[i]['inited'] = true;
+			DrillUp.g_COAS_list[i] = JSON.parse(DrillUp.parameters["动画序列-" + String(i+1) ]);
 		}else{
-			DrillUp.g_COAS_list[i] = DrillUp.drill_COAS_initSequence( {} );
-			DrillUp.g_COAS_list[i]['id'] = i;
-			DrillUp.g_COAS_list[i]['inited'] = false;
+			DrillUp.g_COAS_list[i] = undefined;
 		}
 	}
 	
@@ -2094,7 +2120,7 @@
 	//					（插件完整的功能目录去看看：功能结构树）
 	//=============================================================================
 	//==============================
-	// * 静态数据校验器 - 检查 动画序列
+	// * 静态数据校验器 - 检查动画序列
 	//==============================
 	DrillUp.g_drill_COAS_stateMiss_list = [];
 	DrillUp.g_drill_COAS_stateNodeMiss_list = [];
@@ -2124,7 +2150,7 @@
 		}
 	}
 	//==============================
-	// * 静态数据校验器 - 子节点空检查 状态节点
+	// * 静态数据校验器 - 检查动画序列 - 子节点空检查 状态节点
 	//==============================
 	DrillUp.drill_COAS_checkStateNodeMiss = function( sequence_data, stateNode_data ){
 		if( sequence_data == undefined ){ return; }
@@ -2175,40 +2201,7 @@
 		}
 	}
 	//==============================
-	// * 静态数据校验器 - 数据空检查 状态节点（未使用）
-	//
-	//			说明：	> 配置为空则返回false。此处未被使用，但在c++工具中有对应功能函数。
-	//==============================
-	DrillUp.drill_COAS_checkStateNodeIsEmpty = function( stateNode_data ){
-		if( stateNode_data == undefined ){ return true; }
-		if( stateNode_data['name'] == undefined ){ return true; }
-		if( stateNode_data['name'] == "" ){ return true; }
-		if( stateNode_data['play_type'] == undefined ){ return true; }
-		
-		if( stateNode_data['play_type'] == "随机播放状态元" ){	//（状态节点必须配置对应的 状态元或状态节点，否则为空）
-			if( stateNode_data['play_randomStateSeq'] == undefined ){ return true; }
-			if( stateNode_data['play_randomStateSeq'].length == 0 ){ return true; }
-			return false;
-		}
-		if( stateNode_data['play_type'] == "顺序播放状态元" ){
-			if( stateNode_data['play_plainStateSeq'] == undefined ){ return true; }
-			if( stateNode_data['play_plainStateSeq'].length == 0 ){ return true; }
-			return false;
-		}
-		if( stateNode_data['play_type'] == "随机播放嵌套集合" ){
-			if( stateNode_data['play_randomNodeSeq'] == undefined ){ return true; }
-			if( stateNode_data['play_randomNodeSeq'].length == 0 ){ return true; }
-			return false;
-		}
-		if( stateNode_data['play_type'] == "顺序播放嵌套集合" ){
-			if( stateNode_data['play_plainNodeSeq'] == undefined ){ return true; }
-			if( stateNode_data['play_plainNodeSeq'].length == 0 ){ return true; }
-			return false;
-		}
-		return true;
-	}
-	//==============================
-	// * 静态数据校验器 - 嵌套检查 状态节点
+	// * 静态数据校验器 - 检查动画序列 - 嵌套检查 状态节点『递归函数-头』『递归函数-节』
 	//==============================
 	DrillUp.drill_COAS_checkStateNodeRecursion = function( sequence_data, stateNode_data, layer ){
 		if( sequence_data == undefined ){ return; }
@@ -2247,18 +2240,51 @@
 		}
 	};
 	//==============================
+	// * 静态数据校验器 - 数据空检查 状态节点（未使用）
+	//
+	//			说明：	> 配置为空则返回false。此处未被使用，但在c++工具中有对应功能函数。
+	//==============================
+	DrillUp.drill_COAS_checkStateNodeIsEmpty = function( stateNode_data ){
+		if( stateNode_data == undefined ){ return true; }
+		if( stateNode_data['name'] == undefined ){ return true; }
+		if( stateNode_data['name'] == "" ){ return true; }
+		if( stateNode_data['play_type'] == undefined ){ return true; }
+		
+		if( stateNode_data['play_type'] == "随机播放状态元" ){	//（状态节点必须配置对应的 状态元或状态节点，否则为空）
+			if( stateNode_data['play_randomStateSeq'] == undefined ){ return true; }
+			if( stateNode_data['play_randomStateSeq'].length == 0 ){ return true; }
+			return false;
+		}
+		if( stateNode_data['play_type'] == "顺序播放状态元" ){
+			if( stateNode_data['play_plainStateSeq'] == undefined ){ return true; }
+			if( stateNode_data['play_plainStateSeq'].length == 0 ){ return true; }
+			return false;
+		}
+		if( stateNode_data['play_type'] == "随机播放嵌套集合" ){
+			if( stateNode_data['play_randomNodeSeq'] == undefined ){ return true; }
+			if( stateNode_data['play_randomNodeSeq'].length == 0 ){ return true; }
+			return false;
+		}
+		if( stateNode_data['play_type'] == "顺序播放嵌套集合" ){
+			if( stateNode_data['play_plainNodeSeq'] == undefined ){ return true; }
+			if( stateNode_data['play_plainNodeSeq'].length == 0 ){ return true; }
+			return false;
+		}
+		return true;
+	};
+	//==============================
 	// * 静态数据校验器 - 执行校验
 	//
 	//			说明：	> 插件载入时，对所有 动画序列 进行一次校验检查。
 	//==============================
-	var _drill_COAS_scene_initialize = SceneManager.initialize;
+	var _drill_COAS_scene_initialize2 = SceneManager.initialize;
 	SceneManager.initialize = function() {
-		_drill_COAS_scene_initialize.call(this);
+		_drill_COAS_scene_initialize2.call(this);
 		for(var i = 0; i < DrillUp.g_COAS_list.length; i++ ){
 			var sequence_data = DrillUp.g_COAS_list[i];
 			DrillUp.drill_COAS_checkSequenceData( sequence_data );
 		};
-	}
+	};
 	
 	
 	//=============================================================================
@@ -2811,9 +2837,9 @@ Drill_COAS_StateController.prototype.initialize = function( sequenceData_id, sta
 	this._drill_sequenceData_id = sequenceData_id;
 	this._drill_stateData_id = stateData_id;
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
-    this.drill_controllerState_initData();									//初始化数据
-    this.drill_controllerState_initChild();									//初始化子功能
-    this.drill_controllerState_resetData( sequenceData_id, stateData_id );
+	//this.drill_controllerState_initData();								//初始化数据
+	this.drill_controllerState_initChild();									//初始化子功能
+	this.drill_controllerState_resetData( sequenceData_id, stateData_id );
 };
 //##############################
 // * 状态元 - 帧刷新【标准函数】
@@ -2962,13 +2988,14 @@ Drill_COAS_StateController.prototype.drill_controllerState_setCurIndex = functio
 //##############################
 // * 状态元 - 初始化数据【标准默认值】
 //
-//			参数：	> 无
+//			参数：	> data 对象
 //			返回：	> 无
 //			
 //			说明：	> 该对象初始化 静态数据，提供所需的所有默认值。
 //##############################
-Drill_COAS_StateController.prototype.drill_controllerState_initData = function() {
-	var data = this.drill_data();		//（此处会修改到 静态数据 的指针值）
+Drill_COAS_StateController.drill_controllerState_initData = function( data ){
+	//	（该函数是静态函数，直接修改 静态数据 的指针值）
+	//	（参数会有细微区别，因为此处针对 控制器 的参数，而静态数据针对 接收数据 的参数）
 	
 	// > A主体
 	if( data['name'] == undefined ){ data['name'] = "" };										//A主体 - 名称
@@ -3028,7 +3055,7 @@ Drill_COAS_StateController.prototype.drill_controllerState_resetData_Private = f
 	this._drill_sequenceData_id = sequenceData_id;
 	this._drill_stateData_id = stateData_id;
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
-    this.drill_controllerState_initData();									//初始化数据
+    //this.drill_controllerState_initData();								//初始化数据
     this.drill_controllerState_initChild();									//初始化子功能
 };
 
@@ -3212,9 +3239,9 @@ Drill_COAS_StateNodeController.prototype.initialize = function( sequenceData_id,
 	this._drill_sequenceData_id = sequenceData_id;
 	this._drill_stateNodeData_id = stateNodeData_id;
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
-    this.drill_controllerNode_initData();									//初始化数据
-    this.drill_controllerNode_initChild();									//初始化子功能
-    this.drill_controllerNode_resetData( sequenceData_id, stateNodeData_id );
+	//this.drill_controllerNode_initData();									//初始化数据
+	this.drill_controllerNode_initChild();									//初始化子功能
+	this.drill_controllerNode_resetData( sequenceData_id, stateNodeData_id );
 };
 //##############################
 // * 状态节点 - 帧刷新【标准函数】
@@ -3548,13 +3575,14 @@ Drill_COAS_StateNodeController.prototype.drill_controllerNode_getStateName_AllRo
 //##############################
 // * 状态节点 - 初始化数据【标准默认值】
 //
-//			参数：	> 无
+//			参数：	> data 对象
 //			返回：	> 无
 //			
 //			说明：	> 该对象初始化 静态数据，提供所需的所有默认值。
 //##############################
-Drill_COAS_StateNodeController.prototype.drill_controllerNode_initData = function() {
-	var data = this.drill_data();		//（此处会修改到 静态数据 的指针值）
+Drill_COAS_StateNodeController.drill_controllerNode_initData = function( data ){
+	//	（该函数是静态函数，直接修改 静态数据 的指针值）
+	//	（参数会有细微区别，因为此处针对 控制器 的参数，而静态数据针对 接收数据 的参数）
 	
 	// > A主体
 	if( data['name'] == undefined ){ data['name'] = "" };								//A主体 - 名称
@@ -3608,8 +3636,8 @@ Drill_COAS_StateNodeController.prototype.drill_controllerNode_resetData_Private 
 	this._drill_sequenceData_id = sequenceData_id;
 	this._drill_stateNodeData_id = stateNodeData_id;
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
-    this.drill_controllerNode_initData();									//初始化数据
-    this.drill_controllerNode_initChild();									//初始化子功能
+	//this.drill_controllerNode_initData();									//初始化数据
+	this.drill_controllerNode_initChild();									//初始化子功能
 }
 
 
@@ -3954,9 +3982,9 @@ Drill_COAS_ActController.prototype.initialize = function( sequenceData_id, actDa
 	this._drill_sequenceData_id = sequenceData_id;
 	this._drill_actData_id = actData_id;
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
-    this.drill_controllerAct_initData();									//初始化数据
-    this.drill_controllerAct_initChild();									//初始化子功能
-    this.drill_controllerAct_resetData( sequenceData_id, actData_id );
+	//this.drill_controllerAct_initData();									//初始化数据
+	this.drill_controllerAct_initChild();									//初始化子功能
+	this.drill_controllerAct_resetData( sequenceData_id, actData_id );
 };
 //##############################
 // * 动作元 - 帧刷新【标准函数】
@@ -4097,13 +4125,14 @@ Drill_COAS_ActController.prototype.drill_controllerAct_setCurIndex = function( i
 //##############################
 // * 动作元 - 初始化数据【标准默认值】
 //
-//			参数：	> 无
+//			参数：	> data 对象
 //			返回：	> 无
 //			
 //			说明：	> 该对象初始化 静态数据，提供所需的所有默认值。
 //##############################
-Drill_COAS_ActController.prototype.drill_controllerAct_initData = function() {
-	var data = this.drill_data();		//（此处会修改到 静态数据 的指针值）
+Drill_COAS_ActController.drill_controllerAct_initData = function( data ){
+	//	（该函数是静态函数，直接修改 静态数据 的指针值）
+	//	（参数会有细微区别，因为此处针对 控制器 的参数，而静态数据针对 接收数据 的参数）
 	
 	// > A主体
 	if( data['name'] == undefined ){ data['name'] = "" };										//A主体 - 名称
@@ -4157,8 +4186,8 @@ Drill_COAS_ActController.prototype.drill_controllerAct_resetData_Private = funct
 	this._drill_sequenceData_id = sequenceData_id;
 	this._drill_actData_id = actData_id;
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
-    this.drill_controllerAct_initData();									//初始化数据
-    this.drill_controllerAct_initChild();									//初始化子功能
+	//this.drill_controllerAct_initData();									//初始化数据
+	this.drill_controllerAct_initChild();									//初始化子功能
 };
 
 
@@ -4356,11 +4385,11 @@ Drill_COAS_MainController.prototype.initialize = function( sequenceData_id ){
 	
 	this._drill_sequenceData_id = sequenceData_id;
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
-    this.drill_controllerMain_initData();									//初始化数据
-    this.drill_controllerMain_initChild();									//初始化子功能
-    this.drill_controllerMain_resetData( sequenceData_id );
+	//this.drill_controllerMain_initData();									//初始化数据
+	this.drill_controllerMain_initChild();									//初始化子功能
+	this.drill_controllerMain_resetData( sequenceData_id );
 	
-    this.drill_controllerMain_update();										//（创建后需要帧刷新一次，确保 _drill_curBitmapName 不为空字符串）
+	this.drill_controllerMain_update();										//（创建后需要帧刷新一次，确保 _drill_curBitmapName 不为空字符串）
 	$gameTemp._drill_COAS_lastCreatedMainController = this;					//（记录上一个动画序列）
 };
 //##############################
@@ -4795,13 +4824,14 @@ Drill_COAS_MainController.prototype.drill_controllerMain_setCurSpeed = function(
 //##############################
 // * 动画序列 - 初始化数据【标准默认值】
 //
-//			参数：	> 无
+//			参数：	> data 对象
 //			返回：	> 无
 //			
 //			说明：	> 该对象初始化 静态数据，提供所需的所有默认值。
 //##############################
-Drill_COAS_MainController.prototype.drill_controllerMain_initData = function() {
-	var data = this.drill_data();		//（此处会修改到 静态数据 的指针值）
+Drill_COAS_MainController.drill_controllerMain_initData = function( data ){
+	//	（该函数是静态函数，直接修改 静态数据 的指针值）
+	//	（参数会有细微区别，因为此处针对 控制器 的参数，而静态数据针对 接收数据 的参数）
 	
 	// > A主体（无）
 	
@@ -4854,8 +4884,8 @@ Drill_COAS_MainController.prototype.drill_controllerMain_resetData_Private = fun
 	// > 执行重置
 	this._drill_sequenceData_id = sequenceData_id;
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
-    this.drill_controllerMain_initData();									//初始化数据
-    this.drill_controllerMain_initChild();									//初始化子功能
+	//this.drill_controllerMain_initData();									//初始化数据
+	this.drill_controllerMain_initChild();									//初始化子功能
 };
 
 
@@ -5452,7 +5482,7 @@ Drill_COAS_MainController.prototype.drill_controllerMain_updateSpeed = function(
 // ** 动画序列对象 装饰器【Drill_COAS_SpriteDecorator】
 // **		
 // **		作用域：	地图界面、战斗界面、菜单界面
-// ** 		主功能：	定义一个专门控制 动画序列对象 的贴图容器。
+// ** 		主功能：	定义一个 动画序列对象 的贴图装饰器。
 // ** 		子功能：	
 // **					->装饰器
 // **						->帧刷新

@@ -795,7 +795,7 @@ Game_SelfSwitches.prototype.onChange = function(){
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 独立开关控制 - 最后继承
+// * 独立开关控制 - 最后继承1级
 //==============================
 var _drill_ESS_scene_initialize = SceneManager.initialize;
 SceneManager.initialize = function() {

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        系统 - 字符绘制核心
+ * @plugindesc [v1.2]        系统 - 字符绘制核心
  * @author Drill_up
  * 
  * 
@@ -82,12 +82,22 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 添加了 保持图标原大小 的底层功能，添加了比率设置。
+ * [v1.2]
+ * 修复了 字符块 被清空的bug，添加了 空白块字符 的功能。
  * 
  * 
  * 
  * @param 文本高度与字体大小的比率
  * @desc 文本高度=字体大小*比率；默认比率1.10，此比率会影响所有字符的高度计算，去看看文档的常见问题。
  * @default 1.10
+ * 
+ * @param 默认是否自动缩放图标大小
+ * @type boolean
+ * @on 自动缩放
+ * @off 关闭
+ * @desc true - 自动缩放，false - 关闭，对所有图标有效。开启时，根据字体大小自动缩放；关闭时，固定32x32像素大小。
+ * @default true
+ * 
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -223,6 +233,12 @@
 //				->行上补正
 //			->☆DEBUG行高控制显示
 //
+//			->☆空白块字符
+//				->继承 再处理阶段
+//				->获取文本宽度（半覆写）
+//				->获取文本高度（半覆写）
+//				->绘制基础字符（半覆写）
+//
 //			->☆图标字符
 //				->继承 再处理阶段
 //				->获取文本宽度（半覆写）
@@ -337,6 +353,7 @@
 	
 	/*-----------------杂项------------------*/
 	DrillUp.g_COCD_textHeightPer = Number(DrillUp.parameters["文本高度与字体大小的比率"] || 1.10);
+	DrillUp.g_COCD_iconResizeEnabled = String(DrillUp.parameters["默认是否自动缩放图标大小"] || "false") == "true";
 	
 	
 //=============================================================================
@@ -432,6 +449,9 @@ Game_Interpreter.prototype.drill_COCD_pluginCommand = function( command, args ){
 //##############################
 Bitmap.prototype.drill_COCD_drawText = function( text, options ){
 	
+	// > 『字符贴图流程』 - 清空字符块贴图-全部（可选）【窗口字符 - 窗口字符贴图核心】
+	//	（父贴图执行）sprite.drill_COWCSp_sprite_clearAllSprite();   //『字符块全部清空注意』
+	
 	// > 『字符核心流程』 - 准备绘制配置
 	var cur_options = JSON.parse(JSON.stringify(options));	//（需要深拷贝，因为走一次流程options会变）
 	$gameTemp.drill_COCD_initOptions( cur_options, this );
@@ -445,7 +465,7 @@ Bitmap.prototype.drill_COCD_drawText = function( text, options ){
 		this.drill_COCD_drawRowBlock( rowBlock );
 	}
 	
-	// > 『字符贴图流程』 - 刷新字符块贴图（可选）【窗口字符 - 窗口字符贴图核心】
+	// > 『字符贴图流程』 - 刷新当前的字符块贴图（可选）【窗口字符 - 窗口字符贴图核心】
 	//	（父贴图执行）sprite.drill_COWCSp_sprite_refreshAllSprite();
 }
 //##############################
@@ -1053,8 +1073,8 @@ Game_Temp.prototype.drill_COCD_textBlock_fontReset = function( cur_infoParam, cu
 	// > 『绘制过程定义』 - 全重置字符
 	cur_blockParam['posX'] = 0;							//基础字符配置 - 偏移量X
 	cur_blockParam['posY'] = 0;							//基础字符配置 - 偏移量Y
-	//（不控制）										//基础字符配置 - 额外量X
-	//（不控制）										//基础字符配置 - 额外量Y
+	//（不控制）										//基础字符配置 - 额外偏移量X
+	//（不控制）										//基础字符配置 - 额外偏移量Y
 	
 	if( cur_baseParam['fr_textColor']      != undefined ){ cur_baseParam['textColor']      = cur_baseParam['fr_textColor'];      } //基础字符配置 - 颜色（子插件 【窗口字符 - 颜色核心】 自定义扩展该参数，去见模块 重置控制 ）
 	if( cur_baseParam['fr_outlineEnabled'] != undefined ){ cur_baseParam['outlineEnabled'] = cur_baseParam['fr_outlineEnabled']; } //基础字符配置 - 描边开关（子插件 【窗口字符 - 描边效果】 自定义扩展该参数，去见模块 重置控制 ）
@@ -1944,7 +1964,8 @@ Game_Temp.prototype.drill_COCD_setupOffsetX = function( rowBlock_list, infoParam
 			var cur_x = textBlock.drill_textBlock_getX();
 			
 			cur_x += blockParam['posX'];	//『绘制过程定义』 - 偏移量X
-			cur_x += blockParam['offsetX'];	//『绘制过程定义』 - 额外量X
+			cur_x += blockParam['offsetX'];	//『绘制过程定义』 - 额外偏移量X
+											//	（注意，上述参数对画笔进行直接偏移，无视宽度高度计算）
 			
 			textBlock.drill_textBlock_setX( cur_x );
 		}
@@ -2080,7 +2101,8 @@ Game_Temp.prototype.drill_COCD_setupOffsetY = function( rowBlock_list, infoParam
 			var cur_y = textBlock.drill_textBlock_getY();
 			
 			cur_y += blockParam['posY'];	//『绘制过程定义』 - 偏移量Y
-			cur_y += blockParam['offsetY'];	//『绘制过程定义』 - 额外量Y
+			cur_y += blockParam['offsetY'];	//『绘制过程定义』 - 额外偏移量Y
+											//	（注意，上述参数对画笔进行直接偏移，无视宽度高度计算）
 			
 			textBlock.drill_textBlock_setY( cur_y );
 		}
@@ -2580,7 +2602,7 @@ Game_Temp.prototype.drill_COCD_textBlock_processStyle = function( command, args,
 			return;
 		}
 	}
-	// > 『底层字符定义』 - 额外量X（@@@-ox[0]） offset_x
+	// > 『底层字符定义』 - 额外偏移量X（@@@-ox[0]） offset_x
 	if( command.toLowerCase() == "@@@-ox" ){
 		if( args.length == 1 ){
 			cur_blockParam['offsetX'] = Number(args[0]);		//（底层单块配置）
@@ -2588,7 +2610,7 @@ Game_Temp.prototype.drill_COCD_textBlock_processStyle = function( command, args,
 			return;
 		}
 	}
-	// > 『底层字符定义』 - 额外量Y（@@@-oy[4]） offset_y
+	// > 『底层字符定义』 - 额外偏移量Y（@@@-oy[4]） offset_y
 	if( command.toLowerCase() == "@@@-oy" ){
 		if( args.length == 1 ){
 			cur_blockParam['offsetY'] = Number(args[0]);		//（底层单块配置）
@@ -2718,9 +2740,9 @@ Game_Temp.prototype.drill_COCD_textBlock_restoreStyle = function( cur_infoParam,
 	//	（不操作）
 	// > 『底层字符样式回滚』 - 偏移量Y（@@@-py[0]）
 	//	（不操作）
-	// > 『底层字符样式回滚』 - 额外量X（@@@-ox[0]）
+	// > 『底层字符样式回滚』 - 额外偏移量X（@@@-ox[0]）
 	//	（不操作）
-	// > 『底层字符样式回滚』 - 额外量Y（@@@-oy[4]）
+	// > 『底层字符样式回滚』 - 额外偏移量Y（@@@-oy[4]）
 	//	（不操作）
 	
 	// > 『底层字符样式回滚』 - 内边距 - 全部（@@@-pa[10]）
@@ -3661,14 +3683,14 @@ Game_Temp.prototype.drill_COCD_addPositionX = function( rowBlock_list, infoParam
 			//	（不操作）
 			
 			// > 判断 - 整体对齐时 - 横向居中（@@@-a1）
-			if( rowParam['alignHor_type'] == "center" ){
+			if( rowParam['alignHor_type'] == "center" || rowParam['alignHor_type'] == "居中" ){  //（常用设置，专门兼容一下中文情况）
 				cur_x += 0.5 * rowSpace;
 				textBlock.drill_textBlock_setX( cur_x );
 				continue;
 			}
 			
 			// > 判断 - 整体对齐时 - 横向右对齐（@@@-a2）
-			if( rowParam['alignHor_type'] == "right" ){
+			if( rowParam['alignHor_type'] == "right" || rowParam['alignHor_type'] == "右对齐" ){  //（常用设置，专门兼容一下中文情况）
 				cur_x += rowSpace;
 				textBlock.drill_textBlock_setX( cur_x );
 				continue;
@@ -4181,6 +4203,97 @@ Scene_Map.prototype.drill_COCD_LineHeight_createDebugSprite = function() {
 
 
 //=============================================================================
+// ** ☆空白块字符
+//
+//			说明：	> 该模块专门提供 空白块字符 的设置。指一个具备宽度和高度，但是不绘制的空白字符。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 空白块字符 - 再处理阶段-配置阶段（继承）
+//==============================
+var _drill_COCD_COCD_block_textBlock_processSecond = Game_Temp.prototype.drill_COCD_textBlock_processSecond;
+Game_Temp.prototype.drill_COCD_textBlock_processSecond = function( command, args, cur_baseParam, cur_blockParam, cur_rowParam ){
+	_drill_COCD_COCD_block_textBlock_processSecond.call( this, command, args, cur_baseParam, cur_blockParam, cur_rowParam );
+	
+	// > 『底层字符定义』 - 空白块字符（@@@-ib[100]） icon_block
+	if( command.toLowerCase() == "@@@-ib" ){
+		if( args.length == 1 ){
+			cur_baseParam['blockWidth'] = Number(args[0]);	//（基础字符配置）
+			cur_baseParam['blockHeight'] = undefined;		//（基础字符配置）
+			this.drill_COCD_textBlock_submitSecond( "@" );	//（必须提交一个字符）
+			return;
+		}
+		if( args.length == 2 ){
+			cur_baseParam['blockWidth'] = Number(args[0]);	//（基础字符配置）
+			cur_baseParam['blockHeight'] = Number(args[1]);	//（基础字符配置）
+			this.drill_COCD_textBlock_submitSecond( "@" );	//（必须提交一个字符）
+			return;
+		}
+	}
+}
+//==============================
+// * 空白块字符 - 基础字符 - 默认值（继承）
+//==============================
+var _drill_COCD_COCD_block_drawBaseText_initParam = Game_Temp.prototype.drill_COCD_drawBaseText_initParam;
+Game_Temp.prototype.drill_COCD_drawBaseText_initParam = function( baseParam ){
+	_drill_COCD_COCD_block_drawBaseText_initParam.call( this, baseParam );
+	if( baseParam['blockWidth'] == undefined  ){ };  //空白块字符的宽度
+	if( baseParam['blockHeight'] == undefined ){ };  //空白块字符的高度
+}
+//==============================
+// * 空白块字符 - 基础字符 - 获取文本宽度（半覆写）
+//==============================
+var _drill_COCD_COCD_block_measureBaseTextWidth_Private = Game_Temp.prototype.drill_COCD_measureBaseTextWidth_Private;
+Game_Temp.prototype.drill_COCD_measureBaseTextWidth_Private = function( painter, text, baseParam ){
+	
+	// > 空白块字符情况时
+	if( baseParam['blockWidth'] !== undefined && 
+		baseParam['blockWidth'] > 0 ){
+		return baseParam['blockWidth'];
+		
+	// > 原函数
+	}else{
+		return _drill_COCD_COCD_block_measureBaseTextWidth_Private.call( this, painter, text, baseParam );
+	}
+}
+//==============================
+// * 空白块字符 - 基础字符 - 获取文本高度（半覆写）
+//==============================
+var _drill_COCD_COCD_block_measureBaseTextHeight_Private = Game_Temp.prototype.drill_COCD_measureBaseTextHeight_Private;
+Game_Temp.prototype.drill_COCD_measureBaseTextHeight_Private = function( painter, text, baseParam ){
+	
+	// > 空白块字符情况时
+	if( baseParam['blockHeight'] !== undefined && 
+		baseParam['blockHeight'] > 0 ){
+		return baseParam['blockHeight'];
+		
+	// > 原函数
+	}else{
+		return _drill_COCD_COCD_block_measureBaseTextHeight_Private.call( this, painter, text, baseParam );
+	}
+}
+//==============================
+// * 空白块字符 - 基础字符 - 绘制基础字符（半覆写）
+//==============================
+var _drill_COCD_COCD_block_drawBaseText_Private = Bitmap.prototype.drill_COCD_drawBaseText_Private;
+Bitmap.prototype.drill_COCD_drawBaseText_Private = function( text, x, y, baseParam ){
+	
+	// > 空白块字符情况时
+	if( baseParam['blockWidth'] !== undefined && 
+		baseParam['blockWidth'] > 0 ){
+		return baseParam['blockWidth'];
+		
+		// > 图标情况时 - 『绘制过程定义』 - 空白块字符（@@@-ib[100]）
+		//		（不操作）
+		
+	// > 原函数
+	}else{
+		_drill_COCD_COCD_block_drawBaseText_Private.call( this, text, x, y, baseParam );
+	}
+}
+
+
+//=============================================================================
 // ** ☆图标字符
 //
 //			说明：	> 该模块专门提供 图标字符 的设置。本质上就是在绘制时，将当前字符块变成固定大小的图标符号。
@@ -4197,24 +4310,34 @@ Game_Temp.prototype.drill_COCD_textBlock_processSecond = function( command, args
 	if( command.toLowerCase() == "@@@-ic" ){
 		if( args.length == 1 ){
 			cur_baseParam['iconIndex'] = Number(args[0]);	//（基础字符配置）
+			cur_baseParam['iconSetSize'] = undefined;		//（基础字符配置）
+			this.drill_COCD_textBlock_submitSecond( "@" );	//（必须提交一个字符）
+			return;
+		}
+		if( args.length == 2 ){
+			cur_baseParam['iconIndex'] = Number(args[0]);	//（基础字符配置）
+			cur_baseParam['iconSetSize'] = Number(args[1]);	//（基础字符配置）
 			this.drill_COCD_textBlock_submitSecond( "@" );	//（必须提交一个字符）
 			return;
 		}
 	}
-}//==============================
+}
+//==============================
 // * 图标字符 - 样式阶段-配置阶段（继承）
 //==============================
 var _drill_COCD_COCD_icon_textBlock_processStyle = Game_Temp.prototype.drill_COCD_textBlock_processStyle;
 Game_Temp.prototype.drill_COCD_textBlock_processStyle = function( command, args, cur_infoParam, cur_baseParam, cur_blockParam, cur_rowParam ){
 	_drill_COCD_COCD_icon_textBlock_processStyle.call( this, command, args, cur_infoParam, cur_baseParam, cur_blockParam, cur_rowParam );
 	
-	// > 『底层字符定义』 - 图标保持原大小（@@@-ik[true]） icon_keep
-	if( command.toLowerCase() == "@@@-ik" ){
+	// > 『底层字符定义』 - 图标保持原大小（@@@-ir[true]） icon_resize
+	if( command.toLowerCase() == "@@@-ir" ){
 		if( args.length == 1 ){
 			if( String(args[0]) == "true" ){
-				cur_baseParam['iconKeepSize'] = true;	//（基础字符配置）
-			}else{
-				cur_baseParam['iconKeepSize'] = false;
+				cur_baseParam['iconResizeEnabled'] = true;	//（基础字符配置）
+			}else if( String(args[0]) == "false" ){
+				cur_baseParam['iconResizeEnabled'] = false;	//（基础字符配置）
+			}else{		//（reset）
+				cur_baseParam['iconResizeEnabled'] = DrillUp.g_COCD_iconResizeEnabled;	//（基础字符配置）
 			}
 			this.drill_COCD_textBlock_submitStyle();
 			return;
@@ -4228,7 +4351,7 @@ var _drill_COCD_COCD_icon_textBlock_restoreStyle = Game_Temp.prototype.drill_COC
 Game_Temp.prototype.drill_COCD_textBlock_restoreStyle = function( cur_infoParam, cur_baseParam, cur_blockParam, cur_rowParam ){
 	_drill_COCD_COCD_icon_textBlock_restoreStyle.call( this, cur_infoParam, cur_baseParam, cur_blockParam, cur_rowParam );
 	
-	// > 『底层字符样式回滚』 - 图标保持原大小（@@@-ik[true]）
+	// > 『底层字符样式回滚』 - 图标保持原大小（@@@-ir[true]）
 	//	（不操作）
 	
 }
@@ -4238,7 +4361,12 @@ Game_Temp.prototype.drill_COCD_textBlock_restoreStyle = function( cur_infoParam,
 var _drill_COCD_COCD_icon_drawBaseText_initParam = Game_Temp.prototype.drill_COCD_drawBaseText_initParam;
 Game_Temp.prototype.drill_COCD_drawBaseText_initParam = function( baseParam ){
 	_drill_COCD_COCD_icon_drawBaseText_initParam.call( this, baseParam );
-	if( baseParam['iconIndex'] == undefined ){ baseParam['iconIndex'] = -1 };		//绘制的图标索引
+	if( baseParam['iconIndex'] == undefined ){ baseParam['iconIndex'] = -1 };	//绘制的图标索引
+	
+	// > 固定图标大小（默认undefined，不为undefined时会强制开启缩放图标）
+	if( baseParam['iconSetSize'] == undefined ){ };
+	// > 自动缩放图标大小
+	if( baseParam['iconResizeEnabled'] == undefined ){ baseParam['iconResizeEnabled'] = DrillUp.g_COCD_iconResizeEnabled; };
 }
 //==============================
 // * 图标字符 - 基础字符 - 获取文本宽度（半覆写）
@@ -4248,7 +4376,8 @@ Game_Temp.prototype.drill_COCD_measureBaseTextWidth_Private = function( painter,
 	
 	// > 图标情况时（直接返回宽度值，因为图标是固定的正方形）
 	if( baseParam['iconIndex'] >= 0 ){
-		if( baseParam['iconKeepSize'] == true ){ return Window_Base._iconWidth; }
+		if( baseParam['iconSetSize'] != undefined ){ return baseParam['iconSetSize']; }
+		if( baseParam['iconResizeEnabled'] == false ){ return Window_Base._iconWidth; }
 		return baseParam['fontSize'] *DrillUp.g_COCD_textHeightPer;		//『手算高度』
 		
 	// > 原函数
@@ -4264,7 +4393,8 @@ Game_Temp.prototype.drill_COCD_measureBaseTextHeight_Private = function( painter
 	
 	// > 图标情况时（直接返回高度值，因为图标是固定的正方形）
 	if( baseParam['iconIndex'] >= 0 ){
-		if( baseParam['iconKeepSize'] == true ){ return Window_Base._iconHeight; }
+		if( baseParam['iconSetSize'] != undefined ){ return baseParam['iconSetSize']; }
+		if( baseParam['iconResizeEnabled'] == false ){ return Window_Base._iconHeight; }
 		return baseParam['fontSize'] *DrillUp.g_COCD_textHeightPer;		//『手算高度』
 		
 	// > 原函数
@@ -4301,20 +4431,28 @@ Bitmap.prototype.drill_COCD_drawBaseText_Icon = function( iconIndex, x, y, baseP
 	var ph = Window_Base._iconHeight;
 	var sx = iconIndex % 16 * pw;
 	var sy = Math.floor(iconIndex / 16) * ph;
-	var size = baseParam['fontSize'] *DrillUp.g_COCD_textHeightPer;		//『手算高度』（图标大小就是字符高度）
 	
-	// > 开始绘制 - 保持原大小
-	if( baseParam['iconKeepSize'] == true ){
-		y -= ph;
-		this.blt(bitmap, sx, sy, pw, ph, x, y);
-		
+	var cur_size = baseParam['fontSize'] *DrillUp.g_COCD_textHeightPer;		//『手算高度』（图标大小就是字符高度）
+	var cur_enable = baseParam['iconResizeEnabled'];						//（是否根据字符大小缩放）
+	
+	// > 开始绘制 - 固定图标大小（必然缩放）
+	if( baseParam['iconSetSize'] != undefined ){
+		cur_size = baseParam['iconSetSize'];
+		cur_enable = true;
+	}
+	
 	// > 开始绘制 - 根据字符大小缩放
-	}else{
-		y -= size;
+	if( cur_enable == true ){
+		y -= cur_size;
 		var last_enabled = painter.imageSmoothingEnabled;
 		painter.imageSmoothingEnabled = false;
-		this.blt(bitmap, sx, sy, pw, ph, x, y, size, size);
+		this.blt(bitmap, sx, sy, pw, ph, x, y, cur_size, cur_size);
 		painter.imageSmoothingEnabled = last_enabled;
+		
+	// > 开始绘制 - 保持原大小
+	}else{
+		y -= ph;
+		this.blt(bitmap, sx, sy, pw, ph, x, y);
 	}
 }
 

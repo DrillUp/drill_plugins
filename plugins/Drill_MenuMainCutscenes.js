@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        主菜单 - 主菜单面板的动画转场
+ * @plugindesc [v1.1]        主菜单 - 主菜单面板的动画转场
  * @author Drill_up
  * 
  * 
@@ -20,13 +20,14 @@
  * ----插件扩展
  * 该插件 不能 单独使用。
  * 基于：
- *   - Drill_CoreOfCutscenes       系统-动画转场核心
+ *   - Drill_CoreOfCutscenes          系统-动画转场核心
+ *   - Drill_CoreOfDynamicSnapshot    游戏窗体-动态快照核心
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：地图界面、菜单界面。
  *   作用于界面切换的动画。
- * 2.详细内容可以去看看 "16.图片 > 关于动画转场核心.docx"。
+ * 2.详细内容可以去看看 "17.主菜单 > 关于动画转场核心.docx"。
  * 细节：
  *   (1.切换主菜单面板时，游戏默认不播放 淡出淡入动画 。
  *   (2.没有动画时，玩家能看到菜单加载的过程。
@@ -78,6 +79,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 修复了该插件会导致存档时的截图为蓝黑色的问题。
  * 
  * 
  * 
@@ -156,9 +159,12 @@
 //			->☆插件指令
 //
 //			->☆淡出淡入动画
-//				->执行淡出
-//				->执行淡入
+//				->进入菜单时界面截图-执行淡出
+//				->进入菜单时界面截图-执行淡入
+//				->离开菜单时-执行淡出
+//				->离开菜单时-执行淡入
 //			->☆添加动画
+//			->☆天窗层的贴图
 //
 //
 //		★家谱：
@@ -188,7 +194,10 @@
 	//==============================
 	var DrillUp = DrillUp || {}; 
 	DrillUp.g_MMCut_PluginTip_curName = "Drill_MenuMainCutscenes.js 主菜单-主菜单面板的动画转场";
-	DrillUp.g_MMCut_PluginTip_baseList = ["Drill_CoreOfCutscenes.js 系统-动画转场核心"];
+	DrillUp.g_MMCut_PluginTip_baseList = [
+		"Drill_CoreOfCutscenes.js 系统-动画转场核心",
+		"Drill_CoreOfDynamicSnapshot.js 游戏窗体-动态快照核心"
+	];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
 	//			
@@ -227,7 +236,8 @@
 //=============================================================================
 // * >>>>基于插件检测>>>>
 //=============================================================================
-if( Imported.Drill_CoreOfCutscenes ){
+if( Imported.Drill_CoreOfCutscenes &&
+	Imported.Drill_CoreOfDynamicSnapshot ){		//（进入菜单时要截图，所以要天窗层贴图）
 	
 	
 //#############################################################################
@@ -316,7 +326,6 @@ Game_System.prototype.drill_MMCut_checkSysData_Private = function() {
 	if( this._drill_MMCut_fadeStart_enabled == undefined ){
 		this.drill_MMCut_initSysData();
 	}
-	
 };
 	
 	
@@ -408,7 +417,8 @@ var _drill_MMCut_COCut_setFadeData = Scene_Base.prototype.drill_COCut_setFadeDat
 Scene_Base.prototype.drill_COCut_setFadeData = function( cur_sceneName, tar_sceneName, fade_type, is_white ){
 	_drill_MMCut_COCut_setFadeData.call( this, cur_sceneName, tar_sceneName, fade_type, is_white );
 	
-	// > 执行淡出（地图界面 -> 主菜单界面）
+	// > 执行淡出（地图界面 -> 主菜单界面）『动画转场的界面』
+	//		（进入菜单时界面截图）
 	if( cur_sceneName == "Scene_Map" &&
 		tar_sceneName == "Scene_Menu" &&
 		fade_type == "淡出" ){
@@ -417,16 +427,19 @@ Scene_Base.prototype.drill_COCut_setFadeData = function( cur_sceneName, tar_scen
 		if( $gameSystem._drill_MMCut_fadeStart_enabled == false ){
 			this.drill_COCut_submitFade( false );
 			
-		// > 开启动画时
+		// > 开启动画时（天窗层的贴图）
 		}else{
-			this.drill_COCut_setFadeColor( $gameSystem._drill_MMCut_fadeStart_color );
+			this.drill_MMCut_setFadeSprite( fade_type, $gameSystem._drill_MMCut_fadeStart_color, $gameSystem._drill_MMCut_fadeStart_time );
+			
+			this.drill_COCut_setFadeColor( "" );	//（进入菜单时要截图，此处颜色设为透明）
 			this.drill_COCut_setFadeTime( $gameSystem._drill_MMCut_fadeStart_time );
 			this.drill_COCut_submitFade( true );
 		}
 		return;
 	}
 	
-	// > 执行淡入（地图界面 -> 主菜单界面）
+	// > 执行淡入（地图界面 -> 主菜单界面）『动画转场的界面』
+	//		（进入菜单时界面截图）
 	if( cur_sceneName == "Scene_Map" &&
 		tar_sceneName == "Scene_Menu" &&
 		fade_type == "淡入" ){
@@ -435,9 +448,11 @@ Scene_Base.prototype.drill_COCut_setFadeData = function( cur_sceneName, tar_scen
 		if( $gameSystem._drill_MMCut_fadeStart_enabled == false ){
 			this.drill_COCut_submitFade( false );
 			
-		// > 开启动画时
+		// > 开启动画时（天窗层的贴图）
 		}else{
-			this.drill_COCut_setFadeColor( $gameSystem._drill_MMCut_fadeStart_color );
+			this.drill_MMCut_setFadeSprite( fade_type, $gameSystem._drill_MMCut_fadeStart_color, $gameSystem._drill_MMCut_fadeStart_time );
+			
+			this.drill_COCut_setFadeColor( "" );	//（进入菜单时要截图，此处颜色设为透明）
 			this.drill_COCut_setFadeTime( $gameSystem._drill_MMCut_fadeStart_time );
 			this.drill_COCut_submitFade( true );
 		}
@@ -445,7 +460,8 @@ Scene_Base.prototype.drill_COCut_setFadeData = function( cur_sceneName, tar_scen
 	}
 	
 	
-	// > 执行淡出（主菜单界面 -> 地图界面）
+	// > 执行淡出（主菜单界面 -> 地图界面）『动画转场的界面』
+	//		（离开菜单时）
 	if( cur_sceneName == "Scene_Menu" &&
 		tar_sceneName == "Scene_Map" &&
 		fade_type == "淡出" ){
@@ -463,7 +479,8 @@ Scene_Base.prototype.drill_COCut_setFadeData = function( cur_sceneName, tar_scen
 		return;
 	}
 	
-	// > 执行淡入（主菜单界面 -> 地图界面）
+	// > 执行淡入（主菜单界面 -> 地图界面）『动画转场的界面』
+	//		（离开菜单时）
 	if( cur_sceneName == "Scene_Menu" &&
 		tar_sceneName == "Scene_Map" &&
 		fade_type == "淡入" ){
@@ -539,6 +556,116 @@ Scene_Menu.prototype.popScene = function() {
 	}
 };
 
+
+//=============================================================================
+// ** ☆天窗层的贴图
+//
+//			说明：	> 此模块提供一个简单的贴图，添加到天窗层。
+//					> 该贴图的目的是兼容 进入菜单时的截图 功能。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 天窗层的贴图 - 创建贴图
+//
+//			说明：	> 临时在天窗层搭建一个贴图。
+//==============================
+Scene_Base.prototype.drill_MMCut_setFadeSprite = function( fade_type, fade_color, fade_time ){
+	
+	// > 贴图初始化
+	if( $gameTemp._drill_MMCut_fadeSprite == undefined ){
+		var temp_sprite = new Sprite();
+		temp_sprite.zIndex = 0.5;
+		temp_sprite.bitmap = new Bitmap( Graphics.boxWidth, Graphics.boxHeight );
+		$gameTemp._drill_MMCut_fadeSprite = temp_sprite;
+	}
+	
+	// > 贴图设置
+	$gameTemp._drill_MMCut_fadeSprite._fadeType = fade_type;			//淡出淡入
+	$gameTemp._drill_MMCut_fadeSprite.bitmap.fillAll( fade_color );		//填充颜色
+	$gameTemp._drill_MMCut_fadeSprite._fadeTime = fade_time;			//动画时长
+	$gameTemp._drill_MMCut_fadeSprite._curTime = 0;						//当前时间
+	
+	// > 添加贴图到层级（天窗层）
+	Graphics.drill_CODS_overstoryLayerAddSprite( $gameTemp._drill_MMCut_fadeSprite );
+	Graphics.drill_CODS_sortByZIndex();
+	
+	// > 创建后立刻帧刷新
+	this.drill_MMCut_updateFadeSprite();
+}
+//==============================
+// * 天窗层的贴图 - 帧刷新贴图
+//==============================
+Scene_Base.prototype.drill_MMCut_updateFadeSprite = function(){
+	if( $gameTemp._drill_MMCut_fadeSprite == undefined ){ return; }
+	
+	// > 透明度变化
+	var type = $gameTemp._drill_MMCut_fadeSprite._fadeType;
+	var tar_time = $gameTemp._drill_MMCut_fadeSprite._fadeTime;
+	var cur_time = $gameTemp._drill_MMCut_fadeSprite._curTime;
+	if( type == "淡出" ){
+		var oo = 255;
+		oo = 255 * cur_time / tar_time;
+		if( oo > 255 ){ oo = 255 }
+		$gameTemp._drill_MMCut_fadeSprite.opacity = oo;
+	}else{
+		var oo = 255;
+		oo = 255 * (tar_time - cur_time + 6) / tar_time;	//（天窗层延迟6帧播放淡入动画，动画播的太早会看到截图）
+		if( oo < 0 ){ oo = 0 }
+		$gameTemp._drill_MMCut_fadeSprite.opacity = oo;
+	}
+	
+	// > 时间流逝
+	$gameTemp._drill_MMCut_fadeSprite._curTime += 1;
+}
+
+//==============================
+// * 天窗层的贴图 - 容器初始化
+//==============================
+var _drill_MMCut_temp_initialize2 = Game_Temp.prototype.initialize;
+Game_Temp.prototype.initialize = function(){
+	_drill_MMCut_temp_initialize2.call(this);
+	this._drill_MMCut_fadeSprite = undefined;		//贴图对象
+	Graphics.drill_CODS_overstoryLayerClear();		//清空 天窗层
+};
+
+//==============================
+// * 天窗层的贴图 - 销毁时『多场景与游戏窗体-地图界面』
+//==============================
+var _drill_MMCut_smap_terminate = Scene_Map.prototype.terminate;
+Scene_Map.prototype.terminate = function(){
+	_drill_MMCut_smap_terminate.call(this);
+	$gameTemp._drill_MMCut_fadeSprite = undefined;	//贴图对象
+	Graphics.drill_CODS_overstoryLayerClear();		//清空 天窗层
+};
+//==============================
+// * 天窗层的贴图 - 帧刷新『多场景与游戏窗体-地图界面』
+//==============================
+var _drill_MMCut_smap_update = Scene_Map.prototype.update;
+Scene_Map.prototype.update = function(){
+	_drill_MMCut_smap_update.call(this);
+	if( $gameTemp._drill_MMCut_fadeSprite == undefined ){ return; }
+	this.drill_MMCut_updateFadeSprite();
+};
+
+//==============================
+// * 天窗层的贴图 - 销毁时『多场景与游戏窗体-菜单界面』
+//==============================
+var _drill_MMCut_smenu_terminate = Scene_MenuBase.prototype.terminate;
+Scene_MenuBase.prototype.terminate = function(){
+	_drill_MMCut_smenu_terminate.call(this);
+	$gameTemp._drill_MMCut_fadeSprite = undefined;	//贴图对象
+	Graphics.drill_CODS_overstoryLayerClear();		//清空 天窗层
+};
+//==============================
+// * 天窗层的贴图 - 帧刷新『多场景与游戏窗体-菜单界面』
+//==============================
+var _drill_MMCut_smenu_update = Scene_MenuBase.prototype.update;
+Scene_MenuBase.prototype.update = function(){
+	_drill_MMCut_smenu_update.call(this);
+	if( $gameTemp._drill_MMCut_fadeSprite == undefined ){ return; }
+	this.drill_MMCut_updateFadeSprite();
+};
+		
 
 //=============================================================================
 // * <<<<基于插件检测<<<<

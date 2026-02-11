@@ -27,7 +27,7 @@
  * 基于：
  *   - Drill_CoreOfBallistics       数学模型-弹道核心★★v2.1及以上★★
  *   - Drill_CoreOfWindowCharacter  窗口字符-窗口字符核心★★v2.0及以上★★
- *   - Drill_AssetsOfCurrency       管理器-货币素材库
+ *   - Drill_AssetsOfCurrency       管理器-素材库之货币
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -693,7 +693,7 @@
 	DrillUp.g_GFTP_PluginTip_baseList = [
 		"Drill_CoreOfBallistics.js 数学模型-弹道核心",
 		"Drill_CoreOfWindowCharacter.js 窗口字符-窗口字符核心",
-		"Drill_AssetsOfCurrency.js 管理器-货币素材库"
+		"Drill_AssetsOfCurrency.js 管理器-素材库之货币"
 	];
 	//==============================
 	// * 提示信息 - 报错 - 缺少基础插件
@@ -1353,7 +1353,7 @@ Game_Interpreter.prototype.drill_GFTP_getText_gold = function( count ){
 	// > 获得时
 	if( count > 0 && data['gold_gain_enabled'] == true ){
 		
-		//【管理器 - 货币素材库】
+		//【管理器 - 素材库之货币】
 		context += $gameTemp.drill_AsOC_getFullTextByType( data['gold_text_type'] );
 		context += " x ";
 		context += "\\c[" + data['gain_color'] + "]" + count;
@@ -1361,7 +1361,7 @@ Game_Interpreter.prototype.drill_GFTP_getText_gold = function( count ){
 	// > 失去时
 	if( count < 0 && data['gold_lost_enabled'] == true ){
 		
-		//【管理器 - 货币素材库】
+		//【管理器 - 素材库之货币】
 		context += $gameTemp.drill_AsOC_getFullTextByType( data['gold_text_type'] );
 		context += " x ";
 		context += "\\c[" + data['lost_color'] + "]" + count;
@@ -2590,11 +2590,6 @@ Drill_GFTP_Window.prototype.drill_initMessage = function(){
 // * D窗口内容 - 刷新内容
 //==============================
 Drill_GFTP_Window.prototype.drill_refreshMessage = function( context ){
-
-	// > 『字符贴图流程』 - 清空字符块贴图【窗口字符 - 窗口字符贴图核心】
-	if( Imported.Drill_CoreOfWindowCharacterSprite ){
-		this.drill_COWCSp_sprite_clearAllSprite();
-	}
 	
 	// > 参数准备 - 校验
 	var temp_bitmap = this.contents;
@@ -2648,7 +2643,7 @@ Drill_GFTP_Window.prototype.drill_refreshMessage = function( context ){
 	// > 『字符主流程』 - 绘制文本【窗口字符 - 窗口字符核心】
 	this.drill_COWC_drawText( org_text, options );
 	
-	// > 『字符贴图流程』 - 刷新字符块贴图【窗口字符 - 窗口字符贴图核心】
+	// > 『字符贴图流程』 - 刷新当前的字符块贴图【窗口字符 - 窗口字符贴图核心】
 	if( Imported.Drill_CoreOfWindowCharacterSprite ){
 		this.drill_COWCSp_sprite_refreshAllSprite();
 	}

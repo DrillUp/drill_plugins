@@ -615,14 +615,12 @@
  * @desc 用于区分你设置的颜色的说明注释，脚本中不起作用。
  * @default ==新的返回按钮==
  * 
- * @param 初始是否显示
- * @type boolean
- * @on 显示
- * @off 不显示
- * @desc true - 显示，false - 不显示
- * @default true
+ *
+ * @param ---绑定---
+ * @default 
  *
  * @param 所属菜单
+ * @parent ---绑定---
  * @type select
  * @option 主菜单(Scene_Menu)
  * @value 主菜单
@@ -657,21 +655,37 @@
  * @parent 所属菜单
  * @desc 设置所属菜单为自定义时，将根据此关键字找到对应的菜单。具体去看看 "17.主菜单 > 菜单关键字.docx"。
  * @default 
+ * 
+ * 
+ * @param ---贴图---
+ * @default 
+ *
+ * @param 初始是否显示
+ * @parent ---贴图---
+ * @type boolean
+ * @on 显示
+ * @off 不显示
+ * @desc true - 显示，false - 不显示
+ * @default true
  *
  * @param 平移-返回按钮 X
+ * @parent ---贴图---
  * @desc x轴方向平移，单位像素。0为按钮中心贴在最左边。
  * @default 0
  *
  * @param 平移-返回按钮 Y
+ * @parent ---贴图---
  * @desc y轴方向平移，单位像素。0为按钮中心贴在最上面。
  * @default 0
  * 
  * @param 移动动画
+ * @parent ---贴图---
  * @type struct<DrillWindowMoving>
  * @desc 按钮会从某个点跑回自己的原位置。
  * @default {"移动类型":"弹性移动","移动时长":"30","移动延迟":"0","---起点---":"","坐标类型":"相对坐标","起点-相对坐标 X":"0","起点-相对坐标 Y":"100","起点-绝对坐标 X":"0","起点-绝对坐标 Y":"0"}
  *
  * @param 返回按钮的样式
+ * @parent ---贴图---
  * @type number
  * @min 1
  * @desc 返回按钮的样式，对应配置的样式序号。
@@ -774,6 +788,7 @@
  * @desc 用于区分你设置的颜色的说明注释，脚本中不起作用。
  * @default ==新的按钮样式==
  * 
+ * 
  * @param ---贴图---
  * @default 
  * 
@@ -830,6 +845,7 @@
  * @min 0
  * @desc 背景在同一个菜单，并且在菜单层级下，先后排序的位置，0表示最后面。
  * @default 20
+ * 
  * 
  * @param ---效果---
  * @default 
@@ -900,17 +916,22 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			菜单粒子：
-//				->菜单层级
-//				->显示/隐藏
-//				->粒子遮罩
-//				->样式结构分离
+//			->☆提示信息
+//			->☆静态数据
+//			->☆插件指令
+//				->只有显示隐藏指令
+//			->☆存储数据
+//			->☆菜单层级
+//			
+//			->☆贴图创建标记
+//			->☆贴图控制
+//				->不考虑销毁情况
 //
 //		★家谱：
 //			无
 //		
 //		★脚本文档：
-//			无
+//			17.主菜单 > 多层组合装饰（界面装饰）（脚本）.docx
 //		
 //		★插件私有类：
 //			无
@@ -920,17 +941,28 @@
 //			  sprite分成了3个叶子和一个树根。另外，对齐下标时注意，默认值可能会影响i的索引。
 //
 //		★其它说明细节：
-//			1.代码原理实际上就是菜单gif的改进。
+//			1.这里空间很大，感觉应该放点什么……那就给所有 界面装饰插件 编个号吧。
+//			  ┌──────────────────────────────────┐
+//			  │   /@@@@@@      /@@     /@@   /@@ │
+//			  │  /@@__  @@   /@@@@    | @@  | @@ │
+//			  │ | @@  \ @@  |_  @@    | @@  | @@ │
+//			  │ | @@  | @@    | @@    | @@@@@@@@ │
+//			  │ | @@  | @@    | @@    |_____  @@ │
+//			  │ | @@  | @@    | @@          | @@ │
+//			  │ |  @@@@@@/   /@@@@@@        | @@ │
+//			  │  \______/   |______/        |__/ │
+//			  └──────────────────────────────────┘
+//			2.代码原理实际上就是菜单gif的改进。
 //			（只不过，要考虑的东西更多……并且更多细节了）
-//			2.这个插件一样，必须放在所有菜单插件前面。放后面会出现半覆写的奇怪bug。
-//			3.鼠标和触屏需要考虑html的基本情况：靠近、按下、释放。
+//			3.这个插件一样，必须放在所有菜单插件前面。放后面会出现半覆写的奇怪bug。
+//			4.鼠标和触屏需要考虑html的基本情况：靠近、按下、释放。
 //			
 //		★存在的问题：
 //			暂无
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -961,7 +993,7 @@
 	
 	
 //=============================================================================
-// ** 静态数据
+// ** ☆静态数据
 //=============================================================================
 	var Imported = Imported || {};
 	Imported.Drill_MenuBackButton = true;
@@ -1114,7 +1146,8 @@ Game_Interpreter.prototype.pluginCommand = function( command, args ){
 //==============================
 Game_Interpreter.prototype.drill_MBB_pluginCommand = function( command, args ){
 	if( command === ">菜单返回按钮" ){
-		if(args.length == 4){
+		
+		if( args.length == 4 ){
 			var temp1 = Number(args[1]) - 1;
 			var type = String(args[3]);
 			if( type === "显示" ){
@@ -1129,7 +1162,7 @@ Game_Interpreter.prototype.drill_MBB_pluginCommand = function( command, args ){
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -1321,8 +1354,6 @@ Scene_MenuBase.prototype.drill_MBB_layerRemoveSprite_Private = function( sprite 
 };
 //==============================
 // * 菜单层级 - 添加贴图到层级（私有）
-//
-//			说明：	> 此处兼容了 战斗界面、地图界面 的层级名词。
 //==============================
 Scene_MenuBase.prototype.drill_MBB_layerAddSprite_Private = function( sprite, layer_index ){
 	if( layer_index == "菜单后面层" || layer_index === 0 || 
@@ -1336,11 +1367,15 @@ Scene_MenuBase.prototype.drill_MBB_layerAddSprite_Private = function( sprite, la
 };
 
 
+
 //=============================================================================
-// ** 菜单界面
+// ** ☆贴图创建标记
+//			
+//			说明：	> 此模块管理 创建标记，确保只创建一次。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// ** 菜单 - 创建菜单后面层
+// * 贴图创建标记 - 初始化
 //==============================
 var _drill_MBB_createBackground = Scene_MenuBase.prototype.createBackground;
 Scene_MenuBase.prototype.createBackground = function() {
@@ -1357,15 +1392,15 @@ Scene_MenuBase.prototype.createBackground = function() {
 	_drill_MBB_createBackground.call(this);
 };
 //==============================
-// ** 菜单 - 退出界面
+// * 贴图创建标记 - 退出界面
 //==============================
 var _drill_MBB_terminate = Scene_MenuBase.prototype.terminate;
 Scene_MenuBase.prototype.terminate = function() {
-	_drill_MBB_terminate.call(this);			//（下次进入界面需重新创建）
-	SceneManager._drill_MBB_created = false;
+	_drill_MBB_terminate.call(this);
+	SceneManager._drill_MBB_created = false;	//（下次进入界面需重新创建）
 };
 //==============================
-// * 菜单 - 帧刷新
+// * 贴图创建标记 - 帧刷新
 //==============================
 var _drill_MBB_update = Scene_MenuBase.prototype.update;
 Scene_MenuBase.prototype.update = function() {
@@ -1382,20 +1417,80 @@ Scene_MenuBase.prototype.update = function() {
 	}
 };
 
+
 //=============================================================================
-// ** 按钮
+// ** ☆贴图控制
+//
+//			说明：	> 此模块专门管理 贴图 的创建。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 按钮 - 创建
+// * 贴图控制 - 检查位置
+//==============================
+Scene_MenuBase.prototype.drill_MBB_checkKeyword = function( temp_data ){
+	
+	/*---------------标准----------------*/
+	if( SceneManager._scene.constructor.name === "Scene_Menu" && temp_data['menu'] == "主菜单" ){
+		return true;
+	}else if( SceneManager._scene.constructor.name === "Scene_Item" && temp_data['menu'] == "道具" ){
+		return true;
+	}else if( SceneManager._scene.constructor.name === "Scene_Skill" && temp_data['menu'] == "技能" ){
+		return true;
+	}else if( SceneManager._scene.constructor.name === "Scene_Equip" && temp_data['menu'] == "装备" ){
+		return true;
+	}else if( SceneManager._scene.constructor.name === "Scene_Status" && temp_data['menu'] == "状态" ){
+		return true;
+	}else if( SceneManager._scene.constructor.name === "Scene_Options" && temp_data['menu'] == "选项" ){
+		return true;
+	}else if( SceneManager._scene.constructor.name === "Scene_Load" && temp_data['menu'] == "载入" ){
+		return true;
+	}else if( SceneManager._scene.constructor.name === "Scene_Save" && temp_data['menu'] == "保存" ){
+		return true;
+	}else if( SceneManager._scene.constructor.name === "Scene_GameEnd" && temp_data['menu'] == "游戏结束" ){
+		return true;
+	}else if( SceneManager._scene.constructor.name === "Scene_Shop" && temp_data['menu'] == "商店" ){
+		return true;
+	}else if( SceneManager._scene.constructor.name === "Scene_Name" && temp_data['menu'] == "输入名称" ){
+		return true;
+	}else if( SceneManager._scene.constructor.name === "Scene_Debug" && temp_data['menu'] == "测试查值" ){
+		return true;
+	/*---------------旧选项----------------*/
+	}else if( (SceneManager._scene.constructor.name === "Scene_Party" || SceneManager._scene.constructor.name === "Scene_Drill_SMa_Formation") && temp_data['menu'] == "队形"  ){
+		return true;
+	}else if( SceneManager._scene.constructor.name === "Scene_EnemyBook" && temp_data['menu'] == "敌人图鉴" ){
+		return true;
+	}else if( SceneManager._scene.constructor.name === "Scene_ItemBook" && temp_data['menu'] == "物品图鉴" ){
+		return true;
+	}else if( SceneManager._scene.constructor.name === "Scene_Picture_Gallery" && temp_data['menu'] == "画廊" ){
+		return true;
+	}else{
+		/*---------------自定义----------------*/
+		if( SceneManager._scene.constructor.name === temp_data['menu_key'] ){
+			return true;
+		}
+	}
+	return false;
+};
+//==============================
+// * 贴图控制 - 创建
 //==============================
 Scene_MenuBase.prototype.drill_MBB_create = function() {	
 	SceneManager._drill_MBB_created = true;
 	
-	if(!this._drill_MBB_sprites ){		//防止覆写报错 - 贴图初始化
+	// > 防止报错
+	if( this._drill_MBB_sprites == undefined ){
 		this._drill_MBB_sprites = [];
+	}
+	if( this._drill_MBB_sprites_style == undefined ){
 		this._drill_MBB_sprites_style = [];
+	}
+	if( this._drill_MBB_sprites_layer == undefined ){
 		this._drill_MBB_sprites_layer = [];
+	}
+	if( this._drill_MBB_sprites_highlight == undefined ){
 		this._drill_MBB_sprites_highlight = [];
+	}
+	if( this._drill_MBB_sprites_pushdown == undefined ){
 		this._drill_MBB_sprites_pushdown = [];
 	}
 	
@@ -1418,78 +1513,82 @@ Scene_MenuBase.prototype.drill_MBB_create = function() {
 	}
 	
 	
-	// > 配置的按钮
+	// > 配置的数据
 	for( var i = 1; i < DrillUp.g_MBB_list.length; i++ ){
 		var temp_data = DrillUp.g_MBB_list[i];
 		if( temp_data == undefined ){ continue; }
-		if( this.drill_MBB_checkKeyword(i) ){
-			// > 父层级
-			var temp_layer = new Sprite();
-			temp_layer.visible = $gameSystem._drill_MBB_visible[i];
-			this._drill_MBB_sprites_layer.push(temp_layer);
+		
+		// > 配置的数据 - 检查位置
+		if( this.drill_MBB_checkKeyword( temp_data ) != true ){ continue; }
 			
-			// > 按钮贴图
-			var temp_sprite_data = JSON.parse(JSON.stringify( temp_data ));	//深拷贝数据
-			var temp_style_id = temp_sprite_data['style_id']-1 || 0;
-			var temp_style = DrillUp.g_MBB_style_list[ temp_style_id ];
-			if( temp_style == undefined ){
-				alert( DrillUp.drill_MBB_getPluginTip_ErrorData( temp_sprite_data['style_id'] ) );
-			}
-			temp_style = JSON.parse(JSON.stringify( temp_style ));
-			for(var j = 0; j < temp_style['src_img'].length ; j++){
-				temp_style['src_bitmaps'].push( ImageManager.loadBitmap( temp_style['src_img_file'], temp_style['src_img'][j], 0, false ) );
-			}
-			var temp_sprite = new Sprite();
-			temp_sprite.bitmap = temp_style['src_bitmaps'][0];
-			temp_sprite._time = 0;
-			temp_sprite.x = 0;
-			temp_sprite.y = Graphics.boxHeight * 2;
-			temp_sprite.anchor.x = 0.5;
-			temp_sprite.anchor.y = 0.5;
-			temp_sprite.blendMode = temp_style['blendMode'];
-			temp_sprite.visible = true;
-			if( temp_sprite_data['slideAnim'] ){
-				var data = {
-					"x": temp_sprite_data['x'],
-					"y": temp_sprite_data['y'],
-					
-					"slideMoveType": temp_sprite_data['slideAnim']['slideMoveType'],
-					"slideTime": temp_sprite_data['slideAnim']['slideTime'],
-					"slideDelay": temp_sprite_data['slideAnim']['slideDelay'],
-					"slidePosType": temp_sprite_data['slideAnim']['slidePosType'],
-					"slideX": temp_sprite_data['slideAnim']['slideX'],
-					"slideY": temp_sprite_data['slideAnim']['slideY'],
-					"slideAbsoluteX": temp_sprite_data['slideAnim']['slideAbsoluteX'],
-					"slideAbsoluteY": temp_sprite_data['slideAnim']['slideAbsoluteY'],
-				}
-				temp_sprite.drill_COWA_setAttrMove( data ); //『辅助核心初始化』-贴图基本属性
-			}
-			temp_layer.addChild(temp_sprite);
-			this._drill_MBB_sprites.push(temp_sprite);
-			this._drill_MBB_sprites_style.push(temp_style);
-			// > 高亮效果
-			var temp_highlight = new Sprite();
-			temp_highlight.bitmap = ImageManager.loadBitmap( temp_style['highlight_src_img_file'], temp_style['highlight_src_img'], 0, false );
-			temp_highlight.anchor.x = 0.5;
-			temp_highlight.anchor.y = 0.5;
-			temp_highlight.visible = false;
-			temp_highlight._touched = false;
-			temp_layer.addChild(temp_highlight);
-			this._drill_MBB_sprites_highlight.push(temp_highlight);
-			// > 按下效果
-			var temp_pushdown = new Sprite();
-			temp_pushdown.bitmap = ImageManager.loadBitmap( temp_style['pushdown_src_img_file'], temp_style['pushdown_src_img'], 0, false );
-			temp_pushdown.anchor.x = 0.5;
-			temp_pushdown.anchor.y = 0.5;
-			temp_pushdown.visible = false;
-			temp_pushdown._needPopScene = false;
-			temp_layer.addChild(temp_pushdown);
-			this._drill_MBB_sprites_pushdown.push(temp_pushdown);
-			
-			temp_layer.zIndex = temp_style['zIndex'];
-			this.drill_MBB_layerAddSprite( temp_layer, "菜单前面层" );
+		// > 父层级
+		var temp_layer = new Sprite();
+		temp_layer.visible = $gameSystem._drill_MBB_visible[i];
+		this._drill_MBB_sprites_layer.push(temp_layer);
+		
+		// > 按钮贴图
+		var temp_sprite_data = JSON.parse(JSON.stringify( temp_data ));	//深拷贝数据
+		var temp_style_id = temp_sprite_data['style_id']-1 || 0;
+		var temp_style = DrillUp.g_MBB_style_list[ temp_style_id ];
+		if( temp_style == undefined ){
+			alert( DrillUp.drill_MBB_getPluginTip_ErrorData( temp_sprite_data['style_id'] ) );
 		}
+		temp_style = JSON.parse(JSON.stringify( temp_style ));
+		for(var j = 0; j < temp_style['src_img'].length ; j++){
+			temp_style['src_bitmaps'].push( ImageManager.loadBitmap( temp_style['src_img_file'], temp_style['src_img'][j], 0, false ) );
+		}
+		var temp_sprite = new Sprite();
+		temp_sprite.bitmap = temp_style['src_bitmaps'][0];
+		temp_sprite._time = 0;
+		temp_sprite.x = 0;
+		temp_sprite.y = Graphics.boxHeight * 2;
+		temp_sprite.anchor.x = 0.5;
+		temp_sprite.anchor.y = 0.5;
+		temp_sprite.blendMode = temp_style['blendMode'];
+		temp_sprite.visible = true;
+		if( temp_sprite_data['slideAnim'] ){
+			var data = {
+				"x": temp_sprite_data['x'],
+				"y": temp_sprite_data['y'],
+				
+				"slideMoveType": temp_sprite_data['slideAnim']['slideMoveType'],
+				"slideTime": temp_sprite_data['slideAnim']['slideTime'],
+				"slideDelay": temp_sprite_data['slideAnim']['slideDelay'],
+				"slidePosType": temp_sprite_data['slideAnim']['slidePosType'],
+				"slideX": temp_sprite_data['slideAnim']['slideX'],
+				"slideY": temp_sprite_data['slideAnim']['slideY'],
+				"slideAbsoluteX": temp_sprite_data['slideAnim']['slideAbsoluteX'],
+				"slideAbsoluteY": temp_sprite_data['slideAnim']['slideAbsoluteY'],
+			}
+			temp_sprite.drill_COWA_setAttrMove( data ); //『辅助核心初始化』-贴图基本属性
+		}
+		temp_layer.addChild(temp_sprite);
+		this._drill_MBB_sprites.push(temp_sprite);
+		this._drill_MBB_sprites_style.push(temp_style);
+		// > 高亮效果
+		var temp_highlight = new Sprite();
+		temp_highlight.bitmap = ImageManager.loadBitmap( temp_style['highlight_src_img_file'], temp_style['highlight_src_img'], 0, false );
+		temp_highlight.anchor.x = 0.5;
+		temp_highlight.anchor.y = 0.5;
+		temp_highlight.visible = false;
+		temp_highlight._touched = false;
+		temp_layer.addChild(temp_highlight);
+		this._drill_MBB_sprites_highlight.push(temp_highlight);
+		// > 按下效果
+		var temp_pushdown = new Sprite();
+		temp_pushdown.bitmap = ImageManager.loadBitmap( temp_style['pushdown_src_img_file'], temp_style['pushdown_src_img'], 0, false );
+		temp_pushdown.anchor.x = 0.5;
+		temp_pushdown.anchor.y = 0.5;
+		temp_pushdown.visible = false;
+		temp_pushdown._needPopScene = false;
+		temp_layer.addChild(temp_pushdown);
+		this._drill_MBB_sprites_pushdown.push(temp_pushdown);
+		
+		temp_layer.zIndex = temp_style['zIndex'];
+		this.drill_MBB_layerAddSprite( temp_layer, "菜单前面层" );
 	}
+	
+	// > 配置的默认数据
 	if( this._drill_MBB_sprites.length == 0 && 
 		DrillUp.g_MBB_list[0] != undefined ){
 		var i = 0;
@@ -1564,60 +1663,8 @@ Scene_MenuBase.prototype.drill_MBB_create = function() {
 	
 	this.drill_MBB_sortByZIndex();
 };
-
 //==============================
-// * 按钮 - 检查位置
-//==============================
-Scene_MenuBase.prototype.drill_MBB_checkKeyword = function(i) {
-	var temp_sprite_data = DrillUp.g_MBB_list[i] ; 	//注意，执行该方法，是在DrillUp.g_MBB_list中遍历
-	if( temp_sprite_data == undefined || temp_sprite_data['menu'] == undefined ) {
-		return false;	
-	}
-	/*---------------标准----------------*/
-	if( SceneManager._scene.constructor.name === "Scene_Menu" && temp_sprite_data['menu'] == "主菜单" ){
-		return true;
-	}else if( SceneManager._scene.constructor.name === "Scene_Item" && temp_sprite_data['menu'] == "道具" ){
-		return true;
-	}else if( SceneManager._scene.constructor.name === "Scene_Skill" && temp_sprite_data['menu'] == "技能" ){
-		return true;
-	}else if( SceneManager._scene.constructor.name === "Scene_Equip" && temp_sprite_data['menu'] == "装备" ){
-		return true;
-	}else if( SceneManager._scene.constructor.name === "Scene_Status" && temp_sprite_data['menu'] == "状态" ){
-		return true;
-	}else if( SceneManager._scene.constructor.name === "Scene_Options" && temp_sprite_data['menu'] == "选项" ){
-		return true;
-	}else if( SceneManager._scene.constructor.name === "Scene_Load" && temp_sprite_data['menu'] == "载入" ){
-		return true;
-	}else if( SceneManager._scene.constructor.name === "Scene_Save" && temp_sprite_data['menu'] == "保存" ){
-		return true;
-	}else if( SceneManager._scene.constructor.name === "Scene_GameEnd" && temp_sprite_data['menu'] == "游戏结束" ){
-		return true;
-	}else if( SceneManager._scene.constructor.name === "Scene_Shop" && temp_sprite_data['menu'] == "商店" ){
-		return true;
-	}else if( SceneManager._scene.constructor.name === "Scene_Name" && temp_sprite_data['menu'] == "输入名称" ){
-		return true;
-	}else if( SceneManager._scene.constructor.name === "Scene_Debug" && temp_sprite_data['menu'] == "测试查值" ){
-		return true;
-	/*---------------旧选项----------------*/
-	}else if( (SceneManager._scene.constructor.name === "Scene_Party" || SceneManager._scene.constructor.name === "Scene_Drill_SMa_Formation") && temp_sprite_data['menu'] == "队形"  ){
-		return true;
-	}else if( SceneManager._scene.constructor.name === "Scene_EnemyBook" && temp_sprite_data['menu'] == "敌人图鉴" ){
-		return true;
-	}else if( SceneManager._scene.constructor.name === "Scene_ItemBook" && temp_sprite_data['menu'] == "物品图鉴" ){
-		return true;
-	}else if( SceneManager._scene.constructor.name === "Scene_Picture_Gallery" && temp_sprite_data['menu'] == "画廊" ){
-		return true;
-	}else{
-		/*---------------自定义----------------*/
-		if( SceneManager._scene.constructor.name === temp_sprite_data['menu_key'] ){
-			return true;
-		}
-	}
-	return false;
-};
-
-//==============================
-// * 按钮 - 帧刷新
+// * 贴图控制 - 帧刷新
 //==============================
 Scene_MenuBase.prototype.drill_MBB_update = function() {
 	for (var i = 0; i < this._drill_MBB_sprites.length; i++) {
@@ -1745,6 +1792,7 @@ if( typeof(_drill_mouse_getCurPos) == "undefined" ){	//防止重复定义
         _drill_mouse_y = Graphics.pageToCanvasY(event.pageY);
 	};
 }
+
 
 //=============================================================================
 // * <<<<基于插件检测<<<<

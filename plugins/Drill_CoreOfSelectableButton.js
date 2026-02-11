@@ -846,7 +846,7 @@
  * 
  * @param 平移-名称块 X
  * @parent ---名称块---
- * @desc 以按钮组中心的位置为基准。x轴方向平移，单位像素。正数向右，负数向左。
+ * @desc 以按钮组中心的位置为基准。x轴方向平移，单位像素。正数向左，负数向右。
  * @default 0
  * 
  * @param 平移-名称块 Y
@@ -1309,8 +1309,17 @@
 //			2. 如果你的子窗口【覆写了refresh函数】，那么要记得添加刷新标记。
 //			
 //		★其它说明细节：
-//			1.
-//
+//			1. 2026/1/15：放一只猫咪在这里。
+//				         /＞ —— フ
+//				       （  Θ   Θ )
+//				       / `ミ_ω_ノ
+//				      /　　　   |
+//				     /　 ヽ　　 /
+//				    /　　 |　| |
+//				／￣ 　　 |　| |
+//				| (￣ヽ＿_ヽ_)__)
+//				＼二つ
+//			
 //		★存在的问题：
 //			暂无
 //
@@ -1970,17 +1979,23 @@ Drill_COSB_LayerSprite.prototype.drill_COSB_destroy_Private = function(){
 	// > 销毁 - DEBUG（无）
 };
 //==============================
-// * 按钮组贴图 - 销毁 - 递归断开连接（私有）
+// * 按钮组贴图 - 销毁 - 断开贴图连接（私有）『递归函数-头』
 //==============================
 Drill_COSB_LayerSprite.prototype.drill_sprite_removeChildConnect = function( parent_sprite ){
 	if( parent_sprite == undefined ){ return; }
+	this.drill_sprite_removeChildConnect_Recursion( parent_sprite );
+};
+//==============================
+// * 按钮组贴图 - 销毁 - 断开贴图连接（私有）『递归函数-节』
+//==============================
+Drill_COSB_LayerSprite.prototype.drill_sprite_removeChildConnect_Recursion = function( parent_sprite ){
 	var sprite_list = parent_sprite.children;
 	if( sprite_list == undefined ){ return; }
 	for( var i = sprite_list.length-1; i >= 0; i-- ){
 		var sprite = sprite_list[i];
 		if( sprite == undefined ){ continue; }
 		parent_sprite.removeChild( sprite );
-		this.drill_sprite_removeChildConnect( sprite );
+		this.drill_sprite_removeChildConnect_Recursion( sprite );
 	}
 };
 
@@ -2809,29 +2824,31 @@ Drill_COSB_LayerSprite.prototype.drill_sprite_updateSelectionBtn_Transform = fun
 }
 //==============================
 // * E选中的按钮 - 获取 - 贴图的绝对坐标X
+//
+//			说明：	> 依次累加父贴图的位置。『递归函数-拆解』
 //==============================
 Drill_COSB_LayerSprite.prototype.drill_sprite_getAbsoluteX = function( sprite ){
-	//return sprite.x + this._drill_contextLayer.x;
 	var x = 0;
-    var object = sprite;
-    while( object ){
-        x += object.x;
-        object = object.parent;
-    }
-    return x;
+	var object = sprite;
+	while( object ){
+		x += object.x;
+		object = object.parent;
+	}
+	return x;
 }
 //==============================
 // * E选中的按钮 - 获取 - 贴图的绝对坐标Y
+//
+//			说明：	> 依次累加父贴图的位置。『递归函数-拆解』
 //==============================
 Drill_COSB_LayerSprite.prototype.drill_sprite_getAbsoluteY = function( sprite ){
-	//return sprite.y + this._drill_contextLayer.y;
 	var y = 0;
-    var object = sprite;
-    while( object ){
-        y += object.y;
-        object = object.parent;
-    }
-    return y;
+	var object = sprite;
+	while( object ){
+		y += object.y;
+		object = object.parent;
+	}
+	return y;
 }
 
 
@@ -3692,11 +3709,6 @@ Drill_COSB_WindowSprite.prototype.drill_updateMessage = function() {
 // * B窗口内容 - 刷新内容
 //==============================
 Drill_COSB_WindowSprite.prototype.drill_refreshMessage = function( context ){
-
-	// > 『字符贴图流程』 - 清空字符块贴图【窗口字符 - 窗口字符贴图核心】
-	if( Imported.Drill_CoreOfWindowCharacterSprite ){
-		this.drill_COWCSp_sprite_clearAllSprite();
-	}
 	
 	// > 参数准备 - 校验
 	var temp_bitmap = this.contents;
@@ -3742,7 +3754,7 @@ Drill_COSB_WindowSprite.prototype.drill_refreshMessage = function( context ){
 	hh += this.standardPadding() * 2;
 	this._drill_windowWidth = ww;
 	this._drill_windowHeight = hh;
-	this.width = this._drill_windowWidth;			//（窗口宽度）
+	this.width  = this._drill_windowWidth;		//（窗口宽度）
 	this.height = this._drill_windowHeight;		//（窗口高度）
 	
 	// > 自适应 - 重建画布（自适应高宽需要重建）
@@ -3756,7 +3768,7 @@ Drill_COSB_WindowSprite.prototype.drill_refreshMessage = function( context ){
 	// > 『字符主流程』 - 绘制文本【窗口字符 - 窗口字符核心】
 	this.drill_COWC_drawText( org_text, options );
 	
-	// > 『字符贴图流程』 - 刷新字符块贴图【窗口字符 - 窗口字符贴图核心】
+	// > 『字符贴图流程』 - 刷新当前的字符块贴图【窗口字符 - 窗口字符贴图核心】
 	if( Imported.Drill_CoreOfWindowCharacterSprite ){
 		this.drill_COWCSp_sprite_refreshAllSprite();
 	}

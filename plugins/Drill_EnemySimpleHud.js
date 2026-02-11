@@ -731,8 +731,15 @@
 	//==============================
 	// * 提示信息 - 报错 - NaN校验值
 	//==============================
-	DrillUp.drill_ESH_getPluginTip_ParamIsNaN = function( param_name ){
-		return "【" + DrillUp.g_ESH_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+	DrillUp.drill_ESH_getPluginTip_ParamIsNaN = function( param_name, check_tank ){
+		var text = "【" + DrillUp.g_ESH_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+		if( check_tank ){
+			var keys = Object.keys( check_tank );
+			for( var i=0; i < keys.length; i++ ){
+				text += "\n" + keys[i] + "的值：" + check_tank[ keys[i] ] ;
+			}
+		}
+		return text;
 	};
 	
 	
@@ -1979,11 +1986,21 @@ Scene_Battle.prototype.drill_ESH_updatePosition = function( sprite ){
 	if( DrillUp.g_ESH_checkNaN == true ){
 		if( isNaN( xx ) ){
 			DrillUp.g_ESH_checkNaN = false;
-			alert( DrillUp.drill_ESH_getPluginTip_ParamIsNaN( "xx" ) );
+			var check_tank = {};
+			check_tank["b_data_drill_spriteX"] = b_data._drill_spriteX;
+			check_tank["b_data_drill_spriteHomeX"] = b_data._drill_spriteHomeX;
+			check_tank["b_data_drill_offsetX"] = b_data._drill_offsetX;
+			check_tank["sprite_drill_curSlideX"] = sprite._drill_curSlideX;
+			alert( DrillUp.drill_ESH_getPluginTip_ParamIsNaN( "xx", check_tank ) );
 		}
 		if( isNaN( yy ) ){
 			DrillUp.g_ESH_checkNaN = false;
-			alert( DrillUp.drill_ESH_getPluginTip_ParamIsNaN( "yy" ) );
+			var check_tank = {};
+			check_tank["b_data_drill_spriteY"] = b_data._drill_spriteY;
+			check_tank["b_data_drill_spriteHomeY"] = b_data._drill_spriteHomeY;
+			check_tank["b_data_drill_offsetY"] = b_data._drill_offsetY;
+			check_tank["sprite_drill_curSlideY"] = sprite._drill_curSlideY;
+			alert( DrillUp.drill_ESH_getPluginTip_ParamIsNaN( "yy", check_tank ) );
 		}
 	}
 	

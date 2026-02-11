@@ -170,21 +170,29 @@
 //			->☆插件指令
 //			->☆事件注释
 //
-//			->☆脚本转义阶段 标准模块
+//
+//			->☆管辖权（2A自主移动/2B强制路线）
+//			->☆核心漏洞修复
+//
+//			->☆脚本指令转义阶段 标准模块
 //				->执行转义【标准接口】
 //				->提交转义【标准函数】
-//			->☆指令执行阶段 标准模块
+//			->☆脚本指令转义实现
+//			->☆移动路线应用之脚本转义
+//
+//			->☆脚本指令执行阶段 标准模块
 //				->执行指令【标准接口】
+//			->☆脚本指令执行实现
+//
+//			->☆暂停路线 标准模块
+//
+//			->☆管辖权（嵌套跳转）
+//			->☆嵌套跳转 标准模块
 //				->立即跳下一个移动指令【标准函数】
-//
-//			->☆核心漏洞修复
-//			->☆脚本转义阶段（执行）
-//				->上一条指令再执行n次
-//			->☆指令执行阶段（执行）
-//				->阻止错误的脚本
-//
 //			->☆嵌套跳转
 //			->☆调试防卡死
+//
+//
 //			->☆路线记忆
 //				->记忆指令
 //				->事件页刷新时复原
@@ -205,8 +213,11 @@
 //			2.路线记忆 是一个附属的小功能，不具备标准接口。
 //		
 //		★必要注意事项：
-//			1.移动路线指令的执行流程如下：
-//				脚本转义阶段 -> 执行转义【标准接口】 -> 指令执行阶段 -> 执行指令【标准接口】
+//			1.移动路线指令的执行流程如下：（从上往下）
+//				》脚本指令转义阶段
+//				》	执行转义【标准接口】
+//				》脚本指令执行阶段
+//				》	执行指令【标准接口】
 //			2.嵌套跳转 - 立即跳下一个移动指令 是一个比较难缠的函数。
 //			  留意原理以及说明，这一块对性能影响巨大。
 //		
@@ -326,7 +337,7 @@ Game_Interpreter.prototype.drill_COMR_pluginCommand = function( command, args ){
 			}
 		}
 			
-		/*-----------------对象组获取------------------*/
+		/*-----------------路线记忆------------------*/
 		if( char_list != null && args.length == 4 ){
 			var type = String(args[3]);
 			if( type == "重置路线记忆" ){	
@@ -396,9 +407,9 @@ Game_Event.prototype.drill_COMR_event_readList = function( pageOfList ){
 		if( l.code === 108 ){
 			var args = l.parameters[0].split(' ');
 			var command = args.shift();
-			
-			/*-----------------事件注释 - 路线记忆------------------*/
 			if( command == "=>移动路线核心" ){
+				
+				/*-----------------路线记忆------------------*/
 				if( args.length == 4 ){		//=>移动路线核心 : 路线记忆 : 关闭
 					var temp1 = String(args[1]);
 					var temp2 = String(args[3]);
@@ -419,26 +430,87 @@ Game_Event.prototype.drill_COMR_event_readList = function( pageOfList ){
 };
 
 
+
+//=============================================================================
+// ** ☆管辖权（2A自主移动/2B强制路线）
+//
+//			说明：	> 管辖权 即对 原函数 进行 修改、覆写、继承、控制子插件继承 等的权利。
+//					> 用于后期脱离 原游戏框架 且仍保持兼容性 的标记。
+//=============================================================================
+/*
+//==============================
+// * 2A自主移动《移动路线-移动路线核心》 - 设置自主移动
+//
+//			说明：	> 该函数只被函数 setupPageSettings 调用，即切换事件页时执行一次。
+//					> 『核心漏洞修复』Drill_CoreOfMoveRoute 移动路线的参数补充。
+//==============================
+Game_Character.prototype.setMoveRoute = function( moveRoute ){
+    this._moveRoute = moveRoute;
+    this._moveRouteIndex = 0;
+    this._moveRouteForcing = false;
+};
+
+//==============================
+// * 2B强制路线《移动路线-移动路线核心》 - 设置强制路线
+//
+//			说明：	> 该函数只被函数 command205 调用，并标记强制移动。
+//==============================
+Game_Character.prototype.forceMoveRoute = function( moveRoute ){
+    if( !this._originalMoveRoute ){
+        this.memorizeMoveRoute();
+    }
+    this._moveRoute = moveRoute;
+    this._moveRouteIndex = 0;
+    this._moveRouteForcing = true;
+    this._waitCount = 0;
+};
+*/
+
+//=============================================================================
+// ** ☆核心漏洞修复
+//=============================================================================
+//==============================
+// * 核心漏洞修复 - 2A自主移动 - 设置自主移动
+//
+//			说明：	> 在执行自主移动时，初始化原移动路线。（此操作防止_originalMoveRoute为空 报错。）
+//==============================
+var _drill_COMR_setMoveRoute = Game_Character.prototype.setMoveRoute;
+Game_Character.prototype.setMoveRoute = function( moveRoute ){
+	
+	// > 2A自主移动 时
+	if( this._moveRouteForcing != true ){
+		
+		// > 原函数
+		//		this._moveRoute = moveRoute;
+		//		this._moveRouteIndex = 0;
+		//		this._moveRouteForcing = false;
+		_drill_COMR_setMoveRoute.call( this, moveRoute );
+		
+	// > 2B强制路线 时
+	}else{
+		this._originalMoveRoute = moveRoute;
+		this._originalMoveRouteIndex = 0;
+	}
+};
+
+
 	
 //#############################################################################
-// ** 标准模块（☆脚本转义阶段 标准模块）
-//
-//			说明：	即对子插件开放的固定函数，无论插件如何变化，标准函数都不变。
+// ** 【标准模块】☆脚本指令转义阶段 标准模块
 //#############################################################################
 //##############################
-// * 脚本转义阶段 - 执行转义【标准接口】
+// * 脚本指令转义阶段 - 执行转义【标准接口】
 //					
 //			参数：	> command 字符串   （当前的指令）
 //					> args 字符串列表  （当前的参数列表）
-//					> this._drill_COMR_tran_curData 动态参数对象（后续更新在该对象提供更多数据）
-//					> this._drill_COMR_tran_curData['lastRoute'] 移动路线（上一条的移动路线指令）
-//					> this._drill_COMR_tran_curData['curRouteList'] 移动路线列表（此移动路线之前所有的移动路线列表）
+//					> this._drill_COMR_tran_curData                 动态参数对象 （后续更新在该对象提供更多数据）
+//					> this._drill_COMR_tran_curData['lastRoute']    移动路线     （上一条指令）
+//					> this._drill_COMR_tran_curData['curRouteList'] 移动路线列表 （此指令之前所有的指令列表，含上一条指令）
 //			返回：	> 无
 //					
 //			说明：	> 此函数，能够识别指定的 移动路线指令，并转义成其他移动路线指令。
 //					> 如果成功转义，需要调用函数： this.drill_COMR_routeSubmit_Transform( [] );
-//					  若未调用此函数，则会进入后面阶段执行指令阶段。
-//			示例：	> 具体应用，可见当前插件的函数： _drill_COMR_routeTransform_copy
+//					  若未调用那个函数，则会继续到后面的 脚本指令执行阶段 。
 //##############################
 Game_Character.prototype.drill_COMR_routeTransform = function( command, args ){
 	
@@ -446,7 +518,7 @@ Game_Character.prototype.drill_COMR_routeTransform = function( command, args ){
 	
 }
 //##############################
-// * 脚本转义阶段 - 提交转义【标准函数】
+// * 脚本指令转义阶段 - 提交转义【标准函数】
 //
 //			参数：	> submit_route_list 移动路线列表（当前的移动路线，可以转义成多个其他移动路线指令）
 //			返回：	> 无
@@ -458,67 +530,17 @@ Game_Character.prototype.drill_COMR_routeSubmit_Transform = function( submit_rou
 	this._drill_COMR_tran_routes = submit_route_list;
 }
 
-
-//#############################################################################
-// ** 标准模块（☆指令执行阶段 标准模块）
-//#############################################################################
-//##############################
-// * 指令执行阶段 - 执行指令【标准接口】
-//				
-//			参数：	> command 字符串   （当前的指令）
-//					> args 字符串列表  （当前的参数列表）
-//					> this._drill_COMR_cmd_curData 动态参数对象（后续更新在该对象提供更多数据）
-//			返回：	> 无
-//					
-//			说明：	> 与插件指令类似，执行移动路线指令。
-//			示例：	> 具体应用，可见插件： 移动路线指令集
-//##############################
-Game_Character.prototype.drill_COMR_routeCommand = function( command, args ){
-	
-	//（待子类继承写内容）
-	
-}
-//##############################
-// * 指令执行阶段 - 立即跳下一个移动指令【标准函数】
-//
-//			参数：	> 无
-//			返回：	> 无
-//
-//			说明：	> 该函数调用后，可以立即跳转并执行下一条移动路线指令。
-//					> 多用于 遇障碍结束 的条件移动。
-//##############################
-Game_Character.prototype.drill_COMR_skipToNext = function(){
-	this.drill_COMR_skipToNext_Private();
-}
-
-
 //=============================================================================
-// ** ☆核心漏洞修复
-//=============================================================================
-//==============================
-// * 核心漏洞修复 - 自主移动 初始化设置
+// ** ☆脚本指令转义实现
 //
-//			说明：	> 在执行自主移动时，初始化原移动路线。（此操作防止_originalMoveRoute为空 报错。）
-//==============================
-var _drill_COMR_setMoveRoute = Game_Character.prototype.setMoveRoute;
-Game_Character.prototype.setMoveRoute = function( moveRoute ){
-	if( !this._moveRouteForcing ){
-		_drill_COMR_setMoveRoute.call( this, moveRoute );
-	}else{
-		this._originalMoveRoute = moveRoute;
-		this._originalMoveRouteIndex = 0;
-	}
-};
-
-
-//=============================================================================
-// ** ☆脚本转义阶段（执行）
-//
-//			说明：	> 脚本转义阶段是最先执行的转义阶段，将指令变成多条指令。
+//			说明：	> 脚本指令转义阶段是最先执行的转义阶段，将指令变成多条指令。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 脚本转义 - 自主移动 - 设置
+// * 脚本指令转义实现 - 自主移动 - 设置（继承）
+//
+//			说明：	> 该函数只被函数 setupPageSettings 调用，即切换事件页时执行一次。
+//					> 注意，鼠标悬停的时候，事件页会反复切换，这里的执行次数也会瞬间上涨很多次。
 //==============================
 var _drill_COMR_setMoveRoute2 = Game_Character.prototype.setMoveRoute;
 Game_Character.prototype.setMoveRoute = function( moveRoute ){
@@ -526,7 +548,9 @@ Game_Character.prototype.setMoveRoute = function( moveRoute ){
 	_drill_COMR_setMoveRoute2.call(this, moveRoute);
 };
 //==============================
-// * 脚本转义 - 强制路线 - 执行路线
+// * 脚本指令转义实现 - 强制路线 - 执行路线（继承）
+//
+//			说明：	> 该函数只被函数 command205 调用，并标记强制移动。
 //==============================
 var _drill_COMR_forceMoveRoute = Game_Character.prototype.forceMoveRoute;
 Game_Character.prototype.forceMoveRoute = function( moveRoute ){
@@ -534,24 +558,26 @@ Game_Character.prototype.forceMoveRoute = function( moveRoute ){
 	_drill_COMR_forceMoveRoute.call(this, moveRoute);
 };
 //==============================
-// * 脚本转义 - 修改路线内容
+// * 脚本指令转义实现 - 指令转义
 //
-//			说明：	> 这里将原路线指令遍历一遍，并且将部分 特殊指令 替换成新的 指令集。
-//					> 替换后和替换前的 指令集数量 可以不一样。
+//			说明：	> 这里将原指令遍历一遍，并替换成新的 指令列表 。
+//					> 替换后和替换前的 指令数量 可以不一样。
 //==============================
 Game_Character.prototype.drill_COMR_scriptTransform = function( org_route_list ){
 	
 	// > 临时参数（上一条指令） - 初始化
 	this._drill_COMR_lastRoute = undefined;
 	
-	// > 脚本转义
+	// > 指令
 	var new_route_list = [];
-	for( var k=0; k < org_route_list.length; k++ ){
+	for(var k = 0; k < org_route_list.length; k++ ){
 		var temp_route = org_route_list[k];
+		
+		// > 指令 - 脚本
 		if( temp_route.code === Game_Character.ROUTE_SCRIPT ){
 			var temp_script = temp_route.parameters[0];
 			
-			// > 移动路线指令
+			// > 指令 - 脚本 - 移动路线指令
 			if( temp_script.substr(0,1) == ">" ){
 				var args = temp_script.split(/[:：]+/);
 				var command = args.shift();
@@ -563,11 +589,11 @@ Game_Character.prototype.drill_COMR_scriptTransform = function( org_route_list )
 				
 				// > 临时参数（可用参数） - 初始化
 				this._drill_COMR_tran_curData = {};
-				this._drill_COMR_tran_curData['lastRoute'] = this._drill_COMR_lastRoute;
-				this._drill_COMR_tran_curData['curRouteList'] = new_route_list;
+				this._drill_COMR_tran_curData['lastRoute'] = this._drill_COMR_lastRoute;	//（上一条指令）
+				this._drill_COMR_tran_curData['curRouteList'] = new_route_list;				//（此指令之前所有的指令列表，含上一条指令）
 				
 				
-				// > 执行子函数
+				// > 执行 子函数
 				this.drill_COMR_routeTransform( command, args );
 				
 				
@@ -593,13 +619,14 @@ Game_Character.prototype.drill_COMR_scriptTransform = function( org_route_list )
 				this._drill_COMR_tran_success = undefined;
 				this._drill_COMR_tran_routes = undefined;	
 				
-			// > 普通脚本指令
+				
+			// > 指令 - 脚本 - 其他脚本指令
 			}else{
 				new_route_list.push(temp_route);
 				this._drill_COMR_lastRoute = temp_route;
 			}
 			
-		// > 普通指令
+		// > 指令 - 其他指令
 		}else{
 			new_route_list.push(temp_route);
 			this._drill_COMR_lastRoute = temp_route;
@@ -611,14 +638,28 @@ Game_Character.prototype.drill_COMR_scriptTransform = function( org_route_list )
 	
 	return new_route_list;
 }
+
+//=============================================================================
+// ** ☆移动路线应用之脚本转义
+//
+//			说明：	> 脚本指令转义阶段的 接口继承、执行 的相关应用。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
 //==============================
-// * 脚本转义 - 上一条指令执行n次
+// * 移动路线应用之脚本转义 - 指令绑定
 //==============================
 var _drill_COMR_routeTransform_copy = Game_Character.prototype.drill_COMR_routeTransform;
 Game_Character.prototype.drill_COMR_routeTransform = function( command, args ){
 	_drill_COMR_routeTransform_copy.call( this, command, args );
-	
+	this.drill_COMR_COMR_routeTransform( command, args );
+}
+//==============================
+// * 移动路线应用之脚本转义 - 指令执行
+//==============================
+Game_Character.prototype.drill_COMR_COMR_routeTransform = function( command, args ){
 	if( command == ">核心" ){
+		
+		/*-----------------上一条指令再执行N次------------------*/
 		if( args.length == 2 ){
 			var type = args[0];
 			var temp1 = args[1];
@@ -652,6 +693,7 @@ Game_Character.prototype.drill_COMR_routeTransform = function( command, args ){
 		}
 	}
 	
+	/*-----------------旧指令------------------*/
 	if( command.substr(0,9) == ">上一条指令再执行" ){
 		
 		// > 旧指令 - 再执行n次
@@ -682,36 +724,45 @@ Game_Character.prototype.drill_COMR_routeTransform = function( command, args ){
 }
 
 
+
+//#############################################################################
+// ** 【标准模块】☆脚本指令执行阶段 标准模块
+//#############################################################################
+//##############################
+// * 脚本指令执行阶段 - 执行指令【标准接口】
+//				
+//			参数：	> command 字符串   （当前的指令）
+//					> args 字符串列表  （当前的参数列表）
+//					> this._drill_COMR_cmd_curData   动态参数对象（后续更新在该对象提供更多数据）
+//			返回：	> 无
+//					
+//			说明：	> 与插件指令类似，执行移动路线指令。
+//			示例：	> 具体应用，可见插件： 移动路线指令集
+//##############################
+Game_Character.prototype.drill_COMR_routeCommand = function( command, args ){
+	
+	//（待子类继承写内容）
+	
+}
+
 //=============================================================================
-// ** ☆指令执行阶段（执行）
+// ** ☆脚本指令执行实现
 //
-//			说明：	> 指令执行阶段是指 eval字符串转函数 的阶段，需要拦截部分错误指令。
+//			说明：	> 脚本指令执行阶段是指 eval字符串转函数 的阶段，需要拦截部分错误指令。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 指令执行阶段 - 临时全局变量
-//==============================
-DrillUp.g_COMR_errorMsgTank = [];		//（脚本拦截容器）
-//==============================
-// * 指令执行阶段 - 添加拦截的指令
-//==============================
-DrillUp.drill_COMR_addScript = function( temp_script ){
-	var message = DrillUp.drill_COMR_getPluginTip_UnknownScript( temp_script );
-	if( DrillUp.g_COMR_errorMsgTank.indexOf(message) == -1 ){
-		DrillUp.g_COMR_errorMsgTank.push(message);
-		console.log("%c" + message, "color:#f67; font-size:14px;");	//（通过Console输出拦截信息）
-	}
-};
-//==============================
-// * 指令执行阶段 - 阻止
+// * 脚本指令执行实现 - 脚本指令
 //==============================
 var _drill_COMR_processMoveCommand = Game_Character.prototype.processMoveCommand;
 Game_Character.prototype.processMoveCommand = function( command ){
     var params = command.parameters;
+	
+	// > 脚本指令
 	if( command.code == Game_Character.ROUTE_SCRIPT ){
 		var temp_script = String(params[0]);
 		
-		// > 阻止 ">xxx"
+		// > 脚本指令 - 拦截格式 - ">xxx:xxx"
 		if( temp_script.substr(0,1) == ">" ){
 			var args = temp_script.split(/[ :：]+/);
 			var command = args.shift();
@@ -730,7 +781,7 @@ Game_Character.prototype.processMoveCommand = function( command ){
 			return; 
 		}
 		
-		// > 阻止 "没有括号的函数"
+		// > 脚本指令 - 拦截格式 - "没有括号的文本"
 		if( temp_script.indexOf("=") == -1 && 
 		    temp_script.indexOf(">") == -1 && 
 		    temp_script.indexOf("<") == -1 && 
@@ -740,9 +791,74 @@ Game_Character.prototype.processMoveCommand = function( command ){
 			return; 
 		}
 	}
+	
+	// > 原函数
 	_drill_COMR_processMoveCommand.call( this,command );
-}
+};
+//==============================
+// * 脚本指令执行实现 - 脚本指令 - 脚本拦截容器
+//==============================
+DrillUp.g_COMR_errorMsgTank = [];		//（脚本拦截容器）
+//==============================
+// * 脚本指令执行实现 - 脚本指令 - 添加脚本拦截
+//==============================
+DrillUp.drill_COMR_addScript = function( temp_script ){
+	var message = DrillUp.drill_COMR_getPluginTip_UnknownScript( temp_script );
+	if( DrillUp.g_COMR_errorMsgTank.indexOf(message) == -1 ){
+		DrillUp.g_COMR_errorMsgTank.push(message);
+		console.log("%c" + message, "color:#f67; font-size:14px;");	//（通过Console输出拦截信息）
+	}
+};
 
+
+
+//=============================================================================
+// ** ☆管辖权（嵌套跳转）
+//
+//			说明：	> 管辖权 即对 原函数 进行 修改、覆写、继承、控制子插件继承 等的权利。
+//					> 用于后期脱离 原游戏框架 且仍保持兼容性 的标记。
+//=============================================================================
+/*
+//==============================
+// * 2A自主移动/2B强制路线《移动路线-移动路线核心》 - 帧刷新
+//
+//			说明：	> 此函数除了在 2B强制路线 中被调用；
+//					  还在 事件-自主移动-自定义类型(Game_Event.prototype.moveTypeCustom) 中被调用。
+//==============================
+Game_Character.prototype.updateRoutineMove = function(){
+	
+	// > 等待时间（移动路线中的 等待指令 ）
+    if( this._waitCount > 0 ){
+        this._waitCount--;
+		
+	// > 执行移动路线
+    }else{
+        this.setMovementSuccess(true);
+        var command = this._moveRoute.list[this._moveRouteIndex];
+        if( command ){
+            this.processMoveCommand(command);	//执行单条 2D路线动作
+            this.advanceMoveRouteIndex();		//索引+1
+        }
+    }
+};
+*/
+
+//#############################################################################
+// ** 【标准模块】☆嵌套跳转 标准模块
+//#############################################################################
+//##############################
+// * 嵌套跳转 - 立即跳下一个移动指令【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 无
+//
+//			说明：	> 该函数用于 脚本指令执行阶段。
+//					> 该函数调用后，可以立即跳转并执行下一条移动路线指令。
+//					> 多用于 遇障碍结束 的条件移动。
+//##############################
+Game_Character.prototype.drill_COMR_skipToNext = function(){
+	this.drill_COMR_skipToNext_Private();
+}
 
 //=============================================================================
 // ** ☆嵌套跳转
@@ -755,8 +871,8 @@ Game_Character.prototype.processMoveCommand = function( command ){
 //==============================
 var _drill_COMR_skipData_initialize = Game_Character.prototype.initialize;
 Game_Character.prototype.initialize = function() {
+	this._drill_COMR_skipData = undefined;				//嵌套跳转
 	_drill_COMR_skipData_initialize.call(this);
-	this._drill_COMR_skipData = undefined;
 }
 //==============================
 // * 嵌套跳转 - 初始化检查
@@ -765,12 +881,12 @@ Game_Character.prototype.initialize = function() {
 //==============================
 Game_Character.prototype.drill_COMR_checkSkipData = function(){	
 	if( this._drill_COMR_skipData != undefined ){ return; }
-	this._drill_COMR_skipData = {};
-	this._drill_COMR_skipData['isInOneUpdate'] = true;			//嵌套跳转 - 每帧标记
-	this._drill_COMR_skipData['isSkiping'] = false;				//嵌套跳转 - 正在跳转循环中
+	this._drill_COMR_skipData = {};						//嵌套跳转
+	this._drill_COMR_skipData['isInOneUpdate'] = true;	//嵌套跳转 - 每帧标记
+	this._drill_COMR_skipData['isSkiping'] = false;		//嵌套跳转 - 正在跳转循环中
 }
 //==============================
-// * 嵌套跳转 - 每帧设置
+// * 嵌套跳转 - 帧刷新
 //==============================
 var _drill_COMR_skipData_updateRoutineMove = Game_Character.prototype.updateRoutineMove;
 Game_Character.prototype.updateRoutineMove = function() {
@@ -783,7 +899,7 @@ Game_Character.prototype.updateRoutineMove = function() {
 	_drill_COMR_skipData_updateRoutineMove.call( this );
 }
 //==============================
-// * 嵌套跳转 - 立即跳下一个移动指令
+// * 嵌套跳转 - 立即跳下一个移动指令（私有）
 //
 //			原理：	> 每帧只执行一条移动路线指令。
 //					> (遇障碍结束)功能，要求如果遇到了障碍，这一帧不能浪费，而是直接跳转到下一条指令。
@@ -854,7 +970,6 @@ Game_Character.prototype.drill_COMR_skipToNext_Private = function() {
 	}
 }
 
-
 //=============================================================================
 // ** ☆调试防卡死
 //
@@ -882,6 +997,7 @@ SceneManager.onKeyDown = function( event ){
 };
 
 
+
 //=============================================================================
 // ** ☆路线记忆
 //
@@ -893,17 +1009,17 @@ SceneManager.onKeyDown = function( event ){
 //==============================
 var _drill_COMR_memory_initialize = Game_Character.prototype.initialize;
 Game_Character.prototype.initialize = function() {
+	this._drill_COMR_memoryData = undefined;							//路线记忆
 	_drill_COMR_memory_initialize.call(this);
-	this._drill_COMR_memoryData = undefined;
 }
 //==============================
 // * 路线记忆 - 初始化检查
 //==============================
 Game_Event.prototype.drill_COMR_checkMemoryData = function() {
 	if( this._drill_COMR_memoryData != undefined ){ return; }
-	this._drill_COMR_memoryData = {};
-	this._drill_COMR_memoryData['enable'] = DrillUp.g_COMR_remainRoute;		//路线记忆 - 开关
-	this._drill_COMR_memoryData['mrList'] = [];								//路线记忆 - 路线列表
+	this._drill_COMR_memoryData = {};									//路线记忆
+	this._drill_COMR_memoryData['enable'] = DrillUp.g_COMR_remainRoute;	//路线记忆 - 开关
+	this._drill_COMR_memoryData['mrList'] = [];							//路线记忆 - 路线列表
 	
 	// > 重置移动路线索引
 	this.drill_COMR_resetMoveRouteMemory();

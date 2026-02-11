@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.3]        地图 - 活动地图镜头
+ * @plugindesc [v2.4]        地图 - 活动地图镜头
  * @author Drill_up
  * 
  * 
@@ -301,6 +301,8 @@
  * 修复了镜头墙在 非循环地图 中部分位置无效的bug。
  * [v2.3]
  * 兼容了 滚动地图 原始的事件指令功能。
+ * [v2.4]
+ * 优化了内部结构，修复了镜头在特定分辨率来回移动的bug，修复了慢速移动时行走图抖动的bug。
  * 
  * 
  * 
@@ -485,56 +487,48 @@
 //			->☆静态数据
 //			->☆插件指令
 //			->☆存储数据
+//			->☆存储数据开放函数
 //
-//			->☆管辖权 - 镜头
-//			->☆管辖权 - 镜头滚动
-//			->☆管辖函数覆写
 //
-//			->☆镜头控制器函数
+//			->☆管辖权（镜头控制）
 //			->☆镜头控制
 //				->镜头架设置
 //				->设置镜头位置 setDisplayPos
 //				->切换地图时恢复默认
 //				->控制器帧刷新
-//
 //			->镜头控制器【Drill_LCa_Controller】
-//				->A主体
-//				->B镜头架（单位图块）
-//					->设置宽度【标准函数】
-//					->设置高度【标准函数】
-//					->镜头的矩形范围【标准函数】
-//					->镜头架的矩形范围【标准函数】
-//				->C镜头基点
-//					->获取镜头变换位置（子贴图用）【标准函数】
-//					->获取镜头变换位置（外部贴图用）【标准函数】
-//					->地图落点 转换（外部贴图 -> 子贴图）【标准函数】
-//					->地图落点 转换（子贴图 -> 外部贴图）【标准函数】
-//					->获取地图鼠标落点（子贴图用）【标准函数】
-//					->获取地图鼠标落点（外部贴图用）【标准函数】
-//				->D自动模式
-//				->E观光模式
-//				->F固定看向
-//				->G叠加变化
-//				->H整体平移
-//				->I滚动地图
 //
-//			->☆图块填充（A主体 相关）
+//
+//			->☆图块填充（B图层赋值 相关）
 //				->图块margin
 //				->地图远景
 //				->获取矩阵 缩放、旋转 后的外包裹矩阵
-//			->☆缩放转换（G叠加变化 相关）
+//
+//			->☆管辖权（缩放转换）
+//			->☆缩放转换（O叠加变化 相关）
 //				->屏幕宽度 screenTileX
 //				->屏幕高度 screenTileY
 //				->缩放地图的鼠标X修正
 //				->缩放地图的鼠标Y修正
-//			->☆整体平移（H整体平移 相关）
+//
+//			->☆整体平移（P整体平移 相关）
 //				->鼠标指向标
 //				->边缘遮挡层
-//			->☆滚动地图（I滚动地图 相关）
+//
+//			->☆管辖权（滚动地图）
+//			->☆滚动地图（L手动滚动镜头 相关）
 //				->地图镜头滚动 updateScroll
 //				->玩家镜头位置 updateScroll
 //				->开始滚动 startScroll
 //				->判断滚动状态 isScrolling
+//
+//			->☆镜头墙
+//				->事件容器
+//				->事件注释
+//				->镜头控制器扩展
+//
+//			->☆MOG兼容
+//
 //
 //			->☆层级标记器
 //				->标准模块
@@ -545,15 +539,9 @@
 //					->是否处于图片层
 //					->是否处于最顶层
 //					->是否处于图片层/最顶层任意一层
-//			->☆镜头墙
-//				->事件容器
-//				->事件注释
-//				->镜头控制器扩展
 //
 //			->☆DEBUG镜头对齐框
-//			->镜头对齐框 贴图【Drill_LCa_DebugSprite】
-//
-//			->☆其他插件兼容
+//			->DEBUG镜头对齐贴图【Drill_LCa_DebugSprite】
 //
 //
 //		★家谱：
@@ -564,12 +552,11 @@
 //		
 //		★插件私有类：
 //			* 镜头控制器【Drill_LCa_Controller】
-//			* 镜头对齐框 贴图【Drill_LCa_DebugSprite】
+//			* DEBUG镜头对齐贴图【Drill_LCa_DebugSprite】
 //		
 //		★必要注意事项：
-//			1.镜头原理： 将 整个Spriteset图层 平移、旋转、缩放。
+//			1.镜头原理： 将 ._baseSprite 平移、旋转、缩放。
 //			  底层函数： drill_LCa_updateCameraControl。
-//			  贴图与镜头原理： 镜头变换时，贴图跟随镜头一起变换。
 //			  【旋转与缩放是两个独立的属性，只有平移会受到 旋转与缩放 的影响，且与各功能的影响叠加在一起】
 //			2.子贴图用 与 外部贴图用：
 //			  图层变换时，在图层内的子贴图会跟着变，但在图层外的不会变。【注意，子贴图不会跟着 _displayX 一起移动】
@@ -590,12 +577,13 @@
 //				 /███□███\___|__|__|__
 //			
 //		★其它说明细节：
-//			1.镜头实际上只操作 地图Spriteset_Map（继承于Spriteset_Base）。
+//			1.镜头理论上只操作 地图图层Spriteset_Map（继承于Spriteset_Base）。
+//			  但是很多附加功能关联太多，导致那些函数都要专门管辖。
 //			2.Spriteset_Map无法设置圆心，所以只能通过修改xy圆形的坐标位置，再进行一次逆旋转。
-//			  通过逆旋转，把圆心0,0变成实际圆心(w/2,h/2)
-//			3.另外，这个旋转、缩放的变化过程，使得翻转的过程分支了一大堆if，使得代码变得非常不好看。
-//			4.【地图实际镜头，是_displayX控制的】，Spriteset_Map的xy完全属于例外变量。
-//			5.地图缩小时，刷新范围是受限的。通过控制下面三个参数来设置。
+//			  通过逆旋转，把圆心0,0变成实际圆心(w/2,h/2)。
+//			  而旋转、缩放的变化过程，使得翻转的过程分支了一大堆if，使得代码变得非常不好看。
+//			3.【地图实际镜头位置，是_displayX控制的】，Spriteset_Map的xy完全属于例外变量。
+//			4.地图缩小时，刷新范围是受限的。通过控制下面三个参数来设置。
 //				this._tilemap._width
 //				this._tilemap._height
 //				this._tilemap._margin
@@ -647,8 +635,15 @@
 	//==============================
 	// * 提示信息 - 报错 - NaN校验值
 	//==============================
-	DrillUp.drill_LCa_getPluginTip_ParamIsNaN = function( param_name ){
-		return "【" + DrillUp.g_LCa_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+	DrillUp.drill_LCa_getPluginTip_ParamIsNaN = function( param_name, check_tank ){
+		var text = "【" + DrillUp.g_LCa_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+		if( check_tank ){
+			var keys = Object.keys( check_tank );
+			for( var i=0; i < keys.length; i++ ){
+				text += "\n" + keys[i] + "的值：" + check_tank[ keys[i] ] ;
+			}
+		}
+		return text;
 	};
 	//==============================
 	// * 提示信息 - 报错 - 漏洞函数警告
@@ -714,23 +709,772 @@ if( Imported.Drill_CoreOfBallistics &&
 	Imported.Drill_CoreOfInput ){
 	
 	
-	
 //=============================================================================
-// ** ☆管辖权 - 镜头
+// ** ☆插件指令
+//=============================================================================
+//==============================
+// * 插件指令 - 指令绑定
+//==============================
+var _drill_LCa_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+Game_Interpreter.prototype.pluginCommand = function( command, args ){
+	_drill_LCa_pluginCommand.call(this, command, args);
+	this.drill_LCa_pluginCommand( command, args );
+}
+//==============================
+// * 插件指令 - 指令执行
+//==============================
+Game_Interpreter.prototype.drill_LCa_pluginCommand = function( command, args ){
+	if( command === ">地图镜头" ){
+		
+		/*-----------------镜头控制器------------------*/
+		if( args.length == 2 ){
+			var type = String(args[1]);
+			if( type == "启用" || type == "开启" || type == "打开" || type == "启动" ){
+				$gameSystem.drill_LCa_setEnable( true );
+			}
+			if( type == "关闭" || type == "禁用" ){
+				$gameSystem.drill_LCa_setEnable( false );
+			}
+			if( type == "暂停镜头运行" || type == "锁定镜头" ){
+				$gameSystem.drill_LCa_setPause( true );
+			}
+			if( type == "继续镜头运行" || type == "解锁镜头" ){
+				$gameSystem.drill_LCa_setPause( false );
+			}
+		}
+		
+		
+		/*-----------------H镜头模式------------------*/
+		if( args.length == 4 ){
+			var type = String(args[1]);
+			var temp1 = String(args[3]);
+			if( type == "修改模式" ){
+				$gameSystem.drill_LCa_setMode( temp1 );
+			}
+		}
+		
+		/*-----------------I自动模式------------------*/
+		if( args.length == 4 ){
+			var type = String(args[1]);
+			var temp1 = String(args[3]);
+			if( type == "自动模式-设置镜头移动模式" || type == "设置镜头移动模式" ){
+				if( temp1 == "默认移动" ){ temp1 = "匀速移动"; }
+				$gameSystem._drill_LCa_controller._drill_data['autoMoveType'] = temp1;
+			}
+			if( type == "自动模式-设置弹性模式移动速度" || type == "设置弹性模式移动速度" ){
+				$gameSystem._drill_LCa_controller._drill_data['autoSpeedRatio'] = Number(temp1);
+			}
+			if( type == "自动模式-设置弹性模式镜头速度上限" || type == "设置弹性模式镜头速度上限" ){
+				$gameSystem._drill_LCa_controller._drill_data['autoSpeedMax'] = Number(temp1);
+			}
+		}
+		/*-----------------I自动模式 - 聚焦偏移------------------*/
+		if(args.length == 4){
+			var type = String(args[1]);
+			var temp1 = String(args[3]);
+			if( type == "修改聚焦偏移" ){
+				temp1 = temp1.replace("位置[", "");
+				temp1 = temp1.replace("]", "");
+				var pos = temp1.split(/[,，]/);
+				if( pos.length >= 2 ){
+					var xx = Number(pos[0]);
+					var yy = Number(pos[1]);
+					$gameSystem._drill_LCa_controller.drill_LCa_setAutoOffset( xx, yy );
+				}
+			}
+		}
+		
+		/*-----------------J观光模式------------------*/
+		if( args.length == 4 ){
+			var type = String(args[1]);
+			var temp1 = String(args[3]);
+			if( type == "观光模式-键盘操作" ){
+				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
+					$gameSystem._drill_LCa_controller._drill_data['touristKeyboardEnabled'] = true;
+				}
+				if( temp1 == "关闭" || temp1 == "禁用" ){
+					$gameSystem._drill_LCa_controller._drill_data['touristKeyboardEnabled'] = false;
+				}
+				if( temp1 == "恢复默认" ){
+					$gameSystem._drill_LCa_controller._drill_data['touristKeyboardEnabled'] = DrillUp.g_LCa_tourist_keyboardEnabled;
+				}
+			}
+			if( type == "观光模式-鼠标操作" ){
+				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
+					$gameSystem._drill_LCa_controller._drill_data['touristMouseEnabled'] = true;
+				}
+				if( temp1 == "关闭" || temp1 == "禁用" ){
+					$gameSystem._drill_LCa_controller._drill_data['touristMouseEnabled'] = false;
+				}
+				if( temp1 == "恢复默认" ){
+					$gameSystem._drill_LCa_controller._drill_data['touristMouseEnabled'] = DrillUp.g_LCa_tourist_mouseEnabled;
+				}
+			}
+			if( type == "观光模式-镜头移动速度" ){
+				temp1 = temp1.replace("速度[","");
+				temp1 = temp1.replace("]","");
+				$gameSystem._drill_LCa_controller._drill_data['touristSpeed'] = Number(temp1);
+			}
+		}
+		
+		
+		/*-----------------K固定看向------------------*/
+		if( args.length == 2 ){
+			var type = String(args[1]);
+			if( type == "解除固定看向" ){
+				$gameSystem.drill_LCa_setUnlock();
+			}
+			if( type == "立刻看向目标位置" ){
+				$gameSystem.drill_LCa_setLookAtImmediately();
+			}
+		}
+		if( args.length == 4 ){
+			var type = String(args[1]);
+			var unit = String(args[3]);
+			if( type == "固定看向" ){
+				
+				var pos = null;
+				if( unit == "本事件" ){
+					var e_id = this._eventId;
+					$gameSystem.drill_LCa_setLockEvent( e_id );
+				}
+				if( unit == "玩家位置" ){
+					$gameSystem.drill_LCa_setLockPosition( $gamePlayer.x, $gamePlayer.y );
+				}
+				if( unit.indexOf("事件[") != -1 ){
+					unit = unit.replace("事件[","");
+					unit = unit.replace("]","");
+					var e_id = Number(unit);
+					if( $gameMap.drill_LCa_isEventExist( e_id ) == false ){ return; }
+					$gameSystem.drill_LCa_setLockEvent( e_id );
+				}
+				if( unit.indexOf("事件变量[") != -1 ){
+					unit = unit.replace("事件变量[","");
+					unit = unit.replace("]","");
+					var e_id = $gameVariables.value(Number(unit));
+					if( $gameMap.drill_LCa_isEventExist( e_id ) == false ){ return; }
+					$gameSystem.drill_LCa_setLockEvent( e_id );
+				}
+				if( unit.indexOf("多个事件的中心[") != -1 ){
+					unit = unit.replace("多个事件的中心[","");
+					unit = unit.replace("]","");
+					var e_list = [];
+					var str_list = unit.split(/[,，]/);
+					for(var i = 0; i < str_list.length; i++ ){
+						var e_id = Number(str_list[i]);
+						if( $gameMap.drill_LCa_isEventExist( e_id ) == false ){ continue; }
+						e_list.push(e_id);
+					}
+					$gameSystem.drill_LCa_setLockEventList( e_list );
+				}
+				if( unit.indexOf("位置[") != -1 ){
+					unit = unit.replace("位置[","");
+					unit = unit.replace("]","");
+					var pos = unit.split(/[,，]/);
+					if( pos.length >= 2 ){
+						var xx = Number(pos[0]);
+						var yy = Number(pos[1]);
+						$gameSystem.drill_LCa_setLockPosition( xx, yy );
+					}
+				}
+				if( unit.indexOf("位置变量[") != -1 ){
+					unit = unit.replace("位置变量[","");
+					unit = unit.replace("]","");
+					var pos = unit.split(/[,，]/);
+					if( pos.length >= 2 ){
+						var xx = $gameVariables.value(Number(pos[0]));
+						var yy = $gameVariables.value(Number(pos[1]));
+						$gameSystem.drill_LCa_setLockPosition( xx, yy );
+					}
+				}
+			}
+		}
+		
+		/*-----------------O叠加变化 - 镜头缩放/旋转------------------*/
+		if(args.length == 6){
+			var type = String(args[1]);
+			var temp1 = String(args[3]);
+			var temp2 = String(args[5]);
+			temp1 = temp1.replace("比例[", "");
+			temp1 = temp1.replace("角度[", "");
+			temp1 = temp1.replace("]", "");
+			temp2 = temp2.replace("时间[","");
+			temp2 = temp2.replace("]","");
+			if( type == "旋转" ){
+				if( temp1 == "恢复默认" ){ temp1 = DrillUp.g_LCa_defaultRotation; }
+				var time = Math.max(Number(temp2),1);
+			    $gameSystem.drill_LCa_doRotate( Number(temp1), time, "弹性变化" );
+				return;
+			}
+			if( type == "缩放X" ){
+				if( temp1 == "恢复默认" ){ temp1 = DrillUp.g_LCa_defaultScaleX; }
+				var time = Math.max(Number(temp2),1);
+			    $gameSystem.drill_LCa_doScaleX( Number(temp1), time, "弹性变化" );
+				return;
+			}
+			if( type == "缩放Y" ){
+				if( temp1 == "恢复默认" ){ temp1 = DrillUp.g_LCa_defaultScaleY; }
+				var time = Math.max(Number(temp2),1);
+			    $gameSystem.drill_LCa_doScaleY( Number(temp1), time, "弹性变化" );
+				return;
+			}
+		}
+		/*-----------------O叠加变化 - 镜头翻转------------------*/
+		if( args.length == 6 ){
+			var type = String(args[1]);
+			var temp1 = String(args[3]);
+			var temp2 = String(args[5]);
+			temp1 = temp1.replace("时间[", "");
+			temp1 = temp1.replace("]", "");
+			if( type == "水平翻转" ){
+				var time = Math.max(Number(temp1),1);
+				var changeType = "弹性变化";
+				if( temp2 == "匀速" ){ changeType = "匀速变化"; }
+				if( temp2 == "弹性" ){ changeType = "弹性变化"; }
+				if( temp2 == "平滑" ){ changeType = "增减速变化"; }
+			    $gameSystem.drill_LCa_doScaleX( -1, time, changeType );
+			    $gameSystem.drill_LCa_doScaleY(  1, time, changeType );
+				return;
+			}
+			if( type == "垂直翻转"){
+				var time = Math.max(Number(temp1),1);
+				var changeType = "弹性变化";
+				if( temp2 == "匀速" ){ changeType = "匀速变化"; }
+				if( temp2 == "弹性" ){ changeType = "弹性变化"; }
+				if( temp2 == "平滑" ){ changeType = "增减速变化"; }
+			    $gameSystem.drill_LCa_doScaleX(  1, time, changeType );
+			    $gameSystem.drill_LCa_doScaleY( -1, time, changeType );
+				return;
+			}
+			if( type == "顺时针翻转" ){
+				var time = Math.max(Number(temp1),1);
+				var changeType = "弹性变化";
+				if( temp2 == "匀速" ){ changeType = "匀速变化"; }
+				if( temp2 == "弹性" ){ changeType = "弹性变化"; }
+				if( temp2 == "平滑" ){ changeType = "增减速变化"; }
+			    $gameSystem.drill_LCa_doRotate( 180, time, changeType );
+				return;
+			}
+			if( type == "逆时针翻转" ){
+				var time = Math.max(Number(temp1),1);
+				var changeType = "弹性变化";
+				if( temp2 == "匀速" ){ changeType = "匀速变化"; }
+				if( temp2 == "弹性" ){ changeType = "弹性变化"; }
+				if( temp2 == "平滑" ){ changeType = "增减速变化"; }
+			    $gameSystem.drill_LCa_doRotate( -180, time, changeType );
+				return;
+			}
+			if( type == "恢复翻转" ){
+				var time = Math.max(Number(temp1),1);
+				var changeType = "弹性变化";
+				if( temp2 == "匀速" ){ changeType = "匀速变化"; }
+				if( temp2 == "弹性" ){ changeType = "弹性变化"; }
+				if( temp2 == "平滑" ){ changeType = "增减速变化"; }
+			    $gameSystem.drill_LCa_doScaleX( DrillUp.g_LCa_defaultScaleX, time, changeType );
+			    $gameSystem.drill_LCa_doScaleY( DrillUp.g_LCa_defaultScaleY, time, changeType );
+			    $gameSystem.drill_LCa_doRotate( DrillUp.g_LCa_defaultRotation, time, changeType );
+				return;
+			}
+		}
+		
+		/*-----------------P整体平移------------------*/
+		if(args.length == 8){
+			var type = String(args[1]);
+			var temp1 = String(args[3]);
+			var temp2 = String(args[5]);
+			var temp3 = String(args[7]);
+			if( type == "修改整体平移" ){
+				temp1 = temp1.replace("位置[", "");
+				temp1 = temp1.replace("]", "");
+				temp2 = temp2.replace("时间[", "");
+				temp2 = temp2.replace("]", "");
+				var pos = temp1.split(/[,，]/);
+				if( pos.length >= 2 ){
+					var xx = Number(pos[0]);
+					var yy = Number(pos[1]);
+					$gameSystem._drill_LCa_controller.drill_LCa_setGlobalOffset( xx, yy, Number(temp2), temp3 );
+				}
+			}
+		}
+		if(args.length == 4){
+			var type = String(args[1]);
+			var temp1 = String(args[3]);
+			if( type == "边缘遮挡层" ){
+				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
+					$gameSystem._drill_LCa_controller.drill_LCa_setGlobalBarrierLayerEnabled( true );
+				}
+				if( temp1 == "关闭" || temp1 == "禁用" ){
+					$gameSystem._drill_LCa_controller.drill_LCa_setGlobalBarrierLayerEnabled( false );
+				}
+			}
+		}
+		if(args.length == 6){
+			var type = String(args[1]);
+			var temp1 = String(args[3]);
+			var temp2 = String(args[5]);
+			if( type == "边缘遮挡层" ){
+				if( temp1 == "修改颜色" ){
+					$gameSystem._drill_LCa_controller.drill_LCa_setGlobalBarrierLayerColor( temp2 );
+				}
+			}
+		}
+		
+		/*-----------------L手动滚动镜头------------------*/
+		if(args.length == 8){
+			var type = String(args[1]);
+			var temp1 = String(args[3]);
+			var temp2 = String(args[5]);
+			var temp3 = String(args[7]);
+			if( type == "滚动地图" ){
+				temp2 = temp2.replace("距离[", "");
+				temp2 = temp2.replace("]", "");
+				temp3 = temp3.replace("速度[", "");
+				temp3 = temp3.replace("]", "");
+				if( temp1 == "方向[上]" ){
+					$gameSystem._drill_LCa_controller.drill_LCa_scrollToTarget( 8, Number(temp2), Number(temp3) );
+				}
+				if( temp1 == "方向[下]" ){
+					$gameSystem._drill_LCa_controller.drill_LCa_scrollToTarget( 2, Number(temp2), Number(temp3) );
+				}
+				if( temp1 == "方向[左]" ){
+					$gameSystem._drill_LCa_controller.drill_LCa_scrollToTarget( 4, Number(temp2), Number(temp3) );
+				}
+				if( temp1 == "方向[右]" ){
+					$gameSystem._drill_LCa_controller.drill_LCa_scrollToTarget( 6, Number(temp2), Number(temp3) );
+				}
+				if( temp1 == "方向[左上]" ){
+					$gameSystem._drill_LCa_controller.drill_LCa_scrollToTarget( 7, Number(temp2), Number(temp3) );
+				}
+				if( temp1 == "方向[左下]" ){
+					$gameSystem._drill_LCa_controller.drill_LCa_scrollToTarget( 1, Number(temp2), Number(temp3) );
+				}
+				if( temp1 == "方向[右上]" ){
+					$gameSystem._drill_LCa_controller.drill_LCa_scrollToTarget( 9, Number(temp2), Number(temp3) );
+				}
+				if( temp1 == "方向[右下]" ){
+					$gameSystem._drill_LCa_controller.drill_LCa_scrollToTarget( 3, Number(temp2), Number(temp3) );
+				}
+			}
+		}
+		if(args.length == 6){
+			var type = String(args[1]);
+			var temp1 = String(args[3]);
+			var temp2 = String(args[5]);
+			if( type == "滚动地图" ){
+				if( temp1 == "回到原位置" ){
+					temp2 = temp2.replace("速度[", "");
+					temp2 = temp2.replace("]", "");
+					$gameSystem._drill_LCa_controller.drill_LCa_scrollToHome( Number(temp2) );
+				}
+			}
+		}
+	}
+};
+//==============================
+// * 插件指令 - 事件检查
+//==============================
+Game_Map.prototype.drill_LCa_isEventExist = function( e_id ){
+	if( e_id == 0 ){ return false; }
+	
+	var e = this.event( e_id );
+	if( e == undefined ){
+		alert( DrillUp.drill_LCa_getPluginTip_EventNotFind( e_id ) );
+		return false;
+	}
+	return true;
+};
+
+
+//#############################################################################
+// ** 【标准模块】存储数据 ☆存储数据
+//#############################################################################
+//##############################
+// * 存储数据 - 参数存储 开关
+//          
+//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
+//##############################
+DrillUp.g_LCa_saveEnabled = true;
+//##############################
+// * 存储数据 - 初始化
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_LCa_sys_initialize = Game_System.prototype.initialize;
+Game_System.prototype.initialize = function() {
+    _drill_LCa_sys_initialize.call(this);
+	this.drill_LCa_initSysData();
+};
+//##############################
+// * 存储数据 - 载入存档
+//          
+//			说明：	> 下方为固定写法，不要动。
+//##############################
+var _drill_LCa_sys_extractSaveContents = DataManager.extractSaveContents;
+DataManager.extractSaveContents = function( contents ){
+	_drill_LCa_sys_extractSaveContents.call( this, contents );
+	
+	// > 参数存储 启用时（检查数据）
+	if( DrillUp.g_LCa_saveEnabled == true ){	
+		$gameSystem.drill_LCa_checkSysData();
+		
+	// > 参数存储 关闭时（直接覆盖）
+	}else{
+		$gameSystem.drill_LCa_initSysData();
+	}
+};
+//##############################
+// * 存储数据 - 初始化数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
+//##############################
+Game_System.prototype.drill_LCa_initSysData = function() {
+	this.drill_LCa_initSysData_Private();
+};
+//##############################
+// * 存储数据 - 载入存档时检查数据【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
+//##############################
+Game_System.prototype.drill_LCa_checkSysData = function() {
+	this.drill_LCa_checkSysData_Private();
+};
+//=============================================================================
+// ** 存储数据（接口实现）
+//=============================================================================
+//==============================
+// * 存储数据 - 初始化数据（私有）
+//==============================
+Game_System.prototype.drill_LCa_initSysData_Private = function() {
+	
+	// > 控制器
+	var data = {
+		'enable':true,
+		'pause':false,
+		
+		'mode':DrillUp.g_LCa_mode,
+		
+		'holderWidth':17,
+		'holderHeight':13,
+		
+		'autoOffsetX':DrillUp.g_LCa_auto_x,
+		'autoOffsetY':DrillUp.g_LCa_auto_y,
+		'autoMoveType':DrillUp.g_LCa_auto_moveType,
+		'autoSpeedRatio':DrillUp.g_LCa_auto_speedRatio,
+		'autoSpeedMax':DrillUp.g_LCa_auto_speedMax,
+		
+		'touristKeyboardEnabled':DrillUp.g_LCa_tourist_keyboardEnabled,
+		'touristMouseEnabled':DrillUp.g_LCa_tourist_mouseEnabled,
+		'touristMouseThickness':DrillUp.g_LCa_tourist_mouseThickness,
+		'touristSpeed':DrillUp.g_LCa_tourist_speed / 48,
+		
+		'defaultRotation':DrillUp.g_LCa_defaultRotation,
+		'defaultScaleX':DrillUp.g_LCa_defaultScaleX,
+		'defaultScaleY':DrillUp.g_LCa_defaultScaleY,
+		
+		'globalOffsetX':DrillUp.g_LCa_globalOffset_x,
+		'globalOffsetY':DrillUp.g_LCa_globalOffset_y,
+		'globalBarrierLayerEnabled':DrillUp.g_LCa_globalBarrierLayerEnabled,
+		'globalBarrierLayerColor':DrillUp.g_LCa_globalBarrierLayerColor,
+	};
+	this._drill_LCa_controller = new Drill_LCa_Controller( data );
+	
+};	
+//==============================
+// * 存储数据 - 载入存档时检查数据（私有）
+//==============================
+Game_System.prototype.drill_LCa_checkSysData_Private = function() {
+	
+	// > 旧存档数据自动补充
+	if( this._drill_LCa_controller == undefined || 
+		this._drill_LCa_controller._drill_data['globalOffsetX'] == undefined || 
+		this._drill_LCa_controller._drill_scrollOffsetX == undefined ){
+		this.drill_LCa_initSysData();
+	}
+};
+
+//=============================================================================
+// ** ☆存储数据开放函数
+//
+//			说明：	> 此处全都调用 镜头控制器 的函数。方便子插件使用函数。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 控制器 - 是否启用（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_isEnable = function(){
+	return this._drill_LCa_controller.drill_LCa_isEnable();
+}
+//==============================
+// * 控制器 - 启用/关闭（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_setEnable = function( enable ){
+	return this._drill_LCa_controller.drill_LCa_setEnable( enable );
+}
+//==============================
+// * 控制器 - 是否暂停（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_isPause = function(){
+	return this._drill_LCa_controller.drill_LCa_isPause();
+}
+//==============================
+// * 控制器 - 暂停/继续（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_setPause = function( pause ){
+	return this._drill_LCa_controller.drill_LCa_setPause( pause );
+}
+
+//==============================
+// * A主体
+//==============================
+	//（无）
+
+//==============================
+// * B图层赋值 - 获取位置X（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_getBaseX = function(){
+	return this._drill_LCa_controller.drill_LCa_getBaseX();
+}
+//==============================
+// * B图层赋值 - 获取位置Y（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_getBaseY = function(){
+	return this._drill_LCa_controller.drill_LCa_getBaseY();
+}
+//==============================
+// * B图层赋值 - 获取旋转值（开放函数）
+//
+//			说明：	> 注意，单位为角度。
+//==============================
+Game_System.prototype.drill_LCa_getBaseRotate = function(){
+	return this._drill_LCa_controller.drill_LCa_getBaseRotate();
+}
+//==============================
+// * B图层赋值 - 获取缩放X（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_getBaseScaleX = function(){
+	return this._drill_LCa_controller.drill_LCa_getBaseScaleX();
+}
+Game_System.prototype.drill_LCa_curScaleX = function(){		//（旧函数名）
+	return this._drill_LCa_controller.drill_LCa_getBaseScaleX();
+}
+//==============================
+// * B图层赋值 - 获取缩放Y（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_getBaseScaleY = function(){
+	return this._drill_LCa_controller.drill_LCa_getBaseScaleY();
+}
+Game_System.prototype.drill_LCa_curScaleY = function(){		//（旧函数名）
+	return this._drill_LCa_controller.drill_LCa_getBaseScaleY();
+}
+
+//==============================
+// * C校验值
+//==============================
+	//（无）
+
+//==============================
+// * D数学工具
+//==============================
+	//（无）
+
+//==============================
+// * E镜头架 - 设置宽度（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_setCameraHolderWidth = function( width ){
+	return this._drill_LCa_controller.drill_LCa_setCameraHolderWidth( width );
+}
+//==============================
+// * E镜头架 - 设置高度（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_setCameraHolderHeight = function( height ){
+	return this._drill_LCa_controller.drill_LCa_setCameraHolderHeight( height );
+}
+//==============================
+// * E镜头架 - 镜头的矩形范围（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_getCameraRect = function(){
+	return this._drill_LCa_controller.drill_LCa_getCameraRect();
+}
+//==============================
+// * E镜头架 - 镜头架的矩形范围（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_getCameraHolderRect = function(){
+	return this._drill_LCa_controller.drill_LCa_getCameraHolderRect();
+}
+
+//==============================
+// * F镜头基点 - 活动范围（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_getCameraPosRange = function(){
+	return this._drill_LCa_controller.drill_LCa_getCameraPosRange();
+}
+//==============================
+// * F镜头基点 - 获取镜头基点偏移位置（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_getCameraPosOffset = function(){
+	return this._drill_LCa_controller.drill_LCa_getCameraPosOffset();
+}
+//==============================
+// * F镜头基点 - 获取镜头变换位置（子贴图用）（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_getCameraPos_Children = function(){
+	return this._drill_LCa_controller.drill_LCa_getCameraPos_Children();
+}
+//==============================
+// * F镜头基点 - 获取镜头变换位置（外部贴图用）（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_getCameraPos_OuterSprite = function( x, y ){
+	return this._drill_LCa_controller.drill_LCa_getCameraPos_OuterSprite( x, y );
+}
+//==============================
+// * F镜头基点 - 地图落点 转换（外部贴图 -> 子贴图）（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_getPos_OuterToChildren = function( x, y ){
+	return this._drill_LCa_controller.drill_LCa_getPos_OuterToChildren( x, y );
+}
+//==============================
+// * F镜头基点 - 地图落点 转换（子贴图 -> 外部贴图）（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_getPos_ChildrenToOuter = function( x, y ){
+	return this._drill_LCa_controller.drill_LCa_getPos_ChildrenToOuter( x, y );
+}
+//==============================
+// * F镜头基点 - 获取地图鼠标落点（子贴图用）（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_getMousePos_OnChildren = function(){
+	return this._drill_LCa_controller.drill_LCa_getMousePos_OnChildren();
+}
+//==============================
+// * F镜头基点 - 获取地图鼠标落点（外部贴图用）（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_getMousePos_OnOuterSprite = function(){
+	return this._drill_LCa_controller.drill_LCa_getMousePos_OnOuterSprite();
+}
+
+//==============================
+// * H镜头模式 - 设置模式（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_setMode = function( mode ){
+	this._drill_LCa_controller.drill_LCa_setMode( mode );
+}
+//==============================
+// * H镜头模式 - 获取模式（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_getMode = function(){
+	return this._drill_LCa_controller.drill_LCa_getMode();
+}
+//==============================
+// * I自动模式 - 设置聚焦位置（开放函数）
+//==============================
+//Game_System.prototype.drill_LCa_setAutoPosition = function( x, y ){
+//	this._drill_LCa_controller.drill_LCa_setAutoPosition( x, y );
+//}
+//==============================
+// * J观光模式 - 设置聚焦位置（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_setTouristPosition = function( x, y ){
+	this._drill_LCa_controller.drill_LCa_setTouristPosition( x, y );
+}
+//==============================
+// * K固定看向 - 固定看向位置（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_setLockPosition = function( x, y ){
+	this._drill_LCa_controller.drill_LCa_setLockPosition( x, y );
+}
+//==============================
+// * K固定看向 - 固定看向事件（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_setLockEvent = function( event_id ){
+	this._drill_LCa_controller.drill_LCa_setLockEvent( event_id );
+}
+//==============================
+// * K固定看向 - 固定多个事件的中心（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_setLockEventList = function( event_id ){
+	this._drill_LCa_controller.drill_LCa_setLockEventList( event_id );
+}
+//==============================
+// * K固定看向 - 解除固定看向（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_setUnlock = function(){
+	this._drill_LCa_controller.drill_LCa_setUnlock();
+}
+//==============================
+// * K固定看向 - 立刻看向目标位置（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_setLookAtImmediately = function(){
+	this._drill_LCa_controller.drill_LCa_setLookAtImmediately();
+}
+
+//==============================
+// * O叠加变化 - 执行旋转（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_doRotate = function( rotation, time, changeType ){
+	this._drill_LCa_controller.drill_LCa_doRotate( rotation, time, changeType );
+}
+//==============================
+// * O叠加变化 - 执行缩放X（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_doScaleX = function( scaleX, time, changeType ){
+	this._drill_LCa_controller.drill_LCa_doScaleX( scaleX, time, changeType );
+}
+//==============================
+// * O叠加变化 - 执行缩放Y（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_doScaleY = function( scaleY, time, changeType ){
+	this._drill_LCa_controller.drill_LCa_doScaleY( scaleY, time, changeType );
+}
+//==============================
+// * O叠加变化 - 镜头的X 转 缩放后的X（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_cameraToMapX = function( x ){
+	return this._drill_LCa_controller.drill_LCa_cameraToMapX( x );
+}
+//==============================
+// * O叠加变化 - 镜头的X 转 缩放后的Y（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_cameraToMapY = function( y ){
+	return this._drill_LCa_controller.drill_LCa_cameraToMapY( y );
+}
+//==============================
+// * O叠加变化 - 缩放后的X -> 镜头的X（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_mapToCameraX = function( x ){
+	return this._drill_LCa_controller.drill_LCa_mapToCameraX( x );
+}
+//==============================
+// * O叠加变化 - 缩放后的Y -> 镜头的Y（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_mapToCameraY = function( y ){
+	return this._drill_LCa_controller.drill_LCa_mapToCameraY( y );
+}
+
+//==============================
+// * P整体平移
+//==============================
+	//（无）
+
+//==============================
+// * L手动滚动镜头 - 清空数据（开放函数）
+//==============================
+Game_System.prototype.drill_LCa_clearScrollData = function(){
+	return this._drill_LCa_controller.drill_controller_initScroll();
+}
+
+
+
+//=============================================================================
+// ** ☆管辖权（镜头控制）
 //
 //			说明：	> 管辖权 即对 原函数 进行 修改、覆写、继承、控制子插件继承 等的权利。
 //					> 用于后期脱离 原游戏框架 且仍保持兼容性 的标记。
 //=============================================================================
-/*
-//==============================
-// * A基本属性《地图-活动地图镜头》 - 图块 - 屏幕宽度（图块单位）
-//==============================
-Game_Map.prototype.screenTileX = function(){ return Graphics.width / this.tileWidth(); };
-//==============================
-// * A基本属性《地图-活动地图镜头》 - 图块 - 屏幕高度（图块单位）
-//==============================
-Game_Map.prototype.screenTileY = function(){ return Graphics.height / this.tileHeight(); };
-*/
 /*
 //==============================
 // * E镜头《地图-活动地图镜头》 - 访问器（图块单位）
@@ -766,7 +1510,2901 @@ Game_Map.prototype.setDisplayPos = function( x, y ){
 */
 
 //=============================================================================
-// ** ☆管辖权 - 镜头滚动
+// ** ☆镜头控制
+//
+//			说明：	> 此模块帧刷新 镜头控制器 ，并进行图层数据实时赋值。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 镜头控制 - 镜头架初始化
+//==============================
+var _drill_LCa_setup = Game_Map.prototype.setup;
+Game_Map.prototype.setup = function( mapId ){
+	
+	// > K固定看向（切换地图时，解除固定看向）
+	if( this._mapId != mapId ){
+		$gameSystem.drill_LCa_setUnlock();
+	}
+	
+	// > 原函数
+	_drill_LCa_setup.call( this, mapId );
+	
+	// > E镜头架 设置
+	$gameSystem.drill_LCa_setCameraHolderWidth( this.width() );
+	$gameSystem.drill_LCa_setCameraHolderHeight( this.height() );
+		
+	// > J观光模式 看向
+	$gameSystem.drill_LCa_setTouristPosition( $gamePlayer._x, $gamePlayer._y );
+	
+	// > I自动模式 看向
+	$gameSystem.drill_LCa_setLookAtImmediately();
+	
+	// > L手动滚动镜头 清空数据
+	$gameSystem.drill_LCa_clearScrollData();
+	
+	// > 切换地图时恢复默认
+	if( DrillUp.g_LCa_resetDefaultInMapSwitch == true ){
+		$gameSystem.drill_LCa_doScaleX( DrillUp.g_LCa_defaultScaleX, 1, "匀速变化" );
+		$gameSystem.drill_LCa_doScaleY( DrillUp.g_LCa_defaultScaleY, 1, "匀速变化" );
+		$gameSystem.drill_LCa_doRotate( DrillUp.g_LCa_defaultRotation, 1, "匀速变化" );
+	}
+}
+//==============================
+// * 镜头控制 - 访问器（覆写）
+//==============================
+Game_Map.prototype.displayX = function(){ return this._displayX; };
+Game_Map.prototype.displayY = function(){ return this._displayY; };
+//==============================
+// * 镜头控制 - 屏蔽函数 设置镜头位置
+//==============================
+var _drill_LCa_map_setDisplayPos = Game_Map.prototype.setDisplayPos;
+Game_Map.prototype.setDisplayPos = function( x, y ){
+	
+	// > 镜头开启时，屏蔽
+	if( $gameSystem.drill_LCa_isEnable() == true ){
+		
+		// > J观光模式 看向
+		$gameSystem.drill_LCa_setTouristPosition( x, y );
+		
+		// > I自动模式 看向
+		$gameSystem.drill_LCa_setLookAtImmediately();
+		
+		return;
+	}
+	
+	// > 原函数
+	_drill_LCa_map_setDisplayPos.call( this, x, y );
+}
+//==============================
+// * 镜头控制 - 帧刷新绑定
+//==============================
+var _drill_LCa_spriteset_update2 = Spriteset_Map.prototype.update;
+Spriteset_Map.prototype.update = function(){
+	_drill_LCa_spriteset_update2.call(this);
+	if( $gameSystem.drill_LCa_isEnable() != true ){ return; }
+	this.drill_LCa_updateCameraControl();		//帧刷新 - 镜头控制
+};
+//==============================
+// * 镜头控制 - 帧刷新
+//==============================
+Spriteset_Map.prototype.drill_LCa_updateCameraControl = function(){
+	
+	// > 控制器 帧刷新
+	$gameSystem._drill_LCa_controller.drill_LCa_update();
+	
+	// > 赋值（B图层赋值）
+	//		【注意，此处的赋值，将会大幅度影响 在图层内、在图层外 的全部算法关系】
+	//		【一定要考虑清楚镜头控制哪些层！下层、中层、上层、图片层、最顶层】
+	this._baseSprite.x = $gameSystem._drill_LCa_controller.drill_LCa_getBaseX();							//平移X（单位像素）
+	this._baseSprite.y = $gameSystem._drill_LCa_controller.drill_LCa_getBaseY();							//平移X（单位像素）
+	this._baseSprite.rotation = $gameSystem._drill_LCa_controller.drill_LCa_getBaseRotate() /180*Math.PI;	//旋转（弧度）
+	this._baseSprite.scale.x = $gameSystem._drill_LCa_controller.drill_LCa_getBaseScaleX();					//缩放X
+	this._baseSprite.scale.y = $gameSystem._drill_LCa_controller.drill_LCa_getBaseScaleY();					//缩放Y
+	
+	// > 赋值 - 镜头位置（F镜头基点）
+	$gameMap._displayX = $gameSystem._drill_LCa_controller._drill_cameraX_offset;				//镜头基点X（单位图块）
+	$gameMap._displayY = $gameSystem._drill_LCa_controller._drill_cameraY_offset;				//镜头基点Y（单位图块）
+	
+	// > 赋值 - 远景（F镜头基点）
+	//		（需要累加自定义的位移，见函数 Game_Map.prototype.updateParallax）
+	if( $gameMap._parallaxLoopX ){
+		var parallax_distance = $gameSystem._drill_LCa_controller._drill_curTime * $gameMap._parallaxSx / $gameMap.tileWidth() / 2;
+		$gameMap._parallaxX = $gameSystem._drill_LCa_controller._drill_cameraX_offsetAcc + parallax_distance;
+	}else{
+		$gameMap._parallaxX = $gameSystem._drill_LCa_controller._drill_cameraX_offset;
+	}
+	if( $gameMap._parallaxLoopY ){
+		var parallax_distance = $gameSystem._drill_LCa_controller._drill_curTime * $gameMap._parallaxSy / $gameMap.tileWidth() / 2;
+		$gameMap._parallaxY = $gameSystem._drill_LCa_controller._drill_cameraY_offsetAcc + parallax_distance;
+	}else{
+		$gameMap._parallaxY = $gameSystem._drill_LCa_controller._drill_cameraY_offset;
+	}
+};
+
+
+//=============================================================================
+// ** 镜头控制器【Drill_LCa_Controller】
+// **		
+// **		作用域：	地图界面
+// **		主功能：	定义一个专门控制镜头变化的数据类。
+// **		子功能：	
+// **					->控制器
+// **						->启用/关闭
+// **						->暂停/继续
+// **						> 平移
+// **						> 旋转
+// **						> 缩放
+// **					
+// **					->A主体
+// **					->B图层赋值
+// **						> 位置x（单位像素）
+// **						> 位置y（单位像素）
+// **						> 旋转（单位角度）
+// **						> 缩放x
+// **						> 缩放y
+// **					->C校验值
+// **					->D数学工具
+// **					
+// **					->E镜头架（单位图块）
+// **						->设置宽度【标准函数】
+// **						->设置高度【标准函数】
+// **						->镜头的矩形范围【标准函数】
+// **						->镜头架的矩形范围【标准函数】
+// **						x->缩放自适应
+// **					->F镜头基点
+// **						->活动范围
+// **						->获取镜头基点偏移位置
+// **						->获取镜头变换位置（子贴图用）
+// **						->获取镜头变换位置（外部贴图用）
+// **						->地图落点 转换（外部贴图 -> 子贴图）
+// **						->地图落点 转换（子贴图 -> 外部贴图）
+// **						->获取地图鼠标落点（子贴图用）
+// **						->获取地图鼠标落点（外部贴图用）【如果还没回忆起 地图落点 与 地图鼠标落点，去看看"Drill插件高级手册.docx"】
+// **					
+// **					->H镜头模式
+// **						->保持切换时位置
+// **						->设置模式【标准函数】
+// **						->获取模式【标准函数】
+// **					->I自动模式
+// **						x->设置聚焦位置
+// **						->聚焦偏移
+// **						->循环积累值 Acc
+// **						> 镜头移动模式
+// **						> 弹性模式移动速度
+// **						> 弹性模式镜头速度上限
+// **					->J观光模式
+// **						->设置聚焦位置
+// **						->循环积累值 Acc
+// **						->键盘控制
+// **						->鼠标控制
+// **					->K固定看向
+// **						->固定-自动模式
+// **						->固定-观光模式
+// **						->立刻看向目标位置
+// **					
+// **					->O叠加变化
+// **						->执行旋转【标准函数】
+// **						->执行缩放X【标准函数】
+// **						->执行缩放Y【标准函数】
+// **						->镜头的X 转 缩放后的X【标准函数】
+// **						->镜头的X 转 缩放后的Y【标准函数】
+// **						->缩放后的X 转 镜头的X【标准函数】
+// **						->缩放后的Y 转 镜头的Y【标准函数】
+// **					->P整体平移
+// **						->游戏坐标X 转 html坐标X 控制
+// **						->游戏坐标Y 转 html坐标Y 控制
+// **						x->摇晃的镜头？（不稳定的xy平移）
+// **					
+// **					->L手动滚动镜头
+// **					
+// **					->外部功能
+// **						->镜头墙（该类不含）
+// **						->视野触发（该类不含，见插件 Drill_EventSightSwitch）
+// **						->层级标记器（该类不含）
+// **						->DEBUG镜头对齐贴图（该类不含）
+// **					
+// **		说明：	> 该类为单例，并存储在 $gameSystem 中。
+// **				> 如果思路没跟上，去看 必要注意事项。
+// **				> 可以结合 文档 理解具体功能。
+//=============================================================================
+//==============================
+// * 控制器 - 定义
+//==============================
+function Drill_LCa_Controller(){
+	this.initialize.apply(this, arguments);
+}
+//==============================
+// * 控制器 - 初始化
+//==============================
+Drill_LCa_Controller.prototype.initialize = function( data ){
+	this._drill_data = {};
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
+    this.drill_controller_initData();										//初始化数据
+    this.drill_controller_initChild();										//初始化子功能
+	if( data == undefined ){ data = {}; }
+    this.drill_LCa_resetData( data );
+}
+//##############################
+// * 控制器 - 帧刷新【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//			
+//			说明：	> 此函数必须在 帧刷新 中手动调用执行。
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_update = function(){
+	this.drill_controller_updateAttrImportant();	//帧刷新 - A主体 - 时间流逝
+	if( this._drill_data['pause'] == true ){ return; }
+	
+													//帧刷新 - H镜头模式（无）
+	this.drill_controller_updateAutoMode();			//帧刷新 - I自动模式
+	this.drill_controller_updateTouristMode();		//帧刷新 - J观光模式
+													//帧刷新 - K固定看向（无）
+	
+	this.drill_controller_updateRotation();			//帧刷新 - O叠加变化 - 旋转
+	this.drill_controller_updateScale();			//帧刷新 - O叠加变化 - 缩放
+	this.drill_controller_updateGlobalOffset();		//帧刷新 - P整体平移
+	this.drill_controller_updateScroll();			//帧刷新 - L手动滚动镜头
+	
+													//帧刷新 - E镜头架（无）
+	this.drill_controller_updateOffset();			//帧刷新 - F镜头基点
+	this.drill_controller_updateOffsetAcc();		//帧刷新 - F镜头基点（循环积累值）
+	
+	this.drill_controller_updatePosition();			//帧刷新 - B图层赋值
+													//帧刷新 - D数学工具（无）
+	
+	this.drill_controller_updateCheckNaN();			//帧刷新 - C校验值
+}
+//##############################
+// * 控制器 - 重设数据【标准函数】
+//			
+//			参数：	> data 动态参数对象
+//			返回：	> 无
+//			
+//			说明：	> 通过此函数，你不需要再重新创建一个数据对象，并且贴图能直接根据此数据来变化。
+//					> 参数对象中的参数【可以缺项】，只要的参数项不一样，就刷新；参数项一样，则不变化。
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_resetData = function( data ){
+	this.drill_LCa_resetData_Private( data );
+};
+//##############################
+// * 控制器 - 立即复原（暂未使用）【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 无
+//			
+//			说明：	> 立即恢复无镜头控制的初始状态。
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_restore = function(){
+    this.drill_LCa_restore_Private();
+}
+//##############################
+// * 控制器 - 是否启用【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 布尔
+//			
+//			说明：	> 可放在帧刷新函数中实时调用。
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_isEnable = function(){
+	if( $gameMap == undefined ){ return false; }	//『$gameSystem优先初始化』
+	if( $dataMap == undefined ){ return false; }
+	return this._drill_data['enable'];
+};
+//##############################
+// * 控制器 - 启用/关闭【标准函数】
+//
+//			参数：	> enable 布尔
+//			返回：	> 无
+//			
+//			说明：	> 可放在帧刷新函数中实时调用。
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_setEnable = function( enable ){
+	var data = this._drill_data;
+	data['enable'] = enable;
+};
+//##############################
+// * 控制器 - 是否暂停【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 布尔
+//			
+//			说明：	> 可放在帧刷新函数中实时调用。
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_isPause = function(){
+	return this._drill_data['pause'];
+};
+//##############################
+// * 控制器 - 暂停/继续【标准函数】
+//
+//			参数：	> enable 布尔
+//			返回：	> 无
+//			
+//			说明：	> 可放在帧刷新函数中实时调用。
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_setPause = function( pause ){
+	var data = this._drill_data;
+	data['pause'] = pause;
+};
+
+//##############################
+// * B图层赋值 - 获取位置X【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 数字 （单位像素）
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_getBaseX = function(){
+    return this._drill_x;
+}
+//##############################
+// * B图层赋值 - 获取位置Y【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 数字 （单位像素）
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_getBaseY = function(){
+    return this._drill_y;
+}
+//##############################
+// * B图层赋值 - 获取旋转值【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 数字 （旋转值，单位角度）
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_getBaseRotate = function(){
+    return this._drill_rotation;
+}
+//##############################
+// * B图层赋值 - 获取缩放X【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 数字
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_getBaseScaleX = function(){
+    return this._drill_scaleX;
+}
+//##############################
+// * B图层赋值 - 获取缩放Y【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 数字
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_getBaseScaleY = function(){
+    return this._drill_scaleY;
+}
+
+//##############################
+// * E镜头架 - 设置宽度【标准函数】
+//
+//			参数：	> width 数字（单位图块）
+//			返回：	> 无
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_setCameraHolderWidth = function( width ){
+	var data = this._drill_data;
+	data['holderWidth'] = width;
+	this.drill_LCa_refreshHolder();
+}
+//##############################
+// * E镜头架 - 设置高度【标准函数】
+//
+//			参数：	> height 数字（单位图块）
+//			返回：	> 无
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_setCameraHolderHeight = function( height ){
+	var data = this._drill_data;
+	data['holderHeight'] = height;
+	this.drill_LCa_refreshHolder();
+}
+//##############################
+// * E镜头架 - 镜头的矩形范围【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 矩形对象（x,y,宽,高）（单位图块）
+//			
+//			说明：	> 此函数为基函数，不要放入私有参数，会出现死循环。
+//					> 此函数不包含 旋转与缩放 的坐标影响。
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_getCameraRect = function(){
+	var oww = Graphics.boxWidth  / this.tileWidth();
+	var ohh = Graphics.boxHeight / this.tileHeight();
+	return new Rectangle( 0, 0, oww, ohh );			//（屏幕宽度高度的图块单位）
+}
+//##############################
+// * E镜头架 - 镜头架的矩形范围【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 矩形对象（x,y,宽,高）（单位图块）
+//			
+//			说明：	> 此函数为基函数，不要放入私有参数，会出现死循环。
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_getCameraHolderRect = function(){
+	return new Rectangle( 0, 0, this.width(), this.height() );
+}
+
+//##############################
+// * F镜头基点 - 活动范围【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 矩形对象（x,y,宽,高）（单位图块）
+//			
+//			说明：	> 镜头基点（左上角锚点）的活动范围。与地图是否循环相关。
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_getCameraPosRange = function(){
+	return new Rectangle( this._drill_holderX, this._drill_holderY, this._drill_holderMaxX-this._drill_holderX, this._drill_holderMaxY-this._drill_holderY );
+}
+//##############################
+// * F镜头基点 - 获取镜头基点偏移位置【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 坐标对象（x,y）（单位像素）
+//			
+//			说明：	> 此函数返回 活动范围内 的偏移量。
+//					> 此函数不包含 旋转与缩放 的坐标影响。
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_getCameraPosOffset = function(){
+	return {'x': this._drill_cameraX_offset, 'y': this._drill_cameraY_offset };
+}
+//##############################
+// * F镜头基点 - 获取镜头变换位置（子贴图用）【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 坐标对象（x,y）（单位像素）
+//			
+//			说明：	> 【应用场景】：此函数适用于 下层、中层、上层 的贴图对象。
+//					  直接减去 返回值 即可实现贴图与镜头同步。
+//					> 此函数已包含 旋转与缩放 的坐标影响。
+//					> 子贴图不需考虑 旋转与缩放 贴图变化的影响。
+//					> 使用方法可以见后面函数：drill_LCa_DEBUG_updateSpriteCameraPos
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_getCameraPos_Children = function(){
+	//（如果此处思路没跟上，去看 必要注意事项 ）
+	return {'x': this._drill_cameraX_Children, 'y': this._drill_cameraY_Children };
+}
+//##############################
+// * F镜头基点 - 获取镜头变换位置（外部贴图用）【标准函数】
+//
+//			参数：	> cur_x 数字 （外部贴图的位置X）（单位像素）
+//					> cur_y 数字 （外部贴图的位置Y）（单位像素）
+//			返回：	> 坐标对象（x,y）（单位像素）
+//			
+//			说明：	> 【应用场景】：此函数适用于 图片层、最顶层 的贴图对象。
+//					  由于外部贴图一般都是 图片、UI。
+//					  而这些贴图可以选择【不移动】，直接贴在镜头上，因此对于UI、图片，可能用不上。
+//					> 此函数已包含 旋转与缩放 的坐标影响。
+//					> 外部贴图需要考虑 旋转与缩放 贴图变化的影响。
+//					> 使用方法可以见后面函数：drill_LCa_DEBUG_updateSpriteCameraPos
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_getCameraPos_OuterSprite = function( cur_x, cur_y ){
+	//（如果此处思路没跟上，去看 必要注意事项 ）
+	return this.drill_LCa_getCameraPos_OuterSprite_Private( cur_x, cur_y );
+}
+//##############################
+// * F镜头基点 - 地图落点 转换（外部贴图 -> 子贴图）【标准函数】
+//
+//			参数：	> 坐标对象（x,y）（单位像素）
+//			返回：	> 坐标对象（x,y）（单位像素）
+//			
+//			说明：	> 此函数适用于 图片层、最顶层 的坐标，落到 上层、中层、下层 的坐标。
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_getPos_OuterToChildren = function( x, y ){
+	return this.drill_LCa_getPos_OuterToChildren_Private( x, y );
+}
+//##############################
+// * F镜头基点 - 地图落点 转换（子贴图 -> 外部贴图）【标准函数】
+//
+//			参数：	> 坐标对象（x,y）（单位像素）
+//			返回：	> 坐标对象（x,y）（单位像素）
+//			
+//			说明：	> 此函数适用于 上层、中层、下层 的坐标，落到 图片层、最顶层 的坐标。
+//					> 注意 地图鼠标落点 不要 调用此函数，因为鼠标一直就处于外部贴图。
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_getPos_ChildrenToOuter = function( x, y ){
+	return this.drill_LCa_getPos_ChildrenToOuter_Private( x, y );
+}
+//##############################
+// * F镜头基点 - 获取地图鼠标落点（子贴图用）【标准函数】
+//
+//			参数：	无
+//			返回：	> 坐标对象（x,y）（单位像素）
+//			
+//			说明：	> 此函数适用于 下层、中层、上层 的贴图对象，获取到鼠标的 地图落点 。不含触屏情况。
+//					> 使用方法可以见后面函数：drill_LCa_DEBUG_updateMousePosition
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_getMousePos_OnChildren = function(){
+	return this._drill_mousePos_OnChildren;
+}
+//##############################
+// * F镜头基点 - 获取地图鼠标落点（外部贴图用）【标准函数】
+//
+//			参数：	无
+//			返回：	> 坐标对象（x,y）（单位像素）
+//			
+//			说明：	> 此函数适用于 图片层、最顶层 的贴图对象，获取到鼠标的 地图落点 。不含触屏情况。
+//					> 使用方法可以见后面函数：drill_LCa_DEBUG_updateMousePosition
+//					> 其实此方法就是直接 赋值 _drill_mouse_x ，但考虑到标准化，因此最好考虑情况并调用此函数。
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_getMousePos_OnOuterSprite = function(){
+	return this._drill_mousePos_OnOuterSprite;
+}
+
+//##############################
+// * H镜头模式 - 设置模式【标准函数】
+//
+//			参数：	> mode 字符串
+//			返回：	> 无
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_setMode = function( mode ){
+	this.drill_LCa_setMode_Private( mode );
+}
+//##############################
+// * H镜头模式 - 获取模式【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 字符串
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_getMode = function(){
+	var data = this._drill_data;
+	return data['mode'];
+}
+//##############################
+// * I自动模式 - 设置聚焦位置【标准函数】
+//
+//			参数：	> x 数字
+//					> y 数字
+//			返回：	> 无
+//
+//			说明：	> 此函数为战斗镜头专用。此函数不能放在帧刷新中使用，需要缓冲时间。
+//##############################
+//Drill_LCa_Controller.prototype.drill_LCa_setAutoPosition = function( x, y ){
+//	//（无此函数）
+//}
+//##############################
+// * I自动模式 - 修改聚焦偏移【标准函数】
+//
+//			参数：	> autoOffsetX 数字  （聚焦偏移X）
+//					> autoOffsetY 数字  （聚焦偏移Y）
+//			返回：	> 无
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_setAutoOffset = function( autoOffsetX, autoOffsetY ){
+    this.drill_LCa_setAutoOffset_Private( autoOffsetX, autoOffsetY );
+}
+//##############################
+// * J观光模式 - 设置聚焦位置【标准函数】
+//
+//			参数：	> x 数字
+//					> y 数字
+//			返回：	> 无
+//
+//			说明：	> 设置后，将会覆盖 当前位置。如果是临时看向然后返回，用"固定看向位置"。
+//					> 注意，默认镜头的【左上角会对齐到该点】，你需要考虑 镜头中心点 修正。
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_setTouristPosition = function( x, y ){
+	this._drill_tourist_curXAcc = x;
+	this._drill_tourist_curYAcc = y;
+}
+//##############################
+// * K固定看向 - 固定看向位置【标准函数】
+//
+//			参数：	> x 数字
+//					> y 数字
+//			返回：	> 无
+//
+//			说明：	坐标值为 地图的图块 。
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_setLockPosition = function( x, y ){
+	this.drill_LCa_setLockPosition_Private( x, y );
+}
+//##############################
+// * K固定看向 - 固定看向事件【标准函数】
+//
+//			参数：	> event_id 数字
+//			返回：	> 无
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_setLockEvent = function( event_id ){
+	this.drill_LCa_setLockEvent_Private( event_id );
+}
+//##############################
+// * K固定看向 - 固定多个事件的中心【标准函数】
+//
+//			参数：	> event_id_list 数字列表
+//			返回：	> 无
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_setLockEventList = function( event_id_list ){
+	this.drill_LCa_setLockEventList_Private( event_id_list );
+}
+//##############################
+// * K固定看向 - 解除固定看向【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 无
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_setUnlock = function(){
+	this.drill_LCa_setUnlock_Private();
+	this._drill_lockPos = false;
+}
+//##############################
+// * K固定看向 - 立刻看向目标位置【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 无
+//==============================
+Drill_LCa_Controller.prototype.drill_LCa_setLookAtImmediately = function(){
+	this.drill_LCa_setLookAtImmediately_Private();
+}
+
+//##############################
+// * O叠加变化 - 执行旋转【标准函数】
+//
+//			参数：	> rotation 数字    （旋转值，单位角度）
+//					> time 数字        （时长）
+//					> changeType 字符串（匀速变化/弹性变化/增减速变化）
+//			返回：	> 无
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_doRotate = function( rotation, time, changeType ){
+    this.drill_LCa_doRotate_Private( rotation, time, changeType );
+}
+//##############################
+// * O叠加变化 - 执行缩放X【标准函数】
+//
+//			参数：	> scaleX 数字      （缩放X）
+//					> time 数字        （时长）
+//					> changeType 字符串（匀速变化/弹性变化/增减速变化）
+//			返回：	> 无
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_doScaleX = function( scaleX, time, changeType ){
+    this.drill_LCa_doScaleX_Private( scaleX, time, changeType );
+}
+//##############################
+// * O叠加变化 - 执行缩放Y【标准函数】
+//
+//			参数：	> scaleY 数字      （缩放Y）
+//					> time 数字        （时长）
+//					> changeType 字符串（匀速变化/弹性变化/增减速变化）
+//			返回：	> 无
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_doScaleY = function( scaleY, time, changeType ){
+    this.drill_LCa_doScaleY_Private( scaleY, time, changeType );
+}
+//##############################
+// * O叠加变化 - 镜头的X 转 缩放后的X【标准函数】
+//
+//			参数：	> x 数字   （贴图的X）
+//			返回：	> 数字
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_cameraToMapX = function( x ){
+	x = x / this._drill_scaleX;
+	x -= (Graphics.boxWidth / this._drill_scaleX - Graphics.boxWidth)/2;
+	return Math.round(x);
+}
+//##############################
+// * O叠加变化 - 镜头的X 转 缩放后的Y【标准函数】
+//
+//			参数：	> y 数字   （贴图的Y）
+//			返回：	> 数字
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_cameraToMapY = function( y ){
+	y = y / this._drill_scaleY;
+	y -= (Graphics.boxHeight / this._drill_scaleY - Graphics.boxHeight)/2;
+	return Math.round(y);
+}
+//##############################
+// * O叠加变化 - 缩放后的X 转 镜头的X【标准函数】
+//
+//			参数：	> x 数字   （贴图的X）
+//			返回：	> 数字
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_mapToCameraX = function( x ){
+	x += (Graphics.boxWidth / this._drill_scaleX - Graphics.boxWidth)/2;
+	x = x * this._drill_scaleX;;
+	return Math.round(x);
+}
+//##############################
+// * O叠加变化 - 缩放后的Y 转 镜头的Y【标准函数】
+//
+//			参数：	> y 数字   （贴图的Y）
+//			返回：	> 数字
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_mapToCameraY = function( y ){
+	y += (Graphics.boxHeight / this._drill_scaleY - Graphics.boxHeight)/2;
+	y = y * this._drill_scaleY;
+	return Math.round(y);
+}
+
+//##############################
+// * P整体平移 - 修改整体平移【标准函数】
+//
+//			参数：	> globalOffsetX 数字（整体平移X）
+//					> globalOffsetY 数字（整体平移Y）
+//					> time 数字         （时长）
+//					> changeType 字符串 （匀速移动/弹性移动/增减速移动）
+//			返回：	> 无
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_setGlobalOffset = function( globalOffsetX, globalOffsetY, time, changeType ){
+    this.drill_LCa_setGlobalOffset_Private( globalOffsetX, globalOffsetY, time, changeType );
+}
+//##############################
+// * P整体平移 - 边缘遮挡层 开启/关闭【标准函数】
+//
+//			参数：	> enable 布尔
+//			返回：	> 无
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_setGlobalBarrierLayerEnabled = function( enable ){
+    var data = this._drill_data;
+	data['globalBarrierLayerEnabled'] = enable;
+}
+//##############################
+// * P整体平移 - 边缘遮挡层 修改颜色【标准函数】
+//
+//			参数：	> color 字符串 （颜色）
+//			返回：	> 无
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_setGlobalBarrierLayerColor = function( color ){
+    var data = this._drill_data;
+	data['globalBarrierLayerColor'] = color;
+}
+
+//##############################
+// * L手动滚动镜头 - 开始滚动【标准函数】
+//
+//			参数：	> direction 数字 （方向 8/2/4/6 或 1/3/7/9 ）
+//					> distance 数字  （图块距离）
+//					> speed 数字     （速度 1/2/3/4/5/6 ）
+//			返回：	> 无
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_scrollToTarget = function( direction, distance, speed ){
+	this.drill_LCa_scrollToTarget_Private( direction, distance, speed );
+}
+//##############################
+// * L手动滚动镜头 - 判断滚动状态【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 布尔
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_isScrolling = function(){
+	return this._drill_scrollOffset_curTime < this._drill_scrollOffset_tarTime;
+}
+//##############################
+// * L手动滚动镜头 - 回到原位置【标准函数】
+//
+//			参数：	> speed 数字
+//			返回：	> 无
+//##############################
+Drill_LCa_Controller.prototype.drill_LCa_scrollToHome = function( speed ){
+	this.drill_LCa_scrollToHome_Private( speed );
+	
+}
+
+//##############################
+// * 控制器 - 初始化数据【标准默认值】
+//
+//			参数：	> 无
+//			返回：	> 无
+//			
+//			说明：	> data 动态参数对象（来自类初始化）
+//					  该对象包含 类所需的所有默认值。
+//##############################
+Drill_LCa_Controller.prototype.drill_controller_initData = function(){
+	var data = this._drill_data;
+	
+	// > 控制器
+	if( data['enable'] == undefined ){ data['enable'] = true };											//启用情况
+	if( data['pause'] == undefined ){ data['pause'] = false };											//暂停情况
+	
+	// > A主体（无）
+	
+	// > B图层赋值（无）
+	
+	// > C校验值（无）
+	
+	// > D数学工具（无）
+	
+	
+	// > E镜头架
+	if( data['holderWidth'] == undefined ){ data['holderWidth'] = 17 };									//E镜头架 - 宽度
+	if( data['holderHeight'] == undefined ){ data['holderHeight'] = 13 };								//E镜头架 - 高度
+	
+	// > F镜头基点（无）
+	
+	
+	// > H镜头模式
+	if( data['mode'] == undefined ){ data['mode'] = "自动模式" };										//H镜头模式 - 镜头模式
+	
+	// > I自动模式
+	if( data['autoOffsetX'] == undefined ){ data['autoOffsetX'] = 0 };									//I自动模式 - 聚焦偏移X
+	if( data['autoOffsetY'] == undefined ){ data['autoOffsetY'] = 0 };									//I自动模式 - 聚焦偏移Y
+	if( data['autoMoveType'] == undefined ){ data['autoMoveType'] = "弹性移动" };						//I自动模式 - 镜头移动模式
+	if( data['autoSpeedRatio'] == undefined ){ data['autoSpeedRatio'] = 10 };							//I自动模式 - 弹性模式移动速度
+	if( data['autoSpeedMax'] == undefined ){ data['autoSpeedMax'] = 24 };								//I自动模式 - 弹性模式镜头速度上限	
+	
+	// > J观光模式
+	if( data['touristKeyboardEnabled'] == undefined ){ data['touristKeyboardEnabled'] = true };			//J观光模式 - 是否启用键盘操作
+	if( data['touristMouseEnabled'] == undefined ){ data['touristMouseEnabled'] = true };				//J观光模式 - 是否启用鼠标操作
+	if( data['touristMouseThickness'] == undefined ){ data['touristMouseThickness'] = 40 };				//J观光模式 - 鼠标触发区域的厚度
+	if( data['touristSpeed'] == undefined ){ data['touristSpeed'] = 0.5 };								//J观光模式 - 镜头移动速度
+	
+	
+	// > O叠加变化
+	if( data['defaultRotation'] == undefined ){ data['defaultRotation'] = 0 };							//O叠加变化 - 默认旋转角度
+	if( data['defaultScaleX'] == undefined ){ data['defaultScaleX'] = 1.0 };							//O叠加变化 - 默认X缩放比例
+	if( data['defaultScaleY'] == undefined ){ data['defaultScaleY'] = 1.0 };							//O叠加变化 - 默认Y缩放比例
+	
+	// > P整体平移
+	if( data['globalOffsetX'] == undefined ){ data['globalOffsetX'] = 0 };								//P整体平移 - 整体平移X
+	if( data['globalOffsetY'] == undefined ){ data['globalOffsetY'] = 0 };								//P整体平移 - 整体平移Y
+	if( data['globalBarrierLayerEnabled'] == undefined ){ data['globalBarrierLayerEnabled'] = true };	//P整体平移 - 边缘遮挡层 - 开关
+	if( data['globalBarrierLayerColor'] == undefined ){ data['globalBarrierLayerColor'] = 0 };			//P整体平移 - 边缘遮挡层 - 颜色
+	
+	// > L手动滚动镜头（无）
+	
+}
+//==============================
+// * 控制器 - 初始化子功能
+//==============================
+Drill_LCa_Controller.prototype.drill_controller_initChild = function(){
+	this.drill_controller_initAttr();			//初始化子功能 - A主体
+	this.drill_controller_initParamSet();		//初始化子功能 - B图层赋值
+	this.drill_controller_initCheckNaN();		//初始化子功能 - C校验值
+	this.drill_controller_initMath();			//初始化子功能 - D数学工具
+	
+	this.drill_controller_initHolder();			//初始化子功能 - E镜头架
+	this.drill_controller_initCameraPos();		//初始化子功能 - F镜头基点
+	
+	this.drill_controller_initMode();			//初始化子功能 - H镜头模式
+	this.drill_controller_initAuto();			//初始化子功能 - I自动模式
+	this.drill_controller_initTourist();		//初始化子功能 - J观光模式
+	this.drill_controller_initLock();			//初始化子功能 - K固定看向
+	
+	this.drill_controller_initChange();			//初始化子功能 - O叠加变化
+	this.drill_controller_initGlobalOffset();	//初始化子功能 - P整体平移
+	
+	this.drill_controller_initScroll();			//初始化子功能 - L手动滚动镜头
+}
+//==============================
+// * 控制器 - 重设数据（私有）
+//
+//			说明：	data对象中的参数【可以缺项】。
+//==============================
+Drill_LCa_Controller.prototype.drill_LCa_resetData_Private = function( data ){
+	
+	// > 判断数据重复情况
+	if( this._drill_data != undefined ){
+		var keys = Object.keys( data );
+		var is_same = true;
+		for( var i=0; i < keys.length; i++ ){
+			var key = keys[i];
+			if( this._drill_data[key] != data[key] ){
+				is_same = false;
+			}
+		}
+		if( is_same == true ){ return; }
+	}
+	// > 补充未设置的数据
+	var keys = Object.keys( this._drill_data );
+	for( var i=0; i < keys.length; i++ ){
+		var key = keys[i];
+		if( data[key] == undefined ){
+			data[key] = this._drill_data[key];
+		}
+	}
+	
+	// > 执行重置
+	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
+	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
+    this.drill_controller_initData();										//初始化数据
+    this.drill_controller_initChild();										//初始化子功能
+}
+//==============================
+// * 控制器 - 立即复原（私有）
+//==============================
+Drill_LCa_Controller.prototype.drill_LCa_restore_Private = function(){
+	//...
+}
+
+
+//==============================
+// * A主体 - 初始化子功能
+//==============================
+Drill_LCa_Controller.prototype.drill_controller_initAttr = function(){
+	this._drill_curTime = 0;				//A主体 - 当前时间
+	this._drill_needDestroy = false;		//A主体 - 销毁标记（暂未用到）
+}
+//==============================
+// * A主体 - 帧刷新
+//==============================
+Drill_LCa_Controller.prototype.drill_controller_updateAttrImportant = function(){
+	this._drill_curTime += 1;
+}
+
+//==============================
+// * B图层赋值 - 初始化子功能
+//==============================
+Drill_LCa_Controller.prototype.drill_controller_initParamSet = function(){
+	this._drill_x = 0;						//B图层赋值 - 位置x（单位像素）
+	this._drill_y = 0;						//B图层赋值 - 位置y（单位像素）
+	this._drill_rotation = 0;				//B图层赋值 - 旋转（单位角度）
+	this._drill_scaleX = 1;					//B图层赋值 - 缩放x
+	this._drill_scaleY = 1;					//B图层赋值 - 缩放y
+}
+//==============================
+// * B图层赋值 - 帧刷新 位置
+//==============================
+Drill_LCa_Controller.prototype.drill_controller_updatePosition = function(){
+	var data = this._drill_data;
+	
+	// > 平移
+	this._drill_x = 0;		//（单位像素）
+	this._drill_y = 0;		//（单位像素）
+	if( data['enable'] == false ){ return; }
+	
+	
+	//（此平移不包含 F镜头基点 情况）
+	
+	
+	// > 坐标再反转
+	if( this._drill_scaleX < 0 ){ this._drill_x *= -1; }
+	if( this._drill_scaleY < 0 ){ this._drill_y *= -1; }
+	var ro = (this._drill_rotation%360 + 360)%360;
+	if( ro > 90 && ro < 270 ){
+		this._drill_x *= -1;
+		this._drill_y *= -1;
+	}
+	
+	// > O叠加变化 - 锁定锚点
+	if( this._drill_rotation == 0 && this._drill_scaleX == 1 && this._drill_scaleY == 1 ){
+		//（不操作）
+	}else{
+		// > 锚点(0.5,0.5)锁定
+		var fix_point = $gameTemp.drill_LCa_Math2D_getFixPointInAnchor( 
+							0.0, 0.0, 
+							0.5, 0.5, 
+							Graphics.boxWidth, Graphics.boxHeight,
+							this._drill_rotation /180*Math.PI, 
+							this._drill_scaleX, this._drill_scaleY 
+						);
+		this._drill_x += fix_point.x;
+		this._drill_y += fix_point.y;
+	}
+	
+	// > P整体平移
+	this._drill_x += this._drill_globalOffsetX;
+	this._drill_y += this._drill_globalOffsetY;
+}
+//==============================
+// * B图层赋值 - 常量集合
+//
+//			说明：	> 留意 此控制器 调用 $gameMap 的细节。（避免写出死循环）
+//					  除了以下常量，还有 $gameMap.event、$gameMap.adjustX、$gameMap.adjustY 。
+//==============================
+Drill_LCa_Controller.prototype.width = function(){ return $gameMap.width(); }
+Drill_LCa_Controller.prototype.height = function(){ return $gameMap.height(); }
+Drill_LCa_Controller.prototype.tileWidth = function(){ return $gameMap.tileWidth(); }
+Drill_LCa_Controller.prototype.tileHeight = function(){ return $gameMap.tileHeight(); }
+Drill_LCa_Controller.prototype.isLoopHorizontal = function(){ return $gameMap.isLoopHorizontal(); }
+Drill_LCa_Controller.prototype.isLoopVertical = function(){ return $gameMap.isLoopVertical(); }
+
+//==============================
+// * C校验值 - 初始化子功能
+//==============================
+Drill_LCa_Controller.prototype.drill_controller_initCheckNaN = function(){
+	//（无）
+}
+//==============================
+// * C校验值 - 校验标记
+//==============================
+DrillUp.g_LCa_checkNaN = true;
+//==============================
+// * C校验值 - 帧刷新
+//==============================
+Drill_LCa_Controller.prototype.drill_controller_updateCheckNaN = function(){
+	if( $gameTemp == undefined ){ return; }		//（测试版开启功能，发布版关闭功能）
+	if( $gameTemp.isPlaytest() != true ){ return; }
+	
+	// > 校验值
+	if( DrillUp.g_LCa_checkNaN == true ){
+		if( isNaN( this._drill_x ) ){
+			DrillUp.g_LCa_checkNaN = false;
+			alert( DrillUp.drill_LCa_getPluginTip_ParamIsNaN("_drill_x") );
+		}
+		if( isNaN( this._drill_y ) ){
+			DrillUp.g_LCa_checkNaN = false;
+			alert( DrillUp.drill_LCa_getPluginTip_ParamIsNaN("_drill_y") );
+		}
+		if( isNaN( this._drill_rotation ) ){
+			DrillUp.g_LCa_checkNaN = false;
+			alert( DrillUp.drill_LCa_getPluginTip_ParamIsNaN("_drill_rotation") );
+		}
+		if( isNaN( this._drill_scaleX ) ){
+			DrillUp.g_LCa_checkNaN = false;
+			alert( DrillUp.drill_LCa_getPluginTip_ParamIsNaN("_drill_scaleX") );
+		}
+		if( isNaN( this._drill_scaleY ) ){
+			DrillUp.g_LCa_checkNaN = false;
+			alert( DrillUp.drill_LCa_getPluginTip_ParamIsNaN("_drill_scaleY") );
+		}
+	}
+}
+
+//==============================
+// * D数学工具 - 初始化子功能
+//==============================
+Drill_LCa_Controller.prototype.drill_controller_initMath = function(){
+	//（无）
+}
+//==============================
+// * D数学工具 - 锁定锚点
+//			
+//			参数：	> org_anchor_x 数字    （原贴图锚点X）
+//					> org_anchor_y 数字    （原贴图锚点Y）
+//					> target_anchor_x 数字 （新的锚点X）
+//					> target_anchor_y 数字 （新的锚点Y）
+//					> width 数字           （贴图宽度）
+//					> height 数字          （贴图高度）
+//					> rotation 数字        （旋转度数，弧度）
+//					> scale_x,scale_y 数字 （缩放比例XY，默认1.00）
+//					> skew_x,skew_y 数字   （斜切比例XY，默认0.00）
+//			返回：	> { x:0, y:0 }         （偏移的坐标）
+//			
+//			说明：	> 修正 旋转+缩放+斜切 的坐标，使其看起来像是在绕着 新的锚点 变换。
+//					  旋转+缩放+斜切 可为负数。
+//==============================
+Game_Temp.prototype.drill_LCa_Math2D_getFixPointInAnchor = function( 
+					org_anchor_x,org_anchor_y,			//原贴图锚点 
+					target_anchor_x,target_anchor_y, 	//新的锚点 
+					width, height,						//贴图高宽
+					rotation,							//变换的值（旋转）
+					scale_x, scale_y,					//变换的值（缩放）
+					skew_x, skew_y  ){					//变换的值（斜切）
+	
+	if( scale_x == undefined ){ scale_x = 1; }
+	if( scale_y == undefined ){ scale_y = 1; }
+	if( skew_x == undefined ){ skew_x = 0; }
+	if( skew_y == undefined ){ skew_y = 0; }
+	
+	// > 参数准备 （来自 Pixi.Transform）
+    var _cx = 1; // cos rotation + skewY;
+    var _sx = 0; // sin rotation + skewY;
+    var _cy = 0; // cos rotation + Math.PI/2 - skewX;
+    var _sy = 1; // sin rotation + Math.PI/2 - skewX;
+	
+	// > 旋转+斜切 （来自 Pixi.Transform.prototype.updateSkew）
+    _cx = Math.cos( rotation + skew_y );
+    _sx = Math.sin( rotation + skew_y );
+    _cy = -Math.sin( rotation - skew_x ); // cos, added PI/2
+    _sy = Math.cos( rotation - skew_x ); // sin, added PI/2
+	
+	// > 缩放 （来自 Pixi.Transform.prototype.updateLocalTransform）
+    var a = _cx * scale_x;
+    var b = _sx * scale_x;
+    var c = _cy * scale_y;
+    var d = _sy * scale_y;
+	
+	// > 将参数应用到坐标
+	var cur_x = width  * target_anchor_x;
+	var cur_y = height * target_anchor_y;
+	var center_x = width  * org_anchor_x;
+	var center_y = height * org_anchor_y;
+	var dx = (center_x - cur_x);
+	var dy = (center_y - cur_y);
+    var tar_x = cur_x + (dx * a + dy * c) - center_x;
+    var tar_y = cur_y + (dx * b + dy * d) - center_y;
+	
+	return { "x":tar_x, "y":tar_y };
+}
+//==============================
+// * D数学工具 - 矩阵点的变换
+//			
+//			参数：	> cur_x,cur_y 数字       （需要变换的点）
+//					> center_x,center_y 数字 （矩形中心点）
+//					> rotation 数字          （旋转度数，弧度）
+//					> scale_x,scale_y 数字   （缩放比例XY，默认1.00）
+//			返回：	> { x:0, y:0 }           （变换后的坐标）
+//			
+//			说明：	矩阵内或矩阵外一个点，能够根据矩阵的 旋转+缩放 一并变换。
+//					旋转值和缩放值可为负数。
+//==============================
+Game_Temp.prototype.drill_LCa_Math2D_getPointWithTransform = function( 
+					cur_x,cur_y,						//需要变换的点 
+					center_x,center_y, 					//矩形中心点 
+					rotation, scale_x, scale_y  ){		//变换的值（旋转+缩放）
+	
+	var xx = cur_x;
+	var yy = cur_y;
+	
+	// > 偏移锚点
+	xx -= center_x;
+	yy -= center_y;
+	if( xx == 0 && yy == 0 ){ return { "x":cur_x, "y":cur_y }; }
+	
+	// > 先缩放
+	xx *= scale_x;
+	yy *= scale_y;
+	
+	// > 后旋转
+	var r = Math.sqrt( Math.pow(xx,2) + Math.pow(yy,2) );
+	var p_degree = Math.atan(yy/xx);	
+	p_degree = Math.PI - p_degree;
+	if( xx < 0 ){
+		p_degree = Math.PI + p_degree;
+	}
+	xx = r*Math.cos( rotation + Math.PI - p_degree );		//圆公式 (x-a)²+(y-b)²=r²
+	yy = r*Math.sin( rotation + Math.PI - p_degree );		//圆极坐标 x=ρcosθ,y=ρsinθ
+	
+	// > 恢复锚点
+	xx += center_x;
+	yy += center_y;
+	
+	return { "x":xx, "y":yy };
+}
+//==============================
+// * D数学工具 - 矩阵点的变换（逆向）
+//			
+//			参数：	> cur_x,cur_y 数字       （变换后的坐标）
+//					> center_x,center_y 数字 （矩形中心点）
+//					> rotation 数字          （旋转度数，弧度）
+//					> scale_x,scale_y 数字   （缩放比例XY，默认1.00）
+//			返回：	> { x:0, y:0 }           （变换前的点）
+//			
+//			说明：	同样的函数，能够将正向函数的结果值，扳回成正向函数的最初值。
+//==============================
+Game_Temp.prototype.drill_LCa_Math2D_getPointWithTransformInversed = function( 
+					cur_x,cur_y,						//需要变换的点 
+					center_x,center_y, 					//矩形中心点 
+					rotation, scale_x, scale_y  ){		//变换的值（旋转+缩放）
+	
+	var xx = cur_x;
+	var yy = cur_y;
+	
+	// > 偏移锚点
+	xx += center_x;
+	yy += center_y;
+	if( xx == 0 && yy == 0 ){ return { "x":cur_x, "y":cur_y }; }
+	
+	// > 旋转（逆向）
+	var r = Math.sqrt( Math.pow(xx,2) + Math.pow(yy,2) );
+	var p_degree = Math.atan(yy/xx);	
+	p_degree = Math.PI - p_degree;
+	if( xx < 0 ){
+		p_degree = Math.PI + p_degree;
+	}
+	xx = r*Math.cos( -1*rotation + Math.PI - p_degree );		//圆公式 (x-a)²+(y-b)²=r²
+	yy = r*Math.sin( -1*rotation + Math.PI - p_degree );		//圆极坐标 x=ρcosθ,y=ρsinθ
+	
+	// > 缩放（逆向）
+	xx /= scale_x;
+	yy /= scale_y;
+	
+	// > 恢复锚点
+	xx -= center_x;
+	yy -= center_y;
+	
+	return { "x":xx, "y":yy };
+}
+
+
+//==============================
+// * E镜头架 - 初始化子功能
+//==============================
+Drill_LCa_Controller.prototype.drill_controller_initHolder = function(){
+	//（无）
+}
+//==============================
+// * E镜头架 - 刷新范围
+//
+//			说明：	> 此函数不能放在初始化中执行，因为那个时候 $gameMap 还没创建。『$gameSystem优先初始化』
+//==============================
+Drill_LCa_Controller.prototype.drill_LCa_refreshHolder = function(){
+	var holder_rect = this.drill_LCa_getCameraHolderRect();	//（单位图块）
+	var camera_rect = this.drill_LCa_getCameraRect();		//（单位图块）
+	
+	// > 镜头基点的活动范围
+	//   （横向循环时，矩形全开放）
+	if( this.isLoopHorizontal() ){
+		this._drill_holderX = holder_rect['x'];
+		this._drill_holderMaxX = holder_rect['x'] + holder_rect['width'];
+	//   （不循环时，范围受限）
+	}else{
+		this._drill_holderX = holder_rect['x'];
+		this._drill_holderMaxX = holder_rect['x'] + holder_rect['width'] - camera_rect['width'];
+	}
+	//   （纵向循环时，矩形全开放）
+	if( this.isLoopVertical() ){
+		this._drill_holderY = holder_rect['y'];
+		this._drill_holderMaxY = holder_rect['y'] + holder_rect['height'];
+	//   （不循环时，范围受限）
+	}else{
+		this._drill_holderY = holder_rect['y'];
+		this._drill_holderMaxY = holder_rect['y'] + holder_rect['height'] - camera_rect['height'];
+	}
+	
+	// > 镜头架比镜头还小情况（范围固定为一个负数的值）
+	if( holder_rect['width'] < camera_rect['width'] ){
+		this._drill_holderX = (holder_rect['width'] - camera_rect['width']) *0.5;
+		this._drill_holderMaxX = this._drill_holderX;
+	}
+	if( holder_rect['height'] < camera_rect['height'] ){
+		this._drill_holderY = (holder_rect['height'] - camera_rect['height']) *0.5;
+		this._drill_holderMaxY = this._drill_holderY;
+	}
+	
+	// > 清零
+	this.drill_clearAutoData();
+	this.drill_clearTouristData();
+}
+//==============================
+// * E镜头架 - 获取范围内的位置X（开放函数）
+//==============================
+Drill_LCa_Controller.prototype.drill_LCa_getXInHolder = function( x ){
+	
+	// > 横向循环时，取模
+	if( this.isLoopHorizontal() ){
+		return this.drill_mod( x, this._drill_holderMaxX );
+		
+	// > 不循环时，固定
+	}else{
+		if( x > this._drill_holderMaxX ){ return this._drill_holderMaxX; }
+		if( x < this._drill_holderX ){ return this._drill_holderX; }
+	}
+	return x;
+}
+//==============================
+// * E镜头架 - 获取范围内的位置Y（开放函数）
+//==============================
+Drill_LCa_Controller.prototype.drill_LCa_getYInHolder = function( y ){
+	
+	// > 横向循环时，取模
+	if( this.isLoopVertical() ){
+		return this.drill_mod( y, this._drill_holderMaxY );
+		
+	// > 不循环时，固定
+	}else{
+		if( y > this._drill_holderMaxY ){ return this._drill_holderMaxY; }
+		if( y < this._drill_holderY ){ return this._drill_holderY; }
+	}
+	return y;
+}
+//==============================
+// * E镜头架 - 获取范围内的位置 - 正值取模（私有）
+//
+//			说明：	> 取模后一定为正数。
+//==============================
+Drill_LCa_Controller.prototype.drill_mod = function( n, m ){
+    return ((n % m) + m) % m;
+}
+//==============================
+// * E镜头架 - 镜头中心点X（开放函数）
+//==============================
+Drill_LCa_Controller.prototype.drill_centerXOffset = function(){
+	var camera_rect = this.drill_LCa_getCameraRect();
+    return camera_rect['width']*0.5;
+};
+//==============================
+// * E镜头架 - 镜头中心点Y（开放函数）
+//==============================
+Drill_LCa_Controller.prototype.drill_centerYOffset = function(){
+	var camera_rect = this.drill_LCa_getCameraRect();
+    return camera_rect['height']*0.5;
+};
+
+
+//==============================
+// * F镜头基点 - 初始化子功能
+//==============================
+Drill_LCa_Controller.prototype.drill_controller_initCameraPos = function(){
+	this._drill_cameraX_offset = 0;			//F镜头基点 - 位置x
+	this._drill_cameraY_offset = 0;			//F镜头基点 - 位置y
+	this._drill_cameraX_offsetAcc = 0;		//F镜头基点 - 位置x（循环积累值）
+	this._drill_cameraY_offsetAcc = 0;		//F镜头基点 - 位置y（循环积累值）
+	this._drill_cameraX_Children = 0;		//F镜头基点 - 变换位置x（子贴图用）
+	this._drill_cameraY_Children = 0;		//F镜头基点 - 变换位置y（子贴图用）
+	this._drill_mousePos_OnChildren = 0;	//F镜头基点 - 地图鼠标落点（子贴图用）
+	this._drill_mousePos_OnOuterSprite = 0;	//F镜头基点 - 地图鼠标落点（外部贴图用）
+}
+//==============================
+// * F镜头基点 - 获取镜头变换位置（子贴图用）（私有）
+//
+//			说明：	为防止调用太多增加计算负担，此函数每帧执行一次，将结果放在参数中。
+//==============================
+Drill_LCa_Controller.prototype.drill_LCa_updateCameraPos_Children = function(){
+    
+	// > 镜头偏移量
+	var ox = 0;
+	var oy = 0;
+	var rect_width = Graphics.boxWidth;
+	var rect_height = Graphics.boxHeight;
+	
+	// > 镜头变化时的矩阵偏移量（正向变换）
+	var point_a = $gameTemp.drill_LCa_Math2D_getPointWithTransform( 
+						rect_width, rect_height,
+						Graphics.boxWidth*0.5, Graphics.boxHeight*0.5,
+						this._drill_rotation /180*Math.PI, 
+						this._drill_scaleX, this._drill_scaleY 
+				  );
+	ox += point_a.x;
+	oy += point_a.y;
+	ox -= rect_width;
+	oy -= rect_height;
+			
+	// > 逆向变换
+	var point_b = $gameTemp.drill_LCa_Math2D_getPointWithTransformInversed( 
+						ox, oy,
+						Graphics.boxWidth*0.5, Graphics.boxHeight*0.5,
+						this._drill_rotation /180*Math.PI, 
+						this._drill_scaleX, this._drill_scaleY 
+				  );
+	ox = point_b.x;
+	oy = point_b.y;
+	
+	// > 坐标再反转
+	if( this._drill_scaleX < 0 ){ ox *= -1; }
+	if( this._drill_scaleY < 0 ){ oy *= -1; }
+	var ro = (this._drill_rotation%360 + 360)%360;
+	if( ro > 90 && ro < 270 ){
+		ox *= -1;
+		oy *= -1;
+	}
+	
+	// > P整体平移 的影响
+	ox -= this._drill_globalOffsetX;
+	oy -= this._drill_globalOffsetY;
+	
+	this._drill_cameraX_Children = ox;
+	this._drill_cameraY_Children = oy;
+}
+//==============================
+// * F镜头基点 - 获取镜头变换位置（外部贴图用）（私有）
+//==============================
+Drill_LCa_Controller.prototype.drill_LCa_getCameraPos_OuterSprite_Private = function( cur_x, cur_y ){
+	
+	// > 直接执行一次正向变换即可
+	var outer_point = $gameTemp.drill_LCa_Math2D_getPointWithTransform( 
+							cur_x, cur_y,
+							Graphics.boxWidth*0.5, Graphics.boxHeight*0.5,
+							this._drill_rotation /180*Math.PI, 
+							this._drill_scaleX, this._drill_scaleY 
+					  );
+	
+	// > P整体平移 的影响
+	outer_point.x = outer_point.x + this._drill_globalOffsetX;
+	outer_point.y = outer_point.y + this._drill_globalOffsetY;
+	
+	return outer_point;
+}
+//==============================
+// * F镜头基点 - 地图落点 转换（外部贴图 -> 子贴图）（私有）
+//==============================
+Drill_LCa_Controller.prototype.drill_LCa_getPos_OuterToChildren_Private = function( x, y ){
+	var xx = x;
+	var yy = y;
+	var rect_width = Graphics.boxWidth*1.5;
+	var rect_height = Graphics.boxHeight*1.5;
+	
+	// > 镜头变化时的矩阵偏移量（正向变换）
+	var point_a = $gameTemp.drill_LCa_Math2D_getPointWithTransform( 
+						rect_width, rect_height,
+						Graphics.boxWidth*0.5, Graphics.boxHeight*0.5,
+						this._drill_rotation /180*Math.PI, 
+						this._drill_scaleX, this._drill_scaleY 
+				);
+	xx += point_a.x;
+	yy += point_a.y;
+	xx -= rect_width;
+	yy -= rect_height;
+	
+	// > 逆向变换
+	var point_b = $gameTemp.drill_LCa_Math2D_getPointWithTransformInversed( 
+						xx, yy,
+						Graphics.boxWidth*0.5, Graphics.boxHeight*0.5,
+						this._drill_rotation /180*Math.PI, 
+						this._drill_scaleX, this._drill_scaleY 
+				);
+	xx = point_b.x;
+	yy = point_b.y;
+	
+	// > 镜头变换位置
+	//（不含）
+	
+	// > P整体平移 的影响
+	xx -= this._drill_globalOffsetX;
+	yy -= this._drill_globalOffsetY;
+	
+	return { 'x':xx, 'y':yy };
+}
+//==============================
+// * F镜头基点 - 地图落点 转换（子贴图 -> 外部贴图）（私有）
+//==============================
+Drill_LCa_Controller.prototype.drill_LCa_getPos_ChildrenToOuter_Private = function( x, y ){
+	var xx = x;
+	var yy = y;
+	
+	// > 直接执行一次正向变换即可
+	var outer_point = $gameTemp.drill_LCa_Math2D_getPointWithTransform( 
+							xx, yy,
+							Graphics.boxWidth*0.5, Graphics.boxHeight*0.5,
+							this._drill_rotation /180*Math.PI, 
+							this._drill_scaleX, this._drill_scaleY 
+					  );
+	
+	// > P整体平移 的影响
+	outer_point.x = outer_point.x + this._drill_globalOffsetX;
+	outer_point.y = outer_point.y + this._drill_globalOffsetY;
+	
+	return outer_point;
+}
+//==============================
+// * F镜头基点 - 获取地图鼠标落点（子贴图用）（私有）
+//
+//			说明：	> 为防止调用太多增加计算负担，此函数每帧执行一次，将结果放在参数中。
+//					> 地图鼠标落点 就是 鼠标位置+地图落点 转换。
+//==============================
+Drill_LCa_Controller.prototype.drill_LCa_updateMousePos_OnChildren = function(){
+	var xx = _drill_mouse_x;
+	var yy = _drill_mouse_y;
+	this._drill_mousePos_OnChildren = this.drill_LCa_getPos_OuterToChildren_Private( xx, yy );
+}
+//==============================
+// * F镜头基点 - 获取地图鼠标落点（外部贴图用）（私有）
+//
+//			说明：	> 为防止调用太多增加计算负担，此函数每帧执行一次，将结果放在参数中。
+//					> 由于是外部贴图，地图鼠标落点 不转换。
+//==============================
+Drill_LCa_Controller.prototype.drill_LCa_updateMousePos_OnOuterSprite = function(){
+	var xx = _drill_mouse_x;
+	var yy = _drill_mouse_y;
+	this._drill_mousePos_OnOuterSprite = {'x': xx, 'y': yy };
+}
+//==============================
+// * F镜头基点 - 帧刷新
+//==============================
+Drill_LCa_Controller.prototype.drill_controller_updateOffset = function(){
+	var data = this._drill_data;
+	
+	// > 镜头基点（单位图块）
+	var xx = 0;
+	var yy = 0;
+	if( data['enable'] == false ){ return; }
+	
+	
+	// > I自动模式 位移
+	if( data['mode'] == "自动模式" ){
+		xx += this._drill_autoPos_curX;
+		yy += this._drill_autoPos_curY;
+	}
+	// > J观光模式 位移
+	if( data['mode'] == "观光模式" ){
+		xx += this._drill_tourist_curX;
+		yy += this._drill_tourist_curY;
+	}
+	
+	
+	//	（强制变成能整除的像素，修临时的bug）
+	//	（这里能完美解决：慢速移动时行走图左右抖动的bug）
+	xx = xx * this.tileWidth();
+	xx = Math.round(xx);
+	xx = xx / this.tileWidth();
+	yy = yy * this.tileHeight();
+	yy = Math.round(yy);
+	yy = yy / this.tileHeight();
+	
+	
+	// > 镜头基点 - 记录
+	this._drill_cameraX_offset = xx;
+	this._drill_cameraY_offset = yy;
+	
+	// > 镜头基点 - 变换位置刷新
+	this.drill_LCa_updateCameraPos_Children();
+	this.drill_LCa_updateMousePos_OnChildren();
+	this.drill_LCa_updateMousePos_OnOuterSprite();
+}
+//==============================
+// * F镜头基点 - 帧刷新（循环积累值）
+//
+//			说明：	> 积累值是指，在循环地图中多次向一个方向移动，所处在的位移位置。
+//					  该位置在镜头中会通过取余而折叠起来，但是也有不需要折叠的情况。比如地图魔法圈。
+//==============================
+Drill_LCa_Controller.prototype.drill_controller_updateOffsetAcc = function(){
+	var data = this._drill_data;
+	
+	// > 镜头基点（单位图块）
+	var xxAcc = 0;
+	var yyAcc = 0;
+	if( data['enable'] == false ){ return; }
+	
+	
+	// > I自动模式 位移
+	if( data['mode'] == "自动模式" ){
+		xxAcc += this._drill_autoPos_curXAcc;
+		yyAcc += this._drill_autoPos_curYAcc;
+	}
+	// > J观光模式 位移
+	if( data['mode'] == "观光模式" ){
+		xxAcc += this._drill_tourist_curXAcc;
+		yyAcc += this._drill_tourist_curYAcc;
+	}
+	
+	
+	// > 镜头基点 - 记录（循环积累值）
+	this._drill_cameraX_offsetAcc = xxAcc;
+	this._drill_cameraY_offsetAcc = yyAcc;
+}
+
+
+//==============================
+// * H镜头模式 - 初始化子功能
+//==============================
+Drill_LCa_Controller.prototype.drill_controller_initMode = function(){
+	//（无）
+}
+//==============================
+// * H镜头模式 - 设置模式（私有）
+//==============================
+Drill_LCa_Controller.prototype.drill_LCa_setMode_Private = function( mode ){
+	var data = this._drill_data;
+	
+	// > 保持切换时位置 - 记录位置
+	var last_x = 0;
+	var last_y = 0;
+	if( data['mode'] == "自动模式" ){
+		last_x = this._drill_autoPos_curXAcc;
+		last_y = this._drill_autoPos_curYAcc;
+	}
+	if( data['mode'] == "观光模式" ){
+		last_x = this._drill_tourist_curXAcc;
+		last_y = this._drill_tourist_curYAcc;
+	}
+	
+	// > 设置模式
+	if( mode == "自动模式" ){ data['mode'] = "自动模式"; }
+	if( mode == "观光模式" ){ data['mode'] = "观光模式"; }
+	
+	// > 保持切换时位置 - 位置赋值
+	if( data['mode'] == "自动模式" ){
+		this._drill_autoPos_curXAcc = last_x;
+		this._drill_autoPos_curYAcc = last_y;
+	}
+	if( data['mode'] == "观光模式" ){
+		this._drill_tourist_curXAcc = last_x;
+		this._drill_tourist_curYAcc = last_y;
+	}
+}
+
+//==============================
+// * I自动模式 - 初始化子功能
+//==============================
+Drill_LCa_Controller.prototype.drill_controller_initAuto = function(){
+	this._drill_autoPos_curX = 0;			//I自动模式 - 当前位置x
+	this._drill_autoPos_curY = 0;			//I自动模式 - 当前位置y
+	this._drill_autoPos_curXAcc = 0;		//I自动模式 - 当前位置x（循环积累值）
+	this._drill_autoPos_curYAcc = 0;		//I自动模式 - 当前位置y（循环积累值）
+}
+//==============================
+// * I自动模式 - 清理数据
+//==============================
+Drill_LCa_Controller.prototype.drill_clearAutoData = function(){
+	this._drill_autoPos_curX = 0;			//I自动模式 - 当前位置x
+	this._drill_autoPos_curY = 0;			//I自动模式 - 当前位置y
+	this._drill_autoPos_curXAcc = 0;		//I自动模式 - 当前位置x（循环积累值）
+	this._drill_autoPos_curYAcc = 0;		//I自动模式 - 当前位置y（循环积累值）
+};
+//==============================
+// * I自动模式 - 获取镜头目标位置
+//
+//			说明：	注意，返回值 未经过 adjust镜头相对位置 和 循环 修正。
+//==============================
+Drill_LCa_Controller.prototype.drill_getAutoPosition = function(){
+	
+	// > 默认为玩家位置
+    var tar_x = $gamePlayer._realX;
+    var tar_y = $gamePlayer._realY;
+	
+	// > K固定看向（自动模式）
+	if( this._drill_lockPos == true ){
+		
+		if( this._drill_lockPos_type == "位置" ){
+			tar_x = this._drill_lockPos_x;
+			tar_y = this._drill_lockPos_y;
+		}
+		if( this._drill_lockPos_type == "事件" ){
+			var xxx = 0;
+			var yyy = 0;
+			for(var i = this._drill_lockPos_eventIdList.length-1; i >= 0; i-- ){
+				var e_id = this._drill_lockPos_eventIdList[i];
+				var e = $gameMap.event( e_id );
+				if( e == undefined ){	//（如果设置了多事件看向，而事件被销毁，则立即取消此事件的绑定）
+					this._drill_lockPos_eventIdList.splice(i,1);
+					continue;
+				}
+				xxx += e._realX;
+				yyy += e._realY;
+			}
+			if( this._drill_lockPos_eventIdList.length > 0 ){
+				xxx = xxx / this._drill_lockPos_eventIdList.length;
+				yyy = yyy / this._drill_lockPos_eventIdList.length;
+				tar_x = xxx;
+				tar_y = yyy;
+			}
+		}
+		
+	}
+	
+	// > 对齐至 镜头中心
+	tar_x -= this.drill_centerXOffset();
+	tar_y -= this.drill_centerYOffset();
+	
+	// > 所有图块 都偏差半个图块 作为镜头看向的位置
+	tar_x += 0.5;
+	tar_y += 0.5;
+	
+	return { 'x': tar_x, 'y': tar_y };
+};
+//==============================
+// * I自动模式 - 帧刷新
+//==============================
+Drill_LCa_Controller.prototype.drill_controller_updateAutoMode = function(){
+	var data = this._drill_data;
+	if( data['mode'] != "自动模式" ){ return; }
+	
+	// > 移动累积
+	this.drill_controller_updateAutoMode_posAccumulate();
+	
+	// > E镜头架 位置修正
+	this.drill_controller_updateAutoMode_fixPosInHolder();
+};
+//==============================
+// * I自动模式 - 帧刷新（循环积累值）
+//==============================
+Drill_LCa_Controller.prototype.drill_controller_updateAutoMode_posAccumulate = function(){
+	var data = this._drill_data;
+	
+	// > 立刻看向目标位置 阻塞
+	if( this._drill_autoPos_notRefreshAccNextFrame == true ){
+		this._drill_autoPos_notRefreshAccNextFrame = false;
+		return;
+	}
+	
+	
+	// > 镜头目标位置
+	var tar_pos = this.drill_getAutoPosition();
+	var x2 = tar_pos.x;
+	var y2 = tar_pos.y;
+	
+	
+	// > 聚焦偏移
+	x2 += data['autoOffsetX'] / this.tileWidth();
+	y2 += data['autoOffsetY'] / this.tileHeight();
+	
+	// > L手动滚动镜头
+	x2 += this._drill_scrollOffsetX;
+	y2 += this._drill_scrollOffsetY;
+	
+	
+	// > 匀速移动
+	if( data['autoMoveType'] == "匀速移动" ){
+		this._drill_autoPos_curXAcc = x2;
+		this._drill_autoPos_curYAcc = y2;
+		return;
+	}
+	
+	
+	// > 弹性移动
+	var speedRatio_x = data['autoSpeedRatio'];
+	var speedRatio_y = data['autoSpeedRatio'];
+	var speedRatio_max = data['autoSpeedMax'];
+	
+	// > 弹性移动 - 切换到相对镜头位置
+	//		（注意，adjustX 包含了对 _displayX、_displayY 的处理，具体去看看函数本身）
+	var tar_x = $gameMap.adjustX( x2 );
+	var tar_y = $gameMap.adjustY( y2 );
+	var tar_pixel_x = tar_x * this.tileWidth();
+	var tar_pixel_y = tar_y * this.tileHeight();
+	
+	// > 弹性移动 - 向下
+	if( tar_pixel_y > 0.25 ){	//（因为 图块与像素 的精度问题，tar_pixel_y 就没有 == 0 的时候）
+								//（所以判定留出一个单位，防止 像素最小速度的误差间隙 造成的来回抖动问题）
+		var pixel_distance = Math.abs(tar_pixel_y);									//像素距离
+		var pixel_speed = Math.min( pixel_distance/speedRatio_y, speedRatio_max );	//像素速度
+		if( pixel_speed < 0.25 ){ pixel_speed = 0.25; }								//像素最小速度（1/4像素）
+		
+		if( pixel_distance < pixel_speed ){
+			this._drill_autoPos_curYAcc += tar_y;									//（距离小于速度时，累加剩下的全部距离）
+		}else{
+			this._drill_autoPos_curYAcc += pixel_speed/this.tileHeight();			//（距离大于速度时，累加速度值）
+		}   
+	}
+	// > 弹性移动 - 向左
+	if( tar_pixel_x < 0 ){
+		var pixel_distance = Math.abs(tar_pixel_x);									//像素距离
+		var pixel_speed = Math.min( pixel_distance/speedRatio_x, speedRatio_max );	//像素速度
+		if( pixel_speed < 0.25 ){ pixel_speed = 0.25; }								//像素最小速度（1/4像素）
+		
+		if( pixel_distance < pixel_speed ){
+			this._drill_autoPos_curXAcc += tar_x;									//（距离小于速度时，累加剩下的全部距离）
+		}else{
+			this._drill_autoPos_curXAcc -= pixel_speed/this.tileWidth();			//（距离大于速度时，累加速度值）（因为取了绝对值，负向）
+		}
+	}
+	// > 弹性移动 - 向右
+	if( tar_pixel_x > 0.25 ){	//（因为 图块与像素 的精度问题，tar_pixel_x 就没有 == 0 的时候）
+								//（所以判定留出一个单位，防止 像素最小速度的误差间隙 造成的来回抖动问题）
+		var pixel_distance = Math.abs(tar_pixel_x);									//像素距离
+		var pixel_speed = Math.min( pixel_distance/speedRatio_x, speedRatio_max );	//像素速度
+		if( pixel_speed < 0.25 ){ pixel_speed = 0.25; }								//像素最小速度（1/4像素）
+		
+		if( pixel_distance < pixel_speed ){
+			this._drill_autoPos_curXAcc += tar_x;									//（距离小于速度时，累加剩下的全部距离）
+		}else{
+			this._drill_autoPos_curXAcc += pixel_speed/this.tileWidth();			//（距离大于速度时，累加速度值）
+		}
+	}
+	// > 弹性移动 - 向上
+	if( tar_pixel_y < 0 ){
+		var pixel_distance = Math.abs(tar_pixel_y);									//像素距离
+		var pixel_speed = Math.min( pixel_distance/speedRatio_y, speedRatio_max );	//像素速度
+		if( pixel_speed < 0.25 ){ pixel_speed = 0.25; }								//像素最小速度（1/4像素）
+		
+		if( pixel_distance < pixel_speed ){
+			this._drill_autoPos_curYAcc += tar_y;									//（距离小于速度时，累加剩下的全部距离）
+		}else{
+			this._drill_autoPos_curYAcc -= pixel_speed/this.tileHeight();			//（距离大于速度时，累加速度值）（因为取了绝对值，负向）
+		}
+	}
+	
+	// > 弹性移动 - 切换到相对镜头位置（全展开形式）（旧设置）
+	//		（如果玩家的位移跨度有点大，可能会绕镜头一圈，然后再回来）
+	//var tar_x = 0;
+	//var tar_y = 0;
+	//var half_width  = ($gameMap.width()  - $gameMap.screenTileX()) *0.5;
+	//var half_height = ($gameMap.height() - $gameMap.screenTileY()) *0.5;
+	//if( $gameMap.isLoopHorizontal() ){
+	//	if( half_width < $gameMap._displayX - x2 ){
+	//		tar_x = x2 - $gameMap._displayX + $dataMap.width;
+	//	}else{
+	//		tar_x = x2 - $gameMap._displayX;
+	//	}
+	//}else{
+	//	tar_x = x2 - $gameMap._displayX;
+	//}
+	//if( $gameMap.isLoopVertical() ){
+	//	if( half_height < $gameMap._displayY - y2 ){
+	//		tar_y = y2 - $gameMap._displayY + $dataMap.height;
+	//	}else{
+	//		tar_y = y2 - $gameMap._displayY;
+	//	}
+	//}else{
+	//	tar_y = y2 - $gameMap._displayY;
+	//}
+};
+//==============================
+// * I自动模式 - 帧刷新 - 镜头架位置修正
+//==============================
+Drill_LCa_Controller.prototype.drill_controller_updateAutoMode_fixPosInHolder = function(){
+	
+	// > 设置位置
+	this._drill_autoPos_curX = this.drill_LCa_getXInHolder( this._drill_autoPos_curXAcc );
+	this._drill_autoPos_curY = this.drill_LCa_getYInHolder( this._drill_autoPos_curYAcc );
+	
+	// > 非循环情况，消除积累值
+	if( this.isLoopHorizontal() == false ){
+		this._drill_autoPos_curXAcc = this._drill_autoPos_curX;
+	}
+	if( this.isLoopVertical() == false ){
+		this._drill_autoPos_curYAcc = this._drill_autoPos_curY;
+	}
+};
+//==============================
+// * I自动模式 - 立刻看向目标位置
+//
+//			说明：	自动模式下的功能。
+//==============================
+Drill_LCa_Controller.prototype.drill_LCa_setLookAtImmediately_Auto = function(){
+	//（该指令执行的比 帧刷新 晚，所以只能延迟到下一帧刷新）
+	
+	// > 镜头目标位置
+	var tar_pos = this.drill_getAutoPosition();
+	var xx = tar_pos.x;
+	var yy = tar_pos.y;
+	
+	// > 位置位移
+	this._drill_autoPos_curXAcc = xx;
+	this._drill_autoPos_curYAcc = yy;
+	this._drill_autoPos_notRefreshAccNextFrame = true;		//（下一帧不刷新distance）
+	
+	// > E镜头架 位置修正
+	this.drill_controller_updateAutoMode_fixPosInHolder();
+};
+//==============================
+// * I自动模式 - 修改聚焦偏移（私有）
+//==============================
+Drill_LCa_Controller.prototype.drill_LCa_setAutoOffset_Private = function( autoOffsetX, autoOffsetY ){
+    var data = this._drill_data;
+	data['autoOffsetX'] = autoOffsetX;
+	data['autoOffsetY'] = autoOffsetY;
+};
+
+
+//==============================
+// * J观光模式 - 初始化子功能
+//==============================
+Drill_LCa_Controller.prototype.drill_controller_initTourist = function(){
+	this._drill_tourist_mouseX = 0;			//J观光模式 - 当前鼠标位置X
+	this._drill_tourist_mouseY = 0;			//J观光模式 - 当前鼠标位置Y
+	this._drill_tourist_mouseDirection = 5;	//J观光模式 - 当前鼠标方向
+	this._drill_tourist_curXSpeed = 0;		//J观光模式 - 当前速度x
+	this._drill_tourist_curYSpeed = 0;		//J观光模式 - 当前速度y
+	this._drill_tourist_curX = 0;			//J观光模式 - 当前位置x
+	this._drill_tourist_curY = 0;			//J观光模式 - 当前位置y
+	this._drill_tourist_curXAcc = 0;		//J观光模式 - 当前位置x（循环积累值）
+	this._drill_tourist_curYAcc = 0;		//J观光模式 - 当前位置y（循环积累值）
+};
+//==============================
+// * J观光模式 - 清理数据
+//==============================
+Drill_LCa_Controller.prototype.drill_clearTouristData = function(){
+	this._drill_tourist_mouseX = 0;			//J观光模式 - 当前鼠标位置X
+	this._drill_tourist_mouseY = 0;			//J观光模式 - 当前鼠标位置Y
+	this._drill_tourist_mouseDirection = 5;	//J观光模式 - 当前鼠标方向
+	this._drill_tourist_curXSpeed = 0;		//J观光模式 - 当前速度x
+	this._drill_tourist_curYSpeed = 0;		//J观光模式 - 当前速度y
+	this._drill_tourist_curX = 0;			//J观光模式 - 当前位置x
+	this._drill_tourist_curY = 0;			//J观光模式 - 当前位置y
+	this._drill_tourist_curXAcc = 0;		//J观光模式 - 当前位置x（循环积累值）
+	this._drill_tourist_curYAcc = 0;		//J观光模式 - 当前位置y（循环积累值）
+};
+//==============================
+// * J观光模式 - 帧刷新
+//==============================
+Drill_LCa_Controller.prototype.drill_controller_updateTouristMode = function(){
+	var data = this._drill_data;
+	if( data['mode'] != "观光模式" ){ return; }
+	
+	
+	// > K固定看向（观光模式）
+	if( this._drill_lockPos == true ){
+		var xx = 0;
+		var yy = 0;
+		if( this._drill_lockPos_type == "位置" ){
+			xx = this._drill_lockPos_x;
+			yy = this._drill_lockPos_y;
+		}
+		if( this._drill_lockPos_type == "事件" ){
+			var xxx = 0;
+			var yyy = 0;
+			for(var i = this._drill_lockPos_eventIdList.length-1; i >= 0; i-- ){
+				var e_id = this._drill_lockPos_eventIdList[i];
+				var e = $gameMap.event( e_id );
+				if( e == undefined ){	//（如果设置了多事件看向，而事件被销毁，则立即取消此事件的绑定）
+					this._drill_lockPos_eventIdList.splice(i,1);
+					continue;
+				}
+				xxx += e._realX;
+				yyy += e._realY;
+			}
+			if( this._drill_lockPos_eventIdList.length > 0 ){
+				xxx = xxx / this._drill_lockPos_eventIdList.length;
+				yyy = yyy / this._drill_lockPos_eventIdList.length;
+				xx = xxx;
+				yy = yyy;
+			}
+		}
+		var oww = Graphics.boxWidth  / this.tileWidth();
+		var ohh = Graphics.boxHeight / this.tileHeight();
+		xx -= oww*0.5;	//（镜头中心点 修正）
+		yy -= ohh*0.5;
+		xx += 0.5;
+		yy += 0.5;
+		this._drill_tourist_curXAcc = xx;
+		this._drill_tourist_curYAcc = yy;
+	
+	
+	// > 正常情况
+	}else{
+		
+		// > 帧刷新 - 鼠标控制
+		this.drill_controller_updateTouristMode_Mouse();
+		
+		// > 帧刷新 - 键盘控制（要放后面）
+		this.drill_controller_updateTouristMode_Keyboard();
+		
+		// > 刷新位置
+		this._drill_tourist_curXAcc += this._drill_tourist_curXSpeed;
+		this._drill_tourist_curYAcc += this._drill_tourist_curYSpeed;
+		
+	}
+	
+	// > E镜头架 位置修正
+	this.drill_controller_updateTouristMode_fixPosInHolder();
+};
+//==============================
+// * J观光模式 - 帧刷新 - 镜头架位置修正
+//==============================
+Drill_LCa_Controller.prototype.drill_controller_updateTouristMode_fixPosInHolder = function(){
+	
+	// > 设置位置
+	this._drill_tourist_curX = this.drill_LCa_getXInHolder( this._drill_tourist_curXAcc );
+	this._drill_tourist_curY = this.drill_LCa_getYInHolder( this._drill_tourist_curYAcc );
+	
+	// > 非循环情况，消除积累值
+	if( this.isLoopHorizontal() == false ){
+		this._drill_tourist_curXAcc = this._drill_tourist_curX;
+	}
+	if( this.isLoopVertical() == false ){
+		this._drill_tourist_curYAcc = this._drill_tourist_curY;
+	}
+};
+//==============================
+// * J观光模式 - 帧刷新 - 键盘控制
+//
+//			说明：	此处帧刷新，包括 手柄控制。
+//==============================
+Drill_LCa_Controller.prototype.drill_controller_updateTouristMode_Keyboard = function(){
+	var data = this._drill_data;
+	
+	// > 键盘控制关闭情况
+	if( data['touristKeyboardEnabled'] == false ){ return; }
+	
+	// > 鼠标控制比键盘优先级高
+	if( this._drill_tourist_mouseDirection != 5 ){ return; }
+	
+	// > 键盘控制
+	var speed = data['touristSpeed'];
+	var direction = this.drill_getTouristDirection();
+	if( direction == 0 || direction == 5 ){
+		this._drill_tourist_curXSpeed = 0;
+		this._drill_tourist_curYSpeed = 0;
+	}
+	if( direction == 2 ){
+		this._drill_tourist_curXSpeed = 0;
+		this._drill_tourist_curYSpeed = speed;
+	}
+	if( direction == 4 ){
+		this._drill_tourist_curXSpeed = -1 *speed;
+		this._drill_tourist_curYSpeed = 0;
+	}
+	if( direction == 6 ){
+		this._drill_tourist_curXSpeed = speed;
+		this._drill_tourist_curYSpeed = 0;
+	}
+	if( direction == 8 ){
+		this._drill_tourist_curXSpeed = 0;
+		this._drill_tourist_curYSpeed = -1 *speed;
+	}
+	if( direction == 1 ){
+		this._drill_tourist_curXSpeed = -1 *speed;
+		this._drill_tourist_curYSpeed = speed;
+	}
+	if( direction == 3 ){
+		this._drill_tourist_curXSpeed = speed;
+		this._drill_tourist_curYSpeed = speed;
+	}
+	if( direction == 7 ){
+		this._drill_tourist_curXSpeed = -1 *speed;
+		this._drill_tourist_curYSpeed = -1 *speed;
+	}
+	if( direction == 9 ){
+		this._drill_tourist_curXSpeed = speed;
+		this._drill_tourist_curYSpeed = -1 *speed;
+	}
+};
+//==============================
+// * J观光模式 - 帧刷新 - 鼠标控制
+//
+//			说明：	此处帧刷新，不包括 触屏控制。
+//==============================
+Drill_LCa_Controller.prototype.drill_controller_updateTouristMode_Mouse = function(){
+	var data = this._drill_data;
+	
+	// > 鼠标控制关闭情况
+	if( data['touristMouseEnabled'] == false ){ return; }
+	
+	// > 鼠标位置刷新（包含出界情况）
+	var mouse_pos = TouchInput.drill_COI_getMousePos_WithOutside();
+	this._drill_tourist_mouseX = mouse_pos.x;
+	this._drill_tourist_mouseY = mouse_pos.y;
+	
+	// > 鼠标方向
+	var xx = this._drill_tourist_mouseX;
+	var yy = this._drill_tourist_mouseY;
+	var bb = data['touristMouseThickness'];
+	var ww = Graphics.boxWidth;
+	var hh = Graphics.boxHeight;
+	if( xx != 0 && yy != 0 ){
+		if( xx < bb && 
+			yy < bb ){
+			this._drill_tourist_mouseDirection = 7;
+		}
+		else if( xx < bb*0.5 && //（非边角的矩形，缩小一半）
+				yy >= bb && yy <= hh-bb ){
+			this._drill_tourist_mouseDirection = 4;
+		}
+		else if( xx < bb && 
+				yy > hh-bb ){
+			this._drill_tourist_mouseDirection = 1;
+		}
+		else if( xx > ww-bb && 
+				yy < bb ){
+			this._drill_tourist_mouseDirection = 9;
+		}
+		else if( xx > ww-bb*0.5 && 
+				yy >= bb && yy <= hh - bb ){
+			this._drill_tourist_mouseDirection = 6;
+		}
+		else if( xx > ww-bb && 
+				yy > hh - bb ){
+			this._drill_tourist_mouseDirection = 3;
+		}
+		else if( xx >= bb && xx <= ww-bb && 
+				yy < bb*0.5 ){
+			this._drill_tourist_mouseDirection = 8;
+		}
+		else if( xx >= bb && xx <= ww-bb && 
+				yy > hh-bb*0.5 ){
+			this._drill_tourist_mouseDirection = 2;
+		}
+		else{
+			this._drill_tourist_mouseDirection = 5;
+		}
+	}
+	
+	
+	// > 鼠标速度控制
+	var speed = data['touristSpeed'];
+	var direction = this._drill_tourist_mouseDirection;
+	if( direction == 0 || direction == 5 ){
+		this._drill_tourist_curXSpeed = 0;
+		this._drill_tourist_curYSpeed = 0;
+	}
+	if( direction == 2 ){
+		this._drill_tourist_curXSpeed = 0;
+		this._drill_tourist_curYSpeed = speed;
+	}
+	if( direction == 4 ){
+		this._drill_tourist_curXSpeed = -1 *speed;
+		this._drill_tourist_curYSpeed = 0;
+	}
+	if( direction == 6 ){
+		this._drill_tourist_curXSpeed = speed;
+		this._drill_tourist_curYSpeed = 0;
+	}
+	if( direction == 8 ){
+		this._drill_tourist_curXSpeed = 0;
+		this._drill_tourist_curYSpeed = -1 *speed;
+	}
+	if( direction == 1 ){
+		this._drill_tourist_curXSpeed = -1 *speed;
+		this._drill_tourist_curYSpeed = speed;
+	}
+	if( direction == 3 ){
+		this._drill_tourist_curXSpeed = speed;
+		this._drill_tourist_curYSpeed = speed;
+	}
+	if( direction == 7 ){
+		this._drill_tourist_curXSpeed = -1 *speed;
+		this._drill_tourist_curYSpeed = -1 *speed;
+	}
+	if( direction == 9 ){
+		this._drill_tourist_curXSpeed = speed;
+		this._drill_tourist_curYSpeed = -1 *speed;
+	}
+};
+//==============================
+// * J观光模式 - 获取朝向
+//			
+//			说明：	方向见小键盘结构，5为轴心。2下/4左/6右/8上/ 1左下/3右下/7左上/9右上。
+//==============================
+Drill_LCa_Controller.prototype.drill_getTouristDirection = function(){
+    return Input.dir8;
+};
+
+
+//==============================
+// * K固定看向 - 初始化子功能
+//==============================
+Drill_LCa_Controller.prototype.drill_controller_initLock = function(){
+	this._drill_lockPos = false;			//K固定看向 - 开关
+	this._drill_lockPos_type = "";			//K固定看向 - 看向类型（位置/事件）
+	this._drill_lockPos_x = 0;				//K固定看向 - 位置x
+	this._drill_lockPos_y = 0;				//K固定看向 - 位置y
+	this._drill_lockPos_eventIdList = [];	//K固定看向 - 事件ID列表
+};
+//==============================
+// * K固定看向 - 固定看向位置（私有）
+//==============================
+Drill_LCa_Controller.prototype.drill_LCa_setLockPosition_Private = function( x, y ){
+    if( this.drill_LCa_isEnable() == false ){ return; }
+	var data = this._drill_data;
+	
+	this._drill_lockPos = true;				//K固定看向 - 开关
+	this._drill_lockPos_type = "位置";		//K固定看向 - 类型
+	this._drill_lockPos_x = x;				//K固定看向 - 位置x
+	this._drill_lockPos_y = y;				//K固定看向 - 位置y
+};
+//==============================
+// * K固定看向 - 固定看向事件（私有）
+//==============================
+Drill_LCa_Controller.prototype.drill_LCa_setLockEvent_Private = function( event_id ){
+    if( this.drill_LCa_isEnable() == false ){ return; }
+	var data = this._drill_data;
+	
+	this._drill_lockPos = true;							//K固定看向 - 开关
+	this._drill_lockPos_type = "事件";					//K固定看向 - 类型
+	this._drill_lockPos_eventIdList = [];				//K固定看向 - 事件ID列表
+	this._drill_lockPos_eventIdList.push( event_id );
+};
+//==============================
+// * K固定看向 - 固定看向多个事件的中心（私有）
+//==============================
+Drill_LCa_Controller.prototype.drill_LCa_setLockEventList_Private = function( event_id_list ){
+    if( this.drill_LCa_isEnable() == false ){ return; }
+	var data = this._drill_data;
+	
+	this._drill_lockPos = true;							//K固定看向 - 开关
+	this._drill_lockPos_type = "事件";					//K固定看向 - 类型
+	this._drill_lockPos_eventIdList = event_id_list;	//K固定看向 - 事件ID列表
+};
+//==============================
+// * K固定看向 - 解除固定看向（私有）
+//==============================
+Drill_LCa_Controller.prototype.drill_LCa_setUnlock_Private = function(){
+    if( this.drill_LCa_isEnable() == false ){ return; }
+	var data = this._drill_data;
+	
+	this._drill_lockPos = false;
+};
+//==============================
+// * K固定看向 - 立刻看向目标位置（私有）
+//==============================
+Drill_LCa_Controller.prototype.drill_LCa_setLookAtImmediately_Private = function(){
+    if( this.drill_LCa_isEnable() == false ){ return; }
+	var data = this._drill_data;
+	
+	// > I自动模式 - 立刻看向目标位置
+	if( data['mode'] == "自动模式" ){
+		this.drill_LCa_setLookAtImmediately_Auto();
+	}
+	// > J观光模式 - 立刻看向目标位置
+	if( data['mode'] == "观光模式" ){
+		//（不需操作）
+	}
+};
+
+
+//==============================
+// * O叠加变化 - 初始化子功能
+//==============================
+Drill_LCa_Controller.prototype.drill_controller_initChange = function(){
+	this._drill_rotation_curTime = 0;		//O叠加变化 - 旋转 - 当前时间
+	this._drill_rotation_tarTime = 0;		//O叠加变化 - 旋转 - 目标时间
+	this._drill_rotation_ballistics = null;	//O叠加变化 - 旋转 - 弹道
+	this._drill_scaleX_curTime = 0;			//O叠加变化 - 缩放X - 当前时间
+	this._drill_scaleX_tarTime = 0;			//O叠加变化 - 缩放X - 目标时间
+	this._drill_scaleX_ballistics = null;	//O叠加变化 - 缩放X - 弹道
+	this._drill_scaleY_curTime = 0;			//O叠加变化 - 缩放Y - 当前时间
+	this._drill_scaleY_tarTime = 0;			//O叠加变化 - 缩放Y - 目标时间
+	this._drill_scaleY_ballistics = null;	//O叠加变化 - 缩放Y - 弹道
+};
+//==============================
+// * O叠加变化 - 执行旋转（私有）
+//==============================
+Drill_LCa_Controller.prototype.drill_LCa_doRotate_Private = function( rotation, time, changeType ){
+    if( this.drill_LCa_isEnable() == false ){ return; }
+	this._drill_rotation_curTime = 0;
+	this._drill_rotation_tarTime = time;
+	var data = {};
+	data['rotateNum'] = 0;
+	data['rotateTime'] = time; 
+	data['rotateMode'] = "目标值模式"; 
+	data['targetType'] = changeType; 
+	data['targetDifference'] = rotation - this._drill_rotation; 
+	$gameTemp.drill_COBa_setBallisticsRotate( data );
+	$gameTemp.drill_COBa_preBallisticsRotate( this, 0, this._drill_rotation );
+	this._drill_rotation_ballistics = this['_drill_COBa_rotate'];
+	this['_drill_COBa_rotate'] = null;
+}
+//==============================
+// * O叠加变化 - 执行缩放X（私有）
+//==============================
+Drill_LCa_Controller.prototype.drill_LCa_doScaleX_Private = function( scaleX, time, changeType ){
+    if( this.drill_LCa_isEnable() == false ){ return; }
+	this._drill_scaleX_curTime = 0;
+	this._drill_scaleX_tarTime = time;
+	var data = {};
+	data['scaleXNum'] = 0;
+	data['scaleXTime'] = time; 
+	data['scaleXMode'] = "目标值模式"; 
+	data['targetType'] = changeType; 
+	data['targetDifference'] = scaleX - this._drill_scaleX; 
+	$gameTemp.drill_COBa_setBallisticsScaleX( data );
+	$gameTemp.drill_COBa_preBallisticsScaleX( this, 0, this._drill_scaleX );
+	this._drill_scaleX_ballistics = this['_drill_COBa_scaleX'];
+	this['_drill_COBa_scaleX'] = null;
+}
+//==============================
+// * O叠加变化 - 执行缩放Y（私有）
+//==============================
+Drill_LCa_Controller.prototype.drill_LCa_doScaleY_Private = function( scaleY, time, changeType ){
+    if( this.drill_LCa_isEnable() == false ){ return; }
+	this._drill_scaleY_curTime = 0;
+	this._drill_scaleY_tarTime = time;
+	var data = {};
+	data['scaleYNum'] = 0;
+	data['scaleYTime'] = time; 
+	data['scaleYMode'] = "目标值模式"; 
+	data['targetType'] = changeType; 
+	data['targetDifference'] = scaleY - this._drill_scaleY; 
+	$gameTemp.drill_COBa_setBallisticsScaleY( data );
+	$gameTemp.drill_COBa_preBallisticsScaleY( this, 0, this._drill_scaleY );
+	this._drill_scaleY_ballistics = this['_drill_COBa_scaleY'];
+	this['_drill_COBa_scaleY'] = null;
+}
+//==============================
+// * O叠加变化 - 帧刷新 - 旋转
+//==============================
+Drill_LCa_Controller.prototype.drill_controller_updateRotation = function(){
+	var data = this._drill_data;
+	
+	// > 旋转
+	this._drill_rotation = 0;
+	if( data['enable'] == false ){ return; }
+	
+	// > 叠加变化 - 旋转
+	if( this._drill_rotation_ballistics == null ){
+		this._drill_rotation = data['defaultRotation'];
+	}else{
+		
+		// > 播放弹道
+		var time = this._drill_rotation_curTime;
+		if( time < 0 ){ time = 0; }
+		if( time > this._drill_rotation_ballistics.length-1 ){ time = this._drill_rotation_ballistics.length-1; }
+		this._drill_rotation += this._drill_rotation_ballistics[time];
+		
+		// > 时间+1
+		this._drill_rotation_curTime += 1;
+	}
+}
+//==============================
+// * O叠加变化 - 帧刷新 - 缩放
+//==============================
+Drill_LCa_Controller.prototype.drill_controller_updateScale = function(){
+	var data = this._drill_data;
+	
+	// > 缩放
+	this._drill_scaleX = 1;
+	this._drill_scaleY = 1;
+	if( data['enable'] == false ){ return; }
+	
+	// > 叠加变化 - 缩放X
+	if( this._drill_scaleX_ballistics == null ){
+		this._drill_scaleX = data['defaultScaleX'];
+	}else{
+		
+		// > 播放弹道
+		var time = this._drill_scaleX_curTime;
+		if( time < 0 ){ time = 0; }
+		if( time > this._drill_scaleX_ballistics.length-1 ){ time = this._drill_scaleX_ballistics.length-1; }
+		this._drill_scaleX = this._drill_scaleX_ballistics[time];	//（注意是赋值，不是相加）
+		
+		// > 时间+1
+		this._drill_scaleX_curTime += 1;
+	}
+	
+	// > 叠加变化 - 缩放Y
+	if( this._drill_scaleY_ballistics == null ){
+		this._drill_scaleY = data['defaultScaleY'];
+	}else{
+		
+		// > 播放弹道
+		var time = this._drill_scaleY_curTime;
+		if( time < 0 ){ time = 0; }
+		if( time > this._drill_scaleY_ballistics.length-1 ){ time = this._drill_scaleY_ballistics.length-1; }
+		this._drill_scaleY = this._drill_scaleY_ballistics[time];	//（注意是赋值，不是相加）
+		
+		// > 时间+1
+		this._drill_scaleY_curTime += 1;
+	}
+}
+
+
+//==============================
+// * P整体平移 - 初始化子功能
+//==============================
+Drill_LCa_Controller.prototype.drill_controller_initGlobalOffset = function(){
+	this._drill_globalOffsetX = 0;					//P整体平移 - X
+	this._drill_globalOffsetY = 0;					//P整体平移 - Y
+	this._drill_globalOffset_curTime = 0;			//P整体平移 - 当前时间
+	this._drill_globalOffset_tarTime = 0;			//P整体平移 - 目标时间
+	this._drill_globalOffset_ballisticsX = null;	//P整体平移 - 弹道X
+	this._drill_globalOffset_ballisticsY = null;	//P整体平移 - 弹道Y
+}
+//==============================
+// * P整体平移 - 修改整体平移（私有）
+//==============================
+Drill_LCa_Controller.prototype.drill_LCa_setGlobalOffset_Private = function( globalOffsetX, globalOffsetY, time, changeType ){
+    if( this.drill_LCa_isEnable() == false ){ return; }
+	this._drill_globalOffset_curTime = 0;
+	this._drill_globalOffset_tarTime = time;
+	var data = {};
+	data['movementNum'] = 1; 
+	data['movementTime'] = time; 
+	data['movementMode'] = "两点式"; 
+	data['twoPointType'] = changeType; 
+	data['twoPointDifferenceX'] = globalOffsetX - this._drill_globalOffsetX; 
+	data['twoPointDifferenceY'] = globalOffsetY - this._drill_globalOffsetY; 
+	$gameTemp.drill_COBa_setBallisticsMove( data );
+	$gameTemp.drill_COBa_preBallisticsMove( this, 0, this._drill_globalOffsetX, this._drill_globalOffsetY );
+	this._drill_globalOffset_ballisticsX = this['_drill_COBa_x'];
+	this._drill_globalOffset_ballisticsY = this['_drill_COBa_y'];
+	this['_drill_COBa_x'] = null;
+	this['_drill_COBa_y'] = null;
+}
+//==============================
+// * P整体平移 - 帧刷新
+//==============================
+Drill_LCa_Controller.prototype.drill_controller_updateGlobalOffset = function(){
+	var data = this._drill_data;
+	
+	// > 整体平移
+	this._drill_globalOffsetX = 0;
+	this._drill_globalOffsetY = 0;
+	if( data['enable'] == false ){ return; }
+	
+	// > 弹道
+	if( this._drill_globalOffset_ballisticsX == null ){
+		this._drill_globalOffsetX = data['globalOffsetX'];
+		this._drill_globalOffsetY = data['globalOffsetY'];
+	}else{
+		
+		// > 播放弹道
+		var time = this._drill_globalOffset_curTime;
+		if( time < 0 ){ time = 0; }
+		if( time > this._drill_globalOffset_ballisticsX.length-1 ){ time = this._drill_globalOffset_ballisticsX.length-1; }
+		this._drill_globalOffsetX = this._drill_globalOffset_ballisticsX[time];
+		this._drill_globalOffsetY = this._drill_globalOffset_ballisticsY[time];
+		
+		// > 时间+1
+		this._drill_globalOffset_curTime += 1;
+	}
+	
+	// > 不能越界
+	var ww = Graphics.boxWidth *0.5;
+	var hh = Graphics.boxHeight *0.5;
+	if( this._drill_globalOffsetX > ww ){ this._drill_globalOffsetX = ww; }
+	if( this._drill_globalOffsetX < (-1)*ww ){ this._drill_globalOffsetX = (-1)*ww; }
+	if( this._drill_globalOffsetY > hh ){ this._drill_globalOffsetY = hh; }
+	if( this._drill_globalOffsetY < (-1)*hh ){ this._drill_globalOffsetY = (-1)*hh; }
+}
+
+
+//==============================
+// * L手动滚动镜头 - 初始化子功能
+//==============================
+Drill_LCa_Controller.prototype.drill_controller_initScroll = function(){
+	this._drill_scrollOffsetX = 0;					//L手动滚动镜头 - X（单位图块）
+	this._drill_scrollOffsetY = 0;					//L手动滚动镜头 - Y（单位图块）
+	this._drill_scrollOffset_curTime = 0;			//L手动滚动镜头 - 当前时间
+	this._drill_scrollOffset_tarTime = 0;			//L手动滚动镜头 - 目标时间
+	this._drill_scrollOffset_ballisticsX = null;	//L手动滚动镜头 - 弹道
+	this._drill_scrollOffset_ballisticsY = null;	//L手动滚动镜头 - 弹道
+}
+//==============================
+// * L手动滚动镜头 - 开始滚动（私有）
+//==============================
+Drill_LCa_Controller.prototype.drill_LCa_scrollToTarget_Private = function( direction, distance, speed ){
+    if( this.drill_LCa_isEnable() == false ){ return; }
+	
+	// > 参数转换
+	var scrollOffsetX = 0;	//（单位图块）
+	var scrollOffsetY = 0;	//（单位图块）
+	if( direction == 2 ){
+		scrollOffsetX = this._drill_scrollOffsetX;
+		scrollOffsetY = this._drill_scrollOffsetY + distance;
+	}
+	if( direction == 4 ){
+		scrollOffsetX = this._drill_scrollOffsetX - distance;
+		scrollOffsetY = this._drill_scrollOffsetY;
+	}
+	if( direction == 6 ){
+		scrollOffsetX = this._drill_scrollOffsetX + distance;
+		scrollOffsetY = this._drill_scrollOffsetY;
+	}
+	if( direction == 8 ){
+		scrollOffsetX = this._drill_scrollOffsetX;
+		scrollOffsetY = this._drill_scrollOffsetY - distance;
+	}
+	if( direction == 1 ){
+		scrollOffsetX = this._drill_scrollOffsetX - distance;
+		scrollOffsetY = this._drill_scrollOffsetY + distance;
+	}
+	if( direction == 3 ){
+		scrollOffsetX = this._drill_scrollOffsetX + distance;
+		scrollOffsetY = this._drill_scrollOffsetY + distance;
+	}
+	if( direction == 7 ){
+		scrollOffsetX = this._drill_scrollOffsetX - distance;
+		scrollOffsetY = this._drill_scrollOffsetY - distance;
+	}
+	if( direction == 9 ){
+		scrollOffsetX = this._drill_scrollOffsetX + distance;
+		scrollOffsetY = this._drill_scrollOffsetY - distance;
+	}
+	var real_speed = Math.pow(2, speed) / 256;
+	var time = Math.floor( distance / real_speed );
+	
+	// > 弹道设置
+	this._drill_scrollOffset_curTime = 0;
+	this._drill_scrollOffset_tarTime = time +1;
+	var data = {};
+	data['movementNum'] = 1; 
+	data['movementTime'] = time; 
+	data['movementMode'] = "两点式"; 
+	data['twoPointType'] = "匀速移动"; 
+	data['twoPointDifferenceX'] = scrollOffsetX - this._drill_scrollOffsetX; 
+	data['twoPointDifferenceY'] = scrollOffsetY - this._drill_scrollOffsetY; 
+	$gameTemp.drill_COBa_setBallisticsMove( data );
+	$gameTemp.drill_COBa_preBallisticsMove( this, 0, this._drill_scrollOffsetX, this._drill_scrollOffsetY );
+	this._drill_scrollOffset_ballisticsX = this['_drill_COBa_x'];
+	this._drill_scrollOffset_ballisticsY = this['_drill_COBa_y'];
+	this['_drill_COBa_x'] = null;
+	this['_drill_COBa_y'] = null;
+}
+//==============================
+// * L手动滚动镜头 - 回到原位置（私有）
+//==============================
+Drill_LCa_Controller.prototype.drill_LCa_scrollToHome_Private = function( speed ){
+    if( this.drill_LCa_isEnable() == false ){ return; }
+	
+	// > 参数转换
+	var distance = Math.abs(this._drill_scrollOffsetX) + Math.abs(this._drill_scrollOffsetY);
+	var real_speed = Math.pow(2, speed) / 256;
+	var time = Math.floor( distance / real_speed );
+	
+	// > 弹道设置
+	this._drill_scrollOffset_curTime = 0;
+	this._drill_scrollOffset_tarTime = time +1;
+	var data = {};
+	data['movementNum'] = 1; 
+	data['movementTime'] = time; 
+	data['movementMode'] = "两点式"; 
+	data['twoPointType'] = "匀速移动"; 
+	data['twoPointDifferenceX'] = 0 - this._drill_scrollOffsetX; 
+	data['twoPointDifferenceY'] = 0 - this._drill_scrollOffsetY; 
+	$gameTemp.drill_COBa_setBallisticsMove( data );
+	$gameTemp.drill_COBa_preBallisticsMove( this, 0, this._drill_scrollOffsetX, this._drill_scrollOffsetY );
+	this._drill_scrollOffset_ballisticsX = this['_drill_COBa_x'];
+	this._drill_scrollOffset_ballisticsY = this['_drill_COBa_y'];
+	this['_drill_COBa_x'] = null;
+	this['_drill_COBa_y'] = null;
+}
+//==============================
+// * L手动滚动镜头 - 帧刷新
+//==============================
+Drill_LCa_Controller.prototype.drill_controller_updateScroll = function(){
+	var data = this._drill_data;
+	
+	// > 整体平移
+	this._drill_scrollOffsetX = 0;
+	this._drill_scrollOffsetY = 0;
+	if( data['enable'] == false ){ return; }
+	
+	// > 叠加变化 - 整体平移
+	if( this._drill_scrollOffset_ballisticsX == null ){
+		this._drill_scrollOffsetX = 0;
+		this._drill_scrollOffsetY = 0;
+	}else{
+		
+		// > 播放弹道
+		var time = this._drill_scrollOffset_curTime;
+		if( time < 0 ){ time = 0; }
+		if( time > this._drill_scrollOffset_ballisticsX.length-1 ){ time = this._drill_scrollOffset_ballisticsX.length-1; }
+		this._drill_scrollOffsetX = this._drill_scrollOffset_ballisticsX[time];
+		this._drill_scrollOffsetY = this._drill_scrollOffset_ballisticsY[time];
+	}
+	
+	// > 时间+1
+	this._drill_scrollOffset_curTime += 1;
+}
+
+
+
+//=============================================================================
+// ** ☆图块填充（B图层赋值 相关）
+//			
+//			说明：	> 此部分专门控制镜头产生的 缩放+旋转 处理后，图块的范围的变化。
+//					> 缩放/旋转后，图块填充margin需要进行相应的范围变化。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 图块填充 - margin属性
+//==============================
+Object.defineProperty(Tilemap.prototype, 'margin', {
+    get: function() {
+        return this._margin;
+    },
+    set: function(value) {
+        if (this._margin !== value) {
+            this._margin = value;
+            this._createLayers();
+        }
+    }
+});
+//==============================
+// * 图块填充 - 帧刷新
+//==============================
+var _drill_LCa_s_update = Scene_Map.prototype.update;
+Scene_Map.prototype.update = function (){
+	_drill_LCa_s_update.call(this);
+	this.drill_LCa_updateTileResize();			//帧刷新 - 缩放比例
+};
+//==============================
+// * 图块填充 - 帧刷新 缩放比例
+//==============================
+Scene_Map.prototype.drill_LCa_updateTileResize = function(){
+	
+	// > 强制刷新开关
+	if( DrillUp.g_LCa_forceRefresh == false ){ return; }
+	
+	// > 值相同时，不刷新
+	var layer_sprite = this._spriteset._baseSprite;
+	if( this._drill_LCa_rotation == layer_sprite.rotation &&
+		this._drill_LCa_scale_x == layer_sprite.scale.x &&
+		this._drill_LCa_scale_y == layer_sprite.scale.y ){
+		return;
+	}
+	this._drill_LCa_rotation = layer_sprite.rotation;
+	this._drill_LCa_scale_x = layer_sprite.scale.x;
+	this._drill_LCa_scale_y = layer_sprite.scale.y;
+	
+	// > 外包裹矩形
+	var rect = $gameTemp.drill_LCa_getTileTransformRect( 
+					0,0,Graphics.boxWidth,Graphics.boxHeight,
+					layer_sprite.rotation,
+					layer_sprite.scale.x,
+					layer_sprite.scale.y
+				);
+	var ww = rect.width;
+	var hh = rect.height;
+	if( ww > 6000 ){ ww = 6000; }	//（定义矩形的上限值）
+	if( hh > 6000 ){ hh = 6000; }
+	var ow = (ww - Graphics.boxWidth) *0.5;
+	var oh = (hh - Graphics.boxHeight) *0.5;
+	if( ow < 0 ){ ow = 0; }
+	if( oh < 0 ){ oh = 0; }
+	ow += 20;
+	oh += 20;
+	var ma = ow;
+	if( ma < oh ){ ma = oh; }
+	
+	// > 图块伸缩
+	this._spriteset._tilemap.margin = ma;
+	this._spriteset._tilemap._width = Graphics.boxWidth + ma*2;
+	this._spriteset._tilemap._height = Graphics.boxHeight + ma*2;
+	
+	// > 地图远景
+	var ox = (Graphics.boxWidth - ww)*0.5;
+	var oy = (Graphics.boxHeight - hh)*0.5;
+	if( this._spriteset._parallax ){
+		this._spriteset._parallax.move( ox, oy, ww, hh );
+		this._spriteset._parallax.origin.x += ox;
+		this._spriteset._parallax.origin.y += oy;
+	}
+}
+//==============================
+// * 图块填充 - 获取矩阵 缩放、旋转 后的外包裹矩阵（数学）
+//			
+//			参数：	> x,y,width,height     （矩形对象）
+//					> rotation 数字        （旋转度数，弧度）
+//					> scale_x,scale_y 数字 （缩放比例XY，默认1.00）
+//
+//			说明：	中心锚点固定为矩形中心(0.5,0.5)。
+//==============================
+Game_Temp.prototype.drill_LCa_getTileTransformRect = function( x, y, width, height, rotation, scale_x, scale_y ){
+	var xx = x;
+	var yy = y;
+	var ww = width;
+	var hh = height;
+	
+	// > 先缩放
+	ww /= scale_x;
+	hh /= scale_y;
+	
+	// > 选取矩形的两个对角点，旋转
+	var p1_x = ww * 0.5;
+	var p1_y = hh * 0.5;
+	var p2_x = ww * 0.5;
+	var p2_y = hh *(-0.5);
+	var r = Math.sqrt( Math.pow(p1_x,2) + Math.pow(p1_y,2) );
+	var r_angle = ((rotation *180/Math.PI) % 360 + 360) % 360;
+	var r_rotation = r_angle /180*Math.PI;
+	
+	var p_degree = Math.atan(p1_y/p1_x);	
+	p_degree = Math.PI - p_degree;
+	if( p1_x < 0 ){
+		p_degree = Math.PI + p_degree;
+	}
+	p1_x = r*Math.cos( r_rotation - p_degree );
+	p1_y = r*Math.sin( r_rotation - p_degree );
+	
+	var p_degree = Math.atan(p2_y/p2_x);	
+	p_degree = Math.PI - p_degree;
+	if( p2_x < 0 ){
+		p_degree = Math.PI + p_degree;
+	}
+	p2_x = r*Math.cos( r_rotation - p_degree );
+	p2_y = r*Math.sin( r_rotation - p_degree );
+	
+	// > 选取最长的作为宽度/高度
+	p1_x = Math.abs(p1_x);
+	p1_y = Math.abs(p1_y);
+	p2_x = Math.abs(p2_x);
+	p2_y = Math.abs(p2_y);
+	
+	if( p1_x < p2_x ){ p1_x = p2_x; }
+	var rww = p1_x *2;
+	if( p1_y < p2_y ){ p1_y = p2_y; }
+	var rhh = p1_y *2;
+	
+	xx = xx + ww - rww;
+	yy = yy + hh - rhh;
+	
+	return { 'x':xx, 'y':yy, 'width':rww, 'height':rhh };
+}
+
+
+//=============================================================================
+// ** ☆管辖权（缩放变换）
+//
+//			说明：	> 管辖权 即对 原函数 进行 修改、覆写、继承、控制子插件继承 等的权利。
+//					> 用于后期脱离 原游戏框架 且仍保持兼容性 的标记。
+//=============================================================================
+/*
+//==============================
+// * A基本属性《地图-活动地图镜头》 - 图块 - 屏幕宽度（图块单位）
+//==============================
+Game_Map.prototype.screenTileX = function(){ return Graphics.width / this.tileWidth(); };
+//==============================
+// * A基本属性《地图-活动地图镜头》 - 图块 - 屏幕高度（图块单位）
+//==============================
+Game_Map.prototype.screenTileY = function(){ return Graphics.height / this.tileHeight(); };
+*/
+
+//=============================================================================
+// ** ☆缩放转换（O叠加变化 相关）
+//
+//			说明：	> 此部分专门控制镜头产生的 缩放转换 处理。
+//					> 子插件会根据情况标记出【镜头缩放与位移】，用于处理位置与缩放关系。
+//					> 获取缩放值 的标准函数 见 B图层赋值
+//					> 缩放值转换 的标准函数 见 O叠加变化
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 缩放转换 - 屏幕宽度（图块单位）（覆写）
+//
+//			说明：	> 考虑到镜头缩放情况，这里返回的值需要经过缩放处理。
+//					> 此函数默认只被 _displayX 相关函数用到了，但是这些函数都被覆写了。所以用处不大。
+//==============================
+Game_Map.prototype.screenTileX = function(){
+	var scale_x = $gameSystem._drill_LCa_controller._drill_scaleX;
+	if( scale_x == undefined ){ scale_x = 1; }
+	return Graphics.boxWidth / scale_x / this.tileWidth();
+};
+//==============================
+// * 缩放转换 - 屏幕高度（图块单位）（覆写）
+//
+//			说明：	> 考虑到镜头缩放情况，这里返回的值需要经过缩放处理。
+//					> 此函数默认只被 _displayY 相关函数用到了，但是这些函数都被覆写了。所以用处不大。
+//==============================
+Game_Map.prototype.screenTileY = function(){
+	var scale_y = $gameSystem._drill_LCa_controller._drill_scaleY;
+	if( scale_y == undefined ){ scale_y = 1; }
+	return Graphics.boxHeight / scale_y / this.tileHeight(); 
+};
+//==============================
+// * 缩放转换 - 缩放地图的鼠标X修正
+//
+//			说明：	> 此效果包含了 鼠标左键移动 的转换。
+//==============================
+var _drill_LCa_map_canvasToMapX = Game_Map.prototype.canvasToMapX;
+Game_Map.prototype.canvasToMapX = function( x ){
+	x = $gameSystem.drill_LCa_cameraToMapX( x );
+	return _drill_LCa_map_canvasToMapX.call(this,x);
+};
+//==============================
+// * 缩放转换 - 缩放地图的鼠标Y修正
+//
+//			说明：	> 此效果包含了 鼠标左键移动 的转换。
+//==============================
+var _drill_LCa_map_canvasToMapY = Game_Map.prototype.canvasToMapY;
+Game_Map.prototype.canvasToMapY = function( y ){
+	y = $gameSystem.drill_LCa_cameraToMapY( y );
+	return _drill_LCa_map_canvasToMapY.call(this,y);
+};
+
+
+//=============================================================================
+// ** ☆整体平移（P整体平移 相关）
+//
+//			说明：	> 关键词 globalOffset
+//					> 此模块使用 镜头控制器 的结果数据，进行实时变化。
+//					> 鼠标指向标、边缘遮挡层 所在的位置需要同步平移。搜索关键字：整体平移。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 整体平移 - 鼠标指向标
+//==============================
+var _drill_LCa_globalOffset_processMapTouch = Scene_Map.prototype.processMapTouch;
+Scene_Map.prototype.processMapTouch = function() {
+	$gameMap._drill_LCa_isInProcessMapTouch = true;		//（标记鼠标点击时机）
+	_drill_LCa_globalOffset_processMapTouch.call( this );
+	$gameMap._drill_LCa_isInProcessMapTouch = false;
+}
+//==============================
+// * 整体平移 - 鼠标指向标 - 整体平移X
+//==============================
+var _drill_LCa_globalOffset_canvasToMapX = Game_Map.prototype.canvasToMapX;
+Game_Map.prototype.canvasToMapX = function( x ){
+	if( this._drill_LCa_isInProcessMapTouch == true ){
+		x -= $gameSystem._drill_LCa_controller._drill_globalOffsetX;
+	}
+	return _drill_LCa_globalOffset_canvasToMapX.call( this, x );
+}
+//==============================
+// * 整体平移 - 鼠标指向标 - 整体平移Y
+//==============================
+var _drill_LCa_globalOffset_canvasToMapY = Game_Map.prototype.canvasToMapY;
+Game_Map.prototype.canvasToMapY = function( y ){
+	if( this._drill_LCa_isInProcessMapTouch == true ){
+		y -= $gameSystem._drill_LCa_controller._drill_globalOffsetY;
+	}
+	return _drill_LCa_globalOffset_canvasToMapY.call( this, y );
+}
+/*
+//==============================
+// * 整体平移 - 鼠标指向标（当前方法不合适，改为上面的三个函数）
+//==============================
+var _drill_LCa_globalOffset_setDestination = Game_Temp.prototype.setDestination;
+Game_Temp.prototype.setDestination = function( x, y ){
+	if( $gameMap ){
+		var controller = $gameSystem._drill_LCa_controller;
+		x -= Math.round( controller._drill_globalOffsetX / $gameMap.tileWidth() );	//（图块单位）
+		y -= Math.round( controller._drill_globalOffsetY / $gameMap.tileHeight() );
+	}
+	_drill_LCa_globalOffset_setDestination.call( this, x, y );
+};
+*/
+//==============================
+// * 整体平移 - 边缘遮挡层 - 创建
+//==============================
+var _drill_LCa_globalOffset_createDestination = Spriteset_Map.prototype.createDestination;
+Spriteset_Map.prototype.createDestination = function() {
+	_drill_LCa_globalOffset_createDestination.call(this);	//鼠标目的地 < 上层 < 天气层
+	
+	// > 上层
+	if( !this._drill_mapUpArea ){
+		this._drill_mapUpArea = new Sprite();
+		this._baseSprite.addChild(this._drill_mapUpArea);	
+	}
+	
+	// > 创建 边缘遮挡层
+	//		（边缘遮挡层是为了防止 整体平移后 玩家对 镜头聚焦 理解会有偏差而定的）
+	if( this._drill_LCa_barrierLayer == undefined ){
+		var data = $gameSystem._drill_LCa_controller._drill_data;
+		var ww = Graphics.boxWidth;
+		var hh = Graphics.boxHeight;
+		
+		// > 建立画布
+		var temp_bitmap = new Bitmap( ww*3, hh*3 );
+		temp_bitmap.fillAll( data['globalBarrierLayerColor'] );
+		temp_bitmap.clearRect( ww,hh, ww,hh );
+		
+		// > 建立贴图
+		var temp_sprite = new Sprite();
+		temp_sprite.bitmap = temp_bitmap;
+		temp_sprite._drill_LCa_curColor = data['globalBarrierLayerColor'];
+		temp_sprite.visible = false;
+		temp_sprite.x = (-1) * ww;
+		temp_sprite.y = (-1) * hh;
+		this.addChild( temp_sprite );
+		this._drill_LCa_barrierLayer = temp_sprite;
+	}
+}
+//==============================
+// * 镜头控制 - 帧刷新绑定
+//==============================
+var _drill_LCa_globalOffset_spriteset_update = Spriteset_Map.prototype.update;
+Spriteset_Map.prototype.update = function(){
+	_drill_LCa_globalOffset_spriteset_update.call(this);
+	if( $gameSystem.drill_LCa_isEnable() != true ){ return; }
+	this.drill_LCa_updateBarrierLayer();		//帧刷新 - 边缘遮挡层
+};
+//==============================
+// * 整体平移 - 边缘遮挡层 - 帧刷新
+//==============================
+Spriteset_Map.prototype.drill_LCa_updateBarrierLayer = function() {
+	if( this._drill_LCa_barrierLayer == undefined ){ return; }
+	var controller = $gameSystem._drill_LCa_controller;
+	var data = $gameSystem._drill_LCa_controller._drill_data;
+	
+	// > 整体平移
+	var ww = Graphics.boxWidth;
+	var hh = Graphics.boxHeight;
+	var xx = (-1) * ww;
+	var yy = (-1) * hh;
+	xx += controller._drill_globalOffsetX*2;	//（边缘遮挡层两倍偏移量）
+	yy += controller._drill_globalOffsetY*2;
+	this._drill_LCa_barrierLayer.x = xx;
+	this._drill_LCa_barrierLayer.y = yy;
+	
+	// > 边缘遮挡层 显示
+	if( data['globalBarrierLayerEnabled'] == true ){
+		if( controller._drill_globalOffsetX == 0 && controller._drill_globalOffsetY == 0 ){
+			this._drill_LCa_barrierLayer.visible = false;
+		}else{
+			this._drill_LCa_barrierLayer.visible = true;
+		}
+	}
+	
+	// > 边缘遮挡层 颜色
+	if( this._drill_LCa_barrierLayer._drill_LCa_curColor != data['globalBarrierLayerColor'] ){
+		this._drill_LCa_barrierLayer._drill_LCa_curColor =  data['globalBarrierLayerColor'];
+		
+		// > 重建画布
+		var temp_bitmap = new Bitmap( ww*3, hh*3 );
+		temp_bitmap.fillAll( data['globalBarrierLayerColor'] );
+		temp_bitmap.clearRect( ww,hh, ww,hh );
+		this._drill_LCa_barrierLayer.bitmap = temp_bitmap;
+	}
+}
+/*
+//==============================
+// * 整体平移 - 初始化（不合适，弃用）
+//
+//			说明：	此部分直接修改鼠标的基函数，确保鼠标的位置、落脚点整体平移。
+//==============================
+var _drill_LCa_globalOffset_Graphics_initialize = Graphics.initialize;
+Graphics.initialize = function( width, height, type ){
+	_drill_LCa_globalOffset_Graphics_initialize.call( this, width, height, type );
+	this._drill_LCa_globalOffsetX = 0;
+	this._drill_LCa_globalOffsetY = 0;
+}
+//==============================
+// * 整体平移 - 游戏坐标X 转 html坐标X（不合适，弃用）
+//==============================
+var _drill_LCa_globalOffset_pageToCanvasX = Graphics.pageToCanvasX;
+Graphics.pageToCanvasX = function( x ){
+	var xx = _drill_LCa_globalOffset_pageToCanvasX.call( this, x );
+	xx -= this._drill_LCa_globalOffsetX;
+	return xx;
+}
+//==============================
+// * 整体平移 - 游戏坐标Y 转 html坐标Y（不合适，弃用）
+//==============================
+var _drill_LCa_globalOffset_pageToCanvasY = Graphics.pageToCanvasY;
+Graphics.pageToCanvasY = function( y ){
+	var yy = _drill_LCa_globalOffset_pageToCanvasY.call( this, y );
+	yy -= this._drill_LCa_globalOffsetY;
+	return yy;
+}
+//==============================
+// * 场景管理器 - 帧刷新（不合适，弃用）
+//==============================
+var _drill_LCa_globalOffset_updateMain = SceneManager.updateMain;
+SceneManager.updateMain = function() {
+	_drill_LCa_globalOffset_updateMain.call( this );
+	
+	// > 只在地图界面才进行 整体平移
+	if( $gameSystem && this._scene.constructor.name === "Scene_Map" ){
+		var controller = $gameSystem._drill_LCa_controller;
+		Graphics._drill_LCa_globalOffsetX = controller._drill_globalOffsetX;
+		Graphics._drill_LCa_globalOffsetY = controller._drill_globalOffsetY;
+	}else{
+		Graphics._drill_LCa_globalOffsetX = 0;
+		Graphics._drill_LCa_globalOffsetY = 0;
+	}
+}
+*/
+
+
+
+//=============================================================================
+// ** ☆管辖权（滚动地图）
 //
 //			说明：	> 管辖权 即对 原函数 进行 修改、覆写、继承、控制子插件继承 等的权利。
 //					> 用于后期脱离 原游戏框架 且仍保持兼容性 的标记。
@@ -952,3595 +4590,8 @@ Game_Player.prototype.updateScroll = function( lastScrolledX, lastScrolledY ){
 };
 */
 
-
 //=============================================================================
-// ** ☆管辖函数覆写
-//
-//			说明：	> 此模块 覆写函数，防止其它插件对函数覆写后，影响功能。
-//					（插件完整的功能目录去看看：功能结构树）
-//=============================================================================
-//==============================
-// * 管辖函数覆写『地图-活动地图镜头』 - 访问器（图块单位）
-//==============================
-Game_Map.prototype.displayX = function(){ return this._displayX; };
-Game_Map.prototype.displayY = function(){ return this._displayY; };
-
-
-
-//=============================================================================
-// ** ☆插件指令
-//=============================================================================
-//==============================
-// * 插件指令 - 指令绑定
-//==============================
-var _drill_LCa_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-Game_Interpreter.prototype.pluginCommand = function( command, args ){
-	_drill_LCa_pluginCommand.call(this, command, args);
-	this.drill_LCa_pluginCommand( command, args );
-}
-//==============================
-// * 插件指令 - 指令执行
-//==============================
-Game_Interpreter.prototype.drill_LCa_pluginCommand = function( command, args ){
-	if( command === ">地图镜头" ){
-		
-		/*-----------------镜头控制器------------------*/
-		if( args.length == 2 ){
-			var type = String(args[1]);
-			if( type == "启用" || type == "开启" || type == "打开" || type == "启动" ){
-				$gameSystem.drill_LCa_setEnable( true );
-			}
-			if( type == "关闭" || type == "禁用" ){
-				$gameSystem.drill_LCa_setEnable( false );
-			}
-			if( type == "暂停镜头运行" || type == "锁定镜头" ){
-				$gameSystem.drill_LCa_setPause( true );
-			}
-			if( type == "继续镜头运行" || type == "解锁镜头" ){
-				$gameSystem.drill_LCa_setPause( false );
-			}
-		}
-		
-		/*-----------------A主体------------------*/
-		if( args.length == 4 ){
-			var type = String(args[1]);
-			var temp1 = String(args[3]);
-			if( type == "修改模式" ){
-				$gameSystem.drill_LCa_setMode( temp1 );
-			}
-		}
-		
-		/*-----------------D自动模式------------------*/
-		if( args.length == 4 ){
-			var type = String(args[1]);
-			var temp1 = String(args[3]);
-			if( type == "自动模式-设置镜头移动模式" || type == "设置镜头移动模式" ){
-				if( temp1 == "默认移动" ){ temp1 = "匀速移动"; }
-				$gameSystem._drill_LCa_controller._drill_data['autoMoveType'] = temp1;
-			}
-			if( type == "自动模式-设置弹性模式移动速度" || type == "设置弹性模式移动速度" ){
-				$gameSystem._drill_LCa_controller._drill_data['autoSpeedRatio'] = Number(temp1);
-			}
-			if( type == "自动模式-设置弹性模式镜头速度上限" || type == "设置弹性模式镜头速度上限" ){
-				$gameSystem._drill_LCa_controller._drill_data['autoSpeedMax'] = Number(temp1);
-			}
-		}
-		/*-----------------D自动模式 - 聚焦偏移------------------*/
-		if(args.length == 4){
-			var type = String(args[1]);
-			var temp1 = String(args[3]);
-			if( type == "修改聚焦偏移" ){
-				temp1 = temp1.replace("位置[", "");
-				temp1 = temp1.replace("]", "");
-				var pos = temp1.split(/[,，]/);
-				if( pos.length >= 2 ){
-					var xx = Number(pos[0]);
-					var yy = Number(pos[1]);
-					$gameSystem._drill_LCa_controller.drill_LCa_setAutoOffset( xx, yy );
-				}
-			}
-		}
-		
-		/*-----------------E观光模式------------------*/
-		if( args.length == 4 ){
-			var type = String(args[1]);
-			var temp1 = String(args[3]);
-			if( type == "观光模式-键盘操作" ){
-				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
-					$gameSystem._drill_LCa_controller._drill_data['touristKeyboardEnabled'] = true;
-				}
-				if( temp1 == "关闭" || temp1 == "禁用" ){
-					$gameSystem._drill_LCa_controller._drill_data['touristKeyboardEnabled'] = false;
-				}
-				if( temp1 == "恢复默认" ){
-					$gameSystem._drill_LCa_controller._drill_data['touristKeyboardEnabled'] = DrillUp.g_LCa_tourist_keyboardEnabled;
-				}
-			}
-			if( type == "观光模式-鼠标操作" ){
-				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
-					$gameSystem._drill_LCa_controller._drill_data['touristMouseEnabled'] = true;
-				}
-				if( temp1 == "关闭" || temp1 == "禁用" ){
-					$gameSystem._drill_LCa_controller._drill_data['touristMouseEnabled'] = false;
-				}
-				if( temp1 == "恢复默认" ){
-					$gameSystem._drill_LCa_controller._drill_data['touristMouseEnabled'] = DrillUp.g_LCa_tourist_mouseEnabled;
-				}
-			}
-			if( type == "观光模式-镜头移动速度" ){
-				temp1 = temp1.replace("速度[","");
-				temp1 = temp1.replace("]","");
-				$gameSystem._drill_LCa_controller._drill_data['touristSpeed'] = Number(temp1);
-			}
-		}
-		
-		
-		/*-----------------F固定看向------------------*/
-		if( args.length == 2 ){
-			var type = String(args[1]);
-			if( type == "解除固定看向" ){
-				$gameSystem.drill_LCa_setUnlock();
-			}
-			if( type == "立刻看向目标位置" ){
-				$gameSystem.drill_LCa_setLookAtImmediately();
-			}
-		}
-		if( args.length == 4 ){
-			var type = String(args[1]);
-			var unit = String(args[3]);
-			if( type == "固定看向" ){
-				
-				var pos = null;
-				if( unit == "本事件" ){
-					var e_id = this._eventId;
-					$gameSystem.drill_LCa_setLockEvent( e_id );
-				}
-				if( unit == "玩家位置" ){
-					$gameSystem.drill_LCa_setLockPosition( $gamePlayer.x, $gamePlayer.y );
-				}
-				if( unit.indexOf("事件[") != -1 ){
-					unit = unit.replace("事件[","");
-					unit = unit.replace("]","");
-					var e_id = Number(unit);
-					if( $gameMap.drill_LCa_isEventExist( e_id ) == false ){ return; }
-					$gameSystem.drill_LCa_setLockEvent( e_id );
-				}
-				if( unit.indexOf("事件变量[") != -1 ){
-					unit = unit.replace("事件变量[","");
-					unit = unit.replace("]","");
-					var e_id = $gameVariables.value(Number(unit));
-					if( $gameMap.drill_LCa_isEventExist( e_id ) == false ){ return; }
-					$gameSystem.drill_LCa_setLockEvent( e_id );
-				}
-				if( unit.indexOf("多个事件的中心[") != -1 ){
-					unit = unit.replace("多个事件的中心[","");
-					unit = unit.replace("]","");
-					var e_list = [];
-					var str_list = unit.split(/[,，]/);
-					for(var i = 0; i < str_list.length; i++ ){
-						var e_id = Number(str_list[i]);
-						if( $gameMap.drill_LCa_isEventExist( e_id ) == false ){ continue; }
-						e_list.push(e_id);
-					}
-					$gameSystem.drill_LCa_setLockEventList( e_list );
-				}
-				if( unit.indexOf("位置[") != -1 ){
-					unit = unit.replace("位置[","");
-					unit = unit.replace("]","");
-					var pos = unit.split(/[,，]/);
-					if( pos.length >= 2 ){
-						var xx = Number(pos[0]);
-						var yy = Number(pos[1]);
-						$gameSystem.drill_LCa_setLockPosition( xx, yy );
-					}
-				}
-				if( unit.indexOf("位置变量[") != -1 ){
-					unit = unit.replace("位置变量[","");
-					unit = unit.replace("]","");
-					var pos = unit.split(/[,，]/);
-					if( pos.length >= 2 ){
-						var xx = $gameVariables.value(Number(pos[0]));
-						var yy = $gameVariables.value(Number(pos[1]));
-						$gameSystem.drill_LCa_setLockPosition( xx, yy );
-					}
-				}
-			}
-		}
-		
-		/*-----------------G叠加变化 - 镜头缩放/旋转------------------*/
-		if(args.length == 6){
-			var type = String(args[1]);
-			var temp1 = String(args[3]);
-			var temp2 = String(args[5]);
-			temp1 = temp1.replace("比例[", "");
-			temp1 = temp1.replace("角度[", "");
-			temp1 = temp1.replace("]", "");
-			temp2 = temp2.replace("时间[","");
-			temp2 = temp2.replace("]","");
-			if( type == "旋转" ){
-				if( temp1 == "恢复默认" ){ temp1 = DrillUp.g_LCa_defaultRotation; }
-				var time = Math.max(Number(temp2),1);
-			    $gameSystem.drill_LCa_doRotate( Number(temp1), time, "弹性变化" );
-				return;
-			}
-			if( type == "缩放X" ){
-				if( temp1 == "恢复默认" ){ temp1 = DrillUp.g_LCa_defaultScaleX; }
-				var time = Math.max(Number(temp2),1);
-			    $gameSystem.drill_LCa_doScaleX( Number(temp1), time, "弹性变化" );
-				return;
-			}
-			if( type == "缩放Y" ){
-				if( temp1 == "恢复默认" ){ temp1 = DrillUp.g_LCa_defaultScaleY; }
-				var time = Math.max(Number(temp2),1);
-			    $gameSystem.drill_LCa_doScaleY( Number(temp1), time, "弹性变化" );
-				return;
-			}
-		}
-		/*-----------------G叠加变化 - 镜头翻转------------------*/
-		if( args.length == 6 ){
-			var type = String(args[1]);
-			var temp1 = String(args[3]);
-			var temp2 = String(args[5]);
-			temp1 = temp1.replace("时间[", "");
-			temp1 = temp1.replace("]", "");
-			if( type == "水平翻转" ){
-				var time = Math.max(Number(temp1),1);
-				var changeType = "弹性变化";
-				if( temp2 == "匀速" ){ changeType = "匀速变化"; }
-				if( temp2 == "弹性" ){ changeType = "弹性变化"; }
-				if( temp2 == "平滑" ){ changeType = "增减速变化"; }
-			    $gameSystem.drill_LCa_doScaleX( -1, time, changeType );
-			    $gameSystem.drill_LCa_doScaleY(  1, time, changeType );
-				return;
-			}
-			if( type == "垂直翻转"){
-				var time = Math.max(Number(temp1),1);
-				var changeType = "弹性变化";
-				if( temp2 == "匀速" ){ changeType = "匀速变化"; }
-				if( temp2 == "弹性" ){ changeType = "弹性变化"; }
-				if( temp2 == "平滑" ){ changeType = "增减速变化"; }
-			    $gameSystem.drill_LCa_doScaleX(  1, time, changeType );
-			    $gameSystem.drill_LCa_doScaleY( -1, time, changeType );
-				return;
-			}
-			if( type == "顺时针翻转" ){
-				var time = Math.max(Number(temp1),1);
-				var changeType = "弹性变化";
-				if( temp2 == "匀速" ){ changeType = "匀速变化"; }
-				if( temp2 == "弹性" ){ changeType = "弹性变化"; }
-				if( temp2 == "平滑" ){ changeType = "增减速变化"; }
-			    $gameSystem.drill_LCa_doRotate( 180, time, changeType );
-				return;
-			}
-			if( type == "逆时针翻转" ){
-				var time = Math.max(Number(temp1),1);
-				var changeType = "弹性变化";
-				if( temp2 == "匀速" ){ changeType = "匀速变化"; }
-				if( temp2 == "弹性" ){ changeType = "弹性变化"; }
-				if( temp2 == "平滑" ){ changeType = "增减速变化"; }
-			    $gameSystem.drill_LCa_doRotate( -180, time, changeType );
-				return;
-			}
-			if( type == "恢复翻转" ){
-				var time = Math.max(Number(temp1),1);
-				var changeType = "弹性变化";
-				if( temp2 == "匀速" ){ changeType = "匀速变化"; }
-				if( temp2 == "弹性" ){ changeType = "弹性变化"; }
-				if( temp2 == "平滑" ){ changeType = "增减速变化"; }
-			    $gameSystem.drill_LCa_doScaleX( DrillUp.g_LCa_defaultScaleX, time, changeType );
-			    $gameSystem.drill_LCa_doScaleY( DrillUp.g_LCa_defaultScaleY, time, changeType );
-			    $gameSystem.drill_LCa_doRotate( DrillUp.g_LCa_defaultRotation, time, changeType );
-				return;
-			}
-		}
-		
-		/*-----------------H整体平移------------------*/
-		if(args.length == 8){
-			var type = String(args[1]);
-			var temp1 = String(args[3]);
-			var temp2 = String(args[5]);
-			var temp3 = String(args[7]);
-			if( type == "修改整体平移" ){
-				temp1 = temp1.replace("位置[", "");
-				temp1 = temp1.replace("]", "");
-				temp2 = temp2.replace("时间[", "");
-				temp2 = temp2.replace("]", "");
-				var pos = temp1.split(/[,，]/);
-				if( pos.length >= 2 ){
-					var xx = Number(pos[0]);
-					var yy = Number(pos[1]);
-					$gameSystem._drill_LCa_controller.drill_LCa_setGlobalOffset( xx, yy, Number(temp2), temp3 );
-				}
-			}
-		}
-		if(args.length == 4){
-			var type = String(args[1]);
-			var temp1 = String(args[3]);
-			if( type == "边缘遮挡层" ){
-				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
-					$gameSystem._drill_LCa_controller.drill_LCa_setGlobalBarrierLayerEnabled( true );
-				}
-				if( temp1 == "关闭" || temp1 == "禁用" ){
-					$gameSystem._drill_LCa_controller.drill_LCa_setGlobalBarrierLayerEnabled( false );
-				}
-			}
-		}
-		if(args.length == 6){
-			var type = String(args[1]);
-			var temp1 = String(args[3]);
-			var temp2 = String(args[5]);
-			if( type == "边缘遮挡层" ){
-				if( temp1 == "修改颜色" ){
-					$gameSystem._drill_LCa_controller.drill_LCa_setGlobalBarrierLayerColor( temp2 );
-				}
-			}
-		}
-		
-		/*-----------------I滚动地图------------------*/
-		if(args.length == 8){
-			var type = String(args[1]);
-			var temp1 = String(args[3]);
-			var temp2 = String(args[5]);
-			var temp3 = String(args[7]);
-			if( type == "滚动地图" ){
-				temp2 = temp2.replace("距离[", "");
-				temp2 = temp2.replace("]", "");
-				temp3 = temp3.replace("速度[", "");
-				temp3 = temp3.replace("]", "");
-				if( temp1 == "方向[上]" ){
-					$gameSystem._drill_LCa_controller.drill_LCa_scrollToTarget( 8, Number(temp2), Number(temp3) );
-				}
-				if( temp1 == "方向[下]" ){
-					$gameSystem._drill_LCa_controller.drill_LCa_scrollToTarget( 2, Number(temp2), Number(temp3) );
-				}
-				if( temp1 == "方向[左]" ){
-					$gameSystem._drill_LCa_controller.drill_LCa_scrollToTarget( 4, Number(temp2), Number(temp3) );
-				}
-				if( temp1 == "方向[右]" ){
-					$gameSystem._drill_LCa_controller.drill_LCa_scrollToTarget( 6, Number(temp2), Number(temp3) );
-				}
-				if( temp1 == "方向[左上]" ){
-					$gameSystem._drill_LCa_controller.drill_LCa_scrollToTarget( 7, Number(temp2), Number(temp3) );
-				}
-				if( temp1 == "方向[左下]" ){
-					$gameSystem._drill_LCa_controller.drill_LCa_scrollToTarget( 1, Number(temp2), Number(temp3) );
-				}
-				if( temp1 == "方向[右上]" ){
-					$gameSystem._drill_LCa_controller.drill_LCa_scrollToTarget( 9, Number(temp2), Number(temp3) );
-				}
-				if( temp1 == "方向[右下]" ){
-					$gameSystem._drill_LCa_controller.drill_LCa_scrollToTarget( 3, Number(temp2), Number(temp3) );
-				}
-			}
-		}
-		if(args.length == 6){
-			var type = String(args[1]);
-			var temp1 = String(args[3]);
-			var temp2 = String(args[5]);
-			if( type == "滚动地图" ){
-				if( temp1 == "回到原位置" ){
-					temp2 = temp2.replace("速度[", "");
-					temp2 = temp2.replace("]", "");
-					$gameSystem._drill_LCa_controller.drill_LCa_scrollToHome( Number(temp2) );
-				}
-			}
-		}
-	}
-};
-//==============================
-// * 插件指令 - 事件检查
-//==============================
-Game_Map.prototype.drill_LCa_isEventExist = function( e_id ){
-	if( e_id == 0 ){ return false; }
-	
-	var e = this.event( e_id );
-	if( e == undefined ){
-		alert( DrillUp.drill_LCa_getPluginTip_EventNotFind( e_id ) );
-		return false;
-	}
-	return true;
-};
-
-
-//#############################################################################
-// ** 【标准模块】存储数据 ☆存储数据
-//#############################################################################
-//##############################
-// * 存储数据 - 参数存储 开关
-//          
-//			说明：	> 如果该插件开放了用户可以修改的参数，就注释掉。
-//##############################
-DrillUp.g_LCa_saveEnabled = true;
-//##############################
-// * 存储数据 - 初始化
-//          
-//			说明：	> 下方为固定写法，不要动。
-//##############################
-var _drill_LCa_sys_initialize = Game_System.prototype.initialize;
-Game_System.prototype.initialize = function() {
-    _drill_LCa_sys_initialize.call(this);
-	this.drill_LCa_initSysData();
-};
-//##############################
-// * 存储数据 - 载入存档
-//          
-//			说明：	> 下方为固定写法，不要动。
-//##############################
-var _drill_LCa_sys_extractSaveContents = DataManager.extractSaveContents;
-DataManager.extractSaveContents = function( contents ){
-	_drill_LCa_sys_extractSaveContents.call( this, contents );
-	
-	// > 参数存储 启用时（检查数据）
-	if( DrillUp.g_LCa_saveEnabled == true ){	
-		$gameSystem.drill_LCa_checkSysData();
-		
-	// > 参数存储 关闭时（直接覆盖）
-	}else{
-		$gameSystem.drill_LCa_initSysData();
-	}
-};
-//##############################
-// * 存储数据 - 初始化数据【标准函数】
-//			
-//			参数：	> 无
-//			返回：	> 无
-//          
-//			说明：	> 强行规范的接口，执行数据初始化，并存入存档数据中。
-//##############################
-Game_System.prototype.drill_LCa_initSysData = function() {
-	this.drill_LCa_initSysData_Private();
-};
-//##############################
-// * 存储数据 - 载入存档时检查数据【标准函数】
-//			
-//			参数：	> 无
-//			返回：	> 无
-//          
-//			说明：	> 强行规范的接口，载入存档时执行的数据检查操作。
-//##############################
-Game_System.prototype.drill_LCa_checkSysData = function() {
-	this.drill_LCa_checkSysData_Private();
-};
-//=============================================================================
-// ** 存储数据（接口实现）
-//=============================================================================
-//==============================
-// * 存储数据 - 初始化数据（私有）
-//==============================
-Game_System.prototype.drill_LCa_initSysData_Private = function() {
-	
-	// > 控制器
-	var data = {
-		'enable':true,
-		'pause':false,
-		
-		'mode':DrillUp.g_LCa_mode,
-		
-		'holderWidth':17,
-		'holderHeight':13,
-		
-		'autoOffsetX':DrillUp.g_LCa_auto_x,
-		'autoOffsetY':DrillUp.g_LCa_auto_y,
-		'autoMoveType':DrillUp.g_LCa_auto_moveType,
-		'autoSpeedRatio':DrillUp.g_LCa_auto_speedRatio,
-		'autoSpeedMax':DrillUp.g_LCa_auto_speedMax,
-		
-		'touristKeyboardEnabled':DrillUp.g_LCa_tourist_keyboardEnabled,
-		'touristMouseEnabled':DrillUp.g_LCa_tourist_mouseEnabled,
-		'touristMouseThickness':DrillUp.g_LCa_tourist_mouseThickness,
-		'touristSpeed':DrillUp.g_LCa_tourist_speed / 48,
-		
-		'defaultRotation':DrillUp.g_LCa_defaultRotation,
-		'defaultScaleX':DrillUp.g_LCa_defaultScaleX,
-		'defaultScaleY':DrillUp.g_LCa_defaultScaleY,
-		
-		'globalOffsetX':DrillUp.g_LCa_globalOffset_x,
-		'globalOffsetY':DrillUp.g_LCa_globalOffset_y,
-		'globalBarrierLayerEnabled':DrillUp.g_LCa_globalBarrierLayerEnabled,
-		'globalBarrierLayerColor':DrillUp.g_LCa_globalBarrierLayerColor,
-	};
-	this._drill_LCa_controller = new Drill_LCa_Controller( data );
-	
-};	
-//==============================
-// * 存储数据 - 载入存档时检查数据（私有）
-//==============================
-Game_System.prototype.drill_LCa_checkSysData_Private = function() {
-	
-	// > 旧存档数据自动补充
-	if( this._drill_LCa_controller == undefined || 
-		this._drill_LCa_controller._drill_data['globalOffsetX'] == undefined || 
-		this._drill_LCa_controller._drill_scrollOffsetX == undefined ){
-		this.drill_LCa_initSysData();
-	}
-	
-};
-
-
-//=============================================================================
-// ** ☆镜头控制器函数
-//
-//			说明：	> 此处全都调用 镜头控制器 的函数。方便子插件使用函数。
-//					（插件完整的功能目录去看看：功能结构树）
-//=============================================================================
-//==============================
-// * 控制器 - 是否启用【标准函数】
-//==============================
-Game_System.prototype.drill_LCa_isEnable = function(){
-	return this._drill_LCa_controller.drill_LCa_isEnable();
-}
-//==============================
-// * 控制器 - 启用/关闭【标准函数】
-//==============================
-Game_System.prototype.drill_LCa_setEnable = function( enable ){
-	return this._drill_LCa_controller.drill_LCa_setEnable( enable );
-}
-//==============================
-// * 控制器 - 是否暂停【标准函数】
-//==============================
-Game_System.prototype.drill_LCa_isPause = function(){
-	return this._drill_LCa_controller.drill_LCa_isPause();
-}
-//==============================
-// * 控制器 - 暂停/继续【标准函数】
-//==============================
-Game_System.prototype.drill_LCa_setPause = function( pause ){
-	return this._drill_LCa_controller.drill_LCa_setPause( pause );
-}
-
-//==============================
-// * A主体 - 镜头模式 - 设置模式【标准函数】
-//==============================
-Game_System.prototype.drill_LCa_setMode = function( mode ){
-	this._drill_LCa_controller.drill_LCa_setMode( mode );
-}
-//==============================
-// * A主体 - 镜头模式 - 获取模式【标准函数】
-//==============================
-Game_System.prototype.drill_LCa_getMode = function(){
-	return this._drill_LCa_controller.drill_LCa_getMode();
-}
-//==============================
-// * A主体 - 获取旋转值【标准函数】
-//
-//			说明：	注意，单位为角度。
-//==============================
-Game_System.prototype.drill_LCa_getRotateValue = function(){
-	return this._drill_LCa_controller.drill_LCa_getRotateValue();
-}
-//==============================
-// * A主体 - 获取缩放X值【标准函数】
-//==============================
-Game_System.prototype.drill_LCa_getScaleXValue = function(){
-	return this._drill_LCa_controller.drill_LCa_getScaleXValue();
-}
-Game_System.prototype.drill_LCa_curScaleX = function(){		//（旧函数名）
-	return this._drill_LCa_controller.drill_LCa_getScaleXValue();
-}
-//==============================
-// * A主体 - 获取缩放Y值【标准函数】
-//==============================
-Game_System.prototype.drill_LCa_getScaleYValue = function(){
-	return this._drill_LCa_controller.drill_LCa_getScaleYValue();
-}
-Game_System.prototype.drill_LCa_curScaleY = function(){		//（旧函数名）
-	return this._drill_LCa_controller.drill_LCa_getScaleYValue();
-}
-
-//==============================
-// * B镜头架 - 设置宽度【标准函数】
-//==============================
-Game_System.prototype.drill_LCa_setCameraHolderWidth = function( width ){
-	return this._drill_LCa_controller.drill_LCa_setCameraHolderWidth( width );
-}
-//==============================
-// * B镜头架 - 设置高度【标准函数】
-//==============================
-Game_System.prototype.drill_LCa_setCameraHolderHeight = function( height ){
-	return this._drill_LCa_controller.drill_LCa_setCameraHolderHeight( height );
-}
-//==============================
-// * B镜头架 - 镜头的矩形范围【标准函数】
-//==============================
-Game_System.prototype.drill_LCa_getCameraRect = function(){
-	return this._drill_LCa_controller.drill_LCa_getCameraRect();
-}
-//==============================
-// * B镜头架 - 镜头架的矩形范围【标准函数】
-//==============================
-Game_System.prototype.drill_LCa_getCameraHolderRect = function(){
-	return this._drill_LCa_controller.drill_LCa_getCameraHolderRect();
-}
-
-//==============================
-// * C镜头基点 - 活动范围【标准函数】
-//==============================
-Game_System.prototype.drill_LCa_getCameraPosRange = function(){
-	return this._drill_LCa_controller.drill_LCa_getCameraPosRange();
-}
-//==============================
-// * C镜头基点 - 获取镜头基点偏移位置【标准函数】
-//==============================
-Game_System.prototype.drill_LCa_getCameraPosOffset = function(){
-	return this._drill_LCa_controller.drill_LCa_getCameraPosOffset();
-}
-//==============================
-// * C镜头基点 - 获取镜头变换位置（子贴图用）【标准函数】
-//==============================
-Game_System.prototype.drill_LCa_getCameraPos_Children = function(){
-	return this._drill_LCa_controller.drill_LCa_getCameraPos_Children();
-}
-//==============================
-// * C镜头基点 - 获取镜头变换位置（外部贴图用）【标准函数】
-//==============================
-Game_System.prototype.drill_LCa_getCameraPos_OuterSprite = function( x, y ){
-	return this._drill_LCa_controller.drill_LCa_getCameraPos_OuterSprite( x, y );
-}
-//==============================
-// * C镜头基点 - 地图落点 转换（外部贴图 -> 子贴图）【标准函数】
-//==============================
-Game_System.prototype.drill_LCa_getPos_OuterToChildren = function( x, y ){
-	return this._drill_LCa_controller.drill_LCa_getPos_OuterToChildren( x, y );
-}
-//==============================
-// * C镜头基点 - 地图落点 转换（子贴图 -> 外部贴图）【标准函数】
-//==============================
-Game_System.prototype.drill_LCa_getPos_ChildrenToOuter = function( x, y ){
-	return this._drill_LCa_controller.drill_LCa_getPos_ChildrenToOuter( x, y );
-}
-//==============================
-// * C镜头基点 - 获取地图鼠标落点（子贴图用）【标准函数】
-//==============================
-Game_System.prototype.drill_LCa_getMousePos_OnChildren = function(){
-	return this._drill_LCa_controller.drill_LCa_getMousePos_OnChildren();
-}
-//==============================
-// * C镜头基点 - 获取地图鼠标落点（外部贴图用）【标准函数】
-//==============================
-Game_System.prototype.drill_LCa_getMousePos_OnOuterSprite = function(){
-	return this._drill_LCa_controller.drill_LCa_getMousePos_OnOuterSprite();
-}
-
-//==============================
-// * D自动模式 - 设置聚焦位置【标准函数】
-//==============================
-//Game_System.prototype.drill_LCa_setAutoPosition = function( x, y ){
-//	this._drill_LCa_controller.drill_LCa_setAutoPosition( x, y );
-//}
-//==============================
-// * E观光模式 - 设置聚焦位置【标准函数】
-//==============================
-Game_System.prototype.drill_LCa_setTouristPosition = function( x, y ){
-	this._drill_LCa_controller.drill_LCa_setTouristPosition( x, y );
-}
-//==============================
-// * F固定看向 - 固定看向位置【标准函数】
-//==============================
-Game_System.prototype.drill_LCa_setLockPosition = function( x, y ){
-	this._drill_LCa_controller.drill_LCa_setLockPosition( x, y );
-}
-//==============================
-// * F固定看向 - 固定看向事件【标准函数】
-//==============================
-Game_System.prototype.drill_LCa_setLockEvent = function( event_id ){
-	this._drill_LCa_controller.drill_LCa_setLockEvent( event_id );
-}
-//==============================
-// * F固定看向 - 固定多个事件的中心【标准函数】
-//==============================
-Game_System.prototype.drill_LCa_setLockEventList = function( event_id ){
-	this._drill_LCa_controller.drill_LCa_setLockEventList( event_id );
-}
-//==============================
-// * F固定看向 - 解除固定看向【标准函数】
-//==============================
-Game_System.prototype.drill_LCa_setUnlock = function(){
-	this._drill_LCa_controller.drill_LCa_setUnlock();
-}
-//==============================
-// * F固定看向 - 立刻看向目标位置【标准函数】
-//==============================
-Game_System.prototype.drill_LCa_setLookAtImmediately = function(){
-	this._drill_LCa_controller.drill_LCa_setLookAtImmediately();
-}
-
-//==============================
-// * G叠加变化 - 执行旋转【标准函数】
-//==============================
-Game_System.prototype.drill_LCa_doRotate = function( rotation, time, changeType ){
-	this._drill_LCa_controller.drill_LCa_doRotate( rotation, time, changeType );
-}
-//==============================
-// * G叠加变化 - 执行缩放X【标准函数】
-//==============================
-Game_System.prototype.drill_LCa_doScaleX = function( scaleX, time, changeType ){
-	this._drill_LCa_controller.drill_LCa_doScaleX( scaleX, time, changeType );
-}
-//==============================
-// * G叠加变化 - 执行缩放Y【标准函数】
-//==============================
-Game_System.prototype.drill_LCa_doScaleY = function( scaleY, time, changeType ){
-	this._drill_LCa_controller.drill_LCa_doScaleY( scaleY, time, changeType );
-}
-//==============================
-// * G叠加变化 - 镜头的X 转 缩放后的X【标准函数】
-//==============================
-Game_System.prototype.drill_LCa_cameraToMapX = function( x ){
-	return this._drill_LCa_controller.drill_LCa_cameraToMapX( x );
-}
-//==============================
-// * G叠加变化 - 镜头的X 转 缩放后的Y【标准函数】
-//==============================
-Game_System.prototype.drill_LCa_cameraToMapY = function( y ){
-	return this._drill_LCa_controller.drill_LCa_cameraToMapY( y );
-}
-//==============================
-// * G叠加变化 - 缩放后的X -> 镜头的X【标准函数】
-//==============================
-Game_System.prototype.drill_LCa_mapToCameraX = function( x ){
-	return this._drill_LCa_controller.drill_LCa_mapToCameraX( x );
-}
-//==============================
-// * G叠加变化 - 缩放后的Y -> 镜头的Y【标准函数】
-//==============================
-Game_System.prototype.drill_LCa_mapToCameraY = function( y ){
-	return this._drill_LCa_controller.drill_LCa_mapToCameraY( y );
-}
-//==============================
-// * H整体平移（无）
-//==============================
-// * I滚动地图（无）
-//==============================
-
-
-//=============================================================================
-// ** ☆镜头控制
-//
-//			说明：	> 此模块帧刷新 镜头控制器 ，并进行图层数据实时赋值。
-//					（插件完整的功能目录去看看：功能结构树）
-//=============================================================================
-//==============================
-// * 镜头控制 - 镜头架初始化
-//==============================
-var _drill_LCa_setup = Game_Map.prototype.setup;
-Game_Map.prototype.setup = function( mapId ){
-	
-	// > F固定看向（切换地图时，解除固定看向）
-	if( this._mapId != mapId ){
-		$gameSystem.drill_LCa_setUnlock();
-	}
-	
-	// > 原函数
-	_drill_LCa_setup.call( this, mapId );
-	
-	// > B镜头架 设置
-	$gameSystem.drill_LCa_setCameraHolderWidth( this.width() );
-	$gameSystem.drill_LCa_setCameraHolderHeight( this.height() );
-		
-	// > E观光模式 看向
-	$gameSystem.drill_LCa_setTouristPosition( $gamePlayer._x, $gamePlayer._y );
-	
-	// > D自动模式 看向
-	$gameSystem.drill_LCa_setLookAtImmediately();
-	
-	// > 切换地图时恢复默认
-	if( DrillUp.g_LCa_resetDefaultInMapSwitch == true ){
-		$gameSystem.drill_LCa_doScaleX( DrillUp.g_LCa_defaultScaleX, 1, "匀速变化" );
-		$gameSystem.drill_LCa_doScaleY( DrillUp.g_LCa_defaultScaleY, 1, "匀速变化" );
-		$gameSystem.drill_LCa_doRotate( DrillUp.g_LCa_defaultRotation, 1, "匀速变化" );
-	}
-}
-//==============================
-// * 镜头控制 - 屏蔽函数 设置镜头位置
-//==============================
-var _drill_LCa_map_setDisplayPos = Game_Map.prototype.setDisplayPos;
-Game_Map.prototype.setDisplayPos = function( x, y ){
-	
-	// > 镜头开启时，屏蔽
-	if( $gameSystem.drill_LCa_isEnable() == true ){
-		
-		// > E观光模式 看向
-		$gameSystem.drill_LCa_setTouristPosition( x, y );
-		
-		// > D自动模式 看向
-		$gameSystem.drill_LCa_setLookAtImmediately();
-		
-		return;
-	}
-	_drill_LCa_map_setDisplayPos.call( this, x, y );
-}
-//==============================
-// * 镜头控制 - 帧刷新绑定
-//==============================
-var _drill_LCa_spriteset_update2 = Spriteset_Map.prototype.update;
-Spriteset_Map.prototype.update = function(){
-	_drill_LCa_spriteset_update2.call(this);
-	if( $gameSystem.drill_LCa_isEnable() != true ){ return; }
-	this.drill_LCa_updateCameraControl();		//帧刷新 - 镜头控制
-};
-//==============================
-// * 镜头控制 - 帧刷新
-//==============================
-Spriteset_Map.prototype.drill_LCa_updateCameraControl = function(){
-	
-	// > 控制器 帧刷新
-	$gameSystem._drill_LCa_controller.drill_LCa_update();
-	
-	// > 控制器 赋值（A主体）
-	//		【注意，此处的赋值，将会大幅度影响 在图层内、在图层外 的全部算法关系】
-	//		【一定要考虑清楚镜头控制哪些层！下层、中层、上层、图片层、最顶层】
-	$gameMap._displayX = $gameSystem._drill_LCa_controller._drill_cameraX_offset;				//镜头基点X（单位图块）
-	$gameMap._displayY = $gameSystem._drill_LCa_controller._drill_cameraY_offset;				//镜头基点Y（单位图块）
-	this._baseSprite.x = $gameSystem._drill_LCa_controller._drill_x;							//平移X（单位像素）
-	this._baseSprite.y = $gameSystem._drill_LCa_controller._drill_y;							//平移X（单位像素）
-	this._baseSprite.rotation = $gameSystem._drill_LCa_controller._drill_rotation /180*Math.PI;	//旋转（弧度）
-	this._baseSprite.scale.x = $gameSystem._drill_LCa_controller._drill_scaleX;					//缩放X
-	this._baseSprite.scale.y = $gameSystem._drill_LCa_controller._drill_scaleY;					//缩放Y
-	
-	// > 远景 赋值
-	//		（需要累加自定义的位移，见函数 Game_Map.prototype.updateParallax）
-	if( $gameMap._parallaxLoopX ){
-		var parallax_distance = $gameSystem._drill_LCa_controller._drill_curTime * $gameMap._parallaxSx / $gameMap.tileWidth() / 2;
-		$gameMap._parallaxX = $gameSystem._drill_LCa_controller._drill_cameraX_offsetAcc + parallax_distance;
-	}else{
-		$gameMap._parallaxX = $gameSystem._drill_LCa_controller._drill_cameraX_offset;
-	}
-	if( $gameMap._parallaxLoopY ){
-		var parallax_distance = $gameSystem._drill_LCa_controller._drill_curTime * $gameMap._parallaxSy / $gameMap.tileWidth() / 2;
-		$gameMap._parallaxY = $gameSystem._drill_LCa_controller._drill_cameraY_offsetAcc + parallax_distance;
-	}else{
-		$gameMap._parallaxY = $gameSystem._drill_LCa_controller._drill_cameraY_offset;
-	}
-};
-
-
-//=============================================================================
-// ** 镜头控制器【Drill_LCa_Controller】
-// **		
-// **		作用域：	地图界面
-// **		主功能：	定义一个专门控制镜头变化的数据类。
-// **		子功能：	
-// **					->控制器
-// **						->启用/关闭
-// **						->暂停/继续
-// **						> 平移
-// **						> 旋转
-// **						> 缩放
-// **					->A主体
-// **						> 图层位置x
-// **						> 图层位置y
-// **						> 图层旋转（单位角度）
-// **						> 图层缩放x
-// **						> 图层缩放y
-// **						->镜头模式
-// **							->保持切换时位置
-// **							->设置模式【标准函数】
-// **							->获取模式【标准函数】
-// **						->获取旋转值【标准函数】
-// **						->获取缩放X值【标准函数】
-// **						->获取缩放Y值【标准函数】
-// **						->帧刷新 位置
-// **						->校验值
-// **					->B镜头架（单位图块）
-// **						->设置宽度【标准函数】
-// **						->设置高度【标准函数】
-// **						->镜头的矩形范围【标准函数】
-// **						->镜头架的矩形范围【标准函数】
-// **						x->缩放自适应
-// **					->C镜头基点
-// **						->活动范围
-// **						->获取镜头基点偏移位置
-// **						->获取镜头变换位置（子贴图用）
-// **						->获取镜头变换位置（外部贴图用）
-// **						->地图落点 转换（外部贴图 -> 子贴图）
-// **						->地图落点 转换（子贴图 -> 外部贴图）
-// **						->获取地图鼠标落点（子贴图用）
-// **						->获取地图鼠标落点（外部贴图用）【如果还没回忆起 地图落点 与 地图鼠标落点，去看看"Drill插件高级手册.docx"】
-// **					->D自动模式
-// **						x->设置聚焦位置
-// **						->聚焦偏移
-// **						->循环积累值 Acc
-// **						> 镜头移动模式
-// **						> 弹性模式移动速度
-// **						> 弹性模式镜头速度上限
-// **					->E观光模式
-// **						->设置聚焦位置
-// **						->循环积累值 Acc
-// **						->键盘控制
-// **						->鼠标控制
-// **					->F固定看向
-// **						->固定-自动模式
-// **						->固定-观光模式
-// **						->立刻看向目标位置
-// **					->G叠加变化
-// **						->执行旋转【标准函数】
-// **						->执行缩放X【标准函数】
-// **						->执行缩放Y【标准函数】
-// **						->镜头的X 转 缩放后的X【标准函数】
-// **						->镜头的X 转 缩放后的Y【标准函数】
-// **						->缩放后的X 转 镜头的X【标准函数】
-// **						->缩放后的Y 转 镜头的Y【标准函数】
-// **					->H整体平移
-// **						->游戏坐标X 转 html坐标X 控制
-// **						->游戏坐标Y 转 html坐标Y 控制
-// **						x->摇晃的镜头？（不稳定的xy平移）
-// **					->I滚动地图
-// **					->J数学工具
-// **						->锁定锚点
-// **						->矩阵点的变换
-// **						->矩阵点的变换（逆向）
-// **					->外部功能
-// **						->层级标记器（该类不含）
-// **						->镜头墙（该类不含）
-// **						->视野触发（该类不含）
-// **						->DEBUG镜头对齐框（该类不含）
-// **					
-// **		说明：	> 该类为单例，并存储在 $gameSystem 中。
-// **				> 如果思路没跟上，去看 必要注意事项。
-// **				> 可以结合 文档 理解具体功能。
-//=============================================================================
-//==============================
-// * 控制器 - 定义
-//==============================
-function Drill_LCa_Controller(){
-	this.initialize.apply(this, arguments);
-}
-//==============================
-// * 控制器 - 校验标记
-//==============================
-DrillUp.g_LCa_checkNaN = true;
-//==============================
-// * 控制器 - 常量集合
-//
-//			说明：	> 留意 此控制器 调用 $gameMap 的细节。（避免写出死循环）
-//					  除了以下常量，还有 $gameMap.event、$gameMap.adjustX、$gameMap.adjustY 。
-//==============================
-Drill_LCa_Controller.prototype.width = function(){ return $gameMap.width(); }
-Drill_LCa_Controller.prototype.height = function(){ return $gameMap.height(); }
-Drill_LCa_Controller.prototype.tileWidth = function(){ return $gameMap.tileWidth(); }
-Drill_LCa_Controller.prototype.tileHeight = function(){ return $gameMap.tileHeight(); }
-Drill_LCa_Controller.prototype.isLoopHorizontal = function(){ return $gameMap.isLoopHorizontal(); }
-Drill_LCa_Controller.prototype.isLoopVertical = function(){ return $gameMap.isLoopVertical(); }
-//==============================
-// * 控制器 - 初始化
-//==============================
-Drill_LCa_Controller.prototype.initialize = function( data ){
-	this._drill_data = {};
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
-    this.drill_controller_initData();										//初始化数据
-    this.drill_controller_initChild();										//初始化子功能
-	if( data == undefined ){ data = {}; }
-    this.drill_LCa_resetData( data );
-}
-//##############################
-// * 控制器 - 帧刷新【标准函数】
-//			
-//			参数：	> 无
-//			返回：	> 无
-//			
-//			说明：	> 此函数必须在 帧刷新 中手动调用执行。
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_update = function(){
-	
-	this._drill_curTime += 1;			//帧刷新 - 时间流逝
-	if( this._drill_data['pause'] == true ){ return; }
-	
-	this.drill_updateAutoMode();		//帧刷新 - D自动模式
-	this.drill_updateTouristMode();		//帧刷新 - E观光模式
-										//帧刷新 - F固定看向（无）
-	
-	this.drill_updateRotation();		//帧刷新 - G叠加变化 - 旋转
-	this.drill_updateScale();			//帧刷新 - G叠加变化 - 缩放
-	this.drill_updateGlobalOffset();	//帧刷新 - H整体平移
-	this.drill_updateScroll();			//帧刷新 - I滚动地图
-										//帧刷新 - J数学工具（无）
-	
-	this.drill_updateOffset();			//帧刷新 - C镜头基点
-	this.drill_updateOffsetAcc();		//帧刷新 - C镜头基点（循环积累值）
-	
-	this.drill_updatePosition();		//帧刷新 - A主体 - 位置
-	this.drill_updateCheckNaN();		//帧刷新 - A主体 - 校验值
-										//帧刷新 - B镜头架（无）
-}
-//##############################
-// * 控制器 - 重设数据【标准函数】
-//			
-//			参数：	> data 动态参数对象
-//			返回：	> 无
-//			
-//			说明：	> 通过此函数，你不需要再重新创建一个数据对象，并且贴图能直接根据此数据来变化。
-//					> 参数对象中的参数【可以缺项】，只要的参数项不一样，就刷新；参数项一样，则不变化。
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_resetData = function( data ){
-	this.drill_LCa_resetData_Private( data );
-};
-//##############################
-// * 控制器 - 立即复原（暂未使用）【标准函数】
-//
-//			参数：	> 无
-//			返回：	> 无
-//			
-//			说明：	> 立即恢复无镜头控制的初始状态。
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_restore = function(){
-    this.drill_LCa_restore_Private();
-}
-//##############################
-// * 控制器 - 是否启用【标准函数】
-//
-//			参数：	> 无
-//			返回：	> 布尔
-//			
-//			说明：	> 可放在帧刷新函数中实时调用。
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_isEnable = function(){
-	if( $gameMap == undefined ){ return false; }	//『$gameSystem优先初始化』
-	if( $dataMap == undefined ){ return false; }
-	return this._drill_data['enable'];
-};
-//##############################
-// * 控制器 - 启用/关闭【标准函数】
-//
-//			参数：	> enable 布尔
-//			返回：	> 无
-//			
-//			说明：	> 可放在帧刷新函数中实时调用。
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_setEnable = function( enable ){
-	var data = this._drill_data;
-	data['enable'] = enable;
-};
-//##############################
-// * 控制器 - 是否暂停【标准函数】
-//
-//			参数：	> 无
-//			返回：	> 布尔
-//			
-//			说明：	> 可放在帧刷新函数中实时调用。
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_isPause = function(){
-	return this._drill_data['pause'];
-};
-//##############################
-// * 控制器 - 暂停/继续【标准函数】
-//
-//			参数：	> enable 布尔
-//			返回：	> 无
-//			
-//			说明：	> 可放在帧刷新函数中实时调用。
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_setPause = function( pause ){
-	var data = this._drill_data;
-	data['pause'] = pause;
-};
-
-//##############################
-// * A主体 - 镜头模式 - 设置模式【标准函数】
-//
-//			参数：	> mode 字符串
-//			返回：	> 无
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_setMode = function( mode ){
-	this.drill_LCa_setMode_Private( mode );
-}
-//##############################
-// * A主体 - 镜头模式 - 获取模式【标准函数】
-//
-//			参数：	> 无
-//			返回：	> 字符串
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_getMode = function(){
-	var data = this._drill_data;
-	return data['mode'];
-}
-//##############################
-// * A主体 - 获取旋转值【标准函数】
-//
-//			参数：	> 无
-//			返回：	> 数字 （旋转值，单位角度）
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_getRotateValue = function(){
-    return this._drill_rotation;
-}
-//##############################
-// * A主体 - 获取缩放X值【标准函数】
-//
-//			参数：	> 无
-//			返回：	> 数字 （缩放X）
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_getScaleXValue = function(){
-    return this._drill_scaleX;
-}
-//##############################
-// * A主体 - 获取缩放Y值【标准函数】
-//
-//			参数：	> 无
-//			返回：	> 数字 （缩放Y）
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_getScaleYValue = function(){
-    return this._drill_scaleY;
-}
-
-//##############################
-// * B镜头架 - 设置宽度【标准函数】
-//
-//			参数：	> width 数字（单位图块）
-//			返回：	> 无
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_setCameraHolderWidth = function( width ){
-	var data = this._drill_data;
-	data['holderWidth'] = width;
-	this.drill_LCa_refreshHolder();
-}
-//##############################
-// * B镜头架 - 设置高度【标准函数】
-//
-//			参数：	> height 数字（单位图块）
-//			返回：	> 无
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_setCameraHolderHeight = function( height ){
-	var data = this._drill_data;
-	data['holderHeight'] = height;
-	this.drill_LCa_refreshHolder();
-}
-//##############################
-// * B镜头架 - 镜头的矩形范围【标准函数】
-//
-//			参数：	> 无
-//			返回：	> 矩形对象（x,y,宽,高）（单位图块）
-//			
-//			说明：	> 此函数为基函数，不要放入私有参数，会出现死循环。
-//					> 此函数不包含 旋转与缩放 的坐标影响。
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_getCameraRect = function(){
-	var oww = Graphics.boxWidth  / this.tileWidth();
-	var ohh = Graphics.boxHeight / this.tileHeight();
-	return new Rectangle( 0, 0, oww, ohh );			//（屏幕宽度高度的图块单位）
-}
-//##############################
-// * B镜头架 - 镜头架的矩形范围【标准函数】
-//
-//			参数：	> 无
-//			返回：	> 矩形对象（x,y,宽,高）（单位图块）
-//			
-//			说明：	> 此函数为基函数，不要放入私有参数，会出现死循环。
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_getCameraHolderRect = function(){
-	return new Rectangle( 0, 0, this.width(), this.height() );
-}
-
-//##############################
-// * C镜头基点 - 活动范围【标准函数】
-//
-//			参数：	> 无
-//			返回：	> 矩形对象（x,y,宽,高）（单位图块）
-//			
-//			说明：	> 镜头基点（左上角锚点）的活动范围。与地图是否循环相关。
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_getCameraPosRange = function(){
-	return new Rectangle( this._drill_holderX, this._drill_holderY, this._drill_holderMaxX-this._drill_holderX, this._drill_holderMaxY-this._drill_holderY );
-}
-//##############################
-// * C镜头基点 - 获取镜头基点偏移位置【标准函数】
-//
-//			参数：	> 无
-//			返回：	> 坐标对象（x,y）（单位像素）
-//			
-//			说明：	> 此函数返回 活动范围内 的偏移量。
-//					> 此函数不包含 旋转与缩放 的坐标影响。
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_getCameraPosOffset = function(){
-	return {'x': this._drill_cameraX_offset, 'y': this._drill_cameraY_offset };
-}
-//##############################
-// * C镜头基点 - 获取镜头变换位置（子贴图用）【标准函数】
-//
-//			参数：	> 无
-//			返回：	> 坐标对象（x,y）（单位像素）
-//			
-//			说明：	> 【应用场景】：此函数适用于 下层、中层、上层 的贴图对象。
-//					  直接减去 返回值 即可实现贴图与镜头同步。
-//					> 此函数已包含 旋转与缩放 的坐标影响。
-//					> 子贴图不需考虑 旋转与缩放 贴图变化的影响。
-//					> 使用方法可以见后面函数：drill_LCa_DEBUG_updateSpriteCameraPos
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_getCameraPos_Children = function(){
-	//（如果此处思路没跟上，去看 必要注意事项 ）
-	return {'x': this._drill_cameraX_Children, 'y': this._drill_cameraY_Children };
-}
-//##############################
-// * C镜头基点 - 获取镜头变换位置（外部贴图用）【标准函数】
-//
-//			参数：	> cur_x 数字 （外部贴图的位置X）（单位像素）
-//					> cur_y 数字 （外部贴图的位置Y）（单位像素）
-//			返回：	> 坐标对象（x,y）（单位像素）
-//			
-//			说明：	> 【应用场景】：此函数适用于 图片层、最顶层 的贴图对象。
-//					  由于外部贴图一般都是 图片、UI。
-//					  而这些贴图可以选择【不移动】，直接贴在镜头上，因此对于UI、图片，可能用不上。
-//					> 此函数已包含 旋转与缩放 的坐标影响。
-//					> 外部贴图需要考虑 旋转与缩放 贴图变化的影响。
-//					> 使用方法可以见后面函数：drill_LCa_DEBUG_updateSpriteCameraPos
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_getCameraPos_OuterSprite = function( cur_x, cur_y ){
-	//（如果此处思路没跟上，去看 必要注意事项 ）
-	return this.drill_LCa_getCameraPos_OuterSprite_Private( cur_x, cur_y );
-}
-//##############################
-// * C镜头基点 - 地图落点 转换（外部贴图 -> 子贴图）【标准函数】
-//
-//			参数：	> 坐标对象（x,y）（单位像素）
-//			返回：	> 坐标对象（x,y）（单位像素）
-//			
-//			说明：	> 此函数适用于 图片层、最顶层 的坐标，落到 上层、中层、下层 的坐标。
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_getPos_OuterToChildren = function( x, y ){
-	return this.drill_LCa_getPos_OuterToChildren_Private( x, y );
-}
-//##############################
-// * C镜头基点 - 地图落点 转换（子贴图 -> 外部贴图）【标准函数】
-//
-//			参数：	> 坐标对象（x,y）（单位像素）
-//			返回：	> 坐标对象（x,y）（单位像素）
-//			
-//			说明：	> 此函数适用于 上层、中层、下层 的坐标，落到 图片层、最顶层 的坐标。
-//					> 注意 地图鼠标落点 不要 调用此函数，因为鼠标一直就处于外部贴图。
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_getPos_ChildrenToOuter = function( x, y ){
-	return this.drill_LCa_getPos_ChildrenToOuter_Private( x, y );
-}
-//##############################
-// * C镜头基点 - 获取地图鼠标落点（子贴图用）【标准函数】
-//
-//			参数：	无
-//			返回：	> 坐标对象（x,y）（单位像素）
-//			
-//			说明：	> 此函数适用于 下层、中层、上层 的贴图对象，获取到鼠标的 地图落点 。不含触屏情况。
-//					> 使用方法可以见后面函数：drill_LCa_DEBUG_updateMousePosition
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_getMousePos_OnChildren = function(){
-	return this._drill_mousePos_OnChildren;
-}
-//##############################
-// * C镜头基点 - 获取地图鼠标落点（外部贴图用）【标准函数】
-//
-//			参数：	无
-//			返回：	> 坐标对象（x,y）（单位像素）
-//			
-//			说明：	> 此函数适用于 图片层、最顶层 的贴图对象，获取到鼠标的 地图落点 。不含触屏情况。
-//					> 使用方法可以见后面函数：drill_LCa_DEBUG_updateMousePosition
-//					> 其实此方法就是直接 赋值 _drill_mouse_x ，但考虑到标准化，因此最好考虑情况并调用此函数。
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_getMousePos_OnOuterSprite = function(){
-	return this._drill_mousePos_OnOuterSprite;
-}
-
-//##############################
-// * D自动模式 - 设置聚焦位置【标准函数】
-//
-//			参数：	> x 数字
-//					> y 数字
-//			返回：	> 无
-//
-//			说明：	此函数为战斗镜头专用。此函数不能放在帧刷新中使用，需要缓冲时间。
-//##############################
-//Drill_LCa_Controller.prototype.drill_LCa_setAutoPosition = function( x, y ){
-//	//（无此函数）
-//}
-//##############################
-// * D自动模式 - 修改聚焦偏移【标准函数】
-//
-//			参数：	> autoOffsetX 数字  （聚焦偏移X）
-//					> autoOffsetY 数字  （聚焦偏移Y）
-//			返回：	> 无
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_setAutoOffset = function( autoOffsetX, autoOffsetY ){
-    this.drill_LCa_setAutoOffset_Private( autoOffsetX, autoOffsetY );
-}
-//##############################
-// * E观光模式 - 设置聚焦位置【标准函数】
-//
-//			参数：	> x 数字
-//					> y 数字
-//			返回：	> 无
-//
-//			说明：	> 设置后，将会覆盖 当前位置。如果是临时看向然后返回，用"固定看向位置"。
-//					> 注意，默认镜头的【左上角会对齐到该点】，你需要考虑 镜头中心点 修正。
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_setTouristPosition = function( x, y ){
-	this._drill_tourist_curXAcc = x;
-	this._drill_tourist_curYAcc = y;
-}
-//##############################
-// * F固定看向 - 固定看向位置【标准函数】
-//
-//			参数：	> x 数字
-//					> y 数字
-//			返回：	> 无
-//
-//			说明：	坐标值为 地图的图块 。
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_setLockPosition = function( x, y ){
-	this.drill_LCa_setLockPosition_Private( x, y );
-}
-//##############################
-// * F固定看向 - 固定看向事件【标准函数】
-//
-//			参数：	> event_id 数字
-//			返回：	> 无
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_setLockEvent = function( event_id ){
-	this.drill_LCa_setLockEvent_Private( event_id );
-}
-//##############################
-// * F固定看向 - 固定多个事件的中心【标准函数】
-//
-//			参数：	> event_id_list 数字列表
-//			返回：	> 无
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_setLockEventList = function( event_id_list ){
-	this.drill_LCa_setLockEventList_Private( event_id_list );
-}
-//##############################
-// * F固定看向 - 解除固定看向【标准函数】
-//
-//			参数：	> 无
-//			返回：	> 无
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_setUnlock = function(){
-	this.drill_LCa_setUnlock_Private();
-	this._drill_lockPos = false;
-}
-//##############################
-// * F固定看向 - 立刻看向目标位置【标准函数】
-//
-//			参数：	> 无
-//			返回：	> 无
-//==============================
-Drill_LCa_Controller.prototype.drill_LCa_setLookAtImmediately = function(){
-	this.drill_LCa_setLookAtImmediately_Private();
-}
-
-//##############################
-// * G叠加变化 - 执行旋转【标准函数】
-//
-//			参数：	> rotation 数字    （旋转值，单位角度）
-//					> time 数字        （时长）
-//					> changeType 字符串（匀速变化/弹性变化/增减速变化）
-//			返回：	> 无
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_doRotate = function( rotation, time, changeType ){
-    this.drill_LCa_doRotate_Private( rotation, time, changeType );
-}
-//##############################
-// * G叠加变化 - 执行缩放X【标准函数】
-//
-//			参数：	> scaleX 数字      （缩放X）
-//					> time 数字        （时长）
-//					> changeType 字符串（匀速变化/弹性变化/增减速变化）
-//			返回：	> 无
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_doScaleX = function( scaleX, time, changeType ){
-    this.drill_LCa_doScaleX_Private( scaleX, time, changeType );
-}
-//##############################
-// * G叠加变化 - 执行缩放Y【标准函数】
-//
-//			参数：	> scaleY 数字      （缩放Y）
-//					> time 数字        （时长）
-//					> changeType 字符串（匀速变化/弹性变化/增减速变化）
-//			返回：	> 无
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_doScaleY = function( scaleY, time, changeType ){
-    this.drill_LCa_doScaleY_Private( scaleY, time, changeType );
-}
-//##############################
-// * G叠加变化 - 镜头的X 转 缩放后的X【标准函数】
-//
-//			参数：	> x 数字   （贴图的X）
-//			返回：	> 数字
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_cameraToMapX = function( x ){
-	x = x / this._drill_scaleX;
-	x -= (Graphics.boxWidth / this._drill_scaleX - Graphics.boxWidth)/2;
-	return Math.round(x);
-}
-//##############################
-// * G叠加变化 - 镜头的X 转 缩放后的Y【标准函数】
-//
-//			参数：	> y 数字   （贴图的Y）
-//			返回：	> 数字
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_cameraToMapY = function( y ){
-	y = y / this._drill_scaleY;
-	y -= (Graphics.boxHeight / this._drill_scaleY - Graphics.boxHeight)/2;
-	return Math.round(y);
-}
-//##############################
-// * G叠加变化 - 缩放后的X 转 镜头的X【标准函数】
-//
-//			参数：	> x 数字   （贴图的X）
-//			返回：	> 数字
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_mapToCameraX = function( x ){
-	x += (Graphics.boxWidth / this._drill_scaleX - Graphics.boxWidth)/2;
-	x = x * this._drill_scaleX;;
-	return Math.round(x);
-}
-//##############################
-// * G叠加变化 - 缩放后的Y 转 镜头的Y【标准函数】
-//
-//			参数：	> y 数字   （贴图的Y）
-//			返回：	> 数字
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_mapToCameraY = function( y ){
-	y += (Graphics.boxHeight / this._drill_scaleY - Graphics.boxHeight)/2;
-	y = y * this._drill_scaleY;
-	return Math.round(y);
-}
-
-//##############################
-// * H整体平移 - 修改整体平移【标准函数】
-//
-//			参数：	> globalOffsetX 数字（整体平移X）
-//					> globalOffsetY 数字（整体平移Y）
-//					> time 数字         （时长）
-//					> changeType 字符串 （匀速移动/弹性移动/增减速移动）
-//			返回：	> 无
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_setGlobalOffset = function( globalOffsetX, globalOffsetY, time, changeType ){
-    this.drill_LCa_setGlobalOffset_Private( globalOffsetX, globalOffsetY, time, changeType );
-}
-//##############################
-// * H整体平移 - 边缘遮挡层 开启/关闭【标准函数】
-//
-//			参数：	> enable 布尔
-//			返回：	> 无
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_setGlobalBarrierLayerEnabled = function( enable ){
-    var data = this._drill_data;
-	data['globalBarrierLayerEnabled'] = enable;
-}
-//##############################
-// * H整体平移 - 边缘遮挡层 修改颜色【标准函数】
-//
-//			参数：	> color 字符串 （颜色）
-//			返回：	> 无
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_setGlobalBarrierLayerColor = function( color ){
-    var data = this._drill_data;
-	data['globalBarrierLayerColor'] = color;
-}
-
-//##############################
-// * I滚动地图 - 开始滚动【标准函数】
-//
-//			参数：	> direction 数字 （方向 8/2/4/6 或 1/3/7/9 ）
-//					> distance 数字  （图块距离）
-//					> speed 数字     （速度 1/2/3/4/5/6 ）
-//			返回：	> 无
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_scrollToTarget = function( direction, distance, speed ){
-	this.drill_LCa_scrollToTarget_Private( direction, distance, speed );
-}
-//##############################
-// * I滚动地图 - 判断滚动状态【标准函数】
-//
-//			参数：	> 无
-//			返回：	> 布尔
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_isScrolling = function(){
-	return this._drill_scrollOffset_curTime < this._drill_scrollOffset_tarTime;
-}
-//##############################
-// * I滚动地图 - 回到原位置【标准函数】
-//
-//			参数：	> speed 数字
-//			返回：	> 无
-//##############################
-Drill_LCa_Controller.prototype.drill_LCa_scrollToHome = function( speed ){
-	this.drill_LCa_scrollToHome_Private( speed );
-	
-}
-
-//##############################
-// * 控制器 - 初始化数据【标准默认值】
-//
-//			参数：	> 无
-//			返回：	> 无
-//			
-//			说明：	> data 动态参数对象（来自类初始化）
-//					  该对象包含 类所需的所有默认值。
-//##############################
-Drill_LCa_Controller.prototype.drill_controller_initData = function(){
-	var data = this._drill_data;
-	
-	// > 控制器
-	if( data['enable'] == undefined ){ data['enable'] = true };											//启用情况
-	if( data['pause'] == undefined ){ data['pause'] = false };											//暂停情况
-	
-	// > A主体
-	if( data['mode'] == undefined ){ data['mode'] = "自动模式" };										//A主体 - 镜头模式
-	
-	// > B镜头架
-	if( data['holderWidth'] == undefined ){ data['holderWidth'] = 17 };									//B镜头架 - 宽度
-	if( data['holderHeight'] == undefined ){ data['holderHeight'] = 13 };								//B镜头架 - 高度
-	
-	// > C镜头基点（无）
-	
-	// > D自动模式
-	if( data['autoOffsetX'] == undefined ){ data['autoOffsetX'] = 0 };									//D自动模式 - 聚焦偏移X
-	if( data['autoOffsetY'] == undefined ){ data['autoOffsetY'] = 0 };									//D自动模式 - 聚焦偏移Y
-	if( data['autoMoveType'] == undefined ){ data['autoMoveType'] = "弹性移动" };						//D自动模式 - 镜头移动模式
-	if( data['autoSpeedRatio'] == undefined ){ data['autoSpeedRatio'] = 10 };							//D自动模式 - 弹性模式移动速度
-	if( data['autoSpeedMax'] == undefined ){ data['autoSpeedMax'] = 24 };								//D自动模式 - 弹性模式镜头速度上限	
-	
-	// > E观光模式
-	if( data['touristKeyboardEnabled'] == undefined ){ data['touristKeyboardEnabled'] = true };			//E观光模式 - 是否启用键盘操作
-	if( data['touristMouseEnabled'] == undefined ){ data['touristMouseEnabled'] = true };				//E观光模式 - 是否启用鼠标操作
-	if( data['touristMouseThickness'] == undefined ){ data['touristMouseThickness'] = 40 };				//E观光模式 - 鼠标触发区域的厚度
-	if( data['touristSpeed'] == undefined ){ data['touristSpeed'] = 0.5 };								//E观光模式 - 镜头移动速度
-	
-	// > G叠加变化
-	if( data['defaultRotation'] == undefined ){ data['defaultRotation'] = 0 };							//G叠加变化 - 默认旋转角度
-	if( data['defaultScaleX'] == undefined ){ data['defaultScaleX'] = 1.0 };							//G叠加变化 - 默认X缩放比例
-	if( data['defaultScaleY'] == undefined ){ data['defaultScaleY'] = 1.0 };							//G叠加变化 - 默认Y缩放比例
-	
-	// > H整体平移
-	if( data['globalOffsetX'] == undefined ){ data['globalOffsetX'] = 0 };								//H整体平移 - 整体平移X
-	if( data['globalOffsetY'] == undefined ){ data['globalOffsetY'] = 0 };								//H整体平移 - 整体平移Y
-	if( data['globalBarrierLayerEnabled'] == undefined ){ data['globalBarrierLayerEnabled'] = true };	//H整体平移 - 边缘遮挡层 - 开关
-	if( data['globalBarrierLayerColor'] == undefined ){ data['globalBarrierLayerColor'] = 0 };			//H整体平移 - 边缘遮挡层 - 颜色
-	
-	// > I滚动地图（无）
-	
-	// > J数学工具（无）
-	
-}
-//==============================
-// * 控制器 - 初始化子功能
-//==============================
-Drill_LCa_Controller.prototype.drill_controller_initChild = function(){
-	this.drill_controller_initAttr();			//初始化子功能 - A主体
-	this.drill_controller_initHolder();			//初始化子功能 - B镜头架
-	this.drill_controller_initCameraPos();		//初始化子功能 - C镜头基点
-	this.drill_controller_initAuto();			//初始化子功能 - D自动模式
-	this.drill_controller_initTourist();		//初始化子功能 - E观光模式
-	this.drill_controller_initLock();			//初始化子功能 - F固定看向
-	this.drill_controller_initChange();			//初始化子功能 - G叠加变化
-	this.drill_controller_initGlobalOffset();	//初始化子功能 - H整体平移
-	this.drill_controller_initScroll();			//初始化子功能 - I滚动地图
-	this.drill_controller_initMath();			//初始化子功能 - J数学工具
-}
-//==============================
-// * 控制器 - 重设数据（私有）
-//
-//			说明：	data对象中的参数【可以缺项】。
-//==============================
-Drill_LCa_Controller.prototype.drill_LCa_resetData_Private = function( data ){
-	
-	// > 判断数据重复情况
-	if( this._drill_data != undefined ){
-		var keys = Object.keys( data );
-		var is_same = true;
-		for( var i=0; i < keys.length; i++ ){
-			var key = keys[i];
-			if( this._drill_data[key] != data[key] ){
-				is_same = false;
-			}
-		}
-		if( is_same == true ){ return; }
-	}
-	// > 补充未设置的数据
-	var keys = Object.keys( this._drill_data );
-	for( var i=0; i < keys.length; i++ ){
-		var key = keys[i];
-		if( data[key] == undefined ){
-			data[key] = this._drill_data[key];
-		}
-	}
-	
-	// > 执行重置
-	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
-	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
-    this.drill_controller_initData();										//初始化数据
-    this.drill_controller_initChild();										//初始化子功能
-}
-//==============================
-// * 控制器 - 立即复原（私有）
-//==============================
-Drill_LCa_Controller.prototype.drill_LCa_restore_Private = function(){
-	//...
-}
-
-
-//==============================
-// * A主体 - 初始化子功能
-//==============================
-Drill_LCa_Controller.prototype.drill_controller_initAttr = function(){
-	
-	this._drill_curTime = 0;				//A主体 - 当前时间进度
-	this._drill_needDestroy = false;		//A主体 - 销毁标记（暂未用到）
-	
-	this._drill_x = 0;						//A主体 - 图层位置x（直接赋值 $gameMap._displayX ）
-	this._drill_y = 0;						//A主体 - 图层位置y（直接赋值 $gameMap._displayY ）
-	this._drill_rotation = 0;				//A主体 - 图层旋转（单位角度）
-	this._drill_scaleX = 1;					//A主体 - 图层缩放x
-	this._drill_scaleY = 1;					//A主体 - 图层缩放y
-}
-//==============================
-// * A主体 - 设置模式（私有）
-//==============================
-Drill_LCa_Controller.prototype.drill_LCa_setMode_Private = function( mode ){
-	var data = this._drill_data;
-	
-	// > 保持切换时位置 - 记录位置
-	var last_x = 0;
-	var last_y = 0;
-	if( data['mode'] == "自动模式" ){
-		last_x = this._drill_autoPos_curXAcc;
-		last_y = this._drill_autoPos_curYAcc;
-	}
-	if( data['mode'] == "观光模式" ){
-		last_x = this._drill_tourist_curXAcc;
-		last_y = this._drill_tourist_curYAcc;
-	}
-	
-	// > 设置模式
-	if( mode == "自动模式" ){ data['mode'] = "自动模式"; }
-	if( mode == "观光模式" ){ data['mode'] = "观光模式"; }
-	
-	// > 保持切换时位置 - 位置赋值
-	if( data['mode'] == "自动模式" ){
-		this._drill_autoPos_curXAcc = last_x;
-		this._drill_autoPos_curYAcc = last_y;
-	}
-	if( data['mode'] == "观光模式" ){
-		this._drill_tourist_curXAcc = last_x;
-		this._drill_tourist_curYAcc = last_y;
-	}
-}
-//==============================
-// * A主体 - 帧刷新 位置
-//==============================
-Drill_LCa_Controller.prototype.drill_updatePosition = function(){
-	var data = this._drill_data;
-	
-	// > 平移（单位像素）
-	this._drill_x = 0;
-	this._drill_y = 0;
-	if( data['enable'] == false ){ return; }
-	
-	
-	//（此平移不包含 C镜头基点 情况）
-	
-	
-	// > 坐标再反转
-	if( this._drill_scaleX < 0 ){ this._drill_x *= -1; }
-	if( this._drill_scaleY < 0 ){ this._drill_y *= -1; }
-	var ro = (this._drill_rotation%360 + 360)%360;
-	if( ro > 90 && ro < 270 ){
-		this._drill_x *= -1;
-		this._drill_y *= -1;
-	}
-	
-	// > G叠加变化 - 锁定锚点
-	if( this._drill_rotation == 0 && this._drill_scaleX == 1 && this._drill_scaleY == 1 ){
-		//（不操作）
-	}else{
-		// > 锚点(0.5,0.5)锁定
-		var fix_point = $gameTemp.drill_LCa_Math2D_getFixPointInAnchor( 
-							0.0, 0.0, 
-							0.5, 0.5, 
-							Graphics.boxWidth, Graphics.boxHeight,
-							this._drill_rotation /180*Math.PI, 
-							this._drill_scaleX, this._drill_scaleY 
-						);
-		this._drill_x += fix_point.x;
-		this._drill_y += fix_point.y;
-	}
-	
-	// > H整体平移
-	this._drill_x += this._drill_globalOffsetX;
-	this._drill_y += this._drill_globalOffsetY;
-}
-//==============================
-// * A主体 - 帧刷新 校验值
-//==============================
-Drill_LCa_Controller.prototype.drill_updateCheckNaN = function(){
-	if( $gameTemp == undefined ){ return; }		//（测试版开启功能，发布版关闭功能）
-	if( $gameTemp.isPlaytest() != true ){ return; }
-	
-	// > 校验值
-	if( DrillUp.g_LCa_checkNaN == true ){
-		if( isNaN( this._drill_x ) ){
-			DrillUp.g_LCa_checkNaN = false;
-			alert( DrillUp.drill_LCa_getPluginTip_ParamIsNaN("_drill_x") );
-		}
-		if( isNaN( this._drill_y ) ){
-			DrillUp.g_LCa_checkNaN = false;
-			alert( DrillUp.drill_LCa_getPluginTip_ParamIsNaN("_drill_y") );
-		}
-		if( isNaN( this._drill_rotation ) ){
-			DrillUp.g_LCa_checkNaN = false;
-			alert( DrillUp.drill_LCa_getPluginTip_ParamIsNaN("_drill_rotation") );
-		}
-		if( isNaN( this._drill_scaleX ) ){
-			DrillUp.g_LCa_checkNaN = false;
-			alert( DrillUp.drill_LCa_getPluginTip_ParamIsNaN("_drill_scaleX") );
-		}
-		if( isNaN( this._drill_scaleY ) ){
-			DrillUp.g_LCa_checkNaN = false;
-			alert( DrillUp.drill_LCa_getPluginTip_ParamIsNaN("_drill_scaleY") );
-		}
-	}
-}
-
-
-//==============================
-// * B镜头架 - 初始化子功能
-//==============================
-Drill_LCa_Controller.prototype.drill_controller_initHolder = function(){
-	//（无）
-}
-//==============================
-// * B镜头架 - 刷新范围
-//
-//			说明：	> 此函数不能放在初始化中执行，因为那个时候 $gameMap 还没创建。『$gameSystem优先初始化』
-//==============================
-Drill_LCa_Controller.prototype.drill_LCa_refreshHolder = function(){
-	var holder_rect = this.drill_LCa_getCameraHolderRect();
-	var camera_rect = this.drill_LCa_getCameraRect();
-	
-	// > 镜头基点的活动范围
-	//   （横向循环时，矩形全开放）
-	if( this.isLoopHorizontal() ){
-		this._drill_holderX = holder_rect['x'];
-		this._drill_holderMaxX = holder_rect['x'] + holder_rect['width'];
-	//   （不循环时，范围受限）
-	}else{
-		this._drill_holderX = holder_rect['x'];
-		this._drill_holderMaxX = holder_rect['x'] + holder_rect['width'] - camera_rect['width'];
-	}
-	//   （纵向循环时，矩形全开放）
-	if( this.isLoopVertical() ){
-		this._drill_holderY = holder_rect['y'];
-		this._drill_holderMaxY = holder_rect['y'] + holder_rect['height'];
-	//   （不循环时，范围受限）
-	}else{
-		this._drill_holderY = holder_rect['y'];
-		this._drill_holderMaxY = holder_rect['y'] + holder_rect['height'] - camera_rect['height'];
-	}
-	
-	// > 镜头架比镜头还小情况（范围固定为一个负数的值）
-	if( holder_rect['width'] < camera_rect['width'] ){
-		this._drill_holderX = (holder_rect['width'] - camera_rect['width']) *0.5;
-		this._drill_holderMaxX = this._drill_holderX;
-	}
-	if( holder_rect['height'] < camera_rect['height'] ){
-		this._drill_holderY = (holder_rect['height'] - camera_rect['height']) *0.5;
-		this._drill_holderMaxY = this._drill_holderY;
-	}
-	
-	// > 清零
-	this.drill_clearAutoData();
-	this.drill_clearTouristData();
-}
-//==============================
-// * B镜头架 - 获取范围内的位置X（开放函数）
-//==============================
-Drill_LCa_Controller.prototype.drill_LCa_getXInHolder = function( x ){
-	
-	// > 横向循环时，取模
-	if( this.isLoopHorizontal() ){
-		return this.drill_mod( x, this._drill_holderMaxX );
-		
-	// > 不循环时，固定
-	}else{
-		if( x > this._drill_holderMaxX ){ return this._drill_holderMaxX; }
-		if( x < this._drill_holderX ){ return this._drill_holderX; }
-	}
-	return x;
-}
-//==============================
-// * B镜头架 - 获取范围内的位置Y（开放函数）
-//==============================
-Drill_LCa_Controller.prototype.drill_LCa_getYInHolder = function( y ){
-	
-	// > 横向循环时，取模
-	if( this.isLoopVertical() ){
-		return this.drill_mod( y, this._drill_holderMaxY );
-		
-	// > 不循环时，固定
-	}else{
-		if( y > this._drill_holderMaxY ){ return this._drill_holderMaxY; }
-		if( y < this._drill_holderY ){ return this._drill_holderY; }
-	}
-	return y;
-}
-//==============================
-// * B镜头架 - 正值取模
-//
-//			说明：	取模后一定为正数。
-//==============================
-Drill_LCa_Controller.prototype.drill_mod = function( n, m ){
-    return ((n % m) + m) % m;
-}
-//==============================
-// * B镜头架 - 镜头中心点X（开放函数）
-//==============================
-Drill_LCa_Controller.prototype.drill_centerXOffset = function(){
-	var camera_rect = this.drill_LCa_getCameraRect();
-    return camera_rect['width']*0.5;
-};
-//==============================
-// * B镜头架 - 镜头中心点Y（开放函数）
-//==============================
-Drill_LCa_Controller.prototype.drill_centerYOffset = function(){
-	var camera_rect = this.drill_LCa_getCameraRect();
-    return camera_rect['height']*0.5;
-};
-
-
-//==============================
-// * C镜头基点 - 初始化子功能
-//==============================
-Drill_LCa_Controller.prototype.drill_controller_initCameraPos = function(){
-	this._drill_cameraX_offset = 0;			//C镜头基点 - 位置x
-	this._drill_cameraY_offset = 0;			//C镜头基点 - 位置y
-	this._drill_cameraX_offsetAcc = 0;		//C镜头基点 - 位置x（循环积累值）
-	this._drill_cameraY_offsetAcc = 0;		//C镜头基点 - 位置y（循环积累值）
-	this._drill_cameraX_Children = 0;		//C镜头基点 - 变换位置x（子贴图用）
-	this._drill_cameraY_Children = 0;		//C镜头基点 - 变换位置y（子贴图用）
-	this._drill_mousePos_OnChildren = 0;	//C镜头基点 - 地图鼠标落点（子贴图用）
-	this._drill_mousePos_OnOuterSprite = 0;	//C镜头基点 - 地图鼠标落点（外部贴图用）
-}
-//==============================
-// * C镜头基点 - 获取镜头变换位置（子贴图用）（私有）
-//
-//			说明：	为防止调用太多增加计算负担，此函数每帧执行一次，将结果放在参数中。
-//==============================
-Drill_LCa_Controller.prototype.drill_LCa_updateCameraPos_Children = function(){
-    
-	// > 镜头偏移量
-	var ox = 0;
-	var oy = 0;
-	var rect_width = Graphics.boxWidth;
-	var rect_height = Graphics.boxHeight;
-	
-	// > 镜头变化时的矩阵偏移量（正向变换）
-	var point_a = $gameTemp.drill_LCa_Math2D_getPointWithTransform( 
-						rect_width, rect_height,
-						Graphics.boxWidth*0.5, Graphics.boxHeight*0.5,
-						this._drill_rotation /180*Math.PI, 
-						this._drill_scaleX, this._drill_scaleY 
-				  );
-	ox += point_a.x;
-	oy += point_a.y;
-	ox -= rect_width;
-	oy -= rect_height;
-			
-	// > 逆向变换
-	var point_b = $gameTemp.drill_LCa_Math2D_getPointWithTransformInversed( 
-						ox, oy,
-						Graphics.boxWidth*0.5, Graphics.boxHeight*0.5,
-						this._drill_rotation /180*Math.PI, 
-						this._drill_scaleX, this._drill_scaleY 
-				  );
-	ox = point_b.x;
-	oy = point_b.y;
-	
-	// > 坐标再反转
-	if( this._drill_scaleX < 0 ){ ox *= -1; }
-	if( this._drill_scaleY < 0 ){ oy *= -1; }
-	var ro = (this._drill_rotation%360 + 360)%360;
-	if( ro > 90 && ro < 270 ){
-		ox *= -1;
-		oy *= -1;
-	}
-	
-	// > H整体平移 的影响
-	ox -= this._drill_globalOffsetX;
-	oy -= this._drill_globalOffsetY;
-	
-	this._drill_cameraX_Children = ox;
-	this._drill_cameraY_Children = oy;
-}
-//==============================
-// * C镜头基点 - 获取镜头变换位置（外部贴图用）（私有）
-//==============================
-Drill_LCa_Controller.prototype.drill_LCa_getCameraPos_OuterSprite_Private = function( cur_x, cur_y ){
-	
-	// > 直接执行一次正向变换即可
-	var outer_point = $gameTemp.drill_LCa_Math2D_getPointWithTransform( 
-							cur_x, cur_y,
-							Graphics.boxWidth*0.5, Graphics.boxHeight*0.5,
-							this._drill_rotation /180*Math.PI, 
-							this._drill_scaleX, this._drill_scaleY 
-					  );
-	
-	// > H整体平移 的影响
-	outer_point.x = outer_point.x + this._drill_globalOffsetX;
-	outer_point.y = outer_point.y + this._drill_globalOffsetY;
-	
-	return outer_point;
-}
-//==============================
-// * C镜头基点 - 地图落点 转换（外部贴图 -> 子贴图）（私有）
-//==============================
-Drill_LCa_Controller.prototype.drill_LCa_getPos_OuterToChildren_Private = function( x, y ){
-	var xx = x;
-	var yy = y;
-	var rect_width = Graphics.boxWidth*1.5;
-	var rect_height = Graphics.boxHeight*1.5;
-	
-	// > 镜头变化时的矩阵偏移量（正向变换）
-	var point_a = $gameTemp.drill_LCa_Math2D_getPointWithTransform( 
-						rect_width, rect_height,
-						Graphics.boxWidth*0.5, Graphics.boxHeight*0.5,
-						this._drill_rotation /180*Math.PI, 
-						this._drill_scaleX, this._drill_scaleY 
-				);
-	xx += point_a.x;
-	yy += point_a.y;
-	xx -= rect_width;
-	yy -= rect_height;
-	
-	// > 逆向变换
-	var point_b = $gameTemp.drill_LCa_Math2D_getPointWithTransformInversed( 
-						xx, yy,
-						Graphics.boxWidth*0.5, Graphics.boxHeight*0.5,
-						this._drill_rotation /180*Math.PI, 
-						this._drill_scaleX, this._drill_scaleY 
-				);
-	xx = point_b.x;
-	yy = point_b.y;
-	
-	// > 镜头变换位置
-	//（不含）
-	
-	// > H整体平移 的影响
-	xx -= this._drill_globalOffsetX;
-	yy -= this._drill_globalOffsetY;
-	
-	return { 'x':xx, 'y':yy };
-}
-//==============================
-// * C镜头基点 - 地图落点 转换（子贴图 -> 外部贴图）（私有）
-//==============================
-Drill_LCa_Controller.prototype.drill_LCa_getPos_ChildrenToOuter_Private = function( x, y ){
-	var xx = x;
-	var yy = y;
-	
-	// > 直接执行一次正向变换即可
-	var outer_point = $gameTemp.drill_LCa_Math2D_getPointWithTransform( 
-							xx, yy,
-							Graphics.boxWidth*0.5, Graphics.boxHeight*0.5,
-							this._drill_rotation /180*Math.PI, 
-							this._drill_scaleX, this._drill_scaleY 
-					  );
-	
-	// > H整体平移 的影响
-	outer_point.x = outer_point.x + this._drill_globalOffsetX;
-	outer_point.y = outer_point.y + this._drill_globalOffsetY;
-	
-	return outer_point;
-}
-//==============================
-// * C镜头基点 - 获取地图鼠标落点（子贴图用）（私有）
-//
-//			说明：	> 为防止调用太多增加计算负担，此函数每帧执行一次，将结果放在参数中。
-//					> 地图鼠标落点 就是 鼠标位置+地图落点 转换。
-//==============================
-Drill_LCa_Controller.prototype.drill_LCa_updateMousePos_OnChildren = function(){
-	var xx = _drill_mouse_x;
-	var yy = _drill_mouse_y;
-	this._drill_mousePos_OnChildren = this.drill_LCa_getPos_OuterToChildren_Private( xx, yy );
-}
-//==============================
-// * C镜头基点 - 获取地图鼠标落点（外部贴图用）（私有）
-//
-//			说明：	> 为防止调用太多增加计算负担，此函数每帧执行一次，将结果放在参数中。
-//					> 由于是外部贴图，地图鼠标落点 不转换。
-//==============================
-Drill_LCa_Controller.prototype.drill_LCa_updateMousePos_OnOuterSprite = function(){
-	var xx = _drill_mouse_x;
-	var yy = _drill_mouse_y;
-	this._drill_mousePos_OnOuterSprite = {'x': xx, 'y': yy };
-}
-//==============================
-// * C镜头基点 - 帧刷新
-//==============================
-Drill_LCa_Controller.prototype.drill_updateOffset = function(){
-	var data = this._drill_data;
-	
-	// > 镜头基点（单位图块）
-	var xx = 0;
-	var yy = 0;
-	if( data['enable'] == false ){ return; }
-	
-	
-	// > D自动模式 位移
-	if( data['mode'] == "自动模式" ){
-		xx += this._drill_autoPos_curX;
-		yy += this._drill_autoPos_curY;
-	}
-	// > E观光模式 位移
-	if( data['mode'] == "观光模式" ){
-		xx += this._drill_tourist_curX;
-		yy += this._drill_tourist_curY;
-	}
-	
-	
-	// > 镜头基点 - 记录
-	this._drill_cameraX_offset = xx;
-	this._drill_cameraY_offset = yy;
-	
-	// > 镜头基点 - 变换位置刷新
-	this.drill_LCa_updateCameraPos_Children();
-	this.drill_LCa_updateMousePos_OnChildren();
-	this.drill_LCa_updateMousePos_OnOuterSprite();
-}
-//==============================
-// * C镜头基点 - 帧刷新（循环积累值）
-//
-//			说明：	积累值是指，在循环地图中多次向一个方向移动，所处在的位移位置。
-//					该位置在镜头中会通过取余而折叠起来，但是也有不需要折叠的情况。比如地图魔法圈。
-//==============================
-Drill_LCa_Controller.prototype.drill_updateOffsetAcc = function(){
-	var data = this._drill_data;
-	
-	// > 镜头基点（单位图块）
-	var xxAcc = 0;
-	var yyAcc = 0;
-	if( data['enable'] == false ){ return; }
-	
-	
-	// > D自动模式 位移
-	if( data['mode'] == "自动模式" ){
-		xxAcc += this._drill_autoPos_curXAcc;
-		yyAcc += this._drill_autoPos_curYAcc;
-	}
-	// > E观光模式 位移
-	if( data['mode'] == "观光模式" ){
-		xxAcc += this._drill_tourist_curXAcc;
-		yyAcc += this._drill_tourist_curYAcc;
-	}
-	
-	
-	// > 镜头基点 - 记录（循环积累值）
-	this._drill_cameraX_offsetAcc = xxAcc;
-	this._drill_cameraY_offsetAcc = yyAcc;
-}
-
-
-//==============================
-// * D自动模式 - 初始化子功能
-//==============================
-Drill_LCa_Controller.prototype.drill_controller_initAuto = function(){
-	this._drill_autoPos_curX = 0;			//D自动模式 - 当前位置x
-	this._drill_autoPos_curY = 0;			//D自动模式 - 当前位置y
-	this._drill_autoPos_curXAcc = 0;		//D自动模式 - 当前位置x（循环积累值）
-	this._drill_autoPos_curYAcc = 0;		//D自动模式 - 当前位置y（循环积累值）
-	this._drill_autoPos_pixelFix_x = 0;		//D自动模式 - 像素修正值x
-	this._drill_autoPos_pixelFix_y = 0;		//D自动模式 - 像素修正值y
-}
-//==============================
-// * D自动模式 - 清理数据
-//==============================
-Drill_LCa_Controller.prototype.drill_clearAutoData = function(){
-	this._drill_autoPos_curX = 0;			//D自动模式 - 当前位置x
-	this._drill_autoPos_curY = 0;			//D自动模式 - 当前位置y
-	this._drill_autoPos_curXAcc = 0;		//D自动模式 - 当前位置x（积累值）
-	this._drill_autoPos_curYAcc = 0;		//D自动模式 - 当前位置y（积累值）
-};
-//==============================
-// * D自动模式 - 获取镜头目标位置
-//
-//			说明：	注意，返回值 未经过 adjust镜头相对位置 和 循环 修正。
-//==============================
-Drill_LCa_Controller.prototype.drill_getAutoPosition = function(){
-	
-	// > 默认为玩家位置
-    var tar_x = $gamePlayer._realX;
-    var tar_y = $gamePlayer._realY;
-	
-	// > F固定看向（自动模式）
-	if( this._drill_lockPos == true ){
-		
-		if( this._drill_lockPos_type == "位置" ){
-			tar_x = this._drill_lockPos_x;
-			tar_y = this._drill_lockPos_y;
-		}
-		if( this._drill_lockPos_type == "事件" ){
-			var xxx = 0;
-			var yyy = 0;
-			for(var i = this._drill_lockPos_eventIdList.length-1; i >= 0; i-- ){
-				var e_id = this._drill_lockPos_eventIdList[i];
-				var e = $gameMap.event( e_id );
-				if( e == undefined ){	//（如果设置了多事件看向，而事件被销毁，则立即取消此事件的绑定）
-					this._drill_lockPos_eventIdList.splice(i,1);
-					continue;
-				}
-				xxx += e._realX;
-				yyy += e._realY;
-			}
-			if( this._drill_lockPos_eventIdList.length > 0 ){
-				xxx = xxx / this._drill_lockPos_eventIdList.length;
-				yyy = yyy / this._drill_lockPos_eventIdList.length;
-				tar_x = xxx;
-				tar_y = yyy;
-			}
-		}
-		
-	}
-	
-	// > 对齐至 镜头中心
-	tar_x -= this.drill_centerXOffset();
-	tar_y -= this.drill_centerYOffset();
-	
-	// > 所有图块 都偏差半个图块 作为镜头看向的位置
-	tar_x += 0.5;
-	tar_y += 0.5;
-	
-	return { 'x': tar_x, 'y': tar_y };
-};
-//==============================
-// * D自动模式 - 帧刷新
-//==============================
-Drill_LCa_Controller.prototype.drill_updateAutoMode = function(){
-	var data = this._drill_data;
-	if( data['mode'] != "自动模式" ){ return; }
-	
-	// > 移动累积
-	this.drill_updateAutoMode_posAccumulate();
-	
-	// > B镜头架 位置修正
-	this.drill_updateAutoMode_fixPosInHolder();
-};
-//==============================
-// * D自动模式 - 帧刷新（循环积累值）
-//==============================
-Drill_LCa_Controller.prototype.drill_updateAutoMode_posAccumulate = function(){
-	var data = this._drill_data;
-	
-	// > 立刻看向目标位置 阻塞
-	if( this._drill_autoPos_notRefreshAccNextFrame == true ){
-		this._drill_autoPos_notRefreshAccNextFrame = false;
-		return;
-	}
-	
-	
-	// > 镜头目标位置
-	var tar_pos = this.drill_getAutoPosition();
-	var x2 = tar_pos.x;
-	var y2 = tar_pos.y;
-	
-	
-	// > 聚焦偏移
-	x2 += data['autoOffsetX'] / this.tileWidth();
-	y2 += data['autoOffsetY'] / this.tileHeight();
-	
-	// > I滚动地图
-	x2 += this._drill_scrollOffsetX;
-	y2 += this._drill_scrollOffsetY;
-	
-	
-	// > 匀速移动
-	if( data['autoMoveType'] == "匀速移动" ){
-		this._drill_autoPos_curXAcc = x2;
-		this._drill_autoPos_curYAcc = y2;
-		return;
-	}
-	
-	
-	// > 弹性移动
-	var speedRatio_x = data['autoSpeedRatio'] ;
-	var speedRatio_y = data['autoSpeedRatio'] ;
-	var pixel_speedPlus = 1 / 1000000;	//手动误差值
-	
-	// > 弹性移动 - 切换到相对镜头位置
-	//		（注意，adjustX 包含了对 _displayX、_displayY 的处理，具体去看看函数本身）
-	var tar_x = $gameMap.adjustX( x2 );
-	var tar_y = $gameMap.adjustY( y2 );
-	
-	// > 弹性移动 - 切换到相对镜头位置（全展开形式）
-	//		（如果玩家的位移跨度有点大，可能会绕镜头一圈，然后再回来）
-	//var tar_x = 0;
-	//var tar_y = 0;
-	//var half_width  = ($gameMap.width()  - $gameMap.screenTileX()) *0.5;
-	//var half_height = ($gameMap.height() - $gameMap.screenTileY()) *0.5;
-	//if( $gameMap.isLoopHorizontal() ){
-	//	if( half_width < $gameMap._displayX - x2 ){
-	//		tar_x = x2 - $gameMap._displayX + $dataMap.width;
-	//	}else{
-	//		tar_x = x2 - $gameMap._displayX;
-	//	}
-	//}else{
-	//	tar_x = x2 - $gameMap._displayX;
-	//}
-	//if( $gameMap.isLoopVertical() ){
-	//	if( half_height < $gameMap._displayY - y2 ){
-	//		tar_y = y2 - $gameMap._displayY + $dataMap.height;
-	//	}else{
-	//		tar_y = y2 - $gameMap._displayY;
-	//	}
-	//}else{
-	//	tar_y = y2 - $gameMap._displayY;
-	//}
-	
-	// > 弹性移动 - 向下
-    if( tar_y > 0 ){
-		var distance = Math.abs(tar_y);
-		var pixel_distance = distance * this.tileHeight();									//像素距离
-		var pixel_speed = Math.min(pixel_distance/speedRatio_y, data['autoSpeedMax'] );		//像素速度
-		if( pixel_speed < 0.25 ){ pixel_speed = 0.25; }										//像素最小速度（1/4像素）
-		
-		if( pixel_distance < pixel_speed ){						//第一次收敛（最小收敛间距）
-			this._drill_autoPos_pixelFix_y = 0;					//（镜头停止移动后，所有像素必须吻合归位）
-			this._drill_autoPos_curYAcc += distance;
-		}else{							
-			pixel_speed += this._drill_autoPos_pixelFix_y;												//速度小数位补正
-			this._drill_autoPos_pixelFix_y = pixel_speed - Math.round(pixel_speed) - pixel_speedPlus;	//补正值
-			pixel_speed = Math.round(pixel_speed);														//设置速度为固定像素速度
-			pixel_speed += pixel_speedPlus;
-			
-			if( pixel_distance < pixel_speed ){					//第二次收敛（防止补正溢出）
-				this._drill_autoPos_pixelFix_y = 0;				//
-				this._drill_autoPos_curYAcc += distance;
-			}else{
-				this._drill_autoPos_curYAcc += pixel_speed/this.tileHeight();
-			}
-		}   
-    }
-	// > 弹性移动 - 向左
-    if( tar_x < 0 ){
-		var distance = Math.abs(tar_x);
-		var pixel_distance = distance * this.tileWidth();
-		var pixel_speed = Math.min(pixel_distance/speedRatio_x, data['autoSpeedMax'] );
-		if( pixel_speed < 0.25 ){ pixel_speed = 0.25; }
-			
-		if( pixel_distance < pixel_speed ){
-			this._drill_autoPos_pixelFix_x = 0;
-			this._drill_autoPos_curXAcc -= distance;
-		}else{								
-			pixel_speed += this._drill_autoPos_pixelFix_x;
-			this._drill_autoPos_pixelFix_x = pixel_speed - Math.round(pixel_speed) + pixel_speedPlus;
-			pixel_speed = Math.round(pixel_speed) ;
-			pixel_speed -= pixel_speedPlus;
-			
-			if( pixel_distance < pixel_speed ){			
-				this._drill_autoPos_pixelFix_x = 0;
-				this._drill_autoPos_curXAcc -= distance;
-			}else{
-				this._drill_autoPos_curXAcc -= pixel_speed/this.tileWidth();
-			}
-		}
-    }
-	// > 弹性移动 - 向右
-    if( tar_x > 0 ){
-		var distance = Math.abs(tar_x);
-		var pixel_distance = distance * this.tileWidth();
-		var pixel_speed = Math.min(pixel_distance/speedRatio_x, data['autoSpeedMax'] );
-		if( pixel_speed < 0.25 ){ pixel_speed = 0.25; }
-		
-		if( pixel_distance < pixel_speed ){
-			this._drill_autoPos_pixelFix_x = 0;
-			this._drill_autoPos_curXAcc += distance;
-		}else{
-			pixel_speed += this._drill_autoPos_pixelFix_x;
-			this._drill_autoPos_pixelFix_x = pixel_speed - Math.round(pixel_speed) - pixel_speedPlus;
-			pixel_speed = Math.round(pixel_speed) ;
-			pixel_speed += pixel_speedPlus;
-			
-			if( pixel_distance < pixel_speed ){			
-				this._drill_autoPos_pixelFix_x = 0;
-				this._drill_autoPos_curXAcc += distance;
-			}else{
-				this._drill_autoPos_curXAcc += pixel_speed/this.tileWidth();
-			}
-		}
-    }
-	// > 弹性移动 - 向上
-    if( tar_y < 0 ){
-		var distance = Math.abs(tar_y);
-		var pixel_distance = distance * this.tileHeight();
-		var pixel_speed = Math.min(pixel_distance/speedRatio_y, data['autoSpeedMax'] );
-		if( pixel_speed < 0.25 ){ pixel_speed = 0.25; }	
-		
-		if( pixel_distance < pixel_speed ){	
-			this._drill_autoPos_pixelFix_y = 0;
-			this._drill_autoPos_curYAcc -= distance;
-		}else{		
-			pixel_speed += this._drill_autoPos_pixelFix_y;
-			this._drill_autoPos_pixelFix_y = pixel_speed - Math.round(pixel_speed) + pixel_speedPlus;
-			pixel_speed = Math.round(pixel_speed) ;
-			pixel_speed -= pixel_speedPlus;
-			
-			if( pixel_distance < pixel_speed ){	
-				this._drill_autoPos_pixelFix_y = 0;
-				this._drill_autoPos_curYAcc -= distance;
-			}else{		
-				this._drill_autoPos_curYAcc -= pixel_speed/this.tileHeight();
-			}
-		}
-    }
-	
-};
-//==============================
-// * D自动模式 - 帧刷新 - 镜头架位置修正
-//==============================
-Drill_LCa_Controller.prototype.drill_updateAutoMode_fixPosInHolder = function(){
-	
-	// > 设置位置
-	this._drill_autoPos_curX = this.drill_LCa_getXInHolder( this._drill_autoPos_curXAcc );
-	this._drill_autoPos_curY = this.drill_LCa_getYInHolder( this._drill_autoPos_curYAcc );
-	
-	// > 非循环情况，消除积累值
-	if( this.isLoopHorizontal() == false ){
-		this._drill_autoPos_curXAcc = this._drill_autoPos_curX;
-	}
-	if( this.isLoopVertical() == false ){
-		this._drill_autoPos_curYAcc = this._drill_autoPos_curY;
-	}
-};
-//==============================
-// * D自动模式 - 立刻看向目标位置
-//
-//			说明：	自动模式下的功能。
-//==============================
-Drill_LCa_Controller.prototype.drill_LCa_setLookAtImmediately_Auto = function(){
-	//（该指令执行的比 帧刷新 晚，所以只能延迟到下一帧刷新）
-	
-	// > 镜头目标位置
-	var tar_pos = this.drill_getAutoPosition();
-	var xx = tar_pos.x;
-	var yy = tar_pos.y;
-	
-	// > 位置位移
-	this._drill_autoPos_curXAcc = xx;
-	this._drill_autoPos_curYAcc = yy;
-	this._drill_autoPos_pixelFix_x = 0;
-	this._drill_autoPos_pixelFix_y = 0;
-	this._drill_autoPos_notRefreshAccNextFrame = true;		//（下一帧不刷新distance）
-	
-	// > B镜头架 位置修正
-	this.drill_updateAutoMode_fixPosInHolder();
-};
-//==============================
-// * D自动模式 - 修改聚焦偏移（私有）
-//==============================
-Drill_LCa_Controller.prototype.drill_LCa_setAutoOffset_Private = function( autoOffsetX, autoOffsetY ){
-    var data = this._drill_data;
-	data['autoOffsetX'] = autoOffsetX;
-	data['autoOffsetY'] = autoOffsetY;
-};
-
-
-//==============================
-// * E观光模式 - 初始化子功能
-//==============================
-Drill_LCa_Controller.prototype.drill_controller_initTourist = function(){
-	this._drill_tourist_mouseX = 0;			//E观光模式 - 当前鼠标位置X
-	this._drill_tourist_mouseY = 0;			//E观光模式 - 当前鼠标位置Y
-	this._drill_tourist_mouseDirection = 5;	//E观光模式 - 当前鼠标方向
-	this._drill_tourist_curXSpeed = 0;		//E观光模式 - 当前速度x
-	this._drill_tourist_curYSpeed = 0;		//E观光模式 - 当前速度y
-	this._drill_tourist_curX = 0;			//E观光模式 - 当前位置x
-	this._drill_tourist_curY = 0;			//E观光模式 - 当前位置y
-	this._drill_tourist_curXAcc = 0;		//E观光模式 - 当前位置x（循环积累值）
-	this._drill_tourist_curYAcc = 0;		//E观光模式 - 当前位置y（循环积累值）
-};
-//==============================
-// * E观光模式 - 清理数据
-//==============================
-Drill_LCa_Controller.prototype.drill_clearTouristData = function(){
-	this._drill_tourist_mouseX = 0;			//E观光模式 - 当前鼠标位置X
-	this._drill_tourist_mouseY = 0;			//E观光模式 - 当前鼠标位置Y
-	this._drill_tourist_mouseDirection = 5;	//E观光模式 - 当前鼠标方向
-	this._drill_tourist_curXSpeed = 0;		//E观光模式 - 当前速度x
-	this._drill_tourist_curYSpeed = 0;		//E观光模式 - 当前速度y
-	this._drill_tourist_curX = 0;			//E观光模式 - 当前位置x
-	this._drill_tourist_curY = 0;			//E观光模式 - 当前位置y
-	this._drill_tourist_curXAcc = 0;		//E观光模式 - 当前位置x（循环积累值）
-	this._drill_tourist_curYAcc = 0;		//E观光模式 - 当前位置y（循环积累值）
-};
-//==============================
-// * E观光模式 - 帧刷新
-//==============================
-Drill_LCa_Controller.prototype.drill_updateTouristMode = function(){
-	var data = this._drill_data;
-	if( data['mode'] != "观光模式" ){ return; }
-	
-	
-	// > F固定看向（观光模式）
-	if( this._drill_lockPos == true ){
-		var xx = 0;
-		var yy = 0;
-		if( this._drill_lockPos_type == "位置" ){
-			xx = this._drill_lockPos_x;
-			yy = this._drill_lockPos_y;
-		}
-		if( this._drill_lockPos_type == "事件" ){
-			var xxx = 0;
-			var yyy = 0;
-			for(var i = this._drill_lockPos_eventIdList.length-1; i >= 0; i-- ){
-				var e_id = this._drill_lockPos_eventIdList[i];
-				var e = $gameMap.event( e_id );
-				if( e == undefined ){	//（如果设置了多事件看向，而事件被销毁，则立即取消此事件的绑定）
-					this._drill_lockPos_eventIdList.splice(i,1);
-					continue;
-				}
-				xxx += e._realX;
-				yyy += e._realY;
-			}
-			if( this._drill_lockPos_eventIdList.length > 0 ){
-				xxx = xxx / this._drill_lockPos_eventIdList.length;
-				yyy = yyy / this._drill_lockPos_eventIdList.length;
-				xx = xxx;
-				yy = yyy;
-			}
-		}
-		var oww = Graphics.boxWidth  / this.tileWidth();
-		var ohh = Graphics.boxHeight / this.tileHeight();
-		xx -= oww*0.5;	//（镜头中心点 修正）
-		yy -= ohh*0.5;
-		xx += 0.5;
-		yy += 0.5;
-		this._drill_tourist_curXAcc = xx;
-		this._drill_tourist_curYAcc = yy;
-	
-	
-	// > 正常情况
-	}else{
-		
-		// > 帧刷新 - 鼠标控制
-		this.drill_updateTouristMode_Mouse();
-		
-		// > 帧刷新 - 键盘控制（要放后面）
-		this.drill_updateTouristMode_Keyboard();
-		
-		// > 刷新位置
-		this._drill_tourist_curXAcc += this._drill_tourist_curXSpeed;
-		this._drill_tourist_curYAcc += this._drill_tourist_curYSpeed;
-		
-	}
-	
-	// > B镜头架 位置修正
-	this.drill_updateTouristMode_fixPosInHolder();
-};
-//==============================
-// * E观光模式 - 帧刷新 - 镜头架位置修正
-//==============================
-Drill_LCa_Controller.prototype.drill_updateTouristMode_fixPosInHolder = function(){
-	
-	// > 设置位置
-	this._drill_tourist_curX = this.drill_LCa_getXInHolder( this._drill_tourist_curXAcc );
-	this._drill_tourist_curY = this.drill_LCa_getYInHolder( this._drill_tourist_curYAcc );
-	
-	// > 非循环情况，消除积累值
-	if( this.isLoopHorizontal() == false ){
-		this._drill_tourist_curXAcc = this._drill_tourist_curX;
-	}
-	if( this.isLoopVertical() == false ){
-		this._drill_tourist_curYAcc = this._drill_tourist_curY;
-	}
-};
-//==============================
-// * E观光模式 - 帧刷新 - 键盘控制
-//
-//			说明：	此处帧刷新，包括 手柄控制。
-//==============================
-Drill_LCa_Controller.prototype.drill_updateTouristMode_Keyboard = function(){
-	var data = this._drill_data;
-	
-	// > 键盘控制关闭情况
-	if( data['touristKeyboardEnabled'] == false ){ return; }
-	
-	// > 鼠标控制比键盘优先级高
-	if( this._drill_tourist_mouseDirection != 5 ){ return; }
-	
-	// > 键盘控制
-	var speed = data['touristSpeed'];
-	var direction = this.drill_getTouristDirection();
-	if( direction == 0 || direction == 5 ){
-		this._drill_tourist_curXSpeed = 0;
-		this._drill_tourist_curYSpeed = 0;
-	}
-	if( direction == 2 ){
-		this._drill_tourist_curXSpeed = 0;
-		this._drill_tourist_curYSpeed = speed;
-	}
-	if( direction == 4 ){
-		this._drill_tourist_curXSpeed = -1 *speed;
-		this._drill_tourist_curYSpeed = 0;
-	}
-	if( direction == 6 ){
-		this._drill_tourist_curXSpeed = speed;
-		this._drill_tourist_curYSpeed = 0;
-	}
-	if( direction == 8 ){
-		this._drill_tourist_curXSpeed = 0;
-		this._drill_tourist_curYSpeed = -1 *speed;
-	}
-	if( direction == 1 ){
-		this._drill_tourist_curXSpeed = -1 *speed;
-		this._drill_tourist_curYSpeed = speed;
-	}
-	if( direction == 3 ){
-		this._drill_tourist_curXSpeed = speed;
-		this._drill_tourist_curYSpeed = speed;
-	}
-	if( direction == 7 ){
-		this._drill_tourist_curXSpeed = -1 *speed;
-		this._drill_tourist_curYSpeed = -1 *speed;
-	}
-	if( direction == 9 ){
-		this._drill_tourist_curXSpeed = speed;
-		this._drill_tourist_curYSpeed = -1 *speed;
-	}
-};
-//==============================
-// * E观光模式 - 帧刷新 - 鼠标控制
-//
-//			说明：	此处帧刷新，不包括 触屏控制。
-//==============================
-Drill_LCa_Controller.prototype.drill_updateTouristMode_Mouse = function(){
-	var data = this._drill_data;
-	
-	// > 鼠标控制关闭情况
-	if( data['touristMouseEnabled'] == false ){ return; }
-	
-	// > 鼠标位置刷新（包含出界情况）
-	var mouse_pos = TouchInput.drill_COI_getMousePos_WithOutside();
-	this._drill_tourist_mouseX = mouse_pos.x;
-	this._drill_tourist_mouseY = mouse_pos.y;
-	
-	// > 鼠标方向
-	var xx = this._drill_tourist_mouseX;
-	var yy = this._drill_tourist_mouseY;
-	var bb = data['touristMouseThickness'];
-	var ww = Graphics.boxWidth;
-	var hh = Graphics.boxHeight;
-	if( xx != 0 && yy != 0 ){
-		if( xx < bb && 
-			yy < bb ){
-			this._drill_tourist_mouseDirection = 7;
-		}
-		else if( xx < bb*0.5 && //（非边角的矩形，缩小一半）
-				yy >= bb && yy <= hh-bb ){
-			this._drill_tourist_mouseDirection = 4;
-		}
-		else if( xx < bb && 
-				yy > hh-bb ){
-			this._drill_tourist_mouseDirection = 1;
-		}
-		else if( xx > ww-bb && 
-				yy < bb ){
-			this._drill_tourist_mouseDirection = 9;
-		}
-		else if( xx > ww-bb*0.5 && 
-				yy >= bb && yy <= hh - bb ){
-			this._drill_tourist_mouseDirection = 6;
-		}
-		else if( xx > ww-bb && 
-				yy > hh - bb ){
-			this._drill_tourist_mouseDirection = 3;
-		}
-		else if( xx >= bb && xx <= ww-bb && 
-				yy < bb*0.5 ){
-			this._drill_tourist_mouseDirection = 8;
-		}
-		else if( xx >= bb && xx <= ww-bb && 
-				yy > hh-bb*0.5 ){
-			this._drill_tourist_mouseDirection = 2;
-		}
-		else{
-			this._drill_tourist_mouseDirection = 5;
-		}
-	}
-	
-	
-	// > 鼠标速度控制
-	var speed = data['touristSpeed'];
-	var direction = this._drill_tourist_mouseDirection;
-	if( direction == 0 || direction == 5 ){
-		this._drill_tourist_curXSpeed = 0;
-		this._drill_tourist_curYSpeed = 0;
-	}
-	if( direction == 2 ){
-		this._drill_tourist_curXSpeed = 0;
-		this._drill_tourist_curYSpeed = speed;
-	}
-	if( direction == 4 ){
-		this._drill_tourist_curXSpeed = -1 *speed;
-		this._drill_tourist_curYSpeed = 0;
-	}
-	if( direction == 6 ){
-		this._drill_tourist_curXSpeed = speed;
-		this._drill_tourist_curYSpeed = 0;
-	}
-	if( direction == 8 ){
-		this._drill_tourist_curXSpeed = 0;
-		this._drill_tourist_curYSpeed = -1 *speed;
-	}
-	if( direction == 1 ){
-		this._drill_tourist_curXSpeed = -1 *speed;
-		this._drill_tourist_curYSpeed = speed;
-	}
-	if( direction == 3 ){
-		this._drill_tourist_curXSpeed = speed;
-		this._drill_tourist_curYSpeed = speed;
-	}
-	if( direction == 7 ){
-		this._drill_tourist_curXSpeed = -1 *speed;
-		this._drill_tourist_curYSpeed = -1 *speed;
-	}
-	if( direction == 9 ){
-		this._drill_tourist_curXSpeed = speed;
-		this._drill_tourist_curYSpeed = -1 *speed;
-	}
-};
-//==============================
-// * E观光模式 - 获取朝向
-//			
-//			说明：	方向见小键盘结构，5为轴心。2下/4左/6右/8上/ 1左下/3右下/7左上/9右上。
-//==============================
-Drill_LCa_Controller.prototype.drill_getTouristDirection = function(){
-    return Input.dir8;
-};
-
-
-//==============================
-// * F固定看向 - 初始化子功能
-//==============================
-Drill_LCa_Controller.prototype.drill_controller_initLock = function(){
-	this._drill_lockPos = false;			//F固定看向 - 开关
-	this._drill_lockPos_type = "";			//F固定看向 - 看向类型（位置/事件）
-	this._drill_lockPos_x = 0;				//F固定看向 - 位置x
-	this._drill_lockPos_y = 0;				//F固定看向 - 位置y
-	this._drill_lockPos_eventIdList = [];	//F固定看向 - 事件ID列表
-};
-//==============================
-// * F固定看向 - 固定看向位置（私有）
-//==============================
-Drill_LCa_Controller.prototype.drill_LCa_setLockPosition_Private = function( x, y ){
-    if( this.drill_LCa_isEnable() == false ){ return; }
-	var data = this._drill_data;
-	
-	this._drill_lockPos = true;				//F固定看向 - 开关
-	this._drill_lockPos_type = "位置";		//F固定看向 - 类型
-	this._drill_lockPos_x = x;				//F固定看向 - 位置x
-	this._drill_lockPos_y = y;				//F固定看向 - 位置y
-};
-//==============================
-// * F固定看向 - 固定看向事件（私有）
-//==============================
-Drill_LCa_Controller.prototype.drill_LCa_setLockEvent_Private = function( event_id ){
-    if( this.drill_LCa_isEnable() == false ){ return; }
-	var data = this._drill_data;
-	
-	this._drill_lockPos = true;							//F固定看向 - 开关
-	this._drill_lockPos_type = "事件";					//F固定看向 - 类型
-	this._drill_lockPos_eventIdList = [];				//F固定看向 - 事件ID列表
-	this._drill_lockPos_eventIdList.push( event_id );
-};
-//==============================
-// * F固定看向 - 固定看向多个事件的中心（私有）
-//==============================
-Drill_LCa_Controller.prototype.drill_LCa_setLockEventList_Private = function( event_id_list ){
-    if( this.drill_LCa_isEnable() == false ){ return; }
-	var data = this._drill_data;
-	
-	this._drill_lockPos = true;							//F固定看向 - 开关
-	this._drill_lockPos_type = "事件";					//F固定看向 - 类型
-	this._drill_lockPos_eventIdList = event_id_list;	//F固定看向 - 事件ID列表
-};
-//==============================
-// * F固定看向 - 解除固定看向（私有）
-//==============================
-Drill_LCa_Controller.prototype.drill_LCa_setUnlock_Private = function(){
-    if( this.drill_LCa_isEnable() == false ){ return; }
-	var data = this._drill_data;
-	
-	this._drill_lockPos = false;
-};
-//==============================
-// * F固定看向 - 立刻看向目标位置（私有）
-//==============================
-Drill_LCa_Controller.prototype.drill_LCa_setLookAtImmediately_Private = function(){
-    if( this.drill_LCa_isEnable() == false ){ return; }
-	var data = this._drill_data;
-	
-	// > D自动模式 - 立刻看向目标位置
-	if( data['mode'] == "自动模式" ){
-		this.drill_LCa_setLookAtImmediately_Auto();
-	}
-	// > E观光模式 - 立刻看向目标位置
-	if( data['mode'] == "观光模式" ){
-		//（不需操作）
-	}
-};
-
-
-//==============================
-// * G叠加变化 - 初始化子功能
-//==============================
-Drill_LCa_Controller.prototype.drill_controller_initChange = function(){
-	this._drill_rotation_curTime = 0;		//G叠加变化 - 旋转 - 当前时间
-	this._drill_rotation_tarTime = 0;		//G叠加变化 - 旋转 - 目标时间
-	this._drill_rotation_ballistics = null;	//G叠加变化 - 旋转 - 弹道
-	this._drill_scaleX_curTime = 0;			//G叠加变化 - 缩放X - 当前时间
-	this._drill_scaleX_tarTime = 0;			//G叠加变化 - 缩放X - 目标时间
-	this._drill_scaleX_ballistics = null;	//G叠加变化 - 缩放X - 弹道
-	this._drill_scaleY_curTime = 0;			//G叠加变化 - 缩放Y - 当前时间
-	this._drill_scaleY_tarTime = 0;			//G叠加变化 - 缩放Y - 目标时间
-	this._drill_scaleY_ballistics = null;	//G叠加变化 - 缩放Y - 弹道
-};
-//==============================
-// * G叠加变化 - 执行旋转（私有）
-//==============================
-Drill_LCa_Controller.prototype.drill_LCa_doRotate_Private = function( rotation, time, changeType ){
-    if( this.drill_LCa_isEnable() == false ){ return; }
-	this._drill_rotation_curTime = 0;
-	this._drill_rotation_tarTime = time;
-	var data = {};
-	data['rotateNum'] = 0;
-	data['rotateTime'] = time; 
-	data['rotateMode'] = "目标值模式"; 
-	data['targetType'] = changeType; 
-	data['targetDifference'] = rotation - this._drill_rotation; 
-	$gameTemp.drill_COBa_setBallisticsRotate( data );
-	$gameTemp.drill_COBa_preBallisticsRotate( this, 0, this._drill_rotation );
-	this._drill_rotation_ballistics = this['_drill_COBa_rotate'];
-	this['_drill_COBa_rotate'] = null;
-}
-//==============================
-// * G叠加变化 - 执行缩放X（私有）
-//==============================
-Drill_LCa_Controller.prototype.drill_LCa_doScaleX_Private = function( scaleX, time, changeType ){
-    if( this.drill_LCa_isEnable() == false ){ return; }
-	this._drill_scaleX_curTime = 0;
-	this._drill_scaleX_tarTime = time;
-	var data = {};
-	data['scaleXNum'] = 0;
-	data['scaleXTime'] = time; 
-	data['scaleXMode'] = "目标值模式"; 
-	data['targetType'] = changeType; 
-	data['targetDifference'] = scaleX - this._drill_scaleX; 
-	$gameTemp.drill_COBa_setBallisticsScaleX( data );
-	$gameTemp.drill_COBa_preBallisticsScaleX( this, 0, this._drill_scaleX );
-	this._drill_scaleX_ballistics = this['_drill_COBa_scaleX'];
-	this['_drill_COBa_scaleX'] = null;
-}
-//==============================
-// * G叠加变化 - 执行缩放Y（私有）
-//==============================
-Drill_LCa_Controller.prototype.drill_LCa_doScaleY_Private = function( scaleY, time, changeType ){
-    if( this.drill_LCa_isEnable() == false ){ return; }
-	this._drill_scaleY_curTime = 0;
-	this._drill_scaleY_tarTime = time;
-	var data = {};
-	data['scaleYNum'] = 0;
-	data['scaleYTime'] = time; 
-	data['scaleYMode'] = "目标值模式"; 
-	data['targetType'] = changeType; 
-	data['targetDifference'] = scaleY - this._drill_scaleY; 
-	$gameTemp.drill_COBa_setBallisticsScaleY( data );
-	$gameTemp.drill_COBa_preBallisticsScaleY( this, 0, this._drill_scaleY );
-	this._drill_scaleY_ballistics = this['_drill_COBa_scaleY'];
-	this['_drill_COBa_scaleY'] = null;
-}
-//==============================
-// * G叠加变化 - 帧刷新 - 旋转
-//==============================
-Drill_LCa_Controller.prototype.drill_updateRotation = function(){
-	var data = this._drill_data;
-	
-	// > 旋转
-	this._drill_rotation = 0;
-	if( data['enable'] == false ){ return; }
-	
-	// > 叠加变化 - 旋转
-	if( this._drill_rotation_ballistics == null ){
-		this._drill_rotation = data['defaultRotation'];
-	}else{
-		
-		// > 播放弹道
-		var time = this._drill_rotation_curTime;
-		if( time < 0 ){ time = 0; }
-		if( time > this._drill_rotation_ballistics.length-1 ){ time = this._drill_rotation_ballistics.length-1; }
-		this._drill_rotation += this._drill_rotation_ballistics[time];
-		
-		// > 时间+1
-		this._drill_rotation_curTime += 1;
-	}
-}
-//==============================
-// * G叠加变化 - 帧刷新 - 缩放
-//==============================
-Drill_LCa_Controller.prototype.drill_updateScale = function(){
-	var data = this._drill_data;
-	
-	// > 缩放
-	this._drill_scaleX = 1;
-	this._drill_scaleY = 1;
-	if( data['enable'] == false ){ return; }
-	
-	// > 叠加变化 - 缩放X
-	if( this._drill_scaleX_ballistics == null ){
-		this._drill_scaleX = data['defaultScaleX'];
-	}else{
-		
-		// > 播放弹道
-		var time = this._drill_scaleX_curTime;
-		if( time < 0 ){ time = 0; }
-		if( time > this._drill_scaleX_ballistics.length-1 ){ time = this._drill_scaleX_ballistics.length-1; }
-		this._drill_scaleX = this._drill_scaleX_ballistics[time];	//（注意是赋值，不是相加）
-		
-		// > 时间+1
-		this._drill_scaleX_curTime += 1;
-	}
-	
-	// > 叠加变化 - 缩放Y
-	if( this._drill_scaleY_ballistics == null ){
-		this._drill_scaleY = data['defaultScaleY'];
-	}else{
-		
-		// > 播放弹道
-		var time = this._drill_scaleY_curTime;
-		if( time < 0 ){ time = 0; }
-		if( time > this._drill_scaleY_ballistics.length-1 ){ time = this._drill_scaleY_ballistics.length-1; }
-		this._drill_scaleY = this._drill_scaleY_ballistics[time];	//（注意是赋值，不是相加）
-		
-		// > 时间+1
-		this._drill_scaleY_curTime += 1;
-	}
-}
-
-
-//==============================
-// * H整体平移 - 初始化子功能
-//==============================
-Drill_LCa_Controller.prototype.drill_controller_initGlobalOffset = function(){
-	this._drill_globalOffsetX = 0;					//H整体平移 - X
-	this._drill_globalOffsetY = 0;					//H整体平移 - Y
-	this._drill_globalOffset_curTime = 0;			//H整体平移 - 当前时间
-	this._drill_globalOffset_tarTime = 0;			//H整体平移 - 目标时间
-	this._drill_globalOffset_ballisticsX = null;	//H整体平移 - 弹道X
-	this._drill_globalOffset_ballisticsY = null;	//H整体平移 - 弹道Y
-}
-//==============================
-// * H整体平移 - 修改整体平移（私有）
-//==============================
-Drill_LCa_Controller.prototype.drill_LCa_setGlobalOffset_Private = function( globalOffsetX, globalOffsetY, time, changeType ){
-    if( this.drill_LCa_isEnable() == false ){ return; }
-	this._drill_globalOffset_curTime = 0;
-	this._drill_globalOffset_tarTime = time;
-	var data = {};
-	data['movementNum'] = 1; 
-	data['movementTime'] = time; 
-	data['movementMode'] = "两点式"; 
-	data['twoPointType'] = changeType; 
-	data['twoPointDifferenceX'] = globalOffsetX - this._drill_globalOffsetX; 
-	data['twoPointDifferenceY'] = globalOffsetY - this._drill_globalOffsetY; 
-	$gameTemp.drill_COBa_setBallisticsMove( data );
-	$gameTemp.drill_COBa_preBallisticsMove( this, 0, this._drill_globalOffsetX, this._drill_globalOffsetY );
-	this._drill_globalOffset_ballisticsX = this['_drill_COBa_x'];
-	this._drill_globalOffset_ballisticsY = this['_drill_COBa_y'];
-	this['_drill_COBa_x'] = null;
-	this['_drill_COBa_y'] = null;
-}
-//==============================
-// * H整体平移 - 帧刷新
-//==============================
-Drill_LCa_Controller.prototype.drill_updateGlobalOffset = function(){
-	var data = this._drill_data;
-	
-	// > 整体平移
-	this._drill_globalOffsetX = 0;
-	this._drill_globalOffsetY = 0;
-	if( data['enable'] == false ){ return; }
-	
-	// > 弹道
-	if( this._drill_globalOffset_ballisticsX == null ){
-		this._drill_globalOffsetX = data['globalOffsetX'];
-		this._drill_globalOffsetY = data['globalOffsetY'];
-	}else{
-		
-		// > 播放弹道
-		var time = this._drill_globalOffset_curTime;
-		if( time < 0 ){ time = 0; }
-		if( time > this._drill_globalOffset_ballisticsX.length-1 ){ time = this._drill_globalOffset_ballisticsX.length-1; }
-		this._drill_globalOffsetX = this._drill_globalOffset_ballisticsX[time];
-		this._drill_globalOffsetY = this._drill_globalOffset_ballisticsY[time];
-		
-		// > 时间+1
-		this._drill_globalOffset_curTime += 1;
-	}
-	
-	// > 不能越界
-	var ww = Graphics.boxWidth *0.5;
-	var hh = Graphics.boxHeight *0.5;
-	if( this._drill_globalOffsetX > ww ){ this._drill_globalOffsetX = ww; }
-	if( this._drill_globalOffsetX < (-1)*ww ){ this._drill_globalOffsetX = (-1)*ww; }
-	if( this._drill_globalOffsetY > hh ){ this._drill_globalOffsetY = hh; }
-	if( this._drill_globalOffsetY < (-1)*hh ){ this._drill_globalOffsetY = (-1)*hh; }
-}
-
-
-//==============================
-// * I滚动地图 - 初始化子功能
-//==============================
-Drill_LCa_Controller.prototype.drill_controller_initScroll = function(){
-	this._drill_scrollOffsetX = 0;					//I滚动地图 - X（单位图块）
-	this._drill_scrollOffsetY = 0;					//I滚动地图 - Y（单位图块）
-	this._drill_scrollOffset_curTime = 0;			//I滚动地图 - 当前时间
-	this._drill_scrollOffset_tarTime = 0;			//I滚动地图 - 目标时间
-	this._drill_scrollOffset_ballisticsX = null;	//I滚动地图 - 弹道
-	this._drill_scrollOffset_ballisticsY = null;	//I滚动地图 - 弹道
-}
-//==============================
-// * I滚动地图 - 开始滚动（私有）
-//==============================
-Drill_LCa_Controller.prototype.drill_LCa_scrollToTarget_Private = function( direction, distance, speed ){
-    if( this.drill_LCa_isEnable() == false ){ return; }
-	
-	// > 参数转换
-	var scrollOffsetX = 0;	//（单位图块）
-	var scrollOffsetY = 0;	//（单位图块）
-	if( direction == 2 ){
-		scrollOffsetX = this._drill_scrollOffsetX;
-		scrollOffsetY = this._drill_scrollOffsetY + distance;
-	}
-	if( direction == 4 ){
-		scrollOffsetX = this._drill_scrollOffsetX - distance;
-		scrollOffsetY = this._drill_scrollOffsetY;
-	}
-	if( direction == 6 ){
-		scrollOffsetX = this._drill_scrollOffsetX + distance;
-		scrollOffsetY = this._drill_scrollOffsetY;
-	}
-	if( direction == 8 ){
-		scrollOffsetX = this._drill_scrollOffsetX;
-		scrollOffsetY = this._drill_scrollOffsetY - distance;
-	}
-	if( direction == 1 ){
-		scrollOffsetX = this._drill_scrollOffsetX - distance;
-		scrollOffsetY = this._drill_scrollOffsetY + distance;
-	}
-	if( direction == 3 ){
-		scrollOffsetX = this._drill_scrollOffsetX + distance;
-		scrollOffsetY = this._drill_scrollOffsetY + distance;
-	}
-	if( direction == 7 ){
-		scrollOffsetX = this._drill_scrollOffsetX - distance;
-		scrollOffsetY = this._drill_scrollOffsetY - distance;
-	}
-	if( direction == 9 ){
-		scrollOffsetX = this._drill_scrollOffsetX + distance;
-		scrollOffsetY = this._drill_scrollOffsetY - distance;
-	}
-	var real_speed = Math.pow(2, speed) / 256;
-	var time = Math.floor( distance / real_speed );
-	
-	// > 弹道设置
-	this._drill_scrollOffset_curTime = 0;
-	this._drill_scrollOffset_tarTime = time +1;
-	var data = {};
-	data['movementNum'] = 1; 
-	data['movementTime'] = time; 
-	data['movementMode'] = "两点式"; 
-	data['twoPointType'] = "匀速移动"; 
-	data['twoPointDifferenceX'] = scrollOffsetX - this._drill_scrollOffsetX; 
-	data['twoPointDifferenceY'] = scrollOffsetY - this._drill_scrollOffsetY; 
-	$gameTemp.drill_COBa_setBallisticsMove( data );
-	$gameTemp.drill_COBa_preBallisticsMove( this, 0, this._drill_scrollOffsetX, this._drill_scrollOffsetY );
-	this._drill_scrollOffset_ballisticsX = this['_drill_COBa_x'];
-	this._drill_scrollOffset_ballisticsY = this['_drill_COBa_y'];
-	this['_drill_COBa_x'] = null;
-	this['_drill_COBa_y'] = null;
-}
-//==============================
-// * I滚动地图 - 回到原位置（私有）
-//==============================
-Drill_LCa_Controller.prototype.drill_LCa_scrollToHome_Private = function( speed ){
-    if( this.drill_LCa_isEnable() == false ){ return; }
-	
-	// > 参数转换
-	var distance = Math.abs(this._drill_scrollOffsetX) + Math.abs(this._drill_scrollOffsetY);
-	var real_speed = Math.pow(2, speed) / 256;
-	var time = Math.floor( distance / real_speed );
-	
-	// > 弹道设置
-	this._drill_scrollOffset_curTime = 0;
-	this._drill_scrollOffset_tarTime = time +1;
-	var data = {};
-	data['movementNum'] = 1; 
-	data['movementTime'] = time; 
-	data['movementMode'] = "两点式"; 
-	data['twoPointType'] = "匀速移动"; 
-	data['twoPointDifferenceX'] = 0 - this._drill_scrollOffsetX; 
-	data['twoPointDifferenceY'] = 0 - this._drill_scrollOffsetY; 
-	$gameTemp.drill_COBa_setBallisticsMove( data );
-	$gameTemp.drill_COBa_preBallisticsMove( this, 0, this._drill_scrollOffsetX, this._drill_scrollOffsetY );
-	this._drill_scrollOffset_ballisticsX = this['_drill_COBa_x'];
-	this._drill_scrollOffset_ballisticsY = this['_drill_COBa_y'];
-	this['_drill_COBa_x'] = null;
-	this['_drill_COBa_y'] = null;
-}
-//==============================
-// * I滚动地图 - 帧刷新
-//==============================
-Drill_LCa_Controller.prototype.drill_updateScroll = function(){
-	var data = this._drill_data;
-	
-	// > 整体平移
-	this._drill_scrollOffsetX = 0;
-	this._drill_scrollOffsetY = 0;
-	if( data['enable'] == false ){ return; }
-	
-	// > 叠加变化 - 整体平移
-	if( this._drill_scrollOffset_ballisticsX == null ){
-		this._drill_scrollOffsetX = 0;
-		this._drill_scrollOffsetY = 0;
-	}else{
-		
-		// > 播放弹道
-		var time = this._drill_scrollOffset_curTime;
-		if( time < 0 ){ time = 0; }
-		if( time > this._drill_scrollOffset_ballisticsX.length-1 ){ time = this._drill_scrollOffset_ballisticsX.length-1; }
-		this._drill_scrollOffsetX = this._drill_scrollOffset_ballisticsX[time];
-		this._drill_scrollOffsetY = this._drill_scrollOffset_ballisticsY[time];
-		
-		// > 时间+1
-		this._drill_scrollOffset_curTime += 1;
-	}
-	
-}
-
-
-//==============================
-// * J数学工具 - 初始化子功能
-//==============================
-Drill_LCa_Controller.prototype.drill_controller_initMath = function(){
-	//（无）
-}
-//==============================
-// * J数学工具 - 锁定锚点
-//			
-//			参数：	> org_anchor_x 数字    （原贴图锚点X）
-//					> org_anchor_y 数字    （原贴图锚点Y）
-//					> target_anchor_x 数字 （新的锚点X）
-//					> target_anchor_y 数字 （新的锚点Y）
-//					> width 数字           （贴图宽度）
-//					> height 数字          （贴图高度）
-//					> rotation 数字        （旋转度数，弧度）
-//					> scale_x,scale_y 数字 （缩放比例XY，默认1.00）
-//					> skew_x,skew_y 数字   （斜切比例XY，默认0.00）
-//			返回：	> { x:0, y:0 }         （偏移的坐标）
-//			
-//			说明：	> 修正 旋转+缩放+斜切 的坐标，使其看起来像是在绕着 新的锚点 变换。
-//					  旋转+缩放+斜切 可为负数。
-//==============================
-Game_Temp.prototype.drill_LCa_Math2D_getFixPointInAnchor = function( 
-					org_anchor_x,org_anchor_y,			//原贴图锚点 
-					target_anchor_x,target_anchor_y, 	//新的锚点 
-					width, height,						//贴图高宽
-					rotation,							//变换的值（旋转）
-					scale_x, scale_y,					//变换的值（缩放）
-					skew_x, skew_y  ){					//变换的值（斜切）
-	
-	if( scale_x == undefined ){ scale_x = 1; }
-	if( scale_y == undefined ){ scale_y = 1; }
-	if( skew_x == undefined ){ skew_x = 0; }
-	if( skew_y == undefined ){ skew_y = 0; }
-	
-	// > 参数准备 （来自 Pixi.Transform）
-    var _cx = 1; // cos rotation + skewY;
-    var _sx = 0; // sin rotation + skewY;
-    var _cy = 0; // cos rotation + Math.PI/2 - skewX;
-    var _sy = 1; // sin rotation + Math.PI/2 - skewX;
-	
-	// > 旋转+斜切 （来自 Pixi.Transform.prototype.updateSkew）
-    _cx = Math.cos( rotation + skew_y );
-    _sx = Math.sin( rotation + skew_y );
-    _cy = -Math.sin( rotation - skew_x ); // cos, added PI/2
-    _sy = Math.cos( rotation - skew_x ); // sin, added PI/2
-	
-	// > 缩放 （来自 Pixi.Transform.prototype.updateLocalTransform）
-    var a = _cx * scale_x;
-    var b = _sx * scale_x;
-    var c = _cy * scale_y;
-    var d = _sy * scale_y;
-	
-	// > 将参数应用到坐标
-	var cur_x = width  * target_anchor_x;
-	var cur_y = height * target_anchor_y;
-	var center_x = width  * org_anchor_x;
-	var center_y = height * org_anchor_y;
-	var dx = (center_x - cur_x);
-	var dy = (center_y - cur_y);
-    var tar_x = cur_x + (dx * a + dy * c) - center_x;
-    var tar_y = cur_y + (dx * b + dy * d) - center_y;
-	
-	return { "x":tar_x, "y":tar_y };
-}
-//==============================
-// * J数学工具 - 矩阵点的变换
-//			
-//			参数：	> cur_x,cur_y 数字       （需要变换的点）
-//					> center_x,center_y 数字 （矩形中心点）
-//					> rotation 数字          （旋转度数，弧度）
-//					> scale_x,scale_y 数字   （缩放比例XY，默认1.00）
-//			返回：	> { x:0, y:0 }           （变换后的坐标）
-//			
-//			说明：	矩阵内或矩阵外一个点，能够根据矩阵的 旋转+缩放 一并变换。
-//					旋转值和缩放值可为负数。
-//==============================
-Game_Temp.prototype.drill_LCa_Math2D_getPointWithTransform = function( 
-					cur_x,cur_y,						//需要变换的点 
-					center_x,center_y, 					//矩形中心点 
-					rotation, scale_x, scale_y  ){		//变换的值（旋转+缩放）
-	
-	var xx = cur_x;
-	var yy = cur_y;
-	
-	// > 偏移锚点
-	xx -= center_x;
-	yy -= center_y;
-	if( xx == 0 && yy == 0 ){ return { "x":cur_x, "y":cur_y }; }
-	
-	// > 先缩放
-	xx *= scale_x;
-	yy *= scale_y;
-	
-	// > 后旋转
-	var r = Math.sqrt( Math.pow(xx,2) + Math.pow(yy,2) );
-	var p_degree = Math.atan(yy/xx);	
-	p_degree = Math.PI - p_degree;
-	if( xx < 0 ){
-		p_degree = Math.PI + p_degree;
-	}
-	xx = r*Math.cos( rotation + Math.PI - p_degree );		//圆公式 (x-a)²+(y-b)²=r²
-	yy = r*Math.sin( rotation + Math.PI - p_degree );		//圆极坐标 x=ρcosθ,y=ρsinθ
-	
-	// > 恢复锚点
-	xx += center_x;
-	yy += center_y;
-	
-	return { "x":xx, "y":yy };
-}
-//==============================
-// * J数学工具 - 矩阵点的变换（逆向）
-//			
-//			参数：	> cur_x,cur_y 数字       （变换后的坐标）
-//					> center_x,center_y 数字 （矩形中心点）
-//					> rotation 数字          （旋转度数，弧度）
-//					> scale_x,scale_y 数字   （缩放比例XY，默认1.00）
-//			返回：	> { x:0, y:0 }           （变换前的点）
-//			
-//			说明：	同样的函数，能够将正向函数的结果值，扳回成正向函数的最初值。
-//==============================
-Game_Temp.prototype.drill_LCa_Math2D_getPointWithTransformInversed = function( 
-					cur_x,cur_y,						//需要变换的点 
-					center_x,center_y, 					//矩形中心点 
-					rotation, scale_x, scale_y  ){		//变换的值（旋转+缩放）
-	
-	var xx = cur_x;
-	var yy = cur_y;
-	
-	// > 偏移锚点
-	xx += center_x;
-	yy += center_y;
-	if( xx == 0 && yy == 0 ){ return { "x":cur_x, "y":cur_y }; }
-	
-	// > 旋转（逆向）
-	var r = Math.sqrt( Math.pow(xx,2) + Math.pow(yy,2) );
-	var p_degree = Math.atan(yy/xx);	
-	p_degree = Math.PI - p_degree;
-	if( xx < 0 ){
-		p_degree = Math.PI + p_degree;
-	}
-	xx = r*Math.cos( -1*rotation + Math.PI - p_degree );		//圆公式 (x-a)²+(y-b)²=r²
-	yy = r*Math.sin( -1*rotation + Math.PI - p_degree );		//圆极坐标 x=ρcosθ,y=ρsinθ
-	
-	// > 缩放（逆向）
-	xx /= scale_x;
-	yy /= scale_y;
-	
-	// > 恢复锚点
-	xx -= center_x;
-	yy -= center_y;
-	
-	return { "x":xx, "y":yy };
-}
-
-
-
-//=============================================================================
-// ** ☆图块填充（A主体 相关）
-//			
-//			说明：	> 此部分专门控制镜头产生的 缩放+旋转 处理后，图块的范围的变化。
-//					> 缩放/旋转后，图块填充margin需要进行相应的范围变化。
-//					（插件完整的功能目录去看看：功能结构树）
-//=============================================================================
-//==============================
-// * 图块填充 - margin属性
-//==============================
-Object.defineProperty(Tilemap.prototype, 'margin', {
-    get: function() {
-        return this._margin;
-    },
-    set: function(value) {
-        if (this._margin !== value) {
-            this._margin = value;
-            this._createLayers();
-        }
-    }
-});
-//==============================
-// * 图块填充 - 帧刷新
-//==============================
-var _drill_LCa_s_update = Scene_Map.prototype.update;
-Scene_Map.prototype.update = function (){
-	_drill_LCa_s_update.call(this);
-	this.drill_LCa_updateTileResize();			//帧刷新 - 缩放比例
-};
-//==============================
-// * 图块填充 - 帧刷新 缩放比例
-//==============================
-Scene_Map.prototype.drill_LCa_updateTileResize = function(){
-	
-	// > 强制刷新开关
-	if( DrillUp.g_LCa_forceRefresh == false ){ return; }
-	
-	// > 值相同时，不刷新
-	var layer_sprite = this._spriteset._baseSprite;
-	if( this._drill_LCa_rotation == layer_sprite.rotation &&
-		this._drill_LCa_scale_x == layer_sprite.scale.x &&
-		this._drill_LCa_scale_y == layer_sprite.scale.y ){
-		return;
-	}
-	this._drill_LCa_rotation = layer_sprite.rotation;
-	this._drill_LCa_scale_x = layer_sprite.scale.x;
-	this._drill_LCa_scale_y = layer_sprite.scale.y;
-	
-	// > 外包裹矩形
-	var rect = $gameTemp.drill_LCa_getTileTransformRect( 
-					0,0,Graphics.boxWidth,Graphics.boxHeight,
-					layer_sprite.rotation,
-					layer_sprite.scale.x,
-					layer_sprite.scale.y
-				);
-	var ww = rect.width;
-	var hh = rect.height;
-	if( ww > 6000 ){ ww = 6000; }	//（定义矩形的上限值）
-	if( hh > 6000 ){ hh = 6000; }
-	var ow = (ww - Graphics.boxWidth) *0.5;
-	var oh = (hh - Graphics.boxHeight) *0.5;
-	if( ow < 0 ){ ow = 0; }
-	if( oh < 0 ){ oh = 0; }
-	ow += 20;
-	oh += 20;
-	var ma = ow;
-	if( ma < oh ){ ma = oh; }
-	
-	// > 图块伸缩
-	this._spriteset._tilemap.margin = ma;
-	this._spriteset._tilemap._width = Graphics.boxWidth + ma*2;
-	this._spriteset._tilemap._height = Graphics.boxHeight + ma*2;
-	
-	// > 地图远景
-	var ox = (Graphics.boxWidth - ww)*0.5;
-	var oy = (Graphics.boxHeight - hh)*0.5;
-	if( this._spriteset._parallax ){
-		this._spriteset._parallax.move( ox, oy, ww, hh );
-		this._spriteset._parallax.origin.x += ox;
-		this._spriteset._parallax.origin.y += oy;
-	}
-}
-//==============================
-// * 图块填充 - 获取矩阵 缩放、旋转 后的外包裹矩阵（数学）
-//			
-//			参数：	> x,y,width,height     （矩形对象）
-//					> rotation 数字        （旋转度数，弧度）
-//					> scale_x,scale_y 数字 （缩放比例XY，默认1.00）
-//
-//			说明：	中心锚点固定为矩形中心(0.5,0.5)。
-//==============================
-Game_Temp.prototype.drill_LCa_getTileTransformRect = function( x, y, width, height, rotation, scale_x, scale_y ){
-	var xx = x;
-	var yy = y;
-	var ww = width;
-	var hh = height;
-	
-	// > 先缩放
-	ww /= scale_x;
-	hh /= scale_y;
-	
-	// > 选取矩形的两个对角点，旋转
-	var p1_x = ww * 0.5;
-	var p1_y = hh * 0.5;
-	var p2_x = ww * 0.5;
-	var p2_y = hh *(-0.5);
-	var r = Math.sqrt( Math.pow(p1_x,2) + Math.pow(p1_y,2) );
-	var r_angle = ((rotation *180/Math.PI) % 360 + 360) % 360;
-	var r_rotation = r_angle /180*Math.PI;
-	
-	var p_degree = Math.atan(p1_y/p1_x);	
-	p_degree = Math.PI - p_degree;
-	if( p1_x < 0 ){
-		p_degree = Math.PI + p_degree;
-	}
-	p1_x = r*Math.cos( r_rotation - p_degree );
-	p1_y = r*Math.sin( r_rotation - p_degree );
-	
-	var p_degree = Math.atan(p2_y/p2_x);	
-	p_degree = Math.PI - p_degree;
-	if( p2_x < 0 ){
-		p_degree = Math.PI + p_degree;
-	}
-	p2_x = r*Math.cos( r_rotation - p_degree );
-	p2_y = r*Math.sin( r_rotation - p_degree );
-	
-	// > 选取最长的作为宽度/高度
-	p1_x = Math.abs(p1_x);
-	p1_y = Math.abs(p1_y);
-	p2_x = Math.abs(p2_x);
-	p2_y = Math.abs(p2_y);
-	
-	if( p1_x < p2_x ){ p1_x = p2_x; }
-	var rww = p1_x *2;
-	if( p1_y < p2_y ){ p1_y = p2_y; }
-	var rhh = p1_y *2;
-	
-	xx = xx + ww - rww;
-	yy = yy + hh - rhh;
-	
-	return { 'x':xx, 'y':yy, 'width':rww, 'height':rhh };
-}
-
-
-//=============================================================================
-// ** ☆缩放转换（G叠加变化 相关）
-//
-//			说明：	> 此部分专门控制镜头产生的 缩放转换 处理。
-//					> 子插件会根据情况标记出【镜头缩放与位移】，用于处理位置与缩放关系。
-//					> 获取缩放值 的标准函数 见 A主体
-//					> 缩放值转换 的标准函数 见 G叠加变化
-//					（插件完整的功能目录去看看：功能结构树）
-//=============================================================================
-//==============================
-// * 缩放转换 - 屏幕宽度（图块单位）（覆写）
-//
-//			说明：	> 考虑到镜头缩放情况，这里返回的值需要经过缩放处理。
-//					> 此函数默认只被 _displayX 相关函数用到了，但是这些函数都被覆写了。所以用处不大。
-//==============================
-Game_Map.prototype.screenTileX = function(){
-	var scale_x = $gameSystem._drill_LCa_controller._drill_scaleX;
-	if( scale_x == undefined ){ scale_x = 1; }
-	return Graphics.boxWidth / scale_x / this.tileWidth();
-};
-//==============================
-// * 缩放转换 - 屏幕高度（图块单位）（覆写）
-//
-//			说明：	> 考虑到镜头缩放情况，这里返回的值需要经过缩放处理。
-//					> 此函数默认只被 _displayY 相关函数用到了，但是这些函数都被覆写了。所以用处不大。
-//==============================
-Game_Map.prototype.screenTileY = function(){
-	var scale_y = $gameSystem._drill_LCa_controller._drill_scaleY;
-	if( scale_y == undefined ){ scale_y = 1; }
-	return Graphics.boxHeight / scale_y / this.tileHeight(); 
-};
-//==============================
-// * 缩放转换 - 缩放地图的鼠标X修正
-//
-//			说明：	> 此效果包含了 鼠标左键移动 的转换。
-//==============================
-var _drill_LCa_map_canvasToMapX = Game_Map.prototype.canvasToMapX;
-Game_Map.prototype.canvasToMapX = function( x ){
-	x = $gameSystem.drill_LCa_cameraToMapX( x );
-	return _drill_LCa_map_canvasToMapX.call(this,x);
-};
-//==============================
-// * 缩放转换 - 缩放地图的鼠标Y修正
-//
-//			说明：	> 此效果包含了 鼠标左键移动 的转换。
-//==============================
-var _drill_LCa_map_canvasToMapY = Game_Map.prototype.canvasToMapY;
-Game_Map.prototype.canvasToMapY = function( y ){
-	y = $gameSystem.drill_LCa_cameraToMapY( y );
-	return _drill_LCa_map_canvasToMapY.call(this,y);
-};
-
-
-//=============================================================================
-// ** ☆整体平移（H整体平移 相关）
-//
-//			说明：	> 关键词 globalOffset
-//					> 此模块使用 镜头控制器 的结果数据，进行实时变化。
-//					> 鼠标指向标、边缘遮挡层 所在的位置需要同步平移。搜索关键字：整体平移。
-//					（插件完整的功能目录去看看：功能结构树）
-//=============================================================================
-//==============================
-// * 整体平移 - 鼠标指向标
-//==============================
-var _drill_LCa_globalOffset_processMapTouch = Scene_Map.prototype.processMapTouch;
-Scene_Map.prototype.processMapTouch = function() {
-	$gameMap._drill_LCa_isInProcessMapTouch = true;		//（标记鼠标点击时机）
-	_drill_LCa_globalOffset_processMapTouch.call( this );
-	$gameMap._drill_LCa_isInProcessMapTouch = false;
-}
-//==============================
-// * 整体平移 - 鼠标指向标 - 整体平移X
-//==============================
-var _drill_LCa_globalOffset_canvasToMapX = Game_Map.prototype.canvasToMapX;
-Game_Map.prototype.canvasToMapX = function( x ){
-	if( this._drill_LCa_isInProcessMapTouch == true ){
-		x -= $gameSystem._drill_LCa_controller._drill_globalOffsetX;
-	}
-	return _drill_LCa_globalOffset_canvasToMapX.call( this, x );
-}
-//==============================
-// * 整体平移 - 鼠标指向标 - 整体平移Y
-//==============================
-var _drill_LCa_globalOffset_canvasToMapY = Game_Map.prototype.canvasToMapY;
-Game_Map.prototype.canvasToMapY = function( y ){
-	if( this._drill_LCa_isInProcessMapTouch == true ){
-		y -= $gameSystem._drill_LCa_controller._drill_globalOffsetY;
-	}
-	return _drill_LCa_globalOffset_canvasToMapY.call( this, y );
-}
-/*
-//==============================
-// * 整体平移 - 鼠标指向标（当前方法不合适，改为上面的三个函数）
-//==============================
-var _drill_LCa_globalOffset_setDestination = Game_Temp.prototype.setDestination;
-Game_Temp.prototype.setDestination = function( x, y ){
-	if( $gameMap ){
-		var controller = $gameSystem._drill_LCa_controller;
-		x -= Math.round( controller._drill_globalOffsetX / $gameMap.tileWidth() );	//（图块单位）
-		y -= Math.round( controller._drill_globalOffsetY / $gameMap.tileHeight() );
-	}
-	_drill_LCa_globalOffset_setDestination.call( this, x, y );
-};
-*/
-//==============================
-// * 整体平移 - 边缘遮挡层 - 创建
-//==============================
-var _drill_LCa_globalOffset_createDestination = Spriteset_Map.prototype.createDestination;
-Spriteset_Map.prototype.createDestination = function() {
-	_drill_LCa_globalOffset_createDestination.call(this);	//鼠标目的地 < 上层 < 天气层
-	
-	// > 上层
-	if( !this._drill_mapUpArea ){
-		this._drill_mapUpArea = new Sprite();
-		this._baseSprite.addChild(this._drill_mapUpArea);	
-	}
-	
-	// > 创建 边缘遮挡层
-	//		（边缘遮挡层是为了防止 整体平移后 玩家对 镜头聚焦 理解会有偏差而定的）
-	if( this._drill_LCa_barrierLayer == undefined ){
-		var data = $gameSystem._drill_LCa_controller._drill_data;
-		var ww = Graphics.boxWidth;
-		var hh = Graphics.boxHeight;
-		
-		// > 建立画布
-		var temp_bitmap = new Bitmap( ww*3, hh*3 );
-		temp_bitmap.fillAll( data['globalBarrierLayerColor'] );
-		temp_bitmap.clearRect( ww,hh, ww,hh );
-		
-		// > 建立贴图
-		var temp_sprite = new Sprite();
-		temp_sprite.bitmap = temp_bitmap;
-		temp_sprite._drill_LCa_curColor = data['globalBarrierLayerColor'];
-		temp_sprite.visible = false;
-		temp_sprite.x = (-1) * ww;
-		temp_sprite.y = (-1) * hh;
-		this.addChild( temp_sprite );
-		this._drill_LCa_barrierLayer = temp_sprite;
-	}
-}
-//==============================
-// * 镜头控制 - 帧刷新绑定
-//==============================
-var _drill_LCa_globalOffset_spriteset_update = Spriteset_Map.prototype.update;
-Spriteset_Map.prototype.update = function(){
-	_drill_LCa_globalOffset_spriteset_update.call(this);
-	if( $gameSystem.drill_LCa_isEnable() != true ){ return; }
-	this.drill_LCa_updateBarrierLayer();		//帧刷新 - 边缘遮挡层
-};
-//==============================
-// * 整体平移 - 边缘遮挡层 - 帧刷新
-//==============================
-Spriteset_Map.prototype.drill_LCa_updateBarrierLayer = function() {
-	if( this._drill_LCa_barrierLayer == undefined ){ return; }
-	var controller = $gameSystem._drill_LCa_controller;
-	var data = $gameSystem._drill_LCa_controller._drill_data;
-	
-	// > 整体平移
-	var ww = Graphics.boxWidth;
-	var hh = Graphics.boxHeight;
-	var xx = (-1) * ww;
-	var yy = (-1) * hh;
-	xx += controller._drill_globalOffsetX*2;	//（边缘遮挡层两倍偏移量）
-	yy += controller._drill_globalOffsetY*2;
-	this._drill_LCa_barrierLayer.x = xx;
-	this._drill_LCa_barrierLayer.y = yy;
-	
-	// > 边缘遮挡层 显示
-	if( data['globalBarrierLayerEnabled'] == true ){
-		if( controller._drill_globalOffsetX == 0 && controller._drill_globalOffsetY == 0 ){
-			this._drill_LCa_barrierLayer.visible = false;
-		}else{
-			this._drill_LCa_barrierLayer.visible = true;
-		}
-	}
-	
-	// > 边缘遮挡层 颜色
-	if( this._drill_LCa_barrierLayer._drill_LCa_curColor != data['globalBarrierLayerColor'] ){
-		this._drill_LCa_barrierLayer._drill_LCa_curColor =  data['globalBarrierLayerColor'];
-		
-		// > 重建画布
-		var temp_bitmap = new Bitmap( ww*3, hh*3 );
-		temp_bitmap.fillAll( data['globalBarrierLayerColor'] );
-		temp_bitmap.clearRect( ww,hh, ww,hh );
-		this._drill_LCa_barrierLayer.bitmap = temp_bitmap;
-	}
-}
-/*
-//==============================
-// * 整体平移 - 初始化（不合适，弃用）
-//
-//			说明：	此部分直接修改鼠标的基函数，确保鼠标的位置、落脚点整体平移。
-//==============================
-var _drill_LCa_globalOffset_Graphics_initialize = Graphics.initialize;
-Graphics.initialize = function( width, height, type ){
-	_drill_LCa_globalOffset_Graphics_initialize.call( this, width, height, type );
-	this._drill_LCa_globalOffsetX = 0;
-	this._drill_LCa_globalOffsetY = 0;
-}
-//==============================
-// * 整体平移 - 游戏坐标X 转 html坐标X（不合适，弃用）
-//==============================
-var _drill_LCa_globalOffset_pageToCanvasX = Graphics.pageToCanvasX;
-Graphics.pageToCanvasX = function( x ){
-	var xx = _drill_LCa_globalOffset_pageToCanvasX.call( this, x );
-	xx -= this._drill_LCa_globalOffsetX;
-	return xx;
-}
-//==============================
-// * 整体平移 - 游戏坐标Y 转 html坐标Y（不合适，弃用）
-//==============================
-var _drill_LCa_globalOffset_pageToCanvasY = Graphics.pageToCanvasY;
-Graphics.pageToCanvasY = function( y ){
-	var yy = _drill_LCa_globalOffset_pageToCanvasY.call( this, y );
-	yy -= this._drill_LCa_globalOffsetY;
-	return yy;
-}
-//==============================
-// * 场景管理器 - 帧刷新（不合适，弃用）
-//==============================
-var _drill_LCa_globalOffset_updateMain = SceneManager.updateMain;
-SceneManager.updateMain = function() {
-	_drill_LCa_globalOffset_updateMain.call( this );
-	
-	// > 只在地图界面才进行 整体平移
-	if( $gameSystem && this._scene.constructor.name === "Scene_Map" ){
-		var controller = $gameSystem._drill_LCa_controller;
-		Graphics._drill_LCa_globalOffsetX = controller._drill_globalOffsetX;
-		Graphics._drill_LCa_globalOffsetY = controller._drill_globalOffsetY;
-	}else{
-		Graphics._drill_LCa_globalOffsetX = 0;
-		Graphics._drill_LCa_globalOffsetY = 0;
-	}
-}
-*/
-
-
-//=============================================================================
-// ** ☆滚动地图（I滚动地图 相关）
+// ** ☆滚动地图（L手动滚动镜头 相关）
 //
 //			说明：	> 此模块在 镜头控制器 工作时，屏蔽 干扰镜头功能的函数。
 //					（插件完整的功能目录去看看：功能结构树）
@@ -4612,6 +4663,356 @@ Game_Map.prototype.isScrolling = function(){
 	}
 	return _drill_LCa_map_isScrolling.call(this);
 };
+
+
+
+//=============================================================================
+// ** ☆镜头墙
+//
+//			说明：	> 此模块能在现有 镜头控制器 基础上，添加镜头墙功能。
+//					> 可以作为一个单独插件分离出去。但现在不打算分离。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 事件容器 - 初始化
+//==============================
+var _drill_LCa_temp_initialize2 = Game_Temp.prototype.initialize;
+Game_Temp.prototype.initialize = function() {
+	_drill_LCa_temp_initialize2.call(this);
+	this._drill_LCa_wallEvents = [];			//含镜头墙的事件
+	this._drill_LCa_needRestatistics = true;
+};
+//==============================
+// * 事件容器 - 切换地图时
+//==============================
+var _drill_LCa_gmap_setup = Game_Map.prototype.setup;
+Game_Map.prototype.setup = function(mapId) {
+	$gameTemp._drill_LCa_wallEvents = [];		//含镜头墙的事件
+	$gameTemp._drill_LCa_needRestatistics = true;
+	_drill_LCa_gmap_setup.call(this,mapId);
+}
+//==============================
+// * 事件容器 - 切换贴图时（菜单界面刷新）
+//==============================
+var _drill_LCa_smap_createCharacters = Spriteset_Map.prototype.createCharacters;
+Spriteset_Map.prototype.createCharacters = function() {
+	$gameTemp._drill_LCa_wallEvents = [];
+	$gameTemp._drill_LCa_needRestatistics = true;
+	_drill_LCa_smap_createCharacters.call(this);
+}
+//==============================
+// * 事件容器 - 帧刷新
+//==============================
+var _drill_LCa_map_update = Game_Map.prototype.update;
+Game_Map.prototype.update = function( sceneActive ){
+	_drill_LCa_map_update.call( this, sceneActive );
+	this.drill_LCa_updateRestatistics();	//帧刷新 - 刷新统计
+};
+//==============================
+// * 事件容器 - 帧刷新 - 刷新统计
+//==============================
+Game_Map.prototype.drill_LCa_updateRestatistics = function() {
+	if( !$gameTemp._drill_LCa_needRestatistics ){ return }
+	$gameTemp._drill_LCa_needRestatistics = false;
+	
+	$gameTemp._drill_LCa_wallEvents = [];
+	var event_list = this._events;
+	for(var i = 0; i < event_list.length; i++ ){
+		var temp_event = event_list[i];
+		if( temp_event == null ){ continue; }
+		if( temp_event._erased == true ){ continue; }	//『有效事件』
+		
+		if( temp_event._drill_LCa_wall != null && 
+			temp_event._drill_LCa_wall.length != 0){
+			$gameTemp._drill_LCa_wallEvents.push(temp_event);
+		}
+	}
+}
+//==============================
+// * 镜头墙 - 事件注释
+//==============================
+var _drill_LCa_c_setupPageSettings = Game_Event.prototype.setupPageSettings;
+Game_Event.prototype.setupPageSettings = function() {
+	_drill_LCa_c_setupPageSettings.call(this);
+	
+	// > 镜头墙 - 不跨事件页
+	this._drill_LCa_wall = [];
+	
+	var page = this.page();
+    if( page ){
+		this.list().forEach(function(l) {	//将页面注释转成插件指令格式
+			if( l.code === 108 ){
+				var args = l.parameters[0].split(' ');
+				var command = args.shift();
+				if( command == "=>地图镜头" ){
+					if( args.length == 4 ){
+						if( args[1] ){ var type  = String(args[1]);}
+						if( args[3] ){ var temp1 = String(args[3]);}
+						if( type == "设置镜头墙" ){
+							this._drill_LCa_wall.push(temp1);
+							$gameTemp._drill_LCa_needRestatistics = true;
+						}
+					}
+				};  
+			};
+		}, this);
+    }
+}
+//==============================
+// * 镜头墙 - I自动模式 - 获取镜头目标位置
+//
+//			说明：	> 此功能对 镜头控制器 进行功能扩展。
+//==============================
+var _drill_LCa_Controller_getAutoPosition = Drill_LCa_Controller.prototype.drill_getAutoPosition;
+Drill_LCa_Controller.prototype.drill_getAutoPosition = function(){
+	var pos = _drill_LCa_Controller_getAutoPosition.call( this );
+	var xx = pos['x'];
+	var yy = pos['y'];
+	
+	// > 镜头墙矩形区域
+	var oww = Graphics.boxWidth  / this.tileWidth();
+	var ohh = Graphics.boxHeight / this.tileHeight();
+	var sww = Graphics.boxWidth  / this._drill_scaleX / this.tileWidth();
+	var shh = Graphics.boxHeight / this._drill_scaleY / this.tileHeight();
+	var unit_x = 1/this._drill_scaleX;	//（缩放后的图块值）
+	var unit_y = 1/this._drill_scaleY;
+	var rect_lr_width  = sww * 0.5;		//（左右 镜头墙矩形）
+	var rect_lr_height = shh * 1;
+	var rect_ud_width  = sww * 1;		//（上下 镜头墙矩形）
+	var rect_ud_height = shh * 0.5;
+	
+	// > 镜头墙
+	for(var i=0; i < $gameTemp._drill_LCa_wallEvents.length; i++){
+		var temp_event = $gameTemp._drill_LCa_wallEvents[i];
+		var temp_walls = temp_event._drill_LCa_wall;
+		
+		// > 事件对齐镜头位置
+		var rxx = temp_event._realX - oww*0.5;
+		var ryy = temp_event._realY - ohh*0.5;
+		
+		// > 镜头墙 - 数学问题兼容
+		//		（如果在 循环+镜头墙 情况下，镜头墙处于初始的镜头范围内，则镜头墙无效）
+		if( $gameMap.isLoopHorizontal() && temp_event._realX < sww ){
+			continue;
+		}
+		if( $gameMap.isLoopVertical() && temp_event._realY < shh ){
+			continue;
+		}
+		
+		// > 镜头墙 - 优化（镜头+边界 内未出现墙，则不执行阻塞）
+		if( Math.abs($gameMap.adjustX(temp_event._realX + 0.5) - oww*0.5) <= sww*0.5 + 5.5 &&	//（镜头范围+5个图块边框区域） 
+			Math.abs($gameMap.adjustY(temp_event._realY + 0.5) - ohh*0.5) <= shh*0.5 + 5.5 ){
+		}else{
+			continue;
+		}
+		
+		// > 镜头墙 - 左右
+		for(var j=0; j<temp_walls.length; j++){
+			
+			// > 镜头墙 - 左右（循环地图）
+			if( $gameMap.isLoopHorizontal() ){
+				if( temp_walls[j] == "左" ){
+					
+					var x_min = rxx - rect_lr_width;
+					var x_max = rxx;
+					var y_min = ryy - rect_lr_height*0.5 + unit_y;
+					var y_max = ryy + rect_lr_height*0.5 + unit_y;
+					
+					if( $gameTemp.drill_LCa_Math1D_isValueInLoopRange( xx, x_min, x_max, this.width()  ) &&
+						$gameTemp.drill_LCa_Math1D_isValueInLoopRange( yy, y_min, y_max, this.height() ) ){
+						
+						xx = rxx - rect_lr_width;
+						break;
+					}
+				}
+				if( temp_walls[j] == "右" ){
+					
+					var x_min = rxx;
+					var x_max = rxx + rect_lr_width;
+					var y_min = ryy - rect_lr_height*0.5 + unit_y;
+					var y_max = ryy + rect_lr_height*0.5 + unit_y;
+					
+					if( $gameTemp.drill_LCa_Math1D_isValueInLoopRange( xx, x_min, x_max, this.width()  ) &&
+						$gameTemp.drill_LCa_Math1D_isValueInLoopRange( yy, y_min, y_max, this.height() ) ){
+						
+						xx = rxx + rect_lr_width;
+						break;
+					}
+				}
+				
+			// > 镜头墙 - 左右（非循环地图）
+			}else{
+				if( temp_walls[j] == "左" ){
+					
+					var x_min = rxx - rect_lr_width;
+					var x_max = rxx;
+					var y_min = ryy - rect_lr_height*0.5 + unit_y;
+					var y_max = ryy + rect_lr_height*0.5 + unit_y;
+					
+					if( xx >= x_min && xx <= x_max &&
+						yy >= y_min && yy <= y_max ){
+						
+						xx = rxx - rect_lr_width;
+						break;
+					}
+				}
+				if( temp_walls[j] == "右" ){
+					
+					var x_min = rxx;
+					var x_max = rxx + rect_lr_width;
+					var y_min = ryy - rect_lr_height*0.5 + unit_y;
+					var y_max = ryy + rect_lr_height*0.5 + unit_y;
+					
+					if( xx >= x_min && xx <= x_max &&
+						yy >= y_min && yy <= y_max ){
+						
+						xx = rxx + rect_lr_width;
+						break;
+					}
+				}
+				
+			}
+		}
+		
+		// > 镜头墙 - 上下
+		for(var j=0; j<temp_walls.length; j++){
+			
+			// > 镜头墙 - 上下（循环地图）
+			if( $gameMap.isLoopVertical() ){
+				if( temp_walls[j] == "上" ){
+					
+					var x_min = rxx - rect_ud_width*0.5 + unit_x;
+					var x_max = rxx + rect_ud_width*0.5 + unit_x;
+					var y_min = ryy - rect_ud_height;
+					var y_max = ryy;
+					
+					if( $gameTemp.drill_LCa_Math1D_isValueInLoopRange( xx, x_min, x_max, this.width()  ) &&
+						$gameTemp.drill_LCa_Math1D_isValueInLoopRange( yy, y_min, y_max, this.height() ) ){
+						
+						yy = ryy - rect_ud_height;
+						break;
+					}
+				}
+				if( temp_walls[j] == "下" ){
+					
+					var x_min = rxx - rect_ud_width*0.5 + unit_x;
+					var x_max = rxx + rect_ud_width*0.5 + unit_x;
+					var y_min = ryy;
+					var y_max = ryy + rect_ud_height;
+					
+					if( $gameTemp.drill_LCa_Math1D_isValueInLoopRange( xx, x_min, x_max, this.width()  ) &&
+						$gameTemp.drill_LCa_Math1D_isValueInLoopRange( yy, y_min, y_max, this.height() ) ){
+						
+						yy = ryy + rect_ud_height;
+						break;
+					}
+				}
+				
+			// > 镜头墙 - 上下（非循环地图）
+			}else{
+				if( temp_walls[j] == "上" ){
+					
+					var x_min = rxx - rect_ud_width*0.5 + unit_x;
+					var x_max = rxx + rect_ud_width*0.5 + unit_x;
+					var y_min = ryy - rect_ud_height;
+					var y_max = ryy;
+					
+					if( xx >= x_min && xx <= x_max &&
+						yy >= y_min && yy <= y_max ){
+						
+						yy = ryy - rect_ud_height;
+						break;
+					}
+				}
+				if( temp_walls[j] == "下" ){
+					
+					var x_min = rxx - rect_ud_width*0.5 + unit_x;
+					var x_max = rxx + rect_ud_width*0.5 + unit_x;
+					var y_min = ryy;
+					var y_max = ryy + rect_ud_height;
+					
+					if( xx >= x_min && xx <= x_max &&
+						yy >= y_min && yy <= y_max ){
+						
+						yy = ryy + rect_ud_height;
+						break;
+					}
+				}
+				
+			}
+		}
+	}
+	
+	return { 'x':xx, 'y':yy };
+};
+//==============================
+// * 镜头墙 - 数学工具 - 循环维度的范围判定
+//			
+//			参数：	> cur_value  数字（值）
+//					> range_min  数字（范围最小值）
+//					> range_max  数字（范围最大值）
+//					> loop_value 数字（循环维度值）
+//			返回：	> 布尔           （值是否在范围内）
+//			
+//			说明：	> 常用于循环地图 框选范围 用。
+//					> 以角度为例，循环维度值为360。角度中的 361度和1度 是一样的。
+//					  而且范围为290至370时，5度、722度、310度都包含在范围内。
+//==============================
+Game_Temp.prototype.drill_LCa_Math1D_isValueInLoopRange = function( cur_value, range_min, range_max, loop_value ){
+	var loop = loop_value;
+	
+	// > 全部点落在范围内
+	if( range_max - range_min >= loop ){ return true; }
+	
+	// > 标准化
+	cur_value = (cur_value %loop+loop)%loop;
+	range_min = (range_min %loop+loop)%loop;
+	range_max = (range_max %loop+loop)%loop;
+	
+	// > 相等情况
+	if( range_min == range_max ){
+		return cur_value == range_min;
+	}
+	
+	// > 范围没越过循环 情况
+	if( range_min < range_max ){
+		if( cur_value < range_min ){ return false; }
+		if( cur_value > range_max ){ return false; }
+	}
+	// > 范围越过循环 情况
+	if( range_min > range_max ){
+		if( cur_value > range_min && cur_value < range_max ){ return false; }
+	}
+	return true;
+};
+
+
+
+//=============================================================================
+// * ☆MOG兼容
+//=============================================================================
+//==============================
+// * MOG兼容 - 最后继承1级
+//==============================
+var _drill_LCa_scene_initialize = SceneManager.initialize;
+SceneManager.initialize = function() {
+	_drill_LCa_scene_initialize.call(this);
+	
+	//==============================
+	// * MOG兼容 - mog道具浮动文字
+	//==============================
+	if( Imported.MOG_TreasurePopup ){
+		var _drill_LCa_mog_setupNew = TreasureIcons.prototype.setupNew;
+		TreasureIcons.prototype.setupNew = function( data ){
+			_drill_LCa_mog_setupNew.call( this, data );
+			
+			// > mog的贴图在 图片层
+			var tar_pos = $gameSystem._drill_LCa_controller.drill_LCa_getCameraPos_OuterSprite( this._cx, this._cy );
+			this._cx = tar_pos.x;
+			this._cy = tar_pos.y;
+		}
+	}
+}
 
 
 
@@ -4806,329 +5207,6 @@ DrillUp.drill_LCa_isInArea_PicOrTop = function( sprite ){
 	if( this.drill_LCa_getAncestorLayerSprite( sprite, "最顶层" ) != null ){ return true; }
 	return false;
 };
-
-
-
-//=============================================================================
-// ** ☆镜头墙
-//
-//			说明：	> 此模块能在现有 镜头控制器 基础上，添加镜头墙功能。
-//					> 可以作为一个单独插件分离出去。但现在不打算分离。
-//					（插件完整的功能目录去看看：功能结构树）
-//=============================================================================
-//==============================
-// * 事件容器 - 初始化
-//==============================
-var _drill_LCa_temp_initialize2 = Game_Temp.prototype.initialize;
-Game_Temp.prototype.initialize = function() {	
-	_drill_LCa_temp_initialize2.call(this);
-	this._drill_LCa_wallEvents = [];			//含镜头墙的事件
-	this._drill_LCa_needRestatistics = true;
-};
-//==============================
-// * 事件容器 - 切换地图时
-//==============================
-var _drill_LCa_gmap_setup = Game_Map.prototype.setup;
-Game_Map.prototype.setup = function(mapId) {
-	$gameTemp._drill_LCa_wallEvents = [];		//含镜头墙的事件
-	$gameTemp._drill_LCa_needRestatistics = true;
-	_drill_LCa_gmap_setup.call(this,mapId);
-}
-//==============================
-// * 事件容器 - 切换贴图时（菜单界面刷新）
-//==============================
-var _drill_LCa_smap_createCharacters = Spriteset_Map.prototype.createCharacters;
-Spriteset_Map.prototype.createCharacters = function() {
-	$gameTemp._drill_LCa_wallEvents = [];
-	$gameTemp._drill_LCa_needRestatistics = true;
-	_drill_LCa_smap_createCharacters.call(this);
-}
-//==============================
-// * 事件容器 - 帧刷新
-//==============================
-var _drill_LCa_map_update = Game_Map.prototype.update;
-Game_Map.prototype.update = function( sceneActive ){
-	_drill_LCa_map_update.call( this, sceneActive );
-	this.drill_LCa_updateRestatistics();	//帧刷新 - 刷新统计
-};
-//==============================
-// * 事件容器 - 帧刷新 - 刷新统计
-//==============================
-Game_Map.prototype.drill_LCa_updateRestatistics = function() {
-	if( !$gameTemp._drill_LCa_needRestatistics ){ return }
-	$gameTemp._drill_LCa_needRestatistics = false;
-	
-	$gameTemp._drill_LCa_wallEvents = [];
-	var event_list = this._events;
-	for(var i = 0; i < event_list.length; i++ ){
-		var temp_event = event_list[i];
-		if( temp_event == null ){ continue; }
-		if( temp_event._erased == true ){ continue; }	//『有效事件』
-		
-		if( temp_event._drill_LCa_wall != null && 
-			temp_event._drill_LCa_wall.length != 0){
-			$gameTemp._drill_LCa_wallEvents.push(temp_event);
-		}
-	}
-}
-//==============================
-// * 镜头墙 - 事件注释
-//==============================
-var _drill_LCa_c_setupPageSettings = Game_Event.prototype.setupPageSettings;
-Game_Event.prototype.setupPageSettings = function() {
-	_drill_LCa_c_setupPageSettings.call(this);
-	
-	// > 镜头墙 - 不跨事件页
-	this._drill_LCa_wall = [];
-	
-	var page = this.page();
-    if( page ){
-		this.list().forEach(function(l) {	//将页面注释转成插件指令格式
-			if( l.code === 108 ){
-				var args = l.parameters[0].split(' ');
-				var command = args.shift();
-				if( command == "=>地图镜头" ){
-					if( args.length == 4 ){
-						if( args[1] ){ var type  = String(args[1]);}
-						if( args[3] ){ var temp1 = String(args[3]);}
-						if( type == "设置镜头墙" ){
-							this._drill_LCa_wall.push(temp1);
-							$gameTemp._drill_LCa_needRestatistics = true;
-						}
-					}
-				};  
-			};
-		}, this);
-    }
-}
-//==============================
-// * 镜头墙 - D自动模式 - 获取镜头目标位置
-//
-//			说明：	> 此功能对 镜头控制器 进行功能扩展。
-//==============================
-var _drill_LCa_Controller_getAutoPosition = Drill_LCa_Controller.prototype.drill_getAutoPosition;
-Drill_LCa_Controller.prototype.drill_getAutoPosition = function(){
-	var pos = _drill_LCa_Controller_getAutoPosition.call( this );
-	var xx = pos['x'];
-	var yy = pos['y'];
-	
-	// > 镜头墙矩形区域
-	var oww = Graphics.boxWidth  / this.tileWidth();
-	var ohh = Graphics.boxHeight / this.tileHeight();
-	var sww = Graphics.boxWidth  / this._drill_scaleX / this.tileWidth();
-	var shh = Graphics.boxHeight / this._drill_scaleY / this.tileHeight();
-	var unit_x = 1/this._drill_scaleX;	//（缩放后的图块值）
-	var unit_y = 1/this._drill_scaleY;
-	var rect_lr_width  = sww * 0.5;		//（左右 镜头墙矩形）
-	var rect_lr_height = shh * 1;
-	var rect_ud_width  = sww * 1;		//（上下 镜头墙矩形）
-	var rect_ud_height = shh * 0.5;
-	
-	// > 镜头墙
-	for(var i=0; i < $gameTemp._drill_LCa_wallEvents.length; i++){
-		var temp_event = $gameTemp._drill_LCa_wallEvents[i];
-		var temp_walls = temp_event._drill_LCa_wall;
-		
-		// > 事件对齐镜头位置
-		var rxx = temp_event._realX - oww*0.5;
-		var ryy = temp_event._realY - ohh*0.5;
-		
-		// > 镜头墙 - 数学问题兼容
-		//		（如果在 循环+镜头墙 情况下，镜头墙处于初始的镜头范围内，则镜头墙无效）
-		if( $gameMap.isLoopHorizontal() && temp_event._realX < sww ){
-			continue;
-		}
-		if( $gameMap.isLoopVertical() && temp_event._realY < shh ){
-			continue;
-		}
-		
-		// > 镜头墙 - 优化（镜头+边界 内未出现墙，则不执行阻塞）
-		if( Math.abs($gameMap.adjustX(temp_event._realX + 0.5) - oww*0.5) <= sww*0.5 + 5.5 &&	//（镜头范围+5个图块边框区域） 
-			Math.abs($gameMap.adjustY(temp_event._realY + 0.5) - ohh*0.5) <= shh*0.5 + 5.5 ){
-		}else{
-			continue;
-		}
-		
-		// > 镜头墙 - 左右
-		for(var j=0; j<temp_walls.length; j++){
-			
-			// > 镜头墙 - 左右（循环地图）
-			if( $gameMap.isLoopHorizontal() ){
-				if( temp_walls[j] == "左" ){
-					
-					var x_min = rxx - rect_lr_width;
-					var x_max = rxx;
-					var y_min = ryy - rect_lr_height*0.5 + unit_y;
-					var y_max = ryy + rect_lr_height*0.5 + unit_y;
-					
-					if( $gameTemp.drill_LCa_Math1D_isValueInLoopRange( xx, x_min, x_max, this.width()  ) &&
-						$gameTemp.drill_LCa_Math1D_isValueInLoopRange( yy, y_min, y_max, this.height() ) ){
-						
-						xx = rxx - rect_lr_width;
-						break;
-					}
-				}
-				if( temp_walls[j] == "右" ){
-					
-					var x_min = rxx;
-					var x_max = rxx + rect_lr_width;
-					var y_min = ryy - rect_lr_height*0.5 + unit_y;
-					var y_max = ryy + rect_lr_height*0.5 + unit_y;
-					
-					if( $gameTemp.drill_LCa_Math1D_isValueInLoopRange( xx, x_min, x_max, this.width()  ) &&
-						$gameTemp.drill_LCa_Math1D_isValueInLoopRange( yy, y_min, y_max, this.height() ) ){
-						
-						xx = rxx + rect_lr_width;
-						break;
-					}
-				}
-				
-			// > 镜头墙 - 左右（非循环地图）
-			}else{
-				if( temp_walls[j] == "左" ){
-					
-					var x_min = rxx - rect_lr_width;
-					var x_max = rxx;
-					var y_min = ryy - rect_lr_height*0.5 + unit_y;
-					var y_max = ryy + rect_lr_height*0.5 + unit_y;
-					
-					if( xx >= x_min && xx <= x_max &&
-						yy >= y_min && yy <= y_max ){
-						
-						xx = rxx - rect_lr_width;
-						break;
-					}
-				}
-				if( temp_walls[j] == "右" ){
-					
-					var x_min = rxx;
-					var x_max = rxx + rect_lr_width;
-					var y_min = ryy - rect_lr_height*0.5 + unit_y;
-					var y_max = ryy + rect_lr_height*0.5 + unit_y;
-					
-					if( xx >= x_min && xx <= x_max &&
-						yy >= y_min && yy <= y_max ){
-						
-						xx = rxx + rect_lr_width;
-						break;
-					}
-				}
-				
-			}
-		}
-		
-		// > 镜头墙 - 上下
-		for(var j=0; j<temp_walls.length; j++){
-			
-			// > 镜头墙 - 上下（循环地图）
-			if( $gameMap.isLoopVertical() ){
-				if( temp_walls[j] == "上" ){
-					
-					var x_min = rxx - rect_ud_width*0.5 + unit_x;
-					var x_max = rxx + rect_ud_width*0.5 + unit_x;
-					var y_min = ryy - rect_ud_height;
-					var y_max = ryy;
-					
-					if( $gameTemp.drill_LCa_Math1D_isValueInLoopRange( xx, x_min, x_max, this.width()  ) &&
-						$gameTemp.drill_LCa_Math1D_isValueInLoopRange( yy, y_min, y_max, this.height() ) ){
-						
-						yy = ryy - rect_ud_height;
-						break;
-					}
-				}
-				if( temp_walls[j] == "下" ){
-					
-					var x_min = rxx - rect_ud_width*0.5 + unit_x;
-					var x_max = rxx + rect_ud_width*0.5 + unit_x;
-					var y_min = ryy;
-					var y_max = ryy + rect_ud_height;
-					
-					if( $gameTemp.drill_LCa_Math1D_isValueInLoopRange( xx, x_min, x_max, this.width()  ) &&
-						$gameTemp.drill_LCa_Math1D_isValueInLoopRange( yy, y_min, y_max, this.height() ) ){
-						
-						yy = ryy + rect_ud_height;
-						break;
-					}
-				}
-				
-			// > 镜头墙 - 上下（非循环地图）
-			}else{
-				if( temp_walls[j] == "上" ){
-					
-					var x_min = rxx - rect_ud_width*0.5 + unit_x;
-					var x_max = rxx + rect_ud_width*0.5 + unit_x;
-					var y_min = ryy - rect_ud_height;
-					var y_max = ryy;
-					
-					if( xx >= x_min && xx <= x_max &&
-						yy >= y_min && yy <= y_max ){
-						
-						yy = ryy - rect_ud_height;
-						break;
-					}
-				}
-				if( temp_walls[j] == "下" ){
-					
-					var x_min = rxx - rect_ud_width*0.5 + unit_x;
-					var x_max = rxx + rect_ud_width*0.5 + unit_x;
-					var y_min = ryy;
-					var y_max = ryy + rect_ud_height;
-					
-					if( xx >= x_min && xx <= x_max &&
-						yy >= y_min && yy <= y_max ){
-						
-						yy = ryy + rect_ud_height;
-						break;
-					}
-				}
-				
-			}
-		}
-	}
-	
-	return { 'x':xx, 'y':yy };
-};
-//=============================================================================
-// * 数学工具 - 循环维度的范围判定
-//			
-//			参数：	> cur_value  数字（值）
-//					> range_min  数字（范围最小值）
-//					> range_max  数字（范围最大值）
-//					> loop_value 数字（循环维度值）
-//			返回：	> 布尔           （值是否在范围内）
-//			
-//			说明：	> 常用于循环地图 框选范围 用。
-//					> 以角度为例，循环维度值为360。角度中的 361度和1度 是一样的。
-//					  而且范围为290至370时，5度、722度、310度都包含在范围内。
-//=============================================================================
-Game_Temp.prototype.drill_LCa_Math1D_isValueInLoopRange = function( cur_value, range_min, range_max, loop_value ){
-	var loop = loop_value;
-	
-	// > 全部点落在范围内
-	if( range_max - range_min >= loop ){ return true; }
-	
-	// > 标准化
-	cur_value = (cur_value %loop+loop)%loop;
-	range_min = (range_min %loop+loop)%loop;
-	range_max = (range_max %loop+loop)%loop;
-	
-	// > 相等情况
-	if( range_min == range_max ){
-		return cur_value == range_min;
-	}
-	
-	// > 范围没越过循环 情况
-	if( range_min < range_max ){
-		if( cur_value < range_min ){ return false; }
-		if( cur_value > range_max ){ return false; }
-	}
-	// > 范围越过循环 情况
-	if( range_min > range_max ){
-		if( cur_value > range_min && cur_value < range_max ){ return false; }
-	}
-	return true;
-};
-
 
 
 //=============================================================================
@@ -5651,23 +5729,22 @@ if( DrillUp.g_LCa_debugEnabled == true ){
 			temp_sprite.y = yy;
 			
 			// > 要考虑旋转情况
-			temp_sprite.rotation = temp_sprite._org_rotation + $gameSystem._drill_LCa_controller.drill_LCa_getRotateValue() /180*Math.PI;
+			temp_sprite.rotation = temp_sprite._org_rotation + $gameSystem._drill_LCa_controller.drill_LCa_getBaseRotate() /180*Math.PI;
 			
 			// > 要考虑缩放情况
-			temp_sprite.scale.x = temp_sprite._org_scale_x * $gameSystem._drill_LCa_controller.drill_LCa_getScaleXValue();
-			temp_sprite.scale.y = temp_sprite._org_scale_y * $gameSystem._drill_LCa_controller.drill_LCa_getScaleYValue();
+			temp_sprite.scale.x = temp_sprite._org_scale_x * $gameSystem._drill_LCa_controller.drill_LCa_getBaseScaleX();
+			temp_sprite.scale.y = temp_sprite._org_scale_y * $gameSystem._drill_LCa_controller.drill_LCa_getBaseScaleY();
 		}
 	}
 }
 
 //=============================================================================
-// ** 镜头对齐框 贴图【Drill_LCa_DebugSprite】
+// ** DEBUG镜头对齐贴图【Drill_LCa_DebugSprite】
 // **		
 // **		作用域：	地图界面
-// **		主功能：	定义一个debug镜头对齐框贴图。
+// **		主功能：	定义一个贴图，镜头debug专用。
 // **		子功能：	
-// **					->自定义颜色
-// **					->自定义边框
+// **					->重画边框
 // **					
 // **		说明：	> 该贴图的中心锚点均为左上角，对齐用。
 // **				
@@ -5679,7 +5756,7 @@ if( DrillUp.g_LCa_debugEnabled == true ){
 // **				> 样式 - [ ●不可修改 /自变化/外部变化] 
 //=============================================================================
 //==============================
-// * 对齐框贴图 - 定义
+// * DEBUG镜头对齐贴图 - 定义
 //==============================
 function Drill_LCa_DebugSprite() {
 	this.initialize.apply(this, arguments);
@@ -5687,7 +5764,7 @@ function Drill_LCa_DebugSprite() {
 Drill_LCa_DebugSprite.prototype = Object.create(Sprite.prototype);
 Drill_LCa_DebugSprite.prototype.constructor = Drill_LCa_DebugSprite;
 //==============================
-// * 对齐框贴图 - 初始化
+// * DEBUG镜头对齐贴图 - 初始化
 //==============================
 Drill_LCa_DebugSprite.prototype.initialize = function( data ){
 	Sprite.prototype.initialize.call(this);
@@ -5721,14 +5798,14 @@ Drill_LCa_DebugSprite.prototype.initialize = function( data ){
 	this.zIndex = 100;
 };
 //==============================
-// * 对齐框贴图 - 帧刷新
+// * DEBUG镜头对齐贴图 - 帧刷新
 //==============================
 Drill_LCa_DebugSprite.prototype.update = function() {
 	Sprite.prototype.update.call(this);
 	this.drill_updateRedraw();				//帧刷新 - 重画边框
 };
 //==============================
-// * 帧刷新 - 重画边框
+// * DEBUG镜头对齐贴图 - 帧刷新 - 重画边框
 //==============================
 Drill_LCa_DebugSprite.prototype.drill_updateRedraw = function() {
 	if( this._drill_data == undefined ){ return; }
@@ -5758,29 +5835,6 @@ Drill_LCa_DebugSprite.prototype.drill_updateRedraw = function() {
 	this.bitmap.fillRect( 0, 0, data['thickness'], data['thickness'], "#ff00ff" );
 };
 
-
-//=============================================================================
-// * ☆其他插件兼容
-//=============================================================================
-var _drill_LCa_scene_initialize = SceneManager.initialize;
-SceneManager.initialize = function() {	//（最后继承）
-	_drill_LCa_scene_initialize.call(this);
-	
-	//==============================
-	// * 兼容 - mog道具浮动文字
-	//==============================
-	if( Imported.MOG_TreasurePopup ){
-		var _drill_LCa_mog_setupNew = TreasureIcons.prototype.setupNew;
-		TreasureIcons.prototype.setupNew = function( data ){
-			_drill_LCa_mog_setupNew.call( this, data );
-			
-			// > mog的贴图在 图片层
-			var tar_pos = $gameSystem._drill_LCa_controller.drill_LCa_getCameraPos_OuterSprite( this._cx, this._cy );
-			this._cx = tar_pos.x;
-			this._cy = tar_pos.y;
-		}
-	}
-}
 
 
 //=============================================================================

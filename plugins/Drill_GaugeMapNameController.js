@@ -364,7 +364,7 @@ Game_Map.prototype.initialize = function(){
 // ** 兼容
 //=============================================================================
 //==============================
-// * mog兼容 - 最后继承
+// * mog兼容 - 最后继承1级
 //==============================
 var _drill_GMNC_scene_initialize = SceneManager.initialize;
 SceneManager.initialize = function() {

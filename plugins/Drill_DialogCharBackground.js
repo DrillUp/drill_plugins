@@ -1608,7 +1608,7 @@ Scene_Map.prototype.drill_DCBa_Text_createDebugSprite = function() {
 				
 	temp_bitmap.drill_COWC_drawText( text, options );
 	
-	// > 『字符贴图流程』 - 刷新字符块贴图【窗口字符 - 窗口字符贴图核心】
+	// > 『字符贴图流程』 - 刷新当前的字符块贴图【窗口字符 - 窗口字符贴图核心】
 	temp_sprite.drill_COWCSp_sprite_refreshAllSprite();
 }
 

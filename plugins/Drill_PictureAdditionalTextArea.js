@@ -1307,11 +1307,6 @@ Sprite_Picture.prototype.drill_PATA_refreshText = function(){
 	var temp_sprite = this._drill_PATA_sprite;
 	if( temp_sprite == undefined ){ return; }
 	
-	// > 『字符贴图流程』 - 清空字符块贴图【窗口字符 - 窗口字符贴图核心】
-	if( Imported.Drill_CoreOfWindowCharacterSprite ){
-		temp_sprite.drill_COWCSp_sprite_clearAllSprite();
-	}
-	
 	// > 参数准备 - 校验
 	var temp_bitmap = this._drill_PATA_bitmap;
 	if( temp_bitmap == undefined ){ return; }
@@ -1357,7 +1352,7 @@ Sprite_Picture.prototype.drill_PATA_refreshText = function(){
 		}
 	}
 	
-	// > 『字符贴图流程』 - 刷新字符块贴图【窗口字符 - 窗口字符贴图核心】
+	// > 『字符贴图流程』 - 刷新当前的字符块贴图【窗口字符 - 窗口字符贴图核心】
 	if( Imported.Drill_CoreOfWindowCharacterSprite ){
 		temp_sprite.drill_COWCSp_sprite_refreshAllSprite();
 	}

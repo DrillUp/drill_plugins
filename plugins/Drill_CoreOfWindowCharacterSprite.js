@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        窗口字符 - 窗口字符贴图核心
+ * @plugindesc [v1.1]        窗口字符 - 窗口字符贴图核心
  * @author Drill_up
  * 
  * 
@@ -132,6 +132,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 修复了 字符块 被清空的bug。
  * 
  */
  
@@ -173,10 +175,10 @@
 //			
 //			
 //			->☆字符块贴图 标准模块
-//				->刷新字符块贴图【标准函数】【父Sprite + 父Window_Base】
-//				->清空字符块贴图【标准函数】【父Sprite + 父Window_Base】
+//				->刷新当前的字符块贴图【标准函数】【父Sprite + 父Window_Base】
+//				->清空字符块贴图-全部【标准函数】【父Sprite + 父Window_Base】
 //				->清空字符块贴图-指定区域【标准函数】【父Sprite + 父Window_Base】
-//				->获取字符块贴图【标准函数】【父Sprite + 父Window_Base】
+//				->获取字符块贴图-全部【标准函数】【父Sprite + 父Window_Base】
 //				->获取字符块贴图-指定区域【标准函数】【父Sprite + 父Window_Base】
 //				->添加自定义子贴图【标准函数】【父Sprite + 父Window_Base】
 //				->移除自定义子贴图【标准函数】【父Sprite + 父Window_Base】
@@ -192,9 +194,18 @@
 //					->绘制的贴图 - 创建贴图
 //					->绘制的贴图 - 画布设置
 //					->绘制的贴图 - 贴图设置
-//				->贴图操作-刷新字符块贴图（私有）
+//				->贴图操作-刷新当前的字符块贴图（私有）
+//				->贴图操作-清空字符块贴图-全部（私有）
+//				->贴图操作-清空字符块贴图-指定区域（私有）
 //			->☆窗口字符应用之效果字符（字符块贴图）
 //				> \dts[文本]
+//			
+//			
+//			->☆窗口标记
+//				->建立画布时
+//				->清理画布时（全部画布）
+//				->清理画布时（矩形范围）
+//			
 //			
 //			->☆翻转控制
 //			->☆窗口字符应用之效果字符（翻转控制）
@@ -234,11 +245,20 @@
 //			无
 //		
 //		★必要注意事项：
-//			暂无
+//			1. 2025/12/18：放一个箱子在这里，或许有很多不错的灵感，可以装进这个插件里。
+//				  ╭━┬━┬━┬━┬━┬━┬━┳╮
+//				  ┃ | | | | | | |┃
+//				  ┃_|_|_|_|_|_|_|┃
+//				  ┃━┳━━━━口━━━━┳━┃
+//				  ┃ ┃\/\|卜|/\/┃ ┃
+//				  ┃ ┃/\/|  |\/\┃ ┃
+//				  ╰━┻━━━━━━━━━━┻━╯
 //		
 //		★其它说明细节：
 //			1. 2024/11/2：这个插件被我称为"木大的力量"，因为这插件既强大，又木大。
 //			  比如词条功能、动态字符块功能，看起来非常厉害，但对于游戏的实际效果，只能是锦上添花，实用性太弱了。
+//			2. 2025/12/18：这个插件出现了一个大bug，修了很久，真没想到。
+//			  但确实，字符块能做的事情非常多，但我一年了还没开始加强。
 //		
 //		★存在的问题：
 //			暂无
@@ -333,11 +353,6 @@ Game_Interpreter.prototype.drill_COWCSp_pluginCommand = function( command, args 
 Window_Base.prototype.drill_COWCSp_refreshText_FixWidthAndHeight = function( context ){
 	/* 该函数只作参考用，子插件的实现都可以参考该流程，可见脚本文档 流程-应用举例 */
 	
-	// > 『字符贴图流程』 - 清空字符块贴图【窗口字符 - 窗口字符贴图核心】
-	if( Imported.Drill_CoreOfWindowCharacterSprite ){
-		this.drill_COWCSp_sprite_clearAllSprite();
-	}
-	
 	// > 参数准备 - 校验
 	var temp_bitmap = this.contents;
 	if( temp_bitmap == undefined ){ return; }
@@ -366,7 +381,7 @@ Window_Base.prototype.drill_COWCSp_refreshText_FixWidthAndHeight = function( con
 	// > 『字符主流程』 - 绘制文本【窗口字符 - 窗口字符核心】
 	this.drill_COWC_drawText( org_text, options );
 	
-	// > 『字符贴图流程』 - 刷新字符块贴图【窗口字符 - 窗口字符贴图核心】
+	// > 『字符贴图流程』 - 刷新当前的字符块贴图【窗口字符 - 窗口字符贴图核心】
 	if( Imported.Drill_CoreOfWindowCharacterSprite ){
 		this.drill_COWCSp_sprite_refreshAllSprite();
 	}
@@ -383,11 +398,6 @@ Window_Base.prototype.drill_COWCSp_refreshText_FixWidthAndHeight = function( con
 //##############################
 Window_Base.prototype.drill_COWCSp_refreshText_AutoWidthAndHeight = function( context ){
 	/* 该函数只作参考用，子插件的实现都可以参考该流程，可见脚本文档 流程-应用举例 */
-	
-	// > 『字符贴图流程』 - 清空字符块贴图【窗口字符 - 窗口字符贴图核心】
-	if( Imported.Drill_CoreOfWindowCharacterSprite ){
-		this.drill_COWCSp_sprite_clearAllSprite();
-	}
 	
 	// > 参数准备 - 校验
 	var temp_bitmap = this.contents;
@@ -435,7 +445,7 @@ Window_Base.prototype.drill_COWCSp_refreshText_AutoWidthAndHeight = function( co
 	// > 『字符主流程』 - 绘制文本【窗口字符 - 窗口字符核心】
 	this.drill_COWC_drawText( org_text, options );
 	
-	// > 『字符贴图流程』 - 刷新字符块贴图【窗口字符 - 窗口字符贴图核心】
+	// > 『字符贴图流程』 - 刷新当前的字符块贴图【窗口字符 - 窗口字符贴图核心】
 	if( Imported.Drill_CoreOfWindowCharacterSprite ){
 		this.drill_COWCSp_sprite_refreshAllSprite();
 	}
@@ -544,13 +554,17 @@ Scene_Map.prototype.drill_COWCSp_Text_createDebugSprite = function() {
 				
 	temp_bitmap.drill_COWC_drawText( text, options );
 	
-	// > 『字符贴图流程』 - 刷新字符块贴图
+	
+	var rect = { 'x':70, 'y':370, 'width':80, 'height':20 }
+	
+	// > 『字符贴图流程』 - 刷新当前的字符块贴图【窗口字符 - 窗口字符贴图核心】
 	temp_sprite.drill_COWCSp_sprite_refreshAllSprite();
 	
-	// > 『字符贴图流程』 - 清空字符块贴图-指定区域
-	var rect = { 'x':70, 'y':370, 'width':80, 'height':20 }
-	temp_bitmap.drill_COWC_strokeRect( rect['x'], rect['y'], rect['width'], rect['height'], "#aa2222", 2, "miter" );
+	// > 『字符贴图流程』 - 清空字符块贴图-指定区域【窗口字符 - 窗口字符贴图核心】
 	temp_sprite.drill_COWCSp_sprite_clearSpriteInRect( rect );
+	//temp_bitmap.clearRect( rect['x'], rect['y'], rect['width'], rect['height'] );	//（不考虑这个函数的兼容）
+	
+	temp_bitmap.drill_COWC_strokeRect( rect['x'], rect['y'], rect['width'], rect['height'], "#aa2222", 2, "miter" );
 }
 	
 	
@@ -559,7 +573,7 @@ Scene_Map.prototype.drill_COWCSp_Text_createDebugSprite = function() {
 // ** 【标准模块】☆字符块贴图 标准模块
 //#############################################################################
 //##############################
-// * 字符块贴图『字符贴图流程』 - 刷新字符块贴图【标准函数】【父Sprite + 父Window_Base】
+// * 字符块贴图『字符贴图流程』 - 刷新当前的字符块贴图【标准函数】【父Sprite + 父Window_Base】
 //			
 //			参数：	> 无
 //			返回：	> 对象列表
@@ -575,7 +589,7 @@ Window_Base.prototype.drill_COWCSp_sprite_refreshAllSprite = function(){
 	this._windowContentsSprite.drill_COWCSp_sprite_refreshAllSprite();
 }
 //##############################
-// * 字符块贴图『字符贴图流程』 - 清空字符块贴图【标准函数】【父Sprite + 父Window_Base】
+// * 字符块贴图『字符贴图流程』 - 清空字符块贴图-全部【标准函数】【父Sprite + 父Window_Base】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -606,21 +620,21 @@ Window_Base.prototype.drill_COWCSp_sprite_clearSpriteInRect = function( rect ){
 	this._windowContentsSprite.drill_COWCSp_sprite_clearSpriteInRect( rect );
 }
 //##############################
-// * 字符块贴图『字符贴图流程』 - 获取字符块贴图【标准函数】【父Sprite + 父Window_Base】
+// * 字符块贴图『字符贴图流程』 - 获取字符块贴图-全部【标准函数】【父Sprite + 父Window_Base】
 //			
 //			参数：	> 无
 //			返回：	> 对象列表
 //			
 //			说明：	> 该函数 可以 放在帧刷新中反复调用。
 //					> 该函数的主类为 父贴图/父窗口 。
-//					> 该函数返回全部绘制产生的字符块贴图，但前提是已经执行过刷新函数。
+//					> 该函数返回全部绘制产生的字符块贴图，但前提是已经执行过 刷新当前函数。
 //##############################
 Sprite.prototype.drill_COWCSp_sprite_getAllSprite = function(){
-	if( this.drill_COWCSp_layer == undefined ){ return []; }
-	return this.drill_COWCSp_layer.children;
+	if( this._drill_COWCSp_layer == undefined ){ return []; }
+	return this._drill_COWCSp_layer.children;
 }
-Window_Base.prototype.drill_COWCSp_sprite_getAllSprite = function( rect ){
-	this._windowContentsSprite.drill_COWCSp_sprite_getAllSprite( rect );
+Window_Base.prototype.drill_COWCSp_sprite_getAllSprite = function(){
+	return this._windowContentsSprite.drill_COWCSp_sprite_getAllSprite();
 }
 //##############################
 // * 字符块贴图『字符贴图流程』 - 获取字符块贴图-指定区域【标准函数】【父Sprite + 父Window_Base】
@@ -630,13 +644,14 @@ Window_Base.prototype.drill_COWCSp_sprite_getAllSprite = function( rect ){
 //			
 //			说明：	> 该函数 可以 放在帧刷新中反复调用。
 //					> 该函数的主类为 父贴图/父窗口 。
-//					> 该函数返回区域范围内的绘制产生的字符块贴图，但前提是已经执行过刷新函数。
+//					> 该函数返回区域范围内的绘制产生的字符块贴图，但前提是已经执行过 刷新当前函数。
+//					> 【注意】，这个函数可能不太好用，总是有小问题，获取不到，最好全部获取。
 //##############################
 Sprite.prototype.drill_COWCSp_sprite_getSpriteInRect = function( rect ){
 	return this.drill_COWCSp_sprite_getSpriteInRect_Private( rect );
 }
 Window_Base.prototype.drill_COWCSp_sprite_getSpriteInRect = function( rect ){
-	this._windowContentsSprite.drill_COWCSp_sprite_getSpriteInRect( rect );
+	return this._windowContentsSprite.drill_COWCSp_sprite_getSpriteInRect( rect );
 }
 
 //##############################
@@ -1008,7 +1023,7 @@ Bitmap.prototype.drill_COWCSp_sprite_setupSprite = function( new_sprite, basePar
 }
 
 //==============================
-// * 字符块贴图实现 - 贴图操作 - 刷新字符块贴图（私有）
+// * 字符块贴图实现 - 贴图操作 - 刷新当前的字符块贴图（私有）
 //
 //			说明：	> 字符块贴图统一放在 层级 下面，能方便控制位移，也方便统一删除。
 //==============================
@@ -1028,22 +1043,16 @@ Sprite.prototype.drill_COWCSp_sprite_refreshAllSprite_Private = function(){
 	}
 	if( has_sprite == false ){ return; }
 	
+	// > DEBUG字符块测试
+	//alert("字符块函数执行：\"刷新当前的字符块贴图\" ");
 	
 	// > 层级 - 创建
-	if( this.drill_COWCSp_layer == undefined ){
+	if( this._drill_COWCSp_layer == undefined ){
 		var temp_layer = new Sprite();
-		temp_layer.x = 0 - this.anchor.x * parent_bitmap.width;	//（平移到中心锚点的位置）
+		temp_layer.x = 0 - this.anchor.x * parent_bitmap.width; 	//（平移到中心锚点的位置）
 		temp_layer.y = 0 - this.anchor.y * parent_bitmap.height;	//（由于是子贴图，所以不必考虑 旋转、缩放）
 		this.addChild( temp_layer );
-		this.drill_COWCSp_layer = temp_layer;
-	}
-	
-	// > 层级 - 清空旧贴图
-	var sprite_list = this.drill_COWCSp_layer.children;
-	for( var i = 0; i < sprite_list.length; i++ ){
-		var temp_sprite = sprite_list[i];
-		temp_sprite._drill_COWCSp_destroyed = true;		//（销毁标记）
-		this.drill_COWCSp_layer.removeChild(temp_sprite);
+		this._drill_COWCSp_layer = temp_layer;
 	}
 	
 	
@@ -1058,7 +1067,9 @@ Sprite.prototype.drill_COWCSp_sprite_refreshAllSprite_Private = function(){
 		var sprite_list = parent_bitmap._drill_COWCSp_blockSpriteList;
 		for( var i = 0; i < sprite_list.length; i++ ){
 			var temp_sprite = sprite_list[i];
-			this.drill_COWCSp_layer.addChild( temp_sprite );
+			if( this._drill_COWCSp_layer.children.indexOf(temp_sprite) == -1 ){
+				this._drill_COWCSp_layer.addChild( temp_sprite );
+			}
 		}
 	}
 	
@@ -1070,28 +1081,43 @@ Sprite.prototype.drill_COWCSp_sprite_refreshAllSprite_Private = function(){
 		var sprite_list = parent_bitmap._drill_COWCSp_customSpriteList;
 		for( var i = 0; i < sprite_list.length; i++ ){
 			var temp_sprite = sprite_list[i];
-			this.drill_COWCSp_layer.addChild( temp_sprite );
+			if( this._drill_COWCSp_layer.children.indexOf(temp_sprite) == -1 ){
+				this._drill_COWCSp_layer.addChild( temp_sprite );
+			}
 		}
 	}
 }
 //==============================
-// * 字符块贴图实现 - 贴图操作 - 清空字符块贴图（私有）
+// * 字符块贴图实现 - 贴图操作 - 清空字符块贴图-全部（私有）
 //
 //			说明：	> 层级贴图不删，防止刷新造成反复创建层级而浪费性能。
 //==============================
 Sprite.prototype.drill_COWCSp_sprite_clearAllSprite_Private = function(){
 	
-	if( this.drill_COWCSp_layer != undefined ){
+	// > DEBUG字符块测试
+	if( this._drill_COWCSp_layer != undefined ){
+		//alert("字符块函数执行：\"【清空】字符块贴图-全部\" ");
+		//if( $gameTemp._drill_COWCSp_executeCount == undefined ){ $gameTemp._drill_COWCSp_executeCount = 0; }
+		//$gameTemp._drill_COWCSp_executeCount += 1;
+		//if( $gameTemp._drill_COWCSp_executeCount == 1 ){	//（debug用：执行第N次时强制报错）
+		//	throw new Error("Drill 查看调用堆栈");
+		//}
+	}
+	
+	// > 清空贴图
+	if( this._drill_COWCSp_layer != undefined ){
 		
-		// > 层级 - 清空旧贴图
-		var sprite_list = this.drill_COWCSp_layer.children;
+		// > 清空贴图 - 从层级中移除
+		var sprite_list = this._drill_COWCSp_layer.children;
 		for( var i = sprite_list.length-1; i >= 0; i-- ){
 			var temp_sprite = sprite_list[i];
 			temp_sprite._drill_COWCSp_destroyed = true;		//（销毁标记）
-			this.drill_COWCSp_layer.removeChild(temp_sprite);
+			this._drill_COWCSp_layer.removeChild(temp_sprite);
 		}
+		this._drill_COWCSp_layer = undefined;
 	}
 	
+	// > 清空贴图容器
 	if( this.bitmap != undefined ){
 		var parent_bitmap = this.bitmap;
 		
@@ -1105,6 +1131,7 @@ Sprite.prototype.drill_COWCSp_sprite_clearAllSprite_Private = function(){
 			parent_bitmap._drill_COWCSp_customSpriteList.length = 0;
 		}
 	}
+	
 }
 //=============================
 // * 字符块贴图实现 - 贴图操作 - 清空字符块贴图-指定区域（私有）
@@ -1112,7 +1139,7 @@ Sprite.prototype.drill_COWCSp_sprite_clearAllSprite_Private = function(){
 //			说明：	> rect参数是指相对于 画布位置 的矩形区域。
 //=============================
 Sprite.prototype.drill_COWCSp_sprite_clearSpriteInRect_Private = function( rect ){
-	if( this.drill_COWCSp_layer == undefined ){ return; }
+	if( this._drill_COWCSp_layer == undefined ){ return; }
 	if( rect.width == 0  ){ return; }
 	if( rect.height == 0 ){ return; }
 	
@@ -1120,9 +1147,10 @@ Sprite.prototype.drill_COWCSp_sprite_clearSpriteInRect_Private = function( rect 
 	var parent_bitmap = this.bitmap;
 	
 	// > 遍历字符块贴图列表
-	var sprite_list = this.drill_COWCSp_layer.children;
+	var sprite_list = this._drill_COWCSp_layer.children;
 	for( var i = sprite_list.length-1; i >= 0; i-- ){
 		var temp_sprite = sprite_list[i];
+		if( temp_sprite.bitmap == undefined ){ continue; }
 		var ww = temp_sprite.bitmap.width;	//（字符块子贴图 的画布）
 		var hh = temp_sprite.bitmap.height;
 		var xx = temp_sprite.x - ww * temp_sprite.anchor.x;
@@ -1133,7 +1161,7 @@ Sprite.prototype.drill_COWCSp_sprite_clearSpriteInRect_Private = function( rect 
 			
 			//（与 指定区域 相交的，移除贴图）
 			temp_sprite._drill_COWCSp_destroyed = true;		//（销毁标记）
-			this.drill_COWCSp_layer.removeChild(temp_sprite);
+			this._drill_COWCSp_layer.removeChild(temp_sprite);
 			
 			//（与 指定区域 相交的，移除贴图容器）
 			for( var j = parent_bitmap._drill_COWCSp_blockSpriteList.length-1; j >= 0; j-- ){
@@ -1152,18 +1180,19 @@ Sprite.prototype.drill_COWCSp_sprite_clearSpriteInRect_Private = function( rect 
 //			说明：	> rect参数是指相对于 画布位置 的矩形区域。
 //=============================
 Sprite.prototype.drill_COWCSp_sprite_getSpriteInRect_Private = function( rect ){
-	if( this.drill_COWCSp_layer == undefined ){ return []; }
+	if( this._drill_COWCSp_layer == undefined ){ return []; }
 	if( rect.width == 0  ){ return []; }
 	if( rect.height == 0 ){ return []; }
 	
-	if( this.bitmap == undefined ){ return; }
+	if( this.bitmap == undefined ){ return []; }
 	var parent_bitmap = this.bitmap;
 	
 	// > 遍历字符块贴图列表
 	var result_list = [];
-	var sprite_list = this.drill_COWCSp_layer.children;
+	var sprite_list = this._drill_COWCSp_layer.children;
 	for( var i = 0; i < sprite_list.length; i++ ){
 		var temp_sprite = sprite_list[i];
+		if( temp_sprite.bitmap == undefined ){ continue; }
 		var ww = temp_sprite.bitmap.width;	//（字符块子贴图 的画布）
 		var hh = temp_sprite.bitmap.height;
 		var xx = temp_sprite.x - ww * temp_sprite.anchor.x;
@@ -1217,8 +1246,8 @@ Sprite.prototype.drill_COWCSp_sprite_removeCustomSprite_Private = function( cust
 	}
 	
 	// > 移除贴图
-	if( this.drill_COWCSp_layer != undefined ){
-		this.drill_COWCSp_layer.removeChild( custom_sprite );
+	if( this._drill_COWCSp_layer != undefined ){
+		this._drill_COWCSp_layer.removeChild( custom_sprite );
 	}
 };
 
@@ -1272,6 +1301,90 @@ Game_Temp.prototype.drill_COWC_effect_processCombined = function( matched_index,
 	}
 }
 
+
+
+//=============================================================================
+// ** ☆窗口标记
+//
+//			说明：	> 该模块提供 窗口标记 的功能。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//=============================
+// * 窗口标记 - 建立画布时
+//=============================
+var _drill_COWCSp_createContents = Window_Base.prototype.createContents;
+Window_Base.prototype.createContents = function() {
+	
+	// > 执行 清空字符块贴图-全部
+	if( this.contents != undefined ){
+		this.drill_COWCSp_sprite_clearAllSprite();   //『字符块全部清空注意』（每次重建画布时，之前的字符块贴图都清空）
+	}
+	
+	// > 原函数
+	_drill_COWCSp_createContents.call(this);
+};
+//=============================
+// * 窗口标记 - 清理画布时（全部画布）
+//=============================
+var _drill_COWCSp_bitmap_clear = Bitmap.prototype.clear;
+Bitmap.prototype.clear = function(){
+	_drill_COWCSp_bitmap_clear.call(this);
+	
+	// > 寻找父贴图
+	var temp_child_sprite = null;
+	if( temp_child_sprite == null &&
+		this._drill_COWCSp_blockSpriteList != undefined &&
+		this._drill_COWCSp_blockSpriteList.length > 0 ){
+		temp_child_sprite = this._drill_COWCSp_blockSpriteList[0];
+	}
+	if( temp_child_sprite == null &&
+		this._drill_COWCSp_customSpriteList != undefined &&
+		this._drill_COWCSp_customSpriteList.length > 0 ){
+		temp_child_sprite = this._drill_COWCSp_customSpriteList[0];
+	}
+	if( temp_child_sprite == null ){ return; }
+	var temp_parent_layer = temp_child_sprite.parent;
+	if( temp_parent_layer == null ){ return; }
+	var temp_parent_sprite = temp_parent_layer.parent;
+	if( temp_parent_sprite == null ){ return; }
+	
+	// > 执行 清空字符块贴图-全部
+	temp_parent_sprite.drill_COWCSp_sprite_clearAllSprite();   //『字符块全部清空注意』（每次清理全部画布时，之前的字符块贴图都清空）
+}
+//=============================
+// * 窗口标记 - 清理画布时（矩形范围）
+//
+//			说明：	> 矩形范围的局部清理，特别浪费性能。这里不操作了，让子插件根据情况自己手动加。
+//					> 此函数还会造成 对话框+无头像 的字符块，只能显示最后一个，暂时不明原因。
+//=============================
+/*
+var _drill_COWCSp_bitmap_clearRect = Bitmap.prototype.clearRect;
+Bitmap.prototype.clearRect = function( x, y, width, height ){
+	_drill_COWCSp_bitmap_clearRect.call(this, x, y, width, height);
+	
+	// > 寻找父贴图
+	var temp_child_sprite = null;
+	if( temp_child_sprite == null &&
+		this._drill_COWCSp_blockSpriteList != undefined &&
+		this._drill_COWCSp_blockSpriteList.length > 0 ){
+		temp_child_sprite = this._drill_COWCSp_blockSpriteList[0];
+	}
+	if( temp_child_sprite == null &&
+		this._drill_COWCSp_customSpriteList != undefined &&
+		this._drill_COWCSp_customSpriteList.length > 0 ){
+		temp_child_sprite = this._drill_COWCSp_customSpriteList[0];
+	}
+	if( temp_child_sprite == null ){ return; }
+	var temp_parent_layer = temp_child_sprite.parent;
+	if( temp_parent_layer == null ){ return; }
+	var temp_parent_sprite = temp_parent_layer.parent;
+	if( temp_parent_sprite == null ){ return; }
+	
+	// > 执行 清空字符块贴图-指定区域
+	var rect = { 'x':x, 'y':y, 'width':width, 'height':height }
+	temp_parent_sprite.drill_COWCSp_sprite_clearSpriteInRect( rect );
+};
+*/
 
 
 //=============================================================================

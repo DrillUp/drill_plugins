@@ -1822,17 +1822,28 @@
 //			4.留意关键字：【暂未使用】。
 //
 //		★其它说明细节：
-//			1.该插件的原理模式与菜单魔法圈样式有较大不同，虽然配置原理相似。
+//			1.这里空间很大，感觉应该放点什么……那就给所有 界面装饰插件 编个号吧。
+//			  ┌──────────────────────────────────┐
+//			  │   /@@@@@@      /@@     /@@@@@@@  │
+//			  │  /@@__  @@   /@@@@    | @@____/  │
+//			  │ | @@  \ @@  |_  @@    | @@       │
+//			  │ | @@  | @@    | @@    | @@@@@@@  │
+//			  │ | @@  | @@    | @@    |_____  @@ │
+//			  │ | @@  | @@    | @@     /@@  \ @@ │
+//			  │ |  @@@@@@/   /@@@@@@  |  @@@@@@/ │
+//			  │  \______/   |______/   \______/  │
+//			  └──────────────────────────────────┘
+//			2.该插件的原理模式与菜单魔法圈样式有较大不同，虽然配置原理相似。
 //			  最出现做的是仅限于地图中固定的蓄力魔法阵。
 //			  但是那一类插件局限性太大，还需要考虑播放时间，而且还要阻止魔法蓄力的事件移动。
 //			  后来发现其实魔法圈样式可以其实直接绑定在动画容器中，因为动画时绑定在所有sprite_base中的，任何地方都可以播放动画。一劳永逸。
 //			  rmmv底层，任何sprite都绑定了一个动画容器_animationSprites，这就使得动画可以在很多地方被播放。
-//			2.【动画容器_animationSprites】绕等级★，
+//			3.【动画容器_animationSprites】绕等级★，
 //			  将魔法圈样式sprite绑定在动画中，在动画基础上，扩展动画播放的效果。
 //			  但是绑定之后，消失效果会出现比较麻烦的情况。
 //			  不好获取所有正在播放的动画。
 //			  （后面都是通过绕路来添加其他插件的控制条件）
-//			3.【父贴图后面层】绕等级★★，
+//			4.【父贴图后面层】绕等级★★，
 //			  为了使得动画在角色身后，找父类找到最顶层的 Spriteset_Battle，然后找到指定的子类层，添加。
 //			  并且要绑定随时变化的敌人/玩家位置。
 //			  ._drill_animPBackArea 父贴图后面层
@@ -1867,8 +1878,15 @@
 	//==============================
 	// * 提示信息 - 报错 - NaN校验值
 	//==============================
-	DrillUp.drill_ACi_getPluginTip_ParamIsNaN = function( param_name ){
-		return "【" + DrillUp.g_ACi_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+	DrillUp.drill_ACi_getPluginTip_ParamIsNaN = function( param_name, check_tank ){
+		var text = "【" + DrillUp.g_ACi_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+		if( check_tank ){
+			var keys = Object.keys( check_tank );
+			for( var i=0; i < keys.length; i++ ){
+				text += "\n" + keys[i] + "的值：" + check_tank[ keys[i] ] ;
+			}
+		}
+		return text;
 	};
 	
 	
@@ -2790,7 +2808,7 @@ Sprite_Animation.prototype.setup = function(target, animation, mirror, delay) {
 		var anim_data = DrillUp.g_ACi_style[i];
 		if( this._animation.id == anim_data['anim'] ){
 			
-			// > 『控制器与贴图的样式』 - 校验+提示信息
+			// > 『控制器与贴图的样式-』 - 校验+提示信息
 			var cur_styleId   = i +1;
 			var cur_styleData = anim_data;
 			if( cur_styleData == undefined || 
@@ -2799,7 +2817,7 @@ Sprite_Animation.prototype.setup = function(target, animation, mirror, delay) {
 				return;
 			}
 			
-			// > 『控制器与贴图的样式』 - 创建控制器
+			// > 『控制器与贴图的样式-』 - 创建控制器
 			var temp_controller = new Drill_ACi_Controller( anim_data );
 			$gameTemp._drill_ACi_controllerTank.push( temp_controller );
 			

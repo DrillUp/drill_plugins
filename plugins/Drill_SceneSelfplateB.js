@@ -2616,11 +2616,6 @@ Drill_SSpB_SelectWindow.prototype.processCancel = function() {
 //==============================
 Drill_SSpB_SelectWindow.prototype.drill_window_drawAllItem = function(){
 	
-	// > 『字符贴图流程』 - 清空字符块贴图【窗口字符 - 窗口字符贴图核心】
-	if( Imported.Drill_CoreOfWindowCharacterSprite ){
-		this.drill_COWCSp_sprite_clearAllSprite();
-	}
-	
 	// > 原函数
     var topIndex = this.topIndex();
     for( var i = 0; i < this.maxPageItems(); i++ ){
@@ -2631,7 +2626,7 @@ Drill_SSpB_SelectWindow.prototype.drill_window_drawAllItem = function(){
         }
     }
 	
-	// > 『字符贴图流程』 - 刷新字符块贴图【窗口字符 - 窗口字符贴图核心】
+	// > 『字符贴图流程』 - 刷新当前的字符块贴图【窗口字符 - 窗口字符贴图核心】
 	if( Imported.Drill_CoreOfWindowCharacterSprite ){
 		this.drill_COWCSp_sprite_refreshAllSprite();
 	}
@@ -2654,17 +2649,23 @@ Drill_SSpB_SelectWindow.prototype.drill_window_drawItem = function( index ){
 	// > 参数准备
 	var options = {};
 	options['infoParam'] = {};
-	options['infoParam']['x'] = rect.x,
-	options['infoParam']['y'] = rect.y,
+	options['infoParam']['x'] = rect.x;
+	options['infoParam']['y'] = rect.y;
 	options['infoParam']['canvasWidth'] = temp_bitmap.width;
 	options['infoParam']['canvasHeight'] = temp_bitmap.height;
 	
 	// > 参数准备 - 自定义
 	options['rowParam'] = {};
-	options['rowParam']['alignHor_maxWidth'] = rect.width;
-	options['rowParam']['alignVer_maxHeight'] = rect.height;
+	options['rowParam']['alignHor_maxWidth'] = rect.width;		//『选项的文本域范围』
+	options['rowParam']['alignVer_maxHeight'] = rect.height;	//
 	
-	options['rowParam']['alignHor_type'] = DrillUp.g_SSpB_selWin_align;	//（对齐方式）
+	// > 参数准备 - 窗口字符对齐方式
+	var cur_align = DrillUp.g_SSpB_selWin_align;
+	if( cur_align == "左对齐" ){ cur_align = "left";   }
+	if( cur_align == "居中"   ){ cur_align = "center"; }
+	if( cur_align == "右对齐" ){ cur_align = "right";  }
+	options['rowParam']['alignHor_type'] = cur_align;
+	
 	
 	// > 清空画布（这里在连续绘制选项，不要清空）
 	//temp_bitmap.clear();
@@ -2700,15 +2701,15 @@ Drill_SSpB_SelectWindow.prototype.drill_window_drawNewTag = function( index ){
 	// > 参数准备
 	var options = {};
 	options['infoParam'] = {};
-	options['infoParam']['x'] = rect.x,
-	options['infoParam']['y'] = rect.y,
+	options['infoParam']['x'] = rect.x;
+	options['infoParam']['y'] = rect.y;
 	options['infoParam']['canvasWidth'] = temp_bitmap.width;
 	options['infoParam']['canvasHeight'] = temp_bitmap.height;
 	
 	// > 参数准备 - 自定义
 	options['rowParam'] = {};
-	options['rowParam']['alignHor_maxWidth'] = rect.width;
-	options['rowParam']['alignVer_maxHeight'] = rect.height;
+	options['rowParam']['alignHor_maxWidth'] = rect.width;		//『选项的文本域范围』
+	options['rowParam']['alignVer_maxHeight'] = rect.height;	//
 	if( DrillUp.g_SSpB_watch_setCorner == true ){
 		options['rowParam']['alignHor_type'] = "right";	//（右下角）
 		options['rowParam']['alignVer_type'] = "bottom";
@@ -2888,16 +2889,6 @@ Drill_SSpB_DescWindow.prototype.drill_refreshDescText = function( cur_index ){
 		cur_lineHeight = 0;
 	}
 	
-	// > 对齐方式
-	var cur_align = "left";
-	if( temp_data['context_align'] == "居中" ){ cur_align = "center"; }
-	if( temp_data['context_align'] == "右对齐" ){ cur_align = "right"; }
-	
-	
-	// > 『字符贴图流程』 - 清空字符块贴图【窗口字符 - 窗口字符贴图核心】
-	if( Imported.Drill_CoreOfWindowCharacterSprite ){
-		this.drill_COWCSp_sprite_clearAllSprite();
-	}
 	
 	// > 参数准备 - 校验
 	var temp_bitmap = this.contents;
@@ -2920,7 +2911,13 @@ Drill_SSpB_DescWindow.prototype.drill_refreshDescText = function( cur_index ){
 	options['rowParam'] = {};
 	options['rowParam']['lineHeight_upCorrection'] = cur_lineHeight;
 	
-	options['rowParam']['alignHor_type'] = cur_align;	//（对齐方式）
+	// > 参数准备 - 窗口字符对齐方式
+	var cur_align = temp_data['context_align'];
+	if( cur_align == "左对齐" ){ cur_align = "left";   }
+	if( cur_align == "居中"   ){ cur_align = "center"; }
+	if( cur_align == "右对齐" ){ cur_align = "right";  }
+	options['rowParam']['alignHor_type'] = cur_align;
+	
 	
 	// > 清空画布（固定高宽只需要清空）
 	temp_bitmap.clear();
@@ -2928,7 +2925,7 @@ Drill_SSpB_DescWindow.prototype.drill_refreshDescText = function( cur_index ){
 	// > 『字符主流程』 - 绘制文本【窗口字符 - 窗口字符核心】
 	this.drill_COWC_drawText( org_text, options );
 	
-	// > 『字符贴图流程』 - 刷新字符块贴图【窗口字符 - 窗口字符贴图核心】
+	// > 『字符贴图流程』 - 刷新当前的字符块贴图【窗口字符 - 窗口字符贴图核心】
 	if( Imported.Drill_CoreOfWindowCharacterSprite ){
 		this.drill_COWCSp_sprite_refreshAllSprite();
 	}

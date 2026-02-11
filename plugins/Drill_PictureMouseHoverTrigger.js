@@ -389,7 +389,7 @@ if( Imported.Drill_CoreOfPictureWithMouse &&
 	Imported.Drill_BattleCommandThread ){
 	
 //==============================
-// * >>>>基于插件检测>>>> - 最后继承
+// * >>>>基于插件检测>>>> - 最后继承1级
 //==============================
 var _drill_PMHT_scene_initialize = SceneManager.initialize;
 SceneManager.initialize = function() {

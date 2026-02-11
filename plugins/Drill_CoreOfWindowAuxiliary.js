@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.2]        系统 - 窗口辅助核心
+ * @plugindesc [v2.3]        系统 - 窗口辅助核心
  * @author Drill_up
  * 
  * 
@@ -95,6 +95,8 @@
  * 修复了对话框的窗口等待字符\!变成按两次才显示文本的bug。
  * [v2.2]
  * 分离了窗口字符大底层，只提供基本的窗口移动功能。
+ * [v2.3]
+ * 修复了选项小箭头不能隐藏的bug。
  *
  */
  
@@ -853,6 +855,8 @@ Window_Base.prototype.drill_COWA_updateAttrOpacity = function(){
 			//this.opacity = 255;											//背景容器层 透明度
 			this._windowBackSprite.opacity = oo;							//背景容器层 - 平铺贴图 透明度
 			this._windowFrameSprite.opacity = oo;							//背景容器层 - 框架贴图 透明度
+			this._downArrowSprite.opacity = oo;								//背景容器层 - 下箭头贴图 透明度
+			this._upArrowSprite.opacity = oo;								//背景容器层 - 上箭头贴图 透明度
 			this._drill_COWA_skinBackground.opacity = 0;					//背景容器层 - 背景图片 透明度
 		}
 		if( data['layoutType'] == "单张背景贴图" ){ 
@@ -860,6 +864,8 @@ Window_Base.prototype.drill_COWA_updateAttrOpacity = function(){
 			//this.opacity = 255;											//背景容器层 透明度
 			this._windowBackSprite.opacity = 0;								//背景容器层 - 平铺贴图 透明度
 			this._windowFrameSprite.opacity = 0;							//背景容器层 - 框架贴图 透明度
+			this._downArrowSprite.opacity = 255;							//背景容器层 - 下箭头贴图 透明度
+			this._upArrowSprite.opacity = 255;								//背景容器层 - 上箭头贴图 透明度
 			this._drill_COWA_skinBackground.opacity = oo;					//背景容器层 - 背景图片 透明度
 		}
 		if( data['layoutType'] == "隐藏布局" ){ 
@@ -867,6 +873,8 @@ Window_Base.prototype.drill_COWA_updateAttrOpacity = function(){
 			//this.opacity = 255;											//背景容器层 透明度
 			this._windowBackSprite.opacity = 0;								//背景容器层 - 平铺贴图 透明度
 			this._windowFrameSprite.opacity = 0;							//背景容器层 - 框架贴图 透明度
+			this._downArrowSprite.opacity = 0;								//背景容器层 - 下箭头贴图 透明度
+			this._upArrowSprite.opacity = 0;								//背景容器层 - 上箭头贴图 透明度
 			this._drill_COWA_skinBackground.opacity = oo;					//背景容器层 - 背景图片 透明度
 		}
 	}

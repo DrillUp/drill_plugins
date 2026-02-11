@@ -1579,7 +1579,17 @@
 //					┕-	行走图前面层（_drill_characterUpArea）
 //
 //		★其它说明细节：
-//			暂无
+//			1.这里空间很大，感觉应该放点什么……那就给所有 界面装饰插件 编个号吧。
+//			  ┌──────────────────────────────────┐
+//			  │   /@@@@@@    /@@@@@@    /@@@@@@  │
+//			  │  /@@__  @@  /@@__  @@  /@@__  @@ │
+//			  │ | @@  \ @@ |__/  \ @@ | @@  \ @@ │
+//			  │ | @@  | @@   /@@@@@@/ |  @@@@@@@ │
+//			  │ | @@  | @@  /@@____/   \____  @@ │
+//			  │ | @@  | @@ | @@        /@@  \ @@ │
+//			  │ |  @@@@@@/ | @@@@@@@@ |  @@@@@@/ │
+//			  │  \______/  |________/  \______/  │
+//			  └──────────────────────────────────┘
 //
 //		★存在的问题：
 //			暂无
@@ -1615,8 +1625,15 @@
 	//==============================
 	// * 提示信息 - 报错 - NaN校验值
 	//==============================
-	DrillUp.drill_EFCi_getPluginTip_ParamIsNaN = function( param_name ){
-		return "【" + DrillUp.g_EFCi_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+	DrillUp.drill_EFCi_getPluginTip_ParamIsNaN = function( param_name, check_tank ){
+		var text = "【" + DrillUp.g_EFCi_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+		if( check_tank ){
+			var keys = Object.keys( check_tank );
+			for( var i=0; i < keys.length; i++ ){
+				text += "\n" + keys[i] + "的值：" + check_tank[ keys[i] ] ;
+			}
+		}
+		return text;
 	};
 	
 	
@@ -2153,7 +2170,7 @@ Game_CharacterBase.prototype.drill_EFCi_createController = function( slot_id, st
 		}
 	}
 	
-	// > 『控制器与贴图的样式』 - 校验+提示信息
+	// > 『控制器与贴图的样式-』 - 校验+提示信息
 	var cur_styleId   = style_id +1;
 	var cur_styleData = DrillUp.g_EFCi_style[ style_id ];
 	if( cur_styleData == undefined || 
@@ -2162,7 +2179,7 @@ Game_CharacterBase.prototype.drill_EFCi_createController = function( slot_id, st
 		return;
 	}
 	
-	// > 『控制器与贴图的样式』 - 创建控制器
+	// > 『控制器与贴图的样式-』 - 创建控制器
 	var controller = new Drill_EFCi_Controller( cur_styleData );
 	controller._drill_lastStyleId = style_id;		//（直接在对象身上暂挂样式id）
 	this._drill_EFCi_controllerTank[ slot_id ] = controller;

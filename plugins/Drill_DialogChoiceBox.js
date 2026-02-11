@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        对话框 - 选择项窗口
+ * @plugindesc [v1.1]        对话框 - 选择项窗口
  * @author Drill_up
  * 
  * 
@@ -132,6 +132,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 兼容了选项内的文本居中功能。
  * 
  * 
  * 
@@ -156,7 +158,7 @@
 //		临时局部变量	this._drill_DCBo_xxx
 //		存储数据变量	无
 //		全局存储变量	无
-//		覆盖重写方法	无
+//		覆盖重写方法	Window_ChoiceList.prototype.drawItem（覆写）
 //
 //<<<<<<<<性能记录<<<<<<<<
 //
@@ -207,6 +209,8 @@
 //			->☆列数与行高
 //			->☆管辖权（置灰与隐藏）
 //			->☆置灰与隐藏
+//			->☆管辖权（绘制单个子项）
+//			->☆绘制单个子项
 //
 //
 //			->☆引擎兼容（STG）
@@ -1297,7 +1301,7 @@ Window_ChoiceList.prototype.drill_DCBo_isVisible = function(){
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 选择结束时 - 最后继承
+// * 选择结束时 - 最后继承1级
 //==============================
 var _drill_DCBo_scene_initialize = SceneManager.initialize;
 SceneManager.initialize = function() {
@@ -1783,6 +1787,71 @@ Window_ChoiceList.prototype.drill_DCBo_whenChoiceEnd = function(){
 	$gameSystem._drill_DCBo_randomOptionEnabled = false;
 };
 
+
+
+//=============================================================================
+// ** ☆管辖权（绘制单个子项）
+//
+//			说明：	> 管辖权 即对 原函数 进行 修改、覆写、继承、控制子插件继承 等的权利。
+//					> 用于后期脱离 原游戏框架 且仍保持兼容性 的标记。
+//=============================================================================
+/*
+//==============================
+// * 2A子项 - 绘制单个子项（继承）
+//==============================
+Window_ChoiceList.prototype.drawItem = function( index ){
+    var rect = this.itemRectForText(index);
+    this.drawTextEx(this.commandName(index), rect.x, rect.y);
+};
+*/
+
+//=============================================================================
+// ** ☆绘制单个子项
+//
+//			说明：	> 此模块控制 绘制单个子项 的功能。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 绘制单个子项 - 执行绘制（覆写）
+//==============================
+Window_ChoiceList.prototype.drawItem = function( index ){
+	this.drill_DCBo_drawItem( index );
+};
+//==============================
+// * 绘制单个子项 - 执行绘制
+//
+//			说明：	> 该函数是一个单独定义的函数，参考了 Window_Command.prototype.drawItem 结构。
+//==============================
+Window_ChoiceList.prototype.drill_DCBo_drawItem = function( index ){
+	var rect = this.itemRectForText(index);
+	
+	// > 参数准备 - 校验
+	var temp_bitmap = this.contents;
+	if( temp_bitmap == undefined ){ return; }
+	var org_text = this.commandName(index);
+	if( org_text == undefined ){ return; }
+	if( org_text == "" ){ return; }
+	
+	// > 参数准备
+	var options = {};
+	options['infoParam'] = {};
+	options['infoParam']['x'] = rect.x;
+	options['infoParam']['y'] = rect.y;
+	options['infoParam']['canvasWidth'] = temp_bitmap.width;
+	options['infoParam']['canvasHeight'] = temp_bitmap.height;
+	
+	// > 参数准备 - 自定义
+	options['rowParam'] = {};
+	options['rowParam']['alignHor_maxWidth'] = rect.width;		//『选项的文本域范围』
+	options['rowParam']['alignVer_maxHeight'] = rect.height;	//
+	
+	
+	// > 清空画布（这里在连续绘制选项，不要清空）
+	//temp_bitmap.clear();
+	
+	// > 『字符主流程』 - 绘制文本【窗口字符 - 窗口字符核心】
+	this.drill_COWC_drawText( org_text, options );
+};
 
 
 

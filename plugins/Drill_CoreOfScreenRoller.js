@@ -421,17 +421,23 @@ Drill_COSR_Sprite.prototype.drill_sprite_destroy_Private = function() {
 	this._drill_music_lastBGM = null;
 };
 //==============================
-// * 长画布贴图 - 销毁 - 递归断开连接（私有）
+// * 长画布贴图 - 销毁 - 断开贴图连接（私有）『递归函数-头』
 //==============================
 Drill_COSR_Sprite.prototype.drill_sprite_removeChildConnect = function( parent_sprite ){
 	if( parent_sprite == undefined ){ return; }
+	this.drill_sprite_removeChildConnect_Recursion( parent_sprite );
+};
+//==============================
+// * 长画布贴图 - 销毁 - 断开贴图连接（私有）『递归函数-节』
+//==============================
+Drill_COSR_Sprite.prototype.drill_sprite_removeChildConnect_Recursion = function( parent_sprite ){
 	var sprite_list = parent_sprite.children;
 	if( sprite_list == undefined ){ return; }
 	for( var i = sprite_list.length-1; i >= 0; i-- ){
 		var sprite = sprite_list[i];
 		if( sprite == undefined ){ continue; }
 		parent_sprite.removeChild( sprite );
-		this.drill_sprite_removeChildConnect( sprite );
+		this.drill_sprite_removeChildConnect_Recursion( sprite );
 	}
 };
 
@@ -546,7 +552,7 @@ Drill_COSR_Sprite.prototype.drill_sprite_createStepSprite = function() {
 			
 			// > 文本模式 - 对齐方式初始化
 			var cur_align = "";
-			if( temp_step['text_align'] == "居中" ){
+			if( temp_step['text_align'] == "居中" ){	//（窗口字符对齐方式）
 				cur_align = "center";
 			}else if( temp_step['text_align'] == "右对齐" ){
 				cur_align = "right";
@@ -809,11 +815,6 @@ Drill_COSR_WindowSprite.prototype.drill_refreshMessage = function( context ){
 		alert( DrillUp.drill_COSR_getPluginTip_NeedUpdate_drawText() );
 	};
 	
-	// > 『字符贴图流程』 - 清空字符块贴图【窗口字符 - 窗口字符贴图核心】
-	if( Imported.Drill_CoreOfWindowCharacterSprite ){
-		this.drill_COWCSp_sprite_clearAllSprite();
-	}
-	
 	// > 参数准备 - 校验
 	var temp_bitmap = this.contents;
 	if( temp_bitmap == undefined ){ return; }
@@ -835,7 +836,7 @@ Drill_COSR_WindowSprite.prototype.drill_refreshMessage = function( context ){
 	options['rowParam'] = {};
 	options['rowParam']['lineHeight_upCorrection'] = this._drill_data['lineHeight'];
 	
-	options['rowParam']['alignHor_type'] = this._drill_data['align'];
+	options['rowParam']['alignHor_type'] = this._drill_data['align'];	//（窗口字符对齐方式）
 	
 	options['baseParam'] = {};
 	options['baseParam']['fontSize'] = this.standardFontSize();	//（使用当前窗口的字体大小
@@ -864,7 +865,7 @@ Drill_COSR_WindowSprite.prototype.drill_refreshMessage = function( context ){
 	// > 『字符主流程』 - 绘制文本【窗口字符 - 窗口字符核心】
 	this.drill_COWC_drawText( org_text, options );
 	
-	// > 『字符贴图流程』 - 刷新字符块贴图【窗口字符 - 窗口字符贴图核心】
+	// > 『字符贴图流程』 - 刷新当前的字符块贴图【窗口字符 - 窗口字符贴图核心】
 	if( Imported.Drill_CoreOfWindowCharacterSprite ){
 		this.drill_COWCSp_sprite_refreshAllSprite();
 	}

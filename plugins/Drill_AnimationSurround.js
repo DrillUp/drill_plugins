@@ -1840,9 +1840,18 @@
 //			4.留意关键字：【暂未使用】。
 //
 //		★其它说明细节：
-//			1.插件详细原理说明见 Drill_AnimationCircle 。	
-//			2.与 MOG_BattleHud 和 Drill_BattleCamera 有关联，用于定位第一人称下的动画位置。
-//			3.在circle的基础上添加了环绕球播放功能，保留了3d效果。
+//			1.这里空间很大，感觉应该放点什么……那就给所有 界面装饰插件 编个号吧。
+//			  ┌──────────────────────────────────┐
+//			  │   /@@@@@@    /@@@@@@    /@@@@@@  │
+//			  │  /@@__  @@  /@@__  @@  /@@__  @@ │
+//			  │ | @@  \ @@ |__/  \ @@ | @@  \__/ │
+//			  │ | @@  | @@   /@@@@@@/ | @@@@@@@  │
+//			  │ | @@  | @@  /@@____/  | @@__  @@ │
+//			  │ | @@  | @@ | @@       | @@  \ @@ │
+//			  │ |  @@@@@@/ | @@@@@@@@ |  @@@@@@/ │
+//			  │  \______/  |________/  \______/  │
+//			  └──────────────────────────────────┘
+//			2.插件详细原理说明见 Drill_AnimationCircle 。
 //
 //		★存在的问题：
 //			暂无
@@ -1872,8 +1881,15 @@
 	//==============================
 	// * 提示信息 - 报错 - NaN校验值
 	//==============================
-	DrillUp.drill_ASu_getPluginTip_ParamIsNaN = function( param_name ){
-		return "【" + DrillUp.g_ASu_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+	DrillUp.drill_ASu_getPluginTip_ParamIsNaN = function( param_name, check_tank ){
+		var text = "【" + DrillUp.g_ASu_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+		if( check_tank ){
+			var keys = Object.keys( check_tank );
+			for( var i=0; i < keys.length; i++ ){
+				text += "\n" + keys[i] + "的值：" + check_tank[ keys[i] ] ;
+			}
+		}
+		return text;
 	};
 	
 	
@@ -2794,7 +2810,7 @@ Sprite_Animation.prototype.setup = function(target, animation, mirror, delay) {
 		var anim_data = DrillUp.g_ASu_style[i];
 		if( this._animation.id == anim_data['anim'] ){
 			
-			// > 『控制器与贴图的样式』 - 校验+提示信息
+			// > 『控制器与贴图的样式-』 - 校验+提示信息
 			var cur_styleId   = i +1;
 			var cur_styleData = anim_data;
 			if( cur_styleData == undefined || 
@@ -2803,7 +2819,7 @@ Sprite_Animation.prototype.setup = function(target, animation, mirror, delay) {
 				return;
 			}
 			
-			// > 『控制器与贴图的样式』 - 创建控制器
+			// > 『控制器与贴图的样式-』 - 创建控制器
 			var temp_controller = new Drill_ASu_Controller( anim_data );
 			$gameTemp._drill_ASu_controllerTank.push( temp_controller );
 			

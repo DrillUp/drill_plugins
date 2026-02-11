@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        物体 - 聚集开关
+ * @plugindesc [v1.2]        物体 - 聚集开关
  * @author Drill_up
  *
  * 
@@ -19,7 +19,7 @@
  * -----------------------------------------------------------------------------
  * ----插件扩展
  * 该插件可以单独使用。
- *
+ * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
  * 1.插件的作用域：地图界面。
@@ -223,6 +223,8 @@
  * [v1.1]
  * 大幅度优化了底层结构，节约了事件数据存储空间。
  * 实现了多个独立开关的聚集触发功能。
+ * [v1.2]
+ * 改进了内部结构。
  * 
  * 
  * 
@@ -257,10 +259,14 @@
 //		★性能测试消耗	2023/12/9：
 //							》每1帧计算一次。
 //							》机关管理层：45.3ms（drill_EGS_updatePositionTank）
-//							》消除砖块关卡：149.0ms（drill_EGS_updateSwitch）153.5ms（drill_EGS_getAllEventsNearBy）172.3ms（drill_EGS_updatePositionTank）
+//							》消除砖块关卡：149.0ms（drill_EGS_updateSwitch）153.5ms（drill_EGS_findAllEventsNearBy）172.3ms（drill_EGS_updatePositionTank）
 //						2024/5/2：
 //							》机关管理层：28.8ms（开优化，drill_EGS_updatePositionTank）
 //							》加了个"优化每帧计算量"功能，但后来发现 消除砖块关卡 不能开这个优化，所以感觉这个优化没用。
+//						2025/11/22：
+//							》这次把 drill_EGS_findAllEventsNearBy 结构改进了，但是优化了个寂寞。貌似还多浪费了10ms。（见"优化效果2025-11-22.txt"）
+//							》消除砖块关卡，改进前，每帧执行83次，函数进入216次；改进后，每帧执行193次，函数进入193次。
+//							》至少可读性增强了一点，原来的优化围绕事件列表执行，事件如果多到一定程度，有浪费次数的风险。
 //		★最坏情况		暂无
 //		★备注			这个插件最能提现其消耗程度的，就在关卡 设计-消除砖块，用垃圾本跑一次就能知道情况了。
 //						最初版本帧数为2-3帧，现在优化到了5-6帧，详情去看脚本文档的记录。
@@ -345,8 +351,15 @@
 	//==============================
 	// * 提示信息 - 报错 - NaN校验值
 	//==============================
-	DrillUp.drill_EGS_getPluginTip_ParamIsNaN = function( param_name ){
-		return "【" + DrillUp.g_EGS_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+	DrillUp.drill_EGS_getPluginTip_ParamIsNaN = function( param_name, check_tank ){
+		var text = "【" + DrillUp.g_EGS_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+		if( check_tank ){
+			var keys = Object.keys( check_tank );
+			for( var i=0; i < keys.length; i++ ){
+				text += "\n" + keys[i] + "的值：" + check_tank[ keys[i] ] ;
+			}
+		}
+		return text;
 	};
 	
 	
@@ -1215,6 +1228,15 @@ Game_Map.prototype.drill_EGS_getSlotId = function( character ){
 Game_Map.prototype.drill_EGS_getSlotIdByPos = function( x_pos, y_pos ){
 	return Math.floor( x_pos ) * 100000 + Math.floor( y_pos );
 }
+//==============================
+// * 开关控制（坐标容器） - 获取坐标
+//==============================
+Game_Map.prototype.drill_EGS_getPosXBySlotId = function( slot_id ){
+	return Math.floor( slot_id/100000 );
+}
+Game_Map.prototype.drill_EGS_getPosYBySlotId = function( slot_id ){
+	return slot_id % 100000;
+}
 
 
 //=============================================================================
@@ -1244,110 +1266,116 @@ Game_Map.prototype.drill_EGS_getAllEventsNearBy = function( tar_event, key_str )
 	if( event_tank != undefined ){ return event_tank; }
 	
 	// > 若不存在，获取该事件的所有聚集钥匙
-	var new_event_tank = [];
-	this.drill_EGS_findAllEventsNearBy( tar_event, new_event_tank, key_str );
+	var nearByEvent_tank = [];
+	this.drill_EGS_findAllEventsNearBy( tar_event, nearByEvent_tank, key_str );
 	
 	// > 根据聚集钥匙，建立聚集组（所有 聚集钥匙 都指向 这个组）
-	for(var i = 0; i < new_event_tank.length; i++ ){
-		var temp_event = new_event_tank[i];
+	for(var i = 0; i < nearByEvent_tank.length; i++ ){
+		var temp_event = nearByEvent_tank[i];
 		var nearBy_str = key_str + "_" + String( temp_event._eventId );
-		$gameTemp._drill_EGS_nearByTank[nearBy_str] = new_event_tank;
+		$gameTemp._drill_EGS_nearByTank[nearBy_str] = nearByEvent_tank;
 	}
-	return new_event_tank;
+	return nearByEvent_tank;
 }
 //==============================
-// * 开关控制（聚集组容器） - 获取事件附近的聚集钥匙（基函数）
+// * 开关控制（聚集组容器） - 获取事件附近的聚集钥匙
 //
-//			说明：	> 一次性递归获取所有聚集钥匙事件，事件存储在 nearEvent_tank 中。
+//			参数：	> tar_event 对象指针
+//					> nearByEvent_tank 对象容器指针
+//					> key_str 字符串
+//			返回：	> 无
+//			
+//			说明：	> 深度优先遍历。『递归函数-拆解』
 //					> 若该函数执行次数过多，消耗可能较大。
-//					> 需要先刷新 坐标容器，再从中获取事件。
+//					> 获取所有附近的聚集钥匙事件，事件存储在 nearByEvent_tank 中。
 //==============================
-Game_Map.prototype.drill_EGS_findAllEventsNearBy = function( tar_event, nearEvent_tank, key_str ){
-	
-	// > 若事件不含钥匙，跳出
-	if( tar_event.drill_EGS_hasKey( key_str ) == false ){ return; }
-	
-	// > 若当前事件已存在于列表，跳出
-	if( nearEvent_tank.indexOf( tar_event ) != -1 ){ return; }
-	
-	// > 添加当前事件
-	nearEvent_tank.push( tar_event );
+Game_Map.prototype.drill_EGS_findAllEventsNearBy = function( tar_event, nearByEvent_tank, key_str ){
+	var cur_x = this.roundX( tar_event.x );		//遍历规则(visited) - 当前位置X
+	var cur_y = this.roundY( tar_event.y );		//遍历规则(visited) - 当前位置Y
+	var pos_visitedTank = [];					//遍历规则(visited) - 访问标记容器
+	var pos_stack = [];							//遍历规则(stack) - 栈
 	
 	
-	// > 临近事件 - 位置(0,0) （与事件重合，也算聚集）
-	var slot_id = this.drill_EGS_getSlotId( tar_event );
-	var event_list = $gameTemp._drill_EGS_positionTank[slot_id];
-	if( event_list != undefined ){
-		for(var i = 0; i < event_list.length; i++ ){
-			var temp_event = event_list[i];
-			this.drill_EGS_findAllEventsNearBy( temp_event, nearEvent_tank, key_str );
-		}
-	}
-	// > 临近事件 - 位置(1,0)
-	var xx = this.roundX( tar_event.x +1 );
-	var yy = this.roundY( tar_event.y +0 );
-	var slot_id = this.drill_EGS_getSlotIdByPos( xx, yy );
-	var event_list = $gameTemp._drill_EGS_positionTank[slot_id];
-	if( event_list != undefined ){
-		for(var i = 0; i < event_list.length; i++ ){
-			var temp_event = event_list[i];
-			this.drill_EGS_findAllEventsNearBy( temp_event, nearEvent_tank, key_str );
-		}
-	}
-	// > 临近事件 - 位置(0,1)
-	var xx = this.roundX( tar_event.x +0 );
-	var yy = this.roundY( tar_event.y +1 );
-	var slot_id = this.drill_EGS_getSlotIdByPos( xx, yy );
-	var event_list = $gameTemp._drill_EGS_positionTank[slot_id];
-	if( event_list != undefined ){
-		for(var i = 0; i < event_list.length; i++ ){
-			var temp_event = event_list[i];
-			this.drill_EGS_findAllEventsNearBy( temp_event, nearEvent_tank, key_str );
-		}
-	}
-	// > 临近事件 - 位置(-1,0)
-	var xx = this.roundX( tar_event.x -1 );
-	var yy = this.roundY( tar_event.y +0 );
-	var slot_id = this.drill_EGS_getSlotIdByPos( xx, yy );
-	var event_list = $gameTemp._drill_EGS_positionTank[slot_id];
-	if( event_list != undefined ){
-		for(var i = 0; i < event_list.length; i++ ){
-			var temp_event = event_list[i];
-			this.drill_EGS_findAllEventsNearBy( temp_event, nearEvent_tank, key_str );
-		}
-	}
-	// > 临近事件 - 位置(0,-1)
-	var xx = this.roundX( tar_event.x +0 );
-	var yy = this.roundY( tar_event.y -1 );
-	var slot_id = this.drill_EGS_getSlotIdByPos( xx, yy );
-	var event_list = $gameTemp._drill_EGS_positionTank[slot_id];
-	if( event_list != undefined ){
-		for(var i = 0; i < event_list.length; i++ ){
-			var temp_event = event_list[i];
-			this.drill_EGS_findAllEventsNearBy( temp_event, nearEvent_tank, key_str );
-		}
-	}
-}
-/*
-//==============================
-// * 开关控制 - 单个事件附近的聚集开关（深度优先遍历，tank为容器指针）（旧代码）
-//==============================
-Game_Map.prototype.drill_EGS_eventsNearBy = function( e, tank ) {
-	if( tank.indexOf(e) != -1 ){ return; }
+	// > 遍历规则(stack) - 入栈（初始点）
+	//		（这里的pos就是slot_id）
+	var first_pos = this.drill_EGS_getSlotIdByPos( cur_x, cur_y );
+	pos_stack.push( first_pos );
 	
-	tank.push(e);
-	var tag = e._drill_EGS._tag;
-	var temp_group = $gameTemp._drill_EGS_switchs[tag];
-	for( var i = 0; i < temp_group.length; i++ ){
-		var temp_event = temp_group[i];
-		if( tank.indexOf(temp_event) != -1 ){ continue; }
+	while( pos_stack.length > 0 ){
 		
-		if( $gameMap.distance(temp_event.x, temp_event.y, e.x, e.y) == 1 ){	//距离为1的即相邻
-			this.drill_EGS_eventsNearBy( temp_event, tank );
+		// > 遍历规则(visited) - DEBUG测试 - 计数器（回溯进入次数）
+		//if( DrillUp.g_drill_EGS_Debug_RecursionCount == undefined ){ DrillUp.g_drill_EGS_Debug_RecursionCount = 0; }
+		//DrillUp.g_drill_EGS_Debug_RecursionCount += 1;
+		
+		// > 遍历规则(stack) - 出栈
+		var pos = pos_stack[pos_stack.length-1];
+		pos_stack.pop();
+		
+		// > 遍历规则(visited) - 若已存在于列表，跳出
+		if( pos_visitedTank[pos] === true ){ continue; }
+		
+		// > 遍历规则(visited) - 添加到列表
+		pos_visitedTank[pos] = true;
+		
+		// > 遍历规则(visited) - DEBUG测试 - 计数器（遍历执行次数）
+		//if( DrillUp.g_drill_EGS_Debug_DFSCount == undefined ){ DrillUp.g_drill_EGS_Debug_DFSCount = 0; }
+		//DrillUp.g_drill_EGS_Debug_DFSCount += 1;
+		
+		
+		// > 遍历规则(visited) - 位置(0,0) （与事件重合，也算聚集）
+		var event_list = $gameTemp._drill_EGS_positionTank[pos];
+		if( event_list === undefined ){ continue; }	//（没有事件时，跳出）
+		var has_new_key_str = false;
+		for(var i = 0; i < event_list.length; i++ ){
+			var temp_event = event_list[i];
+			if( temp_event.drill_EGS_hasKey( key_str ) == true ){
+				if( nearByEvent_tank.contains( temp_event ) != true ){
+					nearByEvent_tank.push( temp_event );
+					has_new_key_str = true;
+				}
+			}
+		}
+		if( has_new_key_str == true ){	//（只有新发现的符合聚集钥匙的事件，才继续搜索其他相邻的钥匙）
+			
+			// > 遍历规则(visited) - 位置(1,0)
+			var xx = this.drill_EGS_getPosXBySlotId(pos) +1;
+			var yy = this.drill_EGS_getPosYBySlotId(pos) +0;
+			var next_pos = this.drill_EGS_getSlotIdByPos( xx, yy );
+			var event_list = $gameTemp._drill_EGS_positionTank[next_pos];
+			if( event_list !== undefined ){		//判断函数放这里，执行四遍『减少回溯进入次数』
+				// > 遍历规则(stack) - 入栈
+				pos_stack.push( next_pos );
+			}
+			// > 遍历规则(visited) - 位置(0,1)
+			var xx = this.drill_EGS_getPosXBySlotId(pos) +0;
+			var yy = this.drill_EGS_getPosYBySlotId(pos) +1;
+			var next_pos = this.drill_EGS_getSlotIdByPos( xx, yy );
+			var event_list = $gameTemp._drill_EGS_positionTank[next_pos];
+			if( event_list !== undefined ){		//判断函数放这里，执行四遍『减少回溯进入次数』
+				// > 遍历规则(stack) - 入栈
+				pos_stack.push( next_pos );
+			}
+			// > 遍历规则(visited) - 位置(-1,0)
+			var xx = this.drill_EGS_getPosXBySlotId(pos) -1;
+			var yy = this.drill_EGS_getPosYBySlotId(pos) +0;
+			var next_pos = this.drill_EGS_getSlotIdByPos( xx, yy );
+			var event_list = $gameTemp._drill_EGS_positionTank[next_pos];
+			if( event_list !== undefined ){		//判断函数放这里，执行四遍『减少回溯进入次数』
+				// > 遍历规则(stack) - 入栈
+				pos_stack.push( next_pos );
+			}
+			// > 遍历规则(visited) - 位置(0,-1)
+			var xx = this.drill_EGS_getPosXBySlotId(pos) +0;
+			var yy = this.drill_EGS_getPosYBySlotId(pos) -1;
+			var next_pos = this.drill_EGS_getSlotIdByPos( xx, yy );
+			var event_list = $gameTemp._drill_EGS_positionTank[next_pos];
+			if( event_list !== undefined ){		//判断函数放这里，执行四遍『减少回溯进入次数』
+				// > 遍历规则(stack) - 入栈
+				pos_stack.push( next_pos );
+			}
 		}
 	}
 }
-*/
 
 
 //=============================================================================
@@ -1391,6 +1419,10 @@ Game_Map.prototype.drill_EGS_updateKey = function() {
 // * 开关控制（触发设置） - 帧刷新 开关
 //==============================
 Game_Map.prototype.drill_EGS_updateSwitch = function() {
+	
+	// > 遍历规则(visited) - DEBUG测试 - 计数器
+	//DrillUp.g_drill_EGS_Debug_RecursionCount = 0;
+	//DrillUp.g_drill_EGS_Debug_DFSCount = 0;
 	
 	// > 获取前，先清空 聚集组容器
 	$gameTemp._drill_EGS_nearByTank = {};
@@ -1498,6 +1530,12 @@ Game_Map.prototype.drill_EGS_updateSwitch = function() {
 			}
 		}
 	}
+	
+	// > 遍历规则(visited) - DEBUG测试 - 计数器
+	//alert(
+	//	"回溯进入次数：" + DrillUp.g_drill_EGS_Debug_RecursionCount + "\n" +
+	//	"遍历执行次数：" + DrillUp.g_drill_EGS_Debug_DFSCount
+	//);
 };
 //==============================
 // * 开关控制（触发设置） - 执行切换开关

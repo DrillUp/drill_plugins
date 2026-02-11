@@ -227,6 +227,12 @@
 	DrillUp.drill_FPr_getPluginTip_FolderNotFind = function( dir_path ){
 		return "【" + DrillUp.g_FPr_PluginTip_curName + "】\n预加载失败，指定的文件夹'" + dir_path + "'不存在。";
 	};
+	//==============================
+	// * 提示信息 - 报错 - 底层版本过低
+	//==============================
+	DrillUp.drill_FPr_getPluginTip_LowVersion = function(){
+		return "【" + DrillUp.g_FPr_PluginTip_curName + "】\n游戏底层版本过低，插件基本功能无法执行。\n你可以去看\"rmmv软件版本（必看）.docx\"中的 \"旧工程升级至1.6版本\" 章节，来升级你的游戏底层版本。";
+	};
 	
 	
 //=============================================================================
@@ -280,6 +286,7 @@ Game_Temp.prototype.drill_FPr_preloadInit = function() {
 		if( temp_path == "" ){ continue; }
 		
 		// > 获取文件夹数据
+		if( require == undefined ){ continue; }
 		var r_fs = require('fs');
 		var r_path = require('path');
 		

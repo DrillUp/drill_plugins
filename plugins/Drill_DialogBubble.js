@@ -1334,7 +1334,7 @@ Game_Temp.prototype.drill_DBu_getActorSpriteByActorId_Private = function( actor_
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 绑定位置控制 - 最后继承
+// * 绑定位置控制 - 最后继承1级
 //==============================
 var _drill_DBu_scene_initialize = SceneManager.initialize;
 SceneManager.initialize = function() {

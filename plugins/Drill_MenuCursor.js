@@ -366,8 +366,8 @@
  * @parent ---透明度---
  * @type number
  * @min 0
- * @min 255
- * @desc 开始变化前的等待时间，单位帧。（1秒60帧）
+ * @max 255
+ * @desc 菜单指针的最大透明度。（0为完全透明，255为完全不透明）
  * @default 255
  * 
  * @param 透明度变化方式
@@ -642,8 +642,15 @@
 	//==============================
 	// * 提示信息 - 报错 - NaN校验值
 	//==============================
-	DrillUp.drill_MCu_getPluginTip_ParamIsNaN = function( param_name ){
-		return "【" + DrillUp.g_MCu_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+	DrillUp.drill_MCu_getPluginTip_ParamIsNaN = function( param_name, check_tank ){
+		var text = "【" + DrillUp.g_MCu_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+		if( check_tank ){
+			var keys = Object.keys( check_tank );
+			for( var i=0; i < keys.length; i++ ){
+				text += "\n" + keys[i] + "的值：" + check_tank[ keys[i] ] ;
+			}
+		}
+		return text;
 	};
 	
 	
@@ -866,11 +873,11 @@ Game_System.prototype.drill_MCu_checkSysData = function() {
 //==============================
 Game_System.prototype.drill_MCu_initSysData_Private = function() {
 	
-	// > 『控制器与贴图的样式』 - 校验+提示信息
+	// > 『控制器与贴图的样式-』 - 校验+提示信息
 	this._drill_MCu_curStyleId = DrillUp.g_MCu_defaultStyleId;	//（注意，这个id从1开始计数，因为要适配子插件）
 	var cur_styleData = DrillUp.drill_MCu_getStyleData( this._drill_MCu_curStyleId -1 );
 	
-	// > 『控制器与贴图的样式』 - 创建控制器
+	// > 『控制器与贴图的样式-』 - 创建控制器
 	var temp_controller = new Drill_MCu_Controller( cur_styleData );
 	temp_controller._drill_curStyleId = this._drill_MCu_curStyleId;
 	this._drill_MCu_controller = temp_controller;
@@ -1274,14 +1281,14 @@ Scene_MenuBase.prototype.drill_MCu_layerRemoveSprite_Private = function( sprite 
 //==============================
 // * 菜单层级 - 添加贴图到层级（私有）
 //
-//			说明：	> 此处兼容了 战斗界面、地图界面 的层级名词。
+//			说明：	> 此处兼容了 菜单界面、战斗界面、地图界面 的层级名词。
 //==============================
 Scene_MenuBase.prototype.drill_MCu_layerAddSprite_Private = function( sprite, layer_index ){
-	if( layer_index == "菜单后面层" || layer_index === 0 || 
+	if( layer_index == "菜单后面层" || layer_index === "0" || layer_index === 0 || 
 		layer_index == "下层" || layer_index == "中层" || layer_index == "上层"){
 		this._backgroundSprite.addChild( sprite );
 	}
-	if( layer_index == "菜单前面层" || layer_index === 1 || 
+	if( layer_index == "菜单前面层" || layer_index === "1" || layer_index === 1 || 
 		layer_index == "图片层" || layer_index == "最顶层" ){
 		this._foregroundSprite.addChild( sprite );
 	}
@@ -1424,7 +1431,7 @@ Scene_Title.prototype.terminate = function() {
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 实体类绑定 - 最后继承
+// * 实体类绑定 - 最后继承1级
 //==============================
 var _drill_MCu_scene_initialize = SceneManager.initialize;
 SceneManager.initialize = function() {
@@ -2243,10 +2250,10 @@ Drill_MCu_Controller.prototype.drill_controller_updateAttr = function() {
 		if( this._drill_curStyleId != bean._drill_styleId ){
 			if( bean._drill_styleId > 0 ){
 				
-				// > 『控制器与贴图的样式』 - 校验+提示信息
+				// > 『控制器与贴图的样式-』 - 校验+提示信息
 				var cur_styleData = DrillUp.drill_MCu_getStyleData( bean._drill_styleId -1 );
 				
-				// > 『控制器与贴图的样式』 - 创建控制器
+				// > 『控制器与贴图的样式-』 - 创建控制器
 				this.drill_controller_resetData( cur_styleData );
 				
 				// > 样式改变测试

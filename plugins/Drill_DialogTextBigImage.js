@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        窗口字符 - 大图片字符
+ * @plugindesc [v1.5]        窗口字符 - 大图片字符
  * @author Drill_up
  * 
  * @Drill_LE_param "字符图-%d"
@@ -28,7 +28,7 @@
  *   - Drill_CoreOfWindowCharacter   窗口字符-窗口字符核心★★v2.0及以上★★
  *     需要该核心才能将图片绘制在文本域中。
  * 可被扩展：
- *   - Drill_AssetsOfCurrency        管理器-货币素材库
+ *   - Drill_AssetsOfCurrency        管理器-素材库之货币
  *     通过该插件，能绘制出货币的资源图片。
  * 
  * -----------------------------------------------------------------------------
@@ -87,7 +87,7 @@
  *   （dimg全称为：Drill_Image，即图片字符）
  * 
  * -----------------------------------------------------------------------------
- * ----可选设定 - 货币素材库
+ * ----可选设定 - 素材库之货币
  * 你可以使用素材库中的资源图片来绘制：
  * 
  * 窗口字符：\dimg[货币素材:小图:不占高宽]
@@ -1814,6 +1814,7 @@
 //				->获取文本高度（半覆写）
 //				->绘制基础字符（半覆写）
 //					->绘制大图片
+//			
 //			->☆DEBUG字符图测试
 //		
 //		
@@ -1885,7 +1886,7 @@
 	DrillUp.g_DTBI_list_length = 200;
 	DrillUp.g_DTBI_list = [];
 	for( var i = 0; i < DrillUp.g_DTBI_list_length; i++ ){
-		DrillUp.g_DTBI_list[i] = String(DrillUp.parameters['字符图-' + String(i+1) ] || "");
+		DrillUp.g_DTBI_list[i] = String(DrillUp.parameters["字符图-" + String(i+1) ] || "");
 	}
 	
 	
@@ -1993,7 +1994,6 @@ Game_Temp.prototype.drill_COWC_effect_processCombined = function( matched_index,
 			this.drill_COWC_effect_submitCombined( "@@@dbi[drawOrg:" + String(args[0]) + ":0:0]" );
 			return;
 		}
-		
 		if( args.length == 2 ){
 			var temp1 = String(args[0]);
 			var temp2 = String(args[1]);
@@ -2023,7 +2023,6 @@ Game_Temp.prototype.drill_COWC_effect_processCombined = function( matched_index,
 				}
 			}
 		}
-		
 		if( args.length == 3 ){
 			var temp1 = String(args[0]);
 			var temp2 = String(args[1]);
@@ -2038,72 +2037,7 @@ Game_Temp.prototype.drill_COWC_effect_processCombined = function( matched_index,
 				return;
 			}
 		}
-	}
-	
-	// > 【管理器 - 货币素材库】
-	if( Imported.Drill_AssetsOfCurrency ){
-		if( command == "dimg" && args.length >= 3 ){
-			var temp1 = String(args[0]);
-			var temp2 = String(args[1]);
-			var temp3 = String(args[2]);
-			if( temp1 == "货币素材" ){
-			
-				if( args.length == 3 ){
-						
-					// > 『窗口字符定义』 - 大图片字符（\dimg[货币素材:小图:不占高宽]）
-					if( temp3 == "不占高宽" ){
-						if( temp2 == "小图" ){
-							this.drill_COWC_effect_submitCombined( "@@@dbi[drawAsset:AsOC_currency:1:0:0]" );
-						}
-						if( temp2 == "中型图" ){
-							this.drill_COWC_effect_submitCombined( "@@@dbi[drawAsset:AsOC_currency:2:0:0]" );
-						}
-						if( temp2 == "高清图" ){
-							this.drill_COWC_effect_submitCombined( "@@@dbi[drawAsset:AsOC_currency:3:0:0]" );
-						}
-						return;
-					}
-					
-					// > 『窗口字符定义』 - 大图片字符（\dimg[货币素材:小图:占用高宽]）
-					if( temp3 == "占用高宽" ){
-						if( temp2 == "小图" ){
-							var src_bitmap = $gameTemp.drill_AsOC_getDataSrcImg_Small();	//（『预加载直接赋值』直接从 预加载容器 中取出高宽值）
-							this.drill_COWC_effect_submitCombined( "@@@dbi[drawAsset:AsOC_currency:1:" +String(src_bitmap.width)+":"+String(src_bitmap.height)+ "]" );
-						}
-						if( temp2 == "中型图" ){
-							var src_bitmap = $gameTemp.drill_AsOC_getDataSrcImg_Middle();	//（『预加载直接赋值』直接从 预加载容器 中取出高宽值）
-							this.drill_COWC_effect_submitCombined( "@@@dbi[drawAsset:AsOC_currency:2:" +String(src_bitmap.width)+":"+String(src_bitmap.height)+ "]" );
-						}
-						if( temp2 == "高清图" ){
-							var src_bitmap = $gameTemp.drill_AsOC_getDataSrcImg_Big();		//（『预加载直接赋值』直接从 预加载容器 中取出高宽值）
-							this.drill_COWC_effect_submitCombined( "@@@dbi[drawAsset:AsOC_currency:3:" +String(src_bitmap.width)+":"+String(src_bitmap.height)+ "]" );
-						}
-						return;
-					}
-				}
-				
-				if( args.length == 4 ){
-					var temp4 = String(args[3]);
-					temp4 = temp4.replace("位置[","");
-					temp4 = temp4.replace("]","");
-					
-					// > 『窗口字符定义』 - 大图片字符（\dimg[货币素材:小图:不占高宽:位置[10,-10]]）
-					var pos = temp4.split(/[,，]/);
-					if( pos.length >= 2 ){
-						if( temp2 == "小图" ){
-							this.drill_COWC_effect_submitCombined( "@@@dbi[drawAsset:AsOC_currency:1:0:0"+String(pos[0])+ ":"+String(pos[1])+ "]" );
-						}
-						if( temp2 == "中型图" ){
-							this.drill_COWC_effect_submitCombined( "@@@dbi[drawAsset:AsOC_currency:2:0:0"+String(pos[0])+ ":"+String(pos[1])+ "]" );
-						}
-						if( temp2 == "高清图" ){
-							this.drill_COWC_effect_submitCombined( "@@@dbi[drawAsset:AsOC_currency:3:0:0"+String(pos[0])+ ":"+String(pos[1])+ "]" );
-						}
-						return;
-					}
-				}
-			}
-		}
+		
 	}
 };
 
@@ -2128,70 +2062,46 @@ Game_Temp.prototype.drill_COCD_textBlock_processSecond = function( command, args
 				
 				// > 『底层字符定义』 - 字符图（@@@dbi[drawOrg:1:0:0]） drill_big_image
 				if( args.length == 4 ){
-					cur_baseParam['DTBI_imgType'] = "org";
-					cur_baseParam['DTBI_imgIndex'] = Number(args[1]) -1;	//（基础字符配置）
-					cur_baseParam['DTBI_imgWidth'] = Number(args[2]);
-					cur_baseParam['DTBI_imgHeight'] = Number(args[3]);
-					cur_baseParam['DTBI_imgPosX'] = 0;
-					cur_baseParam['DTBI_imgPosY'] = 0;
+					cur_baseParam['DTBI_imgType'] = "org";					//（基础字符配置）
+					cur_baseParam['DTBI_imgIndex'] = String(args[1]);		//
+					cur_baseParam['DTBI_imgWidth'] = Number(args[2]);		//
+					cur_baseParam['DTBI_imgHeight'] = Number(args[3]);		//
+					cur_baseParam['DTBI_imgPosX'] = 0;						//
+					cur_baseParam['DTBI_imgPosY'] = 0;						//
+					
 					this.drill_COCD_textBlock_submitSecond( "@" );			//（必须提交一个字符）
 					return;
 				}
 				
 				// > 『底层字符定义』 - 字符图（@@@dbi[drawOrg:1:0:0:4:4]） drill_big_image
 				if( args.length == 6 ){
-					cur_baseParam['DTBI_imgType'] = "org";
-					cur_baseParam['DTBI_imgIndex'] = Number(args[1]) -1;	//（基础字符配置）
-					cur_baseParam['DTBI_imgWidth'] = Number(args[2]);
-					cur_baseParam['DTBI_imgHeight'] = Number(args[3]);
-					cur_baseParam['DTBI_imgPosX'] = Number(args[4]);
-					cur_baseParam['DTBI_imgPosY'] = Number(args[5]);
-					this.drill_COCD_textBlock_submitSecond( "@" );			//（必须提交一个字符）
-					return;
-				}
-			}
-		}
-		if( args.length >= 5 ){
-			var drawType = String(args[0]);
-			var imgType = String(args[1]);
-			if( drawType == "drawAsset" ){
-				
-				// > 『底层字符定义』 - 字符图（@@@dbi[drawAsset:imgType:1:0:0]） drill_big_image
-				if( args.length == 5 ){
-					cur_baseParam['DTBI_imgType'] = imgType;
-					cur_baseParam['DTBI_imgIndex'] = Number(args[2]);	//（基础字符配置）
-					cur_baseParam['DTBI_imgWidth'] = Number(args[3]);
-					cur_baseParam['DTBI_imgHeight'] = Number(args[4]);
-					cur_baseParam['DTBI_imgPosX'] = 0;
-					cur_baseParam['DTBI_imgPosY'] = 0;
-					this.drill_COCD_textBlock_submitSecond( "@" );			//（必须提交一个字符）
-					return;
-				}
-				
-				// > 『底层字符定义』 - 字符图（@@@dbi[drawAsset:imgType:1:0:0:4:4]） drill_big_image
-				if( args.length == 7 ){
-					cur_baseParam['DTBI_imgType'] = imgType;
-					cur_baseParam['DTBI_imgIndex'] = Number(args[2]);	//（基础字符配置）
-					cur_baseParam['DTBI_imgWidth'] = Number(args[3]);
-					cur_baseParam['DTBI_imgHeight'] = Number(args[4]);
-					cur_baseParam['DTBI_imgPosX'] = Number(args[5]);
-					cur_baseParam['DTBI_imgPosY'] = Number(args[6]);
+					cur_baseParam['DTBI_imgType'] = "org";					//（基础字符配置）
+					cur_baseParam['DTBI_imgIndex'] = String(args[1]);		//
+					cur_baseParam['DTBI_imgWidth'] = Number(args[2]);		//
+					cur_baseParam['DTBI_imgHeight'] = Number(args[3]);		//
+					cur_baseParam['DTBI_imgPosX'] = Number(args[4]);		//
+					cur_baseParam['DTBI_imgPosY'] = Number(args[5]);		//
+					
 					this.drill_COCD_textBlock_submitSecond( "@" );			//（必须提交一个字符）
 					return;
 				}
 			}
 		}
 	}
-}
+};
 //==============================
 // * 字符图 - 基础字符 - 默认值（继承）
 //==============================
 var _drill_DTBI_COCD_drawBaseText_initParam = Game_Temp.prototype.drill_COCD_drawBaseText_initParam;
 Game_Temp.prototype.drill_COCD_drawBaseText_initParam = function( baseParam ){
 	_drill_DTBI_COCD_drawBaseText_initParam.call( this, baseParam );
-	if( baseParam['DTBI_imgType'] == undefined ){ baseParam['DTBI_imgType'] = "" };			//绘制的字符图类型
-	if( baseParam['DTBI_imgIndex'] == undefined ){ baseParam['DTBI_imgIndex'] = -1 };		//绘制的字符图索引
-}
+	if( baseParam['DTBI_imgType']   === undefined ){ baseParam['DTBI_imgType'] = ""  };		//类型（默认""）
+	if( baseParam['DTBI_imgIndex']  === undefined ){ baseParam['DTBI_imgIndex'] = "" };		//索引（字符串）
+	if( baseParam['DTBI_imgWidth']  === undefined ){ baseParam['DTBI_imgWidth'] = 0  };		//宽度
+	if( baseParam['DTBI_imgHeight'] === undefined ){ baseParam['DTBI_imgHeight'] = 0 };		//高度
+	if( baseParam['DTBI_imgPosX']   === undefined ){ baseParam['DTBI_imgPosX'] = 0   };		//偏移X
+	if( baseParam['DTBI_imgPosY']   === undefined ){ baseParam['DTBI_imgPosY'] = 0   };		//偏移Y
+};
 //==============================
 // * 字符图 - 基础字符 - 获取文本宽度（半覆写）
 //==============================
@@ -2199,14 +2109,14 @@ var _drill_DTBI_COCD_measureBaseTextWidth_Private = Game_Temp.prototype.drill_CO
 Game_Temp.prototype.drill_COCD_measureBaseTextWidth_Private = function( painter, text, baseParam ){
 	
 	// > 字符图时（直接返回零）
-	if( baseParam['DTBI_imgIndex'] >= 0 ){
+	if( baseParam['DTBI_imgType'] != "" ){
 		return baseParam['DTBI_imgWidth'];
 		
 	// > 原函数
 	}else{
 		return _drill_DTBI_COCD_measureBaseTextWidth_Private.call( this, painter, text, baseParam );
 	}
-}
+};
 //==============================
 // * 字符图 - 基础字符 - 获取文本高度（半覆写）
 //==============================
@@ -2214,14 +2124,14 @@ var _drill_DTBI_COCD_measureBaseTextHeight_Private = Game_Temp.prototype.drill_C
 Game_Temp.prototype.drill_COCD_measureBaseTextHeight_Private = function( painter, text, baseParam ){
 	
 	// > 字符图时（直接返回零）
-	if( baseParam['DTBI_imgIndex'] >= 0 ){
+	if( baseParam['DTBI_imgType'] != "" ){
 		return baseParam['DTBI_imgHeight'];
 		
 	// > 原函数
 	}else{
 		return _drill_DTBI_COCD_measureBaseTextHeight_Private.call( this, painter, text, baseParam );
 	}
-}
+};
 //==============================
 // * 字符图 - 基础字符 - 绘制基础字符（半覆写）
 //==============================
@@ -2229,67 +2139,60 @@ var _drill_DTBI_COCD_drawBaseText_Private = Bitmap.prototype.drill_COCD_drawBase
 Bitmap.prototype.drill_COCD_drawBaseText_Private = function( text, x, y, baseParam ){
 	
 	// > 字符图时
-	if( baseParam['DTBI_imgIndex'] >= 0 ){
+	if( baseParam['DTBI_imgType'] != "" ){
+		
+		// > 字符图时 - 资源加载
+		var src_bitmap = this.drill_DTBI_getBitmap( baseParam );
+		if( src_bitmap == null ){ return; }
 		
 		// > 字符图时 - 『绘制过程定义』 - 字符图（@@@dbi[]）
-		this.drill_DTBI_drawImg(
-			baseParam['DTBI_imgType'],
-			baseParam['DTBI_imgIndex'],
-			x + baseParam['DTBI_imgPosX'],
-			y + baseParam['DTBI_imgPosY'],
-			baseParam
-		);
+		this.drill_DTBI_drawBitmap( src_bitmap, x, y, baseParam );
 		
 	// > 原函数
 	}else{
 		_drill_DTBI_COCD_drawBaseText_Private.call( this, text, x, y, baseParam );
 	}
-}
+};
 //==============================
-// * 字符图 - 绘制大图片
+// * 字符图 - 基础字符 - 绘制基础字符 - 资源加载
 //==============================
-Bitmap.prototype.drill_DTBI_drawImg = function( imgType, imgIndex, x, y, baseParam ){
-    
-	// > 资源加载
-	var src_bitmap = null;
-	if( imgType == "" || imgType == "org" ){
-		src_bitmap = $gameTemp._drill_DTBI_preloadTank[ imgIndex ];	//（『预加载直接赋值』直接从 预加载容器 中取出并绘制）
-	}
-	// > 资源加载 - 【管理器 - 货币素材库】
-	if( Imported.Drill_AssetsOfCurrency ){
-		if( imgType == "AsOC_currency" ){
-			if( imgIndex == 1 ){
-				src_bitmap = $gameTemp.drill_AsOC_getDataSrcImg_Small();
-			}
-			if( imgIndex == 2 ){
-				src_bitmap = $gameTemp.drill_AsOC_getDataSrcImg_Middle();
-			}
-			if( imgIndex == 3 ){
-				src_bitmap = $gameTemp.drill_AsOC_getDataSrcImg_Big();
-			}
+Bitmap.prototype.drill_DTBI_getBitmap = function( baseParam ){
+	var imgType = baseParam['DTBI_imgType'];
+	var imgIndex = Number( baseParam['DTBI_imgIndex'] )-1;
+	if( isNaN(imgIndex) == false ){
+		if( imgType == "" || imgType == "org" ){
+			var src_bitmap = $gameTemp._drill_DTBI_preloadTank[ imgIndex ];	//（『预加载直接赋值』直接从 预加载容器 中取出并绘制）
+			return src_bitmap;
 		}
 	}
-	if( src_bitmap == null ){ return; }
-	
+	return null;
+};
+//==============================
+// * 字符图 - 基础字符 - 绘制基础字符 - 绘制图片
+//==============================
+Bitmap.prototype.drill_DTBI_drawBitmap = function( src_bitmap, x, y, baseParam ){
 	
 	// > 执行绘制
-	var pw = src_bitmap.width;
-	var ph = src_bitmap.height;
 	var sx = 0;
 	var sy = 0;
+	var pw = src_bitmap.width;
+	var ph = src_bitmap.height;
+	var xx = x + baseParam['DTBI_imgPosX'];
+	var yy = y + baseParam['DTBI_imgPosY'];
 	
 	// > 执行绘制 - 占用时
 	if( baseParam['DTBI_imgHeight'] > 0 ){
-		y -= src_bitmap.height;
+		yy -= src_bitmap.height;
 		
 	// > 执行绘制 - 不占时
 	}else{
-		y -= baseParam['fontSize'] *DrillUp.g_COCD_textHeightPer;	//『手算高度』
+		yy -= baseParam['fontSize'] *DrillUp.g_COCD_textHeightPer;	//『手算高度』
 	}
 	
 	// > 执行绘制
-	this.blt(src_bitmap, sx, sy, pw, ph, x, y);
+	this.blt( src_bitmap, sx, sy, pw, ph, xx, yy );
 };
+
 
 
 //=============================================================================
@@ -2375,7 +2278,7 @@ Scene_Map.prototype.drill_DTBI_createDebugSprite = function() {
 				
 	temp_bitmap.drill_COWC_drawText( text, options );
 	
-	// > 『字符贴图流程』 - 刷新字符块贴图【窗口字符 - 窗口字符贴图核心】
+	// > 『字符贴图流程』 - 刷新当前的字符块贴图【窗口字符 - 窗口字符贴图核心】
 	temp_sprite.drill_COWCSp_sprite_refreshAllSprite();
 }
 

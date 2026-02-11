@@ -254,6 +254,13 @@
  * @min 1
  * @desc 关闭"作用到所有地图"时，指定的地图发生区域出入时，才会触发。
  * @default 1
+ * 
+ * @param 作用到的地图列表
+ * @parent 是否作用到所有地图
+ * @type number[]
+ * @min 1
+ * @desc 除了"所属地图"，你还可以填多个地图id，同一个贴图在多个地图里面复用。
+ * @default []
  *
  * @param 区域组
  * @parent ---绑定---
@@ -391,7 +398,14 @@
 		
 		// > 绑定
 		data['mapToAll'] = String( dataFrom["是否作用到所有地图"] || "true") == "true";
-		data['mapId'] = Number( dataFrom["所属地图"] || 0);
+		data['map'] = String( dataFrom["所属地图"] || "0" );
+		if( dataFrom["作用到的地图列表"] != "" &&
+			dataFrom["作用到的地图列表"] != undefined ){
+			data['mapList'] = JSON.parse( dataFrom["作用到的地图列表"] );
+		}else{
+			data['mapList'] = [];
+		}
+		data['mapList'].push( data['map'] );
 		if( dataFrom["区域组"] != undefined &&
 			dataFrom["区域组"] != "" ){
 			var temp = JSON.parse( dataFrom["区域组"] );
@@ -609,7 +623,7 @@ Game_Player.prototype.drill_WER_updateCommonEvent = function() {
 		if( temp_data['mapToAll'] == true ){
 			pass = true;
 		}
-		if( temp_data['mapToAll'] == false && temp_data['mapId'] == $gameMap._mapId ){
+		if( temp_data['mapToAll'] == false && temp_data['mapList'].contains( String($gameMap._mapId)) ){
 			pass = true;
 		}
 		if( pass == false ){ continue; }

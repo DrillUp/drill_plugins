@@ -415,8 +415,15 @@
 	//==============================
 	// * 提示信息 - 报错 - NaN校验值
 	//==============================
-	DrillUp.drill_EFN_getPluginTip_ParamIsNaN = function( param_name ){
-		return "【" + DrillUp.g_EFN_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+	DrillUp.drill_EFN_getPluginTip_ParamIsNaN = function( param_name, check_tank ){
+		var text = "【" + DrillUp.g_EFN_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+		if( check_tank ){
+			var keys = Object.keys( check_tank );
+			for( var i=0; i < keys.length; i++ ){
+				text += "\n" + keys[i] + "的值：" + check_tank[ keys[i] ] ;
+			}
+		}
+		return text;
 	};
 	//==============================
 	// * 提示信息 - 报错 - 外部插件冲突（旧插件改名）
@@ -1507,7 +1514,11 @@ Drill_EFN_Controller.prototype.drill_EFN_updateLoop = function() {
 	
 	// > 校验值
 	if( isNaN( cur_index ) ){
-		alert( DrillUp.drill_EFN_getPluginTip_ParamIsNaN( "cur_index" ) );
+		var check_tank = {};
+		check_tank["cur_seqIndex"] = this.cur_seqIndex;
+		check_tank["_drill_curTick"] = this._drill_curTick;
+		check_tank["_drill_loop_curSeq_length"] = this._drill_loop_curSeq.length;
+		alert( DrillUp.drill_EFN_getPluginTip_ParamIsNaN( "cur_index", check_tank ) );
 	}
 }
 //==============================

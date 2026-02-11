@@ -417,29 +417,25 @@
 //			->☆预加载
 //			->☆存储数据
 //			
+//			
 //			->☆切割计算
 //				->执行多边形切割
 //				->数学工具
-//			->☆动态快照控制器创建
+//			->☆动态快照控制器与切割
 //				->界面创建
 //				->单次切割
 //			->☆动态快照控制器与贴图
-//				->跨多个界面控制
 //				->控制器帧刷新
 //				->销毁
 //			
 //			->动态快照控制器【Drill_HDSSW_Controller】
-//				->A主体
-//				->B基本变化
 //			->动态快照贴图【Drill_HDSSW_Sprite】
-//				->A主体
-//				->B基本变化
-//				->C对象绑定
+//			
 //			
 //			->☆刀光计算
 //				->获取刀光起点终点
 //				->数学工具
-//			->☆魔法圈控制器创建
+//			->☆魔法圈控制器与切割
 //				> 刀光
 //				> 切割白背景
 //				> 切割白闪烁
@@ -449,21 +445,11 @@
 //				> 刀光
 //				> 切割白背景
 //				> 切割白闪烁
-//				->跨多个界面控制
 //				->控制器帧刷新
 //				->销毁
 //			
 //			->魔法圈控制器【Drill_HDSSW_CircleController】
-//				->A主体
-//				->B基本变化
-//				->2A闪烁模式
-//				->2B刀光模式
 //			->魔法圈贴图【Drill_HDSSW_CircleSprite】
-//				->A主体
-//				->B基本变化
-//				->C对象绑定
-//				->2A闪烁模式
-//				->2B刀光模式
 //
 //
 //		★家谱：
@@ -480,10 +466,10 @@
 //		
 //		★必要注意事项：
 //			1.该插件的 魔法圈控制器 和 动态快照控制器 相互独立，可以分离开来。
-//
+//		
 //		★其它说明细节：
 //			1.该插件用了大量数学工具，写函数时注意考虑 null 的情况。
-//				
+//		
 //		★存在的问题：
 //			1.问题：见函数 drill_HDSSW_Math2D_getPointToPointDegree 的调用位置，可能存在精度偏差，造成旋转角度不对。
 //			  解决：【未解决】
@@ -524,8 +510,15 @@
 	//==============================
 	// * 提示信息 - 报错 - NaN校验值
 	//==============================
-	DrillUp.drill_HDSSW_getPluginTip_ParamIsNaN = function( param_name ){
-		return "【" + DrillUp.g_HDSSW_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+	DrillUp.drill_HDSSW_getPluginTip_ParamIsNaN = function( param_name, check_tank ){
+		var text = "【" + DrillUp.g_HDSSW_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+		if( check_tank ){
+			var keys = Object.keys( check_tank );
+			for( var i=0; i < keys.length; i++ ){
+				text += "\n" + keys[i] + "的值：" + check_tank[ keys[i] ] ;
+			}
+		}
+		return text;
 	};
 	//==============================
 	// * 提示信息 - 报错 - 底层版本过低
@@ -1079,14 +1072,14 @@ Game_Temp.prototype.drill_HDSSW_Math2D_getPointOnLine_FindX = function( x1,y1,x2
 
 
 //=============================================================================
-// ** ☆动态快照控制器创建
+// ** ☆动态快照控制器与切割
 //
 //			说明：	> 此模块专门管理 控制器 的创建与销毁。
 //					> 遍历控制器 切割平面，如果切到了，添加控制器，原控制器使用A多边形，新控制器使用B多边形。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 动态快照控制器创建 - 界面创建时（地图界面）
+// * 动态快照控制器与切割 - 界面创建时『多场景与游戏窗体-地图界面』
 //==============================
 var _drill_HDSSW_mapCreate_createAllWindows = Scene_Map.prototype.createAllWindows;
 Scene_Map.prototype.createAllWindows = function() {
@@ -1094,7 +1087,7 @@ Scene_Map.prototype.createAllWindows = function() {
 	this.drill_HDSSW_sceneCreate();
 };
 //==============================
-// * 动态快照控制器创建 - 界面创建 （地图界面）
+// * 动态快照控制器与切割 - 界面创建『多场景与游戏窗体-地图界面』
 //==============================
 Scene_Map.prototype.drill_HDSSW_sceneCreate = function() {
 	var cur_scene = SceneManager._scene;
@@ -1124,7 +1117,7 @@ Scene_Map.prototype.drill_HDSSW_sceneCreate = function() {
 	Graphics.drill_CODS_sortByZIndex();
 }
 //==============================
-// * 动态快照控制器创建 - 帧刷新（地图界面）
+// * 动态快照控制器与切割 - 帧刷新『多场景与游戏窗体-地图界面』
 //==============================
 var _drill_HDSSW_mapCreate_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {
@@ -1136,12 +1129,12 @@ Scene_Map.prototype.update = function() {
 	$gameTemp._drill_HDSSW_createCut = null;
 };
 //==============================
-// * 动态快照控制器创建 - 帧刷新 单次切割（地图界面）
+// * 动态快照控制器与切割 - 帧刷新 单次切割『多场景与游戏窗体-地图界面』
 //==============================
 Scene_Map.prototype.drill_HDSSW_executeCut = function( cur_cut ){
 	//alert( JSON.stringify( cur_cut ) );
 	
-	// > 『控制器与贴图的样式』 - 校验+提示信息
+	// > 『控制器与贴图的样式-』 - 校验+提示信息
 	var cur_styleId   = cur_cut['style_id'] +1;
 	var cur_styleData = DrillUp.g_HDSSW_style[ cur_cut['style_id'] ];
 	if( cur_styleData == undefined ){
@@ -1149,7 +1142,7 @@ Scene_Map.prototype.drill_HDSSW_executeCut = function( cur_cut ){
 		return;
 	}
 	
-	// > 『控制器与贴图的样式』 - 创建控制器 - 第一刀
+	// > 『控制器与贴图的样式-』 - 创建控制器 - 第一刀
 	var controller_add_list = [];
 	if( $gameSystem._drill_HDSSW_controllerTank.length == 0 ){
 		
@@ -1177,7 +1170,7 @@ Scene_Map.prototype.drill_HDSSW_executeCut = function( cur_cut ){
 		controller_add_list.push( temp_controller2 );
 		
 		
-	// > 『控制器与贴图的样式』 - 创建控制器 - 第N刀
+	// > 『控制器与贴图的样式-』 - 创建控制器 - 第N刀
 	}else{
 		
 		// > 遍历切割
@@ -1222,7 +1215,7 @@ Scene_Map.prototype.drill_HDSSW_executeCut = function( cur_cut ){
 };
 
 //==============================
-// * 动态快照控制器创建 - 界面创建时（战斗界面）
+// * 动态快照控制器与切割 - 界面创建时『多场景与游戏窗体-战斗界面』
 //==============================
 var _drill_HDSSW_battleCreate_createAllWindows = Scene_Battle.prototype.createAllWindows;
 Scene_Battle.prototype.createAllWindows = function() {
@@ -1230,7 +1223,7 @@ Scene_Battle.prototype.createAllWindows = function() {
 	this.drill_HDSSW_sceneCreate();
 };
 //==============================
-// * 动态快照控制器创建 - 帧刷新（战斗界面）
+// * 动态快照控制器与切割 - 帧刷新『多场景与游戏窗体-战斗界面』
 //==============================
 var _drill_HDSSW_battleCreate_update = Scene_Battle.prototype.update;
 Scene_Battle.prototype.update = function() {
@@ -1242,16 +1235,13 @@ Scene_Battle.prototype.update = function() {
 	$gameTemp._drill_HDSSW_createCut = null;
 };
 //==============================
-// * 动态快照控制器创建 - 界面创建 （战斗界面）
+// * 动态快照控制器与切割 - 函数复制
 //==============================
-Scene_Battle.prototype.drill_HDSSW_sceneCreate = Scene_Map.prototype.drill_HDSSW_sceneCreate;
-//==============================
-// * 动态快照控制器创建 - 帧刷新 单次切割（战斗界面）
-//==============================
-Scene_Battle.prototype.drill_HDSSW_executeCut = Scene_Map.prototype.drill_HDSSW_executeCut;
+Scene_Battle.prototype.drill_HDSSW_sceneCreate = Scene_Map.prototype.drill_HDSSW_sceneCreate;	//界面创建『多场景与游戏窗体-战斗界面』
+Scene_Battle.prototype.drill_HDSSW_executeCut = Scene_Map.prototype.drill_HDSSW_executeCut;		//帧刷新 单次切割『多场景与游戏窗体-战斗界面』
 
 //==============================
-// * 动态快照控制器创建 - 界面创建时（菜单界面）
+// * 动态快照控制器与切割 - 界面创建时『多场景与游戏窗体-菜单界面』
 //==============================
 var _drill_HDSSW_menuCreate_createWindowLayer = Scene_MenuBase.prototype.createWindowLayer;
 Scene_MenuBase.prototype.createWindowLayer = function() {
@@ -1259,7 +1249,7 @@ Scene_MenuBase.prototype.createWindowLayer = function() {
 	this.drill_HDSSW_sceneCreate();
 };
 //==============================
-// * 动态快照控制器创建 - 帧刷新（菜单界面）
+// * 动态快照控制器与切割 - 帧刷新『多场景与游戏窗体-菜单界面』
 //==============================
 var _drill_HDSSW_menuCreate_update = Scene_MenuBase.prototype.update;
 Scene_MenuBase.prototype.update = function() {
@@ -1271,13 +1261,10 @@ Scene_MenuBase.prototype.update = function() {
 	$gameTemp._drill_HDSSW_createCut = null;
 };
 //==============================
-// * 动态快照控制器创建 - 界面创建 （菜单界面）
+// * 动态快照控制器与切割 - 函数复制
 //==============================
-Scene_MenuBase.prototype.drill_HDSSW_sceneCreate = Scene_Map.prototype.drill_HDSSW_sceneCreate;
-//==============================
-// * 动态快照控制器创建 - 帧刷新 单次切割（菜单界面）
-//==============================
-Scene_MenuBase.prototype.drill_HDSSW_executeCut = Scene_Map.prototype.drill_HDSSW_executeCut;
+Scene_MenuBase.prototype.drill_HDSSW_sceneCreate = Scene_Map.prototype.drill_HDSSW_sceneCreate;	//界面创建『多场景与游戏窗体-菜单界面』
+Scene_MenuBase.prototype.drill_HDSSW_executeCut = Scene_Map.prototype.drill_HDSSW_executeCut;	//帧刷新 单次切割『多场景与游戏窗体-菜单界面』
 
 
 
@@ -1309,7 +1296,7 @@ Game_System.prototype.drill_HDSSW_clearAll = function() {
 };
 
 //==============================
-// * 动态快照控制器与贴图 - 销毁时（地图界面）
+// * 动态快照控制器与贴图 - 销毁时『多场景与游戏窗体-地图界面』
 //==============================
 var _drill_HDSSW_smap_terminate = Scene_Map.prototype.terminate;
 Scene_Map.prototype.terminate = function() {
@@ -1318,7 +1305,7 @@ Scene_Map.prototype.terminate = function() {
 	Graphics.drill_CODS_overstoryLayerClear();		//清空 天窗层
 };
 //==============================
-// * 动态快照控制器与贴图 - 帧刷新（地图界面）
+// * 动态快照控制器与贴图 - 帧刷新『多场景与游戏窗体-地图界面』
 //==============================
 var _drill_HDSSW_smap_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {
@@ -1327,7 +1314,7 @@ Scene_Map.prototype.update = function() {
 	this.drill_HDSSW_updateDestroy();				//帧刷新 - 销毁
 };
 //==============================
-// * 动态快照控制器与贴图 - 帧刷新 控制器（地图界面）
+// * 动态快照控制器与贴图 - 帧刷新 控制器『多场景与游戏窗体-地图界面』
 //==============================
 Scene_Map.prototype.drill_HDSSW_updateController = function() {
 	for(var i = 0; i < $gameSystem._drill_HDSSW_controllerTank.length; i++ ){
@@ -1339,7 +1326,7 @@ Scene_Map.prototype.drill_HDSSW_updateController = function() {
 	}
 }
 //==============================
-// * 动态快照控制器与贴图 - 帧刷新 销毁（地图界面）
+// * 动态快照控制器与贴图 - 帧刷新 销毁『多场景与游戏窗体-地图界面』
 //==============================
 Scene_Map.prototype.drill_HDSSW_updateDestroy = function() {
 	
@@ -1363,7 +1350,7 @@ Scene_Map.prototype.drill_HDSSW_updateDestroy = function() {
 };
 
 //==============================
-// * 动态快照控制器与贴图 - 销毁时（战斗界面）
+// * 动态快照控制器与贴图 - 销毁时『多场景与游戏窗体-战斗界面』
 //==============================
 var _drill_HDSSW_sbattle_terminate = Scene_Battle.prototype.terminate;
 Scene_Battle.prototype.terminate = function() {
@@ -1372,7 +1359,7 @@ Scene_Battle.prototype.terminate = function() {
 	Graphics.drill_CODS_overstoryLayerClear();		//清空 天窗层
 };
 //==============================
-// * 动态快照控制器与贴图 - 帧刷新（战斗界面）
+// * 动态快照控制器与贴图 - 帧刷新『多场景与游戏窗体-战斗界面』
 //==============================
 var _drill_HDSSW_sbattle_update = Scene_Battle.prototype.update;
 Scene_Battle.prototype.update = function() {
@@ -1381,16 +1368,13 @@ Scene_Battle.prototype.update = function() {
 	this.drill_HDSSW_updateDestroy();				//帧刷新 - 销毁
 };
 //==============================
-// * 动态快照控制器与贴图 - 帧刷新 控制器（战斗界面）
+// * 动态快照控制器与贴图 - 函数复制
 //==============================
-Scene_Battle.prototype.drill_HDSSW_updateController = Scene_Map.prototype.drill_HDSSW_updateController;
-//==============================
-// * 动态快照控制器与贴图 - 帧刷新 销毁（战斗界面）
-//==============================
-Scene_Battle.prototype.drill_HDSSW_updateDestroy = Scene_Map.prototype.drill_HDSSW_updateDestroy;
+Scene_Battle.prototype.drill_HDSSW_updateController = Scene_Map.prototype.drill_HDSSW_updateController;		//帧刷新 控制器『多场景与游戏窗体-战斗界面』
+Scene_Battle.prototype.drill_HDSSW_updateDestroy = Scene_Map.prototype.drill_HDSSW_updateDestroy;			//帧刷新 销毁『多场景与游戏窗体-战斗界面』
 
 //==============================
-// * 动态快照控制器与贴图 - 销毁时（菜单界面）
+// * 动态快照控制器与贴图 - 销毁时『多场景与游戏窗体-菜单界面』
 //==============================
 var _drill_HDSSW_smenu_terminate = Scene_MenuBase.prototype.terminate;
 Scene_MenuBase.prototype.terminate = function() {
@@ -1399,7 +1383,7 @@ Scene_MenuBase.prototype.terminate = function() {
 	Graphics.drill_CODS_overstoryLayerClear();		//清空 天窗层
 };
 //==============================
-// * 动态快照控制器与贴图 - 帧刷新（菜单界面）
+// * 动态快照控制器与贴图 - 帧刷新『多场景与游戏窗体-菜单界面』
 //==============================
 var _drill_HDSSW_smenu_update = Scene_MenuBase.prototype.update;
 Scene_MenuBase.prototype.update = function() {
@@ -1408,13 +1392,10 @@ Scene_MenuBase.prototype.update = function() {
 	this.drill_HDSSW_updateDestroy();				//帧刷新 - 销毁
 };
 //==============================
-// * 动态快照控制器与贴图 - 帧刷新 控制器（菜单界面）
+// * 动态快照控制器与贴图 - 函数复制
 //==============================
-Scene_MenuBase.prototype.drill_HDSSW_updateController = Scene_Map.prototype.drill_HDSSW_updateController;
-//==============================
-// * 动态快照控制器与贴图 - 帧刷新 销毁（菜单界面）
-//==============================
-Scene_MenuBase.prototype.drill_HDSSW_updateDestroy = Scene_Map.prototype.drill_HDSSW_updateDestroy;
+Scene_MenuBase.prototype.drill_HDSSW_updateController = Scene_Map.prototype.drill_HDSSW_updateController;	//帧刷新 控制器『多场景与游戏窗体-菜单界面』
+Scene_MenuBase.prototype.drill_HDSSW_updateDestroy = Scene_Map.prototype.drill_HDSSW_updateDestroy;			//帧刷新 销毁『多场景与游戏窗体-菜单界面』
 
 
 
@@ -2247,14 +2228,14 @@ Game_Temp.prototype.drill_HDSSW_Math2D_getPointToPointDegree = function( x1,y1,x
 
 
 //=============================================================================
-// ** ☆魔法圈控制器创建
+// ** ☆魔法圈控制器与切割
 //
 //			说明：	> 此模块专门管理 控制器 的创建与销毁。
 //					> 遍历控制器 切割平面，如果切到了，添加控制器，原控制器使用A多边形，新控制器使用B多边形。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 魔法圈控制器创建 - 界面创建时（地图界面）
+// * 魔法圈控制器与切割 - 界面创建时『多场景与游戏窗体-地图界面』
 //==============================
 var _drill_HDSSW_circle_mapCreate_createAllWindows = Scene_Map.prototype.createAllWindows;
 Scene_Map.prototype.createAllWindows = function() {
@@ -2262,7 +2243,7 @@ Scene_Map.prototype.createAllWindows = function() {
 	this.drill_HDSSW_sceneCircleCreate();
 };
 //==============================
-// * 魔法圈控制器创建 - 界面创建 （地图界面）
+// * 魔法圈控制器与切割 - 界面创建『多场景与游戏窗体-地图界面』
 //
 //			说明：	> 界面创建时，贴图 需要根据 控制器 情况进行创建。只创建贴图。
 //==============================
@@ -2352,15 +2333,14 @@ Scene_Map.prototype.drill_HDSSW_sceneCircleCreate = function() {
 	// > 层级排序（天窗层）
 	Graphics.drill_CODS_sortByZIndex();
 }
-
 //==============================
-// * 魔法圈控制器创建 - 帧刷新 单次切割（继承）（地图界面）
+// * 魔法圈控制器与切割 - 帧刷新 单次切割『多场景与游戏窗体-地图界面』
 //
 //			说明：	> 在执行单次切割时，需要创建 控制器+贴图 。
 //==============================
 Scene_Map.prototype.drill_HDSSW_executeCircleCut = function( cur_cut ){
 	
-	// > 『控制器与贴图的样式』 - 校验+提示信息
+	// > 『控制器与贴图的样式-』 - 校验+提示信息
 	var cur_styleId   = cur_cut['style_id'] +1;
 	var cur_styleData = DrillUp.g_HDSSW_style[ cur_cut['style_id'] ];
 	if( cur_styleData == undefined ){
@@ -2369,7 +2349,7 @@ Scene_Map.prototype.drill_HDSSW_executeCircleCut = function( cur_cut ){
 	}
 	
 	
-	// > 『控制器与贴图的样式』 - 创建控制器 - 刀光 （只有这里创建对应的控制器）
+	// > 『控制器与贴图的样式-』 - 创建控制器 - 刀光 （只有这里创建对应的控制器）
 	var controller_add_list = [];
 	var points = $gameTemp.drill_HDSSW_getCircleTwoPoint( cur_cut['x1'], cur_cut['y1'], cur_cut['x2'], cur_cut['y2'] );
 	if( points != null ){
@@ -2393,7 +2373,7 @@ Scene_Map.prototype.drill_HDSSW_executeCircleCut = function( cur_cut ){
 		controller_add_list.push( temp_controller );
 	}
 	
-	// > 『控制器与贴图的样式』 - 创建控制器 - 切割白背景 （只有这里创建对应的控制器）
+	// > 『控制器与贴图的样式-』 - 创建控制器 - 切割白背景 （只有这里创建对应的控制器）
 	if( $gameSystem._drill_HDSSW_backgroundController == undefined ){
 		var temp_data = {};
 		temp_data['zIndex'] = cur_styleData['zIndex'] -1;
@@ -2413,7 +2393,7 @@ Scene_Map.prototype.drill_HDSSW_executeCircleCut = function( cur_cut ){
 	}
 	$gameSystem._drill_HDSSW_backgroundController.drill_controller_setVisible( true );
 	
-	// > 『控制器与贴图的样式』 - 创建控制器 - 切割白闪烁 （只有这里创建对应的控制器）
+	// > 『控制器与贴图的样式-』 - 创建控制器 - 切割白闪烁 （只有这里创建对应的控制器）
 	if( $gameSystem._drill_HDSSW_flickerController == undefined ){
 		var temp_data = {};
 		temp_data['zIndex'] = cur_styleData['zIndex'] +1;
@@ -2485,11 +2465,9 @@ Scene_Map.prototype.drill_HDSSW_executeCircleCut = function( cur_cut ){
 	Graphics.drill_CODS_sortByZIndex();
 	
 };
-Scene_Battle.prototype.drill_HDSSW_executeCircleCut = Scene_Map.prototype.drill_HDSSW_executeCircleCut;
-Scene_MenuBase.prototype.drill_HDSSW_executeCircleCut = Scene_Map.prototype.drill_HDSSW_executeCircleCut;
 
 //==============================
-// * 魔法圈控制器创建 - 界面创建时（战斗界面）
+// * 魔法圈控制器与切割 - 界面创建时『多场景与游戏窗体-战斗界面』
 //==============================
 var _drill_HDSSW_circle_battleCreate_createAllWindows = Scene_Battle.prototype.createAllWindows;
 Scene_Battle.prototype.createAllWindows = function() {
@@ -2497,12 +2475,13 @@ Scene_Battle.prototype.createAllWindows = function() {
 	this.drill_HDSSW_sceneCircleCreate();
 };
 //==============================
-// * 魔法圈控制器创建 - 界面创建 （战斗界面）
+// * 魔法圈控制器与切割 - 函数复制
 //==============================
-Scene_Battle.prototype.drill_HDSSW_sceneCircleCreate = Scene_Map.prototype.drill_HDSSW_sceneCircleCreate;
+Scene_Battle.prototype.drill_HDSSW_sceneCircleCreate = Scene_Map.prototype.drill_HDSSW_sceneCircleCreate;	//界面创建『多场景与游戏窗体-战斗界面』
+Scene_Battle.prototype.drill_HDSSW_executeCircleCut = Scene_Map.prototype.drill_HDSSW_executeCircleCut;		//帧刷新 单次切割『多场景与游戏窗体-战斗界面』
 
 //==============================
-// * 魔法圈控制器创建 - 界面创建时（菜单界面）
+// * 魔法圈控制器与切割 - 界面创建时『多场景与游戏窗体-菜单界面』
 //==============================
 var _drill_HDSSW_circle_menuCreate_createWindowLayer = Scene_MenuBase.prototype.createWindowLayer;
 Scene_MenuBase.prototype.createWindowLayer = function() {
@@ -2510,9 +2489,10 @@ Scene_MenuBase.prototype.createWindowLayer = function() {
 	this.drill_HDSSW_sceneCircleCreate();
 };
 //==============================
-// * 魔法圈控制器创建 - 界面创建 （菜单界面）
+// * 魔法圈控制器与切割 - 函数复制
 //==============================
-Scene_MenuBase.prototype.drill_HDSSW_sceneCircleCreate = Scene_Map.prototype.drill_HDSSW_sceneCircleCreate;
+Scene_MenuBase.prototype.drill_HDSSW_sceneCircleCreate = Scene_Map.prototype.drill_HDSSW_sceneCircleCreate;	//界面创建『多场景与游戏窗体-菜单界面』
+Scene_MenuBase.prototype.drill_HDSSW_executeCircleCut = Scene_Map.prototype.drill_HDSSW_executeCircleCut;	//帧刷新 单次切割『多场景与游戏窗体-菜单界面』
 
 
 
@@ -2560,7 +2540,7 @@ Game_System.prototype.drill_HDSSW_clearAll = function() {
 };
 
 //==============================
-// * 魔法圈控制器与贴图 - 销毁时（地图界面）
+// * 魔法圈控制器与贴图 - 销毁时『多场景与游戏窗体-地图界面』
 //==============================
 var _drill_HDSSW_circle_smap_terminate = Scene_Map.prototype.terminate;
 Scene_Map.prototype.terminate = function() {
@@ -2569,7 +2549,7 @@ Scene_Map.prototype.terminate = function() {
 	Graphics.drill_CODS_overstoryLayerClear();		//清空 天窗层
 };
 //==============================
-// * 魔法圈控制器与贴图 - 帧刷新（地图界面）
+// * 魔法圈控制器与贴图 - 帧刷新『多场景与游戏窗体-地图界面』
 //==============================
 var _drill_HDSSW_circle_smap_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function() {
@@ -2578,7 +2558,7 @@ Scene_Map.prototype.update = function() {
 	this.drill_HDSSW_updateCircleDestroy();			//帧刷新 - 销毁
 };
 //==============================
-// * 魔法圈控制器与贴图 - 帧刷新 控制器（地图界面）
+// * 魔法圈控制器与贴图 - 帧刷新 控制器『多场景与游戏窗体-地图界面』
 //==============================
 Scene_Map.prototype.drill_HDSSW_updateCircleController = function() {
 	for(var i = 0; i < $gameSystem._drill_HDSSW_circleControllerTank.length; i++ ){
@@ -2600,7 +2580,7 @@ Scene_Map.prototype.drill_HDSSW_updateCircleController = function() {
 	}
 }
 //==============================
-// * 魔法圈控制器与贴图 - 帧刷新 销毁（地图界面）
+// * 魔法圈控制器与贴图 - 帧刷新 销毁『多场景与游戏窗体-地图界面』
 //==============================
 Scene_Map.prototype.drill_HDSSW_updateCircleDestroy = function() {
 	
@@ -2651,7 +2631,7 @@ Scene_Map.prototype.drill_HDSSW_updateCircleDestroy = function() {
 };
 
 //==============================
-// * 魔法圈控制器与贴图 - 销毁时（战斗界面）
+// * 魔法圈控制器与贴图 - 销毁时『多场景与游戏窗体-战斗界面』
 //==============================
 var _drill_HDSSW_circle_sbattle_terminate = Scene_Battle.prototype.terminate;
 Scene_Battle.prototype.terminate = function() {
@@ -2660,7 +2640,7 @@ Scene_Battle.prototype.terminate = function() {
 	Graphics.drill_CODS_overstoryLayerClear();		//清空 天窗层
 };
 //==============================
-// * 魔法圈控制器与贴图 - 帧刷新（战斗界面）
+// * 魔法圈控制器与贴图 - 帧刷新『多场景与游戏窗体-战斗界面』
 //==============================
 var _drill_HDSSW_circle_sbattle_update = Scene_Battle.prototype.update;
 Scene_Battle.prototype.update = function() {
@@ -2669,16 +2649,13 @@ Scene_Battle.prototype.update = function() {
 	this.drill_HDSSW_updateCircleDestroy();			//帧刷新 - 销毁
 };
 //==============================
-// * 魔法圈控制器与贴图 - 帧刷新 控制器（战斗界面）
+// * 魔法圈控制器与贴图 - 函数复制
 //==============================
-Scene_Battle.prototype.drill_HDSSW_updateCircleController = Scene_Map.prototype.drill_HDSSW_updateCircleController;
-//==============================
-// * 魔法圈控制器与贴图 - 帧刷新 销毁（战斗界面）
-//==============================
-Scene_Battle.prototype.drill_HDSSW_updateCircleDestroy = Scene_Map.prototype.drill_HDSSW_updateCircleDestroy;
+Scene_Battle.prototype.drill_HDSSW_updateCircleController = Scene_Map.prototype.drill_HDSSW_updateCircleController;	//帧刷新 控制器『多场景与游戏窗体-战斗界面』
+Scene_Battle.prototype.drill_HDSSW_updateCircleDestroy = Scene_Map.prototype.drill_HDSSW_updateCircleDestroy;		//帧刷新 销毁『多场景与游戏窗体-战斗界面』
 
 //==============================
-// * 魔法圈控制器与贴图 - 销毁时（菜单界面）
+// * 魔法圈控制器与贴图 - 销毁时『多场景与游戏窗体-菜单界面』
 //==============================
 var _drill_HDSSW_circle_smenu_terminate = Scene_MenuBase.prototype.terminate;
 Scene_MenuBase.prototype.terminate = function() {
@@ -2687,7 +2664,7 @@ Scene_MenuBase.prototype.terminate = function() {
 	Graphics.drill_CODS_overstoryLayerClear();		//清空 天窗层
 };
 //==============================
-// * 魔法圈控制器与贴图 - 帧刷新（菜单界面）
+// * 魔法圈控制器与贴图 - 帧刷新『多场景与游戏窗体-菜单界面』
 //==============================
 var _drill_HDSSW_circle_smenu_update = Scene_MenuBase.prototype.update;
 Scene_MenuBase.prototype.update = function() {
@@ -2696,13 +2673,10 @@ Scene_MenuBase.prototype.update = function() {
 	this.drill_HDSSW_updateCircleDestroy();			//帧刷新 - 销毁
 };
 //==============================
-// * 魔法圈控制器与贴图 - 帧刷新 控制器（菜单界面）
+// * 魔法圈控制器与贴图 - 函数复制
 //==============================
-Scene_MenuBase.prototype.drill_HDSSW_updateCircleController = Scene_Map.prototype.drill_HDSSW_updateCircleController;
-//==============================
-// * 魔法圈控制器与贴图 - 帧刷新 销毁（菜单界面）
-//==============================
-Scene_MenuBase.prototype.drill_HDSSW_updateCircleDestroy = Scene_Map.prototype.drill_HDSSW_updateCircleDestroy;
+Scene_MenuBase.prototype.drill_HDSSW_updateCircleController = Scene_Map.prototype.drill_HDSSW_updateCircleController;	//帧刷新 控制器『多场景与游戏窗体-菜单界面』
+Scene_MenuBase.prototype.drill_HDSSW_updateCircleDestroy = Scene_Map.prototype.drill_HDSSW_updateCircleDestroy;			//帧刷新 销毁『多场景与游戏窗体-菜单界面』
 
 
 

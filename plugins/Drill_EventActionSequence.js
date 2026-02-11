@@ -369,15 +369,15 @@
 if( Imported.Drill_CoreOfActionSequence &&
 	Imported.Drill_CoreOfEventFrame ){
 	
-	
 //==============================
-// * 强制更新要求
+// * >>>>基于插件检测>>>> - 强制更新要求
 //==============================
 if( DrillUp.drill_COAS_getSequenceData_ById == undefined ){
 	alert( DrillUp.drill_EASe_getPluginTip_NeedUpdate_actionSeq() );
 };
+
 //==============================
-// * 最后继承（检测插件冲突）
+// * >>>>基于插件检测>>>> - 最后继承1级（检测插件冲突）
 //==============================
 var _drill_EASe_scene_initialize = SceneManager.initialize;
 SceneManager.initialize = function() {

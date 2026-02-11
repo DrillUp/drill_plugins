@@ -3,9 +3,10 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        UI - 物品+技能文本的滤镜效果
+ * @plugindesc [v1.3]        UI - 物品+技能文本的滤镜效果
  * @author Drill_up
- *
+ * 
+ * 
  * @help  
  * =============================================================================
  * +++ Drill_ItemTextFilter +++
@@ -14,7 +15,6 @@
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
  * 你可以任意设置物品、装备、防具、技能文本的滤镜效果。
- * ★★必须放在 物品+技能文本颜色插件 的前面★★
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
@@ -22,7 +22,7 @@
  * 必须基于核心插件才能运行。
  * 基于：
  *   - Drill_CoreOfFilter            系统-滤镜核心
- *   - Drill_CoreOfWindowCharacter   窗口字符-窗口字符核心★★v2.0及以上★★
+ *   - Drill_CoreOfWindowCharacter   窗口字符-窗口字符核心★★v2.2及以上★★
  *     需要该核心才能添加滤镜效果。
  * 
  * -----------------------------------------------------------------------------
@@ -31,8 +31,7 @@
  *   作用于物品、技能的名称。
  * 2.想要更多了解滤镜，可以去看看 "1.系统 > 大家族-滤镜效果.docx"。
  * 滤镜：
- *   (1.该插件与 UI-物品+技能文本颜色 相互独立，但是为了使得效果
- *      叠加，则必须放其前面。
+ *   (1.该插件与 UI-物品+技能文本颜色 相互独立。
  *   (2.该插件不支持 技能块元素 的滤镜变色。
  * 
  * -----------------------------------------------------------------------------
@@ -95,6 +94,8 @@
  * 修复了该插件浪费存储空间的bug。
  * [v1.2]
  * 更新并兼容了新的窗口字符底层。
+ * [v1.3]
+ * 修复了使用 窗口字符贴图 时显示不正常的bug。
  *
  */
  
@@ -122,13 +123,18 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			物品+技能文本颜色：
-//				->sprite - 伪装文本
-//				->sprite - bitmap清理时一并删除
-//				->sprite - 通过标识来过滤物品文本
-//				->滤镜 - 存储/对应设置
-//				->滤镜 - 物品/武器/护甲/技能 的分类
-//				->滤镜 - 插件指令修改物品滤镜	x
+//			->☆提示信息
+//			->☆静态数据
+//			
+//			->滤镜数据
+//			->滤镜兼容
+//				->兼容 mog技能浮动框/招式名气泡框
+//				->兼容 mog战斗结果界面
+//				->兼容 mog道具浮动文字
+//				->兼容 mog道具浮动框
+//			
+//			->☆字符块容器
+//			->☆字符块的滤镜
 //		
 //		
 //		★家谱：
@@ -143,25 +149,19 @@
 //		★必要注意事项：
 //			1.这里的滤镜配置存储在$gameTemp里面，与 物品/武器/护甲/技能 一一对应。
 //			  （与其他滤镜不太一样，其它滤镜附着在对象中。）
-//			  物品类型是固定的四种，直接与DataManager的数据文件对齐，与Game_Item没有任何关系。
-//			2.滤镜使用本体可能由于支持的内容太多，看起来较复杂。
-//			  使用物品文本滤镜，必须走流程：>注释初始化 >物品数据初始化 >滤镜初始化 >滤镜配置
-//			  （注释初始化直接存储在system中全局通用。）
-//			3.实际上通过sprite画出来的物品的，都需要手动变色，而窗口中的不存在问题。
-//
+//			2.物品类型是固定的四种，直接与DataManager的数据文件对齐，与Game_Item没有任何关系。
+//		
 //		★其它说明细节：
-//			1.bitmap清理的clearRect有可能只是一个区域。
-//			  通过清理的矩形，与sprite的矩形进行碰撞检测，来确定是否去除。
-//			2.尝试过通过update的方式来处理。但是由于有延迟，不能即时去除sprite，所以弃用。
-//			  这里直接采用 .xxx = this 的方式把父类指针给子类。
-//			  注意，子类指向父类的指针，可能存在潜在的问题，这里需要留意。
+//			1. 2025-12-18：
+//				已将滤镜作用于的贴图，对应到了 窗口字符贴图 上。
+//				原来的贴图结构去掉了。
 //
 //		★存在的问题：
 //			暂无
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -195,7 +195,7 @@
 	
 	
 //=============================================================================
-// ** 静态数据
+// ** ☆静态数据
 //=============================================================================
 	var Imported = Imported || {};
 	Imported.Drill_ItemTextFilter = true;
@@ -219,11 +219,12 @@ if( typeof(_drill_COWC_drawText_functionExist) == "undefined" ){
 }
 
 
+
 //=============================================================================
-// ** 临时数据
+// ** 滤镜数据
 //=============================================================================
 //==============================
-// * 临时数据 - 初始化
+// * 滤镜数据 - 初始化
 //==============================
 var _drill_ITFi_temp_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {
@@ -320,14 +321,14 @@ Game_Temp.prototype.initialize = function() {
 	}
 };
 //==============================
-// * 注释转滤镜内容
+// * 滤镜数据 - 解析注释
 //==============================
-Game_Temp.prototype.drill_ITFi_convertFilterData = function(note,f_data) {
+Game_Temp.prototype.drill_ITFi_convertFilterData = function( note, f_data ){
 	var note_list = note.split('\n');
 	for(var i=0; i< note_list.length; i++){
 		var re_filter = /<(滤镜):([^<>]*?)>/; 				//正则获取（返回数组，第二个为匹配内容）
 		var commands = (note_list[i].match(re_filter)) || [];
-		if(commands != "" && commands != [] ){
+		if( commands != "" && commands != [] ){
 			var args = commands[2].split(':');
 			if(args.length >= 2 && args.length <= 4){
 				var type = String(args[0]);
@@ -380,7 +381,7 @@ Game_Temp.prototype.drill_ITFi_convertFilterData = function(note,f_data) {
 	return f_data;
 };
 //==============================
-// ** 滤镜数据 - 获取 - 物品
+// * 滤镜数据 - 获取 - 物品
 //==============================
 Game_Temp.prototype.drill_ITFi_getFilterData_Item = function( i ){
 	
@@ -391,7 +392,7 @@ Game_Temp.prototype.drill_ITFi_getFilterData_Item = function( i ){
 	return this._drill_ITFi_items[i];
 }
 //==============================
-// ** 滤镜数据 - 获取 - 武器
+// * 滤镜数据 - 获取 - 武器
 //==============================
 Game_Temp.prototype.drill_ITFi_getFilterData_Weapon = function( i ){
 
@@ -402,7 +403,7 @@ Game_Temp.prototype.drill_ITFi_getFilterData_Weapon = function( i ){
 	return this._drill_ITFi_weapons[i];
 }
 //==============================
-// ** 滤镜数据 - 获取 - 护甲
+// * 滤镜数据 - 获取 - 护甲
 //==============================
 Game_Temp.prototype.drill_ITFi_getFilterData_Armor = function( i ){
 
@@ -413,7 +414,7 @@ Game_Temp.prototype.drill_ITFi_getFilterData_Armor = function( i ){
 	return this._drill_ITFi_armors[i];
 }
 //==============================
-// ** 滤镜数据 - 获取 - 技能
+// * 滤镜数据 - 获取 - 技能
 //==============================
 Game_Temp.prototype.drill_ITFi_getFilterData_Skill = function( i ){
 	return this._drill_ITFi_skills[i];
@@ -422,244 +423,11 @@ Game_Temp.prototype.drill_ITFi_getFilterData_Skill = function( i ){
 
 
 //=============================================================================
-// ** 滤镜清除（矩形区域）
+// ** 滤镜兼容
 //=============================================================================
-//=============================
-// * 初始化
-//=============================
-var _drill_ITFi_w_initialize = Window_Base.prototype.initialize;
-Window_Base.prototype.initialize = function(x, y, width, height) {
-	_drill_ITFi_w_initialize.call(this, x, y, width, height);
-	this._drill_ITFi_spriteTank = [];
-}
-//=============================
-// * 帧刷新
-//=============================
-/*
-var _drill_ITFi_update = Window_Base.prototype.update;		//暂不选择延迟删除 块
-Window_Base.prototype.update = function() {
-	if( this.contents && this.contents._drill_ITFi_clearedRect ){
-		var rect = this.contents._drill_ITFi_clearedRect;
-		this.drill_ITFi_clearSpriteInRect(rect.x, rect.y, rect.width, rect.height);
-		this.contents._drill_ITFi_clearedRect = undefined;
-	}
-	_drill_ITFi_update.call(this);
-}
-*/
-//=============================
-// * 清除内容贴图（与范围相交的） 
-//=============================
-Window_Base.prototype.drill_ITFi_clearSpriteInRect = function(rect) {
-	if( !this._drill_ITFi_spriteTank ){ return }
-	
-	for(var i=this._drill_ITFi_spriteTank.length-1; i >= 0 ;i--){
-		var temp_sprite = this._drill_ITFi_spriteTank[i];
-		
-		var x1 = temp_sprite.x;
-		var y1 = temp_sprite.y;
-		var x2 = temp_sprite.x + temp_sprite.bitmap.width;
-		var y2 = temp_sprite.y + temp_sprite.bitmap.height;
-		var x3 = rect.x;
-		var y3 = rect.y;
-		var x4 = rect.x + rect.width;
-		var y4 = rect.y + rect.height;
-		
-		var minx = Math.max(x1, x3);
-		var miny = Math.max(y1, y3);
-		var maxx = Math.min(x2, x4);
-		var maxy = Math.min(y2, y4);
-		
-		if( minx <= maxx && miny <= maxy ){
-			this._windowContentsSprite.removeChild(temp_sprite);
-			this._drill_ITFi_spriteTank.splice(i,1);
-			delete temp_sprite;
-		}
-	}
-};
-//=============================
-// * 清除内容贴图（所有）
-//=============================
-Window_Base.prototype.drill_ITFi_clearAllSprite = function() {
-	if( !this._drill_ITFi_spriteTank ){ return }
-	for(var i=this._drill_ITFi_spriteTank.length-1; i >= 0 ;i--){
-		var temp_sprite = this._drill_ITFi_spriteTank[i];
-		this._windowContentsSprite.removeChild(temp_sprite);
-		this._drill_ITFi_spriteTank.splice(i,1);
-		delete temp_sprite;
-	}
-};
-
-//=============================
-// * 清理情况 - contents被重建
-//=============================
-var _drill_ITFi_createContents = Window_Base.prototype.createContents;
-Window_Base.prototype.createContents = function() {
-	if( this.contents ){
-		this.contents._drill_ITFi_window = null;			//去掉指针
-	}
-	_drill_ITFi_createContents.call(this);
-	this.drill_ITFi_clearAllSprite();
-	this.contents._drill_ITFi_window = this;			//新建指针
-};
-//=============================
-// * 清理情况 - bitmap清理区域
-//=============================
-var _drill_ITFi_bitmap_clearRect = Bitmap.prototype.clearRect;
-Bitmap.prototype.clearRect = function(x, y, width, height) {
-	_drill_ITFi_bitmap_clearRect.call(this, x, y, width, height);
-	if( this._drill_ITFi_window ){
-		var rect = {'x':x, 'y':y, 'width':width, 'height':height};
-		this._drill_ITFi_window.drill_ITFi_clearSpriteInRect(rect);
-	}
-};
-
-//=============================================================================
-// ** 滤镜创建
-//=============================================================================
-//=============================
-// * 滤镜创建 - 物品文本绘制 - 标记
-//
-//			说明：	> 由于窗口字符核心覆写了 drawItemName 函数，所以这里 继承 窗口字符核心函数。
-//=============================
-var _drill_ITFi_COWC_org_drawItemName = Window_Base.prototype.drill_COWC_org_drawItemName;
-Window_Base.prototype.drill_COWC_org_drawItemName = function( item, x, y, width ){
-	this._drill_ITFi_isDrawingItemName = true;		//绘制标记 - 开
-	this._drill_ITFi_curItem = item;				//当前的物品对象
-	
-	// > 原函数
-	_drill_ITFi_COWC_org_drawItemName.call(this, item, x, y, width);
-	
-	this._drill_ITFi_isDrawingItemName = false;		//绘制标记 - 关
-	this._drill_ITFi_curItem = null;				//置空物品对象
-};
-//=============================
-// * 滤镜创建 - 物品文本绘制 - 修改颜色
-//
-//			说明：	> 由于窗口字符核心覆写了 drawText 函数，所以这里 继承 窗口字符核心函数。
-//=============================
-var _drill_ITFi_COWC_org_drawText = Window_Base.prototype.drill_COWC_org_drawText;
-Window_Base.prototype.drill_COWC_org_drawText = function( text, x, y, maxWidth, align ){
-	
-	// > 绘制标记 - 执行
-	if( this._drill_ITFi_isDrawingItemName == true ){
-		
-		// > 创建文本块（所有绘制物品的文本都转成贴图）
-		this.drill_ITFi_drawItemSpriteText( text, x, y, maxWidth, align );
-		return;
-	}
-	
-	// > 原函数
-	_drill_ITFi_COWC_org_drawText.call( this, text, x, y, maxWidth, align );
-};
-//=============================
-// * 滤镜创建 - 创建文本块
-//=============================
-Window_Base.prototype.drill_ITFi_drawItemSpriteText = function( text, x, y, maxWidth, align ){
-	var item = this._drill_ITFi_curItem;
-	
-	// > 计算范围
-	var xx = x;
-	var yy = y;
-	var ww = maxWidth;
-	var hh = this.lineHeight();
-	
-	// > 不在绘制范围，跳出
-	if( xx    >= this.width  ){ return; }
-	if( xx+ww <= 0           ){ return; }
-	if( yy    >= this.height ){ return; }
-	if( yy+hh <= 0           ){ return; }
-	
-	// > 两个矩形相交算法
-	// ...
-	
-	// > 创建贴图
-	var temp_sprite = new Sprite();
-	temp_sprite.bitmap = new Bitmap( ww, hh );
-	temp_sprite.bitmap.textColor = this.contents.textColor;
-	temp_sprite.bitmap.paintOpacity = this.contents.paintOpacity;
-	temp_sprite.bitmap.fontSize = this.contents.fontSize;
-	temp_sprite.bitmap.drawText( item.name, 0, 0, ww, hh );
-	temp_sprite.x = 0 ;
-	temp_sprite.y = 0 ;
-	temp_sprite.x += x;
-	temp_sprite.y += y;
-	
-	// > 物品数据初始化
-	temp_sprite._drill_ITFi_itemId = item.id;
-    if (DataManager.isSkill(item)) {
-		temp_sprite._drill_ITFi_itemType = '技能';
-    } else if (DataManager.isItem(item)) {
-		temp_sprite._drill_ITFi_itemType = '物品';
-    } else if (DataManager.isWeapon(item)) {
-		temp_sprite._drill_ITFi_itemType = '武器';
-    } else if (DataManager.isArmor(item)) {
-		temp_sprite._drill_ITFi_itemType = '护甲';
-    }
-	
-	this._drill_ITFi_spriteTank.push(temp_sprite);
-	this._windowContentsSprite.addChild(temp_sprite);
-}
-
-
 //==============================
-// * 帧刷新
+// * 滤镜兼容 - 兼容 mog技能浮动框/招式名气泡框
 //==============================
-var _drill_ITFi_w_update = Window_Base.prototype.update;
-Window_Base.prototype.update = function() {
-	_drill_ITFi_w_update.call(this);
-	this.drill_ITFi_updateItemTextFilter();
-}
-Window_Base.prototype.drill_ITFi_updateItemTextFilter = function() {
-	if ( !this._drill_ITFi_spriteTank ) { return; }
-	if ( this._drill_ITFi_spriteTank.length == 0 ) { return; }
-	
-	for(var i=0; i< this._drill_ITFi_spriteTank.length; i++){	//遍历sprite的临时 id和类型，获取system的滤镜设置
-		var text_sprite = this._drill_ITFi_spriteTank[i];
-		var item__id = text_sprite._drill_ITFi_itemId;
-		var item_type = text_sprite._drill_ITFi_itemType;
-		if ( !item__id ) { continue; }
-		if ( !item_type ) { continue; }
-		
-		var data;
-		if ( item_type == "技能" ){ var f_data = $gameTemp.drill_ITFi_getFilterData_Skill(item__id); }
-		if ( item_type == "物品" ){ var f_data = $gameTemp.drill_ITFi_getFilterData_Item(item__id); }
-		if ( item_type == "武器" ){ var f_data = $gameTemp.drill_ITFi_getFilterData_Weapon(item__id); }
-		if ( item_type == "护甲" ){ var f_data = $gameTemp.drill_ITFi_getFilterData_Armor(item__id); }
-		
-		//>滤镜初始化
-		if( text_sprite.drill_COF_isInited() == false ){
-			text_sprite.drill_COF_initialize();
-		}
-		
-		//>插件指令配置 - 线性
-		data = f_data.setPureLinear;	
-		text_sprite.drill_COF_setPureLinear_ONCE(data[0],data[1],data[2]);
-		data = f_data.setColorLinear;
-		text_sprite.drill_COF_setColorLinear_ONCE(data[0],data[1],data[2]);
-		data = f_data.setFillLinear;
-		text_sprite.drill_COF_setFillLinear_ONCE(data[0],data[1],data[2]);
-		data = f_data.setBlurLinear;
-		text_sprite.drill_COF_setBlurLinear_ONCE(data[0],data[1]);
-		data = f_data.setNoiseLinear;
-		text_sprite.drill_COF_setNoiseLinear_ONCE(data[0],data[1]);
-		
-		//>插件指令配置 - 波动
-		data = f_data.setPureWave;	
-		text_sprite.drill_COF_setPureWave_ONCE(data[0],data[1],data[2]);
-		data = f_data.setColorWave;
-		text_sprite.drill_COF_setColorWave_ONCE(data[0],data[1],data[2]);
-		data = f_data.setFillWave;
-		text_sprite.drill_COF_setFillWave_ONCE(data[0],data[1],data[2]);
-		data = f_data.setBlurWave;
-		text_sprite.drill_COF_setBlurWave_ONCE(data[0],data[1]);
-		data = f_data.setNoiseWave;
-		text_sprite.drill_COF_setNoiseWave_ONCE(data[0],data[1]);
-	}
-}
-
-//=============================================================================
-// ** 滤镜 - 兼容 mog技能浮动框/招式名气泡框
-//=============================================================================
 if(Imported.MOG_ActionName ){
 	
 	var _drill_ITFi_mog_ActionName_update = SpriteSkillName.prototype.update;
@@ -722,10 +490,9 @@ if(Imported.MOG_ActionName ){
 		text_sprite.drill_COF_setNoiseWave_ONCE(data[0],data[1]);
 	};
 }
-
-//=============================================================================
-// ** 滤镜 - 兼容 mog战斗结果界面
-//=============================================================================
+//==============================
+// * 滤镜兼容 - 兼容 mog战斗结果界面
+//==============================
 if(Imported.MOG_BattleResult ){
 	
 	var _drill_ITFi_mog_BattleResult_addIcon = BattleResult.prototype.addIcon;
@@ -803,10 +570,9 @@ if(Imported.MOG_BattleResult ){
 		}
 	}
 }
-
-//=============================================================================
-// ** 滤镜 - 兼容 mog道具浮动文字
-//=============================================================================
+//==============================
+// * 滤镜兼容 - 兼容 mog道具浮动文字
+//==============================
 if( Imported.MOG_TreasurePopup ){
 	
 	var _drill_ITFi_mog_TreasurePopup_update = TreasureIcons.prototype.update;
@@ -859,9 +625,9 @@ if( Imported.MOG_TreasurePopup ){
 		text_sprite.drill_COF_setNoiseWave_ONCE(data[0],data[1]);
 	};
 }
-//=============================================================================
-// ** 滤镜 - 兼容 mog道具浮动框
-//=============================================================================
+//==============================
+// * 滤镜兼容 - 兼容 mog道具浮动框
+//==============================
 if( Imported.MOG_TreasureHud  ){
 	
 	var _drill_ITFi_mog_TreasureHud_update = Treasure_Hud.prototype.update;
@@ -924,8 +690,198 @@ if( Imported.MOG_TreasureHud  ){
 		text_sprite.drill_COF_setNoiseWave_ONCE(data[0],data[1]);
 		
 	};
-
 }
+
+
+
+//=============================================================================
+// ** ☆字符块容器
+//
+//			说明：	> 该模块提供 字符块贴图 绑定的功能。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//=============================
+// * 字符块容器 - 初始化
+//=============================
+var _drill_ITFi_window_initialize = Window_Base.prototype.initialize;
+Window_Base.prototype.initialize = function( x, y, width, height ){
+	_drill_ITFi_window_initialize.call(this, x, y, width, height);
+	this._drill_ITFi_spriteTank = [];
+};
+//=============================
+// * 字符块容器 - 字符块文本设置
+//
+//			说明：	> 由于窗口字符核心覆写了 drawText 函数，所以这里 继承 窗口字符核心函数。
+//=============================
+var _drill_ITFi_COWC_org_drawText = Window_Base.prototype.drill_COWC_org_drawText;
+Window_Base.prototype.drill_COWC_org_drawText = function( text, x, y, maxWidth, align ){
+	
+	// > 绘制标记 - 执行
+	if( this._drill_ITFi_isDrawingItemName == true ){
+		
+		// > 直接把所有物品名称变成 字符块
+		text = "\\dts[" + text + "]";
+		
+		//// > 颜色文本拼接【UI-物品+技能文本颜色】
+		//if( this._drill_ITC_curCode != undefined ){
+		//	text = "\\cc[oSave]\\cc["+ this._drill_ITC_curCode +"]"+ text +"\\cc[oLoad]";
+		//}
+	}
+	
+	// > 原函数
+	_drill_ITFi_COWC_org_drawText.call( this, text, x, y, maxWidth, align );
+};
+//=============================
+// * 字符块容器 - 字符块贴图设置
+//
+//			说明：	> 由于窗口字符核心覆写了 drawItemName 函数，所以这里 继承 窗口字符核心函数。
+//=============================
+var _drill_ITFi_COWC_org_drawItemName = Window_Base.prototype.drill_COWC_org_drawItemName;
+Window_Base.prototype.drill_COWC_org_drawItemName = function( item, x, y, width ){
+	this._drill_ITFi_isDrawingItemName = true;		//绘制标记 - 开
+	
+	// > 原函数
+	_drill_ITFi_COWC_org_drawItemName.call(this, item, x, y, width);
+	
+	// > 绘制标记 - 执行
+	if( this._drill_ITFi_isDrawingItemName == true ){
+		
+		// > 『字符贴图流程』 - 刷新当前的字符块贴图【窗口字符 - 窗口字符贴图核心】
+		//this.drill_COWCSp_sprite_refreshAllSprite();	//（此处不需要刷新，因为 drill_COWC_org_drawText 中已经刷过一次了）
+		
+		// > 获取贴图
+		//		（矩形获取总是有小问题获取不到）
+		//var rect = {};
+		//rect['x'] = x;
+		//rect['y'] = y;
+		//rect['width'] = width;
+		//rect['height'] = this.lineHeight();
+		//alert( "物品滤镜插件，矩形位置：" + JSON.stringify( rect ) );
+		//var temp_sprite_list = this.drill_COWCSp_sprite_getSpriteInRect( rect );
+		
+		
+		// > 获取贴图【窗口字符 - 窗口字符贴图核心】
+		//		（直接获取最后一个字符块贴图）
+		var temp_sprite_list = this.drill_COWCSp_sprite_getAllSprite();
+		if( temp_sprite_list.length > 0 ){
+			var temp_sprite = temp_sprite_list[temp_sprite_list.length-1];
+			
+			// > 物品数据初始化
+			if( item != undefined ){
+				temp_sprite._drill_ITFi_itemId = item.id;
+				if( DataManager.isSkill(item) ){
+					temp_sprite._drill_ITFi_itemType = "技能";
+				}else if( DataManager.isItem(item) ){
+					temp_sprite._drill_ITFi_itemType = "物品";
+				}else if( DataManager.isWeapon(item) ){
+					temp_sprite._drill_ITFi_itemType = "武器";
+				}else if( DataManager.isArmor(item) ){
+					temp_sprite._drill_ITFi_itemType = "护甲";
+				}
+			}
+			
+			//// > 测试，强制加颜色板
+			//var temp_sprite_2 = new Sprite();
+			//temp_sprite_2.anchor.x = temp_sprite.anchor.x;
+			//temp_sprite_2.anchor.y = temp_sprite.anchor.y;
+			//temp_sprite_2.bitmap = temp_sprite.bitmap;
+			//temp_sprite_2.blendMode = 2;
+			//temp_sprite_2.setBlendColor([255, 0, 0, 255]);
+			//temp_sprite.addChild( temp_sprite_2 );
+			
+			this._drill_ITFi_spriteTank.push(temp_sprite);
+		}
+	}
+	this._drill_ITFi_isDrawingItemName = false;		//绘制标记 - 关
+};
+
+
+//=============================================================================
+// ** ☆字符块的滤镜
+//
+//			说明：	> 该模块专门进行 滤镜设置。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//=============================
+// * 字符块的滤镜 - 帧刷新绑定
+//=============================
+var _drill_ITFi_window_update = Window_Base.prototype.update;
+Window_Base.prototype.update = function() {
+	_drill_ITFi_window_update.call(this);
+	this.drill_ITFi_updateItemTextFilter();	//帧刷新 - 滤镜效果
+	this.drill_ITFi_updateSpriteRemove();	//帧刷新 - 删除滤镜
+}
+//=============================
+// * 字符块的滤镜 - 帧刷新 滤镜效果
+//=============================
+Window_Base.prototype.drill_ITFi_updateItemTextFilter = function() {
+	if( this._drill_ITFi_spriteTank == undefined ){ return; }
+	if( this._drill_ITFi_spriteTank.length == 0 ){ return; }
+	
+	for(var i=0; i < this._drill_ITFi_spriteTank.length; i++){	//遍历sprite的临时 id和类型，获取system的滤镜设置
+		var text_sprite = this._drill_ITFi_spriteTank[i];
+		var item__id = text_sprite._drill_ITFi_itemId;
+		var item_type = text_sprite._drill_ITFi_itemType;
+		if( item__id == undefined ){ continue; }
+		if( item_type == undefined ){ continue; }
+		
+		var data;
+		if( item_type == "技能" ){ var f_data = $gameTemp.drill_ITFi_getFilterData_Skill(item__id); }
+		if( item_type == "物品" ){ var f_data = $gameTemp.drill_ITFi_getFilterData_Item(item__id); }
+		if( item_type == "武器" ){ var f_data = $gameTemp.drill_ITFi_getFilterData_Weapon(item__id); }
+		if( item_type == "护甲" ){ var f_data = $gameTemp.drill_ITFi_getFilterData_Armor(item__id); }
+		
+		// > 滤镜初始化
+		if( text_sprite.drill_COF_isInited() == false ){
+			text_sprite.drill_COF_initialize();
+		}
+		
+		// > 插件指令配置 - 线性
+		data = f_data.setPureLinear;	
+		text_sprite.drill_COF_setPureLinear_ONCE(data[0],data[1],data[2]);
+		data = f_data.setColorLinear;
+		text_sprite.drill_COF_setColorLinear_ONCE(data[0],data[1],data[2]);
+		data = f_data.setFillLinear;
+		text_sprite.drill_COF_setFillLinear_ONCE(data[0],data[1],data[2]);
+		data = f_data.setBlurLinear;
+		text_sprite.drill_COF_setBlurLinear_ONCE(data[0],data[1]);
+		data = f_data.setNoiseLinear;
+		text_sprite.drill_COF_setNoiseLinear_ONCE(data[0],data[1]);
+		
+		// > 插件指令配置 - 波动
+		data = f_data.setPureWave;	
+		text_sprite.drill_COF_setPureWave_ONCE(data[0],data[1],data[2]);
+		data = f_data.setColorWave;
+		text_sprite.drill_COF_setColorWave_ONCE(data[0],data[1],data[2]);
+		data = f_data.setFillWave;
+		text_sprite.drill_COF_setFillWave_ONCE(data[0],data[1],data[2]);
+		data = f_data.setBlurWave;
+		text_sprite.drill_COF_setBlurWave_ONCE(data[0],data[1]);
+		data = f_data.setNoiseWave;
+		text_sprite.drill_COF_setNoiseWave_ONCE(data[0],data[1]);
+	}
+}
+//=============================
+// * 字符块的滤镜 - 帧刷新 删除滤镜
+//=============================
+Window_Base.prototype.drill_ITFi_updateSpriteRemove = function() {
+	if( this._drill_ITFi_spriteTank == undefined ){ return; }
+	if( this._drill_ITFi_spriteTank.length == 0 ){ return; }
+	
+	// > 获取字符块贴图-全部【窗口字符 - 窗口字符贴图核心】
+	var temp_sprite_list = this.drill_COWCSp_sprite_getAllSprite();
+	
+	// > 删除滤镜（如果字符块贴图列表中，没有滤镜的父贴图，就删除）
+	for(var i = this._drill_ITFi_spriteTank.length-1; i >= 0; i-- ){
+		var cur_sprite = this._drill_ITFi_spriteTank[i];
+		if( temp_sprite_list.contains(cur_sprite) ){
+			//（不操作）
+		}else{
+			this._drill_ITFi_spriteTank.splice( i, 1 );
+		}
+	}
+}
+
 
 
 //=============================================================================

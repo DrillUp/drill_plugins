@@ -652,11 +652,14 @@ Drill_ET_WindowSprite.prototype.drill_XETL_updateLineRefresh = function() {
 	var start_y = yOffset + this.height;
 	temp_bitmap.drill_XETL_drawLine( start_x, start_y, start_x + this.width, start_y, line_color, line_thickness, "round" );
 	
+	
 	// > 连接线
 	var start_x = xOffset + xConnect;
 	var start_y = yOffset + yConnect;
 	var end_x = xOffset - d_data['x'];	//（减去偏移）
 	var end_y = yOffset - d_data['y'];
+	
+	// > 连接线 - 对齐方式（偏移实现）
 	if( d_data['align'] == "左对齐" ){
 		end_x += 0;
 		end_y += this.height*0.5;
@@ -669,7 +672,10 @@ Drill_ET_WindowSprite.prototype.drill_XETL_updateLineRefresh = function() {
 		end_x += this.width*1.0;
 		end_y += this.height*0.5;
 	}
+	
+	// > 连接线 - 绘制
 	temp_bitmap.drill_XETL_drawLine( start_x, start_y, end_x, end_y, line_color, line_thickness, "round" );
+	
 	
 	// > 设置画布
 	this._drill_XETL_curSprite.bitmap = temp_bitmap;

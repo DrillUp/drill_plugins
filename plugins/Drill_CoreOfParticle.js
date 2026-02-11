@@ -174,8 +174,15 @@
 	//==============================
 	// * 提示信息 - 报错 - NaN校验值
 	//==============================
-	DrillUp.drill_COPa_getPluginTip_ParamIsNaN = function( curPluginTipName, param_name ){
-		return "【" + curPluginTipName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+	DrillUp.drill_COPa_getPluginTip_ParamIsNaN = function( param_name, check_tank ){
+		var text = "【" + DrillUp.g_COPa_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+		if( check_tank ){
+			var keys = Object.keys( check_tank );
+			for( var i=0; i < keys.length; i++ ){
+				text += "\n" + keys[i] + "的值：" + check_tank[ keys[i] ] ;
+			}
+		}
+		return text;
 	};
 	//==============================
 	// * 提示信息 - 配置错误 - 透明度类型错误
@@ -198,7 +205,7 @@
 	// * 静态数据 - 粒子样式
 	//
 	//			说明：	> 此函数并未使用，只作为 子插件 的参考样式来使用。
-	//					> 『控制器与贴图的样式』 - 核心的参考样式
+	//					> 『控制器与贴图的样式-』 - 核心的参考样式
 	//==============================
 	DrillUp.drill_COPa_styleInit = function( dataFrom ){
 		var data = {};
@@ -1322,7 +1329,7 @@ Drill_COPa_Controller.prototype.drill_controller_initRainbow = function() {
 // **						->是否需要销毁
 // **						->销毁
 // **					
-// **					->A主体
+// **					->A贴图主体
 // **						->层级位置修正
 // **					->B粒子群弹道
 // **						->推演赋值（坐标）
@@ -1376,7 +1383,7 @@ Drill_COPa_Sprite.prototype.update = function() {
 	if( this.drill_sprite_isReady() == false ){ return; }
 	if( this.drill_sprite_isOptimizationPassed() == false ){ return; }
 	Sprite.prototype.update.call(this);
-	this.drill_sprite_updateAttr();				//帧刷新 - A主体
+	this.drill_sprite_updateAttr();				//帧刷新 - A贴图主体
 												//帧刷新 - B粒子群弹道（无）
 												//帧刷新 - C对象绑定（无）
 	this.drill_sprite_updateTransform();		//帧刷新 - D粒子变化
@@ -1410,7 +1417,7 @@ Drill_COPa_Sprite.prototype.drill_sprite_setController = function( controller ){
 //			说明：	> 需要设置 控制器 之后，才能进行手动初始化。
 //##############################
 Drill_COPa_Sprite.prototype.drill_sprite_initChild = function(){
-	this.drill_sprite_initAttr();				//初始化子功能 - A主体
+	this.drill_sprite_initAttr();				//初始化子功能 - A贴图主体
 	this.drill_sprite_initBallistics();			//初始化子功能 - B粒子群弹道
 												//初始化子功能 - C对象绑定（无）
 	this.drill_sprite_initTrailing();			//初始化子功能 - G直线拖尾贴图（拖尾在粒子下面，需要先addChild）
@@ -1483,7 +1490,7 @@ Drill_COPa_Sprite.prototype.drill_sprite_initSelf = function(){
 Drill_COPa_Sprite.prototype.drill_sprite_destroyChild = function(){
 	if( this._drill_controller == null ){ return; }
 	
-	// > 销毁 - A主体
+	// > 销毁 - A贴图主体
 	this.visible = false;
 	
 	// > 销毁 - B粒子群弹道
@@ -1541,7 +1548,7 @@ Drill_COPa_Sprite.prototype.drill_sprite_isOptimizationPassed_Private = function
 
 
 //==============================
-// * A主体 - 初始化子功能
+// * A贴图主体 - 初始化子功能
 //==============================
 Drill_COPa_Sprite.prototype.drill_sprite_initAttr = function() {
 	var data = this._drill_controller._drill_data;
@@ -1555,7 +1562,7 @@ Drill_COPa_Sprite.prototype.drill_sprite_initAttr = function() {
 	this.visible = false;
 };
 //==============================
-// * A主体 - 帧刷新
+// * A贴图主体 - 帧刷新
 //==============================
 Drill_COPa_Sprite.prototype.drill_sprite_updateAttr = function() {
 	
@@ -1585,33 +1592,33 @@ Drill_COPa_Sprite.prototype.drill_sprite_updateAttr = function() {
 	this.visible = this._drill_visible;
 };
 //==============================
-// * A主体 - 帧刷新 - 位置【子插件接口】
+// * A贴图主体 - 帧刷新 - 位置【子插件接口】
 //==============================
 Drill_COPa_Sprite.prototype.drill_sprite_updateAttr_Position = function() {
 	this._drill_x = this._drill_controller._drill_x;
 	this._drill_y = this._drill_controller._drill_y;
 };
 //==============================
-// * A主体 - 帧刷新 - 透明度【子插件接口】
+// * A贴图主体 - 帧刷新 - 透明度【子插件接口】
 //==============================
 Drill_COPa_Sprite.prototype.drill_sprite_updateAttr_Opacity = function() {
 	this._drill_opacity = this._drill_controller._drill_opacity;
 };
 //==============================
-// * A主体 - 帧刷新 - 缩放【子插件接口】
+// * A贴图主体 - 帧刷新 - 缩放【子插件接口】
 //==============================
 Drill_COPa_Sprite.prototype.drill_sprite_updateAttr_Scale = function() {
 	this._drill_scaleX = this._drill_controller._drill_scaleX;
 	this._drill_scaleY = this._drill_controller._drill_scaleY;
 };
 //==============================
-// * A主体 - 帧刷新 - 旋转【子插件接口】
+// * A贴图主体 - 帧刷新 - 旋转【子插件接口】
 //==============================
 Drill_COPa_Sprite.prototype.drill_sprite_updateAttr_Rotation = function() {
 	this._drill_rotation = this._drill_controller._drill_rotation;
 };
 //==============================
-// * A主体 - 帧刷新 - 可见【子插件接口】
+// * A贴图主体 - 帧刷新 - 可见【子插件接口】
 //==============================
 Drill_COPa_Sprite.prototype.drill_sprite_updateAttr_Visible = function() {
 	var data = this._drill_controller._drill_data;
@@ -2130,7 +2137,7 @@ Drill_COPa_Sprite.prototype.drill_sprite_refreshRainBow = function( i ){
 // **						->是否需要销毁
 // **						->销毁
 // **					
-// **					->A主体
+// **					->A贴图主体
 // **					->B粒子群弹道（无）
 // **					->C对象绑定（无）
 // **					->D粒子变化
@@ -2173,7 +2180,7 @@ Drill_COPa_SecSprite.prototype.update = function() {
 	if( this.drill_spriteSec_isReady() == false ){ return; }
 	if( this.drill_spriteSec_isOptimizationPassed() == false ){ return; }
 	Sprite.prototype.update.call(this);
-	this.drill_spriteSec_updateAttr();			//帧刷新 - A主体
+	this.drill_spriteSec_updateAttr();			//帧刷新 - A贴图主体
 												//帧刷新 - B粒子群弹道（无）
 												//帧刷新 - C对象绑定（无）
 	this.drill_spriteSec_updateTransform();		//帧刷新 - D粒子变化
@@ -2250,7 +2257,7 @@ Drill_COPa_SecSprite.prototype.drill_spriteSec_destroy = function(){
 //			说明：	> 创建该类后直接初始化。
 //==============================
 Drill_COPa_SecSprite.prototype.drill_spriteSec_initChild = function(){
-	this.drill_spriteSec_initAttr();				//初始化子功能 - A主体
+	this.drill_spriteSec_initAttr();				//初始化子功能 - A贴图主体
 	this.drill_spriteSec_initBallistics();			//初始化子功能 - B粒子群弹道
 													//初始化子功能 - C对象绑定（无）
 	this.drill_spriteSec_initTransform();			//初始化子功能 - D粒子变化
@@ -2274,7 +2281,7 @@ Drill_COPa_SecSprite.prototype.drill_spriteSec_initSelf = function( parentSprite
 //==============================
 Drill_COPa_SecSprite.prototype.drill_spriteSec_destroyChild = function(){
 	
-	// > 销毁 - A主体
+	// > 销毁 - A贴图主体
 	this.visible = false;
 	
 	// > 销毁 - B粒子群弹道
@@ -2325,7 +2332,7 @@ Drill_COPa_SecSprite.prototype.drill_spriteSec_isOptimizationPassed_Private = fu
 
 
 //==============================
-// * A主体（第二层） - 初始化子功能
+// * A贴图主体（第二层） - 初始化子功能
 //==============================
 Drill_COPa_SecSprite.prototype.drill_spriteSec_initAttr = function() {
 	
@@ -2336,7 +2343,7 @@ Drill_COPa_SecSprite.prototype.drill_spriteSec_initAttr = function() {
 	this.visible = false;
 };
 //==============================
-// * A主体（第二层） - 帧刷新
+// * A贴图主体（第二层） - 帧刷新
 //==============================
 Drill_COPa_SecSprite.prototype.drill_spriteSec_updateAttr = function() {
 	

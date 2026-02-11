@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        窗口字符 - 字体管理器
+ * @plugindesc [v1.4]        窗口字符 - 字体管理器
  * @author Drill_up
  * 
  * 
@@ -33,6 +33,8 @@
  *   (1.你需要去看文档，来配置fonts文件夹下面的字体。
  *      才能保证字体能正常加载到游戏中并使用。
  *   (2.你也可以填系统自带的"SimHei"黑体，"SimSun"宋体。
+ *   (3.很多朋友使用窗口字符时，会遇到各种字体加载的问题。
+ *      建议多看看文档 "23.窗口字符 > 关于字体管理器.docx"。
  * 预加载：
  *   (1.插件中的资源会被反复使用，所以插件默认所有资源都预加载，
  *      预加载相关介绍可以去看看"1.系统 > 关于预加载.docx"。
@@ -63,7 +65,7 @@
  * 1.插件指令修改的是全局默认值，设置后永久有效。
  *   新建的所有贴图/窗口，全部使用此设置作为 默认值。
  *   并且 全重置字符\fr 执行重置时，也会重置为 此设置的值。
- *   但注意，窗口字符的优先级 比该指令高，若有窗口字符，优先用窗口字符效果。
+ *   但注意，窗口字符的优先级 比该指令高，若有窗口字符，优先用窗口字符修改的字体。
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -97,6 +99,8 @@
  * 区分了所有文本和对话框的字体设置。
  * [v1.3]
  * 大幅度修改了底层，并且兼容了新的底层结构。
+ * [v1.4]
+ * 修复了字体管理器加载字体的bug，完善了文档。
  * 
  * 
  * 
@@ -221,14 +225,6 @@
 			message += DrillUp.g_DFF_PluginTip_baseList[i];
 		}
 		return message;
-	};
-	//==============================
-	// * 提示信息 - 报错 - 兼容冲突（目前窗口字符核心已不再冲突）
-	//==============================
-	DrillUp.drill_DFF_getPluginTip_CompatibilityYEP = function(){
-		return "【" + DrillUp.g_DFF_PluginTip_curName + "】\n"+
-				"检测到你开启了 YEP_MessageCore插件。\n"+
-				"请及时关闭该插件，该插件与 窗口字符核心 存在兼容冲突。";
 	};
 	
 	
@@ -557,28 +553,38 @@ Window_Base.prototype.standardFontFace = function(){
 //==============================
 // * 兼容 - 所有窗口的默认字体（覆写）
 //
-//			说明：	> drill插件并不会使用此函数，只作为外部插件兼容用。
-//					> 这个函数，如果直接返回"GameFont"，部分群友的电脑会出现 行高贴顶 的问题。
-//					  使用中文返回'SimHei, Heiti TC, sans-serif'才会正常。
-//					  （暂时不明问题来源，加了 字符绘制核心+窗口字符核心，却仍然出现问题）
+//			说明：	> 字体的加载比较特殊，有第一第二第三默认字体。
+//					  即使【系统-字符绘制核心】覆写了绘制底层，其字体的参数缺省时的默认值也是"GameFont"。
+//					  由于没法保证哪个部件会遇到特殊情况而使用默认字体，所以默认值一定要有。
 //==============================
 Window_Base.prototype.standardFontFace = function(){
+	
+	// > 默认 - 所有文本
+	if( $gameSystem != undefined && 
+		$gameSystem._drill_DFF_globalFontFace != "" ){
+		return $gameSystem._drill_DFF_globalFontFace;
+	}
+	
+	// > 默认 - 系统
     if( $gameSystem.isChinese() ){
         return 'SimHei, Heiti TC, sans-serif';
     }else if( $gameSystem.isKorean() ){
         return 'Dotum, AppleGothic, sans-serif';
     }else{
-        return 'GameFont';
+        return 'GameFont';	//（没法保证其它插件不用这个名称，所以保持定义）
     }
 };
 //==============================
 // * 兼容 - 对话框的默认字体（覆写）
 //
-//			说明：	> drill插件并不会使用此函数，只作为外部插件兼容用。
+//			说明：	> 字体的加载比较特殊，有第一第二第三默认字体。
+//					  即使【系统-字符绘制核心】覆写了绘制底层，其字体的参数缺省时的默认值也是"GameFont"。
+//					  由于没法保证哪个部件会遇到特殊情况而使用默认字体，所以默认值一定要有。
 //==============================
 Window_Message.prototype.standardFontFace = function(){
 	if( $gameSystem != undefined && 
-		$gameSystem._drill_DFF_dialogMode == "自定义模式" ){
+		$gameSystem._drill_DFF_dialogMode == "自定义模式" &&
+		$gameSystem._drill_DFF_dialogFontFace != "" ){
 		return $gameSystem._drill_DFF_dialogFontFace;
 	}
 	return Window_Base.prototype.standardFontFace.call( this );

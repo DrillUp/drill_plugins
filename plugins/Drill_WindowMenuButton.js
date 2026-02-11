@@ -390,6 +390,7 @@
  * @desc 用于区分你设置的颜色的说明注释，脚本中不起作用。
  * @default ==新的按钮==
  *
+ *
  * @param 是否初始显示
  * @type boolean
  * @on 显示
@@ -463,8 +464,12 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			窗口按钮管理器：
-//				->拦截器
+//			->☆提示信息
+//			->☆静态数据
+//			->☆插件指令
+//			->☆存储数据
+//			
+//			->主菜单选项窗口
 //				->callHandler 绑定传值
 //				->debug寻找可用按钮
 //
@@ -478,7 +483,7 @@
 //			无
 //		
 //		★必要注意事项：
-//			1.	this._drill_WMB_maps 拦截器的条件，
+//			1.	this._drill_WMB_conditionList 拦截器的条件，
 //				this._drill_WMB_intercepter 拦截器拦截的内容列表。
 //				this._debug_list 二者的并集，用于显示给用户看管理器信息。
 //				this._debug_Rlist 
@@ -495,7 +500,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -509,37 +514,23 @@
 	DrillUp.drill_WMB_getPluginTip_NoSupportPlugin = function( btn_name ){
 		return "【" + DrillUp.g_WMB_PluginTip_curName + "】\n按钮'" + btn_name + "'执行公共事件时，缺少基础插件 Drill_LayerCommandThread 地图-多线程。";
 	};
+	//==============================
+	// * 提示信息 - 报错 - 兼容冲突
+	//==============================
+	DrillUp.drill_WMB_getPluginTip_CompatibilityOther = function(){
+		return  "【" + DrillUp.g_WMB_PluginTip_curName + "】\n"+
+				"检测到你开启了 YEP_MainMenuManager插件 。\n"+
+				"请及时关闭该插件，该插件与 主菜单选项按钮 的控制相互冲突。";
+	};
 	
 	
 //=============================================================================
-// ** 静态数据
+// ** ☆静态数据
 //=============================================================================
 	var Imported = Imported || {};
 	Imported.Drill_WindowMenuButton = true;
 	var DrillUp = DrillUp || {}; 
 	DrillUp.parameters = PluginManager.parameters('Drill_WindowMenuButton');
-	
-	/*-----------------杂项------------------*/
-    DrillUp.g_WMB_debug = String(DrillUp.parameters['DEBUG-显示状态列表'] || "false") === "true";
-    DrillUp.g_WMB_btn_default_zIndex = Number(DrillUp.parameters['按钮默认优先级'] || 40) ;
-	
-	/*-----------------默认按钮------------------*/
-    DrillUp.g_WMB_btn_item_visible = String(DrillUp.parameters['是否显示道具按钮'] || "true") === "true";
-    DrillUp.g_WMB_btn_skill_visible = String(DrillUp.parameters['是否显示技能按钮'] || "true") === "true";
-    DrillUp.g_WMB_btn_equip_visible = String(DrillUp.parameters['是否显示装备按钮'] || "true") === "true";
-    DrillUp.g_WMB_btn_status_visible = String(DrillUp.parameters['是否显示状态按钮'] || "true") === "true";
-    DrillUp.g_WMB_btn_formation_visible = String(DrillUp.parameters['是否显示队形按钮'] || "true") === "true";
-    DrillUp.g_WMB_btn_options_visible = String(DrillUp.parameters['是否显示选项按钮'] || "true") === "true";
-    DrillUp.g_WMB_btn_save_visible = String(DrillUp.parameters['是否显示保存按钮'] || "true") === "true";
-    DrillUp.g_WMB_btn_gameEnd_visible = String(DrillUp.parameters['是否显示游戏结束按钮'] || "true") === "true";
-    DrillUp.g_WMB_btn_item_zIndex = Number(DrillUp.parameters['道具按钮优先级'] || 100) ;
-    DrillUp.g_WMB_btn_skill_zIndex = Number(DrillUp.parameters['技能按钮优先级'] || 99) ;
-    DrillUp.g_WMB_btn_equip_zIndex = Number(DrillUp.parameters['装备按钮优先级'] || 98) ;
-    DrillUp.g_WMB_btn_status_zIndex = Number(DrillUp.parameters['状态按钮优先级'] || 97) ;
-    DrillUp.g_WMB_btn_formation_zIndex = Number(DrillUp.parameters['队形按钮优先级'] || 96) ;
-    DrillUp.g_WMB_btn_options_zIndex = Number(DrillUp.parameters['选项按钮优先级'] || 3) ;
-    DrillUp.g_WMB_btn_save_zIndex = Number(DrillUp.parameters['保存按钮优先级'] || 2) ;
-    DrillUp.g_WMB_btn_gameEnd_zIndex = Number(DrillUp.parameters['游戏结束按钮优先级'] || 1) ;
 	
 	//==============================
 	// * 静态数据 - 菜单按钮
@@ -547,15 +538,18 @@
 	//==============================
 	DrillUp.drill_WMB_initMenuBtn = function( dataFrom ){
 		var data = {};
+		
 		data['visible'] = String( dataFrom["是否初始显示"] || "true") == "true";
 		data['btn_name'] = String( dataFrom["按钮名称"] || "");
 		data['btn_key'] = String( dataFrom["按钮关键字"] || "");
 		data['zIndex'] = Number( dataFrom["按钮优先级"] || 0);
+		
 		//data['command'] = JSON.parse( dataFrom["执行的插件指令"] || []);
 		data['script'] = String( dataFrom["执行的脚本"] || "");
 		data['commonEventEnable'] = String( dataFrom["是否执行公共事件"] || "false") == "true";
 		data['commonEventId'] = Number( dataFrom["执行的公共事件"] || 0);
 		data['pipeType'] = String( dataFrom["公共事件执行方式"] || "串行");
+		
 		return data;
 	}
 	
@@ -572,7 +566,38 @@
 		}
 	};
 	
-
+	/*-----------------默认按钮------------------*/
+	DrillUp.g_WMB_btn_default_zIndex = Number(DrillUp.parameters["按钮默认优先级"] || 40) ;
+	
+	DrillUp.g_WMB_btn_item_visible = String(DrillUp.parameters["是否显示道具按钮"] || "true") === "true";
+	DrillUp.g_WMB_btn_skill_visible = String(DrillUp.parameters["是否显示技能按钮"] || "true") === "true";
+	DrillUp.g_WMB_btn_equip_visible = String(DrillUp.parameters["是否显示装备按钮"] || "true") === "true";
+	DrillUp.g_WMB_btn_status_visible = String(DrillUp.parameters["是否显示状态按钮"] || "true") === "true";
+	DrillUp.g_WMB_btn_formation_visible = String(DrillUp.parameters["是否显示队形按钮"] || "true") === "true";
+	DrillUp.g_WMB_btn_options_visible = String(DrillUp.parameters["是否显示选项按钮"] || "true") === "true";
+	DrillUp.g_WMB_btn_save_visible = String(DrillUp.parameters["是否显示保存按钮"] || "true") === "true";
+	DrillUp.g_WMB_btn_gameEnd_visible = String(DrillUp.parameters["是否显示游戏结束按钮"] || "true") === "true";
+	
+	DrillUp.g_WMB_btn_item_zIndex = Number(DrillUp.parameters["道具按钮优先级"] || 100);
+	DrillUp.g_WMB_btn_skill_zIndex = Number(DrillUp.parameters["技能按钮优先级"] || 99);
+	DrillUp.g_WMB_btn_equip_zIndex = Number(DrillUp.parameters["装备按钮优先级"] || 98);
+	DrillUp.g_WMB_btn_status_zIndex = Number(DrillUp.parameters["状态按钮优先级"] || 97);
+	DrillUp.g_WMB_btn_formation_zIndex = Number(DrillUp.parameters["队形按钮优先级"] || 96);
+	DrillUp.g_WMB_btn_options_zIndex = Number(DrillUp.parameters["选项按钮优先级"] || 3);
+	DrillUp.g_WMB_btn_save_zIndex = Number(DrillUp.parameters["保存按钮优先级"] || 2);
+	DrillUp.g_WMB_btn_gameEnd_zIndex = Number(DrillUp.parameters["游戏结束按钮优先级"] || 1);
+	
+	/*-----------------杂项------------------*/
+	DrillUp.g_WMB_debug = String(DrillUp.parameters["DEBUG-显示状态列表"] || "false") === "true";
+	
+	
+//==============================
+// * >>>>基于插件检测>>>> - 外部影响插件检测
+//==============================
+if( Imported.YEP_MainMenuManager ){
+	alert( DrillUp.drill_WMB_getPluginTip_CompatibilityOther() );
+};
+	
 	
 //=============================================================================
 // ** ☆插件指令
@@ -591,22 +616,22 @@ Game_Interpreter.prototype.pluginCommand = function( command, args ){
 Game_Interpreter.prototype.drill_WMB_pluginCommand = function( command, args ){
 	if( command === ">主菜单按钮" ){
 		
-		if(args.length == 4){
+		if( args.length == 4 ){
 			var temp1 = String(args[1]);
 			var type = String(args[3]);
-			if (type === "显示") {
+			if( type === "显示" ){
 				$gameSystem.drill_WMB_mapSetAttr(temp1,"visible",true);
 			}
-			if (type === "隐藏") {
+			if( type === "隐藏" ){
 				$gameSystem.drill_WMB_mapSetAttr(temp1,"visible",false);
 			}
 		}
 		
-		if(args.length == 6){
+		if( args.length == 6 ){
 			var temp1 = String(args[1]);
 			var temp2 = String(args[5]);
 			var type = String(args[3]);
-			if (type === "优先级") {
+			if( type === "优先级" ){
 				$gameSystem.drill_WMB_mapSetAttr(temp1,"zIndex",temp2);
 			}
 		}
@@ -615,7 +640,7 @@ Game_Interpreter.prototype.drill_WMB_pluginCommand = function( command, args ){
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -682,18 +707,18 @@ Game_System.prototype.drill_WMB_checkSysData = function() {
 Game_System.prototype.drill_WMB_initSysData_Private = function() {
 	
 	// > 默认按钮
-	this._drill_WMB_maps = [];
-	this._drill_WMB_maps.push({"key":"item" ,"zIndex":DrillUp.g_WMB_btn_item_zIndex,"visible":DrillUp.g_WMB_btn_item_visible });
-	this._drill_WMB_maps.push({"key":"skill","zIndex":DrillUp.g_WMB_btn_skill_zIndex,"visible":DrillUp.g_WMB_btn_skill_visible });
-	this._drill_WMB_maps.push({"key":"equip" ,"zIndex":DrillUp.g_WMB_btn_equip_zIndex,"visible":DrillUp.g_WMB_btn_equip_visible });
-	this._drill_WMB_maps.push({"key":"status" ,"zIndex":DrillUp.g_WMB_btn_status_zIndex,"visible":DrillUp.g_WMB_btn_status_visible });
-	this._drill_WMB_maps.push({"key":"formation","zIndex":DrillUp.g_WMB_btn_formation_zIndex ,"visible":DrillUp.g_WMB_btn_formation_visible });
-	this._drill_WMB_maps.push({"key":"options","zIndex":DrillUp.g_WMB_btn_options_zIndex,"visible":DrillUp.g_WMB_btn_options_visible });
-	this._drill_WMB_maps.push({"key":"save" ,"zIndex":DrillUp.g_WMB_btn_save_zIndex,"visible":DrillUp.g_WMB_btn_save_visible });
-	this._drill_WMB_maps.push({"key":"gameEnd" ,"zIndex":DrillUp.g_WMB_btn_gameEnd_zIndex,"visible":DrillUp.g_WMB_btn_gameEnd_visible });
+	this._drill_WMB_conditionList = [];
+	this._drill_WMB_conditionList.push( {"key":"item",     "zIndex":DrillUp.g_WMB_btn_item_zIndex,     "visible":DrillUp.g_WMB_btn_item_visible     } );
+	this._drill_WMB_conditionList.push( {"key":"skill",    "zIndex":DrillUp.g_WMB_btn_skill_zIndex,    "visible":DrillUp.g_WMB_btn_skill_visible    } );
+	this._drill_WMB_conditionList.push( {"key":"equip" ,   "zIndex":DrillUp.g_WMB_btn_equip_zIndex,    "visible":DrillUp.g_WMB_btn_equip_visible    } );
+	this._drill_WMB_conditionList.push( {"key":"status" ,  "zIndex":DrillUp.g_WMB_btn_status_zIndex,   "visible":DrillUp.g_WMB_btn_status_visible   } );
+	this._drill_WMB_conditionList.push( {"key":"formation","zIndex":DrillUp.g_WMB_btn_formation_zIndex,"visible":DrillUp.g_WMB_btn_formation_visible} );
+	this._drill_WMB_conditionList.push( {"key":"options",  "zIndex":DrillUp.g_WMB_btn_options_zIndex,  "visible":DrillUp.g_WMB_btn_options_visible  } );
+	this._drill_WMB_conditionList.push( {"key":"save",     "zIndex":DrillUp.g_WMB_btn_save_zIndex,     "visible":DrillUp.g_WMB_btn_save_visible     } );
+	this._drill_WMB_conditionList.push( {"key":"gameEnd",  "zIndex":DrillUp.g_WMB_btn_gameEnd_zIndex,  "visible":DrillUp.g_WMB_btn_gameEnd_visible  } );
 	
 	// > 自定义按钮
-	for(var i = 0;i< DrillUp.g_WMB_btns.length; i++){
+	for(var i = 0; i < DrillUp.g_WMB_btns.length; i++){
 		var temp_btn = DrillUp.g_WMB_btns[i]
 		if( temp_btn == null ){ continue; }
 		var data = {
@@ -701,9 +726,9 @@ Game_System.prototype.drill_WMB_initSysData_Private = function() {
 			"zIndex":temp_btn['zIndex'],
 			"visible":temp_btn['visible']
 		};
-		this._drill_WMB_maps.push( data );
+		this._drill_WMB_conditionList.push( data );
 	}
-	//alert(JSON.stringify(this._drill_WMB_maps));
+	//alert(JSON.stringify(this._drill_WMB_conditionList));
 };
 //==============================
 // * 存储数据 - 载入存档时检查数据（私有）
@@ -711,7 +736,7 @@ Game_System.prototype.drill_WMB_initSysData_Private = function() {
 Game_System.prototype.drill_WMB_checkSysData_Private = function() {
 	
 	// > 旧存档数据自动补充
-	if( this._drill_WMB_maps == undefined ){
+	if( this._drill_WMB_conditionList == undefined ){
 		this.drill_WMB_initSysData();
 	}
 	
@@ -719,24 +744,27 @@ Game_System.prototype.drill_WMB_checkSysData_Private = function() {
 	//	（此容器为增量容器，不能根据索引进行空检查）
 };
 //==============================
-// * 指令容器 - map插入属性
+// * 存储数据 - 修改按钮设置（开放函数）
 //==============================
-Game_System.prototype.drill_WMB_mapSetAttr = function( key,attr_name,attr_val ) {
+Game_System.prototype.drill_WMB_mapSetAttr = function( key, attr_name, attr_val ){
+	
 	// > 获取键
-	var map = null;
-	for(var j = 0; j < this._drill_WMB_maps.length ;j++ ){
-		var temp_m = this._drill_WMB_maps[j];
-		if( temp_m['key'] == key ){
-			map = temp_m;
+	var cur_condition = null;
+	for(var j = 0; j < this._drill_WMB_conditionList.length; j++ ){
+		var temp_condition = this._drill_WMB_conditionList[j];
+		if( temp_condition["key"] == key ){
+			cur_condition = temp_condition;
 		}
 	}
+	
 	// > 没有键时新增
-	if( map == null ){
-		map = {"key":key,"zIndex":DrillUp.g_WMB_btn_default_zIndex,"visible":true };
-		this._drill_WMB_maps.push( map );
+	if( cur_condition == null ){
+		cur_condition = {"key":key,"zIndex":DrillUp.g_WMB_btn_default_zIndex,"visible":true};
+		this._drill_WMB_conditionList.push( cur_condition );
 	}
+	
 	// > 修改属性
-	map[attr_name] = attr_val;
+	cur_condition[attr_name] = attr_val;
 };
 
 
@@ -744,18 +772,21 @@ Game_System.prototype.drill_WMB_mapSetAttr = function( key,attr_name,attr_val ) 
 // ** 主菜单选项窗口
 //=============================================================================
 //==============================
-// * 选项窗口 - 按钮拦截（根据条件拦截按钮）
+// * 选项窗口 - 按钮拦截 绑定
 //==============================
 var _drill_WMB_makeCommandList = Window_MenuCommand.prototype.makeCommandList;
 Window_MenuCommand.prototype.makeCommandList = function() {
 	_drill_WMB_makeCommandList.call(this);
 	this.drill_WMB_interceptCommand();
 }
+//==============================
+// * 选项窗口 - 按钮拦截（根据条件拦截按钮）
+//==============================
 Window_MenuCommand.prototype.drill_WMB_interceptCommand = function() {
 	// > debug列表初始化
 	this._debug_list = [];
 	this._debug_Rlist = [];
-	for(var i = 0; i < $gameSystem._drill_WMB_maps.length ;i++ ){
+	for(var i = 0; i < $gameSystem._drill_WMB_conditionList.length ;i++ ){
 		this._debug_list[i] = {};
 		this._debug_list[i]['connected'] = false;		//DEBUG-默认全未连接
 	}
@@ -766,8 +797,8 @@ Window_MenuCommand.prototype.drill_WMB_interceptCommand = function() {
 		var temp_inter = this._drill_WMB_intercepter[i];
 		var pushed = false;
 		// > 对照 指令容器 选择性添加按钮
-		for(var j = 0; j < $gameSystem._drill_WMB_maps.length ;j++ ){
-			var temp_m = $gameSystem._drill_WMB_maps[j];
+		for(var j = 0; j < $gameSystem._drill_WMB_conditionList.length ;j++ ){
+			var temp_m = $gameSystem._drill_WMB_conditionList[j];
 			if( temp_m['key'] == null || temp_inter['symbol'] == null ){ continue; }
 			if( temp_m['key'].toLowerCase() == temp_inter['symbol'].toLowerCase() ){
 				// > 按钮状态检查（显示的push进_list，隐藏的跳过）

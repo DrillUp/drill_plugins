@@ -1184,15 +1184,13 @@ Scene_MenuBase.prototype.drill_XSSD_layerRemoveSprite_Private = function( sprite
 };
 //==============================
 // * 菜单层级 - 添加贴图到层级（私有）
-//
-//			说明：	> 此处兼容了 战斗界面、地图界面 的层级名词。
 //==============================
 Scene_MenuBase.prototype.drill_XSSD_layerAddSprite_Private = function( sprite, layer_index ){
-	if( layer_index == "菜单后面层" || layer_index === 0 || 
+	if( layer_index == "菜单后面层" || layer_index === "0" || layer_index === 0 || 
 		layer_index == "下层" || layer_index == "中层" || layer_index == "上层"){
 		this._backgroundSprite.addChild( sprite );
 	}
-	if( layer_index == "菜单前面层" || layer_index === 1 || 
+	if( layer_index == "菜单前面层" || layer_index === "1" || layer_index === 1 || 
 		layer_index == "图片层" || layer_index == "最顶层" ){
 		this._foregroundSprite.addChild( sprite );
 	}
@@ -2004,11 +2002,6 @@ Drill_XSSD_Window.prototype.drill_checkCondition = function( check ){
 // * D窗口内容 - 刷新内容
 //==============================
 Drill_XSSD_Window.prototype.drill_refreshMessage = function( context ){
-
-	// > 『字符贴图流程』 - 清空字符块贴图【窗口字符 - 窗口字符贴图核心】
-	if( Imported.Drill_CoreOfWindowCharacterSprite ){
-		this.drill_COWCSp_sprite_clearAllSprite();
-	}
 	
 	// > 参数准备 - 校验
 	var temp_bitmap = this.contents;
@@ -2062,7 +2055,7 @@ Drill_XSSD_Window.prototype.drill_refreshMessage = function( context ){
 	// > 『字符主流程』 - 绘制文本【窗口字符 - 窗口字符核心】
 	this.drill_COWC_drawText( org_text, options );
 	
-	// > 『字符贴图流程』 - 刷新字符块贴图【窗口字符 - 窗口字符贴图核心】
+	// > 『字符贴图流程』 - 刷新当前的字符块贴图【窗口字符 - 窗口字符贴图核心】
 	if( Imported.Drill_CoreOfWindowCharacterSprite ){
 		this.drill_COWCSp_sprite_refreshAllSprite();
 	}

@@ -204,12 +204,12 @@
 		return message;
 	};
 	//==============================
-	// * 提示信息 - 报错 - 兼容冲突（目前窗口字符核心已不再冲突）
+	// * 提示信息 - 报错 - 兼容冲突
 	//==============================
 	DrillUp.drill_CODi_getPluginTip_CompatibilityYEP = function(){
 		return  "【" + DrillUp.g_CODi_PluginTip_curName + "】\n"+
 				"检测到你开启了 YEP_MessageCore插件。\n"+
-				"请及时关闭该插件，该插件与 窗口字符核心 存在兼容冲突。";
+				"请及时关闭该插件，该插件与 对话框优化核心 存在兼容冲突。";
 	};
 	
 	
@@ -228,7 +228,14 @@
 //=============================================================================
 if( Imported.Drill_CoreOfWindowCharacter ){
 	
-	
+//==============================
+// * >>>>基于插件检测>>>> - 外部影响插件检测
+//==============================
+if( Imported.YEP_MessageCore ){
+	alert( DrillUp.drill_CODi_getPluginTip_CompatibilityYEP() );
+};
+
+
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
@@ -1047,9 +1054,9 @@ Window_Message.prototype.drill_CODi_message_isPageWaitingInput = function(){
 //==============================
 Window_Message.prototype.drill_CODi_message_initDrawText = function( text, x, y ){
 	
-	// > 『字符贴图流程』 - 清空字符块贴图【窗口字符 - 窗口字符贴图核心】
+	// > 『字符贴图流程』 - 清空字符块贴图-全部【窗口字符 - 窗口字符贴图核心】
 	if( Imported.Drill_CoreOfWindowCharacterSprite ){
-		this.drill_COWCSp_sprite_clearAllSprite();
+		this.drill_COWCSp_sprite_clearAllSprite();   //『字符块全部清空注意』（每次对话框新建页，都要清空一次）
 	}
 	
 	// > 参数准备 - 校验
@@ -1070,7 +1077,7 @@ Window_Message.prototype.drill_CODi_message_initDrawText = function( text, x, y 
 	// > 『字符逐个绘制流程』 - 逐个绘制初始化
 	this.drill_COWC_timing_initDrawText( org_text, options );
 	
-	// > 『字符贴图流程』 - 刷新字符块贴图【窗口字符 - 窗口字符贴图核心】
+	// > 『字符贴图流程』 - 刷新当前的字符块贴图【窗口字符 - 窗口字符贴图核心】
 	if( Imported.Drill_CoreOfWindowCharacterSprite ){
 		this.drill_COWCSp_sprite_refreshAllSprite();
 	}

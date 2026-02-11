@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        地图 - 场所移动的动画转场
+ * @plugindesc [v1.1]        地图 - 场所移动的动画转场
  * @author Drill_up
  * 
  * 
@@ -26,7 +26,7 @@
  * ----设定注意事项
  * 1.插件的作用域：地图界面。
  *   作用于界面切换的动画。
- * 2.详细内容可以去看看 "16.图片 > 关于动画转场核心.docx"。
+ * 2.详细内容可以去看看 "17.主菜单 > 关于动画转场核心.docx"。
  * 细节：
  *   (1.为避免 你设计的动画转场 与 默认的动画转场 相互干扰，
  *      你可以在播放自定义转场前，把场所移动的淡出淡入动画关掉。
@@ -73,6 +73,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 改进了内部结构。
  * 
  * 
  * 
@@ -362,7 +364,7 @@ var _drill_LTCut_COCut_setFadeData = Scene_Base.prototype.drill_COCut_setFadeDat
 Scene_Base.prototype.drill_COCut_setFadeData = function( cur_sceneName, tar_sceneName, fade_type, is_white ){
 	_drill_LTCut_COCut_setFadeData.call( this, cur_sceneName, tar_sceneName, fade_type, is_white );
 	
-	// > 执行淡出（地图界面 -> 地图界面）
+	// > 执行淡出（地图界面 -> 地图界面）『动画转场的界面』
 	if( cur_sceneName == "Scene_Map" &&
 		tar_sceneName == "Scene_Map" &&
 		fade_type == "淡出" ){
@@ -384,7 +386,7 @@ Scene_Base.prototype.drill_COCut_setFadeData = function( cur_sceneName, tar_scen
 		return;
 	}
 	
-	// > 执行淡入（地图界面 -> 地图界面）
+	// > 执行淡入（地图界面 -> 地图界面）『动画转场的界面』
 	if( cur_sceneName == "Scene_Map" &&
 		tar_sceneName == "Scene_Map" &&
 		fade_type == "淡入" ){

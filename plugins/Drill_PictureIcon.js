@@ -893,7 +893,7 @@ Sprite_Picture.prototype.initialize = function( pictureId ){
 //					  （一种急用的情况：设置图标 执行后，就立即执行粉碎效果。）
 //==============================
 Sprite_Picture.prototype.drill_PIc_setBitmapIcon = function( icon_id ){
-	this._drill_PIc_sp_lastIconId = icon_id;		//（需要赋值，外部函数设置快照后，帧刷新中就不会重复设置了）
+	this._drill_PIc_sp_lastIconId = icon_id;		//（需要赋值，这样帧刷新中就不会重复设置了）
 	var bitmap = $gameTemp.drill_PIc_getIconBitmapById( icon_id );
 	if( bitmap == undefined ){ return; }
 	this.bitmap = bitmap;
@@ -907,6 +907,8 @@ Sprite_Picture.prototype.drill_PIc_removeBitmapIcon = function(){
 }
 //==============================
 // * 图片控制 - 贴图 帧刷新
+//
+//			说明：	> 此帧刷新内的操作会延迟1帧，插件指令操作最好立即赋值。
 //==============================
 var _drill_PIc_sp_update = Sprite_Picture.prototype.update;
 Sprite_Picture.prototype.update = function() {
@@ -918,7 +920,7 @@ Sprite_Picture.prototype.update = function() {
 		this._drill_PIc_sp_lastIconId = picture._drill_PIc_iconId;
 		
 		// > 去除图标
-		if( this._drill_PIc_sp_lastIconId == undefined ){
+		if( this._drill_PIc_sp_lastIconId === undefined ){
 			this.drill_PIc_removeBitmapIcon();
 			
 		// > 设置图标
@@ -937,7 +939,7 @@ Sprite_Picture.prototype.update = function() {
 
 
 //=============================================================================
-// ** ☆图标容器
+// ** ☆图标容器『图片bitmap临时容器』
 //
 //			说明：	> 此模块专门管理 图标 的创建。
 //					> 暂时不考虑销毁Bitmap情况，因为本身图标占内存就小。
@@ -951,24 +953,27 @@ Game_Temp.prototype.initialize = function() {
     _drill_PIc_temp_initialize.call(this);
 	this._drill_PIc_curBitmapId = -1;			//图标 计数器
 	this._drill_PIc_curBitmapTank = [];			//图标 贴图容器
-}
+};
 //==============================
 // * 图标容器 - 创建图标
+//
+//			说明：	> 每创建一次，计数器都+1，确保设置的都为最新创建的Bitmap。
+//					> 由于Bitmap是现做的，所以该容器不考虑保存读取的情况。
 //==============================
 Game_Temp.prototype.drill_PIc_createIconBitmapByIconIndex = function( icon_index, icon_size ){
 	
 	// > 计数器+1
 	this._drill_PIc_curBitmapId += 1;
-	var iconBitmap_id = this._drill_PIc_curBitmapId;
+	var bitmap_id = this._drill_PIc_curBitmapId;
 	
-	// > 创建图标Bitmap
+	// > 创建Bitmap
 	var bitmap = ImageManager.drill_PIc_drawIconBitmap( icon_index, icon_size );
-	this._drill_PIc_curBitmapTank[ iconBitmap_id ] = bitmap;
+	this._drill_PIc_curBitmapTank[ bitmap_id ] = bitmap;
 	
-	return iconBitmap_id;
-}
+	return bitmap_id;
+};
 //==============================
-// * 图标容器 - 创建图标Bitmap
+// * 图标容器 - 创建图标 - 创建Bitmap
 //==============================
 ImageManager.drill_PIc_drawIconBitmap = function( icon_index, icon_size ){
 	if( icon_size == undefined ){ icon_size = 1; }
@@ -989,10 +994,10 @@ ImageManager.drill_PIc_drawIconBitmap = function( icon_index, icon_size ){
     return cur_bitmap;
 };
 //==============================
-// * 图标容器 - 获取 图标
+// * 图标容器 - 获取 图标（开放函数）
 //==============================
 Game_Temp.prototype.drill_PIc_getIconBitmapById = function( iconBitmap_id ){
 	return this._drill_PIc_curBitmapTank[ iconBitmap_id ];
-}
+};
 
 

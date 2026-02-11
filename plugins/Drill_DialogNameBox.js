@@ -236,14 +236,6 @@
 		return message;
 	};
 	//==============================
-	// * 提示信息 - 报错 - 兼容冲突（目前窗口字符核心已不再冲突）
-	//==============================
-	DrillUp.drill_DNB_getPluginTip_CompatibilityYEP = function(){
-		return  "【" + DrillUp.g_DNB_PluginTip_curName + "】\n"+
-				"检测到你开启了 YEP_MessageCore插件。\n"+
-				"请及时关闭该插件，该插件与 对话框优化核心 存在兼容冲突。";
-	};
-	//==============================
 	// * 提示信息 - 报错 - 窗口字符底层校验
 	//==============================
 	DrillUp.drill_DNB_getPluginTip_NeedUpdate_drawText = function(){
@@ -830,11 +822,6 @@ Drill_DNB_NameBoxWindow.prototype.drill_resetData_Message = function( text, posi
 //==============================
 Drill_DNB_NameBoxWindow.prototype.drill_refreshMessage = function( context ){
 	
-	// > 『字符贴图流程』 - 清空字符块贴图【窗口字符 - 窗口字符贴图核心】
-	if( Imported.Drill_CoreOfWindowCharacterSprite ){
-		this.drill_COWCSp_sprite_clearAllSprite();
-	}
-	
 	// > 参数准备 - 校验
 	var temp_bitmap = this.contents;
 	if( temp_bitmap == undefined ){ return; }
@@ -887,7 +874,7 @@ Drill_DNB_NameBoxWindow.prototype.drill_refreshMessage = function( context ){
 	// > 『字符主流程』 - 绘制文本【窗口字符 - 窗口字符核心】
 	this.drill_COWC_drawText( org_text, options );
 	
-	// > 『字符贴图流程』 - 刷新字符块贴图【窗口字符 - 窗口字符贴图核心】
+	// > 『字符贴图流程』 - 刷新当前的字符块贴图【窗口字符 - 窗口字符贴图核心】
 	if( Imported.Drill_CoreOfWindowCharacterSprite ){
 		this.drill_COWCSp_sprite_refreshAllSprite();
 	}

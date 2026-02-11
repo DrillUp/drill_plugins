@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.1]        窗口字符 - 窗口字符核心
+ * @plugindesc [v2.2]        窗口字符 - 窗口字符核心
  * @author Drill_up
  * 
  * 
@@ -93,8 +93,8 @@
  * 窗口字符：<br>             表示手动换行。
  * 窗口字符：<WordWrap>       表示自动换行。
  * 
- * 窗口字符：\px[5]           当前字符光标x偏移5像素，正数向右，负数向左。
- * 窗口字符：\py[5]           当前字符光标y偏移5像素，正数向上，负数向下。
+ * 窗口字符：\px[5]           当前字符光标x偏移5像素，正数向右，负数向左。偏移无视 居中/右对齐 的计算。
+ * 窗口字符：\py[5]           当前字符光标y偏移5像素，正数向上，负数向下。偏移无视 居中/右对齐 的计算。
  * 窗口字符：\pa[10]          缩小文本域的范围盒，四个方向压缩10像素。不能为负数，重复设置无效，按最后一个算。
  * 窗口字符：\pt[10]          缩小文本域的范围盒，上侧压缩10像素。不能为负数，重复设置无效，按最后一个算。
  * 窗口字符：\pb[10]          缩小文本域的范围盒，下侧压缩10像素。不能为负数，重复设置无效，按最后一个算。
@@ -108,9 +108,13 @@
  * 窗口字符：\ff[GameFont]    之后的文本设置字体类型为GameFont。
  * 窗口字符：\fr              全重置字符，重置之后文本所有设置。
  * 
+ * 窗口字符：\ib[40]          绘制宽度40像素的空白块字符。空白块字符只用于扩开高宽用。
+ * 窗口字符：\ib[40:30]       绘制宽度40像素,高度30像素的空白块字符。空白块字符只用于扩开高宽用。
  * 窗口字符：\i[1]            绘制第1个图标。
- * 窗口字符：\ik[on]          之后的图标保持原大小（32x32像素）。
- * 窗口字符：\ik[off]         取消保持原大小。
+ * 窗口字符：\i[1:24]         绘制第1个图标，并设置为24x24像素大小。
+ * 窗口字符：\ir[on]          之后的图标自动缩放。
+ * 窗口字符：\ir[off]         之后的图标保持原大小。（32x32像素）
+ * 窗口字符：\ir[reset]       之后的图标按默认值执行 自动缩放/保持原大小。
  * 
  * 1.窗口字符分为四种类型：
  *     表达式：       格式为<xxx>，优先级最高，能比指代字符、效果字符更先执行文本转换。
@@ -122,8 +126,8 @@
  * 3.设置<WordWrap>表示自动换行，只要有一个自动换行符，则表示当前所有文本全都自动换行。
  *   该窗口的文本将会去除所有"\n"换行符，并根据窗口宽度自动换行。
  *   如果你需要在自动换行基础上强制换行，添加<br>手动换行即可。
- * 4."\i[1]" 图标默认会根据字体大小自适应变化。
- *   如果你想保持图标的原本清晰度，可以使用"\ik[on]"来使得图标固定原大小（32x32像素）。
+ * 4."\i[1]" 的图标默认为固定大小（32x32像素）。
+ *   如果你想让图标根据字体大小自动缩放，可以使用"\ir[on]"来实现。
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 字符应用C扩展
@@ -164,9 +168,12 @@
  * 
  * 窗口字符：<单选:21:文本A:文本B>   根据开关21的值，on为文本A，off为文本B
  * 
- * 窗口字符：<分割线:单条:厚度[1]:颜色[0]>       画单条超长的分割线，建议单独给出一行来放分割线。
- * 窗口字符：<分割线:两条:厚度[1]:颜色[0]>       画两条超长的分割线，建议单独给出一行来放分割线。
- * 窗口字符：<分割线:三条:厚度[1]:颜色[0]>       画三条超长的分割线，建议单独给出一行来放分割线。
+ * 窗口字符：<分割线:单条:厚度[1]:颜色[0]>         画单条超长的分割线。（建议单独给出一行来放分割线）
+ * 窗口字符：<分割线:两条:厚度[1]:颜色[0]>         画两条超长的分割线。（建议单独给出一行来放分割线）
+ * 窗口字符：<分割线:三条:厚度[1]:颜色[0]>         画三条超长的分割线。（建议单独给出一行来放分割线）
+ * 窗口字符：<分割线:单条:厚度[1]:颜色[#ffddff]>   画单条超长的自定义颜色分割线。（建议单独给出一行来放分割线）
+ * 窗口字符：<分割线:两条:厚度[1]:颜色[#ffddff]>   画两条超长的自定义颜色分割线。（建议单独给出一行来放分割线）
+ * 窗口字符：<分割线:三条:厚度[1]:颜色[#ffddff]>   画三条超长的自定义颜色分割线。（建议单独给出一行来放分割线）
  * 
  * 1.表达式的优先级最高，能比指代字符、效果字符更先执行文本转换。
  * 2."复制"的中间填2，表示内容复制2个，
@@ -261,6 +268,8 @@
  * [v2.1]
  * 添加了 保持图标原大小 的底层功能。
  * 兼容了YEP的插件，修复选项文本上移的问题。
+ * [v2.2]
+ * 修复了 字符块 被清空的bug。
  * 
  */
  
@@ -484,13 +493,14 @@
 //		★必要注意事项：
 //			1.该插件基于 文本绘制核心（h5的底层直接绘制），脚本层面上完全推翻了原来窗口字符的结构。
 //			  除了设计思路上 表达式、指代字符、效果字符 有保留，其它全没了。（2024/9整月）
+//				. ' .( ' ' .
 //				 '. .)( '.'
-//				  (░░░░░)'
-//				   ))░░(
-//				  █▀▀▀▀▀█▄		"有时候再努力修bug，都是徒劳的"
-//				  █░░░░░█ █
-//				  ▀▄▄▄▄▄▀▀
-//			1.名词术语 - 流程：
+//				  (░░░░░)' .
+//				.  ))░░(
+//				  █▀▀▀▀▀▀█▄		"有时候再努力修bug，都是徒劳的"
+//				  █░░░░░░█ █
+//				  ▀▄▄▄▄▄▄▀▀
+//			2.名词术语 - 流程：
 //				正规的流程：      指核心中所给的函数流程，按照该流程执行绘制函数，即符合正规的流程。
 //				字符核心流程：    字符绘制核心 提供的标准函数，使用此函数表示走该流程。
 //				字符主流程：      窗口字符核心 提供的标准函数，使用此函数表示走该流程。
@@ -652,6 +662,9 @@ Window_Base.prototype.drill_COWC_drawText = function( org_text, options ){
 	org_text = String(org_text);
 	if( org_text == "" ){ return; }
 	
+	// > 『字符贴图流程』 - 清空字符块贴图-全部（可选）【窗口字符 - 窗口字符贴图核心】
+	//	（窗口执行）this.drill_COWCSp_sprite_clearAllSprite();   //『字符块全部清空注意』
+	
 	// > 『字符核心流程』 - 准备绘制配置【系统 - 字符绘制核心】
 	var temp_bitmap = this.contents;
 	temp_bitmap.drill_COWC_timing_setEnabled( false );
@@ -667,8 +680,8 @@ Window_Base.prototype.drill_COWC_drawText = function( org_text, options ){
 		temp_bitmap.drill_COCD_drawRowBlock( rowBlock );
 	}
 	
-	// > 『字符贴图流程』 - 刷新字符块贴图（可选）【窗口字符 - 窗口字符贴图核心】
-	//	（父贴图执行）sprite.drill_COWCSp_sprite_refreshAllSprite();
+	// > 『字符贴图流程』 - 刷新当前的字符块贴图（可选）【窗口字符 - 窗口字符贴图核心】
+	//	（窗口执行）this.drill_COWCSp_sprite_refreshAllSprite();
 };
 //##############################
 // * 流程介绍『字符主流程』 - 绘制文本【标准函数】【Bitmap】
@@ -689,6 +702,9 @@ Bitmap.prototype.drill_COWC_drawText = function( org_text, options ){
 	org_text = String(org_text);
 	if( org_text == "" ){ return; }
 	
+	// > 『字符贴图流程』 - 清空字符块贴图-全部（可选）【窗口字符 - 窗口字符贴图核心】
+	//	（父贴图执行）sprite.drill_COWCSp_sprite_clearAllSprite();   //『字符块全部清空注意』
+	
 	// > 『字符核心流程』 - 准备绘制配置【系统 - 字符绘制核心】
 	this.drill_COWC_timing_setEnabled( false );
 	var cur_options = JSON.parse(JSON.stringify(options));	//（需要深拷贝，因为走一次流程options会变。比如@@@-fs[add:4]多次执行后会叠加）
@@ -703,7 +719,7 @@ Bitmap.prototype.drill_COWC_drawText = function( org_text, options ){
 		this.drill_COCD_drawRowBlock( rowBlock );
 	}
 	
-	// > 『字符贴图流程』 - 刷新字符块贴图（可选）【窗口字符 - 窗口字符贴图核心】
+	// > 『字符贴图流程』 - 刷新当前的字符块贴图（可选）【窗口字符 - 窗口字符贴图核心】
 	//	（父贴图执行）sprite.drill_COWCSp_sprite_refreshAllSprite();
 };
 
@@ -962,7 +978,7 @@ Scene_Map.prototype.drill_COWC_BlockText_createDebugWindow = function() {
 	}
 	
 	// > 创建贴图
-	var temp_window = new Window_Base( 40, 40, 736, 544 );
+	var temp_window = new Window_Base( 40, 40, 736, 556 );
 	this.addChild( temp_window );	//（直接加在最顶层的上面）
 	this._drill_COWC_BlockText_DebugWindow = temp_window;
 	
@@ -1012,7 +1028,7 @@ Scene_Map.prototype.drill_COWC_BlockText_createDebugWindow = function() {
 				"    \\\\{ 和 \\\\}  缩放字体大小  测\\{试\\}的\\{字\\}符  \\fr<br>" + 
 				"    \\\\ff[HappyFont]  字体名称  \\ff[HappyFont]测试的字符\\fs[16]（需字体管理器插件,否则不生效）\\fr<br>" + 
 				"    \\\\i[9]  图标字符  测试的\\i[9]  \\fr<br>" + 
-				"    \\\\ik[on]  图标保持原大小  测试的\\ik[on]\\i[9]\\ik[off]\\i[9]  \\fr<br>" + 
+				"    \\\\ir[on]  图标自动缩放  测试的\\ir[on]\\i[9]\\ir[off]\\i[9]  \\fr<br>" + 
 				
 				"\\c[24]》字符应用A底层-效果字符全叠加：\\fr<br>" +
 				"    \\\\px[3]\\\\py[3]\\\\c[24]\\\\ff[HappyFont]\\\\fi[on]\\\\{" + 
@@ -1035,7 +1051,7 @@ Scene_Map.prototype.drill_COWC_OrgText_createDebugWindow = function() {
 	}
 	
 	// > 创建贴图
-	var temp_window = new Window_Base( 40, 40, 736, 544 );
+	var temp_window = new Window_Base( 40, 40, 736, 556 );
 	this.addChild( temp_window );	//（直接加在最顶层的上面）
 	this._drill_COWC_OrgText_DebugWindow = temp_window;
 	
@@ -1109,7 +1125,7 @@ Scene_Map.prototype.drill_COWC_ExText_createDebugWindow = function() {
 	}
 	
 	// > 创建贴图
-	var temp_window = new Window_Base( 40, 40, 736, 544 );
+	var temp_window = new Window_Base( 40, 40, 736, 556 );
 	this.addChild( temp_window );	//（直接加在最顶层的上面）
 	this._drill_COWC_ExText_DebugWindow = temp_window;
 	
@@ -1626,18 +1642,34 @@ Game_Temp.prototype.drill_COWC_expression_process = function( matched_index, mat
 			temp1 = temp1.replace("]","");
 			temp2 = temp2.replace("颜色[","");
 			temp2 = temp2.replace("]","");
-			
-			if( type == "单条" ){
-				var result_str = "@@@-is[one:"+ temp1 +":"+ this.drill_COWC_effect_textColor(Number(temp2)) + "]";
-				this.drill_COWC_expression_submit( result_str );
-			}
-			if( type == "两条" ){
-				var result_str = "@@@-is[two:"+ temp1 +":"+ this.drill_COWC_effect_textColor(Number(temp2)) + "]";
-				this.drill_COWC_expression_submit( result_str );
-			}
-			if( type == "三条" ){
-				var result_str = "@@@-is[three:"+ temp1 +":"+ this.drill_COWC_effect_textColor(Number(temp2)) + "]";
-				this.drill_COWC_expression_submit( result_str );
+			if( temp2.contains("#") ){
+				
+				if( type == "单条" ){
+					var result_str = "@@@-is[one:"+ temp1 +":"+ temp2 + "]";
+					this.drill_COWC_expression_submit( result_str );
+				}
+				if( type == "两条" ){
+					var result_str = "@@@-is[two:"+ temp1 +":"+ temp2 + "]";
+					this.drill_COWC_expression_submit( result_str );
+				}
+				if( type == "三条" ){
+					var result_str = "@@@-is[three:"+ temp1 +":"+ temp2 + "]";
+					this.drill_COWC_expression_submit( result_str );
+				}
+			}else{
+				
+				if( type == "单条" ){
+					var result_str = "@@@-is[one:"+ temp1 +":"+ this.drill_COWC_effect_textColor(Number(temp2)) + "]";
+					this.drill_COWC_expression_submit( result_str );
+				}
+				if( type == "两条" ){
+					var result_str = "@@@-is[two:"+ temp1 +":"+ this.drill_COWC_effect_textColor(Number(temp2)) + "]";
+					this.drill_COWC_expression_submit( result_str );
+				}
+				if( type == "三条" ){
+					var result_str = "@@@-is[three:"+ temp1 +":"+ this.drill_COWC_effect_textColor(Number(temp2)) + "]";
+					this.drill_COWC_expression_submit( result_str );
+				}
 			}
 		}
 	}
@@ -2436,9 +2468,9 @@ Game_Temp.prototype.drill_COWC_effect_processCombined = function( matched_index,
 			this.drill_COWC_effect_submitCombined( "@@@-py[" + Number(args[0]) + "]" );
 		}
 	}
-	// > 『窗口字符定义』字符应用A底层 - 额外量X（无）
+	// > 『窗口字符定义』字符应用A底层 - 额外偏移量X（无）
 	//	（脚本用，不开放）
-	// > 『窗口字符定义』字符应用A底层 - 额外量Y（无）
+	// > 『窗口字符定义』字符应用A底层 - 额外偏移量Y（无）
 	//	（脚本用，不开放）
 	
 	// > 『窗口字符定义』字符应用A底层 - 内边距 - 全部（\PA[10]）
@@ -2530,24 +2562,45 @@ Game_Temp.prototype.drill_COWC_effect_processCombined = function( matched_index,
 	// > 『窗口字符定义』字符应用A底层 - 字体名称（\FF[GameFont]、\FN[GameFont]）
 	//	（窗口字符在子插件中实现【窗口字符 - 字体管理器】）
 	
-	// > 『窗口字符定义』字符应用A底层 - 图标字符（\I[1]）
+	// > 『窗口字符定义』字符应用A底层 - 空白块字符（\IB[100]、\IB[100:40]）
+	if( command.toUpperCase() == "IB" ){
+		if( args.length == 1 ){
+			var str = "@@@-ib[" + Number(args[0]) + "]";
+			this.drill_COWC_effect_submitCombined( str );
+			return;
+		}
+		if( args.length == 2 ){
+			var str = "@@@-ib[" + Number(args[0]) + ":" + Number(args[1]) + "]";
+			this.drill_COWC_effect_submitCombined( str );
+			return;
+		}
+	}
+	
+	// > 『窗口字符定义』字符应用A底层 - 图标字符（\I[1]、\I[1:32]）
 	if( command.toUpperCase() == "I" ){
 		if( args.length == 1 ){
 			var str = "@@@-ic[" + Number(args[0]) + "]";
 			this.drill_COWC_effect_submitCombined( str );
 			return;
 		}
+		if( args.length == 2 ){
+			var str = "@@@-ic[" + Number(args[0]) + ":" + Number(args[1]) + "]";
+			this.drill_COWC_effect_submitCombined( str );
+			return;
+		}
 	}
 	
-	// > 『窗口字符定义』字符应用A底层 - 图标保持原大小（\IK[on]、\IK[off]）
-	if( command.toUpperCase() == "IK" ){
+	// > 『窗口字符定义』字符应用A底层 - 图标自动缩放（\IR[on]、\IR[off]）
+	if( command.toUpperCase() == "IR" ){
 		if( args.length == 1 ){
 			if( String(args[0]).toUpperCase() == "ON" || String(args[0]).toUpperCase() == "TRUE" ){
-				this.drill_COWC_effect_submitCombined( "@@@-ik[true]" );
+				this.drill_COWC_effect_submitCombined( "@@@-ir[true]" );
 				return;
-			}
-			if( String(args[0]).toUpperCase() == "OFF" || String(args[0]).toUpperCase() == "FALSE" ){
-				this.drill_COWC_effect_submitCombined( "@@@-ik[false]" );
+			}else if( String(args[0]).toUpperCase() == "OFF" || String(args[0]).toUpperCase() == "FALSE" ){
+				this.drill_COWC_effect_submitCombined( "@@@-ir[false]" );
+				return;
+			}else{
+				this.drill_COWC_effect_submitCombined( "@@@-ir[reset]" );
 				return;
 			}
 		}
@@ -2762,7 +2815,7 @@ Game_Temp.prototype.drill_COWC_getEvnetId_InInterpreter = function(){
 	return this._drill_COWC_curInterpreterEventId;
 };
 //==============================
-// * 窗口标记 - 『窗口字符的本事件』 - 最后继承
+// * 窗口标记 - 『窗口字符的本事件』 - 最后继承1级
 //==============================
 var _drill_COWC_scene_initialize4 = SceneManager.initialize;
 SceneManager.initialize = function() {
@@ -2933,10 +2986,8 @@ SceneManager.initialize = function() {
 //==============================
 Window_Base.prototype.drill_COWC_org_drawText = function( text, x, y, maxWidth, align ){
 	
-	// > 『字符贴图流程』 - 清空字符块贴图【窗口字符 - 窗口字符贴图核心】
-	if( Imported.Drill_CoreOfWindowCharacterSprite ){
-		this.drill_COWCSp_sprite_clearAllSprite();
-	}
+	// > 『字符贴图流程』 - 清空字符块贴图-全部【窗口字符 - 窗口字符贴图核心】
+	//	（无）   //『字符块全部清空注意』（此处可能多次绘制，不要执行清空）
 	
 	// > 参数准备 - 校验
 	var org_text = text;
@@ -2955,15 +3006,15 @@ Window_Base.prototype.drill_COWC_org_drawText = function( text, x, y, maxWidth, 
 	// > 参数准备 - 准备绘制配置（特殊情况）
 	options['rowParam'] = {};
 	if( align == "center" || align == "right" ){
-		options['rowParam']['alignHor_type'] = align;
-		options['rowParam']['alignHor_maxWidth'] = maxWidth;
+		options['rowParam']['alignHor_type'] = align;			//（窗口字符对齐方式）
+		options['rowParam']['alignHor_maxWidth'] = maxWidth;	//
 	}
 	
 	
 	// > 『字符主流程』 - 绘制文本【窗口字符 - 窗口字符核心】
 	this.drill_COWC_drawText( org_text, options );
 	
-	// > 『字符贴图流程』 - 刷新字符块贴图【窗口字符 - 窗口字符贴图核心】
+	// > 『字符贴图流程』 - 刷新当前的字符块贴图【窗口字符 - 窗口字符贴图核心】
 	if( Imported.Drill_CoreOfWindowCharacterSprite ){
 		this.drill_COWCSp_sprite_refreshAllSprite();
 	}
@@ -3291,7 +3342,8 @@ SceneManager.initialize = function() {
 Window_Base.prototype.drill_COWC_org_drawItemName = function( item, x, y, width ){
 	width = width || 312;
 	if( item ){  //（直接绘制 图标+文本 组合的文本）
-		this.drawText( "\\i[" + String(item.iconIndex) + "]" + item.name, x, y, width);
+		var text = "\\i[" + String(item.iconIndex) + ":32]" + item.name;
+		this.drill_COWC_org_drawText( text, x, y, width );
 	}
 };
 //==============================
@@ -3303,11 +3355,11 @@ Window_Base.prototype.drill_COWC_org_drawItemName = function( item, x, y, width 
 //					> width 数字
 //			返回：	> 无
 //			
-//			说明：	> 绘制 值+单位，比如"100G"。该函数能被 货币素材库插件 改进。
+//			说明：	> 绘制 值+单位，比如"100G"。该函数能被 素材库之货币插件 改进。
 //==============================
 Window_Base.prototype.drill_COWC_org_drawCurrencyValue = function( value, unit, x, y, width ){
 	
-	// > 将"金币"转为图标【管理器 - 货币素材库】
+	// > 将"金币"转为图标【管理器 - 素材库之货币】
 	if( Imported.Drill_AssetsOfCurrency ){
 		if( unit == $gameTemp.drill_AsOC_getDataText() ){
 			var icon_id = $gameTemp.drill_AsOC_getDataIcon();
@@ -3350,6 +3402,9 @@ Window_Base.prototype.drill_COWC_org_drawCurrencyValue = function( value, unit, 
 //##############################
 Window_Base.prototype.drill_COWC_timing_initDrawText = function( org_text, options ){
 	
+	// > 『字符贴图流程』 - 清空字符块贴图-全部（可选）【窗口字符 - 窗口字符贴图核心】
+	//	（窗口执行）this.drill_COWCSp_sprite_clearAllSprite();   //『字符块全部清空注意』
+	
 	// > 『字符核心流程』 - 准备绘制配置【系统 - 字符绘制核心】
 	var temp_bitmap = this.contents;
 	temp_bitmap.drill_COWC_timing_setEnabled( true );
@@ -3365,8 +3420,8 @@ Window_Base.prototype.drill_COWC_timing_initDrawText = function( org_text, optio
 	// > 『字符逐个绘制流程』 - 数据初始化
 	temp_bitmap.drill_COWC_timing_initData_private( rowBlock_list );
 	
-	// > 『字符贴图流程』 - 刷新字符块贴图（可选）【窗口字符 - 窗口字符贴图核心】
-	//	（父贴图执行）sprite.drill_COWCSp_sprite_refreshAllSprite();
+	// > 『字符贴图流程』 - 刷新当前的字符块贴图（可选）【窗口字符 - 窗口字符贴图核心】
+	//	（窗口执行）this.drill_COWCSp_sprite_refreshAllSprite();
 };
 //##############################
 // * 逐个绘制流程介绍『字符逐个绘制流程』 - 逐个绘制初始化【标准函数】【Bitmap】
@@ -3385,6 +3440,9 @@ Window_Base.prototype.drill_COWC_timing_initDrawText = function( org_text, optio
 //##############################
 Bitmap.prototype.drill_COWC_timing_initDrawText = function( org_text, options ){
 	
+	// > 『字符贴图流程』 - 清空字符块贴图-全部（可选）【窗口字符 - 窗口字符贴图核心】
+	//	（父贴图执行）sprite.drill_COWCSp_sprite_clearAllSprite();   //『字符块全部清空注意』
+	
 	// > 『字符核心流程』 - 准备绘制配置【系统 - 字符绘制核心】
 	this.drill_COWC_timing_setEnabled( true );
 	var cur_options = JSON.parse(JSON.stringify(options));	//（需要深拷贝，因为走一次流程options会变。比如@@@-fs[add:4]多次执行后会叠加）
@@ -3399,7 +3457,7 @@ Bitmap.prototype.drill_COWC_timing_initDrawText = function( org_text, options ){
 	// > 『字符逐个绘制流程』 - 数据初始化
 	this.drill_COWC_timing_initData_private( rowBlock_list );
 	
-	// > 『字符贴图流程』 - 刷新字符块贴图（可选）【窗口字符 - 窗口字符贴图核心】
+	// > 『字符贴图流程』 - 刷新当前的字符块贴图（可选）【窗口字符 - 窗口字符贴图核心】
 	//	（父贴图执行）sprite.drill_COWCSp_sprite_refreshAllSprite();
 };
 //##############################
@@ -4328,6 +4386,11 @@ Scene_Map.prototype.drill_COWC_timing_createDebugWindow = function() {
 	this.addChild( temp_window );	//（直接加在最顶层的上面）
 	this._drill_COWC_timing_DebugWindow = temp_window;
 	
+	// > 『字符贴图流程』 - 清空字符块贴图-全部【窗口字符 - 窗口字符贴图核心】
+	if( Imported.Drill_CoreOfWindowCharacterSprite ){
+		temp_window.drill_COWCSp_sprite_clearAllSprite();   //『字符块全部清空注意』
+	}
+	
 	// > 绘制 - DEBUG显示画布范围
 	var temp_bitmap = temp_window.contents;
 	temp_bitmap.drill_COWC_debug_drawRect();
@@ -4374,7 +4437,7 @@ Scene_Map.prototype.drill_COWC_timing_createDebugWindow = function() {
 	// > 『字符逐个绘制流程』 - 逐个绘制初始化
 	temp_window.drill_COWC_timing_initDrawText( text, options );
 	
-	// > 『字符贴图流程』 - 刷新字符块贴图【窗口字符 - 窗口字符贴图核心】
+	// > 『字符贴图流程』 - 刷新当前的字符块贴图【窗口字符 - 窗口字符贴图核心】
 	if( Imported.Drill_CoreOfWindowCharacterSprite ){
 		temp_window.drill_COWCSp_sprite_refreshAllSprite();
 	}

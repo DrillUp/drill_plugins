@@ -2548,7 +2548,7 @@ Game_Temp.prototype.initialize = function() {
 Game_Temp.prototype.drill_ABPa_createSprite = function( style_id, individual_sprite ){
 	if( $gameTemp._drill_spritesetCreated != true ){ return; }
 	
-	// > 『控制器与贴图的样式』 - 校验+提示信息
+	// > 『控制器与贴图的样式-』 - 校验+提示信息
 	var cur_styleId   = style_id +1;
 	var cur_styleData = DrillUp.g_ABPa_style[ style_id ];
 	if( cur_styleData == undefined || 
@@ -2557,7 +2557,7 @@ Game_Temp.prototype.drill_ABPa_createSprite = function( style_id, individual_spr
 		return;
 	}
 	
-	// > 『控制器与贴图的样式』 - 创建控制器
+	// > 『控制器与贴图的样式-』 - 创建控制器
 	var temp_controller = new Drill_ABPa_Controller( cur_styleData );
 	this._drill_ABPa_controllerTank.push( temp_controller );
 	

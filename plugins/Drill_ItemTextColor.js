@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.6]        UI - 物品+技能文本颜色
+ * @plugindesc [v2.7]        UI - 物品+技能文本颜色
  * @author Drill_up
  * 
  * 
@@ -181,6 +181,8 @@
  * 更新并兼容了新的窗口字符底层。
  * [v2.6]
  * 修复了单独使用颜色插件，不变色的bug。
+ * [v2.7]
+ * 修复了使用 窗口字符贴图 时显示不正常的bug。
  * 
  * 
  * 
@@ -1035,14 +1037,33 @@ Game_Temp.prototype.drill_COWC_skillNameWithIcon = function( n ){
 //=============================
 var _drill_ITC_COWC_org_drawItemName = Window_Base.prototype.drill_COWC_org_drawItemName;
 Window_Base.prototype.drill_COWC_org_drawItemName = function( item, x, y, width ){
-	this._drill_ITC_isDrawingItemName = true;		//绘制标记 - 开
-	this._drill_ITC_curItem = item;					//当前的物品对象
+	var cur_code = "";
+	if( DataManager.isItem(item) ){
+		var item__id = item.id;
+		if( $dataItems[item.id].baseItemId ){ item__id = $dataItems[item.id].baseItemId; }  //（Yep物品核心兼容）
+		cur_code = $gameTemp.drill_ITC_getColorCode_Item( item__id );
+	}
+	if( DataManager.isWeapon(item) ){
+		var item__id = item.id;
+		if( $dataWeapons[item.id].baseItemId ){ item__id = $dataWeapons[item.id].baseItemId; }  //（Yep物品核心兼容）
+		cur_code = $gameTemp.drill_ITC_getColorCode_Weapon( item__id );
+	}
+	if( DataManager.isArmor(item) ){
+		var item__id = item.id;
+		if( $dataArmors[item.id].baseItemId ){ item__id = $dataArmors[item.id].baseItemId; }  //（Yep物品核心兼容）
+		cur_code = $gameTemp.drill_ITC_getColorCode_Armor( item__id );
+	}
+	if( DataManager.isSkill(item) ){
+		cur_code = $gameTemp.drill_ITC_getColorCode_Skill( item.id );
+	}
+	if( cur_code != "" ){
+		this._drill_ITC_curCode = cur_code;			//绘制标记 - 当前的物品颜色代码
+	}
 	
 	// > 原函数
 	_drill_ITC_COWC_org_drawItemName.call( this, item, x, y, width );
 	
-	this._drill_ITC_isDrawingItemName = false;		//绘制标记 - 关
-	this._drill_ITC_curItem = null;					//置空物品对象
+	this._drill_ITC_curCode = undefined;			//绘制标记 - 置空物品颜色代码
 };
 //=============================
 // * 变色控制 - 物品文本绘制 - 修改颜色
@@ -1052,45 +1073,15 @@ Window_Base.prototype.drill_COWC_org_drawItemName = function( item, x, y, width 
 var _drill_ITC_COWC_org_drawText = Window_Base.prototype.drill_COWC_org_drawText;
 Window_Base.prototype.drill_COWC_org_drawText = function( text, x, y, maxWidth, align ){
 	
-	// > 绘制标记 - 执行
-	if( this._drill_ITC_isDrawingItemName == true ){
-		
-		var item = this._drill_ITC_curItem;
-		if( DataManager.isItem(item) ){
-			var item__id = item.id;
-			if( $dataItems[item.id].baseItemId ){ item__id = $dataItems[item.id].baseItemId; }  //（Yep物品核心兼容）
-			var code = $gameTemp.drill_ITC_getColorCode_Item( item__id );
-			if( code != "" ){
-				text = "\\cc[oSave]\\cc["+ code +"]"+ text +"\\cc[oLoad]";
-			}
-		}
-		if( DataManager.isWeapon(item) ){
-			var item__id = item.id;
-			if( $dataWeapons[item.id].baseItemId ){ item__id = $dataWeapons[item.id].baseItemId; }  //（Yep物品核心兼容）
-			var code = $gameTemp.drill_ITC_getColorCode_Weapon( item__id );
-			if( code != "" ){
-				text = "\\cc[oSave]\\cc["+ code +"]"+ text +"\\cc[oLoad]";
-			}
-		}
-		if( DataManager.isArmor(item) ){
-			var item__id = item.id;
-			if( $dataArmors[item.id].baseItemId ){ item__id = $dataArmors[item.id].baseItemId; }  //（Yep物品核心兼容）
-			var code = $gameTemp.drill_ITC_getColorCode_Armor( item__id );
-			if( code != "" ){
-				text = "\\cc[oSave]\\cc["+ code +"]"+ text +"\\cc[oLoad]";
-			}
-		}
-		if( DataManager.isSkill(item) ){
-			var code = $gameTemp.drill_ITC_getColorCode_Skill( item.id );
-			if( code != "" ){
-				text = "\\cc[oSave]\\cc["+ code +"]"+ text +"\\cc[oLoad]";
-			}
-		}
+	// > 绘制标记 - 颜色文本拼接
+	if( this._drill_ITC_curCode != undefined ){
+		text = "\\cc[oSave]\\cc["+ this._drill_ITC_curCode +"]"+ text +"\\cc[oLoad]";
 	}
 	
 	// > 原函数
 	_drill_ITC_COWC_org_drawText.call( this, text, x, y, maxWidth, align );
 };
+
 
 
 //=============================================================================
@@ -1101,6 +1092,8 @@ Window_Base.prototype.drill_COWC_org_drawText = function( text, x, y, maxWidth, 
 //=============================================================================
 //=============================
 // * 变色兼容 - mog技能浮动框/招式名气泡框
+//			
+//			说明：	> 该函数修改 textColor，与窗口字符无关。
 //=============================
 if(Imported.MOG_ActionName ){
 	
@@ -1145,6 +1138,8 @@ if(Imported.MOG_ActionName ){
 }
 //=============================
 // * 变色兼容 - mog战斗结果界面
+//			
+//			说明：	> 该函数修改 textColor，与窗口字符无关。
 //=============================
 if(Imported.MOG_BattleResult ){
 	
@@ -1184,6 +1179,8 @@ if(Imported.MOG_BattleResult ){
 }
 //=============================
 // * 变色兼容 - mog道具浮动文字（覆写）
+//			
+//			说明：	> 该函数修改 textColor，与窗口字符无关。
 //=============================
 if( Imported.MOG_TreasurePopup ){
 	
@@ -1220,6 +1217,8 @@ if( Imported.MOG_TreasurePopup ){
 }
 //=============================
 // * 变色兼容 - mog道具浮动框（覆写）
+//			
+//			说明：	> 该函数修改 textColor，与窗口字符无关。
 //=============================
 if( Imported.MOG_TreasureHud  ){
 	

@@ -360,7 +360,7 @@ DataManager.drill_GSM_doDelete = function( save_file_id ){
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 核心漏洞修复 - 最后继承
+// * 核心漏洞修复 - 最后继承1级
 //==============================
 var _drill_GSM_scene_initialize = SceneManager.initialize;
 SceneManager.initialize = function() {

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        游戏窗体 - 天窗层的多层背景
+ * @plugindesc [v1.3]        游戏窗体 - 天窗层的多层背景
  * @author Drill_up
  * 
  * @Drill_LE_param "背景层-%d"
@@ -33,6 +33,9 @@
  * 1.插件的作用域：地图界面、战斗界面、菜单界面。
  *   作用于渲染器。
  * 2.更多详细内容，去看看文档 "1.系统 > 大家族-屏幕快照.docx"。
+ * 3.要了解更详细的组合方法，
+ *   去看看 "17.主菜单 > 多层组合装饰（界面装饰）.docx"。
+ *   还有 "17.主菜单 > 多层组合装饰（界面装饰-天窗层）.docx"。
  * 细节：
  *   (1.天窗层是在整个游戏画面之上的特殊层级，比最顶层还高，
  *      只有天窗层才能使用动态快照效果。
@@ -141,6 +144,7 @@
  * 2."变量%["表示该变量获取到属性时，会乘以100倍。因为变量只能存整数。
  *   比如缩放值为1.2时，则获取到： 1.2 * 100 = 120。
  * 
+ * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 延迟修改单属性
  * 上述的插件指令中，部分插件指令可以延迟执行：
@@ -199,6 +203,67 @@
  *   的参数可以随意组合。一共有5*7种组合方式。
  * 2.注意，该插件能在 菜单界面 中工作，也就是说，延迟的指令在菜单界面也有效。
  * 
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 周期修改单属性
+ * 上述的插件指令中，部分插件指令可以周期执行：
+ * 
+ * 插件指令：>天窗层背景 : 背景[11] : 添加周期-隐藏(周期) : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>天窗层背景 : 背景变量[21] : 添加周期-隐藏(周期) : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>天窗层背景 : 批量背景[7,8] : 添加周期-隐藏(周期) : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>天窗层背景 : 批量背景变量[21,22] : 添加周期-隐藏(周期) : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>天窗层背景 : 全部背景 : 添加周期-隐藏(周期) : 周期时长[90] : 周期内开始时间[0]
+ * 
+ * 插件指令：>天窗层背景 : 背景[11] : 添加周期-显示(周期) : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>天窗层背景 : 背景[11] : 添加周期-隐藏(周期) : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>天窗层背景 : 背景[11] : 添加周期-暂停(周期) : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>天窗层背景 : 背景[11] : 添加周期-继续(周期) : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>天窗层背景 : 背景[11] : 添加周期-修改单属性(周期) : 透明度[255] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>天窗层背景 : 背景[11] : 添加周期-修改单属性(周期) : 透明度变量[21] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>天窗层背景 : 背景[11] : 添加周期-修改单属性(周期) : 旋转[90] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>天窗层背景 : 背景[11] : 添加周期-修改单属性(周期) : 旋转变量[21] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>天窗层背景 : 背景[11] : 添加周期-修改单属性(周期) : 移动速度X[1.5] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>天窗层背景 : 背景[11] : 添加周期-修改单属性(周期) : 移动速度X变量%[21] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>天窗层背景 : 背景[11] : 添加周期-修改单属性(周期) : 移动速度Y[1.5] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>天窗层背景 : 背景[11] : 添加周期-修改单属性(周期) : 移动速度Y变量%[21] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>天窗层背景 : 背景[11] : 添加周期-修改单属性(周期) : 缩放X[1.2] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>天窗层背景 : 背景[11] : 添加周期-修改单属性(周期) : 缩放X变量%[21] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>天窗层背景 : 背景[11] : 添加周期-修改单属性(周期) : 缩放Y[1.2] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>天窗层背景 : 背景[11] : 添加周期-修改单属性(周期) : 缩放Y变量%[21] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>天窗层背景 : 背景[11] : 添加周期-修改单属性(周期) : 斜切X[0.2] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>天窗层背景 : 背景[11] : 添加周期-修改单属性(周期) : 斜切X变量%[21] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>天窗层背景 : 背景[11] : 添加周期-修改单属性(周期) : 斜切Y[0.2] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>天窗层背景 : 背景[11] : 添加周期-修改单属性(周期) : 斜切Y变量%[21] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>天窗层背景 : 背景[11] : 添加周期-还原所有单属性(周期) : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>天窗层背景 : 背景[11] : 清空周期指令
+ * 
+ * 1.前半部分（背景[11]）和 后半部分（ 添加周期-隐藏(周期) ）
+ *   的参数可以随意组合。一共有5*22种组合方式。
+ * 2."添加周期"后，指令会根据"周期时长"和"开始时间"，持续循环执行。
+ *   "清空周期指令"可以清空添加的指令。
+ * 3.你可以塞入多条周期指令，每个周期指令控制不同的属性，实现复杂的变换效果。
+ * 4.注意，该插件能在 菜单界面 中工作，也就是说，周期的指令在菜单界面也有效。
+ * 5."变量%["表示该变量修改属性值时，会缩小100倍。因为变量只能存整数。
+ *   比如缩放的变量值为120时，则表示赋值： 120 / 100 = 1.2。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 周期移动到
+ * 上述的插件指令中，移动到的插件指令也可以周期执行：
+ * 
+ * 插件指令：>天窗层背景 : 背景[11] : 添加周期-移动到(周期)-匀速移动 : 位置[100,100] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>天窗层背景 : 背景[11] : 添加周期-移动到(周期)-匀速移动 : 位置变量[25,26] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>天窗层背景 : 背景[11] : 添加周期-移动到(周期)-弹性移动 : 位置[100,100] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>天窗层背景 : 背景[11] : 添加周期-移动到(周期)-弹性移动 : 位置变量[25,26] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>天窗层背景 : 背景[11] : 添加周期-移动到(周期)-增减速移动 : 位置[100,100] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>天窗层背景 : 背景[11] : 添加周期-移动到(周期)-增减速移动 : 位置变量[25,26] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>天窗层背景 : 背景[11] : 添加周期-移动到(周期)-执行归位 : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>天窗层背景 : 背景[11] : 清空周期指令
+ * 
+ * 1.前半部分（背景[11]）和 后半部分（ 添加周期-移动到(周期)-匀速移动 ）
+ *   的参数可以随意组合。一共有5*8种组合方式。
+ * 2.注意，该插件能在 菜单界面 中工作，也就是说，周期的指令在菜单界面也有效。
+ * 
+ * 
  * -----------------------------------------------------------------------------
  * ----插件性能
  * 测试仪器：   4G 内存，Intel Core i5-2520M CPU 2.5GHz 处理器
@@ -212,12 +277,12 @@
  * 工作类型：   持续执行
  * 时间复杂度： o(n^2)*o(贴图处理) 每帧
  * 测试方法1：  在地图中放置多个背景，进行性能测试。
- * 测试结果1：  200个事件的地图中，平均消耗为：【15.30ms】
- *              100个事件的地图中，平均消耗为：【9.54ms】
- *               50个事件的地图中，平均消耗为：【7.60ms】
+ * 测试结果1：  200个事件的地图中，平均消耗为：【21.70ms】
+ *              100个事件的地图中，平均消耗为：【19.54ms】
+ *               50个事件的地图中，平均消耗为：【17.64ms】
  * 测试方法2：  在不同的界面中，进行性能测试。
- * 测试结果2：  战斗界面中，平均消耗为：【7.57ms】
- *              菜单界面中，平均消耗为：【12.95ms】
+ * 测试结果2：  战斗界面中，平均消耗为：【17.38ms】
+ *              菜单界面中，平均消耗为：【13.92ms】
  *
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
  *   测试结果并不是精确值，范围在给定值的10ms范围内波动。
@@ -232,6 +297,8 @@
  * 添加了延迟指令功能。
  * [v1.2]
  * 完善了变换功能的插件指令。
+ * [v1.3]
+ * 整理改进了内部结构，并添加了周期指令。
  * 
  * 
  * 
@@ -247,121 +314,121 @@
  *
  * @param 背景层-1
  * @parent ---背景层组 1至20---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-2
  * @parent ---背景层组 1至20---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-3
  * @parent ---背景层组 1至20---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-4
  * @parent ---背景层组 1至20---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-5
  * @parent ---背景层组 1至20---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-6
  * @parent ---背景层组 1至20---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-7
  * @parent ---背景层组 1至20---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-8
  * @parent ---背景层组 1至20---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-9
  * @parent ---背景层组 1至20---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-10
  * @parent ---背景层组 1至20---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-11
  * @parent ---背景层组 1至20---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-12
  * @parent ---背景层组 1至20---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-13
  * @parent ---背景层组 1至20---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-14
  * @parent ---背景层组 1至20---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-15
  * @parent ---背景层组 1至20---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-16
  * @parent ---背景层组 1至20---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-17
  * @parent ---背景层组 1至20---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-18
  * @parent ---背景层组 1至20---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-19
  * @parent ---背景层组 1至20---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-20
  * @parent ---背景层组 1至20---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
@@ -370,121 +437,121 @@
  *
  * @param 背景层-21
  * @parent ---背景层组21至40---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-22
  * @parent ---背景层组21至40---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-23
  * @parent ---背景层组21至40---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-24
  * @parent ---背景层组21至40---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-25
  * @parent ---背景层组21至40---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-26
  * @parent ---背景层组21至40---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-27
  * @parent ---背景层组21至40---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-28
  * @parent ---背景层组21至40---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-29
  * @parent ---背景层组21至40---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-30
  * @parent ---背景层组21至40---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-31
  * @parent ---背景层组21至40---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-32
  * @parent ---背景层组21至40---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-33
  * @parent ---背景层组21至40---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-34
  * @parent ---背景层组21至40---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-35
  * @parent ---背景层组21至40---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-36
  * @parent ---背景层组21至40---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-37
  * @parent ---背景层组21至40---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-38
  * @parent ---背景层组21至40---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-39
  * @parent ---背景层组21至40---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-40
  * @parent ---背景层组21至40---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
@@ -493,121 +560,121 @@
  *
  * @param 背景层-41
  * @parent ---背景层组41至60---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-42
  * @parent ---背景层组41至60---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-43
  * @parent ---背景层组41至60---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-44
  * @parent ---背景层组41至60---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-45
  * @parent ---背景层组41至60---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-46
  * @parent ---背景层组41至60---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-47
  * @parent ---背景层组41至60---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-48
  * @parent ---背景层组41至60---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-49
  * @parent ---背景层组41至60---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-50
  * @parent ---背景层组41至60---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-51
  * @parent ---背景层组41至60---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-52
  * @parent ---背景层组41至60---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-53
  * @parent ---背景层组41至60---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-54
  * @parent ---背景层组41至60---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-55
  * @parent ---背景层组41至60---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-56
  * @parent ---背景层组41至60---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-57
  * @parent ---背景层组41至60---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-58
  * @parent ---背景层组41至60---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-59
  * @parent ---背景层组41至60---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-60
  * @parent ---背景层组41至60---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
@@ -616,126 +683,126 @@
  *
  * @param 背景层-61
  * @parent ---背景层组61至80---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-62
  * @parent ---背景层组61至80---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-63
  * @parent ---背景层组61至80---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-64
  * @parent ---背景层组61至80---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-65
  * @parent ---背景层组61至80---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-66
  * @parent ---背景层组61至80---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-67
  * @parent ---背景层组61至80---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-68
  * @parent ---背景层组61至80---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-69
  * @parent ---背景层组61至80---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-70
  * @parent ---背景层组61至80---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-71
  * @parent ---背景层组61至80---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-72
  * @parent ---背景层组61至80---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-73
  * @parent ---背景层组61至80---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-74
  * @parent ---背景层组61至80---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-75
  * @parent ---背景层组61至80---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-76
  * @parent ---背景层组61至80---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-77
  * @parent ---背景层组61至80---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-78
  * @parent ---背景层组61至80---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-79
  * @parent ---背景层组61至80---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  * @param 背景层-80
  * @parent ---背景层组61至80---
- * @type struct<HDSHDSBckground>
+ * @type struct<HDSBLayer>
  * @desc 背景的详细配置信息。
  * @default 
  *
  */
-/*~struct~HDSHDSBckground:
+/*~struct~HDSBLayer:
  * 
  * @param 标签
  * @desc 只用于方便区分查看的标签，不作用在插件中。
@@ -753,52 +820,13 @@
  * @dir img/Special__layer/
  * @type file
  *
- * @param 平移-背景 X
- * @parent ---贴图---
- * @desc x轴方向平移，正数向左，负数向右，单位像素。0为贴在最左边。
- * @default 0
- *
- * @param 平移-背景 Y
- * @parent ---贴图---
- * @desc y轴方向平移，正数向上，负数向下，单位像素。0为贴在最上面。
- * @default 0
- * 
- * @param 平铺的旋转角度
- * @parent ---贴图---
- * @desc 平铺图形的旋转角度。
- * @default 0.0
- *
- * @param 透明度
- * @parent ---贴图---
- * @type number
- * @min 0
- * @max 255
- * @desc 0为完全透明，255为完全不透明。
- * @default 255
- *
  * @param 是否预加载
  * @parent ---贴图---
  * @type boolean
  * @on 开启
  * @off 关闭
- * @desc true - 开启，false - 关闭，预加载详细介绍可见："1.系统 > 关于预加载.docx"。
+ * @desc true - 开启，false - 关闭，预加载详细介绍去看看："1.系统 > 关于预加载.docx"。
  * @default false
- *
- * @param 混合模式
- * @parent ---贴图---
- * @type select
- * @option 普通
- * @value 0
- * @option 发光
- * @value 1
- * @option 实色混合(正片叠底)
- * @value 2
- * @option 浅色
- * @value 3
- * @option 叠加
- * @value 4
- * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
- * @default 0
  *
  * @param 图像-色调值
  * @parent ---贴图---
@@ -815,6 +843,17 @@
  * @off 关闭
  * @desc 此参数为缩放设置，设置模糊后，缩放时可以模糊资源图像的边缘，防止出现像素锯齿。
  * @default false
+ * 
+ *
+ * @param 平移-背景 X
+ * @parent ---贴图---
+ * @desc x轴方向平移，正数向左，负数向右，单位像素。0为贴在最左边。
+ * @default 0
+ *
+ * @param 平移-背景 Y
+ * @parent ---贴图---
+ * @desc y轴方向平移，正数向上，负数向下，单位像素。0为贴在最上面。
+ * @default 0
  *
  * @param 背景X速度
  * @parent ---贴图---
@@ -825,6 +864,35 @@
  * @parent ---贴图---
  * @desc 背景按y轴方向循环移动的速度。正数向上，负数向下。（可为小数）
  * @default 0.0
+ *
+ * @param 透明度
+ * @parent ---贴图---
+ * @type number
+ * @min 0
+ * @max 255
+ * @desc 0为完全透明，255为完全不透明。
+ * @default 255
+ * 
+ * @param 平铺的旋转角度
+ * @parent ---贴图---
+ * @desc 平铺图形的旋转角度。
+ * @default 0.0
+ *
+ * @param 混合模式
+ * @parent ---贴图---
+ * @type select
+ * @option 普通
+ * @value 0
+ * @option 发光
+ * @value 1
+ * @option 实色混合(正片叠底)
+ * @value 2
+ * @option 浅色
+ * @value 3
+ * @option 叠加
+ * @value 4
+ * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
+ * @default 0
  *
  * @param 是否在地图界面中启用
  * @parent ---贴图---
@@ -952,7 +1020,8 @@
 //		★工作类型		持续执行
 //		★时间复杂度		o(n^2)*o(贴图处理) 每帧
 //		★性能测试因素	特效管理层
-//		★性能测试消耗	7.6ms、15.3ms（Drill_HDSB_Sprite.update）
+//		★性能测试消耗	2026/2/11：
+//							》21.7ms（Drill_HDSB_Sprite.update）
 //		★最坏情况		暂无
 //		★备注			暂无
 //		
@@ -964,35 +1033,35 @@
 //			->☆提示信息
 //			->☆静态数据
 //			->☆插件指令
+//				->『变换特性-平铺贴图』
+//					->修改单属性（不含层级）
+//					->移动到
+//					->获取属性
+//					x->修改中心锚点
+//					->延迟修改单属性（不含混合模式、层级、图片层级）
+//					->延迟移动到
+//					->周期修改单属性（不含混合模式、层级、图片层级）
+//					->周期移动到
+//				x->其它特性
 //			->☆预加载
 //			->☆存储数据
 //			
 //			->☆控制器与贴图
-//				->跨多个界面控制
+//				->多场景
 //				->界面创建
 //				->控制器帧刷新
 //				->基础特性
 //				->销毁
 //			
 //			->天窗层背景控制器【Drill_HDSB_Controller】
-//				->A主体
-//				->B变换特性
-//				->D指令叠加变化
-//				->E延迟指令
-//				->F自变化效果
 //			->天窗层背景贴图【Drill_HDSB_Sprite】
-//				->A主体
-//				->B变换特性
-//				->C对象绑定
-//				->D指令叠加变化-控制器用
-//				->E延迟指令
-//				->F自变化效果
 //
 //
 //		★家谱：
 //			大家族-屏幕快照
 //		
 //		★脚本文档：
+//			17.主菜单 > 多层组合装饰（界面装饰）（脚本）.docx
 //			22.游戏窗体 > 动态快照-天窗层（脚本）.docx
 //		
 //		★插件私有类：
@@ -1000,10 +1069,20 @@
 //			* 天窗层背景贴图【Drill_HDSB_Sprite】
 //		
 //		★必要注意事项：
-//			1. 
+//			暂无
 //		
 //		★其它说明细节：
-//			1.
+//			1.这里空间很大，感觉应该放点什么……那就给所有 界面装饰插件 编个号吧。
+//			  ┌──────────────────────────────────┐
+//			  │   /@@@@@@    /@@@@@@   /@@@@@@@  │
+//			  │  /@@__  @@  /@@__  @@ | @@____/  │
+//			  │ | @@  \ @@ |__/  \ @@ | @@       │
+//			  │ | @@  | @@    /@@@@@/ | @@@@@@@  │
+//			  │ | @@  | @@   |___  @@ |_____  @@ │
+//			  │ | @@  | @@  /@@  \ @@  /@@  \ @@ │
+//			  │ |  @@@@@@/ |  @@@@@@/ |  @@@@@@/ │
+//			  │  \______/   \______/   \______/  │
+//			  └──────────────────────────────────┘
 //		
 //		★存在的问题：
 //			暂无
@@ -1044,8 +1123,15 @@
 	//==============================
 	// * 提示信息 - 报错 - NaN校验值
 	//==============================
-	DrillUp.drill_HDSB_getPluginTip_ParamIsNaN = function( param_name ){
-		return "【" + DrillUp.g_HDSB_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+	DrillUp.drill_HDSB_getPluginTip_ParamIsNaN = function( param_name, check_tank ){
+		var text = "【" + DrillUp.g_HDSB_PluginTip_curName + "】\n检测到参数"+param_name+"出现了NaN值，请及时检查你的函数。";
+		if( check_tank ){
+			var keys = Object.keys( check_tank );
+			for( var i=0; i < keys.length; i++ ){
+				text += "\n" + keys[i] + "的值：" + check_tank[ keys[i] ] ;
+			}
+		}
+		return text;
 	};
 	//==============================
 	// * 提示信息 - 报错 - 底层版本过低
@@ -1077,7 +1163,7 @@
 
 	//==============================
 	// * 静态数据 - 背景
-	//				（~struct~HDSHDSBckground）
+	//				（~struct~HDSBLayer）
 	//==============================
 	DrillUp.drill_HDSB_backgroundInit = function( dataFrom ){
 		var data = {};
@@ -1098,11 +1184,12 @@
 		data['smooth'] = String( dataFrom["图像-模糊边缘"] || "false") == "true";
 		
 		data['visible'] = false;
+		data['pause'] = false;
 		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
 		data['zIndex'] = Number( dataFrom["图片层级"] || 0);
 		
 		// > A主体 - 其它特性
-		data['pause'] = false;
+		//	（无）
 		
 		
 		// > B变换特性
@@ -1117,7 +1204,8 @@
 		//	（无）
 		
 		
-		// > F自变化效果
+		// > G自变化效果
+		//		（背景 不含 摇晃效果）
 		data['effect_float'] = String( dataFrom["浮动效果"] || "关闭");
 		data['effect_floatSpeed'] = Number( dataFrom["浮动速度"] || 1.0);
 		data['effect_floatRange'] = Number( dataFrom["浮动偏移量"] || 15);
@@ -1128,24 +1216,40 @@
 		data['effect_zoomSpeed'] = Number( dataFrom["缩放速度"] || 1.0);
 		data['effect_zoomRange'] = Number( dataFrom["缩放幅度范围"] || 0.2);
 		
+		// > 控制器 初始化数据『控制器与贴图的样式-静态数据-指针初始化』
+		Drill_HDSB_Controller.drill_controller_initData( data );
+		
 		return data;
 	}
-	
-	/*-----------------杂项------------------*/
-	DrillUp.g_HDSB_saveEnabled = String(DrillUp.parameters["是否开启参数存储"] || "false") == "true" ;
-	
+	//==============================
+	// * 静态数据 - 最后继承1级
+	//==============================
+	var _drill_HDSB_scene_initialize = SceneManager.initialize;
+	SceneManager.initialize = function() {
+		_drill_HDSB_scene_initialize.call(this);
+		
+		/*-----------------背景------------------*/
+		for( var i = 0; i < DrillUp.g_HDSB_layers.length; i++ ){
+			var temp = DrillUp.g_HDSB_layers[i];
+			if( temp != undefined ){
+				DrillUp.g_HDSB_layers[i] = DrillUp.drill_HDSB_backgroundInit( temp );
+			}
+		}
+	}
 	/*-----------------背景------------------*/
 	DrillUp.g_HDSB_layers_length = 80;
 	DrillUp.g_HDSB_layers = [];
 	for( var i = 0; i < DrillUp.g_HDSB_layers_length; i++ ){
 		if( DrillUp.parameters["背景层-" + String(i+1) ] != undefined &&
 			DrillUp.parameters["背景层-" + String(i+1) ] != "" ){
-			var temp = JSON.parse(DrillUp.parameters["背景层-" + String(i+1) ]);
-			DrillUp.g_HDSB_layers[i] = DrillUp.drill_HDSB_backgroundInit( temp );
+			DrillUp.g_HDSB_layers[i] = JSON.parse(DrillUp.parameters["背景层-" + String(i+1) ]);
 		}else{
 			DrillUp.g_HDSB_layers[i] = undefined;		//（设为空值，节约静态数据占用容量）
 		}
 	}
+	
+	/*-----------------杂项------------------*/
+	DrillUp.g_HDSB_saveEnabled = String(DrillUp.parameters["是否开启参数存储"] || "false") == "true" ;
 	
 	
 	
@@ -1667,6 +1771,257 @@ Game_Interpreter.prototype.drill_HDSB_pluginCommand = function( command, args ){
 				}
 			}
 		}
+		
+		/*-----------------F周期指令------------------*/
+		if( args.length == 4 ){
+			var type = String(args[3]);
+			if( type == "清空周期指令" ){
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_clearPeriodizeCommand();
+				}
+			}
+		}
+		if( args.length == 8 ){
+			var type = String(args[3]);
+			var time_period = String(args[5]);
+			var time_start = String(args[7]);
+			if( type == "添加周期-显示(周期)" ){
+				time_period = time_period.replace("周期时长[","");
+				time_period = time_period.replace("]","");
+				time_period = Number( time_period );
+				time_start = time_start.replace("周期内开始时间[","");
+				time_start = time_start.replace("]","");
+				time_start = Number( time_start );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setPeriodizeCommand(
+						"drill_controller_setVisible", [true], time_period, time_start
+					);
+				}
+			}
+			if( type == "添加周期-隐藏(周期)" ){
+				time_period = time_period.replace("周期时长[","");
+				time_period = time_period.replace("]","");
+				time_period = Number( time_period );
+				time_start = time_start.replace("周期内开始时间[","");
+				time_start = time_start.replace("]","");
+				time_start = Number( time_start );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setPeriodizeCommand(
+						"drill_controller_setVisible", [false], time_period, time_start
+					);
+				}
+			}
+			if( type == "添加周期-暂停(周期)" ){
+				time_period = time_period.replace("周期时长[","");
+				time_period = time_period.replace("]","");
+				time_period = Number( time_period );
+				time_start = time_start.replace("周期内开始时间[","");
+				time_start = time_start.replace("]","");
+				time_start = Number( time_start );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setPeriodizeCommand(
+						"drill_controller_setPause", [true], time_period, time_start
+					);
+				}
+			}
+			if( type == "添加周期-继续(周期)" ){
+				time_period = time_period.replace("周期时长[","");
+				time_period = time_period.replace("]","");
+				time_period = Number( time_period );
+				time_start = time_start.replace("周期内开始时间[","");
+				time_start = time_start.replace("]","");
+				time_start = Number( time_start );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setPeriodizeCommand(
+						"drill_controller_setPause", [false], time_period, time_start
+					);
+				}
+			}
+			if( type == "添加周期-还原所有单属性(周期)" ){
+				time_period = time_period.replace("周期时长[","");
+				time_period = time_period.replace("]","");
+				time_period = Number( time_period );
+				time_start = time_start.replace("周期内开始时间[","");
+				time_start = time_start.replace("]","");
+				time_start = Number( time_start );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setPeriodizeCommand(
+						"drill_controller_commandChange_restoreAttr", [], time_period, time_start
+					);
+				}
+			}
+			if( type == "添加周期-移动到(周期)-执行归位" ){
+				time_period = time_period.replace("周期时长[","");
+				time_period = time_period.replace("]","");
+				time_period = Number( time_period );
+				time_start = time_start.replace("周期内开始时间[","");
+				time_start = time_start.replace("]","");
+				time_start = Number( time_start );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setPeriodizeCommand(
+						"drill_controller_commandChange_restoreMove", [], time_period, time_start
+					);
+				}
+			}
+		}
+		if( args.length == 12 ){
+			var type = String(args[3]);
+			var temp1 = String(args[5]);
+			var temp2 = String(args[7]);
+			var time_period = String(args[9]);
+			var time_start = String(args[11]);
+			if( type == "添加周期-修改单属性(周期)" ){
+				temp2 = temp2.replace("时间[","");
+				temp2 = temp2.replace("]","");
+				time_period = time_period.replace("周期时长[","");
+				time_period = time_period.replace("]","");
+				time_period = Number( time_period );
+				time_start = time_start.replace("周期内开始时间[","");
+				time_start = time_start.replace("]","");
+				time_start = Number( time_start );
+				
+				if( temp1.indexOf("透明度[") != -1 ||
+					temp1.indexOf("透明度变量[") != -1 ){
+					var num_list = this.drill_HDSB_getArgNumList(temp1);
+					for( var k=0; k < controllers.length; k++ ){
+						controllers[k].drill_controller_setPeriodizeCommand(
+							"drill_controller_commandChange_setOpacity", 
+							[ "匀速变化", num_list[0], Number(temp2) ], time_period, time_start
+						);
+					}
+				}
+				if( temp1.indexOf("旋转[") != -1 ||
+					temp1.indexOf("旋转变量[") != -1 ){
+					var num_list = this.drill_HDSB_getArgNumList(temp1);
+					for( var k=0; k < controllers.length; k++ ){
+						controllers[k].drill_controller_setPeriodizeCommand(
+							"drill_controller_commandChange_setRotate",
+							[ "匀速变化", num_list[0], Number(temp2) ], time_period, time_start
+						);
+					}
+				}
+				if( temp1.indexOf("移动速度X[") != -1 ||
+					temp1.indexOf("移动速度X变量%[") != -1 ){
+					var num_list = this.drill_HDSB_getArgNumList(temp1);
+					for( var k=0; k < controllers.length; k++ ){
+						controllers[k].drill_controller_setPeriodizeCommand(
+							"drill_controller_commandChange_setSpeedX",
+							["匀速变化", num_list[0], Number(temp2) ], time_period, time_start
+						);
+					}
+				}
+				if( temp1.indexOf("移动速度Y[") != -1 ||
+					temp1.indexOf("移动速度Y变量%[") != -1 ){
+					var num_list = this.drill_HDSB_getArgNumList(temp1);
+					for( var k=0; k < controllers.length; k++ ){
+						controllers[k].drill_controller_setPeriodizeCommand(
+							"drill_controller_commandChange_setSpeedY",
+							["匀速变化", num_list[0], Number(temp2) ], time_period, time_start
+						);
+					}
+				}
+				if( temp1.indexOf("缩放X[") != -1 ||
+					temp1.indexOf("缩放X变量%[") != -1 ){
+					var num_list = this.drill_HDSB_getArgNumList(temp1);
+					for( var k=0; k < controllers.length; k++ ){
+						controllers[k].drill_controller_setPeriodizeCommand(
+							"drill_controller_commandChange_setScaleX",
+							[ "匀速变化", num_list[0], Number(temp2) ], time_period, time_start
+						);
+					}
+				}
+				if( temp1.indexOf("缩放Y[") != -1 ||
+					temp1.indexOf("缩放Y变量%[") != -1 ){
+					var num_list = this.drill_HDSB_getArgNumList(temp1);
+					for( var k=0; k < controllers.length; k++ ){
+						controllers[k].drill_controller_setPeriodizeCommand(
+							"drill_controller_commandChange_setScaleY",
+							[ "匀速变化", num_list[0], Number(temp2) ], time_period, time_start
+						);
+					}
+				}
+				if( temp1.indexOf("斜切X[") != -1 ||
+					temp1.indexOf("斜切X变量%[") != -1 ){
+					var num_list = this.drill_HDSB_getArgNumList(temp1);
+					for( var k=0; k < controllers.length; k++ ){
+						controllers[k].drill_controller_setPeriodizeCommand(
+							"drill_controller_commandChange_setSkewX",
+							[ "匀速变化", num_list[0], Number(temp2) ], time_period, time_start
+						);
+					}
+				}
+				if( temp1.indexOf("斜切Y[") != -1 ||
+					temp1.indexOf("斜切Y变量%[") != -1 ){
+					var num_list = this.drill_HDSB_getArgNumList(temp1);
+					for( var k=0; k < controllers.length; k++ ){
+						controllers[k].drill_controller_setPeriodizeCommand(
+							"drill_controller_commandChange_setSkewY",
+							[ "匀速变化", num_list[0], Number(temp2) ], time_period, time_start
+						);
+					}
+				}
+			}
+			if( type == "添加周期-移动到(周期)-匀速移动" ){
+				temp2 = temp2.replace("时间[","");
+				temp2 = temp2.replace("]","");
+				time_period = time_period.replace("周期时长[","");
+				time_period = time_period.replace("]","");
+				time_period = Number( time_period );
+				time_start = time_start.replace("周期内开始时间[","");
+				time_start = time_start.replace("]","");
+				time_start = Number( time_start );
+				if( temp1.indexOf("位置[") != -1 ||
+					temp1.indexOf("位置变量[") != -1 ){
+					var num_list = this.drill_HDSB_getArgNumList(temp1);
+					for( var k=0; k < controllers.length; k++ ){
+						controllers[k].drill_controller_setPeriodizeCommand(
+							"drill_controller_commandChange_setMove",
+							[ "匀速变化", num_list[0], num_list[1], Number(temp2) ], time_period, time_start
+						);
+					}
+				}
+			}
+			if( type == "添加周期-移动到(周期)-弹性移动" ){
+				temp2 = temp2.replace("时间[","");
+				temp2 = temp2.replace("]","");
+				time_period = time_period.replace("周期时长[","");
+				time_period = time_period.replace("]","");
+				time_period = Number( time_period );
+				time_start = time_start.replace("周期内开始时间[","");
+				time_start = time_start.replace("]","");
+				time_start = Number( time_start );
+				if( temp1.indexOf("位置[") != -1 ||
+					temp1.indexOf("位置变量[") != -1 ){
+					var num_list = this.drill_HDSB_getArgNumList(temp1);
+					for( var k=0; k < controllers.length; k++ ){
+						controllers[k].drill_controller_setPeriodizeCommand(
+							"drill_controller_commandChange_setMove",
+							[ "弹性变化", num_list[0], num_list[1], Number(temp2) ], time_period, time_start
+						);
+					}
+				}
+			}
+			if( type == "添加周期-移动到(周期)-增减速移动" ){
+				temp2 = temp2.replace("时间[","");
+				temp2 = temp2.replace("]","");
+				time_period = time_period.replace("周期时长[","");
+				time_period = time_period.replace("]","");
+				time_period = Number( time_period );
+				time_start = time_start.replace("周期内开始时间[","");
+				time_start = time_start.replace("]","");
+				time_start = Number( time_start );
+				if( temp1.indexOf("位置[") != -1 ||
+					temp1.indexOf("位置变量[") != -1 ){
+					var num_list = this.drill_HDSB_getArgNumList(temp1);
+					for( var k=0; k < controllers.length; k++ ){
+						controllers[k].drill_controller_setPeriodizeCommand(
+							"drill_controller_commandChange_setMove",
+							[ "增减速变化", num_list[0], num_list[1], Number(temp2) ], time_period, time_start
+						);
+					}
+				}
+			}
+		}
 	}
 	
 };
@@ -1865,8 +2220,9 @@ Game_Temp.prototype.initialize = function(){
 	this._drill_HDSB_spriteTank = [];			//贴图容器
 	Graphics.drill_CODS_overstoryLayerClear();	//清空 天窗层
 };
+
 //==============================
-// * 控制器与贴图 - 销毁时（地图界面）
+// * 控制器与贴图 - 销毁时『多场景与游戏窗体-地图界面』
 //==============================
 var _drill_HDSB_smap_terminate = Scene_Map.prototype.terminate;
 Scene_Map.prototype.terminate = function(){
@@ -1875,17 +2231,17 @@ Scene_Map.prototype.terminate = function(){
 	Graphics.drill_CODS_overstoryLayerClear();	//清空 天窗层
 };
 //==============================
-// * 控制器与贴图 - 帧刷新（地图界面）
+// * 控制器与贴图 - 帧刷新『多场景与游戏窗体-地图界面』
 //==============================
 var _drill_HDSB_smap_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function(){
 	_drill_HDSB_smap_update.call(this);
-	this.drill_HDSB_updateController();		//帧刷新 - 控制器
-	this.drill_HDSB_updateAttr();			//帧刷新 - 基础特性
-	this.drill_HDSB_updateDestroy();		//帧刷新 - 销毁
+	this.drill_HDSB_updateController();			//帧刷新 - 控制器
+	this.drill_HDSB_updateAttr();				//帧刷新 - 基础特性
+	this.drill_HDSB_updateDestroy();			//帧刷新 - 销毁
 };
 //==============================
-// * 控制器与贴图 - 界面创建时（地图界面）
+// * 控制器与贴图 - 界面创建时『多场景与游戏窗体-地图界面』
 //==============================
 var _drill_HDSB_smap_createAllWindows = Scene_Map.prototype.createAllWindows;
 Scene_Map.prototype.createAllWindows = function(){
@@ -1893,7 +2249,7 @@ Scene_Map.prototype.createAllWindows = function(){
 	this.drill_HDSB_create();
 };
 //==============================
-// * 控制器与贴图 - 界面创建 （地图界面）
+// * 控制器与贴图 - 界面创建『多场景与游戏窗体-地图界面』
 //==============================
 Scene_Map.prototype.drill_HDSB_create = function(){
 	$gameTemp._drill_HDSB_spriteTank = [];			//贴图容器（不允许出现null值）
@@ -1926,7 +2282,7 @@ Scene_Map.prototype.drill_HDSB_create = function(){
 	Graphics.drill_CODS_sortByZIndex();
 }
 //==============================
-// * 控制器与贴图 - 帧刷新 控制器（地图界面）
+// * 控制器与贴图 - 帧刷新 控制器『多场景与游戏窗体-地图界面』
 //==============================
 Scene_Map.prototype.drill_HDSB_updateController = function(){
 	for(var i = 0; i < $gameSystem._drill_HDSB_controllerTank.length; i++ ){
@@ -1938,7 +2294,7 @@ Scene_Map.prototype.drill_HDSB_updateController = function(){
 	}
 }
 //==============================
-// * 控制器与贴图 - 帧刷新 基础特性
+// * 控制器与贴图 - 帧刷新 基础特性『多场景与游戏窗体-地图界面』
 //==============================
 Scene_Map.prototype.drill_HDSB_updateAttr = function(){
 	var has_layerChange = false;
@@ -1963,7 +2319,7 @@ Scene_Map.prototype.drill_HDSB_updateAttr = function(){
 	}
 }
 //==============================
-// * 控制器与贴图 - 帧刷新 销毁（地图界面）
+// * 控制器与贴图 - 帧刷新 销毁『多场景与游戏窗体-地图界面』
 //==============================
 Scene_Map.prototype.drill_HDSB_updateDestroy = function(){
 	
@@ -1988,7 +2344,7 @@ Scene_Map.prototype.drill_HDSB_updateDestroy = function(){
 };
 
 //==============================
-// * 控制器与贴图 - 销毁时（战斗界面）
+// * 控制器与贴图 - 销毁时『多场景与游戏窗体-战斗界面』
 //==============================
 var _drill_HDSB_sbattle_terminate = Scene_Battle.prototype.terminate;
 Scene_Battle.prototype.terminate = function(){
@@ -1997,16 +2353,17 @@ Scene_Battle.prototype.terminate = function(){
 	Graphics.drill_CODS_overstoryLayerClear();	//清空 天窗层
 };
 //==============================
-// * 控制器与贴图 - 帧刷新（战斗界面）
+// * 控制器与贴图 - 帧刷新『多场景与游戏窗体-战斗界面』
 //==============================
 var _drill_HDSB_sbattle_update = Scene_Battle.prototype.update;
 Scene_Battle.prototype.update = function(){
 	_drill_HDSB_sbattle_update.call(this);
-	this.drill_HDSB_updateController();		//帧刷新 - 控制器
-	this.drill_HDSB_updateDestroy();		//帧刷新 - 销毁
+	this.drill_HDSB_updateController();			//帧刷新 - 控制器
+	this.drill_HDSB_updateAttr();				//帧刷新 - 基础特性
+	this.drill_HDSB_updateDestroy();			//帧刷新 - 销毁
 };
 //==============================
-// * 控制器与贴图 - 界面创建时（战斗界面）
+// * 控制器与贴图 - 界面创建时『多场景与游戏窗体-战斗界面』
 //==============================
 var _drill_HDSB_sbattle_createAllWindows = Scene_Battle.prototype.createAllWindows;
 Scene_Battle.prototype.createAllWindows = function(){
@@ -2014,20 +2371,15 @@ Scene_Battle.prototype.createAllWindows = function(){
 	this.drill_HDSB_create();
 };
 //==============================
-// * 控制器与贴图 - 界面创建 （战斗界面）
+// * 控制器与贴图 - 函数复制
 //==============================
-Scene_Battle.prototype.drill_HDSB_create = Scene_Map.prototype.drill_HDSB_create;
-//==============================
-// * 控制器与贴图 - 帧刷新 控制器（战斗界面）
-//==============================
-Scene_Battle.prototype.drill_HDSB_updateController = Scene_Map.prototype.drill_HDSB_updateController;
-//==============================
-// * 控制器与贴图 - 帧刷新 销毁（战斗界面）
-//==============================
-Scene_Battle.prototype.drill_HDSB_updateDestroy = Scene_Map.prototype.drill_HDSB_updateDestroy;
+Scene_Battle.prototype.drill_HDSB_create = Scene_Map.prototype.drill_HDSB_create;						//界面创建       『多场景与游戏窗体-战斗界面』
+Scene_Battle.prototype.drill_HDSB_updateController = Scene_Map.prototype.drill_HDSB_updateController;	//帧刷新 控制器  『多场景与游戏窗体-战斗界面』
+Scene_Battle.prototype.drill_HDSB_updateAttr = Scene_Map.prototype.drill_HDSB_updateAttr;				//帧刷新 基础特性『多场景与游戏窗体-战斗界面』
+Scene_Battle.prototype.drill_HDSB_updateDestroy = Scene_Map.prototype.drill_HDSB_updateDestroy;			//帧刷新 销毁    『多场景与游戏窗体-战斗界面』
 
 //==============================
-// * 控制器与贴图 - 销毁时（菜单界面）
+// * 控制器与贴图 - 销毁时『多场景与游戏窗体-菜单界面』
 //==============================
 var _drill_HDSB_smenu_terminate = Scene_MenuBase.prototype.terminate;
 Scene_MenuBase.prototype.terminate = function(){
@@ -2036,16 +2388,17 @@ Scene_MenuBase.prototype.terminate = function(){
 	Graphics.drill_CODS_overstoryLayerClear();	//清空 天窗层
 };
 //==============================
-// * 控制器与贴图 - 帧刷新（菜单界面）
+// * 控制器与贴图 - 帧刷新『多场景与游戏窗体-菜单界面』
 //==============================
 var _drill_HDSB_smenu_update = Scene_MenuBase.prototype.update;
 Scene_MenuBase.prototype.update = function(){
 	_drill_HDSB_smenu_update.call(this);
-	this.drill_HDSB_updateController();		//帧刷新 - 控制器
-	this.drill_HDSB_updateDestroy();		//帧刷新 - 销毁
+	this.drill_HDSB_updateController();			//帧刷新 - 控制器
+	this.drill_HDSB_updateAttr();				//帧刷新 - 基础特性
+	this.drill_HDSB_updateDestroy();			//帧刷新 - 销毁
 };
 //==============================
-// * 控制器与贴图 - 界面创建时（菜单界面）
+// * 控制器与贴图 - 界面创建时『多场景与游戏窗体-菜单界面』
 //==============================
 var _drill_HDSB_smenu_createWindowLayer = Scene_MenuBase.prototype.createWindowLayer;
 Scene_MenuBase.prototype.createWindowLayer = function(){
@@ -2053,17 +2406,12 @@ Scene_MenuBase.prototype.createWindowLayer = function(){
 	this.drill_HDSB_create();
 };
 //==============================
-// * 控制器与贴图 - 界面创建 （菜单界面）
+// * 控制器与贴图 - 函数复制
 //==============================
-Scene_MenuBase.prototype.drill_HDSB_create = Scene_Map.prototype.drill_HDSB_create;
-//==============================
-// * 控制器与贴图 - 帧刷新 控制器（菜单界面）
-//==============================
-Scene_MenuBase.prototype.drill_HDSB_updateController = Scene_Map.prototype.drill_HDSB_updateController;
-//==============================
-// * 控制器与贴图 - 帧刷新 销毁（菜单界面）
-//==============================
-Scene_MenuBase.prototype.drill_HDSB_updateDestroy = Scene_Map.prototype.drill_HDSB_updateDestroy;
+Scene_MenuBase.prototype.drill_HDSB_create = Scene_Map.prototype.drill_HDSB_create;						//界面创建       『多场景与游戏窗体-菜单界面』
+Scene_MenuBase.prototype.drill_HDSB_updateController = Scene_Map.prototype.drill_HDSB_updateController;	//帧刷新 控制器  『多场景与游戏窗体-菜单界面』
+Scene_MenuBase.prototype.drill_HDSB_updateAttr = Scene_Map.prototype.drill_HDSB_updateAttr;				//帧刷新 基础特性『多场景与游戏窗体-菜单界面』
+Scene_MenuBase.prototype.drill_HDSB_updateDestroy = Scene_Map.prototype.drill_HDSB_updateDestroy;		//帧刷新 销毁    『多场景与游戏窗体-菜单界面』
 
 
 
@@ -2084,12 +2432,12 @@ Scene_MenuBase.prototype.drill_HDSB_updateDestroy = Scene_Map.prototype.drill_HD
 // **					->A主体『界面装饰最终变换值』『变换特性的规范』
 // **						->基础特性
 // **							>  资源名
-// **							>  可见
+// **							>  显示/隐藏
+// **							>  暂停/继续
 // **							>  混合模式
 // **							x> 层级
 // **							>  堆叠级
 // **						->其它特性
-// **							> 暂停/继续
 // **					->B变换特性『变换特性-平铺贴图』
 // **						>  位置X
 // **						>  位置Y
@@ -2101,6 +2449,7 @@ Scene_MenuBase.prototype.drill_HDSB_updateDestroy = Scene_Map.prototype.drill_HD
 // **						>  斜切X
 // **						>  斜切Y
 // **						>  旋转
+// **					->C校验值
 // **					->D指令叠加变化
 // **						> 主体贴图>移动到
 // **						> 主体贴图>透明度
@@ -2112,7 +2461,8 @@ Scene_MenuBase.prototype.drill_HDSB_updateDestroy = Scene_Map.prototype.drill_HD
 // **						> 主体贴图>斜切X（锚点为正中心）
 // **						> 主体贴图>斜切Y（锚点为正中心）
 // **					->E延迟指令
-// **					->F自变化效果
+// **					->F周期指令
+// **					->G自变化效果
 // **						> 平铺贴图>浮动效果
 // **						> 主体贴图>闪烁效果
 // **						> 主体贴图>缩放效果
@@ -2127,19 +2477,14 @@ function Drill_HDSB_Controller(){
     this.initialize.apply(this, arguments);
 };
 //==============================
-// * 控制器 - 校验标记
-//==============================
-DrillUp.g_HDSB_checkNaN = true;
-DrillUp.g_HDSB_notFindStyleAlertOnce = true;
-//==============================
 // * 控制器 - 初始化
 //==============================
 Drill_HDSB_Controller.prototype.initialize = function( data_id ){
 	this._drill_data_id = data_id;
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
-    this.drill_controller_initData();										//初始化数据
-    this.drill_controller_initChild();										//初始化子功能
-    this.drill_controller_resetData( data_id );
+	//this.drill_controller_initData();										//初始化数据
+	this.drill_controller_initChild();										//初始化子功能
+	this.drill_controller_resetData( data_id );
 }
 //##############################
 // * 控制器 - 帧刷新【标准函数】
@@ -2151,14 +2496,17 @@ Drill_HDSB_Controller.prototype.initialize = function( data_id ){
 //##############################
 Drill_HDSB_Controller.prototype.drill_controller_update = function(){
 	this.drill_controller_updateDelayingCommandImportant();		//帧刷新 - E延迟指令 - 时间流逝
+	this.drill_controller_updatePeriodizeCommandImportant();	//帧刷新 - F周期指令 - 时间流逝
 	if( this._drill_pause == true ){ return; }
 	this.drill_controller_updateAttr();							//帧刷新 - A主体
 	this.drill_controller_updateChange_Position();				//帧刷新 - B变换特性 - 平移
 	this.drill_controller_updateChange_MoveRange();				//帧刷新 - B变换特性 - 平铺范围
 	this.drill_controller_updateCommandChange();				//帧刷新 - D指令叠加变化
 	this.drill_controller_updateDelayingCommand();				//帧刷新 - E延迟指令 - 执行延迟指令
-	this.drill_controller_updateEffect();						//帧刷新 - F自变化效果
-	this.drill_controller_updateCheckNaN();						//帧刷新 - A主体 - 校验值
+	this.drill_controller_updatePeriodizeCommand();				//帧刷新 - F周期指令 - 执行延迟指令
+	this.drill_controller_updateEffect();						//帧刷新 - G自变化效果
+	
+	this.drill_controller_updateCheckNaN();						//帧刷新 - C校验值
 }
 //##############################
 // * 控制器 - 重设数据【标准函数】
@@ -2234,13 +2582,14 @@ Drill_HDSB_Controller.prototype.drill_controller_setZIndex = function( zIndex ){
 //##############################
 // * 控制器 - 初始化数据『控制器与贴图』【标准默认值】
 //
-//			参数：	> 无
+//			参数：	> data 对象
 //			返回：	> 无
 //			
 //			说明：	> 该对象初始化 静态数据，提供所需的所有默认值。
 //##############################
-Drill_HDSB_Controller.prototype.drill_controller_initData = function(){
-	var data = this.drill_data();		//（此处会修改到 静态数据 的指针值）
+Drill_HDSB_Controller.drill_controller_initData = function( data ){
+	//	（该函数是静态函数，直接修改 静态数据 的指针值）
+	//	（参数会有细微区别，因为此处针对 控制器 的参数，而静态数据针对 接收数据 的参数）
 	
 	// > A主体 - 基础特性
 	if( data['src_img'] == undefined ){ data['src_img'] = "" };										//A主体 - 资源
@@ -2248,12 +2597,14 @@ Drill_HDSB_Controller.prototype.drill_controller_initData = function(){
 	if( data['tint'] == undefined ){ data['tint'] = 0 };											//A主体 - 图像-色调值
 	if( data['smooth'] == undefined ){ data['smooth'] = false };									//A主体 - 图像-模糊边缘
 	
-	if( data['visible'] == undefined ){ data['visible'] = true };									//A主体 - 显示情况
+	if( data['visible'] == undefined ){ data['visible'] = true };									//A主体 - 显示/隐藏
+	if( data['pause'] == undefined ){ data['pause'] = false };										//A主体 - 暂停/继续
 	if( data['blendMode'] == undefined ){ data['blendMode'] = 0 };									//A主体 - 混合模式
+																									//A主体 - 层级（无）
 	if( data['zIndex'] == undefined ){ data['zIndex'] = 0 };										//A主体 - 图片层级
 	
 	// > A主体 - 其它特性
-	if( data['pause'] == undefined ){ data['pause'] = false };										//A主体 - 暂停情况
+	//	（无）
 	
 	
 	// > B变换特性
@@ -2271,20 +2622,24 @@ Drill_HDSB_Controller.prototype.drill_controller_initData = function(){
 	if( data['skew_y'] == undefined ){ data['skew_y'] = 0 };										//B变换特性 - 平铺的斜切Y
 	
 	
+	// > C校验值（无）
+	
 	// > D指令叠加变化（无）
 	
 	// > E延迟指令（无）
 	
-	// > F自变化效果
-	if( data['effect_float'] == undefined ){ data['effect_float'] = "关闭" };						//F自变化效果 - 浮动效果
-	if( data['effect_floatSpeed'] == undefined ){ data['effect_floatSpeed'] = 1.0 };				//F自变化效果 - 浮动速度
-	if( data['effect_floatRange'] == undefined ){ data['effect_floatRange'] = 15 };					//F自变化效果 - 浮动偏移量
-	if( data['effect_flicker'] == undefined ){ data['effect_flicker'] = "关闭" };					//F自变化效果 - 闪烁效果
-	if( data['effect_flickerSpeed'] == undefined ){ data['effect_flickerSpeed'] = 6.0 };			//F自变化效果 - 闪烁速度
-	if( data['effect_flickerRange'] == undefined ){ data['effect_flickerRange'] = 20 };				//F自变化效果 - 闪烁幅度范围
-	if( data['effect_zoom'] == undefined ){ data['effect_zoom'] = "关闭" };							//F自变化效果 - 缩放效果
-	if( data['effect_zoomSpeed'] == undefined ){ data['effect_zoomSpeed'] = 1.0 };					//F自变化效果 - 缩放速度
-	if( data['effect_zoomRange'] == undefined ){ data['effect_zoomRange'] = 0.2 };					//F自变化效果 - 缩放幅度范围
+	// > F周期指令（无）
+	
+	// > G自变化效果
+	if( data['effect_float'] == undefined ){ data['effect_float'] = "关闭" };						//G自变化效果 - 浮动效果
+	if( data['effect_floatSpeed'] == undefined ){ data['effect_floatSpeed'] = 1.0 };				//G自变化效果 - 浮动速度
+	if( data['effect_floatRange'] == undefined ){ data['effect_floatRange'] = 15 };					//G自变化效果 - 浮动偏移量
+	if( data['effect_flicker'] == undefined ){ data['effect_flicker'] = "关闭" };					//G自变化效果 - 闪烁效果
+	if( data['effect_flickerSpeed'] == undefined ){ data['effect_flickerSpeed'] = 6.0 };			//G自变化效果 - 闪烁速度
+	if( data['effect_flickerRange'] == undefined ){ data['effect_flickerRange'] = 20 };				//G自变化效果 - 闪烁幅度范围
+	if( data['effect_zoom'] == undefined ){ data['effect_zoom'] = "关闭" };							//G自变化效果 - 缩放效果
+	if( data['effect_zoomSpeed'] == undefined ){ data['effect_zoomSpeed'] = 1.0 };					//G自变化效果 - 缩放速度
+	if( data['effect_zoomRange'] == undefined ){ data['effect_zoomRange'] = 0.2 };					//G自变化效果 - 缩放幅度范围
 }
 //==============================
 // * 控制器 - 初始化子功能『控制器与贴图』
@@ -2292,9 +2647,11 @@ Drill_HDSB_Controller.prototype.drill_controller_initData = function(){
 Drill_HDSB_Controller.prototype.drill_controller_initChild = function(){
 	this.drill_controller_initAttr();				//初始化子功能 - A主体
 	this.drill_controller_initChange();				//初始化子功能 - B变换特性
+	this.drill_controller_initCheck();				//初始化子功能 - C校验值
 	this.drill_controller_initCommandChange();		//初始化子功能 - D指令叠加变化
 	this.drill_controller_initDelayingCommand();	//初始化子功能 - E延迟指令
-	this.drill_controller_initEffect();				//初始化子功能 - F自变化效果
+	this.drill_controller_initPeriodizeCommand();	//初始化子功能 - F周期指令
+	this.drill_controller_initEffect();				//初始化子功能 - G自变化效果
 }
 //==============================
 // * 控制器 - 重设数据（私有）
@@ -2311,17 +2668,21 @@ Drill_HDSB_Controller.prototype.drill_controller_resetData_Private = function( d
 	// > 执行重置
 	this._drill_data_id = data_id;
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
-    this.drill_controller_initData();										//初始化数据
-    this.drill_controller_initChild();										//初始化子功能
+	//this.drill_controller_initData();										//初始化数据
+	this.drill_controller_initChild();										//初始化子功能
 }
 //##############################
-// * 控制器 - 『控制器与贴图的样式』空的静态数据
+// * 控制器 - 『控制器与贴图的样式-静态数据』校验标记
+//##############################
+DrillUp.g_HDSB_notFindStyleAlertOnce = true;
+//##############################
+// * 控制器 - 『控制器与贴图的样式-静态数据』空的静态数据
 //			
 //			说明：	> 空数据会在initData时会进行默认值初始化，在其他地方只读。
 //##############################
 Drill_HDSB_Controller.emptyData = {};
 //##############################
-// * 控制器 - 『控制器与贴图的样式』获取静态数据【标准函数】
+// * 控制器 - 『控制器与贴图的样式-静态数据』获取静态数据【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 对象指针
@@ -2335,7 +2696,7 @@ Drill_HDSB_Controller.prototype.drill_data = function(){
 	var cur_styleData = DrillUp.g_HDSB_layers[ this._drill_data_id ];
 	if( cur_styleData == undefined ){
 		
-		// > 『控制器与贴图的样式』 - 校验+提示信息（只执行一次）
+		// > 『控制器与贴图的样式-静态数据』 - 校验+提示信息（只执行一次）
 		if( DrillUp.g_HDSB_notFindStyleAlertOnce == true ){
 			DrillUp.g_HDSB_notFindStyleAlertOnce = false;
 			alert( DrillUp.drill_HDSB_getPluginTip_StyleNotFind(cur_styleId) );
@@ -2353,12 +2714,14 @@ Drill_HDSB_Controller.prototype.drill_controller_initAttr = function(){
 	var data = this.drill_data();
 	
 	// > A主体 - 基础特性
-	this._drill_visible = data['visible'];
-	this._drill_blendMode = data['blendMode'];
-	this._drill_zIndex = data['zIndex'];
+	this._drill_visible = data['visible'];			//控制器 - 显示/隐藏
+	this._drill_pause = data['pause'];				//控制器 - 暂停/继续
+	this._drill_blendMode = data['blendMode'];		//控制器 - 混合模式
+													//控制器 - 层级（无）
+	this._drill_zIndex = data['zIndex'];			//控制器 - 堆叠级
 	
 	// > A主体 - 其它特性
-	this._drill_pause = data['pause'];
+	//	（无）
 	
 	// > 常规
 	this._drill_curTime = 0;			//常规 - 当前时间
@@ -2371,33 +2734,6 @@ Drill_HDSB_Controller.prototype.drill_controller_updateAttr = function(){
 	
 	// > 时间流逝
 	this._drill_curTime += 1;
-}
-//==============================
-// * A主体 - 帧刷新 - 校验值
-//==============================
-Drill_HDSB_Controller.prototype.drill_controller_updateCheckNaN = function(){
-	if( $gameTemp == undefined ){ return; }		//（测试版开启功能，发布版关闭功能）
-	if( $gameTemp.isPlaytest() != true ){ return; }
-	
-	// > 校验值
-	if( DrillUp.g_HDSB_checkNaN == true ){
-		if( isNaN( this.drill_controller_finalTransform_x() ) ){
-			DrillUp.g_HDSB_checkNaN = false;
-			alert( DrillUp.drill_HDSB_getPluginTip_ParamIsNaN( "drill_controller_finalTransform_x" ) );
-		}
-		if( isNaN( this.drill_controller_finalTransform_y() ) ){
-			DrillUp.g_HDSB_checkNaN = false;
-			alert( DrillUp.drill_HDSB_getPluginTip_ParamIsNaN( "drill_controller_finalTransform_y" ) );
-		}
-		if( isNaN( this.drill_controller_finalTransform_opacity() ) ){
-			DrillUp.g_HDSB_checkNaN = false;
-			alert( DrillUp.drill_HDSB_getPluginTip_ParamIsNaN( "drill_controller_finalTransform_opacity" ) );
-		}
-		if( isNaN( this.drill_controller_finalTransform_rotate() ) ){
-			DrillUp.g_HDSB_checkNaN = false;
-			alert( DrillUp.drill_HDSB_getPluginTip_ParamIsNaN( "drill_controller_finalTransform_rotate" ) );
-		}
-	}
 }
 
 //==============================
@@ -2652,6 +2988,52 @@ Game_Temp.prototype.drill_HDSB_Math2D_getPointWithTransform = function(
     var tar_y = center_y + (dx * b + dy * d);
 	
 	return { "x":tar_x, "y":tar_y };
+}
+
+//==============================
+// * C校验值 - 初始化子功能
+//==============================
+Drill_HDSB_Controller.prototype.drill_controller_initCheck = function(){
+	//（无）
+}
+//==============================
+// * C校验值 - 校验标记
+//==============================
+DrillUp.g_HDSB_checkNaN = true;
+//==============================
+// * C校验值 - 帧刷新
+//==============================
+Drill_HDSB_Controller.prototype.drill_controller_updateCheckNaN = function(){
+	if( $gameTemp == undefined ){ return; }		//（测试版开启功能，发布版关闭功能）
+	if( $gameTemp.isPlaytest() != true ){ return; }
+	
+	// > 校验值
+	if( DrillUp.g_HDSB_checkNaN == true ){
+		if( isNaN( this.drill_controller_finalTransform_x() ) ){
+			DrillUp.g_HDSB_checkNaN = false;
+			var check_tank = {};
+			check_tank["_drill_change_x"] = this._drill_change_x;
+			check_tank["_drill_change_selfXAcc"] = this._drill_change_selfXAcc;
+			check_tank["_drill_move_originOffsetX"] = this._drill_move_originOffsetX;
+			alert( DrillUp.drill_HDSB_getPluginTip_ParamIsNaN( "drill_controller_finalTransform_x", check_tank ) );
+		}
+		if( isNaN( this.drill_controller_finalTransform_y() ) ){
+			DrillUp.g_HDSB_checkNaN = false;
+			var check_tank = {};
+			check_tank["_drill_change_y"] = this._drill_change_y;
+			check_tank["_drill_change_selfYAcc"] = this._drill_change_selfYAcc;
+			check_tank["_drill_move_originOffsetY"] = this._drill_move_originOffsetY;
+			alert( DrillUp.drill_HDSB_getPluginTip_ParamIsNaN( "drill_controller_finalTransform_y", check_tank ) );
+		}
+		if( isNaN( this.drill_controller_finalTransform_opacity() ) ){
+			DrillUp.g_HDSB_checkNaN = false;
+			alert( DrillUp.drill_HDSB_getPluginTip_ParamIsNaN( "drill_controller_finalTransform_opacity" ) );
+		}
+		if( isNaN( this.drill_controller_finalTransform_rotate() ) ){
+			DrillUp.g_HDSB_checkNaN = false;
+			alert( DrillUp.drill_HDSB_getPluginTip_ParamIsNaN( "drill_controller_finalTransform_rotate" ) );
+		}
+	}
 }
 
 
@@ -2967,13 +3349,132 @@ Drill_HDSB_Controller.prototype.drill_controller_clearDelayingCommand = function
 
 
 //==============================
-// * F自变化效果 - 初始化子功能
+// * F周期指令 - 初始化子功能
+//==============================
+Drill_HDSB_Controller.prototype.drill_controller_initPeriodizeCommand = function(){
+	this._drill_curPeriodizeCommandTank = [];
+}
+//==============================
+// * F周期指令 - 帧刷新 - 时间流逝
+//
+//			说明：	> 此处的时间流逝不会因为 暂停 而停止流逝。
+//==============================
+Drill_HDSB_Controller.prototype.drill_controller_updatePeriodizeCommandImportant = function(){
+	if( this._drill_curPeriodizeCommandTank.length == 0 ){ return; }
+	
+	// > 帧刷新 时间流逝
+	for(var i = 0; i < this._drill_curPeriodizeCommandTank.length; i++ ){
+		var pc_data = this._drill_curPeriodizeCommandTank[i];
+		
+		// > 时间-1
+		pc_data['cur_time'] += 1;
+	}
+	
+	// > 执行周期指令（暂停/继续）
+	for(var i = 0; i < this._drill_curPeriodizeCommandTank.length; i++ ){
+		var pc_data = this._drill_curPeriodizeCommandTank[i];
+		var time =  pc_data['cur_time'] % pc_data['time_period'];
+		if( time == pc_data['time_start'] ){
+			var method = pc_data['method'];
+			var paramList = pc_data['paramList'];
+			if( method == "drill_controller_setPause" ){
+				this.drill_controller_setPause( paramList[0] );
+			}
+		}
+	}
+}
+//==============================
+// * F周期指令 - 帧刷新 - 执行周期指令
+//==============================
+Drill_HDSB_Controller.prototype.drill_controller_updatePeriodizeCommand = function(){
+	if( this._drill_curPeriodizeCommandTank.length == 0 ){ return; }
+	
+	// > 执行周期指令
+	for(var i = 0; i < this._drill_curPeriodizeCommandTank.length; i++ ){
+		var pc_data = this._drill_curPeriodizeCommandTank[i];
+		var time =  pc_data['cur_time'] % pc_data['time_period'];
+		if( time == pc_data['time_start'] ){
+			var method = pc_data['method'];
+			var paramList = pc_data['paramList'];
+			
+			if( method == "drill_controller_setVisible" ){
+				this.drill_controller_setVisible( paramList[0] );
+			
+			}else if( method == "drill_controller_commandChange_setOpacity" ){
+				this.drill_controller_commandChange_setOpacity( paramList[0], paramList[1], paramList[2] );
+			}else if( method == "drill_controller_commandChange_setSpeedX" ){
+				this.drill_controller_commandChange_setSpeedX( paramList[0], paramList[1], paramList[2] );
+			}else if( method == "drill_controller_commandChange_setSpeedY" ){
+				this.drill_controller_commandChange_setSpeedY( paramList[0], paramList[1], paramList[2] );
+			}else if( method == "drill_controller_commandChange_setRotate" ){
+				this.drill_controller_commandChange_setRotate( paramList[0], paramList[1], paramList[2] );
+				
+			}else if( method == "drill_controller_commandChange_setScaleX" ){
+				this.drill_controller_commandChange_setScaleX( paramList[0], paramList[1], paramList[2] );
+			}else if( method == "drill_controller_commandChange_setScaleY" ){
+				this.drill_controller_commandChange_setScaleY( paramList[0], paramList[1], paramList[2] );
+			}else if( method == "drill_controller_commandChange_setSkewX" ){
+				this.drill_controller_commandChange_setSkewX( paramList[0], paramList[1], paramList[2] );
+			}else if( method == "drill_controller_commandChange_setSkewY" ){
+				this.drill_controller_commandChange_setSkewY( paramList[0], paramList[1], paramList[2] );
+			}else if( method == "drill_controller_commandChange_restoreAttr" ){
+				this.drill_controller_commandChange_restoreAttr();
+			
+			}else if( method == "drill_controller_commandChange_setMove" ){
+				this.drill_controller_commandChange_setMove( paramList[0], paramList[1], paramList[2], paramList[3] );
+			}else if( method == "drill_controller_commandChange_restoreMove" ){
+				this.drill_controller_commandChange_restoreMove();
+			}
+		}
+	}
+	
+}
+//==============================
+// * F周期指令 - 设置指令（开放函数）
+//==============================
+Drill_HDSB_Controller.prototype.drill_controller_setPeriodizeCommand = function( method, paramList, time_period, time_start ){
+	if( method != "drill_controller_setVisible" &&
+		method != "drill_controller_setPause" &&
+		
+		method != "drill_controller_commandChange_setOpacity" &&
+		method != "drill_controller_commandChange_setSpeedX" &&
+		method != "drill_controller_commandChange_setSpeedY" &&
+		method != "drill_controller_commandChange_setRotate" &&
+		
+		method != "drill_controller_commandChange_setScaleX" &&
+		method != "drill_controller_commandChange_setScaleY" &&
+		method != "drill_controller_commandChange_setSkewX" &&
+		method != "drill_controller_commandChange_setSkewY" &&
+		method != "drill_controller_commandChange_restoreAttr" &&
+		
+		method != "drill_controller_commandChange_setMove" &&
+		method != "drill_controller_commandChange_restoreMove"
+	){ return; }
+	
+	var pc_data = {};
+	pc_data['method'] = method;
+	pc_data['paramList'] = paramList;
+	pc_data['time_period'] = time_period;
+	pc_data['time_start'] = time_start;
+	pc_data['cur_time'] = -1;			//（时间先+1后判断，所以取-1）
+	this._drill_curPeriodizeCommandTank.push( pc_data );
+}
+//==============================
+// * F周期指令 - 清空全部（开放函数）
+//==============================
+Drill_HDSB_Controller.prototype.drill_controller_clearPeriodizeCommand = function(){
+	this._drill_curPeriodizeCommandTank = [];
+}
+
+
+//==============================
+// * G自变化效果 - 初始化子功能
 //==============================
 Drill_HDSB_Controller.prototype.drill_controller_initEffect = function(){
 	this._drill_curEffectTime = 0;
 }
 //==============================
-// * F自变化效果 - 帧刷新
+// * G自变化效果 - 帧刷新
 //==============================
 Drill_HDSB_Controller.prototype.drill_controller_updateEffect = function(){
 	this._drill_curEffectTime += 1;
@@ -2993,14 +3494,15 @@ Drill_HDSB_Controller.prototype.drill_controller_updateEffect = function(){
 // **						->是否需要销毁（未使用）
 // **						->销毁（手动）
 // **					
-// **					->A主体
+// **					->A贴图主体
 // **					->B变换特性
 // **					->C对象绑定
 // **						->设置控制器
 // **						->贴图初始化（手动）
 // **					->D指令叠加变化-控制器用
 // **					->E延迟指令
-// **					->F自变化效果
+// **					->F周期指令
+// **					->G自变化效果
 // **					
 // **		说明：	> 你必须在创建贴图后，手动初始化。（还需要先设置 控制器 ）
 // **
@@ -3033,12 +3535,13 @@ Drill_HDSB_Sprite.prototype.update = function(){
 	if( this.drill_sprite_isReady() == false ){ return; }
 	if( this.drill_sprite_isOptimizationPassed() == false ){ return; }
 	Sprite.prototype.update.call(this);
-	this.drill_sprite_updateAttr();					//帧刷新 - A主体
+	this.drill_sprite_updateAttr();					//帧刷新 - A贴图主体
 	this.drill_sprite_updateChange();				//帧刷新 - B变换特性
 													//帧刷新 - C对象绑定（无）
 	this.drill_sprite_updateCommandChange();		//帧刷新 - D指令叠加变化-控制器用
 													//帧刷新 - E延迟指令（无）
-	this.drill_sprite_updateEffect();				//帧刷新 - F自变化效果
+													//帧刷新 - F周期指令（无）
+	this.drill_sprite_updateEffect();				//帧刷新 - G自变化效果
 }
 
 //##############################
@@ -3062,12 +3565,13 @@ Drill_HDSB_Sprite.prototype.drill_sprite_setController = function( controller ){
 //			说明：	> 需要设置 控制器 之后，才能进行初始化。
 //##############################
 Drill_HDSB_Sprite.prototype.drill_sprite_initChild = function(){
-	this.drill_sprite_initAttr();				//初始化子功能 - A主体
+	this.drill_sprite_initAttr();				//初始化子功能 - A贴图主体
 	this.drill_sprite_initChange();				//初始化子功能 - B变换特性
 												//初始化子功能 - C对象绑定（无）
 	this.drill_sprite_initCommandChange();		//初始化子功能 - D指令叠加变化-控制器用
 	this.drill_sprite_initDelayingCommand();	//初始化子功能 - E延迟指令
-	this.drill_sprite_initEffect();				//初始化子功能 - F自变化效果
+	this.drill_sprite_initPeriodizeCommand();	//初始化子功能 - F周期指令
+	this.drill_sprite_initEffect();				//初始化子功能 - G自变化效果
 };
 
 //##############################
@@ -3131,7 +3635,7 @@ Drill_HDSB_Sprite.prototype.drill_sprite_initSelf = function(){
 Drill_HDSB_Sprite.prototype.drill_sprite_destroyChild = function(){
 	if( this._drill_controller == null ){ return; }
 	
-	// > 销毁 - A主体
+	// > 销毁 - A贴图主体
 	this.visible = false;
 	this.removeChild( this._drill_layerSprite );
 	this._drill_layerSprite = null;
@@ -3153,23 +3657,24 @@ Drill_HDSB_Sprite.prototype.drill_sprite_destroySelf = function(){
 
 
 //==============================
-// * A主体 - 初始化子功能
+// * A贴图主体 - 初始化子功能
 //==============================
 Drill_HDSB_Sprite.prototype.drill_sprite_initAttr = function(){
 	var data = this._drill_controller.drill_data();
 	/*
 		贴图的层级如下：
-			- 主体贴图
-			- - 平铺贴图
-		
+			- 主体贴图（this）
+			- - 平铺贴图（_drill_layerSprite）
 	*/
 	
 	// > 主体贴图
 	this.x = 0;
 	this.y = 0;
-	this.visible = this._drill_controller._drill_visible;
-	this.blendMode = this._drill_controller._drill_blendMode;
-	this.zIndex = this._drill_controller._drill_zIndex;
+	this.visible = this._drill_controller._drill_visible;		//贴图 - 显示/隐藏
+																//贴图 - 暂停/继续（无）
+	this.blendMode = this._drill_controller._drill_blendMode;	//贴图 - 混合模式
+																//贴图 - 层级（无）
+	this.zIndex = this._drill_controller._drill_zIndex;			//贴图 - 堆叠级
 	
 	// > 平铺贴图
 	var temp_layer = new TilingSprite();
@@ -3189,12 +3694,15 @@ Drill_HDSB_Sprite.prototype.drill_sprite_initAttr = function(){
 	this.addChild( this._drill_layerSprite );
 }
 //==============================
-// * A主体 - 帧刷新
+// * A贴图主体 - 帧刷新
 //==============================
 Drill_HDSB_Sprite.prototype.drill_sprite_updateAttr = function(){
 	
-	// > 基础特性 - 可见
+	// > 基础特性 - 显示/隐藏
 	this.visible = this._drill_controller._drill_visible;
+	
+	// > 基础特性 - 暂停/继续
+	//	（无）
 	
 	// > 基础特性 - 混合模式
 	if( this.blendMode != this._drill_controller._drill_blendMode ){
@@ -3447,15 +3955,22 @@ Drill_HDSB_Sprite.prototype.drill_sprite_initDelayingCommand = function(){
 	//（无）
 }
 
+//==============================
+// * F周期指令 - 初始化子功能
+//==============================
+Drill_HDSB_Sprite.prototype.drill_sprite_initPeriodizeCommand = function(){
+	//（无）
+}
+
 
 //==============================
-// * F自变化效果 - 初始化子功能
+// * G自变化效果 - 初始化子功能
 //==============================
 Drill_HDSB_Sprite.prototype.drill_sprite_initEffect = function(){
 	//（无）
 }
 //==============================
-// * F自变化效果 - 帧刷新
+// * G自变化效果 - 帧刷新
 //==============================
 Drill_HDSB_Sprite.prototype.drill_sprite_updateEffect = function(){
 	var data = this._drill_controller.drill_data();

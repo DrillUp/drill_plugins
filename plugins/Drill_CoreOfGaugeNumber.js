@@ -1369,17 +1369,23 @@ Drill_COGN_NumberSprite.prototype.drill_COGN_destroy_Private = function() {
 	this._drill_specifiedEx_bitmap = null;
 }
 //==============================
-// * 参数数字 - 销毁 - 递归断开连接（私有）
+// * 参数条 - 销毁 - 断开贴图连接（私有）『递归函数-头』
 //==============================
 Drill_COGN_NumberSprite.prototype.drill_sprite_removeChildConnect = function( parent_sprite ){
 	if( parent_sprite == undefined ){ return; }
+	this.drill_sprite_removeChildConnect_Recursion( parent_sprite );
+};
+//==============================
+// * 参数条 - 销毁 - 断开贴图连接（私有）『递归函数-节』
+//==============================
+Drill_COGN_NumberSprite.prototype.drill_sprite_removeChildConnect_Recursion = function( parent_sprite ){
 	var sprite_list = parent_sprite.children;
 	if( sprite_list == undefined ){ return; }
 	for( var i = sprite_list.length-1; i >= 0; i-- ){
 		var sprite = sprite_list[i];
 		if( sprite == undefined ){ continue; }
 		parent_sprite.removeChild( sprite );
-		this.drill_sprite_removeChildConnect( sprite );
+		this.drill_sprite_removeChildConnect_Recursion( sprite );
 	}
 };
 

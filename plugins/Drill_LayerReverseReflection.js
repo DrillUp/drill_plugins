@@ -1780,9 +1780,9 @@ function Drill_Sprite_LRR() {
 	this.initialize.apply(this, arguments);
 }
 //==============================
-// * 镜像贴图 - 最后继承
+// * 镜像贴图 - 最后继承1级
 //
-//			说明：	确保最后继承，能够将所有 行走图效果 包裹并表现在镜像身上。
+//			说明：	> 确保最后继承，能够将所有 行走图效果 包裹并表现在镜像身上。
 //==============================
 var _drill_LRR_scene_initialize = SceneManager.initialize;
 SceneManager.initialize = function() {

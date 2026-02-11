@@ -1411,6 +1411,14 @@
  * @desc 该粒子将放在指定对应的地图id中。
  * @default 1
  * 
+ * @param 作用到的地图列表
+ * @parent 是否作用到所有地图
+ * @type number[]
+ * @min 1
+ * @desc 除了"所属地图"，你还可以填多个地图id，同一个贴图在多个地图里面复用。
+ * @default []
+ * 
+ * 
  * @param ---贴图---
  * @desc 
  *
@@ -1728,7 +1736,7 @@
 //			无
 //		
 //		★脚本文档：
-//			17.主菜单 > 多层组合装饰（界面装饰-地图界面）（脚本）.docx
+//			17.主菜单 > 多层组合装饰（界面装饰）（脚本）.docx
 //		
 //		★插件私有类：
 //			* 雨滴贴图【Drill_LPR_RaindropSprite】
@@ -1743,7 +1751,18 @@
 //			4.留意 "重点关注" 的代码部分。
 //
 //		★其它说明细节：
-//			1.位移比变化时，影响到 数字雨层 下面的 每个雨滴。
+//			1.这里空间很大，感觉应该放点什么……那就给所有 界面装饰插件 编个号吧。
+//			  ┌──────────────────────────────────┐
+//			  │   /@@@@@@    /@@@@@@    /@@@@@@  │
+//			  │  /@@__  @@  /@@__  @@  /@@__  @@ │
+//			  │ | @@  \ @@ |__/  \ @@ | @@  \ @@ │
+//			  │ | @@  | @@   /@@@@@@/ |  @@@@@@/ │
+//			  │ | @@  | @@  /@@____/   >@@__  @@ │
+//			  │ | @@  | @@ | @@       | @@  \ @@ │
+//			  │ |  @@@@@@/ | @@@@@@@@ |  @@@@@@/ │
+//			  │  \______/  |________/  \______/  │
+//			  └──────────────────────────────────┘
+//			2.位移比变化时，影响到 数字雨层 下面的 每个雨滴。
 //		
 //		★存在的问题：
 //			暂无
@@ -1783,7 +1802,15 @@
 		
 		// > 绑定
 		data['mapToAll'] = String( dataFrom["是否作用到所有地图"] || "false") == "true";
-		data['map'] = Number( dataFrom["所属地图"] || 0);
+		data['map'] = String( dataFrom["所属地图"] || "0" );
+		if( dataFrom["作用到的地图列表"] != "" &&
+			dataFrom["作用到的地图列表"] != undefined ){
+			data['mapList'] = JSON.parse( dataFrom["作用到的地图列表"] );
+		}else{
+			data['mapList'] = [];
+		}
+		data['mapList'].push( data['map'] );
+		
 		
 		// > 贴图
 		data['visible'] = String( dataFrom["初始是否显示"] || "true") == "true";
@@ -2288,7 +2315,7 @@ Game_Map.prototype.drill_LPR_initMapdata = function() {
 			//（不刷新数据）
 			
 		// > 单地图数据时
-		}else if( temp_data['map'] == this.mapId() ){
+		}else if( temp_data['mapList'].contains( String(this.mapId()) ) ){
 			var data = JSON.parse(JSON.stringify( temp_data ));
 			$gameSystem._drill_LPR_dataTank_curData[i] = data;	//（重刷数据）
 			
@@ -2849,29 +2876,33 @@ Drill_LPR_RaindropSprite.prototype.drill_setStartPosition = function( x, y ){
 	this._drill_startY = y;				//字符粒子 - 起始位置Y
 }
 
-////==============================
-//// * 过界判断 - 获取绝对坐标X（依次累加父类位置）
-////==============================
+//==============================
+// * 过界判断 - 获取绝对坐标X
+//
+//			说明：	> 依次累加父贴图的位置。『递归函数-拆解』
+//==============================
 //Drill_LPR_RaindropSprite.prototype.absoluteX = function(){
-//    var x = 0;
-//    var object = this;
-//    while( object ){
-//        x += object.x;
-//        object = object.parent;
-//    }
-//    return x;
+//	var x = 0;
+//	var object = this;
+//	while( object ){
+//		x += object.x;
+//		object = object.parent;
+//	}
+//	return x;
 //};
-////==============================
-//// * 过界判断 - 获取绝对坐标Y（依次累加父类位置）
-////==============================
+//==============================
+// * 过界判断 - 获取绝对坐标Y
+//
+//			说明：	> 依次累加父贴图的位置。『递归函数-拆解』
+//==============================
 //Drill_LPR_RaindropSprite.prototype.absoluteY = function(){
-//    var y = 0;
-//    var object = this;
-//    while( object ){
-//        y += object.y;
-//        object = object.parent;
-//    }
-//    return y;
+//	var y = 0;
+//	var object = this;
+//	while( object ){
+//		y += object.y;
+//		object = object.parent;
+//	}
+//	return y;
 //};
 //==============================
 // * 过界判断 - 判断

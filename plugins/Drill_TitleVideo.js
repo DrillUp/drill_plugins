@@ -3,12 +3,12 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.7]        标题 - 多层标题视频
+ * @plugindesc [v1.8]        标题 - 多层标题视频
  * @author Drill_up
  * 
  * @Drill_LE_param "视频-%d"
  * @Drill_LE_parentKey ""
- * @Drill_LE_var "DrillUp.g_TVi_list_length"
+ * @Drill_LE_var "DrillUp.g_TVi_style_length"
  * 
  *
  * @help
@@ -123,6 +123,8 @@
  * 更新了pixi5的兼容情况。
  * [v1.7]
  * 大幅度修改了全局存储的文件存储结构。
+ * [v1.8]
+ * 修复了视频声音在进入游戏后仍然播放的bug。
  *
  *
  * @param 全局存储的文件路径
@@ -275,6 +277,7 @@
  * @off 隐藏
  * @desc true - 显示，false - 隐藏
  * @default true
+ *
  *
  * @param ---视频配置---
  * @default
@@ -444,12 +447,16 @@
 //		★功能结构树：
 //			->☆提示信息
 //			->☆静态数据
-//			->☆全局存储
 //			->☆插件指令
-//
+//				->只有显示隐藏指令
+//			->☆全局存储
+//			->☆标题层级
+//			x->☆预加载（标题）
+//			
 //			->☆贴图创建标记
-//			->☆音量控制
 //			->☆贴图控制
+//				->退出界面时销毁
+//			->☆音量控制
 //			->视频贴图【Drill_TVi_VideoSprite】
 //
 //
@@ -457,7 +464,7 @@
 //			无
 //		
 //		★脚本文档：
-//			无
+//			17.主菜单 > 多层组合装饰（界面装饰）（脚本）.docx
 //		
 //		★插件私有类：
 //			* 视频贴图【Drill_TVi_VideoSprite】
@@ -467,8 +474,23 @@
 //			2.注意 addEventListener 的函数要 bind(this)。
 //
 //		★其它说明细节：
-//			1.视频实际上是通过texture对sprite进行视频播放控制的。
+//			1.这里空间很大，感觉应该放点什么……那就给所有 界面装饰插件 编个号吧。
+//			  ┌──────────────────────────────────┐
+//			  │   /@@@@@@    /@@@@@@      /@@    │
+//			  │  /@@__  @@  /@@__  @@   /@@@@    │
+//			  │ | @@  \ @@ |__/  \ @@  |_  @@    │
+//			  │ | @@  | @@   /@@@@@@/    | @@    │
+//			  │ | @@  | @@  /@@____/     | @@    │
+//			  │ | @@  | @@ | @@          | @@    │
+//			  │ |  @@@@@@/ | @@@@@@@@   /@@@@@@  │
+//			  │  \______/  |________/  |______/  │
+//			  └──────────────────────────────────┘
+//			2.视频实际上是通过texture对sprite进行视频播放控制的。
 //			  【但是视频不支持遮罩】
+//			3.标题与菜单不同的地方：
+//				只作用于Scene_Title。
+//				this._backgroundSprite要手动建立。
+//				注释和资源文件夹变化。
 //
 //		★存在的问题：
 //			暂无
@@ -511,51 +533,55 @@
 	// * 静态数据 - 视频
 	//				（~struct~TitleVideo）
 	//==============================
-	DrillUp.drill_TVi_videoInit = function( dataFrom ){
+	DrillUp.drill_TVi_videoDataInit = function( dataFrom ){
 		var data = {};
+		
 		data['visible'] = String( dataFrom["初始是否显示"] || "true") == "true";
+		
+		// > B视频
 		data['src'] = String( dataFrom["资源-视频动画"] || "");
-		//data['src_mask'] = String( dataFrom["资源-视频遮罩"] || "");
 		data['playSound'] = String( dataFrom["是否播放声音"] || "false") == "true"; 
 		data['volume'] = Number( dataFrom["音量比"] || 1.00);
+		data['playbackRate'] = Number( dataFrom["视频播放速度"] || 1.0);
+		
 		data['loopEnable'] = String( dataFrom["是否循环播放"] || "false") == "true";
 		data['loopStart'] = Number( dataFrom["起始时间"] || 0);
 		data['loopEnd'] = Number( dataFrom["结束时间"] || 0);
 		data['loopEndLock'] = String( dataFrom["是否指定结束时间"] || "false") == "true";
-		data['playbackRate'] = Number( dataFrom["视频播放速度"] || 1.0);
 		
 		data['widthUseOrg'] = String( dataFrom["是否使用原视频宽度"] || "false") == "true";
 		data['heightUseOrg'] = String( dataFrom["是否使用原视频高度"] || "false") == "true";
 		data['width'] = Number( dataFrom["指定视频宽度"] || 0);
 		data['height'] = Number( dataFrom["指定视频高度"] || 0);
+		data['tint'] = String( dataFrom["视频色调"] || "#ffffff");
+		
+		// > A主体
 		data['x'] = Number( dataFrom["平移-视频 X"] || 0);
 		data['y'] = Number( dataFrom["平移-视频 Y"] || 0);
 		data['opacity'] = Number( dataFrom["透明度"] || 255);
 		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
-		data['menu_index'] = String( dataFrom["菜单层级"] || "菜单后面层");
+		data['layerIndex'] = String( dataFrom["菜单层级"] || "菜单后面层");
 		data['zIndex'] = Number( dataFrom["图片层级"] || 0);
-		data['tint'] = String( dataFrom["视频色调"] || "#ffffff");
+		
 		return data;
 	}
 	
-	/*-----------------杂项------------------*/
-	DrillUp.g_TVi_DEBUG = String(DrillUp.parameters['是否开启Debug模式'] || "true") === "true";
-    DrillUp.g_TVi_dataFileId = Number(DrillUp.parameters["全局存储的文件路径"] || 1);
-	
 	/*-----------------视频------------------*/
-	DrillUp.g_TVi_list_length = 20;
-	DrillUp.g_TVi_list = [];
-	for( var i = 0; i < DrillUp.g_TVi_list_length; i++ ){
+	DrillUp.g_TVi_style_length = 20;
+	DrillUp.g_TVi_style = [];
+	for( var i = 0; i < DrillUp.g_TVi_style_length; i++ ){
 		if( DrillUp.parameters["视频-" + String(i+1) ] != undefined &&
 			DrillUp.parameters["视频-" + String(i+1) ] != "" ){
 			var temp = JSON.parse(DrillUp.parameters["视频-" + String(i+1) ]);
-			DrillUp.g_TVi_list[i] = DrillUp.drill_TVi_videoInit( temp );
-			DrillUp.g_TVi_list[i]['inited'] = true;
+			DrillUp.g_TVi_style[i] = DrillUp.drill_TVi_videoDataInit( temp );
 		}else{
-			DrillUp.g_TVi_list[i] = DrillUp.drill_TVi_videoInit( {} );
-			DrillUp.g_TVi_list[i]['inited'] = false;
+			DrillUp.g_TVi_style[i] = undefined;		//（设为空值，节约静态数据占用容量）
 		}
 	}
+	
+	/*-----------------杂项------------------*/
+	DrillUp.g_TVi_DEBUG = String(DrillUp.parameters["是否开启Debug模式"] || "true") === "true";
+    DrillUp.g_TVi_dataFileId = Number(DrillUp.parameters["全局存储的文件路径"] || 1);
 
 
 //=============================================================================
@@ -617,14 +643,14 @@ Game_Interpreter.prototype.drill_TVi_pluginCommand = function( command, args ){
 // * 『全局存储』 - 载入时检查数据 - 显示情况
 //==============================
 DrillUp.drill_TVi_gCheckData_visible = function(){
-	for( var i = 0; i < DrillUp.g_TVi_list_length ; i++ ){
-		var temp_c = DrillUp.g_TVi_list[i];
+	for( var i = 0; i < DrillUp.g_TVi_style_length ; i++ ){
+		var temp_c = DrillUp.g_TVi_style[i];
 		
 		// > 指定数据为空时
 		if( DrillUp.global_TVi_visibleTank[i] == null ){
-			if( temp_c['inited'] == false ){		//（无配置，跳过）
+			if( temp_c == undefined ){			//（无配置，跳过）
 				DrillUp.global_TVi_visibleTank[i] = null;
-			}else{									//（有配置，初始化默认）
+			}else{								//（有配置，初始化默认）
 				DrillUp.global_TVi_visibleTank[i] = temp_c['visible'];
 			}
 			
@@ -659,11 +685,128 @@ StorageManager.drill_TVi_saveData = function(){
 };
 
 
+//#############################################################################
+// ** 【标准模块】标题层级 ☆标题层级
+//#############################################################################
+//##############################
+// * 标题层级 - 添加贴图到层级【标准函数】
+//				
+//			参数：	> sprite 贴图        （添加的贴图对象）
+//					> layer_index 字符串 （添加到的层级名，菜单后面层/菜单前面层）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图添加到目标层级中。
+//##############################
+Scene_Title.prototype.drill_TVi_layerAddSprite = function( sprite, layer_index ){
+    this.drill_TVi_layerAddSprite_Private(sprite, layer_index);
+};
+//##############################
+// * 标题层级 - 去除贴图【标准函数】
+//				
+//			参数：	> sprite 贴图（添加的贴图对象）
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将指定贴图从标题层级中移除。
+//##############################
+Scene_Title.prototype.drill_TVi_layerRemoveSprite = function( sprite ){
+	this.drill_TVi_layerRemoveSprite_Private( sprite );
+};
+//##############################
+// * 标题层级 - 图片层级排序【标准函数】
+//				
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 执行该函数后，标题层级的子贴图，按照zIndex属性来进行先后排序。值越大，越靠前。
+//##############################
+Scene_Title.prototype.drill_TVi_sortByZIndex = function () {
+    this.drill_TVi_sortByZIndex_Private();
+};
+//=============================================================================
+// ** 标题层级（接口实现）
+//=============================================================================
+//==============================
+// * 标题层级 - 层级初始化1
+//==============================
+var _drill_TVi_titleLayer_createBackground = Scene_Title.prototype.createBackground;
+Scene_Title.prototype.createBackground = function() {
+	_drill_TVi_titleLayer_createBackground.call(this);
+	
+	// > 创建 菜单后面层（注意，Scene_Title 没有继承 Scene_MenuBase，提前创建）
+	if( this._backgroundSprite == undefined ){
+		this._backgroundSprite = new Sprite();
+		this.addChild(this._backgroundSprite);
+	}
+};
+//==============================
+// * 标题层级 - 层级初始化2
+//==============================
+var _drill_TVi_titleLayer_update = Scene_Title.prototype.update;
+Scene_Title.prototype.update = function() {
+	_drill_TVi_titleLayer_update.call(this);
+	
+	// > 创建 菜单后面层（防止报错）
+	if( this._backgroundSprite == undefined ){
+		this._backgroundSprite = new Sprite();
+	}
+	// > 创建 菜单前面层
+	if( this._foregroundSprite == undefined ){
+		this._foregroundSprite = new Sprite();
+		this.addChild(this._foregroundSprite);	
+	}
+};
+//==============================
+// * 标题层级 - 参数定义
+//
+//			说明：	> 所有drill插件的贴图都用唯一参数：zIndex（可为小数、负数），其它插件没有此参数定义。
+//==============================
+if( typeof(_drill_sprite_zIndex) == "undefined" ){						//（防止重复定义）
+	var _drill_sprite_zIndex = true;
+	Object.defineProperty( Sprite.prototype, 'zIndex', {
+		set: function( value ){
+			this.__drill_zIndex = value;
+		},
+		get: function(){
+			if( this.__drill_zIndex == undefined ){ return 20250701; }	//（如果未定义则放最上面）
+			return this.__drill_zIndex;
+		},
+		configurable: true
+	});
+};
+//==============================
+// * 标题层级 - 图片层级排序（私有）
+//==============================
+Scene_Title.prototype.drill_TVi_sortByZIndex_Private = function() {
+   this._backgroundSprite.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
+   this._foregroundSprite.children.sort(function(a, b){return a.zIndex-b.zIndex});
+};
+//==============================
+// * 标题层级 - 去除贴图（私有）
+//==============================
+Scene_Title.prototype.drill_TVi_layerRemoveSprite_Private = function( sprite ){
+	this._backgroundSprite.removeChild( sprite );
+	this._foregroundSprite.removeChild( sprite );
+};
+//==============================
+// * 标题层级 - 添加贴图到层级（私有）
+//==============================
+Scene_Title.prototype.drill_TVi_layerAddSprite_Private = function( sprite, layer_index ){
+	if( layer_index == "菜单后面层" || layer_index === "0" || layer_index === 0 || 
+		layer_index == "下层" || layer_index == "中层" || layer_index == "上层"){
+		this._backgroundSprite.addChild( sprite );
+	}
+	if( layer_index == "菜单前面层" || layer_index === "1" || layer_index === 1 || 
+		layer_index == "图片层" || layer_index == "最顶层" ){
+		this._foregroundSprite.addChild( sprite );
+	}
+};
+
+
+
 //=============================================================================
 // ** ☆贴图创建标记
 //			
-//			说明：	> 此模块专门对 菜单面板 进行 创建标记，确保只创建一次。
-//					  注意，该功能在所有菜单面板中都会执行。
+//			说明：	> 此模块管理 创建标记，确保只创建一次。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
@@ -671,25 +814,22 @@ StorageManager.drill_TVi_saveData = function(){
 //==============================
 var _drill_TVi_createBackground = Scene_Title.prototype.createBackground;
 Scene_Title.prototype.createBackground = function() {
-	// > 背景初始化
+	
+	// > 视频初始化
 	SceneManager._drill_TVi_created = false;	
-   	this._drill_TVi_sprites = [];
-   	this._drill_TVi_sprites_data = [];	//注意，该数组与DrillUp.g_TVi_list数组的下标不同步，要使用data
+	DrillUp.g_drill_TVi_sprites = [];
+	DrillUp.g_drill_TVi_sprites_data = [];
 	
+	// > 原函数
 	_drill_TVi_createBackground.call(this);
-	
-	if( !this._backgroundSprite ){			//附着在定义的标题背景后面
-		this._backgroundSprite = new Sprite();
-		this.addChild(this._backgroundSprite);
-	}
 };
 //==============================
 // * 贴图创建标记 - 退出界面
 //==============================
 var _drill_TVi_terminate = Scene_Title.prototype.terminate;
 Scene_Title.prototype.terminate = function() {
-	_drill_TVi_terminate.call(this);			//（下次进入界面需重新创建）
-	SceneManager._drill_TVi_created = false;
+	_drill_TVi_terminate.call(this);
+	SceneManager._drill_TVi_created = false;	//（下次进入界面需重新创建）
 };
 //==============================
 // * 贴图创建标记 - 帧刷新
@@ -706,30 +846,8 @@ Scene_Title.prototype.update = function() {
 	// > 帧刷新
 	if( SceneManager._drill_TVi_created == true ){
 		this.drill_TVi_update();
-	};
-};
-
-
-//=============================================================================
-// ** ☆音量控制
-//
-//			说明：	> 此模块专门管理 视频音量比 控制。
-//					（插件完整的功能目录去看看：功能结构树）
-//=============================================================================
-//==============================
-// * 音量控制 - 控制音量比例
-//==============================
-var _drill_TVi_setMasterVolume = WebAudio.setMasterVolume;
-WebAudio.setMasterVolume = function(value) {
-	for( var i = 0; i < $gameTemp._drill_TVi_sprites.length; i++) {
-		var sprite = $gameTemp._drill_TVi_sprites[i];
-		if( sprite ){
-			sprite._drill_src.volume = sprite._drill_data['volume'] * value;
-			if( sprite._drill_data['showDebug'] ){ console.log('标题视频-设置音量: ', value); }
-		}
 	}
-	return _drill_TVi_setMasterVolume(value);
-}
+};
 
 
 //=============================================================================
@@ -744,93 +862,85 @@ WebAudio.setMasterVolume = function(value) {
 var _drill_TVi_temp_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {
 	_drill_TVi_temp_initialize.call(this);
-	this._drill_TVi_sprites = [];
+	//this._drill_TVi_sprites = [];			//（Game_Temp里面不要执行初始化）
+	//this._drill_TVi_sprites_data = [];	//（因为开始新游戏时，会执行此初始化，造成视频未被删掉指针就清空了）
 };
+//==============================
+// * 贴图控制 - 初始化
+//==============================
+DrillUp.g_drill_TVi_sprites = [];
+DrillUp.g_drill_TVi_sprites_data = [];
 //==============================
 // * 贴图控制 - 退出界面
 //==============================
 var _drill_TVi_terminate2 = Scene_Title.prototype.terminate;
 Scene_Title.prototype.terminate = function() {
-	_drill_TVi_terminate2.call(this);			//设置需要下次重新创建
-	for(var i=0; i < $gameTemp._drill_TVi_sprites.length; i++){
-		var sprite = $gameTemp._drill_TVi_sprites[i];
-		sprite.drill_TVi_destroy();
+	_drill_TVi_terminate2.call(this);
+	
+	// > 执行销毁
+	for(var i=0; i < DrillUp.g_drill_TVi_sprites.length; i++){
+		var temp_sprite = DrillUp.g_drill_TVi_sprites[i];
+		temp_sprite.drill_TVi_destroy();
+		this.drill_TVi_layerRemoveSprite( temp_sprite );
 	}
-	$gameTemp._drill_TVi_sprites = [];
+	DrillUp.g_drill_TVi_sprites = [];
+	DrillUp.g_drill_TVi_sprites_data = [];
 };
 //==============================
-// * 贴图控制 - 界面创建时
-//==============================
-var _drill_TVi_createDisplayObjects = Scene_Title.prototype.createDisplayObjects;
-Scene_Title.prototype.createDisplayObjects = function() {
-    _drill_TVi_createDisplayObjects.call(this);
-	this.drill_TVi_create();
-}
-//==============================
-// * 贴图控制 - 界面创建
+// * 贴图控制 - 创建
 //==============================
 Scene_Title.prototype.drill_TVi_create = function() {    
 	SceneManager._drill_TVi_created = true;
 	
-	if(!this._drill_TVi_sprites){
-		this._drill_TVi_sprites = [];	//防止某些覆写的菜单报错
-		this._drill_TVi_sprites_data = [];
-		$gameTemp._drill_TVi_sprites = [];
+	// > 防止报错
+	if( DrillUp.g_drill_TVi_sprites == undefined ){
+		DrillUp.g_drill_TVi_sprites = [];
 	}
-	if( !this._backgroundSprite ){		//菜单后面层
-		this._backgroundSprite = new Sprite();
-	}
-	if( !this._foregroundSprite ){		//菜单前面层
-		this._foregroundSprite = new Sprite();
-		this.addChild(this._foregroundSprite);
+	if( DrillUp.g_drill_TVi_sprites_data == undefined ){
+		DrillUp.g_drill_TVi_sprites_data = [];
 	}
 	
 	// > 创建贴图
-	for (var i = 0; i < DrillUp.g_TVi_list.length; i++) {
-		var temp_data = DrillUp.g_TVi_list[i];
+	for( var i = 0; i < DrillUp.g_TVi_style.length; i++ ){
+		var temp_data = DrillUp.g_TVi_style[i];
 		if( temp_data == undefined ){ continue; }
-		if( temp_data['inited'] != true ){ continue; }
 		if( DrillUp.global_TVi_visibleTank[i] != true ){ continue; }
 		
 		// > 视频贴图
 		var temp_suffix = Game_Interpreter.prototype.videoFileExt();	//组合路径
 		var temp_path = 'movies/'+ temp_data['src'] + temp_suffix;
-		if( DrillUp.g_TVi_DEBUG ){ console.log('标题视频-读取材质:', temp_path); }
+		if( DrillUp.g_TVi_DEBUG ){ console.log("标题视频-读取材质:", temp_path); }
 		
 		var data = {
-			"path": temp_path,
-			"muted": !temp_data['playSound'],
-			"volume": temp_data['volume'],
-			"loopEnable": temp_data['loopEnable'],
-			"loopStart": temp_data['loopStart'],
-			"loopEnd": temp_data['loopEnd'],
-			"loopEndUseOrg": !temp_data['loopEndLock'],
-			"playbackRate": temp_data['playbackRate'],
-			"showDebug": DrillUp.g_TVi_DEBUG,
-			
-			"widthUseOrg":temp_data['widthUseOrg'],
-			"heightUseOrg":temp_data['heightUseOrg'],
-			"width":temp_data['width'],
-			"height":temp_data['height'],
 			"x":temp_data['x'],
 			"y":temp_data['y'],
 			"opacity":temp_data['opacity'],
 			"blendMode":temp_data['blendMode'],
 			"zIndex":temp_data['zIndex'],
+			
+			"path": temp_path,
+			"muted": !temp_data['playSound'],
+			"volume": temp_data['volume'],
+			"playbackRate": temp_data['playbackRate'],
+			
+			"loopEnable": temp_data['loopEnable'],
+			"loopStart": temp_data['loopStart'],
+			"loopEnd": temp_data['loopEnd'],
+			"loopEndLock": temp_data['loopEndLock'],
+			
+			"widthUseOrg":temp_data['widthUseOrg'],
+			"heightUseOrg":temp_data['heightUseOrg'],
+			"width":temp_data['width'],
+			"height":temp_data['height'],
 			"tint":temp_data['tint'],
-			//"src_mask":temp_data['src_mask'],
-			//"src_maskFile":"img/Battle__layer/",
+			
+			"showDebug": DrillUp.g_TVi_DEBUG
 		}
 		var temp_sprite = new Drill_TVi_VideoSprite( data );
-		this._drill_TVi_sprites.push(temp_sprite);
-		this._drill_TVi_sprites_data.push(data);
-		$gameTemp._drill_TVi_sprites.push(temp_sprite);
+		DrillUp.g_drill_TVi_sprites.push(temp_sprite);
+		DrillUp.g_drill_TVi_sprites_data.push(data);
 		
-		if( temp_data['menu_index'] == "菜单前面层" ){
-			this._foregroundSprite.addChild(temp_sprite);
-		}else{
-			this._backgroundSprite.addChild(temp_sprite);
-		}
+		this.drill_TVi_layerAddSprite( temp_sprite, temp_data['layerIndex'] );
 	}
 
 	// > 层级排序
@@ -840,26 +950,55 @@ Scene_Title.prototype.drill_TVi_create = function() {
 // * 贴图控制 - 帧刷新
 //==============================
 Scene_Title.prototype.drill_TVi_update = function() {
-	//暂无
+	//（暂无）
 };
+
+
+//=============================================================================
+// ** ☆音量控制
+//
+//			说明：	> 此模块专门管理 视频音量比 控制。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
 //==============================
-// * 贴图控制 - 层级排序（标题）
+// * 音量控制 - 控制音量比例
 //==============================
-Scene_Title.prototype.drill_TVi_sortByZIndex = function() {
-   this._backgroundSprite.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
-   this._foregroundSprite.children.sort(function(a, b){return a.zIndex-b.zIndex});
+var _drill_TVi_setMasterVolume = WebAudio.setMasterVolume;
+WebAudio.setMasterVolume = function( value ){
+	for( var i = 0; i < DrillUp.g_drill_TVi_sprites.length; i++ ){
+		var temp_sprite = DrillUp.g_drill_TVi_sprites[i];
+		if( temp_sprite ){
+			temp_sprite._drill_src.volume = temp_sprite._drill_data['volume'] * value;
+			if( temp_sprite._drill_data['showDebug'] == true ){ console.log("标题视频-设置音量: ", value); }
+		}
+	}
+	return _drill_TVi_setMasterVolume(value);
 };
 
 
 //=============================================================================
 // ** 视频贴图【Drill_TVi_VideoSprite】
-//			
-// 			代码：	> 范围 - 仅用于单图层播放视频。
-//					> 结构 - [ ●合并 /分离/混乱] 贴图与数据合并。只有visible被控制。
-//					> 数量 - [单个/ ●多个 ]
-//					> 创建 - [ ●一次性 /自延迟/外部延迟] 
-//					> 销毁 - [ ●不考虑 /自销毁/外部销毁] 
-//					> 样式 - [ ●不可修改 /自变化/外部变化] 样式设置后固定，不可修改。
+// **
+// **		作用域：	菜单界面
+// **		主功能：	定义一个 视频贴图 对象，用于播放视频。
+// **		子功能：	
+// **					->贴图『独立贴图』
+// **						x->显示贴图/隐藏贴图
+// **						x->是否就绪
+// **						x->优化策略
+// **						->销毁
+// **						->初始化数据
+// **						->初始化对象
+// **					
+// **					->A主体
+// **					->B视频
+// **		
+// **		代码：	> 范围 - 仅用于单图层播放视频。
+// **				> 结构 - [ ●合并 /分离/混乱] 贴图与数据合并。只有visible被控制。
+// **				> 数量 - [单个/ ●多个 ]
+// **				> 创建 - [ ●一次性 /自延迟/外部延迟] 
+// **				> 销毁 - [不考虑/ ●自销毁 /外部销毁] 
+// **				> 样式 - [ ●不可修改 /自变化/外部变化] 样式设置后固定，不可修改。
 //=============================================================================
 //==============================
 // * 视频贴图 - 定义
@@ -872,74 +1011,93 @@ Drill_TVi_VideoSprite.prototype.constructor = Drill_TVi_VideoSprite;
 //==============================
 // * 视频贴图 - 初始化
 //==============================
-Drill_TVi_VideoSprite.prototype.initialize = function( data ) {
+Drill_TVi_VideoSprite.prototype.initialize = function( data ){
 	Sprite.prototype.initialize.call(this);
+	this._drill_data = JSON.parse(JSON.stringify( data ));	//深拷贝数据
 	
-	// > 默认值
-	if( data == undefined ){ data = {}; };
-	if( data['path'] == undefined ){ data['path'] = "" };						//路径
-	if( data['muted'] == undefined ){ data['muted'] = true };					//是否静音
-	if( data['volume'] == undefined ){ data['volume'] = 1.00 };					//音量
-	if( data['loopEnable'] == undefined ){ data['loopEnable'] = true };			//是否循环
-	if( data['loopStart'] == undefined ){ data['loopStart'] = 0 };				//起始位置
-	if( data['loopEnd'] == undefined ){ data['loopEnd'] = 0 };					//终止位置
-	if( data['loopEndUseOrg'] == undefined ){ data['loopEndUseOrg'] = true };	//使用原视频终止位置
-	if( data['playbackRate'] == undefined ){ data['playbackRate'] = 1.0 };		//播放速度
-	if( data['showDebug'] == undefined ){ data['showDebug'] = false };			//输出dubug
-	
-	if( data['widthUseOrg'] == undefined ){ data['widthUseOrg'] = true };		//使用原视频宽度
-	if( data['heightUseOrg'] == undefined ){ data['heightUseOrg'] = true };		//使用原视频高度
-	if( data['width'] == undefined ){ data['width'] = 0 };						//指定宽度
-	if( data['height'] == undefined ){ data['height'] = 0 };					//指定高度
-	if( data['x'] == undefined ){ data['x'] = 0 };								//位置x
-	if( data['y'] == undefined ){ data['y'] = 0 };								//位置y
-	if( data['opacity'] == undefined ){ data['opacity'] = 255 };				//透明度
-	if( data['blendMode'] == undefined ){ data['blendMode'] = 0 };				//混合模式
-	if( data['zIndex'] == undefined ){ data['zIndex'] = 0 };					//图片层级
-	if( data['tint'] == undefined ){ data['tint'] = "#ffffff" };				//色调
-	data['tint'] = data['tint'].replace("#","0x");
-	if( data['src_mask'] == undefined ){ data['src_mask'] = "" };						//遮罩
-	if( data['src_maskFile'] == undefined ){ data['src_maskFile'] = "img/system/" };	//遮罩文件夹
-	
-	
-	// > 私有变量初始化
-	this._drill_data = data;										//数据
-	var nstr = PIXI.VERSION.split(/\./);
-	if( Number(nstr[0] >= 5) ){
-		this._drill_texture = PIXI.Texture.from( data['path'] );				//pixi5视频贴图
-		this._drill_src = this._drill_texture.baseTexture.resource.source;		//视频资源信息
-	}else{
-		this._drill_texture = PIXI.Texture.fromVideo( data['path'] );			//pixi4视频贴图
-		this._drill_src = this._drill_texture.baseTexture.source;				//视频资源信息
-	};
-	this._drill_texture_loaded = false;								//视频读取状态
-	this._drill_video = new PIXI.Sprite();							//视频贴图
-	this._drill_video.texture = this._drill_texture;				//
-	this._drill_video.anchor.x = 0.5;								//
-	this._drill_video.anchor.y = 0.5;								//
-	this._drill_video.tint = parseInt(data['tint']);				//
-	this._drill_loopStart = 0;										//开始位置
-	this._drill_loopEnd = 0;										//结束位置
-	this.addChild(this._drill_video);
-	
-	this.drill_TVi_spriteInit();
-	this.drill_TVi_videoInit();
+	this.drill_initData();									//初始化数据
+	this.drill_initSprite();								//初始化对象
 };
 //==============================
 // * 视频贴图 - 帧刷新
 //==============================
 Drill_TVi_VideoSprite.prototype.update = function() {
 	Sprite.prototype.update.call(this);
-	
-	if( this._drill_texture_loaded ){
-		this._drill_texture.update();
-	}
+											//帧刷新 - A主体（无）
+	this.drill_TVi_updateVideo();			//帧刷新 - B视频
 };
 //==============================
-// * 初始化 - 贴图
+// * 视频贴图 - 初始化数据『独立贴图』
 //==============================
-Drill_TVi_VideoSprite.prototype.drill_TVi_spriteInit = function() {
+Drill_TVi_VideoSprite.prototype.drill_initData = function() {
 	var data = this._drill_data;
+	
+	// > A主体
+	if( data['x'] == undefined ){ data['x'] = 0 };								//位置x
+	if( data['y'] == undefined ){ data['y'] = 0 };								//位置y
+	if( data['opacity'] == undefined ){ data['opacity'] = 255 };				//透明度
+	if( data['blendMode'] == undefined ){ data['blendMode'] = 0 };				//混合模式
+	if( data['zIndex'] == undefined ){ data['zIndex'] = 0 };					//图片层级
+	
+	// > B视频
+	if( data['path'] == undefined ){ data['path'] = "" };						//资源
+	if( data['muted'] == undefined ){ data['muted'] = true };					//是否播放声音
+	if( data['volume'] == undefined ){ data['volume'] = 1.00 };					//音量比
+	if( data['playbackRate'] == undefined ){ data['playbackRate'] = 1.0 };		//视频播放速度
+	
+	if( data['loopEnable'] == undefined ){ data['loopEnable'] = true };			//是否循环播放
+	if( data['loopStart'] == undefined ){ data['loopStart'] = 0 };				//起始时间
+	if( data['loopEnd'] == undefined ){ data['loopEnd'] = 0 };					//结束时间
+	if( data['loopEndLock'] == undefined ){ data['loopEndLock'] = true };		//是否指定结束时间
+	
+	if( data['widthUseOrg'] == undefined  ){ data['widthUseOrg'] = true  };		//是否使用原视频宽度
+	if( data['heightUseOrg'] == undefined ){ data['heightUseOrg'] = true };		//是否使用原视频高度
+	if( data['width'] == undefined  ){ data['width'] = 0  };					//指定视频宽度
+	if( data['height'] == undefined ){ data['height'] = 0 };					//指定视频高度
+	if( data['tint'] == undefined ){ data['tint'] = "#ffffff" };				//视频色调
+	data['tint'] = data['tint'].replace("#","0x");								//视频色调
+	
+	if( data['showDebug'] == undefined ){ data['showDebug'] = false };			//是否开启Debug模式
+	
+	/*	（无法使用遮罩）
+	if( data['src_mask'] == undefined ){ data['src_mask'] = "" };						//遮罩
+	if( data['src_maskFile'] == undefined ){ data['src_maskFile'] = "img/system/" };	//遮罩文件夹
+	*/
+};
+//==============================
+// * 视频贴图 - 初始化对象『独立贴图』
+//==============================
+Drill_TVi_VideoSprite.prototype.drill_initSprite = function() {
+	this.drill_sprite_initAttr();			//初始化子功能 - A主体
+	this.drill_sprite_initVideo();			//初始化子功能 - B视频
+};
+//==============================
+// * 视频贴图 - 执行销毁
+//==============================
+Drill_TVi_VideoSprite.prototype.drill_TVi_destroy = function() {
+	var data = this._drill_data;
+	if( data['showDebug'] == true ){ console.log("视频-执行去除视频。"); }
+	
+	// > 销毁 - A主体
+	this.visible = false;
+	
+	// > 销毁 - B视频
+	this._drill_src['muted'] = true;
+	this._drill_src.pause();
+	this._drill_src.remove();
+	this._drill_texture_loaded = false;
+}
+
+//==============================
+// * A主体 - 初始化子功能
+//==============================
+Drill_TVi_VideoSprite.prototype.drill_sprite_initAttr = function() {
+	var data = this._drill_data;
+	/*
+		贴图的层级如下：
+			- 主体贴图（this）
+			- - 视频贴图（_drill_video）
+	*/
 	
 	this.anchor.x = 0.5;
 	this.anchor.y = 0.5;
@@ -949,25 +1107,49 @@ Drill_TVi_VideoSprite.prototype.drill_TVi_spriteInit = function() {
 	this.blendMode = data['blendMode'];
 	this.zIndex = data['zIndex'];
 	
-	/*if( data['src_mask'] != "" ){
+	/*	（无法使用遮罩）
+	if( data['src_mask'] != "" ){
 		var temp_mask = new Sprite();
 		temp_mask.bitmap = ImageManager.loadBitmap( data['src_maskFile'], data['src_mask'], 0, true);
 		temp_mask.anchor.x = 0.5;
 		temp_mask.anchor.y = 0.5;
 		this.addChild(temp_mask);
 		this.mask = temp_mask;		//『遮罩赋值』
-	}*/		//无法使用遮罩
+	}*/
 }
+
 //==============================
-// * 初始化 - 视频
+// * B视频 - 初始化子功能
 //==============================
-Drill_TVi_VideoSprite.prototype.drill_TVi_videoInit = function() {
+Drill_TVi_VideoSprite.prototype.drill_sprite_initVideo = function() {
 	var data = this._drill_data;
 	
+	// > 底层版本控制
+	var nstr = PIXI.VERSION.split(/\./);
+	if( Number(nstr[0] >= 5) ){
+		this._drill_texture = PIXI.Texture.from( data['path'] );				//pixi5视频贴图
+		this._drill_src = this._drill_texture.baseTexture.resource.source;		//视频资源
+	}else{
+		this._drill_texture = PIXI.Texture.fromVideo( data['path'] );			//pixi4视频贴图
+		this._drill_src = this._drill_texture.baseTexture.source;				//视频资源
+	};
+	
+	// > 视频贴图 初始化
+	this._drill_video = new PIXI.Sprite();
+	this._drill_video.texture = this._drill_texture;
+	this._drill_video.anchor.x = 0.5;
+	this._drill_video.anchor.y = 0.5;
+	this._drill_video.tint = parseInt(data['tint']);
+	this.addChild(this._drill_video);
+	
+	// > 视频资源 初始化
+	this._drill_texture_loaded = false;				//视频读取状态
+	this._drill_loopStart = 0;						//开始位置
+	this._drill_loopEnd = 0;						//结束位置
 	this._drill_src['preload'] = 'auto';
 	this._drill_src['autoload'] = true;
-	this._drill_src['volume'] = data['volume'] * WebAudio._masterVolume;
 	this._drill_src['muted'] = data['muted'];
+	this._drill_src['volume'] = data['volume'] * WebAudio._masterVolume;
 	this._drill_src['loop'] = data['loopEnable'];
 	this._drill_src['playbackRate'] = data['playbackRate'];
 	this._drill_src.addEventListener('loadedmetadata', this.drill_TVi_videoLoaded.bind(this) );
@@ -977,88 +1159,100 @@ Drill_TVi_VideoSprite.prototype.drill_TVi_videoInit = function() {
 	if( this._drill_src.played.length ){
 		this._drill_src.play();
 	}
-	
 }
 //==============================
-// * 监听 - 视频载入完成时
+// * B视频 - 帧刷新
+//==============================
+Drill_TVi_VideoSprite.prototype.drill_TVi_updateVideo = function() {
+	if( this._drill_texture_loaded == true ){
+		this._drill_texture.update();
+	}
+}
+//==============================
+// * B视频 - 监听 - 视频载入完成时
 //==============================
 Drill_TVi_VideoSprite.prototype.drill_TVi_videoLoaded = function() {
 	this._drill_texture_loaded = true;
 	var data = this._drill_data;
-	if( data['showDebug'] ){ console.log('标题视频-读取视频元数据:'); }
+	if( data['showDebug'] == true ){ console.log("视频-读取视频元数据。"); }
 	
 	// > 重设高宽
-	this._drill_video.width = this._drill_src['videoWidth'];
+	this._drill_video.width  = this._drill_src['videoWidth'];
 	this._drill_video.height = this._drill_src['videoHeight'];
-	if( data['widthUseOrg'] == false ) {		//根据指定高宽进行缩放
-		//this._drill_video.scale.x = data['width'] / this._drill_video.width ;
+	if( data['widthUseOrg'] == false ){			//根据指定高宽进行缩放
 		this._drill_video.width = data['width'];
+		//this._drill_video.scale.x = data['width'] / this._drill_video.width;
 	}
-	if( data['heightUseOrg'] == false ) {
-		//this._drill_video.scale.y = data['height'] / this._drill_video.height ;	
+	if( data['heightUseOrg'] == false ){
 		this._drill_video.height = data['height'];
+		//this._drill_video.scale.y = data['height'] / this._drill_video.height;	
 	}
 	
 	// > 重设循环时间
-	if( data['loopEndUseOrg'] == true ) {
-		this._drill_loopStart = data['loopStart'];
-		this._drill_loopEnd = this._drill_src['duration'];
-	}else{
+	if( data['loopEndLock'] == true ){
 		this._drill_loopStart = data['loopStart'];
 		this._drill_loopEnd = data['loopEnd'];
+		if( this._drill_loopEnd > this._drill_src['duration'] ){
+			this._drill_loopEnd = this._drill_src['duration'];
+		}
+	}else{
+		this._drill_loopStart = data['loopStart'];
+		this._drill_loopEnd = this._drill_src['duration'];
 	}
 	if( this._drill_loopStart != 0 ){
 		this._drill_src['currentTime'] = this._drill_loopStart;
 	}
 	
-	if( data['showDebug'] ){
-		console.log('设置视频循环为 %s 至 %s:', this._drill_loopStart, this._drill_loopEnd );
-	}
+	if( data['showDebug'] == true ){ console.log("视频-设置视频循环为 %s 至 %s:", this._drill_loopStart, this._drill_loopEnd ); }
 }
 //==============================
-// * 监听 - 视频帧刷新
+// * B视频 - 监听 - 视频帧刷新
 //==============================
 Drill_TVi_VideoSprite.prototype.drill_TVi_videoUpdated = function() {
 	if( this._drill_texture_loaded != true ){ return; }
 	var data = this._drill_data;
-	if( data['showDebug'] ){ console.log('视频刷新帧:', this._drill_src['currentTime']); }
+	if( data['showDebug'] == true ){ console.log("视频-视频刷新帧:", this._drill_src['currentTime']); }
 	
 	if( this._drill_src['currentTime'] >= this._drill_loopEnd -1 ){	//（这里要提前1帧）
-		if( data['showDebug'] ){
-			console.log('标题视频-播放回到位置:', this._drill_loopStart );
+		
+		// > 循环播放 - 开启时
+		if( data['loopEnable'] == true ){
+			this._drill_src['currentTime'] = this._drill_loopStart;
+			this._drill_src.play();
+			if( data['showDebug'] == true ){ console.log("视频-循环播放（循环节结束时）回到位置:", this._drill_loopStart ); }
+			
+		// > 循环播放 - 结束时
+		}else{
+			this.drill_TVi_destroy();
 		}
-		this._drill_src['currentTime'] = this._drill_loopStart;
-		this._drill_src.play();
 	}
 }
 //==============================
-// * 监听 - 视频结束时
+// * B视频 - 监听 - 视频结束时
 //==============================
 Drill_TVi_VideoSprite.prototype.drill_TVi_videoEnded = function() {
 	var data = this._drill_data;
-	if( data['loopEnable'] == false ) {
+	
+	// > 循环播放 - 开启时
+	//		（此设置好像进不来，因为（循环节结束时）抢先一步循环了）
+	if( data['loopEnable'] == true ){
+		this._drill_src['currentTime'] = this._drill_loopStart;
+		this._drill_src.play();
+		if( data['showDebug'] == true ){ console.log("视频-循环播放（视频结束时）回到位置:", this._drill_loopStart ); }
+		
+	// > 循环播放 - 结束时
+	}else{
 		this.drill_TVi_destroy();
 	}
 }
 //==============================
-// * 监听 - 视频载入错误时
+// * B视频 - 监听 - 视频载入错误时
 //==============================
 Drill_TVi_VideoSprite.prototype.drill_TVi_videoError = function() {
 	var data = this._drill_data;
-	if( data['showDebug'] ){ 
-		console.error('视频发生了错误:', this._drill_src.error);
-	}
+	if( data['showDebug'] == true ){ console.error("视频-视频发生了错误:", this._drill_src.error); }
 }
-//==============================
-// * 贴图 - 去除
-//==============================
-Drill_TVi_VideoSprite.prototype.drill_TVi_destroy = function() {
-	this.visible = false;
-	this._drill_src['muted'] = true;
-	this._drill_src.pause();
-	this._drill_src.remove();
-	this._drill_texture_loaded = false;
-}
+
 
 //=============================================================================
 // * <<<<基于插件检测<<<<
