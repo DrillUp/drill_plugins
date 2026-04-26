@@ -1407,11 +1407,8 @@
  */
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		SLS（Scene_Limited_Shop）
-//		临时全局变量	DrillUp.g_SLS_xxx
-//		临时局部变量	this._drill_SLS_xxx
-//		存储数据变量	无
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -2182,7 +2179,7 @@ Game_System.prototype.drill_SLS_initSysData_Private = function() {
 	for(var i = 0; i < DrillUp.g_SLS_shop_list.length; i++){
 		var temp_data = DrillUp.g_SLS_shop_list[i];
 		if( temp_data == undefined ){ continue; }
-		this._drill_SLS_shopDataList[i] = JSON.parse(JSON.stringify( temp_data ));
+		this._drill_SLS_shopDataList[i] = JSON.parse(JSON.stringify( temp_data ));  //『深拷贝-混杂自定义数据』
 	}
 };
 //==============================
@@ -2205,7 +2202,7 @@ Game_System.prototype.drill_SLS_checkSysData_Private = function() {
 			
 			// > 未存储的，重新初始化
 			if( this._drill_SLS_shopDataList[i] == undefined ){
-				this._drill_SLS_shopDataList[i] = JSON.parse(JSON.stringify( temp_data ));
+				this._drill_SLS_shopDataList[i] = JSON.parse(JSON.stringify( temp_data ));  //『深拷贝-混杂自定义数据』
 			
 			// > 已存储的，跳过
 			}else{

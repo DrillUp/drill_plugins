@@ -1231,11 +1231,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		AsOAA (Assets_Of_Actor_Attributes)
-//		临时全局变量	DrillUp.g_AsOAA_xxx
-//		临时局部变量	this._drill_AsOAA_xxx
-//		存储数据变量	无
-//		全局存储变量	无
+//
+//		插件简称		AsOAA（Assets_Of_Actor_Attributes）
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<

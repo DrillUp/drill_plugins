@@ -153,11 +153,8 @@
  */
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		DCBo (Dialog_Choice_Box)
-//		临时全局变量	DrillUp.g_DCBo_xxx
-//		临时局部变量	this._drill_DCBo_xxx
-//		存储数据变量	无
-//		全局存储变量	无
+//
+//		插件简称		DCBo（Dialog_Choice_Box）
 //		覆盖重写方法	Window_ChoiceList.prototype.drawItem（覆写）
 //
 //<<<<<<<<性能记录<<<<<<<<

@@ -138,11 +138,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		COWCSp（Core_Of_Window_Character_Sprite）
-//		临时全局变量	DrillUp.g_COWCSp_xxx
-//		临时局部变量	this._drill_COWCSp_xxx
-//		存储数据变量	$gameSystem._drill_COWCSp_xxx
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -791,14 +788,14 @@ Game_Temp.prototype.drill_COWCSp_sprite_initData = function( baseParam ){
 	
 	
 	// > 绘制 - 准备绘制配置
-	var new_spriteBaseParam = JSON.parse(JSON.stringify( baseParam ));
+	var new_spriteBaseParam = JSON.parse(JSON.stringify( baseParam ));  //『深拷贝-核心自定义数据』
 	var new_options = {};
 	new_options['infoParam'] = {};
 	new_options['infoParam']['x'] = 0 + padding_left;	//（贴图内边距 位置偏移）
 	new_options['infoParam']['y'] = 0 + padding_top;
 	new_options['infoParam']['canvasWidth']  = 100;		//（先给个非零值）
 	new_options['infoParam']['canvasHeight'] = 100;
-	new_options['baseParam'] = JSON.parse(JSON.stringify(new_spriteBaseParam));
+	new_options['baseParam'] = JSON.parse(JSON.stringify(new_spriteBaseParam));  //『深拷贝-核心自定义数据』
 	new_options['baseParam']['sprite_type'] = "";		//（清空 嵌套绘制，防止死循环执行绘制）
 	new_options['baseParam']['sprite_text'] = "";
 	new_options['baseParam']['sprite_width'] = 0;
@@ -820,7 +817,7 @@ Game_Temp.prototype.drill_COWCSp_sprite_initData = function( baseParam ){
 		var converted_text = $gameTemp.drill_COWC_convertOrgText( new_spriteBaseParam['sprite_text'] );
 		
 		// > 高宽计算 - 『字符核心流程』 - 解析底层字符【系统 - 字符绘制核心】
-		var cur_options = JSON.parse(JSON.stringify(new_options));	//（需要深拷贝，因为走一次流程options会变。比如@@@-fs[add:4]多次执行后会叠加）
+		var cur_options = JSON.parse(JSON.stringify(new_options));	//『深拷贝-核心自定义数据』（需要深拷贝，因为走一次流程options会变。比如@@@-fs[add:4]多次执行后会叠加）
 		var rowBlock_list = $gameTemp.drill_COCD_analysisText( converted_text, cur_options );
 		
 		// > 高宽计算 - 最大宽度

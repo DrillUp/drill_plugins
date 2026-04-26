@@ -90,11 +90,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		COEM（Core_Of_Event_Manager）
-//		临时全局变量	无
-//		临时局部变量	无
-//		存储数据变量	无
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -836,7 +833,7 @@ Game_Map.prototype.drill_COEM_offspring_createEvent_Private = function( map_id, 
 		}
 					
 		// > 获取事件数据
-		var e_data = JSON.parse(JSON.stringify( src_event.event() ));
+		var e_data = JSON.parse(JSON.stringify( src_event.event() ));  //『深拷贝-核心自定义数据』
 		e_data['x'] = tar_x;
 		e_data['y'] = tar_y;
 		if( !e_data['meta'] ){ e_data['meta'] = {}; }	//（兼容镜像错误）
@@ -859,7 +856,7 @@ Game_Map.prototype.drill_COEM_offspring_createEvent_Private = function( map_id, 
 			}
 			
 			// > 获取事件数据
-			var e_data = JSON.parse(JSON.stringify( src_eventData ));
+			var e_data = JSON.parse(JSON.stringify( src_eventData ));  //『深拷贝-核心自定义数据』
 			e_data['x'] = tar_x;
 			e_data['y'] = tar_y;
 			if( !e_data['meta'] ){ e_data['meta'] = {}; }	//（兼容镜像错误）

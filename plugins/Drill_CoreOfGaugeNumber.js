@@ -743,11 +743,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		COGN (Core_Of_Gauge_Number)
-//		临时全局变量	无
-//		临时局部变量	this._drill_COGN_xxx
-//		存储数据变量	无
-//		全局存储变量	无
+//
+//		插件简称		COGN（Core_Of_Gauge_Number）
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -936,7 +933,7 @@
 		}
 	}
 	//==============================
-	// * 数据获取 - 参数数字样式（开放函数）
+	// * 静态数据 - 获取参数数字样式（开放函数）
 	//	
 	//			说明：	> 与直接获取 "DrillUp.g_COGN_list[i]" 一样，只是加了一道过滤提示网。
 	//==============================
@@ -947,7 +944,7 @@
 			alert( DrillUp.drill_COGN_getPluginTip_DataNotFind( index ) );
 			return {};
 		}
-		return JSON.parse(JSON.stringify( data ));
+		return JSON.parse(JSON.stringify( data ));  //『深拷贝-静态数据』
 	}
 	
 	
@@ -1105,7 +1102,7 @@ DrillUp.g_COGN_checkType = true;
 //==============================
 Drill_COGN_NumberSprite.prototype.initialize = function( data ) {
 	Sprite.prototype.initialize.call(this);
-	this._drill_data = JSON.parse(JSON.stringify( data ));	//深拷贝数据
+	this._drill_data = JSON.parse(JSON.stringify( data ));	//『深拷贝-独立贴图的数据』
 	
 	this.drill_initData();									//初始化数据
 	this.drill_initSprite();								//初始化对象

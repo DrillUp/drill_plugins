@@ -610,11 +610,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		SCr（Scene_Credits）
-//		临时全局变量	无
-//		临时局部变量	无
-//		存储数据变量	无
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -936,7 +933,7 @@ Window_TitleCommand.prototype.makeCommandList = function() {
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 面板控制 - 判断 显示情况
+// * 面板控制 - 判断 显示情况（开放函数）
 //==============================
 Game_Temp.prototype.drill_SCr_isVisible = function( context_realIndex ){
 	
@@ -1069,7 +1066,7 @@ Scene_Drill_SCr.prototype.drill_updateMask = function() {
 Scene_Drill_SCr.prototype.drill_createRoller = function() {
 	
 	// > 阶段列表
-	var step_data = JSON.parse(JSON.stringify( DrillUp.g_SCr_stepList ));
+	var step_data = JSON.parse(JSON.stringify( DrillUp.g_SCr_stepList ));  //『深拷贝-独立贴图的数据』（核心的贴图 Drill_COSR_Sprite 用）
 	for( var i = 0; i < step_data.length; i++ ){
 		var temp_data = step_data[i];
 		if( temp_data == undefined ){ continue; }

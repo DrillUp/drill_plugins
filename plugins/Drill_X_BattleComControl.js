@@ -317,13 +317,10 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		XBCC（X_Battle_Com_Control）
-//		临时全局变量	DrillUp.g_XBCC_xxx
-//		临时局部变量	无
-//		存储数据变量	$gameSystem._drill_XBCC_xxx
-//		全局存储变量	无
-//		覆盖重写方法	Window_ActorCommand.prototype.addSkillCommands
-//						Window_ActorCommand.prototype.load_com_images（MOG_BattleCommands插件中的函数）
+//		覆盖重写方法	Window_ActorCommand.prototype.addSkillCommands（覆写）
+//						Window_ActorCommand.prototype.load_com_images（覆写）（MOG_BattleCommands插件中的函数）
 //
 //<<<<<<<<性能记录<<<<<<<<
 //

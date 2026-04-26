@@ -410,15 +410,12 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		WSE（Window_Skill_Element）
-//		临时全局变量	DrillUp.g_WSE_xxx
-//		临时局部变量	this._drill_WSE_xxx
-//		存储数据变量	无
-//		全局存储变量	无
-//		覆盖重写方法	Window_SkillList.prototype.drawItem
-//						Window_SkillList.prototype.itemHeight
-//						Window_SkillList.prototype.maxCols
-//						Window_SkillList.prototype.spacing
+//		覆盖重写方法	Window_SkillList.prototype.drawItem（覆写）
+//						Window_SkillList.prototype.itemHeight（覆写）
+//						Window_SkillList.prototype.maxCols（覆写）
+//						Window_SkillList.prototype.spacing（覆写）
 //
 //<<<<<<<<性能记录<<<<<<<<
 //

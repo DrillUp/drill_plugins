@@ -92,11 +92,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		TSRe (Title_Scene)
-//		临时全局变量	DrillUp.g_TSRe_xxx
-//		临时局部变量	this._drill_TSRe_xxx
-//		存储数据变量	无
-//		全局存储变量	DrillUp.g_TSRe_removeEnabled
+//
+//		插件简称		TSRe（Title_Scene_Remove）
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<

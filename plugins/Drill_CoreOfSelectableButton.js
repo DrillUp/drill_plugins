@@ -1243,11 +1243,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		COSB (Core_Of_Selectable_Button)
-//		临时全局变量	DrillUp.g_COSB_xxx
-//		临时局部变量	this._drill_COSB_xxx
-//		存储数据变量	$gameSystem._drill_COSB_xxx
-//		全局存储变量	无
+//
+//		插件简称		COSB（Core_Of_Selectable_Button）
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -1544,7 +1541,7 @@
 	}
 
 	//==============================
-	// * 静态数据 - 按钮组样式（开放函数）
+	// * 静态数据 - 获取按钮组样式（开放函数）
 	//	
 	//			说明：	> 与直接获取 "DrillUp.g_COSB_btn[i]" 一样，只是加了一道过滤提示网。
 	//==============================
@@ -1554,7 +1551,7 @@
 			alert( DrillUp.drill_COSB_getPluginTip_DataNotFind( index ) );
 			return {};
 		}
-		return JSON.parse(JSON.stringify( data ));
+		return JSON.parse(JSON.stringify( data ));  //『深拷贝-静态数据』
 	}
 	
 	
@@ -1687,7 +1684,7 @@ Drill_COSB_LayerSprite.prototype.constructor = Drill_COSB_LayerSprite;
 //==============================
 Drill_COSB_LayerSprite.prototype.initialize = function( data, selectableWindow ){
 	Sprite.prototype.initialize.call(this);
-	this._drill_data = JSON.parse(JSON.stringify( data ));	//深拷贝数据
+	this._drill_data = JSON.parse(JSON.stringify( data ));  //『深拷贝-独立贴图的数据』
 	this._drill_window = selectableWindow;					//选项窗口指针
 	
 	this.drill_initData();				//初始化数据
@@ -3584,7 +3581,7 @@ Drill_COSB_WindowSprite.prototype.constructor = Drill_COSB_WindowSprite;
 // * 文本贴图 - 初始化
 //==============================
 Drill_COSB_WindowSprite.prototype.initialize = function( data ){
-	this._drill_data = JSON.parse(JSON.stringify( data ));	//深拷贝数据
+	this._drill_data = JSON.parse(JSON.stringify( data ));  //『深拷贝-独立贴图的数据』
 	
     Window_Base.prototype.initialize.call(this);
 	

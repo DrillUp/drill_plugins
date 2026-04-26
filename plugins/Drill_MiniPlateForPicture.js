@@ -986,11 +986,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		MPFP (Mini_Plate_For_Picture)
-//		临时全局变量	DrillUp.g_MPFP_xxx
-//		临时局部变量	this._drill_MPFP_xxx
-//		存储数据变量	$gameSystem._drill_MPFP_xxx
-//		全局存储变量	无
+//
+//		插件简称		MPFP（Mini_Plate_For_Picture）
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<

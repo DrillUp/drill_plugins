@@ -822,11 +822,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		AP（Actor_Portraiture）
-//		临时全局变量	无
-//		临时局部变量	this._drill_AP_xxx
-//		存储数据变量	无
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -1216,20 +1213,22 @@ Scene_Battle.prototype.drill_AP_updateActorActive = function() {
 	if( this._spriteset == undefined ){ return; }
 	if( this._spriteset._drill_AP_spriteTank == undefined ){ return; }
 	
-	// > 激活当前选中的肖像
-	var cur_Actor = BattleManager.actor();		
+	// > 当前选中角色
+	var curActor = BattleManager.actor();
+	
+	// > 角色肖像贴图容器 遍历
 	for(var i=0; i < this._spriteset._drill_AP_spriteTank.length; i++){
 		var temp_sprite = this._spriteset._drill_AP_spriteTank[i];
 		if( temp_sprite == null ){ continue; }
 		var actor = $gameParty.members()[i];
-		var actor_id = actor.actorId();
 				
 		// > 显示的条件
 		if( this.drill_AP_isActorVisible() == true &&		//（肖像显示条件）
-			cur_Actor != undefined &&						//（指定的贴图与角色id对应上）
-			cur_Actor.actorId() == actor.actorId() ){
+			curActor != undefined &&						//
+			actor != undefined &&							//
+			curActor.actorId() == actor.actorId() ){		//（指定的贴图与角色id对应上）
 			temp_sprite.active();
-			temp_sprite.force(cur_Actor._drill_AP_force);
+			temp_sprite.force(curActor._drill_AP_force);
 			
 		// > 不满足条件则隐藏
 		}else{
@@ -1286,10 +1285,13 @@ Spriteset_Battle.prototype.drill_AP_refreshTankIfNeed = function(){
 		
 		// > 根据数据建立sprite
 		var temp_sprite = null;
-		var temp_data = JSON.parse(JSON.stringify( DrillUp.g_AP_list[actor_id-1] ));
-		if( temp_data.actor_id ){
-			temp_sprite = new Drill_AP_Sprite( temp_data );
-			this._drill_AP_actorLayer.addChild(temp_sprite);
+		var temp_data = DrillUp.g_AP_list[actor_id-1];
+		if( temp_data != undefined ){
+			var temp_copy_data = JSON.parse(JSON.stringify( temp_data ));  //『深拷贝-混杂自定义数据』
+			if( temp_copy_data.actor_id ){
+				temp_sprite = new Drill_AP_Sprite( temp_copy_data );
+				this._drill_AP_actorLayer.addChild(temp_sprite);
+			}
 		}
 		this._drill_AP_spriteTank[i] = temp_sprite;
 	}

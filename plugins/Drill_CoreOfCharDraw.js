@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        系统 - 字符绘制核心
+ * @plugindesc [v1.3]        系统 - 字符绘制核心
  * @author Drill_up
  * 
  * 
@@ -84,12 +84,20 @@
  * 添加了 保持图标原大小 的底层功能，添加了比率设置。
  * [v1.2]
  * 修复了 字符块 被清空的bug，添加了 空白块字符 的功能。
+ * [v1.3]
+ * 添加了 左右修正内间距，修复了emoji字符有时候无效的bug。
  * 
  * 
  * 
  * @param 文本高度与字体大小的比率
- * @desc 文本高度=字体大小*比率；默认比率1.10，此比率会影响所有字符的高度计算，去看看文档的常见问题。
+ * @desc 文本高度=字体大小*比率，默认比率1.10。此比率会影响所有字符的高度计算，去看看文档的常见问题。
  * @default 1.10
+ * 
+ * @param 文本左右修正内间距
+ * @type number
+ * @min 0
+ * @desc 绘制一行文本时,该行的左右修正内间距,默认0,单位像素。此间距修正某些字体会左切边情况，去看文档的常见问题。
+ * @default 0
  * 
  * @param 默认是否自动缩放图标大小
  * @type boolean
@@ -101,11 +109,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		COCD（Core_Of_Char_Draw）
-//		临时全局变量	DrillUp.g_COCD_xxx
-//		临时局部变量	this._drill_COCD_xxx
-//		存储数据变量	$gameSystem._drill_COCD_xxx
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -353,6 +358,7 @@
 	
 	/*-----------------杂项------------------*/
 	DrillUp.g_COCD_textHeightPer = Number(DrillUp.parameters["文本高度与字体大小的比率"] || 1.10);
+	DrillUp.g_COCD_textLRExPadding = Number(DrillUp.parameters["文本左右修正内间距"] || 1);
 	DrillUp.g_COCD_iconResizeEnabled = String(DrillUp.parameters["默认是否自动缩放图标大小"] || "false") == "true";
 	
 	
@@ -453,7 +459,7 @@ Bitmap.prototype.drill_COCD_drawText = function( text, options ){
 	//	（父贴图执行）sprite.drill_COWCSp_sprite_clearAllSprite();   //『字符块全部清空注意』
 	
 	// > 『字符核心流程』 - 准备绘制配置
-	var cur_options = JSON.parse(JSON.stringify(options));	//（需要深拷贝，因为走一次流程options会变）
+	var cur_options = JSON.parse(JSON.stringify(options));  //『深拷贝-核心自定义数据』（需要深拷贝，因为走一次流程options会变）
 	$gameTemp.drill_COCD_initOptions( cur_options, this );
 	
 	// > 『字符核心流程』 - 解析底层字符
@@ -618,6 +624,10 @@ Game_Temp.prototype.drill_COCD_drawBaseText_initParam = function( baseParam ){
 //					> 注意此处是 纯绘制，与底层字符、窗口字符无关。
 //==============================
 Bitmap.prototype.drill_COCD_drawBaseText_Private = function( text, x, y, baseParam ){
+	
+	// > 文本左右修正内间距
+	//		（此间距修正某些字体会左切边情况）
+	x += DrillUp.g_COCD_textLRExPadding;
 	
 	// > 开始绘制 字符
 	//		（此处的xy位置就是最终绘制的位置，应该在绘制前就分配好）
@@ -1705,8 +1715,17 @@ Game_Temp.prototype.drill_COCD_setupSplitAll = function( rowBlock_list, infoPara
 				for( var j = 0; j < textBlock_list.length; j++ ){
 					var textBlock = textBlock_list[j];
 					var text = textBlock.drill_textBlock_getText();
+					
+					/*  拆散字符（旧代码）
 					for( var k = 0; k < text.length; k++ ){
 						var ch = text.charAt(k);
+					}
+					*/
+					
+					// > 拆散字符
+					var ch_list = Array.from(text);	//（ch可能是2个以上的字符形成的复合字符，比如emoji字符）
+					for( var k = 0; k < ch_list.length; k++ ){
+						var ch = ch_list[k];
 						
 						// > 依次添加 字符块
 						var new_block = this.drill_COCD_createCopyedTextBlock( textBlock );
@@ -2157,10 +2176,10 @@ Drill_COCD_TextBlock.prototype.drill_textBlock_setTextAndParam = function( text,
 	
 	// > 基础字符配置
 	$gameTemp.drill_COCD_drawBaseText_initParam( baseParam );				//（初始化）
-	this._drill_tb_baseParam = JSON.parse(JSON.stringify( baseParam ));		//（深拷贝）
+	this._drill_tb_baseParam = JSON.parse(JSON.stringify( baseParam ));		//『深拷贝-核心自定义数据』
 	
 	// > 底层单块配置
-	this._drill_tb_blockParam = JSON.parse(JSON.stringify( blockParam ));	//（深拷贝）
+	this._drill_tb_blockParam = JSON.parse(JSON.stringify( blockParam ));	//『深拷贝-核心自定义数据』
 	
 	// > 设置文本
 	this.drill_textBlock_setText( text );
@@ -2202,7 +2221,7 @@ Drill_COCD_TextBlock.prototype.drill_textBlock_refreshWidthAndHeight = function(
 //			说明：	> 存储在字符块中的单行配置，单行块会对此配置进行遍历收集。
 //##############################
 Drill_COCD_TextBlock.prototype.drill_textBlock_setRowParam = function( rowParam ){
-	this._drill_tb_rowParam = JSON.parse(JSON.stringify( rowParam ));		//（深拷贝）
+	this._drill_tb_rowParam = JSON.parse(JSON.stringify( rowParam ));  //『深拷贝-核心自定义数据』
 };
 //##############################
 // * 字符块 - 设置位置X【开放函数】
@@ -2248,9 +2267,9 @@ Drill_COCD_TextBlock.prototype.drill_textBlock_copyFrom = function( textBlock ){
 	
 	// > 阶段 - 创建字符块列表
 	this._drill_tb_text = textBlock._drill_tb_text;
-	this._drill_tb_baseParam  = JSON.parse(JSON.stringify( textBlock._drill_tb_baseParam ));		//（深拷贝）
-	this._drill_tb_blockParam = JSON.parse(JSON.stringify( textBlock._drill_tb_blockParam ));		//（深拷贝）
-	this._drill_tb_rowParam   = JSON.parse(JSON.stringify( textBlock._drill_tb_rowParam ));			//（深拷贝）
+	this._drill_tb_baseParam  = JSON.parse(JSON.stringify( textBlock._drill_tb_baseParam ));		//『深拷贝-核心自定义数据』
+	this._drill_tb_blockParam = JSON.parse(JSON.stringify( textBlock._drill_tb_blockParam ));		//『深拷贝-核心自定义数据』
+	this._drill_tb_rowParam   = JSON.parse(JSON.stringify( textBlock._drill_tb_rowParam ));			//『深拷贝-核心自定义数据』
 	this._drill_tb_width  = textBlock._drill_tb_width;
 	this._drill_tb_height = textBlock._drill_tb_height;
 	
@@ -2436,7 +2455,7 @@ Drill_COCD_RowBlock.prototype.drill_rowBlock_initData = function(){
 Drill_COCD_RowBlock.prototype.drill_rowBlock_copyFrom = function( rowBlock ){
 	
 	this._drill_rb_textBlockList = rowBlock._drill_rb_textBlockList;						//（复制指针列表）
-	this._drill_rb_rowParam = JSON.parse(JSON.stringify( rowBlock._drill_rb_rowParam ));	//（深拷贝）
+	this._drill_rb_rowParam = JSON.parse(JSON.stringify( rowBlock._drill_rb_rowParam ));	//『深拷贝-核心自定义数据』
 	
 	this._drill_rb_rowStartX = rowBlock._drill_rb_rowStartX;
 	this._drill_rb_rowStartY = rowBlock._drill_rb_rowStartY;
@@ -2451,7 +2470,9 @@ Drill_COCD_RowBlock.prototype.drill_rowBlock_getTextBlockList = function(){ retu
 Drill_COCD_RowBlock.prototype.drill_rowBlock_getRowParam = function(){ return this._drill_rb_rowParam; };
 Drill_COCD_RowBlock.prototype.drill_rowBlock_getRowStartX = function(){ return this._drill_rb_rowStartX; };
 Drill_COCD_RowBlock.prototype.drill_rowBlock_getRowStartY = function(){ return this._drill_rb_rowStartY; };
-Drill_COCD_RowBlock.prototype.drill_rowBlock_getRowWidth = function(){ return this._drill_rb_rowWidth; };
+Drill_COCD_RowBlock.prototype.drill_rowBlock_getRowWidth = function(){
+	return Math.ceil(this._drill_rb_rowWidth) + DrillUp.g_COCD_textLRExPadding*2;	//（文本左右修正内间距，增加宽度）
+};
 //==============================
 // * 单行块 - 获取最大字符高度
 //==============================
@@ -3057,7 +3078,7 @@ Scene_Map.prototype.drill_COCD_Text_createDebugSprite = function() {
 	
 	// > 绘制 - 插件标识
 	var text = "【" + DrillUp.g_COCD_PluginTip_curName + "】";
-	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify(options)) );
+	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify( options )) );  //『深拷贝-DEBUG用』
 	for(var i = 0; i < rowBlock_list.length; i++){
 		temp_bitmap.drill_COCD_drawRowBlock( rowBlock_list[i] );		//（绘制字符块）
 	}
@@ -3069,7 +3090,7 @@ Scene_Map.prototype.drill_COCD_Text_createDebugSprite = function() {
 	//		（注意，此处连续解析底层字符时，使用相同的options对象指针，会沾染上一次解析的颜色配置，以及其它样式配置）
 	var text =  "   当前将测试底层字符的功能，底层字符格式为\"@@@xxx\"或\"@@@xxx[]\"。 @@@-br" +
 				"   注意，这里不识别\"\\xx\"或\"\\xx[]\"，该格式是窗口字符核心识别的格式。";
-	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify(options)) );
+	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify( options )) );  //『深拷贝-DEBUG用』
 	for(var i = 0; i < rowBlock_list.length; i++){
 		temp_bitmap.drill_COCD_drawRowBlock( rowBlock_list[i] );		//（绘制字符块）
 	}
@@ -3081,7 +3102,7 @@ Scene_Map.prototype.drill_COCD_Text_createDebugSprite = function() {
 	var text =  "》测试切割字符串：@@@-br" + 
 				"    @@@xxx[[[ddd]]] @@@-fs[@@@-fs[aaa@@@xxx[bbb @@@xxx[ccc]@@@xxx] @@@-br" + 
 				"    aaa@aaa@@aaa@@@aaa@@@@aaa@@@@@aaa@@@@@@aaa@@@@@@@aaa";
-	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify(options)) );
+	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify( options )) );  //『深拷贝-DEBUG用』
 	for(var i = 0; i < rowBlock_list.length; i++){
 		temp_bitmap.drill_COCD_drawRowBlock( rowBlock_list[i] );		//（绘制字符块）
 	}
@@ -3106,7 +3127,7 @@ Scene_Map.prototype.drill_COCD_Text_createDebugSprite = function() {
 				//		@@@-oy[4]
 				//		@@@-oe[true]
 				//		@@@-fs[add:6]
-	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify(options)) );
+	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify( options )) );  //『深拷贝-DEBUG用』
 	for(var i = 0; i < rowBlock_list.length; i++){
 		temp_bitmap.drill_COCD_drawRowBlock( rowBlock_list[i] );		//（绘制字符块）
 	}
@@ -3119,7 +3140,7 @@ Scene_Map.prototype.drill_COCD_Text_createDebugSprite = function() {
 				"    ×@@-sa   拆散字符-全部  （这里不展示效果）@@@-br" + 
 				"    ×@@-sr   拆散字符-当前行  @@@-sr测试的字符，包括标点符号,?~。   @@@-br" + 
 				"              （该拆散字符只会拆散一行，不会影响后面行）" ;
-	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify(options)) );
+	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify( options )) );  //『深拷贝-DEBUG用』
 	for(var i = 0; i < rowBlock_list.length; i++){
 		temp_bitmap.drill_COCD_drawRowBlock( rowBlock_list[i] );		//（绘制字符块）
 	}
@@ -3133,7 +3154,7 @@ Scene_Map.prototype.drill_COCD_Text_createDebugSprite = function() {
 				"@@@-fs[28]x超x@@@-fs[24]x级x@@@-fs[20]x可x@@@-fs[18]x爱x@@@-fs[14]x的x@@@-fs[12]x小x@@@-fs[14]x爱x@@@-fs[18]x丽x@@@-fs[20]x丝x@@@-fs[24]x来x@@@-fs[28]x啦x @@@-fr@@@-br" + 
 				"@@@-fs[12]今天@@@-fs[14]又是@@@-fs[18]非常@@@-fs[20]忙碌@@@-fs[24]的一@@@-fs[28]天哦@@@-fs[24]，我@@@-fs[20]们要@@@-fs[18]打起@@@-fs[14]精神@@@-fs[12]来！ @@@-fr" + 
 				"@@@-br@@@-br@@@-is[two:2:#eef]@@@-br@@@-is[three:2:#eef]";
-	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify(options)) );
+	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify( options )) );  //『深拷贝-DEBUG用』
 	for(var i = 0; i < rowBlock_list.length; i++){
 		temp_bitmap.drill_COCD_drawRowBlock( rowBlock_list[i] );		//（绘制字符块）
 	}
@@ -3149,7 +3170,7 @@ Scene_Map.prototype.drill_COCD_Text_createDebugSprite = function() {
 	
 	var text =  "》测试自动换行：@@@-br" + 
 				"    无有因，头悬市曹何故？无有因，四渎失管何故？无有因，诸色惘惘何故？无有因，慈悲颠倒何故？无有因，庙潜黄衣何故？是曰：细碎沾衣，萦空堕地，犁然寡欲，心动神疲。";
-	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify(options)) );
+	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify( options )) );  //『深拷贝-DEBUG用』
 	for(var i = 0; i < rowBlock_list.length; i++){
 		temp_bitmap.drill_COCD_drawRowBlock( rowBlock_list[i] );		//（绘制字符块）
 	}
@@ -3278,7 +3299,7 @@ Scene_Map.prototype.drill_COCD_Box_createDebugSprite = function() {
 	
 	// > 绘制 - 插件标识
 	var text = "@@@-ws（常规情况）@@@-br常规绘制文本时，文本域的范围会填满整个画布，就像现在这样，加了自动换行，会根据情况排布文本。";
-	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify(options)) );
+	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify( options )) );  //『深拷贝-DEBUG用』
 	for(var i = 0; i < rowBlock_list.length; i++){
 		temp_bitmap.drill_COCD_drawRowBlock( rowBlock_list[i] );		//（绘制字符块）
 	}
@@ -3299,7 +3320,7 @@ Scene_Map.prototype.drill_COCD_Box_createDebugSprite = function() {
 	
 	// > 绘制 - 插件标识
 	var text = "@@@-ws（初始位置20,20）@@@-br但是，部分时候，绘制起始位置不一定紧贴左上角，而是像现在这样，有xy位置的偏移。";
-	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify(options)) );
+	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify( options )) );  //『深拷贝-DEBUG用』
 	for(var i = 0; i < rowBlock_list.length; i++){
 		temp_bitmap.drill_COCD_drawRowBlock( rowBlock_list[i] );		//（绘制字符块）
 	}
@@ -3319,7 +3340,7 @@ Scene_Map.prototype.drill_COCD_Box_createDebugSprite = function() {
 	
 	// > 绘制 - 插件标识
 	var text = "@@@-pa[20]@@@-ws（内边距20）@@@-br还有一种情况，就像现在这样，画布范围整体向内压缩了一段距离。";
-	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify(options)) );
+	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify( options )) );  //『深拷贝-DEBUG用』
 	for(var i = 0; i < rowBlock_list.length; i++){
 		temp_bitmap.drill_COCD_drawRowBlock( rowBlock_list[i] );		//（绘制字符块）
 	}
@@ -3337,7 +3358,7 @@ Scene_Map.prototype.drill_COCD_Box_createDebugSprite = function() {
 	
 	// > 绘制 - 插件标识
 	var text = "@@@-pt[20]@@@-ws（上侧内边距20）@@@-br你可以自定义画布范围向内压缩的距离，分为上下左右四个方向，可以分开设置，但重复设置会被覆盖。";
-	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify(options)) );
+	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify( options )) );  //『深拷贝-DEBUG用』
 	for(var i = 0; i < rowBlock_list.length; i++){
 		temp_bitmap.drill_COCD_drawRowBlock( rowBlock_list[i] );		//（绘制字符块）
 	}
@@ -3355,7 +3376,7 @@ Scene_Map.prototype.drill_COCD_Box_createDebugSprite = function() {
 	
 	// > 绘制 - 插件标识
 	var text = "@@@-pl[20]@@@-ws（左侧内边距20）@@@-br但你现在也看见了，四个方向只有上、左、右有效，所有文本被挤后都会往下挤出界。比如现在这段文本。";
-	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify(options)) );
+	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify( options )) );  //『深拷贝-DEBUG用』
 	for(var i = 0; i < rowBlock_list.length; i++){
 		temp_bitmap.drill_COCD_drawRowBlock( rowBlock_list[i] );		//（绘制字符块）
 	}
@@ -3373,7 +3394,7 @@ Scene_Map.prototype.drill_COCD_Box_createDebugSprite = function() {
 	
 	// > 绘制 - 插件标识
 	var text = "@@@-pr[20]@@@-ws（右侧内边距20）@@@-br所以，修改 下方向 的边距，只能对一些特殊功能的子插件有用，其它情况都是没用的。";
-	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify(options)) );
+	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify( options )) );  //『深拷贝-DEBUG用』
 	for(var i = 0; i < rowBlock_list.length; i++){
 		temp_bitmap.drill_COCD_drawRowBlock( rowBlock_list[i] );		//（绘制字符块）
 	}
@@ -3393,7 +3414,7 @@ Scene_Map.prototype.drill_COCD_Box_createDebugSprite = function() {
 	
 	// > 绘制 - 插件标识
 	var text = "@@@-pl[30]@@@-pr[30]（左右内边距30像素+左右对齐）@@@-br测试的字符@@@-a3测试的字符@@@-a4测试的字符@@@-br测试的字符测试的字符@@@-a4测试的字符测试的字符";
-	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify(options)) );
+	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify( options )) );  //『深拷贝-DEBUG用』
 	for(var i = 0; i < rowBlock_list.length; i++){
 		temp_bitmap.drill_COCD_drawRowBlock( rowBlock_list[i] );		//（绘制字符块）
 	}
@@ -3881,7 +3902,7 @@ Scene_Map.prototype.drill_COCD_Align_createDebugSprite = function() {
 				"左上角@@@-a3正上方@@@-a4右上角@@@-br" + 
 				"@@@-a6正左方@@@-a3居中@@@-a4正右方@@@-br" + 
 				"@@@-a7左下角@@@-a3正下方@@@-a4右下角" ;
-	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify( options )) );
+	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify( options )) );  //『深拷贝-DEBUG用』
 	for(var i = 0; i < rowBlock_list.length; i++){
 		temp_bitmap.drill_COCD_drawRowBlock( rowBlock_list[i] );		//（绘制字符块）
 	}
@@ -3902,7 +3923,7 @@ Scene_Map.prototype.drill_COCD_Align_createDebugSprite = function() {
 	options['infoParam']['canvasWidth'] = temp_bitmap.width;
 	options['infoParam']['canvasHeight'] = temp_bitmap.height;
 	
-	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify( options )) );
+	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify( options )) );  //『深拷贝-DEBUG用』
 	for(var i = 0; i < rowBlock_list.length; i++){
 		temp_bitmap.drill_COCD_drawRowBlock( rowBlock_list[i] );		//（绘制字符块）
 	}
@@ -4171,7 +4192,7 @@ Scene_Map.prototype.drill_COCD_LineHeight_createDebugSprite = function() {
 				"    测试的字符，行下增高[12]。     @@@-br@@@-l2[0]" + 
 				"    @@@-l6[18]测试的字符，行下增高[18]。     @@@-br" + 
 				"    测试的字符，没有行高效果的行。     @@@-br" ;
-	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify( options )) );
+	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify( options )) );  //『深拷贝-DEBUG用』
 	for(var i = 0; i < rowBlock_list.length; i++){
 		temp_bitmap.drill_COCD_drawRowBlock( rowBlock_list[i] );		//（绘制字符块）
 	}
@@ -4195,7 +4216,7 @@ Scene_Map.prototype.drill_COCD_LineHeight_createDebugSprite = function() {
 				"    测试的字符，@@@-fs[36]测试的字符@@@-fr。     @@@-br@@@-l4[0]" + 
 				"    @@@-l8[36]测试的字符，行上补正[36]。     @@@-br" + 
 				"    测试的字符，没有行高效果的行。     @@@-br";
-	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify( options )) );
+	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify( options )) );  //『深拷贝-DEBUG用』
 	for(var i = 0; i < rowBlock_list.length; i++){
 		temp_bitmap.drill_COCD_drawRowBlock( rowBlock_list[i] );		//（绘制字符块）
 	}
@@ -4658,7 +4679,7 @@ Scene_Map.prototype.drill_COCD_Mix_createDebugSprite = function() {
 				"  ---@@@-br" + 
 				"@@@-br@@@-ic[9]字@@@-br@@@-br" + 
 				"  ---@@@-br";
-	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify( options )) );
+	var rowBlock_list = $gameTemp.drill_COCD_analysisText( text, JSON.parse(JSON.stringify( options )) );  //『深拷贝-DEBUG用』
 	for(var i = 0; i < rowBlock_list.length; i++){
 		temp_bitmap.drill_COCD_drawRowBlock( rowBlock_list[i] );		//（绘制字符块）
 	}

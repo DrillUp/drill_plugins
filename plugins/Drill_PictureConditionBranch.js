@@ -73,11 +73,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		PiCB（Picture_Condition_Branch）
-//		临时全局变量	DrillUp.g_PiCB_xxxx
-//		临时局部变量	$gameTemp._drill_PiCB_xxx
-//		存储数据变量	$gameSystem._drill_PiCB_xxx
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<

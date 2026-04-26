@@ -401,11 +401,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		BCa（Battle_Camera）
-//		临时全局变量	DrillUp.g_BCa_xxx
-//		临时局部变量	$gameTemp._drill_cam_xxx	（许多插件关联，不再改动）
-//		存储数据变量	$gameSystem._drill_cam_xxx
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -2137,7 +2134,7 @@ Drill_BCa_Controller.prototype.drill_BCa_resetData_Private = function( data ){
 	}
 	
 	// > 执行重置
-	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
+	this._drill_data = JSON.parse(JSON.stringify( data ));					//『深拷贝-控制器用』
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//私有数据初始化
@@ -4328,7 +4325,7 @@ Drill_BCa_DebugSprite.prototype.initialize = function( data ){
 	if( data['has_right'] == undefined ){ data['has_right'] = false; }	//右边框
 	
 	// > 私有属性初始化
-	this._drill_data = JSON.parse(JSON.stringify( data ));
+	this._drill_data = JSON.parse(JSON.stringify( data ));  //『深拷贝-DEBUG用』
 	this._drill_needRedraw = true;
 	this._org_x = 0;
 	this._org_y = 0;

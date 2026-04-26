@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        系统 - 字符串核心
+ * @plugindesc [v1.4]        系统 - 字符串核心
  * @author Drill_up
  * 
  * @Drill_LE_param "字符串-%d"
@@ -62,13 +62,30 @@
  * ----可选设定
  * 你可以通过插件指令修改字符串内容：
  * 
- * 插件指令：>字符串核心 : 字符串[21] : 使用弹出框修改 : 请输入
- * 插件指令：>字符串核心 : 字符串[21] : 修改字符串 : 某\c[2]字符串
+ * 插件指令：>字符串核心 : 字符串[21] : 修改字符串 : 某字符串
+ * 插件指令：>字符串核心 : 字符串[21] : 修改字符串 : 某字 符串
  * 插件指令：>字符串核心 : 字符串[21] : 还原字符串
  * 
+ * 插件指令：>字符串核心 : 字符串[21] : 使用弹出框修改 : 标题[请输入]
+ * 插件指令：>字符串核心 : 字符串[21] : 使用弹出框修改 : 标题[请输入] : 内容[某字符串]
+ * 插件指令：>字符串核心 : 字符串[21] : 使用弹出框修改 : 标题[请输入] : 内容[某字 符串]
+ * 
  * 1.插件指令修改字符串后，永久有效。
- * 2.由于字符串不能加英文空格，你可以用中文空格代替。
+ *   "修改字符串" 可以支持英文空格。
  * 3.第一条指令中"请输入"，会被作为弹出框的标题进行显示。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 字符串比较
+ * 你可以通过插件指令比较字符串：
+ * 
+ * 插件指令：>字符串核心 : 字符串[21] : 是否包含 : 字符串[22] : 判断结果给开关[21]
+ * 插件指令：>字符串核心 : 字符串[21] : 是否包含 : 一条字符串内容 : 判断结果给开关[21]
+ * 插件指令：>字符串核心 : 字符串[21] : 是否完全匹配 : 字符串[22] : 判断结果给开关[21]
+ * 插件指令：>字符串核心 : 字符串[21] : 是否完全匹配 : 一条字符串内容 : 判断结果给开关[21]
+ * 
+ * 1.这里的字符串比较，不支持直接写英文空格，
+ *   可以先用"修改字符串"存放在一个"字符串[22]"中，然后再比较"字符串[21]"和"字符串[22]"。
+ *   来实现含英文空格的比较。
  * 
  * -----------------------------------------------------------------------------
  * ----知识点
@@ -113,6 +130,8 @@
  * 修复了 对话框中 \str[21] 不能及时生效的bug。
  * [v1.3]
  * 更新并兼容了新的窗口字符底层。
+ * [v1.4]
+ * 添加了字符串比较的插件指令功能。
  * 
  * 
  * @param ---字符串组 1至20---
@@ -1360,11 +1379,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		COSt（Core_Of_String）
-//		临时全局变量	无
-//		临时局部变量	this._drill_COSt_xxx
-//		存储数据变量	无
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -1498,33 +1514,122 @@ Game_Interpreter.prototype.pluginCommand = function( command, args ){
 Game_Interpreter.prototype.drill_COSt_pluginCommand = function( command, args ){
 	if( command === ">字符串核心" ){		//>字符串核心 : 字符串[1] : 修改字符串 : 某\c[2]字符串
 		
-		if(args.length == 6){
-			var temp1 = String(args[1]);
+		/*-----------------字符串对象------------------*/
+		var str_id = null;
+		if( args.length >= 2 ){
+			var unit = String(args[1]);
+			if( str_id == null && unit.indexOf("字符串[") != -1 ){
+				unit = unit.replace("字符串[","");
+				unit = unit.replace("]","");
+				str_id = Number(unit);
+			}
+		}
+		
+		/*-----------------字符串操作------------------*/
+		if( str_id != null && args.length >= 6 ){
+			var type = String(args[3]);
+			if( type == "修改字符串" ){
+				var str_list = [];
+				for( var i = 5; i < args.length; i++ ){
+					str_list.push( String(args[i]) );
+				}
+				var str = str_list.join(" ");
+				$gameStrings.setValue( str_id, str );
+			}
+		}
+		if( str_id != null && args.length == 4 ){
+			var type = String(args[3]);
+			if( type == "还原字符串" ){
+				$gameStrings.setValue( str_id, DrillUp.g_COSt_list[ str_id-1 ]['context'] );
+			}
+		}
+		
+		/*-----------------弹出框修改------------------*/
+		if( str_id != null && args.length == 6 ){
 			var type = String(args[3]);
 			var temp2 = String(args[5]);
-			if( type == "修改字符串" ){	
-				temp1 = temp1.replace("字符串[","");
-				temp1 = temp1.replace("]","");
-				$gameStrings.setValue( Number(temp1), temp2 );
-			}
 			if( type == "使用弹出框修改" ){	
-				temp1 = temp1.replace("字符串[","");
-				temp1 = temp1.replace("]","");
-				var ss = prompt( temp2, $gameStrings.value(temp1) );
-				if( ss != undefined ){
-					$gameStrings.setValue( Number(temp1), ss );
+				temp2 = temp2.replace("标题[","");
+				temp2 = temp2.replace("]","");
+				var temp_input = prompt( temp2, $gameStrings.value(str_id) );
+				if( temp_input != undefined ){
+					$gameStrings.setValue( str_id, temp_input );
 				}
 			}
 		}
-		if(args.length == 4){
-			var temp1 = String(args[1]);
+		if( str_id != null && args.length >= 8 ){
 			var type = String(args[3]);
-			if( type == "还原字符串" ){	
-				temp1 = temp1.replace("字符串[","");
-				temp1 = temp1.replace("]","");
-				$gameStrings.setValue( Number(temp1), DrillUp.g_COSt_list[ Number(temp1)-1 ]['context'] );
+			var temp2 = String(args[5]);
+			if( type == "使用弹出框修改" ){
+				temp2 = temp2.replace("标题[","");
+				temp2 = temp2.replace("]","");
+				var str_list = [];
+				for( var i = 7; i < args.length; i++ ){
+					str_list.push( String(args[i]) );
+				}
+				var str = str_list.join(" ");
+				str = str.replace("内容[","");
+				str = str.replace("]","");
+				var temp_input = prompt( temp2, str );
+				if( temp_input != undefined ){
+					$gameStrings.setValue( str_id, temp_input );
+				}
 			}
 		}
+		
+		/*-----------------字符串比较------------------*/
+		if( str_id != null && args.length == 8 ){
+			var type = String(args[3]);
+			var temp2 = String(args[5]);
+			var temp3 = String(args[7]);
+			if( type == "是否包含" ){
+				temp3 = temp3.replace("判断结果给开关[","");
+				temp3 = temp3.replace("]","");
+				if( temp2.indexOf("字符串[") != -1 ){
+					temp2 = temp2.replace("字符串[","");
+					temp2 = temp2.replace("]","");
+					var temp_str_1 = $gameStrings.value( str_id );
+					var temp_str_2 = $gameStrings.value( temp2 );
+					if( temp_str_1.indexOf(temp_str_2) != -1 ){
+						$gameSwitches.setValue( Number(temp3), true );
+					}else{
+						$gameSwitches.setValue( Number(temp3), false );
+					}
+				}else{
+					var temp_str_1 = $gameStrings.value( str_id );
+					var temp_str_2 = temp2;
+					if( temp_str_1.indexOf(temp_str_2) != -1 ){
+						$gameSwitches.setValue( Number(temp3), true );
+					}else{
+						$gameSwitches.setValue( Number(temp3), false );
+					}
+				}
+			}
+			if( type == "是否完全匹配" ){
+				temp3 = temp3.replace("判断结果给开关[","");
+				temp3 = temp3.replace("]","");
+				if( temp2.indexOf("字符串[") != -1 ){
+					temp2 = temp2.replace("字符串[","");
+					temp2 = temp2.replace("]","");
+					var temp_str_1 = $gameStrings.value( str_id );
+					var temp_str_2 = $gameStrings.value( temp2 );
+					if( temp_str_1 == temp_str_2 ){
+						$gameSwitches.setValue( Number(temp3), true );
+					}else{
+						$gameSwitches.setValue( Number(temp3), false );
+					}
+				}else{
+					var temp_str_1 = $gameStrings.value( str_id );
+					var temp_str_2 = temp2;
+					if( temp_str_1 == temp_str_2 ){
+						$gameSwitches.setValue( Number(temp3), true );
+					}else{
+						$gameSwitches.setValue( Number(temp3), false );
+					}
+				}
+			}
+		}
+		
 	}
 };
 

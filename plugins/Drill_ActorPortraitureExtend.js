@@ -966,11 +966,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		APEx（Actor_Portraiture_Extend）
-//		临时全局变量	无
-//		临时局部变量	this._drill_APEx_xxx
-//		存储数据变量	无
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -1601,7 +1598,7 @@ Drill_APEx_Sprite.prototype.constructor = Drill_APEx_Sprite;
 //==============================
 Drill_APEx_Sprite.prototype.initialize = function( data ){
     Sprite.prototype.initialize.call(this);
-	this._drill_data = JSON.parse(JSON.stringify( data ));
+	this._drill_data = JSON.parse(JSON.stringify( data ));  //『深拷贝-独立贴图的数据』
 	this.drill_sprite_initData();		//初始化数据
 	this.drill_sprite_initChild();		//初始化对象
 };

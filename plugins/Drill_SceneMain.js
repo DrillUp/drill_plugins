@@ -2518,12 +2518,9 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		SMa (Gauge_Button)
-//		临时全局变量	DrillUp.g_SMa_xxx
-//		临时局部变量	this._drill_SMa_xxx
-//		存储数据变量	$gameSystem._drill_SMa_xxx
-//		全局存储变量	无
-//		覆盖重写方法	Scene_Menu.prototype.commandFormation
+//
+//		插件简称		SMa（Scene_Main）
+//		覆盖重写方法	Scene_Menu.prototype.commandFormation（覆写）
 //						Scene_Menu.prototype.commandPersonal（半覆写）
 //						Window_MenuStatus.prototype.refresh（半覆写）
 //

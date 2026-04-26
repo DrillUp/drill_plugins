@@ -1117,11 +1117,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		GFV (Gauge_For_Variable)
-//		临时全局变量	DrillUp.g_GFV_xxx
-//		临时局部变量	this._drill_GFV_xxx
-//		存储数据变量	$gameSystem._drill_GFV_xxx
-//		全局存储变量	无
+//
+//		插件简称		GFV（Gauge_For_Variable）
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -1710,10 +1707,10 @@ Game_System.prototype.drill_GFV_checkSysData = function() {
 Game_System.prototype.drill_GFV_initSysData_Private = function() {
 	
 	this._drill_GFV_bindTank = [];				// 绑定数据容器
-	for(var i = 0; i < DrillUp.g_GFV_bind.length; i++ ){
-		var temp_data = JSON.parse(JSON.stringify( DrillUp.g_GFV_bind[i] ));
+	for( var i = 0; i < DrillUp.g_GFV_bind.length; i++ ){
+		var temp_data = DrillUp.g_GFV_bind[i];
 		if( temp_data == undefined ){ continue; }
-		this._drill_GFV_bindTank[i] = temp_data;
+		this._drill_GFV_bindTank[i] = JSON.parse(JSON.stringify( temp_data ));  //『深拷贝-混杂自定义数据』
 	}
 };
 //==============================
@@ -1735,7 +1732,7 @@ Game_System.prototype.drill_GFV_checkSysData_Private = function() {
 			
 			// > 未存储的，重新初始化
 			if( this._drill_GFV_bindTank[i] == undefined ){
-				this._drill_GFV_bindTank[i] = JSON.parse(JSON.stringify( temp_data ));
+				this._drill_GFV_bindTank[i] = JSON.parse(JSON.stringify( temp_data ));  //『深拷贝-混杂自定义数据』
 			
 			// > 已存储的，跳过
 			}else{

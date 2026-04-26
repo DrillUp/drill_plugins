@@ -964,14 +964,11 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		OKe（Operate_Keys）
-//		临时全局变量	DrillUp.g_OKe_xxxx
-//		临时局部变量	$gameTemp._drill_OKe_xxx
-//		存储数据变量	$gameSystem._drill_OKe_xxx
-//		全局存储变量	无
-//		覆盖重写方法	Input.gamepadMapper 变量
-//						Input.keyMapper 变量
-//						Scene_Map.prototype.isMenuCalled
+//		覆盖重写方法	Input.gamepadMapper（覆写）（变量）
+//						Input.keyMapper（覆写）（变量）
+//						Scene_Map.prototype.isMenuCalled（覆写）
 //
 //<<<<<<<<性能记录<<<<<<<<
 //

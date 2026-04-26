@@ -61,12 +61,9 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		LUB （Layer_Upper_Block）
-//		临时全局变量	DrillUp.xxx
-//		临时局部变量	无
-//		存储数据变量	无
-//		全局存储变量	无
-//		覆盖重写方法	Game_Map.prototype.checkPassage
+//
+//		插件简称		LUB（Layer_Upper_Block）
+//		覆盖重写方法	Game_Map.prototype.checkPassage（覆写）
 //
 //<<<<<<<<性能记录<<<<<<<<
 //

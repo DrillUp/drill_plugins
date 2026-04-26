@@ -274,11 +274,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		COWC（Core_Of_Window_Character）
-//		临时全局变量	无
-//		临时局部变量	this._drill_COWC_xxx
-//		存储数据变量	无
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -668,7 +665,7 @@ Window_Base.prototype.drill_COWC_drawText = function( org_text, options ){
 	// > 『字符核心流程』 - 准备绘制配置【系统 - 字符绘制核心】
 	var temp_bitmap = this.contents;
 	temp_bitmap.drill_COWC_timing_setEnabled( false );
-	var cur_options = JSON.parse(JSON.stringify(options));	//（需要深拷贝，因为走一次流程options会变。比如@@@-fs[add:4]多次执行后会叠加）
+	var cur_options = JSON.parse(JSON.stringify(options));	//『深拷贝-核心自定义数据』（需要深拷贝，因为走一次流程options会变。比如@@@-fs[add:4]多次执行后会叠加）
 	$gameTemp.drill_COCD_initOptions( cur_options, temp_bitmap );
 	
 	// > 『字符主流程』 - 解析窗口字符（Window_Base）
@@ -707,7 +704,7 @@ Bitmap.prototype.drill_COWC_drawText = function( org_text, options ){
 	
 	// > 『字符核心流程』 - 准备绘制配置【系统 - 字符绘制核心】
 	this.drill_COWC_timing_setEnabled( false );
-	var cur_options = JSON.parse(JSON.stringify(options));	//（需要深拷贝，因为走一次流程options会变。比如@@@-fs[add:4]多次执行后会叠加）
+	var cur_options = JSON.parse(JSON.stringify(options));	//『深拷贝-核心自定义数据』（需要深拷贝，因为走一次流程options会变。比如@@@-fs[add:4]多次执行后会叠加）
 	$gameTemp.drill_COCD_initOptions( cur_options, this );
 	
 	// > 『字符主流程』 - 解析窗口字符（Bitmap）
@@ -742,7 +739,7 @@ Window_Base.prototype.drill_COWC_getOrgTextWidth = function( org_text, options )
 	
 	// > 『字符核心流程』 - 准备绘制配置【系统 - 字符绘制核心】
 	var temp_bitmap = this.contents;
-	var cur_options = JSON.parse(JSON.stringify(options));	//（需要深拷贝，因为走一次流程options会变。比如@@@-fs[add:4]多次执行后会叠加）
+	var cur_options = JSON.parse(JSON.stringify(options));	//『深拷贝-核心自定义数据』（需要深拷贝，因为走一次流程options会变。比如@@@-fs[add:4]多次执行后会叠加）
 	$gameTemp.drill_COCD_initOptions( cur_options, temp_bitmap );
 	
 	// > 『字符主流程』 - 解析窗口字符（Window_Base）
@@ -773,7 +770,7 @@ Window_Base.prototype.drill_COWC_getOrgTextHeight = function( org_text, options 
 	
 	// > 『字符核心流程』 - 准备绘制配置【系统 - 字符绘制核心】
 	var temp_bitmap = this.contents;
-	var cur_options = JSON.parse(JSON.stringify(options));	//（需要深拷贝，因为走一次流程options会变。比如@@@-fs[add:4]多次执行后会叠加）
+	var cur_options = JSON.parse(JSON.stringify(options));	//『深拷贝-核心自定义数据』（需要深拷贝，因为走一次流程options会变。比如@@@-fs[add:4]多次执行后会叠加）
 	$gameTemp.drill_COCD_initOptions( cur_options, temp_bitmap );
 	
 	// > 『字符主流程』 - 解析窗口字符（Window_Base）
@@ -3408,7 +3405,7 @@ Window_Base.prototype.drill_COWC_timing_initDrawText = function( org_text, optio
 	// > 『字符核心流程』 - 准备绘制配置【系统 - 字符绘制核心】
 	var temp_bitmap = this.contents;
 	temp_bitmap.drill_COWC_timing_setEnabled( true );
-	var cur_options = JSON.parse(JSON.stringify(options));	//（需要深拷贝，因为走一次流程options会变。比如@@@-fs[add:4]多次执行后会叠加）
+	var cur_options = JSON.parse(JSON.stringify(options));	//『深拷贝-核心自定义数据』（需要深拷贝，因为走一次流程options会变。比如@@@-fs[add:4]多次执行后会叠加）
 	$gameTemp.drill_COCD_initOptions( cur_options, temp_bitmap );
 	
 	// > 『字符核心流程』 - 字符拆散
@@ -3445,7 +3442,7 @@ Bitmap.prototype.drill_COWC_timing_initDrawText = function( org_text, options ){
 	
 	// > 『字符核心流程』 - 准备绘制配置【系统 - 字符绘制核心】
 	this.drill_COWC_timing_setEnabled( true );
-	var cur_options = JSON.parse(JSON.stringify(options));	//（需要深拷贝，因为走一次流程options会变。比如@@@-fs[add:4]多次执行后会叠加）
+	var cur_options = JSON.parse(JSON.stringify(options));	//『深拷贝-核心自定义数据』（需要深拷贝，因为走一次流程options会变。比如@@@-fs[add:4]多次执行后会叠加）
 	$gameTemp.drill_COCD_initOptions( cur_options, this );
 	
 	// > 『字符核心流程』 - 字符拆散

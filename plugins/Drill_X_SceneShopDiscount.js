@@ -656,11 +656,8 @@
  */
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		XSSD（X_Scene_Shop_Discount）
-//		临时全局变量	DrillUp.g_XSSD_xxx
-//		临时局部变量	this._drill_XSSD_xxx
-//		存储数据变量	无
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -1062,7 +1059,7 @@ Game_System.prototype.drill_XSSD_initSysData_Private = function() {
 	for( var i=0; i < DrillUp.g_XSSD_list.length; i++ ){
 		var temp_data = DrillUp.g_XSSD_list[i];	
 		if( temp_data == undefined ){ continue; }	//（空数据不存）
-		this._drill_XSSD_list[i] = JSON.parse(JSON.stringify( temp_data ));
+		this._drill_XSSD_list[i] = JSON.parse(JSON.stringify( temp_data ));  //『深拷贝-独立贴图的数据』
 	}
 };
 //==============================
@@ -1084,7 +1081,7 @@ Game_System.prototype.drill_XSSD_checkSysData_Private = function() {
 			
 			// > 未存储的，重新初始化
 			if( this._drill_XSSD_list[i] == undefined ){
-				this._drill_XSSD_list[i] = JSON.parse(JSON.stringify( temp_data ));
+				this._drill_XSSD_list[i] = JSON.parse(JSON.stringify( temp_data ));  //『深拷贝-独立贴图的数据』
 			
 			// > 已存储的，跳过
 			}else{
@@ -1235,7 +1232,6 @@ Scene_MenuBase.prototype.update = function() {
 		SceneManager._drill_XSSD_created != true ){
 		this.drill_XSSD_create();		
 	}
-	
 	// > 帧刷新
 	if( SceneManager._drill_XSSD_created == true ){
 		this.drill_XSSD_update();
@@ -1256,7 +1252,6 @@ Scene_Shop.prototype.update = function() {
 		SceneManager._drill_XSSD_created != true ){
 		this.drill_XSSD_create();		
 	}
-	
 	// > 帧刷新
 	if( SceneManager._drill_XSSD_created == true ){
 		this.drill_XSSD_update();
@@ -1294,7 +1289,7 @@ Scene_MenuBase.prototype.initialize = function() {
 		if( temp_data == undefined ){ continue; }
 		if( this.drill_XSSD_isEnableDiscount( temp_data ) != true ){ continue; }
 		
-		$gameTemp._drill_XSSD_dataTank[i] = JSON.parse(JSON.stringify( temp_data ));	//深拷贝数据（杜绝引用造成的修改）
+		$gameTemp._drill_XSSD_dataTank[i] = JSON.parse(JSON.stringify( temp_data ));  //『深拷贝-独立贴图的数据』
 		//（未通过的数据，容器中都为null值）
 	};
 };

@@ -617,11 +617,8 @@
  */
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		ESH (Enemy_Simple_Hud)
-//		临时全局变量	DrillUp.g_ESH_xxx
-//		临时局部变量	this._drill_ESH_xxx
-//		存储数据变量	无
-//		全局存储变量	无
+//
+//		插件简称		ESH（Enemy_Simple_Hud）
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -2472,7 +2469,7 @@ Drill_ESH_LifeSprite.prototype.drill_updateStyle = function() {
 	// > 样式数据初始化
 	var s_data = DrillUp.g_ESH_data[ this._drill_styleId -1 ];
 	if( s_data == undefined ){ return; }
-	this._drill_styleData = JSON.parse(JSON.stringify( s_data ));
+	this._drill_styleData = JSON.parse(JSON.stringify( s_data ));  //『深拷贝-独立贴图的数据』
 	
 	// > 销毁
 	this.drill_ESH_destroy();

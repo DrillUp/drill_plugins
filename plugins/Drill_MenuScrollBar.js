@@ -376,11 +376,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		MSB（Menu_Scroll_Bar）
-//		临时全局变量	无
-//		临时局部变量	this._drill_MSB_xxx
-//		存储数据变量	无
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -888,7 +885,7 @@ Drill_MSB_Sprite.prototype.initialize = function( parent ){
 	Sprite_Base.prototype.initialize.call(this);
 	this._drill_parent = parent;
 	this._drill_curStyleId = DrillUp.g_MSB_defaultStyle;
-	this._drill_curStyle = JSON.parse(JSON.stringify( DrillUp.g_MSB_list[ this._drill_curStyleId-1 ] ));	//深拷贝数据
+	this._drill_curStyle = JSON.parse(JSON.stringify( DrillUp.g_MSB_list[ this._drill_curStyleId-1 ] ));  //『深拷贝-混杂自定义数据』
 	
 	this.drill_initSprite();			//初始化对象
 };
@@ -907,7 +904,7 @@ Drill_MSB_Sprite.prototype.drill_MSB_changeStyle = function( style_id ){
 	if( style_id == 0 ){ return; }
 	if( this._drill_curStyleId == style_id ){ return; }
 	this._drill_curStyleId = style_id;
-	this._drill_curStyle = JSON.parse(JSON.stringify( DrillUp.g_MSB_list[ this._drill_curStyleId-1 ] ));	//深拷贝数据
+	this._drill_curStyle = JSON.parse(JSON.stringify( DrillUp.g_MSB_list[ this._drill_curStyleId-1 ] ));  //『深拷贝-混杂自定义数据』
 	this.drill_initSprite();			//强制重新初始化;
 };
 //==============================

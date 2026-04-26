@@ -1414,7 +1414,7 @@
  * @value 3
  * @option 叠加
  * @value 4
- * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
+ * @desc 此参数可以看看："0.基本定义 > 混合模式.docx"。pixi的渲染混合模式。0-普通,1-发光,2-实色混合,3-浅色,4-叠加。
  * @default 0
  *
  * @param UI基准
@@ -1739,11 +1739,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		GFBPa (Animation_Blasting_Particle)
-//		临时全局变量	DrillUp.g_GFBPa_style_xxx
-//		临时局部变量	this._drill_GFBPa_xxx
-//		存储数据变量	$gameSystem._drill_GFBPa_xxx
-//		全局存储变量	无
+//
+//		插件简称		GFBPa（Gauge_Floating_Blast_Particle）
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -2536,7 +2533,7 @@ Game_Temp.prototype.drill_GFBPa_createSimple = function( pos, style_id ){
 	
 	// > 基本参数初始化
 	var data = {};
-	data['s_data'] = JSON.parse(JSON.stringify( DrillUp.g_GFBPa_style[ style_id ] ));
+	data['s_data'] = JSON.parse(JSON.stringify( DrillUp.g_GFBPa_style[ style_id ] ));  //『深拷贝-『临时对象』』
 	
 	// > 临时对象设置
 	data['param_x'] = pos[0];
@@ -2551,7 +2548,7 @@ Game_Temp.prototype.drill_GFBPa_setBuffer = function( style_id ){
 	
 	// > 基本参数初始化
 	var data = {};
-	data['s_data'] = JSON.parse(JSON.stringify( DrillUp.g_GFBPa_style[ style_id ] ));
+	data['s_data'] = JSON.parse(JSON.stringify( DrillUp.g_GFBPa_style[ style_id ] ));  //『深拷贝-『临时对象』』
 	
 	// > 临时对象设置
 	data['param_x'] = 0;
@@ -2565,7 +2562,7 @@ Game_Temp.prototype.drill_GFBPa_setBuffer = function( style_id ){
 Game_Temp.prototype.drill_GFBPa_createByBuffer = function( pos ){
 	var data = this._drill_GFBPa_commandBuffer;
 	if( data == undefined ){ alert( DrillUp.drill_GFBPa_getPluginTip_BufferIsNull() ); return; }
-	data = JSON.parse(JSON.stringify( data ));
+	data = JSON.parse(JSON.stringify( data ));  //『深拷贝-『临时对象』』
 	
 	// > 临时对象设置
 	data['param_x'] = pos[0];

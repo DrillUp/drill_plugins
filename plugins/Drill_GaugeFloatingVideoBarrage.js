@@ -522,11 +522,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		GFVB (Gauge_Floating_Temporary_Text)
-//		临时全局变量	DrillUp.g_GFVB_xxx
-//		临时局部变量	this._drill_GFVB_xxx
-//		存储数据变量	无
-//		全局存储变量	无
+//
+//		插件简称		GFVB（Gauge_Floating_Video_Barrage）
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -1257,7 +1254,7 @@ Game_Temp.prototype.drill_GFVB_createSimple = function( param_type, text, style_
 	
 	// > 基本参数初始化
 	var data = {};
-	data['s_data'] = JSON.parse(JSON.stringify( DrillUp.g_GFVB_style[ style_id ] ));
+	data['s_data'] = JSON.parse(JSON.stringify( DrillUp.g_GFVB_style[ style_id ] ));  //『深拷贝-『临时对象』』
 	data['b_data'] = {};	//（弹道由 弹幕发射器 负责）
 	
 	// > 临时对象设置
@@ -1276,7 +1273,7 @@ Game_Temp.prototype.drill_GFVB_setBuffer = function( style_id ){
 	
 	// > 基本参数初始化
 	var data = {};
-	data['s_data'] = JSON.parse(JSON.stringify( DrillUp.g_GFVB_style[ style_id ] ));
+	data['s_data'] = JSON.parse(JSON.stringify( DrillUp.g_GFVB_style[ style_id ] ));  //『深拷贝-『临时对象』』
 	data['b_data'] = {};	//（弹道由 弹幕发射器 负责）
 	
 	// > 临时对象设置
@@ -1291,7 +1288,7 @@ Game_Temp.prototype.drill_GFVB_setBuffer = function( style_id ){
 Game_Temp.prototype.drill_GFVB_createByBuffer = function( param_type, param_sustainTime ){
 	var data = this._drill_GFVB_commandBuffer;
 	if( data == undefined ){ alert( DrillUp.drill_GFVB_getPluginTip_BufferIsNull() ); return; }
-	data = JSON.parse(JSON.stringify( data ));
+	data = JSON.parse(JSON.stringify( data ));  //『深拷贝-『临时对象』』
 	if( param_sustainTime == undefined ){
 		if( param_type == "常规弹幕" ){
 			param_sustainTime = DrillUp.g_GFVB_simple_lane_time;
@@ -1735,7 +1732,7 @@ Drill_GFVB_SeatAllocator.prototype.drill_allocator_resetData_Private = function(
 	}
 	
 	// > 执行重置
-	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
+	this._drill_data = JSON.parse(JSON.stringify( data ));					//『深拷贝-独立贴图的数据』
 	this._drill_allocatorSerial = new Date().getTime() + Math.random();		//『随机因子-生成一个不重复的序列号』
     this.drill_allocator_initData();										//初始化数据
     this.drill_allocator_initChild();										//初始化子功能
@@ -2120,7 +2117,7 @@ Drill_GFVB_LaneAllocator.prototype.drill_allocator_resetData_Private = function(
 	}
 	
 	// > 执行重置
-	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
+	this._drill_data = JSON.parse(JSON.stringify( data ));					//『深拷贝-独立贴图的数据』
 	this._drill_allocatorSerial = new Date().getTime() + Math.random();		//『随机因子-生成一个不重复的序列号』
     this.drill_allocator_initData();										//初始化数据
     this.drill_allocator_initChild();										//初始化子功能

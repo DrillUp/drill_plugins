@@ -76,11 +76,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		COPi (Core_Of_Picture)
-//		临时全局变量	DrillUp.g_COPi_xxx
-//		临时局部变量	this._drill_COPi_xxx
-//		存储数据变量	$gameSystem._drill_COPi_xxx
-//		全局存储变量	无
+//
+//		插件简称		COPi（Core_Of_Picture）
 //		覆盖重写方法	Sprite_Picture.prototype.updateOrigin（覆写）
 //						Sprite_Picture.prototype.updatePosition（覆写）
 //						Sprite_Picture.prototype.updateScale（覆写）

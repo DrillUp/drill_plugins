@@ -296,7 +296,7 @@
  * @value 2
  * @option 浅色
  * @value 3
- * @desc pixi的渲染混合模式。0-普通,1-变亮。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
+ * @desc 此参数可以看看："0.基本定义 > 混合模式.docx"。pixi的渲染混合模式。0-普通,1-发光,2-实色混合,3-浅色,4-叠加。
  * @default 0
  * 
  * @param 边框划分厚度
@@ -356,7 +356,7 @@
  * @value 2
  * @option 浅色
  * @value 3
- * @desc pixi的渲染混合模式。0-普通,1-变亮。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
+ * @desc 此参数可以看看："0.基本定义 > 混合模式.docx"。pixi的渲染混合模式。0-普通,1-发光,2-实色混合,3-浅色,4-叠加。
  * @default 0
  *
  * @param 浮动效果
@@ -384,11 +384,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		MCB（Menu_Cursor_Border）
-//		临时全局变量	无
-//		临时局部变量	this._drill_MCB_xxx
-//		存储数据变量	无
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -771,7 +768,7 @@ Drill_MCB_Sprite.prototype.initialize = function( parent ){
 	Sprite_Base.prototype.initialize.call(this);
 	this._drill_parent = parent;
 	this._drill_curStyleId = DrillUp.g_MCB_defaultStyle;
-	this._drill_curStyleData = JSON.parse(JSON.stringify( DrillUp.g_MCB_list[ this._drill_curStyleId-1 ] ));	//深拷贝数据
+	this._drill_curStyleData = JSON.parse(JSON.stringify( DrillUp.g_MCB_list[ this._drill_curStyleId-1 ] ));  //『深拷贝-独立贴图的数据』
 	
 	this.drill_initData();					//初始化数据
 	this.drill_initSprite();				//初始化对象
@@ -896,7 +893,7 @@ Drill_MCB_Sprite.prototype.drill_MCB_changeStyle = function( style_id ){
 	
 	if( this._drill_curStyleId == style_id ){ return; }
 	this._drill_curStyleId = style_id;
-	this._drill_curStyleData = JSON.parse(JSON.stringify( DrillUp.g_MCB_list[ this._drill_curStyleId-1 ] ));	//深拷贝数据
+	this._drill_curStyleData = JSON.parse(JSON.stringify( DrillUp.g_MCB_list[ this._drill_curStyleId-1 ] ));  //『深拷贝-独立贴图的数据』
 	
 	// > 强制 初始化对象
 	this.drill_initSprite();

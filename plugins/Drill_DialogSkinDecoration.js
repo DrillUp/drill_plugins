@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        对话框 - 对话框装饰图
+ * @plugindesc [v1.2]        对话框 - 对话框装饰图
  * @author Drill_up
  * 
  * @Drill_LE_param "装饰图-%d"
@@ -91,6 +91,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 优化了旧存档的识别与兼容。
+ * [v1.2]
+ * 修复了 暗淡/透明 窗口时，背景有时会残留的bug。
  * 
  *
  *
@@ -434,11 +436,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		DSD（Dialog_Skin_Decoration）
-//		临时全局变量	无
-//		临时局部变量	this._drill_DSD_xxx
-//		存储数据变量	无
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -565,10 +564,8 @@
 			var data = JSON.parse(DrillUp.parameters["装饰图-" + String(i+1) ]);
 			DrillUp.g_DSD_list[i] = DrillUp.drill_DSD_initStyle( data );
 			DrillUp.g_DSD_list[i]['id'] = i;
-			DrillUp.g_DSD_list[i]['inited'] = true;
 		}else{
-			DrillUp.g_DSD_list[i] = DrillUp.drill_DSD_initStyle( {} );
-			DrillUp.g_DSD_list[i]['inited'] = false;
+			DrillUp.g_DSD_list[i] = undefined;		//（设为空值，节约静态数据占用容量）
 		}
 	}
 
@@ -685,8 +682,10 @@ Game_System.prototype.drill_DSD_checkSysData = function() {
 Game_System.prototype.drill_DSD_initSysData_Private = function() {
 	
 	this._drill_DSD_visibleTank = [];		//显示情况
-	for(var i = 0; i < DrillUp.g_DSD_list.length; i++ ){
-		this._drill_DSD_visibleTank[i] = DrillUp.g_DSD_list[i]['visible'];
+	for( var i = 0; i < DrillUp.g_DSD_list.length; i++ ){
+		var temp_data = DrillUp.g_DSD_list[i];
+		if( temp_data == undefined ){ continue; }
+		this._drill_DSD_visibleTank[i] = temp_data['visible'];
 	}
 };
 //==============================
@@ -700,11 +699,11 @@ Game_System.prototype.drill_DSD_checkSysData_Private = function() {
 	}
 	
 	// > 容器的 空数据 检查
-	for(var i = 0; i < DrillUp.g_DSD_list.length; i++ ){
-		var temp_data = JSON.parse(JSON.stringify( DrillUp.g_DSD_list[i] ));
+	for( var i = 0; i < DrillUp.g_DSD_list.length; i++ ){
+		var temp_data = DrillUp.g_DSD_list[i];
 		
-		// > 已配置（'inited'为 false 表示空数据）
-		if( temp_data['inited'] == true ){
+		// > 已配置（undefined表示未配置的空数据）
+		if( temp_data != undefined ){
 			
 			// > 未存储的，重新初始化
 			if( this._drill_DSD_visibleTank[i] == undefined ){
@@ -745,6 +744,8 @@ Window_Message.prototype.setBackgroundType = function( type ){
 	
     if( type === 0 ){	// 窗口 类型
 		this.drill_DSD_refreshSprite();		//刷新装饰图
+	}else{
+		this.drill_DSD_clearSprite();		//清空装饰图
 	}
 }
 
@@ -787,7 +788,7 @@ Window_Base.prototype.drill_DSD_refreshSprite = function(){
 	// > 建立装饰图
 	for( var i = 0; i < DrillUp.g_DSD_list.length; i++ ){
 		var temp_data = DrillUp.g_DSD_list[i];
-		if( temp_data['inited'] == false ){ continue; }
+		if( temp_data == undefined ){ continue; }
 		if( temp_data['styleId']-1 == -1 ){ continue; }
 		if( temp_data['styleId']-1 == styleId ){
 			var temp_sprite = new Drill_DSD_DecorationSprite( temp_data, this );
@@ -799,6 +800,19 @@ Window_Base.prototype.drill_DSD_refreshSprite = function(){
 	
 	// > 层级排序
 	this._drill_DSD_spriteLayer.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
+};
+//==============================
+// * 对话框绑定 - 清空装饰图（Window_Base）
+//==============================
+Window_Base.prototype.drill_DSD_clearSprite = function(){
+	if( this._drill_DSk_tag == undefined ){ return; }
+	this._drill_DSD_curStyle = -1;	//（置空样式）
+	
+	for(var i = this._drill_DSD_spriteTank.length-1; i >= 0; i-- ){
+		var temp_sprite = this._drill_DSD_spriteTank[i];
+		this._drill_DSD_spriteLayer.removeChild( temp_sprite );
+		this._drill_DSD_spriteTank.splice(i,1);
+	}
 };
 
 
@@ -1009,6 +1023,7 @@ Drill_DSD_DecorationSprite.prototype.drill_sprite_initAttr = function() {
 	// > 私有属性初始化
 	this.anchor.x = 0.5;
 	this.anchor.y = 0.5;
+	this.visible = false;
 }
 //==============================
 // * A主体 - 帧刷新

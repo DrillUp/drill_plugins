@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        管理器 - 全局存储核心
+ * @plugindesc [v1.3]        管理器 - 全局存储核心
  * @author Drill_up
  * 
  * @Drill_LE_param "文件路径-%d"
@@ -46,6 +46,15 @@
  *      全局变量，单次存储的消耗较大。这时候如果事件指令也在执行其他内容，
  *      二者的内容在同一帧中执行，可能会造成比较明显的卡顿。
  *      所以设置间隔，能错开全局变量和事件指令执行的时机。
+ * 载体：
+ *   (1.载体分为文件载体和网页载体。
+ *      文件载体 使用本地文件进行读取和写入，电脑端(PC端)支持该功能。
+ *      网页载体 使用网页数据进行读取和写入，手机端、浏览器支持该功能。
+ *      详细介绍可以去看看："21.管理器 > 数据存储的载体.docx"。
+ *   (2.该插件同时支持文件载体和网页载体。
+ *      使用 文件载体 时，插件会在"save/"文件夹下生成"drill_globalDefault.rpgsave"文件。
+ *      使用 网页载体 时，插件记录"RPG drill_globalDefault"全局存储数据。
+ *      由于网页载体可存储的数据量有限，所以全局存储的功能在网页载体下有时可能无效。
  * 设计：
  *   (1.你可以将一些变量数据偷偷存在玩家的C盘目录，作为meta-game用。
  *      确定了存放位置之后就不要改了，以免多次更新时，玩家电脑里产生
@@ -89,6 +98,8 @@
  * 修改了插件分类。
  * [v1.2]
  * 修复了未配置路径时，存储失败的bug。
+ * [v1.3]
+ * 改进了内部结构，区分了载体的定义。
  * 
  * 
  * 
@@ -182,11 +193,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		COGS（Core_Of_Global_Save）
-//		临时全局变量	DrillUp.g_COGS_xxx
-//		临时局部变量	this._drill_COGS_xxx
-//		存储数据变量	无
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -210,7 +218,7 @@
 //			->☆全局存储
 //				->存储（开放函数）
 //				->载入（开放函数）
-//			->☆存储管理器
+//			->☆存档管理器
 //				->执行全局存储（开放函数）
 //				->执行全局读取（开放函数）
 //
@@ -228,7 +236,7 @@
 //			无
 //		
 //		★必要注意事项：
-//			1.详细去看看 StorageManager 存储管理器的定义，全局存储再次基础上扩展。
+//			1.详细去看看 StorageManager 存档管理器的定义，全局存储再次基础上扩展。
 //
 //		★其它说明细节：
 //			暂无
@@ -269,7 +277,7 @@
 	//==============================
 	DrillUp.drill_COGS_initFile = function( dataFrom ){
 		var data = {};
-		data['name'] = String( dataFrom["文件名"] || "drill_global");	//【生成文件】
+		data['name'] = String( dataFrom["文件名"] || "drill_global");	//『文件载体-文件路径』
 		data['suffix'] = String( dataFrom["文件后缀"] || "rpgsave");
 		data['url_type'] = String( dataFrom["文件夹根目录"] || "当前游戏根目录");
 		data['url_path'] = String( dataFrom["文件夹路径"] || "save/");
@@ -340,9 +348,9 @@ Game_Interpreter.prototype.drill_COGS_pluginCommand = function( command, args ){
 				
 				debug_text += "当前类型：";
 				if( StorageManager.isLocalMode() ){
-					debug_text += "本地文件模式";
+					debug_text += "文件模式";
 				}else{
-					debug_text += "本地网页模式";
+					debug_text += "网页模式";
 				}
 				debug_text += "\n";
 				
@@ -462,13 +470,13 @@ SceneManager.updateScene = function() {
 
 
 //=============================================================================
-// ** ☆存储管理器
+// ** ☆存档管理器
 //			
 //			说明：	> 此模块专门管理 存储流程、读取流程 的功能。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 存储管理器 - 执行全局存储（开放函数）
+// * 存档管理器 - 执行全局存储（开放函数）
 //
 //			参数：	> file_id 数字     （文件路径id）
 //			返回：	> 无
@@ -478,17 +486,17 @@ StorageManager.drill_COGS_saveFile = function( file_id ){
 	var file_data = DrillUp.g_COGS_fileDataTank[ file_id ];		//文件存储数据
 	if( file_data == undefined ){ return; }
 	
-	// > 本地文件模式
+	// > B文件载体
 	if( this.isLocalMode() ){
 		this.drill_COGS_saveToLocalFile( file_set, JSON.stringify(file_data) );
 	
-	// > 本地网页模式
+	// > C网页载体
 	} else {
 		this.drill_COGS_saveToWebStorage( file_set, JSON.stringify(file_data) );
 	}
 };
 //==============================
-// * 存储管理器 - 执行全局读取（开放函数）
+// * 存档管理器 - 执行全局读取（开放函数）
 //
 //			参数：	> file_id 数字     （文件路径id）
 //			返回：	> 无
@@ -496,13 +504,13 @@ StorageManager.drill_COGS_saveFile = function( file_id ){
 StorageManager.drill_COGS_loadFile = function( file_id ){
 	var file_set = DrillUp.drill_COGS_getFileSet( file_id );	//文件路径
 	
-	// > 本地文件模式
+	// > B文件载体
     if( this.isLocalMode() ){
 		var data = this.drill_COGS_loadFromLocalFile( file_set );
 		if( data == "" ){ return null; }
         return JSON.parse( data );
 		
-	// > 本地网页模式
+	// > C网页载体
     }else{
         var data = this.drill_COGS_loadFromWebStorage( file_set );
 		if( data == "" ){ return null; }
@@ -511,12 +519,13 @@ StorageManager.drill_COGS_loadFile = function( file_id ){
 };
 
 //==============================
-// * 文件 - 存储
+// * 存档管理器 - B文件载体 - 存储
 //
 //			说明：	> 传入的数据为加密字符串。
 //==============================
 StorageManager.drill_COGS_saveToLocalFile = function( file_set, json_str ){
-	var fs = require('fs');
+	if( require == undefined ){ return; }
+	var fs = require('fs');  //『文件载体-fs』
 	
 	// > 路径解析
 	var filePath = this.drill_COGS_path_getPath( file_set );
@@ -525,27 +534,28 @@ StorageManager.drill_COGS_saveToLocalFile = function( file_set, json_str ){
 	// > 加密
 	var data = LZString.compressToBase64( json_str );
 	
-	// > 文件夹路径自动创建【生成文件夹】
+	// > 文件夹路径自动创建『文件载体-生成文件夹』
 	if(!fs.existsSync(dirPath) ){
 		fs.mkdirSync(dirPath);
 	}
 	
-	// > 写入
+	// > 写入『文件载体-写入文件』
 	fs.writeFileSync(filePath, data);
 };
 //==============================
-// * 文件 - 读取
+// * 存档管理器 - B文件载体 - 读取
 //
 //			说明：	> 返回的数据为解密字符串。
 //==============================
 StorageManager.drill_COGS_loadFromLocalFile = function( file_set ){
-	var fs = require('fs');
+	if( require == undefined ){ return ""; }
+	var fs = require('fs');  //『文件载体-fs』
 	
 	// > 路径解析
 	var filePath = this.drill_COGS_path_getPath( file_set );
 	var data = null;
 	
-	// > 读取
+	// > 读取『文件载体-读取文件』
 	if( fs.existsSync(filePath) != true ){ return ""; }
 	data = fs.readFileSync(filePath, { encoding: 'utf8' });
 	
@@ -553,7 +563,7 @@ StorageManager.drill_COGS_loadFromLocalFile = function( file_set ){
 	return LZString.decompressFromBase64(data);	//（返回字符串）
 };
 //==============================
-// * 文件 - 获取 - 文件路径（开放函数）
+// * 存档管理器 - B文件载体 - 『文件载体-文件路径』 - 文件路径（开放函数）
 //==============================
 StorageManager.drill_COGS_path_getPath = function( file_set ){
     var fileRoot = "C:/"
@@ -564,7 +574,7 @@ StorageManager.drill_COGS_path_getPath = function( file_set ){
     return filePath;
 };
 //==============================
-// * 文件 - 获取 - 文件夹路径（开放函数）
+// * 存档管理器 - B文件载体 - 『文件载体-文件路径』 - 文件夹路径（开放函数）
 //==============================
 StorageManager.drill_COGS_path_getDir = function( file_set ){
     var fileRoot = "C:/"
@@ -575,33 +585,34 @@ StorageManager.drill_COGS_path_getDir = function( file_set ){
     return fileDir;
 };
 //==============================
-// * 文件 - 获取 - 游戏根目录（开放函数）
+// * 存档管理器 - B文件载体 - 『文件载体-文件路径』 - 游戏根目录（开放函数）
 //==============================
 StorageManager.drill_COGS_path_getParentDirectory = function() {
-    var path = require('path');
+    if( require == undefined ){ return ""; }
+	var path = require('path');  //『文件载体-fs』
     var base = path.dirname(process.mainModule.filename);
     return path.join(base, '/');
 };
 
 //==============================
-// * 网页 - 存储
+// * 存档管理器 - C网页载体 - 存储
 //==============================
 StorageManager.drill_COGS_saveToWebStorage = function( file_set, json_str ){
     var key = this.webStorageKey( this.drill_COGS_path_getWebName(file_set) );
     var data = LZString.compressToBase64( json_str );
-    localStorage.setItem(key, data);
+    localStorage.setItem(key, data);  //『网页载体-写入数据』
 };
 //==============================
-// * 网页 - 读取
+// * 存档管理器 - C网页载体 - 读取
 //==============================
 StorageManager.drill_COGS_loadFromWebStorage = function( file_set ){
     var key = this.webStorageKey( this.drill_COGS_path_getWebName(file_set) );
-    var data = localStorage.getItem(key);
+    var data = localStorage.getItem(key);  //『网页载体-读取数据』
 	if( data == undefined ){ return ""; }
     return LZString.decompressFromBase64(data);
 };
 //==============================
-// * 网页 - 获取 - 存储名（开放函数）
+// * 存档管理器 - C网页载体 - 『网页载体-数据路径』
 //==============================
 StorageManager.drill_COGS_path_getWebName = function( file_set ){
     return "RPG " + file_set['name'];

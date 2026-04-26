@@ -143,11 +143,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		EUOM（Event_Unification_Of_Move）
-//		临时全局变量	无
-//		临时局部变量	this._drill_EUOM.xxx
-//		存储数据变量	无
-//		全局存储变量	无
 //		覆盖重写方法	Game_CharacterBase.prototype.moveStraight	（半覆写）
 //						Game_CharacterBase.prototype.moveDiagonally	（半覆写）
 //

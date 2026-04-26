@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        图片 - 临时屏幕快照
+ * @plugindesc [v1.4]        图片 - 临时屏幕快照
  * @author Drill_up
  * 
  * 
@@ -27,8 +27,14 @@
  * 2.更多详细内容，去看看文档 "1.系统 > 大家族-屏幕快照.docx"。
  * 细节：
  *   (1.屏幕快照都是临时的，且只能作为临时贴图使用，无法保存到存档中。
- *   (2."保存到文件"插件指令，可以将当前屏幕截图保存到指定文件夹中。
- *      但注意只在PC端有效。
+ * 载体：
+ *   (1.载体分为文件载体和网页载体。
+ *      文件载体 使用本地文件进行读取和写入，电脑端(PC端)支持该功能。
+ *      网页载体 使用网页数据进行读取和写入，手机端、浏览器支持该功能。
+ *      详细介绍可以去看看："21.管理器 > 数据存储的载体.docx"。
+ *   (2."保存到文件"插件指令，使用了 文件载体 的功能。
+ *      可以将当前屏幕截图保存到指定文件夹中。
+ *      但注意该功能只在电脑端(PC端)有效。
  * 设计：
  *   (1.你可以将 屏幕快照 和 图片滤镜 结合使用，制作出一闪的效果。
  *      在地图和战斗中都可以做，可以去 特效管理层示例 看看快照效果。
@@ -93,6 +99,8 @@
  * 添加了保存快照文件的功能。
  * [v1.3]
  * 优化了内部结构。
+ * [v1.4]
+ * 改进了截图保存的功能。
  * 
  * 
  * 
@@ -148,11 +156,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		PSS（Picture_Snap_Shot）
-//		临时全局变量	DrillUp.g_PSS_xxx
-//		临时局部变量	this._drill_PSS_xxx
-//		存储数据变量	$gameSystem._drill_PSS_xxx
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -191,7 +196,7 @@
 //			大家族-屏幕快照
 //		
 //		★脚本文档：
-//			16.图片 > 图片资源切换脚本说明.docx
+//			16.图片 > 关于图片bitmap管理（脚本）.docx
 //		
 //		★插件私有类：
 //			无
@@ -239,9 +244,9 @@
 	DrillUp.drill_PSS_initFile = function( dataFrom ){
 		var data = {};
 		
-		data['url_path'] = String( dataFrom["文件夹路径"] || "save/游戏截图/");		//【生成文件】
+		data['url_path'] = String( dataFrom["文件夹路径"] || "save/游戏截图/");  //『文件载体-文件路径』
 		
-		data['file_name'] = String( dataFrom["文件名"] || "游戏截图");
+		data['file_name'] = String( dataFrom["文件名"] || "游戏截图");  //『文件载体-文件路径』
 		data['file_name_with_date'] = String( dataFrom["文件名是否包含日期"] || "true") == "true";
 		data['file_name_with_time'] = String( dataFrom["文件名是否包含时分秒"] || "true") == "true";
 		
@@ -825,6 +830,7 @@ Date.prototype.drill_PSS_getDateTextByFormat = function( fmt ){
 //					> image_quality 图片质量（0~100，只jpg时有效）
 //==============================
 Game_Temp.prototype.drill_PSS_saveBitmap = function( bitmap, url_path, file_name, file_type, image_quality ){
+	if( require == undefined ){ return; }
 	if( file_type != "png" && file_type != "jpg" ){ return; }
 	
 	// > 图片质量（只jpg时有效）
@@ -842,11 +848,11 @@ Game_Temp.prototype.drill_PSS_saveBitmap = function( bitmap, url_path, file_name
 	}
 	
 	// > 路径解析
-	var fs = require('fs');
+	var fs = require('fs');  //『文件载体-fs』
 	var fileRoot = this.drill_PSS_parentDirectoryPath();
 	var dirPath = fileRoot + url_path;
 	
-	// > 文件夹路径自动创建【生成文件夹】
+	// > 文件夹路径自动创建『文件载体-生成文件夹』
 	if(!fs.existsSync(dirPath) ){
 		fs.mkdirSync(dirPath);
 	}
@@ -861,25 +867,27 @@ Game_Temp.prototype.drill_PSS_saveBitmap = function( bitmap, url_path, file_name
 		break;
 	}
 	
-	// > 写入文件
+	// > 写入『文件载体-写入文件』
 	fs.writeFileSync( filePath, data, 'base64' );
 }
 //==============================
-// * 保存快照文件 - 获取目录
+// * 保存快照文件 - 『文件载体-文件路径』 - 游戏根目录（开放函数）
 //==============================
 Game_Temp.prototype.drill_PSS_parentDirectoryPath = function() {
-    var path = require('path');
-    var base = path.dirname(process.mainModule.filename);
-    return path.join(base, '/');
+	if( require == undefined ){ return ""; }
+	var path = require('path');  //『文件载体-fs』
+	var base = path.dirname(process.mainModule.filename);
+	return path.join(base, '/');
 };
 //==============================
-// * 保存快照文件 - 打开保存的文件路径
+// * 保存快照文件 - 执行打开保存的文件夹路径
 //==============================
 Game_Temp.prototype.drill_PSS_openUrl = function() {
+	if( require == undefined ){ return; }
 	var fileRoot = this.drill_PSS_parentDirectoryPath();
 	var filePath = fileRoot + DrillUp.g_PSS_fileSettings['url_path'];
 	
-    var path = require('path');
+	var path = require('path');  //『文件载体-fs』
 	var exec = require('child_process').exec;
 	exec('explorer ' + path.resolve(filePath) );
 };

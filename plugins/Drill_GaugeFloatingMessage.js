@@ -528,11 +528,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		GFM (Gauge_Floating_Treasure_Hud)
-//		临时全局变量	DrillUp.g_GFM_xxx
-//		临时局部变量	this._drill_GFM_xxx
-//		存储数据变量	无
-//		全局存储变量	无
+//
+//		插件简称		GFM（Gauge_Floating_Message）
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -1208,7 +1205,7 @@ Game_Temp.prototype.drill_GFM_pushNewText = function( text, sustain_time ){
 	
 	// > 基本参数初始化
 	var data = {};
-	data['s_data'] = JSON.parse(JSON.stringify( DrillUp.g_GFM_style[ $gameSystem._drill_GFM_styleId -1 ] ));
+	data['s_data'] = JSON.parse(JSON.stringify( DrillUp.g_GFM_style[ $gameSystem._drill_GFM_styleId -1 ] ));  //『深拷贝-独立贴图的数据』
 	data['b_data'] = {};
 	
 	// > 内容文本初始化
@@ -1457,7 +1454,7 @@ Drill_GFM_Allocator.prototype.drill_allocator_resetData_Private = function( data
 	}
 	
 	// > 执行重置
-	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
+	this._drill_data = JSON.parse(JSON.stringify( data ));					//『深拷贝-独立贴图的数据』
 	this._drill_allocatorSerial = new Date().getTime() + Math.random();		//『随机因子-生成一个不重复的序列号』
     this.drill_allocator_initData();										//初始化数据
     this.drill_allocator_initChild();										//初始化子功能

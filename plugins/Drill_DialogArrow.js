@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        对话框 - 对话框小箭头
+ * @plugindesc [v1.4]        对话框 - 对话框小箭头
  * @author Drill_up
  * 
  * @Drill_LE_param "小箭头-%d"
@@ -23,6 +23,9 @@
  * -----------------------------------------------------------------------------
  * ----插件扩展
  * 该插件可以单独使用。
+ * 可被扩展：
+ *   - Drill_DialogMessageAutoPlay     对话框-对话自动播放
+ *     对话框开启自动播放时，可以顺带自动切换对话框小箭头样式。
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -94,6 +97,8 @@
  * 优化了旧存档的识别与兼容。
  * [v1.3]
  * 翻新了对话框的内部结构。
+ * [v1.4]
+ * 改进了插件之间兼容的功能。
  * 
  * 
  *
@@ -238,7 +243,7 @@
  * @value 3
  * @option 叠加
  * @value 4
- * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
+ * @desc 此参数可以看看："0.基本定义 > 混合模式.docx"。pixi的渲染混合模式。0-普通,1-发光,2-实色混合,3-浅色,4-叠加。
  * @default 0
  * 
  * 
@@ -316,11 +321,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		DAr（DialogArrow）
-//		临时全局变量	DrillUp.g_DAr_xxx
-//		临时局部变量	无
-//		存储数据变量	无
-//		全局存储变量	无
+//
+//		插件简称		DAr（Dialog_Arrow）
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -429,11 +431,6 @@
 		
 		return data;
 	}
-	
-	/*-----------------杂项------------------*/
-	DrillUp.g_DAr_visible = String(DrillUp.parameters["是否初始显示"] || 'true') === 'true';
-	DrillUp.g_DAr_curStyle = Number(DrillUp.parameters["当前小箭头"] || 0);
-	
 	/*-----------------对话框小箭头------------------*/
 	DrillUp.g_DAr_list_length = 10;
 	DrillUp.g_DAr_list = [];
@@ -446,6 +443,10 @@
 			DrillUp.g_DAr_list[i] = null;
 		}
 	}
+	
+	/*-----------------杂项------------------*/
+	DrillUp.g_DAr_visible = String(DrillUp.parameters["是否初始显示"] || 'true') === 'true';
+	DrillUp.g_DAr_curStyle = Number(DrillUp.parameters["当前小箭头"] || 0);
 	
 	
 	
@@ -559,7 +560,7 @@ Game_System.prototype.drill_DAr_checkSysData = function() {
 Game_System.prototype.drill_DAr_initSysData_Private = function() {
 	this._drill_DAr_visible = DrillUp.g_DAr_visible;			//显示状态
 	this._drill_DAr_curStyle = DrillUp.g_DAr_curStyle;			//当前样式
-};	
+};
 //==============================
 // * 存储数据 - 载入存档时检查数据（私有）
 //==============================
@@ -569,6 +570,12 @@ Game_System.prototype.drill_DAr_checkSysData_Private = function() {
 	if( this._drill_DAr_curStyle == undefined ){
 		this.drill_DAr_initSysData();
 	}
+};
+//==============================
+// * 存储数据 - 获取当前样式（开放函数）
+//==============================
+Game_System.prototype.drill_DAr_getCurStyleId = function() {
+	return this._drill_DAr_curStyle;
 };
 
 
@@ -596,7 +603,7 @@ var _drill_DAr__refreshPauseSign = Window_Message.prototype._refreshPauseSign;
 Window_Message.prototype._refreshPauseSign = function() {
 	
 	// > 部件刷新 - 原箭头
-	if( $gameSystem._drill_DAr_curStyle == 0 ){
+	if( $gameSystem.drill_DAr_getCurStyleId() == 0 ){
 		_drill_DAr__refreshPauseSign.call( this );
 		
 	// > 部件刷新 - 样式箭头
@@ -622,7 +629,7 @@ Window_Message.prototype._updatePauseSign = function() {
 	
 	
 	// > 帧刷新 - 原箭头
-	if( $gameSystem._drill_DAr_curStyle == 0 ){
+	if( $gameSystem.drill_DAr_getCurStyleId() == 0 ){
 		
 		// > 原函数
 		_drill_DAr__updatePauseSign.call( this );
@@ -692,7 +699,7 @@ Window_Message.prototype._updatePauseSign = function() {
 // **					->C自变化效果
 // **
 // **		代码：	> 范围 - 该类显示单独的小箭头装饰。
-// **				> 结构 - [ ●合并/分离/ 混乱 ] 数据与贴图合并。只visible和curStyle被外部控制。
+// **				> 结构 - [ ●合并 /分离/混乱] 数据与贴图合并。只visible和curStyle被外部控制。
 // **				> 数量 - [ ●单个 /多个] 
 // **				> 创建 - [ ●一次性 /自延迟/外部延迟] 
 // **				> 销毁 - [ ●不考虑 /自销毁/外部销毁] 
@@ -766,8 +773,8 @@ Drill_DAr_ArrowSprite.prototype.drill_sprite_updateAttr = function() {
 	this._drill_curTime += 1;
 	
 	// > 刷新样式
-	if( this._drill_curStyleId != $gameSystem._drill_DAr_curStyle ){
-		this._drill_curStyleId = $gameSystem._drill_DAr_curStyle;
+	if( this._drill_curStyleId != $gameSystem.drill_DAr_getCurStyleId() ){
+		this._drill_curStyleId =  $gameSystem.drill_DAr_getCurStyleId();
 		this.drill_DAr_refreshAll();
 	}
 	
@@ -796,7 +803,7 @@ Drill_DAr_ArrowSprite.prototype.drill_DAr_refreshAll = function() {
 	// > 样式数据
 	var new_data = DrillUp.g_DAr_list[ this._drill_curStyleId - 1 ];
 	if( new_data == undefined ){ return; }
-	this._drill_data = JSON.parse(JSON.stringify( new_data ));
+	this._drill_data = JSON.parse(JSON.stringify( new_data ));  //『深拷贝-独立贴图的数据』
 	
 	// > 清除 旧贴图
 	if( this._drill_DAr_sprite != undefined ){

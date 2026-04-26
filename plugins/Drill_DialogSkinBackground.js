@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        对话框 - 对话框背景
+ * @plugindesc [v1.4]        对话框 - 对话框背景
  * @author Drill_up
  * 
  * @Drill_LE_param "背景层-%d"
@@ -100,6 +100,8 @@
  * 优化了旧存档的识别与兼容。
  * [v1.3]
  * 添加了 拉伸背景 的设置功能。
+ * [v1.4]
+ * 修复了 暗淡/透明 窗口时，背景有时会残留的bug。
  *
  *
  *
@@ -412,7 +414,7 @@
  * @value 3
  * @option 叠加
  * @value 4
- * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看 "0.基本定义 > 混合模式.docx"。
+ * @desc 此参数可以看看："0.基本定义 > 混合模式.docx"。pixi的渲染混合模式。0-普通,1-发光,2-实色混合,3-浅色,4-叠加。
  * @default 0
  * 
  * @param 图片层级
@@ -483,11 +485,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		DSB（Dialog_Skin_Background）
-//		临时全局变量	无
-//		临时局部变量	this._drill_DSB_xxx
-//		存储数据变量	无
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -623,10 +622,8 @@
 			var data = JSON.parse(DrillUp.parameters["背景层-" + String(i+1) ]);
 			DrillUp.g_DSB_list[i] = DrillUp.drill_DSB_initStyle( data );
 			DrillUp.g_DSB_list[i]['id'] = i;
-			DrillUp.g_DSB_list[i]['inited'] = true;
 		}else{
-			DrillUp.g_DSB_list[i] = DrillUp.drill_DSB_initStyle( {} );
-			DrillUp.g_DSB_list[i]['inited'] = false;
+			DrillUp.g_DSB_list[i] = undefined;		//（设为空值，节约静态数据占用容量）
 		}
 	}
 	
@@ -743,8 +740,10 @@ Game_System.prototype.drill_DSB_checkSysData = function() {
 Game_System.prototype.drill_DSB_initSysData_Private = function() {
 	
 	this._drill_DSB_visibleTank = [];		//显示情况
-	for(var i = 0; i < DrillUp.g_DSB_list.length; i++ ){
-		this._drill_DSB_visibleTank[i] = DrillUp.g_DSB_list[i]['visible'];
+	for( var i = 0; i < DrillUp.g_DSB_list.length; i++ ){
+		var temp_data = DrillUp.g_DSB_list[i];
+		if( temp_data == undefined ){ continue; }
+		this._drill_DSB_visibleTank[i] = temp_data['visible'];
 	}
 };
 //==============================
@@ -758,11 +757,11 @@ Game_System.prototype.drill_DSB_checkSysData_Private = function() {
 	}
 	
 	// > 容器的 空数据 检查
-	for(var i = 0; i < DrillUp.g_DSB_list.length; i++ ){
-		var temp_data = JSON.parse(JSON.stringify( DrillUp.g_DSB_list[i] ));
+	for( var i = 0; i < DrillUp.g_DSB_list.length; i++ ){
+		var temp_data = DrillUp.g_DSB_list[i];
 		
-		// > 已配置（'inited'为 false 表示空数据）
-		if( temp_data['inited'] == true ){
+		// > 已配置（undefined表示未配置的空数据）
+		if( temp_data != undefined ){
 			
 			// > 未存储的，重新初始化
 			if( this._drill_DSB_visibleTank[i] == undefined ){
@@ -803,6 +802,8 @@ Window_Message.prototype.setBackgroundType = function( type ){
 	
     if( type === 0 ){	// 窗口 类型
 		this.drill_DSB_refreshSprite();		//刷新背景
+	}else{
+		this.drill_DSB_clearSprite();		//清空背景
 	}
 }
 
@@ -845,7 +846,7 @@ Window_Base.prototype.drill_DSB_refreshSprite = function(){
 	// > 建立背景
 	for( var i = 0; i < DrillUp.g_DSB_list.length; i++ ){
 		var temp_data = DrillUp.g_DSB_list[i];
-		if( temp_data['inited'] == false ){ continue; }
+		if( temp_data == undefined ){ continue; }
 		if( temp_data['styleId']-1 == -1 ){ continue; }
 		if( temp_data['styleId']-1 == styleId ){
 			var temp_sprite = new Drill_DSB_DecorationBackground( temp_data, this );
@@ -857,6 +858,19 @@ Window_Base.prototype.drill_DSB_refreshSprite = function(){
 	
 	// > 层级排序
 	this._drill_DSB_spriteLayer.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
+};
+//==============================
+// * 对话框绑定 - 清空背景（Window_Base）
+//==============================
+Window_Base.prototype.drill_DSB_clearSprite = function(){
+	if( this._drill_DSk_tag == undefined ){ return; }
+	this._drill_DSB_curStyle = -1;	//（置空样式）
+	
+	for(var i = this._drill_DSB_spriteTank.length-1; i >= 0; i-- ){
+		var temp_sprite = this._drill_DSB_spriteTank[i];
+		this._drill_DSB_spriteLayer.removeChild( temp_sprite );
+		this._drill_DSB_spriteTank.splice(i,1);
+	}
 };
 
 

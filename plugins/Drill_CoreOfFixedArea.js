@@ -850,11 +850,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		COFA（Core_Of_Fixed_Area）
-//		临时全局变量	DrillUp.g_COFA_xxx
-//		临时局部变量	无
-//		存储数据变量	无
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -2017,7 +2014,7 @@ Drill_COFA_DebugSprite.prototype.constructor = Drill_COFA_DebugSprite;
 //==============================
 Drill_COFA_DebugSprite.prototype.initialize = function( data ){
 	Sprite.prototype.initialize.call(this);
-	this._drill_data = JSON.parse(JSON.stringify( data ));
+	this._drill_data = JSON.parse(JSON.stringify( data ));  //『深拷贝-DEBUG用』
 	//（注意，此贴图不绑定 事件/玩家 对象，要控制在外部去控制）
 	
 	// > 默认值
@@ -2027,7 +2024,7 @@ Drill_COFA_DebugSprite.prototype.initialize = function( data ){
 	if( data['point_list'] == undefined ){ data['point_list'] = []; }	//点列表（棋盘坐标）
 	
 	// > 私有属性初始化
-	this._drill_pointList = JSON.parse(JSON.stringify( data['point_list'] ));
+	this._drill_pointList = JSON.parse(JSON.stringify( data['point_list'] ));  //『深拷贝-DEBUG用』
 	this._drill_pointNeedRedraw = true;
 	
 	// > 贴图初始化
@@ -2107,7 +2104,7 @@ Drill_COFA_DebugSprite.prototype.drill_changePointList = function( point_list ){
 	if( repeat_count == tank_b.length && tank_b.length > 0 ){ return; }
 	
 	// > 不匹配，则 重画图块点
-	this._drill_pointList = JSON.parse(JSON.stringify( point_list ));
+	this._drill_pointList = JSON.parse(JSON.stringify( point_list ));  //『深拷贝-DEBUG用』
 	this._drill_pointNeedRedraw = true;
 };
 

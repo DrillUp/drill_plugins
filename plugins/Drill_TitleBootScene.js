@@ -41,7 +41,7 @@
  *      这里的窗口配置都只修改 拉伸缩放 的高宽，不控制分辨率。
  *      如果要改分辨率，需要去 系统-引擎核心 中修改屏幕高宽。
  * 视频：
- *   (1.视频动画只支持 .webm(pc端) 和 .mp4(手机端) 格式的视频。
+ *   (1.视频动画只支持 .webm(电脑端) 和 .mp4(手机端) 格式的视频。
  *   (2.部分电脑的浏览器可能存在视频禁用的情况，使得视频无法播放。
  *      如果示例的logo视频能正常播放，那就不是浏览器视频禁用的问题。
  * 阶段：
@@ -439,11 +439,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		TBS (Title_Boot_Scene)
-//		临时全局变量	DrillUp.g_TBS_xxx
-//		临时局部变量	无
-//		存储数据变量	无
-//		全局存储变量	无
+//
+//		插件简称		TBS（Title_Boot_Scene）
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -1099,7 +1096,7 @@ Scene_Drill_TBS.prototype.drill_createGIF = function() {
 	if( temp_data == undefined ){ return }
 	if( temp_data['mode'] !== "GIF模式" ){ return }
 	
-	var temp_sprite_data = JSON.parse(JSON.stringify( temp_data ));	
+	var temp_sprite_data = JSON.parse(JSON.stringify( temp_data ));	  //『深拷贝-混杂自定义数据』
 	var temp_sprite = this._drill_gif_sprite;
 	temp_sprite.bitmap = this._drill_bitmapTank[ this._drill_level ]['gif_bitmaps'][0];
     temp_sprite.anchor.x = 0.5;

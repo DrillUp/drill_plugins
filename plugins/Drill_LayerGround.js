@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.7]        地图 - 多层地图背景
+ * @plugindesc [v2.8]        地图 - 多层地图背景
  * @author Drill_up
  * 
  * @Drill_LE_param "背景层-%d"
@@ -112,8 +112,11 @@
  * 插件指令：>地图背景 : 背景[11] : 暂停
  * 插件指令：>地图背景 : 背景[11] : 继续
  * 插件指令：>地图背景 : 背景[11] : 切换混合模式[0]
+ * 插件指令：>地图背景 : 背景[11] : 还原混合模式
  * 插件指令：>地图背景 : 背景[11] : 切换地图层级[下层]
+ * 插件指令：>地图背景 : 背景[11] : 还原地图层级
  * 插件指令：>地图背景 : 背景[11] : 切换图片层级[10]
+ * 插件指令：>地图背景 : 背景[11] : 还原图片层级
  * 插件指令：>地图背景 : 背景[11] : 修改单属性 : 透明度[255] : 时间[60]
  * 插件指令：>地图背景 : 背景[11] : 修改单属性 : 透明度变量[21] : 时间[60]
  * 插件指令：>地图背景 : 背景[11] : 修改单属性 : 旋转[90] : 时间[60]
@@ -133,7 +136,7 @@
  * 插件指令：>地图背景 : 背景[11] : 立即还原所有单属性
  * 
  * 1.前半部分（背景变量[21]）和 后半部分（显示）
- *   的参数可以随意组合。一共有4*24种组合方式。
+ *   的参数可以随意组合。一共有4*27种组合方式。
  * 2.注意，如果你想永久保持插件指令的改变结果，则需要开启 参数存储 。
  *   参数存储默认关闭，即 插件指令 的所有改变在读取存档后都会复原。
  * 3.插件指令的变化是永久性的。
@@ -195,6 +198,12 @@
  * 插件指令：>地图背景 : 背景[11] : 隐藏(延迟) : 延迟执行时间[20]
  * 插件指令：>地图背景 : 背景[11] : 暂停(延迟) : 延迟执行时间[20]
  * 插件指令：>地图背景 : 背景[11] : 继续(延迟) : 延迟执行时间[20]
+ * 插件指令：>地图背景 : 背景[11] : 切换混合模式(延迟)[0] : 延迟执行时间[20]
+ * 插件指令：>地图背景 : 背景[11] : 还原混合模式(延迟) : 延迟执行时间[20]
+ * 插件指令：>地图背景 : 背景[11] : 切换地图层级(延迟)[下层] : 延迟执行时间[20]
+ * 插件指令：>地图背景 : 背景[11] : 还原地图层级(延迟) : 延迟执行时间[20]
+ * 插件指令：>地图背景 : 背景[11] : 切换图片层级(延迟)[10] : 延迟执行时间[20]
+ * 插件指令：>地图背景 : 背景[11] : 还原图片层级(延迟) : 延迟执行时间[20]
  * 插件指令：>地图背景 : 背景[11] : 修改单属性(延迟) : 透明度[255] : 时间[60] : 延迟执行时间[20]
  * 插件指令：>地图背景 : 背景[11] : 修改单属性(延迟) : 透明度变量[21] : 时间[60] : 延迟执行时间[20]
  * 插件指令：>地图背景 : 背景[11] : 修改单属性(延迟) : 旋转[90] : 时间[60] : 延迟执行时间[20]
@@ -215,7 +224,7 @@
  * 插件指令：>地图背景 : 背景[11] : 立即取消全部延迟指令
  * 
  * 1.前半部分（背景[11]）和 后半部分（隐藏(延迟) : 延迟执行时间[20]）
- *   的参数可以随意组合。一共有4*22种组合方式。
+ *   的参数可以随意组合。一共有4*28种组合方式。
  * 2.设置延迟指令后，指令会被暂存到延迟队列中，等待延迟时间结束之后，执行指令。
  *   "立即取消全部延迟指令"可以清空排在队列中的所有延迟指令。
  * 3.此功能可以简化 并行事件 的设计，你可以在串行事件中执行延迟，延迟后并行变化贴图。
@@ -235,6 +244,17 @@
  * 1.前半部分（背景[11]）和 后半部分（移动到(延迟)-匀速移动 : 位置[100,100] : 时间[60] : 延迟执行时间[20]）
  *   的参数可以随意组合。一共有4*7种组合方式。
  * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 增加延迟
+ * 上述的插件指令中，你还可以设置增加延迟：
+ * 
+ * 插件指令：>地图背景 : 背景[11] : 全部延迟指令增加延迟 : 时间[10]
+ * 插件指令：>地图背景 : 背景[11] : 全部延迟指令增加延迟 : 时间[周期播放完的时间]
+ * 
+ * 1.前半部分（背景[11]）和 后半部分（全部延迟指令增加延迟 : 时间[10]）
+ *   的参数可以随意组合。一共有4*2种组合方式。
+ * 2.如果在此之前没有设置任何延迟指令，则增加延迟没有效果。
+ * 
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 周期修改单属性
@@ -249,6 +269,12 @@
  * 插件指令：>地图背景 : 背景[11] : 添加周期-隐藏(周期) : 周期时长[90] : 周期内开始时间[0]
  * 插件指令：>地图背景 : 背景[11] : 添加周期-暂停(周期) : 周期时长[90] : 周期内开始时间[0]
  * 插件指令：>地图背景 : 背景[11] : 添加周期-继续(周期) : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图背景 : 背景[11] : 添加周期-切换混合模式(周期)[0] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图背景 : 背景[11] : 添加周期-还原混合模式(周期) : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图背景 : 背景[11] : 添加周期-切换地图层级(周期)[下层] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图背景 : 背景[11] : 添加周期-还原地图层级(周期) : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图背景 : 背景[11] : 添加周期-切换图片层级(周期)[10] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>地图背景 : 背景[11] : 添加周期-还原图片层级(周期) : 周期时长[90] : 周期内开始时间[0]
  * 插件指令：>地图背景 : 背景[11] : 添加周期-修改单属性(周期) : 透明度[255] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
  * 插件指令：>地图背景 : 背景[11] : 添加周期-修改单属性(周期) : 透明度变量[21] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
  * 插件指令：>地图背景 : 背景[11] : 添加周期-修改单属性(周期) : 旋转[90] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
@@ -266,10 +292,12 @@
  * 插件指令：>地图背景 : 背景[11] : 添加周期-修改单属性(周期) : 斜切Y[0.2] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
  * 插件指令：>地图背景 : 背景[11] : 添加周期-修改单属性(周期) : 斜切Y变量%[21] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
  * 插件指令：>地图背景 : 背景[11] : 添加周期-还原所有单属性(周期) : 周期时长[90] : 周期内开始时间[0]
- * 插件指令：>地图背景 : 背景[11] : 清空周期指令
+ * 插件指令：>地图背景 : 背景[11] : 暂停周期指令
+ * 插件指令：>地图背景 : 背景[11] : 继续周期指令
+ * 插件指令：>地图背景 : 背景[11] : 清空周期指令(立刻)
  * 
  * 1.前半部分（背景[11]）和 后半部分（ 添加周期-隐藏(周期) ）
- *   的参数可以随意组合。一共有4*22种组合方式。
+ *   的参数可以随意组合。一共有4*30种组合方式。
  * 2."添加周期"后，指令会根据"周期时长"和"开始时间"，持续循环执行。
  *   "清空周期指令"可以清空添加的指令。
  * 3.你可以塞入多条周期指令，每个周期指令控制不同的属性，实现复杂的变换效果。
@@ -287,10 +315,44 @@
  * 插件指令：>地图背景 : 背景[11] : 添加周期-移动到(周期)-增减速移动 : 位置[100,100] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
  * 插件指令：>地图背景 : 背景[11] : 添加周期-移动到(周期)-增减速移动 : 位置变量[25,26] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
  * 插件指令：>地图背景 : 背景[11] : 添加周期-移动到(周期)-执行归位 : 周期时长[90] : 周期内开始时间[0]
- * 插件指令：>地图背景 : 背景[11] : 清空周期指令
+ * 插件指令：>地图背景 : 背景[11] : 暂停周期指令
+ * 插件指令：>地图背景 : 背景[11] : 继续周期指令
+ * 插件指令：>地图背景 : 背景[11] : 清空周期指令(立刻)
  * 
  * 1.前半部分（背景[11]）和 后半部分（ 添加周期-移动到(周期)-匀速移动 ）
- *   的参数可以随意组合。一共有4*8种组合方式。
+ *   的参数可以随意组合。一共有4*10种组合方式。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 周期的延迟
+ * 上述的插件指令中，可以设置：
+ * 
+ * 插件指令：>地图背景 : 背景[11] : 暂停周期指令(延迟) : 延迟执行时间[20]
+ * 插件指令：>地图背景 : 背景[11] : 继续周期指令(延迟) : 延迟执行时间[20]
+ * 插件指令：>地图背景 : 背景[11] : 清空周期指令(延迟) : 延迟执行时间[20]
+ * 
+ * 1.前半部分（背景[11]）和 后半部分（ 暂停周期指令(延迟) : 延迟执行时间[20] ）
+ *   的参数可以随意组合。一共有4*3种组合方式。
+ * 2.注意，周期指令添加后，就开始循环了，
+ *   你如果一开始不想立即执行，可以使用"暂停周期指令"，而后再"继续周期指令(延迟)"。
+ * 3.注意，没有"添加周期(延迟)"的功能，
+ *   只能一次性添加，不能并行延迟添加，这样是为了防止过度设计。
+ * 4.如果一个装饰贴图真的有 两套周期指令，（比如先周期放大后周期缩小）
+ *   那你应该考虑把它合并成一套，增加周期时长，修改周期内开始时间；
+ *   或者使用两个不同的装饰贴图，分别执行不同周期指令，然后通过延迟指令显示隐藏贴图。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 周期末尾时
+ * 上述的插件指令中，可以设置：
+ * 
+ * 插件指令：>地图背景 : 背景[11] : 暂停周期指令(周期末尾时)
+ * 插件指令：>地图背景 : 背景[11] : 清空周期指令(周期末尾时)
+ * 插件指令：>地图背景 : 背景[11] : 执行等待(周期末尾时)
+ * 
+ * 1.注意，指令 "执行等待" 会阻塞事件的执行。（不要写多条相同的指令）
+ *   等待后，可以让周期指令的变换停留在播放结束的时候。
+ *   因为是串行阻塞，所以批量和不批量的等待时长一样。
+ * 2.设计时建议多个贴图一起变换时，使用相同的周期时长，
+ *   这样再执行等待就不会出现周期时间错位的问题。
  * 
  * 
  * -----------------------------------------------------------------------------
@@ -357,6 +419,8 @@
  * [v2.7]
  * 添加了地图列表的设置，一层可以同时绑定给多个地图。
  * 整理改进了内部结构，并添加了周期指令。
+ * [v2.8]
+ * 再次改进了结构。
  * 
  * 
  * 
@@ -374,13 +438,13 @@
  * @parent ---背景层组 1至20---
  * @type struct<LGMapBackground>
  * @desc 背景的详细配置信息。
- * @default 
+ * @default {"标签":"==纯色幕布-白==","---绑定---":"","是否作用到所有地图":"true","所属地图":"1","作用到的地图列表":"[]","---贴图---":"","初始是否显示":"true","资源-背景":"背景-幕布-纯色-白","是否预加载":"true","图像-色调值":"0","图像-模糊边缘":"false","平移-背景 X":"0","平移-背景 Y":"0","背景X速度":"0.0","背景Y速度":"0.0","透明度":"0","平铺的旋转角度":"0.0","位移比X":"0.00","位移比Y":"0.00","位移图块偏移 X":"0","位移图块偏移 Y":"0","混合模式":"0","地图层级":"上层","图片层级":"200","---自变化效果---":"","浮动效果":"关闭","浮动速度":"1.0","浮动偏移量":"15","闪烁效果":"关闭","闪烁速度":"6.0","闪烁幅度范围":"35","缩放效果":"关闭","缩放速度":"1.0","缩放幅度范围":"0.2","---动态遮罩---":"","是否启用地图动态遮罩":"false","关联的动态遮罩板":"动态遮罩板A"}
  *
  * @param 背景层-2
  * @parent ---背景层组 1至20---
  * @type struct<LGMapBackground>
  * @desc 背景的详细配置信息。
- * @default 
+ * @default {"标签":"==纯色幕布-黑==","---绑定---":"","是否作用到所有地图":"true","所属地图":"1","作用到的地图列表":"[]","---贴图---":"","初始是否显示":"true","资源-背景":"背景-幕布-纯色-黑","是否预加载":"true","图像-色调值":"0","图像-模糊边缘":"false","平移-背景 X":"0","平移-背景 Y":"0","背景X速度":"0.0","背景Y速度":"0.0","透明度":"0","平铺的旋转角度":"0.0","位移比X":"0.00","位移比Y":"0.00","位移图块偏移 X":"0","位移图块偏移 Y":"0","混合模式":"0","地图层级":"上层","图片层级":"200","---自变化效果---":"","浮动效果":"关闭","浮动速度":"1.0","浮动偏移量":"15","闪烁效果":"关闭","闪烁速度":"6.0","闪烁幅度范围":"35","缩放效果":"关闭","缩放速度":"1.0","缩放幅度范围":"0.2","---动态遮罩---":"","是否启用地图动态遮罩":"false","关联的动态遮罩板":"动态遮罩板A"}
  *
  * @param 背景层-3
  * @parent ---背景层组 1至20---
@@ -392,43 +456,43 @@
  * @parent ---背景层组 1至20---
  * @type struct<LGMapBackground>
  * @desc 背景的详细配置信息。
- * @default 
+ * @default {"标签":"==滤镜幕布-红==","---绑定---":"","是否作用到所有地图":"true","所属地图":"1","作用到的地图列表":"[]","---贴图---":"","初始是否显示":"true","资源-背景":"背景-幕布-纯色-红","是否预加载":"false","图像-色调值":"0","图像-模糊边缘":"false","平移-背景 X":"0","平移-背景 Y":"0","背景X速度":"0.0","背景Y速度":"0.0","透明度":"0","平铺的旋转角度":"0.0","位移比X":"0.00","位移比Y":"0.00","位移图块偏移 X":"0","位移图块偏移 Y":"0","混合模式":"2","地图层级":"上层","图片层级":"200","---自变化效果---":"","浮动效果":"关闭","浮动速度":"1.0","浮动偏移量":"15","闪烁效果":"关闭","闪烁速度":"6.0","闪烁幅度范围":"35","缩放效果":"关闭","缩放速度":"1.0","缩放幅度范围":"0.2","---动态遮罩---":"","是否启用地图动态遮罩":"false","关联的动态遮罩板":"动态遮罩板A"}
  *
  * @param 背景层-5
  * @parent ---背景层组 1至20---
  * @type struct<LGMapBackground>
  * @desc 背景的详细配置信息。
- * @default 
+ * @default {"标签":"==滤镜幕布-橙==","---绑定---":"","是否作用到所有地图":"true","所属地图":"1","作用到的地图列表":"[]","---贴图---":"","初始是否显示":"true","资源-背景":"背景-幕布-纯色-橙","是否预加载":"false","图像-色调值":"0","图像-模糊边缘":"false","平移-背景 X":"0","平移-背景 Y":"0","背景X速度":"0.0","背景Y速度":"0.0","透明度":"0","平铺的旋转角度":"0.0","位移比X":"0.00","位移比Y":"0.00","位移图块偏移 X":"0","位移图块偏移 Y":"0","混合模式":"2","地图层级":"上层","图片层级":"200","---自变化效果---":"","浮动效果":"关闭","浮动速度":"1.0","浮动偏移量":"15","闪烁效果":"关闭","闪烁速度":"6.0","闪烁幅度范围":"35","缩放效果":"关闭","缩放速度":"1.0","缩放幅度范围":"0.2","---动态遮罩---":"","是否启用地图动态遮罩":"false","关联的动态遮罩板":"动态遮罩板A"}
  *
  * @param 背景层-6
  * @parent ---背景层组 1至20---
  * @type struct<LGMapBackground>
  * @desc 背景的详细配置信息。
- * @default 
+ * @default {"标签":"==滤镜幕布-黄==","---绑定---":"","是否作用到所有地图":"true","所属地图":"1","作用到的地图列表":"[]","---贴图---":"","初始是否显示":"true","资源-背景":"背景-幕布-纯色-黄","是否预加载":"false","图像-色调值":"0","图像-模糊边缘":"false","平移-背景 X":"0","平移-背景 Y":"0","背景X速度":"0.0","背景Y速度":"0.0","透明度":"0","平铺的旋转角度":"0.0","位移比X":"0.00","位移比Y":"0.00","位移图块偏移 X":"0","位移图块偏移 Y":"0","混合模式":"2","地图层级":"上层","图片层级":"200","---自变化效果---":"","浮动效果":"关闭","浮动速度":"1.0","浮动偏移量":"15","闪烁效果":"关闭","闪烁速度":"6.0","闪烁幅度范围":"35","缩放效果":"关闭","缩放速度":"1.0","缩放幅度范围":"0.2","---动态遮罩---":"","是否启用地图动态遮罩":"false","关联的动态遮罩板":"动态遮罩板A"}
  *
  * @param 背景层-7
  * @parent ---背景层组 1至20---
  * @type struct<LGMapBackground>
  * @desc 背景的详细配置信息。
- * @default 
+ * @default {"标签":"==滤镜幕布-绿==","---绑定---":"","是否作用到所有地图":"true","所属地图":"1","作用到的地图列表":"[]","---贴图---":"","初始是否显示":"true","资源-背景":"背景-幕布-纯色-绿","是否预加载":"false","图像-色调值":"0","图像-模糊边缘":"false","平移-背景 X":"0","平移-背景 Y":"0","背景X速度":"0.0","背景Y速度":"0.0","透明度":"0","平铺的旋转角度":"0.0","位移比X":"0.00","位移比Y":"0.00","位移图块偏移 X":"0","位移图块偏移 Y":"0","混合模式":"2","地图层级":"上层","图片层级":"200","---自变化效果---":"","浮动效果":"关闭","浮动速度":"1.0","浮动偏移量":"15","闪烁效果":"关闭","闪烁速度":"6.0","闪烁幅度范围":"35","缩放效果":"关闭","缩放速度":"1.0","缩放幅度范围":"0.2","---动态遮罩---":"","是否启用地图动态遮罩":"false","关联的动态遮罩板":"动态遮罩板A"}
  *
  * @param 背景层-8
  * @parent ---背景层组 1至20---
  * @type struct<LGMapBackground>
  * @desc 背景的详细配置信息。
- * @default 
+ * @default {"标签":"==滤镜幕布-青==","---绑定---":"","是否作用到所有地图":"true","所属地图":"1","作用到的地图列表":"[]","---贴图---":"","初始是否显示":"true","资源-背景":"背景-幕布-纯色-青","是否预加载":"false","图像-色调值":"0","图像-模糊边缘":"false","平移-背景 X":"0","平移-背景 Y":"0","背景X速度":"0.0","背景Y速度":"0.0","透明度":"0","平铺的旋转角度":"0.0","位移比X":"0.00","位移比Y":"0.00","位移图块偏移 X":"0","位移图块偏移 Y":"0","混合模式":"2","地图层级":"上层","图片层级":"200","---自变化效果---":"","浮动效果":"关闭","浮动速度":"1.0","浮动偏移量":"15","闪烁效果":"关闭","闪烁速度":"6.0","闪烁幅度范围":"35","缩放效果":"关闭","缩放速度":"1.0","缩放幅度范围":"0.2","---动态遮罩---":"","是否启用地图动态遮罩":"false","关联的动态遮罩板":"动态遮罩板A"}
  *
  * @param 背景层-9
  * @parent ---背景层组 1至20---
  * @type struct<LGMapBackground>
  * @desc 背景的详细配置信息。
- * @default 
+ * @default {"标签":"==滤镜幕布-蓝==","---绑定---":"","是否作用到所有地图":"true","所属地图":"1","作用到的地图列表":"[]","---贴图---":"","初始是否显示":"true","资源-背景":"背景-幕布-纯色-蓝","是否预加载":"false","图像-色调值":"0","图像-模糊边缘":"false","平移-背景 X":"0","平移-背景 Y":"0","背景X速度":"0.0","背景Y速度":"0.0","透明度":"0","平铺的旋转角度":"0.0","位移比X":"0.00","位移比Y":"0.00","位移图块偏移 X":"0","位移图块偏移 Y":"0","混合模式":"2","地图层级":"上层","图片层级":"200","---自变化效果---":"","浮动效果":"关闭","浮动速度":"1.0","浮动偏移量":"15","闪烁效果":"关闭","闪烁速度":"6.0","闪烁幅度范围":"35","缩放效果":"关闭","缩放速度":"1.0","缩放幅度范围":"0.2","---动态遮罩---":"","是否启用地图动态遮罩":"false","关联的动态遮罩板":"动态遮罩板A"}
  *
  * @param 背景层-10
  * @parent ---背景层组 1至20---
  * @type struct<LGMapBackground>
  * @desc 背景的详细配置信息。
- * @default 
+ * @default {"标签":"==滤镜幕布-紫==","---绑定---":"","是否作用到所有地图":"true","所属地图":"1","作用到的地图列表":"[]","---贴图---":"","初始是否显示":"true","资源-背景":"背景-幕布-纯色-紫","是否预加载":"false","图像-色调值":"0","图像-模糊边缘":"false","平移-背景 X":"0","平移-背景 Y":"0","背景X速度":"0.0","背景Y速度":"0.0","透明度":"0","平铺的旋转角度":"0.0","位移比X":"0.00","位移比Y":"0.00","位移图块偏移 X":"0","位移图块偏移 Y":"0","混合模式":"2","地图层级":"上层","图片层级":"200","---自变化效果---":"","浮动效果":"关闭","浮动速度":"1.0","浮动偏移量":"15","闪烁效果":"关闭","闪烁速度":"6.0","闪烁幅度范围":"35","缩放效果":"关闭","缩放速度":"1.0","缩放幅度范围":"0.2","---动态遮罩---":"","是否启用地图动态遮罩":"false","关联的动态遮罩板":"动态遮罩板A"}
  *
  * @param 背景层-11
  * @parent ---背景层组 1至20---
@@ -1671,7 +1735,7 @@
  * @type boolean
  * @on 模糊
  * @off 关闭
- * @desc 此参数为缩放设置，设置模糊后，缩放时可以模糊资源图像的边缘，防止出现像素锯齿。
+ * @desc 此参数可以看看："0.基本定义 > 缩放模式.docx"。设置模糊后，缩放时可以模糊资源图像的边缘，防止出现像素锯齿。
  * @default false
  *
  *
@@ -1741,7 +1805,7 @@
  * @value 3
  * @option 叠加
  * @value 4
- * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
+ * @desc 此参数可以看看："0.基本定义 > 混合模式.docx"。pixi的渲染混合模式。0-普通,1-发光,2-实色混合,3-浅色,4-叠加。
  * @default 0
  *
  * @param 地图层级
@@ -1872,11 +1936,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		LG（Layer_Ground）
-//		临时全局变量	DrillUp.g_LG_xxx
-//		临时局部变量	this._drill_LG_xxx
-//		存储数据变量	$gameSystem._drill_LG_xxx
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -1901,8 +1962,10 @@
 //					->移动到
 //					->获取属性
 //					x->修改中心锚点
-//					->延迟修改单属性（不含混合模式、层级、图片层级）
+//					->延迟修改单属性
 //					->延迟移动到
+//					->周期修改单属性
+//					->周期移动到
 //				x->其它特性
 //			->☆预加载
 //			->☆存储数据
@@ -2183,6 +2246,19 @@ Game_Interpreter.prototype.pluginCommand = function( command, args ){
 // * 插件指令 - 指令执行
 //==============================
 Game_Interpreter.prototype.drill_LG_pluginCommand = function( command, args ){
+	DrillUp.drill_LG_globalPluginCommand( command, args, this );
+}
+//==============================
+// * 插件指令 - 『作用全局的插件指令』
+//
+//			参数：	> command 字符串
+//					> args 字符串列表
+//					> gameInterpreter 解释器对象
+//
+//			说明：	> 该函数不能有 this 对象。
+//					> 该函数不依赖解释器对象，gameInterpreter 可以为 null。函数可跨界面调用。
+//==============================
+DrillUp.drill_LG_globalPluginCommand = function( command, args, gameInterpreter ){
 	if( command === ">地图背景" ){ // >地图背景 : 背景[1] : 显示
 		
 		/*-----------------对象组获取------------------*/
@@ -2276,6 +2352,21 @@ Game_Interpreter.prototype.drill_LG_pluginCommand = function( command, args ){
 					controllers[k].drill_controller_setZIndex( Number(type) );
 				}
 			}
+			if( type == "还原混合模式" ){
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_restoreBlendMode();
+				}
+			}
+			if( type == "还原地图层级" ){
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_restoreLayerIndex();
+				}
+			}
+			if( type == "还原图片层级" ){
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_restoreZIndex();
+				}
+			}
 		}
 		
 		/*-----------------获取属性------------------*/
@@ -2344,7 +2435,7 @@ Game_Interpreter.prototype.drill_LG_pluginCommand = function( command, args ){
 				
 				if( temp1.indexOf("透明度[") != -1 ||
 					temp1.indexOf("透明度变量[") != -1 ){
-					var num_list = this.drill_LG_getArgNumList(temp1);
+					var num_list = DrillUp.drill_LG_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_commandChange_setOpacity(
 							"匀速变化", num_list[0], Number(temp2)
@@ -2353,7 +2444,7 @@ Game_Interpreter.prototype.drill_LG_pluginCommand = function( command, args ){
 				}
 				if( temp1.indexOf("旋转[") != -1 ||
 					temp1.indexOf("旋转变量[") != -1 ){
-					var num_list = this.drill_LG_getArgNumList(temp1);
+					var num_list = DrillUp.drill_LG_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_commandChange_setRotate(
 							"匀速变化", num_list[0], Number(temp2)
@@ -2362,7 +2453,7 @@ Game_Interpreter.prototype.drill_LG_pluginCommand = function( command, args ){
 				}
 				if( temp1.indexOf("移动速度X[") != -1 ||
 					temp1.indexOf("移动速度X变量%[") != -1 ){
-					var num_list = this.drill_LG_getArgNumList(temp1);
+					var num_list = DrillUp.drill_LG_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_commandChange_setSpeedX(
 							"匀速变化", num_list[0], Number(temp2)
@@ -2371,7 +2462,7 @@ Game_Interpreter.prototype.drill_LG_pluginCommand = function( command, args ){
 				}
 				if( temp1.indexOf("移动速度Y[") != -1 ||
 					temp1.indexOf("移动速度Y变量%[") != -1 ){
-					var num_list = this.drill_LG_getArgNumList(temp1);
+					var num_list = DrillUp.drill_LG_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_commandChange_setSpeedY(
 							"匀速变化", num_list[0], Number(temp2)
@@ -2380,7 +2471,7 @@ Game_Interpreter.prototype.drill_LG_pluginCommand = function( command, args ){
 				}
 				if( temp1.indexOf("缩放X[") != -1 ||
 					temp1.indexOf("缩放X变量%[") != -1 ){
-					var num_list = this.drill_LG_getArgNumList(temp1);
+					var num_list = DrillUp.drill_LG_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_commandChange_setScaleX(
 							"匀速变化", num_list[0], Number(temp2)
@@ -2389,7 +2480,7 @@ Game_Interpreter.prototype.drill_LG_pluginCommand = function( command, args ){
 				}
 				if( temp1.indexOf("缩放Y[") != -1 ||
 					temp1.indexOf("缩放Y变量%[") != -1 ){
-					var num_list = this.drill_LG_getArgNumList(temp1);
+					var num_list = DrillUp.drill_LG_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_commandChange_setScaleY(
 							"匀速变化", num_list[0], Number(temp2)
@@ -2398,7 +2489,7 @@ Game_Interpreter.prototype.drill_LG_pluginCommand = function( command, args ){
 				}
 				if( temp1.indexOf("斜切X[") != -1 ||
 					temp1.indexOf("斜切X变量%[") != -1 ){
-					var num_list = this.drill_LG_getArgNumList(temp1);
+					var num_list = DrillUp.drill_LG_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_commandChange_setSkewX(
 							"匀速变化", num_list[0], Number(temp2)
@@ -2407,7 +2498,7 @@ Game_Interpreter.prototype.drill_LG_pluginCommand = function( command, args ){
 				}
 				if( temp1.indexOf("斜切Y[") != -1 ||
 					temp1.indexOf("斜切Y变量%[") != -1 ){
-					var num_list = this.drill_LG_getArgNumList(temp1);
+					var num_list = DrillUp.drill_LG_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_commandChange_setSkewY(
 							"匀速变化", num_list[0], Number(temp2)
@@ -2420,7 +2511,7 @@ Game_Interpreter.prototype.drill_LG_pluginCommand = function( command, args ){
 				temp2 = temp2.replace("]","");
 				if( temp1.indexOf("位置[") != -1 ||
 					temp1.indexOf("位置变量[") != -1 ){
-					var num_list = this.drill_LG_getArgNumList(temp1);
+					var num_list = DrillUp.drill_LG_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_commandChange_setMove(
 							"匀速变化", num_list[0], num_list[1], Number(temp2)
@@ -2433,7 +2524,7 @@ Game_Interpreter.prototype.drill_LG_pluginCommand = function( command, args ){
 				temp2 = temp2.replace("]","");
 				if( temp1.indexOf("位置[") != -1 ||
 					temp1.indexOf("位置变量[") != -1 ){
-					var num_list = this.drill_LG_getArgNumList(temp1);
+					var num_list = DrillUp.drill_LG_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_commandChange_setMove(
 							"弹性变化", num_list[0], num_list[1], Number(temp2)
@@ -2446,7 +2537,7 @@ Game_Interpreter.prototype.drill_LG_pluginCommand = function( command, args ){
 				temp2 = temp2.replace("]","");
 				if( temp1.indexOf("位置[") != -1 ||
 					temp1.indexOf("位置变量[") != -1 ){
-					var num_list = this.drill_LG_getArgNumList(temp1);
+					var num_list = DrillUp.drill_LG_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_commandChange_setMove(
 							"增减速变化", num_list[0], num_list[1], Number(temp2)
@@ -2468,13 +2559,31 @@ Game_Interpreter.prototype.drill_LG_pluginCommand = function( command, args ){
 		if( args.length == 6 ){
 			var type = String(args[3]);
 			var delay_time = String(args[5]);
+			if( type == "全部延迟指令增加延迟" ){
+				delay_time = delay_time.replace("时间[","");
+				delay_time = delay_time.replace("]","");
+				for( var k=0; k < controllers.length; k++ ){
+					var temp_controller = controllers[k];
+					var temp_time = 0;
+					if( delay_time == "周期播放完的时间" ){
+						temp_time = temp_controller.drill_controller_periodizeCommand_getWaitAndClearTime();
+					}else{
+						temp_time = Number(delay_time);
+					}
+					temp_controller.drill_controller_addDelayingTime( temp_time );
+				}
+			}
+		}
+		if( args.length == 6 ){
+			var type = String(args[3]);
+			var delay_time = String(args[5]);
 			if( type == "显示(延迟)" ){
 				delay_time = delay_time.replace("延迟执行时间[","");
 				delay_time = delay_time.replace("]","");
 				delay_time = Number( delay_time );
 				for( var k=0; k < controllers.length; k++ ){
 					controllers[k].drill_controller_setDelayingCommand(
-						"drill_controller_setVisible", [true], delay_time
+						Drill_LG_Controller.METHOD__drill_controller_setVisible, [true], delay_time
 					);
 				}
 			}
@@ -2484,7 +2593,7 @@ Game_Interpreter.prototype.drill_LG_pluginCommand = function( command, args ){
 				delay_time = Number( delay_time );
 				for( var k=0; k < controllers.length; k++ ){
 					controllers[k].drill_controller_setDelayingCommand(
-						"drill_controller_setVisible", [false], delay_time
+						Drill_LG_Controller.METHOD__drill_controller_setVisible, [false], delay_time
 					);
 				}
 			}
@@ -2494,7 +2603,7 @@ Game_Interpreter.prototype.drill_LG_pluginCommand = function( command, args ){
 				delay_time = Number( delay_time );
 				for( var k=0; k < controllers.length; k++ ){
 					controllers[k].drill_controller_setDelayingCommand(
-						"drill_controller_setPause", [true], delay_time
+						Drill_LG_Controller.METHOD__drill_controller_setPause, [true], delay_time
 					);
 				}
 			}
@@ -2504,7 +2613,104 @@ Game_Interpreter.prototype.drill_LG_pluginCommand = function( command, args ){
 				delay_time = Number( delay_time );
 				for( var k=0; k < controllers.length; k++ ){
 					controllers[k].drill_controller_setDelayingCommand(
-						"drill_controller_setPause", [false], delay_time
+						Drill_LG_Controller.METHOD__drill_controller_setPause, [false], delay_time
+					);
+				}
+			}
+			if( type == "暂停周期指令(延迟)" ){
+				delay_time = delay_time.replace("延迟执行时间[","");
+				delay_time = delay_time.replace("]","");
+				delay_time = Number( delay_time );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setDelayingCommand(
+						Drill_LG_Controller.METHOD__drill_controller_periodizeCommand_setPause, [true], delay_time
+					);
+				}
+			}
+			if( type == "继续周期指令(延迟)" ){
+				delay_time = delay_time.replace("延迟执行时间[","");
+				delay_time = delay_time.replace("]","");
+				delay_time = Number( delay_time );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setDelayingCommand(
+						Drill_LG_Controller.METHOD__drill_controller_periodizeCommand_setPause, [false], delay_time
+					);
+				}
+			}
+			if( type == "清空周期指令(延迟)" ){
+				delay_time = delay_time.replace("延迟执行时间[","");
+				delay_time = delay_time.replace("]","");
+				delay_time = Number( delay_time );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setDelayingCommand(
+						Drill_LG_Controller.METHOD__drill_controller_periodizeCommand_clear, [], delay_time
+					);
+				}
+			}
+			
+			if( type.indexOf("切换混合模式(延迟)[") != -1 ){
+				type = type.replace("切换混合模式(延迟)[","");
+				type = type.replace("]","");
+				delay_time = delay_time.replace("延迟执行时间[","");
+				delay_time = delay_time.replace("]","");
+				delay_time = Number( delay_time );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setDelayingCommand(
+						Drill_LG_Controller.METHOD__drill_controller_setBlendMode, [Number(type)], delay_time
+					);
+				}
+			}
+			if( type.indexOf("切换地图层级(延迟)[") != -1 ){
+				type = type.replace("切换地图层级(延迟)[","");
+				type = type.replace("]","");
+				delay_time = delay_time.replace("延迟执行时间[","");
+				delay_time = delay_time.replace("]","");
+				delay_time = Number( delay_time );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setDelayingCommand(
+						Drill_LG_Controller.METHOD__drill_controller_setLayerIndex, [String(type)], delay_time
+					);
+				}
+			}
+			if( type.indexOf("切换图片层级(延迟)[") != -1 ){
+				type = type.replace("切换图片层级(延迟)[","");
+				type = type.replace("]","");
+				delay_time = delay_time.replace("延迟执行时间[","");
+				delay_time = delay_time.replace("]","");
+				delay_time = Number( delay_time );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setDelayingCommand(
+						Drill_LG_Controller.METHOD__drill_controller_setZIndex, [Number(type)], delay_time
+					);
+				}
+			}
+			if( type == "还原混合模式(延迟)" ){
+				delay_time = delay_time.replace("延迟执行时间[","");
+				delay_time = delay_time.replace("]","");
+				delay_time = Number( delay_time );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setDelayingCommand(
+						Drill_LG_Controller.METHOD__drill_controller_restoreBlendMode, [], delay_time
+					);
+				}
+			}
+			if( type == "还原地图层级(延迟)" ){
+				delay_time = delay_time.replace("延迟执行时间[","");
+				delay_time = delay_time.replace("]","");
+				delay_time = Number( delay_time );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setDelayingCommand(
+						Drill_LG_Controller.METHOD__drill_controller_restoreLayerIndex, [], delay_time
+					);
+				}
+			}
+			if( type == "还原图片层级(延迟)" ){
+				delay_time = delay_time.replace("延迟执行时间[","");
+				delay_time = delay_time.replace("]","");
+				delay_time = Number( delay_time );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setDelayingCommand(
+						Drill_LG_Controller.METHOD__drill_controller_restoreZIndex, [], delay_time
 					);
 				}
 			}
@@ -2514,7 +2720,7 @@ Game_Interpreter.prototype.drill_LG_pluginCommand = function( command, args ){
 				delay_time = Number( delay_time );
 				for( var k=0; k < controllers.length; k++ ){
 					controllers[k].drill_controller_setDelayingCommand(
-						"drill_controller_commandChange_restoreAttr", [], delay_time
+						Drill_LG_Controller.METHOD__drill_controller_commandChange_restoreAttr, [], delay_time
 					);
 				}
 			}
@@ -2524,7 +2730,7 @@ Game_Interpreter.prototype.drill_LG_pluginCommand = function( command, args ){
 				delay_time = Number( delay_time );
 				for( var k=0; k < controllers.length; k++ ){
 					controllers[k].drill_controller_setDelayingCommand(
-						"drill_controller_commandChange_restoreMove", [], delay_time
+						Drill_LG_Controller.METHOD__drill_controller_commandChange_restoreMove, [], delay_time
 					);
 				}
 			}
@@ -2543,80 +2749,80 @@ Game_Interpreter.prototype.drill_LG_pluginCommand = function( command, args ){
 				
 				if( temp1.indexOf("透明度[") != -1 ||
 					temp1.indexOf("透明度变量[") != -1 ){
-					var num_list = this.drill_LG_getArgNumList(temp1);
+					var num_list = DrillUp.drill_LG_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setDelayingCommand(
-							"drill_controller_commandChange_setOpacity", 
+							Drill_LG_Controller.METHOD__drill_controller_commandChange_setOpacity, 
 							[ "匀速变化", num_list[0], Number(temp2) ], delay_time
 						);
 					}
 				}
 				if( temp1.indexOf("旋转[") != -1 ||
 					temp1.indexOf("旋转变量[") != -1 ){
-					var num_list = this.drill_LG_getArgNumList(temp1);
+					var num_list = DrillUp.drill_LG_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setDelayingCommand(
-							"drill_controller_commandChange_setRotate",
+							Drill_LG_Controller.METHOD__drill_controller_commandChange_setRotate,
 							[ "匀速变化", num_list[0], Number(temp2) ], delay_time
 						);
 					}
 				}
 				if( temp1.indexOf("移动速度X[") != -1 ||
 					temp1.indexOf("移动速度X变量%[") != -1 ){
-					var num_list = this.drill_LG_getArgNumList(temp1);
+					var num_list = DrillUp.drill_LG_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setDelayingCommand(
-							"drill_controller_commandChange_setSpeedX",
+							Drill_LG_Controller.METHOD__drill_controller_commandChange_setSpeedX,
 							["匀速变化", num_list[0], Number(temp2) ], delay_time
 						);
 					}
 				}
 				if( temp1.indexOf("移动速度Y[") != -1 ||
 					temp1.indexOf("移动速度Y变量%[") != -1 ){
-					var num_list = this.drill_LG_getArgNumList(temp1);
+					var num_list = DrillUp.drill_LG_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setDelayingCommand(
-							"drill_controller_commandChange_setSpeedY",
+							Drill_LG_Controller.METHOD__drill_controller_commandChange_setSpeedY,
 							["匀速变化", num_list[0], Number(temp2) ], delay_time
 						);
 					}
 				}
 				if( temp1.indexOf("缩放X[") != -1 ||
 					temp1.indexOf("缩放X变量%[") != -1 ){
-					var num_list = this.drill_LG_getArgNumList(temp1);
+					var num_list = DrillUp.drill_LG_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setDelayingCommand(
-							"drill_controller_commandChange_setScaleX",
+							Drill_LG_Controller.METHOD__drill_controller_commandChange_setScaleX,
 							[ "匀速变化", num_list[0], Number(temp2) ], delay_time
 						);
 					}
 				}
 				if( temp1.indexOf("缩放Y[") != -1 ||
 					temp1.indexOf("缩放Y变量%[") != -1 ){
-					var num_list = this.drill_LG_getArgNumList(temp1);
+					var num_list = DrillUp.drill_LG_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setDelayingCommand(
-							"drill_controller_commandChange_setScaleY",
+							Drill_LG_Controller.METHOD__drill_controller_commandChange_setScaleY,
 							[ "匀速变化", num_list[0], Number(temp2) ], delay_time
 						);
 					}
 				}
 				if( temp1.indexOf("斜切X[") != -1 ||
 					temp1.indexOf("斜切X变量%[") != -1 ){
-					var num_list = this.drill_LG_getArgNumList(temp1);
+					var num_list = DrillUp.drill_LG_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setDelayingCommand(
-							"drill_controller_commandChange_setSkewX",
+							Drill_LG_Controller.METHOD__drill_controller_commandChange_setSkewX,
 							[ "匀速变化", num_list[0], Number(temp2) ], delay_time
 						);
 					}
 				}
 				if( temp1.indexOf("斜切Y[") != -1 ||
 					temp1.indexOf("斜切Y变量%[") != -1 ){
-					var num_list = this.drill_LG_getArgNumList(temp1);
+					var num_list = DrillUp.drill_LG_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setDelayingCommand(
-							"drill_controller_commandChange_setSkewY",
+							Drill_LG_Controller.METHOD__drill_controller_commandChange_setSkewY,
 							[ "匀速变化", num_list[0], Number(temp2) ], delay_time
 						);
 					}
@@ -2630,10 +2836,10 @@ Game_Interpreter.prototype.drill_LG_pluginCommand = function( command, args ){
 				delay_time = Number( delay_time );
 				if( temp1.indexOf("位置[") != -1 ||
 					temp1.indexOf("位置变量[") != -1 ){
-					var num_list = this.drill_LG_getArgNumList(temp1);
+					var num_list = DrillUp.drill_LG_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setDelayingCommand(
-							"drill_controller_commandChange_setMove",
+							Drill_LG_Controller.METHOD__drill_controller_commandChange_setMove,
 							[ "匀速变化", num_list[0], num_list[1], Number(temp2) ], delay_time
 						);
 					}
@@ -2647,10 +2853,10 @@ Game_Interpreter.prototype.drill_LG_pluginCommand = function( command, args ){
 				delay_time = Number( delay_time );
 				if( temp1.indexOf("位置[") != -1 ||
 					temp1.indexOf("位置变量[") != -1 ){
-					var num_list = this.drill_LG_getArgNumList(temp1);
+					var num_list = DrillUp.drill_LG_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setDelayingCommand(
-							"drill_controller_commandChange_setMove",
+							Drill_LG_Controller.METHOD__drill_controller_commandChange_setMove,
 							[ "弹性变化", num_list[0], num_list[1], Number(temp2) ], delay_time
 						);
 					}
@@ -2664,10 +2870,10 @@ Game_Interpreter.prototype.drill_LG_pluginCommand = function( command, args ){
 				delay_time = Number( delay_time );
 				if( temp1.indexOf("位置[") != -1 ||
 					temp1.indexOf("位置变量[") != -1 ){
-					var num_list = this.drill_LG_getArgNumList(temp1);
+					var num_list = DrillUp.drill_LG_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setDelayingCommand(
-							"drill_controller_commandChange_setMove",
+							Drill_LG_Controller.METHOD__drill_controller_commandChange_setMove,
 							[ "增减速变化", num_list[0], num_list[1], Number(temp2) ], delay_time
 						);
 					}
@@ -2678,9 +2884,37 @@ Game_Interpreter.prototype.drill_LG_pluginCommand = function( command, args ){
 		/*-----------------F周期指令------------------*/
 		if( args.length == 4 ){
 			var type = String(args[3]);
-			if( type == "清空周期指令" ){
+			if( type == "暂停周期指令" ){
 				for( var k=0; k < controllers.length; k++ ){
-					controllers[k].drill_controller_clearPeriodizeCommand();
+					controllers[k].drill_controller_periodizeCommand_setPause( true );
+				}
+			}
+			if( type == "继续周期指令" ){
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_periodizeCommand_setPause( false );
+				}
+			}
+			if( type == "清空周期指令(立刻)" || type == "清空周期指令" ){
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_periodizeCommand_clear();
+				}
+			}
+			if( type == "暂停周期指令(周期末尾时)" ){
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_periodizeCommand_waitAndPause();
+				}
+			}
+			if( type == "清空周期指令(周期末尾时)" ){
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_periodizeCommand_waitAndClear();
+				}
+			}
+			if( type == "执行等待(周期末尾时)" ){
+				if( controllers.length > 0 ){	//（只取第一个控制器的时间，因为批量控制器不需要叠加等待时间）
+					var result_time = controllers[0].drill_controller_periodizeCommand_getWaitAndClearTime();
+					if( gameInterpreter != undefined ){
+						gameInterpreter.wait(result_time);		//『强制等待』
+					}
 				}
 			}
 		}
@@ -2697,7 +2931,7 @@ Game_Interpreter.prototype.drill_LG_pluginCommand = function( command, args ){
 				time_start = Number( time_start );
 				for( var k=0; k < controllers.length; k++ ){
 					controllers[k].drill_controller_setPeriodizeCommand(
-						"drill_controller_setVisible", [true], time_period, time_start
+						Drill_LG_Controller.METHOD__drill_controller_setVisible, [true], time_period, time_start
 					);
 				}
 			}
@@ -2710,7 +2944,7 @@ Game_Interpreter.prototype.drill_LG_pluginCommand = function( command, args ){
 				time_start = Number( time_start );
 				for( var k=0; k < controllers.length; k++ ){
 					controllers[k].drill_controller_setPeriodizeCommand(
-						"drill_controller_setVisible", [false], time_period, time_start
+						Drill_LG_Controller.METHOD__drill_controller_setVisible, [false], time_period, time_start
 					);
 				}
 			}
@@ -2723,7 +2957,7 @@ Game_Interpreter.prototype.drill_LG_pluginCommand = function( command, args ){
 				time_start = Number( time_start );
 				for( var k=0; k < controllers.length; k++ ){
 					controllers[k].drill_controller_setPeriodizeCommand(
-						"drill_controller_setPause", [true], time_period, time_start
+						Drill_LG_Controller.METHOD__drill_controller_setPause, [true], time_period, time_start
 					);
 				}
 			}
@@ -2736,7 +2970,91 @@ Game_Interpreter.prototype.drill_LG_pluginCommand = function( command, args ){
 				time_start = Number( time_start );
 				for( var k=0; k < controllers.length; k++ ){
 					controllers[k].drill_controller_setPeriodizeCommand(
-						"drill_controller_setPause", [false], time_period, time_start
+						Drill_LG_Controller.METHOD__drill_controller_setPause, [false], time_period, time_start
+					);
+				}
+			}
+			if( type.indexOf("添加周期-切换混合模式(周期)[") != -1 ){
+				type = type.replace("添加周期-切换混合模式(周期)[","");
+				type = type.replace("]","");
+				time_period = time_period.replace("周期时长[","");
+				time_period = time_period.replace("]","");
+				time_period = Number( time_period );
+				time_start = time_start.replace("周期内开始时间[","");
+				time_start = time_start.replace("]","");
+				time_start = Number( time_start );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setPeriodizeCommand(
+						Drill_LG_Controller.METHOD__drill_controller_setBlendMode, [Number(type)], time_period, time_start
+					);
+				}
+			}
+			if( type.indexOf("添加周期-切换地图层级(周期)[") != -1 ){
+				type = type.replace("添加周期-切换地图层级(周期)[","");
+				type = type.replace("]","");
+				time_period = time_period.replace("周期时长[","");
+				time_period = time_period.replace("]","");
+				time_period = Number( time_period );
+				time_start = time_start.replace("周期内开始时间[","");
+				time_start = time_start.replace("]","");
+				time_start = Number( time_start );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setPeriodizeCommand(
+						Drill_LG_Controller.METHOD__drill_controller_setLayerIndex, [String(type)], time_period, time_start
+					);
+				}
+			}
+			if( type.indexOf("添加周期-切换图片层级(周期)[") != -1 ){
+				type = type.replace("添加周期-切换图片层级(周期)[","");
+				type = type.replace("]","");
+				time_period = time_period.replace("周期时长[","");
+				time_period = time_period.replace("]","");
+				time_period = Number( time_period );
+				time_start = time_start.replace("周期内开始时间[","");
+				time_start = time_start.replace("]","");
+				time_start = Number( time_start );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setPeriodizeCommand(
+						Drill_LG_Controller.METHOD__drill_controller_setZIndex, [Number(type)], time_period, time_start
+					);
+				}
+			}
+			if( type == "添加周期-还原混合模式(周期)" ){
+				time_period = time_period.replace("周期时长[","");
+				time_period = time_period.replace("]","");
+				time_period = Number( time_period );
+				time_start = time_start.replace("周期内开始时间[","");
+				time_start = time_start.replace("]","");
+				time_start = Number( time_start );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setPeriodizeCommand(
+						Drill_LG_Controller.METHOD__drill_controller_restoreBlendMode, [], time_period, time_start
+					);
+				}
+			}
+			if( type == "添加周期-还原地图层级(周期)" ){
+				time_period = time_period.replace("周期时长[","");
+				time_period = time_period.replace("]","");
+				time_period = Number( time_period );
+				time_start = time_start.replace("周期内开始时间[","");
+				time_start = time_start.replace("]","");
+				time_start = Number( time_start );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setPeriodizeCommand(
+						Drill_LG_Controller.METHOD__drill_controller_restoreLayerIndex, [], time_period, time_start
+					);
+				}
+			}
+			if( type == "添加周期-还原图片层级(周期)" ){
+				time_period = time_period.replace("周期时长[","");
+				time_period = time_period.replace("]","");
+				time_period = Number( time_period );
+				time_start = time_start.replace("周期内开始时间[","");
+				time_start = time_start.replace("]","");
+				time_start = Number( time_start );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setPeriodizeCommand(
+						Drill_LG_Controller.METHOD__drill_controller_restoreZIndex, [], time_period, time_start
 					);
 				}
 			}
@@ -2749,7 +3067,7 @@ Game_Interpreter.prototype.drill_LG_pluginCommand = function( command, args ){
 				time_start = Number( time_start );
 				for( var k=0; k < controllers.length; k++ ){
 					controllers[k].drill_controller_setPeriodizeCommand(
-						"drill_controller_commandChange_restoreAttr", [], time_period, time_start
+						Drill_LG_Controller.METHOD__drill_controller_commandChange_restoreAttr, [], time_period, time_start
 					);
 				}
 			}
@@ -2762,7 +3080,7 @@ Game_Interpreter.prototype.drill_LG_pluginCommand = function( command, args ){
 				time_start = Number( time_start );
 				for( var k=0; k < controllers.length; k++ ){
 					controllers[k].drill_controller_setPeriodizeCommand(
-						"drill_controller_commandChange_restoreMove", [], time_period, time_start
+						Drill_LG_Controller.METHOD__drill_controller_commandChange_restoreMove, [], time_period, time_start
 					);
 				}
 			}
@@ -2785,80 +3103,80 @@ Game_Interpreter.prototype.drill_LG_pluginCommand = function( command, args ){
 				
 				if( temp1.indexOf("透明度[") != -1 ||
 					temp1.indexOf("透明度变量[") != -1 ){
-					var num_list = this.drill_LG_getArgNumList(temp1);
+					var num_list = DrillUp.drill_LG_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setPeriodizeCommand(
-							"drill_controller_commandChange_setOpacity", 
+							Drill_LG_Controller.METHOD__drill_controller_commandChange_setOpacity, 
 							[ "匀速变化", num_list[0], Number(temp2) ], time_period, time_start
 						);
 					}
 				}
 				if( temp1.indexOf("旋转[") != -1 ||
 					temp1.indexOf("旋转变量[") != -1 ){
-					var num_list = this.drill_LG_getArgNumList(temp1);
+					var num_list = DrillUp.drill_LG_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setPeriodizeCommand(
-							"drill_controller_commandChange_setRotate",
+							Drill_LG_Controller.METHOD__drill_controller_commandChange_setRotate,
 							[ "匀速变化", num_list[0], Number(temp2) ], time_period, time_start
 						);
 					}
 				}
 				if( temp1.indexOf("移动速度X[") != -1 ||
 					temp1.indexOf("移动速度X变量%[") != -1 ){
-					var num_list = this.drill_LG_getArgNumList(temp1);
+					var num_list = DrillUp.drill_LG_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setPeriodizeCommand(
-							"drill_controller_commandChange_setSpeedX",
+							Drill_LG_Controller.METHOD__drill_controller_commandChange_setSpeedX,
 							["匀速变化", num_list[0], Number(temp2) ], time_period, time_start
 						);
 					}
 				}
 				if( temp1.indexOf("移动速度Y[") != -1 ||
 					temp1.indexOf("移动速度Y变量%[") != -1 ){
-					var num_list = this.drill_LG_getArgNumList(temp1);
+					var num_list = DrillUp.drill_LG_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setPeriodizeCommand(
-							"drill_controller_commandChange_setSpeedY",
+							Drill_LG_Controller.METHOD__drill_controller_commandChange_setSpeedY,
 							["匀速变化", num_list[0], Number(temp2) ], time_period, time_start
 						);
 					}
 				}
 				if( temp1.indexOf("缩放X[") != -1 ||
 					temp1.indexOf("缩放X变量%[") != -1 ){
-					var num_list = this.drill_LG_getArgNumList(temp1);
+					var num_list = DrillUp.drill_LG_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setPeriodizeCommand(
-							"drill_controller_commandChange_setScaleX",
+							Drill_LG_Controller.METHOD__drill_controller_commandChange_setScaleX,
 							[ "匀速变化", num_list[0], Number(temp2) ], time_period, time_start
 						);
 					}
 				}
 				if( temp1.indexOf("缩放Y[") != -1 ||
 					temp1.indexOf("缩放Y变量%[") != -1 ){
-					var num_list = this.drill_LG_getArgNumList(temp1);
+					var num_list = DrillUp.drill_LG_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setPeriodizeCommand(
-							"drill_controller_commandChange_setScaleY",
+							Drill_LG_Controller.METHOD__drill_controller_commandChange_setScaleY,
 							[ "匀速变化", num_list[0], Number(temp2) ], time_period, time_start
 						);
 					}
 				}
 				if( temp1.indexOf("斜切X[") != -1 ||
 					temp1.indexOf("斜切X变量%[") != -1 ){
-					var num_list = this.drill_LG_getArgNumList(temp1);
+					var num_list = DrillUp.drill_LG_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setPeriodizeCommand(
-							"drill_controller_commandChange_setSkewX",
+							Drill_LG_Controller.METHOD__drill_controller_commandChange_setSkewX,
 							[ "匀速变化", num_list[0], Number(temp2) ], time_period, time_start
 						);
 					}
 				}
 				if( temp1.indexOf("斜切Y[") != -1 ||
 					temp1.indexOf("斜切Y变量%[") != -1 ){
-					var num_list = this.drill_LG_getArgNumList(temp1);
+					var num_list = DrillUp.drill_LG_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setPeriodizeCommand(
-							"drill_controller_commandChange_setSkewY",
+							Drill_LG_Controller.METHOD__drill_controller_commandChange_setSkewY,
 							[ "匀速变化", num_list[0], Number(temp2) ], time_period, time_start
 						);
 					}
@@ -2875,10 +3193,10 @@ Game_Interpreter.prototype.drill_LG_pluginCommand = function( command, args ){
 				time_start = Number( time_start );
 				if( temp1.indexOf("位置[") != -1 ||
 					temp1.indexOf("位置变量[") != -1 ){
-					var num_list = this.drill_LG_getArgNumList(temp1);
+					var num_list = DrillUp.drill_LG_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setPeriodizeCommand(
-							"drill_controller_commandChange_setMove",
+							Drill_LG_Controller.METHOD__drill_controller_commandChange_setMove,
 							[ "匀速变化", num_list[0], num_list[1], Number(temp2) ], time_period, time_start
 						);
 					}
@@ -2895,10 +3213,10 @@ Game_Interpreter.prototype.drill_LG_pluginCommand = function( command, args ){
 				time_start = Number( time_start );
 				if( temp1.indexOf("位置[") != -1 ||
 					temp1.indexOf("位置变量[") != -1 ){
-					var num_list = this.drill_LG_getArgNumList(temp1);
+					var num_list = DrillUp.drill_LG_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setPeriodizeCommand(
-							"drill_controller_commandChange_setMove",
+							Drill_LG_Controller.METHOD__drill_controller_commandChange_setMove,
 							[ "弹性变化", num_list[0], num_list[1], Number(temp2) ], time_period, time_start
 						);
 					}
@@ -2915,10 +3233,10 @@ Game_Interpreter.prototype.drill_LG_pluginCommand = function( command, args ){
 				time_start = Number( time_start );
 				if( temp1.indexOf("位置[") != -1 ||
 					temp1.indexOf("位置变量[") != -1 ){
-					var num_list = this.drill_LG_getArgNumList(temp1);
+					var num_list = DrillUp.drill_LG_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setPeriodizeCommand(
-							"drill_controller_commandChange_setMove",
+							Drill_LG_Controller.METHOD__drill_controller_commandChange_setMove,
 							[ "增减速变化", num_list[0], num_list[1], Number(temp2) ], time_period, time_start
 						);
 					}
@@ -2936,7 +3254,7 @@ Game_Interpreter.prototype.drill_LG_pluginCommand = function( command, args ){
 //
 //			说明：	> 能获取到字符串中的数字，且包含 变量 转换情况。
 //==============================
-Game_Interpreter.prototype.drill_LG_getArgNumList = function( arg_str ){
+DrillUp.drill_LG_getArgNumList = function( arg_str ){
 	var arr = arg_str.match( /([^\[]+)\[([^\]]+)\]/ );
 	if( arr != undefined && arr.length >= 3 ){
 	// > 有方括号
@@ -2990,7 +3308,7 @@ if( Utils.generateRuntimeId == undefined ){
 //			说明：	> 遍历全部资源，提前预加载标记过的资源。
 //==============================
 Game_Temp.prototype.drill_LG_preloadInit = function(){
-	this._drill_LG_cacheId = Utils.generateRuntimeId();	//资源缓存id
+	this._drill_LG_cacheId = Utils.generateRuntimeId();		//资源缓存id
 	this._drill_LG_preloadTank = [];						//bitmap容器
 	for( var i = 0; i < DrillUp.g_LG_layers.length; i++ ){
 		var temp_data = DrillUp.g_LG_layers[i];
@@ -3321,80 +3639,6 @@ Scene_Map.prototype.drill_LG_layerCameraMoving_Private = function( xx, yy, layer
 
 
 
-/*	（旧代码）
-//data['loopX'] = 0;				//循环地图中，走动循环的次数
-//data['loopY'] = 0;				//
-//data['loopFixX'] = 0;				//循环地图中，把displayX取余的部分加回（图块单位）
-//data['loopFixY'] = 0;				//
-//==============================
-// * 镜头滚动 - 向下滚动
-//==============================
-var _drill_LG_Map_scrollDown = Game_Map.prototype.scrollDown;
-Game_Map.prototype.scrollDown = function(distance) {
-    if (this.isLoopVertical() && this._displayY + distance >= $dataMap.boxHeight) {
-		for(var i =0; i<$gameSystem._drill_LG_dataTank_curController.length; i++){
-			var data = $gameSystem._drill_LG_dataTank_curController[i];
-			if( data['map'] == this.mapId() ){
-				data['loopY'] += 1;		//（记录地图移动时循环次数、偏移量）
-				data['loopFixY'] = data.loopY * $dataMap.boxHeight;
-			}
-		}
-	}
-    _drill_LG_Map_scrollDown.call(this, distance);
-};
-//==============================
-// * 镜头滚动 - 向上滚动
-//==============================
-var _drill_LG_Map_scrollUp = Game_Map.prototype.scrollUp;
-Game_Map.prototype.scrollUp = function(distance) {
-    if (this.isLoopVertical() && this._displayY - distance <= 0 ) {
-		for(var i =0; i<$gameSystem._drill_LG_dataTank_curController.length; i++){
-			var data = $gameSystem._drill_LG_dataTank_curController[i];
-			if( data['map'] == this.mapId() ){
-				data['loopY'] -= 1;		//（记录地图移动时循环次数、偏移量）
-				data['loopFixY'] = data.loopY * $dataMap.boxHeight;
-			}
-		}
-	}
-    _drill_LG_Map_scrollUp.call(this, distance);
-};
-//==============================
-// * 镜头滚动 - 向左滚动
-//==============================
-var _drill_LG_Map_scrollLeft = Game_Map.prototype.scrollLeft;
-Game_Map.prototype.scrollLeft = function(distance) {
-    if (this.isLoopHorizontal() && this._displayX - distance <= 0) {
-		for(var i =0; i<$gameSystem._drill_LG_dataTank_curController.length; i++){
-			var data = $gameSystem._drill_LG_dataTank_curController[i];
-			if( data['map'] == this.mapId() ){
-				data['loopX'] -= 1;		//（记录地图移动时循环次数、偏移量）
-				data['loopFixX'] = data.loopX * $dataMap.boxWidth;
-			}
-		}
-	}
-    _drill_LG_Map_scrollLeft.call(this, distance);
-};
-//==============================
-// * 镜头滚动 - 向右滚动
-//==============================
-var _drill_LG_Map_scrollRight = Game_Map.prototype.scrollRight;
-Game_Map.prototype.scrollRight = function(distance) {
-    if (this.isLoopHorizontal() && this._displayX + distance >= $dataMap.boxWidth) {
-		for(var i =0; i<$gameSystem._drill_LG_dataTank_curController.length; i++){
-			var data = $gameSystem._drill_LG_dataTank_curController[i];
-			if( data['map'] == this.mapId() ){
-				data['loopX'] += 1;		//（记录地图移动时循环次数、偏移量）
-				data['loopFixX'] = data.loopX * $dataMap.boxWidth;
-			}
-		}
-	}
-    _drill_LG_Map_scrollRight.call(this, distance);
-};
-*/
-
-
-
-
 //=============================================================================
 // ** ☆数据容器
 //
@@ -3437,29 +3681,6 @@ Game_Map.prototype.drill_LG_initMapdata = function(){
 		}
 	}
 }
-/*
-//==============================
-// * 数据容器 - 帧刷新绑定
-//
-//			说明：	> 玩家update与地图update有时间差，且晚1帧，所以只能继承玩家的update。
-//==============================
-var _drill_LG_player_update = Game_Player.prototype.update;
-Game_Player.prototype.update = function( sceneActive ){
-    _drill_LG_player_update.call( this, sceneActive );
-	this.drill_LG_updateController();			//帧刷新 - 控制器
-}
-//==============================
-// * 数据容器 - 帧刷新 控制器
-//==============================
-Game_Player.prototype.drill_LG_updateController = function(){
-	for(var i = 0; i < $gameSystem._drill_LG_dataTank_curController.length; i++){
-		var temp_controller = $gameSystem._drill_LG_dataTank_curController[i];
-		if( temp_controller == undefined ){ continue; }
-		
-		// > 控制器 - 帧刷新
-		//temp_controller.drill_controller_update();
-	}
-};*/
 
 
 //=============================================================================
@@ -3527,7 +3748,7 @@ Scene_Map.prototype.drill_LG_create = function(){
 		this.drill_LG_layerAddSprite( temp_sprite, temp_controller._drill_layerIndex );
 		
 		// > 创建动态遮罩
-		if( temp_controller._drill_visible == true ){
+		if( temp_controller.drill_controller_isVisible() == true ){
 			this.drill_LG_createMaskSprite( temp_controller, temp_sprite );
 			temp_sprite['_mask_inited'] = true;
 			
@@ -3702,7 +3923,7 @@ Scene_Map.prototype.drill_LG_updateMask = function(){
 		if( temp_controller == undefined ){ continue; }
 		
 		// > 创建动态遮罩（延迟创建）
-		if( temp_sprite['_mask_inited'] == false && temp_controller._drill_visible == true ){
+		if( temp_sprite['_mask_inited'] == false && temp_controller.drill_controller_isVisible() == true ){
 			temp_sprite['_mask_inited'] = true;
 			this.drill_LG_createMaskSprite( temp_controller, temp_sprite );
 		}
@@ -3801,7 +4022,7 @@ function Drill_LG_Controller(){
 // * 控制器 - 初始化
 //==============================
 Drill_LG_Controller.prototype.initialize = function( data_id ){
-	this._drill_data_id = data_id;
+	this._drill_data_id = data_id;											//样式ID（控制器与样式 多对一 或 一对一）
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     //this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能
@@ -3818,7 +4039,7 @@ Drill_LG_Controller.prototype.initialize = function( data_id ){
 Drill_LG_Controller.prototype.drill_controller_update = function(){
 	this.drill_controller_updateDelayingCommandImportant();		//帧刷新 - E延迟指令 - 时间流逝
 	this.drill_controller_updatePeriodizeCommandImportant();	//帧刷新 - F周期指令 - 时间流逝
-	if( this._drill_pause == true ){ return; }
+	if( this.drill_controller_isPause() == true ){ return; }
 	this.drill_controller_updateAttr();							//帧刷新 - A主体
 	this.drill_controller_updateChange_Position();				//帧刷新 - B变换特性 - 平移
 	this.drill_controller_updateChange_MoveRange();				//帧刷新 - B变换特性 - 平铺范围
@@ -3882,9 +4103,39 @@ Drill_LG_Controller.prototype.drill_controller_destroy = function(){
 Drill_LG_Controller.prototype.drill_controller_isDead = function(){
 	return this._drill_needDestroy == true;
 };
+//==============================
+// * 控制器 - 函数枚举
+//
+//			说明：	> 使用枚举要比字符串比较快很多，适用于大量 延迟指令、周期指令 。
+//==============================
+Drill_LG_Controller.METHOD__drill_controller_setVisible                   = 11;
+Drill_LG_Controller.METHOD__drill_controller_setPause                     = 12;
+Drill_LG_Controller.METHOD__drill_controller_periodizeCommand_setPause    = 13;
+Drill_LG_Controller.METHOD__drill_controller_periodizeCommand_clear       = 14;
+
+Drill_LG_Controller.METHOD__drill_controller_setBlendMode                 = 21;
+Drill_LG_Controller.METHOD__drill_controller_setLayerIndex                = 22;
+Drill_LG_Controller.METHOD__drill_controller_setZIndex                    = 23;
+Drill_LG_Controller.METHOD__drill_controller_restoreBlendMode             = 24;
+Drill_LG_Controller.METHOD__drill_controller_restoreLayerIndex            = 25;
+Drill_LG_Controller.METHOD__drill_controller_restoreZIndex                = 26;
+
+Drill_LG_Controller.METHOD__drill_controller_commandChange_setOpacity     = 31;
+Drill_LG_Controller.METHOD__drill_controller_commandChange_setSpeedX      = 32;
+Drill_LG_Controller.METHOD__drill_controller_commandChange_setSpeedY      = 33;
+Drill_LG_Controller.METHOD__drill_controller_commandChange_setRotate      = 34;
+
+Drill_LG_Controller.METHOD__drill_controller_commandChange_setScaleX      = 41;
+Drill_LG_Controller.METHOD__drill_controller_commandChange_setScaleY      = 42;
+Drill_LG_Controller.METHOD__drill_controller_commandChange_setSkewX       = 43;
+Drill_LG_Controller.METHOD__drill_controller_commandChange_setSkewY       = 44;
+Drill_LG_Controller.METHOD__drill_controller_commandChange_restoreAttr    = 45;
+
+Drill_LG_Controller.METHOD__drill_controller_commandChange_setMove        = 51;
+Drill_LG_Controller.METHOD__drill_controller_commandChange_restoreMove    = 52;
 
 //##############################
-// * 控制器 - 切换混合模式【标准函数】
+// * A主体 - 切换混合模式【标准函数】
 //
 //			参数：	> blendMode 数字
 //			返回：	> 无
@@ -3893,7 +4144,7 @@ Drill_LG_Controller.prototype.drill_controller_setBlendMode = function( blendMod
 	this._drill_blendMode = blendMode;
 };
 //##############################
-// * 控制器 - 切换地图层级【标准函数】
+// * A主体 - 切换地图层级【标准函数】
 //
 //			参数：	> layerIndex 字符串
 //			返回：	> 无
@@ -3902,7 +4153,7 @@ Drill_LG_Controller.prototype.drill_controller_setLayerIndex = function( layerIn
 	this._drill_layerIndex = layerIndex;
 };
 //##############################
-// * 控制器 - 切换图片层级【标准函数】
+// * A主体 - 切换图片层级【标准函数】
 //
 //			参数：	> zIndex 数字
 //			返回：	> 无
@@ -3911,7 +4162,38 @@ Drill_LG_Controller.prototype.drill_controller_setZIndex = function( zIndex ){
 	this._drill_zIndex = zIndex;
 };
 //##############################
-// * 控制器 - 修改位移比【标准函数】
+// * A主体 - 还原混合模式【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 无
+//##############################
+Drill_LG_Controller.prototype.drill_controller_restoreBlendMode = function(){
+	var data = this.drill_data();
+	this._drill_blendMode = data['blendMode'];
+};
+//##############################
+// * A主体 - 还原地图层级【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 无
+//##############################
+Drill_LG_Controller.prototype.drill_controller_restoreLayerIndex = function(){
+	var data = this.drill_data();
+	this._drill_layerIndex = data['layerIndex'];
+};
+//##############################
+// * A主体 - 还原图片层级【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 无
+//##############################
+Drill_LG_Controller.prototype.drill_controller_restoreZIndex = function(){
+	var data = this.drill_data();
+	this._drill_zIndex = data['zIndex'];
+};
+
+//##############################
+// * A主体 - 修改位移比【标准函数】
 //
 //			参数：	> xPer,yPer 数字
 //			返回：	> 无
@@ -4015,7 +4297,7 @@ Drill_LG_Controller.prototype.drill_controller_resetData_Private = function( dat
 	}
 	
 	// > 执行重置
-	this._drill_data_id = data_id;
+	this._drill_data_id = data_id;											//样式ID（控制器与样式 多对一 或 一对一）
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     //this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能
@@ -4087,6 +4369,18 @@ Drill_LG_Controller.prototype.drill_controller_updateAttr = function(){
 	// > 时间流逝
 	this._drill_curTime += 1;
 }
+//==============================
+// * A主体 - 是否 显示/隐藏（开放函数）
+//==============================
+Drill_LG_Controller.prototype.drill_controller_isVisible = function(){
+	return this._drill_visible;
+}
+//==============================
+// * A主体 - 是否 暂停/继续（开放函数）
+//==============================
+Drill_LG_Controller.prototype.drill_controller_isPause = function(){
+	return this._drill_pause;
+}
 
 //==============================
 // * B变换特性 - 初始化子功能
@@ -4129,6 +4423,9 @@ Drill_LG_Controller.prototype.drill_controller_initChange = function(){
 	this._drill_move_h = hh;
 	this._drill_move_originOffsetX = 0;	//（矩形大小变换时，位移修正值）
 	this._drill_move_originOffsetY = 0;
+	
+	// > 变换值 - 『平铺范围』 - 强制帧刷新（确保范围值初始化）
+	this.drill_controller_updateChange_MoveRange();
 }
 //==============================
 // * B变换特性 - 帧刷新 位置
@@ -4612,7 +4909,6 @@ Drill_LG_Controller.prototype.drill_controller_updateDelayingCommandImportant = 
 		
 		// > 时间-1
 		dc_data['left_time'] -= 1;
-		
 	}
 	
 	// > 执行延迟指令（暂停/继续）
@@ -4621,8 +4917,13 @@ Drill_LG_Controller.prototype.drill_controller_updateDelayingCommandImportant = 
 		if( dc_data['left_time'] < 0 ){
 			var method = dc_data['method'];
 			var paramList = dc_data['paramList'];
-			if( method == "drill_controller_setPause" ){
+			
+			if( method == Drill_LG_Controller.METHOD__drill_controller_setPause ){
 				this.drill_controller_setPause( paramList[0] );
+			}else if( method == Drill_LG_Controller.METHOD__drill_controller_periodizeCommand_setPause ){  //暂停周期指令(延迟)
+				this.drill_controller_periodizeCommand_setPause( paramList[0] );
+			}else if( method == Drill_LG_Controller.METHOD__drill_controller_periodizeCommand_clear ){  //清空周期指令(延迟)
+				this.drill_controller_periodizeCommand_clear();
 			}
 		}
 	}
@@ -4640,33 +4941,68 @@ Drill_LG_Controller.prototype.drill_controller_updateDelayingCommand = function(
 			var method = dc_data['method'];
 			var paramList = dc_data['paramList'];
 			
-			if( method == "drill_controller_setVisible" ){
-				this.drill_controller_setVisible( paramList[0] );
-			
-			}else if( method == "drill_controller_commandChange_setOpacity" ){
-				this.drill_controller_commandChange_setOpacity( paramList[0], paramList[1], paramList[2] );
-			}else if( method == "drill_controller_commandChange_setSpeedX" ){
-				this.drill_controller_commandChange_setSpeedX( paramList[0], paramList[1], paramList[2] );
-			}else if( method == "drill_controller_commandChange_setSpeedY" ){
-				this.drill_controller_commandChange_setSpeedY( paramList[0], paramList[1], paramList[2] );
-			}else if( method == "drill_controller_commandChange_setRotate" ){
-				this.drill_controller_commandChange_setRotate( paramList[0], paramList[1], paramList[2] );
+			switch( method ){
+				case Drill_LG_Controller.METHOD__drill_controller_setVisible:
+					this.drill_controller_setVisible( paramList[0] );
+					break;
 				
-			}else if( method == "drill_controller_commandChange_setScaleX" ){
-				this.drill_controller_commandChange_setScaleX( paramList[0], paramList[1], paramList[2] );
-			}else if( method == "drill_controller_commandChange_setScaleY" ){
-				this.drill_controller_commandChange_setScaleY( paramList[0], paramList[1], paramList[2] );
-			}else if( method == "drill_controller_commandChange_setSkewX" ){
-				this.drill_controller_commandChange_setSkewX( paramList[0], paramList[1], paramList[2] );
-			}else if( method == "drill_controller_commandChange_setSkewY" ){
-				this.drill_controller_commandChange_setSkewY( paramList[0], paramList[1], paramList[2] );
-			}else if( method == "drill_controller_commandChange_restoreAttr" ){
-				this.drill_controller_commandChange_restoreAttr();
-			
-			}else if( method == "drill_controller_commandChange_setMove" ){
-				this.drill_controller_commandChange_setMove( paramList[0], paramList[1], paramList[2], paramList[3] );
-			}else if( method == "drill_controller_commandChange_restoreMove" ){
-				this.drill_controller_commandChange_restoreMove();
+				case Drill_LG_Controller.METHOD__drill_controller_setBlendMode:
+					this.drill_controller_setBlendMode( paramList[0] );
+					break;
+				case Drill_LG_Controller.METHOD__drill_controller_setLayerIndex:
+					this.drill_controller_setLayerIndex( paramList[0] );
+					break;
+				case Drill_LG_Controller.METHOD__drill_controller_setZIndex:
+					this.drill_controller_setZIndex( paramList[0] );
+					break;
+				case Drill_LG_Controller.METHOD__drill_controller_restoreBlendMode:
+					this.drill_controller_restoreBlendMode();
+					break;
+				case Drill_LG_Controller.METHOD__drill_controller_restoreLayerIndex:
+					this.drill_controller_restoreLayerIndex();
+					break;
+				case Drill_LG_Controller.METHOD__drill_controller_restoreZIndex:
+					this.drill_controller_restoreZIndex();
+					break;
+				
+				case Drill_LG_Controller.METHOD__drill_controller_commandChange_setOpacity:
+					this.drill_controller_commandChange_setOpacity( paramList[0], paramList[1], paramList[2] );
+					break;
+				case Drill_LG_Controller.METHOD__drill_controller_commandChange_setSpeedX:
+					this.drill_controller_commandChange_setSpeedX( paramList[0], paramList[1], paramList[2] );
+					break;
+				case Drill_LG_Controller.METHOD__drill_controller_commandChange_setSpeedY:
+					this.drill_controller_commandChange_setSpeedY( paramList[0], paramList[1], paramList[2] );
+					break;
+				case Drill_LG_Controller.METHOD__drill_controller_commandChange_setRotate:
+					this.drill_controller_commandChange_setRotate( paramList[0], paramList[1], paramList[2] );
+					break;
+					
+				case Drill_LG_Controller.METHOD__drill_controller_commandChange_setScaleX:
+					this.drill_controller_commandChange_setScaleX( paramList[0], paramList[1], paramList[2] );
+					break;
+				case Drill_LG_Controller.METHOD__drill_controller_commandChange_setScaleY:
+					this.drill_controller_commandChange_setScaleY( paramList[0], paramList[1], paramList[2] );
+					break;
+				case Drill_LG_Controller.METHOD__drill_controller_commandChange_setSkewX:
+					this.drill_controller_commandChange_setSkewX( paramList[0], paramList[1], paramList[2] );
+					break;
+				case Drill_LG_Controller.METHOD__drill_controller_commandChange_setSkewY:
+					this.drill_controller_commandChange_setSkewY( paramList[0], paramList[1], paramList[2] );
+					break;
+				case Drill_LG_Controller.METHOD__drill_controller_commandChange_restoreAttr:
+					this.drill_controller_commandChange_restoreAttr();
+					break;
+				
+				case Drill_LG_Controller.METHOD__drill_controller_commandChange_setMove:
+					this.drill_controller_commandChange_setMove( paramList[0], paramList[1], paramList[2], paramList[3] );
+					break;
+				case Drill_LG_Controller.METHOD__drill_controller_commandChange_restoreMove:
+					this.drill_controller_commandChange_restoreMove();
+					break;
+				
+				default:
+					break;
 			}
 		}
 	}
@@ -4683,29 +5019,56 @@ Drill_LG_Controller.prototype.drill_controller_updateDelayingCommand = function(
 // * E延迟指令 - 设置指令（开放函数）
 //==============================
 Drill_LG_Controller.prototype.drill_controller_setDelayingCommand = function( method, paramList, delay_time ){
-	if( method != "drill_controller_setVisible" &&
-		method != "drill_controller_setPause" &&
+	var enable = false;
+	switch( method ){
+		case Drill_LG_Controller.METHOD__drill_controller_setVisible:
+		case Drill_LG_Controller.METHOD__drill_controller_setPause:
+		case Drill_LG_Controller.METHOD__drill_controller_periodizeCommand_setPause:
+		case Drill_LG_Controller.METHOD__drill_controller_periodizeCommand_clear:
 		
-		method != "drill_controller_commandChange_setOpacity" &&
-		method != "drill_controller_commandChange_setSpeedX" &&
-		method != "drill_controller_commandChange_setSpeedY" &&
-		method != "drill_controller_commandChange_setRotate" &&
+		case Drill_LG_Controller.METHOD__drill_controller_setBlendMode:
+		case Drill_LG_Controller.METHOD__drill_controller_setLayerIndex:
+		case Drill_LG_Controller.METHOD__drill_controller_setZIndex:
+		case Drill_LG_Controller.METHOD__drill_controller_restoreBlendMode:
+		case Drill_LG_Controller.METHOD__drill_controller_restoreLayerIndex:
+		case Drill_LG_Controller.METHOD__drill_controller_restoreZIndex:
 		
-		method != "drill_controller_commandChange_setScaleX" &&
-		method != "drill_controller_commandChange_setScaleY" &&
-		method != "drill_controller_commandChange_setSkewX" &&
-		method != "drill_controller_commandChange_setSkewY" &&
-		method != "drill_controller_commandChange_restoreAttr" &&
+		case Drill_LG_Controller.METHOD__drill_controller_commandChange_setOpacity:
+		case Drill_LG_Controller.METHOD__drill_controller_commandChange_setSpeedX:
+		case Drill_LG_Controller.METHOD__drill_controller_commandChange_setSpeedY:
+		case Drill_LG_Controller.METHOD__drill_controller_commandChange_setRotate:
 		
-		method != "drill_controller_commandChange_setMove" &&
-		method != "drill_controller_commandChange_restoreMove"
-	){ return; }
+		case Drill_LG_Controller.METHOD__drill_controller_commandChange_setScaleX:
+		case Drill_LG_Controller.METHOD__drill_controller_commandChange_setScaleY:
+		case Drill_LG_Controller.METHOD__drill_controller_commandChange_setSkewX:
+		case Drill_LG_Controller.METHOD__drill_controller_commandChange_setSkewY:
+		case Drill_LG_Controller.METHOD__drill_controller_commandChange_restoreAttr:
+		
+		case Drill_LG_Controller.METHOD__drill_controller_commandChange_setMove:
+		case Drill_LG_Controller.METHOD__drill_controller_commandChange_restoreMove:
+			enable = true;
+			break;
+		
+		default:
+			break;
+	}
+	if( enable == false ){ return; }
 	
 	var dc_data = {};
 	dc_data['method'] = method;
 	dc_data['paramList'] = paramList;
 	dc_data['left_time'] = delay_time;
 	this._drill_curDelayingCommandTank.push( dc_data );
+}
+//==============================
+// * E延迟指令 - 增加延迟（开放函数）
+//==============================
+Drill_LG_Controller.prototype.drill_controller_addDelayingTime = function( time ){
+	if( isNaN(time) ){ return; }
+	for(var i = 0; i < this._drill_curDelayingCommandTank.length; i++ ){
+		var dc_data = this._drill_curDelayingCommandTank[i];
+		dc_data['left_time'] += Number( time );
+	}
 }
 //==============================
 // * E延迟指令 - 清空全部（开放函数）
@@ -4720,6 +5083,9 @@ Drill_LG_Controller.prototype.drill_controller_clearDelayingCommand = function()
 //==============================
 Drill_LG_Controller.prototype.drill_controller_initPeriodizeCommand = function(){
 	this._drill_curPeriodizeCommandTank = [];
+	this._drill_periodizeCommand_pause = undefined;				//暂停周期指令
+	this._drill_periodizeCommand_waitAndPauseTime = undefined;	//一次性计时器（暂停周期指令-周期末尾时）
+	this._drill_periodizeCommand_waitAndClearTime = undefined;	//一次性计时器（清空周期指令-周期末尾时）
 }
 //==============================
 // * F周期指令 - 帧刷新 - 时间流逝
@@ -4728,6 +5094,24 @@ Drill_LG_Controller.prototype.drill_controller_initPeriodizeCommand = function()
 //==============================
 Drill_LG_Controller.prototype.drill_controller_updatePeriodizeCommandImportant = function(){
 	if( this._drill_curPeriodizeCommandTank.length == 0 ){ return; }
+	
+	// > 暂停周期指令
+	if( this._drill_periodizeCommand_pause == true ){ return; }
+	
+	// > 一次性计时器
+	if( this._drill_periodizeCommand_waitAndPauseTime !== undefined ){
+		this._drill_periodizeCommand_waitAndPauseTime -= 1;
+		if( this._drill_periodizeCommand_waitAndPauseTime == 0 ){
+			this.drill_controller_periodizeCommand_setPause(true);  //（暂停周期指令-周期末尾时）
+		}
+	}
+	if( this._drill_periodizeCommand_waitAndClearTime !== undefined ){
+		this._drill_periodizeCommand_waitAndClearTime -= 1;
+		if( this._drill_periodizeCommand_waitAndClearTime == 0 ){
+			this.drill_controller_periodizeCommand_clear();  //（清空周期指令-周期末尾时）
+		}
+	}
+	
 	
 	// > 帧刷新 时间流逝
 	for(var i = 0; i < this._drill_curPeriodizeCommandTank.length; i++ ){
@@ -4744,7 +5128,8 @@ Drill_LG_Controller.prototype.drill_controller_updatePeriodizeCommandImportant =
 		if( time == pc_data['time_start'] ){
 			var method = pc_data['method'];
 			var paramList = pc_data['paramList'];
-			if( method == "drill_controller_setPause" ){
+			
+			if( method == Drill_LG_Controller.METHOD__drill_controller_setPause ){
 				this.drill_controller_setPause( paramList[0] );
 			}
 		}
@@ -4764,33 +5149,68 @@ Drill_LG_Controller.prototype.drill_controller_updatePeriodizeCommand = function
 			var method = pc_data['method'];
 			var paramList = pc_data['paramList'];
 			
-			if( method == "drill_controller_setVisible" ){
-				this.drill_controller_setVisible( paramList[0] );
-			
-			}else if( method == "drill_controller_commandChange_setOpacity" ){
-				this.drill_controller_commandChange_setOpacity( paramList[0], paramList[1], paramList[2] );
-			}else if( method == "drill_controller_commandChange_setSpeedX" ){
-				this.drill_controller_commandChange_setSpeedX( paramList[0], paramList[1], paramList[2] );
-			}else if( method == "drill_controller_commandChange_setSpeedY" ){
-				this.drill_controller_commandChange_setSpeedY( paramList[0], paramList[1], paramList[2] );
-			}else if( method == "drill_controller_commandChange_setRotate" ){
-				this.drill_controller_commandChange_setRotate( paramList[0], paramList[1], paramList[2] );
+			switch( method ){
+				case Drill_LG_Controller.METHOD__drill_controller_setVisible:
+					this.drill_controller_setVisible( paramList[0] );
+					break;
 				
-			}else if( method == "drill_controller_commandChange_setScaleX" ){
-				this.drill_controller_commandChange_setScaleX( paramList[0], paramList[1], paramList[2] );
-			}else if( method == "drill_controller_commandChange_setScaleY" ){
-				this.drill_controller_commandChange_setScaleY( paramList[0], paramList[1], paramList[2] );
-			}else if( method == "drill_controller_commandChange_setSkewX" ){
-				this.drill_controller_commandChange_setSkewX( paramList[0], paramList[1], paramList[2] );
-			}else if( method == "drill_controller_commandChange_setSkewY" ){
-				this.drill_controller_commandChange_setSkewY( paramList[0], paramList[1], paramList[2] );
-			}else if( method == "drill_controller_commandChange_restoreAttr" ){
-				this.drill_controller_commandChange_restoreAttr();
-			
-			}else if( method == "drill_controller_commandChange_setMove" ){
-				this.drill_controller_commandChange_setMove( paramList[0], paramList[1], paramList[2], paramList[3] );
-			}else if( method == "drill_controller_commandChange_restoreMove" ){
-				this.drill_controller_commandChange_restoreMove();
+				case Drill_LG_Controller.METHOD__drill_controller_setBlendMode:
+					this.drill_controller_setBlendMode( paramList[0] );
+					break;
+				case Drill_LG_Controller.METHOD__drill_controller_setLayerIndex:
+					this.drill_controller_setLayerIndex( paramList[0] );
+					break;
+				case Drill_LG_Controller.METHOD__drill_controller_setZIndex:
+					this.drill_controller_setZIndex( paramList[0] );
+					break;
+				case Drill_LG_Controller.METHOD__drill_controller_restoreBlendMode:
+					this.drill_controller_restoreBlendMode();
+					break;
+				case Drill_LG_Controller.METHOD__drill_controller_restoreLayerIndex:
+					this.drill_controller_restoreLayerIndex();
+					break;
+				case Drill_LG_Controller.METHOD__drill_controller_restoreZIndex:
+					this.drill_controller_restoreZIndex();
+					break;
+				
+				case Drill_LG_Controller.METHOD__drill_controller_commandChange_setOpacity:
+					this.drill_controller_commandChange_setOpacity( paramList[0], paramList[1], paramList[2] );
+					break;
+				case Drill_LG_Controller.METHOD__drill_controller_commandChange_setSpeedX:
+					this.drill_controller_commandChange_setSpeedX( paramList[0], paramList[1], paramList[2] );
+					break;
+				case Drill_LG_Controller.METHOD__drill_controller_commandChange_setSpeedY:
+					this.drill_controller_commandChange_setSpeedY( paramList[0], paramList[1], paramList[2] );
+					break;
+				case Drill_LG_Controller.METHOD__drill_controller_commandChange_setRotate:
+					this.drill_controller_commandChange_setRotate( paramList[0], paramList[1], paramList[2] );
+					break;
+					
+				case Drill_LG_Controller.METHOD__drill_controller_commandChange_setScaleX:
+					this.drill_controller_commandChange_setScaleX( paramList[0], paramList[1], paramList[2] );
+					break;
+				case Drill_LG_Controller.METHOD__drill_controller_commandChange_setScaleY:
+					this.drill_controller_commandChange_setScaleY( paramList[0], paramList[1], paramList[2] );
+					break;
+				case Drill_LG_Controller.METHOD__drill_controller_commandChange_setSkewX:
+					this.drill_controller_commandChange_setSkewX( paramList[0], paramList[1], paramList[2] );
+					break;
+				case Drill_LG_Controller.METHOD__drill_controller_commandChange_setSkewY:
+					this.drill_controller_commandChange_setSkewY( paramList[0], paramList[1], paramList[2] );
+					break;
+				case Drill_LG_Controller.METHOD__drill_controller_commandChange_restoreAttr:
+					this.drill_controller_commandChange_restoreAttr();
+					break;
+				
+				case Drill_LG_Controller.METHOD__drill_controller_commandChange_setMove:
+					this.drill_controller_commandChange_setMove( paramList[0], paramList[1], paramList[2], paramList[3] );
+					break;
+				case Drill_LG_Controller.METHOD__drill_controller_commandChange_restoreMove:
+					this.drill_controller_commandChange_restoreMove();
+					break;
+				
+				default:
+					break;
 			}
 		}
 	}
@@ -4800,23 +5220,38 @@ Drill_LG_Controller.prototype.drill_controller_updatePeriodizeCommand = function
 // * F周期指令 - 设置指令（开放函数）
 //==============================
 Drill_LG_Controller.prototype.drill_controller_setPeriodizeCommand = function( method, paramList, time_period, time_start ){
-	if( method != "drill_controller_setVisible" &&
-		method != "drill_controller_setPause" &&
+	var enable = false;
+	switch( method ){
+		case Drill_LG_Controller.METHOD__drill_controller_setVisible:
+		case Drill_LG_Controller.METHOD__drill_controller_setPause:
 		
-		method != "drill_controller_commandChange_setOpacity" &&
-		method != "drill_controller_commandChange_setSpeedX" &&
-		method != "drill_controller_commandChange_setSpeedY" &&
-		method != "drill_controller_commandChange_setRotate" &&
+		case Drill_LG_Controller.METHOD__drill_controller_setBlendMode:
+		case Drill_LG_Controller.METHOD__drill_controller_setLayerIndex:
+		case Drill_LG_Controller.METHOD__drill_controller_setZIndex:
+		case Drill_LG_Controller.METHOD__drill_controller_restoreBlendMode:
+		case Drill_LG_Controller.METHOD__drill_controller_restoreLayerIndex:
+		case Drill_LG_Controller.METHOD__drill_controller_restoreZIndex:
 		
-		method != "drill_controller_commandChange_setScaleX" &&
-		method != "drill_controller_commandChange_setScaleY" &&
-		method != "drill_controller_commandChange_setSkewX" &&
-		method != "drill_controller_commandChange_setSkewY" &&
-		method != "drill_controller_commandChange_restoreAttr" &&
+		case Drill_LG_Controller.METHOD__drill_controller_commandChange_setOpacity:
+		case Drill_LG_Controller.METHOD__drill_controller_commandChange_setSpeedX:
+		case Drill_LG_Controller.METHOD__drill_controller_commandChange_setSpeedY:
+		case Drill_LG_Controller.METHOD__drill_controller_commandChange_setRotate:
 		
-		method != "drill_controller_commandChange_setMove" &&
-		method != "drill_controller_commandChange_restoreMove"
-	){ return; }
+		case Drill_LG_Controller.METHOD__drill_controller_commandChange_setScaleX:
+		case Drill_LG_Controller.METHOD__drill_controller_commandChange_setScaleY:
+		case Drill_LG_Controller.METHOD__drill_controller_commandChange_setSkewX:
+		case Drill_LG_Controller.METHOD__drill_controller_commandChange_setSkewY:
+		case Drill_LG_Controller.METHOD__drill_controller_commandChange_restoreAttr:
+		
+		case Drill_LG_Controller.METHOD__drill_controller_commandChange_setMove:
+		case Drill_LG_Controller.METHOD__drill_controller_commandChange_restoreMove:
+			enable = true;
+			break;
+		
+		default:
+			break;
+	}
+	if( enable == false ){ return; }
 	
 	var pc_data = {};
 	pc_data['method'] = method;
@@ -4827,10 +5262,40 @@ Drill_LG_Controller.prototype.drill_controller_setPeriodizeCommand = function( m
 	this._drill_curPeriodizeCommandTank.push( pc_data );
 }
 //==============================
-// * F周期指令 - 清空全部（开放函数）
+// * F周期指令 - 获取 周期剩余时间（开放函数）
 //==============================
-Drill_LG_Controller.prototype.drill_controller_clearPeriodizeCommand = function(){
+Drill_LG_Controller.prototype.drill_controller_periodizeCommand_getWaitAndClearTime = function(){
+	if( this._drill_curPeriodizeCommandTank.length == 0 ){ return 0; }
+	var pc_data = this._drill_curPeriodizeCommandTank[0];				//（只取第一个周期指令的时间）
+	var cur_period_time = pc_data['cur_time'] % pc_data['time_period'];	//（周期内的当前时间）
+	return pc_data['time_period'] - cur_period_time;					//（周期内的剩余时间）
+}
+//==============================
+// * F周期指令 - 暂停周期指令-立刻（开放函数）
+//==============================
+Drill_LG_Controller.prototype.drill_controller_periodizeCommand_setPause = function( enabled ){
+	this._drill_periodizeCommand_pause = enabled;				//（暂停周期指令）
+	this.drill_controller_setPause( enabled );					//（暂停变换）
+	this._drill_periodizeCommand_waitAndPauseTime = undefined;	//（删除 一次性计时器）
+}
+//==============================
+// * F周期指令 - 暂停周期指令-周期末尾时（开放函数）
+//==============================
+Drill_LG_Controller.prototype.drill_controller_periodizeCommand_waitAndPause = function(){
+	this._drill_periodizeCommand_waitAndPauseTime = this.drill_controller_periodizeCommand_getWaitAndClearTime();
+}
+//==============================
+// * F周期指令 - 清空周期指令-立刻（开放函数）
+//==============================
+Drill_LG_Controller.prototype.drill_controller_periodizeCommand_clear = function(){
 	this._drill_curPeriodizeCommandTank = [];
+	this._drill_periodizeCommand_waitAndClearTime = undefined;	//（删除 一次性计时器）
+}
+//==============================
+// * F周期指令 - 清空周期指令-周期末尾时（开放函数）
+//==============================
+Drill_LG_Controller.prototype.drill_controller_periodizeCommand_waitAndClear = function(){
+	this._drill_periodizeCommand_waitAndClearTime = this.drill_controller_periodizeCommand_getWaitAndClearTime();
 }
 
 
@@ -5101,11 +5566,11 @@ Drill_LG_Sprite.prototype.drill_sprite_initAttr = function(){
 	// > 主体贴图
 	this.x = 0;
 	this.y = 0;
-	this.visible = this._drill_controller._drill_visible;		//贴图 - 显示/隐藏
-																//贴图 - 暂停/继续（无）
-	this.blendMode = this._drill_controller._drill_blendMode;	//贴图 - 混合模式
-	this.layerIndex = this._drill_controller._drill_layerIndex;	//贴图 - 层级
-	this.zIndex = this._drill_controller._drill_zIndex;			//贴图 - 堆叠级
+	this.visible = this._drill_controller.drill_controller_isVisible();		//贴图 - 显示/隐藏
+																			//贴图 - 暂停/继续（无）
+	this.blendMode = this._drill_controller._drill_blendMode;				//贴图 - 混合模式
+	this.layerIndex = this._drill_controller._drill_layerIndex;				//贴图 - 层级
+	this.zIndex = this._drill_controller._drill_zIndex;						//贴图 - 堆叠级
 	
 	// > 平铺贴图
 	var temp_layer = new TilingSprite();
@@ -5130,7 +5595,7 @@ Drill_LG_Sprite.prototype.drill_sprite_initAttr = function(){
 Drill_LG_Sprite.prototype.drill_sprite_updateAttr = function(){
 	
 	// > 基础特性 - 显示/隐藏
-	this.visible = this._drill_controller._drill_visible;
+	this.visible = this._drill_controller.drill_controller_isVisible();
 	
 	// > 基础特性 - 暂停/继续
 	//	（无）
@@ -5149,7 +5614,9 @@ Drill_LG_Sprite.prototype.drill_sprite_updateAttr = function(){
 // * B变换特性 - 初始化子功能
 //==============================
 Drill_LG_Sprite.prototype.drill_sprite_initChange = function(){
-	//（无）
+	
+	// > 强制帧刷新（确保与控制器初始 变换值 同步）
+	this.drill_sprite_updateChange();
 }
 //==============================
 // * B变换特性 - 帧刷新

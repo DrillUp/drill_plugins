@@ -88,11 +88,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		PDBF (Picture_Drag_By_Force)
-//		临时全局变量	DrillUp.g_PDBF_xxx
-//		临时局部变量	this._drill_PDBF_xxx
-//		存储数据变量	$gameSystem._drill_PDBF_xxx
-//		全局存储变量	无
+//
+//		插件简称		PDBF（Picture_Drag_By_Force）
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<

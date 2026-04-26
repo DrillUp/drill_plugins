@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        管理器 - 强制预加载文件夹
+ * @plugindesc [v1.1]        管理器 - 强制预加载文件夹
  * @author Drill_up
  * 
  * @Drill_LE_param "文件夹路径-%d"
@@ -29,9 +29,16 @@
  * 1.插件的作用域：地图界面、战斗界面、菜单界面。
  *   作用于整个游戏。
  * 2.详细可以去看看"1.系统 > 关于预加载.docx"。
- * 文件夹：
+ * 细节：
  *   (1.该插件提供一次性对文件夹下的所有图片文件，进行预加载功能。
  *      但是注意，并不是所有图片适合开预加载，预加载也有缺点，详细去看文档说明。
+ * 载体：
+ *   (1.载体分为文件载体和网页载体。
+ *      文件载体 使用本地文件进行读取和写入，电脑端(PC端)支持该功能。
+ *      网页载体 使用网页数据进行读取和写入，手机端、浏览器支持该功能。
+ *      详细介绍可以去看看："21.管理器 > 数据存储的载体.docx"。
+ *   (2.该插件用到了 本地载体的读取 功能。
+ *      该插件在网页载体情况下不会生效。
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -59,6 +66,8 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 改进了内部结构，防止在手机端报错。
  * 
  * 
  * 
@@ -168,11 +177,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		FPr（Force_Preload）
-//		临时全局变量	无
-//		临时局部变量	无
-//		存储数据变量	无
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -285,34 +291,34 @@ Game_Temp.prototype.drill_FPr_preloadInit = function() {
 		if( temp_path == undefined ){ continue; }
 		if( temp_path == "" ){ continue; }
 		
-		// > 获取文件夹数据
+		// > 文件夹
 		if( require == undefined ){ continue; }
-		var r_fs = require('fs');
-		var r_path = require('path');
+		var r_fs = require('fs');      //『文件载体-fs』
+		var r_path = require('path');  //『文件载体-fs』
 		
+		// > 文件夹 - 获取路径
 		var base_path = r_path.dirname(process.mainModule.filename);
 		var folder_path = r_path.join(base_path,temp_path);
 		//alert( folder_path );
 		
-		// > 文件夹校验
+		// > 文件夹 - 校验
 		if( r_fs.existsSync(folder_path) != true ){
 			alert( DrillUp.drill_FPr_getPluginTip_FolderNotFind(folder_path) );
 			continue;
 		}
 		
-		// > 遍历文件夹
+		// > 文件夹 - 遍历
 		var file_list = r_fs.readdirSync( folder_path );
-		//alert( file_list );
 		for(var j = 0; j < file_list.length; j++ ){
 			var file_name = file_list[j];
 			var file_path = r_path.join(folder_path,file_name);
 			var file_state = r_fs.statSync( file_path );
 			
-			// > 文件夹时
+			// > 遍历 - 文件夹时
 			if( file_state.isDirectory() ){
 				//（不操作）
 				
-			// > 文件时
+			// > 遍历 - 文件时『文件载体-读取文件』
 			}else{
 				if( r_path.extname(file_name) == ".png" ){
 					var base_name = r_path.basename(file_name);

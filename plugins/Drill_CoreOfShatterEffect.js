@@ -769,11 +769,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		COSE（Core_Of_Shatter_Effect）
-//		临时全局变量	无
-//		临时局部变量	this._drill_COSE_xxx
-//		存储数据变量	无
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -1429,7 +1426,7 @@ Drill_COSE_Controller.prototype.drill_COSE_resetData_Private = function( data ){
 	}
 	
 	// > 执行重置
-	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
+	this._drill_data = JSON.parse(JSON.stringify( data ));					//『深拷贝-控制器用』
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_initData();													//初始化数据
     this.drill_initPrivateData();											//私有数据初始化

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.6]        主菜单 - 多层菜单视频
+ * @plugindesc [v1.7]        主菜单 - 多层菜单视频
  * @author Drill_up
  * 
  * @Drill_LE_param "视频-%d"
@@ -37,13 +37,18 @@
  *   (2.视频对一些自带背景的菜单插件可能不起作用，因为有些插件自己设
  *      设置了底图，会把菜单的功能覆盖掉。
  * 视频：
- *   (1.视频动画只支持 .webm(pc端) 和 .mp4(手机端) 格式的视频。
+ *   (1.视频动画只支持 .webm(电脑端) 和 .mp4(手机端) 格式的视频。
  *   (2.视频与GIF区别在于清晰度和声音。
  *      如果你有条件制作GIF，建议使用GIF而不是视频。
  *   (3.循环播放时，视频的末尾可能会闪一下黑屏。属于正常情况。
- *   (4.视频是一个比较复杂的文件结构，需要通过环境内置的解析器来解析，
- *      低版本的node.js由于环境缺陷，运行两个以上视频会非常卡，高配电
- *      脑也卡到4帧，而火狐浏览器、高版本的js环境不存在该问题。
+ *   (4.低配杀手：
+ *      视频文件需要通过环境内置的解析器来解析，
+ *      低版本的环境中，运行非常吃渲染。（可能是核显的问题）
+ *      单个视频会有轻微卡顿，两个以上视频会非常非常卡。
+ *      低配windows电脑会卡到4帧，低配苹果电脑会卡出"resolution"渲染错误。
+ *      而常规的游戏本的环境不存在该问题。
+ *      该插件因为在渲染其他贴图的同时，还要渲染视频，所以压力很大。
+ *      如果只播放视频，压力就没那么大。
  * 贴图化：
  *   (1.相对于插件旧版本，现在你已经可以设置多层视频了，并且可以
  *      自由控制位置、大小、层级。
@@ -67,8 +72,8 @@
  * ----可选设定
  * 你可以通过插件指令控制视频的显示情况：
  * 
- * 插件指令：>菜单视频 : 视频[3] : 显示
- * 插件指令：>菜单视频 : 视频[4] : 隐藏
+ * 插件指令：>菜单视频 : 视频[3] : 启用
+ * 插件指令：>菜单视频 : 视频[4] : 禁用
  * 
  * 1.如果你想制作同一个菜单，有不同的风格，可以先配置两种不同风格的
  *   视频，然后使用显示/隐藏视频指令来进行风格切换。
@@ -111,6 +116,8 @@
  * 修复了在播放视频时，突然暂停播放的问题。
  * [v1.6]
  * 修复了视频声音在离开界面后仍然播放的bug。
+ * [v1.7]
+ * 再次改进了结构。
  * 
  * 
  *
@@ -412,7 +419,7 @@
  * @value 3
  * @option 叠加
  * @value 4
- * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
+ * @desc 此参数可以看看："0.基本定义 > 混合模式.docx"。pixi的渲染混合模式。0-普通,1-发光,2-实色混合,3-浅色,4-叠加。
  * @default 0
  *
  * @param 视频色调
@@ -440,11 +447,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		MVi（Menu_Video）
-//		临时全局变量	DrillUp.g_MVi_xxx
-//		临时局部变量	this._drill_MVi_xxx
-//		存储数据变量	$gameSystem._drill_MVi_xxx
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -597,9 +601,22 @@ Game_Interpreter.prototype.pluginCommand = function( command, args ){
 // * 插件指令 - 指令执行
 //==============================
 Game_Interpreter.prototype.drill_MVi_pluginCommand = function( command, args ){
+	DrillUp.drill_MVi_globalPluginCommand( command, args, this );
+}
+//==============================
+// * 插件指令 - 『作用全局的插件指令』
+//
+//			参数：	> command 字符串
+//					> args 字符串列表
+//					> gameInterpreter 解释器对象
+//
+//			说明：	> 该函数不能有 this 对象。
+//					> 该函数不依赖解释器对象，gameInterpreter 可以为 null。函数可跨界面调用。
+//==============================
+DrillUp.drill_MVi_globalPluginCommand = function( command, args, gameInterpreter ){
 	if( command === ">菜单视频" ){
 		
-		if(args.length == 4){
+		if( args.length == 4 ){
 			var temp1 = String(args[1]);
 			var type = String(args[3]);
 			var b_id = -1;
@@ -607,10 +624,10 @@ Game_Interpreter.prototype.drill_MVi_pluginCommand = function( command, args ){
 			temp1 = temp1.replace("]","");
 			b_id = Number(temp1) - 1;
 			
-			if( b_id >= 0 && type === "显示" ){
+			if( b_id >= 0 && (type ===  "启用" || type === "显示") ){
 				$gameSystem._drill_MVi_sprites_visible[b_id] = true;
 			}
-			if( b_id >= 0 && type === "隐藏" ){
+			if( b_id >= 0 && (type ===  "禁用" || type === "隐藏") ){
 				$gameSystem._drill_MVi_sprites_visible[b_id] = false;
 			}
 		}
@@ -685,7 +702,7 @@ Game_System.prototype.drill_MVi_checkSysData = function() {
 //==============================
 Game_System.prototype.drill_MVi_initSysData_Private = function() {
 	
-	this._drill_MVi_sprites_visible = [];
+	this._drill_MVi_sprites_visible = [];			//显示控制
 	for(var i = 0; i < DrillUp.g_MVi_style.length ;i++){
 		var temp_data = DrillUp.g_MVi_style[i];
 		if( temp_data == undefined ){ continue; }
@@ -1097,7 +1114,7 @@ Drill_MVi_VideoSprite.prototype.constructor = Drill_MVi_VideoSprite;
 //==============================
 Drill_MVi_VideoSprite.prototype.initialize = function( data ){
 	Sprite.prototype.initialize.call(this);
-	this._drill_data = JSON.parse(JSON.stringify( data ));	//深拷贝数据
+	this._drill_data = JSON.parse(JSON.stringify( data ));	//『深拷贝-独立贴图的数据』
 	
 	this.drill_initData();									//初始化数据
 	this.drill_initSprite();								//初始化对象

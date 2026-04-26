@@ -106,11 +106,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		EUOT（Event_Unification_Of_Trigger）
-//		临时全局变量	无
-//		临时局部变量	this._drill_EUOT.xxx
-//		存储数据变量	无
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -620,7 +617,7 @@ Game_Map.prototype.drill_EUOT_refreshSwitch = function(){
 				if( temp_event == temp_switch ){ continue; }
 				
 				temp_event.drill_EMoHS_checkSwitchData();	//（Bean是一个对象类，不能直接复制指针）
-				temp_event._drill_EMoHS_switchData['switch'] = JSON.parse(JSON.stringify( temp_switch._drill_EMoHS_switchData['switch'] ));
+				temp_event._drill_EMoHS_switchData['switch'] = JSON.parse(JSON.stringify( temp_switch._drill_EMoHS_switchData['switch'] ));  //『深拷贝-混杂自定义数据』
 			}
 			
 			// > 刷新 鼠标悬停响应开关 的统计

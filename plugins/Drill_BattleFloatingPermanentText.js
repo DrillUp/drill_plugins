@@ -702,11 +702,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		BFPT (Gauge_Floating_Text)
-//		临时全局变量	DrillUp.g_BFPT_xxx
-//		临时局部变量	this._drill_BFPT_xxx
-//		存储数据变量	$gameSystem._drill_BFPT_xxx
-//		全局存储变量	无
+//
+//		插件简称		BFPT（Battle_Floating_Permanent_Text）
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -1539,7 +1536,7 @@ Game_System.prototype.drill_BFPT_create = function( slot_id, style_id ){
 	}
 	
 	// > 数据
-	this._drill_BFPT_dataTank[ slot_id ] = JSON.parse(JSON.stringify( DrillUp.g_BFPT_style[ style_id ] ));		//深拷贝
+	this._drill_BFPT_dataTank[ slot_id ] = JSON.parse(JSON.stringify( DrillUp.g_BFPT_style[ style_id ] ));  //『深拷贝-独立贴图的数据』
 
 	// > 私有数据
 	this._drill_BFPT_dataTank[ slot_id ]['m_cur_time'] = 0;				//当前时间（移动）

@@ -232,14 +232,11 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		ICa（Item_Category）
-//		临时全局变量	DrillUp.g_ICa_xxx
-//		临时局部变量	无
-//		存储数据变量	无
-//		全局存储变量	无
-//		覆盖重写方法	Window_ItemCategory.prototype.makeCommandList
-//						(mog)Scene_Item.prototype.createButtons
-//						(mog)Scene_Item.prototype.addCatIndex
+//		覆盖重写方法	Window_ItemCategory.prototype.makeCommandList（覆写）
+//						Scene_Item.prototype.createButtons（覆写）（mog）
+//						Scene_Item.prototype.addCatIndex（覆写）（mog）
 //
 //<<<<<<<<性能记录<<<<<<<<
 //

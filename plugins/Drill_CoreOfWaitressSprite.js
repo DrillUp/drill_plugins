@@ -64,11 +64,8 @@
  */
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		COWS（Core_Of_Waitress_Sprite）
-//		临时全局变量	无
-//		临时局部变量	this._drill_COWS_xxx
-//		存储数据变量	无
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -179,7 +176,7 @@ Drill_COWS_WaitressSprite.prototype.constructor = Drill_COWS_WaitressSprite;
 //==============================
 Drill_COWS_WaitressSprite.prototype.initialize = function( default_act_data ) {
 	Sprite_Base.prototype.initialize.call(this);
-	this._drill_defaultData = JSON.parse(JSON.stringify( default_act_data ));	//深拷贝数据
+	this._drill_defaultData = JSON.parse(JSON.stringify( default_act_data ));	//『深拷贝-混杂自定义数据』
 	
 	this.drill_initSprite();			//初始化对象
 	this.drill_initDefaultData();		//初始化默认行为
@@ -205,7 +202,7 @@ Drill_COWS_WaitressSprite.prototype.drill_COWS_pushNewAct = function( act_comman
 	if(!act_command ){ return; }
 	if( act_command == "" ){ return; }
 	if( this._drill_act_commands.indexOf(act_command) != -1 ){ return; }
-	var temp_data = JSON.parse(JSON.stringify( act_data ));
+	var temp_data = JSON.parse(JSON.stringify( act_data ));  //『深拷贝-混杂自定义数据』
 	
 	// > 默认值
 	if( temp_data['gif_src'] == undefined ){ temp_data['gif_src'] = [] };							//资源

@@ -291,11 +291,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		EFN（Event_Frame_Number）
-//		临时全局变量	DrillUp.g_EFN_xxx
-//		临时局部变量	this._drill_EFN_xxxx
-//		存储数据变量	无
-//		全局存储变量	无
 //		覆盖重写方法	Game_CharacterBase.prototype.updateAnimation（半覆写）
 //						Game_CharacterBase.prototype.updateAnimationCount（半覆写）
 //						Game_CharacterBase.prototype.updatePattern（半覆写）
@@ -1268,7 +1265,7 @@ Drill_EFN_Controller.prototype.drill_controller_resetData_Private = function( da
 	}
 	
 	// > 执行重置
-	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
+	this._drill_data = JSON.parse(JSON.stringify( data ));					//『深拷贝-控制器用』
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//私有数据初始化

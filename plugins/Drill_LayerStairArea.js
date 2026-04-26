@@ -116,16 +116,13 @@
  */
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		LSA（Layer_Stair_Area）
-//		临时全局变量	DrillUp.g_LSA_xxx
-//		临时局部变量	this._drill_LSA_xxx
-//		存储数据变量	无
-//		全局存储变量	无
-//		覆盖重写方法	Game_CharacterBase.prototype.canPass（半覆盖）
-//						Game_CharacterBase.prototype.moveStraight（半覆盖）
-//						Game_Player.prototype.checkEventTriggerThere（半覆盖）
-//						Game_Character.prototype.findDirectionTo（半覆盖）
-//						（部分看起来像半覆盖的函数，实际上为 附加条件阻塞/执行 的功能）
+//		覆盖重写方法	Game_CharacterBase.prototype.canPass（半覆写）
+//						Game_CharacterBase.prototype.moveStraight（半覆写）
+//						Game_Player.prototype.checkEventTriggerThere（半覆写）
+//						Game_Character.prototype.findDirectionTo（半覆写）
+//						（部分看起来像半覆写的函数，实际上为 附加条件阻塞/执行 的功能）
 //
 //<<<<<<<<性能记录<<<<<<<<
 //

@@ -1439,11 +1439,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		CONA（Core_Of_NumberArray）
-//		临时全局变量	DrillUp.g_CONA_xxx
-//		临时局部变量	this._drill_CONA_xxx
-//		存储数据变量	$gameNumberArray
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -1755,7 +1752,7 @@ Game_Interpreter.prototype.drill_CONA_pluginCommand = function( command, args ){
 				temp2 = temp2.replace("变量[","");
 				temp2 = temp2.replace("]","");
 				temp2 = Number(temp2);
-				var copy_arr = JSON.parse(JSON.stringify( data_tank[ arr_index ] ));	//（深拷贝）
+				var copy_arr = JSON.parse(JSON.stringify( data_tank[ arr_index ] ));	//『深拷贝-混杂自定义数据』
 				var result = 0;
 				copy_arr.sort();
 				if( copy_arr.length == 0 ){
@@ -2162,7 +2159,7 @@ Game_Interpreter.prototype.drill_CONA_pluginCommand = function( command, args ){
 				temp1 = temp1.replace("]","");
 				var arr2_index = $gameNumberArray.drill_CONA_getArrayIndex( temp1 );
 				if( arr2_index == -1 ){ return; }
-				data_tank[ arr_index ] = JSON.parse(JSON.stringify( data_tank[ arr2_index ] ));	//（深拷贝）
+				data_tank[ arr_index ] = JSON.parse(JSON.stringify( data_tank[ arr2_index ] ));	//『深拷贝-混杂自定义数据』
 			}
 			
 			if( type == "重置数组" && temp1.indexOf("数组值[") != -1 ){	

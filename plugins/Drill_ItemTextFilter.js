@@ -100,14 +100,11 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		ITFi (Item_Text_Filter)
-//		临时全局变量	DrillUp.g_ITFi_xxx
-//		临时局部变量	$gameTemp._drill_ITFi_xxx
-//		存储数据变量	无
-//		全局存储变量	无
-//		覆盖重写方法	BattleResult.prototype.addIcon（mog）
-//						TreasureIcons.prototype.refreshName（mog）
-//						Treasure_Hud.prototype.refresh_name（mog）
+//
+//		插件简称		ITFi（Item_Text_Filter）
+//		覆盖重写方法	BattleResult.prototype.addIcon（覆写）（mog）
+//						TreasureIcons.prototype.refreshName（覆写）（mog）
+//						Treasure_Hud.prototype.refresh_name（覆写）（mog）
 //
 //<<<<<<<<性能记录<<<<<<<<
 //

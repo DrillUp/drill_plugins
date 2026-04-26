@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.8]        对话框 - 对话框皮肤
+ * @plugindesc [v1.9]        对话框 - 对话框皮肤
  * @author Drill_up
  * 
  * @Drill_LE_param "皮肤样式-%d"
@@ -24,10 +24,11 @@
  * ----插件扩展
  * 该插件可以单独使用。
  * 可作用于：
- *   - Drill_DialogSkinBackground    对话框-对话框背景
- *   - Drill_DialogSkinDecoration    对话框-对话框装饰图
- *     背景和装饰图可以在对话框皮肤插件的基础上，添加更多装饰功能。
- *   - Drill_DialogNameBox           对话框-姓名框窗口
+ *   - Drill_DialogSkinBackground     对话框-对话框背景
+ *   - Drill_DialogSkinDecoration     对话框-对话框装饰图
+ *   - Drill_DialogSkinShakeEffect    对话框-对话框的震动效果
+ *     上述插件可以在对话框皮肤插件的基础上，添加更多装饰功能。
+ *   - Drill_DialogNameBox            对话框-姓名框窗口
  *     该插件能够支持 姓名框窗口 的皮肤设计。
  * 
  * -----------------------------------------------------------------------------
@@ -150,6 +151,8 @@
  * 修复了子窗口的边框有时缝合不了的bug。
  * [v1.8]
  * 添加了子窗口姓名框的收拢偏移量、前缀后缀配置。
+ * [v1.9]
+ * 优化了参数 窗口平铺背景向内缩进距 的管理结构。
  * 
  * 
  * 
@@ -583,7 +586,7 @@
  * @value 2
  * @option 浅色
  * @value 3
- * @desc pixi的渲染混合模式。0-普通,1-变亮。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
+ * @desc 此参数可以看看："0.基本定义 > 混合模式.docx"。pixi的渲染混合模式。0-普通,1-发光,2-实色混合,3-浅色,4-叠加。
  * @default 0
  * 
  * @param 边框划分厚度
@@ -668,7 +671,7 @@
  * @value 2
  * @option 浅色
  * @value 3
- * @desc pixi的渲染混合模式。0-普通,1-变亮。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
+ * @desc 此参数可以看看："0.基本定义 > 混合模式.docx"。pixi的渲染混合模式。0-普通,1-发光,2-实色混合,3-浅色,4-叠加。
  * @default 0
  *
  * @param 浮动效果
@@ -737,11 +740,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		DSk（Dialog_Skin）
-//		临时全局变量	无
-//		临时局部变量	this._drill_DSk_xxx
-//		存储数据变量	无
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -767,11 +767,13 @@
 //				->获取样式数据（根据窗口类名）
 //			
 //			->☆预加载
+//			->☆原型链规范（_refreshAllParts 对话框）
+//			
 //			->☆对话框的皮肤
 //				->3A主体
+//					->窗口平铺背景向内缩进距
 //				->3B边框皮肤
 //				->3C窗口皮肤
-//					->窗口平铺背景向内缩进距
 //			->☆对话框子窗口的皮肤
 //				->4A金钱窗口
 //				->4B选择项窗口
@@ -1200,6 +1202,174 @@ if( DrillUp.g_DSk_preloadEnabled == true ){
 
 
 //=============================================================================
+// ** ☆原型链规范（_refreshAllParts 对话框）
+//
+//			说明：	> 此处专门补上缺失的原型链，未缺失的则注释掉。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 刷新全部部件 - 对话框
+//==============================
+Window_Message.prototype._refreshAllParts = function(){
+	Window.prototype._refreshAllParts.call(this);
+}
+Window_Message.prototype._refreshBack = function(){
+	Window.prototype._refreshBack.call(this);
+}
+Window_Message.prototype._refreshFrame = function(){
+	Window.prototype._refreshFrame.call(this);
+}
+Window_Message.prototype._refreshCursor = function(){
+	Window.prototype._refreshCursor.call(this);
+}
+Window_Message.prototype._refreshContents = function(){
+	Window.prototype._refreshContents.call(this);
+}
+Window_Message.prototype._refreshArrows = function(){
+	Window.prototype._refreshArrows.call(this);
+}
+Window_Message.prototype._refreshPauseSign = function(){
+	Window.prototype._refreshPauseSign.call(this);
+}
+//==============================
+// * 刷新全部部件 - 4A金钱窗口
+//==============================
+Window_Gold.prototype._refreshAllParts = function(){
+	Window.prototype._refreshAllParts.call(this);
+}
+Window_Gold.prototype._refreshBack = function(){
+	Window.prototype._refreshBack.call(this);
+}
+Window_Gold.prototype._refreshFrame = function(){
+	Window.prototype._refreshFrame.call(this);
+}
+Window_Gold.prototype._refreshCursor = function(){
+	Window.prototype._refreshCursor.call(this);
+}
+Window_Gold.prototype._refreshContents = function(){
+	Window.prototype._refreshContents.call(this);
+}
+Window_Gold.prototype._refreshArrows = function(){
+	Window.prototype._refreshArrows.call(this);
+}
+Window_Gold.prototype._refreshPauseSign = function(){
+	Window.prototype._refreshPauseSign.call(this);
+}
+//==============================
+// * 刷新全部部件 - 4B选择项窗口
+//==============================
+Window_ChoiceList.prototype._refreshAllParts = function(){
+	Window.prototype._refreshAllParts.call(this);
+}
+Window_ChoiceList.prototype._refreshBack = function(){
+	Window.prototype._refreshBack.call(this);
+}
+Window_ChoiceList.prototype._refreshFrame = function(){
+	Window.prototype._refreshFrame.call(this);
+}
+Window_ChoiceList.prototype._refreshCursor = function(){
+	Window.prototype._refreshCursor.call(this);
+}
+Window_ChoiceList.prototype._refreshContents = function(){
+	Window.prototype._refreshContents.call(this);
+}
+Window_ChoiceList.prototype._refreshArrows = function(){
+	Window.prototype._refreshArrows.call(this);
+}
+Window_ChoiceList.prototype._refreshPauseSign = function(){
+	Window.prototype._refreshPauseSign.call(this);
+}
+//==============================
+// * 刷新全部部件 - 4C数字输入窗口
+//==============================
+Window_NumberInput.prototype._refreshAllParts = function(){
+	Window.prototype._refreshAllParts.call(this);
+}
+Window_NumberInput.prototype._refreshBack = function(){
+	Window.prototype._refreshBack.call(this);
+}
+Window_NumberInput.prototype._refreshFrame = function(){
+	Window.prototype._refreshFrame.call(this);
+}
+Window_NumberInput.prototype._refreshCursor = function(){
+	Window.prototype._refreshCursor.call(this);
+}
+Window_NumberInput.prototype._refreshContents = function(){
+	Window.prototype._refreshContents.call(this);
+}
+Window_NumberInput.prototype._refreshArrows = function(){
+	Window.prototype._refreshArrows.call(this);
+}
+Window_NumberInput.prototype._refreshPauseSign = function(){
+	Window.prototype._refreshPauseSign.call(this);
+}
+//==============================
+// * 刷新全部部件 - 4D选择物品窗口
+//==============================
+Window_EventItem.prototype._refreshAllParts = function(){
+	Window.prototype._refreshAllParts.call(this);
+}
+Window_EventItem.prototype._refreshBack = function(){
+	Window.prototype._refreshBack.call(this);
+}
+Window_EventItem.prototype._refreshFrame = function(){
+	Window.prototype._refreshFrame.call(this);
+}
+Window_EventItem.prototype._refreshCursor = function(){
+	Window.prototype._refreshCursor.call(this);
+}
+Window_EventItem.prototype._refreshContents = function(){
+	Window.prototype._refreshContents.call(this);
+}
+Window_EventItem.prototype._refreshArrows = function(){
+	Window.prototype._refreshArrows.call(this);
+}
+Window_EventItem.prototype._refreshPauseSign = function(){
+	Window.prototype._refreshPauseSign.call(this);
+}
+//==============================
+// * 刷新全部部件 - 最后继承1级
+//==============================
+var _drill_DSk_scene_initialize1 = SceneManager.initialize;
+SceneManager.initialize = function() {
+	_drill_DSk_scene_initialize1.call(this);
+	
+	//==============================
+	// * 刷新全部部件 - 4E姓名框窗口（Drill姓名框）
+	//==============================
+	if( Imported.Drill_DialogNameBox ){
+		Drill_DNB_NameBoxWindow.prototype._refreshAllParts = function(){
+			Window.prototype._refreshAllParts.call(this);
+		}
+		Drill_DNB_NameBoxWindow.prototype._refreshBack = function(){
+			Window.prototype._refreshBack.call(this);
+		}
+		Drill_DNB_NameBoxWindow.prototype._refreshFrame = function(){
+			Window.prototype._refreshFrame.call(this);
+		}
+		Drill_DNB_NameBoxWindow.prototype._refreshCursor = function(){
+			Window.prototype._refreshCursor.call(this);
+		}
+		Drill_DNB_NameBoxWindow.prototype._refreshContents = function(){
+			Window.prototype._refreshContents.call(this);
+		}
+		Drill_DNB_NameBoxWindow.prototype._refreshArrows = function(){
+			Window.prototype._refreshArrows.call(this);
+		}
+		Drill_DNB_NameBoxWindow.prototype._refreshPauseSign = function(){
+			Window.prototype._refreshPauseSign.call(this);
+		}
+	}
+	
+	//==============================
+	// * 刷新全部部件 - 4E姓名框窗口（Yep姓名框）
+	//==============================
+	//	（无）
+}
+
+
+
+//=============================================================================
 // ** ☆对话框的皮肤
 //
 //			说明：	> 该模块将对 对话框 进行专门管理。
@@ -1229,13 +1399,39 @@ Window_Message.prototype.setBackgroundType = function( type ){
 	}
 }
 //==============================
-// * 3A主体 - 帧刷新
+// * 3A主体（兼容） - 『对话框的帧刷新』
 //==============================
 var _drill_DSk_mes_update = Window_Message.prototype.update;
 Window_Message.prototype.update = function(){
 	_drill_DSk_mes_update.call(this);
 	this.drill_DSk_updateSkin();				//帧刷新 - 3C窗口皮肤
 												//帧刷新 - 3B边框皮肤（无）
+}
+//==============================
+// * 3A主体（对话框优化核心） - 『对话框的帧刷新』
+//==============================
+if( Imported.Drill_CoreOfDialog ){
+	var _drill_DSk_CODi_message_update = Window_Message.prototype.drill_CODi_message_update;
+	Window_Message.prototype.drill_CODi_message_update = function(){
+		_drill_DSk_CODi_message_update.call(this);
+		this.drill_DSk_updateSkin();				//帧刷新 - 3C窗口皮肤
+													//帧刷新 - 3B边框皮肤（无）
+	};
+}
+//==============================
+// * 3A主体 - 窗口平铺背景向内缩进距
+//
+//			说明：	> 此处直接管辖 margin 参数。注意该函数不在帧刷新中。
+//==============================
+var _drill_DSk_mes__refreshBack = Window_Message.prototype._refreshBack;
+Window_Message.prototype._refreshBack = function(){
+	
+	// > 0G背景贴图（设置平铺间距）『0G背景贴图的位移』
+	var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
+	this._margin = 4 + data['window_backInner'];
+	
+	// > 原函数
+	_drill_DSk_mes__refreshBack.call(this);
 }
 
 
@@ -1515,30 +1711,6 @@ Window_Base.prototype.updateTone = function() {
 	_drill_DSk_skin_updateTone.call( this );
 }
 
-//==============================
-// * 3C窗口皮肤 - 窗口平铺背景向内缩进距
-//
-//			说明：	> 此设置属于特殊底层设置，修改 窗口的平铺背景。
-//==============================
-var _drill_DSk__refreshBack = Window.prototype._refreshBack;
-Window.prototype._refreshBack = function(){
-	
-	// > 0G背景贴图（设置平铺间距）
-	if( this._drill_DSk_tag != undefined ){
-		var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
-		this._drill_DSk_marginTemp = this._margin;		//（控制 _margin 向内缩进距）
-		this._margin = this._drill_DSk_marginTemp + data['window_backInner'];
-	}
-	
-	// > 原函数
-	_drill_DSk__refreshBack.call(this);
-	
-	// > 0G背景贴图（还原平铺间距）
-	if( this._drill_DSk_tag != undefined ){
-		this._margin = this._drill_DSk_marginTemp;
-	}
-}
-
 
 
 //=============================================================================
@@ -1579,6 +1751,23 @@ Window_Gold.prototype.update = function(){
 	this.drill_DSk_updateSkin();				//帧刷新 - 3C窗口皮肤
 												//帧刷新 - 3B边框皮肤（无）
 }
+//==============================
+// * 4A金钱窗口 - 窗口平铺背景向内缩进距
+//
+//			说明：	> 此处直接管辖 margin 参数。注意该函数不在帧刷新中。
+//==============================
+var _drill_DSk_Gold__refreshBack = Window_Gold.prototype._refreshBack;
+Window_Gold.prototype._refreshBack = function(){
+	
+	// > 0G背景贴图（设置平铺间距）『0G背景贴图的位移』
+	if( this._drill_DSk_tag != undefined ){
+		var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
+		this._margin = 4 + data['window_backInner'];
+	}
+	
+	// > 原函数
+	_drill_DSk_Gold__refreshBack.call(this);
+}
 
 //==============================
 // * 4B选择项窗口 - 初始化皮肤『对话框多个子窗口』
@@ -1608,6 +1797,21 @@ Window_ChoiceList.prototype.update = function(){
 	_drill_DSk_ChoiceList_update.call(this);
 	this.drill_DSk_updateSkin();			//帧刷新 - 3C窗口皮肤
 											//帧刷新 - 3B边框皮肤（无）
+}
+//==============================
+// * 4B选择项窗口 - 窗口平铺背景向内缩进距
+//
+//			说明：	> 此处直接管辖 margin 参数。注意该函数不在帧刷新中。
+//==============================
+var _drill_DSk_ChoiceList__refreshBack = Window_ChoiceList.prototype._refreshBack;
+Window_ChoiceList.prototype._refreshBack = function(){
+	
+	// > 0G背景贴图（设置平铺间距）『0G背景贴图的位移』
+	var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
+	this._margin = 4 + data['window_backInner'];
+	
+	// > 原函数
+	_drill_DSk_ChoiceList__refreshBack.call(this);
 }
 
 //==============================
@@ -1639,6 +1843,21 @@ Window_NumberInput.prototype.update = function(){
 	this.drill_DSk_updateSkin();				//帧刷新 - 3C窗口皮肤
 												//帧刷新 - 3B边框皮肤（无）
 }
+//==============================
+// * 4C数字输入窗口 - 窗口平铺背景向内缩进距
+//
+//			说明：	> 此处直接管辖 margin 参数。注意该函数不在帧刷新中。
+//==============================
+var _drill_DSk_NumberInput__refreshBack = Window_NumberInput.prototype._refreshBack;
+Window_NumberInput.prototype._refreshBack = function(){
+	
+	// > 0G背景贴图（设置平铺间距）『0G背景贴图的位移』
+	var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
+	this._margin = 4 + data['window_backInner'];
+	
+	// > 原函数
+	_drill_DSk_NumberInput__refreshBack.call(this);
+}
 
 //==============================
 // * 4D选择物品窗口 - 初始化皮肤『对话框多个子窗口』
@@ -1669,13 +1888,28 @@ Window_EventItem.prototype.update = function(){
 	this.drill_DSk_updateSkin();			//帧刷新 - 3C窗口皮肤
 											//帧刷新 - 3B边框皮肤（无）
 }
+//==============================
+// * 4D选择物品窗口 - 窗口平铺背景向内缩进距
+//
+//			说明：	> 此处直接管辖 margin 参数。注意该函数不在帧刷新中。
+//==============================
+var _drill_DSk_EventItem__refreshBack = Window_EventItem.prototype._refreshBack;
+Window_EventItem.prototype._refreshBack = function(){
+	
+	// > 0G背景贴图（设置平铺间距）『0G背景贴图的位移』
+	var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
+	this._margin = 4 + data['window_backInner'];
+	
+	// > 原函数
+	_drill_DSk_EventItem__refreshBack.call(this);
+}
 
 //==============================
 // * 对话框子窗口的皮肤 - 最后继承1级
 //==============================
-var _drill_DSk_scene_initialize = SceneManager.initialize;
+var _drill_DSk_scene_initialize2 = SceneManager.initialize;
 SceneManager.initialize = function() {
-	_drill_DSk_scene_initialize.call(this);
+	_drill_DSk_scene_initialize2.call(this);
 	
 	//==============================
 	// * 4E姓名框窗口（Drill姓名框）
@@ -1710,6 +1944,21 @@ SceneManager.initialize = function() {
 			_drill_DSk_DNB_update.call(this);
 			this.drill_DSk_updateSkin();			//帧刷新 - 3C窗口皮肤
 													//帧刷新 - 3B边框皮肤（无）
+		}
+		//==============================
+		// * 4E姓名框窗口（Drill姓名框） - 窗口平铺背景向内缩进距
+		//
+		//			说明：	> 此处直接管辖 margin 参数。注意该函数不在帧刷新中。
+		//==============================
+		var _drill_DSk_DNB__refreshBack = Drill_DNB_NameBoxWindow.prototype._refreshBack;
+		Drill_DNB_NameBoxWindow.prototype._refreshBack = function(){
+			
+			// > 0G背景贴图（设置平铺间距）『0G背景贴图的位移』
+			var data = $gameSystem.drill_DSk_getStyle( this._drill_DSk_tag );
+			this._margin = 4 + data['window_backInner'];
+			
+			// > 原函数
+			_drill_DSk_DNB__refreshBack.call(this);
 		}
 	}
 	//==============================
@@ -1796,7 +2045,7 @@ Drill_DSk_BorderSprite.prototype.initialize = function( parentWindow ){
 	Sprite.prototype.initialize.call(this);
 	this._drill_parent = parentWindow;
 	this._drill_curStyleId = $gameSystem.drill_DSk_getStyleId( parentWindow._drill_DSk_tag );
-	this._drill_curStyleData = JSON.parse(JSON.stringify( $gameSystem.drill_DSk_getStyle( parentWindow._drill_DSk_tag ) ));	//深拷贝数据
+	this._drill_curStyleData = JSON.parse(JSON.stringify( $gameSystem.drill_DSk_getStyle( parentWindow._drill_DSk_tag ) ));  //『深拷贝-独立贴图的数据』
 	
 	this.drill_initData();					//初始化数据
 	this.drill_initSprite();				//初始化对象
@@ -1863,7 +2112,6 @@ Drill_DSk_BorderSprite.prototype.drill_sprite_updateAttr = function() {
 	if( rect.width <= 2 || rect.height <= 2 ){
 		sprite_visible = false;
 	}
-	
 	this.visible = sprite_visible;
 	
 	// > 可见 - C边框层
@@ -1875,6 +2123,15 @@ Drill_DSk_BorderSprite.prototype.drill_sprite_updateAttr = function() {
 	if( this._cornerSprite_layer != undefined ){
 		this._cornerSprite_layer.visible = data['corner_visible'];
 	}
+	
+	
+	// > 位置
+	var sprite_x = 0;
+	var sprite_y = 0;
+	sprite_x += this._drill_offsetX;
+	sprite_y += this._drill_offsetY;
+	this.x = sprite_x;
+	this.y = sprite_y;
 }
 //==============================
 // * A主体 - 刷新样式（开放函数）
@@ -1885,20 +2142,22 @@ Drill_DSk_BorderSprite.prototype.drill_DSk_refreshStyle = function(){
 	
 	if( this._drill_curStyleId == styleId ){ return; }
 	this._drill_curStyleId = styleId;
-	this._drill_curStyleData = JSON.parse(JSON.stringify( $gameSystem.drill_DSk_getStyle( this._drill_parent._drill_DSk_tag ) ));	//深拷贝数据
+	this._drill_curStyleData = JSON.parse(JSON.stringify( $gameSystem.drill_DSk_getStyle( this._drill_parent._drill_DSk_tag ) ));  //『深拷贝-独立贴图的数据』
 	
 	// > 强制 初始化对象
 	this.drill_initSprite();
 };
 //==============================
 // * A主体 - 刷新位置（开放函数）
+//
+//			说明：	> 该函数单次变化，不在帧刷新中。
 //==============================
 Drill_DSk_BorderSprite.prototype.drill_DSk_refreshPosition = function() {
 	var rect = this.drill_DSk_getRect();
-	this.x = rect.x + rect.width*0.5 ;
-	this.y = rect.y + rect.height*0.5;
-	//this.x = Math.round( rect.x + rect.width*0.5 );	//『非整数坐标抖动问题』问题来自YEP插件，而不是该插件
-	//this.y = Math.round( rect.y + rect.height*0.5);	//
+	this._drill_offsetX = rect.x + rect.width*0.5 ;
+	this._drill_offsetY = rect.y + rect.height*0.5;
+	//this._drill_offsetX = Math.round( rect.x + rect.width*0.5 );	//『非整数坐标抖动问题』问题来自YEP插件，而不是该插件
+	//this._drill_offsetY = Math.round( rect.y + rect.height*0.5);	//
 }
 //==============================
 // * A主体 - 获取矩形（开放函数）
@@ -2322,9 +2581,9 @@ Drill_DSk_BorderSprite.prototype.drill_sprite_updateCorner = function() {
 //==============================
 // * 对话框子窗口的特殊配置 - 最后继承1级
 //==============================
-var _drill_DSk_scene_initialize2 = SceneManager.initialize;
+var _drill_DSk_scene_initialize3 = SceneManager.initialize;
 SceneManager.initialize = function() {
-	_drill_DSk_scene_initialize2.call(this);
+	_drill_DSk_scene_initialize3.call(this);
 	
 	//==============================
 	// * 4E姓名框窗口（Drill姓名框） - 特殊配置『对话框多个子窗口』
@@ -2397,6 +2656,6 @@ SceneManager.initialize = function() {
 	// * 4E姓名框窗口（Yep姓名框） - 特殊配置『对话框多个子窗口』
 	//==============================
 	//	（无）
-	
 }
+
 

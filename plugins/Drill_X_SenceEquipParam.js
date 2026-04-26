@@ -354,16 +354,13 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		XSEP（X_Sence_Equip_Param）
-//		临时全局变量	DrillUp.g_XSEP_xxx
-//		临时局部变量	无
-//		存储数据变量	无
-//		全局存储变量	无
-//		覆盖重写方法	Window_EquipStatus.prototype.refresh（mog插件）
-//						Window_EquipStatus.prototype.drawParamName（mog插件）
-//						Window_EquipStatus.prototype.drawCurrentParam（mog插件）
-//						Window_EquipStatus.prototype.drawRightArrowM（mog插件）
-//						Window_EquipStatus.prototype.drawNewParam（mog插件）
+//		覆盖重写方法	Window_EquipStatus.prototype.refresh（覆写）（mog）
+//						Window_EquipStatus.prototype.drawParamName（覆写）（mog）
+//						Window_EquipStatus.prototype.drawCurrentParam（覆写）（mog）
+//						Window_EquipStatus.prototype.drawRightArrowM（覆写）（mog）
+//						Window_EquipStatus.prototype.drawNewParam（覆写）（mog）
 //
 //<<<<<<<<性能记录<<<<<<<<
 //

@@ -498,11 +498,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		OSCo (Secret_Code)
-//		临时全局变量	DrillUp.g_OSCo_xxx
-//		临时局部变量	无
-//		存储数据变量	$gameSystem._drill_OSCo_xxx
-//		全局存储变量	无
+//
+//		插件简称		OSCo（Secret_Code）
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -758,7 +755,7 @@ Game_System.prototype.drill_OSCo_initSysData_Private = function() {
 	for(var i=0; i < DrillUp.g_OSCo_list.length; i++){
 		var temp_data = DrillUp.g_OSCo_list[i];
 		if( temp_data == undefined ){ continue; }
-		this._drill_OSCo_list[i] = JSON.parse(JSON.stringify( temp_data ));
+		this._drill_OSCo_list[i] = JSON.parse(JSON.stringify( temp_data ));  //『深拷贝-混杂自定义数据』
 	}
 };
 //==============================
@@ -780,7 +777,7 @@ Game_System.prototype.drill_OSCo_checkSysData_Private = function() {
 			
 			// > 未存储的，重新初始化
 			if( this._drill_OSCo_list[i] == undefined ){
-				this._drill_OSCo_list[i] = JSON.parse(JSON.stringify( temp_data ));
+				this._drill_OSCo_list[i] = JSON.parse(JSON.stringify( temp_data ));  //『深拷贝-混杂自定义数据』
 			
 			// > 已存储的，跳过
 			}else{

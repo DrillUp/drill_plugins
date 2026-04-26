@@ -779,11 +779,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		BFN (Battle_Floating_Num)
-//		临时全局变量	DrillUp.g_BFN_xxx
-//		临时局部变量	this._drill_BFN_xxx
-//		存储数据变量	无
-//		全局存储变量	无
+//
+//		插件简称		BFN（Battle_Floating_Num）
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -1783,8 +1780,8 @@ Game_Temp.prototype.drill_BFN_createSimple = function( pos, text, style_id, ball
 	
 	// > 基本参数初始化
 	var data = {};
-	data['s_data'] = JSON.parse(JSON.stringify( DrillUp.g_BFN_style[ style_id ] ));
-	data['b_data'] = JSON.parse(JSON.stringify( DrillUp.g_BFN_ballistics[ ballistics_id ] ));
+	data['s_data'] = JSON.parse(JSON.stringify( DrillUp.g_BFN_style[ style_id ] ));  //『深拷贝-『临时对象』』
+	data['b_data'] = JSON.parse(JSON.stringify( DrillUp.g_BFN_ballistics[ ballistics_id ] ));  //『深拷贝-『临时对象』』
 	
 	// > 临时对象设置
 	data['b_data']['movementNum'] = 1;
@@ -1811,8 +1808,8 @@ Game_Temp.prototype.drill_BFN_setBuffer = function( style_id, ballistics_id ){
 	
 	// > 基本参数初始化
 	var data = {};
-	data['s_data'] = JSON.parse(JSON.stringify( DrillUp.g_BFN_style[ style_id ] ));
-	data['b_data'] = JSON.parse(JSON.stringify( DrillUp.g_BFN_ballistics[ ballistics_id ] ));
+	data['s_data'] = JSON.parse(JSON.stringify( DrillUp.g_BFN_style[ style_id ] ));  //『深拷贝-『临时对象』』
+	data['b_data'] = JSON.parse(JSON.stringify( DrillUp.g_BFN_ballistics[ ballistics_id ] ));  //『深拷贝-『临时对象』』
 	
 	// > 临时对象设置
 	data['param_x'] = 0;
@@ -1827,7 +1824,7 @@ Game_Temp.prototype.drill_BFN_setBuffer = function( style_id, ballistics_id ){
 Game_Temp.prototype.drill_BFN_createByBuffer = function( pos, time ){
 	var data = this._drill_BFN_commandBuffer;
 	if( data == undefined ){ alert( DrillUp.drill_BFN_getPluginTip_BufferIsNull() ); return; }
-	data = JSON.parse(JSON.stringify( data ));
+	data = JSON.parse(JSON.stringify( data ));  //『深拷贝-『临时对象』』
 	
 	// > 临时对象设置
 	data['b_data']['movementNum'] = 1;
@@ -2102,7 +2099,7 @@ Drill_BFN_NumberSprite.prototype.constructor = Drill_BFN_NumberSprite;
 //==============================
 Drill_BFN_NumberSprite.prototype.initialize = function( data ) {
 	Sprite_Base.prototype.initialize.call(this);
-	this._drill_data = JSON.parse(JSON.stringify( data ));	//深拷贝数据
+	this._drill_data = JSON.parse(JSON.stringify( data ));	//『深拷贝-独立贴图的数据』
 	
 	this.drill_initData();									//初始化数据
 	this.drill_initSprite();								//初始化对象

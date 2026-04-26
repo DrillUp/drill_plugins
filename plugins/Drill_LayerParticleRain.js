@@ -1451,7 +1451,7 @@
  * @value 3
  * @option 叠加
  * @value 4
- * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
+ * @desc 此参数可以看看："0.基本定义 > 混合模式.docx"。pixi的渲染混合模式。0-普通,1-发光,2-实色混合,3-浅色,4-叠加。
  * @default 0
  *
  * @param 地图层级
@@ -1544,13 +1544,15 @@
  * @type select
  * @option 普通
  * @value 0
- * @option 叠加
+ * @option 发光
  * @value 1
  * @option 实色混合(正片叠底)
  * @value 2
  * @option 浅色
  * @value 3
- * @desc pixi的渲染混合模式。0-普通,1-变亮。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
+ * @option 叠加
+ * @value 4
+ * @desc 此参数可以看看："0.基本定义 > 混合模式.docx"。pixi的渲染混合模式。0-普通,1-发光,2-实色混合,3-浅色,4-叠加。
  * @default 1
  * 
  * 
@@ -1690,11 +1692,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		LPR（Layer_ParticleRain）
-//		临时全局变量	DrillUp.g_LPR_xxx
-//		临时局部变量	this._drill_LPR_xxx
-//		存储数据变量	$gameSystem._drill_LPR_xxx
-//		全局存储变量	无
+//
+//		插件简称		LPR（Layer_Particle_Rain）
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -1893,6 +1892,19 @@ Game_Interpreter.prototype.pluginCommand = function( command, args ){
 // * 插件指令 - 指令执行
 //==============================
 Game_Interpreter.prototype.drill_LPR_pluginCommand = function( command, args ){
+	DrillUp.drill_LPR_globalPluginCommand( command, args, this );
+}
+//==============================
+// * 插件指令 - 『作用全局的插件指令』
+//
+//			参数：	> command 字符串
+//					> args 字符串列表
+//					> gameInterpreter 解释器对象
+//
+//			说明：	> 该函数不能有 this 对象。
+//					> 该函数不依赖解释器对象，gameInterpreter 可以为 null。函数可跨界面调用。
+//==============================
+DrillUp.drill_LPR_globalPluginCommand = function( command, args, gameInterpreter ){
 	if( command === ">地图数字雨" ){ // >地图数字雨 : 数字雨[1] : 显示
 	
 		/*-----------------对象组获取------------------*/
@@ -1930,7 +1942,7 @@ Game_Interpreter.prototype.drill_LPR_pluginCommand = function( command, args ){
 				var type = String(args[3]);
 				var temp2 = String(args[5]);
 				if( type == "变混合模式" ){
-					var num_list = this.drill_LPR_getArgNumList(temp2);
+					var num_list = DrillUp.drill_LPR_getArgNumList(temp2);
 					changing['type'] = type;
 					changing['data1'] = num_list[0];
 					$gameSystem._drill_LPR_dataTank_changing.push(changing);
@@ -1942,8 +1954,8 @@ Game_Interpreter.prototype.drill_LPR_pluginCommand = function( command, args ){
 				var temp2 = String(args[5]);
 				var temp3 = String(args[7]);
 				if( type == "变透明" ){
-					var num_list2 = this.drill_LPR_getArgNumList(temp2);
-					var num_list3 = this.drill_LPR_getArgNumList(temp3);
+					var num_list2 = DrillUp.drill_LPR_getArgNumList(temp2);
+					var num_list3 = DrillUp.drill_LPR_getArgNumList(temp3);
 					changing['type'] = type;
 					changing['data1'] = num_list2[0];
 					changing['data2'] = num_list3[0];
@@ -1957,7 +1969,7 @@ Game_Interpreter.prototype.drill_LPR_pluginCommand = function( command, args ){
 //==============================
 // * 插件指令 - 获取方括号中的数字（返回数字数组）
 //==============================
-Game_Interpreter.prototype.drill_LPR_getArgNumList = function( arg_str ){
+DrillUp.drill_LPR_getArgNumList = function( arg_str ){
 	var arr = arg_str.match( /([^\[]+)\[([^\]]+)\]/ );
 	if( arr.length >= 3 ){
 	// > 有方括号
@@ -2056,7 +2068,7 @@ Game_System.prototype.drill_LPR_initSysData_Private = function() {
 		var temp_data = DrillUp.g_LPR_layers[i];
 		if( temp_data == undefined ){ continue; }
 		if( temp_data['mapToAll'] == true ){		//全地图数据直接存储（每次地图刷新时，不刷新 全地图数据）
-			var data = JSON.parse(JSON.stringify( temp_data ));
+			var data = JSON.parse(JSON.stringify( temp_data ));  //『深拷贝-混杂自定义数据』
 			this._drill_LPR_dataTank_curData[i] = data;
 		}
 	}
@@ -2086,7 +2098,7 @@ Game_System.prototype.drill_LPR_checkSysData_Private = function() {
 			
 			// > 未存储的，重新初始化
 			if( this._drill_LPR_dataTank_curData[i] == undefined ){
-				this._drill_LPR_dataTank_curData[i] = JSON.parse(JSON.stringify( temp_data ));
+				this._drill_LPR_dataTank_curData[i] = JSON.parse(JSON.stringify( temp_data ));  //『深拷贝-混杂自定义数据』
 			
 			// > 已存储的，跳过
 			}else{
@@ -2316,7 +2328,7 @@ Game_Map.prototype.drill_LPR_initMapdata = function() {
 			
 		// > 单地图数据时
 		}else if( temp_data['mapList'].contains( String(this.mapId()) ) ){
-			var data = JSON.parse(JSON.stringify( temp_data ));
+			var data = JSON.parse(JSON.stringify( temp_data ));  //『深拷贝-混杂自定义数据』
 			$gameSystem._drill_LPR_dataTank_curData[i] = data;	//（重刷数据）
 			
 		// > 其它情况时
@@ -2405,7 +2417,7 @@ Scene_Map.prototype.drill_LPR_create = function() {
 		
 		// > 粒子集合
 		for( var j = 0; j < temp_data['raindrop_count']; j++ ){	
-			var temp_sprite_data = JSON.parse(JSON.stringify( temp_data ));	//深拷贝数据（杜绝引用造成的修改）
+			var temp_sprite_data = JSON.parse(JSON.stringify( temp_data ));	//『深拷贝-混杂自定义数据』（杜绝引用造成的修改）
 			var temp_sprite = new Drill_LPR_RaindropSprite( temp_sprite_data );
 			temp_sprite['_parentIndex'] = i;
 			temp_sprite['_curIndex'] = j;

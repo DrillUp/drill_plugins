@@ -250,7 +250,7 @@
  * @desc 选项被锁定时，信息面板显示的选项名。
  * @default \c[7]---未知---
  *
- * @param 用语-锁定的选项内容
+ * @param 用语-锁定的描述内容
  * @parent ----锁定内容----
  * @type note
  * @desc 选项被锁定时，信息面板显示的内容。
@@ -909,7 +909,7 @@
  * @param 选项内容
  * @parent ---选项内容---
  * @type note
- * @desc 每个选项显示的长文本内容。（只有窗口模式有效，且需要启用 选项内容 。）
+ * @desc 每个选项显示的长文本内容。（只有窗口模式有效，且需要"选项窗口"打开"是否启用选项内容"。）
  * @default "长文本选项描述"
  * 
  * 
@@ -971,6 +971,62 @@
  * @type note
  * @desc 该选项下的描述窗口显示的内容。
  * @default "没有描述"
+ * 
+ * @param 是否自定义锁定时描述内容-1
+ * @parent ---描述内容---
+ * @type boolean
+ * @on 自定义
+ * @off 关闭
+ * @desc true - 自定义，false - 关闭。默认关闭自定义，并使用"用语-锁定的描述内容"。
+ * @default false
+ * 
+ * @param 自定义的锁定时描述内容-1
+ * @parent 是否自定义锁定时描述内容-1
+ * @type note
+ * @desc 选项被锁定时，描述窗口显示的内容。
+ * @default ""
+ * 
+ * @param 是否自定义锁定时描述内容-2
+ * @parent ---描述内容---
+ * @type boolean
+ * @on 自定义
+ * @off 关闭
+ * @desc true - 自定义，false - 关闭。默认关闭自定义，并使用"用语-锁定的描述内容"。
+ * @default false
+ * 
+ * @param 自定义的锁定时描述内容-2
+ * @parent 是否自定义锁定时描述内容-2
+ * @type note
+ * @desc 选项被锁定时，描述窗口显示的内容。
+ * @default ""
+ * 
+ * @param 是否自定义锁定时描述内容-3
+ * @parent ---描述内容---
+ * @type boolean
+ * @on 自定义
+ * @off 关闭
+ * @desc true - 自定义，false - 关闭。默认关闭自定义，并使用"用语-锁定的描述内容"。
+ * @default false
+ * 
+ * @param 自定义的锁定时描述内容-3
+ * @parent 是否自定义锁定时描述内容-3
+ * @type note
+ * @desc 选项被锁定时，描述窗口显示的内容。
+ * @default ""
+ * 
+ * @param 是否自定义锁定时描述内容-4
+ * @parent ---描述内容---
+ * @type boolean
+ * @on 自定义
+ * @off 关闭
+ * @desc true - 自定义，false - 关闭。默认关闭自定义，并使用"用语-锁定的描述内容"。
+ * @default false
+ * 
+ * @param 自定义的锁定时描述内容-4
+ * @parent 是否自定义锁定时描述内容-4
+ * @type note
+ * @desc 选项被锁定时，描述窗口显示的内容。
+ * @default ""
  *
  * @param 行高控制模式
  * @parent ---描述内容---
@@ -1390,11 +1446,8 @@
  */
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		SSpM（Scene_Selfplate_A）
-//		临时全局变量	DrillUp.g_SSpM_xxx
-//		临时局部变量	this._drill_SSpM_xxx
-//		存储数据变量	$gameSystem._drill_SSpM_context_list
-//		全局存储变量	DrillUp.global_SSpM_enableTank
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -1734,6 +1787,34 @@
 		}else{
 			data['context4'] = "";
 		}
+		data['lockedContextEnabled1'] = String(dataFrom["是否自定义锁定时描述内容-1"] || "false") == "true" ;
+		if( dataFrom["自定义的锁定时描述内容-1"] != undefined &&
+			dataFrom["自定义的锁定时描述内容-1"] != "" ){
+			data['lockedContext1'] = JSON.parse( dataFrom["自定义的锁定时描述内容-1"] );
+		}else{
+			data['lockedContext1'] = "";
+		}
+		data['lockedContextEnabled2'] = String(dataFrom["是否自定义锁定时描述内容-2"] || "false") == "true" ;
+		if( dataFrom["自定义的锁定时描述内容-2"] != undefined &&
+			dataFrom["自定义的锁定时描述内容-2"] != "" ){
+			data['lockedContext2'] = JSON.parse( dataFrom["自定义的锁定时描述内容-2"] );
+		}else{
+			data['lockedContext2'] = "";
+		}
+		data['lockedContextEnabled3'] = String(dataFrom["是否自定义锁定时描述内容-3"] || "false") == "true" ;
+		if( dataFrom["自定义的锁定时描述内容-3"] != undefined &&
+			dataFrom["自定义的锁定时描述内容-3"] != "" ){
+			data['lockedContext3'] = JSON.parse( dataFrom["自定义的锁定时描述内容-3"] );
+		}else{
+			data['lockedContext3'] = "";
+		}
+		data['lockedContextEnabled4'] = String(dataFrom["是否自定义锁定时描述内容-4"] || "false") == "true" ;
+		if( dataFrom["自定义的锁定时描述内容-4"] != undefined &&
+			dataFrom["自定义的锁定时描述内容-4"] != "" ){
+			data['lockedContext4'] = JSON.parse( dataFrom["自定义的锁定时描述内容-4"] );
+		}else{
+			data['lockedContext4'] = "";
+		}
 		data['context_align'] = String(dataFrom["描述内容对齐方式"] || "左对齐");
 		data['context_lineheight_type'] = String(DrillUp.parameters["行高控制模式"] || "默认补正");
 		data['context_lineheight_custom'] = Number(DrillUp.parameters["自定义补正值"] || 30);
@@ -1847,11 +1928,16 @@
 	/*-----------------锁定内容------------------*/
 	DrillUp.g_SSpM_locked_name = String(DrillUp.parameters["用语-锁定的选项名"] || "");
 	DrillUp.g_SSpM_locked_name = DrillUp.g_SSpM_locked_name.replace(/\\\\/g,"\\");	//（为了支持\\n的写法）
-	if( DrillUp.parameters["用语-锁定的选项内容"] != undefined && 
-		DrillUp.parameters["用语-锁定的选项内容"] != "" ){
-		DrillUp.g_SSpM_locked_context = JSON.parse( DrillUp.parameters["用语-锁定的选项内容"] );
+	if( DrillUp.parameters["用语-锁定的描述内容"] != undefined && 
+		DrillUp.parameters["用语-锁定的描述内容"] != "" ){
+		DrillUp.g_SSpM_locked_context = JSON.parse( DrillUp.parameters["用语-锁定的描述内容"] );
 	}else{
-		DrillUp.g_SSpM_locked_context = "";
+		if( DrillUp.parameters["用语-锁定的选项内容"] != undefined &&	//（旧名称）
+			DrillUp.parameters["用语-锁定的选项内容"] != "" ){
+			DrillUp.g_SSpM_locked_context = JSON.parse( DrillUp.parameters["用语-锁定的选项内容"] );
+		}else{
+			DrillUp.g_SSpM_locked_context = "";
+		}
 	}
 	DrillUp.g_SSpM_locked_type = String(DrillUp.parameters["内容锁定方式"] || "锁定描述图和描述内容");
 	DrillUp.g_SSpM_locked_pic = String(DrillUp.parameters["资源-锁定的描述图"] || "");
@@ -2275,7 +2361,7 @@ Game_Temp.prototype.initialize = function() {
 	this._drill_SSpM_visibleContextDataList = [];
 };
 //==============================
-// * 面板控制 - 判断 锁定情况
+// * 面板控制 - 判断 锁定情况（开放函数）
 //==============================
 Game_Temp.prototype.drill_SSpM_isLocked = function( context_realIndex ){
 	
@@ -2297,7 +2383,7 @@ Game_Temp.prototype.drill_SSpM_isLocked = function( context_realIndex ){
 	}
 }
 //==============================
-// * 面板控制 - 判断 显示情况
+// * 面板控制 - 判断 显示情况（开放函数）
 //==============================
 Game_Temp.prototype.drill_SSpM_isEnabled = function( context_realIndex ){
 	
@@ -3218,7 +3304,35 @@ Drill_SSpM_DescWindow.prototype.drill_refreshDescText = function( cur_index ){
 	if( $gameTemp.drill_SSpM_isLocked( temp_data['index'] ) == true && 
 		(DrillUp.g_SSpM_locked_type == "锁定描述图和描述内容" || 
 		 DrillUp.g_SSpM_locked_type == "只锁定描述内容" ) ){
-		context = DrillUp.g_SSpM_locked_context;	//锁定内容
+		
+		if( this._drill_wi == 1 ){ 
+			if( temp_data['lockedContextEnabled1'] == true ){
+				context = temp_data['lockedContext1'];		//自定义的锁定时描述内容
+			}else{
+				context = DrillUp.g_SSpM_locked_context;	//用语-锁定的描述内容
+			}
+		}
+		if( this._drill_wi == 2 ){ 
+			if( temp_data['lockedContextEnabled2'] == true ){
+				context = temp_data['lockedContext2'];		//自定义的锁定时描述内容
+			}else{
+				context = DrillUp.g_SSpM_locked_context;	//用语-锁定的描述内容
+			}
+		}
+		if( this._drill_wi == 3 ){ 
+			if( temp_data['lockedContextEnabled3'] == true ){
+				context = temp_data['lockedContext3'];		//自定义的锁定时描述内容
+			}else{
+				context = DrillUp.g_SSpM_locked_context;	//用语-锁定的描述内容
+			}
+		}
+		if( this._drill_wi == 4 ){ 
+			if( temp_data['lockedContextEnabled4'] == true ){
+				context = temp_data['lockedContext4'];		//自定义的锁定时描述内容
+			}else{
+				context = DrillUp.g_SSpM_locked_context;	//用语-锁定的描述内容
+			}
+		}
 	}else{
 		// > 当前内容（对应窗口索引）
 		if( this._drill_wi == 1 ){ context = temp_data['context1']; }

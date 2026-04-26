@@ -537,11 +537,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		GOBTN（Gauge_Of_Buffer_Time_Num）
-//		临时全局变量	DrillUp.g_GOBTN_xxx
-//		临时局部变量	this._drill_GOBTN_xxx
-//		存储数据变量	无
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -988,7 +985,7 @@ function Drill_GOBTN_GameTimeNum() {
 // * 时间数字物体 - 初始化
 //==============================
 Drill_GOBTN_GameTimeNum.prototype.initialize = function( data ) {
-	this._drill_data = JSON.parse(JSON.stringify( data ));	//深拷贝数据
+	this._drill_data = JSON.parse(JSON.stringify( data ));	//『深拷贝-混杂自定义数据』
 	var data = this._drill_data;
 	//alert(JSON.stringify(data));
 	

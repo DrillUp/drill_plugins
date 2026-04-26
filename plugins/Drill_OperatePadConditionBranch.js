@@ -82,11 +82,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		OPCB（Operate_Pad_Condition_Branch）
-//		临时全局变量	DrillUp.g_OPCB_xxxx
-//		临时局部变量	$gameTemp._drill_OPCB_xxx
-//		存储数据变量	$gameSystem._drill_OPCB_xxx
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<

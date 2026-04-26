@@ -140,12 +140,14 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		DFF（Dialog_Font_Face）
-//		临时全局变量	DrillUp.g_DFF_xxx
-//		临时局部变量	无
-//		存储数据变量	无
-//		全局存储变量	无
-//		覆盖重写方法	Window_Base.prototype.standardFontFace
+//		覆盖重写方法	Window_Base.prototype.standardFontFace（覆写）
+//						Window_Message.prototype.standardFontFace（覆写）
+//						Window_Gold.prototype.standardFontFace（覆写）
+//						Window_ChoiceList.prototype.standardFontFace（覆写）
+//						Window_NumberInput.prototype.standardFontFace（覆写）
+//						Window_EventItem.prototype.standardFontFace（覆写）
 //
 //<<<<<<<<性能记录<<<<<<<<
 //

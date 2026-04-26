@@ -458,13 +458,10 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		LCa（Layer_Camera）
-//		临时全局变量	DrillUp.g_LCa_xxx
-//		临时局部变量	this._drill_LCa_xxx
-//		存储数据变量	$gameSystem._drill_LCa_xxx
-//		全局存储变量	无
-//		覆盖重写方法	Game_Map.prototype.screenTileX
-//						Game_Map.prototype.screenTileY
+//		覆盖重写方法	Game_Map.prototype.screenTileX（覆写）
+//						Game_Map.prototype.screenTileY（覆写）
 //						Game_Player.prototype.updateScroll（半覆写）
 //						Game_Map.prototype.updateScroll（半覆写）
 //						Game_Map.prototype.setDisplayPos（半覆写）
@@ -2388,7 +2385,7 @@ Drill_LCa_Controller.prototype.drill_LCa_resetData_Private = function( data ){
 	}
 	
 	// > 执行重置
-	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
+	this._drill_data = JSON.parse(JSON.stringify( data ));					//『深拷贝-控制器用』
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能
@@ -5780,7 +5777,7 @@ Drill_LCa_DebugSprite.prototype.initialize = function( data ){
 	if( data['has_right'] == undefined ){ data['has_right'] = false; }	//右边框
 	
 	// > 私有属性初始化
-	this._drill_data = JSON.parse(JSON.stringify( data ));
+	this._drill_data = JSON.parse(JSON.stringify( data ));  //『深拷贝-DEBUG用』
 	this._drill_needRedraw = true;
 	this._org_x = 0;
 	this._org_y = 0;

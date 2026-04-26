@@ -94,12 +94,9 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		LRS（Layer_Running_Speed）
-//		临时全局变量	DrillUp.g_LRS_xxx
-//		临时局部变量	无
-//		存储数据变量	$gameSystem._drill_LRS_xxx
-//		全局存储变量	无
-//		覆盖重写方法	Scene_Map.prototype.isFastForward
+//		覆盖重写方法	Scene_Map.prototype.isFastForward（半覆写）
 //
 //<<<<<<<<性能记录<<<<<<<<
 //
@@ -315,7 +312,7 @@ Scene_Map.prototype.updateMainMultiply = function() {
     }
 }
 //==============================
-// * 长按加速控制 - 加速运行条件
+// * 长按加速控制 - 加速运行条件（半覆写）
 //==============================
 var _drill_LRS_isFastForward = Scene_Map.prototype.isFastForward;
 Scene_Map.prototype.isFastForward = function() {

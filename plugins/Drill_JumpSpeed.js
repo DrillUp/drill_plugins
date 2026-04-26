@@ -133,13 +133,10 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		JSp（Jump_Speed）
-//		临时全局变量	无
-//		临时局部变量	this._drill_JSp_xxx（Game_Event中存储，Game_CharacterBase判断使用）
-//		存储数据变量	无
-//		全局存储变量	无
-//		覆盖重写方法	Game_CharacterBase.prototype.updateJump（半重写）
-//						Game_CharacterBase.prototype.jump（半重写）
+//		覆盖重写方法	Game_CharacterBase.prototype.updateJump（半覆写）
+//						Game_CharacterBase.prototype.jump（半覆写）
 //
 //<<<<<<<<性能记录<<<<<<<<
 //

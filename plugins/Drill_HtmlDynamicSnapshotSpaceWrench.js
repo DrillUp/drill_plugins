@@ -389,11 +389,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		HDSSW（Html_Dynamic_Snapshot_Space_Wrench）
-//		临时全局变量	DrillUp.g_HDSSW_xxx
-//		临时局部变量	this._drill_HDSSW_xxx
-//		存储数据变量	$gameSystem._drill_HDSSW_xxx
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -456,7 +453,7 @@
 //			大家族-屏幕快照
 //		
 //		★脚本文档：
-//			22.游戏窗体 > 动态快照-天窗层（脚本）.docx
+//			22.游戏窗体 > 多层组合装饰（界面装饰-天窗层）（脚本）.docx
 //		
 //		★插件私有类：
 //			* 动态快照控制器【Drill_HDSSW_Controller】
@@ -1574,7 +1571,7 @@ Drill_HDSSW_Controller.prototype.drill_controller_resetData_Private = function( 
 	}
 	
 	// > 执行重置
-	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
+	this._drill_data = JSON.parse(JSON.stringify( data ));					//『深拷贝-控制器用』
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能
@@ -2906,7 +2903,7 @@ Drill_HDSSW_CircleController.prototype.drill_controller_resetData_Private = func
 	}
 	
 	// > 执行重置
-	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
+	this._drill_data = JSON.parse(JSON.stringify( data ));					//『深拷贝-控制器用』
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能

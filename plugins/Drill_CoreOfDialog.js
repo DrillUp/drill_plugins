@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.0]        对话框 - 对话框优化核心
+ * @plugindesc [v1.1]        对话框 - 对话框优化核心
  * @author Drill_up
  * 
  * 
@@ -25,6 +25,7 @@
  *     需要该核心才能进行对话框 窗口字符 的支持。
  * 可作用于：
  *   - Drill_DialogNameBox              对话框-姓名框窗口
+ *     姓名框窗口需要该核心才能显示出来。
  * 
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -42,6 +43,8 @@
  * 设计：
  *   (1.对话框优化核心可以支持实时切换脸图，
  *      你可以用窗口字符控制播放速度，并且切换脸图表情。
+ *   (2.你也可以给脸图的字符加入持续时间。
+ *      比如"\fp[-2:0:持续[15]]"，效果为对话框换成玩家领队的脸图，并在15帧变回原来的脸图。
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 消息输入字符
@@ -49,19 +52,17 @@
  * 
  * 窗口字符：\$              对话框中，打开金钱窗口(右上角出现一个金钱窗口,结束对话消失)
  * 
- * 窗口字符：\fc[资源名:1]   对话框中，第二个为脸图索引，从0开始计数，范围为0~7。
- * 窗口字符：\fa[5]          对话框中，换成第n个角色脸图(角色从1开始计数)。
- * 窗口字符：\fa[5:0]        对话框中，换成第n个角色脸图，第二个为脸图索引，从0开始计数，范围为0~7。
- * 窗口字符：\fp[-2]         对话框中，换成玩家队员脸图(-2表示领队，1表示第一个跟随者)。
- * 窗口字符：\fp[-2:0]       对话框中，换成玩家队员脸图，第二个为脸图索引，从0开始计数，范围为0~7。
+ * 窗口字符：\fc[资源名:1]            对话框中，换成"资源名"脸图，参数2为脸图索引，索引从0开始计数，范围为0~7。
+ * 窗口字符：\fc[资源名:1:持续[15]]   对话框中，换成"资源名"脸图，参数2为脸图索引，参数3为脸图持续时间。
+ * 窗口字符：\fa[5]                   对话框中，换成第n个角色脸图(角色从1开始计数)。
+ * 窗口字符：\fa[5:0]                 对话框中，换成第n个角色脸图，参数2为脸图索引，索引从0开始计数，范围为0~7。
+ * 窗口字符：\fa[5:0:持续[15]]        对话框中，换成第n个角色脸图，参数2为脸图索引，参数3为脸图持续时间。
+ * 窗口字符：\fp[-2]                  对话框中，换成玩家队员脸图(-2表示领队，1表示第一个跟随者)。
+ * 窗口字符：\fp[-2:0]                对话框中，换成玩家队员脸图，参数2为脸图索引，索引从0开始计数，范围为0~7。
+ * 窗口字符：\fp[-2:0:持续[15]]       对话框中，换成玩家队员脸图，参数2为脸图索引，参数3为脸图持续时间。
  * 
- * -----------------------------------------------------------------------------
- * ----可选设定 - Debug查看
- * 你可以通过插件指令打开插件的Debug查看：
- * 
- * 插件指令：>窗口字符核心 : DEBUG窗口字符的逐个绘制测试 : 开启
- * 插件指令：>窗口字符核心 : DEBUG窗口字符的逐个绘制测试 : 关闭
- * 
+ * 1.窗口字符换了脸图后，一直有效，不会变回。
+ *   如果你想变回到之前的头像，可以加参数 "持续[]"，即持续时间结束后，自动变回前一个绘制的头像。
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -89,15 +90,14 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
+ * [v1.1]
+ * 优化了脸图的窗口字符设置。
  * 
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		CODi（Core_Of_Dialog）
-//		临时全局变量	无
-//		临时局部变量	this._drill_CODi_xxx
-//		存储数据变量	无
-//		全局存储变量	无
 //		覆盖重写方法	见管辖权
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -255,16 +255,7 @@ Game_Interpreter.prototype.drill_CODi_pluginCommand = function( command, args ){
 		if( args.length == 4 ){
 			var type = String(args[1]);
 			var temp1 = String(args[3]);
-			/*
-			if( type == "DEBUG窗口字符的逐个绘制测试" ){
-				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
-					$gameTemp._drill_CODi_timing_DebugEnabled = true;
-				}
-				if( temp1 == "关闭" || temp1 == "禁用" ){
-					$gameTemp._drill_CODi_timing_DebugEnabled = false;
-				}
-			}
-			*/
+			//...（暂无）
 		}
 	}
 };
@@ -696,7 +687,7 @@ SceneManager.initialize = function() {
 	
 	
 	//==============================
-	// * 管辖权覆写函数（对话框） - 帧刷新（覆写） 『窗口字符旧函数覆写』
+	// * 管辖权覆写函数（对话框） - 『对话框的帧刷新』（覆写） 『窗口字符旧函数覆写』
 	//==============================
 	Window_Message.prototype.update = function(){
 		this.drill_CODi_message_update();
@@ -856,7 +847,7 @@ Window_Message.prototype.initialize = function() {
 	this._drill_CODi_message_isStarted = false;		//（打开关闭标记）
 }
 //==============================
-// * 对话框绘制控制 - 帧刷新
+// * 对话框绘制控制 - 帧刷新『对话框的帧刷新』
 //==============================
 Window_Message.prototype.drill_CODi_message_update = function(){
 	
@@ -1016,26 +1007,33 @@ Window_Message.prototype.drill_CODi_message_updatePage = function(){
 		if( has_subWindow == true ){ return; }
 		
 		
-		// > 绘制结束时 - 等待按下
-		if( this.contents._drill_COWC_timing_inputWait_enabled == true ){ //等待按下开关【窗口字符 - 窗口字符核心】（该开关能 开启/关闭 所有 等待按下 的功能）
+		// > 绘制结束时 - 等待按下 - 开启时【窗口字符 - 窗口字符核心】
+		//		（播放完毕后，等待玩家按一次确定键）
+		//		（该开关能 开启/关闭 所有 等待按下 的功能）
+		if( this.contents._drill_COWC_timing_inputWait_enabled == true ){
 			if( this._drill_CODi_message_curPagePlaying == true ){
 				if( this.contents.drill_COWC_timing_isTriggered() ){
-					this._drill_CODi_message_curPagePlaying = false;
+					this._drill_CODi_message_curPagePlaying = false;	//（结束当前页，进入下一页）
 				}
 			}
+			
+		// > 绘制结束时 - 等待按下 - 关闭时
+		//		（播放完毕后，直接跳出进入下一页）
 		}else{
-			this._drill_CODi_message_curPagePlaying = false;
+			this._drill_CODi_message_curPagePlaying = false;	//（结束当前页，进入下一页）
 		}
 	}
 };
 //==============================
-// * 2Q绘制页 - 是否正在播放（开放函数）
+// * 2Q绘制页 - 是否正在 播放当前页（开放函数）
 //==============================
 Window_Message.prototype.drill_CODi_message_isPagePlaying = function(){
 	return this._drill_CODi_message_curPagePlaying == true;
 };
 //==============================
-// * 2Q绘制页 - 是否正在等待按下（开放函数）
+// * 2Q绘制页 - 是否正在 等待按下（开放函数）
+//
+//			说明：	> 该函数在 对话框+子窗口 的情况时，也返回true。（函数 Window_Message.prototype.isAnySubWindowActive ）
 //==============================
 Window_Message.prototype.drill_CODi_message_isPageWaitingInput = function(){
 	if( this.drill_COWC_timing_isPlaying() == true ){ return false; }
@@ -1294,23 +1292,71 @@ Window_Message.prototype.drill_CODi_message_faceInit = function(){
 };
 //==============================
 // * 2S脸图管理 - 帧刷新
+//
+//			说明：	> 该函数被调用时，脸图已经完成了加载。
 //==============================
 Window_Message.prototype.drill_CODi_message_updateFace = function(){
+	
+	// > 加载完毕时，执行绘制一次
 	if( this._drill_CODi_drawed == false ){
 		this._drill_CODi_drawed = true;
-		this.contents.drill_CODi_refreshFace( $gameMessage.faceName(), $gameMessage.faceIndex(), 0, 0 );
+		var param_data = {};
+		param_data['faceName'] = $gameMessage.faceName();
+		param_data['faceIndex'] = $gameMessage.faceIndex();
+		param_data['faceSustain'] = -1;
+		this.contents.drill_CODi_setDrawFace( param_data );
+	}
+	
+	// > 脸图的持续时间
+	if( this.contents != undefined &&
+		this.contents._drill_CODi_lastFaceParam_always != undefined &&
+		this.contents._drill_CODi_lastFaceParam_sustain != undefined ){
+		var param_1 = this.contents._drill_CODi_lastFaceParam_always;
+		var param_2 = this.contents._drill_CODi_lastFaceParam_sustain;
+		
+		// > 脸图的持续时间 - 时间-1
+		param_2['faceSustain'] -= 1;
+		
+		// > 脸图的持续时间 - 变回前一个头像
+		if( param_2['faceSustain'] <= 0 ){
+			this.contents.drill_CODi_setDrawFace( param_1 );
+			this.contents._drill_CODi_lastFaceParam_sustain = undefined; //（销毁持续时间的配置）
+		}
 	}
 };
 //==============================
-// * 2S脸图管理 - 帧刷新 - 执行绘制
+// * 2S脸图管理 - 设置脸图
+//
+//			说明：	> 注意，这里在Bitmap类中。
+//==============================
+Bitmap.prototype.drill_CODi_setDrawFace = function( param_data ){
+	if( param_data['faceName']  == undefined ){ param_data['faceName'] = ""; }
+	if( param_data['faceIndex'] == undefined ){ param_data['faceIndex'] = 0; }
+	if( param_data['x'] == undefined ){ param_data['x'] = 0; }
+	if( param_data['y'] == undefined ){ param_data['y'] = 0; }
+	if( param_data['width']  == undefined ){ param_data['width']  = Window_Base._faceWidth;  }
+	if( param_data['height'] == undefined ){ param_data['height'] = Window_Base._faceHeight; }
+	if( param_data['faceSustain'] == undefined ){ param_data['faceSustain'] = -1;  }
+	
+	// > 脸图的持续时间
+	//		（记录当前数据，区分永久变化和临时变化，如果临时变化时间结束，就画回之前的永久变化脸图）
+	if( param_data['faceSustain'] == -1 ){
+		this._drill_CODi_lastFaceParam_always = param_data;
+	}else{
+		this._drill_CODi_lastFaceParam_sustain = param_data;
+	}
+	
+	// > 执行绘制
+	this.drill_CODi_redrawFace( param_data['faceName'], param_data['faceIndex'], param_data['x'], param_data['y'], param_data['width'], param_data['height'] );
+};
+//==============================
+// * 2S脸图管理 - 设置脸图 - 执行绘制（私有）
 //
 //			说明：	> 注意，这里在Bitmap类中，所以要复刻绘制脸图函数。
 //==============================
-Bitmap.prototype.drill_CODi_refreshFace = function( faceName, faceIndex, x, y, width, height ){
-	width = width || Window_Base._faceWidth;
-    height = height || Window_Base._faceHeight;
+Bitmap.prototype.drill_CODi_redrawFace = function( faceName, faceIndex, x, y, width, height ){
     var bitmap = ImageManager.loadFace(faceName);
-	if( bitmap.isReady() == false ){ return; }	//（帧刷新中有加载阻塞，所以此处不可能返回false，但，以防万一）
+	if( bitmap.isReady() == false ){ return; }  //（帧刷新中有加载阻塞，所以此处不可能返回false，但，以防万一）
 	
 	// > 清理脸图区域
 	this.clearRect( x, y, width, height );
@@ -1325,7 +1371,7 @@ Bitmap.prototype.drill_CODi_refreshFace = function( faceName, faceIndex, x, y, w
     var sx = faceIndex % 4 * pw + (pw - sw) / 2;
     var sy = Math.floor(faceIndex / 4) * ph + (ph - sh) / 2;
     this.blt(bitmap, sx, sy, sw, sh, dx, dy);
-}
+};
 
 
 
@@ -1389,24 +1435,34 @@ var _drill_CODi_COWC_effect_processCombined_2 = Game_Temp.prototype.drill_COWC_e
 Game_Temp.prototype.drill_COWC_effect_processCombined = function( matched_index, matched_str, command, args ){
 	_drill_CODi_COWC_effect_processCombined_2.call( this, matched_index, matched_str, command, args );
 	
-	// > 『窗口字符定义』 - 指定脸图（\FC[faceName:0]）
 	if( command.toUpperCase() == "FC" ){
+		// > 『窗口字符定义』 - 指定脸图（\FC[faceName:0]）
 		if( args.length == 2 ){
 			var faceName = String(args[0]);
-			var faceIndex = Number(args[1]);
+			var faceIndex = String(args[1]);
 			$gameTemp.drill_CODi_realTimeLoad_addFaceName( faceName ); //（解析时加载贴图）
-			this.drill_COWC_effect_submitCombined( "@@@_fc[" + faceName + ":" + String(faceIndex) + "]" );
+			this.drill_COWC_effect_submitCombined( "@@@_fc[" + faceName + ":" + String(faceIndex) + ":-1]" );
+		}
+		// > 『窗口字符定义』 - 指定脸图（\FC[faceName:0:持续[15]]）
+		if( args.length == 3 ){
+			var faceName = String(args[0]);
+			var faceIndex = String(args[1]);
+			var faceSustain = String(args[2]);
+			faceSustain = faceSustain.replace("持续[","");
+			faceSustain = faceSustain.replace("]","");
+			$gameTemp.drill_CODi_realTimeLoad_addFaceName( faceName ); //（解析时加载贴图）
+			this.drill_COWC_effect_submitCombined( "@@@_fc[" + faceName + ":" + String(faceIndex) + ":" + String(faceSustain) + "]" );
 		}
 	}
-	// > 『窗口字符定义』 - 第5个角色脸图（\FA[5]、\FA[5:0]）
 	if( command.toUpperCase() == "FA" ){
+		// > 『窗口字符定义』 - 第5个角色脸图（\FA[5]、\FA[5:0]）
 		if( args.length == 1 ){
 			var actor = $gameActors.actor( Number(args[0]) );
 			if( actor != undefined ){
 				var faceName = actor.faceName();
 				var faceIndex = actor.faceIndex();
 				$gameTemp.drill_CODi_realTimeLoad_addFaceName( faceName ); //（解析时加载贴图）
-				this.drill_COWC_effect_submitCombined( "@@@_fc[" + faceName + ":" + String(faceIndex) + "]" );
+				this.drill_COWC_effect_submitCombined( "@@@_fc[" + faceName + ":" + String(faceIndex) + ":-1]" );
 			}else{
 				this.drill_COWC_effect_submitCombined( "" );	//（没有角色脸图时，直接去掉窗口字符）
 			}
@@ -1417,14 +1473,29 @@ Game_Temp.prototype.drill_COWC_effect_processCombined = function( matched_index,
 				var faceName = actor.faceName();
 				var faceIndex = Number(args[1]);
 				$gameTemp.drill_CODi_realTimeLoad_addFaceName( faceName ); //（解析时加载贴图）
-				this.drill_COWC_effect_submitCombined( "@@@_fc[" + faceName + ":" + String(faceIndex) + "]" );
+				this.drill_COWC_effect_submitCombined( "@@@_fc[" + faceName + ":" + String(faceIndex) + ":-1]" );
+			}else{
+				this.drill_COWC_effect_submitCombined( "" );	//（没有角色脸图时，直接去掉窗口字符）
+			}
+		}
+		// > 『窗口字符定义』 - 第5个角色脸图（\FA[5:0:持续[15]]）
+		if( args.length == 3 ){
+			var actor = $gameActors.actor( Number(args[0]) );
+			if( actor != undefined ){
+				var faceName = actor.faceName();
+				var faceIndex = Number(args[1]);
+				var faceSustain = String(args[2]);
+				faceSustain = faceSustain.replace("持续[","");
+				faceSustain = faceSustain.replace("]","");
+				$gameTemp.drill_CODi_realTimeLoad_addFaceName( faceName ); //（解析时加载贴图）
+				this.drill_COWC_effect_submitCombined( "@@@_fc[" + faceName + ":" + String(faceIndex) + ":" + String(faceSustain) + "]" );
 			}else{
 				this.drill_COWC_effect_submitCombined( "" );	//（没有角色脸图时，直接去掉窗口字符）
 			}
 		}
 	}
-	// > 『窗口字符定义』 - 第1个玩家队员脸图（\FP[1]、\FP[1:0]）
 	if( command.toUpperCase() == "FP" ){
+		// > 『窗口字符定义』 - 第1个玩家队员脸图（\FP[1]、\FP[1:0]）
 		if( args.length == 1 ){
 			var actor = null;
 			var p_id = Number(args[0]);
@@ -1438,7 +1509,7 @@ Game_Temp.prototype.drill_COWC_effect_processCombined = function( matched_index,
 				var faceName = actor.faceName();
 				var faceIndex = actor.faceIndex();
 				$gameTemp.drill_CODi_realTimeLoad_addFaceName( faceName ); //（解析时加载贴图）
-				this.drill_COWC_effect_submitCombined( "@@@_fc[" + faceName + ":" + String(faceIndex) + "]" );
+				this.drill_COWC_effect_submitCombined( "@@@_fc[" + faceName + ":" + String(faceIndex) + ":-1]" );
 			}else{
 				this.drill_COWC_effect_submitCombined( "" );	//（没有角色脸图时，直接去掉窗口字符）
 			}
@@ -1456,7 +1527,29 @@ Game_Temp.prototype.drill_COWC_effect_processCombined = function( matched_index,
 				var faceName = actor.faceName();
 				var faceIndex = Number(args[1]);
 				$gameTemp.drill_CODi_realTimeLoad_addFaceName( faceName ); //（解析时加载贴图）
-				this.drill_COWC_effect_submitCombined( "@@@_fc[" + faceName + ":" + String(faceIndex) + "]" );
+				this.drill_COWC_effect_submitCombined( "@@@_fc[" + faceName + ":" + String(faceIndex) + ":-1]" );
+			}else{
+				this.drill_COWC_effect_submitCombined( "" );	//（没有角色脸图时，直接去掉窗口字符）
+			}
+		}
+		// > 『窗口字符定义』 - 第1个玩家队员脸图（\FP[1:0:持续[15]]）
+		if( args.length == 3 ){
+			var actor = null;
+			var p_id = Number(args[0]);
+			if( p_id == -2 ){  //『玩家id』
+				actor = $gameParty.members()[ 0 ];
+			}
+			if( p_id > 0 ){  //『玩家队员id』
+				actor = $gameParty.members()[ p_id ];
+			}
+			if( actor != undefined ){
+				var faceName = actor.faceName();
+				var faceIndex = Number(args[1]);
+				var faceSustain = String(args[2]);
+				faceSustain = faceSustain.replace("持续[","");
+				faceSustain = faceSustain.replace("]","");
+				$gameTemp.drill_CODi_realTimeLoad_addFaceName( faceName ); //（解析时加载贴图）
+				this.drill_COWC_effect_submitCombined( "@@@_fc[" + faceName + ":" + String(faceIndex) + ":" + String(faceSustain) + "]" );
 			}else{
 				this.drill_COWC_effect_submitCombined( "" );	//（没有角色脸图时，直接去掉窗口字符）
 			}
@@ -1472,10 +1565,11 @@ Game_Temp.prototype.drill_COCD_textBlock_processStyle = function( command, args,
 	
 	// > 『底层字符定义』 - 指定脸图（@@@_fc[faceName:0]） face_choose（索引值从0开始编号，是因为对话框编辑后，事件指令显示的是0开始的编号）
 	if( command.toLowerCase() == "@@@_fc" ){
-		if( args.length == 2 ){
+		if( args.length == 3 ){
 			if( cur_infoParam['parentWindow'] == "Window_Message" ){
 				cur_blockParam['faceName'] = String(args[0]);
 				cur_blockParam['faceIndex'] = Number(args[1]);
+				cur_blockParam['faceSustain'] = Number(args[2]);
 			}
 			this.drill_COCD_textBlock_submitStyle();	//（其它地方使用此字符，也要消除）
 			return;
@@ -1492,6 +1586,7 @@ Game_Temp.prototype.drill_COCD_textBlock_restoreStyle = function( cur_infoParam,
 	// > 『底层字符样式回滚』 - 指定脸图（@@@_fc[faceName:0]）
 	cur_blockParam['faceName'] = undefined;
 	cur_blockParam['faceIndex'] = undefined;
+	cur_blockParam['faceSustain'] = undefined;
 }
 //==============================
 // * 窗口字符应用之消息输入字符（2S脸图管理） - 绘制过程 - 每个字符开始时
@@ -1506,9 +1601,14 @@ Bitmap.prototype.drill_COWC_timing_textStart = function( textBlock, row_index, t
 	var cur_blockParam = textBlock.drill_textBlock_getBlockParam();
 	
 	// > 『绘制过程定义』 - 指定脸图（@@@_fc[faceName:0]）
-	if( cur_blockParam['faceName']  != undefined &&
-		cur_blockParam['faceIndex'] != undefined ){
-		this.drill_CODi_refreshFace( cur_blockParam['faceName'], cur_blockParam['faceIndex'], 0, 0 );
+	if( cur_blockParam['faceName']    !== undefined &&
+		cur_blockParam['faceIndex']   !== undefined &&
+		cur_blockParam['faceSustain'] !== undefined ){
+		var param_data = {};
+		param_data['faceName']    = cur_blockParam['faceName'];
+		param_data['faceIndex']   = cur_blockParam['faceIndex'];
+		param_data['faceSustain'] = cur_blockParam['faceSustain'];
+		this.drill_CODi_setDrawFace( param_data );
 	}
 }
 

@@ -94,6 +94,7 @@
  */
 /*~struct~DrillLCCMouseBorderSprite:
  * 
+ * 
  * @param ---资源---
  * @default 
  *
@@ -112,6 +113,7 @@
  * @require 1
  * @dir img/Map__ui_cameraConsole/
  * @type file[]
+ * 
  * 
  * @param ---贴图---
  * @default 
@@ -162,17 +164,14 @@
  * @value 3
  * @option 叠加
  * @value 4
- * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
+ * @desc 此参数可以看看："0.基本定义 > 混合模式.docx"。pixi的渲染混合模式。0-普通,1-发光,2-实色混合,3-浅色,4-叠加。
  * @default 0
  * 
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		LCC（Layer_Camera_Console）
-//		临时全局变量	DrillUp.g_LCC_xxx
-//		临时局部变量	this._drill_LCC_xxx
-//		存储数据变量	$gameSystem._drill_LCC_xxx
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -197,9 +196,7 @@
 //			->☆地图层级
 //			
 //			->☆贴图控制
-//			->边界移动指向标 贴图【Drill_LCC_MouseBorderSprite】
-//				->A主体
-//				->B播放GIF
+//			->边界移动指向贴图【Drill_LCC_MouseBorderSprite】
 //
 //
 //		★家谱：
@@ -209,7 +206,7 @@
 //			无
 //		
 //		★插件私有类：
-//			* 边界移动指向标 贴图【Drill_LCC_MouseBorderSprite】
+//			* 边界移动指向贴图【Drill_LCC_MouseBorderSprite】
 //		
 //		★必要注意事项：
 //			暂无
@@ -284,8 +281,8 @@
 	}
 	
 	/*-----------------杂项------------------*/
-	DrillUp.g_LCC_mouseBorder_visible = String(DrillUp.parameters['是否启用边界移动指向标'] || 'true') === 'true';
-	DrillUp.g_LCC_mouseBorder_data = DrillUp.drill_LCC_initMouseBorderSpriteData( JSON.parse(DrillUp.parameters['边界移动指向标配置']) );
+	DrillUp.g_LCC_mouseBorder_visible = String(DrillUp.parameters["是否启用边界移动指向标"] || "true") === "true";
+	DrillUp.g_LCC_mouseBorder_data = DrillUp.drill_LCC_initMouseBorderSpriteData( JSON.parse(DrillUp.parameters["边界移动指向标配置"]) );
 	
 	
 //=============================================================================
@@ -565,13 +562,19 @@ Scene_Map.prototype.update = function() {
 
 
 //=============================================================================
-// ** 边界移动指向标 贴图【Drill_LCC_MouseBorderSprite】
+// ** 边界移动指向贴图【Drill_LCC_MouseBorderSprite】
 // **		
 // **		作用域：	地图界面
 // **		主功能：	定义一个 鼠标接近边界时 显示的指向标贴图。
 // **		子功能：	
-// **					->贴图
-// **						->帧刷新
+// **					->贴图『独立贴图』
+// **						x->显示贴图/隐藏贴图
+// **						x->是否就绪
+// **						x->优化策略
+// **						x->销毁
+// **						->初始化数据
+// **						->初始化对象
+// **					
 // **					->A主体
 // **					->B播放GIF
 // **					
@@ -582,10 +585,10 @@ Scene_Map.prototype.update = function() {
 // **				> 数量 - [ ●单个 /多个] 
 // **				> 创建 - [ ●一次性 /自延迟/外部延迟] 
 // **				> 销毁 - [ ●不考虑 /自销毁/外部销毁] 
-// **				> 样式 - [不可修改/ ●自变化 /外部变化] 样式在贴图帧刷新中自变化。
+// **				> 样式 - [ ●不可修改 /自变化/外部变化] 
 //=============================================================================
 //==============================
-// * 贴图 - 定义
+// * 边界移动指向贴图 - 定义
 //==============================
 function Drill_LCC_MouseBorderSprite() {
 	this.initialize.apply(this, arguments);
@@ -593,15 +596,17 @@ function Drill_LCC_MouseBorderSprite() {
 Drill_LCC_MouseBorderSprite.prototype = Object.create(Sprite_Base.prototype);
 Drill_LCC_MouseBorderSprite.prototype.constructor = Drill_LCC_MouseBorderSprite;
 //==============================
-// * 贴图 - 初始化
+// * 边界移动指向贴图 - 初始化
 //==============================
 Drill_LCC_MouseBorderSprite.prototype.initialize = function( data ){
 	Sprite_Base.prototype.initialize.call(this);
-	this._drill_data = JSON.parse(JSON.stringify( data ));	//深拷贝数据
-    this.drill_spriteBorder_initChild();					//初始化子功能
+	this._drill_data = data;			//（直接传指针）
+	
+	this.drill_initData();				//初始化数据
+	this.drill_initSprite();			//初始化对象
 };
 //==============================
-// * 贴图 - 帧刷新
+// * 边界移动指向贴图 - 帧刷新
 //==============================
 Drill_LCC_MouseBorderSprite.prototype.update = function() {
 	Sprite_Base.prototype.update.call(this);
@@ -612,9 +617,15 @@ Drill_LCC_MouseBorderSprite.prototype.update = function() {
 	this.drill_spriteBorder_updateGIF();			//帧刷新 - B播放GIF
 };
 //==============================
-// * 贴图 - 初始化子功能
+// * 边界移动指向贴图 - 初始化数据『独立贴图』
 //==============================
-Drill_LCC_MouseBorderSprite.prototype.drill_spriteBorder_initChild = function(){
+Drill_LCC_MouseBorderSprite.prototype.drill_initData = function() {
+	//（暂无 默认值）
+}
+//==============================
+// * 边界移动指向贴图 - 初始化对象『独立贴图』
+//==============================
+Drill_LCC_MouseBorderSprite.prototype.drill_initSprite = function(){
 	this.drill_spriteBorder_initAttr();				//初始化子功能 - A主体
 	this.drill_spriteBorder_initGIF();				//初始化子功能 - B播放GIF
 };

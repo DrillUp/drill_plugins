@@ -112,11 +112,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		COPWM (Core_Of_Picture_With_Mouse)
-//		临时全局变量	DrillUp.g_COPWM_xxx
-//		临时局部变量	this._drill_COPWM_xxx
-//		存储数据变量	$gameSystem._drill_COPWM_xxx
-//		全局存储变量	无
+//
+//		插件简称		COPWM（Core_Of_Picture_With_Mouse）
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<

@@ -319,11 +319,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		WET（When_Encounter_Troop）
-//		临时全局变量	无
-//		临时局部变量	无
-//		存储数据变量	无
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -575,7 +572,7 @@ Game_System.prototype.drill_WET_initSysData_Private = function() {
 	for(var i=0; i < DrillUp.g_WET_trigger.length; i++){
 		var temp_data = DrillUp.g_WET_trigger[i];
 		if( temp_data == undefined ){ continue; }
-		this._drill_WET_dataTank[i] = JSON.parse(JSON.stringify( temp_data ));
+		this._drill_WET_dataTank[i] = JSON.parse(JSON.stringify( temp_data ));  //『深拷贝-混杂自定义数据』
 		this._drill_WET_dataTank[i]['activeCount'] = 0;
 	}
 };
@@ -598,7 +595,7 @@ Game_System.prototype.drill_WET_checkSysData_Private = function() {
 			
 			// > 未存储的，重新初始化
 			if( this._drill_WET_dataTank[i] == undefined ){
-				this._drill_WET_dataTank[i] = JSON.parse(JSON.stringify( temp_data ));
+				this._drill_WET_dataTank[i] = JSON.parse(JSON.stringify( temp_data ));  //『深拷贝-混杂自定义数据』
 				this._drill_WET_dataTank[i]['activeCount'] = 0;
 			
 			// > 已存储的，跳过

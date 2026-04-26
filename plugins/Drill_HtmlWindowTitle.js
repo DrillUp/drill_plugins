@@ -150,12 +150,9 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		HWT (Html_Window_Title)
-//		临时全局变量	无
-//		临时局部变量	无
-//		存储数据变量	无
-//		全局存储变量	DrillUp.global_HWT_xxx
-//		覆盖重写方法	Scene_Boot.prototype.updateDocumentTitle
+//
+//		插件简称		HWT（Html_Window_Title）
+//		覆盖重写方法	Scene_Boot.prototype.updateDocumentTitle（覆写）
 //
 //<<<<<<<<性能记录<<<<<<<<
 //

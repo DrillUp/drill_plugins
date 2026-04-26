@@ -96,12 +96,9 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		AIP（Animation_In_Parallel）
-//		临时全局变量	无
-//		临时局部变量	【无】
-//		存储数据变量	无
-//		全局存储变量	无
-//		覆盖重写方法	Sprite_Base.prototype.isAnimationPlaying
+//		覆盖重写方法	Sprite_Base.prototype.isAnimationPlaying（覆写）
 //
 //<<<<<<<<性能记录<<<<<<<<
 //
@@ -529,7 +526,7 @@ Game_Battler.prototype.drill_AIP_startParallelAnimation = function( animationId,
 var _drill_AIP_setupAnimation = Sprite_Battler.prototype.setupAnimation;
 Sprite_Battler.prototype.setupAnimation = function() {
 	if( this._battler.isAnimationRequested() ){	
-		this._drill_AIP_data = JSON.parse(JSON.stringify( this._battler._animations ));	//复制一份
+		this._drill_AIP_data = JSON.parse(JSON.stringify( this._battler._animations ));  //『深拷贝-混杂自定义数据』
 		this._drill_AIP_data_enable = true;
 	}
 	

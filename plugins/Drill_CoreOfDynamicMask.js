@@ -77,11 +77,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		CODM（Core_Of_Dynamic_Mask）
-//		临时全局变量	DrillUp.g_CODM_xxx
-//		临时局部变量	this._drill_CODM_xxx
-//		存储数据变量	$gameSystem._drill_CODM_xxx
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -1007,7 +1004,7 @@ Drill_CODM_PerspectiveMarker.prototype.update = function() {
 // * 属性 - 默认值初始化
 //==============================
 Drill_CODM_PerspectiveMarker.prototype.drill_initData = function( data ){
-	this._drill_data = JSON.parse(JSON.stringify( data ));
+	this._drill_data = JSON.parse(JSON.stringify( data ));  //『深拷贝-控制器用』
 	var data = this._drill_data;
 	
 	// > 贴图

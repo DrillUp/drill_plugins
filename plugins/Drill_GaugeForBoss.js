@@ -117,7 +117,7 @@
  * 设计：
  *   (1.很多时候你并不缺少工具，你缺的是一个生命框设计参考。
  *      比如，玩一款你喜欢的游戏，留意一下游戏中敌人的血条和数值。
- *      或者去看一些游戏视频，尝试模仿，你就能逐渐理解其结构了。
+ *      或者去看一些游戏设计视频，尝试模仿，你就能逐渐理解其结构了。
  *      另外注意，该插件配置有 固定框样式 和 BOSS设置 两个。
  *      找不到配置的时候，记得 往下翻 参数列表，因为BOSS设置在下面。
  * 旧版本：
@@ -1393,11 +1393,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		GFB (Gauge_For_Boss)
-//		临时全局变量	DrillUp.g_GFB_xxx
-//		临时局部变量	this._drill_GFB_xxx
-//		存储数据变量	$gameSystem._drill_GFB_xxx
-//		全局存储变量	无
+//
+//		插件简称		GFB（Gauge_For_Boss）
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -2049,10 +2046,10 @@ Game_System.prototype.drill_GFB_checkSysData = function() {
 Game_System.prototype.drill_GFB_initSysData_Private = function() {
 	
 	this._drill_GFB_bindTank = [];				// 绑定数据容器
-	for(var i = 0; i < DrillUp.g_GFB_bind.length; i++ ){
-		var temp_data = JSON.parse(JSON.stringify( DrillUp.g_GFB_bind[i] ));
+	for( var i = 0; i < DrillUp.g_GFB_bind.length; i++ ){
+		var temp_data = DrillUp.g_GFB_bind[i];
 		if( temp_data == undefined ){ continue; }
-		this._drill_GFB_bindTank[i] = temp_data;
+		this._drill_GFB_bindTank[i] = JSON.parse(JSON.stringify( temp_data ));  //『深拷贝-混杂自定义数据』
 	}
 };
 //==============================
@@ -2074,7 +2071,7 @@ Game_System.prototype.drill_GFB_checkSysData_Private = function() {
 			
 			// > 未存储的，重新初始化
 			if( this._drill_GFB_bindTank[i] == undefined ){
-				this._drill_GFB_bindTank[i] = JSON.parse(JSON.stringify( temp_data ));
+				this._drill_GFB_bindTank[i] = JSON.parse(JSON.stringify( temp_data ));  //『深拷贝-混杂自定义数据』
 			
 			// > 已存储的，跳过
 			}else{

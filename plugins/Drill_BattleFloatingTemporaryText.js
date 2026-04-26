@@ -984,11 +984,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		BFTT (Gauge_Floating_Temporary_Text)
-//		临时全局变量	DrillUp.g_BFTT_xxx
-//		临时局部变量	this._drill_BFTT_xxx
-//		存储数据变量	无
-//		全局存储变量	无
+//
+//		插件简称		BFTT（Gauge_Floating_Temporary_Text）
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -2129,8 +2126,8 @@ Game_Temp.prototype.drill_BFTT_createSimple = function( pos, text, style_id, bal
 	
 	// > 基本参数初始化
 	var data = {};
-	data['s_data'] = JSON.parse(JSON.stringify( DrillUp.g_BFTT_style[ style_id ] ));
-	data['b_data'] = JSON.parse(JSON.stringify( DrillUp.g_BFTT_ballistics[ ballistics_id ] ));
+	data['s_data'] = JSON.parse(JSON.stringify( DrillUp.g_BFTT_style[ style_id ] ));  //『深拷贝-『临时对象』』
+	data['b_data'] = JSON.parse(JSON.stringify( DrillUp.g_BFTT_ballistics[ ballistics_id ] ));  //『深拷贝-『临时对象』』
 	
 	// > 临时对象设置
 	data['b_data']['movementNum'] = 1;
@@ -2150,8 +2147,8 @@ Game_Temp.prototype.drill_BFTT_setBuffer = function( style_id, ballistics_id ){
 	
 	// > 基本参数初始化
 	var data = {};
-	data['s_data'] = JSON.parse(JSON.stringify( DrillUp.g_BFTT_style[ style_id ] ));
-	data['b_data'] = JSON.parse(JSON.stringify( DrillUp.g_BFTT_ballistics[ ballistics_id ] ));
+	data['s_data'] = JSON.parse(JSON.stringify( DrillUp.g_BFTT_style[ style_id ] ));  //『深拷贝-『临时对象』』
+	data['b_data'] = JSON.parse(JSON.stringify( DrillUp.g_BFTT_ballistics[ ballistics_id ] ));  //『深拷贝-『临时对象』』
 	
 	// > 临时对象设置
 	data['param_x'] = 0;
@@ -2165,7 +2162,7 @@ Game_Temp.prototype.drill_BFTT_setBuffer = function( style_id, ballistics_id ){
 Game_Temp.prototype.drill_BFTT_createByBuffer = function( pos, time ){
 	var data = this._drill_BFTT_commandBuffer;
 	if( data == undefined ){ alert( DrillUp.drill_BFTT_getPluginTip_BufferIsNull() ); return; }
-	data = JSON.parse(JSON.stringify( data ));
+	data = JSON.parse(JSON.stringify( data ));  //『深拷贝-『临时对象』』
 	
 	// > 临时对象设置
 	data['b_data']['movementNum'] = 1;

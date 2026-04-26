@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        管理器 - 存档管理器
+ * @plugindesc [v1.5]        管理器 - 存档管理器
  * @author Drill_up
  * 
  * 
@@ -72,20 +72,10 @@
  * 
  * 插件指令：>存档管理器 : 当前存档 : 检查存档是否为旧存档 : 开关[21]
  * 
- * 1.旧存档相关内容可以去看看："21.管理器 > 数据更新与旧存档.docx"
- * 2.旧存档指你对游戏工程进行 保存/部署 操作后，以前该游戏任何时间存储过的存档，
+ * 1.旧存档相关内容可以去看看："21.管理器 > 数据更新与旧存档.docx"。
+ *   旧存档指你对游戏工程进行 保存/部署 操作后，以前该游戏任何时间存储过的存档，
  *   都会被列为旧存档。只有用新版游戏再次存档后，旧存档标记才会消失。
- * 
- * -----------------------------------------------------------------------------
- * ----可选设定 - 存档转移校验
- * 你可以使用下面插件指令获取存档相关信息：
- * （冒号两边都有一个空格）
- * 
- * 插件指令：>存档管理器 : 当前存档 : 检查存档是否在同一机器上运行 : 开关[21]
- * 
- * 1.插件添加后，每个存档会额外存储用户当前使用的电脑型号、操作系统数据。
- *   如果存档未被转移，获取后的开关值为true。
- *   如果存档被转移到 别的电脑 或 系统被重装为其它版本，获取后的开关值为false。
+ * 2.指令只有"当前存档"，因为需要打开并读取了指定存档后，才能查看是否为旧存档。
  * 
  * -----------------------------------------------------------------------------
  * ----插件性能
@@ -124,6 +114,8 @@
  * 添加了删除存档功能。
  * [v1.4]
  * 修复了 在编辑器中删除事件后读取旧存档出错 的bug。
+ * [v1.5]
+ * 分离了设备识别的功能插件。
  * 
  * 
  * 
@@ -143,11 +135,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		GSM (Global_Save_Manager)
-//		临时全局变量	DrillUp.drill_GSM_xxx
-//		临时局部变量	无
-//		存储数据变量	无
-//		全局存储变量	无
+//
+//		插件简称		GSM（Global_Storage_Manager）
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -173,7 +162,6 @@
 //
 //			->☆自动存档
 //			->☆旧存档校验
-//			->☆存档转移校验
 //			
 //			
 //		★家谱：
@@ -216,8 +204,8 @@
 	
 	
 	/*-----------------杂项------------------*/
-	DrillUp.g_GSM_autoSaveSlot = Number(DrillUp.parameters['自动存档槽位'] || 1);
-	DrillUp.g_GSM_autoTransferSave = String(DrillUp.parameters['场所移动时是否自动存档'] || "false") == "true";
+	DrillUp.g_GSM_autoSaveSlot = Number(DrillUp.parameters["自动存档槽位"] || 1);
+	DrillUp.g_GSM_autoTransferSave = String(DrillUp.parameters["场所移动时是否自动存档"] || "false") == "true";
 	
 	
 //=============================================================================
@@ -303,12 +291,6 @@ Game_Interpreter.prototype.drill_GSM_pluginCommand = function( command, args ){
 				temp2 = Number(temp2);
 				$gameSwitches.setValue( temp2, DrillUp.g_GSM_isOldSave );
 			}
-			if( type == "检查存档是否在同一机器上运行" ){
-				temp2 = temp2.replace("开关[","");
-				temp2 = temp2.replace("]","");
-				temp2 = Number(temp2);
-				$gameSwitches.setValue( temp2, DrillUp.g_GSM_isSameSave );
-			}
 		}
 		
 	}
@@ -322,7 +304,7 @@ Game_Interpreter.prototype.drill_GSM_pluginCommand = function( command, args ){
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 存档管理器 - 执行保存
+// * 存档管理器 - 执行保存（开放函数）
 //==============================
 DataManager.drill_GSM_doSave = function( save_file_id ){
 	$gameSystem.onBeforeSave();
@@ -330,7 +312,7 @@ DataManager.drill_GSM_doSave = function( save_file_id ){
 	return success;
 }
 //==============================
-// * 存档管理器 - 执行载入
+// * 存档管理器 - 执行载入（开放函数）
 //==============================
 DataManager.drill_GSM_doLoad = function( save_file_id ){
 	var success = DataManager.loadGame( save_file_id );
@@ -345,7 +327,7 @@ DataManager.drill_GSM_doLoad = function( save_file_id ){
 	return success;
 }
 //==============================
-// * 存档管理器 - 执行删除
+// * 存档管理器 - 执行删除（开放函数）
 //==============================
 DataManager.drill_GSM_doDelete = function( save_file_id ){
 	StorageManager.remove( save_file_id );
@@ -367,14 +349,19 @@ SceneManager.initialize = function() {
 	_drill_GSM_scene_initialize.call(this);
 	
 	//==============================
-	// * 核心漏洞修复 - 标记
+	// * 核心漏洞修复 - 『屏蔽根据版本重刷地图』
 	//==============================
 	Scene_Load.prototype.reloadMapIfUpdated = function() {
+		// （禁止重刷）
+		
+		// > 标记
 		$gameTemp._drill_GSM_isInLoadScene = true;
 	};
 };
 //==============================
 // * 核心漏洞修复 - 读取地图后操作
+//
+//			说明：	> 此处修复 "在编辑器中删除事件后读取旧存档出错" 的bug。
 //==============================
 var _drill_GSM_onMapLoaded = Scene_Map.prototype.onMapLoaded;
 Scene_Map.prototype.onMapLoaded = function() {
@@ -386,7 +373,7 @@ Scene_Map.prototype.onMapLoaded = function() {
 		for(var i = 0; i < $gameMap._events.length; i++){
 			var e = $gameMap._events[i];
 			if( e == undefined ){ continue; }	//『非空事件』（此处不考虑 _erased 的情况）
-			if( e.event() == undefined ){
+			if( e.event() == undefined ){		//
 				$gameMap._events[ i ] = null;	//（由于此处直接与事件数据交互，贴图还没被创建，所以不走 事件管理核心 的销毁流程）
 			}
 		}
@@ -411,6 +398,7 @@ var _drill_GSM_command201 = Game_Interpreter.prototype.command201;
 Game_Interpreter.prototype.command201 = function() {
 	_drill_GSM_command201.call(this);
 	
+	// > 场所移动时是否自动存档
 	if( DrillUp.g_GSM_autoTransferSave == true ){
 		if( $gamePlayer.isTransferring() ){
 			DataManager.drill_GSM_doSave( DrillUp.g_GSM_autoSaveSlot );
@@ -430,32 +418,37 @@ Game_Interpreter.prototype.command201 = function() {
 //==============================
 DrillUp.g_GSM_isOldSave = false;
 //==============================
-// * 旧存档校验 - 初始化（新游戏时）
+// * 旧存档校验 - 容器初始化（新游戏时）
 //==============================
-var _drill_GSM_createGameObjects2 = DataManager.createGameObjects;
+var _drill_GSM_createGameObjects = DataManager.createGameObjects;
 DataManager.createGameObjects = function() {
-	_drill_GSM_createGameObjects2.call( this );
+	_drill_GSM_createGameObjects.call( this );
 	DrillUp.g_GSM_isOldSave = false;		//（刷新标记）
 }
 //==============================
 // * 旧存档校验 - 保存存档时 - 数据获取
 //==============================
-var _drill_GSM_makeSaveContents2 = DataManager.makeSaveContents;
+var _drill_GSM_makeSaveContents = DataManager.makeSaveContents;
 DataManager.makeSaveContents = function() {
-    var contents = _drill_GSM_makeSaveContents2.call(this);
+    var contents = _drill_GSM_makeSaveContents.call(this);
+	
+	// > 版本号 - 保存
 	contents._drill_GSM_versionId = $dataSystem.versionId;
+	
     return contents;
 };
 //==============================
 // * 旧存档校验 - 载入存档时 - 数据赋值
 //==============================
-var _drill_GSM_extractSaveContents2 = DataManager.extractSaveContents;
+var _drill_GSM_extractSaveContents = DataManager.extractSaveContents;
 DataManager.extractSaveContents = function( contents ){
-	_drill_GSM_extractSaveContents2.call( this, contents );
+	_drill_GSM_extractSaveContents.call( this, contents );
 	
-	// > 比较存档
+	// > 版本号 - 空情况
 	if( contents._drill_GSM_versionId == undefined ){
 		DrillUp.g_GSM_isOldSave = true;
+		
+	// > 版本号 - 比较
 	}else{
 		if( contents._drill_GSM_versionId == $dataSystem.versionId ){
 			DrillUp.g_GSM_isOldSave = false;
@@ -464,96 +457,3 @@ DataManager.extractSaveContents = function( contents ){
 		}
 	}
 };
-
-
-//=============================================================================
-// ** ☆存档转移校验
-//
-//			说明：	> 此模块提供 存档转移校验 的功能。
-//					（插件完整的功能目录去看看：功能结构树）
-//=============================================================================
-//==============================
-// * 存档转移校验 - 参数
-//==============================
-DrillUp.g_GSM_isSameSave = true;
-//==============================
-// * 存档转移校验 - 初始化（新游戏时）
-//==============================
-var _drill_GSM_createGameObjects = DataManager.createGameObjects;
-DataManager.createGameObjects = function() {
-	_drill_GSM_createGameObjects.call( this );
-	DrillUp.g_GSM_isSameSave = true;		//（刷新标记）
-}
-//==============================
-// * 存档转移校验 - 保存存档时 - 数据获取
-//==============================
-var _drill_GSM_makeSaveContents = DataManager.makeSaveContents;
-DataManager.makeSaveContents = function() {
-    var contents = _drill_GSM_makeSaveContents.call(this);
-	
-	// > 相同存档时，保存信息
-	if( DrillUp.g_GSM_isSameSave == true ){
-		contents._drill_GSM_checkInfo = DataManager.drill_GSM_getInfoData();
-	}
-	
-    return contents;
-};
-//==============================
-// * 存档转移校验 - 载入存档时 - 数据赋值
-//==============================
-var _drill_GSM_extractSaveContents = DataManager.extractSaveContents;
-DataManager.extractSaveContents = function( contents ){
-	_drill_GSM_extractSaveContents.call( this, contents );
-	
-	// > 比对存档信息
-	var info = contents._drill_GSM_checkInfo;
-	DrillUp.g_GSM_isSameSave = (info == DataManager.drill_GSM_getInfoData() );
-};
-//==============================
-// * 存档转移校验 - 获取字符串信息
-//==============================
-DataManager.drill_GSM_getInfoData = function(){
-	
-	// > 本地文件模式
-	var info = "";
-    if( StorageManager.isLocalMode() ){
-		
-		var os = require("os");
-		info += os.platform();		//操作系统
-		info += os.release();		//系统版本
-		info += os.type();			//系统名称
-		info += os.arch();			//CPU架构
-	
-	// > 本地网页模式
-	}else{
-		
-		info += navigator.appCodeName;
-		info += navigator.appName;
-		info += navigator.appVersion;
-		info += navigator.userAgent;
-	}
-	return info
-}
-/*
-	var os = require("os");
-	 
-	var osInfo; 
-	osInfo += "操作系统=" + os.platform();
-	osInfo += "系统版本=" + os.release();
-	osInfo += "系统名称=" + os.type();
-	osInfo += "CPU架构=" + os.arch();
-	 
-	console.log(osInfo);
-*/
-/*
-	浏览器模式
-	navigator.appCodeName
-	navigator.appName
-	navigator.appVersion
-	navigator.cookieEnabled
-	navigator.platform（只输出win32……）
-	navigator.userAgent
-	
-	https://www.runoob.com/jsref/obj-navigator.html
-*/
-

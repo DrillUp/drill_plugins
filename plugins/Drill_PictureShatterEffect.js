@@ -122,11 +122,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		PSE（Picture_Shatter_Effect）
-//		临时全局变量	DrillUp.g_PSE_opacityType
-//		临时局部变量	this._drill_PSE_xxx
-//		存储数据变量	$gameMap._drill_PSE_opacityType
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<

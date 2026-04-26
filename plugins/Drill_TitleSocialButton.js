@@ -196,11 +196,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		TSB (Title_Social_Button)
-//		临时全局变量	DrillUp.g_TSB_xxx
-//		临时局部变量	this._drill_TSB_xxx
-//		存储数据变量	无
-//		全局存储变量	无
+//
+//		插件简称		TSB（Title_Social_Button）
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -303,7 +300,7 @@ Scene_Title.prototype.createForeground = function() {
 		var temp_data = DrillUp.g_TSB_btn[i];
 		if( temp_data == null ){ continue; }
 		
-		var temp_sprite_data = JSON.parse(JSON.stringify( temp_data ));	//深拷贝数据（杜绝引用造成的修改）
+		var temp_sprite_data = JSON.parse(JSON.stringify( temp_data ));  //『深拷贝-混杂自定义数据』（杜绝引用造成的修改）
 		var temp_sprite = new Sprite();
 		temp_sprite.bitmap = ImageManager.loadTitle1(temp_sprite_data['src_img']);
 		temp_sprite.anchor.x = 0.5;

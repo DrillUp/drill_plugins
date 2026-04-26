@@ -1494,7 +1494,7 @@
  * @value 3
  * @option 叠加
  * @value 4
- * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
+ * @desc 此参数可以看看："0.基本定义 > 混合模式.docx"。pixi的渲染混合模式。0-普通,1-发光,2-实色混合,3-浅色,4-叠加。
  * @default 0
  *
  * @param 图像-色调值
@@ -1510,7 +1510,7 @@
  * @type boolean
  * @on 模糊
  * @off 关闭
- * @desc 此参数为缩放设置，设置模糊后，缩放时可以模糊资源图像的边缘，防止出现像素锯齿。
+ * @desc 此参数可以看看："0.基本定义 > 缩放模式.docx"。设置模糊后，缩放时可以模糊资源图像的边缘，防止出现像素锯齿。
  * @default false
  *
  * @param 动画层级
@@ -1736,11 +1736,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		AGi（Animation_Gif）
-//		临时全局变量	DrillUp.g_AGi_xxx
-//		临时局部变量	this._drill_AGi_xxx
-//		存储数据变量	$gameSystem._drill_AGi_xxx
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -2375,8 +2372,8 @@ Game_System.prototype.drill_AGi_checkSysData_Private = function() {
 	}
 	
 	// > 容器的 空数据 检查
-	for(var i = 0; i < DrillUp.g_AGi_style.length; i++ ){
-		var temp_data = JSON.parse(JSON.stringify( DrillUp.g_AGi_style[i] ));
+	for( var i = 0; i < DrillUp.g_AGi_style.length; i++ ){
+		var temp_data = DrillUp.g_AGi_style[i];
 		
 		// > 已配置（'inited'为 false 表示空数据）
 		if( temp_data['inited'] == true ){
@@ -3253,7 +3250,7 @@ Drill_AGi_Controller.prototype.drill_controller_resetData_Private = function( da
 	}
 	
 	// > 执行重置
-	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
+	this._drill_data = JSON.parse(JSON.stringify( data ));					//『深拷贝-控制器用』
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能

@@ -217,12 +217,9 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		LDF （Layer_Damage_Floor）
-//		临时全局变量	DrillUp.g_LDF_xxx
-//		临时局部变量	无
-//		存储数据变量	$gameSystem._drill_LDF_xxx
-//		全局存储变量	无
-//		覆盖重写方法	Game_Actor.prototype.executeFloorDamage
+//
+//		插件简称		LDF（Layer_Damage_Floor）
+//		覆盖重写方法	Game_Actor.prototype.executeFloorDamage（覆写）
 //
 //<<<<<<<<性能记录<<<<<<<<
 //
@@ -512,7 +509,7 @@ Game_System.prototype.drill_LDF_initSysData_Private = function() {
 	for(var i=0; i < DrillUp.g_LDF_data.length; i++ ){
 		var temp_data = DrillUp.g_LDF_data[i];
 		if( temp_data == undefined ){ continue; }
-		this._drill_LDF_custom[i] = JSON.parse(JSON.stringify( temp_data ));
+		this._drill_LDF_custom[i] = JSON.parse(JSON.stringify( temp_data ));  //『深拷贝-混杂自定义数据』
 	}
 };
 //==============================
@@ -534,7 +531,7 @@ Game_System.prototype.drill_LDF_checkSysData_Private = function() {
 			
 			// > 未存储的，重新初始化
 			if( this._drill_LDF_custom[i] == undefined ){
-				this._drill_LDF_custom[i] = JSON.parse(JSON.stringify( temp_data ));
+				this._drill_LDF_custom[i] = JSON.parse(JSON.stringify( temp_data ));  //『深拷贝-混杂自定义数据』
 			
 			// > 已存储的，跳过
 			}else{

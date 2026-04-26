@@ -93,11 +93,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		COEF（Core_Of_Event_Frame）
-//		临时全局变量	DrillUp.g_COEF_xxx
-//		临时局部变量	this._drill_COEF_xxxx
-//		存储数据变量	无
-//		全局存储变量	无
 //		覆盖重写方法	Game_CharacterBase.prototype.screenX（覆写）
 //						Game_CharacterBase.prototype.screenY（覆写）
 //						Sprite_Character.prototype.updatePosition（覆写）

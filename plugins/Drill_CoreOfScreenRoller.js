@@ -76,11 +76,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		COSR (Core_Of_Screen_Roller)
-//		临时全局变量	无
-//		临时局部变量	this._drill_COSR_xxx
-//		存储数据变量	无
-//		全局存储变量	无
+//
+//		插件简称		COSR（Core_Of_Screen_Roller）
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -240,7 +237,7 @@ Drill_COSR_Sprite.prototype.constructor = Drill_COSR_Sprite;
 //==============================
 Drill_COSR_Sprite.prototype.initialize = function( data ){
 	Sprite.prototype.initialize.call(this);
-	this._drill_data = JSON.parse(JSON.stringify( data ));	//深拷贝数据
+	this._drill_data = JSON.parse(JSON.stringify( data ));  //『深拷贝-独立贴图的数据』
 	//（该贴图不能修改样式，直接删除重建即可）
 	
 	this.drill_initData();						//初始化数据
@@ -761,7 +758,7 @@ Drill_COSR_WindowSprite.prototype.constructor = Drill_COSR_WindowSprite;
 // * 段落文本域 - 初始化
 //==============================
 Drill_COSR_WindowSprite.prototype.initialize = function( data ){
-	this._drill_data = JSON.parse(JSON.stringify( data ));	//深拷贝数据
+	this._drill_data = JSON.parse(JSON.stringify( data ));  //『深拷贝-独立贴图的数据』
 	
     Window_Base.prototype.initialize.call(this);
 	

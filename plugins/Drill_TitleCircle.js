@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.8]        标题 - 多层标题魔法圈
+ * @plugindesc [v1.9]        标题 - 多层标题魔法圈
  * @author Drill_up
  * 
  * @Drill_LE_param "魔法圈-%d"
@@ -66,18 +66,19 @@
  * 你可以在同一个菜单里面加入非常多的不同种类的魔法圈。
  *
  * -----------------------------------------------------------------------------
- * ----可选设定
+ * ----可选设定 - 显示/隐藏
  * 你可以通过插件指令控制标题魔法圈的显示情况：
  * 
  * 插件指令：>标题魔法圈 : 魔法圈[1] : 显示
  * 插件指令：>标题魔法圈 : 魔法圈[1] : 隐藏
  * 插件指令：>标题魔法圈 : 隐藏全部
- *
- * 1.数字表示GIF对应配置的编号。
- * 2.魔法圈没有默认，都是一个个贴在指定菜单中的。
+ * 
+ * 1."魔法圈[1]"中的数字表示对应插件配置的编号，只能一个一个改。
+ * 2.如果你想制作不同的风格的标题界面，可以先用多层装饰插件的配置一种风格，
+ *   然后关闭"初始是否显示"，再配置下一种风格，
+ *   并在游戏中使用显示/隐藏指令来进行切换，实现多种风格。
  * 3.注意，插件指令做出的改变是全局的。
  * 
- *
  * -----------------------------------------------------------------------------
  * ----插件性能
  * 测试仪器：   4G 内存，Intel Core i5-2520M CPU 2.5GHz 处理器
@@ -121,6 +122,8 @@
  * 大幅度修改了全局存储的文件存储结构。
  * [v1.8]
  * 整理改进了内部结构。
+ * [v1.9]
+ * 再次改进了结构。
  *
  *
  * @param 全局存储的文件路径
@@ -668,7 +671,7 @@
  * @type boolean
  * @on 模糊
  * @off 关闭
- * @desc 此参数为缩放设置，设置模糊后，缩放时可以模糊资源图像的边缘，防止出现像素锯齿。
+ * @desc 此参数可以看看："0.基本定义 > 缩放模式.docx"。设置模糊后，缩放时可以模糊资源图像的边缘，防止出现像素锯齿。
  * @default false
  *
  * @param 资源-魔法圈遮罩
@@ -716,7 +719,7 @@
  * @value 3
  * @option 叠加
  * @value 4
- * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
+ * @desc 此参数可以看看："0.基本定义 > 混合模式.docx"。pixi的渲染混合模式。0-普通,1-发光,2-实色混合,3-浅色,4-叠加。
  * @default 0
  *
  * @param 菜单层级
@@ -865,11 +868,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		TCi（Title_Circle）
-//		临时全局变量	DrillUp.g_TCi_xxx
-//		临时局部变量	this._drill_TCi_xxx
-//		存储数据变量	无
-//		全局存储变量	DrillUp.global_TCi_visibleTank
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -1141,19 +1141,22 @@ Game_Interpreter.prototype.drill_TCi_pluginCommand = function( command, args ){
 			if( type === "显示" ){
 				DrillUp.global_TCi_visibleTank[temp1] = true;
 				StorageManager.drill_TCi_saveData();
+				return;
 			}
 			if( type === "隐藏" ){
 				DrillUp.global_TCi_visibleTank[temp1] = false;
 				StorageManager.drill_TCi_saveData();
+				return;
 			}
 		}
 		if( args.length == 2 ){
 			var type = String(args[1]);
 			if( type === "隐藏全部" ){
-				for(var i=0; i<DrillUp.global_TCi_visibleTank.length; i++){
+				for(var i=0; i < DrillUp.global_TCi_visibleTank.length; i++){
 					DrillUp.global_TCi_visibleTank[i] = false;
 				}
 				StorageManager.drill_TCi_saveData();
+				return;
 			}
 		}
 	}
@@ -1526,79 +1529,6 @@ Scene_Title.prototype.drill_TCi_updateAttr = function(){
 		this.drill_TCi_sortByZIndex();
 	}
 }
-/* （旧功能，这两个函数的体量直接涵盖了：控制器+贴图+贴图控制 三大功能）
-//==============================
-// * 贴图控制 - 创建（旧）
-//==============================
-Scene_Title.prototype.drill_TCi_create = function() {	
-	SceneManager._drill_TCi_created = true;
-	
-	// > 防止报错
-	if( this._drill_TCi_spriteTank == undefined ){
-		this._drill_TCi_spriteTank = [];
-	}
-	if( this._drill_TCi_spriteChildTank == undefined ){
-		this._drill_TCi_spriteChildTank = [];
-	}
-	if( this._drill_TCi_dataTank == undefined ){
-		this._drill_TCi_dataTank = [];
-	}
-	
-	// > 配置的魔法圈
-	for( var i = 0; i < DrillUp.g_TCi_style.length; i++ ){
-		var temp_data = DrillUp.g_TCi_style[i];
-		if( temp_data == undefined ){ continue; }
-				
-		// > 魔法圈贴图
-		var temp_sprite_data = JSON.parse(JSON.stringify( temp_data ));		//深拷贝数据（杜绝引用造成的修改）
-		
-		var temp_sprite_bitmap = new Sprite( ImageManager.loadBitmap( temp_sprite_data['src_img_file'], temp_sprite_data['src_img'], 0, true ) );
-		temp_sprite_bitmap.anchor.x = 0.5;
-		temp_sprite_bitmap.anchor.y = 0.5;
-		this._drill_TCi_spriteChildTank.push(temp_sprite_bitmap);
-		
-		var temp_sprite = new Sprite();
-		temp_sprite.anchor.x = 0.5;
-		temp_sprite.anchor.y = 0.5;
-		temp_sprite.x = temp_sprite_data['x'];
-		temp_sprite.y = temp_sprite_data['y'];
-		temp_sprite.opacity = temp_sprite_data['opacity'];
-		temp_sprite.blendMode = temp_sprite_data['blendMode'];
-		temp_sprite.scale.x = temp_sprite_data['scale_x'];
-		temp_sprite.scale.y = temp_sprite_data['scale_y'];
-		temp_sprite.skew.x = temp_sprite_data['skew_x'];
-		temp_sprite.skew.y = temp_sprite_data['skew_y'];
-		temp_sprite.visible = DrillUp.global_TCi_visibleTank[i] || false;
-		temp_sprite.addChild(temp_sprite_bitmap);
-		
-		this._drill_TCi_spriteTank.push(temp_sprite);
-		this._drill_TCi_dataTank.push(temp_sprite_data);
-		
-		// > 魔法圈父级
-		var temp_layer = new Sprite();
-		temp_layer.addChild(temp_sprite);
-		temp_layer.zIndex = temp_sprite_data['zIndex'];
-		
-		// > 魔法圈遮罩
-		if( temp_sprite_data['src_img_mask'] != "" ){
-			var temp_mask = new Sprite( ImageManager.loadBitmap( temp_sprite_data['src_img_file'], temp_sprite_data['src_img_mask'], 0, true ) );
-			temp_layer.addChild(temp_mask);
-			temp_layer.mask = temp_mask;		//『遮罩赋值』
-		}
-		
-		this.drill_TCi_layerAddSprite( temp_layer, temp_sprite_data['menu_index'] );
-	}
-	this.drill_TCi_sortByZIndex();
-};
-//==============================
-// * 贴图控制 - 帧刷新（旧）
-//==============================
-Scene_Title.prototype.drill_TCi_update = function() {
-	for(var i = 0; i < this._drill_TCi_spriteChildTank.length; i++ ){
-		this._drill_TCi_spriteChildTank[i].rotation += this._drill_TCi_dataTank[i]['rotate'] /180*Math.PI;
-	};
-};
-*/
 
 
 
@@ -1667,7 +1597,7 @@ function Drill_TCi_Controller(){
 // * 控制器 - 初始化
 //==============================
 Drill_TCi_Controller.prototype.initialize = function( data_id ){
-	this._drill_data_id = data_id;
+	this._drill_data_id = data_id;											//样式ID（控制器与样式 多对一 或 一对一）
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
 	//this.drill_controller_initData();										//初始化数据
 	this.drill_controller_initChild();										//初始化子功能
@@ -1684,7 +1614,7 @@ Drill_TCi_Controller.prototype.initialize = function( data_id ){
 Drill_TCi_Controller.prototype.drill_controller_update = function(){
 	this.drill_controller_updateDelayingCommandImportant();		//帧刷新 - E延迟指令 - 时间流逝
 	this.drill_controller_updatePeriodizeCommandImportant();	//帧刷新 - F周期指令 - 时间流逝
-	if( this._drill_pause == true ){ return; }
+	if( this.drill_controller_isPause() == true ){ return; }
 	this.drill_controller_updateAttr();							//帧刷新 - A主体
 	this.drill_controller_updateChange_Rotation();				//帧刷新 - B变换特性 - 旋转
 	this.drill_controller_updateCommandChange();				//帧刷新 - D指令叠加变化
@@ -1745,9 +1675,38 @@ Drill_TCi_Controller.prototype.drill_controller_destroy = function(){
 Drill_TCi_Controller.prototype.drill_controller_isDead = function(){
 	return this._drill_needDestroy == true;
 };
+//==============================
+// * 控制器 - 函数枚举
+//
+//			说明：	> 使用枚举要比字符串比较快很多，适用于大量 延迟指令、周期指令 。
+//==============================
+Drill_TCi_Controller.METHOD__drill_controller_setVisible                   = 11;
+Drill_TCi_Controller.METHOD__drill_controller_setPause                     = 12;
+Drill_TCi_Controller.METHOD__drill_controller_periodizeCommand_setPause    = 13;
+Drill_TCi_Controller.METHOD__drill_controller_periodizeCommand_clear       = 14;
+
+Drill_TCi_Controller.METHOD__drill_controller_setBlendMode                 = 21;
+Drill_TCi_Controller.METHOD__drill_controller_setLayerIndex                = 22;
+Drill_TCi_Controller.METHOD__drill_controller_setZIndex                    = 23;
+Drill_TCi_Controller.METHOD__drill_controller_restoreBlendMode             = 24;
+Drill_TCi_Controller.METHOD__drill_controller_restoreLayerIndex            = 25;
+Drill_TCi_Controller.METHOD__drill_controller_restoreZIndex                = 26;
+
+Drill_TCi_Controller.METHOD__drill_controller_commandChange_setOpacity     = 31;
+Drill_TCi_Controller.METHOD__drill_controller_commandChange_setRotate      = 34;
+Drill_TCi_Controller.METHOD__drill_controller_commandChange_setRotateSpeed = 35;
+
+Drill_TCi_Controller.METHOD__drill_controller_commandChange_setScaleX      = 41;
+Drill_TCi_Controller.METHOD__drill_controller_commandChange_setScaleY      = 42;
+Drill_TCi_Controller.METHOD__drill_controller_commandChange_setSkewX       = 43;
+Drill_TCi_Controller.METHOD__drill_controller_commandChange_setSkewY       = 44;
+Drill_TCi_Controller.METHOD__drill_controller_commandChange_restoreAttr    = 45;
+
+Drill_TCi_Controller.METHOD__drill_controller_commandChange_setMove        = 51;
+Drill_TCi_Controller.METHOD__drill_controller_commandChange_restoreMove    = 52;
 
 //##############################
-// * 控制器 - 切换混合模式【标准函数】
+// * A主体 - 切换混合模式【标准函数】
 //
 //			参数：	> blendMode 数字
 //			返回：	> 无
@@ -1756,7 +1715,7 @@ Drill_TCi_Controller.prototype.drill_controller_setBlendMode = function( blendMo
 	this._drill_blendMode = blendMode;
 };
 //##############################
-// * 控制器 - 切换标题层级【标准函数】
+// * A主体 - 切换标题层级【标准函数】
 //
 //			参数：	> layerIndex 字符串
 //			返回：	> 无
@@ -1765,13 +1724,43 @@ Drill_TCi_Controller.prototype.drill_controller_setLayerIndex = function( layerI
 	this._drill_layerIndex = layerIndex;
 };
 //##############################
-// * 控制器 - 切换图片层级【标准函数】
+// * A主体 - 切换图片层级【标准函数】
 //
 //			参数：	> zIndex 数字
 //			返回：	> 无
 //##############################
 Drill_TCi_Controller.prototype.drill_controller_setZIndex = function( zIndex ){
 	this._drill_zIndex = zIndex;
+};
+//##############################
+// * A主体 - 还原混合模式【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 无
+//##############################
+Drill_TCi_Controller.prototype.drill_controller_restoreBlendMode = function(){
+	var data = this.drill_data();
+	this._drill_blendMode = data['blendMode'];
+};
+//##############################
+// * A主体 - 还原地图层级【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 无
+//##############################
+Drill_TCi_Controller.prototype.drill_controller_restoreLayerIndex = function(){
+	var data = this.drill_data();
+	this._drill_layerIndex = data['layerIndex'];
+};
+//##############################
+// * A主体 - 还原图片层级【标准函数】
+//
+//			参数：	> 无
+//			返回：	> 无
+//##############################
+Drill_TCi_Controller.prototype.drill_controller_restoreZIndex = function(){
+	var data = this.drill_data();
+	this._drill_zIndex = data['zIndex'];
 };
 
 //##############################
@@ -1865,7 +1854,7 @@ Drill_TCi_Controller.prototype.drill_controller_resetData_Private = function( da
 	}
 	
 	// > 执行重置
-	this._drill_data_id = data_id;
+	this._drill_data_id = data_id;											//样式ID（控制器与样式 多对一 或 一对一）
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
 	//this.drill_controller_initData();										//初始化数据
 	this.drill_controller_initChild();										//初始化子功能
@@ -1913,7 +1902,7 @@ Drill_TCi_Controller.prototype.drill_controller_initAttr = function(){
 	var data = this.drill_data();
 	
 	// > A主体 - 基础特性
-	this._drill_visible = false;					//控制器 - 显示/隐藏
+	this._drill_visible = true;						//控制器 - 显示/隐藏（data['visible'] 用于 _visibleTank 初始化）
 	this._drill_pause = data['pause'];				//控制器 - 暂停/继续
 	this._drill_blendMode = data['blendMode'];		//控制器 - 混合模式
 	this._drill_layerIndex = data['layerIndex'];	//控制器 - 层级
@@ -1925,17 +1914,33 @@ Drill_TCi_Controller.prototype.drill_controller_initAttr = function(){
 	// > 常规
 	this._drill_curTime = 0;			//常规 - 当前时间
 	this._drill_needDestroy = false;	//常规 - 销毁
+	
+	// > 强制帧刷新（如果初始_drill_visible为false，切换菜单界面时会有1帧看到其他突兀的图像，所以要刷一次）
+	this.drill_controller_updateAttr();
 }
 //==============================
 // * A主体 - 帧刷新
 //==============================
 Drill_TCi_Controller.prototype.drill_controller_updateAttr = function(){
 	
-	// > 显示/隐藏 设置
-	this._drill_visible = DrillUp.global_TCi_visibleTank[ this._drill_data_id ];
-	
 	// > 时间流逝
 	this._drill_curTime += 1;
+}
+//==============================
+// * A主体 - 是否 显示/隐藏（开放函数）
+//
+//			说明：	> 理论上 显示/隐藏 应该扩展为 启用/禁用，
+//					  但由于标题界面没法执行 延迟指令/周期指令，无法修改 显示/隐藏，且插件只装饰标题一个界面，所以这里设定保留。
+//==============================
+Drill_TCi_Controller.prototype.drill_controller_isVisible = function(){
+	if( DrillUp.global_TCi_visibleTank[ this._drill_data_id ] === false ){ return false; }
+	return this._drill_visible;
+}
+//==============================
+// * A主体 - 是否 暂停/继续（开放函数）
+//==============================
+Drill_TCi_Controller.prototype.drill_controller_isPause = function(){
+	return this._drill_pause;
 }
 
 //==============================
@@ -2284,8 +2289,13 @@ Drill_TCi_Controller.prototype.drill_controller_updateDelayingCommandImportant =
 		if( dc_data['left_time'] < 0 ){
 			var method = dc_data['method'];
 			var paramList = dc_data['paramList'];
-			if( method == "drill_controller_setPause" ){
+			
+			if( method == Drill_TCi_Controller.METHOD__drill_controller_setPause ){
 				this.drill_controller_setPause( paramList[0] );
+			}else if( method == Drill_TCi_Controller.METHOD__drill_controller_periodizeCommand_setPause ){  //暂停周期指令(延迟)
+				this.drill_controller_periodizeCommand_setPause( paramList[0] );
+			}else if( method == Drill_TCi_Controller.METHOD__drill_controller_periodizeCommand_clear ){  //清空周期指令(延迟)
+				this.drill_controller_periodizeCommand_clear();
 			}
 		}
 	}
@@ -2303,31 +2313,65 @@ Drill_TCi_Controller.prototype.drill_controller_updateDelayingCommand = function
 			var method = dc_data['method'];
 			var paramList = dc_data['paramList'];
 			
-			if( method == "drill_controller_setVisible" ){
-				this.drill_controller_setVisible( paramList[0] );
-			
-			}else if( method == "drill_controller_commandChange_setOpacity" ){
-				this.drill_controller_commandChange_setOpacity( paramList[0], paramList[1], paramList[2] );
-			}else if( method == "drill_controller_commandChange_setRotate" ){
-				this.drill_controller_commandChange_setRotate( paramList[0], paramList[1], paramList[2] );
-			}else if( method == "drill_controller_commandChange_setRotateSpeed" ){
-				this.drill_controller_commandChange_setRotateSpeed( paramList[0], paramList[1], paramList[2] );
+			switch( method ){
+				case Drill_TCi_Controller.METHOD__drill_controller_setVisible:
+					this.drill_controller_setVisible( paramList[0] );
+					break;
 				
-			}else if( method == "drill_controller_commandChange_setScaleX" ){
-				this.drill_controller_commandChange_setScaleX( paramList[0], paramList[1], paramList[2] );
-			}else if( method == "drill_controller_commandChange_setScaleY" ){
-				this.drill_controller_commandChange_setScaleY( paramList[0], paramList[1], paramList[2] );
-			}else if( method == "drill_controller_commandChange_setSkewX" ){
-				this.drill_controller_commandChange_setSkewX( paramList[0], paramList[1], paramList[2] );
-			}else if( method == "drill_controller_commandChange_setSkewY" ){
-				this.drill_controller_commandChange_setSkewY( paramList[0], paramList[1], paramList[2] );
-			}else if( method == "drill_controller_commandChange_restoreAttr" ){
-				this.drill_controller_commandChange_restoreAttr();
-			
-			}else if( method == "drill_controller_commandChange_setMove" ){
-				this.drill_controller_commandChange_setMove( paramList[0], paramList[1], paramList[2], paramList[3] );
-			}else if( method == "drill_controller_commandChange_restoreMove" ){
-				this.drill_controller_commandChange_restoreMove();
+				case Drill_TCi_Controller.METHOD__drill_controller_setBlendMode:
+					this.drill_controller_setBlendMode( paramList[0] );
+					break;
+				case Drill_TCi_Controller.METHOD__drill_controller_setLayerIndex:
+					this.drill_controller_setLayerIndex( paramList[0] );
+					break;
+				case Drill_TCi_Controller.METHOD__drill_controller_setZIndex:
+					this.drill_controller_setZIndex( paramList[0] );
+					break;
+				case Drill_TCi_Controller.METHOD__drill_controller_restoreBlendMode:
+					this.drill_controller_restoreBlendMode();
+					break;
+				case Drill_TCi_Controller.METHOD__drill_controller_restoreLayerIndex:
+					this.drill_controller_restoreLayerIndex();
+					break;
+				case Drill_TCi_Controller.METHOD__drill_controller_restoreZIndex:
+					this.drill_controller_restoreZIndex();
+					break;
+				
+				case Drill_TCi_Controller.METHOD__drill_controller_commandChange_setOpacity:
+					this.drill_controller_commandChange_setOpacity( paramList[0], paramList[1], paramList[2] );
+					break;
+				case Drill_TCi_Controller.METHOD__drill_controller_commandChange_setRotate:
+					this.drill_controller_commandChange_setRotate( paramList[0], paramList[1], paramList[2] );
+					break;
+				case Drill_TCi_Controller.METHOD__drill_controller_commandChange_setRotateSpeed:
+					this.drill_controller_commandChange_setRotateSpeed( paramList[0], paramList[1], paramList[2] );
+					break;
+					
+				case Drill_TCi_Controller.METHOD__drill_controller_commandChange_setScaleX:
+					this.drill_controller_commandChange_setScaleX( paramList[0], paramList[1], paramList[2] );
+					break;
+				case Drill_TCi_Controller.METHOD__drill_controller_commandChange_setScaleY:
+					this.drill_controller_commandChange_setScaleY( paramList[0], paramList[1], paramList[2] );
+					break;
+				case Drill_TCi_Controller.METHOD__drill_controller_commandChange_setSkewX:
+					this.drill_controller_commandChange_setSkewX( paramList[0], paramList[1], paramList[2] );
+					break;
+				case Drill_TCi_Controller.METHOD__drill_controller_commandChange_setSkewY:
+					this.drill_controller_commandChange_setSkewY( paramList[0], paramList[1], paramList[2] );
+					break;
+				case Drill_TCi_Controller.METHOD__drill_controller_commandChange_restoreAttr:
+					this.drill_controller_commandChange_restoreAttr();
+					break;
+				
+				case Drill_TCi_Controller.METHOD__drill_controller_commandChange_setMove:
+					this.drill_controller_commandChange_setMove( paramList[0], paramList[1], paramList[2], paramList[3] );
+					break;
+				case Drill_TCi_Controller.METHOD__drill_controller_commandChange_restoreMove:
+					this.drill_controller_commandChange_restoreMove();
+					break;
+				
+				default:
+					break;
 			}
 		}
 	}
@@ -2344,28 +2388,55 @@ Drill_TCi_Controller.prototype.drill_controller_updateDelayingCommand = function
 // * E延迟指令 - 设置指令（开放函数）
 //==============================
 Drill_TCi_Controller.prototype.drill_controller_setDelayingCommand = function( method, paramList, delay_time ){
-	if( method != "drill_controller_setVisible" &&
-		method != "drill_controller_setPause" &&
+	var enable = false;
+	switch( method ){
+		case Drill_TCi_Controller.METHOD__drill_controller_setVisible:
+		case Drill_TCi_Controller.METHOD__drill_controller_setPause:
+		case Drill_TCi_Controller.METHOD__drill_controller_periodizeCommand_setPause:
+		case Drill_TCi_Controller.METHOD__drill_controller_periodizeCommand_clear:
 		
-		method != "drill_controller_commandChange_setOpacity" &&
-		method != "drill_controller_commandChange_setRotate" &&
-		method != "drill_controller_commandChange_setRotateSpeed" &&
+		case Drill_TCi_Controller.METHOD__drill_controller_setBlendMode:
+		case Drill_TCi_Controller.METHOD__drill_controller_setLayerIndex:
+		case Drill_TCi_Controller.METHOD__drill_controller_setZIndex:
+		case Drill_TCi_Controller.METHOD__drill_controller_restoreBlendMode:
+		case Drill_TCi_Controller.METHOD__drill_controller_restoreLayerIndex:
+		case Drill_TCi_Controller.METHOD__drill_controller_restoreZIndex:
 		
-		method != "drill_controller_commandChange_setScaleX" &&
-		method != "drill_controller_commandChange_setScaleY" &&
-		method != "drill_controller_commandChange_setSkewX" &&
-		method != "drill_controller_commandChange_setSkewY" &&
-		method != "drill_controller_commandChange_restoreAttr" &&
+		case Drill_TCi_Controller.METHOD__drill_controller_commandChange_setOpacity:
+		case Drill_TCi_Controller.METHOD__drill_controller_commandChange_setRotate:
+		case Drill_TCi_Controller.METHOD__drill_controller_commandChange_setRotateSpeed:
 		
-		method != "drill_controller_commandChange_setMove" &&
-		method != "drill_controller_commandChange_restoreMove"
-	){ return; }
+		case Drill_TCi_Controller.METHOD__drill_controller_commandChange_setScaleX:
+		case Drill_TCi_Controller.METHOD__drill_controller_commandChange_setScaleY:
+		case Drill_TCi_Controller.METHOD__drill_controller_commandChange_setSkewX:
+		case Drill_TCi_Controller.METHOD__drill_controller_commandChange_setSkewY:
+		case Drill_TCi_Controller.METHOD__drill_controller_commandChange_restoreAttr:
+		
+		case Drill_TCi_Controller.METHOD__drill_controller_commandChange_setMove:
+		case Drill_TCi_Controller.METHOD__drill_controller_commandChange_restoreMove:
+			enable = true;
+			break;
+		
+		default:
+			break;
+	}
+	if( enable == false ){ return; }
 	
 	var dc_data = {};
 	dc_data['method'] = method;
 	dc_data['paramList'] = paramList;
 	dc_data['left_time'] = delay_time;
 	this._drill_curDelayingCommandTank.push( dc_data );
+}
+//==============================
+// * E延迟指令 - 增加延迟（开放函数）
+//==============================
+Drill_TCi_Controller.prototype.drill_controller_addDelayingTime = function( time ){
+	if( isNaN(time) ){ return; }
+	for(var i = 0; i < this._drill_curDelayingCommandTank.length; i++ ){
+		var dc_data = this._drill_curDelayingCommandTank[i];
+		dc_data['left_time'] += Number( time );
+	}
 }
 //==============================
 // * E延迟指令 - 清空全部（开放函数）
@@ -2380,6 +2451,9 @@ Drill_TCi_Controller.prototype.drill_controller_clearDelayingCommand = function(
 //==============================
 Drill_TCi_Controller.prototype.drill_controller_initPeriodizeCommand = function(){
 	this._drill_curPeriodizeCommandTank = [];
+	this._drill_periodizeCommand_pause = undefined;				//暂停周期指令
+	this._drill_periodizeCommand_waitAndPauseTime = undefined;	//一次性计时器（暂停周期指令-周期末尾时）
+	this._drill_periodizeCommand_waitAndClearTime = undefined;	//一次性计时器（清空周期指令-周期末尾时）
 }
 //==============================
 // * F周期指令 - 帧刷新 - 时间流逝
@@ -2388,6 +2462,24 @@ Drill_TCi_Controller.prototype.drill_controller_initPeriodizeCommand = function(
 //==============================
 Drill_TCi_Controller.prototype.drill_controller_updatePeriodizeCommandImportant = function(){
 	if( this._drill_curPeriodizeCommandTank.length == 0 ){ return; }
+	
+	// > 暂停周期指令
+	if( this._drill_periodizeCommand_pause == true ){ return; }
+	
+	// > 一次性计时器
+	if( this._drill_periodizeCommand_waitAndPauseTime !== undefined ){
+		this._drill_periodizeCommand_waitAndPauseTime -= 1;
+		if( this._drill_periodizeCommand_waitAndPauseTime == 0 ){
+			this.drill_controller_periodizeCommand_setPause(true);  //（暂停周期指令-周期末尾时）
+		}
+	}
+	if( this._drill_periodizeCommand_waitAndClearTime !== undefined ){
+		this._drill_periodizeCommand_waitAndClearTime -= 1;
+		if( this._drill_periodizeCommand_waitAndClearTime == 0 ){
+			this.drill_controller_periodizeCommand_clear();  //（清空周期指令-周期末尾时）
+		}
+	}
+	
 	
 	// > 帧刷新 时间流逝
 	for(var i = 0; i < this._drill_curPeriodizeCommandTank.length; i++ ){
@@ -2404,7 +2496,8 @@ Drill_TCi_Controller.prototype.drill_controller_updatePeriodizeCommandImportant 
 		if( time == pc_data['time_start'] ){
 			var method = pc_data['method'];
 			var paramList = pc_data['paramList'];
-			if( method == "drill_controller_setPause" ){
+			
+			if( method == Drill_TCi_Controller.METHOD__drill_controller_setPause ){
 				this.drill_controller_setPause( paramList[0] );
 			}
 		}
@@ -2424,31 +2517,65 @@ Drill_TCi_Controller.prototype.drill_controller_updatePeriodizeCommand = functio
 			var method = pc_data['method'];
 			var paramList = pc_data['paramList'];
 			
-			if( method == "drill_controller_setVisible" ){
-				this.drill_controller_setVisible( paramList[0] );
-			
-			}else if( method == "drill_controller_commandChange_setOpacity" ){
-				this.drill_controller_commandChange_setOpacity( paramList[0], paramList[1], paramList[2] );
-			}else if( method == "drill_controller_commandChange_setRotate" ){
-				this.drill_controller_commandChange_setRotate( paramList[0], paramList[1], paramList[2] );
-			}else if( method == "drill_controller_commandChange_setRotateSpeed" ){
-				this.drill_controller_commandChange_setRotateSpeed( paramList[0], paramList[1], paramList[2] );
+			switch( method ){
+				case Drill_TCi_Controller.METHOD__drill_controller_setVisible:
+					this.drill_controller_setVisible( paramList[0] );
+					break;
 				
-			}else if( method == "drill_controller_commandChange_setScaleX" ){
-				this.drill_controller_commandChange_setScaleX( paramList[0], paramList[1], paramList[2] );
-			}else if( method == "drill_controller_commandChange_setScaleY" ){
-				this.drill_controller_commandChange_setScaleY( paramList[0], paramList[1], paramList[2] );
-			}else if( method == "drill_controller_commandChange_setSkewX" ){
-				this.drill_controller_commandChange_setSkewX( paramList[0], paramList[1], paramList[2] );
-			}else if( method == "drill_controller_commandChange_setSkewY" ){
-				this.drill_controller_commandChange_setSkewY( paramList[0], paramList[1], paramList[2] );
-			}else if( method == "drill_controller_commandChange_restoreAttr" ){
-				this.drill_controller_commandChange_restoreAttr();
-			
-			}else if( method == "drill_controller_commandChange_setMove" ){
-				this.drill_controller_commandChange_setMove( paramList[0], paramList[1], paramList[2], paramList[3] );
-			}else if( method == "drill_controller_commandChange_restoreMove" ){
-				this.drill_controller_commandChange_restoreMove();
+				case Drill_TCi_Controller.METHOD__drill_controller_setBlendMode:
+					this.drill_controller_setBlendMode( paramList[0] );
+					break;
+				case Drill_TCi_Controller.METHOD__drill_controller_setLayerIndex:
+					this.drill_controller_setLayerIndex( paramList[0] );
+					break;
+				case Drill_TCi_Controller.METHOD__drill_controller_setZIndex:
+					this.drill_controller_setZIndex( paramList[0] );
+					break;
+				case Drill_TCi_Controller.METHOD__drill_controller_restoreBlendMode:
+					this.drill_controller_restoreBlendMode();
+					break;
+				case Drill_TCi_Controller.METHOD__drill_controller_restoreLayerIndex:
+					this.drill_controller_restoreLayerIndex();
+					break;
+				case Drill_TCi_Controller.METHOD__drill_controller_restoreZIndex:
+					this.drill_controller_restoreZIndex();
+					break;
+				
+				case Drill_TCi_Controller.METHOD__drill_controller_commandChange_setOpacity:
+					this.drill_controller_commandChange_setOpacity( paramList[0], paramList[1], paramList[2] );
+					break;
+				case Drill_TCi_Controller.METHOD__drill_controller_commandChange_setRotate:
+					this.drill_controller_commandChange_setRotate( paramList[0], paramList[1], paramList[2] );
+					break;
+				case Drill_TCi_Controller.METHOD__drill_controller_commandChange_setRotateSpeed:
+					this.drill_controller_commandChange_setRotateSpeed( paramList[0], paramList[1], paramList[2] );
+					break;
+					
+				case Drill_TCi_Controller.METHOD__drill_controller_commandChange_setScaleX:
+					this.drill_controller_commandChange_setScaleX( paramList[0], paramList[1], paramList[2] );
+					break;
+				case Drill_TCi_Controller.METHOD__drill_controller_commandChange_setScaleY:
+					this.drill_controller_commandChange_setScaleY( paramList[0], paramList[1], paramList[2] );
+					break;
+				case Drill_TCi_Controller.METHOD__drill_controller_commandChange_setSkewX:
+					this.drill_controller_commandChange_setSkewX( paramList[0], paramList[1], paramList[2] );
+					break;
+				case Drill_TCi_Controller.METHOD__drill_controller_commandChange_setSkewY:
+					this.drill_controller_commandChange_setSkewY( paramList[0], paramList[1], paramList[2] );
+					break;
+				case Drill_TCi_Controller.METHOD__drill_controller_commandChange_restoreAttr:
+					this.drill_controller_commandChange_restoreAttr();
+					break;
+				
+				case Drill_TCi_Controller.METHOD__drill_controller_commandChange_setMove:
+					this.drill_controller_commandChange_setMove( paramList[0], paramList[1], paramList[2], paramList[3] );
+					break;
+				case Drill_TCi_Controller.METHOD__drill_controller_commandChange_restoreMove:
+					this.drill_controller_commandChange_restoreMove();
+					break;
+				
+				default:
+					break;
 			}
 		}
 	}
@@ -2458,22 +2585,37 @@ Drill_TCi_Controller.prototype.drill_controller_updatePeriodizeCommand = functio
 // * F周期指令 - 设置指令（开放函数）
 //==============================
 Drill_TCi_Controller.prototype.drill_controller_setPeriodizeCommand = function( method, paramList, time_period, time_start ){
-	if( method != "drill_controller_setVisible" &&
-		method != "drill_controller_setPause" &&
+	var enable = false;
+	switch( method ){
+		case Drill_TCi_Controller.METHOD__drill_controller_setVisible:
+		case Drill_TCi_Controller.METHOD__drill_controller_setPause:
 		
-		method != "drill_controller_commandChange_setOpacity" &&
-		method != "drill_controller_commandChange_setRotate" &&
-		method != "drill_controller_commandChange_setRotateSpeed" &&
+		case Drill_TCi_Controller.METHOD__drill_controller_setBlendMode:
+		case Drill_TCi_Controller.METHOD__drill_controller_setLayerIndex:
+		case Drill_TCi_Controller.METHOD__drill_controller_setZIndex:
+		case Drill_TCi_Controller.METHOD__drill_controller_restoreBlendMode:
+		case Drill_TCi_Controller.METHOD__drill_controller_restoreLayerIndex:
+		case Drill_TCi_Controller.METHOD__drill_controller_restoreZIndex:
 		
-		method != "drill_controller_commandChange_setScaleX" &&
-		method != "drill_controller_commandChange_setScaleY" &&
-		method != "drill_controller_commandChange_setSkewX" &&
-		method != "drill_controller_commandChange_setSkewY" &&
-		method != "drill_controller_commandChange_restoreAttr" &&
+		case Drill_TCi_Controller.METHOD__drill_controller_commandChange_setOpacity:
+		case Drill_TCi_Controller.METHOD__drill_controller_commandChange_setRotate:
+		case Drill_TCi_Controller.METHOD__drill_controller_commandChange_setRotateSpeed:
 		
-		method != "drill_controller_commandChange_setMove" &&
-		method != "drill_controller_commandChange_restoreMove"
-	){ return; }
+		case Drill_TCi_Controller.METHOD__drill_controller_commandChange_setScaleX:
+		case Drill_TCi_Controller.METHOD__drill_controller_commandChange_setScaleY:
+		case Drill_TCi_Controller.METHOD__drill_controller_commandChange_setSkewX:
+		case Drill_TCi_Controller.METHOD__drill_controller_commandChange_setSkewY:
+		case Drill_TCi_Controller.METHOD__drill_controller_commandChange_restoreAttr:
+		
+		case Drill_TCi_Controller.METHOD__drill_controller_commandChange_setMove:
+		case Drill_TCi_Controller.METHOD__drill_controller_commandChange_restoreMove:
+			enable = true;
+			break;
+		
+		default:
+			break;
+	}
+	if( enable == false ){ return; }
 	
 	var pc_data = {};
 	pc_data['method'] = method;
@@ -2484,10 +2626,40 @@ Drill_TCi_Controller.prototype.drill_controller_setPeriodizeCommand = function( 
 	this._drill_curPeriodizeCommandTank.push( pc_data );
 }
 //==============================
-// * F周期指令 - 清空全部（开放函数）
+// * F周期指令 - 获取 周期剩余时间（开放函数）
 //==============================
-Drill_TCi_Controller.prototype.drill_controller_clearPeriodizeCommand = function(){
+Drill_TCi_Controller.prototype.drill_controller_periodizeCommand_getWaitAndClearTime = function(){
+	if( this._drill_curPeriodizeCommandTank.length == 0 ){ return 0; }
+	var pc_data = this._drill_curPeriodizeCommandTank[0];				//（只取第一个周期指令的时间）
+	var cur_period_time = pc_data['cur_time'] % pc_data['time_period'];	//（周期内的当前时间）
+	return pc_data['time_period'] - cur_period_time;					//（周期内的剩余时间）
+}
+//==============================
+// * F周期指令 - 暂停周期指令-立刻（开放函数）
+//==============================
+Drill_TCi_Controller.prototype.drill_controller_periodizeCommand_setPause = function( enabled ){
+	this._drill_periodizeCommand_pause = enabled;				//（暂停周期指令）
+	this.drill_controller_setPause( enabled );					//（暂停变换）
+	this._drill_periodizeCommand_waitAndPauseTime = undefined;	//（删除 一次性计时器）
+}
+//==============================
+// * F周期指令 - 暂停周期指令-周期末尾时（开放函数）
+//==============================
+Drill_TCi_Controller.prototype.drill_controller_periodizeCommand_waitAndPause = function(){
+	this._drill_periodizeCommand_waitAndPauseTime = this.drill_controller_periodizeCommand_getWaitAndClearTime();
+}
+//==============================
+// * F周期指令 - 清空周期指令-立刻（开放函数）
+//==============================
+Drill_TCi_Controller.prototype.drill_controller_periodizeCommand_clear = function(){
 	this._drill_curPeriodizeCommandTank = [];
+	this._drill_periodizeCommand_waitAndClearTime = undefined;	//（删除 一次性计时器）
+}
+//==============================
+// * F周期指令 - 清空周期指令-周期末尾时（开放函数）
+//==============================
+Drill_TCi_Controller.prototype.drill_controller_periodizeCommand_waitAndClear = function(){
+	this._drill_periodizeCommand_waitAndClearTime = this.drill_controller_periodizeCommand_getWaitAndClearTime();
 }
 
 
@@ -2700,11 +2872,11 @@ Drill_TCi_Sprite.prototype.drill_sprite_initAttr = function(){
 	// > 主体贴图
 	this.anchor.x = 0.5;
 	this.anchor.y = 0.5;
-	this.visible = this._drill_controller._drill_visible;		//贴图 - 显示/隐藏
-																//贴图 - 暂停/继续（无）
-	this.blendMode = this._drill_controller._drill_blendMode;	//贴图 - 混合模式
-	this.layerIndex = this._drill_controller._drill_layerIndex;	//贴图 - 层级
-	this.zIndex = this._drill_controller._drill_zIndex;			//贴图 - 堆叠级
+	this.visible = this._drill_controller.drill_controller_isVisible();		//贴图 - 显示/隐藏
+																			//贴图 - 暂停/继续（无）
+	this.blendMode = this._drill_controller._drill_blendMode;				//贴图 - 混合模式
+	this.layerIndex = this._drill_controller._drill_layerIndex;				//贴图 - 层级
+	this.zIndex = this._drill_controller._drill_zIndex;						//贴图 - 堆叠级
 	
 	// > 圈贴图
 	var temp_sprite = new Sprite(); 
@@ -2730,7 +2902,7 @@ Drill_TCi_Sprite.prototype.drill_sprite_initAttr = function(){
 Drill_TCi_Sprite.prototype.drill_sprite_updateAttr = function(){
 	
 	// > 基础特性 - 显示/隐藏
-	this.visible = this._drill_controller._drill_visible;
+	this.visible = this._drill_controller.drill_controller_isVisible();
 	
 	// > 基础特性 - 暂停/继续
 	//	（无）
@@ -2750,7 +2922,9 @@ Drill_TCi_Sprite.prototype.drill_sprite_updateAttr = function(){
 // * B变换特性 - 初始化子功能
 //==============================
 Drill_TCi_Sprite.prototype.drill_sprite_initChange = function(){
-	//（无）
+	
+	// > 强制帧刷新（确保与控制器初始 变换值 同步）
+	this.drill_sprite_updateChange();
 }
 //==============================
 // * B变换特性 - 帧刷新

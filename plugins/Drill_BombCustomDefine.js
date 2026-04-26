@@ -543,11 +543,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		BoCD （Bomb_Custom_Define）
-//		临时全局变量	DrillUp.g_BoCD_xxx
-//		临时局部变量	this._drill_BoCD_xxxx
-//		存储数据变量	无
-//		全局存储变量	无
+//
+//		插件简称		BoCD（Bomb_Custom_Define）
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -839,16 +836,16 @@ Game_Temp.prototype.initialize = function() {
 	
 	// > 初始化时读取地图数据
 	this._drill_BoCD_dataMaps = [];
-	for( var i=0; i < map_ids.length; i++ ){
-		var map_id = map_ids[i];
-		if( this.drill_BoCD_hasMapId( map_id ) ){
-			this._drill_BoCD_dataMaps[ map_ids[i] ] = DataManager.drill_getMapData( map_ids[i] );
-			
-		}else{
-			this._drill_BoCD_dataMaps[ map_ids[i] ] = null;
-			alert( DrillUp.drill_BoCD_getPluginTip_MapLost( map_ids[i] ) );
-		}
-	}
+	//for( var i=0; i < map_ids.length; i++ ){
+	//	var map_id = map_ids[i];
+	//	if( this.drill_BoCD_hasMapId( map_id ) ){
+	//		this._drill_BoCD_dataMaps[ map_ids[i] ] = DataManager.drill_COEM_getMapData( map_ids[i] );
+	//		
+	//	}else{
+	//		this._drill_BoCD_dataMaps[ map_ids[i] ] = null;
+	//		alert( DrillUp.drill_BoCD_getPluginTip_MapLost( map_ids[i] ) );
+	//	}
+	//}
 };
 //==============================
 // ** 检查地图id
@@ -877,7 +874,7 @@ Game_Map.prototype.drill_BoC_putBomb = function( input_data ) {
 		if( temp['enable'] && this.drill_BoC_isBombCanPut( input_data['x'],input_data['y'] ) ){	//验证炸弹是否能放
 			// > 找到火力对应的地图事件
 			var map_data = $gameTemp._drill_BoCD_dataMaps[ temp['map_id'] ];
-			var data = JSON.parse(JSON.stringify( map_data.events[ temp['event_id'] ] ));
+			var data = JSON.parse(JSON.stringify( map_data.events[ temp['event_id'] ] ));  //『深拷贝-混杂自定义数据』
 			data['x'] = input_data['x'];
 			data['y'] = input_data['y'];
 			if( !data['meta'] ){ data['meta'] = {}; }		//镜像错误兼容
@@ -904,7 +901,7 @@ Game_Map.prototype.drill_BoC_putBomb = function( input_data ) {
 		if( temp['enable'] && this.drill_BoC_isBombCanPut( input_data['x'],input_data['y'] ) ){	//验证炸弹是否能放
 			// > 找到火力对应的地图事件
 			var map_data = $gameTemp._drill_BoCD_dataMaps[ temp['map_id'] ];
-			var data = JSON.parse(JSON.stringify( map_data.events[ temp['event_id'] ] ));
+			var data = JSON.parse(JSON.stringify( map_data.events[ temp['event_id'] ] ));  //『深拷贝-混杂自定义数据』
 			data['x'] = input_data['x'];
 			data['y'] = input_data['y'];
 			if( !data['meta'] ){ data['meta'] = {}; }		//镜像错误兼容

@@ -412,11 +412,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		PJPC (Picture_Jigsaw_Puzzle_Cutter)
-//		临时全局变量	DrillUp.g_PJPC_xxx
-//		临时局部变量	this._drill_PJPC_xxx
-//		存储数据变量	$gameSystem._drill_PJPC_xxx
-//		全局存储变量	无
+//
+//		插件简称		PJPC（Picture_Jigsaw_Puzzle_Cutter）
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<

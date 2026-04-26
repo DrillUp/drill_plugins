@@ -145,13 +145,10 @@
  */
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		MS（Move_Speed）
-//		临时全局变量	DrillUp.g_MS_xxx
-//		临时局部变量	this._drill_MS_xxx
-//		存储数据变量	无
-//		全局存储变量	无
-//		覆盖重写方法	Game_CharacterBase.prototype.updateMove
-//						Game_CharacterBase.prototype.distancePerFrame
+//		覆盖重写方法	Game_CharacterBase.prototype.updateMove（覆写）
+//						Game_CharacterBase.prototype.distancePerFrame（覆写）
 //
 //<<<<<<<<性能记录<<<<<<<<
 //

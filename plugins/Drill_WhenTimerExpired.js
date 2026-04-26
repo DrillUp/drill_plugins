@@ -125,12 +125,9 @@
  */
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		WTE (When_Timer_Expired)
-//		临时全局变量	DrillUp.g_WTE_xxx
-//		临时局部变量	无
-//		存储数据变量	无
-//		全局存储变量	无
-//		覆盖重写方法	Game_Timer.prototype.onExpire
+//
+//		插件简称		WTE（When_Timer_Expired）
+//		覆盖重写方法	Game_Timer.prototype.onExpire（覆写）
 //
 //<<<<<<<<性能记录<<<<<<<<
 //

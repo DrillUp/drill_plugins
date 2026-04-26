@@ -259,7 +259,7 @@
  * @value 3
  * @option 叠加
  * @value 4
- * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
+ * @desc 此参数可以看看："0.基本定义 > 混合模式.docx"。pixi的渲染混合模式。0-普通,1-发光,2-实色混合,3-浅色,4-叠加。
  * @default 0
  * 
  * 
@@ -339,11 +339,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		MDe（Mouse_Destination）
-//		临时全局变量	DrillUp.g_MDe_xxx
-//		临时局部变量	this._drill_MDe_xxx
-//		存储数据变量	$gameSystem._drill_MDe_xxx
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -895,7 +892,7 @@ Drill_MDe_DestSprite.prototype.drill_sprite_updateAttr_Style = function() {
 		this._drill_curStyle =  $gameSystem._drill_MDe_curStyle;
 		
 		// > 重设数据 - 获取指定样式的数据
-		var new_data = JSON.parse(JSON.stringify( DrillUp.g_MDe_list[ $gameSystem._drill_MDe_curStyle - 1 ] ));
+		var new_data = JSON.parse(JSON.stringify( DrillUp.g_MDe_list[ $gameSystem._drill_MDe_curStyle - 1 ] ));  //『深拷贝-混杂自定义数据』
 		this.drill_sprite_resetData( new_data );
 	}
 };

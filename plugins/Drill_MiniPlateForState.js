@@ -1034,11 +1034,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		MPFS (Mini_Plate_For_State)
-//		临时全局变量	DrillUp.g_MPFS_xxx
-//		临时局部变量	this._drill_MPFS_xxx
-//		存储数据变量	$gameSystem._drill_MPFS_xxx
-//		全局存储变量	无
+//
+//		插件简称		MPFS（Mini_Plate_For_State）
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -1358,7 +1355,7 @@
 	/*----------------状态---------------*/
 	DrillUp.g_MPFS_list_length = 80;
 	DrillUp.g_MPFS_list = [];
-	for( var i = 0; i < DrillUp.g_MPFS_list_length ; i++ ){
+	for( var i = 0; i < DrillUp.g_MPFS_list_length; i++ ){
 		if( DrillUp.parameters["状态-" + String(i+1) ] != undefined &&
 			DrillUp.parameters["状态-" + String(i+1) ] != "" ){
 			var temp = JSON.parse( DrillUp.parameters["状态-" + String(i+1)] );

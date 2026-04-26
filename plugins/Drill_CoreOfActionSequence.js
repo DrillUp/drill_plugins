@@ -1457,7 +1457,7 @@
  * @type boolean
  * @on 模糊
  * @off 关闭
- * @desc 此参数为缩放设置，设置模糊后，缩放时可以模糊资源图像的边缘，防止出现像素锯齿。
+ * @desc 此参数可以看看："0.基本定义 > 缩放模式.docx"。设置模糊后，缩放时可以模糊资源图像的边缘，防止出现像素锯齿。
  * @default false
  * 
  * 
@@ -1610,7 +1610,7 @@
  * @type boolean
  * @on 模糊
  * @off 关闭
- * @desc 此参数为缩放设置，设置模糊后，缩放时可以模糊资源图像的边缘，防止出现像素锯齿。
+ * @desc 此参数可以看看："0.基本定义 > 缩放模式.docx"。设置模糊后，缩放时可以模糊资源图像的边缘，防止出现像素锯齿。
  * @default false
  * 
  * 
@@ -1622,11 +1622,8 @@
  */
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		COAS（Core_Of_Action_Sequence）
-//		临时全局变量	无
-//		临时局部变量	this._drill_COAS_xxx
-//		存储数据变量	无
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -3675,10 +3672,10 @@ Drill_COAS_StateNodeController.prototype.drill_controllerNode_initNode = functio
 	
 	// > 数据赋值
 	this._drill_play_type = data['play_type'];
-	this._drill_play_randomStateSeq = JSON.parse(JSON.stringify( data['play_randomStateSeq'] ));
-	this._drill_play_plainStateSeq = JSON.parse(JSON.stringify( data['play_plainStateSeq'] ));
-	this._drill_play_randomNodeSeq = JSON.parse(JSON.stringify( data['play_randomNodeSeq'] ));
-	this._drill_play_plainNodeSeq = JSON.parse(JSON.stringify( data['play_plainNodeSeq'] ));
+	this._drill_play_randomStateSeq = JSON.parse(JSON.stringify( data['play_randomStateSeq'] ));	//『深拷贝-核心自定义数据』
+	this._drill_play_plainStateSeq = JSON.parse(JSON.stringify( data['play_plainStateSeq'] ));		//『深拷贝-核心自定义数据』
+	this._drill_play_randomNodeSeq = JSON.parse(JSON.stringify( data['play_randomNodeSeq'] ));		//『深拷贝-核心自定义数据』
+	this._drill_play_plainNodeSeq = JSON.parse(JSON.stringify( data['play_plainNodeSeq'] ));		//『深拷贝-核心自定义数据』
 	this._drill_play_randomMax = data['play_randomMax'] || 5;
 	
 	this._drill_curLayer = 0;					//C节点 - 当前层数

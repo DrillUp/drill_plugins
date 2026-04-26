@@ -676,14 +676,11 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		TSc (Title_Scene)
-//		临时全局变量	DrillUp.g_TSc_xxx
-//		临时局部变量	this._drill_TSc_xxx
-//		存储数据变量	无
-//		全局存储变量	DrillUp.global_TSc_styleId
-//		覆盖重写方法	Scene_Title.prototype.drawGameTitle
-//						Scene_Title.prototype.createCommandWindow
-//						Scene_Title.prototype.playTitleMusic
+//
+//		插件简称		TSc（Title_Scene）
+//		覆盖重写方法	Scene_Title.prototype.drawGameTitle（覆写）
+//						Scene_Title.prototype.createCommandWindow（覆写）
+//						Scene_Title.prototype.playTitleMusic（覆写）
 //
 //<<<<<<<<性能记录<<<<<<<<
 //
@@ -1304,7 +1301,7 @@ Scene_Title.prototype.drill_TSc_createButton = function() {
 	}
 	
 	// > 准备按钮组参数
-	var data_style = JSON.parse(JSON.stringify( DrillUp.g_COSB_btn[DrillUp.global_TSc_commandButton_index] ));	//深拷贝数据
+	var data_style = JSON.parse(JSON.stringify( DrillUp.g_COSB_btn[DrillUp.global_TSc_commandButton_index] ));  //『深拷贝-混杂自定义数据』
 	if( data_style == undefined ){
 		alert( DrillUp.drill_TSc_getPluginTip_NoSupportData_style( DrillUp.global_TSc_commandButton_index+1 ) );
 	}else{

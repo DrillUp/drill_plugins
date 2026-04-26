@@ -154,12 +154,9 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		SG (Speed_Gear)
-//		临时全局变量	DrillUp.g_SG_xxx
-//		临时局部变量	无
-//		存储数据变量	$gameSystem._drill_SG_xxx
-//		全局存储变量	无
-//		覆盖重写方法	AudioManager.updateBufferParameters
+//
+//		插件简称		SG（Speed_Gear）
+//		覆盖重写方法	AudioManager.updateBufferParameters（覆写）
 //
 //<<<<<<<<性能记录<<<<<<<<
 //

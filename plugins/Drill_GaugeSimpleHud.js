@@ -499,11 +499,8 @@
  */
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		GSH (Gauge_Simple_Hud)
-//		临时全局变量	DrillUp.g_GSH_xxx
-//		临时局部变量	this._drill_GSH_xxx
-//		存储数据变量	无
-//		全局存储变量	无
+//
+//		插件简称		GSH（Gauge_Simple_Hud）
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -876,10 +873,10 @@ Game_System.prototype.drill_GSH_checkSysData = function() {
 Game_System.prototype.drill_GSH_initSysData_Private = function() {
 	
 	this._drill_GSH_dataTank = [];			//生命框数据容器
-	for(var i = 0; i < DrillUp.g_GSH_data.length ;i++){
+	for( var i = 0; i < DrillUp.g_GSH_data.length; i++ ){
 		var temp_data = DrillUp.g_GSH_data[i];
 		if( temp_data == undefined ){ continue; }
-		this._drill_GSH_dataTank[i] = JSON.parse(JSON.stringify( temp_data ));	//深拷贝数据
+		this._drill_GSH_dataTank[i] = JSON.parse(JSON.stringify( temp_data ));	//『深拷贝-混杂自定义数据』
 	}
 };
 //==============================
@@ -893,7 +890,7 @@ Game_System.prototype.drill_GSH_checkSysData_Private = function() {
 	}
 	
 	// > 容器的 空数据 检查
-	for(var i = 0; i < DrillUp.g_GSH_data.length; i++ ){
+	for( var i = 0; i < DrillUp.g_GSH_data.length; i++ ){
 		var temp_data = DrillUp.g_GSH_data[i];
 		
 		// > 已配置（undefined表示未配置的空数据）
@@ -901,7 +898,7 @@ Game_System.prototype.drill_GSH_checkSysData_Private = function() {
 			
 			// > 未存储的，重新初始化
 			if( this._drill_GSH_dataTank[i] == undefined ){
-				this._drill_GSH_dataTank[i] = JSON.parse(JSON.stringify( temp_data ));
+				this._drill_GSH_dataTank[i] = JSON.parse(JSON.stringify( temp_data ));  //『深拷贝-混杂自定义数据』
 			
 			// > 已存储的，跳过
 			}else{

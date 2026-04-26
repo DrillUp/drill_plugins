@@ -78,11 +78,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		COPa (Core_Of_Particle)
-//		临时全局变量	DrillUp.g_COPa_style_xxx
-//		临时局部变量	this._drill_COPa_xxx
-//		存储数据变量	$gameSystem._drill_COPa_xxx
-//		全局存储变量	无
+//
+//		插件简称		COPa（Core_Of_Particle）
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -612,7 +609,7 @@ Drill_COPa_Controller.prototype.drill_controller_resetData_Private = function( d
 	}
 	
 	// > 执行重置
-	this._drill_data = JSON.parse(JSON.stringify( data ));					//深拷贝
+	this._drill_data = JSON.parse(JSON.stringify( data ));					//『深拷贝-控制器用』
 	this._drill_controllerSerial = new Date().getTime() + Math.random();	//『随机因子-生成一个不重复的序列号』
     this.drill_controller_initData();										//初始化数据
     this.drill_controller_initChild();										//初始化子功能

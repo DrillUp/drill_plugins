@@ -753,11 +753,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		DSS（Dialog_Single_Sprite）
-//		临时全局变量	DrillUp.g_DSS_xxx
-//		临时局部变量	this._drill_DSS_xxx
-//		存储数据变量	无
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -1177,17 +1174,17 @@ Window_Message.prototype.initialize = function() {
 	this._drill_DSS_spriteData['lastState'] = false;	//变化锁
 }
 //==============================
-// * 对话框控制（兼容） - 对话框 帧刷新
+// * 对话框控制（兼容） - 『对话框的帧刷新』
 //==============================
 var _drill_DSS_update = Window_Message.prototype.update;
 Window_Message.prototype.update = function() {
 	_drill_DSS_update.call(this);
 	this.drill_DSS_updateWindowHide();			//帧刷新变换
 };
+//==============================
+// * 对话框控制（对话框优化核心） - 『对话框的帧刷新』
+//==============================
 if( Imported.Drill_CoreOfDialog ){
-	//==============================
-	// * 对话框控制（对话框优化核心） - 对话框 帧刷新
-	//==============================
 	var _drill_DSS_CODi_message_update = Window_Message.prototype.drill_CODi_message_update;
 	Window_Message.prototype.drill_CODi_message_update = function(){
 		_drill_DSS_CODi_message_update.call(this);

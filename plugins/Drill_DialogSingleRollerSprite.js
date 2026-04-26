@@ -581,11 +581,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		DSRS（Dialog_Single_Sprite）
-//		临时全局变量	DrillUp.g_DSRS_xxx
-//		临时局部变量	this._drill_DSRS_xxx
-//		存储数据变量	无
-//		全局存储变量	无
+//
+//		插件简称		DSRS（Dialog_Single_Roller_Sprite）
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -1456,7 +1453,7 @@ Scene_Battle.prototype.drill_DSRS_updateMask = Scene_Map.prototype.drill_DSRS_up
 Scene_Map.prototype.drill_DSRS_createRoller = function() {
 	
 	// > 阶段列表
-	var step_data = JSON.parse(JSON.stringify( DrillUp.g_DSRS_stepList ));
+	var step_data = JSON.parse(JSON.stringify( DrillUp.g_DSRS_stepList ));  //『深拷贝-独立贴图的数据』（核心的贴图 Drill_COSR_Sprite 用）
 	for( var i = 0; i < step_data.length; i++ ){
 		var temp_data = step_data[i];
 		if( temp_data == undefined ){ continue; }

@@ -628,11 +628,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		PASl (Picture_Adsorption_Slot)
-//		临时全局变量	DrillUp.g_PASl_xxx
-//		临时局部变量	this._drill_PASl_xxx
-//		存储数据变量	$gameSystem._drill_PASl_xxx
-//		全局存储变量	无
+//
+//		插件简称		PASl（Picture_Adsorption_Slot）
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -2107,7 +2104,7 @@ Game_Screen.prototype.drill_PASl_addSlot_ByIndex = function( index, x, y, style_
 	}
 	
 	// > A主体
-	var c_data = JSON.parse(JSON.stringify( data ));
+	var c_data = JSON.parse(JSON.stringify( data ));  //『深拷贝-控制器用』
 	c_data['x'] = x;
 	c_data['y'] = y;
 	

@@ -443,12 +443,9 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		WMB（Window_Menu_Button）
-//		临时全局变量	DrillUp.g_WMB_xxx
-//		临时局部变量	this._drill_WMB_xxx
-//		存储数据变量	$gameSystem._drill_WMB_xxx
-//		全局存储变量	无
-//		覆盖重写方法	Window_MenuCommand.prototype.callHandler
+//		覆盖重写方法	Window_MenuCommand.prototype.callHandler（覆写）
 //
 //<<<<<<<<性能记录<<<<<<<<
 //
@@ -823,7 +820,7 @@ Window_MenuCommand.prototype.drill_WMB_interceptCommand = function() {
 			temp['zIndex'] = DrillUp.g_WMB_btn_default_zIndex;
 			this._list.push(temp);
 			
-			var temp_back = JSON.parse(JSON.stringify( temp ));	//DEBUG-拦截器中放行的新按钮，捕获
+			var temp_back = JSON.parse(JSON.stringify( temp ));  //『深拷贝-DEBUG用』
 			temp_back['visible'] = true;
 			temp_back['connected'] = true;
 			this._debug_Rlist.push(temp_back);

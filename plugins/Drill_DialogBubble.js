@@ -591,11 +591,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		DBu（Dialog_Operator）
-//		临时全局变量	无
-//		临时局部变量	this._drill_DBu_xxx
-//		存储数据变量	无
-//		全局存储变量	无
+//
+//		插件简称		DBu（Dialog_Bubble）
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -624,7 +621,7 @@
 //			->☆气泡框皮肤
 //			->☆气泡框矩形
 //			
-//			->☆气泡尖角贴图控制
+//			->☆气泡尖角贴图的控制
 //			->气泡尖角贴图【Drill_DBu_DecorationSprite】
 //			
 //			
@@ -1334,38 +1331,30 @@ Game_Temp.prototype.drill_DBu_getActorSpriteByActorId_Private = function( actor_
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 绑定位置控制 - 最后继承1级
+// * 绑定位置控制（兼容） - 『对话框的帧刷新』
 //==============================
-var _drill_DBu_scene_initialize = SceneManager.initialize;
-SceneManager.initialize = function() {
-	_drill_DBu_scene_initialize.call(this);
+var _drill_DBu_massage_update = Window_Message.prototype.update;
+Window_Message.prototype.update = function(){
 	
-	//==============================
-	// * 实时刷新位置（兼容） - 帧刷新时
-	//==============================
-	var _drill_DBu_massage_update = Window_Message.prototype.update;
-	Window_Message.prototype.update = function(){
+	// > 帧刷新位置
+	$gameSystem.drill_DBu_updateAllPos();
+		
+	// > 原函数
+	_drill_DBu_massage_update.call(this);
+};
+//==============================
+// * 绑定位置控制（对话框优化核心） - 『对话框的帧刷新』
+//==============================
+if( Imported.Drill_CoreOfDialog ){
+	var _drill_DBu_CODi_message_update = Window_Message.prototype.drill_CODi_message_update;
+	Window_Message.prototype.drill_CODi_message_update = function(){
 		
 		// > 帧刷新位置
 		$gameSystem.drill_DBu_updateAllPos();
-			
+		
 		// > 原函数
-		_drill_DBu_massage_update.call(this);
+		_drill_DBu_CODi_message_update.call(this);
 	};
-	//==============================
-	// * 实时刷新位置（对话框优化核心） - 帧刷新时
-	//==============================
-	if( Imported.Drill_CoreOfDialog ){
-		var _drill_DBu_CODi_message_update = Window_Message.prototype.drill_CODi_message_update;
-		Window_Message.prototype.drill_CODi_message_update = function(){
-			
-			// > 帧刷新位置
-			$gameSystem.drill_DBu_updateAllPos();
-			
-			// > 原函数
-			_drill_DBu_CODi_message_update.call(this);
-		};
-	}
 }
 //==============================
 // * 绑定位置控制 - 帧刷新位置
@@ -1703,13 +1692,13 @@ Game_System.prototype.drill_DOp_getCurStyle = function(){
 
 
 //=============================================================================
-// ** ☆气泡尖角贴图控制
+// ** ☆气泡尖角贴图的控制
 //
 //			说明：	> 此模块专门控制对话框的 矩形，即位置和高宽。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 3A主体 - 初始化
+// * 气泡尖角贴图的控制 - 3A主体 - 初始化
 //==============================
 var _drill_DBu_initialize = Window_Message.prototype.initialize;
 Window_Message.prototype.initialize = function() {
@@ -1717,7 +1706,7 @@ Window_Message.prototype.initialize = function() {
 	this.drill_DBu_createSprite();			//创建贴图
 };
 //==============================
-// * 3A主体 - 设置背景（非帧刷新，窗口/暗淡/透明）
+// * 气泡尖角贴图的控制 - 3A主体 - 设置背景（非帧刷新，窗口/暗淡/透明）
 //
 //			说明：	> 窗口类型切换时，刷新装饰图的出现情况。
 //==============================
@@ -1731,9 +1720,9 @@ Window_Message.prototype.setBackgroundType = function( type ){
 }
 
 //==============================
-// * 气泡尖角贴图控制 - 创建贴图（Window_Message）
+// * 气泡尖角贴图的控制 - 创建贴图
 //
-//			说明：	> 尖角只在 对话框 中有，子窗口没有。
+//			说明：	> 尖角只在 对话框（Window_Message） 中有，子窗口没有。
 //==============================
 Window_Message.prototype.drill_DBu_createSprite = function() {
 	
@@ -1747,9 +1736,9 @@ Window_Message.prototype.drill_DBu_createSprite = function() {
 	this._drill_DBu_spriteLayer.addChild(this._drill_DBu_bubbleSprite);
 };
 //==============================
-// * 气泡尖角贴图控制 - 刷新贴图（Window_Message）
+// * 气泡尖角贴图的控制 - 刷新贴图
 //
-//			说明：	> 尖角只在 对话框 中有，子窗口没有。
+//			说明：	> 尖角只在 对话框（Window_Message） 中有，子窗口没有。
 //==============================
 Window_Message.prototype.drill_DBu_refreshSprite = function(){
 	

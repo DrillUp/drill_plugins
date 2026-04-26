@@ -486,11 +486,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		DOp（Dialog_Operator）
-//		临时全局变量	无
-//		临时局部变量	this._drill_DOp_xxx
-//		存储数据变量	无
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -697,7 +694,7 @@ Game_Interpreter.prototype.drill_DOp_pluginCommand = function( command, args ){
 			}
 			if( type == "还原默认变形样式" || type == "还原默认形状样式" ){	
 				var id = DrillUp.g_DOp_defaultStyleId;
-				$gameSystem._drill_DOp_curStyle = JSON.parse(JSON.stringify( DrillUp.g_DOp_list[ id-1 ] ));
+				$gameSystem._drill_DOp_curStyle = JSON.parse(JSON.stringify( DrillUp.g_DOp_list[ id-1 ] ));  //『深拷贝-混杂自定义数据』
 			}
 		}
 		if( args.length == 4 ){
@@ -785,7 +782,7 @@ Game_Interpreter.prototype.drill_DOp_pluginCommand = function( command, args ){
 					alert( DrillUp.drill_DOp_getPluginTip_ErrorValue( type, temp1 ) );
 					return;
 				}
-				$gameSystem._drill_DOp_curStyle = JSON.parse(JSON.stringify( DrillUp.g_DOp_list[ Number(temp1)-1 ] ));
+				$gameSystem._drill_DOp_curStyle = JSON.parse(JSON.stringify( DrillUp.g_DOp_list[ Number(temp1)-1 ] ));  //『深拷贝-混杂自定义数据』
 			}
 		}
 	}
@@ -861,7 +858,7 @@ Game_System.prototype.drill_DOp_initSysData_Private = function() {
 	
 	this._drill_DOp_outFrameEnabled = DrillUp.g_DOp_outFrameEnabled;	//对话框是否可出界
 	this._drill_DOp_autoWrap = DrillUp.g_DOp_autoWrap;					//自动换行开关
-	this._drill_DOp_curStyle = JSON.parse(JSON.stringify( DrillUp.g_DOp_list[ DrillUp.g_DOp_defaultStyleId -1 ] )); //默认变形样式
+	this._drill_DOp_curStyle = JSON.parse(JSON.stringify( DrillUp.g_DOp_list[ DrillUp.g_DOp_defaultStyleId -1 ] ));  //『深拷贝-混杂自定义数据』默认变形样式
 };
 //==============================
 // * 存储数据 - 载入存档时检查数据（私有）
@@ -1383,7 +1380,7 @@ Window_Message.prototype.initialize = function(){
 	this._drill_DOp_autoRect_needUpdate = true;			//（帧刷新锁）
 };
 //==============================
-// * 自动调整（对话框） - 帧刷新时
+// * 自动调整（兼容） - 『对话框的帧刷新』
 //
 //			说明：	> 该函数会被 对话框优化核心 覆写，这里用于兼容默认没用核心的情况。
 //==============================
@@ -1397,7 +1394,7 @@ Window_Message.prototype.update = function(){
     _drill_DOp_autoRect_update.call(this);
 };
 //==============================
-// * 自动调整（对话框） - 执行对话框时
+// * 自动调整（兼容） - 执行对话框时
 //
 //			说明：	> 该函数会被 对话框优化核心 覆写，这里用于兼容默认没用核心的情况。
 //==============================
@@ -1407,7 +1404,7 @@ Window_Message.prototype.startMessage = function(){
     _drill_DOp_autoRect_startMessage.call( this );
 };
 //==============================
-// * 自动调整（对话框） - 新建页时
+// * 自动调整（兼容） - 新建页时
 //
 //			说明：	> 该函数会被 对话框优化核心 覆写，这里用于兼容默认没用核心的情况。
 //==============================
@@ -1417,7 +1414,7 @@ Window_Message.prototype.newPage = function( textState ){
     _drill_DOp_autoRect_newPage.call( this, textState );
 };
 //==============================
-// * 自动调整（对话框） - 设置位置时（非帧刷新）
+// * 自动调整（兼容） - 设置位置时（非帧刷新）
 //==============================
 var _drill_DOp_autoRect_updatePlacement = Window_Message.prototype.updatePlacement;
 Window_Message.prototype.updatePlacement = function() {
@@ -1432,7 +1429,7 @@ Window_Message.prototype.updatePlacement = function() {
 if( Imported.Drill_CoreOfDialog ){
 	
 	//==============================
-	// * 自动调整（对话框优化核心） - 帧刷新时
+	// * 自动调整（对话框优化核心） - 『对话框的帧刷新』
 	//==============================
 	var _drill_DOp_CODi_autoRect_message_update = Window_Message.prototype.drill_CODi_message_update;
 	Window_Message.prototype.drill_CODi_message_update = function(){

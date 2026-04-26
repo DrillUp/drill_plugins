@@ -1392,7 +1392,7 @@
  * @value 3
  * @option 叠加
  * @value 4
- * @desc pixi的渲染混合模式。0-普通,1-发光。其他更详细相关介绍，去看看"0.基本定义 > 混合模式.docx"。
+ * @desc 此参数可以看看："0.基本定义 > 混合模式.docx"。pixi的渲染混合模式。0-普通,1-发光,2-实色混合,3-浅色,4-叠加。
  * @default 0
  *
  * @param 所在层级
@@ -1703,11 +1703,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		ABPa (Animation_Blasting_Particle)
-//		临时全局变量	DrillUp.g_ABPa_style_xxx
-//		临时局部变量	this._drill_ABPa_xxx
-//		存储数据变量	$gameSystem._drill_ABPa_xxx
-//		全局存储变量	无
+//
+//		插件简称		ABPa（Animation_Blasting_Particle）
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<

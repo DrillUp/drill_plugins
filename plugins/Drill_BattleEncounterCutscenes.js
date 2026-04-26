@@ -223,11 +223,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//
 //		插件简称		BECut（Battle_Encounter_Cutscenes）
-//		临时全局变量	DrillUp.g_BECut_xxx
-//		临时局部变量	this._drill_BECut_xxx
-//		存储数据变量	$gameSystem._drill_BECut_xxx
-//		全局存储变量	无
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<

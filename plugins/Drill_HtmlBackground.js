@@ -409,11 +409,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		HB (Html_Background)
-//		临时全局变量	DrillUp.g_HB_xxxx
-//		临时局部变量	this._drill_HB_xxx
-//		存储数据变量	$gameSystem._drill_HB_xxx
-//		全局存储变量	无
+//
+//		插件简称		HB（Html_Background）
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -727,8 +724,8 @@ Game_System.prototype.drill_HB_checkSysData_Private = function() {
 	}
 	
 	// > 容器的 空数据 检查
-	for(var i = 0; i < DrillUp.g_HB_background_list.length; i++ ){
-		var temp_data = JSON.parse(JSON.stringify( DrillUp.g_HB_background_list[i] ));
+	for( var i = 0; i < DrillUp.g_HB_background_list.length; i++ ){
+		var temp_data = DrillUp.g_HB_background_list[i];
 		
 		// > 已配置（'inited'为 false 表示空数据）
 		if( temp_data['inited'] == true ){

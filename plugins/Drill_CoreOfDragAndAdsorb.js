@@ -67,11 +67,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		CODAA (Core_Of_Drag_And_Adsorb)
-//		临时全局变量	DrillUp.g_CODAA_xxx
-//		临时局部变量	this._drill_CODAA_xxx
-//		存储数据变量	$gameSystem._drill_CODAA_xxx
-//		全局存储变量	无
+//
+//		插件简称		CODAA（Core_Of_Drag_And_Adsorb）
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -1878,7 +1875,7 @@ Drill_CODAA_SlotController.prototype.drill_slot_resetData_Private = function( da
 	}
 	
 	// > 执行重置
-	this._drill_data = JSON.parse(JSON.stringify( data ));				//深拷贝
+	this._drill_data = JSON.parse(JSON.stringify( data ));				//『深拷贝-控制器用』
 	this._drill_slotSerial = new Date().getTime() + Math.random();		//『随机因子-生成一个不重复的序列号』
     this.drill_slot_initData();											//初始化数据
     this.drill_slot_initChild();										//初始化子功能

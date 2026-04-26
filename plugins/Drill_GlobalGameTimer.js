@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        管理器 - 累计游戏计时器
+ * @plugindesc [v1.4]        管理器 - 累计游戏计时器
  * @author Drill_up
  * 
  * @Drill_LE_param "定时开关-%d"
@@ -33,6 +33,14 @@
  *      也就是说，开游戏即永久记录。
  *   (2.由于该数据是跨存档的，所以在不重置、不删save文件夹的情况下，
  *      时间会持续累加。
+ * 载体：
+ *   (1.载体分为文件载体和网页载体。
+ *      文件载体 使用本地文件进行读取和写入，电脑端(PC端)支持该功能。
+ *      网页载体 使用网页数据进行读取和写入，手机端、浏览器支持该功能。
+ *      详细介绍可以去看看："21.管理器 > 数据存储的载体.docx"。
+ *   (2.该插件同时支持文件载体和网页载体。
+ *      使用 文件载体 时，插件会在"save/"文件夹下生成"drill_timer.rpgsave"文件。
+ *      使用 网页载体 时，插件记录"RPG drill_timer"全局存储数据。
  * 累计时间：
  *   (1.累计时间以真实时间为准，但是会受到变速齿轮影响。
  *   (2."当前累计时间"是指 玩家当前打开游戏 后，持续游玩的累计时间。
@@ -132,6 +140,8 @@
  * 修改了插件分类。
  * [v1.3]
  * 优化了内部结构。
+ * [v1.4]
+ * 改进了内部结构，防止在手机端报错。
  * 
  * 
  *
@@ -316,11 +326,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		GGT (Global_Game_Timer)
-//		临时全局变量	DrillUp.g_GGT_xxx
-//		临时局部变量	无
-//		存储数据变量	无
-//		全局存储变量	无
+//
+//		插件简称		GGT（Global_Game_Timer）
 //		覆盖重写方法	无
 //
 //<<<<<<<<性能记录<<<<<<<<
@@ -365,7 +372,7 @@
 //			暂无
 //
 //		★其它说明细节：
-//			1.存储管理器 分为 本地文件存储和本地网页存储。
+//			1.存档管理器 分为 B文件载体 和 C网页载体 。
 //			  这个去看看脚本注释 StorageManager 就能理解了。
 //			2.时间数据存在 drill_timer.rpgsave 文件中。
 //			
@@ -421,10 +428,6 @@
 		return data;
 	}
 	
-	
-	/*-----------------杂项------------------*/
-	DrillUp.g_GGT_recordNum = Number(DrillUp.parameters["默认计次上限"] || 10);	
-	
 	/*-----------------定时开关------------------*/
 	DrillUp.g_GGT_list_length = 20;
 	DrillUp.g_GGT_list = [];
@@ -437,6 +440,10 @@
 			DrillUp.g_GGT_list[i] = null;		//（直接null，防止反复判定）
 		}
 	}
+	
+	
+	/*-----------------杂项------------------*/
+	DrillUp.g_GGT_recordNum = Number(DrillUp.parameters["默认计次上限"] || 10);	
 	
 	
 //=============================================================================
@@ -777,11 +784,11 @@ SceneManager.drill_GGT_updateSceneSwitch = function(){
 //==============================
 StorageManager.drill_GGT_save = function(){
 	
-	// > B文件模式
+	// > B文件载体
 	if( this.isLocalMode() ){
 		this.drill_GGT_saveToLocalFile( JSON.stringify( DrillUp.g_GGT_data ) );
 	
-	// > C网页模式
+	// > C网页载体
 	}else{
 		this.drill_GGT_saveToWebStorage( JSON.stringify( DrillUp.g_GGT_data ) );
 	}
@@ -791,44 +798,46 @@ StorageManager.drill_GGT_save = function(){
 //==============================
 StorageManager.drill_GGT_load = function(){
 	
-	// > B文件模式
+	// > B文件载体
 	if( this.isLocalMode() ){
 		return this.drill_GGT_loadFromLocalFile();
 		
-	// > C网页模式
+	// > C网页载体
 	}else{
 		return this.drill_GGT_loadFromWebStorage();
 	}
 };
 
 //==============================
-// * 存档管理器 - B文件模式 - 保存
+// * 存档管理器 - B文件载体 - 保存
 //==============================
 StorageManager.drill_GGT_saveToLocalFile = function( json_str ){
-	var fs = require('fs');
+	if( require == undefined ){ return; }
+	var fs = require('fs');  //『文件载体-fs』
 	var dirPath = this.localFileDirectoryPath();
 	var filePath = this.drill_GGT_localFilePath();
 	
 	// > 加密
 	var data = LZString.compressToBase64( json_str );
 	
-	// > 文件夹路径自动创建【生成文件夹】
+	// > 文件夹路径自动创建『文件载体-生成文件夹』
 	if(!fs.existsSync(dirPath) ){
 		fs.mkdirSync(dirPath);
 	}
 	
-	// > 写入
+	// > 写入『文件载体-写入文件』
 	fs.writeFileSync(filePath, data);
 };
 //==============================
-// * 存档管理器 - B文件模式 - 载入
+// * 存档管理器 - B文件载体 - 载入
 //==============================
 StorageManager.drill_GGT_loadFromLocalFile = function(){
-	var fs = require('fs');
+	if( require == undefined ){ return; }
+	var fs = require('fs');  //『文件载体-fs』
 	var filePath = this.drill_GGT_localFilePath();
 	var data = null;
 	
-	// > 读取
+	// > 读取『文件载体-读取文件』
 	if( fs.existsSync(filePath) != true ){ return ""; }
 	data = fs.readFileSync(filePath, { encoding: 'utf8' });
 	
@@ -836,28 +845,34 @@ StorageManager.drill_GGT_loadFromLocalFile = function(){
 	return LZString.decompressFromBase64(data);	//（返回字符串）
 };
 //==============================
-// * 存档管理器 - B文件模式 - 文件路径
+// * 存档管理器 - B文件载体 - 『文件载体-文件路径』
 //==============================
 StorageManager.drill_GGT_localFilePath = function(){
-    return this.localFileDirectoryPath() + "drill_timer.rpgsave";	//【生成文件】
+    return this.localFileDirectoryPath() + "drill_timer.rpgsave";
 };
 
 //==============================
-// * 存档管理器 - C网页模式 - 保存
+// * 存档管理器 - C网页载体 - 保存
 //==============================
 StorageManager.drill_GGT_saveToWebStorage = function( json_str ){
-    var key = this.webStorageKey( "RPG drill_timer" );
+    var key = this.webStorageKey( this.drill_GGT_getWebName() );
     var data = LZString.compressToBase64( json_str );
-    localStorage.setItem(key, data);
+    localStorage.setItem(key, data);  //『网页载体-写入数据』
 };
 //==============================
-// * 存档管理器 - C网页模式 - 载入
+// * 存档管理器 - C网页载体 - 载入
 //==============================
 StorageManager.drill_GGT_loadFromWebStorage = function(){
-    var key = this.webStorageKey( "RPG drill_timer" );
-    var data = localStorage.getItem(key);
+    var key = this.webStorageKey( this.drill_GGT_getWebName() );
+    var data = localStorage.getItem(key);  //『网页载体-读取数据』
 	if( data == undefined ){ return ""; }
     return LZString.decompressFromBase64(data);
+};
+//==============================
+// * 存档管理器 - C网页载体 - 『网页载体-数据路径』
+//==============================
+StorageManager.drill_GGT_getWebName = function(){
+	return "RPG drill_timer";
 };
 
 

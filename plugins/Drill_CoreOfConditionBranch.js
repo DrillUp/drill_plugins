@@ -111,11 +111,8 @@
  */
  
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-//		插件简称		COCB (Core_Of_Condition_Branch)
-//		临时全局变量	DrillUp.g_COCB_xxx
-//		临时局部变量	无
-//		存储数据变量	无
-//		全局存储变量	无
+//
+//		插件简称		COCB（Core_Of_Condition_Branch）
 //		覆盖重写方法	Game_Interpreter.prototype.command111（半覆写）
 //
 //<<<<<<<<性能记录<<<<<<<<
